@@ -1,10 +1,11 @@
-/* $Id: lang.cpp,v 1.43 2003-11-21 11:29:33 sandervl Exp $ */
+/* $Id: lang.cpp,v 1.44 2004-01-29 14:21:50 bird Exp $ */
 /*
  * Win32 language API functions for OS/2
  *
  * Copyright 1998 Sander van Leeuwen
  * Copyright 1998 Patrick Haller
  * Copyright 1999 Przemyslaw Dobrowolski
+ * Copyright 2004 InnoTek Systemberatung GmbH
  *
  *
  * Project Odin Software License can be found in LICENSE.TXT
@@ -29,146 +30,269 @@
 
 ODINDEBUGCHANNEL(KERNEL32-LANG)
 
-static ULONG defaultLanguage = 0;
+static ULONG gulDefaultLanguageId = 0;
 
 //******************************************************************************
 //******************************************************************************
 void WIN32API SetDefaultLanguage(DWORD deflang)
 {
-  defaultLanguage = deflang;
+  gulDefaultLanguageId = deflang;
 }
 //******************************************************************************
 //******************************************************************************
-ULONG GetLanguageId()
+static ULONG DeterminDefaultLanguageId(void)
 {
-  if(defaultLanguage == 0) {
-	switch(OSLibQueryCountry()) {
-	case CTRY_USA:
-		defaultLanguage = MAKELANGID(LANG_ENGLISH, SUBLANG_ENGLISH_US);
-		break;
-        case CTRY_CANADA://TODO: french-canadian
-		defaultLanguage = MAKELANGID(LANG_ENGLISH, SUBLANG_ENGLISH_US);
-		break;
-        case CTRY_LATIN_AMERICA:
-		defaultLanguage = MAKELANGID(LANG_SPANISH, SUBLANG_SPANISH);
-		break;
-        case CTRY_RUSSIA:
-		defaultLanguage = MAKELANGID(LANG_RUSSIAN, SUBLANG_RUSSIAN);
-		break;
-        case CTRY_GREECE:
-		defaultLanguage = MAKELANGID(LANG_GREEK, SUBLANG_DEFAULT);
-		break;
-        case CTRY_NETHERLANDS:
-		defaultLanguage = MAKELANGID(LANG_DUTCH, SUBLANG_DUTCH);
-		break;
-        case CTRY_BELGIUM://TODO: french-belgian
-		defaultLanguage = MAKELANGID(LANG_DUTCH, SUBLANG_DUTCH_BELGIAN);
-		break;
-        case CTRY_FRANCE:
-		defaultLanguage = MAKELANGID(LANG_FRENCH, SUBLANG_FRENCH);
-		break;
-        case CTRY_SPAIN:
-		defaultLanguage = MAKELANGID(LANG_SPANISH, SUBLANG_SPANISH);
-		break;
-        case CTRY_ITALY:
-		defaultLanguage = MAKELANGID(LANG_ITALIAN, SUBLANG_ITALIAN);
-		break;
-        case CTRY_SWITZERLAND:
-		defaultLanguage = MAKELANGID(LANG_GERMAN, SUBLANG_GERMAN_SWISS);
-		break;
-        case CTRY_AUSTRIA:
-		defaultLanguage = MAKELANGID(LANG_GERMAN, SUBLANG_GERMAN_AUSTRIAN);
-		break;
-        case CTRY_UNITED_KINGDOM:
-		defaultLanguage = MAKELANGID(LANG_ENGLISH, SUBLANG_ENGLISH_UK);
-		break;
-        case CTRY_IRELAND:
-		defaultLanguage = MAKELANGID(LANG_ENGLISH, SUBLANG_ENGLISH_EIRE);
-		break;
-        case CTRY_DENMARK:
-		defaultLanguage = MAKELANGID(LANG_DANISH, SUBLANG_DEFAULT);
-		break;
-        case CTRY_SWEDEN:
-		defaultLanguage = MAKELANGID(LANG_SWEDISH, SUBLANG_DEFAULT);
-		break;
-        case CTRY_NORWAY:
-		defaultLanguage = MAKELANGID(LANG_NORWEGIAN, SUBLANG_DEFAULT);
-		break;
-        case CTRY_GERMANY:
-		defaultLanguage = MAKELANGID(LANG_GERMAN, SUBLANG_GERMAN);
-		break;
-        case CTRY_MEXICO:
-		defaultLanguage = MAKELANGID(LANG_SPANISH, SUBLANG_SPANISH_MEXICAN);
-		break;
-        case CTRY_BRAZIL:
-		defaultLanguage = MAKELANGID(LANG_PORTUGUESE, SUBLANG_PORTUGUESE_BRAZILIAN);
-		break;
-        case CTRY_AUSTRALIA:
-		defaultLanguage = MAKELANGID(LANG_ENGLISH, SUBLANG_ENGLISH_AUS);
-		break;
-        case CTRY_NEW_ZEALAND:
-		defaultLanguage = MAKELANGID(LANG_ENGLISH, SUBLANG_ENGLISH_NZ);
-		break;
-        case CTRY_JAPAN:
-		defaultLanguage = MAKELANGID(LANG_JAPANESE, SUBLANG_DEFAULT);
-		break;
-        case CTRY_KOREA:
-		defaultLanguage = MAKELANGID(LANG_KOREAN, SUBLANG_DEFAULT);
-		break;
-        case CTRY_SINGAPORE:
-		defaultLanguage = MAKELANGID(LANG_CHINESE, SUBLANG_CHINESE_SINGAPORE);
-		break;
-        case CTRY_HONG_KONG:
-		defaultLanguage = MAKELANGID(LANG_CHINESE, SUBLANG_CHINESE_HONGKONG);
-		break;
-        case CTRY_CHINA:
-		defaultLanguage = MAKELANGID(LANG_CHINESE, SUBLANG_CHINESE_TRADITIONAL);
-		break;
-        case CTRY_TAIWAN:
-		defaultLanguage = MAKELANGID(LANG_CHINESE, SUBLANG_CHINESE_TRADITIONAL);
-		break;
-        case CTRY_TURKEY:
-		defaultLanguage = MAKELANGID(LANG_TURKISH, SUBLANG_DEFAULT);
-		break;
-        case CTRY_PORTUGAL:
-		defaultLanguage = MAKELANGID(LANG_PORTUGUESE, SUBLANG_DEFAULT);
-		break;
-        case CTRY_LUXEMBOURG:
-		defaultLanguage = MAKELANGID(LANG_GERMAN, SUBLANG_GERMAN_LUXEMBOURG);
-		break;
-        case CTRY_ICELAND:
-		defaultLanguage = MAKELANGID(LANG_ICELANDIC, SUBLANG_DEFAULT);
-		break;
-        case CTRY_FINLAND:
-		defaultLanguage = MAKELANGID(LANG_FINNISH, SUBLANG_DEFAULT);
-		break;
-        case CTRY_BULGARIA:
-		defaultLanguage = MAKELANGID(LANG_BULGARIAN, SUBLANG_DEFAULT);
-		break;
-        case CTRY_UKRAINE:
-		defaultLanguage = MAKELANGID(LANG_UKRAINIAN, SUBLANG_RUSSIAN);
-		break;
-        case CTRY_CROATIA:
-		defaultLanguage = MAKELANGID(LANG_CROATIAN, SUBLANG_CROATIAN);
-                break;
-        case CTRY_SLOVENIA:
-		defaultLanguage = MAKELANGID(LANG_SLOVENIAN, SUBLANG_DEFAULT);
-                break;
-        case CTRY_CZECH_REPUBLIC:
-		defaultLanguage = MAKELANGID(LANG_CZECH, SUBLANG_DEFAULT);
-		break;
-        case CTRY_SLOVAK_REPUBLIC:
-		defaultLanguage = MAKELANGID(LANG_SLOVAK, SUBLANG_DEFAULT);
-		break;
-	case CTRY_POLAND:
-                defaultLanguage = MAKELANGID(LANG_POLISH, SUBLANG_DEFAULT);
-                break;
-	default:
-		defaultLanguage = MAKELANGID(LANG_ENGLISH, SUBLANG_ENGLISH_UK);
-		break;
-	}
-  }
-  return defaultLanguage;
+    const char *pszLang = getenv("LANG");
+    if (pszLang && pszLang[0] && pszLang[1])   /* (Ignore one character values (like 'C').) */
+    {
+        /** Conversion table from LANG to LanguageId based upon vac365 locales,
+         * Sun JDK Internationalization Docs (1.2), good friends and google.
+         * LANG value format: <language id>_<region>.[stuff]
+         *
+         * If no region is specified in LANG, we'll search exact match, and if not
+         * found <val>_<val>. So for values where language id doesn't match region
+         * then add a 2nd line with only language id (if there is such a default).
+         */
+        const static struct
+        {
+            const char *pszLang;    /* LANG value. (case insensitive) */
+            ULONG       ulLangId;   /* Win32 Language ID. */
+        }   aLangToLangId[] =
+        {
+            { "ar_ae",      MAKELANGID(LANG_ARABIC, SUBLANG_ARABIC_UAE) },
+            { "ar_BH",      MAKELANGID(LANG_ARABIC, SUBLANG_ARABIC_BAHRAIN) },
+            { "ar_DZ",      MAKELANGID(LANG_ARABIC, SUBLANG_ARABIC_ALGERIA) },
+            { "ar",         MAKELANGID(LANG_ARABIC, SUBLANG_ARABIC_EGYPT) },
+            { "ar_EG",      MAKELANGID(LANG_ARABIC, SUBLANG_ARABIC_EGYPT) },
+            { "ar_IQ",      MAKELANGID(LANG_ARABIC, SUBLANG_ARABIC_IRAQ        ) },
+            { "ar_JO",      MAKELANGID(LANG_ARABIC, SUBLANG_ARABIC_JORDAN      ) },
+            { "ar_KW",      MAKELANGID(LANG_ARABIC, SUBLANG_ARABIC_KUWAIT      ) },
+            { "ar_LB",      MAKELANGID(LANG_ARABIC, SUBLANG_ARABIC_LEBANON     ) },
+            { "ar_LY",      MAKELANGID(LANG_ARABIC, SUBLANG_ARABIC_LIBYA       ) },
+            { "ar_MA",      MAKELANGID(LANG_ARABIC, SUBLANG_ARABIC_MOROCCO     ) },
+            { "ar_OM",      MAKELANGID(LANG_ARABIC, SUBLANG_ARABIC_OMAN        ) },
+            { "ar_QA",      MAKELANGID(LANG_ARABIC, SUBLANG_ARABIC_QATAR       ) },
+            { "ar_SA",      MAKELANGID(LANG_ARABIC, SUBLANG_ARABIC_SAUDI_ARABIA) },
+            { "ar_SY",      MAKELANGID(LANG_ARABIC, SUBLANG_ARABIC_SYRIA       ) },
+            { "ar_TN",      MAKELANGID(LANG_ARABIC, SUBLANG_ARABIC_TUNISIA     ) },
+            { "ar_YE",      MAKELANGID(LANG_ARABIC, SUBLANG_ARABIC_YEMEN       ) },
+            { "ar_SD",      MAKELANGID(LANG_ARABIC, SUBLANG_DEFAULT) }, /* no win32 constant. */
+            { "be",         MAKELANGID(LANG_BELARUSIAN, SUBLANG_DEFAULT) },
+            { "be_BY",      MAKELANGID(LANG_BELARUSIAN, SUBLANG_DEFAULT) },
+            { "bg_BG",      MAKELANGID(LANG_BULGARIAN, SUBLANG_DEFAULT) },
+            { "ca",         MAKELANGID(LANG_CATALAN, SUBLANG_DEFAULT) },
+            { "ca_ES",      MAKELANGID(LANG_CATALAN, SUBLANG_DEFAULT) },
+            { "cs",         MAKELANGID(LANG_CZECH, SUBLANG_DEFAULT) },
+            { "cs_CZ",      MAKELANGID(LANG_CZECH, SUBLANG_DEFAULT) },
+            { "da",         MAKELANGID(LANG_DANISH, SUBLANG_DEFAULT) },
+            { "da_DK",      MAKELANGID(LANG_DANISH, SUBLANG_DEFAULT) },
+            { "de_AT",      MAKELANGID(LANG_GERMAN, SUBLANG_GERMAN_AUSTRIAN) },
+            { "de_CH",      MAKELANGID(LANG_GERMAN, SUBLANG_GERMAN_SWISS) },
+            { "de_DE",      MAKELANGID(LANG_GERMAN, SUBLANG_GERMAN) },
+            { "de_LU",      MAKELANGID(LANG_GERMAN, SUBLANG_GERMAN_LUXEMBOURG) },
+            { "el",         MAKELANGID(LANG_GREEK, SUBLANG_DEFAULT) },
+            { "el_GR",      MAKELANGID(LANG_GREEK, SUBLANG_DEFAULT) },
+            { "en_AU",      MAKELANGID(LANG_ENGLISH, SUBLANG_ENGLISH_AUS) },
+            { "en_CA",      MAKELANGID(LANG_ENGLISH, SUBLANG_ENGLISH_CAN) },
+            { "en_GB",      MAKELANGID(LANG_ENGLISH, SUBLANG_ENGLISH_UK) },
+            { "en_IE",      MAKELANGID(LANG_ENGLISH, SUBLANG_ENGLISH_EIRE) },
+            { "en_NZ",      MAKELANGID(LANG_ENGLISH, SUBLANG_ENGLISH_NZ) },
+            { "en_US",      MAKELANGID(LANG_ENGLISH, SUBLANG_ENGLISH_US) },
+            { "en_ZA",      MAKELANGID(LANG_ENGLISH, SUBLANG_ENGLISH_SOUTH_AFRICA) },
+            { "en_DK",      MAKELANGID(LANG_ENGLISH, SUBLANG_ENGLISH_US) }, /* odd ibm vac365 */
+            { "en_JP",      MAKELANGID(LANG_ENGLISH, SUBLANG_ENGLISH_US) }, /* odd ibm vac365 */
+            { "es_AR",      MAKELANGID(LANG_SPANISH, SUBLANG_SPANISH_ARGENTINA         ) },
+            { "es_BO",      MAKELANGID(LANG_SPANISH, SUBLANG_SPANISH_BOLIVIA           ) },
+            { "es_CL",      MAKELANGID(LANG_SPANISH, SUBLANG_SPANISH_CHILE             ) },
+            { "es_CO",      MAKELANGID(LANG_SPANISH, SUBLANG_SPANISH_COLOMBIA          ) },
+            { "es_CR",      MAKELANGID(LANG_SPANISH, SUBLANG_SPANISH_COSTA_RICA        ) },
+            { "es_DO",      MAKELANGID(LANG_SPANISH, SUBLANG_SPANISH_DOMINICAN_REPUBLIC) },
+            { "es_EC",      MAKELANGID(LANG_SPANISH, SUBLANG_SPANISH_ECUADOR           ) },
+            { "es_ES",      MAKELANGID(LANG_SPANISH, SUBLANG_SPANISH                   ) }, /* SUBLANG_SPANISH_MODERN? */
+            { "es_GT",      MAKELANGID(LANG_SPANISH, SUBLANG_SPANISH_GUATEMALA         ) },
+            { "es_HN",      MAKELANGID(LANG_SPANISH, SUBLANG_SPANISH_HONDURAS          ) },
+            { "es_MX",      MAKELANGID(LANG_SPANISH, SUBLANG_SPANISH_MEXICAN           ) },
+            { "es_NI",      MAKELANGID(LANG_SPANISH, SUBLANG_SPANISH_NICARAGUA         ) },
+            { "es_PA",      MAKELANGID(LANG_SPANISH, SUBLANG_SPANISH_PANAMA            ) },
+            { "es_PE",      MAKELANGID(LANG_SPANISH, SUBLANG_SPANISH_PERU              ) },
+            { "es_PR",      MAKELANGID(LANG_SPANISH, SUBLANG_SPANISH_PUERTO_RICO       ) },
+            { "es_PY",      MAKELANGID(LANG_SPANISH, SUBLANG_SPANISH_PARAGUAY          ) },
+            { "es_SV",      MAKELANGID(LANG_SPANISH, SUBLANG_SPANISH_EL_SALVADOR       ) },
+            { "es_UY",      MAKELANGID(LANG_SPANISH, SUBLANG_SPANISH_URUGUAY           ) },
+            { "es_VE",      MAKELANGID(LANG_SPANISH, SUBLANG_SPANISH_VENEZUELA         ) },
+            { "et",         MAKELANGID(LANG_ESTONIAN, SUBLANG_DEFAULT) },
+            { "et_EE",      MAKELANGID(LANG_ESTONIAN, SUBLANG_DEFAULT) },
+            { "fi_FI",      MAKELANGID(LANG_FINNISH, SUBLANG_DEFAULT) },
+            { "fo",         MAKELANGID(LANG_FAEROESE, SUBLANG_DEFAULT) },
+            { "fo_FO",      MAKELANGID(LANG_FAEROESE, SUBLANG_DEFAULT) },
+            { "fr_BE",      MAKELANGID(LANG_FRENCH, SUBLANG_FRENCH_BELGIAN) },
+            { "fr_CA",      MAKELANGID(LANG_FRENCH, SUBLANG_FRENCH_CANADIAN) },
+            { "fr_CH",      MAKELANGID(LANG_FRENCH, SUBLANG_FRENCH_SWISS) },
+            { "fr_FR",      MAKELANGID(LANG_FRENCH, SUBLANG_FRENCH) },
+            { "fr_LU",      MAKELANGID(LANG_FRENCH, SUBLANG_FRENCH_LUXEMBOURG) },
+            { "hr_HR",      MAKELANGID(LANG_CROATIAN, SUBLANG_DEFAULT) },
+            { "hu_HU",      MAKELANGID(LANG_HUNGARIAN, SUBLANG_DEFAULT) },
+            { "is_IS",      MAKELANGID(LANG_ICELANDIC, SUBLANG_DEFAULT) },
+            { "it_CH",      MAKELANGID(LANG_ITALIAN, SUBLANG_ITALIAN_SWISS) },
+            { "it_IT",      MAKELANGID(LANG_ITALIAN, SUBLANG_ITALIAN) },
+            { "iw",         MAKELANGID(LANG_HEBREW, SUBLANG_DEFAULT) },
+            { "iw_IL",      MAKELANGID(LANG_HEBREW, SUBLANG_DEFAULT) },
+            { "ja_JP",      MAKELANGID(LANG_JAPANESE, SUBLANG_DEFAULT) },
+            { "ko",         MAKELANGID(LANG_KOREAN, SUBLANG_DEFAULT) },
+            { "ko_KR",      MAKELANGID(LANG_KOREAN, SUBLANG_DEFAULT) },
+            { "lt_LT",      MAKELANGID(LANG_LITHUANIAN, SUBLANG_DEFAULT) },
+            { "lv_LV",      MAKELANGID(LANG_LATVIAN, SUBLANG_DEFAULT) },
+            /*{ "mk_MK",      MAKELANGID(LANG_MACEDONIAN, SUBLANG_DEFAULT) }, - no win32 eq */
+            { "nl_BE",      MAKELANGID(LANG_DUTCH, SUBLANG_DUTCH_BELGIAN) },
+            { "nl_NL",      MAKELANGID(LANG_DUTCH, SUBLANG_DUTCH) },
+            { "no_NO",      MAKELANGID(LANG_NORWEGIAN, SUBLANG_NORWEGIAN_NYNORSK) }, /* yeah sure! Sun is medling in norwegian politics here... */
+            { "no_NO_B",    MAKELANGID(LANG_NORWEGIAN, SUBLANG_NORWEGIAN_BOKMAL) },  /* yeah sure! Sun is medling in norwegian politics here... */
+            { "ny",         MAKELANGID(LANG_NORWEGIAN, SUBLANG_NORWEGIAN_NYNORSK) },
+            { "ny_NO",      MAKELANGID(LANG_NORWEGIAN, SUBLANG_NORWEGIAN_NYNORSK) },
+            { "nb",         MAKELANGID(LANG_NORWEGIAN, SUBLANG_NORWEGIAN_BOKMAL) },
+            { "nb_NO",      MAKELANGID(LANG_NORWEGIAN, SUBLANG_NORWEGIAN_BOKMAL) },
+            { "pl_PL",      MAKELANGID(LANG_POLISH, SUBLANG_DEFAULT) },
+            { "pt_BR",      MAKELANGID(LANG_PORTUGUESE, SUBLANG_PORTUGUESE_BRAZILIAN) },
+            { "pt_PT",      MAKELANGID(LANG_PORTUGUESE, SUBLANG_PORTUGUESE) },
+            { "ro_RO",      MAKELANGID(LANG_ROMANIAN, SUBLANG_DEFAULT) },
+            { "ru_RU",      MAKELANGID(LANG_RUSSIAN, SUBLANG_DEFAULT) },
+            { "sh",         MAKELANGID(LANG_SERBIAN, SUBLANG_SERBIAN_CYRILLIC) },
+            { "sh_YU",      MAKELANGID(LANG_SERBIAN, SUBLANG_SERBIAN_CYRILLIC) },
+            { "sk_SK",      MAKELANGID(LANG_SLOVAK, SUBLANG_DEFAULT) },
+            { "sl_SL",      MAKELANGID(LANG_SLOVENIAN, SUBLANG_DEFAULT) },
+            { "sq",         MAKELANGID(LANG_ALBANIAN, SUBLANG_DEFAULT) },
+            { "sq_AL",      MAKELANGID(LANG_ALBANIAN, SUBLANG_DEFAULT) },
+            { "sr",         MAKELANGID(LANG_SERBIAN, SUBLANG_DEFAULT) },
+            { "sr_YU",      MAKELANGID(LANG_SERBIAN, SUBLANG_DEFAULT) },
+            { "sv",         MAKELANGID(LANG_SWEDISH, SUBLANG_SWEDISH) },
+            { "sv_FI",      MAKELANGID(LANG_SWEDISH, SUBLANG_SWEDISH_FINLAND) },
+            { "sv_SE",      MAKELANGID(LANG_SWEDISH, SUBLANG_SWEDISH) },
+            { "th_TH",      MAKELANGID(LANG_THAI, SUBLANG_DEFAULT) },
+            { "tr_TR",      MAKELANGID(LANG_TURKISH, SUBLANG_DEFAULT) },
+            { "tr_DE",      MAKELANGID(LANG_TURKISH, SUBLANG_DEFAULT) }, /* phun ;-) */
+            { "uk",         MAKELANGID(LANG_UKRAINIAN, SUBLANG_DEFAULT) },
+            { "uk_UA",      MAKELANGID(LANG_UKRAINIAN, SUBLANG_DEFAULT) },
+            { "zh",         MAKELANGID(LANG_CHINESE, SUBLANG_CHINESE_SIMPLIFIED) },
+            { "zh_CN",      MAKELANGID(LANG_CHINESE, SUBLANG_CHINESE_SIMPLIFIED) },
+            { "zh_TW",      MAKELANGID(LANG_CHINESE, SUBLANG_CHINESE_TRADITIONAL) },
+            { "zh_HK",      MAKELANGID(LANG_CHINESE, SUBLANG_CHINESE_HONGKONG) },
+            /*{ "zh_??",      MAKELANGID(LANG_CHINESE, SUBLANG_CHINESE_SINGAPORE) },*/
+        };
+
+        /*
+         * Strip off anything past the '.' and any '_EURO'.
+         */
+        char szLang[16];
+        strncpy(szLang, pszLang, sizeof(szLang));
+        szLang[sizeof(szLang) - 1] = '\0';
+        char *psz = strrchr(szLang, '.');
+        if (psz)
+            *psz = '\0';
+        strupr(szLang);
+        psz = strstr(szLang, "_EURO");
+        if (psz)
+            *psz = '\0';
+
+        /*
+         * Loop thru the table looking for 'exact' match.
+         */
+        int i;
+        for (i = 0; i < sizeof(aLangToLangId) / sizeof(aLangToLangId[0]); i++)
+            if (!stricmp(aLangToLangId[i].pszLang, szLang))
+                return aLangToLangId[i].ulLangId;
+
+        /*
+         * No exact match. We'll now try look for <langid> and then for <langid>_<langid>.
+         * ASSUMES: no user sets "LANG=e" or any other on character letter.
+         */
+        szLang[2] = '\0';
+        for (i = 0; i < sizeof(aLangToLangId) / sizeof(aLangToLangId[0]); i++)
+            if (!stricmp(aLangToLangId[i].pszLang, szLang))
+                return aLangToLangId[i].ulLangId;
+
+        szLang[2] = '_';
+        szLang[3] = szLang[0];
+        szLang[4] = szLang[1];
+        szLang[5] = '\0';
+        for (i = 0; i < sizeof(aLangToLangId) / sizeof(aLangToLangId[0]); i++)
+            if (!stricmp(aLangToLangId[i].pszLang, szLang))
+                return aLangToLangId[i].ulLangId;
+
+        /*
+         * No match, let's try find the language if nothing else.
+         */
+        for (i = 0; i < sizeof(aLangToLangId) / sizeof(aLangToLangId[0]); i++)
+            if (!strnicmp(aLangToLangId[i].pszLang, szLang, 2))
+                return MAKELANGID(PRIMARYLANGID(aLangToLangId[i].ulLangId), SUBLANG_NEUTRAL);
+
+        /* we give up! */
+        dprintf(("DeterminDefaultLanguageId: WARNING: LANG value '%s' isn't known to us!!!\n", pszLang));
+        DebugInt3();
+    }
+
+
+    /*
+     * If LANG parsing failes, we'll go for the country info.
+     */
+    switch(OSLibQueryCountry())
+    {
+        case CTRY_AUSTRALIA:        return MAKELANGID(LANG_ENGLISH, SUBLANG_ENGLISH_AUS);
+        case CTRY_AUSTRIA:          return MAKELANGID(LANG_GERMAN, SUBLANG_GERMAN_AUSTRIAN);
+        case CTRY_BELGIUM:          return MAKELANGID(LANG_DUTCH, SUBLANG_DUTCH_BELGIAN);    //TODO: french-belgian
+        case CTRY_BRAZIL:           return MAKELANGID(LANG_PORTUGUESE, SUBLANG_PORTUGUESE_BRAZILIAN);
+        case CTRY_BULGARIA:         return MAKELANGID(LANG_BULGARIAN, SUBLANG_DEFAULT);
+        case CTRY_CANADA:           return MAKELANGID(LANG_ENGLISH, SUBLANG_ENGLISH_CAN);       //TODO: french-canadian
+        case CTRY_CHINA:            return MAKELANGID(LANG_CHINESE, SUBLANG_CHINESE_TRADITIONAL);
+        case CTRY_CROATIA:          return MAKELANGID(LANG_CROATIAN, SUBLANG_CROATIAN);
+        case CTRY_CZECH_REPUBLIC:   return MAKELANGID(LANG_CZECH, SUBLANG_DEFAULT);
+        case CTRY_DENMARK:          return MAKELANGID(LANG_DANISH, SUBLANG_DEFAULT);
+        case CTRY_FINLAND:          return MAKELANGID(LANG_FINNISH, SUBLANG_DEFAULT);
+        case CTRY_FRANCE:           return MAKELANGID(LANG_FRENCH, SUBLANG_FRENCH);
+        case CTRY_GERMANY:          return MAKELANGID(LANG_GERMAN, SUBLANG_GERMAN);
+        case CTRY_GREECE:           return MAKELANGID(LANG_GREEK, SUBLANG_DEFAULT);
+        case CTRY_HONG_KONG:        return MAKELANGID(LANG_CHINESE, SUBLANG_CHINESE_HONGKONG);
+        case CTRY_ICELAND:          return MAKELANGID(LANG_ICELANDIC, SUBLANG_DEFAULT);
+        case CTRY_IRELAND:          return MAKELANGID(LANG_ENGLISH, SUBLANG_ENGLISH_EIRE);
+        case CTRY_ITALY:            return MAKELANGID(LANG_ITALIAN, SUBLANG_ITALIAN);
+        case CTRY_JAPAN:            return MAKELANGID(LANG_JAPANESE, SUBLANG_DEFAULT);
+        case CTRY_KOREA:            return MAKELANGID(LANG_KOREAN, SUBLANG_DEFAULT);
+        case CTRY_LATIN_AMERICA:    return MAKELANGID(LANG_SPANISH, SUBLANG_SPANISH);
+        case CTRY_LUXEMBOURG:       return MAKELANGID(LANG_GERMAN, SUBLANG_GERMAN_LUXEMBOURG);
+        case CTRY_MEXICO:           return MAKELANGID(LANG_SPANISH, SUBLANG_SPANISH_MEXICAN);
+        case CTRY_NETHERLANDS:      return MAKELANGID(LANG_DUTCH, SUBLANG_DUTCH);
+        case CTRY_NEW_ZEALAND:      return MAKELANGID(LANG_ENGLISH, SUBLANG_ENGLISH_NZ);
+        case CTRY_NORWAY:           return MAKELANGID(LANG_NORWEGIAN, SUBLANG_DEFAULT);
+        case CTRY_POLAND:           return MAKELANGID(LANG_POLISH, SUBLANG_DEFAULT);
+        case CTRY_PORTUGAL:         return MAKELANGID(LANG_PORTUGUESE, SUBLANG_DEFAULT);
+        case CTRY_RUSSIA:           return MAKELANGID(LANG_RUSSIAN, SUBLANG_RUSSIAN);
+        case CTRY_SINGAPORE:        return MAKELANGID(LANG_CHINESE, SUBLANG_CHINESE_SINGAPORE);
+        case CTRY_SLOVAK_REPUBLIC:  return MAKELANGID(LANG_SLOVAK, SUBLANG_DEFAULT);
+        case CTRY_SLOVENIA:         return MAKELANGID(LANG_SLOVENIAN, SUBLANG_DEFAULT);
+        case CTRY_SPAIN:            return MAKELANGID(LANG_SPANISH, SUBLANG_SPANISH);
+        case CTRY_SWEDEN:           return MAKELANGID(LANG_SWEDISH, SUBLANG_DEFAULT);
+        case CTRY_SWITZERLAND:      return MAKELANGID(LANG_GERMAN, SUBLANG_GERMAN_SWISS);
+        case CTRY_TAIWAN:           return MAKELANGID(LANG_CHINESE, SUBLANG_CHINESE_TRADITIONAL);
+        case CTRY_TURKEY:           return MAKELANGID(LANG_TURKISH, SUBLANG_DEFAULT);
+        case CTRY_UKRAINE:          return MAKELANGID(LANG_UKRAINIAN, SUBLANG_RUSSIAN);
+        case CTRY_UNITED_KINGDOM:   return MAKELANGID(LANG_ENGLISH, SUBLANG_ENGLISH_UK);
+        default:
+            return MAKELANGID(LANG_ENGLISH, SUBLANG_ENGLISH_UK);
+    }
+    /* will never reach this point! */
+}
+
+ULONG GetLanguageId(void)
+{
+    /*
+     * If no default language is set we'll try determin that by evaluating the
+     * LANG env.var. and OS/2 country information.
+     */
+    if (gulDefaultLanguageId == 0)
+    {
+        gulDefaultLanguageId = DeterminDefaultLanguageId();
+        dprintf(("KERNEL32: GetLanguageId: Sets default language id to %#x\n", gulDefaultLanguageId));
+    }
+    return gulDefaultLanguageId;
 }
 //******************************************************************************
 //******************************************************************************
@@ -272,7 +396,7 @@ static BOOL LocaleFromUniChar(WCHAR wcUniChar, LPWSTR wbuf, ULONG *pLen)
  *
  * Author    : Przemyslaw Dobrowolski [Tue, 1999/07/22 17:07]
  *****************************************************************************/
-int WIN32API GetLocaleInfoW(LCID lcid, LCTYPE LCType, LPWSTR wbuf, 
+int WIN32API GetLocaleInfoW(LCID lcid, LCTYPE LCType, LPWSTR wbuf,
                             int len)
 {
   LocaleObject    locale_object = NULL;
@@ -329,9 +453,8 @@ int WIN32API GetLocaleInfoW(LCID lcid, LCTYPE LCType, LPWSTR wbuf,
        case LOCALE_STHOUSAND:
         LocaleFromUniStr(puni_lconv->thousands_sep,wbuf,&ulInfoLen);
         //MN: hack for Czech language; weird value returned here (0xA0 instead of 0x20)
-        if(defaultLanguage == CTRY_CZECH_REPUBLIC) {
+        if (gulDefaultLanguageId == CTRY_CZECH_REPUBLIC)
            ((BYTE*)wbuf)[0] = ((BYTE*)wbuf)[0] & 0x7F;
-        }
         break;
 
       case LOCALE_SGROUPING: // tested only with Polish & English
@@ -911,7 +1034,7 @@ int WIN32API GetLocaleInfoA(LCID lcid, LCTYPE LCType, LPSTR buf, int len)
 
   if (ret_len && buf)
     UnicodeToAscii(lpWStr,buf);
-  
+
   if (lpWStr) free(lpWStr); // free prevooisly allocated memory
 
   dprintf(("KERNEL32: GetLocaleInfoA returned %d -> %s",ret_len, (ret_len) ? buf : NULL));
@@ -937,7 +1060,7 @@ LCID WIN32API GetThreadLocale()
 BOOL WIN32API SetThreadLocale(LCID locale)
 {
  TEB *teb = GetThreadTEB();
- 
+
   if(teb == NULL) {
   	dprintf(("KERNEL32: ERROR SetThreadLocale teb == NULL!"));
 	return FALSE;
