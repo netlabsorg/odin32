@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.10 2000-12-02 23:26:58 bird Exp $
+# $Id: makefile,v 1.11 2000-12-16 20:10:07 bird Exp $
 
 #
 # Odin32 API
@@ -39,8 +39,8 @@ all:    $(OBJDIR)\common.lib \
 # The neede tools
 #
 needed:     $(OBJDIR)\common.lib \
-            $(ODIN32_TOOLS)\kDef2Wat.exe
-
+            $(ODIN32_TOOLS)\kDef2Wat.exe \
+            $(SYMBOLIC)
 
 #
 # The library.
@@ -69,7 +69,7 @@ $(ODIN32_TOOLS)\kDef2Wat.exe $(OBJDIR)\kDef2Wat.exe kDef2Wat.exe : force
 #
 # Clean rule.
 #
-clean:
+clean:  $(SYMBOLIC)
     $(MAKE_CMD) -f common.mak clean
     $(MAKE_CMD) -f kDef2Wat.mak clean
     $(MAKE_CMD) -f kDump.mak clean
@@ -78,7 +78,7 @@ clean:
 #
 # Dep rule - makes depenencies for C, C++ and Asm files.
 #
-dep:
+dep:    $(SYMBOLIC)
     $(DEPEND) $(CINCLUDES) *.c *.cpp *.h *.asm *.inc \
         *.rc *.dlg $(ODIN32_INCLUDE)\*.h -robj *.orc \
         -objo    *.c *.cpp \
@@ -88,12 +88,12 @@ dep:
 #
 # A simple hack to make nmake process the target.
 #
-force:
+force:  $(SYMBOLIC)
      -@echo ...
 
 
 #
 # Lib rule - dummy rule
 #
-lib:
+lib:    $(SYMBOLIC)
 

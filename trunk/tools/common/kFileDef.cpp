@@ -8,7 +8,14 @@
 /*******************************************************************************
 *   Defined Constants                                                          *
 *******************************************************************************/
-#define StringCase(psz, pszMatch) (strnicmp(psz, pszMatch, sizeof(pszMatch)-1) == 0)
+#define StringCase(psz, pszMatch) (strnicmp(psz, pszMatch, sizeof(pszMatch)-1) == 0 \
+                                   && (   psz[sizeof(pszMatch)-1] == '\0' \
+                                       || psz[sizeof(pszMatch)-1] == ' '  \
+                                       || psz[sizeof(pszMatch)-1] == '\n' \
+                                       || psz[sizeof(pszMatch)-1] == '\r' \
+                                       || psz[sizeof(pszMatch)-1] == '\t' \
+                                       ) \
+                                   )
 
 /*******************************************************************************
 *   Header Files                                                               *

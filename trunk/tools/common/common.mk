@@ -1,4 +1,4 @@
-# $Id: common.mk,v 1.4 2000-12-02 23:26:57 bird Exp $
+# $Id: common.mk,v 1.5 2000-12-16 20:10:07 bird Exp $
 #
 # Common definitions for tools.
 #
@@ -10,6 +10,16 @@
 #
 # Project Odin Software License can be found in LICENSE.TXT
 #
+
+
+#
+# We use exception, so we'll have to enable them.
+#
+!ifndef WAT
+CXXFLAGS = $(CXXFLAGS) $(CXXEXCEPTIONS)
+!else
+CXXFLAGS += $(CXXEXCEPTIONS)
+!endif
 
 
 #

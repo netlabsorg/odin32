@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.15 2000-12-02 23:26:58 bird Exp $
+# $Id: Makefile,v 1.16 2000-12-16 20:10:07 bird Exp $
 
 #
 # Common makefile for database utils. ICC edition
@@ -113,7 +113,10 @@ dep:
 # clean
 #
 clean:
-   $(RM) *.obj *.lib *.o *.a *.dll *.exe *.pch *.log *.map *.html
+    $(RM) *.obj *.lib *.o *.a *.dll *.exe *.pch *.log *.map *.html
+!ifdef ODIN32_BIN
+    $(RM) $(ODIN32_BIN)\StateUpd.exe $(ODIN32_BIN)\APIImport.exe $(ODIN32_BIN)\kHTMLPC.exe
+!endif
     $(DODIRS) "gd" $(MAKE_CMD) clean
 
 

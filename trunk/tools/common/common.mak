@@ -1,4 +1,4 @@
-# $Id: common.mak,v 1.2 2000-12-02 23:26:57 bird Exp $
+# $Id: common.mak,v 1.3 2000-12-16 20:10:07 bird Exp $
 
 #
 # Odin32 API
@@ -18,6 +18,16 @@ EXETARGET = 1
 # Compiler, tools, and interference rules.
 #
 !include ../../makefile.inc
+
+
+#
+# We use exception, so we'll have to enable them.
+#
+!ifndef WAT
+CXXFLAGS = $(CXXFLAGS) $(CXXEXCEPTIONS)
+!else
+CXXFLAGS += $(CXXEXCEPTIONS)
+!endif
 
 
 #
