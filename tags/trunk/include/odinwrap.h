@@ -1,4 +1,4 @@
-/* $Id: odinwrap.h,v 1.5 1999-08-13 00:30:34 phaller Exp $ */
+/* $Id: odinwrap.h,v 1.6 1999-08-17 16:58:19 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -13,6 +13,7 @@
 #ifndef _ODINWRAP_H_
 #define _ODINWARP_H_
 
+#include <os2sel.h>
 
 /****************************************************************************
  * Defines                                                                  *
