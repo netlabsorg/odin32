@@ -602,6 +602,10 @@ typedef struct tagMEMORYSTATUS
 
 #define PIPE_UNLIMITED_INSTANCES    255
 
+#define NMPWAIT_WAIT_FOREVER		0xffffffff
+#define NMPWAIT_NOWAIT			0x00000001
+#define NMPWAIT_USE_DEFAULT_WAIT	0x00000000
+
 #ifndef NOLOGERROR
 
 /* LogParamError and LogError values */

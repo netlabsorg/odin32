@@ -1,5 +1,3 @@
-/* $Id: objbase.h,v 1.3 2002-02-15 17:16:25 sandervl Exp $ */
-
 #ifndef __WINE_OBJBASE_H
 #define __WINE_OBJBASE_H
 
