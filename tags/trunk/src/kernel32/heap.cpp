@@ -1,11 +1,11 @@
-/* $Id: heap.cpp,v 1.16 1999-11-13 14:21:30 sandervl Exp $ */
+/* $Id: heap.cpp,v 1.17 1999-12-09 00:52:20 sandervl Exp $ */
 
 /*
- * Project Odin Software License can be found in LICENSE.TXT
- *
  * Win32 heap API functions for OS/2
  *
- * Copyright 1998 Sander van Leeuwen
+ * Copyright 1999 Sander van Leeuwen
+ *
+ * Project Odin Software License can be found in LICENSE.TXT
  *
  */
 

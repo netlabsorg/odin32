@@ -1,4 +1,4 @@
-/* $Id: heapstring.cpp,v 1.21 1999-12-06 20:39:38 sandervl Exp $ */
+/* $Id: heapstring.cpp,v 1.22 1999-12-09 00:52:20 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -551,8 +551,7 @@ int WIN32API lstrcpynWtoA(LPSTR  astring,
     unilen -= 1+out_bytes_left; //end + left bytes
     astring[unilen] = 0; //terminate
 
-    return unilen;
-
+    return unilen; //length of string (excluding terminator)
   }
   else
   {
@@ -627,7 +626,7 @@ int WIN32API lstrcpynAtoW(LPWSTR unicode,
 
     //SvL: Determine length of ascii string
     in_bytes_left = strlen(in_buf)+1;
-    in_bytes_left = min(in_bytes_left, asciilen); //buffer size in bytes
+    in_bytes_left = asciilen = min(in_bytes_left, asciilen); //buffer size in bytes
     
     out_buf = (UniChar*)unicode;
 
@@ -638,12 +637,10 @@ int WIN32API lstrcpynAtoW(LPWSTR unicode,
                         &out_buf,        &uni_chars_left,
                         &num_subs );
 
-    //@@@PH what's this?
-    //unicode[asciilen-1-in_bytes_left] = 0;
+    asciilen -= 1+uni_chars_left; //end + left bytes
 
-    //@@@PH what's this?
-    //return asciilen - 1;
-    return asciilen;
+    unicode[asciilen] = 0; // always terminate string
+    return asciilen; //length of string (excluding terminator)
   }
   else
   { //poor man's conversion

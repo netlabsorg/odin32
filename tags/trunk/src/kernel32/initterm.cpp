@@ -1,4 +1,4 @@
-/* $Id: initterm.cpp,v 1.28 1999-11-23 20:01:18 sandervl Exp $ */
+/* $Id: initterm.cpp,v 1.29 1999-12-09 00:52:20 sandervl Exp $ */
 
 /*
  * KERNEL32 DLL entry point
@@ -41,6 +41,7 @@
 #include <odinlx.h>
 #include "oslibmisc.h"
 #include <heapshared.h>
+#include <heapcode.h>
 #include "mmap.h"
 #include "directory.h"
 #include "hmdevio.h"
@@ -110,6 +111,9 @@ unsigned long SYSTEM _DLL_InitTerm(unsigned long hModule, unsigned long
             if(InitializeSharedHeap() == FALSE)
                 return 0UL;
 
+            if(InitializeCodeHeap() == FALSE)
+                return 0UL;
+
             PROFILE_LoadOdinIni();
             if(RegisterLxDll(hModule, 0, 0) == FALSE)
                 return 0UL;
@@ -170,6 +174,7 @@ static void APIENTRY cleanup(ULONG ulReason)
     WriteOutProfiles();
     DestroyTIB();
     DestroySharedHeap();
+    DestroyCodeHeap();
     _ctordtorTerm();
 
     //NOTE: Must be done after DestroyTIB

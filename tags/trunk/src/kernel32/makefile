@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.66 1999-12-01 18:40:48 sandervl Exp $
+# $Id: makefile,v 1.67 1999-12-09 00:52:20 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -31,7 +31,7 @@ CXXFLAGS = $(CXXFLAGS) -DDEBUG_ENABLELOG_LEVEL2
 OBJS = KERNEL32.OBJ KOBJECTS.OBJ CONSOLE.OBJ CONIN.OBJ \
 CONBUFFER.OBJ CONOUT.OBJ UNICODE.OBJ network.OBJ HMDEVIO.OBJ \
 profile.obj THREAD.OBJ virtual.obj THUNK.OBJ OBSOLETE.OBJ COMM.OBJ\
-MESSAGE.OBJ RESOURCE.OBJ EXCEPTIONS.OBJ heapshared.obj cpuhlp.obj \
+MESSAGE.OBJ RESOURCE.OBJ EXCEPTIONS.OBJ heapshared.obj cpuhlp.obj heapcode.obj \
 LFILE.OBJ NPIPE.OBJ oslibdos.obj oslibmisc.obj MISC.OBJ EXCEPTUTIL.OBJ \
 LANG.OBJ ICCIO.OBJ MAP.OBJ WIN32UTIL.OBJ heap.OBJ heapstring.obj \
 os2heap.OBJ vmutex.OBJ initterm.OBJ handlemanager.OBJ  \
@@ -150,7 +150,7 @@ os2heap.OBJ: \
     os2heap.h \
     initterm.h
 
-initterm.OBJ: .\initterm.cpp initterm.h  $(PDWIN32_INCLUDE)\heapshared.h  mmap.h directory.h hmdevio.h cpuhlp.h
+initterm.OBJ: .\initterm.cpp initterm.h  $(PDWIN32_INCLUDE)\heapshared.h  mmap.h directory.h hmdevio.h cpuhlp.h $(PDWIN32_INCLUDE)\heapcode.h
 
 thunk.OBJ: \
     .\thunk.cpp \
@@ -386,6 +386,7 @@ interlock.obj: interlock.asm
 toolhelp.obj: toolhelp.cpp
 
 heapshared.obj: heapshared.cpp $(PDWIN32_INCLUDE)\heapshared.h
+heapcode.obj: heapcode.cpp $(PDWIN32_INCLUDE)\heapshared.h $(PDWIN32_INCLUDE)\heapcode.h
 cpu.obj: cpu.cpp cpuhlp.h
 cpuhlp.obj: cpuhlp.asm
 
