@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.28 2001-07-09 08:07:59 bird Exp $
+# $Id: makefile,v 1.29 2001-07-20 15:39:46 sandervl Exp $
 
 #
 # Odin32 API
@@ -30,7 +30,7 @@ $(OBJDIR)\sync.obj \
 $(OBJDIR)\initterm.obj \
 $(OBJDIR)\time.obj \
 $(OBJDIR)\unknown.obj \
-$(OBJDIR)\arith64.obj \
+$(OBJDIR)\large_int.obj \
 $(OBJDIR)\regfunc.obj \
 $(OBJDIR)\ntdllrsrc.obj
 
