@@ -1,4 +1,4 @@
-/* $Id: mixeros2.h,v 1.4 2002-05-24 18:02:48 sandervl Exp $ */
+/* $Id: mixeros2.h,v 1.5 2002-05-25 17:19:41 sandervl Exp $ */
 
 /*
  * Mixer multimedia
@@ -13,53 +13,58 @@
 #ifndef __WINMM_OS2MIXER_H__
 #define __WINMM_OS2MIXER_H__
 
-#define MIXER_MAX_VOLUME        	100
+#define MIXER_IOCTL90_MAX_VOLUME      	100
+#define MIXER_WIN32_MIN_VOLUME          0
+#define MIXER_WIN32_MAX_VOLUME          65535
+#define MIXER_WIN32_CSTEP_VOLUME        31
 
-#define MIX_CTRL_MIX_OUT_LINE           0
-#define MIX_CTRL_VOL_OUT_LINE     	1
-#define MIX_CTRL_MUTE_OUT_LINE     	2
-#define MIX_CTRL_VOL_IN_L_MONO    	3
-#define MIX_CTRL_MUTE_IN_L_MONO    	4
-#define MIX_CTRL_VOL_IN_L_PHONE   	5
-#define MIX_CTRL_MUTE_IN_L_PHONE   	6
-#define MIX_CTRL_VOL_IN_L_MIC     	7
-#define MIX_CTRL_MUTE_IN_L_MIC     	8
-#define MIX_CTRL_BOOST_IN_L_MIC 	9
-#define MIX_CTRL_VOL_IN_L_LINE    	10
-#define MIX_CTRL_MUTE_IN_L_LINE    	11
-#define MIX_CTRL_VOL_IN_L_CD      	12
-#define MIX_CTRL_MUTE_IN_L_CD      	13
-#define MIX_CTRL_VOL_IN_L_SPDIF   	14
-#define MIX_CTRL_MUTE_IN_L_SPDIF   	15
-#define MIX_CTRL_VOL_OUT_SPDIF    	16
-#define MIX_CTRL_MUTE_OUT_SPDIF    	17
-#define MIX_CTRL_VOL_IN_L_VIDEO   	18
-#define MIX_CTRL_MUTE_IN_L_VIDEO   	19
-#define MIX_CTRL_VOL_IN_L_AUX     	20
-#define MIX_CTRL_MUTE_IN_L_AUX     	21
-#define MIX_CTRL_VOL_IN_L_PCM     	22
-#define MIX_CTRL_MUTE_IN_L_PCM     	23
-#define MIX_CTRL_VOL_IN_L_WAVETABLE    	24
-#define MIX_CTRL_MUTE_IN_L_WAVETABLE   	25
-#define MIX_CTRL_VOL_IN_L_MIDI    	26
-#define MIX_CTRL_MUTE_IN_L_MIDI   	27
-#define MIX_CTRL_OUT_L_3DCENTER		28
-#define MIX_CTRL_OUT_L_3DDEPTH 		29
-#define MIX_CTRL_OUT_L_TREBLE       	30
-#define MIX_CTRL_OUT_L_BASS    		31
-#define MIX_CTRL_MUX_IN_W_SRC    	32
-#define MIX_CTRL_VOL_IN_W_MONO     	33
-#define MIX_CTRL_VOL_IN_W_PHONE   	34
-#define MIX_CTRL_VOL_IN_W_MIC     	35
-#define MIX_CTRL_VOL_IN_W_LINE    	36
-#define MIX_CTRL_VOL_IN_W_CD   		37
-#define MIX_CTRL_VOL_IN_W_SPDIF     	38
-#define MIX_CTRL_VOL_IN_W_VIDEO     	39
-#define MIX_CTRL_VOL_IN_W_AUX     	40
-#define MIX_CTRL_VOL_IN_W_PCM     	41
-#define MIX_CTRL_VOL_IN_W_WAVETABLE    	42
-#define MIX_CTRL_VOL_IN_W_MIDI     	43
-#define MIX_CTRL_MAX               	44
+#define WIN32_TO_IOCTL90_VOLUME(a)      ((a*MIXER_IOCTL90_MAX_VOLUME)/(MIXER_WIN32_MAX_VOLUME-MIXER_WIN32_MIN_VOLUME))
+#define IOCTL90_TO_WIN32_VOLUME(a)      ((a*(MIXER_WIN32_MAX_VOLUME-MIXER_WIN32_MIN_VOLUME))/MIXER_IOCTL90_MAX_VOLUME)
+
+#define MIX_CTRL_VOL_OUT_LINE     	0
+#define MIX_CTRL_MUTE_OUT_LINE     	1
+#define MIX_CTRL_VOL_IN_L_MONO    	2
+#define MIX_CTRL_MUTE_IN_L_MONO    	3
+#define MIX_CTRL_VOL_IN_L_PHONE   	4
+#define MIX_CTRL_MUTE_IN_L_PHONE   	5
+#define MIX_CTRL_VOL_IN_L_MIC     	6
+#define MIX_CTRL_MUTE_IN_L_MIC     	7
+#define MIX_CTRL_BOOST_IN_L_MIC 	8
+#define MIX_CTRL_VOL_IN_L_LINE    	9
+#define MIX_CTRL_MUTE_IN_L_LINE    	10
+#define MIX_CTRL_VOL_IN_L_CD      	11
+#define MIX_CTRL_MUTE_IN_L_CD      	12
+#define MIX_CTRL_VOL_IN_L_SPDIF   	13
+#define MIX_CTRL_MUTE_IN_L_SPDIF   	14
+#define MIX_CTRL_VOL_OUT_SPDIF    	15
+#define MIX_CTRL_MUTE_OUT_SPDIF    	16
+#define MIX_CTRL_VOL_IN_L_VIDEO   	17
+#define MIX_CTRL_MUTE_IN_L_VIDEO   	18
+#define MIX_CTRL_VOL_IN_L_AUX     	19
+#define MIX_CTRL_MUTE_IN_L_AUX     	20
+#define MIX_CTRL_VOL_IN_L_PCM     	21
+#define MIX_CTRL_MUTE_IN_L_PCM     	22
+#define MIX_CTRL_VOL_IN_L_WAVETABLE    	23
+#define MIX_CTRL_MUTE_IN_L_WAVETABLE   	24
+#define MIX_CTRL_VOL_IN_L_MIDI    	25
+#define MIX_CTRL_MUTE_IN_L_MIDI   	26
+#define MIX_CTRL_OUT_L_3DCENTER		27
+#define MIX_CTRL_OUT_L_3DDEPTH 		28
+#define MIX_CTRL_OUT_L_TREBLE       	29
+#define MIX_CTRL_OUT_L_BASS    		30
+#define MIX_CTRL_MUX_IN_W_SRC    	31
+#define MIX_CTRL_VOL_IN_W_MONO     	32
+#define MIX_CTRL_VOL_IN_W_PHONE   	33
+#define MIX_CTRL_VOL_IN_W_MIC     	34
+#define MIX_CTRL_VOL_IN_W_LINE    	35
+#define MIX_CTRL_VOL_IN_W_CD   		36
+#define MIX_CTRL_VOL_IN_W_SPDIF     	37
+#define MIX_CTRL_VOL_IN_W_VIDEO     	38
+#define MIX_CTRL_VOL_IN_W_AUX     	39
+#define MIX_CTRL_VOL_IN_W_PCM     	40
+#define MIX_CTRL_VOL_IN_W_WAVETABLE    	41
+#define MIX_CTRL_VOL_IN_W_MIDI     	42
+#define MIX_CTRL_MAX               	43
 
 #define MIXER_SRC_MONOIN      	0
 #define MIXER_SRC_PHONE       	1
@@ -97,6 +102,7 @@ BOOL OSLibMixGetVolume(DWORD dwControl, BOOL *pfMute, DWORD *pdwVolLeft, DWORD *
 BOOL OSLibMixSetRecSource(DWORD dwRecSrc, DWORD dwVolL, DWORD dwVolR);
 BOOL OSLibMixGetRecSource(DWORD *pdwRecSrc, DWORD *pdwVolL, DWORD *pdwVolR);
 BOOL OSLibMixIsRecSourcePresent(DWORD dwRecSrc);
+BOOL OSLibMixGetCtrlCaps(DWORD dwControl, LONG *plMinimum, LONG *plMaximum, DWORD *pcSteps);
 
 #ifdef __cplusplus
 }
