@@ -1,4 +1,4 @@
-/* $Id: dibsect.cpp,v 1.53 2001-06-03 14:52:47 sandervl Exp $ */
+/* $Id: dibsect.cpp,v 1.54 2001-06-08 11:03:33 sandervl Exp $ */
 
 /*
  * GDI32 DIB sections
@@ -589,56 +589,8 @@ BOOL DIBSection::BitBlt(HDC hdcDest, int nXdest, int nYdest, int nDestWidth,
   }
   else  bitmapBits = bmpBits;
 
-  switch(Rop) {
-      case 0xcc0020: /* SRCCOPY */
-          Rop = ROP_SRCCOPY;
-          break;
-      case 0xee0086: /* SRCPAINT */
-          Rop = ROP_SRCPAINT;
-          break;
-      case 0x8800c6: /* SRCAND */
-          Rop = ROP_SRCAND;
-          break;
-      case 0x660046: /* SRCINVERT */
-          Rop = ROP_SRCINVERT;
-          break;
-      case 0x440328: /* SRCERASE */
-          Rop = ROP_SRCERASE;
-          break;
-      case 0x330008: /* NOTSRCCOPY */
-          Rop = ROP_NOTSRCCOPY;
-          break;
-      case 0x1100a6: /* NOTSRCERASE */
-          Rop = ROP_NOTSRCERASE;
-          break;
-      case 0xc000ca: /* MERGECOPY */
-          Rop = ROP_MERGECOPY;
-          break;
-      case 0xbb0226: /* MERGEPAINT */
-          Rop = ROP_MERGEPAINT;
-          break;
-      case 0xf00021: /* PATCOPY */
-          Rop = ROP_PATCOPY;
-          break;
-      case 0xfb0a09: /* PATPAINT */
-          Rop = ROP_PATPAINT;
-          break;
-      case 0x5a0049: /* PATINVERT */
-          Rop = ROP_PATINVERT;
-          break;
-      case 0x550009: /* DSTINVERT */
-          Rop = ROP_DSTINVERT;
-          break;
-      case 0x000042: /* BLACKNESS */
-          Rop = ROP_ZERO;
-          break;
-      case 0xff0062: /* WHITENESS */
-          Rop = ROP_ONE;
-          break;
-      default:
-          Rop = ROP_SRCCOPY;
-          break;
-  }
+  //Translate ROP
+  Rop = Rop >> 16;
 
   //SvL: Optimize this.. (don't convert entire bitmap if only a part will be blitted to the dc)
   if(dibinfo.dsBitfields[1] == 0x3E0) {//RGB 555?
