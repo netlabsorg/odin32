@@ -1,4 +1,4 @@
-/* $Id: hmmmap.cpp,v 1.19 2002-03-24 11:59:45 sandervl Exp $ */
+/* $Id: hmmmap.cpp,v 1.20 2002-05-20 13:47:58 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -50,12 +50,12 @@
 //******************************************************************************
 //******************************************************************************
 DWORD HMDeviceMemMapClass::CreateFileMapping(PHMHANDLEDATA         pHMHandleData,
-			 		     HFILE hFile, 
+			 		     HFILE hFile,
                 	 		     SECURITY_ATTRIBUTES *sa, /* [in] Optional security attributes*/
                 	 		     DWORD protect,   /* [in] Protection for mapping object */
                 		   	     DWORD size_high, /* [in] High-order 32 bits of object size */
                 		   	     DWORD size_low,  /* [in] Low-order 32 bits of object size */
-                		   	     LPCSTR name)     /* [in] Name of file-mapping object */ 
+                		   	     LPCSTR name)     /* [in] Name of file-mapping object */
 {
  Win32MemMap *map;
 
@@ -63,7 +63,7 @@ DWORD HMDeviceMemMapClass::CreateFileMapping(PHMHANDLEDATA         pHMHandleData
      protect & ~(PAGE_READONLY|PAGE_READWRITE|PAGE_WRITECOPY|SEC_COMMIT|SEC_IMAGE|SEC_RESERVE|SEC_NOCACHE) ||
      (protect & (PAGE_READONLY|PAGE_READWRITE|PAGE_WRITECOPY)) == 0 ||
 //     (hFile == -1 && (protect & SEC_COMMIT)) ||
-     ((protect & SEC_COMMIT) && (protect & SEC_RESERVE))) 
+     ((protect & SEC_COMMIT) && (protect & SEC_RESERVE)))
   {
 
 	dprintf(("CreateFileMappingA: invalid parameter (combination)!"));
@@ -108,9 +108,9 @@ DWORD HMDeviceMemMapClass::CreateFileMapping(PHMHANDLEDATA         pHMHandleData
   	if(map == NULL) {
 		dprintf(("CreateFileMappingA: can't create Win32MemMap object!"));
 		return ERROR_OUTOFMEMORY;
-  	} 
+  	}
 
-  	if(map->Init() == FALSE) {
+        if(map->Init(size_low) == FALSE) {
 		dprintf(("CreateFileMappingA: init failed!"));
 		delete map;
 		return ERROR_GEN_FAILURE;
@@ -176,10 +176,10 @@ LPVOID HMDeviceMemMapClass::MapViewOfFileEx(PHMHANDLEDATA pHMHandleData,
            dwDesiredAccess,
            dwFileOffsetHigh,
            dwFileOffsetLow,
-           dwNumberOfBytesToMap, 
+           dwNumberOfBytesToMap,
            lpBaseAddress));
 
-  if(lpBaseAddress != NULL) 
+  if(lpBaseAddress != NULL)
   {
 #if 0
      //No can do. Let us choose the address
