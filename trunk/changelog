@@ -1,4 +1,8 @@
-/* $Id: changelog,v 1.1881 2001-12-04 11:26:01 sandervl Exp $ */
+/* $Id: changelog,v 1.1882 2001-12-04 12:58:02 phaller Exp $ */
+
+ 2001-12-04: Patrick Haller <patrick.haller@innotek.de>
+    - KERNEL32: o parallel port support restricted to physical ports
+                  (LAN redirections not supported)
 
  2001-12-04: Sander van Leeuwen <sandervl@xs4all.nl>
     - COMCTL32: o Hack added for proper resizing of wizard property sheet in

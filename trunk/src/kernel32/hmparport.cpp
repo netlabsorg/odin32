@@ -1,4 +1,4 @@
-/* $Id: hmparport.cpp,v 1.14 2001-12-04 00:07:25 phaller Exp $ */
+/* $Id: hmparport.cpp,v 1.15 2001-12-04 12:56:52 phaller Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -90,20 +90,22 @@ typedef MODEMSTATUS *PMODEMSTATUS;
 
 
 // Hardwired parallel port configuration information.
-// Yet unsure if it's beneficial to query Resource Manager
-// for these values as direct port i/o is not allowed anyway.
+// @@@PH better query the Resource Manager
 typedef struct tagParallelPortConfiguration
 {
   ULONG ulNumber;
   ULONG ulPortBase;
   ULONG ulPortSpan;
+  ULONG ulEcpPortBase;
+  ULONG ulEcpPortSpan;
 } PARALLELPORTCONFIGURATION, *PPARALLELPORTCONFIGURATION;
 
-#define NUM_PARALLELPORTS 3
-static PARALLELPORTCONFIGURATION arrParallelPorts[NUM_PARALLELPORTS] = {
-  {1, 0x378, 8},
-  {2, 0x278, 8},
-  {3, 0x3bc, 8}
+#define MAX_PARALLEL_PORTS_CONFIGURATION 3
+static PARALLELPORTCONFIGURATION arrParallelPorts[MAX_PARALLEL_PORTS_CONFIGURATION] = 
+{
+  {1, 0x378, 8, 0x778, 3},
+  {2, 0x278, 8, 0x678, 3},
+  {3, 0x3bc, 8, 0x000, 0}
 };
 
 
@@ -134,7 +136,8 @@ static VOID *CreateDevData()
 }
 
 
-HMDeviceParPortClass::HMDeviceParPortClass(LPCSTR lpDeviceName) : HMDeviceHandler(lpDeviceName)
+HMDeviceParPortClass::HMDeviceParPortClass(LPCSTR lpDeviceName) : 
+  HMDeviceHandler(lpDeviceName)
 {
   dprintf(("HMDeviceParPortClass::HMDevParPortClass(%s)\n",
            lpDeviceName));
@@ -144,26 +147,19 @@ HMDeviceParPortClass::HMDeviceParPortClass(LPCSTR lpDeviceName) : HMDeviceHandle
 #endif
   
   // first, we determine the number of parallel port devices available
-  BYTE  bParallelPorts = NUM_PARALLELPORTS;
   
-#if 0
-  // Note:
-  // OSLibDosDevConfig does *NOT* report any OS/2 related information
-  // about the parallel ports such as LPT redirections or even an
-  // installed LPT device driver, it appears to just report what the
-  // BIOS told.
-  
-  DWORD rc = OSLibDosDevConfig(&bParallelPorts,
+  // PH 2001-12-04 Note:
+  // This call will not return any information about redirected LPT ports.
+  // We have a specific application requiring exactly this behaviour as it
+  // cannot talk to redirected LPTs anyway.
+  // For any change in this behaviour, we'd require a configuration switch.
+  bNumberOfParallelPorts = 0;
+  DWORD rc = OSLibDosDevConfig(&bNumberOfParallelPorts,
                                DEVINFO_PRINTER);
   dprintf(("HMDeviceParPortClass: Parallel ports reported: %d\n",
-          bParallelPorts));
-  if (0 == bParallelPorts)
+          bNumberOfParallelPorts));
+  if (0 == bNumberOfParallelPorts)
     return;
-  
-  // @@@PH
-  // query configuration data from Resource Manager
-  // (base i/o ports, etc. for the IOCTL_INTERNAL_GET_xxx)
-#endif
   
   VOID *pData;
   dprintf(("HMDeviceParPortClass: Registering LPTs with Handle Manager\n"));
@@ -173,11 +169,12 @@ HMDeviceParPortClass::HMDeviceParPortClass(LPCSTR lpDeviceName) : HMDeviceHandle
     HMDeviceRegisterEx("LPT1", this, pData);
   
   // add symbolic links to the "real name" of the device
+  if (bNumberOfParallelPorts > 0)
   {
     // Note: \\.\LPTx: is invalid (NT4SP6)
     PSZ pszLPT  = strdup("\\\\.\\LPTx");
     PSZ pszLPT2 = strdup("\\Device\\ParallelPort0");
-    for (char ch = '1'; ch <= '1' + (bParallelPorts - 1); ch++)
+    for (char ch = '1'; ch <= '1' + (bNumberOfParallelPorts - 1); ch++)
     {
       pszLPT[7] = ch;
       pszLPT2[20] = ch - 1; // \DeviceParallelPort0 -> LPT1
@@ -209,27 +206,29 @@ HMDeviceParPortClass::HMDeviceParPortClass(LPCSTR lpDeviceName) : HMDeviceHandle
  *****************************************************************************/
 BOOL HMDeviceParPortClass::FindDevice(LPCSTR lpClassDevName, LPCSTR lpDeviceName, int namelength)
 {
-  // can be both, "LPT1" and "LPT1:"
-    if(namelength > 5)
-        return FALSE;  //can't be lpt name
-
-    //first 3 letters 'LPT'?
-    if(lstrncmpiA(lpDeviceName, lpClassDevName, 3) != 0) {
-        return FALSE;
-    }
-
-    if(namelength == 5 && lpDeviceName[4] != ':') {
-        return FALSE;
-    }
-  
-    // can support up tp LPT9
-    if ( (lpDeviceName[3] >= '1') &&
-         (lpDeviceName[3] <= '1' + NUM_PARALLELPORTS) )
-    {
-      return TRUE;
-    }
-  
+  // Don't accept any name if no parallel ports have been detected
+  if (bNumberOfParallelPorts == 0)
     return FALSE;
+  
+  // can be both, "LPT1" and "LPT1:"
+  if(namelength > 5)
+    return FALSE;  //can't be lpt name
+
+  //first 3 letters 'LPT'?
+  if(lstrncmpiA(lpDeviceName, lpClassDevName, 3) != 0)
+    return FALSE;
+
+  if(namelength == 5 && lpDeviceName[4] != ':')
+    return FALSE;
+  
+  // can support up tp LPT9
+  if ( (lpDeviceName[3] >= '1') &&
+       (lpDeviceName[3] <= '1' + bNumberOfParallelPorts) )
+  {
+    return TRUE;
+  }
+
+  return FALSE;
 }
 
 DWORD HMDeviceParPortClass::CreateFile(HANDLE        hHandle,
@@ -244,10 +243,16 @@ DWORD HMDeviceParPortClass::CreateFile(HANDLE        hHandle,
            lpSecurityAttributes,
            pHMHandleDataTemplate));
   
- char lptname[6];
+  char lptname[6];
 
   dprintf(("HMDeviceParPortClass: Parallel port %s open request\n", lpFileName));
-
+  
+  // Don't accept any name if no parallel ports have been detected
+  if (bNumberOfParallelPorts == 0)
+  {
+    return ERROR_DEV_NOT_EXIST;
+  }
+  
   strcpy(lptname, lpFileName);
   lptname[4] = 0;   //get rid of : (if present) (eg LPT1:)
 
@@ -279,9 +284,9 @@ DWORD HMDeviceParPortClass::CreateFile(HANDLE        hHandle,
     ULONG ulPortNo = lptname[3] - '1';
     
     // safety check (device no 0..8 -> LPT1..9)
-    if (ulPortNo > 8)
+    if (ulPortNo > MAX_PARALLEL_PORTS_CONFIGURATION)
     {
-      delete pHMHandleData->lpHandlerData;
+      HMDeviceParPortClass::CloseHandle(pHMHandleData);
       return ERROR_DEV_NOT_EXIST;
     }
     
@@ -718,7 +723,7 @@ BOOL HMDeviceParPortClass::DeviceIoControl(PHMHANDLEDATA pHMHandleData,
         // Specifies the base physical address that the system-supplied 
         // function driver for parallel ports uses to control the ECP 
         // operation of the parallel port.
-        pPPI->OriginalEcpController.LowPart  = pPPD->pHardwareConfiguration->ulPortBase;
+        pPPI->OriginalEcpController.LowPart  = pPPD->pHardwareConfiguration->ulEcpPortBase;
         pPPI->OriginalEcpController.HighPart = 0;
         
         // Pointer to the I/O port resource that is used to control the 
@@ -726,7 +731,7 @@ BOOL HMDeviceParPortClass::DeviceIoControl(PHMHANDLEDATA pHMHandleData,
         pPPI->EcpController = NULL;
         
         // Specifies the size, in bytes, of the I/O port resource.
-        pPPI->SpanOfEcpController = pPPD->pHardwareConfiguration->ulPortSpan;
+        pPPI->SpanOfEcpController = pPPD->pHardwareConfiguration->ulEcpPortSpan;
         
         // Not used.
         pPPI->PortNumber = 0;
