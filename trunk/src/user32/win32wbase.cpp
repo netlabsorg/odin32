@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.344 2002-12-04 15:23:40 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.345 2002-12-05 09:25:06 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -1910,6 +1910,45 @@ LRESULT Win32BaseWindow::DefWindowProcA(UINT Msg, WPARAM wParam, LPARAM lParam)
                 if (!(GetClassLongW( top, GCL_STYLE ) & CS_NOCLOSE))
                     PostMessageW( top, WM_SYSCOMMAND, SC_CLOSE, 0 );
 	    }
+
+            //Default OS/2 app behaviour for system keys
+            if(fOS2Look)
+            {
+		    if( wParam == VK_F5 )	/* try to restore the window */
+		    {
+	                HWND top = GetTopParent();
+                        /* No checks needed SC_RESTORE handler does them */
+	                PostMessageW( top, WM_SYSCOMMAND, SC_RESTORE, 0 );
+		    }
+
+		    if( wParam == VK_F7 )	/* size the window */
+		    {
+	                HWND top = GetTopParent();
+	                PostMessageW( top, WM_SYSCOMMAND, SC_MOVE, 0 );
+		    }
+
+		    if( wParam == VK_F8 )	/* move the window */
+		    {
+	                HWND top = GetTopParent();
+	                if ( GetWindowLongA(top, GWL_STYLE) & WS_SIZEBOX)
+	                PostMessageW( top, WM_SYSCOMMAND, SC_SIZE, 0 );
+		    }
+
+		    if( wParam == VK_F9 )	/* try to minimize the window */
+		    {
+	                HWND top = GetTopParent();
+	                if ( GetWindowLongA(top, GWL_STYLE) & WS_MINIMIZEBOX)
+	                    PostMessageW( top, WM_SYSCOMMAND, SC_MINIMIZE, 0 );
+		    }
+
+		    if( wParam == VK_F10 )	/* try to maximize the window */
+		    {
+	                HWND top = GetTopParent();
+	                if ( GetWindowLongA(top, GWL_STYLE) & WS_MAXIMIZEBOX)
+	                    PostMessageW( top, WM_SYSCOMMAND, SC_MAXIMIZE, 0 );
+		    }
+            }
+
 	} 
 	else if( wParam == VK_F10 )
 	        iF10Key = 1;
