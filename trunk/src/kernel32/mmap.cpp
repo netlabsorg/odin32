@@ -1,4 +1,4 @@
-/* $Id: mmap.cpp,v 1.71 2004-04-02 15:46:33 sandervl Exp $ */
+/* $Id: mmap.cpp,v 1.72 2004-04-06 14:20:20 sandervl Exp $ */
 
 /*
  * Win32 Memory mapped file & view classes
@@ -571,16 +571,22 @@ fail:
 BOOL Win32MemMap::updateViewPages(ULONG offset, ULONG size, PAGEVIEW flags)
 {
     Win32MemMapView **views = (Win32MemMapView **)alloca(sizeof(Win32MemMapView*)*nrMappings);
+    int localmaps;
+
     if(views) 
     {
-        if(Win32MemMapView::findViews(this, nrMappings, views) == nrMappings) 
+        localmaps = Win32MemMapView::findViews(this, nrMappings, views);
+        if(localmaps <= nrMappings) 
         {
-            for(int i=0;i<nrMappings;i++) 
+            for(int i=0;i<localmaps;i++) 
             {
                 views[i]->changePageFlags(offset, size, flags);
             }           
         }
-        else DebugInt3(); //oh, oh
+        else {
+            dprintf(("unexpected number of views %d vs %d", localmaps, nrMappings));
+            DebugInt3(); //oh, oh
+        }
     }
     return TRUE;
 }
