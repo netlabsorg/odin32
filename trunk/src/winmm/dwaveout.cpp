@@ -1,4 +1,4 @@
-/* $Id: dwaveout.cpp,v 1.23 2000-04-08 09:16:53 sandervl Exp $ */
+/* $Id: dwaveout.cpp,v 1.24 2000-04-09 11:29:07 sandervl Exp $ */
 
 /*
  * Wave playback class
@@ -536,9 +536,6 @@ ULONG DartWaveOut::getPosition()
  MCI_STATUS_PARMS mciStatus = {0};
  ULONG rc, nrbytes;
 
-    if(State != STATE_PLAYING)
-        return 0;
-
     mciStatus.ulItem = MCI_STATUS_POSITION;
     rc = mciSendCommand(DeviceId, MCI_STATUS, MCI_STATUS_ITEM|MCI_WAIT, (PVOID)&mciStatus, 0);
     if((rc & 0xFFFF) == MCIERR_SUCCESS) {
@@ -644,8 +641,10 @@ void DartWaveOut::handler(ULONG ulStatus, PMCI_MIX_BUFFER pBuffer, ULONG ulFlags
   if(ulFlags == MIX_STREAM_ERROR) {
     if(ulStatus == ERROR_DEVICE_UNDERRUN) {
         dprintf(("WINMM: WaveOut handler UNDERRUN!\n"));
-        fUnderrun = TRUE;
-        pause();    //out of buffers, so pause playback
+	if(State == STATE_PLAYING) {
+        	fUnderrun = TRUE;
+        	pause();    //out of buffers, so pause playback
+	}
         return;
     }
     dprintf(("WINMM: WaveOut handler, Unknown error %X\n", ulStatus));
@@ -658,8 +657,10 @@ void DartWaveOut::handler(ULONG ulStatus, PMCI_MIX_BUFFER pBuffer, ULONG ulFlags
         wmutex->leave();
 	//last buffer played -> no new ones -> underrun; pause playback
         dprintf(("WINMM: WaveOut handler UNDERRUN!\n"));
-        fUnderrun = TRUE;
-        pause();    //out of buffers, so pause playback
+	if(State == STATE_PLAYING) {
+        	fUnderrun = TRUE;
+        	pause();    //out of buffers, so pause playback
+	}
         return;
   }
   while(whdr) {
