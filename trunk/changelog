@@ -1,4 +1,8 @@
-/* $Id: changelog,v 1.2414 2003-01-02 15:21:25 sandervl Exp $ */
+/* $Id: changelog,v 1.2415 2003-01-03 11:26:20 sandervl Exp $ */
+
+ 2002-01-03: Dietrich Teickner <Dietrich_Teickner@t-online   >
+    - KERNEL32: o Convert timezone names in Set/GetTimeZoneInformation as
+                  WGSS expects/returns ascii strings instead of unicode.
 
  2003-01-02: Sander van Leeuwen <sandervl@innotek   >
     - KERNEL32: o Set the codepage of the message queue for each new thread
