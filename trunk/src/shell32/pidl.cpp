@@ -1,4 +1,4 @@
-/* $Id: pidl.cpp,v 1.6 2000-03-26 16:34:42 cbratschi Exp $ */
+/* $Id: pidl.cpp,v 1.7 2000-03-28 15:28:43 cbratschi Exp $ */
 
 /*
  * Win32 SHELL32 for OS/2
@@ -49,6 +49,7 @@
 
 ODINDEBUGCHANNEL(SHELL32-PIDL)
 
+#ifdef DEBUG
 void pdump (LPCITEMIDLIST pidl)
 {  DWORD type;
    char * szData;
@@ -99,6 +100,8 @@ void pdump (LPCITEMIDLIST pidl)
    __SET_DEBUGGING(__DBCL_TRACE, dbch_pidl, TRUE);
 
 }
+#endif
+
 #define BYTES_PRINTED 32
 BOOL pcheck (LPCITEMIDLIST pidl)
 {       DWORD type, ret=TRUE;

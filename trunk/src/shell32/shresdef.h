@@ -1,4 +1,4 @@
-/* $Id: shresdef.h,v 1.4 2000-03-26 16:34:56 cbratschi Exp $ */
+/* $Id: shresdef.h,v 1.5 2000-03-28 15:28:54 cbratschi Exp $ */
 
 /*
  * Win32 SHELL32 for OS/2
@@ -41,7 +41,7 @@
 #define IDS_SHV_INVALID_MOVE_TITLE     30
 #define IDS_SHV_INVALID_MOVE           31
 
-#define ID_LISTVIEW	2000
+#define ID_LISTVIEW     2000
 #define ID_NEWFOLDER    0x7053
 
 #define IDS_ABOUTBOX                    101
@@ -56,6 +56,8 @@
 #define IDS_SYSTEMFOLDERS               112
 #define IDS_LOCALHARDRIVES              113
 #define IDS_FILENOTFOUND                114
+#define IDS_35FLOPPY                    115
+#define IDS_525FLOPPY                   116
 
 #endif /* __WINE_SHELL_RES_H */
 

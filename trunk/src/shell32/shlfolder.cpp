@@ -1,4 +1,4 @@
-/* $Id: shlfolder.cpp,v 1.10 2000-03-27 15:09:21 cbratschi Exp $ */
+/* $Id: shlfolder.cpp,v 1.11 2000-03-28 15:28:53 cbratschi Exp $ */
 /*
  * Shell Folder stuff
  *
@@ -113,19 +113,17 @@ static HRESULT SHELL32_ParseNextElement(
 
    /* get the shellfolder for the child pidl and let it analyse further */
    hr = IShellFolder_BindToObject(psf, *pidlInOut, NULL, &IID_IShellFolder, (LPVOID*)&psfChild);
-dprintf(("C 1"));
+
    if (psfChild)
    {  dprintf(("C 1a %d",psfChild/*,(psfChild)->fnParseDisplayName()*/));
      hr = IShellFolder_ParseDisplayName(psfChild, hwndOwner, NULL, szNext, pEaten, &pidlOut, pdwAttributes);
-dprintf(("C 1b"));
+
      IShellFolder_Release(psfChild);
-dprintf(("C 2"));
      pidlTemp = ILCombine(*pidlInOut, pidlOut);
-dprintf(("C 3"));
      if (pidlOut)
        ILFree(pidlOut);
    }
-dprintf(("C 4"));
+
    ILFree(*pidlInOut);
    *pidlInOut = pidlTemp;
 
@@ -797,6 +795,7 @@ static HRESULT WINAPI  IShellFolder_fnCompareIDs(
    else
    {
      LPPIDLDATA pd1, pd2;
+
      pd1 = _ILGetDataPointer(pidl1);
      pd2 = _ILGetDataPointer(pidl2);
 
@@ -2098,16 +2097,22 @@ static HRESULT WINAPI ISF_MyComputer_fnGetDisplayNameOf(
 
        if ((szPath[0] == 'A') || (szPath[0] == 'a') || (szPath[0] == 'B') || (szPath[0] == 'b'))
        {
-//CB: todo: move to resource, German name is "3,5-Diskette" -> English "3.5-Disk"?
-         strcpy(szDrive,"Floppy drive");
+         //floppy
+         strncpy(szDrive,szPath,2);
+         //3.5 floppy
+         LoadStringA(shell32_hInstance,IDS_35FLOPPY,szPath,sizeof(szPath)-10);
+         //CB: todo: 5.25 floppy check
+         strcat(szPath," (");
+         strncat(szPath,szDrive,2);
+         strcat(szPath,")");
        } else
        {
          GetVolumeInformationA(szPath,szDrive,12,&dwVolumeSerialNumber,&dwMaximumComponetLength,&dwFileSystemFlags,NULL,0);
+         strcat (szDrive," (");
+         strncat (szDrive, szPath, 2);
+         strcat (szDrive,")");
+         strcpy (szPath, szDrive);
        }
-       strcat (szDrive," (");
-       strncat (szDrive, szPath, 2);
-       strcat (szDrive,")");
-       strcpy (szPath, szDrive);
      }
    }
 

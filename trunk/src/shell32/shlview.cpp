@@ -1,4 +1,4 @@
-/* $Id: shlview.cpp,v 1.10 2000-03-27 15:09:22 cbratschi Exp $ */
+/* $Id: shlview.cpp,v 1.11 2000-03-28 15:28:54 cbratschi Exp $ */
 /*
  * ShellView
  *
@@ -114,7 +114,6 @@ extern struct ICOM_VTABLE(IViewObject) vovt;
 #define FILEDIALOG_COLUMN_TYPE 2
 #define FILEDIALOG_COLUMN_TIME 3
 #define FILEDIALOG_COLUMN_ATTRIB 4
-//CB: todo: drive view!
 
 /*menu items */
 #define IDM_VIEW_FILES  (FCIDM_SHVIEWFIRST + 0x500)
@@ -183,7 +182,8 @@ IShellView * IShellView_Constructor( IShellFolder * pFolder)
  * ##### helperfunctions for communication with ICommDlgBrowser #####
  */
 static BOOL IsInCommDlg(IShellViewImpl * This)
-{  return(This->pCommDlgBrowser != NULL);
+{
+  return(This->pCommDlgBrowser != NULL);
 }
 
 static HRESULT IncludeObject(IShellViewImpl * This, LPCITEMIDLIST pidl)
@@ -501,11 +501,13 @@ static HRESULT ShellView_FillList(IShellViewImpl * This)
    HDPA     hdpa;
 
 //CB: really slow, even without debug information
+//    too much transfers
    TRACE("%p\n",This);
 
 //CB: FindFirstFileA, many calls to FindNextFileA in this block
 //    OS/2's APIs can read more than one file per call -> much faster
 //    -> add a new API for faster handling
+
    /* get the itemlist from the shfolder*/
    hRes = IShellFolder_EnumObjects(This->pSFParent,This->hWnd, SHCONTF_NONFOLDERS | SHCONTF_FOLDERS, &pEnumIDList);
    if (hRes != S_OK)
@@ -525,10 +527,13 @@ static HRESULT ShellView_FillList(IShellViewImpl * This)
    /* copy the items into the array*/
    while((S_OK == IEnumIDList_Next(pEnumIDList,1,(LPITEMIDLIST*)&pidl,&dwFetched)) && dwFetched)
    {
-     if (pDPA_InsertPtr(hdpa, 0x7fff, pidl) == -1)
+     if (IncludeObject(This,pidl) == S_OK) /* in a commdlg This works as a filemask*/
      {
-       SHFree(pidl);
-     }
+       if (pDPA_InsertPtr(hdpa, 0x7fff, pidl) == -1)
+       {
+         SHFree(pidl);
+       }
+     } else SHFree(pidl);
    }
 
    /*sort the array*/
@@ -547,15 +552,10 @@ static HRESULT ShellView_FillList(IShellViewImpl * This)
    {
      pidl = (LPITEMIDLIST)DPA_GetPtr(hdpa, i);
 
-     if (IncludeObject(This, pidl) == S_OK) /* in a commdlg This works as a filemask*/
-     {
-       lvItem.iItem = iPos;                                      /*add the item to the end of the list*/
-       lvItem.lParam = (LPARAM)pidl;                         /*set the item's data*/
-       ListView_InsertItemA(This->hWndList, &lvItem);
-       iPos++;
-     }
-     else
-       SHFree(pidl);                     /* the listview has the COPY*/
+     lvItem.iItem = iPos;                                 /*add the item to the end of the list*/
+     lvItem.lParam = (LPARAM)pidl;                        /*set the item's data*/
+     ListView_InsertItemA(This->hWndList, &lvItem);
+     iPos++;
    }
 
    /*turn the listview's redrawing back on and force it to draw*/

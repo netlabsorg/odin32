@@ -1,4 +1,4 @@
-/* $Id: shellpath.cpp,v 1.7 2000-03-26 16:34:52 cbratschi Exp $ */
+/* $Id: shellpath.cpp,v 1.8 2000-03-28 15:28:52 cbratschi Exp $ */
 
 /*
  * Win32 SHELL32 for OS/2
@@ -554,24 +554,30 @@ static BOOL PathMatchSingleMaskA(LPCSTR name, LPCSTR mask)
   }
   return 0;
 }
+
 static BOOL PathMatchSingleMaskW(LPCWSTR name, LPCWSTR mask)
 {
-  while (*name && *mask && *mask!=';') {
-    if (*mask=='*') {
-      do {
-   if (PathMatchSingleMaskW(name,mask+1)) return 1;  /* try substrings */
+  while (*name && *mask && (*mask != ';'))
+  {
+    if (*mask == '*')
+    {
+      do
+      {
+        if (PathMatchSingleMaskW(name,mask+1)) return 1;  /* try substrings */
       } while (*name++);
-      return 0;
+      return FALSE;
     }
-    if (towupper(*mask)!=towupper(*name) && *mask!='?') return 0;
+    if ((towupper(*mask) != towupper(*name)) && (*mask != '?')) return 0;
     name++;
     mask++;
   }
-  if (!*name) {
-    while (*mask=='*') mask++;
-    if (!*mask || *mask==';') return 1;
+  if (!*name)
+  {
+    while (*mask == '*') mask++;
+    if (!*mask || (*mask == ';')) return TRUE;
   }
-  return 0;
+
+  return FALSE;
 }
 /*************************************************************************
  * PathMatchSpec [SHELL32.46]
@@ -585,40 +591,48 @@ ODINFUNCTION2(BOOL, PathMatchSpecA,
 {
   TRACE("%s %s\n",name,mask);
 
-  if (!lstrcmpA( mask, "*.*" )) return 1;   /* we don't require a period */
+  if (!lstrcmpA( mask, "*.*" )) return TRUE;   /* we don't require a period */
 
-  while (*mask) {
-    if (PathMatchSingleMaskA(name,mask)) return 1;    /* helper function */
+  while (*mask)
+  {
+    if (PathMatchSingleMaskA(name,mask)) return TRUE;    /* helper function */
     while (*mask && *mask!=';') mask++;
-    if (*mask==';') {
+    if (*mask==';')
+    {
       mask++;
       while (*mask==' ') mask++;      /*  masks may be separated by "; " */
-     }
-   }
-  return 0;
+    }
+  }
+
+  return FALSE;
 }
+
 ODINFUNCTION2(BOOL, PathMatchSpecW,
               LPCWSTR, name,
               LPCWSTR, mask)
-{  WCHAR stemp[4];
+{
   TRACE("%ls %ls\n",name,mask);
-   lstrcpyAtoW(stemp,"*.*");
-  if (!lstrcmpW( mask, stemp )) return 1;   /* we don't require a period */
 
-  while (*mask) {
-    if (PathMatchSingleMaskW(name,mask)) return 1;    /* helper function */
-    while (*mask && *mask!=';') mask++;
-    if (*mask==';') {
+  if (!lstrcmpW( mask, (WCHAR*)L"*.*" )) return TRUE;   /* we don't require a period */
+
+  while (*mask)
+  {
+    if (PathMatchSingleMaskW(name,mask)) return TRUE;    /* helper function */
+    while (*mask && (*mask != ';')) mask++;
+    if (*mask == ';')
+    {
       mask++;
       while (*mask==' ') mask++;       /* masks may be separated by "; " */
-     }
-   }
-  return 0;
+    }
+  }
+
+  return FALSE;
 }
 ODINFUNCTION2(BOOL, PathMatchSpecAW,
               LPVOID, name,
               LPVOID, mask)
-{  if (VERSION_OsIsUnicode())
+{
+   if (VERSION_OsIsUnicode())
      return PathMatchSpecW( (LPWSTR)name, (LPWSTR)mask );
    return PathMatchSpecA( (LPSTR)name, (LPSTR)mask );
 }
@@ -1294,7 +1308,7 @@ DWORD WINAPI SHGetValueA(
 {
     FIXME("(%p),stub!\n", pSubKey);
 
-	return ERROR_SUCCESS;  /* return success */
+        return ERROR_SUCCESS;  /* return success */
 }
 
 DWORD WINAPI SHGetValueW(
@@ -1308,7 +1322,7 @@ DWORD WINAPI SHGetValueW(
 {
     FIXME("(%p),stub!\n", pSubKey);
 
-	return ERROR_SUCCESS;  /* return success */
+        return ERROR_SUCCESS;  /* return success */
 }
 
 /* gets a user-specific registry value. */
@@ -1326,7 +1340,7 @@ LONG WINAPI SHRegGetUSValueA(
 {
     FIXME("(%p),stub!\n", pSubKey);
 
-	return ERROR_SUCCESS;  /* return success */
+        return ERROR_SUCCESS;  /* return success */
 }
 
 LONG WINAPI SHRegGetUSValueW(
@@ -1342,6 +1356,6 @@ LONG WINAPI SHRegGetUSValueW(
 {
     FIXME("(%p),stub!\n", pSubKey);
 
-	return ERROR_SUCCESS;  /* return success */
+        return ERROR_SUCCESS;  /* return success */
 }
 

@@ -1,4 +1,4 @@
-/* $Id: shell32_En.orc,v 1.2 2000-03-26 16:34:45 cbratschi Exp $ */
+/* $Id: shell32_En.orc,v 1.3 2000-03-28 15:28:46 cbratschi Exp $ */
 LANGUAGE LANG_ENGLISH, SUBLANG_DEFAULT
 
 #if 1
@@ -62,5 +62,7 @@ STRINGTABLE DISCARDABLE
     IDS_SYSTEMFOLDERS       "System Folders"
     IDS_LOCALHARDRIVES      "Local Hard Drives"
     IDS_FILENOTFOUND        "File not found"
+    IDS_35FLOPPY            "3.5 disk"
+    IDS_525FLOPPY           "5.25 disk"
 }
 
