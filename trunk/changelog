@@ -1,4 +1,7 @@
-/* $Id: changelog,v 1.2313 2002-09-17 17:36:49 sandervl Exp $ */
+/* $Id: changelog,v 1.2314 2002-09-18 10:56:24 sandervl Exp $ */
+
+ 2002-09-18: Platon Fomichev <platon@innotek   >
+    - USER32:   o WM_MOUSEWHEEL update
 
  2002-09-17: Platon Fomichev <platon@innotek   >
     - USER32:   o Create invisible vertical scroller for all top-level windows
