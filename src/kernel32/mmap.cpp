@@ -1,4 +1,4 @@
-/* $Id: mmap.cpp,v 1.38 2000-03-28 17:11:49 sandervl Exp $ */
+/* $Id: mmap.cpp,v 1.39 2000-04-15 10:00:45 sandervl Exp $ */
 
 /*
  * Win32 Memory mapped file & view classes
@@ -424,7 +424,7 @@ BOOL Win32MemMap::flushView(ULONG offset, ULONG cbFlush)
 	goto success; //TODO: Return an error here?
 
   while(cbFlush) {
-	if(VirtualQuery((LPSTR)lpvBase, &memInfo, cbFlush) == 0) {
+	if(VirtualQuery((LPSTR)lpvBase, &memInfo, sizeof(MEMORY_BASIC_INFORMATION)) == 0) {
 		dprintf(("Win32MemMap::flushView: VirtualQuery (%x,%x) failed for %x", lpvBase, cbFlush, (ULONG)lpvBase+i*PAGE_SIZE));
 		goto fail;
 	}
