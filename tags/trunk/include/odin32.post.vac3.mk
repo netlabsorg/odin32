@@ -1,4 +1,4 @@
-# $Id: odin32.post.vac3.mk,v 1.16 2001-08-04 14:18:23 bird Exp $
+# $Id: odin32.post.vac3.mk,v 1.17 2001-08-16 04:13:20 bird Exp $
 
 #
 # Odin32 API
@@ -128,6 +128,7 @@ lib:    $(OBJDIR) \
 #
 !ifndef NO_MAIN_RULE
 $(OBJDIR)\$(TARGET).$(TARGET_EXTENSION): $(LIBS) $(OBJS) $(OS2RES) $(DEFFILE) $(OBJDIR)\bldlevel.$(DEFFILE) $(OBJDIR)\$(TARGET).lrf
+    $(CMDQD_WAIT)
     -4 $(LD2) $(LD2FLAGS) @$(OBJDIR)\$(TARGET).lrf
 !ifdef OS2RES
     $(OS2RC) $(OS2RCLFLAGS) $(OS2RES) $@
@@ -199,6 +200,7 @@ lib:
 #
 !ifndef NO_MAIN_RULE
 $(OBJDIR)\$(TARGET).$(TARGET_EXTENSION): $(LIBS) $(OBJS) $(OS2RES) $(DEFFILE) $(OBJDIR)\bldlevel.$(DEFFILE) $(OBJDIR)\$(TARGET).lrf
+    $(CMDQD_WAIT)
     -4 $(LD2) $(LD2FLAGS) @$(OBJDIR)\$(TARGET).lrf
 !ifdef OS2RES
     $(OS2RC) $(OS2RCLFLAGS) $(OS2RES) $@
@@ -294,6 +296,7 @@ libs: all
 #
 !ifndef NO_MAIN_RULE
 $(OBJDIR)\$(TARGET).$(TARGET_EXTENSION): $(OBJS)
+    $(CMDQD_WAIT)
     $(RM) $@
 !if "$(CCENV)" != "EMX"
     -4 $(ILIB) $(ILIBFLAGS) $@ @<<$@.parm
