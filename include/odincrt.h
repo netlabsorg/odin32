@@ -13,11 +13,12 @@ typedef struct {
         ULONG   OwningThread;
         ULONG   hmtxLock;
         ULONG   Reserved;
+        LONG    CreationCount;
 } CRITICAL_SECTION_OS2, *PCRITICAL_SECTION_OS2;
 
 ULONG WIN32API DosDeleteCriticalSection(CRITICAL_SECTION_OS2 *);
 ULONG WIN32API DosEnterCriticalSection(CRITICAL_SECTION_OS2 *, ULONG ulTimeout = SEM_INDEFINITE_WAIT);
-ULONG WIN32API DosInitializeCriticalSection(CRITICAL_SECTION_OS2 *, char *pszSemName);
+ULONG WIN32API DosInitializeCriticalSection(CRITICAL_SECTION_OS2 *, char *pszSemName, BOOL fShared = FALSE);
 ULONG WIN32API DosAccessCriticalSection(CRITICAL_SECTION_OS2 *, char *pszSemName);
 ULONG WIN32API DosLeaveCriticalSection(CRITICAL_SECTION_OS2 *);
 
