@@ -1,4 +1,4 @@
-/* $Id: changelog,v 1.1732 2001-10-10 14:48:57 phaller Exp $ */
+/* $Id: changelog,v 1.1733 2001-10-10 17:21:27 sandervl Exp $ */
 
  2001-10-10: Sander van Leeuwen <sandervl@xs4all.nl>
     - USER32:   o Do not blindly add ODIN_FUNCTION macros to functions that
@@ -6,6 +6,9 @@
                   This tends to make logfiles very big...
     - WSOCK32:  o Added IP_ADD_MEMBERSHIP, IP_DROP_MEMBERSHIP, IP_MULTICAST_LOOP &
                   IP_MULTICAST_TTL to setsockopt
+                o Add support for WS2_32 IPPROTO_IP options
+    - WS2_32:   o Translate IPPROTO_IP options in setsockopt before calling
+                  wsock32
     - DDRAW:    o Commented out DiveAcquire/DeaquireFrameBuffer for now
                   (surflock/unlock)
 
