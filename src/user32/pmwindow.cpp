@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.172 2002-04-13 06:19:31 bird Exp $ */
+/* $Id: pmwindow.cpp,v 1.173 2002-05-14 09:06:49 sandervl Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -1008,6 +1008,12 @@ MRESULT EXPENTRY Win32FrameWindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM m
             dprintf(("WARNING: WM_ADJUSTWINDOWPOS with SWP_NOADJUST flag!!"));
             break;
         }
+        if ((pswp->fl == SWP_FOCUSACTIVATE) || (pswp->fl == SWP_FOCUSDEACTIVATE))
+        {
+           dprintf(("Pure focus flags are not sent to win32 windows"));
+           goto RunDefFrameWndProc;
+        }
+
         //CB: show dialog in front of owner
         if (win32wnd->IsModalDialogOwner())
         {
