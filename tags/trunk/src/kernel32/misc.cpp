@@ -1,4 +1,4 @@
-/* $Id: misc.cpp,v 1.17 2000-01-13 20:09:09 sandervl Exp $ */
+/* $Id: misc.cpp,v 1.18 2000-01-20 21:40:26 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -360,14 +360,26 @@ void CloseLogFile()
 //******************************************************************************
 void OpenPrivateLogFiles()
 {
-  OpenPrivateLogFilePE();
+#ifdef DEFAULT_LOGGING_OFF
+    if(getenv("WIN32LOG_ENABLED")) {
+#else
+    if(!getenv("NOWIN32LOG")) {
+#endif
+  	OpenPrivateLogFilePE();
+    }
 }
 //******************************************************************************
 //Used to close all private logfiles used in kernel32 (for now only in winimagepeldr.cpp)
 //******************************************************************************
 void ClosePrivateLogFiles()
 {
-  ClosePrivateLogFilePE();
+#ifdef DEFAULT_LOGGING_OFF
+    if(getenv("WIN32LOG_ENABLED")) {
+#else
+    if(!getenv("NOWIN32LOG")) {
+#endif
+    	ClosePrivateLogFilePE();
+    }
 }
 //******************************************************************************
 //******************************************************************************
