@@ -1,14 +1,11 @@
-/* $Id: virtual.cpp,v 1.1 1999-08-21 16:30:31 sandervl Exp $ */
+/* $Id: virtual.cpp,v 1.2 1999-08-24 12:23:25 sandervl Exp $ */
 
 /*
  * Win32 virtual memory functions
  *
- * Copyright 1998 Sander van Leeuwen (sandervl@xs4all.nl) (OS/2 Port)
+ * Copyright 1999 Sander van Leeuwen (sandervl@xs4all.nl)
  *
- * NOTE: Quick 'n dirty implementation (read entire file in memory)
- *       Not tested, nor complete (write mapping & protection)
- *
- * Based on Wine code (memory\virtual.c):
+ * Parts (VIRTUAL_MapFileA/W) based on Wine code (memory\virtual.c):
  *
  * Copyright 1997 Alexandre Julliard
  *
@@ -21,7 +18,7 @@
 #include <string.h>
 #include <win\virtual.h>
 #include <heapstring.h>
-
+#include "mmap.h"
 
 /***********************************************************************
  *             CreateFileMapping32A   (KERNEL32.46)
@@ -42,13 +39,22 @@ HANDLE WINAPI CreateFileMappingA(
 {
  HANDLE dupHandle;
 
-     if(DuplicateHandle(GetCurrentProcess(), hFile, GetCurrentProcess(),
+   if((hFile == -1 && size_low == 0) || size_high ||
+       protect & (PAGE_READONLY|PAGE_READWRITE|PAGE_WRITECOPY|SEC_COMMIT|SEC_IMAGE|SEC_RESERVE|SEC_NOCACHE) ||
+       ((protect & SEC_COMMIT) && (protect & SEC_RESERVE))) 
+   {
+
+	dprintf(("CreateFileMappingA: invalid parameter (combination)!"));
+	SetLastError(ERROR_INVALID_PARAMETER);
+	return 0;	
+   }
+   if(DuplicateHandle(GetCurrentProcess(), hFile, GetCurrentProcess(),
                         &dupHandle, 0, FALSE, DUPLICATE_SAME_ACCESS) == FALSE) 
-     {
-		dprintf(("CreateFileMappingA: DuplicateHandle failed!"));
-		return 0;
-     }
-     return 	dupHandle;
+   {
+	dprintf(("CreateFileMappingA: DuplicateHandle failed!"));
+	return 0;
+   }
+   return dupHandle;
 }
 
 
@@ -238,8 +244,8 @@ LPVOID WINAPI VIRTUAL_MapFileA( LPCSTR name )
     HANDLE hFile, hMapping;
     LPVOID ptr = NULL;
 
-    hFile = CreateFileA( name, GENERIC_READ, FILE_SHARE_READ, NULL, 
-                           OPEN_EXISTING, FILE_FLAG_RANDOM_ACCESS, 0);
+    hFile = CreateFileA(name, GENERIC_READ, FILE_SHARE_READ, NULL, 
+                        OPEN_EXISTING, FILE_FLAG_RANDOM_ACCESS, 0);
     if (hFile != INVALID_HANDLE_VALUE)
     {
         hMapping = CreateFileMappingA( hFile, NULL, PAGE_READONLY, 0, 0, NULL );

@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.26 1999-08-23 13:54:43 sandervl Exp $
+# $Id: makefile,v 1.27 1999-08-24 12:23:24 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -19,20 +19,20 @@ CXXFLAGS = $(CXXFLAGS) -I$(PDWIN32_INCLUDE) /Tm+
 
 
 OBJS = KERNEL32.OBJ KOBJECTS.OBJ CONSOLE.OBJ CONIN.OBJ CONBUFFER.OBJ \
-       CONOUT.OBJ UNICODE.OBJ network.OBJ DEVIO.OBJ profile.obj \
-       THREAD.OBJ virtual.obj THUNK.OBJ OBSOLETE.OBJ COMM.OBJ \
-       MESSAGE.OBJ RESOURCE.OBJ NAMEID.OBJ WINRES.OBJ WINMOD.OBJ \
-       OS2NATIVE.OBJ EXCEPTIONS.OBJ LFILE.OBJ NPIPE.OBJ \
-       MISC.OBJ EXCEPTUTIL.OBJ LANG.OBJ ICCIO.OBJ MAP.OBJ \
-       WIN32UTIL.OBJ heap.OBJ heapstring.obj os2heap.OBJ \
-       vmutex.OBJ initterm.OBJ os2util.OBJ handlemanager.OBJ \
-       hmdevice.obj hmopen32.obj hmobjects.obj hmevent.obj \
-       hmmutex.obj hmsemaphore.obj wprocess.OBJ conprop.OBJ \
-       winimage.OBJ windll.OBJ winexe.OBJ time.obj \
-       pefile.OBJ winimgres.OBJ wintls.obj async.OBJ fileio.obj \
-       atom.obj disk.obj directory.obj cvtbitmap.obj \
-       cvtmenu.obj cvtaccel.obj cvticon.obj cvticongrp.obj \
-       cvtcursor.obj cvtcursorgrp.obj stubs.obj
+ CONOUT.OBJ UNICODE.OBJ network.OBJ DEVIO.OBJ profile.obj \
+ THREAD.OBJ virtual.obj THUNK.OBJ OBSOLETE.OBJ COMM.OBJ \
+ MESSAGE.OBJ RESOURCE.OBJ NAMEID.OBJ WINRES.OBJ WINMOD.OBJ \
+ OS2NATIVE.OBJ EXCEPTIONS.OBJ LFILE.OBJ NPIPE.OBJ \
+ MISC.OBJ EXCEPTUTIL.OBJ LANG.OBJ ICCIO.OBJ MAP.OBJ \
+ WIN32UTIL.OBJ heap.OBJ heapstring.obj os2heap.OBJ \
+ vmutex.OBJ initterm.OBJ os2util.OBJ handlemanager.OBJ \
+ hmdevice.obj hmopen32.obj hmobjects.obj hmevent.obj \
+ hmmutex.obj hmsemaphore.obj wprocess.OBJ conprop.OBJ \
+ winimage.OBJ windll.OBJ winexe.OBJ time.obj mmap.obj \
+ pefile.OBJ winimgres.OBJ wintls.obj async.OBJ fileio.obj \
+ atom.obj disk.obj directory.obj cvtbitmap.obj \
+ cvtmenu.obj cvtaccel.obj cvticon.obj cvticongrp.obj \
+ cvtcursor.obj cvtcursorgrp.obj stubs.obj 
 
 
 TARGET = kernel32
@@ -295,7 +295,8 @@ async.OBJ: \
         $(PDWIN32_INCLUDE)\misc.h \
         $(PDWIN32_INCLUDE)\unicode.h
 
-virtual.obj:   virtual.cpp $(PDWIN32_INCLUDE)\win\virtual.h
+virtual.obj:   virtual.cpp $(PDWIN32_INCLUDE)\win\virtual.h mmap.h
+mmap.obj:      mmap.cpp mmap.h $(PDWIN32_INCLUDE)\vmutex.h
 
 pefile.OBJ:    pefile.cpp $(PDWIN32_INCLUDE)\pefile.h
 winimage.OBJ:  winimage.cpp $(PDWIN32_INCLUDE)\winimage.h $(PDWIN32_INCLUDE)\windll.h $(PDWIN32_INCLUDE)\pefile.h $(PDWIN32_INCLUDE)\winres.h initterm.h
