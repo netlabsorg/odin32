@@ -1,4 +1,4 @@
-/* $Id: thread.h,v 1.7 1999-10-14 12:29:15 sandervl Exp $ */
+/* $Id: thread.h,v 1.8 1999-11-10 16:36:30 phaller Exp $ */
 
 /*
  * Thread definitions
@@ -105,6 +105,7 @@ typedef struct _THDB
     ULONG          hab;            // Thread Anchor block
     BOOL           fMsgTranslated; // TranslateMessage called for this message?
     ULONG          newWindow;      // Pointer to window object of window that was just created
+    void*          pWsockData;     // Winsock data pointer (NULL if unused)
 #endif
 } THDB;
 
@@ -122,7 +123,7 @@ extern THDB *pCurrentThread;
 
 /* scheduler/thread.c */
 extern THDB *THREAD_CreateInitialThread( struct _PDB *pdb, int server_fd );
-extern THDB *THREAD_Create( struct _PDB *pdb, DWORD flags, 
+extern THDB *THREAD_Create( struct _PDB *pdb, DWORD flags,
                             DWORD stack_size, BOOL alloc_stack16,
                             LPSECURITY_ATTRIBUTES sa, int *server_handle );
 extern THDB *THREAD_Current(void);
