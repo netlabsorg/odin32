@@ -1,13 +1,43 @@
-# $Id: makefile,v 1.11 2001-06-28 22:01:55 bird Exp $
+# $Id: makefile,v 1.12 2002-08-20 21:30:17 bird Exp $
 
 #
 # Odin32 API
 #
 #   Makefile for the Quick-and-Dirty dependency utility. (FastDep)
 #
+#   Copyright (c) 1999-2002 knut st. osmundsen (bird@anduin.net)
+#
+#   GPL
 #
 
 
+!ifdef BUILD_SETUP_MAK
+
+
+#
+# Setup config
+#
+PATH_ROOT = ..\..
+!include $(PATH_ROOT)\$(BUILD_SETUP_MAK)
+
+#
+# Target config
+#
+TARGET_NAME = fastdep
+TARGET_PUBLIC = 1
+TARGET_PUBNAME = $(PATH_TOOLS)\fastdep.$(EXT_EXE)
+TARGET_OBJS =\
+$(PATH_TARGET)\fastdep.$(EXT_OBJ)\
+$(PATH_TARGET)\avl.$(EXT_OBJ)\
+
+#
+# Rules config
+#
+RULES_FORWARD =
+!include $(MAKE_INCLUDE_PROCESS)
+
+
+!else
 #
 # Directory macro.
 #
@@ -69,6 +99,7 @@ TARGET = FastDep
 #
 !include $(ODIN32_POST_INC)
 
+!endif
 
 #
 # We need all.
