@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.4 2000-02-09 13:44:32 sandervl Exp $
+# $Id: makefile,v 1.5 2000-02-09 14:40:34 sandervl Exp $
 #
 # PD-Win32
 #
@@ -32,6 +32,7 @@ TARGET = GLU32
 all: $(TARGET).DLL $(TARGET).LIB
 
 SOURCES = \
+  initterm.cpp
   nurbs\interface\bezierEval.cpp \
   nurbs\interface\bezierPatch.cpp \
   nurbs\interface\bezierPatchMesh.cpp \
@@ -221,7 +222,7 @@ SOURCES = \
   util\gluint.h
 
 OBJS = \
-  $(PDWIN32_LIB)/dllentry.obj \
+  initterm.obj \
   resource.obj \
   nurbs\interface\bezierEval.obj \
   nurbs\interface\bezierPatch.obj \
