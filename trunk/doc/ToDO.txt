@@ -1,9 +1,12 @@
-/* $Id: ToDO.txt,v 1.17 2001-11-22 11:50:55 phaller Exp $ */
+/* $Id: ToDO.txt,v 1.18 2001-11-23 16:32:51 phaller Exp $ */
 
 To Do list for ODIN:
 
 
 Assigned Status Topic -------------------------------------------------------
+
+PH              Equip HandleManager w/ symbolic links and name mgmt
+                functionality (LPTx - \Device\ParallelPortx, etc.)
 
                 Update Mesa to latest stable build (might fix Parsec)
 
