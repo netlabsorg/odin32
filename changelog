@@ -1,4 +1,8 @@
-/* $Id: changelog,v 1.2035 2002-03-31 19:23:00 bird Exp $ */
+/* $Id: changelog,v 1.2036 2002-04-06 14:56:38 sandervl Exp $ */
+
+ 2002-04-06: Sander van Leeuwen <sandervl@xs4all.nl>
+    - KERNEL32: o Do not test for write capability with CDROM drives
+                  (IOCTL_DISK_IS_WRITABLE)
 
  2002-03-31: knut st. osmundsen <bird@anduin.net>
     - Include:  o Removed blank lines from odinbuild.h and wrapped
