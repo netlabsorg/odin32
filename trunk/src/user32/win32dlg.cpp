@@ -1,4 +1,4 @@
-/* $Id: win32dlg.cpp,v 1.3 1999-09-22 08:58:35 sandervl Exp $ */
+/* $Id: win32dlg.cpp,v 1.4 1999-09-26 11:09:39 sandervl Exp $ */
 /*
  * Win32 Dialog Code for OS/2
  *
@@ -196,6 +196,14 @@ Win32Dialog::Win32Dialog(HINSTANCE hInst, LPCSTR dlgTemplate, HWND owner,
     {
         /* Send initialisation messages and set focus */
         hwndFocus = GetNextDlgTabItem( getWindowHandle(), 0, FALSE );
+
+#if 1
+	//TODO: SetFocus call messes things up
+	SendMessageA(WM_INITDIALOG, (WPARAM)hwndFocus, param);
+#else
+	if (SendMessageA(WM_INITDIALOG, (WPARAM)hwndFocus, param ))
+             SetFocus(hwndFocus);
+#endif
         if (dlgInfo.style & WS_VISIBLE && !(getStyle() & WS_VISIBLE))
         {
             ShowWindow( SW_SHOWNORMAL );    /* SW_SHOW doesn't always work */
