@@ -1,5 +1,3 @@
-/* $Id: odinwrap.h,v 1.29 2000-12-09 16:04:24 phaller Exp $ */
-
 /*
  * Project Odin Software License can be found in LICENSE.TXT
  *
@@ -58,7 +56,6 @@
 #include <odin.h>
 
 // ---------------------------------------------------------------------------
-extern int IsExeStarted(); //kernel32
 extern unsigned long int WIN32API GetCurrentThreadId(); //kernel32
 
 // ---------------------------------------------------------------------------
@@ -107,8 +104,10 @@ extern unsigned long int WIN32API GetCurrentThreadId(); //kernel32
 #define FNEPILOGUE(a)   \
   PROFILE_STOP(a)       \
   ODIN_HEAPCHECK();     \
-  if (sel != GetFS() && IsExeStarted()) \
-    dprintf(("ERROR: FS: for thread %08xh corrupted by "a, GetCurrentThreadId()));
+  if (sel != GetFS()) { \
+    SetFS(sel); \
+    dprintf(("WARNING: FS: for thread %08xh corrupted by "a, GetCurrentThreadId())); \
+  }
   
   
 /****************************************************************************
