@@ -1,4 +1,4 @@
-/* $Id: options.h,v 1.2 1999-10-19 18:29:47 cbratschi Exp $ */
+/* $Id: options.h,v 1.3 2000-01-08 14:42:06 sandervl Exp $ */
 
 /*
  * Command-line options.
@@ -10,7 +10,7 @@
 #ifndef __WINE_OPTIONS_H
 #define __WINE_OPTIONS_H
 
-#include "windef.h"
+//#include "windef.h"
 
   /* Supported languages */
   /* When adding a new language look at ole/ole2nls.c
@@ -85,8 +85,9 @@ extern struct options Options;
 
 /* Odin profile functions */
 
-#define ODINCOLORS      "COLORS"
-#define ODINDIRECTORIES "DIRECTORIES"
+#define ODINCOLORS        "COLORS"
+#define ODINDIRECTORIES   "DIRECTORIES"
+#define ODINCUSTOMIZATION "CUSTOMIZATION"
 
 int WINAPI PROFILE_GetOdinIniString(LPCSTR section,LPCSTR key_name,LPCSTR def,LPCSTR buffer,int len);
 int WINAPI PROFILE_SetOdinIniString(LPCSTR section,LPCSTR key_name,LPCSTR value);
