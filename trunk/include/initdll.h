@@ -78,19 +78,11 @@ ULONG APIENTRY inittermComdlg32(ULONG hModule, ULONG ulFlag);
 ULONG APIENTRY inittermComctl32(ULONG hModule, ULONG ulFlag);
 ULONG APIENTRY inittermGdi32(ULONG hModule, ULONG ulFlag);
 ULONG APIENTRY inittermWsock32(ULONG hModule, ULONG ulFlag);
+ULONG APIENTRY inittermWininet(ULONG hModule, ULONG ulFlag);
 ULONG APIENTRY inittermRpcrt4(ULONG hModule, ULONG ulFlag);
 ULONG APIENTRY inittermAvifil32(ULONG hModule, ULONG ulFlag);
 ULONG APIENTRY inittermQuartz(ULONG hModule, ULONG ulFlag);
 ULONG APIENTRY inittermRiched32(ULONG hModule, ULONG ulFlag);
 ULONG APIENTRY InitializeKernel32();
-
-#define ORDINALBASE_GDI32	0
-#define ORDINALBASE_USER32	1000
-#define ORDINALBASE_KERNEL32	3000
-#define ORDINALBASE_SHELL32	9000
-#define ORDINALBASE_COMCTL32	7000
-#define ORDINALBASE_OLE32       10000
-#define ORDINALBASE_WSOCK32     11000
-#define ORDINALBASE_SHLWAPI     13000
 
 #endif //__INITDLL_H__
