@@ -1,4 +1,4 @@
-# $Id: setup.tools.mk,v 1.6 2002-04-22 01:59:34 bird Exp $
+# $Id: setup.tools.mk,v 1.7 2002-04-30 06:19:13 bird Exp $
 
 
 #
@@ -25,6 +25,8 @@ CLRRST=
 # Standard tools - may be overridden by compiler specific setupfiles.
 #
 ECHO            = $(TOOL_ECHO)
+TOOL_BLDLEVEL   = $(PATH_TOOLS)\BldLevelInf.cmd
+TOOL_BUILDENV   = $(PATH_TOOLS)\BuildEnv.cmd
 TOOL_CMP        = $(PATH_TOOLS)\cmp.exe
 !if "$(BUILD_SHELL)" != "4OS2"
 TOOL_COPY       = copy
@@ -42,33 +44,25 @@ TOOL_DOWITHDIRS = $(PATH_TOOLS)\dowithdirs.cmd
 TOOL_ECHO       = @echo $(CLRTXT)
 TOOL_EXISTS     = $(PATH_TOOLS)\Exists.cmd
 TOOL_MAKE       = $(MAKE) -nologo
+TOOL_MAPSYM     = $(PATH_TOOLS)\MapSym.cmd $(BUILD_ENV)
 TOOL_RM         = rm.exe -f
 TOOL_TYPE       = type
-TOOL_BUILDENV   = $(PATH_TOOLS)\BuildEnv.cmd
 
 
 #
 # Default Extensions.
 #
-EXT_OBJ = obj
-EXT_LIB = lib
-EXT_ILIB= lib
-EXT_EXE = exe
 EXT_DLL = dll
-EXT_RES = res
-EXT_SYS = sys
+EXT_EXE = exe
 EXT_IFS = ifs
-EXT_VDD = sys
+EXT_ILIB= lib
+EXT_LIB = lib
+EXT_MAP = map
+EXT_OBJ = obj
 EXT_RES = res
-
-
-#
-# Depreciated (kso don't like these)
-#
-RM=$(TOOLS_RM)
-TOOLS_DEL=@del      # use TOOLS_RM!
-CD=cd
-CD_ENTER=cd
-CD_LEAVE=cd ..
+EXT_RES = res
+EXT_SYM = sym
+EXT_SYS = sys
+EXT_VDD = sys
 
 
