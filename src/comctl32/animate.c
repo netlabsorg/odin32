@@ -21,6 +21,9 @@
 #include "mmsystem.h"
 #include "services.h"
 #include "debugtools.h"
+#ifdef __WIN32OS2__
+#include "ccbase.h"
+#endif
 
 DEFAULT_DEBUG_CHANNEL(animate);
 
@@ -39,6 +42,7 @@ typedef struct
    DWORD    (* WINAPIV fnICDecompress)(HIC,DWORD,LPBITMAPINFOHEADER,LPVOID,LPBITMAPINFOHEADER,LPVOID);
 
     HMMIO (* WINAPI fnmmioOpenA)(LPSTR,MMIOINFO*,DWORD);
+    HMMIO (* WINAPI fnmmioOpenW)(LPSTR,MMIOINFO*,DWORD);
     MMRESULT (* WINAPI fnmmioClose)(HMMIO,UINT);
     UINT  (* WINAPI fnmmioAscend)(HMMIO,MMCKINFO*,UINT);
     UINT  (* WINAPI fnmmioDescend)(HMMIO,MMCKINFO*,const MMCKINFO*,UINT);
@@ -99,13 +103,24 @@ static void ANIMATE_Notify(ANIMATE_INFO* infoPtr, UINT notif)
          (LPARAM)infoPtr->hWnd);
 }
 
+#ifdef __WIN32OS2__
+static BOOL ANIMATE_LoadRes(ANIMATE_INFO *infoPtr,HINSTANCE hInst,LPWSTR lpName,BOOL unicode)
+#else
 static BOOL ANIMATE_LoadResA(ANIMATE_INFO *infoPtr, HINSTANCE hInst, LPSTR lpName)
+#endif
 {
     HRSRC   hrsrc;
     MMIOINFO    mminfo;
     LPVOID  lpAvi;
 
+#ifdef __WIN32OS2__
+    if (unicode)
+      hrsrc = FindResourceW(hInst,lpName,(LPWSTR)L"AVI");
+    else
+      hrsrc = FindResourceA(hInst,(LPCSTR)lpName,"AVI");
+#else
     hrsrc = FindResourceA(hInst, lpName, "AVI");
+#endif
     if (!hrsrc)
     return FALSE;
 
@@ -132,10 +147,21 @@ static BOOL ANIMATE_LoadResA(ANIMATE_INFO *infoPtr, HINSTANCE hInst, LPSTR lpNam
 }
 
 
+#ifdef __WIN32OS2__
+static BOOL ANIMATE_LoadFile(ANIMATE_INFO *infoPtr,LPWSTR lpName,BOOL unicode)
+#else
 static BOOL ANIMATE_LoadFileA(ANIMATE_INFO *infoPtr, LPSTR lpName)
+#endif
 {
+#ifdef __WIN32OS2__
+    if (unicode)
+      infoPtr->hMMio = infoPtr->fnmmioOpenW(lpName,NULL,MMIO_ALLOCBUF | MMIO_READ | MMIO_DENYWRITE);
+    else
+      infoPtr->hMMio = infoPtr->fnmmioOpenA((LPSTR)lpName,NULL,MMIO_ALLOCBUF | MMIO_READ | MMIO_DENYWRITE);
+#else
     infoPtr->hMMio = infoPtr->fnmmioOpenA((LPSTR)lpName, NULL,
                    MMIO_ALLOCBUF | MMIO_READ | MMIO_DENYWRITE);
+#endif
 
     if (!infoPtr->hMMio)
     return FALSE;
@@ -683,7 +709,11 @@ static BOOL    ANIMATE_GetAviCodec(ANIMATE_INFO *infoPtr)
     return TRUE;
 }
 
+#ifdef __WIN32OS2__
+static LRESULT ANIMATE_Open(HWND hWnd, WPARAM wParam, LPARAM lParam,BOOL unicode)
+#else
 static LRESULT ANIMATE_OpenA(HWND hWnd, WPARAM wParam, LPARAM lParam)
+#endif
 {
     ANIMATE_INFO *infoPtr = ANIMATE_GetInfoPtr(hWnd);
     HINSTANCE hInstance = (HINSTANCE)wParam;
@@ -701,6 +731,26 @@ static LRESULT ANIMATE_OpenA(HWND hWnd, WPARAM wParam, LPARAM lParam)
     if (HIWORD(lParam)) {
     TRACE("(\"%s\");\n", (LPSTR)lParam);
 
+#ifdef __WIN32OS2__
+    if (HIWORD(lParam)) {
+        //TRACE("(\"%s\");\n", (LPSTR)lParam);
+
+        if (!ANIMATE_LoadRes(infoPtr, hInstance, (LPWSTR)lParam,unicode)) {
+            //TRACE("No AVI resource found!\n");
+            if (!ANIMATE_LoadFile(infoPtr, (LPWSTR)lParam,unicode)) {
+                //WARN("No AVI file found!\n");
+                return FALSE;
+            }
+        }
+    } else {
+        //TRACE("(%u);\n", (WORD)LOWORD(lParam));
+
+        if (!ANIMATE_LoadRes(infoPtr,hInstance,unicode ? MAKEINTRESOURCEW((INT)lParam):(LPWSTR)MAKEINTRESOURCEA((INT)lParam),unicode)) {
+            //WARN("No AVI resource found!\n");
+            return FALSE;
+        }
+    }
+#else
     if (!ANIMATE_LoadResA(infoPtr, hInstance, (LPSTR)lParam)) {
         TRACE("No AVI resource found!\n");
         if (!ANIMATE_LoadFileA(infoPtr, (LPSTR)lParam)) {
@@ -716,6 +766,7 @@ static LRESULT ANIMATE_OpenA(HWND hWnd, WPARAM wParam, LPARAM lParam)
         WARN("No AVI resource found!\n");
         return FALSE;
     }
+#endif
     }
 
     if (!ANIMATE_GetAviInfo(infoPtr)) {
@@ -789,6 +840,9 @@ static LRESULT ANIMATE_Create(HWND hWnd, WPARAM wParam, LPARAM lParam)
     hModWinmm = LoadLibraryA("WINMM");
 
     infoPtr->fnmmioOpenA = (void*)GetProcAddress(hModWinmm, "mmioOpenA");
+#ifdef __WIN32OS2__
+    infoPtr->fnmmioOpenW = (void*)GetProcAddress(hModWinmm, "mmioOpenW");
+#endif
     infoPtr->fnmmioClose = (void*)GetProcAddress(hModWinmm, "mmioClose");
     infoPtr->fnmmioAscend = (void*)GetProcAddress(hModWinmm, "mmioAscend");
     infoPtr->fnmmioDescend = (void*)GetProcAddress(hModWinmm, "mmioDescend");
@@ -849,11 +903,19 @@ static LRESULT WINAPI ANIMATE_WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LP
     return DefWindowProcA(hWnd, uMsg, wParam, lParam);
     switch (uMsg)
     {
+#ifdef __WIN32OS2__
+        case ACM_OPENA:
+          return ANIMATE_Open(hWnd,wParam,lParam,FALSE);
+
+        case ACM_OPENW:
+          return ANIMATE_Open(hWnd,wParam,lParam,TRUE);
+#else
     case ACM_OPENA:
     return ANIMATE_OpenA(hWnd, wParam, lParam);
 
     /*  case ACM_OPEN32W: FIXME!! */
     /*      return ANIMATE_Open32W(hWnd, wParam, lParam); */
+#endif
 
     case ACM_PLAY:
     return ANIMATE_Play(hWnd, wParam, lParam);
@@ -931,7 +993,11 @@ static LRESULT WINAPI ANIMATE_WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LP
     if (uMsg >= WM_USER)
         ERR("unknown msg %04x wp=%08x lp=%08lx\n", uMsg, wParam, lParam);
 
+#ifdef __WIN32OS2__
+            return defComCtl32ProcA (hWnd, uMsg, wParam, lParam);
+#else
     return DefWindowProcA(hWnd, uMsg, wParam, lParam);
+#endif
     }
     return 0;
 }
