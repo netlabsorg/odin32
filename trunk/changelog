@@ -1,7 +1,9 @@
- /* $Id: changelog,v 1.200 1999-09-15 10:25:49 phaller Exp $ */
+ /* $Id: changelog,v 1.201 1999-09-15 11:25:48 phaller Exp $ */
 
  99-09-14: Patrick Haller <phaller@gmx.net>
         - AVIFIL32:   ported AVIFIL32 from WINE
+        - WNASPI32:   ported WNASPI32 from WINE
+                      Note: someone should adapt it to OS/2's R3 ASPI router
 
  99-09-14: Sander van Leeuwen <sandervl@xs4all.nl>
         - USER32\NEW: Implemented Enum(Thread/Child)Windows based on Edgar
