@@ -1,4 +1,4 @@
-/* $Id: wprocess.cpp,v 1.21 1999-08-18 12:24:17 sandervl Exp $ */
+/* $Id: wprocess.cpp,v 1.22 1999-08-18 17:18:01 sandervl Exp $ */
 
 /*
  * Win32 process functions
@@ -439,8 +439,6 @@ HINSTANCE WIN32API LoadLibraryA(LPCTSTR lpszLibFile)
 
   return hDll;
 }
-
-
 //******************************************************************************
 //******************************************************************************
 HINSTANCE WIN32API LoadLibraryExA(LPCTSTR lpszLibFile, HANDLE hFile, DWORD dwFlags)
@@ -451,7 +449,7 @@ HINSTANCE WIN32API LoadLibraryExA(LPCTSTR lpszLibFile, HANDLE hFile, DWORD dwFla
   dprintf(("KERNEL32:  LoadLibraryExA %s (%X)\n", lpszLibFile, dwFlags));
   hDll = O32_LoadLibrary(lpszLibFile);
   if(hDll) {
-    return hDll;    //converted dll or win32k took care of it
+    	return hDll;    //converted dll or win32k took care of it
   }
 
   if(Win32Image::isPEImage((char *)lpszLibFile)) {
@@ -596,6 +594,65 @@ DWORD WIN32API GetModuleFileNameW(HMODULE hModule, LPWSTR lpFileName, DWORD nSiz
     rc = GetModuleFileNameA(hModule, asciifilename, nSize);
     if(rc)      AsciiToUnicode(asciifilename, lpFileName);
     free(asciifilename);
+    return(rc);
+}
+//******************************************************************************
+//NOTE: GetModuleHandleA does NOT support files with multiple dots (i.e. 
+//      very.weird.exe)
+//******************************************************************************
+HANDLE WIN32API GetModuleHandleA(LPCTSTR lpszModule)
+{
+ HANDLE    hMod;
+ Win32Dll *windll;
+ char      szModule[CCHMAXPATH];
+ BOOL      fDllModule = FALSE;
+
+  if(lpszModule == NULL) {
+	hMod = WinExe->getInstanceHandle();
+  }
+  else {
+  	strcpy(szModule, StripPath((char *)lpszModule));
+  	strupr(szModule);
+	if(strstr(szModule, ".DLL")) {
+		fDllModule = TRUE;
+	}
+	else {
+		if(!strstr(szModule, ".")) {
+			//if there's no extension or trainling dot, we 
+                        //assume it's a dll (see Win32 SDK docs)
+			fDllModule = TRUE;
+		}
+	}
+  	char *dot = strstr(szModule, ".");
+  	if(dot)
+		*dot = 0;
+
+  	if(!fDllModule && !strcmpi(lpszModule, WinExe->getModuleName())) {
+		hMod = WinExe->getInstanceHandle();
+	}
+	else {
+  		windll = Win32Dll::findModule(szModule);
+		if(windll) {
+			hMod = windll->getInstanceHandle();
+		}
+		else    hMod = OS2iGetModuleHandleA( (PSZ) lpszModule);
+	}
+  }
+
+  eprintf(("KERNEL32:  GetModuleHandle %s returned %X\n", lpszModule, hMod));
+  return(hMod);
+}
+//******************************************************************************
+//******************************************************************************
+HMODULE WIN32API GetModuleHandleW(LPCWSTR arg1)
+{
+ HMODULE rc;
+ char   *astring;
+
+    astring = UnicodeToAsciiString((LPWSTR)arg1);
+    rc = GetModuleHandleA(astring);
+    dprintf(("KERNEL32:  OS2GetModuleHandleW %s returned %X\n", astring, rc));
+    FreeAsciiString(astring);
     return(rc);
 }
 //******************************************************************************
