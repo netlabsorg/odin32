@@ -1,4 +1,4 @@
-/* $Id: fastdep.c,v 1.22 2000-11-19 08:29:12 bird Exp $
+/* $Id: fastdep.c,v 1.23 2000-11-21 04:35:36 bird Exp $
  *
  * Fast dependents. (Fast = Quick and Dirty!)
  *
@@ -31,8 +31,12 @@
 #       define INLINE _Inline
 #   elif defined(__IBMCPP__)
 #       define INLINE inline
+#   elif defined(__WATCOMC__)
+#       define INLINE __inline
+#   elif defined(__WATCOM_CPLUSPLUS__)
+#       define INLINE inline
 #   else
-#       error "unknown compiler - inline keyword unknown!"
+#       error message("unknown compiler - inline keyword unknown!")
 #   endif
 #endif
 
