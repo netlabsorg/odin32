@@ -1,4 +1,4 @@
-/* $Id: pe.cpp,v 1.7 1999-08-26 07:48:14 sandervl Exp $ */
+/* $Id: pe.cpp,v 1.8 1999-08-28 07:38:15 sandervl Exp $ */
 
 /*
  * PELDR main exe loader code
@@ -76,7 +76,6 @@ int main(int argc, char *argv[])
  APIRET  rc;
  HMODULE hmodPMWin = 0, hmodKernel32 = 0;
  WINEXCEPTION_FRAME exceptFrame;
- ULONG curdisk, curlogdisk, flength = CCHMAXPATH;
 
   rc = DosLoadModule(exeName, sizeof(exeName), "PMWIN.DLL", &hmodPMWin);
   rc = DosQueryProcAddr(hmodPMWin, ORD_WIN32INITIALIZE, NULL, (PFN *)&MyWinInitialize);
@@ -124,14 +123,6 @@ int main(int argc, char *argv[])
   while(*szCmdLine == ' ' && *szCmdLine )       //skip spaces
         szCmdLine++;
 
-  DosQueryCurrentDisk(&curdisk, &curlogdisk);
-  DosQueryCurrentDir(curdisk, &fullpath[3], &flength);
-  fullpath[0] = 'A' + (curdisk-1);
-  fullpath[1] = ':';
-  fullpath[2] = '\\';
-  strcat(fullpath, "\\");
-  strcat(fullpath, exeName);
-  WinExe->setFullPath(fullpath);
   WinExe->setCommandLine(szCmdLine);
 
   Krnl32SetExceptionHandler(&exceptFrame);
