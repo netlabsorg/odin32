@@ -1,4 +1,7 @@
- /* $Id: changelog,v 1.778 2000-03-04 19:11:15 bird Exp $ */
+ /* $Id: changelog,v 1.779 2000-03-04 19:37:40 jeroen Exp $ */
+
+ 2000-03-04: Jeroen van den Horn <J.vandenHorn@fibre.a2000.nl>
+        - GLUT32: Added logic to escape from optimizer bug in VACPP
 
  2000-03-04: knut st. osmundsen <knut.stange.osmundse@pmsc.no>
         - include\pdwin32.v*.*:
@@ -11,8 +14,8 @@
                  compiler and linker flags, this is allready done!
 
  2000-03-04: Sander van Leeuwen <sandervl@xs4all.nl>
-	- WSOCK32: Fixed bug in setsockopt for SO_LINGER (options size wasn't
-	           adjusted)
+        - WSOCK32: Fixed bug in setsockopt for SO_LINGER (options size wasn't
+                   adjusted)
 
  2000-03-03: Markus Montkowski <mmontkowski@gmx.de>
         - DDRAW:  Fixed bug in CreateSurface and QueryInterface
@@ -21,37 +24,37 @@
                   in the virtualKeyTable
 
  2000-03-03: Sander van Leeuwen <sandervl@xs4all.nl>
-	- KERNEL32: Create shell dirs in odin\bin directory
+        - KERNEL32: Create shell dirs in odin\bin directory
                     Cleanup (never call Open32 apis directly if the proc
                     isn't a wrapper; include win32api.h and call Odin api)
                     Fixed FS corruption for DosAliasMem
                     Fixed bug in Win32PeLdrImage::commitPage (quake 3 screensaver's
                     fixup section doesn't start on page boundary)
-	- ADVAPI32/KERNEL32: Moved registry apis in kernel32 as we need them
+        - ADVAPI32/KERNEL32: Moved registry apis in kernel32 as we need them
                              there (importing them directly creates a circular
                              dependency (kernel32->advapi32->kernel32))
                              Should probably be moved to ntdll
-	- WINMM: Fixed typo in DartWaveOut::init to determine bits per sample
+        - WINMM: Fixed typo in DartWaveOut::init to determine bits per sample
                  (Realplayer 7 audio now works (when playing .rm files))
 
  2000-03-03: Jeroen van den Horn <J.vandenHorn@fibre.a2000.nl>
-	- KERNEL32: Fixed calling convention bug in conprop2.cpp
+        - KERNEL32: Fixed calling convention bug in conprop2.cpp
                     (caused crashes with release build)
 
  2000-03-02: Sander van Leeuwen <sandervl@xs4all.nl>
-	- OPENGL\GLIDE: 	Use Odin OS/2 api wrappers in fxos2.cpp
-	- OPENGL\MESA: 		Reapplied TLS fixes
+        - OPENGL\GLIDE:         Use Odin OS/2 api wrappers in fxos2.cpp
+        - OPENGL\MESA:          Reapplied TLS fixes
                                 Check for null pointer in wglSetPixelFormat
-	- OPENGL\MESA\3dfx: 	Use c files from Mesa dir
+        - OPENGL\MESA\3dfx:     Use c files from Mesa dir
                                 Check for null pointer in wglSetPixelFormat
-	- WINMM: Fixed DartWaveOut::getPosition (overflow)
+        - WINMM: Fixed DartWaveOut::getPosition (overflow)
                  (fixes mp3 playback in RealPlayer 7)
-	- KERNEL32: Fixed SetCurrentDirectory (don't remove backslash
+        - KERNEL32: Fixed SetCurrentDirectory (don't remove backslash
                     if app wants to change dir to "\")
                     Create shell folders + shell keys
                     (NOTE: This has to be done in the odin install program
                            once we have one)
-	- ADVAPI32: Added crypt api stubs
+        - ADVAPI32: Added crypt api stubs
 
  2000-03-01: Jeroen van den Horn <J.vandenHorn@fibre.a2000.nl>
         - OPENGL: Implemented DIVE support in Mesa
@@ -73,13 +76,13 @@
                   wrapper anymore
         - OPENGL\GLIDE\CVG\GLIDE:
                   Disable instruction scheduling in release build -> messed up
-	          colors when turned on (most likely VAC optimizer bug)
+                  colors when turned on (most likely VAC optimizer bug)
                   TODO: Somebody should also check this for the voodoo 1 glide dll.
-	- OPENGL\GLIDE\CVG:
-	   	  Fixed makefile
-	- OPENGL\MESA\GL\gl.h
-		  Removed circular header dependency (breaks build)
-	- OPENGL\MESA\3dfx:
+        - OPENGL\GLIDE\CVG:
+                  Fixed makefile
+        - OPENGL\MESA\GL\gl.h
+                  Removed circular header dependency (breaks build)
+        - OPENGL\MESA\3dfx:
 		  Copy 3dfx opengl32.dll to bin\glide
 
  2000-03-01: Edgar Buerkle <Edgar.Buerkle@gmx.net>

@@ -1,4 +1,4 @@
-/* $Id: glut_win.c,v 1.3 2000-03-04 19:10:16 jeroen Exp $ */
+/* $Id: glut_win.c,v 1.4 2000-03-04 19:33:43 jeroen Exp $ */
 /* Copyright (c) Mark J. Kilgard, 1994, 1997.  */
 
 /* This program is freely distributable without licensing fees
@@ -1024,7 +1024,6 @@ glutVisibilityFunc(GLUTvisibilityCB visibilityFunc)
 void GLAPIENTRY
 glutReshapeFunc(GLUTreshapeCB reshapeFunc)
 {
-  WriteLog("GLUT32: Setting reshapeFunc to @%08X\n",reshapeFunc);
   if (reshapeFunc) {
     __glutCurrentWindow->reshape = reshapeFunc;
   } else {

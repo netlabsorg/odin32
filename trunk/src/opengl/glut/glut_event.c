@@ -1,4 +1,4 @@
-/* $Id: glut_event.c,v 1.3 2000-03-04 19:10:14 jeroen Exp $ */
+/* $Id: glut_event.c,v 1.4 2000-03-04 19:33:43 jeroen Exp $ */
 /* Copyright (c) Mark J. Kilgard, 1994, 1995, 1996, 1997, 1998. */
 
 /* This program is freely distributable without licensing fees
@@ -1332,8 +1332,6 @@ processWindowWorkList(GLUTwindow * window)
   /* Strip out dummy, finish, and debug work bits. */
   window->workMask &= ~(GLUT_DUMMY_WORK | GLUT_FINISH_WORK | GLUT_DEBUG_WORK);
 
-    WriteLog("GLUT32: processWindowWorkList -> will now return!\n");
-
   if (window->workMask) {
     /* Leave on work list. */
     return window;
@@ -1347,7 +1345,6 @@ processWindowWorkList(GLUTwindow * window)
 void GLAPIENTRY
 glutMainLoop(void)
 {
-  WriteLog("GLUT32 MainLoop entered\n");
 #if !defined(_WIN32) && !defined(__WIN32OS2__)
   if (!__glutDisplay)
     __glutFatalUsage("main loop entered with out proper initialization.");
@@ -1356,7 +1353,6 @@ glutMainLoop(void)
     __glutFatalUsage(
       "main loop entered with no windows created.");
   for (;;) {
-    WriteLog("GLUT32 --> LOOP in!\n");
     if (__glutWindowWorkList) {
       GLUTwindow *remainder, *work;
 
@@ -1376,13 +1372,9 @@ glutMainLoop(void)
       if (__glutTimerList) {
         waitForSomething();
       } else {
-    WriteLog("Calling processEventsAndTimeouts from #1403\n");
         processEventsAndTimeouts();
-    WriteLog("processEventsAndTimeouts from #1403 returned!\n");
       }
     }
   }
-
-    WriteLog("MainLoop ended... ???\n");
 }
 /* ENDCENTRY */
