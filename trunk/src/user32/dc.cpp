@@ -1,4 +1,4 @@
-/* $Id: dc.cpp,v 1.104 2001-05-18 07:21:27 sandervl Exp $ */
+/* $Id: dc.cpp,v 1.105 2001-05-23 08:35:57 sandervl Exp $ */
 
 /*
  * DC functions for USER32
@@ -1132,11 +1132,6 @@ BOOL WIN32API RedrawWindow(HWND hwnd, const RECT* pRect, HRGN hrgn, DWORD redraw
 
     if (hwnd == NULLHANDLE)
     {
-#if 1
-        // Don't do this for now (causes lots of desktop repaints in WordPad)
-        SetLastError(ERROR_INVALID_PARAMETER_W);
-        return FALSE;
-#else
         hwnd = HWND_DESKTOP;
         wnd  = Win32BaseWindow::GetWindowFromOS2Handle(OSLIB_HWND_DESKTOP);
 
@@ -1147,7 +1142,6 @@ BOOL WIN32API RedrawWindow(HWND hwnd, const RECT* pRect, HRGN hrgn, DWORD redraw
             SetLastError(ERROR_INVALID_PARAMETER_W);
             return FALSE;
         }
-#endif
     }
     else
     {
