@@ -1,4 +1,4 @@
-/* $Id: user32.cpp,v 1.100 2001-06-12 17:02:36 sandervl Exp $ */
+/* $Id: user32.cpp,v 1.101 2001-06-13 10:29:45 sandervl Exp $ */
 
 /*
  * Win32 misc user32 API functions for OS/2
@@ -632,11 +632,12 @@ BOOL WIN32API SystemParametersInfoA(UINT uiAction, UINT uiParam, PVOID pvParam, 
     case SPI_GETDRAGFULLWINDOWS:
         *(BOOL *)pvParam = FALSE; //CB: where is the Warp 4 setting stored?
         break;
+
     case SPI_GETNONCLIENTMETRICS:
     {
 	LPNONCLIENTMETRICSA lpnm = (LPNONCLIENTMETRICSA)pvParam;
 		
-	if (lpnm->cbSize == sizeof(NONCLIENTMETRICSA))
+ 	if (lpnm->cbSize == sizeof(NONCLIENTMETRICSA))
 	{
             memset(lpnm, 0, sizeof(NONCLIENTMETRICSA));
             lpnm->cbSize = sizeof(NONCLIENTMETRICSA);
@@ -651,13 +652,22 @@ BOOL WIN32API SystemParametersInfoA(UINT uiAction, UINT uiParam, PVOID pvParam, 
             lpnm->iSmCaptionHeight = GetSystemMetrics(SM_CYSMSIZE);
 
             LPLOGFONTA lpLogFont = &(lpnm->lfMenuFont);
-            GetProfileStringA("Desktop", "MenuFont", "MS Sans Serif",
-                              lpLogFont->lfFaceName, LF_FACESIZE);
-
-            lpLogFont->lfHeight = -GetProfileIntA("Desktop","MenuFontSize", 13);
-            lpLogFont->lfWidth = 0;
-            lpLogFont->lfEscapement = lpLogFont->lfOrientation = 0;
-            lpLogFont->lfWeight = FW_NORMAL;
+            if(fOS2Look) {
+                GetProfileStringA("Desktop", "MenuFont", "WarpSans",
+                                  lpLogFont->lfFaceName, LF_FACESIZE);
+                lpLogFont->lfWeight = FW_BOLD;
+                lpLogFont->lfHeight = -GetProfileIntA("Desktop","MenuFontSize", 16);
+                lpLogFont->lfWidth = 0;
+                lpLogFont->lfEscapement = lpLogFont->lfOrientation = 0;
+            }
+            else {
+                GetProfileStringA("Desktop", "MenuFont", "MS Sans Serif",
+                                  lpLogFont->lfFaceName, LF_FACESIZE);
+                lpLogFont->lfWeight = FW_NORMAL;
+                lpLogFont->lfHeight = -GetProfileIntA("Desktop","MenuFontSize", 13);
+                lpLogFont->lfWidth = 0;
+                lpLogFont->lfEscapement = lpLogFont->lfOrientation = 0;
+            }
             lpLogFont->lfItalic = FALSE;
             lpLogFont->lfStrikeOut = FALSE;
             lpLogFont->lfUnderline = FALSE;
@@ -676,9 +686,9 @@ BOOL WIN32API SystemParametersInfoA(UINT uiAction, UINT uiParam, PVOID pvParam, 
             lpnm->iScrollHeight    = GetSystemMetrics(SM_CYHSCROLL);
             lpnm->iMenuHeight      = GetSystemMetrics(SM_CYMENU);
             lpnm->iMenuWidth       = lpnm->iMenuHeight; //TODO
-        }
+          }
 	else
-	{
+ 	{
 	    dprintf(("SPI_GETNONCLIENTMETRICS: size mismatch !! (is %d; should be %d)\n", lpnm->cbSize, sizeof(NONCLIENTMETRICSA)));
 	    /* FIXME: SetLastError? */
 	    rc = FALSE;

@@ -1,4 +1,4 @@
-/* $Id: oslibwin.cpp,v 1.99 2001-06-13 08:19:34 sandervl Exp $ */
+/* $Id: oslibwin.cpp,v 1.100 2001-06-13 10:29:44 sandervl Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -122,12 +122,16 @@ BOOL OSLibWinConvertStyle(ULONG dwStyle, ULONG dwExStyle, ULONG *OSWinStyle, ULO
   if(fOS2Look) {
       if((dwStyle & WS_CAPTION_W) == WS_CAPTION_W) {
           *OSFrameStyle = FCF_TITLEBAR;
-          if(dwStyle & WS_SYSMENU_W)
+          if((dwStyle & WS_SYSMENU_W) && !(dwExStyle & WS_EX_TOOLWINDOW_W))
           {
               *OSFrameStyle |= FCF_SYSMENU;
           }
           if((dwStyle & WS_MINIMIZEBOX_W) || (dwStyle & WS_MAXIMIZEBOX_W)) {
               *OSFrameStyle |= FCF_MINMAX;
+          }
+          else
+          if(dwStyle & WS_SYSMENU_W) {
+              *OSFrameStyle |= FCF_CLOSEBUTTON;
           }
       }
   }
@@ -135,7 +139,8 @@ BOOL OSLibWinConvertStyle(ULONG dwStyle, ULONG dwExStyle, ULONG *OSWinStyle, ULO
 }
 //******************************************************************************
 //******************************************************************************
-BOOL OSLibWinPositionFrameControls(HWND hwndFrame, RECTLOS2 *pRect)
+BOOL OSLibWinPositionFrameControls(HWND hwndFrame, RECTLOS2 *pRect, DWORD dwStyle, 
+                                   DWORD dwExStyle, HICON hSysMenuIcon)
 {
   SWP  swp[3];
   HWND hwndControl;
@@ -148,6 +153,7 @@ BOOL OSLibWinPositionFrameControls(HWND hwndFrame, RECTLOS2 *pRect)
       minmaxheight = WinQuerySysValue(HWND_DESKTOP, SV_CYMINMAXBUTTON);
   }
 
+#if 0
   hwndControl = WinWindowFromID(hwndFrame, FID_SYSMENU);
   if(hwndControl) {
       swp[i].hwnd = hwndControl;
@@ -164,40 +170,58 @@ BOOL OSLibWinPositionFrameControls(HWND hwndFrame, RECTLOS2 *pRect)
       pRect->xLeft += minmaxwidth/2;
       i++;
   }
-  hwndControl = WinWindowFromID(hwndFrame, FID_TITLEBAR);
-  if(hwndControl) {
-      swp[i].hwnd = hwndControl;
-      swp[i].hwndInsertBehind = HWND_TOP;
-      swp[i].x  = pRect->xLeft;
-      swp[i].y  = pRect->yBottom;
-      if(pRect->yTop - pRect->yBottom > minmaxheight) {
-          swp[i].y += pRect->yTop - pRect->yBottom - minmaxheight;
-      }
-      swp[i].cx = pRect->xRight - pRect->xLeft;
-      if(WinWindowFromID(hwndFrame, FID_MINMAX)) {
-          swp[i].cx -= (minmaxwidth + minmaxwidth/2);
-      }
-      swp[i].cy = minmaxheight;
-      swp[i].fl = SWP_SIZE | SWP_MOVE | SWP_SHOW;
-      dprintf(("FID_TITLEBAR (%d,%d)(%d,%d)", swp[i].x, swp[i].y, swp[i].cx, swp[i].cy));
-      pRect->xLeft += swp[i].cx;
-      i++;
+#else
+  if((dwStyle & WS_SYSMENU_W) && !(dwExStyle & WS_EX_TOOLWINDOW_W) && hSysMenuIcon) {
+      pRect->xLeft += minmaxwidth/2;
   }
-  hwndControl = WinWindowFromID(hwndFrame, FID_MINMAX);
-  if(hwndControl) {
-      swp[i].hwnd = hwndControl;
-      swp[i].hwndInsertBehind = HWND_TOP;
-      swp[i].x  = pRect->xLeft;
-      swp[i].y  = pRect->yBottom;
-      if(pRect->yTop - pRect->yBottom > minmaxheight) {
-          swp[i].y += pRect->yTop - pRect->yBottom - minmaxheight;
+#endif
+  if((dwStyle & WS_CAPTION_W) == WS_CAPTION_W) {
+      hwndControl = WinWindowFromID(hwndFrame, FID_TITLEBAR);
+      if(hwndControl) {
+          swp[i].hwnd = hwndControl;
+          swp[i].hwndInsertBehind = HWND_TOP;
+          swp[i].x  = pRect->xLeft;
+          swp[i].y  = pRect->yBottom;
+          if(pRect->yTop - pRect->yBottom > minmaxheight) {
+              swp[i].y += pRect->yTop - pRect->yBottom - minmaxheight;
+          }
+          swp[i].cx = pRect->xRight - pRect->xLeft;
+          if((dwStyle & WS_MINIMIZEBOX_W) || (dwStyle & WS_MAXIMIZEBOX_W)) {
+              swp[i].cx -= minmaxwidth;
+          }
+          if(dwStyle & WS_SYSMENU_W) {
+              swp[i].cx -= minmaxwidth/2;
+          }
+          swp[i].cy = minmaxheight;
+          swp[i].fl = SWP_SIZE | SWP_MOVE | SWP_SHOW;
+          dprintf(("FID_TITLEBAR (%d,%d)(%d,%d)", swp[i].x, swp[i].y, swp[i].cx, swp[i].cy));
+          pRect->xLeft += swp[i].cx;
+          i++;
       }
-      swp[i].cx = minmaxwidth + minmaxwidth/2;
-      swp[i].cy = minmaxheight;
-      swp[i].fl = SWP_SIZE | SWP_MOVE | SWP_SHOW;
-      dprintf(("FID_MINMAX (%d,%d)(%d,%d)", swp[i].x, swp[i].y, swp[i].cx, swp[i].cy));
-      pRect->xLeft += swp[i].cx;
-      i++;
+  }
+  if((dwStyle & WS_MINIMIZEBOX_W) || (dwStyle & WS_MAXIMIZEBOX_W) || (dwStyle & WS_SYSMENU_W)) {
+      hwndControl = WinWindowFromID(hwndFrame, FID_MINMAX);
+      if(hwndControl) {
+          swp[i].hwnd = hwndControl;
+          swp[i].hwndInsertBehind = HWND_TOP;
+          swp[i].x  = pRect->xLeft;
+          swp[i].y  = pRect->yBottom;
+          if(pRect->yTop - pRect->yBottom > minmaxheight) {
+              swp[i].y += pRect->yTop - pRect->yBottom - minmaxheight;
+          }
+          swp[i].cx = 0;
+          if((dwStyle & WS_MINIMIZEBOX_W) || (dwStyle & WS_MAXIMIZEBOX_W)) {
+              swp[i].cx += minmaxwidth;
+          }
+          if(dwStyle & WS_SYSMENU_W) {
+              swp[i].cx += minmaxwidth/2;
+          }
+          swp[i].cy = minmaxheight;
+          swp[i].fl = SWP_SIZE | SWP_MOVE | SWP_SHOW;
+          dprintf(("FID_MINMAX (%d,%d)(%d,%d)", swp[i].x, swp[i].y, swp[i].cx, swp[i].cy));
+          pRect->xLeft += swp[i].cx;
+          i++;
+      }
   }
   return WinSetMultWindowPos(GetThreadHAB(), swp, i);
 }

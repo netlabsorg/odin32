@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.134 2001-06-10 12:05:39 sandervl Exp $ */
+/* $Id: pmwindow.cpp,v 1.135 2001-06-13 10:29:45 sandervl Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -156,6 +156,18 @@ BOOL InitPM()
     dprintf(("InitPM: Desktop (%d,%d) bpp %d", ScreenWidth, ScreenHeight, ScreenBitsPerPel));
     return TRUE;
 } /* End of main */
+//******************************************************************************
+//menu.cpp
+BOOL MENU_Init();
+//******************************************************************************
+void WIN32API SetWindowAppearance(BOOL fLooks)
+{
+    if(fLooks) {
+        SYSCOLOR_Init(FALSE); //use OS/2 colors
+    }
+    fOS2Look = fLooks;
+    MENU_Init();
+}
 //******************************************************************************
 //Win32 window message handler
 //******************************************************************************
