@@ -1,4 +1,4 @@
-/* $Id: transform.cpp,v 1.6 2001-07-30 12:00:38 sandervl Exp $ */
+/* $Id: transform.cpp,v 1.7 2001-09-10 11:02:41 sandervl Exp $ */
 
 /*
  * GDI32 coordinate & transformation code
@@ -67,7 +67,7 @@ BOOL WIN32API LPtoDP(HDC hdc, PPOINT lpPoints, int nCount)
 BOOL WIN32API DPtoLP(HDC hdc, PPOINT lpPoints, int nCount)
 {
     BOOL ret;
-    DWORD hdcwidth, hdcheight;
+    LONG hdcwidth, hdcheight;
     pDCData pHps;
 
     pHps = (pDCData)OSLibGpiQueryDCData((HPS)hdc);
