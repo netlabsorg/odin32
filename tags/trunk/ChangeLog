@@ -1,4 +1,7 @@
- /* $Id: ChangeLog,v 1.60 1999-07-23 07:31:45 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.61 1999-07-23 17:51:16 sandervl Exp $ */
+ 99-07-23: Yuri Dario <mc6530@mclink.it>
+	- misc: Changes for compilation with VAC 3.6.5
+
  99-07-23: Edgar Buerkle <100566.557@compuserve.com>
 	- VERSION:  VerQueryValueA/W Wine implementation ported
 
