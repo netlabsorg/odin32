@@ -1,4 +1,4 @@
-/* $Id: waveoutdart.cpp,v 1.8 2002-06-04 17:36:55 sandervl Exp $ */
+/* $Id: waveoutdart.cpp,v 1.9 2002-06-05 09:19:30 sandervl Exp $ */
 
 /*
  * Wave playback class (DART)
@@ -196,16 +196,10 @@ MMRESULT DartWaveOut::write(LPWAVEHDR pwh, UINT cbwh)
         int consumerate = getAvgBytesPerSecond();
         int minbufsize = consumerate/32;
 
-        if(pwh->dwBufferLength > minbufsize) {
-            ulBufSize = pwh->dwBufferLength/2;
-            if(ulBufSize < minbufsize) {
-                dprintf(("set buffer size to %d bytes (org size = %d)", minbufsize, pwh->dwBufferLength));
-                ulBufSize = minbufsize;
-            }
-        }
-        else {
-            //assume application knows what it's doing and use the first buffersize
-            ulBufSize = pwh->dwBufferLength;
+        ulBufSize = pwh->dwBufferLength/2;
+        if(ulBufSize > minbufsize) {
+            dprintf(("set buffer size to %d bytes (org size = %d)", minbufsize, pwh->dwBufferLength));
+            ulBufSize = minbufsize;
         }
 #else
         if(pwh->dwBufferLength >= 512 && pwh->dwBufferLength <= 1024)
