@@ -1,4 +1,7 @@
-/* $Id: changelog,v 1.2372 2002-12-02 09:34:03 sandervl Exp $ */
+/* $Id: changelog,v 1.2373 2002-12-02 16:32:22 sandervl Exp $ */
+
+ 2002-12-02: Platon Fomichev <platon@innotek   >
+    - OLE32:    o Removed stupid wait in STUBMGR_Start. Blocks PM for two seconds.
 
  2002-12-02: Sander van Leeuwen <sandervl@innotek   >
     - KERNEL32: o Convert command line from OS/2 to Windows codepage
