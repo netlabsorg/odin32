@@ -1,4 +1,4 @@
-# $Id: process.mak,v 1.13 2002-05-16 11:37:00 bird Exp $
+# $Id: process.mak,v 1.14 2002-06-19 02:16:27 bird Exp $
 
 #
 # Unix-like tools for OS/2
@@ -16,21 +16,33 @@
 #   already.
 #   It also requires the TARGET_NAME to be specified in the makefile.
 # -----------------------------------------------------------------------------
-!if "$(MAKE_SETUP_INCLUDED)" != "YES"
-! if [$(ECHO) $(CLRERR)Fatal error: You must include setup.mak before process.mak in the makefile.$(CLRRST)]
-! endif
-! error
+!if "$(MAKE_SETUP_INCLUDED)"  != "YES"
+! ifndef MAKEVER
+!  if [$(ECHO) $(CLRERR)Fatal error: You must include setup.mak before process.mak in the makefile.$(CLRRST)]
+!  endif
+!  error
+!else
+!  error $(CLRERR)Fatal error: You must include setup.mak before process.mak in the makefile.$(CLRRST)
+!endif
 !endif
 !if "$(ENV_STATUS)" != "OK"
-! if [$(ECHO) $(CLRERR)Fatal error: The environment is not valid. Bad setup.mak?$(CLRRST)]
+! ifndef MAKEVER
+!  if [$(ECHO) $(CLRERR)Fatal error: The environment is not valid. Bad setup.mak?$(CLRRST)]
+!  endif
+!  error
+! else
+!  error $(CLRERR)Fatal error: The environment is not valid. Bad setup.mak?$(CLRRST)
 ! endif
-! error
 !endif
 
 !if "$(TARGET_NAME)" == "" && "$(TARGET_MODE)" != "EMPTY"
-! if [$(ECHO) $(CLRERR)Fatal error: TARGET_NAME is not defined! Should be set in the makefile.$(CLRRST)]
+! ifndef MAKEVER
+!  if [$(ECHO) $(CLRERR)Fatal error: TARGET_NAME is not defined! Should be set in the makefile.$(CLRRST)]
+!  endif
+!  error
+! else
+!  error $(CLRERR)Fatal error: TARGET_NAME is not defined! Should be set in the makefile.$(CLRRST)
 ! endif
-! error
 !endif
 
 !ifdef TARGET_MODE
@@ -52,9 +64,15 @@
 !        if "$(TARGET_MODE)" != "IFSLIB"
 # Dummy/Hub/TopLevel empty makefile. This has no target.
 !         if "$(TARGET_MODE)" != "EMPTY"
-!          if [$(ECHO) $(CLRERR)Fatal Error: Bad TARGET_MODE="$(TARGET_MODE)". Valid ones are: EXE, DLL, SYS, IFS, VDD, LIB, SYSLIB, IFSLIB and EMPTY.$(CLRRST)]
+!          if "$(TARGET_MODE)" != "TESTCASE"
+!           ifndef MAKEVER
+!            if [$(ECHO) $(CLRERR)Fatal Error: Bad TARGET_MODE="$(TARGET_MODE)". Valid ones are: EXE, DLL, SYS, IFS, VDD, LIB, SYSLIB, IFSLIB, TESTCASE and EMPTY.$(CLRRST)]
+!            endif
+!            error
+!           else
+!            error $(CLRERR)Fatal Error: Bad TARGET_MODE="$(TARGET_MODE)". Valid ones are: EXE, DLL, SYS, IFS, VDD, LIB, SYSLIB, IFSLIB, TESTCASE and EMPTY.$(CLRRST)
+!           endif
 !          endif
-!          error
 !         endif
 !        endif
 !       endif
@@ -99,10 +117,17 @@ TARGET_EXT  = $(EXT_LIB)
 ! if "$(TARGET_MODE)" == "EMPTY"
 TARGET_EXT  = empty
 ! endif
+! if "$(TARGET_MODE)" == "TESTCASE"
+TARGET_EXT  = testcase
+! endif
 ! ifndef TARGET_EXT
-!  if [$(ECHO) $(CLRERR)Internal Error: TARGET_EXT not set. Probably invalid TARGET_MODE. (TARGET_MODE="$(TARGET_MODE)")$(CLRRST)]
+!  ifndef MAKEVER
+!   if [$(ECHO) $(CLRERR)Internal Error: TARGET_EXT not set. Probably invalid TARGET_MODE. (TARGET_MODE="$(TARGET_MODE)")$(CLRRST)]
+!   endif
+!   error
+!  else
+!   error $(CLRERR)Internal Error: TARGET_EXT not set. Probably invalid TARGET_MODE. (TARGET_MODE="$(TARGET_MODE)")$(CLRRST)
 !  endif
-!  error
 ! endif
 !endif
 
@@ -114,7 +139,11 @@ PATH_TARGET = $(PATH_OBJ)\$(TARGET_NAME).$(TARGET_EXT)
 # Default target file. (output)
 !ifndef TARGET
 ! if "$(TARGET_MODE)" != "EMPTY"
+!  if "$(TARGET_MODE)" != "TESTCASE"
 TARGET      = $(PATH_TARGET)\$(TARGET_NAME).$(TARGET_EXT)
+!  else
+TARGET      = testcase
+!  endif
 ! endif
 !endif
 
@@ -227,8 +256,12 @@ TARGET_STACKSIZE=0x10000
 # Tell user what we're building.
 # -----------------------------------------------------------------------------
 !ifndef BUILD_QUIET
-!if [$(ECHO) Target is $(CLRFIL)$(TARGET)$(CLRRST)]
-!endif
+! ifndef MAKEVER
+!  if [$(ECHO) Target is $(CLRFIL)$(TARGET)$(CLRRST)]
+!  endif
+! else
+$(ECHO) Target is $(CLRFIL)$(TARGET)$(CLRRST)
+! endif
 !endif
 
 
@@ -238,15 +271,27 @@ TARGET_STACKSIZE=0x10000
 
 !if "$(TARGET_MODE)" != "EMPTY"
 ! if "$(PATH_TARGET)" != ""
-!  if [$(TOOL_EXISTS) $(PATH_TARGET)] != 0
-!   ifndef BUILD_QUIET
-!    if [$(ECHO) Target path $(CLRFIL)$(PATH_TARGET)$(CLRTXT) does NOT exist. Creating. $(CLRRST)]
+!  ifndef MAKEVER
+!   if [$(TOOL_EXISTS) $(PATH_TARGET)] != 0
+!    ifndef BUILD_QUIET
+!     if [$(ECHO) Target path $(CLRFIL)$(PATH_TARGET)$(CLRTXT) does NOT exist. Creating. $(CLRRST)]
+!     endif
+!    endif
+!    if [$(TOOL_CREATEPATH) $(PATH_TARGET)]
+!     if [$(ECHO) $(CLRERR)Error: Could not create $(CLRFIL)$(PATH_TARGET)$(CLRRST)]
+!     endif
+!     error
 !    endif
 !   endif
-!   if [$(TOOL_CREATEPATH) $(PATH_TARGET)]
-!    if [$(ECHO) $(CLRERR)Error: Could not create $(CLRFIL)$(PATH_TARGET)$(CLRRST)]
+!  else
+!   if %exist($(PATH_TARGET)) == 0
+!    ifndef BUILD_QUIET
+$(ECHO) Target path $(CLRFIL)$(PATH_TARGET)$(CLRTXT) does NOT exist. Creating. $(CLRRST)
 !    endif
-!    error
+!   else
+!    if [$(TOOL_CREATEPATH) $(PATH_TARGET)]
+!     error $(CLRERR)Error: Could not create $(CLRFIL)$(PATH_TARGET)$(CLRRST)
+!    endif
 !   endif
 !  endif
 ! endif
@@ -258,189 +303,192 @@ TARGET_STACKSIZE=0x10000
 # -----------------------------------------------------------------------------
 # Common inference rules
 # -----------------------------------------------------------------------------
-
 .SUFFIXES:
-.SUFFIXES: .$(EXT_OBJ) .c .cpp .asm .$(EXT_RES) .rc .pre-c .pre-cpp # .h .def
+.SUFFIXES: .c .cpp .asm .$(EXT_OBJ) .$(EXT_RES) .rc .ii .s
+
+#
+# A workaround for SlickEdits inability to find the buggy files..
+# This makes the source filenames in the error listing have full path.
+# See setup.mak for compile command line.
+#
+_SRC = $<
+!ifdef SLKRUNS
+_SRC = $(PATH_CURRENT)\$<
+!endif
 
 
 # Assembling assembly source.
 .asm{$(PATH_TARGET)}.$(EXT_OBJ):
-    @$(ECHO) Assembling $(CLRFIL)$< $(CLRTXT)$(TOOL_JOB_SUB_MSG) $(CLRRST)
+    @$(ECHO) Assembling $(CLRFIL)$(_SRC) $(CLRTXT)$(TOOL_JOB_SUB_MSG) $(CLRRST)
+    \
 ! ifndef BUILD_VERBOSE
     @ \
 ! endif
 !if "$(TARGET_MODE)" == "SYS" || "$(TARGET_MODE)" == "SYSLIB" || "$(TARGET_MODE)" == "IFS" || "$(TARGET_MODE)" == "IFSLIB"
-    $(TOOL_JOB_SUB) $(AS) $(AS_FLAGS_SYS) $< $(AS_OBJ_OUT)$@
+    $(TOOL_JOB_SUB) $(AS) $(AS_FLAGS_SYS) $(_SRC) $(AS_OBJ_OUT)$@
 !else
-    $(TOOL_JOB_SUB) $(AS) $(AS_FLAGS) $< $(AS_OBJ_OUT)$@
+    $(TOOL_JOB_SUB) $(AS) $(AS_FLAGS) $(_SRC) $(AS_OBJ_OUT)$@
 !endif
 
 .asm.$(EXT_OBJ):
-    @$(ECHO) Assembling $(CLRFIL)$< $(CLRRST)
+    @$(ECHO) Assembling $(CLRFIL)$(_SRC) $(CLRRST)
+    \
 !ifndef BUILD_VERBOSE
     @ \
 !endif
 !if "$(TARGET_MODE)" == "SYS" || "$(TARGET_MODE)" == "SYSLIB" || "$(TARGET_MODE)" == "IFS" || "$(TARGET_MODE)" == "IFSLIB"
-    $(AS) $(AS_FLAGS_SYS) $< $(AS_OBJ_OUT)$(PATH_TARGET)\$(@F)
+    $(AS) $(AS_FLAGS_SYS) $(_SRC) $(AS_OBJ_OUT)$(PATH_TARGET)\$(@F)
 !else
-    $(AS) $(AS_FLAGS) $< $(AS_OBJ_OUT)$(PATH_TARGET)\$(@F)
+    $(AS) $(AS_FLAGS) $(_SRC) $(AS_OBJ_OUT)$(PATH_TARGET)\$(@F)
 !endif
 
+# C++ Compiler base line
+_CXX_BASELINE = $(CXX) \
+!if "$(TARGET_MODE)" == "EXE" || "$(TARGET_MODE)" == "LIB"
+        $(CXX_FLAGS_EXE) \
+!endif
+!if "$(TARGET_MODE)" == "DLL"
+        $(CXX_FLAGS_DLL) \
+!endif
+!if "$(TARGET_MODE)" == "SYS" || "$(TARGET_MODE)" == "SYSLIB"
+        $(CXX_FLAGS_SYS) \
+!endif
+!if "$(TARGET_MODE)" == "IFS" || "$(TARGET_MODE)" == "IFSLIB"
+        $(CXX_FLAGS_IFS) \
+!endif
 
 # Compiling C++ source.
 .cpp{$(PATH_TARGET)}.$(EXT_OBJ):
-    @$(ECHO) C++ Compiler $(CLRFIL)$< $(CLRTXT)$(TOOL_JOB_SUB_MSG) $(CLRRST)
+    @$(ECHO) C++ Compiler $(CLRFIL)$(_SRC) $(CLRTXT)$(TOOL_JOB_SUB_MSG) $(CLRRST)
+    \
 !ifndef BUILD_VERBOSE
     @ \
 !endif
-    $(TOOL_JOB_SUB) $(CXX) \
-!if "$(TARGET_MODE)" == "EXE" || "$(TARGET_MODE)" == "LIB"
-        $(CXX_FLAGS_EXE) \
-!endif
-!if "$(TARGET_MODE)" == "DLL"
-        $(CXX_FLAGS_DLL) \
-!endif
-!if "$(TARGET_MODE)" == "SYS" || "$(TARGET_MODE)" == "SYSLIB"
-        $(CXX_FLAGS_SYS) \
-!endif
-!if "$(TARGET_MODE)" == "IFS" || "$(TARGET_MODE)" == "IFSLIB"
-        $(CXX_FLAGS_IFS) \
-!endif
+    $(TOOL_JOB_SUB) $(_CXX_BASELINE) \
 !if "$(CXX_LST_OUT)" != ""
         $(CXX_LST_OUT)$(PATH_TARGET)\$(@B).s \
 !endif
-        $(CXX_OBJ_OUT)$@ $<
+        $(CXX_OBJ_OUT)$@ $(_SRC)
 
 .cpp.$(EXT_OBJ):
-    @$(ECHO) C++ Compiler $(CLRFIL)$< $(CLRRST)
+    @$(ECHO) C++ Compiler $(CLRFIL)$(_SRC) $(CLRRST)
+    \
 !ifndef BUILD_VERBOSE
     @ \
 !endif
-    $(CXX) \
-!if "$(TARGET_MODE)" == "EXE" || "$(TARGET_MODE)" == "LIB"
-        $(CXX_FLAGS_EXE) \
-!endif
-!if "$(TARGET_MODE)" == "DLL"
-        $(CXX_FLAGS_DLL) \
-!endif
-!if "$(TARGET_MODE)" == "SYS" || "$(TARGET_MODE)" == "SYSLIB"
-        $(CXX_FLAGS_SYS) \
-!endif
-!if "$(TARGET_MODE)" == "IFS" || "$(TARGET_MODE)" == "IFSLIB"
-        $(CXX_FLAGS_IFS) \
-!endif
+    $(_CXX_BASELINE) \
 !if "$(CXX_LST_OUT)" != ""
         $(CXX_LST_OUT)$(PATH_TARGET)\$(@B).s \
 !endif
-        $(CXX_OBJ_OUT)$(PATH_TARGET)\$(@F) $<
+        $(CXX_OBJ_OUT)$(PATH_TARGET)\$(@F) $(_SRC)
 
 
 # Pre-Compiling C++ source.
-.cpp.pre-cpp:
-    @$(ECHO) C++ Compiler $(CLRFIL)$< $(CLRRST)
+.cpp.ii:
+    @$(ECHO) C++ Compiler $(CLRFIL)$(_SRC) $(CLRRST)
+    \
 !ifndef BUILD_VERBOSE
     @ \
 !endif
-    $(CXX) \
+    $(_CXX_BASELINE) \
+        $(CXX_PC_2_STDOUT) $(_SRC) > $@
+
+
+# Compiler C++ source to assembly.
+!if "$(CXX_AS_2_FILE)" != ""
+.cpp.s:
+    @$(ECHO) C++ To Assembly $(CLRFIL)$(_SRC) $(CLRRST)
+    \
+!ifndef BUILD_VERBOSE
+    @ \
+!endif
+    $(_CXX_BASELINE) \
+        $(CXX_AS_2_FILE)$@ $(_SRC)
+!endif
+
+
+
+# C Compiler base line
+_CC_BASELINE = $(CC) \
 !if "$(TARGET_MODE)" == "EXE" || "$(TARGET_MODE)" == "LIB"
-        $(CXX_FLAGS_EXE) \
+        $(CC_FLAGS_EXE) \
 !endif
 !if "$(TARGET_MODE)" == "DLL"
-        $(CXX_FLAGS_DLL) \
+        $(CC_FLAGS_DLL) \
 !endif
 !if "$(TARGET_MODE)" == "SYS" || "$(TARGET_MODE)" == "SYSLIB"
-        $(CXX_FLAGS_SYS) \
+        $(CC_FLAGS_SYS) \
 !endif
 !if "$(TARGET_MODE)" == "IFS" || "$(TARGET_MODE)" == "IFSLIB"
-        $(CXX_FLAGS_IFS) \
+        $(CC_FLAGS_IFS) \
 !endif
-        $(CXX_PC_2_STDOUT) $< > $@
-
 
 # Compiling C source.
 .c{$(PATH_TARGET)}.$(EXT_OBJ):
-    @$(ECHO) C Compiler $(CLRFIL)$< $(CLRTXT)$(TOOL_JOB_SUB_MSG) $(CLRRST)
+    @$(ECHO) C Compiler $(CLRFIL)$(_SRC) $(CLRTXT)$(TOOL_JOB_SUB_MSG) $(CLRRST)
+    \
 !ifndef BUILD_VERBOSE
     @ \
 !endif
-    $(TOOL_JOB_SUB) $(CC) \
-!if "$(TARGET_MODE)" == "EXE" || "$(TARGET_MODE)" == "LIB"
-        $(CC_FLAGS_EXE) \
-!endif
-!if "$(TARGET_MODE)" == "DLL"
-        $(CC_FLAGS_DLL) \
-!endif
-!if "$(TARGET_MODE)" == "SYS" || "$(TARGET_MODE)" == "SYSLIB"
-        $(CC_FLAGS_SYS) \
-!endif
-!if "$(TARGET_MODE)" == "IFS" || "$(TARGET_MODE)" == "IFSLIB"
-        $(CC_FLAGS_IFS) \
-!endif
+    $(TOOL_JOB_SUB) $(_CC_BASELINE) \
 !if "$(CC_LST_OUT)" != ""
         $(CC_LST_OUT)$(PATH_TARGET)\$(@B).s \
 !endif
-        $(CC_OBJ_OUT)$@ $<
+        $(CC_OBJ_OUT)$@ $(_SRC)
 
 .c.$(EXT_OBJ):
-    @$(ECHO) C Compiler $(CLRFIL)$< $(CLRRST)
+    @$(ECHO) C Compiler $(CLRFIL)$(_SRC) $(CLRRST)
+    \
 !ifndef BUILD_VERBOSE
     @ \
 !endif
-    $(CC) \
-!if "$(TARGET_MODE)" == "EXE" || "$(TARGET_MODE)" == "LIB"
-        $(CC_FLAGS_EXE) \
-!endif
-!if "$(TARGET_MODE)" == "DLL"
-        $(CC_FLAGS_DLL) \
-!endif
-!if "$(TARGET_MODE)" == "SYS" || "$(TARGET_MODE)" == "SYSLIB"
-        $(CC_FLAGS_SYS) \
-!endif
-!if "$(TARGET_MODE)" == "IFS" || "$(TARGET_MODE)" == "IFSLIB"
-        $(CC_FLAGS_IFS) \
-!endif
+    $(_CC_BASELINE) \
 !if "$(CC_LST_OUT)" != ""
         $(CC_LST_OUT)$(PATH_TARGET)\$(@B).s \
 !endif
-        $(CC_OBJ_OUT)$(PATH_TARGET)\$(@F) $<
+        $(CC_OBJ_OUT)$(PATH_TARGET)\$(@F) $(_SRC)
 
 
 # Pre-Compiling C source.
-.c.pre-c:
-    @$(ECHO) C PreCompiler $(CLRFIL)$< $(CLRRST)
+.c.ii:
+    @$(ECHO) C PreCompiler $(CLRFIL)$(_SRC) $(CLRRST)
+    \
 !ifndef BUILD_VERBOSE
     @ \
 !endif
-    $(CC) \
-!if "$(TARGET_MODE)" == "EXE" || "$(TARGET_MODE)" == "LIB"
-        $(CC_FLAGS_EXE) \
+    $(_CC_BASELINE) \
+        $(CC_PC_2_STDOUT) $(_SRC) > $@
+
+
+# Compiler C source to assembly.
+!if "$(CC_AS_2_FILE)" != ""
+.c.s:
+    @$(ECHO) C To Assembly $(CLRFIL)$(_SRC) $(CLRRST)
+    \
+!ifndef BUILD_VERBOSE
+    @ \
 !endif
-!if "$(TARGET_MODE)" == "DLL"
-        $(CC_FLAGS_DLL) \
+    $(_CC_BASELINE) \
+        $(CC_AS_2_FILE)$@ $(_SRC)
 !endif
-!if "$(TARGET_MODE)" == "SYS" || "$(TARGET_MODE)" == "SYSLIB"
-        $(CC_FLAGS_SYS) \
-!endif
-!if "$(TARGET_MODE)" == "IFS" || "$(TARGET_MODE)" == "IFSLIB"
-        $(CC_FLAGS_IFS) \
-!endif
-        $(CC_PC_2_STDOUT) $< > $@
 
 
 # Compiling resources.
 .rc{$(PATH_TARGET)}.res:
-    @$(ECHO) RC Compiler $(CLRFIL)$< $(CLRTXT)$(TOOL_JOB_SUB_MSG)$(CLRRST)
+    @$(ECHO) RC Compiler $(CLRFIL)$(_SRC) $(CLRTXT)$(TOOL_JOB_SUB_MSG)$(CLRRST)
+    \
 !ifndef BUILD_VERBOSE
     @ \
 !endif
-    $(TOOL_JOB_SUB) $(RC) $(RC_FLAGS) $< $@
+    $(TOOL_JOB_SUB) $(RC) $(RC_FLAGS) $(_SRC) $@
 
 .rc.res:
-    @$(ECHO) RC Compiler $(CLRFIL)$< $(CLRRST)
+    @$(ECHO) RC Compiler $(CLRFIL)$(_SRC) $(CLRRST)
+    \
 !ifndef BUILD_VERBOSE
     @ \
 !endif
-    $(RC) $(RC_FLAGS) $< $(PATH_TARGET)\$(@F)
+    $(RC) $(RC_FLAGS) $(_SRC) $(PATH_TARGET)\$(@F)
 
 
 
@@ -559,16 +607,24 @@ install:
 
 
 
+!if "$(TARGET_MODE)" != "TESTCASE"
+!ifndef BUILD_OWN_TESTCASE_RULE
+!ifndef MAKEVER
+_TESTCASE_TST1 = [$(TOOL_EXISTS) testcase] == 0
+_TESTCASE_TST2 = [$(TOOL_EXISTS) testcase.mak] == 0
+!else
+_TESTCASE_TST1 = exists(testcase) != 0
+_TESTCASE_TST2 = exists(testcase.mak) != 0
+!endif
 # -----------------------------------------------------------------------------
 # The testcase rule - Execute testcases when present.
 #   Testcases are either a testcase.mak file or a testcase subdirectory.
 # -----------------------------------------------------------------------------
-!ifndef BUILD_OWN_TESTCASE_RULE
 testcase:
-!if [$(TOOL_EXISTS) testcase] == 0
+!if $(_TESTCASE_TST1)
     @$(TOOL_DODIRS) "testcase" $(TOOL_MAKE) -f $(BUILD_MAKEFILE) $@
 !endif
-!if [$(TOOL_EXISTS) testcase.mak] == 0
+!if $(_TESTCASE_TST2)
     @$(TOOL_DOMAKES) "testcase.mak" $(TOOL_MAKE) $@
 !endif
 !ifdef SUBDIRS
@@ -581,6 +637,7 @@ testcase:
     @$(TOOL_DOMAKES) "$(POSTMAKEFILES)" $(TOOL_MAKE) $@
 !endif
 !endif
+!endif #!TESTCASE
 
 
 
@@ -588,6 +645,7 @@ testcase:
 # The shell rule - Setup the correcte shell environment and start a shell.
 # -----------------------------------------------------------------------------
 shell:
+    \
 !ifndef BUILD_VERBOSE
     @ \
 !endif
@@ -601,6 +659,7 @@ shell:
 # -----------------------------------------------------------------------------
 dep:
     @$(ECHO) Building dependencies $(CLRRST)
+    \
 !ifndef BUILD_VERBOSE
     @ \
 !endif
@@ -625,6 +684,7 @@ dep:
 # The clean rule - Clean up output files.
 #   The current setup doesn't clean the installed ones.
 # -----------------------------------------------------------------------------
+!if "$(TARGET_MODE)" != "TESTCASE"
 clean:
 !if "$(PATH_TARGET)" != ""              # paranoia
     $(TOOL_RM) \
@@ -643,10 +703,30 @@ clean:
         $(PATH_TARGET)\*.s \
         $(PATH_TARGET)\*.lst \
         $(PATH_TARGET)\*.lnk \
-        $(PATH_TARGET)\*.pre-c \
-        $(PATH_TARGET)\*.pre-cpp \
+        $(PATH_TARGET)\*.ii \
         $(PATH_TARGET)\.depend
+    $(TOOL_RM) \
+        .\*.ii \
+        .\*.err \
+        .\.depend
 !endif
+!ifdef SUBDIRS
+    @$(TOOL_DODIRS) "$(SUBDIRS)" $(TOOL_MAKE) -f $(BUILD_MAKEFILE) NODEP=1 $@
+!endif
+!ifdef PREMAKEFILES
+    @$(TOOL_DOMAKES) "$(PREMAKEFILES)" $(TOOL_MAKE) NODEP=1 $@
+!endif
+!ifdef POSTMAKEFILES
+    @$(TOOL_DOMAKES) "$(POSTMAKEFILES)" $(TOOL_MAKE) NODEP=1 $@
+!endif
+!endif #!TESTCASE
+
+
+
+# -----------------------------------------------------------------------------
+# The nothing rule - Rule for testing the makefile structure.
+# -----------------------------------------------------------------------------
+nothing:
 !ifdef SUBDIRS
     @$(TOOL_DODIRS) "$(SUBDIRS)" $(TOOL_MAKE) -f $(BUILD_MAKEFILE) $@
 !endif
@@ -656,6 +736,7 @@ clean:
 !ifdef POSTMAKEFILES
     @$(TOOL_DOMAKES) "$(POSTMAKEFILES)" $(TOOL_MAKE) $@
 !endif
+    @$(ECHO) Completed nothing in $(MAKEFILE).
 
 
 
@@ -666,14 +747,16 @@ clean:
 $(TARGET): $(TARGET_OBJS) $(TARGET_RES) $(TARGET_DEF_LINK) $(TARGET_LNK) $(TARGET_DEPS)
 !if "$(TOOL_JOB_WAIT)" != ""
 ! ifndef BUILD_QUIET
-   @$(ECHO) Waiting for jobs to complete $(CLRRST)
+    @$(ECHO) Waiting for jobs to complete $(CLRRST)
 ! endif
+    \
 ! ifndef BUILD_VERBOSE
-   @ \
+    @ \
 ! endif
-   $(TOOL_JOB_WAIT)
+    $(TOOL_JOB_WAIT)
 !endif
     @$(ECHO) Linking $(TARGET_MODE) $(CLRFIL)$@ $(CLRRST)
+    \
 !ifndef BUILD_VERBOSE
     @ \
 !endif
@@ -697,6 +780,7 @@ $(TARGET): $(TARGET_OBJS) $(TARGET_RES) $(TARGET_DEF_LINK) $(TARGET_LNK) $(TARGE
 !endif
 !if "$(TARGET_RES)" != "" && "$(RL)" != ""
     @$(ECHO) Linking Resources $(CLRRST)
+    \
 ! ifndef BUILD_VERBOSE
     @ \
 ! endif
@@ -704,12 +788,14 @@ $(TARGET): $(TARGET_OBJS) $(TARGET_RES) $(TARGET_DEF_LINK) $(TARGET_LNK) $(TARGE
 !endif
 !if "$(TARGET_DLLRNAME)" != ""
     @$(ECHO) Dll Rename $(TARGET_DLLRNAME)
+    \
 ! ifndef BUILD_VERBOSE
     @ \
 ! endif
     $(TOOL_DLLRNAME) $(TARGET) $(TARGET_DLLRNAME)
 !endif
 !if "$(TOOL_MAPSYM)" != "" && "$(TARGET_SYM)" != "" && "$(TARGET_MAP)" != ""
+    \
 ! ifndef BUILD_VERBOSE
     @ \
 ! endif
@@ -722,7 +808,7 @@ $(TARGET): $(TARGET_OBJS) $(TARGET_RES) $(TARGET_DEF_LINK) $(TARGET_LNK) $(TARGE
 #
 $(TARGET_LNK): $(MAKE_INCLUDE_PROCESS) $(MAKE_INCLUDE_SETUP) $(PATH_MAKE)\setup.mak $(MAKEFILE)
 !ifndef TOOL_DEFCONV
-    @$(ECHO) Creating Linker Input File $(CLRRST)<<$@
+    @$(TOOL_ECHO) Creating Linker Input File $(CLRRST)<<$@
 $(LINK_LNK1)
 $(LINK_LNK2)
 $(LINK_LNK3)
@@ -732,6 +818,7 @@ $(LINK_LNK5)
 !else
     @$(ECHO) Creating Linker Input File $(CLRRST) $@
     @$(TOOL_RM) $@
+    \
 ! ifdef BUILD_VERBOSE
     @ \
 ! endif
@@ -759,6 +846,7 @@ $(TARGET_DEF_LINK): $(TARGET_DEF)
 ! ifndef BUILD_QUIET
     @$(ECHO) Stamping deffile with build level info.$(CLRRST)
 ! endif
+    \
 ! ifndef BUILD_VERBOSE
     @ \
 ! endif
@@ -777,6 +865,7 @@ $(TARGET): $(TARGET_OBJS) $(TARGET_LNK) $(TARGET_DEPS)
 ! ifndef BUILD_QUIET
    @$(ECHO) Waiting for jobs to complete $(CLRRST)
 ! endif
+    \
 ! ifndef BUILD_VERBOSE
    @ \
 ! endif
@@ -796,7 +885,7 @@ $(TARGET): $(TARGET_OBJS) $(TARGET_LNK) $(TARGET_DEPS)
 # Lib parameter file.
 #
 $(TARGET_LNK): $(MAKE_INCLUDE_PROCESS) $(MAKE_INCLUDE_SETUP) $(PATH_MAKE)\setup.mak $(MAKEFILE)
-    @$(ECHO) Creating Lib Input File $(CLRRST)<<$@
+    @$(TOOL_ECHO) Creating Lib Input File $(CLRRST)<<$@
 $(AR_LNK1)
 $(AR_LNK2)
 $(AR_LNK3)
@@ -815,10 +904,12 @@ $(AR_LNK5)
 !if "$(TARGET_PUBNAME)" != ""
 $(TARGET_PUBNAME): $(TARGET)
     @$(ECHO) Copying $(CLRFIL)$(TARGET)$(CLRTXT) to $(CLRFIL)$(@D)$(CLRRST)
+    \
 !ifndef BUILD_VERBOSE
     @if not exist $(@D) $(ECHO) Target public path $(CLRFIL)$(@D)$(CLRTXT) does NOT exist. Creating. $(CLRRST)
 !endif
     @if not exist $(@D) $(TOOL_CREATEPATH) $(@D)
+    \
 !ifndef BUILD_VERBOSE
     @ \
 !endif
@@ -844,6 +935,7 @@ $(TARGET_PUBNAME): $(TARGET)
 !ifdef TARGET_ILIB
 $(TARGET_ILIB): $(TARGET_IDEF)
     @$(ECHO) Creating Import Library $(CLRFIL)$@ $(CLRRST)
+    \
 !ifndef BUILD_VERBOSE
     @ \
 !endif
@@ -867,22 +959,35 @@ $(TARGET_ILIB): $(TARGET_IDEF)
 # -----------------------------------------------------------------------------
 # Read Dependencies.
 # -----------------------------------------------------------------------------
-
-!if "$(TARGET_MODE)" != "EMPTY"
+!if "$(TARGET_MODE)" != "TESTCASE"
+!if "$(TARGET_MODE)" != "EMPTY" && "$(NODEP)" == ""
 
 #
 # Read dependency file for current directory
 #
-!if [$(TOOL_EXISTS) $(TARGET_DEPEND)] == 0
-! ifdef BUILD_VERBOSE
-!  if [$(ECHO) Including dependency $(CLRFIL)$(TARGET_DEPEND)$(CLRRST)]
+!ifndef MAKEVER
+! if [$(TOOL_EXISTS) $(TARGET_DEPEND)] == 0
+!  ifdef BUILD_VERBOSE
+!   if [$(ECHO) Including dependency $(CLRFIL)$(TARGET_DEPEND)$(CLRRST)]
+!   endif
 !  endif
-! endif
-! include $(TARGET_DEPEND)
-!else
-! ifndef NODEP
+!  include $(TARGET_DEPEND)
+! else
+!  ifndef NODEP
 !   if [$(ECHO) $(CLRERR)WARNING: Please make dependencies first. $(TARGET_DEPEND) is missing.$(CLRRST)]
 !   endif
+!  endif
+! endif
+!else
+! if %exists($(TARGET_DEPEND)) != 0
+!  ifdef BUILD_VERBOSE
+$(ECHO) Including dependency $(CLRFIL)$(TARGET_DEPEND)$(CLRRST)
+!  endif
+!  include $(TARGET_DEPEND)
+! else
+!  ifndef NODEP
+$(ECHO) $(CLRERR)WARNING: Please make dependencies first. $(TARGET_DEPEND) is missing.$(CLRRST)
+!  endif
 ! endif
 !endif
 
@@ -891,47 +996,87 @@ $(TARGET_ILIB): $(TARGET_IDEF)
 # Read global dependency files.
 #
 !ifdef BUILD_DEPEND1
-! if [$(TOOL_EXISTS) $(BUILD_DEPEND1)] == 0
-!  ifdef BUILD_VERBOSE
-!   if [$(ECHO) Including dependency $(CLRFIL)$(BUILD_DEPEND1)$(CLRRST)]
+! ifndef MAKEVER
+!  if [$(TOOL_EXISTS) $(BUILD_DEPEND1)] == 0
+!   ifdef BUILD_VERBOSE
+!    if [$(ECHO) Including dependency $(CLRFIL)$(BUILD_DEPEND1)$(CLRRST)]
+!    endif
 !   endif
-!  endif
-!  include $(BUILD_DEPEND1)
-! else
-!  ifndef NODEP
+!   include $(BUILD_DEPEND1)
+!  else
+!   ifndef NODEP
 !    if [$(ECHO) $(CLRERR)WARNING: Please make dependencies first. $(BUILD_DEPEND1) is missing.$(CLRRST)]
 !    endif
+!   endif
+!  endif
+! else
+!  if %exists($(BUILD_DEPEND1)) != 0
+!   ifdef BUILD_VERBOSE
+$(ECHO) Including dependency $(CLRFIL)$(BUILD_DEPEND1)$(CLRRST)
+!   endif
+!   include $(BUILD_DEPEND1)
+!  else
+!   ifndef NODEP
+$(ECHO) $(CLRERR)WARNING: Please make dependencies first. $(BUILD_DEPEND1) is missing.$(CLRRST)
+!   endif
 !  endif
 ! endif
 !endif
 
+
 !ifdef BUILD_DEPEND2
-! if [$(TOOL_EXISTS) $(BUILD_DEPEND2)] == 0
-!  ifdef BUILD_VERBOSE
-!   if [$(ECHO) Including dependency $(CLRFIL)$(BUILD_DEPEND2)$(CLRRST)]
+! ifndef MAKEVER
+!  if [$(TOOL_EXISTS) $(BUILD_DEPEND2)] == 0
+!   ifdef BUILD_VERBOSE
+!    if [$(ECHO) Including dependency $(CLRFIL)$(BUILD_DEPEND2)$(CLRRST)]
+!    endif
 !   endif
-!  endif
-!  include $(BUILD_DEPEND2)
-! else
-!  ifndef NODEP
+!   include $(BUILD_DEPEND2)
+!  else
+!   ifndef NODEP
 !    if [$(ECHO) $(CLRERR)WARNING: Please make dependencies first. $(BUILD_DEPEND2) is missing.$(CLRRST)]
 !    endif
+!   endif
+!  endif
+! else
+!  if %exists($(BUILD_DEPEND2)) != 0
+!   ifdef BUILD_VERBOSE
+$(ECHO) Including dependency $(CLRFIL)$(BUILD_DEPEND2)$(CLRRST)
+!   endif
+!   include $(BUILD_DEPEND2)
+!  else
+!   ifndef NODEP
+$(ECHO) $(CLRERR)WARNING: Please make dependencies first. $(BUILD_DEPEND2) is missing.$(CLRRST)
+!   endif
 !  endif
 ! endif
 !endif
 
 
 !ifdef BUILD_DEPEND3
-! if [$(TOOL_EXISTS) $(BUILD_DEPEND3)] == 0
-!  ifdef BUILD_VERBOSE
-!   if [$(ECHO) Including dependency $(CLRFIL)$(BUILD_DEPEND3)$(CLRRST)]
+! ifndef MAKEVER
+!  if [$(TOOL_EXISTS) $(BUILD_DEPEND3)] == 0
+!   ifdef BUILD_VERBOSE
+!    if [$(ECHO) Including dependency $(CLRFIL)$(BUILD_DEPEND3)$(CLRRST)]
+!    endif
 !   endif
-!  endif
-!  include $(BUILD_DEPEND3)
-! else
-!  ifndef NODEP
+!   include $(BUILD_DEPEND3)
+!  else
+!   ifndef NODEP
 !    if [$(ECHO) $(CLRERR)WARNING: Please make dependencies first. $(BUILD_DEPEND3) is missing.$(CLRRST)]
 !    endif
+!   endif
+!  endif
+! else
+!  if %exists($(BUILD_DEPEND3)) != 0
+!   ifdef BUILD_VERBOSE
+$(ECHO) Including dependency $(CLRFIL)$(BUILD_DEPEND3)$(CLRRST)
+!   endif
+!   include $(BUILD_DEPEND3)
+!  else
+!   ifndef NODEP
+$(ECHO) $(CLRERR)WARNING: Please make dependencies first. $(BUILD_DEPEND3) is missing.$(CLRRST)
+!   endif
 !  endif
 ! endif
 !endif
@@ -946,14 +1091,23 @@ $(TARGET_ILIB): $(TARGET_IDEF)
 !if "$(BUILD_MULTIJOBS)" != ""
 ! if [$(TOOL_JOB_UP)] != 0
 !  if "$(BUILD_QUITE)" == ""
-!   if [$(ECHO) Starting Job Daemon With $(TOOL_JOB_WORKERS) Workers...$(CLRRST)]
+!   ifndef MAKEVER
+!    if [$(ECHO) Starting Job Daemon With $(TOOL_JOB_WORKERS) Workers...$(CLRRST)]
+!    endif
+!   else
+$(ECHO) Starting Job Daemon With $(TOOL_JOB_WORKERS) Workers...$(CLRRST)
 !   endif
 !  endif
 !  if [$(TOOL_JOB_INIT) $(TOOL_JOB_WORKERS)] != 0
-!   if [$(ECHO) $(CLRERR)Fatal error: Failed to start job daemon.$(CLRRST)]
-!   endif
-!   error
+!   ifndef MAKEVER
+!    if [$(ECHO) $(CLRERR)Fatal error: Failed to start job daemon.$(CLRRST)]
+!    endif
+!    error
+!else
+!    error $(CLRERR)Fatal error: Failed to start job daemon.$(CLRRST)
+!endif
 !  endif
 ! endif
 !endif
 
+!endif #!TESTCASE
