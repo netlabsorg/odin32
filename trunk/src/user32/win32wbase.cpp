@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.372 2003-05-06 13:50:37 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.373 2003-05-14 11:40:17 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -2538,43 +2538,40 @@ BOOL Win32BaseWindow::SetWindowPos(HWND hwndInsertAfter, int x, int y, int cx,
         return TRUE;
     }
 
-#if 0
-    /* Fix redundant flags */
-    if(getStyle() & WS_VISIBLE) {
-        fuFlags &= ~SWP_SHOWWINDOW;
-    }
-    else
-    {
-        if (!(fuFlags & SWP_SHOWWINDOW))
-              fuFlags |= SWP_NOREDRAW;
-        fuFlags &= ~SWP_HIDEWINDOW;
-    }
-
-////    if(cx < 0) cx = 0;
-////    if(cy < 0) cy = 0;
-
-    if((rectWindow.right - rectWindow.left == cx) && (rectWindow.bottom - rectWindow.top == cy)) {
-        fuFlags |= SWP_NOSIZE;    /* Already the right size */
-    }
-
-    if((rectWindow.left == x) && (rectWindow.top == y)) {
-        fuFlags |= SWP_NOMOVE;    /* Already the right position */
-    }
-
-    if(getWindowHandle() == GetActiveWindow()) {
-        fuFlags |= SWP_NOACTIVATE;   /* Already active */
-    }
-    else
-    if((getStyle() & (WS_POPUP | WS_CHILD)) != WS_CHILD )
-    {
-        if(!(fuFlags & SWP_NOACTIVATE)) /* Bring to the top when activating */
+    if(state >= STATE_CREATED) {
+        /* Fix redundant flags */
+        if(getStyle() & WS_VISIBLE) {
+            fuFlags &= ~SWP_SHOWWINDOW;
+        }
+        else
         {
-            fuFlags &= ~SWP_NOZORDER;
-            hwndInsertAfter = HWND_TOP;
+            if (!(fuFlags & SWP_SHOWWINDOW))
+                  fuFlags |= SWP_NOREDRAW;
+            fuFlags &= ~SWP_HIDEWINDOW;
+        }
+
+        if((rectWindow.right - rectWindow.left == cx) && (rectWindow.bottom - rectWindow.top == cy)) {
+            fuFlags |= SWP_NOSIZE;    /* Already the right size */
+        }
+
+        if((rectWindow.left == x) && (rectWindow.top == y)) {
+            fuFlags |= SWP_NOMOVE;    /* Already the right position */
+        }
+
+        if(getWindowHandle() == GetActiveWindow()) {
+            fuFlags |= SWP_NOACTIVATE;   /* Already active */
+        }
+        else
+        if((getStyle() & (WS_POPUP | WS_CHILD)) != WS_CHILD )
+        {
+            if(!(fuFlags & SWP_NOACTIVATE)) /* Bring to the top when activating */
+            {
+                fuFlags &= ~SWP_NOZORDER;
+                hwndInsertAfter = HWND_TOP;
+            }
         }
     }
     /* TODO: Check hwndInsertAfter */
-#endif
 
     //Note: Solitaire crashes when receiving WM_SIZE messages before WM_CREATE
     if(state < STATE_POST_WMNCCREATE)
