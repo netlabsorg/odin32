@@ -1,4 +1,8 @@
-/* $Id: changelog,v 1.1356 2001-04-14 07:27:49 bird Exp $ */
+/* $Id: changelog,v 1.1357 2001-04-15 09:06:20 sandervl Exp $ */
+
+ 2001-04-15: Sander van Leeuwen <sandervl@xs4all.nl>
+    - KERNEL32: o RegQueryValueExA/W broken. Reserved & type parameters reversed.
+                  (fixes crash in Notepad and possibly solves many other problems)
 
  2001-04-14: knut st. osmundsen <knut.stange.osmundsen@mynd.no>
     - configure,win32k:
