@@ -1,4 +1,4 @@
-/* $Id: time.cpp,v 1.3 1999-08-31 19:24:03 phaller Exp $ */
+/* $Id: time.cpp,v 1.4 1999-08-31 20:25:17 phaller Exp $ */
 
 /*
  * Timer MM apis
@@ -164,7 +164,7 @@ ODINFUNCTION5(MMRESULT,       timeSetEvent,
 
   // check parameters
   if ((wDelay < OS2TIMER_RESOLUTION_MINIMUM) ||
-      (wDelay > OS2TIMER_RESOLUTION_MINIMUM))
+      (wDelay > OS2TIMER_RESOLUTION_MAXIMUM))
     return NULL;
 
    if (wResolution == 0)
