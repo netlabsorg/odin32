@@ -1,4 +1,4 @@
-# $Id: newrelR3Tst.mak,v 1.4 2002-08-20 05:04:43 bird Exp $
+# $Id: newrelR3Tst.mak,v 1.5 2002-08-24 22:07:41 bird Exp $
 
 #
 # newrelR3Tst - separate make file for the release new (R3Tst build).
@@ -8,36 +8,28 @@
 # GPL
 #
 
-
 #
-# Setup.
+# Setup config.
 #
-ALL_INCLUDES= -I../include -I../kLib/include
-ALL_DEFINES = -DKKRNLLIB -DR3TST
+ALL_INCLUDES    = -I../include -I../kLib/include
+ALL_DEFINES     = -DKKRNLLIB -DR3TST
 !if "$(BUILD_ENV)" == "VAC308" || "$(BUILD_ENV)" == "VAC365"
-ALL_NO_DBGMEM = 1
+ALL_NO_DBGMEM   = 1
 !endif
-PATH_ROOT   = ..\..\..\..
+PATH_ROOT       = ..\..\..\..
 !include $(PATH_ROOT)\make\setup.mak
 
 
 #
-# Config.
+# Target config.
 #
-TARGET_MODE = SYSLIB
-TARGET_NAME = kKrnlLib_newrelR3Tst
-MAKEFILE    = newrelR3Tst.mak
-
-
-#
-# Object files.
-#
-TARGET_OBJS =\
-$(PATH_TARGET)\newrel.$(EXT_OBJ)
-
+TARGET_MODE     = SYSLIB
+TARGET_NAME     = newrel
+TARGET_SUB      = kKrnlLib\R3Tst
+MAKEFILE        = newrelR3Tst.mak
 
 #
-# Process
+# Rules config.
 #
 !include $(MAKE_INCLUDE_PROCESS)
 

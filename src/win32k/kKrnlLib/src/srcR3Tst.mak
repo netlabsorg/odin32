@@ -1,4 +1,4 @@
-# $Id: srcR3Tst.mak,v 1.6 2002-08-20 05:47:53 bird Exp $
+# $Id: srcR3Tst.mak,v 1.7 2002-08-24 22:07:42 bird Exp $
 
 #
 # kKrnlLib/srcR3Tst makefile.
@@ -9,30 +9,26 @@
 #
 
 #
-# Load the build setup.
+# Setup config.
 #
-PATH_ROOT = ..\..\..\..
+PATH_ROOT       = ..\..\..\..
+ALL_INCLUDES    = -I../include -I../kLib/include
+AS_INCLUDES     = -I$(PATH_DDKBASE)\inc
+ALL_DEFINES     = -DKKRNLLIB -DR3TST
 !include $(PATH_ROOT)\make\setup.mak
 !include ..\..\makefile.inc
 
-
 #
-# Config.
+# Target config.
 #
-TARGET_MODE  = SYSLIB
-TARGET_NAME  = kKrnlLib_srcR3Tst
-MAKEFILE     = srcR3Tst.mak
-ALL_INCLUDES = -I../include -I../kLib/include
-AS_INCLUDES  = -I$(PATH_DDKBASE)\inc
-ALL_DEFINES  = -DKKRNLLIB -DR3TST
+TARGET_MODE     = SYSLIB
+TARGET_NAME     = src
+TARGET_SUB      = kKrnlLib\R3Tst
+MAKEFILE        = srcR3Tst.mak
 
+PREMAKEFILES    = newdbgR3Tst.mak newrelR3Tst.mak Dev16R3Tst.mak
 
-#
-# Targets.
-#
-PREMAKEFILES = newdbgR3Tst.mak newrelR3Tst.mak Dev16R3Tst.mak
-
-TARGET_OBJS =\
+TARGET_OBJS     =\
 $(PATH_TARGET)\d32Globals.$(EXT_OBJ)\
 $(PATH_TARGET)\d32Hlp.$(EXT_OBJ)\
 $(PATH_TARGET)\d32Init.$(EXT_OBJ)\
@@ -65,34 +61,38 @@ $(PATH_TARGET)\tstFakeA.$(EXT_OBJ)\
 $(PATH_TARGET)\tstInit.$(EXT_OBJ)\
 $(PATH_TARGET)\tstkKrnlLib.$(EXT_OBJ)\
 \
-$(PATH_OBJ)\kKrnlLib_newdbgR3Tst.$(EXT_LIB)\kKrnlLib_newdbgR3Tst.$(EXT_LIB)\
-$(PATH_OBJ)\kKrnlLib_newrelR3Tst.$(EXT_LIB)\kKrnlLib_newrelR3Tst.$(EXT_LIB)\
+$(PATH_OBJ)\$(TARGET_SUB)\newdbg.$(EXT_LIB)\newdbg.$(EXT_LIB)\
+$(PATH_OBJ)\$(TARGET_SUB)\newrel.$(EXT_LIB)\newrel.$(EXT_LIB)\
 \
-$(PATH_ROOT)\obj\$(SHT_TRGPLTFRM)$(SHT_BLDMD)mscv6-16\kKrnlLib_dev16R3Tst.$(EXT_LIB)\kKrnlLib_dev16R3Tst.$(EXT_LIB)\
+$(PATH_ROOT)\obj\$(SHT_TRGPLTFRM)$(SHT_BLDMD)mscv6-16\$(TARGET_SUB)\dev16.$(EXT_LIB)\dev16.$(EXT_LIB)\
 \
 $(PATH_TARGET)\SymDB32.$(EXT_OBJ)\
 $(PATH_TARGET)\calltaba.$(EXT_OBJ)\
 $(PATH_TARGET)\TstFakers.$(EXT_OBJ)\
 
-
-TARGET_DEPS =\
-$(PATH_OBJ)\kKrnlLib_newdbgR3Tst.$(EXT_LIB)\kKrnlLib_newdbgR3Tst.$(EXT_LIB)\
-$(PATH_OBJ)\kKrnlLib_newrelR3Tst.$(EXT_LIB)\kKrnlLib_newrelR3Tst.$(EXT_LIB)\
-$(PATH_ROOT)\obj\$(SHT_TRGPLTFRM)$(SHT_BLDMD)mscv6-16\kKrnlLib_dev16.$(EXT_LIB)\kKrnlLib_dev16.$(EXT_LIB)\
-
-
-TARGET_NO_DEP=\
-calltaba.c\
-TstFakers.c
-
+TARGET_NO_DEP   =\
+TstFakers.c \
+calltaba.asm \
 
 #
-# Load the build process rules.
+# Rules config.
 #
+RULES_FORWARD   = calltaba.asm TstFakers.c
 !include $(MAKE_INCLUDE_PROCESS)
 
+!if !$(BUILD_FORWARDING)
 
-# generated code.
-TstFakers.c: .force
-    $(TOOL_DOMAKES) "MkCallTab.mak" $(TOOL_MAKE) $@
+#
+# Generate calltaba.asm.
+#
+calltaba.asm: $(PATH_TOOLS)\MkCallTab.$(EXT_EXE)
+    $** calltab > $@
+
+#
+# Generate TstFakers.asm.
+#
+TstFakers.c: $(PATH_TOOLS)\MkCallTab.$(EXT_EXE)
+    $** tstfakers > $@
+
+!endif #!BUILD_FORWARDING
 
