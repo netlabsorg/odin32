@@ -1,4 +1,4 @@
-# $Id: odin32.rel.vac3.mk,v 1.2 2000-12-16 15:39:56 sandervl Exp $
+# $Id: odin32.rel.vac3.mk,v 1.3 2001-04-02 09:54:45 sandervl Exp $
 
 #
 # Odin32 API
@@ -44,7 +44,7 @@ OS2RC  = rc
 ASFLAGS          = -Mb -Sc -Sv:ALP
 IMPLIBFLAGS      = /nologo
 ILIBFLAGS        = /quiet /nologo
-RCFLAGS          = -s -I. -I$(CPPMAIN)\include
+RCFLAGS          = -s -I. -I$(CPPMAIN)\include -D__WIN32OS2__
 OS2RCFLAGS       = -r -n
 OS2RCLFLAGS      = -x2 -n
 

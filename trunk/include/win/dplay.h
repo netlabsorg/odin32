@@ -1,4 +1,4 @@
-// $Id: dplay.h,v 1.7 2001-03-13 23:13:26 hugh Exp $
+// $Id: dplay.h,v 1.8 2001-04-02 09:54:19 sandervl Exp $
 #ifndef __WINE_DPLAY_H
 #define __WINE_DPLAY_H
 
@@ -377,6 +377,8 @@ typedef BOOL (* CALLBACK LPDPENUMSESSIONSCALLBACK)(
 
 extern HRESULT WINAPI DirectPlayEnumerateA( LPDPENUMDPCALLBACKA, LPVOID );
 extern HRESULT WINAPI DirectPlayEnumerateW( LPDPENUMDPCALLBACKW, LPVOID );
+#define     DirectPlayEnumerate WINELIB_NAME_AW(DirectPlayEnumerate)
+
 extern HRESULT WINAPI DirectPlayCreate( LPGUID lpGUID, LPDIRECTPLAY2 *lplpDP, IUnknown *pUnk);
 
 typedef BOOL (* CALLBACK LPDPENUMPLAYERSCALLBACK)(
