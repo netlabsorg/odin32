@@ -1,4 +1,4 @@
-/* $Id: hmfile.cpp,v 1.28 2001-05-24 08:19:18 sandervl Exp $ */
+/* $Id: hmfile.cpp,v 1.29 2001-11-07 15:35:36 sandervl Exp $ */
 
 /*
  * File IO win32 apis
@@ -75,11 +75,7 @@ DWORD HMDeviceFileClass::CreateFile (LPCSTR        lpFileName,
              "\\\\.\\",
              4) == 0)
   {
-        // check the named pipes
-        if (strnicmp("\\\\.\\PIPE",lpFileName,8)==0)
-            lpFileName+=3;
-        else
-            lpFileName+=4;
+        lpFileName+=4;
   }
   else {
         ParsePath(lpFileName, filepath, sizeof(filepath));

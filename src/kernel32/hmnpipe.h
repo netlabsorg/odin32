@@ -1,4 +1,4 @@
-/* $Id: hmnpipe.h,v 1.2 2001-04-26 13:22:46 sandervl Exp $ */
+/* $Id: hmnpipe.h,v 1.3 2001-11-07 15:35:37 sandervl Exp $ */
 /*
  * Project Odin Software License can be found in LICENSE.TXT
  *
@@ -14,8 +14,10 @@
 class HMDeviceNamedPipeClass : public HMDeviceFileClass
 {
   public:
-  HMDeviceNamedPipeClass(LPCSTR lpDeviceName) : HMDeviceFileClass(lpDeviceName) {}
- 
+  HMDeviceNamedPipeClass(LPCSTR lpDeviceName);
+
+  virtual BOOL  FindDevice(LPCSTR lpClassDevName, LPCSTR lpDeviceName, int namelength) ;
+
   virtual BOOL  PeekNamedPipe(PHMHANDLEDATA pHMHandleData,
                               LPVOID lpvBuffer,
                               DWORD   cbBuffer,
