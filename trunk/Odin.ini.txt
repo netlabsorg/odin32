@@ -1,4 +1,4 @@
-/* $Id: Odin.ini.txt,v 1.7 2000-01-18 20:23:11 sandervl Exp $ */
+/* $Id: Odin.ini.txt,v 1.8 2000-04-14 22:57:27 sandervl Exp $ */
 
 Odin initialization file documentation
 
@@ -9,18 +9,6 @@ UseWinColors	Use Windows colors
 SaveColors	Save/restore colors to/from Odin.ini
 		values: 1/0
 		default: 1
-
-[DIRECTORIES]
-SYSTEM		Windows system directory
-		- This directory _must_ exist!
-		- Don't use backslashes as last character!
-		default: Open32 -> \os2\system
-		example: e:\win32\system
-WINDOWS		Windows directory
-		- This directory _must_ exist!
-		- Don't use backslashes as last character!
-		default: Open32 -> \os2
-		example: e:\win32
 
 [DLLRENAMEWIN]
 OLE32=OLE32OS2
