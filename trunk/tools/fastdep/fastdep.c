@@ -1,4 +1,4 @@
-/* $Id: fastdep.c,v 1.1 2000-02-09 23:48:49 bird Exp $
+/* $Id: fastdep.c,v 1.2 2000-02-23 09:26:58 bird Exp $
  *
  * Fast dependents. (Fast = Quick and Dirty!)
  *
@@ -37,6 +37,7 @@ typedef struct _Options
     BOOL            fObjRule;
     BOOL            fNoObjectPath;
     BOOL            fSrcWhenObj;
+    BOOL            fAppend;            /* append to the output file, not overwrite it. */
 } OPTIONS, *POPTIONS;
 
 
@@ -79,7 +80,7 @@ char *pathlistFindFile(const char *pszPathList, const char *pszFilename, char *p
  */
 int main(int argc, char **argv)
 {
-    FILE       *phDep;
+    FILE       *phDep = NULL;
     int         rc   = 0;
     int         argi = 1;
     const char *pszDepFile = pszDefaultDepFile;
@@ -98,7 +99,8 @@ int main(int argc, char **argv)
         szObjectDir,     /* pszObjectDir */
         TRUE,            /* fObjRule */
         FALSE,           /* fNoObjectPath */
-        TRUE             /* fSrcWhenObj */
+        TRUE,            /* fSrcWhenObj */
+        FALSE            /* fAppend */
     };
 
     if (argc == 1)
@@ -107,149 +109,184 @@ int main(int argc, char **argv)
         return -87;
     }
 
-    /* look for depend filename option "-d <filename>" */
-    if (argc >= 3 && strcmp(argv[1], "-d") == 0)
+    while (argi < argc)
     {
-        pszDepFile = argv[2];
-        argi = 3;
-    }
-
-    phDep = fopen(pszDepFile, "w");
-    if (phDep != NULL)
-    {
-        while (argi < argc)
+        if (argv[argi][0] == '-' || argv[argi][0] == '/')
         {
-            if (argv[argi][0] == '-' || argv[argi][0] == '/')
+            /* parameters */
+            switch (argv[argi][1])
             {
-                /* parameters */
-                switch (argv[argi][1])
-                {
-                    case 'E': /* list of paths. If a file is found in one of these directories the */
-                    case 'e': /* filename will be used without the directory path. */
-                        /* Eall<[+]|-> ? */
-                        if (strlen(&argv[argi][1]) <= 5 && strnicmp(&argv[argi][1], "Eall", 4) == 0)
-                        {
-                            options.fExcludeAll = argv[argi][5] != '-';
-                            break;
-                        }
-                        /* path or path list */
-                        if (strlen(argv[argi]) > 2)
-                            strcat(szExclude, &argv[argi][2]);
-                        else
-                        {
-                            strcat(szExclude, argv[argi+1]);
-                            argi++;
-                        }
-                        if (szExclude[strlen(szExclude)-1] != ';')
-                            strcat(szExclude, ";");
-                        break;
+                case 'A':
+                case 'a': /* Append to the output file */
+                    options.fAppend = argv[argi][2] != '-';
+                    break;
 
-                    case 'I': /* optional include path. This has precedence over the INCLUDE environment variable. */
-                    case 'i':
-                        if (strlen(argv[argi]) > 2)
-                            strcat(szInclude, &argv[argi][2]);
+                case 'D':
+                case 'd': /* "-d <filename>" */
+                    if (argv[argi][2] != '\0')
+                        pszDepFile = &argv[argi][2];
+                    else
+                    {
+                        if (argi + 1 < argc)
+                            pszDepFile = argv[++argi];
                         else
                         {
-                            strcat(szInclude, argv[argi+1]);
-                            argi++;
-                        }
-                        if (szInclude[strlen(szInclude)-1] != ';')
-                            strcat(szInclude, ";");
-                        break;
-
-                    case 'n': /* no object path , -N<[+]|-> */
-                    case 'N':
-                        if (strlen(argv[argi]) <= 1+1+1)
-                            options.fNoObjectPath = argv[argi][2] != '-';
-                        else
-                        {
-                            fprintf(stderr, "error: invalid parameter!, '%s'\n", argv[argi]);
+                            fprintf(stderr, "invalid parameter -d, filename missing!\n");
                             return -1;
                         }
+                    }
+                    if (phDep != NULL)
+                    {
+                        fclose(phDep);
+                        phDep = NULL;
+                    }
+                    break;
+
+                case 'E': /* list of paths. If a file is found in one of these directories the */
+                case 'e': /* filename will be used without the directory path. */
+                    /* Eall<[+]|-> ? */
+                    if (strlen(&argv[argi][1]) <= 5 && strnicmp(&argv[argi][1], "Eall", 4) == 0)
+                    {
+                        options.fExcludeAll = argv[argi][5] != '-';
                         break;
+                    }
+                    /* path or path list */
+                    if (strlen(argv[argi]) > 2)
+                        strcat(szExclude, &argv[argi][2]);
+                    else
+                    {
+                        strcat(szExclude, argv[argi+1]);
+                        argi++;
+                    }
+                    if (szExclude[strlen(szExclude)-1] != ';')
+                        strcat(szExclude, ";");
+                    break;
 
-                    case 'o': /* object base directory, Obj or Obr<[+]|-> */
-                    case 'O':
-                        if (strlen(&argv[argi][1]) <= 4 && strnicmp(&argv[argi][1], "Obr", 3) == 0)
-                        {
-                            options.fObjRule = argv[argi][4] != '-';
-                            break;
-                        }
+                case 'I': /* optional include path. This has precedence over the INCLUDE environment variable. */
+                case 'i':
+                    if (strlen(argv[argi]) > 2)
+                        strcat(szInclude, &argv[argi][2]);
+                    else
+                    {
+                        strcat(szInclude, argv[argi+1]);
+                        argi++;
+                    }
+                    if (szInclude[strlen(szInclude)-1] != ';')
+                        strcat(szInclude, ";");
+                    break;
 
-                        if (strlen(&argv[argi][1]) >= 4 && strnicmp(&argv[argi][1], "Obj", 3) == 0)
-                        {
-                            if (strlen(argv[argi]) > 4)
-                                strcpy(szObjectExt, argv[argi]+4);
-                            else
-                            {
-                                strcpy(szObjectExt, argv[argi+1]);
-                                argi++;
-                            }
-                            break;
-                        }
+                case 'n': /* no object path , -N<[+]|-> */
+                case 'N':
+                    if (strlen(argv[argi]) <= 1+1+1)
+                        options.fNoObjectPath = argv[argi][2] != '-';
+                    else
+                    {
+                        fprintf(stderr, "error: invalid parameter!, '%s'\n", argv[argi]);
+                        return -1;
+                    }
+                    break;
 
-                        /* path */
-                        if (strlen(argv[argi]) > 2)
-                            strcpy(szObjectDir, argv[argi]+2);
+                case 'o': /* object base directory, Obj or Obr<[+]|-> */
+                case 'O':
+                    if (strlen(&argv[argi][1]) <= 4 && strnicmp(&argv[argi][1], "Obr", 3) == 0)
+                    {
+                        options.fObjRule = argv[argi][4] != '-';
+                        break;
+                    }
+
+                    if (strlen(&argv[argi][1]) >= 4 && strnicmp(&argv[argi][1], "Obj", 3) == 0)
+                    {
+                        if (strlen(argv[argi]) > 4)
+                            strcpy(szObjectExt, argv[argi]+4);
                         else
                         {
-                            strcpy(szObjectDir, argv[argi+1]);
+                            strcpy(szObjectExt, argv[argi+1]);
                             argi++;
                         }
-                        if (szObjectDir[strlen(szObjectDir)-1] != '\\'
-                            && szObjectDir[strlen(szObjectDir)-1] != '/'
-                            )
-                            strcat(szObjectDir, "\\");
                         break;
-
-                    case 'h':
-                    case 'H':
-                    case '?':
-                        syntax();
-                        return 1;
-
-                    default:
-                        fprintf(stderr, "error: invalid parameter! '%s'\n", argv[argi]);
-                        return -1;
-                }
-
-            }
-            else
-            {   /* not a parameter! */
-                ULONG        ulRc;
-                FILEFINDBUF3 filebuf = {0};
-                HDIR         hDir = HDIR_CREATE;
-                ULONG        ulFound = 1;
-
-                ulRc = DosFindFirst(argv[argi], &hDir,
-                                    FILE_READONLY |  FILE_HIDDEN | FILE_SYSTEM | FILE_ARCHIVED,
-                                    &filebuf, sizeof(FILEFINDBUF3), &ulFound, FIL_STANDARD);
-                while (ulRc == NO_ERROR)
-                {
-                    char *psz;
-                    char  szSource[CCHMAXPATH];
-
-                    if ((psz = strrchr(argv[argi], '\\')) || (psz = strrchr(argv[argi], '/')))
-                    {
-                        strncpy(szSource, argv[argi], psz - argv[argi] + 1);
-                        szSource[psz - argv[argi] + 1]  = '\0';
                     }
-                    else
-                        szSource[0]  = '\0';
 
-                    strcat(szSource, filebuf.achName);
-                    rc -= makeDependent(phDep, &szSource[0], &options);
-                    ulRc = DosFindNext(hDir, &filebuf, sizeof(filebuf), &ulFound);
-                }
-                DosFindClose(hDir);
+                    /* path */
+                    if (strlen(argv[argi]) > 2)
+                        strcpy(szObjectDir, argv[argi]+2);
+                    else
+                    {
+                        strcpy(szObjectDir, argv[argi+1]);
+                        argi++;
+                    }
+                    if (szObjectDir[strlen(szObjectDir)-1] != '\\'
+                        && szObjectDir[strlen(szObjectDir)-1] != '/'
+                        )
+                        strcat(szObjectDir, "\\");
+                    break;
+
+                case 'h':
+                case 'H':
+                case '?':
+                    syntax();
+                    return 1;
+
+                default:
+                    fprintf(stderr, "error: invalid parameter! '%s'\n", argv[argi]);
+                    return -1;
             }
-            /* next */
-            argi++;
+
         }
-    } else
-    {
-        fprintf(stderr, "error opening outputfile '%s'.\n", pszDepFile);
-        rc = 1;
+        else
+        {   /* not a parameter! */
+            ULONG        ulRc;
+            FILEFINDBUF3 filebuf = {0};
+            HDIR         hDir = HDIR_CREATE;
+            ULONG        ulFound = 1;
+
+            /*
+             * Open output file.
+             */
+            if (phDep == NULL)
+            {
+                phDep = fopen(pszDepFile, options.fAppend ? "a" : "w");
+                if (phDep == NULL)
+                {
+                    fprintf(stderr, "error opening outputfile '%s'.\n", pszDepFile);
+                    return 1;
+                }
+            }
+
+            /*
+             * Search for the files specified.
+             */
+            ulRc = DosFindFirst(argv[argi], &hDir,
+                                FILE_READONLY |  FILE_HIDDEN | FILE_SYSTEM | FILE_ARCHIVED,
+                                &filebuf, sizeof(FILEFINDBUF3), &ulFound, FIL_STANDARD);
+            while (ulRc == NO_ERROR)
+            {
+                char *psz;
+                char  szSource[CCHMAXPATH];
+
+                /*
+                 * Make full path.
+                 */
+                if ((psz = strrchr(argv[argi], '\\')) || (psz = strrchr(argv[argi], '/')))
+                {
+                    strncpy(szSource, argv[argi], psz - argv[argi] + 1);
+                    szSource[psz - argv[argi] + 1]  = '\0';
+                }
+                else
+                    szSource[0]  = '\0';
+                strcat(szSource, filebuf.achName);
+
+                /*
+                 * Analyse the file.
+                 */
+                rc -= makeDependent(phDep, &szSource[0], &options);
+
+                /* next file */
+                ulRc = DosFindNext(hDir, &filebuf, sizeof(filebuf), &ulFound);
+            }
+            DosFindClose(hDir);
+        }
+        /* next */
+        argi++;
     }
 
     return rc;
@@ -267,9 +304,10 @@ static void syntax(void)
         "FastDep v0.1\n"
         "Quick and dirty dependant scanner. Creates a makefile readable depend file.\n"
         "\n"
-        "Syntax: FastDep [-d <outputfn>] [-e <excludepath>] [-eall<[+]|->]\n"
-        "                [-i <include>] [-n<[+]|->] [-o <objdir>] [-obr<[+]|->]\n"
+        "Syntax: FastDep [-a<[+]|->] [-d <outputfn>] [-e <excludepath>] [-eall<[+]|->]\n"
+        "                [-i <include>] [-n<[+]|->] [-o <objdir>] [-obr<[+]|->] <files>\n"
         "\n"
+        "   -a<[+]|->       Append to the output file. Default: Overwrite.\n"
         "   -d <outputfn>   Output filename. Default: %s\n"
         "   -e excludepath  Exclude paths. If a filename is found in any\n"
         "                   of these paths only the filename is used, not\n"
@@ -284,6 +322,7 @@ static void syntax(void)
         "                   entire filename path\n"
         "   -obr<[+]|->     -obr+: Object rule.\n"
         "                   -obr-: No object rule, rule for source filename is generated.\n"
+        "   <files>         Files to scan. Wildchars are allowed.\n"
         "\n",
         pszDefaultDepFile
         );
