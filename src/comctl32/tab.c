@@ -1107,10 +1107,15 @@ static void TAB_SetItemBounds (HWND hwnd)
      * Make sure there is enough space for the letters + icon + growing the
      * selected item + extra space for the selected item.
      */
+#ifdef __WIN32OS2__
+    //Code below doesn't always work
+    infoPtr->tabHeight = item_height + 2 * VERTICAL_ITEM_PADDING +
+        SELECTED_TAB_OFFSET;
+#else
     infoPtr->tabHeight = item_height + SELECTED_TAB_OFFSET +
 	                 ((lStyle & TCS_BUTTONS) ? 2 : 1) *
                           VERTICAL_ITEM_PADDING;
-
+#endif
     TRACE("tabH=%d, tmH=%ld, iconh=%d\n",
 	  infoPtr->tabHeight, fontMetrics.tmHeight, icon_height);
   }
