@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.11 1999-09-05 15:59:36 dengert Exp $ */
+/* $Id: win32wbase.cpp,v 1.12 1999-09-05 17:14:03 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -1199,8 +1199,10 @@ LRESULT Win32BaseWindow::DefWindowProcW(UINT Msg, WPARAM wParam, LPARAM lParam)
 //******************************************************************************
 LRESULT Win32BaseWindow::SendMessageA(ULONG Msg, WPARAM wParam, LPARAM lParam)
 {
-  if(PostSpyMessage(getWindowHandle(), Msg, wParam, lParam) == FALSE)
-        dprintf(("SendMessageA %s for %x %x %x", GetMsgText(Msg), getWindowHandle(), wParam, lParam));
+  if(Msg != WM_GETDLGCODE && Msg != WM_ENTERIDLE) {//sent *very* often
+        if(PostSpyMessage(getWindowHandle(), Msg, wParam, lParam) == FALSE)
+            dprintf(("SendMessageA %s for %x %x %x", GetMsgText(Msg), getWindowHandle(), wParam, lParam));
+  }
 
   if(HkCBT::OS2HkCBTProc(getWindowHandle(), Msg, wParam, lParam) == TRUE) {//hook swallowed msg
         return(0);
@@ -1238,8 +1240,10 @@ LRESULT Win32BaseWindow::SendMessageA(ULONG Msg, WPARAM wParam, LPARAM lParam)
 //******************************************************************************
 LRESULT Win32BaseWindow::SendMessageW(ULONG Msg, WPARAM wParam, LPARAM lParam)
 {
-  if(PostSpyMessage(getWindowHandle(), Msg, wParam, lParam) == FALSE)
-        dprintf(("SendMessageA %s for %x %x %x", GetMsgText(Msg), getWindowHandle(), wParam, lParam));
+  if(Msg != WM_GETDLGCODE && Msg != WM_ENTERIDLE) {//sent *very* often
+        if(PostSpyMessage(getWindowHandle(), Msg, wParam, lParam) == FALSE)
+            dprintf(("SendMessageW %s for %x %x %x", GetMsgText(Msg), getWindowHandle(), wParam, lParam));
+  }
 
   if(HkCBT::OS2HkCBTProc(getWindowHandle(), Msg, wParam, lParam) == TRUE) {//hook swallowed msg
         return(0);
