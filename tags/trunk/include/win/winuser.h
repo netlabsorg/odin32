@@ -775,6 +775,18 @@ typedef struct
 #define WM_EXITSIZEMOVE     0x0232
 #define WM_DROPFILES        0x0233
 
+
+/*
+ * DROPFILES for CF_HDROP and CF_PRINTERS
+ */
+typedef struct _DROPFILES
+{
+  DWORD pFiles;
+  POINT pt;
+  BOOL  fNC;
+  BOOL  fWide;
+} DROPFILES;
+
 #define WM_IME_SETCONTEXT               0x0281
 #define WM_IME_NOTIFY                   0x0282
 #define WM_IME_CONTROL                  0x0283
