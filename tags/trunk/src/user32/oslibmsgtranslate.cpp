@@ -1,4 +1,4 @@
-/* $Id: oslibmsgtranslate.cpp,v 1.64 2001-10-23 08:36:20 phaller Exp $ */
+/* $Id: oslibmsgtranslate.cpp,v 1.65 2001-10-24 13:18:59 phaller Exp $ */
 /*
  * Window message translation functions for OS/2
  *
@@ -604,34 +604,44 @@ BOOL OS2ToWinMsgTranslate(void *pTeb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode,
     }
       
     case WM_CHAR_SPECIAL:
-      {
+    {
         // @@@PH
         // special char message from the keyboard hook
         dprintf(("PM: WM_CHAR_SPECIAL\n"));
         
         // AltGr is a very, very strange key!
         UCHAR ucPMScanCode = CHAR4FROMMP(os2Msg->mp1);
-        if (PMSCAN_ALTRIGHT == ucPMScanCode)
+        switch (ucPMScanCode)
         {
-          ULONG flags = SHORT1FROMMP(os2Msg->mp1);
+          case PMSCAN_ESC:
+            // Note: ESC generates a WM_CHAR under Windows, not under PM
+            // so we've got to post it to ourself here!
+            // WM_CHAR(0x0000001bh, 000010001h)
+            // @@@PH
+            break;
           
-          // we need very special treatment here for the
-          // poor, crippled AltGr key
-          
-          if (flags & KC_KEYUP)
+          case PMSCAN_ALTRIGHT:
           {
-            // key up
-            // 1 - generate a virtual LCONTROL-keypress
-            // 2 - send LMENU-keypress (NT emulates ALtGr w/ Ctrl-Alt!)
+            ULONG flags = SHORT1FROMMP(os2Msg->mp1);
+            
+            // we need very special treatment here for the
+            // poor, crippled AltGr key
+            
+            if (flags & KC_KEYUP)
+            {
+              // key up
+              // 1 - generate a virtual LCONTROL-keypress
+              // 2 - send LMENU-keypress (NT emulates ALtGr w/ Ctrl-Alt!)
+            }
+            else
+            {
+              // key down:
+              // 1 - generate a virtual LCONTROL-keypress
+              // 2 - send LMENU-keypress (NT emulates ALtGr w/ Ctrl-AltGr!)
+            }
           }
-          else
-          {
-            // key down:
-            // 1 - generate a virtual LCONTROL-keypress
-            // 2 - send LMENU-keypress (NT emulates ALtGr w/ Ctrl-Alt!)
-          }
-        }
-      }
+        } /* switch */
+    } /* case */
         // NO BREAK! FALLTHRU CASE!
       
     case WM_CHAR:
