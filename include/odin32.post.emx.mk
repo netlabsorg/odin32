@@ -1,4 +1,4 @@
-# $Id: odin32.post.emx.mk,v 1.6 2000-12-03 02:55:12 bird Exp $
+# $Id: odin32.post.emx.mk,v 1.7 2000-12-03 05:14:29 bird Exp $
 
 #
 # Odin32 API
@@ -31,6 +31,7 @@
 #    binary directory. It is only copied to the compiler specific directory.
 #    Main bin is /bin. Compiler specific bin is /bin/debug, /bin/debug.vac36, etc.
 # Define ADDITIONAL_DEP to add dependencies rules.
+# Define ADDITIONAL_ALL to add targets all should depend on.
 #
 # Define MAKEFILE if the name of the makefile isn't "makefile".
 # Define DEFFILE to specify another file than $(TARGET).def or $(ORGTARGET).def.
@@ -114,7 +115,8 @@ all:    $(OBJDIR) \
         $(OBJDIR)\$(TARGET).sym \
         $(ODIN32_BIN)\$(TARGET).$(TARGET_EXTENSION) \
         $(ODIN32_BIN)\$(TARGET).sym \
-        lib
+        lib \
+        $(ADDITIONAL_ALL)
 !endif
 
 
@@ -171,7 +173,8 @@ all:    $(OBJDIR) \
         $(OBJDIR)\$(TARGET).$(TARGET_EXTENSION) \
         $(OBJDIR)\$(TARGET).sym \
         $(ODIN32_BIN)\$(TARGET).$(TARGET_EXTENSION) \
-        $(ODIN32_BIN)\$(TARGET).sym
+        $(ODIN32_BIN)\$(TARGET).sym \
+        $(ADDITIONAL_ALL)
 !endif
 
 
@@ -233,10 +236,12 @@ LOCALCLEAN = 1
 all:    $(OBJDIR) \
         $(INTLIBS) \
 !ifndef PUBLICLIB
-        $(OBJDIR)\$(TARGET).$(TARGET_EXTENSION)
+        $(OBJDIR)\$(TARGET).$(TARGET_EXTENSION) \
+        $(ADDITIONAL_ALL)
 !else
         $(OBJDIR)\$(TARGET).$(TARGET_EXTENSION) \
-        $(ODIN32_LIB)\$(TARGET).$(TARGET_EXTENSION)
+        $(ODIN32_LIB)\$(TARGET).$(TARGET_EXTENSION) \
+        $(ADDITIONAL_ALL)
 !endif
 !endif
 
