@@ -1,4 +1,4 @@
-# $Id: process.mak,v 1.34 2002-09-20 04:35:45 bird Exp $
+# $Id: process.mak,v 1.35 2003-03-05 15:10:07 bird Exp $
 #
 # Generic Buildsystem
 #
@@ -469,10 +469,10 @@ $(ECHO) Target path $(CLRFIL)$(PATH_TARGET)$(CLRTXT) does NOT exist. Creating. $
 # This makes the source filenames in the error listing have full path.
 # See setup.mak for compile command line.
 #
-_SRC = $<
-!ifdef SLKRUNS
+#_SRC = $<
+#!ifdef SLKRUNS
 _SRC = $(PATH_CURRENT)\$<
-!endif
+#!endif
 _DST = $(PATH_TARGET)\$(@F)
 
 
@@ -1123,7 +1123,7 @@ $(_PREMAKEFILES_BINARY):
 
 binary executable: \
 !if "$(TARGET_MODE)" != "LIB" && "$(TARGET_MODE)" != "SYSLIB" && "$(TARGET_MODE)" != "IFSLIB" && !defined(TARGET_NEEDED)
-        $(_SUBDIRS_BINARY) $(_PREMAKEFILES_BINARY) $(TARGET) $(_TARGET_EARLY_PUBLISH)
+        $(_SUBDIRS_BINARY) $(_PREMAKEFILES_BINARY) $(TARGET) $(_TARGET_EARLY_PUBLISH) $(OTHERS)
 !else
         $(_SUBDIRS_BINARY) $(_PREMAKEFILES_BINARY)
 !endif
@@ -1350,9 +1350,21 @@ packing: \
 # The target rule - Build the target.
 #   NOTE! NO SUBDIRS OR POST/PREMAKED INVOLVED!
 # -----------------------------------------------------------------------------
-target: $(TARGET) $(TARGET_ILIB) $(_TARGET_EARLY_PUBLISH)
+target: $(TARGET) $(TARGET_ILIB) $(_TARGET_EARLY_PUBLISH) $(OTHERS)
 !if "$(TARGET)$(TARGET_ILIB)" != ""
     @$(ECHO) Successfully Built $(CLRFIL)$(TARGET) $(TARGET_ILIB)$(CLRRST)
+!else
+    @$(ECHO) .$(CLRRST)
+!endif
+
+
+
+# -----------------------------------------------------------------------------
+# Others (experimental)
+# -----------------------------------------------------------------------------
+others: $(OTHERS)
+!if "$(OTHERS)" != ""
+    @$(ECHO) Successfully Built $(OTHERS)$(CLRRST)
 !else
     @$(ECHO) .$(CLRRST)
 !endif
