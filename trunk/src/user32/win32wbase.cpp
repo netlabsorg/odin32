@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.355 2003-02-07 15:34:48 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.356 2003-02-10 19:10:22 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -3159,27 +3159,46 @@ BOOL Win32BaseWindow::EnumChildWindows(WNDENUMPROC lpfn, LPARAM lParam)
 }
 //******************************************************************************
 //Enumerate first-level children only and check thread id
+//NOTE: NT4 returns first-level children in Z-order!
 //******************************************************************************
 BOOL Win32BaseWindow::EnumThreadWindows(DWORD dwThreadId, WNDENUMPROC lpfn, LPARAM lParam)
 {
-    Win32BaseWindow *child = 0;
+    Win32BaseWindow *wnd = NULL;
+    HWND henum, hwnd, hwndWin32;
     ULONG  tid, pid;
     BOOL   rc;
-    HWND   hwnd;
 
-    dprintf(("EnumThreadWindows %x %x %x", dwThreadId, lpfn, lParam));
+    //Enumerate all top-level windows and check the process and thread ids
+    henum = OSLibWinBeginEnumWindows(OSLIB_HWND_DESKTOP);
+    hwnd = OSLibWinGetNextWindow(henum);
 
-    for (child = (Win32BaseWindow *)getFirstChild(); child; child = (Win32BaseWindow *)child->getNextChild())
+    while(hwnd)
     {
-        OSLibWinQueryWindowProcess(child->getOS2WindowHandle(), &pid, &tid);
+        wnd = GetWindowFromOS2FrameHandle(hwnd);
+        if(wnd == NULL) {
+            hwnd = OSLibWinQueryClientWindow(hwnd);
+            if(hwnd)  wnd = GetWindowFromOS2Handle(hwnd);
+        }
+        if(wnd) {
+             hwndWin32 = wnd->getWindowHandle();
+        }
+        else hwndWin32 = 0;
 
-        if(dwThreadId == tid) {
-            dprintf2(("EnumThreadWindows: Found Window %x", child->getWindowHandle()));
-            if((rc = lpfn(child->getWindowHandle(), lParam)) == FALSE) {
-                break;
+        if(wnd) RELEASE_WNDOBJ(wnd);
+
+        if(hwndWin32) {
+            OSLibWinQueryWindowProcess(hwnd, &pid, &tid);
+
+            if(dwThreadId == tid) {
+                dprintf(("EnumThreadWindows: Found Window %x", hwndWin32));
+                if((rc = lpfn(hwndWin32, lParam)) == FALSE) {
+                    break;
+                }
             }
         }
+        hwnd = OSLibWinGetNextWindow(henum);
     }
+    OSLibWinEndEnumWindows(henum);
     return TRUE;
 }
 //******************************************************************************
@@ -3789,6 +3808,7 @@ LONG Win32BaseWindow::SetWindowLong(int index, ULONG value, BOOL fUnicode)
                 break;
 
         case GWL_HWNDPARENT:
+                dprintf(("GWL_ID GWL_HWNDPARENT %x, new %x", GetParent(), value));
                 oldval = SetParent((HWND)value);
                 break;
 
