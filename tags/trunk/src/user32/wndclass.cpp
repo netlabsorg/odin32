@@ -1,4 +1,4 @@
-/* $Id: wndclass.cpp,v 1.5 1999-06-20 16:47:38 sandervl Exp $ */
+/* $Id: wndclass.cpp,v 1.6 1999-06-21 00:21:26 buerkle Exp $ */
 
 /*
  * Win32 Window Class Managment Code for OS/2
@@ -843,12 +843,23 @@ LRESULT EXPENTRY_O32 OS2ToWinCallback(HWND hwnd, UINT Msg, WPARAM wParam, LPARAM
 			break;
 		case WM_ACTIVATE:
                 	if(LOWORD(wParam) != WA_INACTIVE)
-                	{//SvL: Bugfix, Open32 is NOT sending this to the window (messes up Solitaire)
-                  	 HDC hdc = GetDC(hwnd);
+                  {
+                   //EB: I think the problem is not a missing wm_erasebkgnd.
+                   //Maybe some wrong flags in open32 during async repainting.
+                   //SvL: Bugfix, Open32 is NOT sending this to the window (messes up Solitaire)
+                   RECT rect;
+                   HRGN hrgn;
+                   HDC hdc = GetDC(hwnd);
 
-                        	wclass->GetWinCallback()(hwnd, WM_ERASEBKGND, hdc, 0);
-                        	ReleaseDC(hwnd, hdc);
-                	}
+                   // erase the dirty rect
+                   GetUpdateRect(hwnd, &rect, TRUE);
+                   hrgn = CreateRectRgnIndirect(&rect);
+                   SelectClipRgn (hdc, hrgn);
+                   DeleteObject (hrgn);
+                   wclass->GetWinCallback()(hwnd, WM_ERASEBKGND, hdc, (LPARAM)&rect);
+                   SelectClipRgn (hdc, NULL);
+                   ReleaseDC(hwnd, hdc);
+                  }
 			break;
 		}
 		return wclass->GetWinCallback()(hwnd, Msg, wParam, lParam);
