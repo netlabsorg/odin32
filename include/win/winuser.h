@@ -1968,24 +1968,6 @@ typedef struct
 DECL_WINELIB_TYPE_AW(MSGBOXPARAMS)
 DECL_WINELIB_TYPE_AW(LPMSGBOXPARAMS)
 
-typedef struct _numberfmt32a {
-    UINT NumDigits;
-    UINT LeadingZero;
-    UINT Grouping;
-    LPCSTR lpDecimalSep;
-    LPCSTR lpThousandSep;
-    UINT NegativeOrder;
-} NUMBERFMTA;
-
-typedef struct _numberfmt32w {
-    UINT NumDigits;
-    UINT LeadingZero;
-    UINT Grouping;
-    LPCWSTR lpDecimalSep;
-    LPCWSTR lpThousandSep;
-    UINT NegativeOrder;
-} NUMBERFMTW;
-
 #define MONITOR_DEFAULTTONULL       0x00000000
 #define MONITOR_DEFAULTTOPRIMARY    0x00000001
 #define MONITOR_DEFAULTTONEAREST    0x00000002
@@ -3250,9 +3232,6 @@ BOOL      WINAPI GetMenuItemInfoW(HMENU,UINT,BOOL,MENUITEMINFOW*);
 BOOL      WINAPI GetMonitorInfoA(HMONITOR,LPMONITORINFO);
 BOOL      WINAPI GetMonitorInfoW(HMONITOR,LPMONITORINFO);
 #define     GetMonitorInfo WINELIB_NAME_AW(GetMonitorInfo)
-INT       WINAPI GetNumberFormatA(LCID,DWORD,LPCSTR,const NUMBERFMTA*,LPSTR,int);
-INT       WINAPI GetNumberFormatW(LCID,DWORD,LPCWSTR,const NUMBERFMTW*,LPWSTR,int);
-#define     GetNumberFormat WINELIB_NAME_AW(GetNumberFormat);
 DWORD       WINAPI GetWindowContextHelpId(HWND);
 DWORD       WINAPI GetWindowThreadProcessId(HWND,LPDWORD);
 BOOL      WINAPI IsWindowUnicode(HWND);

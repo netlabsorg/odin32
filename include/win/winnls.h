@@ -11,7 +11,8 @@
 #endif
 
 #ifndef OS2_INCLUDED
-#include "windef.h"
+#include <windef.h>
+#include <winbase.h>
 #endif
 
 #define MB_PRECOMPOSED              0x00000001
@@ -591,37 +592,172 @@
 #define  C3_ALPHA                        0x8000
 #define  C3_NOTAPPLICABLE                0x0000
 
+/* Code page information.
+ */
+#define MAX_LEADBYTES     12
+#define MAX_DEFAULTCHAR   2
+
+/* Defines for calendar handling */
+#define CAL_ICALINTVALUE          0x00000001
+#define CAL_SCALNAME              0x00000002
+#define CAL_IYEAROFFSETRANGE      0x00000003
+#define CAL_SERASTRING            0x00000004
+#define CAL_SSHORTDATE            0x00000005
+#define CAL_SLONGDATE             0x00000006
+#define CAL_SDAYNAME1             0x00000007
+#define CAL_SDAYNAME2             0x00000008
+#define CAL_SDAYNAME3             0x00000009
+#define CAL_SDAYNAME4             0x0000000a
+#define CAL_SDAYNAME5             0x0000000b
+#define CAL_SDAYNAME6             0x0000000c
+#define CAL_SDAYNAME7             0x0000000d
+#define CAL_SABBREVDAYNAME1       0x0000000e
+#define CAL_SABBREVDAYNAME2       0x0000000f
+#define CAL_SABBREVDAYNAME3       0x00000010
+#define CAL_SABBREVDAYNAME4       0x00000011
+#define CAL_SABBREVDAYNAME5       0x00000012
+#define CAL_SABBREVDAYNAME6       0x00000013
+#define CAL_SABBREVDAYNAME7       0x00000014
+#define CAL_SMONTHNAME1           0x00000015
+#define CAL_SMONTHNAME2           0x00000016
+#define CAL_SMONTHNAME3           0x00000017
+#define CAL_SMONTHNAME4           0x00000018
+#define CAL_SMONTHNAME5           0x00000019
+#define CAL_SMONTHNAME6           0x0000001a
+#define CAL_SMONTHNAME7           0x0000001b
+#define CAL_SMONTHNAME8           0x0000001c
+#define CAL_SMONTHNAME9           0x0000001d
+#define CAL_SMONTHNAME10          0x0000001e
+#define CAL_SMONTHNAME11          0x0000001f
+#define CAL_SMONTHNAME12          0x00000020
+#define CAL_SMONTHNAME13          0x00000021
+#define CAL_SABBREVMONTHNAME1     0x00000022
+#define CAL_SABBREVMONTHNAME2     0x00000023
+#define CAL_SABBREVMONTHNAME3     0x00000024
+#define CAL_SABBREVMONTHNAME4     0x00000025
+#define CAL_SABBREVMONTHNAME5     0x00000026
+#define CAL_SABBREVMONTHNAME6     0x00000027
+#define CAL_SABBREVMONTHNAME7     0x00000028
+#define CAL_SABBREVMONTHNAME8     0x00000029
+#define CAL_SABBREVMONTHNAME9     0x0000002a
+#define CAL_SABBREVMONTHNAME10    0x0000002b
+#define CAL_SABBREVMONTHNAME11    0x0000002c
+#define CAL_SABBREVMONTHNAME12    0x0000002d
+#define CAL_SABBREVMONTHNAME13    0x0000002e
+#define CAL_SYEARMONTH            0x0000002f
+#define CAL_GREGORIAN                  1
+#define CAL_GREGORIAN_US               2
+#define CAL_JAPAN                      3
+#define CAL_TAIWAN                     4
+#define CAL_KOREA                      5
+#define CAL_HIJRI                      6
+#define CAL_THAI                       7
+#define CAL_HEBREW                     8
+#define CAL_GREGORIAN_ME_FRENCH        9
+#define CAL_GREGORIAN_ARABIC           10
+#define CAL_GREGORIAN_XLIT_ENGLISH     11
+#define CAL_GREGORIAN_XLIT_FRENCH      12
+
 typedef DWORD CALTYPE;
 typedef DWORD CALID;
-
-#if (defined(__IBMCPP__) || defined(__IBMC__))
-  typedef BOOL (CALLBACK tCALINFO_ENUMPROCA)(LPSTR);
-  typedef BOOL (CALLBACK tCALINFO_ENUMPROCW)(LPWSTR);
-  typedef tCALINFO_ENUMPROCA *CALINFO_ENUMPROCA;
-  typedef tCALINFO_ENUMPROCW *CALINFO_ENUMPROCW;
-#else
-  typedef BOOL (CALLBACK* CALINFO_ENUMPROCA)(LPSTR);
-  typedef BOOL (CALLBACK* CALINFO_ENUMPROCW)(LPWSTR);
-#endif
 
 
 #ifndef OS2_INCLUDED
 
+/* Define a bunch of callback types */
+
+#if defined(STRICT) || defined(__WINE__)
+typedef BOOL    (* CALLBACK CALINFO_ENUMPROCA)(LPSTR);
+typedef BOOL    (* CALLBACK CALINFO_ENUMPROCW)(LPWSTR);
+typedef BOOL    (* CALLBACK CALINFO_ENUMPROCEXA)(LPSTR,CALID);
+typedef BOOL    (* CALLBACK CALINFO_ENUMPROCEXW)(LPWSTR,CALID);
+typedef BOOL    (* CALLBACK CODEPAGE_ENUMPROCA)(LPSTR);
+typedef BOOL    (* CALLBACK CODEPAGE_ENUMPROCW)(LPWSTR);
+typedef BOOL    (* CALLBACK DATEFMT_ENUMPROCA)(LPSTR);
+typedef BOOL    (* CALLBACK DATEFMT_ENUMPROCW)(LPWSTR);
+typedef BOOL    (* CALLBACK DATEFMT_ENUMPROCEXA)(LPSTR,CALID);
+typedef BOOL    (* CALLBACK DATEFMT_ENUMPROCEXW)(LPWSTR,CALID);
+typedef BOOL    (* CALLBACK LOCALE_ENUMPROCA)(LPSTR);
+typedef BOOL    (* CALLBACK LOCALE_ENUMPROCW)(LPWSTR);
+typedef BOOL    (* CALLBACK TIMEFMT_ENUMPROCA)(LPSTR);
+typedef BOOL    (* CALLBACK TIMEFMT_ENUMPROCW)(LPWSTR);
+#else
+typedef FARPROC CALINFO_ENUMPROCA;
+typedef FARPROC CALINFO_ENUMPROCW;
+typedef FARPROC CALINFO_ENUMPROCEXA;
+typedef FARPROC CALINFO_ENUMPROCEXW;
+typedef FARPROC CODEPAGE_ENUMPROCA;
+typedef FARPROC CODEPAGE_ENUMPROCW;
+typedef FARPROC DATEFMT_ENUMPROCA;
+typedef FARPROC DATEFMT_ENUMPROCW;
+typedef FARPROC DATEFMT_ENUMPROCEXA;
+typedef FARPROC DATEFMT_ENUMPROCEXW;
+typedef FARPROC LOCALE_ENUMPROCA;
+typedef FARPROC LOCALE_ENUMPROCW;
+typedef FARPROC TIMEFMT_ENUMPROCA;
+typedef FARPROC TIMEFMT_ENUMPROCW;
+#endif /* STRICT || __WINE__ */
+
 DECL_WINELIB_TYPE_AW(CALINFO_ENUMPROC)
-
-BOOL  WINAPI EnumCalendarInfoA(CALINFO_ENUMPROCA lpCalInfoEnumProc,LCID Locale,CALID Calendar,CALTYPE CalType);
-BOOL  WINAPI EnumCalendarInfoW(CALINFO_ENUMPROCW lpCalInfoEnumProc,LCID Locale,CALID Calendar,CALTYPE CalType);
-#define EnumCalendarInfo WINELIB_NAME_AW(EnumCalendarInfo)
-
-        /* FIXME: This does not belong to an interface file */
-UINT16      WINAPI CompareString16(DWORD,DWORD,LPCSTR,DWORD,LPCSTR,DWORD);
-INT16       WINAPI GetLocaleInfo16(LCID,LCTYPE,LPSTR,INT16);
-BOOL16      WINAPI GetStringType16(LCID,DWORD,LPCSTR,INT16,LPWORD);
+DECL_WINELIB_TYPE_AW(CALINFO_ENUMPROCEX)
+DECL_WINELIB_TYPE_AW(CODEPAGE_ENUMPROC)
+DECL_WINELIB_TYPE_AW(DATEFMT_ENUMPROC)
+DECL_WINELIB_TYPE_AW(DATEFMT_ENUMPROCEX)
+DECL_WINELIB_TYPE_AW(LOCALE_ENUMPROC)
+DECL_WINELIB_TYPE_AW(TIMEFMT_ENUMPROC)
 
 
-LCID WINAPI ConvertDefaultLocale(LCID   Locale);
+typedef struct
+{
+    UINT MaxCharSize;
+    BYTE   DefaultChar[MAX_DEFAULTCHAR];
+    BYTE   LeadByte[MAX_LEADBYTES];
+} CPINFO, *LPCPINFO;
 
-#ifdef __WIN32OS2__
+typedef struct
+{
+    UINT MaxCharSize;
+    BYTE DefaultChar[MAX_DEFAULTCHAR];
+    BYTE LeadByte[MAX_LEADBYTES];
+    WCHAR UnicodeDefaultChar;
+    UINT CodePage;
+    CHAR CodePageName[MAX_PATH];
+} CPINFOEXA, *LPCPINFOEXA;
+
+typedef struct
+{
+    UINT MaxCharSize;
+    BYTE DefaultChar[MAX_DEFAULTCHAR];
+    BYTE LeadByte[MAX_LEADBYTES];
+    WCHAR UnicodeDefaultChar;
+    UINT CodePage;
+    WCHAR CodePageName[MAX_PATH];
+} CPINFOEXW, *LPCPINFOEXW;
+
+DECL_WINELIB_TYPE_AW(CPINFOEX)
+DECL_WINELIB_TYPE_AW(LPCPINFOEX)
+
+typedef struct _numberfmtA {
+    UINT NumDigits;
+    UINT LeadingZero;
+    UINT Grouping;
+    LPSTR lpDecimalSep;
+    LPSTR lpThousandSep;
+    UINT NegativeOrder;
+} NUMBERFMTA, *LPNUMBERFMTA;
+
+typedef struct _numberfmtW {
+    UINT NumDigits;
+    UINT LeadingZero;
+    UINT Grouping;
+    LPWSTR lpDecimalSep;
+    LPWSTR lpThousandSep;
+    UINT NegativeOrder;
+} NUMBERFMTW, *LPNUMBERFMTW;
+
+DECL_WINELIB_TYPE_AW(NUMBERFMT)
+DECL_WINELIB_TYPE_AW(LPNUMBERFMT)
+
 typedef struct _currencyfmtA {
     UINT    NumDigits;
     UINT    LeadingZero;
@@ -643,7 +779,83 @@ typedef struct _currencyfmtW {
     UINT    PositiveOrder;
     LPWSTR  lpCurrencySymbol;
 } CURRENCYFMTW, *LPCURRENCYFMTW;
-#endif //__WIN32OS2__
+
+/* APIs
+ */
+
+UINT        WINAPI CompareStringA(LCID,DWORD,LPCSTR,DWORD,LPCSTR,DWORD);
+UINT        WINAPI CompareStringW(LCID,DWORD,LPCWSTR,DWORD,LPCWSTR,DWORD);
+#define     CompareString WINELIB_NAME_AW(CompareString)
+LCID        WINAPI ConvertDefaultLocale(LCID);
+BOOL        WINAPI EnumCalendarInfoA(CALINFO_ENUMPROCA,LCID,CALID,CALTYPE);
+BOOL        WINAPI EnumCalendarInfoW(CALINFO_ENUMPROCW,LCID,CALID,CALTYPE);
+#define     EnumCalendarInfo WINELIB_NAME_AW(EnumCalendarInfo)
+BOOL        WINAPI EnumCalendarInfoExA(CALINFO_ENUMPROCEXA,LCID,CALID,CALTYPE);
+BOOL        WINAPI EnumCalendarInfoExW(CALINFO_ENUMPROCEXW,LCID,CALID,CALTYPE);
+#define     EnumCalendarInfoEx WINELIB_NAME_AW(EnumCalendarInfoEx)
+BOOL        WINAPI EnumDateFormatsA(DATEFMT_ENUMPROCA,LCID,DWORD);
+BOOL        WINAPI EnumDateFormatsW(DATEFMT_ENUMPROCW,LCID,DWORD);
+#define     EnumDateFormats WINELIB_NAME_AW(EnumDateFormats)
+BOOL        WINAPI EnumDateFormatsExA(DATEFMT_ENUMPROCEXA,LCID,DWORD);
+BOOL        WINAPI EnumDateFormatsExW(DATEFMT_ENUMPROCEXW,LCID,DWORD);
+#define     EnumDateFormatsEx WINELIB_NAME_AW(EnumDateFormatsEx)
+BOOL        WINAPI EnumSystemCodePagesA(CODEPAGE_ENUMPROCA,DWORD);
+BOOL        WINAPI EnumSystemCodePagesW(CODEPAGE_ENUMPROCW,DWORD);
+#define     EnumSystemCodePages WINELIB_NAME_AW(EnumSystemCodePages)
+BOOL        WINAPI EnumSystemLocalesA(LOCALE_ENUMPROCA,DWORD);
+BOOL        WINAPI EnumSystemLocalesW(LOCALE_ENUMPROCW,DWORD);
+#define     EnumSystemLocales WINELIB_NAME_AW(EnumSystemLocales)
+BOOL        WINAPI EnumTimeFormatsA(TIMEFMT_ENUMPROCA,LCID,DWORD);
+BOOL        WINAPI EnumTimeFormatsW(TIMEFMT_ENUMPROCW,LCID,DWORD);
+#define     EnumTimeFormats WINELIB_NAME_AW(EnumTimeFormats)
+int         WINAPI FoldStringA(DWORD,LPCSTR,int,LPSTR,int);
+int         WINAPI FoldStringW(DWORD,LPCWSTR,int,LPWSTR,int);
+#define     FoldString WINELIB_NAME_AW(FoldString)
+UINT        WINAPI GetACP(void);
+BOOL        WINAPI GetCPInfo(UINT,LPCPINFO);
+BOOL        WINAPI GetCPInfoExA(UINT,DWORD,LPCPINFOEXA);
+BOOL        WINAPI GetCPInfoExW(UINT,DWORD,LPCPINFOEXW);
+#define     GetCPInfoEx WINELIB_NAME_AW(GetCPInfoEx)
+INT         WINAPI GetCurrencyFormatA(LCID,DWORD,LPCSTR,const CURRENCYFMTA*,LPSTR,int);
+INT         WINAPI GetCurrencyFormatW(LCID,DWORD,LPCWSTR,const CURRENCYFMTW*,LPWSTR,int);
+#define     GetCurrencyFormat WINELIB_NAME_AW(GetCurrencyFormat)
+INT         WINAPI GetDateFormatA(LCID,DWORD,LPSYSTEMTIME,LPCSTR,LPSTR,INT);
+INT         WINAPI GetDateFormatW(LCID,DWORD,LPSYSTEMTIME,LPCWSTR,LPWSTR,INT);
+#define     GetDateFormat WINELIB_NAME_AW(GetDateFormat)
+INT         WINAPI GetLocaleInfoA(LCID,LCTYPE,LPSTR,INT);
+INT         WINAPI GetLocaleInfoW(LCID,LCTYPE,LPWSTR,INT);
+#define     GetLocaleInfo WINELIB_NAME_AW(GetLocaleInfo)
+INT         WINAPI GetNumberFormatA(LCID,DWORD,LPCSTR,const NUMBERFMTA*,LPSTR,int);
+INT         WINAPI GetNumberFormatW(LCID,DWORD,LPCWSTR,const NUMBERFMTW*,LPWSTR,int);
+#define     GetNumberFormat WINELIB_NAME_AW(GetNumberFormat)
+UINT        WINAPI GetOEMCP(void);
+BOOL        WINAPI GetStringTypeA(LCID,DWORD,LPCSTR,INT,LPWORD);
+BOOL        WINAPI GetStringTypeW(DWORD,LPCWSTR,INT,LPWORD);
+BOOL        WINAPI GetStringTypeExA(LCID,DWORD,LPCSTR,INT,LPWORD);
+BOOL        WINAPI GetStringTypeExW(LCID,DWORD,LPCWSTR,INT,LPWORD);
+#define     GetStringTypeEx WINELIB_NAME_AW(GetStringTypeEx)
+LANGID      WINAPI GetSystemDefaultLangID(void);
+LCID        WINAPI GetSystemDefaultLCID(void);
+LCID        WINAPI GetThreadLocale(void);
+INT         WINAPI GetTimeFormatA(LCID,DWORD,LPSYSTEMTIME,LPCSTR,LPSTR,INT);
+INT         WINAPI GetTimeFormatW(LCID,DWORD,LPSYSTEMTIME,LPCWSTR,LPWSTR,INT);
+#define     GetTimeFormat WINELIB_NAME_AW(GetTimeFormat)
+LANGID      WINAPI GetUserDefaultLangID(void);
+LCID        WINAPI GetUserDefaultLCID(void);
+BOOL        WINAPI IsDBCSLeadByte(BYTE);
+BOOL        WINAPI IsDBCSLeadByteEx(UINT,BYTE);
+BOOL        WINAPI IsValidCodePage(UINT);
+BOOL        WINAPI IsValidLocale(LCID,DWORD);
+INT         WINAPI LCMapStringA(LCID,DWORD,LPCSTR,INT,LPSTR,INT);
+INT         WINAPI LCMapStringW(LCID,DWORD,LPCWSTR,INT,LPWSTR,INT);
+#define     LCMapString WINELIB_NAME_AW(LCMapString)
+INT         WINAPI MultiByteToWideChar(UINT,DWORD,LPCSTR,INT,LPWSTR,INT);
+BOOL        WINAPI SetLocaleInfoA(LCID,LCTYPE,LPCSTR);
+BOOL        WINAPI SetLocaleInfoW(LCID,LCTYPE,LPCWSTR);
+#define     SetLocaleInfo WINELIB_NAME_AW(SetLocaleInfo)
+BOOL        WINAPI SetThreadLocale(LCID);
+INT         WINAPI WideCharToMultiByte(UINT,DWORD,LPCWSTR,INT,LPSTR,INT,LPCSTR,LPBOOL);
+
 #endif //#ifndef OS2_INCLUDED
 
 #endif  /* __WINE_WINNLS_H */

@@ -204,4 +204,8 @@ LONG       WINAPI RegSetValueExA(HKEY,LPCSTR,DWORD,DWORD,LPBYTE,DWORD);
 LONG       WINAPI RegSetValueExW(HKEY,LPCWSTR,DWORD,DWORD,LPBYTE,DWORD);
 #define     RegSetValueEx WINELIB_NAME_AW(RegSetValueEx)
 
+LONG WINAPI RegQueryMultipleValuesA(HKEY hKey, PVALENTA val_list, DWORD num_vals, LPTSTR lpValueBuf, LPDWORD ldwTotsize);
+LONG WINAPI RegQueryMultipleValuesW(HKEY hKey, PVALENTW val_list, DWORD num_vals, LPWSTR lpValueBuf, LPDWORD ldwTotsize);
+#define     RegQueryMultipleValues WINELIB_NAME_AW(RegQueryMultipleValues)
+
 #endif  /* __WINE_WINREG_H */
