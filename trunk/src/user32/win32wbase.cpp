@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.286 2001-09-30 22:24:41 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.287 2001-10-01 17:28:08 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -3278,6 +3278,40 @@ HWND Win32BaseWindow::GetWindow(UINT uCmd)
         else hwndRelated = 0;
 
         break;
+
+    case GW_HWNDNEXTCHILD:
+        lock();
+        window = (Win32BaseWindow *)getNextChild();
+        if(window) {
+             hwndRelated = window->getWindowHandle();
+        }
+        else hwndRelated = 0;
+        unlock();
+        break;
+
+    case GW_HWNDFIRSTCHILD:
+        lock();
+        window = (Win32BaseWindow *)getFirstChild();
+        if(window) {
+             hwndRelated = window->getWindowHandle();
+        }
+        else hwndRelated = 0;
+        unlock();
+        break;
+
+    case GW_HWNDLASTCHILD:
+        lock();
+        window = (Win32BaseWindow *)getFirstChild();
+        if(window) {
+             while (window->getNextChild())
+             {
+                window = (Win32BaseWindow *)window->getNextChild();
+             }
+             hwndRelated = window->getWindowHandle();
+        }
+        else hwndRelated = 0;
+        unlock();
+        break;
     }
 end:
     dprintf(("GetWindow %x %d returned %x", getWindowHandle(), uCmd, hwndRelated));
@@ -3747,93 +3781,6 @@ WORD Win32BaseWindow::GetWindowWord(int index)
 void Win32BaseWindow::setWindowId(DWORD id)
 {
     dwIDMenu = id;
-}
-//******************************************************************************
-//******************************************************************************
-HWND Win32BaseWindow::getNextDlgGroupItem(HWND hwndCtrl, BOOL fPrevious)
-{
- Win32BaseWindow *firstchild = NULL, *child, *nextchild, *lastchild;
- HWND retvalue;
-
-    lock();
-    if (hwndCtrl)
-    {
-        firstchild = child = GetWindowFromHandle(hwndCtrl);
-        if (!child)
-        {
-            retvalue = 0;
-            goto END;
-        }
-        /* Make sure hwndCtrl is a top-level child */
-        while ((child->getStyle() & WS_CHILD) && (child->getParent() != this))
-        {
-            child = child->getParent();
-            if(child == NULL) break;
-        }
-        if (!child || (child->getParent() != this))
-        {
-            retvalue = 0;
-            goto END;
-        }
-    }
-    else
-    {
-        /* No ctrl specified -> start from the beginning */
-        child = (Win32BaseWindow *)getFirstChild();
-        if (!child)
-        {
-            retvalue = 0;
-            goto END;
-        }
-
-        if (fPrevious)
-        {
-            while (child->getNextChild())
-            {
-                child = (Win32BaseWindow *)child->getNextChild();
-            }
-        }
-    }
-
-    lastchild = child;
-    nextchild = (Win32BaseWindow *)child->getNextChild();
-    while (TRUE)
-    {
-        if (!nextchild || (nextchild->getStyle() & WS_GROUP))
-        {
-            /* Wrap-around to the beginning of the group */
-            Win32BaseWindow *pWndTemp;
-
-            nextchild = (Win32BaseWindow *)getFirstChild();
-
-            for(pWndTemp = nextchild;pWndTemp;pWndTemp = (Win32BaseWindow *)pWndTemp->getNextChild())
-            {
-                if (pWndTemp->getStyle() & WS_GROUP)
-                    nextchild = pWndTemp;
-
-                if (pWndTemp == child)
-                    break;
-            }
-
-        }
-        if (nextchild == child)
-            break;
-
-        if ((nextchild->getStyle() & WS_VISIBLE) && !(nextchild->getStyle() & WS_DISABLED))
-        {
-            lastchild = nextchild;
-
-            if (!fPrevious)
-                break;
-        }
-
-        nextchild = (Win32BaseWindow *)nextchild->getNextChild();
-    }
-    retvalue = lastchild->getWindowHandle();
-END:
-    unlock();
-    if(firstchild) RELEASE_WNDOBJ(firstchild);
-    return retvalue;
 }
 //******************************************************************************
 //Locates window in linked list and increases reference count (if found)

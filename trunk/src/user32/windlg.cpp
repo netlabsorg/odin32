@@ -1,4 +1,4 @@
-/* $Id: windlg.cpp,v 1.24 2001-07-23 19:16:41 sandervl Exp $ */
+/* $Id: windlg.cpp,v 1.25 2001-10-01 17:28:09 sandervl Exp $ */
 /*
  * Win32 dialog apis for OS/2
  *
@@ -490,7 +490,7 @@ UINT WIN32API GetDlgItemInt(HWND hwnd, INT id, BOOL *translated, BOOL fSigned)
   char * endptr;
   long result = 0;
 
-    dprintf(("USER32:  GetDlgItemInt\n"));
+    dprintf(("USER32: GetDlgItemInt %x %x %x %d", hwnd, id, translated, fSigned));
     if (translated) *translated = FALSE;
 
     if (!SendDlgItemMessageA(hwnd, id, WM_GETTEXT, sizeof(str), (LPARAM)str))
@@ -516,18 +516,86 @@ UINT WIN32API GetDlgItemInt(HWND hwnd, INT id, BOOL *translated, BOOL fSigned)
 }
 //******************************************************************************
 //******************************************************************************
-HWND WIN32API GetNextDlgGroupItem( HWND hwnd, HWND hwndCtrl, BOOL fPrevious)
+HWND WIN32API GetNextDlgGroupItem( HWND hwndDlg, HWND hwndCtrl, BOOL fPrevious)
 {
-  Win32BaseWindow *window;
+    HWND hwnd, retvalue;
 
-    window = Win32BaseWindow::GetWindowFromHandle(hwnd);
-    if(!window) {
+    if(!IsWindow(hwndDlg) || (hwndCtrl && !IsWindow(hwndCtrl))) {
         dprintf(("GetNextDlgGroupItem, window %x not found", hwnd));
         SetLastError(ERROR_INVALID_WINDOW_HANDLE);
         return 0;
     }
-    dprintf(("USER32:  GetNextDlgGroupItem\n"));
-    return window->getNextDlgGroupItem(hwndCtrl, fPrevious);
+    dprintf(("USER32: GetNextDlgGroupItem %x %x %d", hwndDlg, hwndCtrl, fPrevious));
+
+    #define WIN_GetFullHandle(a)	a
+
+    hwndDlg = WIN_GetFullHandle( hwndDlg );
+    hwndCtrl = WIN_GetFullHandle( hwndCtrl );
+
+    if(hwndCtrl)
+    {
+        /* if the hwndCtrl is the child of the control in the hwndDlg,
+	 * then the hwndDlg has to be the parent of the hwndCtrl */
+        if(GetParent(hwndCtrl) != hwndDlg && GetParent(GetParent(hwndCtrl)) == hwndDlg)
+            hwndDlg = GetParent(hwndCtrl);
+    }
+
+    if (hwndCtrl)
+    {
+        /* Make sure hwndCtrl is a top-level child */
+        HWND parent = GetParent( hwndCtrl );
+        while (parent && parent != hwndDlg) parent = GetParent(parent);
+        if (parent != hwndDlg) return 0;
+    }
+    else
+    {
+        /* No ctrl specified -> start from the beginning */
+        if (!(hwndCtrl = GetWindow( hwndDlg, GW_CHILD ))) return 0;
+#ifdef __WIN32OS2__
+        if (fPrevious) hwndCtrl = GetWindow( hwndCtrl, GW_HWNDLASTCHILD );
+#else
+        if (fPrevious) hwndCtrl = GetWindow( hwndCtrl, GW_HWNDLAST );
+#endif
+    }
+
+    retvalue = hwndCtrl;
+#ifdef __WIN32OS2__
+    hwnd = GetWindow( hwndCtrl, GW_HWNDNEXTCHILD );
+#else
+    hwnd = GetWindow( hwndCtrl, GW_HWNDNEXT );
+#endif
+    while (1)
+    {
+        if (!hwnd || (GetWindowLongW( hwnd, GWL_STYLE ) & WS_GROUP))
+        {
+            /* Wrap-around to the beginning of the group */
+            HWND tmp;
+
+#ifdef __WIN32OS2__
+            hwnd = GetWindow( hwndDlg, GW_HWNDFIRSTCHILD );
+            for (tmp = hwnd; tmp; tmp = GetWindow( tmp, GW_HWNDNEXTCHILD ) )
+#else
+            hwnd = GetWindow( hwndDlg, GW_CHILD );
+            for (tmp = hwnd; tmp; tmp = GetWindow( tmp, GW_HWNDNEXT ) )
+#endif
+            {
+                if (GetWindowLongW( tmp, GWL_STYLE ) & WS_GROUP) hwnd = tmp;
+                if (tmp == hwndCtrl) break;
+            }
+        }
+        if (hwnd == hwndCtrl) break;
+        if ((GetWindowLongW( hwnd, GWL_STYLE ) & (WS_VISIBLE|WS_DISABLED)) == WS_VISIBLE)
+        {
+            retvalue = hwnd;
+	    if (!fPrevious) break;
+	}
+#ifdef __WIN32OS2__
+        hwnd = GetWindow( hwnd, GW_HWNDNEXTCHILD );
+#else
+        hwnd = GetWindow( hwnd, GW_HWNDNEXT );
+#endif
+    }
+    return retvalue;
 }
 /***********************************************************************
  *           GetDialogBaseUnits   (USER.243) (USER32.233)
