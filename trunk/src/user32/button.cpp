@@ -1,4 +1,4 @@
-/* $Id: button.cpp,v 1.5 1999-10-08 21:23:07 cbratschi Exp $ */
+/* $Id: button.cpp,v 1.6 1999-10-09 11:03:22 sandervl Exp $ */
 /* File: button.cpp -- Button type widgets
  *
  * Copyright (C) 1993 Johannes Ruscheinski
@@ -21,6 +21,7 @@
 #include "winbase.h"
 #include "controls.h"
 #include "button.h"
+#include <misc.h>
 
 //Prototypes
 
@@ -117,7 +118,9 @@ static LRESULT BUTTON_Enable(HWND hwnd,WPARAM wParam,LPARAM lParam)
 {
   DWORD dwStyle = GetWindowLongA(hwnd,GWL_STYLE);
 
-  PAINT_BUTTON(hwnd,dwStyle & 0x0f,ODA_DRAWENTIRE);
+//  PAINT_BUTTON(hwnd,dwStyle & 0x0f,ODA_DRAWENTIRE);
+  //SvL: 09/10/99 Force it to redraw properly
+  InvalidateRect( hwnd, NULL, FALSE );
 
   return 0;
 }
@@ -695,13 +698,16 @@ static void BUTTON_DrawPushButton(
         text = (char*)malloc(textLen);
         GetWindowTextA(hwnd,text,textLen);
         GetObjectA( GetSysColorBrush(COLOR_BTNFACE), sizeof(lb), &lb );
-        if (dwStyle & WS_DISABLED &&
-            GetSysColor(COLOR_GRAYTEXT)==lb.lbColor)
+        if (dwStyle & WS_DISABLED && GetSysColor(COLOR_GRAYTEXT)==lb.lbColor)
+        {
+	    dprintf(("Disable button"));
             /* don't write gray text on gray background */
             PaintGrayOnGray( hDC,infoPtr->hFont,&rc,text,
                                DT_CENTER | DT_VCENTER );
+        }
         else
         {
+	    dprintf(("Enable button"));
             SetTextColor( hDC, (dwStyle & WS_DISABLED) ?
                                  GetSysColor(COLOR_GRAYTEXT) :
                                  GetSysColor(COLOR_BTNTEXT) );
