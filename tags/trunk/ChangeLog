@@ -1,4 +1,10 @@
- /* $Id: ChangeLog,v 1.502 1999-12-03 17:50:16 cbratschi Exp $ */
+ /* $Id: ChangeLog,v 1.503 1999-12-04 00:03:47 sandervl Exp $ */
+
+ 99-12-03: Sander van Leeuwen <sandervl@xs4all.nl>
+	- USER32: Experimental WM_ERASEBACKGND change
+                  Ignore PM WM_ERASEBACKGROUND (return 1), always
+                  send one in BeginPaint and call BeginPaint/EndPaint
+                  in the default window handler for WM_(ICON)PAINT
 
  99-12-03: Christoph Bratschi <cbratschi@datacomm.ch>
 	- USER32: removed WS_* check in scrollbar code
