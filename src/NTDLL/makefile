@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.35 2003-01-23 20:21:58 sandervl Exp $
+# $Id: makefile,v 1.36 2003-02-07 13:58:28 sandervl Exp $
 
 #
 # Odin32 API
@@ -9,6 +9,7 @@
 
 CCENV = EMX
 NOTEXPDEF = 1
+WRC_PREFIX_RESOURCE=1
 
 #
 # Compiler, tools, and interference rules.

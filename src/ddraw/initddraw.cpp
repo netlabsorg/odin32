@@ -1,4 +1,4 @@
-/* $Id: initddraw.cpp,v 1.1 2003-01-21 11:20:35 sandervl Exp $
+/* $Id: initddraw.cpp,v 1.2 2003-02-07 13:58:17 sandervl Exp $
  *
  * DLL entry point
  *
@@ -38,7 +38,7 @@
 
 extern "C" {
  //Win32 resource table (produced by wrc)
- extern DWORD _Resource_PEResTab;
+ extern DWORD ddraw_PEResTab;
 }
 
 char ddrawPath[CCHMAXPATH] = "";
@@ -74,7 +74,7 @@ ULONG APIENTRY inittermDDraw(ULONG hModule, ULONG ulFlag)
 
          CheckVersionFromHMOD(PE2LX_VERSION, hModule); /*PLF Wed  98-03-18 05:28:48*/
 
-         dllHandle = RegisterLxDll(hModule, NULL, (PVOID)&_Resource_PEResTab,
+         dllHandle = RegisterLxDll(hModule, NULL, (PVOID)&ddraw_PEResTab,
                                    DDRAW_MAJORIMAGE_VERSION, DDRAW_MINORIMAGE_VERSION,
                                    IMAGE_SUBSYSTEM_WINDOWS_GUI);
          if (dllHandle == 0)

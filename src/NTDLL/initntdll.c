@@ -35,7 +35,7 @@
 
 
 BOOL WIN32API NTDLL_LibMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved);
-extern DWORD _Resource_PEResTab;
+extern DWORD ntdll_PEResTab;
 
 static HMODULE dllHandle = 0;
 
@@ -53,7 +53,7 @@ ULONG APIENTRY inittermNTDLL(ULONG hModule, ULONG ulFlag)
       case 0 :
 
          CheckVersionFromHMOD(PE2LX_VERSION, hModule); /*PLF Wed  98-03-18 05:28:48*/
-         dllHandle = RegisterLxDll(hModule, (WIN32DLLENTRY)NTDLL_LibMain, (PVOID)&_Resource_PEResTab,
+         dllHandle = RegisterLxDll(hModule, (WIN32DLLENTRY)NTDLL_LibMain, (PVOID)&ntdll_PEResTab,
                                    0, 0, 0);
          if(dllHandle == 0)
              return 0UL;
