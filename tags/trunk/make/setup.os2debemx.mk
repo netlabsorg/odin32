@@ -1,4 +1,4 @@
-# $Id: setup.os2debemx.mk,v 1.5 2002-08-24 04:59:46 bird Exp $
+# $Id: setup.os2debemx.mk,v 1.6 2002-08-24 22:33:11 bird Exp $
 
 # ---OS2, DEBUG, EMX----------------------------
 ENV_NAME="OS/2, Debug, EMX/GCC Compiler"
@@ -41,7 +41,6 @@ LINK=ilink.exe
 IMPLIB=implib.exe
 RC=rc.exe
 RL=rc.exe
-EXEPACK=lxlite.exe
 
 
 #

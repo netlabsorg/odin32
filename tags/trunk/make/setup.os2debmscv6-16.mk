@@ -1,4 +1,4 @@
-# $Id: setup.os2debmscv6-16.mk,v 1.7 2002-08-24 04:59:46 bird Exp $
+# $Id: setup.os2debmscv6-16.mk,v 1.8 2002-08-24 22:33:11 bird Exp $
 
 # ---OS2, DEBUG, MSCV6-------------------------
 ENV_NAME="OS/2, Debug, Microsoft C v6.0a 16-bit"
@@ -17,6 +17,7 @@ ENV_16BIT = 16
 #
 !include $(PATH_MAKE)\setup.os2debalp.mk
 !include $(PATH_MAKE)\setup.os2prfwrc.mk
+!include $(PATH_MAKE)\setup.optional.mscvx-16.mk
 
 
 #
@@ -29,7 +30,6 @@ LINK=ilink.exe
 IMPLIB=implib.exe
 RC=rc.exe
 RL=rc.exe
-EXEPACK=lxlite.exe
 
 
 #
@@ -44,76 +44,6 @@ _AR_LNK3= +"$(TARGET_OBJS: ="&^
 AR_LNK3= $(_AR_LNK3:+""&^
 =)
 AR_LNK4= "$(@R).lst";
-
-
-#
-# C Compiler flags.
-#
-_CC_SEG_TEXT     =
-_CC_SEG_DATA     =
-_CC_SEG_XCPT     =
-_CC_DEFAULT_LIBS = /Zl
-_CC_PACK         = /Zp
-_CC_MODEL        = /Asfw
-_OBJ_MODEL       = c
-
-!ifdef ALL_SEG_TEXT
-_CC_SEG_TEXT=/NT$(ALL_SEG_TEXT)
-!endif
-!ifdef CC_SEG_TEXT
-_CC_SEG_TEXT=/NT$(CC_SEG_TEXT)
-!endif
-!ifdef ALL_SEG_DATA
-_CC_SEG_DATA=/ND$(ALL_SEG_TEXT)
-!endif
-!ifdef CC_SEG_DATA
-_CC_SEG_DATA=/ND$(CC_SEG_TEXT)
-!endif
-!if defined(CC_DEFAULT_LIBS) || defined(ALL_DEFAULT_LIBS)
-_CC_DEFAULT_LIBS =
-!endif
-!ifdef ALL_PACK
-_CC_PACK        = /Zp$(ALL_PACK)
-!endif
-!ifdef CC_PACK
-_CC_PACK        = /Zp$(CC_PACK)
-!endif
-# Model
-!if !defined(CC_MODEL) && defined(ALL_MODEL)
-CC_MODEL    = $(ALL_MODEL)
-!endif
-!ifdef CC_MODEL
-_CC_MODEL   =
-!endif
-!if "$(CC_MODEL)" == "TINY"
-_CC_MODEL   = /AT
-_OBJ_MODEL  = s
-!endif
-!if "$(CC_MODEL)" == "SMALL"
-_CC_MODEL   = /AS
-_OBJ_MODEL  = s
-!endif
-!if "$(CC_MODEL)" == "COMPACT"
-_CC_MODEL   = /AC
-_OBJ_MODEL  = c
-!endif
-!if "$(CC_MODEL)" == "MEDIUM"
-_CC_MODEL   = /AM
-_OBJ_MODEL  = m
-!endif
-!if "$(CC_MODEL)" == "LARGE"
-_CC_MODEL   = /AL
-_OBJ_MODEL  = l
-!endif
-!if "$(CC_MODEL)" == "HUGE"
-_CC_MODEL   = /AH
-_OBJ_MODEL  = l
-!endif
-!if "$(_CC_MODEL)" == ""
-! error Invalid MODEL. CC_MODEL=$(CC_MODEL)
-!endif
-
-_CC_OPTIONAL = $(_CC_SEG_TEXT) $(_CC_SEG_DATA) $(_CC_SEG_XCPT) $(_CC_DEFAULT_LIBS) $(_CC_PACK) $(_CC_MODEL)
 
 CC_FLAGS=/nologo /c /DDEBUG /DOS2 /D__16BIT__ /W0 /G2s /Zi /Owis $(_CC_OPTIONAL) $(CC_DEFINES) $(ALL_DEFINES) $(BUILD_DEFINES) $(CC_INCLUDES) $(ALL_INCLUDES) /I$(PATH_INCLUDES)
 CC_FLAGS_EXE=$(CC_FLAGS)
