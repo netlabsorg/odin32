@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.4 2000-02-09 13:44:32 sandervl Exp $
+# $Id: Makefile,v 1.5 2000-02-09 14:46:26 sandervl Exp $
 #
 # PD-Win32 API
 #
@@ -38,7 +38,7 @@ OBJS = glut_8x13.obj glut_9x15.obj glut_bitmap.obj glut_bwidth.obj glut_cindex.o
        glut_swap.obj glut_swidth.obj glut_tablet.obj glut_teapot.obj glut_tr10.obj \
        glut_tr24.obj glut_util.obj glut_vidresize.obj glut_warp.obj glut_win.obj \
        glut_winmisc.obj win32_glx.obj win32_menu.obj win32_util.obj win32_winproc.obj \
-       win32_x11.obj glut_term.obj $(PDWIN32_LIB)/dllentry.obj resource.obj
+       win32_x11.obj glut_term.obj initterm.obj resource.obj
 
 all     : $(TARGET).DLL
 
@@ -58,6 +58,7 @@ resource.asm: $(TARGET).rc
 
 resource.obj: resource.asm
 
+initterm.obj: initterm.cpp
 win32_glx.obj: win32_glx.c os2_glx.h
 win32_x11.obj: win32_x11.c os2_x11.h
 win32_menu.obj: win32_menu.c glutint.h glut.h
