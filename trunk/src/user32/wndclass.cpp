@@ -1,4 +1,4 @@
-/* $Id: wndclass.cpp,v 1.11 1999-06-26 14:09:58 sandervl Exp $ */
+/* $Id: wndclass.cpp,v 1.12 1999-06-26 15:07:01 sandervl Exp $ */
 
 /*
  * Win32 Window Class Managment Code for OS/2
@@ -91,10 +91,15 @@ LRESULT WIN32API ButtonCallback(HWND hwnd, UINT Msg, WPARAM wParam, LPARAM lPara
 			}
 		}	
 		return rc;
+
 	case WM_CREATE:
-	case WM_DESTROY:
 	case WM_MBUTTONDOWN:
 	case WM_RBUTTONDOWN:
+		rc = ButtonHandler(hwnd, Msg, wParam, lParam);
+		NotifyParent(hwnd, Msg, wParam, lParam);
+		return rc;
+
+	case WM_DESTROY:
 		NotifyParent(hwnd, Msg, wParam, lParam);
 		break;
   }
