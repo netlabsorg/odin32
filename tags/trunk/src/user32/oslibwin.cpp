@@ -1,4 +1,4 @@
-/* $Id: oslibwin.cpp,v 1.112 2002-01-12 14:09:30 sandervl Exp $ */
+/* $Id: oslibwin.cpp,v 1.113 2002-01-20 15:26:20 sandervl Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -373,6 +373,31 @@ BOOL  OSLibWinQueryWindowClientRect(HWND hwndOS2, PRECT pRect)
   }
   else  memset(pRect, 0, sizeof(RECT));
   return rc;
+}
+//******************************************************************************
+//******************************************************************************
+BOOL OSLibQueryWindowRectAbsolute (HWND hwndOS2, PRECT pRect)
+{
+    BOOL     rc;
+    RECTLOS2 rectl;
+
+    rc = WinQueryWindowRect (hwndOS2, (RECTL *)&rectl);
+    if (rc)
+    {
+        rc = WinMapWindowPoints (hwndOS2, HWND_DESKTOP, (POINTL *)&rectl, 2);
+        if (rc)
+        {
+            pRect->left   = rectl.xLeft;
+            pRect->right  = rectl.xRight;
+            pRect->top    = mapScreenY (rectl.yTop);
+            pRect->bottom = mapScreenY (rectl.yBottom);
+        }
+    }
+    if (!rc)
+    {
+        memset(pRect, 0, sizeof(*pRect));
+    }
+    return rc;
 }
 //******************************************************************************
 //******************************************************************************
