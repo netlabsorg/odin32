@@ -1,20 +1,20 @@
-/                                          sandervl phaller achimha cbratschi hugh davidr bird jeroen mike
+/                                          sandervl phaller achimha hugh bird mike
 /CVSROOT                                   ktk sandervl phaller achimha
 /bin                                       sandervl phaller bird
-/include                                   sandervl phaller achimha bird davidr cbratschi hugh mike
+/include                                   sandervl phaller achimha bird hugh mike
 /lib                                       sandervl phaller bird
 /src                                       sandervl phaller achimha bird
-/include/win                               sandervl phaller achimha bird davidr cbratschi hugh mike
-/include/old                               sandervl phaller bird davidr cbratschi mike
-/include/win/wine                          sandervl phaller achimha bird davidr cbratschi hugh mike
+/include/win                               sandervl phaller achimha bird hugh mike
+/include/old                               sandervl phaller bird mike
+/include/win/wine                          sandervl phaller achimha bird hugh mike
 /src/advapi32                              sandervl phaller bird
-/src/capi2032                              sandervl cbratschi phaller
-/src/comdlg32                              sandervl cbratschi
+/src/capi2032                              sandervl phaller
+/src/comdlg32                              sandervl 
 /src/ddraw                                 sandervl hugh mike
 /src/dsound                                sandervl hugh mike
 /src/dinput                                sandervl hugh mike
 /src/dplay                                 sandervl hugh mike
-/src/gdi32                                 sandervl phaller cbratschi hugh
+/src/gdi32                                 sandervl phaller hugh
 /src/kernel32                              sandervl phaller bird
 /src/kernel32/new                          sandervl phaller bird
 /src/kernel32/old                          sandervl phaller bird
@@ -22,11 +22,11 @@
 /src/lz32                                  sandervl phaller
 /src/mpr                                   sandervl phaller bird
 /src/NTDLL                                 sandervl phaller
-/src/ole32                                 sandervl davidr
-/src/oleaut32                              sandervl davidr
-/src/olesvr32                              sandervl davidr
-/src/olecli32                              sandervl davidr
-/src/oledlg                                sandervl davidr
+/src/ole32                                 sandervl 
+/src/oleaut32                              sandervl 
+/src/olesvr32                              sandervl 
+/src/olecli32                              sandervl 
+/src/oledlg                                sandervl 
 /src/imm32                                 sandervl 
 /src/imagehlp                              sandervl 
 /src/rasapi32                              sandervl 
@@ -40,13 +40,13 @@
 /src/OMFDUMP                               sandervl phaller bird
 /src/pe2lx                                 sandervl bird
 /src/peldr                                 sandervl bird phaller
-/src/shell32                               sandervl phaller bird cbratschi
+/src/shell32                               sandervl phaller bird 
 /src/shell32/old                           sandervl phaller bird
-/src/shlwapi                               sandervl phaller cbratschi
+/src/shlwapi                               sandervl phaller 
 /src/spy                                   sandervl phaller 
 /src/tapi32                                sandervl phaller bird
-/src/user32                                sandervl phaller cbratschi
-/src/user32/new                            sandervl phaller achimha bird cbratschi
+/src/user32                                sandervl phaller 
+/src/user32/new                            sandervl phaller achimha bird 
 /src/user32/old                            sandervl phaller achimha bird 
 /src/version                               sandervl phaller bird
 /src/winmm                                 sandervl phaller 
@@ -71,8 +71,8 @@
 /tools                                     sandervl phaller bird
 /src/advapi32/backup                       sandervl phaller achimha bird
 /src/advapi32/backups                      sandervl phaller achimha bird
-/src/comdlg32/backup                       sandervl achimha cbratschi
-/src/comdlg32/backups                      sandervl achimha cbratschi
+/src/comdlg32/backup                       sandervl achimha 
+/src/comdlg32/backups                      sandervl achimha 
 /src/ddraw/backup                          sandervl hugh achimha
 /src/dsound/backup                         sandervl hugh achimha phaller
 /src/gdi32/backup                          sandervl phaller achimha bird
@@ -81,7 +81,7 @@
 /src/kernel32/backups                      sandervl phaller achimha bird
 /src/mpr/backup                            sandervl phaller achimha bird
 /src/NTDLL/backup                          sandervl achimha
-/src/ole32/backup                          sandervl davidr achimha
+/src/ole32/backup                          sandervl achimha
 /src/pe2lx/backup                          sandervl achimha
 /src/shell32/backup                        sandervl phaller achimha bird
 /src/tapi32/backup                         sandervl phaller achimha bird
@@ -92,6 +92,6 @@
 /src/winspool/backup                       sandervl phaller achimha bird
 /src/wnetap32/backup                       sandervl phaller achimha bird
 /src/wsock32/backup                        sandervl phaller achimha bird
-/src/comctl32                              sandervl achimha cbratschi phaller
-/src/opengl                                sandervl jeroen
-/src/opengl/glut                           sandervl jeroen
+/src/comctl32                              sandervl achimha phaller
+/src/opengl                                sandervl 
+/src/opengl/glut                           sandervl 
