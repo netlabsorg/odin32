@@ -1,4 +1,4 @@
-/* $Id: font.cpp,v 1.16 2000-12-30 10:17:23 sandervl Exp $ */
+/* $Id: font.cpp,v 1.17 2001-02-02 19:37:08 sandervl Exp $ */
 
 /*
  * GDI32 font apis
@@ -518,6 +518,8 @@ ODINFUNCTION5(DWORD, GetFontData,
               DWORD, dbData)
 {
   dprintf(("GDI32: GetFontData, not implemented (GDI_ERROR)\n"));
+  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+
   return(GDI_ERROR);
 }
 //******************************************************************************
