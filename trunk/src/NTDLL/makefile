@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.8 1999-08-18 19:35:30 phaller Exp $
+# $Id: makefile,v 1.9 1999-08-21 12:29:28 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -40,7 +40,7 @@ all: $(TARGET).dll $(TARGET).lib
 
 
 $(TARGET).dll: $(OBJS) $(TARGET).def
-        $(LD) $(LDFLAGS) -Fm -Fe$@ $(OBJS) sbsstub.obj $(TARGET).def $(PDWIN32_LIB)\kernel32.lib $(PDWIN32_LIB)/odincrt.lib OS2386.LIB cppom30O.lib
+        $(LD) $(LDFLAGS) -Fm -Fe$@ $(OBJS) sbsstub.obj $(TARGET).def $(PDWIN32_LIB)\kernel32.lib $(PDWIN32_LIB)/odincrt.lib OS2386.LIB $(RTLLIB_O)
 # PMWINX.LIB LIBULS.LIB LIBCONV.LIB
         $(CP) $@ $(PDWIN32_BIN)
 

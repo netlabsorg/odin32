@@ -1,4 +1,4 @@
-# $Id: pdwin32.mk,v 1.4 1999-06-10 16:21:50 achimha Exp $
+# $Id: pdwin32.mk,v 1.5 1999-08-21 12:29:28 sandervl Exp $
 #
 # PD-Win32 Project
 #
@@ -17,6 +17,18 @@
 # include compiler environment
 !ifndef CCENV
 CCENV=VAC3
+VAC3=1
+#VAC36=1
+!endif
+
+!ifdef VAC3
+RTLLIB   = cppom30.lib
+RTLLIB_O = cppom30o.lib
+!endif
+
+!ifdef VAC36
+RTLLIB   = cpprms36.lib
+RTLLIB_O = cpprmo36.lib
 !endif
 
 !ifdef DEBUG
