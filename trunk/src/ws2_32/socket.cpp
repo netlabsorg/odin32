@@ -1,3 +1,4 @@
+/* $Id */
 /*
  * based on Windows Sockets 1.1 specs
  * (ftp.microsoft.com:/Advsys/winsock/spec11/WINSOCK.TXT)
