@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.25 1999-10-06 07:56:37 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.26 1999-10-07 09:28:01 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -125,7 +125,8 @@ void Win32BaseWindow::Init()
 
   horzScrollInfo     = NULL;
   vertScrollInfo     = NULL;
-
+  hwndHorzScroll     = 0;
+  hwndVertScroll     = 0;
 }
 //******************************************************************************
 //todo get rid of resources (menu, accel, icon etc)
@@ -159,6 +160,10 @@ Win32BaseWindow::~Win32BaseWindow()
         free(horzScrollInfo);
         horzScrollInfo = NULL;
   }
+  //TODO: Destroy windows if they're not associated with our window anymore (showwindow false)?
+//  hwndHorzScroll
+//  hwndVertScroll
+
 }
 //******************************************************************************
 //******************************************************************************
@@ -474,6 +479,15 @@ BOOL Win32BaseWindow::CreateWindowExA(CREATESTRUCTA *cs, ATOM classAtom)
   }
 #endif
 
+  if (cs->style & WS_HSCROLL)
+  {
+	hwndHorzScroll = OSLibWinQueryScrollBarHandle(OS2HwndFrame, OSLIB_HSCROLL);
+  }
+
+  if (cs->style & WS_VSCROLL) {
+	hwndVertScroll = OSLibWinQueryScrollBarHandle(OS2HwndFrame, OSLIB_VSCROLL);
+  }
+
   fakeWinBase.hwndThis     = OS2Hwnd;
   fakeWinBase.pWindowClass = windowClass;
 //  SetFakeOpen32();
@@ -490,7 +504,10 @@ BOOL Win32BaseWindow::CreateWindowExA(CREATESTRUCTA *cs, ATOM classAtom)
                 }
         }
   }
-  else  windowId = (UINT)cs->hMenu;
+  else
+  {
+	setWindowId((DWORD)cs->hMenu);
+  }
 
   //Set icon from class
   if(windowClass->getIcon())
@@ -1257,13 +1274,13 @@ SCROLLBAR_INFO *Win32BaseWindow::getScrollInfo(int nBar)
     switch(nBar) {
     case SB_HORZ:
         if(horzScrollInfo) {
-            horzScrollInfo->CurVal = OSLibWinGetScrollPos(OS2HwndFrame, OSLIB_HSCROLL);
+            horzScrollInfo->CurVal = OSLibWinGetScrollPos(OS2HwndFrame, hwndHorzScroll);
             return horzScrollInfo;
         }
         break;
     case SB_VERT:
         if(vertScrollInfo) {
-            vertScrollInfo->CurVal = OSLibWinGetScrollPos(OS2HwndFrame, OSLIB_VSCROLL);
+            vertScrollInfo->CurVal = OSLibWinGetScrollPos(OS2HwndFrame, hwndVertScroll);
             return vertScrollInfo;
         }
         break;
@@ -1276,6 +1293,7 @@ SCROLLBAR_INFO *Win32BaseWindow::getScrollInfo(int nBar)
 LONG Win32BaseWindow::setScrollInfo(int nBar, SCROLLINFO *info, int fRedraw)
 {
   SCROLLBAR_INFO *infoPtr;
+  HWND            hwndScroll;
   ULONG           scrollType;
   int             new_flags;
 
@@ -1285,6 +1303,7 @@ LONG Win32BaseWindow::setScrollInfo(int nBar, SCROLLINFO *info, int fRedraw)
             return 0;
         }
         infoPtr = horzScrollInfo;
+	hwndScroll = hwndHorzScroll;
         scrollType = OSLIB_HSCROLL;
         break;
     case SB_VERT:
@@ -1292,6 +1311,7 @@ LONG Win32BaseWindow::setScrollInfo(int nBar, SCROLLINFO *info, int fRedraw)
             return 0;
         }
         infoPtr = vertScrollInfo;
+	hwndScroll = hwndVertScroll;
         scrollType = OSLIB_VSCROLL;
         break;
     default:
@@ -1308,7 +1328,7 @@ LONG Win32BaseWindow::setScrollInfo(int nBar, SCROLLINFO *info, int fRedraw)
         if( infoPtr->Page != info->nPage )
         {
             infoPtr->Page = info->nPage;
-            OSLibWinSetScrollPageSize(OS2HwndFrame, scrollType, info->nPage, infoPtr->MaxVal, fRedraw);
+            OSLibWinSetScrollPageSize(OS2HwndFrame, hwndScroll, info->nPage, infoPtr->MaxVal, fRedraw);
         }
     }
 
@@ -1318,7 +1338,7 @@ LONG Win32BaseWindow::setScrollInfo(int nBar, SCROLLINFO *info, int fRedraw)
         if( infoPtr->CurVal != info->nPos )
         {
             infoPtr->CurVal = info->nPos;
-            OSLibWinSetScrollPos(OS2HwndFrame, scrollType, info->nPos, fRedraw);
+            OSLibWinSetScrollPos(OS2HwndFrame, hwndScroll, info->nPos, fRedraw);
         }
     }
 
@@ -1340,7 +1360,7 @@ LONG Win32BaseWindow::setScrollInfo(int nBar, SCROLLINFO *info, int fRedraw)
                 infoPtr->MinVal = info->nMin;
                 infoPtr->MaxVal = info->nMax;
 
-                OSLibWinSetScrollRange(OS2HwndFrame, scrollType, info->nMin, info->nMax, fRedraw);
+                OSLibWinSetScrollRange(OS2HwndFrame, hwndScroll, info->nMin, info->nMax, fRedraw);
             }
         }
     }
@@ -2380,7 +2400,6 @@ LONG Win32BaseWindow::SetWindowLongA(int index, ULONG value)
                 return oldval;
         case GWL_HWNDPARENT:
                 return SetParent((HWND)value);
-
         case GWL_ID:
                 oldval = getWindowId();
                 setWindowId(value);
@@ -2456,6 +2475,13 @@ WORD Win32BaseWindow::GetWindowWord(int index)
    }
    SetLastError(ERROR_INVALID_PARAMETER);
    return 0;
+}
+//******************************************************************************
+//******************************************************************************
+void Win32BaseWindow::setWindowId(DWORD id)
+{
+   windowId = id;
+   OSLibSetWindowID(OS2HwndFrame, id);
 }
 //******************************************************************************
 //******************************************************************************

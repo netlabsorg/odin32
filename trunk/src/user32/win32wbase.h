@@ -1,4 +1,4 @@
-/* $Id: win32wbase.h,v 1.13 1999-10-04 20:53:46 sandervl Exp $ */
+/* $Id: win32wbase.h,v 1.14 1999-10-07 09:28:02 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -113,7 +113,7 @@ Win32BaseWindow *getParent()                    { return (Win32BaseWindow *)Chil
        WNDPROC  getWindowProc()                 { return win32wndproc; };
          void   setWindowProc(WNDPROC newproc)  { win32wndproc = newproc; };
         DWORD   getWindowId()                   { return windowId; };
-         void   setWindowId(DWORD id)           { windowId = id; };
+         void   setWindowId(DWORD id);
          ULONG  getWindowHeight()               { return rectClient.bottom - rectClient.top; };
          ULONG  getWindowWidth()                { return rectClient.right - rectClient.left; };
          BOOL   isChild();
@@ -178,6 +178,8 @@ Win32BaseWindow *getOwner()                   { return owner; };
 Win32BaseWindow *getTopParent();
  SCROLLBAR_INFO *getScrollInfo(int nBar);
        LONG      setScrollInfo(int nBar, SCROLLINFO *info, int fRedraw);
+       HWND      getVertScrollHandle()        { return hwndVertScroll; };
+       HWND      getHorzScrollHandle()        { return hwndHorzScroll; };
 
        LRESULT  SendMessageA(ULONG msg, WPARAM wParam, LPARAM lParam);
        LRESULT  SendMessageW(ULONG msg, WPARAM wParam, LPARAM lParam);
@@ -251,6 +253,8 @@ protected:
 
 SCROLLBAR_INFO *vertScrollInfo;
 SCROLLBAR_INFO *horzScrollInfo;
+        HWND    hwndHorzScroll; //os/2 handle
+        HWND    hwndVertScroll; //os/2 handle
 
 Win32WndClass  *windowClass;
 

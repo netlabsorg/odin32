@@ -1,4 +1,4 @@
-/* $Id: oslibwin.cpp,v 1.12 1999-10-04 09:56:00 sandervl Exp $ */
+/* $Id: oslibwin.cpp,v 1.13 1999-10-07 09:28:00 sandervl Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -692,34 +692,38 @@ BOOL OSLibWinEnableScrollBar(HWND hwndParent, int scrollBar, BOOL fEnable)
 }
 //******************************************************************************
 //******************************************************************************
-BOOL OSLibWinShowScrollBar(HWND hwndParent, int scrollBar, BOOL fShow)
+BOOL OSLibWinShowScrollBar(HWND hwndParent, HWND hwndScroll, int scrollBar, BOOL fShow)
 {
- HWND hwndScroll;
-
-   if(scrollBar == OSLIB_VSCROLL) {
-	hwndScroll = WinWindowFromID(hwndParent, FID_VERTSCROLL);
-   }
-   else hwndScroll = WinWindowFromID(hwndParent, FID_HORZSCROLL);
-
-   if(hwndScroll == NULL)
+   if(hwndScroll == NULL) {
+	dprintf(("OSLibWinShowScrollBar: scrollbar %d (parent %x) not found!", scrollBar, hwndParent));
 	return FALSE;
+   }
 
-   if(fShow != WinIsWindowVisible(hwndScroll)) {
-	WinShowWindow(hwndScroll, fShow);
+   if(fShow != WinIsWindowVisible(hwndScroll)) 
+   {
+         WinSetParent(hwndScroll, fShow ? hwndParent : HWND_OBJECT, FALSE);
+         WinSendMsg(hwndParent, WM_UPDATEFRAME,
+                    MPFROMLONG( ( scrollBar == OSLIB_VSCROLL ) ? FCF_VERTSCROLL 
+	                                                       : FCF_HORZSCROLL),
+                    MPVOID );
+
+	 WinShowWindow(hwndScroll, fShow);
    }
    return TRUE;   
 }
 //******************************************************************************
 //******************************************************************************
-ULONG OSLibWinGetScrollPos(HWND hwndParent, int scrollBar)
+HWND OSLibWinQueryScrollBarHandle(HWND hwndParent, int scrollBar)
 {
- HWND hwndScroll;
-
    if(scrollBar == OSLIB_VSCROLL) {
-	hwndScroll = WinWindowFromID(hwndParent, FID_VERTSCROLL);
+	return WinWindowFromID(hwndParent, FID_VERTSCROLL);
    }
-   else hwndScroll = WinWindowFromID(hwndParent, FID_HORZSCROLL);
-
+   else return WinWindowFromID(hwndParent, FID_HORZSCROLL);
+}
+//******************************************************************************
+//******************************************************************************
+ULONG OSLibWinGetScrollPos(HWND hwndParent, HWND hwndScroll)
+{
    if(hwndScroll == NULL)
 	return 0;
 
@@ -727,15 +731,9 @@ ULONG OSLibWinGetScrollPos(HWND hwndParent, int scrollBar)
 }
 //******************************************************************************
 //******************************************************************************
-ULONG OSLibWinSetScrollPos(HWND hwndParent, int scrollBar, int pos, int fRedraw)
+ULONG OSLibWinSetScrollPos(HWND hwndParent, HWND hwndScroll, int pos, int fRedraw)
 {
- HWND  hwndScroll;
  ULONG oldPos;
-
-   if(scrollBar == OSLIB_VSCROLL) {
-	hwndScroll = WinWindowFromID(hwndParent, FID_VERTSCROLL);
-   }
-   else hwndScroll = WinWindowFromID(hwndParent, FID_HORZSCROLL);
 
    if(hwndScroll == NULL)
 	return 0;
@@ -749,16 +747,9 @@ ULONG OSLibWinSetScrollPos(HWND hwndParent, int scrollBar, int pos, int fRedraw)
 }
 //******************************************************************************
 //******************************************************************************
-BOOL OSLibWinSetScrollRange(HWND hwndParent, int scrollBar, int minpos, 
+BOOL OSLibWinSetScrollRange(HWND hwndParent, HWND hwndScroll, int minpos, 
                             int maxpos, int fRedraw)
 {
- HWND hwndScroll;
-
-   if(scrollBar == OSLIB_VSCROLL) {
-	hwndScroll = WinWindowFromID(hwndParent, FID_VERTSCROLL);
-   }
-   else hwndScroll = WinWindowFromID(hwndParent, FID_HORZSCROLL);
-
    if(hwndScroll == NULL)
 	return 0;
 
@@ -768,16 +759,9 @@ BOOL OSLibWinSetScrollRange(HWND hwndParent, int scrollBar, int minpos,
 }
 //******************************************************************************
 //******************************************************************************
-BOOL OSLibWinSetScrollPageSize(HWND hwndParent, int scrollBar, int pagesize, 
+BOOL OSLibWinSetScrollPageSize(HWND hwndParent, HWND hwndScroll, int pagesize, 
                                int totalsize, int fRedraw)
 {
- HWND hwndScroll;
-
-   if(scrollBar == OSLIB_VSCROLL) {
-	hwndScroll = WinWindowFromID(hwndParent, FID_VERTSCROLL);
-   }
-   else hwndScroll = WinWindowFromID(hwndParent, FID_HORZSCROLL);
-
    if(hwndScroll == NULL)
 	return 0;
 
@@ -885,6 +869,13 @@ HWND OSLibWinObjectWindowFromID(HWND hwndOwner, ULONG ID)
   }
   WinEndEnumWindows(henum);
   return hwndFound;
+}
+//******************************************************************************
+//******************************************************************************
+BOOL OSLibSetWindowID(HWND hwnd, ULONG value)
+{
+  dprintf(("OSLibSetWindowID hwnd:%x ID:%x", hwnd, value));
+  return WinSetWindowULong(hwnd, QWS_ID, value);
 }
 //******************************************************************************
 //******************************************************************************
