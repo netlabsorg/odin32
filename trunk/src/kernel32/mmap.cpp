@@ -1,4 +1,4 @@
-/* $Id: mmap.cpp,v 1.36 2000-03-09 19:03:19 sandervl Exp $ */
+/* $Id: mmap.cpp,v 1.37 2000-03-23 19:23:47 sandervl Exp $ */
 
 /*
  * Win32 Memory mapped file & view classes
@@ -34,10 +34,15 @@
 #define DBG_LOCALLOG	DBG_mmap
 #include "dbglocal.h"
 
+//NOTE: This must be in the local data segment -> if a shared semaphore was
+//      created by a different process, the handle returned by DosOpenMutexSem
+//      will be returned in hGlobalMapMutex
+HMTX             hGlobalMapMutex = 0;
+
 //Global DLL Data
 #pragma data_seg(_GLOBALDATA)
 Win32MemMap     *Win32MemMap::memmaps = NULL;
-VMutex           globalmapMutex(VMUTEX_SHARED);
+VMutex           globalmapMutex(VMUTEX_SHARED, &hGlobalMapMutex);
 #pragma data_seg()
 VMutex           globalviewMutex;
 Win32MemMapView *Win32MemMapView::mapviews = NULL;
@@ -48,10 +53,10 @@ Win32MemMapView *Win32MemMapView::mapviews = NULL;
 Win32MemMap::Win32MemMap(HFILE hfile, ULONG size, ULONG fdwProtect, LPSTR lpszName)
                : nrMappings(0), pMapping(NULL), mMapAccess(0), referenced(0), image(0)
 {
-  globalmapMutex.enter();
+  globalmapMutex.enter(VMUTEX_WAIT_FOREVER, &hGlobalMapMutex);
   next    = memmaps;
   memmaps = this;
-  globalmapMutex.leave();
+  globalmapMutex.leave(&hGlobalMapMutex);
 
   hMemFile   = hfile;
 
@@ -71,10 +76,10 @@ Win32MemMap::Win32MemMap(HFILE hfile, ULONG size, ULONG fdwProtect, LPSTR lpszNa
 Win32MemMap::Win32MemMap(Win32PeLdrImage *pImage, ULONG baseAddress, ULONG size)
                : nrMappings(0), pMapping(NULL), mMapAccess(0), referenced(0)
 {
-  globalmapMutex.enter();
+  globalmapMutex.enter(VMUTEX_WAIT_FOREVER, &hGlobalMapMutex);
   next    = memmaps;
   memmaps = this;
-  globalmapMutex.leave();
+  globalmapMutex.leave(&hGlobalMapMutex);
 
   hMemFile   = -1;
 
@@ -147,7 +152,7 @@ Win32MemMap::~Win32MemMap()
   }
   mapMutex.leave();
 
-  globalmapMutex.enter();
+  globalmapMutex.enter(VMUTEX_WAIT_FOREVER, &hGlobalMapMutex);
   Win32MemMap *map = memmaps;
 
   if(map == this) {
@@ -164,7 +169,7 @@ Win32MemMap::~Win32MemMap()
 	}
 	else	dprintf(("Win32MemMap::~Win32MemMap: map not found!! (%x)", this));
   }
-  globalmapMutex.leave();
+  globalmapMutex.leave(&hGlobalMapMutex);
 }
 //******************************************************************************
 //We determine whether a page has been modified by checking it's protection flags
@@ -466,7 +471,7 @@ Win32MemMap *Win32MemMap::findMap(LPSTR lpszName)
   if(lpszName == NULL)
 	return NULL;
 
-  globalmapMutex.enter();
+  globalmapMutex.enter(VMUTEX_WAIT_FOREVER, &hGlobalMapMutex);
   Win32MemMap *map = memmaps;
 
   if(map != NULL) {
@@ -476,7 +481,7 @@ Win32MemMap *Win32MemMap::findMap(LPSTR lpszName)
 		map = map->next;
 	}
   }
-  globalmapMutex.leave();
+  globalmapMutex.leave(&hGlobalMapMutex);
   if(!map) dprintf(("Win32MemMap::findMap: couldn't find map %s", lpszName));
   return map;
 }
@@ -484,7 +489,7 @@ Win32MemMap *Win32MemMap::findMap(LPSTR lpszName)
 //******************************************************************************
 Win32MemMap *Win32MemMap::findMap(ULONG address)
 {
-  globalmapMutex.enter();
+  globalmapMutex.enter(VMUTEX_WAIT_FOREVER, &hGlobalMapMutex);
   Win32MemMap *map = memmaps;
 
   if(map != NULL) {
@@ -497,7 +502,7 @@ Win32MemMap *Win32MemMap::findMap(ULONG address)
 		map = map->next;
 	}
   }
-  globalmapMutex.leave();
+  globalmapMutex.leave(&hGlobalMapMutex);
   return map;
 }
 //******************************************************************************
