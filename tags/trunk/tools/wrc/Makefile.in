@@ -3,8 +3,10 @@ TOPSRCDIR = @top_srcdir@
 TOPOBJDIR = ../..
 SRCDIR    = @srcdir@
 VPATH     = @srcdir@
+LEXOPT    = -Cf #-w -b
+YACCOPT   = #-v
 
-PROGRAMS = wrc@PROGEXT@
+PROGRAMS = wrc
 MODULE   = none
 
 C_SRCS = \
@@ -17,25 +19,42 @@ C_SRCS = \
 	wrc.c \
 	writeres.c
 
+GEN_C_SRCS = ppy.tab.c lex.ppl.c
 EXTRA_SRCS = parser.y parser.l
 EXTRA_OBJS = y.tab.o lex.yy.o
 
 all: $(PROGRAMS)
 
-depend:: y.tab.h
-
 @MAKE_RULES@
 
-wrc@PROGEXT@: $(OBJS)
-	$(CC) $(CFLAGS) -o wrc@PROGEXT@ $(OBJS) $(LEXLIB)
+wrc: $(OBJS) $(TOPOBJDIR)/unicode/libwine_unicode.$(LIBEXT)
+	$(CC) $(CFLAGS) -o wrc $(OBJS) $(LIBUNICODE) $(LEXLIB) $(LDFLAGS)
+
+$(TOPOBJDIR)/unicode/libwine_unicode.$(LIBEXT):
+	cd `dirname $@` && $(MAKE) `basename $@`
 
 y.tab.c y.tab.h: parser.y
-	$(YACC) -d -t $(SRCDIR)/parser.y
+	$(YACC) $(YACCOPT) -d -t $(SRCDIR)/parser.y
+
+ppy.tab.c ppy.tab.h: ppy.y
+	$(YACC) $(YACCOPT) -bppy -ppp -d -t $(SRCDIR)/ppy.y
 
 lex.yy.c: parser.l
-	$(LEX) -8 $(SRCDIR)/parser.l
+	$(LEX) $(LEXOPT) -d -8 $(SRCDIR)/parser.l
+
+lex.ppl.c: ppl.l
+	$(LEX) $(LEXOPT) -d -Ppp -8 -olex.ppl.c $(SRCDIR)/ppl.l
 
 clean::
-	$(RM) y.tab.c y.tab.h lex.yy.c
+	$(RM) ppy.tab.h ppy.output parser.output parser.tab.h lex.backup y.output
+
+install:: $(PROGRAMS)
+	[ -d $(bindir) ] || $(MKDIR) $(bindir)
+	[ -d $(mandir)/man$(prog_manext) ] || $(MKDIR) $(mandir)/man$(prog_manext)
+	$(INSTALL_DATA) $(SRCDIR)/wrc.man $(mandir)/man$(prog_manext)/wrc.$(prog_manext)
+	$(INSTALL_PROGRAM) wrc $(bindir)/wrc
+
+uninstall::
+	$(RM) $(bindir)/wrc $(mandir)/man$(prog_manext)/wrc.$(prog_manext)
 
 ### Dependencies:
