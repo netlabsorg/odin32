@@ -379,9 +379,9 @@ typedef struct _PARTITION_INFORMATION {
     DWORD HiddenSectors;
     DWORD PartitionNumber;
     BYTE  PartitionType;
-    BOOL  BootIndicator;
-    BOOL  RecognizedPartition;
-    BOOL  RewritePartition;
+    BYTE  BootIndicator;
+    BYTE  RecognizedPartition;
+    BYTE  RewritePartition;
 } PARTITION_INFORMATION, *PPARTITION_INFORMATION;
 
 typedef struct _SET_PARTITION_INFORMATION {
@@ -545,6 +545,7 @@ typedef struct _PARALLEL_PNP_INFORMATION {
 
 typedef struct _DISK_EXTENT {
     DWORD           DiskNumber;
+    DWORD           Align1;
     LARGE_INTEGER   StartingOffset;
     LARGE_INTEGER   ExtentLength;
 } DISK_EXTENT, *PDISK_EXTENT;
@@ -555,8 +556,8 @@ typedef struct _DISK_EXTENT {
 
 typedef struct _VOLUME_DISK_EXTENTS {
     DWORD       NumberOfDiskExtents;
+    DWORD       Align1;
     DISK_EXTENT Extents[1];
 } VOLUME_DISK_EXTENTS, *PVOLUME_DISK_EXTENTS;
-
 
 #endif
