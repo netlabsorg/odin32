@@ -4361,9 +4361,16 @@ HRESULT WINAPI VarNumFromParseNum(NUMPARSE * pnumprs, BYTE * rgbDig,
  */
 INT WINAPI VariantTimeToDosDateTime(DATE pvtime, USHORT *wDosDate, USHORT *wDosTime)
 {
-    struct tm t;
+  struct tm t;
+  
+#ifdef __WIN32OS2__
+    *wDosTime = 0;
+    *wDosDate = 0;
+#else
+  // PH 2001-11-15: this is definately gonna crash!
     wDosTime = 0;
     wDosDate = 0;
+#endif
 
     TRACE("( 0x%x, 0x%x, 0x%p ), stub\n", *wDosDate, *wDosTime, &pvtime );
 
