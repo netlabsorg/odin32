@@ -1,4 +1,4 @@
-# $Id: process.mak,v 1.1.2.3 2002-04-01 13:54:20 bird Exp $
+# $Id: process.mak,v 1.1.2.4 2002-04-06 20:19:52 bird Exp $
 
 #
 # Unix-like tools for OS/2
@@ -352,6 +352,7 @@ install:
 #
 # Run evt. testcase
 #
+!ifndef BUILD_NO_TESTCASE
 testcase: install
 !if [$(TOOL_EXISTS) testcase] == 0
     @$(TOOL_DODIRS) "testcase" $(TOOL_MAKE) $@
@@ -368,6 +369,7 @@ testcase: install
 !ifdef POSTMAKEFILES
     @$(TOOL_DOMAKES) "$(POSTMAKEFILES)" $(TOOL_MAKE) $@
 !endif
+!endif
 
 
 #
@@ -375,7 +377,11 @@ testcase: install
 #
 dep:
     @$(ECHO) Building dependencies $(CLRRST)
-    @$(TOOL_DEP) $(TOOL_DEP_FLAGS) -o$$(PATH_TARGET) -d$(BUILD_TARGET_DEPEND) $(TOOL_DEP_FILES)
+    @$(TOOL_DEP) $(TOOL_DEP_FLAGS) -o$$(PATH_TARGET) -d$(BUILD_TARGET_DEPEND)\
+!ifdef TARGET_NO_DEP
+        -x$(TARGET_NO_DEP: =;)\
+!endif
+        $(TOOL_DEP_FILES)
 !ifdef SUBDIRS
     @$(TOOL_DODIRS) "$(SUBDIRS)" $(TOOL_MAKE) NODEP=1 $@
 !endif
