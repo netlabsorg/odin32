@@ -1,4 +1,4 @@
-/* $Id: dcrgn.cpp,v 1.2 2000-06-14 13:15:24 sandervl Exp $ */
+/* $Id: dcrgn.cpp,v 1.3 2000-06-17 11:56:14 sandervl Exp $ */
 
 /*
  * DC functions for USER32
@@ -120,6 +120,7 @@ BOOL GetOS2UpdateRect(Win32BaseWindow *window, LPRECT pRect)
    return updateRegionExists;
 }
 //******************************************************************************
+//TODO: Seems to return region in window coordinates instead of client coordinates
 //******************************************************************************
 int WIN32API GetUpdateRgn(HWND hwnd, HRGN hrgn, BOOL erase)
 {
@@ -205,7 +206,7 @@ int WIN32API GetWindowRgn(HWND hwnd, HRGN hRgn)
     dprintf(("USER32:GetWindowRgn (%x,%x)", hwnd, hRgn));
     hWindowRegion = window->GetWindowRegion();
 
-    return O32_CombineRgn(hRgn, hWindowRegion, 0, RGN_COPY_W);
+    return CombineRgn(hRgn, hWindowRegion, 0, RGN_COPY_W);
 }
 /*****************************************************************************
  * Name      : int WIN32API SetWindowRgn
@@ -243,7 +244,7 @@ int WIN32API SetWindowRgn(HWND hwnd,
     }
     dprintf(("USER32:SetWindowRgn (%x,%x,%d)", hwnd, hRgn, bRedraw));
     if(window->GetWindowRegion()) {
-        O32_DeleteObject(window->GetWindowRegion());
+        DeleteObject(window->GetWindowRegion());
     }
     window->SetWindowRegion(hRgn);
     if(bRedraw) {
