@@ -52,6 +52,21 @@ class OS2IDirectDrawSurface
 
  private:
         HRESULT         ColorFill(LPRECT, DWORD);
+        void (__cdecl *BltSolid)( char *pDBDst,
+                                char *pFBDst,
+                                DWORD dwDstTop,
+                                DWORD dwDstLeft,
+                                DWORD dwPitchDBDst,
+                                DWORD dwPitchFBDst,
+                                char *pDBSrc,
+                                char *pFBSrc,
+                                DWORD dwSrcTop,
+                                DWORD dwSrcLeft,
+                                DWORD dwWidth,
+                                DWORD dwHeight,
+                                DWORD dwPitchDBSrc,
+                                DWORD dwPitchFBSrc
+                               );
  protected:
         HRESULT                lastError;
         HDIVE                  hDive;

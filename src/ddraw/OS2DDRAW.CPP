@@ -16,7 +16,7 @@
 #include <winerror.h>
 #include <builtin.h>
 #include "cio2.h"
-
+#include "os2util.h"
 // include with the videomodes we support
 // better would be to get these modes from the card
 // But for now we use standard VESA 2.0 modes with 70Hz
@@ -175,6 +175,17 @@ OS2IDirectDraw::OS2IDirectDraw(GUID *lpGUID) :
   }
   else
     bScale = FALSE;
+
+  rc = InitIO();
+
+  if(rc)  // try to get IOPL for the thread
+  {
+    dprintf(("DDRAW: No IOPL\n"));
+  }
+  else
+  {
+    dprintf(("DDRAW: IOPL 3!\n"));
+  }
 }
 //******************************************************************************
 //******************************************************************************
@@ -1557,15 +1568,15 @@ HRESULT __stdcall DrawWaitForVerticalBlank(THIS, DWORD dwFlags, HANDLE hEvent)
 {
   HRESULT rc;
   int rci;
-
+  USHORT sel;
   dprintf(("DDRAW: WaitForVerticalBlank\n"));
 
   if(DDWAITVB_BLOCKBEGINEVENT == dwFlags) // This parameter isn't support in DX
     return (DDERR_UNSUPPORTED);
 
+  return DD_OK;
 
-  rci = io_init1();
-
+  rci = InitIO();
 
   if(rci)  // try to get IOPL for the thread
   {
@@ -1573,11 +1584,14 @@ HRESULT __stdcall DrawWaitForVerticalBlank(THIS, DWORD dwFlags, HANDLE hEvent)
     return (DDERR_UNSUPPORTED);  // we failed so return error that we don't support this
   }
   // AT this point we should have IOPL so lets use it!
+  dprintf(("DDRAW: IOPL 3!\n"));
 
   rc = DDERR_INVALIDPARAMS; // set returnvalue to fail
 
   if(DDWAITVB_BLOCKBEGIN == dwFlags)
   {
+    dprintf(("DDRAW: BLOCKBEGIN\n"));
+
     while ((c_inb1(0x3da)&0x08)!=0); // Wait for end of vert. retrace if one is running
     while ((c_inb1(0x3da)&0x08)==0); // Wait for new start of retrace
     rc = DD_OK;
@@ -1585,6 +1599,7 @@ HRESULT __stdcall DrawWaitForVerticalBlank(THIS, DWORD dwFlags, HANDLE hEvent)
 
   if(DDWAITVB_BLOCKEND == dwFlags)
   {
+    dprintf(("DDRAW: BLOCKEND\n"));
     rc = DD_OK;
     if((c_inb1(0x3da)&0x08)!=0)        // Are we in a vert. retrace
     {
