@@ -1,4 +1,4 @@
-/* $Id: gdi32.cpp,v 1.25 1999-12-16 00:10:50 sandervl Exp $ */
+/* $Id: gdi32.cpp,v 1.26 1999-12-16 16:52:31 cbratschi Exp $ */
 
 /*
  * GDI32 apis
@@ -17,30 +17,6 @@
 #include "callback.h"
 #include "unicode.h"
 #include "dibsect.h"
-
-typedef struct _POLYTEXTA
-{
-    int     x;
-    int     y;
-    UINT    n;
-    LPCSTR lpstr;
-    UINT    uiFlags;
-    RECT    rcl;
-    int     *pdx;
-} POLYTEXTA;
-
-
-typedef struct _POLYTEXTW
-{
-    int     x;
-    int     y;
-    UINT    n;
-    LPCWSTR lpstr;
-    UINT    uiFlags;
-    RECT    rcl;
-    int     *pdx;
-} POLYTEXTW;
-
 
 static ULONG QueryPaletteSize(BITMAPINFOHEADER *pBHdr)
 {
@@ -996,13 +972,6 @@ BOOL WIN32API EnumEnhMetaFile( HDC arg1, HENHMETAFILE arg2, ENHMFENUMPROC arg3, 
     dprintf(("GDI32: EnumEnhMetaFile DOESN'T WORK!"));
 //    return O32_EnumEnhMetaFile(arg1, arg2, arg3, arg4, arg5);
     return 0;
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API MoveToEx( HDC arg1, int arg2, int arg3, PPOINT  arg4)
-{
-    dprintf(("GDI32: MoveToEx\n"));
-    return O32_MoveToEx(arg1, arg2, arg3, arg4);
 }
 //******************************************************************************
 //******************************************************************************
@@ -3168,105 +3137,6 @@ int WIN32API GetPixelFormat(HDC hdc)
            hdc));
 
   return (0);
-}
-
-
-/*****************************************************************************
- * Name      : BOOL PolyTextOutA
- * Purpose   : The PolyTextOutA function draws several strings using the font
- *             and text colors currently selected in the specified device context.
- * Parameters: HDC  hdc   handle of device context
- *             CONST POLYTEXT *pptxt address of array of structures that identify strings
- *             int            cStrings number of structures in array
- * Variables :
- * Result    : TRUE / FALSE
- * Remark    :
- * Status    : UNTESTED STUB
- *
- * Author    : Patrick Haller [Mon, 1998/06/15 08:00]
- *****************************************************************************/
-
-BOOL WIN32API PolyTextOutA(HDC       hdc,
-                              POLYTEXTA *pptxt,
-                              int       cStrings)
-{
-  dprintf(("GDI32: PolyTextOutA(%08xh, %08xh, %08xh) not implemented.\n",
-           hdc,
-           pptxt,
-           cStrings));
-
-  return (FALSE);
-}
-
-
-#if 0
-
-The POLYTEXT structure describes how the PolyTextOut function should draw a string of text.
-
-Members
-
-x
-
-Specifies the horizontal reference point for the string. The string is aligned to this point using the current text-alignment mode.
-
-y
-
-Specifies the vertical reference point for the string. The string is aligned to this point using the current text-alignment mode.
-
-n
-
-Specifies the number of characters in the string.
-
-uiFlags
-
-Specifies whether the string is to be opaque or clipped and whether the string is accompanied by an array of character-width values. This member can be one or more of the following values:
-
-Value   Meaning
-ETO_OPAQUE      The rectangles given for each string is to be opaqued with the current background color.
-ETO_CLIPPED     Each string is to be clipped to its given rectangle.
-lpstr
-
-Points to a string of text to be drawn by the PolyTextOut function.
-
-rcl
-
-Specifies a rectangle structure that contains the dimensions of the opaquing or clipping rectangle. This member is ignored if neither of the ETO_OPAQUE nor the ETO_CLIPPED value is specified for the uiFlags member.
-
-pdx
-
-Specifies in an array the width value for each character in the string.
-
-See Also
-
-PolyTextOut
-#endif
-
-
-/*****************************************************************************
- * Name      : BOOL PolyTextOutW
- * Purpose   : The PolyTextOutW function draws several strings using the font
- *             and text colors currently selected in the specified device context.
- * Parameters: HDC  hdc   handle of device context
- *             CONST POLYTEXT *pptxt address of array of structures that identify strings
- *             int            cStrings number of structures in array
- * Variables :
- * Result    : TRUE / FALSE
- * Remark    :
- * Status    : UNTESTED STUB
- *
- * Author    : Patrick Haller [Mon, 1998/06/15 08:00]
- *****************************************************************************/
-
-BOOL WIN32API PolyTextOutW(HDC       hdc,
-                              POLYTEXTW *pptxt,
-                              int       cStrings)
-{
-  dprintf(("GDI32: PolyTextOutW(%08xh, %08xh, %08xh) not implemented.\n",
-           hdc,
-           pptxt,
-           cStrings));
-
-  return (FALSE);
 }
 
 
