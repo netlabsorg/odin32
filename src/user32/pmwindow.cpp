@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.155 2001-10-15 17:09:04 sandervl Exp $ */
+/* $Id: pmwindow.cpp,v 1.156 2001-10-18 13:28:08 sandervl Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -330,6 +330,9 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
 
     case WM_SHOW:
         dprintf(("OS2: WM_SHOW %x %d", hwnd, mp1));
+        //SvL: When a window is made visible, then we don't receive a
+        //     WM_VRNENABLED message (for some weird reason)
+        win32wnd->callVisibleRgnNotifyProc(TRUE);
         win32wnd->MsgShow((ULONG)mp1);
         break;
 
