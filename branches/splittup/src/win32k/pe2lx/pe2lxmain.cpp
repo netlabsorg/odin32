@@ -1,4 +1,4 @@
-/* $Id: pe2lxmain.cpp,v 1.7 2001-02-10 11:11:48 bird Exp $
+/* $Id: pe2lxmain.cpp,v 1.7.2.1 2001-10-14 22:58:53 bird Exp $
  *
  * Pe2Lx main program. (Ring 3 only!)
  *
@@ -43,7 +43,7 @@
 *   Global Variables                                                           *
 *******************************************************************************/
 char szBackupWin32Filename[CCHMAXPATH]; /* too save stack/heap */
-struct options options = DEFAULT_OPTION_ASSIGMENTS;
+struct Win32kOptions options = DEFAULT_OPTION_ASSIGMENTS;
 
 /*******************************************************************************
 *   Internal Functions                                                         *
