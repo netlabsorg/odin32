@@ -1,4 +1,4 @@
-/* $Id: exceptions.cpp,v 1.44 2000-09-09 08:59:54 sandervl Exp $ */
+/* $Id: exceptions.cpp,v 1.45 2000-09-15 13:24:29 sandervl Exp $ */
 
 /* WARNING: Compiling this module with ICC with optimizations turned on   */
 /* currently breaks this module. To get correct code, it is not necessary */
@@ -1052,12 +1052,6 @@ ULONG APIENTRY OS2ExceptionHandler(PEXCEPTIONREPORTRECORD       pERepRec,
                                    PCONTEXTRECORD               pCtxRec,
                                    PVOID                        p)
 {
-  //MN: If EH_NESTED_CALL is set, an exception occurred during the execution
-  //    of this exception handler. We better bail out ASAP or we'll likely
-  //    recurse infinitely until we run out of stack space!!
-  if (pERepRec->fHandlerFlags & EH_NESTED_CALL)
-      return XCPT_CONTINUE_SEARCH;
-
   //SvL: Check if exception inside debug fprintf -> if so, clear lock so
   //     next dprintf won't wait forever
   CheckLogException();
@@ -1174,6 +1168,13 @@ continueFail:
   case XCPT_UNABLE_TO_GROW_STACK:
   case XCPT_IN_PAGE_ERROR:
 CrashAndBurn:
+        //SvL: TODO: this may not always be the right thing to do
+        //MN: If EH_NESTED_CALL is set, an exception occurred during the execution
+        //    of this exception handler. We better bail out ASAP or we'll likely
+        //    recurse infinitely until we run out of stack space!!
+        if (pERepRec->fHandlerFlags & EH_NESTED_CALL)
+		return XCPT_CONTINUE_SEARCH;
+
 #ifdef DEBUG
         dprintfException(pERepRec, pERegRec, pCtxRec, p);
         if(pCtxRec->ContextFlags & CONTEXT_CONTROL) {
