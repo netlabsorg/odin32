@@ -1,4 +1,4 @@
-# $Id: setup.os2relwat11-16.mk,v 1.11 2002-08-28 04:42:05 bird Exp $
+# $Id: setup.os2relwat11-16.mk,v 1.12 2002-08-28 05:02:22 bird Exp $
 
 #
 # Note! Watcom is unable to do debug info release builds.
@@ -32,31 +32,20 @@ LD_OLDCPP       = 1
 _LD_LIBPATH     = $(PATH_WATCOM)\lib286\os2;$(PATH_WATCOM)\lib286;
 ! include $(PATH_MAKE)\setup.os2relwlink.mk
 !endif
+!include $(PATH_MAKE)\setup.os2allilib.mk
 !include $(PATH_MAKE)\setup.optional.watcom11x.mk
 
 
 #
 # The tools
 #
-AR=ilib.exe
 CC=wcc.exe
 CXX=wpp.exe
-IMPLIB=implib.exe
 
 
 #
 # The flags
 #
-AR_FLAGS=/nologo /noignorecase
-AR_CMD=$(AR) $(AR_FLAGS) @"$(TARGET_LNK)"
-AR_LNK1= "$(@R).$(EXT_LIB)"
-AR_LNK2=y
-_AR_LNK3= +"$(TARGET_OBJS: ="&^
- +")"
-AR_LNK3= $(_AR_LNK3:+""&^
-=)
-AR_LNK4= "$(@R).lst";
-
 _CC_FLAGS_OS =
 
 CC_FLAGS=-bt=os2 -dOS2 -d__16BIT__ -5 -zq -bm -ze -w4 -zld $(_CC_OPTIONAL) $(CC_DEFINES) $(ALL_DEFINES) $(BUILD_DEFINES) $(CC_INCLUDES:-I=-i=) $(ALL_INCLUDES:-I=-i=) -i=$(PATH_INCLUDES) -i=$(WATCOM)\h
@@ -101,7 +90,7 @@ CXX_FLAGS_VDD=$(CC_FLAGS_VDD)
 CXX_FLAGS_IFS=$(CC_FLAGS_IFS)
 !endif
 
-IMPLIB_FLAGS=/NOI /Nologo
+
 
 
 #
