@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.6 1999-10-28 15:23:05 sandervl Exp $
+# $Id: makefile,v 1.7 1999-11-04 18:50:50 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -9,8 +9,13 @@
 #	Usage: nmake ( debug | nodebuginfo | release | all | clean )
 #
 #            debug: Change to a debug build.
+#            debugsmp: Start nmake process in background that processes all
+#                      dlls in reverse (linking fails, but first nmake will 
+#                      correct this)
 #            nodebuginfo: Change to a debug build without debug info in binaries
+#            nodebuginfosmp: Change to an SMP debug build without debug info in binaries
 #            release: Change to a release build.
+#            releasesmp: Change to an SMP release build.
 #            all: Build the entire tree.
 #            clean: Bring tree back to a "virgin" state.
 #
@@ -33,14 +38,28 @@ debug:		odin_libraries  needed_tools
 		cd src
 		nmake -nologo all DEBUG=1
 
+debugsmp:	odin_libraries  needed_tools
+		cd src
+		start nmake -i -f makefile.smp -nologo all DEBUG=1
+		nmake -nologo all DEBUG=1
+
 nodebuginfo:	odin_libraries  needed_tools
 		cd src
+		nmake -nologo all DEBUG=1 NODEBUGINFO=1
+
+nodebuginfosmp:	odin_libraries  needed_tools
+		cd src
+		start nmake -i -f makefile.smp -nologo all DEBUG=1 NODEBUGINFO=1
 		nmake -nologo all DEBUG=1 NODEBUGINFO=1
 
 release:	odin_libraries  needed_tools
 		cd src
 		nmake -nologo all
 
+releasesmp:	odin_libraries  needed_tools
+		cd src
+		start nmake -i -f makefile.smp -nologo all
+		nmake -nologo all
 
 
 # --- common section ---
