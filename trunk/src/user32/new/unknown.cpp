@@ -1,4 +1,4 @@
-/* $Id: unknown.cpp,v 1.1 1999-07-14 08:35:36 sandervl Exp $ */
+/* $Id: unknown.cpp,v 1.2 1999-08-05 23:39:48 phaller Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -11,10 +11,10 @@
 
 #include <os2win.h>
 
-
 /*****************************************************************************
  * Defines                                                                   *
  *****************************************************************************/
+
 
 /*****************************************************************************
  * Structures                                                                *
@@ -173,5 +173,21 @@ HRESULT WIN32API GetTaskmanWindow ( )
   dprintf(("USER32: GetTaskmanWindow() not implemented.\n"));
 
   return Locals.hGlobalTaskmanWindow;
+}
+
+
+/***********************************************************************
+ *           SetInternalWindowPos   (USER32.483)
+ */
+void WIN32API SetInternalWindowPos(HWND    hwnd,
+                                   UINT    showCmd,
+                                   LPRECT  rect,
+                                   LPPOINT pt )
+{
+  dprintf(("USER32: SetInternalWindowPos(%08xh,%08xh,%08xh,%08xh) not implemented.\n",
+           hwnd,
+           showCmd,
+           rect,
+           pt));
 }
 
