@@ -1,4 +1,4 @@
-/* $Id: wsa.cpp,v 1.5 2000-03-30 20:52:55 sandervl Exp $ */
+/* $Id: wsa.cpp,v 1.6 2000-05-02 13:09:43 bird Exp $ */
 
 /*
  *
@@ -31,6 +31,11 @@
 
 ODINDEBUGCHANNEL(WSOCK32-WSA)
 
+//kso: dirty fix to make this compile! not permanent!
+BOOL WINAPI QueryPerformanceCounter(LARGE_INTEGER *p);
+#define LowPart u.LowPart
+
+
 #ifndef winsockcleanupsockets
 // Exported by SO32DLL.  Used to close all open sockets.
 void _System winsockcleanupsockets(void);
@@ -58,7 +63,7 @@ ODINFUNCTION2(int, WSAStartup,
 
     if (!lpWSAData) return WSAEINVAL;
 
-    if(fWSAInitialized == FALSE) 
+    if(fWSAInitialized == FALSE)
     {
         WINSOCK_CreateIData();
         pwsi = WINSOCK_GetIData();
@@ -141,7 +146,7 @@ BOOL WIN32API WSAIsBlocking()
 }
 //******************************************************************************
 //******************************************************************************
-void WSASetBlocking(BOOL fBlock, HANDLE tid) 
+void WSASetBlocking(BOOL fBlock, HANDLE tid)
 {
     LPWSINFO pwsi = WINSOCK_GetIData(tid);
 
@@ -160,7 +165,7 @@ void WSASetBlocking(BOOL fBlock, HANDLE tid)
 ODINFUNCTION2(int,__WSAFDIsSet,SOCKET, s, ws_fd_set*,set)
 {
   int i = set->fd_count;
-    
+
   while (i--)
       if (set->fd_array[i] == s) return 1;
 
@@ -204,7 +209,7 @@ UINT wsaErrno()
 	case SOCENETUNREACH:	return WSAENETUNREACH;
 	case SOCENETRESET:	return WSAENETRESET;
 	case SOCECONNABORTED:	return WSAECONNABORTED;
-	case SOCEPIPE:	
+	case SOCEPIPE:
 	case SOCECONNRESET:	return WSAECONNRESET;
 	case SOCENOBUFS:	return WSAENOBUFS;
 	case SOCEISCONN:	return WSAEISCONN;
@@ -240,7 +245,7 @@ UINT wsaHerrno()
 	case HOST_NOT_FOUND:	return WSAHOST_NOT_FOUND;
 	case TRY_AGAIN:		return WSATRY_AGAIN;
 	case NO_RECOVERY:	return WSANO_RECOVERY;
-	case NO_DATA:		return WSANO_DATA; 
+	case NO_DATA:		return WSANO_DATA;
 
 	case 0:			return 0;
         default:
