@@ -1,4 +1,19 @@
- /* $Id: changelog,v 1.412 1999-11-04 20:06:45 phaller Exp $ */
+ /* $Id: changelog,v 1.413 1999-11-05 09:21:25 sandervl Exp $ */
+
+ 99-11-05: Jens Wiessner <wiessnej@rfi.de>
+	- MSVFW32: Updated to Wine level 991031
+	- IMM32: Replaced some FIXME entries with dprintf;
+	- KERNEL32: Added _wsnprintfA to .DEF file for export (MSACM32 needs this)
+	- INCLUDE: New MSACM.H from Wine991031 (MSACM32 needs this)
+	- MSACM32: New MSACM32.DLL (Ported from Wine9910131)
+
+ 99-11-05: Edgar Buerkle <Edgar.Buerkle@gmx.net>
+	- GDI32: Fixes for StretchDIBits & GetDIBColorTable
+	- USER32: Fixes for ArrangeIconicWindows & ShowOwnedPopups
+                  NULL pointer checks in hasWindowName/hasClassName/FindClass
+	- OLE32: Always create OLE window class
+	- KERNEL32: Null pointer check in lstrcmpiA
+	- SHELL32: Corrected export of Shell_GetCachedImageIndex
 
  99-11-04: Sander van Leeuwen <sandervl@xs4all.nl>
 	- SHLWAPI: Fixed makefile
