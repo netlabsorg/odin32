@@ -1,4 +1,4 @@
-/* $Id: oslibmsgtranslate.cpp,v 1.68 2001-10-25 15:35:53 phaller Exp $ */
+/* $Id: oslibmsgtranslate.cpp,v 1.69 2001-10-26 09:10:12 phaller Exp $ */
 /*
  * Window message translation functions for OS/2
  *
@@ -164,6 +164,12 @@ USHORT pmscan2winkey [][2] = {
 static BOOL fGenerateDoubleClick = FALSE;
 static MSG  doubleClickMsg = {0};
 
+
+// Note:
+// For a "lonekey"-press of AltGr, we only receive WM_KEYUP
+// messages. If the key is pressed longer and starts to repeat,
+// WM_KEYDOWN messages come in properly.
+static BOOL fKeyAltGrDown = FALSE;
 
 //******************************************************************************
 //******************************************************************************
@@ -683,7 +689,7 @@ BOOL OS2ToWinMsgTranslate(void *pTeb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode,
         keyWasPressed = ((SHORT1FROMMP (os2Msg->mp1) & KC_PREVDOWN) == KC_PREVDOWN);
 
         dprintf(("PM: WM_CHAR: %x %x rep=%d scancode=%x", SHORT1FROMMP(os2Msg->mp2), SHORT2FROMMP(os2Msg->mp2), repeatCount, scanCode));
-        dprintf(("PM: WM_CHAR: hwnd %x flags %x mp1 %x, mp2 %x", win32wnd->getWindowHandle(), flags, os2Msg->mp1, os2Msg->mp2));
+        dprintf(("PM: WM_CHAR: hwnd %x flags %x mp1 %x, mp2 %x, time=%08xh", win32wnd->getWindowHandle(), flags, os2Msg->mp1, os2Msg->mp2, os2Msg->time));
 
         // vitali add begin
         if ( ( SHORT1FROMMP(os2Msg->mp2) & 0x0FF ) == 0x0E0 )
@@ -804,6 +810,7 @@ VirtualKeyFound:
         // ------------------------------------------------
         // check if additional messages have to be recorded
         // ------------------------------------------------
+#if 0
         {
           MSG extramsg;
           extramsg.hwnd = winMsg->hwnd;
@@ -812,23 +819,6 @@ VirtualKeyFound:
           
           switch (scanCode)
           {
-            case PMSCAN_ESC:
-            {
-              // Note: ESC generates a WM_CHAR for WINWM_KEYDOWN
-              // under Windows, not under PM
-              // so we've got to post it to ourself here!
-              // WM_CHAR(0x0000001bh, 00010001h)
-              if (winMsg->message == WINWM_KEYDOWN)
-              {
-                extramsg.message = WINWM_CHAR;
-                extramsg.wParam  = VK_ESCAPE_W;
-                extramsg.lParam  = winMsg->lParam;
-                setThreadQueueExtraCharMessage(teb, &extramsg);
-              }
-            }
-            break;
-            
-#if 0
             case PMSCAN_PRINT:
               // Note: PRINT generates a WM_KEYUP under Windows
               // also only call the standard kbd hook for the WM_KEYUP msg,
@@ -840,50 +830,109 @@ VirtualKeyFound:
               extramsg.lParam  = winMsg->lParam;
               setThreadQueueExtraCharMessage(teb, &extramsg);
               break;
-#endif
             
+            #define WIN_KEY_EXTENDED   0x01000000
+            #define WIN_KEY_DONTCARE   0x02000000
+            #define WIN_KEY_ALTHELD    0x20000000
+            #define WIN_KEY_PREVSTATE  0x40000000
             case PMSCAN_ALTRIGHT:
             {
               // we need very special treatment here for the
               // poor, crippled AltGr key
-              if (keyWasPressed)
+              // Note: see fKeyAltGrDown above!
+              
+              if ( (keyWasPressed) || (fKeyAltGrDown == FALSE) )
               {
+                fKeyAltGrDown = TRUE;
+                
                 // 1 - generate a virtual LCONTROL-keypress
                 // 2 - send LMENU-keypress (NT emulates ALtGr w/ Ctrl-AltGr!)
                 // 0xfe000000: mask out extended-key, scancode, repeatcount
+                // Note: Win sends a WINWM_SYSKEYDOWN to the hooks,
+                // the queue gets a WM_KEYDOWN only! (wrong impl. here)
                 extramsg.message = WINWM_KEYDOWN;
                 extramsg.wParam  = VK_RMENU_W;
                 extramsg.lParam  = (winMsg->lParam & 0xfe000000)
+                                   | WIN_KEY_EXTENDED
+                                   | (keyWasPressed ? WIN_KEY_PREVSTATE : 0)
+                                   | WIN_KEY_ALTHELD
                                    | repeatCount
-                                   | (WINSCAN_ALTRIGHT << 24);
+                                   | (WINSCAN_ALTRIGHT << 16);
                 winMsg->message  = WINWM_KEYDOWN;
                 winMsg->wParam   = VK_LCONTROL_W;
                 winMsg->lParam   = (winMsg->lParam & 0xfe000000)
+                                   | WIN_KEY_DONTCARE
+                                   | (keyWasPressed ? WIN_KEY_PREVSTATE : 0)
+                                   | WIN_KEY_ALTHELD
                                    | repeatCount
-                                   | (WINSCAN_CTRLLEFT << 24);
+                                   | (WINSCAN_CTRLLEFT << 16);
               }
               else
               {
+                // OK, now we can release it!
+                fKeyAltGrDown = FALSE;
+                
                 // key up
                 // 1 - generate a virtual LCONTROL-keypress
                 // 2 - send LMENU-keypress (NT emulates ALtGr w/ Ctrl-Alt!)
-                extramsg.message = WINWM_KEYDOWN;
+                extramsg.message = WINWM_KEYUP;
                 extramsg.wParam  = VK_RMENU_W;
                 extramsg.lParam  = (winMsg->lParam & 0xfe000000)
+                                   | WIN_KEY_EXTENDED
                                    | repeatCount
-                                   | (WINSCAN_ALTRIGHT << 24);
+                                   | (WINSCAN_ALTRIGHT << 16);
                 winMsg->message  = WINWM_SYSKEYUP;
                 winMsg->wParam   = VK_LCONTROL_W;
                 winMsg->lParam   = (winMsg->lParam & 0xfe000000)
+                                   | WIN_KEY_ALTHELD
                                    | repeatCount
-                                   | (WINSCAN_CTRLLEFT << 24);
+                                   | (WINSCAN_CTRLLEFT << 16);
               }
               
+              // @@@PH
+              // unknown: this leads to an infinite loop
+              // because the OS/2 WM_CHAR_SPECIAL message is never
+              // removed from the queue?!
               setThreadQueueExtraCharMessage(teb, &extramsg);
+              
+              if ( (keyWasPressed) || (fKeyAltGrDown == FALSE) )
+              {
+                fKeyAltGrDown = TRUE;
+                
+                // 1 - generate a virtual LCONTROL-keypress
+                // 2 - send LMENU-keypress (NT emulates ALtGr w/ Ctrl-AltGr!)
+                // 0xfe000000: mask out extended-key, scancode, repeatcount
+                // Note: Win sends a WINWM_SYSKEYDOWN to the hooks,
+                // the queue gets a WM_KEYDOWN only! (wrong impl. here)
+                winMsg->message = WINWM_KEYDOWN;
+                winMsg->wParam  = VK_RMENU_W;
+                winMsg->lParam  = (winMsg->lParam & 0xfe000000)
+                                   | WIN_KEY_EXTENDED
+                                   | (keyWasPressed ? WIN_KEY_PREVSTATE : 0)
+                                   | WIN_KEY_ALTHELD
+                                   | repeatCount
+                                   | (WINSCAN_ALTRIGHT << 16);
+              }
+              else
+              {
+                // OK, now we can release it!
+                fKeyAltGrDown = FALSE;
+                
+                // key up
+                // 1 - generate a virtual LCONTROL-keypress
+                // 2 - send LMENU-keypress (NT emulates ALtGr w/ Ctrl-Alt!)
+                winMsg->message = WINWM_KEYUP;
+                winMsg->wParam  = VK_RMENU_W;
+                winMsg->lParam  = (winMsg->lParam & 0xfe000000)
+                                   | WIN_KEY_EXTENDED
+                                   | repeatCount
+                                   | (WINSCAN_ALTRIGHT << 16);
+              }
             }
+            break;
           } /* switch */
         }
-      
+#endif
       
         if (ISKDB_CAPTURED())
         {
@@ -1045,49 +1094,66 @@ BOOL OSLibWinTranslateMessage(MSG *msg)
     //NOTE: These actually need to be posted so that the next message retrieved by GetMessage contains
     //      the newly generated WM_CHAR message.
     if(!teb->o.odin.fTranslated && teb->o.odin.os2msg.msg == WM_CHAR && !((SHORT1FROMMP(teb->o.odin.os2msg.mp1) & KC_KEYUP) == KC_KEYUP))
-    {//TranslatedMessage was called before DispatchMessage, so queue WM_CHAR message
-            ULONG fl = SHORT1FROMMP(teb->o.odin.os2msg.mp1);
-            MSG extramsg;
+    {
+      //TranslatedMessage was called before DispatchMessage, so queue WM_CHAR message
+      ULONG fl = SHORT1FROMMP(teb->o.odin.os2msg.mp1);
+      MSG extramsg;
 
-            memcpy(&extramsg, msg, sizeof(MSG));
-            extramsg.wParam = SHORT1FROMMP(teb->o.odin.os2msg.mp2);
-            extramsg.lParam = 0;
+      memcpy(&extramsg, msg, sizeof(MSG));
+      extramsg.wParam = SHORT1FROMMP(teb->o.odin.os2msg.mp2);
+      extramsg.lParam = 0;
 
-            if(!(fl & KC_CHAR) && msg->message < WINWM_SYSKEYDOWN) {
-                return FALSE;
-            }
+      // ESCAPE generates a WM_CHAR under windows, so take
+      // special care for this here.
+      UCHAR ucPMScanCode = CHAR4FROMMP(teb->o.odin.os2msg.mp1);
+      switch (ucPMScanCode)
+      {
+        case PMSCAN_ESC:
+          extramsg.wParam  = VK_ESCAPE_W;
+          fl |= KC_CHAR;
+        break;
+      }
 
-            if(fl & KC_VIRTUALKEY) {
-                if(msg->wParam) {
-                    if ((msg->wParam >= VK_NUMPAD0_W) && (msg->wParam <= VK_NUMPAD9_W))
-                        extramsg.wParam = msg->wParam - 0x30;
-                    else
-                        extramsg.wParam = msg->wParam;
-                }
-                else    extramsg.wParam = SHORT2FROMMP(teb->o.odin.os2msg.mp2);
-            }
+      if(!(fl & KC_CHAR) && msg->message < WINWM_SYSKEYDOWN) 
+      {
+        return FALSE;
+      }
+
+      if(fl & KC_VIRTUALKEY)
+      {
+        if(msg->wParam)
+        {
+          if ((msg->wParam >= VK_NUMPAD0_W) && 
+              (msg->wParam <= VK_NUMPAD9_W))
+            extramsg.wParam = msg->wParam - 0x30;
+          else
+            extramsg.wParam = msg->wParam;
+        }
+        else    
+          extramsg.wParam = SHORT2FROMMP(teb->o.odin.os2msg.mp2);
+      }
 
 
-            if(msg->message >= WINWM_SYSKEYDOWN) {
-                    extramsg.message = WINWM_SYSCHAR;
-            }
-            else    extramsg.message = WINWM_CHAR;
+      if(msg->message >= WINWM_SYSKEYDOWN) 
+        extramsg.message = WINWM_SYSCHAR;
+      else    
+        extramsg.message = WINWM_CHAR;
 
-            if(fl & KC_DEADKEY) {
-                extramsg.message++;  //WM_DEADCHAR/WM_SYSDEADCHAR
-            }
+      if(fl & KC_DEADKEY)
+        extramsg.message++;  //WM_DEADCHAR/WM_SYSDEADCHAR
 
-            extramsg.lParam = msg->lParam & 0x00FFFFFF;
-            if(fl & KC_ALT)
-                extramsg.lParam |= (1<<29);
-            if(fl & KC_PREVDOWN)
-                extramsg.lParam |= (1<<30);
-            if(fl & KC_KEYUP)
-                extramsg.lParam |= (1<<31);
-      
-            // insert message into the queue
-            setThreadQueueExtraCharMessage(teb, &extramsg);
-            return TRUE;
+
+      extramsg.lParam = msg->lParam & 0x00FFFFFF;
+      if(fl & KC_ALT)
+        extramsg.lParam |= (1<<29);
+      if(fl & KC_PREVDOWN)
+        extramsg.lParam |= (1<<30);
+      if(fl & KC_KEYUP)
+        extramsg.lParam |= (1<<31);
+
+      // insert message into the queue
+      setThreadQueueExtraCharMessage(teb, &extramsg);
+      return TRUE;
     }
     return FALSE;
 }

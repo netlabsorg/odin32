@@ -1,4 +1,8 @@
-/* $Id: ChangeLog,v 1.1792 2001-10-25 16:01:03 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.1793 2001-10-26 09:10:57 phaller Exp $ */
+
+ 2001-10-26: Patrick Haller <patrick.haller@innotek.de>
+    - USER32:   o fixed ESC keyboard event
+                o fixed passing thru special key events to the frame window
 
  2001-10-25: Patrick Haller <patrick.haller@innotek.de>
     - USER32:   o fixed scancodes for [Pause] and [PrtScr]
