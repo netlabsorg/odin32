@@ -1,4 +1,4 @@
-/* $Id: crt.cpp,v 1.7 1999-08-19 20:43:19 phaller Exp $ */
+/* $Id: crt.cpp,v 1.8 1999-08-22 22:45:52 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -21,6 +21,7 @@
 #include <wctype.h>
 
 #include "ntdll.h"
+#include <heapstring.h>
 
 /*
 NTDLL.sprintf
