@@ -223,6 +223,21 @@ typedef struct linecallstatus_tag {
     DWORD dwDevSpecificOffset;
 } LINECALLSTATUS, *LPLINECALLSTATUS;
 
+typedef struct linecardentry_tag
+{
+    DWORD       dwPermanentCardID;
+    DWORD       dwCardNameSize;
+    DWORD       dwCardNameOffset;
+    DWORD       dwCardNumberDigits;
+    DWORD       dwSameAreaRuleSize;
+    DWORD       dwSameAreaRuleOffset;
+    DWORD       dwLongDistanceRuleSize;
+    DWORD       dwLongDistanceRuleOffset;
+    DWORD       dwInternationalRuleSize; 
+    DWORD       dwInternationalRuleOffset;
+    DWORD       dwOptions;                
+} LINECARDENTRY, *LPLINECARDENTRY;
+
 typedef struct linecountrylist_tag {
     DWORD dwTotalSize;
     DWORD dwNeededSize;
@@ -916,6 +931,145 @@ DWORD WINAPI tapiRequestMakeCall(LPCSTR,LPCSTR,LPCSTR,LPCSTR);
 #define LINETRANSLATERESULT_VOICEDETECT         0x00000400      
 #endif
 
+
+#define LINE_ADDRESSSTATE                       0L
+#define LINE_CALLINFO                           1L
+#define LINE_CALLSTATE                          2L
+#define LINE_CLOSE                              3L
+#define LINE_DEVSPECIFIC                        4L
+#define LINE_DEVSPECIFICFEATURE                 5L
+#define LINE_GATHERDIGITS                       6L
+#define LINE_GENERATE                           7L
+#define LINE_LINEDEVSTATE                       8L
+#define LINE_MONITORDIGITS                      9L
+#define LINE_MONITORMEDIA                       10L
+#define LINE_MONITORTONE                        11L
+#define LINE_REPLY                              12L
+#define LINE_REQUEST                            13L
+#define PHONE_BUTTON                            14L
+#define PHONE_CLOSE                             15L
+#define PHONE_DEVSPECIFIC                       16L
+#define PHONE_REPLY                             17L
+#define PHONE_STATE                             18L
+#define LINE_CREATE                             19L       
+#define PHONE_CREATE                            20L       
+
+#if (TAPI_CURRENT_VERSION >= 0x00020000)
+#define LINE_AGENTSPECIFIC                      21L       
+#define LINE_AGENTSTATUS                        22L       
+#define LINE_APPNEWCALL                         23L       
+#define LINE_PROXYREQUEST                       24L       
+#define LINE_REMOVE                             25L       
+#define PHONE_REMOVE                            26L       
+#endif
+
+
+#define INITIALIZE_NEGOTIATION                  0xFFFFFFFFL
+
+#define LINEADDRCAPFLAGS_FWDNUMRINGS            0x00000001
+#define LINEADDRCAPFLAGS_PICKUPGROUPID          0x00000002
+#define LINEADDRCAPFLAGS_SECURE                 0x00000004
+#define LINEADDRCAPFLAGS_BLOCKIDDEFAULT         0x00000008
+#define LINEADDRCAPFLAGS_BLOCKIDOVERRIDE        0x00000010
+#define LINEADDRCAPFLAGS_DIALED                 0x00000020
+#define LINEADDRCAPFLAGS_ORIGOFFHOOK            0x00000040
+#define LINEADDRCAPFLAGS_DESTOFFHOOK            0x00000080
+#define LINEADDRCAPFLAGS_FWDCONSULT             0x00000100
+#define LINEADDRCAPFLAGS_SETUPCONFNULL          0x00000200
+#define LINEADDRCAPFLAGS_AUTORECONNECT          0x00000400
+#define LINEADDRCAPFLAGS_COMPLETIONID           0x00000800
+#define LINEADDRCAPFLAGS_TRANSFERHELD           0x00001000
+#define LINEADDRCAPFLAGS_TRANSFERMAKE           0x00002000
+#define LINEADDRCAPFLAGS_CONFERENCEHELD         0x00004000
+#define LINEADDRCAPFLAGS_CONFERENCEMAKE         0x00008000
+#define LINEADDRCAPFLAGS_PARTIALDIAL            0x00010000
+#define LINEADDRCAPFLAGS_FWDSTATUSVALID         0x00020000
+#define LINEADDRCAPFLAGS_FWDINTEXTADDR          0x00040000
+#define LINEADDRCAPFLAGS_FWDBUSYNAADDR          0x00080000
+#define LINEADDRCAPFLAGS_ACCEPTTOALERT          0x00100000
+#define LINEADDRCAPFLAGS_CONFDROP               0x00200000
+#define LINEADDRCAPFLAGS_PICKUPCALLWAIT         0x00400000
+#if (TAPI_CURRENT_VERSION >= 0x00020000)
+#define LINEADDRCAPFLAGS_PREDICTIVEDIALER       0x00800000
+#define LINEADDRCAPFLAGS_QUEUE                  0x01000000
+#define LINEADDRCAPFLAGS_ROUTEPOINT             0x02000000
+#define LINEADDRCAPFLAGS_HOLDMAKESNEW           0x04000000
+#define LINEADDRCAPFLAGS_NOINTERNALCALLS        0x08000000
+#define LINEADDRCAPFLAGS_NOEXTERNALCALLS        0x10000000
+#define LINEADDRCAPFLAGS_SETCALLINGID           0x20000000
+#endif
+
+#define LINEADDRESSMODE_ADDRESSID               0x00000001
+#define LINEADDRESSMODE_DIALABLEADDR            0x00000002
+
+#define LINEADDRESSSHARING_PRIVATE              0x00000001
+#define LINEADDRESSSHARING_BRIDGEDEXCL          0x00000002
+#define LINEADDRESSSHARING_BRIDGEDNEW           0x00000004
+#define LINEADDRESSSHARING_BRIDGEDSHARED        0x00000008
+#define LINEADDRESSSHARING_MONITORED            0x00000010
+
+#define LINEADDRESSSTATE_OTHER                  0x00000001
+#define LINEADDRESSSTATE_DEVSPECIFIC            0x00000002
+#define LINEADDRESSSTATE_INUSEZERO              0x00000004
+#define LINEADDRESSSTATE_INUSEONE               0x00000008
+#define LINEADDRESSSTATE_INUSEMANY              0x00000010
+#define LINEADDRESSSTATE_NUMCALLS               0x00000020
+#define LINEADDRESSSTATE_FORWARD                0x00000040
+#define LINEADDRESSSTATE_TERMINALS              0x00000080
+#define LINEADDRESSSTATE_CAPSCHANGE             0x00000100
+
+#define LINEADDRFEATURE_FORWARD                 0x00000001
+#define LINEADDRFEATURE_MAKECALL                0x00000002
+#define LINEADDRFEATURE_PICKUP                  0x00000004
+#define LINEADDRFEATURE_SETMEDIACONTROL         0x00000008
+#define LINEADDRFEATURE_SETTERMINAL             0x00000010
+#define LINEADDRFEATURE_SETUPCONF               0x00000020
+#define LINEADDRFEATURE_UNCOMPLETECALL          0x00000040
+#define LINEADDRFEATURE_UNPARK                  0x00000080
+#if (TAPI_CURRENT_VERSION >= 0x00020000)
+#define LINEADDRFEATURE_PICKUPHELD              0x00000100
+#define LINEADDRFEATURE_PICKUPGROUP             0x00000200
+#define LINEADDRFEATURE_PICKUPDIRECT            0x00000400
+#define LINEADDRFEATURE_PICKUPWAITING           0x00000800
+#define LINEADDRFEATURE_FORWARDFWD              0x00001000
+#define LINEADDRFEATURE_FORWARDDND              0x00002000
+#endif
+
+#if (TAPI_CURRENT_VERSION >= 0x00020000)
+#define LINEAGENTFEATURE_SETAGENTGROUP          0x00000001
+#define LINEAGENTFEATURE_SETAGENTSTATE          0x00000002
+#define LINEAGENTFEATURE_SETAGENTACTIVITY       0x00000004
+#define LINEAGENTFEATURE_AGENTSPECIFIC          0x00000008
+#define LINEAGENTFEATURE_GETAGENTACTIVITYLIST   0x00000010
+#define LINEAGENTFEATURE_GETAGENTGROUP          0x00000020
+
+#define LINEAGENTSTATE_LOGGEDOFF                0x00000001
+#define LINEAGENTSTATE_NOTREADY                 0x00000002
+#define LINEAGENTSTATE_READY                    0x00000004
+#define LINEAGENTSTATE_BUSYACD                  0x00000008
+#define LINEAGENTSTATE_BUSYINCOMING             0x00000010
+#define LINEAGENTSTATE_BUSYOUTBOUND             0x00000020
+#define LINEAGENTSTATE_BUSYOTHER                0x00000040
+#define LINEAGENTSTATE_WORKINGAFTERCALL         0x00000080
+#define LINEAGENTSTATE_UNKNOWN                  0x00000100
+#define LINEAGENTSTATE_UNAVAIL                  0x00000200
+
+#define LINEAGENTSTATUS_GROUP                   0x00000001
+#define LINEAGENTSTATUS_STATE                   0x00000002
+#define LINEAGENTSTATUS_NEXTSTATE               0x00000004
+#define LINEAGENTSTATUS_ACTIVITY                0x00000008
+#define LINEAGENTSTATUS_ACTIVITYLIST            0x00000010
+#define LINEAGENTSTATUS_GROUPLIST               0x00000020
+#define LINEAGENTSTATUS_CAPSCHANGE              0x00000040
+#define LINEAGENTSTATUS_VALIDSTATES             0x00000080
+#define LINEAGENTSTATUS_VALIDNEXTSTATES         0x00000100
+#endif
+
+
+#define LINEANSWERMODE_NONE                     0x00000001
+#define LINEANSWERMODE_DROP                     0x00000002
+#define LINEANSWERMODE_HOLD                     0x00000004
+
 #define LINEFEATURE_DEVSPECIFIC                 0x00000001
 #define LINEFEATURE_DEVSPECIFICFEAT             0x00000002
 #define LINEFEATURE_FORWARD                     0x00000004
@@ -1196,6 +1350,11 @@ DWORD WINAPI tapiRequestMakeCall(LPCSTR,LPCSTR,LPCSTR,LPCSTR);
 #define LINEDISCONNECTMODE_BLOCKED              0x00020000
 #define LINEDISCONNECTMODE_DONOTDISTURB         0x00040000
 #endif
+
+#define STRINGFORMAT_ASCII                      0x00000001
+#define STRINGFORMAT_DBCS                       0x00000002
+#define STRINGFORMAT_UNICODE                    0x00000003
+#define STRINGFORMAT_BINARY                     0x00000004
 
 #ifdef __cplusplus
 } /* extern "C" */

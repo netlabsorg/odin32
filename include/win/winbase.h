@@ -1337,6 +1337,7 @@ BOOL      WINAPI BuildCommDCBAndTimeoutsW(LPCWSTR,LPDCB,LPCOMMTIMEOUTS);
 #define     BuildCommDCBAndTimeouts WINELIB_NAME_AW(BuildCommDCBAndTimeouts)
 BOOL      WINAPI GetCommTimeouts(HANDLE,LPCOMMTIMEOUTS);
 BOOL      WINAPI SetCommTimeouts(HANDLE,LPCOMMTIMEOUTS);
+BOOL      WINAPI GetCommProperties(HANDLE,LPCOMMPROP);
 BOOL      WINAPI GetCommState(HANDLE,LPDCB);
 BOOL      WINAPI SetCommState(HANDLE,LPDCB);
 BOOL      WINAPI TransmitCommChar(HANDLE,CHAR);
@@ -1850,6 +1851,7 @@ DWORD       WINAPI GetModuleFileNameW(HMODULE,LPWSTR,DWORD);
 HMODULE   WINAPI GetModuleHandleA(LPCSTR);
 HMODULE   WINAPI GetModuleHandleW(LPCWSTR);
 #define     GetModuleHandle WINELIB_NAME_AW(GetModuleHandle)
+BOOL      WINAPI GetOverlappedResult(HANDLE,LPOVERLAPPED,LPDWORD,BOOL);
 UINT      WINAPI GetPrivateProfileIntA(LPCSTR,LPCSTR,INT,LPCSTR);
 UINT      WINAPI GetPrivateProfileIntW(LPCWSTR,LPCWSTR,INT,LPCWSTR);
 #define     GetPrivateProfileInt WINELIB_NAME_AW(GetPrivateProfileInt)
