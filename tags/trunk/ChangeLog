@@ -1,4 +1,11 @@
- /* $Id: ChangeLog,v 1.514 1999-12-06 18:11:43 dengert Exp $ */
+ /* $Id: ChangeLog,v 1.515 1999-12-06 20:31:43 sandervl Exp $ */
+
+ 99-12-06: Przemyslaw Dobrowolski <dobrawka@asua.org.pl>
+	- WINMM: Ported MMIO from Wine (now SoundRecorder can open wave files)
+
+ 99-12-06: Edgar Buerkle <Edgar.Buerkle@gmx.net>
+	- KERNEL32: Temporary hack in GetFullPathNameA to replace forward
+                    slashes by backslashes (needed for WinZip 7.0)
 
  99-12-06: Daniela Engert <dani@ngrt.de>
 	- ODINCRT: change debug *allocs to return zeroed memory (instead of
