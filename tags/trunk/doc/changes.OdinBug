@@ -1,4 +1,8 @@
-
+version 0.5.6a 09-06-2002
+                         Fixed: Silly bug in date translation prevented 0.5.6
+                                from working in May...
+                         Fixed: A few hints on the Settings and EMail page
+                                
 version 0.5.6 25.01.2002
                          Changed: Help: Rearranged help sections dealing with 
                                   the creation of logfiles.
@@ -35,8 +39,8 @@ version 0.5.6 25.01.2002
 known problems:
                          - InstallDateTime key decoding from WarpIN database
                            is still ugly, although it seems to work
-                         - Detection whether 2nd Thread has completed
-                           is not water proof, although possibly good enough
+                         - Detection whether 2nd Thread has completed is
+                           not water proof, although possibly good enough
                          - It appears that the VX-Rexx event queue is not 
                            processed as long the second thread is running?
                            (First attempt to change this made OdinBug hang)
@@ -46,5 +50,6 @@ todo-list:
                            to a local file) (a la popuplog.os2)
                          - Clean source code for public release (partly done)
                          - Restructure code and remove some double 
-                           implementations, put code into OdinTool Library
+                           implementations, put code into a OdinTools Library
+                           (Purpose: Share code with OdinTool.)
 
