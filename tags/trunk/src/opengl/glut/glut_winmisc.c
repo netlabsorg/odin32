@@ -1,4 +1,4 @@
-/* $Id: glut_winmisc.c,v 1.3 2000-03-04 19:10:16 jeroen Exp $ */
+/* $Id: glut_winmisc.c,v 1.4 2000-03-04 19:33:43 jeroen Exp $ */
 /* Copyright (c) Mark J. Kilgard, 1994.  */
 
 /* This program is freely distributable without licensing fees
@@ -65,7 +65,6 @@ glutPositionWindow(int x, int y)
 void GLAPIENTRY
 glutReshapeWindow(int w, int h)
 {
-  WriteLog("glutReshapeWindow (glut_winmisc)\n");
   IGNORE_IN_GAME_MODE();
   if (w <= 0 || h <= 0)
     __glutWarning("glutReshapeWindow: non-positive width or height not allowed");
