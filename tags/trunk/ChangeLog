@@ -1,7 +1,14 @@
- /* $Id: ChangeLog,v 1.1000 2000-06-21 17:34:10 phaller Exp $ */
+ /* $Id: ChangeLog,v 1.1001 2000-06-21 18:41:03 phaller Exp $ */
 
  2000-06-21: Patrick Haller <phaller@gmx.net>
     - MSVCRT:      - Added stub for __CxxLongjmpUnwind (NETSCAPE 4.7)
+    - CRTDLL:      - CRTDLL is in some serious troble:
+                     1. CRTDLL__close() -> _close()
+                        CRTDLL__openU() -> CreateFileA()
+                        this combination is incompatible !
+                     2. calls like _close() go into the OS/2 kernel somewhere
+                        without proper FS: protection -> CRASH.
+                     CRTDLL__close() is fixed (CloseHandle()) now.
 
  2000-06-18: Przemyslaw Dobrowolski <dobrawka@asua.org.pl>
     - KERNEL32:    Added language support for Poland
