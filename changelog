@@ -1,4 +1,4 @@
-/* $Id: changelog,v 1.1527 2001-06-18 09:00:20 sandervl Exp $ */
+/* $Id: changelog,v 1.1528 2001-06-18 13:36:41 sandervl Exp $ */
 
  2001-06-18: Sander van Leeuwen <sandervl@xs4all.nl>
     - USER32:   o Added export entry for GetScrollBarInfo
@@ -6,6 +6,7 @@
                 o Correct size of SBS_SIZEBOX and SBS_SIZEGRIP scrollbars
                   during creation. (if too high or wide)
                   (CPOV bottom scrollbar now appears)
+    - COMCTL32: o Wrong check in 6/17 comctl32 change
 
  2001-06-17: Sander van Leeuwen <sandervl@xs4all.nl>
     - KERNEL32: o Implemented IOCTL_SCSI_PASS_THROUGH_DIRECT storage ioctl
