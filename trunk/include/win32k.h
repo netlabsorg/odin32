@@ -1,4 +1,4 @@
-/* $Id: win32k.h,v 1.7 2001-02-19 05:45:12 bird Exp $
+/* $Id: win32k.h,v 1.8 2001-02-20 04:56:28 bird Exp $
  *
  * Top level make file for the Win32k library.
  * Contains library and 32-bit IOCtl definition.
@@ -30,6 +30,8 @@
 #define K32_PROCESSREADWRITE    0x05
 #define K32_HANDLESYSTEMEVENT   0x06
 #define K32_QUERYSYSTEMMEMINFO  0x07
+#define K32_LASTIOCTLFUNCTION   K32_QUERYSYSTEMMEMINFO
+
 
 /*
  * Elf category
@@ -257,67 +259,68 @@ typedef struct _k32SystemMemInfo
 
 /*
  * K32 category parameter structs
+ *
+ * Note. The ULONG rc should allways be the first datamember!
  */
 typedef struct _k32AllocMemEx
 {
-    PVOID   pv;                         /* Pointer to allocated memory block */
-                                        /* On input this holds the suggested */
-                                        /* location of the block. */
-    ULONG   cb;                         /* Blocksize (bytes) */
-    ULONG   flFlags;                    /* Flags (equal to DosAllocMem flags) */
-    ULONG   ulCS;                       /* Call CS */
-    ULONG   ulEIP;                      /* Call EIP */
-    ULONG   rc;                         /* Return code. */
+    ULONG       rc;                     /* Return code. */
+    PPVOID      ppv;                    /* Pointer to pointer to the allocated memory block */
+                                        /* On input it (*ppv) may hold the suggested  location of the block. */
+    ULONG       cb;                     /* Blocksize (bytes) */
+    ULONG       flFlags;                /* Flags (equal to DosAllocMem flags) */
+    ULONG       ulCS;                   /* Call CS */
+    ULONG       ulEIP;                  /* Call EIP */
 } K32ALLOCMEMEX, *PK32ALLOCMEMEX;
 
 typedef struct _k32QueryOTEs
 {
+    ULONG       rc;                     /* Return code. */
     HMODULE     hMTE;                   /* Module handle. */
     PQOTEBUFFER pQOte;                  /* Pointer to output buffer. */
     ULONG       cbQOte;                 /* Size of the buffer pointed to by pQOte  */
-    ULONG       rc;                     /* Return code. */
 } K32QUERYOTES, *PK32QUERYOTES;
 
 typedef struct _k32QueryOptionsStatus
 {
-    PK32OPTIONS     pOptions;           /* Pointer to option struct. (NULL allowed) */
-    PK32STATUS      pStatus;            /* Pointer to status struct. (NULL allowed) */
-    ULONG           rc;                 /* Return code. */
+    ULONG       rc;                     /* Return code. */
+    PK32OPTIONS pOptions;               /* Pointer to option struct. (NULL allowed) */
+    PK32STATUS  pStatus;                /* Pointer to status struct. (NULL allowed) */
 } K32QUERYOPTIONSSTATUS, *PK32QUERYOPTIONSSTATUS;
 
 typedef struct _k32SetOptions
 {
-    PK32OPTIONS     pOptions;           /* Pointer to option struct. (NULL allowed) */
-    ULONG           rc;                 /* Return code. */
+    ULONG        rc;                    /* Return code. */
+    PK32OPTIONS  pOptions;              /* Pointer to option struct. (NULL allowed) */
 } K32SETOPTIONS, *PK32SETOPTIONS;
 
 typedef struct _k32ProcessReadWrite
 {
+    ULONG       rc;                     /* Return code. */
     PID         pid;                    /* Process ID of the process to access memory in. */
     ULONG       cb;                     /* Number of bytes to read or write. */
     PVOID       pvSource;               /* Pointer to source data. */
     PVOID       pvTarget;               /* Pointer to target area. */
     BOOL        fRead;                  /* TRUE:   pvSource is within pid while pvTarget is ours. */
                                         /* FALSE:  pvTarget is within pid while pvSource is ours. */
-    ULONG       rc;                     /* Return code. */
 } K32PROCESSREADWRITE, *PK32PROCESSREADWRITE;
 
 typedef struct _k32HandleSystemEvent
 {
+    ULONG       rc;                     /* Return code. */
     ULONG       ulEvent;                /* Event identifier. One of the K32_SYSEVENT_ defines. */
     HEV         hev;                    /* Handle of shared event semaphore which should be */
                                         /* posted when the the requested event occurs.      */
     BOOL        fHandle;                /* Action flag. */
                                         /* TRUE:  Take control of the event. */
                                         /* FALSE: Give control back to the OS of this event. (hev must match the current handle!) */
-    ULONG       rc;                     /* Return code. */
 } K32HANDLESYSTEMEVENT, *PK32HANDLESYSTEMEVENT;
 
 typedef struct _k32QuerySystemMemInfo
 {
+    APIRET      rc;                     /* Return code. */
     PK32SYSTEMMEMINFO   pMemInfo;       /* Pointer to system memory info structure with cb set. */
                                         /* The other members will be filled on successful return. */
-    APIRET      rc;                     /* Return code. */
 } K32QUERYSYSTEMMEMINFO, *PK32QUERYSYSTEMMEMINFO;
 
 
