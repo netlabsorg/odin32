@@ -577,7 +577,6 @@ EXPORTS
     CreateWindowProc                          @2000
     GetOS2Callback__15Win32WindowProcFv       @2001
     _GetSysColorPen@4                         @2002
-    _TrackWin32Window@8                       @2003
     Win32ToOS2Handle__FUl                     @2006
     _MOUSE_Enable@4                           @2007
     _KeyTranslatePMToWin@4                    @2008

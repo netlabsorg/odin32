@@ -1,4 +1,4 @@
-/* $Id: oslibutil.cpp,v 1.1 1999-09-15 23:18:54 sandervl Exp $ */
+/* $Id: oslibutil.cpp,v 1.2 1999-12-26 17:30:15 cbratschi Exp $ */
 /*
  * Window API utility functions for OS/2
  *
@@ -23,7 +23,7 @@ HAB GetThreadHAB()
   thdb = GetThreadTHDB();
   if(thdb)
   {
-	return (HAB)thdb->hab;
+        return (HAB)thdb->hab;
   }
 
   dprintf(("GetThreadHAB: thdb == NULL!!"));
@@ -38,9 +38,9 @@ void SetThreadHAB(HAB hab)
   thdb = GetThreadTHDB();
   if(thdb)
   {
-	thdb->hab = (ULONG)hab;
+        thdb->hab = (ULONG)hab;
   }
-  else 	dprintf(("SetThreadHAB: thdb == NULL!!"));
+  else  dprintf(("SetThreadHAB: thdb == NULL!!"));
 }
 //******************************************************************************
 //******************************************************************************
@@ -51,7 +51,7 @@ HMQ GetThreadMessageQueue()
   thdb = GetThreadTHDB();
   if(thdb)
   {
-	return (HMQ)thdb->hmq;
+        return (HMQ)thdb->hmq;
   }
 
   dprintf(("GetThreadMessageQueue: thdb == NULL!!"));
@@ -66,9 +66,36 @@ void SetThreadMessageQueue(HMQ hmq)
   thdb = GetThreadTHDB();
   if(thdb)
   {
-	thdb->hmq = (ULONG)hmq;	
+        thdb->hmq = (ULONG)hmq;
   }
-  else 	dprintf(("SetThreadMessageQueue: thdb == NULL!!"));
+  else  dprintf(("SetThreadMessageQueue: thdb == NULL!!"));
 }
 //******************************************************************************
 //******************************************************************************
+DWORD GetThreadMessageExtraInfo()
+{
+ THDB *thdb;
+
+  thdb = GetThreadTHDB();
+  if(thdb)
+  {
+        return thdb->lParam;
+  }
+
+  dprintf(("GetThreadMessageExtraInfo: thdb == NULL!!"));
+  return 0;
+}
+//******************************************************************************
+//******************************************************************************
+DWORD SetThreadMessageExtraInfo(DWORD lParam)
+{
+ THDB *thdb;
+
+  thdb = GetThreadTHDB();
+  if(thdb)
+  {
+        thdb->lParam = lParam;
+  }
+  else  dprintf(("SetThreadMessageExtraInfo: thdb == NULL!!"));
+  return 0;
+}

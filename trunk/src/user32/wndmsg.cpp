@@ -1,4 +1,4 @@
-/* $Id: wndmsg.cpp,v 1.7 1999-10-23 10:21:45 sandervl Exp $ */
+/* $Id: wndmsg.cpp,v 1.8 1999-12-26 17:30:20 cbratschi Exp $ */
 /*
  * Win32 window message text function for OS/2
  *
@@ -336,6 +336,8 @@ MSGDESC gaMsgs[] =
     { "WM_INITMENU", WM_INITMENU,                           // 0x0116
         0},
     { "WM_INITMENUPOPUP", WM_INITMENUPOPUP,                 // 0x0117
+        0},
+    { "WM_SYSTIMER", WM_SYSTIMER,                           // 0x0118
         0},
     { "WM_MENUSELECT", WM_MENUSELECT,                       // 0x011F
         0},
@@ -689,7 +691,10 @@ char *GetMsgText(int Msg)
         if(gaMsgs[i].msg == Msg)
                 return(gaMsgs[i].pszMsg);
   }
-  sprintf(msgtxt, "%s %X ", "Unknown Message ", Msg);
+  if (Msg >= WM_USER)
+    sprintf(msgtxt,"User Message %X (WM_USER+%d)",Msg,Msg-WM_USER);
+  else
+    sprintf(msgtxt, "%s %X ","Unknown Message ", Msg);
   return(msgtxt);
 }
 

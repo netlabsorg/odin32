@@ -1,4 +1,4 @@
-/* $Id: windlgmsg.cpp,v 1.2 1999-10-08 21:30:52 cbratschi Exp $ */
+/* $Id: windlgmsg.cpp,v 1.3 1999-12-26 17:30:20 cbratschi Exp $ */
 /*
  * Win32 dialog message APIs for OS/2
  *
@@ -15,6 +15,8 @@
  */
 #include <os2win.h>
 #include <misc.h>
+#include <string.h>
+#include <ctype.h>
 #include "win32wbase.h"
 #include "win32dlg.h"
 
@@ -54,8 +56,6 @@ LONG WIN32API SendDlgItemMessageW( HWND hwnd, int id, UINT Msg, WPARAM wParam, L
     }
     return 0;
 }
-//TODO
-#if 0
 /***********************************************************************
  *           DIALOG_IsAccelerator
  */
@@ -63,7 +63,7 @@ static BOOL DIALOG_IsAccelerator( HWND hwnd, HWND hwndDlg, WPARAM vKey )
 {
     HWND hwndControl = hwnd;
     HWND hwndNext;
-    WND *wndPtr;
+    Win32BaseWindow *win32wnd;
     BOOL RetVal = FALSE;
     INT dlgCode;
 
@@ -81,16 +81,24 @@ static BOOL DIALOG_IsAccelerator( HWND hwnd, HWND hwndDlg, WPARAM vKey )
     {
         do
         {
-            wndPtr = WIN_FindWndPtr( hwndControl );
-            if ( (wndPtr != NULL) &&
-                 ((wndPtr->dwStyle & (WS_VISIBLE | WS_DISABLED)) == WS_VISIBLE) )
+            win32wnd = Win32BaseWindow::GetWindowFromHandle(hwndControl);
+            if ( (win32wnd != NULL) &&
+                 ((win32wnd->getStyle() & (WS_VISIBLE | WS_DISABLED)) == WS_VISIBLE) )
             {
-                dlgCode = SendMessageA( hwndControl, WM_GETDLGCODE, 0, 0 );
-                if ( (dlgCode & (DLGC_BUTTON | DLGC_STATIC)) &&
-                     (wndPtr->text!=NULL))
+              dlgCode = SendMessageA( hwndControl, WM_GETDLGCODE, 0, 0 );
+              if (dlgCode & (DLGC_BUTTON | DLGC_STATIC))
+              {
+                INT textLen = win32wnd->GetWindowTextLength();
+
+                if (textLen > 0)
                 {
                     /* find the accelerator key */
-                    LPSTR p = wndPtr->text - 2;
+                    char* text;
+                    LPSTR p;
+
+                    text = (char*)malloc(textLen+1);
+                    win32wnd->GetWindowTextA(text,textLen);
+                    p = text - 2;
                     do
                     {
                         p = strchr( p + 2, '&' );
@@ -101,7 +109,7 @@ static BOOL DIALOG_IsAccelerator( HWND hwnd, HWND hwndDlg, WPARAM vKey )
                     if (p != NULL && toupper( p[1] ) == toupper( vKey ) )
                     {
                         if ((dlgCode & DLGC_STATIC) ||
-                            (wndPtr->dwStyle & 0x0f) == BS_GROUPBOX )
+                            (win32wnd->getStyle() & 0x0f) == BS_GROUPBOX )
                         {
                             /* set focus to the control */
                             SendMessageA( hwndDlg, WM_NEXTDLGCTL,
@@ -114,7 +122,7 @@ static BOOL DIALOG_IsAccelerator( HWND hwnd, HWND hwndDlg, WPARAM vKey )
                         {
                             /* send command message as from the control */
                             SendMessageA( hwndDlg, WM_COMMAND,
-                                MAKEWPARAM( LOWORD(wndPtr->wIDmenu),
+                                MAKEWPARAM( LOWORD(win32wnd->getWindowId()),
                                     BN_CLICKED ),
                                 (LPARAM)hwndControl );
                         }
@@ -125,17 +133,18 @@ static BOOL DIALOG_IsAccelerator( HWND hwnd, HWND hwndDlg, WPARAM vKey )
                             SendMessageA( hwndControl, WM_LBUTTONUP, 0, 0);
                         }
                         RetVal = TRUE;
-            WIN_ReleaseWndPtr(wndPtr);
+                        free(text);
                         break;
                     }
+                    free(text);
                 }
+              }
         hwndNext = GetWindow( hwndControl, GW_CHILD );
             }
         else
         {
         hwndNext = 0;
         }
-            WIN_ReleaseWndPtr(wndPtr);
         if (!hwndNext)
         {
             hwndNext = GetWindow( hwndControl, GW_HWNDNEXT );
@@ -162,7 +171,6 @@ static BOOL DIALOG_IsAccelerator( HWND hwnd, HWND hwndDlg, WPARAM vKey )
     }
     return RetVal;
 }
-#endif
 /***********************************************************************
  *           DIALOG_IsDialogMessage
  */
@@ -250,8 +258,6 @@ static BOOL DIALOG_IsDialogMessage( HWND hwnd, HWND hwndDlg,
         if (dlgCode & DLGC_WANTCHARS) break;
         /* drop through */
 
-//TODO:
-#if 0
     case WM_SYSCHAR:
         if (DIALOG_IsAccelerator( hwnd, hwndDlg, wParam ))
         {
@@ -259,7 +265,6 @@ static BOOL DIALOG_IsDialogMessage( HWND hwnd, HWND hwndDlg,
             return TRUE;
         }
         break;
-#endif
     }
 
     /* If we get here, the message has not been treated specially */

@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.69 1999-12-24 18:39:10 sandervl Exp $ */
+/* $Id: pmwindow.cpp,v 1.70 1999-12-26 17:30:16 cbratschi Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -135,7 +135,7 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
  OSLIBPOINT       point, ClientPoint;
  Win32BaseWindow *win32wnd;
  THDB            *thdb;
- APIRET           rc;
+ APIRET           rc = 0;
  MSG              winMsg, *pWinMsg;
 
   //Restore our FS selector
@@ -174,7 +174,7 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
 
   if(msg == WIN32APP_POSTMSG && (ULONG)mp1 == WIN32PM_MAGIC) {
         //win32 app user message
-        return (MRESULT)win32wnd->PostMessage((POSTMSG_PACKET *)mp2);;
+        return (MRESULT)win32wnd->PostMessage((POSTMSG_PACKET *)mp2);
   }
   switch( msg )
   {
@@ -202,37 +202,27 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
 
     case WM_QUIT:
         dprintf(("OS2: WM_QUIT %x", hwnd));
-        if(win32wnd->MsgQuit()) {
-                goto RunDefWndProc;
-        }
+        win32wnd->MsgQuit();
         break;
 
     case WM_CLOSE:
         dprintf(("OS2: WM_CLOSE %x", hwnd));
-        if(win32wnd->MsgClose()) {
-                goto RunDefWndProc;
-        }
+        win32wnd->MsgClose();
         break;
 
     case WM_DESTROY:
         dprintf(("OS2: WM_DESTROY %x", hwnd));
-        if(win32wnd->MsgDestroy()) {
-                goto RunDefWndProc;
-        }
+        win32wnd->MsgDestroy();
         break;
 
     case WM_ENABLE:
         dprintf(("OS2: WM_ENABLE %x", hwnd));
-        if(win32wnd->MsgEnable(SHORT1FROMMP(mp1))) {
-                goto RunDefWndProc;
-        }
+        win32wnd->MsgEnable(SHORT1FROMMP(mp1));
         break;
 
     case WM_SHOW:
         dprintf(("OS2: WM_SHOW %x %d", hwnd, mp1));
-        if(win32wnd->MsgShow((ULONG)mp1)) {
-                goto RunDefWndProc;
-        }
+        win32wnd->MsgShow((ULONG)mp1);
         break;
 
 #if 1
@@ -321,10 +311,32 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
            fMinimized = TRUE;
         }
 
-        if(win32wnd->MsgActivate(SHORT1FROMMP(mp1), fMinimized, Win32BaseWindow::OS2ToWin32Handle(hwndActivate))) {
-                goto RunDefWndProc;
-        }
+        win32wnd->MsgActivate(SHORT1FROMMP(mp1), fMinimized, Win32BaseWindow::OS2ToWin32Handle(hwndActivate));
         break;
+    }
+
+    case WM_SIZE:
+    {
+        dprintf(("OS2: WM_SIZE (%d,%d) (%d,%d)", SHORT1FROMMP(mp2), SHORT2FROMMP(mp2), SHORT1FROMMP(mp1), SHORT2FROMMP(mp2)));
+        break;
+    }
+
+    case WM_MINMAXFRAME:
+    {
+        dprintf(("OS2: WM_MINMAXFRAME"));
+        break;
+    }
+
+    case WM_OWNERPOSCHANGE:
+    {
+        dprintf(("OS2: WM_OWNERPOSCHANGE"));
+        goto RunDefWndProc;
+    }
+
+    case WM_CALCVALIDRECTS:
+    {
+        dprintf(("OS2: WM_CALCVALIDRECTS"));
+        goto RunDefWndProc;
     }
 
     case WM_SETFOCUS:
@@ -340,12 +352,9 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
         if((ULONG)mp2 == TRUE) {
                 HWND hwndFocusWin32 = Win32BaseWindow::OS2ToWin32Handle(hwndFocus);
                 recreateCaret (hwndFocusWin32);
-                rc = win32wnd->MsgSetFocus(hwndFocusWin32);
+                win32wnd->MsgSetFocus(hwndFocusWin32);
         }
-        else    rc = win32wnd->MsgKillFocus(Win32BaseWindow::OS2ToWin32Handle(hwndFocus));
-        if(rc) {
-                goto RunDefWndProc;
-        }
+        else win32wnd->MsgKillFocus(Win32BaseWindow::OS2ToWin32Handle(hwndFocus));
         break;
     }
 
@@ -361,9 +370,8 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
     case WM_BUTTON3DOWN:
     case WM_BUTTON3UP:
     case WM_BUTTON3DBLCLK:
-        if(win32wnd->MsgButton(pWinMsg)) {
-                goto RunDefWndProc;
-        }
+        win32wnd->MsgButton(pWinMsg);
+        rc = TRUE;
         break;
 
     case WM_BUTTON2MOTIONSTART:
@@ -385,24 +393,20 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
     }
 
     case WM_CONTROL:
+        goto RunDefWndProc;
+
     case WM_COMMAND:
         dprintf(("OS2: WM_COMMAND %x %x %x", hwnd, mp1, mp2));
         win32wnd->DispatchMsg(pWinMsg);
-        //todo controls + accelerators
         break;
 
     case WM_SYSCOMMAND:
-    {
-        if(win32wnd->DispatchMsg(pWinMsg)) {
-            goto RunDefWndProc;
-        }
-        break;
-    }
-    case WM_CHAR:
-    {
         win32wnd->DispatchMsg(pWinMsg);
         break;
-    }
+
+    case WM_CHAR:
+        win32wnd->DispatchMsg(pWinMsg);
+        break;
 
     case WM_INITMENU:
         win32wnd->MsgInitMenu(pWinMsg);
@@ -423,9 +427,7 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
 
         dprintf(("OS2: WM_SETWINDOWPARAMS %x", hwnd));
         if(wndParams->fsStatus & WPM_TEXT) {
-            if(win32wnd->MsgSetText(wndParams->pszText, wndParams->cchText)) {
-                    goto RunDefWndProc;
-            }
+            win32wnd->MsgSetText(wndParams->pszText, wndParams->cchText);
         }
         goto RunDefWndProc;
     }
@@ -457,14 +459,26 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
         goto RunDefWndProc;
 
     case WM_HITTEST:
-        // Only send this message if the window is enabled
-        if (WinIsWindowEnabled(hwnd))
-        {
-                if(win32wnd->MsgHitTest(pWinMsg)) {
-                    goto RunDefWndProc;
-                }
-        }
-        else    goto RunDefWndProc;
+    {
+      DWORD res;
+
+      // Only send this message if the window is enabled
+      if (!WinIsWindowEnabled(hwnd))
+        res = HT_ERROR;
+      else if (win32wnd->getIgnoreHitTest())
+        res = HT_NORMAL;
+      else
+      {
+        dprintf(("USER32: WM_HITTEST %x (%d,%d)",hwnd,(*(POINTS *)&mp1).x,(*(POINTS *)&mp1).y));
+
+        //CB: WinWindowFromPoint: PM sends WM_HITTEST -> loop -> stack overflow
+        win32wnd->setIgnoreHitTest(TRUE);
+        res = win32wnd->MsgHitTest(pWinMsg);
+        win32wnd->setIgnoreHitTest(FALSE);
+      }
+      RestoreOS2TIB();
+      return (MRESULT)res;
+    }
 
     case WM_CONTEXTMENU:
     {
@@ -478,28 +492,6 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
     {
         dprintf(("OS2: WM_ERASEBACKGROUND %x", win32wnd->getWindowHandle()));
         break;
-    }
-
-    case WM_SIZE:
-    {
-        dprintf(("OS2: WM_SIZE (%d,%d) (%d,%d)", SHORT1FROMMP(mp2), SHORT2FROMMP(mp2), SHORT1FROMMP(mp1), SHORT2FROMMP(mp2)));
-        break;
-    }
-    case WM_MINMAXFRAME:
-    {
-        dprintf(("OS2: WM_MINMAXFRAME"));
-        break;
-    }
-    case WM_OWNERPOSCHANGE:
-    {
-        dprintf(("OS2: WM_OWNERPOSCHANGE"));
-        goto RunDefWndProc;
-    }
-
-    case WM_CALCVALIDRECTS:
-    {
-        dprintf(("OS2: WM_CALCVALIDRECTS"));
-        goto RunDefWndProc;
     }
 
     case WM_FOCUSCHANGE:
@@ -532,7 +524,7 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
         return WinDefWindowProc( hwnd, msg, mp1, mp2 );
   }
   RestoreOS2TIB();
-  return (MRESULT)FALSE;
+  return (MRESULT)rc;
 
 RunDefWndProc:
 //  dprintf(("OS2: RunDefWndProc msg %x for %x", msg, hwnd));
