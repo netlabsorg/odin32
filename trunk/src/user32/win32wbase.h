@@ -1,4 +1,4 @@
-/* $Id: win32wbase.h,v 1.90 2000-03-18 16:13:39 cbratschi Exp $ */
+/* $Id: win32wbase.h,v 1.91 2000-03-31 14:42:49 cbratschi Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -113,7 +113,7 @@ virtual  ULONG  MsgEnable(BOOL fEnable);
          ULONG  MsgChar(MSG *msg);
          ULONG  MsgPaint(ULONG tmp1, BOOL select = TRUE);
          ULONG  MsgEraseBackGround(HDC hdc);
-         ULONG  MsgHitTest(ULONG x, ULONG y);
+         ULONG  MsgHitTest(MSG *msg);
          ULONG  MsgNCPaint();
          ULONG  MsgFormatFrame(WINDOWPOS *lpWndPos);
          ULONG  DispatchMsgA(MSG *msg);

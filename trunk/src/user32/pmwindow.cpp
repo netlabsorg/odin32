@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.87 2000-03-13 13:10:47 sandervl Exp $ */
+/* $Id: pmwindow.cpp,v 1.88 2000-03-31 14:42:48 cbratschi Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -95,7 +95,7 @@ BOOL InitPM()
      hab,                               /* Anchor block handle          */
      (PSZ)WIN32_STDCLASS,               /* Window class name            */
      (PFNWP)Win32WindowProc,            /* Address of window procedure  */
-     0,
+     CS_HITTEST,
      NROF_WIN32WNDBYTES)) {
         dprintf(("WinRegisterClass Win32BaseWindow failed"));
         return(FALSE);
@@ -104,7 +104,7 @@ BOOL InitPM()
      hab,                               /* Anchor block handle          */
      (PSZ)WIN32_STDCLASS2,              /* Window class name            */
      (PFNWP)Win32WindowProc,            /* Address of window procedure  */
-     CS_SAVEBITS,
+     CS_SAVEBITS | CS_HITTEST,
      NROF_WIN32WNDBYTES)) {
         dprintf(("WinRegisterClass Win32BaseWindow failed"));
         return(FALSE);
@@ -117,7 +117,7 @@ BOOL InitPM()
    if (!WinRegisterClass (hab,
                           WIN32_INNERFRAME,
                           FrameClassInfo.pfnWindowProc,
-                          FrameClassInfo.flClassStyle,
+                          FrameClassInfo.flClassStyle | CS_HITTEST,
                           FrameClassInfo.cbWindowData)) {
      dprintf (("WinRegisterClass Win32InnerFrame failed"));
      return (FALSE);
@@ -336,6 +336,11 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
     //**************************************************************************
     //Mouse messages (OS/2 Window coordinates -> Win32 coordinates relative to screen
     //**************************************************************************
+    case WM_HITTEST:
+        rc = win32wnd->MsgHitTest(pWinMsg);
+        break;
+
+
     case WM_BUTTON1DOWN:
     case WM_BUTTON1UP:
     case WM_BUTTON1DBLCLK:
