@@ -1,4 +1,4 @@
-/* $Id: OS2DDRAW.H,v 1.17 2002-08-28 08:20:05 sandervl Exp $ */
+/* $Id: ddraw2d.h,v 1.1 2002-12-04 10:34:59 sandervl Exp $ */
 
 /*
  * DX Draw base class definition
@@ -77,6 +77,9 @@ class OS2IDirectDraw
     inline  int           GetScreenWidth()  { return screenwidth;  }
     inline  int           GetScreenHeight() { return screenheight; }
     inline  int           GetScreenBpp()    { return screenbpp;}
+    inline  DWORD         GetCooperativeLevel() { return dwCoopMode; };
+    inline  HWND          GetClientWindow() { return hwndClient; };
+
     FOURCC        GetScreenFourCC();
     BOOL          IsFourCCSupported(FOURCC fourcc);
     // We should be able to use any mode with less or same bits and same or

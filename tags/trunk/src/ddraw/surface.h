@@ -1,4 +1,4 @@
-/* $Id: OS2SURFACE.H,v 1.16 2001-10-05 12:33:10 sandervl Exp $ */
+/* $Id: surface.h,v 1.1 2002-12-04 10:35:02 sandervl Exp $ */
 
 /*
  * Direct/X Surface class
@@ -130,6 +130,9 @@ class OS2IDirectDrawSurface
         HBITMAP                hbmImage;
         HGDIOBJ                hgdiOld;
         DWORD                  dwLastDCUnique;
+
+        HWND                   hwndFullScreen;
+
         // The real pointers hold the allocated memory (for the free)
         // The other an pointer addjusted to QWORDs which we use and report
         char                  *pFrameBuffer, *pFBreal;

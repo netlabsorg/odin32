@@ -1,4 +1,4 @@
-/* $Id: OS2DDRAW.CPP,v 1.37 2002-08-28 08:20:04 sandervl Exp $ */
+/* $Id: ddraw2d.cpp,v 1.1 2002-12-04 10:34:59 sandervl Exp $ */
 
 /*
  * DX Draw base class implementation
@@ -21,10 +21,10 @@
 #include <memory.h>
 
 #define INITGUID
-#include "os2ddraw.h"
-#include "os2clipper.h"
-#include "os2palette.h"
-#include "os2surface.h"
+#include "ddraw2d.h"
+#include "clipper.h"
+#include "palette.h"
+#include "surface.h"
 #include <misc.h>
 #include <string.h>
 #include <winreg.h>
@@ -1893,8 +1893,9 @@ HRESULT WIN32API DrawSetCooperativeLevel(THIS This, HWND hwndClient, DWORD dwFla
     me->hwndClient = hwndClient;
     if(hwndClient) {
         //TODO: Can this be done here??
-        SetWindowPos(me->hwndClient, HWND_TOP, 0, 0, me->screenwidth, me->screenheight,0);
-        ShowWindow(hwndClient, SW_SHOW);
+//NOTE: This messes up some DDraw apps, so don't touch the window
+//        SetWindowPos(me->hwndClient, HWND_TOP, 0, 0, me->screenwidth, me->screenheight,0);
+//        ShowWindow(hwndClient, SW_SHOW);
     }
     return(DD_OK);
 }

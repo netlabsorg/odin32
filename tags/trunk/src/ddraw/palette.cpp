@@ -1,4 +1,4 @@
-/* $Id: OS2PALETTE.CPP,v 1.16 2002-02-17 20:40:05 sandervl Exp $ */
+/* $Id: palette.cpp,v 1.1 2002-12-04 10:35:01 sandervl Exp $ */
 
 /*
  * DX palette class implementation
@@ -20,10 +20,10 @@
 #include <string.h>
 #include <memory.h>
 #define INITGUID
-#include "os2ddraw.h"
-#include "os2clipper.h"
-#include "os2palette.h"
-#include "os2surface.h"
+#include "ddraw2d.h"
+#include "clipper.h"
+#include "palette.h"
+#include "surface.h"
 #include <misc.h>
 #include "os2palset.h"
 #include "os2fsdd.h"

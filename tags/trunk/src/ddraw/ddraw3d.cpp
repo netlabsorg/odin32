@@ -1,4 +1,4 @@
-/* $Id: OS2D3D.CPP,v 1.13 2002-02-17 20:40:04 sandervl Exp $ */
+/* $Id: ddraw3d.cpp,v 1.1 2002-12-04 10:35:00 sandervl Exp $ */
 
 /*
  * DX clipper class routines
@@ -19,10 +19,10 @@
 
 #include <odin.h>
 #include <winbase.h>
-#include "os2ddraw.h"
-#include "os2clipper.h"
-#include "os2palette.h"
-#include "os2surface.h"
+#include "ddraw2d.h"
+#include "clipper.h"
+#include "palette.h"
+#include "surface.h"
 #include <misc.h>
 #include <winerror.h>
 #undef THIS
