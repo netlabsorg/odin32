@@ -1,4 +1,8 @@
-/* $Id: changelog,v 1.2341 2002-10-11 14:57:11 sandervl Exp $ */
+/* $Id: changelog,v 1.2342 2002-10-15 09:17:09 sandervl Exp $ */
+
+ 2002-10-15: Platon Fomichev <platon@innotek   >
+    - USER32:   o Disable close button & close item in system menu for windows
+                  with SC_NOCLOSE class style
 
  2002-10-11: Sander van Leeuwen <sandervl@innotek   >
     - USER32:   o SetParent bugfix; don't clear window id if parent is set to 
