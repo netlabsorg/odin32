@@ -1,9 +1,16 @@
-/* $Id: win32class.cpp,v 1.2 1999-10-21 19:23:51 sandervl Exp $ */
+/* $Id: win32class.cpp,v 1.3 1999-10-24 22:56:09 sandervl Exp $ */
 /*
  * Win32 Window Class Managment Code for OS/2
  *
- *
  * Copyright 1998-1999 Sander van Leeuwen (sandervl@xs4all.nl)
+ *
+ *
+ * TODO: Right now all class atoms are global. This must be changed.
+ * TODO: Global atoms of classes with CS_GLOBALCLASS flag are not deleted
+ *       Must all be changed if we want to support global app classes
+ *       that can be used by other apps. (low priority)
+ *
+ * Project Odin Software License can be found in LICENSE.TXT
  *
  */
 #include <os2win.h>
@@ -22,6 +29,7 @@
 Win32WndClass::Win32WndClass(WNDCLASSEXA *wndclass, BOOL isUnicode) : GenericObject(&wndclasses, OBJTYPE_CLASS)
 {
   this->isUnicode = isUnicode;
+  processId = 0;
 
   if(HIWORD(wndclass->lpszClassName)) {
         if(isUnicode) {
@@ -48,12 +56,21 @@ Win32WndClass::Win32WndClass(WNDCLASSEXA *wndclass, BOOL isUnicode) : GenericObj
                 strcpy((char *)classNameA, wndclass->lpszClassName);
                 AsciiToUnicode(classNameA, classNameW);
         }
-        classAtom       = GlobalAddAtomA(classNameA);
+	classAtom = 0;
+	//SvL: If a system control has already be registered, use that atom instead
+        //     of creating a new one
+	if(wndclass->style & CS_GLOBALCLASS) {
+		classAtom = GlobalFindAtomA(classNameA);
+	}
+	if(!classAtom) classAtom = GlobalAddAtomA(classNameA);
   }
   else {
         classNameA      = NULL;
         classNameW      = NULL;
         classAtom       = (DWORD)wndclass->lpszClassName;
+  }
+  if(!(wndclass->style & CS_GLOBALCLASS)) {
+	processId = GetCurrentProcess();
   }
   menuNameA = 0;
   menuNameW = 0;
@@ -105,7 +122,10 @@ Win32WndClass::Win32WndClass(WNDCLASSEXA *wndclass, BOOL isUnicode) : GenericObj
 //******************************************************************************
 Win32WndClass::~Win32WndClass()
 {
-  if (classNameA) GlobalDeleteAtom(classAtom);
+  if(classNameA && (windowStyle & CS_GLOBALCLASS)) {
+	GlobalDeleteAtom(classAtom);
+  }
+
   if(userClassLong)     free(userClassLong);
   if(classNameA)        free(classNameA);
   if(classNameW)        free(classNameW);
@@ -173,7 +193,7 @@ Win32WndClass *Win32WndClass::FindClass(HINSTANCE hInstance, LPSTR id)
         else {
                 wndclass = (Win32WndClass *)wndclass->GetNext();
                 while(wndclass != NULL) {
-                        if(wndclass->classAtom == (DWORD)id/* && wndclass->hInstance == hInstance*/) {
+                        if(wndclass->classAtom == (DWORD)id /* && wndclass->hInstance == hInstance*/) {
                                 leaveMutex(OBJTYPE_CLASS);
                                 return(wndclass);
                         }
@@ -184,6 +204,18 @@ Win32WndClass *Win32WndClass::FindClass(HINSTANCE hInstance, LPSTR id)
   leaveMutex(OBJTYPE_CLASS);
   dprintf(("Class %X (inst %X) not found!", id, hInstance));
   return(NULL);
+}
+//******************************************************************************
+//An app can only access another process' class if it's global
+//(all system classes are global)
+//NOTE: NOT USED NOW
+//******************************************************************************
+BOOL Win32WndClass::isAppClass(ULONG curProcessId)
+{
+  if(windowStyle & CS_GLOBALCLASS)
+	return TRUE;
+
+  return curProcessId = processId;
 }
 //******************************************************************************
 //******************************************************************************
@@ -426,4 +458,3 @@ void Win32WndClass::UnregisterClassA(HINSTANCE hinst, LPSTR id)
 //******************************************************************************
 //******************************************************************************
 GenericObject *Win32WndClass::wndclasses = NULL;
-

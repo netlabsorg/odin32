@@ -1,4 +1,4 @@
-/* $Id: win32wmdichild.cpp,v 1.6 1999-10-24 12:30:28 sandervl Exp $ */
+/* $Id: win32wmdichild.cpp,v 1.7 1999-10-24 22:56:10 sandervl Exp $ */
 /*
  * Win32 MDI Child Window Class for OS/2
  *
@@ -349,6 +349,7 @@ HWND Win32MDIChildWindow::createChild(Win32MDIClientWindow *client, LPMDICREATES
     /* Find the class atom */
     if (!(classAtom = (client->IsUnicode() ? GlobalFindAtomW((LPWSTR)cs->szClass) :
                                              GlobalFindAtomA(cs->szClass))))
+
     {
         if (!HIWORD(cs->szClass))
         {

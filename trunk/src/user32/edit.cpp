@@ -1,4 +1,4 @@
-/* $Id: edit.cpp,v 1.7 1999-10-23 23:04:33 sandervl Exp $ */
+/* $Id: edit.cpp,v 1.8 1999-10-24 22:56:03 sandervl Exp $ */
 /*
  *      Edit control
  *
@@ -2809,7 +2809,8 @@ static INT EDIT_WM_GetText(HWND hwnd, EDITSTATE *es, INT count, LPSTR text)
   if (es->text == NULL)  // the only case of failure i can imagine
     return 0;
 
-  len = min(count, lstrlenA(es->text)); // determine length
+  //SvL: Bugfix: +1
+  len = min(count, lstrlenA(es->text)+1); // determine length
   lstrcpynA(text, es->text, len);       // copy as much as possible
   return len;
 }
@@ -3716,7 +3717,8 @@ BOOL EDIT_Register()
 {
     WNDCLASSA wndClass;
 
-    if (GlobalFindAtomA(EDITCLASSNAME)) return FALSE;
+//SvL: Don't check this now
+//    if (GlobalFindAtomA(EDITCLASSNAME)) return FALSE;
 
     ZeroMemory(&wndClass,sizeof(WNDCLASSA));
     wndClass.style         = CS_GLOBALCLASS | CS_DBLCLKS;

@@ -1,4 +1,4 @@
-/* $Id: listbox.cpp,v 1.10 1999-10-20 06:38:09 sandervl Exp $ */
+/* $Id: listbox.cpp,v 1.11 1999-10-24 22:56:05 sandervl Exp $ */
 /*
  * Listbox controls
  *
@@ -2757,7 +2757,8 @@ BOOL LISTBOX_Register()
 {
     WNDCLASSA wndClass;
 
-    if (GlobalFindAtomA(LISTBOXCLASSNAME)) return FALSE;
+//SvL: Don't check this now
+//    if (GlobalFindAtomA(LISTBOXCLASSNAME)) return FALSE;
 
     ZeroMemory(&wndClass,sizeof(WNDCLASSA));
     wndClass.style         = CS_GLOBALCLASS | CS_DBLCLKS;
@@ -2783,7 +2784,8 @@ BOOL COMBOLBOX_Register()
 {
     WNDCLASSA wndClass;
 
-    if (GlobalFindAtomA(COMBOLBOXCLASSNAME)) return FALSE;
+//SvL: Don't check this now
+//    if (GlobalFindAtomA(COMBOLBOXCLASSNAME)) return FALSE;
 
     ZeroMemory(&wndClass,sizeof(WNDCLASSA));
     wndClass.style         = CS_GLOBALCLASS | CS_DBLCLKS | CS_SAVEBITS;

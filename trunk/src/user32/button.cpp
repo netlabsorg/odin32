@@ -1,4 +1,4 @@
-/* $Id: button.cpp,v 1.14 1999-10-23 23:04:32 sandervl Exp $ */
+/* $Id: button.cpp,v 1.15 1999-10-24 22:56:00 sandervl Exp $ */
 /* File: button.cpp -- Button type widgets
  *
  * Copyright (C) 1993 Johannes Ruscheinski
@@ -1062,7 +1062,8 @@ BOOL BUTTON_Register()
 {
     WNDCLASSA wndClass;
 
-    if (GlobalFindAtomA(BUTTONCLASSNAME)) return FALSE;
+//SvL: Don't check this now
+//    if (GlobalFindAtomA(BUTTONCLASSNAME)) return FALSE;
 
     ZeroMemory(&wndClass,sizeof(WNDCLASSA));
     wndClass.style         = CS_GLOBALCLASS | CS_HREDRAW | CS_VREDRAW | CS_PARENTDC | CS_DBLCLKS;
