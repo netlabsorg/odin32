@@ -1,15 +1,15 @@
-/* $Id: k32QueryOptionsStatus.cpp,v 1.1.2.2 2002-04-01 09:06:05 bird Exp $
+/* $Id: k32QueryOptionsStatus.cpp,v 1.1.2.3 2002-04-01 09:57:14 bird Exp $
  *
  * k32QueryOptionsStatus  - Queries the options and/or the status of
  *                          Win32k.sys driver.
  *
- * Copyright (c) 2000 knut st. osmundsen (knut.stange.osmundsen@mynd.no)
+ * Copyright (c) 2000-2002 knut st. osmundsen (bird@anduin.net)
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *
  */
 #ifndef NOFILEID
-static const char szFileId[] = "$Id: k32QueryOptionsStatus.cpp,v 1.1.2.2 2002-04-01 09:06:05 bird Exp $";
+static const char szFileId[] = "$Id: k32QueryOptionsStatus.cpp,v 1.1.2.3 2002-04-01 09:57:14 bird Exp $";
 #endif
 
 
@@ -64,7 +64,7 @@ static const char szFileId[] = "$Id: k32QueryOptionsStatus.cpp,v 1.1.2.2 2002-04
  * @param       pOptions    Pointer to options structure. (NULL is allowed)
  * @param       pStatus     Pointer to status structure. (NULL is allowed)
  * @status      completely implelemented.
- * @author      knut st. osmundsen (knut.stange.osmundsen@mynd.no)
+ * @author      knut st. osmundsen (bird@anduin.net)
  * @remark      One of the pointer may be NULL.
  */
 APIRET k32QueryOptionsStatus(PK32OPTIONS pOptions, PK32STATUS pStatus)

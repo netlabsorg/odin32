@@ -1,14 +1,14 @@
-/* $Id: myVMAllocMem.cpp,v 1.1.2.2 2002-04-01 09:06:07 bird Exp $
+/* $Id: myVMAllocMem.cpp,v 1.1.2.3 2002-04-01 09:57:16 bird Exp $
  *
  * Debug module - overloads VMAllocMem to analyse input parameters....
  *
- * Copyright (c) 2000 knut st. osmundsen (knut.stange.osmundsen@mynd.no)
+ * Copyright (c) 2000-2002 knut st. osmundsen (bird@anduin.net)
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *
  */
 #ifndef NOFILEID
-static const char szFileId[] = "$Id: myVMAllocMem.cpp,v 1.1.2.2 2002-04-01 09:06:07 bird Exp $";
+static const char szFileId[] = "$Id: myVMAllocMem.cpp,v 1.1.2.3 2002-04-01 09:57:16 bird Exp $";
 #endif
 
 /*******************************************************************************
@@ -48,7 +48,7 @@ static const char szFileId[] = "$Id: myVMAllocMem.cpp,v 1.1.2.2 2002-04-01 09:06
  * @time
  * @sketch
  * @status
- * @author    knut st. osmundsen (knut.stange.osmundsen@mynd.no)
+ * @author    knut st. osmundsen (bird@anduin.net)
  * @remark
  */
 APIRET KRNLCALL myVMAllocMem(ULONG p1, ULONG p2, ULONG p3, USHORT p4, USHORT p5, USHORT p6, ULONG p7, ULONG p8, ULONG p9)

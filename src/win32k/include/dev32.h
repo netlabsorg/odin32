@@ -1,8 +1,8 @@
-/* $Id: dev32.h,v 1.12.2.1 2001-09-27 03:08:18 bird Exp $
+/* $Id: dev32.h,v 1.12.2.2 2002-04-01 10:01:02 bird Exp $
  *
  * dev32 - header file for 32-bit part of the driver.
  *
- * Copyright (c) 1999 knut st. osmundsen
+ * Copyright (c) 1999-2002 knut st. osmundsen (bird@anduin.net)
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *

@@ -1,14 +1,14 @@
-/* $Id: mmf.cpp,v 1.1.2.2 2002-04-01 09:06:07 bird Exp $
+/* $Id: mmf.cpp,v 1.1.2.3 2002-04-01 09:57:16 bird Exp $
  *
  * Memory Mapped Files.
  *
- * Copyright (c) 2000 knut st. osmundsen (knut.stange.osmundsen@mynd.no)
+ * Copyright (c) 2000-2002 knut st. osmundsen (bird@anduin.net)
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *
  */
 #ifndef NOFILEID
-static const char szFileId[] = "$Id: mmf.cpp,v 1.1.2.2 2002-04-01 09:06:07 bird Exp $";
+static const char szFileId[] = "$Id: mmf.cpp,v 1.1.2.3 2002-04-01 09:57:16 bird Exp $";
 #endif
 
 /** @design     Memory Mapped Files - Ring 0

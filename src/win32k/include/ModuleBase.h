@@ -1,8 +1,8 @@
-/* $Id: ModuleBase.h,v 1.6 2001-02-11 14:59:20 bird Exp $
+/* $Id: ModuleBase.h,v 1.6.2.1 2002-04-01 10:01:00 bird Exp $
  *
  * ModuleBase - Declaration of the Basic module class.
  *
- * Copyright (c) 1999-2000 knut st. osmundsen
+ * Copyright (c) 1999-2002 knut st. osmundsen (bird@anduin.net)
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *

@@ -1,9 +1,9 @@
-; $Id: d32CallGate.asm,v 1.1.2.1 2002-03-31 20:09:05 bird Exp $
+; $Id: d32CallGate.asm,v 1.1.2.2 2002-04-01 09:57:11 bird Exp $
 ;
 ; 32-bit CallGate used to communitcate fast between Ring-3 and Ring-0.
 ; This module contains all assembly workers for this.
 ;
-; Copyright (c) 2001 knut st. osmundsen (knut.stange.osmundsen@mynd.no)
+; Copyright (c) 2001-2002 knut st. osmundsen (bird@anduin.net)
 ;
 ; Project Odin Software License can be found in LICENSE.TXT
 ;
@@ -119,7 +119,7 @@ CODE32 segment
 ; @uses     eax, ecx, edx
 ; @sketch
 ; @status
-; @author   knut st. osmundsen (knut.stange.osmundsen@mynd.no)
+; @author   knut st. osmundsen (bird@anduin.net)
 ; @remark
 InitCallGate proc near
     push    ebp
@@ -213,7 +213,7 @@ InitCallGate endp
 ; @uses     eax, ecx, edx
 ; @sketch
 ; @status
-; @author   knut st. osmundsen (knut.stange.osmundsen@mynd.no)
+; @author   knut st. osmundsen (bird@anduin.net)
 ; @remark
 ;   stack frame - before KMEnterKmodeSEF:
 ;       --bottom of stack---
@@ -286,7 +286,7 @@ Win32kCallGate endp
 ;           Call the API worker.
 ;           Return.
 ; @status   Completely implemented.
-; @author   knut st. osmundsen (knut.stange.osmundsen@mynd.no)
+; @author   knut st. osmundsen (bird@anduin.net)
 Win32kAPIRouter proc near
     ASSUME  ds:FLAT, es:nothing, ss:nothing
     ;

@@ -1,14 +1,14 @@
-/* $Id: d32Win32kOpenClose.c,v 1.1.2.2 2002-04-01 09:06:03 bird Exp $
+/* $Id: d32Win32kOpenClose.c,v 1.1.2.3 2002-04-01 09:57:11 bird Exp $
  *
  * Open and Close handlers for the Win32k driver.
  *
- * Copyright (c) 2001 knut st. osmundsen (kosmunds@csc.no)
+ * Copyright (c) 2001-2002 knut st. osmundsen (bird@anduin.net)
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *
  */
 #ifndef NOFILEID
-static const char szFileId[] = "$Id: d32Win32kOpenClose.c,v 1.1.2.2 2002-04-01 09:06:03 bird Exp $";
+static const char szFileId[] = "$Id: d32Win32kOpenClose.c,v 1.1.2.3 2002-04-01 09:57:11 bird Exp $";
 #endif
 
 
@@ -52,7 +52,7 @@ static const char szFileId[] = "$Id: d32Win32kOpenClose.c,v 1.1.2.2 2002-04-01 0
  * Make sure there is a task data structure.
  * @returns Strategy return status.
  * @param   pRpOpen     Pointer to request packet.
- * @author  knut st. osmundsen (kosmunds@csc.no)
+ * @author  knut st. osmundsen (bird@anduin.net)
  */
 USHORT _loadds _Far32 _Pascal Win32kOpen(PRP32OPENCLOSE pRpOpen)
 {
@@ -86,7 +86,7 @@ USHORT _loadds _Far32 _Pascal Win32kOpen(PRP32OPENCLOSE pRpOpen)
  * Cleanup task data structure.
  * @returns Strategy return status.
  * @param   pRpOpen     Pointer to request packet.
- * @author  knut st. osmundsen (kosmunds@csc.no)
+ * @author  knut st. osmundsen (bird@anduin.net)
  */
 USHORT _loadds _Far32 _Pascal Win32kClose(PRP32OPENCLOSE pRpClose)
 {

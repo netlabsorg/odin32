@@ -1,14 +1,14 @@
-/* $Id: k32SetEnvironment.cpp,v 1.1.2.2 2002-04-01 09:06:06 bird Exp $
+/* $Id: k32SetEnvironment.cpp,v 1.1.2.3 2002-04-01 09:57:15 bird Exp $
  *
  * k32SetEnvironment - Sets the Odin32 environment for a process.
  *
- * Copyright (c) 2001 knut st. osmundsen (kosmunds@csc.no)
+ * Copyright (c) 2001-2002 knut st. osmundsen (bird@anduin.net)
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *
  */
 #ifndef NOFILEID
-static const char szFileId[] = "$Id: k32SetEnvironment.cpp,v 1.1.2.2 2002-04-01 09:06:06 bird Exp $";
+static const char szFileId[] = "$Id: k32SetEnvironment.cpp,v 1.1.2.3 2002-04-01 09:57:15 bird Exp $";
 #endif
 
 
@@ -52,7 +52,7 @@ static const char szFileId[] = "$Id: k32SetEnvironment.cpp,v 1.1.2.2 2002-04-01 
  * @param   pid             Process Id to set environment for.
  *                          Currently limited to the current process (if pszzEnvironment != NULL).
  * @status  Completely implemented.
- * @author  knut st. osmundsen (knut.stange.osmundsen@mynd.no)
+ * @author  knut st. osmundsen (bird@anduin.net)
  * @remark  This is called by the kernel32 initterm proc.
  *          It should be called by any environment replacement later...
  */

@@ -1,8 +1,8 @@
-; $Id: d32Events.asm,v 1.1.2.1 2002-03-31 20:09:06 bird Exp $
+; $Id: d32Events.asm,v 1.1.2.2 2002-04-01 09:57:11 bird Exp $
 ;
 ; d32Events - Code for overriding system events.
 ;
-; Copyright (c) 2000-2001 knut st. osmundsen (knut.stange.osmundsen@mynd.no)
+; Copyright (c) 2000-2002 knut st. osmundsen (bird@anduin.net)
 ;
 ; Project Odin Software License can be found in LICENSE.TXT
 ;
@@ -53,7 +53,7 @@ CODE16 segment
 ; @uses
 ; @sketch
 ; @status
-; @author   knut st. osmundsen (knut.stange.osmundsen@mynd.no)
+; @author   knut st. osmundsen (bird@anduin.net)
 ; @remark
 mydh_SendEvent PROC FAR
     ; Preserve some registers.
@@ -149,7 +149,7 @@ mydh_SendEvent ENDP
 ; @time
 ; @sketch
 ; @status
-; @author   knut st. osmundsen (knut.stange.osmundsen@mynd.no)
+; @author   knut st. osmundsen (bird@anduin.net)
 ; @remark   Assumes that caller is kdbbase.sys and it is called far.
 myRASRST PROC FAR
     ASSUME ds:nothing, ss:nothing

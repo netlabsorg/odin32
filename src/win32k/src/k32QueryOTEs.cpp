@@ -1,15 +1,15 @@
-/* $Id: k32QueryOTEs.cpp,v 1.1.2.2 2002-04-01 09:06:05 bird Exp $
+/* $Id: k32QueryOTEs.cpp,v 1.1.2.3 2002-04-01 09:57:14 bird Exp $
  *
  * k32QueryOTEs  -  Get's the object table entries (OTEs) for a given
  *                  module (given by a module handle).
  *
- * Copyright (c) 2000 knut st. osmundsen (knut.stange.osmundsen@mynd.no)
+ * Copyright (c) 2000-2002 knut st. osmundsen (bird@anduin.net)
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *
  */
 #ifndef NOFILEID
-static const char szFileId[] = "$Id: k32QueryOTEs.cpp,v 1.1.2.2 2002-04-01 09:06:05 bird Exp $";
+static const char szFileId[] = "$Id: k32QueryOTEs.cpp,v 1.1.2.3 2002-04-01 09:57:14 bird Exp $";
 #endif
 
 
@@ -46,7 +46,7 @@ static const char szFileId[] = "$Id: k32QueryOTEs.cpp,v 1.1.2.2 2002-04-01 09:06
  * @param       pQOte   Pointer to output buffer.
  * @param       cbQOte  Size (in bytes) of the output buffer.
  * @status      completely implelemented.
- * @author      knut st. osmundsen (knut.stange.osmundsen@mynd.no)
+ * @author      knut st. osmundsen (bird@anduin.net)
  * @remark
  */
 APIRET k32QueryOTEs(HMTE hMTE, PQOTEBUFFER pQOte, ULONG cbQOte)

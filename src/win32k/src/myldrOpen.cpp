@@ -1,14 +1,14 @@
-/* $Id: myldrOpen.cpp,v 1.1.2.2 2002-04-01 09:06:09 bird Exp $
+/* $Id: myldrOpen.cpp,v 1.1.2.3 2002-04-01 09:57:18 bird Exp $
  *
  * myldrOpen - ldrOpen.
  *
- * Copyright (c) 1998-2001 knut st. osmundsen <knut.stange.osmundsen@mynd.no>
+ * Copyright (c) 1998-2002 knut st. osmundsen (bird@anduin.net)
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *
  */
 #ifndef NOFILEID
-static const char szFileId[] = "$Id: myldrOpen.cpp,v 1.1.2.2 2002-04-01 09:06:09 bird Exp $";
+static const char szFileId[] = "$Id: myldrOpen.cpp,v 1.1.2.3 2002-04-01 09:57:18 bird Exp $";
 #endif
 
 
@@ -803,7 +803,7 @@ ret:
  *                        normally the executable name.
  *
  * @status    completly implemented.
- * @author    knut st. osmundsen (knut.stange.osmundsen@mynd.no)
+ * @author    knut st. osmundsen (bird@anduin.net)
  * @remark    Implementation note:
  *  The arguments convention is as follows:
  *      First argument, which should be the executable name, is terminated with a '\0'.
@@ -937,7 +937,7 @@ APIRET AddArgsToFront(int cArgs,  ...)
  * @returns   OS/2 return code.
  * @param     pszExecName   Pointer to new executable name.
  * @status    completly implemented.
- * @author    knut st. osmundsen (knut.stange.osmundsen@mynd.no)
+ * @author    knut st. osmundsen (bird@anduin.net)
  * @remark    .
  */
 APIRET SetExecName(const char *pszExecName)
@@ -984,7 +984,7 @@ APIRET SetExecName(const char *pszExecName)
  *                          On failiure it's undefined.
  * @param     pfl           Some flags set by ldrOpen.
  * @sketch    stub
- * @author    knut st. osmundsen (knut.stange.osmundsen@mynd.no)
+ * @author    knut st. osmundsen (bird@anduin.net)
  * @remark
  */
 APIRET OpenPATH(PSFN phFile, char *pszFilename, PULONG pfl)

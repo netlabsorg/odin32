@@ -1,14 +1,14 @@
-/* $Id: ldr.cpp,v 1.1.2.2 2002-04-01 09:06:07 bird Exp $
+/* $Id: ldr.cpp,v 1.1.2.3 2002-04-01 09:57:15 bird Exp $
  *
  * ldr.cpp - Loader helpers.
  *
- * Copyright (c)  1999 knut  St.  osmundsen
+ * Copyright (c) 1999-2002 knut st. osmundsen (bird@anduin.net)
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *
  */
 #ifndef NOFILEID
-static const char szFileId[] = "$Id: ldr.cpp,v 1.1.2.2 2002-04-01 09:06:07 bird Exp $";
+static const char szFileId[] = "$Id: ldr.cpp,v 1.1.2.3 2002-04-01 09:57:15 bird Exp $";
 #endif
 
 /*******************************************************************************
@@ -344,7 +344,7 @@ ULONG      removeModule(SFN hFile)
  * @param       fExecChild  Use hMTE of the PTDAExecChild if present.
  * @sketch
  * @status      completely implemented.
- * @author      knut st. osmundsen (knut.stange.osmundsen@mynd.no)
+ * @author      knut st. osmundsen (bird@anduin.net)
  * @remark      The path from the pExeModule might not be fully qualified.
  */
 PSZ ldrGetExePath(PSZ pszPath, BOOL fExecChild)

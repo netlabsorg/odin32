@@ -1,8 +1,8 @@
-/* $Id: asmutils.h,v 1.4 2000-01-24 18:18:59 bird Exp $
+/* $Id: asmutils.h,v 1.4.6.1 2002-04-01 10:01:01 bird Exp $
  *
  * Assembly utilities.
  *
- * Copyright (c) 1998-1999 knut st. osmundsen
+ * Copyright (c) 1998-2002 knut st. osmundsen (bird@anduin.net)
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *

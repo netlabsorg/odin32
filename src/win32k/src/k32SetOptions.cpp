@@ -1,14 +1,14 @@
-/* $Id: k32SetOptions.cpp,v 1.1.2.2 2002-04-01 09:06:06 bird Exp $
+/* $Id: k32SetOptions.cpp,v 1.1.2.3 2002-04-01 09:57:15 bird Exp $
  *
  * k32SetOptions - Sets the changable options of win32k.sys the options.
  *
- * Copyright (c) 2000 knut st. osmundsen (knut.stange.osmundsen@mynd.no)
+ * Copyright (c) 2000-2002 knut st. osmundsen (bird@anduin.net)
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *
  */
 #ifndef NOFILEID
-static const char szFileId[] = "$Id: k32SetOptions.cpp,v 1.1.2.2 2002-04-01 09:06:06 bird Exp $";
+static const char szFileId[] = "$Id: k32SetOptions.cpp,v 1.1.2.3 2002-04-01 09:57:15 bird Exp $";
 #endif
 
 
@@ -60,7 +60,7 @@ static const char szFileId[] = "$Id: k32SetOptions.cpp,v 1.1.2.2 2002-04-01 09:0
  * @returns     OS2 returncode.
  * @param       pOptions    Pointer to options structure. (NULL is allowed)
  * @status      completely implelemented.
- * @author      knut st. osmundsen (knut.stange.osmundsen@mynd.no)
+ * @author      knut st. osmundsen (bird@anduin.net)
  * @remark      One of the pointer may be NULL.
  */
 APIRET k32SetOptions(PK32OPTIONS pOptions)

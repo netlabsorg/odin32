@@ -1,8 +1,8 @@
-/* $Id: options.h,v 1.22.2.1 2001-09-27 03:08:19 bird Exp $
+/* $Id: options.h,v 1.22.2.2 2002-04-01 10:01:04 bird Exp $
  *
  * Options.
  *
- * Copyright (c) 1998-1999 knut st. osmundsen
+ * Copyright (c) 1998-2002 knut st. osmundsen (bird@anduin.net)
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *

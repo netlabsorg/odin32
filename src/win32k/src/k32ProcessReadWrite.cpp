@@ -1,14 +1,14 @@
-/* $Id: k32ProcessReadWrite.cpp,v 1.1.2.2 2002-04-01 09:06:05 bird Exp $
+/* $Id: k32ProcessReadWrite.cpp,v 1.1.2.3 2002-04-01 09:57:13 bird Exp $
  *
  * k32ProcessReadWrite  -  Read or write to another process.
  *
- * Copyright (c) 2000 knut st. osmundsen (knut.stange.osmundsen@mynd.no)
+ * Copyright (c) 2000-2002 knut st. osmundsen (bird@anduin.net)
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *
  */
 #ifndef NOFILEID
-static const char szFileId[] = "$Id: k32ProcessReadWrite.cpp,v 1.1.2.2 2002-04-01 09:06:05 bird Exp $";
+static const char szFileId[] = "$Id: k32ProcessReadWrite.cpp,v 1.1.2.3 2002-04-01 09:57:13 bird Exp $";
 #endif
 
 
@@ -50,7 +50,7 @@ static const char szFileId[] = "$Id: k32ProcessReadWrite.cpp,v 1.1.2.2 2002-04-0
  * @param       fRead       TRUE:   pvSource is within pid while pvTarget is ours.
  *                          FALSE:  pvTarget is within pid while pvSource is ours.
  * @status      completely implelemented.
- * @author      knut st. osmundsen (knut.stange.osmundsen@mynd.no)
+ * @author      knut st. osmundsen (bird@anduin.net)
  * @remark
  */
 APIRET k32ProcessReadWrite(PID pid, ULONG cb, PVOID pvSource, PVOID pvTarget, BOOL fRead)

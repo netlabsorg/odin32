@@ -1,16 +1,16 @@
-/* $Id: myldrWasLoadModuled.cpp,v 1.1.2.2 2002-04-01 09:06:10 bird Exp $
+/* $Id: myldrWasLoadModuled.cpp,v 1.1.2.3 2002-04-01 09:57:19 bird Exp $
  *
  * ldrWasLoadModuled - Tells OS/2 that the executable module was LoadModuled
  *      too. This way DosQueryProcAddr and DosQueryProcType will work for
  *      executables too.
  *
- * Copyright (c) 2000 knut st. osmundsen (knut.stange.osmundsen@mynd.no)
+ * Copyright (c) 2000-2002 knut st. osmundsen (bird@anduin.net)
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *
  */
 #ifndef NOFILEID
-static const char szFileId[] = "$Id: myldrWasLoadModuled.cpp,v 1.1.2.2 2002-04-01 09:06:10 bird Exp $";
+static const char szFileId[] = "$Id: myldrWasLoadModuled.cpp,v 1.1.2.3 2002-04-01 09:57:19 bird Exp $";
 #endif
 
 /*******************************************************************************

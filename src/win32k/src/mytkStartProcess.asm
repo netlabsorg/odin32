@@ -1,9 +1,9 @@
-; $Id: mytkStartProcess.asm,v 1.1.2.1 2002-03-31 20:09:20 bird Exp $
+; $Id: mytkStartProcess.asm,v 1.1.2.2 2002-04-01 09:57:20 bird Exp $
 ;
 ; tkStartProcess overloader. Needed to clear the loader semaphore
 ; when a process is being started syncronously.
 ;
-; Copyright (c) 2000-2001 knut st. osmundsen (kosmunds@csc.no)
+; Copyright (c) 2000-2002 knut st. osmundsen (bird@anduin.net)
 ;
 ; Project Odin Software License can be found in LICENSE.TXT
 ;
@@ -68,7 +68,7 @@ CODE32 SEGMENT
 ; @uses      eax, ecx, edx
 ; @sketch
 ; @status
-; @author    knut st. osmundsen (knut.stange.osmundsen@pmsc.no)
+; @author    knut st. osmundsen (bird@anduin.net)
 ; @remark
 _mytkStartProcess PROC NEAR
     ASSUME DS:FLAT, ES:NOTHING, SS:NOTHING

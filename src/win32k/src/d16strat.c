@@ -1,9 +1,9 @@
-/* $Id: d16strat.c,v 1.1.2.1 2002-03-31 20:09:05 bird Exp $
+/* $Id: d16strat.c,v 1.1.2.2 2002-04-01 09:57:10 bird Exp $
  *
  * d16strat.c - 16-bit strategy routine, device headers, device_helper (ptr)
  *              and 16-bit IOClts.
  *
- * Copyright (c) 1999 knut st. osmundsen
+ * Copyright (c) 1999-2002 knut st. osmundsen (bird@anduin.net)
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *

@@ -1,15 +1,15 @@
-/* $Id: k32HandleSystemEvent.cpp,v 1.1.2.2 2002-04-01 09:06:04 bird Exp $
+/* $Id: k32HandleSystemEvent.cpp,v 1.1.2.3 2002-04-01 09:57:13 bird Exp $
  *
  * k32HandleSystemEvent - Override system events like Ctrl-Alt-Delete
  *          and Ctrl-Alt-2xNumLock.
  *
- * Copyright (c) 2000-2001 knut st. osmundsen (knut.stange.osmundsen@mynd.no)
+ * Copyright (c) 2000-2002 knut st. osmundsen (bird@anduin.net)
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *
  */
 #ifndef NOFILEID
-static const char szFileId[] = "$Id: k32HandleSystemEvent.cpp,v 1.1.2.2 2002-04-01 09:06:04 bird Exp $";
+static const char szFileId[] = "$Id: k32HandleSystemEvent.cpp,v 1.1.2.3 2002-04-01 09:57:13 bird Exp $";
 #endif
 
 
@@ -85,7 +85,7 @@ struct
  *                      TRUE:  Take control of the event.<br>
  *                      FALSE: Give control back to the OS of this event. (hev must match the current handle!)
  * @status  partially implemented.
- * @author  knut st. osmundsen (knut.stange.osmundsen@mynd.no)
+ * @author  knut st. osmundsen (bird@anduin.net)
  * @remark  Not all events are implemented yet.
  */
 APIRET k32HandleSystemEvent(ULONG ulEvent, HEV hev, BOOL fHandle)

@@ -1,7 +1,7 @@
-/* $Id: dev16.h,v 1.11.2.1 2001-09-27 03:08:17 bird Exp $
+/* $Id: dev16.h,v 1.11.2.2 2002-04-01 10:01:02 bird Exp $
  * dev16 - 16-bit specific. Should not be used in 32-bit C/C++.
  *
- * Copyright (c) 1999-2001 knut st. osmundsen (kosmunds@csc.com)
+ * Copyright (c) 1999-2002 knut st. osmundsen (bird@anduin.net)
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *

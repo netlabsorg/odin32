@@ -1,10 +1,10 @@
-; $Id: devlast.asm,v 1.1.2.1 2002-03-31 20:09:08 bird Exp $
+; $Id: devlast.asm,v 1.1.2.2 2002-04-01 09:57:12 bird Exp $
 ;
 ; DevLast - the object file termintating the resident part of the objects.
 ; Code after the ???END labes and object files and which are linked in
 ; after this file is discarded after init.
 ;
-; Copyright (c) 1999-2001 knut st. osmundsen (kosmunds@csc.com)
+; Copyright (c) 1999-2002 knut st. osmundsen (bird@anduin.net)
 ;
 ; Project Odin Software License can be found in LICENSE.TXT
 ;
@@ -87,7 +87,7 @@ CODE16_INIT segment
 ; @cproto   ULONG GetR0InitPtr(void);
 ; @returns  Flat pointer to R0Init. (ax:dx)
 ; @uses     uses eax, edx.
-; @author   knut st. osmundsen (kosmunds@csc.com)
+; @author   knut st. osmundsen (bird@anduin.net)
 _GetR0InitPtr PROC NEAR
     assume ds:nothing, ss:nothing, es:nothing
     mov     eax, offset FLAT:CODE32:R0Init

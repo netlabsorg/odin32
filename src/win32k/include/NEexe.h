@@ -1,10 +1,10 @@
-/* $Id: NEexe.h,v 1.1.2.2 2002-04-01 08:31:10 bird Exp $
+/* $Id: NEexe.h,v 1.1.2.3 2002-04-01 10:01:00 bird Exp $
  *
  * NE DEFINITIONS AND DECLARATIONS.
  * --------------------------------
  *
  * Copyright Robert J. Amstadt, 1993
- * Copyright knut st. osmundsen (2001) (I've messed them up ;-)
+ * Copyright knut st. osmundsen (bird@anduin.net)
  *
  */
 

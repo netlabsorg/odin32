@@ -1,8 +1,8 @@
-; $Id: myVR32AllocMem.asm,v 1.1.2.1 2002-03-31 20:09:15 bird Exp $
+; $Id: myVR32AllocMem.asm,v 1.1.2.2 2002-04-01 09:57:16 bird Exp $
 ;
 ; VR32AllocMem over loader which adds the OBJ_ANY flag.
 ;
-; Copyright (c) 2001 knut st. osmundsen (knut.stange.osmundsen@mynd.no)
+; Copyright (c) 2001-2002 knut st. osmundsen (bird@anduin.net)
 ;
 ; Project Odin Software License can be found in LICENSE.TXT
 ;

@@ -1,8 +1,8 @@
-; $Id: devSegDf.inc,v 1.8 2001-02-23 02:57:54 bird Exp $
+; $Id: devSegDf.inc,v 1.8.2.1 2002-04-01 10:01:02 bird Exp $
 ;
 ; Segment definitions for win32k.sys.
 ;
-; Copyright (c) 1998-2000 knut st. osmundsen
+; Copyright (c) 1998-2002 knut st. osmundsen (bird@anduin.net)
 ;
 ; Project Odin Software License can be found in LICENSE.TXT
 ;

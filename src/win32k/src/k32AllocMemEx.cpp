@@ -1,15 +1,15 @@
-/* $Id: k32AllocMemEx.cpp,v 1.1.2.2 2002-04-01 09:06:04 bird Exp $
+/* $Id: k32AllocMemEx.cpp,v 1.1.2.3 2002-04-01 09:57:13 bird Exp $
  *
  * k32AllocMemEx - Equivalent to DosAllocMem, but this one
  *                 uses the address in ppv.
  *
- * Copyright (c) 2000 knut st. osmundsen (knut.stange.osmundsen@mynd.no)
+ * Copyright (c) 2000-2002 knut st. osmundsen (bird@anduin.net)
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *
  */
 #ifndef NOFILEID
-static const char szFileId[] = "$Id: k32AllocMemEx.cpp,v 1.1.2.2 2002-04-01 09:06:04 bird Exp $";
+static const char szFileId[] = "$Id: k32AllocMemEx.cpp,v 1.1.2.3 2002-04-01 09:57:13 bird Exp $";
 #endif
 
 
@@ -101,7 +101,7 @@ ULONG vmApiF1[] =
  * @param   ulEIP   EIP where the memoryobject was requested.
  * @sketch
  * @status  partially implemented.
- * @author  knut st. osmundsen (knut.stange.osmundsen@mynd.no)
+ * @author  knut st. osmundsen (bird@anduin.net)
  * @remark  Seems like I have to solve that "Grow private arena" problem which
  *          applies when we allocate at a specific address.
  *          I'll look into it ASAP and add a fix for this in the loader too.

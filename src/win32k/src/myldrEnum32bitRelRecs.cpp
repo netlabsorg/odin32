@@ -1,14 +1,14 @@
-/* $Id: myldrEnum32bitRelRecs.cpp,v 1.1.2.2 2002-04-01 09:06:08 bird Exp $
+/* $Id: myldrEnum32bitRelRecs.cpp,v 1.1.2.3 2002-04-01 09:57:17 bird Exp $
  *
  * myldrEnum32bitRelRecs - ldrEnum32bitRelRecs
  *
- * Copyright (c) 2000-2001 knut st. osmundsen (kosmunds@csc.com)
+ * Copyright (c) 2000-2002 knut st. osmundsen (bird@anduin.net)
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *
  */
 #ifndef NOFILEID
-static const char szFileId[] = "$Id: myldrEnum32bitRelRecs.cpp,v 1.1.2.2 2002-04-01 09:06:08 bird Exp $";
+static const char szFileId[] = "$Id: myldrEnum32bitRelRecs.cpp,v 1.1.2.3 2002-04-01 09:57:17 bird Exp $";
 #endif
 
 /*******************************************************************************

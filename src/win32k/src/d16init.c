@@ -1,11 +1,11 @@
-/* $Id: d16init.c,v 1.1.2.1 2002-03-31 20:09:05 bird Exp $
+/* $Id: d16init.c,v 1.1.2.2 2002-04-01 09:57:10 bird Exp $
  *
  * d16init - init routines for both drivers.
  *
  * IMPORTANT! Code and data defined here will be discarded after init is
  *            completed. CodeEnd and DataEnd should not be set here.?
  *
- * Copyright (c) 1999-2001 knut st. osmundsen (kosmunds@csc.com)
+ * Copyright (c) 1999-2002 knut st. osmundsen (bird@anduin.net)
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *

@@ -1,8 +1,8 @@
-/* $Id: pe2lx.cpp,v 1.1.2.2 2002-04-01 09:06:10 bird Exp $
+/* $Id: pe2lx.cpp,v 1.1.2.3 2002-04-01 09:57:20 bird Exp $
  *
  * Pe2Lx class implementation. Ring 0 and Ring 3
  *
- * Copyright (c) 1998-2000 knut st. osmundsen (knut.stange.osmundsen@mynd.no)
+ * Copyright (c) 1998-2002 knut st. osmundsen (bird@anduin.net)
  * Copyright (c) 1998 Sander van Leeuwen (sandervl@xs4all.nl)
  * Copyright (c) 1998 Peter Fitzsimmons
  *
@@ -10,7 +10,7 @@
  *
  */
 #ifndef NOFILEID
-static const char szFileId[] = "$Id: pe2lx.cpp,v 1.1.2.2 2002-04-01 09:06:10 bird Exp $";
+static const char szFileId[] = "$Id: pe2lx.cpp,v 1.1.2.3 2002-04-01 09:57:20 bird Exp $";
 #endif
 
 
@@ -2064,7 +2064,7 @@ ULONG Pe2Lx::writeFile(PCSZ pszLXFilename)
  * @returns   TRUE if executable.
  *            FALSE if not an executable.
  * @sketch
- * @author    knut st. osmundsen (knut.stange.osmundsen@mynd.no)
+ * @author    knut st. osmundsen (bird@anduin.net)
  */
 BOOL    Pe2Lx::isExe()
 {
@@ -2077,7 +2077,7 @@ BOOL    Pe2Lx::isExe()
  * @returns   TRUE if dynamic link library.
  *            FALSE if not a dynamic link library.
  * @sketch
- * @author    knut st. osmundsen (knut.stange.osmundsen@mynd.no)
+ * @author    knut st. osmundsen (bird@anduin.net)
  */
 BOOL    Pe2Lx::isDll()
 {
@@ -2090,7 +2090,7 @@ BOOL    Pe2Lx::isDll()
  * Called by ldrClose when the kernel32 handle is closed.
  * @sketch      Free path
  *              nullify path pointer and kernel32 handle.
- * @author      knut st. osmundsen (knut.stange.osmundsen@mynd.no)
+ * @author      knut st. osmundsen (bird@anduin.net)
  */
 VOID Pe2Lx::invalidateOdin32Path()
 {
@@ -5041,7 +5041,7 @@ PCSZ Pe2Lx::queryOdin32ModuleName(PCSZ pszWin32ModuleName)
  *
  *              Fail returning FALSE.
  * @status
- * @author      knut st. osmundsen (knut.stange.osmundsen@mynd.no)
+ * @author      knut st. osmundsen (bird@anduin.net)
  * @remark
  */
 BOOL Pe2Lx::initOdin32Path()
@@ -5122,7 +5122,7 @@ BOOL Pe2Lx::initOdin32Path()
  * @param       psz     Fully qualified filename of kernel32 with path.
  * @sketch
  * @status
- * @author      knut st. osmundsen (knut.stange.osmundsen@mynd.no)
+ * @author      knut st. osmundsen (bird@anduin.net)
  * @remark
  */
 BOOL Pe2Lx::setOdin32Path(const char *psz)

@@ -1,8 +1,8 @@
-/* $Id: ldr.h,v 1.7.2.1 2001-09-27 03:08:18 bird Exp $
+/* $Id: ldr.h,v 1.7.2.2 2002-04-01 10:01:03 bird Exp $
  *
  * ldr - Our loader "subsystem" public header file.
  *
- * Copyright (c) 2000 knut st. osmundsen (knut.stange.osmundsen@mynd.no)
+ * Copyright (c) 2000-2002 knut st. osmundsen (bird@anduin.net)
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *

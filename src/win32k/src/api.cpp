@@ -1,14 +1,14 @@
-/* $Id: api.cpp,v 1.1.2.2 2002-04-01 09:06:02 bird Exp $
+/* $Id: api.cpp,v 1.1.2.3 2002-04-01 09:57:10 bird Exp $
  *
  * API Overload Init and Helper Function.
  *
- * Copyright (c) 2001 knut st. osmundsen (knut.stange.osmundsen@mynd.no)
+ * Copyright (c) 2001-2002 knut st. osmundsen (bird@anduin.net)
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *
  */
 #ifndef NOFILEID
-static const char szFileId[] = "$Id: api.cpp,v 1.1.2.2 2002-04-01 09:06:02 bird Exp $";
+static const char szFileId[] = "$Id: api.cpp,v 1.1.2.3 2002-04-01 09:57:10 bird Exp $";
 #endif
 
 /*******************************************************************************
@@ -115,7 +115,7 @@ APIRET  apiWriteLine(SFN sfn, PULONG poff, PSZ pszString);
  *          Parse the file
  *          Close the file.
  * @status  completely implemented.
- * @author  knut st. osmundsen (knut.stange.osmundsen@mynd.no)
+ * @author  knut st. osmundsen (bird@anduin.net)
  * @remark  Must hold the loader semaphore before calling this function!
  */
 APIRET  apiReadIniFile(PSZ pszIniFile)
@@ -186,7 +186,7 @@ APIRET  apiReadIniFile(PSZ pszIniFile)
  * @param   pszFile     Pointer to file mapping.
  * @sketch
  * @status  completely implemented.
- * @author  knut st. osmundsen (knut.stange.osmundsen@mynd.no)
+ * @author  knut st. osmundsen (bird@anduin.net)
  * @remark
  */
 APIRET  apiParseIniFile(PSZ pszFile)
@@ -324,7 +324,7 @@ APIRET  apiParseIniFile(PSZ pszFile)
  * @param   ppszFile    Pointer to pointer variable.
  * @sketch
  * @status  completly implemented.
- * @author  knut st. osmundsen (knut.stange.osmundsen@mynd.no)
+ * @author  knut st. osmundsen (bird@anduin.net)
  */
 PSZ     apiStripIniLine(PSZ pszFile, PSZ * ppszFile)
 {
@@ -401,7 +401,7 @@ PSZ     apiStripIniLine(PSZ pszFile, PSZ * ppszFile)
  *          Skip blanks.
  *          Convert decimal number string and return it.
  * @status  completely implemented.
- * @author  knut st. osmundsen (knut.stange.osmundsen@mynd.no)
+ * @author  knut st. osmundsen (bird@anduin.net)
  * @remark  Layz, we only read '[n' no checking for the ending ']'.
  */
 int     apiInterpretApiNo(PSZ pszSection)
@@ -435,7 +435,7 @@ int     apiInterpretApiNo(PSZ pszSection)
  * @param   paApiData   Pointer to api data to sort.
  * @sketch  Loop thru all entries and sort all four mask arrays.
  * @status  completely implemented.
- * @author  knut st. osmundsen (knut.stange.osmundsen@mynd.no)
+ * @author  knut st. osmundsen (bird@anduin.net)
  * @remark  See apiSortMaskArray.
  */
 void    apiSortApiData(PAPIDATAENTRY paApiData)
@@ -460,7 +460,7 @@ void    apiSortApiData(PAPIDATAENTRY paApiData)
  * @param   pMasks  Pointer to a mask array structure.
  * @sketch  Use bouble sort.
  * @status  partially implemented.
- * @author  knut st. osmundsen (knut.stange.osmundsen@mynd.no)
+ * @author  knut st. osmundsen (bird@anduin.net)
  * @remark  Duplicate submasks aren't tested for.
  *          example: "DOSCALL1.DLL" is equal to "DOS*"
  */
@@ -498,7 +498,7 @@ void    apiSortMaskArray(PMASKARRAY pMasks)
  * @param   paApiData   Pointer to api data table.
  * @sketch  Loop thru all api entries and free mask array pointers.
  * @status  Completely implemented.
- * @author  knut st. osmundsen (knut.stange.osmundsen@mynd.no)
+ * @author  knut st. osmundsen (bird@anduin.net)
  * @remark  Any serialization is not my problem.
  */
 void    apiFreeApiData(PAPIDATAENTRY paApiData)
@@ -528,7 +528,7 @@ void    apiFreeApiData(PAPIDATAENTRY paApiData)
  * @param   pszIniFile  Pointer to the name of the ini file.
  * @sketch
  * @status
- * @author  knut st. osmundsen (knut.stange.osmundsen@mynd.no)
+ * @author  knut st. osmundsen (bird@anduin.net)
  * @remark
  */
 APIRET  apiWriteIniFile(PSZ pszIniFile)
@@ -605,7 +605,7 @@ APIRET  apiWriteIniFile(PSZ pszIniFile)
  * @param   pszType     Type string for these masks.
  * @param   fEnabled    If the api entry is enabled or not.
  * @status  completely implemented.
- * @author  knut st. osmundsen (knut.stange.osmundsen@mynd.no)
+ * @author  knut st. osmundsen (bird@anduin.net)
  */
 APIRET  apiWriteMasks(SFN sfn, PULONG poff, PMASKARRAY pMasks, PSZ pszType, BOOL fEnabled)
 {
@@ -643,7 +643,7 @@ APIRET  apiWriteMasks(SFN sfn, PULONG poff, PMASKARRAY pMasks, PSZ pszType, BOOL
  *                       the IOSftWriteAt function.)
  * @param   pszString   String to be written.
  * @status  completely implemented.
- * @author  knut st. osmundsen (knut.stange.osmundsen@mynd.no)
+ * @author  knut st. osmundsen (bird@anduin.net)
  */
 APIRET  apiWriteLine(SFN sfn, PULONG poff, PSZ pszString)
 {
@@ -782,7 +782,7 @@ APIRET KRNLCALL SftFileSize(
  * @param   pMasks      Pointer to mask array.
  * @sketch
  * @status
- * @author  knut st. osmundsen (knut.stange.osmundsen@mynd.no)
+ * @author  knut st. osmundsen (bird@anduin.net)
  * @remark
  */
 BOOL    apiFindNameInMaskArray(PSZ pszName, PMASKARRAY pMasks)
@@ -805,7 +805,7 @@ BOOL    apiFindNameInMaskArray(PSZ pszName, PMASKARRAY pMasks)
  *          Parse out filename+ext from full filename and copy it to pszName.
  *          return.
  * @status  completely implemented.
- * @author  knut st. osmundsen (knut.stange.osmundsen@mynd.no)
+ * @author  knut st. osmundsen (bird@anduin.net)
  */
 APIRET  apiGetProccessName(PSZ pszName)
 {
@@ -860,7 +860,7 @@ APIRET  apiGetProccessName(PSZ pszName)
  *          Parse out filename+ext from full filename and copy it to pszName.
  *          return.
  * @status  completely implemented.
- * @author  knut st. osmundsen (knut.stange.osmundsen@mynd.no)
+ * @author  knut st. osmundsen (bird@anduin.net)
  */
 APIRET  apiGetModuleName(PSZ pszName, USHORT usCS, ULONG ulEIP)
 {
@@ -913,7 +913,7 @@ APIRET  apiGetModuleName(PSZ pszName, USHORT usCS, ULONG ulEIP)
  * @param   ulEIP   EIP of the API caller.
  * @sketch
  * @status
- * @author  knut st. osmundsen (knut.stange.osmundsen@mynd.no)
+ * @author  knut st. osmundsen (bird@anduin.net)
  * @remark
  */
 BOOL _Optlink   APIQueryEnabled(int iApi, USHORT usCS, LONG ulEIP)
@@ -988,7 +988,7 @@ BOOL _Optlink   APIQueryEnabled(int iApi, USHORT usCS, LONG ulEIP)
  * @sketch  Find Ini file location.
  *          Read the inifile and there by initiate the aApiData strcut.
  * @status  completly implemented.
- * @author  knut st. osmundsen (knut.stange.osmundsen@mynd.no)
+ * @author  knut st. osmundsen (bird@anduin.net)
  */
 APIRET _Optlink APIInit(void)
 {
