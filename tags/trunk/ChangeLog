@@ -1,4 +1,7 @@
- /* $Id: ChangeLog,v 1.636 2000-01-11 17:33:27 cbratschi Exp $ */
+ /* $Id: ChangeLog,v 1.637 2000-01-11 20:38:23 sandervl Exp $ */
+
+ 2000-01-11: Jens Wiessner <wiessnej@rfi.de>
+	- TWAIN_32: Bugfix (removed test code)
 
  2000-01-11: Christoph Bratschi <cbratschi@datacomm.ch>
 	- USER32/NEW: fixed AdjustWindowRectEx
