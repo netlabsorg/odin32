@@ -1,4 +1,4 @@
-/* $Id: d32init.c,v 1.26 2000-12-11 06:22:14 bird Exp $
+/* $Id: d32init.c,v 1.27 2000-12-12 14:50:09 bird Exp $
  *
  * d32init.c - 32-bits init routines.
  *
@@ -700,6 +700,10 @@ int interpretFunctionProlog32(char *pach, BOOL fOverload)
      *  or
      *     push ebp
      *     mov eax, dword ptr [xxxxxxxx]
+     *  or
+     *     sub esp, imm8
+     *     push ebx
+     *     push edi
      *
      * These are allowed when not overloading:
      *     mov eax, imm32
@@ -727,6 +731,8 @@ int interpretFunctionProlog32(char *pach, BOOL fOverload)
      *
      */
     if ((pach[0] == 0x55 && (pach[1] == 0x8b || pach[1] == 0xa1)) /* the two first prologs */
+        ||
+        (pach[0] == 0x83 &&  pach[3] == 0x53 && pach[4] == 0x57)  /* the third prolog */
         ||
         (pach[0] == 0xB8 && (pach[5] == 0xEB || pach[5] == 0x55) && !fOverload) /* the two next prologs */
         ||
