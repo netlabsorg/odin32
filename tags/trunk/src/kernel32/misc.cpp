@@ -1,4 +1,4 @@
-/* $Id: misc.cpp,v 1.32 2001-03-19 19:27:13 sandervl Exp $ */
+/* $Id: misc.cpp,v 1.33 2001-03-21 12:32:55 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -25,6 +25,7 @@
 #include <string.h>
 #include <stdarg.h>
 #include <win32type.h>
+#include <win32api.h>
 #include <misc.h>
 #include "initterm.h"
 #include "logging.h"
@@ -248,6 +249,8 @@ static BOOL fLogging = TRUE;
 static int  dwEnableLogging = 1;
 static int  oldcrtmsghandle = 0;
 
+static BOOL fDisableThread[5] = {0};
+
 //#define CHECK_ODINHEAP
 #if defined(DEBUG) && defined(CHECK_ODINHEAP)
 int checkOdinHeap = 1;
@@ -257,14 +260,12 @@ int checkOdinHeap = 1;
 #endif
 
 //#define LOG_TIME
-#ifdef LOG_TIME
-DWORD WIN32API GetTickCount(void);
-#endif
 
 int SYSTEM WriteLog(char *tekst, ...)
 {
   USHORT  sel = RestoreOS2FS();
   va_list argptr;
+  TEB *teb = GetThreadTEB();
 
   ODIN_HEAPCHECK();
 
@@ -289,12 +290,33 @@ int SYSTEM WriteLog(char *tekst, ...)
     }
     else
       fLogging = FALSE;
+
+    if(getenv("DISABLE_THREAD1")) {
+      fDisableThread[0] = TRUE;
+    }
+    if(getenv("DISABLE_THREAD2")) {
+      fDisableThread[1] = TRUE;
+    }
+    if(getenv("DISABLE_THREAD3")) {
+      fDisableThread[2] = TRUE;
+    }
+    if(getenv("DISABLE_THREAD4")) {
+      fDisableThread[3] = TRUE;
+    }
+    if(getenv("DISABLE_THREAD5")) {
+      fDisableThread[4] = TRUE;
+    }
+  }
+
+  if(teb) {
+      if(teb->o.odin.threadId < 5 && fDisableThread[teb->o.odin.threadId-1] == 1) {
+          SetFS(sel);
+          return 1;
+      }
   }
 
   if(fLogging && flog && (dwEnableLogging > 0))
   {
-    TEB *teb = GetThreadTEB();
-
     va_start(argptr, tekst);
     if(teb) {
         teb->o.odin.logfile = (DWORD)flog;
@@ -310,6 +332,11 @@ int SYSTEM WriteLog(char *tekst, ...)
         else fprintf(flog, "t%d: ", teb->o.odin.threadId);
 #endif
     }
+#ifdef LOG_TIME
+    else {
+        fprintf(flog, "tX: (%x) ", GetTickCount());
+    }
+#endif
     vfprintf(flog, tekst, argptr);
     if(teb) teb->o.odin.logfile = 0;
     va_end(argptr);
