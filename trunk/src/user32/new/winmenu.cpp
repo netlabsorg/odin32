@@ -1,4 +1,4 @@
-/* $Id: winmenu.cpp,v 1.5 1999-09-09 21:01:34 phaller Exp $ */
+/* $Id: winmenu.cpp,v 1.6 1999-09-14 09:56:06 phaller Exp $ */
 
 /*
  * Win32 menu API functions for OS/2
@@ -107,7 +107,7 @@ BOOL WIN32API SetMenu( HWND hwnd, HMENU hmenu)
 
     window = Win32BaseWindow::GetWindowFromHandle(hwnd);
     if(!window) {
-        dprintf(("GetMenu, window %x not found", hwnd));
+        dprintf(("SetMenu, window %x not found", hwnd));
         return 0;
     }
     dprintf(("SetMenu %x %x\n", hwnd, hmenu));
