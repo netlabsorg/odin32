@@ -1,4 +1,4 @@
-; $Id: odincrt.def,v 1.19 1999-12-09 10:58:14 sandervl Exp $
+; $Id: odincrt.def,v 1.20 1999-12-21 12:28:08 sandervl Exp $
 ; Odin VAC++ 3.08 shared multithreaded runtime
 LIBRARY ODINCRT INITINSTANCE TERMINSTANCE
 PROTMODE
@@ -31,6 +31,31 @@ EXPORTS
        _debug_ucalloc = os2_debug_ucalloc               @181
     __nw__FUiPCcT1 = os2__nw__FUiPCcT1                  @172
     __dl__FPvPCcUi = os2__dl__FPvPCcUi                  @201
+
+    fread = os2_fread                                             @265
+    fwrite = os2_fwrite                                            @430
+    fopen = os2_fopen                                             @293
+    fputc = os2_fputc                                             @305
+    fputs = os2_fputs                                             @311
+    fsetpos = os2_fsetpos                                           @652
+    fclose = os2_fclose                                            @354
+    fflush = os2_fflush                                            @370
+    freopen = os2_freopen                                           @612
+    fgetpos = os2_fgetpos                                           @630
+    vfprintf = os2_vfprintf                                          @755
+    feof = os2_feof                                              @230
+    ferror = os2_ferror                                            @414
+    fseek = os2_fseek                                             @271
+    ftell = os2_ftell                                             @273
+    fgetc = os2_fgetc                                             @262
+    fgets = os2_fgets                                            @267
+    fgetwc = os2_fgetwc                                            @343
+    fgetws = os2_fgetws                                            @369
+    fputwc = os2_fputwc                                            @435
+    fputws = os2_fputws                                            @478
+
+;;TODO!
+    fprintf                                           @647
   
      strdup                  			       	@472
     ;strncpy doesn't stop at 0 terminator!
@@ -258,7 +283,6 @@ EXPORTS
     __tdump_allocated_delta                           @227
     acos                                              @228
     rand                                              @229
-    feof                                              @230
     __udump_allocated_delta                           @231
     tanh                                              @232
     asin                                              @233
@@ -290,18 +314,13 @@ EXPORTS
     scanf                                             @259
     putc                                              @260
     puts                                              @261
-    fgetc                                             @262
     _ProfileThrow32                                   @263
     _cabs                                             @264
-    fread                                             @265
     ldexp                                             @266
-    fgets                                             @267
     srand                                             @268
     raise                                             @269
     _IEEE_DBL_SIGN_NEG_MASK                           @270
-    fseek                                             @271
     mblen                                             @272
-    ftell                                             @273
     _ecvt                                             @274
     set_new_handler__FPFv_v                           @275
     _dup2                                             @276
@@ -321,7 +340,6 @@ EXPORTS
     getwc                                             @290
     __ct__7istreamFP9streambufiP7ostream              @291
     floor                                             @292
-    fopen                                             @293
     __vft7ostream3ios_9strstream8iostream             @294
     wctob                                             @295
     _erfc                                             @296
@@ -333,13 +351,11 @@ EXPORTS
     __ct__7istreamFP9streambuf                        @302
     __ct__7ostreamFP9streambuf                        @303
     wchar_out__7ostreamFiPcT1                         @304
-    fputc                                             @305
     _itoa                                             @306
     _IEEE_LDBL_ALL_EXP_MASK                           @307
     _open                                             @308
     _ltoa                                             @309
     qsort                                             @310
-    fputs                                             @311
     __as__18istream_withassignFR7istream              @312
     putwc                                             @313
     get__7istreamFR9streambufc                        @314
@@ -371,7 +387,6 @@ EXPORTS
     __dt__7fstreamFv                                  @340
     __ct__7ostreamFv                                  @341
     __dt__7istreamFv                                  @342
-    fgetwc                                            @343
     __dt__7ostreamFv                                  @344
     _set_mt_terminate__FPFv_v                         @345
     fscanf                                            @347
@@ -380,7 +395,6 @@ EXPORTS
     __vtt10ostrstream                                 @350
     _getch                                            @352
     sscanf                                            @353
-    fclose                                            @354
     signal                                            @355
     _chmod                                            @356
     _dump_allocated                                   @357
@@ -395,8 +409,6 @@ EXPORTS
     ls_complicated__7ostreamFc                        @366
     rename                                            @367
     __ls__7ostreamFr                                  @368
-    fgetws                                            @369
-    fflush                                            @370
     __ls__7ostreamFw                                  @371
     _kbhit                                            @372
     cclass                                            @373
@@ -440,7 +452,6 @@ EXPORTS
     wctype                                            @411
     wcscat                                            @412
     _mkdir                                            @413
-    ferror                                            @414
     _ultoa                                            @415
     __vft7istream3ios_19iostream_withassign8iostream  @416
     _ftime                                            @417
@@ -456,12 +467,10 @@ EXPORTS
     getenv                                            @427
     perror                                            @428
     wcsspn                                            @429
-    fwrite                                            @430
     sync__8stdiobufFv                                 @431
     setjmp                                            @432
     _Fmprs                                            @433
     _lseek                                            @434
-    fputwc                                            @435
     _Fnprs                                            @436
     strtod                                            @437
     _rmdir                                            @438
@@ -503,7 +512,6 @@ EXPORTS
     initcount__13Iostream_init                        @475
     floatfield__3ios                                  @476
     __ct__12strstreambufFPSciT1                       @477
-    fputws                                            @478
     strupr                                            @479
     __ct__8ifstreamFv                                 @480
     _set_mt_unexpected__FPFv_v                        @481
@@ -636,7 +644,6 @@ EXPORTS
     get_complicated__7istreamFRUc                     @609
     _eh_del                                           @610
     ls_complicated__7ostreamFSc                       @611
-    freopen                                           @612
     ls_complicated__7ostreamFUc                       @613
     ungetwc                                           @614
     isspace                                           @615
@@ -654,7 +661,6 @@ EXPORTS
     _cscanf                                           @627
     iscntrl                                           @628
     mbrtowc                                           @629
-    fgetpos                                           @630
     memicmp                                           @631
     isdigit                                           @632
     seekoff__12strstreambufFlQ2_3ios8seek_diri        @633
@@ -671,12 +677,10 @@ EXPORTS
     setvbuf                                           @644
     getwchar                                          @645
     difftime                                          @646
-    fprintf                                           @647
     wcscoll                                           @648
     _uflush                                           @649
     wcspbrk                                           @650
     strtold                                           @651
-    fsetpos                                           @652
     _FreeFCB                                          @653
     wcsncat                                           @654
     __vft8iostream3ios_9strstream                     @655
@@ -776,7 +780,6 @@ EXPORTS
     hex__Fli                                          @752
     iswupper                                          @753
     strftime                                          @754
-    vfprintf                                          @755
     _ustats                                           @756
     _NAN_STR                                          @757
     towupper                                          @758
