@@ -1,4 +1,4 @@
-/* $Id: msvcrt.cpp,v 1.14 2000-08-22 08:09:21 phaller Exp $ */
+/* $Id: msvcrt.cpp,v 1.15 2000-08-31 00:03:10 phaller Exp $ */
 
 /*
  * The Visual C RunTime DLL (MSVCRT/MSVCRT20/MSVCRT40)
@@ -65,6 +65,7 @@ LPSTR	MSVCRT__tzname;
 UINT 	MSVCRT__winmajor;    
 UINT 	MSVCRT__winminor;    
 UINT 	MSVCRT__winver;      
+LPWSTR  MSVCRT__wcmdln;
 
 
 // syserr / sysnerr Defs
@@ -852,6 +853,16 @@ int * CDECL MSVCRT___p___mb_cur_max()
 
 
 /*********************************************************************
+ *                  __p___wargv         (MSVCRT.103)
+ */
+wchar_t** CDECL MSVCRT___p___wargv(void)
+{
+  dprintf(("MSVCRT: __p___wargv\n"));
+  return __wargv;
+}
+
+
+/*********************************************************************
  *                  __p__acmdln  (MSVCRT.105)
  */
 char ** CDECL MSVCRT___p__acmdln()
@@ -982,6 +993,16 @@ char ** CDECL MSVCRT___p__tzname()
 
 
 /*********************************************************************
+ *                  __p__wcmdln  (MSVCRT.122)
+ */
+LPWSTR* CDECL MSVCRT___p__wcmdln()
+{
+  dprintf(("MSVCRT: __p__wcmdln\n"));
+	return &MSVCRT__wcmdln;
+}
+
+
+/*********************************************************************
  *                  __p__winmajor  (MSVCRT.124)
  */
 int * CDECL MSVCRT___p__winmajor()
@@ -1028,6 +1049,30 @@ int CDECL MSVCRT___setusermatherr(int matherr)
 {
   dprintf(("MSVCRT: __setusermatherr\n"));
 	return __usermatherr = matherr;
+}	
+
+
+/*********************************************************************
+ *                  __wgetmainargs    (MSVCRT.140)
+ */
+char* CDECL MSVCRT___wgetmainargs(DWORD arg0,
+                                  DWORD arg1,
+                                  DWORD arg2,
+                                  DWORD arg3,
+                                  DWORD arg4)
+{
+  dprintf(("MSVCRT: __wgetmainargs(%08xh,%08xh,%08xh,%08xh,%08xh) not implemented\n",
+           arg0,
+           arg1,
+           arg2,
+           arg3,
+           arg4));
+  
+  // __argc
+  // __wargv
+  // _wenviron
+  
+  return (char*)arg2;
 }	
 
 

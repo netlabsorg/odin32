@@ -1,4 +1,4 @@
-; $Id: msvcrt.def,v 1.18 2000-08-22 02:45:41 phaller Exp $
+; $Id: msvcrt.def,v 1.19 2000-08-31 00:03:11 phaller Exp $
 
 ;
 ; Based on Windows 98 : MSVCRT.DLL (v6.00.8397.0)
@@ -111,7 +111,7 @@ EXPORTS
     __p___argv			= _MSVCRT___p___argv		@100
     __p___initenv		= _MSVCRT___p__initenv		@101
     __p___mb_cur_max		= _MSVCRT___p___mb_cur_max	@102
-;   __p___wargv							@103
+    __p___wargv			= _MSVCRT___p___wargv   	@103
 ;   __p___winitenv						@104
     __p__acmdln			= _MSVCRT___p__acmdln		@105
 ;   __p__amblksiz						@106
@@ -130,7 +130,7 @@ EXPORTS
     __p__pwctype		= _MSVCRT___p__pwctype		@119
     __p__timezone		= _MSVCRT___p__timezone		@120
     __p__tzname			= _MSVCRT___p__tzname		@121
-;   __p__wcmdln							@122
+    __p__wcmdln			= _MSVCRT___p__wcmdln   	@122
 ;   __p__wenviron						@123
     __p__winmajor		= _MSVCRT___p__winmajor		@124
     __p__winminor		= _MSVCRT___p__winminor		@125
@@ -148,11 +148,11 @@ EXPORTS
 ;   __unDNameEx							@137
 ;   __unguarded_readlc_active					@138
     __wargv							@139
-;   __wgetmainargs						@140
+    __wgetmainargs		= _MSVCRT___wgetmainargs     	@140
 ;   __winitenv							@141
     _abnormal_termination	= _CRTDLL__abnormal_termination	@142
     _access			= _CRTDLL__access		@143
-    _acmdln			= MSVCRT__acmdln		@144
+    _acmdln			= MSVCRT__acmdln		@144 ; var export
 ;   _adj_fdiv_m16i						@145
 ;   _adj_fdiv_m32						@146
 ;   _adj_fdiv_m32i						@147
@@ -500,7 +500,7 @@ EXPORTS
     _wasctime			= _MSVCRT__wasctime 		@485
     _wchdir			= _MSVCRT__wchdir		@486
     _wchmod			= _MSVCRT__wchmod		@487
-;   _wcmdln							@488	
+    _wcmdln			= MSVCRT__wcmdln                @488 ; var export
     _wcreat			= _MSVCRT__wcreat		@489
     _wcsdup			= _CRTDLL__wcsdup		@490
     _wcsicmp			= _CRTDLL__wcsicmp		@491
