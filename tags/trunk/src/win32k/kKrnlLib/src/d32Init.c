@@ -1,4 +1,4 @@
-/* $Id: d32Init.c,v 1.1 2002-03-10 02:45:54 bird Exp $
+/* $Id: d32Init.c,v 1.2 2002-04-01 12:48:41 bird Exp $
  *
  * d32init.c - 32-bits init routines.
  *
@@ -8,7 +8,7 @@
  *
  */
 #ifndef NOFILEID
-static const char szFileId[] = "$Id: d32Init.c,v 1.1 2002-03-10 02:45:54 bird Exp $";
+static const char szFileId[] = "$Id: d32Init.c,v 1.2 2002-04-01 12:48:41 bird Exp $";
 #endif
 
 
@@ -211,20 +211,20 @@ ULONG R0Init(RP32INIT *pRpInit)
     kprintf(("\tCom port no.%03xh\n", options.usCom));
 
     kprintf(("\tKernel: v%d.%d  build %d%c type ",
-                options.usVerMajor,
-                options.usVerMinor,
-                options.ulBuild,
-                (options.fKernel & KF_REV_MASK)
-                    ? ((options.fKernel & KF_REV_MASK) >> KF_REV_SHIFT) + 'a'-1
+                usVerMajor,
+                usVerMinor,
+                ulKernelBuild,
+                (fKernel & KF_REV_MASK)
+                    ? ((fKernel & KF_REV_MASK) >> KF_REV_SHIFT) + 'a'-1
                     : ' '
                 ));
-    if (options.fKernel & KF_SMP)
+    if (fKernel & KF_SMP)
         kprintf(("SMP "));
-    else if (options.fKernel & KF_W4)
+    else if (fKernel & KF_W4)
         kprintf(("W4 "));
     else
         kprintf(("UNI "));
-    if (options.fKernel & KF_DEBUG)
+    if (fKernel & KF_DEBUG)
         kprintf(("DEBUG\n"));
     else
         kprintf(("\n"));
