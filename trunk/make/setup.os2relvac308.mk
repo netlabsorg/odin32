@@ -1,4 +1,4 @@
-# $Id: setup.os2relvac308.mk,v 1.11 2002-08-20 19:14:33 bird Exp $
+# $Id: setup.os2relvac308.mk,v 1.12 2002-08-20 21:20:10 bird Exp $
 
 # ---OS2, RELEASE, VAC308-------------------------
 ENV_NAME="OS/2, Release, IBM VisualAge for C++ 3.08"
@@ -67,7 +67,7 @@ CXX_PC_2_STDOUT=/Pd+ /P+
 
 !if "$(CC_AS_CXX)" != ""
 ! if "$(CXX_AS_CC)" != ""
-!  if [@(ECHO) $(CLRERR)Error: Do you think you're smart? CC_AS_CXX and CXX_AS_CC is mutual execlusive!$(CLRRST)]
+!  if [@(ECHO) $(CLRERR)Error: CC_AS_CXX and CXX_AS_CC is mutual execlusive!$(CLRRST)]
 !  endif
 !  error
 ! endif
@@ -80,11 +80,11 @@ CC_FLAGS_IFS=$(CXX_FLAGS_IFS) /Tdp
 !endif
 !if "$(CXX_AS_CC)" != ""
 CXX=$(CC)
-CXX_FLAGS_EXE=$(C_FLAGS_EXE) /Tdc
-CXX_FLAGS_DLL=$(C_FLAGS_DLL) /Tdc
-CXX_FLAGS_SYS=$(C_FLAGS_SYS) /Tdc
-CXX_FLAGS_VDD=$(C_FLAGS_VDD) /Tdc
-CXX_FLAGS_IFS=$(C_FLAGS_IFS) /Tdc
+CXX_FLAGS_EXE=$(CC_FLAGS_EXE) /Tdc
+CXX_FLAGS_DLL=$(CC_FLAGS_DLL) /Tdc
+CXX_FLAGS_SYS=$(CC_FLAGS_SYS) /Tdc
+CXX_FLAGS_VDD=$(CC_FLAGS_VDD) /Tdc
+CXX_FLAGS_IFS=$(CC_FLAGS_IFS) /Tdc
 !endif
 
 IMPLIB_FLAGS=/NOI /Nologo
