@@ -47,11 +47,13 @@ static HANDLE i_initializeProcessHeap()
   return _processheap;
 }
 
-static HANDLE processheap = i_initializeProcessHeap();
+// Note:
+// variable is exported (i. e. to heapstring)
+HANDLE Heap_ProcessHeap = i_initializeProcessHeap();
 
 // This macro could be mapped to GetProcessHeap() if there
 // is any change in functionality
-#define GETPROCESSHEAP processheap
+#define GETPROCESSHEAP Heap_ProcessHeap
 
 
 //******************************************************************************
@@ -224,7 +226,7 @@ ODINFUNCTIONNODBG2(BOOL, HeapWalk, HANDLE, hHeap, LPVOID, lpEntry)
 HANDLE WIN32API GetProcessHeap()
 {
 //    dprintf2(("KERNEL32: GetProcessHeap\n"));
-    return(processheap);
+    return(Heap_ProcessHeap);
 }
 #if 1
 /*
