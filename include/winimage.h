@@ -1,4 +1,4 @@
-/* $Id: winimage.h,v 1.10 1999-08-23 17:04:14 sandervl Exp $ */
+/* $Id: winimage.h,v 1.11 1999-08-25 12:29:25 sandervl Exp $ */
 
 /*
  *
@@ -113,9 +113,6 @@ public:
         Win32Image(char *szFileName);
 virtual ~Win32Image();
 
-        //called to reset object to native OS/2 or converted win32 dll
-        void OS2ImageInit(HINSTANCE hinstance, int NameTableId, int Win32TableId);
-
         //reservedMem is address of memory reserved in peldr.dll (allocated before
         //any dlls are loaded, so that exes without fixups can be loaded at a low
         //address)
@@ -159,6 +156,9 @@ static  BOOL  isPEImage(char *szFileName);
 virtual BOOL  isDll() = 0;
 
 protected:
+        //called to reset object to native OS/2 or converted win32 dll
+        void OS2ImageInit(HINSTANCE hinstance, int NameTableId, int Win32TableId);
+
 	void tlsAlloc();		//Allocate TLS index for this module
 	void tlsDelete();		//Destroy TLS index for this module
 
