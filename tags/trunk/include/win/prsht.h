@@ -1,4 +1,4 @@
-/* $Id: prsht.h,v 1.7 2002-05-15 12:37:28 sandervl Exp $ */
+/* $Id: prsht.h,v 1.8 2003-05-15 14:21:06 sandervl Exp $ */
 
 #ifndef _WINE_PRSHT_H
 #define _WINE_PRSHT_H
@@ -230,7 +230,7 @@ DECL_WINELIB_TYPE_AW(LPFNPSPCALLBACK)
 #define PSH_RTLREADING          0x0800
 #define PSH_WIZARDCONTEXTHELP   0x00001000
 
-#define PSH_WIZARD97            0x00002000  
+#define PSH_WIZARD97_OLD        0x00002000 /* for IE < 5 */
 #define PSH_WATERMARK           0x00008000
 #define PSH_USEHBMWATERMARK     0x00010000
 #define PSH_USEHPLWATERMARK     0x00020000
@@ -239,6 +239,7 @@ DECL_WINELIB_TYPE_AW(LPFNPSPCALLBACK)
 #define PSH_USEHBMHEADER        0x00100000
 #define PSH_USEPAGELANG         0x00200000
 #define PSH_WIZARD_LITE         0x00400000
+#define PSH_WIZARD97_NEW        0x01000000 /* for IE >= 5 */
 #define PSH_NOCONTEXTHELP       0x02000000
 
 #define PSCB_INITIALIZED  1
