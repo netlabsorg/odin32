@@ -1,4 +1,4 @@
-/* $Id: fastdep.c,v 1.19 2000-03-24 01:50:36 bird Exp $
+/* $Id: fastdep.c,v 1.20 2000-05-18 21:28:40 bird Exp $
  *
  * Fast dependents. (Fast = Quick and Dirty!)
  *
@@ -242,7 +242,7 @@ static char *   pszIncludeEnv;
 static const char pszDefaultDepFile[] = ".depend";
 static const char *apszExtC_CPP[] = {"c", "sqc", "cpp", "h", "hpp", NULL};
 static const char *apszExtAsm[]   = {"asm", "inc", NULL};
-static const char *apszExtRC[]    = {"rc", "dlg", NULL};
+static const char *apszExtRC[]    = {"rc", "orc", "dlg", NULL};
 static const char *apszExtCOBOL[] = {"cbl", "cob", "sqb", NULL};
 static CONFIGENTRY aConfig[] =
 {
@@ -260,7 +260,7 @@ static CONFIGENTRY aConfig[] =
 
     {
         apszExtRC,
-        1,
+        2,
         langRC,
     },
 
@@ -1286,9 +1286,10 @@ int langRC(const char *pszFilename, const char *pszNormFilename, void *pvFile, B
             i++;
 
         /* is this an include? */
-        if (   (i1 = strncmp(&szBuffer[i], "#include", 8)) == 0
-            ||       strncmp(&szBuffer[i], "RCINCLUDE", 9) == 0
-            || (i1 = strncmp(&szBuffer[i], "DLGINCLUDE", 10)) == 0
+        i1 = 1;
+        if (   strncmp(&szBuffer[i], "#include", 8) == 0
+            || (i1 = strncmp(&szBuffer[i], "RCINCLUDE", 9)) == 0
+            || strncmp(&szBuffer[i], "DLGINCLUDE", 10) == 0
             )
         {
             char szFullname[CCHMAXPATH];
@@ -1296,7 +1297,7 @@ int langRC(const char *pszFilename, const char *pszNormFilename, void *pvFile, B
             BOOL f = FALSE;
             int  j;
 
-            if (i1 == 0)
+            if (i1 != 0)
             {   /*
                  * #include <file.h>,  #include "file.h" or DLGINCLUDE 1 "file.h"
                  *
@@ -1319,20 +1320,22 @@ int langRC(const char *pszFilename, const char *pszNormFilename, void *pvFile, B
                 if (!f) continue;
             }
             else
-            {   /* RCINCLUDE filename.dlg
+            {   /*
+                 * RCINCLUDE ["]filename.dlg["]
                  * Extract filename.
                  */
 
                 /* skip to filename.dlg start - if eol will continue to loop. */
                 i += 9;
-                while (szBuffer[i] == ' ' || szBuffer[i] == '\t')
+                while (szBuffer[i] == ' ' || szBuffer[i] == '\t' || szBuffer[i] == '"')
                     i++;
                 if (szBuffer[i] == '\0')
                     continue;
 
                 /* search to end of filename. */
                 j = i+1;
-                while (szBuffer[i+j] != ' ' && szBuffer[i+j] != '\t' && szBuffer[i+j] != '\0')
+                while (   szBuffer[i+j] != ' ' && szBuffer[i+j] != '\t'
+                       && szBuffer[i+j] != '"' && szBuffer[i+j] != '\0')
                     j++;
             }
 
