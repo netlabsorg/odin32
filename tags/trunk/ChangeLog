@@ -1,7 +1,7 @@
- /* $Id: ChangeLog,v 1.145 1999-08-28 07:36:07 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.146 1999-08-28 07:44:45 sandervl Exp $ */
 
  99-08-28: Yuri Dario <mc6530@mclink.it>
-	- INCLUDE\WIN: Added macro's to windowsx.h
+	- INCLUDE\WIN: Added macros to windowsx.h
 
  99-08-27: Daniela Engert <dani@ngrt.de>
         - USER32\NEW: window creation, window relationship, window sizing and
