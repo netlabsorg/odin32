@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.225 2000-12-17 15:04:11 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.226 2000-12-24 14:54:07 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -2373,6 +2373,9 @@ BOOL Win32BaseWindow::SetWindowPos(HWND hwndInsertAfter, int x, int y, int cx, i
 //******************************************************************************
 void Win32BaseWindow::NotifyFrameChanged(WINDOWPOS *wpos, RECT *oldClientRect)
 {
+ HRGN hrgn, hrgnClient;
+ RECT rect;
+
     MsgFormatFrame(NULL);
     if(RECT_WIDTH(rectClient) != RECT_WIDTH(*oldClientRect) ||
        RECT_HEIGHT(rectClient) != RECT_HEIGHT(*oldClientRect))
@@ -2383,10 +2386,6 @@ void Win32BaseWindow::NotifyFrameChanged(WINDOWPOS *wpos, RECT *oldClientRect)
     WINDOWPOS wpOld = *wpos;
     SendInternalMessageA(WM_WINDOWPOSCHANGING, 0, (LPARAM)wpos);
 
-    UnionRect(oldClientRect, oldClientRect, &rectClient);
-    OffsetRect(oldClientRect, -rectClient.left, -rectClient.top);
-    InvalidateRect(getWindowHandle(), oldClientRect, TRUE);
-
     if ((wpos->hwndInsertAfter != wpOld.hwndInsertAfter) ||
         (wpos->x != wpOld.x) || (wpos->y != wpOld.y) || (wpos->cx != wpOld.cx) || (wpos->cy != wpOld.cy) || (wpos->flags != wpOld.flags))
     {
@@ -2394,6 +2393,37 @@ void Win32BaseWindow::NotifyFrameChanged(WINDOWPOS *wpos, RECT *oldClientRect)
          SetWindowPos(wpos->hwndInsertAfter, wpos->x, wpos->y, wpos->cx, wpos->cy, wpos->flags | SWP_NOSENDCHANGING);
     }
     else SendInternalMessageA(WM_WINDOWPOSCHANGED, 0, (LPARAM)wpos);
+
+    rect = rectWindow;
+    OffsetRect(&rect, -rectWindow.left, -rectWindow.top);
+    hrgn = CreateRectRgnIndirect(&rect);
+    if (!hrgn) {
+         dprintf(("ERROR: NotifyFrameChanged, CreateRectRgnIndirect failed!!"));
+         return;
+    }
+    rect = rectClient;
+    OffsetRect(&rect, -rectClient.left, -rectClient.top);
+    hrgnClient = CreateRectRgnIndirect(&rect);
+    if (!hrgn) {
+         dprintf(("ERROR: NotifyFrameChanged, CreateRectRgnIndirect failed!!"));
+         return;
+    }
+    CombineRgn(hrgn, hrgn, hrgnClient, RGN_DIFF);
+    DeleteObject(hrgnClient);
+
+    if(!EqualRect(oldClientRect, &rectClient)) {
+         UnionRect(oldClientRect, oldClientRect, &rectClient);
+         OffsetRect(oldClientRect, -rectClient.left, -rectClient.top);
+         hrgnClient = CreateRectRgnIndirect(oldClientRect);
+         if (!hrgn) {
+              dprintf(("ERROR: NotifyFrameChanged, CreateRectRgnIndirect failed!!"));
+              return;
+         }
+         CombineRgn(hrgn, hrgn, hrgnClient, RGN_OR);
+         DeleteObject(hrgnClient);
+    }
+    InvalidateRgn(getWindowHandle(), hrgn, TRUE);
+    DeleteObject(hrgn);
 }
 //******************************************************************************
 //TODO: Check how this api really works in NT
@@ -2551,7 +2581,7 @@ HWND Win32BaseWindow::SetParent(HWND hwndNewParent)
     * including the WM_SHOWWINDOW messages and all */
    if(fCreated && (getStyle() & WS_VISIBLE)) {
         ShowWindow(SW_HIDE);
-    fShow = TRUE;
+        fShow = TRUE;
    }
 
    newparent = GetWindowFromHandle(hwndNewParent);
@@ -2562,7 +2592,7 @@ HWND Win32BaseWindow::SetParent(HWND hwndNewParent)
         OSLibWinSetParent(getOS2WindowHandle(), getParent()->getOS2WindowHandle());
         if(!(getStyle() & WS_CHILD))
         {
-        //TODO: Send WM_STYLECHANGED msg?
+            //TODO: Send WM_STYLECHANGED msg?
             setStyle(getStyle() | WS_CHILD);
             if(getWindowId())
                 {
@@ -2585,8 +2615,8 @@ HWND Win32BaseWindow::SetParent(HWND hwndNewParent)
       WM_WINDOWPOSCHANGED notification messages.
    */
    if(fCreated) {
-    SetWindowPos(HWND_TOPMOST, 0, 0, 0, 0,
-                 SWP_NOMOVE|SWP_NOSIZE|(fShow? SWP_SHOWWINDOW : 0));
+        SetWindowPos(HWND_TOPMOST, 0, 0, 0, 0,
+                     SWP_NOACTIVATE|SWP_NOMOVE|SWP_NOSIZE|(fShow? SWP_SHOWWINDOW : 0));
 
    /* FIXME: a WM_MOVE is also generated (in the DefWindowProc handler
     * for WM_WINDOWPOSCHANGED) in Windows, should probably remove SWP_NOMOVE */
@@ -2977,10 +3007,11 @@ HWND Win32BaseWindow::SetActiveWindow()
             return cbta.hWndActive;
         }
     }
+    SetWindowPos(HWND_TOP, 0,0,0,0, SWP_NOSIZE | SWP_NOMOVE );
 
-    if(OSLibWinSetActiveWindow(OS2Hwnd) == FALSE) {
-        dprintf(("OSLibWinSetActiveWindow %x returned FALSE!", OS2Hwnd));
-    }
+//    if(OSLibWinSetActiveWindow(OS2Hwnd) == FALSE) {
+//        dprintf(("OSLibWinSetActiveWindow %x returned FALSE!", OS2Hwnd));
+//    }
     hwndActive = GetActiveWindow();
     return (hwndActive) ? hwndActive : windowDesktop->getWindowHandle(); //pretend the desktop was active
 }
