@@ -1,4 +1,4 @@
-/* $Id: user32.cpp,v 1.15 1999-06-26 13:21:12 sandervl Exp $ */
+/* $Id: user32.cpp,v 1.16 1999-06-26 15:07:00 sandervl Exp $ */
 
 /*
  * Win32 misc user32 API functions for OS/2
@@ -291,7 +291,7 @@ BOOL WIN32API GetMessageA( LPMSG arg1, HWND  arg2, UINT arg3, UINT  arg4)
 //******************************************************************************
 HWND WIN32API GetFocus(void)
 {
-    dprintf(("USER32:  GetFocus\n"));
+//    dprintf(("USER32:  GetFocus\n"));
     return O32_GetFocus();
 }
 //******************************************************************************

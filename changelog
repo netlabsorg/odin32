@@ -1,4 +1,7 @@
- /* $Id: changelog,v 1.23 1999-06-25 18:13:22 achimha Exp $ */
+ /* $Id: changelog,v 1.24 1999-06-26 15:06:35 sandervl Exp $ */
+ 99-06-26: Sander van Leeuwen
+	- USER32: Changes for message spy & several message handler changes
+
  99-06-25: Achim Hasenmueller
         - Finally fixed changelog date format to be compliant with
           the official EU date format :)
