@@ -1,4 +1,10 @@
- /* $Id: changelog,v 1.319 1999-10-14 12:28:35 sandervl Exp $ */
+ /* $Id: changelog,v 1.320 1999-10-14 17:20:58 phaller Exp $ */
+
+ 99-10-14: Patrick Haller <phaller@gmx.net>
+	- KERNEL32:	Fix: threads might need more memory in debug mode (thread.cpp)
+		        Fix: a little cleanup (virtual.cpp)
+			Fix: lstrcpyAW taking NULL parameters (broken WINE controls?) (heapstring.cpp)
+	- ADVAPI32:	Fix: RegConnectRegistryA slightly improved
 
  99-10-14: knut st. osmundsen <knut.stange.osmundsen@pmsc.no>
     - PE2LX:      New implementation in src\win32k\pe2lx.
