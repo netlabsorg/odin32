@@ -1,4 +1,4 @@
-/* $Id: HandleManager.cpp,v 1.66 2001-06-22 19:40:27 sandervl Exp $ */
+/* $Id: HandleManager.cpp,v 1.67 2001-06-23 07:45:42 sandervl Exp $ */
 
 /*
  * Win32 Unified Handle Manager for OS/2
@@ -3024,15 +3024,15 @@ DWORD  HMMsgWaitForMultipleObjects  (DWORD      cObjects,
 #else
   ULONG   ulIndex;
   PHANDLE pArrayOfHandles;
-  PHANDLE pLoop1 = pHandles;
+  PHANDLE pLoop1 = lphObjects;
   PHANDLE pLoop2;
   DWORD   rc;
 
   // allocate array for handle table
-  pArrayOfHandles = (PHANDLE)alloca(nCount * sizeof(HANDLE));
+  pArrayOfHandles = (PHANDLE)alloca(cObjects * sizeof(HANDLE));
   if (pArrayOfHandles == NULL)
   {
-  dprintf(("ERROR: HMMsgWaitForMultipleObjects: alloca failed to allocate %d handles", nCount));
+      dprintf(("ERROR: HMMsgWaitForMultipleObjects: alloca failed to allocate %d handles", cObjects));
       O32_SetLastError(ERROR_NOT_ENOUGH_MEMORY);
       return WAIT_FAILED;
   }
@@ -3042,7 +3042,7 @@ DWORD  HMMsgWaitForMultipleObjects  (DWORD      cObjects,
   // convert array to odin handles
   for (ulIndex = 0;
 
-       ulIndex < nCount;
+       ulIndex < cObjects;
 
        ulIndex++,
        pLoop1++,
@@ -3067,9 +3067,9 @@ DWORD  HMMsgWaitForMultipleObjects  (DWORD      cObjects,
   // OK, now forward to Open32.
   // @@@PH: Note this will fail on handles that do NOT belong to Open32
   //        but to i.e. the console subsystem!
-  rc = O32_MsgWaitForMultipleObjects(nCount,
+  rc = O32_MsgWaitForMultipleObjects(cObjects,
                                      pArrayOfHandles,
-                                     fWaitAll, dwMilliseconds,
+                                     fWaitAll, dwTimeout,
                                      dwWakeMask);
 
   return (rc);                            // OK, done

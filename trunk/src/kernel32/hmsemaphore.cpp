@@ -1,4 +1,4 @@
-/* $Id: hmsemaphore.cpp,v 1.6 2001-06-22 19:40:28 sandervl Exp $ */
+/* $Id: hmsemaphore.cpp,v 1.7 2001-06-23 07:45:43 sandervl Exp $ */
 
 /*
  * Win32 Semaphore implementation
@@ -59,14 +59,17 @@
 #define DCE_POSTONE     0x0800  /* DosCreateEventSem option to post only   */
                                 /* waiter and auto-reset the semaphore when*/
                                 /* there are multiple waiters.             */
+
 #endif
 
+#ifdef USE_OS2SEMAPHORES
 typedef struct {
     LONG currentCount;
     LONG maximumCount;
     LONG refCount;
     HEV  hev;
 } SEM_INFO, *PSEM_INFO;
+#endif
 
 /*****************************************************************************
  * Defines                                                                   *
