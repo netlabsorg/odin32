@@ -1,4 +1,4 @@
-/* $Id: buildenv.cmd,v 1.38 2002-11-03 00:30:23 bird Exp $
+/* $Id: buildenv.cmd,v 1.39 2002-11-03 01:10:44 bird Exp $
  *
  * This is the master tools environment script. It contains environment
  * configurations for many development tools. Each tool can be installed
@@ -112,6 +112,7 @@
     aCfg.i.sId = 'doxygen';         aCfg.i.sGrp = 'doc';        aCfg.i.sSet = 'DoxyGen';                aCfg.i.sDesc = 'Doxygen v1.2.11 for OS/2';        i = i + 1;
     aCfg.i.sId = 'emx';             aCfg.i.sGrp = 'comp32';     aCfg.i.sSet = 'EMX';                    aCfg.i.sDesc = 'EMX v0.9d fixpack 04';      i = i + 1;
     aCfg.i.sId = 'emxpgcc';         aCfg.i.sGrp = 'comp32';     aCfg.i.sSet = 'EMXPGCC';                aCfg.i.sDesc = 'Pentium Optimized GCC/EMX v1.1.1 r2 with binutils 2.9.1'; i = i + 1;
+    aCfg.i.sId = 'freetypeemx';     aCfg.i.sGrp = 'misc';       aCfg.i.sSet = 'FreeTypeEMX';            aCfg.i.sDesc = 'FreeType v1.3.1 for EMX.'; i = i + 1;
     aCfg.i.sId = 'gcc302';          aCfg.i.sGrp = 'comp32';     aCfg.i.sSet = 'GCC30x,''gcc302''';      aCfg.i.sDesc = 'GCC/EMX v3.0.2beta with binutils 2.11.2'; i = i + 1;
     aCfg.i.sId = 'gcc303';          aCfg.i.sGrp = 'comp32';     aCfg.i.sSet = 'GCC30x,''gcc303''';      aCfg.i.sDesc = 'GCC/EMX v3.0.3beta with binutils 2.11.2'; i = i + 1;
     aCfg.i.sId = 'icatgam';         aCfg.i.sGrp = 'debugger';   aCfg.i.sSet = 'ICATGam';                aCfg.i.sDesc = 'ICAT for OS/2 latest';      i = i + 1;
@@ -123,6 +124,7 @@
     aCfg.i.sId = 'ida414';          aCfg.i.sGrp = 'misc';       aCfg.i.sSet = 'IDA414';                 aCfg.i.sDesc = 'Interactive DisAssembler (IDA) v4.14'; i = i + 1;
     aCfg.i.sId = 'idasdk';          aCfg.i.sGrp = 'misc';       aCfg.i.sSet = 'IDASDK';                 aCfg.i.sDesc = 'Interactive DisAssembler (IDA) SDK'; i = i + 1;
     aCfg.i.sId = 'java131';         aCfg.i.sGrp = 'java';       aCfg.i.sSet = 'Java131';                aCfg.i.sDesc = 'Java v1.3.1 (co131-20020710)'; i = i + 1;
+    aCfg.i.sId = 'jpeg';            aCfg.i.sGrp = 'misc';       aCfg.i.sSet = 'JPEG';                   aCfg.i.sDesc = '(lib)JPEG v6b';             i = i + 1;
     aCfg.i.sId = 'mode12050';       aCfg.i.sGrp = 'misc';       aCfg.i.sSet = 'Mode,120,50';            aCfg.i.sDesc = 'mode 120,50';               i = i + 1;
     aCfg.i.sId = 'mode8050';        aCfg.i.sGrp = 'misc';       aCfg.i.sSet = 'Mode,80,50';             aCfg.i.sDesc = 'mode 80,50';                i = i + 1;
     aCfg.i.sId = 'mscv6';           aCfg.i.sGrp = 'comp32';     aCfg.i.sSet = 'MSCV6_32';               aCfg.i.sDesc = 'MicroSoft C v6.0 32-bit';   i = i + 1;
@@ -831,9 +833,10 @@ PathSetDefault: procedure expose aCfg. aPath. sPathFile
     do
         say 'Info: No or empty path file, using birds defaults.';
         aPath.i.sPId = 'cvs';                       aPath.i.sPath = 'f:\cvs';                       i = i + 1;
+        aPath.i.sPId = 'db2v52';                    aPath.i.sPath = 'f:\sqllib52';                  i = i + 1;
         aPath.i.sPId = 'emx';                       aPath.i.sPath = 'f:\emx';                       i = i + 1;
         aPath.i.sPId = 'emxpgcc';                   aPath.i.sPath = 'f:\emxpgcc';                   i = i + 1;
-        aPath.i.sPId = 'db2v52';                    aPath.i.sPath = 'f:\sqllib52';                  i = i + 1;
+        aPath.i.sPId = 'freetypeemx';               aPath.i.sPath = 'f:\Freetype\v1.3.1-emx\emx';   i = i + 1;
         aPath.i.sPId = 'gcc302';                    aPath.i.sPath = 'f:\gcc302beta';                i = i + 1;
         aPath.i.sPId = 'gcc303';                    aPath.i.sPath = 'f:\gcc303beta';                i = i + 1;
         aPath.i.sPId = 'icatgam';                   aPath.i.sPath = 'f:\icatos2';                   i = i + 1;
@@ -844,6 +847,7 @@ PathSetDefault: procedure expose aCfg. aPath. sPathFile
         aPath.i.sPId = 'ida414';                    aPath.i.sPath = 'f:\ida414';                    i = i + 1;
         aPath.i.sPId = 'idasdk';                    aPath.i.sPath = 'f:\idasdk';                    i = i + 1;
         aPath.i.sPId = 'java131';                   aPath.i.sPath = 'e:\java131';                   i = i + 1;
+        aPath.i.sPId = 'jpeg';                      aPath.i.sPath = 'f:\jpeg\v6b';                  i = i + 1;
         aPath.i.sPId = 'ddk';                       aPath.i.sPath = 'f:\ddk\april02';               i = i + 1;
         aPath.i.sPId = 'ddkbase';                   aPath.i.sPath = 'f:\ddk\april02\base';          i = i + 1;
         aPath.i.sPId = 'ddkvideo';                  aPath.i.sPath = 'f:\ddk\april02\video';         i = i + 1;
@@ -1696,6 +1700,38 @@ return rc;
 
 
 /*
+ * FreeType v1.3.1 EMX release.
+ */
+FreeTypeEMX: procedure expose aCfg. aPath. sPathFile
+    parse arg sToolId,sOperation,fRM,fQuiet
+    sPathFreeType = PathQuery('freetypeemx', sToolId, sOperation);
+    if (sPathFreeType = '') then
+        return 1;
+    /* If config operation we're done now. */
+    if (pos('config', sOperation) > 0) then
+        return 0;
+    call EnvSet      fRm, 'PATH_FREETYPE', sPathFreeType;
+    call EnvAddFront fRm, 'beginlibpath',sPathFreeType'\dll;'
+    call EnvAddFront fRm, 'path',        sPathFreeType'\bin;'
+    call EnvAddFront fRM, 'include',     sPathFreeType'\include;'
+    call EnvAddFront fRM, 'C_INCLUDE_PATH', sPathFreeType'\include;'
+    call EnvAddFront fRM, 'lib',         sPathFreeType'\lib;'
+
+    /*
+     * Verify.
+     */
+    if (pos('verify', sOperation) <= 0) then
+        return 0;
+
+    if (    \CfgVerifyFile(sPathFreeType'\bin\ftsbit.exe', fQuiet),
+        |   \CfgVerifyFile(sPathFreeType'\bin\ftzoom.exe', fQuiet),
+        |   \CfgVerifyFile(sPathFreeType'\dll\ttf.dll', fQuiet),
+        ) then
+        return 2;
+return 0;
+
+
+/*
  * IBM DB2 v5.2
  */
 db2v52: procedure expose aCfg. aPath. sPathFile
@@ -2270,6 +2306,49 @@ return 0;
 
 
 /*
+ * Interactive Disassembler (IDA) Plugin SDK (v5.0?)
+ */
+IDASDK: procedure expose aCfg. aPath. sPathFile
+    parse arg sToolId,sOperation,fRM,fQuiet
+    /*
+     * IDA main directory.
+     */
+    sPathIDASDK = PathQuery('idasdk', sToolId, sOperation);
+    if (sPathIDASDK = '') then
+        return 1;
+    /* If config operation we're done now. */
+    if (pos('config', sOperation) > 0) then
+        return 0;
+
+    /*
+     * Installing the environment variables.
+     */
+    call EnvSet      fRM, 'PATH_IDASDK',    sPathIDASDK
+    call EnvAddFront fRM, 'include',        sPathIDASDK'\include;'
+    call EnvAddFront fRM, 'lib',            sPathIDASDK'\libwat.os2;'
+    call EnvAddFront fRM, 'path',           sPathIDASDK'\bin\os2;'
+    call EnvAddFront fRM, 'beginlibpath',   sPathIDASDK'\bin\os2;'
+
+    /*
+     * Verify.
+     */
+    if (pos('verify', sOperation) <= 0) then
+        return 0;
+    if (    \CfgVerifyFile(sPathIDASDK'\os2wat.cfg', fQuiet),
+        |   \CfgVerifyFile(sPathIDASDK'\d32wat.cfg', fQuiet),
+        |   \CfgVerifyFile(sPathIDASDK'\include\exehdr.h', fQuiet),
+        |   \CfgVerifyFile(sPathIDASDK'\include\ida.hpp', fQuiet),
+        |   \CfgVerifyFile(sPathIDASDK'\include\vm.hpp', fQuiet),
+        |   \CfgVerifyFile(sPathIDASDK'\libwat.os2\ida.lib', fQuiet),
+        |   \CfgVerifyFile(sPathIDASDK'\libwat.d32\ida.lib', fQuiet),
+        |   \CfgVerifyFile(sPathIDASDK'\libwat.d32\INIRT386.OBJ', fQuiet),
+      /*  |   \CfgVerifyFile(sPathIDASDK'\libbor.d32\ida.lib', fQuiet)*/,
+        ) then
+        return 2;
+return 0;
+
+
+/*
  * JAVA v1.3.1 (latest)
  */
 Java131: procedure expose aCfg. aPath. sPathFile
@@ -2325,46 +2404,39 @@ return 0;
 
 
 /*
- * Interactive Disassembler (IDA) Plugin SDK (v5.0?)
+ * (lib) JPEG v6b port.
  */
-IDASDK: procedure expose aCfg. aPath. sPathFile
+JPEG: procedure expose aCfg. aPath. sPathFile
     parse arg sToolId,sOperation,fRM,fQuiet
-    /*
-     * IDA main directory.
-     */
-    sPathIDASDK = PathQuery('idasdk', sToolId, sOperation);
-    if (sPathIDASDK = '') then
+    sPathJPEG = PathQuery('jpeg', sToolId, sOperation);
+    if (sPathJPEG = '') then
         return 1;
     /* If config operation we're done now. */
     if (pos('config', sOperation) > 0) then
         return 0;
-
-    /*
-     * Installing the environment variables.
-     */
-    call EnvSet      fRM, 'PATH_IDASDK',    sPathIDASDK
-    call EnvAddFront fRM, 'include',        sPathIDASDK'\include;'
-    call EnvAddFront fRM, 'lib',            sPathIDASDK'\libwat.os2;'
-    call EnvAddFront fRM, 'path',           sPathIDASDK'\bin\os2;'
-    call EnvAddFront fRM, 'beginlibpath',   sPathIDASDK'\bin\os2;'
+    call EnvSet      fRm, 'PATH_JPEG',   sPathJPEG;
+    call EnvAddFront fRm, 'beginlibpath',sPathJPEG'\dll;'
+    call EnvAddFront fRm, 'path',        sPathJPEG'\bin;'
+    call EnvAddFront fRM, 'include',     sPathJPEG'\include;'
+    call EnvAddFront fRM, 'C_INCLUDE_PATH', sPathJPEG'\include;'
+    call EnvAddFront fRM, 'lib',         sPathJPEG'\lib;'
 
     /*
      * Verify.
      */
     if (pos('verify', sOperation) <= 0) then
         return 0;
-    if (    \CfgVerifyFile(sPathIDASDK'\os2wat.cfg', fQuiet),
-        |   \CfgVerifyFile(sPathIDASDK'\d32wat.cfg', fQuiet),
-        |   \CfgVerifyFile(sPathIDASDK'\include\exehdr.h', fQuiet),
-        |   \CfgVerifyFile(sPathIDASDK'\include\ida.hpp', fQuiet),
-        |   \CfgVerifyFile(sPathIDASDK'\include\vm.hpp', fQuiet),
-        |   \CfgVerifyFile(sPathIDASDK'\libwat.os2\ida.lib', fQuiet),
-        |   \CfgVerifyFile(sPathIDASDK'\libwat.d32\ida.lib', fQuiet),
-        |   \CfgVerifyFile(sPathIDASDK'\libwat.d32\INIRT386.OBJ', fQuiet),
-      /*  |   \CfgVerifyFile(sPathIDASDK'\libbor.d32\ida.lib', fQuiet)*/,
+
+    if (    \CfgVerifyFile(sPathJPEG'\bin\cjpeg.exe', fQuiet),
+        |   \CfgVerifyFile(sPathJPEG'\dll\jpeg.dll', fQuiet),
+        |   \CfgVerifyFile(sPathJPEG'\include\jpeglib.h', fQuiet),
+        |   \CfgVerifyFile(sPathJPEG'\lib\jpeg.a', fQuiet),
+        |   \CfgVerifyFile(sPathJPEG'\lib\jpeg.lib', fQuiet),
         ) then
         return 2;
 return 0;
+
+
 
 
 /*
