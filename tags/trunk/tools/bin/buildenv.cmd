@@ -1,4 +1,4 @@
-/* $Id: buildenv.cmd,v 1.45 2003-01-23 14:10:20 bird Exp $
+/* $Id: buildenv.cmd,v 1.46 2003-02-24 14:51:46 bird Exp $
  *
  * This is the master tools environment script. It contains environment
  * configurations for many development tools. Each tool can be installed
@@ -26,7 +26,7 @@
     /*
      * Version
      */
-    sVersion = '1.0.16 [2003-01-23]';
+    sVersion = '1.0.17 [2003-02-24]';
 
     /*
      * Create argument array with lowercase arguments.
@@ -73,7 +73,7 @@
         say '   showconfigured  Show all configured tools.'
         say '   shownotconfigured   Show all tools which isn''t configured.'
         say ''
-        say 'Copyright (c) 1999-2002 knut st. osmundsen'
+        say 'Copyright (c) 1999-2003 knut st. osmundsen'
         say 'Published under GPL v2'
         return 8;
     end
@@ -958,9 +958,9 @@ PathSetDefault: procedure expose aCfg. aPath. sPathFile
         aPath.i.sPId = 'mscv6-16';                  aPath.i.sPath = 'd:\dev\ddktools\toolkits\msc60'; i = i + 1;
         aPath.i.sPId = 'mscv7-16';                  aPath.i.sPath = 'd:\dev\msc\v7.0';              i = i + 1;
         aPath.i.sPId = 'mysql';                     aPath.i.sPath = 'd:\apps\mysql\v3.23.50b1';     i = i + 1;
-      /*aPath.i.sPId = 'netqos2';                   aPath.i.sPath = 'e:\netqos2';                   i = i + 1;
-        aPath.i.sPId = 'perl';                      aPath.i.sPath = 'e:\perllib';                   i = i + 1;
-        aPath.i.sPId = 'python';                    aPath.i.sPath = 'e:\python';                    i = i + 1;*/
+      /*aPath.i.sPId = 'netqos2';                   aPath.i.sPath = 'e:\netqos2';                   i = i + 1;*/
+        aPath.i.sPId = 'perl';                      aPath.i.sPath = 'd:\dev\perl\v5.00455';         i = i + 1;
+      /*aPath.i.sPId = 'python';                    aPath.i.sPath = 'e:\python';                    i = i + 1;*/
         aPath.i.sPId = 'toolkit40';                 aPath.i.sPath = 'd:\dev\toolkit\v40csd1';       i = i + 1;
       /*aPath.i.sPId = 'toolkit45';                 aPath.i.sPath = 'e:\toolkit45';                 i = i + 1;
         aPath.i.sPId = 'toolkit451';                aPath.i.sPath = 'e:\toolkit451';                i = i + 1; */
@@ -2777,8 +2777,9 @@ Odin32Testcase: procedure expose aCfg. aPath. sPathFile
         return 0;
 return 0;
 
+
 /*
- * PERL 5005_53
+ * PERL 5005_53 or 5.004_55
  */
 Perl: procedure expose aCfg. aPath. sPathFile
     parse arg sToolId,sOperation,fRM,fQuiet
@@ -2786,31 +2787,6 @@ Perl: procedure expose aCfg. aPath. sPathFile
     /*
      * Perl main directory.
      */
-/* BAD
-    sPathPerl       = PathQuery('perl', sToolId, sOperation);
-    if (sPathPerl = '') then
-        return 1;
-    /* If config operation we're done now. */
-    if (pos('config', sOperation) > 0) then
-        return 0;
-
-    /*
-     * Installing the environment variables.
-     */
-    sPathPerlForw   = translate(sPathPerl, '/', '\');
-    call EnvSet      fRM, 'PATH_PERL',      sPathPerl;
-    call EnvAddFront fRM, 'path',           sPathPerl'\bin;'
-    call EnvAddFront fRM, 'beginlibpath',   sPathPerl'\dll;'
-    call EnvAddEnd   fRM, 'bookshelf',      sPathPerl'\book;'
-    call EnvSet      fRM, 'perllib_prefix', sPathPerlForw'/lib;'sPathPerl'\lib'
-    call EnvSet      fRM, 'perl5lib',       sPathPerlForw'/lib/site_perl/5.00553/os2;'sPathPerlForw'/lib/site_perl/5.00553'
-    call EnvSet      fRM, 'perl5load',      '2'
-    call EnvSet      fRM, 'perl_sh_dir',    sPathPerlForw'/bin_sh/sh.exe'
-    call EnvSet      fRM, 'manpath',        sPathPerlForw'/man'
-    call EnvSet      fRM, 'perl_badlang',   '0'
-/*    call EnvSet      fRM, 'LANG',           'en_US' /* dirty fix... */*/
-*/
-/* seems ok */
     sPathPerl       = PathQuery('perl', sToolId, sOperation);
     if (sPathPerl = '') then
         return 1;
@@ -2837,11 +2813,20 @@ Perl: procedure expose aCfg. aPath. sPathFile
      */
     if (pos('verify', sOperation) <= 0) then
         return 0;
+
+    sPerlDLL = 'perl.dll';
+    sVer     = '5.004_55';
+    f5005_53 = FileExists(sPathPerl'\dll\perlE0AC.dll');
+    if (f5005_53) then
+    do
+        sPerlDLL = 'perlE0AC.dll';
+        sVer     = '5.005_53';
+    end
     if (    \CfgVerifyFile(sPathPerl'\bin\perl.exe', fQuiet),
-        |   \CfgVerifyFile(sPathPerl'\dll\perlE0AC.dll', fQuiet),
+        |   \CfgVerifyFile(sPathPerl'\dll\'||sPerlDLL, fQuiet),
         ) then
         return 2;
-    rc = CheckCmdOutput('perl --version', 0, fQuiet, 'This is perl, version 5.005_53 built for os2');
+    rc = CheckCmdOutput('perl --version', 0, fQuiet, 'This is perl, version '||sVer||' built for os2');
 return rc;
 
 
