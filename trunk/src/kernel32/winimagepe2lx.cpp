@@ -1,4 +1,4 @@
-/* $Id: winimagepe2lx.cpp,v 1.3 1999-10-17 01:49:09 bird Exp $ */
+/* $Id: winimagepe2lx.cpp,v 1.4 1999-11-16 18:27:01 bird Exp $ */
 
 /*
  * Win32 PE2LX Image base class
@@ -250,7 +250,7 @@ BOOL Win32Pe2LxImage::init()
         {
             PVOID pv;
             pv = getPointerFromRVA(pTLSDir->StartAddressOfRawData);
-            if (pv == NULL)
+            if (pv == NULL || pTLSDir->StartAddressOfRawData == 0UL)
             {
                 eprintf(("Win32Pe2LxImage::init: invalid RVA to TLS StartAddressOfRawData - %#8x.\n",
                          pTLSDir->StartAddressOfRawData));
@@ -488,7 +488,9 @@ VOID  Win32Pe2LxImage::cleanup()
  * Converts a RVA to an pointer.
  * @returns   Pointer matching the given RVA, NULL on error.
  * @param     ulRVA  An address relative to the imagebase of the original PE image.
+ *                   If this is 0UL NULL is returned.
  * @sketch    DEBUG: validate state, paSections != NULL
+ *            IF ulRVA is 0 THEN return NULL
  *            LOOP while more section left and ulRVA is not within section
  *                next section
  *            IF section matching ulRVA is not found THEN fail.
@@ -496,6 +498,7 @@ VOID  Win32Pe2LxImage::cleanup()
  * @status    completely implemented.
  * @author    knut st. osmundsen
  * @remark    Should not be called until getSections has returned successfully.
+ *            RVA == 0 is ignored.
  */
 PVOID  Win32Pe2LxImage::getPointerFromRVA(ULONG ulRVA)
 {
@@ -504,6 +507,9 @@ PVOID  Win32Pe2LxImage::getPointerFromRVA(ULONG ulRVA)
         if (paSections == NULL)
             return NULL;
     #endif
+
+    if (ulRVA == 0UL)
+        return NULL;
 
     i = 0;
     while (i < cSections &&
