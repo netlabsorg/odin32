@@ -1,4 +1,4 @@
-; $Id: gdi32.DEF,v 1.17 2001-05-27 19:01:14 sandervl Exp $
+; $Id: gdi32.DEF,v 1.18 2001-08-02 14:49:31 sandervl Exp $
 
 ;Created by BLAST for IBM's compiler
 LIBRARY GDI32 INITINSTANCE
@@ -373,4 +373,6 @@ EXPORTS
     _setWinDeviceRegionFromPMDeviceRegion@16                    @1211 NONAME
 
     _UnselectGDIObjects@4                                       @1212 NONAME
+    
+    OSLibGpiSetCp__FUlT1                                        @1213 NONAME
 
