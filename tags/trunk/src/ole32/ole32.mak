@@ -1,4 +1,4 @@
-# $Id: ole32.mak,v 1.3 2000-12-02 23:40:43 bird Exp $
+# $Id: ole32.mak,v 1.4 2001-01-25 20:17:23 sandervl Exp $
 
 #
 # Odin32 API
@@ -49,7 +49,7 @@ $(OBJDIR)\oleDrag.obj \
 $(OBJDIR)\oleMenu.obj \
 $(OBJDIR)\stg_bigblockfile.obj \
 $(OBJDIR)\stg_stream.obj \
-$(OBJDIR)\storage.obj \
+$(OBJDIR)\storage32.obj \
 $(OBJDIR)\stubs.obj \
 $(OBJDIR)\taskmem.obj \
 $(OBJDIR)\ole32rsrc.obj \
