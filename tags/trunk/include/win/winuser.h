@@ -1,4 +1,4 @@
-/* $Id: winuser.h,v 1.37 2000-02-22 17:05:17 cbratschi Exp $ */
+/* $Id: winuser.h,v 1.38 2000-02-23 17:03:00 cbratschi Exp $ */
 
 #ifndef __INCLUDE_WINUSER_H
 #define __INCLUDE_WINUSER_H
@@ -3742,6 +3742,8 @@ WORD        WINAPI SYSTEM_KillSystemTimer( WORD );
 /* Extra functions that don't exist in the Windows API */
 
 HPEN      WINAPI GetSysColorPen(INT);
+HBRUSH    WINAPI GetPattern55AABrush(VOID);
+HBITMAP   WINAPI GetPattern55AABitmap(VOID);
 INT       WINAPI LoadMessageA(HMODULE,UINT,WORD,LPSTR,INT);
 INT       WINAPI LoadMessageW(HMODULE,UINT,WORD,LPWSTR,INT);
 
