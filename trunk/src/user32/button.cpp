@@ -1,4 +1,4 @@
-/* $Id: button.cpp,v 1.18 1999-11-17 17:04:51 cbratschi Exp $ */
+/* $Id: button.cpp,v 1.19 1999-11-21 14:04:10 achimha Exp $ */
 /* File: button.cpp -- Button type widgets
  *
  * Copyright (C) 1993 Johannes Ruscheinski
@@ -17,6 +17,10 @@
 #include "button.h"
 #include <misc.h>
 #include "initterm.h"
+
+#ifdef DEBUG
+char *GetMsgText(int Msg);
+#endif
 
 //Prototypes
 
@@ -535,6 +539,9 @@ static LRESULT BUTTON_SetState(HWND hwnd,WPARAM wParam,LPARAM lParam)
 static
 LRESULT WINAPI ButtonWndProc(HWND hwnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
 {
+//  dprintf(("ButtonWndProc hwnd: %04x, msg %s, wp %08x lp %08lx\n",
+//           hwnd, GetMsgText(uMsg), wParam, lParam));
+
   switch (uMsg)
   {
     case WM_GETDLGCODE:
