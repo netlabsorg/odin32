@@ -1,4 +1,4 @@
-; $Id: comctl32.def,v 1.10 1999-06-21 13:59:00 sandervl Exp $
+; $Id: comctl32.def,v 1.11 1999-08-14 16:13:09 cbratschi Exp $
 LIBRARY COMCTL32 INITINSTANCE
 DESCRIPTION 'COMCTL32 Common Controls Library'
 DATA MULTIPLE NONSHARED
@@ -98,7 +98,7 @@ EXPORTS
   DSA_SetItem         = _DSA_SetItem@12            @324
   DSA_InsertItem      = _DSA_InsertItem@12         @325
   DSA_DeleteItem      = _DSA_DeleteItem@8          @326
-  DSA_DeleteAllItems  = _DSA_DeleteAllItems@4      @327 
+  DSA_DeleteAllItems  = _DSA_DeleteAllItems@4      @327
 
   DPA_Create          = _DPA_Create@4              @328
   DPA_Destroy         = _DPA_Destroy@4             @329
@@ -135,3 +135,6 @@ EXPORTS
   StrStrA             = _COMCTL32_StrStrA@8        @354
   StrStrW             = _COMCTL32_StrStrW@8        @362
   StrSpnW             = _COMCTL32_StrSpnW@8        @364
+
+  comctl32_410        = _comctl32_410@16           @410
+  InitMUILanguage     = _InitMUILanguage@4         @500 ;should be 70

@@ -1,4 +1,4 @@
-/* $Id: comboex.c,v 1.3 1999-06-10 16:21:57 achimha Exp $ */
+/* $Id: comboex.c,v 1.4 1999-08-14 16:13:09 cbratschi Exp $ */
 /*
  * ComboBoxEx control
  *
@@ -15,7 +15,7 @@
  *   - All notifications.
  *
  * FIXME:
- *   - should include "combo.h" 
+ *   - should include "combo.h"
  */
 
 #include "winbase.h"
@@ -49,7 +49,7 @@ COMBOEX_GetEditControl (HWND hwnd, WPARAM wParam, LPARAM lParam)
     COMBOEX_INFO *infoPtr = COMBOEX_GetInfoPtr (hwnd);
 
     if ((GetWindowLongA (hwnd, GWL_STYLE) & CBS_DROPDOWNLIST) != CBS_DROPDOWN)
-	return 0;
+        return 0;
 
 //    TRACE (comboex, "-- 0x%x\n", GetDlgItem (infoPtr->hwndCombo, ID_CB_EDIT));
 
@@ -102,10 +102,10 @@ COMBOEX_SetExtendedStyle (HWND hwnd, WPARAM wParam, LPARAM lParam)
     dwTemp = infoPtr->dwExtStyle;
 
     if ((DWORD)wParam) {
-	infoPtr->dwExtStyle = (infoPtr->dwExtStyle & ~(DWORD)wParam) | (DWORD)lParam;
+        infoPtr->dwExtStyle = (infoPtr->dwExtStyle & ~(DWORD)wParam) | (DWORD)lParam;
     }
     else
-	infoPtr->dwExtStyle = (DWORD)lParam;
+        infoPtr->dwExtStyle = (DWORD)lParam;
 
     /* FIXME: repaint?? */
 
@@ -149,8 +149,8 @@ COMBOEX_Forward (HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
 //    FIXME (comboex, "(0x%x 0x%x 0x%lx): stub\n", uMsg, wParam, lParam);
 
-    if (infoPtr->hwndCombo)    
-	return SendMessageA (infoPtr->hwndCombo, uMsg, wParam, lParam);
+    if (infoPtr->hwndCombo)
+        return SendMessageA (infoPtr->hwndCombo, uMsg, wParam, lParam);
 
     return 0;
 }
@@ -165,8 +165,8 @@ COMBOEX_Create (HWND hwnd, WPARAM wParam, LPARAM lParam)
     /* allocate memory for info structure */
     infoPtr = (COMBOEX_INFO *)COMCTL32_Alloc (sizeof(COMBOEX_INFO));
     if (infoPtr == NULL) {
-//	ERR (comboex, "could not allocate info memory!\n");
-	return 0;
+//      ERR (comboex, "could not allocate info memory!\n");
+        return 0;
     }
 
     SetWindowLongA (hwnd, 0, (DWORD)infoPtr);
@@ -177,12 +177,12 @@ COMBOEX_Create (HWND hwnd, WPARAM wParam, LPARAM lParam)
 
     /* create combo box */
     dwComboStyle = GetWindowLongA (hwnd, GWL_STYLE) &
-			(CBS_SIMPLE|CBS_DROPDOWN|CBS_DROPDOWNLIST|WS_CHILD);
+                        (CBS_SIMPLE|CBS_DROPDOWN|CBS_DROPDOWNLIST|WS_CHILD);
 
     infoPtr->hwndCombo = CreateWindowA ("ComboBox", "",
-			 WS_CHILD | WS_VISIBLE | CBS_OWNERDRAWFIXED | dwComboStyle,
-			0, 0, 0, 0, hwnd, (HMENU)1,
-			GetWindowLongA (hwnd, GWL_HINSTANCE), NULL);
+                         WS_CHILD | WS_VISIBLE | CBS_OWNERDRAWFIXED | dwComboStyle,
+                        0, 0, 0, 0, hwnd, (HMENU)1,
+                        GetWindowLongA (hwnd, GWL_HINSTANCE), NULL);
 
     return 0;
 }
@@ -195,7 +195,7 @@ COMBOEX_Destroy (HWND hwnd, WPARAM wParam, LPARAM lParam)
 
 
     if (infoPtr->hwndCombo)
-	DestroyWindow (infoPtr->hwndCombo);
+        DestroyWindow (infoPtr->hwndCombo);
 
 
 
@@ -216,92 +216,92 @@ COMBOEX_Size (HWND hwnd, WPARAM wParam, LPARAM lParam)
     GetClientRect (hwnd, &rect);
 
     MoveWindow (infoPtr->hwndCombo, 0, 0, rect.right -rect.left,
-		  rect.bottom - rect.top, TRUE);
+                  rect.bottom - rect.top, TRUE);
 
     return 0;
 }
 
 
-LRESULT WINAPI
+static LRESULT WINAPI
 COMBOEX_WindowProc (HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
     switch (uMsg)
     {
-/*	case CBEM_DELETEITEM: */
+/*      case CBEM_DELETEITEM: */
 
-	case CBEM_GETCOMBOCONTROL:
-	    return COMBOEX_GetComboControl (hwnd, wParam, lParam);
+        case CBEM_GETCOMBOCONTROL:
+            return COMBOEX_GetComboControl (hwnd, wParam, lParam);
 
-	case CBEM_GETEDITCONTROL:
-	    return COMBOEX_GetEditControl (hwnd, wParam, lParam);
+        case CBEM_GETEDITCONTROL:
+            return COMBOEX_GetEditControl (hwnd, wParam, lParam);
 
-	case CBEM_GETEXTENDEDSTYLE:
-	    return COMBOEX_GetExtendedStyle (hwnd, wParam, lParam);
+        case CBEM_GETEXTENDEDSTYLE:
+            return COMBOEX_GetExtendedStyle (hwnd, wParam, lParam);
 
-	case CBEM_GETIMAGELIST:
-	    return COMBOEX_GetImageList (hwnd, wParam, lParam);
+        case CBEM_GETIMAGELIST:
+            return COMBOEX_GetImageList (hwnd, wParam, lParam);
 
-/*	case CBEM_GETITEM32A:
-	case CBEM_GETITEM32W:
-	case CBEM_GETUNICODEFORMAT:
-	case CBEM_HASEDITCHANGED:
+/*      case CBEM_GETITEM32A:
+        case CBEM_GETITEM32W:
+        case CBEM_GETUNICODEFORMAT:
+        case CBEM_HASEDITCHANGED:
 */
 
-	case CBEM_INSERTITEMA:
-	    return COMBOEX_InsertItemA (hwnd, wParam, lParam);
+        case CBEM_INSERTITEMA:
+            return COMBOEX_InsertItemA (hwnd, wParam, lParam);
 
-/*	case CBEM_INSERTITEM32W: */
+/*      case CBEM_INSERTITEM32W: */
 
-	case CBEM_SETEXTENDEDSTYLE:
-	    return COMBOEX_SetExtendedStyle (hwnd, wParam, lParam);
+        case CBEM_SETEXTENDEDSTYLE:
+            return COMBOEX_SetExtendedStyle (hwnd, wParam, lParam);
 
-	case CBEM_SETIMAGELIST:
-	    return COMBOEX_SetImageList (hwnd, wParam, lParam);
+        case CBEM_SETIMAGELIST:
+            return COMBOEX_SetImageList (hwnd, wParam, lParam);
 
-	case CBEM_SETITEMA:
-	    return COMBOEX_SetItemA (hwnd, wParam, lParam);
+        case CBEM_SETITEMA:
+            return COMBOEX_SetItemA (hwnd, wParam, lParam);
 
-/*	case CBEM_SETITEM32W:
-	case CBEM_SETUNICODEFORMAT:
+/*      case CBEM_SETITEM32W:
+        case CBEM_SETUNICODEFORMAT:
 */
 
-	case CB_DELETESTRING:
-	case CB_FINDSTRINGEXACT:
-	case CB_GETCOUNT:
-	case CB_GETCURSEL:
-	case CB_GETDROPPEDCONTROLRECT:
-	case CB_GETDROPPEDSTATE:
-	case CB_GETITEMDATA:
-	case CB_GETITEMHEIGHT:
-	case CB_GETLBTEXT:
-	case CB_GETLBTEXTLEN:
-	case CB_GETEXTENDEDUI:
-	case CB_LIMITTEXT:
-	case CB_RESETCONTENT:
-	case CB_SELECTSTRING:
-	case CB_SETCURSEL:
-	case CB_SETDROPPEDWIDTH:
-	case CB_SETEXTENDEDUI:
-	case CB_SETITEMDATA:
-	case CB_SETITEMHEIGHT:
-	case CB_SHOWDROPDOWN:
-	    return COMBOEX_Forward (hwnd, uMsg, wParam, lParam);
+        case CB_DELETESTRING:
+        case CB_FINDSTRINGEXACT:
+        case CB_GETCOUNT:
+        case CB_GETCURSEL:
+        case CB_GETDROPPEDCONTROLRECT:
+        case CB_GETDROPPEDSTATE:
+        case CB_GETITEMDATA:
+        case CB_GETITEMHEIGHT:
+        case CB_GETLBTEXT:
+        case CB_GETLBTEXTLEN:
+        case CB_GETEXTENDEDUI:
+        case CB_LIMITTEXT:
+        case CB_RESETCONTENT:
+        case CB_SELECTSTRING:
+        case CB_SETCURSEL:
+        case CB_SETDROPPEDWIDTH:
+        case CB_SETEXTENDEDUI:
+        case CB_SETITEMDATA:
+        case CB_SETITEMHEIGHT:
+        case CB_SHOWDROPDOWN:
+            return COMBOEX_Forward (hwnd, uMsg, wParam, lParam);
 
 
-	case WM_CREATE:
-	    return COMBOEX_Create (hwnd, wParam, lParam);
+        case WM_CREATE:
+            return COMBOEX_Create (hwnd, wParam, lParam);
 
-	case WM_DESTROY:
-	    return COMBOEX_Destroy (hwnd, wParam, lParam);
+        case WM_DESTROY:
+            return COMBOEX_Destroy (hwnd, wParam, lParam);
 
-	case WM_SIZE:
-	    return COMBOEX_Size (hwnd, wParam, lParam);
+        case WM_SIZE:
+            return COMBOEX_Size (hwnd, wParam, lParam);
 
-	default:
-//	    if (uMsg >= WM_USER)
-//		ERR (comboex, "unknown msg %04x wp=%08x lp=%08lx\n",
-//		     uMsg, wParam, lParam);
-	    return DefWindowProcA (hwnd, uMsg, wParam, lParam);
+        default:
+//          if (uMsg >= WM_USER)
+//              ERR (comboex, "unknown msg %04x wp=%08x lp=%08lx\n",
+//                   uMsg, wParam, lParam);
+            return DefWindowProcA (hwnd, uMsg, wParam, lParam);
     }
     return 0;
 }
@@ -322,7 +322,7 @@ COMBOEX_Register (VOID)
     wndClass.hCursor       = LoadCursorA (0, IDC_ARROWA);
     wndClass.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);
     wndClass.lpszClassName = WC_COMBOBOXEXA;
- 
+
     RegisterClassA (&wndClass);
 }
 
@@ -331,6 +331,6 @@ VOID
 COMBOEX_Unregister (VOID)
 {
     if (GlobalFindAtomA (WC_COMBOBOXEXA))
-	UnregisterClassA (WC_COMBOBOXEXA, (HINSTANCE)NULL);
+        UnregisterClassA (WC_COMBOBOXEXA, (HINSTANCE)NULL);
 }
 

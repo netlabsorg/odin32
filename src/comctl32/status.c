@@ -1,4 +1,4 @@
-/* $Id: status.c,v 1.9 1999-07-12 15:58:48 cbratschi Exp $ */
+/* $Id: status.c,v 1.10 1999-08-14 16:13:12 cbratschi Exp $ */
 /*
  * Interface code to StatusWindow widget/control
  *
@@ -1153,7 +1153,7 @@ STATUSBAR_SendNotify (HWND hwnd, UINT code)
 
 
 
-LRESULT WINAPI
+static LRESULT WINAPI
 StatusWindowProc (HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
     switch (msg) {

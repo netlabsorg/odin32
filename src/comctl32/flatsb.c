@@ -1,4 +1,4 @@
-/* $Id: flatsb.c,v 1.3 1999-06-10 16:21:58 achimha Exp $ */
+/* $Id: flatsb.c,v 1.4 1999-08-14 16:13:10 cbratschi Exp $ */
 /*
  * Flat Scrollbar control
  *
@@ -19,48 +19,48 @@
 
 #include "winbase.h"
 #include "commctrl.h"
-#include "flatsb.h" 
+#include "flatsb.h"
 
 
 #define FlatSB_GetInfoPtr(hwnd) ((FLATSB_INFO*)GetWindowLongA (hwnd, 0))
 
 
-BOOL WINAPI 
+BOOL WINAPI
 FlatSB_EnableScrollBar(HWND hwnd, INT dummy, UINT dummy2)
 {
 //    FIXME_(commctrl)("stub\n");
     return 0;
 }
 
-BOOL WINAPI 
+BOOL WINAPI
 FlatSB_ShowScrollBar(HWND hwnd, INT code, BOOL flag)
 {
 //    FIXME_(commctrl)("stub\n");
     return 0;
 }
 
-BOOL WINAPI 
+BOOL WINAPI
 FlatSB_GetScrollRange(HWND hwnd, INT code, LPINT min, LPINT max)
 {
 //    FIXME_(commctrl)("stub\n");
     return 0;
 }
 
-BOOL WINAPI 
+BOOL WINAPI
 FlatSB_GetScrollInfo(HWND hwnd, INT code, LPSCROLLINFO info)
 {
 //    FIXME_(commctrl)("stub\n");
     return 0;
 }
 
-INT WINAPI 
+INT WINAPI
 FlatSB_GetScrollPos(HWND hwnd, INT code)
 {
 //    FIXME_(commctrl)("stub\n");
     return 0;
 }
 
-BOOL WINAPI 
+BOOL WINAPI
 FlatSB_GetScrollProp(HWND hwnd, INT propIndex, LPINT prop)
 {
 //    FIXME_(commctrl)("stub\n");
@@ -68,28 +68,28 @@ FlatSB_GetScrollProp(HWND hwnd, INT propIndex, LPINT prop)
 }
 
 
-INT WINAPI 
+INT WINAPI
 FlatSB_SetScrollPos(HWND hwnd, INT code, INT pos, BOOL fRedraw)
 {
 //    FIXME_(commctrl)("stub\n");
     return 0;
 }
 
-INT WINAPI 
+INT WINAPI
 FlatSB_SetScrollInfo(HWND hwnd, INT code, LPSCROLLINFO info, BOOL fRedraw)
 {
 //    FIXME_(commctrl)("stub\n");
     return 0;
 }
 
-INT WINAPI 
+INT WINAPI
 FlatSB_SetScrollRange(HWND hwnd, INT code, INT min, INT max, BOOL fRedraw)
 {
 //    FIXME_(commctrl)("stub\n");
     return 0;
 }
 
-BOOL WINAPI 
+BOOL WINAPI
 FlatSB_SetScrollProp(HWND hwnd, UINT index, INT newValue, BOOL flag)
 {
 //    FIXME_(commctrl)("stub\n");
@@ -127,23 +127,23 @@ FlatSB_Destroy (HWND hwnd, WPARAM wParam, LPARAM lParam)
 
 
 
-LRESULT WINAPI
+static LRESULT WINAPI
 FlatSB_WindowProc (HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
     switch (uMsg)
     {
 
-	case WM_CREATE:
-	    return FlatSB_Create (hwnd, wParam, lParam);
+        case WM_CREATE:
+            return FlatSB_Create (hwnd, wParam, lParam);
 
-	case WM_DESTROY:
-	    return FlatSB_Destroy (hwnd, wParam, lParam);
+        case WM_DESTROY:
+            return FlatSB_Destroy (hwnd, wParam, lParam);
 
-	default:
-//	    if (uMsg >= WM_USER)
-//		ERR_(datetime)("unknown msg %04x wp=%08x lp=%08lx\n",
-//		     uMsg, wParam, lParam);
-	    return DefWindowProcA (hwnd, uMsg, wParam, lParam);
+        default:
+//          if (uMsg >= WM_USER)
+//              ERR_(datetime)("unknown msg %04x wp=%08x lp=%08lx\n",
+//                   uMsg, wParam, lParam);
+            return DefWindowProcA (hwnd, uMsg, wParam, lParam);
     }
     return 0;
 }
@@ -164,7 +164,7 @@ FLATSB_Register (VOID)
     wndClass.hCursor       = LoadCursorA (0, IDC_ARROWA);
     wndClass.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);
     wndClass.lpszClassName = FLATSB_CLASSA;
- 
+
     RegisterClassA (&wndClass);
 }
 
@@ -173,6 +173,6 @@ VOID
 FLATSB_Unregister (VOID)
 {
     if (GlobalFindAtomA (FLATSB_CLASSA))
-	UnregisterClassA (FLATSB_CLASSA, (HINSTANCE)NULL);
+        UnregisterClassA (FLATSB_CLASSA, (HINSTANCE)NULL);
 }
 

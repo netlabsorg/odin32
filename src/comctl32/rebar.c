@@ -1,4 +1,4 @@
-/* $Id: rebar.c,v 1.7 1999-07-12 15:58:48 cbratschi Exp $ */
+/* $Id: rebar.c,v 1.8 1999-08-14 16:13:12 cbratschi Exp $ */
 /*
  * Rebar control
  *
@@ -1860,7 +1860,7 @@ REBAR_Size (HWND hwnd, WPARAM wParam, LPARAM lParam)
 }
 
 
-LRESULT WINAPI
+static LRESULT WINAPI
 REBAR_WindowProc (HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
     switch (uMsg)

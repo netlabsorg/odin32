@@ -1,4 +1,4 @@
-/* $Id: treeview.c,v 1.9 1999-07-23 15:54:34 cbratschi Exp $ */
+/* $Id: treeview.c,v 1.10 1999-08-14 16:13:16 cbratschi Exp $ */
 /* Treeview control
  *
  * Copyright 1998 Eric Kohl <ekohl@abo.rhein-zeitung.de>
@@ -45,6 +45,7 @@
 #include "winbase.h"
 #include "wingdi.h"
 #include "commctrl.h"
+#include "comctl32.h"
 #include "treeview.h"
 
 
@@ -459,6 +460,26 @@ TREEVIEW_GetItemHeight (HWND hwnd)
 }
 
 static LRESULT
+TREEVIEW_GetLineColor (HWND hwnd, WPARAM wParam, LPARAM lParam)
+{
+  TREEVIEW_INFO *infoPtr = TREEVIEW_GetInfoPtr(hwnd);
+
+  //TRACE("\n");
+  return (LRESULT) infoPtr->clrLine;
+}
+
+static LRESULT
+TREEVIEW_SetLineColor (HWND hwnd, WPARAM wParam, LPARAM lParam)
+{
+  TREEVIEW_INFO *infoPtr = TREEVIEW_GetInfoPtr(hwnd);
+  COLORREF prevColor=infoPtr->clrLine;
+
+  //TRACE("\n");
+  infoPtr->clrLine=(COLORREF) lParam;
+  return (LRESULT) prevColor;
+}
+
+static LRESULT
 TREEVIEW_SetTextColor (HWND hwnd, WPARAM wParam, LPARAM lParam)
 {
   TREEVIEW_INFO *infoPtr = TREEVIEW_GetInfoPtr(hwnd);
@@ -509,7 +530,7 @@ static void
 TREEVIEW_DrawItem (HWND hwnd, HDC hdc, TREEVIEW_ITEM *wineItem)
 {
   TREEVIEW_INFO *infoPtr = TREEVIEW_GetInfoPtr(hwnd);
-
+  DWORD dwStyle = GetWindowLongA(hwnd,GWL_STYLE);
   INT   center,xpos,cx,cy, cditem, drawmode;
   HFONT hOldFont;
   UINT  uTextJustify = DT_LEFT;
@@ -522,11 +543,12 @@ TREEVIEW_DrawItem (HWND hwnd, HDC hdc, TREEVIEW_ITEM *wineItem)
         hOldFont = SelectObject (hdc, infoPtr->hFont);
 
   cditem=0;
+  //TRACE ("cdmode:%x\n",infoPtr->cdmode);
   if (infoPtr->cdmode & CDRF_NOTIFYITEMDRAW) {
                 drawmode=CDDS_ITEMPREPAINT;
 
                 if (infoPtr->cdmode & CDRF_NOTIFYSUBITEMDRAW)
-      drawmode|=CDDS_SUBITEM;
+                  drawmode|=CDDS_SUBITEM;
 
                 cditem=TREEVIEW_SendCustomDrawItemNotify (hwnd, hdc, wineItem, drawmode);
 
@@ -546,7 +568,7 @@ TREEVIEW_DrawItem (HWND hwnd, HDC hdc, TREEVIEW_ITEM *wineItem)
   /*
    * Display the tree hierarchy
    */
-  if ( GetWindowLongA( hwnd, GWL_STYLE) & TVS_HASLINES)
+  if ( dwStyle & TVS_HASLINES)
   {
     /*
      * Write links to parent node
@@ -556,7 +578,7 @@ TREEVIEW_DrawItem (HWND hwnd, HDC hdc, TREEVIEW_ITEM *wineItem)
      * points[1] is the L corner
      * points[2] is attached to the parent or the up sibling
      */
-    if ( GetWindowLongA( hwnd, GWL_STYLE) & TVS_LINESATROOT)
+    if ( dwStyle & TVS_LINESATROOT)
     {
       TREEVIEW_ITEM *upNode    = NULL;
         BOOL  hasParentOrSibling = TRUE;
@@ -597,9 +619,9 @@ TREEVIEW_DrawItem (HWND hwnd, HDC hdc, TREEVIEW_ITEM *wineItem)
       }
 
       /*
-       * Get a doted pen
+       * Get a dotted pen
        */
-      hnewPen = CreatePen(PS_DOT, 0, GetSysColor(COLOR_WINDOWTEXT) );
+      hnewPen = CreatePen(PS_DOT, 0, infoPtr->clrLine);
       hOldPen = SelectObject( hdc, hnewPen );
 
       if (hasParentOrSibling)
@@ -618,8 +640,7 @@ TREEVIEW_DrawItem (HWND hwnd, HDC hdc, TREEVIEW_ITEM *wineItem)
   if (wineItem->iLevel != 0)/*  update position only for non root node */
     xpos+=(5*wineItem->iLevel);
 
-  if (( GetWindowLongA( hwnd, GWL_STYLE) & TVS_HASBUTTONS) &&
-      ( GetWindowLongA( hwnd, GWL_STYLE) & TVS_HASLINES))
+  if (( dwStyle & TVS_HASBUTTONS) && ( dwStyle & TVS_HASLINES))
   {
           if ( (wineItem->cChildren) ||
                (wineItem->cChildren == I_CHILDRENCALLBACK))
@@ -875,7 +896,6 @@ TREEVIEW_SetItemA (HWND hwnd, WPARAM wParam, LPARAM lParam)
 
   if (tvItem->mask & TVIF_INTEGRAL) {
         wineItem->iIntegral=tvItem->iIntegral;
-//        FIXME (treeview," TVIF_INTEGRAL not supported yet\n");
   }
 
   if (tvItem->mask & TVIF_PARAM) {
@@ -908,9 +928,18 @@ TREEVIEW_SetItemA (HWND hwnd, WPARAM wParam, LPARAM lParam)
   return TRUE;
 }
 
+static LRESULT
+TREEVIEW_GetItemState (HWND hwnd, WPARAM wParam, LPARAM lParam)
 
+{
+    TREEVIEW_INFO *infoPtr = TREEVIEW_GetInfoPtr(hwnd);
+        TREEVIEW_ITEM *wineItem;
 
+        wineItem = TREEVIEW_ValidItem (infoPtr, (HTREEITEM)wParam);
+        if (!wineItem) return 0;
 
+        return (wineItem->state & lParam);
+}
 
 static void
 TREEVIEW_Refresh (HWND hwnd)
@@ -1143,7 +1172,6 @@ TREEVIEW_GetItemA (HWND hwnd, WPARAM wParam, LPARAM lParam)
 
    if (tvItem->mask & TVIF_INTEGRAL) {
         tvItem->iIntegral=wineItem->iIntegral;
-//              FIXME (treeview," TVIF_INTEGRAL not supported yet\n");
    }
 
    // undocumented: windows ignores TVIF_PARAM and
@@ -1381,29 +1409,71 @@ static INT WINAPI TREEVIEW_CallBackCompare(
 }
 
 /***************************************************************************
+ * Treeview native sort routine: sort on item text.
+ */
+static INT WINAPI TREEVIEW_SortOnName (
+  LPVOID first,
+  LPVOID second,
+  LPARAM tvInfoPtr)
+{
+  HWND hwnd=(HWND) tvInfoPtr;
+  char *txt1, *txt2;
+  TREEVIEW_ITEM *item;
+
+
+  item=(TREEVIEW_ITEM *) first;
+  if (item->pszText==LPSTR_TEXTCALLBACKA)  {
+         TREEVIEW_SendDispInfoNotify (hwnd, item, TVN_GETDISPINFO, TVIF_TEXT);
+        }
+  txt1=item->pszText;
+
+  item=(TREEVIEW_ITEM *) second;
+  if (item->pszText==LPSTR_TEXTCALLBACKA)  {
+         TREEVIEW_SendDispInfoNotify (hwnd, item, TVN_GETDISPINFO, TVIF_TEXT);
+        }
+  txt2=item->pszText;
+
+  return -strcmp (txt1,txt2);
+}
+
+/***************************************************************************
  * Setup the treeview structure with regards of the sort method
  * and sort the children of the TV item specified in lParam
+ * fRecurse: currently unused. Should be zero.
+ * parent: if pSort!=NULL, should equal pSort->hParent.
+ *         otherwise, item which child items are to be sorted.
+ * pSort:  sort method info. if NULL, sort on item text.
+ *         if non-NULL, sort on item's lParam content, and let the
+ *         application decide what that means. See also TVM_SORTCHILDRENCB.
  */
-LRESULT WINAPI TREEVIEW_SortChildrenCB(
+
+static LRESULT WINAPI TREEVIEW_Sort (
   HWND   hwnd,
-  WPARAM wParam,
-  LPARAM lParam)
+  BOOL   fRecurse,
+  HTREEITEM parent,
+  LPTVSORTCB pSort
+  )
 {
   TREEVIEW_INFO *infoPtr = TREEVIEW_GetInfoPtr(hwnd);
   TREEVIEW_ITEM *sortMe  = NULL; /* Node for which we sort the children */
 
   /* Obtain the TVSORTBC struct */
-  infoPtr->pCallBackSort = (LPTVSORTCB)lParam;
+  infoPtr->pCallBackSort = pSort;
+
+        /* undocumented feature: TVI_ROOT means `sort the whole tree' */
+
+  if (parent==TVI_ROOT)
+    parent=infoPtr->TopRootItem;
 
   /* Check for a valid handle to the parent item */
-  if (!TREEVIEW_ValidItem(infoPtr, infoPtr->pCallBackSort->hParent))
+  if (!TREEVIEW_ValidItem(infoPtr, parent))
   {
-//    ERR ("invalid item hParent=%d\n", (INT)infoPtr->pCallBackSort->hParent);
+    ERR ("invalid item hParent=%x\n", (INT)parent);
     return FALSE;
   }
 
   /* Obtain the parent node to sort */
-  sortMe = &infoPtr->items[ (INT)infoPtr->pCallBackSort->hParent ];
+  sortMe = &infoPtr->items[ (INT)parent ];
 
   /* Make sure there is something to sort */
   if ( sortMe->cChildren > 1 )
@@ -1433,10 +1503,16 @@ LRESULT WINAPI TREEVIEW_SortChildrenCB(
     } while ( itemHandle != NULL );
 
     /* let DPA perform the sort activity */
-    DPA_Sort(
-      sortList,                  /* what  */
-      TREEVIEW_CallBackCompare,  /* how   */
-      hwnd);                     /* owner */
+        if (pSort)
+        DPA_Sort(
+                sortList,                  /* what  */
+                TREEVIEW_CallBackCompare,  /* how   */
+                hwnd);                     /* owner */
+        else
+                DPA_Sort (
+                        sortList,                  /* what  */
+                TREEVIEW_SortOnName,       /* how   */
+                        hwnd);                     /* owner */
 
     /*
      * Reorganized TREEVIEW_ITEM structures.
@@ -1475,6 +1551,34 @@ LRESULT WINAPI TREEVIEW_SortChildrenCB(
   }
   return FALSE;
 }
+
+/***************************************************************************
+ * Setup the treeview structure with regards of the sort method
+ * and sort the children of the TV item specified in lParam
+ */
+static LRESULT WINAPI TREEVIEW_SortChildrenCB(
+  HWND   hwnd,
+  WPARAM wParam,
+  LPARAM lParam
+  )
+{
+ LPTVSORTCB pSort=(LPTVSORTCB) lParam;
+
+ return TREEVIEW_Sort (hwnd, wParam, pSort->hParent, pSort);
+}
+
+
+/***************************************************************************
+ * Sort the children of the TV item specified in lParam.
+ */
+static LRESULT WINAPI TREEVIEW_SortChildren (
+  HWND   hwnd,
+  WPARAM wParam,
+  LPARAM lParam)
+{
+ return TREEVIEW_Sort (hwnd, (BOOL) wParam, (HTREEITEM) lParam, NULL);
+}
+
 
 int ffs(int mask)
 {
@@ -1778,7 +1882,55 @@ TREEVIEW_InsertItemA (HWND hwnd, WPARAM wParam, LPARAM lParam)
 }
 
 
+static LRESULT
+TREEVIEW_InsertItemW(HWND hwnd, WPARAM wParam, LPARAM lParam)
+{
+    TVINSERTSTRUCTW *tvisW;
+    TVINSERTSTRUCTA tvisA;
+    LRESULT lRes;
 
+    tvisW = (LPTVINSERTSTRUCTW)lParam;
+
+    tvisA.hParent = tvisW->hParent;
+    tvisA.hInsertAfter = tvisW->hInsertAfter;
+
+    tvisA.DUMMYUNIONNAME.item.mask           = tvisW->DUMMYUNIONNAME.item.mask;
+    tvisA.DUMMYUNIONNAME.item.hItem          = tvisW->DUMMYUNIONNAME.item.hItem;
+    tvisA.DUMMYUNIONNAME.item.state          = tvisW->DUMMYUNIONNAME.item.state;
+    tvisA.DUMMYUNIONNAME.item.stateMask      = tvisW->DUMMYUNIONNAME.item.stateMask;
+    tvisA.DUMMYUNIONNAME.item.cchTextMax     = tvisW->DUMMYUNIONNAME.item.cchTextMax;
+
+    if(tvisW->DUMMYUNIONNAME.item.pszText)
+    {
+        if (tvisW->DUMMYUNIONNAME.item.pszText!=LPSTR_TEXTCALLBACKW)
+        {
+            int len = lstrlenW (tvisW->DUMMYUNIONNAME.item.pszText)+1;
+            tvisA.DUMMYUNIONNAME.item.pszText = COMCTL32_Alloc (len);
+            lstrcpyWtoA (tvisA.DUMMYUNIONNAME.item.pszText,
+                         tvisW->DUMMYUNIONNAME.item.pszText );
+        }
+        else
+        {
+            tvisA.DUMMYUNIONNAME.item.pszText = LPSTR_TEXTCALLBACKA;
+            tvisA.DUMMYUNIONNAME.item.cchTextMax = 0;
+        }
+    }
+
+    tvisA.DUMMYUNIONNAME.item.iImage         = tvisW->DUMMYUNIONNAME.item.iImage;
+    tvisA.DUMMYUNIONNAME.item.iSelectedImage = tvisW->DUMMYUNIONNAME.item.iSelectedImage;
+    tvisA.DUMMYUNIONNAME.item.cChildren      = tvisW->DUMMYUNIONNAME.item.cChildren;
+    tvisA.DUMMYUNIONNAME.item.lParam         = tvisW->DUMMYUNIONNAME.item.lParam;
+
+    lRes = TREEVIEW_InsertItemA(hwnd,wParam,(LPARAM)&tvisA);
+
+    if (tvisA.DUMMYUNIONNAME.item.pszText!=LPSTR_TEXTCALLBACKA)
+    {
+        COMCTL32_Free(tvisA.DUMMYUNIONNAME.item.pszText);
+    }
+
+    return lRes;
+
+}
 
 
 static LRESULT
@@ -1857,7 +2009,7 @@ TREEVIEW_SetToolTips (HWND hwnd, WPARAM wParam)
 }
 
 
-LRESULT CALLBACK
+static LRESULT CALLBACK
 TREEVIEW_GetEditControl (HWND hwnd)
 
 {
@@ -1978,14 +2130,9 @@ TREEVIEW_Size (HWND hwnd, WPARAM wParam, LPARAM lParam)
 static LRESULT
 TREEVIEW_StyleChanged (HWND hwnd, WPARAM wParam, LPARAM lParam)
 {
-  LPSTYLESTRUCT lpss=(LPSTYLESTRUCT) lParam;
-
 //  TRACE (treeview,"(%x %lx)\n",wParam,lParam);
 
-  if (wParam & (GWL_STYLE))
-         SetWindowLongA( hwnd, GWL_STYLE, lpss->styleNew);
-  if (wParam & (GWL_EXSTYLE))
-         SetWindowLongA( hwnd, GWL_STYLE, lpss->styleNew);
+  TREEVIEW_Refresh(hwnd);
 
   return 0;
 }
@@ -2021,6 +2168,7 @@ TREEVIEW_Create (HWND hwnd, WPARAM wParam, LPARAM lParam)
     infoPtr->uNumItems=0;
     infoPtr->clrBk = GetSysColor (COLOR_WINDOW);
     infoPtr->clrText = GetSysColor (COLOR_BTNTEXT);
+    infoPtr->clrLine = GetSysColor (COLOR_WINDOWTEXT);
     infoPtr->cy = 0;
     infoPtr->cx = 0;
     infoPtr->uIndent = 15;
@@ -2038,6 +2186,7 @@ TREEVIEW_Create (HWND hwnd, WPARAM wParam, LPARAM lParam)
     infoPtr->clrText=-1;        /* use system color */
     infoPtr->dropItem=0;
     infoPtr->pCallBackSort=NULL;
+    infoPtr->uScrollTime = 300; /* milliseconds */
 
 /*
     infoPtr->hwndNotify = GetParent32 (hwnd);
@@ -2695,7 +2844,7 @@ TREEVIEW_EndEditLabelNow (HWND hwnd, WPARAM wParam, LPARAM lParam)
 
 
 
-LRESULT
+static LRESULT
 TREEVIEW_LButtonDoubleClick (HWND hwnd, WPARAM wParam, LPARAM lParam)
 {
   TREEVIEW_ITEM *wineItem;
@@ -3357,8 +3506,23 @@ TREEVIEW_KeyDown (HWND hwnd, WPARAM wParam, LPARAM lParam)
   return FALSE;
 }
 
+static LRESULT
+TREEVIEW_GetScrollTime (HWND hwnd)
+{
+  TREEVIEW_INFO *infoPtr = TREEVIEW_GetInfoPtr(hwnd);
+  return infoPtr->uScrollTime;
+}
 
-LRESULT WINAPI
+static LRESULT
+TREEVIEW_SetScrollTime (HWND hwnd, UINT uScrollTime)
+{
+  TREEVIEW_INFO *infoPtr = TREEVIEW_GetInfoPtr(hwnd);
+  UINT uOldScrollTime = infoPtr->uScrollTime;
+  infoPtr->uScrollTime = min (uScrollTime, 100);
+  return uOldScrollTime;
+}
+
+static LRESULT WINAPI
 TREEVIEW_WindowProc (HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
     switch (uMsg) {
@@ -3366,8 +3530,7 @@ TREEVIEW_WindowProc (HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
           return TREEVIEW_InsertItemA (hwnd, wParam, lParam);
 
         case TVM_INSERTITEMW:
-//                      FIXME (treeview, "Unimplemented msg TVM_INSERTITEM32W\n");
-                return 0;
+          return TREEVIEW_InsertItemW(hwnd,wParam,lParam);
 
         case TVM_DELETEITEM:
                 return TREEVIEW_DeleteItem (hwnd, wParam, lParam);
@@ -3403,7 +3566,7 @@ TREEVIEW_WindowProc (HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
                 return TREEVIEW_GetItemA (hwnd, wParam, lParam);
 
         case TVM_GETITEMW:
-//                      FIXME (treeview, "Unimplemented msg TVM_GETITEM32W\n");
+//                      FIXME (treeview, "Unimplemented msg TVM_GETITEMW\n");
                 return 0;
 
         case TVM_SETITEMA:
@@ -3414,11 +3577,11 @@ TREEVIEW_WindowProc (HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
                 return 0;
 
         case TVM_EDITLABELA:
-//                      FIXME (treeview, "Unimplemented msg TVM_EDITLABEL32A \n");
+//                      FIXME (treeview, "Unimplemented msg TVM_EDITLABELA \n");
                 return 0;
 
         case TVM_EDITLABELW:
-//                      FIXME (treeview, "Unimplemented msg TVM_EDITLABEL32W \n");
+//                      FIXME (treeview, "Unimplemented msg TVM_EDITLABELW \n");
                 return 0;
 
         case TVM_GETEDITCONTROL:
@@ -3434,8 +3597,7 @@ TREEVIEW_WindowProc (HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
                 return TREEVIEW_CreateDragImage (hwnd, wParam, lParam);
 
         case TVM_SORTCHILDREN:
-//                      FIXME (treeview, "Unimplemented msg TVM_SORTCHILDREN\n");
-                return 0;
+                return TREEVIEW_SortChildrenCB(hwnd, wParam, lParam);
 
         case TVM_ENSUREVISIBLE:
 //                      FIXME (treeview, "Unimplemented msg TVM_ENSUREVISIBLE\n");
@@ -3448,11 +3610,11 @@ TREEVIEW_WindowProc (HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
                 return TREEVIEW_EndEditLabelNow (hwnd, wParam, lParam);
 
         case TVM_GETISEARCHSTRINGA:
-//                      FIXME (treeview, "Unimplemented msg TVM_GETISEARCHSTRING32A\n");
+//                      FIXME (treeview, "Unimplemented msg TVM_GETISEARCHSTRINGA\n");
                 return 0;
 
         case TVM_GETISEARCHSTRINGW:
-//                      FIXME (treeview, "Unimplemented msg TVM_GETISEARCHSTRING32W\n");
+//                      FIXME (treeview, "Unimplemented msg TVM_GETISEARCHSTRINGW\n");
                 return 0;
 
         case TVM_GETTOOLTIPS:
@@ -3484,12 +3646,19 @@ TREEVIEW_WindowProc (HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
                 return TREEVIEW_GetTextColor (hwnd);
 
         case TVM_SETSCROLLTIME:
-//                      FIXME (treeview, "Unimplemented msg TVM_SETSCROLLTIME\n");
-                return 0;
+                return TREEVIEW_SetScrollTime (hwnd, (UINT)wParam);
 
         case TVM_GETSCROLLTIME:
-//                      FIXME (treeview, "Unimplemented msg TVM_GETSCROLLTIME\n");
-                return 0;
+                return TREEVIEW_GetScrollTime (hwnd);
+
+        case TVM_GETITEMSTATE:
+                return TREEVIEW_GetItemState (hwnd,wParam, lParam);
+
+        case TVM_GETLINECOLOR:
+                return TREEVIEW_GetLineColor (hwnd,wParam, lParam);
+
+        case TVM_SETLINECOLOR:
+                return TREEVIEW_SetLineColor (hwnd,wParam, lParam);
 
         case TVM_SETINSERTMARKCOLOR:
 //                      FIXME (treeview, "Unimplemented msg TVM_SETINSERTMARKCOLOR\n");
@@ -3503,86 +3672,84 @@ TREEVIEW_WindowProc (HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 //                      FIXME (treeview, "Unimplemented msg TVM_GETUNICODEFORMAT\n");
                 return 0;
 
-                case WM_COMMAND:
-                         return TREEVIEW_Command (hwnd, wParam, lParam);
+        case WM_COMMAND:
+                return TREEVIEW_Command (hwnd, wParam, lParam);
 
-                case WM_CREATE:
-                        return TREEVIEW_Create (hwnd, wParam, lParam);
+        case WM_CREATE:
+                return TREEVIEW_Create (hwnd, wParam, lParam);
 
-                case WM_DESTROY:
-                        return TREEVIEW_Destroy (hwnd);
+        case WM_DESTROY:
+                return TREEVIEW_Destroy (hwnd);
 
-/*              case WM_ENABLE: */
+/*      case WM_ENABLE: */
 
-                case WM_ERASEBKGND:
-                        return TREEVIEW_EraseBackground (hwnd, wParam, lParam);
+        case WM_ERASEBKGND:
+                return TREEVIEW_EraseBackground (hwnd, wParam, lParam);
 
-                case WM_GETDLGCODE:
+        case WM_GETDLGCODE:
                 return DLGC_WANTARROWS | DLGC_WANTCHARS;
 
-                case WM_PAINT:
+        case WM_PAINT:
                 return TREEVIEW_Paint (hwnd, wParam, lParam);
 
-                case WM_GETFONT:
+        case WM_GETFONT:
                 return TREEVIEW_GetFont (hwnd, wParam, lParam);
 
-                case WM_SETFONT:
+        case WM_SETFONT:
                 return TREEVIEW_SetFont (hwnd, wParam, lParam);
 
-                case WM_KEYDOWN:
-                        return TREEVIEW_KeyDown (hwnd, wParam, lParam);
+        case WM_KEYDOWN:
+                return TREEVIEW_KeyDown (hwnd, wParam, lParam);
 
+        case WM_SETFOCUS:
+                return TREEVIEW_SetFocus (hwnd, wParam, lParam);
 
-                case WM_SETFOCUS:
-                        return TREEVIEW_SetFocus (hwnd, wParam, lParam);
+        case WM_KILLFOCUS:
+                return TREEVIEW_KillFocus (hwnd, wParam, lParam);
 
-                case WM_KILLFOCUS:
-                        return TREEVIEW_KillFocus (hwnd, wParam, lParam);
+        case WM_LBUTTONDOWN:
+                return TREEVIEW_LButtonDown (hwnd, wParam, lParam);
 
+        case WM_LBUTTONUP:
+                return TREEVIEW_LButtonUp (hwnd, wParam, lParam);
 
-                case WM_LBUTTONDOWN:
-                        return TREEVIEW_LButtonDown (hwnd, wParam, lParam);
+        case WM_LBUTTONDBLCLK:
+                return TREEVIEW_LButtonDoubleClick (hwnd, wParam, lParam);
 
-                case WM_LBUTTONUP:
-                        return TREEVIEW_LButtonUp (hwnd, wParam, lParam);
+        case WM_RBUTTONDOWN:
+                return TREEVIEW_RButtonDown (hwnd, wParam, lParam);
 
-                case WM_LBUTTONDBLCLK:
-                        return TREEVIEW_LButtonDoubleClick (hwnd, wParam, lParam);
+        case WM_RBUTTONUP:
+                return TREEVIEW_RButtonUp (hwnd, wParam, lParam);
 
-                case WM_RBUTTONDOWN:
-                        return TREEVIEW_RButtonDown (hwnd, wParam, lParam);
+        case WM_MOUSEMOVE:
+                return TREEVIEW_MouseMove (hwnd, wParam, lParam);
 
-                case WM_RBUTTONUP:
-                        return TREEVIEW_RButtonUp (hwnd, wParam, lParam);
+        case WM_STYLECHANGED:
+                return TREEVIEW_StyleChanged (hwnd, wParam, lParam);
 
-                case WM_MOUSEMOVE:
-                        return TREEVIEW_MouseMove (hwnd, wParam, lParam);
+/*      case WM_SYSCOLORCHANGE: */
+/*      case WM_SETREDRAW: */
 
+        case WM_TIMER:
+                return TREEVIEW_HandleTimer (hwnd, wParam, lParam);
 
-/*              case WM_SYSCOLORCHANGE: */
-                case WM_STYLECHANGED:
-                        return TREEVIEW_StyleChanged (hwnd, wParam, lParam);
+        case WM_SIZE:
+                return TREEVIEW_Size (hwnd, wParam,lParam);
 
-/*              case WM_SETREDRAW: */
+        case WM_HSCROLL:
+                return TREEVIEW_HScroll (hwnd, wParam, lParam);
 
-                case WM_TIMER:
-                        return TREEVIEW_HandleTimer (hwnd, wParam, lParam);
+        case WM_VSCROLL:
+                return TREEVIEW_VScroll (hwnd, wParam, lParam);
 
-                case WM_SIZE:
-                        return TREEVIEW_Size (hwnd, wParam,lParam);
+        case WM_DRAWITEM:
+//              printf ("drawItem\n");
+                return DefWindowProcA (hwnd, uMsg, wParam, lParam);
 
-                case WM_HSCROLL:
-                        return TREEVIEW_HScroll (hwnd, wParam, lParam);
-                case WM_VSCROLL:
-                        return TREEVIEW_VScroll (hwnd, wParam, lParam);
-
-                case WM_DRAWITEM:
-//                      printf ("drawItem\n");
-                        return DefWindowProcA (hwnd, uMsg, wParam, lParam);
-
-                default:
-//                if (uMsg >= WM_USER)
-//              FIXME (treeview, "Unknown msg %04x wp=%08x lp=%08lx\n",
+        default:
+//              if (uMsg >= WM_USER)
+//                FIXME (treeview, "Unknown msg %04x wp=%08x lp=%08lx\n",
 //                   uMsg, wParam, lParam);
             return DefWindowProcA (hwnd, uMsg, wParam, lParam);
       }

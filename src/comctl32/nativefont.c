@@ -1,4 +1,4 @@
-/* $Id: nativefont.c,v 1.3 1999-06-10 16:22:01 achimha Exp $ */
+/* $Id: nativefont.c,v 1.4 1999-08-14 16:13:12 cbratschi Exp $ */
 /*
  * Native Font control
  *
@@ -59,22 +59,22 @@ NATIVEFONT_Destroy (HWND hwnd, WPARAM wParam, LPARAM lParam)
 
 
 
-LRESULT WINAPI
+static LRESULT WINAPI
 NATIVEFONT_WindowProc (HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
     switch (uMsg)
     {
 
-	case WM_CREATE:
-	    return NATIVEFONT_Create (hwnd, wParam, lParam);
+        case WM_CREATE:
+            return NATIVEFONT_Create (hwnd, wParam, lParam);
 
-	case WM_DESTROY:
-	    return NATIVEFONT_Destroy (hwnd, wParam, lParam);
+        case WM_DESTROY:
+            return NATIVEFONT_Destroy (hwnd, wParam, lParam);
 
-	default:
-//	    ERR (nativefont, "unknown msg %04x wp=%08x lp=%08lx\n",
-//		     uMsg, wParam, lParam);
-	    return DefWindowProcA (hwnd, uMsg, wParam, lParam);
+        default:
+//          ERR (nativefont, "unknown msg %04x wp=%08x lp=%08lx\n",
+//                   uMsg, wParam, lParam);
+            return DefWindowProcA (hwnd, uMsg, wParam, lParam);
     }
     return 0;
 }
@@ -95,7 +95,7 @@ NATIVEFONT_Register (VOID)
     wndClass.hCursor       = LoadCursorA (0, IDC_ARROWA);
     wndClass.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);
     wndClass.lpszClassName = WC_NATIVEFONTCTLA;
- 
+
     RegisterClassA (&wndClass);
 }
 
@@ -104,6 +104,6 @@ VOID
 NATIVEFONT_Unregister (VOID)
 {
     if (GlobalFindAtomA (WC_NATIVEFONTCTLA))
-	UnregisterClassA (WC_NATIVEFONTCTLA, (HINSTANCE)NULL);
+        UnregisterClassA (WC_NATIVEFONTCTLA, (HINSTANCE)NULL);
 }
 

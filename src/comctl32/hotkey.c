@@ -1,4 +1,4 @@
-/* $Id: hotkey.c,v 1.3 1999-06-10 16:21:59 achimha Exp $ */
+/* $Id: hotkey.c,v 1.4 1999-08-14 16:13:10 cbratschi Exp $ */
 /*
  * Hotkey control
  *
@@ -78,10 +78,10 @@ HOTKEY_EraseBackground (HWND hwnd, WPARAM wParam, LPARAM lParam)
     RECT   rc;
 
     hBrush =
-	(HBRUSH)SendMessageA (GetParent (hwnd), WM_CTLCOLOREDIT,
-				wParam, (LPARAM)hwnd);
+        (HBRUSH)SendMessageA (GetParent (hwnd), WM_CTLCOLOREDIT,
+                                wParam, (LPARAM)hwnd);
     if (hBrush)
-	hBrush = (HBRUSH)GetStockObject (WHITE_BRUSH);
+        hBrush = (HBRUSH)GetStockObject (WHITE_BRUSH);
     GetClientRect (hwnd, &rc);
 
     FillRect ((HDC)wParam, &rc, hBrush);
@@ -105,23 +105,23 @@ HOTKEY_KeyDown (HWND hwnd, WPARAM wParam, LPARAM lParam)
     /* HOTKEY_INFO *infoPtr = HOTKEY_GetInfoPtr (hwnd); */
 
     switch (wParam) {
-	case VK_RETURN:
-	case VK_TAB:
-	case VK_SPACE:
-	case VK_DELETE:
-	case VK_ESCAPE:
-	case VK_BACK:
-	    return DefWindowProcA (hwnd, WM_KEYDOWN, wParam, lParam);
+        case VK_RETURN:
+        case VK_TAB:
+        case VK_SPACE:
+        case VK_DELETE:
+        case VK_ESCAPE:
+        case VK_BACK:
+            return DefWindowProcA (hwnd, WM_KEYDOWN, wParam, lParam);
 
-	case VK_SHIFT:
-	case VK_CONTROL:
-	case VK_MENU:
-//	    FIXME (hotkey, "modifier key pressed!\n");
-	    break;
+        case VK_SHIFT:
+        case VK_CONTROL:
+        case VK_MENU:
+//          FIXME (hotkey, "modifier key pressed!\n");
+            break;
 
-	default:
-//	    FIXME (hotkey, " %d\n", wParam);
-	    break;
+        default:
+//          FIXME (hotkey, " %d\n", wParam);
+            break;
     }
 
     return TRUE;
@@ -205,18 +205,18 @@ HOTKEY_SetFont (HWND hwnd, WPARAM wParam, LPARAM lParam)
 
     hdc = GetDC (hwnd);
     if (infoPtr->hFont)
-	hOldFont = SelectObject (hdc, infoPtr->hFont);
+        hOldFont = SelectObject (hdc, infoPtr->hFont);
 
     GetTextMetricsA (hdc, &tm);
     infoPtr->nHeight = tm.tmHeight;
 
     if (infoPtr->hFont)
-	SelectObject (hdc, hOldFont);
+        SelectObject (hdc, hOldFont);
     ReleaseDC (hwnd, hdc);
 
     if (LOWORD(lParam)) {
 
-//	FIXME (hotkey, "force redraw!\n");
+//      FIXME (hotkey, "force redraw!\n");
 
     }
 
@@ -230,23 +230,23 @@ HOTKEY_SysKeyDown (HWND hwnd, WPARAM wParam, LPARAM lParam)
     /* HOTKEY_INFO *infoPtr = HOTKEY_GetInfoPtr (hwnd); */
 
     switch (wParam) {
-	case VK_RETURN:
-	case VK_TAB:
-	case VK_SPACE:
-	case VK_DELETE:
-	case VK_ESCAPE:
-	case VK_BACK:
-	    return DefWindowProcA (hwnd, WM_SYSKEYDOWN, wParam, lParam);
+        case VK_RETURN:
+        case VK_TAB:
+        case VK_SPACE:
+        case VK_DELETE:
+        case VK_ESCAPE:
+        case VK_BACK:
+            return DefWindowProcA (hwnd, WM_SYSKEYDOWN, wParam, lParam);
 
-	case VK_SHIFT:
-	case VK_CONTROL:
-	case VK_MENU:
-//	    FIXME (hotkey, "modifier key pressed!\n");
-	    break;
+        case VK_SHIFT:
+        case VK_CONTROL:
+        case VK_MENU:
+//          FIXME (hotkey, "modifier key pressed!\n");
+            break;
 
-	default:
-//	    FIXME (hotkey, " %d\n", wParam);
-	    break;
+        default:
+//          FIXME (hotkey, " %d\n", wParam);
+            break;
     }
 
     return TRUE;
@@ -265,64 +265,64 @@ HOTKEY_SysKeyUp (HWND hwnd, WPARAM wParam, LPARAM lParam)
 
 
 
-LRESULT WINAPI
+static LRESULT WINAPI
 HOTKEY_WindowProc (HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
     switch (uMsg)
     {
-/*	case HKM_GETHOTKEY: */
-/*	case HKM_SETHOTKEY: */
-/*	case HKM_SETRULES: */
+/*      case HKM_GETHOTKEY: */
+/*      case HKM_SETHOTKEY: */
+/*      case HKM_SETRULES: */
 
-/*	case WM_CHAR: */
+/*      case WM_CHAR: */
 
-	case WM_CREATE:
-	    return HOTKEY_Create (hwnd, wParam, lParam);
+        case WM_CREATE:
+            return HOTKEY_Create (hwnd, wParam, lParam);
 
-	case WM_DESTROY:
-	    return HOTKEY_Destroy (hwnd, wParam, lParam);
+        case WM_DESTROY:
+            return HOTKEY_Destroy (hwnd, wParam, lParam);
 
-	case WM_ERASEBKGND:
-	    return HOTKEY_EraseBackground (hwnd, wParam, lParam);
+        case WM_ERASEBKGND:
+            return HOTKEY_EraseBackground (hwnd, wParam, lParam);
 
-	case WM_GETDLGCODE:
-	    return DLGC_WANTCHARS | DLGC_WANTARROWS;
+        case WM_GETDLGCODE:
+            return DLGC_WANTCHARS | DLGC_WANTARROWS;
 
-	case WM_GETFONT:
-	    return HOTKEY_GetFont (hwnd, wParam, lParam);
+        case WM_GETFONT:
+            return HOTKEY_GetFont (hwnd, wParam, lParam);
 
-	case WM_KEYDOWN:
-	case WM_SYSKEYDOWN:
-	    return HOTKEY_KeyDown (hwnd, wParam, lParam);
+        case WM_KEYDOWN:
+        case WM_SYSKEYDOWN:
+            return HOTKEY_KeyDown (hwnd, wParam, lParam);
 
-	case WM_KEYUP:
-	case WM_SYSKEYUP:
-	    return HOTKEY_KeyUp (hwnd, wParam, lParam);
+        case WM_KEYUP:
+        case WM_SYSKEYUP:
+            return HOTKEY_KeyUp (hwnd, wParam, lParam);
 
-	case WM_KILLFOCUS:
-	    return HOTKEY_KillFocus (hwnd, wParam, lParam);
+        case WM_KILLFOCUS:
+            return HOTKEY_KillFocus (hwnd, wParam, lParam);
 
-	case WM_LBUTTONDOWN:
-	    return HOTKEY_LButtonDown (hwnd, wParam, lParam);
+        case WM_LBUTTONDOWN:
+            return HOTKEY_LButtonDown (hwnd, wParam, lParam);
 
-	case WM_NCCREATE:
-	    return HOTKEY_NCCreate (hwnd, wParam, lParam);
+        case WM_NCCREATE:
+            return HOTKEY_NCCreate (hwnd, wParam, lParam);
 
-/*	case WM_PAINT: */
+/*      case WM_PAINT: */
 
-	case WM_SETFOCUS:
-	    return HOTKEY_SetFocus (hwnd, wParam, lParam);
+        case WM_SETFOCUS:
+            return HOTKEY_SetFocus (hwnd, wParam, lParam);
 
-	case WM_SETFONT:
-	    return HOTKEY_SetFont (hwnd, wParam, lParam);
+        case WM_SETFONT:
+            return HOTKEY_SetFont (hwnd, wParam, lParam);
 
-/*	case WM_SYSCHAR: */
+/*      case WM_SYSCHAR: */
 
-	default:
-//	    if (uMsg >= WM_USER)
-//		ERR (hotkey, "unknown msg %04x wp=%08x lp=%08lx\n",
-//		     uMsg, wParam, lParam);
-	    return DefWindowProcA (hwnd, uMsg, wParam, lParam);
+        default:
+//          if (uMsg >= WM_USER)
+//              ERR (hotkey, "unknown msg %04x wp=%08x lp=%08lx\n",
+//                   uMsg, wParam, lParam);
+            return DefWindowProcA (hwnd, uMsg, wParam, lParam);
     }
     return 0;
 }
@@ -343,7 +343,7 @@ HOTKEY_Register (VOID)
     wndClass.hCursor       = 0;
     wndClass.hbrBackground = 0;
     wndClass.lpszClassName = HOTKEY_CLASSA;
- 
+
     RegisterClassA (&wndClass);
 }
 
@@ -352,6 +352,6 @@ VOID
 HOTKEY_Unregister (VOID)
 {
     if (GlobalFindAtomA (HOTKEY_CLASSA))
-	UnregisterClassA (HOTKEY_CLASSA, (HINSTANCE)NULL);
+        UnregisterClassA (HOTKEY_CLASSA, (HINSTANCE)NULL);
 }
 

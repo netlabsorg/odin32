@@ -1,4 +1,4 @@
-/* $Id: header.c,v 1.7 1999-06-30 15:52:16 cbratschi Exp $ */
+/* $Id: header.c,v 1.8 1999-08-14 16:13:10 cbratschi Exp $ */
 /*
  *  Header control
  *
@@ -1443,7 +1443,7 @@ HEADER_SetFont (HWND hwnd, WPARAM wParam, LPARAM lParam)
 }
 
 
-LRESULT WINAPI
+static LRESULT WINAPI
 HEADER_WindowProc (HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
     switch (msg) {
