@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.12 1999-09-25 15:10:00 cbratschi Exp $ */
+/* $Id: win32wbase.cpp,v 1.13 1999-09-25 16:49:30 cbratschi Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -392,7 +392,7 @@ BOOL Win32BaseWindow::CreateWindowExA(CREATESTRUCTA *cs, ATOM classAtom)
   OSLibWinConvertStyle(cs->style, cs->dwExStyle, &dwOSWinStyle, &dwOSFrameStyle);
 
 //CB: dwOSFrameStyle handled by OSLibWinConvertStyle
-//    todo: subclass frame WM_PAINT -> call DrawEdge() if HAS_3DFRAME
+//    todo: subclass frame WM_PAINT -> call DrawEdge() if HAS_3DFRAME (code below)
 //          OSLibWinCreateWindow: perhaps problems
 //    shouldn't we always use a frame? -> no problems with scrollbars
 
@@ -479,6 +479,13 @@ BOOL Win32BaseWindow::CreateWindowExA(CREATESTRUCTA *cs, ATOM classAtom)
                      rectClient.bottom-rectClient.top,
                      SWP_NOACTIVATE);
   }
+  //Subclass frame
+  if (dwStyle & WS_CHILD && HAS_3DFRAME(dwExStyle))
+  {
+    //CB: use a win32 window procedure and call DrawEdge() or
+    //    emulate DrawEdge() in a OS/2 procedure
+  }
+
   //Get the client window rectangle
   GetClientRect(Win32Hwnd, &rectClient);
 
@@ -1017,8 +1024,15 @@ ULONG Win32BaseWindow::MsgButton(ULONG msg, ULONG ncx, ULONG ncy, ULONG clx, ULO
                 win32ncmsg = WM_NCLBUTTONUP;
                 break;
         case BUTTON_LEFTDBLCLICK:
-                win32msg = WM_LBUTTONDBLCLK;
-                win32ncmsg = WM_NCLBUTTONDBLCLK;
+                if (windowClass->getClassLongA(GCL_STYLE) & CS_DBLCLKS)
+                {
+                  win32msg = WM_LBUTTONDBLCLK;
+                  win32ncmsg = WM_NCLBUTTONDBLCLK;
+                } else
+                {
+                  MsgButton(BUTTON_LEFTDOWN,ncx,ncy,clx,cly);
+                  return MsgButton(BUTTON_LEFTUP,ncx,ncy,clx,cly);
+                }
                 break;
         case BUTTON_RIGHTUP:
                 win32msg = WM_RBUTTONUP;
@@ -1029,8 +1043,15 @@ ULONG Win32BaseWindow::MsgButton(ULONG msg, ULONG ncx, ULONG ncy, ULONG clx, ULO
                 win32ncmsg = WM_NCRBUTTONDOWN;
                 break;
         case BUTTON_RIGHTDBLCLICK:
-                win32msg = WM_RBUTTONDBLCLK;
-                win32ncmsg = WM_NCRBUTTONDBLCLK;
+                if (windowClass->getClassLongA(GCL_STYLE) & CS_DBLCLKS)
+                {
+                  win32msg = WM_RBUTTONDBLCLK;
+                  win32ncmsg = WM_NCRBUTTONDBLCLK;
+                } else
+                {
+                  MsgButton(BUTTON_RIGHTDOWN,ncx,ncy,clx,cly);
+                  return MsgButton(BUTTON_RIGHTUP,ncx,ncy,clx,cly);
+                }
                 break;
         case BUTTON_MIDDLEUP:
                 win32msg = WM_MBUTTONUP;
@@ -1041,18 +1062,21 @@ ULONG Win32BaseWindow::MsgButton(ULONG msg, ULONG ncx, ULONG ncy, ULONG clx, ULO
                 win32ncmsg = WM_NCMBUTTONDOWN;
                 break;
         case BUTTON_MIDDLEDBLCLICK:
-                win32msg = WM_MBUTTONDBLCLK;
-                win32ncmsg = WM_NCMBUTTONDBLCLK;
+                if (windowClass->getClassLongA(GCL_STYLE) & CS_DBLCLKS)
+                {
+                  win32msg = WM_MBUTTONDBLCLK;
+                  win32ncmsg = WM_NCMBUTTONDBLCLK;
+                } else
+                {
+                  MsgButton(BUTTON_MIDDLEDOWN,ncx,ncy,clx,cly);
+                  return MsgButton(BUTTON_MIDDLEUP,ncx,ncy,clx,cly);
+                }
                 break;
         default:
                 dprintf(("Win32BaseWindow::Button: invalid msg!!!!"));
                 return 1;
     }
-    if(win32msg == WM_MBUTTONDBLCLK || win32msg == WM_RBUTTONDBLCLK || win32msg == WM_LBUTTONDBLCLK) {
-        if(!(windowClass->getClassLongA(GCL_STYLE) & CS_DBLCLKS)) {
-            return 1;
-        }
-    }
+
     SendInternalMessageA(WM_SETCURSOR, Win32Hwnd, MAKELONG(lastHitTestVal, win32ncmsg));
 
     //WM_NC*BUTTON* is posted when the cursor is in a non-client area of the window
