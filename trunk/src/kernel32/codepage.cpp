@@ -1,4 +1,5 @@
-/*
+/* $Id: codepage.cpp,v 1.4 2000-07-18 14:55:12 bird Exp $
+**
 ** Module   :CODEPAGE.CPP
 ** Abstract :
 **
