@@ -1,4 +1,4 @@
-/* $Id: dibitmap.cpp,v 1.8 2000-08-18 18:14:56 sandervl Exp $ */
+/* $Id: dibitmap.cpp,v 1.9 2000-09-01 01:36:14 phaller Exp $ */
 
 /*
  * GDI32 dib & bitmap code
@@ -28,22 +28,38 @@ HBITMAP WIN32API CreateDIBitmap(HDC hdc, const BITMAPINFOHEADER *lpbmih,
   int iHeight;
   HBITMAP rc;
 
-    //TEMPORARY HACK TO PREVENT CRASH IN OPEN32 (WSeB GA)
+  //TEMPORARY HACK TO PREVENT CRASH IN OPEN32 (WSeB GA)
 
-    iHeight = lpbmih->biHeight;
-    if(lpbmih->biHeight < 0)
-    {
-	dprintf(("GDI32: CreateDIBitmap negative height! (%d,%d)", lpbmih->biWidth, lpbmih->biHeight));
-      	((BITMAPINFOHEADER *)lpbmih)->biHeight = -lpbmih->biHeight;
-    }
+  iHeight = lpbmih->biHeight;
+  if(lpbmih->biHeight < 0)
+  {
+    dprintf(("GDI32: CreateDIBitmap negative height! (%d,%d)", lpbmih->biWidth, lpbmih->biHeight));
+    ((BITMAPINFOHEADER *)lpbmih)->biHeight = -lpbmih->biHeight;
+  }
 
-    rc = O32_CreateDIBitmap(hdc, lpbmih, fdwInit, lpbInit, lpbmi, fuUsage);
+  // 2000/09/01 PH Netscape 4.7
+  // If color depth of lpbhmi is 16 bit and lpbmi is 8 bit,
+  // Open32 will crash since it won't allocate any palette color memory,
+  // however wants to copy it later on ...
+  int biBitCount = lpbmih->biBitCount;
+  
+  if (lpbmih->biBitCount != lpbmi->bmiHeader.biBitCount)
+  {
+    dprintf(("GDI32: CreateDIBitmap: color depths of bitmaps differ! (%d,%d\n",
+             lpbmih->biBitCount,
+             lpbmi->bmiHeader.biBitCount));
+             
+    ((BITMAPINFOHEADER *)lpbmih)->biBitCount = lpbmi->bmiHeader.biBitCount;
+  }
 
-    dprintf(("GDI32: CreateDIBitmap %x %x %x %x returned %x", hdc, fdwInit, lpbInit, fuUsage, rc));
+  rc = O32_CreateDIBitmap(hdc, lpbmih, fdwInit, lpbInit, lpbmi, fuUsage);
 
-    ((BITMAPINFOHEADER *)lpbmih)->biHeight = iHeight;
+  dprintf(("GDI32: CreateDIBitmap %x %x %x %x returned %x", hdc, fdwInit, lpbInit, fuUsage, rc));
 
-    return rc;
+  ((BITMAPINFOHEADER *)lpbmih)->biHeight   = iHeight;
+  ((BITMAPINFOHEADER *)lpbmih)->biBitCount = biBitCount;
+
+  return rc;
 }
 //******************************************************************************
 //******************************************************************************

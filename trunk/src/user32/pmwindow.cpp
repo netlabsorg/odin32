@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.101 2000-08-30 13:55:28 sandervl Exp $ */
+/* $Id: pmwindow.cpp,v 1.102 2000-09-01 01:36:15 phaller Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -782,60 +782,85 @@ PosChangedEnd:
         if(win32wnd == NULL) {
                 return (MRESULT)rc;
         } 
-	if(usSetFocus) 
-	{
-  	  Win32BaseWindow *winfocus = Win32BaseWindow::GetWindowFromOS2Handle(hwndLoseFocus);
-	  if(!(fsFocusChange & FC_NOLOSEACTIVE)) {
-		if(!winfocus || (winfocus->GetTopParent() != win32wnd->GetTopParent())) {
-			if(winfocus) {
-				WinSendMsg(winfocus->GetTopParent()->getOS2WindowHandle(), WM_ACTIVATE, (MPARAM)0, (MPARAM)hwndGainFocus);
-			}
-			else	WinSendMsg(hwndLoseFocus, WM_ACTIVATE, (MPARAM)0, (MPARAM)hwndGainFocus);
-		}
-	  }
-          //SvL: Check if window is still valid
-          win32wnd = Win32BaseWindow::GetWindowFromOS2Handle(hwnd);
-          if(win32wnd == NULL) {
-                return (MRESULT)rc;
-          } 
-  	  if(!(fsFocusChange & FC_NOSETACTIVE)) 
-	  {
-	    	Win32BaseWindow *topparent = win32wnd->GetTopParent();
-		if(!winfocus || (winfocus->GetTopParent() != topparent)) 
-		{
-			if(!(fsFocusChange & FC_NOBRINGTOTOP)) 
-			{
-                		if(topparent) {
-                        		//put window at the top of z order
-	                        	WinSetWindowPos(topparent->getOS2WindowHandle(), HWND_TOP, 0, 0, 0, 0, SWP_ZORDER);
-	                	}
-			}
-			WinSendMsg(topparent->getOS2WindowHandle(), WM_ACTIVATE, (MPARAM)1, (MPARAM)hwndLoseFocus);
-		}
-	  }
-	}
-	else 
-	{
- 	  Win32BaseWindow *winfocus = Win32BaseWindow::GetWindowFromOS2Handle(hwndGainFocus);
-	  if(!(fsFocusChange & FC_NOLOSEACTIVE)) {
-		if(!winfocus || (winfocus->GetTopParent() != win32wnd->GetTopParent())) {
-			WinSendMsg(win32wnd->GetTopParent()->getOS2WindowHandle(), WM_ACTIVATE, (MPARAM)0, (MPARAM)hwndGainFocus);
-		}
-	  }
-          //SvL: Check if window is still valid
-          win32wnd = Win32BaseWindow::GetWindowFromOS2Handle(hwnd);
-          if(win32wnd == NULL) {
-                return (MRESULT)rc;
-          } 
-  	  if(!(fsFocusChange & FC_NOSETACTIVE)) {
-		if(!winfocus || (winfocus->GetTopParent() != win32wnd->GetTopParent())) {
-			if(winfocus) {
-				WinSendMsg(winfocus->GetTopParent()->getOS2WindowHandle(), WM_ACTIVATE, (MPARAM)1, (MPARAM)hwndLoseFocus);
-			}
-	       		else	WinSendMsg(hwndGainFocus, WM_ACTIVATE, (MPARAM)1, (MPARAM)hwndLoseFocus);
-		}
-	  }
-	}
+      
+      
+      if(usSetFocus)
+      {
+        Win32BaseWindow *winfocus = Win32BaseWindow::GetWindowFromOS2Handle(hwndLoseFocus);
+        if(!(fsFocusChange & FC_NOLOSEACTIVE))
+        {
+          if(!winfocus || (winfocus->GetTopParent() != win32wnd->GetTopParent())) 
+          {
+            if(winfocus)
+              WinSendMsg(winfocus->GetTopParent()->getOS2WindowHandle(), WM_ACTIVATE, (MPARAM)0, (MPARAM)hwndGainFocus);
+            else	
+              WinSendMsg(hwndLoseFocus, WM_ACTIVATE, (MPARAM)0, (MPARAM)hwndGainFocus);
+          }
+        }
+        //SvL: Check if window is still valid
+        win32wnd = Win32BaseWindow::GetWindowFromOS2Handle(hwnd);
+        if(win32wnd == NULL)
+          return (MRESULT)rc;
+
+        if(!(fsFocusChange & FC_NOSETACTIVE))
+        {
+          Win32BaseWindow *topparent = win32wnd->GetTopParent();
+          if(!winfocus || (winfocus->GetTopParent() != topparent))
+          {
+            if(!(fsFocusChange & FC_NOBRINGTOTOP))
+            {
+              if(topparent) {
+                //put window at the top of z order
+                WinSetWindowPos(topparent->getOS2WindowHandle(), HWND_TOP, 0, 0, 0, 0, SWP_ZORDER);
+              }
+            }
+
+            // PH 2000/09/01 Netscape 4.7
+            // check if topparent is valid
+            if (topparent)
+              WinSendMsg(topparent->getOS2WindowHandle(), WM_ACTIVATE, (MPARAM)1, (MPARAM)hwndLoseFocus);
+          }
+        }
+      }
+      else /* no usSetFocus */
+      {
+        Win32BaseWindow *winfocus = Win32BaseWindow::GetWindowFromOS2Handle(hwndGainFocus);
+        if(!(fsFocusChange & FC_NOLOSEACTIVE)) 
+        {
+          Win32BaseWindow *topparent = win32wnd->GetTopParent();
+          
+          if(!winfocus || (winfocus->GetTopParent() != topparent))
+          {
+            // PH 2000/09/01 Netscape 4.7
+            // check if topparent is valid
+            if (topparent)
+              WinSendMsg(topparent->getOS2WindowHandle(), WM_ACTIVATE, (MPARAM)0, (MPARAM)hwndGainFocus);
+          }
+        }
+        //SvL: Check if window is still valid
+        win32wnd = Win32BaseWindow::GetWindowFromOS2Handle(hwnd);
+        if(win32wnd == NULL)
+          return (MRESULT)rc;
+
+        if(!(fsFocusChange & FC_NOSETACTIVE)) 
+        {
+          if(!winfocus || (winfocus->GetTopParent() != win32wnd->GetTopParent())) 
+          {
+            if(winfocus)
+            {
+              // PH 2000/09/01 Netscape 4.7
+              // check if topparent is valid
+              Win32BaseWindow *topparent = winfocus->GetTopParent();
+              if (topparent)
+                WinSendMsg(topparent->getOS2WindowHandle(), WM_ACTIVATE, (MPARAM)1, (MPARAM)hwndLoseFocus);
+            }
+            else	
+              WinSendMsg(hwndGainFocus, WM_ACTIVATE, (MPARAM)1, (MPARAM)hwndLoseFocus);
+          }
+        }
+      }
+      
+      
 	//TODO: Don't send WM_SETSELECTION to child window if frame already has selection
 	if(!(fsFocusChange & FC_NOSETSELECTION)) {
        		WinSendMsg(hwndGainFocus, WM_SETSELECTION, (MPARAM)1, (MPARAM)0);
