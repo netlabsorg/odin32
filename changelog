@@ -1,4 +1,10 @@
-/* $Id: changelog,v 1.1927 2001-12-26 19:06:57 achimha Exp $ */
+/* $Id: changelog,v 1.1928 2001-12-30 10:43:07 sandervl Exp $ */
+
+ 2001-12-30: Sander van Leeuwen <sandervl@xs4all.nl>
+    - KERNEL32: o Fixed some wrong return values for disk functions (hmdisk)
+
+ 2001-12-28: Sander van Leeuwen <sandervl@xs4all.nl>
+    - USER32:   o Do not send WM_SETCURSOR when mouse is captured (SDK docs)
 
  2001-12-26: Achim Hasenmueller <achimha@innotek.de>
     - USER32:   o don't use hardcoded font height values for menu fonts. Query
