@@ -1,11 +1,9 @@
-/* $Id: lang.cpp,v 1.9 1999-06-29 17:23:47 sandervl Exp $ */
-
 /*
  * Win32 language API functions for OS/2
  *
  * Copyright 1998 Sander van Leeuwen
  * Copyright 1998 Patrick Haller
- *
+ * Copyright 1999 Przemyslaw Dobrowolski
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *
@@ -13,10 +11,10 @@
 #include <os2win.h>
 #include <winnls.h>
 #include <stdlib.h>
+#include <stdio.h>
 #include <string.h>
 #include <winos2def.h>
 #include "unicode.h"
-
 
 //******************************************************************************
 //******************************************************************************
@@ -53,180 +51,708 @@ LANGID WIN32API GetSystemDefaultLangID(void)
   dprintf(("KERNEL32:  OS2GetSystemDefaultLangID, always returns US English\n"));
   return(MAKELANGID(LANG_ENGLISH, SUBLANG_ENGLISH_US));
 }
-//******************************************************************************
-//******************************************************************************
+
+/*****************************************************************************
+ * Name      : DWORD GetLocaleInfoA
+ * Purpose   : The GetLocaleInfoA function returns specific locale information
+ * Parameters: LCID   lcid    locale identifier
+ *             LCTYPE LCType  type of information
+ *             LPSTR  buf     address of buffer for information
+ *             int    len     size of buffer
+ * Variables :
+ * Result    : size of target buffer
+ * Remark    : In this version LOCALE_SYSTEM_DEFAULT == LOCALE_USER_DEFAULT
+ *             look into GetLocaleInfoW
+ *
+ * Status    : TESTED
+ *
+ * Author    : Przemyslaw Dobrowolski [Tue, 1999/07/21 12:18]
+ *****************************************************************************/
 int WIN32API GetLocaleInfoA(LCID lcid, LCTYPE LCType, LPSTR buf, int len)
 {
-  COUNTRYCODE  Country    = {0};
-  COUNTRYINFO  CtryInfo   = {0};
-  ULONG        ulInfoLen  = 0;
+  LPWSTR lpWStr;
+  int    ret_len;
 
-  dprintf(("KERNEL32:  OS2GetLocaleInfoA: Not complete!\n"));
   if (len && (! buf) )
   {
     SetLastError(ERROR_INSUFFICIENT_BUFFER);
     return 0;
   }
 
-  // Only standard. TODO: Use os2.ini PM_National section
-  DosQueryCtryInfo(sizeof(CtryInfo), &Country, &CtryInfo, &ulInfoLen);
+  dprintf(("KERNEL32:  OS2GetLocaleInfoA lcID=%d,lcType=%x,buf=%X,len=%d\n",lcid,LCType,buf,len));
 
-  LCType &= ~(LOCALE_NOUSEROVERRIDE|LOCALE_USE_CP_ACP);
+  if (buf)
+    lpWStr=(LPWSTR)malloc(len*(sizeof(WCHAR)));
+  else
+    lpWStr=NULL; // Query for buffer size
 
-  switch(LCType)
+  ret_len=GetLocaleInfoW(lcid, LCType, lpWStr, len);
+
+  if (buf)
   {
-    case LOCALE_SDECIMAL:
-      if(buf) *buf = CtryInfo.szDecimal[0];
-      return 1;
-    case LOCALE_SDATE:
-      if(buf) *buf = CtryInfo.szDateSeparator[0];
-      return 1;
-    case LOCALE_STIME:
-      if(buf) *buf = CtryInfo.szTimeSeparator[0];
-      return 1;
-    case LOCALE_STHOUSAND:
-      if(buf) *buf = CtryInfo.szThousandsSeparator[0];
-      return 1;
-    case LOCALE_SCURRENCY:
-      if(len > strlen(CtryInfo.szCurrency))
-      {
-        strcpy(buf, CtryInfo.szCurrency);
-        return (strlen(buf) + 1);
-      }
-      else
-        break;
-    case LOCALE_SSHORTDATE:
-      if(CtryInfo.fsDateFmt == 0)
-      {
-        if(len > 8)
-        {
-          strcpy(buf, "MMXddXyy");
-          buf[2] = buf[5] = CtryInfo.szDateSeparator[0];
-          return 9;
-        }
-        else
-          break;
-      }
-      else if(CtryInfo.fsDateFmt == 1)
-      {
-        if(len > 8)
-        {
-          strcpy(buf, "ddXMMXyy");
-          buf[2] = buf[5] = CtryInfo.szDateSeparator[0];
-          return 9;
-        }
-        else
-          break;
-      }
-      else /* if(CtryInfo.fsDateFmt == 2) */
-      {
-        if(len > 8)
-        {
-          strcpy(buf, "yyXMMXdd");
-          buf[2] = buf[5] = CtryInfo.szDateSeparator[0];
-          return 9;
-        }
-        else
-          break;
-      }
-    case LOCALE_STIMEFORMAT:
-      if(CtryInfo.fsTimeFmt == 0)
-      {
-        if(len > 8)
-        {
-          strcpy(buf, "HHXmmXss");
-          buf[2] = buf[5] = CtryInfo.szTimeSeparator[0];
-          return 9;
-        }
-        else
-          break;
-      }
-      else /* if(CtryInfo.fsTimeFmt == 1) */
-      {
-        if(len > 8)
-        {
-          strcpy(buf, "HHXmmXss");
-          buf[2] = buf[5] = CtryInfo.szTimeSeparator[0];
-          return 9;
-        }
-        else
-          break;
-      }
-    case LOCALE_S1159:
-      if(CtryInfo.fsTimeFmt == 0)
-      {
-        if(len > 2)
-        {
-          strcpy(buf, "AM");
-          return 3;
-        }
-        else
-          break;
-      }
-      if(buf) *buf = 0;
-      return 1;
-    case LOCALE_S2359:
-      if(CtryInfo.fsTimeFmt == 0)
-      {
-        if(len > 2)
-        {
-          strcpy(buf, "PM");
-          return 3;
-        }
-        else
-          break;
-      }
-      if(buf) *buf = 0;
-      return 1;
-/***
-    LOCALE_SABBREVMONTHNAME11:
-    LOCALE_SABBREVMONTHNAME12:
-    LOCALE_SABBREVMONTHNAME13:
-    LOCALE_SPOSITIVESIGN:
-    LOCALE_SNEGATIVESIGN:
-    LOCALE_IPOSSIGNPOSN:
-    LOCALE_INEGSIGNPOSN:
-    LOCALE_IPOSSYMPRECEDES:
-    LOCALE_IPOSSEPBYSPACE:
-    LOCALE_INEGSYMPRECEDES:
-    LOCALE_INEGSEPBYSPACE:
-    LOCALE_FONTSIGNATURE:
-    LOCALE_SISO639LANGNAME:
-    LOCALE_SISO3166CTRYNAME:
-***/
-    default:
-      dprintf(("KERNEL32:  OS2GetLocaleInfoA: LCType %d not yet supported\n", LCType));
-      if(buf) *buf = '1';
-      return(1);
+    UnicodeToAscii(lpWStr,buf);
+    free(lpWStr);
   }
 
-  // a 'break' in 'switch(LCType)': buffer too small
-  SetLastError(ERROR_INSUFFICIENT_BUFFER);
-  return 0;
+  dprintf(("KERNEL32:  OS2GetLocaleInfoA returned %d\n",len));
 
+  return (ret_len);
 }
 //******************************************************************************
 //******************************************************************************
+static BOOL LocaleFromUniStr(LPWSTR lpUniStr, LPWSTR wbuf, ULONG *pLen)
+{
+  if (wbuf)
+  {
+    if (*pLen > UniStrlen(lpUniStr))
+      UniStrcpy(wbuf,lpUniStr);
+    else
+    {
+      SetLastError(ERROR_INSUFFICIENT_BUFFER);
+      *pLen=0;
+      return FALSE;
+    }
+  }
+
+  *pLen=UniStrlen(lpUniStr)+1; // + null terminator
+
+  return TRUE;
+}
+//******************************************************************************
+//******************************************************************************
+static BOOL LocaleFromUniChar(WCHAR wcUniChar, LPWSTR wbuf, ULONG *pLen)
+{
+  if (wbuf)
+  {
+    if (*pLen > sizeof(WCHAR))
+    {
+      wbuf[0]=(WCHAR)'0'+wcUniChar;
+      wbuf[1]=0;
+    }
+    else
+    {
+      SetLastError(ERROR_INSUFFICIENT_BUFFER);
+      *pLen=0;
+      return FALSE;
+    }
+  }
+
+  *pLen=2;
+
+  return TRUE;
+}
+
+/*****************************************************************************
+ * Name      : DWORD GetLocaleInfoW
+ * Purpose   : The GetLocaleInfoW function returns specific locale information
+ * Parameters: LCID   lcid    locale identifier
+ *             LCTYPE LCType  type of information
+ *             LPSTRW wbuf    address of buffer for information
+ *             int    len     size of buffer
+ * Variables :
+ * Result    : size of target buffer
+ * Remark    : In this version LOCALE_SYSTEM_DEFAULT == LOCALE_USER_DEFAULT
+ *
+ * LOCALE_STHOUSAND   - with some languages returns OS/2 separator not Windows!
+ * LOCALE_IMEASURE    - return '0' like English US
+ * LOCALE_INEGNUMBER  - return '1' like English US
+ * LOCALE_ICURRDIGITS - return '2' like English US
+ * LOCALE_IDATE are identical as LOCALE_ILDATE (must be fixed?)
+ * LOCALE_SGROUPING and
+ * LOCALE_SMONGROUPING are tested only with Polish & English languages
+ * LOCALE_SMONTHNAME13 and
+ * LOCALE_SABBERVMONTHNAME13 - returns empty string like English US
+ * LOCALE_FONTSIGNATURE - return empty string like English US
+ *
+ * Status    : FULLY TESTED
+ *
+ * Author    : Przemyslaw Dobrowolski [Tue, 1999/07/22 17:07]
+ *****************************************************************************/
 int WIN32API GetLocaleInfoW(LCID lcid, LCTYPE LCType, LPWSTR wbuf, int len)
 {
-  WORD wlen;
-  char *abuf;
+  LocaleObject    locale_object = NULL;
+  struct UniLconv *puni_lconv = NULL;
+  WCHAR           *pInfoItem;
+  int             rc;
+  COUNTRYCODE     Country    = {0};
+  COUNTRYINFO     CtryInfo   = {0};
+  ULONG           ulInfoLen  = 0;
 
-  dprintf(("KERNEL32:  OS2GetLocaleInfoW\n"));
+  dprintf(("KERNEL32:  OS2GetLocaleInfoW lcID=%d,lcType=%x,wbuf=%X,len=%d\n",lcid,LCType,wbuf,len));
+
   if (len && (! wbuf) )
   {
     SetLastError(ERROR_INSUFFICIENT_BUFFER);
     return 0;
   }
-  abuf = (char *) malloc(len);
-  wlen = GetLocaleInfoA(lcid, LCType, abuf, len);
 
-  if (wlen && len)  // no check of wbuf length !!
-    AsciiToUnicodeN(abuf, wbuf, wlen);
+  if (wbuf) *wbuf==0;
 
-  free(abuf);
-  return wlen;
+  rc=UniCreateLocaleObject(UNI_UCS_STRING_POINTER,(UniChar *)L"", &locale_object);
+
+  if ( rc == ULS_SUCCESS )
+  {
+    UniQueryLocaleInfo(locale_object, &puni_lconv);
+
+    DosQueryCtryInfo(sizeof(COUNTRYINFO), &Country, &CtryInfo, &ulInfoLen);
+
+    ulInfoLen = len; // Now we use this variable as returned length info
+
+    LCType &= ~(LOCALE_NOUSEROVERRIDE|LOCALE_USE_CP_ACP);
+
+    switch(LCType)
+    {
+      case LOCALE_SDECIMAL:
+        LocaleFromUniStr(puni_lconv->decimal_point,wbuf,&ulInfoLen);
+        break;
+
+      case LOCALE_IMEASURE: // Fixme!
+        // only like English US
+        LocaleFromUniChar(0,wbuf,&ulInfoLen);
+        break;
+
+      case LOCALE_INEGNUMBER: // Fixme!
+        // only like English US
+        LocaleFromUniChar(1,wbuf,&ulInfoLen);
+        break;
+
+      case LOCALE_ICURRDIGITS:// Fixme!
+        // only like English US
+        LocaleFromUniChar(2,wbuf,&ulInfoLen);
+        break;
+
+       case LOCALE_STHOUSAND:
+        LocaleFromUniStr(puni_lconv->thousands_sep,wbuf,&ulInfoLen);
+        break;
+
+      case LOCALE_SGROUPING: // tested only with Polish & English
+        if (wbuf)
+        {
+          if (puni_lconv->grouping)
+          {
+            if (len >= 3*sizeof(WCHAR))
+            {
+              wbuf[0]='0'+*puni_lconv->grouping;
+              wbuf[1]=(WCHAR)';';
+              wbuf[2]=(WCHAR)'0';
+              wbuf[3]=0;
+              ulInfoLen=4;
+            }
+            else
+            {
+              SetLastError(ERROR_INSUFFICIENT_BUFFER);
+              break;
+            }
+          }
+          else
+          {
+            wbuf[0]=20; // Windows return space!!
+            ulInfoLen=2;
+          }
+        }
+        else
+            ulInfoLen=2;
+        break;
+
+      case LOCALE_SMONGROUPING: // tested only with Polish & English
+        if (wbuf)
+        {
+          if (puni_lconv->mon_grouping)
+          {
+            if (len >= 3*sizeof(WCHAR))
+            {
+              wbuf[0]='0'+*puni_lconv->mon_grouping;
+              wbuf[1]=(WCHAR)';';
+              wbuf[2]=(WCHAR)'0';
+              wbuf[3]=0;
+              ulInfoLen=4;
+            }
+            else
+            {
+              SetLastError(ERROR_INSUFFICIENT_BUFFER);
+              break;
+            }
+          }
+          else
+          {
+            wbuf[0]=20; // Windows return space!!
+            ulInfoLen=2;
+          }
+        }
+        else
+            ulInfoLen=2;
+        break;
+
+
+      case LOCALE_SCURRENCY:
+        LocaleFromUniStr(puni_lconv->currency_symbol,wbuf,&ulInfoLen);
+        break;
+
+      case LOCALE_SMONDECIMALSEP:
+        LocaleFromUniStr(puni_lconv->mon_decimal_point,wbuf,&ulInfoLen);
+        break;
+
+      case LOCALE_SMONTHOUSANDSEP:
+        LocaleFromUniStr(puni_lconv->mon_thousands_sep,wbuf,&ulInfoLen);
+        break;
+
+      case LOCALE_SPOSITIVESIGN:
+        LocaleFromUniStr(puni_lconv->positive_sign,wbuf,&ulInfoLen);
+        break;
+
+      case LOCALE_SNEGATIVESIGN:
+        LocaleFromUniStr(puni_lconv->negative_sign,wbuf,&ulInfoLen);
+        break;
+
+      case LOCALE_IPOSSIGNPOSN:
+        LocaleFromUniChar(puni_lconv->p_sign_posn,wbuf,&ulInfoLen);
+        break;
+
+      case LOCALE_INEGSIGNPOSN:
+        LocaleFromUniChar(puni_lconv->n_sign_posn,wbuf,&ulInfoLen);
+        break;
+
+      case LOCALE_IPOSSYMPRECEDES:
+        LocaleFromUniChar(puni_lconv->p_cs_precedes,wbuf,&ulInfoLen);
+        break;
+
+      case LOCALE_IPOSSEPBYSPACE:
+        LocaleFromUniChar(puni_lconv->p_sep_by_space,wbuf,&ulInfoLen);
+        break;
+
+      case LOCALE_INEGSYMPRECEDES:
+        LocaleFromUniChar(puni_lconv->n_cs_precedes,wbuf,&ulInfoLen);
+        break;
+
+      case LOCALE_INEGSEPBYSPACE:
+        LocaleFromUniChar(puni_lconv->n_sep_by_space,wbuf,&ulInfoLen);
+        break;
+
+      case LOCALE_S1159:
+        UniQueryLocaleItem(locale_object, AM_STR,&pInfoItem);
+        LocaleFromUniStr(pInfoItem,wbuf,&ulInfoLen);
+        UniFreeMem(pInfoItem);
+        break;
+
+      case LOCALE_S2359:
+        UniQueryLocaleItem(locale_object, PM_STR,&pInfoItem);
+        LocaleFromUniStr(pInfoItem,wbuf,&ulInfoLen);
+        UniFreeMem(pInfoItem);
+        break;
+
+      case LOCALE_IDEFAULTLANGUAGE:
+      case LOCALE_ILANGUAGE:
+        UniQueryLocaleItem(locale_object, XWINLOCALE,&pInfoItem);
+        LocaleFromUniStr(pInfoItem,wbuf,&ulInfoLen);
+        UniFreeMem(pInfoItem);
+        break;
+
+      case LOCALE_INEGCURR:
+        UniQueryLocaleItem(locale_object, INEGCURR,&pInfoItem);
+        LocaleFromUniStr(pInfoItem,wbuf,&ulInfoLen);
+        UniFreeMem(pInfoItem);
+        break;
+
+      case LOCALE_ICURRENCY:
+        UniQueryLocaleItem(locale_object, ICURRENCY,&pInfoItem);
+        LocaleFromUniStr(pInfoItem,wbuf,&ulInfoLen);
+        UniFreeMem(pInfoItem);
+        break;
+
+
+
+      case LOCALE_SNATIVELANGNAME:
+      case LOCALE_SLANGUAGE:
+        UniQueryLocaleItem(locale_object, SLANGUAGE,&pInfoItem);
+        LocaleFromUniStr(pInfoItem,wbuf,&ulInfoLen);
+        UniFreeMem(pInfoItem);
+        break;
+
+      case LOCALE_SABBREVLANGNAME:
+        UniQueryLocaleItem(locale_object, SABBREVLANGNAME,&pInfoItem);
+        LocaleFromUniStr(pInfoItem,wbuf,&ulInfoLen);
+        UniFreeMem(pInfoItem);
+        break;
+
+      case LOCALE_IDEFAULTCOUNTRY:
+      case LOCALE_ICOUNTRY:
+        UniQueryLocaleItem(locale_object, ICOUNTRY,&pInfoItem);
+        LocaleFromUniStr(pInfoItem,wbuf,&ulInfoLen);
+        UniFreeMem(pInfoItem);
+        break;
+
+      case LOCALE_SENGLANGUAGE:
+        UniQueryLocaleItem(locale_object, SENGLANGUAGE,&pInfoItem);
+        LocaleFromUniStr(pInfoItem,wbuf,&ulInfoLen);
+        UniFreeMem(pInfoItem);
+        break;
+
+      case LOCALE_SENGCOUNTRY:
+      case LOCALE_SCOUNTRY:
+        UniQueryLocaleItem(locale_object, SENGCOUNTRYNAME,&pInfoItem);
+        LocaleFromUniStr(pInfoItem,wbuf,&ulInfoLen);
+        UniFreeMem(pInfoItem);
+        break;
+
+      case LOCALE_SABBREVCTRYNAME:
+        UniQueryLocaleItem(locale_object, SABBREVCTRYNAME,&pInfoItem);
+        LocaleFromUniStr(pInfoItem,wbuf,&ulInfoLen);
+        UniFreeMem(pInfoItem);
+        break;
+
+      case LOCALE_SNATIVECTRYNAME:
+        UniQueryLocaleItem(locale_object, SCOUNTRY,&pInfoItem);
+        LocaleFromUniStr(pInfoItem,wbuf,&ulInfoLen);
+        UniFreeMem(pInfoItem);
+        break;
+
+      case LOCALE_SNATIVEDIGITS:
+        UniQueryLocaleItem(locale_object, SNATIVEDIGITS,&pInfoItem);
+        LocaleFromUniStr(pInfoItem,wbuf,&ulInfoLen);
+        UniFreeMem(pInfoItem);
+        break;
+
+
+      case LOCALE_IDEFAULTCODEPAGE:
+        UniQueryLocaleItem(locale_object, ICODEPAGE,&pInfoItem);
+        LocaleFromUniStr(pInfoItem,wbuf,&ulInfoLen);
+        UniFreeMem(pInfoItem);
+        break;
+
+      case LOCALE_IDEFAULTANSICODEPAGE:
+        UniQueryLocaleItem(locale_object, IANSICODEPAGE,&pInfoItem);
+        LocaleFromUniStr(pInfoItem,wbuf,&ulInfoLen);
+        UniFreeMem(pInfoItem);
+        break;
+
+      case LOCALE_IDEFAULTMACCODEPAGE:
+        UniQueryLocaleItem(locale_object, IMACCODEPAGE,&pInfoItem);
+        LocaleFromUniStr(pInfoItem,wbuf,&ulInfoLen);
+        UniFreeMem(pInfoItem);
+        break;
+
+      case LOCALE_SLIST:
+        UniQueryLocaleItem(locale_object, LISTSEP,&pInfoItem);
+        LocaleFromUniStr(pInfoItem,wbuf,&ulInfoLen);
+        UniFreeMem(pInfoItem);
+        break;
+
+      case LOCALE_SINTLSYMBOL:
+        UniQueryLocaleItem(locale_object, SINTLSYMBOL,&pInfoItem);
+        LocaleFromUniStr(pInfoItem,wbuf,&ulInfoLen);
+        UniFreeMem(pInfoItem);
+        break;
+
+      case LOCALE_SDAYNAME7:
+        UniQueryLocaleItem(locale_object, DAY_1,&pInfoItem);
+        LocaleFromUniStr(pInfoItem,wbuf,&ulInfoLen);
+        UniFreeMem(pInfoItem);
+        break;
+
+      case LOCALE_SDAYNAME1:
+        UniQueryLocaleItem(locale_object, DAY_2,&pInfoItem);
+        LocaleFromUniStr(pInfoItem,wbuf,&ulInfoLen);
+        UniFreeMem(pInfoItem);
+        break;
+
+      case LOCALE_SDAYNAME2:
+        UniQueryLocaleItem(locale_object, DAY_3,&pInfoItem);
+        LocaleFromUniStr(pInfoItem,wbuf,&ulInfoLen);
+        UniFreeMem(pInfoItem);
+        break;
+
+      case LOCALE_SDAYNAME3:
+        UniQueryLocaleItem(locale_object, DAY_4,&pInfoItem);
+        LocaleFromUniStr(pInfoItem,wbuf,&ulInfoLen);
+        UniFreeMem(pInfoItem);
+        break;
+
+      case LOCALE_SDAYNAME4:
+        UniQueryLocaleItem(locale_object, DAY_5,&pInfoItem);
+        LocaleFromUniStr(pInfoItem,wbuf,&ulInfoLen);
+        UniFreeMem(pInfoItem);
+        break;
+
+      case LOCALE_SDAYNAME5:
+        UniQueryLocaleItem(locale_object, DAY_6,&pInfoItem);
+        LocaleFromUniStr(pInfoItem,wbuf,&ulInfoLen);
+        UniFreeMem(pInfoItem);
+        break;
+
+      case LOCALE_SDAYNAME6:
+        UniQueryLocaleItem(locale_object, DAY_7,&pInfoItem);
+        LocaleFromUniStr(pInfoItem,wbuf,&ulInfoLen);
+        UniFreeMem(pInfoItem);
+        break;
+
+      case LOCALE_SABBREVDAYNAME7:
+        UniQueryLocaleItem(locale_object, ABDAY_1,&pInfoItem);
+        LocaleFromUniStr(pInfoItem,wbuf,&ulInfoLen);
+        UniFreeMem(pInfoItem);
+        break;
+
+      case LOCALE_SABBREVDAYNAME1:
+        UniQueryLocaleItem(locale_object, ABDAY_2,&pInfoItem);
+        LocaleFromUniStr(pInfoItem,wbuf,&ulInfoLen);
+        UniFreeMem(pInfoItem);
+        break;
+
+      case LOCALE_SABBREVDAYNAME2:
+        UniQueryLocaleItem(locale_object, ABDAY_3,&pInfoItem);
+        LocaleFromUniStr(pInfoItem,wbuf,&ulInfoLen);
+        UniFreeMem(pInfoItem);
+        break;
+
+      case LOCALE_SABBREVDAYNAME3:
+        UniQueryLocaleItem(locale_object, ABDAY_4,&pInfoItem);
+        LocaleFromUniStr(pInfoItem,wbuf,&ulInfoLen);
+        UniFreeMem(pInfoItem);
+        break;
+
+      case LOCALE_SABBREVDAYNAME4:
+        UniQueryLocaleItem(locale_object, ABDAY_5,&pInfoItem);
+        LocaleFromUniStr(pInfoItem,wbuf,&ulInfoLen);
+        UniFreeMem(pInfoItem);
+        break;
+
+      case LOCALE_SABBREVDAYNAME5:
+        UniQueryLocaleItem(locale_object, ABDAY_6,&pInfoItem);
+        LocaleFromUniStr(pInfoItem,wbuf,&ulInfoLen);
+        UniFreeMem(pInfoItem);
+        break;
+
+      case LOCALE_SABBREVDAYNAME6:
+        UniQueryLocaleItem(locale_object, ABDAY_7,&pInfoItem);
+        LocaleFromUniStr(pInfoItem,wbuf,&ulInfoLen);
+        UniFreeMem(pInfoItem);
+        break;
+
+      case LOCALE_SMONTHNAME1:
+        UniQueryLocaleItem(locale_object, MON_1,&pInfoItem);
+        LocaleFromUniStr(pInfoItem,wbuf,&ulInfoLen);
+        UniFreeMem(pInfoItem);
+        break;
+
+      case LOCALE_SMONTHNAME2:
+        UniQueryLocaleItem(locale_object, MON_2,&pInfoItem);
+        LocaleFromUniStr(pInfoItem,wbuf,&ulInfoLen);
+        UniFreeMem(pInfoItem);
+        break;
+
+      case LOCALE_SMONTHNAME3:
+        UniQueryLocaleItem(locale_object, MON_3,&pInfoItem);
+        LocaleFromUniStr(pInfoItem,wbuf,&ulInfoLen);
+        UniFreeMem(pInfoItem);
+        break;
+
+      case LOCALE_SMONTHNAME4:
+        UniQueryLocaleItem(locale_object, MON_4,&pInfoItem);
+        LocaleFromUniStr(pInfoItem,wbuf,&ulInfoLen);
+        UniFreeMem(pInfoItem);
+        break;
+
+      case LOCALE_SMONTHNAME5:
+        UniQueryLocaleItem(locale_object, MON_5,&pInfoItem);
+        LocaleFromUniStr(pInfoItem,wbuf,&ulInfoLen);
+        UniFreeMem(pInfoItem);
+        break;
+
+      case LOCALE_SMONTHNAME6:
+        UniQueryLocaleItem(locale_object, MON_6,&pInfoItem);
+        LocaleFromUniStr(pInfoItem,wbuf,&ulInfoLen);
+        UniFreeMem(pInfoItem);
+        break;
+
+      case LOCALE_SMONTHNAME7:
+        UniQueryLocaleItem(locale_object, MON_7,&pInfoItem);
+        LocaleFromUniStr(pInfoItem,wbuf,&ulInfoLen);
+        UniFreeMem(pInfoItem);
+        break;
+
+      case LOCALE_SMONTHNAME8:
+        UniQueryLocaleItem(locale_object, MON_8,&pInfoItem);
+        LocaleFromUniStr(pInfoItem,wbuf,&ulInfoLen);
+        UniFreeMem(pInfoItem);
+        break;
+
+      case LOCALE_SMONTHNAME9:
+        UniQueryLocaleItem(locale_object, MON_9,&pInfoItem);
+        LocaleFromUniStr(pInfoItem,wbuf,&ulInfoLen);
+        UniFreeMem(pInfoItem);
+        break;
+
+      case LOCALE_SMONTHNAME10:
+        UniQueryLocaleItem(locale_object, MON_10,&pInfoItem);
+        LocaleFromUniStr(pInfoItem,wbuf,&ulInfoLen);
+        UniFreeMem(pInfoItem);
+        break;
+
+      case LOCALE_SMONTHNAME11:
+        UniQueryLocaleItem(locale_object, MON_11,&pInfoItem);
+        LocaleFromUniStr(pInfoItem,wbuf,&ulInfoLen);
+        UniFreeMem(pInfoItem);
+        break;
+
+      case LOCALE_SMONTHNAME12:
+        UniQueryLocaleItem(locale_object, MON_12,&pInfoItem);
+        LocaleFromUniStr(pInfoItem,wbuf,&ulInfoLen);
+        UniFreeMem(pInfoItem);
+        break;
+
+      case LOCALE_FONTSIGNATURE: // FixMe!!!
+      case LOCALE_SABBREVMONTHNAME13:
+      case LOCALE_SMONTHNAME13:
+        LocaleFromUniStr((LPWSTR)L"\0",wbuf,&ulInfoLen);
+        break;
+
+      case LOCALE_SABBREVMONTHNAME1:
+        UniQueryLocaleItem(locale_object, ABMON_1,&pInfoItem);
+        LocaleFromUniStr(pInfoItem,wbuf,&ulInfoLen);
+        UniFreeMem(pInfoItem);
+        break;
+
+      case LOCALE_SABBREVMONTHNAME2:
+        UniQueryLocaleItem(locale_object, ABMON_2,&pInfoItem);
+        LocaleFromUniStr(pInfoItem,wbuf,&ulInfoLen);
+        UniFreeMem(pInfoItem);
+        break;
+
+      case LOCALE_SABBREVMONTHNAME3:
+        UniQueryLocaleItem(locale_object, ABMON_3,&pInfoItem);
+        LocaleFromUniStr(pInfoItem,wbuf,&ulInfoLen);
+        UniFreeMem(pInfoItem);
+        break;
+
+      case LOCALE_SABBREVMONTHNAME4:
+        UniQueryLocaleItem(locale_object, ABMON_4,&pInfoItem);
+        LocaleFromUniStr(pInfoItem,wbuf,&ulInfoLen);
+        UniFreeMem(pInfoItem);
+        break;
+
+      case LOCALE_SABBREVMONTHNAME5:
+        UniQueryLocaleItem(locale_object, ABMON_5,&pInfoItem);
+        LocaleFromUniStr(pInfoItem,wbuf,&ulInfoLen);
+        UniFreeMem(pInfoItem);
+        break;
+
+      case LOCALE_SABBREVMONTHNAME6:
+        UniQueryLocaleItem(locale_object, ABMON_6,&pInfoItem);
+        LocaleFromUniStr(pInfoItem,wbuf,&ulInfoLen);
+        UniFreeMem(pInfoItem);
+        break;
+
+      case LOCALE_SABBREVMONTHNAME7:
+        UniQueryLocaleItem(locale_object, ABMON_7,&pInfoItem);
+        LocaleFromUniStr(pInfoItem,wbuf,&ulInfoLen);
+        UniFreeMem(pInfoItem);
+        break;
+
+      case LOCALE_SABBREVMONTHNAME8:
+        UniQueryLocaleItem(locale_object, ABMON_8,&pInfoItem);
+        LocaleFromUniStr(pInfoItem,wbuf,&ulInfoLen);
+        UniFreeMem(pInfoItem);
+        break;
+
+      case LOCALE_SABBREVMONTHNAME9:
+        UniQueryLocaleItem(locale_object, ABMON_9,&pInfoItem);
+        LocaleFromUniStr(pInfoItem,wbuf,&ulInfoLen);
+        UniFreeMem(pInfoItem);
+        break;
+
+      case LOCALE_SABBREVMONTHNAME10:
+        UniQueryLocaleItem(locale_object, ABMON_10,&pInfoItem);
+        LocaleFromUniStr(pInfoItem,wbuf,&ulInfoLen);
+        UniFreeMem(pInfoItem);
+        break;
+
+      case LOCALE_SABBREVMONTHNAME11:
+        UniQueryLocaleItem(locale_object, ABMON_11,&pInfoItem);
+        LocaleFromUniStr(pInfoItem,wbuf,&ulInfoLen);
+        UniFreeMem(pInfoItem);
+        break;
+
+      case LOCALE_SABBREVMONTHNAME12:
+        UniQueryLocaleItem(locale_object, ABMON_12,&pInfoItem);
+        LocaleFromUniStr(pInfoItem,wbuf,&ulInfoLen);
+        UniFreeMem(pInfoItem);
+        break;
+
+      case LOCALE_SDATE:
+        UniQueryLocaleItem(locale_object, DATESEP,&pInfoItem);
+        LocaleFromUniStr(pInfoItem,wbuf,&ulInfoLen);
+        UniFreeMem(pInfoItem);
+        break;
+
+    case LOCALE_STIME:
+        UniQueryLocaleItem(locale_object, TIMESEP,&pInfoItem);
+        LocaleFromUniStr(pInfoItem,wbuf,&ulInfoLen);
+        UniFreeMem(pInfoItem);
+        break;
+
+    case LOCALE_IDATE:
+    case LOCALE_ILDATE:
+        LocaleFromUniChar(CtryInfo.fsDateFmt,wbuf,&ulInfoLen);
+        break;
+
+      case LOCALE_ITIME:
+        UniQueryLocaleItem(locale_object, TIMESEP,&pInfoItem);
+        LocaleFromUniStr(pInfoItem,wbuf,&ulInfoLen);
+        UniFreeMem(pInfoItem);
+        break;
+
+      case LOCALE_SSHORTDATE:
+        UniQueryLocaleItem(locale_object, WSHORTDATE,&pInfoItem);
+        LocaleFromUniStr(pInfoItem,wbuf,&ulInfoLen);
+        UniFreeMem(pInfoItem);
+        break;
+
+      case LOCALE_SLONGDATE:
+        UniQueryLocaleItem(locale_object, WLONGDATE,&pInfoItem);
+        LocaleFromUniStr(pInfoItem,wbuf,&ulInfoLen);
+        UniFreeMem(pInfoItem);
+        break;
+
+
+      case LOCALE_STIMEFORMAT:
+        UniQueryLocaleItem(locale_object, WTIMEFORMAT,&pInfoItem);
+        LocaleFromUniStr(pInfoItem,wbuf,&ulInfoLen);
+        UniFreeMem(pInfoItem);
+        break;
+
+      case LOCALE_SISO639LANGNAME:
+        UniQueryLocaleItem(locale_object, SISO639LANGNAME,&pInfoItem);
+        LocaleFromUniStr(pInfoItem,wbuf,&ulInfoLen);
+        UniFreeMem(pInfoItem);
+        break;
+
+      case LOCALE_SISO3166CTRYNAME:
+        UniQueryLocaleItem(locale_object, SISO3166CTRYNAME,&pInfoItem);
+        LocaleFromUniStr(pInfoItem,wbuf,&ulInfoLen);
+        UniFreeMem(pInfoItem);
+        break;
+
+    default:
+      dprintf(("KERNEL32:  OS2GetLocaleInfoW: LCType %X not yet supported\n", LCType));
+      if (wbuf)
+      {
+        wbuf[0] = (WCHAR) '1';
+        wbuf[1] = 0;
+      }
+      ulInfoLen=2;
+      break;
+
+    }
+    UniFreeLocaleInfo(puni_lconv);
+    UniFreeLocaleObject(locale_object);
+  }
+  else
+    return (0);
+
+  dprintf(("KERNEL32:  OS2GetLocaleInfoW returned %d\n",ulInfoLen));
+
+  return (ulInfoLen);
 }
+
 //******************************************************************************
 //******************************************************************************
 BOOL WIN32API IsValidLocale(LCID Locale, DWORD dwFlags)
@@ -416,5 +942,3 @@ DWORD WIN32API VerLanguageNameW(UINT  idLang,
 
   return (0);
 }
-
-
