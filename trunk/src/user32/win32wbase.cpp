@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.171 2000-03-01 13:30:05 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.172 2000-03-16 19:19:10 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -854,30 +854,6 @@ ULONG Win32BaseWindow::MsgActivate(BOOL fActivate, BOOL fMinimized, HWND hwnd, H
     }
     else    SendInternalMessageA(WM_ACTIVATEAPP, 0, threadidhwnd);  //deactivate; specify thread id of other process
     return rc;
-}
-//******************************************************************************
-//TODO: Is this correct and complete?
-//Add print screen, break & numlock
-//******************************************************************************
-void Win32BaseWindow::setExtendedKey(ULONG virtualkey, ULONG *lParam)
-{
-    switch(virtualkey) {
-    case VK_LEFT:
-    case VK_RIGHT:
-    case VK_DOWN:
-    case VK_UP:
-    case VK_PRIOR:
-    case VK_NEXT:
-    case VK_END:
-    case VK_DIVIDE:
-    case VK_DELETE:
-    case VK_EXECUTE: //Numeric enter key?
-    case VK_HOME:
-    case VK_INSERT:
-    case VK_RCONTROL:
-    case VK_RMENU: //is this the right alt???
-        *lParam = *lParam | (1<<24);
-    }
 }
 //******************************************************************************
 //******************************************************************************

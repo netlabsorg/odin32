@@ -1,4 +1,4 @@
-/* $Id: oslibmsgtranslate.cpp,v 1.24 2000-03-14 15:01:00 sandervl Exp $ */
+/* $Id: oslibmsgtranslate.cpp,v 1.25 2000-03-16 19:19:09 sandervl Exp $ */
 /*
  * Window message translation functions for OS/2
  *
@@ -45,7 +45,7 @@ USHORT virtualKeyTable [66] = {
                0x08,    // VK_BACKSPACE     VK_BACK
                0x09,    // VK_TAB           VK_TAB
                0x00,    // VK_BACKTAB       No equivalent!
-               0x0A,    // VK_NEWLINE       0x0A (no VK_* def)
+               0x0D,    // VK_NEWLINE       VK_RETURN
                0x10,    // VK_SHIFT         VK_SHIFT
                0x11,    // VK_CTRL          VK_CONTROL
                0x12,    // VK_ALT           VK_MENU, best match I guess
@@ -607,7 +607,32 @@ VirtualKeyFound:
         winMsg->wParam  = virtualKey;
         winMsg->lParam  = repeatCount & 0x0FFFF;                 // bit 0-15, repeatcount
         winMsg->lParam |= (scanCode & 0x0FF) << 16;              // bit 16-23, scancode
-        win32wnd->setExtendedKey(virtualKey, (ULONG *)&winMsg->lParam);
+
+	//TODO: Is this correct and complete? (how does PM differentiate between
+        //      i.e numeric pad pgdn & 'normal' pgdn??)
+	//Check if it's an extended key
+    	switch(virtualKey) {
+    	case VK_RETURN_W:
+		//The enter key on the numeric keypad is an extended key
+		if(SHORT2FROMMP(os2Msg->mp2) != VK_NEWLINE)
+			break;
+		//no break
+    	case VK_LEFT_W:
+    	case VK_RIGHT_W:
+    	case VK_DOWN_W:
+    	case VK_UP_W:
+    	case VK_PRIOR_W:
+    	case VK_NEXT_W:
+    	case VK_END_W:
+    	case VK_DIVIDE_W:
+    	case VK_DELETE_W:
+    	case VK_HOME_W:
+    	case VK_INSERT_W:
+    	case VK_RCONTROL_W:
+    	case VK_RMENU_W: //is this the right alt???
+        	winMsg->lParam = winMsg->lParam | (1<<24);
+		break;
+    	}
 
         if(!(SHORT1FROMMP(os2Msg->mp1) & KC_ALT))
         {
