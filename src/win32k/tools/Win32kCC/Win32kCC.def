@@ -1,0 +1,4 @@
+; $Id: Win32kCC.def,v 1.1.2.1 2002-04-01 13:40:19 bird Exp $
+NAME Win32kCC WINDOWAPI
+DESCRIPTION 'Odin32 - Win32k Controll Center.'
+
