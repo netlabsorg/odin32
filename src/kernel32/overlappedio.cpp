@@ -1,4 +1,4 @@
-/* $Id: overlappedio.cpp,v 1.6 2001-12-07 11:28:11 sandervl Exp $ */
+/* $Id: overlappedio.cpp,v 1.7 2001-12-07 14:13:38 sandervl Exp $ */
 
 /*
  * Win32 overlapped IO class
@@ -35,7 +35,8 @@ OverlappedIOHandler::OverlappedIOHandler(LPOVERLAPPED_HANDLER lpReadHandler,
         throw(InvalidParameter);
     }
 
-    pending[ASYNC_INDEX_READ] = pending[ASYNC_INDEX_WRITE] = pending [ASYNC_INDEX_POLL] = NULL;
+    pending[ASYNC_INDEX_READ] = pending[ASYNC_INDEX_WRITE]  = NULL;
+    pending [ASYNC_INDEX_POLL] = pending [ASYNC_INDEX_BUSY] = NULL;
 
     this->lpReadHandler       = lpReadHandler;
     this->lpWriteHandler      = lpWriteHandler;
@@ -164,6 +165,8 @@ DWORD OverlappedIOHandler::threadHandler(DWORD dwOperation)
     LPASYNCIOREQUEST lpRequest;
     LPOVERLAPPED     lpOverlapped;
     HANDLE hEvents[2];
+    HANDLE hEventsWait[2];
+    HANDLE hHandle;
     DWORD  ret, dwTimeOut, dwResult;
     int    index;
 
@@ -195,10 +198,6 @@ DWORD OverlappedIOHandler::threadHandler(DWORD dwOperation)
             dprintf(("!WARNING!: WaitForMultipleObjects -> WAIT_FAILED!"));
             break;
         }
-        if(ret == WAIT_FAILED) {
-            dprintf(("!WARNING!: WaitForMultipleObjects -> WAIT_FAILED!"));
-            break;
-        }
         //if hEventExit has been signalled, then we are told to exit
         if(ret == (WAIT_OBJECT_0+1)) {
             dprintf(("end of threadHandler signalled"));
@@ -214,42 +213,53 @@ DWORD OverlappedIOHandler::threadHandler(DWORD dwOperation)
         }
         lpRequest       = pending[index];
         pending[index]  = lpRequest->next;
-        lpRequest->next = NULL;
+
+        //add to in process list
+        lpRequest->next = pending[ASYNC_INDEX_BUSY];
+        pending[ASYNC_INDEX_BUSY] = lpRequest;
         ::LeaveCriticalSection(&critsect);
 
         lpOverlapped = lpRequest->lpOverlapped;;
+        hHandle      = lpRequest->hHandle;
 
         switch(dwOperation) {
         case ASYNCIO_READ:
         case ASYNCIO_READWRITE:
-            lpReadHandler(lpRequest, &dwResult, NULL);
+            lpRequest->dwLastError = lpReadHandler(lpRequest, &dwResult, NULL);
             lpOverlapped->Internal     = lpRequest->dwLastError;
             lpOverlapped->InternalHigh = dwResult;
             if(lpRequest->lpdwResult) {
                 *lpRequest->lpdwResult = dwResult;
             }
+            if(lpRequest->dwAsyncType == ASYNCIO_READ) {
+                 dprintf(("ASYNCIO_READ %x finished; result %x, last error %d", lpOverlapped, dwResult, lpRequest->dwLastError));
+            }
+            else dprintf(("ASYNCIO_WRITE %x finished; result %x, last error %d", lpOverlapped, dwResult, lpRequest->dwLastError));
             //wake up user thread
             ::SetEvent(lpOverlapped->hEvent);
-            delete lpRequest;
             break;
 
         case ASYNCIO_WRITE:
-            lpWriteHandler(lpRequest, &dwResult, NULL);
+            lpRequest->dwLastError = lpWriteHandler(lpRequest, &dwResult, NULL);
             lpOverlapped->Internal     = lpRequest->dwLastError;
             lpOverlapped->InternalHigh = dwResult;
             if(lpRequest->lpdwResult) {
                 *lpRequest->lpdwResult = dwResult;
             }
+            dprintf(("ASYNCIO_WRITE %x finished; result %x, last error %d", lpOverlapped, dwResult, lpRequest->dwLastError));
             //wake up user thread
             ::SetEvent(lpOverlapped->hEvent);
-            delete lpRequest;
             break;
 
         case ASYNCIO_POLL:
+            hEventsWait[0] = lpRequest->hEventCancel;
+            hEventsWait[1] = hEventExit;
+            ret = WAIT_TIMEOUT;
             while(TRUE)
             {
                 dwTimeOut = 0;
-                if(lpPollHandler(lpRequest, &dwResult, &dwTimeOut) == TRUE) {
+                lpRequest->dwLastError = lpPollHandler(lpRequest, &dwResult, &dwTimeOut);
+                if(lpRequest->dwLastError != ERROR_IO_PENDING) {
                     break;
                 }
                 if(dwTimeOut == 0) {
@@ -257,18 +267,31 @@ DWORD OverlappedIOHandler::threadHandler(DWORD dwOperation)
                     DebugInt3();
                     break;
                 }
-                Sleep(dwTimeOut);
+                //sleep a while to avoid wasting too many cpu cycles; we are woken up when a timeout occurs,
+                //when the operation is cancelled or when the process exits
+                ret = WaitForMultipleObjects(2, hEventsWait, FALSE, dwTimeOut);
+                if(ret != WAIT_TIMEOUT) {
+                    dprintf(("ASYNCIO_POLL: WaitForSingleObject didn't time out, abort (ret = %x)", ret));
+                    break;
+                }
             }
-            lpOverlapped->Internal     = lpRequest->dwLastError;
-            lpOverlapped->InternalHigh = dwResult;
-            if(lpRequest->lpdwResult) {
-                *lpRequest->lpdwResult = dwResult;
+            //Don't access the overlapped & result memory when CancelIo was used to cancel the operation
+            if(ret == WAIT_TIMEOUT)
+            {
+                dprintf(("ASYNCIO_POLL %x: result %x, last error %d", lpOverlapped, dwResult, lpRequest->dwLastError));
+                lpOverlapped->Internal     = lpRequest->dwLastError;
+                lpOverlapped->InternalHigh = dwResult;
+                if(lpRequest->lpdwResult) {
+                    *lpRequest->lpdwResult = dwResult;
+                }
+                //wake up user thread
+                ::SetEvent(lpOverlapped->hEvent);
             }
-            //wake up user thread
-            ::SetEvent(lpOverlapped->hEvent);
-            delete lpRequest;
             break;
         }
+        //remove from in-process list and delete async request object
+        findAndRemoveRequest(ASYNC_INDEX_BUSY, hHandle);
+        delete lpRequest;
     }
     return 0;
 }
@@ -396,6 +419,7 @@ BOOL OverlappedIOHandler::ReadFile(HANDLE        hHandle,
 //******************************************************************************
 //******************************************************************************
 BOOL OverlappedIOHandler::WaitForEvent(HANDLE        hHandle,
+                                       DWORD         dwEventMask,
                                        LPDWORD       lpfdwEvtMask,
                                        LPOVERLAPPED  lpOverlapped,
                                        LPOVERLAPPED_COMPLETION_ROUTINE lpCompletionRoutine,
@@ -423,6 +447,7 @@ BOOL OverlappedIOHandler::WaitForEvent(HANDLE        hHandle,
     lpRequest->lpCompletionRoutine = lpCompletionRoutine;
     lpRequest->dwUserData          = dwUserData;
     lpRequest->dwTimeOut           = dwTimeOut;
+    lpRequest->dwEventMask         = dwEventMask;
     lpRequest->next                = NULL;
 
     ::EnterCriticalSection(&critsect);
@@ -458,8 +483,12 @@ BOOL OverlappedIOHandler::CancelIo(HANDLE hHandle)
     {
         while(TRUE) {
             lpRequest = findAndRemoveRequest(i, hHandle);
+
             if(lpRequest) {
-                 delete lpRequest;
+                 ::SetEvent(lpRequest->hEventCancel);   //cancel pending operation
+                 if(i != ASYNC_INDEX_BUSY) {//thread that handles the request will delete it
+                    delete lpRequest;
+                 }
             }
             else break;
         }
@@ -517,3 +546,4 @@ LPASYNCIOREQUEST OverlappedIOHandler::findAndRemoveRequest(int index, HANDLE hHa
 }
 //******************************************************************************
 //******************************************************************************
+
