@@ -1,4 +1,10 @@
-/* $Id: changelog,v 1.1903 2001-12-11 15:10:56 achimha Exp $ */
+/* $Id: changelog,v 1.1904 2001-12-11 17:34:03 sandervl Exp $ */
+
+ 2001-12-11: Sander van Leeuwen <sandervl@xs4all.nl>
+    - USER32:   o Swallow message if WH_KEYBOARD_LL hook returns TRUE
+                o Fixed windows key scancodes
+                o Do no generate a left control key message when Alt-Gr 
+                  is pressed (experimental change)
 
  2001-12-11: Patrick Haller <patrick.haller@innotek.de>
     - PMKBDHK:  o Interception of PM Window Hoteys (i. e. Alt-F7)
