@@ -1,15 +1,15 @@
-/* $Id: stubs.cpp,v 1.22 2002-11-12 17:06:03 sandervl Exp $ */
-/* 
+/* $Id: stubs.cpp,v 1.23 2004-01-30 22:11:42 bird Exp $ */
+/*
  * Win32 COM/OLE stubs for OS/2
- * 
+ *
  * 1/7/99
- * 
+ *
  * Copyright 1999 David J. Raison
  * Copyright 1998 Sander van Leeuwen
- * 
- * 
+ *
+ *
  * Project Odin Software License can be found in LICENSE.TXT
- * 
+ *
  */
 
 #include "ole32.h"
@@ -206,14 +206,6 @@ HRESULT WIN32API OleDoAutoConvert(IStorage *pStg, LPCLSID pClsidNew)
 {
     dprintf(("OLE32: OleDoAutoConvert - stub"));
     return(E_OUTOFMEMORY);
-}
-//*******************************************************************************
-//*******************************************************************************
-HRESULT WIN32API OleDraw(IUnknown *pUnk, DWORD dwAspect, HDC hdcDraw,
-                            LPCRECT lprcBounds)
-{
-    dprintf(("OLE32: OleDraw - stub"));
-    return(E_INVALIDARG);
 }
 //*******************************************************************************
 //*******************************************************************************
