@@ -1,4 +1,4 @@
-/* $Id: DSOUND.CPP,v 1.5 1999-10-23 23:00:49 sandervl Exp $ */
+/* $Id: DSOUND.CPP,v 1.6 1999-11-14 22:12:14 hugh Exp $ */
 
 /*
  * DirectSound exported APIs
@@ -32,14 +32,16 @@ HRESULT WIN32API OS2DirectSoundCreate(const GUID *lpGUID,
  HRESULT         rc;
 
   dprintf(("DirectSoundCreate %X %X %X\n", lpGUID, ppDS, pUnkOuter));
-  if(newsound == NULL)  return(DSERR_OUTOFMEMORY);
+  if(newsound == NULL)
+    return(DSERR_OUTOFMEMORY);
 
   rc = newsound->GetLastError();
   if(rc != DS_OK) {
     *ppDS = NULL;
     delete newsound;
   }
-  else  *ppDS = (LPDIRECTSOUND)newsound;
+  else
+    *ppDS = (LPDIRECTSOUND)newsound;
   return(rc);
 }
 //******************************************************************************
