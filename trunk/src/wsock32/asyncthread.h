@@ -1,4 +1,4 @@
-/* $Id: asyncthread.h,v 1.12 2002-02-23 16:39:09 sandervl Exp $ */
+/* $Id: asyncthread.h,v 1.13 2002-07-30 15:34:51 achimha Exp $ */
 
 /*
  * Async thread help functions
@@ -11,7 +11,7 @@
 #define __ASYNCTHREAD_H__
 
 #include <vmutex.h>
-#include <vsemaphore.h>
+#include "vsemaphore.h"
 
 #define	ASYNCCNV	_Optlink
 

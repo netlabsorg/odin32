@@ -1,4 +1,4 @@
-/* $Id: vsemaphore.cpp,v 1.1 2002-07-22 09:53:47 sandervl Exp $ */
+/* $Id: vsemaphore.cpp,v 1.2 2002-07-30 15:34:52 achimha Exp $ */
 
 /*
  * Semaphore class
@@ -18,7 +18,7 @@
 #define INCL_DOSSEMAPHORES
 #define INCL_DOSERRORS
 #include <os2wrap.h>	//Odin32 OS/2 api wrappers
-#include <VSemaphore.h>
+#include "vsemaphore.h"
 #include <win32type.h>
 #include <misc.h>
 
