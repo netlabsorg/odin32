@@ -1,4 +1,3 @@
-/* $Id: shlobj.h,v 1.8 2000-08-20 09:46:15 sandervl Exp $ */
 #ifndef __WINE_SHLOBJ_H
 #define __WINE_SHLOBJ_H
 
@@ -393,7 +392,7 @@ typedef struct
 #endif
 } SHELLFLAGSTATE, * LPSHELLFLAGSTATE;
 
-void WINAPI SHGetSettings(LPSHELLFLAGSTATE lpsfs, DWORD dwMask, DWORD dwx);
+void WINAPI SHGetSettings(LPSHELLFLAGSTATE lpsfs, DWORD dwMask);
 
 #define SSF_SHOWALLOBJECTS		0x0001
 #define SSF_SHOWEXTENSIONS		0x0002
