@@ -1,4 +1,4 @@
-/* $Id: treeview.cpp,v 1.10 2000-04-16 18:26:59 cbratschi Exp $ */
+/* $Id: treeview.cpp,v 1.11 2000-04-16 18:48:53 cbratschi Exp $ */
 /* Treeview control
  *
  * Copyright 1998 Eric Kohl <ekohl@abo.rhein-zeitung.de>
@@ -5277,4 +5277,3 @@ VOID TREEVIEW_Unregister (VOID)
 {
     UnregisterClassA (WC_TREEVIEWA, (HINSTANCE)NULL);
 }
-

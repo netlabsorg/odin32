@@ -1,4 +1,4 @@
-/* $Id: CCBase.h,v 1.9 2000-04-16 18:26:56 cbratschi Exp $ */
+/* $Id: CCBase.h,v 1.10 2000-04-16 18:52:38 cbratschi Exp $ */
 /*
  * COMCTL32 Base Functions and Macros for all Controls
  *
@@ -52,7 +52,7 @@ VOID drawStubControl(HWND hwnd,HDC hdc);
 INT lstrcmpAtoW(CHAR *textA,WCHAR *textW);
 INT lstrcmpAW(WCHAR *textA,BOOL textaunicode,WCHAR *textB,BOOL textbunicode);
 
-//read note in CCBase.cpp!
+//read note in CCBase.cpp!!
 INT lstrcmpniA(CHAR *textA,CHAR *textB,INT len);
 INT lstrcmpniAtoW(CHAR *textA,WCHAR* textB,INT len);
 INT lstrcmpniW(WCHAR *textA,WCHAR *textB,INT len);
