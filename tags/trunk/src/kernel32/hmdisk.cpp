@@ -1,4 +1,4 @@
-/* $Id: hmdisk.cpp,v 1.54 2002-09-27 13:42:48 sandervl Exp $ */
+/* $Id: hmdisk.cpp,v 1.55 2002-09-27 13:58:24 sandervl Exp $ */
 
 /*
  * Win32 Disk API functions for OS/2
@@ -24,6 +24,7 @@
 #include "osliblvm.h"
 #include "oslibcdio.h"
 #include "asmutil.h"
+#include <custombuild.h>
 
 #define DBG_LOCALLOG    DBG_hmdisk
 #include "dbglocal.h"
@@ -61,6 +62,16 @@ typedef struct
     CHAR      szVolumeName[256];
 } DRIVE_INFO;
 
+static BOOL fPhysicalDiskAccess = FALSE;
+
+//******************************************************************************
+//******************************************************************************
+void WIN32API EnablePhysicalDiskAccess(BOOL fEnable)
+{
+    fPhysicalDiskAccess = fEnable;
+}
+//******************************************************************************
+//******************************************************************************
 HMDeviceDiskClass::HMDeviceDiskClass(LPCSTR lpDeviceName) : HMDeviceKernelObjectClass(lpDeviceName)
 {
     HMDeviceRegisterEx("\\\\.\\PHYSICALDRIVE", this, NULL);
@@ -154,7 +165,7 @@ DWORD HMDeviceDiskClass::CreateFile (LPCSTR        lpFileName,
     {
         int length;
 
-        if(!VERSION_IS_WIN2000_OR_HIGHER()) {
+        if(!VERSION_IS_WIN2000_OR_HIGHER() || !fPhysicalDiskAccess) {
             return ERROR_FILE_NOT_FOUND;    //not allowed
         }
         if(OSLibLVMStripVolumeName(lpFileName, szVolumeName, sizeof(szVolumeName))) 
@@ -200,6 +211,10 @@ DWORD HMDeviceDiskClass::CreateFile (LPCSTR        lpFileName,
     else 
     if(strncmp(lpFileName, "\\\\.\\PHYSICALDRIVE", 17) == 0) 
     {
+        if(!fPhysicalDiskAccess) {
+            return ERROR_FILE_NOT_FOUND;    //not allowed
+        }
+
         //Note: this only works on Warp 4.5 and up
         sprintf(szDiskName, "\\\\.\\Physical_Disk%c", lpFileName[17]+1);
         fPhysicalDisk    = TRUE;
