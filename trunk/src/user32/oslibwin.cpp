@@ -1,4 +1,4 @@
-/* $Id: oslibwin.cpp,v 1.64 2000-01-26 18:02:34 cbratschi Exp $ */
+/* $Id: oslibwin.cpp,v 1.65 2000-01-29 20:46:52 sandervl Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -67,7 +67,6 @@ HWND OSLibWinCreateWindow(HWND hwndParent,ULONG dwWinStyle,
   }
   ULONG dwClientStyle = 0;
   ULONG dwFrameStyle = 0;
-#if 1
 
   BOOL TopLevel = hwndParent == HWND_DESKTOP;
 
@@ -99,27 +98,6 @@ HWND OSLibWinCreateWindow(HWND hwndParent,ULONG dwWinStyle,
   }
   dprintf(("OSLibWinCreateWindow: (FRAME) WinCreateStdWindow failed (%x)", WinGetLastError(GetThreadHAB())));
   return 0;
-#else
-        dwClientStyle = dwWinStyle & ~(WS_TABSTOP | WS_GROUP);
-
-        dwFrameStyle |= FCF_NOBYTEALIGN;
-        if ((hwndParent == HWND_DESKTOP) && (dwFrameStyle & FCF_TITLEBAR))
-                dwFrameStyle |= FCF_TASKLIST | FCF_NOMOVEWITHOWNER;
-
-        dwWinStyle   &= ~WS_CLIPCHILDREN;
-
-        *hwndFrame = WinCreateStdWindow(hwndParent, dwWinStyle,
-                                       &dwFrameStyle, WIN32_STDCLASS,
-                                       "", dwClientStyle, 0, id, &hwndClient);
-        if(*hwndFrame) {
-                if(pszName) {
-                        WinSetWindowText(*hwndFrame, pszName);
-                }
-                return hwndClient;
-        }
-        dprintf(("OSLibWinCreateWindow: (FRAME) WinCreateStdWindow failed (%x)", WinGetLastError(GetThreadHAB())));
-        return 0;
-#endif
 }
 //******************************************************************************
 //******************************************************************************
@@ -134,7 +112,7 @@ BOOL OSLibWinConvertStyle(ULONG dwStyle, ULONG *dwExStyle, ULONG *OSWinStyle, UL
   if(dwStyle & WS_MINIMIZE_W)
         *OSWinStyle |= WS_MINIMIZED;
 //Done explicitely in CreateWindowExA
-#if 1
+#if 0
   if(dwStyle & WS_VISIBLE_W)
         *OSWinStyle |= WS_VISIBLE;
 #endif

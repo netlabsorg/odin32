@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.148 2000-01-28 22:26:00 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.149 2000-01-29 20:46:52 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -2048,6 +2048,7 @@ BOOL Win32BaseWindow::SetWindowPos(HWND hwndInsertAfter, int x, int y, int cx, i
    BOOL rc = FALSE;
    Win32BaseWindow *window;
    HWND hParent = 0;
+   BOOL fShow = FALSE, fHide = FALSE;
 
     if (fuFlags &
        ~(SWP_NOSIZE     | SWP_NOMOVE     | SWP_NOZORDER     |
@@ -2085,6 +2086,15 @@ if (cy == 0)
 
 #endif
 
+    if(fuFlags & SWP_SHOWWINDOW) {
+        fShow = TRUE;
+        fuFlags &= ~SWP_SHOWWINDOW;
+    }
+    else
+    if(fuFlags & SWP_HIDEWINDOW) {
+        fHide = TRUE;
+        fuFlags &= ~SWP_HIDEWINDOW;
+    }
     wpos.flags            = fuFlags;
     wpos.cy               = cy;
     wpos.cx               = cx;
@@ -2131,7 +2141,14 @@ if (cy == 0)
 
     dprintf (("WinSetWindowPos %x %x (%d,%d)(%d,%d) %x", swp.hwnd, swp.hwndInsertBehind, swp.x, swp.y, swp.cx, swp.cy, swp.fl));
 
+    //SvL: For some reason WinSetMultWindowPos doesn't work for showing windows when they are hidden..
+    if(fHide) {
+        ShowWindow(SW_HIDE);
+    }
     rc = OSLibWinSetMultWindowPos(&swp, 1);
+    if(fShow) {
+        ShowWindow(SW_SHOWNA);
+    }
 
     if (rc == FALSE)
     {
