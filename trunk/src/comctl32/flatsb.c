@@ -1,3 +1,4 @@
+/* $Id: flatsb.c,v 1.3 1999-06-10 16:21:58 achimha Exp $ */
 /*
  * Flat Scrollbar control
  *

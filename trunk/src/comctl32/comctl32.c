@@ -1,3 +1,4 @@
+/* $Id: comctl32.c,v 1.5 1999-06-10 16:21:58 achimha Exp $ */
 /*
  * Win32 common controls implementation
  *

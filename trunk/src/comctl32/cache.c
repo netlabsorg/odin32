@@ -1,3 +1,4 @@
+/* $Id: cache.c,v 1.3 1999-06-10 16:21:57 achimha Exp $ */
 /*
  * Wine internally cached objects to speedup some things and prevent 
  * infinite duplication of trivial code and data. 

@@ -1,3 +1,4 @@
+/* $Id: obj_oleobj.h,v 1.3 1999-06-10 16:21:55 achimha Exp $ */
 /*
  * Defines IOleObject COM and other oleidl.h interfaces
  * 

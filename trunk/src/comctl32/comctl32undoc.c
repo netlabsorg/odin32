@@ -1,3 +1,4 @@
+/* $Id: comctl32undoc.c,v 1.6 1999-06-10 16:21:58 achimha Exp $ */
 /*
  * Undocumented functions from COMCTL32.DLL
  *

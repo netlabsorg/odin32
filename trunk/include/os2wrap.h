@@ -1,3 +1,4 @@
+/* $Id: os2wrap.h,v 1.2 1999-06-10 16:21:48 achimha Exp $ */
 #ifndef __OS2WRAP_H__
 #define __OS2WRAP_H__
 

@@ -1,3 +1,4 @@
+# $Id: pdwin32.mk,v 1.4 1999-06-10 16:21:50 achimha Exp $
 #
 # PD-Win32 Project
 #
