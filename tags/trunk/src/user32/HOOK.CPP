@@ -1,4 +1,4 @@
-/* $Id: HOOK.CPP,v 1.39 2003-01-03 16:35:50 sandervl Exp $ */
+/* $Id: HOOK.CPP,v 1.40 2004-11-23 16:58:29 sao2l02 Exp $ */
 
 /*
  * Windows hook functions

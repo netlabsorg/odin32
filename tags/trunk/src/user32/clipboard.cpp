@@ -1,4 +1,4 @@
-/* $Id: clipboard.cpp,v 1.19 2004-05-03 12:09:00 sandervl Exp $ */
+/* $Id: clipboard.cpp,v 1.20 2004-11-23 16:53:59 sao2l02 Exp $ */
 
 /*
  * Win32 Clipboard API functions for OS/2
@@ -1913,8 +1913,39 @@ HANDLE WIN32API GetClipboardData(UINT uFormat)
     ULONG   ulPMData = OSLibWinQueryClipbrdData(hab, ulPMFormat);
     if (!ulPMData)
     {
+        if (uFormat == CF_UNICODETEXT) for (;;) {
+// I know not where the conversion should done, I will try this here. (DT)
+// If not, any riched20.dll supported progamm can never send CF_TEXT via clipboard to UNICODE-Programms eg. NotePad(32).exe.
+// the CF_UNICODETEXT is only available after closing Window/application.
+// with the wgss50.dll O32_GetClipBoardData (before 20040414) we had this problem never. 
+          HANDLE hMem = GetClipboardData(CF_TEXT);
+          if (!hMem)
+             break;
+          dbgDumpClipboardData("GetClipboardData Source", CF_TEXT, hMem);
+          const void *pv = GlobalLock(hMem);
+          if (!pv)
+             break;
+          unsigned cb = strlen((char*)pv) + 1;
+          unsigned cbRet = cb * sizeof(WCHAR);
+            /*
+             * Allocate memory.
+             */
+          PCLIPLOCALDATA pLocalClip;
+          HANDLE hRet = clipboardCacheAllocGlobalAlloc(uFormat, cbRet, &pLocalClip);
+          if (hRet)
+          {
+             void * pvRet = GlobalLock(hRet);
+             unsigned uCp = clipboardGetCodepage(uFormat == CF_TEXT ? LOCALE_IDEFAULTANSICODEPAGE : LOCALE_IDEFAULTCODEPAGE);
+             MultiByteToWideChar(uCp, MB_PRECOMPOSED, (LPCSTR)pv, cb, (LPWSTR)pvRet, cbRet / sizeof(WCHAR));
+             GlobalUnlock(hRet);
+             hRet = clipboardCacheInsertNode(pLocalClip);
+             dbgDumpClipboardData("GetClipboardData After Convert", uFormat, hRet);
+          }
+          GlobalUnlock(hMem);
+          return hRet;
+        }
         //no last error?
-        dprintf(("USER32: GetClipboardData: returns NULL (format not present)\n"));
+        dprintf(("USER32: GetClipboardData: returns NULL (data not present)\n"));
         return NULL;
     }
 
