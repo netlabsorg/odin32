@@ -1,4 +1,4 @@
-/* $Id: os2wrap.h,v 1.10 1999-11-26 00:04:30 sandervl Exp $ */
+/* $Id: os2wrap.h,v 1.11 1999-12-13 14:31:12 achimha Exp $ */
 #ifndef __OS2WRAP_H__
 #define __OS2WRAP_H__
 
@@ -1948,6 +1948,9 @@ inline ULONG _DosQueryNPipeSemState(HSEM a, PPIPESEMSTATE b, ULONG c)
 #undef  DosQueryNPipeSemState
 #define DosQueryNPipeSemState _DosQueryNPipeSemState
 
+//AH: Different definition in 4.5 toolkit headers!!!
+//we don't need it so far, so let's just remove it for now
+#ifdef 0
 inline ULONG _DosRawReadNPipe(PCSZ a, ULONG b, PULONG c, PVOID d)
 {
  ULONG yyrc;
@@ -1961,6 +1964,7 @@ inline ULONG _DosRawReadNPipe(PCSZ a, ULONG b, PULONG c, PVOID d)
 
 #undef  DosRawReadNPipe
 #define DosRawReadNPipe _DosRawReadNPipe
+#endif
 
 inline ULONG _DosRawWriteNPipe(PCSZ a, ULONG b)
 {
