@@ -1,4 +1,4 @@
-/* $Id: oslibmisc.cpp,v 1.17 2003-01-20 10:46:28 sandervl Exp $ */
+/* $Id: oslibmisc.cpp,v 1.18 2003-03-03 16:38:20 sandervl Exp $ */
 /*
  * Misc OS/2 util. procedures
  *
@@ -13,6 +13,7 @@
 #define INCL_WIN
 #define INCL_BASE
 #define INCL_DOSPROCESS
+#define INCL_DOSERRORS
 #define INCL_DOSSEL
 #define INCL_DOSNLS        /* National Language Support values */
 #include <os2wrap.h>	//Odin32 OS/2 api wrappers
@@ -328,6 +329,12 @@ ULONG OSLibQueryCountry()
         return -1;
     }
     return CtryInfo.country;
+}
+//******************************************************************************
+//******************************************************************************
+BOOL OSLibDisablePopups()
+{
+   return DosError(FERR_DISABLEEXCEPTION | FERR_DISABLEHARDERR) == NO_ERROR;   
 }
 //******************************************************************************
 //******************************************************************************
