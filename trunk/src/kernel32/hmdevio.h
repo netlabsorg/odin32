@@ -1,7 +1,15 @@
-/* $Id: devio.h,v 1.3 1999-06-10 19:11:30 phaller Exp $ */
+/* $Id: hmdevio.h,v 1.1 1999-11-12 14:57:15 sandervl Exp $ */
 
 #ifndef __DEVIO_H__
 #define __DEVIO_H__
+
+/*****************************************************************************
+ * Includes                                                                  *
+ *****************************************************************************/
+
+#include <handlemanager.h>
+#include "HMDevice.h"
+#include "HMObjects.h"
 
 #ifndef _OS2WIN_H
 #define GENERIC_READ                 0x80000000
@@ -44,27 +52,6 @@ typedef struct  _GENPORT_WRITE_INPUT {
         UCHAR   CharData;
     };
 }   GENPORT_WRITE_INPUT;
-
-typedef struct _tagOVERLAPPED {
-    DWORD    Internal;
-    DWORD    InternalHigh;
-    DWORD    Offset;
-    DWORD    OffsetHigh;
-    HANDLE   hEvent;
-} OVERLAPPED, *POVERLAPPED, *LPOVERLAPPED;
-
-typedef BOOL (* WINIOCTL)(HANDLE hDevice, DWORD dwIoControlCode,
-              LPVOID lpInBuffer, DWORD nInBufferSize,
-              LPVOID lpOutBuffer, DWORD nOutBufferSize,
-              LPDWORD lpBytesReturned, LPOVERLAPPED lpOverlapped);
-
-typedef struct {
-    char     szWin32Name[32];
-    char     szOS2Name[32];
-    BOOL     fCreateFile;
-    DWORD    hDevice;
-    WINIOCTL devIOCtl;
-} WIN32DRV;
 
 typedef enum _INTERFACE_TYPE {
     InterfaceTypeUndefined = -1,
@@ -110,15 +97,48 @@ typedef struct _MapDevRequest
 
 #endif
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+typedef BOOL (* WINIOCTL)(HANDLE hDevice, DWORD dwIoControlCode,
+              LPVOID lpInBuffer, DWORD nInBufferSize,
+              LPVOID lpOutBuffer, DWORD nOutBufferSize,
+              LPDWORD lpBytesReturned, LPOVERLAPPED lpOverlapped);
 
-HANDLE OS2CreateFile(char *szName, DWORD fdwAccess, DWORD fdwShareMode);
-void   OS2CloseFile(HANDLE hDevice);
+typedef struct {
+    char     szWin32Name[32];
+    char     szOS2Name[32];
+    BOOL     fCreateFile;
+    DWORD    hDevice;
+    WINIOCTL devIOCtl;
+} WIN32DRV;
 
-#ifdef __cplusplus
-}
-#endif
+/*****************************************************************************
+ * Structures                                                                *
+ *****************************************************************************/
+
+class HMDeviceDriver : public HMDeviceKernelObjectClass
+{
+public:
+  HMDeviceDriver(LPCSTR lpDeviceName, LPSTR lpOS2DevName, BOOL fCreate, WINIOCTL pDevIOCtl);
+
+                       /* this is a handler method for calls to CreateFile() */
+  virtual DWORD  CreateFile (LPCSTR        lpFileName,
+                             PHMHANDLEDATA pHMHandleData,
+                             PVOID         lpSecurityAttributes,
+                             PHMHANDLEDATA pHMHandleDataTemplate);
+
+  virtual DWORD  CloseHandle(PHMHANDLEDATA pHMHandleData);
+
+                    /* this is a handler method for calls to DeviceIoControl() */
+  virtual BOOL   DeviceIoControl    (PHMHANDLEDATA pHMHandleData, DWORD dwIoControlCode,
+                                     LPVOID lpInBuffer, DWORD nInBufferSize,
+                                     LPVOID lpOutBuffer, DWORD nOutBufferSize,
+                                     LPDWORD lpBytesReturned, LPOVERLAPPED lpOverlapped);
+private:
+  BOOL     fCreateFile;
+  LPSTR    szOS2Name;
+  WINIOCTL devIOCtl;
+};
+
+void  RegisterDevices();
+
 
 #endif

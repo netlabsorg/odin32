@@ -1,4 +1,4 @@
-/* $Id: Fileio.cpp,v 1.14 1999-11-08 13:43:11 sandervl Exp $ */
+/* $Id: Fileio.cpp,v 1.15 1999-11-12 14:57:12 sandervl Exp $ */
 
 /*
  * Win32 File IO API functions for OS/2
@@ -26,7 +26,6 @@
 #include "unicode.h"
 #include <heapstring.h>
 #include "handlemanager.h"
-#include "devio.h"
 #include "oslibdos.h"
 
 ODINDEBUGCHANNEL(KERNEL32-FILEIO)
