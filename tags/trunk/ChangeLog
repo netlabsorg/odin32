@@ -1,4 +1,7 @@
-/* $Id: ChangeLog,v 1.2469 2003-02-06 10:29:47 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.2470 2003-02-06 12:03:36 sandervl Exp $ */
+
+ 2002-02-06: Dietrich Teickner <Dietrich_Teickner@t-online   >
+    - USER32:   o Edit control: fixed heap corruption in undo buffer
 
  2003-02-06: Sander van Leeuwen <sandervl@innotek   >
     - ODINCRT:  o Rewrote critical sections to be safe on SMP systems
