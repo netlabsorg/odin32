@@ -1,4 +1,4 @@
-/* $Id: gdi32.cpp,v 1.64 2000-12-29 18:40:44 sandervl Exp $ */
+/* $Id: gdi32.cpp,v 1.65 2001-01-18 18:13:17 sandervl Exp $ */
 
 /*
  * GDI32 apis
@@ -192,17 +192,17 @@ ODINFUNCTION1(BOOL, DeleteDC, HDC, hdc)
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API StrokeAndFillPath( HDC arg1)
+BOOL WIN32API StrokeAndFillPath(HDC hdc)
 {
-    dprintf(("GDI32: StrokeAndFillPath\n"));
-    return O32_StrokeAndFillPath(arg1);
+    dprintf(("GDI32: StrokeAndFillPath %x", hdc));
+    return O32_StrokeAndFillPath(hdc);
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API StrokePath( HDC arg1)
+BOOL WIN32API StrokePath(HDC hdc)
 {
-    dprintf(("GDI32: StrokePath\n"));
-    return O32_StrokePath(arg1);
+    dprintf(("GDI32: StrokePath %x", hdc));
+    return O32_StrokePath(hdc);
 }
 //******************************************************************************
 //******************************************************************************
@@ -241,24 +241,28 @@ BOOL WIN32API SetPixelV(HDC arg1, int arg2, int arg3, COLORREF  arg4)
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API GetDCOrgEx(HDC arg1, PPOINT arg2)
+BOOL WIN32API GetDCOrgEx(HDC hdc, PPOINT lpPoint)
 {
-    dprintf(("GDI32: GetDCOrgEx\n"));
-    return O32_GetDCOrgEx(arg1, arg2);
+    if(lpPoint == NULL) {
+        dprintf(("WARNING: GDI32: GetDCOrgEx %x NULL", hdc));
+        return FALSE;
+    }
+    dprintf(("GDI32: GetDCOrgEx %x (%d,%d)", hdc, lpPoint));
+    return O32_GetDCOrgEx(hdc, lpPoint);
 }
 //******************************************************************************
 //******************************************************************************
-int WIN32API AbortDoc( HDC arg1)
+int WIN32API AbortDoc(HDC hdc)
 {
-    dprintf(("GDI32: AbortDoc"));
-    return O32_AbortDoc(arg1);
+    dprintf(("GDI32: AbortDoc %x", hdc));
+    return O32_AbortDoc(hdc);
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API AbortPath( HDC arg1)
+BOOL WIN32API AbortPath(HDC hdc)
 {
-    dprintf(("GDI32: AbortPath"));
-    return O32_AbortPath(arg1);
+    dprintf(("GDI32: AbortPath %x", hdc));
+    return O32_AbortPath(hdc);
 }
 //******************************************************************************
 //******************************************************************************
@@ -283,10 +287,10 @@ BOOL WIN32API ArcTo( HDC arg1, int arg2, int arg3, int arg4, int arg5, int  arg6
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API BeginPath( HDC arg1)
+BOOL WIN32API BeginPath(HDC hdc)
 {
-    dprintf(("GDI32: BeginPath"));
-    return O32_BeginPath(arg1);
+    dprintf(("GDI32: BeginPath $x", hdc));
+    return O32_BeginPath(hdc);
 }
 //******************************************************************************
 //******************************************************************************
@@ -297,17 +301,20 @@ BOOL WIN32API Chord( HDC arg1, int arg2, int arg3, int arg4, int arg5, int  arg6
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API CloseFigure( HDC arg1)
+BOOL WIN32API CloseFigure(HDC hdc)
 {
-    dprintf(("GDI32: CloseFigure"));
-    return O32_CloseFigure(arg1);
+    dprintf(("GDI32: CloseFigure %x", hdc));
+    return O32_CloseFigure(hdc);
 }
 //******************************************************************************
 //******************************************************************************
-HBRUSH WIN32API CreateBrushIndirect( const LOGBRUSH * arg1)
+HBRUSH WIN32API CreateBrushIndirect( const LOGBRUSH *pLogBrush)
 {
-    dprintf(("GDI32: CreateBrushIndirect"));
-    return O32_CreateBrushIndirect((LPLOGBRUSH)arg1);
+ HBRUSH hBrush;
+
+    hBrush = O32_CreateBrushIndirect((LPLOGBRUSH)pLogBrush);
+    dprintf(("GDI32: CreateBrushIndirect %x %x %x returned %x", pLogBrush->lbStyle, pLogBrush->lbColor, pLogBrush->lbHatch, hBrush));
+    return hBrush;
 }
 //******************************************************************************
 //******************************************************************************
@@ -504,31 +511,32 @@ BOOL WIN32API DPtoLP( HDC arg1, PPOINT arg2, int  arg3)
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API Ellipse( HDC arg1, int arg2, int arg3, int arg4, int  arg5)
+BOOL WIN32API Ellipse(HDC hdc, int nLeftRect, int nTopRect, int nRightRect,
+                      int nBottomRect)
 {
-    dprintf(("GDI32: Ellipse"));
-    return O32_Ellipse(arg1, arg2, arg3, arg4, arg5);
+    dprintf(("GDI32: Ellipse %x (%d,%d)(%d,%d)", nLeftRect, nTopRect, nRightRect, nBottomRect));
+    return O32_Ellipse(hdc, nLeftRect, nTopRect, nRightRect, nBottomRect);
 }
 //******************************************************************************
 //******************************************************************************
-int WIN32API EndDoc( HDC arg1)
+int WIN32API EndDoc( HDC hdc)
 {
-    dprintf(("GDI32: EndDoc"));
-    return O32_EndDoc(arg1);
+    dprintf(("GDI32: EndDoc %x", hdc));
+    return O32_EndDoc(hdc);
 }
 //******************************************************************************
 //******************************************************************************
-int WIN32API EndPage( HDC arg1)
+int WIN32API EndPage( HDC hdc)
 {
-    dprintf(("GDI32: EndPage"));
-    return O32_EndPage(arg1);
+    dprintf(("GDI32: EndPage %x", hdc));
+    return O32_EndPage(hdc);
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API EndPath( HDC arg1)
+BOOL WIN32API EndPath( HDC hdc)
 {
-    dprintf(("GDI32: EndPath"));
-    return O32_EndPath(arg1);
+    dprintf(("GDI32: EndPath %x", hdc));
+    return O32_EndPath(hdc);
 }
 //******************************************************************************
 //******************************************************************************
@@ -701,17 +709,23 @@ BOOL WIN32API GetAspectRatioFilterEx( HDC arg1, PSIZE  arg2)
 }
 //******************************************************************************
 //******************************************************************************
-COLORREF WIN32API GetBkColor( HDC arg1)
+COLORREF WIN32API GetBkColor(HDC hdc)
 {
-    dprintf(("GDI32: GetBkColor"));
-    return O32_GetBkColor(arg1);
+ COLORREF color;
+
+    color = O32_GetBkColor(hdc);
+    dprintf(("GDI32: GetBkColor %x returned %x", hdc, color));
+    return color;
 }
 //******************************************************************************
 //******************************************************************************
-int WIN32API GetBkMode( HDC arg1)
+int WIN32API GetBkMode(HDC hdc)
 {
-    dprintf(("GDI32: GetBkMode"));
-    return O32_GetBkMode(arg1);
+ int bkmode;
+
+    bkmode = O32_GetBkMode(hdc);
+    dprintf(("GDI32: GetBkMode %x returned %d", hdc, bkmode));
+    return bkmode;
 }
 //******************************************************************************
 //******************************************************************************
@@ -780,10 +794,14 @@ HANDLE WIN32API GetCurrentObject( HDC hdc, UINT arg2)
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API GetCurrentPositionEx( HDC arg1, PPOINT  arg2)
+BOOL WIN32API GetCurrentPositionEx( HDC hdc, PPOINT lpPoint)
 {
-    dprintf(("GDI32: GetCurrentPositionEx"));
-    return O32_GetCurrentPositionEx(arg1, arg2);
+ BOOL rc;
+
+    dprintf(("GDI32: GetCurrentPositionEx %x", hdc));
+    rc = O32_GetCurrentPositionEx(hdc, lpPoint);
+    dprintf(("GDI32: GetCurrentPositionEx returned %d (%d,%d)", rc, lpPoint->x, lpPoint->y));
+    return rc;
 }
 //******************************************************************************
 //******************************************************************************
@@ -969,7 +987,9 @@ BOOL WIN32API Pie(HDC hdc, int nLeftRect, int nTopRect, int nRightRect,
                   int nBottomRect, int nXRadial1, int nYRadial1, int nXRadial2,
                   int nYRadial2)
 {
-    dprintf(("GDI32: Pie"));
+    dprintf(("GDI32: Pie %x (%d,%d)(%d,%d) (%d,%d) (%d,%d)", hdc, nLeftRect, nTopRect, nRightRect,
+              nBottomRect, nXRadial1, nYRadial1, nXRadial2, nYRadial2));
+
     //CB: bug in O32_Pie
     if (nXRadial1 == nXRadial2 && nYRadial1 == nYRadial2)
       return O32_Ellipse(hdc,nLeftRect,nTopRect,nRightRect,nBottomRect);
@@ -1008,7 +1028,7 @@ BOOL WIN32API PolyPolygon( HDC arg1, const POINT * arg2, const INT * arg3, UINT 
 //******************************************************************************
 BOOL WIN32API PolyPolyline( HDC hdc, const POINT * lppt, const DWORD * lpdwPolyPoints, DWORD cCount)
 {
-    dprintf(("GDI32: PolyPolyline"));
+    dprintf(("GDI32: PolyPolyline %x %x %x %d", hdc, lppt, lpdwPolyPoints, cCount));
 
     return O32_PolyPolyline(hdc,lppt,lpdwPolyPoints,cCount);
 }
@@ -1021,17 +1041,21 @@ BOOL WIN32API Polygon( HDC hdc, const POINT *lpPoints, int count)
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API PtVisible( HDC arg1, int arg2, int  arg3)
+BOOL WIN32API PtVisible( HDC hdc, int x, int  y)
 {
-    dprintf(("GDI32: PtVisible"));
-    return O32_PtVisible(arg1, arg2, arg3);
+    dprintf(("GDI32: PtVisible %x (%d,%d)", hdc, x, y));
+    return O32_PtVisible(hdc, x, y);
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API RectVisible( HDC arg1, const RECT * arg2)
+BOOL WIN32API RectVisible( HDC hdc, const RECT *lpRect)
 {
-    dprintf(("GDI32: RectVisible\n"));
-    return O32_RectVisible(arg1, arg2);
+    if(lpRect == NULL) {
+       dprintf(("WARNING: GDI32: RectVisible %x lpRect == NULL!"));
+       return FALSE;
+    }    
+    dprintf(("GDI32: RectVisible %x (%d,%d)(%d,%d)", hdc, lpRect->left, lpRect->top, lpRect->right, lpRect->bottom));
+    return O32_RectVisible(hdc, lpRect);
 }
 //******************************************************************************
 //******************************************************************************
@@ -1050,10 +1074,17 @@ HDC WIN32API ResetDCW( HDC arg1, const DEVMODEW *  arg2)
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API RestoreDC( HDC arg1, int  arg2)
+BOOL WIN32API RestoreDC(HDC hdc, int id)
 {
-    dprintf(("GDI32: RestoreDC\n"));
-    return O32_RestoreDC(arg1, arg2);
+ BOOL ret;
+
+    dprintf(("GDI32: RestoreDC %x %d", hdc, id));
+
+    ret = O32_RestoreDC(hdc, id);
+    if(ret == FALSE) {
+        dprintf(("ERROR: GDI32: RestoreDC %x %d FAILED", hdc, id));
+    }
+    return ret;
 }
 //******************************************************************************
 //******************************************************************************
@@ -1064,10 +1095,17 @@ BOOL WIN32API RoundRect( HDC arg1, int arg2, int arg3, int arg4, int arg5, int a
 }
 //******************************************************************************
 //******************************************************************************
-int WIN32API SaveDC( HDC arg1)
+int WIN32API SaveDC( HDC hdc)
 {
-    dprintf(("GDI32: SaveDC"));
-    return O32_SaveDC(arg1);
+ int id;
+
+    dprintf(("GDI32: SaveDC %x", hdc));
+    id = O32_SaveDC(hdc);
+    if(id == 0) {
+         dprintf(("ERROR: GDI32: SaveDC %x FAILED", hdc));
+    }
+    else dprintf(("GDI32: SaveDC %x returned %d", hdc, id));
+    return id;
 }
 //******************************************************************************
 //******************************************************************************
