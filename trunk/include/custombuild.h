@@ -463,6 +463,7 @@ extern IMAGE_FILE_HEADER nt_dinput_header;
 extern IMAGE_FILE_HEADER nt_dsound_header;
 extern IMAGE_FILE_HEADER nt_uxtheme_header;
 extern IMAGE_FILE_HEADER nt_mciwave_header;
+extern IMAGE_FILE_HEADER nt_urlmon_header;
 #ifdef __cplusplus
 }
 #endif
