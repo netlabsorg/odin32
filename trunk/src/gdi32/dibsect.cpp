@@ -1,4 +1,4 @@
-/* $Id: dibsect.cpp,v 1.42 2000-11-09 18:16:56 sandervl Exp $ */
+/* $Id: dibsect.cpp,v 1.43 2000-11-23 19:23:01 sandervl Exp $ */
 
 /*
  * GDI32 DIB sections
@@ -107,7 +107,7 @@ DIBSection::DIBSection(BITMAPINFOHEADER_W *pbmi, char *pColors, DWORD iUsage, DW
    pOS2bmp->cy            = pbmi->biHeight;
    pOS2bmp->cPlanes       = pbmi->biPlanes;
    pOS2bmp->cBitCount     = pbmi->biBitCount;
-   pOS2bmp->ulCompression = pbmi->biCompression;
+   pOS2bmp->ulCompression = pbmi->biCompression; //same as OS/2 (uncompressed, rle8, rle4)
    //SvL: Ignore BI_BITFIELDS_W type (GpiDrawBits fails otherwise)
    if(pOS2bmp->ulCompression == BI_BITFIELDS_W) {
         pOS2bmp->ulCompression = 0;
@@ -296,7 +296,11 @@ int DIBSection::SetDIBits(HDC hdc, HBITMAP hbitmap, UINT startscan, UINT
    pOS2bmp->cy            = pbmi->biHeight;
    pOS2bmp->cPlanes       = pbmi->biPlanes;
    pOS2bmp->cBitCount     = pbmi->biBitCount;
-   pOS2bmp->ulCompression = pbmi->biCompression;
+   pOS2bmp->ulCompression = pbmi->biCompression; //same as OS/2 (uncompressed, rle8, rle4)
+   //SvL: Ignore BI_BITFIELDS_W type (GpiDrawBits fails otherwise)
+   if(pOS2bmp->ulCompression == BI_BITFIELDS_W) {
+        pOS2bmp->ulCompression = 0;
+   }
    pOS2bmp->cbImage       = pbmi->biSizeImage;
 
    // clear DIBSECTION structure
@@ -363,8 +367,17 @@ int DIBSection::SetDIBits(HDC hdc, HBITMAP hbitmap, UINT startscan, UINT
 
    if(bits)
    {
-      int size = bmpsize*lines;
-      memcpy(bmpBits+bmpsize*startscan, bits, size);
+      if(pOS2bmp->ulCompression == BCA_UNCOMP) {
+          int size = bmpsize*lines;
+          memcpy(bmpBits+bmpsize*startscan, bits, size);
+      }
+      else {
+          dprintf(("Compressed image!!"));
+          if(startscan != 0) {
+               dprintf(("WARNING: Compressed image & startscan != 0!!!!"));
+          }
+          memcpy(bmpBits, bits, pbmi->biSizeImage);
+      }
    }
    return(lines);
 }
