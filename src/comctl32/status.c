@@ -476,10 +476,16 @@ STATUSBAR_GetTextLength (STATUSWINDOWINFO *infoPtr, HWND hwnd, WPARAM wParam)
     {
         if (nPart >= infoPtr->numParts)
    	    return FALSE;
-	part = &infoPtr->parts[nPart];
+        if (infoPtr->simple)
+        part = &infoPtr->part0;
+        else
+        part = &infoPtr->parts[nPart];
     }
 #else
-	part = &infoPtr->parts[nPart];
+        if (infoPtr->simple)
+        part = &infoPtr->part0;
+        else
+        part = &infoPtr->parts[nPart];
 #endif
 
     if (part->text)
