@@ -1,4 +1,4 @@
-/* $Id: menu.cpp,v 1.53 2002-12-12 13:55:41 sandervl Exp $*/
+/* $Id: menu.cpp,v 1.54 2002-12-29 17:17:15 sandervl Exp $*/
 /*
  * Menu functions
  *
@@ -1510,7 +1510,7 @@ UINT MENU_DrawMenuBar( HDC hDC, LPRECT lprect, HWND hwnd,
       for (i = 0; i < lppop->nItems; i++)
       {
         OffsetRect(&lppop->items[i].rect,-lprect->left,-lprect->top);
-        MENU_DrawMenuItem( hwnd,GetMenu(hwnd), GetWindow(hwnd,GW_OWNER),
+        MENU_DrawMenuItem( hwnd,GetMenu(hwnd), hwnd,
                          memDC, &lppop->items[i], lppop->Height, TRUE, ODA_DRAWENTIRE );
         OffsetRect(&lppop->items[i].rect,lprect->left,lprect->top);
       }

@@ -1,4 +1,4 @@
-/* $Id: oslibwin.cpp,v 1.130 2002-12-04 15:23:38 sandervl Exp $ */
+/* $Id: oslibwin.cpp,v 1.131 2002-12-29 17:17:16 sandervl Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -161,6 +161,8 @@ BOOL OSLibWinPositionFrameControls(HWND hwndFrame, RECTLOS2 *pRect, DWORD dwStyl
   int  i = 0;
   static int minmaxwidth  = 0;
   static int minmaxheight = 0;
+
+  dprintf(("OSLibWinPositionFrameControls %x (%x,%x) %x %d", hwndFrame, dwStyle, dwExStyle, hSysMenuIcon, drawCloseButton));
 
   if(minmaxwidth == 0) {
       minmaxwidth  = WinQuerySysValue(HWND_DESKTOP, SV_CXMINMAXBUTTON);
@@ -1097,6 +1099,7 @@ void OSLibSetWindowStyle(HWND hwndFrame, HWND hwndClient, ULONG dwStyle, ULONG d
 //******************************************************************************
 BOOL OSLibChangeCloseButtonState(HWND hwndFrame, BOOL State)
 {
+    dprintf(("OSLibChangeCloseButtonState %x %d", hwndFrame, State));
     return WinEnableMenuItem(WinWindowFromID(hwndFrame, FID_SYSMENU), SC_CLOSE, State);
 }
 //******************************************************************************
