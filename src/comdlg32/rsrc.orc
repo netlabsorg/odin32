@@ -46,3 +46,4 @@
 #include "cdlg_Sv.orc"
 #include "cdlg_Wa.orc"
 #include "cdlg_Ja.orc"
+#include "cdlg_Zh.orc"
