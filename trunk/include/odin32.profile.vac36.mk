@@ -1,4 +1,4 @@
-# $Id: odin32.profile.vac36.mk,v 1.2 2001-10-01 01:23:14 bird Exp $
+# $Id: odin32.profile.vac36.mk,v 1.3 2001-10-10 22:06:12 phaller Exp $
 
 #
 # Odin32 API.
@@ -44,7 +44,10 @@ OS2RC  = rc
 ASFLAGS          = -Mb -Sc -Sv:ALP +Od -D:DEBUG
 IMPLIBFLAGS      = /nologo
 ILIBFLAGS        = /nofree /quiet /nologo
-RCFLAGS          = -s -I. -I$(CPPMAIN)\include
+RCFLAGS          = -s -I. -I$(CPPMAIN)\include -D__WIN32OS2__
+!ifdef WRC_PREFIX_RESOURCE
+RCFLAGS          = $(RCFLAGS) -p $(TARGET)
+!endif
 OS2RCFLAGS       = -r -n
 OS2RCLFLAGS      = -x2 -n
 
@@ -87,12 +90,16 @@ CDEFINES         = -DDEBUG -DPROFILE -D__WIN32OS2__ -D__i386__ -D__WINE__ -DTCPV
 #   when we add new flags to for example LD2FLAGS too many times.
 #
 !ifdef EXETARGET
+!ifndef STACKSIZE
+STACKSIZE = 0x50000
+!endif
+
 !   ifdef VIO
-LDTARGETFLAGS    = -Ge+ -B"/pmtype:vio"
-LD2TARGETFLAGS   = /EXEC /pmtype:vio
+LDTARGETFLAGS    = -Ge+ -B"/pmtype:vio /stack:$(STACKSIZE)"
+LD2TARGETFLAGS   = /EXEC /pmtype:vio /stack:$(STACKSIZE)
 !   else
-LDTARGETFLAGS    = -Ge+ -B"/pmtype:pm"
-LD2TARGETFLAGS   = /EXEC /pmtype:pm
+LDTARGETFLAGS    = -Ge+ -B"/pmtype:pm /stack:$(STACKSIZE)"
+LD2TARGETFLAGS   = /EXEC /pmtype:pm /stack:$(STACKSIZE)
 !   endif
 !else
 LDTARGETFLAGS    = -Ge-
