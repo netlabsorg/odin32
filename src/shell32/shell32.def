@@ -1,4 +1,4 @@
-; $Id: shell32.def,v 1.11 1999-07-05 13:49:24 phaller Exp $
+; $Id: shell32.def,v 1.12 1999-08-05 17:18:09 phaller Exp $
 
 ;Created by BLAST for IBM's compiler
 ;based on Windows 95
@@ -64,7 +64,7 @@ EXPORTS
     PathUnquoteSpaces                 = _PathUnquoteSpacesAW@4                @56
     PathGetDriveNumber                = _PathGetDriveNumber@4                 @57
     ParseField                        = _ParseFieldA@16                       @58
-;   RestartDialog                     = _RestartDialog@12                     @59
+    RestartDialog                     = _RestartDialog@12                     @59
     ExitWindowsDialog                 = _ExitWindowsDialog@4                  @60
     RunFileDlg                        = _RunFileDlg@24                        @61
     PickIconDlg                       = _PickIconDlg@16                       @62
