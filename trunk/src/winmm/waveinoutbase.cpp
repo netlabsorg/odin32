@@ -1,4 +1,4 @@
-/* $Id: waveinoutbase.cpp,v 1.1 2001-03-23 16:23:45 sandervl Exp $ */
+/* $Id: waveinoutbase.cpp,v 1.2 2001-03-23 17:43:46 sandervl Exp $ */
 
 /*
  * Wave playback class (DART)
@@ -42,7 +42,6 @@ WaveInOut::WaveInOut(LPWAVEFORMATEX pwfx, ULONG fdwOpen, ULONG nCallback, ULONG 
     next            = NULL;
     wavehdr         = NULL;
     curhdr          = NULL;
-    dwInstance      = 0;
     ulError         = 0;
     State           = STATE_STOPPED;
     queuedbuffers   = 0;
@@ -99,8 +98,8 @@ WaveInOut::~WaveInOut()
 /******************************************************************************/
 void WaveInOut::callback(UINT uMessage, DWORD dw1, DWORD dw2)
 {
-    dprintf(("WINMM:WaveInOut::callback(HDRVR h=%08xh, UINT uMessage=%08xh, DWORD dwUser=%08xh, DWORD dw1=%08xh, DWORD dw2=%08xh)\n",
-             this, uMessage, dwInstance, dw1, dw2));
+    dprintf(("WINMM:WaveInOut::callback type %x (HDRVR h=%08xh, UINT uMessage=%08xh, DWORD dwUser=%08xh, DWORD dw1=%08xh, DWORD dw2=%08xh)\n",
+             fdwOpen, this, uMessage, dwInstance, dw1, dw2));
 
     switch(fdwOpen & CALLBACK_TYPEMASK) {
     case CALLBACK_WINDOW:
