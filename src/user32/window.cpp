@@ -1,4 +1,4 @@
-/* $Id: window.cpp,v 1.134 2003-04-02 12:58:02 sandervl Exp $ */
+/* $Id: window.cpp,v 1.135 2003-06-03 11:58:38 sandervl Exp $ */
 /*
  * Win32 window apis for OS/2
  *
@@ -780,10 +780,7 @@ HWND WIN32API SetFocus(HWND hwnd)
     }
 
     hwnd_O = window->getOS2WindowHandle();
-    if(teb->o.odin.hwndFocus) {
-         lastFocus = teb->o.odin.hwndFocus;
-    }
-    else lastFocus = OSLibWinQueryFocus (OSLIB_HWND_DESKTOP);
+    lastFocus = OSLibWinQueryFocus (OSLIB_HWND_DESKTOP);
 
     hwndTopParent = window->GetTopParent();
     activate = FALSE;
@@ -805,27 +802,6 @@ HWND WIN32API SetFocus(HWND hwnd)
         return 0;
     }
 
-    //PM doesn't allow SetFocus calls during WM_SETFOCUS message processing;
-    //must delay this function call
-    if(teb->o.odin.fWM_SETFOCUS) {
-        dprintf(("USER32: Delay SetFocus call!"));
-        teb->o.odin.hwndFocus = hwnd;
-
-        //If keystrokes were ignored and focus is set to the old focus window, then
-        //PM won't send us a WM_SETFOCUS message. (as we don't inform PM for SetFocus(0))
-        if(fIgnoreKeystrokes && lastFocus_W == hwnd) {
-            dprintf(("Manually send WM_SETFOCUS; real focus window hasn't changed"));
-            SendMessageA(lastFocus_W, WM_SETFOCUS, 0, 0);
-        }
-        else {
-            //mp1 = win32 window handle
-            //mp2 = top parent if activation required
-            OSLibPostMessageDirect(hwnd_O, WIN32APP_SETFOCUSMSG, hwnd, (activate) ? hwndTopParent : 0);
-        }
-        RELEASE_WNDOBJ(window);
-        return lastFocus_W;
-    }
-    teb->o.odin.hwndFocus = 0;
     if(!IsWindow(hwnd)) return FALSE;       //abort if window destroyed
 
     //NOTE: Don't always activate the window or else the z-order will be changed!!
@@ -838,7 +814,6 @@ HWND WIN32API SetFocus(HWND hwnd)
         dprintf(("Manually send WM_SETFOCUS; real focus window hasn't changed"));
         SendMessageA(lastFocus_W, WM_SETFOCUS, 0, 0);
     }
-
     fIgnoreKeystrokes = FALSE;
     return ret;
 }
@@ -859,15 +834,6 @@ HWND WIN32API GetFocus()
         dprintf(("GetFocus; returning 0 after SetFocus(0) call"));
         return 0;
     }
-    //PM doesn't allow SetFocus calls during WM_SETFOCUS message processing;
-    //If focus was changed during WM_SETFOCUS, the focus window handle is
-    //stored in teb->o.odin.hwndFocus (set back to 0 when delayed SetFocus
-    //is activated)
-    if(teb->o.odin.hwndFocus) {
-        dprintf(("USER32: GetFocus %x (DURING WM_SETFOCUS PROCESSING)", teb->o.odin.hwndFocus));
-        return teb->o.odin.hwndFocus;
-    }
-
     hwnd = OSLibWinQueryFocus(OSLIB_HWND_DESKTOP);
     hwnd = OS2ToWin32Handle(hwnd);
     dprintf(("USER32: GetFocus %x\n", hwnd));

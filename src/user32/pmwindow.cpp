@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.215 2003-05-07 16:13:26 sandervl Exp $ */
+/* $Id: pmwindow.cpp,v 1.216 2003-06-03 11:58:37 sandervl Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -58,6 +58,10 @@
 
 #define DBG_LOCALLOG    DBG_pmwindow
 #include "dbglocal.h"
+
+
+// Notification that focus change has completed (UNDOCUMENTED)
+#define WM_FOCUSCHANGED            0x000e
 
 //define this to use the new code for WM_CALCVALIDRECT handling
 //#define USE_CALCVALIDRECT
@@ -726,53 +730,42 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
         ShowWindow(win32wnd->getWindowHandle(), SW_SHOW_W);
         break;
 
-    case WIN32APP_SETFOCUSMSG:
-        //PM doesn't allow SetFocus calls during WM_SETFOCUS message processing;
-        //must delay this function call
-        //mp1 = win32 window handle
-        //mp2 = top parent if activation required
-        dprintf(("USER32: Delayed SetFocus %x %x %x call!", teb->o.odin.hwndFocus, mp1, mp2));
-        if(teb->o.odin.hwndFocus) {
-            RELEASE_WNDOBJ(win32wnd);
-            win32wnd = Win32BaseWindow::GetWindowFromHandle(teb->o.odin.hwndFocus);
-            if(win32wnd) {
-                 if(mp2) {
-                    SetActiveWindow((HWND)mp2);
-                 }
-                 if(!IsWindow(win32wnd->getWindowHandle())) break;       //abort if window destroyed
-                 WinFocusChange(HWND_DESKTOP, win32wnd->getOS2WindowHandle(), FC_NOSETACTIVE);
-            }
-            else DebugInt3();
-        }
-        break;
-
     case WIN32APP_CHNGEFRAMECTRLS:
     {
-      dprintf(("OS2: WIN32APP_CHANGEFRAMECTRLS"));
-      OSLibSetWindowStyle(win32wnd->getOS2FrameWindowHandle(), win32wnd->getOS2WindowHandle(), (ULONG)mp1, win32wnd->getExStyle(), (ULONG)mp2);
-      break;
+        dprintf(("OS2: WIN32APP_CHANGEFRAMECTRLS"));
+        OSLibSetWindowStyle(win32wnd->getOS2FrameWindowHandle(), win32wnd->getOS2WindowHandle(), (ULONG)mp1, win32wnd->getExStyle(), (ULONG)mp2);
+        break;
     }
-
+   
     case WM_SETFOCUS:
     {
-      HWND hwndFocus = (HWND)mp1;
-
+        HWND hwndFocus = (HWND)mp1;
         dprintf(("OS2: WM_SETFOCUS %x %x (%x) %d cur focus %x", win32wnd->getWindowHandle(), mp1, OS2ToWin32Handle(hwndFocus), mp2, WinQueryFocus(HWND_DESKTOP)));
+        break;
+    }
+
+    //Handle all focus processed during WM_FOCUSCHANGED; PM doesn't like focus
+    //changes during focus processing (WM_SETFOCUS). This message is sent
+    //after all focus work has been completed.
+    case WM_FOCUSCHANGED:
+    {
+      HWND hwndFocus      = (HWND)mp1;
+      HWND hwndFocusWin32 = OS2ToWin32Handle(hwndFocus);
+
+        dprintf(("OS2: WM_FOCUSCHANGED %x %x (%x) %d cur focus %x", win32wnd->getWindowHandle(), mp1, OS2ToWin32Handle(hwndFocus), mp2, WinQueryFocus(HWND_DESKTOP)));
 
         //PM doesn't allow SetFocus calls during WM_SETFOCUS message processing;
         //must delay this function call
 
-        teb->o.odin.fWM_SETFOCUS = TRUE;
-        teb->o.odin.hwndFocus    = 0;
         if(WinQueryWindowULong(hwndFocus, OFFSET_WIN32PM_MAGIC) != WIN32PM_MAGIC)
         {
             //another (non-win32) application's window
             //set to NULL (allowed according to win32 SDK) to avoid problems
-            hwndFocus = NULL;
+            hwndFocus      = 0;
+            hwndFocusWin32 = 0;
         }
         if((ULONG)mp2 == TRUE) {
-            HWND hwndFocusWin32 = OS2ToWin32Handle(hwndFocus);
-            recreateCaret (hwndFocusWin32);
+            recreateCaret(hwndFocusWin32);
             win32wnd->MsgSetFocus(hwndFocusWin32);
         }
         else {
@@ -783,8 +776,6 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
             }
             else dprintf(("Window has already received a WM_KILLFOCUS (SetFocus(0)); ignore"));
         }
-        teb->o.odin.fWM_SETFOCUS = FALSE;
-
         break;
     }
 
