@@ -1,6 +1,6 @@
-# $Id: pdwin32.emx.rel,v 1.3 1999-06-10 16:21:49 achimha Exp $
+# $Id: pdwin32.emx.rel,v 1.4 2000-09-01 16:01:20 bird Exp $
 # ODIN / win32os2 Project
-# 
+#
 # RELEASE makefile for the EMX compiler environment
 #
 # phaller@gmx.net, 1999/05/27
@@ -8,7 +8,7 @@
 
 
 # ---------------------------------------------------------------------------------
-# NOTE: this configuration is not supported neither working, it's experimental only. 
+# NOTE: this configuration is not supported neither working, it's experimental only.
 # ---------------------------------------------------------------------------------
 
 
@@ -29,4 +29,6 @@ CXXFLAGS = -c -pipe -Wall -O2 -mcpu=i586 -fomit-frame-pointer -I$(PDWIN32_INCLUD
 ASFLAGS = -Zomf
 LDFLAGS = -Zmt -Zomf -Zmap
 IMPLIBFLAGS =
+OS2RCFLAGS       = -r -n
+OS2RCLFLAGS      = -x2 -n
 
