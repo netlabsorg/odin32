@@ -24,6 +24,7 @@
 #define HAVE_FLOAT_H
 #define WINE_LARGE_INTEGER
 #include "oleaut32.h"
+
 #endif
 
 #include "config.h"
@@ -46,6 +47,18 @@
 #include "parsedt.h"
 
 DEFAULT_DEBUG_CHANNEL(ole);
+
+#ifdef __WIN32OS2__
+#undef FIXME
+#undef TRACE
+#ifdef DEBUG
+#define FIXME WriteLogNoEOL("FIXME %s: ", __FUNCTION__); WriteLog
+#define TRACE WriteLogNoEOL("%s", __FUNCTION__); WriteLog
+#else
+#define FIXME 1 ? (void)0 : (void)((int (*)(char *, ...)) NULL)
+#define TRACE 1 ? (void)0 : (void)((int (*)(char *, ...)) NULL)
+#endif
+#endif
 
 #ifndef FLT_MAX
 # ifdef MAXFLOAT
@@ -1029,6 +1042,9 @@ static HRESULT Coerce( VARIANTARG* pd, LCID lcid, ULONG dwFlags, VARIANTARG* ps,
             break;
         case( VT_INT ):
         case( VT_I4 ):
+#ifdef __WIN32OS2__
+        case( VT_HRESULT ):
+#endif
             res = VariantCopy( pd, ps );
             break;
 		case( VT_UI1 ):

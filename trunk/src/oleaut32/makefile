@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.24 2001-04-24 19:44:50 sandervl Exp $
+# $Id: makefile,v 1.25 2001-05-30 17:43:39 sandervl Exp $
 
 #
 # Odin32 API
@@ -32,6 +32,7 @@ $(OBJDIR)\variant.obj \
 $(OBJDIR)\ole2disp.obj \
 $(OBJDIR)\parsedt.obj \
 $(OBJDIR)\olepicture.obj \
+$(OBJDIR)\asmutil.obj \
 #$(OBJDIR)\iPicture.obj \
 #$(OBJDIR)\iPictureNone.obj \
 #$(OBJDIR)\iPictureBmp.obj \
