@@ -1,9 +1,9 @@
-/* $Id: changelog,v 1.1801 2001-10-28 10:39:12 sandervl Exp $ */
+/* $Id: changelog,v 1.1802 2001-10-28 11:09:52 sandervl Exp $ */
 
  2001-10-28: Sander van Leeuwen <sandervl@xs4all.nl>
-    - USER32:   o LISTVIEW_GetItemWidth bugfix: item can never be bigger
+    - COMCTL32: o LISTVIEW_GetItemWidth bugfix: item can never be bigger
                   than the client area
-                o Fixes for Set/GetWindowLong for dialogs. (unicode flag not
+    - USER32:   o Fixes for Set/GetWindowLong for dialogs. (unicode flag not
                   passed to parent class methods)
 
  2001-10-27: Sander van Leeuwen <sandervl@xs4all.nl>
