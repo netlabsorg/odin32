@@ -1,0 +1,46 @@
+;/* $Id: extract.def,v 1.1 2001-09-16 03:09:14 bird Exp $
+; *
+; * Definition file for Extract.exe
+; *
+; * Note: The order of segments is vital!
+; *
+; * Copyright (c) 2001 knut st. osmundsen (kosmunds@csc.com)
+; *
+; * Project Odin Software License can be found in LICENSE.TXT
+; *
+; */
+
+NAME Extract
+
+DESCRIPTION 'Extract - Kernel and Symbol Reader. (c) knut st. osmundsen'
+
+IMPORTS
+        DOSEXIT                 = DOSCALLS.5
+        DosQuerySysState        = DOSCALL1.368
+
+SEGMENTS
+    EMULATOR_TEXT       class 'CODE'
+    _TEXT               class 'CODE'
+
+    CODE32              class 'CODE'
+    _MSGSEG32           class 'CODE'
+
+    CONST32_RO          class 'CONST'    MIXED1632
+    _VFT                class 'CONST'    MIXED1632
+    _CONST              class 'CONST'    MIXED1632
+
+    _DATA               class 'DATA'     MIXED1632
+    C_ETEXT             class 'DATA'     MIXED1632
+
+    c_common            class 'DATA'     MIXED1632
+    DATA32              class 'DATA'     MIXED1632
+    CTOR_DTOR1          class 'DATA'     MIXED1632
+    CTOR_DTOR2          class 'DATA'     MIXED1632
+    CTOR_DTOR3          class 'DATA'     MIXED1632
+    DDE4_DATA32         class 'DATA'     MIXED1632
+
+    BSS                 class 'BSS'      MIXED1632
+    BSS32               class 'BSS'      MIXED1632
+
+    BIGDATA32           class 'DATA'
+
