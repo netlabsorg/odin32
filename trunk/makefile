@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.16 2000-12-09 16:04:55 phaller Exp $
+# $Id: makefile,v 1.17 2001-09-30 00:39:51 bird Exp $
 
 #
 # Odin32
@@ -38,80 +38,75 @@
 #
 !include makefile.inc
 
-all:        odin_libraries  needed_tools
-    cd src
-    $(MAKE) -nologo  all
-    cd ..\tools\install
-    $(MAKE) -nologo  all
 
-clean:
-    cd lib
-    $(MAKE) -nologo clean
-    cd ..\tools
-    $(MAKE) -nologo clean
-    cd ..\src
-    $(MAKE) -nologo clean
+#
+# (Re?)Define make command.
+#
+MAKE_CMD = $(MAKE) -nologo
 
-profile:      odin_libraries  needed_tools
-    cd src
-    $(MAKE) -nologo all DEBUG=1 PROFILE=1
-    cd ..\tools\install
-    $(MAKE) -nologo all DEBUG=1 PROFILE=1
 
-debug:      odin_libraries  needed_tools
-    cd src
-    $(MAKE) -nologo all DEBUG=1
-    cd ..\tools\install
-    $(MAKE) -nologo all DEBUG=1
+#
+# Build which are normally built.
+#
+BLDDIRS = src tools\install
+ALL_DIRS = include lib src tools
 
-debugsmp:   odin_libraries  needed_tools
-    cd src
-    $(MAKE) -nologo DEBUG=1 smp
-    cd ..\tools\install
-    $(MAKE) -nologo DEBUG=1 all
 
-nodebuginfo:    odin_libraries  needed_tools
-    cd src
-    $(MAKE) -nologo all DEBUG=1 NODEBUGINFO=1
-    cd ..\tools\install
-    $(MAKE) -nologo all DEBUG=1 NODEBUGINFO=1
+#
+# The ordinary rules.
+#
+all:            odin_libraries  needed
+    @$(DODIRS) "$(BLDDIRS)"     $(MAKE_CMD) all
 
-nodebuginfosmp: odin_libraries  needed_tools
-    cd src
-    $(MAKE) -nologo DEBUG=1 NODEBUGINFO=1 smp
-    cd ..\tools\install
-    $(MAKE) -nologo DEBUG=1 NODEBUGINFO=1 all
+clean nothing:
+    @$(DODIRS) "$(ALL_DIRS)"    $(MAKE_CMD) $@
 
-release:    odin_libraries  needed_tools
+libs: lib
+lib dep:        needed
+    @$(DODIRS) "$(ALL_DIRS)"    $(MAKE_CMD) $@
+
+
+#
+# Special build mode rules.
+#
+debug:          odin_libraries  needed
+    @$(DODIRS) "$(BLDDIRS)"     $(MAKE_CMD) DEBUG=1 all
+
+debugsmp:       odin_libraries  needed
+    @$(DODIRS) "src"            $(MAKE_CMD) DEBUG=1 smp
+    @$(DODIRS) "tools\install"  $(MAKE_CMD) DEBUG=1 all
+
+nodebuginfo:    odin_libraries  needed
+    @$(DODIRS) "$(BLDDIRS)"     $(MAKE_CMD) DEBUG=1 NODEBUGINFO=1 all
+
+nodebuginfosmp: odin_libraries  needed
+    @$(DODIRS) "src"            $(MAKE_CMD) DEBUG=1 NODEBUGINFO=1 smp
+    @$(DODIRS) "tools\install"  $(MAKE_CMD) DEBUG=1 NODEBUGINFO=1 all
+
+profile:        odin_libraries  needed
+    @$(DODIRS) "$(BLDDIRS)"     $(MAKE_CMD) DEBUG=1 PROFILE=1 all
+
+profilesmp:     odin_libraries  needed
+    @$(DODIRS) "src"            $(MAKE_CMD) DEBUG=1 PROFILE=1 smp
+    @$(DODIRS) "tools\install"  $(MAKE_CMD) DEBUG=1 PROFILE=1 all
+
+release:        odin_libraries  needed
     SET DEBUG=
-    cd src
-    $(MAKE) -nologo all
-    cd ..\tools\install
-    $(MAKE) -nologo all
+    @$(DODIRS) "$(BLDDIRS)"     $(MAKE_CMD) all
 
-releasesmp: odin_libraries  needed_tools
+releasesmp:     odin_libraries  needed
     SET DEBUG=
-    cd src
-    $(MAKE) -nologo smp
-    cd ..\tools\install
-    $(MAKE) -nologo all
-
-dep: needed_tools
-    cd tools
-    $(MAKE) -nologo dep
-    cd ..\src
-    $(MAKE) -nologo dep
+    @$(DODIRS) "src"            $(MAKE_CMD) smp
+    @$(DODIRS) "tools\install"  $(MAKE_CMD) all
 
 
-# --- common section ---
+#
+# Common rules.
+#
 odin_libraries:
-    cd lib
-    $(MAKE) -nologo
-    cd ..
+    @$(DODIRS) "lib"            $(MAKE_CMD)
 
-
-needed_tools:
-    cd tools
-    $(MAKE) -nologo needed
-    cd ..
+needed_tools: needed
+needed:
+    @$(DODIRS) "tools"          $(MAKE_CMD) $@
 
