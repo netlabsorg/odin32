@@ -1,4 +1,4 @@
-/* $Id: kHll.cpp,v 1.14 2000-05-29 19:46:28 bird Exp $
+/* $Id: kHll.cpp,v 1.15 2000-08-31 03:02:27 bird Exp $
  *
  * kHll - Implementation of the class kHll.
  *        That class is used to create HLL debuginfo.
@@ -34,12 +34,14 @@
 #include <string.h>
 #include <stddef.h>
 #include <stdlib.h>
-#include <assert.h>
 
 #include <kList.h>
 #include <kFile.h>
+#include <kFileFormatBase.h>
+#include <kFileLX.h>
 
 #include "hll.h"
+#include "sym.h"
 #include "kHll.h"
 
 
@@ -152,7 +154,7 @@ void kHllBaseEntry::idaList(kFile *pFile, kHllBaseEntry *pEntry)
  * @param     pachName  Symbol name.
  * @param     cchName   Length of symbol name.
  * @param     off       Offset into the object.
- * @param     iObject   LX Object index.
+ * @param     iObject   LX Object index. (1 based)
  * @param     iType     Type index. (index into type table)
  */
 kHllPubSymEntry::kHllPubSymEntry(
@@ -248,6 +250,41 @@ void            kHllPubSymEntry::ida(kFile *pFile) throw(int)
 }
 
 
+BOOL kHllPubSymEntry::operator==(const kHllPubSymEntry &entry) const
+{
+    return pPubSym->iObject == entry.pPubSym->iObject
+           && pPubSym->off == entry.pPubSym->off;
+}
+
+BOOL kHllPubSymEntry::operator!=(const kHllPubSymEntry &entry) const
+{
+    return pPubSym->iObject != entry.pPubSym->iObject
+           || pPubSym->off != entry.pPubSym->off;
+}
+
+BOOL kHllPubSymEntry::operator< (const kHllPubSymEntry &entry) const
+{
+    return pPubSym->iObject < entry.pPubSym->iObject
+           || (pPubSym->iObject == entry.pPubSym->iObject && pPubSym->off < entry.pPubSym->off);
+}
+
+BOOL kHllPubSymEntry::operator<=(const kHllPubSymEntry &entry) const
+{
+    return pPubSym->iObject < entry.pPubSym->iObject
+           || (pPubSym->iObject == entry.pPubSym->iObject && pPubSym->off <= entry.pPubSym->off);
+}
+
+BOOL kHllPubSymEntry::operator> (const kHllPubSymEntry &entry) const
+{
+    return pPubSym->iObject > entry.pPubSym->iObject
+           || (pPubSym->iObject == entry.pPubSym->iObject && pPubSym->off > entry.pPubSym->off);
+}
+
+BOOL kHllPubSymEntry::operator>=(const kHllPubSymEntry &entry) const
+{
+    return pPubSym->iObject > entry.pPubSym->iObject
+           || (pPubSym->iObject == entry.pPubSym->iObject && pPubSym->off >= entry.pPubSym->off);
+}
 
 
 
@@ -274,7 +311,7 @@ void            kHllPubSymEntry::ida(kFile *pFile) throw(int)
 
 /**
  * Constructor.
- * @param     iSeg      Segment number for these linenumbers.
+ * @param     iSeg      Segment number for these linenumbers. (1 based)
  * @param     offBase   Base offset for all line number offsets. (defaults to 0)
  */
 kHllLineNumberChunk::kHllLineNumberChunk(
@@ -487,7 +524,7 @@ kHllSrcEntry::~kHllSrcEntry()
  * module segement.
  * @returns   Pointer to linenumber chunk which you may add linenumber info to.
  *            NULL on failiure.
- * @param     iSeg      Segment number for these linenumbers.
+ * @param     iSeg      Segment number for these linenumbers. (1 based)
  * @param     offBase   Base offset for all line number offsets. (defaults to 0)
  */
 kHllLineNumberChunk *
@@ -722,7 +759,7 @@ kHllModuleEntry::kHllModuleEntry(
         unsigned char       cSegInfo/*= 0 */,
         PHLLSEGINFO         paSegInfo/*= NULL */
         )
-: fValidOffsetsAndSizes(FALSE)
+: fValidOffsetsAndSizes(FALSE), iObjectMax(0)
 {
     int         i;
     int         cchName;
@@ -756,15 +793,20 @@ kHllModuleEntry::kHllModuleEntry(
     /* objects */
     if (cSegInfo != 0)
     {
+        assert(paSegInfo->iObject != 0);
         pModule->SegInfo0.iObject = paSegInfo->iObject;
         pModule->SegInfo0.cb      = paSegInfo->cb;
         pModule->SegInfo0.off     = paSegInfo->off;
+        iObjectMax = pModule->SegInfo0.iObject;
 
         for (i = 1, pSegInfo = (PHLLSEGINFO)&pModule->achName[cchName]; i < cSegInfo; i++, pSegInfo++)
         {
+            assert(paSegInfo->iObject != 0);
             pSegInfo->iObject   = paSegInfo[i].iObject;
             pSegInfo->cb        = paSegInfo[i].cb;
             pSegInfo->off       = paSegInfo[i].off;
+            if (pSegInfo->iObject > iObjectMax)
+                iObjectMax = pSegInfo->iObject;
         }
     }
 }
@@ -785,7 +827,7 @@ kHllModuleEntry::~kHllModuleEntry()
 /**
  * Adds an object to the module.
  * @returns   Success indicator.
- * @param     iObject   LX Object index.
+ * @param     iObject   LX Object index. (1 based)
  * @param     off       Offset into the object to the module data.
  * @param     cb        Size of module data (in the object).
  */
@@ -796,6 +838,7 @@ BOOL            kHllModuleEntry::addSegInfo(
                     )
 {
     assert(pModule != NULL);
+    assert(iObject != 0);
 
     /*
      * Reallocate? (Note that we'll initially allocated space for 3 objects.)
@@ -819,6 +862,8 @@ BOOL            kHllModuleEntry::addSegInfo(
         pModule->SegInfo0.cb = cb;
         pModule->SegInfo0.off = off;
         pModule->SegInfo0.iObject = iObject;
+        if (pModule->SegInfo0.iObject > iObjectMax)
+            iObjectMax = pModule->SegInfo0.iObject;
     }
     else
     {
@@ -827,6 +872,8 @@ BOOL            kHllModuleEntry::addSegInfo(
         pSegInfo->cb = cb;
         pSegInfo->off = off;
         pSegInfo->iObject = iObject;
+        if (pSegInfo->iObject > iObjectMax)
+            iObjectMax = pSegInfo->iObject;
     }
     pModule->cSegInfo++;
 
@@ -840,7 +887,7 @@ BOOL            kHllModuleEntry::addSegInfo(
  * @returns   Handle to the symbol. NULL on error.
  * @param     pszName  Symbol name.
  * @param     off      Offset into the LX Object of the symbol.
- * @param     iObject  LX Object index.
+ * @param     iObject  LX Object index. (1 based)
  * @param     pvType   Type handle. NULL if not type.
  */
 const void *    kHllModuleEntry::addPublicSymbol(
@@ -851,6 +898,8 @@ const void *    kHllModuleEntry::addPublicSymbol(
                     )
 {
     assert(pszName != NULL);
+    if (iObject > iObjectMax)
+        iObjectMax = iObject;
     return addPublicSymbol(pszName, strlen(pszName), off, iObject, pvType);
 }
 
@@ -862,7 +911,7 @@ const void *    kHllModuleEntry::addPublicSymbol(
  * @param     pachName   Symbol name.
  * @param     cchName    Name length.
  * @param     off        Offset into the LX Object of the symbol.
- * @param     iObject    LX Object index.
+ * @param     iObject    LX Object index. (1 based)
  * @param     pvType     Type handle. NULL if not type.
  */
 const void *    kHllModuleEntry::addPublicSymbol(
@@ -877,6 +926,9 @@ const void *    kHllModuleEntry::addPublicSymbol(
 
     /* parameter assertion */
     assert(pachName != NULL);
+    assert(iObject != 0);
+    if (iObject > iObjectMax)
+        iObjectMax = iObject;
 
     /*
      * Create a public symbol entry
@@ -1073,6 +1125,128 @@ int         kHllModuleEntry::writeDirEntries(FILE *phFile, unsigned short iMod)
 
     return cchWritten;
 }
+
+
+/**
+ * Converts and writes SYM seginfo a segment for this module entry.
+ * @returns     Count of bytes written on success.
+ *              -4  Out of memory.
+ *              -3  Invalid offsets.
+ *              -2  Seek error.
+ *              -1  Write error.
+ *              0   no data written (this is an error condition!)
+ * @param       pFile       Pointer to output file object.
+ * @param       iSeg        Segment number which we processing. (1 based)
+ * @param       pSegDef     Segment definition. This is to be updated (count).
+ * @param       paoffSyms           Reference symbol offset table.
+ *                                  Insert 16 byte aligned symbol offsets.
+ *                                  This table should be reallocated when full.
+ * @param       coffsymsAllocated   Reference to allocated size of the symbol offset table.
+ * @param       offSegDef           Offset of the segement definition.
+ *
+ */
+void            kHllModuleEntry::writeSymSeg(kFile *pFile, int iSeg, PSEGDEF pSegDef,
+                                             unsigned short * &paoffSyms, int &coffSymsAllocated,
+                                             unsigned long offSegDef)  throw(int)
+{
+    kHllPubSymEntry* pPubSym;
+    char achBuffer[CCHMAXPATH + sizeof(SYMDEF32)];
+    PSYMDEF32   pSym = (PSYMDEF32)&achBuffer[0];
+    int         cbSym;
+    long        off = pFile->getPos();
+
+    assert(iSeg > 0);
+
+    /*
+     * Add module name symbol.
+     *  -see if this module has a segment info entry for the current segment.
+     */
+    if (pModule->cSegInfo != 0)
+    {
+        PHLLSEGINFO pSegInfo;
+        if (pModule->SegInfo0.iObject == iSeg)
+            pSegInfo = &pModule->SegInfo0;
+        else
+        {
+            int i;
+            for (i = pModule->cSegInfo,
+                 pSegInfo = (PHLLSEGINFO)&pModule->achName[pModule->cchName];
+                 i > 0 && pSegInfo->iObject != iSeg;
+                 i--, pSegInfo++
+                 )
+                i = i; //
+            if (i <= 0)
+                pSegInfo = NULL;
+        }
+
+        /* anything to write? */
+        if (pSegInfo)
+        {
+            pSym->wSymVal = pSegInfo->off;
+            pSym->cbSymName = pModule->cchName;
+            memcpy(pSym->achSymName, pModule->achName, pModule->cchName);
+            pSym->cbSymName += sprintf(pSym->achSymName + pModule->cchName, "_Start_Seg%d", iSeg);
+            cbSym = sizeof(SYMDEF32) + pSym->cbSymName - 1;
+            pFile->write(pSym, cbSym);
+            if (coffSymsAllocated <= pSegDef->cSymbols + 1)
+            {
+                void *pv;
+                pv = realloc(paoffSyms, (coffSymsAllocated + 50) * sizeof(unsigned short));
+                if (pv == NULL)
+                    throw(ERROR_NOT_ENOUGH_MEMORY);
+                paoffSyms = (unsigned short *)pv;
+                coffSymsAllocated += 50;
+            }
+            paoffSyms[pSegDef->cSymbols] = (unsigned short)(off - offSegDef);
+            pSegDef->cSymbols++;
+            off += cbSym;
+        }
+    }
+
+
+    /*
+     * Add all public symbols.
+     */
+    pPubSym = (kHllPubSymEntry*)PublicSymbols.getFirst();
+    while (pPubSym != NULL)
+    {
+        /* if the current segement then make a symbol entry */
+        if (pPubSym->getObjectIndex() == iSeg)
+        {
+            pSym->wSymVal = pPubSym->getOffset();
+            pSym->cbSymName = pPubSym->getNameLength();
+            memcpy(pSym->achSymName, pPubSym->getName(), pSym->cbSymName);
+            cbSym = sizeof(SYMDEF32) + pSym->cbSymName - 1;
+            pFile->write(pSym, cbSym);
+            if (coffSymsAllocated <= pSegDef->cSymbols + 1)
+            {
+                void *pv;
+                pv = realloc(paoffSyms, (coffSymsAllocated + 50) * sizeof(unsigned short));
+                if (pv == NULL)
+                    throw(ERROR_NOT_ENOUGH_MEMORY);
+                paoffSyms = (unsigned short *)pv;
+                coffSymsAllocated += 50;
+            }
+            paoffSyms[pSegDef->cSymbols] = (unsigned short)(off - offSegDef);
+            pSegDef->cSymbols++;
+            off += cbSym;
+        }
+
+        /* next entry */
+        pPubSym = (kHllPubSymEntry*)pPubSym->getNext();
+    }
+}
+
+
+/**
+ * Gets the highest object index. (ie. object count since it is 1 based.)
+ * @returns     Highest object index.
+ */
+int             kHllModuleEntry::queryMaxObjectIndex()
+{
+    return iObjectMax;
+}
+
 
 
 /**
@@ -1282,7 +1456,7 @@ int         kHll::write(FILE *phFile)
 /**
  * Constructor - Creates an empty HLL object.
  */
-kHll::kHll()
+kHll::kHll() : pszModName(NULL)
 {
 }
 
@@ -1294,7 +1468,7 @@ kHll::kHll()
  *                      start of the debuginfo.
  *                      Note. The file object is set to throw on errors.
  */
-kHll::kHll(kFile *pFile) throw (int)
+kHll::kHll(kFile *pFile) throw (int) : pszModName(NULL)
 {
     long            offHllHdr;          /* Offset of debug data in file. */
     HLLHDR          hllHdr;             /* HLL data header. */
@@ -1327,7 +1501,7 @@ kHll::kHll(kFile *pFile) throw (int)
     /*
      * Loop thru the directory entries and add them we have implemented.
      */
-    unsigned long    ulHLLVersion = 0;  /* HLL version of the last module. */
+    //unsigned long    ulHLLVersion = 0;  /* HLL version of the last module. */
     kHllModuleEntry *pCurMod = NULL;    /* Current Module. */
     int              iCurMod = 0;       /* Current Module index (import). */
 
@@ -1372,7 +1546,7 @@ kHll::kHll(kFile *pFile) throw (int)
                  */
                 pCurMod = this->addModule(szName, hllMod.cchName, NULL, hllMod.cSegInfo, paSegInfo);
                 iCurMod = pDirEntry->iMod;
-                ulHLLVersion = HLLMAKEVER(hllMod.chVerMajor, hllMod.chVerMinor);
+                //ulHLLVersion = HLLMAKEVER(hllMod.chVerMajor, hllMod.chVerMinor);
 
                 if (paSegInfo != NULL)
                     free(paSegInfo);
@@ -1451,6 +1625,9 @@ kHll::kHll(kFile *pFile) throw (int)
  */
 kHll::~kHll()
 {
+    if (pszModName != NULL)
+        free(pszModName);
+    pszModName = NULL;
 }
 
 
@@ -1516,14 +1693,76 @@ kHllModuleEntry *   kHll::addModule(
     return pEntry;
 }
 
+/**
+ * Sets the modulename.
+ * @returns     Success indicator.
+ * @param       pszModName  Pointer to modulename.
+ *                          If a filename is given the path and extention is removed.
+ */
+BOOL                kHll::setModName(
+                        const char *        pszModName
+                        )
+{
+    const char *pszEnd = pszModName  + strlen(pszModName) - 1;
+
+    /* remove path */
+    while (pszEnd >= pszModName && *pszEnd != '\\' && *pszEnd != '/')
+        pszEnd--;
+    pszModName = ++pszEnd;
+
+    /* find extention (if any) */
+    while (*pszEnd != '\0' && *pszEnd != '.')
+        pszEnd++;
+    return setModName(pszModName, pszEnd - pszModName);
+}
+
+
+/**
+ * Sets the modulename.
+ * @returns     Success indicator.
+ * @param       pszModName  Pointer to modulename.
+ * @param       cchModName  Length of modulename.
+ */
+BOOL                kHll::setModName(
+                        const char *        pachModName,
+                        int                 cchModName
+                        )
+{
+
+    /* allocate memory for the module name */
+    if (pszModName != NULL)
+        free(this->pszModName);
+    pszModName = (char*)malloc(cchModName + 1);
+    if (pszModName == NULL)
+        return FALSE;
+
+    /* copy the module name */
+    memcpy(pszModName, pachModName, cchModName);
+    pszModName[cchModName] = '\0';
+
+    return TRUE;
+}
+
+
+/**
+ * Get the modulename. If not set we'll try make one...
+ * @returns     Const pointer to modulename.
+ *              NULL if no modulename.
+ * @sketch
+ */
+const char *        kHll::getModName()
+{
+    if (pszModName != NULL)
+        return pszModName;
+    return NULL;
+}
+
 
 /**
  * Dump the object in a human readable fashion to stdout.
  */
-void            kHll::dump()
+void            kHll::dump(FILE *ph)
 {
-    FILE *ph = stdout;
-
     fprintf(ph,
             "------- start dumping kHll object 0x%08x --- %d modules -------\n",
             this, Modules.getCount());
@@ -1568,6 +1807,7 @@ void            kHll::ida(kFile *pFile) throw(int)
     }
 
     pFile->printf("}\n\n");
+    pFile->setSize();
 }
 
 
@@ -1617,6 +1857,293 @@ kHll *          kHll::readLX(
                 pszFilename, iOS2Error);
     }
     return NULL;
+}
+
+
+/**
+ * Create a kHll object from an LX export table.
+ * @returns     Pointer to kHll object.
+ * @param       pFileLX     Pointer to the LX file.
+ */
+kHll *              kHll::readLXExports(
+                        kFileLX *pFileLX
+                        ) throw(int)
+{
+    char                szBuffer[CCHMAXPATH];
+    kHll *              pHll = new kHll();
+    kHllModuleEntry *   pModule;
+    int                 i;
+
+
+    /*
+     * Set modulename.
+     */
+    if (!pFileLX->queryModuleName(szBuffer))
+        strcpy(szBuffer, "HMM");
+    pHll->setModName(szBuffer);
+
+
+    /*
+     * Make fake module.
+     */
+    pModule = pHll->addModule(szBuffer, NULL);
+    if (pModule == NULL)
+    {
+        fprintf(stderr, "addModule failed\n");
+        delete pHll;
+        return NULL;
+    }
+    pModule->getSourceEntry()->addFile(szBuffer);
+
+
+    /*
+     * Add segment to the module.
+     */
+    for (i = 0; i < pFileLX->getObjectCount(); i++)
+    {
+        struct o32_obj *pLXObject = pFileLX->getObject((USHORT)i);
+        if (pLXObject)
+        {
+            if (!pModule->addSegInfo((USHORT)(i+1), 0, pLXObject->o32_size))
+                fprintf(stderr, "warning: addseginfo failed!\n");
+        }
+        else
+            fprintf(stderr, "warning: pFileLX->getObject failed for Segment no.=%d (0 based)\n", i);
+    }
+
+
+    /*
+     * Exports
+     */
+    EXPORTENTRY export;
+    if (pFileLX->findFirstExport(&export))
+    {
+        do
+        {
+            if (export.achName[0] == '\0')
+                sprintf(export.achName, "Ordinal%03d", export.ulOrdinal);
+            pModule->addPublicSymbol(export.achName, export.offset,
+                                     (unsigned short)export.iObject, NULL);
+        } while (pFileLX->findNextExport(&export));
+    }
+
+    return pHll;
+}
+
+
+/**
+ * Create a kHll object from a Symbol file.
+ * @returns     Pointer to kHll object.
+ * @param       pFile       Pointer to Symbol file file object.
+ * @param       pFileLX     Pointer to corresponding LX (only LX - FIXME!) file. [optional].
+ */
+kHll *          kHll::readSym(
+                    kFile *pFile,
+                    kFileLX *pFileLX /*= NULL */
+                    )
+{
+    kHll *pHll = NULL;
+
+    /*
+     * Start conversion.
+     */
+    PBYTE pbSym = (PBYTE)pFile->readFile();
+    if (pbSym != NULL)
+    {
+        kHllModuleEntry *   pModule;
+        PMAPDEF             pMapDef;        /* Mapfile header */
+
+        pHll = new kHll();
+
+        pMapDef = (PMAPDEF)pbSym;
+        while (pMapDef != NULL)
+        {
+            int         iSeg;
+            PSEGDEF     pSegDef;            /* Segment header */
+
+            /*
+             * Map definition.
+             */
+            printf("- Map definition -\n"
+                   "    ppNextMap    0x%04x  paragraph pointer to next map\n"
+                   "    bFlags       0x%02x    symbol types\n"
+                   "    bReserved1   0x%02x    reserved\n"
+                   "    pSegEntry    0x%04x  segment entry point value\n"
+                   "    cConsts      0x%04x  count of constants in map\n"
+                   "    pConstDef    0x%04x  pointer to constant chain\n"
+                   "    cSegs        0x%04x  count of segments in map\n"
+                   "    ppSegDef     0x%04x  paragraph pointer to first segment\n"
+                   "    cbMaxSym     0x%02x    maximum symbol-name length\n"
+                   "    cbModName    0x%02x    length of module name\n"
+                   "    achModName   %.*s\n"
+                   "\n",
+                   pMapDef->ppNextMap,
+                   pMapDef->bFlags,
+                   pMapDef->bReserved1,
+                   pMapDef->pSegEntry,
+                   pMapDef->cConsts,
+                   pMapDef->pConstDef,
+                   pMapDef->cSegs,
+                   pMapDef->ppSegDef,
+                   pMapDef->cbMaxSym,
+                   pMapDef->cbModName,
+                   pMapDef->cbModName,
+                   pMapDef->achModName
+                   );
+
+            /*
+             * Add Module and modulename.
+             */
+            pHll->setModName(pMapDef->achModName, pMapDef->cbModName);
+            pModule = pHll->addModule(pMapDef->achModName, pMapDef->cbModName, NULL);
+            if (pModule == NULL)
+            {
+                fprintf(stderr, "addModule failed\n");
+                delete pHll;
+                return NULL;
+            }
+            pModule->getSourceEntry()->addFile(pMapDef->achModName, pMapDef->cbModName);
+
+
+            /*
+             * Read and convert segments with info.
+             */
+            pSegDef = SEGDEFPTR(pbSym, *pMapDef);
+            iSeg = 1;
+            while (pSegDef != NULL)
+            {
+                struct o32_obj *pLXObject;
+                PSYMDEF32       pSymDef32;  /* Symbol definition 32-bit */
+                PSYMDEF16       pSymDef16;  /* Symbol definition 16-bit */
+                int             iSym;
+
+
+                /*
+                 * Dump Segment definition.
+                 */
+                printf("    - Segment Definition -\n"
+                       "      ppNextSeg   0x%04x  paragraph pointer to next segment\n"
+                       "      cSymbols    0x%04x  count of symbols in list\n"
+                       "      pSymDef     0x%04x  offset of symbol chain\n"
+                       "      wSegNum     0x%04x  segment number (1-based)\n"
+                       "      wReserved2  0x%04x  reserved\n"
+                       "      wReserved3  0x%04x  reserved\n"
+                       "      wReserved4  0x%04x  reserved\n"
+                       "      bFlags      0x%04x  symbol types\n"
+                       "      bReserved1  0x%04x  reserved\n"
+                       "      ppLineDef   0x%04x  offset of line number record\n"
+                       "      bReserved2  0x%04x  reserved\n"
+                       "      bReserved3  0x%04x  reserved\n"
+                       "      cbSegName   0x%04x  length of segment name\n"
+                       "      achSegName  %.*s\n",
+                       pSegDef->ppNextSeg,
+                       pSegDef->cSymbols,
+                       pSegDef->pSymDef,
+                       pSegDef->wSegNum,
+                       pSegDef->wReserved2,
+                       pSegDef->wReserved3,
+                       pSegDef->wReserved4,
+                       pSegDef->bFlags,
+                       pSegDef->bReserved1,
+                       pSegDef->ppLineDef ,
+                       pSegDef->bReserved2,
+                       pSegDef->bReserved3,
+                       pSegDef->cbSegName,
+                       pSegDef->cbSegName,
+                       pSegDef->achSegName
+                       );
+
+                /*
+                 * Add segment to the module - FIXME - need info from the LX Object table...
+                 */
+                if (pFileLX)
+                {
+                    pLXObject = pFileLX->getObject((USHORT)iSeg-1);
+                    if (pLXObject == NULL)
+                        fprintf(stderr, "warning: pFileLX->getObject failed for iSeg=%d\n",
+                                iSeg);
+                }
+
+                if (pLXObject != NULL)
+                {   /* Make fake LX object info */
+
+                }
+
+                if (pLXObject)
+                {
+                    if (!pModule->addSegInfo((USHORT)iSeg, 0, pLXObject->o32_size))
+                        fprintf(stderr, "warning: addseginfo failed!\n");
+                }
+
+                /*
+                 * Read and convert symbols
+                 */
+                for (iSym = 0; iSym < pSegDef->cSymbols; iSym++)
+                {
+                    unsigned long   offset;
+                    int             cchName;
+                    const char *    pachName;
+                    pSymDef32 = SYMDEFPTR32(pbSym, pSegDef, iSym);
+                    pSymDef16 = (PSYMDEF16)pSymDef32;
+
+                    if (SEG32BitSegment(*pSegDef))
+                    {   /* pSymDef32 */
+                        offset = pSymDef32->wSymVal;
+                        cchName = pSymDef32->cbSymName;
+                        pachName = pSymDef32->achSymName;
+                    }
+                    else
+                    {   /* pSymDef16 */
+                        offset = pSymDef16->wSymVal;
+                        cchName = pSymDef16->cbSymName;
+                        pachName = pSymDef16->achSymName;
+                    }
+
+                    printf("      0x%08x  %.*s\n",
+                           offset,
+                           cchName,
+                           pachName);
+
+                    /*
+                     * Add symbol - currently we define it as public - it's a symbol local to this module really.
+                     */
+                    pModule->addPublicSymbol(pachName, cchName, offset, (USHORT)iSeg, 0);
+                }
+
+
+                /*
+                 * Next segment
+                 */
+                printf("\n");
+                pSegDef = NEXTSEGDEFPTR(pbSym, *pSegDef);
+                iSeg++;
+            }
+
+
+            /*
+             * Next map
+             */
+            pMapDef = NEXTMAPDEFPTR(pbSym, *pMapDef);
+            if (pMapDef != NULL)
+            {
+                if (pMapDef->ppNextMap == 0)
+                {   /* last map */
+                    PLAST_MAPDEF pLastMapDef = (PLAST_MAPDEF)pMapDef;
+                    printf("- Last Map definition -\n"
+                           "    ppNextMap    0x%04x  always zero\n"
+                           "    version      0x%02x    release number (minor version number)\n"
+                           "    release      0x%02x    major version number\n",
+                           pLastMapDef->ppNextMap,
+                           pLastMapDef->release,
+                           pLastMapDef->version
+                           );
+                    break;
+                }
+            }
+        } /* Map loop */
+    }
+
+    return pHll;
 }
 
 
@@ -1777,6 +2304,141 @@ APIRET          kHll::writeToLX(
 
 
 /**
+ * Converts HLL info to a Sym file.
+ * No backup is made. (sorry)
+ * @returns   OS2 return code.
+ * @param     pFile     Pointer to output file object.
+ */
+void            kHll::writeSym(
+                    kFile *     pFile
+                    )           throw(int)
+{
+    long            off;
+    int             rc = 0;
+    long            offEndMap;
+    int             cbMapDef;
+    PMAPDEF         pMapDef = (PMAPDEF)malloc(sizeof(MAPDEF) + CCHMAXPATH); /* Mapfile header */
+    PLAST_MAPDEF    pEndMapDef = (PLAST_MAPDEF)pMapDef;
+    int             iSeg;               /* (1 based) */
+    int             cSegs = queryMaxObjectIndex();
+
+    /* If any I/O operation failes, it should throw errors to our caller. */
+    pFile->setThrowOnErrors();
+
+    /* Ensure that there is a module name. */
+    if (getModName() == NULL)
+        setModName(pFile->getFilename());
+
+    /* Make mapdef. */
+    memset(pMapDef, 0, sizeof(MAPDEF) + CCHMAXPATH);
+    pMapDef->bFlags     = 2; //what's this?
+    pMapDef->pSegEntry  = 1; //dummy
+    pMapDef->cbMaxSym   = 64;
+    strcpy(pMapDef->achModName, getModName());
+    pMapDef->cbModName  = (unsigned char)strlen(pMapDef->achModName);
+    cbMapDef            = (int)((sizeof(MAPDEF) - 1 + pMapDef->cbModName + 15UL) & ~15UL);
+    pMapDef->ppSegDef   = (unsigned short)(cbMapDef >> 4);
+    pMapDef->cSegs      = (unsigned short)cSegs;
+    pFile->write(pMapDef, cbMapDef);
+
+
+    /*
+     * Make segment info.
+     *  -determin number of segments
+     *  -loop thru every segment and write symbols.
+     */
+    for (iSeg = 1; iSeg <= cSegs && rc == 0; iSeg++)
+    {
+        char                achBufferSegDef[CCHMAXPATH + sizeof(SEGDEF)];
+        int                 cbSegDef;
+        PSEGDEF             pSegDef = (PSEGDEF)&achBufferSegDef[0];
+        long                offSegDef = pFile->getPos();
+        kHllModuleEntry *   pModule;
+        int                 coffSymsAllocated = 100;
+        unsigned short  *   paoffSyms = (unsigned short *)malloc(sizeof(unsigned short) * coffSymsAllocated);
+
+        /* Make and write segdef. */
+        memset(pSegDef, 0, sizeof(SEGDEF));
+        sprintf(pSegDef->achSegName, "Segment%d", iSeg);
+        pSegDef->wSegNum    = (unsigned short)iSeg;
+        pSegDef->bReserved3 = (char)0xff;
+        pSegDef->cbSegName  = (unsigned char)strlen(pSegDef->achSegName);
+        pSegDef->bFlags     = SEG_FLAGS_32BIT;
+        cbSegDef            = (int)(((sizeof(SEGDEF) + pSegDef->cbSegName) + 15UL) & ~15UL);
+        pFile->write(pSegDef, cbSegDef);
+
+
+        /* Write symbols. */
+        pModule = (kHllModuleEntry*)Modules.getFirst();
+        while (pModule && rc == 0)
+        {
+            pModule->writeSymSeg(pFile, iSeg, pSegDef, paoffSyms, coffSymsAllocated, offSegDef);
+            pModule = (kHllModuleEntry*)pModule->getNext();
+        }
+
+
+        /* Write offset array */
+        off = pFile->getPos();
+        pSegDef->pSymDef = (unsigned short)(off - offSegDef);
+        pFile->write(paoffSyms, pSegDef->cSymbols * sizeof(unsigned short));
+        pFile->write(pSegDef, (size_t)(16 - (pFile->getPos() % 16)));
+
+
+        /* Write updated segdef. */
+        off = pFile->getPos();
+        assert((off % 16) == 0);
+        if (iSeg < cSegs)
+            pSegDef->ppNextSeg = (unsigned short)(off >> 4);
+        pFile->writeAt(pSegDef, sizeof(SEGDEF), offSegDef);
+        pFile->set(off);
+        free(paoffSyms);
+    }
+
+
+    /*
+     * Write the updated mapdef and the last mapdef entry.
+     */
+    offEndMap = pFile->getPos();
+    assert((offEndMap % 16) == 0);
+    pMapDef->ppNextMap = (unsigned short)(offEndMap >> 4);
+    pFile->writeAt(pMapDef, sizeof(MAPDEF), 0);
+
+    pEndMapDef->ppNextMap = 0;
+    pEndMapDef->release   = 1;
+    pEndMapDef->version   = 5;
+    pFile->writeAt(pEndMapDef, sizeof(LAST_MAPDEF), offEndMap);
+    pFile->setSize();
+
+    /*
+     * Cleanup
+     */
+    free(pMapDef);
+}
+
+
+/**
+ * Gets the highest object index.
+ * @returns     Higest object index used. (1 based?)
+ */
+int                 kHll::queryMaxObjectIndex()
+{
+    int iObjectMax = 0;
+    kHllModuleEntry *pModule = (kHllModuleEntry*)Modules.getFirst();
+    while (pModule != NULL)
+    {
+        int iObject = pModule->queryMaxObjectIndex();
+
+        if (iObject > iObjectMax)
+            iObjectMax = iObject;
+
+        /* next */
+        pModule = (kHllModuleEntry*)pModule->getNext();
+    }
+    return iObjectMax;
+}
+
+
+/**
  * Find the size of a file.
  * @returns   Size of file. -1 on error.
  * @param     phFile  File handle.
@@ -1798,34 +2460,3 @@ signed long fsize(FILE *phFile)
     return cb;
 }
 
-
-
-#if 1
-/**
- * Debugging entry point for the readLX constructor.
- * It reads this executable and dumps it.
- * @param    argc   Argument count.
- * @param    argv   Argument vector - only the first entry is used.
- */
-void main(int argc, char **argv)
-{
-    kHll *pHll;
-
-    /* read last argument */
-    pHll = kHll::readLX(argv[argc-1]);
-    if (pHll)
-    {
-        printf("Successfully read %s\n", argv[0]);
-        pHll->dump();
-        kFile kidc("dbg.idc", FALSE);
-        pHll->ida(&kidc);
-    }
-    argc = argc;
-    delete (pHll);
-}
-
-#ifdef __IBMCPP__
-#include "klist.cpp"
-#endif
-
-#endif
