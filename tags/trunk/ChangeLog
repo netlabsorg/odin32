@@ -1,4 +1,16 @@
-/* $Id: ChangeLog,v 1.1401 2001-05-08 12:19:48 bird Exp $ */
+/* $Id: ChangeLog,v 1.1402 2001-05-09 03:52:47 bird Exp $ */
+
+ 2001-05-09: knut st. osmundsen <knut.stange.osmundsen@mynd.no>
+    - src/ws2help, bin/debug, bin/release, src/win32k/list,
+      src/win32k/debug:
+                o Removed directories. These were either not needed
+                  or unused. I did this now since I was going to
+                  remove ws2help anyway and there by breaking your tree.
+    - tools/bin/CVSRemoveDeletedDirs.cmd:
+                o Rexx script which removes the above directories
+                  from your local tree. Run this from the root of the tree.
+                  To physically remove the directories you have to specify
+                  REMOVE as argument (no dash or slash!).
 
  2001-05-08: knut st. osmundsen <knut.stange.osmundsen@mynd.no>
     - src/makefile:
