@@ -1,4 +1,4 @@
-/* $Id: hmdisk.cpp,v 1.27 2001-10-30 00:46:17 sandervl Exp $ */
+/* $Id: hmdisk.cpp,v 1.28 2001-11-22 16:03:23 sandervl Exp $ */
 
 /*
  * Win32 Disk API functions for OS/2
@@ -36,6 +36,7 @@ typedef struct
     DWORD (CDECL *SendASPI32Command)(LPSRB lpSRB);
     ULONG     driveLetter;
     ULONG     driveType;
+    ULONG     dwVolumelabel;
     CHAR      signature[8];
     DWORD     dwAccess;
     DWORD     dwShare;
@@ -136,6 +137,7 @@ DWORD HMDeviceDiskClass::CreateFile (LPCSTR        lpFileName,
 
         DRIVE_INFO *drvInfo = (DRIVE_INFO *)malloc(sizeof(DRIVE_INFO));
         if(drvInfo == NULL) {
+             DebugInt3();
              if(pHMHandleData->hHMHandle) OSLibDosClose(pHMHandleData->hHMHandle);
              return ERROR_OUTOFMEMORY;
         }
@@ -179,6 +181,10 @@ DWORD HMDeviceDiskClass::CreateFile (LPCSTR        lpFileName,
                              &drvInfo->signature[0], 4, &datasize);
         }
 
+        if(hFile) {
+            OSLibDosQueryVolumeSerialAndName(1 + drvInfo->driveLetter - 'A', &drvInfo->dwVolumelabel, NULL, 0);
+        }
+
         return (NO_ERROR);
     }
     else {
@@ -216,7 +222,8 @@ DWORD HMDeviceDiskClass::OpenDisk(PVOID pDrvInfo)
              dprintf(("Drive not ready"));
              return 0; 
         }
-        else return hFile;
+        OSLibDosQueryVolumeSerialAndName(1 + drvInfo->driveLetter - 'A', &drvInfo->dwVolumelabel, NULL, 0);
+        return hFile;
     }
     return 0;
 }
@@ -565,8 +572,7 @@ BOOL HMDeviceDiskClass::DeviceIoControl(PHMHANDLEDATA pHMHandleData, DWORD dwIoC
             *lpBytesReturned = 0;
         }
 
-        char   temp;
-        ULONG  bytesread, oldmode;
+        ULONG  volumelabel;
         APIRET rc;
 
         if(!pHMHandleData->hHMHandle) {
@@ -579,21 +585,23 @@ BOOL HMDeviceDiskClass::DeviceIoControl(PHMHANDLEDATA pHMHandleData, DWORD dwIoC
         }
 
         //Applications can use this IOCTL to check if the floppy has been changed
-        //OSLibDosGetDiskGeometry won't fail when that happens so we read one
-        //byte from the disk and return ERROR_MEDIA_CHANGED if it fails with
-        //ERROR_WRONG_DISK
-        oldmode = SetErrorMode(SEM_FAILCRITICALERRORS);
-        rc = OSLibDosRead(pHMHandleData->hHMHandle, (PVOID)&temp,
-                          1, &bytesread);
-        SetErrorMode(oldmode);
-        if(rc == FALSE) {
-            dprintf(("IOCTL_DISK_GET_DRIVE_GEOMETRY: DosRead failed with rc %d", GetLastError()));
-            if(GetLastError() == ERROR_WRONG_DISK) {
-                SetLastError(ERROR_MEDIA_CHANGED);
-                return FALSE;
-            }
+        //OSLibDosGetDiskGeometry won't fail when that happens so we read the
+        //volume label from the disk and return ERROR_MEDIA_CHANGED if the volume
+        //label has changed
+        //TODO: Find better way to determine if floppy was removed or switched
+        rc = OSLibDosQueryVolumeSerialAndName(1 + drvInfo->driveLetter - 'A', &volumelabel, NULL, 0);
+        if(rc) {
+            dprintf(("IOCTL_DISK_GET_DRIVE_GEOMETRY: OSLibDosQueryVolumeSerialAndName failed with rc %d", GetLastError()));
+            if(pHMHandleData->hHMHandle) OSLibDosClose(pHMHandleData->hHMHandle);
+            pHMHandleData->hHMHandle = 0;
+            SetLastError(ERROR_MEDIA_CHANGED);
+            return FALSE;
         }
-        else OSLibDosSetFilePtr(pHMHandleData->hHMHandle, -1, OSLIB_SETPTR_FILE_CURRENT);
+        if(volumelabel != drvInfo->dwVolumelabel) {
+            dprintf(("IOCTL_DISK_GET_DRIVE_GEOMETRY: volume changed %x -> %x", drvInfo->dwVolumelabel, volumelabel));
+            SetLastError(ERROR_MEDIA_CHANGED);
+            return FALSE;
+        }
 
         if(OSLibDosGetDiskGeometry(pHMHandleData->hHMHandle, drvInfo->driveLetter, pGeom) == FALSE) {
             return FALSE;
@@ -1214,6 +1222,7 @@ BOOL HMDeviceDiskClass::ReadFile(PHMHANDLEDATA pHMHandleData,
     return FALSE;
   }
 
+  //If we didn't get an OS/2 handle for the disk before, get one now
   if(!pHMHandleData->hHMHandle) {
       DRIVE_INFO *drvInfo = (DRIVE_INFO*)pHMHandleData->dwUserData;
       pHMHandleData->hHMHandle = OpenDisk(drvInfo);
@@ -1310,6 +1319,209 @@ DWORD HMDeviceDiskClass::SetFilePointer(PHMHANDLEDATA pHMHandleData,
       dprintf(("SetFilePointer failed (error = %d)", GetLastError()));
   }
   return ret;
+}
+/*****************************************************************************
+ * Name      : BOOL ReadFileEx
+ * Purpose   : The ReadFileEx function reads data from a file asynchronously.
+ *             It is designed solely for asynchronous operation, unlike the
+ *             ReadFile function, which is designed for both synchronous and
+ *             asynchronous operation. ReadFileEx lets an application perform
+ *             other processing during a file read operation.
+ *             The ReadFileEx function reports its completion status asynchronously,
+ *             calling a specified completion routine when reading is completed
+ *             and the calling thread is in an alertable wait state.
+ * Parameters: HANDLE       hFile                handle of file to read
+ *             LPVOID       lpBuffer             address of buffer
+ *             DWORD        nNumberOfBytesToRead number of bytes to read
+ *             LPOVERLAPPED lpOverlapped         address of offset
+ *             LPOVERLAPPED_COMPLETION_ROUTINE lpCompletionRoutine address of completion routine
+ * Variables :
+ * Result    : TRUE / FALSE
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Mon, 1998/06/15 08:00]
+ *****************************************************************************/
+BOOL HMDeviceDiskClass::ReadFileEx(PHMHANDLEDATA pHMHandleData,
+                           LPVOID       lpBuffer,
+                           DWORD        nNumberOfBytesToRead,
+                           LPOVERLAPPED lpOverlapped,
+                           LPOVERLAPPED_COMPLETION_ROUTINE  lpCompletionRoutine)
+{
+  dprintf(("ERROR: ReadFileEx(%08xh,%08xh,%08xh,%08xh,%08xh) not implemented.\n",
+           pHMHandleData->hHMHandle,
+           lpBuffer,
+           nNumberOfBytesToRead,
+           lpOverlapped,
+           lpCompletionRoutine));
+  return FALSE;
+}
+
+
+/*****************************************************************************
+ * Name      : BOOL HMDeviceDiskClass::WriteFile
+ * Purpose   : write data to handle / device
+ * Parameters: PHMHANDLEDATA pHMHandleData,
+ *             LPCVOID       lpBuffer,
+ *             DWORD         nNumberOfBytesToWrite,
+ *             LPDWORD       lpNumberOfBytesWritten,
+ *             LPOVERLAPPED  lpOverlapped
+ * Variables :
+ * Result    : Boolean
+ * Remark    :
+ * Status    :
+ *
+ * Author    : Patrick Haller [Wed, 1998/02/11 20:44]
+ *****************************************************************************/
+
+BOOL HMDeviceDiskClass::WriteFile(PHMHANDLEDATA pHMHandleData,
+                                    LPCVOID       lpBuffer,
+                                    DWORD         nNumberOfBytesToWrite,
+                                    LPDWORD       lpNumberOfBytesWritten,
+                                    LPOVERLAPPED  lpOverlapped)
+{
+  LPVOID       lpRealBuf;
+  Win32MemMap *map;
+  DWORD        offset, byteswritten;
+  BOOL         bRC;
+
+  dprintf2(("KERNEL32: HMDeviceDiskClass::WriteFile %s(%08x,%08x,%08x,%08x,%08x) - stub?\n",
+           lpHMDeviceName,
+           pHMHandleData,
+           lpBuffer,
+           nNumberOfBytesToWrite,
+           lpNumberOfBytesWritten,
+           lpOverlapped));
+
+  DRIVE_INFO *drvInfo = (DRIVE_INFO*)pHMHandleData->dwUserData;
+  if(drvInfo == NULL) {
+      dprintf(("ERROR: DeviceIoControl: drvInfo == NULL!!!"));
+      DebugInt3();
+      SetLastError(ERROR_INVALID_HANDLE);
+      return FALSE;
+  }
+
+  //SvL: It's legal for this pointer to be NULL
+  if(lpNumberOfBytesWritten)
+    *lpNumberOfBytesWritten = 0;
+  else
+    lpNumberOfBytesWritten = &byteswritten;
+
+  if((pHMHandleData->dwFlags & FILE_FLAG_OVERLAPPED) && !lpOverlapped) {
+    dprintf(("FILE_FLAG_OVERLAPPED flag set, but lpOverlapped NULL!!"));
+    SetLastError(ERROR_INVALID_PARAMETER);
+    return FALSE;
+  }
+  if(!(pHMHandleData->dwFlags & FILE_FLAG_OVERLAPPED) && lpOverlapped) {
+    dprintf(("Warning: lpOverlapped != NULL & !FILE_FLAG_OVERLAPPED; sync operation"));
+  }
+
+  //If we didn't get an OS/2 handle for the disk before, get one now
+  if(!pHMHandleData->hHMHandle) {
+      DRIVE_INFO *drvInfo = (DRIVE_INFO*)pHMHandleData->dwUserData;
+      pHMHandleData->hHMHandle = OpenDisk(drvInfo);
+      if(!pHMHandleData->hHMHandle) {
+          dprintf(("No disk inserted; aborting"));
+          SetLastError(ERROR_NOT_READY);
+          return -1;
+      }
+  }
+  //NOTE: For now only allow an application to write to drive A
+  //      Might want to extend this to all removable media, but it's
+  //      too dangerous to allow win32 apps to write to the harddisk directly
+  if(drvInfo->driveLetter != 'A') {
+      SetLastError(ERROR_ACCESS_DENIED);
+      return -1;
+  }
+
+
+  //SvL: DosWrite doesn't like reading from memory addresses returned by
+  //     DosAliasMem -> search for original memory mapped pointer and use
+  //     that one + commit pages if not already present
+  map = Win32MemMapView::findMapByView((ULONG)lpBuffer, &offset, MEMMAP_ACCESS_READ);
+  if(map) {
+    lpRealBuf = (LPVOID)((ULONG)map->getMappingAddr() + offset);
+    DWORD nrpages = nNumberOfBytesToWrite/4096;
+    if(offset & 0xfff)
+        nrpages++;
+    if(nNumberOfBytesToWrite & 0xfff)
+        nrpages++;
+
+    map->commitPage(offset & ~0xfff, TRUE, nrpages);
+  }
+  else  lpRealBuf = (LPVOID)lpBuffer;
+
+  if(pHMHandleData->dwFlags & FILE_FLAG_OVERLAPPED) {
+    dprintf(("ERROR: Overlapped IO not yet implememented!!"));
+  }
+//  else {
+    bRC = OSLibDosWrite(pHMHandleData->hHMHandle,
+                            (PVOID)lpRealBuf,
+                            nNumberOfBytesToWrite,
+                            lpNumberOfBytesWritten);
+//  }
+
+  dprintf2(("KERNEL32: HMDeviceDiskClass::WriteFile returned %08xh\n",
+           bRC));
+
+  return bRC;
+}
+
+/*****************************************************************************
+ * Name      : BOOL WriteFileEx
+ * Purpose   : The WriteFileEx function writes data to a file. It is designed
+ *             solely for asynchronous operation, unlike WriteFile, which is
+ *             designed for both synchronous and asynchronous operation.
+ *             WriteFileEx reports its completion status asynchronously,
+ *             calling a specified completion routine when writing is completed
+ *             and the calling thread is in an alertable wait state.
+ * Parameters: HANDLE       hFile                handle of file to write
+ *             LPVOID       lpBuffer             address of buffer
+ *             DWORD        nNumberOfBytesToRead number of bytes to write
+ *             LPOVERLAPPED lpOverlapped         address of offset
+ *             LPOVERLAPPED_COMPLETION_ROUTINE lpCompletionRoutine address of completion routine
+ * Variables :
+ * Result    : TRUE / FALSE
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Mon, 1998/06/15 08:00]
+ *****************************************************************************/
+
+BOOL HMDeviceDiskClass::WriteFileEx(PHMHANDLEDATA pHMHandleData,
+                           LPVOID       lpBuffer,
+                           DWORD        nNumberOfBytesToWrite,
+                           LPOVERLAPPED lpOverlapped,
+                           LPOVERLAPPED_COMPLETION_ROUTINE  lpCompletionRoutine)
+{
+  dprintf(("ERROR: WriteFileEx(%08xh,%08xh,%08xh,%08xh,%08xh) not implemented.\n",
+           pHMHandleData->hHMHandle,
+           lpBuffer,
+           nNumberOfBytesToWrite,
+           lpOverlapped,
+           lpCompletionRoutine));
+  return FALSE;
+}
+
+/*****************************************************************************
+ * Name      : DWORD HMDeviceDiskClass::GetFileType
+ * Purpose   : determine the handle type
+ * Parameters: PHMHANDLEDATA pHMHandleData
+ * Variables :
+ * Result    : API returncode
+ * Remark    :
+ * Status    :
+ *
+ * Author    : Patrick Haller [Wed, 1998/02/11 20:44]
+ *****************************************************************************/
+
+DWORD HMDeviceDiskClass::GetFileType(PHMHANDLEDATA pHMHandleData)
+{
+  dprintf2(("KERNEL32: HMDeviceDiskClass::GetFileType %s(%08x)\n",
+             lpHMDeviceName,
+             pHMHandleData));
+
+  return FILE_TYPE_DISK;
 }
 //******************************************************************************
 //******************************************************************************
