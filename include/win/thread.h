@@ -1,4 +1,4 @@
-/* $Id: thread.h,v 1.6 1999-09-26 22:24:51 sandervl Exp $ */
+/* $Id: thread.h,v 1.7 1999-10-14 12:29:15 sandervl Exp $ */
 
 /*
  * Thread definitions
@@ -104,6 +104,7 @@ typedef struct _THDB
     ULONG          hmq;		   // Thread message queue
     ULONG          hab;            // Thread Anchor block
     BOOL           fMsgTranslated; // TranslateMessage called for this message?
+    ULONG          newWindow;      // Pointer to window object of window that was just created
 #endif
 } THDB;
 
