@@ -3,6 +3,9 @@ LIBRARY ODINCRT INITINSTANCE TERMINSTANCE
 PROTMODE
 DATA MULTIPLE NONSHARED READWRITE LOADONCALL
 CODE LOADONCALL
+SEGMENTS
+   DDE4_DATA32 CLASS 'DATA' NONSHARED READWRITE LOADONCALL
+   LIBDATA16   CLASS 'DATA' NONSHARED READWRITE LOADONCALL
 
 ; We should have plain forwarders for functions that do
 ; NOT employ _CrtGetLocalData in any way. Alternatively,
@@ -963,4 +966,3 @@ EXPORTS
     __ctordtorTerm                                    @916
     _Exception_CPP                                    @917
     __ctdtused                                        @918
-
