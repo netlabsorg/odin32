@@ -1,12 +1,15 @@
-/* $Id: text.cpp,v 1.39 2003-12-29 12:04:15 sandervl Exp $ */
+/* $Id: text.cpp,v 1.40 2004-01-11 11:42:22 sandervl Exp $ */
 
 /*
  * GDI32 text apis
  *
- * Based on Wine code (991031) (objects\text.c)
+ * Based on Wine/ReWind code (objects\text.c, objects\font.c)
  *
  * Copyright 1993, 1994 Alexandre Julliard
+ *           1997 Alex Korobka
+ *
  * Copyright 1999-2000 Christoph Bratschi
+ * Copyright 2002-2003 Innotek Systemberatung GmbH (sandervl@innotek.de)
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *
@@ -20,6 +23,8 @@
 #include "oslibgpi.h"
 #include <dcdata.h>
 #include <unicode.h>
+#include "dibsect.h"
+#include "ft2supp.h"
 #include "font.h"
 
 #define DBG_LOCALLOG    DBG_text
@@ -76,7 +81,9 @@ UINT WINAPI GetTextCharset(HDC hdc) /* [in] Handle to device context */
 //#undef INVERT
 //#define INVERT_SETYINVERSION
 //******************************************************************************
-BOOL InternalTextOutA(HDC hdc,int X,int Y,UINT fuOptions,CONST RECT *lprc,LPCSTR lpszString,INT cbCount,CONST INT *lpDx,BOOL IsExtTextOut)
+BOOL InternalTextOutAW(HDC hdc,int X,int Y,UINT fuOptions,
+                       CONST RECT *lprc, LPCSTR lpszStringA, LPCWSTR lpszStringW,
+                       INT cbCount,CONST INT *lpDx,BOOL IsExtTextOut, BOOL fUnicode)
 {
   pDCData pHps = (pDCData)OSLibGpiQueryDCData(hdc);
   ULONG flOptions = 0;
@@ -84,11 +91,17 @@ BOOL InternalTextOutA(HDC hdc,int X,int Y,UINT fuOptions,CONST RECT *lprc,LPCSTR
   POINTLOS2 ptl;
   LONG hits;
 
-  if (!pHps || (cbCount < 0) || ((lpszString == NULL) && (cbCount != 0)))
+  if (!pHps || (cbCount < 0) || (((lpszStringA == NULL && !fUnicode) || (lpszStringW == NULL && fUnicode)) && (cbCount != 0)))
   {
         dprintf(("InternalTextOutA: invalid parameter"));
         SetLastError(ERROR_INVALID_HANDLE);
         return FALSE;
+  }
+
+  if(cbCount == -1) {
+       if(fUnicode) 
+            cbCount = lstrlenW(lpszStringW);
+       else cbCount = lstrlenA(lpszStringA);
   }
 
   if (cbCount > 512)
@@ -97,7 +110,7 @@ BOOL InternalTextOutA(HDC hdc,int X,int Y,UINT fuOptions,CONST RECT *lprc,LPCSTR
         SetLastError(ERROR_INVALID_PARAMETER);
         return FALSE;
   }
-  if (fuOptions & ~((UINT)(ETO_CLIPPED | ETO_OPAQUE)))
+  if (fuOptions & ~((UINT)(ETO_CLIPPED | ETO_OPAQUE | ETO_GLYPH_INDEX)))
   {
         dprintf(("InternalTextOutA: invalid fuOptions"));
         //ETO_GLYPH_INDEX, ETO_RTLLEADING, ETO_NUMERICSLOCAL, ETO_NUMERICSLATIN, ETO_IGNORELANGUAGE, ETO_PDY  are ignored
@@ -149,12 +162,16 @@ BOOL InternalTextOutA(HDC hdc,int X,int Y,UINT fuOptions,CONST RECT *lprc,LPCSTR
   }
   else
   {
-    if (fuOptions)
+    if (fuOptions & ~ETO_GLYPH_INDEX)
     {
-        dprintf(("InternalTextOutA: ERROR_INVALID_HANDLE"));
-        SetLastError(ERROR_INVALID_HANDLE);
+        dprintf(("InternalTextOutA: ERROR_INVALID_PARAMETER"));
+        SetLastError(ERROR_INVALID_PARAMETER);
         return FALSE;
     }
+  }
+
+  if((lpszStringA || lpszStringW) && cbCount) {
+      DIBSECTION_CHECK_IF_DIRTY(hdc);
   }
 
   if (cbCount == 0)
@@ -175,6 +192,9 @@ BOOL InternalTextOutA(HDC hdc,int X,int Y,UINT fuOptions,CONST RECT *lprc,LPCSTR
         FillRect(hdc, lprc, hbrush);
         SelectObject(hdc, oldbrush);
         DeleteObject(hbrush);
+
+        DIBSECTION_MARK_INVALID(hdc);
+
         return TRUE;
 #endif
     }
@@ -243,85 +263,54 @@ BOOL InternalTextOutA(HDC hdc,int X,int Y,UINT fuOptions,CONST RECT *lprc,LPCSTR
   ptl.y -= vertAdjust;
 #endif
 
-  hits = OSLibGpiCharStringPosAt(pHps,&ptl,&pmRect,flOptions,cbCount,lpszString,lpDx);
+  if(fUnicode) 
+       hits = FT2Module.Ft2CharStringPosAtW(pHps->hps,&ptl,&pmRect,flOptions,cbCount,lpszStringW,lpDx, fuOptions & ETO_GLYPH_INDEX);
+  else hits = FT2Module.Ft2CharStringPosAtA(pHps->hps,&ptl,&pmRect,flOptions,cbCount,lpszStringA,lpDx, fuOptions & ETO_GLYPH_INDEX);
 
   if (lprc && ((align & 0x18) == TA_BASELINE))
-    OSLibGpiSetTextAlignment(pHps,pmHAlign,pmVAlign);
+      OSLibGpiSetTextAlignment(pHps,pmHAlign,pmVAlign);
 
   if(hits == GPIOS_ERROR) {
-        dprintf(("InternalTextOutA: OSLibGpiCharStringPosAt returned GPIOS_ERROR"));
+      dprintf(("InternalTextOutA: OSLibGpiCharStringPosAt returned GPIOS_ERROR"));
 #ifdef INVERT_SETYINVERSION
-        GpiEnableYInversion(pHps->hps, oldyinv);
+      GpiEnableYInversion(pHps->hps, oldyinv);
 #endif
-        return FALSE;
+      return FALSE;
   }
 
   if (getAlignUpdateCP(pHps))
   {
-    OSLibGpiQueryCurrentPosition(pHps,&ptl);
-    ptl.y -= getWorldYDeltaFor1Pixel(pHps);
+      OSLibGpiQueryCurrentPosition(pHps,&ptl);
+      ptl.y -= getWorldYDeltaFor1Pixel(pHps);
 #ifndef INVERT
-    ptl.y += vertAdjust;
+      ptl.y += vertAdjust;
 #endif
-    OSLibGpiSetCurrentPosition(pHps,&ptl);
+      OSLibGpiSetCurrentPosition(pHps,&ptl);
   }
 
 #ifdef INVERT_SETYINVERSION
   GpiEnableYInversion(pHps->hps, oldyinv);
 #endif
+
+  DIBSECTION_MARK_INVALID(hdc);
+
   return TRUE;
-}
-//******************************************************************************
-//******************************************************************************
-BOOL InternalTextOutW(HDC hdc,int X,int Y,UINT fuOptions,CONST RECT *lprc,LPCWSTR lpszString,INT cbCount,CONST INT *lpDx,BOOL IsExtTextOut)
-{
-  char *astring = NULL;
-  BOOL  rc;
-
-  if(cbCount == -1) {
-     astring = UnicodeToAsciiString((LPWSTR)lpszString);
-  }
-  else
-  if(cbCount >= 0) {
-     int n = WideCharToMultiByte( CP_ACP, 0, lpszString, cbCount, 0, 0, NULL, NULL ) + 1;
-
-     astring = (char *)HEAP_malloc( n );
-     UnicodeToAsciiN((LPWSTR)lpszString, astring, n );
-  }
-
-  rc = InternalTextOutA(hdc,X,Y,fuOptions,lprc,(LPCSTR)astring, strlen( astring ),lpDx,IsExtTextOut);
-  if(astring) {
-      FreeAsciiString(astring);
-  }
-
-  return(rc);
 }
 //******************************************************************************
 //******************************************************************************
 BOOL WIN32API ExtTextOutA(HDC hdc,int X,int Y,UINT fuOptions,CONST RECT *lprc,LPCSTR lpszString,UINT cbCount,CONST INT *lpDx)
 {
-  LPSTR astring = NULL;
-  LPCSTR aCstring = lpszString;
   BOOL  rc;
+  SIZE  size;
+  int   newy;
 
-  /* no guarantee for zeroterminated text in lpszString, found in "PuTTY A Free Win32 Telnet SSH Client" */
-  if (cbCount >= 0)
-  {
-     astring = (char *)malloc(cbCount+1);
-     memcpy(astring, lpszString, cbCount);
-     astring[cbCount] = '\0';
-     aCstring = astring;
-  }
   if(lprc)
   {
-        dprintf(("GDI32: ExtTextOutA %x %s (%d,%d) %x %d %x rect (%d,%d)(%d,%d)", hdc, /*lpszString*/ aCstring, X, Y, fuOptions, cbCount, lpDx, lprc->left, lprc->top, lprc->right, lprc->bottom));
+        dprintf(("GDI32: ExtTextOutA %x %.*s (%d,%d) %x %d %x rect (%d,%d)(%d,%d)", hdc, cbCount, lpszString, X, Y, fuOptions, cbCount, lpDx, lprc->left, lprc->top, lprc->right, lprc->bottom));
   }
-  else  dprintf(("GDI32: ExtTextOutA %x %s (%d,%d) %x %d %x", hdc, /*lpszString*/ aCstring, X, Y, fuOptions, cbCount, lpDx));
+  else  dprintf(("GDI32: ExtTextOutA %x %.*s (%d,%d) %x %d %x", hdc, cbCount, lpszString, X, Y, fuOptions, cbCount, lpDx));
 
-  rc = InternalTextOutA(hdc, X, Y, fuOptions, lprc, aCstring, cbCount, lpDx, TRUE);
-
-  if(astring)
-      free(astring);
+  rc = InternalTextOutAW(hdc, X, Y, fuOptions, lprc, lpszString, NULL, cbCount, lpDx, TRUE, FALSE);
 
   return(rc);
 }
@@ -330,24 +319,25 @@ BOOL WIN32API ExtTextOutA(HDC hdc,int X,int Y,UINT fuOptions,CONST RECT *lprc,LP
 BOOL WIN32API ExtTextOutW(HDC hdc,int X,int Y,UINT fuOptions,CONST RECT *lprc,LPCWSTR lpszString,UINT cbCount,CONST int *lpDx)
 {
   if(lprc) {
-        dprintf(("GDI32: ExtTextOutW %x %ls (%d,%d) %x %d %x rect (%d,%d)(%d,%d)", hdc, lpszString, X, Y, fuOptions, cbCount, lpDx, lprc->left, lprc->top, lprc->right, lprc->bottom));
+        dprintf(("GDI32: ExtTextOutW %x %.*ls (%d,%d) %x %d %x rect (%d,%d)(%d,%d)", hdc, cbCount, lpszString, X, Y, fuOptions, cbCount, lpDx, lprc->left, lprc->top, lprc->right, lprc->bottom));
   }
-  else  dprintf(("GDI32: ExtTextOutW %x %ls (%d,%d) %x %d %x", hdc, lpszString, X, Y, fuOptions, cbCount, lpDx));
-  return InternalTextOutW(hdc, X, Y, fuOptions, lprc, lpszString, cbCount, lpDx, TRUE);
+  else  dprintf(("GDI32: ExtTextOutW %x %.*ls (%d,%d) %x %d %x", hdc, cbCount, lpszString, X, Y, fuOptions, cbCount, lpDx));
+
+  return InternalTextOutAW(hdc, X, Y, fuOptions, lprc, NULL, lpszString, cbCount, lpDx, TRUE, TRUE);
 }
 //******************************************************************************
 //******************************************************************************
 BOOL WIN32API TextOutA(HDC hdc,int nXStart,int nYStart,LPCSTR lpszString,int cbString)
 {
    dprintf(("GDI32: TextOutA %x (%d,%d) %d %.*s", hdc, nXStart, nYStart, cbString, cbString, lpszString));
-   return InternalTextOutA(hdc,nXStart,nYStart,0,NULL,lpszString,cbString,NULL,FALSE);
+   return InternalTextOutAW(hdc,nXStart,nYStart,0,NULL,lpszString,NULL,cbString,NULL,FALSE, FALSE);
 }
 //******************************************************************************
 //******************************************************************************
 BOOL WIN32API TextOutW(HDC hdc,int nXStart,int nYStart,LPCWSTR lpszString,int cbString)
 {
    dprintf(("GDI32: TextOutW %x (%d,%d) %d %.*ls", hdc, nXStart, nYStart, cbString, cbString, lpszString));
-   return InternalTextOutW(hdc,nXStart,nYStart,0,NULL,lpszString,cbString,NULL,FALSE);
+   return InternalTextOutAW(hdc,nXStart,nYStart,0,NULL, NULL, lpszString,cbString,NULL,FALSE, TRUE);
 }
 //******************************************************************************
 //******************************************************************************
@@ -357,10 +347,10 @@ BOOL WIN32API PolyTextOutA(HDC hdc,POLYTEXTA *pptxt,int cStrings)
 
   for (INT x = 0;x < cStrings;x++)
   {
-    BOOL rc;
+      BOOL rc;
 
-    rc = InternalTextOutA(hdc,pptxt[x].x,pptxt[x].y,pptxt[x].uiFlags,&pptxt[x].rcl,pptxt[x].lpstr,pptxt[x].n,pptxt[x].pdx,TRUE);
-    if (!rc) return FALSE;
+      rc = ExtTextOutA(hdc,pptxt[x].x,pptxt[x].y,pptxt[x].uiFlags,&pptxt[x].rcl,pptxt[x].lpstr, pptxt[x].n,pptxt[x].pdx);
+      if (!rc) return FALSE;
   }
 
   return TRUE;
@@ -373,15 +363,19 @@ BOOL WIN32API PolyTextOutW(HDC hdc,POLYTEXTW *pptxt,int cStrings)
 
   for (INT x = 0;x < cStrings;x++)
   {
-    BOOL rc;
+      BOOL rc;
 
-    rc = InternalTextOutW(hdc,pptxt[x].x,pptxt[x].y,pptxt[x].uiFlags,&pptxt[x].rcl,pptxt[x].lpstr,pptxt[x].n,pptxt[x].pdx,TRUE);
-    if (!rc) return FALSE;
+      rc = ExtTextOutW(hdc,pptxt[x].x,pptxt[x].y,pptxt[x].uiFlags,&pptxt[x].rcl, pptxt[x].lpstr,pptxt[x].n,pptxt[x].pdx);
+      if (!rc) return FALSE;
   }
 
   return TRUE;
 }
 //******************************************************************************
+// Note: GetTextExtentPoint behaves differently under certain circumstances
+//       compared to GetTextExtentPoint32 (due to bugs).
+//       We are treating both as the same thing which is not entirely correct.
+//
 //******************************************************************************
 BOOL WIN32API GetTextExtentPointA(HDC hdc, LPCTSTR lpsz, int cbString,
                                   LPSIZE lpsSize)
@@ -427,9 +421,14 @@ BOOL WIN32API GetTextExtentPointW(HDC    hdc,
    // Verified with NT4, SP6
    if(cbString == 0)
    {
+      dprintf(("!WARNING!: GDI32: GetTextExtentPointW invalid parameter!"));
       SetLastError(ERROR_SUCCESS);
       return TRUE;
    }
+
+   if(pHps->isPrinter)
+       ReallySetCharAttrs(pHps);
+
    if(cbString > 512)
    {
       DWORD cbStringNew;
@@ -446,22 +445,13 @@ BOOL WIN32API GetTextExtentPointW(HDC    hdc,
          }
          lpSize->cx += newSize.cx;
          lpSize->cy  = max(newSize.cy, lpSize->cy);
-         lpString     += cbStringNew;
+         lpString    += cbStringNew;
          cbString -= cbStringNew;
       }
       return TRUE;
    }
 
-   int   len;
-   LPSTR astring;
-
-   len = WideCharToMultiByte( CP_ACP, 0, lpString, cbString, 0, 0, NULL, NULL );
-   astring = (char *)malloc( len + 1 );
-   lstrcpynWtoA(astring, lpString, len + 1 );
-
-   rc = OSLibGpiQueryTextBox(pHps, len, astring, TXTBOXOS_COUNT, pts);
-   free(astring);
-
+   rc = FT2Module.Ft2GetTextExtentW(pHps->hps, cbString, lpString, TXTBOXOS_COUNT, pts);
    if(rc == FALSE)
    {
       SetLastError(ERROR_INVALID_PARAMETER);    //todo wrong error
@@ -475,8 +465,8 @@ BOOL WIN32API GetTextExtentPointW(HDC    hdc,
    {//scale for printer dcs
        LONG alArray[2];
 
-       if (OSLibDevQueryCaps(pHps, OSLIB_CAPS_HORIZONTAL_RESOLUTION, 2, &alArray[0]))
-         lpSize->cx = lpSize->cx * alArray[0] / alArray[1];
+       if(OSLibDevQueryCaps(pHps, OSLIB_CAPS_HORIZONTAL_RESOLUTION, 2, &alArray[0]))
+           lpSize->cx = lpSize->cx * alArray[0] / alArray[1];
    }
 
    dprintf(("GDI32: GetTextExtentPointW %x %ls %d returned %d (%d,%d)", hdc, lpString, cbString, rc, lpSize->cx, lpSize->cy));
@@ -552,20 +542,20 @@ BOOL WIN32API GetTextExtentExPointW(HDC hdc,
     size->cx = size->cy = nFit = extent = 0;
     for(index = 0; index < count; index++)
     {
-    if(!GetTextExtentPoint32W( hdc, str, 1, &tSize )) goto done;
+ 	if(!GetTextExtentPoint32W( hdc, str, 1, &tSize )) goto done;
         /* GetTextExtentPoint includes intercharacter spacing. */
         /* FIXME - justification needs doing yet.  Remember that the base
          * data will not be in logical coordinates.
          */
-    extent += tSize.cx;
-    if( !lpnFit || extent <= maxExt )
+	extent += tSize.cx;
+	if( !lpnFit || extent <= maxExt )
         /* It is allowed to be equal. */
         {
-        nFit++;
-        if( alpDx ) alpDx[index] = extent;
+	    nFit++;
+	    if( alpDx ) alpDx[index] = extent;
         }
-    if( tSize.cy > size->cy ) size->cy = tSize.cy;
-    str++;
+	if( tSize.cy > size->cy ) size->cy = tSize.cy;
+	str++;
     }
     size->cx = extent;
     if(lpnFit) *lpnFit = nFit;
@@ -575,6 +565,186 @@ BOOL WIN32API GetTextExtentExPointW(HDC hdc,
 
 done:
     return ret;
+}
+//******************************************************************************
+//******************************************************************************
+BOOL WIN32API GetCharWidth32A( HDC hdc, UINT iFirstChar, UINT iLastChar, PINT pWidthArray)
+{
+    BOOL ret = FALSE;
+      
+    for (int i = iFirstChar; i <= iLastChar; i++)
+    {
+        SIZE size;
+        CHAR c = i;
+        
+        if (GetTextExtentPointA(hdc, &c, 1, &size))
+        {
+            pWidthArray[i-iFirstChar] = size.cx;
+            // at least one character was processed
+            ret = TRUE;
+        }
+        else
+        {
+            // default value for unprocessed characters
+            pWidthArray[i-iFirstChar] = 0;
+        }
+        
+        dprintf2(("Char 0x%x('%c') -> width %d", i, i<256? i: '.', pWidthArray[i-iFirstChar]));
+    }
+   
+    return ret;
+}
+//******************************************************************************
+//******************************************************************************
+BOOL WIN32API GetCharWidth32W(HDC hdc, UINT iFirstChar, UINT iLastChar, PINT pWidthArray)
+{
+    BOOL ret = FALSE;
+      
+    for (int i = iFirstChar; i <= iLastChar; i++)
+    {
+        SIZE size;
+        WCHAR wc = i;
+        
+        if (GetTextExtentPointW(hdc, &wc, 1, &size))
+        {
+            pWidthArray[i-iFirstChar] = size.cx;
+            // at least one character was processed
+            ret = TRUE;
+        }
+        else
+        {
+            // default value for unprocessed characters
+            pWidthArray[i-iFirstChar] = 0;
+        }
+        
+        dprintf2(("Char 0x%x('%c') -> width %d", i, i<256? i: '.', pWidthArray[i-iFirstChar]));
+    }
+   
+    return ret;
+}
+//******************************************************************************
+// GetStringWidthW
+//
+// Return the width of each character in the string
+//
+// Parameters:
+//    HDC    hdc            - device context handle
+//    LPWSTR lpszString     - unicod string pointer
+//    UINT   cbString       - number of valid characters in string
+//    PINT   pWidthArray    - array that receives the character width (must be 
+//                            large enough to contain cbString elements
+//   
+// Returns:
+//    FALSE                 - failure
+//    TRUE                  - success
+//
+//******************************************************************************
+BOOL WIN32API GetStringWidthW(HDC hdc, LPWSTR lpszString, UINT cbString, PINT pWidthArray)
+{
+    return FT2Module.Ft2GetStringWidthW(hdc, lpszString, cbString, pWidthArray);
+}
+//******************************************************************************
+//******************************************************************************
+BOOL WIN32API GetCharWidthFloatA(HDC hdc, UINT iFirstChar, UINT iLastChar, PFLOAT pxBUffer)
+{
+    dprintf(("ERROR: GDI32: GetCharWidthFloatA, not implemented\n"));
+    DebugInt3();
+    return(FALSE);
+}
+//******************************************************************************
+//******************************************************************************
+BOOL WIN32API GetCharWidthFloatW(HDC hdc, UINT iFirstChar, UINT iLastChar, PFLOAT pxBUffer)
+{
+    dprintf(("ERROR: GDI32: GetCharWidthFloatW, not implemented\n"));
+    DebugInt3();
+    return(FALSE);
+}
+//******************************************************************************
+//******************************************************************************
+BOOL WIN32API GetCharABCWidthsA(HDC hdc, UINT firstChar, UINT lastChar, LPABC abc)
+{
+    if(FT2Module.isEnabled() == FALSE) 
+    {//fallback method
+        return O32_GetCharABCWidths(hdc, firstChar, lastChar, abc);
+    }
+
+    INT i, wlen, count = (INT)(lastChar - firstChar + 1);
+    LPSTR str;
+    LPWSTR wstr;
+    BOOL ret = TRUE;
+
+    if(count <= 0) {
+        dprintf(("ERROR: Invalid parameter!!"));
+        SetLastError(ERROR_INVALID_PARAMETER);
+        return FALSE;
+    }
+
+    str = (LPSTR)HeapAlloc(GetProcessHeap(), 0, count);
+    for(i = 0; i < count; i++)
+	str[i] = (BYTE)(firstChar + i);
+
+    wstr = FONT_mbtowc(hdc, str, count, &wlen, NULL);
+
+    for(i = 0; i < wlen; i++)
+    {
+	if(!GetCharABCWidthsW(hdc, wstr[i], wstr[i], abc))
+	{
+	    ret = FALSE;
+	    break;
+	}
+	abc++;
+    }
+
+    HeapFree(GetProcessHeap(), 0, str);
+    HeapFree(GetProcessHeap(), 0, wstr);
+
+    return ret;
+}
+//******************************************************************************
+//******************************************************************************
+BOOL WIN32API GetCharABCWidthsW( HDC hdc, UINT firstChar, UINT lastChar, LPABC abc)
+{
+    if(FT2Module.isEnabled() == FALSE) 
+    {//no fallback method (yet)
+        DebugInt3();
+        return FALSE;
+    }
+
+    int i;
+    GLYPHMETRICS gm;
+
+    for (i=firstChar;i<=lastChar;i++) 
+    {
+        if(GetGlyphOutlineW(hdc, i, GGO_METRICS, &gm, 0, NULL, NULL) == GDI_ERROR) 
+        {
+            dprintf(("ERROR: GetGlyphOutlineW failed!!"));
+            return FALSE;
+        }
+        abc[i-firstChar].abcA = gm.gmptGlyphOrigin.x;
+        abc[i-firstChar].abcB = gm.gmBlackBoxX;
+        abc[i-firstChar].abcC = gm.gmCellIncX - gm.gmptGlyphOrigin.x - gm.gmBlackBoxX;
+        dprintf2(("GetCharABCWidthsW %d (%d,%d,%d)", i, abc[i-firstChar].abcA, abc[i-firstChar].abcB, abc[i-firstChar].abcC));
+    }
+    return TRUE;
+}
+//******************************************************************************
+//******************************************************************************
+BOOL WIN32API GetCharABCWidthsFloatA(HDC hdc, UINT iFirstChar, UINT iLastChar, LPABCFLOAT pxBUffer)
+{
+    dprintf(("ERROR: GDI32: GetCharABCWidthsFloatA, not implemented\n"));
+    DebugInt3();
+    return(FALSE);
+}
+//******************************************************************************
+//******************************************************************************
+BOOL WIN32API GetCharABCWidthsFloatW(HDC hdc,
+                                     UINT iFirstChar,
+                                     UINT iLastChar,
+                                     LPABCFLOAT pxBUffer)
+{
+    dprintf(("ERROR: GDI32: GetCharABCWidthsFloatA, not implemented\n"));
+    DebugInt3();
+    return(FALSE);
 }
 //******************************************************************************
 //******************************************************************************

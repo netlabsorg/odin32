@@ -1,4 +1,4 @@
-/* $Id: line.cpp,v 1.13 2002-11-26 10:53:10 sandervl Exp $ */
+/* $Id: line.cpp,v 1.14 2004-01-11 11:42:18 sandervl Exp $ */
 /*
  * Line API's
  *
@@ -20,6 +20,8 @@
 
 #define ROUND_FLOAT(x) ((INT)((x < 0) ? x-0.5:x+0.5))
 
+//******************************************************************************
+//******************************************************************************
 VOID toWin32LineEnd(PPOINTLOS2 startPt,INT nXEnd,INT nYEnd,PPOINTLOS2 pt)
 {
   if ((startPt->x != nXEnd) || (startPt->y != nYEnd))
@@ -47,12 +49,23 @@ VOID toWin32LineEnd(PPOINTLOS2 startPt,INT nXEnd,INT nYEnd,PPOINTLOS2 pt)
     pt->y = nYEnd;
   }
 }
-
+//******************************************************************************
+//******************************************************************************
 BOOL drawSingleLinePoint(HDC hdc,pDCData pHps,PPOINTLOS2 pt)
 {
-  LOGPEN penInfo;
+  LOGPEN    penInfo;
+  EXTLOGPEN extpenInfo;
 
-  if (!GetObjectA(GetCurrentObject(hdc,OBJ_PEN),sizeof(penInfo),(LPVOID)&penInfo)) return FALSE;
+  if (!GetObjectA(GetCurrentObject(hdc,OBJ_PEN),sizeof(penInfo),(LPVOID)&penInfo)) 
+  {//try extlogpen
+      if (!GetObjectA(GetCurrentObject(hdc,OBJ_PEN),sizeof(extpenInfo),(LPVOID)&extpenInfo)) {
+          return FALSE;
+      }
+      penInfo.lopnStyle   = extpenInfo.elpPenStyle;
+      penInfo.lopnWidth.x = extpenInfo.elpWidth;
+      penInfo.lopnWidth.y = 0; //??????
+      penInfo.lopnColor   = extpenInfo.elpColor;
+  }
 
   if ((penInfo.lopnWidth.x > 1) || (penInfo.lopnWidth.y > 1))
   {
@@ -69,7 +82,8 @@ BOOL drawSingleLinePoint(HDC hdc,pDCData pHps,PPOINTLOS2 pt)
     return drawLinePoint(pHps,pt,color);
   }
 }
-
+//******************************************************************************
+//******************************************************************************
 BOOL WIN32API MoveToEx( HDC hdc, int X, int Y, LPPOINT lpPoint)
 {
   pDCData pHps = (pDCData)OSLibGpiQueryDCData(hdc);
@@ -145,7 +159,7 @@ BOOL WIN32API LineTo( HDC hdc, int nXEnd, int  nYEnd)
         rc = O32_LineTo(hdc,newPoint.x,newPoint.y); //CB: wide line not supported
       } else
       {
-        if (OSLibGpiLine(pHps,&newPoint) == 0)
+        if (OSLibGpiLine(pHps,&newPoint) == FALSE)
           rc = FALSE;
       }
     }

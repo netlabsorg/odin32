@@ -1,4 +1,4 @@
-//$Id: rgbcvt.h,v 1.4 2003-07-16 10:46:18 sandervl Exp $
+//$Id: rgbcvt.h,v 1.5 2004-01-11 11:42:22 sandervl Exp $
 #ifndef __RGBCVT_H__
 #define __RGBCVT_H__
 

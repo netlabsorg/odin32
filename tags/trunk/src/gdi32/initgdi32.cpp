@@ -1,4 +1,4 @@
-/* $Id: initgdi32.cpp,v 1.15 2003-07-17 08:03:33 sandervl Exp $
+/* $Id: initgdi32.cpp,v 1.16 2004-01-11 11:42:17 sandervl Exp $
  *
  * DLL entry point
  *

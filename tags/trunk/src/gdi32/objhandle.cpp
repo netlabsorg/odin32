@@ -1,9 +1,10 @@
-/* $Id: objhandle.cpp,v 1.31 2002-11-26 10:53:10 sandervl Exp $ */
+/* $Id: objhandle.cpp,v 1.32 2004-01-11 11:42:18 sandervl Exp $ */
 /*
  * Win32 Handle Management Code for OS/2
  *
  *
  * Copyright 2000-2002 Sander van Leeuwen (sandervl@xs4all.nl)
+ * Copyright 2003 Innotek Systemberatung GmbH (sandervl@innotek.de)
  *
  * TODO: The table should be dynamically increased when necessary
  *       This is just a quick and dirty implementation
@@ -36,68 +37,108 @@
 
 //******************************************************************************
 
-typedef struct {
-  DWORD      dwUserData;
-  DWORD      dwGDI32Data;
-  DWORD      dwFlags;
-  DWORD      dwType;
+typedef struct _GdiObject
+{
+  DWORD              dwUserData;
+  DWORD              dwGDI32Data;
+  DWORD              dwFlags;
+  DWORD              dwType;
+#ifdef DEBUG
+  DWORD              dwTime;
+  struct _GdiObject *prev;
+#endif
+  struct _GdiObject *next;
 } GdiObject;
 
-static GdiObject *objHandleTable  = NULL;
-static ULONG      lowestFreeIndex = 1;
-static VMutex     objTableMutex;
+typedef struct 
+{
+  GdiObject *headfree;
+  GdiObject *tailfree;
+  GdiObject *objects;
+  int        iAllocated;
+#ifdef DEBUG
+  DWORD      dwMaxAllocated;
+#endif
+} GdiObjectTable;
+
+static GdiObjectTable  objHandleTable = { 0 };
+static VMutex          objTableMutex;
 
 //******************************************************************************
 //******************************************************************************
 BOOL WIN32API ObjAllocateHandle(HANDLE *hObject, DWORD dwUserData, DWORD dwType)
 {
     DWORD oldlowestidx;
+    BOOL  retry = FALSE;
 
     objTableMutex.enter();
-    if(objHandleTable == NULL) {
-        objHandleTable = (GdiObject *)malloc(MAX_OBJECT_HANDLES*sizeof(GdiObject));
-        if(objHandleTable == NULL) {
+    if(objHandleTable.objects == NULL) 
+    {
+        objHandleTable.objects = (GdiObject *)malloc(MAX_OBJECT_HANDLES*sizeof(GdiObject));
+        if(objHandleTable.objects == NULL) {
             DebugInt3();
+            return FALSE;
         }
-        memset(objHandleTable, 0, MAX_OBJECT_HANDLES*sizeof(GdiObject));
+        memset(objHandleTable.objects, 0, MAX_OBJECT_HANDLES*sizeof(GdiObject));
+        if(objHandleTable.objects[0].dwType == HNDL_NONE) {
+            //first handle can never be used
+            objHandleTable.objects[0].dwType     = HNDL_INVALID;
+            objHandleTable.objects[0].dwUserData = -1;
+            objHandleTable.objects[0].dwFlags    = OBJHANDLE_FLAG_NODELETE;
+        }
+        objHandleTable.tailfree = &objHandleTable.objects[MAX_OBJECT_HANDLES-1];
+        for(int i=MAX_OBJECT_HANDLES-1;i>0;i--) 
+        {
+            GdiObject *obj = &objHandleTable.objects[i];
+
+#ifdef DEBUG
+            if(objHandleTable.headfree) {
+                objHandleTable.headfree->prev = obj;
+            }
+            obj->prev = NULL;
+#endif
+            obj->next = objHandleTable.headfree;
+            objHandleTable.headfree = obj;
+        }
+        objHandleTable.iAllocated = 1; //one invalid object
     }
 
-    if(lowestFreeIndex == -1) {
+    GdiObject *newobj = objHandleTable.headfree;
+    if(newobj == NULL) {
         //oops, out of handles
         objTableMutex.leave();
         dprintf(("ERROR: GDI: ObjAllocateHandle OUT OF GDI OBJECT HANDLES!!"));
         DebugInt3();
         return FALSE;
     }
-    if(objHandleTable[0].dwType == HNDL_NONE) {
-        //first handle can never be used
-        objHandleTable[0].dwType     = HNDL_INVALID;
-        objHandleTable[0].dwUserData = -1;
+    objHandleTable.headfree = newobj->next;
+    //if there's nothing left, then there's nothing left
+    if(objHandleTable.headfree == NULL) {
+         dprintf(("WARNING: Just allocated our last GDI handle..."));
+         objHandleTable.tailfree = NULL;
     }
-    *hObject = lowestFreeIndex;
-    *hObject = MAKE_HANDLE(*hObject);
-    objHandleTable[lowestFreeIndex].dwUserData  = dwUserData;
-    objHandleTable[lowestFreeIndex].dwType      = dwType;
-    objHandleTable[lowestFreeIndex].dwGDI32Data = 0;
-    objHandleTable[lowestFreeIndex].dwFlags     = 0;
+#ifdef DEBUG
+    else objHandleTable.headfree->prev = NULL;
+    newobj->prev = NULL;
+    newobj->dwTime = GetCurrentTime();
+#endif
 
-    oldlowestidx = lowestFreeIndex+1;
+    newobj->next = NULL;
 
-    lowestFreeIndex = -1;
+    *hObject = MAKE_HANDLE(((char *)newobj - (char *)objHandleTable.objects)/sizeof(*newobj));
+    newobj->dwUserData  = dwUserData;
+    newobj->dwType      = dwType;
+    newobj->dwGDI32Data = 0;
+    newobj->dwFlags     = 0;
 
-    //find next free handle
-findhandle:
-    for(int i=oldlowestidx;i<MAX_OBJECT_HANDLES;i++) {
-        if(objHandleTable[i].dwUserData == 0) {
-            lowestFreeIndex = i;
-            break;
-        }
+    objHandleTable.iAllocated++;
+#ifdef DEBUG
+    if(objHandleTable.iAllocated > objHandleTable.dwMaxAllocated) {
+        objHandleTable.dwMaxAllocated = objHandleTable.iAllocated;
     }
-    if(lowestFreeIndex == -1) {
-        oldlowestidx = 0; //search from the start
-        goto findhandle;
-    }
+#endif
     objTableMutex.leave();
+    dprintf2(("ObjAllocateHandle %x type %d", *hObject, dwType));
     return TRUE;
 }
 //******************************************************************************
@@ -105,15 +146,31 @@ findhandle:
 BOOL WIN32API ObjDeleteHandle(HANDLE hObject, DWORD dwType)
 {
     hObject &= OBJHANDLE_MAGIC_MASK;
-    if(hObject < MAX_OBJECT_HANDLES) {
+    if(hObject < MAX_OBJECT_HANDLES) 
+    {
         objTableMutex.enter();
-        if(!(objHandleTable[hObject].dwFlags & OBJHANDLE_FLAG_NODELETE)) 
+        GdiObject *obj = &objHandleTable.objects[hObject];
+        if(!(obj->dwFlags & OBJHANDLE_FLAG_NODELETE)) 
         {
-            objHandleTable[hObject].dwUserData = 0;
-            objHandleTable[hObject].dwType     = HNDL_NONE;
-////            if(lowestFreeIndex == -1 || hObject < lowestFreeIndex)
-            if(lowestFreeIndex == -1)
-                lowestFreeIndex = hObject;
+            dprintf2(("ObjDeleteHandle %x type %d", MAKE_HANDLE(hObject), obj->dwType));
+
+            obj->dwUserData = 0;
+            obj->dwType     = HNDL_NONE;
+            obj->next       = NULL;
+
+            //add to the tail of the free object list
+            if(objHandleTable.tailfree) 
+                objHandleTable.tailfree->next = obj;
+
+#ifdef DEBUG
+            obj->prev       = objHandleTable.tailfree;
+#endif
+            objHandleTable.tailfree = obj;
+            if(objHandleTable.headfree == NULL)
+                objHandleTable.headfree = obj;
+
+            objHandleTable.iAllocated--;
+            if(objHandleTable.iAllocated < 0) DebugInt3();
         }
         else {
             dprintf(("ObjDeleteHandle: unable to delete system object %x", MAKE_HANDLE(hObject)));
@@ -132,10 +189,10 @@ DWORD WIN32API ObjQueryHandleData(HANDLE hObject, DWORD dwType)
     objTableMutex.enter();
     hObject &= OBJHANDLE_MAGIC_MASK;
     if(hObject < MAX_OBJECT_HANDLES && 
-       ((dwType == HNDL_ANY && objHandleTable[hObject].dwType != HNDL_NONE) || 
-       dwType == objHandleTable[hObject].dwType)) 
+       ((dwType == HNDL_ANY && objHandleTable.objects[hObject].dwType != HNDL_NONE) || 
+       dwType == objHandleTable.objects[hObject].dwType)) 
     {
-        dwUserData = objHandleTable[hObject].dwUserData;
+        dwUserData = objHandleTable.objects[hObject].dwUserData;
     }
     objTableMutex.leave();
     return dwUserData;
@@ -149,10 +206,10 @@ BOOL WIN32API ObjSetHandleData(HANDLE hObject, DWORD dwType, DWORD dwUserData)
     objTableMutex.enter();
     hObject &= OBJHANDLE_MAGIC_MASK;
     if(hObject < MAX_OBJECT_HANDLES && 
-       ((dwType == HNDL_ANY && objHandleTable[hObject].dwType != HNDL_NONE) || 
-       dwType == objHandleTable[hObject].dwType)) 
+       ((dwType == HNDL_ANY && objHandleTable.objects[hObject].dwType != HNDL_NONE) || 
+       dwType == objHandleTable.objects[hObject].dwType)) 
     {
-        objHandleTable[hObject].dwUserData = dwUserData;
+        objHandleTable.objects[hObject].dwUserData = dwUserData;
         fSuccess = TRUE;
     }
     objTableMutex.leave();
@@ -167,10 +224,10 @@ DWORD WIN32API ObjQueryHandleGDI32Data(HANDLE hObject, DWORD dwType)
     objTableMutex.enter();
     hObject &= OBJHANDLE_MAGIC_MASK;
     if(hObject < MAX_OBJECT_HANDLES && 
-       ((dwType == HNDL_ANY && objHandleTable[hObject].dwType != HNDL_NONE) || 
-       dwType == objHandleTable[hObject].dwType)) 
+       ((dwType == HNDL_ANY && objHandleTable.objects[hObject].dwType != HNDL_NONE) || 
+       dwType == objHandleTable.objects[hObject].dwType)) 
     {
-        dwGDI32Data = objHandleTable[hObject].dwGDI32Data;
+        dwGDI32Data = objHandleTable.objects[hObject].dwGDI32Data;
     }
     objTableMutex.leave();
     return dwGDI32Data;
@@ -184,10 +241,10 @@ BOOL WIN32API ObjSetHandleGDI32Data(HANDLE hObject, DWORD dwType, DWORD dwGDI32D
     objTableMutex.enter();
     hObject &= OBJHANDLE_MAGIC_MASK;
     if(hObject < MAX_OBJECT_HANDLES && 
-       ((dwType == HNDL_ANY && objHandleTable[hObject].dwType != HNDL_NONE) || 
-       dwType == objHandleTable[hObject].dwType)) 
+       ((dwType == HNDL_ANY && objHandleTable.objects[hObject].dwType != HNDL_NONE) || 
+       dwType == objHandleTable.objects[hObject].dwType)) 
     {
-        objHandleTable[hObject].dwGDI32Data = dwGDI32Data;
+        objHandleTable.objects[hObject].dwGDI32Data = dwGDI32Data;
         fSuccess = TRUE;
     }
     objTableMutex.leave();
@@ -201,9 +258,9 @@ DWORD WIN32API ObjQueryHandleFlags(OBJHANDLE hObject)
 
     objTableMutex.enter();
     hObject &= OBJHANDLE_MAGIC_MASK;
-    if(hObject < MAX_OBJECT_HANDLES && objHandleTable[hObject].dwType != HNDL_NONE) 
+    if(hObject < MAX_OBJECT_HANDLES && objHandleTable.objects[hObject].dwType != HNDL_NONE) 
     {
-        dwFlags = objHandleTable[hObject].dwFlags;
+        dwFlags = objHandleTable.objects[hObject].dwFlags;
     }
     objTableMutex.leave();
     return dwFlags;
@@ -216,11 +273,11 @@ BOOL WIN32API ObjSetHandleFlag(HANDLE hObject, DWORD dwFlag, BOOL fSet)
 
     objTableMutex.enter();
     hObject &= OBJHANDLE_MAGIC_MASK;
-    if(hObject < MAX_OBJECT_HANDLES && objHandleTable[hObject].dwType != HNDL_NONE) {
+    if(hObject < MAX_OBJECT_HANDLES && objHandleTable.objects[hObject].dwType != HNDL_NONE) {
         if(fSet) {
-             objHandleTable[hObject].dwFlags |= dwFlag;
+             objHandleTable.objects[hObject].dwFlags |= dwFlag;
         }
-        else objHandleTable[hObject].dwFlags &= ~dwFlag;
+        else objHandleTable.objects[hObject].dwFlags &= ~dwFlag;
 
         dprintf(("ObjSetHandleFlag %x -> %x", MAKE_HANDLE(hObject), dwFlag));
 
@@ -237,12 +294,49 @@ DWORD WIN32API ObjQueryHandleType(HANDLE hObject)
 
     objTableMutex.enter();
     hObject &= OBJHANDLE_MAGIC_MASK;
-    if(hObject < MAX_OBJECT_HANDLES && objHandleTable[hObject].dwType != HNDL_NONE) {
-        objtype = objHandleTable[hObject].dwType;
+    if(hObject < MAX_OBJECT_HANDLES && objHandleTable.objects[hObject].dwType != HNDL_NONE) {
+        objtype = objHandleTable.objects[hObject].dwType;
     }
     objTableMutex.leave();
     return objtype;
 }
+//******************************************************************************
+//******************************************************************************
+#ifdef DEBUG
+void dumpObjectType(char *szType, DWORD dwType)
+{
+    for(int i=0;i<MAX_OBJECT_HANDLES;i++) {
+        if(objHandleTable.objects[i].dwUserData != 0 && objHandleTable.objects[i].dwType == dwType) {
+            dprintf(("%s object %x %x %x %x time %x", szType, MAKE_HANDLE(i), objHandleTable.objects[i].dwUserData, objHandleTable.objects[i].dwGDI32Data, objHandleTable.objects[i].dwFlags, objHandleTable.objects[i].dwTime));
+        }
+    }
+}
+//******************************************************************************
+//******************************************************************************
+void WIN32API ObjDumpObjects()
+{
+    dprintf(("Open object handles (%d, max %d): (time %x)", objHandleTable.iAllocated, objHandleTable.dwMaxAllocated, GetCurrentTime()));
+
+    dumpObjectType("HNDL_PEN", HNDL_PEN);
+    dumpObjectType("HNDL_BRUSH", HNDL_BRUSH);
+    dumpObjectType("HNDL_DC", HNDL_DC);
+    dumpObjectType("HNDL_METADC", HNDL_METADC);
+    dumpObjectType("HNDL_PALETTE", HNDL_PALETTE);
+    dumpObjectType("HNDL_FONT", HNDL_FONT);
+    dumpObjectType("HNDL_BITMAP", HNDL_BITMAP);
+    dumpObjectType("HNDL_DIBSECTION", HNDL_DIBSECTION);
+    dumpObjectType("HNDL_REGION", HNDL_REGION);
+    dumpObjectType("HNDL_METAFILE", HNDL_METAFILE);
+    dumpObjectType("HNDL_ENHMETAFILE", HNDL_ENHMETAFILE);
+    dumpObjectType("HNDL_MEMDC", HNDL_MEMDC);
+    dumpObjectType("HNDL_EXTPEN", HNDL_EXTPEN);
+    dumpObjectType("HNDL_ENHMETADC", HNDL_ENHMETADC);
+    dumpObjectType("HNDL_MENU", HNDL_MENU);
+    dumpObjectType("HNDL_ACCEL", HNDL_ACCEL);
+    dumpObjectType("HNDL_CURSORICON", HNDL_CURSORICON);
+    dumpObjectType("HNDL_DDELP", HNDL_DDELP);
+}
+#endif
 //******************************************************************************
 //******************************************************************************
 int WIN32API GetObjectA( HGDIOBJ hObject, int size, void *lpBuffer)
