@@ -1,4 +1,4 @@
-/* $Id: combo.cpp,v 1.17 1999-11-21 14:04:10 achimha Exp $ */
+/* $Id: combo.cpp,v 1.18 1999-11-21 17:34:10 achimha Exp $ */
 /*
  * Combo controls
  *
@@ -1492,6 +1492,12 @@ static LRESULT COMBO_GetText(HWND hwnd,WPARAM wParam,LPARAM lParam)
 static LRESULT COMBO_HandleText(HWND hwnd,UINT message,WPARAM wParam,LPARAM lParam)
 {
   LPHEADCOMBO lphc = (LPHEADCOMBO)GetInfoPtr(hwnd);
+
+  if (lphc == NULL)
+  {
+    dprintf(("COMBO_HandleText Info Pointer NULL!\n"));
+    return CB_ERR;
+  }
 
   if ((message == WM_GETTEXTLENGTH) && !(lphc->wState & CBF_EDIT))
   {
