@@ -1,4 +1,4 @@
-/* $Id: HandleManager.cpp,v 1.57 2001-01-14 17:16:54 sandervl Exp $ */
+/* $Id: HandleManager.cpp,v 1.58 2001-01-14 17:59:05 sandervl Exp $ */
 
 /*
  * Win32 Unified Handle Manager for OS/2
@@ -1883,8 +1883,8 @@ DWORD HMWaitForSingleObject(HANDLE hObject,
 //       teb->o.odin.fIgnoreMsgs = TRUE;
 
        while(TRUE) {
-           dwResult =  (O32_MsgWaitForMultipleObjects(1, &hObject, FALSE, 
-                                                      INFINITE, QS_ALLINPUT));
+           dwResult = O32_MsgWaitForMultipleObjects(1, &hObject, FALSE, 
+                                                    INFINITE, QS_ALLINPUT);
            if(dwResult == WAIT_OBJECT_0 + 1) {
                MSG msg ;
 
@@ -1905,13 +1905,11 @@ DWORD HMWaitForSingleObject(HANDLE hObject,
 //       teb->o.odin.fIgnoreMsgs = FALSE;
        FreeLibrary(hUser32);
        return dwResult;
-  }
-  else {
 #else
     // maybe handles from CreateProcess() ...
     dwResult = O32_WaitForSingleObject(hObject, dwTimeout);
-#endif
     return (dwResult);
+#endif
   }
 
   // @@@PH Problem: wrong class (base class) is called instead of
