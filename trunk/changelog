@@ -1,4 +1,8 @@
-/* $Id: changelog,v 1.2443 2003-01-13 16:51:23 sandervl Exp $ */
+/* $Id: changelog,v 1.2444 2003-01-14 19:38:17 sandervl Exp $ */
+
+ 2003-01-14: Sander van Leeuwen <sandervl@innotek   >
+    - WINMM:    o Delete all wave object on unload
+                o Fix linked list synchronization
 
  2003-01-13: Sander van Leeuwen <sandervl@innotek   >
     - KERNEL32: o Don't allocate selectors anymore. Allocate tiled memory
