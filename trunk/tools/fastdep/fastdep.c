@@ -1,4 +1,4 @@
-/* $Id: fastdep.c,v 1.44 2002-09-14 23:24:42 bird Exp $
+/* $Id: fastdep.c,v 1.45 2002-09-20 04:37:12 bird Exp $
  *
  * Fast dependents. (Fast = Quick and Dirty!)
  *
@@ -297,6 +297,7 @@ static const char *apszExtRC[]    = {"rc",  "dlg", NULL};
 static const char *apszExtORC[]   = {"orc", "dlg", NULL};
 static const char *apszExtCOBOL[] = {"cbl", "cob", "sqb", "wbl", NULL};
 static const char *apszExtIPF[]   = {"ipf", "man", NULL};
+static const char *apszExtIPP[]   = {"ipp", NULL};
 static CONFIGENTRY aConfig[] =
 {
     {
@@ -344,6 +345,14 @@ static CONFIGENTRY aConfig[] =
         apszExtIPF,
         -1,
         langIPF,
+        NULL,
+    },
+
+    {
+        "IPP",
+        apszExtIPP,
+        -1,
+        langC_CPP,
         NULL,
     },
 
@@ -953,7 +962,7 @@ int main(int argc, char **argv)
 void syntax(void)
 {
     printf(
-        "FastDep v0.47 (build %d)\n"
+        "FastDep v0.48 (build %d)\n"
         "Dependency scanner. Creates a makefile readable depend file.\n"
         " - was quick and dirty, now it's just quick -\n"
         "\n"
