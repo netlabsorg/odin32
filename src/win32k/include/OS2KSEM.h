@@ -1,4 +1,4 @@
-/* $Id: OS2KSEM.h,v 1.1.2.1 2000-08-22 03:00:18 bird Exp $
+/* $Id: OS2KSEM.h,v 1.1.2.2 2000-08-23 04:25:44 bird Exp $
  *
  * OS/2 kernel Semaphore functions.
  *
@@ -47,19 +47,61 @@ typedef struct _KSEMSHR
      * We'll reserve 20 bytes just to be sure!.
      */
     char achDummy[20];
+
+    struct
+    {
+        char            ks_achSignature[4];
+        char            ks_bFlags;
+        char            ks_bType;
+        unsigned short  ks_Owner;
+        unsigned short  ks_cusPendingWriters;
+        unsigned short  ks_cusNest;
+        unsigned short  ks_cusReaders;
+        unsigned short  ks_cusPendingReaders;
+    } debug;
+
+    struct
+    {
+        char            ks_bFlags;
+        char            ks_bType;
+        unsigned short  ks_Owner;
+        unsigned short  ks_cusPendingWriters;
+        unsigned short  ks_cusNest;
+        unsigned short  ks_cusReaders;
+        unsigned short  ks_cusPendingReaders;
+    } release;
+
 }   KSEMSHR,
    *PKSEMSHR,
    *HKSEMSHR;                           /* Handle to kernel shared semphore. */
 typedef HKSEMSHR * PHKSEMSHR;
 
 
-typedef struct _KSEMMTX
+typedef union _KSEMMTX
 {
     /**
      * Astrict is 12 byte while retail is 8 bytes.
      * We'll reserve 20 bytes just to be sure!
      */
     char achDummy[20];
+
+    struct
+    {
+        char            ksem_achSignature[4];
+        char            ksem_bFlags;
+        char            ksem_bType;
+        unsigned short  ksem_Owner;
+        unsigned short  ksem_cusPendingWriters;
+        unsigned short  ksem_cusNest;
+    }debug;
+    struct
+    {
+        char            ksem_bFlags;
+        char            ksem_bType;
+        unsigned short  ksem_Owner;
+        unsigned short  ksem_cusPendingWriters;
+        unsigned short  ksem_cusNest;
+    } release;
 }   KSEMMTX,
    *PKSEMMTX,
    *HKSEMMTX;                           /* Handle to kernel mutex semaphore. */
@@ -73,6 +115,24 @@ typedef struct _KSEMEVT
      * We'll reserve 20 bytes just to be sure!
      */
     char achDummy[20];
+
+    struct
+    {
+        char            kse_achSignature[4];
+        char            kse_bFlags;
+        char            kse_bType;
+        unsigned short  kse_Owner;
+        unsigned short  kse_cusPendingWriters;
+    } debug;
+
+    struct
+    {
+        char            kse_bFlags;
+        char            kse_bType;
+        unsigned short  kse_Owner;
+        unsigned short  kse_cusPendingWriters;
+    } release;
+
 }   KSEMEVT,
    *PKSEMEVT,
    *HKSEMEVT;                           /* Handle to kernel event sempahore. */

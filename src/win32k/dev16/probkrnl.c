@@ -1,4 +1,4 @@
-/* $Id: probkrnl.c,v 1.20.4.9 2000-08-22 03:00:16 bird Exp $
+/* $Id: probkrnl.c,v 1.20.4.10 2000-08-23 04:25:42 bird Exp $
  *
  * Description:   Autoprobes the os2krnl file and os2krnl[*].sym files.
  *                Another Hack!
@@ -102,12 +102,12 @@ IMPORTKRNLSYM aImportTab[NBR_OF_KRNLIMPORTS] =
     {FALSE, -1, 11, "_VMAllocMem",          -1,  -1,  -1,  -1, EPT_PROCIMPORT32},  /* 11 */
     {FALSE, -1, 11, "_VMGetOwner",          -1,  -1,  -1,  -1, EPT_PROCIMPORT32},  /* 12 */
     {FALSE, -1, 11, "g_tkExecPgm",          -1,  -1,  -1,  -1, EPT_PROC32},        /* 13 */
-    {FALSE, -1, 16, "g_tkStartProcess",     -1,  -1,  -1,  -1, EPT_PROC32},        /* 14 */
+    {FALSE, -1, 15, "_tkStartProcess",      -1,  -1,  -1,  -1, EPT_PROC32},        /* 14 */
     {FALSE, -1, 11, "f_FuStrLenZ",          -1,  -1,  -1,  -1, EPT_PROCIMPORT16},  /* 15 */
     {FALSE, -1, 10, "f_FuStrLen",           -1,  -1,  -1,  -1, EPT_PROCIMPORT16},  /* 16 */
     {FALSE, -1,  8, "f_FuBuff",             -1,  -1,  -1,  -1, EPT_PROCIMPORT16},  /* 17 */
     {FALSE, -1, 16, "_VMObjHandleInfo",     -1,  -1,  -1,  -1, EPT_PROCIMPORT32},  /* 18 */
-    {FALSE, -1, 18, "_VMPseudoHandleMap",   -1,  -1,  -1,  -1, EPT_PROCIMPORT32},  /* 19 */
+    {FALSE, -1, 21, "_ldrASMpMTEFromHandle",-1,  -1,  -1,  -1, EPT_PROCIMPORT32},  /* 19 */
     {FALSE, -1, 12, "_ldrOpenPath",         -1,  -1,  -1,  -1, EPT_PROC32},        /* 20 */
     {FALSE, -1, 12, "_LDRClearSem",         -1,  -1,  -1,  -1, EPT_PROCIMPORT32},  /* 21 */
     {FALSE, -1, 14, "_ldrFindModule",       -1,  -1,  -1,  -1, EPT_PROCIMPORT32},  /* 22 */
@@ -815,7 +815,9 @@ static int ProbeSymFile(const char * pszFilename)
          */
         for (iSym = 0; iSym < SegDef.cSymbols && cLeftToFind; iSym++)
         {
+            IMPORTKRNLSYM * pImport;
             unsigned cchName;
+
             /*
              * Fileoffset of the current symbol.
              * Set filepointer to that position.
@@ -868,34 +870,37 @@ static int ProbeSymFile(const char * pszFilename)
             /*
              * Search proctable.
              */
-            for (i = 0; i < NBR_OF_KRNLIMPORTS; i++)
+            for (i = 0, pImport = &aImportTab[0]; i < NBR_OF_KRNLIMPORTS; i++, pImport++)
             {
-                if (!aImportTab[i].fFound                                       /* Not allready found */
-                    && (aImportTab[i].fType & EPT_VARIMPORT ? !fCode : fCode)   /* Don't look for code in a data segment */
-                    && aImportTab[i].cchName == cchName                         /* Equal name length */
-                    && kstrncmp(aImportTab[i].achName, achBuffer, cchName) == 0 /* Equal name */
+                if (!pImport->fFound                                       /* Not allready found */
+                    && (pImport->fType & EPT_VARIMPORT ? !fCode : fCode)   /* Don't look for code in a data segment */
+                    && pImport->cchName == cchName                         /* Equal name length */
+                    && kstrncmp(pImport->achName, achBuffer, cchName) == 0 /* Equal name */
                     )
                 {   /* Symbol was found */
-                    aImportTab[i].offObject = (SegDef.bFlags & 0x01 ? SymDef32.wSymVal : SymDef16.wSymVal);
-                    aImportTab[i].ulAddress = aImportTab[i].offObject + paKrnlOTEs[iSeg].ote_base;
-                    aImportTab[i].iObject   = (unsigned char)iSeg;
-                    aImportTab[i].usSel     = paKrnlOTEs[iSeg].ote_sel;
+                    pImport->offObject = (SegDef.bFlags & 0x01 ? SymDef32.wSymVal : SymDef16.wSymVal);
+                    pImport->ulAddress = pImport->offObject + paKrnlOTEs[iSeg].ote_base;
+                    pImport->iObject   = (unsigned char)iSeg;
+                    pImport->usSel     = paKrnlOTEs[iSeg].ote_sel;
                     dprintf(("debug: base=%lx, size=%lx iSeg=%d\n", paKrnlOTEs[iSeg].ote_base, paKrnlOTEs[iSeg].ote_size, iSeg));
 
                     /* Paranoia test! */
                     #ifndef EXTRACT
-                    if (aImportTab[i].offObject < paKrnlOTEs[iSeg].ote_size)
+                    if (pImport->offObject < paKrnlOTEs[iSeg].ote_size)
                     {
-                        aImportTab[i].fFound = TRUE;
+                        pImport->fFound = TRUE;
                         cLeftToFind--;
                         dprintf(("Found: %s at off 0x%lx addr 0x%lx, sel=0x%x\n",
-                                 aImportTab[i].achName, aImportTab[i].offObject,
-                                 aImportTab[i].ulAddress, aImportTab[i].usSel));
+                                 pImport->achName, pImport->offObject,
+                                 pImport->ulAddress, pImport->usSel));
+                        printf16("Found: %s at off 0x%lx addr 0x%lx, sel=0x%x\n",
+                                 pImport->achName, pImport->offObject,
+                                 pImport->ulAddress, pImport->usSel);
                     }
                     else/* test failed, continue on next symbol*/
-                        dprintf(("Error: Paranoia test failed for %s\n", aImportTab[i].achName));;
+                        dprintf(("Error: Paranoia test failed for %s\n", pImport->achName));;
                     #else
-                    aImportTab[i].fFound = TRUE;
+                    pImport->fFound = TRUE;
                     cLeftToFind--;
                     #endif /* !EXTRACT */
                     break;
@@ -1533,6 +1538,8 @@ static int processFile(const char *pszFilename)
     APIRET   rc;
     int      cch = kstrlen(pszFilename);
 
+    DosWrite(2, (char*)pszFilename, cch, &rc);
+
     /* Filename check */
     if (cch < 10 || cch > 11
         || !(pszFilename[0] >= '0' && pszFilename[0] <= '9')
@@ -1669,7 +1676,7 @@ int main(int argc, char **argv)
         FILEFINDBUF ffb;
         int         i;
 
-        printf16("/* $Id: probkrnl.c,v 1.20.4.9 2000-08-22 03:00:16 bird Exp $\n"
+        printf16("/* $Id: probkrnl.c,v 1.20.4.10 2000-08-23 04:25:42 bird Exp $\n"
                  "*\n"
                  "* Autogenerated kernel symbol database.\n"
                  "*\n"
