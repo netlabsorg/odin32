@@ -1,4 +1,4 @@
-/* $Id: shlguid.h,v 1.4 2000-03-26 16:29:41 cbratschi Exp $ */
+/* $Id: shlguid.h,v 1.5 2000-04-09 11:09:10 sandervl Exp $ */
 
 #ifndef __WINE_SHLGUID_H
 #define __WINE_SHLGUID_H
@@ -19,6 +19,7 @@ DEFINE_SHLGUID(CGID_ShellDocView,       0x000214D1L, 0, 0);
 DEFINE_SHLGUID(IID_INewShortcutHookA,   0x000214E1L, 0, 0);
 DEFINE_SHLGUID(IID_IShellIcon,          0x000214E5L, 0, 0);
 DEFINE_SHLGUID(IID_IShellPropSheetExt,  0x000214E9L, 0, 0);
+DEFINE_SHLGUID(IID_IShellLinkA,         0x000214EEL, 0, 0);
 DEFINE_SHLGUID(IID_IShellCopyHook,      0x000214EFL, 0, 0);
 DEFINE_SHLGUID(IID_IFileViewer,         0x000214F0L, 0, 0);
 DEFINE_SHLGUID(IID_IFileViewerSite,     0x000214F3L, 0, 0);

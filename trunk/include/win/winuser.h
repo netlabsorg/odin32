@@ -1,4 +1,4 @@
-/* $Id: winuser.h,v 1.39 2000-03-11 15:09:33 sandervl Exp $ */
+/* $Id: winuser.h,v 1.40 2000-04-09 11:09:12 sandervl Exp $ */
 
 #ifndef __INCLUDE_WINUSER_H
 #define __INCLUDE_WINUSER_H
@@ -2037,6 +2037,9 @@ typedef struct
 #define IDI_WINLOGOA     MAKEINTRESOURCEA(32517)
 #define IDI_WINLOGOW     MAKEINTRESOURCEW(32517)
 #define IDI_WINLOGO      WINELIB_NAME_AW(IDI_WINLOGO)
+#define IDI_WARNING      IDI_EXCLAMATION
+#define IDI_ERROR        IDI_HAND
+#define IDI_INFORMATION  IDI_ASTERISK
 
 #define IDC_BUMMERA      MAKEINTRESOURCEA(100)
 #define IDC_BUMMERW      MAKEINTRESOURCEW(100)

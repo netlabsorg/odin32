@@ -1,4 +1,4 @@
-/* $Id: shlobj.h,v 1.5 2000-02-03 13:26:23 sandervl Exp $ */
+/* $Id: shlobj.h,v 1.6 2000-04-09 11:09:11 sandervl Exp $ */
 #ifndef __WINE_SHLOBJ_H
 #define __WINE_SHLOBJ_H
 
@@ -22,6 +22,7 @@
 #include "shell.h"
 #include "commctrl.h"
 #include "prsht.h"
+#include "shlguid.h"
 
 #ifdef __cplusplus
 extern "C" {

@@ -1,4 +1,4 @@
-/* $Id: windows.h,v 1.5 2000-02-05 02:42:19 sandervl Exp $ */
+/* $Id: windows.h,v 1.6 2000-04-09 11:09:11 sandervl Exp $ */
 
 #ifndef __WINE_WINDOWS_H
 #define __WINE_WINDOWS_H
@@ -9,7 +9,9 @@ extern "C" {
 
 #ifdef __WIN32OS2__
 #include <odin.h>
+#if defined (__IBMC__) || (__IBMCPP__ < 400)
 #define CINTERFACE 1
+#endif
 #endif
 
 #include "winbase.h"

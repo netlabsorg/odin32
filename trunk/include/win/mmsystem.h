@@ -1,4 +1,4 @@
-/* $Id: mmsystem.h,v 1.7 2000-04-05 14:17:00 sandervl Exp $ */
+/* $Id: mmsystem.h,v 1.8 2000-04-09 11:09:09 sandervl Exp $ */
 /* 
  * MMSYSTEM - Multimedia Wine Extension ... :-)
  */
@@ -16,32 +16,24 @@ typedef LPCSTR		HPCSTR;         /* a huge version of LPCSTR */
    
 #include "pshpack1.h"
 
-//#ifndef NONAMELESSSTRUCT
-//#define DUMMYSTRUCTNAME
-//#define DUMMYSTRUCTNAME1
-//#define DUMMYSTRUCTNAME2
-//#define DUMMYSTRUCTNAME3
-//#define DUMMYSTRUCTNAME4
-//#define DUMMYSTRUCTNAME5
-//#else /* !defined(NONAMELESSSTRUCT) */
-#define DUMMYSTRUCTNAME   s
-#define DUMMYSTRUCTNAME1  s1
-#define DUMMYSTRUCTNAME2  s2
-#define DUMMYSTRUCTNAME3  s3
-#define DUMMYSTRUCTNAME4  s4
-#define DUMMYSTRUCTNAME5  s5
-#undef DUMMYUNIONNAME
-#undef DUMMYUNIONNAME1
-#undef DUMMYUNIONNAME2
-#undef DUMMYUNIONNAME3
-#undef DUMMYUNIONNAME4
-#undef DUMMYUNIONNAME5
+#if defined(__cplusplus) && !defined(NONAMELESSUNION)
+#define DUMMYUNIONNAME
+#define DUMMYUNIONNAME1
+#define DUMMYUNIONNAME2
+#define DUMMYUNIONNAME3
+#define DUMMYUNIONNAME4
+#define DUMMYUNIONNAME5
+#else
 #define DUMMYUNIONNAME   u
 #define DUMMYUNIONNAME1  u1
 #define DUMMYUNIONNAME2  u2
 #define DUMMYUNIONNAME3  u3
 #define DUMMYUNIONNAME4  u4
 #define DUMMYUNIONNAME5  u5
+#endif
+
+#define DUMMYSTRUCTNAME   s
+#define DUMMYSTRUCTNAME1  s1
 
 //#endif /* !defined(NONAMELESSSTRUCT) */
    
@@ -146,6 +138,9 @@ typedef struct {
 #define MM_MOM_POSITIONCB   0x3CA
 
 #define MM_MIM_MOREDATA     0x3CC
+
+#define MM_MIXM_LINE_CHANGE     0x3D0
+#define MM_MIXM_CONTROL_CHANGE  0x3D1
 
 #define MMSYSERR_BASE          0
 #define WAVERR_BASE            32

@@ -1,4 +1,4 @@
-/* $Id: wingdi.h,v 1.12 2000-02-29 00:55:09 sandervl Exp $ */
+/* $Id: wingdi.h,v 1.13 2000-04-09 11:09:11 sandervl Exp $ */
 
 #ifndef __WINE_WINGDI_H
 #define __WINE_WINGDI_H
@@ -529,6 +529,7 @@ typedef struct
 } ENUMLOGFONTEXW,*LPENUMLOGFONTEXW;
 
 DECL_WINELIB_TYPE_AW(ENUMLOGFONT)
+DECL_WINELIB_TYPE_AW(ENUMLOGFONTEX)
 DECL_WINELIB_TYPE_AW(LPENUMLOGFONT)
 DECL_WINELIB_TYPE_AW(LPENUMLOGFONTEX)
 
@@ -2826,6 +2827,7 @@ INT       WINAPI AbortDoc(HDC);
 BOOL      WINAPI AbortPath(HDC);
 INT       WINAPI AddFontResourceA(LPCSTR);
 INT       WINAPI AddFontResourceW(LPCWSTR);
+#define  AddFontResource WINELIB_NAME_AW(AddFontResource)
 BOOL      WINAPI AnimatePalette(HPALETTE,UINT,UINT,const PALETTEENTRY*);
 BOOL      WINAPI Arc(HDC,INT,INT,INT,INT,INT,INT,INT,INT);
 BOOL      WINAPI BeginPath(HDC);
@@ -3040,8 +3042,10 @@ BOOL      WINAPI RectInRegion(HRGN,const RECT *);
 BOOL      WINAPI RectVisible(HDC,const RECT*);
 BOOL      WINAPI RemoveFontResourceA(LPCSTR);
 BOOL      WINAPI RemoveFontResourceW(LPCWSTR);
+#define RemoveFontResource WINELIB_NAME_AW(RemoveFontResource)
 HDC       WINAPI ResetDCA(HDC,const DEVMODEA *);
 HDC       WINAPI ResetDCW(HDC,const DEVMODEW *);
+#define ResetDC WINELIB_NAME_AW(ResetDC)
 BOOL      WINAPI ResizePalette(HPALETTE,UINT);
 BOOL      WINAPI RestoreDC(HDC,INT);
 BOOL      WINAPI RoundRect(HDC,INT,INT,INT,INT,INT,INT);

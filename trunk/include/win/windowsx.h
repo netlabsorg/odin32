@@ -1,4 +1,4 @@
-/* $Id: windowsx.h,v 1.8 2000-02-09 13:40:23 sandervl Exp $ */
+/* $Id: windowsx.h,v 1.9 2000-04-09 11:09:11 sandervl Exp $ */
 
 /* Copyright (C) 1999 Corel Corporation (Paul Quinn) */
 
@@ -950,6 +950,8 @@ extern "C" {
 #define ComboBox_SetCurSel(hwndCtl, index)    \
 		((int)(DWORD)SendMessage((hwndCtl), CB_SETCURSEL, (WPARAM)(int)(index), 0L))
 
+#define ComboBox_SelectString(hwndCtl, indexStart, lpszSelect)  ((int)(DWORD)SendMessage((hwndCtl), CB_SELECTSTRING, (WPARAM)(int)(indexStart), (LPARAM)(LPCTSTR)(lpszSelect)))
+
 #define ComboBox_GetLBTextLen(hwndCtl, index) \
 		((int)(DWORD)SendMessage((hwndCtl), CB_GETLBTEXTLEN, (WPARAM)(int)(index), 0L))
 
@@ -992,6 +994,8 @@ extern "C" {
 
 #define ListBox_GetItemData(hwndCtl, index)     \
 	((LRESULT)(DWORD)SendMessage((hwndCtl), LB_GETITEMDATA, (WPARAM)(int)(index), 0L))
+
+#define ListBox_SetItemData(hwndCtl, index, data)   ((int)(DWORD)SendMessage((hwndCtl), LB_SETITEMDATA, (WPARAM)(int)(index), (LPARAM)(data)))
 
 #define ListBox_GetCurSel(hwndCtl)        \
 	((int)(DWORD)SendMessage((hwndCtl), LB_GETCURSEL, 0L, 0L))
@@ -1058,6 +1062,7 @@ extern "C" {
 #define Edit_GetText(hwndCtl, lpch, cchMax)     GetWindowText((hwndCtl), (lpch), (cchMax))
 #define Edit_GetTextLength(hwndCtl)             GetWindowTextLength(hwndCtl)
 #define Edit_SetText(hwndCtl, lpsz)             SetWindowText((hwndCtl), (lpsz))
+#define Edit_LimitText(hwndCtl, cchMax)         ((void)SendMessage((hwndCtl), EM_LIMITTEXT, (WPARAM)(cchMax), 0L))
 
 #define Edit_Enable(hwndCtl, fEnable)           EnableWindow((hwndCtl), (fEnable))
 #define Edit_SetReadOnly(hwndCtl, fReadOnly)    ((BOOL)(DWORD)SendMessage((hwndCtl), EM_SETREADONLY, (WPARAM)(BOOL)(fReadOnly), 0L))
