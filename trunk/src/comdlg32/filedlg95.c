@@ -1,4 +1,4 @@
-/* $Id: filedlg95.c,v 1.11 2000-08-20 09:45:23 sandervl Exp $*/
+/* $Id: filedlg95.c,v 1.12 2000-08-20 15:25:23 phaller Exp $*/
 /*
  * COMMDLG - File Open Dialogs Win95 look and feel
  *
@@ -36,6 +36,8 @@
 #include "cderr.h"
 #include "winnls.h"
 #include "shellapi.h"
+#include "shlguid.h"
+#include "shlwapi.h"
 #include "tchar.h"
 #include "filedlgbrowser.h"
 #include "wine/obj_contextmenu.h"
