@@ -1,4 +1,4 @@
-/* $Id: environ.cpp,v 1.7 2000-10-02 16:04:51 phaller Exp $ */
+/* $Id: environ.cpp,v 1.8 2000-10-02 16:22:09 phaller Exp $ */
 
 /*
  * Win32 environment file functions for OS/2
@@ -176,7 +176,7 @@ static LPCSTR ENV_FindVariable( LPCSTR env, LPCSTR name, INT len )
  *
  *****************************************************************************/
 
-ODINFUNCTION3(DWORD;  ExpandEnvironmentStringsA,
+ODINFUNCTION3(DWORD,  ExpandEnvironmentStringsA,
               LPCSTR, src,
               LPSTR,  dst,
               DWORD,  count)
@@ -262,10 +262,10 @@ ODINFUNCTION3(DWORD;  ExpandEnvironmentStringsA,
  *
  *****************************************************************************/
 
-ODINFUNCTION3(DWORD;   ExpandEnvironmentStringsW,
-              LPCWSTR, src,
-              LPWSTR,  dst,
-              DWORD,   count)
+ODINFUNCTION3(DWORD,   ExpandEnvironmentStringsW,
+              LPCWSTR, lpSrc,
+              LPWSTR,  lpDst,
+              DWORD,   nSize)
 {
   LPSTR srcA = HEAP_strdupWtoA( GetProcessHeap(), 0, lpSrc );
   LPSTR dstA = lpDst ? (LPSTR)HeapAlloc( GetProcessHeap(), 0, nSize ) : NULL;
