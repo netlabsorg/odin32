@@ -1,4 +1,4 @@
-/* $Id: fastdep.c,v 1.28 2001-07-02 18:21:02 bird Exp $
+/* $Id: fastdep.c,v 1.29 2001-07-03 21:59:56 bird Exp $
  *
  * Fast dependents. (Fast = Quick and Dirty!)
  *
@@ -15,6 +15,8 @@
 *******************************************************************************/
 #define INCL_DOSERRORS
 #define INCL_FILEMGR
+#define INCL_DOSMISC
+
 
 /*
  * Size of the \n charater (forget '\r').
@@ -22,11 +24,16 @@
  * but I doubd that fastdep will work at all under a UNICODE system. ;-)
  */
 #if defined(UNICODE) && !defined(__WIN32OS2__)
-#define CBNEWLINE     (2)
+#define CBNEWLINE       (2)
 #else
-#define CBNEWLINE     (1)
+#define CBNEWLINE       (1)
 #endif
 
+
+/*
+ * Time stamp size.
+ */
+#define TS_SIZE         (48)
 
 
 /*******************************************************************************
@@ -121,7 +128,6 @@ typedef struct _Options
     const char *    pszExcludeFiles;    /* List of excluded files. */
     const char *    pszSuperDependency; /* Name for super dependency rule. */
     BOOL            fForceScan;         /* Force scan of all files. */
-    FDATE           fDepDate;           /* The date which files are to be search from. */
 } OPTIONS, *POPTIONS;
 
 
@@ -129,7 +135,7 @@ typedef struct _Options
  * Language specific analysis functions type.
  */
 typedef int ( _FNLANG)  (const char *pszFilename, const char *pszNormFilename,
-                         FDATE FileDate, BOOL fHeader);
+                         const char *pszTS, BOOL fHeader);
 typedef _FNLANG    *PFNLANG;
 
 
@@ -157,6 +163,7 @@ typedef struct _DepRule
     int             cDeps;              /* Entries in the dependant array. */
     char **         papszDep;           /* Pointer to an array of pointers to dependants. */
     BOOL            fUpdated;           /* If we have updated this entry during current run. */
+    char            szTS[TS_SIZE];      /* Time stamp. */
 } DEPRULE, *PDEPRULE;
 
 
@@ -171,12 +178,12 @@ typedef struct _DepRule
 *   Internal Functions                                                         *
 *******************************************************************************/
 static void syntax(void);
-static int makeDependent(const char *pszFilename, FDATE FileDate);
+static int makeDependent(const char *pszFilename, const char *pszTS);
 
-static int langC_CPP(const char *pszFilename, const char *pszNormFilename, FDATE FileDate, BOOL fHeader);
-static int langAsm(  const char *pszFilename, const char *pszNormFilename, FDATE FileDate, BOOL fHeader);
-static int langRC(   const char *pszFilename, const char *pszNormFilename, FDATE FileDate, BOOL fHeader);
-static int langCOBOL(const char *pszFilename, const char *pszNormFilename, FDATE FileDate, BOOL fHeader);
+static int langC_CPP(const char *pszFilename, const char *pszNormFilename, const char *pszTS, BOOL fHeader);
+static int langAsm(  const char *pszFilename, const char *pszNormFilename, const char *pszTS, BOOL fHeader);
+static int langRC(   const char *pszFilename, const char *pszNormFilename, const char *pszTS, BOOL fHeader);
+static int langCOBOL(const char *pszFilename, const char *pszNormFilename, const char *pszTS, BOOL fHeader);
 
 
 /* string operations */
@@ -229,9 +236,12 @@ static char *textbufferGetNextLine(void *pvBuffer, void **ppv, char *pszLineBuff
 static BOOL  depReadFile(const char *pszFilename);
 static BOOL  depWriteFile(const char *pszFilename);
 static void  depRemoveAll(void);
-static void *depAddRule(const char *pszRulePath, const char *pszName, const char *pszExt, FDATE FileDate);
+static void *depAddRule(const char *pszRulePath, const char *pszName, const char *pszExt, const char *pszTS);
 static BOOL  depAddDepend(void *pvRule, const char *pszDep, BOOL fCheckCyclic);
+static void  depMarkNotFound(void *pvRule);
 static BOOL  depCheckCyclic(PDEPRULE pdepRule, const char *pszDep);
+static BOOL  depValidate(PDEPRULE pdepRule);
+INLINE char *depMakeTS(char *pszTS, PFILEFINDBUF3 pfindbuf3);
 
 
 /*******************************************************************************
@@ -333,8 +343,7 @@ OPTIONS options =
     TRUE,            /* fCacheSearchDirs */
     szExcludeFiles,  /* pszExcludeFiles */
     NULL,            /* pszSuperDependency */
-    FALSE,           /* fForceScan */
-    {1,1,1}          /* fDepDate */
+    FALSE            /* fForceScan */
 };
 
 
@@ -408,6 +417,12 @@ int main(int argc, char **argv)
     }
     else
         pszIncludeEnv = "";
+
+
+    /*
+     * Disable hard errors.
+     */
+    DosError(FERR_DISABLEHARDERR | FERR_ENABLEEXCEPTION);
 
 
     /*
@@ -783,6 +798,7 @@ int main(int argc, char **argv)
                     const char *    psz;
                     char            szSource[CCHMAXPATH];
                     BOOL            fExcluded;
+                    char            szTS[TS_SIZE];
 
                     /*
                      * Make full path.
@@ -816,7 +832,8 @@ int main(int argc, char **argv)
                     /*
                      * Analyse the file.
                      */
-                    rc -= makeDependent(&szSource[0], pfindbuf3->fdateLastWrite);
+                    depMakeTS(szTS, pfindbuf3);
+                    rc -= makeDependent(&szSource[0], szTS);
                 }
 
                 /* next file */
@@ -902,11 +919,11 @@ void syntax(void)
  * and written to file later.
  * @returns
  * @param   pszFilename     Pointer to source filename. Correct case is assumed!
- * @param   FileDate        File date.
+ * @param   pszTS           File time stamp.
  * @status  completely implemented.
  * @author  knut st. osmundsen
  */
-int makeDependent(const char *pszFilename, FDATE FileDate)
+int makeDependent(const char *pszFilename, const char *pszTS)
 {
     int    rc = -1;
 
@@ -936,7 +953,7 @@ int makeDependent(const char *pszFilename, FDATE FileDate)
     {
         char szNormFile[CCHMAXPATH];
         fileNormalize2(pszFilename, szNormFile);
-        rc = (*pCfg->pfn)(pszFilename, &szNormFile[0], FileDate, fHeader);
+        rc = (*pCfg->pfn)(pszFilename, &szNormFile[0], pszTS, fHeader);
     }
     else
     {
@@ -957,13 +974,13 @@ int makeDependent(const char *pszFilename, FDATE FileDate)
  *          !0 on error.
  * @param   pszFilename         Pointer to source filename. Correct case is assumed!
  * @param   pszNormFilename     Pointer to normalized source filename.
- * @parma   FileDate            Date of the source file.
+ * @param   pszTS               File time stamp.
  * @parma   fHeader             True if header file is being scanned.
  * @status  completely implemented.
  * @author  knut st. osmundsen
  */
 int langC_CPP(const char *pszFilename, const char *pszNormFilename,
-              FDATE FileDate, BOOL fHeader)
+              const char *pszTS, BOOL fHeader)
 {
     void *  pvFile;                     /* Text buffer pointer. */
     void *  pvRule;                     /* Handle to the current rule. */
@@ -992,14 +1009,14 @@ int langC_CPP(const char *pszFilename, const char *pszNormFilename,
     if (options.fObjRule && !fHeader)
     {
         if (options.fNoObjectPath)
-            pvRule = depAddRule(fileNameNoExt(pszFilename, szBuffer), NULL, options.pszObjectExt, FileDate);
+            pvRule = depAddRule(fileNameNoExt(pszFilename, szBuffer), NULL, options.pszObjectExt, pszTS);
         else
             pvRule = depAddRule(options.fObjectDir ?
                                     options.pszObjectDir :
                                     filePathSlash(pszFilename, szBuffer),
                                 fileNameNoExt(pszFilename, szBuffer + CCHMAXPATH),
                                 options.pszObjectExt,
-                                FileDate);
+                                pszTS);
 
         if (options.fSrcWhenObj && pvRule)
             depAddDepend(pvRule,
@@ -1009,7 +1026,7 @@ int langC_CPP(const char *pszFilename, const char *pszNormFilename,
     }
     else
         pvRule = depAddRule(options.fExcludeAll || pathlistFindFile2(options.pszExclude, pszNormFilename) ?
-                            fileName(pszFilename, szBuffer) : pszNormFilename, NULL, NULL, FileDate);
+                            fileName(pszFilename, szBuffer) : pszNormFilename, NULL, NULL, pszTS);
 
     /* duplicate rule? */
     if (pvRule == NULL)
@@ -1128,8 +1145,11 @@ int langC_CPP(const char *pszFilename, const char *pszNormFilename,
                             depAddDepend(pvRule, szBuffer, options.fCheckCyclic);
                     }
                     else
+                    {
                         fprintf(stderr, "%s(%d): warning include file '%s' not found!\n",
                                 pszFilename, iLine, szFullname);
+                        depMarkNotFound(pvRule);
+                    }
                 }
             }
             else
@@ -1253,13 +1273,13 @@ int langC_CPP(const char *pszFilename, const char *pszNormFilename,
  *          !0 on error.
  * @param   pszFilename         Pointer to source filename. Correct case is assumed!
  * @param   pszNormFilename     Pointer to normalized source filename.
- * @parma   FileDate            Date of the source file.
+ * @param   pszTS               File time stamp.
  * @parma   fHeader             True if header file is being scanned.
  * @status  completely implemented.
  * @author  knut st. osmundsen
  */
 int langAsm(const char *pszFilename, const char *pszNormFilename,
-            FDATE FileDate, BOOL fHeader)
+            const char *pszTS, BOOL fHeader)
 {
     void *  pvFile;                     /* Text buffer pointer. */
     void *  pvRule;                     /* Handle to the current rule. */
@@ -1274,14 +1294,14 @@ int langAsm(const char *pszFilename, const char *pszNormFilename,
     if (options.fObjRule && !fHeader)
     {
         if (options.fNoObjectPath)
-            pvRule = depAddRule(fileNameNoExt(pszFilename, szBuffer), NULL, options.pszObjectExt, FileDate);
+            pvRule = depAddRule(fileNameNoExt(pszFilename, szBuffer), NULL, options.pszObjectExt, pszTS);
         else
             pvRule = depAddRule(options.fObjectDir ?
                                     options.pszObjectDir :
                                     filePathSlash(pszFilename, szBuffer),
                                 fileNameNoExt(pszFilename, szBuffer + CCHMAXPATH),
                                 options.pszObjectExt,
-                                FileDate);
+                                pszTS);
 
         if (options.fSrcWhenObj && pvRule)
             depAddDepend(pvRule,
@@ -1291,7 +1311,7 @@ int langAsm(const char *pszFilename, const char *pszNormFilename,
     }
     else
         pvRule = depAddRule(options.fExcludeAll || pathlistFindFile2(options.pszExclude, pszNormFilename) ?
-                            fileName(pszFilename, szBuffer) : pszNormFilename, NULL, NULL, FileDate);
+                            fileName(pszFilename, szBuffer) : pszNormFilename, NULL, NULL, pszTS);
 
     /* duplicate rule? */
     if (pvRule == NULL)
@@ -1370,8 +1390,11 @@ int langAsm(const char *pszFilename, const char *pszNormFilename,
                     depAddDepend(pvRule, szBuffer, options.fCheckCyclic);
             }
             else
+            {
                 fprintf(stderr, "%s(%d): warning include file '%s' not found!\n",
                         pszFilename, iLine, szFullname);
+                depMarkNotFound(pvRule);
+            }
         }
     } /*while*/
 
@@ -1384,14 +1407,14 @@ int langAsm(const char *pszFilename, const char *pszNormFilename,
 /**
  * Generates depend info on this Resource file, these are stored internally
  * and written to file later.
- * @returns   0 on success.
- *            !0 on error.
- * @param     pszFilename      Pointer to source filename. Correct case is assumed!
- * @param     pszNormFilename  Pointer to normalized source filename.
- * @parma   FileDate            Date of the source file.
+ * @returns 0 on success.
+ *          !0 on error.
+ * @param   pszFilename         Pointer to source filename. Correct case is assumed!
+ * @param   pszNormFilename     Pointer to normalized source filename.
+ * @param   pszTS               File time stamp.
  * @parma   fHeader             True if header file is being scanned.
- * @status    completely implemented.
- * @author    knut st. osmundsen
+ * @status  completely implemented.
+ * @author  knut st. osmundsen
  */
 #if 0
 int langRC(const char *pszFilename, const char *pszNormFilename, void *pvFile, BOOL fHeader)
@@ -1409,14 +1432,14 @@ int langRC(const char *pszFilename, const char *pszNormFilename, void *pvFile, B
     if (options.fObjRule && !fHeader)
     {
         if (options.fNoObjectPath)
-            pvRule = depAddRule(fileNameNoExt(pszFilename, szBuffer), NULL, options.pszRsrcExt, FileDate);
+            pvRule = depAddRule(fileNameNoExt(pszFilename, szBuffer), NULL, options.pszRsrcExt, pszTS);
         else
             pvRule = depAddRule(options.fObjectDir ?
                                     options.pszObjectDir :
                                     filePathSlash(pszFilename, szBuffer),
                                 fileNameNoExt(pszFilename, szBuffer + CCHMAXPATH),
                                 options.pszRsrcExt,
-                                FileDate);
+                                pszTS);
 
         if (options.fSrcWhenObj && pvRule)
             depAddDepend(pvRule,
@@ -1427,7 +1450,7 @@ int langRC(const char *pszFilename, const char *pszNormFilename, void *pvFile, B
     else
         pvRule = depAddRule(options.fExcludeAll || pathlistFindFile2(options.pszExclude, pszNormFilename) ?
                             fileName(pszFilename, szBuffer) : pszNormFilename, NULL, NULL,
-                            FileDate);
+                            pszTS);
 
     /* duplicate rule? */
     if (pvRule == NULL)
@@ -1535,16 +1558,20 @@ int langRC(const char *pszFilename, const char *pszNormFilename, void *pvFile, B
                     depAddDepend(pvRule, szBuffer, options.fCheckCyclic);
             }
             else
+            {
                 fprintf(stderr, "%s(%d): warning include file '%s' not found!\n",
                         pszFilename, iLine, szFullname);
-        }     } /*while*/
+                depMarkNotFound(pvRule);
+            }
+        }
+    } /*while*/
 
     textbufferDestroy(pvFile);
     return 0;
 }
 #else
 int langRC(const char *pszFilename, const char *pszNormFilename,
-           FDATE FileDate, BOOL fHeader)
+           const char *pszTS, BOOL fHeader)
 {
     void *  pvFile;                     /* Text buffer pointer. */
     void *  pvRule;                     /* Handle to the current rule. */
@@ -1573,14 +1600,14 @@ int langRC(const char *pszFilename, const char *pszNormFilename,
     if (options.fObjRule && !fHeader)
     {
         if (options.fNoObjectPath)
-            pvRule = depAddRule(fileNameNoExt(pszFilename, szBuffer), NULL, options.pszRsrcExt, FileDate);
+            pvRule = depAddRule(fileNameNoExt(pszFilename, szBuffer), NULL, options.pszRsrcExt, pszTS);
         else
             pvRule = depAddRule(options.fObjectDir ?
                                     options.pszObjectDir :
                                     filePathSlash(pszFilename, szBuffer),
                                 fileNameNoExt(pszFilename, szBuffer + CCHMAXPATH),
                                 options.pszRsrcExt,
-                                FileDate);
+                                pszTS);
 
         if (options.fSrcWhenObj && pvRule)
             depAddDepend(pvRule,
@@ -1590,7 +1617,7 @@ int langRC(const char *pszFilename, const char *pszNormFilename,
     }
     else
         pvRule = depAddRule(options.fExcludeAll || pathlistFindFile2(options.pszExclude, pszNormFilename) ?
-                            fileName(pszFilename, szBuffer) : pszNormFilename, NULL, NULL, FileDate);
+                            fileName(pszFilename, szBuffer) : pszNormFilename, NULL, NULL, pszTS);
 
     /* duplicate rule? */
     if (pvRule == NULL)
@@ -1709,8 +1736,11 @@ int langRC(const char *pszFilename, const char *pszNormFilename,
                             depAddDepend(pvRule, szBuffer, options.fCheckCyclic);
                     }
                     else
+                    {
                         fprintf(stderr, "%s(%d): warning include file '%s' not found!\n",
                                 pszFilename, iLine, szFullname);
+                        depMarkNotFound(pvRule);
+                    }
                 }
             }
             else
@@ -1839,8 +1869,11 @@ int langRC(const char *pszFilename, const char *pszNormFilename,
                         depAddDepend(pvRule, szFullname, options.fCheckCyclic);
                 }
                 else
+                {
                     fprintf(stderr, "%s(%d): warning include file '%s' not found!\n",
                             pszFilename, iLine, pszFilename);
+                    depMarkNotFound(pvRule);
+                }
             }
         }
 
@@ -1896,13 +1929,13 @@ int langRC(const char *pszFilename, const char *pszNormFilename,
  *          !0 on error.
  * @param   pszFilename         Pointer to source filename. Correct case is assumed!
  * @param   pszNormFilename     Pointer to normalized source filename.
- * @parma   FileDate            Date of the source file.
+ * @param   pszTS               File time stamp.
  * @parma   fHeader             True if header file is being scanned.
  * @status  completely implemented.
  * @author  knut st. osmundsen
  */
 int langCOBOL(const char *pszFilename, const char *pszNormFilename,
-              FDATE FileDate, BOOL fHeader)
+              const char *pszTS, BOOL fHeader)
 {
     void *  pvFile;                     /* Text buffer pointer. */
     void *  pvRule;                     /* Handle to the current rule. */
@@ -1917,14 +1950,14 @@ int langCOBOL(const char *pszFilename, const char *pszNormFilename,
     if (options.fObjRule && !fHeader)
     {
         if (options.fNoObjectPath)
-            pvRule = depAddRule(fileNameNoExt(pszFilename, szBuffer), NULL, options.pszObjectExt, FileDate);
+            pvRule = depAddRule(fileNameNoExt(pszFilename, szBuffer), NULL, options.pszObjectExt, pszTS);
         else
             pvRule = depAddRule(options.fObjectDir ?
                                     options.pszObjectDir :
                                     filePathSlash(pszFilename, szBuffer),
                                 fileNameNoExt(pszFilename, szBuffer + CCHMAXPATH),
                                 options.pszObjectExt,
-                                FileDate);
+                                pszTS);
 
         if (options.fSrcWhenObj && pvRule)
             depAddDepend(pvRule,
@@ -1934,7 +1967,7 @@ int langCOBOL(const char *pszFilename, const char *pszNormFilename,
     }
     else
         pvRule = depAddRule(options.fExcludeAll || pathlistFindFile2(options.pszExclude, pszNormFilename) ?
-                            fileName(pszFilename, szBuffer) : pszNormFilename, NULL, NULL, FileDate);
+                            fileName(pszFilename, szBuffer) : pszNormFilename, NULL, NULL, pszTS);
 
     /* duplicate rule? */
     if (pvRule == NULL)
@@ -2045,8 +2078,11 @@ int langCOBOL(const char *pszFilename, const char *pszNormFilename,
                     depAddDepend(pvRule, szBuffer, options.fCheckCyclic);
             }
             else
+            {
                 fprintf(stderr, "%s(%d): warning include file '%s' not found!\n",
                         pszFilename, iLine, szFullname);
+                depMarkNotFound(pvRule);
+            }
         }
     } /*while*/
 
@@ -2991,9 +3027,9 @@ char *textbufferGetNextLine(void *pvBuffer, void **ppv, char *pszLineBuffer, int
  */
 BOOL  depReadFile(const char *pszFilename)
 {
-    FILESTATUS3 fst3;
     void *      pvFile;
     char *      pszNext;
+    char *      pszPrev;                /* Previous line, only valid when finding new rule. */
     BOOL        fMoreDeps = FALSE;
     void *      pvRule = NULL;
 
@@ -3003,23 +3039,8 @@ BOOL  depReadFile(const char *pszFilename)
     if (pvFile == NULL)
         return FALSE;
 
-    /* get the filedate and subtract one month from it. */
-    if (!DosQueryPathInfo((PSZ)pszFilename, FIL_STANDARD, &fst3, sizeof(fst3)))
-    {
-        if (fst3.fdateLastWrite.month <= 1)
-        {
-            if (fst3.fdateLastWrite.year != 0)
-            {
-                fst3.fdateLastWrite.month = 12;
-                fst3.fdateLastWrite.year--;
-            }
-        }
-        else
-            fst3.fdateLastWrite.month--;
-        options.fDepDate = fst3.fdateLastWrite;
-    }
-
     /* parse the original depend file */
+    pszPrev = NULL;
     pszNext = pvFile;
     while (*pszNext != '\0')
     {
@@ -3056,36 +3077,49 @@ BOOL  depReadFile(const char *pszFilename)
         }
 
         if (*psz == '#')
+        {
+            pszPrev = psz;
             continue;
+        }
 
         /* new rule? */
-        if (!fMoreDeps && *psz != ' ' && *psz != '\t' && *psz != '\0')
+        if (!fMoreDeps)
         {
-            i = 0;
-            while (psz[i] != '\0')
+            if (*psz != ' ' && *psz != '\t' && *psz != '\0')
             {
-                if (psz[i] == ':'
-                    && (psz[i+1] == ' '
-                        || psz[i+1] == '\t'
-                        || psz[i+1] == '\0'
-                        || (psz[i+1] == '\\' && psz[i+2] == '\0')
-                        )
-                    )
+                i = 0;
+                while (psz[i] != '\0')
                 {
-                    static FDATE FileDate = {0,0,0};
-                    char *pszCont = strchr(&psz[i], '\\');
-                    fMoreDeps = pszCont != NULL && pszCont[1] == '\0';
+                    if (psz[i] == ':'
+                        && (psz[i+1] == ' '
+                            || psz[i+1] == '\t'
+                            || psz[i+1] == '\0'
+                            || (psz[i+1] == '\\' && psz[i+2] == '\0')
+                            )
+                        )
+                    {
+                        char    szTS[TS_SIZE];
+                        char *  pszCont = strchr(&psz[i], '\\');
+                        fMoreDeps = pszCont != NULL && pszCont[1] == '\0';
 
-                    psz[i] = '\0';
-                    pvRule = depAddRule(trimQuotes(trimR(psz)), NULL, NULL, FileDate);
-                    ((PDEPRULE)pvRule)->fUpdated = FALSE;
-                    psz += i + 1;
-                    cch -= i + 1;
-                    break;
+                        /* read evt. timestamp. */
+                        szTS[0] = '\0';
+                        if (pszPrev && strlen(pszPrev) > 25 && *pszPrev == '#')
+                            strcpy(szTS, pszPrev + 2);
+
+                        psz[i] = '\0';
+                        pvRule = depAddRule(trimQuotes(trimR(psz)), NULL, NULL, szTS);
+                        ((PDEPRULE)pvRule)->fUpdated = FALSE;
+                        psz += i + 1;
+                        cch -= i + 1;
+                        break;
+                    }
+                    i++;
                 }
-                i++;
             }
+            pszPrev = NULL;
         }
+
 
         /* more dependants */
         if (fMoreDeps)
@@ -3194,15 +3228,22 @@ BOOL  depWriteFile(const char *pszFilename)
         pdep = (PDEPRULE)(void*)AVLBeginEnumTree((PPAVLNODECORE)(void*)&pdepTree, &EnumData, TRUE);
         while (pdep != NULL)
         {
+            int cchTS = strlen(pdep->szTS);
             int fQuoted = strpbrk(pdep->pszRule, " \t") != NULL; /* TODO/BUGBUG/FIXME: are there more special chars to look out for?? */
 
             /* Write rule. Flush the buffer first if necessary. */
             cch = strlen(pdep->pszRule);
-            if (iBuffer + cch + fQuoted * 2 + 2 >= sizeof(szBuffer))
+            if (iBuffer + cch + fQuoted * 2 + cchTS + 9 >= sizeof(szBuffer))
             {
                 fwrite(szBuffer, iBuffer, 1, phFile);
                 iBuffer = 0;
             }
+
+            memcpy(szBuffer + iBuffer, "# ", 2);
+            memcpy(szBuffer + iBuffer + 2, pdep->szTS, cchTS);
+            iBuffer += cchTS + 2;
+            szBuffer[iBuffer++] = '\n';
+
             if (fQuoted) szBuffer[iBuffer++] = '"';
             strcpy(szBuffer + iBuffer, pdep->pszRule);
             iBuffer += cch;
@@ -3300,7 +3341,7 @@ void  depRemoveAll(void)
  * @param     pszExt        Extention (without '.')
  *                          NULL if pszRulePath or pszRulePath and pszName contains the entire rule.
  */
-void *depAddRule(const char *pszRulePath, const char *pszName, const char *pszExt, FDATE FileDate)
+void *depAddRule(const char *pszRulePath, const char *pszName, const char *pszExt, const char *pszTS)
 {
     char     szRule[CCHMAXPATH*2];
     PDEPRULE pNew;
@@ -3336,8 +3377,9 @@ void *depAddRule(const char *pszRulePath, const char *pszName, const char *pszEx
     strcpy(pNew->pszRule, szRule);
     pNew->cDeps = 0;
     pNew->papszDep = NULL;
-    pNew->avlCore.Key = pNew->pszRule;
     pNew->fUpdated = TRUE;
+    pNew->avlCore.Key = pNew->pszRule;
+    strcpy(pNew->szTS, pszTS);
 
     /* Insert the rule */
     if (!AVLInsert((PPAVLNODECORE)(void*)&pdepTree, &pNew->avlCore))
@@ -3349,15 +3391,16 @@ void *depAddRule(const char *pszRulePath, const char *pszName, const char *pszEx
          *   we'll use the information we've got.
          * Reuse the node in the tree.
          */
-        PDEPRULE    pOld = (PDEPRULE)AVLGet((PPAVLNODECORE)(void*)&pdepTree, pNew->avlCore.Key);
+        PDEPRULE    pOld = (PDEPRULE)(void*)AVLGet((PPAVLNODECORE)(void*)&pdepTree, pNew->avlCore.Key);
         assert(pOld);
         free(pNew);
         if (pOld->fUpdated)
             return NULL;
 
         pOld->fUpdated = TRUE;
-        if (!options.fForceScan && *(PUSHORT)&FileDate < *(PUSHORT)&options.fDepDate)
+        if (!options.fForceScan && !strcmp(pOld->szTS, pszTS) && depValidate(pOld))
             return NULL;
+        strcpy(pOld->szTS, pszTS);
 
         if (pOld->papszDep)
         {
@@ -3430,6 +3473,17 @@ BOOL  depAddDepend(void *pvRule, const char *pszDep, BOOL fCheckCyclic)
 
 
 /**
+ * Marks the file as one which is to be rescanned next time
+ * since not all dependencies was found...
+ * @param   pvRule  Rule handle...
+ */
+void  depMarkNotFound(void *pvRule)
+{
+    ((PDEPRULE)pvRule)->szTS[0] = '\0';
+}
+
+
+/**
  * Checks if adding this dependent will create a cylic dependency.
  * @returns   TRUE: Cyclic.
  *            FALSE: Non-cylic.
@@ -3486,6 +3540,88 @@ BOOL depCheckCyclic(PDEPRULE pdepRule, const char *pszDep)
 
     return FALSE;
 }
+
+
+/**
+ * Validates that the dependencies for the file exists
+ * in the given locations. Dependants without path is ignored.
+ * @returns TRUE if all ok.
+ *          FALSE if one (or possibly more) dependants are non-existing.
+ * @param   pdepRule    Pointer to rule we're to validate.
+ */
+BOOL depValidate(PDEPRULE pdepRule)
+{
+    int i;
+
+    for (i = 0; i < pdepRule->cDeps; i++)
+    {
+        char *psz = pdepRule->papszDep[i];
+        if (    psz[1] == ':'
+            ||  strchr(psz, '\\')
+            ||  strchr(psz, '/')
+            )
+        {
+            /*
+             * Check existance of the file.
+             *   Search cache first
+             */
+            if (!filecacheFind(psz))
+            {
+                char szDir[CCHMAXPATH];
+
+                filePathSlash(psz, szDir);
+                if (!filecacheIsDirCached(szDir))
+                {
+                    /*
+                     * If caching of entire dirs are enabled, we'll
+                     * add the directory to the cache and search it.
+                     */
+                    if (options.fCacheSearchDirs && filecacheAddDir(szDir))
+                    {
+                        if (!filecacheFind(psz))
+                            return FALSE;
+                    }
+                    else
+                    {
+                        FILESTATUS3 fsts3;
+
+                        /* ask the OS */
+                        if (DosQueryPathInfo(psz, FIL_STANDARD, &fsts3, sizeof(fsts3)))
+                            return FALSE;
+                        /* add file to cache. */
+                        filecacheAddFile(psz);
+                    }
+                }
+            }
+        }
+    }
+
+    return TRUE;
+}
+
+
+/**
+ * Make a timestamp from the file data provided thru the
+ * search API.
+ * @returns Pointer to pszTS
+ * @param   pszTS       Pointer to timestamp (output).
+ * @param   pfindbuf3   Pointer to search result.
+ */
+INLINE char *depMakeTS(char *pszTS, PFILEFINDBUF3 pfindbuf3)
+{
+    sprintf(pszTS, "%04d-%02d-%02d-%02d.%02d.%02d 0x%04x%04x %d",
+            pfindbuf3->fdateLastWrite.year + 1980,
+            pfindbuf3->fdateLastWrite.month,
+            pfindbuf3->fdateLastWrite.day,
+            pfindbuf3->ftimeLastWrite.hours,
+            pfindbuf3->ftimeLastWrite.minutes,
+            pfindbuf3->ftimeLastWrite.twosecs * 2,
+            (ULONG)*(PUSHORT)(void*)&pfindbuf3->fdateCreation,
+            (ULONG)*(PUSHORT)(void*)&pfindbuf3->ftimeCreation,
+            pfindbuf3->cbFile);
+    return pszTS;
+}
+
 
 
 
