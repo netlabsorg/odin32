@@ -1,4 +1,13 @@
- /* $Id: ChangeLog,v 1.868 2000-04-06 21:11:39 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.869 2000-04-07 02:56:01 bird Exp $ */
+
+ 2000-04-07: Knut St. Osmundsen <knut.stange.osmundsen@pmsc.no>
+        - TOOLS\DBGINFO: Sym2Hll is now able to convert .SYM files into HLL
+                debuginfo and add it to LX executables. This might be
+                quite useful if you want to see system DLL while debugging.
+                But before you add debuginfo to all dll's in c:\os2\dll
+                I have to warn that this is _very_ alpha software. Do always
+                make a backup (Sym2Hll don't create backups!) and have
+                recovery boot disks ready!
 
  2000-04-06: Sander van Leeuwen <sandervl@xs4all.nl>
 	- WINMM: Fixed message callback once more (previous fix broke rp7)
