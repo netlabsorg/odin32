@@ -1,4 +1,4 @@
-/* $Id: wintls.cpp,v 1.16 2000-11-21 11:35:09 sandervl Exp $ */
+/* $Id: wintls.cpp,v 1.17 2000-12-12 23:57:16 sandervl Exp $ */
 /*
  * Win32 TLS API functions
  *
@@ -127,7 +127,7 @@ void Win32ImageBase::tlsDetachThread()  //destroy TLS structures
    }
    tlsmem = TlsGetValue(tlsIndex);
    if(tlsmem) {
-        VirtualFree(tlsmem, tlsTotalSize, MEM_RELEASE);
+        VirtualFree(tlsmem, 0, MEM_RELEASE);
    }
    else {
         dprintf(("ERROR: tlsDetachThread: tlsmem == NULL!!!"));
