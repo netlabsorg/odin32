@@ -1,4 +1,4 @@
-/* $Id: gdi32.cpp,v 1.73 2001-07-07 19:05:21 sandervl Exp $ */
+/* $Id: gdi32.cpp,v 1.74 2001-07-14 15:31:41 sandervl Exp $ */
 
 /*
  * GDI32 apis
@@ -264,13 +264,6 @@ BOOL WIN32API GetDCOrgEx(HDC hdc, PPOINT lpPoint)
 }
 //******************************************************************************
 //******************************************************************************
-int WIN32API AbortDoc(HDC hdc)
-{
-    dprintf(("GDI32: AbortDoc %x", hdc));
-    return O32_AbortDoc(hdc);
-}
-//******************************************************************************
-//******************************************************************************
 BOOL WIN32API AbortPath(HDC hdc)
 {
     dprintf(("GDI32: AbortPath %x", hdc));
@@ -533,20 +526,6 @@ BOOL WIN32API Ellipse(HDC hdc, int nLeftRect, int nTopRect, int nRightRect,
 {
     dprintf(("GDI32: Ellipse %x (%d,%d)(%d,%d)", nLeftRect, nTopRect, nRightRect, nBottomRect));
     return O32_Ellipse(hdc, nLeftRect, nTopRect, nRightRect, nBottomRect);
-}
-//******************************************************************************
-//******************************************************************************
-int WIN32API EndDoc( HDC hdc)
-{
-    dprintf(("GDI32: EndDoc %x", hdc));
-    return O32_EndDoc(hdc);
-}
-//******************************************************************************
-//******************************************************************************
-int WIN32API EndPage( HDC hdc)
-{
-    dprintf(("GDI32: EndPage %x", hdc));
-    return O32_EndPage(hdc);
 }
 //******************************************************************************
 //******************************************************************************
@@ -1174,27 +1153,6 @@ ODINFUNCTION3(BOOL, SetTextJustification, HDC, hdc, int, nBreakExtra, int, nBrea
 }
 //******************************************************************************
 //******************************************************************************
-INT WIN32API StartDocA( HDC arg1, const DOCINFOA *arg2)
-{
-    dprintf(("GDI32: StartDocA"));
-    return O32_StartDoc(arg1, (LPDOCINFOA)arg2);
-}
-//******************************************************************************
-//******************************************************************************
-INT WIN32API StartDocW( HDC arg1, const DOCINFOW *arg2)
-{
-    dprintf(("GDI32: StartDocW STUB"));
-    // NOTE: This will not work as is (needs UNICODE support)
-//    return O32_StartDoc(arg1, arg2);
-    return 0;
-}
-//******************************************************************************
-//******************************************************************************
-int WIN32API StartPage( HDC arg1)
-{
-    dprintf(("GDI32: StartPage"));
-    return O32_StartPage(arg1);
-}
 //******************************************************************************
 //******************************************************************************
 BOOL WIN32API UnrealizeObject( HGDIOBJ hObject)
@@ -1208,14 +1166,6 @@ BOOL WIN32API WidenPath( HDC hdc)
 {
     dprintf(("GDI32: WidenPath %x", hdc));
     return O32_WidenPath(hdc);
-}
-//******************************************************************************
-//TODO: Not implemented
-//******************************************************************************
-int WIN32API SetAbortProc(HDC hdc, ABORTPROC lpAbortProc)
-{
-  dprintf(("GDI32: SetAbortProc - stub (1)w\n"));
-  return(1);
 }
 //******************************************************************************
 //Selects the current path as a clipping region for a device context, combining
