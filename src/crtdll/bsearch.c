@@ -1,10 +1,14 @@
-/* $Id: bsearch.c,v 1.1 1999-12-20 11:09:41 sandervl Exp $ */
+/* $Id: bsearch.c,v 1.2 1999-12-21 12:27:11 sandervl Exp $ */
 /* bsearch.c (emx+gcc) -- Copyright (c) 1990-1995 by Eberhard Mattes */
 
 #include <odin.h>
 #include <builtin.h>
 
-void *CDECL bsearch (const void *key, const void *base, size_t num, size_t width,
+/*********************************************************************
+ *                  bsearch	(CRTDLL.346)
+ */
+
+void *CDECL CRTDLL_bsearch (const void *key, const void *base, size_t num, size_t width,
                      int (* CDECL compare)(const void *key, const void *element))
 {
   int left, right, median, sign;

@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.15 1999-12-20 11:47:01 sandervl Exp $
+# $Id: makefile,v 1.16 1999-12-21 12:24:22 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -30,11 +30,10 @@ OBJS = NTDLL.obj\
        sec.obj\
        sync.obj\
        initterm.obj\
-       crt.obj\
        time.obj\
        unknown.obj\
        arith64.obj\
-       regfunc.obj qsort.obj
+       regfunc.obj 
 
 
 TARGET = NTDLL
@@ -43,7 +42,7 @@ all: $(TARGET).dll $(TARGET).lib
 
 
 $(TARGET).dll: $(OBJS) $(TARGET).def
-        $(LD) $(LDFLAGS) -Fm -Fe$@ $(OBJS) sbsstub.obj $(TARGET).def $(PDWIN32_LIB)\kernel32.lib $(PDWIN32_LIB)\user32.lib $(PDWIN32_LIB)/kernel32.lib $(PDWIN32_LIB)/odincrt.lib OS2386.LIB $(RTLLIB_O)
+        $(LD) $(LDFLAGS) -Fm -Fe$@ $(OBJS) sbsstub.obj $(TARGET).def $(PDWIN32_LIB)\kernel32.lib $(PDWIN32_LIB)\user32.lib $(PDWIN32_LIB)/kernel32.lib $(PDWIN32_LIB)/crtdll.lib $(PDWIN32_LIB)/odincrt.lib OS2386.LIB $(RTLLIB_O)
 # PMWINX.LIB LIBULS.LIB LIBCONV.LIB
         $(CP) $@ $(PDWIN32_BIN)
 

@@ -1,4 +1,4 @@
-/* $Id: crtdll.cpp,v 1.16 1999-12-18 14:32:23 sandervl Exp $ */
+/* $Id: crtdll.cpp,v 1.17 1999-12-21 12:27:11 sandervl Exp $ */
 
 /*
  * The C RunTime DLL
@@ -107,7 +107,7 @@ new_handler_type CDECL CRTDLL_set_new_handler(new_handler_type func)
  */
 double CDECL CRTDLL__CIacos( double x )
 {
-  dprintf(("NTDLL: _CIacos\n"));
+  dprintf(("CRTDLL: _CIacos\n"));
   dprintf(("should be register function\n"));
   return acos(x);
 }
@@ -118,7 +118,7 @@ double CDECL CRTDLL__CIacos( double x )
  */
 double CDECL CRTDLL__CIasin( double x )
 {
-  dprintf(("NTDLL: _CIasin\n"));
+  dprintf(("CRTDLL: _CIasin\n"));
   dprintf(("should be register function\n"));
   return asin(x);
 }
@@ -129,7 +129,7 @@ double CDECL CRTDLL__CIasin( double x )
  */
 double CDECL CRTDLL__CIatan( double x )
 {
-  dprintf(("NTDLL: _CIatan\n"));
+  dprintf(("CRTDLL: _CIatan\n"));
   dprintf(("should be register function\n"));
   return atan(x);
 }
@@ -140,7 +140,7 @@ double CDECL CRTDLL__CIatan( double x )
  */
 double CDECL CRTDLL__CIatan2( double x, double y )
 {
-  dprintf(("NTDLL: _CIatan2\n"));
+  dprintf(("CRTDLL: _CIatan2\n"));
   dprintf(("should be register function\n"));
   return atan2(x,y);
 }
@@ -151,7 +151,7 @@ double CDECL CRTDLL__CIatan2( double x, double y )
  */
 double CDECL CRTDLL__CIcos( double x )
 {
-  dprintf(("NTDLL: _CIcos\n"));
+  dprintf(("CRTDLL: _CIcos\n"));
   dprintf(("should be register function\n"));
   return cos(x);
 }
@@ -162,7 +162,7 @@ double CDECL CRTDLL__CIcos( double x )
  */
 double CDECL CRTDLL__CIcosh( double x )
 {
-  dprintf(("NTDLL: _CIcosh\n"));
+  dprintf(("CRTDLL: _CIcosh\n"));
   dprintf(("should be register function\n"));
   return cosh(x);
 }
@@ -173,7 +173,7 @@ double CDECL CRTDLL__CIcosh( double x )
  */
 double CDECL CRTDLL__CIexp( double x )
 {
-  dprintf(("NTDLL: _CIexp\n"));
+  dprintf(("CRTDLL: _CIexp\n"));
   dprintf(("should be register function\n"));
   return exp(x);
 }
@@ -184,7 +184,7 @@ double CDECL CRTDLL__CIexp( double x )
  */
 double CDECL CRTDLL__CIfmod( double x, double y )
 {
-  dprintf(("NTDLL: _CIfmod\n"));
+  dprintf(("CRTDLL: _CIfmod\n"));
   dprintf(("should be register function\n"));
   return fmod(x,y);
 }
@@ -195,7 +195,7 @@ double CDECL CRTDLL__CIfmod( double x, double y )
  */
 double CDECL CRTDLL__CIlog( double x )
 {
-  dprintf(("NTDLL: _CIlog\n"));
+  dprintf(("CRTDLL: _CIlog\n"));
   dprintf(("should be register function\n"));
   return log(x);
 }
@@ -206,7 +206,7 @@ double CDECL CRTDLL__CIlog( double x )
  */
 double CDECL CRTDLL__CIlog10( double x )
 {
-  dprintf(("NTDLL: _CIlog10\n"));
+  dprintf(("CRTDLL: _CIlog10\n"));
   dprintf(("should be register function\n"));
   return log10(x);
 }
@@ -217,7 +217,7 @@ double CDECL CRTDLL__CIlog10( double x )
  */
 double CDECL CRTDLL__CIsin( double x )
 {
-  dprintf(("NTDLL: _CIsin\n"));
+  dprintf(("CRTDLL: _CIsin\n"));
   dprintf(("should be register function\n"));
   return sin(x);
 }
@@ -228,7 +228,7 @@ double CDECL CRTDLL__CIsin( double x )
  */
 double CDECL CRTDLL__CIsinh( double x )
 {
-  dprintf(("NTDLL: _CIsinh\n"));
+  dprintf(("CRTDLL: _CIsinh\n"));
   dprintf(("should be register function\n"));
   return sinh(x);
 }
@@ -239,7 +239,7 @@ double CDECL CRTDLL__CIsinh( double x )
  */
 double CDECL CRTDLL__CIsqrt( double x )
 {
-  dprintf(("NTDLL: _CIsqrt\n"));
+  dprintf(("CRTDLL: _CIsqrt\n"));
   dprintf(("should be register function\n"));
   return acos(x);
 }
@@ -250,7 +250,7 @@ double CDECL CRTDLL__CIsqrt( double x )
  */
 double CDECL CRTDLL__CItan( double x )
 {
-  dprintf(("NTDLL: _CItan\n"));
+  dprintf(("CRTDLL: _CItan\n"));
   dprintf(("should be register function\n"));
   return tan(x);
 }
@@ -261,7 +261,7 @@ double CDECL CRTDLL__CItan( double x )
  */
 double CDECL CRTDLL__CItanh( double x )
 {
-  dprintf(("NTDLL: _CItanh\n"));
+  dprintf(("CRTDLL: _CItanh\n"));
   dprintf(("should be register function\n"));
   return tanh(x);
 }
@@ -4020,7 +4020,7 @@ LPWSTR CDECL CRTDLL__wcsdup( LPCWSTR str )
 int CDECL CRTDLL__wcsicoll( LPCWSTR str1, LPCWSTR str2 )
 {
   dprintf(("CRTDLL: _wcsicoll\n"));
-  return NTDLL__wcsicmp( str1, str2 );
+  return CRTDLL__wcsicmp( str1, str2 );
 }
 
 
@@ -4185,34 +4185,6 @@ double CDECL CRTDLL_atof( const char *nptr )
   dprintf(("CRTDLL: atof\n"));
   return (atof(nptr));
 }
-
-
-/*********************************************************************
- *                  bsearch	(CRTDLL.346)
- */
-void * CDECL CRTDLL_bsearch( const void *key, const void *base0,  size_t nelem,
-	 size_t size, int (*cmp)(const void *ck, const void *ce))
-{
-  dprintf(("CRTDLL: bsearch\n"));
-  char *base = (char *)base0;
-  int lim, cmpval;
-  void *p;
-
-  for (lim = nelem; lim != 0; lim >>= 1)
-  {
-    p = base + (lim >> 1) * size;
-    cmpval = (*cmp)(key, p);
-    if (cmpval == 0)
-      return p;
-    if (cmpval > 0)
-    {				/* key > p: move right */
-      base = (char *)p + size;
-      lim--;
-    } /* else move left */
-  }
-  return 0;
-}
-
 
 /*********************************************************************
  *                  calloc	(CRTDLL.347)
@@ -4991,7 +4963,7 @@ int CDECL CRTDLL_raise( int sig )
  */
 int CDECL CRTDLL_rand( void )
 {
-    dprintf(("CRTDLL: rand\n"));
+//    dprintf(("CRTDLL: rand\n"));
     return (rand());
 }
 
@@ -5270,7 +5242,6 @@ wint_t CDECL CRTDLL_ungetwc( wint_t wc, FILE *strm )
   dprintf(("CRTDLL: ungetwc\n"));
   return (ungetwc(wc, strm));
 }
-
 
 /*********************************************************************
  *                  vfprintf       (CRTDLL.494)

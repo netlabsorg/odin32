@@ -1,4 +1,4 @@
-/* $Id: crtinc.h,v 1.11 1999-12-18 14:32:24 sandervl Exp $ */
+/* $Id: crtinc.h,v 1.12 1999-12-21 12:27:12 sandervl Exp $ */
 
 /* Definitions for the CRTDLL library (CRTDLL.DLL)
  *
@@ -144,7 +144,7 @@ UINT 	CRTDLL_winver_dll;       /* CRTDLL.328 */
 
 // CRTDLL Functions
 CRTDLL_FILE * 	CDECL CRTDLL__fdopen(INT handle, LPCSTR mode);
-INT 		CDECL NTDLL__wcsicmp( LPCWSTR str1, LPCWSTR str2 );
+INT 		CDECL CRTDLL__wcsicmp( LPCWSTR str1, LPCWSTR str2 );
 INT 		CDECL CRTDLL_vfprintf( CRTDLL_FILE *file, LPSTR format, va_list args );
 VOID *		CDECL CRTDLL_malloc(DWORD size);
 long 		CDECL CRTDLL__lseek(int handle,long offset,int origin);
