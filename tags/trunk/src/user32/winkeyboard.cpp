@@ -1,4 +1,4 @@
-/* $Id: winkeyboard.cpp,v 1.43 2003-07-31 15:56:48 sandervl Exp $ */
+/* $Id: winkeyboard.cpp,v 1.44 2004-03-15 14:00:12 sandervl Exp $ */
 /*
  * Win32 <-> PM key translation
  *
@@ -1091,9 +1091,7 @@ HKL WIN32API GetKeyboardLayout(DWORD dwLayout)
  *****************************************************************************/
 INT WIN32API GetKeyboardLayoutNameA(LPSTR pwszKLID)
 {
-   dprintf(("not correctly implemented"));
-
-   sprintf(pwszKLID, "%08x",GetKeyboardLayout(0));
+   sprintf(pwszKLID, "%08x", LOWORD(GetKeyboardLayout(0)));
    return 1;
 }
 
