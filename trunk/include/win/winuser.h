@@ -3194,6 +3194,13 @@ typedef VOID (* CALLBACK SENDASYNCPROC)(HWND, UINT, DWORD, LRESULT);
 #define STATE_SYSTEM_ONLY_REDUNDANT     0x40000000  // this object has children, but they are all redundant
 #define STATE_SYSTEM_VALID              0x7FFFFFFF
 
+
+/* RegisterDeviceNotification stuff */
+typedef  PVOID           HDEVNOTIFY;
+typedef  HDEVNOTIFY     *PHDEVNOTIFY;
+
+#define DEVICE_NOTIFY_WINDOW_HANDLE     0x00000000
+
 #include "poppack.h"
 #define     EnumTaskWindows(handle,proc,lparam) \
             EnumThreadWindows(handle,proc,lparam)
@@ -3209,11 +3216,32 @@ typedef VOID (* CALLBACK SENDASYNCPROC)(HWND, UINT, DWORD, LRESULT);
 #define     AnsiToOemBuffA CharToOemBuffA
 #define     AnsiToOemBuffW CharToOemBuffW
 #define     AnsiToOemBuff WINELIB_NAME_AW(AnsiToOemBuff)
-WORD        WINAPI CascadeWindows (HWND, UINT, const LPRECT,
-                                   UINT, const HWND *);
+
+#if defined(_WINGDI_) && !defined(NOGDI)
+LONG        WINAPI ChangeDisplaySettingsA(LPDEVMODEA,DWORD);
+LONG        WINAPI ChangeDisplaySettingsW(LPDEVMODEW,DWORD);
+#define     ChangeDisplaySettings WINELIB_NAME_AW(ChangeDisplaySettings)
+LONG        WINAPI ChangeDisplaySettingsExA(LPCSTR,LPDEVMODEA,HWND,DWORD,LPARAM);
+LONG        WINAPI ChangeDisplaySettingsExW(LPCWSTR,LPDEVMODEW,HWND,DWORD,LPARAM);
+#define     ChangeDisplaySettingsEx WINELIB_NAME_AW(ChangeDisplaySettingsEx)
+BOOL        WINAPI EnumDisplayDevicesA(LPVOID,DWORD,LPDISPLAY_DEVICEA,DWORD);
+BOOL        WINAPI EnumDisplayDevicesW(LPVOID,DWORD,LPDISPLAY_DEVICEW,DWORD);
+#define     EnumDisplayDevices WINELIB_NAME_AW(EnumDisplayDevices)
+BOOL        WINAPI EnumDisplaySettingsA(LPCSTR,DWORD,LPDEVMODEA);
+BOOL        WINAPI EnumDisplaySettingsW(LPCWSTR,DWORD,LPDEVMODEW);
+#define     EnumDisplaySettings WINELIB_NAME_AW(EnumDisplaySettings)
+#endif /* defined(_WINGDI_) && !defined(NOGDI) */
+
+HKL         WINAPI ActivateKeyboardLayout(HKL,UINT);
+LONG        WINAPI BroadcastSystemMessage(DWORD,LPDWORD,UINT,WPARAM,LPARAM);
+WORD        WINAPI CascadeWindows(HWND, UINT, const LPRECT, UINT, const HWND *);
+BOOL        WINAPI CascadeChildWindows(HWND, DWORD);
 INT       WINAPI CopyAcceleratorTableA(HACCEL,LPACCEL,INT);
 INT       WINAPI CopyAcceleratorTableW(HACCEL,LPACCEL,INT);
 #define     CopyAcceleratorTable WINELIB_NAME_AW(CopyAcceleratorTable)
+HACCEL      WINAPI CreateAcceleratorTableA(LPACCEL,INT);
+HACCEL      WINAPI CreateAcceleratorTableW(LPACCEL,INT);
+#define     CreateAcceleratorTable WINELIB_NAME_AW(CreateAcceleratorTable)
 HICON     WINAPI CreateIconIndirect(LPICONINFO);
 BOOL      WINAPI DestroyAcceleratorTable(HACCEL);
 BOOL      WINAPI EnumDisplayMonitors(HDC,LPRECT,MONITORENUMPROC,LPARAM);
@@ -3223,6 +3251,8 @@ INT       WINAPI EnumPropsExW(HWND,PROPENUMPROCEXW,LPARAM);
 BOOL      WINAPI EnumThreadWindows(DWORD,WNDENUMPROC,LPARAM);
 BOOL      WINAPI ExitWindowsEx(UINT,DWORD);
 BOOL      WINAPI GetIconInfo(HICON,LPICONINFO);
+HKL       WINAPI GetKeyboardLayout(DWORD);
+INT       WINAPI GetKeyboardLayoutList(INT,HKL *);
 DWORD       WINAPI GetMenuContextHelpId(HMENU);
 UINT      WINAPI GetMenuDefaultItem(HMENU,UINT,UINT);
 BOOL      WINAPI GetMenuInfo(HMENU,LPMENUINFO);
@@ -3249,25 +3279,32 @@ BOOL      WINAPI PaintDesktop(HDC);
 BOOL      WINAPI PostThreadMessageA(DWORD, UINT, WPARAM, LPARAM);
 BOOL      WINAPI PostThreadMessageW(DWORD, UINT, WPARAM, LPARAM);
 #define     PostThreadMessage WINELIB_NAME_AW(PostThreadMessage)
-UINT      WINAPI ReuseDDElParam(UINT,UINT,UINT,UINT,UINT);
-BOOL      WINAPI SendNotifyMessageA(HWND,UINT,WPARAM,LPARAM);
-BOOL      WINAPI SendNotifyMessageW(HWND,UINT,WPARAM,LPARAM);
+
+BOOL        WINAPI RegisterHotKey(HWND,INT,UINT,UINT);
+HDEVNOTIFY  WINAPI RegisterDeviceNotificationA(HANDLE,LPVOID,DWORD);
+HDEVNOTIFY  WINAPI RegisterDeviceNotificationW(HANDLE,LPVOID,DWORD);
+#define     RegisterDeviceNotification WINELIB_NAME_AW(RegisterDeviceNotification)
+
+BOOL        WINAPI SendNotifyMessageA(HWND,UINT,WPARAM,LPARAM);
+BOOL        WINAPI SendNotifyMessageW(HWND,UINT,WPARAM,LPARAM);
 #define     SendNotifyMessage WINELIB_NAME_AW(SendNotifyMessage)
 VOID        WINAPI SetDebugErrorLevel(DWORD);
 VOID        WINAPI SetLastErrorEx(DWORD,DWORD);
-BOOL      WINAPI SetMenuDefaultItem(HMENU,UINT,UINT);
-BOOL      WINAPI SetMenuInfo(HMENU,LPCMENUINFO);
-BOOL      WINAPI SetMenuItemInfoA(HMENU,UINT,BOOL,const MENUITEMINFOA*);
-BOOL      WINAPI SetMenuItemInfoW(HMENU,UINT,BOOL,const MENUITEMINFOW*);
+BOOL        WINAPI SetMenuDefaultItem(HMENU,UINT,UINT);
+BOOL        WINAPI SetMenuInfo(HMENU,LPCMENUINFO);
+BOOL        WINAPI SetMenuItemInfoA(HMENU,UINT,BOOL,const MENUITEMINFOA*);
+BOOL        WINAPI SetMenuItemInfoW(HMENU,UINT,BOOL,const MENUITEMINFOW*);
 #define     SetMenuItemInfo WINELIB_NAME_AW(SetMenuItemInfo)
-BOOL      WINAPI SetWindowContextHelpId(HWND,DWORD);
+BOOL        WINAPI SetWindowContextHelpId(HWND,DWORD);
+BOOL        WINAPI TileChildWindows(HWND, DWORD);
 WORD        WINAPI TileWindows (HWND, UINT, const LPRECT,
                                 UINT, const HWND *);
-BOOL      WINAPI TrackMouseEvent(LPTRACKMOUSEEVENT);
-BOOL      WINAPI TrackPopupMenuEx(HMENU,UINT,INT,INT,HWND,
+INT         WINAPI ToUnicode(UINT,UINT,PBYTE,LPWSTR,int,UINT);
+BOOL        WINAPI TrackMouseEvent(LPTRACKMOUSEEVENT);
+BOOL        WINAPI TrackPopupMenuEx(HMENU,UINT,INT,INT,HWND,
                                     LPTPMPARAMS);
-BOOL        WINAPI UnpackDDElParam(UINT,UINT,UINT*,UINT*);
 DWORD       WINAPI WaitForInputIdle(HANDLE,DWORD);
+BOOL        WINAPI UnregisterHotKey(HWND,INT);
 VOID        WINAPI keybd_event(BYTE,BYTE,DWORD,DWORD);
 VOID        WINAPI mouse_event(DWORD,DWORD,DWORD,DWORD,DWORD);
 
@@ -3653,6 +3690,7 @@ BOOL      WINAPI InsertMenuItemA(HMENU,UINT,BOOL,const MENUITEMINFOA*);
 BOOL      WINAPI InsertMenuItemW(HMENU,UINT,BOOL,const MENUITEMINFOW*);
 #define     InsertMenuItem WINELIB_NAME_AW(InsertMenuItem)
 BOOL      WINAPI IntersectRect(LPRECT,const RECT*,const RECT*);
+int       WINAPI InternalGetWindowText(HWND hwnd, LPWSTR lpString, INT nMaxCount);
 BOOL      WINAPI InvalidateRect(HWND,const RECT*,BOOL);
 BOOL      WINAPI InvalidateRgn(HWND,HRGN,BOOL);
 BOOL      WINAPI InvertRect(HDC,const RECT*);
@@ -3716,10 +3754,14 @@ INT       WINAPI LookupIconIdFromDirectoryEx(LPBYTE,BOOL,INT,INT,UINT);
 UINT      WINAPI MapVirtualKeyA(UINT,UINT);
 UINT      WINAPI MapVirtualKeyW(UINT,UINT);
 #define     MapVirtualKey WINELIB_NAME_AW(MapVirtualKey)
-UINT      WINAPI MapVirtualKeyEx32A(UINT,UINT,HKL);
+
+UINT        WINAPI MapVirtualKeyExA(UINT,UINT,HKL);
+UINT        WINAPI MapVirtualKeyExW(UINT,UINT,HKL);
 #define     MapVirtualKeyEx WINELIB_NAME_AW(MapVirtualKeyEx)
+
 BOOL      WINAPI MapDialogRect(HWND,LPRECT);
 INT       WINAPI MapWindowPoints(HWND,HWND,LPPOINT,UINT);
+UINT      WINAPI MenuItemFromPoint(HWND,HMENU,POINT);
 BOOL      WINAPI MessageBeep(UINT);
 INT       WINAPI MessageBoxA(HWND,LPCSTR,LPCSTR,UINT);
 INT       WINAPI MessageBoxW(HWND,LPCWSTR,LPCWSTR,UINT);
@@ -3852,6 +3894,7 @@ INT       WINAPI ShowCursor(BOOL);
 BOOL      WINAPI ShowScrollBar(HWND,INT,BOOL);
 BOOL      WINAPI ShowOwnedPopups(HWND,BOOL);
 BOOL      WINAPI ShowWindow(HWND,INT);
+BOOL      WINAPI ShowWindowAsync(HWND hwnd, int nCmdShow);
 BOOL      WINAPI SubtractRect(LPRECT,const RECT*,const RECT*);
 BOOL      WINAPI SwapMouseButton(BOOL);
 BOOL      WINAPI SwitchToThisWindow(HWND,BOOL);
@@ -3871,6 +3914,7 @@ BOOL      WINAPI TranslateMessage(const MSG*);
 BOOL      WINAPI UnhookWindowsHook(INT,HOOKPROC);
 BOOL      WINAPI UnhookWindowsHookEx(HHOOK);
 BOOL      WINAPI UnionRect(LPRECT,const RECT*,const RECT*);
+BOOL      WINAPI UnloadKeyboardLayout(HKL hkl);
 BOOL      WINAPI UnregisterClassA(LPCSTR,HINSTANCE);
 BOOL      WINAPI UnregisterClassW(LPCWSTR,HINSTANCE);
 #define     UnregisterClass WINELIB_NAME_AW(UnregisterClass)
