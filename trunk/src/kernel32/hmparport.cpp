@@ -1,4 +1,4 @@
-/* $Id: hmparport.cpp,v 1.3 2001-11-08 15:38:43 phaller Exp $ */
+/* $Id: hmparport.cpp,v 1.4 2001-11-08 16:00:17 phaller Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -113,6 +113,9 @@ static VOID *CreateDevData()
 
 HMDeviceParPortClass::HMDeviceParPortClass(LPCSTR lpDeviceName) : HMDeviceHandler(lpDeviceName)
 {
+  dprintf(("HMDeviceParPortClass::HMDevParPortClass(%s)\n",
+           lpDeviceName));
+  
   VOID *pData;
   dprintf(("HMDeviceParPortClass: Register LPT1 to LPT3 with Handle Manager\n"));
   
@@ -136,6 +139,10 @@ HMDeviceParPortClass::HMDeviceParPortClass(LPCSTR lpDeviceName) : HMDeviceHandle
  *****************************************************************************/
 BOOL HMDeviceParPortClass::FindDevice(LPCSTR lpClassDevName, LPCSTR lpDeviceName, int namelength)
 {
+  dprintf(("HMDeviceParPortClass::FindDevice(%s,%s)\n",
+           lpClassDevName,
+           lpDeviceName));
+  
     if(namelength > 5)
         return FALSE;  //can't be lpt name
 
@@ -157,10 +164,16 @@ BOOL HMDeviceParPortClass::FindDevice(LPCSTR lpClassDevName, LPCSTR lpDeviceName
 }
 
 DWORD HMDeviceParPortClass::CreateFile(LPCSTR lpFileName,
-                                    PHMHANDLEDATA pHMHandleData,
-                                    PVOID lpSecurityAttributes,
-                                    PHMHANDLEDATA pHMHandleDataTemplate)
+                                       PHMHANDLEDATA pHMHandleData,
+                                       PVOID lpSecurityAttributes,
+                                       PHMHANDLEDATA pHMHandleDataTemplate)
 {
+  dprintf(("HMDeviceParPortClass::CreateFile(%s,%08xh,%08xh,%08xh)\n",
+           lpFileName,
+           pHMHandleData,
+           lpSecurityAttributes,
+           pHMHandleDataTemplate));
+  
  char comname[6];
 
   dprintf(("HMDeviceParPortClass: Parallel port %s open request\n", lpFileName));
@@ -241,7 +254,8 @@ DWORD HMDeviceParPortClass::CreateFile(LPCSTR lpFileName,
                       /* this is a handler method for calls to CloseHandle() */
 BOOL HMDeviceParPortClass::CloseHandle(PHMHANDLEDATA pHMHandleData)
 {
-  dprintf(("HMDeviceParPortClass: Parallel port close request\n"));
+  dprintf(("HMDeviceParPortClass: Parallel port close request(%08xh)\n",
+          pHMHandleData));
   delete pHMHandleData->lpHandlerData;
   return OSLibDosClose(pHMHandleData->hHMHandle);
 }
@@ -264,10 +278,10 @@ BOOL HMDeviceParPortClass::CloseHandle(PHMHANDLEDATA pHMHandleData)
  *****************************************************************************/
 
 BOOL HMDeviceParPortClass::WriteFile(PHMHANDLEDATA pHMHandleData,
-                                  LPCVOID       lpBuffer,
-                                  DWORD         nNumberOfBytesToWrite,
-                                  LPDWORD       lpNumberOfBytesWritten,
-                                  LPOVERLAPPED  lpOverlapped)
+                                     LPCVOID       lpBuffer,
+                                     DWORD         nNumberOfBytesToWrite,
+                                     LPDWORD       lpNumberOfBytesWritten,
+                                     LPOVERLAPPED  lpOverlapped)
 {
   dprintf(("KERNEL32:HMDeviceParPortClass::WriteFile %s(%08x,%08x,%08x,%08x,%08x)",
            lpHMDeviceName,
@@ -324,10 +338,10 @@ BOOL HMDeviceParPortClass::WriteFile(PHMHANDLEDATA pHMHandleData,
  *****************************************************************************/
 
 BOOL HMDeviceParPortClass::WriteFileEx(PHMHANDLEDATA pHMHandleData,
-                           LPVOID       lpBuffer,
-                           DWORD        nNumberOfBytesToWrite,
-                           LPOVERLAPPED lpOverlapped,
-                           LPOVERLAPPED_COMPLETION_ROUTINE  lpCompletionRoutine)
+                                       LPVOID       lpBuffer,
+                                       DWORD        nNumberOfBytesToWrite,
+                                       LPOVERLAPPED lpOverlapped,
+                                       LPOVERLAPPED_COMPLETION_ROUTINE  lpCompletionRoutine)
 {
   dprintf(("ERROR: WriteFileEx %s (%08xh,%08xh,%08xh,%08xh,%08xh) not implemented.\n",
            lpHMDeviceName,
@@ -358,10 +372,10 @@ BOOL HMDeviceParPortClass::WriteFileEx(PHMHANDLEDATA pHMHandleData,
  *****************************************************************************/
 
 BOOL HMDeviceParPortClass::ReadFile(PHMHANDLEDATA pHMHandleData,
-                                 LPCVOID       lpBuffer,
-                                 DWORD         nNumberOfBytesToRead,
-                                 LPDWORD       lpNumberOfBytesRead,
-                                 LPOVERLAPPED  lpOverlapped)
+                                    LPCVOID       lpBuffer,
+                                    DWORD         nNumberOfBytesToRead,
+                                    LPDWORD       lpNumberOfBytesRead,
+                                    LPOVERLAPPED  lpOverlapped)
 {
   dprintf(("KERNEL32:HMDeviceParPortClass::ReadFile %s(%08x,%08x,%08x,%08x,%08x)",
            lpHMDeviceName,
@@ -436,12 +450,15 @@ BOOL HMDeviceParPortClass::ReadFileEx(PHMHANDLEDATA pHMHandleData,
 }
 
 BOOL HMDeviceParPortClass::GetCommProperties( PHMHANDLEDATA pHMHandleData,
-                                           LPCOMMPROP lpcmmp)
+                                             LPCOMMPROP lpcmmp)
 {
+  dprintf(("HMDeviceParPortClass::GetCommProperties(%08xh, %08xh)\n",
+           pHMHandleData,
+           lpcmmp));
+  
   APIRET rc;
   ULONG ulLen;
   int i;
-  dprintf(("HMDeviceParPortClass::GetCommProperties"));
   
 #if 0
   USHORT COMErr;
@@ -491,11 +508,15 @@ BOOL HMDeviceParPortClass::ClearCommError( PHMHANDLEDATA pHMHandleData,
                                           LPDWORD lpdwErrors,
                                           LPCOMSTAT lpcst)
 {
+  dprintf(("HMDeviceParPortClass::ClearCommError(%08xh,%08xh,%08xh)\n",
+           pHMHandleData,
+           lpdwErrors,
+           lpcst));
+  
   APIRET rc;
   ULONG ulLen;
   USHORT COMErr;
 
-  dprintf(("HMDeviceParPortClass::ClearCommError"));
   ulLen = sizeof(USHORT);
   
   *lpdwErrors = 0;
@@ -559,10 +580,14 @@ BOOL HMDeviceParPortClass::ClearCommError( PHMHANDLEDATA pHMHandleData,
 }
 
 
-BOOL HMDeviceParPortClass::DeviceIoControl(PHMHANDLEDATA pHMHandleData, DWORD dwIoControlCode,
-                             LPVOID lpInBuffer, DWORD nInBufferSize,
-                             LPVOID lpOutBuffer, DWORD nOutBufferSize,
-                             LPDWORD lpBytesReturned, LPOVERLAPPED lpOverlapped)
+BOOL HMDeviceParPortClass::DeviceIoControl(PHMHANDLEDATA pHMHandleData, 
+                                           DWORD dwIoControlCode,
+                                           LPVOID lpInBuffer, 
+                                           DWORD nInBufferSize,
+                                           LPVOID lpOutBuffer, 
+                                           DWORD nOutBufferSize,
+                                           LPDWORD lpBytesReturned, 
+                                           LPOVERLAPPED lpOverlapped)
 {
 #ifdef DEBUG
     char *msg = NULL;
@@ -598,6 +623,11 @@ BOOL HMDeviceParPortClass::SetDefaultCommConfig( PHMHANDLEDATA pHMHandleData,
                                                 LPCOMMCONFIG lpCC,
                                                 DWORD dwSize)
 {
+  dprintf(("HMDeviceParPortClass::SetDefaultCommConfig(%08xh,%08xh,%08xh)\n",
+           pHMHandleData,
+           lpCC,
+           dwSize));
+  
   PHMDEVPARPORTDATA pDevData = (PHMDEVPARPORTDATA)pHMHandleData->lpDeviceData;
   if((NULL==pDevData) || (pDevData->ulMagic != MAGIC_PARPORT) )
   {
@@ -615,6 +645,12 @@ BOOL HMDeviceParPortClass::GetDefaultCommConfig( PHMHANDLEDATA pHMHandleData,
                                                 LPCOMMCONFIG lpCC,
                                                 LPDWORD lpdwSize)
 {
+  dprintf(("HMDeviceParPortClass::GetDefaultCommConfig(%08xh,%08xh,%08xh)\n",
+           pHMHandleData,
+           lpCC,
+           lpdwSize));
+
+  
   PHMDEVPARPORTDATA pDevData = (PHMDEVPARPORTDATA)pHMHandleData->lpDeviceData;
 
   if( O32_IsBadWritePtr(lpCC,sizeof(COMMCONFIG)) ||
@@ -643,7 +679,6 @@ BOOL HMDeviceParPortClass::SetCommConfig( PHMHANDLEDATA pHMHandleData,
 {
   dprintf(("HMDeviceParPortClass::SetCommConfig not implemented"));
 
-
   return(TRUE);
 }
 
@@ -654,7 +689,10 @@ BOOL HMDeviceParPortClass::GetCommConfig( PHMHANDLEDATA pHMHandleData,
 {
   PHMDEVPARPORTDATA pDevData = (PHMDEVPARPORTDATA)pHMHandleData->lpHandlerData;
 
-  dprintf(("HMDeviceParPortClass::GetCommConfig"));
+  dprintf(("HMDeviceParPortClass::GetCommConfig(%08xh,%08xh,%08xh)\n",
+           pHMHandleData,
+           lpCC,
+           lpdwSize));
 
   if( O32_IsBadWritePtr(lpCC,sizeof(COMMCONFIG)) ||
       *lpdwSize< sizeof(COMMCONFIG) )
