@@ -1,4 +1,4 @@
-/* $Id: thread.cpp,v 1.35 2001-11-14 12:30:44 phaller Exp $ */
+/* $Id: thread.cpp,v 1.36 2001-11-30 19:05:47 phaller Exp $ */
 
 /*
  * Win32 Thread API functions
@@ -38,10 +38,24 @@
 
 ODINDEBUGCHANNEL(KERNEL32-THREAD)
 
+
+// The function GetThreadTEB() is defined in wprocess.cpp
+// This macro is for performance improvement only.
+// DWORD TIBFlatPtr is exported from wprocess.cpp
+#define GetThreadTEB() ((TEB*)(TIBFlatPtr))
+
 //******************************************************************************
 //******************************************************************************
 DWORD WIN32API GetCurrentThreadId()
 {
+  // check cached identifier
+  TEB *teb = GetThreadTEB();
+  if(teb != NULL) 
+  {
+    // this is set in InitializeTIB() already.
+    return teb->o.odin.threadId;
+  }
+  
 ////  dprintf(("GetCurrentThreadId\n"));
   return(O32_GetCurrentThreadId());
 }
