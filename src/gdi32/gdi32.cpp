@@ -1,4 +1,4 @@
-/* $Id: gdi32.cpp,v 1.29 2000-01-07 17:37:53 cbratschi Exp $ */
+/* $Id: gdi32.cpp,v 1.30 2000-01-20 21:39:35 sandervl Exp $ */
 
 /*
  * GDI32 apis
@@ -17,6 +17,8 @@
 #include "callback.h"
 #include "unicode.h"
 #include "dibsect.h"
+#include <codepage.h>
+#include "oslibgpi.h"
 
 static ULONG QueryPaletteSize(BITMAPINFOHEADER *pBHdr)
 {
@@ -305,13 +307,19 @@ HBITMAP WIN32API CreateCompatibleBitmap( HDC arg1, int arg2, int  arg3)
 }
 //******************************************************************************
 //******************************************************************************
-HDC WIN32API CreateCompatibleDC( HDC arg1)
+HDC WIN32API CreateCompatibleDC( HDC hdc)
 {
- HDC rc;
+ HDC newHdc;
+ ULONG oldcp;
 
-    rc = O32_CreateCompatibleDC(arg1);
-    dprintf(("GDI32: CreateCompatibleDC %X returned %x", arg1, rc));
-    return rc;
+    newHdc = O32_CreateCompatibleDC(hdc);
+    oldcp = OSLibGpiQueryCp(hdc);
+    if (!oldcp) { /* If new DC is to be created */
+        oldcp = GetDisplayCodepage();
+    	OSLibGpiSetCp(newHdc, oldcp);
+    }
+
+    return newHdc;
 }
 //******************************************************************************
 //******************************************************************************
