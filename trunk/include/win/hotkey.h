@@ -1,4 +1,4 @@
-/* $Id: hotkey.h,v 1.4 1999-09-23 15:49:57 cbratschi Exp $ */
+/* $Id: hotkey.h,v 1.5 2000-02-25 16:58:33 cbratschi Exp $ */
 
 /*
  * Hotkey class extra info
@@ -12,6 +12,8 @@
 
 typedef struct tagHOTKEY_INFO
 {
+    COMCTL32_HEADER header;
+
     HFONT hFont;
     BOOL  bFocus;
     INT   nHeight;

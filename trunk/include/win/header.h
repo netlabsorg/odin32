@@ -1,4 +1,4 @@
-/* $Id: header.h,v 1.7 1999-10-07 21:00:05 cbratschi Exp $ */
+/* $Id: header.h,v 1.8 2000-02-25 16:58:33 cbratschi Exp $ */
 
 /*
  * Header window definitions
@@ -31,6 +31,8 @@ typedef struct
 
 typedef struct
 {
+    COMCTL32_HEADER header;
+
     UINT      uNumItem; /* number of items (columns) */
     INT       nHeight;  /* height of the header (pixels) */
     HFONT     hFont;            /* handle to the current font */
@@ -43,7 +45,6 @@ typedef struct
     BOOL      bTrackOpen;
     BOOL      bDragDrop;
     BOOL      bTimer;
-    BOOL      bUnicode;       /* Unicode flag */
     INT       iMoveItem;        /* index of tracked item. (Tracking mode) */
     INT       xTrackOffset;     /* distance between the right side of the tracked item and the cursor */
     INT       xOldTrack;        /* track offset (see above) after the last WM_MOUSEMOVE */
