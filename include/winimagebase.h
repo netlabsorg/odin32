@@ -1,4 +1,4 @@
-/* $Id: winimagebase.h,v 1.2 1999-09-18 17:45:23 sandervl Exp $ */
+/* $Id: winimagebase.h,v 1.3 1999-10-05 13:48:40 sandervl Exp $ */
 
 /*
  * Win32 PE Image base class
@@ -23,6 +23,8 @@
 #endif
 
 #define LANG_GETFIRST           0x80000000
+#define ID_GETFIRST             LANG_GETFIRST
+#define IDLANG_GETFIRST         LANG_GETFIRST
 
 class Win32Resource;
 
