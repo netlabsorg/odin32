@@ -1,4 +1,4 @@
-; $Id: msvcrt.def,v 1.17 2000-06-21 17:33:37 phaller Exp $
+; $Id: msvcrt.def,v 1.18 2000-08-22 02:45:41 phaller Exp $
 
 ;
 ; Based on Windows 98 : MSVCRT.DLL (v6.00.8397.0)
@@ -328,7 +328,7 @@ EXPORTS
     _lfind			= _CRTDLL__lfind		@315
     _loaddll			= _CRTDLL__loaddll		@316
     _local_unwind2		= _CRTDLL__local_unwind2	@317
-;   _lock							@318
+    _lock			= _MSVCRT__lock 		@318
     _locking			= _CRTDLL__locking		@319
     _logb			= _CRTDLL__logb			@320
     _longjmpex			= _CRTDLL_longjmp		@321 ; Not correct
@@ -492,7 +492,7 @@ EXPORTS
     _ungetch			= _CRTDLL__ungetch		@477
     _unlink			= _CRTDLL__unlink		@478
     _unloaddll			= _CRTDLL__unloaddll		@479
-;   _unlock							@480
+    _unlock			= _MSVCRT__unlock       	@480
     _utime			= _CRTDLL__utime		@481
     _vsnprintf			= _CRTDLL__vsnprintf		@482
     _vsnwprintf			= _CRTDLL__vsnwprintf		@483

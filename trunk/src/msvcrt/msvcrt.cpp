@@ -1,4 +1,4 @@
-/* $Id: msvcrt.cpp,v 1.12 2000-06-21 17:33:37 phaller Exp $ */
+/* $Id: msvcrt.cpp,v 1.13 2000-08-22 02:45:40 phaller Exp $ */
 
 /*
  * The Visual C RunTime DLL (MSVCRT/MSVCRT20/MSVCRT40)
@@ -13,8 +13,13 @@
 #include <odinwrap.h>
 #include <wchar.h>
 #include <math.h>
+#include <string.h>
+
 #include <heapstring.h>
 #include <crtdll.h>
+
+#include <win/winbase.h>
+#include <win/winnt.h>
 #include "msvcrt.h"
 
 ODINDEBUGCHANNEL(msvcrt)
@@ -610,11 +615,39 @@ INT CDECL MSVCRT_EXP49(DWORD ret)
  *                  _CxxThrowException    (MSVCRT.66)
  *	FIXME - Could not find anything about it
  */
-INT CDECL MSVCRT__CxxThrowException(DWORD ret)
+
+static EXCEPTION_RECORD cxxExceptionFrame =
+{ 0x0e06d763, // Exception Code
+  0x00000001, // Exception Flags
+  0x00000000, // Exception Record Pointer
+  0x00000000, // Exception Address
+  0x00000003, // Number Of Parameters
+  0x19930520, // Parameter #1
+  0x00000000, // Parameter #2
+  0x00000000  // Parameter #3
+};
+
+VOID CDECL MSVCRT__CxxThrowException(DWORD arg1,
+                                     DWORD arg2)
 {
-  dprintf(("MSVCRT: _CxxThrowException not implemented.\n"));
-  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
-  return FALSE;
+  EXCEPTION_RECORD er;
+  
+  dprintf(("MSVCRT: _CxxThrowException %08xh %08xh\n",
+           arg1,
+           arg2));
+  
+  //memcpy(er, cxxExceptionFrame, sizeof(er));
+  // PH: optimization - why copying values when they're overwritten anyway...
+  memcpy(&er, &cxxExceptionFrame, 6);
+  
+  // Note: er.ExceptionInformation[0] is already set!
+  er.ExceptionInformation[1] = arg1;
+  er.ExceptionInformation[2] = arg2;
+  
+  RaiseException(er.ExceptionCode,
+                 er.ExceptionFlags,
+                 er.NumberParameters,
+                 &er.ExceptionInformation[0]);
 }
 
 /*********************************************************************
@@ -1213,6 +1246,58 @@ wchar_t * CDECL MSVCRT__itow( int value, wchar_t *string, int radix )
   dprintf(("MSVCRT: _itow not implemented.\n"));
   SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
   return FALSE;
+}
+
+
+/*********************************************************************
+ *                  _unlock    (MSVCRT.480)
+ */
+// Note: PH 2000/08/22 array size is probably larger than 0x12!
+static CRITICAL_SECTION* arrpCriticalSections[0x12] = {0};
+
+#define CRITSEC_TABLE_LOCK 0x11
+ 
+VOID CDECL MSVCRT__unlock(unsigned long ulIndex)
+{
+  dprintf(("MSVCRT: _unlock\n"));
+  
+  CRITICAL_SECTION *pCS = arrpCriticalSections[ulIndex];
+  LeaveCriticalSection(pCS);
+}
+
+
+/*********************************************************************
+ *                  _lock    (MSVCRT.318)
+ */
+// Prototype from CRTDLL.CPP
+VOID CDECL amsg_exit(int errnum);
+
+VOID CDECL MSVCRT__lock(unsigned long ulIndex)
+{
+  dprintf(("MSVCRT: _lock\n"));
+  
+  CRITICAL_SECTION *pCS = arrpCriticalSections[ulIndex];
+  if (pCS == NULL)
+  {
+    CRITICAL_SECTION *pCSNew;
+    
+    pCSNew = (CRITICAL_SECTION*)malloc( sizeof(CRITICAL_SECTION) );
+    if (pCSNew == NULL)
+      amsg_exit(0x11); // yield error message
+    
+    MSVCRT__lock(CRITSEC_TABLE_LOCK); // lock table
+    if (pCS != NULL) // has been modified meanwhile by other thread ?
+      free(pCSNew);
+    else
+    {
+      InitializeCriticalSection(pCSNew);
+      arrpCriticalSections[ulIndex] = pCSNew;
+    }
+      
+    MSVCRT__unlock(CRITSEC_TABLE_LOCK); // unlock table
+  }
+    
+  EnterCriticalSection(pCS);
 }
 
 
