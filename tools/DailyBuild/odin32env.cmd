@@ -1,4 +1,4 @@
-/* $Id: odin32env.cmd,v 1.13 2000-11-23 15:47:14 bird Exp $
+/* $Id: odin32env.cmd,v 1.14 2000-12-12 21:55:43 bird Exp $
  *
  * Sets the build environment.
  *
@@ -20,6 +20,7 @@ parse arg sCompiler
     call EnvVar_Set 0, 'CVSROOT',   ':pserver:bird@www.netlabs.org:d:/netlabs.src/odin32'
     call EnvVar_Set 0, 'HOME',      'd:\knut\home'
     call EnvVar_Set 0, 'USER',      'bird'
+    call EnvVar_Set 0, 'HOSTNAME',  'Univac-Job'
 
 
     /*
