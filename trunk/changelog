@@ -1,4 +1,4 @@
-/* $Id: changelog,v 1.1606 2001-07-16 19:33:35 sandervl Exp $ */
+/* $Id: changelog,v 1.1607 2001-07-16 20:18:07 sandervl Exp $ */
 
  2001-07-16: Sander van Leeuwen <sandervl@xs4all.nl>
     - KERNEL32: o RegEnumKeyExW fix (lpszClass can be NULL)
@@ -6,6 +6,8 @@
     - USER32:   o Allocate more memory for icon bitmap before calling
                   GpiCreateBitmap. This function seems to touch more bytes
                   than necessary (??).
+    - GDI32:    o AddFontResourceA: ignore if called with filename of PE 
+                  executable (return 1; gets rid of error message in Photoshop 6)
 
  2001-07-15: Sander van Leeuwen <sandervl@xs4all.nl>
     - COMDLG32: o Ported Wine printer dialog code (inactive due to missing
