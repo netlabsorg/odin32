@@ -1,11 +1,10 @@
-# $Id: kernel32.mak,v 1.13 2001-08-08 10:06:53 sandervl Exp $
+# $Id: kernel32.mak,v 1.14 2001-09-30 08:50:59 bird Exp $
 
 #
 # Odin32 API
 #
 #       kernel32.dll makefile
 #
-WRC_PREFIX_RESOURCE=1
 
 #
 # Alternate makefile name.
@@ -15,19 +14,8 @@ MAKEFILE=kernel32.mak
 #
 # Compiler, tools, and interference rules.
 #
+WRC_PREFIX_RESOURCE=1
 !include ../../makefile.inc
-
-#
-# Overrides.
-#
-#
-# Overrides.
-#
-!ifndef WAT
-RCFLAGS     = $(RCFLAGS) -p $(TARGET)
-!else
-RCFLAGS    += -p $(TARGET)
-!endif
 
 
 #
