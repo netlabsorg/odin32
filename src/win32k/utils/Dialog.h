@@ -1,4 +1,4 @@
-/* $Id: Dialog.h,v 1.2.2.1 2001-02-16 23:20:29 bird Exp $
+/* $Id: Dialog.h,v 1.2.2.2 2001-02-17 08:57:50 bird Exp $
  *
  * Dialog IDs.
  *
@@ -27,7 +27,7 @@
 #define DL_WIN32KCC_NTBK            1002
 
 /*
- * The Logging page.
+ * The Logging Page.
  */
 #define DL_LOGGING_PAGE             1100
 #define GR_LOGGING                  1101
@@ -67,7 +67,7 @@
 #define CB_LDR_REXX                 1280
 
 /*
- * The Heaps page.
+ * The Heaps Page.
  */
 #define DL_HEAPS_PAGE               1300
 #define GR_HEAPS                    1301
@@ -105,7 +105,7 @@
 #define TX_HEAP_SWP_FREE_BLOCKS_VAL 1354
 
 /*
- * The Status page.
+ * The Status Page.
  */
 #define PG_WIN32K_INFO_PAGE         1400
 #define GR_W32K                     1401
@@ -127,3 +127,43 @@
 #define CB_LDRFIX_EXEFIXES          1503
 #define CB_LDRFIX_FORCEPRELOAD      1504
 
+/*
+ * The MemInfo Page.
+ */
+#define DL_MEMINFO_PAGE             1600
+#define GR_MEMINFO                  1601
+
+#define GR_MEMINFO_SWAP             1610
+#define TX_MEMINFO_SWAP_SIZE        1611
+#define TX_MEMINFO_SWAP_AVAIL       1612
+#define TX_MEMINFO_SWAP_USED        1613
+#define TX_MEMINFO_SWAP_MINFREE     1614
+#define TX_MEMINFO_SWAP_CFG_MINFREE 1615
+#define TX_MEMINFO_SWAP_CFG_SIZE    1616
+#define TX_MEMINFO_SWAP_BROKEN_DFS  1617
+#define TX_MEMINFO_SWAP_GROW_FAILS  1618
+#define TX_MEMINFO_SWAP_DFS_IN_MEMFILE 1619
+
+#define GR_MEMINFO_PHYSPAGE         1640
+#define TX_MEMINFO_PHYS_SIZE        1641
+#define TX_MEMINFO_PHYS_AVAIL       1642
+#define TX_MEMINFO_PHYS_USED        1643
+#define TX_MEMINFO_PAGE_ENABLED     1651
+#define TX_MEMINFO_PAGE_FAULTS      1652
+#define TX_MEMINFO_PAGE_FAULTS_ACTIVE 1653
+#define TX_MEMINFO_PAGE_PHYSPAGES   1654
+#define TX_MEMINFO_PAGE_RESPAGES    1655
+#define TX_MEMINFO_PAGE_SWAPPAGES   1656
+#define TX_MEMINFO_PAGE_DISCPAGES   1657
+#define TX_MEMINFO_PAGE_DISCINMEM   1658
+
+#define GR_MEMINFO_VM               1680
+#define TX_MEMINFO_VM_ADDRESSLIMIT  1681
+#define TX_MEMINFO_VM_SHARED_MIN    1682
+#define TX_MEMINFO_VM_SHARED_MAX    1683
+#define TX_MEMINFO_VM_PRIVATE_MAX   1684
+#define TX_MEMINFO_VM_SYSTEM_MIN    1685
+#define TX_MEMINFO_VM_SYSTEM_MAX    1686
+#define TX_MEMINFO_VM_PRIVATE_HMAX  1687
+#define TX_MEMINFO_VM_SHARED_HMIN   1688
+#define TX_MEMINFO_VM_SHARED_HMAX   1689
