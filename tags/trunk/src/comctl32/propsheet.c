@@ -1,4 +1,4 @@
-/* $Id: propsheet.c,v 1.15 1999-11-21 17:58:07 cbratschi Exp $ */
+/* $Id: propsheet.c,v 1.16 1999-11-27 18:14:37 achimha Exp $ */
 /*
  * Property Sheets
  *
@@ -889,6 +889,13 @@ static int PROPSHEET_CreatePage(HWND hwndParent,
 
 //  TRACE("index %d\n", index);
 
+  //AH: Check if ppshpage is valid
+  if (ppshpage == NULL)
+  {
+    dprintf(("COMCTL32:PROPSHEET_CreatePage: ERROR!!! ppshpage == NULL!!!\n"));
+    return FALSE;  
+  }
+
   if (ppshpage->dwFlags & PSP_DLGINDIRECT)
     pTemplate = (DLGTEMPLATE*)ppshpage->u1.pResource;
   else
@@ -898,6 +905,13 @@ static int PROPSHEET_CreatePage(HWND hwndParent,
                                     RT_DIALOGA);
     HGLOBAL hTemplate = LoadResource(ppshpage->hInstance, hResource);
     pTemplate = (LPDLGTEMPLATEA)LockResource(hTemplate);
+  }
+
+  //AH: Check if pTemplate is valid
+  if (pTemplate == NULL)
+  {
+    dprintf(("COMCTL32:PROPSHEET_CreatePage: ERROR!!! Dialog Template == NULL!!!\n"));
+    return FALSE;
   }
 
   if (((MyDLGTEMPLATEEX*)pTemplate)->signature == 0xFFFF)
