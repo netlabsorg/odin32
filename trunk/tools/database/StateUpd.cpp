@@ -1,4 +1,4 @@
-/* $Id: StateUpd.cpp,v 1.11 2000-02-12 23:54:29 bird Exp $
+/* $Id: StateUpd.cpp,v 1.12 2000-02-14 13:49:13 bird Exp $
  *
  * StateUpd - Scans source files for API functions and imports data on them.
  *
@@ -607,7 +607,8 @@ static unsigned long processAPI(char **papszLines, int i, int &iRet, const char 
     if (0x0000ffff & ulRc) /* if low word is 0 the fatal */
     {
         unsigned long ulRcTmp;
-        char szErrorDesc[2113]; /* due to some limitation in the latest EMX release size is 2112 and not 4096 as initially implemented. */
+        //char szErrorDesc[2113]; /* due to some limitation in the latest EMX release size is 2112 and not 4096 as initially implemented. */
+        char  *pszErrorDesc = (char*)malloc(20480);
 
         /* 2.*/
         ulRcTmp = analyseFnHdr(&FnDesc, papszLines, i, pszFilename, pOptions);
@@ -631,12 +632,13 @@ static unsigned long processAPI(char **papszLines, int i, int &iRet, const char 
             fprintf(phLog, "  Author %d: '%s'  (refcode=%ld)\n", j, FnDesc.apszAuthor[j], FnDesc.alAuthorRefCode[j]);
 
         /* 4.*/
-        ulRcTmp = dbUpdateFunction(&FnDesc, pOptions->lDllRefcode, &szErrorDesc[0]);
+        ulRcTmp = dbUpdateFunction(&FnDesc, pOptions->lDllRefcode, pszErrorDesc);
         if (ulRcTmp != 0)
         {
-            fprintf(phSignal, "%s,%s: %s\n", pszFilename, FnDesc.pszName, &szErrorDesc[0]);
+            fprintf(phSignal, "%s,%s: %s\n", pszFilename, FnDesc.pszName, pszErrorDesc);
             ulRc += ulRcTmp << 16;
         }
+        free(pszErrorDesc);
     }
 
     return ulRc;
@@ -913,7 +915,7 @@ static unsigned long analyseFnDcl2(PFNDESC pFnDesc, char **papszLines, int i, in
         pszReturn = skipBackwards("{};-+#:\"\'", pszReturn, iReturn, papszLines);
         *pszEnd = '\0';
         copy(pszEnd, pszReturn, iReturn, pszFn-1, iFn, papszLines);
-        if (strlen(pszEnd) > 1024)
+        if (strlen(pszEnd) > 128)
         {
             fprintf(phSignal,"Fatal error! return statement is too larget. len=%d", strlen(pszEnd));
             fprintf(phLog,   "Fatal error! return statement is too larget. len=%d", strlen(pszEnd));
@@ -949,14 +951,24 @@ static unsigned long analyseFnDcl2(PFNDESC pFnDesc, char **papszLines, int i, in
         for (j = 0; j < cArgs; j++)
         {
             if ((psz = strchr(apszArgs[j], ')')) == NULL)
-            {
-                pFnDesc->apszParamName[j] = findStartOfWord(apszArgs[j] + strlen(apszArgs[j]) - 1,
+            {   /* Common argument */
+                if (apszArgs[j][strlen(apszArgs[j]-1)] != '*')
+                {   /* Normal case, Type [moretype] Name.*/
+                    pFnDesc->apszParamName[j] = findStartOfWord(apszArgs[j] + strlen(apszArgs[j]) - 1,
                                                             apszArgs[j]);
-                pFnDesc->apszParamName[j][-1] = '\0';
+                    pFnDesc->apszParamName[j][-1] = '\0';
+                }
+                else
+                {   /* No argument name only type - make a dummy one: 'arg[1..n]' */
+                    sprintf(pszEnd, "arg%i", j);
+                    pFnDesc->apszParamName[j] = pszEnd;
+                    pszEnd = strlen(pszEnd) + pszEnd + 1;
+                    *pszEnd = '\0';
+                }
                 pFnDesc->apszParamType[j] = trim(apszArgs[j]);
             }
             else
-            {
+            {   /* Function pointer argument... */
                 char *pszP2 = psz;
                 psz = findStartOfWord(psz-1, apszArgs[j]);
                 strncat(pszEnd, psz, pszP2 - psz);
@@ -1642,6 +1654,13 @@ static char *findStartOfWord(char *psz, const char *pszStart)
 }
 
 
+/**
+ * Trims a string, ie. removing spaces (and tabs) from both ends of the string.
+ * @returns   Pointer to first not space or tab char in the string.
+ * @param     psz   Pointer to the string which is to be trimmed.
+ * @status    completely implmented.
+ * @author    knut st. osmundsen (knut.stange.osmundsen@pmsc.no)
+ */
 static char *trim(char *psz)
 {
     int i;
@@ -1660,7 +1679,6 @@ static char *trim(char *psz)
 /* copy: remove remarks, and unneeded spaces, ensuring no space after '(',
  *       ensuring space after '*', ensuring no space before ',' and ')'.
  */
-
 static void copy(char *psz, char *pszFrom, int iFrom, char *pszTo, int iTo, char **papszLines)
 {
     copy(psz, pszFrom - papszLines[iFrom], iFrom, pszTo - papszLines[iTo], iTo, papszLines);
@@ -1717,6 +1735,17 @@ static void copy(char *psz, int jFrom, int iFrom, int jTo, int iTo, char **papsz
 }
 
 #else
+/**
+ * Copies a set of lines to a buffer (psz) removing precompiler lines and all comments.
+ * @param     psz
+ * @param     jFrom       Starting position, index into line iFrom.
+ * @param     iFrom       Starting position, index into papszLines.
+ * @param     jTo         Ending position, index into line iFrom.
+ * @param     iTo         Ending position, index into papszLines.
+ * @param     papszLines  Array of lines.
+ * @status    completely implemented.
+ * @author    knut st. osmundsen (knut.stange.osmundsen@pmsc.no)
+ */
 static void copy(char *psz, int jFrom, int iFrom, int jTo, int iTo, char **papszLines)
 {
     char chPrev = '\n';
@@ -1780,10 +1809,14 @@ static void copy(char *psz, int jFrom, int iFrom, int jTo, int iTo, char **papsz
  * @returns   Upper case of the char given in ch.
  * @param     ch  Char to capitalize.
  */
+#if 0
 inline char upcase(char ch)
 {
     return ch >= 'a' && ch <= 'z' ?  (char)(ch - ('a' - 'A')) : ch;
 }
+#else
+#define  upcase(ch) ((ch) >= 'a' && (ch) <= 'z' ?  (char)((ch) - ('a' - 'A')) : (ch))
+#endif
 
 
 /**
