@@ -1,4 +1,4 @@
-/* $Id: wsock32.h,v 1.16 2001-02-28 20:28:09 sandervl Exp $ */
+/* $Id: wsock32.h,v 1.17 2001-07-07 10:44:11 achimha Exp $ */
 
 /* WSOCK32.H--definitions & conversions for Odin's wsock32.dll.
  * Unused/unneeded Microsoft declarations removed.
@@ -50,12 +50,18 @@
 #define WSAMAKESELECTREPLY(event,error)     MAKELONG(event,error)
 
 // WSAAsyncSelect flags
-#define FD_READ         0x01
-#define FD_WRITE        0x02
-#define FD_OOB          0x04
-#define FD_ACCEPT       0x08
-#define FD_CONNECT      0x10
-#define FD_CLOSE        0x20
+// also apply to Winsock 2.0 WSAEventSelect
+#define FD_READ                     0x01
+#define FD_WRITE                    0x02
+#define FD_OOB                      0x04
+#define FD_ACCEPT                   0x08
+#define FD_CONNECT                  0x10
+#define FD_CLOSE                    0x20
+// Winsock 2.0 only
+#define FD_QOS                      0x40
+#define FD_GROUP_QOS                0x80
+#define FD_ROUTING_INTERFACE_CHANGE 0x100
+#define FD_ADDRESS_LIST_CHANGE      0x200
 
 #define SOCKET_ERROR 		-1
 #define NO_ERROR		0
@@ -233,6 +239,14 @@ void WSASetBlocking(BOOL fBlock, HANDLE tid = CURRENT_THREAD);
 void WINSOCK_DeleteIData(void);
 BOOL WINSOCK_CreateIData(void);
 LPWSINFO WINSOCK_GetIData(HANDLE tid = CURRENT_THREAD);
+
+typedef HANDLE WSAEVENT;
+
+// modes for the async select worker
+#define WSA_SELECT_HWND   1
+#define WSA_SELECT_HEVENT 2
+// async select worker routine
+int WSAAsyncSelectWorker(SOCKET s, int mode, int notifyHandle, int notifyData, long lEventMask);
 
 #endif  /* _WINSOCK32CONST_ */
 

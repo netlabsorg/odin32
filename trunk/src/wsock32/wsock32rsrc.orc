@@ -1,4 +1,4 @@
-/* $Id: wsock32rsrc.orc,v 1.3 2001-01-14 21:00:06 sandervl Exp $ */
+/* $Id: wsock32rsrc.orc,v 1.4 2001-07-07 10:44:11 achimha Exp $ */
 
 #include "winuser.h"
 #include "odinrsrc.h"
@@ -27,7 +27,7 @@ BEGIN
             VALUE "FileDescription", "WSOCK32 System dll\0"
             VALUE "FileVersion", "4.00\0"
             VALUE "InternalName", "WSOCK32\0"
-            VALUE "LegalCopyright", "Copyright (C) 1999-2000\0"
+            VALUE "LegalCopyright", "Copyright (C) 1999-2001\0"
             VALUE "LegalTrademarks", "\0"
             VALUE "OriginalFilename", "WSOCK32.DLL\0"
             VALUE "ProductName", "Odin32 - WSOCK32\0"

@@ -1,4 +1,4 @@
-/* $Id: asyncapi.cpp,v 1.9 2001-04-28 16:15:18 sandervl Exp $ */
+/* $Id: asyncapi.cpp,v 1.10 2001-07-07 10:44:08 achimha Exp $ */
 
 /*
  *
@@ -155,8 +155,8 @@ void ASYNCCNV WSAsyncThreadProc(void *pparm)
    lParam = (fail << 16) | size;
 
    if(!pThreadParm->fCancelled) {
-   	dprintf(("WSAsyncThreadProc %x %x %x %x", pThreadParm->hwnd, pThreadParm->msg, pThreadParm->hAsyncTaskHandle, lParam));
-  	PostMessageA(pThreadParm->hwnd, pThreadParm->msg,
+   	dprintf(("WSAsyncThreadProc %x %x %x %x", pThreadParm->notifyHandle, pThreadParm->notifyData, pThreadParm->hAsyncTaskHandle, lParam));
+  	PostMessageA((HWND)pThreadParm->notifyHandle, (DWORD)pThreadParm->notifyData,
                      (WPARAM)pThreadParm->hAsyncTaskHandle, lParam);
    }
    pThreadParm->fActive = FALSE;
@@ -202,11 +202,11 @@ LHANDLE WSAAsyncRequest(AsyncRequestType requesttype, HWND hwnd, int msg, char *
 		return 0;
 	}
 	memset(pThreadParm, 0, sizeof(*pThreadParm));
-	pThreadParm->request= requesttype;
-        pThreadParm->hwnd   = hwnd;
-        pThreadParm->msg    = msg;
-        pThreadParm->buf    = buf;
-        pThreadParm->buflen = buflen;
+	pThreadParm->request      = requesttype;
+        pThreadParm->notifyHandle = (int)hwnd;
+        pThreadParm->notifyData   = (int)msg;
+        pThreadParm->buf          = buf;
+        pThreadParm->buflen       = buflen;
 
 	switch(requesttype) {
 	case ASYNC_GETHOSTBYNAME:
@@ -398,15 +398,28 @@ ODINFUNCTION6(LHANDLE,WSAAsyncGetServByPort,
 }
 //******************************************************************************
 //******************************************************************************
-void AsyncNotifyEvent(PASYNCTHREADPARM pThreadParm, ULONG event, ULONG socket_error)
+void AsyncSelectNotifyEvent(PASYNCTHREADPARM pThreadParm, ULONG event, ULONG socket_error)
 {
-   pThreadParm->u.asyncselect.lEventsPending &= ~event;
+    pThreadParm->u.asyncselect.lEventsPending &= ~event;
 
-   event = WSAMAKESELECTREPLY(event, socket_error);
+    event = WSAMAKESELECTREPLY(event, socket_error);
 
-   dprintf(("AsyncNotifyEvent %x %x %x %x", pThreadParm->u.asyncselect.s, pThreadParm->hwnd, pThreadParm->msg, event));
-   PostMessageA(pThreadParm->hwnd, pThreadParm->msg, (WPARAM)pThreadParm->u.asyncselect.s,
-               (LPARAM)event);
+    if (pThreadParm->u.asyncselect.mode == WSA_SELECT_HWND)
+    {
+        dprintf(("AsyncSelectNotifyEvent: notifying window %x %x %x %x", pThreadParm->u.asyncselect.s, pThreadParm->notifyHandle, pThreadParm->notifyData, event));
+        PostMessageA((HWND)pThreadParm->notifyHandle, (DWORD)pThreadParm->notifyData, (WPARAM)pThreadParm->u.asyncselect.s,
+                     (LPARAM)event);
+    }
+    else
+    if (pThreadParm->u.asyncselect.mode == WSA_SELECT_HEVENT)
+    {
+        dprintf(("AsyncSelectNotifyEvent: notifying event semaphore %x %x %x %x", pThreadParm->u.asyncselect.s, pThreadParm->notifyHandle, pThreadParm->notifyData, event));
+        SetEvent(pThreadParm->notifyHandle);
+    }
+    else
+    {
+        dprintf(("AsyncSelectNotifyEvent: error, unknown mode"));
+    }
 }
 //******************************************************************************
 #define  nr(i) 		((i != -1) ? 1 : 0)
@@ -482,7 +495,7 @@ asyncloopstart:
 		case SOCEPIPE:
        			if(lEventsPending & FD_CLOSE) {
 				dprintf(("FD_CLOSE; broken connection"));
-       				AsyncNotifyEvent(pThreadParm, FD_CLOSE, WSAECONNRESET);
+       				AsyncSelectNotifyEvent(pThreadParm, FD_CLOSE, WSAECONNRESET);
 			}
 
 			//remote connection broken (so can't receive data anymore)
@@ -493,7 +506,7 @@ asyncloopstart:
 		case SOCEINVAL:
        			if(lEventsPending & FD_CLOSE) {
 				dprintf(("FD_CLOSE; SOCEINVAL"));
-       				AsyncNotifyEvent(pThreadParm, FD_CLOSE, selecterr);
+       				AsyncSelectNotifyEvent(pThreadParm, FD_CLOSE, selecterr);
 			}
       			break;
 		default:
@@ -509,7 +522,7 @@ asyncloopstart:
 
          	if(lEventsPending & FD_CONNECT) {
 	    		if(state & SS_ISCONNECTED) {
-				AsyncNotifyEvent(pThreadParm, FD_CONNECT, NO_ERROR);
+				AsyncSelectNotifyEvent(pThreadParm, FD_CONNECT, NO_ERROR);
 	    		}
             		else {
             			sockoptlen = sizeof(int);
@@ -518,13 +531,13 @@ asyncloopstart:
                 	        		 (char *) &sockoptval, &sockoptlen);
 				//SvL: WSeB returns SOCECONNREFUSED, Warp 4 0x3d
 				if(sockoptval == SOCECONNREFUSED || sockoptval == (SOCECONNREFUSED - SOCBASEERR)) {
-					AsyncNotifyEvent(pThreadParm, FD_CONNECT, WSAECONNREFUSED);
+					AsyncSelectNotifyEvent(pThreadParm, FD_CONNECT, WSAECONNREFUSED);
 				}
             		}
         	}
 		else
 		if(!(state & SS_CANTSENDMORE) && (lEventsPending & FD_WRITE)) {
-			AsyncNotifyEvent(pThreadParm, FD_WRITE, NO_ERROR);
+			AsyncSelectNotifyEvent(pThreadParm, FD_WRITE, NO_ERROR);
 		}
         }
 
@@ -536,7 +549,7 @@ asyncloopstart:
             		if(lEventsPending & FD_CLOSE)
 			{
 				dprintf(("FD_CLOSE; ioctl; socket error"));
-				AsyncNotifyEvent(pThreadParm, FD_CLOSE, NO_ERROR);
+				AsyncSelectNotifyEvent(pThreadParm, FD_CLOSE, NO_ERROR);
 				//remote connection broken (so can't receive data anymore)
                         	//but can still send
        				pThreadParm->u.asyncselect.lEventsPending &= ~(FD_READ | FD_ACCEPT);
@@ -558,11 +571,11 @@ asyncloopstart:
                			break;
 			}
 			if((sockoptval & SO_ACCEPTCONN) == SO_ACCEPTCONN) {
-				AsyncNotifyEvent(pThreadParm, FD_ACCEPT, NO_ERROR);
+				AsyncSelectNotifyEvent(pThreadParm, FD_ACCEPT, NO_ERROR);
 			}
 		}
 		if((lEventsPending & FD_READ) && bytesread >= 0) {
-			AsyncNotifyEvent(pThreadParm, FD_READ, NO_ERROR);
+			AsyncSelectNotifyEvent(pThreadParm, FD_READ, NO_ERROR);
 		}
 #if 0
 //SvL: This generates FD_CLOSE messages when the connection is just fine
@@ -570,14 +583,14 @@ asyncloopstart:
        		else
 		if((lEventsPending & FD_CLOSE) && (state == 0 && bytesread == 0)) {
 			dprintf(("FD_CLOSE; state == 0 && bytesread == 0"));
-			AsyncNotifyEvent(pThreadParm, FD_CLOSE, NO_ERROR);
+			AsyncSelectNotifyEvent(pThreadParm, FD_CLOSE, NO_ERROR);
 		}
 #endif
 	}
       	if(ready(noexcept))
       	{
 		if(lEventsPending & FD_OOB) {
-         		AsyncNotifyEvent(pThreadParm, FD_OOB, NO_ERROR);
+         		AsyncSelectNotifyEvent(pThreadParm, FD_OOB, NO_ERROR);
 		}
       	}
 	if((pThreadParm->u.asyncselect.lEventsPending & (FD_ACCEPT|FD_CLOSE|FD_CONNECT)) ==
@@ -599,34 +612,85 @@ ODINFUNCTION4(int,WSAAsyncSelect,
               u_int,wMsg,
               long,lEvent)
 {
+   /* just forward call to worker method */
+   return WSAAsyncSelectWorker(s, WSA_SELECT_HWND, (int)hWnd, (int)wMsg, lEvent);
+}
+//******************************************************************************
+//******************************************************************************
+int WSAAsyncSelectWorker(SOCKET s, int mode, int notifyHandle, int notifyData, long lEventMask)
+{
   PASYNCTHREADPARM pThreadParm;
   int              nonblock = 1;
   int              ret;
 
+#ifdef DEBUG
+    // log all event bits that are set
+    char tmpbuf[300];
+    strcpy(tmpbuf, "");
+    if (lEventMask & FD_READ)
+        strcat(tmpbuf, " FD_READ");
+    if (lEventMask & FD_WRITE)
+        strcat(tmpbuf, " FD_WRITE");
+    if (lEventMask & FD_OOB)
+        strcat(tmpbuf, " FD_OOB");    
+    if (lEventMask & FD_ACCEPT)
+        strcat(tmpbuf, " FD_ACCEPT");
+    if (lEventMask & FD_CONNECT)
+        strcat(tmpbuf, " FD_CONNECT");
+    if (lEventMask & FD_CLOSE)
+        strcat(tmpbuf, " FD_CLOSE");
+    if (lEventMask & FD_QOS)
+        strcat(tmpbuf, " FD_QOS");
+    if (lEventMask & FD_GROUP_QOS)
+        strcat(tmpbuf, " FD_GROUP_QOS");
+    if (lEventMask & FD_ROUTING_INTERFACE_CHANGE)
+        strcat(tmpbuf, " FD_ROUTING_INTERFACE_CHANGE");
+    if (lEventMask & FD_ADDRESS_LIST_CHANGE)
+        strcat(tmpbuf, " FD_ADDRESS_LIST_CHANGE");
+    dprintf(("event bits:%s", tmpbuf));
+#endif
+
    if(!fWSAInitialized)
    {
+        dprintf(("WSA sockets not initialized"));
       	WSASetLastError(WSANOTINITIALISED);
 	return SOCKET_ERROR;
    }
    else
    if(WSAIsBlocking())
    {
+        dprintf(("blocking call in progress"));
         WSASetLastError(WSAEINPROGRESS);      	// blocking call in progress
 	return SOCKET_ERROR;
    }
    else
-   if(hWnd && !IsWindow(hWnd))
+   if((mode == WSA_SELECT_HWND) && (HWND)notifyHandle && !IsWindow((HWND)notifyHandle))
    {
+        dprintf(("invalid window handle"));
         WSASetLastError(WSAEINVAL);           	// invalid parameter
 	return SOCKET_ERROR;
    }
+#if 0
+// AH: null sempahore is ok when clearing request
+   else
+   if ((mode == WSA_SELECT_HEVENT) && !(WSAEVENT)notifyHandle)
+   {
+        dprintf(("invalid event semaphore handle"));
+        WSASetLastError(WSAEINVAL);           	// invalid parameter
+	return SOCKET_ERROR;
+   }
+#endif
+
    //Set socket to non-blocking mode
    ret = ioctl(s, FIONBIO, (char *) &nonblock, sizeof(nonblock));
    if(ret == SOCKET_ERROR) {
+        dprintf(("setting socket to non blocking mode failed"));
  	WSASetLastError(wsaErrno());
 	return SOCKET_ERROR;
    }
-   if(FindAndSetAsyncEvent(s, hWnd, wMsg, lEvent) == TRUE) {
+   if(FindAndSetAsyncEvent(s, mode, notifyHandle, notifyData, lEventMask) == TRUE)
+   {
+        dprintf(("already got socket, just changing event mask"));
 	//found and changed active async event
 	WSASetLastError(NO_ERROR);
 	return NO_ERROR;
@@ -639,11 +703,12 @@ ODINFUNCTION4(int,WSAAsyncSelect,
  	return SOCKET_ERROR;
    }
    memset(pThreadParm, 0, sizeof(*pThreadParm));
-   pThreadParm->request= ASYNC_SELECT;
-   pThreadParm->hwnd   = hWnd;
-   pThreadParm->msg    = wMsg;
-   pThreadParm->u.asyncselect.lEvents        = lEvent;
-   pThreadParm->u.asyncselect.lEventsPending = lEvent;
+   pThreadParm->request                      = ASYNC_SELECT;
+   pThreadParm->notifyHandle                 = notifyHandle;
+   pThreadParm->notifyData                   = notifyData;
+   pThreadParm->u.asyncselect.mode           = mode;
+   pThreadParm->u.asyncselect.lEvents        = lEventMask;
+   pThreadParm->u.asyncselect.lEventsPending = lEventMask;
    pThreadParm->u.asyncselect.s              = s;
    pThreadParm->u.asyncselect.asyncSem       = new VSemaphore;
    if(pThreadParm->u.asyncselect.asyncSem == NULL) {

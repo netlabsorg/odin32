@@ -1,4 +1,4 @@
-/* $Id: asyncthread.cpp,v 1.9 2001-04-29 18:47:31 sandervl Exp $ */
+/* $Id: asyncthread.cpp,v 1.10 2001-07-07 10:44:09 achimha Exp $ */
 
 /*
  * Async thread help functions
@@ -207,18 +207,19 @@ static PASYNCTHREADPARM FindAsyncEvent(SOCKET s)
 }
 //******************************************************************************
 //******************************************************************************
-BOOL FindAndSetAsyncEvent(SOCKET s, HWND hwnd, int msg, ULONG lEvent)
+BOOL FindAndSetAsyncEvent(SOCKET s, int mode, int notifyHandle, int notifyData, ULONG lEventMask)
 {
  PASYNCTHREADPARM pThreadInfo;
  
    asyncThreadMutex.enter();
    pThreadInfo = FindAsyncEvent(s);
    if(pThreadInfo) {
-	pThreadInfo->u.asyncselect.lEvents        = lEvent;
-        pThreadInfo->u.asyncselect.lEventsPending = lEvent;
-	pThreadInfo->hwnd                  = hwnd;
-	pThreadInfo->msg                   = msg;
-	if(lEvent == 0) {
+        pThreadInfo->u.asyncselect.mode           = mode;
+	pThreadInfo->u.asyncselect.lEvents        = lEventMask;
+        pThreadInfo->u.asyncselect.lEventsPending = lEventMask;
+	pThreadInfo->notifyHandle                 = notifyHandle;
+	pThreadInfo->notifyData                   = notifyData;
+	if(lEventMask == 0) {
 		//make sure this thread isn't used anymore
 		pThreadInfo->fRemoved = TRUE;
 	}
@@ -262,8 +263,8 @@ BOOL QueryAsyncEvent(SOCKET s, HWND *pHwnd, int *pMsg, ULONG *plEvent)
    asyncThreadMutex.enter();
    pThreadInfo = FindAsyncEvent(s);
    if(pThreadInfo) {
-	*pHwnd   = pThreadInfo->hwnd;
-	*pMsg    = pThreadInfo->msg;
+	*pHwnd   = (HWND)pThreadInfo->notifyHandle;
+	*pMsg    = pThreadInfo->notifyData;
 	*plEvent = pThreadInfo->u.asyncselect.lEvents;
    }
    asyncThreadMutex.leave();
