@@ -1,4 +1,4 @@
-/* $Id: initterm.cpp,v 1.4 2000-02-09 14:49:36 sandervl Exp $ */
+/* $Id: initterm.cpp,v 1.4 2000-02-09 14:45:47 sandervl Exp $ */
 
 /*
  * DLL entry point
@@ -44,6 +44,8 @@ void CDECL _ctordtorTerm( void );
  extern DWORD _Resource_PEResTab;
 }
 
+BOOL WINAPI Glut32LibMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID ImpLoad);
+
 //******************************************************************************
 //******************************************************************************
 BOOL WINAPI LibMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID fImpLoad)
@@ -51,18 +53,18 @@ BOOL WINAPI LibMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID fImpLoad)
    switch (fdwReason)
    {
    case DLL_PROCESS_ATTACH:
-	return TRUE;
-
    case DLL_THREAD_ATTACH:
    case DLL_THREAD_DETACH:
-	return TRUE;
+	return Glut32LibMain(hinstDLL, fdwReason, fImpLoad);
 
    case DLL_PROCESS_DETACH:
+   	Glut32LibMain(hinstDLL, fdwReason, fImpLoad);
    	_ctordtorTerm();
 	return TRUE;
    }
    return FALSE;
 }
+
 /****************************************************************************/
 /* _DLL_InitTerm is the function that gets called by the operating system   */
 /* loader when it loads and frees this DLL for each process that accesses   */
@@ -112,3 +114,5 @@ unsigned long SYSTEM _DLL_InitTerm(unsigned long hModule, unsigned long
    /***********************************************************/
    return 1UL;
 }
+//******************************************************************************
+//******************************************************************************
