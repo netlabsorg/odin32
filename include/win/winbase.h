@@ -548,6 +548,43 @@ typedef struct tagMEMORYSTATUS
 } MEMORYSTATUS, *LPMEMORYSTATUS;
 
 
+//
+// Define the NamedPipe definitions
+//
+
+
+//
+// Define the dwOpenMode values for CreateNamedPipe
+//
+
+#define PIPE_ACCESS_INBOUND         0x00000001
+#define PIPE_ACCESS_OUTBOUND        0x00000002
+#define PIPE_ACCESS_DUPLEX          0x00000003
+
+//
+// Define the Named Pipe End flags for GetNamedPipeInfo
+//
+
+#define PIPE_CLIENT_END             0x00000000
+#define PIPE_SERVER_END             0x00000001
+
+//
+// Define the dwPipeMode values for CreateNamedPipe
+//
+
+#define PIPE_WAIT                   0x00000000
+#define PIPE_NOWAIT                 0x00000001
+#define PIPE_READMODE_BYTE          0x00000000
+#define PIPE_READMODE_MESSAGE       0x00000002
+#define PIPE_TYPE_BYTE              0x00000000
+#define PIPE_TYPE_MESSAGE           0x00000004
+
+//
+// Define the well known values for CreateNamedPipe nMaxInstances
+//
+
+#define PIPE_UNLIMITED_INSTANCES    255
+
 #ifndef NOLOGERROR
 
 /* LogParamError and LogError values */
@@ -1748,8 +1785,8 @@ BOOL      WINAPI WriteConsoleA(HANDLE,LPCVOID,DWORD,LPDWORD,LPVOID);
 BOOL      WINAPI WriteConsoleW(HANDLE,LPCVOID,DWORD,LPDWORD,LPVOID);
 #define     WriteConsole WINELIB_NAME_AW(WriteConsole)
 BOOL      WINAPI WriteFile(HANDLE,LPCVOID,DWORD,LPDWORD,LPOVERLAPPED);
-BOOL      WINAPI WriteeFileEx(HANDLE hFile, LPCVOID lpBuffer, DWORD nNumberOfBytesToWrite,
-                              LPOVERLAPPED lpOverlapped, LPOVERLAPPED_COMPLETION_ROUTINE lpCompletionRoutine);
+BOOL      WINAPI WriteFileEx(HANDLE hFile, LPCVOID lpBuffer, DWORD nNumberOfBytesToWrite,
+                             LPOVERLAPPED lpOverlapped, LPOVERLAPPED_COMPLETION_ROUTINE lpCompletionRoutine);
 DWORD       WINAPI GetLastError(void);
 LANGID      WINAPI GetSystemDefaultLangID(void);
 LCID        WINAPI GetSystemDefaultLCID(void);
@@ -2269,6 +2306,65 @@ BOOL WINAPI    SetPrivateObjectSecurity(SECURITY_INFORMATION  si,
                                           PGENERIC_MAPPING      pgm,
                                           HANDLE                hClientToken);
 
+
+HANDLE WINAPI CreateNamedPipeA(LPCSTR lpName, DWORD dwOpenMode, DWORD dwPipeMode,
+                               DWORD nMaxInstances, DWORD nOutBufferSize,
+                               DWORD nInBufferSize, DWORD nDefaultTimeOut,
+                               LPSECURITY_ATTRIBUTES lpSecurityAttributes);
+HANDLE WINAPI CreateNamedPipeW(LPCWSTR lpName, DWORD dwOpenMode, DWORD dwPipeMode,
+                               DWORD nMaxInstances, DWORD nOutBufferSize, DWORD nInBufferSize,
+                               DWORD nDefaultTimeOut, LPSECURITY_ATTRIBUTES lpSecurityAttributes);
+#define     CreateNamedPipe WINELIB_NAME_AW(CreateNamedPipe)
+
+BOOL WINAPI GetNamedPipeHandleStateA(HANDLE hNamedPipe, LPDWORD lpState,
+                                     LPDWORD lpCurInstances, LPDWORD lpMaxCollectionCount,
+                                     LPDWORD lpCollectDataTimeout, LPSTR lpUserName,
+                                     DWORD nMaxUserNameSize);
+BOOL WINAPI GetNamedPipeHandleStateW(HANDLE hNamedPipe,LPDWORD lpState, LPDWORD lpCurInstances,
+                                     LPDWORD lpMaxCollectionCount, LPDWORD lpCollectDataTimeout,
+                                     LPWSTR lpUserName, DWORD nMaxUserNameSize);
+#define     GetNamedPipeHandleState WINELIB_NAME_AW(GetNamedPipeHandleState)
+
+BOOL WINAPI CallNamedPipeA(LPCSTR lpNamedPipeName, LPVOID lpInBuffer, DWORD nInBufferSize,
+                           LPVOID lpOutBuffer, DWORD nOutBufferSize, LPDWORD lpBytesRead,
+                           DWORD nTimeOut);
+BOOL WINAPI CallNamedPipeW(LPCWSTR lpNamedPipeName, LPVOID lpInBuffer, DWORD nInBufferSize,
+                           LPVOID lpOutBuffer, DWORD nOutBufferSize, LPDWORD lpBytesRead,
+                           DWORD nTimeOut);
+#define     CallNamedPipe WINELIB_NAME_AW(CallNamedPipe)
+
+
+BOOL WINAPI WaitNamedPipeA(LPCSTR lpNamedPipeName, DWORD nTimeOut);
+BOOL WINAPI WaitNamedPipeW(LPCWSTR lpNamedPipeName, DWORD nTimeOut);
+
+#define     WaitNamedPipe WINELIB_NAME_AW(WaitNamedPipe)
+
+BOOL WINAPI CreatePipe(PHANDLE hReadPipe, PHANDLE hWritePipe, LPSECURITY_ATTRIBUTES lpPipeAttributes,
+                       DWORD nSize);
+BOOL WINAPI ConnectNamedPipe(HANDLE hNamedPipe, LPOVERLAPPED lpOverlapped);
+BOOL WINAPI DisconnectNamedPipe(HANDLE hNamedPipe);
+BOOL WINAPI SetNamedPipeHandleState(HANDLE hNamedPipe, LPDWORD lpMode,
+                                    LPDWORD lpMaxCollectionCount, LPDWORD lpCollectDataTimeout);
+BOOL WINAPI GetNamedPipeInfo(HANDLE hNamedPipe, LPDWORD lpFlags, LPDWORD lpOutBufferSize,
+                             LPDWORD lpInBufferSize, LPDWORD lpMaxInstances);
+BOOL WINAPI PeekNamedPipe(HANDLE hNamedPipe, LPVOID lpBuffer, DWORD nBufferSize,
+                          LPDWORD lpBytesRead, LPDWORD lpTotalBytesAvail,
+                          LPDWORD lpBytesLeftThisMessage);
+BOOL WINAPI TransactNamedPipe(HANDLE hNamedPipe, LPVOID lpInBuffer, DWORD nInBufferSize,
+                              LPVOID lpOutBuffer, DWORD nOutBufferSize, LPDWORD lpBytesRead,
+                              LPOVERLAPPED lpOverlapped);
+
+HANDLE WINAPI CreateMailslotA(LPCSTR lpName, DWORD nMaxMessageSize, DWORD lReadTimeout,
+                              LPSECURITY_ATTRIBUTES lpSecurityAttributes);
+HANDLE WINAPI CreateMailslotW(LPCWSTR lpName, DWORD nMaxMessageSize, DWORD lReadTimeout,
+                              LPSECURITY_ATTRIBUTES lpSecurityAttributes);
+#define     CreateMailslot WINELIB_NAME_AW(WaitNamedPipe)
+
+BOOL WINAPI GetMailslotInfo(HANDLE hMailslot, LPDWORD lpMaxMessageSize,
+                            LPDWORD lpNextSize, LPDWORD lpMessageCount,
+                            LPDWORD lpReadTimeout);
+
+BOOL WINAPI SetMailslotInfo(HANDLE hMailslot, DWORD lReadTimeout);
 
 /* undocumented functions */
 
