@@ -2,6 +2,7 @@
  * Listview class extra info
  *
  * Copyright 1998 Eric Kohl
+ * Copyright 2000 Christoph Bratschi
  */
 
 #ifndef __WINE_LISTVIEW_H
@@ -19,7 +20,7 @@ typedef struct tagEDITLABEL_ITEM
 
 typedef struct tagLISTVIEW_SUBITEM
 {
-    LPSTR pszText;
+    LPWSTR pszText;
     INT iImage;
     INT iSubItem;
 
@@ -28,7 +29,7 @@ typedef struct tagLISTVIEW_SUBITEM
 typedef struct tagLISTVIEW_ITEM
 {
   UINT state;
-  LPSTR pszText;
+  LPWSTR pszText;
   INT iImage;
   LPARAM lParam;
   INT iIndent;
@@ -39,6 +40,8 @@ typedef struct tagLISTVIEW_ITEM
 
 typedef struct tagLISTVIEW_INFO
 {
+    COMCTL32_HEADER header;
+
     COLORREF clrBk;
     COLORREF clrText;
     COLORREF clrTextBk;
@@ -52,7 +55,6 @@ typedef struct tagLISTVIEW_INFO
     INT nItemWidth;
     INT nSelectionMark;
     INT nHotItem;
-    SHORT notifyFormat;
     RECT rcList;
     RECT rcView;
     SIZE iconSize;
