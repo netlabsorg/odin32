@@ -1,4 +1,4 @@
-/* $Id: oslibdos.cpp,v 1.78 2001-10-12 21:10:01 achimha Exp $ */
+/* $Id: oslibdos.cpp,v 1.79 2001-10-15 05:51:34 phaller Exp $ */
 /*
  * Wrappers for OS/2 Dos* API
  *
@@ -2608,10 +2608,19 @@ DWORD OSLibDosDevIOCtl( DWORD hFile, DWORD dwCat, DWORD dwFunc,
   {
     rc = DosAllocMem(&pTiledData, dwDataMaxLen, PAG_READ | PAG_WRITE);
     if (rc)
-      goto _exit_ioctl;
+        goto _exit_ioctl;
     
     flagTiledData = TRUE;
   }
+
+  // copy data from real buffers to
+  // bounce buffers if necessary
+  if (pTiledParm != pParm)
+    memcpy(pTiledParm, pParm, *pdwParmLen);
+  
+  if (pTiledData != pData)
+    memcpy(pTiledData, pData, *pdwDataLen);
+
 
   rc = DosDevIOCtl( (HFILE)hFile, dwCat, dwFunc,
                      pParm, dwParmMaxLen, pdwParmLen,
