@@ -1,4 +1,4 @@
-; $Id: exceptutil.asm,v 1.9 2000-08-28 18:35:28 sandervl Exp $
+; $Id: exceptutil.asm,v 1.10 2000-09-04 18:24:42 sandervl Exp $
 
 ;/*
 ; * Project Odin Software License can be found in LICENSE.TXT
@@ -208,6 +208,29 @@ RestoreOS2FS proc near
 	pop	fs
 	ret
 RestoreOS2FS endp
+
+	PUBLIC _Mul32x32to64
+_Mul32x32to64 proc near
+	push	ebp
+	mov	ebp, esp
+	push	eax
+	push	edx
+	push	edi
+
+	mov	edi, [ebp+8]	;64 bits result
+	mov	eax, [ebp+12]	;op1
+	mov	edx, [ebp+16]	;op2
+	mul	edx
+	mov	[edi], eax
+	mov	[edi+4], edx
+
+	pop	edi
+	pop	edx
+	pop	eax
+	pop	ebp
+	ret
+_Mul32x32to64 endp
+
 CODE32          ENDS
 
                 END
