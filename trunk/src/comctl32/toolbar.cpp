@@ -1,4 +1,4 @@
-/* $Id: toolbar.cpp,v 1.10 2000-08-08 17:05:00 cbratschi Exp $ */
+/* $Id: toolbar.cpp,v 1.11 2000-09-07 18:16:52 sandervl Exp $ */
 /*
  * Toolbar control
  *
@@ -2996,10 +2996,20 @@ TOOLBAR_SetBitmapSize (HWND hwnd, WPARAM wParam, LPARAM lParam)
 
     if (((INT)LOWORD(lParam) <= 0) || ((INT)HIWORD(lParam) <= 0)) return FALSE;
 
+//SvL: Old code causes assertion failures in MFC apps; this is from the latest
+//     Wine sources
+#if 1
+    if (infoPtr->nNumButtons > 0)
+        dprintf(("TOOLBAR_SetBitmapSize: %d buttons, undoc increase to bitmap size : %d-%d -> %d-%d\n",
+             infoPtr->nNumButtons,
+             infoPtr->nBitmapWidth, infoPtr->nBitmapHeight,
+             LOWORD(lParam), HIWORD(lParam)));
+#else
     /* Bitmap size can only be set before adding any button to the toolbar
        according to the documentation.  */
     if( infoPtr->nNumButtons != 0 )
         return FALSE;
+#endif
 
     infoPtr->nBitmapWidth = (INT)LOWORD(lParam);
     infoPtr->nBitmapHeight = (INT)HIWORD(lParam);
@@ -3110,10 +3120,24 @@ TOOLBAR_SetButtonSize (HWND hwnd, WPARAM wParam, LPARAM lParam)
 
     if (((INT)LOWORD(lParam) <= 0) || ((INT)HIWORD(lParam) <= 0)) return FALSE;
 
+#if 1
+    //SvL: Same for MFC apps (assertion failed when returning FALSE
+    /* Button size can only be set before adding any button to the toolbar
+       according to the documentation.  */
+    /* this appears to be wrong. WINZIP32.EXE (ver 8) calls this on
+       one of its buttons after adding it to the toolbar, and it
+       checks that the return value is nonzero - mjm */
+    if( infoPtr->nNumButtons != 0 )
+    {
+        dprintf(("TOOLBAR_SetButtonSize: Button size set after button in toolbar\n"));
+        return TRUE;
+    }
+#else
     /* Button size can only be set before adding any button to the toolbar
        according to the documentation.  */
     if( infoPtr->nNumButtons != 0 )
         return FALSE;
+#endif
 
     infoPtr->nButtonWidth = (INT)LOWORD(lParam);
     infoPtr->nButtonHeight = (INT)HIWORD(lParam);
@@ -3906,6 +3930,36 @@ TOOLBAR_Size (HWND hwnd, WPARAM wParam, LPARAM lParam)
         x = parent_rect.left;
         y = parent_rect.top;
 
+//SvL: Latest Wine
+#if 1
+    RECT window_rect;
+	if (dwStyle & CCS_NORESIZE) {
+	    uPosFlags |= (SWP_NOSIZE | SWP_NOMOVE);
+
+	    /*
+             * this sets the working width of the toolbar, and
+             * Calc Toolbar will not adjust it, only the height
+             */
+	    infoPtr->nWidth = parent_rect.right - parent_rect.left; 
+	    cy = infoPtr->nHeight;
+	    cx = infoPtr->nWidth;
+	    TOOLBAR_CalcToolbar (hwnd);
+	    infoPtr->nWidth = cx;
+	    infoPtr->nHeight = cy;
+	}
+	else {
+	    infoPtr->nWidth = parent_rect.right - parent_rect.left;
+	    TOOLBAR_CalcToolbar (hwnd);
+	    cy = infoPtr->nHeight;
+	    cx = infoPtr->nWidth;
+
+	    if (dwStyle & CCS_NOMOVEY) {
+		GetWindowRect(hwnd, &window_rect);
+		ScreenToClient(parent, (LPPOINT)&window_rect.left);
+		y = window_rect.top;
+	    }
+	}
+#else
         if (dwStyle & CCS_NORESIZE) {
             uPosFlags |= (SWP_NOSIZE | SWP_NOMOVE);
             /* FIXME */
@@ -3922,7 +3976,7 @@ TOOLBAR_Size (HWND hwnd, WPARAM wParam, LPARAM lParam)
             cy = infoPtr->nHeight;
             cx = infoPtr->nWidth;
         }
-
+#endif
         if (dwStyle & CCS_NOPARENTALIGN) {
             uPosFlags |= SWP_NOMOVE;
             cy = infoPtr->nHeight;
