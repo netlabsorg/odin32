@@ -1,4 +1,4 @@
-/* $Id: win32type.h,v 1.9 1999-07-17 11:50:26 sandervl Exp $ */
+/* $Id: win32type.h,v 1.10 1999-07-18 10:36:54 sandervl Exp $ */
 
 #ifndef __WIN32TYPE_H__
 #define __WIN32TYPE_H__
@@ -47,8 +47,9 @@
 #define LPLONG  LONG *
 #define PDWORD  DWORD *
 #define LRESULT DWORD
-#define LPARAM  DWORD
-#define WPARAM  DWORD
+typedef LONG    LPARAM;
+typedef unsigned int    UINT;
+typedef UINT    WPARAM;
 #define CONST   const
 #define LPTSTR  char *
 #define LPSTR   char *
@@ -70,6 +71,7 @@
 #define HBRUSH  DWORD
 #define HMENU   DWORD
 #define WNDPROC DWORD
+#define DLGPROC DWORD
 #define WNDPROC_O32 DWORD
 #define HRESULT DWORD
 
@@ -182,5 +184,78 @@ typedef struct
     DWORD   time;
     POINT   pt;
 } MSG, *LPMSG;
+
+typedef struct
+{
+    UINT      cbSize;
+    UINT      style;
+    WNDPROC   lpfnWndProc;
+    INT       cbClsExtra;
+    INT       cbWndExtra;
+    HINSTANCE hInstance;
+    HICON     hIcon;
+    HCURSOR   hCursor;
+    HBRUSH    hbrBackground;
+    LPCSTR      lpszMenuName;
+    LPCSTR      lpszClassName;
+    HICON     hIconSm;
+} WNDCLASSEXA, *LPWNDCLASSEXA;
+
+typedef struct
+{
+    UINT      cbSize;
+    UINT      style;
+    WNDPROC   lpfnWndProc;
+    INT       cbClsExtra;
+    INT       cbWndExtra;
+    HINSTANCE hInstance;
+    HICON     hIcon;
+    HCURSOR   hCursor;
+    HBRUSH    hbrBackground;
+    LPCWSTR     lpszMenuName;
+    LPCWSTR     lpszClassName;
+    HICON     hIconSm;
+} WNDCLASSEXW, *LPWNDCLASSEXW;
+
+typedef struct tagCREATESTRUCTA
+{
+    LPVOID      lpCreateParams;
+    HINSTANCE hInstance;
+    HMENU     hMenu;
+    HWND      hwndParent;
+    INT       cy;
+    INT       cx;
+    INT       y;
+    INT       x;
+    LONG        style;
+    LPCSTR      lpszName;
+    LPCSTR      lpszClass;
+    DWORD       dwExStyle;
+} CREATESTRUCTA, *LPCREATESTRUCTA;
+
+typedef struct
+{
+    LPVOID      lpCreateParams;
+    HINSTANCE hInstance;
+    HMENU     hMenu;
+    HWND      hwndParent;
+    INT       cy;
+    INT       cx;
+    INT       y;
+    INT       x;
+    LONG        style;
+    LPCWSTR     lpszName;
+    LPCWSTR     lpszClass;
+    DWORD       dwExStyle;
+} CREATESTRUCTW, *LPCREATESTRUCTW;
+
+typedef struct tagRECT
+{
+    INT  xLeft;
+    INT  yTop;
+    INT  xRight;
+    INT  yBottom;
+} RECT, *PRECT, *LPRECT;
+typedef const RECT *LPCRECT;
 
 #endif
