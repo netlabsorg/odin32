@@ -1,4 +1,4 @@
-/* $Id: winexelx.cpp,v 1.11 2002-12-20 10:38:58 sandervl Exp $ */
+/* $Id: winexelx.cpp,v 1.12 2003-02-13 15:30:53 sandervl Exp $ */
 
 /*
  * Win32 LX Exe class (compiled in OS/2 using Odin32 api)
@@ -46,6 +46,9 @@ BOOL WIN32API RegisterLxExe(WINMAIN EntryPoint, PVOID pResData)
 
   //Signal to TEB management that we're a real OS/2 app and don't
   //require setting FS to our special win32 selector
+  fSwitchTIBSel = FALSE;
+
+  //We're an OS/2 app
   fIsOS2Image = TRUE;
 
   if(WinExe != NULL) //should never happen
