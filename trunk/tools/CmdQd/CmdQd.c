@@ -1,4 +1,4 @@
-/* $Id: CmdQd.c,v 1.9 2001-11-24 02:21:39 bird Exp $
+/* $Id: CmdQd.c,v 1.10 2001-11-24 06:05:31 bird Exp $
  *
  * Command Queue Daemon / Client.
  *
@@ -181,6 +181,8 @@ typedef struct SharedMem
         msgShowCompletedJobsResponse = 12,
         msgShowFailedJobs = 13,
         msgShowFailedJobsResponse = 14,
+        msgSharedMemOwnerDied = 0xfd,
+        msgClientOwnerDied = 0xfe,
         msgDying = 0xff
     } enmMsgType;
 
@@ -512,7 +514,7 @@ int Init(const char *arg0, int cWorkers)
     szArg[strlen(arg0)] = '\0';
     rc = DosExecPgm(NULL, 0, EXEC_BACKGROUND, &szArg[0], NULL, &Res, &szArg[0]);
     if (rc)
-        Error("Fatal error: Failed to start daemon. rc=%d\n");
+        Error("Fatal error: Failed to start daemon. rc=%d\n", rc);
     return rc;
 }
 
@@ -1200,10 +1202,32 @@ int Daemon(int cWorkers)
             }
 
 
+            case msgClientOwnerDied:
+            {
+                DosCloseMutexSem(pShrMem->hmtxClient);
+                rc = DosCreateMutexSem(NULL, &pShrMem->hmtxClient, DC_SEM_SHARED, FALSE);
+                if (rc)
+                    Error("Failed to restore dead client semaphore\n");
+                pShrMem->enmMsgType = msgUnknown;
+                rc = shrmemSendDaemon(TRUE);
+                break;
+            }
+
+
+            case msgSharedMemOwnerDied:
+            {
+                DosCloseMutexSem(pShrMem->hmtx);
+                rc = DosCreateMutexSem(NULL, &pShrMem->hmtx, DC_SEM_SHARED, TRUE);
+                if (rc)
+                    Error("Failed to restore dead shared mem semaphore\n");
+                pShrMem->enmMsgType = msgUnknown;
+                rc = shrmemSendDaemon(TRUE);
+                break;
+            }
 
 
             default:
-                Error("Internal error: Invalid message id %d\n", pShrMem->enmMsgType);
+                Error("Internal error: Invalid message id %d\n", pShrMem->enmMsgType, rc);
                 pShrMem->enmMsgType = msgUnknown;
                 rc = shrmemSendDaemon(TRUE);
         }
@@ -1870,7 +1894,7 @@ int Submit(int rcIgnore)
     cch = strlen(psz) + 1;
     if (cch > sizeof(pShrMem->u1.Submit.szCommand))
     {
-        Error("Fatal error: Command too long.\n");
+        Error("Fatal error: Command too long.\n", rc);
         shrmemFree();
         return -1;
     }
@@ -2270,20 +2294,28 @@ int shrmemCreate(void)
 int shrmemOpen(void)
 {
     int     rc;
+    ULONG   ulIgnore;
 
+    /*
+     * Get memory.
+     */
     rc = DosGetNamedSharedMem((PPVOID)(PVOID)&pShrMem,
                               SHARED_MEM_NAME,
                               PAG_READ | PAG_WRITE);
     if (rc)
     {
-        Error("Fatal error: Failed to open shared memory. rc=%d\n");
+        Error("Fatal error: Failed to open shared memory. rc=%d\n", rc);
         return rc;
     }
 
+
+    /*
+     * Open semaphores.
+     */
     rc = DosOpenEventSem(NULL, &pShrMem->hevClient);
     if (rc)
     {
-        Error("Fatal error: Failed to open client event semaphore. rc=%d\n");
+        Error("Fatal error: Failed to open client event semaphore. rc=%d\n", rc);
         DosFreeMem(pShrMem);
         return rc;
     }
@@ -2291,7 +2323,7 @@ int shrmemOpen(void)
     rc = DosOpenEventSem(NULL, &pShrMem->hevDaemon);
     if (rc)
     {
-        Error("Fatal error: Failed to open daemon event semaphore. rc=%d\n");
+        Error("Fatal error: Failed to open daemon event semaphore. rc=%d\n", rc);
         DosCloseEventSem(pShrMem->hevClient);
         DosFreeMem(pShrMem);
         return rc;
@@ -2300,49 +2332,126 @@ int shrmemOpen(void)
     rc = DosOpenMutexSem(NULL, &pShrMem->hmtx);
     if (rc)
     {
-        Error("Fatal error: Failed to open mutex semaphore. rc=%d\n");
-        DosCloseEventSem(pShrMem->hevClient);
-        DosCloseEventSem(pShrMem->hevDaemon);
-        DosFreeMem(pShrMem);
-        return rc;
+        /* try correct client died situation */
+        if (rc == ERROR_SEM_OWNER_DIED)
+        {
+            pShrMem->enmMsgType = msgSharedMemOwnerDied;
+            DosResetEventSem(pShrMem->hevClient, &ulIgnore);
+            DosPostEventSem(pShrMem->hevDaemon);
+            if (DosWaitEventSem(pShrMem->hevClient, 2000))
+            {
+                Error("Fatal error: Failed to open mutex semaphore. (owner dead) rc=%d\n", rc);
+                shrmemFree();
+                return rc;
+            }
+            rc = DosOpenMutexSem(NULL, &pShrMem->hmtx);
+        }
+
+        if (rc)
+        {
+            Error("Fatal error: Failed to open mutex semaphore. rc=%d\n", rc);
+            DosCloseEventSem(pShrMem->hevClient);
+            DosCloseEventSem(pShrMem->hevDaemon);
+            DosFreeMem(pShrMem);
+            return rc;
+        }
     }
 
     rc = DosOpenMutexSem(NULL, &pShrMem->hmtxClient);
     if (rc)
     {
-        Error("Fatal error: Failed to open client mutex semaphore. rc=%d\n");
-        DosCloseEventSem(pShrMem->hevClient);
-        DosCloseEventSem(pShrMem->hevDaemon);
-        DosCloseMutexSem(pShrMem->hmtx);
-        DosFreeMem(pShrMem);
-        return rc;
-    }
+        /* try correct client died situation */
+        if (rc == ERROR_SEM_OWNER_DIED)
+        {
+            pShrMem->enmMsgType = msgClientOwnerDied;
+            DosResetEventSem(pShrMem->hevClient, &ulIgnore);
+            DosPostEventSem(pShrMem->hevDaemon);
+            if (DosWaitEventSem(pShrMem->hevClient, 2000))
+            {
+                Error("Fatal error: Failed to open client mutex semaphore. (owner dead) rc=%d\n", rc);
+                shrmemFree();
+                return rc;
+            }
+            rc = DosOpenMutexSem(NULL, &pShrMem->hmtxClient);
+        }
 
-    rc = DosRequestMutexSem(pShrMem->hmtxClient, SEM_INDEFINITE_WAIT);
-    if (rc)
-    {
-        Error("Fatal error: Failed to open take ownership of client mutex semaphore. rc=%d\n");
-        shrmemFree();
-        return rc;
-    }
-
-    rc = DosRequestMutexSem(pShrMem->hmtx, SEM_INDEFINITE_WAIT);
-    if (rc)
-    {
-        Error("Fatal error: Failed to open take ownership of mutex semaphore. rc=%d\n");
-        shrmemFree();
-        return rc;
+        if (rc)
+        {
+            Error("Fatal error: Failed to open client mutex semaphore. rc=%d\n", rc);
+            DosCloseEventSem(pShrMem->hevClient);
+            DosCloseEventSem(pShrMem->hevDaemon);
+            DosCloseMutexSem(pShrMem->hmtx);
+            DosFreeMem(pShrMem);
+            return rc;
+        }
     }
 
 
     /*
-     * Install signal handlers.
+     * Before we request semaphores we need to have signal handlers installed.
      */
     signal(SIGSEGV, signalhandlerClient);
     signal(SIGTERM, signalhandlerClient);
     signal(SIGABRT, signalhandlerClient);
     signal(SIGINT,  signalhandlerClient);
     signal(SIGBREAK,signalhandlerClient);
+
+
+    /*
+     * Request the necessary semaphores to be able to talk to the daemon.
+     */
+    rc = DosRequestMutexSem(pShrMem->hmtxClient, SEM_INDEFINITE_WAIT);
+    if (rc)
+    {
+        /* try correct client died situation */
+        if (rc == ERROR_SEM_OWNER_DIED)
+        {
+            pShrMem->enmMsgType = msgClientOwnerDied;
+            DosResetEventSem(pShrMem->hevClient, &ulIgnore);
+            DosPostEventSem(pShrMem->hevDaemon);
+            if (DosWaitEventSem(pShrMem->hevClient, 2000))
+            {
+                Error("Fatal error: Failed to take ownership of client mutex semaphore. (owner dead) rc=%d\n", rc);
+                shrmemFree();
+                return rc;
+            }
+            rc = DosRequestMutexSem(pShrMem->hmtxClient, SEM_INDEFINITE_WAIT);
+        }
+
+        if (rc)
+        {
+            Error("Fatal error: Failed to take ownership of client mutex semaphore. rc=%d\n", rc);
+            shrmemFree();
+            return rc;
+        }
+    }
+
+    rc = DosRequestMutexSem(pShrMem->hmtx, SEM_INDEFINITE_WAIT);
+    if (rc)
+    {
+        /* try correct client died situation */
+        if (rc == ERROR_SEM_OWNER_DIED)
+        {
+            pShrMem->enmMsgType = msgSharedMemOwnerDied;
+            DosResetEventSem(pShrMem->hevClient, &ulIgnore);
+            DosPostEventSem(pShrMem->hevDaemon);
+            if (DosWaitEventSem(pShrMem->hevClient, 2000))
+            {
+                Error("Fatal error: Failed to take ownership of mutex mutex semaphore. (owner dead) rc=%d\n", rc);
+                shrmemFree();
+                return rc;
+            }
+            rc = DosRequestMutexSem(pShrMem->hmtx, SEM_INDEFINITE_WAIT);
+        }
+
+        if (rc)
+        {
+            Error("Fatal error: Failed to take ownership of mutex semaphore. rc=%d\n", rc);
+            shrmemFree();
+            return rc;
+        }
+    }
+
 
     return rc;
 }
