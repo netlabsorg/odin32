@@ -1,4 +1,4 @@
-/* $Id: dib.cpp,v 1.6 2000-11-09 18:15:18 sandervl Exp $ */
+/* $Id: dib.cpp,v 1.7 2000-11-14 14:27:49 sandervl Exp $ */
 
 /*
  * Win32 DIB functions for OS/2
@@ -30,7 +30,7 @@
  * Return the width of a DIB bitmap in bytes. DIB bitmap data is 32-bit aligned.
  * http://www.microsoft.com/msdn/sdk/platforms/doc/sdk/win32/struc/src/str01.htm
  */
-int DIB_GetDIBWidthBytes( int width, int depth )
+int WIN32API DIB_GetDIBWidthBytes( int width, int depth )
 {
     int words;
 
