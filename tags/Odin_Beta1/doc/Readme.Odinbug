@@ -1,0 +1,97 @@
+Odin Bug Report Generator Version 0.5.5
+=======================================
+
+0. Disclaimer
+=============
+
+OdinBug is free, but copyrighted software. It is not guaranteed  to fulfill
+any particular purpose. Use it at your own risk. It may  be included free of
+charge with every application that comes with  or makes use of Odin libraries.
+The sourcecode it currently available only upon request (but also for free!).
+
+1. Introduction
+===============
+
+The main goal of this program is to make creating proper bug reports for Team
+Odin more comfortable.
+
+The reason I started to write this program was, that I saw every day that
+Sander van Leeuwen and other Team Odin members write emails, telling  us users
+to bring in proper bug reports (I don't exclude myself).
+
+Well, I would like Sander and all the others to spend there time on Odin and
+not writing emails about things that should be a non-issue.
+
+2. Installation
+===============
+
+As OdinBug.EXE is written in VX-REXX it needs the VROBJ.DLL runtime.
+
+VROBJ.DLL can be found in the directory x:\IMAGES (x=CD-ROM drive) of  your
+original Warp 4 CD-ROM and has to be copied into into d:\OS2\DLL
+(d=bootdrive), or somewhere else in your LIBPATH.
+
+There is also a VROBJ.WPI package at the following location:
+
+    http://groups.yahoo.com/group/odinusers/files/vrobj.wpi
+    ftp://ftp.os2.org/odin/weekly/vrobj.wpi
+
+This package can be installed the usual way using WarpIN.
+
+Put OdinBug.EXE into your Odin "Windows" directory.
+
+Whenever a new version of OdinBug is executed for the first time, it  creates
+an object for itself (and a few others) in the Odin folder and  associates
+odin32_?.log files with it. Now you can doubleclick on any  odin32_?.log file
+and OdinBug is fired up. 
+
+Note: XWorkplace users should create "Odin Log Files" as a subtype of  "Plain
+Text" and associate OdinBug with that filetype in order to have  OdinBug as a
+default for Odin logfiles and your favorites text editor  as additional
+editor/viewer.
+
+Before pressing "Create" for the first time you have to configure your  email
+client on the "EMail" page.
+
+3. WHAT IT DOES
+
+OdinBug presents a notebook of forms to fill in the information  needed
+by Team Odin and generates a report that follows the standards  defined by
+Team Odin (see Online help for details).
+
+Generally this program needs 1 file as input from the user:
+
+- the Odin log file:   odin32_?.log
+
+Note: Only debug builds can create log files!!!
+
+It will try to determine the Odin buildfile automatically, but if this  fails
+or OdinBug is unsure, it will prompt the user to enter a valid  buildfile,
+too.
+
+As soon as the user has specified these files, all the other information  is
+gathered from CONFIG.SYS, SYSLEVEL files, the WarpIN database, from  ODIN.INI
+and also from the odin32_?.log files. Only minor adjustments  should have to
+be made (especially from users with non-Scitech Display  drivers).
+
+It also scans the odin_?.log file to find the exception information  and the
+stack dump in case an application traps. Be aware that these  logfiles can
+become quite large and that it might take a while until  processing is
+complete.
+
+The exception is presented on the exceptions page of OdinBug.
+
+4. USAGE
+
+OdinBug is quite self explanatory anyway and there is a full featured
+online help and manual available. Please, read it!
+
+5. BUG REPORTS AND FEATURE REQUESTS FOR THIS PROGRAM (OdinBug)
+
+Just email *me* and tell me what you think or what you would like to see!  I
+will try to implement or fix it.
+
+
+6. AUTHOR:
+
+Herwig Bauernfeind, 24-11-2001 EMail: herwig.bauernfeind@aon.at 
