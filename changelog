@@ -1,4 +1,8 @@
-/* $Id: changelog,v 1.1931 2001-12-30 16:52:21 sandervl Exp $ */
+/* $Id: changelog,v 1.1932 2001-12-30 21:27:36 bird Exp $ */
+  
+ 2001-12-31: knut st. osmundsen <bird@anduin.net>
+    - Tools/CmdQd:
+                o Corrected bad statement in the clean2 rule.
 
  2001-12-30: Sander van Leeuwen <sandervl@xs4all.nl>
     - KERNEL32: o Fixed some wrong return values for disk functions (hmdisk)
