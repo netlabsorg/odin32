@@ -1,4 +1,4 @@
-/* $Id: oslibdos.cpp,v 1.32 2000-06-25 07:13:28 sandervl Exp $ */
+/* $Id: oslibdos.cpp,v 1.33 2000-06-28 21:05:56 phaller Exp $ */
 /*
  * Wrappers for OS/2 Dos* API
  *
@@ -1904,3 +1904,34 @@ DWORD OSLibDosQueryVolumeSerialAndName(int drive, LPDWORD lpVolumeSerialNumber,
 }
 //******************************************************************************
 //******************************************************************************
+
+
+//******************************************************************************
+//******************************************************************************
+BOOL OSLibDosCreatePipe(PHANDLE phfRead,
+                        PHANDLE phfWrite,
+                        void*   lpsa,
+                        DWORD   dwSize)
+{
+  APIRET rc;
+
+  dprintf(("DosCreatePipe(%08xh,%08xh,%08xh)\n",
+           phfRead,
+           phfWrite,
+           dwSize));
+  
+  // select default buffer size
+  if (dwSize == 0)
+    dwSize = 4096;
+  
+  rc = DosCreatePipe(phfRead,
+                     phfWrite,
+                     dwSize);
+  dprintf(("DosCreatePipe rc=%d",rc));
+  if (rc)
+  {
+    SetLastError(error2WinError(rc,ERROR_INVALID_PARAMETER_W));
+    return -1; // INVALID_HANDLE_VALUE
+  }
+  return NO_ERROR;
+}

@@ -1,4 +1,4 @@
-/* $Id: oslibdos.h,v 1.18 2000-06-16 00:04:31 phaller Exp $ */
+/* $Id: oslibdos.h,v 1.19 2000-06-28 21:05:57 phaller Exp $ */
 
 /*
  * Wrappers for OS/2 Dos* API
@@ -166,6 +166,12 @@ BOOL OSLibDosWaitNamedPipe(LPCSTR lpszNamedPipeName,
                             DWORD   dwTimeout);
 
 BOOL OSLibDosDisconnectNamedPipe(DWORD hPipe);
+
+BOOL OSLibDosCreatePipe(PHANDLE phfRead,
+                        PHANDLE phfWrite,
+                        void*   lpsa,
+                        DWORD   dwSize);
+
 
 DWORD OSLibDosFindFirst(LPCSTR lpFileName,WIN32_FIND_DATAA* lpFindFileData);
 DWORD OSLibDosFindFirstMulti(LPCSTR lpFileName,WIN32_FIND_DATAA *lpFindFileData,DWORD *count);
