@@ -1,4 +1,4 @@
-; $Id: shlwapi.def,v 1.21 2001-04-28 16:26:05 sandervl Exp $
+; $Id: shlwapi.def,v 1.22 2001-05-19 09:13:12 sandervl Exp $
 
 ; updated export ordinals to NT4 SP6 version of SHLWAPI.DLL
 ; Note: W95/W98 has DIFFERENT export ordinals
@@ -461,7 +461,7 @@ EXPORTS
 ;   SHRegWriteUSValueW     = _SHRegWriteUSValueW@?                @618
 ;   SHSetSetThreadRef      = _SHSetThreadRef@?                    @619
     SHSetValueA            = _SHSetValueA@24                      @620
-;   SHSetValueW            = _SHSetValueW@?                       @621
+    SHSetValueW            = _SHSetValueW@24                      @621
 ;   SHSkipJunction         = _SHSkipJunction@8                    @622
 ;   SHStrDupA              = _SHStrDupA@?                         @623
 ;   SHStrDupW              = _SHStrDUpW@?                         @624
