@@ -1,4 +1,4 @@
-; $Id: quartz.def,v 1.2 2001-08-23 18:34:23 sandervl Exp $
+; $Id: quartz.def,v 1.3 2001-09-15 15:35:59 sandervl Exp $
 
 ;
 ;
@@ -12,4 +12,6 @@ EXPORTS
   DllUnregisterServer  = _QUARTZ_DllUnregisterServer@0        @4
   AMGetErrorTextA      = _AMGetErrorTextA@12                  @5
   AMGetErrorTextW      = _AMGetErrorTextW@12                  @6
+  AmpFactorToDB        = _QUARTZ_AmpFactorToDB@4              @7
+  DBToAmpFactor        = _QUARTZ_DBToAmpFactor@4              @8
 
