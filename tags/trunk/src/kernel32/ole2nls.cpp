@@ -1,4 +1,4 @@
-/* $Id: ole2nls.cpp,v 1.15 2001-11-14 12:30:40 phaller Exp $
+/* $Id: ole2nls.cpp,v 1.16 2001-12-30 10:46:37 sandervl Exp $
  *
  *  National Language Support library
  *
@@ -1984,6 +1984,8 @@ ODINFUNCTION6(INT, LCMapStringA,
     INT, srclen,     /* [in] source length */
     LPSTR, dststr,   /* [out] destination buffer */
     INT, dstlen)     /* [in] destination buffer length */
+{
+  int i;
 #else
 INT WINAPI LCMapStringA(
     LCID lcid,      /* [in] locale identifier created with MAKELCID;
@@ -1994,12 +1996,12 @@ INT WINAPI LCMapStringA(
     INT srclen,     /* [in] source length */
     LPSTR dststr,   /* [out] destination buffer */
     INT dstlen)     /* [in] destination buffer length */
-#endif
 {
   int i;
 
   TRACE("(0x%04lx,0x%08lx,%s,%d,%p,%d)\n",
     lcid,mapflags,srcstr,srclen,dststr,dstlen);
+#endif
 
   if ( ((dstlen!=0) && (dststr==NULL)) || (srcstr==NULL) )
   {
@@ -2241,16 +2243,19 @@ INT WINAPI LCMapStringA(
 ODINFUNCTION6(INT, LCMapStringW,
     LCID, lcid,DWORD, mapflags,LPCWSTR, srcstr,INT, srclen,LPWSTR, dststr,
     INT, dstlen)
+{
+  int i;
+
 #else
 INT WINAPI LCMapStringW(
     LCID lcid,DWORD mapflags,LPCWSTR srcstr,INT srclen,LPWSTR dststr,
     INT dstlen)
-#endif
 {
   int i;
 
   TRACE("(0x%04lx,0x%08lx,%p,%d,%p,%d)\n",
                  lcid, mapflags, srcstr, srclen, dststr, dstlen);
+#endif
 
   if ( ((dstlen!=0) && (dststr==NULL)) || (srcstr==NULL) )
   {
