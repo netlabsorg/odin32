@@ -1,7 +1,8 @@
- /* $Id: changelog,v 1.447 1999-11-14 11:59:26 sandervl Exp $ */
+ /* $Id: changelog,v 1.448 1999-11-14 13:08:51 sandervl Exp $ */
 
  99-11-14: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32: Implemented GetMenuItemRect
+                  Fixed SetParent bug (use frame (not client) handle)
 
  99-11-14: Edgar Buerkle <Edgar.Buerkle@gmx.net>
 	- USER32: Fixed WindowFromPoint
