@@ -1,8 +1,8 @@
-/* $Id: texobj.h,v 1.1 2000-02-29 00:48:39 sandervl Exp $ */
+/* $Id: texobj.h,v 1.2 2000-05-23 20:34:57 jeroen Exp $ */
 
 /*
  * Mesa 3-D graphics library
- * Version:  3.1
+ * Version:  3.3
  *
  * Copyright (C) 1999  Brian Paul   All Rights Reserved.
  *
@@ -59,27 +59,30 @@ extern void gl_test_texture_object_completeness( const GLcontext *ctx, struct gl
  * API functions
  */
 
-extern void gl_GenTextures( GLcontext *ctx, GLsizei n, GLuint *textures );
+extern void
+_mesa_GenTextures( GLsizei n, GLuint *textures );
 
 
-extern void gl_DeleteTextures( GLcontext *ctx,
-                               GLsizei n, const GLuint *textures);
+extern void
+_mesa_DeleteTextures( GLsizei n, const GLuint *textures);
 
 
-extern void gl_BindTexture( GLcontext *ctx, GLenum target, GLuint texture );
+extern void
+_mesa_BindTexture( GLenum target, GLuint texture );
 
 
-extern void gl_PrioritizeTextures( GLcontext *ctx,
-                                   GLsizei n, const GLuint *textures,
-                                   const GLclampf *priorities );
+extern void
+_mesa_PrioritizeTextures( GLsizei n, const GLuint *textures,
+                          const GLclampf *priorities );
 
 
-extern GLboolean gl_AreTexturesResident( GLcontext *ctx, GLsizei n,
-                                         const GLuint *textures,
-                                         GLboolean *residences );
+extern GLboolean
+_mesa_AreTexturesResident( GLsizei n, const GLuint *textures,
+                           GLboolean *residences );
 
 
-extern GLboolean gl_IsTexture( GLcontext *ctx, GLuint texture );
+extern GLboolean
+_mesa_IsTexture( GLuint texture );
 
 
 #endif

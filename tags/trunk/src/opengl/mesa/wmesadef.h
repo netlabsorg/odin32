@@ -1,4 +1,4 @@
-/* $Id: wmesadef.h,v 1.2 2000-03-01 18:49:40 jeroen Exp $ */
+/* $Id: wmesadef.h,v 1.3 2000-05-23 20:35:00 jeroen Exp $ */
 /*      File name       :       wmesadef.h
  *  Version             :       2.3
  *
@@ -19,7 +19,10 @@
 
 /*
  * $Log: wmesadef.h,v $
- * Revision 1.2  2000-03-01 18:49:40  jeroen
+ * Revision 1.3  2000-05-23 20:35:00  jeroen
+ * *** empty log message ***
+ *
+ * Revision 1.2  2000/03/01 18:49:40  jeroen
  * *** empty log message ***
  *
  * Revision 1.1  2000/02/29 00:48:44  sandervl
@@ -36,7 +39,10 @@
 
 /*
  * $Log: wmesadef.h,v $
- * Revision 1.2  2000-03-01 18:49:40  jeroen
+ * Revision 1.3  2000-05-23 20:35:00  jeroen
+ * *** empty log message ***
+ *
+ * Revision 1.2  2000/03/01 18:49:40  jeroen
  * *** empty log message ***
  *
  * Revision 1.1  2000/02/29 00:48:44  sandervl
@@ -55,7 +61,10 @@
 
 /*
  * $Log: wmesadef.h,v $
- * Revision 1.2  2000-03-01 18:49:40  jeroen
+ * Revision 1.3  2000-05-23 20:35:00  jeroen
+ * *** empty log message ***
+ *
+ * Revision 1.2  2000/03/01 18:49:40  jeroen
  * *** empty log message ***
  *
  * Revision 1.1  2000/02/29 00:48:44  sandervl
@@ -76,20 +85,12 @@
 #ifndef DDMESADEF_H
 #define DDMESADEF_H
 
-#ifdef __WIN32OS2__/* Nope, we use this hdr in DIVE code, so instead include*/
-                   /* os2win.h in the source if it is needed! */
-//#include <os2win.h>
-#else
-#include <windows.h>
-#endif
-
 #if defined(DDRAW)
-#include <ddraw.h>
+#ifdef __WIN32OS2__
+#define __WINE_DD_OBJ_BASE_H/* Don't include dd_obj_base.h, or the file won't*/
+#endif                                 /* compile due to redefined symbols.*/
+#include <ddraw.h>          /* Is this a bug in the Odin DDRAW implementation??*/
 #endif
-
-//#include "gl.h"
-//#include "context.h"
-//#include "profile.h"
 
 #define REDBITS         0x03
 #define REDSHIFT        0x00
@@ -98,8 +99,10 @@
 #define BLUEBITS        0x02
 #define BLUESHIFT       0x06
 
+typedef HANDLE ULONG;
+
 typedef struct _dibSection{
-        HDC             hDC;
+        HDC     hDC;
         HANDLE  hFileMap;
         BOOL    fFlushed;
         LPVOID  base;
@@ -119,7 +122,7 @@ typedef struct wmesa_context{
 #ifdef DIVE
     ULONG               hDiveInstance; /* This actually is a DIVE Handle   */
     ULONG               BackBufferNumber;
-    PVOID               ppFrameBuffer;
+    PVOID               ppFrameBuffer; /* FrameBuffer address - used for DIRECT access to screen only */
     ULONG               ScanLineBytes,ScanLines;
     POINT               WinPos;
     WNDPROC             hWndProc;
@@ -129,7 +132,7 @@ typedef struct wmesa_context{
     HRGN                hrgn;
     HDC                 hps;
     BOOL                BackBufferOwnAllocation;
-    GLint               awidth,aheight; /* Allocated w/h for ImageBuffer */
+    GLint               awidth,aheight;/* Allocated w/h for ImageBuffer    */
 #endif
     PBYTE               pbPixels;
     int                 nColors;
@@ -148,19 +151,25 @@ typedef struct wmesa_context{
     GLcontext          *gl_ctx;                 /* The core GL/Mesa context*/
     GLvisual           *gl_visual;                 /* Describes the buffers*/
     GLframebuffer      *gl_buffer;    /* Depth, stencil, accum, etc buffers*/
+
+    /* 3D projection stuff */
     RECT                drawRect;
     UINT                uiDIBoffset;
-    PBYTE               ScreenMem;     /* WinG memory                      */
-    HPALETTE            hPal;          /* Current Palette                  */
-    HPALETTE            hPalHalfTone;
+                                       /* OpenGL stuff                     */
     HPALETTE            hGLPalette;
-    WMDIBSECTION        dib;
-    BITMAPINFO         *IndexFormat;
+    PBYTE                           ScreenMem; /* WinG memory              */
+    BITMAPINFO                      *IndexFormat;
+    HPALETTE                        hPal;      /* Current Palette          */
+    HPALETTE                        hPalHalfTone;
+
+
+    WMDIBSECTION            dib;
     BITMAPINFO          bmi;
     HBITMAP             hbmDIB;
     HBITMAP             hOldBitmap;
-    HBITMAP             Old_Compat_BM;
-    HBITMAP             Compat_BM;     /* Bitmap for double buffering      */
+    HBITMAP                         Old_Compat_BM;
+    HBITMAP                         Compat_BM;/* Bitmap for double buffering*/
+
     HWND                Window;
     HDC                 hDC;
     HPALETTE            hPalette;

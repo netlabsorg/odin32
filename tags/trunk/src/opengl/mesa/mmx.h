@@ -1,4 +1,4 @@
-/* $Id: mmx.h,v 1.2 2000-03-01 18:49:32 jeroen Exp $ */
+/* $Id: mmx.h,v 1.3 2000-05-23 20:34:53 jeroen Exp $ */
 
 /*
  * Mesa 3-D graphics library
@@ -32,7 +32,7 @@
 #define ASM_MMX_H
 
 
-extern void __cdecl
+extern void _ASMAPI
 gl_mmx_blend_transparency( GLcontext *ctx, GLuint n, const GLubyte mask[],
                            GLubyte rgba[][4], const GLubyte dest[][4] );
 

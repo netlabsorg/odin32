@@ -1,8 +1,8 @@
-/* $Id: matrix.h,v 1.1 2000-02-29 00:48:33 sandervl Exp $ */
+/* $Id: matrix.h,v 1.2 2000-05-23 20:34:52 jeroen Exp $ */
 
 /*
  * Mesa 3-D graphics library
- * Version:  3.1
+ * Version:  3.3
  *
  * Copyright (C) 1999  Brian Paul   All Rights Reserved.
  *
@@ -32,69 +32,37 @@
 #define MATRIX_H
 
 
-#include "gl.h"
 #include "config.h"
 
 typedef struct {
    GLfloat m[16];
-   GLfloat *inv;                /* optional */
+   GLfloat *inv;                                                /* optional*/
    GLuint flags;
    GLuint type;
 } GLmatrix;
+
 
 #ifdef VMS
 #define gl_calculate_model_project_matrix gl_calculate_model_project_matr
 #endif
 
 
+extern void gl_matrix_transposef( GLfloat to[16], const GLfloat from[16] );
+
+extern void gl_matrix_transposed( GLdouble to[16], const GLdouble from[16] );
+
+
 extern void gl_rotation_matrix( GLfloat angle, GLfloat x, GLfloat y, GLfloat z,
                                 GLfloat m[] );
 
 
-
-extern void gl_Frustum( GLcontext *ctx,
-                        GLdouble left, GLdouble right,
-                        GLdouble bottom, GLdouble top,
-                        GLdouble nearval, GLdouble farval );
-
-extern void gl_Ortho( GLcontext *ctx,
-                      GLdouble left, GLdouble right,
-                      GLdouble bottom, GLdouble top,
-                      GLdouble nearval, GLdouble farval );
-
-extern void gl_PushMatrix( GLcontext *ctx );
-
-extern void gl_PopMatrix( GLcontext *ctx );
-
-extern void gl_LoadIdentity( GLcontext *ctx );
-
-extern void gl_LoadMatrixf( GLcontext *ctx, const GLfloat *m );
-
-extern void gl_MatrixMode( GLcontext *ctx, GLenum mode );
-
-extern void gl_MultMatrixf( GLcontext *ctx, const GLfloat *m );
-
 extern void gl_mat_mul_floats( GLmatrix *mat, const GLfloat *m, GLuint flags );
+
 extern void gl_mat_mul_mat( GLmatrix *mat, const GLmatrix *mat2 );
-
-extern void gl_Rotatef( GLcontext *ctx,
-                        GLfloat angle, GLfloat x, GLfloat y, GLfloat z );
-
-extern void gl_Scalef( GLcontext *ctx, GLfloat x, GLfloat y, GLfloat z );
-
-extern void gl_Translatef( GLcontext *ctx, GLfloat x, GLfloat y, GLfloat z );
-
-extern void gl_Viewport( GLcontext *ctx,
-                         GLint x, GLint y, GLsizei width, GLsizei height );
-
-extern void gl_DepthRange( GLcontext* ctx, GLclampd nearval, GLclampd farval );
-
-
-
-
 
 extern void gl_calculate_model_project_matrix( GLcontext *ctx );
 
+extern void gl_matrix_copy( GLmatrix *to, const GLmatrix *from );
 
 extern void gl_matrix_ctr( GLmatrix *m );
 
@@ -102,18 +70,91 @@ extern void gl_matrix_dtr( GLmatrix *m );
 
 extern void gl_matrix_alloc_inv( GLmatrix *m );
 
-extern void gl_matrix_copy( GLmatrix *to, const GLmatrix *from );
-
 extern void gl_matrix_mul( GLmatrix *dest,
 			   const GLmatrix *a,
 			   const GLmatrix *b );
 
 extern void gl_matrix_analyze( GLmatrix *mat );
 
-
-extern void gl_MultMatrixd( GLcontext *ctx, const GLdouble *m );
 extern GLboolean gl_matrix_invert( GLmatrix *mat );
+
 extern void gl_print_matrix( const GLmatrix *m );
+
+
+
+extern void
+_mesa_Frustum( GLdouble left, GLdouble right,
+               GLdouble bottom, GLdouble top,
+               GLdouble nearval, GLdouble farval );
+
+extern void
+_mesa_Ortho( GLdouble left, GLdouble right,
+             GLdouble bottom, GLdouble top,
+             GLdouble nearval, GLdouble farval );
+
+extern void
+_mesa_PushMatrix( void );
+
+extern void
+_mesa_PopMatrix( void );
+
+extern void
+_mesa_LoadIdentity( void );
+
+extern void
+_mesa_LoadMatrixf( const GLfloat *m );
+
+extern void
+_mesa_LoadMatrixd( const GLdouble *m );
+
+extern void
+_mesa_MatrixMode( GLenum mode );
+
+extern void
+_mesa_MultMatrixf( const GLfloat *m );
+
+extern void
+_mesa_MultMatrixd( const GLdouble *m );
+
+extern void
+_mesa_Rotatef( GLfloat angle, GLfloat x, GLfloat y, GLfloat z );
+
+extern void
+_mesa_Rotated( GLdouble angle, GLdouble x, GLdouble y, GLdouble z );
+
+extern void
+_mesa_Scalef( GLfloat x, GLfloat y, GLfloat z );
+
+extern void
+_mesa_Scaled( GLdouble x, GLdouble y, GLdouble z );
+
+extern void
+_mesa_Translatef( GLfloat x, GLfloat y, GLfloat z );
+
+extern void
+_mesa_Translated( GLdouble x, GLdouble y, GLdouble z );
+
+extern void
+_mesa_LoadTransposeMatrixfARB( const GLfloat *m );
+
+extern void
+_mesa_LoadTransposeMatrixdARB( const GLdouble *m );
+
+extern void
+_mesa_MultTransposeMatrixfARB( const GLfloat *m );
+
+extern void
+_mesa_MultTransposeMatrixdARB( const GLdouble *m );
+
+extern void
+_mesa_Viewport( GLint x, GLint y, GLsizei width, GLsizei height );
+
+extern void
+gl_Viewport( GLcontext *ctx, GLint x, GLint y, GLsizei width, GLsizei height );
+
+extern void
+_mesa_DepthRange( GLclampd nearval, GLclampd farval );
+
 
 
 #endif

@@ -1,4 +1,4 @@
-/* $Id: stereo.h,v 1.1 2000-02-29 00:48:38 sandervl Exp $ */
+/* $Id: stereo.h,v 1.2 2000-05-23 20:34:57 jeroen Exp $ */
 /* File name stereov.h
    header file for stereo display driver
 ***************************************************************
@@ -16,13 +16,6 @@
 ***************************************************************
 
 */
-#if defined( __WIN32__) || defined (WIN32)
-   #include <windows.h>
-#endif
-
-#if defined(__WIN32OS2__)
-   #include <os2win.h>
-#endif
 
 typedef enum VIEW_INDICATOR { FIRST, SECOND};
 

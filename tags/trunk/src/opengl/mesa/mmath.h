@@ -1,8 +1,8 @@
-/* $Id: mmath.h,v 1.1 2000-02-29 00:48:34 sandervl Exp $ */
+/* $Id: mmath.h,v 1.2 2000-05-23 20:34:53 jeroen Exp $ */
 
 /*
  * Mesa 3-D graphics library
- * Version:  3.1
+ * Version:  3.3
  *
  * Copyright (C) 1999  Brian Paul   All Rights Reserved.
  *
@@ -23,10 +23,6 @@
  * AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-/* $XFree86: xc/lib/GL/mesa/src/mmath.h,v 1.2 1999/04/04 00:20:28 dawes Exp $ */
-
-
-
 
 
 /*
@@ -39,15 +35,9 @@
 #ifndef MMATH_H
 #define MMATH_H
 
-#ifdef HAVE_CONFIG_H
-#include "conf.h"
-#endif
 
-#ifndef XFree86Server
-#include <math.h>
-#else
-#include "GL/xf86glx.h"
-#endif
+#include "glheader.h"
+
 
 /*
  * Set the x86 FPU control word to guarentee only 32 bits of presision
@@ -73,7 +63,7 @@ typedef unsigned short fpu_control_t;
 /* Set it up how we want it.
  */
 #if !defined(NO_FAST_MATH)
-#define START_FAST_MATH(x)                                      \
+#define START_FAST_MATH(x)                  \
    {                                                            \
       static fpu_control_t mask = _FPU_SINGLE | _FPU_MASK_IM    \
             | _FPU_MASK_DM | _FPU_MASK_ZM | _FPU_MASK_OM        \
@@ -97,6 +87,47 @@ typedef unsigned short fpu_control_t;
       _FPU_SETCW( x );                          \
    }
 
+#define HAVE_FAST_MATH
+
+#elif defined(__WATCOMC__) && !defined(NO_FAST_MATH)
+
+/* This is the watcom specific inline assembly version of setcw and getcw */
+
+void START_FAST_MATH2(unsigned short *x);
+#pragma aux START_FAST_MATH2 =          \
+    "fstcw   word ptr [esi]"            \
+    "or      word ptr [esi], 0x3f"      \
+    "fldcw   word ptr [esi]"            \
+    parm [esi]                          \
+    modify exact [];
+
+void END_FAST_MATH2(unsigned short *x);
+#pragma aux END_FAST_MATH2 =            \
+    "fldcw   word ptr [esi]"            \
+    parm [esi]                          \
+    modify exact [];
+
+#define START_FAST_MATH(x)  START_FAST_MATH2(& x)
+#define END_FAST_MATH(x)  END_FAST_MATH2(& x)
+
+/*
+__inline START_FAST_MATH(unsigned short x)
+    {
+    _asm {
+        fstcw   ax
+        mov     x , ax
+        or      ax, 0x3f
+        fldcw   ax
+        }
+    }
+
+__inline END_FAST_MATH(unsigned short x)
+    {
+    _asm {
+        fldcw   x
+        }
+    }
+*/
 #define HAVE_FAST_MATH
 
 #else
@@ -131,20 +162,32 @@ static __inline int FloatToInt(float f)
 {
    int r;
    _asm {
-     fld f
-     fistp r
-    }
+         fld f
+         fistp r
+        }
    return r;
 }
-#elif defined(__WIN32OS2__)
+#elif defined(__WATCOMC__)
+long FloatToInt(float f);
+#pragma aux FloatToInt =                \
+        "push   eax"                        \
+        "fistp  dword ptr [esp]"            \
+        "pop    eax"                        \
+        parm [8087]                         \
+        value [eax]                         \
+        modify exact [eax];
+float asm_sqrt (float x);
+#pragma aux asm_sqrt =                  \
+        "fsqrt"                             \
+        parm [8087]                         \
+        value [8087]                        \
+        modify exact [];
+#else
 #define FloatToInt(F) ((int) (F))
 #endif
 #else
 #define FloatToInt(F) ((int) (F))
 #endif
-
-
-
 
 
 /*
@@ -154,25 +197,28 @@ static __inline int FloatToInt(float f)
 extern float gl_sqrt(float x);
 
 #ifdef FAST_MATH
+#if defined (__WATCOMC__) && defined(USE_X86_ASM)
+#  define GL_SQRT(X)  asm_sqrt(X)
+#else
 #  define GL_SQRT(X)  gl_sqrt(X)
+#endif
 #else
 #  define GL_SQRT(X)  sqrt(X)
 #endif
 
 
-
 /*
  * Normalize a 3-element vector to unit length.
  */
-#define NORMALIZE_3FV( V )			\
-do {						\
-   GLdouble len = LEN_SQUARED_3FV(V);		\
-   if (len > 1e-50) {				\
-      len = 1.0 / GL_SQRT(len);			\
-      V[0] = (GLfloat) (V[0] * len);		\
-      V[1] = (GLfloat) (V[1] * len);		\
-      V[2] = (GLfloat) (V[2] * len);		\
-   }						\
+#define NORMALIZE_3FV( V )                      \
+do {                                            \
+   GLdouble len = LEN_SQUARED_3FV(V);           \
+   if (len > 1e-50) {                           \
+      len = 1.0 / GL_SQRT(len);                 \
+      V[0] = (GLfloat) (V[0] * len);            \
+      V[1] = (GLfloat) (V[1] * len);            \
+      V[2] = (GLfloat) (V[2] * len);            \
+   }                                            \
 } while(0)
 
 #define LEN_3FV( V ) (GL_SQRT(V[0]*V[0]+V[1]*V[1]+V[2]*V[2]))
@@ -193,11 +239,11 @@ do {						\
 
 #define IEEE_ONE 0x3f7f0000
 
-#define CLAMP_FLOAT_COLOR(f)			\
-	do {					\
-	   if (*(GLuint *)&f >= IEEE_ONE)	\
-	      f = (*(GLint *)&f < 0) ? 0 : 1;	\
-	} while(0)
+#define CLAMP_FLOAT_COLOR(f)                    \
+        do {                                    \
+           if (*(GLuint *)&f >= IEEE_ONE)       \
+              f = (*(GLint *)&f < 0) ? 0 : 1;   \
+        } while(0)
 
 #define CLAMP_FLOAT_COLOR_VALUE(f)              \
     ( (*(GLuint *)&f >= IEEE_ONE)               \
@@ -282,7 +328,7 @@ do {                                            \
 } while(0)
 
 
-extern void gl_init_math(void);
+extern void _mesa_init_math(void);
 
 
 #endif

@@ -1,8 +1,8 @@
-/* $Id: vertices.h,v 1.2 2000-03-01 18:49:39 jeroen Exp $ */
+/* $Id: vertices.h,v 1.3 2000-05-23 20:35:00 jeroen Exp $ */
 
 /*
  * Mesa 3-D graphics library
- * Version:  3.1
+ * Version:  3.3
  *
  * Copyright (C) 1999  Brian Paul   All Rights Reserved.
  *
@@ -28,37 +28,44 @@
 #ifndef VERTICES_H_
 #define VERTICES_H_
 
+#ifdef USE_X86_ASM
+#define _PROJAPI _ASMAPI
+#define _PROJAPIP _ASMAPIP
+#else
+#define _PROJAPI
+#define _PROJAPIP *
+#endif
 
-typedef void (* __cdecl gl_transform_func)( GLfloat *first_vert,
+typedef void (_PROJAPIP gl_transform_func)( GLfloat *first_vert,
                                    const GLfloat *m,
                                    const GLfloat *src,
                                    GLuint src_stride,
                                    GLuint count );
 
-typedef void (* __cdecl gl_cliptest_func)( GLfloat *first_vert,
-                                  GLfloat *last_vert, /* use count instead? */
+typedef void (_PROJAPIP gl_cliptest_func)( GLfloat *first_vert,
+                                  GLfloat *last_vert, /* use count instead?*/
                                   GLubyte *or_mask,
                                   GLubyte *and_mask,
                                   GLubyte *clip_mask );
 
-typedef void (*gl_project_clipped_func)( GLfloat *first,
-					 GLfloat *last,
-					 const GLfloat *m,
-					 GLuint stride,
-					 const GLubyte *clipmask );
+typedef void (_PROJAPIP gl_project_clipped_func)( GLfloat *first,
+                                         GLfloat *last,
+                                         const GLfloat *m,
+                                         GLuint stride,
+                                         const GLubyte *clipmask );
 
-typedef void (*gl_project_func)( GLfloat *first,
-				 GLfloat *last,
-				 const GLfloat *m,
-				 GLuint stride );
+typedef void (_PROJAPIP gl_project_func)( GLfloat *first,
+                                 GLfloat *last,
+                                 const GLfloat *m,
+                                 GLuint stride );
 
 
 /* At the moment these are used by fastpaths in the FX and MGA drivers.
  */
 extern gl_transform_func       gl_xform_points3_v16_general;
-extern gl_cliptest_func        gl_cliptest_points4_v16;			
-extern gl_project_clipped_func gl_project_clipped_v16;			
-extern gl_project_func         gl_project_v16;			
+extern gl_cliptest_func        gl_cliptest_points4_v16;
+extern gl_project_clipped_func gl_project_clipped_v16;
+extern gl_project_func         gl_project_v16;
 
 
 
@@ -66,9 +73,9 @@ extern GLenum gl_reduce_prim[];
 extern void gl_init_vertices(void);
 
 typedef void (*gl_vertex_interp_func)( GLfloat t,
-				       GLfloat *result,
-				       const GLfloat *in,
-				       const GLfloat *out );
-				
+                                       GLfloat *result,
+                                       const GLfloat *in,
+                                       const GLfloat *out );
+
 
 #endif

@@ -1,8 +1,8 @@
-/* $Id: teximage.h,v 1.1 2000-02-29 00:48:39 sandervl Exp $ */
+/* $Id: teximage.h,v 1.2 2000-05-23 20:34:57 jeroen Exp $ */
 
 /*
  * Mesa 3-D graphics library
- * Version:  3.1
+ * Version:  3.3
  *
  * Copyright (C) 1999  Brian Paul   All Rights Reserved.
  *
@@ -35,97 +35,101 @@
 /*** Internal functions ***/
 
 
-extern struct gl_texture_image *gl_alloc_texture_image( void );
+extern GLint
+_mesa_base_tex_format( GLint format );
 
 
-extern void gl_free_texture_image( struct gl_texture_image *teximage );
+extern struct gl_texture_image *
+gl_alloc_texture_image( void );
 
 
-
-
-/*** API entry points ***/
-
-
-extern void gl_TexImage1D( GLcontext *ctx,
-                           GLenum target, GLint level, GLint internalformat,
-                           GLsizei width, GLint border, GLenum format,
-                           GLenum type, const GLvoid *pixels );
-
-
-extern void gl_TexImage2D( GLcontext *ctx,
-                           GLenum target, GLint level, GLint internalformat,
-                           GLsizei width, GLsizei height, GLint border,
-                           GLenum format, GLenum type,
-                           const GLvoid *pixels );
-
-
-extern void gl_TexImage3D( GLcontext *ctx,
-                           GLenum target, GLint level, GLint internalformat,
-                           GLsizei width, GLsizei height, GLsizei depth,
-                           GLint border, GLenum format, GLenum type,
-                           const GLvoid *pixels );
-
-
-extern void gl_GetTexImage( GLcontext *ctx, GLenum target, GLint level,
-                            GLenum format, GLenum type, GLvoid *pixels );
+extern void
+gl_free_texture_image( struct gl_texture_image *teximage );
 
 
 
-extern void gl_TexSubImage1D( GLcontext *ctx,
-                              GLenum target, GLint level, GLint xoffset,
-                              GLsizei width, GLenum format, GLenum type,
-                              const GLvoid *pixels );
+/*** API entry point functions ***/
 
 
-extern void gl_TexSubImage2D( GLcontext *ctx,
-                              GLenum target, GLint level,
-                              GLint xoffset, GLint yoffset,
-                              GLsizei width, GLsizei height,
-                              GLenum format, GLenum type,
-                              const GLvoid *pixels );
+extern void
+_mesa_TexImage1D( GLenum target, GLint level, GLint internalformat,
+                  GLsizei width, GLint border,
+                  GLenum format, GLenum type, const GLvoid *pixels );
 
 
-extern void gl_TexSubImage3D( GLcontext *ctx,
-                              GLenum target, GLint level,
-                              GLint xoffset, GLint yoffset, GLint zoffset,
-                              GLsizei width, GLsizei height, GLsizei depth,
-                              GLenum format, GLenum type,
-                              const GLvoid *pixels );
+extern void
+_mesa_TexImage2D( GLenum target, GLint level, GLint internalformat,
+                  GLsizei width, GLsizei height, GLint border,
+                  GLenum format, GLenum type, const GLvoid *pixels );
 
 
-extern void gl_CopyTexImage1D( GLcontext *ctx,
-                               GLenum target, GLint level,
-                               GLenum internalformat,
-                               GLint x, GLint y,
-                               GLsizei width, GLint border );
+extern void
+_mesa_TexImage3D( GLenum target, GLint level, GLint internalformat,
+                  GLsizei width, GLsizei height, GLsizei depth, GLint border,
+                  GLenum format, GLenum type, const GLvoid *pixels );
 
 
-extern void gl_CopyTexImage2D( GLcontext *ctx,
-                               GLenum target, GLint level,
-                               GLenum internalformat, GLint x, GLint y,
-                               GLsizei width, GLsizei height,
-                               GLint border );
+extern void
+_mesa_TexImage3DEXT( GLenum target, GLint level, GLenum internalformat,
+                     GLsizei width, GLsizei height, GLsizei depth,
+                     GLint border, GLenum format, GLenum type,
+                     const GLvoid *pixels );
 
 
-extern void gl_CopyTexSubImage1D( GLcontext *ctx,
-                                  GLenum target, GLint level,
-                                  GLint xoffset, GLint x, GLint y,
-                                  GLsizei width );
+extern void
+_mesa_GetTexImage( GLenum target, GLint level,
+                   GLenum format, GLenum type, GLvoid *pixels );
 
 
-extern void gl_CopyTexSubImage2D( GLcontext *ctx,
-                                  GLenum target, GLint level,
-                                  GLint xoffset, GLint yoffset,
-                                  GLint x, GLint y,
-                                  GLsizei width, GLsizei height );
+extern void
+_mesa_TexSubImage1D( GLenum target, GLint level, GLint xoffset,
+                     GLsizei width,
+                     GLenum format, GLenum type,
+                     const GLvoid *pixels );
 
 
-extern void gl_CopyTexSubImage3D( GLcontext *ctx,
-                                  GLenum target, GLint level,
-                                  GLint xoffset, GLint yoffset,
-                                  GLint zoffset,
-                                  GLint x, GLint y,
-                                  GLsizei width, GLsizei height );
+extern void
+_mesa_TexSubImage2D( GLenum target, GLint level,
+                     GLint xoffset, GLint yoffset,
+                     GLsizei width, GLsizei height,
+                     GLenum format, GLenum type,
+                     const GLvoid *pixels );
+
+
+extern void
+_mesa_TexSubImage3D( GLenum target, GLint level,
+                     GLint xoffset, GLint yoffset, GLint zoffset,
+                     GLsizei width, GLsizei height, GLsizei depth,
+                     GLenum format, GLenum type,
+                     const GLvoid *pixels );
+
+
+extern void
+_mesa_CopyTexImage1D( GLenum target, GLint level, GLenum internalformat,
+                      GLint x, GLint y, GLsizei width, GLint border );
+
+
+extern void
+_mesa_CopyTexImage2D( GLenum target, GLint level,
+                      GLenum internalformat, GLint x, GLint y,
+                      GLsizei width, GLsizei height, GLint border );
+
+
+extern void
+_mesa_CopyTexSubImage1D( GLenum target, GLint level, GLint xoffset,
+                         GLint x, GLint y, GLsizei width );
+
+
+extern void
+_mesa_CopyTexSubImage2D( GLenum target, GLint level,
+                         GLint xoffset, GLint yoffset,
+                         GLint x, GLint y, GLsizei width, GLsizei height );
+
+
+extern void
+_mesa_CopyTexSubImage3D( GLenum target, GLint level,
+                         GLint xoffset, GLint yoffset, GLint zoffset,
+                         GLint x, GLint y, GLsizei width, GLsizei height );
 
 #endif
 

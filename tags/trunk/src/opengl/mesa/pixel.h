@@ -1,8 +1,8 @@
-/* $Id: pixel.h,v 1.1 2000-02-29 00:48:35 sandervl Exp $ */
+/* $Id: pixel.h,v 1.2 2000-05-23 20:34:54 jeroen Exp $ */
 
 /*
  * Mesa 3-D graphics library
- * Version:  3.1
+ * Version:  3.3
  *
  * Copyright (C) 1999  Brian Paul   All Rights Reserved.
  *
@@ -40,21 +40,39 @@
  */
 
 
-extern void gl_GetPixelMapfv( GLcontext *ctx, GLenum map, GLfloat *values );
+extern void
+_mesa_GetPixelMapfv( GLenum map, GLfloat *values );
 
-extern void gl_GetPixelMapuiv( GLcontext *ctx, GLenum map, GLuint *values );
+extern void
+_mesa_GetPixelMapuiv( GLenum map, GLuint *values );
 
-extern void gl_GetPixelMapusv( GLcontext *ctx, GLenum map, GLushort *values );
+extern void
+_mesa_GetPixelMapusv( GLenum map, GLushort *values );
 
+extern void
+_mesa_PixelMapfv( GLenum map, GLint mapsize, const GLfloat *values );
 
-extern void gl_PixelMapfv( GLcontext *ctx,
-                           GLenum map, GLint mapsize, const GLfloat *values );
+extern void
+_mesa_PixelMapuiv(GLenum map, GLint mapsize, const GLuint *values );
 
-extern void gl_PixelStorei( GLcontext *ctx, GLenum pname, GLint param );
+extern void
+_mesa_PixelMapusv(GLenum map, GLint mapsize, const GLushort *values );
 
-extern void gl_PixelTransferf( GLcontext *ctx, GLenum pname, GLfloat param );
+extern void
+_mesa_PixelStoref( GLenum pname, GLfloat param );
 
-extern void gl_PixelZoom( GLcontext *ctx, GLfloat xfactor, GLfloat yfactor );
+extern void
+_mesa_PixelStorei( GLenum pname, GLint param );
+
+extern void
+_mesa_PixelTransferf( GLenum pname, GLfloat param );
+
+extern void
+_mesa_PixelTransferi( GLenum pname, GLint param );
+
+extern void
+_mesa_PixelZoom( GLfloat xfactor, GLfloat yfactor );
+
 
 
 /*

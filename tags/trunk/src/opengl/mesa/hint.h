@@ -1,10 +1,10 @@
-/* $Id: scissor.h,v 1.2 2000-05-23 20:34:55 jeroen Exp $ */
+/* $Id: hint.h,v 1.1 2000-05-23 20:34:51 jeroen Exp $ */
 
 /*
  * Mesa 3-D graphics library
  * Version:  3.3
  *
- * Copyright (C) 1999  Brian Paul   All Rights Reserved.
+ * Copyright (C) 1999-2000  Brian Paul   All Rights Reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -25,27 +25,21 @@
  */
 
 
-
-
-
-#ifndef SCISSOR_H
-#define SCISSOR_H
+#ifndef HINT_H
+#define HINT_H
 
 
 #include "types.h"
 
 
+extern GLboolean
+_mesa_try_Hint( GLcontext *ctx, GLenum target, GLenum mode );
+
 extern void
-_mesa_Scissor( GLint x, GLint y, GLsizei width, GLsizei height );
+_mesa_Hint( GLenum target, GLenum mode );
 
-
-extern GLint
-gl_scissor_span( GLcontext *ctx, GLuint n, GLint x, GLint y, GLubyte mask[] );
-
-
-extern GLuint
-gl_scissor_pixels( GLcontext *ctx, GLuint n, const GLint x[], const GLint y[],
-                   GLubyte mask[] );
+extern void
+_mesa_HintPGI( GLenum target, GLint mode );
 
 
 #endif

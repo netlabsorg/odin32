@@ -1,10 +1,10 @@
-/* $Id: scissor.h,v 1.2 2000-05-23 20:34:55 jeroen Exp $ */
+/* $Id: state.h,v 1.1 2000-05-23 20:34:57 jeroen Exp $ */
 
 /*
  * Mesa 3-D graphics library
  * Version:  3.3
  *
- * Copyright (C) 1999  Brian Paul   All Rights Reserved.
+ * Copyright (C) 1999-2000  Brian Paul   All Rights Reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -25,27 +25,20 @@
  */
 
 
-
-
-
-#ifndef SCISSOR_H
-#define SCISSOR_H
-
+#ifndef STATE_H
+#define STATE_H
 
 #include "types.h"
 
 
-extern void
-_mesa_Scissor( GLint x, GLint y, GLsizei width, GLsizei height );
+extern void gl_update_state( GLcontext *ctx );
 
 
-extern GLint
-gl_scissor_span( GLcontext *ctx, GLuint n, GLint x, GLint y, GLubyte mask[] );
+/* for debugging */
+extern void gl_print_state( const char *msg, GLuint state );
 
-
-extern GLuint
-gl_scissor_pixels( GLcontext *ctx, GLuint n, const GLint x[], const GLint y[],
-                   GLubyte mask[] );
+/* for debugging */
+extern void gl_print_enable_flags( const char *msg, GLuint flags );
 
 
 #endif

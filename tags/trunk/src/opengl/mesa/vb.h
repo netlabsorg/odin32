@@ -1,8 +1,8 @@
-/* $Id: vb.h,v 1.1 2000-02-29 00:48:42 sandervl Exp $ */
+/* $Id: vb.h,v 1.2 2000-05-23 20:34:59 jeroen Exp $ */
 
 /*
  * Mesa 3-D graphics library
- * Version:  3.1
+ * Version:  3.3
  *
  * Copyright (C) 1999  Brian Paul   All Rights Reserved.
  *
@@ -53,7 +53,6 @@
 #include "conf.h"
 #endif
 
-#include "gl.h"
 #include "vector.h"
 #include "matrix.h"
 #include "config.h"
@@ -113,9 +112,9 @@ struct gl_material
    GLfloat Specular[4];
    GLfloat Emission[4];
    GLfloat Shininess;
-   GLfloat AmbientIndex;	/* for color index lighting */
-   GLfloat DiffuseIndex;	/* for color index lighting */
-   GLfloat SpecularIndex;	/* for color index lighting */
+   GLfloat AmbientIndex;        /* for color index lighting */
+   GLfloat DiffuseIndex;        /* for color index lighting */
+   GLfloat SpecularIndex;       /* for color index lighting */
 };
 
 
@@ -130,27 +129,27 @@ struct gl_material
  */
 struct immediate
 {
-   struct immediate *next;	/* for cache of free IM's */
+   struct immediate *next;      /* for cache of free IM's */
    GLuint id, ref_count;
 
    /* This must be saved when immediates are shared in display lists.
     */
    GLuint Start, Count;
-   GLuint LastData;		/* count or count+1 */
+   GLuint LastData;             /* count or count+1 */
    GLuint AndFlag, OrFlag, BeginState;
-   GLuint LastPrimitive;	
+   GLuint LastPrimitive;
 
-   GLuint ArrayAndFlags;	/* precalc'ed for glArrayElt */
+   GLuint ArrayAndFlags;        /* precalc'ed for glArrayElt */
    GLuint ArrayIncr;
    GLuint ArrayEltFlush;
    GLuint FlushElt;
 
-   GLuint TF1[2];		/* precalc'ed for glTexCoord */
+   GLuint TF1[2];               /* precalc'ed for glTexCoord */
    GLuint TF2[2];
    GLuint TF3[2];
    GLuint TF4[2];
 
-   GLuint  Primitive[VB_SIZE];	/* GLubyte would do... */
+   GLuint  Primitive[VB_SIZE];  /* GLubyte would do... */
    GLuint  NextPrimitive[VB_SIZE];
 
    /* allocate storage for these on demand:
@@ -162,7 +161,7 @@ struct immediate
 
    struct vertex_arrays v;
 
-   struct gl_context *backref;		
+   struct gl_context *backref;
    void (*maybe_transform_vb)( struct immediate * );
 
    /* Normal lengths, zero if not available.
@@ -205,8 +204,8 @@ struct vertex_buffer
     * If we are not compiling, ctx->input points to this struct, in which
     * case the values will be scribbled during transform_vb.
     */
-   struct immediate *IM;	
-   struct vertex_array_pointers store;	
+   struct immediate *IM;
+   struct vertex_array_pointers store;
 
    /* Where to find outstanding untransformed vertices.
     */
@@ -219,7 +218,7 @@ struct vertex_buffer
    GLuint     CopyStart;
    GLuint     Parity, Ovf;
    GLuint     PurgeFlags;
-   GLuint     IndirectCount;	/* defaults to count */
+   GLuint     IndirectCount;    /* defaults to count */
    GLuint     OrFlag, SavedOrFlag;
    GLuint     EarlyCull;
    GLuint     Culled, CullDone;
@@ -241,8 +240,8 @@ struct vertex_buffer
    GLuint      *Primitive;
    GLuint      LastPrimitive;
 
-   GLfloat (*BoundsPtr)[3];	/* Bounds for cull check */
-   GLfloat  *NormalLengthPtr;	/* Array of precomputed inv. normal lengths */
+   GLfloat (*BoundsPtr)[3];     /* Bounds for cull check */
+   GLfloat  *NormalLengthPtr;   /* Array of precomputed inv. normal lengths */
 
 
    /* Holds malloced storage for pipeline data not supplied by
@@ -251,8 +250,8 @@ struct vertex_buffer
    GLvector4f Eye;
    GLvector4f Clip;
    GLvector4f Win;
-   GLvector4ub BColor;		/* not used in cva */
-   GLvector1ui BIndex;		/* not used in cva */
+   GLvector4ub BColor;          /* not used in cva */
+   GLvector1ui BIndex;          /* not used in cva */
    GLubyte (*Specular)[4];
    GLubyte (*Spec[2])[4];
 
@@ -300,18 +299,18 @@ struct vertex_buffer
    /* Not used for cva:
     */
    GLubyte *NormCullStart;
-   GLubyte *CullMask;	        /* Results of vertex culling */
+   GLubyte *CullMask;           /* Results of vertex culling */
    GLubyte *NormCullMask;       /* Compressed onto shared normals */
 
 
-   GLubyte ClipOrMask;		/* bitwise-OR of all ClipMask[] values */
-   GLubyte ClipAndMask;		/* bitwise-AND of all ClipMask[] values */
+   GLubyte ClipOrMask;          /* bitwise-OR of all ClipMask[] values */
+   GLubyte ClipAndMask;         /* bitwise-AND of all ClipMask[] values */
    GLubyte CullFlag[2];
-   GLubyte CullMode;		/* see flags below */
+   GLubyte CullMode;            /* see flags below */
 
-   GLuint CopyCount;		/* max 3 vertices to copy after transform */
+   GLuint CopyCount;            /* max 3 vertices to copy after transform */
    GLuint Copy[3];
-   GLfloat CopyProj[3][4];	/* temporary store for projected clip coords */
+   GLfloat CopyProj[3][4];      /* temporary store for projected clip coords */
 };
 
 
@@ -321,7 +320,7 @@ extern void gl_free_immediate( struct immediate *im );
 
 extern struct vertex_buffer *gl_vb_create_for_immediate( GLcontext *ctx );
 extern struct vertex_buffer *gl_vb_create_for_cva( GLcontext *ctx,
-						   GLuint size );
+                                                   GLuint size );
 extern void gl_vb_free( struct vertex_buffer * );
 extern struct immediate *gl_immediate_alloc( GLcontext *ctx );
 extern void gl_immediate_free( struct immediate *im );
