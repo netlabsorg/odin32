@@ -1,4 +1,4 @@
-/* $Id: wsa.cpp,v 1.7 2001-10-13 18:51:08 sandervl Exp $ */
+/* $Id: wsa.cpp,v 1.8 2002-02-20 10:02:30 sandervl Exp $ */
 
 /*
  *
@@ -47,8 +47,8 @@ BOOL fWSAInitialized = FALSE;
 static int num_startup = 0;
 
 //******************************************************************************
-WSADATA WINSOCK_data = { 0x0101, 0x0101,
-                        "Odin Sockets 1.1", "OS/2",
+WSADATA WINSOCK_data = { 0x0202, 0x0202,
+                        "Odin Sockets 2.0", "OS/2",
 		         WS_MAX_SOCKETS_PER_PROCESS,
 		         WS_MAX_UDP_DATAGRAM, NULL };
 //******************************************************************************
