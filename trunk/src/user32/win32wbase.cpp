@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.145 2000-01-26 18:02:36 cbratschi Exp $ */
+/* $Id: win32wbase.cpp,v 1.146 2000-01-27 17:21:09 cbratschi Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -2047,13 +2047,13 @@ if (cx == 0)
 {
   dprintf(("CB: cx is 0! %d",fuFlags));
   if (fuFlags & SWP_NOSIZE) dprintf(("CB: nosize"));
-  //cx = 50;
+  cx = 50;
 }
 if (cy == 0)
 {
   dprintf(("CB: cy is 0! %d",fuFlags));
   if (fuFlags & SWP_NOSIZE) dprintf(("CB: nosize"));
-  //cy = 50;
+  cy = 50;
 }
 
 #endif

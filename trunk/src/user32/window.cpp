@@ -1,4 +1,4 @@
-/* $Id: window.cpp,v 1.51 2000-01-26 18:02:38 cbratschi Exp $ */
+/* $Id: window.cpp,v 1.52 2000-01-27 17:21:10 cbratschi Exp $ */
 /*
  * Win32 window apis for OS/2
  *
@@ -816,25 +816,21 @@ BOOL WIN32API AdjustWindowRectEx( PRECT rect, DWORD style, BOOL menu, DWORD exSt
     if (exStyle & WS_EX_DLGMODALFRAME) style &= ~WS_THICKFRAME;
 
     //Adjust rect outer (Win32BaseWindow::AdjustRectOuter)
-    /* Decide if the window will be managed (see CreateWindowEx) */
-    //if (!WindowNeedsWMBorder()) //CB: check Options.managed
-    {
-      if (HAS_THICKFRAME(style,exStyle))
-        InflateRect( rect, GetSystemMetrics(SM_CXFRAME), GetSystemMetrics(SM_CYFRAME) );
+    if (HAS_THICKFRAME(style,exStyle))
+      InflateRect( rect, GetSystemMetrics(SM_CXFRAME), GetSystemMetrics(SM_CYFRAME) );
+    else
+      if (HAS_DLGFRAME(style,exStyle))
+        InflateRect(rect, GetSystemMetrics(SM_CXDLGFRAME), GetSystemMetrics(SM_CYDLGFRAME) );
       else
-        if (HAS_DLGFRAME(style,exStyle))
-          InflateRect(rect, GetSystemMetrics(SM_CXDLGFRAME), GetSystemMetrics(SM_CYDLGFRAME) );
-        else
-          if (HAS_THINFRAME(style))
-            InflateRect( rect, GetSystemMetrics(SM_CXBORDER), GetSystemMetrics(SM_CYBORDER));
+        if (HAS_THINFRAME(style))
+          InflateRect( rect, GetSystemMetrics(SM_CXBORDER), GetSystemMetrics(SM_CYBORDER));
 
-      if ((style & WS_CAPTION) == WS_CAPTION)
-      {
-        if (exStyle & WS_EX_TOOLWINDOW)
-          rect->top -= GetSystemMetrics(SM_CYSMCAPTION);
-        else
-          rect->top -= GetSystemMetrics(SM_CYCAPTION);
-      }
+    if ((style & WS_CAPTION) == WS_CAPTION)
+    {
+      if (exStyle & WS_EX_TOOLWINDOW)
+        rect->top -= GetSystemMetrics(SM_CYSMCAPTION);
+      else
+        rect->top -= GetSystemMetrics(SM_CYCAPTION);
     }
 
     if (menu)
@@ -1306,12 +1302,6 @@ HWND WIN32API WindowFromPoint( POINT point)
     if(hwndOS2)
     {
       hwnd = Win32BaseWindow::OS2ToWin32Handle(hwndOS2);
-      if (!hwnd)
-      {
-        //CB: could be a frame control
-        hwndOS2 = OSLibWinQueryWindow(hwndOS2,QWOS_PARENT);
-        hwnd = Win32BaseWindow::OS2ToWin32Handle(hwndOS2);
-      }
       if(hwnd) {
               dprintf(("WindowFromPoint (%d,%d) %x->%x\n", point.x, point.y, hwndOS2, hwnd));
               return hwnd;

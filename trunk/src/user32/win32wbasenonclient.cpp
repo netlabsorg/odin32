@@ -1,4 +1,4 @@
-/* $Id: win32wbasenonclient.cpp,v 1.5 2000-01-26 18:02:37 cbratschi Exp $ */
+/* $Id: win32wbasenonclient.cpp,v 1.6 2000-01-27 17:21:09 cbratschi Exp $ */
 /*
  * Win32 Window Base Class for OS/2 (non-client methods)
  *
@@ -73,9 +73,6 @@ LONG Win32BaseWindow::HandleNCActivate(WPARAM wParam)
 {
   WORD wStateChange;
 
-  //CB: only caption is changed on activation
-  if (!(dwStyle & WS_CAPTION)) return TRUE;
-
   if( wParam ) wStateChange = !(flags & WIN_NCACTIVATED);
   else wStateChange = flags & WIN_NCACTIVATED;
 
@@ -83,6 +80,8 @@ LONG Win32BaseWindow::HandleNCActivate(WPARAM wParam)
   {
     if (wParam) flags |= WIN_NCACTIVATED;
     else flags &= ~WIN_NCACTIVATED;
+
+    if (!(dwStyle & WS_CAPTION)) return TRUE;
 
     if(!(dwStyle & WS_MINIMIZE))
       DoNCPaint((HRGN)1,FALSE);
@@ -302,34 +301,16 @@ LONG Win32BaseWindow::HandleNCLButtonDown(WPARAM wParam,LPARAM lParam)
 }
 //******************************************************************************
 //******************************************************************************
-BOOL Win32BaseWindow::WindowNeedsWMBorder()
-{
-  if (!(dwStyle & WS_CHILD) &&
-      //Options.managed  && //CB: to check
-      !(dwExStyle & WS_EX_TOOLWINDOW) &&
-      ( ((dwStyle & WS_CAPTION) == WS_CAPTION) ||
-        (dwStyle & WS_THICKFRAME)))
-      return TRUE;
-  if (dwExStyle & WS_EX_TRAYWINDOW)
-    return TRUE;
-  return FALSE;
-}
-//******************************************************************************
-//******************************************************************************
 VOID Win32BaseWindow::AdjustMaximizedRect(LPRECT rect)
 {
-  /* Decide if the window will be managed (see CreateWindowEx) */
-  //if (!WindowNeedsWMBorder()) //CB: check Options.managed
-  {
-    if (HAS_THICKFRAME(dwStyle,dwExStyle ))
-      InflateRect( rect, GetSystemMetrics(SM_CXFRAME), GetSystemMetrics(SM_CYFRAME) );
+  if (HAS_THICKFRAME(dwStyle,dwExStyle ))
+    InflateRect( rect, GetSystemMetrics(SM_CXFRAME), GetSystemMetrics(SM_CYFRAME) );
+  else
+    if (HAS_DLGFRAME( dwStyle, dwExStyle ))
+      InflateRect(rect, GetSystemMetrics(SM_CXDLGFRAME), GetSystemMetrics(SM_CYDLGFRAME) );
     else
-      if (HAS_DLGFRAME( dwStyle, dwExStyle ))
-        InflateRect(rect, GetSystemMetrics(SM_CXDLGFRAME), GetSystemMetrics(SM_CYDLGFRAME) );
-      else
-        if (HAS_THINFRAME( dwStyle ))
-          InflateRect( rect, GetSystemMetrics(SM_CXBORDER), GetSystemMetrics(SM_CYBORDER));
-  }
+      if (HAS_THINFRAME( dwStyle ))
+        InflateRect( rect, GetSystemMetrics(SM_CXBORDER), GetSystemMetrics(SM_CYBORDER));
 }
 //******************************************************************************
 //******************************************************************************
@@ -344,25 +325,21 @@ VOID Win32BaseWindow::AdjustRectOuter(LPRECT rect,BOOL menu)
 {
   if(dwStyle & WS_ICONIC) return;
 
-  /* Decide if the window will be managed (see CreateWindowEx) */
-  //if (!WindowNeedsWMBorder()) //CB: check Options.managed
-  {
-    if (HAS_THICKFRAME(dwStyle,dwExStyle ))
-      InflateRect( rect, GetSystemMetrics(SM_CXFRAME), GetSystemMetrics(SM_CYFRAME) );
+  if (HAS_THICKFRAME(dwStyle,dwExStyle ))
+    InflateRect( rect, GetSystemMetrics(SM_CXFRAME), GetSystemMetrics(SM_CYFRAME) );
+  else
+    if (HAS_DLGFRAME( dwStyle, dwExStyle ))
+      InflateRect(rect, GetSystemMetrics(SM_CXDLGFRAME), GetSystemMetrics(SM_CYDLGFRAME) );
     else
-      if (HAS_DLGFRAME( dwStyle, dwExStyle ))
-        InflateRect(rect, GetSystemMetrics(SM_CXDLGFRAME), GetSystemMetrics(SM_CYDLGFRAME) );
-      else
-        if (HAS_THINFRAME( dwStyle ))
-          InflateRect( rect, GetSystemMetrics(SM_CXBORDER), GetSystemMetrics(SM_CYBORDER));
+      if (HAS_THINFRAME( dwStyle ))
+        InflateRect( rect, GetSystemMetrics(SM_CXBORDER), GetSystemMetrics(SM_CYBORDER));
 
-    if ((dwStyle & WS_CAPTION) == WS_CAPTION)
-    {
-      if (dwExStyle & WS_EX_TOOLWINDOW)
-        rect->top -= GetSystemMetrics(SM_CYSMCAPTION);
-      else
-        rect->top -= GetSystemMetrics(SM_CYCAPTION);
-    }
+  if ((dwStyle & WS_CAPTION) == WS_CAPTION)
+  {
+    if (dwExStyle & WS_EX_TOOLWINDOW)
+      rect->top -= GetSystemMetrics(SM_CYSMCAPTION);
+    else
+      rect->top -= GetSystemMetrics(SM_CYCAPTION);
   }
 
   if (menu)
