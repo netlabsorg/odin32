@@ -1,4 +1,4 @@
-/* $Id: avl.c,v 1.2 2000-03-24 01:40:52 bird Exp $
+/* $Id: avl.c,v 1.3 2000-11-21 04:35:36 bird Exp $
  *
  * AVL-Tree (lookalike) implementation.
  *
@@ -18,6 +18,20 @@
 #define AVL_HEIGHTOF(pNode) ((unsigned char)((pNode) != NULL ? pNode->uchHeight : 0))
 #define max(a,b) (((a) > (b)) ? (a) : (b))
 
+#ifndef INLINE
+#   if defined(__IBMC__)
+#       define INLINE _Inline
+#   elif defined(__IBMCPP__)
+#       define INLINE inline
+#   elif defined(__WATCOMC__)
+#       define INLINE __inline
+#   elif defined(__WATCOM_CPLUSPLUS__)
+#       define INLINE inline
+#   else
+#       error message("unknown compiler - inline keyword unknown!")
+#   endif
+#endif
+
 
 /*******************************************************************************
 *   Internal Functions                                                         *
@@ -31,8 +45,12 @@
 #endif
 #include "string.h"
 
+#if defined(__IBMCPP__) || defined(__IBMC__)
 #include <builtin.h>
-#define assert(a) ((a) ? (void)0 : __interrupt(3))
+#define assert(a) ((a) ? (void)0 : __interrupt(3) )
+#else
+#include <assert.h>
+#endif
 
 
 /*******************************************************************************
@@ -57,7 +75,7 @@ typedef struct _AVLStack2
 /*******************************************************************************
 *   Internal Functions                                                         *
 *******************************************************************************/
-_Inline void AVLRebalance(PAVLSTACK pStack);
+INLINE void AVLRebalance(PAVLSTACK pStack);
 
 
 /**
@@ -650,7 +668,7 @@ PAVLNODECORE    AVLGetBestFit(PPAVLNODECORE ppTree, AVLKEY Key, int fAbove)
  * @author    knut st. osmundsen
  * @remark
  */
-_Inline void AVLRebalance(PAVLSTACK pStack)
+INLINE void AVLRebalance(PAVLSTACK pStack)
 {
     while (pStack->cEntries > 0)
     {
