@@ -1,4 +1,4 @@
-/* $Id: lanman.h,v 1.1 2000-10-02 21:20:08 phaller Exp $ */
+/* $Id: lanman.h,v 1.2 2001-09-06 22:23:39 phaller Exp $ */
 /*
  * Wrappers for NT/LAN Manager specific data structures
  *
@@ -16,6 +16,13 @@
  * OS/2 LAN Server structures                                               *
  ****************************************************************************/
 #pragma pack(1)
+
+
+#define CNLEN           15                  /* Computer name length     */
+#define UNCLEN          (CNLEN+2)           /* UNC computer name length */
+#define NNLEN           12                  /* 8.3 Net name length      */
+#define RMLEN           (UNCLEN+1+NNLEN)    /* Maximum remote name length */
+
 
 struct wksta_info_0 {
     unsigned short wki0_reserved_1;
@@ -192,7 +199,13 @@ struct stat_server_0  {
 }; /* stat_server_0 */
 
 
-
+struct server_info_1 {
+  unsigned char         sv1_name[CNLEN + 1];
+  unsigned char         sv1_version_major;
+  unsigned char         sv1_version_minor;
+  unsigned long         sv1_type;
+  unsigned char *       sv1_comment;
+}; /* server_info_1 */
 
 
 #pragma pack()
@@ -456,6 +469,22 @@ typedef struct _STAT_SERVER_0 {
      DWORD          sts0_reqbufneed;
      DWORD          sts0_bigbufneed;
 } STAT_SERVER_0, *PSTAT_SERVER_0, *LPSTAT_SERVER_0;
+
+
+typedef struct _SERVER_INFO_100 {
+     DWORD          sv100_platform_id;
+     LPWSTR         sv100_name;
+} SERVER_INFO_100, *PSERVER_INFO_100, *LPSERVER_INFO_100;
+
+
+typedef struct _SERVER_INFO_101 {
+     DWORD          sv101_platform_id;
+     LPWSTR         sv101_name;
+     DWORD          sv101_version_major;
+     DWORD          sv101_version_minor;
+     DWORD          sv101_type;
+     LPWSTR         sv101_comment;
+} SERVER_INFO_101, *PSERVER_INFO_101, *LPSERVER_INFO_101;
 
 
 #endif
