@@ -1,4 +1,11 @@
-/* $Id: ChangeLog,v 1.2616 2003-08-06 09:58:42 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.2617 2003-08-06 11:00:11 sandervl Exp $ */
+
+ 2003-08-06: Sander van Leeuwen <sandervl@innotek   >
+    - USER32:   o Cleaned up GetMessage/PeekMessage. 
+                o Removed DispatchMessage change for WM_CHAR; must return
+                  the proper format in Get/PeekMessageA/W. 
+                  (assuming the GetMessageW/DispatchMessageA combination is
+                   not allowed)
 
  2002-08-06: Dmitry Froloff <froloff@os2   >
     - KERNEL32: o HMDeviceConsoleOutClass::CreateFile; use current window size
