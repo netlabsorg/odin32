@@ -1,5 +1,5 @@
 ################################################################################
-# $Id: Makefile,v 1.50 2000-09-21 12:05:56 bird Exp $
+# $Id: Makefile,v 1.51 2000-09-21 15:37:04 bird Exp $
 #
 # Win32k makefile.
 #
@@ -36,7 +36,7 @@ NAME = Win32k
 ################################################################################
 # COMPILER/LINKER/ASSEMBLER
 ################################################################################
-CC16        = fhfix.exe $(MSCPATH)\binp\cl.exe
+CC16        = clfix.exe $(MSCPATH)\binp\cl.exe
 CC          = icc
 !if "$(CCENV)" == "VAC36"
 ILIB        = ilib /nofree /nobackup /nologo
@@ -307,7 +307,7 @@ AINCLUDES  = -Fdi:$(WIN32KINCLUDE) \
 !if "$(DDKPATH)" == "" || "$(MSCPATH)" == ""  || "$(TOOLKIT)" == "" || "$(VACPATH)" == ""
 all: pe2lx.exe
 !else
-all: fhfix.exe $(WIN32KBIN)\$(NAME).sys pe2lx.exe kRx.exe lib Win32kCC.exe
+all: clfix.exe $(WIN32KBIN)\$(NAME).sys pe2lx.exe kRx.exe lib Win32kCC.exe
 !endif
 
 
@@ -425,10 +425,10 @@ TSTLIBS = $(LIBS)
 
 
 ################################################################################
-# fhfix.exe rule.
+# clfix.exe rule.
 ################################################################################
-fhfix.exe:
-    icc $(@B).c
+clfix.exe: $(@B).c
+    $(CC) $(@B).c
 
 
 ################################################################################
