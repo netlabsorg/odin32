@@ -1,4 +1,18 @@
-/* $Id: changelog,v 1.1343 2001-04-02 22:51:21 sandervl Exp $ */
+/* $Id: changelog,v 1.1344 2001-04-03 14:11:23 sandervl Exp $ */
+
+ 2001-04-03: Sander van Leeuwen <sandervl@xs4all.nl>   
+    - DDRAW:    o Only reset physical palette in DirectDraw destructor if 
+                  palette was really changed.
+                  (gets rid of excessive screen redraws in DXView)
+    - KERNEL32: o Return GetUserDefaultLCID in GetSystemDefaultLCID
+                o Return GetUserDefaultLangID in GetSystemDefaultLangID
+                o Ported Wine's codepage, string & unicode functions (codepage.cpp)
+                o Ported Wine's codepage unicode conversion functions & tables
+                  (kernel32\unicode)
+                o Return OEM codepage in GetWindows/DisplayCodepage (message queue/hps)
+                  (works for both Acrobat Distiller & StarOffice)
+                  TODO: Rewrite heapstring functions to use WideCharToMultiByte
+                        and MultiByteToWideChar
 
  2001-04-02: Sander van Leeuwen <sandervl@xs4all.nl>   
     - USER32:   o Mouse message translation fix (check capture)
