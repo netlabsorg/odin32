@@ -1,8 +1,9 @@
-/* $Id: ChangeLog,v 1.1545 2001-06-24 15:44:55 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.1546 2001-06-24 16:40:19 sandervl Exp $ */
 
  2001-06-24: Sander van Leeuwen <sandervl@xs4all.nl>
     - KERNEL32: o Rewrote CopyFile & MoveFile (just call DosCopy/Move)
-                o Rewrote RemoveDirectory (call DosDeleteDir)
+                o Rewrote CreateDirectory & RemoveDirectory 
+                  (call DosCreateDir & DosDeleteDir)
                 o Fix for HeapRealloc; recent HeapSize fix broke it 
                   (listboxes empty)
 
