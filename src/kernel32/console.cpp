@@ -1,4 +1,4 @@
-/* $Id: console.cpp,v 1.21 2000-08-10 02:19:54 phaller Exp $ */
+/* $Id: console.cpp,v 1.22 2000-10-20 11:46:46 sandervl Exp $ */
 
 /*
  * Win32 Console API Translation for OS/2
@@ -64,10 +64,12 @@
 #define  INCL_DOSPROCESS
 #define  INCL_DOSMODULEMGR
 #define  INCL_VIO
+#define  INCL_KBD
 #define  INCL_AVIO
 #include <os2wrap.h>         //Odin32 OS/2 api wrappers
 
 #include <win32type.h>
+#include <win32api.h>
 #include <misc.h>
 
 #include "conwin.h"          // Windows Header for console only
@@ -79,91 +81,16 @@
 #include "conin.h"
 #include "conout.h"
 #include "conbuffer.h"
+#include "conbuffervio.h"
 
 #include "conprop.h"
 #include "unicode.h"
 #include "heapstring.h"
 
-#define DBG_LOCALLOG	DBG_console
+#define DBG_LOCALLOG    DBG_console
 #include "dbglocal.h"
 
-
-/***********************************
- * PH: fixups for missing os2win.h *
- ***********************************/
-
 #include <os2sel.h>
-
-extern "C"
-{
-  void   _System _O32_SetLastError(DWORD  dwError);
-  DWORD  _System _O32_GetLastError(void);
-  LPSTR  _System _O32_GetCommandLine(void);
-  void   _System _O32_ExitProcess(UINT exitcode);
-  HANDLE _System _O32_GetStdHandle(DWORD dwDevice);
-  DWORD  _System _O32_GetFileType(HANDLE hFile);
-
-inline void SetLastError(DWORD a)
-{
- USHORT sel = GetFS();
-
-    _O32_SetLastError(a);
-    SetFS(sel);
-}
-
-inline DWORD GetLastError()
-{
- DWORD yyrc;
- USHORT sel = GetFS();
-
-    yyrc = _O32_GetLastError();
-    SetFS(sel);
-
-    return yyrc;
-}
-
-inline LPSTR GetCommandLine()
-{
- LPSTR yyrc;
- USHORT sel = GetFS();
-
-    yyrc = _O32_GetCommandLine();
-    SetFS(sel);
-
-    return yyrc;
-}
-
-inline void ExitProcess(UINT a)
-{
- USHORT sel = GetFS();
-
-    _O32_ExitProcess(a);
-    SetFS(sel);
-}
-
-inline HANDLE GetStdHandle(DWORD a)
-{
- HANDLE yyrc;
- USHORT sel = GetFS();
-
-    yyrc = _O32_GetStdHandle(a);
-    SetFS(sel);
-
-    return yyrc;
-}
-
-inline DWORD GetFileType(HANDLE a)
-{
- DWORD yyrc;
- USHORT sel = GetFS();
-
-    yyrc = _O32_GetFileType(a);
-    SetFS(sel);
-
-    return yyrc;
-}
-
-}
 
 /*****************************************************************************
  * Defines                                                                   *
@@ -180,7 +107,7 @@ inline DWORD GetFileType(HANDLE a)
 
 static ICONSOLEGLOBALS ConsoleGlobals;
 static ICONSOLEINPUT   ConsoleInput;
-
+       BOOL            flVioConsole = FALSE;
 
 /*****************************************************************************
  * Prototypes                                                                *
@@ -246,104 +173,129 @@ void static iConsoleInputQueueUnlock()
  * Author    : Patrick Haller [Tue, 1998/02/10 01:55]
  *****************************************************************************/
 
-APIRET iConsoleInit(void)               /* creation of the console subsystem */
+APIRET iConsoleInit(BOOL fVioConsole)              /* creation of the console subsystem */
 {
-  APIRET rc;                                              /* API return code */
+  APIRET rc;                                       /* API return code */
   ULONG  ulPostCount;                              /* semaphore post counter */
 
 
+  flVioConsole = fVioConsole;
 
   if (ConsoleGlobals.hevConsole != NULLHANDLE) /* we're already initialized ?*/
     return (NO_ERROR);                             /* then abort immediately */
 
-                                 /* create console synchronization semaphore */
-  rc = DosCreateEventSem (NULL,
-                          &ConsoleGlobals.hevConsole,
-                          0L,                        /* semaphore is private */
-                          FALSE);                             /* reset state */
-  if (rc != NO_ERROR)                                       /* other error ? */
-    return (rc);                                    /* raise error condition */
-
-
-                                     /* create console input queue semaphore */
-  rc = DosCreateEventSem (NULL,
-                          &ConsoleInput.hevInputQueue,
-                          0L,                        /* semaphore is private */
-                          FALSE);                             /* reset state */
-  if (rc != NO_ERROR)                                       /* other error ? */
+  if(flVioConsole == TRUE)
   {
-    DosCloseEventSem(ConsoleGlobals.hevConsole);    /* close other semaphore */
-    return (rc);                                    /* raise error condition */
+    /***************************************************************************
+    * Create pseudo-devices and initialize ConsoleGlobals                     *
+    ***************************************************************************/
+
+    rc = iConsoleDevicesRegister();                /* ensure devices are there */
+    if (rc != NO_ERROR)                                    /* check for errors */
+    {
+        return (rc);                                    /* raise error condition */
+    }
+    rc = DosCreateMutexSem(NULL,
+                             &ConsoleInput.hmtxInputQueue,
+                             0L,
+                             FALSE);
+    if (rc != NO_ERROR)                                       /* other error ? */
+    {
+        return (rc);                                    /* raise error condition */
+    }
+
+    return NO_ERROR;
   }
+  else {
+    /* create console synchronization semaphore */
+    rc = DosCreateEventSem (NULL,
+                            &ConsoleGlobals.hevConsole,
+                            0L,                        /* semaphore is private */
+                            FALSE);                             /* reset state */
+    if (rc != NO_ERROR)                                       /* other error ? */
+        return (rc);                                    /* raise error condition */
 
 
-  rc = DosCreateMutexSem(NULL,
-                         &ConsoleInput.hmtxInputQueue,
-                         0L,
-                         FALSE);
-  if (rc != NO_ERROR)                                       /* other error ? */
-  {
-    DosCloseEventSem(ConsoleGlobals.hevConsole);    /* close other semaphore */
-    DosCloseEventSem(ConsoleInput.hevInputQueue);   /* close other semaphore */
-    return (rc);                                    /* raise error condition */
+                                         /* create console input queue semaphore */
+    rc = DosCreateEventSem (NULL,
+                              &ConsoleInput.hevInputQueue,
+                              0L,                        /* semaphore is private */
+                              FALSE);                             /* reset state */
+    if (rc != NO_ERROR)                                       /* other error ? */
+    {
+        DosCloseEventSem(ConsoleGlobals.hevConsole);    /* close other semaphore */
+        return (rc);                                    /* raise error condition */
+    }
+
+
+    rc = DosCreateMutexSem(NULL,
+                             &ConsoleInput.hmtxInputQueue,
+                             0L,
+                             FALSE);
+    if (rc != NO_ERROR)                                       /* other error ? */
+    {
+        DosCloseEventSem(ConsoleGlobals.hevConsole);    /* close other semaphore */
+        DosCloseEventSem(ConsoleInput.hevInputQueue);   /* close other semaphore */
+        return (rc);                                    /* raise error condition */
+    }
+
+    /***************************************************************************
+    * Create pseudo-devices and initialize ConsoleGlobals                     *
+    ***************************************************************************/
+
+    rc = iConsoleDevicesRegister();                /* ensure devices are there */
+    if (rc != NO_ERROR)                                    /* check for errors */
+    {
+        DosCloseEventSem(ConsoleGlobals.hevConsole);    /* close other semaphore */
+        DosCloseEventSem(ConsoleInput.hevInputQueue);   /* close other semaphore */
+        return (rc);                                    /* raise error condition */
+    }
+
+
+    /***************************************************************************
+    * Presentation Manager Initialization phase                               *
+    ***************************************************************************/
+
+        /* OK, we're about to initialize the console subsystem for this process. */
+                               /* start message thread for console object window */
+    ConsoleGlobals.tidConsole = _beginthread(iConsoleMsgThread,
+                                               NULL,
+                                               12288,
+                                               NULL);
+                                       /* has the thread been created properly ? */
+    if (ConsoleGlobals.tidConsole == -1)
+    {
+        DosCloseEventSem(ConsoleInput.hevInputQueue);   /* close other semaphore */
+        DosCloseEventSem(ConsoleGlobals.hevConsole);    /* close event semaphore */
+        ConsoleGlobals.hevConsole = NULLHANDLE;         /* for ConsoleIsActive() */
+        return (rc);                                    /* raise error condition */
+    }
+    else
+        DosSetPriority(PRTYS_THREAD,                             /* set priority */
+                       ConsoleGlobals.Options.ulConsoleThreadPriorityClass,
+                       ConsoleGlobals.Options.ulConsoleThreadPriorityDelta,
+                       ConsoleGlobals.tidConsole);
+
+
+                          /* wait for the child thread to do it's initialization */
+                                                  /* timeout isn't really useful */
+    rc = DosWaitEventSem(ConsoleGlobals.hevConsole,
+                           SEM_INDEFINITE_WAIT);
+    if (rc != NO_ERROR)                                    /* check for errors */
+    {
+        DosCloseEventSem(ConsoleInput.hevInputQueue);   /* close other semaphore */
+        DosCloseEventSem(ConsoleGlobals.hevConsole);    /* close event semaphore */
+        ConsoleGlobals.hevConsole = NULLHANDLE;         /* for ConsoleIsActive() */
+        return (rc);                                    /* raise error condition */
+    }
+
+    DosResetEventSem(ConsoleGlobals.hevConsole,       /* reset event semaphore */
+                       &ulPostCount);
+
+    rc = ConsoleGlobals.rcConsole;   /* pass thru console thread's return code */
+
+    return (rc);                                                         /* OK */
   }
-
-  /***************************************************************************
-   * Create pseudo-devices and initialize ConsoleGlobals                     *
-   ***************************************************************************/
-
-  rc = iConsoleDevicesRegister();                /* ensure devices are there */
-  if (rc != NO_ERROR)                                    /* check for errors */
-  {
-    DosCloseEventSem(ConsoleGlobals.hevConsole);    /* close other semaphore */
-    DosCloseEventSem(ConsoleInput.hevInputQueue);   /* close other semaphore */
-    return (rc);                                    /* raise error condition */
-  }
-
-
-  /***************************************************************************
-   * Presentation Manager Initialization phase                               *
-   ***************************************************************************/
-
-    /* OK, we're about to initialize the console subsystem for this process. */
-                           /* start message thread for console object window */
-  ConsoleGlobals.tidConsole = _beginthread(iConsoleMsgThread,
-                                           NULL,
-                                           12288,
-                                           NULL);
-                                   /* has the thread been created properly ? */
-  if (ConsoleGlobals.tidConsole == -1)
-  {
-    DosCloseEventSem(ConsoleInput.hevInputQueue);   /* close other semaphore */
-    DosCloseEventSem(ConsoleGlobals.hevConsole);    /* close event semaphore */
-    ConsoleGlobals.hevConsole = NULLHANDLE;         /* for ConsoleIsActive() */
-    return (rc);                                    /* raise error condition */
-  }
-  else
-    DosSetPriority(PRTYS_THREAD,                             /* set priority */
-                   ConsoleGlobals.Options.ulConsoleThreadPriorityClass,
-                   ConsoleGlobals.Options.ulConsoleThreadPriorityDelta,
-                   ConsoleGlobals.tidConsole);
-
-
-                      /* wait for the child thread to do it's initialization */
-                                              /* timeout isn't really useful */
-  rc = DosWaitEventSem(ConsoleGlobals.hevConsole,
-                       SEM_INDEFINITE_WAIT);
-  if (rc != NO_ERROR)                                    /* check for errors */
-  {
-    DosCloseEventSem(ConsoleInput.hevInputQueue);   /* close other semaphore */
-    DosCloseEventSem(ConsoleGlobals.hevConsole);    /* close event semaphore */
-    ConsoleGlobals.hevConsole = NULLHANDLE;         /* for ConsoleIsActive() */
-    return (rc);                                    /* raise error condition */
-  }
-
-  DosResetEventSem(ConsoleGlobals.hevConsole,       /* reset event semaphore */
-                   &ulPostCount);
-
-  rc = ConsoleGlobals.rcConsole;   /* pass thru console thread's return code */
-
-  return (rc);                                                         /* OK */
 }
 
 
@@ -396,6 +348,17 @@ APIRET iConsoleDevicesRegister(void)
   ConsoleGlobals.coordWindowSize.Y               = ConsoleGlobals.Options.coordDefaultSize.Y;
   ConsoleGlobals.coordWindowPos.X                = 0;
   ConsoleGlobals.coordWindowPos.Y                = 0;
+  if(flVioConsole == TRUE) {
+        VIOMODEINFO videoinfo;
+
+        videoinfo.cb = sizeof(VIOMODEINFO);
+        rc = VioGetMode(&videoinfo, 0);
+        if(rc == 0) {
+            dprintf(("video mode (%d,%d)", videoinfo.col, videoinfo.row));
+            ConsoleGlobals.coordWindowSize.X = videoinfo.col;
+            ConsoleGlobals.coordWindowSize.Y = videoinfo.row;
+        }
+  }
 
 
   ConsoleGlobals.flFrameFlags = FCF_SIZEBORDER   |   /* frame creation flags */
@@ -409,7 +372,7 @@ APIRET iConsoleDevicesRegister(void)
                                 FCF_MINMAX;
 
                                                    /* generate copy of title */
-  ConsoleGlobals.pszWindowTitle = strdup(GetCommandLine());
+  ConsoleGlobals.pszWindowTitle = strdup(GetCommandLineA());
 
                                     /* obtain module handle to our resources */
   rc = DosQueryModuleHandle("KERNEL32",
@@ -427,98 +390,107 @@ APIRET iConsoleDevicesRegister(void)
   ConsoleGlobals.hConsoleBuffer        = INVALID_HANDLE_VALUE;
 
 
-  // defaults are effective, try to read and apply stored properties
-  if (ConsolePropertyLoad(&ConsoleGlobals.Options) == NO_ERROR)
-    ConsolePropertyApply(&ConsoleGlobals.Options);
+  if (flVioConsole == FALSE)
+  {
+    // defaults are effective, try to read and apply stored properties
+    if (ConsolePropertyLoad(&ConsoleGlobals.Options) == NO_ERROR)
+        ConsolePropertyApply(&ConsoleGlobals.Options);
+  }
 
 
   /***************************************************************************
    * Standard handles     Initialization phase                               *
    ***************************************************************************/
 
-                   /* create devices and register devices with handlemanager */
+  /* create devices and register devices with handlemanager */
+  pHMDeviceConsoleIn  = new HMDeviceConsoleInClass("CONIN$",
+                                                   &ConsoleInput,
+                                                   &ConsoleGlobals);
 
-    pHMDeviceConsoleIn  = new HMDeviceConsoleInClass("CONIN$",
-                                                     &ConsoleInput,
-                                                     &ConsoleGlobals);
-    rc = HMDeviceRegister ("CONIN$",
-                           pHMDeviceConsoleIn);
-    if (rc != NO_ERROR)                                  /* check for errors */
+  rc = HMDeviceRegister ("CONIN$",
+                         pHMDeviceConsoleIn);
+  if (rc != NO_ERROR)                                  /* check for errors */
       dprintf(("KERNEL32:ConsoleDevicesRegister: registering CONIN$ failed with %u.\n",
                rc));
 
 
-    pHMDeviceConsoleOut = new HMDeviceConsoleOutClass("CONOUT$",
-                                                      &ConsoleInput,
-                                                      &ConsoleGlobals);
-    rc = HMDeviceRegister ("CONOUT$",
-                           pHMDeviceConsoleOut);
-    if (rc != NO_ERROR)                                  /* check for errors */
+  pHMDeviceConsoleOut = new HMDeviceConsoleOutClass("CONOUT$",
+                                                    &ConsoleInput,
+                                                    &ConsoleGlobals);
+  rc = HMDeviceRegister ("CONOUT$",
+                         pHMDeviceConsoleOut);
+  if (rc != NO_ERROR)                                  /* check for errors */
       dprintf(("KERNEL32:ConsoleDevicesRegister: registering CONOUT$ failed with %u.\n",
                rc));
 
-
-    pHMDeviceConsoleBuffer = new HMDeviceConsoleBufferClass("CONBUFFER$",
-                                                            &ConsoleInput,
-                                                            &ConsoleGlobals);
-    rc = HMDeviceRegister ("CONBUFFER$",
-                           pHMDeviceConsoleBuffer);
-    if (rc != NO_ERROR)                                  /* check for errors */
+  if(flVioConsole == TRUE)
+  {
+        pHMDeviceConsoleBuffer = (HMDeviceConsoleBufferClass *)new HMDeviceConsoleVioBufferClass("CONBUFFER$",
+                                                                                                 &ConsoleInput,
+                                                                                                 &ConsoleGlobals);
+  }
+  else {
+        pHMDeviceConsoleBuffer = new HMDeviceConsoleBufferClass("CONBUFFER$",
+                                                                &ConsoleInput,
+                                                                &ConsoleGlobals);
+  }
+  rc = HMDeviceRegister ("CONBUFFER$",
+                         pHMDeviceConsoleBuffer);
+  if (rc != NO_ERROR)                                  /* check for errors */
       dprintf(("KERNEL32:ConsoleDevicesRegister: registering CONBUFFER$ failed with %u.\n",
                rc));
 
 
-      /***********************************************************************
-       * initialize stdin handle                                             *
-       ***********************************************************************/
-      hStandardIn = GetStdHandle(STD_INPUT_HANDLE);
-      dwType = GetFileType(hStandardIn);
-      if (dwType == FILE_TYPE_CHAR)                /* is handle redirected ? */
-        hStandardIn = HMCreateFile("CONIN$",
-                                   GENERIC_READ | GENERIC_WRITE,
-                                   FILE_SHARE_READ | FILE_SHARE_WRITE,
-                                   NULL,
-                                   0,
-                                   CONSOLE_TEXTMODE_BUFFER,
-                                   0);
+  /***********************************************************************
+   * initialize stdin handle                                             *
+   ***********************************************************************/
+  hStandardIn = GetStdHandle(STD_INPUT_HANDLE);
+  dwType = GetFileType(hStandardIn);
+  if (dwType == FILE_TYPE_CHAR)                /* is handle redirected ? */
+    hStandardIn = HMCreateFile("CONIN$",
+                               GENERIC_READ | GENERIC_WRITE,
+                               FILE_SHARE_READ | FILE_SHARE_WRITE,
+                               NULL,
+                               0,
+                               CONSOLE_TEXTMODE_BUFFER,
+                               0);
 
-      HMSetStdHandle(STD_INPUT_HANDLE,
-                     hStandardIn);
+  HMSetStdHandle(STD_INPUT_HANDLE,
+                 hStandardIn);
 
-      /***********************************************************************
-       * initialize stdout handle                                            *
-       ***********************************************************************/
-      hStandardOut = GetStdHandle(STD_OUTPUT_HANDLE);
-      dwType = GetFileType(hStandardOut);
-      if (dwType == FILE_TYPE_CHAR)                /* is handle redirected ? */
-        hStandardOut = HMCreateFile("CONOUT$",
-                                   GENERIC_READ | GENERIC_WRITE,
-                                   FILE_SHARE_READ | FILE_SHARE_WRITE,
-                                   NULL,
-                                   0,
-                                   CONSOLE_TEXTMODE_BUFFER,
-                                   0);
+  /***********************************************************************
+   * initialize stdout handle                                            *
+   ***********************************************************************/
+  hStandardOut = GetStdHandle(STD_OUTPUT_HANDLE);
+  dwType = GetFileType(hStandardOut);
+  if (dwType == FILE_TYPE_CHAR)                /* is handle redirected ? */
+    hStandardOut = HMCreateFile("CONOUT$",
+                                GENERIC_READ | GENERIC_WRITE,
+                                FILE_SHARE_READ | FILE_SHARE_WRITE,
+                                NULL,
+                                0,
+                                CONSOLE_TEXTMODE_BUFFER,
+                                0);
 
-      HMSetStdHandle(STD_OUTPUT_HANDLE,
-                     hStandardOut);
+  HMSetStdHandle(STD_OUTPUT_HANDLE,
+                 hStandardOut);
 
+  /***********************************************************************
+   * initialize stderr handle                                            *
+   ***********************************************************************/
+  hStandardError = GetStdHandle(STD_ERROR_HANDLE);
+  dwType = GetFileType(hStandardError);
+  if (dwType == FILE_TYPE_CHAR)                /* is handle redirected ? */
+    hStandardError = HMCreateFile("CONOUT$",
+                                  GENERIC_READ | GENERIC_WRITE,
+                                  FILE_SHARE_READ | FILE_SHARE_WRITE,
+                                  NULL,
+                                  0,
+                                  CONSOLE_TEXTMODE_BUFFER,
+                                  0);
 
-      /***********************************************************************
-       * initialize stderr handle                                            *
-       ***********************************************************************/
-      hStandardError = GetStdHandle(STD_ERROR_HANDLE);
-      dwType = GetFileType(hStandardError);
-      if (dwType == FILE_TYPE_CHAR)                /* is handle redirected ? */
-        hStandardError = HMCreateFile("CONOUT$",
-                                   GENERIC_READ | GENERIC_WRITE,
-                                   FILE_SHARE_READ | FILE_SHARE_WRITE,
-                                   NULL,
-                                   0,
-                                   CONSOLE_TEXTMODE_BUFFER,
-                                   0);
-
-      HMSetStdHandle(STD_ERROR_HANDLE,
-                     hStandardError);
+  HMSetStdHandle(STD_ERROR_HANDLE,
+                 hStandardError);
 
   return (NO_ERROR);                                                   /* OK */
 }
@@ -541,22 +513,26 @@ APIRET iConsoleDevicesRegister(void)
 
 ULONG iConsoleTerminate(VOID)
 {
-  APIRET rc;
+  APIRET rc = NO_ERROR;
 
-  DosCloseEventSem(ConsoleGlobals.hevConsole);      /* close other semaphore */
-  DosCloseEventSem(ConsoleInput.hevInputQueue);     /* close other semaphore */
+  if(flVioConsole == FALSE)
+  {
+    DosCloseEventSem(ConsoleGlobals.hevConsole);      /* close other semaphore */
+    DosCloseEventSem(ConsoleInput.hevInputQueue);     /* close other semaphore */
+
+
+    WinPostMsg (ConsoleGlobals.hwndFrame,         /* force thread to terminate */
+                WM_CLOSE,
+                (MPARAM)NULL,
+                (MPARAM)NULL);
+
+    rc = DosWaitThread(&ConsoleGlobals.tidConsole,/* wait until thd terminates */
+                       DCWW_WAIT);
+
+  }
   DosCloseMutexSem(ConsoleInput.hmtxInputQueue);          /* close semaphore */
 
-
-  WinPostMsg (ConsoleGlobals.hwndFrame,         /* force thread to terminate */
-              WM_CLOSE,
-              (MPARAM)NULL,
-              (MPARAM)NULL);
-
-  rc = DosWaitThread(&ConsoleGlobals.tidConsole,/* wait until thd terminates */
-                     DCWW_WAIT);
-
-                                           /* close the consolebuffer handle */
+  /* close the consolebuffer handle */
   HMCloseHandle(ConsoleGlobals.hConsoleBufferDefault);
   free(ConsoleGlobals.pszWindowTitle);   /* free previously allocated memory */
 
@@ -585,6 +561,9 @@ void iConsoleWaitClose(void)
   if (iConsoleIsActive() == FALSE)
     return;                                                          /* nope */
 
+  if(flVioConsole == TRUE)  //no need to wait for VIO session
+    return;
+
   strcpy (szBuffer,               /* indicate console process has terminated */
           "Completed: ");
 
@@ -602,10 +581,10 @@ void iConsoleWaitClose(void)
 
                                           /* terminate console immediately ? */
   if (ConsoleGlobals.Options.fTerminateAutomatically == FALSE) {
-	if(getenv("ODIN_AUTOEXITCONSOLE") == NULL) {
-	    DosWaitThread(&ConsoleGlobals.tidConsole,   /* wait until thd terminates */
-        	          DCWW_WAIT);
-	}
+    if(getenv("ODIN_AUTOEXITCONSOLE") == NULL) {
+        DosWaitThread(&ConsoleGlobals.tidConsole,   /* wait until thd terminates */
+                      DCWW_WAIT);
+    }
   }
 }
 
@@ -624,6 +603,9 @@ void iConsoleWaitClose(void)
 
 BOOL iConsoleIsActive(void)
 {
+  if(flVioConsole == TRUE) //actually, this isn't needed in VIO mode
+     return TRUE;
+
   return (NULLHANDLE != ConsoleGlobals.hevConsole);
 }
 
@@ -853,10 +835,10 @@ MRESULT EXPENTRY iConsoleWindowProc(HWND   hwnd,
                        HWND_DESKTOP,
                        0,
                        0,
-                       ConsoleGlobals.Options.coordDefaultPosition.X *
+                       ConsoleGlobals.Options.coordDefaultSize.X *
                          ConsoleGlobals.sCellCX +
                          2 * WinQuerySysValue(HWND_DESKTOP, SV_CXSIZEBORDER),
-                       ConsoleGlobals.Options.coordDefaultPosition.Y *
+                       ConsoleGlobals.Options.coordDefaultSize.Y *
                          ConsoleGlobals.sCellCY +
                          WinQuerySysValue(HWND_DESKTOP, SV_CYTITLEBAR) +
                          2 * WinQuerySysValue(HWND_DESKTOP, SV_CYSIZEBORDER),
@@ -1407,8 +1389,12 @@ APIRET iConsoleInputEventPush(PINPUT_RECORD pInputRecord)
   memcpy(pirFree,                                               /* copy data */
          pInputRecord,
          sizeof (INPUT_RECORD) );
-                                                  /* unblock reading threads */
-  rc = DosPostEventSem(ConsoleInput.hevInputQueue);
+
+  if(flVioConsole == FALSE)
+  {     /* unblock reading threads */
+        rc = DosPostEventSem(ConsoleInput.hevInputQueue);
+  }
+  else  rc = 0;
   return (rc);                                                         /* OK */
 }
 
@@ -1972,8 +1958,76 @@ APIRET iConsoleInputEventPushFocus(BOOL bSetFocus)
  * Author    : Patrick Haller [Tue, 1998/03/07 16:55]
  *****************************************************************************/
 
-ULONG iConsoleInputQueryEvents (void)
+ULONG iConsoleInputQueryEvents(PICONSOLEINPUT pConsoleInput, int fWait)
 {
+ ULONG ulPostCounter;                   /* semaphore post counter - ignored */
+ APIRET rc;                                               /* API returncode */
+
+  if(flVioConsole)
+  {
+    KBDKEYINFO keyinfo;
+
+        rc = KbdCharIn(&keyinfo, IO_NOWAIT, 0); //grab key if present; don't wait
+        if((rc || !(keyinfo.fbStatus & 0x40)) && fWait == QUERY_EVENT_WAIT && ConsoleInput.ulEvents == 0) {
+                rc = KbdCharIn(&keyinfo, IO_WAIT, 0);
+        }
+        while(rc == 0 && (keyinfo.fbStatus & 0x40))
+        {
+                INPUT_RECORD InputRecord = {0};
+
+                InputRecord.EventType = KEY_EVENT;
+                InputRecord.Event.KeyEvent.wRepeatCount = 1;
+                InputRecord.Event.KeyEvent.bKeyDown     = 1;
+                InputRecord.Event.KeyEvent.dwControlKeyState = 0;
+
+                if(keyinfo.fbStatus & 2)
+                        InputRecord.Event.KeyEvent.dwControlKeyState |= ENHANCED_KEY;
+
+                if(keyinfo.fsState & (KBDSTF_RIGHTSHIFT|KBDSTF_LEFTSHIFT))
+                        InputRecord.Event.KeyEvent.dwControlKeyState |= SHIFT_PRESSED;
+
+                if(keyinfo.fsState & KBDSTF_LEFTALT)
+                        InputRecord.Event.KeyEvent.dwControlKeyState |= LEFT_ALT_PRESSED;
+
+                if(keyinfo.fsState & KBDSTF_RIGHTALT)
+                        InputRecord.Event.KeyEvent.dwControlKeyState |= RIGHT_ALT_PRESSED;
+
+                if(keyinfo.fsState & KBDSTF_LEFTCONTROL)
+                    InputRecord.Event.KeyEvent.dwControlKeyState |= LEFT_CTRL_PRESSED;
+
+                if(keyinfo.fsState & KBDSTF_RIGHTCONTROL)
+                    InputRecord.Event.KeyEvent.dwControlKeyState |= RIGHT_CTRL_PRESSED;
+
+                if(keyinfo.fsState & KBDSTF_CAPSLOCK_ON)
+                    InputRecord.Event.KeyEvent.dwControlKeyState |= CAPSLOCK_ON;
+
+                if(keyinfo.fsState & KBDSTF_SCROLLLOCK_ON)
+                    InputRecord.Event.KeyEvent.dwControlKeyState |= SCROLLLOCK_ON;
+
+                if(keyinfo.fsState & KBDSTF_NUMLOCK_ON)
+                    InputRecord.Event.KeyEvent.dwControlKeyState |= NUMLOCK_ON;
+
+                InputRecord.Event.KeyEvent.wVirtualKeyCode  = 0;
+                InputRecord.Event.KeyEvent.wVirtualScanCode = keyinfo.chScan;
+                InputRecord.Event.KeyEvent.uChar.AsciiChar  = keyinfo.chChar;
+
+                rc = iConsoleInputEventPush(&InputRecord);          /* add it to the queue */
+                if(rc) {
+                    dprintf(("WARNING: lost key!!"));
+                    break;
+                }
+
+                rc = KbdCharIn(&keyinfo, IO_NOWAIT, 0); //grab key if present; don't wait
+        }
+  }
+  else
+  if(fWait == QUERY_EVENT_WAIT && ConsoleInput.ulEvents == 0)
+  {
+        rc = DosWaitEventSem(pConsoleInput->hevInputQueue,      /* wait for input */
+                             SEM_INDEFINITE_WAIT);
+        DosResetEventSem(pConsoleInput->hevInputQueue,         /* reset semaphore */
+                         &ulPostCounter);              /* post counter - ignored */
+  }
   return (ConsoleInput.ulEvents);        /* return number of events in queue */
 }
 
@@ -2276,8 +2330,8 @@ BOOL WIN32API AllocConsole(VOID)
   WriteLog("KERNEL32/CONSOLE: OS2AllocConsole() called.\n");
 #endif
 
-  rc = iConsoleInit();                   /* initialize subsystem if required */
-  if (rc != NO_ERROR)                                    /* check for errors */
+  rc = iConsoleInit(flVioConsole);               /* initialize subsystem if required */
+  if (rc != NO_ERROR)                            /* check for errors */
   {
     SetLastError(rc);                            /* pass thru the error code */
     return FALSE;                                          /* signal failure */
@@ -2309,10 +2363,10 @@ BOOL WIN32API AllocConsole(VOID)
  *****************************************************************************/
 
 HANDLE WIN32API CreateConsoleScreenBuffer(DWORD  dwDesiredAccess,
-                                             DWORD  dwShareMode,
-                                             LPVOID lpSecurityAttributes,
-                                             DWORD  dwFlags,
-                                             LPVOID lpScreenBufferData)
+                                          DWORD  dwShareMode,
+                                          LPVOID lpSecurityAttributes,
+                                          DWORD  dwFlags,
+                                          LPVOID lpScreenBufferData)
 {
   HANDLE hResult;
 
@@ -2538,7 +2592,7 @@ BOOL WIN32API FreeConsole( VOID )
  *****************************************************************************/
 
 BOOL WIN32API GenerateConsoleCtrlEvent(DWORD dwCtrlEvent,
-                                          DWORD dwProcessGroupId)
+                                       DWORD dwProcessGroupId)
 {
 #ifdef DEBUG_LOCAL2
   WriteLog("KERNEL32/CONSOLE: OS2GenerateConsoleCtrlEvent(%08x,%08x) not implemented.\n",
@@ -2675,7 +2729,7 @@ UINT WIN32API GetConsoleOutputCP(VOID)
  *****************************************************************************/
 
 BOOL WIN32API GetConsoleScreenBufferInfo(HANDLE                      hConsoleOutput,
-                                            PCONSOLE_SCREEN_BUFFER_INFO lpConsoleScreenBufferInfo)
+                                         PCONSOLE_SCREEN_BUFFER_INFO lpConsoleScreenBufferInfo)
 {
   BOOL fResult;
 
@@ -2818,7 +2872,7 @@ COORD WIN32API GetLargestConsoleWindowSize(HANDLE hConsoleOutput)
  *****************************************************************************/
 
 BOOL WIN32API GetNumberOfConsoleInputEvents(HANDLE  hConsoleInput,
-                                               LPDWORD lpNumberOfEvents)
+                                            LPDWORD lpNumberOfEvents)
 {
   BOOL fResult;
 
@@ -2920,9 +2974,9 @@ BOOL WIN32API PeekConsoleInputW(HANDLE        hConsoleInput,
  *****************************************************************************/
 
 BOOL WIN32API PeekConsoleInputA(HANDLE        hConsoleInput,
-                                   PINPUT_RECORD pirBuffer,
-                                   DWORD         cInRecords,
-                                   LPDWORD       lpcRead)
+                                PINPUT_RECORD pirBuffer,
+                                DWORD         cInRecords,
+                                LPDWORD       lpcRead)
 {
   BOOL fResult;
 
@@ -2958,10 +3012,10 @@ BOOL WIN32API PeekConsoleInputA(HANDLE        hConsoleInput,
  *****************************************************************************/
 
 BOOL WIN32API ReadConsoleA(HANDLE  hConsoleInput,
-                              LPVOID  lpvBuffer,
-                              DWORD   cchToRead,
-                              LPDWORD lpcchRead,
-                              LPVOID  lpvReserved)
+                           LPVOID  lpvBuffer,
+                           DWORD   cchToRead,
+                           LPDWORD lpcchRead,
+                           LPVOID  lpvReserved)
 {
   BOOL fResult;
 
@@ -2998,10 +3052,10 @@ BOOL WIN32API ReadConsoleA(HANDLE  hConsoleInput,
  *****************************************************************************/
 
 BOOL WIN32API ReadConsoleW(HANDLE  hConsoleInput,
-                              LPVOID  lpvBuffer,
-                              DWORD   cchToRead,
-                              LPDWORD lpcchRead,
-                              LPVOID  lpvReserved)
+                           LPVOID  lpvBuffer,
+                           DWORD   cchToRead,
+                           LPDWORD lpcchRead,
+                           LPVOID  lpvReserved)
 {
   BOOL fResult;
 
@@ -3038,9 +3092,9 @@ BOOL WIN32API ReadConsoleW(HANDLE  hConsoleInput,
  *****************************************************************************/
 
 BOOL WIN32API ReadConsoleInputA(HANDLE        hConsoleInput,
-                                   PINPUT_RECORD pirBuffer,
-                                   DWORD         cInRecords,
-                                   LPDWORD       lpcRead)
+                                PINPUT_RECORD pirBuffer,
+                                DWORD         cInRecords,
+                                LPDWORD       lpcRead)
 {
   BOOL fResult;
 
@@ -3076,9 +3130,9 @@ BOOL WIN32API ReadConsoleInputA(HANDLE        hConsoleInput,
  *****************************************************************************/
 
 BOOL WIN32API ReadConsoleInputW(HANDLE        hConsoleInput,
-                                   PINPUT_RECORD pirBuffer,
-                                   DWORD         cInRecords,
-                                   LPDWORD       lpcRead)
+                                PINPUT_RECORD pirBuffer,
+                                DWORD         cInRecords,
+                                LPDWORD       lpcRead)
 {
   BOOL fResult;
 
@@ -3114,10 +3168,10 @@ BOOL WIN32API ReadConsoleInputW(HANDLE        hConsoleInput,
  *****************************************************************************/
 
 BOOL WIN32API ReadConsoleOutputA(HANDLE      hConsoleOutput,
-                                    PCHAR_INFO  pchiDestBuffer,
-                                    COORD       coordDestBufferSize,
-                                    COORD       coordDestBufferCoord,
-                                    PSMALL_RECT psrctSourceRect)
+                                 PCHAR_INFO  pchiDestBuffer,
+                                 COORD       coordDestBufferSize,
+                                 COORD       coordDestBufferCoord,
+                                 PSMALL_RECT psrctSourceRect)
 {
   BOOL fResult;
 
@@ -3154,10 +3208,10 @@ BOOL WIN32API ReadConsoleOutputA(HANDLE      hConsoleOutput,
  *****************************************************************************/
 
 BOOL WIN32API ReadConsoleOutputW(HANDLE      hConsoleOutput,
-                                    PCHAR_INFO  pchiDestBuffer,
-                                    COORD       coordDestBufferSize,
-                                    COORD       coordDestBufferCoord,
-                                    PSMALL_RECT psrctSourceRect)
+                                 PCHAR_INFO  pchiDestBuffer,
+                                 COORD       coordDestBufferSize,
+                                 COORD       coordDestBufferCoord,
+                                 PSMALL_RECT psrctSourceRect)
 {
   BOOL fResult;
 
@@ -3194,10 +3248,10 @@ BOOL WIN32API ReadConsoleOutputW(HANDLE      hConsoleOutput,
  *****************************************************************************/
 
 BOOL WIN32API ReadConsoleOutputAttribute(HANDLE  hConsoleOutput,
-                                            LPWORD  lpwAttribute,
-                                            DWORD   cReadCells,
-                                            COORD   coordReadCoord,
-                                            LPDWORD lpcNumberRead)
+                                         LPWORD  lpwAttribute,
+                                         DWORD   cReadCells,
+                                         COORD   coordReadCoord,
+                                         LPDWORD lpcNumberRead)
 {
   BOOL fResult;
 
@@ -3234,10 +3288,10 @@ BOOL WIN32API ReadConsoleOutputAttribute(HANDLE  hConsoleOutput,
  *****************************************************************************/
 
 BOOL WIN32API ReadConsoleOutputCharacterA(HANDLE  hConsoleOutput,
-                                             LPTSTR  lpReadBuffer,
-                                             DWORD   cchRead,
-                                             COORD   coordReadCoord,
-                                             LPDWORD lpcNumberRead)
+                                          LPTSTR  lpReadBuffer,
+                                          DWORD   cchRead,
+                                          COORD   coordReadCoord,
+                                          LPDWORD lpcNumberRead)
 {
   BOOL fResult;
 
@@ -3274,10 +3328,10 @@ BOOL WIN32API ReadConsoleOutputCharacterA(HANDLE  hConsoleOutput,
  *****************************************************************************/
 
 BOOL WIN32API ReadConsoleOutputCharacterW(HANDLE  hConsoleOutput,
-                                             LPTSTR  lpReadBuffer,
-                                             DWORD   cchRead,
-                                             COORD   coordReadCoord,
-                                             LPDWORD lpcNumberRead)
+                                          LPTSTR  lpReadBuffer,
+                                          DWORD   cchRead,
+                                          COORD   coordReadCoord,
+                                          LPDWORD lpcNumberRead)
 {
   BOOL fResult;
 
@@ -3314,10 +3368,10 @@ BOOL WIN32API ReadConsoleOutputCharacterW(HANDLE  hConsoleOutput,
  *****************************************************************************/
 
 BOOL WIN32API ScrollConsoleScreenBufferA(HANDLE      hConsoleOutput,
-                                            PSMALL_RECT psrctSourceRect,
-                                            PSMALL_RECT psrctClipRect,
-                                            COORD       coordDestOrigin,
-                                            PCHAR_INFO  pchiFill)
+                                         PSMALL_RECT psrctSourceRect,
+                                         PSMALL_RECT psrctClipRect,
+                                         COORD       coordDestOrigin,
+                                         PCHAR_INFO  pchiFill)
 {
   BOOL fResult;
 
@@ -3354,10 +3408,10 @@ BOOL WIN32API ScrollConsoleScreenBufferA(HANDLE      hConsoleOutput,
  *****************************************************************************/
 
 BOOL WIN32API ScrollConsoleScreenBufferW(HANDLE      hConsoleOutput,
-                                            PSMALL_RECT psrctSourceRect,
-                                            PSMALL_RECT psrctClipRect,
-                                            COORD       coordDestOrigin,
-                                            PCHAR_INFO  pchiFill)
+                                         PSMALL_RECT psrctSourceRect,
+                                         PSMALL_RECT psrctClipRect,
+                                         COORD       coordDestOrigin,
+                                         PCHAR_INFO  pchiFill)
 {
   BOOL fResult;
 
@@ -3706,13 +3760,13 @@ BOOL WIN32API SetConsoleTitleW(LPWSTR lpszTitle)
 
   if (lpszTitle == NULL)                                 /* check parameters */
     return FALSE;
-  
+
   if (ConsoleGlobals.pszWindowTitle != NULL)           /* previously set name */
     free (ConsoleGlobals.pszWindowTitle);                     /* then free it */
-  
+
   /* create an ascii copy of the lpszTitle */
   int iLength = UniStrlen(lpszTitle);
-  
+
   ConsoleGlobals.pszWindowTitle = (PSZ)malloc(iLength+1);
   ConsoleGlobals.pszWindowTitle[iLength] = 0;
   lstrcpynWtoA(ConsoleGlobals.pszWindowTitle,
@@ -3739,8 +3793,8 @@ BOOL WIN32API SetConsoleTitleW(LPWSTR lpszTitle)
  *****************************************************************************/
 
 BOOL WIN32API SetConsoleWindowInfo(HANDLE      hConsoleOutput,
-                                      BOOL        fAbsolute,
-                                      PSMALL_RECT psrctWindowRect)
+                                   BOOL        fAbsolute,
+                                   PSMALL_RECT psrctWindowRect)
 {
   BOOL fResult;
 
@@ -3775,10 +3829,10 @@ BOOL WIN32API SetConsoleWindowInfo(HANDLE      hConsoleOutput,
  *****************************************************************************/
 
 BOOL WIN32API WriteConsoleA(HANDLE      hConsoleOutput,
-                               CONST VOID* lpvBuffer,
-                               DWORD       cchToWrite,
-                               LPDWORD     lpcchWritten,
-                               LPVOID      lpvReserved)
+                            CONST VOID* lpvBuffer,
+                            DWORD       cchToWrite,
+                            LPDWORD     lpcchWritten,
+                            LPVOID      lpvReserved)
 {
   BOOL fResult;
 
@@ -3815,10 +3869,10 @@ BOOL WIN32API WriteConsoleA(HANDLE      hConsoleOutput,
  *****************************************************************************/
 
 BOOL WIN32API WriteConsoleW(HANDLE      hConsoleOutput,
-                               CONST VOID* lpvBuffer,
-                               DWORD       cchToWrite,
-                               LPDWORD     lpcchWritten,
-                               LPVOID      lpvReserved)
+                            CONST VOID* lpvBuffer,
+                            DWORD       cchToWrite,
+                            LPDWORD     lpcchWritten,
+                            LPVOID      lpvReserved)
 {
   BOOL fResult;
 
@@ -3855,9 +3909,9 @@ BOOL WIN32API WriteConsoleW(HANDLE      hConsoleOutput,
  *****************************************************************************/
 
 BOOL WIN32API WriteConsoleInputA(HANDLE        hConsoleInput,
-                                    PINPUT_RECORD pirBuffer,
-                                    DWORD         cInRecords,
-                                    LPDWORD       lpcWritten)
+                                 PINPUT_RECORD pirBuffer,
+                                 DWORD         cInRecords,
+                                 LPDWORD       lpcWritten)
 {
   BOOL fResult;
 
@@ -3893,9 +3947,9 @@ BOOL WIN32API WriteConsoleInputA(HANDLE        hConsoleInput,
  *****************************************************************************/
 
 BOOL WIN32API WriteConsoleInputW(HANDLE        hConsoleInput,
-                                    PINPUT_RECORD pirBuffer,
-                                    DWORD         cInRecords,
-                                    LPDWORD       lpcWritten)
+                                 PINPUT_RECORD pirBuffer,
+                                 DWORD         cInRecords,
+                                 LPDWORD       lpcWritten)
 {
   BOOL fResult;
 
@@ -3931,10 +3985,10 @@ BOOL WIN32API WriteConsoleInputW(HANDLE        hConsoleInput,
  *****************************************************************************/
 
 BOOL WIN32API WriteConsoleOutputA(HANDLE      hConsoleOutput,
-                                     PCHAR_INFO  pchiSrcBuffer,
-                                     COORD       coordSrcBufferSize,
-                                     COORD       coordSrcBufferCoord,
-                                     PSMALL_RECT psrctDestRect)
+                                  PCHAR_INFO  pchiSrcBuffer,
+                                  COORD       coordSrcBufferSize,
+                                  COORD       coordSrcBufferCoord,
+                                  PSMALL_RECT psrctDestRect)
 {
   BOOL fResult;
 
@@ -3971,10 +4025,10 @@ BOOL WIN32API WriteConsoleOutputA(HANDLE      hConsoleOutput,
  *****************************************************************************/
 
 BOOL WIN32API WriteConsoleOutputW(HANDLE      hConsoleOutput,
-                                     PCHAR_INFO  pchiSrcBuffer,
-                                     COORD       coordSrcBufferSize,
-                                     COORD       coordSrcBufferCoord,
-                                     PSMALL_RECT psrctDestRect)
+                                  PCHAR_INFO  pchiSrcBuffer,
+                                  COORD       coordSrcBufferSize,
+                                  COORD       coordSrcBufferCoord,
+                                  PSMALL_RECT psrctDestRect)
 {
   BOOL fResult;
 
@@ -4010,10 +4064,10 @@ BOOL WIN32API WriteConsoleOutputW(HANDLE      hConsoleOutput,
  *****************************************************************************/
 
 BOOL WIN32API WriteConsoleOutputAttribute(HANDLE  hConsoleOutput,
-                                             LPWORD  lpwAttribute,
-                                             DWORD   cWriteCells,
-                                             COORD   coordWriteCoord,
-                                             LPDWORD lpcNumberWritten)
+                                          LPWORD  lpwAttribute,
+                                          DWORD   cWriteCells,
+                                          COORD   coordWriteCoord,
+                                          LPDWORD lpcNumberWritten)
 {
   BOOL fResult;
 
@@ -4050,10 +4104,10 @@ BOOL WIN32API WriteConsoleOutputAttribute(HANDLE  hConsoleOutput,
  *****************************************************************************/
 
 BOOL WIN32API WriteConsoleOutputCharacterA(HANDLE  hConsoleOutput,
-                                              LPTSTR  lpWriteBuffer,
-                                              DWORD   cchWrite,
-                                              COORD   coordWriteCoord,
-                                              LPDWORD lpcWritten)
+                                           LPTSTR  lpWriteBuffer,
+                                           DWORD   cchWrite,
+                                           COORD   coordWriteCoord,
+                                           LPDWORD lpcWritten)
 {
   BOOL fResult;
 
@@ -4090,10 +4144,10 @@ BOOL WIN32API WriteConsoleOutputCharacterA(HANDLE  hConsoleOutput,
  *****************************************************************************/
 
 BOOL WIN32API WriteConsoleOutputCharacterW(HANDLE  hConsoleOutput,
-                                              LPTSTR  lpWriteBuffer,
-                                              DWORD   cchWrite,
-                                              COORD   coordWriteCoord,
-                                              LPDWORD lpcWritten)
+                                           LPTSTR  lpWriteBuffer,
+                                           DWORD   cchWrite,
+                                           COORD   coordWriteCoord,
+                                           LPDWORD lpcWritten)
 {
   BOOL fResult;
 

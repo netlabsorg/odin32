@@ -1,4 +1,4 @@
-/* $Id: conbuffer.h,v 1.2 1999-12-09 19:08:25 sandervl Exp $ */
+/* $Id: conbuffer.h,v 1.3 2000-10-20 11:46:44 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -39,7 +39,7 @@
 
 class HMDeviceConsoleBufferClass : public HMDeviceHandler
 {
-  private:
+  protected:
     PICONSOLEINPUT   pConsoleInput;         /* pointer to console input area */
     PICONSOLEGLOBALS pConsoleGlobals;      /* pointer to console global area */
 

@@ -1,4 +1,4 @@
-/* $Id: message.cpp,v 1.12 2000-10-06 11:04:01 sandervl Exp $ */
+/* $Id: message.cpp,v 1.13 2000-10-20 11:46:47 sandervl Exp $ */
 
 /*
  * Win32 message API functions for OS/2
@@ -25,7 +25,7 @@
 #include "heap.h"
 #include "heapstring.h"
 
-#define DBG_LOCALLOG	DBG_message
+#define DBG_LOCALLOG    DBG_message
 #include "dbglocal.h"
 
 typedef VOID (* WIN32API WVSPRINTFAPROC)(LPSTR,LPCSTR,va_list);
@@ -222,6 +222,19 @@ DWORD WIN32API FormatMessageA(DWORD   dwFlags,
            continue;
          }
 
+         if (dwFlags & FORMAT_MESSAGE_IGNORE_INSERTS) {
+            /* Ignore inserts, except for '%0' - maybe more? */
+            if (*f == '0') {
+               eos = TRUE;
+               f++;
+               continue;
+            }
+            else {
+               ADD_TO_T('%');
+               continue;
+            }
+         }
+
          switch (*f)
          {
            case '1': case '2': case '3': case '4': case '5':
@@ -355,6 +368,9 @@ DWORD WIN32API FormatMessageA(DWORD   dwFlags,
   if (from)
     HeapFree(GetProcessHeap(),0,from);
 
+  dprintf(("gives: %s", (dwFlags & FORMAT_MESSAGE_ALLOCATE_BUFFER) ?
+           *(LPSTR*)lpBuffer : lpBuffer));
+
   return (dwFlags & FORMAT_MESSAGE_ALLOCATE_BUFFER) ?
          strlen(*(LPSTR*)lpBuffer):
          strlen(lpBuffer);
@@ -445,6 +461,20 @@ DWORD WINAPI FormatMessageW(DWORD   dwFlags,
                ADD_TO_T('%');
                continue;
             }
+
+            if (dwFlags & FORMAT_MESSAGE_IGNORE_INSERTS) {
+               /* Ignore inserts, except for '%0' - maybe more? */
+               if (*f == '0') {
+                  eos = TRUE;
+                  f++;
+                  continue;
+               }
+               else {
+                  ADD_TO_T('%');
+                  continue;
+               }
+            }
+
             switch (*f) {
             case '1':case '2':case '3':case '4':case '5':
             case '6':case '7':case '8':case '9':
