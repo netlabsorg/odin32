@@ -1,4 +1,9 @@
-/* $Id: changelog,v 1.2339 2002-10-08 16:42:36 sandervl Exp $ */
+/* $Id: changelog,v 1.2340 2002-10-10 16:28:15 sandervl Exp $ */
+
+ 2002-10-10: Sander van Leeuwen <sandervl@innotek   >
+    - KERNEL32: o Overlapped IO bugfixes for synchronization (typically seen
+                  with heavy threaded apps on SMP systems)
+                o Fix for IP logging
 
  2001-10-08: Dietrich Teickner <Dietrich_Teickner@t-online   >
     - SHELL32:  o SHFileOperationA updates
