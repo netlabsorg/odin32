@@ -1,4 +1,7 @@
-/* $Id: changelog,v 1.1986 2002-02-18 22:14:29 phaller Exp $ */
+/* $Id: changelog,v 1.1987 2002-02-19 12:22:16 sandervl Exp $ */
+
+ 2002-02-19: Sander van Leeuwen <sandervl@xs4all.nl>
+    - KERNEL32: o Added support for Russian country code
 
  2002-02-18: Patrick Haller <patrick.haller@innotek.de>
     - USER32:   o fixed structure size for 
