@@ -1,4 +1,4 @@
-/* $Id: environ.cpp,v 1.10 2001-04-05 05:54:51 sandervl Exp $ */
+/* $Id: environ.cpp,v 1.11 2001-04-26 17:01:58 sandervl Exp $ */
 
 /*
  * Win32 environment file functions for OS/2
@@ -133,6 +133,13 @@ ODINFUNCTION3(DWORD, GetEnvironmentVariableW,
   char *astring, *asciibuffer;
   DWORD rc;
 
+  if (!lpName || !*lpName)
+  {
+      dprintf(("GetEnvironmentVariableW: invalid name!"));
+      SetLastError(ERROR_INVALID_PARAMETER);
+      return 0;
+  }
+
   if(nSize) {
        asciibuffer = (char *)malloc(nSize+1);
        *asciibuffer = 0;
@@ -142,7 +149,8 @@ ODINFUNCTION3(DWORD, GetEnvironmentVariableW,
   astring     = UnicodeToAsciiString((LPWSTR)lpName);
 
   rc = CALL_ODINFUNC(GetEnvironmentVariableA)(astring, asciibuffer, nSize);
-  AsciiToUnicode(asciibuffer, lpBuffer);
+  if(asciibuffer)
+      AsciiToUnicode(asciibuffer, lpBuffer);
   FreeAsciiString(astring);
   if(asciibuffer)
 	free(asciibuffer);
