@@ -1,4 +1,4 @@
-/* $Id: hmthread.cpp,v 1.12 2002-05-22 12:57:42 sandervl Exp $ */
+/* $Id: hmthread.cpp,v 1.13 2002-06-11 16:36:53 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -45,48 +45,50 @@ HANDLE HMDeviceThreadClass::CreateThread(PHMHANDLEDATA          pHMHandleData,
                                          LPDWORD                lpIDThread,
                                          BOOL                   fFirstThread)
 {
-  Win32Thread *winthread;
-  DWORD threadid;
+    Win32Thread *winthread;
+    DWORD        threadid;
+    HANDLE       hThread = pHMHandleData->hHMHandle;
 
-  if(lpIDThread == NULL) { 
+    if(lpIDThread == NULL) { 
         lpIDThread = &threadid;
-  }
-  pHMHandleData->dwInternalType = HMTYPE_THREAD;
-  pHMHandleData->dwUserData     = THREAD_ALIVE;
+    }
+    pHMHandleData->dwInternalType = HMTYPE_THREAD;
+    pHMHandleData->dwUserData     = THREAD_ALIVE;
 
-  //SvL: This doesn't really create a thread, but only sets up the
-  //     handle of thread 0
-  if(fFirstThread) {
-	pHMHandleData->hHMHandle = O32_GetCurrentThread(); //return Open32 handle of thread
-	return pHMHandleData->hHMHandle;
-  }
-  winthread = new Win32Thread(lpStartAddr, lpvThreadParm, fdwCreate, pHMHandleData->hHMHandle);
+    //SvL: This doesn't really create a thread, but only sets up the
+    //     handle of thread 0
+    if(fFirstThread) {
+	    pHMHandleData->hHMHandle = O32_GetCurrentThread(); //return Open32 handle of thread
+	    return pHMHandleData->hHMHandle;
+    }
+    winthread = new Win32Thread(lpStartAddr, lpvThreadParm, fdwCreate, hThread);
 
-  if(winthread == 0) {
-      SetLastError(ERROR_NOT_ENOUGH_MEMORY);
-      return(0);
-  }
-  // @@@PH Note: with debug code enabled, ODIN might request more stack space!
-  //SvL: Also need more stack in release build (RealPlayer 7 sometimes runs
-  //     out of stack
-  if (cbStack > 0)
-     cbStack <<= 1;     // double stack
-  else
-     cbStack = 1048576; // per default 1MB stack per thread
+    if(winthread == 0) {
+        DebugInt3();
+        SetLastError(ERROR_NOT_ENOUGH_MEMORY);
+        return(0);
+    }
+    // @@@PH Note: with debug code enabled, ODIN might request more stack space!
+    //SvL: Also need more stack in release build (RealPlayer 7 sometimes runs
+    //     out of stack
+    if (cbStack > 0)
+        cbStack <<= 1;     // double stack
+    else
+        cbStack = 1048576; // per default 1MB stack per thread
 
-  pHMHandleData->hHMHandle = O32_CreateThread(lpsa,
-                                              cbStack,
-                                              winthread->GetOS2Callback(),
-                                              (LPVOID)winthread,
-                                              fdwCreate,
-                                              lpIDThread);
+    pHMHandleData->hHMHandle = O32_CreateThread(lpsa, cbStack, winthread->GetOS2Callback(),
+                                                (LPVOID)winthread, fdwCreate, lpIDThread);
 
-  if(lpIDThread) {
-      *lpIDThread = MAKE_THREADID(O32_GetCurrentProcessId(), *lpIDThread);
-  }
-  dprintf(("CreateThread created %08xh\n", pHMHandleData->hHMHandle));
+    *lpIDThread = MAKE_THREADID(O32_GetCurrentProcessId(), *lpIDThread);
+    
+    TEB *teb = GetTEBFromThreadHandle(hThread);
+    if(teb) {
+        //store thread id in TEB
+        teb->o.odin.threadId = *lpIDThread;
+    }
+    dprintf(("CreateThread created %08x, id %x", pHMHandleData->hHMHandle, *lpIDThread));
   
-  return pHMHandleData->hHMHandle;
+    return pHMHandleData->hHMHandle;
 }
 //******************************************************************************
 //******************************************************************************
