@@ -1,4 +1,4 @@
-/* $Id: ChangeLog,v 1.2527 2003-03-26 16:01:06 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.2528 2003-03-26 16:02:58 sandervl Exp $ */
 
  2003-03-26: Sander van Leeuwen <sandervl@innotek   >
     - KERNEL32: o WaitForSingleObject/(Msg)WaitForMultipleObject fixes to 
@@ -27,7 +27,6 @@
 
  2003-03-12: Platon Fomichev <stauff@innotek   >
     - USER32:   o GetKeyState and GetAsyncKeyState fixes for numpad keyboard
-                  (Java2 defect 284)
 
  2003-03-06: Sander van Leeuwen <sandervl@innotek   >
     - KERNEL32: o Don't change the stack alignment if the thread has less than
