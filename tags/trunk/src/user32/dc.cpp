@@ -1,4 +1,4 @@
-/* $Id: dc.cpp,v 1.113 2001-12-13 15:32:57 sandervl Exp $ */
+/* $Id: dc.cpp,v 1.114 2001-12-26 11:35:38 sandervl Exp $ */
 
 /*
  * DC functions for USER32
@@ -77,6 +77,7 @@ LONG clientHeight(Win32BaseWindow *wnd, HWND hwnd, pDCData pHps);
 
 #ifdef DEBUG
 #define dprintfRegion(a,b,c) if(DbgEnabledLvl2USER32[DBG_LOCALLOG] == 1) dprintfRegion1(a,b,c)
+//#define dprintfRegion(a,b,c) dprintfRegion1(a,b,c)
 
 void dprintfRegion1(HPS hps, HWND hWnd, HRGN hrgnClip)
 {
@@ -1315,15 +1316,10 @@ BOOL WIN32API RedrawWindow(HWND hwnd, const RECT* pRect, HRGN hrgn, DWORD redraw
     {
         dprintf2(("Update region (%d,%d)(%d,%d)", rectl.xLeft, rectl.yBottom, rectl.xRight, rectl.yTop));
         //TODO: Does this work if RDW_ALLCHILDREN is set??
-        if(redraw & RDW_UPDATENOW_W) {
-            RECT rectUpdate;
-
-            if(redraw & RDW_FRAME_W) {
-                mapOS2ToWin32Rect(wnd->getWindowHeight(), (PRECTLOS2)&rectl, &rectUpdate);
-                wnd->MsgNCPaint(&rectUpdate);
-            }
-
-            wnd->MsgPaint(0, FALSE);
+        if(redraw & RDW_UPDATENOW_W) 
+        {
+            dprintf(("RDW_UPDATENOW -> UpdateWindow"));
+            UpdateWindow(wnd->getWindowHandle());
         }
         else
 //        if((redraw & RDW_ERASE_W) && (redraw & RDW_ERASENOW_W))
@@ -1335,6 +1331,7 @@ BOOL WIN32API RedrawWindow(HWND hwnd, const RECT* pRect, HRGN hrgn, DWORD redraw
     }
     else if((redraw & RDW_INTERNALPAINT_W) && !(redraw & RDW_INVALIDATE_W))
     {
+        dprintf(("Manual redraw"));
         if(redraw & RDW_UPDATENOW_W) {
             wnd->MsgPaint(0, FALSE);
         }
