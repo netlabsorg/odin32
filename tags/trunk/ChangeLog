@@ -1,4 +1,11 @@
-/* $Id: ChangeLog,v 1.1577 2001-07-08 08:06:48 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.1578 2001-07-08 15:44:08 achimha Exp $ */
+
+ 2001-07-08: Achim Hasenmueller <achimha@innotek.de>
+    - WSOCK32:  o error message to human readable text translation
+                  for WSASetLastError (debug version)
+                o implemented IPPROTO_IP support for setsockopt
+                  (not fully done)
+                o reset semaphore in WSAEnumNetworkEvents
 
  2001-07-08: Sander van Leeuwen <sandervl@xs4all.nl>
     - USER32:   o Some icon fixes
