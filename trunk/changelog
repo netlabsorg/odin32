@@ -1,5 +1,7 @@
- /* $Id: changelog,v 1.1020 2000-07-02 11:29:51 sandervl Exp $ */
+ /* $Id: changelog,v 1.1021 2000-07-02 14:32:07 sandervl Exp $ */
 
  2000-07-02: Sander van Leeuwen <sandervl@xs4all.nl>
     - RICHED32: Fixed bug when creating edit window (needs to be WS_CHILD)
-
+    - USER32:   Fixed moving of child windows in MsgFormatFrame & move
+                child windows if only client rectangle changes
+                (fixes Acrobat Distiller window)
