@@ -1,4 +1,4 @@
-/* $Id: hmfile.cpp,v 1.23 2000-10-18 17:09:32 sandervl Exp $ */
+/* $Id: hmfile.cpp,v 1.24 2000-11-23 19:23:50 sandervl Exp $ */
 
 /*
  * File IO win32 apis
@@ -35,7 +35,7 @@ inline void ignore_dprintf(...){}
 #include "mmap.h"
 #include "oslibdos.h"
 
-#define DBG_LOCALLOG	DBG_hmfile
+#define DBG_LOCALLOG    DBG_hmfile
 #include "dbglocal.h"
 
 /*****************************************************************************
@@ -76,9 +76,9 @@ DWORD HMDeviceFileClass::CreateFile (LPCSTR        lpFileName,
   {
         // check the named pipes
         if (strnicmp("\\\\.\\PIPE",lpFileName,8)==0)
-        	lpFileName+=3;
+            lpFileName+=3;
         else
-        	lpFileName+=4;
+            lpFileName+=4;
   }
 
 
@@ -99,14 +99,37 @@ DWORD HMDeviceFileClass::CreateFile (LPCSTR        lpFileName,
 
   if (hFile != INVALID_HANDLE_ERROR)
   {
-	pHMHandleData->dwUserData = (DWORD) new HMFileInfo((LPSTR)lpFileName, lpSecurityAttributes);
-     	pHMHandleData->hHMHandle  = hFile;
-     	return (NO_ERROR);
+        pHMHandleData->dwUserData = (DWORD) new HMFileInfo((LPSTR)lpFileName, lpSecurityAttributes);
+        pHMHandleData->hHMHandle  = hFile;
+        return (NO_ERROR);
   }
   else {
-	dprintf(("CreateFile failed; error %d", GetLastError()));
-    	return(GetLastError());
+        dprintf(("CreateFile failed; error %d", GetLastError()));
+        return(GetLastError());
   }
+}
+
+//*****************************************************************************
+//Parses and copies path
+//OpenFile in NT4, SP6 accepts double (or more) backslashes as separators for directories!
+//(OS/2 doesn't)
+//Girotel 2.0 (Dutch banking app) seems to depend on this behaviour
+//*****************************************************************************
+void HMDeviceFileClass::ParsePath(LPCSTR lpszFileName, LPSTR lpszParsedFileName, DWORD length)
+{
+
+    while(*lpszFileName != 0) {
+        *lpszParsedFileName++ = *lpszFileName;
+        if(*lpszFileName == '\\') {
+            while(*lpszFileName == '\\') {
+                 lpszFileName++;
+            }
+        }
+        else {
+            lpszFileName++;
+        }
+    }
+    *lpszParsedFileName = 0;
 }
 
 /*****************************************************************************
@@ -147,36 +170,41 @@ DWORD HMDeviceFileClass::OpenFile (LPCSTR        lpszFileName,
            fuMode));
 
   //Re-open using name in OFSTRUCT
-  if(fuMode & OF_REOPEN) 
-	lpFileName = (LPSTR)pOFStruct->szPathName;
+  if(fuMode & OF_REOPEN)
+        lpFileName = (LPSTR)pOFStruct->szPathName;
   else  memset(pOFStruct, 0, sizeof(OFSTRUCT));
 
   if(strcmp(lpFileName,       // "support" for local unc names
              "\\\\.\\") == 0)
   {
-    	lpFileName+=4;
+        lpFileName+=4;
   }
-  else 
-  if(!strchr(lpFileName, ':') && !strchr(lpFileName, '\\')) 
+  else
+  if(!strchr(lpFileName, ':') && !strchr(lpFileName, '\\'))
   {
-	//filename only; search for file in following order
-	//1: dir from which the app loaded
-	//2: current dir
-	//3: windows system dir
-	//4: windows dir
-	//5: dirs in path path environment variable
-	//SearchPath does exactly that
-	LPSTR filenameinpath;
+    //filename only; search for file in following order
+    //1: dir from which the app loaded
+    //2: current dir
+    //3: windows system dir
+    //4: windows dir
+    //5: dirs in path path environment variable
+    //SearchPath does exactly that
+    LPSTR filenameinpath;
 
-	if(SearchPathA(NULL, lpFileName, NULL, sizeof(filepath), filepath, &filenameinpath) == 0
-           && !(fuMode & OF_CREATE) ) 
+    if(SearchPathA(NULL, lpFileName, NULL, sizeof(filepath), filepath, &filenameinpath) == 0
+           && !(fuMode & OF_CREATE) )
         {
-  		pOFStruct->nErrCode = ERROR_FILE_NOT_FOUND;
-		SetLastError(ERROR_FILE_NOT_FOUND);
-		return HFILE_ERROR;
-	}
-	lpFileName = filepath;
+        pOFStruct->nErrCode = ERROR_FILE_NOT_FOUND;
+        SetLastError(ERROR_FILE_NOT_FOUND);
+        return HFILE_ERROR;
+    }
+    lpFileName = filepath;
   }
+  else {
+    ParsePath(lpFileName, filepath, sizeof(filepath));
+    lpFileName = filepath;
+  }
+
   // filling OFSTRUCT
   pOFStruct->cBytes = sizeof(OFSTRUCT);
   pOFStruct->nErrCode = 0;
@@ -187,72 +215,72 @@ DWORD HMDeviceFileClass::OpenFile (LPCSTR        lpszFileName,
 
   if(hFile != INVALID_HANDLE_ERROR)
   {
-	//Needed for GetFileTime
-    	pHMHandleData->hHMHandle = hFile;
-    	GetFileTime(pHMHandleData,
+        //Needed for GetFileTime
+        pHMHandleData->hHMHandle = hFile;
+        GetFileTime(pHMHandleData,
                     NULL,
                     NULL,
                     &filetime );
 
-    	FileTimeToDosDateTime(&filetime,
+        FileTimeToDosDateTime(&filetime,
                               &filedatetime[0],
                               &filedatetime[1] );
-    	memcpy(pOFStruct->reserved, filedatetime, sizeof(pOFStruct->reserved));
+        memcpy(pOFStruct->reserved, filedatetime, sizeof(pOFStruct->reserved));
 
-  	if(fuMode & OF_DELETE)
-  	{
-       		OSLibDosClose(hFile);
-	        OSLibDosDelete((LPSTR)lpFileName);
-  	}
-  	else 
-	if(fuMode & OF_EXIST)
-  	{
-       		OSLibDosClose(hFile);
-		hFile = HFILE_ERROR;
-  	}
-   	if(fuMode & OF_PARSE) 
-	{
-	  CHAR drive[4];
+    if(fuMode & OF_DELETE)
+    {
+            OSLibDosClose(hFile);
+            OSLibDosDelete((LPSTR)lpFileName);
+    }
+    else
+    if(fuMode & OF_EXIST)
+    {
+        OSLibDosClose(hFile);
+        hFile = HFILE_ERROR;
+    }
+    if(fuMode & OF_PARSE)
+    {
+      CHAR drive[4];
 
-		drive[0] = pOFStruct->szPathName[0];
-		drive[1] = pOFStruct->szPathName[1];
-		drive[2] = pOFStruct->szPathName[2];
-		drive[3] = 0;
+        drive[0] = pOFStruct->szPathName[0];
+        drive[1] = pOFStruct->szPathName[1];
+        drive[2] = pOFStruct->szPathName[2];
+        drive[3] = 0;
 
-        	pOFStruct->fFixedDisk = (GetDriveTypeA(drive) != DRIVE_REMOVABLE);
-		
-      		OSLibDosClose(hFile);
-		hFile = HFILE_ERROR;
-   	}
+        pOFStruct->fFixedDisk = (GetDriveTypeA(drive) != DRIVE_REMOVABLE);
 
-       	if((fuMode & OF_VERIFY))
-       	{
-        	if(memcmp(pOFStruct->reserved, filedatetime, sizeof(pOFStruct->reserved)))
-        	{
-            		OSLibDosClose(hFile);
-            		SetLastError(ERROR_FILE_NOT_FOUND);
-        	}
-		hFile = HFILE_ERROR;
-    	}
+        OSLibDosClose(hFile);
+        hFile = HFILE_ERROR;
+    }
 
-  	pOFStruct->nErrCode = GetLastError();
-    	pHMHandleData->hHMHandle = hFile;
+        if((fuMode & OF_VERIFY))
+        {
+            if(memcmp(pOFStruct->reserved, filedatetime, sizeof(pOFStruct->reserved)))
+            {
+                    OSLibDosClose(hFile);
+                    SetLastError(ERROR_FILE_NOT_FOUND);
+            }
+        hFile = HFILE_ERROR;
+        }
+
+        pOFStruct->nErrCode = GetLastError();
+        pHMHandleData->hHMHandle = hFile;
 
         if(hFile != HFILE_ERROR) {
-		pHMHandleData->dwUserData = (DWORD) new HMFileInfo((LPSTR)lpFileName, NULL);
-	}
-    	return (NO_ERROR);
+        pHMHandleData->dwUserData = (DWORD) new HMFileInfo((LPSTR)lpFileName, NULL);
+    }
+        return (NO_ERROR);
   }
   else {
-	DWORD rc = GetLastError();
+        DWORD rc = GetLastError();
 
-       	if(fuMode & OF_EXIST)
-       	{
-          	if(rc == ERROR_OPEN_FAILED) {
-			SetLastError(ERROR_FILE_NOT_FOUND);
-		}
-	}
-	//todo: OF_PROMPT handling (pop up message box)
+        if(fuMode & OF_EXIST)
+        {
+            if(rc == ERROR_OPEN_FAILED) {
+            SetLastError(ERROR_FILE_NOT_FOUND);
+        }
+    }
+    //todo: OF_PROMPT handling (pop up message box)
   }
   // error branch
   pOFStruct->nErrCode = GetLastError();
@@ -265,18 +293,18 @@ DWORD HMDeviceFileClass::OpenFile (LPCSTR        lpszFileName,
 
 /*****************************************************************************
  * Name      : HMDeviceFileClass::DuplicateHandle
- * Purpose   : 
- * Parameters: 
+ * Purpose   :
+ * Parameters:
  *             various parameters as required
  * Variables :
  * Result    :
  * Remark    : DUPLICATE_CLOSE_SOURCE flag handled in HMDuplicateHandle
- *             
+ *
  * Status    : partially implemented
  *
  * Author    : SvL
  *****************************************************************************/
-BOOL HMDeviceFileClass::DuplicateHandle(PHMHANDLEDATA pHMHandleData, 
+BOOL HMDeviceFileClass::DuplicateHandle(PHMHANDLEDATA pHMHandleData,
                                         HANDLE  srcprocess,
                                         PHMHANDLEDATA pHMSrcHandle,
                                         HANDLE  destprocess,
@@ -291,14 +319,14 @@ BOOL HMDeviceFileClass::DuplicateHandle(PHMHANDLEDATA pHMHandleData,
 
   dprintf(("KERNEL32:HMDeviceFileClass::DuplicateHandle (%08x,%08x,%08x,%08x,%08x)",
            pHMHandleData,
-           srcprocess, 
-           pHMSrcHandle->hHMHandle, 
-           destprocess, 
+           srcprocess,
+           pHMSrcHandle->hHMHandle,
+           destprocess,
            desthandle));
 
   //TODO: Inheritance of file handles won't work!
 
-  if(destprocess != srcprocess) 
+  if(destprocess != srcprocess)
   {
     //TODO:!!!!
     dprintf(("ERROR: DuplicateHandle; different processes not yet supported!!"));
@@ -311,28 +339,28 @@ BOOL HMDeviceFileClass::DuplicateHandle(PHMHANDLEDATA pHMHandleData,
     //     file handle
     //     Can't use DosDupHandle or else there can be a sharing violation
     //     when an app tries to access the same file again
-    if(fdwOdinOptions) 
+    if(fdwOdinOptions)
     {
         HMHANDLEDATA duphdata;
 
-	memcpy(&duphdata, pHMHandleData, sizeof(duphdata));
-	duphdata.dwCreation = OPEN_EXISTING;
+        memcpy(&duphdata, pHMHandleData, sizeof(duphdata));
+        duphdata.dwCreation = OPEN_EXISTING;
 
-    	if(CreateFile(srcfileinfo->lpszFileName, &duphdata,
-                      srcfileinfo->lpSecurityAttributes, NULL) == NO_ERROR) 
+        if(CreateFile(srcfileinfo->lpszFileName, &duphdata,
+                      srcfileinfo->lpSecurityAttributes, NULL) == NO_ERROR)
         {
-		memcpy(pHMHandleData, &duphdata, sizeof(duphdata));
-		SetLastError(ERROR_SUCCESS);
-      		return TRUE;
+            memcpy(pHMHandleData, &duphdata, sizeof(duphdata));
+            SetLastError(ERROR_SUCCESS);
+            return TRUE;
         }
-    	dprintf(("ERROR: DuplicateHandle; CreateFile %s failed -> trying DosDupHandle instead!", 
+        dprintf(("ERROR: DuplicateHandle; CreateFile %s failed -> trying DosDupHandle instead!",
                   srcfileinfo->lpszFileName));
-	//SvL: IE5 setup opens file with DENYREADWRITE, so CreateFile can't
+        //SvL: IE5 setup opens file with DENYREADWRITE, so CreateFile can't
         //     be used for duplicating the handle; try DosDupHandle instead
     }
-    
+
     if(!(fdwOptions & DUPLICATE_SAME_ACCESS) && fdwAccess != pHMSrcHandle->dwAccess) {
-    	dprintf(("WARNING: DuplicateHandle; app wants different access permission; Not supported!! (%x, %x)", fdwAccess, pHMSrcHandle->dwAccess));
+        dprintf(("WARNING: DuplicateHandle; app wants different access permission; Not supported!! (%x, %x)", fdwAccess, pHMSrcHandle->dwAccess));
     }
 
     rc = OSLibDosDupHandle(pHMSrcHandle->hHMHandle,
@@ -382,13 +410,13 @@ DWORD HMDeviceFileClass::CloseHandle(PHMHANDLEDATA pHMHandleData)
   bRC = OSLibDosClose(pHMHandleData->hHMHandle);
 
   if(pHMHandleData->dwFlags & FILE_FLAG_DELETE_ON_CLOSE) {
-	//TODO: should only do this after all handles have been closed
-	if(fileInfo) {
-		DeleteFileA(fileInfo->lpszFileName);
-	}        
+    //TODO: should only do this after all handles have been closed
+    if(fileInfo) {
+        DeleteFileA(fileInfo->lpszFileName);
+    }
   }
   if(fileInfo) {
-	delete fileInfo;
+    delete fileInfo;
   }
   dprintf(("KERNEL32: HMDeviceFileClass::CloseHandle returned %08xh\n",
            bRC));
@@ -435,48 +463,48 @@ BOOL HMDeviceFileClass::ReadFile(PHMHANDLEDATA pHMHandleData,
   //SvL: It's legal for this pointer to be NULL
   if(lpNumberOfBytesRead)
     *lpNumberOfBytesRead = 0;
-  else  
+  else
     lpNumberOfBytesRead = &bytesread;
 
   if((pHMHandleData->dwFlags & FILE_FLAG_OVERLAPPED) && !lpOverlapped) {
-	dprintf(("FILE_FLAG_OVERLAPPED flag set, but lpOverlapped NULL!!"));
-	SetLastError(ERROR_INVALID_PARAMETER);
-	return FALSE;
+    dprintf(("FILE_FLAG_OVERLAPPED flag set, but lpOverlapped NULL!!"));
+    SetLastError(ERROR_INVALID_PARAMETER);
+    return FALSE;
   }
   if(!(pHMHandleData->dwFlags & FILE_FLAG_OVERLAPPED) && lpOverlapped) {
-	dprintf(("Warning: lpOverlapped != NULL & !FILE_FLAG_OVERLAPPED; sync operation"));
+    dprintf(("Warning: lpOverlapped != NULL & !FILE_FLAG_OVERLAPPED; sync operation"));
   }
 
-  //SvL: DosRead doesn't like writing to memory addresses returned by 
-  //     DosAliasMem -> search for original memory mapped pointer and use 
+  //SvL: DosRead doesn't like writing to memory addresses returned by
+  //     DosAliasMem -> search for original memory mapped pointer and use
   //     that one + commit pages if not already present
   map = Win32MemMapView::findMapByView((ULONG)lpBuffer, &offset, MEMMAP_ACCESS_WRITE);
   if(map) {
-	lpRealBuf = (LPVOID)((ULONG)map->getMappingAddr() + offset);
-	DWORD nrpages = nNumberOfBytesToRead/4096;
-	if(offset & 0xfff) 
-		nrpages++;
-	if(nNumberOfBytesToRead & 0xfff) 
-		nrpages++;
+    lpRealBuf = (LPVOID)((ULONG)map->getMappingAddr() + offset);
+    DWORD nrpages = nNumberOfBytesToRead/4096;
+    if(offset & 0xfff)
+        nrpages++;
+    if(nNumberOfBytesToRead & 0xfff)
+        nrpages++;
 
-	map->commitPage(offset & ~0xfff, TRUE, nrpages);
+    map->commitPage(offset & ~0xfff, TRUE, nrpages);
   }
   else  lpRealBuf = (LPVOID)lpBuffer;
 
   if(pHMHandleData->dwFlags & FILE_FLAG_OVERLAPPED) {
-	dprintf(("ERROR: Overlapped IO not yet implememented!!"));
+    dprintf(("ERROR: Overlapped IO not yet implememented!!"));
   }
 //  else {
-  	bRC = OSLibDosRead(pHMHandleData->hHMHandle,
+    bRC = OSLibDosRead(pHMHandleData->hHMHandle,
                            (PVOID)lpRealBuf,
                            nNumberOfBytesToRead,
                            lpNumberOfBytesRead);
 //  }
 
   if(bRC == 0) {
-     	dprintf(("KERNEL32: HMDeviceFileClass::ReadFile returned %08xh %x\n",
+        dprintf(("KERNEL32: HMDeviceFileClass::ReadFile returned %08xh %x\n",
                   bRC, GetLastError()));
-	dprintf(("%x -> %d", lpBuffer, IsBadWritePtr((LPVOID)lpBuffer, nNumberOfBytesToRead)));
+    dprintf(("%x -> %d", lpBuffer, IsBadWritePtr((LPVOID)lpBuffer, nNumberOfBytesToRead)));
   }
 
   return bRC;
@@ -558,39 +586,39 @@ BOOL HMDeviceFileClass::WriteFile(PHMHANDLEDATA pHMHandleData,
   //SvL: It's legal for this pointer to be NULL
   if(lpNumberOfBytesWritten)
     *lpNumberOfBytesWritten = 0;
-  else  
+  else
     lpNumberOfBytesWritten = &byteswritten;
 
   if((pHMHandleData->dwFlags & FILE_FLAG_OVERLAPPED) && !lpOverlapped) {
-	dprintf(("FILE_FLAG_OVERLAPPED flag set, but lpOverlapped NULL!!"));
-	SetLastError(ERROR_INVALID_PARAMETER);
-	return FALSE;
+    dprintf(("FILE_FLAG_OVERLAPPED flag set, but lpOverlapped NULL!!"));
+    SetLastError(ERROR_INVALID_PARAMETER);
+    return FALSE;
   }
   if(!(pHMHandleData->dwFlags & FILE_FLAG_OVERLAPPED) && lpOverlapped) {
-	dprintf(("Warning: lpOverlapped != NULL & !FILE_FLAG_OVERLAPPED; sync operation"));
+    dprintf(("Warning: lpOverlapped != NULL & !FILE_FLAG_OVERLAPPED; sync operation"));
   }
 
-  //SvL: DosWrite doesn't like reading from memory addresses returned by 
-  //     DosAliasMem -> search for original memory mapped pointer and use 
+  //SvL: DosWrite doesn't like reading from memory addresses returned by
+  //     DosAliasMem -> search for original memory mapped pointer and use
   //     that one + commit pages if not already present
   map = Win32MemMapView::findMapByView((ULONG)lpBuffer, &offset, MEMMAP_ACCESS_READ);
   if(map) {
-	lpRealBuf = (LPVOID)((ULONG)map->getMappingAddr() + offset);
-	DWORD nrpages = nNumberOfBytesToWrite/4096;
-	if(offset & 0xfff) 
-		nrpages++;
-	if(nNumberOfBytesToWrite & 0xfff) 
-		nrpages++;
+    lpRealBuf = (LPVOID)((ULONG)map->getMappingAddr() + offset);
+    DWORD nrpages = nNumberOfBytesToWrite/4096;
+    if(offset & 0xfff)
+        nrpages++;
+    if(nNumberOfBytesToWrite & 0xfff)
+        nrpages++;
 
-	map->commitPage(offset & ~0xfff, TRUE, nrpages);
+    map->commitPage(offset & ~0xfff, TRUE, nrpages);
   }
   else  lpRealBuf = (LPVOID)lpBuffer;
 
   if(pHMHandleData->dwFlags & FILE_FLAG_OVERLAPPED) {
-	dprintf(("ERROR: Overlapped IO not yet implememented!!"));
+    dprintf(("ERROR: Overlapped IO not yet implememented!!"));
   }
 //  else {
-  	bRC = OSLibDosWrite(pHMHandleData->hHMHandle,
+    bRC = OSLibDosWrite(pHMHandleData->hHMHandle,
                             (PVOID)lpRealBuf,
                             nNumberOfBytesToWrite,
                             lpNumberOfBytesWritten);
@@ -676,18 +704,16 @@ DWORD HMDeviceFileClass::GetFileType(PHMHANDLEDATA pHMHandleData)
 DWORD HMDeviceFileClass::GetFileInformationByHandle(PHMHANDLEDATA               pHMHandleData,
                                                     BY_HANDLE_FILE_INFORMATION* pHFI)
 {
-  dprintfl(("KERNEL32: HMDeviceFileClass::GetFileInformationByHandle %s(%08xh,%08xh)\n",
-           lpHMDeviceName,
-           pHMHandleData,
-           pHFI));
+    dprintfl(("KERNEL32: HMDeviceFileClass::GetFileInformationByHandle %s(%08xh,%08xh)\n",
+              lpHMDeviceName, pHMHandleData, pHFI));
 
-  if(OSLibDosGetFileInformationByHandle(pHMHandleData->hHMHandle,
-                                        pHFI))
-  {
-	return TRUE;
-  }
-  dprintf(("GetFileInformationByHandle failed with error %d", GetLastError()));
-  return FALSE;
+    if(OSLibDosGetFileInformationByHandle(pHMHandleData->hHMHandle,
+                                          pHFI))
+    {
+        return TRUE;
+    }
+    dprintf(("GetFileInformationByHandle failed with error %d", GetLastError()));
+    return FALSE;
 
 }
 
@@ -706,15 +732,15 @@ DWORD HMDeviceFileClass::GetFileInformationByHandle(PHMHANDLEDATA               
 
 BOOL HMDeviceFileClass::SetEndOfFile(PHMHANDLEDATA pHMHandleData)
 {
-  dprintfl(("KERNEL32: HMDeviceFileClass::SetEndOfFile %s(%08xh)\n",
-           lpHMDeviceName,
-           pHMHandleData));
+    dprintfl(("KERNEL32: HMDeviceFileClass::SetEndOfFile %s(%08xh)\n",
+             lpHMDeviceName,
+             pHMHandleData));
 
-  if(OSLibDosSetEndOfFile(pHMHandleData->hHMHandle)) {
-	return TRUE;
-  }
-  dprintf(("SetEndOfFile failed with error %d", GetLastError()));
-  return FALSE;
+    if(OSLibDosSetEndOfFile(pHMHandleData->hHMHandle)) {
+        return TRUE;
+    }
+    dprintf(("SetEndOfFile failed with error %d", GetLastError()));
+    return FALSE;
 }
 
 
@@ -742,34 +768,30 @@ BOOL HMDeviceFileClass::SetFileTime(PHMHANDLEDATA pHMHandleData,
  WORD lastaccessdate = 0, lastaccesstime = 0;
  WORD lastwritedate = 0, lastwritetime = 0;
 
-  dprintfl(("KERNEL32: HMDeviceFileClass::SetFileTime %s(%08xh,%08xh,%08xh,%08xh)\n",
-           lpHMDeviceName,
-           pHMHandleData,
-           pFT1,
-           pFT2,
-           pFT3));
+    dprintfl(("KERNEL32: HMDeviceFileClass::SetFileTime %s(%08xh,%08xh,%08xh,%08xh)\n",
+              lpHMDeviceName, pHMHandleData, pFT1, pFT2, pFT3));
 
-  if(pFT1 && pFT1->dwLowDateTime && pFT1->dwHighDateTime) {
-  	FileTimeToDosDateTime(pFT1, &creationdate, &creationtime);
-  }
+    if(pFT1 && pFT1->dwLowDateTime && pFT1->dwHighDateTime) {
+        FileTimeToDosDateTime(pFT1, &creationdate, &creationtime);
+    }
 
-  if(pFT2 && pFT2->dwLowDateTime && pFT2->dwHighDateTime) {
-  	FileTimeToDosDateTime(pFT2, &lastaccessdate, &lastaccesstime);
-  }
+    if(pFT2 && pFT2->dwLowDateTime && pFT2->dwHighDateTime) {
+        FileTimeToDosDateTime(pFT2, &lastaccessdate, &lastaccesstime);
+    }
 
-  if(pFT3 && pFT3->dwLowDateTime && pFT3->dwHighDateTime) {
-  	FileTimeToDosDateTime(pFT3, &lastwritedate, &lastwritetime);
-  }
+    if(pFT3 && pFT3->dwLowDateTime && pFT3->dwHighDateTime) {
+        FileTimeToDosDateTime(pFT3, &lastwritedate, &lastwritetime);
+    }
 
-  if(OSLibDosSetFileTime(pHMHandleData->hHMHandle,
-                             creationdate, creationtime, 
-                             lastaccessdate, lastaccesstime, 
-                             lastwritedate, lastwritetime)) 
-  {
-	return TRUE;
-  }
-  dprintf(("SetFileTime failed with error %d", GetLastError()));
-  return FALSE;
+    if(OSLibDosSetFileTime(pHMHandleData->hHMHandle,
+                           creationdate, creationtime,
+                           lastaccessdate, lastaccesstime,
+                           lastwritedate, lastwritetime))
+    {
+        return TRUE;
+    }
+    dprintf(("SetFileTime failed with error %d", GetLastError()));
+    return FALSE;
 }
 
 /*****************************************************************************
@@ -798,26 +820,26 @@ BOOL HMDeviceFileClass::GetFileTime(PHMHANDLEDATA pHMHandleData,
  BOOL rc;
 
   if(!pFT1 && !pFT2 && !pFT3) {//TODO: does NT do this?
-  	dprintf(("ERROR: GetFileTime: invalid parameter!"));
-	SetLastError(ERROR_INVALID_PARAMETER);
-	return FALSE;
+    dprintf(("ERROR: GetFileTime: invalid parameter!"));
+    SetLastError(ERROR_INVALID_PARAMETER);
+    return FALSE;
   }
 
   if(OSLibDosGetFileTime(pHMHandleData->hHMHandle,
-                         &creationdate, &creationtime, 
-                         &lastaccessdate, &lastaccesstime, 
+                         &creationdate, &creationtime,
+                         &lastaccessdate, &lastaccesstime,
                          &lastwritedate, &lastwritetime))
   {
-	if(pFT1) {
-		DosDateTimeToFileTime(creationdate, creationtime, pFT1);
-	}
-	if(pFT2) {
-		DosDateTimeToFileTime(lastaccessdate, lastaccesstime, pFT2);
-	}
-	if(pFT3) {
-		DosDateTimeToFileTime(lastwritedate, lastwritetime, pFT3);
-	}
-	return TRUE;
+    if(pFT1) {
+        DosDateTimeToFileTime(creationdate, creationtime, pFT1);
+    }
+    if(pFT2) {
+        DosDateTimeToFileTime(lastaccessdate, lastaccesstime, pFT2);
+    }
+    if(pFT3) {
+        DosDateTimeToFileTime(lastwritedate, lastwritetime, pFT3);
+    }
+    return TRUE;
   }
   dprintf(("GetFileTime failed with error %d", GetLastError()));
   return FALSE;
@@ -885,7 +907,7 @@ DWORD HMDeviceFileClass::SetFilePointer(PHMHANDLEDATA pHMHandleData,
                                dwMoveMethod);
 
   if(ret == -1) {
-	dprintf(("SetFilePointer failed (error = %d)", GetLastError()));
+    dprintf(("SetFilePointer failed (error = %d)", GetLastError()));
   }
   return ret;
 }
@@ -1116,7 +1138,7 @@ HMFileInfo::HMFileInfo(LPSTR lpszFileName, PVOID lpSecurityAttributes)
 {
   this->lpszFileName = (LPSTR)malloc(strlen(lpszFileName)+1);
   if(!this->lpszFileName) {
-	DebugInt3();
+    DebugInt3();
   }
   strcpy(this->lpszFileName, lpszFileName);
   this->lpSecurityAttributes = lpSecurityAttributes;
@@ -1126,8 +1148,8 @@ HMFileInfo::HMFileInfo(LPSTR lpszFileName, PVOID lpSecurityAttributes)
 HMFileInfo::~HMFileInfo()
 {
   if(lpszFileName) {
-	free(lpszFileName);
-	lpszFileName = NULL;
+    free(lpszFileName);
+    lpszFileName = NULL;
   }
 }
 //******************************************************************************

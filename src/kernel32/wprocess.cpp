@@ -1,4 +1,4 @@
-/* $Id: wprocess.cpp,v 1.109 2000-11-21 14:10:09 sandervl Exp $ */
+/* $Id: wprocess.cpp,v 1.110 2000-11-23 19:23:51 sandervl Exp $ */
 
 /*
  * Win32 process functions
@@ -1436,12 +1436,12 @@ DWORD WIN32API GetModuleFileNameW(HMODULE hModule, LPWSTR lpszPath, DWORD cchPat
 //NOTE: GetModuleHandleA does NOT support files with multiple dots (i.e.
 //      very.weird.exe)
 //
-//  	hinst = LoadLibrary("WINSPOOL.DRV");      -> succeeds
-//	    hinst2 = GetModuleHandle("WINSPOOL.DRV"); -> succeeds
+//      hinst = LoadLibrary("WINSPOOL.DRV");      -> succeeds
+//      hinst2 = GetModuleHandle("WINSPOOL.DRV"); -> succeeds
 //      hinst3 = GetModuleHandle("WINSPOOL.");    -> fails
 //      hinst4 = GetModuleHandle("WINSPOOL");     -> fails
-//  	hinst = LoadLibrary("KERNEL32.DLL");      -> succeeds
-//	    hinst2 = GetModuleHandle("KERNEL32.DLL"); -> succeeds
+//      hinst = LoadLibrary("KERNEL32.DLL");      -> succeeds
+//      hinst2 = GetModuleHandle("KERNEL32.DLL"); -> succeeds
 //      hinst3 = GetModuleHandle("KERNEL32.");    -> fails
 //      hinst4 = GetModuleHandle("KERNEL32");     -> succeeds
 //      Same behaviour as observed in NT4, SP6
@@ -1572,13 +1572,15 @@ BOOL WINAPI CreateProcessA( LPCSTR lpApplicationName, LPSTR lpCommandLine,
     strncpy(szAppName, cmdline, sizeof(szAppName));
     szAppName[254] = 0;
     if(*exename == '"') {
-         exename++;
+        exename++;
+        while(*exename != 0 && *exename != '"')
+             exename++;
     }
-
-    //TODO: doesn't work for directories with spaces!
-    while(*exename != 0 && *exename != ' ' && *exename != '"')
-         exename++;
-
+    else {
+        //TODO: doesn't work for directories with spaces!
+        while(*exename != 0 && *exename != ' ' && *exename != '"')
+             exename++;
+    }
     if(*exename != 0) {
          *exename = 0;
     }
