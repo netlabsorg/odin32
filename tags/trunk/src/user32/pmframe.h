@@ -1,4 +1,4 @@
-/* $Id: pmframe.h,v 1.2 1999-10-11 16:04:51 cbratschi Exp $ */
+/* $Id: pmframe.h,v 1.3 1999-10-29 16:06:55 cbratschi Exp $ */
 /*
  * Win32 Frame Managment Code for OS/2
  *
@@ -11,5 +11,6 @@
 PVOID FrameSubclassFrameWindow(Win32BaseWindow *win32wnd);
 VOID  FrameSetBorderSize(Win32BaseWindow *win32wnd,BOOL resize);
 UINT  FrameGetDefSizeBorderSize(VOID);
+VOID  FrameTrackFrame(Win32BaseWindow *win32wnd,BOOL lefttop);
 
 #endif

@@ -1,4 +1,4 @@
-/* $Id: oslibwin.cpp,v 1.37 1999-10-28 15:20:25 sandervl Exp $ */
+/* $Id: oslibwin.cpp,v 1.38 1999-10-29 16:06:55 cbratschi Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -925,23 +925,30 @@ BOOL OSLibWinEnableScrollBar(HWND hwndParent, int scrollBar, BOOL fEnable)
 }
 //******************************************************************************
 //******************************************************************************
+HWND OSLibWinQueryObjectWindow(VOID)
+{
+  return WinQueryObjectWindow(HWND_DESKTOP);
+}
+//******************************************************************************
+//******************************************************************************
 BOOL OSLibWinShowScrollBar(HWND hwndParent, HWND hwndScroll, int scrollBar,
                            BOOL fShow, BOOL fForceChange)
 {
+   HWND hwndObj = WinQueryObjectWindow(HWND_DESKTOP),hwndCurPar = WinQueryWindow(hwndScroll,QW_PARENT);
+
    if(hwndScroll == NULL) {
         dprintf(("OSLibWinShowScrollBar: scrollbar %d (parent %x) not found!", scrollBar, hwndParent));
         return FALSE;
    }
 
-   if(fShow != WinIsWindowVisible(hwndScroll) || fForceChange)
+   if ((fShow && hwndCurPar == hwndObj) || (!fShow && hwndCurPar != hwndObj) || fForceChange)
    {
-         WinSetParent(hwndScroll, fShow ? hwndParent : HWND_OBJECT, FALSE);
+     //CB: bug: winhlp32: hide vert scrollbar on maximize doesn't update the frame
+         WinSetParent(hwndScroll,fShow ? hwndParent:HWND_OBJECT,FALSE);
          WinSendMsg(hwndParent, WM_UPDATEFRAME,
                     MPFROMLONG( ( scrollBar == OSLIB_VSCROLL ) ? FCF_VERTSCROLL
                                                                : FCF_HORZSCROLL),
                     MPVOID );
-
-         WinShowWindow(hwndScroll, fShow);
    }
    return TRUE;
 }
@@ -1047,6 +1054,8 @@ void OSLibSetWindowStyle(HWND hwnd, ULONG dwStyle)
   WinSetWindowULong(hwnd, QWL_STYLE,
                     (WinQueryWindowULong(hwnd, QWL_STYLE) & ~0xffff0000) |
                     OSWinStyle);
+
+  //CB: bug: it doesn't work with child windows!
 
   if(OSFrameStyle & FCF_TITLEBAR)
   {
