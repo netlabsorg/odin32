@@ -1,4 +1,4 @@
-/* $Id: shell.c,v 1.2 2001-10-17 09:15:20 phaller Exp $ */
+/* $Id: shell.c,v 1.3 2002-03-08 11:01:00 sandervl Exp $ */
 /*
  * 				Shell Library Functions
  *
@@ -399,7 +399,10 @@ HINSTANCE16 WINAPI ShellExecute16( HWND16 hWnd, LPCSTR lpOperation,
 
     /* First try to execute lpFile with lpParameters directly */ 
     strcpy(cmd,lpFile);
-    strcat(cmd,lpParameters ? lpParameters : "");
+    if (lpParameters) {
+        strcat(cmd, " " );
+        strcat(cmd,lpParameters );
+    }
 
     retval = WinExec16( cmd, iShowCmd );
 

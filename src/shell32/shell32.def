@@ -1,4 +1,4 @@
-; $Id: shell32.def,v 1.36 2002-02-14 12:10:10 sandervl Exp $
+; $Id: shell32.def,v 1.37 2002-03-08 11:01:00 sandervl Exp $
 
 ; Based on Windows 95
 LIBRARY SHELL32 INITINSTANCE
@@ -166,7 +166,7 @@ EXPORTS
     ILFree                            = _ILFree@4                             @155
     ILGlobalGree                      = _ILGlobalFree@4                       @156
     ILCreateFromPath                  = _ILCreateFromPathAW@4                 @157
-    PathGetExtension                  = _PathGetExtensionAW@4                 @158
+    PathGetExtension                  = _PathGetExtensionAW@12                @158
     PathIsDirectory                   = _PathIsDirectoryAW@4                  @159
 ;   SHNetConnectionDialog             = _SHNetConnectionDialog@?              @160
     SHRunControlPanel                 = _SHRunControlPanel@8                  @161
