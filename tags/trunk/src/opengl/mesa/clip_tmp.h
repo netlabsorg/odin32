@@ -1,4 +1,4 @@
-/* $Id: clip_tmp.h,v 1.2 2000-03-01 18:49:24 jeroen Exp $ */
+/* $Id: clip_tmp.h,v 1.3 2000-05-21 20:17:32 jeroen Exp $ */
 
 /*
  * Mesa 3-D graphics library
@@ -35,7 +35,7 @@
  * the case where the cliptest passes.  This isn't essential,
  * and an asm implementation needn't replicate that behaviour.
  */
-static GLvector4f * __cdecl TAG(cliptest_points4)( GLvector4f *clip_vec,
+static GLvector4f * _XFORMAPI TAG(cliptest_points4)( GLvector4f *clip_vec,
                                            GLvector4f *proj_vec,
                                            GLubyte clipMask[],
                                            GLubyte *orMask,
@@ -100,7 +100,7 @@ static GLvector4f * __cdecl TAG(cliptest_points4)( GLvector4f *clip_vec,
    return proj_vec;
 }
 
-static GLvector4f * __cdecl TAG(cliptest_points3)( GLvector4f *clip_vec,
+static GLvector4f * _XFORMAPI TAG(cliptest_points3)( GLvector4f *clip_vec,
                                            GLvector4f *proj_vec,
                                            GLubyte clipMask[],
                                            GLubyte *orMask,
@@ -134,7 +134,7 @@ static GLvector4f * __cdecl TAG(cliptest_points3)( GLvector4f *clip_vec,
    return clip_vec;
 }
 
-static GLvector4f * __cdecl TAG(cliptest_points2)( GLvector4f *clip_vec,
+static GLvector4f * _XFORMAPI TAG(cliptest_points2)( GLvector4f *clip_vec,
                                            GLvector4f *proj_vec,
                                            GLubyte clipMask[],
                                            GLubyte *orMask,

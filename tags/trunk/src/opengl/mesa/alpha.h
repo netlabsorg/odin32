@@ -1,8 +1,8 @@
-/* $Id: alpha.h,v 1.1 2000-02-29 00:48:24 sandervl Exp $ */
+/* $Id: alpha.h,v 1.2 2000-05-21 20:03:18 jeroen Exp $ */
 
 /*
  * Mesa 3-D graphics library
- * Version:  3.1
+ * Version:  3.3
  *
  * Copyright (C) 1999  Brian Paul   All Rights Reserved.
  *
@@ -35,11 +35,13 @@
 #include "types.h"
 
 
-extern GLint gl_alpha_test( const GLcontext *ctx, GLuint n,
-                            CONST GLubyte rgba[][4], GLubyte mask[] );
+extern GLint
+_mesa_alpha_test( const GLcontext *ctx, GLuint n,
+                  CONST GLubyte rgba[][4], GLubyte mask[] );
 
 
-extern void gl_AlphaFunc( GLcontext *ctx, GLenum func, GLclampf ref );
+extern void
+_mesa_AlphaFunc( GLenum func, GLclampf ref );
 
 
 #endif
