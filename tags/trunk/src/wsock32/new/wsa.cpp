@@ -1,4 +1,4 @@
-/* $Id: wsa.cpp,v 1.1 2000-03-22 20:01:07 sandervl Exp $ */
+/* $Id: wsa.cpp,v 1.2 2000-03-23 19:21:54 sandervl Exp $ */
 
 /*
  *
@@ -31,6 +31,11 @@
 
 ODINDEBUGCHANNEL(WSOCK32-WSA)
 
+#ifndef winsockcleanupsockets
+// Exported by SO32DLL.  Used to close all open sockets.
+void _System winsockcleanupsockets(void);
+#endif
+
 static void WSASetBlocking(BOOL fBlock);
 
 BOOL fWSAInitialized = FALSE;
@@ -52,13 +57,17 @@ ODINFUNCTION2(int, WSAStartup,
 
     if (!lpWSAData) return WSAEINVAL;
 
-    pwsi = WINSOCK_GetIData();
-    if( pwsi == NULL )
+    if(fWSAInitialized == FALSE) 
     {
         WINSOCK_CreateIData();
         pwsi = WINSOCK_GetIData();
-	if (!pwsi) return WSASYSNOTREADY;
+
+    	sock_init();
     }
+    else pwsi = WINSOCK_GetIData();
+
+    if (!pwsi) return WSASYSNOTREADY;
+
     pwsi->num_startup++;
     fWSAInitialized = TRUE;
 
@@ -74,6 +83,8 @@ ODINFUNCTION0(int,WSACleanup)
     LPWSINFO pwsi = WINSOCK_GetIData();
     if( pwsi ) {
 	if( --pwsi->num_startup > 0 ) return 0;
+
+        winsockcleanupsockets();
 
 	fWSAInitialized = FALSE;
 	WINSOCK_DeleteIData();
@@ -102,15 +113,6 @@ ODINFUNCTION1(FARPROC,WSASetBlockingHook,
 //******************************************************************************
 //TODO: Implement this
 //******************************************************************************
-ODINFUNCTION0(int,WSACancelBlockingCall)
-{
-  LPWSINFO pwsi = WINSOCK_GetIData();
-
-  if( pwsi ) return 0;
-  return SOCKET_ERROR;
-}
-//******************************************************************************
-//******************************************************************************
 ODINFUNCTION0(int,WSAUnhookBlockingHook)
 {
     LPWSINFO pwsi = WINSOCK_GetIData();
@@ -125,7 +127,7 @@ ODINFUNCTION0(int,WSAUnhookBlockingHook)
 }
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION0(BOOL,WSAIsBlocking)
+BOOL WIN32API WSAIsBlocking()
 {
     LPWSINFO pwsi = WINSOCK_GetIData();
 

@@ -1,4 +1,4 @@
-/* $Id: wsock32.h,v 1.4 2000-03-22 20:01:09 sandervl Exp $ */
+/* $Id: wsock32.h,v 1.5 2000-03-23 19:21:55 sandervl Exp $ */
 
 /* WSOCK32.H--definitions & conversions for Odin's wsock32.dll.
  * Unused/unneeded Microsoft declarations removed.
@@ -23,6 +23,8 @@
 #include <nerrno.h>
 #include <sys\time.h>
 
+#include <odinwrap.h>
+
 /*
  * Socket state bits.
  */
@@ -44,6 +46,8 @@
 
 //socketopt options
 #define SO_DONTLINGER   (u_int)(~SO_LINGER)
+
+#define WSAMAKESELECTREPLY(event,error)     MAKELONG(event,error)
 
 // WSAAsyncSelect flags
 #define FD_READ         0x01
@@ -215,8 +219,8 @@ typedef struct _WSINFO
 
 void WIN32API WSASetLastError(int iError);
 int  WIN32API WSAGetLastError(void);
-BOOL WIN32API WSAIsBlocking(void);
 int  WIN32API WSAAsyncSelect(SOCKET s, HWND hWnd, u_int wMsg, long lEvent);
+BOOL WIN32API WSAIsBlocking(void);
 
 extern BOOL fWSAInitialized;
 

@@ -1,4 +1,4 @@
-/* $Id: asyncthread.h,v 1.1 2000-03-22 20:01:04 sandervl Exp $ */
+/* $Id: asyncthread.h,v 1.2 2000-03-23 19:21:54 sandervl Exp $ */
 
 /*
  * Async thread help functions
@@ -11,6 +11,7 @@
 #define __ASYNCTHREAD_H__
 
 #include <vmutex.h>
+#include <vsemaphore.h>
 
 #define	ASYNCCNV	_Optlink
 
@@ -22,7 +23,8 @@ enum AsyncRequestType {
   ASYNC_GETPROTOBYNAME,
   ASYNC_GETPROTOBYNUMBER,
   ASYNC_GETSERVBYNAME,
-  ASYNC_GETSERVBYPORT
+  ASYNC_GETSERVBYPORT,
+  ASYNC_SELECT
 } ;
 
 typedef struct _ASYNCTHREADPARM
@@ -61,14 +63,21 @@ typedef struct _ASYNCTHREADPARM
 			int	port;
 			LPSTR   proto;
 		} getservbyport;
+		struct {
+			VSemaphore *asyncSem;
+			DWORD       lEvents;
+                        DWORD       lEventsPending;
+			SOCKET      s;
+		} asyncselect;
         } u;
         _ASYNCTHREADPARM *next;
 } ASYNCTHREADPARM, *PASYNCTHREADPARM;
 
-ULONG QueueAsyncJob(ASYNCTHREADPROC asyncproc, PASYNCTHREADPARM pThreadParm);
+ULONG QueueAsyncJob(ASYNCTHREADPROC asyncproc, PASYNCTHREADPARM pThreadParm, BOOL fSetBlocking = FALSE);
 void  RemoveFromQueue(PASYNCTHREADPARM pThreadParm);
 
 void  EnableAsyncEvent(SOCKET s, ULONG flags);
 BOOL  QueryAsyncEvent(SOCKET s, HWND *pHwnd, int *pMsg, ULONG *plEvent);
+BOOL  FindAndSetAsyncEvent(SOCKET s, HWND hwnd, int msg, ULONG lEvent);
 
 #endif  //__ASYNCTHREAD_H__

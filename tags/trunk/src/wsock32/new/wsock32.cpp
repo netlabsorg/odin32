@@ -1,4 +1,4 @@
-/* $Id: wsock32.cpp,v 1.16 2000-03-22 20:01:08 sandervl Exp $ */
+/* $Id: wsock32.cpp,v 1.17 2000-03-23 19:21:54 sandervl Exp $ */
 
 /*
  *
@@ -93,7 +93,7 @@ tryagain:
 	fCurrentThread = FALSE; //just to prevent infinite loops
 	goto tryagain;
     }
-    else {
+    if(iData == NULL) {
 	dprintf(("WINSOCK_GetIData: couldn't find struct for thread %x", tid));
 	DebugInt3();// should never happen!!!!!!!
     }
@@ -144,16 +144,18 @@ void WINSOCK_DeleteIData(void)
 }
 //******************************************************************************
 //******************************************************************************
-ODINPROCEDURE1(WSASetLastError,
-               int,iError)
+void WIN32API WSASetLastError(int iError)
 {
   // according to the docs, WSASetLastError() is just a call-through
   // to SetLastError()
+  if(iError) {
+	dprintf(("WSASetLastError %x", iError));
+  }
   SetLastError(iError);
 }
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION0(int,WSAGetLastError)
+int WIN32API WSAGetLastError()
 {
   return GetLastError();
 }
@@ -231,7 +233,7 @@ ODINFUNCTION1(int,OS2closesocket,SOCKET, s)
    ret = soclose(s);
 
    //Close WSAAsyncSelect thread if one was created for this socket
-   EnableAsyncEvent(s, 0L);
+   WSAAsyncSelect(s, 0, 0, 0);
    
    if(ret == SOCKET_ERROR) {
  	WSASetLastError(wsaErrno());
@@ -290,6 +292,9 @@ ODINFUNCTION3(int,OS2ioctlsocket,
       	WSASetLastError(WSAEINPROGRESS);
       	return SOCKET_ERROR;
    } 
+   // clear high word (not used in OS/2's tcpip stack)
+   cmd = LOUSHORT(cmd);
+
    if(cmd != FIONBIO && cmd != FIONREAD && cmd != SIOCATMARK) {
         WSASetLastError(WSAEINVAL);
       	return SOCKET_ERROR;
@@ -316,8 +321,7 @@ ODINFUNCTION3(int,OS2ioctlsocket,
 		}
 	}
    }
-   // clear high word (not used in OS/2's tcpip stack)
-   ret = ioctl(s, LOUSHORT(cmd), (char *)argp, sizeof(int));
+   ret = ioctl(s, cmd, (char *)argp, sizeof(int));
 
    // Map EOPNOTSUPP to EINVAL
    if(ret == SOCKET_ERROR && sock_errno() == SOCEOPNOTSUPP)
@@ -877,6 +881,7 @@ tryagain:
                 ret = setsockopt(s, level, optname, (char *)optval, optlen);
 		break;
 	default: 
+		dprintf(("setsockopt: unknown option %x", optname));
             	WSASetLastError(WSAENOPROTOOPT);
             	return SOCKET_ERROR;
         } 
@@ -891,6 +896,7 @@ tryagain:
                	ret = setsockopt(s, level, optname, (char *)optval, optlen);
         } 
 	else {
+		dprintf(("setsockopt: unknown option %x", optname));
        		WSASetLastError(WSAENOPROTOOPT);
       		return SOCKET_ERROR;
         }
@@ -973,6 +979,7 @@ ODINFUNCTION5(int,OS2getsockopt,
                 }
 		break;
 	default: 
+		dprintf(("getsockopt: unknown option %x", optname));
             	WSASetLastError(WSAENOPROTOOPT);
             	return SOCKET_ERROR;
         } 
@@ -987,6 +994,7 @@ ODINFUNCTION5(int,OS2getsockopt,
                	ret = getsockopt(s, level, optname, (char *)optval, optlen);
         } 
 	else {
+		dprintf(("getsockopt: unknown option %x", optname));
        		WSASetLastError(WSAENOPROTOOPT);
       		return SOCKET_ERROR;
         }

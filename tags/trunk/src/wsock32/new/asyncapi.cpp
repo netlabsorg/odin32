@@ -1,4 +1,4 @@
-/* $Id: asyncapi.cpp,v 1.1 2000-03-22 20:01:04 sandervl Exp $ */
+/* $Id: asyncapi.cpp,v 1.2 2000-03-23 19:21:53 sandervl Exp $ */
 
 /*
  *
@@ -6,7 +6,7 @@
  *
  * Copyright (C) 2000 Sander van Leeuwen (sandervl@xs4all.nl)
  *
- * Based on Wine code: (dlls\winsock\async.c)
+ * Parts based on Wine code: (dlls\winsock\async.c)
  * (C) 1993,1994,1996,1997 John Brezak, Erik Bos, Alex Korobka.
  * (C) 1999 Marcus Meissner
  *
@@ -16,6 +16,7 @@
 #define INCL_BASE
 #include <os2wrap.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <odin.h>
 #include <odinwrap.h>
@@ -151,7 +152,6 @@ void ASYNCCNV WSAsyncThreadProc(void *pparm)
   	PostMessageA(pThreadParm->hwnd, pThreadParm->msg, 
                      (WPARAM)pThreadParm->hAsyncTaskHandle, lParam);
    }
-   RemoveFromQueue(pThreadParm); 
 }
 //******************************************************************************
 //******************************************************************************
@@ -160,10 +160,10 @@ LHANDLE WSAAsyncRequest(AsyncRequestType requesttype, HWND hwnd, int msg, char *
                         PVOID param4)
 {
   PASYNCTHREADPARM pThreadParm;
-  LHANDLE          hHost = 0;
-  LPSTR            tempname;
-  LPSTR            tempproto;
-  LPSTR            tempaddr;
+  LHANDLE          hAsyncRequest = 0;
+  LPSTR            tempname  = 0;
+  LPSTR            tempproto = 0;
+  LPSTR            tempaddr  = 0;
 
    if(!fWSAInitialized)
    {
@@ -192,6 +192,7 @@ LHANDLE WSAAsyncRequest(AsyncRequestType requesttype, HWND hwnd, int msg, char *
 		WSASetLastError(WSAEFAULT);
 		return 0;
 	}
+	memset(pThreadParm, 0, sizeof(*pThreadParm));
 	pThreadParm->request= requesttype;
         pThreadParm->hwnd   = hwnd;
         pThreadParm->msg    = msg;
@@ -282,7 +283,19 @@ LHANDLE WSAAsyncRequest(AsyncRequestType requesttype, HWND hwnd, int msg, char *
 			strcpy(pThreadParm->u.getservbyport.proto, (char *)param2);
 		break;
 	}
-   	return (LHANDLE)QueueAsyncJob(WSAsyncThreadProc, pThreadParm);
+   	hAsyncRequest = (LHANDLE)QueueAsyncJob(WSAsyncThreadProc, pThreadParm);
+	if(hAsyncRequest == 0) {
+		free(pThreadParm);
+		if(tempname)	free(tempname);
+		if(tempaddr)	free(tempaddr);
+		if(tempproto)	free(tempproto);
+
+		dprintf(("WSAAsyncRequest: QueueAsyncJob failure!"));
+		DebugInt3();
+		WSASetLastError(WSAEFAULT);
+	 	return 0;
+	}
+	return hAsyncRequest;
    }
    return 0;
 }                      
@@ -376,13 +389,236 @@ ODINFUNCTION6(LHANDLE,WSAAsyncGetServByPort,
 }
 //******************************************************************************
 //******************************************************************************
+void AsyncNotifyEvent(PASYNCTHREADPARM pThreadParm, ULONG event, ULONG socket_error)
+{
+   pThreadParm->u.asyncselect.lEventsPending &= ~event;
+
+   event = WSAMAKESELECTREPLY(event, socket_error);
+
+   PostMessageA(pThreadParm->hwnd, pThreadParm->msg, (WPARAM)pThreadParm->u.asyncselect.s, 
+               (LPARAM)event);
+}
+//******************************************************************************
+#define  nr(i) 		((i != -1) ? 1 : 0)
+#define  ready(i)       ((i != -1) && (sockets[i] != -1))
+//******************************************************************************
+void ASYNCCNV WSAsyncSelectThreadProc(void *pparm)
+{
+ PASYNCTHREADPARM pThreadParm = (PASYNCTHREADPARM)pparm;
+ SOCKET           sockets[3];
+ SOCKET           s = pThreadParm->u.asyncselect.s;
+ int       	  noread, nowrite, noexcept, state, sockoptlen, sockoptval;
+ int              tmp, i, lEventsPending, ret, bytesread;
+  
+   while(TRUE)
+   {
+asyncloopstart:
+	i         = 0;
+	noread    = nowrite = noexcept = -1;
+
+	//break if user cancelled request
+      	if(pThreadParm->u.asyncselect.lEvents == 0) {
+		break;
+      	}
+
+        lEventsPending = pThreadParm->u.asyncselect.lEventsPending;
+      	//block if no events are pending
+      	if(lEventsPending == 0)
+      	{
+		//wait for events to be enabled
+		pThreadParm->u.asyncselect.asyncSem->wait();
+		//reset event semaphore
+		pThreadParm->u.asyncselect.asyncSem->reset();
+         	continue;
+      	}
+
+	if(lEventsPending & (FD_READ | FD_CLOSE | FD_ACCEPT)) {
+		noread = i++;
+		sockets[noread] = s;
+	}
+	if(lEventsPending & (FD_WRITE | FD_CONNECT)) {
+		nowrite = i++;
+		sockets[nowrite] = s;
+	}
+	if(lEventsPending & FD_OOB) {
+		noexcept = i++;
+		sockets[noexcept] = s;
+	}
+
+        dprintf(("WSAsyncSelectThreadProc %x wrs=%d, rds=%d, oos =%d, pending = %x", pThreadParm->u.asyncselect.s, noread, nowrite, noexcept, lEventsPending));
+
+	ret = select((int *)sockets, nr(noread), nr(nowrite), nr(noexcept), -1);
+	if(ret == SOCKET_ERROR) {
+		int selecterr = sock_errno();
+		switch(selecterr) 
+		{
+		case SOCEINTR:
+			goto asyncloopstart;	//so_cancel was called
+
+		case SOCECONNRESET:
+		case SOCEPIPE:
+       			if(lEventsPending & FD_CLOSE)
+       				AsyncNotifyEvent(pThreadParm, FD_CLOSE, WSAECONNRESET);
+
+			//remote connection broken (so can't receive data anymore)
+                        //but can still send
+       			pThreadParm->u.asyncselect.lEventsPending &= ~(FD_READ | FD_ACCEPT);
+			goto asyncloopstart; 
+
+		case SOCEINVAL:
+       			if(lEventsPending & FD_CLOSE)
+       				AsyncNotifyEvent(pThreadParm, FD_CLOSE, selecterr);
+      			break;
+		default:
+			dprintf(("WSAsyncSelectThreadProc: select SOCKET_ERROR %x", selecterr));
+			break; //something bad happened
+		}
+		break;
+	}
+
+      	if(ready(nowrite))
+ 	{
+        	state = ioctl(s, FIOBSTATUS, (char *)&tmp, sizeof(tmp));
+
+         	if(lEventsPending & FD_CONNECT) {
+	    		if(state & SS_ISCONNECTED) {
+				AsyncNotifyEvent(pThreadParm, FD_CONNECT, NO_ERROR);
+	    		}
+            		else {
+            			sockoptlen = sizeof(int);
+
+            			ret = getsockopt(s, SOL_SOCKET, SO_ERROR,
+                	        		 (char *) &sockoptval, &sockoptlen);
+				if(sockoptval == (WSAECONNREFUSED-WSABASEERR)) {
+					AsyncNotifyEvent(pThreadParm, FD_CONNECT, WSAECONNREFUSED);
+				}
+            		}  
+        	}
+		else
+		if(!(state & SS_CANTSENDMORE) && (lEventsPending & FD_WRITE)) {
+			AsyncNotifyEvent(pThreadParm, FD_WRITE, NO_ERROR);
+		}
+        }
+
+      	if(ready(noread))
+      	{
+         	state = ioctl(s, FIONREAD, (CHAR *) &bytesread, sizeof(bytesread));
+         	if(state == SOCKET_ERROR) {
+            		if(lEventsPending & FD_CLOSE) 
+			{
+				AsyncNotifyEvent(pThreadParm, FD_CLOSE, NO_ERROR);
+				//remote connection broken (so can't receive data anymore)
+                        	//but can still send
+       				pThreadParm->u.asyncselect.lEventsPending &= ~(FD_READ | FD_ACCEPT);
+				continue;
+			}
+			else {
+				dprintf(("WSAsyncSelectThreadProc: ioctl SOCKET_ERROR!"));
+				break; //todo: correct???
+			}
+		}
+         	if(lEventsPending & FD_ACCEPT) 
+ 		{
+            		sockoptlen = sizeof(sockoptlen);
+
+            		ret = getsockopt(s, SOL_SOCKET, SO_OPTIONS,
+                                         (char *) &sockoptval, &sockoptlen);
+		        if(ret == SOCKET_ERROR) {
+				dprintf(("WSAsyncSelectThreadProc: getsockopt SOCKET_ERROR!"));
+               			break;
+			}
+			if((sockoptval & SO_ACCEPTCONN) == SO_ACCEPTCONN) {
+				AsyncNotifyEvent(pThreadParm, FD_ACCEPT, NO_ERROR);
+			}
+		}
+		if((lEventsPending & FD_READ) && bytesread > 0) {
+			AsyncNotifyEvent(pThreadParm, FD_READ, NO_ERROR);
+		}
+	}
+      	if(ready(noexcept))
+      	{
+		if(lEventsPending & FD_OOB) {
+         		AsyncNotifyEvent(pThreadParm, FD_OOB, NO_ERROR);
+		}
+      	}
+	if((pThreadParm->u.asyncselect.lEventsPending & (FD_ACCEPT|FD_CLOSE|FD_CONNECT)) == 
+            (lEventsPending & (FD_ACCEPT|FD_CLOSE|FD_CONNECT))) {
+		DosSleep(10);
+	}
+   }
+   delete pThreadParm->u.asyncselect.asyncSem;
+}
+//******************************************************************************
+//******************************************************************************
 ODINFUNCTION4(int,WSAAsyncSelect,
               SOCKET,s,
               HWND,hWnd,
               u_int,wMsg,
               long,lEvent)
 {
-  return SOCKET_ERROR;
+  PASYNCTHREADPARM pThreadParm;
+  int              nonblock = 1;
+  int              ret;
+
+   if(!fWSAInitialized)
+   {
+      	WSASetLastError(WSANOTINITIALISED);
+	return SOCKET_ERROR;
+   }
+   else
+   if(WSAIsBlocking())
+   {
+        WSASetLastError(WSAEINPROGRESS);      	// blocking call in progress
+	return SOCKET_ERROR;
+   }
+   else
+   if(hWnd && !IsWindow(hWnd))
+   {
+        WSASetLastError(WSAEINVAL);           	// invalid parameter
+	return SOCKET_ERROR;
+   }
+   //Set socket to non-blocking mode
+   ret = ioctl(s, FIONBIO, (char *) &nonblock, sizeof(nonblock));
+   if(ret == SOCKET_ERROR) {
+ 	WSASetLastError(wsaErrno());
+	return SOCKET_ERROR;
+   }
+   if(FindAndSetAsyncEvent(s, hWnd, wMsg, lEvent) == TRUE) {
+	//found and changed active async event
+	WSASetLastError(NO_ERROR);
+	return NO_ERROR;
+   }
+   pThreadParm = (PASYNCTHREADPARM)malloc(sizeof(ASYNCTHREADPARM));
+   if(pThreadParm == NULL) {
+	dprintf(("WSAAsyncSelect: malloc failure!"));
+	DebugInt3();
+	WSASetLastError(WSAEFAULT);
+ 	return SOCKET_ERROR;
+   }
+   memset(pThreadParm, 0, sizeof(*pThreadParm));
+   pThreadParm->request= ASYNC_SELECT;
+   pThreadParm->hwnd   = hWnd;
+   pThreadParm->msg    = wMsg;
+   pThreadParm->u.asyncselect.lEvents        = lEvent;
+   pThreadParm->u.asyncselect.lEventsPending = lEvent;
+   pThreadParm->u.asyncselect.s              = s;
+   pThreadParm->u.asyncselect.asyncSem       = new VSemaphore;
+   if(pThreadParm->u.asyncselect.asyncSem == NULL) {
+	dprintf(("WSAAsyncSelect: VSemaphore alloc failure!"));
+	DebugInt3();
+	WSASetLastError(WSAEFAULT);
+ 	return SOCKET_ERROR;
+   }
+   if(QueueAsyncJob(WSAsyncSelectThreadProc, pThreadParm) == 0) {
+	delete pThreadParm->u.asyncselect.asyncSem;
+	free(pThreadParm);
+	dprintf(("WSAAsyncSelect: QueueAsyncJob failure!"));
+	DebugInt3();
+	WSASetLastError(WSAEFAULT);
+ 	return SOCKET_ERROR;
+   }
+   WSASetLastError(NO_ERROR);
+   return NO_ERROR;
 }
 //******************************************************************************
 //******************************************************************************
