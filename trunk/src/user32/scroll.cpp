@@ -1,4 +1,4 @@
-/* $Id: scroll.cpp,v 1.24 1999-11-19 17:59:34 cbratschi Exp $ */
+/* $Id: scroll.cpp,v 1.25 1999-11-24 18:21:37 cbratschi Exp $ */
 /*
  * Scrollbar control
  *
@@ -265,7 +265,7 @@ static enum SCROLL_HITTEST SCROLL_HitTest( HWND hwnd, INT nBar,
     {
         if (pt.y < rect.top + arrowSize) return (infoPtr->flags & ESB_DISABLE_LTUP) ? SCROLL_NOWHERE:SCROLL_TOP_ARROW;
         if (pt.y >= rect.bottom - arrowSize) return (infoPtr->flags & ESB_DISABLE_RTDN) ? SCROLL_NOWHERE:SCROLL_BOTTOM_ARROW;
-        if (!thumbPos) return SCROLL_TOP_RECT;
+        if (!thumbPos) return ((infoPtr->flags & ESB_DISABLE_BOTH) == ESB_DISABLE_BOTH) ? SCROLL_NOWHERE:SCROLL_TOP_RECT;
         pt.y -= rect.top;
         if (pt.y < thumbPos) return SCROLL_TOP_RECT;
         if (pt.y >= thumbPos + thumbSize) return SCROLL_BOTTOM_RECT;
@@ -274,7 +274,7 @@ static enum SCROLL_HITTEST SCROLL_HitTest( HWND hwnd, INT nBar,
     {
         if (pt.x < rect.left + arrowSize) return (infoPtr->flags & ESB_DISABLE_LTUP) ? SCROLL_NOWHERE:SCROLL_TOP_ARROW;
         if (pt.x >= rect.right - arrowSize) return (infoPtr->flags & ESB_DISABLE_RTDN) ? SCROLL_NOWHERE:SCROLL_BOTTOM_ARROW;
-        if (!thumbPos) return SCROLL_TOP_RECT;
+        if (!thumbPos) return ((infoPtr->flags & ESB_DISABLE_BOTH) == ESB_DISABLE_BOTH) ? SCROLL_NOWHERE:SCROLL_TOP_RECT;
         pt.x -= rect.left;
         if (pt.x < thumbPos) return SCROLL_TOP_RECT;
         if (pt.x >= thumbPos + thumbSize) return SCROLL_BOTTOM_RECT;
@@ -794,7 +794,12 @@ LRESULT SCROLL_HandleScrollEvent(HWND hwnd,WPARAM wParam,LPARAM lParam,INT nBar,
         pt.y = (SHORT)HIWORD(lParam);
         SCROLL_trackVertical = vertical;
         SCROLL_trackHitTest = hittest = SCROLL_HitTest( hwnd, nBar, pt, FALSE );
-        if (SCROLL_trackHitTest == SCROLL_NOWHERE) return res;
+        if (SCROLL_trackHitTest == SCROLL_NOWHERE)
+        {
+          MessageBeep(MB_ICONEXCLAMATION);
+
+          return res;
+        }
         SCROLL_Scrolling = TRUE;
         timerRunning = FALSE;
         if (SCROLL_FocusWin == hwnd && SCROLL_Highlighted)

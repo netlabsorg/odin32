@@ -1,4 +1,4 @@
-/* $Id: button.cpp,v 1.19 1999-11-21 14:04:10 achimha Exp $ */
+/* $Id: button.cpp,v 1.20 1999-11-24 18:21:34 cbratschi Exp $ */
 /* File: button.cpp -- Button type widgets
  *
  * Copyright (C) 1993 Johannes Ruscheinski
@@ -7,6 +7,9 @@
  * Copyright (c) 1999 Christoph Bratschi
  *
  * WINE version: 991031
+ *
+ * Status: complete
+ * Version: 5.00
  */
 
 #include <string.h>
@@ -84,6 +87,10 @@ static const pfPaint btnPaintFunc[MAX_BTN_TYPE] =
 static HBITMAP hbitmapCheckBoxes = 0;
 static WORD checkBoxWidth = 0, checkBoxHeight = 0;
 
+static LRESULT BUTTON_SendNotify(HWND hwnd,DWORD code)
+{
+  return SendMessageA(GetParent(hwnd),WM_COMMAND,MAKEWPARAM(GetWindowLongA(hwnd,GWL_ID),code),hwnd);
+}
 
 static LRESULT BUTTON_GetDlgCode(HWND hwnd,WPARAM wParam,LPARAM lParam)
 {
@@ -116,6 +123,8 @@ static LRESULT BUTTON_GetDlgCode(HWND hwnd,WPARAM wParam,LPARAM lParam)
 static LRESULT BUTTON_Enable(HWND hwnd,WPARAM wParam,LPARAM lParam)
 {
   DWORD dwStyle = GetWindowLongA(hwnd,GWL_STYLE);
+
+  if (dwStyle & BS_NOTIFY && !wParam) BUTTON_SendNotify(hwnd,BN_DISABLE);
 
   //PAINT_BUTTON(hwnd,dwStyle & 0x0f,ODA_DRAWENTIRE);
   //SvL: 09/10/99 Force it to redraw properly
@@ -174,7 +183,10 @@ static LRESULT BUTTON_EraseBkgnd(HWND hwnd,WPARAM wParam,LPARAM lParam)
 
 static LRESULT BUTTON_Paint(HWND hwnd,WPARAM wParam,LPARAM lParam)
 {
-  DWORD style = GetWindowLongA(hwnd,GWL_STYLE) & 0x0f;
+  DWORD dwStyle = GetWindowLongA(hwnd,GWL_STYLE);
+  DWORD style = dwStyle & 0x0f;
+
+  if (dwStyle & BS_NOTIFY) BUTTON_SendNotify(hwnd,BN_PAINT);
 
   if (btnPaintFunc[style])
   {
@@ -184,7 +196,7 @@ static LRESULT BUTTON_Paint(HWND hwnd,WPARAM wParam,LPARAM lParam)
     SetBkMode(hdc,OPAQUE);
     (btnPaintFunc[style])(hwnd,hdc,ODA_DRAWENTIRE);
     if(!wParam) EndPaint(hwnd,&ps);
-  }
+  } else return DefWindowProcA(hwnd,WM_PAINT,wParam,lParam);
 
   return 0;
 }
@@ -196,7 +208,7 @@ static LRESULT BUTTON_LButtonDblClk(HWND hwnd,WPARAM wParam,LPARAM lParam)
 
   if(dwStyle & BS_NOTIFY || style == BS_RADIOBUTTON ||
      style == BS_USERBUTTON || style == BS_OWNERDRAW)
-    SendMessageA(GetParent(hwnd),WM_COMMAND,MAKEWPARAM(GetWindowLongA(hwnd,GWL_ID),BN_DOUBLECLICKED),hwnd);
+    BUTTON_SendNotify(hwnd,BN_DOUBLECLICKED);
   else BUTTON_LButtonDown(hwnd,wParam,lParam);
 
   return 0;
@@ -205,11 +217,14 @@ static LRESULT BUTTON_LButtonDblClk(HWND hwnd,WPARAM wParam,LPARAM lParam)
 static LRESULT BUTTON_LButtonDown(HWND hwnd,WPARAM wParam,LPARAM lParam)
 {
   BUTTONINFO* infoPtr = (BUTTONINFO*)GetInfoPtr(hwnd);
+  DWORD dwStyle = GetWindowLongA(hwnd,GWL_STYLE);
 
   SetCapture(hwnd);
   SetFocus(hwnd);
   SendMessageA(hwnd,BM_SETSTATE,TRUE,0);
   infoPtr->state |= BUTTON_BTNPRESSED;
+
+  if (dwStyle & BS_NOTIFY) BUTTON_SendNotify(hwnd,BN_HILITE);
 
   return 0;
 }
@@ -217,6 +232,7 @@ static LRESULT BUTTON_LButtonDown(HWND hwnd,WPARAM wParam,LPARAM lParam)
 static LRESULT BUTTON_LButtonUp(HWND hwnd,WPARAM wParam,LPARAM lParam)
 {
   BUTTONINFO* infoPtr = (BUTTONINFO*)GetInfoPtr(hwnd);
+  DWORD dwStyle = GetWindowLongA(hwnd,GWL_STYLE);
   RECT rect;
   POINT pt;
 
@@ -235,9 +251,6 @@ static LRESULT BUTTON_LButtonUp(HWND hwnd,WPARAM wParam,LPARAM lParam)
   GetClientRect(hwnd,&rect);
   if (PtInRect(&rect,pt))
   {
-    DWORD dwStyle = GetWindowLongA(hwnd,GWL_STYLE);
-    DWORD id = GetWindowLongA(hwnd,GWL_ID);
-
     switch(dwStyle & 0x0f)
     {
       case BS_AUTOCHECKBOX:
@@ -252,8 +265,10 @@ static LRESULT BUTTON_LButtonUp(HWND hwnd,WPARAM wParam,LPARAM lParam)
                      ((infoPtr->state & 3)+1),0);
         break;
     }
-    SendMessageA(GetParent(hwnd),WM_COMMAND,MAKEWPARAM(id,BN_CLICKED),hwnd);
+    BUTTON_SendNotify(hwnd,BN_CLICKED);
   }
+
+  if (dwStyle & BS_NOTIFY) BUTTON_SendNotify(hwnd,BN_UNHILITE);
 
   return 0;
 }
@@ -261,6 +276,7 @@ static LRESULT BUTTON_LButtonUp(HWND hwnd,WPARAM wParam,LPARAM lParam)
 static LRESULT BUTTON_CaptureChanged(HWND hwnd,WPARAM wParam,LPARAM lParam)
 {
   BUTTONINFO* infoPtr = (BUTTONINFO*)GetInfoPtr(hwnd);
+  DWORD dwStyle = GetWindowLongA(hwnd,GWL_STYLE);
 
   if (infoPtr->state & BUTTON_BTNPRESSED)
   {
@@ -268,6 +284,8 @@ static LRESULT BUTTON_CaptureChanged(HWND hwnd,WPARAM wParam,LPARAM lParam)
     if (infoPtr->state & BUTTON_HIGHLIGHTED)
       SendMessageA( hwnd, BM_SETSTATE, FALSE, 0 );
   }
+
+  if (dwStyle & BS_NOTIFY) BUTTON_SendNotify(hwnd,BN_UNHILITE);
 
   return 0;
 }
@@ -344,7 +362,6 @@ static LRESULT BUTTON_KeyUp(HWND hwnd,WPARAM wParam,LPARAM lParam)
   {
     BUTTONINFO* infoPtr = (BUTTONINFO*)GetInfoPtr(hwnd);
     DWORD dwStyle = GetWindowLongA(hwnd,GWL_STYLE);
-    DWORD id = GetWindowLongA(hwnd,GWL_ID);
 
     ReleaseCapture();
     if (!(infoPtr->state & BUTTON_HIGHLIGHTED)) return 0;
@@ -364,7 +381,7 @@ static LRESULT BUTTON_KeyUp(HWND hwnd,WPARAM wParam,LPARAM lParam)
                      ((infoPtr->state & 3)+1),0);
         break;
     }
-    SendMessageA(GetParent(hwnd),WM_COMMAND,MAKEWPARAM(id,BN_CLICKED),hwnd);
+    BUTTON_SendNotify(hwnd,BN_CLICKED);
   } else if (wParam != VK_TAB) ReleaseCapture();
 
   return 0;
@@ -380,7 +397,10 @@ static LRESULT BUTTON_SysKeyUp(HWND hwnd,WPARAM wParam,LPARAM lParam)
 static LRESULT BUTTON_SetFocus(HWND hwnd,WPARAM wParam,LPARAM lParam)
 {
   BUTTONINFO* infoPtr = (BUTTONINFO*)GetInfoPtr(hwnd);
-  DWORD style = GetWindowLongA(hwnd,GWL_STYLE) & 0x0f;
+  DWORD dwStyle = GetWindowLongA(hwnd,GWL_STYLE);
+  DWORD style = dwStyle & 0x0f;
+
+  if (dwStyle & BS_NOTIFY) BUTTON_SendNotify(hwnd,BN_SETFOCUS);
 
   if ((style == BS_AUTORADIOBUTTON || style == BS_RADIOBUTTON) &&
       (GetCapture() != hwnd) && !(SendMessageA(hwnd,BM_GETCHECK,0,0) & BST_CHECKED))
@@ -388,7 +408,7 @@ static LRESULT BUTTON_SetFocus(HWND hwnd,WPARAM wParam,LPARAM lParam)
     /* The notification is sent when the button (BS_AUTORADIOBUTTON)
        is unckecked and the focus was not given by a mouse click. */
     if (style == BS_AUTORADIOBUTTON) SendMessageA(hwnd,BM_SETCHECK,TRUE,0);
-    SendMessageA(GetParent(hwnd),WM_COMMAND,MAKEWPARAM(GetWindowLongA(hwnd,GWL_ID),BN_CLICKED),hwnd);
+    BUTTON_SendNotify(hwnd,BN_CLICKED);
   }
 
   infoPtr->state |= BUTTON_HASFOCUS;
@@ -400,13 +420,15 @@ static LRESULT BUTTON_SetFocus(HWND hwnd,WPARAM wParam,LPARAM lParam)
 static LRESULT BUTTON_KillFocus(HWND hwnd,WPARAM wParam,LPARAM lParam)
 {
   BUTTONINFO* infoPtr = (BUTTONINFO*)GetInfoPtr(hwnd);
-  DWORD style = GetWindowLongA(hwnd,GWL_STYLE) & 0x0f;
+  DWORD dwStyle = GetWindowLongA(hwnd,GWL_STYLE);
+  DWORD style = dwStyle & 0x0f;
+
+  if (dwStyle & BS_NOTIFY) BUTTON_SendNotify(hwnd,BN_KILLFOCUS);
 
   if (infoPtr->state & BUTTON_HASFOCUS)
   {
     infoPtr->state &= ~BUTTON_HASFOCUS;
     PAINT_BUTTON(hwnd,style,ODA_FOCUS);
-    InvalidateRect(hwnd,NULL,TRUE);
   }
 
   return 0;
@@ -721,6 +743,8 @@ static void BUTTON_DrawPushButton(
         uState |= DFCS_PUSHED;
     }
 
+    if (dwStyle & BS_FLAT) uState |= DFCS_FLAT;
+
     DrawFrameControl( hDC, &rc, DFC_BUTTON, uState );
     InflateRect( &rc, -2, -2 );
 
@@ -843,7 +867,7 @@ static void BUTTON_DrawPushButton(
     SelectObject( hDC, hOldPen );
     SelectObject( hDC, hOldBrush );
 
-    if (infoPtr->state & BUTTON_HASFOCUS)
+    if (infoPtr->state & BUTTON_HASFOCUS && IsWindowEnabled(hwnd))
     {
         InflateRect( &focus_rect, -1, -1 );
         DrawFocusRect( hDC, &focus_rect );
@@ -950,6 +974,8 @@ static void CB_Paint(HWND hwnd,HDC hDC,WORD action)
 
         if (dwStyle & WS_DISABLED) state |= DFCS_INACTIVE;
 
+        if (dwStyle & BS_FLAT) state |= DFCS_FLAT;
+
         DrawFrameControl( hDC, &rbox, DFC_BUTTON, state );
 
         if( text && action != ODA_SELECT )
@@ -962,7 +988,7 @@ static void CB_Paint(HWND hwnd,HDC hDC,WORD action)
     }
 
     if ((action == ODA_FOCUS) ||
-        ((action == ODA_DRAWENTIRE) && (infoPtr->state & BUTTON_HASFOCUS)))
+        ((action == ODA_DRAWENTIRE) && (infoPtr->state & BUTTON_HASFOCUS) && IsWindowEnabled(hwnd)))
     {
         /* again, this is what CTL3D expects */
 
@@ -1075,10 +1101,13 @@ static void UB_Paint(HWND hwnd,HDC hDC,WORD action)
     if (infoPtr->hFont) SelectObject( hDC, infoPtr->hFont );
     hBrush = GetSysColorBrush(COLOR_BTNFACE);
 
-    FillRect( hDC, &rc, hBrush );
     if ((action == ODA_FOCUS) ||
-        ((action == ODA_DRAWENTIRE) && (infoPtr->state & BUTTON_HASFOCUS)))
-        DrawFocusRect( hDC, &rc );
+        ((action == ODA_DRAWENTIRE) && (infoPtr->state & BUTTON_HASFOCUS) && IsWindowEnabled(hwnd)))
+    {
+      DrawFocusRect( hDC, &rc );
+      InflateRect(&rc,-1,-1);
+    }
+    FillRect( hDC, &rc, hBrush );
 }
 
 
