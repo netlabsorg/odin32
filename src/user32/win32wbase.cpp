@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.317 2002-03-18 15:26:30 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.318 2002-03-20 10:30:07 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -1279,7 +1279,8 @@ ULONG Win32BaseWindow::MsgNCPaint(PRECT pUpdateRect)
     if ((pUpdateRect->left >= client.left) && (pUpdateRect->left < client.right) &&
        (pUpdateRect->right >= client.left) && (pUpdateRect->right < client.right) &&
        (pUpdateRect->top  >= client.top) && (pUpdateRect->top < client.bottom) &&
-       (pUpdateRect->bottom >= client.top) && (pUpdateRect->bottom < client.bottom))
+       (pUpdateRect->bottom >= client.top) && (pUpdateRect->bottom < client.bottom)
+       && (!(getStyle() & WS_MINIMIZE)))
     {
         return 0;
     }
@@ -1288,6 +1289,12 @@ ULONG Win32BaseWindow::MsgNCPaint(PRECT pUpdateRect)
     hrgn = CreateRectRgnIndirect(pUpdateRect);
 
     rc = SendMessageA(getWindowHandle(),WM_NCPAINT, hrgn, 0);
+    //Send WM_PAINTICON here if minimized, because client window will
+    //not receive a (valid) WM_PAINT message
+    if (getStyle() & WS_MINIMIZE) 
+    {
+        rc = SendMessageA(getWindowHandle(),WM_PAINTICON, 1, 0);
+    }
 
     DeleteObject(hrgn);
 
@@ -1788,6 +1795,10 @@ LRESULT Win32BaseWindow::DefWindowProcA(UINT Msg, WPARAM wParam, LPARAM lParam)
     case WM_PRINT:
         return DefWndPrint(wParam,lParam);
 
+    case WM_SYNCPAINT:
+        RedrawWindow(getWindowHandle(), NULL, 0, RDW_ERASENOW | RDW_ERASE | RDW_ALLCHILDREN);
+        return 0;
+
     case WM_PAINTICON:
     case WM_PAINT:
     {
@@ -2276,8 +2287,6 @@ BOOL Win32BaseWindow::ShowWindow(ULONG nCmdShow)
     case SW_SHOWDEFAULT: /* FIXME: should have its own handler */
     case SW_RESTORE:
          dprintf(("ShowWindow:restoring window"));
-         //Set client rectangle to 0 (contains negative values)
-         setClientRect(0,0,0,0);
 
          swp |= SWP_SHOWWINDOW | SWP_FRAMECHANGED;
          if( getStyle() & (WS_MINIMIZE | WS_MAXIMIZE) ) {
@@ -2299,7 +2308,11 @@ BOOL Win32BaseWindow::ShowWindow(ULONG nCmdShow)
     if((getStyle() & WS_CHILD) && !(getExStyle() & WS_EX_MDICHILD))
         swp |= SWP_NOACTIVATE | SWP_NOZORDER;
 
-    SetWindowPos(HWND_TOP, newPos.left, newPos.top, newPos.right, newPos.bottom, LOWORD(swp));
+    dprintf(("ShowWindow : SetWindowPos now"));   
+    if (!(getStyle() & WS_MINIMIZE)) {
+         SetWindowPos(HWND_TOP, newPos.left, newPos.top, newPos.right, newPos.bottom, LOWORD(swp));
+    }
+    else OSLibWinMinimizeWindow(getOS2FrameWindowHandle());
 
     if(!(swp & SWP_NOACTIVATE)) {
         OSLibWinSetActiveWindow(OS2HwndFrame);

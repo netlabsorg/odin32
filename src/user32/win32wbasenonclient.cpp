@@ -1,4 +1,4 @@
-/* $Id: win32wbasenonclient.cpp,v 1.38 2002-02-05 17:59:01 sandervl Exp $ */
+/* $Id: win32wbasenonclient.cpp,v 1.39 2002-03-20 10:30:07 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2 (non-client methods)
  *
@@ -438,7 +438,12 @@ LONG Win32BaseWindow::HandleNCCalcSize(BOOL calcValidRects,RECT *winRect)
         if (winRect->left > winRect->right)
             winRect->right = winRect->left;
     }
-
+    else {
+        //must return empty rectangle in parent coordinates (converted to
+        //(0,0)(0,0) in NCCALCSIZE handler
+        winRect->right  = winRect->left;
+        winRect->bottom = winRect->top;
+    }
     return result;
 }
 //******************************************************************************
