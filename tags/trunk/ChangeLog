@@ -1,4 +1,4 @@
- /* $Id: ChangeLog,v 1.348 1999-10-20 17:51:14 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.349 1999-10-20 22:13:23 sandervl Exp $ */
 
  99-10-20: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32: Added support for WM_WINDOWPOSCHANGING in default window handler
@@ -6,6 +6,7 @@
                   Convert back windowpos structure in WM_ADJUSTWINDOWPOS (NOT DONE)
                   Bugfixes for PM WM_WINDOWPOSCHANGED handling & OSLibMapSWPtoWINDOWPOS.
                   (Win32 WM_WINDOWPOSCHANGED now also sends window coordinates, not client)
+                  Rewrote MapWindowPoints. (NOTE: Needs to be tested!)
 
  99-10-20: Patrick Haller <phaller@gmx.net>
 	- WSOCK32:  Partial rewrite of WSA async sockets completed.
