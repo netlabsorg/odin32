@@ -1,4 +1,4 @@
-/* $Id: win32wbase.h,v 1.72 2000-01-18 20:08:17 sandervl Exp $ */
+/* $Id: win32wbase.h,v 1.73 2000-01-21 13:30:35 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -156,7 +156,7 @@ Win32BaseWindow *getParent();
          void   setParent(Win32BaseWindow *pwindow) { ChildWindow::SetParent((ChildWindow *)pwindow); };
        WNDPROC  getWindowProc()                 { return win32wndproc; };
          void   setWindowProc(WNDPROC newproc)  { win32wndproc = newproc; };
-        DWORD   getWindowId()                   { return windowId; };
+        DWORD   getWindowId()                   { return dwIDMenu; };
          void   setWindowId(DWORD id);
          ULONG  getWindowHeight()               { return rectWindow.bottom - rectWindow.top; };
          ULONG  getWindowWidth()                { return rectWindow.right - rectWindow.left; };
@@ -187,8 +187,8 @@ Win32BaseWindow *getParent();
          DWORD  getFlags()                      { return flags; };
          void   setFlags(DWORD newflags)        { flags = newflags; };
 
-         HMENU  GetMenu()                           { return hMenu; };
-         VOID   SetMenu(HMENU newMenu)              { hMenu = newMenu; };
+         HMENU  GetMenu()                           { return dwIDMenu; };
+         VOID   SetMenu(HMENU newMenu)              { dwIDMenu = newMenu; };
          void   SetSysMenu(HMENU hSystemMenu)       { hSysMenu = hSystemMenu; };
          HMENU  GetSysMenu()                        { return hSysMenu; }
 
@@ -305,7 +305,6 @@ protected:
 
         HWND    OS2Hwnd;
         HWND    OS2HwndFrame;
-        HMENU   hMenu;
         HMENU   hSysMenu;
         HWND    Win32Hwnd;
         BOOL    isUnicode;
@@ -319,7 +318,7 @@ protected:
         ULONG   hInstance;              //GWL_HINSTANCE
 //Moved in ChildWindow class
 /////   Win32BaseWindow *parent;                    //GWL_HWNDPARENT
-        ULONG   windowId;               //GWL_ID
+        ULONG   dwIDMenu;               //GWL_ID
         ULONG   userData;               //GWL_USERDATA
 
          HWND   hwndLinkAfter;
