@@ -1,4 +1,4 @@
-/* $Id: winimagepeldr.h,v 1.2 2000-05-02 20:53:15 sandervl Exp $ */
+/* $Id: winimagepeldr.h,v 1.3 2000-05-26 18:42:57 sandervl Exp $ */
 
 /*
  * Win32 PE loader Image base class
@@ -80,13 +80,15 @@ virtual ~Win32PeLdrImage();
         //reservedMem is address of memory reserved in peldr.dll (allocated before
         //any dlls are loaded, so that exes without fixups can be loaded at a low
         //address)
-virtual BOOL  init(ULONG reservedMem);
+    virtual BOOL  init(ULONG reservedMem);
 
     virtual BOOL  insideModule(ULONG address);
     virtual BOOL  insideModuleCode(ULONG address);
 
     virtual ULONG getApi(char *name);
     virtual ULONG getApi(int ordinal);
+
+    virtual ULONG getImageSize();
 
     //Returns required OS version for this image
     virtual ULONG getVersion();

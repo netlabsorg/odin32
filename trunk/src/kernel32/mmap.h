@@ -1,4 +1,4 @@
-/* $Id: mmap.h,v 1.15 2000-02-05 14:09:32 sandervl Exp $ */
+/* $Id: mmap.h,v 1.16 2000-05-26 18:42:56 sandervl Exp $ */
 
 /*
  * Memory mapped class
@@ -60,6 +60,9 @@ Win32PeLdrImage *getImage()              { return image; };
    void   AddRef()                       { ++referenced; };
    void   Release()                      { if(--referenced == 0) delete this; };
 
+   void   close()                        { fClosed = TRUE; };
+   BOOL   isClosed()                     { return fClosed; };
+
    BOOL   commitPage(ULONG offset, BOOL fWriteAccess, int nrpages = NRPAGES_TOCOMMIT);
 
 static Win32MemMap *findMap(LPSTR lpszName);
@@ -96,6 +99,7 @@ protected:
    ULONG  mMapAccess;
    LPSTR  lpszMapName;
    void  *pMapping;
+   BOOL   fClosed;  //handle is removed by CloseHandle
 
    ULONG  nrMappings;
 
