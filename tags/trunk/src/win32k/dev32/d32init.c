@@ -1,4 +1,4 @@
-/* $Id: d32init.c,v 1.33 2001-02-11 15:21:09 bird Exp $
+/* $Id: d32init.c,v 1.34 2001-02-11 15:57:14 bird Exp $
  *
  * d32init.c - 32-bits init routines.
  *
@@ -1459,6 +1459,7 @@ int importTabInit(void)
                 if (!aImportTab[i].fFound)
                 {
                     memset(pchCTEntry, 0, VARIMPORT_ENTRY);
+                    pchCTEntry += VARIMPORT_ENTRY;
                     break;
                 }
             case EPT_VARIMPORT32:
