@@ -1,4 +1,4 @@
-/* $Id: winaccel.cpp,v 1.2 1999-07-18 18:04:30 sandervl Exp $ */
+/* $Id: winaccel.cpp,v 1.3 1999-07-20 07:42:36 sandervl Exp $ */
 /*
  * Win32 accelartor key functions for OS/2
  *
@@ -10,31 +10,72 @@
  */
 #include <os2win.h>
 #include <misc.h>
+#include <win32wnd.h>
 
+//******************************************************************************
+//******************************************************************************
+HACCEL WIN32API LoadAcceleratorsA(HINSTANCE hinst, LPCSTR lpszAcc)
+{
+ HACCEL rc;
+
+    rc = (HACCEL)FindResourceA(hinst, lpszAcc, RT_ACCELERATORA);
+
+    dprintf(("LoadAcceleratorsA returned %d\n", rc));
+    return(rc);
+}
+//******************************************************************************
+//******************************************************************************
+HACCEL WIN32API LoadAcceleratorsW(HINSTANCE hinst, LPCWSTR lpszAccel)
+{
+ HACCEL rc;
+
+    rc = (HACCEL)FindResourceW(hinst, lpszAccel, RT_ACCELERATORW);
+
+    dprintf(("LoadAcceleratorsW returned %d\n", rc));
+    return(rc);
+}
+//******************************************************************************
+//******************************************************************************
+BOOL WIN32API DestroyAcceleratorTable( HACCEL haccel)
+{
+ Win32Resource *winres;
+
+    if(HIWORD(haccel) == 0) {
+	dprintf(("DestroyAcceleratorTable: invalid haccel %x", haccel));
+	SetLastError(ERROR_INVALID_PARAMETER);
+	return FALSE;
+    }
+    dprintf(("DestroyAcceleratorTable %x\n", haccel));
+    winres = (Win32Resource *)haccel;
+    delete winres;
+    return TRUE;
+}
 //******************************************************************************
 //TODO: Do more than just return?
 //******************************************************************************
 int WIN32API TranslateAcceleratorA(HWND hwnd, HACCEL haccel, LPMSG lpmsg)
 {
-    //CB: needs more work
-    //WinTranslateAccel();
-    //get hab, translate
+ Win32Window *window;
+
+    window = Win32Window::GetWindowFromHandle(hwnd);
+    if(!window) {
+//Msg for (non-client) child of our frame window
+//    	dprintf(("TranslateAcceleratorA, window %x not found", hwnd));
+    	return FALSE;
+    }
+    if(window->GetAccelTable() != haccel) {
+	dprintf(("TranslateAcceleratorA %X %X %X", hwnd, haccel, lpmsg->hwnd));
+	window->SetAccelTable(haccel);
+    }
+
     //SvL: OS/2 automatically translates accelerator keys
     return FALSE;
 }
 //******************************************************************************
 //******************************************************************************
-int WIN32API TranslateAccelerator( HWND arg1, HACCEL arg2, LPMSG  arg3)
+int WIN32API TranslateAcceleratorW( HWND hwnd, HACCEL hAccel, LPMSG lpMsg)
 {
-    //SvL: OS/2 automatically translates accelerator keys
-    return FALSE;
-}
-//******************************************************************************
-//******************************************************************************
-int WIN32API TranslateAcceleratorW( HWND arg1, HACCEL arg2, LPMSG  arg3)
-{
-    //SvL: OS/2 automatically translates accelerator keys
-    return FALSE;
+    return TranslateAcceleratorA(hwnd, hAccel, lpMsg);
 }
 //******************************************************************************
 //******************************************************************************
@@ -63,15 +104,6 @@ HACCEL WIN32API CreateAcceleratorTableW( LPACCEL arg1, int  arg2)
 #endif
     // NOTE: This will not work as is (needs UNICODE support)
     return O32_CreateAcceleratorTable(arg1, arg2);
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API DestroyAcceleratorTable( HACCEL arg1)
-{
-#ifdef DEBUG
-    WriteLog("USER32:  DestroyAcceleratorTable\n");
-#endif
-    return O32_DestroyAcceleratorTable(arg1);
 }
 //******************************************************************************
 //******************************************************************************

@@ -1,4 +1,4 @@
-/* $Id: win32wnd.cpp,v 1.16 1999-07-19 18:40:44 sandervl Exp $ */
+/* $Id: win32wnd.cpp,v 1.17 1999-07-20 07:42:36 sandervl Exp $ */
 /*
  * Win32 Window Code for OS/2
  *
@@ -98,6 +98,9 @@ void Win32Window::Init()
   lastHitTestVal   = 0;
   owner            = NULL;
   windowClass      = 0;
+
+  acceltableResource = NULL;
+  menuResource       = NULL;
 }
 //******************************************************************************
 //******************************************************************************
@@ -114,37 +117,43 @@ Win32Window::~Win32Window()
 }
 //******************************************************************************
 //******************************************************************************
+BOOL Win32Window::isChild()
+{
+    return (dwStyle & WS_CHILD) != 0;
+}
+//******************************************************************************
+//******************************************************************************
 BOOL Win32Window::CreateWindowExA(CREATESTRUCTA *cs, ATOM classAtom)
 {
  char  buffer[256];
  INT   sw = SW_SHOW;
  POINT maxSize, maxPos, minTrack, maxTrack;
 
-  SetLastError(0);
+    SetLastError(0);
 
-  /* Find the parent window */
-  if (cs->hwndParent)
-  {
-        Win32Window *window = GetWindowFromHandle(cs->hwndParent);
-        if(!window) {
-                dprintf(("Bad parent %04x\n", cs->hwndParent ));
-                SetLastError(ERROR_INVALID_PARAMETER);
-        return FALSE;
-        }
-        /* Make sure parent is valid */
-        if (!window->IsWindow() )
-        {
-                dprintf(("Bad parent %04x\n", cs->hwndParent ));
-                SetLastError(ERROR_INVALID_PARAMETER);
-                return FALSE;
-        }
-  }
-  else
-  if ((cs->style & WS_CHILD) && !(cs->style & WS_POPUP)) {
-        dprintf(("No parent for child window\n" ));
-        SetLastError(ERROR_INVALID_PARAMETER);
-        return FALSE;  /* WS_CHILD needs a parent, but WS_POPUP doesn't */
-  }
+    /* Find the parent window */
+    if (cs->hwndParent)
+    {
+            Win32Window *window = GetWindowFromHandle(cs->hwndParent);
+            if(!window) {
+                    dprintf(("Bad parent %04x\n", cs->hwndParent ));
+                    SetLastError(ERROR_INVALID_PARAMETER);
+                    return FALSE;
+            }
+            /* Make sure parent is valid */
+            if (!window->IsWindow() )
+            {
+                    dprintf(("Bad parent %04x\n", cs->hwndParent ));
+                    SetLastError(ERROR_INVALID_PARAMETER);
+                    return FALSE;
+            }
+    }
+    else
+    if ((cs->style & WS_CHILD) && !(cs->style & WS_POPUP)) {
+            dprintf(("No parent for child window\n" ));
+            SetLastError(ERROR_INVALID_PARAMETER);
+            return FALSE;  /* WS_CHILD needs a parent, but WS_POPUP doesn't */
+    }
 
   /* Find the window class */
   windowClass = Win32WndClass::FindClass(cs->hInstance, (LPSTR)classAtom);
@@ -665,9 +674,10 @@ ULONG Win32Window::MsgShow(BOOL fShow)
 }
 //******************************************************************************
 //******************************************************************************
-ULONG Win32Window::MsgMove(ULONG xParent, ULONG yParent)
+ULONG Win32Window::MsgMove(ULONG x, ULONG y)
 {
-  return SendInternalMessageA(WM_MOVE, 0, MAKELONG((USHORT)xParent, (USHORT)yParent));
+  dprintf(("MsgMove to (%d,%d)", x, y));
+  return SendInternalMessageA(WM_MOVE, 0, MAKELONG((USHORT)x, (USHORT)y));
 }
 //******************************************************************************
 //******************************************************************************
@@ -679,6 +689,7 @@ ULONG Win32Window::MsgCommand(ULONG cmd, ULONG Id, HWND hwnd)
     case CMD_CONTROL:
         return 0; //todo
     case CMD_ACCELERATOR:
+        dprintf(("accelerator command"));
         return 0; //todo
   }
 }
@@ -732,6 +743,7 @@ ULONG Win32Window::MsgButton(ULONG msg, ULONG x, ULONG y)
  ULONG win32msg;
  ULONG win32ncmsg;
 
+  dprintf(("MsgButton to (%d,%d)", x, y));
   switch(msg) {
         case BUTTON_LEFTDOWN:
                 win32msg = WM_LBUTTONDOWN;
@@ -1048,9 +1060,9 @@ BOOL Win32Window::SetMenu(ULONG hMenu)
  PVOID          menutemplate;
  Win32Resource *winres = (Win32Resource *)hMenu;
 
-#if 1
-    if(winres == NULL) {
+    if(HIWORD(winres) == 0) {
         dprintf(("Win32Window:: Win32Resource *winres == 0"));
+    SetLastError(ERROR_INVALID_PARAMETER);
         return FALSE;
     }
     menutemplate = winres->lockOS2Resource();
@@ -1064,19 +1076,22 @@ BOOL Win32Window::SetMenu(ULONG hMenu)
         dprintf(("Win32Window::SetMenu OS2HwndMenu == 0"));
         return FALSE;
     }
+    menuResource = winres;
     return TRUE;
-#else
-   if(HMHandleTranslateToOS2(hMenu, (PULONG)&menutemplate) == NO_ERROR)
-   {
-    OS2HwndMenu = OSLibWinCreateMenu(OS2HwndFrame, menutemplate);
-    if(OS2HwndMenu == 0) {
-        dprintf(("Win32Window::SetMenu OS2HwndMenu == 0"));
-        return FALSE;
+}
+//******************************************************************************
+//******************************************************************************
+BOOL Win32Window::SetAccelTable(ULONG hAccel)
+{
+ Win32Resource *winres = (Win32Resource *)hAccel;
+
+    if(HIWORD(hAccel) == 0) {
+        dprintf(("SetAccelTable: hAccel %x invalid", hAccel));
+	    SetLastError(ERROR_INVALID_PARAMETER);
+	    return FALSE;
     }
-   }
-   dprintf(("Win32Window::SetMenu unknown hMenu (%x)", hMenu));
-   return FALSE;
-#endif
+    acceltableResource = winres;
+ 	return OSLibWinSetAccelTable(OS2HwndFrame, winres->lockOS2Resource());
 }
 //******************************************************************************
 //******************************************************************************

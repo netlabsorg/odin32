@@ -1,4 +1,4 @@
-; $Id: user32.def,v 1.2 1999-07-18 20:41:12 cbratschi Exp $
+; $Id: user32.def,v 1.3 1999-07-20 07:42:35 sandervl Exp $
 
 ;Created by BLAST for IBM's compiler
 LIBRARY USER32 INITINSTANCE
@@ -553,7 +553,7 @@ EXPORTS
     ToUnicode                  = _ToUnicode@24               @540
     TrackPopupMenu             = _TrackPopupMenu@28          @541
     TrackPopupMenuEx           = _TrackPopupMenuEx@24        @542
-    TranslateAccelerator       = _TranslateAccelerator@12    @543
+    TranslateAccelerator       = _TranslateAcceleratorA@12   @543
     TranslateAcceleratorA      = _TranslateAcceleratorA@12   @544
     TranslateAcceleratorW      = _TranslateAcceleratorW@12   @545
     TranslateMDISysAccel       = _TranslateMDISysAccel@8     @546

@@ -1,4 +1,4 @@
-/* $Id: oslibwin.cpp,v 1.16 1999-07-19 18:40:43 sandervl Exp $ */
+/* $Id: oslibwin.cpp,v 1.17 1999-07-20 07:42:35 sandervl Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -145,6 +145,20 @@ BOOL OSLibPostMessage(HWND hwnd, ULONG msg, ULONG wParam, ULONG lParam)
 HWND OSLibWinCreateMenu(HWND hwndParent, PVOID menutemplate)
 {
   return WinCreateMenu(hwndParent, menutemplate);
+}
+//******************************************************************************
+//******************************************************************************
+BOOL OSLibWinSetAccelTable(HWND hwnd, PVOID acceltemplate)
+{
+ HACCEL haccel;
+ HAB    hab = WinQueryAnchorBlock(hwnd);
+
+    haccel = WinCreateAccelTable(hab, (PACCELTABLE)acceltemplate);
+    if(haccel == 0) {
+        dprintf(("OSLibWinSetAccelTable: WinCreateAccelTable returned 0"));
+        return FALSE;
+    }
+    return WinSetAccelTable(hab, haccel, hwnd);
 }
 //******************************************************************************
 //******************************************************************************
@@ -329,32 +343,6 @@ BOOL OSLibWinIsWindowVisible(HWND hwnd)
 BOOL OSLibWinQueryActiveWindow()
 {
   return WinQueryActiveWindow(HWND_DESKTOP);
-}
-//******************************************************************************
-//******************************************************************************
-void OSLibWinPostQuitMessage(ULONG nExitCode)
-{
-  WinPostQueueMsg(GetThreadMessageQueue(), WM_QUIT, (MPARAM)nExitCode, 0);
-}
-//******************************************************************************
-//******************************************************************************
-LONG OSLibWinDispatchMsg(MSG *msg, BOOL isUnicode)
-{
- QMSG qmsg;
-
-  WinToOS2MsgTranslate(msg, &qmsg, isUnicode);
-  return (LONG)WinDispatchMsg(GetThreadHAB(), &qmsg);
-}
-//******************************************************************************
-//******************************************************************************
-BOOL OSLibWinGetMsg(LPMSG pMsg, HWND hwnd, UINT uMsgFilterMin, UINT uMsgFilterMax, BOOL isUnicode)
-{
- QMSG qmsg;
- BOOL rc;
-
-  rc = WinGetMsg(GetThreadHAB(), &qmsg, TranslateWinMsg(uMsgFilterMin), TranslateWinMsg(uMsgFilterMax), 0);
-  OS2ToWinMsgTranslate(&qmsg, pMsg, isUnicode);
-  return rc;
 }
 //******************************************************************************
 //******************************************************************************
