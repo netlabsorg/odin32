@@ -1,4 +1,4 @@
-/* $Id: wprocess.cpp,v 1.97 2000-10-01 12:05:57 sandervl Exp $ */
+/* $Id: wprocess.cpp,v 1.98 2000-10-02 13:38:58 sandervl Exp $ */
 
 /*
  * Win32 process functions
@@ -1642,9 +1642,72 @@ HINSTANCE WIN32API WinExec(LPCSTR lpCmdLine, UINT nCmdShow)
     //TODO: Shouldn't call Open32, but the api in user32..
     rc = O32_WaitForInputIdle(procinfo.hProcess, 15000);
     if(rc != 0) {
-    dprintf(("WinExec: WaitForInputIdle %x returned %x", procinfo.hProcess, rc));
+    	dprintf(("WinExec: WaitForInputIdle %x returned %x", procinfo.hProcess, rc));
     }
     return procinfo.hProcess; //correct?
+}
+/**********************************************************************
+ * LoadModule    (KERNEL32.499)
+ *
+ * Wine: 20000909
+ *
+ * Copyright 1995 Alexandre Julliard
+ */
+HINSTANCE WINAPI LoadModule( LPCSTR name, LPVOID paramBlock ) 
+{
+    LOADPARAMS *params = (LOADPARAMS *)paramBlock;
+    PROCESS_INFORMATION info;
+    STARTUPINFOA startup;
+    HINSTANCE hInstance;
+    LPSTR cmdline, p;
+    char filename[MAX_PATH];
+    BYTE len;
+
+    dprintf(("LoadModule %s %x", name, paramBlock));
+
+    if (!name) return ERROR_FILE_NOT_FOUND;
+
+    if (!SearchPathA( NULL, name, ".exe", sizeof(filename), filename, NULL ) &&
+        !SearchPathA( NULL, name, NULL, sizeof(filename), filename, NULL ))
+        return GetLastError();
+
+    len = (BYTE)params->lpCmdLine[0];
+    if (!(cmdline = (LPSTR)HeapAlloc( GetProcessHeap(), 0, strlen(filename) + len + 2 )))
+        return ERROR_NOT_ENOUGH_MEMORY;
+
+    strcpy( cmdline, filename );
+    p = cmdline + strlen(cmdline);
+    *p++ = ' ';
+    memcpy( p, params->lpCmdLine + 1, len );
+    p[len] = 0;
+
+    memset( &startup, 0, sizeof(startup) );
+    startup.cb = sizeof(startup);
+    if (params->lpCmdShow)
+    {
+        startup.dwFlags = STARTF_USESHOWWINDOW;
+        startup.wShowWindow = params->lpCmdShow[1];
+    }
+    
+    if (CreateProcessA( filename, cmdline, NULL, NULL, FALSE, 0,
+                        params->lpEnvAddress, NULL, &startup, &info ))
+    {
+        /* Give 15 seconds to the app to come up */
+        if ( O32_WaitForInputIdle ( info.hProcess, 15000 ) ==  0xFFFFFFFF ) 
+            dprintf(("ERROR: WaitForInputIdle failed: Error %ld\n", GetLastError() ));
+        hInstance = 33;
+        /* Close off the handles */
+        CloseHandle( info.hThread );
+        CloseHandle( info.hProcess );
+    }
+    else if ((hInstance = GetLastError()) >= 32)
+    {
+        dprintf(("ERROR: Strange error set by CreateProcess: %d\n", hInstance ));
+        hInstance = 11;
+    }
+
+    HeapFree( GetProcessHeap(), 0, cmdline );
+    return hInstance;
 }
 //******************************************************************************
 //******************************************************************************

@@ -1,4 +1,4 @@
-/* $Id: oslibdos.cpp,v 1.46 2000-09-25 19:00:27 sandervl Exp $ */
+/* $Id: oslibdos.cpp,v 1.47 2000-10-02 13:38:56 sandervl Exp $ */
 /*
  * Wrappers for OS/2 Dos* API
  *
@@ -44,16 +44,16 @@ void OSLibInitWSeBFileIO()
  HMODULE hDoscalls;
 
   if(DosQueryModuleHandle("DOSCALLS", &hDoscalls) != NO_ERROR) {
-  return;
+    return;
   }
   if(DosQueryProcAddr(hDoscalls, 989, NULL, (PFN *)&DosSetFileSizeLProc) != NO_ERROR) {
-  return;
+    return;
   }
   if(DosQueryProcAddr(hDoscalls, 988, NULL, (PFN *)&DosSetFilePtrLProc) != NO_ERROR) {
-  return;
+    return;
   }
   if(DosQueryProcAddr(hDoscalls, 986, NULL, (PFN *)&DosSetFileLocksLProc) != NO_ERROR) {
-  return;
+    return;
   }
   f64BitIO = TRUE;
 }
@@ -166,7 +166,7 @@ DWORD error2WinError(APIRET rc,DWORD defaultCode = ERROR_NOT_ENOUGH_MEMORY_W)
         return ERROR_INVALID_AT_INTERRUPT_TIME_W; //CB: right???
 
     case ERROR_DEVICE_IN_USE: //99
-  return ERROR_DEVICE_IN_USE_W;
+        return ERROR_DEVICE_IN_USE_W;
 
     case ERROR_DRIVE_LOCKED: //108
         return ERROR_DRIVE_LOCKED_W;
@@ -175,13 +175,13 @@ DWORD error2WinError(APIRET rc,DWORD defaultCode = ERROR_NOT_ENOUGH_MEMORY_W)
         return ERROR_BROKEN_PIPE_W;
 
     case ERROR_OPEN_FAILED: //110
-  return ERROR_OPEN_FAILED_W;
+        return ERROR_OPEN_FAILED_W;
 
     case ERROR_BUFFER_OVERFLOW: //111
         return ERROR_BUFFER_OVERFLOW_W;
 
     case ERROR_DISK_FULL: //112
-  return ERROR_DISK_FULL_W;
+        return ERROR_DISK_FULL_W;
 
     case ERROR_NO_MORE_SEARCH_HANDLES: //113
         return ERROR_NO_MORE_SEARCH_HANDLES_W;
@@ -232,7 +232,7 @@ DWORD error2WinError(APIRET rc,DWORD defaultCode = ERROR_NOT_ENOUGH_MEMORY_W)
         return ERROR_EAS_DIDNT_FIT;
 
     default:
-      dprintf(("WARNING: error2WinError: error %d not included!!!!", rc));
+        dprintf(("WARNING: error2WinError: error %d not included!!!!", rc));
         return defaultCode;
   }
 }
@@ -763,7 +763,7 @@ DWORD OSLibDosCreateFile(CHAR *lpszFile,
 
    //TODO: FILE_SHARE_DELETE
    if((fuShare & (FILE_SHARE_READ_W | FILE_SHARE_WRITE_W)) == 0 )
-  openMode |= OPEN_SHARE_DENYREADWRITE;
+        openMode |= OPEN_SHARE_DENYREADWRITE;
    else
    if((fuShare & (FILE_SHARE_READ_W | FILE_SHARE_WRITE_W)) == (FILE_SHARE_READ_W | FILE_SHARE_WRITE_W))
         openMode |= OPEN_SHARE_DENYNONE;
@@ -772,13 +772,13 @@ DWORD OSLibDosCreateFile(CHAR *lpszFile,
         openMode |= OPEN_SHARE_DENYWRITE;
    else
    if(fuShare & FILE_SHARE_WRITE_W)
-  openMode |= OPEN_SHARE_DENYREAD;
+        openMode |= OPEN_SHARE_DENYREAD;
 
    if(fuAccess == (GENERIC_READ_W | GENERIC_WRITE_W))
-  openMode |= OPEN_ACCESS_READWRITE;
+        openMode |= OPEN_ACCESS_READWRITE;
    else
    if(fuAccess & GENERIC_READ_W)
-  openMode |= OPEN_ACCESS_READONLY;
+        openMode |= OPEN_ACCESS_READONLY;
    else
    if(fuAccess & GENERIC_WRITE_W)
         openMode |= OPEN_ACCESS_WRITEONLY;
@@ -798,8 +798,8 @@ DWORD OSLibDosCreateFile(CHAR *lpszFile,
 #endif
 
    if(strlen(lpszFile) == 2 && lpszFile[1] == ':') {
-  //app tries to open physical disk
-  openMode |= OPEN_FLAGS_DASD;
+        //app tries to open physical disk
+        openMode |= OPEN_FLAGS_DASD;
    }
    int retry = 0;
    while(retry < 2)
@@ -814,20 +814,20 @@ DWORD OSLibDosCreateFile(CHAR *lpszFile,
                       openMode,
                       NULL);
     if(rc == ERROR_TOO_MANY_OPEN_FILES)
-        {
-      ULONG CurMaxFH;
-      LONG  ReqCount = 32;
+    {
+        ULONG CurMaxFH;
+        LONG  ReqCount = 32;
 
-    rc = DosSetRelMaxFH(&ReqCount, &CurMaxFH);
-    if(rc) {
-      dprintf(("DosSetRelMaxFH returned %d", rc));
-      SetLastError(ERROR_TOO_MANY_OPEN_FILES_W);
-      return INVALID_HANDLE_VALUE_W;
+        rc = DosSetRelMaxFH(&ReqCount, &CurMaxFH);
+        if(rc) {
+            dprintf(("DosSetRelMaxFH returned %d", rc));
+            SetLastError(ERROR_TOO_MANY_OPEN_FILES_W);
+            return INVALID_HANDLE_VALUE_W;
+        }
+        dprintf(("DosOpen failed -> increased nr open files to %d", CurMaxFH));
     }
-    dprintf(("DosOpen failed -> increased nr open files to %d", CurMaxFH));
-    }
-  else  break;
-  retry++;
+    else  break;
+    retry++;
    }
 
    if(rc)
@@ -859,18 +859,18 @@ DWORD OSLibDosOpenFile(CHAR *lpszFile, UINT fuMode)
    {
         if(fuMode & OF_CREATE_W) {
             openFlag |= OPEN_ACTION_CREATE_IF_NEW |
-                            OPEN_ACTION_REPLACE_IF_EXISTS;
-  }
-        else    openFlag |= OPEN_ACTION_OPEN_IF_EXISTS;                                //180575
+                        OPEN_ACTION_REPLACE_IF_EXISTS;
+   }
+   else openFlag |= OPEN_ACTION_OPEN_IF_EXISTS;
 
-        if(fuMode & OF_READWRITE_W)
-            openMode |= OPEN_ACCESS_READWRITE;
-        else
-  if(fuMode & OF_WRITE_W)
-            openMode |= OPEN_ACCESS_WRITEONLY;
-        else
-  if(fuMode & OF_CREATE_W)
-            openMode |= OPEN_ACCESS_READWRITE;
+   if(fuMode & OF_READWRITE_W)
+        openMode |= OPEN_ACCESS_READWRITE;
+   else
+   if(fuMode & OF_WRITE_W)
+        openMode |= OPEN_ACCESS_WRITEONLY;
+   else
+   if(fuMode & OF_CREATE_W)
+        openMode |= OPEN_ACCESS_READWRITE;
    }
 
    if((fuMode & OF_SHARE_DENY_WRITE_W) ||
@@ -929,38 +929,38 @@ BOOL OSLibDosLockFile(DWORD hFile, DWORD dwFlags,
    // file region
 
    if(lpOverlapped) {//TODO:
-  dprintf(("OSLibDosLockFile: overlapped lock not yet implemented!!"));
+        dprintf(("OSLibDosLockFile: overlapped lock not yet implemented!!"));
    }
    //TODO: Locking region crossing end of file is permitted. Works in OS/2??
    if(f64BitIO)
    {
-    FILELOCKL lockRangeL;
+        FILELOCKL lockRangeL;
 
-  lockRangeL.lOffset.ulLo = OffsetLow;
-  lockRangeL.lOffset.ulHi = OffsetHigh;
-  lockRangeL.lRange.ulLo  = nNumberOfBytesToLockLow;
-  lockRangeL.lRange.ulHi  = nNumberOfBytesToLockHigh;
+        lockRangeL.lOffset.ulLo = OffsetLow;
+        lockRangeL.lOffset.ulHi = OffsetHigh;
+        lockRangeL.lRange.ulLo  = nNumberOfBytesToLockLow;
+        lockRangeL.lRange.ulHi  = nNumberOfBytesToLockHigh;
 
-    rc = OdinDosSetFileLocksL(hFile, NULL, &lockRangeL,
+        rc = OdinDosSetFileLocksL(hFile, NULL, &lockRangeL,
                                   (dwFlags & LOCKFILE_FAIL_IMMEDIATELY_W) ? 0 : 5000, 0);
         //SvL: 64 bits values are only supported by JFS
         //     Try the 32 bits DosSetFileLocks if it fails
         //     (TODO: should check the partition type instead)
         if(rc == ERROR_INVALID_PARAMETER && (OffsetHigh || nNumberOfBytesToLockHigh)) {
-    goto oldlock;
+            goto oldlock;
         }
    }
    else
    {
 oldlock:
-    FILELOCK lockRange = { OffsetLow, nNumberOfBytesToLockLow };
+        FILELOCK lockRange = { OffsetLow, nNumberOfBytesToLockLow };
 
-    rc = DosSetFileLocks(hFile, NULL, &lockRange,
+        rc = DosSetFileLocks(hFile, NULL, &lockRange,
                              (dwFlags & LOCKFILE_FAIL_IMMEDIATELY_W) ? 0 : 5000, 0);
    }
    if(rc) {
-    SetLastError(error2WinError(rc));
-  return FALSE;
+        SetLastError(error2WinError(rc));
+        return FALSE;
    }
    SetLastError(ERROR_SUCCESS_W);
    return TRUE;
@@ -977,35 +977,35 @@ BOOL OSLibDosUnlockFile(DWORD hFile, DWORD OffsetLow, DWORD OffsetHigh,
    // file region
 
    if(lpOverlapped) {//TODO:
-  dprintf(("OSLibDosUnlockFile: overlapped unlock not yet implemented!!"));
+        dprintf(("OSLibDosUnlockFile: overlapped unlock not yet implemented!!"));
    }
    if(f64BitIO)
    {
-    FILELOCKL unlockRangeL;
+        FILELOCKL unlockRangeL;
 
-  unlockRangeL.lOffset.ulLo = OffsetLow;
-  unlockRangeL.lOffset.ulHi = OffsetHigh;
-  unlockRangeL.lRange.ulLo  = nNumberOfBytesToLockLow;
-  unlockRangeL.lRange.ulHi  = nNumberOfBytesToLockHigh;
+        unlockRangeL.lOffset.ulLo = OffsetLow;
+        unlockRangeL.lOffset.ulHi = OffsetHigh;
+        unlockRangeL.lRange.ulLo  = nNumberOfBytesToLockLow;
+        unlockRangeL.lRange.ulHi  = nNumberOfBytesToLockHigh;
 
-    rc = OdinDosSetFileLocksL(hFile, &unlockRangeL, NULL, 5000, 0);
+        rc = OdinDosSetFileLocksL(hFile, &unlockRangeL, NULL, 5000, 0);
         //SvL: 64 bits values are only supported by JFS
         //     Try the 32 bits DosSetFileLocks if it fails
         //     (TODO: should check the partition type instead)
         if(rc == ERROR_INVALID_PARAMETER && (OffsetHigh || nNumberOfBytesToLockHigh)) {
-    goto oldlock;
+            goto oldlock;
         }
    }
    else
    {
 oldlock:
-    FILELOCK unlockRange = { OffsetLow, nNumberOfBytesToLockLow };
+        FILELOCK unlockRange = { OffsetLow, nNumberOfBytesToLockLow };
 
         rc = DosSetFileLocks(hFile, &unlockRange, NULL,  5000, 0);
    }
    if(rc) {
-    SetLastError(error2WinError(rc));
-  return FALSE;
+        SetLastError(error2WinError(rc));
+        return FALSE;
    }
    SetLastError(ERROR_SUCCESS_W);
    return TRUE;
@@ -1029,29 +1029,29 @@ DWORD OSLibDosGetFileSize(DWORD hFile, LPDWORD lpdwFileSizeHigh)
 
    if(f64BitIO)
    {
-     FILESTATUS3L fsts3ConfigInfoL = {{0}};
-     ULONG        ulBufSize       = sizeof(FILESTATUS3L);
+        FILESTATUS3L fsts3ConfigInfoL = {{0}};
+        ULONG        ulBufSize       = sizeof(FILESTATUS3L);
 
-    rc = DosQueryFileInfo(hFile, FIL_STANDARDL, &fsts3ConfigInfoL, ulBufSize);
-    if(lpdwFileSizeHigh) {
-      *lpdwFileSizeHigh = fsts3ConfigInfoL.cbFile.ulHi;
-  }
-  sizeLow = fsts3ConfigInfoL.cbFile.ulLo;
+        rc = DosQueryFileInfo(hFile, FIL_STANDARDL, &fsts3ConfigInfoL, ulBufSize);
+        if(lpdwFileSizeHigh) {
+            *lpdwFileSizeHigh = fsts3ConfigInfoL.cbFile.ulHi;
+        }
+        sizeLow = fsts3ConfigInfoL.cbFile.ulLo;
    }
    else
    {
-     FILESTATUS3 fsts3ConfigInfo = {{0}};
-     ULONG       ulBufSize       = sizeof(FILESTATUS3);
+        FILESTATUS3 fsts3ConfigInfo = {{0}};
+        ULONG       ulBufSize       = sizeof(FILESTATUS3);
 
-    if(lpdwFileSizeHigh) {
-      *lpdwFileSizeHigh = 0;
-  }
-    rc = DosQueryFileInfo(hFile, FIL_STANDARD, &fsts3ConfigInfo, ulBufSize);
-  sizeLow = fsts3ConfigInfo.cbFile;
+        if(lpdwFileSizeHigh) {
+            *lpdwFileSizeHigh = 0;
+        }
+        rc = DosQueryFileInfo(hFile, FIL_STANDARD, &fsts3ConfigInfo, ulBufSize);
+        sizeLow = fsts3ConfigInfo.cbFile;
    }
    if(rc) {
-    SetLastError(error2WinError(rc));
-    return -1;
+        SetLastError(error2WinError(rc));
+        return -1;
    }
    SetLastError(ERROR_SUCCESS_W);
    return sizeLow;
@@ -1084,21 +1084,20 @@ DWORD OSLibDosSetFilePointer(DWORD hFile, DWORD OffsetLow, DWORD *OffsetHigh, DW
   // needs to be skipped.
   if( (f64BitIO) && (OffsetHigh) )
   {
-  offsetL.ulLo = OffsetLow;
-  offsetL.ulHi = (OffsetHigh) ? *OffsetHigh : 0;
-  rc = OdinDosSetFilePtrL(hFile, offsetL, method, &newoffsetL);
-  if(OffsetHigh) {
-    *OffsetHigh = newoffsetL.ulHi;
+        offsetL.ulLo = OffsetLow;
+        offsetL.ulHi = (OffsetHigh) ? *OffsetHigh : 0;
+        rc = OdinDosSetFilePtrL(hFile, offsetL, method, &newoffsetL);
+        if(OffsetHigh) {
+            *OffsetHigh = newoffsetL.ulHi;
+        }
+        newoffset = newoffsetL.ulLo;
   }
-  newoffset = newoffsetL.ulLo;
-   }
-  else
-    rc = DosSetFilePtr(hFile, OffsetLow, method, &newoffset);
+  else  rc = DosSetFilePtr(hFile, OffsetLow, method, &newoffset);
 
   if(rc)
   {
-    SetLastError(error2WinError(rc));
-    return -1;
+        SetLastError(error2WinError(rc));
+        return -1;
   }
   SetLastError(ERROR_SUCCESS_W);
   return newoffset;
@@ -1113,20 +1112,20 @@ BOOL OSLibDosSetEndOfFile(DWORD hFile)
  APIRET   rc;
 
    if(f64BitIO) {
-  rc = OdinDosSetFilePtrL(hFile, FilePosL, FILE_CURRENT, &newFilePosL);
-  if(rc == 0) {
-          rc = OdinDosSetFileSizeL(hFile, newFilePosL);
-  }
+        rc = OdinDosSetFilePtrL(hFile, FilePosL, FILE_CURRENT, &newFilePosL);
+        if(rc == 0) {
+            rc = OdinDosSetFileSizeL(hFile, newFilePosL);
+        }
    }
    else {
-    rc = DosSetFilePtr(hFile, 0, FILE_CURRENT, &newFilePos);
-  if(rc == 0) {
-          rc = DosSetFileSize(hFile, newFilePos);
-  }
+        rc = DosSetFilePtr(hFile, 0, FILE_CURRENT, &newFilePos);
+        if(rc == 0) {
+            rc = DosSetFileSize(hFile, newFilePos);
+        }
    }
    if(rc) {
-    SetLastError(error2WinError(rc));
-    return FALSE;
+        SetLastError(error2WinError(rc));
+        return FALSE;
    }
    SetLastError(ERROR_SUCCESS_W);
    return TRUE;
@@ -1139,91 +1138,87 @@ BOOL OSLibDosGetFileInformationByHandle(DWORD hFile, BY_HANDLE_FILE_INFORMATION*
 
    if(f64BitIO)
    {
-     FILESTATUS4L statusL = { 0 };
+        FILESTATUS4L statusL = { 0 };
 
-    rc = DosQueryFileInfo(hFile,
-                        FIL_QUERYEASIZEL,
-                        &statusL,
-                              sizeof(statusL));
-    if(rc == NO_ERROR)
-    {
-      pInfo->dwFileAttributes = 0;
-    if(!(statusL.attrFile & NOT_NORMAL))
-        pInfo->dwFileAttributes |= FILE_ATTRIBUTE_NORMAL_W;
-    if(statusL.attrFile & FILE_READONLY)
-            pInfo->dwFileAttributes |= FILE_ATTRIBUTE_READONLY_W;
-    if(statusL.attrFile & FILE_HIDDEN)
-            pInfo->dwFileAttributes |= FILE_ATTRIBUTE_HIDDEN_W;
-    if(statusL.attrFile & FILE_SYSTEM)
-            pInfo->dwFileAttributes |= FILE_ATTRIBUTE_SYSTEM_W;
-    if(statusL.attrFile & FILE_DIRECTORY)
-            pInfo->dwFileAttributes |= FILE_ATTRIBUTE_DIRECTORY_W;
-    if(statusL.attrFile & FILE_ARCHIVED)
-            pInfo->dwFileAttributes |= FILE_ATTRIBUTE_ARCHIVE_W;
+        rc = DosQueryFileInfo(hFile, FIL_QUERYEASIZEL,
+                              &statusL, sizeof(statusL));
+        if(rc == NO_ERROR)
+        {
+            pInfo->dwFileAttributes = 0;
+            if(!(statusL.attrFile & NOT_NORMAL))
+                pInfo->dwFileAttributes |= FILE_ATTRIBUTE_NORMAL_W;
+            if(statusL.attrFile & FILE_READONLY)
+                    pInfo->dwFileAttributes |= FILE_ATTRIBUTE_READONLY_W;
+            if(statusL.attrFile & FILE_HIDDEN)
+                    pInfo->dwFileAttributes |= FILE_ATTRIBUTE_HIDDEN_W;
+            if(statusL.attrFile & FILE_SYSTEM)
+                    pInfo->dwFileAttributes |= FILE_ATTRIBUTE_SYSTEM_W;
+            if(statusL.attrFile & FILE_DIRECTORY)
+                    pInfo->dwFileAttributes |= FILE_ATTRIBUTE_DIRECTORY_W;
+            if(statusL.attrFile & FILE_ARCHIVED)
+                    pInfo->dwFileAttributes |= FILE_ATTRIBUTE_ARCHIVE_W;
 
-    pmDateTimeToFileTime(&statusL.fdateCreation,
-                               &statusL.ftimeCreation,
-                               &pInfo->ftCreationTime);
-    pmDateTimeToFileTime(&statusL.fdateLastAccess,
-                               &statusL.ftimeLastAccess,
-                               &pInfo->ftLastAccessTime);
-    pmDateTimeToFileTime(&statusL.fdateLastWrite,
-                               &statusL.ftimeLastWrite,
-                               &pInfo->ftLastWriteTime);
+            pmDateTimeToFileTime(&statusL.fdateCreation,
+                                 &statusL.ftimeCreation,
+                                 &pInfo->ftCreationTime);
+            pmDateTimeToFileTime(&statusL.fdateLastAccess,
+                                 &statusL.ftimeLastAccess,
+                                 &pInfo->ftLastAccessTime);
+            pmDateTimeToFileTime(&statusL.fdateLastWrite,
+                                 &statusL.ftimeLastWrite,
+                                 &pInfo->ftLastWriteTime);
 
-    pInfo->nFileSizeHigh = statusL.cbFile.ulHi;
-    pInfo->nFileSizeLow  = statusL.cbFile.ulLo;
-    pInfo->dwVolumeSerialNumber = 0; //todo
-    pInfo->nNumberOfLinks = 1;
-    pInfo->nFileIndexHigh = 0;
-    pInfo->nFileIndexLow  = 0;
-     }
+            pInfo->nFileSizeHigh = statusL.cbFile.ulHi;
+            pInfo->nFileSizeLow  = statusL.cbFile.ulLo;
+            pInfo->dwVolumeSerialNumber = 0; //todo
+            pInfo->nNumberOfLinks = 1;
+            pInfo->nFileIndexHigh = 0;
+            pInfo->nFileIndexLow  = 0;
+        }
    }
    else
    {
-     FILESTATUS4  status  = { 0 };
+        FILESTATUS4  status  = { 0 };
 
-    rc = DosQueryFileInfo(hFile,
-                        FIL_QUERYEASIZE,
-                        &status,
+        rc = DosQueryFileInfo(hFile, FIL_QUERYEASIZE, &status,
                               sizeof(status));
-    if(rc == NO_ERROR)
-    {
-      pInfo->dwFileAttributes = 0;
-    if(!(status.attrFile & NOT_NORMAL))
-        pInfo->dwFileAttributes |= FILE_ATTRIBUTE_NORMAL_W;
-    if(status.attrFile & FILE_READONLY)
-            pInfo->dwFileAttributes |= FILE_ATTRIBUTE_READONLY_W;
-    if(status.attrFile & FILE_HIDDEN)
-            pInfo->dwFileAttributes |= FILE_ATTRIBUTE_HIDDEN_W;
-    if(status.attrFile & FILE_SYSTEM)
-            pInfo->dwFileAttributes |= FILE_ATTRIBUTE_SYSTEM_W;
-    if(status.attrFile & FILE_DIRECTORY)
-            pInfo->dwFileAttributes |= FILE_ATTRIBUTE_DIRECTORY_W;
-    if(status.attrFile & FILE_ARCHIVED)
-            pInfo->dwFileAttributes |= FILE_ATTRIBUTE_ARCHIVE_W;
+        if(rc == NO_ERROR)
+        {
+            pInfo->dwFileAttributes = 0;
+            if(!(status.attrFile & NOT_NORMAL))
+                pInfo->dwFileAttributes |= FILE_ATTRIBUTE_NORMAL_W;
+            if(status.attrFile & FILE_READONLY)
+                    pInfo->dwFileAttributes |= FILE_ATTRIBUTE_READONLY_W;
+            if(status.attrFile & FILE_HIDDEN)
+                    pInfo->dwFileAttributes |= FILE_ATTRIBUTE_HIDDEN_W;
+            if(status.attrFile & FILE_SYSTEM)
+                    pInfo->dwFileAttributes |= FILE_ATTRIBUTE_SYSTEM_W;
+            if(status.attrFile & FILE_DIRECTORY)
+                    pInfo->dwFileAttributes |= FILE_ATTRIBUTE_DIRECTORY_W;
+            if(status.attrFile & FILE_ARCHIVED)
+                    pInfo->dwFileAttributes |= FILE_ATTRIBUTE_ARCHIVE_W;
 
-    pmDateTimeToFileTime(&status.fdateCreation,
-                               &status.ftimeCreation,
-                               &pInfo->ftCreationTime);
-    pmDateTimeToFileTime(&status.fdateLastAccess,
-                               &status.ftimeLastAccess,
-                               &pInfo->ftLastAccessTime);
-    pmDateTimeToFileTime(&status.fdateLastWrite,
-                               &status.ftimeLastWrite,
-                               &pInfo->ftLastWriteTime);
+            pmDateTimeToFileTime(&status.fdateCreation,
+                                 &status.ftimeCreation,
+                                 &pInfo->ftCreationTime);
+            pmDateTimeToFileTime(&status.fdateLastAccess,
+                                 &status.ftimeLastAccess,
+                                 &pInfo->ftLastAccessTime);
+            pmDateTimeToFileTime(&status.fdateLastWrite,
+                                 &status.ftimeLastWrite,
+                                 &pInfo->ftLastWriteTime);
 
-    pInfo->nFileSizeHigh = 0;
-    pInfo->nFileSizeLow = status.cbFile;
-    pInfo->dwVolumeSerialNumber = 0; //todo
-    pInfo->nNumberOfLinks = 1;
-    pInfo->nFileIndexHigh = 0;
-    pInfo->nFileIndexLow = 0;
-     }
+            pInfo->nFileSizeHigh = 0;
+            pInfo->nFileSizeLow = status.cbFile;
+            pInfo->dwVolumeSerialNumber = 0; //todo
+            pInfo->nNumberOfLinks = 1;
+            pInfo->nFileIndexHigh = 0;
+            pInfo->nFileIndexLow = 0;
+        }
    }
    if(rc) {
         SetLastError(error2WinError(rc));
-    return FALSE;
+        return FALSE;
    }
    SetLastError(ERROR_SUCCESS_W);
    return TRUE;
@@ -1241,26 +1236,26 @@ BOOL OSLibDosSetFileTime(DWORD hFile, WORD creationdate, WORD creationtime,
 
   if(rc == NO_ERROR)
   {
-  if(creationdate && creationtime) {
-    fileInfo.fdateCreation   = *(FDATE *)&creationdate;
-          fileInfo.ftimeCreation   = *(FTIME *)&creationtime;
-  }
-  if(lastaccessdate && lastaccesstime) {
-    fileInfo.fdateLastAccess = *(FDATE *)&lastaccessdate;
-          fileInfo.ftimeLastAccess = *(FTIME *)&lastaccesstime;
-  }
-  if(lastwritedate && lastwritetime) {
-    fileInfo.fdateLastWrite  = *(FDATE *)&lastwritedate;
-          fileInfo.ftimeLastWrite  = *(FTIME *)&lastwritetime;
-  }
+    if(creationdate && creationtime) {
+        fileInfo.fdateCreation   = *(FDATE *)&creationdate;
+        fileInfo.ftimeCreation   = *(FTIME *)&creationtime;
+    }
+    if(lastaccessdate && lastaccesstime) {
+        fileInfo.fdateLastAccess = *(FDATE *)&lastaccessdate;
+        fileInfo.ftimeLastAccess = *(FTIME *)&lastaccesstime;
+    }
+    if(lastwritedate && lastwritetime) {
+        fileInfo.fdateLastWrite  = *(FDATE *)&lastwritedate;
+        fileInfo.ftimeLastWrite  = *(FTIME *)&lastwritetime;
+    }
 
-  rc = DosSetFileInfo(hFile, FIL_STANDARD, &fileInfo, sizeof(fileInfo));
+    rc = DosSetFileInfo(hFile, FIL_STANDARD, &fileInfo, sizeof(fileInfo));
   }
 
   if(rc)
   {
-        SetLastError(error2WinError(rc));
-      return FALSE;
+    SetLastError(error2WinError(rc));
+    return FALSE;
   }
   SetLastError(ERROR_SUCCESS_W);
   return TRUE;
@@ -1278,18 +1273,18 @@ BOOL OSLibDosGetFileTime(DWORD hFile, WORD *creationdate, WORD *creationtime,
 
   if(rc == NO_ERROR)
   {
-  *creationdate   = *(WORD *)&fileInfo.fdateCreation;
-        *creationtime   = *(WORD *)&fileInfo.ftimeCreation;
-  *lastaccessdate = *(WORD *)&fileInfo.fdateLastAccess;
-        *lastaccesstime = *(WORD *)&fileInfo.ftimeLastAccess;
-  *lastwritedate  = *(WORD *)&fileInfo.fdateLastWrite;
-        *lastwritetime  = *(WORD *)&fileInfo.ftimeLastWrite;
+    *creationdate   = *(WORD *)&fileInfo.fdateCreation;
+    *creationtime   = *(WORD *)&fileInfo.ftimeCreation;
+    *lastaccessdate = *(WORD *)&fileInfo.fdateLastAccess;
+    *lastaccesstime = *(WORD *)&fileInfo.ftimeLastAccess;
+    *lastwritedate  = *(WORD *)&fileInfo.fdateLastWrite;
+    *lastwritetime  = *(WORD *)&fileInfo.ftimeLastWrite;
   }
 
   if(rc)
   {
-        SetLastError(error2WinError(rc));
-      return FALSE;
+    SetLastError(error2WinError(rc));
+    return FALSE;
   }
   SetLastError(ERROR_SUCCESS_W);
   return TRUE;
@@ -1918,13 +1913,13 @@ DWORD OSLibDosQueryVolumeSerialAndName(int drive, LPDWORD lpVolumeSerialNumber,
 
    switch(rc) {
    case ERROR_INVALID_DRIVE:
-  return ERROR_INVALID_DRIVE_W;
+        return ERROR_INVALID_DRIVE_W;
    case ERROR_NO_VOLUME_LABEL:
-  return ERROR_NO_VOLUME_LABEL_W;
+        return ERROR_NO_VOLUME_LABEL_W;
    case NO_ERROR:
-  break;
+        break;
    default:
-  return ERROR_NOT_ENOUGH_MEMORY; //whatever
+        return ERROR_NOT_ENOUGH_MEMORY; //whatever
    }
 
    if(lpVolumeSerialNumber) {
@@ -1932,9 +1927,9 @@ DWORD OSLibDosQueryVolumeSerialAndName(int drive, LPDWORD lpVolumeSerialNumber,
    }
    if(lpVolumeNameBuffer)
    {
-    if(nVolumeNameSize > fsi.vol.cch) {
-             strcpy(lpVolumeNameBuffer, (PCHAR)fsi.vol.szVolLabel);
-  }
+        if(nVolumeNameSize > fsi.vol.cch) {
+            strcpy(lpVolumeNameBuffer, (PCHAR)fsi.vol.szVolLabel);
+        }
         else return ERROR_BUFFER_OVERFLOW_W;
    }
 
@@ -2040,8 +2035,8 @@ ULONG OSLibDosQueryModuleName(ULONG hModule, int cchName, char *pszName)
 ULONG OSLibDosQuerySysInfo(ULONG iStart, ULONG iLast, PVOID pBuf, ULONG cbBuf)
 {
   APIRET rc;
-  
-  rc = DosQuerySysInfo(iStart, iLast, pBuf, cbBuf); 
+
+  rc = DosQuerySysInfo(iStart, iLast, pBuf, cbBuf);
   SetLastError(error2WinError(rc,ERROR_INVALID_HANDLE));
   return rc;
 }

@@ -1,4 +1,4 @@
-/* $Id: KERNEL32.CPP,v 1.54 2000-09-25 19:57:17 phaller Exp $ */
+/* $Id: KERNEL32.CPP,v 1.55 2000-10-02 13:38:55 sandervl Exp $ */
 
 /*
  * Win32 compatibility file functions for OS/2
@@ -314,13 +314,6 @@ BOOL WIN32API IsDBCSLeadByte(BYTE arg1)
 }
 //******************************************************************************
 //******************************************************************************
-DWORD WIN32API LoadModule( LPCSTR arg1, PVOID  arg2)
-{
-    dprintf(("KERNEL32:  OS2LoadModule\n"));
-    return O32_LoadModule(arg1, arg2);
-}
-//******************************************************************************
-//******************************************************************************
 int WIN32API MulDiv(int arg1, int arg2, int  arg3)
 {
     dprintf2(("KERNEL32:  MulDiv %d*%d/%d\n", arg1, arg2, arg3));
@@ -406,50 +399,6 @@ BOOL WIN32API GetBinaryTypeW(LPCWSTR lpApplicationName, LPDWORD lpBinaryType)
     rc = GetBinaryTypeA(astring, lpBinaryType);
     FreeAsciiString(astring);
     return(rc);
-}
-//******************************************************************************
-//TODO: SetLastError
-//******************************************************************************
-BOOL WIN32API GetVersionExA(OSVERSIONINFOA *lpVersionInformation)
-{
-   dprintf(("KERNEL32:  OS2GetVersionExA\n"));
-
-   if(lpVersionInformation == NULL || lpVersionInformation->dwOSVersionInfoSize != sizeof(OSVERSIONINFOA))
-        return(FALSE);
-
-   lpVersionInformation->dwMajorVersion = ODINNT_MAJOR_VERSION;    //pretend we're NT 4.0
-   lpVersionInformation->dwMinorVersion = ODINNT_MINOR_VERSION;
-   lpVersionInformation->dwBuildNumber  = ODINNT_BUILD_NR;
-   lpVersionInformation->dwPlatformId   = VER_PLATFORM_WIN32_NT;
-   strcpy(lpVersionInformation->szCSDVersion, ODINNT_CSDVERSION);
-   return(TRUE);
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API GetVersionExW(OSVERSIONINFOW *lpVersionInformation)
-{
-   dprintf(("KERNEL32:  OS2GetVersionExW\n"));
-
-   if(lpVersionInformation == NULL || lpVersionInformation->dwOSVersionInfoSize != sizeof(OSVERSIONINFOW))
-        return(FALSE);
-
-   lpVersionInformation->dwMajorVersion = ODINNT_MAJOR_VERSION;    //pretend we're NT 4.0
-   lpVersionInformation->dwMinorVersion = ODINNT_MINOR_VERSION;
-   lpVersionInformation->dwBuildNumber  = ODINNT_BUILD_NR;
-   lpVersionInformation->dwPlatformId   = VER_PLATFORM_WIN32_NT;
-   lstrcpyW(lpVersionInformation->szCSDVersion, ODINNT_CSDVERSION_W);
-   return(TRUE);
-}
-//******************************************************************************
-//******************************************************************************
-LONG WIN32API GetVersion()
-{
-  dprintf(("KERNEL32:  GetVersion\n"));
-  // highword 0 = NT, lowword high byte major ver, low byte minor ver
-/* @@@PH 98/04/04 MFC30 makes assumptions about process control block        */
-/*                structures that lead to crashes if we don't identify as NT */
-
-  return ODINNT_VERSION;
 }
 //******************************************************************************
 //******************************************************************************
