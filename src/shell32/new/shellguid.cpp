@@ -24,7 +24,7 @@
 #include <wine/obj_commdlgbrowser.h>
 #include <wine/obj_extracticon.h>
 #include <wine/obj_shellextinit.h>
-//#include <docobj.h>
+#include <docobj.h>
 
 /*
  * Francis Beaudet <francis@macadamian.com>

@@ -39,6 +39,7 @@
 
 DEFAULT_DEBUG_CHANNEL(shell)
 
+
 typedef struct
 {	ICOM_VTABLE(IShellView)* lpvtbl;
 	DWORD		ref;
