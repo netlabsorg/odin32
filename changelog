@@ -1,4 +1,9 @@
-/* $Id: changelog,v 1.2272 2002-08-19 13:54:31 sandervl Exp $ */
+/* $Id: changelog,v 1.2273 2002-08-19 15:08:45 bird Exp $ */
+ 
+ 2002-08-19: knut st. osmundsen <bird@anduin   >
+    - MAKE:     o New TARGET_MODE: DEPEND.
+                o Some polish.
+    - TOOLS:    o Did some polish and help on BuildEnv.cmd.
 
  2002-08-19: Sander van Leeuwen <sandervl@innotek   >
     - USER32:   o Don't send queued WM_CHAR messages for windows that have
