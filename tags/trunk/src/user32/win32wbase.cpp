@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.260 2001-06-09 14:50:21 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.261 2001-06-10 09:19:58 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -239,6 +239,9 @@ Win32BaseWindow::~Win32BaseWindow()
     Win32BaseWindow *wndparent = (Win32BaseWindow *)ChildWindow::getParentOfChild();
     if(wndparent) {
         RELEASE_WNDOBJ(wndparent);
+    }
+    if(owner) {
+        RELEASE_WNDOBJ(owner);
     }
     if(windowClass) {
         RELEASE_CLASSOBJ(windowClass);
@@ -1054,7 +1057,10 @@ ULONG Win32BaseWindow::MsgButton(MSG *msg)
                     Win32BaseWindow *win32top = Win32BaseWindow::GetWindowFromHandle(hwndTop);
 
                     //SvL: Calling OSLibSetActiveWindow(hwndTop); causes focus problems
-                    if (win32top) OSLibWinSetFocus(win32top->getOS2FrameWindowHandle());
+                    if (win32top) {
+                        OSLibWinSetFocus(win32top->getOS2FrameWindowHandle());
+                        RELEASE_WNDOBJ(win32top);
+                    }
                 }
         }
     }
@@ -1720,8 +1726,8 @@ LRESULT Win32BaseWindow::DefWindowProcA(UINT Msg, WPARAM wParam, LPARAM lParam)
             if (mnemonic == (char) wParam) {
                 siblingWindow->SendInternalMessageA (BM_CLICK, 0, 0);
             }
-
             sibling = siblingWindow->GetNextWindow (GW_HWNDNEXT);
+            RELEASE_WNDOBJ(siblingWindow);
         }
 
         return 0;
@@ -2112,6 +2118,7 @@ LRESULT Win32BaseWindow::BroadcastMessageA(int type, UINT msg, WPARAM wParam, LP
                 }
                 else    PostMessageA(window->getWindowHandle(), msg, wParam, lParam);
             }
+            RELEASE_WNDOBJ(window);
         }
     }
     return 0;
@@ -2136,6 +2143,7 @@ LRESULT Win32BaseWindow::BroadcastMessageW(int type, UINT msg, WPARAM wParam, LP
                 }
                 else    PostMessageW(window->getWindowHandle(), msg, wParam, lParam);
             }
+            RELEASE_WNDOBJ(window);
         }
     }
     return 0;
@@ -2456,6 +2464,7 @@ BOOL Win32BaseWindow::SetWindowPos(HWND hwndInsertAfter, int x, int y, int cx, i
         Win32BaseWindow *wndBehind = Win32BaseWindow::GetWindowFromHandle(swp.hwndInsertBehind);
         if(wndBehind) {
             swp.hwndInsertBehind   = wndBehind->getOS2FrameWindowHandle();
+            RELEASE_WNDOBJ(wndBehind);
         }
         else {
             dprintf(("ERROR: SetWindowPos: hwndInsertBehind %x invalid!",swp.hwndInsertBehind));
@@ -2735,7 +2744,9 @@ HWND Win32BaseWindow::SetParent(HWND hwndNewParent)
         ShowWindow(SW_HIDE);
         fShow = TRUE;
    }
-
+   if(oldparent) {
+        RELEASE_WNDOBJ(oldparent);
+   }
    newparent = GetWindowFromHandle(hwndNewParent);
    if(newparent && !newparent->isDesktopWindow())
    {
@@ -2949,12 +2960,15 @@ HWND Win32BaseWindow::FindWindowEx(HWND hwndParent, HWND hwndChildAfter, ATOM at
 {
  Win32BaseWindow *parent = GetWindowFromHandle(hwndParent);
  Win32BaseWindow *child  = GetWindowFromHandle(hwndChildAfter);
+ Win32BaseWindow *firstchild = child;
 
     dprintf(("FindWindowEx %x %x %x %s", hwndParent, hwndChildAfter, atom, lpszWindow));
     if((hwndParent != 0 && !parent) ||
        (hwndChildAfter != 0 && !child) ||
        (hwndParent == 0 && hwndChildAfter != 0))
     {
+        if(parent)      RELEASE_WNDOBJ(parent);
+        if(firstchild)  RELEASE_WNDOBJ(firstchild);
         dprintf(("Win32BaseWindow::FindWindowEx: parent or child not found %x %x", hwndParent, hwndChildAfter));
         SetLastError(ERROR_INVALID_WINDOW_HANDLE);
         return 0;
@@ -2962,6 +2976,7 @@ HWND Win32BaseWindow::FindWindowEx(HWND hwndParent, HWND hwndChildAfter, ATOM at
     SetLastError(0);
     if(hwndParent != 0)
     {//if the current process owns the window, just do a quick search
+        lock(&critsect);
         child = (Win32BaseWindow *)parent->getFirstChild();
         if(hwndChildAfter != 0)
         {
@@ -2982,10 +2997,18 @@ HWND Win32BaseWindow::FindWindowEx(HWND hwndParent, HWND hwndChildAfter, ATOM at
                (!lpszWindow || child->hasWindowName(lpszWindow)))
             {
                 dprintf(("FindWindowEx: Found window %x", child->getWindowHandle()));
-                return child->getWindowHandle();
+                HWND hwndChild = child->getWindowHandle();
+                unlock(&critsect);
+                if(parent)      RELEASE_WNDOBJ(parent);
+                if(firstchild)  RELEASE_WNDOBJ(firstchild);
+                dprintf(("FindWindowEx: Found window %x", child->getWindowHandle()));
+                return hwndChild;
             }
             child = (Win32BaseWindow *)child->getNextChild();
         }
+        unlock(&critsect);
+        if(parent)      RELEASE_WNDOBJ(parent);
+        if(firstchild)  RELEASE_WNDOBJ(firstchild);
     }
     else {
         Win32BaseWindow *wnd;
@@ -3018,6 +3041,8 @@ HWND Win32BaseWindow::FindWindowEx(HWND hwndParent, HWND hwndChildAfter, ATOM at
             hwnd = OSLibWinGetNextWindow(henum);
         }
         OSLibWinEndEnumWindows(henum);
+        if(parent)      RELEASE_WNDOBJ(parent);
+        if(firstchild)  RELEASE_WNDOBJ(firstchild);
     }
     SetLastError(ERROR_CANNOT_FIND_WND_CLASS); //TODO: not always correct
     return 0;
@@ -3531,12 +3556,13 @@ void Win32BaseWindow::setWindowId(DWORD id)
 //******************************************************************************
 HWND Win32BaseWindow::getNextDlgGroupItem(HWND hwndCtrl, BOOL fPrevious)
 {
- Win32BaseWindow *child, *nextchild, *lastchild;
+ Win32BaseWindow *firstchild = NULL, *child, *nextchild, *lastchild;
  HWND retvalue;
 
+    lock();
     if (hwndCtrl)
     {
-        child = GetWindowFromHandle(hwndCtrl);
+        firstchild = child = GetWindowFromHandle(hwndCtrl);
         if (!child)
         {
             retvalue = 0;
@@ -3548,7 +3574,6 @@ HWND Win32BaseWindow::getNextDlgGroupItem(HWND hwndCtrl, BOOL fPrevious)
             child = child->getParent();
             if(child == NULL) break;
         }
-
         if (!child || (child->getParent() != this))
         {
             retvalue = 0;
@@ -3610,6 +3635,8 @@ HWND Win32BaseWindow::getNextDlgGroupItem(HWND hwndCtrl, BOOL fPrevious)
     }
     retvalue = lastchild->getWindowHandle();
 END:
+    unlock();
+    if(firstchild) RELEASE_WNDOBJ(firstchild);
     return retvalue;
 }
 //******************************************************************************
@@ -3623,7 +3650,7 @@ Win32BaseWindow *Win32BaseWindow::GetWindowFromHandle(HWND hwnd)
     lock(&critsect);
     if(HwGetWindowHandleData(hwnd, (DWORD *)&window) == TRUE) {
          if(window) {
-////             dprintf(("addRef %x; refcount %d", hwnd, window->getRefCount()+1));
+             dprintf(("addRef %x; refcount %d", hwnd, window->getRefCount()+1));
              window->addRef();
          }
          unlock(&critsect);
