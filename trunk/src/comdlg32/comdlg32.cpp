@@ -1,4 +1,4 @@
-/* $Id: comdlg32.cpp,v 1.17 1999-11-02 20:37:42 sandervl Exp $ */
+/* $Id: comdlg32.cpp,v 1.18 1999-11-09 22:38:57 phaller Exp $ */
 
 /*
  * COMDLG32 implementation
@@ -24,7 +24,7 @@
 #include <wndproc.h>
 #include <win32wnd.h>
 
-ODINDEBUGCHANNEL(COMDLG32)
+ODINDEBUGCHANNEL(COMDLG32-COMDLG32)
 
 #if 0
 #define COMDLG32_CHECKHOOK(a,b,c)           \
@@ -86,6 +86,7 @@ ODINFUNCTION1(BOOL, GetSaveFileNameA,
 
   COMDLG32_CHECKHOOK(lpofn, OFN_ENABLEHOOK, WNDPROC)
 
+  //@@@PH 1999/11/09 needs to be fixed
   return(O32_GetSaveFileName(lpofn));
 }
 
@@ -174,9 +175,9 @@ ODINFUNCTION1(BOOL, GetSaveFileNameW,
   ofn.lpstrFileTitle    = szFileTitle;
   ofn.lpstrCustomFilter = szCustFilter;
 
-  COMDLG32_CHECKHOOK((&ofn), OFN_ENABLEHOOK, WNDPROC)
-
-  bResult =  O32_GetSaveFileName(&ofn);
+  // call ascii variant of function
+  // @@@PH switch to ODIN_GetSaveFileNameA later
+  bResult = GetSaveFileNameA(&ofn);
 
   if (ofn.lpTemplateName    != NULL) FreeAsciiString((char*)ofn.lpTemplateName);
   if (ofn.lpstrFilter       != NULL) FreeAsciiString((char*)ofn.lpstrFilter);
@@ -229,11 +230,13 @@ ODINFUNCTION1(BOOL, GetOpenFileNameA,
 {
   Win32WindowProc *wndproc;
 
-  if(lpofn->Flags & (OFN_ENABLETEMPLATE|OFN_ENABLETEMPLATEHANDLE)) {
-	return GetFileDialog95A(lpofn, OPEN_DIALOG);
+  if(lpofn->Flags & (OFN_ENABLETEMPLATE|OFN_ENABLETEMPLATEHANDLE))
+  {
+    return GetFileDialog95A(lpofn, OPEN_DIALOG);
   }
   COMDLG32_CHECKHOOK(lpofn, OFN_ENABLEHOOK, WNDPROC)
 
+  //@@@PH 1999/11/09 needs to be fixed
   return(O32_GetOpenFileName(lpofn));
 }
 
@@ -322,9 +325,9 @@ ODINFUNCTION1(BOOL, GetOpenFileNameW,
   ofn.lpstrFileTitle    = szFileTitle;
   ofn.lpstrCustomFilter = szCustFilter;
 
-  COMDLG32_CHECKHOOK((&ofn), OFN_ENABLEHOOK, WNDPROC)
-
-  bResult =  O32_GetOpenFileName(&ofn);
+  // call ascii variant of function
+  // @@@PH switch to ODIN_GetOpenFileNameA later
+  bResult = GetOpenFileNameA(&ofn);
 
   if (ofn.lpTemplateName    != NULL) FreeAsciiString((char*)ofn.lpTemplateName);
   if (ofn.lpstrFilter       != NULL) FreeAsciiString((char*)ofn.lpstrFilter);
