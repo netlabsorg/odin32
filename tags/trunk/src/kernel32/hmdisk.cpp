@@ -1,4 +1,4 @@
-/* $Id: hmdisk.cpp,v 1.14 2001-10-10 11:01:17 phaller Exp $ */
+/* $Id: hmdisk.cpp,v 1.15 2001-10-10 14:47:42 phaller Exp $ */
 
 /*
  * Win32 Disk API functions for OS/2
@@ -176,6 +176,7 @@ BOOL HMDeviceDiskClass::CloseHandle(PHMHANDLEDATA pHMHandleData)
 }
 //******************************************************************************
 //******************************************************************************
+
 
 // this helper function just calls the specified
 // ioctl function for the CDROM manager with no
@@ -486,8 +487,6 @@ BOOL HMDeviceDiskClass::DeviceIoControl(PHMHANDLEDATA pHMHandleData, DWORD dwIoC
     case FSCTL_UNLOCK_VOLUME:
         break;
 
-    case IOCTL_DISK_CHECK_VERIFY:
-    case IOCTL_DISK_EJECT_MEDIA:
     case IOCTL_DISK_FORMAT_TRACKS:
     case IOCTL_DISK_GET_DRIVE_LAYOUT:
         break;
@@ -532,7 +531,61 @@ BOOL HMDeviceDiskClass::DeviceIoControl(PHMHANDLEDATA pHMHandleData, DWORD dwIoC
     case IOCTL_CDROM_UNLOAD_DRIVER:
     case IOCTL_CDROM_READ_TOC:
     case IOCTL_CDROM_GET_CONTROL:
+        break;
+    
     case IOCTL_CDROM_PLAY_AUDIO_MSF:
+    {
+      dprintf(("Play CDROM audio playback"));
+      
+#pragma pack(1)
+      struct
+      {
+        DWORD ucSignature;
+        BYTE  ucAddressingMode;
+        DWORD ulStartingMSF;
+        DWORD ulEndingMSF;
+      } ParameterBlock;
+#pragma pack()
+      
+      PCDROM_PLAY_AUDIO_MSF pPlay = (PCDROM_PLAY_AUDIO_MSF)lpInBuffer;
+      
+      // setup the parameter block
+      ParameterBlock.ucSignature = 0x43443031; // 'CD01'
+      ParameterBlock.ucAddressingMode = 1;     // MSF format
+      
+      // @@@PH unknown if this kind of MSF conversion is correct!
+      ParameterBlock.ulStartingMSF    = pPlay->StartingM << 16 |
+                                        pPlay->StartingS << 8  |
+                                        pPlay->StartingF;
+      ParameterBlock.ulEndingMSF      = pPlay->EndingM << 16 |
+                                        pPlay->EndingS << 8  |
+                                        pPlay->EndingF;
+        
+      DWORD dwParameterSize = sizeof( ParameterBlock );
+      DWORD dwDataSize      = 0;
+      DWORD ret;
+    
+      if(lpBytesReturned)
+        *lpBytesReturned = 0;
+    
+      ret = OSLibDosDevIOCtl(pHMHandleData->hHMHandle,
+                             0x81,  // IOCTL_CDROMAUDIO
+                             0x50,  // CDROMAUDIO_PLAYAUDIO
+                             &ParameterBlock,
+                             sizeof( ParameterBlock ),
+                             &dwParameterSize,
+                             NULL,
+                             0,
+                             &dwDataSize);
+      if(ret)
+      {
+        SetLastError(error2WinError(ret));
+        return FALSE;
+      }
+      SetLastError(ERROR_SUCCESS);
+      return TRUE;
+    }
+      
     case IOCTL_CDROM_SEEK_AUDIO_MSF:
         break;
 
@@ -662,7 +715,9 @@ BOOL HMDeviceDiskClass::DeviceIoControl(PHMHANDLEDATA pHMHandleData, DWORD dwIoC
     // STORAGE class
     // -------------
       
+    case IOCTL_DISK_CHECK_VERIFY:
     case IOCTL_STORAGE_CHECK_VERIFY:
+      dprintf(("IOCTL_STORAGE_CHECK_VERIFY incompletely implemented"));
         if(lpBytesReturned) {
             *lpBytesReturned = 0;
         }
@@ -674,6 +729,7 @@ BOOL HMDeviceDiskClass::DeviceIoControl(PHMHANDLEDATA pHMHandleData, DWORD dwIoC
         SetLastError(NO_ERROR);
         return TRUE;
 
+    case IOCTL_DISK_EJECT_MEDIA:
     case IOCTL_STORAGE_EJECT_MEDIA:
     {
       dprintf(("Ejecting storage media"));
