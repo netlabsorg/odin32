@@ -1,4 +1,10 @@
-/* $Id: changelog,v 1.2140 2002-06-08 13:11:54 sandervl Exp $ */
+/* $Id: changelog,v 1.2141 2002-06-09 10:46:17 sandervl Exp $ */
+
+ 2002-06-09: Sander van Leeuwen <sandervl@xs4all.nl>
+    - USER32:   o SendMessageTimeoutA/W fixes for inter-process/thread message
+                  communication
+                  (fixes OpenOffice 1.0 crash during install (at 76%))
+    - WININET:  o Fixed shlwapi imports
 
  2002-06-08: Sander van Leeuwen <sandervl@xs4all.nl>
     - SHELL32:  o Moved resource files to subdir
