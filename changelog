@@ -1,4 +1,8 @@
- /* $Id: changelog,v 1.724 2000-02-12 11:52:22 davidr Exp $ */
+ /* $Id: changelog,v 1.725 2000-02-12 18:07:27 cbratschi Exp $ */
+
+ 2000-02-12: Christoph Bratschi <cbratschi@datacomm.ch>
+	- USER32: added v5.00 messages to wndmsg.cpp
+	- GDI32: LineDDA fix
 
  2000-02-12: David Raison <djr@lemur.co.uk>
  	- OLE32: Fixed IsEqualIID issue

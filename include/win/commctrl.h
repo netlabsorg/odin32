@@ -1,4 +1,4 @@
-/* $Id: commctrl.h,v 1.18 2000-02-10 18:47:35 cbratschi Exp $ */
+/* $Id: commctrl.h,v 1.19 2000-02-12 18:08:22 cbratschi Exp $ */
 /*
  * Common controls definitions
  */
@@ -1909,12 +1909,12 @@ typedef struct
 #define TVS_NOTOOLTIPS        0x0080
 #define TVS_CHECKBOXES        0x0100
 #define TVS_TRACKSELECT       0x0200
-#define TVS_SINGLEEXPAND          0x0400
-#define TVS_INFOTIP               0x0800
-#define TVS_FULLROWSELECT         0x1000
-#define TVS_NOSCROLL              0x2000
-#define TVS_NONEVENHEIGHT         0x4000
-#define TVS_NOHSCROLL             0x8000
+#define TVS_SINGLEEXPAND      0x0400
+#define TVS_INFOTIP           0x0800
+#define TVS_FULLROWSELECT     0x1000
+#define TVS_NOSCROLL          0x2000
+#define TVS_NONEVENHEIGHT     0x4000
+#define TVS_NOHSCROLL         0x8000
 
 #define TVS_SHAREDIMAGELISTS  0x0000
 #define TVS_PRIVATEIMAGELISTS 0x0400

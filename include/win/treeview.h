@@ -1,4 +1,4 @@
-/* $Id: treeview.h,v 1.6 2000-02-10 18:47:36 cbratschi Exp $ */
+/* $Id: treeview.h,v 1.7 2000-02-12 18:08:23 cbratschi Exp $ */
 /*
  * Treeview class extra info
  *
@@ -13,6 +13,7 @@
 
 #define MINIMUM_INDENT 10
 #define TV_DEFAULTITEMHEIGHT 16
+#define TV_REFRESH_DELAY 100     /* 100 ms delay between two refreshes */
 #define TVITEM_ALLOC    16      /* default nr of items to allocate at first try */
 
 
@@ -40,8 +41,9 @@ typedef struct {
   RECT      rect;
   RECT      text;
   RECT      expandBox;      /* expand box (+/-) coordinate */
-  RECT          bitmap;
+  RECT      bitmap;
   RECT      statebitmap;
+  BOOL      calculated;
 } TREEVIEW_ITEM;
 
 
@@ -70,7 +72,7 @@ typedef struct tagTREEVIEW_INFO
   HTREEITEM     firstVisible;   /* handle to first visible item */
   HTREEITEM     dropItem;       /* handle to item selected by drag cursor */
   HTREEITEM     insertMarkItem; /* item after which insertion mark is placed */
-  BOOL                  insertBeforeorAfter; /* flag used by TVM_SETINSERTMARK */
+  BOOL          insertBeforeorAfter; /* flag used by TVM_SETINSERTMARK */
   HIMAGELIST    dragList;       /* Bitmap of dragged item */
   INT           cx,cy;          /* current x/y place in list */
   COLORREF      clrBk;
@@ -97,15 +99,20 @@ typedef struct tagTREEVIEW_INFO
 
 #define TV_HSCROLL      0x01    /* treeview too large to fit in window */
 #define TV_VSCROLL      0x02    /* (horizontal/vertical) */
-#define TV_LDRAG                0x04    /* Lbutton pushed to start drag */
+#define TV_LDRAG        0x04    /* Lbutton pushed to start drag */
 #define TV_LDRAGGING    0x08    /* Lbutton pushed, mouse moved.  */
-#define TV_RDRAG                0x10    /* dito Rbutton */
+#define TV_RDRAG        0x10    /* dito Rbutton */
 #define TV_RDRAGGING    0x20
+#define TV_NOREDRAW     0x40
+#define TV_CALCALL      0x80
 
 /* bitflags for infoPtr->timer */
 
 #define TV_EDIT_TIMER    1
-#define TV_EDIT_TIMER_SET 1
+#define TV_REFRESH_TIMER 2
+
+#define TV_EDIT_TIMER_SET    1
+#define TV_REFRESH_TIMER_SET 2
 
 
 extern VOID TREEVIEW_Register (VOID);
