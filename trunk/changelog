@@ -1,10 +1,15 @@
- /* $Id: changelog,v 1.1184 2000-10-09 17:30:33 sandervl Exp $ */
+ /* $Id: changelog,v 1.1185 2000-10-09 17:47:56 sandervl Exp $ */
 
  2000-10-09: Yuri Dario <mc6530@mclink.it>
     - USER32: Corrected background brush for MDI windows
 
  2000-10-09: Patrick Haller <phaller@gmx.net>
     - KERNEL32: Fixed console bug (left offset) reported by Michal
+
+ 2000-10-09: Michal Necasek <mike@mendelu.cz>
+    - KERNEL32: IsValidLocale; don't check for kernel32 resources (that aren't there)
+                Always return true for now -> winhlp32 no longer complains about 
+                different languages when loading helpfiles
 
  2000-10-08: Sander van Leeuwen <sandervl@xs4all.nl>
     - USER32: FrameTrackFrame fix for child windows
