@@ -1,4 +1,4 @@
-/* $Id: scroll.cpp,v 1.11 1999-10-18 10:54:03 sandervl Exp $ */
+/* $Id: scroll.cpp,v 1.12 1999-10-20 16:27:00 cbratschi Exp $ */
 /*
  * Scrollbar control
  *
@@ -702,19 +702,19 @@ static void SCROLL_RefreshScrollBar( HWND hwnd, INT nBar,
         SetLastError(ERROR_INVALID_WINDOW_HANDLE);
         return;
     }
-    if(nBar == SB_VERT) 
+    if(nBar == SB_VERT)
     {
-    	hwndScroll = Win32BaseWindow::OS2ToWin32Handle(window->getVertScrollHandle());
+        hwndScroll = Win32BaseWindow::OS2ToWin32Handle(window->getVertScrollHandle());
     }
-    else 
+    else
     if(nBar == SB_HORZ)
     {
-	hwndScroll = Win32BaseWindow::OS2ToWin32Handle(window->getHorzScrollHandle());
+        hwndScroll = Win32BaseWindow::OS2ToWin32Handle(window->getHorzScrollHandle());
     }
     else hwndScroll = hwnd;
 
     if(hwndScroll == 0)
-	return;
+        return;
 
     hdc = GetDCEx( hwndScroll, 0, DCX_CACHE | ((nBar == SB_CTL) ? 0 : DCX_WINDOW));
 
@@ -1150,9 +1150,9 @@ LRESULT WINAPI HorzScrollBarWndProc(HWND hwnd,UINT message,WPARAM wParam,LPARAM 
             POINT pt;
             CONV_POINT16TO32( (POINT16 *)&lParam, &pt );
             SCROLL_HandleScrollEvent( hwnd, SB_HORZ, message, pt );
-	    if(message == WM_MOUSEMOVE) {
-		return 1; //SvL: Let PM change the mouse cursor to the default
-	    }
+            if(message == WM_MOUSEMOVE) {
+                return 1; //SvL: Let PM change the mouse cursor to the default
+            }
         }
         break;
 
@@ -1228,9 +1228,9 @@ LRESULT WINAPI VertScrollBarWndProc(HWND hwnd,UINT message,WPARAM wParam,LPARAM 
             POINT pt;
             CONV_POINT16TO32( (POINT16 *)&lParam, &pt );
             SCROLL_HandleScrollEvent( hwnd, SB_VERT, message, pt );
-	    if(message == WM_MOUSEMOVE) {
-		return 1; //SvL: Let PM change the mouse cursor to the default
-	    }
+            if(message == WM_MOUSEMOVE) {
+                return 1; //SvL: Let PM change the mouse cursor to the default
+            }
         }
         break;
 

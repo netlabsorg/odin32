@@ -1,4 +1,4 @@
-/* $Id: syscolor.h,v 1.5 1999-10-05 16:02:53 cbratschi Exp $ */
+/* $Id: syscolor.h,v 1.6 1999-10-20 16:27:01 cbratschi Exp $ */
 
 /*
  * WINE:
@@ -34,5 +34,6 @@ BOOL   WIN32API OS2UpdateWindow(HWND hwnd);
 HBRUSH WIN32API OS2GetSysColorBrush(int nIndex);
 
 extern void SYSCOLOR_Init(void);
+extern void SYSCOLOR_Save(void);
 
 #endif  /* __WINE_SYSCOLOR_H */
