@@ -1,4 +1,4 @@
-/* $Id: itypelib.h,v 1.2 2000-01-02 21:29:58 davidr Exp $ */
+/* $Id: itypelib.h,v 1.3 2000-09-17 22:28:54 davidr Exp $ */
 /* 
  * OLE Typelib functions private header
  *
@@ -118,6 +118,13 @@ typedef struct ITypeLibImpl
     oList<TLBImpLib *>		pImpLibs;	     	/* Imported typelibs */
     oList<TYPEDESC *>		pTypedesc;	       	/* array of TypeDescriptions found in the libary */
 } ITypeLibImpl;
+
+/* internal TypeComp data */
+typedef struct ITypeCompImpl
+{
+    ICOM_VTABLE(ITypeComp) *	lpvtbl;
+    ULONG			ref;			// Reference count...
+} ITypeCompImpl;
 
 /*-------------------------FILE STRUCTURES-----------------------------------*/
 
@@ -580,6 +587,16 @@ HRESULT WIN32API ITypeInfo2Impl_GetAllVarCustData(LPTYPEINFO iface,
 HRESULT WIN32API ITypeInfo2Impl_GetAllImplTypeCustData(LPTYPEINFO iface,
 				UINT index, CUSTDATA *pCustData);
 
+HRESULT WIN32API ITypeCompImpl_QueryInterface(LPTYPECOMP iface,
+				REFIID riid, VOID **ppvObject);
+ULONG   WIN32API ITypeCompImpl_AddRef(LPTYPECOMP iface);
+ULONG   WIN32API ITypeCompImpl_Release(LPTYPECOMP iface);
+HRESULT	WIN32API ITypeCompImpl_Bind(LPTYPECOMP iface,
+				LPOLESTR szName, ULONG lHashVal, WORD wFlags,
+				ITypeInfo** ppTInfo, DESCKIND* pDescKind, BINDPTR* pBindPtr);
+HRESULT	WIN32API ITypeCompImpl_BindType(LPTYPECOMP iface,
+				LPOLESTR szName, ULONG lHashVal, ITypeInfo** ppTInfo,
+				ITypeComp** ppTComp);
 
 // Helper functions
 extern BSTR DupAtoBstr(char * pAscii);
