@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.178 2002-06-17 14:04:54 sandervl Exp $ */
+/* $Id: pmwindow.cpp,v 1.179 2002-06-20 14:18:15 sandervl Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -66,6 +66,8 @@ ULONG   ScreenHeight = 0;
 ULONG   ScreenBitsPerPel = 0;
 BOOL    fOS2Look = FALSE;
 BOOL    fForceMonoCursor = FALSE;
+BOOL    fDragDropActive = FALSE;
+BOOL    fDragDropDisabled = FALSE;
 HBITMAP hbmFrameMenu[3] = {0};
 
 static PFNWP pfnFrameWndProc = NULL;
@@ -263,6 +265,12 @@ void WIN32API SetWindowAppearance(int fLooks)
 void WIN32API CustForceMonoCursor()
 {
     fForceMonoCursor = TRUE;
+}
+//******************************************************************************
+//******************************************************************************
+void WIN32API SetDragDrop(BOOL fDisabled)
+{
+    fDragDropDisabled = fDisabled;
 }
 //******************************************************************************
 //CD notification window class
@@ -784,8 +792,6 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
         win32wnd->DispatchMsgA(pWinMsg);
         break;
 
-//temporarily disabled
-#if 0
     case DM_DRAGOVER:
     {
         PDRAGINFO pDragInfo = (PDRAGINFO)mp1;
@@ -794,6 +800,11 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
         USHORT    syDrop = SHORT2FROMMP(mp2);
 
         dprintf(("OS2: DM_DRAGOVER %x (%d,%d)", win32wnd->getWindowHandle(), sxDrop, syDrop));
+
+        if(fDragDropDisabled) {
+	        rc = (MRFROM2SHORT (DOR_NEVERDROP, 0));
+            break;
+        }
 
         //does this window accept dropped files?
         if(!DragDropAccept(win32wnd->getWindowHandle())) {
@@ -809,15 +820,17 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
             ULONG ulBytes, cItems;
             char *pszFiles;
 
-            win32wnd->setDragDropActive(TRUE);
-
             pszFiles = PMDragExtractFiles(pDragInfo, &cItems, &ulBytes);
             if(pszFiles) {
                 POINT point = {sxDrop, syDrop};
                 if(DragDropDragEnter(win32wnd->getWindowHandle(), point, cItems, pszFiles, ulBytes, DROPEFFECT_COPY_W) == FALSE) {
-                        rc = (MRFROM2SHORT (DOR_NEVERDROP, 0));
+                    rc = (MRFROM2SHORT (DOR_NEVERDROP, 0));
                 }
-                else    rc = (MRFROM2SHORT(DOR_DROP, DO_MOVE));
+                else {
+                    fDragDropActive = TRUE;
+                    rc = (MRFROM2SHORT(DOR_DROP, DO_MOVE));
+                    win32wnd->setDragDropActive(TRUE);
+                }
                 free(pszFiles);
             }
             else {
@@ -836,6 +849,18 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
     case DM_DRAGLEAVE:
     {
         dprintf(("OS2: DM_DRAGLEAVE %x", win32wnd->getWindowHandle()));
+
+        if(fDragDropDisabled) {
+            break;
+        }
+
+        fDragDropActive = FALSE;
+
+        //does this window accept dropped files?
+        if(!DragDropAccept(win32wnd->getWindowHandle())) {
+            break;
+        }
+
         DragDropDragLeave(win32wnd->getWindowHandle());
         win32wnd->setDragDropActive(FALSE);
         break;
@@ -851,7 +876,13 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
 
         dprintf(("OS2: DM_DROP %x (%d,%d)", win32wnd->getWindowHandle(), sxDrop, syDrop));
 
+        fDragDropActive = FALSE;
         rc = (MRFROM2SHORT (DOR_NODROP, 0));
+
+        if(fDragDropDisabled) {
+            rc = (MRFROM2SHORT (DOR_NODROP, 0));
+            break;
+        }
 
         //does this window accept dropped files?
         if(!DragDropAccept(win32wnd->getWindowHandle())) {
@@ -878,7 +909,6 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
         }  
         break;
     }
-#endif
 
     case WM_DDE_INITIATE:
     case WM_DDE_INITIATEACK:
