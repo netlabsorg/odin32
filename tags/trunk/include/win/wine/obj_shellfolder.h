@@ -1,4 +1,4 @@
-/* $Id: obj_shellfolder.h,v 1.7 2000-03-26 16:29:41 cbratschi Exp $ */
+/* $Id: obj_shellfolder.h,v 1.8 2000-08-18 02:04:21 phaller Exp $ */
 /*
  * Defines the COM interfaces and APIs related to IShellFolder
  *
@@ -20,7 +20,7 @@ extern "C" {
 #endif /* defined(__cplusplus) */
 
 /****************************************************************************
-*  STRRET (temporary, move it away)
+*  STRRET
 */
 #define STRRET_WSTR     0x0000
 #define STRRET_OFFSETA  0x0001
@@ -44,11 +44,12 @@ typedef struct _STRRET
 /*****************************************************************************
  * Predeclare the interfaces
  */
-DEFINE_SHLGUID(IID_IShellFolder,        0x000214E6L, 0, 0);
 typedef struct IShellFolder IShellFolder, *LPSHELLFOLDER;
 
-DEFINE_SHLGUID(IID_IPersistFolder,      0x000214EAL, 0, 0);
 typedef struct IPersistFolder IPersistFolder, *LPPERSISTFOLDER;
+
+DEFINE_GUID(IID_IPersistFolder2, 0x1ac3d9f0L, 0x175C, 0x11D1, 0x95, 0xBE, 0x00, 0x60, 0x97, 0x97, 0xEA, 0x4F);
+typedef struct IPersistFolder2 IPersistFolder2, *LPPERSISTFOLDER2;
 
 DEFINE_GUID(IID_IShellFolder2,  0xB82C5AA8, 0xA41B, 0x11D2, 0xBE, 0x32, 0x0, 0xc0, 0x4F, 0xB9, 0x36, 0x61);
 typedef struct IShellFolder2 IShellFolder2, *LPSHELLFOLDER2;
@@ -328,8 +329,33 @@ ICOM_DEFINE(IPersistFolder, IPersist)
 /*** IPersistFolder methods ***/
 #define IPersistFolder_Initialize(p,a)          ICOM_CALL1(Initialize,p,a)
 
+/*****************************************************************************
+ * IPersistFolder2 interface
+ */
+
+#define ICOM_INTERFACE IPersistFolder2
+#define IPersistFolder2_METHODS \
+    ICOM_METHOD1( HRESULT, GetCurFolder, LPITEMIDLIST*, pidl)
+#define IPersistFolder2_IMETHODS \
+    IPersist_IMETHODS \
+    IPersistFolder_METHODS \
+    IPersistFolder2_METHODS
+ICOM_DEFINE(IPersistFolder2, IPersistFolder)
+#undef ICOM_INTERFACE
+
+/*** IUnknown methods ***/
+#define IPersistFolder2_QueryInterface(p,a,b)	ICOM_CALL2(QueryInterface,p,a,b) 
+#define IPersistFolder2_AddRef(p)		ICOM_CALL (AddRef,p)
+#define IPersistFolder2_Release(p)		ICOM_CALL (Release,p)
+/*** IPersist methods ***/
+#define IPersistFolder2_GetClassID(p,a)		ICOM_CALL1(GetClassID,p,a)
+/*** IPersistFolder methods ***/
+#define IPersistFolder2_Initialize(p,a)		ICOM_CALL1(Initialize,p,a)
+/*** IPersistFolder2 methods ***/
+#define IPersistFolder2_GetCurFolder(p,a)	ICOM_CALL1(GetCurFolder,p,a)
+
 #ifdef __cplusplus
 } /* extern "C" */
 #endif /* defined(__cplusplus) */
 
-#endif /* __WINE_WINE_OBJ_SHELLLINK_H */
+#endif /* __WINE_WINE_OBJ_SHELLFOLDER_H */
