@@ -1,4 +1,4 @@
-/* $Id: CmdQd.c,v 1.3 2001-09-01 22:48:10 bird Exp $
+/* $Id: CmdQd.c,v 1.4 2001-09-02 02:51:41 bird Exp $
  *
  * Command Queue Daemon / Client.
  *
@@ -94,10 +94,25 @@
 #include <os2.h>
 
 
+/*
+ * Memory debugging.
+ */
+#ifdef DEBUGMEMORY
+void my_free(void *);
+void *my_malloc(size_t);
+
+#undef free
+#undef malloc
+
+#define free(pv) my_free(pv)
+#define malloc(cb) my_malloc(cb)
+
+#endif
+
 /*******************************************************************************
 *   Defined Constants And Macros                                               *
 *******************************************************************************/
-#define SHARED_MEM_NAME     "\\SHAREMEM\\CmdQd"
+#define SHARED_MEM_NAME     "\\SHAREMEM\\CmdQd2"
 #define SHARED_MEM_SIZE     65536
 #define IDLE_TIMEOUT_MS     -1 //(60*1000*3)
 #define OUTPUT_CHUNK        (8192-8)
@@ -124,7 +139,8 @@ typedef struct SharedMem
         msgWait = 3,
         msgWaitResponse = 4,
         msgKill = 5,
-        msgKillResponse = 6
+        msgKillResponse = 6,
+        msgDying = 0xff
     }           enmMsgType;
 
     union
@@ -233,7 +249,8 @@ void syntax(void);
 int  Init(const char *arg0, int cWorkers);
 int  Daemon(int cWorkers);
 int  DaemonInit(int cWorkers);
-void signalhandler(int sig);
+void signalhandlerDaemon(int sig);
+void signalhandlerClient(int sig);
 void Worker(void * iWorkerId);
 char*WorkerArguments(char *pszArg, const char *pszzEnv, const char *pszCommand, char *pszCurDir, PPATHCACHE pPathCache);
 char*fileNormalize(char *pszFilename, char *pszCurDir);
@@ -370,12 +387,6 @@ int Init(const char *arg0, int cWorkers)
     RESULTCODES     Res;                /* dummy, unused */
     char            szArg[CCHMAXPATH + 32];
 
-    if (!getenv("COMSPEC"))
-    {
-        Error("Fatal error: env. var. COMSPEC not found!\n");
-        return 0;
-    }
-
     sprintf(&szArg[0], "%s\t!Daemon! %d", arg0, cWorkers);
     szArg[strlen(arg0)] = '\0';
     rc = DosExecPgm(NULL, 0, EXEC_BACKGROUND, &szArg[0], NULL, &Res, &szArg[0]);
@@ -498,9 +509,11 @@ int Daemon(int cWorkers)
                     /*
                      * Wait for output.
                      */
-                    rc = DosWaitEventSem(hevJobQueueFine, SEM_INDEFINITE_WAIT);
-                    if (rc)
+                    /*rc = DosWaitEventSem(hevJobQueueFine, SEM_INDEFINITE_WAIT); - there is some timing problem here,  */
+                    rc = DosWaitEventSem(hevJobQueueFine, 1000); /* timeout after 1 second. */
+                    if (rc && rc != ERROR_TIMEOUT)
                         break;
+                    rc = NO_ERROR;      /* in case of TIMEOUT */
 
                     /*
                      * Copy output - Optimized so we don't cause to many context switches.
@@ -619,6 +632,12 @@ int Daemon(int cWorkers)
     }
 
     /*
+     * Set dying msg type. shrmemFree posts the hevClient so clients
+     * waiting for the daemon to respond will quit.
+     */
+    pShrMem->enmMsgType = msgDying;
+
+    /*
      * Cleanup.
      */
     shrmemFree();
@@ -675,7 +694,7 @@ int DaemonInit(int cWorkers)
                             }
                          if (!rc)
                          {
-                             DosSetMaxFH(cWorkers * 3 + 20);
+                             DosSetMaxFH(cWorkers * 6 + 20);
                              return 0;      /* success! */
                          }
 
@@ -708,12 +727,33 @@ int DaemonInit(int cWorkers)
 /**
  * Daemon signal handler.
  */
-void signalhandler(int sig)
+void signalhandlerDaemon(int sig)
 {
-    sig = sig;
+    /*
+     * Set dying msg type. shrmemFree posts the hevClient so clients
+     * waiting for the daemon to respond will quit.
+     */
+    pShrMem->enmMsgType = msgDying;
+
+    /*
+     * Free and exit.
+     */
     shrmemFree();
     exit(-42);
+    sig = sig;
 }
+
+
+/**
+ * Client signal handler.
+ */
+void signalhandlerClient(int sig)
+{
+    shrmemFree();
+    exit(-42);
+    sig = sig;
+}
+
 
 
 /**
@@ -773,7 +813,7 @@ void Worker(void * iWorkerId)
             /*
              * Redirect output and start process.
              */
-            WorkerArguments(szArg, &pJob->JobInfo.szzEnv, &pJob->JobInfo.szCommand[0],
+            WorkerArguments(&szArg[0], &pJob->JobInfo.szzEnv[0], &pJob->JobInfo.szCommand[0],
                             &pJob->JobInfo.szCurrentDir[0], &PathCache);
             rc = DosCreatePipe(&hPipeR, &hPipeW, sizeof(pJobOutput->szOutput) - 1);
             if (rc)
@@ -825,7 +865,7 @@ void Worker(void * iWorkerId)
                     ULONG       cchRead;
                     ULONG       cchRead2 = 0;
 
-                    cchRead = sizeof(pJobOutput->szOutput) - 1;
+                    cchRead = sizeof(pJobOutput->szOutput) - pJobOutput->cchOutput - 1;
                     while (((rc = DosRead(hPipeR,
                                          &pJobOutput->szOutput[pJobOutput->cchOutput],
                                          cchRead, &cchRead2)) == NO_ERROR
@@ -1398,11 +1438,11 @@ int shrmemCreate(void)
     /*
      * Install signal handlers.
      */
-    signal(SIGSEGV, signalhandler);
-    signal(SIGTERM, signalhandler);
-    signal(SIGABRT, signalhandler);
-    signal(SIGINT,  signalhandler);
-    signal(SIGBREAK,signalhandler);
+    signal(SIGSEGV, signalhandlerDaemon);
+    signal(SIGTERM, signalhandlerDaemon);
+    signal(SIGABRT, signalhandlerDaemon);
+    signal(SIGINT,  signalhandlerDaemon);
+    signal(SIGBREAK,signalhandlerDaemon);
 
     return rc;
 }
@@ -1467,7 +1507,7 @@ int shrmemOpen(void)
     rc = DosRequestMutexSem(pShrMem->hmtxClient, SEM_INDEFINITE_WAIT);
     if (rc)
     {
-        Error("Fatal error: Failed to open aquire ownership of client mutex semaphore. rc=%d\n");
+        Error("Fatal error: Failed to open take ownership of client mutex semaphore. rc=%d\n");
         shrmemFree();
         return rc;
     }
@@ -1475,7 +1515,7 @@ int shrmemOpen(void)
     rc = DosRequestMutexSem(pShrMem->hmtx, SEM_INDEFINITE_WAIT);
     if (rc)
     {
-        Error("Fatal error: Failed to open aquire ownership of mutex semaphore. rc=%d\n");
+        Error("Fatal error: Failed to open take ownership of mutex semaphore. rc=%d\n");
         shrmemFree();
         return rc;
     }
@@ -1484,11 +1524,11 @@ int shrmemOpen(void)
     /*
      * Install signal handlers.
      */
-    signal(SIGSEGV, signalhandler);
-    signal(SIGTERM, signalhandler);
-    signal(SIGABRT, signalhandler);
-    signal(SIGINT,  signalhandler);
-    signal(SIGBREAK,signalhandler);
+    signal(SIGSEGV, signalhandlerClient);
+    signal(SIGTERM, signalhandlerClient);
+    signal(SIGABRT, signalhandlerClient);
+    signal(SIGINT,  signalhandlerClient);
+    signal(SIGBREAK,signalhandlerClient);
 
     return rc;
 }
@@ -1501,6 +1541,9 @@ void shrmemFree(void)
 {
     if (!pShrMem)
         return;
+    /* wakeup any clients */
+    DosPostEventSem(pShrMem->hevClient);
+    /* free stuff */
     DosReleaseMutexSem(pShrMem->hmtxClient);
     DosReleaseMutexSem(pShrMem->hmtx);
     DosCloseMutexSem(pShrMem->hmtxClient);
@@ -1546,7 +1589,16 @@ int  shrmemSendDaemon(BOOL fWait)
         }
 
         if (!rc)
+        {
             rc = DosRequestMutexSem(pShrMem->hmtx, SEM_INDEFINITE_WAIT);
+            if (rc == ERROR_SEM_OWNER_DIED)
+            {
+                DosCloseMutexSem(pShrMem->hmtx);
+                pShrMem->hmtx = NULLHANDLE;
+                rc = DosCreateMutexSem(NULL, &pShrMem->hmtx, DC_SEM_SHARED, TRUE);
+            }
+        }
+
         if (rc && rc != ERROR_INTERRUPT)
             Error("Internal error: failed to get next message from daemon, rc=%d\n", rc);
     }
@@ -1580,10 +1632,19 @@ int  shrmemSendClient(int enmMsgTypeResponse)
         if (!rc)
         {
             rc = DosRequestMutexSem(pShrMem->hmtx, SEM_INDEFINITE_WAIT);
+            if (rc == ERROR_SEM_OWNER_DIED)
+            {
+                Error("Internal error: shared mem mutex owner died.\n");
+                return -1;
+            }
+
             if (!rc && pShrMem->enmMsgType != enmMsgTypeResponse)
             {
-                Error("Internal error: Invalid response message. response=%d  expected=%d\n",
-                      pShrMem->enmMsgType, enmMsgTypeResponse);
+                if (pShrMem->enmMsgType != msgDying)
+                    Error("Internal error: Invalid response message. response=%d  expected=%d\n",
+                          pShrMem->enmMsgType, enmMsgTypeResponse);
+                else
+                    Error("Fatal error: daemon just died!\n");
                 return -1;
             }
         }
@@ -1611,3 +1672,40 @@ void Error(const char *pszFormat, ...)
     va_end(arg);
 }
 
+
+#ifdef DEBUGMEMORY
+void my_free(void *pv)
+{
+    DosFreeMem((PVOID)((unsigned)pv & 0xffff0000));
+}
+
+void *my_malloc(size_t cb)
+{
+    APIRET  rc;
+    PVOID   pv;
+    ULONG   cbAlloc;
+    char    szMsg[200];
+
+    cbAlloc = (cb + 0x1fff) & (~0x0fff);
+
+    rc = DosAllocMem(&pv, cbAlloc, PAG_READ | PAG_WRITE);
+    if (!rc)
+    {
+        rc = DosSetMem(pv, cbAlloc - 0x1000, PAG_READ | PAG_WRITE | PAG_COMMIT);
+        if (rc)
+            __interrupt(3);
+        if (cb & 0xfff)
+            pv = (PVOID)((unsigned)pv + 0x1000 - (cb & 0x0fff));
+    }
+
+    strcpy(szMsg, "malloc(");
+    _itoa(cb, szMsg + strlen(szMsg), 16);
+    strcat(szMsg, ") -> ");
+    _itoa(pv, szMsg + strlen(szMsg), 16);
+    strcat(szMsg, "\r\n");
+
+    DosPutMessage(1, strlen(szMsg), szMsg);
+
+    return rc ? NULL : pv;
+}
+#endif
