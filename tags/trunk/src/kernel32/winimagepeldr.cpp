@@ -1,4 +1,4 @@
-/* $Id: winimagepeldr.cpp,v 1.9 1999-10-27 10:35:42 sandervl Exp $ */
+/* $Id: winimagepeldr.cpp,v 1.10 1999-11-03 20:18:22 sandervl Exp $ */
 
 /*
  * Win32 PE loader Image base class
@@ -760,7 +760,7 @@ void Win32PeLdrImage::StoreImportByOrd(Win32DllBase *WinDll, ULONG ordinal, ULON
              WinDll->getName(),
              ordinal));
 
-    	fout << "--->>> NOT FOUND!";
+    	fout << "--->>> NOT FOUND!" << endl;
     	*import = (ULONG)MissingApi;
   }
   else  *import = apiaddr;
@@ -780,7 +780,7 @@ void Win32PeLdrImage::StoreImportByName(Win32DllBase *WinDll, char *impname, ULO
              WinDll->getName(),
              impname));
 
-    	fout << "--->>> NOT FOUND!";
+    	fout << "--->>> NOT FOUND!" << endl;
     	*import = (ULONG)MissingApi;
   }
   else  *import = apiaddr;
