@@ -269,6 +269,15 @@ static inline WCHAR *struprW( WCHAR *str )
     return ret;
 }
 
+static inline long int atolW( const WCHAR *str )
+{
+    return strtolW( str, (WCHAR **)0, 10 );
+}
+
+static inline int atoiW( const WCHAR *str )
+{
+    return (int)atolW( str );
+}
 
 #if defined(__IBMC__) || defined(__IBMCPP__) || defined(__WATCOMC__) || defined(__WATCOM_CPLUSPLUS__)
 #undef static

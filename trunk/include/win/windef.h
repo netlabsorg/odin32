@@ -217,6 +217,7 @@ typedef signed int      INT32;
 typedef UINT *          UINT_PTR;
 typedef unsigned short  WORD;
 typedef unsigned long   DWORD;
+typedef unsigned long * DWORD_PTR;
 typedef unsigned long   ULONG;
 typedef unsigned char   BYTE;
 typedef long            LONG;
