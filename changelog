@@ -1,7 +1,8 @@
-/* $Id: changelog,v 1.1902 2001-12-11 11:11:37 phaller Exp $ */
+/* $Id: changelog,v 1.1903 2001-12-11 15:10:56 achimha Exp $ */
 
  2001-12-11: Patrick Haller <patrick.haller@innotek.de>
     - PMKBDHK:  o Interception of PM Window Hoteys (i. e. Alt-F7)
+                  TODO: generate accelerators in Odin
 
  2001-12-10: Sander van Leeuwen <sandervl@xs4all.nl>
     - KERNEL32: o Overlapped IO updates
