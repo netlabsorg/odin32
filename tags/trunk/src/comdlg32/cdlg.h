@@ -1,4 +1,4 @@
-/* $Id: cdlg.h,v 1.3 1999-11-28 12:32:27 sandervl Exp $ */
+/* $Id: cdlg.h,v 1.4 2000-02-03 13:27:36 sandervl Exp $ */
 /*
  *  Common Dialog Boxes interface (32 bit)
  *
@@ -92,39 +92,39 @@ typedef struct {
 #include "shellapi.h"
 
 /* DPA */
-extern HDPA	(WINAPI* COMDLG32_DPA_Create) (INT);  
-extern LPVOID	(WINAPI* COMDLG32_DPA_GetPtr) (const HDPA, INT);   
-extern LPVOID	(WINAPI* COMDLG32_DPA_DeleteAllPtrs) (const HDPA hdpa);
-extern LPVOID	(WINAPI* COMDLG32_DPA_DeletePtr) (const HDPA hdpa, INT i);
-extern INT	(WINAPI* COMDLG32_DPA_InsertPtr) (const HDPA, INT, LPVOID); 
-extern BOOL	(WINAPI* COMDLG32_DPA_Destroy) (const HDPA); 
+extern HDPA	(* WINAPI COMDLG32_DPA_Create) (INT);  
+extern LPVOID	(* WINAPI COMDLG32_DPA_GetPtr) (const HDPA, INT);   
+extern LPVOID	(* WINAPI COMDLG32_DPA_DeleteAllPtrs) (const HDPA hdpa);
+extern LPVOID	(* WINAPI COMDLG32_DPA_DeletePtr) (const HDPA hdpa, INT i);
+extern INT	(* WINAPI COMDLG32_DPA_InsertPtr) (const HDPA, INT, LPVOID); 
+extern BOOL	(* WINAPI COMDLG32_DPA_Destroy) (const HDPA); 
 
 /* IMAGELIST */
-extern HICON	(WINAPI* COMDLG32_ImageList_GetIcon) (HIMAGELIST, INT, UINT);
-extern HIMAGELIST (WINAPI *COMDLG32_ImageList_LoadImageA) (HINSTANCE, LPCSTR, INT, INT, COLORREF, UINT, UINT);
-extern BOOL	(WINAPI* COMDLG32_ImageList_Draw) (HIMAGELIST himl, int i, HDC hdcDest, int x, int y, UINT fStyle);
-extern BOOL	(WINAPI* COMDLG32_ImageList_Destroy) (HIMAGELIST himl);
+extern HICON	(* WINAPI COMDLG32_ImageList_GetIcon) (HIMAGELIST, INT, UINT);
+extern HIMAGELIST (* WINAPI COMDLG32_ImageList_LoadImageA) (HINSTANCE, LPCSTR, INT, INT, COLORREF, UINT, UINT);
+extern BOOL	(* WINAPI COMDLG32_ImageList_Draw) (HIMAGELIST himl, int i, HDC hdcDest, int x, int y, UINT fStyle);
+extern BOOL	(* WINAPI COMDLG32_ImageList_Destroy) (HIMAGELIST himl);
 
 /* ITEMIDLIST */
 
-extern LPITEMIDLIST (WINAPI *COMDLG32_PIDL_ILClone) (LPCITEMIDLIST);
-extern LPITEMIDLIST (WINAPI *COMDLG32_PIDL_ILCombine)(LPCITEMIDLIST,LPCITEMIDLIST);
-extern LPITEMIDLIST (WINAPI *COMDLG32_PIDL_ILGetNext)(LPITEMIDLIST);
-extern BOOL (WINAPI *COMDLG32_PIDL_ILRemoveLastID)(LPCITEMIDLIST);
-extern BOOL (WINAPI *COMDLG32_PIDL_ILIsEqual)(LPCITEMIDLIST, LPCITEMIDLIST);
+extern LPITEMIDLIST (* WINAPI COMDLG32_PIDL_ILClone) (LPCITEMIDLIST);
+extern LPITEMIDLIST (* WINAPI COMDLG32_PIDL_ILCombine)(LPCITEMIDLIST,LPCITEMIDLIST);
+extern LPITEMIDLIST (* WINAPI COMDLG32_PIDL_ILGetNext)(LPITEMIDLIST);
+extern BOOL (* WINAPI COMDLG32_PIDL_ILRemoveLastID)(LPCITEMIDLIST);
+extern BOOL (* WINAPI COMDLG32_PIDL_ILIsEqual)(LPCITEMIDLIST, LPCITEMIDLIST);
 
 /* SHELL */
-extern BOOL (WINAPI *COMDLG32_SHGetPathFromIDListA) (LPCITEMIDLIST,LPSTR);
-extern HRESULT (WINAPI *COMDLG32_SHGetSpecialFolderLocation)(HWND,INT,LPITEMIDLIST *);
-extern DWORD (WINAPI *COMDLG32_SHGetDesktopFolder)(IShellFolder **);
-extern DWORD	(WINAPI *COMDLG32_SHGetFileInfoA)(LPCSTR,DWORD,SHFILEINFOA*,UINT,UINT);
-extern DWORD (WINAPI *COMDLG32_SHFree)(LPVOID);
+extern BOOL (* WINAPI COMDLG32_SHGetPathFromIDListA) (LPCITEMIDLIST,LPSTR);
+extern HRESULT (* WINAPI COMDLG32_SHGetSpecialFolderLocation)(HWND,INT,LPITEMIDLIST *);
+extern DWORD (* WINAPI COMDLG32_SHGetDesktopFolder)(IShellFolder **);
+extern DWORD	(* WINAPI COMDLG32_SHGetFileInfoA)(LPCSTR,DWORD,SHFILEINFOA*,UINT,UINT);
+extern DWORD (* WINAPI COMDLG32_SHFree)(LPVOID);
 
 /* PATH */
-extern BOOL (WINAPI *COMDLG32_PathIsRootA)(LPCSTR x);
-extern LPCSTR (WINAPI *COMDLG32_PathFindFilenameA)(LPCSTR path);
-extern DWORD (WINAPI *COMDLG32_PathRemoveFileSpecA)(LPSTR fn);
-extern BOOL (WINAPI *COMDLG32_PathMatchSpecW)(LPCWSTR x, LPCWSTR y);
-extern LPSTR (WINAPI *COMDLG32_PathAddBackslashA)(LPSTR path);
+extern BOOL (* WINAPI COMDLG32_PathIsRootA)(LPCSTR x);
+extern LPCSTR (* WINAPI COMDLG32_PathFindFilenameA)(LPCSTR path);
+extern DWORD (* WINAPI COMDLG32_PathRemoveFileSpecA)(LPSTR fn);
+extern BOOL (* WINAPI COMDLG32_PathMatchSpecW)(LPCWSTR x, LPCWSTR y);
+extern LPSTR (* WINAPI COMDLG32_PathAddBackslashA)(LPSTR path);
 #endif
 

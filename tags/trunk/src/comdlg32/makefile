@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.10 2000-01-26 23:19:54 sandervl Exp $
+# $Id: makefile,v 1.11 2000-02-03 13:27:40 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -55,9 +55,9 @@ initterm.obj: initterm.cpp
 
 cdlg32.obj: cdlg32.cpp cdlg.h
 finddlg32.obj: finddlg32.cpp cdlg.h
-filedlg95.obj: filedlg95.cpp filedlgbrowser.h cdlg.h
-filedlgbrowser.obj: filedlgbrowser.cpp filedlgbrowser.h cdlg.h
-filetitle.obj: filetitle.cpp cdlg.h
+filedlg95.obj: filedlg95.c filedlgbrowser.h cdlg.h
+filedlgbrowser.obj: filedlgbrowser.c filedlgbrowser.h cdlg.h
+filetitle.obj: filetitle.c cdlg.h
 comdlgguid.obj: comdlgguid.cpp
 
 clean:
