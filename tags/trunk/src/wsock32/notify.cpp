@@ -1,4 +1,4 @@
-/* $Id: notify.cpp,v 1.3 1999-08-16 20:18:39 phaller Exp $ */
+/* $Id: notify.cpp,v 1.4 1999-10-20 01:18:30 phaller Exp $ */
 
 /*
  *
@@ -30,14 +30,15 @@ typedef u_int           SOCKET;
 
 typedef unsigned long TID;
 
-typedef struct AsyncStatus {
-    HWND hwnd;     // owner's hwindow
-    u_int msg;     // message to send when event occurs
-    ULONG event;    // event that may occur
-    SOCKET socket; // the socket
-    int status;    // blocking yes/no
-    TID threadID;  // Thread ID for async
-    int MsgStat;   // has message been sent yet?
+typedef struct AsyncStatus
+{
+    HWND   hwnd;              // owner's hwindow
+    u_int  msg;               // message to send when event occurs
+    ULONG  event;             // event that may occur
+    SOCKET socket;            // the socket
+    int    status;            // blocking yes/no
+    TID    threadID;          // Thread ID for async
+    int    MsgStat;           // has message been sent yet?
     struct AsyncStatus *Next; // pointer to next AsyncStatus in the list
     struct AsyncStatus *Prev; // pointer to previous AsyncStatus in the list
 } AsyncStatus;

@@ -1,4 +1,4 @@
-/* $Id: wsock32.cpp,v 1.4 1999-08-16 20:18:40 phaller Exp $ */
+/* $Id: wsock32.cpp,v 1.5 1999-10-20 01:18:31 phaller Exp $ */
 
 /*
  *
@@ -488,7 +488,7 @@ AsyncStatus * FindASY(SOCKET s)
     if(as->socket == s)
       return as;
 
-  return 0;
+  return NULL;
 }
 
 
