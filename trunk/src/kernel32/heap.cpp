@@ -1,4 +1,4 @@
-/* $Id: heap.cpp,v 1.22 2000-09-08 18:07:50 sandervl Exp $ */
+/* $Id: heap.cpp,v 1.23 2000-11-06 20:01:26 sandervl Exp $ */
 
 /*
  * Win32 heap API functions for OS/2
@@ -49,6 +49,10 @@ ODINFUNCTIONNODBG4(LPVOID, HeapReAlloc, HANDLE, hHeap, DWORD, dwFlags, LPVOID,
   dprintf2(("HeapReAlloc %X bytes", dwBytes));
   if(curheap == NULL)
         return(NULL);
+
+  //Some apps (i.e. nt's cmd.exe) assume the returned pointer is the same as the old one!
+  if(curheap->Size(0, lpMem) > dwBytes)
+        return lpMem;
 
   return(curheap->ReAlloc(dwFlags, lpMem, dwBytes));
 }
