@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.5 1999-06-23 22:17:51 phaller Exp $
+# $Id: makefile,v 1.6 1999-06-23 22:19:05 phaller Exp $
 
 #
 # PD-Win32 API
@@ -20,7 +20,7 @@ CXXFLAGS = $(CXXFLAGS) -I$(PDWIN32_INCLUDE)
 
 TARGET = shell32
 
-OBJS =  shell32.obj sh.obj she.obj drag.obj initterm.obj misc.obj ordinal.obj
+OBJS =  shell32.obj sh.obj she.obj drag.obj initterm.obj misc.obj ordinal.obj unknown.obj
 
 all: $(TARGET).dll $(TARGET).lib
 
@@ -49,6 +49,8 @@ she.obj: she.cpp shell32.h
 misc.obj: misc.cpp shell32.h
 
 ordinal.obj: ordinal.cpp shell32.h
+
+unknown.obj: unknown.cpp shell32.h
 
 initterm.obj: initterm.cpp
 
