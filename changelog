@@ -1,4 +1,9 @@
-/* $Id: changelog,v 1.2291 2002-08-28 05:05:01 bird Exp $ */
+/* $Id: changelog,v 1.2292 2002-08-28 08:22:34 sandervl Exp $ */
+
+ 2002-08-28: Platon Fomichev <platon@innotek   >
+    - DDRAW:    o Added custom function to hide mouse cursor when the primary
+                  surface (screen) is locked by the app to prevent display
+                  corruption with color/animated mouse pointers.
 
  2002-08-27: knut st. osmundsen <bird@anduin   >
     - FASTDEP:  o Tweaked cyclic dependency checks performance a little bit more.
