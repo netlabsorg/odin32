@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.46 1999-10-24 22:51:21 sandervl Exp $
+# $Id: makefile,v 1.47 1999-10-26 11:15:33 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -25,7 +25,7 @@ profile.obj THREAD.OBJ virtual.obj THUNK.OBJ OBSOLETE.OBJ COMM.OBJ\
 MESSAGE.OBJ RESOURCE.OBJ EXCEPTIONS.OBJ heapshared.obj \
 LFILE.OBJ NPIPE.OBJ oslibdos.obj oslibmisc.obj MISC.OBJ EXCEPTUTIL.OBJ \
 LANG.OBJ ICCIO.OBJ MAP.OBJ WIN32UTIL.OBJ heap.OBJ heapstring.obj \
-os2heap.OBJ vmutex.OBJ initterm.OBJ handlemanager.OBJ winresmenu.obj \
+os2heap.OBJ vmutex.OBJ initterm.OBJ handlemanager.OBJ  \
 hmdevice.obj hmopen32.obj hmobjects.obj hmevent.obj hmmutex.obj \
 hmsemaphore.obj wprocess.OBJ conprop.OBJ winimagelx.obj \
 winimagebase.OBJ windllbase.OBJ winexebase.OBJ time.obj mmap.obj \
@@ -33,7 +33,7 @@ winimagepe2lx.obj winimagepeldr.obj windllpe2lx.obj windlllx.obj windllpeldr.obj
 winexepe2lx.obj winexelx.obj winexepeldr.obj WINRES.OBJ \
 pefile.OBJ winimgres.OBJ wintls.obj async.OBJ fileio.obj \
 atom.obj disk.obj directory.obj cvtbitmap.obj hmmmap.obj winfakepeldr.obj \
-cvtmenu.obj cvtaccel.obj cvticon.obj cvticongrp.obj oslibexcept.obj \
+cvtaccel.obj cvticon.obj cvticongrp.obj oslibexcept.obj \
 cvtcursor.obj cvtcursorgrp.obj stubs.obj interlock.obj toolhelp.obj
 
 
@@ -256,7 +256,6 @@ iccio.OBJ: \
 winres.OBJ: \
     .\winres.cpp \
     cvtresource.h \
-    $(PDWIN32_INCLUDE)\winresmenu.h \
     $(PDWIN32_INCLUDE)\winres.h \
     $(PDWIN32_INCLUDE)\winimagebase.h \
     $(PDWIN32_INCLUDE)\winexebase.h \
@@ -348,10 +347,7 @@ winfakepeldr.obj:  winfakepeldr.cpp $(PDWIN32_INCLUDE)\winimagepeldr.h $(PDWIN32
 winimgres.OBJ: winimgres.cpp $(PDWIN32_INCLUDE)\winimagebase.h $(PDWIN32_INCLUDE)\pefile.h $(PDWIN32_INCLUDE)\winimagepe2lx.h $(PDWIN32_INCLUDE)\winimagepeldr.h $(PDWIN32_INCLUDE)\winimagelx.h $(PDWIN32_INCLUDE)\winres.h
 stubs.obj:     stubs.cpp stubs.h
 
-winresmenu.obj: winresmenu.cpp $(PDWIN32_INCLUDE)\winresmenu.h $(PDWIN32_INCLUDE)\winres.h
-
 cvtbitmap.obj: cvtbitmap.cpp $(PDWIN32_INCLUDE)\winicon.h $(PDWIN32_INCLUDE)\misc.h cvtresource.h
-cvtmenu.obj: cvtmenu.cpp $(PDWIN32_INCLUDE)\winmenu.h $(PDWIN32_INCLUDE)\misc.h cvtresource.h
 cvtaccel.obj: cvtaccel.cpp $(PDWIN32_INCLUDE)\winaccel.h $(PDWIN32_INCLUDE)\misc.h cvtresource.h
 cvticon.obj: cvticon.cpp $(PDWIN32_INCLUDE)\winicon.h $(PDWIN32_INCLUDE)\misc.h cvtresource.h
 cvticongrp.obj: cvticongrp.cpp $(PDWIN32_INCLUDE)\winicon.h $(PDWIN32_INCLUDE)\misc.h cvtresource.h
