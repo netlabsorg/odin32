@@ -1,4 +1,4 @@
-# $Id: clib16.mak,v 1.1 2002-03-10 05:22:31 bird Exp $
+# $Id: clib16.mak,v 1.2 2002-04-01 12:42:46 bird Exp $
 
 #
 # clib16
@@ -34,8 +34,10 @@ $(PATH_TARGET)\anfaldiv.$(EXT_OBJ)\
 $(PATH_TARGET)\anfalrem.$(EXT_OBJ)\
 $(PATH_TARGET)\anfauldi.$(EXT_OBJ)\
 $(PATH_TARGET)\anuldiv.$(EXT_OBJ)\
+$(PATH_TARGET)\anldiv.$(EXT_OBJ)\
 $(PATH_TARGET)\fmemcpy.$(EXT_OBJ)\
 $(PATH_TARGET)\anulrem.$(EXT_OBJ)\
+$(PATH_TARGET)\anlrem.$(EXT_OBJ)\
 $(PATH_TARGET)\anlmul.$(EXT_OBJ)\
 $(PATH_TARGET)\__AHINCR.$(EXT_OBJ)\
 $(PATH_TARGET)\anlshl.$(EXT_OBJ)\
