@@ -1,4 +1,4 @@
-/* $Id: wprocess.cpp,v 1.52 1999-11-30 14:15:56 sandervl Exp $ */
+/* $Id: wprocess.cpp,v 1.53 1999-11-30 19:40:27 sandervl Exp $ */
 
 /*
  * Win32 process functions
@@ -156,6 +156,10 @@ TEB *InitializeTIB(BOOL fMainThread)
     	ProcessPDB.heap            = ProcessPDB.system_heap;  /* will be changed later on */
     	ProcessPDB.next            = NULL;
     	ProcessPDB.winver          = 0xffff; /* to be determined */
+        ProcessPDB.server_pid      = (void *)GetCurrentProcessId();
+
+        /* Initialize the critical section */
+        InitializeCriticalSection( &ProcessPDB.crit_section );
    }
    dprintf(("InitializeTIB setup TEB with selector %x", tibsel));
    dprintf(("InitializeTIB: FS(%x):[0] = %x", GetFS(), QueryExceptionChain()));
@@ -189,6 +193,12 @@ void DestroyTIB()
    dprintf(("DestroyTIB: FS(%x):[0] = %x", GetFS(), QueryExceptionChain()));
    *TIBFlatPtr = 0;
    return;
+}
+/******************************************************************************/
+/******************************************************************************/
+void SetPDBInstance(HINSTANCE hInstance)
+{
+  ProcessPDB.hInstance = hInstance;
 }
 /******************************************************************************/
 /******************************************************************************/
