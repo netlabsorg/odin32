@@ -1,4 +1,4 @@
-/* $Id: exceptions.cpp,v 1.37 2000-03-18 19:49:43 sandervl Exp $ */
+/* $Id: exceptions.cpp,v 1.38 2000-03-20 20:32:40 sandervl Exp $ */
 
 /*
  * Win32 Device IOCTL API functions for OS/2
@@ -1117,7 +1117,9 @@ void OS2SetExceptionHandler(void *exceptframe)
 
   DosSetExceptionHandler(pExceptRec);
   dprintf(("OS2SetExceptionHandler: exception chain %x", pExceptRec));
+#ifdef DEBUG_ENABLELOG_LEVEL2
   PrintExceptionChain();
+#endif
 }
 
 #ifdef DEBUG
@@ -1153,7 +1155,9 @@ void OS2UnsetExceptionHandler(void *exceptframe)
 
   DosUnsetExceptionHandler(pExceptRec);
   dprintf(("OS2UnsetExceptionHandler: exception chain %x", pExceptRec));
+#ifdef DEBUG_ENABLELOG_LEVEL2
   PrintExceptionChain();
+#endif
 }
 
 void SetOS2ExceptionChain(ULONG val)
