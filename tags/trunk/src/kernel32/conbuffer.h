@@ -1,4 +1,4 @@
-/* $Id: conbuffer.h,v 1.3 2000-10-20 11:46:44 sandervl Exp $ */
+/* $Id: conbuffer.h,v 1.4 2001-11-26 14:53:58 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -54,7 +54,8 @@ class HMDeviceConsoleBufferClass : public HMDeviceHandler
     }
 
                        /* this is a handler method for calls to CreateFile() */
-  virtual DWORD  CreateFile (LPCSTR        lpFileName,
+  virtual DWORD  CreateFile (HANDLE        hHandle,
+                             LPCSTR        lpFileName,
                              PHMHANDLEDATA pHMHandleData,
                              PVOID         lpSecurityAttributes,
                              PHMHANDLEDATA pHMHandleDataTemplate);

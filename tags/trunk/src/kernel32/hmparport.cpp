@@ -1,4 +1,4 @@
-/* $Id: hmparport.cpp,v 1.7 2001-11-23 18:58:24 phaller Exp $ */
+/* $Id: hmparport.cpp,v 1.8 2001-11-26 14:54:03 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -195,7 +195,8 @@ BOOL HMDeviceParPortClass::FindDevice(LPCSTR lpClassDevName, LPCSTR lpDeviceName
     return FALSE;
 }
 
-DWORD HMDeviceParPortClass::CreateFile(LPCSTR lpFileName,
+DWORD HMDeviceParPortClass::CreateFile(HANDLE        hHandle,
+                                       LPCSTR lpFileName,
                                        PHMHANDLEDATA pHMHandleData,
                                        PVOID lpSecurityAttributes,
                                        PHMHANDLEDATA pHMHandleDataTemplate)

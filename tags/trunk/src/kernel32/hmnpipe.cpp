@@ -1,4 +1,4 @@
-/* $Id: hmnpipe.cpp,v 1.3 2001-11-07 15:35:37 sandervl Exp $ */
+/* $Id: hmnpipe.cpp,v 1.4 2001-11-26 14:54:02 sandervl Exp $ */
 /*
  * Project Odin Software License can be found in LICENSE.TXT
  *
@@ -127,7 +127,8 @@ DWORD HMDeviceNamedPipeClass::CreateNamedPipe(PHMHANDLEDATA pHMHandleData,
  * Author    : SvL
  *****************************************************************************/
 
-DWORD HMDeviceNamedPipeClass::CreateFile (LPCSTR        lpFileName,
+DWORD HMDeviceNamedPipeClass::CreateFile (HANDLE        hHandle,
+                                          LPCSTR        lpFileName,
                                           PHMHANDLEDATA pHMHandleData,
                                           PVOID         lpSecurityAttributes,
                                           PHMHANDLEDATA pHMHandleDataTemplate)
