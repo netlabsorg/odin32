@@ -1,7 +1,6 @@
- /* $Id: ChangeLog,v 1.94 1999-08-18 08:36:15 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.95 1999-08-18 08:42:39 sandervl Exp $ */
  99-08-18: Przemyslaw Dobrowolski <dobrawka@asua.org.pl>
-	- KERNEL32: Profile bugfix (line 506) & removed redundant '\r' (except
-                    on line 199)
+	- KERNEL32: Removed redundant '\r' (except on line 199)
               
  99-08-17: Sander van Leeuwen <sandervl@xs4all.nl>
 	- KERNEL32/LZ32: Fixed compilation problems introduced by changes below

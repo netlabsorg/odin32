@@ -1,4 +1,4 @@
-/* $Id: profile.cpp,v 1.11 1999-08-18 08:35:38 sandervl Exp $ */
+/* $Id: profile.cpp,v 1.12 1999-08-18 08:42:25 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -505,8 +505,8 @@ static BOOL PROFILE_Open( LPCSTR filename )
 
     /* check for path */
 
-    if (!strchr( filename,'/') &&
-        !strchr( filename,'\\') &&
+    if (!strchr( filename,'/') ||
+        !strchr( filename,'\\') ||
         !strchr( filename,':'))
     {
       char fullname[MAX_PATHNAME_LEN];
