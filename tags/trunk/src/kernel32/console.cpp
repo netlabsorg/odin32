@@ -1,4 +1,4 @@
-/* $Id: console.cpp,v 1.14 1999-10-08 09:52:33 sandervl Exp $ */
+/* $Id: console.cpp,v 1.15 1999-10-27 12:38:47 phaller Exp $ */
 
 /*
  * Win32 Console API Translation for OS/2
@@ -383,36 +383,15 @@ APIRET iConsoleDevicesRegister(void)
    * Initialize Console Window Options *
    *************************************/
 
-  ConsoleGlobals.Options.fTerminateAutomatically = FALSE;
-  ConsoleGlobals.Options.fSpeakerEnabled         = TRUE;
+  // load defaults
+  ConsolePropertyDefault(&ConsoleGlobals.Options);
 
-  ConsoleGlobals.Options.fSetWindowPosition      = FALSE;
-  ConsoleGlobals.Options.coordDefaultPosition.X  = 0;
-  ConsoleGlobals.Options.coordDefaultPosition.Y  = 0;
-  ConsoleGlobals.Options.coordDefaultSize.X      = 80;
-  ConsoleGlobals.Options.coordDefaultSize.Y      = 25;
+  ConsoleGlobals.ulTimerFrequency = 10;  /* cursor + blitter timer frequency */
+
   ConsoleGlobals.coordWindowSize.X               = ConsoleGlobals.Options.coordDefaultSize.X;
   ConsoleGlobals.coordWindowSize.Y               = ConsoleGlobals.Options.coordDefaultSize.Y;
   ConsoleGlobals.coordWindowPos.X                = 0;
   ConsoleGlobals.coordWindowPos.Y                = 0;
-
-  ConsoleGlobals.Options.fQuickInsert            = FALSE;
-  ConsoleGlobals.Options.fInsertMode             = FALSE;
-  ConsoleGlobals.Options.fMouseActions           = FALSE;
-  ConsoleGlobals.Options.fToolbarActive          = FALSE;
-
-  ConsoleGlobals.Options.ucDefaultAttribute = 0x0007;  /* 07 = grey on black */
-
-  ConsoleGlobals.Options.ulTabSize               = 8;      /* tabulator size */
-  ConsoleGlobals.Options.ulUpdateLimit           = 8; /* scroll max. n lines */
-
-                                     /* priority settings for message thread */
-  ConsoleGlobals.Options.ulConsoleThreadPriorityClass = PRTYC_REGULAR;
-  ConsoleGlobals.Options.ulConsoleThreadPriorityDelta = +10;
-
-  ConsoleGlobals.Options.ucCursorDivisor = 10; /* timer divisor for blinking */
-
-  ConsoleGlobals.ulTimerFrequency = 10;  /* cursor + blitter timer frequency */
 
 
   ConsoleGlobals.flFrameFlags = FCF_SIZEBORDER   |   /* frame creation flags */
