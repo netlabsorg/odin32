@@ -1,54 +1,54 @@
-/                                          *
+/                                          sandervl phaller achimha
 /CVSROOT                                   ktk
-/bin                                       *
-/include                                   *
-/lib                                       *
-/src                                       *
-/include/win                               *
-/include/win/wine                          *
-/src/advapi32                              *
-/src/capi2032                              *
-/src/comdlg32                              *
-/src/ddraw                                 *
-/src/dsound                                *
-/src/gdi32                                 *
-/src/kernel32                              *
-/src/mpr                                   *
-/src/NTDLL                                 *
-/src/ole32                                 *
-/src/OMFDUMP                               *
-/src/pe2lx                                 *
-/src/peldr                                 *
-/src/shell32                               *
-/src/tapi32                                *
-/src/user32                                *
-/src/version                               *
-/src/winmm                                 *
-/src/winspool                              *
-/src/wnetap32                              *
-/src/wsock32                               *
-/src/advapi32/backup                       *
-/src/advapi32/backups                      *
-/src/comdlg32/backup                       *
-/src/comdlg32/backups                      *
-/src/ddraw/backup                          *
-/src/dsound/backup                         *
-/src/gdi32/backup                          *
-/src/gdi32/backups                         *
-/src/kernel32/backup                       *
-/src/kernel32/backups                      *
-/src/mpr/backup                            *
-/src/NTDLL/backup                          *
-/src/ole32/backup                          *
-/src/pe2lx/backup                          *
-/src/shell32/backup                        *
-/src/tapi32/backup                         *
-/src/user32/backup                         *
-/src/user32/backups                        *
-/src/user32/new                            *
-/src/version/backup                        *
-/src/winmm/backup                          *
-/src/winspool/backup                       *
-/src/wnetap32/backup                       *
-/src/wsock32/backup                        *
-/src/comctl32                              *
+/bin                                       sandervl phaller achimha
+/include                                   sandervl phaller achimha
+/lib                                       sandervl phaller achimha
+/src                                       sandervl phaller achimha
+/include/win                               sandervl phaller achimha
+/include/win/wine                          sandervl phaller achimha
+/src/advapi32                              sandervl phaller achimha
+/src/capi2032                              sandervl achimha cbratschi
+/src/comdlg32                              sandervl achimha cbratschi
+/src/ddraw                                 sandervl hugh
+/src/dsound                                sandervl hugh
+/src/gdi32                                 sandervl phaller achimha
+/src/kernel32                              sandervl phaller achimha
+/src/mpr                                   sandervl phaller achimha
+/src/NTDLL                                 sandervl phaller
+/src/ole32                                 sandervl davidr
+/src/OMFDUMP                               sandervl phaller achimha
+/src/pe2lx                                 sandervl
+/src/peldr                                 sandervl
+/src/shell32                               sandervl phaller achimha
+/src/tapi32                                sandervl phaller achimha
+/src/user32                                sandervl phaller achimha
+/src/version                               sandervl phaller achimha
+/src/winmm                                 sandervl phaller achimha
+/src/winspool                              sandervl phaller achimha
+/src/wnetap32                              sandervl phaller achimha
+/src/wsock32                               sandervl phaller achimha
+/src/advapi32/backup                       sandervl phaller achimha
+/src/advapi32/backups                      sandervl phaller achimha
+/src/comdlg32/backup                       sandervl achimha cbratschi
+/src/comdlg32/backups                      sandervl achimha cbratschi
+/src/ddraw/backup                          sandervl hugh
+/src/dsound/backup                         sandervl hugh
+/src/gdi32/backup                          sandervl phaller achimha
+/src/gdi32/backups                         sandervl phaller achimha
+/src/kernel32/backup                       sandervl phaller achimha
+/src/kernel32/backups                      sandervl phaller achimha
+/src/mpr/backup                            sandervl phaller achimha
+/src/NTDLL/backup                          sandervl
+/src/ole32/backup                          sandervl davidr
+/src/pe2lx/backup                          sandervl
+/src/shell32/backup                        sandervl phaller achimha
+/src/tapi32/backup                         sandervl phaller achimha
+/src/user32/backup                         sandervl phaller achimha
+/src/user32/backups                        sandervl phaller achimha
+/src/user32/new                            sandervl phaller achimha
+/src/version/backup                        sandervl phaller
+/src/winmm/backup                          sandervl phaller achimha
+/src/winspool/backup                       sandervl phaller achimha
+/src/wnetap32/backup                       sandervl phaller achimha
+/src/wsock32/backup                        sandervl phaller achimha
+/src/comctl32                              sandervl phaller achimha
