@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.327 2002-06-02 19:34:31 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.328 2002-06-09 19:53:32 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -80,31 +80,6 @@ static fDestroyAll = FALSE;
 static ULONG currentProcessId = -1;
 static int iF10Key = 0;
 static int iMenuSysKey = 0;
-
-
-
-/***
- * Performance Optimization:
- * we're directly inlining this micro function from win32wndhandle.cpp.
- * Changes there must be reflected here.
- ***/
-extern ULONG WindowHandleTable[MAX_WINDOW_HANDLES];
-
-BOOL INLINE i_HwGetWindowHandleData(HWND hwnd, DWORD *pdwUserData)
-{
-  if((hwnd & 0xFFFF0000) != WNDHANDLE_MAGIC_HIGHWORD) {
-	return FALSE; //unknown window (PM?)
-  }
-  hwnd &= WNDHANDLE_MAGIC_MASK;
-  if(hwnd < MAX_WINDOW_HANDLES) {
-	*pdwUserData = WindowHandleTable[hwnd];
-	return TRUE;
-  }
-  *pdwUserData = 0;
-  return FALSE;
-}
-#define HwGetWindowHandleData(a,b) i_HwGetWindowHandleData(a,b)
-
 
 //******************************************************************************
 //******************************************************************************
@@ -507,14 +482,7 @@ BOOL Win32BaseWindow::CreateWindowExA(CREATESTRUCTA *cs, ATOM classAtom)
     if ((cs->style & WS_CHILD) && cs->hwndParent)
     {
         SetParent(cs->hwndParent);
-//        owner = GetWindowFromHandle(cs->hwndParent);
         owner = 0;
-/*        if(owner == NULL)
-        {
-            dprintf(("HwGetWindowHandleData couldn't find owner window %x!!!", cs->hwndParent));
-            SetLastError(ERROR_INVALID_WINDOW_HANDLE);
-            return FALSE;
-        }*/
         //SvL: Shell positioning shouldn't be done for child windows! (breaks Notes)
         fXDefault = fCXDefault = FALSE;
     }
@@ -2313,7 +2281,6 @@ BOOL Win32BaseWindow::ShowWindow(ULONG nCmdShow)
     if((getStyle() & WS_CHILD) && !(getExStyle() & WS_EX_MDICHILD))
         swp |= SWP_NOACTIVATE | SWP_NOZORDER;
 
-    dprintf(("ShowWindow : SetWindowPos now"));   
     if (!(getStyle() & WS_MINIMIZE)) {
          SetWindowPos(HWND_TOP, newPos.left, newPos.top, newPos.right, newPos.bottom, LOWORD(swp));
     }
@@ -2795,7 +2762,6 @@ HWND Win32BaseWindow::SetParent(HWND hwndNewParent)
         setParent(newparent);
         getParent()->addChild(this);
         fParentChange = TRUE;
-
         OSLibWinSetParent(getOS2FrameWindowHandle(), getParent()->getOS2WindowHandle());
         if(!(getStyle() & WS_CHILD))
         {
@@ -3545,7 +3511,7 @@ LONG Win32BaseWindow::SetWindowLong(int index, ULONG value, BOOL fUnicode)
         }
         case GWL_STYLE:
         {
-           STYLESTRUCT ss;
+                STYLESTRUCT ss;
 
                 //SvL: TODO: Can you change minimize or maximize status here too?
 
@@ -3554,14 +3520,10 @@ LONG Win32BaseWindow::SetWindowLong(int index, ULONG value, BOOL fUnicode)
                     break;
                 }
                 dprintf(("SetWindowLong GWL_STYLE %x old %x new style %x (%x)", getWindowHandle(), dwStyle, value));
-#ifdef DEBUG
-//                if((value & WS_CHILD) != (dwStyle & WS_CHILD)) {
-//                    DebugInt3(); //is this allowed?
-//                }
-#endif
-                value &= ~(WS_CHILD);
+                
+                //Changing WS_CHILD style is allowed
                 ss.styleOld = getStyle();
-                ss.styleNew = value | (ss.styleOld & WS_CHILD);
+                ss.styleNew = value;
                 SendMessageA(getWindowHandle(),WM_STYLECHANGING,GWL_STYLE,(LPARAM)&ss);
                 setStyle(ss.styleNew);
                 SendMessageA(getWindowHandle(),WM_STYLECHANGED,GWL_STYLE,(LPARAM)&ss);
