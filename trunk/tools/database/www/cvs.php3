@@ -1,6 +1,6 @@
 <?php
 
-require "../Odin32DBhelpers.php3";
+require "Odin32DBhelpers.php3";
 
 /*
  * Configuration:
@@ -33,7 +33,6 @@ class CVSFile
     {
         global $sCVSROOT;
 
-        $timer = Odin32DBTimerStart("");
 
         $this->fOk = 0;
         /*
@@ -93,6 +92,27 @@ class CVSFile
             return 1;
         }
 
+        /*
+         * Parse the file.
+         */
+        $this->fOk = $this->ParseFile2($hFile, 0);// $fNoDeltas);
+
+        fclose($hFile);
+
+        /*
+         * Return.
+         */
+
+        return 1;
+    }
+
+
+    /**
+     * Parses the file.
+     * (internal)
+     */
+    function ParseFile($hFile, $fNoDeltas)
+    {
 
         /*
          * Parse file.
@@ -273,7 +293,7 @@ class CVSFile
                 {
                     $this->sError = "Invalid file format.";
                     fclose($hFile);
-                    return 1;
+                    return 0;
                 }
                 $this->aasKeys[$sKey] = $asValue;
             }
@@ -298,16 +318,215 @@ class CVSFile
             //echo "debug key: $sKey  value(".sizeof($asValue)."):".$asValue[0]."\n";
         }
 
-        fclose($hFile);
-
-        /*
-         * Return successfully.
-         */
-        $this->fOk = 1;
-
-        Odin32DBTimerStop($timer);
         return 1;
     }
+
+
+    /**
+     * Parses the file.
+     * (internal)
+     */
+    function ParseFile2($hFile, $fNoDeltas)
+    {
+
+        /*
+         * Parse file.
+         */
+        $sKey   = "";
+        $sRev   = "";
+
+        $sLine  = "";
+        $fStop  = 0;
+        while (!$fStop)
+        {
+            /*
+             * Left trim.
+             * If empty line, get next and iterate.
+             */
+            $sLine = ltrim($sLine);
+            if ($sLine == "")
+            {
+                if (feof($hFile))
+                    break;
+                $sLine = fgets($hFile, 0x1000);
+                continue;
+            }
+
+            /*
+             * Are we looking for a new key word?
+             */
+            if ($sKey == "")
+            {
+                $cch = strlen($sLine);
+                for ($i = 0; $i < $cch; $i++)
+                {
+                    $c = $sLine[$i];
+                    if (!(   ($c >= 'a' && $c <= 'z')
+                          || ($c >= 'A' && $c <= 'Z')
+                          || ($c >= '0' && $c <= '9')
+                          || $c == '.'  || $c == '_'
+                          )
+                        )
+                        break;
+                }
+                if ($sLine[0] >= "0" && $sLine[0] <= "9") // Revision number: delta or revision info
+                    $sRev = substr($sLine, 0, $i);
+                else
+                    $sKey = substr($sLine, 0, $i);
+                $sLine = ltrim(substr($sLine, $i));
+                continue;
+            }
+
+
+            /*
+             * Extract value
+             */
+            $fSemicolon = !($sKey == "desc" || $sKey == "log" || $sKey == "desc");
+            $asValue = array();
+            $fEnd = 0;
+            if ($sLine[0] == "@") //check if the value is enclosed in '@'s
+            {
+                $sLine = substr($sLine, 1);
+                for (;;)
+                {
+                    /* get new line? */
+                    if ($sLine == "")
+                    {
+                        if (feof($hFile))
+                            break;
+                        $sLine = fgets($hFile, 0x1000);
+                        continue;
+                    }
+
+                    /*
+                     * Look for end char ( @) and copy.
+                     * If end of value then $sLine <- rest of line.
+                     */
+                    if ($sLine[0] != '@' || $sLine[1] == '@')
+                    {
+                        $iAt = 0;
+                        while ($iAt = strpos($sLine, "@", $iAt+1))
+                            if ($fEnd = ($sLine[++$iAt] != '@'))
+                            {
+                                $asValue[] = str_replace("@@", "@", substr($sLine, 0, $iAt - 1));
+                                /* if semicolon end, skip to it. ASSUMES: same line! */
+                                if ($fSemicolon && ($i = strpos($sLine, ";", $iAt)) > 0)
+                                    $iAt = $i + 1;
+                                $sLine = substr($sLine, $iAt);
+                                break;
+                            }
+                        if ($iAt > 0)
+                            break;
+                    }
+                    else
+                    {
+                        /* if semicolon end, skip to it. ASSUMES: same line! */
+                        if ($fSemicolon && ($iAt = strpos($sLine, ";", 1)) > 0)
+                            $sLine = substr($sLine, $iAt+1);
+                        else
+                            $sLine = substr($sLine, 1);
+                        break;
+                    }
+
+                    $asValue[] = str_replace("@@", "@", $sLine);
+                    $sLine = fgets($hFile, 0x1000);
+                }
+            }
+            else
+            {
+                for (;;)
+                {
+                    /* get new line? */
+                    if ($sLine == "")
+                    {
+                        if (feof($hFile))
+                            break;
+                        $sLine = fgets($hFile, 0x1000);
+                        continue;
+                    }
+
+                    /*
+                     * Look for end char (either ; or @) and copy.
+                     * If end of value then $sLine <- rest of line.
+                     */
+                    if (($i = strpos($sLine, ';')) <= 0 && $sLine[0] != ';')
+                    {   //terminator not found.
+                        $asValue[] = $sLine;
+                        $sLine = fgets($hFile, 0x1000);
+                    }
+                    else
+                    {   //terminator found
+                        $asValue[] = substr($sLine, 0, $i);
+                        $sLine = substr($sLine, $i+1);
+                        break; // end
+                    }
+                }
+            }
+
+
+            /*
+             * Process the key.
+             */
+            switch ($sKey)
+            {
+                /*
+                 * This is normally the keyword separating
+                 * revision info from log+text info.
+                 */
+                case "desc":
+                    $sRev = "";
+                    break;
+
+                /*
+                 * Stop after the first log entry.
+                 */
+                case "log":
+                    $fStop = $fNoDeltas;
+                    break;
+
+                /*
+                 * Don'r read deltas for archives with the expand tag set
+                 */
+                case "expand":
+                    $fNoDeltas = 1;//= $asValue[0] != "";
+                    break;
+            }
+
+            /*
+             * Save key and value in the appopriate place.
+             */
+            if ($sRev == "")
+            {   /* Base keys */
+                if (sizeof($this->aaKeys) <= 0 //sanity check! head must come first and have a value!
+                    && ($sKey != "head" || sizeof($asValue) <= 0 || $asValue[0] == ""))
+                {
+                    $this->sError = "Invalid file format.";
+                    fclose($hFile);
+                    return 1;
+                }
+                $this->aasKeys[$sKey] = $asValue;
+            }
+            else if ($sKey != "text")
+            {   /* Revision information keys  */
+                if (!isset($this->aaasRevs[$sRev]))
+                    $this->aaasRevs[$sRev] = array($sKey => $asValue);
+                else
+                    $this->aaasRevs[$sRev][$sKey] = $asValue;
+            }
+            else
+            {   /* Delta (ie. 'text') key */
+                $this->aasDeltas[$sRev] = $asValue;
+            }
+
+            /*
+             * Completed reading of this key, so next one.
+             */
+            $sKey = "";
+        }
+
+        return 1;
+    }
+
 
 
     /**
@@ -399,7 +618,10 @@ class CVSFile
             case 'h':
             case 'hpp':
                 C_ColorInit($aVariables);
+                $iColorEncoder = 1;
                 break;
+            default:
+                $iColorEncoder = 0;
         }
 
 
@@ -409,39 +631,25 @@ class CVSFile
          */
         echo "<table><tr><td bgcolor=#020286><pre><font size=-0 face=\"System VIO, System Monospaced\" color=#02FEFE>\n";
 
-        $fComment = 0;
-        $iLine = 0;
-        $cLines = sizeof($this->aasDeltas[$sRevision]);
-        //echo "<!-- debug $this->sExt -->\n";
-        while ($iLine < $cLines)
+        for ($cLines = sizeof($this->aasDeltas[$sRevision]), $iLine = 0;
+             ($iLine < $cLines);
+             $iLine++)
         {
-            $sLine = htmlspecialchars($this->aasDeltas[$sRevision][$iLine++]);
-
             /*
              * Preprocessing... Color coding
              */
-            switch ($this->sExt)
+            switch ($iColorEncoder)
             {
-                case 'c':
-                case 'cpp':
-                case 'cxx':
-                case 'h':
-                case 'hpp':
-                    $sLine = C_ColorEncode($sLine, $aVariables);
-                    //echo "<a name=$iLine>";
-                    //C_ColorEncode2($sLine, $aVariables);
-                    //echo "</a>";
+                case 1:
+                    echo "<a name=$iLine>";
+                    echo  C_ColorEncode(htmlspecialchars($this->aasDeltas[$sRevision][$iLine]), $aVariables);
+                    //C_ColorEncode2(htmlspecialchars($this->aasDeltas[$sRevision][$iLine]), $aVariables);
+                    echo "</a>";
                     break;
 
                 default:
-                    echo  "<a name=$iLine>$sLine</a>";
-
+                    echo  "<a name=$iLine>",htmlspecialchars($this->aasDeltas[$sRevision][$iLine]),"</a>";
             }
-
-            /*
-             * Finished processing of the line. So, write it.
-             */
-            echo  "<a name=$iLine>$sLine</a>";
         }
 
         echo "</pre></td></tr></table>\n";
@@ -504,9 +712,7 @@ class CVSFile
         $sDate = $this->aaasRevs[$sRev]["date"][0];
         $sCurDate = date("Y.m.d.H.i.s");
         if ($sDate > $sCurDate)
-        {
             return "0 seconds"; //fixme?
-        }
 
         /* seconds */
         $i1 = substr($sCurDate, 17, 2);
@@ -594,6 +800,7 @@ class CVSFile
 function ListDirectory($sDir, $iSortColumn)
 {
     global $sCVSROOT;
+    $timer = Odin32DBTimerStart("List Directory");
 
     /*
      * Validate and fixup $sDir.
@@ -654,6 +861,7 @@ function ListDirectory($sDir, $iSortColumn)
     /*
      * Get CVS data.
      */
+    $cvstimer = Odin32DBTimerStart("Get CVS Data");
     $asRev      = array();
     $asAge      = array();
     $asAuthor   = array();
@@ -666,11 +874,24 @@ function ListDirectory($sDir, $iSortColumn)
             $asRev[$sFile]    = $sRev = $obj->getHead();
             $asAge[$sFile]    = $obj->getAge($sRev);
             $asAuthor[$sFile] = $obj->getAuthor($sRev);
-            $asLog[$sFile]    = $obj->getLog($sRev);
+            $asTmpLog         = $obj->getLog($sRev);
+            for ($sLog = "", $j = sizeof($asTmpLog) - 1; $j >= 0; $j--)
+            {
+                if ($sLog == "")
+                {
+                    if (trim($asTmpLog[$j]) != "")
+                        $sLog = $asTmpLog[$j];
+                    continue;
+                }
+                $sLog = $asTmpLog[$j]."<br>".$sLog;
+            }
+            $asLog[$sFile] = $sLog;
+            $sLog = "";
         }
         else
-            $asLog[$sFile] = $obj->sError;
+            $asLog[$sFile]    = $obj->sError;
     }
+    Odin32DBTimerStop($cvstimer);
 
     /*
      * Sort the stuff.
@@ -687,17 +908,18 @@ function ListDirectory($sDir, $iSortColumn)
     }
     asort($asSorted);
 
+
     /*
      * Present data
      */
     $aColumnColors = array("#cccccc","#cccccc","#cccccc","#cccccc", "#88ff88","#cccccc","#cccccc","#cccccc","#cccccc");
     echo "<table border=0 width=100% cellspacing=1 cellpadding=2>\n",
          "  <hr NOSHADE>\n",
-         "    <th bgcolor=#".$aColumnColors[4+0-$iSortColumn]."><b><a href=cvs.phtml?sDir=$sDir&iSortColumn=0>Filename</a></b></th>\n",
-         "    <th bgcolor=#".$aColumnColors[4+1-$iSortColumn]."><b><a href=cvs.phtml?sDir=$sDir&iSortColumn=1>Rev</a></b></th>\n",
-         "    <th bgcolor=#".$aColumnColors[4+2-$iSortColumn]."><b><a href=cvs.phtml?sDir=$sDir&iSortColumn=2>Age</a></b></th>\n",
-         "    <th bgcolor=#".$aColumnColors[4+3-$iSortColumn]."><b><a href=cvs.phtml?sDir=$sDir&iSortColumn=3>Author</a></b></th>\n",
-         "    <th bgcolor=#".$aColumnColors[4+4-$iSortColumn]."><b><a href=cvs.phtml?sDir=$sDir&iSortColumn=4>Last Log Entry</a></b></th>\n",
+         "    <th bgcolor=",$aColumnColors[4+0-$iSortColumn],"><font size=-1><b><a href=cvs.phtml?sDir=$sDir&iSortColumn=0>Filename</a></b></font></th>\n",
+         "    <th bgcolor=",$aColumnColors[4+1-$iSortColumn],"><font size=-1><b><a href=cvs.phtml?sDir=$sDir&iSortColumn=1>Rev</a></b></font></th>\n",
+         "    <th bgcolor=",$aColumnColors[4+2-$iSortColumn],"><font size=-1><b><a href=cvs.phtml?sDir=$sDir&iSortColumn=2>Age</a></b></font></th>\n",
+         "    <th bgcolor=",$aColumnColors[4+3-$iSortColumn],"><font size=-1><b><a href=cvs.phtml?sDir=$sDir&iSortColumn=3>Author</a></b></font></th>\n",
+         "    <th bgcolor=",$aColumnColors[4+4-$iSortColumn],"><font size=-1><b><a href=cvs.phtml?sDir=$sDir&iSortColumn=4>Last Log Entry</a></b></font></th>\n",
          "  </hr>\n";
     $i = 0;
     /* directories */
@@ -708,25 +930,25 @@ function ListDirectory($sDir, $iSortColumn)
         else
             $sParentDir = "";
         $sBgColor = ($i++ % 2) ? "" : " bgcolor=#ccccee";
-        echo "  <tr>\n",
-             "    <td", $sBgColor , ">",
-                  "<font size=-1><a href=\"cvs.phtml?sDir=$sParentDir\">Parent Directory</a></font></td>\n",
-             "    <td$sBgColor>&nbsp;</td>\n",
-             "    <td$sBgColor>&nbsp;</td>\n",
-             "    <td$sBgColor>&nbsp;</td>\n",
-             "    <td$sBgColor>&nbsp;</td>\n",
-             "  </tr>\n";
+        echo "<tr>\n",
+             " <td", $sBgColor , ">",
+               "<font size=-1><a href=\"cvs.phtml?sDir=",$sParentDir,"\"><img src=\"cvsicons/parent.gif\" border=0> Parent Directory</a></font></td>\n",
+             " <td$sBgColor>&nbsp;</td>\n",
+             " <td$sBgColor>&nbsp;</td>\n",
+             " <td$sBgColor>&nbsp;</td>\n",
+             " <td$sBgColor>&nbsp;</td>\n",
+             "</tr>\n";
     }
     while (list($sKey, $sVal) = each($asSubDirs))
     {
         $sBgColor = ($i++ % 2) ? "" : " bgcolor=#ccccee";
-        echo "  <tr>\n",
-             "    <td$sBgColor><font size=-1><a href=\"cvs.phtml?sDir=$sDir/$sVal\">$sVal</a></font></td>\n",
-             "    <td$sBgColor>&nbsp;</td>\n",
-             "    <td$sBgColor>&nbsp;</td>\n",
-             "    <td$sBgColor>&nbsp;</td>\n",
-             "    <td$sBgColor>&nbsp;</td>\n",
-             "  </tr>\n";
+        echo "<tr>\n",
+             " <td$sBgColor><font size=-1><a href=\"cvs.phtml?sDir=$sDir/$sVal\"><img src=\"cvsicons/dir.gif\" border=0> $sVal</a></font></td>\n",
+             " <td$sBgColor>&nbsp;</td>\n",
+             " <td$sBgColor>&nbsp;</td>\n",
+             " <td$sBgColor>&nbsp;</td>\n",
+             " <td$sBgColor>&nbsp;</td>\n",
+             "</tr>\n";
     }
 
     /* files */
@@ -736,26 +958,18 @@ function ListDirectory($sDir, $iSortColumn)
         $sRev   = isset($asRev[$sKey])  ? $asRev[$sKey]     : "<i> error </i>";
         $sAge   = isset($asAge[$sKey])  ? $asAge[$sKey]     : "<i> error </i>";
         $sAuthor= isset($asAuthor[$sKey])?$asAuthor[$sKey]  : "<i> error </i>";
-        for ($sLog = "", $j = sizeof($asLog[$sKey]) - 1; $j >= 0; $j--)
-        {
-            if ($sLog == "")
-            {
-                if (trim($asLog[$sKey][$j]) != "")
-                    $sLog = $asLog[$sKey][$j];
-                continue;
-            }
-            $sLog = $asLog[$sKey][$j]."<br>".$sLog;
-        }
-        echo "  <tr>\n",
-             "    <td$sBgColor><font size=-1><a href=\"cvs.phtml?sFile=$sDir/$sKey\">$sKey</a></font></td>\n",
-             "    <td$sBgColor><font size=-1><a href=\"cvs.phtml?sFile=$sDir/$sKey?sRev=$sRev\">$sRev</a></font></td>\n",
-             "    <td$sBgColor><font size=-1>$sAge</font></td>\n",
-             "    <td$sBgColor><font size=-1>$sAuthor</font></td>\n",
-             "    <td$sBgColor><font size=-1>$sLog</font></td>\n",
-             "  </tr>\n";
+        $sLog   = isset($asLog[$sKey])  ?$asLog[$sKey]      : "<i> error </i>";
+        echo "<tr>\n",
+             " <td$sBgColor><font size=-1><a href=\"cvs.phtml?sFile=$sDir/$sKey\"><img src=\"cvsicons/file.gif\" border=0>",substr($sKey, 0, -2),"</a></font></td>\n",
+             " <td$sBgColor><font size=-2><a href=\"cvs.phtml?sFile=$sDir/$sKey?sRev=$sRev\">$sRev</a></font></td>\n",
+             " <td$sBgColor><font size=-2>$sAge</font></td>\n",
+             " <td$sBgColor><font size=-2>$sAuthor</font></td>\n",
+             " <td$sBgColor><font size=-2>$sLog</font></td>\n",
+             "</tr>\n";
     }
 
     echo "</table>\n";
+    Odin32DBTimerStop($timer);
 
 
     /*
