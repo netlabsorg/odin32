@@ -1,4 +1,4 @@
-/* $Id: wprocess.cpp,v 1.30 1999-08-27 16:51:01 sandervl Exp $ */
+/* $Id: wprocess.cpp,v 1.31 1999-09-15 23:38:03 sandervl Exp $ */
 
 /*
  * Win32 process functions
@@ -14,9 +14,10 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "unicode.h"
-#include "windll.h"
-#include "winexe.h"
+#include <unicode.h>
+#include <windllbase.h>
+#include <winexebase.h>
+#include <windllpeldr.h>
 
 #ifdef __IBMCPP__
 #include <builtin.h>
@@ -31,7 +32,6 @@
 #include <wprocess.h>
 #include "mmap.h"
 
-BOOL      fExeStarted = FALSE;
 BOOL      fFreeLibrary = FALSE;
 
 //Process database
@@ -198,111 +198,6 @@ USHORT WIN32API SetWin32TIB()
 
    return GetFS();
 }
-/******************************************************************************/
-//******************************************************************************
-void WIN32API RegisterExe(WIN32EXEENTRY EntryPoint, PIMAGE_TLS_CALLBACK *TlsCallbackAddr,
-           		  LPDWORD TlsIndexAddr, ULONG TlsInitSize,
-           		  ULONG TlsTotalSize, LPVOID TlsAddress,
-                 	  LONG Win32TableId, LONG NameTableId, LONG VersionResId,
-                    	 LONG Pe2lxVersion, HINSTANCE hinstance, ULONG dwReserved)
-{
-  if(WinExe != NULL) //should never happen
-    	delete(WinExe);
-
-  CheckVersion(Pe2lxVersion, OSLibGetDllName(hinstance));
-
-  if(getenv("WIN32_IOPL2")) {
-    io_init1();
-  }
-
-  Win32Exe *winexe;
-
-  winexe = new Win32Exe(hinstance, NameTableId, Win32TableId);
-
-  if(winexe) {
-   	dprintf(("RegisterExe Win32TableId = %x", Win32TableId));
-   	dprintf(("RegisterExe NameTableId  = %x", NameTableId));
-   	dprintf(("RegisterExe VersionResId = %x", VersionResId));
-   	dprintf(("RegisterExe Pe2lxVersion = %x", Pe2lxVersion));
-
-      	winexe->setVersionId(VersionResId);
-   	winexe->setEntryPoint((ULONG)EntryPoint);
-   	winexe->setTLSAddress(TlsAddress);
-   	winexe->setTLSInitSize(TlsInitSize);
-   	winexe->setTLSTotalSize(TlsTotalSize);
-   	winexe->setTLSIndexAddr(TlsIndexAddr);
-   	winexe->setTLSCallBackAddr(TlsCallbackAddr);
-
-   	winexe->start();
-  }
-  else {
-      	eprintf(("Win32Exe creation failed!\n"));
-      	DebugInt3();
-   	return;
-  }
-}
-//******************************************************************************
-//******************************************************************************
-ULONG WIN32API RegisterDll(WIN32DLLENTRY pfnDllEntry, PIMAGE_TLS_CALLBACK *TlsCallbackAddr,
-            		   LPDWORD TlsIndexAddr, ULONG TlsInitSize,
-            		   ULONG TlsTotalSize, LPVOID TlsAddress,
-                  	   LONG Win32TableId, LONG NameTableId, LONG VersionResId,
-                     	   LONG Pe2lxVersion, HINSTANCE hinstance, ULONG dwAttachType)
-{
- char *name;
-
-  Win32Dll *winmod = Win32Dll::findModule(hinstance);
-  if(dwAttachType == 0)
-  { //Process attach
-   	if(getenv("WIN32_IOPL2")) {
-         	io_init1();
-   	}
-   	name = OSLibGetDllName(hinstance);
-   	CheckVersion(Pe2lxVersion, name);
-
-   	dprintf(("RegisterDll %X %s reason %d\n", hinstance, name, dwAttachType));
-   	dprintf(("RegisterDll Win32TableId = %x", Win32TableId));
-   	dprintf(("RegisterDll NameTableId  = %x", NameTableId));
-   	dprintf(("RegisterDll VersionResId = %x", VersionResId));
-   	dprintf(("RegisterDll Pe2lxVersion = %x", Pe2lxVersion));
-
-   	if(winmod != NULL) {
-         	//dll manually loaded by PE loader (Win32Dll::init)
-         	winmod->OS2DllInit(hinstance, NameTableId, Win32TableId, pfnDllEntry);
-   	}
-   	else {
-      		//converted win32 dll loaded by OS/2 loader
-      		winmod = new Win32Dll(hinstance, NameTableId, Win32TableId, pfnDllEntry);
-      		if(winmod == NULL) {
-            		eprintf(("Failed to allocate module object!\n"));
-            		DebugInt3();
-            		return 0;                    //fail dll load
-      		}
-   	}
-   	winmod->setTLSAddress(TlsAddress);
-   	winmod->setTLSInitSize(TlsInitSize);
-   	winmod->setTLSTotalSize(TlsTotalSize);
-   	winmod->setTLSIndexAddr(TlsIndexAddr);
-   	winmod->setTLSCallBackAddr(TlsCallbackAddr);
-
-   	/* @@@PH 1998/03/17 console devices initialization */
-   	iConsoleDevicesRegister();
-
-   	//SvL: 19-8-'98
-   	winmod->AddRef();
-   	winmod->setVersionId(VersionResId);
-
-   	winmod->attachProcess();
-   }
-   else {//process detach
-   	if(winmod != NULL && !fFreeLibrary) {
-      		return 0;   //don't unload (OS/2 dll unload bug)
-   	}
-	//Runtime environment could already be gone, so don't do this
-	// dprintf(("KERNEL32: Dll Removed by FreeLibrary or ExitProcess\n"));
-   }
-   return 1;   //success
-}
 //******************************************************************************
 //******************************************************************************
 void _System Win32DllExitList(ULONG reason)
@@ -345,14 +240,14 @@ VOID WIN32API ExitProcess(DWORD exitcode)
 //******************************************************************************
 BOOL WIN32API FreeLibrary(HINSTANCE hinstance)
 {
- Win32Dll *winmod;
+ Win32DllBase *winmod;
  BOOL rc;
 
   dprintf(("FreeLibrary"));
-  winmod = Win32Dll::findModule(hinstance);
+  winmod = Win32DllBase::findModule(hinstance);
   if(winmod) {
-    winmod->Release();
-    return(TRUE);
+    	winmod->Release();
+    	return(TRUE);
   }
   dprintf(("KERNEL32: FreeLibrary %s %X\n", OSLibGetDllName(hinstance), hinstance));
 
@@ -365,11 +260,11 @@ BOOL WIN32API FreeLibrary(HINSTANCE hinstance)
 }
 /******************************************************************************/
 /******************************************************************************/
-static HINSTANCE iLoadLibraryA(LPCTSTR lpszLibFile)
+static HINSTANCE iLoadLibraryA(LPCTSTR lpszLibFile, DWORD dwFlags)
 {
  char        modname[CCHMAXPATH];
  HINSTANCE   hDll;
- Win32Dll   *module;
+ Win32DllBase *module;
 
   hDll = O32_LoadLibrary(lpszLibFile);
   dprintf(("KERNEL32:  iLoadLibraryA %s returned %X (%d)\n",
@@ -387,36 +282,40 @@ static HINSTANCE iLoadLibraryA(LPCTSTR lpszLibFile)
 	strcat(modname,".DLL");
   }
 
-  if(Win32Image::isPEImage((char *)modname)) {
-    module = Win32Dll::findModule((char *)modname);
-    if(module) {//don't load it again
-        module->AddRef();
-        return module->getInstanceHandle();
-    }
+  if(Win32ImageBase::isPEImage((char *)modname)) 
+  {
+    	module = Win32DllBase::findModule((char *)modname);
+    	if(module) {//don't load it again
+        	module->AddRef();
+        	return module->getInstanceHandle();
+    	}
 
-    module = new Win32Dll((char *)modname);
-    if(module == NULL)
-        return(0);
+    	Win32PeLdrDll *peldrDll = new Win32PeLdrDll((char *)modname);
+    	if(peldrDll == NULL)
+        	return(0);
 
-    module->init(0);
-    if(module->getError() != NO_ERROR) {
-        dprintf(("LoadLibary %s failed (::init)\n", lpszLibFile));
-        delete(module);
-        return(0);
-    }
-    if(module->attachProcess() == FALSE) {
-        dprintf(("LoadLibary %s failed (::attachProcess)\n", lpszLibFile));
-        delete(module);
-        return(0);
-    }
-    module->AddRef();
-    return module->getInstanceHandle();
+    	peldrDll->init(0);
+    	if(peldrDll->getError() != NO_ERROR) {
+        	dprintf(("LoadLibary %s failed (::init)\n", lpszLibFile));
+        	delete(peldrDll);
+        	return(0);
+    	}
+    	if(dwFlags & DONT_RESOLVE_DLL_REFERENCES) {
+        	peldrDll->setNoEntryCalls();
+    	}
+
+    	if(peldrDll->attachProcess() == FALSE) {
+        	dprintf(("LoadLibary %s failed (::attachProcess)\n", lpszLibFile));
+        	delete(peldrDll);
+        	return(0);
+    	}
+    	peldrDll->AddRef();
+    	return peldrDll->getInstanceHandle();
   }
-  else
-    return(0);
+  else  return(0);
 }
-
-
+//******************************************************************************
+//******************************************************************************
 HINSTANCE WIN32API LoadLibraryA(LPCTSTR lpszLibFile)
 {
   HINSTANCE hDll;
@@ -424,7 +323,7 @@ HINSTANCE WIN32API LoadLibraryA(LPCTSTR lpszLibFile)
   dprintf(("KERNEL32:  LoadLibraryA(%s)\n",
            lpszLibFile));
 
-  hDll = iLoadLibraryA(lpszLibFile);
+  hDll = iLoadLibraryA(lpszLibFile, 0);
   if (hDll == 0)
   {
     char * pszName;
@@ -437,7 +336,7 @@ HINSTANCE WIN32API LoadLibraryA(LPCTSTR lpszLibFile)
       pszName++;                // skip backslash
 
       // now try again without fully qualified path
-      hDll = iLoadLibraryA(pszName);
+      hDll = iLoadLibraryA(pszName, 0);
     }
   }
 
@@ -447,45 +346,27 @@ HINSTANCE WIN32API LoadLibraryA(LPCTSTR lpszLibFile)
 //******************************************************************************
 HINSTANCE WIN32API LoadLibraryExA(LPCTSTR lpszLibFile, HANDLE hFile, DWORD dwFlags)
 {
- Win32Dll   *module;
- HINSTANCE   hDll;
+ HINSTANCE     hDll;
 
   dprintf(("KERNEL32:  LoadLibraryExA %s (%X)\n", lpszLibFile, dwFlags));
-  hDll = O32_LoadLibrary(lpszLibFile);
-  if(hDll) {
-    	return hDll;    //converted dll or win32k took care of it
+  hDll = iLoadLibraryA(lpszLibFile, dwFlags);
+  if (hDll == 0)
+  {
+    char * pszName;
+
+    // remove path from the image name
+    pszName = strrchr((char *)lpszLibFile,
+                      '\\');
+    if (pszName != NULL)
+    {
+      pszName++;                // skip backslash
+
+      // now try again without fully qualified path
+      hDll = iLoadLibraryA(pszName, dwFlags);
+    }
   }
 
-  if(Win32Image::isPEImage((char *)lpszLibFile)) {
-    module = Win32Dll::findModule((char *)lpszLibFile);
-    if(module) {//don't load it again
-        module->AddRef();
-        return module->getInstanceHandle();
-    }
-
-    module = new Win32Dll((char *)lpszLibFile);
-
-    if(module == NULL)
-        return(0);
-
-    module->init(0);
-    if(module->getError() != NO_ERROR) {
-        dprintf(("LoadLibary %s failed (::init)\n", lpszLibFile));
-        delete(module);
-        return(0);
-    }
-    if(dwFlags & DONT_RESOLVE_DLL_REFERENCES) {
-        module->setNoEntryCalls();
-    }
-    if(module->attachProcess() == FALSE) {
-        dprintf(("LoadLibary %s failed (::attachProcess)\n", lpszLibFile));
-        delete(module);
-        return(0);
-    }
-    module->AddRef();
-    return module->getInstanceHandle();
-  }
-  return(0);
+  return hDll;
 }
 //******************************************************************************
 //******************************************************************************
@@ -561,15 +442,15 @@ LPCWSTR WIN32API GetCommandLineW(void)
 DWORD WIN32API GetModuleFileNameA(HMODULE hinstModule, LPTSTR lpszPath, DWORD cchPath)
 {
  DWORD rc;
- Win32Image *module;
+ Win32ImageBase *module;
  char *fpath = NULL;
 
   dprintf(("GetModuleFileName %X", hinstModule));
   if(hinstModule == 0 || hinstModule == -1 || (WinExe && hinstModule == WinExe->getInstanceHandle())) {
-    	module = (Win32Image *)WinExe;
+    	module = (Win32ImageBase *)WinExe;
   }
   else {
-    	module = (Win32Image *)Win32Dll::findModule(hinstModule);
+    	module = (Win32ImageBase *)Win32DllBase::findModule(hinstModule);
   }
 
   if(module) {
@@ -607,7 +488,7 @@ DWORD WIN32API GetModuleFileNameW(HMODULE hModule, LPWSTR lpFileName, DWORD nSiz
 HANDLE WIN32API GetModuleHandleA(LPCTSTR lpszModule)
 {
  HANDLE    hMod;
- Win32Dll *windll;
+ Win32DllBase *windll;
  char      szModule[CCHMAXPATH];
  BOOL      fDllModule = FALSE;
 
@@ -635,7 +516,7 @@ HANDLE WIN32API GetModuleHandleA(LPCTSTR lpszModule)
 		hMod = WinExe->getInstanceHandle();
 	}
 	else {
-  		windll = Win32Dll::findModule(szModule);
+  		windll = Win32DllBase::findModule(szModule);
 		if(windll) {
 			hMod = windll->getInstanceHandle();
 		}
@@ -721,17 +602,21 @@ BOOL WIN32API CreateProcessW(LPCWSTR arg1, LPWSTR arg2,
 //******************************************************************************
 FARPROC WIN32API GetProcAddress(HMODULE hModule, LPCSTR lpszProc)
 {
- Win32Dll *winmod;
+ Win32DllBase *winmod;
  FARPROC   proc;
  ULONG     ulAPIOrdinal;
 
-  winmod = Win32Dll::findModule((HINSTANCE)hModule);
+  winmod = Win32DllBase::findModule((HINSTANCE)hModule);
   if(winmod) {
-    ulAPIOrdinal = (ULONG)lpszProc;
-    if (ulAPIOrdinal <= 0x0000FFFF) {
-        return (FARPROC)winmod->getApi((int)ulAPIOrdinal);
-    }
-    else    return (FARPROC)winmod->getApi((char *)lpszProc);
+    	ulAPIOrdinal = (ULONG)lpszProc;
+    	if (ulAPIOrdinal <= 0x0000FFFF) {
+        	proc = (FARPROC)winmod->getApi((int)ulAPIOrdinal);
+    	}
+    	else    proc = (FARPROC)winmod->getApi((char *)lpszProc);
+	if(proc == 0) {
+		SetLastError(ERROR_PROC_NOT_FOUND);
+	}
+	return proc;
   }
   proc = O32_GetProcAddress(hModule, lpszProc);
   dprintf(("KERNEL32:  GetProcAddress %s from %X returned %X\n", lpszProc, hModule, proc));
@@ -742,8 +627,8 @@ FARPROC WIN32API GetProcAddress(HMODULE hModule, LPCSTR lpszProc)
 //******************************************************************************
 BOOL SYSTEM GetVersionStruct(char *modname, char *verstruct, ULONG bufLength)
 {
- HINSTANCE   hinstance;
- Win32Image *winimage;
+ HINSTANCE       hinstance;
+ Win32ImageBase *winimage;
 
   dprintf(("GetVersionStruct"));
   hinstance = OSLibQueryModuleHandle(modname);
@@ -752,53 +637,42 @@ BOOL SYSTEM GetVersionStruct(char *modname, char *verstruct, ULONG bufLength)
     	return(FALSE);
   }
   if(WinExe && WinExe->getInstanceHandle() == hinstance) {
-    	winimage = (Win32Image *)WinExe;
+    	winimage = (Win32ImageBase *)WinExe;
   }
   else {
-    	winimage = (Win32Image *)Win32Dll::findModule(hinstance);
+    	winimage = (Win32ImageBase *)Win32DllBase::findModule(hinstance);
     	if(winimage == NULL) {
         	dprintf(("GetVersionStruct can't find Win32Image for %s\n", modname));
         	return(FALSE);
     	}
   }
-  if(winimage->getVersionId() == -1) {
-    dprintf(("GetVersionStruct: %s has no version resource!\n", modname));
-    return(FALSE);
-  }
-  return OSLibGetResource(hinstance, winimage->getVersionId(), verstruct, bufLength);
+  return winimage->getVersionStruct(verstruct, bufLength);
 }
 //******************************************************************************
 //******************************************************************************
 ULONG SYSTEM GetVersionSize(char *modname)
 {
- HINSTANCE   hinstance;
- Win32Image *winimage;
+ HINSTANCE       hinstance;
+ Win32ImageBase *winimage;
 
   dprintf(("GetVersionSize of %s\n", modname));
   hinstance = OSLibQueryModuleHandle(modname);
   if(hinstance == 0) {
-    dprintf(("GetVersionSize can't find handle for %s\n", modname));
-    return(FALSE);
+    	dprintf(("GetVersionSize can't find handle for %s\n", modname));
+    	return(FALSE);
   }
 
   if(WinExe && WinExe->getInstanceHandle() == hinstance) {
-    	winimage = (Win32Image *)WinExe;
+    	winimage = (Win32ImageBase *)WinExe;
   }
   else {
-    	winimage = (Win32Image *)Win32Dll::findModule(hinstance);
+    	winimage = (Win32ImageBase *)Win32DllBase::findModule(hinstance);
     	if(winimage == NULL) {
         	dprintf(("GetVersionSize can't find Win32Image for %s\n", modname));
         	return(FALSE);
     	}
   }
-  if(winimage->getVersionId() == -1) {
-    	dprintf(("GetVersionSize: %s has no version resource!\n", modname));
-    	return(FALSE);
-  }
-  ULONG size = OSLibGetResourceSize(hinstance, winimage->getVersionId());
-
-  dprintf(("Version resource size = %d, id %d\n", size, winimage->getVersionId()));
-  return(size);
+  return winimage->getVersionSize();
 }
 //******************************************************************************
 //******************************************************************************

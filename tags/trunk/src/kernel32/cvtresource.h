@@ -1,4 +1,4 @@
-/* $Id: cvtresource.h,v 1.3 1999-09-04 12:41:46 sandervl Exp $ */
+/* $Id: cvtresource.h,v 1.4 1999-09-15 23:38:01 sandervl Exp $ */
 
 #ifndef _CVTRESOURCE_H_
 #define _CVTRESOURCE_H_
@@ -7,14 +7,14 @@
 #include <winicon.h>
 #include <winaccel.h>
 #include <wincursor.h>
-#include <winimage.h>
+#include <winimagebase.h>
 
 void *ConvertAccelerator(WINACCEL *accdata, int size, int cp = 0);
 void *ConvertBitmap(WINBITMAPINFOHEADER *pBHdr, ULONG ulSize, PULONG pulSize);
 void *ConvertCursor(CursorComponent *curHdr, int size, int *os2size, int offsetBits = 0);
-void *ConvertCursorGroup(CursorHeader *chdr, int size, Win32Image *module);
+void *ConvertCursorGroup(CursorHeader *chdr, int size, Win32ImageBase *module);
 void *ConvertIcon(WINBITMAPINFOHEADER *bmpHdr, int size, int *os2size, int offsetBits = 0);
-void *ConvertIconGroup(IconHeader *ihdr, int size, Win32Image *module);
+void *ConvertIconGroup(IconHeader *ihdr, int size, Win32ImageBase *module);
 void *ConvertMenu(MenuHeader *menu, int size, int cp = 0);
 
 ULONG QueryConvertedBitmapSize(WINBITMAPINFOHEADER *pBHdr, ULONG ulSize);

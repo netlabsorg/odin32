@@ -1,4 +1,4 @@
-/* $Id: winres.cpp,v 1.18 1999-09-14 16:56:08 sandervl Exp $ */
+/* $Id: winres.cpp,v 1.19 1999-09-15 23:38:02 sandervl Exp $ */
 
 /*
  * Win32 resource class
@@ -27,12 +27,17 @@
 #include <win32type.h>
 #include <winres.h>
 #include <misc.h>
-#include <nameid.h>
-#include <winexe.h>
+#include <winexepe2lx.h>
+#include <windllpe2lx.h>
 #include "cvtresource.h"
 #include <vmutex.h>
 
 VMutex resmutex;
+
+char *ResTypes[MAX_RES] =
+      {"niks", "CURSOR", "BITMAP", "ICON", "MENU", "DIALOG", "STRING",
+       "FONTDIR", "FONT", "ACCELERATOR", "RCDATA",  "MESSAGETABLE",
+       "GROUP_CURSOR", "niks", "GROUP_ICON", "niks", "VERSION"};
 
 //******************************************************************************
 //******************************************************************************
@@ -91,12 +96,9 @@ static ULONG CalcBitmapSize(ULONG cBits, LONG cx, LONG cy)
 Win32Resource::Win32Resource() :
         os2resdata(NULL), winresdata(NULL), resType(RSRC_CUSTOMNODATA)
 {
-  resmutex.enter();
-  next           = module->winres;
-  module->winres = this;
-  resmutex.leave();
-
+  next       = NULL;
   module     = NULL;
+
   id         = -1;
   type       = -1;
   hres       = 0;
@@ -108,7 +110,7 @@ Win32Resource::Win32Resource() :
 }
 //******************************************************************************
 //******************************************************************************
-Win32Resource::Win32Resource(Win32Image *module, HRSRC hRes, ULONG id, ULONG type) :
+Win32Resource::Win32Resource(Win32ImageBase *module, HRSRC hRes, ULONG id, ULONG type) :
         os2resdata(NULL), winresdata(NULL), resType(RSRC_PE2LX)
 {
  APIRET rc;
@@ -167,7 +169,7 @@ Win32Resource::Win32Resource(Win32Image *module, HRSRC hRes, ULONG id, ULONG typ
 }
 //******************************************************************************
 //******************************************************************************
-Win32Resource::Win32Resource(Win32Image *module, ULONG id, ULONG type,
+Win32Resource::Win32Resource(Win32ImageBase *module, ULONG id, ULONG type,
                  ULONG size, char *resdata) : hres(NULL),
         os2resdata(NULL), winresdata(NULL), resType(RSRC_PELOADER)
 {
@@ -245,7 +247,10 @@ PVOID Win32Resource::lockResource()
     case NTRT_ACCELERATORS:
     case NTRT_MENU:
     case NTRT_DIALOG:
-        newid = module->getWin32ResourceId(id);
+    {
+//TODO->!!!!
+//        newid = ((Win32Pe2LxImage *)module)->getWin32ResourceId(id);
+//TODO->!!!!
 
         rc = DosGetResource((HMODULE)module->hinstance, RT_RCDATA, (int)newid, (PPVOID)&resdata);
         if(rc) {
@@ -255,6 +260,7 @@ PVOID Win32Resource::lockResource()
         winresdata = (char *)malloc(ressize);
         memcpy(winresdata, resdata, ressize);
         break;
+    }
 
     //TODO:not yet implemented
     case NTRT_FONTDIR:
@@ -328,6 +334,41 @@ PVOID Win32Resource::lockOS2Resource()
 	}
    }
    return os2resdata;
+}
+//******************************************************************************
+//return size of converted win32 resource
+//******************************************************************************
+ULONG Win32Resource::getOS2Size()
+{
+  switch(type) {
+    case NTRT_NEWBITMAP:
+    case NTRT_BITMAP:
+	return QueryConvertedBitmapSize((WINBITMAPINFOHEADER *)winresdata, ressize);
+
+    case NTRT_CURSOR:
+	return QueryConvertedCursorSize((CursorComponent *)winresdata, ressize);
+
+    case NTRT_ICON:
+	return QueryConvertedIconSize((WINBITMAPINFOHEADER *)winresdata, ressize);
+
+    case NTRT_GROUP_ICON:
+    case NTRT_GROUP_CURSOR:
+    case NTRT_ACCELERATORS:
+    case NTRT_NEWMENU:
+    case NTRT_MENU:
+    case NTRT_NEWDIALOG:
+    case NTRT_DIALOG:
+    case NTRT_FONTDIR:
+    case NTRT_FONT:
+    case NTRT_MESSAGETABLE:
+    case NTRT_RCDATA:
+    case NTRT_VERSION:
+    case NTRT_STRING:
+    default:
+	dprintf(("Win32Resource::getOS2Size SHOULDN'T BE CALLED for this resource type (%d) (NOT IMPLEMENTED)!!", type));
+	break;
+  }
+  return 0;
 }
 //******************************************************************************
 //******************************************************************************
@@ -434,7 +475,7 @@ PVOID Win32Resource::convertOS2Bitmap(void *bmpdata)
 }
 //******************************************************************************
 //******************************************************************************
-void Win32Resource::destroyAll(Win32Image *module)
+void Win32Resource::destroyAll(Win32ImageBase *module)
 {
  Win32Resource *res = module->winres, *next;
 

@@ -1,7 +1,7 @@
-/* $Id: winimage.cpp,v 1.20 1999-09-13 14:57:08 phaller Exp $ */
+/* $Id: winimagepeldr.cpp,v 1.1 1999-09-15 23:39:08 sandervl Exp $ */
 
 /*
- * Win32 PE Image class
+ * Win32 PE loader Image base class
  *
  * Copyright 1998-1999 Sander van Leeuwen (sandervl@xs4all.nl)
  * Copyright 1998 Knut St. Osmundsen
@@ -24,20 +24,19 @@
 #include <stdlib.h>
 
 #include <assert.h>
-#include "misc.h"
-#include "nameid.h"
-#include "win32type.h"
-#include "winimage.h"
-#include "windll.h"
-#include "winexe.h"
-#include "pefile.h"
-#include "unicode.h"
-#include "winres.h"
+#include <misc.h>
+#include <win32type.h>
+#include <winimagebase.h>
+#include <winimagepeldr.h>
+#include <windllpeldr.h>
+#include <pefile.h>
+#include <unicode.h>
+#include <winres.h>
 #include "oslibmisc.h"
 #include "initterm.h"
 #include <win\virtual.h>
 
-char szErrorTitle[]     = "Win32 for OS/2";
+char szErrorTitle[]     = "Odin";
 char szMemErrorMsg[]    = "Memory allocation failure";
 char szFileErrorMsg[]   = "File IO error";
 char szPEErrorMsg[]     = "Not a valid win32 exe. (perhaps 16 bits windows)";
@@ -59,19 +58,13 @@ extern ULONG flAllocMem;    /*Tue 03.03.1998: knut */
 
 //******************************************************************************
 //******************************************************************************
-Win32Image::Win32Image(char *szFileName) :
-    errorState(NO_ERROR), entryPoint(0), nrsections(0), imageSize(0),
+Win32PeLdrImage::Win32PeLdrImage(char *szFileName) :
+    Win32ImageBase(-1), 
+    nrsections(0), imageSize(0),
     imageVirtBase(-1), realBaseAddress(0), imageVirtEnd(0),
     nrNameExports(0), nrOrdExports(0), nameexports(NULL), ordexports(NULL),
-    NameTable(NULL), Win32Table(NULL), fullpath(NULL),
-    tlsAddress(0), tlsIndexAddr(0), tlsInitSize(0), tlsTotalSize(0), tlsCallBackAddr(0), tlsIndex(-1),
-    pResSection(NULL), pResDir(NULL), winres(NULL), VersionId(-1)
+    pResSection(NULL), pResDir(NULL)
 {
-  //native win32 exe/dll, converted dll or native OS/2 dll
-  //if it's either of the latter two, this flag will be reset when
-  //RegisterDll is called
-  fNativePEImage = TRUE;
-
   strcpy(this->szFileName, szFileName);
 
   strcpy(szModule, OSLibStripPath(szFileName));
@@ -92,91 +85,11 @@ Win32Image::Win32Image(char *szFileName) :
 	dprintf(("PE LOGFILE for %s: %s", szModule, logname));
     	foutInit = TRUE;
   }
-
-#ifdef DEBUG
-  magic = MAGIC_WINIMAGE;
-#endif
 }
 //******************************************************************************
 //******************************************************************************
-Win32Image::Win32Image(HINSTANCE hinstance, int NameTableId, int Win32TableId) :
-    errorState(NO_ERROR), entryPoint(0), nrsections(0), imageSize(0),
-    imageVirtBase(-1), realBaseAddress(0), imageVirtEnd(0),
-    nrNameExports(0), nrOrdExports(0), nameexports(NULL), ordexports(NULL),
-    NameTable(NULL), Win32Table(NULL), fullpath(NULL),
-    tlsAddress(0), tlsIndexAddr(0), tlsInitSize(0), tlsTotalSize(0), tlsCallBackAddr(0), tlsIndex(-1),
-    pResSection(NULL), pResDir(NULL), winres(NULL)
+Win32PeLdrImage::~Win32PeLdrImage()
 {
-#ifdef DEBUG
-  magic = MAGIC_WINIMAGE;
-#endif
-  OS2ImageInit(hinstance, NameTableId, Win32TableId);
-
-  szFileName[0] = 0;
-
-  char *name = OSLibGetDllName(hinstance);
-  strcpy(szModule, name);
-  strupr(szModule);
-  char *dot = strstr(szModule, ".");
-  while(dot) {
-	char *newdot = strstr(dot+1, ".");
-	if(newdot == NULL)	break;
-	dot = newdot;
-  }
-  if(dot)
-	*dot = 0;
-}
-//******************************************************************************
-//******************************************************************************
-void Win32Image::OS2ImageInit(HINSTANCE hinstance, int NameTableId, int Win32TableId)
-{
- APIRET rc;
-
-  this->hinstance    = hinstance;
-  this->NameTableId  = NameTableId;
-  this->Win32TableId = Win32TableId;
-
-  //converted win32 exe/dll or OS/2 system dll
-  fNativePEImage     = FALSE;
-
-  if(NameTableId != NO_NAMETABLE) {
-    //Load name table resource
-    rc = DosGetResource(hinstance, RT_RCDATA, NameTableId, (PPVOID)&NameTable);
-    if(rc) {
-        eprintf(("Can't find converted name resource (rc %d)!!\n", rc));
-        return;
-    }
-  }
-  else  this->NameTableId = 0;
-
-  //Load win32 id table resource
-  if((Win32TableId & 0xFFFFFF) != NO_LOOKUPTABLE) {
-    rc = DosGetResource(hinstance, RT_RCDATA, Win32TableId, (PPVOID)&Win32Table);
-    if(rc) {
-        eprintf(("Can't find win32 id resource (rc %d)!!\n", rc));
-        return;
-    }
-  }
-  else  this->Win32TableId = 0;
-}
-//******************************************************************************
-//******************************************************************************
-Win32Image::~Win32Image()
-{
- Win32Resource *res;
-
-  if(NameTable)
-    	DosFreeResource((PVOID)NameTable);
-
-  if(Win32Table)
-    	DosFreeResource((PVOID)Win32Table);
-
-  while(winres)
-  {
-    	res    = winres->next;
-    	delete(winres);
-    	winres = res;
-  }
   if(realBaseAddress)
     	DosFreeMem((PVOID)realBaseAddress);
 
@@ -185,12 +98,10 @@ Win32Image::~Win32Image()
 
   if(ordexports)
     	free(ordexports);
-  if(fullpath)
-    	free(fullpath);
 }
 //******************************************************************************
 //******************************************************************************
-BOOL Win32Image::init(ULONG reservedMem)
+BOOL Win32PeLdrImage::init(ULONG reservedMem)
 {
  HANDLE fImgMapping = 0;
  char   szErrorMsg[64];
@@ -436,6 +347,9 @@ BOOL Win32Image::init(ULONG reservedMem)
     	}
   }
 
+  //SvL: Use pointer to image header as module handle now. Some apps needs this
+  hinstance = (HINSTANCE)realBaseAddress;
+
   if(processImports((char *)win32file) == FALSE) {
     	fout << "Failed to process imports!" << endl;
     	goto failure;
@@ -447,9 +361,6 @@ BOOL Win32Image::init(ULONG reservedMem)
 //    	pResDir = (PIMAGE_RESOURCE_DIRECTORY)ImageDirectoryOffset(win32file, IMAGE_DIRECTORY_ENTRY_RESOURCE);
 	pResDir = (PIMAGE_RESOURCE_DIRECTORY)(sh.VirtualAddress + realBaseAddress);
   }
-
-  //SvL: Use pointer to image header as module handle now. Some apps needs this
-  hinstance = (HINSTANCE)realBaseAddress;
 
   //set final memory protection flags (storeSections sets them to read/write)
   if(setMemFlags() == FALSE) {
@@ -466,7 +377,7 @@ failure:
 }
 //******************************************************************************
 //******************************************************************************
-void Win32Image::addSection(ULONG type, char *rawdata, ULONG rawsize, ULONG virtaddress, ULONG virtsize)
+void Win32PeLdrImage::addSection(ULONG type, char *rawdata, ULONG rawsize, ULONG virtaddress, ULONG virtsize)
 {
   virtsize = max(rawsize, virtsize);
 
@@ -491,7 +402,7 @@ void Win32Image::addSection(ULONG type, char *rawdata, ULONG rawsize, ULONG virt
 }
 //******************************************************************************
 //******************************************************************************
-BOOL Win32Image::allocSections(ULONG reservedMem)
+BOOL Win32PeLdrImage::allocSections(ULONG reservedMem)
 {
  APIRET rc;
  ULONG  baseAddress;
@@ -510,7 +421,7 @@ BOOL Win32Image::allocSections(ULONG reservedMem)
 }
 //******************************************************************************
 //******************************************************************************
-Section *Win32Image::findSection(ULONG type)
+Section *Win32PeLdrImage::findSection(ULONG type)
 {
   for(int i=0;i<nrsections;i++) {
 	if(section[i].type == type) {
@@ -521,7 +432,7 @@ Section *Win32Image::findSection(ULONG type)
 }
 //******************************************************************************
 //******************************************************************************
-Section *Win32Image::findSectionByAddr(ULONG addr)
+Section *Win32PeLdrImage::findSectionByAddr(ULONG addr)
 {
   for(int i=0;i<nrsections;i++) {
 	if(section[i].virtaddr <= addr && section[i].virtaddr + section[i].virtualsize > addr) {
@@ -535,7 +446,7 @@ Section *Win32Image::findSectionByAddr(ULONG addr)
 //NOTE: Needs testing (while loop)
 //TODO: Free unused (parts of) reservedMem
 //******************************************************************************
-BOOL Win32Image::allocFixedMem(ULONG reservedMem)
+BOOL Win32PeLdrImage::allocFixedMem(ULONG reservedMem)
 {
  ULONG  address = 0;
  ULONG  *memallocs;
@@ -600,7 +511,7 @@ BOOL Win32Image::allocFixedMem(ULONG reservedMem)
 }
 //******************************************************************************
 //******************************************************************************
-BOOL Win32Image::storeSections(char *win32file)
+BOOL Win32PeLdrImage::storeSections(char *win32file)
 {
  int i;
  APIRET rc;
@@ -676,7 +587,7 @@ BOOL Win32Image::storeSections(char *win32file)
 }
 //******************************************************************************
 //******************************************************************************
-BOOL Win32Image::setMemFlags()
+BOOL Win32PeLdrImage::setMemFlags()
 {
  int i;
  APIRET rc;
@@ -712,7 +623,7 @@ BOOL Win32Image::setMemFlags()
 }
 //******************************************************************************
 //******************************************************************************
-BOOL Win32Image::setFixups(PIMAGE_BASE_RELOCATION prel)
+BOOL Win32PeLdrImage::setFixups(PIMAGE_BASE_RELOCATION prel)
 {
  int   i, j;
  char *page;
@@ -768,7 +679,7 @@ BOOL Win32Image::setFixups(PIMAGE_BASE_RELOCATION prel)
 }
 //******************************************************************************
 //******************************************************************************
-void Win32Image::AddOff32Fixup(ULONG fixupaddr)
+void Win32PeLdrImage::AddOff32Fixup(ULONG fixupaddr)
 {
  ULONG orgaddr;
  ULONG *fixup;
@@ -779,7 +690,7 @@ void Win32Image::AddOff32Fixup(ULONG fixupaddr)
 }
 //******************************************************************************
 //******************************************************************************
-void Win32Image::AddOff16Fixup(ULONG fixupaddr, BOOL fHighFixup)
+void Win32PeLdrImage::AddOff16Fixup(ULONG fixupaddr, BOOL fHighFixup)
 {
  ULONG   orgaddr;
  USHORT *fixup;
@@ -795,7 +706,7 @@ void Win32Image::AddOff16Fixup(ULONG fixupaddr, BOOL fHighFixup)
 }
 //******************************************************************************
 //******************************************************************************
-void Win32Image::StoreImportByOrd(Win32Dll *WinDll, ULONG ordinal, ULONG impaddr)
+void Win32PeLdrImage::StoreImportByOrd(Win32DllBase *WinDll, ULONG ordinal, ULONG impaddr)
 {
  ULONG *import;
  ULONG  apiaddr;
@@ -810,7 +721,7 @@ void Win32Image::StoreImportByOrd(Win32Dll *WinDll, ULONG ordinal, ULONG impaddr
 }
 //******************************************************************************
 //******************************************************************************
-void Win32Image::StoreImportByName(Win32Dll *WinDll, char *impname, ULONG impaddr)
+void Win32PeLdrImage::StoreImportByName(Win32DllBase *WinDll, char *impname, ULONG impaddr)
 {
  ULONG *import;
  ULONG  apiaddr;
@@ -825,7 +736,7 @@ void Win32Image::StoreImportByName(Win32Dll *WinDll, char *impname, ULONG impadd
 }
 //******************************************************************************
 //******************************************************************************
-BOOL Win32Image::processExports(char *win32file)
+BOOL Win32PeLdrImage::processExports(char *win32file)
 {
  IMAGE_SECTION_HEADER    sh;
  PIMAGE_EXPORT_DIRECTORY ped;
@@ -913,7 +824,7 @@ BOOL Win32Image::processExports(char *win32file)
 }
 //******************************************************************************
 //******************************************************************************
-void Win32Image::AddNameExport(ULONG virtaddr, char *apiname, ULONG ordinal)
+void Win32PeLdrImage::AddNameExport(ULONG virtaddr, char *apiname, ULONG ordinal)
 {
  ULONG nsize;
 
@@ -944,7 +855,7 @@ void Win32Image::AddNameExport(ULONG virtaddr, char *apiname, ULONG ordinal)
 }
 //******************************************************************************
 //******************************************************************************
-void Win32Image::AddOrdExport(ULONG virtaddr, ULONG ordinal)
+void Win32PeLdrImage::AddOrdExport(ULONG virtaddr, ULONG ordinal)
 {
   if(ordexports == NULL) {
     	ordexports   = (OrdExport *)malloc(nrOrdExports * sizeof(OrdExport));
@@ -962,7 +873,7 @@ void Win32Image::AddOrdExport(ULONG virtaddr, ULONG ordinal)
  *  knut [Jul 22 1998 2:44am]
  **/
 //******************************************************************************
-BOOL Win32Image::processImports(char *win32file)
+BOOL Win32PeLdrImage::processImports(char *win32file)
 {
  PIMAGE_IMPORT_DESCRIPTOR pID;
  IMAGE_SECTION_HEADER     shID;
@@ -977,7 +888,7 @@ BOOL Win32Image::processImports(char *win32file)
  ULONG *pulImport;
  ULONG  ulCurFixup;
  int    Size;
- Win32Dll *WinDll;
+ Win32PeLdrDll *WinDll;
 
 /* "algorithm:"
  *      1) get module names and store them
@@ -1093,31 +1004,52 @@ BOOL Win32Image::processImports(char *win32file)
     fout << "**********************************************************************" << endl;
     fout << "************** Import Module " << pszCurModule << endl;
     fout << "**********************************************************************" << endl;
-    WinDll = Win32Dll::findModule(pszCurModule);
+    WinDll = (Win32PeLdrDll *)Win32DllBase::findModule(pszCurModule);
     if(WinDll == NULL)
     {  //not found, so load it
-        WinDll = new Win32Dll(pszCurModule, this);
+	if(isPEImage(pszCurModule) == FALSE) 
+	{//LX image, so let OS/2 do all the work for us
+		APIRET rc;
+  		char   szModuleFailure[CCHMAXPATH] = "";
+		ULONG  hInstanceNewDll;
 
-        if(WinDll == NULL) {
-            fout << "WinDll: Error allocating memory" << endl;
-            WinMessageBox(HWND_DESKTOP, HWND_DESKTOP, szMemErrorMsg, szErrorTitle, 0, MB_OK | MB_ERROR | MB_MOVEABLE);
-            errorState = ERROR_INTERNAL;
-            return(FALSE);
-        }
-        fout << "**********************************************************************" << endl;
-        fout << "**********************     Loading Module        *********************" << endl;
-        fout << "**********************************************************************" << endl;
-        if(WinDll->init(0) == FALSE) {
-            fout << "Internal WinDll error " << WinDll->getError() << endl;
-            return(FALSE);
-        }
-        if(WinDll->attachProcess() == FALSE) {
-            fout << "attachProcess failed!" << endl;
-            errorState = ERROR_INTERNAL;
-            return(FALSE);
-        }
-        fout << "**********************************************************************" << endl;
-        fout << "**********************  Finished Loading Module  *********************" << endl;
+  		rc = DosLoadModule(szModuleFailure, sizeof(szModuleFailure), pszCurModule, (HMODULE *)&hInstanceNewDll);
+  		if(rc) {
+			dprintf(("DosLoadModule returned %X for %s\n", rc, szModuleFailure));
+			errorState = rc;
+			return(FALSE);
+  		}
+		WinDll = (Win32PeLdrDll *)Win32DllBase::findModule(hInstanceNewDll);
+		if(WinDll == NULL) {//shouldn't happen!
+			dprintf(("Just loaded the dll, but can't find it anywhere?!!?"));
+			errorState = ERROR_INTERNAL;
+			return(FALSE);
+		}
+	}
+	else {
+        	WinDll = new Win32PeLdrDll(pszCurModule, this);
+
+        	if(WinDll == NULL) {
+	            fout << "WinDll: Error allocating memory" << endl;
+	            WinMessageBox(HWND_DESKTOP, HWND_DESKTOP, szMemErrorMsg, szErrorTitle, 0, MB_OK | MB_ERROR | MB_MOVEABLE);
+	            errorState = ERROR_INTERNAL;
+	            return(FALSE);
+	        }
+	        fout << "**********************************************************************" << endl;
+	        fout << "**********************     Loading Module        *********************" << endl;
+	        fout << "**********************************************************************" << endl;
+	        if(WinDll->init(0) == FALSE) {
+	            fout << "Internal WinDll error " << WinDll->getError() << endl;
+	            return(FALSE);
+	        }
+	        if(WinDll->attachProcess() == FALSE) {
+        	    fout << "attachProcess failed!" << endl;
+	            errorState = ERROR_INTERNAL;
+	            return(FALSE);
+	        }
+	}
+	fout << "**********************************************************************" << endl;
+	fout << "**********************  Finished Loading Module  *********************" << endl;
         fout << "**********************************************************************" << endl;
     }
     else    fout << "Already found " << pszCurModule << endl;
@@ -1163,103 +1095,6 @@ BOOL Win32Image::processImports(char *win32file)
 
   free(pszModules);
   return TRUE;
-}
-//******************************************************************************
-//******************************************************************************
-BOOL Win32Image::isPEImage(char *szFileName)
-{
- IMAGE_FILE_HEADER     fh;
- HFILE  win32handle;
- ULONG  ulAction       = 0;      /* Action taken by DosOpen */
- ULONG  ulLocal        = 0;      /* File pointer position after DosSetFilePtr */
- APIRET rc             = NO_ERROR;            /* Return code */
- LPVOID win32file      = NULL;
- ULONG  ulRead;
- int    nSections, i;
-
-  rc = DosOpen(szFileName,                     /* File path name */
-           &win32handle,                   /* File handle */
-               &ulAction,                      /* Action taken */
-               0L,                             /* File primary allocation */
-               0L,                     /* File attribute */
-               OPEN_ACTION_FAIL_IF_NEW |
-               OPEN_ACTION_OPEN_IF_EXISTS,     /* Open function type */
-               OPEN_FLAGS_NOINHERIT |
-               OPEN_SHARE_DENYNONE  |
-               OPEN_ACCESS_READONLY,           /* Open mode of the file */
-               0L);                            /* No extended attribute */
-
-  if (rc != NO_ERROR)
-  {
-    //@@@PH message box !
-    DebugErrorBox(rc,
-                  "KERNEL32:Win32Image::isPeImage(%s) failed.",
-                  szFileName);
-
-    	dprintf(("KERNEL32:Win32Image::isPEImage(%s) failed with %u\n",
-             	  szFileName, rc));
-    	return(FALSE);
-  }
-
-  /* Move the file pointer back to the beginning of the file */
-  DosSetFilePtr(win32handle, 0L, FILE_BEGIN, &ulLocal);
-
-  IMAGE_DOS_HEADER *pdoshdr = (IMAGE_DOS_HEADER *)malloc(sizeof(IMAGE_DOS_HEADER));
-  if(pdoshdr == NULL)   {
-    	DosClose(win32handle);                /* Close the file */
-    	return(FALSE);
-  }
-  rc = DosRead(win32handle, pdoshdr, sizeof(IMAGE_DOS_HEADER), &ulRead);
-  if(rc != NO_ERROR) {
-    	DosClose(win32handle);                /* Close the file */
-    	return(FALSE);
-  }
-  ULONG hdrsize = pdoshdr->e_lfanew + SIZE_OF_NT_SIGNATURE + sizeof(IMAGE_FILE_HEADER);
-  free(pdoshdr);
-
-  /* Move the file pointer back to the beginning of the file */
-  DosSetFilePtr(win32handle, 0L, FILE_BEGIN, &ulLocal);
-
-  win32file = malloc(hdrsize);
-  if(win32file == NULL) {
-    	DosClose(win32handle);                /* Close the file */
-    	return(FALSE);
-  }
-  rc = DosRead(win32handle, win32file, hdrsize, &ulRead);
-  if(rc != NO_ERROR) {
-    	goto failure;
-  }
-
-  if(GetPEFileHeader (win32file, &fh) == FALSE) {
-    	goto failure;
-  }
-
-  if(!(fh.Characteristics & IMAGE_FILE_EXECUTABLE_IMAGE)) {//not valid
-    	goto failure;
-  }
-  if(fh.Machine != IMAGE_FILE_MACHINE_I386) {
-    	goto failure;
-  }
-  //IMAGE_FILE_SYSTEM == only drivers (device/file system/video etc)?
-  if(fh.Characteristics & IMAGE_FILE_SYSTEM) {
-    	goto failure;
-  }
-  DosClose(win32handle);
-  return(TRUE);
-
-failure:
-  free(win32file);
-  DosClose(win32handle);
-  return(FALSE);
-}
-//******************************************************************************
-//******************************************************************************
-void Win32Image::setFullPath(char *name)
-{
-  dassert(name, ("setFullPath, name == NULL"));
-  fullpath = (char *)malloc(strlen(name)+1);
-  dassert(fullpath, ("setFullPath, fullpath == NULL"));
-  strcpy(fullpath, name);
 }
 //******************************************************************************
 //******************************************************************************

@@ -1,4 +1,4 @@
-/* $Id: cvtcursorgrp.cpp,v 1.2 1999-09-04 12:41:45 sandervl Exp $ */
+/* $Id: cvtcursorgrp.cpp,v 1.3 1999-09-15 23:38:00 sandervl Exp $ */
 
 /*
  * PE2LX cursor group code
@@ -31,7 +31,7 @@ HRSRC WIN32API FindResourceA(HINSTANCE hModule, LPCSTR lpszName, LPCSTR lpszType
 
 //******************************************************************************
 //******************************************************************************
-void *ConvertCursorGroup(CursorHeader *chdr, int size, Win32Image *module)
+void *ConvertCursorGroup(CursorHeader *chdr, int size, Win32ImageBase *module)
 {
  CursorResDir *rdir = (CursorResDir *)(chdr + 1);
  int i, groupsize = 0, os2cursorsize;

@@ -1,9 +1,9 @@
-/* $Id: winexe.cpp,v 1.11 1999-08-23 18:06:27 sandervl Exp $ */
+/* $Id: winexebase.cpp,v 1.1 1999-09-15 23:39:07 sandervl Exp $ */
 
 /*
- * Win32 exe class
+ * Win32 exe base class
  *
- * Copyright 1998 Sander van Leeuwen (sandervl@xs4all.nl)
+ * Copyright 1998-1999 Sander van Leeuwen (sandervl@xs4all.nl)
  *
  *
  * Project Odin Software License can be found in LICENSE.TXT
@@ -21,9 +21,9 @@
 #include <iostream.h>
 #include <fstream.h>
 #include <misc.h>
-#include <nameid.h>
 #include <win32type.h>
-#include <winexe.h>
+#include <winexebase.h>
+#include <windllbase.h>
 #include <wprocess.h>
 #include <pefile.h>
 #include "exceptions.h"
@@ -33,65 +33,34 @@
 #include "conwin.h"          // Windows Header for console only
 #include "console.h"
 
-Win32Exe *WinExe = NULL;
+BOOL         fExeStarted = FALSE;
+Win32ExeBase *WinExe = NULL;
 
 //******************************************************************************
-//Called by ring 3 pe loader to create win32 executable
 //******************************************************************************
-Win32Exe* WIN32API CreateWin32Exe(char *szFileName) 
-{
-  return new Win32Exe(szFileName);
-}
-//******************************************************************************
-//******************************************************************************
-Win32Exe::Win32Exe(char *szFileName) : Win32Image(szFileName), fConsoleApp(FALSE),
+Win32ExeBase::Win32ExeBase(HINSTANCE hInstance) 
+                 : Win32ImageBase(hInstance),
+                   fConsoleApp(FALSE),
                    cmdline(NULL)
 {
-  fConsoleApp = (oh.Subsystem == IMAGE_SUBSYSTEM_WINDOWS_CUI);
-  WinExe = this;
-
-  dprintf(("Win32Exe ctor: %s", szFileName));
-
-  if(fConsoleApp) {
-   dprintf(("Console application!\n"));
-
-   APIRET rc = iConsoleInit();                     /* initialize console subsystem */
-   if (rc != NO_ERROR)                                  /* check for errors */
-            dprintf(("KERNEL32:Win32Image:Init ConsoleInit failed with %u.\n", rc));
-  }
-}
-//******************************************************************************
-//******************************************************************************
-Win32Exe::Win32Exe(HINSTANCE hinstance, int NameTableId, int Win32TableId) :
-         Win32Image(hinstance, NameTableId, Win32TableId),
-         fConsoleApp(FALSE), cmdline(NULL)
-{
-  if(GET_CONSOLE(Win32TableId) == 1) {//console app
-   dprintf(("Console application!\n"));
-
-   fConsoleApp = TRUE;
-   APIRET rc = iConsoleInit();                     /* initialize console subsystem */
-   if (rc != NO_ERROR)                                  /* check for errors */
-            dprintf(("KERNEL32:Win32Image:Init ConsoleInit failed with %u.\n", rc));
-  }
   WinExe = this;
 }
 //******************************************************************************
 //******************************************************************************
-Win32Exe::~Win32Exe()
+Win32ExeBase::~Win32ExeBase()
 {
-  Win32Dll::deleteAll();
+  Win32DllBase::deleteAll();
   WinExe = NULL;
 }
 //******************************************************************************
 //******************************************************************************
-ULONG Win32Exe::start()
+ULONG Win32ExeBase::start()
 {
  WINEXCEPTION_FRAME exceptFrame;
  ULONG rc;
 
   if(getenv("WIN32_IOPL2")) {
-   io_init1();
+   	io_init1();
   }
   dprintf(("Start executable %X\n", WinExe));
 
@@ -115,7 +84,7 @@ ULONG Win32Exe::start()
 }
 //******************************************************************************
 //******************************************************************************
-BOOL Win32Exe::isDll()
+BOOL Win32ExeBase::isDll()
 {
   return FALSE;
 }

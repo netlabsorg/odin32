@@ -1,4 +1,4 @@
-/* $Id: oslibmisc.cpp,v 1.1 1999-08-26 12:56:02 sandervl Exp $ */
+/* $Id: oslibmisc.cpp,v 1.2 1999-09-15 23:38:01 sandervl Exp $ */
 
 /*
  * Misc OS/2 util. procedures
@@ -58,7 +58,9 @@ char *OSLibGetDllName(ULONG hModule)
 {
  static char modname[CCHMAXPATH] = {0};
 
-  DosQueryModuleName(hModule, CCHMAXPATH, modname);
+  if(DosQueryModuleName(hModule, CCHMAXPATH, modname) != 0) {
+	return NULL;
+  }
   return(modname);
 }
 //******************************************************************************

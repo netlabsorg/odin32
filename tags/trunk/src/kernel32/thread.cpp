@@ -1,4 +1,4 @@
-/* $Id: thread.cpp,v 1.13 1999-09-13 13:16:21 phaller Exp $ */
+/* $Id: thread.cpp,v 1.14 1999-09-15 23:38:02 sandervl Exp $ */
 
 /*
  * Win32 Thread API functions
@@ -11,12 +11,13 @@
  */
 #include <os2win.h>
 #include <stdarg.h>
+#include <string.h>
 #include "thread.h"
 #include "exceptutil.h"
 #include <misc.h>
 #include <wprocess.h>
-#include <windll.h>
-#include <winexe.h>
+#include <windllbase.h>
+#include <winexebase.h>
 #include <except.h>
 
 static DWORD OPEN32API Win32ThreadProc(LPVOID lpData);
@@ -96,8 +97,6 @@ INT WIN32API GetThreadPriority(HANDLE hThread)
     dprintf(("OS2GetThreadPriority(%08xh)\n",
              hThread));
 
-  /* @@@PH: map os/2 priority model to win32 priority model */
-
     return O32_GetThreadPriority(hThread);
 }
 //******************************************************************************
@@ -116,8 +115,6 @@ BOOL WIN32API SetThreadPriority(HANDLE hThread, int priority)
     dprintf(("OS2SetThreadPriority (%08xh,%08xh)\n",
              hThread,
              priority));
-
-  /* @@@PH: map win32 priority model to os/2 priority model */
 
     return O32_SetThreadPriority(hThread, priority);
 }
@@ -146,8 +143,8 @@ VOID WIN32API ExitThread(DWORD exitcode)
   dprintf(("ExitThread (%08xu)\n",
            exitcode));
 
-  Win32Dll::detachThreadFromAllDlls(); 	//send DLL_THREAD_DETACH message to all dlls
-  Win32Dll::tlsDetachThreadFromAllDlls(); //destroy TLS structures of all dlls
+  Win32DllBase::detachThreadFromAllDlls(); 	//send DLL_THREAD_DETACH message to all dlls
+  Win32DllBase::tlsDetachThreadFromAllDlls(); //destroy TLS structures of all dlls
   WinExe->tlsDetachThread();			//destroy TLS structure of main exe
   DestroyTIB();
   O32_ExitThread(exitcode);
@@ -199,8 +196,8 @@ static DWORD OPEN32API Win32ThreadProc(LPVOID lpData)
 
   SetWin32TIB();
   WinExe->tlsAttachThread();		  //setup TLS structure of main exe
-  Win32Dll::tlsAttachThreadToAllDlls(); //setup TLS structures of all dlls
-  Win32Dll::attachThreadToAllDlls();	  //send DLL_THREAD_ATTACH message to all dlls
+  Win32DllBase::tlsAttachThreadToAllDlls(); //setup TLS structures of all dlls
+  Win32DllBase::attachThreadToAllDlls();	  //send DLL_THREAD_ATTACH message to all dlls
 
   //Note: The Win32 exception structure references by FS:[0] is the same
   //      in OS/2
@@ -208,8 +205,8 @@ static DWORD OPEN32API Win32ThreadProc(LPVOID lpData)
   rc = winthread(userdata);
   OS2UnsetExceptionHandler((void *)&exceptFrame);
 
-  Win32Dll::detachThreadFromAllDlls();  //send DLL_THREAD_DETACH message to all dlls
-  Win32Dll::tlsDetachThreadFromAllDlls(); //destroy TLS structures of all dlls
+  Win32DllBase::detachThreadFromAllDlls();  //send DLL_THREAD_DETACH message to all dlls
+  Win32DllBase::tlsDetachThreadFromAllDlls(); //destroy TLS structures of all dlls
   WinExe->tlsDetachThread();		  //destroy TLS structure of main exe
   DestroyTIB();
   return rc;
