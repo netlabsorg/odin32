@@ -1,4 +1,4 @@
-/* $Id: Fake.c,v 1.3 2001-11-09 07:41:09 bird Exp $
+/* $Id: Fake.c,v 1.4 2001-11-19 03:16:15 bird Exp $
  *
  * Fake stubs for the ldr and kernel functions we imports or overloads.
  *
@@ -8,7 +8,7 @@
  *
  */
 #ifndef NOFILEID
-static const char szFileId[] = "$Id: Fake.c,v 1.3 2001-11-09 07:41:09 bird Exp $";
+static const char szFileId[] = "$Id: Fake.c,v 1.4 2001-11-19 03:16:15 bird Exp $";
 #endif
 
 /*******************************************************************************
@@ -22,7 +22,17 @@ static const char szFileId[] = "$Id: Fake.c,v 1.3 2001-11-09 07:41:09 bird Exp $
 #define DWORD  ULONG
 #define WORD   USHORT
 
-#define DUMMY()     int dummy; dummy = 0; dummy = dummy + 1;
+#define DUMMY()     volatile int dummy1, dummy2; \
+                    dummy1 = 23; \
+                    dummy2 = 42; \
+                    dummy1 = dummy1 + 1 + dummy2;
+
+#define Assert(expr) \
+        if (!(expr))                                                                \
+        {                                                                           \
+            printf("%s(%d) - %s: %s\n", __FILE__, __FUNCTION__, __LINE__, #expr);   \
+            INT3();                                                                 \
+        }
 
 /*******************************************************************************
 *   Header Files                                                               *
@@ -1140,7 +1150,7 @@ BOOL KRNLCALL  fakeKSEMQueryMutex(HKSEMMTX hkmtx, PUSHORT pcusNest)
 VOID  KRNLCALL  fakeKSEMInit(PKSEM pksem, ULONG fulType, ULONG fulFlags)
 {
     KLOGENTRY3("VOID KRNLCALL","PKSEM pksem, ULONG fulType, ULONG fulFlags", pksem, fulType, fulFlags);
-    if (fulType != KSEM_MUTEX)
+    if (fulType != KSEM_MUTEX && fulType != KSEM_SHARED)
     {
         printf("fakeKSEMInit:                   Invalid fulType parameter (%d).\n", fulType);
         KLOGEXITVOID();
@@ -1149,7 +1159,7 @@ VOID  KRNLCALL  fakeKSEMInit(PKSEM pksem, ULONG fulType, ULONG fulFlags)
 
     memcpy(pksem->mtx.debug.ksem_achSignature, "KSEM", 4);
     pksem->mtx.debug.ksem_bFlags = (char)fulFlags;
-    pksem->mtx.debug.ksem_bType = KSEM_MUTEX;
+    pksem->mtx.debug.ksem_bType = fulType;
     pksem->mtx.debug.ksem_cusNest = 0;
     pksem->mtx.debug.ksem_cusPendingWriters = 0;
     pksem->mtx.debug.ksem_Owner = 0;
@@ -1161,31 +1171,54 @@ VOID  KRNLCALL  fakeKSEMInit(PKSEM pksem, ULONG fulType, ULONG fulFlags)
 
 ULONG KRNLCALL  fakeKSEMRequestExclusive(HKSEMSHR hkshr, ULONG ulTimeout)
 {
-    KLOGENTRY2("ULONG","HKSEMSHR hkshr, ULONG ulTimeout", hkshr, ulTimeout);
-    KNOREF(hkshr);
+    //KLOGENTRY2("ULONG","HKSEMSHR hkshr, ULONG ulTimeout", hkshr, ulTimeout);  /* used bye kLog.c */
+    DUMMY();
     KNOREF(ulTimeout);
-    KLOGEXIT(-1);
-    return -1;
+
+    Assert(!memcmp(hkshr->debug.ks_achSignature, "KSEM", 4));
+    Assert(hkshr->debug.ks_bType == KSEM_SHARED);
+    Assert(hkshr->debug.ks_Owner == 0);
+    hkshr->debug.ks_Owner = 1;
+    //KLOGEXIT(0);
+    return 0;
 }
 
 
 ULONG KRNLCALL  fakeKSEMRequestShared(HKSEMSHR hkshr, ULONG ulTimeout)
 {
-    KLOGENTRY2("ULONG","HKSEMSHR hkshr, ULONG ulTimeout", hkshr, ulTimeout);
+    //KLOGENTRY2("ULONG","HKSEMSHR hkshr, ULONG ulTimeout", hkshr, ulTimeout);  /* used bye kLog.c */
     DUMMY();
-    KNOREF(hkshr);
     KNOREF(ulTimeout);
-    KLOGEXIT(-1);
-    return -1;
+
+    Assert(!memcmp(hkshr->debug.ks_achSignature, "KSEM", 4));
+    Assert(hkshr->debug.ks_bType == KSEM_SHARED);
+    Assert(hkshr->debug.ks_Owner == 0);
+    hkshr->debug.ks_Owner = 42;
+    //KLOGEXIT(0);
+    return 0;
 }
 
 
 VOID  KRNLCALL  fakeKSEMRelease(HKSEM hksem)
 {
-    KLOGENTRY1("VOID","HKSEM hksem", hksem);
+    //KLOGENTRY1("VOID","HKSEM hksem", hksem);                                  /* used bye kLog.c */
     DUMMY();
-    KNOREF(hksem);
-    KLOGEXITVOID();
+
+    Assert(!memcmp(hksem->shr.debug.ks_achSignature, "KSEM", 4));
+    switch (hksem->shr.debug.ks_bType)
+    {
+        case KSEM_SHARED:
+            Assert(hksem->shr.debug.ks_Owner != 0);
+            hksem->shr.debug.ks_Owner = 0;
+            break;
+        case KSEM_MUTEX:
+            Assert(hksem->mtx.debug.ksem_Owner != 0);
+            hksem->mtx.debug.ksem_Owner = 0;
+            break;
+        default:
+            INT3();
+    }
+    //KLOGEXITVOID();
 }
 
 
