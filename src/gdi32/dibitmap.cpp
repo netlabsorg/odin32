@@ -1,4 +1,4 @@
-/* $Id: dibitmap.cpp,v 1.19 2001-06-01 12:29:25 sandervl Exp $ */
+/* $Id: dibitmap.cpp,v 1.20 2001-06-03 14:52:47 sandervl Exp $ */
 
 /*
  * GDI32 dib & bitmap code
@@ -14,11 +14,15 @@
 #include <stdarg.h>
 #include <string.h>
 #include <misc.h>
+#include <cpuhlp.h>
 #include <winuser32.h>
 #include "dibsect.h"
+#include "rgbcvt.h"
 
 #define DBG_LOCALLOG    DBG_dibitmap
 #include "dbglocal.h"
+
+ULONG CalcBitmapSize(ULONG cBits, LONG cx, LONG cy);
 
 //******************************************************************************
 //******************************************************************************
@@ -295,11 +299,11 @@ int WIN32API GetDIBits(HDC hdc, HBITMAP hBitmap, UINT uStartScan, UINT cScanLine
     DeleteDC(hdcMem);
 #endif
 
-    // set proper color masks!
+    // set proper color masks
     switch(lpbi->bmiHeader.biBitCount) {
     case 16: //RGB 565
        ((DWORD*)(lpbi->bmiColors))[0] = 0xF800;
-       ((DWORD*)(lpbi->bmiColors))[1] = 0x07E0;
+       ((DWORD*)(lpbi->bmiColors))[1] = 0x03E0;
        ((DWORD*)(lpbi->bmiColors))[2] = 0x001F;
        break;
     case 24:
@@ -309,6 +313,19 @@ int WIN32API GetDIBits(HDC hdc, HBITMAP hBitmap, UINT uStartScan, UINT cScanLine
        ((DWORD*)(lpbi->bmiColors))[2] = 0xFF0000;
        break;
     }
+    if(lpvBits && lpbi->bmiHeader.biBitCount == 16 && ((DWORD*)(lpbi->bmiColors))[1] == 0x3E0) 
+    {//RGB 555?
+        dprintf(("RGB 565->555 conversion required"));
+
+        int imgsize = CalcBitmapSize(lpbi->bmiHeader.biBitCount,
+                                     lpbi->bmiHeader.biWidth, lpbi->bmiHeader.biHeight);
+
+        if(CPUFeatures & CPUID_MMX) {
+             RGB565to555MMX((WORD *)lpvBits, (WORD *)lpvBits, imgsize/sizeof(WORD));
+        }
+        else RGB565to555((WORD *)lpvBits, (WORD *)lpvBits, imgsize/sizeof(WORD));
+    }
+
     //WGSS/Open32 returns 0 when querying the bitmap info; must return nr of scanlines
     //as 0 signals failure
     if(lpvBits == NULL) {
