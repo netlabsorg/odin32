@@ -1,4 +1,4 @@
-/* $Id: oslibdos.h,v 1.36 2001-10-25 13:19:05 sandervl Exp $ */
+/* $Id: oslibdos.h,v 1.37 2001-10-30 18:46:46 sandervl Exp $ */
 
 /*
  * Wrappers for OS/2 Dos* API
@@ -300,6 +300,25 @@ BOOL  OSLibDosGetDiskGeometry(HANDLE hDisk, DWORD cDisk, void *pGeom);
                               PFILELOCKL pflLock,
                               ULONG timeout,
                               ULONG flags);
+
+
+   typedef APIRET (* APIENTRY PROC_DosOpenL)(PCSZ  pszFileName, PHFILE phf,
+                                             PULONG pulAction,
+                                             LONGLONG cbFile,
+                                             ULONG ulAttribute,
+                                             ULONG fsOpenFlags,
+                                             ULONG fsOpenMode,
+                                             PEAOP2 peaop2);
+
+   APIRET APIENTRY OdinDosOpenL(PCSZ  pszFileName,
+                                PHFILE phf,
+                                PULONG pulAction,
+                                LONGLONG cbFile,
+                                ULONG ulAttribute,
+                                ULONG fsOpenFlags,
+                                ULONG fsOpenMode,
+                                PEAOP2 peaop2);
+
 #endif
 
 #endif
