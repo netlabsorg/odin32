@@ -1,8 +1,9 @@
-/* $Id: changelog,v 1.1864 2001-11-29 12:42:13 sandervl Exp $ */
+/* $Id: changelog,v 1.1865 2001-11-29 13:38:24 sandervl Exp $ */
 
  2001-11-29: Sander van Leeuwen <sandervl@xs4all.nl>
     - COMCTL32: o Listview: invalidate entire item for ownerdraw control
                             (don't exclude report margin)
+    - KERNEL32: o Fixed disk access (yesterday's changes broke it)
 
  2001-11-29: Patrick Haller <patrick.haller@innotek.de>
     - KERNEL32: o Split dosdevice.cpp from stubs.cpp
