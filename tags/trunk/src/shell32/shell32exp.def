@@ -35,7 +35,6 @@ EXPORTS
     _DoEnvironmentSubstA@8                    @44
     _PathFileExists@4                         @45
     _PathMatchSpec@8                          @46
-    _PathMatchSpecW@8                         @346
     _PathSetDlgItemPath@12                    @48
     _PathQualify@4                            @49
     _PathResolve@12                           @51
@@ -243,3 +242,6 @@ EXPORTS
     _SHELL32_654@8                            @654
     _FileIconInit@4                           @660
     _IsUserAdmin@0                            @680
+    _StrRetToBufA@16                          @1000
+    _StrRetToBufW@16                          @1001
+    _PathMatchSpecW@8                         @1002
