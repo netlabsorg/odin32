@@ -1,4 +1,4 @@
-/* $Id: os2timer.h,v 1.4 1999-08-31 15:04:11 phaller Exp $ */
+/* $Id: os2timer.h,v 1.5 1999-08-31 15:39:21 phaller Exp $ */
 
 #ifndef __OS2TIMER_H__
 #define __OS2TIMER_H__
@@ -16,6 +16,14 @@
  #define HEV    int
  #define HTIMER int
 #endif
+
+
+/****************************************************************************
+ * Definitions                                                              *
+ ****************************************************************************/
+
+#define OS2TIMER_RESOLUTION_MINIMUM 33
+#define OS2TIMER_RESOLUTION_MAXIMUM 65535
 
 
 /****************************************************************************
