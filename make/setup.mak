@@ -1,4 +1,4 @@
-# $Id: setup.mak,v 1.5 2002-04-22 01:59:33 bird Exp $
+# $Id: setup.mak,v 1.6 2002-04-22 02:23:05 bird Exp $
 
 #
 # Generic makefile system.
@@ -239,7 +239,7 @@ MAKE_INCLUDE_SETUP = $(PATH_MAKE)\setup.$(SHT_TRGPLTFRM)$(SHT_BLDMD)$(SHT_BLDENV
 # TODO   Should these be overridable by setup.[w]xyz.mak ? (kso)
 
 BUILD_ENVS_BASE_POST    = toolkit40
-BUILD_ENVS_BASE_PRE     =
+BUILD_ENVS_BASE_PRE     = odin32testcase
 
 
 # Check if there is any change in the environment.
