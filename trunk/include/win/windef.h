@@ -576,14 +576,20 @@ typedef LPCSTR LPCTSTR;
 #include <stdlib.h>
 #endif
 
+#if !defined(__WATCOMC__) || !defined(_MAX_PATH)
 #define _MAX_PATH  260
+#endif
 #define MAX_PATH   260
 #define _MAX_DRIVE 3
+#if !defined(__WATCOMC__) || !defined(_MAX_DIR)
 #define _MAX_DIR   256
+#endif
 #if !defined(__WIN32OS2__) && !defined(_MAX_FNAME)
 #define _MAX_FNAME 255
 #endif
+#if !defined(__WATCOMC__) || !defined(_MAX_EXT)
 #define _MAX_EXT   256
+#endif
 
 #define HFILE_ERROR16   ((HFILE16)-1)
 #define HFILE_ERROR     ((HFILE)-1)
