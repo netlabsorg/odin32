@@ -1,4 +1,4 @@
-/* $Id: oslibmsgtranslate.cpp,v 1.76 2001-11-09 02:09:27 phaller Exp $ */
+/* $Id: oslibmsgtranslate.cpp,v 1.77 2001-11-16 17:47:04 phaller Exp $ */
 /*
  * Window message translation functions for OS/2
  *
@@ -667,10 +667,8 @@ VirtualKeyFound:
             // Note: altgr affects the alt-key state in windows!
             // The overlay causes GetKeyState/GetAsyncKeyState to return
             // the correct states
-            KeySetOverlayKeyState(VK_LMENU_W, KEYOVERLAYSTATE_DONTCARE);
             KeySetOverlayKeyState(VK_LCONTROL_W, KEYOVERLAYSTATE_DONTCARE);
             KeySetOverlayKeyState(VK_CONTROL_W, KEYOVERLAYSTATE_DONTCARE);
-            KeySetOverlayKeyState(VK_RMENU_W, KEYOVERLAYSTATE_DONTCARE);
           }
           else
           {
@@ -682,10 +680,13 @@ VirtualKeyFound:
             // Note: altgr affects the alt-key state in windows!
             // The overlay causes GetKeyState/GetAsyncKeyState to return
             // the correct states
-            KeySetOverlayKeyState(VK_LMENU_W, KEYOVERLAYSTATE_DOWN);
             KeySetOverlayKeyState(VK_LCONTROL_W, KEYOVERLAYSTATE_DOWN);
             KeySetOverlayKeyState(VK_CONTROL_W, KEYOVERLAYSTATE_DOWN);
             KeySetOverlayKeyState(VK_RMENU_W, KEYOVERLAYSTATE_DOWN);
+            KeySetOverlayKeyState(VK_MENU_W, KEYOVERLAYSTATE_DOWN);
+            
+            // Note: when CTRL comes up, windows keeps ALTGR still down!
+            // KeySetOverlayKeyState(VK_RMENU_W, KEYOVERLAYSTATE_DOWN);
           }
           
           break;
@@ -932,7 +933,10 @@ BOOL OSLibWinTranslateMessage(MSG *msg)
     
     // AltGr is not released with WINWM_SYSKEYUP, but WINWM_KEYUP
     if (fl & KC_KEYUP)
+    {
       extramsg.message = WINWM_KEYUP;
+    }
+      
     
     extramsg.wParam = VK_RMENU_W;
     
@@ -945,6 +949,7 @@ BOOL OSLibWinTranslateMessage(MSG *msg)
     
     // insert message into the queue
     setThreadQueueExtraCharMessage(teb, &extramsg);
+
     return TRUE;
   }
   

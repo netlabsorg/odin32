@@ -1,4 +1,4 @@
-/* $Id: oslibmsg.cpp,v 1.49 2001-10-26 17:48:21 sandervl Exp $ */
+/* $Id: oslibmsg.cpp,v 1.50 2001-11-16 17:47:05 phaller Exp $ */
 /*
  * Window message translation functions for OS/2
  *
@@ -34,6 +34,8 @@
 #include "pmwindow.h"
 #include "oslibwin.h"
 #include <win\hook.h>
+#include <winscan.h>
+#include <winkeyboard.h>
 
 #define DBG_LOCALLOG	DBG_oslibmsg
 #include "dbglocal.h"
@@ -205,6 +207,24 @@ LONG OSLibWinDispatchMsg(MSG *msg, BOOL isUnicode)
 }
 //******************************************************************************
 //******************************************************************************
+
+static void i_MostUglyAltGrHack(LPMSG pMsg)
+{
+  switch (pMsg->message)
+  {
+    case WINWM_KEYUP:
+    case WINWM_SYSKEYUP:
+      USHORT wWinScan = (pMsg->lParam & 0x00ff0000) >> 16;
+      if (wWinScan == WINSCAN_ALTRIGHT)
+      {
+        KeySetOverlayKeyState(VK_RMENU_W, KEYOVERLAYSTATE_DONTCARE);
+        KeySetOverlayKeyState(VK_MENU_W, KEYOVERLAYSTATE_DONTCARE);
+      }
+      break;
+  }
+}
+
+
 BOOL OSLibWinGetMsg(LPMSG pMsg, HWND hwnd, UINT uMsgFilterMin, UINT uMsgFilterMax,
                     BOOL isUnicode)
 {
@@ -260,6 +280,8 @@ BOOL OSLibWinGetMsg(LPMSG pMsg, HWND hwnd, UINT uMsgFilterMin, UINT uMsgFilterMa
               goto continuegetmsg;
             break;
         }
+    
+        i_MostUglyAltGrHack(pMsg);
     
         return (pMsg->message != WINWM_QUIT);
   }
@@ -320,6 +342,8 @@ continuegetmsg:
         goto continuegetmsg;
       break;
   }
+  
+  i_MostUglyAltGrHack(pMsg);
   
   return rc;
 }
