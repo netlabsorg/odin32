@@ -1,4 +1,4 @@
-/* $Id: registry.cpp,v 1.14 2002-04-29 17:05:30 sandervl Exp $ */
+/* $Id: registry.cpp,v 1.15 2002-05-16 12:53:45 sandervl Exp $ */
 
 /*
  * Win32 registry API functions for OS/2
@@ -716,31 +716,24 @@ LONG WIN32API RegOpenKeyExW(HKEY    arg1,
  * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
  *****************************************************************************/
 
-LONG WIN32API RegQueryInfoKeyA(HKEY        arg1,
-                               LPSTR       arg2,
-                               LPDWORD     arg3,
-                               LPDWORD     arg4,
-                               LPDWORD     arg5,
-                               LPDWORD     arg6,
-                               LPDWORD     arg7,
-                               LPDWORD     arg8,
-                               LPDWORD     arg9,
-                               LPDWORD     arg10,
-                               LPDWORD     arg11,
-                               LPFILETIME  arg12)
+LONG WIN32API RegQueryInfoKeyA(HKEY        hkey,
+                               LPSTR       lpszClass,
+                               LPDWORD     lpcchClass,
+                               LPDWORD     lpdwReserved,
+                               LPDWORD     lpcSubKeys,
+                               LPDWORD     lpcchMaxSubKey,
+                               LPDWORD     lpcchMaxClass,
+                               LPDWORD     lpcValues,
+                               LPDWORD     lpcchMaxValueName,
+                               LPDWORD     lpcbMaxValueData,
+                               LPDWORD     lpcbSecurityDescriptor,
+                               LPFILETIME  lpftLastWriteTime)
 {
-  return O32_RegQueryInfoKey(ConvertKey(arg1),
-                             arg2,
-                             arg3,
-                             arg4,
-                             arg5,
-                             arg6,
-                             arg7,
-                             arg8,
-                             arg9,
-                             arg10,
-                             arg11,
-                             arg12);
+    return O32_RegQueryInfoKey(ConvertKey(hkey), lpszClass,
+                               lpcchClass, lpdwReserved, lpcSubKeys,
+                               lpcchMaxSubKey, lpcchMaxClass, lpcValues,
+                               lpcchMaxValueName, lpcbMaxValueData, 
+                               lpcbSecurityDescriptor,lpftLastWriteTime);
 }
 
 
@@ -769,33 +762,26 @@ LONG WIN32API RegQueryInfoKeyW(HKEY        hkey,
                                LPDWORD     lpcbSecurityDescriptor,
                                LPFILETIME  lpftLastWriteTime)
 {
-  char *astring;
-  LONG  rc;
+    LONG  rc;
 
-  rc = O32_RegQueryInfoKey(ConvertKey(hkey),
-                           (char *)lpszClass,
-                           lpcchClass,
-                           lpdwReserved,
-                           lpcSubKeys,
-                           lpcchMaxSubKey,
-                           lpcchMaxClass,
-                           lpcValues,
-                           lpcchMaxValueName,
-                           lpcbMaxValueData,
-                           lpcbSecurityDescriptor,
-                           lpftLastWriteTime);
-  if(rc == ERROR_SUCCESS)
-  {
-    if(*lpcchClass) {
-            astring = (char *)malloc(*lpcchClass+1); //returned length does NOT include 0 terminator
+    rc = O32_RegQueryInfoKey(ConvertKey(hkey), (char *)lpszClass,
+                             lpcchClass, lpdwReserved, lpcSubKeys,
+                             lpcchMaxSubKey, lpcchMaxClass, lpcValues,
+                             lpcchMaxValueName, lpcbMaxValueData, 
+                             lpcbSecurityDescriptor,lpftLastWriteTime);
+    if(rc == ERROR_SUCCESS)
+    {
+        if(lpcchClass && *lpcchClass) {
+            char *astring = (char *)malloc(*lpcchClass+1); //returned length does NOT include 0 terminator
             strcpy(astring, (char *)lpszClass);
             AsciiToUnicode(astring, lpszClass);
             free(astring);
+        }
+        else 
+        if(lpszClass) *lpszClass = 0;
     }
-    else    *lpszClass = 0;
-  }
-  //TODO: lpcbMaxValueData could be wrong for string key values!!! (as it's in bytes)
-  return(rc);
+    //TODO: lpcbMaxValueData could be wrong for string key values!!! (as it's in bytes)
+    return(rc);
 }
 
 
