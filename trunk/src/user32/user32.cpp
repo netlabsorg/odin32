@@ -1,4 +1,4 @@
-/* $Id: user32.cpp,v 1.69 2000-02-06 17:39:33 cbratschi Exp $ */
+/* $Id: user32.cpp,v 1.70 2000-02-09 13:42:38 sandervl Exp $ */
 
 /*
  * Win32 misc user32 API functions for OS/2
@@ -1069,18 +1069,12 @@ BOOL WIN32API AttachThreadInput(DWORD idAttach, DWORD idAttachTo, BOOL fAttach)
   return(TRUE);
 }
 //******************************************************************************
-//TODO:How can we emulate this one in OS/2???
 //******************************************************************************
 DWORD WIN32API WaitForInputIdle(HANDLE hProcess, DWORD dwTimeOut)
 {
-#ifdef DEBUG
-  WriteLog("USER32:  WaitForInputIdle (Not Implemented) %d\n", dwTimeOut);
-#endif
+  dprintf(("USER32: WaitForInputIdle %x %d\n", hProcess, dwTimeOut));
 
-  if(dwTimeOut == INFINITE) return(0);
-
-//  DosSleep(dwTimeOut/16);
-  return(0);
+  return O32_WaitForInputIdle(hProcess, dwTimeOut);
 }
 
 /* Help Functions */
