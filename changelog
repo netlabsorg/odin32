@@ -1,7 +1,11 @@
-/* $Id: changelog,v 1.2300 2002-09-06 12:42:34 sandervl Exp $ */
+/* $Id: changelog,v 1.2301 2002-09-11 02:33:38 bird Exp $ */
+
+ 2002-09-10: knut st. osmundsen <bird@anduin   >
+    - TOOLS/VSLICK:
+                o Added kdev.e. Odin32.e with more goodies like an 'Extra' menu.
 
  2002-09-05: Sander van Leeuwen <sandervl@innotek   >
-    - USER32:   o Caret bug in edit control WM_ERASEBKGND handler (hidden, 
+    - USER32:   o Caret bug in edit control WM_ERASEBKGND handler (hidden,
                   but not shown again)
                 o Removed obsolete hack in CreateCaret
 
