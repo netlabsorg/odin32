@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.1.2.1 2002-04-01 09:06:54 bird Exp $
+# $Id: Makefile,v 1.1.2.2 2002-04-01 12:51:15 bird Exp $
 
 #
 # Win32k/dev32 makefile.
@@ -59,7 +59,6 @@ $(PATH_TARGET)\myldrFindModule.$(EXT_OBJ)\
 $(PATH_TARGET)\myldrGetFileName.$(EXT_OBJ)\
 $(PATH_TARGET)\myldrOpen.$(EXT_OBJ)\
 $(PATH_TARGET)\myldrOpenPath.$(EXT_OBJ)\
-$(PATH_TARGET)\myldrOpenPatha.$(EXT_OBJ)\
 $(PATH_TARGET)\myldrRead.$(EXT_OBJ)\
 $(PATH_TARGET)\myldrSetVMflags.$(EXT_OBJ)\
 $(PATH_TARGET)\myldrWasLoadModuled.$(EXT_OBJ)\
@@ -70,8 +69,7 @@ $(PATH_TARGET)\pe2lx.$(EXT_OBJ)\
 $(PATH_TARGET)\PerTaskW32kData.$(EXT_OBJ)\
 $(PATH_TARGET)\d32CallGate.$(EXT_OBJ)\
 $(PATH_TARGET)\d32Events.$(EXT_OBJ)\
-$(PATH_TARGET)\devfirst.$(EXT_OBJ)\
-$(PATH_TARGET)\devlast.$(EXT_OBJ)\
+$(PATH_TARGET)\log.$(EXT_OBJ)\
 \
 $(PATH_ROOT)\obj\$(NAME_1)$(NAME_2)mscv6\win32k_dev16.$(EXT_LIB)\win32k_dev16.$(EXT_LIB)\
 
