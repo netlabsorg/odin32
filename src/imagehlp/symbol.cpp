@@ -1,3 +1,4 @@
+/* $Id: symbol.cpp,v 1.2 2000-08-02 14:56:27 bird Exp $ */
 /*
  *	IMAGEHLP library
  *
@@ -109,7 +110,7 @@ BOOL WINAPI SymGetSearchPath(
  *		SymGetSymFromAddr (IMAGEHLP.@)
  */
 BOOL WINAPI SymGetSymFromAddr(
-  HANDLE hProcess, DWORD dwAddr, 
+  HANDLE hProcess, DWORD dwAddr,
   PDWORD pdwDisplacement, PIMAGEHLP_SYMBOL Symbol)
 {
   dprintf(("(0x%08x, 0x%08lx, %p, %p): stub\n",
