@@ -1,4 +1,4 @@
-/* $Id: HandleManager.cpp,v 1.99 2003-04-11 12:08:34 sandervl Exp $ */
+/* $Id: HandleManager.cpp,v 1.100 2003-05-05 10:51:04 sandervl Exp $ */
 
 /*
  * Win32 Unified Handle Manager for OS/2
@@ -136,6 +136,7 @@ struct _HMGlobals
   HMDeviceHandler        *pHMOpen32;       /* default handle manager instance */
   HMDeviceHandler        *pHMEvent;        /* static instances of subsystems */
   HMDeviceHandler        *pHMFile;
+  HMDeviceHandler        *pHMInfoFile;
   HMDeviceHandler        *pHMDisk;
   HMDeviceHandler        *pHMMutex;
   HMDeviceHandler        *pHMSemaphore;
@@ -489,6 +490,7 @@ DWORD HMInitialize(void)
     HMGlobals.pHMOpen32     = new HMDeviceOpen32Class("\\\\.\\");
     HMGlobals.pHMEvent      = new HMDeviceEventClass("\\\\EVENT\\");
     HMGlobals.pHMFile       = new HMDeviceFileClass("\\\\FILE\\");
+    HMGlobals.pHMInfoFile   = new HMDeviceInfoFileClass("\\\\INFOFILE\\");
     HMGlobals.pHMDisk       = new HMDeviceDiskClass("\\\\DISK\\");
     HMGlobals.pHMMutex      = new HMDeviceMutexClass("\\\\MUTEX\\");
     HMGlobals.pHMSemaphore  = new HMDeviceSemaphoreClass("\\\\SEM\\");
@@ -527,6 +529,8 @@ DWORD HMTerminate(void)
     delete HMGlobals.pHMEvent;
   if(HMGlobals.pHMFile)
     delete HMGlobals.pHMFile;
+  if(HMGlobals.pHMInfoFile)
+    delete HMGlobals.pHMInfoFile;
   if(HMGlobals.pHMMutex)
     delete HMGlobals.pHMMutex;
   if(HMGlobals.pHMSemaphore)
@@ -1068,7 +1072,10 @@ HANDLE HMCreateFile(LPCSTR lpFileName,
     pDevData       = _HMDeviceGetData((LPSTR)lpFileName);
 
     if(pDeviceHandler == HMGlobals.pHMOpen32) {
-        pDeviceHandler = HMGlobals.pHMFile;
+        if(dwDesiredAccess == 0) {
+             pDeviceHandler = HMGlobals.pHMInfoFile;
+        }
+        else pDeviceHandler = HMGlobals.pHMFile;
     }
   }
 

@@ -1,4 +1,4 @@
-/* $Id: hmfile.h,v 1.9 2003-02-04 11:28:58 sandervl Exp $ */
+/* $Id: hmfile.h,v 1.10 2003-05-05 10:51:05 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -157,11 +157,36 @@ public:
                                    LPDWORD       arg3,
                                    BOOL          arg4);
 
-private:
-  void ParsePath(LPCSTR lpszFileName, LPSTR lpszParsedFileName, DWORD length);
-
 };
 
+
+class HMDeviceInfoFileClass : public HMDeviceHandler
+{
+public:
+  HMDeviceInfoFileClass(LPCSTR lpDeviceName) : HMDeviceHandler(lpDeviceName) {}
+
+  /* this is a handler method for calls to CreateFile() */
+  virtual DWORD  CreateFile (LPCSTR        lpFileName,
+                             PHMHANDLEDATA pHMHandleData,
+                             PVOID         lpSecurityAttributes,
+                             PHMHANDLEDATA pHMHandleDataTemplate);
+
+  /* this is a handler method for calls to CloseHandle() */
+  virtual BOOL   CloseHandle(PHMHANDLEDATA pHMHandleData);
+
+  /* this is a handler method for calls to GetFileTime() */
+  virtual BOOL  GetFileTime (PHMHANDLEDATA pHMHandleData,
+                             LPFILETIME    pFT1,
+                             LPFILETIME    pFT2,
+                             LPFILETIME    pFT3);
+
+  /* this is a handler method for calls to GetFileSize() */
+  virtual DWORD GetFileSize(PHMHANDLEDATA pHMHandleData,
+                            PDWORD        pSizeHigh);
+
+  /* this is a handler method for calls to GetFileType() */
+  virtual DWORD GetFileType (PHMHANDLEDATA pHMHandleData);
+};
 
 #endif /* __HMFILE_H__ */
 

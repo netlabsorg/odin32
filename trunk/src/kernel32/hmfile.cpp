@@ -1,4 +1,4 @@
-/* $Id: hmfile.cpp,v 1.42 2003-04-02 12:58:29 sandervl Exp $ */
+/* $Id: hmfile.cpp,v 1.43 2003-05-05 10:51:05 sandervl Exp $ */
 
 /*
  * File IO win32 apis
@@ -37,6 +37,8 @@ inline void ignore_dprintf(...){}
 
 #define DBG_LOCALLOG    DBG_hmfile
 #include "dbglocal.h"
+
+static void ParsePath(LPCSTR lpszFileName, LPSTR lpszParsedFileName, DWORD length);
 
 /*****************************************************************************
  * Name      : DWORD HMDeviceFileClass::CreateFile
@@ -102,31 +104,6 @@ DWORD HMDeviceFileClass::CreateFile (LPCSTR        lpFileName,
         dprintf(("CreateFile failed; error %d", GetLastError()));
         return(GetLastError());
   }
-}
-
-//*****************************************************************************
-//Parses and copies path
-//OpenFile in NT4, SP6 accepts double (or more) backslashes as separators for directories!
-//(OS/2 doesn't)
-//Girotel 2.0 (Dutch banking app) seems to depend on this behaviour
-//*****************************************************************************
-void HMDeviceFileClass::ParsePath(LPCSTR lpszFileName, LPSTR lpszParsedFileName, DWORD length)
-{
-    int i=0;
-
-    while(*lpszFileName != 0 && i < length-1) {
-        *lpszParsedFileName++ = *lpszFileName;
-        if(*lpszFileName == '\\') {
-            while(*lpszFileName == '\\') {
-                 lpszFileName++;
-            }
-        }
-        else {
-            lpszFileName++;
-        }
-        i++;
-    }
-    *lpszParsedFileName = 0;
 }
 
 /*****************************************************************************
@@ -1089,6 +1066,202 @@ BOOL HMDeviceFileClass::GetOverlappedResult(PHMHANDLEDATA pHMHandleData,
 //                                 arg3,
 //                                 arg4));
 }
+
+//******************************************************************************
+//******************************************************************************
+// File information handle class
+//
+// When the application opens a file with CreateFile and 0 for desired access,
+// then we need to create a handle with limited access. 
+//
+// MSDN:
+//
+// If this parameter is zero, the application can query file and device attributes 
+// without accessing the device. This is useful if an application wants to determine 
+// the size of a floppy disk drive and the formats it supports without requiring
+// a floppy in the drive. It can also be used to test for the file's or directory's
+// existence without opening it for read or write access.
+//
+//******************************************************************************
+//******************************************************************************
+
+/******************************************************************************
+ * Name      : DWORD HMDeviceInfoFileClass::CreateFile
+ * Purpose   : this is called from the handle manager if a CreateFile() is
+ *             performed on a handle
+ * Parameters: LPCSTR        lpFileName            name of the file / device
+ *             PHMHANDLEDATA pHMHandleData         data of the NEW handle
+ *             PVOID         lpSecurityAttributes  ignored
+ *             PHMHANDLEDATA pHMHandleDataTemplate data of the template handle
+ * Variables :
+ * Result    :
+ * Remark    : 
+ * Status    : NO_ERROR - API succeeded
+ *             other    - what is to be set in SetLastError
+ *
+ * Author    : SvL
+ *****************************************************************************/
+DWORD HMDeviceInfoFileClass::CreateFile (LPCSTR        lpFileName,
+                                         PHMHANDLEDATA pHMHandleData,
+                                         PVOID         lpSecurityAttributes,
+                                         PHMHANDLEDATA pHMHandleDataTemplate)
+{
+  char  filepath[260];
+  DWORD dwAttr;
+
+  dprintfl(("KERNEL32: HMDeviceInfoFileClass::CreateFile %s(%s,%08x,%08x,%08x)\n",
+           lpHMDeviceName,
+           lpFileName,
+           pHMHandleData,
+           lpSecurityAttributes,
+           pHMHandleDataTemplate));
+  
+  ParsePath(lpFileName, filepath, sizeof(filepath));
+
+  //convert to long file name if in 8.3 hashed format
+  GetLongPathNameA(filepath, filepath, sizeof(filepath));
+  lpFileName = filepath;
+
+
+  dwAttr = GetFileAttributesA(lpFileName);
+  if(dwAttr == -1) {
+      return GetLastError();
+  }
+
+  pHMHandleData->dwUserData = (DWORD) new HMFileInfo((LPSTR)lpFileName, lpSecurityAttributes);
+  pHMHandleData->hHMHandle  = 0x8000000;
+  return (NO_ERROR);
+
+}
+/******************************************************************************
+ * Name      : BOOL HMDeviceFileClass::CloseHandle
+ * Purpose   : close the handle
+ * Parameters: PHMHANDLEDATA pHMHandleData
+ * Variables :
+ * Result    : API returncode
+ * Remark    :
+ * Status    :
+ *
+ * Author    : Patrick Haller [Wed, 1998/02/11 20:44]
+ *****************************************************************************/
+BOOL HMDeviceInfoFileClass::CloseHandle(PHMHANDLEDATA pHMHandleData)
+{
+  HMFileInfo *fileInfo = (HMFileInfo *)pHMHandleData->dwUserData;
+
+  dprintfl(("KERNEL32: HMDeviceInfoFileClass::CloseHandle(%08x)\n",
+           pHMHandleData->hHMHandle));
+
+  if(fileInfo) {
+      delete fileInfo;
+  }
+  return TRUE;
+}
+/******************************************************************************
+ * Name      : BOOL HMDeviceInfoFileClass::GetFileTime
+ * Purpose   : Get file time
+ * Parameters: PHMHANDLEDATA pHMHandleData
+ *             PFILETIME     pFT1
+ *             PFILETIME     pFT2
+ *             PFILETIME     pFT3
+ * Variables :
+ * Result    : API returncode
+ * Remark    :
+ * Status    :
+ *
+ * Author    : SvL
+ *****************************************************************************/
+BOOL HMDeviceInfoFileClass::GetFileTime (PHMHANDLEDATA pHMHandleData,
+                                         LPFILETIME    pFT1,
+                                         LPFILETIME    pFT2,
+                                         LPFILETIME    pFT3)
+{
+  HMFileInfo *fileInfo = (HMFileInfo *)pHMHandleData->dwUserData;
+
+  if(!pFT1 && !pFT2 && !pFT3) {//TODO: does NT do this?
+    dprintf(("ERROR: GetFileTime: invalid parameter!"));
+    SetLastError(ERROR_INVALID_PARAMETER);
+    return FALSE;
+  }
+  WIN32_FIND_DATAA finddata;
+  HANDLE hFind;
+    
+  hFind = FindFirstFileA(fileInfo->lpszFileName, &finddata);
+  if(hFind == INVALID_HANDLE_VALUE) {
+      return GetLastError();
+  }
+  if(pFT1) {
+      *pFT1 = finddata.ftCreationTime;
+  }
+  if(pFT2) {
+      *pFT2 = finddata.ftLastAccessTime;
+  }
+  if(pFT3) {
+      *pFT3 = finddata.ftLastWriteTime;
+  }
+  FindClose(hFind);
+  SetLastError(ERROR_SUCCESS);
+  return TRUE;
+}
+/******************************************************************************
+ * Name      : DWORD HMDeviceInfoFileClass::GetFileSize
+ * Purpose   : get file size
+ * Parameters: PHMHANDLEDATA pHMHandleData
+ *             PDWORD        pSize
+ * Variables :
+ * Result    : API returncode
+ * Remark    : Doesn't fail for directories; just returns 0 (verified in NT4, SP6)
+ * Status    :
+ *
+ * Author    : SvL
+ *****************************************************************************/
+DWORD HMDeviceInfoFileClass::GetFileSize(PHMHANDLEDATA pHMHandleData,
+                                         PDWORD        lpdwFileSizeHigh)
+{
+  HMFileInfo *fileInfo = (HMFileInfo *)pHMHandleData->dwUserData;
+
+  SetLastError(ERROR_SUCCESS);
+
+  if(lpdwFileSizeHigh)
+    *lpdwFileSizeHigh = 0;
+
+  if(fileInfo == NULL) {
+      DebugInt3();
+      SetLastError(ERROR_INVALID_PARAMETER); //TODO
+      return -1; //INVALID_FILE_SIZE;
+  }
+
+  WIN32_FIND_DATAA finddata;
+  HANDLE hFind;
+    
+  hFind = FindFirstFileA(fileInfo->lpszFileName, &finddata);
+  if(hFind == INVALID_HANDLE_VALUE) {
+      return GetLastError();
+  }
+  if(lpdwFileSizeHigh) {
+      *lpdwFileSizeHigh = finddata.nFileSizeHigh;
+  }
+  FindClose(hFind);
+  return finddata.nFileSizeLow;
+}
+/******************************************************************************
+ * Name      : DWORD HMDeviceFileClass::GetFileType
+ * Purpose   : determine the handle type
+ * Parameters: PHMHANDLEDATA pHMHandleData
+ * Variables :
+ * Result    : API returncode
+ * Remark    : Returns FILE_TYPE_DISK for both files and directories
+ * Status    :
+ *
+ * Author    : Patrick Haller [Wed, 1998/02/11 20:44]
+ ******************************************************************************/
+DWORD HMDeviceInfoFileClass::GetFileType(PHMHANDLEDATA pHMHandleData)
+{
+  dprintfl(("KERNEL32: HMDeviceInfoFileClass::GetFileType %s(%08x)\n",
+           lpHMDeviceName,
+           pHMHandleData));
+
+  return FILE_TYPE_DISK;
+}
 //******************************************************************************
 //******************************************************************************
 HMFileInfo::HMFileInfo(LPSTR lpszFileName, PVOID lpSecurityAttributes)
@@ -1108,6 +1281,31 @@ HMFileInfo::~HMFileInfo()
     free(lpszFileName);
     lpszFileName = NULL;
   }
+}
+
+//*****************************************************************************
+//Parses and copies path
+//OpenFile in NT4, SP6 accepts double (or more) backslashes as separators for directories!
+//(OS/2 doesn't)
+//Girotel 2.0 (Dutch banking app) seems to depend on this behaviour
+//*****************************************************************************
+static void ParsePath(LPCSTR lpszFileName, LPSTR lpszParsedFileName, DWORD length)
+{
+    int i=0;
+
+    while(*lpszFileName != 0 && i < length-1) {
+        *lpszParsedFileName++ = *lpszFileName;
+        if(*lpszFileName == '\\') {
+            while(*lpszFileName == '\\') {
+                 lpszFileName++;
+            }
+        }
+        else {
+            lpszFileName++;
+        }
+        i++;
+    }
+    *lpszParsedFileName = 0;
 }
 //******************************************************************************
 //******************************************************************************
