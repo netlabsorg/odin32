@@ -1,4 +1,4 @@
-# $Id: odin32.post.wat.mk,v 1.15 2001-08-04 14:18:54 bird Exp $
+# $Id: odin32.post.wat.mk,v 1.16 2001-09-30 00:59:03 bird Exp $
 
 #
 # Odin32 API
@@ -134,7 +134,9 @@ $(OBJDIR)\$(TARGET).$(TARGET_EXTENSION): $(LIBS) $(OBJS) $(OS2RES) $(OBJDIR)\$(T
     $(OS2RC) $(OS2RCLFLAGS) $(OS2RES) $@
 !endif
 !ifndef DEBUG
+!ifndef NO_LXLITE
     $(LXLITE) $@
+!endif
 !endif
 !endif
 
@@ -218,6 +220,7 @@ library {$(LIBS)}
 <<
 !endif
 
+
 !endif # !ifndef EXETARGET !else
 !else # !ifndef LIBTARGET
 ###############################################################################
@@ -298,10 +301,9 @@ $(OBJDIR)\$^&.lst
 !ifndef NO_DEP_RULE
 dep: dep_internal $(ADDITIONAL_DEP) .SYMBOLIC
 dep_internal: .SYMBOLIC
-    $(DEPEND) $(CINCLUDES) *.c *.cpp *.h *.asm *.inc \
-        *.rc *.dlg $(ODIN32_INCLUDE)\*.h -robj *.orc
+    $(DEPEND) $(CINCLUDES) *.c *.cpp *.h *.asm *.inc *.rc *.dlg -robj *.orc
 !ifdef SUBDIRS
-    $(DODIRS) "$(SUBDIRS)"  $(MAKE_CMD) dep
+    @$(DODIRS) "$(SUBDIRS)"  $(MAKE_CMD) dep
 !endif
 !endif
 
@@ -313,7 +315,7 @@ dep_internal: .SYMBOLIC
 !ifndef NO_INTERNAL_LIBS
 !ifdef INTLIBS
 $(INTLIBS): .SYMBOLIC
-    $(DODIRS) "$(SUBDIRS)"  $(MAKE_CMD) libs
+    @$(DODIRS) "$(SUBDIRS)"  $(MAKE_CMD) libs
 !endif
 !endif
 
@@ -326,7 +328,11 @@ $(INTLIBS): .SYMBOLIC
 #
 # Common: Copy library rule.
 #
+!ifndef PUBLICLIB
 $(ODIN32_LIB)\$(ORGTARGET).lib: $(OBJDIR)\$(ORGTARGET).lib
+!else
+$(ODIN32_LIB)\$(TARGET).$(TARGET_EXTENSION): $(OBJDIR)\$(TARGET).$(TARGET_EXTENSION)
+!endif
     @if not exist $^: $(CREATEPATH) $^:
     $(CP) $[@ $@
 
@@ -441,7 +447,7 @@ clean:  clean2 .SYMBOLIC
 !endif
 !endif
 !ifdef SUBDIRS
-    $(DODIRS) "$(SUBDIRS)"  $(MAKE_CMD) clean
+    @$(DODIRS) "$(SUBDIRS)"  $(MAKE_CMD) clean
 !endif
 
 
@@ -454,6 +460,12 @@ clean:  clean2 .SYMBOLIC
 #!       include .depend
 #!   else
 #!       if [$(ECHO) .depend doesn't exist]
+#!       endif
+#!   endif
+#!   if [$(EXISTS) $(ODIN32_INCLUDE)\.depend] == 0
+#!       include $(ODIN32_INCLUDE)\.depend
+#!   else
+#!       if [$(ECHO) /include/.depend doesn't exist]
 #!       endif
 #!   endif
 #!endif
