@@ -1,4 +1,4 @@
-/* $Id: winimagepeldr_new.h,v 1.1 2001-05-30 08:23:22 sandervl Exp $ */
+/* $Id: winimagepeldr_new.h,v 1.2 2001-05-30 18:32:15 phaller Exp $ */
 
 /*
  * Win32 PE loader Image base class
@@ -13,6 +13,13 @@
 #define __WINIMAGEPELDR_H__
 
 #include <winimagebase.h>
+
+
+// 2001-05-30 PH
+// to enable sanity checks for the new loader code,
+// enable this define.
+//#define VERIFY_LOADER
+
 
 #define SINGLE_PAGE 		0  //commit single page
 #define COMPLETE_SECTION 	1  //commit entire section
@@ -54,6 +61,21 @@ typedef struct {
   ULONG  flags;         //psh[i].Characteristics
 } Section;
 
+
+#ifdef VERIFY_LOADER
+typedef struct {
+  ULONG  virtaddr;
+  ULONG  ordinal;
+  ULONG  nlength;
+  char   name[4];
+} NameExport;
+
+typedef struct {
+  ULONG  virtaddr;
+  ULONG  ordinal;
+} OrdExport;
+#endif
+
 class Win32DllBase;
 class Win32MemMap;
 class CIndexLookupLimit;
@@ -76,6 +98,13 @@ virtual ~Win32PeLdrImage();
 
     virtual ULONG getApi(char *name);
     virtual ULONG getApi(int ordinal);
+
+#ifdef VERIFY_LOADER
+    virtual ULONG new_getApi(char *name);
+    virtual ULONG new_getApi(int ordinal);
+    virtual ULONG old_getApi(char *name);
+    virtual ULONG old_getApi(int ordinal);
+#endif
 
     virtual ULONG getImageSize();
 
@@ -114,13 +143,18 @@ protected:
         void  AddOrdExport(ULONG virtaddr, ULONG ordinal, BOOL fAbsoluteAddress=FALSE);
         BOOL  AddForwarder(ULONG virtaddr, char *apiname, ULONG ordinal);
 
-        Win32DllBase *loadDll(char *pszCurModule);
+Win32DllBase *loadDll(char *pszCurModule);
 
  	IMAGE_OPTIONAL_HEADER oh;
 	IMAGE_FILE_HEADER     fh;
 
         ULONG                 nrNameExports, nameExportSize;
         ULONG                 nrOrdExports;
+
+#ifdef VERIFY_LOADER
+        NameExport           *nameexports, *curnameexport;
+        OrdExport            *ordexports, *curordexport;
+#endif
 
         ULONG                 nrsections, imageSize, imageVirtBase, imageVirtEnd;
         //OS/2 virtual base address

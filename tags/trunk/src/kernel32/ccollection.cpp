@@ -1,4 +1,4 @@
-/* $Id: ccollection.cpp,v 1.4 2001-05-30 13:02:55 phaller Exp $ */
+/* $Id: ccollection.cpp,v 1.5 2001-05-30 18:29:59 phaller Exp $ */
 
 /*
  * Collection class:
@@ -86,6 +86,18 @@ int CIndexLookup::shrink()
 {
     // shrink the index array to the absolutely necessary size only
 
+    if (iInitialized == 0)
+    {
+        // if no elements were allocated, simple remove all data memory
+        if (pEntries)
+        {
+            free(pEntries);
+            pEntries = NULL;
+        }
+
+        return 1;
+    }
+
     // verify if shrink can do anything good
     if ( (iOffset < iUsedOffset) ||
          (iHigh   > iUsedHigh) )
@@ -105,9 +117,13 @@ int CIndexLookup::shrink()
         {
             int iRelative = iUsedOffset - iOffset;
 
-            memcpy(pNewData,
-                   pEntries + (iRelative * sizeof(INDEXLOOKUPENTRY)),
-                   iRequiredSize * sizeof(INDEXLOOKUPENTRY));
+            // Note: due to C++ pointer arithmetic,
+            // (pEntries + iRelative) should automatically
+            // increase pEntries by iRelative-times the
+            // sizeof(INDEXLOOKUPENTRY) byte positions!
+            memmove(pNewData,
+                    pEntries + iRelative,
+                    iRequiredSize * sizeof(INDEXLOOKUPENTRY));
     
             // deferred delete ensures we've always got a valid array
             PINDEXLOOKUPENTRY pTemp = pEntries;
@@ -152,9 +168,9 @@ PINDEXLOOKUPENTRY CIndexLookup::reallocateData(int iShift, int iRequiredSize)
     if (pEntries != NULL)
     {
         // copy the data, array cannot overlap
-        memmove(pNewData,
+        memmove(pNewData + (iShift * sizeof(INDEXLOOKUPENTRY)),
                 pEntries,
-                iSize);
+                iSize * sizeof(INDEXLOOKUPENTRY));
 
         // zero out at the beginning or at the end
         if (iShift == 0)
@@ -213,7 +229,8 @@ int CIndexLookup::ensureCapacity(int iIndex)
             // deferred delete ensures we've always got a valid array
             PINDEXLOOKUPENTRY pTemp = pEntries;
             pEntries = pNewData;
-            free(pTemp);
+            if (pTemp)
+                free(pTemp);
 
             iSize = iRequiredSize;
             iOffset = iIndex;
@@ -235,8 +252,9 @@ int CIndexLookup::ensureCapacity(int iIndex)
                 // deferred delete ensures we've always got a valid array
                 PINDEXLOOKUPENTRY pTemp = pEntries;
                 pEntries = pNewData;
-                free(pTemp);
-
+                if (pTemp)
+                    free(pTemp);
+                
                 iSize = iRequiredSize;
                 iHigh = iIndex;
             }
@@ -260,6 +278,9 @@ void* CIndexLookup::addElement(int iIndex, void* pObject)
 
         if (iIndex > iUsedHigh)
             iUsedHigh = iIndex;
+
+        // used limits are not initialized
+        iInitialized = 1;
 
         // insert entry and quit
         pEntries[iIndex - iOffset].pObject = pObject;
@@ -301,6 +322,7 @@ void CIndexLookup::clear(void)
     iSize = 0;
     iUsedOffset = INT_MAX;
     iUsedHigh = INT_MIN;
+    iInitialized = 0;
 }
 
 
@@ -317,7 +339,6 @@ void* CIndexLookup::getElement(int iIndex)
         return NULL;
     }
 }
-
 
 
 CIndexLookupLimit::CIndexLookupLimit(int iHardLimitLow,

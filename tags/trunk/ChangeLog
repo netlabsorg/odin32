@@ -1,4 +1,9 @@
-/* $Id: ChangeLog,v 1.1460 2001-05-30 17:43:08 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.1461 2001-05-30 18:33:00 phaller Exp $ */
+
+ 2001-05-30: Patrick Haller <patrick.haller@innotek.de>
+    - KERNEL32: o further performance improvement of hashtables
+                o fixes for loader improvements (PE, LX)
+                o Todo: measuring new code, reducing memory requirements                
 
  2001-05-30: Sander van Leeuwen <sandervl@xs4all.nl>
     - USER32:   o RedrawWindow: don't clear erase background flag if the 
