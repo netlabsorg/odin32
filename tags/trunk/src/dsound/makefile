@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.17 2000-03-06 23:38:37 bird Exp $
+# $Id: makefile,v 1.18 2000-03-13 12:47:53 sandervl Exp $
 
 #
 # Odin32 API
@@ -27,7 +27,12 @@ $(OBJDIR)\dsound.obj \
 $(OBJDIR)\os2dsound.obj \
 $(OBJDIR)\initterm.obj \
 $(OBJDIR)\os2sndbuffer.obj \
-$(OBJDIR)\os2helper.obj \
+$(OBJDIR)\os2primbuff.obj \
+$(OBJDIR)\os2notify.obj \
+$(OBJDIR)\os23dlistener.obj \
+$(OBJDIR)\os23dbuffer.obj \
+$(OBJDIR)\dart.obj \
+$(OBJDIR)\dsmixer.obj \
 $(OBJDIR)\dsoundrsrc.obj
 
 
@@ -60,6 +65,8 @@ $(OBJS)
 pmwinx.lib
 $(PDWIN32_LIB)/kernel32.lib
 $(PDWIN32_LIB)/odincrt.lib
+$(PDWIN32_LIB)/ole32.lib
+mmpm2.lib
 OS2386.LIB
 $(RTLLIB_O)
 $(TARGET).def

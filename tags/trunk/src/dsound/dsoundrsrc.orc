@@ -1,4 +1,4 @@
-/* $Id: dsoundrsrc.orc,v 1.1 2000-03-06 23:38:37 bird Exp $ */
+/* $Id: dsoundrsrc.orc,v 1.2 2000-03-13 12:47:52 sandervl Exp $ */
 
 #include "winuser.h"
 #include "odinrsrc.h"
