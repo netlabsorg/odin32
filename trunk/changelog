@@ -1,4 +1,4 @@
-/* $Id: changelog,v 1.1869 2001-11-30 17:50:13 phaller Exp $ */
+/* $Id: changelog,v 1.1870 2001-11-30 18:47:14 sandervl Exp $ */
 
  2001-11-30: Patrick Haller <patrick.haller@innotek.de>
     - KERNEL32: o heapstring.cpp: improvement on HEAP_malloc, HEAP_free,
@@ -13,6 +13,7 @@
  2001-11-30: Sander van Leeuwen <sandervl@xs4all.nl>
     - USER32:   o Changed menu hilite background to the color used by PM
                   (OS/2 look)
+                o DIALOG_IsAccelerator resync (Wine)
     - KERNEL32: o Partly implemented PurgeComm
 
  2001-11-29: Patrick Haller <patrick.haller@innotek.de>
