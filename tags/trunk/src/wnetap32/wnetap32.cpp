@@ -1,4 +1,4 @@
-/* $Id: wnetap32.cpp,v 1.16 2001-09-07 08:20:59 phaller Exp $ */
+/* $Id: wnetap32.cpp,v 1.17 2002-03-08 11:37:10 sandervl Exp $ */
 
 /*
  *
@@ -37,91 +37,117 @@
 #include <string.h>
 #include <winconst.h>
 
-#include "oslibnet.h"
+#include "wnetap32.h"
 #include "lanman.h"
+#include "oslibnet.h"
 
 ODINDEBUGCHANNEL(WNETAP32-WNETAP32)
+
+
+extern DWORD WIN32API OSLibNetbiosHlpHandler(LPVOID lpParam);
 
 
 /****************************************************************************
  * Module Global Variables                                                  *
  ****************************************************************************/
 
-#define NCBNAMSZ        16
-#define MAX_LANA       254
-
-typedef struct _NCB {
-    UCHAR   ncb_command;
-    UCHAR   ncb_retcode;
-    UCHAR   ncb_lsn;
-    UCHAR   ncb_num;
-    PUCHAR  ncb_buffer;
-    WORD    ncb_length;
-    UCHAR   ncb_callname[NCBNAMSZ];
-    UCHAR   ncb_name[NCBNAMSZ];
-    UCHAR   ncb_rto;
-    UCHAR   ncb_sto;
-    void (* CALLBACK ncb_post)( struct _NCB * );
-    UCHAR   ncb_lana_num;
-    UCHAR   ncb_cmd_cplt;
-    UCHAR   ncb_reserve[10];
-    HANDLE  ncb_event;
-} NCB, *PNCB;
-
-#define NRC_GOODRET     0x00
-#define NRC_BUFLEN      0x01
-#define NRC_ILLCMD      0x03
-#define NRC_CMDTMO      0x05
-#define NRC_INCOMP      0x06
-#define NRC_BADDR       0x07
-#define NRC_SNUMOUT     0x08
-#define NRC_NORES       0x09
-#define NRC_SCLOSED     0x0a
-#define NRC_CMDCAN      0x0b
-#define NRC_DUPNAME     0x0d
-#define NRC_NAMTFUL     0x0e
-#define NRC_ACTSES      0x0f
-#define NRC_LOCTFUL     0x11
-#define NRC_REMTFUL     0x12
-#define NRC_ILLNN       0x13
-#define NRC_NOCALL      0x14
-#define NRC_NOWILD      0x15
-#define NRC_INUSE       0x16
-#define NRC_NAMERR      0x17
-#define NRC_SABORT      0x18
-#define NRC_NAMCONF     0x19
-#define NRC_IFBUSY      0x21
-#define NRC_TOOMANY     0x22
-#define NRC_BRIDGE      0x23
-#define NRC_CANOCCR     0x24
-#define NRC_CANCEL      0x26
-#define NRC_DUPENV      0x30
-#define NRC_ENVNOTDEF   0x34
-#define NRC_OSRESNOTAV  0x35
-#define NRC_MAXAPPS     0x36
-#define NRC_NOSAPS      0x37
-#define NRC_NORESOURCES 0x38
-#define NRC_INVADDRESS  0x39
-#define NRC_INVDDID     0x3B
-#define NRC_LOCKFAIL    0x3C
-#define NRC_OPENERR     0x3f
-#define NRC_SYSTEM      0x40
-
-#define NRC_PENDING     0xff
-
 
 //******************************************************************************
+// Note:
+// The major difference between OS/2 and Win32 regarding NetBIOS is
+// all operations and resources are per-process for Win32 and
+// global for OS/2. So we might probably end up with stray netbios names etc.
+// long after a process has vanished.
 //******************************************************************************
+//#define NETBIOS_ENABLED
 ODINFUNCTION1(UCHAR, OS2Netbios,
-              PNCB, pncb)
+              PNCB_w, pncb)
 {
-#ifdef DEBUG
-  WriteLog("OS2Netbios; pretend no network available\n");
-#endif
-  return(NRC_OPENERR);
+#ifndef NETBIOS_ENABLED
+  pncb->ncb_retcode = NRC_OPENERR_w;
+  return pncb->ncb_retcode;
+  
+#else
+  UCHAR rc;
+
+  // Note: OS/2 specific documentation is found in DSSPGR1+DSSPGR2
+  
+  // fork for asynchronous operation:
+  if (pncb->ncb_command & ASYNCH_w)
+  {
+    // either event or post may be specified
+    if ( (pncb->ncb_event != 0) &&
+         (pncb->ncb_post  != 0) )
+    {
+      pncb->ncb_retcode = NRC_ILLCMD_w;
+      return NRC_ILLCMD_w;
+    }
+    
+    
+    // @@@PH
+    // we might go for one or more statically allocated
+    // worker threads instead of creating and destroying
+    // a thread for each single request.
+    
+    // we're to start an ODIN thread ourself and do
+    // the operation itself synchronously!
+    
+    // say the netbios operation is still pending ...
+    pncb->ncb_cmd_cplt = NRC_PENDING_w;
+    
+    UCHAR  ucCommand = pncb->ncb_command;
+    DWORD  tidNetbios;
+    HANDLE hNetbiosThread = CreateThread(NULL,
+                                         0x8000,
+                                         OSLibNetbiosHlpHandler,
+                                         (LPVOID)pncb,
+                                         0, // thread creation flags
+                                         &tidNetbios);
+    if (hNetbiosThread == NULL)
+    {
+      // in case the thread could not be launched, 
+      // return with error
+      pncb->ncb_retcode  = NRC_SYSTEM_w;
+      pncb->ncb_cmd_cplt = NRC_SYSTEM_w;
+      return pncb->ncb_retcode;
+    }
+    else
+    {
+      dprintf(("NETBIOS: Netbios helper thread %d started for command %02xh\n",
+               tidNetbios,
+               ucCommand));
+      
+      // verify if the operation has completed already
+      if (pncb->ncb_cmd_cplt != NRC_PENDING_w)
+      {
+        // Docs say in this case return as if the request was synchronous
+        rc = pncb->ncb_retcode;
+      }
+      else
+      {
+        // this is the "operation pending" return code
+        rc = 0;
+      }
+    }
+  }
+  else
+  {
+    // verify request
+    if ( (pncb->ncb_event != 0) ||
+         (pncb->ncb_post  != 0) )
+    {
+      pncb->ncb_retcode = NRC_ILLCMD_w;
+      return NRC_ILLCMD_w;
+    }
+    
+    // call the Request Router
+    rc = OSLibNetBIOS( pncb );
+  }
+
+  return( rc );
+#endif /* NETBIOS_ENABLED */
 }
-//******************************************************************************
-//******************************************************************************
+
 
 /*****************************************************************************
  * Name      : NET_API_STATUS NetAlertRaise
@@ -1072,6 +1098,7 @@ ODINFUNCTION4(NET_API_STATUS, OS2I_NetPathCompare,
 /*****************************************************************************
  * Name      : NET_API_STATUS I_NetPathType
  * Purpose   :
+
  * Parameters: wrong
  * Variables :
  * Result    :
@@ -1095,6 +1122,7 @@ ODINFUNCTION2(NET_API_STATUS, OS2I_NetPathType,
 
 /*****************************************************************************
  * Name      : NET_API_STATUS NetapipBufferAllocate
+
  * Purpose   :
  * Parameters: wrong
  * Variables :
