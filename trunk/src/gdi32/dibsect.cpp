@@ -1,4 +1,4 @@
-/* $Id: dibsect.cpp,v 1.13 2000-01-31 22:30:07 sandervl Exp $ */
+/* $Id: dibsect.cpp,v 1.14 2000-02-01 12:53:29 sandervl Exp $ */
 
 /*
  * GDI32 DIB sections
@@ -42,7 +42,7 @@ static VMutex dibMutex;
 //This is not a complete solution for CreateDIBSection, but enough for Quake 2!
 //******************************************************************************
 //******************************************************************************
-DIBSection::DIBSection(WINBITMAPINFOHEADER *pbmi, DWORD handle, int fFlip)
+DIBSection::DIBSection(WINBITMAPINFOHEADER *pbmi, DWORD iUsage, DWORD handle, int fFlip)
                 : bmpBits(NULL), pOS2bmp(NULL), next(NULL)
 {
   int  os2bmpsize;
@@ -95,6 +95,10 @@ DIBSection::DIBSection(WINBITMAPINFOHEADER *pbmi, DWORD handle, int fFlip)
    pOS2bmp->cPlanes       = pbmi->biPlanes;
    pOS2bmp->cBitCount     = pbmi->biBitCount;
    pOS2bmp->ulCompression = pbmi->biCompression;
+   //SvL: Ignore BI_BITFIELDS type (GpiDrawBits fails otherwise)
+   if(pOS2bmp->ulCompression == 3) {
+	pOS2bmp->ulCompression = 0;
+   }
    pOS2bmp->cbImage       = pbmi->biSizeImage;
    dprintf(("handle                 %x", handle));
    dprintf(("pOS2bmp->cx            %d\n", pOS2bmp->cx));
@@ -103,9 +107,10 @@ DIBSection::DIBSection(WINBITMAPINFOHEADER *pbmi, DWORD handle, int fFlip)
    dprintf(("pOS2bmp->cBitCount     %d\n", pOS2bmp->cBitCount));
    dprintf(("pOS2bmp->ulCompression %d\n", pOS2bmp->ulCompression));
    dprintf(("pOS2bmp->cbImage       %d\n", pOS2bmp->cbImage));
-   dprintf(("Bits at 0x%08X\n",bmpBits));
+   dprintf(("Bits at %x, size %d",bmpBits, bmpsize*pbmi->biHeight));
 
    this->handle = handle;
+   this->iUsage = iUsage;
 
    dibMutex.enter();
    if(section == NULL)
@@ -311,9 +316,9 @@ BOOL DIBSection::BitBlt(HDC hdcDest, int nXdest, int nYdest, int nDestWidth,
   {
     WinReleasePS(hps);
   }
-  if(rc == GPI_OK)
-    return(TRUE);
-
+  if(rc == GPI_OK) {
+    	return(TRUE);
+  }
   dprintf(("DIBSection::BitBlt %X (%d,%d) (%d,%d) to (%d,%d) (%d,%d) returned %d\n", hps, point[0].x, point[0].y, point[1].x, point[1].y, point[2].x, point[2].y, point[3].x, point[3].y, rc));
   dprintf(("WinGetLastError returned %X\n", WinGetLastError(WinQueryAnchorBlock(hwndDest)) & 0xFFFF));
   return(FALSE);
@@ -324,7 +329,7 @@ void DIBSection::SelectDIBObject(HDC hdc)
 {
   this->hdc  = hdc;
   hwndParent = WinWindowFromDC(hdc);
-  dprintf(("SelectDIBObject(0x%08X) hwndParent = 0x%08X\n",hdc, hwndParent));
+  dprintf(("SelectDIBObject %x into %x hwndParent = %x", handle, hdc, hwndParent));
 }
 //******************************************************************************
 //******************************************************************************
@@ -379,6 +384,7 @@ int DIBSection::GetDIBSection(int iSize, void *lpBuffer)
  DIBSECTION *pDIBSection = (DIBSECTION *)lpBuffer;
  LPWINBITMAP dsBm        = (LPWINBITMAP)lpBuffer;
 
+  dprintf2(("GetDIBSection %x %d %x", handle, iSize, lpBuffer));
   if(iSize == sizeof(DIBSECTION))
   {
     // BITMAP struct

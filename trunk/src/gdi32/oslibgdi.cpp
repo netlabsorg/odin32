@@ -1,4 +1,4 @@
-/* $Id: oslibgdi.cpp,v 1.3 2000-01-28 22:24:58 sandervl Exp $ */
+/* $Id: oslibgdi.cpp,v 1.4 2000-02-01 12:53:30 sandervl Exp $ */
 
 /*
  * GDI32 support code
@@ -56,12 +56,12 @@ INT OSLibSetDIBitsToDevice(HDC hdc, INT xDest, INT yDest, DWORD cx, DWORD cy,
   os2bmpinfo.cclrUsed      = info->biClrUsed;
   os2bmpinfo.cclrImportant = info->biClrImportant;
 
-//  rc = GpiDrawBits((HPS)hdc, (VOID *)bits, &os2bmpinfo, 4,
-//                   points, ROP_SRCCOPY, BBO_IGNORE);
+  rc = GpiDrawBits((HPS)hdc, (VOID *)bits, &os2bmpinfo, 4,
+                   points, ROP_SRCCOPY, BBO_IGNORE);
 
-//  if(rc != GPI_OK) {
-//	dprintf(("GpiDrawBits returned %d", rc));
-//  }
+  if(rc != GPI_OK) {
+	dprintf(("GpiDrawBits returned %d", rc));
+  }
   return lines;
 }
 //******************************************************************************
