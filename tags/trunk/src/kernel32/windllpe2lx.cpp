@@ -1,4 +1,4 @@
-/* $Id: windllpe2lx.cpp,v 1.10 2001-07-08 02:49:47 bird Exp $ */
+/* $Id: windllpe2lx.cpp,v 1.11 2001-07-10 20:18:12 bird Exp $ */
 
 /*
  * Win32 PE2LX Dll class
@@ -38,6 +38,10 @@
 #define DBG_LOCALLOG    DBG_windllpe2lx
 #include "dbglocal.h"
 
+/*******************************************************************************
+*   Global Variables                                                           *
+*******************************************************************************/
+extern BOOL fPeLoader;
 
 /**
  * Register an Pe2Lx Dll module. Called from TIBFix code in Dll Pe2Lx module.
@@ -110,9 +114,15 @@ ULONG WIN32API RegisterPe2LxDll(ULONG ulPe2LxVersion, HINSTANCE hinstance, ULONG
         /* @@@PH 1998/03/17 Console devices initialization */
         iConsoleDevicesRegister();
 
-        /* Before we attach the DLL we must make sure that we have a valid executable */
-        if (!WinExe)
+        /*
+         * Before we attach the DLL we must make sure that we have a valid executable
+         * Should perhaps find a good way of checking for native LX binaries...
+         */
+        if (!WinExe && !fPeLoader)
+        {
+            dprintf(("RegisterPe2LxDll: tries to do an early exe init.\n"));
             Win32Pe2LxExe::earlyInit();
+        }
 
         /* Add reference and attach dll to process. */
         pWinMod->AddRef();
@@ -142,6 +152,7 @@ Win32Pe2LxDll::Win32Pe2LxDll(HINSTANCE hinstance, BOOL fWin32k)
     Win32Pe2LxImage(hinstance, fWin32k)
 {
     dprintf(("Win32Pe2LxDll::Win32Pe2LxDll %s", szModule));
+    fDll = TRUE;
 }
 
 
