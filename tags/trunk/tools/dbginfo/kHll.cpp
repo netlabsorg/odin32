@@ -1,4 +1,4 @@
-/* $Id: kHll.cpp,v 1.16 2000-09-16 15:17:07 bird Exp $
+/* $Id: kHll.cpp,v 1.17 2000-09-16 17:30:25 bird Exp $
  *
  * kHll - Implementation of the class kHll.
  *        That class is used to create HLL debuginfo.
@@ -2249,13 +2249,22 @@ APIRET          kHll::writeToLX(
                                 {
                                     /*
                                      * Write dummy signature (_VerifySignature in the OS2KRNL checks this).
+                                     *  The signatures size is the last dword in the file.
+                                     *  If we pad that dword with 0 (or a number larger than the filesize)
+                                     *  the module is verified successfully by the OS2KRNL.
+                                     *
+                                     *  FYI. If the verify fails a DosExit is issued in the init process,
+                                     *  and it will crash due to a bad exception handler point (at fs:0)
+                                     *  when the termination exception occures. Which so leads to another
+                                     *  exception in the exceptionhandler (which don't check for NULL
+                                     *  pointers to exceptionhandlers only -1 pointers).
                                      */
-                                    static char aFakeSig[0x200] = {0};
+                                    static char achFakeSig[4] = {0};
                                     if (fseek(phFile, 0, SEEK_END) == 0)
                                     {
-                                        if (fwrite(&aFakeSig[0], 1, sizeof(aFakeSig), phFile) == sizeof(aFakeSig))
+                                        if (fwrite(&achFakeSig[0], 1, sizeof(achFakeSig), phFile) == sizeof(achFakeSig))
                                         {
-                                            cch += sizeof(aFakeSig);
+                                            cch += sizeof(achFakeSig);
 
                                             /*
                                              * Update exeheader.
