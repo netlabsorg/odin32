@@ -10,6 +10,7 @@
 HMENU MENU_GetSysMenu(HWND hWnd,HMENU hPopupMenu);
 UINT MENU_GetMenuBarHeight(HWND hWnd,UINT menubarWidth,INT orgX,INT orgY);
 void MENU_TrackMouseMenuBar(HWND hWnd,INT ht,POINT pt);
+void MENU_TrackMouseMenuBar_MouseMove(HWND hwnd,POINT pt,BOOL OnMenu);
 void MENU_TrackKbdMenuBar(HWND hWnd,UINT wParam,INT vkey);
 UINT MENU_DrawMenuBar(HDC hDC,LPRECT lprect,HWND hWnd,BOOL suppress_draw);
 
