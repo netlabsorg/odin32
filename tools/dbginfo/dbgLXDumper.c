@@ -1,4 +1,4 @@
-/* $Id: dbgLXDumper.c,v 1.4 2000-03-27 10:20:42 bird Exp $
+/* $Id: dbgLXDumper.c,v 1.5 2000-03-27 12:36:16 bird Exp $
  *
  * dbgLXDumper - reads and interprets the debuginfo found in an LX executable.
  *
@@ -189,13 +189,10 @@ int dumpHLL(FILE *phOut, PBYTE pb, int cb)
             "- HLL header -\n"
             "    Signature          %.4s\n"
             "    Directory offset   0x%08x (%d)\n"
-            "    reserved           0x%08x (%d)\n"
             "\n",
             pHdr->achSignature,
             pHdr->offDirectory,
-            pHdr->offDirectory,
-            pHdr->ulReserved,
-            pHdr->ulReserved);
+            pHdr->offDirectory);
 
 
     /*
@@ -210,10 +207,13 @@ int dumpHLL(FILE *phOut, PBYTE pb, int cb)
     pDir = (PHLLDIR)(pb + pHdr->offDirectory);
     fprintf(phOut,
             "- HLL Directory -\n"
-            "    Reserved           0x%08x (%d)\n"
-            "    Number of entries  0x%08x (%d)\n",
-            pDir->ulReserved,
-            pDir->ulReserved,
+            "    Size of this struct  0x%02x (%d)\n"
+            "    Size directory entry 0x%02x (%d)\n"
+            "    Number of entries    0x%08x (%d)\n",
+            pDir->cb,
+            pDir->cb,
+            pDir->cbEntry,
+            pDir->cbEntry,
             pDir->cEntries,
             pDir->cEntries);
 
