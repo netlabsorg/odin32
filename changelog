@@ -1,13 +1,19 @@
- /* $Id: changelog,v 1.942 2000-05-16 20:01:37 sandervl Exp $ */
+ /* $Id: changelog,v 1.943 2000-05-18 09:09:34 sandervl Exp $ */
+
+ 2000-05-18: Sander van Leeuwen <sandervl@xs4all.nl>
+    - KERNEL32: EnumResourceNamesA bugfix (wrong length in UnicodeToAsciiN call)
+                (reported by Michal Necasek)
+                Call CheckLogException for each exception; safety guard against
+                exceptions inside WriteLog.
+    - WSOCK32:  Mark cancelled async select to avoid finding it before the
+                thread removes itself from the queue
 
  2000-05-16: Sander van Leeuwen <sandervl@xs4all.nl>
-    - COMDLG32:
-                Fixed shlwapi imports (GetProcAddress failed for PathFindFileNameA
+    - COMDLG32: Fixed shlwapi imports (GetProcAddress failed for PathFindFileNameA
                 -> crash when calling file dialog functions)
 
  2000-05-16: Jeroen van den Horn <J.vandenHorn@fibre.a2000.nl>
-    - GDI32: 
-             Fixed bug in font.cpp
+    - GDI32: Fixed bug in font.cpp
              iFontRename should use strncpy instead of memcpy since source
              string passed may be smaller than amount of bytes to copy
              resulting in GPF.
@@ -25,16 +31,13 @@
     - KERNEL32: Print name of image referenced by EIP (stackdump)
 
  2000-05-12: Sander van Leeuwen <sandervl@xs4all.nl>
-    - USER32:
-                Fixed bug in HOOK_RemoveHook (wrong call for enter semaphore method)
+    - USER32:   Fixed bug in HOOK_RemoveHook (wrong call for enter semaphore method)
                 SetSysColors bugfix (called itself for some reason)
                 Fixed wrong dispatch of messages under certain conditions
-    - COMDLG32:
-                Fixed initial directory for GetOpen/SaveFileNameW
+    - COMDLG32: Fixed initial directory for GetOpen/SaveFileNameW
                 If initial dir string == "" -> use current dir (not only
                 when ptr equals NULL) (verified this behaviour in NT 4)
-    - GDI32:
-                Do manual image flip in dib section blit (fixes wrong position
+    - GDI32:    Do manual image flip in dib section blit (fixes wrong position
                 of Palm Emulator bitmap)
                 Might also fix reversed video in RealPlayer 7 (Warp 4 FP13/WSeB FP1)
 
@@ -42,20 +45,17 @@
     - COMCTL32: Fixed treeview item height bug (reported by Markus Montkowski)
 
  2000-05-10: Sander van Leeuwen <sandervl@xs4all.nl>
-    - USER32:
-                Fix for SetForegroundWindow (SWP_NOZORDER flag removed)
+    - USER32:   Fix for SetForegroundWindow (SWP_NOZORDER flag removed)
                 GetForegroundWindow now uses WinQueryActiveWindow instead
                 of Open32's GetForegroundWindow
     - KERNEL32: Extra logging for atom functions, fixed GlobalGetAtomNameW
-    - COMDLG32:
-                Added missing ascii to unicode conversions in GetFileDialog95W
+    - COMDLG32: Added missing ascii to unicode conversions in GetFileDialog95W
                 (file name (returned), initial dir & file dialog title)
     - RICHED32: Added (Wine port)
     - TOOLS\INSTALL: Added ChangeLog to installation script
 
  2000-05-09: Sander van Leeuwen <sandervl@xs4all.nl>
-    - KERNEL32:
-                Enclose executable name in quotes if it (or it's directory)
+    - KERNEL32: Enclose executable name in quotes if it (or it's directory)
                 contains spaces
                 Route rtl error messages to logfile (_set_crt_msg_handle)
                 Added support for system, user default & neutral language in
@@ -63,11 +63,9 @@
                 Fill in correct language id in GetUserDefaultLCID/GetSystemDefaultLCID
                 GetUserDefaultLangID & GetSystemDefaultLangID; gets country
                 with DosQueryCtryInfo
-    - WSOCK32:
-                Return WSAWOULDBLOCK if recv returns 0 and connection is
+    - WSOCK32:  Return WSAWOULDBLOCK if recv returns 0 and connection is
                 still available. (experimental change for rp7)
-    - USER32:
-                MENU_PtMenu: return when menu has no window handle (prevents
+    - USER32:   MENU_PtMenu: return when menu has no window handle (prevents
                 Moraff's YourJongg from crashing -> need to check why this
                 happens)
                 Bugfix in AdjustWindowRectEx; if style, exstyle and menu
@@ -75,8 +73,7 @@
                 (verified this in NT 4)
                 Don't send WM_ACTIVATE, WM_SET/KILLFOCUS & WM_SHOWWINDOW
                 messages when window is being destroyed.
-    - SHELL32:
-                Wrong systray classname used when creating systray window
+    - SHELL32:  Wrong systray classname used when creating systray window
                 Fixed bugs in SYSTRAY_SetTip/SYSTRAY_ModifyTip; string
                 copy operations used wrong size -> heap corruption
     - DINPUT:   Check window handle if app acquired mouse input in
@@ -87,42 +84,35 @@
     - GDI32:    Added stretch blit mode support to dibsection blits
 
  2000-05-05: Sander van Leeuwen <sandervl@xs4all.nl>
-    - USER32:
-                Fixed window property functions (ported from Wine)
+    - USER32:   Fixed window property functions (ported from Wine)
                 The old ones used Open32 functions which no longer work
                 due to atom api changes a few months ago.
                 If the mouse has already been captured, then it must
                 be released before calling WinSetCapture ->
                 fixes menus & dialog in MS Word 97
-    - OLE32:
-                Fixed BindCtxImpl_SetBindOptions/BindCtxImpl_GetBindOptions
+    - OLE32:    Fixed BindCtxImpl_SetBindOptions/BindCtxImpl_GetBindOptions
                 Need to check size of bind structure before copying (as done in Wine)
                 -> fixes crash (stack corruption) in MS Word 97
-    - WSOCK32:
-                When changing the receive or send buffer (setsockopt) and
+    - WSOCK32:  When changing the receive or send buffer (setsockopt) and
                 it fails with WSAENOBUFS, decrease size until no error
                 is returned (63kb buffer is not always accepted by the
                 16 bits tcpip stack) (stops when buffer < 4096)
 
  2000-05-04: Achim Hasenmueller <achimha@innotek.de>
-    - USER32:
-                Applied fix to GetDCEx where the check to see if
+    - USER32:   Applied fix to GetDCEx where the check to see if
                 the window has its own DC was applying invalid
                 style flags due to missing parantheses
                 (reported by Oliver Braun)
 
  2000-05-04: Sander van Leeuwen <sandervl@xs4all.nl>
-    - USER32:
-                Menu font from bold to normal again. Bold fonts are too
+    - USER32:   Menu font from bold to normal again. Bold fonts are too
                 big (rp7 menu split in two parts).
 
  2000-05-03: Sander van Leeuwen <sandervl@xs4all.nl>
-    - WSOCK32:
-                Fixed WSAEFAULT errors in setsockopt (16 bits TCP/IP stack
+    - WSOCK32:  Fixed WSAEFAULT errors in setsockopt (16 bits TCP/IP stack
                 doesn't like high addresses; similar problems can also occur
                 elsewhere in wsock32)
-    - USER32:
-                Change settings return by SystemParameterInfo for SPI_GETNONCLIENTMETRICS
+    - USER32:   Change settings return by SystemParameterInfo for SPI_GETNONCLIENTMETRICS
                 Caption & menu fonts now bold; different sizes (more like Wine now)
                 Set/clear WS_VISIBLE flag in SetWindowPos; don't call
                 ShowWindow.
@@ -131,16 +121,14 @@
                 Send WM_CAPTURECHANGED messages when capture changes
 
  2000-05-02: Sander van Leeuwen <sandervl@xs4all.nl>
-    - KERNEL32:
-                GetLocaleInfoA/W fix (size of buffer for i.e. LOCALE_IDATE
+    - KERNEL32: GetLocaleInfoA/W fix (size of buffer for i.e. LOCALE_IDATE
                 should be >= 2, not > 2)
                 VirtualFree: Check for ERROR_ALIAS return value
 
                 Ported and changed/fixed XFolder stack dump code (symbol file only)
                 When a win32 app crashes, a dump of the stack is written
                 in odin32_0.log.
-    - USER32:
-                Merged some Wine dialog changes (setting focus + font size)
+    - USER32:   Merged some Wine dialog changes (setting focus + font size)
                 Extra logging for some apis
                 Added support for RDW_FRAME flag to GetDCEx
     - INCLUDE\makefiles:
