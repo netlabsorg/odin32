@@ -1,4 +1,4 @@
-/* $Id: icontitle.cpp,v 1.1 1999-12-30 18:32:58 cbratschi Exp $ */
+/* $Id: icontitle.cpp,v 1.2 1999-12-30 18:55:04 cbratschi Exp $ */
 /*
  * Icontitle window class.
  *
@@ -13,15 +13,6 @@
 #include <heapstring.h>
 #include "controls.h"
 #include "icontitle.h"
-
-
-/*
-#include "winuser.h"
-#include "wine/winuser16.h"
-#include "win.h"
-#include "desktop.h"
-#include "heap.h"
-*/
 
 static  LPCSTR  emptyTitleText = "<...>";
 
@@ -60,10 +51,10 @@ HWND ICONTITLE_Create(Win32BaseWindow *parent)
     win32wnd = Win32BaseWindow::GetWindowFromHandle(hWnd);
     if (win32wnd)
     {
-	win32wnd->setOwner(parent);	/* MDI depends on this */
-	win32wnd->setStyle(win32wnd->getStyle() & ~(WS_CAPTION | WS_BORDER));
-	if (parent->getStyle() & WS_DISABLED ) win32wnd->setStyle(win32wnd->getStyle() | WS_DISABLED);
-	return hWnd;
+        win32wnd->setOwner(parent);     /* MDI depends on this */
+        win32wnd->setStyle(win32wnd->getStyle() & ~(WS_CAPTION | WS_BORDER));
+        if (parent->getStyle() & WS_DISABLED ) win32wnd->setStyle(win32wnd->getStyle() | WS_DISABLED);
+        return hWnd;
     }
     return 0;
 }
