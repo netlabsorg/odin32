@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.63 2000-02-09 23:40:54 bird Exp $
+# $Id: Makefile,v 1.64 2000-02-09 23:47:03 bird Exp $
 
 #
 # PD-Win32 API
@@ -90,7 +90,7 @@ resource.asm: user32.rc
 
 dep:
     $(DEPEND) -I$(PDWIN32_INCLUDE);$(PDWIN32_INCLUDE)\win \
-    *.c *.cpp *.h *.asm *.inc $(PDWIN32_INCLUDE)\*.h
+        *.c *.cpp *.h *.asm *.inc $(PDWIN32_INCLUDE)\*.h
 
 !ifndef NODEP
 !include .depend

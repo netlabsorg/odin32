@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.6 2000-02-09 23:40:50 bird Exp $
+# $Id: makefile,v 1.7 2000-02-09 23:47:01 bird Exp $
 #
 # PD-Win32 API
 #
@@ -98,7 +98,7 @@ $(PDWIN32_LIB)\$(TARGET3).lib: $(TARGET3).lib
 
 dep:
     $(DEPEND) -I$(PDWIN32_INCLUDE);$(PDWIN32_INCLUDE)\win \
-    *.c *.cpp *.h *.asm *.inc $(PDWIN32_INCLUDE)\*.h
+        *.c *.cpp *.h *.asm *.inc $(PDWIN32_INCLUDE)\*.h
     cd glut
     $(MAKE_CMD) NODEP=1 dep
     cd ..\glu
