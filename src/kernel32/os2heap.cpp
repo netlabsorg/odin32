@@ -1,4 +1,4 @@
-/* $Id: os2heap.cpp,v 1.22 2001-07-28 18:03:38 sandervl Exp $ */
+/* $Id: os2heap.cpp,v 1.23 2001-07-30 12:01:24 sandervl Exp $ */
 
 /*
  * Heap class for OS/2
@@ -61,8 +61,6 @@ OS2Heap::OS2Heap(DWORD flOptions, DWORD dwInitialSize, DWORD dwMaximumSize)
   this->dwInitialSize = dwInitialSize;
   this->flOptions     = flOptions;
 
-  dprintf(("KERNEL32:  HeapCreate: initial size %d, max size %d (flags %X) returned %X\n", dwInitialSize, dwMaximumSize, flOptions, hPrimaryHeap));
-
   if(!(flOptions & HEAP_NO_SERIALIZE))
   {
     hmutex = new VMutex();
@@ -98,6 +96,7 @@ OS2Heap::OS2Heap(DWORD flOptions, DWORD dwInitialSize, DWORD dwMaximumSize)
         DebugInt3();
   }
   hPrimaryHeap = (HANDLE)uheap;
+  dprintf(("KERNEL32:  HeapCreate: initial size %d, max size %d (flags %X) returned %X\n", dwInitialSize, dwMaximumSize, flOptions, hPrimaryHeap));
 }
 //******************************************************************************
 //******************************************************************************

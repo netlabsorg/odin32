@@ -1,4 +1,4 @@
-; $Id: USER32.DEF,v 1.62 2001-07-28 13:43:53 sandervl Exp $
+; $Id: USER32.DEF,v 1.63 2001-07-30 12:02:15 sandervl Exp $
 
 LIBRARY USER32 INITINSTANCE TERMINSTANCE
 DESCRIPTION 'Odin32 System Dll - User32'
@@ -686,7 +686,7 @@ EXPORTS
     _clientHeight@8                                              @2017 NONAME
     _changePageXForm@20                                          @2018 NONAME
     _removeClientArea@4                                          @2019 NONAME
-    _setMapMode@8                                                @2020 NONAME
+    _setMapModeDC@8                                              @2020 NONAME
     _TestWideLine@4                                              @2021 NONAME
     _Calculate1PixelDelta@4                                      @2022 NONAME
     _DIB_GetDIBWidthBytes@8                                      @2023 NONAME
