@@ -1,4 +1,4 @@
-/* $Id: hmstd.cpp,v 1.7 2001-12-05 18:06:02 sandervl Exp $ */
+/* $Id: hmstd.cpp,v 1.8 2002-05-22 12:57:23 sandervl Exp $ */
 
 /*
  * Handle Manager class for standard in, out & error handles
@@ -154,6 +154,7 @@ BOOL HMDeviceStandardClass::WriteFile(PHMHANDLEDATA pHMHandleData,
      dprintf(("STDOUT (GUI): %s", lpLowMemBuffer));
      return TRUE;
   }
+  dprintf(("STDOUT: %*s", nNumberOfBytesToWrite, lpLowMemBuffer));
   return O32_WriteFile(pHMHandleData->hHMHandle, lpLowMemBuffer, nNumberOfBytesToWrite,
                        lpNumberOfBytesWritten, lpOverlapped);
 }
