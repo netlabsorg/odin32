@@ -1,7 +1,19 @@
-/* $Id: changelog,v 1.1968 2002-02-09 22:58:21 bird Exp $ */
+/* $Id: changelog,v 1.1969 2002-02-11 13:50:43 sandervl Exp $ */
 
- 2002-02-09: knut st. osmundsen <bird@anduin.net>
-    - WRC:      o Corrected lstrcmpiA declaration missmatch.
+ 2002-02-10: Sander van Leeuwen <sandervl@xs4all.nl>
+    - USER32:   o Extended logging added
+
+ 2002-02-10: Platon Fomichev <platon@innotek.de>
+    - USER32\PMKBDHK:
+                o Fixes for shift-enter & shift-enter (numpad)
+
+ 2002-02-10: Dmitry Froloff <froloff@os2.ru>
+    - KERNEL32: o Translate strings used for Dos* functions from Windows
+                  to OS/2 codepage
+                o Translate strings returned by Dos* functions from OS/2
+                  to Windows codepage
+    - USER32:   o Translate strings used to set the window title (OS/2 mode)
+                  from Windows to OS/2 codepage.
 
  2002-02-09: Sander van Leeuwen <sandervl@xs4all.nl>
     - KERNEL32: o Logging updates
