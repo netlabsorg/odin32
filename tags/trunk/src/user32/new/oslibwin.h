@@ -1,4 +1,4 @@
-/* $Id: oslibwin.h,v 1.5 1999-07-17 11:52:22 sandervl Exp $ */
+/* $Id: oslibwin.h,v 1.6 1999-07-17 12:49:41 cbratschi Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -12,9 +12,9 @@
 #ifndef __OSLIBWIN_H__
 #define __OSLIBWIN_H__
 
-#define OS2TOWIN32POINT(height, y)	(height - y)
+#define OS2TOWIN32POINT(height, y)      (height - y)
 
-#define OSLIB_HWND_DESKTOP	0
+#define OSLIB_HWND_DESKTOP      0
 BOOL  OSLibWinSetParent(HWND hwnd, HWND hwndParent, ULONG fRedraw = TRUE);
 
 
@@ -31,6 +31,15 @@ BOOL  OSLibPostMessage(HWND hwnd, ULONG msg, ULONG wParam, ULONG lParam);
 
 HWND  OSLibWinCreateMenu(HWND hwndParent, PVOID menutemplate);
 
+#define WA_WARNING                 0
+#define WA_NOTE                    1
+#define WA_ERROR                   2
+#define WA_CWINALARMS             13     /* count of valid alarms     53304*/
+
+BOOL OSLibWinAlarm(HWND hwndDeskTop,ULONG flStyle);
+ULONG OSLibDosBeep(ULONG freg,ULONG dur);
+LONG OSLibWinQueryWindowTextLength(HWND hwnd);
+LONG OSLibWinQueryWindowText(HWND hwnd,LONG lLength,char* pun);
 
 #define SWPOS_SIZE                   0x0001
 #define SWPOS_MOVE                   0x0002
