@@ -1,4 +1,4 @@
-/* $Id: oslibdos.cpp,v 1.64 2001-06-12 17:03:33 sandervl Exp $ */
+/* $Id: oslibdos.cpp,v 1.65 2001-06-16 16:10:12 sandervl Exp $ */
 /*
  * Wrappers for OS/2 Dos* API
  *
@@ -26,6 +26,7 @@
 #include <ctype.h>
 #include <win32api.h>
 #include <winconst.h>
+#include <win\winioctl.h>
 #include <misc.h>
 #include "initterm.h"
 #include "oslibdos.h"
@@ -2331,6 +2332,62 @@ BOOL OSLibGetDiskFreeSpace(LPSTR lpRootPathName, LPDWORD lpSectorsPerCluster,
         *lpBytesPerSector        = fsAlloc.cbSector;
         *lpNumberOfFreeClusters  = fsAlloc.cUnitAvail;
         *lpTotalNumberOfClusters = fsAlloc.cUnit;
+        SetLastError(ERROR_SUCCESS_W);
+        return TRUE;
+   }
+   SetLastError(error2WinError(rc));
+   return FALSE;
+}
+//******************************************************************************
+//******************************************************************************
+BOOL  OSLibDosGetDiskGeometry(DWORD cDisk, PVOID pdiskgeom)
+{
+   PDISK_GEOMETRY pGeom = (PDISK_GEOMETRY)pdiskgeom;
+   BYTE  param[2] = {0, 0};
+   ULONG parsize = 2;
+   BIOSPARAMETERBLOCK bpb;
+   ULONG datasize = sizeof(bpb);
+   APIRET rc;
+
+   param[1] = cDisk - 'A';
+   rc = DosDevIOCtl(-1, IOCTL_DISK, DSK_GETDEVICEPARAMS, param, 2, &parsize, &bpb, sizeof(bpb), &datasize);
+   if(rc == 0)
+   {
+        pGeom->SectorsPerTrack   = bpb.usSectorsPerTrack;
+        pGeom->BytesPerSector    = bpb.usBytesPerSector;
+        pGeom->TracksPerCylinder = 80;  //TODO:!!!!!
+        pGeom->Cylinders.u.LowPart  = bpb.cCylinders;
+        pGeom->Cylinders.u.HighPart = 0;
+        switch(bpb.bDeviceType) {
+        case DEVTYPE_48TPI:
+            pGeom->MediaType = F5_360_512;  //?????
+            break;
+        case DEVTYPE_96TPI:
+            pGeom->MediaType = F5_1Pt2_512; //?????
+            break;
+        case DEVTYPE_35:
+            pGeom->MediaType = F3_720_512;
+            break;
+        case DEVTYPE_8SD:
+        case DEVTYPE_8DD:
+            pGeom->MediaType = RemovableMedia;
+            break;
+        case DEVTYPE_FIXED:
+            pGeom->MediaType = FixedMedia;
+            break;
+        case DEVTYPE_TAPE:
+            pGeom->MediaType = RemovableMedia;
+            break;
+        case DEVTYPE_UNKNOWN: //others, include 1.44 3.5 inch disk drive
+            pGeom->MediaType = F3_1Pt44_512;
+            break;
+        case 8: //RW optical disk
+            pGeom->MediaType = RemovableMedia;
+            break;
+        case 9: //2.88 3.5 inch disk
+            pGeom->MediaType = F3_2Pt88_512;
+            break;
+        }
         SetLastError(ERROR_SUCCESS_W);
         return TRUE;
    }

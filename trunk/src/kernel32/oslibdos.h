@@ -1,4 +1,4 @@
-/* $Id: oslibdos.h,v 1.29 2001-06-12 17:03:34 sandervl Exp $ */
+/* $Id: oslibdos.h,v 1.30 2001-06-16 16:10:13 sandervl Exp $ */
 
 /*
  * Wrappers for OS/2 Dos* API
@@ -215,6 +215,8 @@ ULONG OSLibDosQuerySysInfo(ULONG iStart, ULONG iLast, PVOID pBuf, ULONG cbBuf);
 ULONG OSLibGetDriveType(ULONG diskIndex);
 ULONG OSLibGetLogicalDrives();
 ULONG OSLibDosQueryCurrentDisk();
+
+BOOL  OSLibDosGetDiskGeometry(DWORD cDisk, void *pGeom);
 
 #ifdef OS2DEF_INCLUDED
 #ifndef FIL_STANDARDL
