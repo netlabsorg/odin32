@@ -1,4 +1,4 @@
-/* $Id: thread.cpp,v 1.7 1999-07-07 08:11:10 sandervl Exp $ */
+/* $Id: thread.cpp,v 1.8 1999-08-09 22:10:08 phaller Exp $ */
 
 /*
  * Win32 Thread API functions
@@ -11,6 +11,7 @@
  */
 #include <os2win.h>
 #include <stdarg.h>
+#include <odincrt.h>
 #include "thread.h"
 #include "except.h"
 #include <misc.h>
@@ -28,7 +29,11 @@ HANDLE WIN32API CreateThread(LPSECURITY_ATTRIBUTES lpsa, DWORD cbStack,
                              LPVOID lpvThreadParm, DWORD fdwCreate,
                              LPDWORD lpIDThread)
 {
- Win32Thread *winthread = new Win32Thread(lpStartAddr, lpvThreadParm, fdwCreate);
+ Win32Thread *winthread;
+
+ ODIN_FS_BEGIN
+ winthread = new Win32Thread(lpStartAddr, lpvThreadParm, fdwCreate);
+ ODIN_FS_END
 
   if(winthread == 0)
     return(0);
@@ -156,7 +161,7 @@ static DWORD OPEN32API Win32ThreadProc(LPVOID lpData)
  LPVOID           userdata  = me->lpUserData;
  DWORD            rc;
 
-  delete me;    //only called once
+ ODIN_delete(me)    //only called once
 
   dprintf(("Win32ThreadProc %d\n", GetCurrentThreadId()));
 

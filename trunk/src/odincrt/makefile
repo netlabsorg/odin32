@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.2 1999-08-09 18:10:50 achimha Exp $
+# $Id: makefile,v 1.3 1999-08-09 22:10:09 phaller Exp $
 
 #
 # PD-Win32 API
@@ -36,7 +36,7 @@ $(TARGET).lib: $(TARGET).dll
         $(CP) $@ $(PDWIN32_LIB)
 
 
-odincrt.obj: odincrt.cpp odincrt.h
+odincrt.obj: odincrt.cpp $(PDWIN32_INCLUDE)\odincrt.h
 initterm.obj: initterm.cpp
 odinfs.obj: odinfs.asm
 
