@@ -1,4 +1,4 @@
-/* $Id: misc.cpp,v 1.38 2001-06-12 17:03:33 sandervl Exp $ */
+/* $Id: misc.cpp,v 1.39 2001-06-23 07:38:51 bird Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -11,9 +11,9 @@
  */
 
 
-/*****************************************************************************
- * Includes                                                                  *
- *****************************************************************************/
+/*******************************************************************************
+*   Internal Functions                                                         *
+*******************************************************************************/
 
 #define INCL_BASE
 #define INCL_WIN
@@ -32,6 +32,8 @@
 #include "exceptutil.h"
 #include <wprocess.h>
 #include <versionos2.h>
+#include "odinbuild.h"
+
 
 /*****************************************************************************
  * PMPRINTF Version                                                          *
@@ -359,7 +361,7 @@ int SYSTEM WriteLog(char *tekst, ...)
     if(tekst[strlen(tekst)-1] != '\n')
       fprintf(flog, "\n");
 
-    if(fFlushLines) 
+    if(fFlushLines)
       fflush(flog);
   }
   SetFS(sel);
@@ -684,3 +686,16 @@ int SYSTEM DebugErrorBox(ULONG  iErrorCode,
   SetFS(sel);
   return iRC;
 }
+
+
+/**
+ * Query Odin32 build number.
+ * @returns Build number.
+ * @status  Completely implemented.
+ * @author  knut st. osmundsen (knut.stange.osmundsen@mynd.no)
+ */
+int     WIN32API Odin32GetBuildNumber(void)
+{
+    return ODIN32_BUILD_NR;
+}
+
