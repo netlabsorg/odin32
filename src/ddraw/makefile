@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.32 2002-12-29 14:11:01 sandervl Exp $
+# $Id: makefile,v 1.33 2003-01-21 11:20:36 sandervl Exp $
 
 #
 # Odin32 API
@@ -34,7 +34,9 @@ $(OBJDIR)\palette.obj \
 $(OBJDIR)\os2palset.obj \
 $(OBJDIR)\os2fsdd.obj \
 $(OBJDIR)\rectangle.obj \
+$(OBJDIR)\initddraw.obj \
 $(OBJDIR)\initterm.obj \
+$(OBJDIR)\divewrap.obj \
 $(OBJDIR)\os2util.obj \
 $(OBJDIR)\bltFunc.obj \
 $(OBJDIR)\fillfunc.obj \
@@ -53,7 +55,6 @@ $(ODIN32_LIB)/comctl32.lib \
 $(ODIN32_LIB)/kernel32.lib \
 $(ODIN32_LIB)/$(ODINCRT).lib \
 $(ODIN32_LIB)/user32.lib \
-mmpm2.lib \
 OS2386.LIB \
 $(RTLLIB_O)
 

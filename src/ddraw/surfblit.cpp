@@ -1,4 +1,4 @@
-/* $Id: surfblit.cpp,v 1.2 2002-12-30 14:05:44 sandervl Exp $ */
+/* $Id: surfblit.cpp,v 1.3 2003-01-21 11:20:36 sandervl Exp $ */
 
 /*
  * DirectDraw Surface class implementaion
@@ -41,6 +41,7 @@
 #include <cpuhlp.h>
 #include "asmutil.h"
 #include "wndproc.h"
+#include "divewrap.h"
 
 #ifndef __WATCOMC__
   #include <builtin.h>
@@ -292,6 +293,7 @@ HRESULT WIN32API SurfBlt4(THIS This, LPRECT lpDestRect, LPDIRECTDRAWSURFACE4 lpD
    delete pIRectSrc;
   } //if(src)
 
+#if 0
   if(dest->diveBufNr == DIVE_BUFFER_SCREEN &&
      !(dwFlags & (DDBLT_COLORFILL|DDBLT_DEPTHFILL|DDBLT_ROP) ) &&
      dest->DDSurfaceDesc.ddpfPixelFormat.dwRGBBitCount > 8 && 
@@ -404,6 +406,7 @@ dodiveblit:
           return DD_OK;
       }
   }
+#endif
 
   //TODO: do we need to check the source for clipping information in case
   //      the app wants to copy from the frame buffer?
