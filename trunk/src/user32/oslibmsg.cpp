@@ -1,4 +1,4 @@
-/* $Id: oslibmsg.cpp,v 1.31 2000-03-29 17:16:06 sandervl Exp $ */
+/* $Id: oslibmsg.cpp,v 1.32 2000-04-13 18:50:44 sandervl Exp $ */
 /*
  * Window message translation functions for OS/2
  *
@@ -179,12 +179,13 @@ LONG OSLibWinDispatchMsg(MSG *msg, BOOL isUnicode)
         memcpy(&os2msg, MsgThreadPtr, sizeof(QMSG));
         MsgThreadPtr->time = -1;
         if(msg->hwnd) {
-            thdb->nrOfMsgs = 1;
-            thdb->msgstate++; //odd -> next call to our PM window handler should dispatch the translated msg
-            memcpy(&thdb->msg, msg, sizeof(MSG));
+            	thdb->nrOfMsgs = 1;
+            	thdb->msgstate++; //odd -> next call to our PM window handler should dispatch the translated msg
+            	memcpy(&thdb->msg, msg, sizeof(MSG));
         }
         if(os2msg.hwnd || os2msg.msg == WM_QUIT) {
-            return (LONG)WinDispatchMsg(thdb->hab, &os2msg);
+		memset(MsgThreadPtr, 0, sizeof(*MsgThreadPtr));
+            	return (LONG)WinDispatchMsg(thdb->hab, &os2msg);
         }
         //SvL: Don't dispatch messages sent by PostThreadMessage (correct??)
         //     Or WM_TIMER msgs with no window handle or timer proc
