@@ -1,4 +1,4 @@
-/* $Id: os2timer.cpp,v 1.15 2000-05-24 01:56:25 phaller Exp $ */
+/* $Id: os2timer.cpp,v 1.16 2000-10-01 21:16:29 phaller Exp $ */
 
 /*
  * OS/2 Timer class
@@ -43,7 +43,9 @@
 extern "C"
 {
   typedef DWORD (* CALLBACK LPTHREAD_START_ROUTINE)(LPVOID);
-
+  
+  DWORD WIN32API GetLastError();
+  
   HANDLE WIN32API CreateThread(LPSECURITY_ATTRIBUTES lpsa,
                                DWORD cbStack,
                                LPTHREAD_START_ROUTINE lpStartAddr,
@@ -267,6 +269,15 @@ OS2Timer::OS2Timer() : TimerSem(0), TimerHandle(0), hTimerThread(0),
   else
     timers = this;
   
+  // create timer semaphore
+  int rc = DosCreateEventSem(NULL, &TimerSem, DC_SEM_SHARED, 0);
+  if(rc != 0)
+  {
+    dprintf(("WINMM: OS2Timer: DosCreateEventSem failed rc=#%08xh\n", rc));
+    return; // terminate thread
+  }
+  
+  
   //hTimerThread = _beginthread(TimerHlpHandler, NULL, 0x4000, (void *)this);
   hTimerThread = CreateThread(NULL,
                               0x4000,
@@ -274,10 +285,13 @@ OS2Timer::OS2Timer() : TimerSem(0), TimerHandle(0), hTimerThread(0),
                               (LPVOID)this,
                               0, // thread creation flags
                               &TimerThreadID);
-
-  //@@@PH: CreateThread() should be used instead
-  //@@@PH: logic sux ... waits for creation of semaphores
-  DosSleep(10);
+  
+  if (hTimerThread == NULL)
+  {
+    dprintf(("WINMM: OS2Timer: CreateThread failed rc=#%08xh\n", 
+             GetLastError()));
+    DosCloseEventSem(TimerSem);
+  }
 }
 /******************************************************************************/
 /******************************************************************************/
@@ -401,17 +415,14 @@ void OS2Timer::TimerHandler()
                        0L,                  /* Increase by 15         */
                        0L);                 /* Assume current thread  */
 
-  rc = DosCreateEventSem(NULL, &TimerSem, DC_SEM_SHARED, 0);
-  if(rc != 0)
-  {
-    dprintf(("WINMM: OS2Timer: DosCreateEventSem failed rc=#%08xh\n", rc));
-    return; // terminate thread
-  }
-
   TimerStatus = Stopped;
 
   while(!fFatal)
   {
+    dprintf(("WINMM: OS2Timer::TimerHandler waiting on timer (%04xh, %08xh\n",
+             dwFlags,
+            clientCallback));
+    
     DosWaitEventSem(TimerSem, SEM_INDEFINITE_WAIT);
     DosResetEventSem(TimerSem, &Count);
     if(!fFatal)
@@ -422,6 +433,10 @@ void OS2Timer::TimerHandler()
         // check timer running condition
         if (TimerStatus == Running)
         {
+          dprintf(("WINMM: OS2Timer::TimerHandler firing (%04xh, %08xh\n",
+                   dwFlags,
+                  clientCallback));
+          
           // process the event
           switch (dwFlags & 0x0030)
           {
