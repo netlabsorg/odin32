@@ -1,4 +1,4 @@
-/* $Id: smalloc_avl.c,v 1.1 2000-01-24 01:45:21 bird Exp $
+/* $Id: smalloc_avl.c,v 1.2 2000-01-24 03:05:14 bird Exp $
  *
  * Swappable Heap - AVL.
  *
@@ -39,8 +39,9 @@
 #define MEMBLOCK_FROM_FREESIZENODE(a) \
                                 ((PMEMBLOCK)((unsigned)(a) - (unsigned)(&((PMEMBLOCK)0)->u2.coreFree)))
 
-#define BLOCKSIZE (1024*256)            /* 256KB */
-#define ALIGNMENT (sizeof(unsigned))
+#define BLOCKSIZE               (1024*256)            /* 256KB */
+#define ALIGNMENT               (sizeof(unsigned))
+#define MEMBLOCKS_PER_CHUNK     (256)
 
 
 #define INCL_DOS
@@ -75,7 +76,7 @@
 /*******************************************************************************
 *   Structures and Typedefs                                                    *
 *******************************************************************************/
-#pragma pack(1)
+#pragma pack(4)
 typedef struct _MEMBLOCK /* mb */
 {
     union
@@ -92,7 +93,7 @@ typedef struct _MEMBLOCK /* mb */
     } u2;
     struct _MEMBLOCK   *pmbNext;        /* Pointer to list of blocks with the same size */
 } MEMBLOCK, *PMEMBLOCK;
-#pragma pack()
+
 
 typedef struct _HeapAnchor /* ha */
 {
@@ -110,6 +111,15 @@ typedef struct _HeapAnchor /* ha */
     unsigned            cbUsed;         /* Amount of used memory. */
 
 } HEAPANCHOR, *PHEAPANCHOR;
+
+
+typedef struct _MemblockChunk /* mc */
+{
+    struct _MemblockChunk * pNext;      /* Pointer to next chunk */
+    unsigned            cFree;          /* Number of free memblocks */
+    char                achBitmap[MEMBLOCKS_PER_CHUNK/8]; /* Used(1)/Free(0) bitmap */
+    MEMBLOCK            amb[MEMBLOCKS_PER_CHUNK]; /* Array of memblocks */
+} MEMBLOCKCHUNK, *PMEMBLOCKCHUNK;
 
 
 typedef struct _SubHeaps_Callback_param
@@ -130,8 +140,9 @@ typedef struct _Allocated_Callback_param
 *  Global data
 ******************************************************************************/
 static PHEAPANCHOR  phaFirst;           /* Pointer to the first anchor block.*/
-static PHEAPANCHOR  phaLast;            /* Pointer to the first anchor block.*/
+static PHEAPANCHOR  phaLast;            /* Pointer to the last anchor block.*/
 static unsigned     cbSwpHeapMax;       /* Maximum amount of memory used by the heap. */
+static PMEMBLOCKCHUNK pmcFirst;          /* Pointer to the first memblock chunk. */
 
 #ifndef RING0
 char                fSwpInited;         /* init flag */
@@ -164,10 +175,55 @@ static unsigned     _swp_dump_allocated_callback(PMEMBLOCK pmb, PALLOCATED_CALLB
  */
 _Inline PMEMBLOCK swpAllocateMemblock(void)
 {
+    #if 0
     PMEMBLOCK pmb = (PMEMBLOCK)rmalloc(sizeof(MEMBLOCK));
     if (pmb != NULL)
         memset(pmb, 0, sizeof(*pmb));
     return pmb;
+
+    #else
+
+    unsigned long *pul;
+    unsigned long  ul;
+    int            i = 0;
+    PMEMBLOCKCHUNK pmcLast = NULL;
+    PMEMBLOCKCHUNK pmc = pmcFirst;
+    while (pmc != NULL && pmc->cFree == 0)
+    {
+        pmcLast =  pmc;
+        pmc = pmc->pNext;
+    }
+
+    /* allocate another chunk? */
+    if (pmc == NULL)
+    {
+        pmc = rmalloc(sizeof(*pmc));
+        if (pmc != NULL)
+        {
+            memset(pmc, 0, sizeof(*pmc));
+            pmc->cFree = MEMBLOCKS_PER_CHUNK;
+            if (pmcLast == NULL)
+                pmcFirst = pmc;
+            else
+                pmcLast->pNext = pmc;
+        }
+        else
+        {
+            kprintf(("swpAllocateMemblock: rmalloc failed\n"));
+            return NULL;
+        }
+    }
+
+    /* find first free */
+    pmc->cFree--;
+    pul = (unsigned long*)pmc->achBitmap;
+    while (*pul == 0xFFFFFFFF)
+        pul++, i += 8*4;
+    while (pmc->achBitmap[i/8] & (0x1 << (i%8)))
+        i++;
+    pmc->achBitmap[i/8] |=  0x1 << (i%8);
+    return &pmc->amb[i];
+    #endif
 }
 
 /**
@@ -178,8 +234,31 @@ _Inline PMEMBLOCK swpAllocateMemblock(void)
  */
 _Inline void swpReleaseMemblock(PMEMBLOCK pmb)
 {
+    #if 0
     if (pmb != NULL)
         rfree(pmb);
+    #else
+    int             i;
+    PMEMBLOCKCHUNK  pmc = pmcFirst;
+    while (pmc != NULL && !((void*)pmc < (void*)pmb && (unsigned)pmc + sizeof(*pmc) > (unsigned)pmb))
+        pmc = pmc->pNext;
+
+    if (pmc != NULL)
+    {
+        i = ((unsigned)pmb - (unsigned)pmc->amb) / sizeof(pmc->amb[0]);
+        #ifdef DEBUG
+        if ((pmc->achBitmap[i / 8] & (1 << (i % 8))) == 0)
+        {
+            kprintf(("swpReleaseMemblock: the memblock requested to be freed are allread free!\n"));
+            pmc->cFree++;
+        }
+        #endif
+        pmc->cFree--;
+        pmc->achBitmap[i / 8] &= pmc->achBitmap[i / 8] & ~(0x1 << i % 8);
+        #endif
+    }
+    else
+        kprintf(("swpReleaseMemblock: hmm pmb is not found within any pmc.\n"));
 }
 
 
@@ -625,15 +704,16 @@ static PMEMBLOCK swpFindWithinUsedBlock(PHEAPANCHOR *ppha, void *pvUser)
  */
 int swpHeapInit(unsigned cbSizeInit, unsigned cbSizeMax)
 {
-    unsigned  cbSize = MAX(BLOCKSIZE, cbSizeInit);
-    PMEMBLOCK pmbFree = swpAllocateMemblock();
+    PMEMBLOCK pmbFree;
     cbSwpHeapMax = cbSizeMax;
-
+    pmcFirst = NULL;
+    pmbFree = swpAllocateMemblock();
     if (pmbFree != NULL)
     {
         phaFirst = rmalloc(sizeof(*phaFirst));
         if (phaFirst != NULL)
         {
+            unsigned  cbSize = MAX(BLOCKSIZE, cbSizeInit);
             memset(phaFirst, 0, sizeof(*phaFirst));
             #ifdef RING0
             phaFirst->pvBlock = D32Hlp_VMAlloc(VMDHA_SWAP, cbSize, ~0UL);
@@ -647,11 +727,11 @@ int swpHeapInit(unsigned cbSizeInit, unsigned cbSizeMax)
                 #ifdef DEBUG_ALLOC
                 phaFirst->ulSignature = HEAPANCHOR_SIGNATURE;
                 #endif
-                phaFirst->cbSize = cbSizeInit;
+                phaFirst->cbSize = cbSize;
 
                 /* free memblock */
                 pmbFree->u1.uData = (unsigned)phaFirst->pvBlock;
-                pmbFree->u2.cbSize = cbSizeInit;
+                pmbFree->u2.cbSize = cbSize;
                 #ifdef DEBUG_ALLOC
                 pmbFree->u1.puData[0] = SIGNATURE_START;
                 pmbFree->u1.puData[(pmbFree->u2.cbSize / sizeof(unsigned)) - 1] = SIGNATURE_END;
@@ -693,7 +773,7 @@ int swpHeapInit(unsigned cbSizeInit, unsigned cbSizeMax)
         swpReleaseMemblock(pmbFree);
     }
     else
-        kprintf(("swpHeapInit: swpAllocateMemblock failed\n"));
+        kprintf(("swpHeapInit: swpAllocateMemblock failed.\n"));
     return -1;
 }
 
@@ -751,7 +831,7 @@ void *srealloc(void *pv, unsigned cbNew)
         return NULL;
     }
     #endif
-    pmb = swpFindUsedBlock(SSToDS(&pha), pv));
+    pmb = swpFindUsedBlock(SSToDS(&pha), pv);
     if (pmb != NULL)
     {
         void *pvRet;
@@ -770,6 +850,7 @@ void *srealloc(void *pv, unsigned cbNew)
                     pha->cbUsed -= pmb->u2.cbSize - cbNew;
                     pmb->u2.cbSize = cbNew;
                     #ifdef DEBUG_ALLOC
+                    pmbNew->u1.puData[-1] = SIGNATURE_END;
                     pmbNew->u1.puData[0] = SIGNATURE_START;
                     pmbNew->u1.puData[(pmbNew->u2.cbSize / sizeof(unsigned)) - 1] = SIGNATURE_END;
                     #endif
@@ -802,13 +883,14 @@ void *srealloc(void *pv, unsigned cbNew)
             {
                 pvRet = pv;
                 /* split the free block? */
-                if (pmbRight->u2.cbSize + pmb->u2.cbSize + CB_SIGNATURES > cbNew)
+                if (pmbRight->u2.cbSize + pmb->u2.cbSize - CB_SIGNATURES > cbNew)
                 {
                     pha->cbFree -= pmbRight->u2.cbSize;
                     swpRemoveFromFreeSize(pha, pmbRight);
                     pmbRight->u1.uData = pmb->u1.uData + cbNew;
                     pmbRight->u2.cbSize = pmbRight->u2.cbSize + pmb->u2.cbSize - cbNew;
                     #ifdef DEBUG_ALLOC
+                    pmbRight->u1.puData[-1] = SIGNATURE_END;
                     pmbRight->u1.puData[0] = SIGNATURE_START;
                     pmbRight->u1.puData[(pmbRight->u2.cbSize / sizeof(unsigned)) - 1] = SIGNATURE_END;
                     #endif
@@ -910,7 +992,7 @@ unsigned _swp_msize(void *pv)
         kprintf(("_swp_msize: _swp_heap_check failed!\n"));
     #endif
 
-    pmb = swpFindUsedBlock(SSToDS(&pha), pv));
+    pmb = swpFindUsedBlock(SSToDS(&pha), pv);
     return pmb != NULL ? pmb->u2.cbSize - CB_SIGNATURES : 0;
 }
 
@@ -1113,9 +1195,9 @@ int _swp_heap_check(void)
                     Int3();
                     return FALSE;
                 }
-                if (pmbUsed->u1.puData[(pmbUsed->u2.cbSize/sizeof(unsigned)) - 1] != SIGNATURE_END)
+                if (pmbUsed->u1.puData[(pmbUsed->u2.cbSize / sizeof(unsigned)) - 1] != SIGNATURE_END)
                 {
-                    kprintf(("_swp_heap_check: invalid start signature on used block, pv=0x%08x\n", pmbUsed->u1.pvData));
+                    kprintf(("_swp_heap_check: invalid end signature on used block, pv=0x%08x\n", pmbUsed->u1.pvData));
                     Int3();
                     return FALSE;
                 }
@@ -1153,9 +1235,9 @@ int _swp_heap_check(void)
                     Int3();
                     return FALSE;
                 }
-                if (pmbFree->u1.puData[(pmbFree->u2.cbSize/sizeof(unsigned)) - 1] != SIGNATURE_END)
+                if (pmbFree->u1.puData[(pmbFree->u2.cbSize / sizeof(unsigned)) - 1] != SIGNATURE_END)
                 {
-                    kprintf(("_swp_heap_check: invalid start signature on free block, pv=0x%08x\n", pmbUsed->u1.pvData));
+                    kprintf(("_swp_heap_check: invalid end signature on free block, pv=0x%08x\n", pmbUsed->u1.pvData));
                     Int3();
                     return FALSE;
                 }
