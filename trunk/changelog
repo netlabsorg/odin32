@@ -1,14 +1,20 @@
-/* $Id: changelog,v 1.1865 2001-11-29 13:38:24 sandervl Exp $ */
+/* $Id: changelog,v 1.1866 2001-11-29 18:47:52 phaller Exp $ */
+
+ 2001-11-29: Patrick Haller <patrick.haller@innotek.de>
+    - KERNEL32: o Split dosdevice.cpp from stubs.cpp
+                  (DefineDosDevice, QueryDosDevice)
+                o Fixed CDROM ioctls and disk access
+                  (previous fix failed or cause possible regression)
+    - OLEAUT32: o olepicture.c: fixed null pointer exception
+                  cause: our TRACE, FIXME, etc. debugtools macros all
+                  go out of scope of a braceless if-statement before!
+                  Therefore, we're getting false (error) messages or
+                  even crashes. (to be fixed)
 
  2001-11-29: Sander van Leeuwen <sandervl@xs4all.nl>
     - COMCTL32: o Listview: invalidate entire item for ownerdraw control
                             (don't exclude report margin)
     - KERNEL32: o Fixed disk access (yesterday's changes broke it)
-
- 2001-11-29: Patrick Haller <patrick.haller@innotek.de>
-    - KERNEL32: o Split dosdevice.cpp from stubs.cpp
-                  (DefineDosDevice, QueryDosDevice)
-    - OLEAUT32: o olepicture.c: fixed null pointer exception
 
  2001-11-28: Patrick Haller <patrick.haller@innotek.de>
     - KERNEL32: o fixes in ::CreateFile calls (return codes must be Win32)
