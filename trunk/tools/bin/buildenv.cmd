@@ -1,4 +1,4 @@
-/* $Id: buildenv.cmd,v 1.23 2002-08-30 18:28:57 bird Exp $
+/* $Id: buildenv.cmd,v 1.24 2002-09-01 11:44:51 bird Exp $
  *
  * This is the master tools environment script. It contains environment
  * configurations for many development tools. Each tool can be installed
@@ -1140,7 +1140,7 @@ CheckCmdOutput: procedure
      * If command
      */
     rc = 0;
-    if (rcCmd = rcCmdExpected) then
+    if (/*rcCmd = rcCmdExpected*/ 1) then
     do
         if (pos(sOutputPartExpected, sOutput) <= 0) then
         do
