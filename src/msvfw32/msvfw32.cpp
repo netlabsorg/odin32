@@ -1,4 +1,4 @@
-/* $Id: msvfw32.cpp,v 1.5 2000-08-02 16:27:41 bird Exp $ */
+/* $Id: msvfw32.cpp,v 1.6 2000-11-19 13:04:28 sandervl Exp $ */
 /*
  * Copyright 1998 Marcus Meissner
  * Copyright 1999 Jens Wiessner
@@ -9,7 +9,7 @@
 #include <odin.h>
 
 #define ICOM_CINTERFACE 1
-#define strcasecmp               strcmp
+////#define strcasecmp               strcmp
 
 #include <os2win.h>
 #include "winerror.h"
@@ -22,7 +22,7 @@
 #include "wine/obj_base.h"
 #include "wingdi.h"
 #include "vfw.h"
-#include "driver.h"
+//#include "driver.h"
 // #include "msvfw32.h"
 
 #include "debugtools.h"
@@ -111,7 +111,7 @@ ICOpen(DWORD fccType,DWORD fccHandler,UINT wMode) {
 	    if (!hdrv)
 		    return 0;
 	}
-	whic = PWINE_HIC(HeapAlloc(GetProcessHeap(),0,sizeof(WINE_HIC)));
+	whic = (WINE_HIC *) HeapAlloc(GetProcessHeap(),0,sizeof(WINE_HIC));
 	whic->hdrv	= hdrv;
 	whic->driverproc= NULL;
 	whic->privatevfw= ICSendMessage((HIC)whic,DRV_OPEN,0,(LPARAM)&icopen);
@@ -667,7 +667,7 @@ HANDLE VFWAPI ICImageCompress(
         LPVOID              lpBits,     // data to compress
         LPBITMAPINFO        lpbiOut,    // compress to this (NULL ==> default)
         LONG                lQuality,   // quality to use
-        LONG                plSize)     // compress to this size (0=whatever)
+        LONG  *             plSize)     // compress to this size (0=whatever)
 {
 #ifdef DEBUG
     dprintf(("MSVFW32: ICImageCompress not implemented\n"));
