@@ -1,5 +1,3 @@
-/* $Id: winnls.h,v 1.6 2001-04-16 17:02:54 sandervl Exp $ */
-
 #ifndef __WINE_WINNLS_H
 #define __WINE_WINNLS_H
 
