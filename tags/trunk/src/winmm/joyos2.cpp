@@ -1,4 +1,4 @@
-/* $Id: joyos2.cpp,v 1.4 2000-02-17 14:09:30 sandervl Exp $ */
+/* $Id: joyos2.cpp,v 1.5 2003-04-02 12:59:23 sandervl Exp $ */
 /*
  * OS/2 Joystick apis
  *
@@ -36,7 +36,7 @@
 
 //******************************************************************************
 //******************************************************************************
-LONG JoyOpen(HFILE *phGame)
+LONG JoyOpen(HANDLE *phGame)
 {
   ULONG   action;
   APIRET  rc;
@@ -57,7 +57,7 @@ LONG JoyOpen(HFILE *phGame)
 }
 //******************************************************************************
 //******************************************************************************
-LONG JoyGetParams(HFILE hGame, GAME_PARM_STRUCT *pGameParams)
+LONG JoyGetParams(HANDLE hGame, GAME_PARM_STRUCT *pGameParams)
 {
   ULONG             dataLen;
   APIRET            rc;
@@ -85,7 +85,7 @@ LONG JoyGetParams(HFILE hGame, GAME_PARM_STRUCT *pGameParams)
 //    tell user to move to lower right and press button
 //    call get status with wait
 // Then call set calibration IOCTL with these values
-LONG JoyCalibrate(HFILE hGame, GAME_CALIB_STRUCT  gameCalib)
+LONG JoyCalibrate(HANDLE hGame, GAME_CALIB_STRUCT  gameCalib)
 {
   ULONG              parmLen;
   APIRET             rc;
@@ -105,7 +105,7 @@ LONG JoyCalibrate(HFILE hGame, GAME_CALIB_STRUCT  gameCalib)
 
 //******************************************************************************
 //******************************************************************************
-LONG JoyGetStatus( HFILE hGame, GAME_STATUS_STRUCT  *pGameStatus )
+LONG JoyGetStatus( HANDLE hGame, GAME_STATUS_STRUCT  *pGameStatus )
 {
   ULONG               dataLen;
   APIRET              rc;
@@ -124,7 +124,7 @@ LONG JoyGetStatus( HFILE hGame, GAME_STATUS_STRUCT  *pGameStatus )
 }
 //******************************************************************************
 //******************************************************************************
-LONG JoyClose( HFILE hGame )
+LONG JoyClose( HANDLE hGame )
 {
   APIRET  rc;
 
@@ -134,7 +134,7 @@ LONG JoyClose( HFILE hGame )
 }
 //******************************************************************************
 //******************************************************************************
-LONG JoyGetCalValues( HFILE hGame, GAME_CALIB_STRUCT  *pGameCalib )
+LONG JoyGetCalValues( HANDLE hGame, GAME_CALIB_STRUCT  *pGameCalib )
 {
   ULONG              dataLen;
   APIRET             rc;
@@ -157,7 +157,7 @@ LONG JoyGetCalValues( HFILE hGame, GAME_CALIB_STRUCT  *pGameCalib )
 LONG JoyInstalled(USHORT wID)
 {
   BOOL             flReturn=1; // MMSYSERR_NODRIVER
-  HFILE            hJoy;
+  HANDLE            hJoy;
   APIRET           rc;
   GAME_PARM_STRUCT GameParams;
 
