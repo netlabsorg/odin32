@@ -1,4 +1,7 @@
-/* $Id: changelog,v 1.1723 2001-10-06 19:07:44 sandervl Exp $ */
+/* $Id: changelog,v 1.1724 2001-10-07 08:25:04 sandervl Exp $ */
+
+ 2001-10-07: Sander van Leeuwen <sandervl@xs4all.nl>
+    - DDRAW:    o Don't use Dive for blitting to/from 8 bpp surfaces
 
  2001-10-06: Sander van Leeuwen <sandervl@xs4all.nl>
     - QUARTZ/OLEAUT32: 
