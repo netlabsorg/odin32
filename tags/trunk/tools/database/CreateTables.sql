@@ -1,4 +1,4 @@
--- $Id: CreateTables.sql,v 1.3 2000-02-11 23:54:24 bird Exp $
+-- $Id: CreateTables.sql,v 1.4 2000-02-12 23:54:29 bird Exp $
 --
 -- Create all tables.
 --
@@ -37,8 +37,8 @@ CREATE TABLE function (
     return   VARCHAR(64),
     updated  TINYINT  NOT NULL DEFAULT 0,
     UNIQUE i1(refcode, aliasfn),
-    UNIQUE i1a(aliasfn, name, dll),
-    UNIQUE i1b(aliasfn, dll, refcode),
+    UNIQUE i1a(dll, aliasfn, refcode),
+    UNIQUE i1b(aliasfn, name, dll),
     UNIQUE i1c(aliasfn, intname, dll, refcode),
     UNIQUE i2(name, dll, refcode),
     UNIQUE i3(intname, dll, refcode),
