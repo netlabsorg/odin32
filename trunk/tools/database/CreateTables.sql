@@ -1,4 +1,4 @@
--- $Id: CreateTables.sql,v 1.10 2000-07-18 22:13:20 bird Exp $
+-- $Id: CreateTables.sql,v 1.11 2000-07-19 21:29:36 bird Exp $
 --
 -- Create all tables.
 --
@@ -14,8 +14,9 @@ USE Odin32;
 CREATE TABLE state (
     refcode TINYINT NOT NULL PRIMARY KEY,
     color   CHAR(7) NOT NULL,
+    weight  TINYINT NOT NULL,
     name    VARCHAR(32) NOT NULL,
-    description VARCHAR(128),
+    description VARCHAR(128) NOT NULL,
     UNIQUE u1(refcode),
     UNIQUE u2(name),
     UNIQUE u3(color)
