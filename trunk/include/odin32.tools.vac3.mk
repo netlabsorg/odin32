@@ -1,4 +1,4 @@
-# $Id: odin32.tools.vac3.mk,v 1.2 2000-12-09 16:04:22 phaller Exp $
+# $Id: odin32.tools.vac3.mk,v 1.3 2001-04-02 12:38:04 sandervl Exp $
 
 #
 # Odin32 API
@@ -37,10 +37,18 @@ MAKE_CMD    = $(MAKE_CMD) NODEP=1
 .SUFFIXES: .orc_asm .orc
 
 .c{$(OBJDIR)}.obj:
+!ifdef USERAPP
+    $(CC) $(CFLAGS) $(CINCLUDES) $(CDEFINES_WIN32APP) -Fo$(OBJDIR)\$(@B).obj -c $<
+!else
     $(CC) $(CFLAGS) $(CINCLUDES) $(CDEFINES) -Fo$(OBJDIR)\$(@B).obj -c $<
+!endif
 
 .cpp{$(OBJDIR)}.obj:
+!ifdef USERAPP
+    $(CXX) $(CXXFLAGS) $(CINCLUDES) $(CDEFINES_WIN32APP) -Fo$(OBJDIR)\$(@B).obj -c $<
+!else
     $(CXX) $(CXXFLAGS) $(CINCLUDES) $(CDEFINES) -Fo$(OBJDIR)\$(@B).obj -c $<
+!endif
 
 .asm{$(OBJDIR)}.obj:
     $(AS) $(ASFLAGS) -Fdo:$(OBJDIR) $<
