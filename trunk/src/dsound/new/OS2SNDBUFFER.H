@@ -1,4 +1,4 @@
-/* $Id: OS2SNDBUFFER.H,v 1.2 2000-03-08 18:26:48 mike Exp $ */
+/* $Id: OS2SNDBUFFER.H,v 1.3 2000-03-08 20:44:09 mike Exp $ */
 
 /*
  * DirectSound SoundBuffer class
@@ -51,7 +51,7 @@ class OS2IDirectSoundBuffer
     ULONG status;              // DSB status - playing, looping etc.
     BOOL  fLocked;             // is buffer currently locked?
     BOOL  fPrimary;            // is this a primary buffer?
-    DWORD DSvolume;            // DSB volume (in dB)
+    LONG  DSvolume;            // DSB volume (in dB)
     LONG  volume;              // volume (linear)
     LONG  DSpan;               // DSB pan (in dB)
     LONG  pan;                 // pan (linear)

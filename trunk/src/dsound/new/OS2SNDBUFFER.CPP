@@ -1,4 +1,4 @@
-/* $Id: OS2SNDBUFFER.CPP,v 1.2 2000-03-08 18:26:47 mike Exp $ */
+/* $Id: OS2SNDBUFFER.CPP,v 1.3 2000-03-08 20:44:09 mike Exp $ */
 
 /*
  * DirectSound SoundBuffer class
@@ -413,7 +413,7 @@ HRESULT __stdcall SoundBufLock(THIS_ DWORD dwWriteCursor, DWORD dwWriteBytes,
 {
    OS2IDirectSoundBuffer *me = (OS2IDirectSoundBuffer *)This;
 
-   dprintf(("DSOUND-OS2IDirectSoundBuffer::SoundBufLock (buf=%X, %d bytes)", me, dwWriteBytes));
+   dprintf(("DSOUND-OS2IDirectSoundBuffer::SoundBufLock (buf=%X, %d bytes of %d)", me, dwWriteBytes, me->bufferdesc.dwBufferBytes));
    if (me == NULL || !lplpvAudioPtr1 || !lpdwAudioBytes1)
       return DSERR_INVALIDPARAM;
 
@@ -461,14 +461,24 @@ HRESULT __stdcall SoundBufPlay(THIS_ DWORD dwRes1, DWORD dwRes2, DWORD dwFlags)
       return DSERR_INVALIDPARAM;
    }
 
-   me->frac     = 0;
-   me->fPlaying = TRUE;
-   me->status   = DSBSTATUS_PLAYING;
-   me->fLoop = dwFlags == DSBPLAY_LOOPING;
-   if (me->fLoop)
-      me->status |= DSBSTATUS_LOOPING;
+   if (!me->fPlaying) {
+      me->frac     = 0;
+      me->fPlaying = TRUE;
+      me->status   = DSBSTATUS_PLAYING;
+      me->fLoop = dwFlags == DSBPLAY_LOOPING;
+      if (me->fLoop)
+         me->status |= DSBSTATUS_LOOPING;
 
-   dprintf(("  Buffer %X: start at pos %d, loop %s",me, me->playpos, me->fLoop?"YES":"NO"));
+      dprintf(("  Buffer %X: start at pos %d, loop %s",me, me->playpos, me->fLoop?"YES":"NO"));
+   }
+   else {
+      me->fLoop = dwFlags == DSBPLAY_LOOPING;
+      if (me->fLoop)
+         me->status |= DSBSTATUS_LOOPING;
+
+      dprintf(("  Buffer %X: already playing, loop %s",me, me->fLoop?"YES":"NO"));
+   }
+
    return DS_OK;
 }
 
@@ -506,15 +516,16 @@ HRESULT __stdcall SoundBufSetVolume(THIS_ LONG lVolume)
 {
    OS2IDirectSoundBuffer *me = (OS2IDirectSoundBuffer *)This;
 
-   dprintf(("DSOUND-OS2IDirectSoundBuffer::SoundBufSetVolume (buf=%X)", me));
+   dprintf(("DSOUND-OS2IDirectSoundBuffer::SoundBufSetVolume (%d, buf=%X)", lVolume, me));
    if (me == NULL) {
       return DSERR_INVALIDPARAM;
    }
-   me->DSvolume = lVolume;
+   me->DSvolume = (lVolume > 0) ? 0 : lVolume;
 
    /* = (10 ^ (1/10)) = 1dB - but the formula below gives results _very_ similar */
    /* to 'real' DirectSound, indistinguishable for all practical purposes        */
-   me->volume = 255.0 * pow(4, lVolume / 1000.0);
+   me->volume = 255.0 * pow(4, me->DSvolume / 1000.0);
+   dprintf(("  New volume: %d", me->volume));
 
    return DS_OK;
 }
@@ -524,7 +535,7 @@ HRESULT __stdcall SoundBufSetPan(THIS_ LONG lPan)
 {
    OS2IDirectSoundBuffer *me = (OS2IDirectSoundBuffer *)This;
 
-   dprintf(("DSOUND-OS2IDirectSoundBuffer::SoundBufSetPan (buf=%X)", me));
+   dprintf(("DSOUND-OS2IDirectSoundBuffer::SoundBufSetPan (%d, buf=%X)", lPan, me));
    if (me == NULL) {
       return DSERR_INVALIDPARAM;
    }
