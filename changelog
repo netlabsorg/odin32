@@ -1,4 +1,7 @@
- /* $Id: changelog,v 1.37 1999-06-30 16:07:59 sandervl Exp $ */
+ /* $Id: changelog,v 1.38 1999-07-02 12:42:14 sandervl Exp $ */
+ 99-07-02: Christoph Bratschi <cbratschi@datacomm.ch>
+	- PE2LX/USER32: Dialog bugfix for entryfield strings
+
  99-06-30: Christoph Bratschi <cbratschi@datacomm.ch>
 	- KERNEL32: Unicode changes (unicode.cpp)
 		    lstrcpynA/W (kernel32.cpp
