@@ -1,42 +1,35 @@
 ##############################################################################
-# $Id: makefile,v 1.1 2000-01-22 00:49:21 bird Exp $
+# $Id: makefile,v 1.2 2000-02-27 02:15:35 bird Exp $
 #
 # PD-Win32 API
 #
-#       pe2lx.exe makefile
+#       elf2lx.exe makefile
 #
 ##############################################################################
-
-##############################################################################
-# Directories
-##############################################################################
-PDWIN32_INCLUDE = ..\..\..\include
-PDWIN32_BIN     = ..\..\..\bin
-ELF2LXOBJ       = ..\object
-ELF2LXLIST      = ..\list
-WIN32KBASE      = ..
-WIN32K_INCLUDE  = $(WIN32KBASE)\include
-WIN32K_MISC     = $(WIN32KBASE)\misc
-WIN32K_LDR      = $(WIN32KBASE)\ldr
-OBJEXT          = elf_obj
 
 ##############################################################################
 # Include
 ##############################################################################
+!include ..\makefile.inc
 !include $(PDWIN32_INCLUDE)\pdwin32.mk
 
+##############################################################################
+# Object extention
+##############################################################################
+OBJEXT          = elf_obj
 
 ##############################################################################
 # Tools and Flags Addjustments
 ##############################################################################
-CFLAGS     = $(CFLAGS)   -DRING3 -I$(PDWIN32_INCLUDE) -I$(WIN32K_INCLUDE) \
+CINCLUDES  = -I$(WIN32KINCLUDE) -I$(PDWIN32_INCLUDE)
+CFLAGS     = $(CINCLUDES) $(CFLAGS) -DRING3 -DELF2LX \
              -Ge+ -Wall+ppt-ppc-inl-cnv-gnr-vft-gen-uni-ext- -Gm- -Gn- -Ti+ -Rn
-CXXFLAGS   = $(CXXFLAGS) -DRING3 -I$(PDWIN32_INCLUDE) -I$(WIN32K_INCLUDE) \
+CXXFLAGS   = $(CINCLUDES) $(CXXFLAGS) -DRING3 -DELF2LX \
              -Ge+ -Wall+ppt-ppc-inl-cnv-gnr-vft- -Gm- -Gn- -Ti+ -Gx -Rn
 
 LD         = ilink
 LDFLAGS    = /nologo /NOI /A:16 /NOE /O:$@ /packcode /packdata \
-             /MAP:$(ELF2LXLIST)\$(@B).map /pmtype:vio /Stack:4096 \
+             /MAP:$(WIN32KLIST)\$(@B).map /pmtype:vio /Stack:4096 \
 !ifdef DEBUG
 !ifndef NODEBUGINFO
     /debug /dbgpack
@@ -49,57 +42,60 @@ LDFLAGS    = /nologo /NOI /A:16 /NOE /O:$@ /packcode /packdata \
 ##############################################################################
 # Interference rules. Note: -Fo is IBMCPP specific.
 ##############################################################################
-{$(WIN32K_MISC)}.c{$(ELF2LXOBJ)}.$(OBJEXT):
+{$(WIN32KMISC)}.c{$(WIN32KOBJ)}.$(OBJEXT):
     @echo compiling: $(@B).c
-    @$(CC) $(CFLAGS) -c -Fa$(ELF2LXLIST)\$(@B).asm -Fo$@ $<
+    @$(CC) $(CFLAGS) -c -Fa$(WIN32KLIST)\$(@B).asm -Fo$@ $<
 
-{$(WIN32K_MISC)}.cpp{$(ELF2LXOBJ)}.$(OBJEXT):
+{$(WIN32KMISC)}.cpp{$(WIN32KOBJ)}.$(OBJEXT):
     @echo compiling: $(@B).cpp
-    @$(CXX) $(CXXFLAGS) -c -Fa$(ELF2LXLIST)\$(@B).asm -Fo$@ $<
+    @$(CXX) $(CXXFLAGS) -c -Fa$(WIN32KLIST)\$(@B).asm -Fo$@ $<
 
-{$(WIN32K_LDR)}.cpp{$(ELF2LXOBJ)}.$(OBJEXT):
+{$(WIN32KLDR)}.cpp{$(WIN32KOBJ)}.$(OBJEXT):
     @echo compiling: $(@B).cpp
-    @$(CXX) $(CXXFLAGS) -c -Fa$(ELF2LXLIST)\$(@B).asm -Fo$@ $<
+    @$(CXX) $(CXXFLAGS) -c -Fa$(WIN32KLIST)\$(@B).asm -Fo$@ $<
 
-.cpp{$(ELF2LXOBJ)}.$(OBJEXT):
+.cpp{$(WIN32KOBJ)}.$(OBJEXT):
     @echo compiling: $(@B).cpp
-    @$(CXX) $(CXXFLAGS) -c -Fa$(ELF2LXLIST)\$(@B).asm -Fo$@ $<
+    @$(CXX) $(CXXFLAGS) -c -Fa$(WIN32KLIST)\$(@B).asm -Fo$@ $<
 
 
 #
 # Visual slick edit!
 #
-{$(WIN32K_MISC)}.c.obj:
+{$(WIN32KMISC)}.c.obj:
     @echo compiling: $(@B).c
-    @$(CC) $(CFLAGS) -c -Fa$(ELF2LXLIST)\$(@B).asm -Fo$(ELF2LXOBJ)\$(@B).$(OBJEXT) $<
+    @$(CC) $(CFLAGS) -c -Fa$(WIN32KLIST)\$(@B).asm -Fo$(WIN32KOBJ)\$(@B).$(OBJEXT) $<
 
-{$(WIN32K_MISC)}.cpp.obj:
+{$(WIN32KMISC)}.cpp.obj:
     @echo compiling: $(@B).cpp
-    @$(CXX) $(CXXFLAGS) -c -Fa$(ELF2LXLIST)\$(@B).asm -Fo$(ELF2LXOBJ)\$(@B).$(OBJEXT) $<
+    @$(CXX) $(CXXFLAGS) -c -Fa$(WIN32KLIST)\$(@B).asm -Fo$(WIN32KOBJ)\$(@B).$(OBJEXT) $<
 
-{$(WIN32K_LDR)}.cpp.obj:
+{$(WIN32KLDR)}.cpp.obj:
     @echo compiling: $(@B).cpp
-    @$(CXX) $(CXXFLAGS) -c -Fa$(ELF2LXLIST)\$(@B).asm -Fo$(ELF2LXOBJ)\$(@B).$(OBJEXT) $<
+    @$(CXX) $(CXXFLAGS) -c -Fa$(WIN32KLIST)\$(@B).asm -Fo$(WIN32KOBJ)\$(@B).$(OBJEXT) $<
 
 .cpp.obj:
     @echo compiling: $(@B).cpp
-    @$(CXX) $(CXXFLAGS) -c -Fa$(ELF2LXLIST)\$(@B).asm -Fo$(ELF2LXOBJ)\$(@B).$(OBJEXT) $<
+    @$(CXX) $(CXXFLAGS) -c -Fa$(WIN32KLIST)\$(@B).asm -Fo$(WIN32KOBJ)\$(@B).$(OBJEXT) $<
 
 
 ##############################################################################
 # Main targets.
 ##############################################################################
-TARGET   = pe2lx
+TARGET   =  Elf2Lx
 
-OBJS     =  $(ELF2LXOBJ)\pe2lx.$(OBJEXT)      \
-            $(ELF2LXOBJ)\pe2lxmain.$(OBJEXT)  \
-            $(ELF2LXOBJ)\modulebase.$(OBJEXT) \
-            $(ELF2LXOBJ)\malloc.$(OBJEXT)     \
-            $(ELF2LXOBJ)\new.$(OBJEXT)        \
-            $(ELF2LXOBJ)\stricmp.$(OBJEXT)    \
-            $(ELF2LXOBJ)\vprintf.$(OBJEXT)
+OBJS     =  $(WIN32KOBJ)\elf2lx.$(OBJEXT) \
+            $(WIN32KOBJ)\elf2lxmain.$(OBJEXT) \
+            $(WIN32KOBJ)\modulebase.$(OBJEXT) \
+            $(WIN32KOBJ)\malloc.$(OBJEXT) \
+            $(WIN32KOBJ)\smalloc_avl.$(OBJEXT) \
+            $(WIN32KOBJ)\avl.$(OBJEXT) \
+            $(WIN32KOBJ)\rmalloc_avl.$(OBJEXT) \
+            $(WIN32KOBJ)\new.$(OBJEXT) \
+            $(WIN32KOBJ)\stricmp.$(OBJEXT) \
+            $(WIN32KOBJ)\vprintf.$(OBJEXT)
 
-all: ELFDumper.exe #$(TARGET).exe
+all: ELFDumper.exe $(TARGET).exe
 
 $(TARGET).exe: $(OBJS)
     @echo linking $@
@@ -107,9 +103,19 @@ $(TARGET).exe: $(OBJS)
     $(CP) $@ $(PDWIN32_BIN)
 
 ELFDumper.exe: ELFDumper.cpp ..\include\elf.h
-    $(CXX) $(CXXFLAGS) -Re -Gn- -Fa$(ELF2LXLIST)\ELFDumper.asm \
-        -Fo$(ELF2LXOBJ)\ELFDumper.$(OBJEXT) -Fe$@ ELFDumper.cpp
+    $(CXX) $(CXXFLAGS) -Re -Gn- -Fa$(WIN32KLIST)\ELFDumper.asm \
+        -Fo$(WIN32KOBJ)\ELFDumper.$(OBJEXT) -Fe$@ ELFDumper.cpp
 
+
+##############################################################################
+# Dependencies.
+##############################################################################
+dep:
+    $(DEPEND) -obj$(OBJEXT) -o..\Object $(CINCLUDES) ..\misc\*.c* ..\include\*.h
+
+!ifndef NODEP
+!include .depend
+!endif
 
 ##############################################################################
 # Cleanup
