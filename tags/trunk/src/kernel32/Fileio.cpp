@@ -1,4 +1,4 @@
-/* $Id: Fileio.cpp,v 1.56 2001-11-26 14:53:57 sandervl Exp $ */
+/* $Id: Fileio.cpp,v 1.57 2001-12-01 19:26:40 sandervl Exp $ */
 
 /*
  * Win32 File IO API functions for OS/2
@@ -652,6 +652,12 @@ ODINFUNCTION5(BOOL,         ReadFile,
               PDWORD,       lpNumberOfBytesRead,
               LPOVERLAPPED, lpOverlapped)
 {
+  if(lpNumberOfBytesRead) *lpNumberOfBytesRead = 0;
+  if(dwLength == 0) {
+      dprintf(("!WARNING!: Nothing to do"));
+      //TODO: should we fail here instead?? (wine doesn't)
+      return TRUE;
+  }
   return (HMReadFile(hFile,
                      pBuffer,
                      dwLength,
@@ -667,6 +673,11 @@ ODINFUNCTION5(BOOL,         ReadFileEx,
               LPOVERLAPPED, lpOverlapped,
               LPOVERLAPPED_COMPLETION_ROUTINE,  lpCompletionRoutine)
 {
+  if(nNumberOfBytesToRead == 0) {
+      dprintf(("!WARNING!: Nothing to do"));
+      //TODO: should we fail here instead?? (wine doesn't)
+      return TRUE;
+  }
   return (HMReadFileEx(hFile,
                        lpBuffer,
                        nNumberOfBytesToRead,
@@ -681,6 +692,13 @@ ODINFUNCTION5(BOOL, WriteFile,
               LPDWORD, nrbyteswritten,
               LPOVERLAPPED, lpOverlapped)
 {
+  if(nrbyteswritten) *nrbyteswritten = 0;
+  if(nrbytes == 0) {
+      dprintf(("!WARNING!: Nothing to do"));
+      //TODO: should we fail here instead?? (wine doesn't)
+      return TRUE;
+  }
+
   return (HMWriteFile(hFile,
                       buffer,
                       nrbytes,
@@ -715,6 +733,12 @@ ODINFUNCTION5(BOOL,         WriteFileEx,
               LPOVERLAPPED, lpOverlapped,
               LPOVERLAPPED_COMPLETION_ROUTINE,  lpCompletionRoutine)
 {
+  if(nNumberOfBytesToWrite == 0) {
+      dprintf(("!WARNING!: Nothing to do"));
+      //TODO: should we fail here instead?? (wine doesn't)
+      return TRUE;
+  }
+
   return (HMWriteFileEx(hFile,
                         (LPVOID)lpBuffer,
                         nNumberOfBytesToWrite,
