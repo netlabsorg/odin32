@@ -1,4 +1,4 @@
-/* $Id: sec.c,v 1.3 2003-01-16 15:22:40 sandervl Exp $ */
+/* $Id: sec.c,v 1.4 2003-04-07 18:40:52 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -15,6 +15,7 @@
 #include <windows.h>
 #include <stdlib.h>
 #include <string.h>
+
 #include <time.h>
 #include <ctype.h>
 #include <math.h>

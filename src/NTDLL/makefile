@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.36 2003-02-07 13:58:28 sandervl Exp $
+# $Id: makefile,v 1.37 2003-04-07 18:40:49 sandervl Exp $
 
 #
 # Odin32 API
@@ -8,7 +8,6 @@
 
 
 CCENV = EMX
-NOTEXPDEF = 1
 WRC_PREFIX_RESOURCE=1
 
 #
@@ -16,6 +15,7 @@ WRC_PREFIX_RESOURCE=1
 #
 !include ../../makefile.inc
 
+CDEFINES   =  -I$(ODIN32_INCLUDE)\emxruntime $(CDEFINES)
 
 #
 # Object files. Prefix with OBJDIR and one space before the '\'.
@@ -52,32 +52,32 @@ $(OBJDIR)\ntdllrsrc.obj
 # Libraries. One space before the '\'.
 #
 
+# -liberty_s -lstdcxx -lExCRuntime -lExDllSupport -lc_alias -lgcc_eh
+# -lgcc -lc -lc_dllso -lgcc_eh -lgcc -lc -lsys -los2 -lend
+
+LIBS = \
+$(ODIN32_LIB_)\EmxSupport\EMXOS2FSRoutines.lib \
+$(EMX)\lib\iberty_s.lib \
+$(EMX)\lib\gcc-lib\i386-pc-os2-emx\3.2.1\mt\stdcxx.lib \
+$(EMX)\lib\c_alias.lib \
+$(EMX)\lib\gcc-lib\i386-pc-os2-emx\3.2.1\mt\gcc_eh.lib \
+$(EMX)\lib\gcc-lib\i386-pc-os2-emx\3.2.1\mt\gcc.lib \
+$(EMX)\lib\mt\c.lib \
+$(EMX)\lib\mt\c_dllso.lib \
+$(EMX)\lib\mt\sys.lib \
+$(EMX)\lib\os2.lib \
+$(ODIN32_LIB_)\EmxSupport\ExCRuntime.lib \
+$(ODIN32_LIB_)\EmxSupport\ExDllSupport.lib \
+$(ODIN32_LIB)\kernel32.lib \
+$(ODIN32_LIB)\user32.lib 
 
 #
 # Target name - name of the dll without extention and path.
 #
 TARGET = ntdll
 
-all: $(OBJDIR) $(OBJDIR)\$(TARGET).dll $(TARGET).lib
-
-$(OBJDIR)\$(TARGET).dll: $(OBJS) $(TARGET).def
-    $(LD) $(LDFLAGS) -L$(ODIN32_LIB_)\Release -Zso -Zsys $(OBJS) $(TARGET).def -L.\libs -lm\
-      -liberty_s -lstdcxx -o $(OBJDIR)\$(TARGET).dll
-    touch $(OBJDIR)\$(TARGET).map
-    @echo "Illegal Sym File for EMX" > $(OBJDIR)\$(TARGET).sym
-
-$(TARGET).lib: 
-    implib $(OBJDIR)\$(TARGET).lib ntdll.def
-    @copy $(OBJDIR)\$(TARGET).lib $(ODIN32_LIB_)\Release > nul:
-    @copy $(OBJDIR)\$(TARGET).lib $(ODIN32_LIB_)\Debug  > nul:
-
 #
 # Includes the common rules.
 #
 !include $(ODIN32_POST_INC)
 
-lib:
-    $(IMPDEF) $(IMPDEF_FLAGS) ntdll-vac.def $(OBJDIR)\ntdllexp.def
-    implib $(OBJDIR)\$(TARGET).lib $(OBJDIR)\ntdllexp.def
-    @copy $(OBJDIR)\$(TARGET).lib $(ODIN32_LIB_)\Release > nul:
-    @copy $(OBJDIR)\$(TARGET).lib $(ODIN32_LIB_)\Debug  > nul:

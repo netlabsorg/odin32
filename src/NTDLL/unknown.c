@@ -1,4 +1,4 @@
-/* $Id: unknown.c,v 1.1 2003-01-16 15:22:42 sandervl Exp $ */
+/* $Id: unknown.c,v 1.2 2003-04-07 18:40:52 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -47,79 +47,6 @@ NTSTATUS WIN32API NtAllocateUuids(DWORD x1,
 
   return 0;
 }
-
-
-/*****************************************************************************
- * Name      : _alldiv
- * Purpose   : unknown
- * Parameters: unknown, probably wrong
- * Variables :
- * Result    :
- * Remark    : NTDLL.?
- * Status    : UNTESTED STUB
- *
- * Author    : Patrick Haller [Tue, 1999/06/01 09:00]
- *****************************************************************************/
-
-DWORD CDECL OS2_alldiv(DWORD x1,
-                       DWORD x2)
-{
-  dprintf(("NTDLL: _alldiv(%08xh,%08xh) not implemented.\n",
-           x1,
-           x2));
-
-  return (x1 / x2);
-}
-
-
-/*****************************************************************************
- * Name      : _allmul
- * Purpose   : unknown
- * Parameters: unknown, probably wrong
- * Variables :
- * Result    :
- * Remark    : NTDLL.?
- * Status    : UNTESTED STUB
- *
- * Author    : Patrick Haller [Tue, 1999/06/01 09:00]
- *****************************************************************************/
-
-DWORD CDECL OS2_allmul(DWORD x1,
-                       DWORD x2)
-{
-  dprintf(("NTDLL: _allmul(%08xh,%08xh) not implemented.\n",
-           x1,
-           x2));
-
-  return (x1 * x2);
-}
-
-
-/*****************************************************************************
- * Name      : RtlLargeIntegerToChar
- * Purpose   : unknown
- * Parameters: unknown, probably wrong
- * Variables :
- * Result    :
- * Remark    : NTDLL.?
- * Status    : UNTESTED STUB
- *
- * Author    : Patrick Haller [Tue, 1999/06/01 09:00]
- *****************************************************************************/
-
-DWORD WIN32API RtlLargeIntegerToChar(LARGE_INTEGER li,
-                                     LPWSTR        retstr,
-                                     DWORD         retlen)
-{
-  dprintf(("NTDLL: RtlLargeIntegerToChar(%08xh,%08xh,%08xh) not implemented.\n",
-           li,
-           retstr,
-           retlen));
-
-  return 0;
-}
-
-
 
 /*****************************************************************************
  * Name      : NtAlertThread
