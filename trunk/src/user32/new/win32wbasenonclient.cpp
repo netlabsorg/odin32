@@ -1,4 +1,4 @@
-/* $Id: win32wbasenonclient.cpp,v 1.10 2000-01-15 15:37:31 sandervl Exp $ */
+/* $Id: win32wbasenonclient.cpp,v 1.11 2000-01-15 16:37:12 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2 (non-client methods)
  *
@@ -600,10 +600,8 @@ VOID Win32BaseWindow::DrawFrame(HDC hdc,RECT *rect,BOOL dlgFrame,BOOL active)
   /* Draw frame */
   PatBlt(hdc,rect->left,   rect->top,      rect->right-rect->left, height,PATCOPY);
   PatBlt(hdc,rect->left,   rect->top,      width,                  rect->bottom-rect->top,PATCOPY);
-  PatBlt(hdc,rect->left,   rect->bottom, rect->right-rect->left,-height,PATCOPY);
-  //SvL: Was PatBlt(hdc,rect->left,   rect->bottom-1, rect->right-rect->left,-height,PATCOPY);
-  PatBlt(hdc,rect->right,  rect->top,     -width,                  rect->bottom-rect->top,PATCOPY);
-  //SvL: Was PatBlt(hdc,rect->right-1,  rect->top,     -width,                  rect->bottom-rect->top,PATCOPY);
+  PatBlt(hdc,rect->left,   rect->bottom-1, rect->right-rect->left,-height,PATCOPY);
+  PatBlt(hdc,rect->right-1,rect->top,     -width,                  rect->bottom-rect->top,PATCOPY);
   SelectObject(hdc,oldBrush);
 
   InflateRect(rect,-width,-height);
