@@ -1,4 +1,4 @@
-; $Id: shell32dbg.def,v 1.3 2002-06-07 08:21:43 sandervl Exp $
+; $Id: shell32dbg.def,v 1.4 2003-02-14 10:07:18 sandervl Exp $
 
 ; Based on Windows 95
 LIBRARY SHELL32 INITINSTANCE
@@ -28,7 +28,7 @@ EXPORTS
     ILCloneFirst                      = _DbgILCloneFirst@4                       @19
     ILGlobalClone                     = _DbgILGlobalClone@4                      @20
     ILIsEqual                         = _DbgILIsEqual@8                          @21
-    Control_RunDLL                    = _DbgControl_RunDLL@16                    @22
+    Control_RunDLL                    = _DbgControl_RunDLLA@16                   @22
     ILIsParent                        = _DbgILIsParent@12                        @23
     ILFindChild                       = _DbgILFindChild@8                        @24
     ILCombine                         = _DbgILCombine@8                          @25
@@ -47,8 +47,8 @@ EXPORTS
     PathStripPath                     = _DbgPathStripPathAW@4                    @38
     PathIsUNC                         = _DbgPathIsUNCAW@4                        @39
     PathIsRelative                    = _DbgPathIsRelativeAW@4                   @40
-;   Control_RunDLLA                   = _DbgControl_RunDLLA@16                   @41
-;   Control_RunDLLW                   = _DbgControl_RunDLLW@16                   @42
+    Control_RunDLLA                   = _DbgControl_RunDLLA@16                   @41
+    Control_RunDLLW                   = _DbgControl_RunDLLW@16                   @42
     PathIsExe                         = _DbgPathIsExeAW@4                        @43
     DoEnvironmentSubstA               = _DbgDoEnvironmentSubstA@8                @44
     PathFileExists                    = _DbgPathFileExistsAW@4                   @45
@@ -172,7 +172,7 @@ EXPORTS
     SHRunControlPanel                 = _DbgSHRunControlPanel@8                  @161
     SHSimpleIDListFromPath            = _DbgSHSimpleIDListFromPathAW@4           @162
     StrToOleStr                       = _DbgStrToOleStr@8                        @163
-    Win32DeleteFile                   = _DbgWin32DeleteFile@4                    @164
+    Win32DeleteFile                   = _DbgWin32DeleteFileAW@4                  @164
     SHCreateDirectory                 = _DbgSHCreateDirectory@8                  @165
 ;   CallCPLEntry16                    = _DbgCallCPLEntry16@?                     @166
     SHAddFromPropSheetExtArray        = _DbgSHAddFromPropSheetExtArray@12        @167
@@ -247,7 +247,7 @@ EXPORTS
     SHBrowseForFolder                 = _DbgSHBrowseForFolderA@4                 @236
     SHBrowseForFolderA                = _DbgSHBrowseForFolderA@4                 @237
     SHBrowseForFolderW                = _DbgSHBrowseForFolderW@4                 @238
-    SHChangeNotify                    = _DbgSHChangeNotifyAW@16                  @239
+    SHChangeNotify                    = _DbgSHChangeNotify@16                    @239
     SHEmptyRecycleBinA                = _DbgSHEmptyRecycleBinA@12                @240
     SHEmptyRecycleBinW                = _DbgSHEmptyRecycleBinW@12                @241
     SHFileOperation                   = _DbgSHFileOperationAW@4                  @242

@@ -457,9 +457,14 @@ VOID WINAPI SHGetSettings(LPSHELLFLAGSTATE lpsfs, DWORD dwMask);
 #define SHCNF_FLUSH		0x1000
 #define SHCNF_FLUSHNOWAIT	0x2000
 
-void WINAPI SHChangeNotifyA(LONG wEventId, UINT uFlags, LPCVOID dwItem1, LPCVOID dwItem2);
-void WINAPI SHChangeNotifyW(LONG wEventId, UINT uFlags, LPCVOID dwItem1, LPCVOID dwItem2);
-#define  SHChangeNotify WINELIB_NAME_AW(SHChangeNotify)
+void WINAPI SHChangeNotify(LONG wEventId, UINT uFlags, LPCVOID dwItem1, LPCVOID dwItem2);
+
+/****************************************************************************
+* SHCreateDirectory API
+*/
+DWORD WINAPI SHCreateDirectory(HWND, LPCVOID);
+DWORD WINAPI SHCreateDirectoryExA(HWND, LPCSTR, LPSECURITY_ATTRIBUTES);
+DWORD WINAPI SHCreateDirectoryExW(HWND, LPCWSTR, LPSECURITY_ATTRIBUTES);
 
 /****************************************************************************
 * SHGetSpecialFolderLocation API

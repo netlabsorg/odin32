@@ -1,4 +1,4 @@
-; $Id: shell32.def,v 1.38 2002-06-07 08:21:43 sandervl Exp $
+; $Id: shell32.def,v 1.39 2003-02-14 10:07:18 sandervl Exp $
 
 ; Based on Windows 95
 LIBRARY SHELL32 INITINSTANCE
@@ -28,7 +28,7 @@ EXPORTS
     ILCloneFirst                      = _ILCloneFirst@4                       @19
     ILGlobalClone                     = _ILGlobalClone@4                      @20
     ILIsEqual                         = _ILIsEqual@8                          @21
-    Control_RunDLL                    = _Control_RunDLL@16                    @22
+    Control_RunDLL                    = _Control_RunDLLA@16                   @22
     ILIsParent                        = _ILIsParent@12                        @23
     ILFindChild                       = _ILFindChild@8                        @24
     ILCombine                         = _ILCombine@8                          @25
@@ -47,8 +47,8 @@ EXPORTS
     PathStripPath                     = _PathStripPathAW@4                    @38
     PathIsUNC                         = _PathIsUNCAW@4                        @39
     PathIsRelative                    = _PathIsRelativeAW@4                   @40
-;   Control_RunDLLA                   = _Control_RunDLLA@16                   @41
-;   Control_RunDLLW                   = _Control_RunDLLW@16                   @42
+    Control_RunDLLA                   = _Control_RunDLLA@16                   @41
+    Control_RunDLLW                   = _Control_RunDLLW@16                   @42
     PathIsExe                         = _PathIsExeAW@4                        @43
     DoEnvironmentSubstA               = _DoEnvironmentSubstA@8                @44
     PathFileExists                    = _PathFileExistsAW@4                   @45
@@ -172,7 +172,7 @@ EXPORTS
     SHRunControlPanel                 = _SHRunControlPanel@8                  @161
     SHSimpleIDListFromPath            = _SHSimpleIDListFromPathAW@4           @162
     StrToOleStr                       = _StrToOleStr@8                        @163
-    Win32DeleteFile                   = _Win32DeleteFile@4                    @164
+    Win32DeleteFile                   = _Win32DeleteFileAW@4                  @164
     SHCreateDirectory                 = _SHCreateDirectory@8                  @165
 ;   CallCPLEntry16                    = _CallCPLEntry16@?                     @166
     SHAddFromPropSheetExtArray        = _SHAddFromPropSheetExtArray@12        @167
@@ -247,7 +247,7 @@ EXPORTS
     SHBrowseForFolder                 = _SHBrowseForFolderA@4                 @236
     SHBrowseForFolderA                = _SHBrowseForFolderA@4                 @237
     SHBrowseForFolderW                = _SHBrowseForFolderW@4                 @238
-    SHChangeNotify                    = _SHChangeNotifyAW@16                  @239
+    SHChangeNotify                    = _SHChangeNotify@16                    @239
     SHEmptyRecycleBinA                = _SHEmptyRecycleBinA@12                @240
     SHEmptyRecycleBinW                = _SHEmptyRecycleBinW@12                @241
     SHFileOperation                   = _SHFileOperationAW@4                  @242
