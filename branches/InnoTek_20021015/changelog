@@ -1,0 +1,174 @@
+/* $Id: changelog,v 1.2342 2002-10-15 09:17:09 sandervl Exp $ */
+
+ 2002-10-15: Platon Fomichev <platon@innotek   >
+    - USER32:   o Disable close button & close item in system menu for windows
+                  with SC_NOCLOSE class style
+
+ 2002-10-11: Sander van Leeuwen <sandervl@innotek   >
+    - USER32:   o SetParent bugfix; don't clear window id if parent is set to 
+                  0.
+
+ 2002-10-10: Sander van Leeuwen <sandervl@innotek   >
+    - KERNEL32: o Overlapped IO bugfixes for synchronization (typically seen
+                  with heavy threaded apps on SMP systems)
+                o Fix for IP logging
+
+ 2001-10-08: Dietrich Teickner <Dietrich_Teickner@t-online   >
+    - SHELL32:  o SHFileOperationA updates
+
+ 2002-10-08: Sander van Leeuwen <sandervl@innotek   >
+    - ODINCRT:  o Updates for shared critical sections
+
+ 2002-10-07: Sander van Leeuwen <sandervl@innotek   >
+    - ODINCRT:  o Minor updates for critical section functions
+
+ 2002-10-07: Platon Fomichev <platon@innotek   >
+    - IPHLPAPI: o GetAdaptersInfo bugfix
+    - KERNEL32: o CD ioctls: stop audio when seeking
+
+ 2002-10-03: Sander van Leeuwen <sandervl@innotek   >
+    - KERNEL32: o Added IP logging (define WIN32_IP_LOGGING in dbglog.cpp)
+    - IPLOG:    o IP logging server
+
+ 2002-10-03: Platon Fomichev <platon@innotek   >
+    - KERNEL32: o Implemented IOCTL_CDROM_RAW_READ
+
+ 2002-10-01: Sander van Leeuwen <sandervl@innotek   >
+    - KERNEL32: o Be careful with stack usage in exception handler during
+                  XCPT_GUARD_PAGE_VIOLATION. 
+
+ 2002-09-30: Sander van Leeuwen <sandervl@innotek   >
+    - SHELL32:  o Fixed crash when deleting a file in the file dialog
+    - KERNEL32: o Fixes for volume access
+
+ 2002-09-30: Platon Fomichev <platon@innotek   >
+    - COMDLG32: o File dialogs: if lpstrInitialDir is not a dir but a filename
+                  skip it and use current directory
+
+ 2002-09-27: Sander van Leeuwen <sandervl@innotek   >
+    - KERNEL32: o GetFileSize must fail for drives
+                o Disable physical disk & volume access by default; 
+                  call EnablePhysicalDiskAccess to enable it (custom build)
+                o FindFirst/NextVolumeA fixes for ignoring LVM volumes
+
+ 2002-09-26: Sander van Leeuwen <sandervl@innotek   >
+    - KERNEL32: o OS/2 Physical partition names have base 1 (0 for win32)
+                o Convert ERROR_PATH_NOT_FOUND to ERROR_FILE_NOT_FOUND in
+                  OSLibDosCreateFile
+                o IOCTL_DISK_GET_DRIVE_GEOMETRY fix for physical drive
+                o Fixed return value for FindNextVolumeMountPointA/W
+                o Fixed read & write for unmounted volumes; must update
+                  current file position manually & check for boundaries
+    - WINMM:    o Fixed debug wrapper logging
+    - USER32:   o WM_ADJUSTFRAMEPOS:
+                  The PM frame control changes the z-order of a child window
+                  if it receives focus after a window has been destroyed
+                  We can't let this happen as this breaks assumptions
+                  elsewhere (e.g. GetNextDlgGroupItem)
+                  By returning 0 here, we prevent the default frame handler
+                  from messing things up. (one example is a group of radio buttons)
+
+ 2002-09-24: Vit Timchishin <tivv@ukr    >
+    - KERNEL32: o Fix for OSLibDosFreeMem
+
+ 2002-09-24: Sander van Leeuwen <sandervl@innotek   >
+    - BIN:      o WGSS update from IBM
+    - IPHLPAPI: o GetNetworkParams: fixed completely broken code to fill in
+                  DNS entries.
+
+ 2002-09-19:
+    - MAKE, TOOLS/BIN/RM, FASTDEP:
+                o IPF and IPP support. They are built in the 'misc' pass.
+                  See make\testcase\ipf.mak for usage example.
+                  NB. FastDep does only C styled dependency generation
+                  for .IPP files.
+                o Corrected bad .orc dependency generation.
+                o Added some shortcut rules to restart/skip passes.
+                o Fixed rm -R filename. Suppressed ERROR_PATH_NOT_FOUND msgs.
+
+ 2002-09-19: Sander van Leeuwen <sandervl@innotek   >
+    - ODINCRT:  o Include new & delete in memory statistics
+
+ 2002-09-19: Platon Fomichev <platon@innotek   >
+    - USER32:   o Put window on top of owner if owner is not in the foreground;
+                  HWND_TOP forces the owner to the top as well
+                  (window creation)
+
+ 2002-09-18: Sander van Leeuwen <sandervl@innotek   >
+    - KERNEL32: o Added code to print leaked heap memory
+
+ 2002-09-18: Platon Fomichev <platon@innotek   >
+    - USER32:   o WM_MOUSEWHEEL update
+
+ 2002-09-17: Platon Fomichev <platon@innotek   >
+    - USER32:   o Create invisible vertical scroller for all top-level windows
+                  so the IBM wheel driver sends us WM_VSCROLL messages
+                o Added WM_MOUSEWHEEL message support
+
+ 2002-09-16: Sander van Leeuwen <sandervl@innotek   >
+    - COMCTL32: o LISTVIEW_ProcessLetterKeys bugfix
+    - GDI32:    o Statistics fixes & print leaked gdi handles
+                  when unloaded.
+                o Don't recycle handles too soon. That makes it more difficult
+                  to interpret the logfile.
+
+ 2002-09-16: Platon Fomichev <platon@innotek   >
+    - USER32:   o Combobox fix to update selected item when the control is rolled
+                  up
+
+ 2001-09-15: Dietrich Teickner <Dietrich_Teickner@t-online   >
+    - SHELL32:  o Wine resync for shfileop.c
+
+ 2002-09-14: Sander van Leeuwen <sandervl@innotek   >
+    - KERNEL32: o WaitForSingleObject, (Msg)WaitForMultipleObjects:
+                  If dwTimeout is not 0 and smaller than 20 ms, then
+                  temporarily change thread priority to time critical to
+                  make sure we don't get a late timeout.
+                  (CLOCKSCALE=4 in config.sys also improves timeout responds)
+
+ 2002-09-14: Yuri Dario <mc6530@mclink   >
+    - DSOUND:   o Load MMPM2 (MDM.DLL) on demand
+
+ 2002-09-12: Platon Fomichev <platon@innotek   >
+    - USER32:   o Translate PM WM_VSCROLL to WM_MOUSEWHEEL messages (currently
+                  only dispatched to (dinput) hook handler)
+
+ 2002-09-12: knut st. osmundsen <bird@anduin   >
+    - MAKE:     o Corrected bug in process which made it put the libraries in
+                  the wrong place.
+                o Always stamp the .def file before linking so that build level
+                  info will be up to date.
+                o Added some shortcuts rules for lazy programmers:
+                  * pass[1-6] for starting from a given pass.
+                  * quick for only doing lib, executable and publish.
+
+ 2002-09-10: knut st. osmundsen <bird@anduin   >
+    - TOOLS/VSLICK:
+                o Added kdev.e. Odin32.e with more goodies like an 'Extra' menu.
+
+ 2002-09-05: Sander van Leeuwen <sandervl@innotek   >
+    - USER32:   o Caret bug in edit control WM_ERASEBKGND handler (hidden,
+                  but not shown again)
+                o Removed obsolete hack in CreateCaret
+
+ 2002-09-05: Dietrich Teickner <Dietrich_Teickner@t-online   >
+    - COMDLG32: o Corrected translation of IDS_TODESKTOP resource string
+
+ 2002-09-04: knut st. osmundsen <bird@anduin   >
+    - FASTDEP:  o Corrected bug in caching. Didn't force rescan of files when
+                  a dependant file wasn't present any more.
+                o Corrected makefile. No memory debug.
+    - CMDQD:    o Corrected makefile.
+
+    - Tools/DailyBuilds:
+                o Changed odin32env.cmd to use buildenv.cmd to set up the
+                  desired build environment.
+                o Changed odin32clean.cmd to use tools\bin\rm.exe.
+    - MAKE:     o Corrected CC_NO_DBGMEM check for vac3xx.
+
+ 2002-09-03: Sander van Leeuwen <sandervl@innotek   >
+    - USER32:   o Cleaned up clipboard code
+
+ 2002-09-03: Platon Fomichev <platon@innotek   >
+    - USER32:   o Fix for Ctrl-Break
+

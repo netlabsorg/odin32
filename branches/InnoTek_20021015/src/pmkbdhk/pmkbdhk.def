@@ -1,0 +1,10 @@
+; $Id: pmkbdhk.def,v 1.2 2001-12-13 12:25:21 sandervl Exp $
+
+LIBRARY PMKBDHK INITGLOBAL
+DESCRIPTION 'Odin OS/2 Presentation Manager Keyboard Hook'
+DATA SINGLE SHARED
+CODE SHARED LOADONCALL
+
+EXPORTS
+        hookKill        @2
+        hookInit        @3

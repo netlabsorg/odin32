@@ -1,0 +1,26 @@
+LIBRARY VIO32 INITINSTANCE
+DATA MULTIPLE NONSHARED
+
+EXPORTS
+  InputHook         @1
+  SendMsgHook       @2
+  vio32Open         @10
+  vio32Close        @11
+  kbd32GetKey       @12
+  kbd32SetMode      @13
+  kbd32GetMode      @14
+  kbd32AddFilter    @15
+  kbd32RemoveFilter @16
+  vio32GetEvent     @17
+  kbd32GetKeyStatus @18
+  vio32GetMouse     @19
+  vio32WriteEvent   @20
+  vio32GetEventQSize @21
+  vio32PeekEvent    @22
+  vio32FlushEventQ  @23
+  InstallHook       @31
+  DeInstallHook     @32
+  VIOWindowClient   @33
+  VIOWindowFrame    @34
+
+ 
