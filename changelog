@@ -1,4 +1,7 @@
-/* $Id: changelog,v 1.2061 2002-05-01 08:02:04 sandervl Exp $ */
+/* $Id: changelog,v 1.2062 2002-05-06 09:39:36 sandervl Exp $ */
+
+ 2002-05-06: Sander van Leeuwen <sandervl@xs4all.nl>
+    - WS2_32:   o WSAAccept added (Wine port (X11 license); todo LGPL)
 
  2002-05-01: Sander van Leeuwen <sandervl@xs4all.nl>
     - USER32:   o PMSCAN_DBE_CONV & PMSCAN_DBE_NOCONV added to keyboard
