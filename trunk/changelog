@@ -1,4 +1,8 @@
-/* $Id: changelog,v 1.2369 2002-11-28 19:48:46 sandervl Exp $ */
+/* $Id: changelog,v 1.2370 2002-11-29 15:04:18 sandervl Exp $ */
+
+ 2002-11-29: Sander van Leeuwen <sandervl@innotek   >
+    - USER32:   o Add ODIN_SetSyscolors to override system colors without
+                  forcing a desktop repaint
 
  2002-11-28: Sander van Leeuwen <sandervl@innotek   >
     - KERNEL32: o Make sure the stack is properly aligned
