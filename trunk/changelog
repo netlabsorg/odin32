@@ -1,4 +1,7 @@
- /* $Id: changelog,v 1.506 1999-12-05 00:32:19 sandervl Exp $ */
+ /* $Id: changelog,v 1.507 1999-12-05 10:01:18 sandervl Exp $ */
+
+ 99-12-05: Edgar Buerkle <Edgar.Buerkle@gmx.net>
+	- KERNEL32: Better logging for CreateProcessA
 
  99-12-05: Sander van Leeuwen <sandervl@xs4all.nl>
 	- GDI32: Changed DEFAULT_GUI_FONT to WarpSans.9
@@ -8,6 +11,9 @@
                  pmwindow.cpp. (client can change without affecting the
                  frame window's size/position; previously we never sent an update)
                  -> fixes wrong button position in RealPlayer
+	- INCLUDE\heapstring.h: Changed definition of lstrcpy(n)AtoW/WtoA
+        - KERNEL32: CHanged lstrcpy(n)AtoW/WtoA
+	- LZ32: Removed prototype of lstrcpyAtoW
 
  99-12-04 Achim Hasenmueller <achimha@innotek.de>
         - WSOCK32\NEW: Fixed bugs with incorrect relay window invocation
