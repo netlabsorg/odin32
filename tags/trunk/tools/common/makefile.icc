@@ -1,9 +1,10 @@
-# $Id: makefile.icc,v 1.1 1999-09-05 02:09:18 bird Exp $
+# $Id: makefile.icc,v 1.2 1999-09-05 02:30:46 bird Exp $
 
+#
+# PD-Win32 API
 #
 # Tools common library, ICC version.
 #
-# Copyright 1999 knut st. osmundsen
 #
 
 
