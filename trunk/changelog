@@ -1,8 +1,17 @@
-/* $Id: changelog,v 1.1269 2001-02-18 17:59:27 sandervl Exp $ */
+/* $Id: changelog,v 1.1270 2001-02-19 06:03:34 bird Exp $ */
+
+ 2000-02-18: knut st. osmundsen <knut.stange.osmundsen@mynd.no>
+    - Win32k:   o Finished implementation of DosAllocMemEx.
+                  DosAllocMemEx is equal to DosAllocMem but takes some extra
+                  OBJ_ flags (defined in win32k.h).
+                  TODO: "Grow arena" problem when allocating memory at a
+                  specific location. I'll fix this ASAP and add a fix for the
+                  loader too (which has the same problems with loading EXEs
+                  without fixup above 64MB).
 
  2001-02-18: Sander van Leeuwen <sandervl@xs4all.nl>
     - USER32:   o Restore window origin in SetWindowPos for parent window with
-                  CS_OWNDC style. 
+                  CS_OWNDC style.
                   Do the same thing in WM_VRNENABLED message handler.
                   (fixes paint offset problems in Opera windows)
                 o Bug in yesterday's ScrollWindowEx fix
