@@ -1,4 +1,4 @@
-/* $Id: OS2CLIPPER.CPP,v 1.12 2001-05-28 17:17:09 phaller Exp $ */
+/* $Id: OS2CLIPPER.CPP,v 1.13 2001-09-30 22:23:44 sandervl Exp $ */
 
 /*
  * DX clipper class routines
@@ -21,12 +21,14 @@
 #include <misc.h>
 #include <winerror.h>
 #include <winuser.h>
+#include <winuser32.h>
+#include "oslibgpi.h"
 
 //******************************************************************************
 //******************************************************************************
 OS2IDirectDrawClipper::OS2IDirectDrawClipper(void) :
-                 Referenced(0), lastError(DD_OK),
-                 clipWindow(0)
+                 Referenced(0), lastError(DD_OK), fDrawingAllowed(TRUE),
+                 clipWindow(0), lpRgnData(NULL), fClipListChanged(FALSE)
 {
   // this constructor creates an unassociated instance of the ddraw clipper,
   // no ddraw object is associated
@@ -45,14 +47,13 @@ OS2IDirectDrawClipper::OS2IDirectDrawClipper(void) :
   lpDraw                  = NULL;
   // lpDraw->Vtbl.AddRef(lpDraw);
   // hDive                   = lpDirectDraw->GetDiveInstance();
-  windowRect.left = windowRect.right = windowRect.top = windowRect.bottom = 0;
 }
 
 //******************************************************************************
 //******************************************************************************
 OS2IDirectDrawClipper::OS2IDirectDrawClipper(OS2IDirectDraw *lpDirectDraw) :
-                 Referenced(0), lastError(DD_OK),
-                 clipWindow(0)
+                 Referenced(0), lastError(DD_OK), fDrawingAllowed(TRUE),
+                 clipWindow(0), lpRgnData(NULL), fClipListChanged(FALSE)
 {
   lpVtbl                  = &Vtbl;
   Vtbl.AddRef             = ClipAddRef;
@@ -68,12 +69,15 @@ OS2IDirectDrawClipper::OS2IDirectDrawClipper(OS2IDirectDraw *lpDirectDraw) :
   lpDraw                  = lpDirectDraw;
   lpDraw->Vtbl.AddRef(lpDraw);
   hDive                   = lpDirectDraw->GetDiveInstance();
-  windowRect.left = windowRect.right = windowRect.top = windowRect.bottom = 0;
 }
 //******************************************************************************
 //******************************************************************************
 OS2IDirectDrawClipper::~OS2IDirectDrawClipper()
-{
+{ 
+  if(lpRgnData) free(lpRgnData);
+  if(clipWindow) {
+      WinSetVisibleRgnNotifyProc(clipWindow, NULL, 0);
+  }
   lpDraw->Vtbl.Release(lpDraw);
 }
 //******************************************************************************
@@ -141,26 +145,25 @@ HRESULT WIN32API ClipGetClipList(THIS This, LPRECT lpRect, LPRGNDATA lpClipList,
   }
   if(me->clipWindow) 
   {
-      HRGN hRgn, hRgn1;
-      HDC  hdc;
-      int  bufneeded;
+      RECT *rect = (RECT *)&lpClipList->Buffer;
+      DWORD regiondatasize;
 
-	hRgn = CreateRectRgn(0, 0, 1, 1);
-	hdc = GetDC(me->clipWindow);
-	if(GetClipRgn(hdc, hRgn)) {
-		if(lpRect) {
-			hRgn1 = CreateRectRgnIndirect(lpRect);
-			CombineRgn(hRgn, hRgn, hRgn1, RGN_AND);
-			DeleteObject(hRgn1);
-		}
-		bufneeded = GetRegionData(hRgn, *lpdwSize, lpClipList);
-		if(bufneeded > *lpdwSize) {
-			rc = DDERR_REGIONTOOSMALL;
-		}
-	}
-	else	rc = DDERR_NOCLIPLIST;
-	DeleteObject(hRgn);
-	ReleaseDC(me->clipWindow, hdc);	
+      if(me->lpRgnData == NULL) {
+          DebugInt3();
+          return DDERR_NOCLIPLIST;
+      }
+      regiondatasize = me->lpRgnData->rdh.dwSize + me->lpRgnData->rdh.nCount*sizeof(RECT);
+      if(lpClipList == NULL) {
+          *lpdwSize = regiondatasize;
+          return DD_OK;
+      }
+
+      if(*lpdwSize < regiondatasize) {
+          *lpdwSize = regiondatasize;
+          return DDERR_REGIONTOOSMALL;
+      }
+      memcpy(lpClipList, me->lpRgnData, regiondatasize);
+      dprintf(("Boundary rectangle (%d,%d)(%d,%d)", lpClipList->rdh.rcBound.left, lpClipList->rdh.rcBound.top, lpClipList->rdh.rcBound.right, lpClipList->rdh.rcBound.bottom));
   }
   else { //todo!!
 	dprintf(("ClipGetClipList not complete if not associated with window!"));
@@ -223,22 +226,72 @@ HRESULT WIN32API ClipInitialize(THIS This, LPDIRECTDRAW lpDD, DWORD dwFlags)
 //******************************************************************************
 HRESULT WIN32API ClipIsClipListChanged(THIS This, BOOL *lpbChanged)
 {
+ OS2IDirectDrawClipper *me = (OS2IDirectDrawClipper *)This;
+
   dprintf(("DDRAW: ClipIsClipListChanged %x %x", This, lpbChanged));
 
+  if(lpbChanged == NULL) {
+      return DDERR_INVALIDPARAMS;
+  }
+  *lpbChanged = me->fClipListChanged;
+  me->fClipListChanged = FALSE;
   return(DD_OK);
 }
 //******************************************************************************
 //******************************************************************************
-HRESULT WIN32API ClipSetClipList(THIS This, LPRGNDATA lpClipList, DWORD lpdwSize)
+HRESULT WIN32API ClipSetClipList(THIS This, LPRGNDATA lpClipList, DWORD dwFlags)
 {
  OS2IDirectDrawClipper *me = (OS2IDirectDrawClipper *)This;
 
-  dprintf(("DDRAW: ClipSetClipList %x %x %x", This, lpClipList, lpdwSize));
+  dprintf(("DDRAW: ClipSetClipList %x %x %x", This, lpClipList, dwFlags));
 
   if(me->clipWindow) {
-	return DDERR_CLIPPERISUSINGHWND;
+      return DDERR_CLIPPERISUSINGHWND;
   }
-  return(DD_OK);
+  if(lpClipList == NULL) {
+      //TODO: should protect this with a critical section
+      if(me->lpRgnData) {
+          free(me->lpRgnData);
+          me->lpRgnData = NULL;
+      }
+      return DD_OK;
+  }
+  //TODO: return error if a clip list is already active??
+  if(me->lpRgnData) {
+      free(me->lpRgnData);
+      me->lpRgnData = NULL;
+  }
+  me->lpRgnData = (LPRGNDATA)malloc(lpClipList->rdh.dwSize + lpClipList->rdh.nCount*sizeof(RECT));
+  memcpy(me->lpRgnData, lpClipList, lpClipList->rdh.dwSize + lpClipList->rdh.nCount*sizeof(RECT));
+  return DD_OK;
+}
+//******************************************************************************
+//******************************************************************************
+BOOL WIN32API ClipVisRgnCallback(HWND hwnd, BOOL fDrawingAllowed, DWORD dwUserData)
+{
+ OS2IDirectDrawClipper *me = (OS2IDirectDrawClipper *)dwUserData;
+ LPRGNDATA lpClipList, lpRgnOld;
+
+  dprintf(("DDRAW: ClipVisRgnCallback %x %x %x", me, hwnd, fDrawingAllowed));
+  if(me && me->clipWindow == hwnd) {
+      me->fClipListChanged = TRUE;
+      lpRgnOld = me->lpRgnData;
+      if(fDrawingAllowed == FALSE) {
+          me->fDrawingAllowed = FALSE;
+          lpClipList = (LPRGNDATA)malloc(sizeof(RGNDATA));
+          lpClipList->rdh.dwSize   = sizeof(lpClipList->rdh);
+          lpClipList->rdh.iType    = RDH_RECTANGLES;    // one and only possible value
+          lpClipList->rdh.nCount   = 0;
+          lpClipList->rdh.nRgnSize = 0;
+          me->lpRgnData = lpClipList;
+      }
+      else {
+          me->fDrawingAllowed = TRUE;
+          me->lpRgnData = OSLibQueryVisibleRegion(hwnd, me->lpDraw->GetScreenHeight());
+      }
+      free(lpRgnOld);
+  }
+  return TRUE;
 }
 //******************************************************************************
 //DWORD param not used in DirectX 3
@@ -249,8 +302,31 @@ HRESULT WIN32API ClipSetHWnd(THIS This, DWORD reserved, HWND hwnd)
 
   dprintf(("DDRAW: ClipSetHWnd %x %x %x", This, reserved, hwnd));
 
+  if(!IsWindow(hwnd)) {
+      dprintf(("WARNING: ClipSetHWnd invalid window handle"));
+      return DDERR_INVALIDPARAMS;
+  }
+  if(me->clipWindow) {
+      //TODO: Is this really allowed??
+      WinSetVisibleRgnNotifyProc(me->clipWindow, NULL, 0);
+  }
   me->clipWindow = hwnd;
-  GetClientRect(hwnd, &me->windowRect);
+  WinSetVisibleRgnNotifyProc(hwnd, ClipVisRgnCallback, (DWORD)me);
+
+#if 1
+  me->lpRgnData = OSLibQueryVisibleRegion(hwnd, me->lpDraw->GetScreenHeight());
+#else
+  me->lpRgnData = (LPRGNDATA)malloc(sizeof(RGNDATAHEADER) + sizeof(RECT));
+  me->lpRgnData->rdh.dwSize = sizeof(RGNDATAHEADER);
+  me->lpRgnData->rdh.iType  = RDH_RECTANGLES;
+  me->lpRgnData->rdh.nCount = 1;
+  me->lpRgnData->rdh.nRgnSize = sizeof(RECT);
+  //TODO: Do we need to return the window rectangle or the client
+  //      rectangle converted to screen coordinates??????
+  GetWindowRect(me->clipWindow, &me->lpRgnData->rdh.rcBound);
+  RECT *rect = (RECT *)&me->lpRgnData->Buffer;
+  *rect = me->lpRgnData->rdh.rcBound;
+#endif
 
   return(DD_OK);
 }

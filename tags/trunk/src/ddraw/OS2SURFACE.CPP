@@ -1,4 +1,4 @@
-/* $Id: OS2SURFACE.CPP,v 1.32 2001-04-04 09:02:14 sandervl Exp $ */
+/* $Id: OS2SURFACE.CPP,v 1.33 2001-09-30 22:23:44 sandervl Exp $ */
 
 /*
  * DirectDraw Surface class implementaion
@@ -4515,11 +4515,15 @@ HRESULT WIN32API SurfLock( THIS This,
 
   dprintf(("DDRAW: SurfLock %d %08X %d %d\n", (int)lpRect, (int)lpSurfaceDesc, dwFlags, hEvent));
 
-  if((NULL==lpSurfaceDesc)|| ((dwFlags & DDLOCK_EVENT) && NULL != hEvent))
+  if((NULL==lpSurfaceDesc)|| ((dwFlags & DDLOCK_EVENT) && NULL != hEvent)) {
+    dprintf(("Invalid parameters"));
     return DDERR_INVALIDPARAMS;
+  }
 
-  if(lpSurfaceDesc->dwSize != sizeof(DDSURFACEDESC) && lpSurfaceDesc->dwSize != sizeof(DDSURFACEDESC2))
+  if(lpSurfaceDesc->dwSize != sizeof(DDSURFACEDESC) && lpSurfaceDesc->dwSize != sizeof(DDSURFACEDESC2)) {
+    dprintf(("Invalid parameters"));
     return DDERR_INVALIDPARAMS;
+  }
 
   SurfaceDesc4.dwSize = sizeof(DDSURFACEDESC2);
 
@@ -4569,16 +4573,16 @@ HRESULT WIN32API SurfLock4( THIS This,
   }
 
   if (NULL!=lpRect)
-    pIRectNew = new DDRectangle( lpRect->left, lpRect->top, lpRect->bottom, lpRect->right );
+    pIRectNew = new DDRectangle( lpRect->left, lpRect->top, lpRect->right, lpRect->bottom );
   else
-    pIRectNew = new DDRectangle( 0, 0, me->height, me->width);
+    pIRectNew = new DDRectangle( 0, 0, me->width, me->height);
 
   // ToDo : the lockchecking should be done in a critcal seq.
   dprintf( ("Lock Rectangle (%d/%d) x (%d/%d)\n",
-            pIRectNew->Top(),
             pIRectNew->Left(),
-            pIRectNew->Bottom(),
-            pIRectNew->Right() ));
+            pIRectNew->Top(),
+            pIRectNew->Right(),
+            pIRectNew->Bottom()));
 
   rc = DD_OK;
 
@@ -4990,6 +4994,11 @@ HRESULT WIN32API SurfUnlock(THIS This, LPVOID lpSurfaceData)
     // complete surface so we must compare the rects.
     dprintf(("DDRAW: Rectangle compare"));
 
+#if 1
+    i = 0;
+    pIRectEnum = (DDRectangle*)DPA_FastGetPtr(me->DPA_LockedRects,0);
+    Found = (pIRectEnum != NULL);
+#else
     pIRectUnlock = new DDRectangle( 0, 0, me->height, me->width);
 
     while(i<DPA_GetPtrCount(me->DPA_LockedRects) && !Found)
@@ -5015,6 +5024,7 @@ HRESULT WIN32API SurfUnlock(THIS This, LPVOID lpSurfaceData)
       }
     }
     delete pIRectUnlock;
+#endif
   }
 
   if(!Found)
