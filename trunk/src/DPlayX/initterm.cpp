@@ -1,4 +1,5 @@
-/*
+/* $Id: initterm.cpp,v 1.7 2001-09-05 12:51:21 bird Exp $
+ *
  * DLL entry point
  *
  * Copyright 1998 Sander van Leeuwen
@@ -68,7 +69,7 @@ unsigned long SYSTEM _DLL_InitTerm(unsigned long hModule, unsigned long
          ctordtorInit();
 
          CheckVersionFromHMOD(PE2LX_VERSION, hModule); /*PLF Wed  98-03-18 05:28:48*/
- 
+
          dllHandle = RegisterLxDll(hModule, DPLAYX_LibMain, (PVOID)&_Resource_PEResTab);
          if(dllHandle == 0)
              return 0UL;

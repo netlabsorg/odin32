@@ -1,4 +1,5 @@
-/*
+/* $Id: mailslot.cpp,v 1.2 2001-09-05 12:57:59 bird Exp $
+ *
  * Win32 mailslot APIs
  *
  * Copyright 2001 Sander van Leeuwen (sandervl@xs4all.nl)
@@ -36,7 +37,7 @@ ODINDEBUGCHANNEL(KERNEL32-MAILSLOT)
  *             the mailslot, for use in server mailslot operations.
  *             If the function fails, the return value is INVALID_HANDLE_VALUE.
  * Remark    :
- * Status    : 
+ * Status    :
  *
  * Author    : SvL
  *****************************************************************************/
@@ -65,7 +66,7 @@ ODINFUNCTION4(HANDLE, CreateMailslotA, LPCSTR, lpName, DWORD, nMaxMessageSize,
  *             the mailslot, for use in server mailslot operations.
  *             If the function fails, the return value is INVALID_HANDLE_VALUE.
  * Remark    :
- * Status    : 
+ * Status    :
  *
  * Author    : SvL
  *****************************************************************************/
@@ -95,7 +96,7 @@ ODINFUNCTION4(HANDLE, CreateMailslotW, LPCWSTR, lpName, DWORD, nMaxMessageSize,
  * Variables :
  * Result    : TRUE / FALSE
  * Remark    :
- * Status    : 
+ * Status    :
  *
  * Author    : SvL
  *****************************************************************************/
@@ -119,7 +120,7 @@ ODINFUNCTION5(BOOL, GetMailslotInfo, HANDLE,  hMailslot,
  * Variables :
  * Result    : TRUE / FALSE
  * Remark    :
- * Status    : 
+ * Status    :
  *
  * Author    : SvL
  *****************************************************************************/

@@ -1,4 +1,5 @@
-/*
+/* $Id: initterm.cpp,v 1.19 2001-09-05 12:50:39 bird Exp $
+ *
  * DLL entry point
  *
  * Copyright 1998 Sander van Leeuwen
@@ -90,15 +91,15 @@ unsigned long SYSTEM _DLL_InitTerm(unsigned long hModule, unsigned long
    switch (ulFlag) {
       case 0 :
       {
-	     APIRET rc;
-		
+         APIRET rc;
+
 #ifdef __IBMCPP__
          ctordtorInit();
 #endif
          DosQueryModuleName(hModule, CCHMAXPATH, ddrawPath);
          char *endofpath = strrchr(ddrawPath, '\\');
          if (endofpath)
-			*(endofpath+1) = '\0';
+            *(endofpath+1) = '\0';
 
          CheckVersionFromHMOD(PE2LX_VERSION, hModule); /*PLF Wed  98-03-18 05:28:48*/
 
@@ -106,17 +107,17 @@ unsigned long SYSTEM _DLL_InitTerm(unsigned long hModule, unsigned long
                                    DDRAW_MAJORIMAGE_VERSION, DDRAW_MINORIMAGE_VERSION,
                                    IMAGE_SUBSYSTEM_WINDOWS_GUI);
          if (dllHandle == 0)
-			return 0UL;
+            return 0UL;
 
          rc = DosExitList(EXITLIST_NONCOREDLL | EXLST_ADD, cleanup);
          if (rc)
-			return 0UL;
+            return 0UL;
 
          break;
       }
       case 1 :
          if(dllHandle) {
-		 	UnregisterLxDll(dllHandle);
+            UnregisterLxDll(dllHandle);
          }
          break;
       default  :

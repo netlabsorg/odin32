@@ -1,7 +1,8 @@
-/*
- *	National Language Support library
+/* $Id: ole2nls.cpp,v 1.14 2001-09-05 12:57:59 bird Exp $
  *
- *	Copyright 1995	Martin von Loewis
+ *  National Language Support library
+ *
+ *  Copyright 1995  Martin von Loewis
  *      Copyright 1998  David Lee Lambert
  *      Copyright 2000  Julio César Gázquez
  */
@@ -40,7 +41,7 @@
 #include <wctype.h>
 #include <unicode.h>
 
-#define DBG_LOCALLOG	DBG_kernel32
+#define DBG_LOCALLOG    DBG_kernel32
 #include "dbglocal.h"
 
 ODINDEBUGCHANNEL(KERNEL32-OLE2NLS)
@@ -48,140 +49,140 @@ ODINDEBUGCHANNEL(KERNEL32-OLE2NLS)
 
 DEFAULT_DEBUG_CHANNEL(string);
 
-/* Locale name to id map. used by EnumSystemLocales, GetLocaleInfoA 
+/* Locale name to id map. used by EnumSystemLocales, GetLocaleInfoA
  * MUST contain all #defines from winnls.h
  * last entry has NULL name, 0 id.
- */ 
-#define LOCALE_ENTRY(x)	{#x,LOCALE_##x}
+ */
+#define LOCALE_ENTRY(x) {#x,LOCALE_##x}
 static const struct tagLOCALE_NAME2ID {
-    const char	*name;
-    LCTYPE	id;
+    const char  *name;
+    LCTYPE  id;
 } locale_name2id[]= {
-	LOCALE_ENTRY(ILANGUAGE),
-	LOCALE_ENTRY(SLANGUAGE),
-	LOCALE_ENTRY(SENGLANGUAGE),
-	LOCALE_ENTRY(SABBREVLANGNAME),
-	LOCALE_ENTRY(SNATIVELANGNAME),
-	LOCALE_ENTRY(ICOUNTRY),
-	LOCALE_ENTRY(SCOUNTRY),
-	LOCALE_ENTRY(SENGCOUNTRY),
-	LOCALE_ENTRY(SABBREVCTRYNAME),
-	LOCALE_ENTRY(SNATIVECTRYNAME),
-	LOCALE_ENTRY(IDEFAULTLANGUAGE),
-	LOCALE_ENTRY(IDEFAULTCOUNTRY),
-	LOCALE_ENTRY(IDEFAULTCODEPAGE),
-	LOCALE_ENTRY(IDEFAULTANSICODEPAGE),
-	LOCALE_ENTRY(IDEFAULTMACCODEPAGE),
-	LOCALE_ENTRY(SLIST),
-	LOCALE_ENTRY(IMEASURE),
-	LOCALE_ENTRY(SDECIMAL),
-	LOCALE_ENTRY(STHOUSAND),
-	LOCALE_ENTRY(SGROUPING),
-	LOCALE_ENTRY(IDIGITS),
-	LOCALE_ENTRY(ILZERO),
-	LOCALE_ENTRY(INEGNUMBER),
-	LOCALE_ENTRY(SNATIVEDIGITS),
-	LOCALE_ENTRY(SCURRENCY),
-	LOCALE_ENTRY(SINTLSYMBOL),
-	LOCALE_ENTRY(SMONDECIMALSEP),
-	LOCALE_ENTRY(SMONTHOUSANDSEP),
-	LOCALE_ENTRY(SMONGROUPING),
-	LOCALE_ENTRY(ICURRDIGITS),
-	LOCALE_ENTRY(IINTLCURRDIGITS),
-	LOCALE_ENTRY(ICURRENCY),
-	LOCALE_ENTRY(INEGCURR),
-	LOCALE_ENTRY(SDATE),
-	LOCALE_ENTRY(STIME),
-	LOCALE_ENTRY(SSHORTDATE),
-	LOCALE_ENTRY(SLONGDATE),
-	LOCALE_ENTRY(STIMEFORMAT),
-	LOCALE_ENTRY(IDATE),
-	LOCALE_ENTRY(ILDATE),
-	LOCALE_ENTRY(ITIME),
-	LOCALE_ENTRY(ITIMEMARKPOSN),
-	LOCALE_ENTRY(ICENTURY),
-	LOCALE_ENTRY(ITLZERO),
-	LOCALE_ENTRY(IDAYLZERO),
-	LOCALE_ENTRY(IMONLZERO),
-	LOCALE_ENTRY(S1159),
-	LOCALE_ENTRY(S2359),
-	LOCALE_ENTRY(ICALENDARTYPE),
-	LOCALE_ENTRY(IOPTIONALCALENDAR),
-	LOCALE_ENTRY(IFIRSTDAYOFWEEK),
-	LOCALE_ENTRY(IFIRSTWEEKOFYEAR),
-	LOCALE_ENTRY(SDAYNAME1),
-	LOCALE_ENTRY(SDAYNAME2),
-	LOCALE_ENTRY(SDAYNAME3),
-	LOCALE_ENTRY(SDAYNAME4),
-	LOCALE_ENTRY(SDAYNAME5),
-	LOCALE_ENTRY(SDAYNAME6),
-	LOCALE_ENTRY(SDAYNAME7),
-	LOCALE_ENTRY(SABBREVDAYNAME1),
-	LOCALE_ENTRY(SABBREVDAYNAME2),
-	LOCALE_ENTRY(SABBREVDAYNAME3),
-	LOCALE_ENTRY(SABBREVDAYNAME4),
-	LOCALE_ENTRY(SABBREVDAYNAME5),
-	LOCALE_ENTRY(SABBREVDAYNAME6),
-	LOCALE_ENTRY(SABBREVDAYNAME7),
-	LOCALE_ENTRY(SMONTHNAME1),
-	LOCALE_ENTRY(SMONTHNAME2),
-	LOCALE_ENTRY(SMONTHNAME3),
-	LOCALE_ENTRY(SMONTHNAME4),
-	LOCALE_ENTRY(SMONTHNAME5),
-	LOCALE_ENTRY(SMONTHNAME6),
-	LOCALE_ENTRY(SMONTHNAME7),
-	LOCALE_ENTRY(SMONTHNAME8),
-	LOCALE_ENTRY(SMONTHNAME9),
-	LOCALE_ENTRY(SMONTHNAME10),
-	LOCALE_ENTRY(SMONTHNAME11),
-	LOCALE_ENTRY(SMONTHNAME12),
-	LOCALE_ENTRY(SMONTHNAME13),
-	LOCALE_ENTRY(SABBREVMONTHNAME1),
-	LOCALE_ENTRY(SABBREVMONTHNAME2),
-	LOCALE_ENTRY(SABBREVMONTHNAME3),
-	LOCALE_ENTRY(SABBREVMONTHNAME4),
-	LOCALE_ENTRY(SABBREVMONTHNAME5),
-	LOCALE_ENTRY(SABBREVMONTHNAME6),
-	LOCALE_ENTRY(SABBREVMONTHNAME7),
-	LOCALE_ENTRY(SABBREVMONTHNAME8),
-	LOCALE_ENTRY(SABBREVMONTHNAME9),
-	LOCALE_ENTRY(SABBREVMONTHNAME10),
-	LOCALE_ENTRY(SABBREVMONTHNAME11),
-	LOCALE_ENTRY(SABBREVMONTHNAME12),
-	LOCALE_ENTRY(SABBREVMONTHNAME13),
-	LOCALE_ENTRY(SPOSITIVESIGN),
-	LOCALE_ENTRY(SNEGATIVESIGN),
-	LOCALE_ENTRY(IPOSSIGNPOSN),
-	LOCALE_ENTRY(INEGSIGNPOSN),
-	LOCALE_ENTRY(IPOSSYMPRECEDES),
-	LOCALE_ENTRY(IPOSSEPBYSPACE),
-	LOCALE_ENTRY(INEGSYMPRECEDES),
-	LOCALE_ENTRY(INEGSEPBYSPACE),
-	LOCALE_ENTRY(FONTSIGNATURE),
-	LOCALE_ENTRY(SISO639LANGNAME),
-	LOCALE_ENTRY(SISO3166CTRYNAME),
-	{NULL,0}
+    LOCALE_ENTRY(ILANGUAGE),
+    LOCALE_ENTRY(SLANGUAGE),
+    LOCALE_ENTRY(SENGLANGUAGE),
+    LOCALE_ENTRY(SABBREVLANGNAME),
+    LOCALE_ENTRY(SNATIVELANGNAME),
+    LOCALE_ENTRY(ICOUNTRY),
+    LOCALE_ENTRY(SCOUNTRY),
+    LOCALE_ENTRY(SENGCOUNTRY),
+    LOCALE_ENTRY(SABBREVCTRYNAME),
+    LOCALE_ENTRY(SNATIVECTRYNAME),
+    LOCALE_ENTRY(IDEFAULTLANGUAGE),
+    LOCALE_ENTRY(IDEFAULTCOUNTRY),
+    LOCALE_ENTRY(IDEFAULTCODEPAGE),
+    LOCALE_ENTRY(IDEFAULTANSICODEPAGE),
+    LOCALE_ENTRY(IDEFAULTMACCODEPAGE),
+    LOCALE_ENTRY(SLIST),
+    LOCALE_ENTRY(IMEASURE),
+    LOCALE_ENTRY(SDECIMAL),
+    LOCALE_ENTRY(STHOUSAND),
+    LOCALE_ENTRY(SGROUPING),
+    LOCALE_ENTRY(IDIGITS),
+    LOCALE_ENTRY(ILZERO),
+    LOCALE_ENTRY(INEGNUMBER),
+    LOCALE_ENTRY(SNATIVEDIGITS),
+    LOCALE_ENTRY(SCURRENCY),
+    LOCALE_ENTRY(SINTLSYMBOL),
+    LOCALE_ENTRY(SMONDECIMALSEP),
+    LOCALE_ENTRY(SMONTHOUSANDSEP),
+    LOCALE_ENTRY(SMONGROUPING),
+    LOCALE_ENTRY(ICURRDIGITS),
+    LOCALE_ENTRY(IINTLCURRDIGITS),
+    LOCALE_ENTRY(ICURRENCY),
+    LOCALE_ENTRY(INEGCURR),
+    LOCALE_ENTRY(SDATE),
+    LOCALE_ENTRY(STIME),
+    LOCALE_ENTRY(SSHORTDATE),
+    LOCALE_ENTRY(SLONGDATE),
+    LOCALE_ENTRY(STIMEFORMAT),
+    LOCALE_ENTRY(IDATE),
+    LOCALE_ENTRY(ILDATE),
+    LOCALE_ENTRY(ITIME),
+    LOCALE_ENTRY(ITIMEMARKPOSN),
+    LOCALE_ENTRY(ICENTURY),
+    LOCALE_ENTRY(ITLZERO),
+    LOCALE_ENTRY(IDAYLZERO),
+    LOCALE_ENTRY(IMONLZERO),
+    LOCALE_ENTRY(S1159),
+    LOCALE_ENTRY(S2359),
+    LOCALE_ENTRY(ICALENDARTYPE),
+    LOCALE_ENTRY(IOPTIONALCALENDAR),
+    LOCALE_ENTRY(IFIRSTDAYOFWEEK),
+    LOCALE_ENTRY(IFIRSTWEEKOFYEAR),
+    LOCALE_ENTRY(SDAYNAME1),
+    LOCALE_ENTRY(SDAYNAME2),
+    LOCALE_ENTRY(SDAYNAME3),
+    LOCALE_ENTRY(SDAYNAME4),
+    LOCALE_ENTRY(SDAYNAME5),
+    LOCALE_ENTRY(SDAYNAME6),
+    LOCALE_ENTRY(SDAYNAME7),
+    LOCALE_ENTRY(SABBREVDAYNAME1),
+    LOCALE_ENTRY(SABBREVDAYNAME2),
+    LOCALE_ENTRY(SABBREVDAYNAME3),
+    LOCALE_ENTRY(SABBREVDAYNAME4),
+    LOCALE_ENTRY(SABBREVDAYNAME5),
+    LOCALE_ENTRY(SABBREVDAYNAME6),
+    LOCALE_ENTRY(SABBREVDAYNAME7),
+    LOCALE_ENTRY(SMONTHNAME1),
+    LOCALE_ENTRY(SMONTHNAME2),
+    LOCALE_ENTRY(SMONTHNAME3),
+    LOCALE_ENTRY(SMONTHNAME4),
+    LOCALE_ENTRY(SMONTHNAME5),
+    LOCALE_ENTRY(SMONTHNAME6),
+    LOCALE_ENTRY(SMONTHNAME7),
+    LOCALE_ENTRY(SMONTHNAME8),
+    LOCALE_ENTRY(SMONTHNAME9),
+    LOCALE_ENTRY(SMONTHNAME10),
+    LOCALE_ENTRY(SMONTHNAME11),
+    LOCALE_ENTRY(SMONTHNAME12),
+    LOCALE_ENTRY(SMONTHNAME13),
+    LOCALE_ENTRY(SABBREVMONTHNAME1),
+    LOCALE_ENTRY(SABBREVMONTHNAME2),
+    LOCALE_ENTRY(SABBREVMONTHNAME3),
+    LOCALE_ENTRY(SABBREVMONTHNAME4),
+    LOCALE_ENTRY(SABBREVMONTHNAME5),
+    LOCALE_ENTRY(SABBREVMONTHNAME6),
+    LOCALE_ENTRY(SABBREVMONTHNAME7),
+    LOCALE_ENTRY(SABBREVMONTHNAME8),
+    LOCALE_ENTRY(SABBREVMONTHNAME9),
+    LOCALE_ENTRY(SABBREVMONTHNAME10),
+    LOCALE_ENTRY(SABBREVMONTHNAME11),
+    LOCALE_ENTRY(SABBREVMONTHNAME12),
+    LOCALE_ENTRY(SABBREVMONTHNAME13),
+    LOCALE_ENTRY(SPOSITIVESIGN),
+    LOCALE_ENTRY(SNEGATIVESIGN),
+    LOCALE_ENTRY(IPOSSIGNPOSN),
+    LOCALE_ENTRY(INEGSIGNPOSN),
+    LOCALE_ENTRY(IPOSSYMPRECEDES),
+    LOCALE_ENTRY(IPOSSEPBYSPACE),
+    LOCALE_ENTRY(INEGSYMPRECEDES),
+    LOCALE_ENTRY(INEGSEPBYSPACE),
+    LOCALE_ENTRY(FONTSIGNATURE),
+    LOCALE_ENTRY(SISO639LANGNAME),
+    LOCALE_ENTRY(SISO3166CTRYNAME),
+    {NULL,0}
 };
 
 static char *GetLocaleSubkeyName( DWORD lctype );
 
 #ifndef __WIN32OS2__
 /***********************************************************************
- *		GetUserDefaultLCID (KERNEL32.@)
- *		GetUserDefaultLCID (OLE2NLS.1)
+ *      GetUserDefaultLCID (KERNEL32.@)
+ *      GetUserDefaultLCID (OLE2NLS.1)
  */
 LCID WINAPI GetUserDefaultLCID(void)
 {
-	return MAKELCID( GetUserDefaultLangID() , SORT_DEFAULT );
+    return MAKELCID( GetUserDefaultLangID() , SORT_DEFAULT );
 }
 
 /***********************************************************************
- *		GetSystemDefaultLCID (KERNEL32.@)
- *		GetSystemDefaultLCID (OLE2NLS.2)
+ *      GetSystemDefaultLCID (KERNEL32.@)
+ *      GetSystemDefaultLCID (OLE2NLS.2)
  */
 LCID WINAPI GetSystemDefaultLCID(void)
 {
-	return GetUserDefaultLCID();
+    return GetUserDefaultLCID();
 }
 #endif //__WIN32OS2__
 
@@ -221,28 +222,28 @@ static BOOL CALLBACK NLS_FindLanguageID_ProcA(HMODULE hModule, LPCSTR type,
 
     if(l_data->lang && strlen(l_data->lang) > 0 && !strcasecmp(l_data->lang, buf_language))
     {
-	if(l_data->country && strlen(l_data->country) > 0)
-	{
-	    if(!strcasecmp(l_data->country, buf_country))
-	    {
-		l_data->found_lang_id[0] = LangID;
-		l_data->n_found = 1;
-		TRACE("Found lang_id %04X for %s_%s\n", LangID, l_data->lang, l_data->country);
-		return FALSE; /* stop enumeration */
-	    }
-	}
-	else /* l_data->country not specified */
-	{
-	    if(l_data->n_found < NLS_MAX_LANGUAGES)
-	    {
-		l_data->found_lang_id[l_data->n_found] = LangID;
-		strncpy(l_data->found_country[l_data->n_found], buf_country, 3);
-		strncpy(l_data->found_language[l_data->n_found], buf_language, 3);
-		l_data->n_found++;
-		TRACE("Found lang_id %04X for %s\n", LangID, l_data->lang);
-		return TRUE; /* continue search */
-	    }
-	}
+    if(l_data->country && strlen(l_data->country) > 0)
+    {
+        if(!strcasecmp(l_data->country, buf_country))
+        {
+        l_data->found_lang_id[0] = LangID;
+        l_data->n_found = 1;
+        TRACE("Found lang_id %04X for %s_%s\n", LangID, l_data->lang, l_data->country);
+        return FALSE; /* stop enumeration */
+        }
+    }
+    else /* l_data->country not specified */
+    {
+        if(l_data->n_found < NLS_MAX_LANGUAGES)
+        {
+        l_data->found_lang_id[l_data->n_found] = LangID;
+        strncpy(l_data->found_country[l_data->n_found], buf_country, 3);
+        strncpy(l_data->found_language[l_data->n_found], buf_language, 3);
+        l_data->n_found++;
+        TRACE("Found lang_id %04X for %s\n", LangID, l_data->lang);
+        return TRUE; /* continue search */
+        }
+    }
     }
 
     /* Just in case, check LOCALE_SENGLANGUAGE too,
@@ -255,11 +256,11 @@ static BOOL CALLBACK NLS_FindLanguageID_ProcA(HMODULE hModule, LPCSTR type,
 
     if(l_data->lang && strlen(l_data->lang) > 0 && !strcasecmp(l_data->lang, buf_en_language))
     {
-	l_data->found_lang_id[l_data->n_found] = LangID;
-	strncpy(l_data->found_country[l_data->n_found], buf_country, 3);
-	strncpy(l_data->found_language[l_data->n_found], buf_language, 3);
-	l_data->n_found++;
-	TRACE("Found lang_id %04X for %s\n", LangID, l_data->lang);
+    l_data->found_lang_id[l_data->n_found] = LangID;
+    strncpy(l_data->found_country[l_data->n_found], buf_country, 3);
+    strncpy(l_data->found_language[l_data->n_found], buf_language, 3);
+    l_data->n_found++;
+    TRACE("Found lang_id %04X for %s\n", LangID, l_data->lang);
     }
 
     return TRUE; /* continue search */
@@ -269,16 +270,16 @@ static BOOL CALLBACK NLS_FindLanguageID_ProcA(HMODULE hModule, LPCSTR type,
  *           NLS_GetLanguageID
  *
  * INPUT:
- *	Lang: a string whose two first chars are the iso name of a language.
- *	Country: a string whose two first chars are the iso name of country
- *	Charset: a string defining the chossen charset encoding
- *	Dialect: a string defining a variation of the locale
+ *  Lang: a string whose two first chars are the iso name of a language.
+ *  Country: a string whose two first chars are the iso name of country
+ *  Charset: a string defining the chossen charset encoding
+ *  Dialect: a string defining a variation of the locale
  *
- *	all those values are from the standardized format of locale
- *	name in unix which is: Lang[_Country][.Charset][@Dialect]
+ *  all those values are from the standardized format of locale
+ *  name in unix which is: Lang[_Country][.Charset][@Dialect]
  *
  * RETURNS:
- *	the numeric code of the language used by Windows
+ *  the numeric code of the language used by Windows
  *
  * FIXME: Charset and Dialect are not handled
  */
@@ -289,65 +290,65 @@ static LANGID NLS_GetLanguageID(LPCSTR Lang, LPCSTR Country, LPCSTR Charset, LPC
 
     if(!Lang)
     {
-	l_data.found_lang_id[0] = MAKELANGID(LANG_ENGLISH, SUBLANG_DEFAULT);
-	goto END;
+    l_data.found_lang_id[0] = MAKELANGID(LANG_ENGLISH, SUBLANG_DEFAULT);
+    goto END;
     }
 
     memset(&l_data, 0, sizeof(LANG_FIND_DATA));
     strncpy(l_data.lang, Lang, sizeof(l_data.lang));
 
     if(Country && strlen(Country) > 0)
-	strncpy(l_data.country, Country, sizeof(l_data.country));
+    strncpy(l_data.country, Country, sizeof(l_data.country));
 
     EnumResourceLanguagesA(GetModuleHandleA("KERNEL32"), RT_STRINGA,
-	(LPCSTR)LOCALE_ILANGUAGE, NLS_FindLanguageID_ProcA, (LONG)&l_data);
+    (LPCSTR)LOCALE_ILANGUAGE, NLS_FindLanguageID_ProcA, (LONG)&l_data);
 
     strcpy(lang_string, l_data.lang);
     if(l_data.country && strlen(l_data.country) > 0)
     {
-	strcat(lang_string, "_");
-	strcat(lang_string, l_data.country);
+    strcat(lang_string, "_");
+    strcat(lang_string, l_data.country);
     }
 
     if(!l_data.n_found)
     {
-	if(l_data.country && strlen(l_data.country) > 0)
-	{
-	    MESSAGE("Warning: Language '%s' was not found, retrying without country name...\n", lang_string);
-	    l_data.country[0] = 0;
-	    EnumResourceLanguagesA(GetModuleHandleA("KERNEL32"), RT_STRINGA,
-		(LPCSTR)LOCALE_ILANGUAGE, NLS_FindLanguageID_ProcA, (LONG)&l_data);
-	}
+    if(l_data.country && strlen(l_data.country) > 0)
+    {
+        MESSAGE("Warning: Language '%s' was not found, retrying without country name...\n", lang_string);
+        l_data.country[0] = 0;
+        EnumResourceLanguagesA(GetModuleHandleA("KERNEL32"), RT_STRINGA,
+        (LPCSTR)LOCALE_ILANGUAGE, NLS_FindLanguageID_ProcA, (LONG)&l_data);
+    }
     }
 
     /* Re-evaluate lang_string */
     strcpy(lang_string, l_data.lang);
     if(l_data.country && strlen(l_data.country) > 0)
     {
-	strcat(lang_string, "_");
-	strcat(lang_string, l_data.country);
+    strcat(lang_string, "_");
+    strcat(lang_string, l_data.country);
     }
 
     if(!l_data.n_found)
     {
-	MESSAGE("Warning: Language '%s' was not recognized, defaulting to English\n", lang_string);
-	l_data.found_lang_id[0] = MAKELANGID(LANG_ENGLISH, SUBLANG_DEFAULT);
+    MESSAGE("Warning: Language '%s' was not recognized, defaulting to English\n", lang_string);
+    l_data.found_lang_id[0] = MAKELANGID(LANG_ENGLISH, SUBLANG_DEFAULT);
     }
     else
     {
-	if(l_data.n_found == 1)
-	    TRACE("For language '%s' lang_id %04X was found\n", lang_string, l_data.found_lang_id[0]);
-	else /* l_data->n_found > 1 */
-	{
-	    int i;
-	    MESSAGE("For language '%s' several language ids were found:\n", lang_string);
-	    for(i = 0; i < l_data.n_found; i++)
-		MESSAGE("%s_%s - %04X; ", l_data.found_language[i], l_data.found_country[i], l_data.found_lang_id[i]);
+    if(l_data.n_found == 1)
+        TRACE("For language '%s' lang_id %04X was found\n", lang_string, l_data.found_lang_id[0]);
+    else /* l_data->n_found > 1 */
+    {
+        int i;
+        MESSAGE("For language '%s' several language ids were found:\n", lang_string);
+        for(i = 0; i < l_data.n_found; i++)
+        MESSAGE("%s_%s - %04X; ", l_data.found_language[i], l_data.found_country[i], l_data.found_lang_id[i]);
 
-	    MESSAGE("\nInstead of using first in the list, suggest to define\n"
-		    "your LANG environment variable like this: LANG=%s_%s\n",
-		    l_data.found_language[0], l_data.found_country[0]);
-	}
+        MESSAGE("\nInstead of using first in the list, suggest to define\n"
+            "your LANG environment variable like this: LANG=%s_%s\n",
+            l_data.found_language[0], l_data.found_country[0]);
+    }
     }
 END:
     TRACE("Returning %04X\n", l_data.found_lang_id[0]);
@@ -355,76 +356,76 @@ END:
 }
 #ifndef __WIN32OS2__
 /***********************************************************************
- *		GetUserDefaultLangID (KERNEL32.@)
- *		GetUserDefaultLangID (OLE2NLS.3)
+ *      GetUserDefaultLangID (KERNEL32.@)
+ *      GetUserDefaultLangID (OLE2NLS.3)
  */
 LANGID WINAPI GetUserDefaultLangID(void)
 {
-	/* caching result, if defined from environment, which should (?) not change during a WINE session */
-	static	LANGID	userLCID = 0;
+    /* caching result, if defined from environment, which should (?) not change during a WINE session */
+    static  LANGID  userLCID = 0;
 
-	if (userLCID == 0)
+    if (userLCID == 0)
         {
                 char buf[256];
-		char *lang,*country,*charset,*dialect,*next;
+        char *lang,*country,*charset,*dialect,*next;
 
-		if (GetEnvironmentVariableA( "LANGUAGE", buf, sizeof(buf) )) goto ok;
-		if (GetEnvironmentVariableA( "LANG", buf, sizeof(buf) )) goto ok;
-		if (GetEnvironmentVariableA( "LC_ALL", buf, sizeof(buf) )) goto ok;
-		if (GetEnvironmentVariableA( "LC_MESSAGES", buf, sizeof(buf) )) goto ok;
-		if (GetEnvironmentVariableA( "LC_CTYPE", buf, sizeof(buf) )) goto ok;
+        if (GetEnvironmentVariableA( "LANGUAGE", buf, sizeof(buf) )) goto ok;
+        if (GetEnvironmentVariableA( "LANG", buf, sizeof(buf) )) goto ok;
+        if (GetEnvironmentVariableA( "LC_ALL", buf, sizeof(buf) )) goto ok;
+        if (GetEnvironmentVariableA( "LC_MESSAGES", buf, sizeof(buf) )) goto ok;
+        if (GetEnvironmentVariableA( "LC_CTYPE", buf, sizeof(buf) )) goto ok;
 
-		return userLCID = MAKELANGID( LANG_ENGLISH, SUBLANG_DEFAULT );
+        return userLCID = MAKELANGID( LANG_ENGLISH, SUBLANG_DEFAULT );
 
         ok:
-		if (!strcmp(buf,"POSIX") || !strcmp(buf,"C"))
+        if (!strcmp(buf,"POSIX") || !strcmp(buf,"C"))
                     return userLCID = MAKELANGID( LANG_ENGLISH, SUBLANG_DEFAULT );
-		
-		lang=buf;
-		
-		do {
-			next=strchr(lang,':'); if (next) *next++='\0';
-			dialect=strchr(lang,'@'); if (dialect) *dialect++='\0';
-			charset=strchr(lang,'.'); if (charset) *charset++='\0';
-			country=strchr(lang,'_'); if (country) *country++='\0';
-			
-			userLCID = NLS_GetLanguageID(lang, country, charset, dialect);
-			
-			lang=next;
-		} while (lang && !userLCID);
 
-		if (!userLCID)
+        lang=buf;
+
+        do {
+            next=strchr(lang,':'); if (next) *next++='\0';
+            dialect=strchr(lang,'@'); if (dialect) *dialect++='\0';
+            charset=strchr(lang,'.'); if (charset) *charset++='\0';
+            country=strchr(lang,'_'); if (country) *country++='\0';
+
+            userLCID = NLS_GetLanguageID(lang, country, charset, dialect);
+
+            lang=next;
+        } while (lang && !userLCID);
+
+        if (!userLCID)
                 {
                     MESSAGE( "Warning: language '%s' not recognized, defaulting to English\n",
                              buf );
                     userLCID = MAKELANGID( LANG_ENGLISH, SUBLANG_DEFAULT );
                 }
-	}
-	return userLCID;
+    }
+    return userLCID;
 }
 
 /***********************************************************************
- *		GetSystemDefaultLangID (KERNEL32.@)
- *		GetSystemDefaultLangID (OLE2NLS.4)
+ *      GetSystemDefaultLangID (KERNEL32.@)
+ *      GetSystemDefaultLangID (OLE2NLS.4)
  */
 LANGID WINAPI GetSystemDefaultLangID(void)
 {
-	return GetUserDefaultLangID();
+    return GetUserDefaultLangID();
 }
 #endif //__WIN32OS2__
 /******************************************************************************
- *		ConvertDefaultLocale (KERNEL32.@)
+ *      ConvertDefaultLocale (KERNEL32.@)
  */
 LCID WINAPI ConvertDefaultLocale (LCID lcid)
-{	switch (lcid)
-	{  case LOCALE_SYSTEM_DEFAULT:
-	     return GetSystemDefaultLCID();
-	   case LOCALE_USER_DEFAULT:
-	     return GetUserDefaultLCID();
-	   case LOCALE_NEUTRAL:
-	     return MAKELCID (LANG_NEUTRAL, SUBLANG_NEUTRAL);
-	}  
-	return MAKELANGID( PRIMARYLANGID(lcid), SUBLANG_NEUTRAL);
+{   switch (lcid)
+    {  case LOCALE_SYSTEM_DEFAULT:
+         return GetSystemDefaultLCID();
+       case LOCALE_USER_DEFAULT:
+         return GetUserDefaultLCID();
+       case LOCALE_NEUTRAL:
+         return MAKELCID (LANG_NEUTRAL, SUBLANG_NEUTRAL);
+    }
+    return MAKELANGID( PRIMARYLANGID(lcid), SUBLANG_NEUTRAL);
 }
 
 /* Enhanced version of LoadStringW.
@@ -446,7 +447,7 @@ static INT NLS_LoadStringExW(HMODULE hModule, LANGID lang_id, UINT res_id, LPWST
     if(!hrsrc) return 0;
     hmem = LoadResource(hModule, hrsrc);
     if(!hmem) return 0;
-    
+
 #ifdef __WIN32OS2__
     p = (WCHAR*)LockResource(hmem);
 #else
@@ -454,18 +455,18 @@ static INT NLS_LoadStringExW(HMODULE hModule, LANGID lang_id, UINT res_id, LPWST
 #endif
     string_num = res_id & 0x000f;
     for(i = 0; i < string_num; i++)
-	p += *p + 1;
-    
+    p += *p + 1;
+
     TRACE("strlen = %d\n", (int)*p );
-    
+
     if (buffer == NULL) return *p;
     i = min(buflen - 1, *p);
     if (i > 0) {
-	memcpy(buffer, p + 1, i * sizeof (WCHAR));
-	buffer[i] = (WCHAR) 0;
+    memcpy(buffer, p + 1, i * sizeof (WCHAR));
+    buffer[i] = (WCHAR) 0;
     } else {
-	if (buflen > 1)
-	    buffer[0] = (WCHAR) 0;
+    if (buflen > 1)
+        buffer[0] = (WCHAR) 0;
     }
 
     FreeResource(hmem);
@@ -474,9 +475,9 @@ static INT NLS_LoadStringExW(HMODULE hModule, LANGID lang_id, UINT res_id, LPWST
 }
 #ifndef __WIN32OS2__
 /******************************************************************************
- *		GetLocaleInfoA (KERNEL32.@)
+ *      GetLocaleInfoA (KERNEL32.@)
  *
- * NOTES 
+ * NOTES
  *  LANG_NEUTRAL is equal to LOCALE_SYSTEM_DEFAULT
  *
  *  MS online documentation states that the string returned is NULL terminated
@@ -486,7 +487,7 @@ static INT NLS_LoadStringExW(HMODULE hModule, LANGID lang_id, UINT res_id, LPWST
 INT WINAPI GetLocaleInfoA(LCID lcid,LCTYPE LCType,LPSTR buf,INT len)
 {
     LPCSTR  retString = NULL;
-    int	found = 0, i;
+    int found = 0, i;
     char    *pacKey;
     char    acBuffer[128];
     DWORD   dwBufferSize=128;
@@ -496,23 +497,23 @@ INT WINAPI GetLocaleInfoA(LCID lcid,LCTYPE LCType,LPSTR buf,INT len)
 
   if (len && (! buf) ) {
     SetLastError(ERROR_INSUFFICIENT_BUFFER);
-		return 0;
-	}
+        return 0;
+    }
 
-	if (lcid == LOCALE_NEUTRAL || lcid == LANG_SYSTEM_DEFAULT)
-	{
+    if (lcid == LOCALE_NEUTRAL || lcid == LANG_SYSTEM_DEFAULT)
+    {
             lcid = GetSystemDefaultLCID();
-	} 
-	else if (lcid == LANG_USER_DEFAULT) /*0x800*/
-	{
+    }
+    else if (lcid == LANG_USER_DEFAULT) /*0x800*/
+    {
             lcid = GetUserDefaultLCID();
-	}
+    }
 
     /* LOCALE_NOUSEROVERRIDE means: do not get user redefined settings
        from the registry. Instead, use system default values. */
     NoUserOverride = (LCType & LOCALE_NOUSEROVERRIDE) != 0;
 
-	LCType &= ~(LOCALE_NOUSEROVERRIDE|LOCALE_USE_CP_ACP);
+    LCType &= ~(LOCALE_NOUSEROVERRIDE|LOCALE_USE_CP_ACP);
 
     /* First, check if it's in the registry. */
     /* All user customized values are stored in the registry by SetLocaleInfo */
@@ -523,10 +524,10 @@ INT WINAPI GetLocaleInfoA(LCID lcid,LCTYPE LCType,LPSTR buf,INT len)
 
         sprintf( acRealKey, "Control Panel\\International\\%s", pacKey );
 
-        if ( RegOpenKeyExA( HKEY_CURRENT_USER, acRealKey, 
+        if ( RegOpenKeyExA( HKEY_CURRENT_USER, acRealKey,
                             0, KEY_READ, &hKey) == ERROR_SUCCESS )
         {
-            if ( RegQueryValueExA( hKey, NULL, NULL, NULL, (LPBYTE)acBuffer, 
+            if ( RegQueryValueExA( hKey, NULL, NULL, NULL, (LPBYTE)acBuffer,
                                    &dwBufferSize ) == ERROR_SUCCESS )
             {
                 retString = acBuffer;
@@ -538,61 +539,61 @@ INT WINAPI GetLocaleInfoA(LCID lcid,LCTYPE LCType,LPSTR buf,INT len)
 
     /* If not in the registry, get it from the NLS entries. */
     if(!found) {
-	WCHAR wcBuffer[128];
-	int res_size;
+    WCHAR wcBuffer[128];
+    int res_size;
 
-	/* check if language is registered in the kernel32 resources */
-	if((res_size = NLS_LoadStringExW(GetModuleHandleA("KERNEL32"), LANGIDFROMLCID(lcid),
-		LCType, wcBuffer, sizeof(wcBuffer)/sizeof(wcBuffer[0])))) {
-	    WideCharToMultiByte(CP_ACP, 0, wcBuffer, res_size, acBuffer, dwBufferSize, NULL, NULL);
-	    retString = acBuffer;
-	    found = 1;
-	}
+    /* check if language is registered in the kernel32 resources */
+    if((res_size = NLS_LoadStringExW(GetModuleHandleA("KERNEL32"), LANGIDFROMLCID(lcid),
+        LCType, wcBuffer, sizeof(wcBuffer)/sizeof(wcBuffer[0])))) {
+        WideCharToMultiByte(CP_ACP, 0, wcBuffer, res_size, acBuffer, dwBufferSize, NULL, NULL);
+        retString = acBuffer;
+        found = 1;
+    }
     }
 
     /* if not found report a most descriptive error */
     if(!found) {
-	retString=0;
-	/* If we are through all of this, retLen should not be zero anymore.
-	   If it is, the value is not supported */
-	i=0;
-	while (locale_name2id[i].name!=NULL) {
-	    if (LCType == locale_name2id[i].id) {
-		retString = locale_name2id[i].name;
-		break;
-	    }
-	    i++;
-	}
-	if(!retString)
-	    FIXME("Unkown LC type %lX\n", LCType);
-	else
-	    FIXME("'%s' is not defined for your language (%04X).\n"
-		"Please define it in dlls/kernel/nls/YourLanguage.nls\n"
-		"and submit patch for inclusion into the next Wine release.\n",
-			retString, LOWORD(lcid));
-	SetLastError(ERROR_INVALID_PARAMETER);
-	return 0;			
+    retString=0;
+    /* If we are through all of this, retLen should not be zero anymore.
+       If it is, the value is not supported */
+    i=0;
+    while (locale_name2id[i].name!=NULL) {
+        if (LCType == locale_name2id[i].id) {
+        retString = locale_name2id[i].name;
+        break;
+        }
+        i++;
+    }
+    if(!retString)
+        FIXME("Unkown LC type %lX\n", LCType);
+    else
+        FIXME("'%s' is not defined for your language (%04X).\n"
+        "Please define it in dlls/kernel/nls/YourLanguage.nls\n"
+        "and submit patch for inclusion into the next Wine release.\n",
+            retString, LOWORD(lcid));
+    SetLastError(ERROR_INVALID_PARAMETER);
+    return 0;
     }
 
     /* a FONTSIGNATURE is not a string, just 6 DWORDs  */
     if (LCType == LOCALE_FONTSIGNATURE) {
         if (len) {
-	    len = (len < sizeof(FONTSIGNATURE)) ? len : sizeof(FONTSIGNATURE);
+        len = (len < sizeof(FONTSIGNATURE)) ? len : sizeof(FONTSIGNATURE);
             memcpy(buf, retString, len);
-	    return len;
-	}
+        return len;
+    }
         return sizeof(FONTSIGNATURE);
     }
     /* if len=0 return only the length, don't touch the buffer*/
     if (len) {
-	lstrcpynA(buf,retString,len);
-	return strlen(buf) + 1;
+    lstrcpynA(buf,retString,len);
+    return strlen(buf) + 1;
     }
     return strlen(retString)+1;
 }
 
 /******************************************************************************
- *		GetLocaleInfoW (KERNEL32.@)
+ *      GetLocaleInfoW (KERNEL32.@)
  *
  * NOTES
  *  MS documentation states that len "specifies the size, in bytes (ANSI version)
@@ -600,28 +601,28 @@ INT WINAPI GetLocaleInfoA(LCID lcid,LCTYPE LCType,LPSTR buf,INT len)
  *  the same between GetLocaleInfoW and GetLocaleInfoA.
  */
 INT WINAPI GetLocaleInfoW(LCID lcid,LCTYPE LCType,LPWSTR wbuf,INT len)
-{	WORD wlen;
-	LPSTR abuf;
-	
-	if (len && (! wbuf) )
-	{ SetLastError(ERROR_INSUFFICIENT_BUFFER);
-	  return 0;
-	}
+{   WORD wlen;
+    LPSTR abuf;
 
-	abuf = (LPSTR)HeapAlloc(GetProcessHeap(),0,len);
-	wlen = GetLocaleInfoA(lcid, LCType, abuf, len);
+    if (len && (! wbuf) )
+    { SetLastError(ERROR_INSUFFICIENT_BUFFER);
+      return 0;
+    }
 
-	if (wlen && len)	/* if len=0 return only the length*/
+    abuf = (LPSTR)HeapAlloc(GetProcessHeap(),0,len);
+    wlen = GetLocaleInfoA(lcid, LCType, abuf, len);
+
+    if (wlen && len)    /* if len=0 return only the length*/
             MultiByteToWideChar( CP_ACP, 0, abuf, -1, wbuf, len );
 
-	HeapFree(GetProcessHeap(),0,abuf);
-	return wlen;
+    HeapFree(GetProcessHeap(),0,abuf);
+    return wlen;
 }
 #endif //__WIN32OS2__
 
 /******************************************************************************
  *
- *		GetLocaleSubkeyName [helper function]
+ *      GetLocaleSubkeyName [helper function]
  *
  *          - For use with the registry.
  *          - Gets the registry subkey name for a given lctype.
@@ -729,7 +730,7 @@ static char *GetLocaleSubkeyName( DWORD lctype )
         pacKey = "sCurrency";
         break;
 
-    /* The following are not listed under MSDN as supported, 
+    /* The following are not listed under MSDN as supported,
      * but seem to be used and also stored in the registry.
      */
 
@@ -754,7 +755,7 @@ static char *GetLocaleSubkeyName( DWORD lctype )
 }
 
 /******************************************************************************
- *		SetLocaleInfoA	[KERNEL32.656]
+ *      SetLocaleInfoA  [KERNEL32.656]
  */
 BOOL WINAPI SetLocaleInfoA(DWORD lcid, DWORD lctype, LPCSTR data)
 {
@@ -765,10 +766,10 @@ BOOL WINAPI SetLocaleInfoA(DWORD lcid, DWORD lctype, LPCSTR data)
     if ( (pacKey = GetLocaleSubkeyName(lctype)) )
     {
         sprintf( acRealKey, "Control Panel\\International\\%s", pacKey );
-        if ( RegCreateKeyA( HKEY_CURRENT_USER, acRealKey, 
+        if ( RegCreateKeyA( HKEY_CURRENT_USER, acRealKey,
                                &hKey ) == ERROR_SUCCESS )
         {
-            if ( RegSetValueExA( hKey, NULL, 0, REG_SZ, 
+            if ( RegSetValueExA( hKey, NULL, 0, REG_SZ,
 #ifdef __WIN32OS2__
                                  (LPBYTE)data, strlen(data)+1 ) != ERROR_SUCCESS )
 #else
@@ -828,7 +829,7 @@ BOOL WIN32API SetLocaleInfoW(LCID    Locale,
 #endif
 
 /******************************************************************************
- *		IsValidLocale	[KERNEL32.489]
+ *      IsValidLocale   [KERNEL32.489]
  */
 BOOL WINAPI IsValidLocale(LCID lcid,DWORD flags)
 {
@@ -839,14 +840,14 @@ BOOL WINAPI IsValidLocale(LCID lcid,DWORD flags)
 #else
     /* check if language is registered in the kernel32 resources */
     if(!FindResourceExW(GetModuleHandleA("KERNEL32"), RT_STRINGW, (LPCWSTR)LOCALE_ILANGUAGE, LOWORD(lcid)))
-	return FALSE;
+    return FALSE;
     else
-	return TRUE;
+    return TRUE;
 #endif
 }
 
 static BOOL CALLBACK EnumResourceLanguagesProcW(HMODULE hModule, LPCWSTR type,
-		LPCWSTR name, WORD LangID, LONG lParam)
+        LPCWSTR name, WORD LangID, LONG lParam)
 {
     CHAR bufA[20];
     WCHAR bufW[20];
@@ -857,7 +858,7 @@ static BOOL CALLBACK EnumResourceLanguagesProcW(HMODULE hModule, LPCWSTR type,
 }
 
 /******************************************************************************
- *		EnumSystemLocalesW	[KERNEL32.209]
+ *      EnumSystemLocalesW  [KERNEL32.209]
  */
 BOOL WINAPI EnumSystemLocalesW( LOCALE_ENUMPROCW lpfnLocaleEnum,
                                     DWORD flags )
@@ -865,14 +866,14 @@ BOOL WINAPI EnumSystemLocalesW( LOCALE_ENUMPROCW lpfnLocaleEnum,
     TRACE("(%p,%08lx)\n", lpfnLocaleEnum,flags);
 
     EnumResourceLanguagesW(GetModuleHandleA("KERNEL32"), RT_STRINGW,
-	    (LPCWSTR)LOCALE_ILANGUAGE, EnumResourceLanguagesProcW,
-	    (LONG)lpfnLocaleEnum);
+        (LPCWSTR)LOCALE_ILANGUAGE, EnumResourceLanguagesProcW,
+        (LONG)lpfnLocaleEnum);
 
     return TRUE;
 }
 
 static BOOL CALLBACK EnumResourceLanguagesProcA(HMODULE hModule, LPCSTR type,
-		LPCSTR name, WORD LangID, LONG lParam)
+        LPCSTR name, WORD LangID, LONG lParam)
 {
     CHAR bufA[20];
     LOCALE_ENUMPROCA lpfnLocaleEnum = (LOCALE_ENUMPROCA)lParam;
@@ -881,7 +882,7 @@ static BOOL CALLBACK EnumResourceLanguagesProcA(HMODULE hModule, LPCSTR type,
 }
 
 /******************************************************************************
- *		EnumSystemLocalesA	[KERNEL32.208]
+ *      EnumSystemLocalesA  [KERNEL32.208]
  */
 BOOL WINAPI EnumSystemLocalesA(LOCALE_ENUMPROCA lpfnLocaleEnum,
                                    DWORD flags)
@@ -889,8 +890,8 @@ BOOL WINAPI EnumSystemLocalesA(LOCALE_ENUMPROCA lpfnLocaleEnum,
     TRACE("(%p,%08lx)\n", lpfnLocaleEnum,flags);
 
     EnumResourceLanguagesA(GetModuleHandleA("KERNEL32"), RT_STRINGA,
-	    (LPCSTR)LOCALE_ILANGUAGE, EnumResourceLanguagesProcA,
-	    (LONG)lpfnLocaleEnum);
+        (LPCSTR)LOCALE_ILANGUAGE, EnumResourceLanguagesProcA,
+        (LONG)lpfnLocaleEnum);
 
     return TRUE;
 }
@@ -1154,7 +1155,7 @@ static const unsigned char CT_CType2_LUT[] = {
   C2_LEFTTORIGHT /* ÿ - 255 */
 };
 
-const WORD OLE2NLS_CT_CType3_LUT[] = { 
+const WORD OLE2NLS_CT_CType3_LUT[] = {
   0x0000, /*   -   0 */
   0x0000, /*   -   1 */
   0x0000, /*   -   2 */
@@ -1414,70 +1415,70 @@ const WORD OLE2NLS_CT_CType3_LUT[] = {
 };
 
 /******************************************************************************
- *		GetStringTypeA	[KERNEL32.396]
+ *      GetStringTypeA  [KERNEL32.396]
  */
 BOOL WINAPI GetStringTypeA(LCID locale,DWORD dwInfoType,LPCSTR src,
                                INT cchSrc,LPWORD chartype)
 {
-	return GetStringTypeExA(locale,dwInfoType,src,cchSrc,chartype);
+    return GetStringTypeExA(locale,dwInfoType,src,cchSrc,chartype);
 }
 
 /******************************************************************************
- *		GetStringTypeExA	[KERNEL32.397]
+ *      GetStringTypeExA    [KERNEL32.397]
  *
  * FIXME: Ignores the locale.
  */
 BOOL WINAPI GetStringTypeExA(LCID locale,DWORD dwInfoType,LPCSTR src,
                                  INT cchSrc,LPWORD chartype)
 {
-	int	i;
-	
-	if ((src==NULL) || (chartype==NULL) || (src==(LPSTR)chartype))
-	{
-	  SetLastError(ERROR_INVALID_PARAMETER);
-	  return FALSE;
-	}
+    int i;
 
-	if (cchSrc==-1)
-	  cchSrc=strlen(src)+1;
-	  
-	switch (dwInfoType) {
-	case CT_CTYPE1:
-	  for (i=0;i<cchSrc;i++) 
-	  {
-	    chartype[i] = 0;
-	    if (isdigit(src[i])) chartype[i]|=C1_DIGIT;
-	    if (isalpha(src[i])) chartype[i]|=C1_ALPHA;
-	    if (islower(src[i])) chartype[i]|=C1_LOWER;
-	    if (isupper(src[i])) chartype[i]|=C1_UPPER;
-	    if (isspace(src[i])) chartype[i]|=C1_SPACE;
-	    if (ispunct(src[i])) chartype[i]|=C1_PUNCT;
-	    if (iscntrl(src[i])) chartype[i]|=C1_CNTRL;
+    if ((src==NULL) || (chartype==NULL) || (src==(LPSTR)chartype))
+    {
+      SetLastError(ERROR_INVALID_PARAMETER);
+      return FALSE;
+    }
+
+    if (cchSrc==-1)
+      cchSrc=strlen(src)+1;
+
+    switch (dwInfoType) {
+    case CT_CTYPE1:
+      for (i=0;i<cchSrc;i++)
+      {
+        chartype[i] = 0;
+        if (isdigit(src[i])) chartype[i]|=C1_DIGIT;
+        if (isalpha(src[i])) chartype[i]|=C1_ALPHA;
+        if (islower(src[i])) chartype[i]|=C1_LOWER;
+        if (isupper(src[i])) chartype[i]|=C1_UPPER;
+        if (isspace(src[i])) chartype[i]|=C1_SPACE;
+        if (ispunct(src[i])) chartype[i]|=C1_PUNCT;
+        if (iscntrl(src[i])) chartype[i]|=C1_CNTRL;
 /* FIXME: isblank() is a GNU extension */
-/*		if (isblank(src[i])) chartype[i]|=C1_BLANK; */
-	    if ((src[i] == ' ') || (src[i] == '\t')) chartype[i]|=C1_BLANK;
-	    /* C1_XDIGIT */
-	}
-	return TRUE;
+/*      if (isblank(src[i])) chartype[i]|=C1_BLANK; */
+        if ((src[i] == ' ') || (src[i] == '\t')) chartype[i]|=C1_BLANK;
+        /* C1_XDIGIT */
+    }
+    return TRUE;
 
-	case CT_CTYPE2:
-	  for (i=0;i<cchSrc;i++) 
-	  {
-	    chartype[i]=(WORD)CT_CType2_LUT[i];
-	  }
-	  return TRUE;
+    case CT_CTYPE2:
+      for (i=0;i<cchSrc;i++)
+      {
+        chartype[i]=(WORD)CT_CType2_LUT[i];
+      }
+      return TRUE;
 
-	case CT_CTYPE3:
-	  for (i=0;i<cchSrc;i++) 
-	  {
-	    chartype[i]=OLE2NLS_CT_CType3_LUT[i];
-	  }
-	  return TRUE;
+    case CT_CTYPE3:
+      for (i=0;i<cchSrc;i++)
+      {
+        chartype[i]=OLE2NLS_CT_CType3_LUT[i];
+      }
+      return TRUE;
 
-	default:
-	  ERR("Unknown dwInfoType:%ld\n",dwInfoType);
-	  return FALSE;
-	}
+    default:
+      ERR("Unknown dwInfoType:%ld\n",dwInfoType);
+      return FALSE;
+    }
 }
 
 /***********************************************************************
@@ -1486,7 +1487,7 @@ BOOL WINAPI GetStringTypeExA(LCID locale,DWORD dwInfoType,LPCSTR src,
 DWORD WINAPI VerLanguageNameA( UINT wLang, LPSTR szLang, UINT nSize )
 {
     if(!szLang)
-	return 0;
+    return 0;
 
     return GetLocaleInfoA(MAKELCID(wLang, SORT_DEFAULT), LOCALE_SENGLANGUAGE, szLang, nSize);
 }
@@ -1497,44 +1498,44 @@ DWORD WINAPI VerLanguageNameA( UINT wLang, LPSTR szLang, UINT nSize )
 DWORD WINAPI VerLanguageNameW( UINT wLang, LPWSTR szLang, UINT nSize )
 {
     if(!szLang)
-	return 0;
+    return 0;
 
     return GetLocaleInfoW(MAKELCID(wLang, SORT_DEFAULT), LOCALE_SENGLANGUAGE, szLang, nSize);
 }
 
- 
+
 static const unsigned char LCM_Unicode_LUT[] = {
-  6      ,   3, /*   -   1 */  
-  6      ,   4, /*   -   2 */  
-  6      ,   5, /*   -   3 */  
-  6      ,   6, /*   -   4 */  
-  6      ,   7, /*   -   5 */  
-  6      ,   8, /*   -   6 */  
-  6      ,   9, /*   -   7 */  
-  6      ,  10, /*   -   8 */  
-  7      ,   5, /*   -   9 */  
-  7      ,   6, /*   -  10 */  
-  7      ,   7, /*   -  11 */  
-  7      ,   8, /*   -  12 */  
-  7      ,   9, /*   -  13 */  
-  6      ,  11, /*   -  14 */  
-  6      ,  12, /*   -  15 */  
-  6      ,  13, /*   -  16 */  
-  6      ,  14, /*   -  17 */  
-  6      ,  15, /*   -  18 */  
-  6      ,  16, /*   -  19 */  
-  6      ,  17, /*   -  20 */  
-  6      ,  18, /*   -  21 */  
-  6      ,  19, /*   -  22 */  
-  6      ,  20, /*   -  23 */  
-  6      ,  21, /*   -  24 */  
-  6      ,  22, /*   -  25 */  
-  6      ,  23, /*   -  26 */  
-  6      ,  24, /*   -  27 */  
-  6      ,  25, /*   -  28 */  
-  6      ,  26, /*   -  29 */  
-  6      ,  27, /*   -  30 */  
-  6      ,  28, /*   -  31 */  
+  6      ,   3, /*   -   1 */
+  6      ,   4, /*   -   2 */
+  6      ,   5, /*   -   3 */
+  6      ,   6, /*   -   4 */
+  6      ,   7, /*   -   5 */
+  6      ,   8, /*   -   6 */
+  6      ,   9, /*   -   7 */
+  6      ,  10, /*   -   8 */
+  7      ,   5, /*   -   9 */
+  7      ,   6, /*   -  10 */
+  7      ,   7, /*   -  11 */
+  7      ,   8, /*   -  12 */
+  7      ,   9, /*   -  13 */
+  6      ,  11, /*   -  14 */
+  6      ,  12, /*   -  15 */
+  6      ,  13, /*   -  16 */
+  6      ,  14, /*   -  17 */
+  6      ,  15, /*   -  18 */
+  6      ,  16, /*   -  19 */
+  6      ,  17, /*   -  20 */
+  6      ,  18, /*   -  21 */
+  6      ,  19, /*   -  22 */
+  6      ,  20, /*   -  23 */
+  6      ,  21, /*   -  24 */
+  6      ,  22, /*   -  25 */
+  6      ,  23, /*   -  26 */
+  6      ,  24, /*   -  27 */
+  6      ,  25, /*   -  28 */
+  6      ,  26, /*   -  29 */
+  6      ,  27, /*   -  30 */
+  6      ,  28, /*   -  31 */
   7      ,   2, /*   -  32 */
   7      ,  28, /* ! -  33 */
   7      ,  29, /* " -  34 */ /* " */
@@ -1764,7 +1765,7 @@ static const unsigned char LCM_Unicode_LUT_2[] = { 33, 44, 145 };
 
 #define LCM_Diacritic_Start 131
 
-static const unsigned char LCM_Diacritic_LUT[] = { 
+static const unsigned char LCM_Diacritic_LUT[] = {
 123,  /* ƒ - 131 */
   2,  /* „ - 132 */
   2,  /* … - 133 */
@@ -1895,11 +1896,11 @@ static const unsigned char LCM_Diacritic_LUT[] = {
 /******************************************************************************
  * OLE2NLS_isPunctuation [INTERNAL]
  */
-static int OLE2NLS_isPunctuation(unsigned char c) 
+static int OLE2NLS_isPunctuation(unsigned char c)
 {
-  /* "punctuation character" in this context is a character which is 
+  /* "punctuation character" in this context is a character which is
      considered "less important" during word sort comparison.
-     See LCMapString implementation for the precise definition 
+     See LCMapString implementation for the precise definition
      of "less important". */
 
   return (LCM_Unicode_LUT[-2+2*c]==6);
@@ -1908,9 +1909,9 @@ static int OLE2NLS_isPunctuation(unsigned char c)
 /******************************************************************************
  * OLE2NLS_isNonSpacing [INTERNAL]
  */
-static int OLE2NLS_isNonSpacing(unsigned char c) 
+static int OLE2NLS_isNonSpacing(unsigned char c)
 {
-  /* This function is used by LCMapStringA.  Characters 
+  /* This function is used by LCMapStringA.  Characters
      for which it returns true are ignored when mapping a
      string with NORM_IGNORENONSPACE */
   return ((c==136) || (c==170) || (c==186));
@@ -1919,9 +1920,9 @@ static int OLE2NLS_isNonSpacing(unsigned char c)
 /******************************************************************************
  * OLE2NLS_isSymbol [INTERNAL]
  */
-static int OLE2NLS_isSymbol(unsigned char c) 
+static int OLE2NLS_isSymbol(unsigned char c)
 {
-  /* This function is used by LCMapStringA.  Characters 
+  /* This function is used by LCMapStringA.  Characters
      for which it returns true are ignored when mapping a
      string with NORM_IGNORESYMBOLS */
 #ifdef __WIN32OS2__
@@ -1932,7 +1933,7 @@ static int OLE2NLS_isSymbol(unsigned char c)
 }
 
 /******************************************************************************
- *		identity	[Internal]
+ *      identity    [Internal]
  */
 #ifdef __WIN32OS2__
 static int _Optlink identity(int c)
@@ -1958,43 +1959,43 @@ static int identity(int c)
  *
  * NOTES
  *    If called with scrlen = -1, the function will compute the length
- *      of the 0-terminated string strsrc by itself.      
- * 
- *    If called with dstlen = 0, returns the buffer length that 
+ *      of the 0-terminated string strsrc by itself.
+ *
+ *    If called with dstlen = 0, returns the buffer length that
  *      would be required.
  *
  *    NORM_IGNOREWIDTH means to compare ASCII and wide characters
- *    as if they are equal.  
+ *    as if they are equal.
  *    In the only code page implemented so far, there may not be
  *    wide characters in strings passed to LCMapStringA,
  *    so there is nothing to be done for this flag.
  */
 #ifdef __WIN32OS2__
 ODINFUNCTION6(INT, LCMapStringA,
-	LCID, lcid,      /* [in] locale identifier created with MAKELCID; 
-		                LOCALE_SYSTEM_DEFAULT and LOCALE_USER_DEFAULT are 
+    LCID, lcid,      /* [in] locale identifier created with MAKELCID;
+                        LOCALE_SYSTEM_DEFAULT and LOCALE_USER_DEFAULT are
                                 predefined values. */
-	DWORD, mapflags, /* [in] flags */
-	LPCSTR, srcstr,  /* [in] source buffer */
-	INT, srclen,     /* [in] source length */
-	LPSTR, dststr,   /* [out] destination buffer */
-	INT, dstlen)     /* [in] destination buffer length */
+    DWORD, mapflags, /* [in] flags */
+    LPCSTR, srcstr,  /* [in] source buffer */
+    INT, srclen,     /* [in] source length */
+    LPSTR, dststr,   /* [out] destination buffer */
+    INT, dstlen)     /* [in] destination buffer length */
 #else
 INT WINAPI LCMapStringA(
-	LCID lcid,      /* [in] locale identifier created with MAKELCID; 
-		                LOCALE_SYSTEM_DEFAULT and LOCALE_USER_DEFAULT are 
+    LCID lcid,      /* [in] locale identifier created with MAKELCID;
+                        LOCALE_SYSTEM_DEFAULT and LOCALE_USER_DEFAULT are
                                 predefined values. */
-	DWORD mapflags, /* [in] flags */
-	LPCSTR srcstr,  /* [in] source buffer */
-	INT srclen,     /* [in] source length */
-	LPSTR dststr,   /* [out] destination buffer */
-	INT dstlen)     /* [in] destination buffer length */
+    DWORD mapflags, /* [in] flags */
+    LPCSTR srcstr,  /* [in] source buffer */
+    INT srclen,     /* [in] source length */
+    LPSTR dststr,   /* [out] destination buffer */
+    INT dstlen)     /* [in] destination buffer length */
 #endif
 {
   int i;
 
   TRACE("(0x%04lx,0x%08lx,%s,%d,%p,%d)\n",
-	lcid,mapflags,srcstr,srclen,dststr,dstlen);
+    lcid,mapflags,srcstr,srclen,dststr,dstlen);
 
   if ( ((dstlen!=0) && (dststr==NULL)) || (srcstr==NULL) )
   {
@@ -2002,7 +2003,7 @@ INT WINAPI LCMapStringA(
     SetLastError(ERROR_INVALID_PARAMETER);
     return 0;
   }
-  if (srclen == -1) 
+  if (srclen == -1)
     srclen = strlen(srcstr) + 1 ;    /* (include final '\0') */
 
 #define LCMAPSTRINGA_SUPPORTED_FLAGS (LCMAP_UPPERCASE     | \
@@ -2013,20 +2014,20 @@ INT WINAPI LCMapStringA(
                                         SORT_STRINGSORT     | \
                                         NORM_IGNOREWIDTH    | \
                                         NORM_IGNOREKANATYPE)
-  /* FIXME: as long as we don't support Katakana nor Hiragana 
+  /* FIXME: as long as we don't support Katakana nor Hiragana
    * characters, we can support NORM_IGNOREKANATYPE
    */
   if (mapflags & ~LCMAPSTRINGA_SUPPORTED_FLAGS)
   {
     FIXME("(0x%04lx,0x%08lx,%p,%d,%p,%d): "
-	  "unimplemented flags: 0x%08lx\n",
-	  lcid,
-	  mapflags,
-	  srcstr,
-	  srclen,
-	  dststr,
-	  dstlen,
-	  mapflags & ~LCMAPSTRINGA_SUPPORTED_FLAGS
+      "unimplemented flags: 0x%08lx\n",
+      lcid,
+      mapflags,
+      srcstr,
+      srclen,
+      dststr,
+      dstlen,
+      mapflags & ~LCMAPSTRINGA_SUPPORTED_FLAGS
      );
   }
 
@@ -2034,40 +2035,40 @@ INT WINAPI LCMapStringA(
   {
     int i,j;
 #ifdef __WIN32OS2__
-    int (* _Optlink f)(int) = identity; 
+    int (* _Optlink f)(int) = identity;
 #else
-    int (* f)(int) = identity; 
+    int (* f)(int) = identity;
 #endif
     int flag_ignorenonspace = mapflags & NORM_IGNORENONSPACE;
     int flag_ignoresymbols = mapflags & NORM_IGNORESYMBOLS;
 
     if (flag_ignorenonspace || flag_ignoresymbols)
     {
-      /* For some values of mapflags, the length of the resulting 
-	 string is not known at this point.  Windows does map the string
-	 and does not SetLastError ERROR_INSUFFICIENT_BUFFER in
-	 these cases. */
+      /* For some values of mapflags, the length of the resulting
+     string is not known at this point.  Windows does map the string
+     and does not SetLastError ERROR_INSUFFICIENT_BUFFER in
+     these cases. */
       if (dstlen==0)
       {
-	/* Compute required length */
-	for (i=j=0; i < srclen; i++)
-	{
-	  if ( !(flag_ignorenonspace && OLE2NLS_isNonSpacing(srcstr[i]))
-	       && !(flag_ignoresymbols && OLE2NLS_isSymbol(srcstr[i])) )
-	    j++;
-	}
-	return j;
+    /* Compute required length */
+    for (i=j=0; i < srclen; i++)
+    {
+      if ( !(flag_ignorenonspace && OLE2NLS_isNonSpacing(srcstr[i]))
+           && !(flag_ignoresymbols && OLE2NLS_isSymbol(srcstr[i])) )
+        j++;
+    }
+    return j;
       }
     }
     else
     {
       if (dstlen==0)
-	return srclen;  
-      if (dstlen<srclen) 
-	   {
-	     SetLastError(ERROR_INSUFFICIENT_BUFFER);
-	     return 0;
-	   }
+    return srclen;
+      if (dstlen<srclen)
+       {
+         SetLastError(ERROR_INSUFFICIENT_BUFFER);
+         return 0;
+       }
     }
     if (mapflags & LCMAP_UPPERCASE)
       f = toupper;
@@ -2077,10 +2078,10 @@ INT WINAPI LCMapStringA(
     for (i=j=0; (i<srclen) && (j<dstlen) ; i++)
     {
       if ( !(flag_ignorenonspace && OLE2NLS_isNonSpacing(srcstr[i]))
-	   && !(flag_ignoresymbols && OLE2NLS_isSymbol(srcstr[i])) )
+       && !(flag_ignoresymbols && OLE2NLS_isSymbol(srcstr[i])) )
       {
-	dststr[j] = (CHAR) f(srcstr[i]);
-	j++;
+    dststr[j] = (CHAR) f(srcstr[i]);
+    j++;
       }
     }
     return j;
@@ -2104,30 +2105,30 @@ INT WINAPI LCMapStringA(
     {
       int ofs;
       unsigned char source_char = srcstr[i];
-      if (source_char!='\0') 
+      if (source_char!='\0')
       {
-	if (flag_stringsort || !OLE2NLS_isPunctuation(source_char))
-	{
-	  unicode_len++;
-	  if ( LCM_Unicode_LUT[-2+2*source_char] & ~15 )
-	    unicode_len++;             /* double letter */
-	}
-	else
-	{
-	  delayed_punctuation_len++;
-	}	  
+    if (flag_stringsort || !OLE2NLS_isPunctuation(source_char))
+    {
+      unicode_len++;
+      if ( LCM_Unicode_LUT[-2+2*source_char] & ~15 )
+        unicode_len++;             /* double letter */
+    }
+    else
+    {
+      delayed_punctuation_len++;
+    }
       }
-	  
+
       if (isupper(source_char))
-	case_len=unicode_len; 
+    case_len=unicode_len;
 
       ofs = source_char - LCM_Diacritic_Start;
       if ((ofs>=0) && (LCM_Diacritic_LUT[ofs]!=2))
-	diacritic_len=unicode_len;
+    diacritic_len=unicode_len;
     }
 
     if (mapflags & NORM_IGNORECASE)
-      case_len=0;                   
+      case_len=0;
     if (mapflags & NORM_IGNORENONSPACE)
       diacritic_len=0;
 
@@ -2138,7 +2139,7 @@ INT WINAPI LCMapStringA(
       +     4                            /* four '\1' separators */
       +     1  ;                         /* terminal '\0' */
     if (dstlen==0)
-      return room;      
+      return room;
     else if (dstlen<room)
     {
       SetLastError(ERROR_INSUFFICIENT_BUFFER);
@@ -2154,73 +2155,73 @@ INT WINAPI LCMapStringA(
 #endif
     /* locate each component, write separators */
     diacritic_component = dststr + 2*unicode_len ;
-    *diacritic_component++ = '\1'; 
+    *diacritic_component++ = '\1';
     case_component = diacritic_component + diacritic_len ;
-    *case_component++ = '\1'; 
+    *case_component++ = '\1';
     delayed_punctuation_component = case_component + case_len ;
     *delayed_punctuation_component++ = '\1';
     *delayed_punctuation_component++ = '\1';
 
-    /* read source string char by char, write 
+    /* read source string char by char, write
        corresponding weight in each component. */
     for (i=0,count=0;i<srclen;i++)
     {
       unsigned char source_char=srcstr[i];
-      if (source_char!='\0') 
+      if (source_char!='\0')
       {
-	int type,longcode;
-	type = LCM_Unicode_LUT[-2+2*source_char];
-	longcode = type >> 4;
-	type &= 15;
-	if (!flag_stringsort && OLE2NLS_isPunctuation(source_char)) 
-	{
-	  WORD encrypted_location = (1<<15) + 7 + 4*count;
-	  *delayed_punctuation_component++ = (unsigned char) (encrypted_location>>8);
-	  *delayed_punctuation_component++ = (unsigned char) (encrypted_location&255);
+    int type,longcode;
+    type = LCM_Unicode_LUT[-2+2*source_char];
+    longcode = type >> 4;
+    type &= 15;
+    if (!flag_stringsort && OLE2NLS_isPunctuation(source_char))
+    {
+      WORD encrypted_location = (1<<15) + 7 + 4*count;
+      *delayed_punctuation_component++ = (unsigned char) (encrypted_location>>8);
+      *delayed_punctuation_component++ = (unsigned char) (encrypted_location&255);
                      /* big-endian is used here because it lets string comparison be
-			compatible with numerical comparison */
+            compatible with numerical comparison */
 
-	  *delayed_punctuation_component++ = type;
-	  *delayed_punctuation_component++ = LCM_Unicode_LUT[-1+2*source_char];  
-                     /* assumption : a punctuation character is never a 
-			double or accented letter */
-	}
-	else
-	{
-	  dststr[2*count] = type;
-	  dststr[2*count+1] = LCM_Unicode_LUT[-1+2*source_char];  
-	  if (longcode)
-	  {
-	    if (count<case_len)
-	      case_component[count] = ( isupper(source_char) ? 18 : 2 ) ;
-	    if (count<diacritic_len)
-	      diacritic_component[count] = 2; /* assumption: a double letter
-						 is never accented */
-	    count++;
-	    
-	    dststr[2*count] = type;
-	    dststr[2*count+1] = *(LCM_Unicode_LUT_2 - 1 + longcode); 
-	    /* 16 in the first column of LCM_Unicode_LUT  -->  longcode = 1 
-	       32 in the first column of LCM_Unicode_LUT  -->  longcode = 2 
-	       48 in the first column of LCM_Unicode_LUT  -->  longcode = 3 */
-	  }
+      *delayed_punctuation_component++ = type;
+      *delayed_punctuation_component++ = LCM_Unicode_LUT[-1+2*source_char];
+                     /* assumption : a punctuation character is never a
+            double or accented letter */
+    }
+    else
+    {
+      dststr[2*count] = type;
+      dststr[2*count+1] = LCM_Unicode_LUT[-1+2*source_char];
+      if (longcode)
+      {
+        if (count<case_len)
+          case_component[count] = ( isupper(source_char) ? 18 : 2 ) ;
+        if (count<diacritic_len)
+          diacritic_component[count] = 2; /* assumption: a double letter
+                         is never accented */
+        count++;
 
-	  if (count<case_len)
-	    case_component[count] = ( isupper(source_char) ? 18 : 2 ) ;
-	  if (count<diacritic_len)
-	  {
-	    int ofs = source_char - LCM_Diacritic_Start;
-	    diacritic_component[count] = (ofs>=0 ? LCM_Diacritic_LUT[ofs] : 2);
-	  }
-	  count++;
-	}
+        dststr[2*count] = type;
+        dststr[2*count+1] = *(LCM_Unicode_LUT_2 - 1 + longcode);
+        /* 16 in the first column of LCM_Unicode_LUT  -->  longcode = 1
+           32 in the first column of LCM_Unicode_LUT  -->  longcode = 2
+           48 in the first column of LCM_Unicode_LUT  -->  longcode = 3 */
+      }
+
+      if (count<case_len)
+        case_component[count] = ( isupper(source_char) ? 18 : 2 ) ;
+      if (count<diacritic_len)
+      {
+        int ofs = source_char - LCM_Diacritic_Start;
+        diacritic_component[count] = (ofs>=0 ? LCM_Diacritic_LUT[ofs] : 2);
+      }
+      count++;
+    }
       }
     }
     dststr[room-1] = '\0';
     return room;
   }
 }
-		     
+
 /*************************************************************************
  *              LCMapStringW                [KERNEL32.493]
  *
@@ -2232,33 +2233,33 @@ INT WINAPI LCMapStringA(
  */
 #ifdef __WIN32OS2__
 ODINFUNCTION6(INT, LCMapStringW,
-	LCID, lcid,DWORD, mapflags,LPCWSTR, srcstr,INT, srclen,LPWSTR, dststr,
-	INT, dstlen)
+    LCID, lcid,DWORD, mapflags,LPCWSTR, srcstr,INT, srclen,LPWSTR, dststr,
+    INT, dstlen)
 #else
 INT WINAPI LCMapStringW(
-	LCID lcid,DWORD mapflags,LPCWSTR srcstr,INT srclen,LPWSTR dststr,
-	INT dstlen)
+    LCID lcid,DWORD mapflags,LPCWSTR srcstr,INT srclen,LPWSTR dststr,
+    INT dstlen)
 #endif
 {
   int i;
- 
+
   TRACE("(0x%04lx,0x%08lx,%p,%d,%p,%d)\n",
                  lcid, mapflags, srcstr, srclen, dststr, dstlen);
-  
+
   if ( ((dstlen!=0) && (dststr==NULL)) || (srcstr==NULL) )
   {
     ERR("(src=%p,dst=%p): Invalid NULL string\n", srcstr, dststr);
     SetLastError(ERROR_INVALID_PARAMETER);
     return 0;
   }
-  if (srclen==-1) 
+  if (srclen==-1)
     srclen = strlenW(srcstr)+1;
 
   /* FIXME: Both this function and it's companion LCMapStringA()
    * completely ignore the "lcid" parameter.  In place of the "lcid"
    * parameter the application must set the "LC_COLLATE" or "LC_ALL"
    * environment variable prior to invoking this function.  */
-  if (mapflags & LCMAP_SORTKEY) 
+  if (mapflags & LCMAP_SORTKEY)
   {
       /* Possible values of LC_COLLATE. */
       char *lc_collate_default = 0; /* value prior to this function */
@@ -2315,7 +2316,7 @@ INT WINAPI LCMapStringW(
       /* FIXME: Prior to to setting the LC_COLLATE locale category the
        * current value is backed up so it can be restored after the
        * last LC_COLLATE sensitive function returns.
-       * 
+       *
        * Even though the locale is adjusted for a minimum amount of
        * time a race condition exists where other threads may be
        * affected if they invoke LC_COLLATE sensitive functions.  One
@@ -2355,7 +2356,7 @@ INT WINAPI LCMapStringW(
       if(returned_len == 0)
       {
           LPSTR srcstr_ascii = (LPSTR)HEAP_strdupWtoA(GetProcessHeap(),
-					   0, srcstr);
+                       0, srcstr);
           ERR("wcstombs failed.  The string specified (%s) may contains an "
               "invalid character.\n", srcstr_ascii);
           SetLastError(ERROR_INVALID_PARAMETER);
@@ -2368,7 +2369,7 @@ INT WINAPI LCMapStringW(
       else if(returned_len > src_native_len)
       {
           src_native[src_native_len - 1] = 0;
-          ERR("wcstombs returned a string (%s) that was longer (%d bytes) " 
+          ERR("wcstombs returned a string (%s) that was longer (%d bytes) "
               "than expected (%d bytes).\n", src_native, returned_len,
               dst_native_len);
 
@@ -2410,11 +2411,11 @@ INT WINAPI LCMapStringW(
        * various tables as it is done in LCMapStringA().  However, I'm
        * not sure what those tables are. */
       returned_len = strxfrm(dst_native, src_native, dst_native_len) + 1;
-      
+
       if(returned_len > dst_native_len)
       {
           dst_native[dst_native_len - 1] = 0;
-          ERR("strxfrm returned a string (%s) that was longer (%d bytes) " 
+          ERR("strxfrm returned a string (%s) that was longer (%d bytes) "
               "than expected (%d bytes).\n", dst_native, returned_len,
               dst_native_len);
 
@@ -2429,7 +2430,7 @@ INT WINAPI LCMapStringW(
           return 0;
       }
       dst_native_len = returned_len;
-      
+
       TRACE("dst_native = %s  dst_native_len = %d\n",
              dst_native, dst_native_len);
 
@@ -2452,7 +2453,7 @@ INT WINAPI LCMapStringW(
 
       /* Restore LC_COLLATE now that the last LC_COLLATE sensitive
        * function has returned. */
-      setlocale(LC_COLLATE, lc_collate_default); 
+      setlocale(LC_COLLATE, lc_collate_default);
 
       if(returned_len == 0)
       {
@@ -2469,7 +2470,7 @@ INT WINAPI LCMapStringW(
       {
           if(returned_len > dstlen)
           {
-              ERR("mbstowcs returned a string that was longer (%d chars) " 
+              ERR("mbstowcs returned a string that was longer (%d chars) "
                   "than the buffer provided (%d chars).\n", returned_len,
                   dstlen);
               SetLastError(ERROR_INSUFFICIENT_BUFFER);
@@ -2477,7 +2478,7 @@ INT WINAPI LCMapStringW(
               if(src_native) HeapFree(GetProcessHeap(), 0, src_native);
               if(dst_native) HeapFree(GetProcessHeap(), 0, dst_native);
               if(dststr_libc) HeapFree(GetProcessHeap(), 0, dststr_libc);
-              return 0;          
+              return 0;
           }
           dstlen = returned_len;
 
@@ -2506,14 +2507,14 @@ INT WINAPI LCMapStringW(
   else
   {
 #ifdef __WIN32OS2__
-    int (* _Optlink f)(int) = identity; 
+    int (* _Optlink f)(int) = identity;
 #else
-    int (*f)(int)=identity; 
+    int (*f)(int)=identity;
 #endif
 
     if (dstlen==0)
-        return srclen;  
-    if (dstlen<srclen) 
+        return srclen;
+    if (dstlen<srclen)
     {
         SetLastError(ERROR_INSUFFICIENT_BUFFER);
         return 0;
@@ -2542,7 +2543,7 @@ INT WINAPI LCMapStringW(
  * Note that len == -1 is not permitted.
  */
 static inline int OLE2NLS_EstimateMappingLength(LCID lcid, DWORD dwMapFlags,
-						LPCSTR str, DWORD len)
+                        LPCSTR str, DWORD len)
 {
     /* Estimate only for small strings to keep the estimation error from
      * becoming too large. */
@@ -2551,7 +2552,7 @@ static inline int OLE2NLS_EstimateMappingLength(LCID lcid, DWORD dwMapFlags,
 }
 
 /******************************************************************************
- *		CompareStringA	[KERNEL32.143]
+ *      CompareStringA  [KERNEL32.143]
  * Compares two strings using locale
  *
  * RETURNS
@@ -2564,13 +2565,13 @@ static inline int OLE2NLS_EstimateMappingLength(LCID lcid, DWORD dwMapFlags,
  * Defaults to a word sort, but uses a string sort if
  * SORT_STRINGSORT is set.
  * Calls SetLastError for ERROR_INVALID_FLAGS, ERROR_INVALID_PARAMETER.
- * 
+ *
  * BUGS
  *
  * This implementation ignores the locale
  *
  * FIXME
- * 
+ *
  * Quite inefficient.
  */
 UINT WINAPI CompareStringA(
@@ -2586,10 +2587,10 @@ UINT WINAPI CompareStringA(
   int result;
   LPSTR sk1,sk2;
   TRACE("%s and %s\n",
-	debugstr_a (s1), debugstr_a (s2));
+    debugstr_a (s1), debugstr_a (s2));
 
   if ( (s1==NULL) || (s2==NULL) )
-  {    
+  {
     ERR("(s1=%s,s2=%s): Invalid NULL string\n", s1, s2);
     SetLastError(ERROR_INVALID_PARAMETER);
     return 0;
@@ -2600,7 +2601,7 @@ UINT WINAPI CompareStringA(
 
   if (l1 == -1) l1 = strlen(s1);
   if (l2 == -1) l2 = strlen(s2);
-  	
+
   mapstring_flags = LCMAP_SORTKEY | fdwStyle ;
   len1 = OLE2NLS_EstimateMappingLength(lcid, mapstring_flags, s1, l1);
   len2 = OLE2NLS_EstimateMappingLength(lcid, mapstring_flags, s2, l2);
@@ -2611,7 +2612,7 @@ UINT WINAPI CompareStringA(
   sk1 = (LPSTR)HeapAlloc(GetProcessHeap(), 0, len1 + len2);
   sk2 = sk1 + len1;
   if ( (!LCMapStringA(lcid,mapstring_flags,s1,l1,sk1,len1))
-	 || (!LCMapStringA(lcid,mapstring_flags,s2,l2,sk2,len2)) )
+     || (!LCMapStringA(lcid,mapstring_flags,s2,l2,sk2,len2)) )
   {
     ERR("Bug in LCmapStringA.\n");
     result = 0;
@@ -2633,44 +2634,44 @@ UINT WINAPI CompareStringA(
 }
 
 /******************************************************************************
- *		CompareStringW	[KERNEL32.144]
+ *      CompareStringW  [KERNEL32.144]
  * This implementation ignores the locale
  * FIXME :  Does only string sort.  Should
  * be reimplemented the same way as CompareStringA.
  */
-UINT WINAPI CompareStringW(DWORD lcid, DWORD fdwStyle, 
+UINT WINAPI CompareStringW(DWORD lcid, DWORD fdwStyle,
                                LPCWSTR s1, DWORD l1, LPCWSTR s2,DWORD l2)
 {
-	int len,ret;
-	if(fdwStyle & NORM_IGNORENONSPACE)
-		FIXME("IGNORENONSPACE not supprted\n");
-	if(fdwStyle & NORM_IGNORESYMBOLS)
-		FIXME("IGNORESYMBOLS not supported\n");
+    int len,ret;
+    if(fdwStyle & NORM_IGNORENONSPACE)
+        FIXME("IGNORENONSPACE not supprted\n");
+    if(fdwStyle & NORM_IGNORESYMBOLS)
+        FIXME("IGNORESYMBOLS not supported\n");
 
-	/* Is strcmp defaulting to string sort or to word sort?? */
-	/* FIXME: Handle NORM_STRINGSORT */
-	l1 = (l1==-1)?strlenW(s1):l1;
-	l2 = (l2==-1)?strlenW(s2):l2;
-	len = l1<l2 ? l1:l2;
-	ret = (fdwStyle & NORM_IGNORECASE) ? strncmpiW(s1,s2,len) : strncmpW(s1,s2,len);
-	/* not equal, return 1 or 3 */
-	if(ret!=0) {
-		/* need to translate result */
-		return ((int)ret < 0) ? 1 : 3;
-	}
-	/* same len, return 2 */
-	if(l1==l2) return 2;
-	/* the longer one is lexically greater */
-	return (l1<l2)? 1 : 3;
+    /* Is strcmp defaulting to string sort or to word sort?? */
+    /* FIXME: Handle NORM_STRINGSORT */
+    l1 = (l1==-1)?strlenW(s1):l1;
+    l2 = (l2==-1)?strlenW(s2):l2;
+    len = l1<l2 ? l1:l2;
+    ret = (fdwStyle & NORM_IGNORECASE) ? strncmpiW(s1,s2,len) : strncmpW(s1,s2,len);
+    /* not equal, return 1 or 3 */
+    if(ret!=0) {
+        /* need to translate result */
+        return ((int)ret < 0) ? 1 : 3;
+    }
+    /* same len, return 2 */
+    if(l1==l2) return 2;
+    /* the longer one is lexically greater */
+    return (l1<l2)? 1 : 3;
 }
 
 /******************************************************************************
- *		OLE_GetFormatA	[Internal]
+ *      OLE_GetFormatA  [Internal]
  *
  * FIXME
  *    If datelen == 0, it should return the reguired string length.
  *
- This function implements stuff for GetDateFormat() and 
+ This function implements stuff for GetDateFormat() and
  GetTimeFormat().
 
   d    single-digit (no leading zero) day (of month)
@@ -2698,15 +2699,15 @@ UINT WINAPI CompareStringW(DWORD lcid, DWORD fdwStyle,
   ''   used to quote literal characters
   ''   (within a quoted string) indicates a literal '
 
- These functions REQUIRE valid locale, date,  and format. 
+ These functions REQUIRE valid locale, date,  and format.
  */
 static INT OLE_GetFormatA(LCID locale,
-			    DWORD flags,
-			    DWORD tflags,
-			    LPSYSTEMTIME xtime,
-			    LPCSTR _format, 	/*in*/
-			    LPSTR date,		/*out*/
-			    INT datelen)
+                DWORD flags,
+                DWORD tflags,
+                LPSYSTEMTIME xtime,
+                LPCSTR _format,     /*in*/
+                LPSTR date,     /*out*/
+                INT datelen)
 {
    INT inpos, outpos;
    int count, type, inquote, Overflow;
@@ -2716,14 +2717,14 @@ static INT OLE_GetFormatA(LCID locale,
    int buflen;
 
    const char * _dgfmt[] = { "%d", "%02d" };
-   const char ** dgfmt = _dgfmt - 1; 
+   const char ** dgfmt = _dgfmt - 1;
 
    /* report, for debugging */
    TRACE("(0x%lx,0x%lx, 0x%lx, time(y=%d m=%d wd=%d d=%d,h=%d,m=%d,s=%d), fmt=%p \'%s\' , %p, len=%d)\n",
-   	 locale, flags, tflags,
-	 xtime->wYear,xtime->wMonth,xtime->wDayOfWeek,xtime->wDay, xtime->wHour, xtime->wMinute, xtime->wSecond,
-	 _format, _format, date, datelen);
-  
+     locale, flags, tflags,
+     xtime->wYear,xtime->wMonth,xtime->wDayOfWeek,xtime->wDay, xtime->wHour, xtime->wMinute, xtime->wSecond,
+     _format, _format, date, datelen);
+
    if(datelen == 0) {
      FIXME("datelen = 0, returning 255\n");
      return 255;
@@ -2734,11 +2735,11 @@ static INT OLE_GetFormatA(LCID locale,
    count = 0; inquote = 0; Overflow = 0;
    type = '\0';
    date[0] = buf[0] = '\0';
-      
+
    strcpy(format,_format);
 
    /* alter the formatstring, while it works for all languages now in wine
-   its possible that it fails when the time looks like ss:mm:hh as example*/   
+   its possible that it fails when the time looks like ss:mm:hh as example*/
    if (tflags & (TIME_NOMINUTESORSECONDS))
    { if ((pos = strstr ( format, ":mm")))
      { memcpy ( pos, pos+3, strlen(format)-(pos-format)-2 );
@@ -2749,145 +2750,145 @@ static INT OLE_GetFormatA(LCID locale,
      { memcpy ( pos, pos+3, strlen(format)-(pos-format)-2 );
      }
    }
-   
+
    for (inpos = 0;; inpos++) {
       /* TRACE("STATE inpos=%2d outpos=%2d count=%d inquote=%d type=%c buf,date = %c,%c\n", inpos, outpos, count, inquote, type, buf[inpos], date[outpos]); */
       if (inquote) {
-	 if (format[inpos] == '\'') {
-	    if (format[inpos+1] == '\'') {
-	       inpos += 1;
-	       date[outpos++] = '\'';
-	    } else {
-	       inquote = 0;
-	       continue; /* we did nothing to the output */
-	    }
-	 } else if (format[inpos] == '\0') {
-	    date[outpos++] = '\0';
-	    if (outpos > datelen) Overflow = 1;
-	    break;
-	 } else {
-	    date[outpos++] = format[inpos];
-	    if (outpos > datelen) {
-	       Overflow = 1;
-	       date[outpos-1] = '\0'; /* this is the last place where
-					 it's safe to write */
-	       break;
-	    }
-	 }
+     if (format[inpos] == '\'') {
+        if (format[inpos+1] == '\'') {
+           inpos += 1;
+           date[outpos++] = '\'';
+        } else {
+           inquote = 0;
+           continue; /* we did nothing to the output */
+        }
+     } else if (format[inpos] == '\0') {
+        date[outpos++] = '\0';
+        if (outpos > datelen) Overflow = 1;
+        break;
+     } else {
+        date[outpos++] = format[inpos];
+        if (outpos > datelen) {
+           Overflow = 1;
+           date[outpos-1] = '\0'; /* this is the last place where
+                     it's safe to write */
+           break;
+        }
+     }
       } else if (  (count && (format[inpos] != type))
-		   || count == 4
-		   || (count == 2 && strchr("ghHmst", type)) ) {
-	    if (type == 'h' && (tflags & TIME_FORCE24HOURFORMAT)) type= 'H';
-	    if (type == 'd') {
-	       if (count == 4) {
-		  GetLocaleInfoA(locale,
-				   LOCALE_SDAYNAME1
-				   + (xtime->wDayOfWeek+6)%7,
-				   buf, sizeof(buf));
-	       } else if (count == 3) {
-			   GetLocaleInfoA(locale, 
-					    LOCALE_SABBREVDAYNAME1 
-					    + (xtime->wDayOfWeek+6)%7,
-					    buf, sizeof(buf));
-		      } else {
-		  sprintf(buf, dgfmt[count], xtime->wDay);
-	       }
-	    } else if (type == 'M') {
-	       if (count == 3) {
-		  GetLocaleInfoA(locale, 
-				   LOCALE_SABBREVMONTHNAME1
-				   + xtime->wMonth - 1,
-				   buf, sizeof(buf));
-	       } else if (count == 4) {
-		  GetLocaleInfoA(locale,
-				   LOCALE_SMONTHNAME1
-				   + xtime->wMonth - 1,
-				   buf, sizeof(buf));
-		 } else {
-		  sprintf(buf, dgfmt[count], xtime->wMonth);
-	       }
-	    } else if (type == 'y') {
-	       if (count == 4) {
-		      sprintf(buf, "%d", xtime->wYear);
-	       } else if (count == 3) {
-		  strcpy(buf, "yyy");
-		  WARN("unknown format, c=%c, n=%d\n",  type, count);
-		 } else {
-		  sprintf(buf, dgfmt[count], xtime->wYear % 100);
-	       }
-	    } else if (type == 'g') {
-	       if        (count == 2) {
-		  FIXME("LOCALE_ICALENDARTYPE unimp.\n");
-		  strcpy(buf, "AD");
-	    } else {
-		  strcpy(buf, "g");
-		  WARN("unknown format, c=%c, n=%d\n", type, count);
-	       }
-	    } else if (type == 'h') {
-	       /* gives us hours 1:00 -- 12:00 */
-	       sprintf(buf, dgfmt[count], (xtime->wHour-1)%12 +1);
-	    } else if (type == 'H') {
-	       /* 24-hour time */
-	       sprintf(buf, dgfmt[count], xtime->wHour);
-	    } else if ( type == 'm') {
-	       sprintf(buf, dgfmt[count], xtime->wMinute);
-	    } else if ( type == 's') {
-	       sprintf(buf, dgfmt[count], xtime->wSecond);
-	    } else if (type == 't') {
+           || count == 4
+           || (count == 2 && strchr("ghHmst", type)) ) {
+        if (type == 'h' && (tflags & TIME_FORCE24HOURFORMAT)) type= 'H';
+        if (type == 'd') {
+           if (count == 4) {
+          GetLocaleInfoA(locale,
+                   LOCALE_SDAYNAME1
+                   + (xtime->wDayOfWeek+6)%7,
+                   buf, sizeof(buf));
+           } else if (count == 3) {
+               GetLocaleInfoA(locale,
+                        LOCALE_SABBREVDAYNAME1
+                        + (xtime->wDayOfWeek+6)%7,
+                        buf, sizeof(buf));
+              } else {
+          sprintf(buf, dgfmt[count], xtime->wDay);
+           }
+        } else if (type == 'M') {
+           if (count == 3) {
+          GetLocaleInfoA(locale,
+                   LOCALE_SABBREVMONTHNAME1
+                   + xtime->wMonth - 1,
+                   buf, sizeof(buf));
+           } else if (count == 4) {
+          GetLocaleInfoA(locale,
+                   LOCALE_SMONTHNAME1
+                   + xtime->wMonth - 1,
+                   buf, sizeof(buf));
+         } else {
+          sprintf(buf, dgfmt[count], xtime->wMonth);
+           }
+        } else if (type == 'y') {
+           if (count == 4) {
+              sprintf(buf, "%d", xtime->wYear);
+           } else if (count == 3) {
+          strcpy(buf, "yyy");
+          WARN("unknown format, c=%c, n=%d\n",  type, count);
+         } else {
+          sprintf(buf, dgfmt[count], xtime->wYear % 100);
+           }
+        } else if (type == 'g') {
+           if        (count == 2) {
+          FIXME("LOCALE_ICALENDARTYPE unimp.\n");
+          strcpy(buf, "AD");
+        } else {
+          strcpy(buf, "g");
+          WARN("unknown format, c=%c, n=%d\n", type, count);
+           }
+        } else if (type == 'h') {
+           /* gives us hours 1:00 -- 12:00 */
+           sprintf(buf, dgfmt[count], (xtime->wHour-1)%12 +1);
+        } else if (type == 'H') {
+           /* 24-hour time */
+           sprintf(buf, dgfmt[count], xtime->wHour);
+        } else if ( type == 'm') {
+           sprintf(buf, dgfmt[count], xtime->wMinute);
+        } else if ( type == 's') {
+           sprintf(buf, dgfmt[count], xtime->wSecond);
+        } else if (type == 't') {
                if ((tflags & TIME_NOTIMEMARKER))
                   buf[0]='\0';
                else if (count == 1) {
-		  sprintf(buf, "%c", (xtime->wHour < 12) ? 'A' : 'P');
+          sprintf(buf, "%c", (xtime->wHour < 12) ? 'A' : 'P');
                } else if (count == 2) {
                  /* sprintf(buf, "%s", (xtime->wHour < 12) ? "AM" : "PM"); */
                   GetLocaleInfoA(locale,
-                           (xtime->wHour<12) 
+                           (xtime->wHour<12)
                            ? LOCALE_S1159 : LOCALE_S2359,
                            buf, sizeof(buf));
                }
-	    };
+        };
 
-	    /* we need to check the next char in the format string 
-	       again, no matter what happened */
-	    inpos--;
-	    
-	    /* add the contents of buf to the output */
-	    buflen = strlen(buf);
-	    if (outpos + buflen < datelen) {
-	       date[outpos] = '\0'; /* for strcat to hook onto */
-		 strcat(date, buf);
-	       outpos += buflen;
-	    } else {
-	       date[outpos] = '\0';
-	       strncat(date, buf, datelen - outpos);
-		 date[datelen - 1] = '\0';
-		 SetLastError(ERROR_INSUFFICIENT_BUFFER);
-	       WARN("insufficient buffer\n");
-		 return 0;
-	    }
+        /* we need to check the next char in the format string
+           again, no matter what happened */
+        inpos--;
 
-	    /* reset the variables we used to keep track of this item */
-	    count = 0;
-	    type = '\0';
-	 } else if (format[inpos] == '\0') {
-	    /* we can't check for this at the loop-head, because
-	       that breaks the printing of the last format-item */
-	    date[outpos] = '\0';
-	    break;
+        /* add the contents of buf to the output */
+        buflen = strlen(buf);
+        if (outpos + buflen < datelen) {
+           date[outpos] = '\0'; /* for strcat to hook onto */
+         strcat(date, buf);
+           outpos += buflen;
+        } else {
+           date[outpos] = '\0';
+           strncat(date, buf, datelen - outpos);
+         date[datelen - 1] = '\0';
+         SetLastError(ERROR_INSUFFICIENT_BUFFER);
+           WARN("insufficient buffer\n");
+         return 0;
+        }
+
+        /* reset the variables we used to keep track of this item */
+        count = 0;
+        type = '\0';
+     } else if (format[inpos] == '\0') {
+        /* we can't check for this at the loop-head, because
+           that breaks the printing of the last format-item */
+        date[outpos] = '\0';
+        break;
          } else if (count) {
-	    /* continuing a code for an item */
-	    count +=1;
-	    continue;
-	 } else if (strchr("hHmstyMdg", format[inpos])) {
-	    type = format[inpos];
-	    count = 1;
-	    continue;
-	 } else if (format[inpos] == '\'') {
-	    inquote = 1;
-	    continue;
+        /* continuing a code for an item */
+        count +=1;
+        continue;
+     } else if (strchr("hHmstyMdg", format[inpos])) {
+        type = format[inpos];
+        count = 1;
+        continue;
+     } else if (format[inpos] == '\'') {
+        inquote = 1;
+        continue;
        } else {
-	    date[outpos++] = format[inpos];
-	 }
+        date[outpos++] = format[inpos];
+     }
       /* now deal with a possible buffer overflow */
       if (outpos >= datelen) {
        date[datelen - 1] = '\0';
@@ -2895,7 +2896,7 @@ static INT OLE_GetFormatA(LCID locale,
        return 0;
       }
    }
-   
+
    if (Overflow) {
       SetLastError(ERROR_INSUFFICIENT_BUFFER);
    };
@@ -2905,7 +2906,7 @@ static INT OLE_GetFormatA(LCID locale,
    /* sanity check */
    if (outpos > datelen-1) outpos = datelen-1;
    date[outpos] = '\0';
-   
+
    TRACE("returns string '%s', len %d\n", date, outpos);
    return outpos;
 }
@@ -2914,9 +2915,9 @@ static INT OLE_GetFormatA(LCID locale,
  * OLE_GetFormatW [INTERNAL]
  */
 static INT OLE_GetFormatW(LCID locale, DWORD flags, DWORD tflags,
-			    LPSYSTEMTIME xtime,
-			    LPCWSTR format,
-			    LPWSTR output, INT outlen)
+                LPSYSTEMTIME xtime,
+                LPCWSTR format,
+                LPWSTR output, INT outlen)
 {
    INT   inpos, outpos;
    int     count, type=0, inquote;
@@ -2935,11 +2936,11 @@ static INT OLE_GetFormatW(LCID locale, DWORD flags, DWORD tflags,
 
    /* make a debug report */
    TRACE("args: 0x%lx, 0x%lx, 0x%lx, time(d=%d,h=%d,m=%d,s=%d), fmt:%s (at %p), "
-   	      "%p with max len %d\n",
-	 locale, flags, tflags,
-	 xtime->wDay, xtime->wHour, xtime->wMinute, xtime->wSecond,
-	 debugstr_w(format), format, output, outlen);
-   
+          "%p with max len %d\n",
+     locale, flags, tflags,
+     xtime->wDay, xtime->wHour, xtime->wMinute, xtime->wSecond,
+     debugstr_w(format), format, output, outlen);
+
    if(outlen == 0) {
      FIXME("outlen = 0, returning 255\n");
      return 255;
@@ -2951,91 +2952,91 @@ static INT OLE_GetFormatW(LCID locale, DWORD flags, DWORD tflags,
    inquote = Overflow = 0;
    /* this is really just a sanity check */
    output[0] = buf[0] = 0;
-   
+
    /* this loop is the core of the function */
    for (inpos = 0; /* we have several break points */ ; inpos++) {
       if (inquote) {
-	 if (format[inpos] == (WCHAR) '\'') {
-	    if (format[inpos+1] == '\'') {
-	       inpos++;
-	       output[outpos++] = '\'';
-	    } else {
-	       inquote = 0;
-	       continue;
-	    }
-	 } else if (format[inpos] == 0) {
-	    output[outpos++] = 0;
-	    if (outpos > outlen) Overflow = 1;
-	    break;  /*  normal exit (within a quote) */
-	 } else {
-	    output[outpos++] = format[inpos]; /* copy input */
-	    if (outpos > outlen) {
-	       Overflow = 1;
-	       output[outpos-1] = 0; 
-	       break;
-	    }
-	 }
+     if (format[inpos] == (WCHAR) '\'') {
+        if (format[inpos+1] == '\'') {
+           inpos++;
+           output[outpos++] = '\'';
+        } else {
+           inquote = 0;
+           continue;
+        }
+     } else if (format[inpos] == 0) {
+        output[outpos++] = 0;
+        if (outpos > outlen) Overflow = 1;
+        break;  /*  normal exit (within a quote) */
+     } else {
+        output[outpos++] = format[inpos]; /* copy input */
+        if (outpos > outlen) {
+           Overflow = 1;
+           output[outpos-1] = 0;
+           break;
+        }
+     }
       } else if (  (count && (format[inpos] != type))
-		   || ( (count==4 && type =='y') ||
-			(count==4 && type =='M') ||
-			(count==4 && type =='d') ||
-			(count==2 && type =='g') ||
-			(count==2 && type =='h') ||
-			(count==2 && type =='H') ||
-			(count==2 && type =='m') ||
-			(count==2 && type =='s') ||
-			(count==2 && type =='t') )  ) {
+           || ( (count==4 && type =='y') ||
+            (count==4 && type =='M') ||
+            (count==4 && type =='d') ||
+            (count==2 && type =='g') ||
+            (count==2 && type =='h') ||
+            (count==2 && type =='H') ||
+            (count==2 && type =='m') ||
+            (count==2 && type =='s') ||
+            (count==2 && type =='t') )  ) {
           switch(type)
           {
           case 'd':
-	    if        (count == 4) {
-	       GetLocaleInfoW(locale,
-			     LOCALE_SDAYNAME1 + (xtime->wDayOfWeek +6)%7,
-			     buf, sizeof(buf)/sizeof(WCHAR) );
-	    } else if (count == 3) {
-	       GetLocaleInfoW(locale,
-				LOCALE_SABBREVDAYNAME1 +
-				(xtime->wDayOfWeek +6)%7,
-				buf, sizeof(buf)/sizeof(WCHAR) );
-	    } else {
+        if        (count == 4) {
+           GetLocaleInfoW(locale,
+                 LOCALE_SDAYNAME1 + (xtime->wDayOfWeek +6)%7,
+                 buf, sizeof(buf)/sizeof(WCHAR) );
+        } else if (count == 3) {
+           GetLocaleInfoW(locale,
+                LOCALE_SABBREVDAYNAME1 +
+                (xtime->wDayOfWeek +6)%7,
+                buf, sizeof(buf)/sizeof(WCHAR) );
+        } else {
                 sprintf( tmp, "%.*d", count, xtime->wDay );
                 MultiByteToWideChar( CP_ACP, 0, tmp, -1, buf, sizeof(buf)/sizeof(WCHAR) );
-	    }
+        }
             break;
 
           case 'M':
-	    if        (count == 4) {
-	       GetLocaleInfoW(locale,  LOCALE_SMONTHNAME1 +
-				xtime->wMonth -1, buf,
-				sizeof(buf)/sizeof(WCHAR) );
-	    } else if (count == 3) {
-	       GetLocaleInfoW(locale,  LOCALE_SABBREVMONTHNAME1 +
-				xtime->wMonth -1, buf,
-				sizeof(buf)/sizeof(WCHAR) );
-	    } else {
+        if        (count == 4) {
+           GetLocaleInfoW(locale,  LOCALE_SMONTHNAME1 +
+                xtime->wMonth -1, buf,
+                sizeof(buf)/sizeof(WCHAR) );
+        } else if (count == 3) {
+           GetLocaleInfoW(locale,  LOCALE_SABBREVMONTHNAME1 +
+                xtime->wMonth -1, buf,
+                sizeof(buf)/sizeof(WCHAR) );
+        } else {
                 sprintf( tmp, "%.*d", count, xtime->wMonth );
                 MultiByteToWideChar( CP_ACP, 0, tmp, -1, buf, sizeof(buf)/sizeof(WCHAR) );
-	    }
+        }
             break;
           case 'y':
-	    if        (count == 4) {
+        if        (count == 4) {
                 sprintf( tmp, "%d", xtime->wYear );
-	    } else if (count == 3) {
+        } else if (count == 3) {
                 strcpy( tmp, "yyy" );
-	    } else {
+        } else {
                 sprintf( tmp, "%.*d", count, xtime->wYear % 100 );
-	    }
+        }
             MultiByteToWideChar( CP_ACP, 0, tmp, -1, buf, sizeof(buf)/sizeof(WCHAR) );
             break;
 
           case 'g':
-	    if        (count == 2) {
-	       FIXME("LOCALE_ICALENDARTYPE unimplemented\n");
+        if        (count == 2) {
+           FIXME("LOCALE_ICALENDARTYPE unimplemented\n");
                strcpy( tmp, "AD" );
-	    } else {
-	       /* Win API sez we copy it verbatim */
+        } else {
+           /* Win API sez we copy it verbatim */
                 strcpy( tmp, "g" );
-	    }
+        }
             MultiByteToWideChar( CP_ACP, 0, tmp, -1, buf, sizeof(buf)/sizeof(WCHAR) );
             break;
 
@@ -3061,61 +3062,61 @@ static INT OLE_GetFormatW(LCID locale, DWORD flags, DWORD tflags,
               break;
 
           case 't':
-	    GetLocaleInfoW(locale, (xtime->wHour < 12) ?
-			     LOCALE_S1159 : LOCALE_S2359,
-			     buf, sizeof(buf) );
-	    if        (count == 1) {
-	       buf[1] = 0;
-	    }
+        GetLocaleInfoW(locale, (xtime->wHour < 12) ?
+                 LOCALE_S1159 : LOCALE_S2359,
+                 buf, sizeof(buf) );
+        if        (count == 1) {
+           buf[1] = 0;
+        }
             break;
           }
 
-	 /* no matter what happened,  we need to check this next 
-	    character the next time we loop through */
-	 inpos--;
+     /* no matter what happened,  we need to check this next
+        character the next time we loop through */
+     inpos--;
 
-	 /* cat buf onto the output */
-	 outlen = strlenW(buf);
-	 if (outpos + buflen < outlen) {
+     /* cat buf onto the output */
+     outlen = strlenW(buf);
+     if (outpos + buflen < outlen) {
             strcpyW( output + outpos, buf );
-	    outpos += buflen;
-	 } else {
+        outpos += buflen;
+     } else {
             lstrcpynW( output + outpos, buf, outlen - outpos );
-	    Overflow = 1;
-	    break; /* Abnormal exit */
-	 }
+        Overflow = 1;
+        break; /* Abnormal exit */
+     }
 
-	 /* reset the variables we used this time */
-	 count = 0;
-	 type = '\0';
+     /* reset the variables we used this time */
+     count = 0;
+     type = '\0';
       } else if (format[inpos] == 0) {
-	 /* we can't check for this at the beginning,  because that 
-	 would keep us from printing a format spec that ended the 
-	 string */
-	 output[outpos] = 0;
-	 break;  /*  NORMAL EXIT  */
+     /* we can't check for this at the beginning,  because that
+     would keep us from printing a format spec that ended the
+     string */
+     output[outpos] = 0;
+     break;  /*  NORMAL EXIT  */
       } else if (count) {
-	 /* how we keep track of the middle of a format spec */
-	 count++;
-	 continue;
+     /* how we keep track of the middle of a format spec */
+     count++;
+     continue;
       } else if ( (datevars && (format[inpos]=='d' ||
-				format[inpos]=='M' ||
-				format[inpos]=='y' ||
-				format[inpos]=='g')  ) ||
-		  (timevars && (format[inpos]=='H' ||
-				format[inpos]=='h' ||
-				format[inpos]=='m' ||
-				format[inpos]=='s' ||
-				format[inpos]=='t') )    ) {
-	 type = format[inpos];
-	 count = 1;
-	 continue;
+                format[inpos]=='M' ||
+                format[inpos]=='y' ||
+                format[inpos]=='g')  ) ||
+          (timevars && (format[inpos]=='H' ||
+                format[inpos]=='h' ||
+                format[inpos]=='m' ||
+                format[inpos]=='s' ||
+                format[inpos]=='t') )    ) {
+     type = format[inpos];
+     count = 1;
+     continue;
       } else if (format[inpos] == '\'') {
-	 inquote = 1;
-	 continue;
+     inquote = 1;
+     continue;
       } else {
-	 /* unquoted literals */
-	 output[outpos++] = format[inpos];
+     /* unquoted literals */
+     output[outpos++] = format[inpos];
       }
    }
 
@@ -3130,14 +3131,14 @@ static INT OLE_GetFormatW(LCID locale, DWORD flags, DWORD tflags,
    output[outpos] = '0';
 
    TRACE(" returning %s\n", debugstr_w(output));
-	
+
    return (!Overflow) ? outlen : 0;
-   
+
 }
 
 
 /******************************************************************************
- *		GetDateFormatA	[KERNEL32.310]
+ *      GetDateFormatA  [KERNEL32.310]
  * Makes an ASCII string of the date
  *
  * This function uses format to format the date,  or,  if format
@@ -3159,10 +3160,10 @@ static INT OLE_GetFormatW(LCID locale, DWORD flags, DWORD tflags,
  *
  */
 INT WINAPI GetDateFormatA(LCID locale,DWORD flags,
-			      LPSYSTEMTIME xtime,
-			      LPCSTR format, LPSTR date,INT datelen) 
+                  LPSYSTEMTIME xtime,
+                  LPCSTR format, LPSTR date,INT datelen)
 {
-   
+
   char format_buf[40];
   LPCSTR thisformat;
   SYSTEMTIME t;
@@ -3173,12 +3174,12 @@ INT WINAPI GetDateFormatA(LCID locale,DWORD flags,
   BOOL res;
 
   TRACE("(0x%04lx,0x%08lx,%p,%s,%p,%d)\n",
-	      locale,flags,xtime,format,date,datelen);
-  
+          locale,flags,xtime,format,date,datelen);
+
   if (!locale) {
      locale = LOCALE_SYSTEM_DEFAULT;
      };
-  
+
   if (locale == LOCALE_SYSTEM_DEFAULT) {
      thislocale = GetSystemDefaultLCID();
   } else if (locale == LOCALE_USER_DEFAULT) {
@@ -3195,38 +3196,38 @@ INT WINAPI GetDateFormatA(LCID locale,DWORD flags,
       /* Check year(?)/month and date for range and set ERROR_INVALID_PARAMETER  on error*/
       /*FIXME: SystemTimeToFileTime doesn't yet do that ckeck*/
       if(!res)
-	{
-	  SetLastError(ERROR_INVALID_PARAMETER);
-	  return 0;
-	}
-      FileTimeToSystemTime(&ft,&t); 
-     
+    {
+      SetLastError(ERROR_INVALID_PARAMETER);
+      return 0;
+    }
+      FileTimeToSystemTime(&ft,&t);
+
   };
   thistime = &t;
 
   if (format == NULL) {
-     GetLocaleInfoA(thislocale, ((flags&DATE_LONGDATE) 
-				   ? LOCALE_SLONGDATE
-				   : LOCALE_SSHORTDATE),
-		      format_buf, sizeof(format_buf));
+     GetLocaleInfoA(thislocale, ((flags&DATE_LONGDATE)
+                   ? LOCALE_SLONGDATE
+                   : LOCALE_SSHORTDATE),
+              format_buf, sizeof(format_buf));
      thisformat = format_buf;
   } else {
      thisformat = format;
   };
 
-  
-  ret = OLE_GetFormatA(thislocale, flags, 0, thistime, thisformat, 
-		       date, datelen);
-  
+
+  ret = OLE_GetFormatA(thislocale, flags, 0, thistime, thisformat,
+               date, datelen);
+
 
    TRACE(
-	       "GetDateFormatA() returning %d, with data=%s\n",
-	       ret, date);
+           "GetDateFormatA() returning %d, with data=%s\n",
+           ret, date);
   return ret;
 }
 
 /******************************************************************************
- *		GetDateFormatW	[KERNEL32.311]
+ *      GetDateFormatW  [KERNEL32.311]
  * Makes a Unicode string of the date
  *
  * Acts the same as GetDateFormatA(),  except that it's Unicode.
@@ -3234,16 +3235,16 @@ INT WINAPI GetDateFormatA(LCID locale,DWORD flags,
  *
  */
 INT WINAPI GetDateFormatW(LCID locale,DWORD flags,
-			      LPSYSTEMTIME xtime,
-			      LPCWSTR format,
-			      LPWSTR date, INT datelen)
+                  LPSYSTEMTIME xtime,
+                  LPCWSTR format,
+                  LPWSTR date, INT datelen)
 {
   // convert "format" on passing in into ASCII
   LPSTR pszAsciiFormat = UnicodeToAsciiString((LPWSTR) format);
   LPSTR pszAsciiDate = (char *)alloca(datelen);
-  
+
   TRACE("Kernel32-ole2nls: GetDateFormatW(0x%04lx,0x%08lx,%p,%s,%p,%d) not yet complete\n",
-	      locale,flags,xtime,pszAsciiFormat,date,datelen);
+          locale,flags,xtime,pszAsciiFormat,date,datelen);
 
   // call ASCII variant
   int rc = GetDateFormatA(locale,
@@ -3252,34 +3253,34 @@ INT WINAPI GetDateFormatW(LCID locale,DWORD flags,
                           pszAsciiFormat,
                           pszAsciiDate,
                           datelen);  // is in "characters", not bytes
-    
+
   FreeAsciiString(pszAsciiFormat);
-  
+
   // convert "date" on returning to UNICODE
   if (datelen != 0)
   {
     // in this case 'rc' holds the number of characters to convert
     lstrcpynAtoW(date, pszAsciiDate, rc);
   }
-  
+
   return rc;
-  
+
 #if PH_OFF
    unsigned short datearr[] = {'1','9','9','4','-','1','-','1',0};
 
-   FIXME("STUB (should call OLE_GetFormatW)\n");   
+   FIXME("STUB (should call OLE_GetFormatW)\n");
    lstrcpynW(date, datearr, datelen);
    return (  datelen < 9) ? datelen : 9;
 #endif
 }
 
 /**************************************************************************
- *              EnumDateFormatsA	(KERNEL32.198)
+ *              EnumDateFormatsA    (KERNEL32.198)
  */
 BOOL WINAPI EnumDateFormatsA(
   DATEFMT_ENUMPROCA lpDateFmtEnumProc, LCID Locale,  DWORD dwFlags)
 {
-  LCID Loc = GetUserDefaultLCID(); 
+  LCID Loc = GetUserDefaultLCID();
   if(!lpDateFmtEnumProc)
     {
       SetLastError(ERROR_INVALID_PARAMETER);
@@ -3294,42 +3295,42 @@ BOOL WINAPI EnumDateFormatsA(
     switch(dwFlags)
     {
       case DATE_SHORTDATE:
-	if(!(*lpDateFmtEnumProc)("dd.MM.yy")) return TRUE;
-	if(!(*lpDateFmtEnumProc)("d.M.yyyy")) return TRUE;
-	if(!(*lpDateFmtEnumProc)("d.MM.yy")) return TRUE;
-	if(!(*lpDateFmtEnumProc)("d.M.yy")) return TRUE;
-	return TRUE;
+    if(!(*lpDateFmtEnumProc)("dd.MM.yy")) return TRUE;
+    if(!(*lpDateFmtEnumProc)("d.M.yyyy")) return TRUE;
+    if(!(*lpDateFmtEnumProc)("d.MM.yy")) return TRUE;
+    if(!(*lpDateFmtEnumProc)("d.M.yy")) return TRUE;
+    return TRUE;
       case DATE_LONGDATE:
         if(!(*lpDateFmtEnumProc)("dddd,d. MMMM yyyy")) return TRUE;
         if(!(*lpDateFmtEnumProc)("d. MMMM yyyy")) return TRUE;
         if(!(*lpDateFmtEnumProc)("d. MMM yyyy")) return TRUE;
-	return TRUE;
+    return TRUE;
       default:
-	FIXME("Unknown date format (%ld)\n", dwFlags); 
-	SetLastError(ERROR_INVALID_PARAMETER);
-	return FALSE;
+    FIXME("Unknown date format (%ld)\n", dwFlags);
+    SetLastError(ERROR_INVALID_PARAMETER);
+    return FALSE;
      }
-   }       
+   }
 
    case 0x0000040c:  /* (Loc,"fr_FR") */
    {
     switch(dwFlags)
     {
       case DATE_SHORTDATE:
-	if(!(*lpDateFmtEnumProc)("dd/MM/yy")) return TRUE;
-	if(!(*lpDateFmtEnumProc)("dd.MM.yy")) return TRUE;
-	if(!(*lpDateFmtEnumProc)("dd-MM-yy")) return TRUE;
-	if(!(*lpDateFmtEnumProc)("dd/MM/yyyy")) return TRUE;
-	return TRUE;
+    if(!(*lpDateFmtEnumProc)("dd/MM/yy")) return TRUE;
+    if(!(*lpDateFmtEnumProc)("dd.MM.yy")) return TRUE;
+    if(!(*lpDateFmtEnumProc)("dd-MM-yy")) return TRUE;
+    if(!(*lpDateFmtEnumProc)("dd/MM/yyyy")) return TRUE;
+    return TRUE;
       case DATE_LONGDATE:
         if(!(*lpDateFmtEnumProc)("dddd d MMMM yyyy")) return TRUE;
         if(!(*lpDateFmtEnumProc)("d MMM yy")) return TRUE;
         if(!(*lpDateFmtEnumProc)("d MMMM yyyy")) return TRUE;
-	return TRUE;
+    return TRUE;
       default:
-	FIXME("Unknown date format (%ld)\n", dwFlags); 
-	SetLastError(ERROR_INVALID_PARAMETER);
-	return FALSE;
+    FIXME("Unknown date format (%ld)\n", dwFlags);
+    SetLastError(ERROR_INVALID_PARAMETER);
+    return FALSE;
      }
    }
 
@@ -3338,176 +3339,176 @@ BOOL WINAPI EnumDateFormatsA(
     switch(dwFlags)
     {
       case DATE_SHORTDATE:
-	if(!(*lpDateFmtEnumProc)("yy-MM-dd")) return TRUE;
-	if(!(*lpDateFmtEnumProc)("dd-MM-yy")) return TRUE;
-	if(!(*lpDateFmtEnumProc)("yy MM dd")) return TRUE;
-	if(!(*lpDateFmtEnumProc)("dd/MM/yy")) return TRUE;
-	return TRUE;
+    if(!(*lpDateFmtEnumProc)("yy-MM-dd")) return TRUE;
+    if(!(*lpDateFmtEnumProc)("dd-MM-yy")) return TRUE;
+    if(!(*lpDateFmtEnumProc)("yy MM dd")) return TRUE;
+    if(!(*lpDateFmtEnumProc)("dd/MM/yy")) return TRUE;
+    return TRUE;
       case DATE_LONGDATE:
         if(!(*lpDateFmtEnumProc)("d MMMM, yyyy")) return TRUE;
         if(!(*lpDateFmtEnumProc)("d MMM yyyy")) return TRUE;
-	return TRUE;
+    return TRUE;
       default:
-	FIXME("Unknown date format (%ld)\n", dwFlags); 
-	SetLastError(ERROR_INVALID_PARAMETER);
-	return FALSE;
+    FIXME("Unknown date format (%ld)\n", dwFlags);
+    SetLastError(ERROR_INVALID_PARAMETER);
+    return FALSE;
      }
    }
 
-   case 0x00000809:  /* (Loc,"en_UK") */ 
-  {    
+   case 0x00000809:  /* (Loc,"en_UK") */
+  {
    switch(dwFlags)
     {
       case DATE_SHORTDATE:
-	if(!(*lpDateFmtEnumProc)("dd/MM/yy")) return TRUE;
-	if(!(*lpDateFmtEnumProc)("dd/MM/yyyy")) return TRUE;
-	if(!(*lpDateFmtEnumProc)("d/M/yy")) return TRUE;
-	if(!(*lpDateFmtEnumProc)("d.M.yy")) return TRUE;
-	return TRUE;
+    if(!(*lpDateFmtEnumProc)("dd/MM/yy")) return TRUE;
+    if(!(*lpDateFmtEnumProc)("dd/MM/yyyy")) return TRUE;
+    if(!(*lpDateFmtEnumProc)("d/M/yy")) return TRUE;
+    if(!(*lpDateFmtEnumProc)("d.M.yy")) return TRUE;
+    return TRUE;
       case DATE_LONGDATE:
         if(!(*lpDateFmtEnumProc)("dd MMMM yyyy")) return TRUE;
         if(!(*lpDateFmtEnumProc)("d MMMM yyyy")) return TRUE;
-	return TRUE;
+    return TRUE;
       default:
-	FIXME("Unknown date format (%ld)\n", dwFlags); 
-	SetLastError(ERROR_INVALID_PARAMETER);
-	return FALSE;
+    FIXME("Unknown date format (%ld)\n", dwFlags);
+    SetLastError(ERROR_INVALID_PARAMETER);
+    return FALSE;
     }
   }
 
-   case 0x00000c09:  /* (Loc,"en_AU") */   
-  {    
+   case 0x00000c09:  /* (Loc,"en_AU") */
+  {
    switch(dwFlags)
     {
       case DATE_SHORTDATE:
-	if(!(*lpDateFmtEnumProc)("d/MM/yy")) return TRUE;
-	if(!(*lpDateFmtEnumProc)("d/M/yy")) return TRUE;
-	if(!(*lpDateFmtEnumProc)("dd/MM/yy")) return TRUE;
-	return TRUE;
+    if(!(*lpDateFmtEnumProc)("d/MM/yy")) return TRUE;
+    if(!(*lpDateFmtEnumProc)("d/M/yy")) return TRUE;
+    if(!(*lpDateFmtEnumProc)("dd/MM/yy")) return TRUE;
+    return TRUE;
       case DATE_LONGDATE:
         if(!(*lpDateFmtEnumProc)("dddd,d MMMM yyyy")) return TRUE;
         if(!(*lpDateFmtEnumProc)("d MMMM yyyy")) return TRUE;
-	return TRUE;
+    return TRUE;
       default:
-	FIXME("Unknown date format (%ld)\n", dwFlags); 
-	SetLastError(ERROR_INVALID_PARAMETER);
-	return FALSE;
+    FIXME("Unknown date format (%ld)\n", dwFlags);
+    SetLastError(ERROR_INVALID_PARAMETER);
+    return FALSE;
     }
   }
 
-   case 0x00001009:  /* (Loc,"en_CA") */ 
-  {    
+   case 0x00001009:  /* (Loc,"en_CA") */
+  {
    switch(dwFlags)
     {
       case DATE_SHORTDATE:
-	if(!(*lpDateFmtEnumProc)("dd/MM/yy")) return TRUE;
-	if(!(*lpDateFmtEnumProc)("d/M/yy")) return TRUE;
-	if(!(*lpDateFmtEnumProc)("yy-MM-dd")) return TRUE;
-	if(!(*lpDateFmtEnumProc)("M/dd/yy")) return TRUE;
-	return TRUE;
+    if(!(*lpDateFmtEnumProc)("dd/MM/yy")) return TRUE;
+    if(!(*lpDateFmtEnumProc)("d/M/yy")) return TRUE;
+    if(!(*lpDateFmtEnumProc)("yy-MM-dd")) return TRUE;
+    if(!(*lpDateFmtEnumProc)("M/dd/yy")) return TRUE;
+    return TRUE;
       case DATE_LONGDATE:
         if(!(*lpDateFmtEnumProc)("d-MMM-yy")) return TRUE;
         if(!(*lpDateFmtEnumProc)("MMMM d, yyyy")) return TRUE;
-	return TRUE;
+    return TRUE;
       default:
-	FIXME("Unknown date format (%ld)\n", dwFlags); 
-	SetLastError(ERROR_INVALID_PARAMETER);
-	return FALSE;
+    FIXME("Unknown date format (%ld)\n", dwFlags);
+    SetLastError(ERROR_INVALID_PARAMETER);
+    return FALSE;
     }
   }
 
-   case 0x00001409:  /* (Loc,"en_NZ") */ 
-  {    
+   case 0x00001409:  /* (Loc,"en_NZ") */
+  {
    switch(dwFlags)
     {
       case DATE_SHORTDATE:
-	if(!(*lpDateFmtEnumProc)("d/MM/yy")) return TRUE;
-	if(!(*lpDateFmtEnumProc)("dd/MM/yy")) return TRUE;
-	if(!(*lpDateFmtEnumProc)("d.MM.yy")) return TRUE;
-	return TRUE;
+    if(!(*lpDateFmtEnumProc)("d/MM/yy")) return TRUE;
+    if(!(*lpDateFmtEnumProc)("dd/MM/yy")) return TRUE;
+    if(!(*lpDateFmtEnumProc)("d.MM.yy")) return TRUE;
+    return TRUE;
       case DATE_LONGDATE:
         if(!(*lpDateFmtEnumProc)("d MMMM yyyy")) return TRUE;
         if(!(*lpDateFmtEnumProc)("dddd, d MMMM yyyy")) return TRUE;
-	return TRUE;
+    return TRUE;
       default:
-	FIXME("Unknown date format (%ld)\n", dwFlags); 
-	SetLastError(ERROR_INVALID_PARAMETER);
-	return FALSE;
+    FIXME("Unknown date format (%ld)\n", dwFlags);
+    SetLastError(ERROR_INVALID_PARAMETER);
+    return FALSE;
     }
   }
 
-   case 0x00001809:  /* (Loc,"en_IE") */   
-  {    
+   case 0x00001809:  /* (Loc,"en_IE") */
+  {
    switch(dwFlags)
     {
       case DATE_SHORTDATE:
-	if(!(*lpDateFmtEnumProc)("dd/MM/yy")) return TRUE;
-	if(!(*lpDateFmtEnumProc)("d/M/yy")) return TRUE;
-	if(!(*lpDateFmtEnumProc)("d.M.yy")) return TRUE;
-	return TRUE;
+    if(!(*lpDateFmtEnumProc)("dd/MM/yy")) return TRUE;
+    if(!(*lpDateFmtEnumProc)("d/M/yy")) return TRUE;
+    if(!(*lpDateFmtEnumProc)("d.M.yy")) return TRUE;
+    return TRUE;
       case DATE_LONGDATE:
         if(!(*lpDateFmtEnumProc)("dd MMMM yyyy")) return TRUE;
         if(!(*lpDateFmtEnumProc)("d MMMM yyyy")) return TRUE;
-	return TRUE;
+    return TRUE;
       default:
-	FIXME("Unknown date format (%ld)\n", dwFlags); 
-	SetLastError(ERROR_INVALID_PARAMETER);
-	return FALSE;
+    FIXME("Unknown date format (%ld)\n", dwFlags);
+    SetLastError(ERROR_INVALID_PARAMETER);
+    return FALSE;
     }
   }
 
-   case 0x00001c09:  /* (Loc,"en_ZA") */   
-  {    
+   case 0x00001c09:  /* (Loc,"en_ZA") */
+  {
    switch(dwFlags)
     {
       case DATE_SHORTDATE:
-	if(!(*lpDateFmtEnumProc)("yy/MM/dd")) return TRUE;
-	return TRUE;
+    if(!(*lpDateFmtEnumProc)("yy/MM/dd")) return TRUE;
+    return TRUE;
       case DATE_LONGDATE:
         if(!(*lpDateFmtEnumProc)("dd MMMM yyyy")) return TRUE;
-	return TRUE;
+    return TRUE;
       default:
-	FIXME("Unknown date format (%ld)\n", dwFlags); 
-	SetLastError(ERROR_INVALID_PARAMETER);
-	return FALSE;
+    FIXME("Unknown date format (%ld)\n", dwFlags);
+    SetLastError(ERROR_INVALID_PARAMETER);
+    return FALSE;
     }
   }
 
-   case 0x00002009:  /* (Loc,"en_JM") */  
-  {    
+   case 0x00002009:  /* (Loc,"en_JM") */
+  {
    switch(dwFlags)
     {
       case DATE_SHORTDATE:
-	if(!(*lpDateFmtEnumProc)("dd/MM/yyyy")) return TRUE;
-	return TRUE;
+    if(!(*lpDateFmtEnumProc)("dd/MM/yyyy")) return TRUE;
+    return TRUE;
       case DATE_LONGDATE:
         if(!(*lpDateFmtEnumProc)("dddd,MMMM dd,yyyy")) return TRUE;
         if(!(*lpDateFmtEnumProc)("MMMM dd,yyyy")) return TRUE;
         if(!(*lpDateFmtEnumProc)("dddd,dd MMMM,yyyy")) return TRUE;
         if(!(*lpDateFmtEnumProc)("dd MMMM,yyyy")) return TRUE;
-	return TRUE;
+    return TRUE;
       default:
-	FIXME("Unknown date format (%ld)\n", dwFlags); 
-	SetLastError(ERROR_INVALID_PARAMETER);
-	return FALSE;
+    FIXME("Unknown date format (%ld)\n", dwFlags);
+    SetLastError(ERROR_INVALID_PARAMETER);
+    return FALSE;
     }
   }
 
    case 0x00002809:  /* (Loc,"en_BZ") */
-   case 0x00002c09:  /* (Loc,"en_TT") */  
-  {    
+   case 0x00002c09:  /* (Loc,"en_TT") */
+  {
    switch(dwFlags)
     {
       case DATE_SHORTDATE:
-	if(!(*lpDateFmtEnumProc)("dd/MM/yyyy")) return TRUE;
-	return TRUE;
+    if(!(*lpDateFmtEnumProc)("dd/MM/yyyy")) return TRUE;
+    return TRUE;
       case DATE_LONGDATE:
         if(!(*lpDateFmtEnumProc)("dddd,dd MMMM yyyy")) return TRUE;
-	return TRUE;
+    return TRUE;
       default:
-	FIXME("Unknown date format (%ld)\n", dwFlags); 
-	SetLastError(ERROR_INVALID_PARAMETER);
-	return FALSE;
+    FIXME("Unknown date format (%ld)\n", dwFlags);
+    SetLastError(ERROR_INVALID_PARAMETER);
+    return FALSE;
     }
   }
 
@@ -3516,30 +3517,30 @@ BOOL WINAPI EnumDateFormatsA(
    switch(dwFlags)
     {
       case DATE_SHORTDATE:
-	if(!(*lpDateFmtEnumProc)("M/d/yy")) return TRUE;
-	if(!(*lpDateFmtEnumProc)("M/d/yyyy")) return TRUE;
-	if(!(*lpDateFmtEnumProc)("MM/dd/yy")) return TRUE;
-	if(!(*lpDateFmtEnumProc)("MM/dd/yyyy")) return TRUE;
-	if(!(*lpDateFmtEnumProc)("yy/MM/dd")) return TRUE;
-	if(!(*lpDateFmtEnumProc)("dd-MMM-yy")) return TRUE;
-	return TRUE;
+    if(!(*lpDateFmtEnumProc)("M/d/yy")) return TRUE;
+    if(!(*lpDateFmtEnumProc)("M/d/yyyy")) return TRUE;
+    if(!(*lpDateFmtEnumProc)("MM/dd/yy")) return TRUE;
+    if(!(*lpDateFmtEnumProc)("MM/dd/yyyy")) return TRUE;
+    if(!(*lpDateFmtEnumProc)("yy/MM/dd")) return TRUE;
+    if(!(*lpDateFmtEnumProc)("dd-MMM-yy")) return TRUE;
+    return TRUE;
       case DATE_LONGDATE:
         if(!(*lpDateFmtEnumProc)("dddd, MMMM dd, yyyy")) return TRUE;
         if(!(*lpDateFmtEnumProc)("MMMM dd, yyyy")) return TRUE;
         if(!(*lpDateFmtEnumProc)("dddd, dd MMMM, yyyy")) return TRUE;
         if(!(*lpDateFmtEnumProc)("dd MMMM, yyyy")) return TRUE;
-	return TRUE;
+    return TRUE;
       default:
-	FIXME("Unknown date format (%ld)\n", dwFlags); 
-	SetLastError(ERROR_INVALID_PARAMETER);
-	return FALSE;
+    FIXME("Unknown date format (%ld)\n", dwFlags);
+    SetLastError(ERROR_INVALID_PARAMETER);
+    return FALSE;
     }
   }
  }
 }
 
 /**************************************************************************
- *              EnumDateFormatsW	(KERNEL32.199)
+ *              EnumDateFormatsW    (KERNEL32.199)
  */
 BOOL WINAPI EnumDateFormatsW(
   DATEFMT_ENUMPROCW lpDateFmtEnumProc, LCID Locale, DWORD dwFlags)
@@ -3550,12 +3551,12 @@ BOOL WINAPI EnumDateFormatsW(
 }
 
 /**************************************************************************
- *              EnumTimeFormatsA	(KERNEL32.210)
+ *              EnumTimeFormatsA    (KERNEL32.210)
  */
 BOOL WINAPI EnumTimeFormatsA(
   TIMEFMT_ENUMPROCA lpTimeFmtEnumProc, LCID Locale, DWORD dwFlags)
 {
-  LCID Loc = GetUserDefaultLCID(); 
+  LCID Loc = GetUserDefaultLCID();
   if(!lpTimeFmtEnumProc)
     {
       SetLastError(ERROR_INVALID_PARAMETER);
@@ -3563,20 +3564,20 @@ BOOL WINAPI EnumTimeFormatsA(
     }
   if(dwFlags)
     {
-      FIXME("Unknown time format (%ld)\n", dwFlags); 
+      FIXME("Unknown time format (%ld)\n", dwFlags);
     }
 
   switch( Loc )
  {
    case 0x00000407:  /* (Loc,"de_DE") */
    {
-    if(!(*lpTimeFmtEnumProc)("HH.mm")) return TRUE; 
+    if(!(*lpTimeFmtEnumProc)("HH.mm")) return TRUE;
     if(!(*lpTimeFmtEnumProc)("HH:mm:ss")) return TRUE;
     if(!(*lpTimeFmtEnumProc)("H:mm:ss")) return TRUE;
     if(!(*lpTimeFmtEnumProc)("H.mm")) return TRUE;
     if(!(*lpTimeFmtEnumProc)("H.mm'Uhr'")) return TRUE;
     return TRUE;
-   }       
+   }
 
    case 0x0000040c:  /* (Loc,"fr_FR") */
    case 0x00000c0c:  /* (Loc,"fr_CA") */
@@ -3590,9 +3591,9 @@ BOOL WINAPI EnumTimeFormatsA(
    }
 
    case 0x00000809:  /* (Loc,"en_UK") */
-   case 0x00000c09:  /* (Loc,"en_AU") */ 
+   case 0x00000c09:  /* (Loc,"en_AU") */
    case 0x00001409:  /* (Loc,"en_NZ") */
-   case 0x00001809:  /* (Loc,"en_IE") */ 
+   case 0x00001809:  /* (Loc,"en_IE") */
    {
     if(!(*lpTimeFmtEnumProc)("h:mm:ss tt")) return TRUE;
     if(!(*lpTimeFmtEnumProc)("HH:mm:ss")) return TRUE;
@@ -3600,16 +3601,16 @@ BOOL WINAPI EnumTimeFormatsA(
     return TRUE;
    }
 
-   case 0x00001c09:  /* (Loc,"en_ZA") */   
+   case 0x00001c09:  /* (Loc,"en_ZA") */
    case 0x00002809:  /* (Loc,"en_BZ") */
-   case 0x00002c09:  /* (Loc,"en_TT") */ 
+   case 0x00002c09:  /* (Loc,"en_TT") */
    {
     if(!(*lpTimeFmtEnumProc)("h:mm:ss tt")) return TRUE;
-    if(!(*lpTimeFmtEnumProc)("hh:mm:ss tt")) return TRUE; 
-    return TRUE;  
+    if(!(*lpTimeFmtEnumProc)("hh:mm:ss tt")) return TRUE;
+    return TRUE;
    }
 
-   default:  /* default to US style "en_US" */   
+   default:  /* default to US style "en_US" */
    {
     if(!(*lpTimeFmtEnumProc)("h:mm:ss tt")) return TRUE;
     if(!(*lpTimeFmtEnumProc)("hh:mm:ss tt")) return TRUE;
@@ -3621,7 +3622,7 @@ BOOL WINAPI EnumTimeFormatsA(
 }
 
 /**************************************************************************
- *              EnumTimeFormatsW	(KERNEL32.211)
+ *              EnumTimeFormatsW    (KERNEL32.211)
  */
 BOOL WINAPI EnumTimeFormatsW(
   TIMEFMT_ENUMPROCW lpTimeFmtEnumProc, LCID Locale, DWORD dwFlags)
@@ -3634,9 +3635,9 @@ BOOL WINAPI EnumTimeFormatsW(
 /**************************************************************************
  *           This function is used just locally !
  *  Description: Inverts a string.
- */ 
+ */
 static void OLE_InvertString(char* string)
-{    
+{
     char    sTmpArray[128];
     INT     counter, i = 0;
 
@@ -3653,68 +3654,68 @@ static void OLE_InvertString(char* string)
  *           This function is used just locally !
  *  Description: Test if the given string (psNumber) is valid or not.
  *               The valid characters are the following:
- *               - Characters '0' through '9'. 
- *               - One decimal point (dot) if the number is a floating-point value. 
- *               - A minus sign in the first character position if the number is 
+ *               - Characters '0' through '9'.
+ *               - One decimal point (dot) if the number is a floating-point value.
+ *               - A minus sign in the first character position if the number is
  *                 a negative value.
  *              If the function succeeds, psBefore/psAfter will point to the string
- *              on the right/left of the decimal symbol. pbNegative indicates if the 
+ *              on the right/left of the decimal symbol. pbNegative indicates if the
  *              number is negative.
  */
 static INT OLE_GetNumberComponents(char* pInput, char* psBefore, char* psAfter, BOOL* pbNegative)
 {
-char	sNumberSet[] = "0123456789";
-BOOL	bInDecimal = FALSE;
+char    sNumberSet[] = "0123456789";
+BOOL    bInDecimal = FALSE;
 
-	/* Test if we do have a minus sign */
-	if ( *pInput == '-' )
-	{
-		*pbNegative = TRUE;
-		pInput++; /* Jump to the next character. */
-	}
-	
-	while(*pInput != '\0')
-	{
-		/* Do we have a valid numeric character */
-		if ( strchr(sNumberSet, *pInput) != NULL )
-		{
-			if (bInDecimal == TRUE)
+    /* Test if we do have a minus sign */
+    if ( *pInput == '-' )
+    {
+        *pbNegative = TRUE;
+        pInput++; /* Jump to the next character. */
+    }
+
+    while(*pInput != '\0')
+    {
+        /* Do we have a valid numeric character */
+        if ( strchr(sNumberSet, *pInput) != NULL )
+        {
+            if (bInDecimal == TRUE)
                 *psAfter++ = *pInput;
-			else
+            else
                 *psBefore++ = *pInput;
-		}
-		else
-		{
-			/* Is this a decimal point (dot) */
-			if ( *pInput == '.' )
-			{
-				/* Is it the first time we find it */
-				if ((bInDecimal == FALSE))
-					bInDecimal = TRUE;
-				else
-					return -1; /* ERROR: Invalid parameter */
-			}
-			else
-			{
-				/* It's neither a numeric character, nor a decimal point.
-				 * Thus, return an error.
+        }
+        else
+        {
+            /* Is this a decimal point (dot) */
+            if ( *pInput == '.' )
+            {
+                /* Is it the first time we find it */
+                if ((bInDecimal == FALSE))
+                    bInDecimal = TRUE;
+                else
+                    return -1; /* ERROR: Invalid parameter */
+            }
+            else
+            {
+                /* It's neither a numeric character, nor a decimal point.
+                 * Thus, return an error.
                  */
-				return -1;
-			}
-		}
+                return -1;
+            }
+        }
         pInput++;
-	}
-	
-	/* Add an End of Line character to the output buffers */
-	*psBefore = '\0';
-	*psAfter = '\0';
+    }
 
-	return 0; 
+    /* Add an End of Line character to the output buffers */
+    *psBefore = '\0';
+    *psAfter = '\0';
+
+    return 0;
 }
 
 /**************************************************************************
  *           This function is used just locally !
- *  Description: A number could be formatted using different numbers 
+ *  Description: A number could be formatted using different numbers
  *               of "digits in group" (example: 4;3;2;0).
  *               The first parameter of this function is an array
  *               containing the rule to be used. It's format is the following:
@@ -3737,34 +3738,34 @@ static INT OLE_GetGrouping(char* sRule, INT index)
     {
         memcpy(sData, sRule+index, 1);
         memcpy(sData+1, "\0", 1);
-        nData = atoi(sData);            
+        nData = atoi(sData);
     }
-        
+
     else
     {
         memcpy(sData, sRule+nRuleSize-1, 1);
         memcpy(sData+1, "\0", 1);
-        nData = atoi(sData);            
+        nData = atoi(sData);
     }
-    
+
     return nData;
 }
 
 /**************************************************************************
- *              GetNumberFormatA	(KERNEL32.355)
+ *              GetNumberFormatA    (KERNEL32.355)
  */
 INT WINAPI GetNumberFormatA(LCID locale, DWORD dwflags,
-			       LPCSTR lpvalue,   const NUMBERFMTA * lpFormat,
-			       LPSTR lpNumberStr, int cchNumber)
+                   LPCSTR lpvalue,   const NUMBERFMTA * lpFormat,
+                   LPSTR lpNumberStr, int cchNumber)
 {
     char   sNumberDigits[3], sDecimalSymbol[5], sDigitsInGroup[11], sDigitGroupSymbol[5], sILZero[2];
     INT    nNumberDigits, nNumberDecimal, i, j, nCounter, nStep, nRuleIndex, nGrouping, nDigits, retVal, nLZ;
     char   sNumber[128], sDestination[128], sDigitsAfterDecimal[10], sDigitsBeforeDecimal[128];
-    char   sRule[10], sSemiColumn[]=";", sBuffer[5], sNegNumber[2];    
+    char   sRule[10], sSemiColumn[]=";", sBuffer[5], sNegNumber[2];
     char   *pStr = NULL, *pTmpStr = NULL;
     LCID   systemDefaultLCID;
     BOOL   bNegative = FALSE;
-    enum   Operations 
+    enum   Operations
     {
         USE_PARAMETER,
         USE_LOCALEINFO,
@@ -3795,7 +3796,7 @@ INT WINAPI GetNumberFormatA(LCID locale, DWORD dwflags,
     if (lpFormat != NULL)
     {
         if (dwflags == 0)
-            used_operation = USE_PARAMETER; 
+            used_operation = USE_PARAMETER;
     }
     else
     {
@@ -3839,7 +3840,7 @@ INT WINAPI GetNumberFormatA(LCID locale, DWORD dwflags,
     }
 
     nNumberDigits = atoi(sNumberDigits);
-    
+
     /* Remove the ";" */
     i=0;
     j = 1;
@@ -3855,9 +3856,9 @@ INT WINAPI GetNumberFormatA(LCID locale, DWORD dwflags,
     sprintf(sBuffer, "%d", i);
     memcpy(sRule, sBuffer, 1); /* Number of digits in the groups ( used by OLE_GetGrouping() ) */
     memcpy(sRule + j, "\0", 1);
-    
+
     /* First, format the digits before the decimal. */
-    if ((nNumberDecimal>0) && (atoi(sDigitsBeforeDecimal) != 0)) 
+    if ((nNumberDecimal>0) && (atoi(sDigitsBeforeDecimal) != 0))
     {
         /* Working on an inverted string is easier ! */
         OLE_InvertString(sDigitsBeforeDecimal);
@@ -3865,9 +3866,9 @@ INT WINAPI GetNumberFormatA(LCID locale, DWORD dwflags,
         nStep = nCounter = i = j = 0;
         nRuleIndex = 1;
         nGrouping = OLE_GetGrouping(sRule, nRuleIndex);
-        
+
         /* Here, we will loop until we reach the end of the string.
-         * An internal counter (j) is used in order to know when to 
+         * An internal counter (j) is used in order to know when to
          * insert the "digit group symbol".
          */
         while (nNumberDecimal > 0)
@@ -3897,7 +3898,7 @@ INT WINAPI GetNumberFormatA(LCID locale, DWORD dwflags,
      {
         nLZ = atoi(sILZero);
         if (nLZ != 0)
-        {        
+        {
             /* Use 0.xxx instead of .xxx */
             memcpy(sDestination, "0", 1);
             memcpy(sDestination+1, "\0", 1);
@@ -3912,29 +3913,29 @@ INT WINAPI GetNumberFormatA(LCID locale, DWORD dwflags,
     nCounter = nNumberDigits;
     if ( (nDigits>0) && (pStr = strstr (sNumber, ".")) )
     {
-        i = strlen(sNumber) - strlen(pStr) + 1;        
+        i = strlen(sNumber) - strlen(pStr) + 1;
         strncpy ( sDigitsAfterDecimal, sNumber + i, nNumberDigits);
         j = strlen(sDigitsAfterDecimal);
         if (j < nNumberDigits)
-            nCounter = nNumberDigits-j;            
+            nCounter = nNumberDigits-j;
     }
     for (i=0;i<nCounter;i++)
-         memcpy(sDigitsAfterDecimal+i+j, "0", 1);    
-    memcpy(sDigitsAfterDecimal + nNumberDigits, "\0", 1);    
+         memcpy(sDigitsAfterDecimal+i+j, "0", 1);
+    memcpy(sDigitsAfterDecimal + nNumberDigits, "\0", 1);
 
     i = strlen(sDestination);
     j = strlen(sDigitsAfterDecimal);
     /* Finally, construct the resulting formatted string. */
-        
+
     for (nCounter=0; nCounter<i; nCounter++)
         memcpy(sNumber + nCounter, sDestination + nCounter, 1);
-       
+
     memcpy(sNumber + nCounter, sDecimalSymbol, strlen(sDecimalSymbol));
 
     for (i=0; i<j; i++)
         memcpy(sNumber + nCounter+i+strlen(sDecimalSymbol), sDigitsAfterDecimal + i, 1);
     memcpy(sNumber + nCounter+i+strlen(sDecimalSymbol), "\0", 1);
-        
+
     /* Is it a negative number */
     if (bNegative == TRUE)
     {
@@ -3942,13 +3943,13 @@ INT WINAPI GetNumberFormatA(LCID locale, DWORD dwflags,
         pStr = sDestination;
         pTmpStr = sNumber;
         switch (i)
-        {          
+        {
         case 0:
             *pStr++ = '(';
             while (*sNumber != '\0')
                 *pStr++ =  *pTmpStr++;
-            *pStr++ = ')';                
-            break;  
+            *pStr++ = ')';
+            break;
         case 1:
             *pStr++ = '-';
             while (*pTmpStr != '\0')
@@ -3980,27 +3981,27 @@ INT WINAPI GetNumberFormatA(LCID locale, DWORD dwflags,
     else
         strcpy(sDestination, sNumber);
 
-    /* If cchNumber is zero, then returns the number of bytes or characters 
+    /* If cchNumber is zero, then returns the number of bytes or characters
      * required to hold the formatted number string
      */
     if (cchNumber==0)
         retVal = strlen(sDestination) + 1;
-    else           
+    else
     {
         strncpy (lpNumberStr, sDestination, cchNumber-1);
         *(lpNumberStr+cchNumber-1) = '\0';   /* ensure we got a NULL at the end */
         retVal = strlen(lpNumberStr);
     }
-          
+
     return retVal;
 }
 
 /**************************************************************************
- *              GetNumberFormatW	(KERNEL32.@)
+ *              GetNumberFormatW    (KERNEL32.@)
  */
 INT WINAPI GetNumberFormatW(LCID locale, DWORD dwflags,
-			       LPCWSTR lpvalue,  const NUMBERFMTW * lpFormat,
-			       LPWSTR lpNumberStr, int cchNumber)
+                   LPCWSTR lpvalue,  const NUMBERFMTW * lpFormat,
+                   LPWSTR lpNumberStr, int cchNumber)
 {
  FIXME("%s: stub, no reformating done\n",debugstr_w(lpvalue));
 
@@ -4009,11 +4010,11 @@ INT WINAPI GetNumberFormatW(LCID locale, DWORD dwflags,
 }
 
 /**************************************************************************
- *              GetCurrencyFormatA	(KERNEL32.302)
+ *              GetCurrencyFormatA  (KERNEL32.302)
  */
 INT WINAPI GetCurrencyFormatA(LCID locale, DWORD dwflags,
-			       LPCSTR lpvalue,   const CURRENCYFMTA * lpFormat,
-			       LPSTR lpCurrencyStr, int cchCurrency)
+                   LPCSTR lpvalue,   const CURRENCYFMTA * lpFormat,
+                   LPSTR lpCurrencyStr, int cchCurrency)
 {
     UINT   nPosOrder, nNegOrder;
     INT    retVal;
@@ -4023,7 +4024,7 @@ INT WINAPI GetCurrencyFormatA(LCID locale, DWORD dwflags,
     char   *pNumberFormated = sNumberFormated;
     LCID   systemDefaultLCID;
     BOOL   bIsPositive = FALSE, bValidFormat = FALSE;
-    enum   Operations 
+    enum   Operations
     {
         USE_PARAMETER,
         USE_LOCALEINFO,
@@ -4038,7 +4039,7 @@ INT WINAPI GetCurrencyFormatA(LCID locale, DWORD dwflags,
     if (lpFormat != NULL)
     {
         if (dwflags == 0)
-            used_operation = USE_PARAMETER; 
+            used_operation = USE_PARAMETER;
     }
     else
     {
@@ -4051,28 +4052,28 @@ INT WINAPI GetCurrencyFormatA(LCID locale, DWORD dwflags,
     /* Load the fields we need */
     switch(used_operation)
     {
-    case USE_LOCALEINFO:        
+    case USE_LOCALEINFO:
         /* Specific to CURRENCYFMTA*/
         GetLocaleInfoA(locale, LOCALE_INEGCURR, sNegOrder, sizeof(sNegOrder));
         GetLocaleInfoA(locale, LOCALE_ICURRENCY, sPosOrder, sizeof(sPosOrder));
         GetLocaleInfoA(locale, LOCALE_SCURRENCY, sCurrencySymbol, sizeof(sCurrencySymbol));
-        
+
         nPosOrder = atoi(sPosOrder);
         nNegOrder = atoi(sNegOrder);
         break;
-    case USE_PARAMETER:        
+    case USE_PARAMETER:
         /* Specific to CURRENCYFMTA*/
         nNegOrder = lpFormat->NegativeOrder;
         nPosOrder = lpFormat->PositiveOrder;
         strcpy(sCurrencySymbol, lpFormat->lpCurrencySymbol);
         break;
     case USE_SYSTEMDEFAULT:
-        systemDefaultLCID = GetSystemDefaultLCID();        
+        systemDefaultLCID = GetSystemDefaultLCID();
         /* Specific to CURRENCYFMTA*/
         GetLocaleInfoA(systemDefaultLCID, LOCALE_INEGCURR, sNegOrder, sizeof(sNegOrder));
         GetLocaleInfoA(systemDefaultLCID, LOCALE_ICURRENCY, sPosOrder, sizeof(sPosOrder));
         GetLocaleInfoA(systemDefaultLCID, LOCALE_SCURRENCY, sCurrencySymbol, sizeof(sCurrencySymbol));
-        
+
         nPosOrder = atoi(sPosOrder);
         nNegOrder = atoi(sNegOrder);
         break;
@@ -4080,7 +4081,7 @@ INT WINAPI GetCurrencyFormatA(LCID locale, DWORD dwflags,
         SetLastError(ERROR_INVALID_PARAMETER);
         return 0;
     }
-    
+
     /* Construct a temporary number format structure */
     if (lpFormat != NULL)
     {
@@ -4104,7 +4105,7 @@ INT WINAPI GetCurrencyFormatA(LCID locale, DWORD dwflags,
         bIsPositive = TRUE;
         retVal = GetNumberFormatA(locale,0,lpvalue,(bValidFormat)?&numberFmt:NULL,pNumberFormated,128);
     }
-        
+
     if (retVal == 0)
         return 0;
 
@@ -4219,14 +4220,14 @@ INT WINAPI GetCurrencyFormatA(LCID locale, DWORD dwflags,
             strcat (pDestination, sCurrencySymbol);
             break;
         case 14:   /* format: ($ 1.1) */
-            strcpy (pDestination, "("); 
+            strcpy (pDestination, "(");
             strcat (pDestination, sCurrencySymbol);
             strcat (pDestination, " ");
             strcat (pDestination, pNumberFormated);
             strcat (pDestination, ")");
             break;
         case 15:   /* format: (1.1 $) */
-            strcpy (pDestination, "("); 
+            strcpy (pDestination, "(");
             strcat (pDestination, pNumberFormated);
             strcat (pDestination, " ");
             strcat (pDestination, sCurrencySymbol);
@@ -4246,41 +4247,41 @@ INT WINAPI GetCurrencyFormatA(LCID locale, DWORD dwflags,
         strncpy (lpCurrencyStr, pDestination, cchCurrency-1);
         *(lpCurrencyStr+cchCurrency-1) = '\0';   /* ensure we got a NULL at the end */
         return  strlen(lpCurrencyStr);
-    }    
+    }
 }
 
 /**************************************************************************
- *              GetCurrencyFormatW	(KERNEL32.303)
+ *              GetCurrencyFormatW  (KERNEL32.303)
  */
 INT WINAPI GetCurrencyFormatW(LCID locale, DWORD dwflags,
-			       LPCWSTR lpvalue,   const CURRENCYFMTW * lpFormat,
-			       LPWSTR lpCurrencyStr, int cchCurrency)
+                   LPCWSTR lpvalue,   const CURRENCYFMTW * lpFormat,
+                   LPWSTR lpCurrencyStr, int cchCurrency)
 {
     FIXME("This API function is NOT implemented !\n");
     return 0;
 }
 
 /******************************************************************************
- *		OLE2NLS_CheckLocale	[intern]
- */ 
+ *      OLE2NLS_CheckLocale [intern]
+ */
 static LCID OLE2NLS_CheckLocale (LCID locale)
 {
-	if (!locale) 
-	{ locale = LOCALE_SYSTEM_DEFAULT;
-	}
-  
-	if (locale == LOCALE_SYSTEM_DEFAULT) 
-  	{ return GetSystemDefaultLCID();
-	} 
-	else if (locale == LOCALE_USER_DEFAULT) 
-	{ return GetUserDefaultLCID();
-	}
-	else
-	{ return locale;
-	}
+    if (!locale)
+    { locale = LOCALE_SYSTEM_DEFAULT;
+    }
+
+    if (locale == LOCALE_SYSTEM_DEFAULT)
+    { return GetSystemDefaultLCID();
+    }
+    else if (locale == LOCALE_USER_DEFAULT)
+    { return GetUserDefaultLCID();
+    }
+    else
+    { return locale;
+    }
 }
 /******************************************************************************
- *		GetTimeFormatA	[KERNEL32.422]
+ *      GetTimeFormatA  [KERNEL32.422]
  * Makes an ASCII string of the time
  *
  * Formats date according to format,  or locale default if format is
@@ -4298,13 +4299,13 @@ static LCID OLE2NLS_CheckLocale (LCID locale)
  * tt time marker (AM, PM)
  *
  */
-INT WINAPI 
+INT WINAPI
 GetTimeFormatA(LCID locale,        /* [in]  */
-	       DWORD flags,        /* [in]  */
-	       LPSYSTEMTIME xtime, /* [in]  */ 
-	       LPCSTR format,      /* [in]  */
-	       LPSTR timestr,      /* [out] */
-	       INT timelen         /* [in]  */) 
+           DWORD flags,        /* [in]  */
+           LPSYSTEMTIME xtime, /* [in]  */
+           LPCSTR format,      /* [in]  */
+           LPSTR timestr,      /* [out] */
+           INT timelen         /* [in]  */)
 { char format_buf[40];
   LPCSTR thisformat;
   SYSTEMTIME t;
@@ -4312,92 +4313,92 @@ GetTimeFormatA(LCID locale,        /* [in]  */
   LCID thislocale=0;
   DWORD thisflags=LOCALE_STIMEFORMAT; /* standart timeformat */
   INT ret;
-    
+
   TRACE("GetTimeFormat(0x%04lx,0x%08lx,%p,%s,%p,%d)\n",locale,flags,xtime,format,timestr,timelen);
 
   thislocale = OLE2NLS_CheckLocale ( locale );
 
-  if (format == NULL) 
+  if (format == NULL)
   { if (flags & LOCALE_NOUSEROVERRIDE)  /*use system default*/
     { thislocale = GetSystemDefaultLCID();
     }
     GetLocaleInfoA(thislocale, thisflags, format_buf, sizeof(format_buf));
     thisformat = format_buf;
   }
-  else 
+  else
   { thisformat = format;
   }
-  
+
   if (xtime == NULL) /* NULL means use the current local time*/
   { GetLocalTime(&t);
     thistime = &t;
-  } 
+  }
   else
   { thistime = xtime;
   /* Check that hour,min and sec is in range */
   }
   ret = OLE_GetFormatA(thislocale, thisflags, flags, thistime, thisformat,
-  			 timestr, timelen);
+             timestr, timelen);
   return ret;
 }
 
 
 /******************************************************************************
- *		GetTimeFormatW	[KERNEL32.423]
+ *      GetTimeFormatW  [KERNEL32.423]
  * Makes a Unicode string of the time
  */
-INT WINAPI 
+INT WINAPI
 GetTimeFormatW(LCID locale,        /* [in]  */
-	       DWORD flags,        /* [in]  */
-	       LPSYSTEMTIME xtime, /* [in]  */ 
-	       LPCWSTR format,     /* [in]  */
-	       LPWSTR timestr,     /* [out] */
-	       INT timelen         /* [in]  */) 
-{	WCHAR format_buf[40];
-	LPCWSTR thisformat;
-	SYSTEMTIME t;
-	LPSYSTEMTIME thistime;
-	LCID thislocale=0;
-	DWORD thisflags=LOCALE_STIMEFORMAT; /* standart timeformat */
-	INT ret;
-	    
-	TRACE("GetTimeFormat(0x%04lx,0x%08lx,%p,%s,%p,%d)\n",locale,flags,
-	xtime,debugstr_w(format),timestr,timelen);
+           DWORD flags,        /* [in]  */
+           LPSYSTEMTIME xtime, /* [in]  */
+           LPCWSTR format,     /* [in]  */
+           LPWSTR timestr,     /* [out] */
+           INT timelen         /* [in]  */)
+{   WCHAR format_buf[40];
+    LPCWSTR thisformat;
+    SYSTEMTIME t;
+    LPSYSTEMTIME thistime;
+    LCID thislocale=0;
+    DWORD thisflags=LOCALE_STIMEFORMAT; /* standart timeformat */
+    INT ret;
 
-	thislocale = OLE2NLS_CheckLocale ( locale );
+    TRACE("GetTimeFormat(0x%04lx,0x%08lx,%p,%s,%p,%d)\n",locale,flags,
+    xtime,debugstr_w(format),timestr,timelen);
 
-	if (format == NULL) 
-	{ if (flags & LOCALE_NOUSEROVERRIDE)  /*use system default*/
-	  { thislocale = GetSystemDefaultLCID();
-	  }
-	  GetLocaleInfoW(thislocale, thisflags, format_buf, 40);
-	  thisformat = format_buf;
-	}	  
-	else 
-	{ thisformat = format;
-	}
- 
-	if (xtime == NULL) /* NULL means use the current local time*/
-	{ GetLocalTime(&t);
-	  thistime = &t;
-	} 
-	else
-	{ thistime = xtime;
-	}
+    thislocale = OLE2NLS_CheckLocale ( locale );
 
-	ret = OLE_GetFormatW(thislocale, thisflags, flags, thistime, thisformat,
-  			 timestr, timelen);
-	return ret;
+    if (format == NULL)
+    { if (flags & LOCALE_NOUSEROVERRIDE)  /*use system default*/
+      { thislocale = GetSystemDefaultLCID();
+      }
+      GetLocaleInfoW(thislocale, thisflags, format_buf, 40);
+      thisformat = format_buf;
+    }
+    else
+    { thisformat = format;
+    }
+
+    if (xtime == NULL) /* NULL means use the current local time*/
+    { GetLocalTime(&t);
+      thistime = &t;
+    }
+    else
+    { thistime = xtime;
+    }
+
+    ret = OLE_GetFormatW(thislocale, thisflags, flags, thistime, thisformat,
+             timestr, timelen);
+    return ret;
 }
 
 /******************************************************************************
- *		EnumCalendarInfoA	[KERNEL32.196]
+ *      EnumCalendarInfoA   [KERNEL32.196]
  */
 BOOL WINAPI EnumCalendarInfoA(
-	CALINFO_ENUMPROCA calinfoproc,LCID locale,CALID calendar,CALTYPE caltype
+    CALINFO_ENUMPROCA calinfoproc,LCID locale,CALID calendar,CALTYPE caltype
 ) {
-	FIXME("(%p,0x%04lx,0x%08lx,0x%08lx),stub!\n",calinfoproc,locale,calendar,caltype);
-	return FALSE;
+    FIXME("(%p,0x%04lx,0x%08lx,0x%08lx),stub!\n",calinfoproc,locale,calendar,caltype);
+    return FALSE;
 }
 
 #ifdef __WIN32OS2__

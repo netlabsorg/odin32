@@ -1,3 +1,4 @@
+/* $Id: testdrv.cpp,v 1.3 2001-09-05 12:52:27 bird Exp $ */
 //******************************************************************************
 //******************************************************************************
 // Test sample device driver dll
@@ -15,7 +16,7 @@
 #define INCL_DOSERRORS           /* DOS Error values         */
 #define INCL_DOSPROCESS          /* DOS Process values       */
 #define INCL_DOSMISC             /* DOS Miscellanous values  */
-#include <os2wrap.h>	         //Odin32 OS/2 api wrappers
+#include <os2wrap.h>             //Odin32 OS/2 api wrappers
 
 #include <winconst.h>
 #include <win32type.h>
@@ -23,7 +24,7 @@
 #include <misc.h>
 #include <win\winioctl.h>
 
-#define TESTDRV_CATEGORY	0x40
+#define TESTDRV_CATEGORY    0x40
 
 //******************************************************************************
 //******************************************************************************
@@ -53,30 +54,30 @@ HANDLE WIN32API DrvOpen(DWORD dwAccess, DWORD dwShare)
     sharetype |= OPEN_SHARE_DENYWRITE;
 
 tryopen:
-  rc = DosOpen(	"TESTDRV$",                     /* File path name */
-               	&hfFileHandle,                  /* File handle */
-               	&ulAction,                      /* Action taken */
-	       	0,
-         	FILE_NORMAL,
-           	FILE_OPEN,
-           	sharetype,
-               	0L);                            /* No extended attribute */
+  rc = DosOpen( "TESTDRV$",                     /* File path name */
+                &hfFileHandle,                  /* File handle */
+                &ulAction,                      /* Action taken */
+            0,
+            FILE_NORMAL,
+            FILE_OPEN,
+            sharetype,
+                0L);                            /* No extended attribute */
 
   if(rc == ERROR_TOO_MANY_OPEN_FILES) {
    ULONG CurMaxFH;
    LONG  ReqCount = 32;
 
-	rc = DosSetRelMaxFH(&ReqCount, &CurMaxFH);
-	if(rc) {
-		dprintf(("DosSetRelMaxFH returned %d", rc));
-		return rc;
-	}
-	dprintf(("DosOpen failed -> increased nr open files to %d", CurMaxFH));
-	goto tryopen;
+    rc = DosSetRelMaxFH(&ReqCount, &CurMaxFH);
+    if(rc) {
+        dprintf(("DosSetRelMaxFH returned %d", rc));
+        return rc;
+    }
+    dprintf(("DosOpen failed -> increased nr open files to %d", CurMaxFH));
+    goto tryopen;
   }
 
   if(rc == NO_ERROR) {
-     	return hfFileHandle;
+        return hfFileHandle;
   }
   else  return -1;
 }
@@ -104,7 +105,7 @@ BOOL WIN32API DrvIOCtl(HANDLE hDevice, DWORD dwIoControlCode,
 
   *lpBytesReturned = nOutBufferSize;
 
-  rc = DosDevIOCtl(hDevice, TESTDRV_CATEGORY, ioctl, 
+  rc = DosDevIOCtl(hDevice, TESTDRV_CATEGORY, ioctl,
                    lpInBuffer, nInBufferSize, &nInBufferSize,
                    lpOutBuffer, nOutBufferSize, lpBytesReturned);
 
