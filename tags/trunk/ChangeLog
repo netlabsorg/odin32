@@ -1,4 +1,7 @@
-/* $Id: ChangeLog,v 1.1449 2001-05-27 19:00:43 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.1450 2001-05-28 09:21:40 phaller Exp $ */
+
+ 2001-05-28: Patrick Haller <patrick.haller@innotek.de>
+    - GDI32:    o Split GDI32.CPP into ICM.CPP and GDI32.CPP
 
  2001-05-27: Sander van Leeuwen <sandervl@xs4all.nl>
     - COMCTL32: o Listview: merged old LISTVIEW_EnsureVisible
