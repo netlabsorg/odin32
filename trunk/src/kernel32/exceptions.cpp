@@ -1,4 +1,4 @@
-/* $Id: exceptions.cpp,v 1.32 2000-01-27 21:51:16 sandervl Exp $ */
+/* $Id: exceptions.cpp,v 1.33 2000-01-29 14:22:56 sandervl Exp $ */
 
 /*
  * Win32 Device IOCTL API functions for OS/2
@@ -1126,75 +1126,5 @@ int _System CheckCurFS()
     }
     SetFS(sel);
     return TRUE;
-}
-
-/*****************************************************************************
- * Name      : void ReplaceExceptionHandler
- * Purpose   :
- * Parameters: ...
- * Variables :
- * Result    :
- * Remark    :
- * Status    :
- *
- * Author    : Sander van Leeuwen [Tue, 1999/07/01 09:00]
- *****************************************************************************/
-
-//******************************************************************************
-//SvL: Replace original startup code exception handler
-extern BOOL fExeStarted;
-//******************************************************************************
-void ReplaceExceptionHandler()
-{
-  static BOOL         fRegistered = FALSE;
-  PWINEXCEPTION_FRAME orgframe;
-  APIRET          rc;
-  ULONGULONG_W    timerval;
-
-  DisableFPUExceptions();
-
-  if(fExeStarted == FALSE)
-    return;
-
-  orgframe = (PWINEXCEPTION_FRAME)QueryExceptionChain();
-  if((int)orgframe == 0 ||
-     (int)orgframe == -1)
-    return;
-
-  dprintf(("KERNEL32: ReplaceExceptionHandler\n"));
-
-  StartupCodeHandler = orgframe->Handler;
-  orgframe->Handler = (PEXCEPTION_HANDLER)OS2ExceptionHandler;
-  orgframe->Prev    = (_WINEXCEPTION_FRAME *)0;
-  SetExceptionChain((ULONG)-1);
-
-#if 0
-  if(fRegistered == FALSE)
-  {
-#endif
-
-    dprintf(("KERNEL32: ReplaceExceptionHandler: New exception frame at %X\n",
-             orgframe));
-    rc = DosSetExceptionHandler((PEXCEPTIONREGISTRATIONRECORD)orgframe);
-    fRegistered = TRUE;
-
-#if 0
-  }
-  else
-  {
-    while(orgframe && orgframe->Handler != (PEXCEPTION_HANDLER)OS2ExceptionHandler)
-    {
-      orgframe = orgframe->Prev;
-    }
-
-    dprintf(("KERNEL32: ReplaceExceptionHandler: Restore old exception frame %X\n",
-             orgframe));
-    if(orgframe)
-    {
-      orgframe->Prev  = (_WINEXCEPTION_FRAME *)0;
-      SetExceptionChain((ULONG)orgframe);
-    }
-  }
-#endif
 }
 
