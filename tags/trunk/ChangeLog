@@ -1,4 +1,4 @@
- /* $Id: ChangeLog,v 1.891 2000-04-15 15:09:36 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.892 2000-04-15 16:30:23 sandervl Exp $ */
 
  2000-04-15: Christoph Bratschi <cbratschi@datacomm.ch>
 	- COMCTL32: rewrote listview item handling: sort bug fix,
@@ -11,6 +11,13 @@
                     (otherwise DosFindFirst fails)
                     Fixed flushing of file maps (wrong VirtualQuery parameter)
                     Path search fix for dlls
+                    Dll search order:
+  		    1) exe dir
+		    2) current dir
+		    3) windows system dir (kernel32 path)
+		    4) windows dir
+		    5) path environment variable
+
 	- ODINCRT:  Added checks for failing mallocs
 	- USER32:   Corrected return value of EnableWindow
                     Send WM_CANCELMODE message when disabling window
