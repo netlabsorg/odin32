@@ -1,4 +1,4 @@
-/* $Id: odin32env.cmd,v 1.22 2002-02-08 10:54:03 bird Exp $
+/* $Id: odin32env.cmd,v 1.23 2002-02-26 17:26:37 bird Exp $
  *
  * Sets the build environment.
  *
@@ -18,7 +18,7 @@ parse arg sCompiler
      *
      * In addition the CVSROOT, USER and HOME directories right below have to corrected.
      */
-    call EnvVar_Set 0, 'CVSROOT',   ':pserver:bird@www.netlabs.org:e:/netlabs.cvs/odin32'
+    call EnvVar_Set 0, 'CVSROOT',   ':pserver:bird@www.netlabs.org:/netlabs.cvs/odin32'
     call EnvVar_Set 0, 'HOME',      'd:\knut\home'
     call EnvVar_Set 0, 'USER',      'bird'
     call EnvVar_Set 0, 'HOSTNAME',  'Univac-Job'
