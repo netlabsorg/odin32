@@ -1,4 +1,4 @@
-/* $Id: pe2lx.cpp,v 1.23 2000-12-18 14:19:24 bird Exp $
+/* $Id: pe2lx.cpp,v 1.24 2001-02-02 08:35:54 bird Exp $
  *
  * Pe2Lx class implementation. Ring 0 and Ring 3
  *
@@ -557,15 +557,14 @@ ULONG Pe2Lx::init(PCSZ pszFilename)
     /* 11.Align section. (Fix which is applied to EXEs/Dlls which contain no fixups and has an
      *    alignment which is not a multiple of 64Kb. The sections are concatenated into one big object. */
     /* TODO! this test has to be enhanced a bit. WWPack32, new Borland++ depends on image layout. */
-    fAllInOneObject = (pNtHdrs->FileHeader.Characteristics & IMAGE_FILE_RELOCS_STRIPPED) == IMAGE_FILE_RELOCS_STRIPPED;
-    fAllInOneObject = 1; /* KSO Fri 22.09.2000: for the time beeing we'll allways apply the alignment fix.
-                          * There are just too many apps failing because of missing baserelocations.
-                          * When I have explored the VDM flag of VMAllocMem I'll remove this.
-                          */
+    fAllInOneObject =  !isPEOneObjectDisabled() 
+                       && (   isPEOneObjectForced()
+                           || (pNtHdrs->FileHeader.Characteristics & IMAGE_FILE_RELOCS_STRIPPED) == IMAGE_FILE_RELOCS_STRIPPED
+                           );
     if (fAllInOneObject)
     {
         printInf(("All-In-One-Object fix is applied.\n"));
-        if (pNtHdrs->OptionalHeader.ImageBase >= 0x04000000UL)
+        if (pNtHdrs->OptionalHeader.ImageBase >= 0x04000000UL && !(pNtHdrs->FileHeader.Characteristics & IMAGE_FILE_DLL))
             printWar(("ImageBase >= 64MB this object may not be runnable! (ImageBase=%#8x)\n",
                      pNtHdrs->OptionalHeader.ImageBase));
     }
