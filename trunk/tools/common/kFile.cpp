@@ -1,4 +1,4 @@
-/* $Id: kFile.cpp,v 1.2 2000-05-27 02:14:20 bird Exp $
+/* $Id: kFile.cpp,v 1.3 2000-05-29 19:45:57 bird Exp $
  *
  * kFile - Simple (for the time being) file class.
  *
@@ -19,7 +19,11 @@
 *   Header Files                                                               *
 *******************************************************************************/
 #include <os2.h>
+
+#include <malloc.h>
 #include <string.h>
+#include <stdarg.h>
+#include <stdio.h>
 
 #include <kFile.h>
 
@@ -208,6 +212,50 @@ BOOL            kFile::writeAt(void *pvBuffer, long cbBuffer, long off)
 {
     return set(off) && write(pvBuffer, cbBuffer);
 }
+
+
+/**
+ * printf - formatted write.
+ *
+ * Lonely '\n's are prefixed with a '\r' to make output conform with
+ * PC line ending.
+ *
+ * @returns     Number of bytes written.
+ * @param       pszFormat   Format string.
+ * @param       ...         Ellipcis.
+ * @remark      Currently limited to 64KB of result data.
+ */
+int             kFile::printf(const char *pszFormat, ...) throw (int)
+{
+    long        offStart = getPos();
+    va_list     arg;
+
+    /* !QUICK AND DIRTY! */
+    char *  psz, * pszEnd;
+    char *  pszBuffer = (char*)malloc(1024*64); //64KB should normally be enough...
+
+    va_start(arg, pszFormat);
+    pszEnd = vsprintf(pszBuffer, pszFormat, arg) + pszBuffer;
+    va_end(arg);
+
+    psz = pszEnd;
+    while (psz > pszBuffer)
+    {
+        if (*psz-- == '\n' && *psz != '\r')
+        {
+            memmove(psz+2, psz+1, pszEnd - psz + 1);
+            psz[1] = '\r';
+            pszEnd++;
+        }
+    }
+
+    write(pszBuffer, pszEnd - pszBuffer);
+    free(pszBuffer);
+
+    return getPos() - offStart;
+}
+
+
 
 
 /**
