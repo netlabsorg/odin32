@@ -1,4 +1,4 @@
-/* $Id: fastdep.c,v 1.3 2000-02-29 10:48:10 bird Exp $
+/* $Id: fastdep.c,v 1.4 2000-03-04 23:51:57 bird Exp $
  *
  * Fast dependents. (Fast = Quick and Dirty!)
  *
@@ -20,9 +20,48 @@
 *******************************************************************************/
 #include <os2.h>
 #include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+
+/*
+ * This following section is used while testing fastdep.
+ * stdio.h should be included; string.h never included.
+ */
+/*
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+*/
 
+#if 1
+#include <stdio.h>
+#else
+#include <string.h>
+#include <string.h>
+#endif
+
+/*
+ */ /* */ /*
+#include <string.h>
+ */
+#if 1
+#    if 1
+        #if 0
+# include <string.h>
+        #else
+#            if 1
+                #if 1
+                    #if 0
+# include <string.h>
+                    #else /* */ /*
+*/
+ # include <stdio.h>
+                    #endif
+                #endif
+            #endif
+        #endif
+    #endif
+#endif
 
 /*******************************************************************************
 *   Structures and Typedefs                                                    *
@@ -89,6 +128,11 @@ char *fileExt(const char *pszFilename, char *pszBuffer);
 /* pathlist operations */
 char *pathlistFindFile(const char *pszPathList, const char *pszFilename, char *pszBuffer);
 
+/* word operations */
+static char *findEndOfWord(char *psz);
+#if 0 /* not used */
+static char *findStartOfWord(char *psz, const char *pszStart);
+#endif
 
 /*******************************************************************************
 *   Global Variables                                                           *
@@ -490,8 +534,22 @@ static int makeDependent(FILE *phDep, const char *pszFilename, POPTIONS pOptions
  */
 int langC_CPP(FILE *phDep, const char *pszFilename, FILE *phFile, BOOL fHeader, POPTIONS pOptions)
 {
-    char szBuffer[4096]; /* max line length */
-    int  iLine;
+    int     iLine;                      /* Linenumber. */
+    char    szBuffer[4096];             /* Max line length is 4096... should not be a problem. */
+    BOOL    fComment;                   /* TRUE when within a multiline comment. */
+                                        /* FALSE when not within a multiline comment. */
+    int     iIfStack;                   /* StackPointer. */
+    struct  IfStackEntry
+    {
+        int fIncluded : 1;              /* TRUE:  include this code;
+                                         * FALSE: excluded */
+        int fIf : 1;                    /* TRUE:  #if part of the expression.
+                                         * FALSE: #else part of the expression. */
+        int fSupported : 1;             /* TRUE:  supported if/else statement
+                                         * FALSE: unsupported all else[<something>] are ignored
+                                         *        All code is included.
+                                         */
+    } achIfStack[256];
 
 
     /**********************************/
@@ -518,68 +576,216 @@ int langC_CPP(FILE *phDep, const char *pszFilename, FILE *phFile, BOOL fHeader, 
     /*******************/
     /* find dependants */
     /*******************/
+    /* Initiate the IF-stack, comment state and line number. */
+    iIfStack = 0;
+    achIfStack[iIfStack].fIf = TRUE;
+    achIfStack[iIfStack].fIncluded = TRUE;
+    achIfStack[iIfStack].fSupported = TRUE;
+    fComment = FALSE;
     iLine = 0;
     while (!feof(phFile)) /* line loop */
     {
         if (fgets(szBuffer, sizeof(szBuffer), phFile) != NULL)
         {
             /* search for #include */
+            register char *pszC;
             int cbLen;
             int i = 0;
             iLine++;
 
             /* skip blank chars */
             cbLen = strlen(szBuffer);
-            while (i + 9 < cbLen && (szBuffer[i] == ' ' || szBuffer[i] == '\t'))
+            while (i + 2 < cbLen && (szBuffer[i] == ' ' || szBuffer[i] == '\t'))
                 i++;
 
-            /* is this an include? */
-            if (szBuffer[i] == '#' && strncmp(&szBuffer[i], "#include", 8) == 0)
+            /* preprocessor statement? */
+            if (!fComment && szBuffer[i] == '#')
             {
-                char szFullname[CCHMAXPATH];
-                char *psz;
-                BOOL f = FALSE;
-                int  j;
-
-                /* extract info between "" or <> */
-                while (i < cbLen && !(f = (szBuffer[i] == '"' || szBuffer[i] == '<')))
+                /*
+                 * Preprocessor checks
+                 * We known that we have a preprocessor statment (starting with an '#' * at szBuffer[i]).
+                 * Depending on the word afterwards we'll take some different actions.
+                 * So we'll start of by extracting that word and make a string swich on it.
+                 * Note that there might be some blanks between the hash and the word.
+                 */
+                int     cchWord;
+                char *  pszEndWord;
+                char *  pszArgument;
+                i++;                /* skip hash ('#') */
+                while (szBuffer[i] == '\t' || szBuffer[i] == ' ') /* skip blanks */
                     i++;
-                i++; /* skip '"' or '<' */
+                pszArgument = pszEndWord = findEndOfWord(&szBuffer[i]);
+                cchWord = pszEndWord - &szBuffer[i];
 
-                /* if invalid statement then continue with the next line! */
-                if (!f) continue;
+                /*
+                 * Find the argument by skipping the blanks.
+                 */
+                while (*pszArgument == '\t' || *pszArgument == ' ') /* skip blanks */
+                    pszArgument++;
 
-                /* find end */
-                j = f = 0;
-                while (i + j < cbLen &&  j < CCHMAXPATH &&
-                       !(f = (szBuffer[i+j] == '"' || szBuffer[i+j] == '>')))
-                    j++;
-
-                /* if invalid statement then continue with the next line! */
-                if (!f) continue;
-
-                /* copy filename */
-                strncpy(szFullname, &szBuffer[i], j);
-                szFullname[j] = '\0'; /* ensure terminatition. */
-
-                /* find include file! */
-                psz = pathlistFindFile(pOptions->pszInclude, szFullname, szBuffer);
-                if (psz == NULL)
-                    psz = pathlistFindFile(getenv("INCLUDE"), szFullname, szBuffer);
-
-                /* did we find the include? */
-                if (psz != NULL)
+                /*
+                 * string switch.
+                 */
+                if (strncmp(&szBuffer[i], "include", cchWord) == 0)
                 {
-                    char szBuffer2[CCHMAXPATH];
-                    if (pOptions->fExcludeAll ||
-                        pathlistFindFile(pOptions->pszExclude, szFullname, szBuffer2) != NULL
-                        )
-                        strcpy(szBuffer, szFullname);
-                    fprintf(phDep, " \\\n%4.s %s", "", szBuffer);
+                    /*
+                     * #include
+                     *
+                     * Are we in a state where this file is to be included?
+                     */
+                    if (achIfStack[iIfStack].fIncluded)
+                    {
+                        char szFullname[CCHMAXPATH];
+                        char *psz;
+                        BOOL f = FALSE;
+                        int  j;
+
+                        /* extract info between "" or <> */
+                        while (i < cbLen && !(f = (szBuffer[i] == '"' || szBuffer[i] == '<')))
+                            i++;
+                        i++; /* skip '"' or '<' */
+
+                        /* if invalid statement then continue with the next line! */
+                        if (!f) continue;
+
+                        /* find end */
+                        j = f = 0;
+                        while (i + j < cbLen &&  j < CCHMAXPATH &&
+                               !(f = (szBuffer[i+j] == '"' || szBuffer[i+j] == '>')))
+                            j++;
+
+                        /* if invalid statement then continue with the next line! */
+                        if (!f) continue;
+
+                        /* copy filename */
+                        strncpy(szFullname, &szBuffer[i], j);
+                        szFullname[j] = '\0'; /* ensure terminatition. */
+
+                        /* find include file! */
+                        psz = pathlistFindFile(pOptions->pszInclude, szFullname, szBuffer);
+                        if (psz == NULL)
+                            psz = pathlistFindFile(getenv("INCLUDE"), szFullname, szBuffer);
+
+                        /* did we find the include? */
+                        if (psz != NULL)
+                        {
+                            char szBuffer2[CCHMAXPATH];
+                            if (pOptions->fExcludeAll ||
+                                pathlistFindFile(pOptions->pszExclude, szFullname, szBuffer2) != NULL
+                                )
+                                strcpy(szBuffer, szFullname);
+                            fprintf(phDep, " \\\n%4.s %s", "", szBuffer);
+                        }
+                        else
+                            fprintf(stderr, "%s(%d): warning include file '%s' not found!\n",
+                                    pszFilename, iLine, szFullname);
+                    }
                 }
                 else
-                    fprintf(stderr, "%s(%d): warning include file '%s' not found!\n",
-                            pszFilename, iLine, szFullname);
+                    /*
+                     * #if
+                     */
+                    if (strncmp(&szBuffer[i], "if", cchWord) == 0)
+                {   /* #if 0 and #if <1-9> are supported */
+                    pszEndWord = findEndOfWord(pszArgument);
+                    iIfStack++;
+                    if ((pszEndWord - pszArgument) == 1
+                        && *pszArgument >= '0' && *pszArgument <= '9')
+                    {
+                        if (*pszArgument != '0')
+                            achIfStack[iIfStack].fIncluded =  TRUE;
+                        else
+                            achIfStack[iIfStack].fIncluded =  FALSE;
+                    }
+                    else
+                        achIfStack[iIfStack].fSupported = FALSE;
+                    achIfStack[iIfStack].fIncluded = TRUE;
+                    achIfStack[iIfStack].fIf = TRUE;
+                }
+                else
+                    /*
+                     * #else
+                     */
+                    if (strncmp(&szBuffer[i], "else", cchWord) == 0)
+                {
+                    if (achIfStack[iIfStack].fSupported)
+                    {
+                        if (achIfStack[iIfStack].fIncluded) /* ARG!! this'll prevent warning */
+                            achIfStack[iIfStack].fIncluded = FALSE;
+                        else
+                            achIfStack[iIfStack].fIncluded = TRUE;
+                    }
+                    achIfStack[iIfStack].fIf = FALSE;
+                }
+                else
+                    /*
+                     * #endif
+                     */
+                    if (strncmp(&szBuffer[i], "endif", cchWord) == 0)
+                {   /* Pop the if-stack. */
+                    if (iIfStack > 0)
+                        iIfStack--;
+                    else
+                        fprintf(stderr, "%s(%d): If-Stack underflow!\n", pszFilename, iLine);
+                }
+                /*
+                 * general if<something> and elseif<something> implementations
+                 */
+                else
+                    if (strncmp(&szBuffer[i], "elseif", 6) == 0)
+                {
+                    achIfStack[iIfStack].fSupported = FALSE;
+                    achIfStack[iIfStack].fIncluded = TRUE;
+                }
+                else
+                    if (strncmp(&szBuffer[i], "if", 2) == 0)
+                {
+                    iIfStack++;
+                    achIfStack[iIfStack].fIf = TRUE;
+                    achIfStack[iIfStack].fSupported = FALSE;
+                    achIfStack[iIfStack].fIncluded = TRUE;
+                }
+                /* The rest of them aren't implemented yet.
+                else if (strncmp(&szBuffer[i], "if") == 0)
+                {
+                }
+                */
+            }
+
+            /*
+             * Comment checks.
+             *  -Start at first non-blank.
+             *  -Loop thru the line since we might have more than one
+             *   comment statement on a single line.
+             */
+            pszC = &szBuffer[i];
+            while (pszC != NULL && *pszC != '\0')
+            {
+                if (fComment)
+                    pszC = strstr(pszC, "*/");  /* look for end comment mark. */
+                else
+                {
+                    char *pszLC;
+                    pszLC= strstr(pszC, "//");  /* look for single line comment mark. */
+                    pszC = strstr(pszC, "/*");  /* look for start comment mark */
+                    if (pszLC && pszLC < pszC)  /* if there is an single line comment mark before the */
+                        break;                  /* muliline comment mark we'll ignore the multiline mark. */
+                }
+
+                /* Comment mark found? */
+                if (pszC != NULL)
+                {
+                    fComment = !fComment;
+                    pszC += 2;          /* skip comment mark */
+
+                    /* debug */
+                    /*
+                    if (fComment)
+                        fprintf(stderr, "starts at line %d\n", iLine);
+                    else
+                        fprintf(stderr, "ends   at line %d\n", iLine);
+                        */
+                }
             }
         }
         else
@@ -1201,4 +1407,56 @@ char *pathlistFindFile(const char *pszPathList, const char *pszFilename, char *p
 
     return *pszBuffer == '\0' ? NULL : pszBuffer;
 }
+
+
+/**
+ * Finds the first char after word.
+ * @returns   Pointer to the first char after word.
+ * @param     psz  Where to start.
+ * @author    knut st. osmundsen (knut.stange.osmundsen@pmsc.no)
+ */
+static char *findEndOfWord(char *psz)
+{
+
+    while (*psz != '\0' &&
+            (
+              (*psz >= 'A' && *psz <= 'Z') || (*psz >= 'a' && *psz <= 'z')
+              ||
+              (*psz >= '0' && *psz <= '9')
+              ||
+              *psz == '_'
+            )
+          )
+        ++psz;
+    return (char *)psz;
+}
+
+#if 0 /* not used */
+/**
+ * Find the starting char of a word
+ * @returns   Pointer to first char in word.
+ * @param     psz       Where to start.
+ * @param     pszStart  Where to stop.
+ * @author    knut st. osmundsen (knut.stange.osmundsen@pmsc.no)
+ */
+static char *findStartOfWord(const char *psz, const char *pszStart)
+{
+    const char *pszR = psz;
+    while (psz >= pszStart &&
+            (
+                 (*psz >= 'A' && *psz <= 'Z')
+              || (*psz >= 'a' && *psz <= 'z')
+              || (*psz >= '0' && *psz <= '9')
+              || *psz == '_'
+             )
+          )
+        pszR = psz--;
+    return (char*)pszR;
+}
+#endif
+
+/*
+ * Testin purpose.
+ */
+#include <os2.h>
 
