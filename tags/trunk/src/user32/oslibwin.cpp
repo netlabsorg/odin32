@@ -1,4 +1,4 @@
-/* $Id: oslibwin.cpp,v 1.25 1999-10-12 20:16:23 sandervl Exp $ */
+/* $Id: oslibwin.cpp,v 1.26 1999-10-13 14:24:25 sandervl Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -138,8 +138,7 @@ BOOL OSLibWinConvertStyle(ULONG dwStyle, ULONG *dwExStyle, ULONG *OSWinStyle, UL
     } else if (*dwExStyle & WS_EX_STATICEDGE_W)
     {
       *OSFrameStyle |= FCF_SIZEBORDER;
-      *borderHeight = *borderWidth = 1;
-
+      *borderHeight = *borderWidth = 2;
     } 
     else
     if(dwStyle & WS_BORDER_W)
@@ -578,6 +577,8 @@ dprintf(("window (%d,%d)(%d,%d)  client (%d,%d)(%d,%d)",
 //******************************************************************************
 void OSLibMapWINDOWPOStoSWP(PWINDOWPOS pwpos, PSWP pswp, PSWP pswpOld, HWND hParent, HWND hFrame)
 {
+ BOOL fCvt = FALSE;
+
    HWND hWnd            = pwpos->hwnd;
    HWND hWndInsertAfter = pwpos->hwndInsertAfter;
    long x               = pwpos->x;
@@ -624,13 +625,10 @@ void OSLibMapWINDOWPOStoSWP(PWINDOWPOS pwpos, PSWP pswp, PSWP pswpOld, HWND hPar
          x = pswpOld->x;
          y = pswpOld->y;
 
-//SvL: TEST
-#if 0
          if (!((y == 0) && (pswpOld->cy == 0)))
          {
             y = parentHeight - y - pswpOld->cy;
          }
-#endif
       }
  
       if (flags & SWP_SIZE)
@@ -665,9 +663,16 @@ void OSLibMapWINDOWPOStoSWP(PWINDOWPOS pwpos, PSWP pswp, PSWP pswpOld, HWND hPar
 }
 //******************************************************************************
 //******************************************************************************
-BOOL OSLibWinCalcFrameRect(HWND hwndFrame, RECTLOS2 *pRect, BOOL fClient)
+BOOL  OSLibWinCalcFrameRect(HWND hwndFrame, RECT *pRect, BOOL fClient)
 {
-   return WinCalcFrameRect(hwndFrame, (PRECTL)pRect, fClient);
+ BOOL rc;
+ 
+   WinMapWindowPoints(hwndFrame, HWND_DESKTOP, (PPOINTL)pRect, 2);
+
+   rc = WinCalcFrameRect(hwndFrame, (PRECTL)pRect, fClient);
+   WinMapWindowPoints(HWND_DESKTOP, hwndFrame, (PPOINTL)pRect, 2);
+
+   return rc;
 }
 //******************************************************************************
 //******************************************************************************
