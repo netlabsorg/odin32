@@ -1,4 +1,4 @@
-/* $Id: trackbar.cpp,v 1.6 2001-03-31 13:25:27 sandervl Exp $ */
+/* $Id: trackbar.cpp,v 1.7 2002-08-20 14:53:27 sandervl Exp $ */
 /*
  * Trackbar control
  *
@@ -1235,8 +1235,6 @@ TRACKBAR_SetPos(TRACKBAR_INFO *infoPtr,WPARAM wParam,LPARAM lParam)
     INT lastPos = infoPtr->nPos;
 
     infoPtr->nPos = (INT)LOWORD(lParam);
-
-    if (lastPos == infoPtr->nPos) return 0; //nothing changed
 
     if (infoPtr->nPos < infoPtr->nRangeMin)
         infoPtr->nPos = infoPtr->nRangeMin;
