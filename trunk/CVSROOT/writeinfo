@@ -1,7 +1,7 @@
-/                                          sandervl phaller achimha cbratschi hugh davidr vince jtroster bird dengert jeroen mike
+/                                          sandervl phaller achimha cbratschi hugh davidr bird jeroen mike
 /CVSROOT                                   ktk sandervl
 /bin                                       sandervl phaller achimha bird
-/include                                   sandervl phaller achimha bird dengert davidr cbratschi
+/include                                   sandervl phaller achimha bird davidr cbratschi
 /lib                                       sandervl phaller achimha bird
 /src                                       sandervl phaller achimha bird
 /include/win                               sandervl phaller achimha bird davidr cbratschi
@@ -16,7 +16,7 @@
 /src/dplay                                 sandervl hugh achimha mike
 /src/gdi32                                 sandervl phaller achimha bird cbratschi hugh
 /src/kernel32                              sandervl phaller achimha bird cbratschi
-/src/kernel32/new                          sandervl phaller achimha bird buerkle dengert cbratschi
+/src/kernel32/new                          sandervl phaller achimha bird cbratschi
 /src/kernel32/old                          sandervl phaller achimha bird
 /src/Odin32API                             sandervl bird
 /src/lz32                                  sandervl achimha phaller
@@ -43,11 +43,11 @@
 /src/shell32                               sandervl phaller achimha bird cbratschi
 /src/shell32/old                           sandervl phaller achimha bird
 /src/shlwapi                               sandervl phaller cbratschi
-/src/spy                                   sandervl phaller achimha dengert
+/src/spy                                   sandervl phaller achimha 
 /src/tapi32                                sandervl phaller achimha bird
-/src/user32                                sandervl phaller achimha bird dengert cbratschi
-/src/user32/new                            sandervl phaller achimha bird buerkle dengert cbratschi
-/src/user32/old                            sandervl phaller achimha bird dengert
+/src/user32                                sandervl phaller achimha bird cbratschi
+/src/user32/new                            sandervl phaller achimha bird cbratschi
+/src/user32/old                            sandervl phaller achimha bird 
 /src/version                               sandervl phaller achimha bird
 /src/winmm                                 sandervl phaller achimha jtroster
 /src/winspool                              sandervl phaller achimha bird
