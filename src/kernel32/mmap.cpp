@@ -1,4 +1,4 @@
-/* $Id: mmap.cpp,v 1.40 2000-05-24 19:28:26 sandervl Exp $ */
+/* $Id: mmap.cpp,v 1.41 2000-05-26 18:42:55 sandervl Exp $ */
 
 /*
  * Win32 Memory mapped file & view classes
@@ -16,6 +16,8 @@
  * TODO: Handles returned should be usable by all apis that accept file handles
  * TODO: Sharing memory mapped files between multiple processes
  * TODO: Memory mapped files with views that extend the file (not 100% correct now)
+ * TODO: Suspend all threads when a page is committed (possible that another thread
+ *       accesses the same memory before the page is read from disk
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *
@@ -51,7 +53,8 @@ Win32MemMapView *Win32MemMapView::mapviews = NULL;
 //TODO: sharing between processes
 //******************************************************************************
 Win32MemMap::Win32MemMap(HFILE hfile, ULONG size, ULONG fdwProtect, LPSTR lpszName)
-               : nrMappings(0), pMapping(NULL), mMapAccess(0), referenced(0), image(0)
+               : nrMappings(0), pMapping(NULL), mMapAccess(0), referenced(0), image(0),
+                 fClosed(FALSE)
 {
   globalmapMutex.enter(VMUTEX_WAIT_FOREVER, &hGlobalMapMutex);
   next    = memmaps;
@@ -74,7 +77,8 @@ Win32MemMap::Win32MemMap(HFILE hfile, ULONG size, ULONG fdwProtect, LPSTR lpszNa
 //Map constructor used for executable image maps (only used internally)
 //******************************************************************************
 Win32MemMap::Win32MemMap(Win32PeLdrImage *pImage, ULONG baseAddress, ULONG size)
-               : nrMappings(0), pMapping(NULL), mMapAccess(0), referenced(0)
+               : nrMappings(0), pMapping(NULL), mMapAccess(0), referenced(0), image(0),
+                 fClosed(FALSE)
 {
   globalmapMutex.enter(VMUTEX_WAIT_FOREVER, &hGlobalMapMutex);
   next    = memmaps;
@@ -291,6 +295,12 @@ BOOL Win32MemMap::unmapViewOfFile(Win32MemMapView *view)
 	pMapping = NULL;
   }
   mapMutex.leave();
+  
+  //if there are no more mappings left and the memory map's handle has been
+  //closed, then delete the object
+  if(nrMappings == 0 && fClosed) {
+	delete this;
+  }
   return TRUE;
 fail:
   mapMutex.leave();
@@ -525,7 +535,11 @@ void Win32MemMap::deleteAll()
 		if(map->getImage()) {
 			delete map;
 		}
-		else	CloseHandle(memmaps->hMemMap);
+		else {
+			if(!map->isClosed()) 
+				CloseHandle(memmaps->hMemMap);
+			delete map;
+		}
 	}
 	else {
   		//delete all views created by this process for this map

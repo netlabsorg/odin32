@@ -1,4 +1,4 @@
-/* $Id: winimagepeldr.cpp,v 1.42 2000-05-02 20:53:15 sandervl Exp $ */
+/* $Id: winimagepeldr.cpp,v 1.43 2000-05-26 18:42:56 sandervl Exp $ */
 
 /*
  * Win32 PE loader Image base class
@@ -1492,6 +1492,12 @@ BOOL Win32PeLdrImage::insideModuleCode(ULONG address)
 	return TRUE;
   }
   return FALSE;
+}
+//******************************************************************************
+//******************************************************************************
+ULONG Win32PeLdrImage::getImageSize()
+{
+  return imageSize;
 }
 //******************************************************************************
 //******************************************************************************
