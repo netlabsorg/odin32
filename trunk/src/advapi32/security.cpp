@@ -1,4 +1,4 @@
-/* $Id: security.cpp,v 1.1 1999-11-30 19:41:45 sandervl Exp $ */
+/* $Id: security.cpp,v 1.2 1999-12-19 12:24:52 sandervl Exp $ */
 /*
  * Win32 security API functions for OS/2
  *
@@ -144,74 +144,6 @@ GetTokenInformation( HANDLE token, TOKEN_INFORMATION_CLASS tokeninfoclass,
 */
 
 /******************************************************************************
- * AllocateAndInitializeSid [ADVAPI32.11]
- *
- * PARAMS
- *   pIdentifierAuthority []
- *   nSubAuthorityCount   []
- *   nSubAuthority0       []
- *   nSubAuthority1       []
- *   nSubAuthority2       []
- *   nSubAuthority3       []
- *   nSubAuthority4       []
- *   nSubAuthority5       []
- *   nSubAuthority6       []
- *   nSubAuthority7       []
- *   pSid                 []
- */
-BOOL WINAPI
-AllocateAndInitializeSid( PSID_IDENTIFIER_AUTHORITY pIdentifierAuthority,
-                          BYTE nSubAuthorityCount,
-                          DWORD nSubAuthority0, DWORD nSubAuthority1,
-                          DWORD nSubAuthority2, DWORD nSubAuthority3,
-                          DWORD nSubAuthority4, DWORD nSubAuthority5,
-                          DWORD nSubAuthority6, DWORD nSubAuthority7,
-                          PSID *pSid )
-{
-    if (!(*pSid = (PSID)HeapAlloc(GetProcessHeap(), 0,
-                                  GetSidLengthRequired(nSubAuthorityCount))))
-        return FALSE;
-
-    (*pSid)->Revision = SID_REVISION;
-    if (pIdentifierAuthority)
-        memcpy(&(*pSid)->IdentifierAuthority, pIdentifierAuthority,
-               sizeof (SID_IDENTIFIER_AUTHORITY));
-    *GetSidSubAuthorityCount(*pSid) = nSubAuthorityCount;
-
-    if (nSubAuthorityCount > 0)
-        *GetSidSubAuthority(*pSid, 0) = nSubAuthority0;
-    if (nSubAuthorityCount > 1)
-        *GetSidSubAuthority(*pSid, 1) = nSubAuthority1;
-    if (nSubAuthorityCount > 2)
-        *GetSidSubAuthority(*pSid, 2) = nSubAuthority2;
-    if (nSubAuthorityCount > 3)
-        *GetSidSubAuthority(*pSid, 3) = nSubAuthority3;
-    if (nSubAuthorityCount > 4)
-        *GetSidSubAuthority(*pSid, 4) = nSubAuthority4;
-    if (nSubAuthorityCount > 5)
-        *GetSidSubAuthority(*pSid, 5) = nSubAuthority5;
-    if (nSubAuthorityCount > 6)
-        *GetSidSubAuthority(*pSid, 6) = nSubAuthority6;
-    if (nSubAuthorityCount > 7)
-        *GetSidSubAuthority(*pSid, 7) = nSubAuthority7;
-
-    return TRUE;
-}
-
-/******************************************************************************
- * FreeSid [ADVAPI32.42]
- *
- * PARAMS
- *   pSid []
- */
-PVOID WINAPI
-FreeSid( PSID pSid )
-{
-    HeapFree( GetProcessHeap(), 0, pSid );
-    return NULL;
-}
-
-/******************************************************************************
  * CopySid [ADVAPI32.24]
  *
  * PARAMS
@@ -222,16 +154,7 @@ FreeSid( PSID pSid )
 BOOL WINAPI
 CopySid( DWORD nDestinationSidLength, PSID pDestinationSid, PSID pSourceSid )
 {
-
-    if (!IsValidSid(pSourceSid))
-        return FALSE;
-
-    if (nDestinationSidLength < GetLengthSid(pSourceSid))
-        return FALSE;
-
-    memcpy(pDestinationSid, pSourceSid, GetLengthSid(pSourceSid));
-
-    return TRUE;
+	CallWin32ToNt (RtlCopySid( nDestinationSidLength, pDestinationSid, pSourceSid));
 }
 
 /******************************************************************************
@@ -243,19 +166,7 @@ CopySid( DWORD nDestinationSidLength, PSID pDestinationSid, PSID pSourceSid )
 BOOL WINAPI
 IsValidSid( PSID pSid )
 {
-    if (IsBadReadPtr(pSid, 4))
-    {
-        WARN_(security)("(%p): invalid pointer!", pSid);
-        return FALSE;
-    }
-
-    if (pSid->SubAuthorityCount > SID_MAX_SUB_AUTHORITIES)
-        return FALSE;
-
-    if (!pSid || pSid->Revision != SID_REVISION)
-        return FALSE;
-
-    return TRUE;
+	CallWin32ToNt (RtlValidSid( pSid));
 }
 
 /******************************************************************************
@@ -268,45 +179,15 @@ IsValidSid( PSID pSid )
 BOOL WINAPI
 EqualSid( PSID pSid1, PSID pSid2 )
 {
-    if (!IsValidSid(pSid1) || !IsValidSid(pSid2))
-        return FALSE;
-
-    if (*GetSidSubAuthorityCount(pSid1) != *GetSidSubAuthorityCount(pSid2))
-        return FALSE;
-
-    if (memcmp(pSid1, pSid2, GetLengthSid(pSid1)) != 0)
-        return FALSE;
-
-    return TRUE;
+	CallWin32ToNt (RtlEqualSid( pSid1, pSid2));
 }
 
 /******************************************************************************
  * EqualPrefixSid [ADVAPI32.39]
  */
-BOOL WINAPI EqualPrefixSid (PSID pSid1, PSID pSid2) {
-    if (!IsValidSid(pSid1) || !IsValidSid(pSid2))
-        return FALSE;
-
-    if (*GetSidSubAuthorityCount(pSid1) != *GetSidSubAuthorityCount(pSid2))
-        return FALSE;
-
-    if (memcmp(pSid1, pSid2, GetSidLengthRequired(pSid1->SubAuthorityCount - 1))
- != 0)
-        return FALSE;
-
-    return TRUE;
-}
-
-/******************************************************************************
- * GetSidLengthRequired [ADVAPI32.63]
- *
- * PARAMS
- *   nSubAuthorityCount []
- */
-DWORD WINAPI
-GetSidLengthRequired( BYTE nSubAuthorityCount )
+BOOL WINAPI EqualPrefixSid (PSID pSid1, PSID pSid2) 
 {
-    return sizeof (SID) + (nSubAuthorityCount - 1) * sizeof (DWORD);
+	CallWin32ToNt (RtlEqualPrefixSid( pSid1, pSid2));
 }
 
 /******************************************************************************
@@ -319,67 +200,7 @@ BOOL WINAPI
 InitializeSid (PSID pSid, PSID_IDENTIFIER_AUTHORITY pIdentifierAuthority,
                     BYTE nSubAuthorityCount)
 {
-    int i;
-
-    pSid->Revision = SID_REVISION;
-    if (pIdentifierAuthority)
-        memcpy(&pSid->IdentifierAuthority, pIdentifierAuthority,
-               sizeof (SID_IDENTIFIER_AUTHORITY));
-    *GetSidSubAuthorityCount(pSid) = nSubAuthorityCount;
-
-    for (i = 0; i < nSubAuthorityCount; i++)
-        *GetSidSubAuthority(pSid, i) = 0;
-
-    return TRUE;
-}
-
-/******************************************************************************
- * GetSidIdentifierAuthority [ADVAPI32.62]
- *
- * PARAMS
- *   pSid []
- */
-PSID_IDENTIFIER_AUTHORITY WINAPI
-GetSidIdentifierAuthority( PSID pSid )
-{
-    return &pSid->IdentifierAuthority;
-}
-
-/******************************************************************************
- * GetSidSubAuthority [ADVAPI32.64]
- *
- * PARAMS
- *   pSid          []
- *   nSubAuthority []
- */
-PDWORD WINAPI
-GetSidSubAuthority( PSID pSid, DWORD nSubAuthority )
-{
-    return &pSid->SubAuthority[nSubAuthority];
-}
-
-/******************************************************************************
- * GetSidSubAuthorityCount [ADVAPI32.65]
- *
- * PARAMS
- *   pSid []
- */
-PUCHAR WINAPI
-GetSidSubAuthorityCount (PSID pSid)
-{
-    return &pSid->SubAuthorityCount;
-}
-
-/******************************************************************************
- * GetLengthSid [ADVAPI32.48]
- *
- * PARAMS
- *   pSid []
- */
-DWORD WINAPI
-GetLengthSid (PSID pSid)
-{
-    return GetSidLengthRequired( * GetSidSubAuthorityCount(pSid) );
+	CallWin32ToNt (RtlInitializeSid( pSid, pIdentifierAuthority, nSubAuthorityCount));
 }
 
 /*	##############################################

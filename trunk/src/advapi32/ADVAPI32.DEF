@@ -1,4 +1,4 @@
-; $Id: ADVAPI32.DEF,v 1.8 1999-11-30 19:41:06 sandervl Exp $
+; $Id: ADVAPI32.DEF,v 1.9 1999-12-19 12:24:51 sandervl Exp $
 
 ;Created by BLAST for IBM's compiler
 LIBRARY ADVAPI32 INITINSTANCE
@@ -121,7 +121,7 @@ EXPORTS
      AddAuditAccessAce          = _AddAuditAccessAce@24              @9
      AdjustTokenGroups          = _AdjustTokenGroups@24              @10
      AdjustTokenPrivileges      = _AdjustTokenPrivileges@24          @11
-     AllocateAndInitializeSid   = _AllocateAndInitializeSid@44       @12
+     AllocateAndInitializeSid   = _RtlAllocateAndInitializeSid@44    @12
      AllocateLocallyUniqueId    = _AllocateLocallyUniqueId@4         @13
      AreAllAccessesGranted      = _AreAllAccessesGranted@8           @14
      AreAnyAccessesGranted      = _AreAnyAccessesGranted@8           @15
@@ -152,13 +152,13 @@ EXPORTS
      EqualPrefixSid             = _EqualPrefixSid@8                  @40
      EqualSid                   = _EqualSid@8                        @41
      FindFirstFreeAce           = _FindFirstFreeAce@8                @42
-     FreeSid                    = _FreeSid@4                         @43
+     FreeSid                    = _RtlFreeSid@4                      @43
      GetAce                     = _GetAce@12                         @44
      GetAclInformation          = _GetAclInformation@16              @45
      GetFileSecurityA           = _GetFileSecurityA@20               @46
      GetFileSecurityW           = _GetFileSecurityW@20               @47
      GetKernelObjectSecurity    = _GetKernelObjectSecurity@20        @48
-     GetLengthSid               = _GetLengthSid@4                    @49
+     GetLengthSid               = _RtlLengthSid@4                    @49
      GetNumberOfEventLogRecords  = _GetNumberOfEventLogRecords@8     @50
      GetOldestEventLogRecord    = _GetOldestEventLogRecord@8         @51
      GetPrivateObjectSecurity   = _GetPrivateObjectSecurity@20       @52
@@ -172,10 +172,10 @@ EXPORTS
      GetServiceDisplayNameW     = _GetServiceDisplayNameW@16         @60
      GetServiceKeyNameA         = _GetServiceKeyNameA@16             @61
      GetServiceKeyNameW         = _GetServiceKeyNameW@16             @62
-     GetSidIdentifierAuthority  = _GetSidIdentifierAuthority@4       @63
-     GetSidLengthRequired       = _GetSidLengthRequired@4            @64
-     GetSidSubAuthority         = _GetSidSubAuthority@8              @65
-     GetSidSubAuthorityCount    = _GetSidSubAuthorityCount@4         @66
+     GetSidIdentifierAuthority  = _RtlIdentifierAuthoritySid@4       @63
+     GetSidLengthRequired       = _RtlLengthRequiredSid@4            @64
+     GetSidSubAuthority         = _RtlSubAuthoritySid@8              @65
+     GetSidSubAuthorityCount    = _RtlSubAuthorityCountSid@4         @66
      GetTokenInformation        = _GetTokenInformation@20            @67
      GetUserNameA               = _GetUserNameA@8                    @68
      GetUserNameW               = _GetUserNameW@8                    @69
