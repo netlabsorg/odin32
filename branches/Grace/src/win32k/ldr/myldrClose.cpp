@@ -1,4 +1,4 @@
-/* $Id: myldrClose.cpp,v 1.5.4.1 2000-07-16 22:43:35 bird Exp $
+/* $Id: myldrClose.cpp,v 1.5.4.2 2000-08-21 22:59:39 bird Exp $
  *
  * myldrClose - ldrClose
  *
@@ -30,6 +30,7 @@
 #include "ldr.h"
 #include "ldrCalls.h"
 #include "ModuleBase.h"
+#include "Pe2Lx.h"
 
 
 /**
@@ -62,6 +63,16 @@ ULONG LDRCALL myldrClose(SFN hFile)
         SetState(hFile, HSTATE_UNUSED);
         #pragma info(restore)
     }
+    /*
+     * Invalidate the odin32path if kernel32 is closed.
+     *  (Might possible not be needed as Pe2Lx does invalides
+     *   the odin32path on object destruction.)
+     */
+    else if (Pe2Lx::getKernel32SFN() == hFile)
+        Pe2Lx::invalidateOdin32Path();
 
+    /*
+     * Finally call the real close function.
+     */
     return ldrClose(hFile);
 }

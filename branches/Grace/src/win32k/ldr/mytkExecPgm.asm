@@ -1,4 +1,4 @@
-; $Id: mytkExecPgm.asm,v 1.10.4.3 2000-08-19 14:37:16 bird Exp $
+; $Id: mytkExecPgm.asm,v 1.10.4.4 2000-08-21 22:59:40 bird Exp $
 ;
 ; mytkExecPgm - tkExecPgm overload
 ;
@@ -22,7 +22,7 @@ CCHMAXPATH      EQU CCHFILENAME - 1     ; Max path length
 
 
 ;
-;   Imported Functions
+;   Imported Functions and variables.
 ;
     extrn  _g_tkExecPgm:PROC
 
@@ -325,20 +325,18 @@ tkepgm_callbehind:
     mov     es, ax
     ASSUME  ds:FLAT, es:FLAT            ; both ds and es are now FLAT
 
-    ;
-    ; Clear loader state, current exe module and tkExecPgm global data flag.
-    ;
-    mov     ulLDRState, 0               ; Clears loaderstate. (LDRSTATE_UNKNOWN)
-    mov     pExeModule, 0               ; Sets the exemodule pointer to NULL.
-    mov     fTkExecPgm, 0               ; Marks global data invalid.
 
     ;
     ; Clear loader semaphore.
+    ; and clear loader state, current exe module and tkExecPgm global data flag.
     ;
     cmp     fLdrSemTaken, 0             ; is the semaphore still taken?
     je      tkepgm_callbehindret        ; jmp if not taken.
-    mov     fLdrSemTaken, 0             ; Loader semaphore is not taken any longer!
+    mov     ulLDRState, 0               ; Clears loaderstate. (LDRSTATE_UNKNOWN)
+    mov     pExeModule, 0               ; Sets the exemodule pointer to NULL.
+    mov     fTkExecPgm, 0               ; Marks global data invalid.
     call    near ptr FLAT:_LDRClearSem@0
+    mov     fLdrSemTaken, 0             ; Loader semaphore is not taken any longer!
 
     ;
     ; Restore ds and es (probably unecessary but...) and Return

@@ -1,4 +1,4 @@
-/* $Id: LdrCalls.h,v 1.3.4.4 2000-08-20 08:08:45 bird Exp $
+/* $Id: LdrCalls.h,v 1.3.4.5 2000-08-21 22:59:38 bird Exp $
  *
  * Prototypes for the loader overrided function.
  *
@@ -212,6 +212,8 @@ extern HKMTX *  pLdrSem;
  */
 extern PMTE LDRCALL ldrValidateMteHandle(HMTE hMTE);
 
+extern PSZ *pldrpFileNameBuf;
+#define ldrpFileNameBuf (*pldrpFileNameBuf)
 
 
 #ifdef __cplusplus
