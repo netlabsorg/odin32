@@ -32,10 +32,11 @@ all: $(TARGET).dll $(TARGET).lib
 
 
 $(TARGET).dll: $(OBJS) $(TARGET).def 
-	$(LD) $(LDFLAGS) -Fm -Fe$@ $(OBJS) $(TARGET).def \
+	$(LD) $(LDFLAGS) -Fm -Fe$@ $(OBJS) sbsstub.obj $(TARGET).def \
               $(PDWIN32_LIB)\pmwinx.lib \
               $(PDWIN32_LIB)\advapi32.lib \
-              $(PDWIN32_LIB)\kernel32.lib
+              $(PDWIN32_LIB)\kernel32.lib \
+               $(PDWIN32_LIB)/odincrt.lib OS2386.LIB
 	$(CP) $@ $(PDWIN32_BIN)
 #              $(PDWIN32_LIB)\ntdll.lib \
 
