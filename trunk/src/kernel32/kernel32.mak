@@ -1,4 +1,4 @@
-# $Id: kernel32.mak,v 1.44 2003-08-08 15:52:58 sandervl Exp $
+# $Id: kernel32.mak,v 1.45 2004-01-12 09:55:27 sandervl Exp $
 
 #
 # Odin32 API
@@ -143,6 +143,7 @@ $(OBJDIR)\hmnpipe.obj \
 $(OBJDIR)\hmdisk.obj \
 $(OBJDIR)\oslibcdio.obj \
 $(OBJDIR)\version.obj \
+$(OBJDIR)\mmapnotify.obj \
 !ifdef DEBUG
 $(OBJDIR)\exceptstackdump.obj \
 $(OBJDIR)\dbgwrap.obj \
@@ -151,6 +152,10 @@ $(OBJDIR)\module.obj \
 $(OBJDIR)\hmmailslot.obj \
 $(OBJDIR)\mailslot.obj \
 $(OBJDIR)\oslibtime.obj \
+$(OBJDIR)\kbdhook.obj \
+!ifndef CUSTOMBUILD
+$(OBJDIR)\kdbhookhlp.obj \
+!endif
 $(OBJDIR)\conodin32.obj \
 $(OBJDIR)\oslibwps.obj \
 $(OBJDIR)\kernelrsrc.obj
