@@ -1,4 +1,4 @@
-/* $Id: hmmmap.cpp,v 1.21 2003-02-18 18:48:54 sandervl Exp $ */
+/* $Id: hmmmap.cpp,v 1.22 2003-02-18 18:58:47 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -104,8 +104,7 @@ DWORD HMDeviceMemMapClass::CreateFileMapping(PHMHANDLEDATA         pHMHandleData
         //release it here
         return ERROR_ALREADY_EXISTS;
   }
-  
-#if 0
+#if 0  
   //We reuse the original memory map object if another one is created for
   //the same file handle
   //TODO: different file handles can exist for the same file (DuplicateHandle)
@@ -137,7 +136,6 @@ DWORD HMDeviceMemMapClass::CreateFileMapping(PHMHANDLEDATA         pHMHandleData
 		return ERROR_GEN_FAILURE;
 	}
   }
-  map->AddRef();
   pHMHandleData->dwUserData = (ULONG)map;
   pHMHandleData->dwInternalType = HMTYPE_MEMMAP;
   return NO_ERROR;
