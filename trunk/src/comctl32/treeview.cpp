@@ -1,4 +1,4 @@
-/* $Id: treeview.cpp,v 1.16 2000-08-08 17:05:02 cbratschi Exp $ */
+/* $Id: treeview.cpp,v 1.17 2000-08-13 17:12:40 cbratschi Exp $ */
 /* Treeview control
  *
  * Copyright 1998 Eric Kohl <ekohl@abo.rhein-zeitung.de>
@@ -9,6 +9,11 @@
  *
  * Note that TREEVIEW_INFO * and HTREEITEM are the same thing.
  *
+ * Note2: All items always! have valid (allocated) pszText field.
+ *      If item's text == LPSTR_TEXTCALLBACKA/W we allocate buffer
+ *      of size TEXT_CALLBACK_SIZE in DoSetItem.
+ *      We use callbackMask to keep track of fields to be updated.
+ *
  *
  * Status: complete (many things untested)
  * Version: 5.80
@@ -16,7 +21,7 @@
 
 /*
  Most identical with:
- - Corel 20000212 level
+ - Corel 20000807 level
  - (WINE 991212 level)
 */
 
@@ -70,12 +75,12 @@
 
 #define MINIMUM_INDENT 19
 
-#define IDT_CHECK        401 //CB: remove later
-
 #define CALLBACK_MASK_ALL (TVIF_TEXT|TVIF_CHILDREN|TVIF_IMAGE|TVIF_SELECTEDIMAGE)
 
-#define STATEIMAGEINDEX(x) (((x) >> 12) & 0x0f)
+#define STATEIMAGEINDEX(x)   (((x) >> 12) & 0x0f)
 #define OVERLAYIMAGEINDEX(x) (((x) >> 8) & 0x0f)
+#define ISVISIBLE(x)         ((x)->displayed)
+#define INCLIENT(x)          ((x)->inclient)
 
 typedef VOID (*TREEVIEW_ItemEnumFunc)(TREEVIEW_INFO *, TREEVIEW_ITEM *,LPVOID);
 
@@ -86,10 +91,9 @@ static void    TREEVIEW_RefreshItem(TREEVIEW_INFO *infoPtr,TREEVIEW_ITEM *item,D
 
 static VOID    TREEVIEW_HideInfoTip(TREEVIEW_INFO *infoPtr);
 static LRESULT TREEVIEW_DoSelectItem(TREEVIEW_INFO *, INT, HTREEITEM, INT);
-static LRESULT TREEVIEW_EnsureVisible(TREEVIEW_INFO *, HTREEITEM);
+static LRESULT TREEVIEW_EnsureVisible(TREEVIEW_INFO *,HTREEITEM,BOOL);
 static LRESULT TREEVIEW_RButtonUp(TREEVIEW_INFO *, LPPOINT);
 static LRESULT TREEVIEW_EndEditLabelNow(TREEVIEW_INFO *infoPtr, BOOL bCancel);
-static VOID    TREEVIEW_UpdateScrollBars(TREEVIEW_INFO *infoPtr, BOOL);
 static VOID    TREEVIEW_CheckInfoTip(TREEVIEW_INFO *infoPtr);
 static VOID    TREEVIEW_ISearch(TREEVIEW_INFO *infoPtr,CHAR ch);
 
@@ -167,10 +171,7 @@ TREEVIEW_ItemName(TREEVIEW_ITEM *item)
     if (item == NULL) return (WCHAR*)L"<null item>";
     if (item->pszText == LPSTR_TEXTCALLBACKW) return (WCHAR*)L"<callback>";
     if (item->pszText == NULL) return (WCHAR*)L"<null>";
-    /* It would be nice to check item->callbackMask & TVIF_TEXT here,
-     * and indicate that this is a callback string, but there is nowhere
-     * to put that indication. (Or we could be clever, and put it before
-     * pszText, but that is just too hacky.) */
+
     return item->pszText;
 }
 
@@ -196,19 +197,19 @@ TREEVIEW_IsChildOf(TREEVIEW_ITEM *parent, TREEVIEW_ITEM *child)
 static TREEVIEW_ITEM *
 TREEVIEW_GetLastListItem(TREEVIEW_INFO *infoPtr, TREEVIEW_ITEM *wineItem)
 {
-    /*
-     * Get this item's last sibling
-     */
-    while (wineItem->nextSibling)
-        wineItem = wineItem->nextSibling;
+    if (!wineItem)
+       return NULL;
 
-    /*
-     * If the last sibling has expanded children, restart.
-     */
-    if ((wineItem->state & TVIS_EXPANDED) && wineItem->firstChild != NULL)
+    while (wineItem->lastChild)
     {
-        return TREEVIEW_GetLastListItem(infoPtr, wineItem->firstChild);
+       if (wineItem->state & TVIS_EXPANDED)
+          wineItem = wineItem->lastChild;
+       else
+          break;
     }
+
+    if (wineItem == infoPtr->root)
+        return NULL;
 
     return wineItem;
 }
@@ -222,23 +223,17 @@ TREEVIEW_GetPrevListItem(TREEVIEW_INFO *infoPtr, TREEVIEW_ITEM *tvItem)
 {
     if (tvItem->prevSibling)
     {
-        /*
-         * This item has a prevSibling, get the last item.  Since
-         * GetLastListItem first looks at siblings, we must feed it with the
-         * first child.
-         */
+        /* This item has a prevSibling, get the last item in the sibling's tree. */
         TREEVIEW_ITEM *upItem = tvItem->prevSibling;
 
-        if ((upItem->state & TVIS_EXPANDED) && upItem->firstChild != NULL)
-            return TREEVIEW_GetLastListItem(infoPtr, upItem->firstChild);
+        if ((upItem->state & TVIS_EXPANDED) && upItem->lastChild != NULL)
+            return TREEVIEW_GetLastListItem(infoPtr, upItem->lastChild);
         else
             return upItem;
     }
     else
     {
-        /*
-         * this item does not have a prevSibling, get the parent
-         */
+        /* this item does not have a prevSibling, get the parent */
         return (tvItem->parent != infoPtr->root) ? tvItem->parent : NULL;
     }
 }
@@ -251,7 +246,6 @@ TREEVIEW_GetPrevListItem(TREEVIEW_INFO *infoPtr, TREEVIEW_ITEM *tvItem)
 static TREEVIEW_ITEM *
 TREEVIEW_GetNextListItem(TREEVIEW_INFO *infoPtr, TREEVIEW_ITEM *tvItem)
 {
-    assert(infoPtr != NULL);
     assert(tvItem != NULL);
 
     /*
@@ -444,6 +438,7 @@ TREEVIEW_SendCustomDrawNotify(TREEVIEW_INFO *infoPtr,DWORD dwDrawStage,HDC hdc,R
 }
 
 /* FIXME: need to find out when the flags in uItemState need to be set */
+
 static BOOL
 TREEVIEW_SendCustomDrawItemNotify(TREEVIEW_INFO *infoPtr,HDC hdc,TREEVIEW_ITEM *wineItem,UINT uItemDrawState)
 {
@@ -456,12 +451,12 @@ TREEVIEW_SendCustomDrawItemNotify(TREEVIEW_INFO *infoPtr,HDC hdc,TREEVIEW_ITEM *
   dwDrawStage = CDDS_ITEM | uItemDrawState;
   dwItemSpec = (DWORD)wineItem;
   uItemState = 0;
-  if (wineItem == infoPtr->selectedItem)
+  if (wineItem->state & TVIS_SELECTED)
   {
     uItemState |= CDIS_SELECTED;
     if (GetFocus() == infoPtr->hwnd) uItemState |= CDIS_FOCUS;
   }
-  if (wineItem == infoPtr->focusItem)
+  if (wineItem == infoPtr->selectedItem)
     uItemState |= CDIS_FOCUS;
   if (wineItem == infoPtr->hotItem)
     uItemState |= CDIS_HOT;
@@ -486,18 +481,6 @@ TREEVIEW_SendCustomDrawItemNotify(TREEVIEW_INFO *infoPtr,HDC hdc,TREEVIEW_ITEM *
 }
 
 static void
-TREEVIEW_GetDispInfo(TREEVIEW_INFO *infoPtr,TREEVIEW_ITEM *wineItem,NMTVDISPINFOW* info,UINT mask)
-{
-  info->item.mask = mask;
-  info->item.hItem = wineItem;
-  info->item.state = wineItem->state;
-  info->item.stateMask = 0;
-  info->item.lParam = wineItem->lParam;
-
-  sendNotify(infoPtr->hwnd,isUnicodeNotify(&infoPtr->header) ? TVN_GETDISPINFOW:TVN_GETDISPINFOA,&info->hdr);
-}
-
-static void
 TREEVIEW_UpdateDispInfo(TREEVIEW_INFO *infoPtr,TREEVIEW_ITEM *wineItem,UINT mask)
 {
   NMTVDISPINFOW callback;
@@ -506,19 +489,25 @@ TREEVIEW_UpdateDispInfo(TREEVIEW_INFO *infoPtr,TREEVIEW_ITEM *wineItem,UINT mask
 
   if (mask == 0) return;
 
-  if ((mask & TVIF_TEXT) /*&& (wineItem->cchTextMax < TEXT_CALLBACK_SIZE)*/)
-  {
-    wineItem->pszText = (WCHAR*)COMCTL32_ReAlloc(wineItem->pszText,TEXT_CALLBACK_SIZE*sizeof(WCHAR));
-    wineItem->cchTextMax = TEXT_CALLBACK_SIZE;
-  }
+  /* 'state' always contains valid value, as well as 'lParam'.
+   * All other parameters are uninitialized.
+   */
 
   callback.item.pszText         = wineItem->pszText;
   callback.item.cchTextMax      = wineItem->cchTextMax;
+  callback.item.mask            = mask;
+  callback.item.hItem           = wineItem;
+  callback.item.state           = wineItem->state;
+  callback.item.lParam = wineItem->lParam;
+
+  /*
+  callback.item.stateMask       = 0;
   callback.item.iImage          = wineItem->iImage;
   callback.item.iSelectedImage  = wineItem->iSelectedImage;
   callback.item.cChildren       = wineItem->cChildren;
+  */
 
-  TREEVIEW_GetDispInfo(infoPtr,wineItem,&callback,mask);
+  sendNotify(infoPtr->hwnd,isUnicodeNotify(&infoPtr->header) ? TVN_GETDISPINFOW:TVN_GETDISPINFOA,&callback.hdr);
 
   /* It may have changed due to a call to SetItem. */
   mask &= wineItem->callbackMask;
@@ -542,7 +531,7 @@ TREEVIEW_UpdateDispInfo(TREEVIEW_INFO *infoPtr,TREEVIEW_ITEM *wineItem,UINT mask
 
       newText = (WCHAR*)COMCTL32_Alloc(len*sizeof(WCHAR));
       lstrcpyAtoW(newText,(LPSTR)callback.item.pszText);
-      COMCTL32_Free(wineItem->pszText);
+      if (wineItem->pszText) COMCTL32_Free(wineItem->pszText);
       wineItem->pszText = newText;
       wineItem->cchTextMax = len;
     }
@@ -594,7 +583,7 @@ static VOID
 TREEVIEW_ComputeTextWidth(TREEVIEW_INFO *infoPtr,TREEVIEW_ITEM *item,HDC hDC,BOOL useFont)
 {
     HDC hdc;
-    HFONT hOldFont;
+    HFONT hOldFont = 0;
     RECT rect;
 
     /* DRAW's OM docker creates items like this */
@@ -868,15 +857,12 @@ TREEVIEW_InsertBefore(TREEVIEW_ITEM *newItem, TREEVIEW_ITEM *sibling,
 
         newItem->prevSibling = sibling->prevSibling;
         sibling->prevSibling = newItem;
-    }
+    } else newItem->prevSibling = NULL;
 
     newItem->nextSibling = sibling;
 
     if (parent->firstChild == sibling)
-    {
-        newItem->nextSibling = parent->firstChild;
         parent->firstChild = newItem;
-    }
 
     if (parent->lastChild == NULL)
         parent->lastChild = newItem;
@@ -902,15 +888,12 @@ TREEVIEW_InsertAfter(TREEVIEW_ITEM *newItem, TREEVIEW_ITEM *sibling,
 
         newItem->nextSibling = sibling->nextSibling;
         sibling->nextSibling = newItem;
-    }
+    } else newItem->nextSibling = NULL;
 
     newItem->prevSibling = sibling;
 
     if (parent->lastChild == sibling)
-    {
-        newItem->prevSibling = parent->lastChild;
         parent->lastChild = newItem;
-    }
 
     if (parent->firstChild == NULL)
         parent->firstChild = newItem;
@@ -1014,7 +997,7 @@ TREEVIEW_DoSetItem(TREEVIEW_INFO *infoPtr,TREEVIEW_ITEM *wineItem,const TVITEMEX
     if (changed && (wineItem->iSelectedImage != tvItem->iSelectedImage)) *changed |= TVIF_SELECTEDIMAGE;
     wineItem->iSelectedImage = tvItem->iSelectedImage;
 
-    if (wineItem->iImage == I_IMAGECALLBACK)
+    if (wineItem->iSelectedImage == I_IMAGECALLBACK)
       callbackSet |= TVIF_SELECTEDIMAGE;
     else
       callbackClear |= TVIF_SELECTEDIMAGE;
@@ -1058,6 +1041,7 @@ TREEVIEW_InsertItem(TREEVIEW_INFO *infoPtr,WPARAM wParam,LPARAM lParam,BOOL unic
   HTREEITEM insertAfter;
   INT x;
   TREEVIEW_ITEM *newItem, *parentItem;
+  BOOL bTextUpdated = FALSE;
 
   if (!ptdi) return NULL;
   tvItem = &ptdi->itemex;
@@ -1130,6 +1114,7 @@ TREEVIEW_InsertItem(TREEVIEW_INFO *infoPtr,WPARAM wParam,LPARAM lParam,BOOL unic
 
     aChild = parentItem->firstChild;
 
+    bTextUpdated = TRUE;
     TREEVIEW_UpdateDispInfo(infoPtr, newItem, TVIF_TEXT);
 
     /* Iterate the parent children to see where we fit in */
@@ -1149,8 +1134,10 @@ TREEVIEW_InsertItem(TREEVIEW_INFO *infoPtr,WPARAM wParam,LPARAM lParam,BOOL unic
       else if (comp > 0)        /* we are bigger than the current one */
       {
         previousChild = aChild;
-        aChild = (aChild->nextSibling == 0)     /* This will help us to exit   */
-                  ? NULL        /* if there is no more sibling */
+
+         /* This will help us to exit if there is no more sibling */
+        aChild = (aChild->nextSibling == 0)
+                  ? NULL
                   : aChild->nextSibling;
 
         /* Look at the next item */
@@ -1253,8 +1240,6 @@ TREEVIEW_UnlinkItem(TREEVIEW_ITEM *item)
 static void
 TREEVIEW_RemoveItem(TREEVIEW_INFO *infoPtr, TREEVIEW_ITEM *wineItem)
 {
-    TREEVIEW_ITEM *newFirstVisible;
-
     //TRACE("%p, (%s)\n", wineItem, TREEVIEW_ItemName(wineItem));
 
     TREEVIEW_SendTreeviewNotify(infoPtr,isUnicodeNotify(&infoPtr->header) ? TVN_DELETEITEMW:TVN_DELETEITEMA,TVIF_HANDLE | TVIF_PARAM,0,wineItem,0);
@@ -1294,10 +1279,15 @@ TREEVIEW_DeleteItem(TREEVIEW_INFO *infoPtr, WPARAM wParam, LPARAM lParam)
 {
     TREEVIEW_ITEM *oldSelection = infoPtr->selectedItem;
     TREEVIEW_ITEM *newSelection = NULL;
+    TREEVIEW_ITEM *newFirstVisible = NULL;
+    TREEVIEW_ITEM *parent, *prev = NULL;
+    BOOL visible = FALSE;
 
     if (lParam == (LPARAM)TVI_ROOT)
     {
+	parent = infoPtr->root;
         newSelection = NULL;
+	visible = TRUE;
         TREEVIEW_RemoveTree(infoPtr);
     }
     else
@@ -1308,6 +1298,13 @@ TREEVIEW_DeleteItem(TREEVIEW_INFO *infoPtr, WPARAM wParam, LPARAM lParam)
             return FALSE;
 
         //TRACE("%p (%s)\n", wineItem, TREEVIEW_ItemName(wineItem));
+	parent = wineItem->parent;
+
+        if (ISVISIBLE(wineItem))
+        {
+            prev = TREEVIEW_GetPrevListItem(infoPtr, wineItem);
+            visible = TRUE;
+        }
 
         if (infoPtr->selectedItem != NULL
             && (wineItem == infoPtr->selectedItem
@@ -1319,19 +1316,48 @@ TREEVIEW_DeleteItem(TREEVIEW_INFO *infoPtr, WPARAM wParam, LPARAM lParam)
                 newSelection = wineItem->parent;
         }
 
+	if (infoPtr->firstVisible == wineItem)
+	{
+	    if (wineItem->nextSibling)
+	       newFirstVisible = wineItem->nextSibling;
+	    else if (wineItem->prevSibling)
+	       newFirstVisible = wineItem->prevSibling;
+	    else if (wineItem->parent != infoPtr->root)
+	       newFirstVisible = wineItem->parent;
+	}
+	else
+	    newFirstVisible = infoPtr->firstVisible;
+
         TREEVIEW_RemoveItem(infoPtr, wineItem);
     }
 
     /* Don't change if somebody else already has. */
-    if (oldSelection == infoPtr->selectedItem
-        && TREEVIEW_ValidItem(infoPtr, newSelection))
+    if (oldSelection == infoPtr->selectedItem)
     {
+      if (TREEVIEW_ValidItem(infoPtr, newSelection))
         TREEVIEW_DoSelectItem(infoPtr, TVGN_CARET, newSelection, TVC_UNKNOWN);
+      else
+        infoPtr->selectedItem = 0;
     }
+
+    /* Validate insertMark dropItem.
+     * hotItem ??? - used for comparision only.
+     */
+    if (!TREEVIEW_ValidItem(infoPtr, infoPtr->insertMarkItem))
+	infoPtr->insertMarkItem = 0;
+
+    if (!TREEVIEW_ValidItem(infoPtr, infoPtr->dropItem))
+	infoPtr->dropItem = 0;
+
+    if (!TREEVIEW_ValidItem(infoPtr, newFirstVisible))
+        newFirstVisible = infoPtr->root->firstChild;
 
     TREEVIEW_VerifyTree(infoPtr);
 
-    TREEVIEW_QueueRefresh(infoPtr);
+    if (visible)
+      TREEVIEW_QueueRefresh(infoPtr);
+    else if (INCLIENT(parent) && !TREEVIEW_HasChildren(infoPtr,parent))
+      TREEVIEW_RefreshItem(infoPtr,parent,TVIF_CHILDREN);
 
     return TRUE;
 }
@@ -1419,6 +1445,8 @@ TREEVIEW_SetImageList(TREEVIEW_INFO *infoPtr, WPARAM wParam, LPARAM lParam)
 {
     HIMAGELIST himlNew = (HIMAGELIST)lParam;
     HIMAGELIST himlOld = 0;
+    int oldWidth  = infoPtr->normalImageWidth;
+    int oldHeight = infoPtr->normalImageHeight;
 
     switch (wParam)
     {
@@ -1453,7 +1481,8 @@ TREEVIEW_SetImageList(TREEVIEW_INFO *infoPtr, WPARAM wParam, LPARAM lParam)
         break;
     }
 
-    infoPtr->uInternalStatus |= TV_CALCALL;
+    if ((oldWidth != infoPtr->normalImageWidth) || (oldHeight != infoPtr->normalImageHeight))
+      infoPtr->uInternalStatus |= TV_CALCALL;
     TREEVIEW_QueueRefresh(infoPtr);
 
     return (LRESULT)himlOld;
@@ -1525,17 +1554,23 @@ TREEVIEW_GetFont(TREEVIEW_INFO *infoPtr, WPARAM wParam, LPARAM lParam)
 static LRESULT
 TREEVIEW_SetFont(TREEVIEW_INFO *infoPtr, WPARAM wParam, LPARAM lParam)
 {
+  UINT uHeight = infoPtr->uItemHeight;
+
   infoPtr->hFont = wParam ? (HFONT)wParam : GetStockObject(SYSTEM_FONT);
 
   DeleteObject(infoPtr->hBoldFont);
   infoPtr->hBoldFont = TREEVIEW_CreateBoldFont(infoPtr->hFont);
 
   if (!infoPtr->bHeightSet)
-      infoPtr->uItemHeight = TREEVIEW_NaturalHeight(infoPtr);
+    infoPtr->uItemHeight = TREEVIEW_NaturalHeight(infoPtr);
 
   SendMessageA(infoPtr->hwndToolTip,WM_SETFONT,infoPtr->hFont,1);
-  infoPtr->uInternalStatus |= TV_CALCALL;
-  TREEVIEW_CalcItems(infoPtr);
+
+  if (uHeight != infoPtr->uItemHeight)
+  {
+    infoPtr->uInternalStatus |= TV_CALCALL;
+    TREEVIEW_CalcItems(infoPtr);
+  }
 
   if (lParam)
   {
@@ -1645,13 +1680,13 @@ static LRESULT
 TREEVIEW_GetItemRect(TREEVIEW_INFO *infoPtr, WPARAM wParam, LPARAM lParam)
 {
     TREEVIEW_ITEM *wineItem;
-    const HTREEITEM *pItem = (HTREEITEM *)lParam;
+    const HTREEITEM *pItem = (HTREEITEM*)lParam;
     LPRECT lpRect = (LPRECT)lParam;
 
     /*
      * validate parameters
      */
-    if ((pItem == NULL) || (lpRect == NULL))
+    if (pItem == NULL)
         return FALSE;
 
     TREEVIEW_UnqueueRefresh(infoPtr,TRUE,TRUE);
@@ -1820,6 +1855,10 @@ TREEVIEW_GetNextItem(TREEVIEW_INFO *infoPtr, WPARAM wParam, LPARAM lParam)
       case TVGN_DROPHILITE:
         retval = infoPtr->dropItem;
         break;
+
+      case TVGN_LASTVISIBLE:
+        retval = TREEVIEW_GetLastListItem(infoPtr,infoPtr->root);
+        break;
     }
 
     if (retval)
@@ -1847,10 +1886,6 @@ TREEVIEW_GetNextItem(TREEVIEW_INFO *infoPtr, WPARAM wParam, LPARAM lParam)
 
       case TVGN_CHILD:
         retval = wineItem->firstChild;
-        break;
-
-      case TVGN_LASTVISIBLE:
-        retval = TREEVIEW_GetLastListItem(infoPtr, wineItem);
         break;
 
       case TVGN_NEXTVISIBLE:
@@ -1980,11 +2015,16 @@ TREEVIEW_DrawItemLines(TREEVIEW_INFO *infoPtr, HDC hdc, TREEVIEW_ITEM *item)
             /* plussize = ceil(rectsize * 3/4) */
             LONG plussize = (rectsize + 1) * 3 / 4;
 
-            HPEN hNewPen = CreatePen(PS_SOLID, 0, infoPtr->clrLine);
-            HPEN hOldPen = SelectObject(hdc, hNewPen);
+	    HPEN hNewPen  = CreatePen(PS_SOLID, 0, infoPtr->clrLine);
+	    HPEN hOldPen  = SelectObject(hdc, hNewPen);
+	    HBRUSH hbr    = CreateSolidBrush(infoPtr->clrBk);
+	    HBRUSH hbrOld = SelectObject(hdc, hbr);
 
             Rectangle(hdc, centerx - rectsize, centery - rectsize,
                       centerx + rectsize + 1, centery + rectsize + 1);
+
+	    SelectObject(hdc, hbrOld);
+	    DeleteObject(hbr);
 
             SelectObject(hdc, hOldPen);
             DeleteObject(hNewPen);
@@ -2070,7 +2110,7 @@ TREEVIEW_DrawItem(TREEVIEW_INFO *infoPtr, HDC hdc, TREEVIEW_ITEM *wineItem)
 
         if (infoPtr->himlState && imageIndex)
         {
-            ImageList_Draw(infoPtr->himlState, imageIndex - 1, hdc,
+            ImageList_Draw(infoPtr->himlState, imageIndex, hdc,
                            wineItem->stateOffset,
                            centery - infoPtr->stateImageHeight / 2,
                            ILD_NORMAL);
@@ -2168,7 +2208,7 @@ TREEVIEW_DrawItem(TREEVIEW_INFO *infoPtr, HDC hdc, TREEVIEW_ITEM *wineItem)
             }
 
             /* Draw the box arround the selected item */
-            if ((wineItem->state & TVIS_SELECTED) && inFocus)
+            if ((wineItem == infoPtr->selectedItem) && inFocus)
             {
                 HPEN hNewPen = CreatePen(PS_DOT, 0,
                                          GetSysColor(COLOR_WINDOWTEXT));
@@ -2482,12 +2522,12 @@ TREEVIEW_Sort(TREEVIEW_INFO *infoPtr, BOOL fRecurse, HTREEITEM parent,
 
     if (pSort)
     {
-        pfnCompare = TREEVIEW_CallBackCompare;
+        pfnCompare = (PFNDPACOMPARE)TREEVIEW_CallBackCompare;
         lpCompare = (LPARAM)pSort;
     }
     else
     {
-        pfnCompare = TREEVIEW_SortOnName;
+        pfnCompare = (PFNDPACOMPARE)TREEVIEW_SortOnName;
         lpCompare = (LPARAM)infoPtr;
     }
 
@@ -2650,7 +2690,7 @@ TREEVIEW_Collapse(TREEVIEW_INFO *infoPtr, TREEVIEW_ITEM *wineItem,
         wineItem->state |= TVIS_SELECTED;
         infoPtr->selectedItem = wineItem;
 
-        TREEVIEW_EnsureVisible(infoPtr, wineItem);
+        TREEVIEW_EnsureVisible(infoPtr,wineItem,TRUE);
     }
 
     return TRUE;
@@ -2688,11 +2728,9 @@ return FALSE; //CB: how does this work??? (only display one level? nonsense in M
             return FALSE;
         }
 
-        wineItem->state |= TVIS_EXPANDEDONCE;
-
         TREEVIEW_SendExpanded(infoPtr, wineItem, TVE_EXPAND);
 
-        //TRACE("  TVN_ITEMEXPANDED sent...\n");
+        wineItem->state |= TVIS_EXPANDEDONCE;
     }
     else
     {
@@ -2812,7 +2850,8 @@ TREEVIEW_HitTest(TREEVIEW_INFO *infoPtr,LPTVHITTESTINFO lpht,BOOL ignoreClientRe
 {
     TREEVIEW_ITEM *wineItem;
     RECT rect;
-    UINT status, x, y;
+    UINT status;
+    LONG x, y;
 
     if (!lpht) return 0;
 
@@ -3044,7 +3083,8 @@ HWND TREEVIEW_EditLabel(TREEVIEW_INFO *infoPtr,HTREEITEM hItem,BOOL unicode)
 
   /* Make shure that edit item is selected */
 
-  TREEVIEW_DoSelectItem ( infoPtr, TVGN_CARET, hItem, TVC_UNKNOWN);
+  TREEVIEW_DoSelectItem(infoPtr,TVGN_CARET,hItem,TVC_UNKNOWN);
+  TREEVIEW_EnsureVisible(infoPtr,hItem,TRUE);
 
   TREEVIEW_UpdateDispInfo(infoPtr, editItem, TVIF_TEXT);
 
@@ -3278,8 +3318,8 @@ TREEVIEW_TrackMouse(TREEVIEW_INFO *infoPtr, POINT pt)
         {
             if (msg.message == WM_MOUSEMOVE)
             {
-                pt.x = (INT)LOWORD(msg.lParam);
-                pt.y = (INT)HIWORD(msg.lParam);
+                pt.x = (LONG)(INT16)LOWORD(msg.lParam);
+                pt.y = (LONG)(INT16)HIWORD(msg.lParam);
                 if (PtInRect(&r, pt))
                     continue;
                 else
@@ -3313,8 +3353,9 @@ TREEVIEW_LButtonDoubleClick(TREEVIEW_INFO *infoPtr, WPARAM wParam, LPARAM lParam
   TREEVIEW_ITEM *wineItem;
   TV_HITTESTINFO hit;
 
-  hit.pt.x = (INT)LOWORD(lParam);
-  hit.pt.y = (INT)HIWORD(lParam);
+  hit.pt.x = (LONG)(INT16)LOWORD(lParam);
+  hit.pt.y = (LONG)(INT16)HIWORD(lParam);
+
   SetFocus (infoPtr->hwnd);
 
   if (infoPtr->Timer & TV_EDIT_TIMER_SET)
@@ -3356,9 +3397,15 @@ TREEVIEW_LButtonDoubleClick(TREEVIEW_INFO *infoPtr, WPARAM wParam, LPARAM lParam
 
       case TVHT_ONITEMLABEL:
       case TVHT_ONITEMICON:
-      case TVHT_ONITEMSTATEICON:
       case TVHT_ONITEMBUTTON:
         TREEVIEW_Toggle(infoPtr, wineItem, TRUE);
+        break;
+
+      case TVHT_ONITEMSTATEICON:
+        if (infoPtr->dwStyle & TVS_CHECKBOXES)
+          TREEVIEW_ToggleItemState(infoPtr, wineItem);
+        else
+          TREEVIEW_Toggle(infoPtr, wineItem, TRUE);
         break;
     }
  }
@@ -3383,8 +3430,8 @@ TREEVIEW_LButtonDown(TREEVIEW_INFO *infoPtr, WPARAM wParam, LPARAM lParam)
      return 0;
   }
 
-  ht.pt.x = (INT)LOWORD(lParam);
-  ht.pt.y = (INT)HIWORD(lParam);
+  ht.pt.x = (LONG)(INT16)LOWORD(lParam);
+  ht.pt.y = (LONG)(INT16)HIWORD(lParam);
 
   TREEVIEW_HitTest(infoPtr,&ht,FALSE);
 
@@ -3453,8 +3500,8 @@ TREEVIEW_RButtonDown(TREEVIEW_INFO *infoPtr, WPARAM wParam, LPARAM lParam)
       return 0;
    }
 
-   ht.pt.x = (INT)LOWORD(lParam);
-   ht.pt.y = (INT)HIWORD(lParam);
+   ht.pt.x = (LONG)(INT16)LOWORD(lParam);
+   ht.pt.y = (LONG)(INT16)HIWORD(lParam);
 
    TREEVIEW_HitTest(infoPtr,&ht,FALSE);
 
@@ -3588,7 +3635,7 @@ TREEVIEW_DoSelectItem(TREEVIEW_INFO *infoPtr, INT action, HTREEITEM newSelect,
                                       TVIF_HANDLE | TVIF_STATE | TVIF_PARAM,
                                       prevSelect,
                                       newSelect))
-        return FALSE;       /* FIXME: OK? */
+        return FALSE;
 
       if (prevSelect)
       {
@@ -3616,7 +3663,7 @@ TREEVIEW_DoSelectItem(TREEVIEW_INFO *infoPtr, INT action, HTREEITEM newSelect,
       }
 
       TREEVIEW_UnqueueRefresh(infoPtr,TRUE,TRUE);
-      TREEVIEW_EnsureVisible(infoPtr,infoPtr->selectedItem);
+      TREEVIEW_EnsureVisible(infoPtr,infoPtr->selectedItem,FALSE);
       if (infoPtr->dwStyle & TVS_FULLROWSELECT)
       {
         TREEVIEW_ITEM *item;
@@ -3774,10 +3821,10 @@ TREEVIEW_SelectItem(TREEVIEW_INFO *infoPtr, WPARAM wParam, LPARAM lParam)
 
 /* Scrolling ************************************************************/
 
-static LRESULT TREEVIEW_EnsureVisible(TREEVIEW_INFO *infoPtr,HTREEITEM item)
+static LRESULT TREEVIEW_EnsureVisible(TREEVIEW_INFO *infoPtr,HTREEITEM item,BOOL bHScroll)
 {
   RECT rect;
-  INT scrollY;
+  INT scrollY = 0,scrollX = 0;
 
   if (!item) return FALSE;
 
@@ -3806,13 +3853,27 @@ static LRESULT TREEVIEW_EnsureVisible(TREEVIEW_INFO *infoPtr,HTREEITEM item)
     scrollY = item->rect.bottom-rect.bottom;
     mod = scrollY % infoPtr->uItemHeight;
     if (mod) scrollY += infoPtr->uItemHeight-mod;
-  } else return FALSE;
+  }
 
-  if (scrollY != 0)
+  if (bHScroll)
+  {
+    if (!item->calculated) TREEVIEW_CalcItem(infoPtr,item,0);
+
+    if (item->textOffset < rect.left)
+      scrollX = item->textOffset-rect.left;
+    else if (item->textOffset+item->textWidth > rect.right)
+    {
+      scrollX = item->textOffset+item->textWidth-rect.right;
+      if (scrollX > item->textOffset-rect.left) scrollX = item->textOffset-rect.left;
+    }
+  }
+
+  if ((scrollY != 0) || (scrollX != 0))
   {
     infoPtr->lefttop.y += scrollY;
+    infoPtr->lefttop.x += scrollX;
     TREEVIEW_CalcItems(infoPtr);
-    ScrollWindowEx(infoPtr->hwnd,0,-scrollY,NULL,NULL,0,NULL,SW_INVALIDATE | SW_SCROLLCHILDREN | (infoPtr->uScrollTime << 16));
+    ScrollWindowEx(infoPtr->hwnd,-scrollX,-scrollY,NULL,NULL,0,NULL,SW_INVALIDATE | SW_SCROLLCHILDREN | (infoPtr->uScrollTime << 16));
 
     return TRUE;
   }
@@ -4072,15 +4133,36 @@ TREEVIEW_Create (HWND hwnd, WPARAM wParam, LPARAM lParam)
 
   if (infoPtr->dwStyle & TVS_CHECKBOXES)
   {
-    HBITMAP hbmLoad;
+    RECT rc;
+    HBITMAP hbm, hbmOld;
+    HDC hdc;
     int nIndex;
 
-    infoPtr->himlState = ImageList_Create (16, 16,ILC_COLOR | ILC_MASK, 15, 1);
+    infoPtr->himlState = ImageList_Create(16,16,ILC_COLOR | ILC_MASK,3,0);
 
-    //MSDN docu says: uses DrawFrameControl but never believe what they write
-    hbmLoad = LoadBitmapA (COMCTL32_hModule, MAKEINTRESOURCEA(IDT_CHECK));
-    nIndex = ImageList_AddMasked (infoPtr->himlState, hbmLoad, CLR_DEFAULT);
-    DeleteObject (hbmLoad);
+    hdc = CreateCompatibleDC(0);
+    hbm = CreateCompatibleBitmap(hdc, 48, 16);
+    hbmOld = SelectObject(hdc, hbm);
+
+    rc.left  = 0;   rc.top    = 0;
+    rc.right = 48;  rc.bottom = 16;
+    FillRect(hdc, &rc, (HBRUSH)(COLOR_WINDOW+1));
+
+    rc.left  = 18;   rc.top    = 2;
+    rc.right = 30;   rc.bottom = 14;
+    DrawFrameControl(hdc, &rc, DFC_BUTTON,
+                     DFCS_BUTTONCHECK|DFCS_FLAT);
+
+    rc.left  = 34;   rc.right  = 46;
+    DrawFrameControl(hdc, &rc, DFC_BUTTON,
+                     DFCS_BUTTONCHECK|DFCS_FLAT|DFCS_CHECKED);
+
+    nIndex = ImageList_AddMasked(infoPtr->himlState, hbm,
+                                 GetSysColor(COLOR_WINDOW));
+    //TRACE("chckbox index %d\n", nIndex);
+    SelectObject(hdc, hbmOld);
+    DeleteObject(hbm);
+    DeleteDC(hdc);
 
     infoPtr->stateImageWidth = 16;
     infoPtr->stateImageHeight = 16;
@@ -4196,8 +4278,7 @@ TREEVIEW_KeyDown(TREEVIEW_INFO *infoPtr, WPARAM wParam, LPARAM lParam)
         break;
 
     case VK_END:
-        newSelection = TREEVIEW_GetLastListItem(infoPtr,
-                                                infoPtr->root->lastChild);
+        newSelection = TREEVIEW_GetLastListItem(infoPtr,infoPtr->root);
         break;
 
     case VK_LEFT:
@@ -4270,7 +4351,7 @@ TREEVIEW_KeyDown(TREEVIEW_INFO *infoPtr, WPARAM wParam, LPARAM lParam)
   {
     if (TREEVIEW_DoSelectItem(infoPtr,TVGN_CARET,newSelection,TVC_BYKEYBOARD))
     {
-      TREEVIEW_EnsureVisible(infoPtr, newSelection);
+      TREEVIEW_EnsureVisible(infoPtr,newSelection,FALSE);
     }
   }
 
@@ -4292,12 +4373,28 @@ TREEVIEW_Size(TREEVIEW_INFO *infoPtr, WPARAM wParam, LPARAM lParam)
 }
 
 static LRESULT
-TREEVIEW_StyleChanged(TREEVIEW_INFO *infoPtr, WPARAM wParam, LPARAM lParam)
+TREEVIEW_StyleChanged(TREEVIEW_INFO *infoPtr,WPARAM wParam,LPARAM lParam)
 {
-  //TRACE("(%x %lx)\n", wParam, lParam);
-
   if (wParam == GWL_STYLE)
-    infoPtr->dwStyle = ((LPSTYLESTRUCT)lParam)->styleNew;
+  {
+    DWORD dwNewStyle = ((LPSTYLESTRUCT)lParam)->styleNew;
+
+    /* we have to take special care about tooltips */
+    if ((infoPtr->dwStyle ^ dwNewStyle) & TVS_NOTOOLTIPS)
+    {
+      if (infoPtr->dwStyle & TVS_NOTOOLTIPS)
+      {
+        infoPtr->hwndToolTip = createToolTip(infoPtr->hwnd,TTF_TRACK | TTF_ABSOLUTE | TTF_TRANSPARENT,TRUE);
+        SendMessageA(infoPtr->hwndToolTip,WM_SETFONT,infoPtr->hFont,0);
+      } else
+      {
+        DestroyWindow(infoPtr->hwndToolTip);
+        infoPtr->hwndToolTip = 0;
+      }
+    }
+
+    infoPtr->dwStyle = dwNewStyle;
+  }
 
   if (infoPtr->hwndEdit) SetFocus(infoPtr->hwnd);
 
@@ -4713,7 +4810,7 @@ static VOID TREEVIEW_ISearch(TREEVIEW_INFO *infoPtr,CHAR ch)
   if (!item && nearest)
   {
     TREEVIEW_SelectItem(infoPtr,(WPARAM)TVGN_CARET,(LPARAM)nearest);
-    TREEVIEW_EnsureVisible(infoPtr,nearest);
+    TREEVIEW_EnsureVisible(infoPtr,nearest,FALSE);
     infoPtr->dwISearchTime = GetTickCount();
 
     COMCTL32_Free(newString);
@@ -4728,7 +4825,7 @@ ISearchDone:
     infoPtr->pszISearch = newString;
     infoPtr->uISearchLen = len;
     TREEVIEW_SelectItem(infoPtr,(WPARAM)TVGN_CARET,(LPARAM)item);
-    TREEVIEW_EnsureVisible(infoPtr,item);
+    TREEVIEW_EnsureVisible(infoPtr,item,FALSE);
     infoPtr->dwISearchTime = GetTickCount();
   } else
   {
@@ -4854,7 +4951,7 @@ TREEVIEW_WindowProc (HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
           return TREEVIEW_SortChildren(infoPtr, wParam, lParam);
 
         case TVM_ENSUREVISIBLE:
-          return TREEVIEW_EnsureVisible(infoPtr,(HTREEITEM)lParam);
+          return TREEVIEW_EnsureVisible(infoPtr,(HTREEITEM)lParam,TRUE);
 
         case TVM_SORTCHILDRENCB:
           return TREEVIEW_SortChildrenCB(infoPtr, wParam, lParam);

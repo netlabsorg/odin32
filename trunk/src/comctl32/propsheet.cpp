@@ -1,11 +1,11 @@
-/* $Id: propsheet.cpp,v 1.6 2000-08-11 10:56:12 sandervl Exp $ */
+/* $Id: propsheet.cpp,v 1.7 2000-08-13 17:12:39 cbratschi Exp $ */
 /*
  * Property Sheets
  *
  * Copyright 1998 Francis Beaudet
  * Copyright 1999 Thuy Nguyen
  * Copyright 1999 Achim Hasenmueller
- * Copyright 1999 Christoph Bratschi
+ * Copyright 1999-2000 Christoph Bratschi
  *
  * TODO:
  *   - Tab order
@@ -13,7 +13,7 @@
  */
 
 /*
- - Corel WINE 20000513 level
+ - Corel WINE 20000807 level
  - (WINE 991212 level)
 */
 
@@ -104,11 +104,11 @@ static BOOL PROPSHEET_CreateTabControl(HWND hwndParent,
 static int PROPSHEET_CreatePage(HWND hwndParent, int index,
                                 const PropSheetInfo * psInfo,
                                 LPPROPSHEETPAGEA ppshpage);
-static BOOL PROPSHEET_ShowPage(HWND hwndDlg, int index, PropSheetInfo * psInfo);
+static int  PROPSHEET_ShowPage(HWND hwndDlg, int index, PropSheetInfo * psInfo);
 static PADDING_INFO PROPSHEET_GetPaddingInfo(HWND hwndDlg);
-static BOOL PROPSHEET_Back(HWND hwndDlg);
-static BOOL PROPSHEET_Next(HWND hwndDlg);
-static BOOL PROPSHEET_Finish(HWND hwndDlg);
+static void PROPSHEET_Back(HWND hwndDlg);
+static void PROPSHEET_Next(HWND hwndDlg);
+static void PROPSHEET_Finish(HWND hwndDlg);
 static BOOL PROPSHEET_Apply(HWND hwndDlg, LPARAM lParam);
 static void PROPSHEET_Cancel(HWND hwndDlg, LPARAM lParam);
 static void PROPSHEET_Help(HWND hwndDlg);
@@ -181,6 +181,27 @@ static BOOL PROPSHEET_CollectSheetInfo(LPCPROPSHEETHEADERA lppsh,
   psInfo->activeValid = FALSE;
 
   return TRUE;
+}
+
+/******************************************************************************
+ *            PROPSHEET_FindPageByResId
+ *
+ * Find page index corresponding to page resource id.
+ */
+INT PROPSHEET_FindPageByResId(PropSheetInfo * psInfo, LRESULT resId)
+{
+   INT i;
+
+   for (i = 0; i < psInfo->nPages; i++)
+   {
+      LPCPROPSHEETPAGEA lppsp = (LPCPROPSHEETPAGEA)psInfo->proppage[i].hpage;
+
+      /* Fixme: if resource ID is a string shall we use strcmp ??? */
+      if (lppsp->pszTemplate == (LPVOID)resId)
+         break;
+   }
+
+   return i;
 }
 
 /******************************************************************************
@@ -1003,7 +1024,7 @@ static int PROPSHEET_CreatePage(HWND hwndParent,
 
   PropPageInfo* ppInfo = psInfo->proppage;
 
-//  TRACE("index %d\n", index);
+  //TRACE("index %d\n", index);
 
   //AH: Check if ppshpage is valid
   if (ppshpage == NULL)
@@ -1039,6 +1060,7 @@ static int PROPSHEET_CreatePage(HWND hwndParent,
     ((MyDLGTEMPLATEEX*)pTemplate)->style &= ~WS_POPUP;
     ((MyDLGTEMPLATEEX*)pTemplate)->style &= ~WS_DISABLED;
     ((MyDLGTEMPLATEEX*)pTemplate)->style &= ~WS_VISIBLE;
+    ((MyDLGTEMPLATEEX*)pTemplate)->style &= ~WS_THICKFRAME;
   }
   else
   {
@@ -1049,6 +1071,7 @@ static int PROPSHEET_CreatePage(HWND hwndParent,
     pTemplate->style &= ~WS_POPUP;
     pTemplate->style &= ~WS_DISABLED;
     pTemplate->style &= ~WS_VISIBLE;
+    pTemplate->style &= ~WS_THICKFRAME;
   }
 
   if (psInfo->proppage[index].useCallback)
@@ -1067,80 +1090,28 @@ static int PROPSHEET_CreatePage(HWND hwndParent,
   return TRUE;
 }
 
-#if 0
 /******************************************************************************
  *            PROPSHEET_ShowPage
  *
  * Displays or creates the specified page.
- */
-static BOOL PROPSHEET_ShowPage(HWND hwndDlg, int index, PropSheetInfo * psInfo)
-{
-  if (index == psInfo->active_page)
-    {
-      if (GetTopWindow(hwndDlg) != psInfo->proppage[index].hwndPage)
-          SetWindowPos(psInfo->proppage[index].hwndPage, HWND_TOP, 0, 0, 0, 0, SWP_NOSIZE | SWP_NOMOVE);
-    return TRUE;
-    }
-
-  if (psInfo->proppage[index].hwndPage == 0)
-  {
-     LPCPROPSHEETPAGEA ppshpage;
-     PSHNOTIFY psn;
-
-     ppshpage = (LPCPROPSHEETPAGEA)psInfo->proppage[index].hpage;
-     PROPSHEET_CreatePage(hwndDlg, index, psInfo, (PROPSHEETPAGEA*)ppshpage);
-
-     psn.hdr.hwndFrom = hwndDlg;
-     psn.hdr.code     = PSN_SETACTIVE;
-     psn.hdr.idFrom   = 0;
-     psn.lParam       = 0;
-
-     /* Send the notification before showing the page. */
-     SendMessageA(psInfo->proppage[index].hwndPage,
-                  WM_NOTIFY, 0, (LPARAM) &psn);
-
-     /*
-      * TODO: check return value. 
-      */
-  }
-
-  if (psInfo->active_page != -1)
-     ShowWindow(psInfo->proppage[psInfo->active_page].hwndPage, SW_HIDE);
-
-  ShowWindow(psInfo->proppage[index].hwndPage, SW_SHOW);
-
-  if (!(psInfo->ppshheader->dwFlags & PSH_WIZARD))
-  {
-     HWND hwndTabCtrl;
-
-     /* Synchronize current selection with tab control */
-     hwndTabCtrl = GetDlgItem(hwndDlg, IDC_TABCONTROL);
-     SendMessageA(hwndTabCtrl, TCM_SETCURSEL, index, 0);
-  }
-
-  psInfo->active_page = index;
-  psInfo->activeValid = TRUE;
-
-  return TRUE;
-}
-#else
-/******************************************************************************
- *            PROPSHEET_ShowPage
  *
- * Displays or creates the specified page.
+ * Returns: 1 - specified page is activated.
+ *          0 - function fails
+ *         -1 - some other page is activated
  */
-static BOOL PROPSHEET_ShowPage(HWND hwndDlg, int index, PropSheetInfo * psInfo)
+static int PROPSHEET_ShowPage(HWND hwndDlg, int index, PropSheetInfo * psInfo)
 {
   RECT rc;
   PADDING_INFO padding;
   UINT pageWidth,pageHeight;
 
   if (index == psInfo->active_page)
-    {
-      if (GetTopWindow(hwndDlg) != psInfo->proppage[index].hwndPage)
-          SetWindowPos(psInfo->proppage[index].hwndPage, HWND_TOP, 0, 0, 0, 0, SWP_NOSIZE | SWP_NOMOVE);
-    return TRUE;
-    }
+  {
+    if (GetTopWindow(hwndDlg) != psInfo->proppage[index].hwndPage)
+        SetWindowPos(psInfo->proppage[index].hwndPage, HWND_TOP, 0, 0, 0, 0, SWP_NOSIZE | SWP_NOMOVE);
+
+    return 1;
+  }
 
   if (psInfo->active_page != -1)
      ShowWindow(psInfo->proppage[psInfo->active_page].hwndPage, SW_HIDE);
@@ -1149,9 +1120,13 @@ static BOOL PROPSHEET_ShowPage(HWND hwndDlg, int index, PropSheetInfo * psInfo)
   {
      LPCPROPSHEETPAGEA ppshpage;
      PSHNOTIFY psn;
+     LRESULT ret;
 
      ppshpage = (LPCPROPSHEETPAGEA)psInfo->proppage[index].hpage;
      PROPSHEET_CreatePage(hwndDlg, index, psInfo, (PROPSHEETPAGEA*)ppshpage);
+
+     if (psInfo->proppage[index].hwndPage == 0)
+        return 0;
 
      psn.hdr.hwndFrom = hwndDlg;
      psn.hdr.code     = PSN_SETACTIVE;
@@ -1159,12 +1134,24 @@ static BOOL PROPSHEET_ShowPage(HWND hwndDlg, int index, PropSheetInfo * psInfo)
      psn.lParam       = 0;
 
      /* Send the notification before showing the page. */
-     SendMessageA(psInfo->proppage[index].hwndPage,
+     ret = SendMessageA(psInfo->proppage[index].hwndPage,
                   WM_NOTIFY, 0, (LPARAM) &psn);
 
-     /*
-      * TODO: check return value.
-      */
+     if (ret)
+     {
+        /* User doesn't accept new selection - find desired page and reselect */
+        if (ret == -1)
+        {
+           if (index > psInfo->active_page)
+              index++;
+           else
+              index--;
+        }
+        else
+           index = PROPSHEET_FindPageByResId(psInfo, ret);
+
+        return PROPSHEET_SetCurSel(hwndDlg, index, 0) ? -1 : 0;
+     }
   }
 
   if (psInfo->active_page != -1)
@@ -1173,8 +1160,8 @@ static BOOL PROPSHEET_ShowPage(HWND hwndDlg, int index, PropSheetInfo * psInfo)
   }
 
   /* HACK: Sometimes a property page doesn't get displayed at the right place inside the
-   *	   property sheet. This will force the window to be placed at the proper location
-   *	   before it is displayed.
+   *       property sheet. This will force the window to be placed at the proper location
+   *       before it is displayed.
    */
   rc.left = psInfo->x;
   rc.top = psInfo->y;
@@ -1200,9 +1187,9 @@ static BOOL PROPSHEET_ShowPage(HWND hwndDlg, int index, PropSheetInfo * psInfo)
   }
 
   SetWindowPos(psInfo->proppage[index].hwndPage, HWND_TOP,
-     	       rc.left + padding.x,
-     	       rc.top + padding.y,
-     	       pageWidth, pageHeight, SWP_SHOWWINDOW);
+               rc.left + padding.x,
+               rc.top + padding.y,
+               pageWidth, pageHeight, SWP_SHOWWINDOW);
 
   if (!(psInfo->ppshheader->dwFlags & PSH_WIZARD))
   {
@@ -1216,23 +1203,23 @@ static BOOL PROPSHEET_ShowPage(HWND hwndDlg, int index, PropSheetInfo * psInfo)
   psInfo->active_page = index;
   psInfo->activeValid = TRUE;
 
-  return TRUE;
+  return 1;
 }
-#endif
 
 /******************************************************************************
  *            PROPSHEET_Back
  */
-static BOOL PROPSHEET_Back(HWND hwndDlg)
+static void PROPSHEET_Back(HWND hwndDlg)
 {
-  BOOL res;
   PSHNOTIFY psn;
   HWND hwndPage;
+  LRESULT msgResult = 0;
+  INT idx;
   PropSheetInfo* psInfo = (PropSheetInfo*) GetPropA(hwndDlg,
                                                     PropSheetInfoStr);
 
   if (psInfo->active_page < 0)
-     return FALSE;
+     return;
 
   psn.hdr.code     = PSN_WIZBACK;
   psn.hdr.hwndFrom = hwndDlg;
@@ -1241,34 +1228,36 @@ static BOOL PROPSHEET_Back(HWND hwndDlg)
 
   hwndPage = psInfo->proppage[psInfo->active_page].hwndPage;
 
-  if (SendMessageA(hwndPage, WM_NOTIFY, 0, (LPARAM) &psn) == -1)
-    return FALSE;
+  msgResult = SendMessageA(hwndPage, WM_NOTIFY, 0, (LPARAM) &psn);
 
-  if (psInfo->active_page > 0)
+  if (msgResult == -1)
+     return;
+  else if (msgResult == 0)
+     idx = psInfo->active_page - 1;
+  else
+     idx = PROPSHEET_FindPageByResId(psInfo, msgResult);
+
+  if (idx >= 0 && idx < psInfo->nPages)
   {
-     res = PROPSHEET_CanSetCurSel(hwndDlg);
-     if(res != FALSE)
-     {
-       res = PROPSHEET_SetCurSel(hwndDlg, psInfo->active_page - 1, 0);
-     }
+     if (PROPSHEET_CanSetCurSel(hwndDlg))
+        PROPSHEET_SetCurSel(hwndDlg, idx, 0);
   }
-
-  return TRUE;
 }
 
 /******************************************************************************
  *            PROPSHEET_Next
  */
-static BOOL PROPSHEET_Next(HWND hwndDlg)
+static void PROPSHEET_Next(HWND hwndDlg)
 {
   PSHNOTIFY psn;
   HWND hwndPage;
   LRESULT msgResult = 0;
+  INT idx;
   PropSheetInfo* psInfo = (PropSheetInfo*) GetPropA(hwndDlg,
                                                     PropSheetInfoStr);
 
   if (psInfo->active_page < 0)
-     return FALSE;
+     return;
 
   psn.hdr.code     = PSN_WIZNEXT;
   psn.hdr.hwndFrom = hwndDlg;
@@ -1282,20 +1271,23 @@ static BOOL PROPSHEET_Next(HWND hwndDlg)
   //TRACE("msg result %ld\n", msgResult);
 
   if (msgResult == -1)
-    return FALSE;
+     return;
+  else if (msgResult == 0)
+     idx = psInfo->active_page + 1;
+  else
+     idx = PROPSHEET_FindPageByResId(psInfo, msgResult);
 
-  if(PROPSHEET_CanSetCurSel(hwndDlg) != FALSE)
+  if (idx < psInfo->nPages )
   {
-    PROPSHEET_SetCurSel(hwndDlg, psInfo->active_page + 1, 0);
+     if (PROPSHEET_CanSetCurSel(hwndDlg) != FALSE)
+        PROPSHEET_SetCurSel(hwndDlg, idx, 0);
   }
-
-  return TRUE;
 }
 
 /******************************************************************************
  *            PROPSHEET_Finish
  */
-static BOOL PROPSHEET_Finish(HWND hwndDlg)
+static void PROPSHEET_Finish(HWND hwndDlg)
 {
   PSHNOTIFY psn;
   HWND hwndPage;
@@ -1304,7 +1296,7 @@ static BOOL PROPSHEET_Finish(HWND hwndDlg)
                                                     PropSheetInfoStr);
 
   if (psInfo->active_page < 0)
-     return FALSE;
+     return;
 
   psn.hdr.code     = PSN_WIZFINISH;
   psn.hdr.hwndFrom = hwndDlg;
@@ -1318,14 +1310,12 @@ static BOOL PROPSHEET_Finish(HWND hwndDlg)
   //TRACE("msg result %ld\n", msgResult);
 
   if (msgResult != 0)
-    return FALSE;
+    return;
 
   if (psInfo->isModeless)
     psInfo->activeValid = FALSE;
   else
     EndDialog(hwndDlg, TRUE);
-
-  return TRUE;
 }
 
 /******************************************************************************
@@ -1372,6 +1362,11 @@ static BOOL PROPSHEET_Apply(HWND hwndDlg, LPARAM lParam)
        msgResult = SendMessageA(hwndPage, WM_NOTIFY, 0, (LPARAM) &psn);
        if (msgResult == PSNRET_INVALID_NOCHANGEPAGE)
           return FALSE;
+       else if (msgResult == PSNRET_INVALID)
+       {
+          PROPSHEET_SetCurSel(hwndDlg, i, 0);
+          return FALSE;
+       }
     }
   }
 
@@ -1399,6 +1394,7 @@ static BOOL PROPSHEET_Apply(HWND hwndDlg, LPARAM lParam)
      psn.lParam   = 0;
      hwndPage = psInfo->proppage[psInfo->active_page].hwndPage;
      SendMessageA(hwndPage, WM_NOTIFY, 0, (LPARAM) &psn);
+     /* Fixme: probably we have to handle return value */
   }
 
   return TRUE;
@@ -1436,6 +1432,7 @@ static void PROPSHEET_Cancel(HWND hwndDlg, LPARAM lParam)
 
     if (hwndPage)
        SendMessageA(hwndPage, WM_NOTIFY, 0, (LPARAM) &psn);
+       /* No return value */
   }
 
   if (psInfo->isModeless)
@@ -1616,10 +1613,13 @@ static BOOL PROPSHEET_SetCurSel(HWND hwndDlg,
                                                     PropSheetInfoStr);
   HWND hwndPage;
   HWND hwndHelp  = GetDlgItem(hwndDlg, IDHELP);
+  int i;
 
   /* hpage takes precedence over index */
   if (hpage != NULL)
     index = PROPSHEET_GetPageIndex(hpage, psInfo);
+
+ again:
 
   if (index < 0 || index >= psInfo->nPages)
   {
@@ -1635,7 +1635,7 @@ static BOOL PROPSHEET_SetCurSel(HWND hwndDlg,
    */
   if (hwndPage)
   {
-    int result;
+    LRESULT result;
     PSHNOTIFY psn;
 
     psn.hdr.code     = PSN_SETACTIVE;
@@ -1645,15 +1645,40 @@ static BOOL PROPSHEET_SetCurSel(HWND hwndDlg,
 
     result = SendMessageA(hwndPage, WM_NOTIFY, 0, (LPARAM) &psn);
 
-    /*
-     * TODO: check return value.
+    /* Fixme: If user doesn't accept new selection shall we send
+     * notifications to the page specified by user, or select it
+     * silently?
      */
+    if (result == -1)
+    {
+       if (index != psInfo->active_page)
+       {
+          if (index > psInfo->active_page)
+             index++;
+          else if (index < psInfo->active_page)
+             index--;
+
+          goto again;
+       }
+    }
+    else if (result != 0)
+    {
+       index = PROPSHEET_FindPageByResId(psInfo, result);
+       goto again;
+    }
   }
 
   /*
    * Display the new page.
    */
-  PROPSHEET_ShowPage(hwndDlg, index, psInfo);
+  i = PROPSHEET_ShowPage(hwndDlg, index, psInfo);
+
+  /*  0 - function is failed,
+   * -1 - some other page is activated (via recursive call to SetCurSel) -
+   *    exit now to avoid overwriting state of help button.
+   */
+  if (i <= 0)
+     return (BOOL)i;
 
   if (psInfo->proppage[index].hasHelp)
     EnableWindow(hwndHelp, TRUE);
@@ -1842,6 +1867,7 @@ static BOOL PROPSHEET_RemovePage(HWND hwndDlg,
       {
         /* activate the next page */
         PROPSHEET_ShowPage(hwndDlg, index + 1, psInfo);
+        psInfo->active_page = index;
       }
     }
     else
