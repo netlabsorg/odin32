@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.9 1999-07-18 14:39:35 sandervl Exp $ */
+/* $Id: pmwindow.cpp,v 1.10 1999-07-18 14:56:36 sandervl Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -83,16 +83,14 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
 {
  POSTMSG_PACKET *postmsg;
  Win32Window  *win32wnd;
- ULONG         magic;
  APIRET        rc;
 
   //Restore our FS selector
   SetWin32TIB();
 
-  win32wnd = (Win32Window *)WinQueryWindowULong(hwnd, OFFSET_WIN32WNDPTR);
-  magic    = WinQueryWindowULong(hwnd, OFFSET_WIN32PM_MAGIC);
+  win32wnd = Win32Window::GetWindowFromOS2Handle(hwnd);
 
-  if(msg != WM_CREATE && win32wnd == NULL && magic != WIN32PM_MAGIC) {
+  if(msg != WM_CREATE && win32wnd == NULL) {
         dprintf(("Invalid win32wnd pointer for window %x!!", hwnd));
         goto RunDefWndProc;
   }

@@ -1,4 +1,4 @@
-/* $Id: win32wnd.cpp,v 1.11 1999-07-18 14:39:35 sandervl Exp $ */
+/* $Id: win32wnd.cpp,v 1.12 1999-07-18 14:56:37 sandervl Exp $ */
 /*
  * Win32 Window Code for OS/2
  *
@@ -665,7 +665,7 @@ ULONG Win32Window::MsgShow(BOOL fShow)
 //******************************************************************************
 //******************************************************************************
 ULONG Win32Window::MsgMove(ULONG xParent, ULONG yParent)
-{  	
+{
   return SendInternalMessageA(WM_MOVE, 0, MAKELONG((USHORT)xParent, (USHORT)yParent));
 }
 //******************************************************************************
@@ -769,16 +769,16 @@ ULONG Win32Window::MsgMouseMove(ULONG keystate, ULONG x, ULONG y)
 ULONG winstate = 0;
 
   if(keystate & WMMOVE_LBUTTON)
-  	winstate |= MK_LBUTTON;
+    winstate |= MK_LBUTTON;
   if(keystate & WMMOVE_RBUTTON)
-  	winstate |= MK_RBUTTON;
+    winstate |= MK_RBUTTON;
   if(keystate & WMMOVE_MBUTTON)
-  	winstate |= MK_MBUTTON;
+    winstate |= MK_MBUTTON;
   if(keystate & WMMOVE_SHIFT)
-  	winstate |= MK_SHIFT;
+    winstate |= MK_SHIFT;
   if(keystate & WMMOVE_CTRL)
-  	winstate |= MK_CONTROL;
-  	
+    winstate |= MK_CONTROL;
+
    return SendInternalMessageA(WM_MOUSEMOVE, keystate, MAKELONG(x, y));
 }
 //******************************************************************************
@@ -791,17 +791,17 @@ ULONG Win32Window::MsgPaint(ULONG tmp1, ULONG tmp2)
 //******************************************************************************
 ULONG Win32Window::MsgEraseBackGround(ULONG hps)
 {
- 	if(isIcon) {
- 			return SendInternalMessageA(WM_ICONERASEBKGND, hps, 0);
- 	}
-  	else	return SendInternalMessageA(WM_ERASEBKGND, hps, 0);
+    if(isIcon) {
+            return SendInternalMessageA(WM_ICONERASEBKGND, hps, 0);
+    }
+    else    return SendInternalMessageA(WM_ERASEBKGND, hps, 0);
 }
 //******************************************************************************
 //******************************************************************************
 ULONG Win32Window::MsgSetText(LPSTR lpsz, LONG cch)
 {
   if(isUnicode) {
-    	return SendInternalMessageW(WM_SETTEXT, 0, (LPARAM)lpsz);
+        return SendInternalMessageW(WM_SETTEXT, 0, (LPARAM)lpsz);
   }
   else  return SendInternalMessageA(WM_SETTEXT, 0, (LPARAM)lpsz);
 }
@@ -1465,6 +1465,21 @@ Win32Window *Win32Window::GetWindowFromHandle(HWND hwnd)
     return window;
    }
    else return NULL;
+}
+//******************************************************************************
+//******************************************************************************
+Win32Window *Win32Window::GetWindowFromOS2Handle(HWND hwnd)
+{
+ Win32Window *win32wnd;
+ DWORD        magic;
+
+  win32wnd = (Win32Window *)OSLibWinGetWindowULong(hwnd, OFFSET_WIN32WNDPTR);
+  magic    = OSLibWinGetWindowULong(hwnd, OFFSET_WIN32PM_MAGIC);
+
+  if(win32wnd && CheckMagicDword(magic)) {
+    return win32wnd;
+  }
+  return 0;
 }
 //******************************************************************************
 //******************************************************************************
