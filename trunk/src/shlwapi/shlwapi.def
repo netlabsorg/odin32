@@ -1,4 +1,4 @@
-; $Id: shlwapi.def,v 1.19 2000-12-16 22:53:44 bird Exp $
+; $Id: shlwapi.def,v 1.20 2001-04-28 13:32:20 sandervl Exp $
 
 ; updated export ordinals to NT4 SP6 version of SHLWAPI.DLL
 ; Note: W95/W98 has DIFFERENT export ordinals
@@ -18,193 +18,277 @@ EXPORTS
 ; --------------------
 
 
-                             _SHLWAPI_1@8                         @1
-                             _SHLWAPI_2@8                         @2
-                             _SHLWAPI_3@8                         @3
-                             _SHLWAPI_4@8                         @4
-                             _SHLWAPI_5@12                        @5
-                             _SHLWAPI_6@12                        @6
-                             _SHLWAPI_7@12                        @7
-                             _SHLWAPI_8@8                         @8
-                             _SHLWAPI_9@4                         @9
-                             _SHLWAPI_10@8                        @10
-                             _SHLWAPI_11@20                       @11
-                             _SHLWAPI_12@8                        @12
-                             _SHLWAPI_13@8                        @13
-                             _SHLWAPI_14@8                        @14
-                             _SHLWAPI_15@8                        @15
+                             _SHLWAPI_1@8                         @1  NONAME
+                             _SHLWAPI_2@8                         @2  NONAME
+                             _SHLWAPI_3@8                         @3  NONAME
+                             _SHLWAPI_4@8                         @4  NONAME
+                             _SHLWAPI_5@12                        @5  NONAME
+                             _SHLWAPI_6@12                        @6  NONAME
+                             _SHLWAPI_7@12                        @7  NONAME
+                             _SHLWAPI_8@8                         @8  NONAME
+                             _SHLWAPI_9@4                         @9  NONAME
+                             _SHLWAPI_10@8                        @10 NONAME
+                             _SHLWAPI_11@20                       @11 NONAME
+                             _SHLWAPI_12@8                        @12 NONAME
+                             _SHLWAPI_13@8                        @13 NONAME
+                             _SHLWAPI_14@8                        @14 NONAME
+                             _SHLWAPI_15@8                        @15 NONAME
     SHCreateThread         = _SHCreateThread@16                   @16
-                             _SHLWAPI_17@8                        @17
-                             _SHLWAPI_18@8                        @18
-                             _SHLWAPI_19@4                        @19
-                             _SHLWAPI_20@8                        @20
-                             _SHLWAPI_21@8                        @21
-                             _SHLWAPI_22@8                        @22
-                             _SHLWAPI_23@12                       @23
-                             _SHLWAPI_24@12                       @24
-                             _SHLWAPI_28@4                        @28
-                             _SHLWAPI_30@4                        @30
-
-                             _CallWindowProcW@20                  @37
-                             _CharLowerW@4                        @38
-                             _CharLowerBuffW@8                    @39
-                             _CharNextW@4                         @40
-                             _CharPrevW@8                         @41
-                             _CharToOemW@8                        @42
-                             _CharUpperW@4                        @43
-                             _CharUpperBuffW@8                    @44
-                             _CompareStringW@24                   @45
-                             _CopyAcceleratorTableW@12            @46
-                             _CreateAcceleratorTableW@8           @47
-                             _CreateDCW@16                        @48
-                             _CreateDialogParamW@20               @49 ; @@@PH imcomplete
-                             _CreateDirectoryW@8                  @50
-                             _CreateEventW@16                     @51
-                             _CreateFileW@28                      @52
-                             _CreateFontIndirectW@4               @53
-                             _CreateICW@16                        @54
-                             _CreateWindowExW@48                  @55
-                             _DefWindowProcW@16                   @56
-                             _DeleteFileW@4                       @57
-                             _DialogBoxIndirectParamW@20          @58 ; @@@PH imcomplete
-                             _DialogBoxParamW@20                  @59 ; @@@PH imcomplete
-                             _DispatchMessageW@4                  @60
-                             _DrawTextW@20                        @61
-                             _EnumFontFamiliesW@16                @62
-                             _EnumFontFamiliesExW@20              @63
-                             _EnumResourceNamesW@16               @64
-                             _FindFirstFileW@8                    @65
-                             _FindResourceW@12                    @66
-                             _FindWindowW@8                       @67
-                             _FormatMessageW@28                   @68
-                             _GetClassInfoW@12                    @69
-                             _GetClassLongW@8                     @70
-                             _GetClassNameW@12                    @71
-                             _GetClipboardFormatNameW@12          @72
-                             _GetCurrentDirectoryW@8              @73
-                             _GetDlgItemTextW@16                  @74
-                             _GetFileAttributesW@4                @75
-                             _GetFullPathNameW@16                 @76
-                             _GetLocaleInfoW@16                   @77
-                             _GetMenuItemInfoW@16                 @78
-                             _GetMessageW@16                      @79
-                             _GetModuleFileNameW@12               @80
-                             _GetSystemDirectoryW@8               @81
-                             _SearchPathW@24                      @82
-                             _GetModuleHandleW@4                  @83
-                             _GetObjectW@12                       @84
-                             _GetPrivateProfileIntW@16            @85
-                             _GetProfileStringW@20                @86
-                             _GetPropW@8                          @87
-                             _GetStringTypeExW@20                 @88
-                             _GetTempFileNameW@16                 @89
-                             _GetTempPathW@8                      @90
-                             _GetTextExtentPoint32W@16            @91
-                             _GetTextFaceW@12                     @92
-                             _GetTextMetricsW@8                   @93
-                             _GetWindowLongW@8                    @94
-                             _GetWindowTextW@12                   @95
-                             _GetWindowTextLengthW@4              @96
-                             _GetWindowsDirectoryW@8              @97
-                             _InsertMenuW@20                      @98 ; @@@PH incomplete
-                             _IsDialogMessageW@8                  @99
-                             _LoadAcceleratorsW@8                 @100
-                             _LoadBitmapW@8                       @101
-                             _LoadCursorW@8                       @102
-                             _LoadIconW@8                         @103
-                             _LoadImageW@24                       @104
-                             _LoadLibraryExW@12                   @105
-                             _LoadMenuW@8                         @106
-                             _LoadStringW@16                      @107
-                             _MessageBoxIndirectW@4               @108
-                             _ModifyMenuW@20                      @109
-                             _GetCharWidth32W@16                  @110
-                             _GetCharacterPlacementW@24           @111
-                             _CopyFileW@12                        @112
-                             _MoveFileW@8                         @113
-                             _OemToCharW@8                        @114
-                             _OutputDebugStringW@4                @115
-                             _PeekMessageW@20                     @116
-                             _PostMessageW@16                     @117
-                             _PostThreadMessageW@16               @118
-                             _RegCreateKeyW@12                    @119
-                             _RegCreateKeyExW@36                  @120
-                             _RegDeleteKeyW@8                     @121
-                             _RegEnumKeyW@16                      @122
-                             _RegEnumKeyExW@32                    @123
-                             _RegOpenKeyW@12                      @124
-                             _RegOpenKeyExW@20                    @125
-                             _RegQueryInfoKeyW@48                 @126
-                             _RegQueryValueW@16                   @127
-                             _RegQueryValueExW@24                 @128
-                             _RegSetValueW@20                     @129
-                             _RegSetValueExW@24                   @130
-                             _RegisterClassW@4                    @131
-                             _RegisterClipboardFormatW@4          @132
-                             _RegisterWindowMessageW@4            @133
-                             _RemovePropW@8                       @134
-                             _SendDlgItemMessageW@20              @135
-                             _SendMessageW@16                     @136
-                             _SetCurrentDirectoryW@4              @137
+                             _SHLWAPI_17@8                        @17 NONAME
+                             _SHLWAPI_18@8                        @18 NONAME
+                             _SHLWAPI_19@4                        @19 NONAME
+                             _SHLWAPI_20@8                        @20 NONAME
+                             _SHLWAPI_21@8                        @21 NONAME
+                             _SHLWAPI_22@8                        @22 NONAME
+                             _SHLWAPI_23@12                       @23 NONAME
+                             _SHLWAPI_24@12                       @24 NONAME
+                             _SHLWAPI_28@4                        @28 NONAME
+                             _SHLWAPI_30@4                        @30 NONAME
+                             _SHLWAPI_32@4                        @32 NONAME
+                             _CallWindowProcW@20                  @37 NONAME
+                             _CharLowerW@4                        @38 NONAME
+                             _CharLowerBuffW@8                    @39 NONAME
+                             _CharNextW@4                         @40 NONAME
+                             _CharPrevW@8                         @41 NONAME
+                             _CharToOemW@8                        @42 NONAME
+                             _CharUpperW@4                        @43 NONAME
+                             _CharUpperBuffW@8                    @44 NONAME
+                             _CompareStringW@24                   @45 NONAME 
+                             _CopyAcceleratorTableW@12            @46 NONAME
+                             _CreateAcceleratorTableW@8           @47 NONAME
+                             _CreateDCW@16                        @48 NONAME
+                             _CreateDialogParamW@20               @49 NONAME ; @@@PH imcomplete
+                             _CreateDirectoryW@8                  @50 NONAME
+                             _CreateEventW@16                     @51 NONAME
+                             _CreateFileW@28                      @52 NONAME
+                             _CreateFontIndirectW@4               @53 NONAME
+                             _CreateICW@16                        @54 NONAME
+                             _CreateWindowExW@48                  @55 NONAME
+                             _DefWindowProcW@16                   @56 NONAME
+                             _DeleteFileW@4                       @57 NONAME
+                             _DialogBoxIndirectParamW@20          @58 NONAME ; @@@PH imcomplete
+                             _DialogBoxParamW@20                  @59 NONAME ; @@@PH imcomplete
+                             _DispatchMessageW@4                  @60 NONAME
+                             _DrawTextW@20                        @61 NONAME
+                             _EnumFontFamiliesW@16                @62 NONAME
+                             _EnumFontFamiliesExW@20              @63 NONAME
+                             _EnumResourceNamesW@16               @64 NONAME
+                             _FindFirstFileW@8                    @65 NONAME
+                             _FindResourceW@12                    @66 NONAME
+                             _FindWindowW@8                       @67 NONAME
+                             _FormatMessageW@28                   @68 NONAME
+                             _GetClassInfoW@12                    @69 NONAME
+                             _GetClassLongW@8                     @70 NONAME
+                             _GetClassNameW@12                    @71 NONAME
+                             _GetClipboardFormatNameW@12          @72 NONAME
+                             _GetCurrentDirectoryW@8              @73 NONAME
+                             _SHLWAPI_74@16                       @74 NONAME
+                             _GetFileAttributesW@4                @75  NONAME
+                             _GetFullPathNameW@16                 @76 NONAME
+                             _GetLocaleInfoW@16                   @77 NONAME
+                             _GetMenuItemInfoW@16                 @78 NONAME
+                             _GetMessageW@16                      @79 NONAME
+                             _GetModuleFileNameW@12               @80 NONAME
+                             _GetSystemDirectoryW@8               @81 NONAME
+                             _SearchPathW@24                      @82 NONAME
+                             _GetModuleHandleW@4                  @83 NONAME
+                             _GetObjectW@12                       @84 NONAME
+                             _GetPrivateProfileIntW@16            @85 NONAME
+                             _GetProfileStringW@20                @86 NONAME
+                             _GetPropW@8                          @87 NONAME
+                             _GetStringTypeExW@20                 @88 NONAME
+                             _GetTempFileNameW@16                 @89 NONAME
+                             _GetTempPathW@8                      @90 NONAME
+                             _GetTextExtentPoint32W@16            @91 NONAME
+                             _GetTextFaceW@12                     @92 NONAME
+                             _GetTextMetricsW@8                   @93 NONAME
+                             _GetWindowLongW@8                    @94 NONAME
+                             _GetWindowTextW@12                   @95 NONAME
+                             _GetWindowTextLengthW@4              @96 NONAME
+                             _GetWindowsDirectoryW@8              @97 NONAME
+                             _InsertMenuW@20                      @98 NONAME
+                             _IsDialogMessageW@8                  @99 NONAME
+                             _LoadAcceleratorsW@8                 @100 NONAME
+                             _LoadBitmapW@8                       @101 NONAME
+                             _LoadCursorW@8                       @102 NONAME
+                             _LoadIconW@8                         @103 NONAME
+                             _LoadImageW@24                       @104 NONAME
+                             _LoadLibraryExW@12                   @105 NONAME
+                             _LoadMenuW@8                         @106 NONAME
+                             _LoadStringW@16                      @107 NONAME
+                             _MessageBoxIndirectW@4               @108 NONAME
+                             _ModifyMenuW@20                      @109 NONAME
+                             _GetCharWidth32W@16                  @110 NONAME
+                             _GetCharacterPlacementW@24           @111 NONAME
+                             _CopyFileW@12                        @112 NONAME
+                             _MoveFileW@8                         @113 NONAME
+                             _OemToCharW@8                        @114 NONAME
+                             _OutputDebugStringW@4                @115 NONAME
+                             _PeekMessageW@20                     @116 NONAME
+                             _PostMessageW@16                     @117 NONAME
+                             _PostThreadMessageW@16               @118 NONAME
+                             _RegCreateKeyW@12                    @119 NONAME
+                             _RegCreateKeyExW@36                  @120 NONAME
+                             _RegDeleteKeyW@8                     @121 NONAME
+                             _RegEnumKeyW@16                      @122 NONAME
+                             _RegEnumKeyExW@32                    @123 NONAME
+                             _RegOpenKeyW@12                      @124 NONAME
+                             _RegOpenKeyExW@20                    @125 NONAME
+                             _RegQueryInfoKeyW@48                 @126 NONAME
+                             _RegQueryValueW@16                   @127 NONAME
+                             _RegQueryValueExW@24                 @128 NONAME
+                             _RegSetValueW@20                     @129 NONAME
+                             _RegSetValueExW@24                   @130 NONAME
+                             _RegisterClassW@4                    @131 NONAME
+                             _RegisterClipboardFormatW@4          @132 NONAME
+                             _RegisterWindowMessageW@4            @133 NONAME
+                             _RemovePropW@8                       @134 NONAME
+                             _SendDlgItemMessageW@20              @135 NONAME
+                             _SendMessageW@16                     @136 NONAME
+                             _SetCurrentDirectoryW@4              @137 NONAME
                              _SetDlgItemTextW@12                  @138
                              _SetMenuItemInfoW@16                 @139 ; @@@PH imcomplete
-                             _SetPropW@12                         @140
-                             _SetWindowLongW@12                   @141
-                             _SetWindowsHookExW@16                @142
-                             _SetWindowTextW@8                    @143
-                             _StartDocW@8                         @144
-                             _SystemParametersInfoW@16            @145
-                             _TranslateAcceleratorW@12            @146
-                             _UnregisterClassW@8                  @147
-                             _VkKeyScanW@4                        @148
-                             _WinHelpW@16                         @149
-                             _wvsprintfW@12                       @150
+                             _SetPropW@12                         @140 NONAME
+                             _SetWindowLongW@12                   @141 NONAME
+                             _SetWindowsHookExW@16                @142 NONAME
+                             _SetWindowTextW@8                    @143 NONAME
+                             _StartDocW@8                         @144 NONAME
+                             _SystemParametersInfoW@16            @145 NONAME
+                             _TranslateAcceleratorW@12            @146 NONAME
+                             _UnregisterClassW@8                  @147 NONAME
+                             _VkKeyScanW@4                        @148 NONAME
+                             _WinHelpW@16                         @149 NONAME
+                             _wvsprintfW@12                       @150 NONAME
+                             _SHLWAPI_151@0                       @151 NONAME
+                             _SHLWAPI_152@12                      @152 NONAME
+                             _SHLWAPI_153@12                      @153 NONAME
 
-                             _SHLWAPI_156@8                       @156
-                             _SHLWAPI_158@8                       @158
-                             _SHLWAPI_160@8                       @160
-                             _SHLWAPI_169@4                       @169
-                             _SHLWAPI_170@4                       @170
-                             _SHLWAPI_185@24                      @185
-                             _SHLWAPI_191@24                      @191
-                             _SHLWAPI_193@0                       @193
-                             _SHLWAPI_197@12                      @197
-                             _SHLWAPI_219@16                      @219
-                             _SHLWAPI_222@4                       @222
-                             _SHLWAPI_223@4                       @223
-                             _SHLWAPI_237@4                       @237
-                             _SHLWAPI_240@16                      @240
-                             _SHLWAPI_241@0                       @241
-                             _SHLWAPI_243@20                      @243
-;   AssocCreate            = _AssocCreate@20                      @253
-;   AssocQueryKeyA         = _AssocQueryKeyA@20                   @254
-                             _SHLWAPI_266@16                      @266
-                             _SHLWAPI_267@16                      @267
-                             _SHLWAPI_268@8                       @268
-                             _SHLWAPI_276@0                       @276
-                             _SHLWAPI_309@4                       @309
-                             _RegisterClassExW@4                  @314
-                             _CallMsgFilterW@8                    @332
-                             _FindNextFileW@8                     @341
-                             _SHLWAPI_342@16                      @342
-                             _SHLWAPI_346@12                      @346
-                             _SHLWAPI_364@12                      @364
-                             _SHLWAPI_376@0                       @376
-                             _SHLWAPI_377@12                      @377
+                             _SHLWAPI_156@8                       @156 NONAME
+                             _SHLWAPI_158@8                       @158 NONAME
+                             _CompareStringW@24                   @159 NONAME
+                             _SHLWAPI_160@8                       @160 NONAME
+                             _SHLWAPI_162@8                       @162 NONAME
+                             _SHLWAPI_165@16                      @165 NONAME
+                             _SHLWAPI_169@4                       @169 NONAME
+                             _SHLWAPI_170@4                       @170 NONAME
+                             _SHLWAPI_181@12                      @181 NONAME
+                             _SHLWAPI_183@4                       @183 NONAME
+                             _SHLWAPI_185@24                      @185 NONAME
+                             _SHLWAPI_191@24                      @191 NONAME
+                             _SHLWAPI_193@0                       @193 NONAME
+                             _SHLWAPI_197@12                      @197 NONAME
+                             _SHLWAPI_205@24                      @205 NONAME
+                             _SHLWAPI_206@24                      @206 NONAME
+                             _SHLWAPI_215@12                      @215 NONAME
+                             _SHLWAPI_217@12                      @217 NONAME
+                             _SHLWAPI_218@16                      @218 NONAME
+                             _SHLWAPI_219@16                      @219 NONAME
+                             _SHLWAPI_222@4                       @222 NONAME
+                             _SHLWAPI_223@4                       @223 NONAME
+                             _SHLWAPI_237@4                       @237 NONAME
+                             _SHLWAPI_240@16                      @240 NONAME
+                             _SHLWAPI_241@0                       @241 NONAME
+                             _SHLWAPI_243@20                      @243 NONAME
+;   AssocCreate            = _AssocCreate@20                      @253 ;by name
+;   AssocQueryKeyA         = _AssocQueryKeyA@20                   @254 ;by name
+;   AssocQueryKeyW         = _AssocQueryKeyW@20                   @255 ;by name
+                             _SHLWAPI_266@16                      @266 NONAME
+                             _SHLWAPI_267@16                      @267 NONAME
+                             _SHLWAPI_268@8                       @268 NONAME
+                             _SHLWAPI_276@0                       @276 NONAME
+                             _SHLWAPI_278@24                      @278 NONAME
+                             _WritePrivateProfileStringW@16       @298 NONAME
+
+                             _DrawTextExW@24                      @301 NONAME
+                             _GetMenuItemInfoW@16                 @302 NONAME ; FIXME CreateFontW
+                             _InsertMenuItemW@16                  @303 NONAME
+                             _CreateMetaFileW@4                   @304 NONAME
+                             _CreateMutexW@12                     @305 NONAME
+                             _ExpandEnvironmentStringsW@12        @306 NONAME
+                             _CreateSemaphoreW@16                 @307 NONAME
+                             _IsBadStringPtrW@8                   @308 NONAME
+                             _LoadLibraryW@4                      @309 NONAME
+                             _GetTimeFormatW@24                   @310 NONAME
+                             _GetDateFormatW@24                   @311 NONAME
+                             _GetPrivateProfileStringW@24         @312 NONAME
+                             _SHLWAPI_313@20                      @313 NONAME
+                             _RegisterClassExW@4                  @314 NONAME
+                             _GetClassInfoExW@12                  @315 NONAME
+
+                             _SHLWAPI_318@16                      @318 NONAME
+                             _FindWindowExW@16                    @319 NONAME
+
+                             _SHLWAPI_320@8                       @320 NONAME
+                             _SHLWAPI_321@8                       @321 NONAME
+                             _SHLWAPI_322@4                       @322 NONAME
+                             _SHLWAPI_323@4                       @323 NONAME
+
+                             _CallMsgFilterW@8                    @332 NONAME
+                             _SHLWAPI_333@4                       @333 NONAME
+                             _SHLWAPI_334@8                       @334 NONAME
+                             _SHLWAPI_335@4                       @335 NONAME
+                             _SHLWAPI_336@4                       @336 NONAME
+                             _SHLWAPI_337@20                      @337 NONAME
+                             _SetFileAttributesW@8                @338 NONAME
+                             _GetNumberFormatW@24                 @339 NONAME
+                             _MessageBoxW@16                      @340 NONAME
+                             _FindNextFileW@8                     @341 NONAME
+                             _SHLWAPI_342@16                      @342 NONAME
+                             _SHLWAPI_346@12                      @346 NONAME
+                             _RegDeleteValueW@8                   @347 NONAME
+
+                             _SHLWAPI_357@20                      @357 NONAME
+                             _SHLWAPI_358@24                      @358 NONAME
+                             _OpenEventW@12                       @359 NONAME
+                             _RemoveDirectoryW@4                  @360 NONAME
+                             _GetShortPathNameW@12                @361 NONAME
+
+                             _SHLWAPI_364@12                      @364 NONAME
+                     
+                             _RegEnumValueW@32                    @366 NONAME
+                             _WritePrivateProfileStructW@20       @367 NONAME
+                             _GetPrivateProfileStructW@20         @368 NONAME
+                             _CreateProcessW@40                   @369 NONAME
+                             _SHLWAPI_370@12                      @370 NONAME
+
+                             _SHLWAPI_364@12                      @364 NONAME
+                             _SHLWAPI_376@0                       @376 NONAME ;kernel32.GetUserDefaultUILanguage
+                             _SHLWAPI_377@12                      @377 NONAME
+                             _SHLWAPI_378@12                      @378 NONAME
+
 ;   AssocQueryStringA      = _AssocQueryStringA@20                @381
 ;   AssocQueryStringByKeyA = _AssocQueryStringByKeyA@20           @382
     ChrCmpIA               = _ChrCmpIA@8                          @385
-  ; ChrCmpIW               = _ChrCmpIW@?                          @386
+  ; ChrCmpIW               = _ChrCmpIW@8                          @386
 
-;                            _SHLWAPI_407@16                      @407
-;                            _SHLWAPI_408@16                      @408
-;                            _SHLWAPI_409@12                      @409
-;                            _SHLWAPI_410@12                      @410
+                             _SHLWAPI_389@4                       @389 NONAME
+                             _SHLWAPI_390@8                       @390 NONAME
+                             _SHLWAPI_391@20                      @391 NONAME
 
-                             _SHLWAPI_437@4                       @437
+                             _SHLWAPI_401@4                       @401 NONAME
+                             _SHLWAPI_402@4                       @402 NONAME
+                             _SHLWAPI_403@4                       @403 NONAME
+    ColorHLSToRGB          = _ColorHLSToRGB@12                    @404 NONAME
+
+;                            _SHLWAPI_407@16                      @407 NONAME
+;                            _SHLWAPI_408@16                      @408 NONAME
+;                            _SHLWAPI_409@12                      @409 NONAME
+;                            _SHLWAPI_410@12                      @410 NONAME
+
+                             _SHLWAPI_431@4                       @431 NONAME
+
+                             _SendMessageTimeoutW@28              @434 NONAME
+
+                             _SHLWAPI_437@4                       @437 NONAME
+         
+                             _GetEnvironmentVariableW@12          @442 NONAME
+                             _GetSystemWindowsDirectoryA@8        @443 NONAME
+                             _GetSystemWindowsDirectoryW@8        @444 NONAME
+  ; ColorRGBToHLS @445
+
     DllGetVersion          = _DllGetVersion@4                     @446
-  ; GetMenuPosFromID       = _GetMenuPosFromID@?                  @447
-;   HashData               = _HashData@16                         @448
+    GetMenuPosFromID       = _GetMenuPosFromID@8                  @447
+    HashData               = _HashData@16                         @448
   ; IntlStrEqWorkerA       = _StrIsIntlEqualA@16                  @449
   ; IntlStrEqWorkerW       = _StrIsIntlEqualw@16                  @450
     PathAddBackslashA      = _PathAddBackslashA@4                 @451
@@ -330,14 +414,14 @@ EXPORTS
     SHDeleteKeyW           = _SHDeleteKeyW@8                      @570
   ; SHDeleteOrphanKeyA     = _SHDeleteOrphanKeyA@?                @571
   ; SHDeleteOrphanKeyW     = _SHDeleteOrphanKeyW@?                @572
-  ; SHDeleteValueA         = _SHDeleteValueA@?                    @573
-  ; SHDeleteValueW         = _SHDeleteValueW@?                    @574
+    SHDeleteValueA         = _SHDeleteValueA@12                   @573
+    SHDeleteValueW         = _SHDeleteValueW@12                   @574
   ; SHEnumKeyExA           = _SHEnumKeyExA@?                      @575
   ; SHEnumKeyExW           = _SHEnumKeyExW@?                      @576
   ; SHEnumValueA           = _SHEnumValueA@?                      @577
   ; SHEnumValueW           = _SHEnumValueW@?                      @578
-;   _SHGetInstanceExplorer@4 = ????                               @579
-  ; SHGetInverseCMAP       = _SHGetInverseCMAP@?                  @580
+    _SHGetInstanceExplorer = __SHGetInstanceExplorer@4            @579
+    SHGetInverseCMAP       = _SHGetInverseCMAP@8                  @580
 ;   SHGetThreadRef         = _SHGetThreadRef@?                    @581
     SHGetValueA            = _SHGetValueA@24                      @582
     SHGetValueW            = _SHGetValueW@24                      @583
@@ -366,12 +450,12 @@ EXPORTS
     SHRegGetBoolUSValueW   = _SHRegGetBoolUSValueW@16             @606
     SHRegGetUSValueA       = _SHRegGetUSValueA@32                 @607
     SHRegGetUSValueW       = _SHRegGetUSValueW@32                 @608
-  ; SHRegOpenUSKeyA        = _SHRegOpenUSKeyA@?                   @609
-  ; SHRegOpenUSKeyW        = _SHRegOpenUSKeyW@?                   @610
+    SHRegOpenUSKeyA        = _SHRegOpenUSKeyA@20                  @609
+    SHRegOpenUSKeyW        = _SHRegOpenUSKeyW@20                  @610
   ; SHRegQueryInfoKeyA     = _SHRegQueryInfoKeyA@?                @611
   ; SHRegQueryInfoKeyW     = _SHRegQueryInfoKeyW@?                @612
-  ; SHRegQueryUSValueA     = _SHRegQueryUSValueA@?                @613
-  ; SHRegQueryUSValueW     = _SHRegQueryUSValueW@?                @614
+    SHRegQueryUSValueA     = _SHRegQueryUSValueA@32               @613
+    SHRegQueryUSValueW     = _SHRegQueryUSValueW@32               @614
     SHRegSetUSValueA       = _SHRegSetUSValueA@24                 @615
     SHRegSetUSValueW       = _SHRegSetUSValueW@24                 @616
 ;   SHRegWriteUSValueA     = _SHRegWriteUSValueA@?                @617
@@ -388,8 +472,8 @@ EXPORTS
     StrCSpnW               = _StrCSpnW@8                          @628
     StrCatBuffA            = _StrCatBuffA@12                      @629
     StrCatBuffW            = _StrCatBuffW@12                      @630
-  ; StrCatA                = _StrCatA@?                                 ; not exported ?
-  ; StrCatW                = _StrCatW@?                           @631
+;    StrCatA                = _StrCatA@8                                 ; not exported ?
+    StrCatW                = _StrCatW@8                           @631
     StrChrA                = _StrChrA@8                           @632
     StrChrIA               = _StrChrIA@8                          @633
     StrChrIW               = _StrChrIW@8                          @634
@@ -414,8 +498,8 @@ EXPORTS
   ; StrFromTimeIntervalW   = _StrFromTimeIntervalW@?              @652
   ; IntlStrEqWorkerA       = _StrIsIntlEqualA@16                  @653
   ; StrIsIntlEqualW        = _StrIsIntlEqualW@?                   @654
-  ; StrNCatA               = _StrNCatA@?                          @655
-  ; StrNCatW               = _StrNCatW@12                         @656
+    StrNCatA               = _StrNCatA@12                         @655
+    StrNCatW               = _StrNCatW@12                         @656
   ; StrPBrkA               = _StrPBrkA@?                          @657
   ; StrPBrkW               = _StrPBrkW@?                          @658
     StrRChrA               = _StrRChrA@12                         @659
@@ -424,8 +508,8 @@ EXPORTS
     StrRChrW               = _StrRChrW@12                         @662
   ; StrRStrIA              = _StrRStrIA@?                         @663
   ; StrRStrIW              = _StrRStrIW@?                         @664
-;   StrRetToBufA           = _StrRetToBufA@16                     @665
-;   StrRetToBufW           = _StrRetToBufW@16                     @666
+    StrRetToBufA           = _StrRetToBufA@16                     @665
+    StrRetToBufW           = _StrRetToBufW@16                     @666
 ;   StrRetToStrA           = _StrRetToStrA@12                     @667
 ;   StrRetToStrW           = _StrRetToStrW@12                     @668
   ; StrSpnA                = _StrSpnA@?                           @669
@@ -435,8 +519,8 @@ EXPORTS
     StrStrIW               = _StrStrIW@8                          @673
     StrStrW                = _StrStrW@8                           @674
     StrToIntA              = _StrToIntA@4                         @675
-  ; StrToIntExA            = _StrToIntExA@?                       @676
-  ; StrToIntExW            = _StrToIntExW@?                       @677
+    StrToIntExA            = _StrToIntExA@12                      @676
+    StrToIntExW            = _StrToIntExW@12                      @677
     StrToIntW              = _StrToIntW@4                         @678
   ; StrTrimA               = _StrTrimA@?                          @679
   ; StrTrimW               = _StrTrimW@?                          @680
@@ -468,12 +552,8 @@ EXPORTS
     UrlUnescapeW           = _UrlUnescapeW@16                     @706
     wnsprintfA             = _wnsprintfA                          @707
     wnsprintfW             = _wnsprintfW                          @708
-;   wvnsprintfA            = _wvnsprintfA@16                      @709
-;   wvnsprintfW            = _wvnsprintfW@16                      @710
-
-;which ordinals??
-    StrRetToBufA           = _StrRetToBufA@16                     @800
-    StrRetToBufW           = _StrRetToBufW@16                     @801
+;    wvnsprintfA            = _wvnsprintfA@16                      @709
+;    wvnsprintfW            = _wvnsprintfW@16                      @710
 
     SHRegGetPathA          = _SHRegGetPathA@20                    @802
     SHRegGetPathW          = _SHRegGetPathW@20                    @803

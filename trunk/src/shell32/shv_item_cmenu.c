@@ -1,13 +1,8 @@
-/* $Id: shv_item_cmenu.c,v 1.1 2000-08-30 13:53:01 sandervl Exp $ */
 /*
  *	IContextMenu for items in the shellview
  *
  *	1998, 2000	Juergen Schmied <juergen.schmied@debitel.net>
  */
-#ifdef __WIN32OS2__
-#define ICOM_CINTERFACE 1
-#include <odin.h>
-#endif
 #include <string.h>
 
 #include "winerror.h"
@@ -23,9 +18,8 @@
 
 #include "shell32_main.h"
 #include "shellfolder.h"
-#include "shell.h" /* DROPFILESTRUCT */
 
-DEFAULT_DEBUG_CHANNEL(shell)
+DEFAULT_DEBUG_CHANNEL(shell);
 
 /**************************************************************************
 *  IContextMenu Implementation
@@ -490,7 +484,7 @@ static HRESULT WINAPI ISvItemCm_fnGetCommandString(
 	  case GCS_VERBW:
 	    switch(idCommand)
 	    { case FCIDM_SHVIEW_RENAME:
-	        lstrcpyAtoW((LPWSTR)lpszName, "rename");
+                MultiByteToWideChar( CP_ACP, 0, "rename", -1, (LPWSTR)lpszName, uMaxNameLen );
 	        hr = NOERROR;
 	        break;
 	    }

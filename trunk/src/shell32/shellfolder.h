@@ -1,4 +1,3 @@
-/* $Id: shellfolder.h,v 1.2 2000-08-30 13:50:58 sandervl Exp $ */
 /*
  * defines helperfunctions to manipulate the contents of a IShellFolder
  *
@@ -8,7 +7,6 @@
 #define __WINE_SHELLFOLDER_HELP_H
 
 #include "winbase.h"
-#include "shell.h"
 
 #include "wine/obj_base.h"
 #include "wine/obj_shellfolder.h"

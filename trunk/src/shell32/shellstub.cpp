@@ -1,4 +1,4 @@
-/* $Id: shellstub.cpp,v 1.2 2001-04-19 08:32:18 sandervl Exp $ */
+/* $Id: shellstub.cpp,v 1.3 2001-04-28 13:33:47 sandervl Exp $ */
 
 /*
  * Win32 SHELL32 for OS/2
@@ -94,12 +94,6 @@ ODINFUNCTION2(DWORD, DAD_DragMove, DWORD, x1, DWORD, x2)
 }
 
 ODINFUNCTION1(DWORD, Desktop_UpdateBriefcaseOnEvent, DWORD, x1)
-{
-  dprintf(("STUB!"));
-  return 0;
-}
-
-ODINFUNCTION2(DWORD, ILSaveToStream, DWORD, x1, DWORD, x2)
 {
   dprintf(("STUB!"));
   return 0;

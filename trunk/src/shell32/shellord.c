@@ -1,4 +1,3 @@
-/* $Id: shellord.c,v 1.2 2000-11-06 10:20:56 sandervl Exp $ */
 /*
  * The parameters of many functions changes between different OS versions
  * (NT uses Unicode strings, 95 uses ASCII strings)
@@ -6,10 +5,6 @@
  * Copyright 1997 Marcus Meissner
  *           1998 Jürgen Schmied
  */
-#ifdef __WIN32OS2__
-#define ICOM_CINTERFACE 1
-#include <odin.h>
-#endif
 #include <string.h>
 #include <stdio.h>
 #include "winerror.h"
@@ -121,14 +116,15 @@ VOID WINAPI SHGetSetSettings(DWORD x, DWORD y, DWORD z)
  * NOTES
  *  the registry path are for win98 (tested)
  *  and possibly are the same in nt40
+ *
  */
-void WINAPI SHGetSettings(LPSHELLFLAGSTATE lpsfs, DWORD dwMask, DWORD dwx)
+VOID WINAPI SHGetSettings(LPSHELLFLAGSTATE lpsfs, DWORD dwMask)
 {
 	HKEY	hKey;
 	DWORD	dwData;
 	DWORD	dwDataSize = sizeof (DWORD);
 
-	TRACE("(%p 0x%08lx 0x%08lx)\n",lpsfs,dwMask, dwx);
+	TRACE("(%p 0x%08lx)\n",lpsfs,dwMask);
 	
 	if (RegCreateKeyExA(HKEY_CURRENT_USER, "Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced",
 				 0, 0, 0, KEY_ALL_ACCESS, 0, &hKey, 0))
@@ -231,9 +227,11 @@ int WINAPIV ShellMessageBoxW(
 	UINT uType,
 	...)
 {
-	WCHAR	szText[100],szTitle[100],szTemp[256];
-	LPCWSTR   pszText = szText, pszTitle = szTitle;
+	WCHAR	szText[100],szTitle[100];
+	LPCWSTR pszText = szText, pszTitle = szTitle, pszTemp;
 	va_list args;
+	int	ret;
+
 	va_start(args, uType);
 	/* wvsprintfA(buf,fmt, args); */
 
@@ -241,21 +239,23 @@ int WINAPIV ShellMessageBoxW(
 	(DWORD)hInstance,(DWORD)hWnd,lpText,lpCaption,uType);
 
 	if (!HIWORD(lpCaption))
-	  LoadStringW(hInstance, (DWORD)lpCaption, szTitle, 100);
+	  LoadStringW(hInstance, (DWORD)lpCaption, szTitle, sizeof(szTitle)/sizeof(szTitle[0]));
 	else
 	  pszTitle = lpCaption;
 
 	if (!HIWORD(lpText))
-	  LoadStringW(hInstance, (DWORD)lpText, szText, 100);
+	  LoadStringW(hInstance, (DWORD)lpText, szText, sizeof(szText)/sizeof(szText[0]));
 	else
 	  pszText = lpText;
 
-	FormatMessageW(FORMAT_MESSAGE_FROM_STRING | FORMAT_MESSAGE_ARGUMENT_ARRAY,
-		       szText, 0, 0, szTemp, 256, (LPDWORD) args);
+	FormatMessageW(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_STRING, 
+		       pszText, 0, 0, (LPWSTR)&pszTemp, 0, &args);
 
 	va_end(args);
 
-	return MessageBoxW(hWnd,szTemp,szTitle,uType);
+	ret = MessageBoxW(hWnd,pszTemp,pszTitle,uType);
+	LocalFree((HLOCAL)pszTemp);
+	return ret;
 }
 
 /*************************************************************************
@@ -269,9 +269,11 @@ int WINAPIV ShellMessageBoxA(
 	UINT uType,
 	...)
 {
-	char	szText[100],szTitle[100],szTemp[256];
-	LPCSTR   pszText = szText, pszTitle = szTitle;
+	char	szText[100],szTitle[100];
+	LPCSTR  pszText = szText, pszTitle = szTitle, pszTemp;
 	va_list args;
+	int	ret;
+
 	va_start(args, uType);
 	/* wvsprintfA(buf,fmt, args); */
 
@@ -279,21 +281,23 @@ int WINAPIV ShellMessageBoxA(
 	(DWORD)hInstance,(DWORD)hWnd,lpText,lpCaption,uType);
 
 	if (!HIWORD(lpCaption))
-	  LoadStringA(hInstance, (DWORD)lpCaption, szTitle, 100);
+	  LoadStringA(hInstance, (DWORD)lpCaption, szTitle, sizeof(szTitle));
 	else
 	  pszTitle = lpCaption;
 
 	if (!HIWORD(lpText))
-	  LoadStringA(hInstance, (DWORD)lpText, szText, 100);
+	  LoadStringA(hInstance, (DWORD)lpText, szText, sizeof(szText));
 	else
 	  pszText = lpText;
 
-	FormatMessageA(FORMAT_MESSAGE_FROM_STRING | FORMAT_MESSAGE_ARGUMENT_ARRAY,
-		       szText, 0, 0, szTemp, 256, (LPDWORD) args);
+	FormatMessageA(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_STRING, 
+		       pszText, 0, 0, (LPSTR)&pszTemp, 0, &args);
 
 	va_end(args);
 
-	return MessageBoxA(hWnd,szTemp,szTitle,uType);
+	ret = MessageBoxA(hWnd,pszTemp,pszTitle,uType);
+	LocalFree((HLOCAL)pszTemp);
+	return ret;
 }
 
 /*************************************************************************
@@ -455,8 +459,8 @@ DWORD WINAPI SHAddToRecentDocs (UINT uFlags,LPCVOID pv)
  *  see IShellFolder::CreateViewObject
  */
 HRESULT WINAPI SHCreateShellFolderViewEx(
-	LPCSHELLFOLDERVIEWINFO psvcbi, /*[in ] shelltemplate struct*/
-	LPSHELLVIEW* ppv)              /*[out] IShellView pointer*/
+	LPCSHELLFOLDERVIEWINFO psvcbi, /* [in] shelltemplate struct */
+	LPSHELLVIEW* ppv)              /* [out] IShellView pointer */
 {
 	IShellView * psf;
 	HRESULT hRes;
@@ -877,22 +881,6 @@ BOOL WINAPI SHWaitForFileToOpen(
 	FIXME("%p 0x%08lx 0x%08lx stub\n", pidl, dwFlags, dwTimeout);
 	return 0;
 }
-/*************************************************************************
- * Control_FillCache_RunDLL			[SHELL32.8]
- *
- */
-HRESULT WINAPI Control_FillCache_RunDLL(HWND hWnd, HANDLE hModule, DWORD w, DWORD x)
-{	FIXME("0x%04x 0x%04x 0x%04lx 0x%04lx stub\n",hWnd, hModule,w,x);
-	return 0;
-}
-/*************************************************************************
- * RunDLL_CallEntry16				[SHELL32.122]
- * the name is propably wrong
- */
-HRESULT WINAPI RunDLL_CallEntry16(DWORD v, DWORD w, DWORD x, DWORD y, DWORD z)
-{	FIXME("0x%04lx 0x%04lx 0x%04lx 0x%04lx 0x%04lx stub\n",v,w,x,y,z);
-	return 0;
-}
 
 /************************************************************************
  *	shell32_654				[SHELL32.654]
@@ -977,5 +965,41 @@ BOOL WINAPI shell32_243(DWORD a, DWORD b)
 DWORD WINAPI SHELL32_714(LPVOID x)
 {
  	FIXME("(%s)stub\n", debugstr_w(x));
+	return 0;
+}
+
+/*************************************************************************
+ *      SHAddFromPropSheetExtArray	[SHELL32]
+ */
+DWORD WINAPI SHAddFromPropSheetExtArray(DWORD a, DWORD b, DWORD c)
+{
+ 	FIXME("(%08lx,%08lx,%08lx)stub\n", a, b, c);
+	return 0;
+}
+
+/*************************************************************************
+ *      SHCreatePropSheetExtArray	[SHELL32]
+ */
+DWORD WINAPI SHCreatePropSheetExtArray(DWORD a, LPCSTR b, DWORD c)
+{
+ 	FIXME("(%08lx,%s,%08lx)stub\n", a, debugstr_a(b), c);
+	return 0;
+}
+
+/*************************************************************************
+ *      SHReplaceFromPropSheetExtArray	[SHELL]
+ */
+DWORD WINAPI SHReplaceFromPropSheetExtArray(DWORD a, DWORD b, DWORD c, DWORD d)
+{
+ 	FIXME("(%08lx,%08lx,%08lx,%08lx)stub\n", a, b, c, d);
+	return 0;
+}
+
+/*************************************************************************
+ *      SHDestroyPropSheetExtArray	[SHELL32]
+ */
+DWORD WINAPI SHDestroyPropSheetExtArray(DWORD a)
+{
+ 	FIXME("(%08lx)stub\n", a);
 	return 0;
 }

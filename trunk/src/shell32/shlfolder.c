@@ -1,4 +1,3 @@
-/* $Id: shlfolder.c,v 1.1 2000-08-30 13:52:57 sandervl Exp $ */
 /*
  *	Shell Folder stuff
  *
@@ -9,16 +8,16 @@
  *
  */
 #ifdef __WIN32OS2__
-#define ICOM_CINTERFACE 1
-#include <odin.h>
+#define WINE_LARGE_INTEGER
+#define snprintf(a,b,c,d)	sprintf(a,c,d)
 #endif
-
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
 
 #include "debugtools.h"
 #include "winerror.h"
+#include "winbase.h"
 
 #include "oleidl.h"
 #include "shlguid.h"
@@ -31,13 +30,9 @@
 #include "shell32_main.h"
 #include "shresdef.h"
 #include "shlwapi.h"
-
-#define INITGUID
-#include "initguid.h"
 #include "shellfolder.h"
 
-
-DEFAULT_DEBUG_CHANNEL(shell)
+DEFAULT_DEBUG_CHANNEL(shell);
 
 
 /***************************************************************************
@@ -346,7 +341,7 @@ static void SF_RegisterClipFmt (IGenericSFImpl * This)
 }
 
 /**************************************************************************
-*	we need a seperate IUnknown to handle aggregation
+*	we need a separate IUnknown to handle aggregation
 *	(inner IUnknown)
 */
 static HRESULT WINAPI IUnknown_fnQueryInterface(
@@ -615,7 +610,7 @@ static ULONG WINAPI IShellFolder_fnRelease(IShellFolder2 * iface)
 *  ULONG*        pdwAttributes   //[out] items attributes
 *
 * NOTES
-*  every folder trys to parse only it's own (the leftmost) pidl and creates a 
+*  every folder tries to parse only its own (the leftmost) pidl and creates a 
 *  subfolder to evaluate the remaining parts
 *  now we can parse into namespaces implemented by shell extensions
 *
@@ -657,7 +652,7 @@ static HRESULT WINAPI IShellFolder_fnParseDisplayName(
 	  szNext = GetNextElementW(lpszDisplayName, szElement, MAX_PATH);
 
 	  /* build the full pathname to the element */
-	  lstrcpynWtoA(szTempA, szElement, lstrlenW(szElement) + 1);
+          WideCharToMultiByte( CP_ACP, 0, szElement, -1, szTempA, MAX_PATH, NULL, NULL );
 	  strcpy(szPath, This->sMyPath);
 	  PathAddBackslashA(szPath);
 	  strcat(szPath, szTempA);
@@ -690,7 +685,10 @@ static HRESULT WINAPI IShellFolder_fnParseDisplayName(
 	  }
 	}
 
-	*ppidl = pidlTemp;
+        if (!hr)
+	  *ppidl = pidlTemp;
+	else
+	  *ppidl = NULL;
 
 	TRACE("(%p)->(-- pidl=%p ret=0x%08lx)\n", This, ppidl? *ppidl:0, hr);
 
@@ -1187,8 +1185,8 @@ static HRESULT WINAPI IShellFolder_fnSetNameOf(
 	strcpy(szDest, This->sMyPath);
 	PathAddBackslashA(szDest);
 	len = strlen (szDest);
-	lstrcpynWtoA(szDest+len, lpName, MAX_PATH-len);
-	
+        WideCharToMultiByte( CP_ACP, 0, lpName, -1, szDest+len, MAX_PATH-len, NULL, NULL );
+        szDest[MAX_PATH-1] = 0;
 	TRACE("src=%s dest=%s\n", szSrc, szDest);
 	if ( MoveFileA(szSrc, szDest) )
 	{
@@ -1497,9 +1495,20 @@ static HRESULT WINAPI ISFHelper_fnDeleteItems(
 	_ICOM_THIS_From_ISFHelper(IGenericSFImpl,iface)
 	int i;
 	char szPath[MAX_PATH];
+        BOOL bConfirm = TRUE;
 
 	TRACE("(%p)(%u %p)\n", This, cidl, apidl);
 	
+	/* deleting multiple items so give a slightly different warning */
+	if(cidl != 1)
+	{
+          char tmp[8]; 
+          snprintf(tmp, sizeof(tmp), "%d", cidl);
+	  if(!SHELL_WarnItemDelete(ASK_DELETE_MULTIPLE_ITEM, tmp))
+            return E_FAIL;
+          bConfirm = FALSE;
+	}
+
 	for(i=0; i< cidl; i++)
 	{
 	  strcpy(szPath, This->sMyPath);
@@ -1509,9 +1518,12 @@ static HRESULT WINAPI ISFHelper_fnDeleteItems(
 	  if (_ILIsFolder(apidl[i]))
 	  {
 	    LPITEMIDLIST pidl;
-
-	    MESSAGE("delete %s\n", szPath);
-	    if (! SHELL_DeleteDirectoryA(szPath, TRUE)) return E_FAIL;
+	    TRACE("delete %s\n", szPath);
+	    if (! SHELL_DeleteDirectoryA(szPath, bConfirm))
+	    {
+              TRACE("delete %s failed, bConfirm=%d", szPath, bConfirm);
+	      return E_FAIL;
+	    }
 	    pidl = ILCombine(This->absPidl, apidl[i]);
 	    SHChangeNotifyA(SHCNE_RMDIR, SHCNF_IDLIST, pidl, NULL);
 	    SHFree(pidl); 
@@ -1520,8 +1532,12 @@ static HRESULT WINAPI ISFHelper_fnDeleteItems(
 	  {
 	    LPITEMIDLIST pidl;
 
-	    MESSAGE("delete %s\n", szPath);
-	    if (! DeleteFileA(szPath)) return E_FAIL;
+	    TRACE("delete %s\n", szPath);
+	    if (! SHELL_DeleteFileA(szPath, bConfirm))
+	    {
+              TRACE("delete %s failed, bConfirm=%d", szPath, bConfirm);
+	      return E_FAIL;
+	    }
 	    pidl = ILCombine(This->absPidl, apidl[i]);
 	    SHChangeNotifyA(SHCNE_DELETE, SHCNF_IDLIST, pidl, NULL);
 	    SHFree(pidl); 
@@ -2132,7 +2148,7 @@ static HRESULT WINAPI ISF_MyComputer_fnParseDisplayName(
 	    lpszDisplayName[2] == (WCHAR)'\\')
 	{
 	  szNext = GetNextElementW(lpszDisplayName, szElement, MAX_PATH);
-	  lstrcpynWtoA(szTempA, szElement, lstrlenW(szElement) + 1);
+          WideCharToMultiByte( CP_ACP, 0, szElement, -1, szTempA, MAX_PATH, NULL, NULL );
 	  pidlTemp = _ILCreateDrive(szTempA);
 
 	  if (szNext && *szNext)
@@ -2497,11 +2513,7 @@ static HRESULT WINAPI ISF_MyComputer_fnGetDetailsOf(
 	      {
 	        _ILSimpleGetText(pidl, szPath, MAX_PATH);
 	        GetDiskFreeSpaceExA(szPath, NULL, &ulBytes, NULL);
-#ifdef __WIN32OS2__
-	        StrFormatByteSizeA(ulBytes.LowPart, psd->str.u.cStr, MAX_PATH);
-#else
 	        StrFormatByteSizeA(ulBytes.s.LowPart, psd->str.u.cStr, MAX_PATH);
-#endif
 	      }
 	      break;
 	    case 3:	/* free size */
@@ -2509,11 +2521,7 @@ static HRESULT WINAPI ISF_MyComputer_fnGetDetailsOf(
 	      {
 	        _ILSimpleGetText(pidl, szPath, MAX_PATH);
 	        GetDiskFreeSpaceExA(szPath, &ulBytes, NULL, NULL);
-#ifdef __WIN32OS2__
-	        StrFormatByteSizeA(ulBytes.LowPart, psd->str.u.cStr, MAX_PATH);
-#else
 	        StrFormatByteSizeA(ulBytes.s.LowPart, psd->str.u.cStr, MAX_PATH);
-#endif
 	      }
 	      break;
 	  }

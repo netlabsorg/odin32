@@ -1,18 +1,14 @@
-/* $Id: shlmenu.c,v 1.1 2000-08-30 13:52:59 sandervl Exp $ */
 /*
  * see www.geocities.com/SiliconValley/4942/filemenu.html
  */
-#ifdef __WIN32OS2__
-#define ICOM_CINTERFACE 1
-#include <odin.h>
-#endif
 #include <string.h>
 
+#include "shlobj.h"
 #include "wine/obj_base.h"
 #include "wine/obj_enumidlist.h"
 #include "wine/obj_shellfolder.h"
 #include "wine/undocshell.h"
-
+#include "shlwapi.h"
 #include "heap.h"
 #include "debugtools.h"
 #include "shell32_main.h"
@@ -51,7 +47,7 @@ static BOOL bAbortInit;
 
 #define	CCH_MAXITEMTEXT 256
 
-DEFAULT_DEBUG_CHANNEL(shell)
+DEFAULT_DEBUG_CHANNEL(shell);
 
 LPFMINFO FM_GetMenuInfo(HMENU hmenu)
 {	MENUINFO	MenuInfo;
@@ -358,6 +354,9 @@ BOOL WINAPI FileMenu_AppendItemA(
 	return TRUE;
 
 }
+
+/**********************************************************************/
+
 BOOL WINAPI FileMenu_AppendItemAW(
 	HMENU hMenu,
 	LPCVOID lpText,
@@ -602,7 +601,7 @@ LRESULT WINAPI FileMenu_DrawItem(
 	ExtTextOutA (lpdis->hDC, xt , yt, ETO_OPAQUE, &TextRect, pMyItem->szItemText, pMyItem->cchItemText, NULL);
 	
 	Shell_GetImageList(0, &hImageList);
-	pImageList_Draw(hImageList, pMyItem->iIconIndex, lpdis->hDC, xi, yi, ILD_NORMAL);
+	ImageList_Draw(hImageList, pMyItem->iIconIndex, lpdis->hDC, xi, yi, ILD_NORMAL);
 
 	TRACE("-- 0x%04x 0x%04x 0x%04x 0x%04x\n", TextRect.left, TextRect.top, TextRect.right, TextRect.bottom);
 	
@@ -690,7 +689,10 @@ BOOL WINAPI FileMenu_DeleteItemByCmd (HMENU hMenu, UINT uID)
 	mii.fMask = MIIM_SUBMENU;
 
 	GetMenuItemInfoA(hMenu, uID, FALSE, &mii );
-	if ( mii.hSubMenu );
+	if ( mii.hSubMenu )
+	{
+	  /* FIXME: Do what? */
+	}
 
 	DeleteMenu(hMenu, MF_BYCOMMAND, uID);
 	return TRUE;
@@ -710,7 +712,10 @@ BOOL WINAPI FileMenu_DeleteItemByIndex ( HMENU hMenu, UINT uPos)
 	mii.fMask = MIIM_SUBMENU;
 
 	GetMenuItemInfoA(hMenu, uPos, TRUE, &mii );
-	if ( mii.hSubMenu );
+	if ( mii.hSubMenu )
+	{
+	  /* FIXME: Do what? */
+	}
 
 	DeleteMenu(hMenu, MF_BYPOSITION, uPos);
 	return TRUE;
@@ -819,6 +824,8 @@ BOOL _SHIsMenuSeparator(HMENU hm, int i)
 
 	return(FALSE);
 }
+
+/**********************************************************************/
 
 HRESULT WINAPI Shell_MergeMenus (HMENU hmDst, HMENU hmSrc, UINT uInsert, UINT uIDAdjust, UINT uIDAdjustMax, ULONG uFlags)
 {	int		nItem;

@@ -1,4 +1,4 @@
-/* $Id: shres.orc,v 1.12 2001-04-23 10:47:23 sandervl Exp $ */
+/* $Id: shres.orc,v 1.13 2001-04-28 13:33:48 sandervl Exp $ */
 /*
  * Top level resource file for Common Dialogs
  *
@@ -103,13 +103,14 @@ FONT 8, "Helv"
 {
  DEFPUSHBUTTON "OK", 1, 80, 176, 50, 12, BS_DEFPUSHBUTTON | WS_GROUP | WS_TABSTOP
  PUSHBUTTON "Cancel", 2, 134, 176, 50, 12, WS_GROUP | WS_TABSTOP
- LTEXT "", IDD_TITLE, 4, 4, 18, 12
- LTEXT "", IDD_STATUS, 4, 25, 18, 12
+ LTEXT "", IDD_TITLE, 4, 4, 180, 12
+ LTEXT "", IDD_STATUS, 4, 25, 180, 12
  CONTROL "Tree1",IDD_TREEVIEW,"SysTreeView32",
  	TVS_HASBUTTONS | TVS_HASLINES | TVS_LINESATROOT |
-	WS_BORDER | WS_TABSTOP,
+	WS_BORDER | WS_TABSTOP, 
 	4, 40, 180, 120
 }
+
 
 /*
         special folders

@@ -13,16 +13,19 @@
 #include <heapstring.h>
 #include <winnls.h>
 #endif
-
 #include <ctype.h>
 #include <stdlib.h> 
 #include <stdio.h>
 #include <string.h>
 
 #include "winerror.h"
-#include "wine/undocshell.h"
+#include "windef.h"
+#include "winbase.h"
+#include "wingdi.h"
+#include "winuser.h"
+#include "shlwapi.h"
+#include "shlobj.h"
 #include "wine/unicode.h"
-#include "heap.h"
 #include "debugtools.h"
 
 DEFAULT_DEBUG_CHANNEL(shell);
@@ -45,6 +48,16 @@ LPWSTR WINAPI StrChrW (LPCWSTR str, WCHAR x )
 	TRACE("%s 0x%04x\n",debugstr_w(str),x);
 	return strchrW(str, x);
 }
+#ifndef __WIN32OS2__
+/*************************************************************************
+ * StrCmpIW					[SHLWAPI]
+ */
+int WINAPI StrCmpIW ( LPCWSTR wstr1, LPCWSTR wstr2 )
+{
+    TRACE("%s %s\n", debugstr_w(wstr1),debugstr_w(wstr2));
+    return strcmpiW( wstr1, wstr2 );
+}
+#endif
 
 /*************************************************************************
  * StrCmpNA					[SHLWAPI]
@@ -83,6 +96,15 @@ int WINAPI StrCmpNIW ( LPCWSTR wstr1, LPCWSTR wstr2, int len)
 }
 
 /*************************************************************************
+ * StrCmpW					[SHLWAPI]
+ */
+int WINAPI StrCmpW ( LPCWSTR wstr1, LPCWSTR wstr2 )
+{
+    TRACE("%s %s\n", debugstr_w(wstr1),debugstr_w(wstr2));
+    return strcmpW( wstr1, wstr2 );
+}
+
+/*************************************************************************
  * StrCatW					[SHLWAPI]
  */
 LPWSTR WINAPI StrCatW( LPWSTR wstr1, LPCWSTR wstr2 )
@@ -97,6 +119,15 @@ LPWSTR WINAPI StrCatW( LPWSTR wstr1, LPCWSTR wstr2 )
 LPWSTR WINAPI StrCpyW( LPWSTR wstr1, LPCWSTR wstr2 )
 {
     return strcpyW( wstr1, wstr2 );
+}
+
+
+/*************************************************************************
+ * StrCpyNW					[SHLWAPI]
+ */
+LPWSTR WINAPI StrCpyNW( LPWSTR wstr1, LPCWSTR wstr2, int n )
+{
+    return lstrcpynW( wstr1, wstr2, n );
 }
 
 
@@ -130,7 +161,6 @@ LPWSTR WINAPI StrStrW(LPCWSTR lpFirst, LPCWSTR lpSrch)
     return NULL;
 }
 
-#ifndef __WIN32OS2__
 /*************************************************************************
  * StrStrIA					[SHLWAPI]
  */
@@ -160,7 +190,6 @@ LPWSTR WINAPI StrStrIW(LPCWSTR lpFirst, LPCWSTR lpSrch)
     }
     return NULL;
 }
-#endif
 
 /*************************************************************************
  *	StrToIntA			[SHLWAPI]
@@ -176,14 +205,32 @@ int WINAPI StrToIntA(LPCSTR lpSrc)
  */
 int WINAPI StrToIntW(LPCWSTR lpSrc)
 {
-	int ret;
-	LPSTR lpStr =  HEAP_strdupWtoA(GetProcessHeap(),0,lpSrc);
+    char buffer[32];
 
-	TRACE("%s\n", debugstr_w(lpSrc));
+    TRACE("%s\n", debugstr_w(lpSrc));
+    WideCharToMultiByte( CP_ACP, 0, lpSrc, -1, buffer, sizeof(buffer), NULL, NULL );
+    buffer[sizeof(buffer)-1] = 0;
+    return atol(buffer);
+}
 
-	ret = atol(lpStr);
-	HeapFree(GetProcessHeap(),0,lpStr);
-	return ret;
+/*************************************************************************
+ *	StrToIntExA			[SHLWAPI]
+ */
+BOOL WINAPI StrToIntExA( LPCSTR pszString, DWORD dwFlags, LPINT piRet)
+{
+	TRACE("%s %ld stub !\n", debugstr_a(pszString), dwFlags);
+	piRet = (LPINT) StrToIntA(pszString);
+	return TRUE;
+}
+
+/*************************************************************************
+ *	StrToIntExW			[SHLWAPI]
+ */
+BOOL WINAPI StrToIntExW( LPCWSTR pszString, DWORD dwFlags, LPINT piRet)
+{
+	TRACE("%s %ld stub !\n", debugstr_w(pszString), dwFlags);
+	piRet = (LPINT) StrToIntW(pszString);
+	return TRUE;
 }
 
 /*************************************************************************
@@ -347,7 +394,7 @@ LPWSTR WINAPI StrCatBuffW(LPWSTR front, LPCWSTR back, INT size)
  * NOTES
  *  the pidl is for STRRET OFFSET
  */
-HRESULT WINAPI StrRetToBufA (LPSTRRET src, LPITEMIDLIST pidl, LPSTR dest, DWORD len)
+HRESULT WINAPI StrRetToBufA (LPSTRRET src, const ITEMIDLIST *pidl, LPSTR dest, DWORD len)
 {
 	TRACE("dest=0x%p len=0x%lx strret=0x%p pidl=%p stub\n",dest,len,src,pidl);
 
@@ -385,7 +432,7 @@ HRESULT WINAPI StrRetToBufA (LPSTRRET src, LPITEMIDLIST pidl, LPSTR dest, DWORD 
  * NOTES
  *  the pidl is for STRRET OFFSET
  */
-HRESULT WINAPI StrRetToBufW (LPSTRRET src, LPITEMIDLIST pidl, LPWSTR dest, DWORD len)
+HRESULT WINAPI StrRetToBufW (LPSTRRET src, const ITEMIDLIST *pidl, LPWSTR dest, DWORD len)
 {
 	TRACE("dest=0x%p len=0x%lx strret=0x%p pidl=%p stub\n",dest,len,src,pidl);
 
@@ -397,13 +444,16 @@ HRESULT WINAPI StrRetToBufW (LPSTRRET src, LPITEMIDLIST pidl, LPWSTR dest, DWORD
 	    break;
 
 	  case STRRET_CSTRA:
-	    lstrcpynAtoW((LPWSTR)dest, src->u.cStr, len);
+              if (!MultiByteToWideChar( CP_ACP, 0, src->u.cStr, -1, dest, len ) && len)
+                  dest[len-1] = 0;
 	    break;
 
 	  case STRRET_OFFSETA:
 	    if (pidl)
 	    {
-	      lstrcpynAtoW((LPWSTR)dest, ((LPCSTR)&pidl->mkid)+src->u.uOffset, len);
+              if (!MultiByteToWideChar( CP_ACP, 0, ((LPCSTR)&pidl->mkid)+src->u.uOffset, -1,
+                                        dest, len ) && len)
+                  dest[len-1] = 0;
 	    }
 	    break;
 
@@ -424,7 +474,7 @@ LPSTR WINAPI StrFormatByteSizeA ( DWORD dw, LPSTR pszBuf, UINT cchBuf )
 {	char buf[64];
 	TRACE("%lx %p %i\n", dw, pszBuf, cchBuf);
 	if ( dw<1024L )
-	{ sprintf (buf,"%3.1f bytes", (FLOAT)dw);
+	{ sprintf (buf,"%ld bytes", dw);
 	}
 	else if ( dw<1048576L)
 	{ sprintf (buf,"%3.1f KB", (FLOAT)dw/1024);
@@ -443,22 +493,30 @@ LPSTR WINAPI StrFormatByteSizeA ( DWORD dw, LPSTR pszBuf, UINT cchBuf )
  * StrFormatByteSizeW				[SHLWAPI]
  */
 LPWSTR WINAPI StrFormatByteSizeW ( DWORD dw, LPWSTR pszBuf, UINT cchBuf )
-{	char buf[64];
-	TRACE("%lx %p %i\n", dw, pszBuf, cchBuf);
-	if ( dw<1024L )
-	{ sprintf (buf,"%3.1f bytes", (FLOAT)dw);
-	}
-	else if ( dw<1048576L)
-	{ sprintf (buf,"%3.1f KB", (FLOAT)dw/1024);
-	}
-	else if ( dw < 1073741824L)
-	{ sprintf (buf,"%3.1f MB", (FLOAT)dw/1048576L);
-	}
-	else
-	{ sprintf (buf,"%3.1f GB", (FLOAT)dw/1073741824L);
-	}
-	lstrcpynAtoW (pszBuf, buf, cchBuf);
-	return pszBuf;	
+{
+        char buf[64];
+        StrFormatByteSizeA( dw, buf, sizeof(buf) );
+        if (!MultiByteToWideChar( CP_ACP, 0, buf, -1, pszBuf, cchBuf ) && cchBuf)
+            pszBuf[cchBuf-1] = 0;
+        return pszBuf;
+}
+
+/*************************************************************************
+ *      StrNCatA	[SHLWAPI]
+ */
+LPSTR WINAPI StrNCatA(LPSTR front, LPCSTR back, INT cchMax)
+{
+	TRACE("%s %s %i stub\n", debugstr_a(front),debugstr_a(back),cchMax);
+	return (front);
+}
+
+/*************************************************************************
+ *      StrNCatW	[SHLWAPI]
+ */
+LPWSTR WINAPI StrNCatW(LPWSTR front, LPCWSTR back, INT cchMax)
+{
+	TRACE("%s %s %i stub\n", debugstr_w(front),debugstr_w(back),cchMax);
+	return (front);
 }
 
 /*************************************************************************

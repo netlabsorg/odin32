@@ -1,4 +1,4 @@
-/* $Id: folders.c,v 1.7 2000-11-28 11:00:47 sandervl Exp $ */
+/* $Id: folders.c,v 1.8 2001-04-28 13:33:44 sandervl Exp $ */
 /*
  *  Copyright 1997  Marcus Meissner
  *  Copyright 1998  Juergen Schmied
@@ -409,10 +409,10 @@ static HRESULT WINAPI IExtractIconA_fnExtract(IExtractIconA * iface, LPCSTR pszF
     FIXME("(%p) (file=%p index=%u %p %p size=%u) semi-stub\n", This, pszFile, nIconIndex, phiconLarge, phiconSmall, nIconSize);
 
     if (phiconLarge)
-      *phiconLarge = pImageList_GetIcon(ShellBigIconList, nIconIndex, ILD_TRANSPARENT);
+      *phiconLarge = ImageList_GetIcon(ShellBigIconList, nIconIndex, ILD_TRANSPARENT);
 
     if (phiconSmall)
-      *phiconSmall = pImageList_GetIcon(ShellSmallIconList, nIconIndex, ILD_TRANSPARENT);
+      *phiconSmall = ImageList_GetIcon(ShellSmallIconList, nIconIndex, ILD_TRANSPARENT);
 
     return S_OK;
 }

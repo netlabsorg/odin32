@@ -1,4 +1,3 @@
-/* $Id: shlview.c,v 1.1 2000-08-30 13:52:59 sandervl Exp $ */
 /*
  *	ShellView
  *
@@ -22,34 +21,24 @@
  * FIXME: when the ShellView_WndProc gets a WM_NCDESTROY should we do a
  * Release() ??? 
  */
-#ifdef __WIN32OS2__
-#define ICOM_CINTERFACE 1
-#include <odin.h>
-#endif
 
 #include <stdlib.h>
 #include <string.h>
 
+#include "windef.h"
+#include "winerror.h"
+#include "winnls.h"
 #include "servprov.h"
 #include "shlguid.h"
-#include "wine/obj_base.h"
-#include "wine/obj_shellfolder.h"
-#include "wine/obj_shellview.h"
-#include "wine/obj_oleview.h"
-#include "wine/obj_commdlgbrowser.h"
-#include "wine/obj_shellbrowser.h"
-#include "wine/obj_dockingwindowframe.h"
-#include "wine/obj_extracticon.h"
-#include "wine/obj_dragdrop.h"
+#include "shlobj.h"
 #include "wine/undocshell.h"
 #include "shresdef.h"
 #include "debugtools.h"
-#include "winerror.h"
-#include "wine/winestring.h"
 
 #include "docobj.h"
 #include "pidl.h"
 #include "shell32_main.h"
+#include "shellfolder.h"
 
 DEFAULT_DEBUG_CHANNEL(shell);
 
@@ -117,13 +106,11 @@ static struct ICOM_VTABLE(IViewObject) vovt;
 
 #define SHV_CHANGE_NOTIFY WM_USER + 0x1111
 
-#define TOOLBAR_ID   (L"SHELLDLL_DefView")
 /*windowsx.h */
 #define GET_WM_COMMAND_ID(wp, lp)               LOWORD(wp)
 #define GET_WM_COMMAND_HWND(wp, lp)             (HWND)(lp)
 #define GET_WM_COMMAND_CMD(wp, lp)              HIWORD(wp)
-/* winuser.h */
-#define WM_SETTINGCHANGE                WM_WININICHANGE
+
 extern void WINAPI _InsertMenuItem (HMENU hmenu, UINT indexMenu, BOOL fByPosition, 
 			UINT wID, UINT fType, LPSTR dwTypeData, UINT fState);
 
@@ -151,7 +138,7 @@ MYTOOLINFO Tools[] =
 #ifdef __WIN32OS2__
 typedef void (* CALLBACK PFNSHGETSETTINGSPROC)(LPSHELLFLAGSTATE lpsfs, DWORD dwMask);
 #else
-typedef void (CALLBACK *PFNSHGETSETTINGSPROC)(LPSHELLFLAGSTATE lpsfs, DWORD dwMask);
+typedef void CALLBACK (*PFNSHGETSETTINGSPROC)(LPSHELLFLAGSTATE lpsfs, DWORD dwMask);
 #endif
 
 /**********************************************************
@@ -1258,7 +1245,8 @@ static LRESULT ShellView_OnNotify(IShellViewImpl * This, UINT CtlID, LPNMHDR lpn
 		ListView_GetItemA(This->hWndList, &lvItem);
 		
 		pidl = (LPITEMIDLIST)lpdi->item.lParam;
-		lstrcpynAtoW(wszNewName, lpdi->item.pszText, MAX_PATH);
+                if (!MultiByteToWideChar( CP_ACP, 0, lpdi->item.pszText, -1, wszNewName, MAX_PATH ))
+                    wszNewName[MAX_PATH-1] = 0;
 	        hr = IShellFolder_SetNameOf(This->pSFParent, 0, pidl, wszNewName, SHGDN_INFOLDER, &pidl);
 		
 		if(SUCCEEDED(hr) && pidl)
@@ -1284,12 +1272,72 @@ static LRESULT ShellView_OnNotify(IShellViewImpl * This, UINT CtlID, LPNMHDR lpn
 	      msg.pt = 0;*/
 	      
 	      LPNMLVKEYDOWN plvKeyDown = (LPNMLVKEYDOWN) lpnmh;
+
+              /* initiate a rename of the selected file or directory */
+              if(plvKeyDown->wVKey == VK_F2)
+              {
+                /* see how many files are selected */
+                int i = ListView_GetSelectedCount(This->hWndList);
+
+                /* get selected item */
+                if(i == 1)
+                {
+                  /* get selected item */
+                  i = ListView_GetNextItem(This->hWndList, -1,
+			LVNI_SELECTED);
+ 
+                  ListView_EnsureVisible(This->hWndList, i, 0);
+                  ListView_EditLabelA(This->hWndList, i);
+                }
+              }
 #if 0
 	      TranslateAccelerator(This->hWnd, This->hAccel, &msg)
 #endif
-	      FIXME("LVN_KEYDOWN key=0x%08x\n",plvKeyDown->wVKey);
+	      else if(plvKeyDown->wVKey == VK_DELETE)
+              {
+		int i, item_index;
+		LVITEMA item;
+		LPITEMIDLIST* pItems;
+		ISFHelper *psfhlp;
+
+		IShellFolder_QueryInterface(This->pSFParent, &IID_ISFHelper,
+		 	(LPVOID*)&psfhlp);
+
+		if(!(i = ListView_GetSelectedCount(This->hWndList)))
+		  break;
+	
+		/* allocate memory for the pidl array */
+		pItems = HeapAlloc(GetProcessHeap(), 0, 
+			sizeof(LPITEMIDLIST) * i);
+ 
+		/* retrieve all selected items */
+		i = 0;
+		item_index = -1;
+		while(ListView_GetSelectedCount(This->hWndList) > i)
+		{
+		  /* get selected item */
+		  item_index = ListView_GetNextItem(This->hWndList, 
+			item_index, LVNI_SELECTED);
+		  item.iItem = item_index;
+		  ListView_GetItemA(This->hWndList, &item);
+
+		  /* get item pidl */
+		  pItems[i] = (LPITEMIDLIST)item.lParam;
+		  
+		  i++;
+		}
+
+		/* perform the item deletion */
+		ISFHelper_DeleteItems(psfhlp, i, pItems);
+
+		/* free pidl array memory */
+		HeapFree(GetProcessHeap(), 0, pItems);
+              }
+              else
+		FIXME("LVN_KEYDOWN key=0x%08x\n",plvKeyDown->wVKey);
 	    }
 	    break;
+
 	  default:
 	    TRACE("-- %p WM_COMMAND %x unhandled\n", This, lpnmh->code);
 	    break;;

@@ -1,4 +1,4 @@
-/* $Id: shellguid.c,v 1.1 2000-08-30 13:52:55 sandervl Exp $ */
+/* $Id: shellguid.c,v 1.2 2001-04-28 13:33:46 sandervl Exp $ */
 /*
  *  Shell UID
  *
@@ -21,3 +21,4 @@
 #include "shlguid.h"
 #include "shlobj.h"
 #include "docobj.h"
+#include "shellfolder.h"

@@ -1,4 +1,3 @@
-/* $Id: shellole.c,v 1.1 2000-08-30 13:52:56 sandervl Exp $ */
 /*
  *	handling of SHELL32.DLL OLE-Objects
  *
@@ -6,25 +5,15 @@
  *	Copyright 1998	Juergen Schmied  <juergen.schmied@metronet.de>
  *
  */
-#ifdef __WIN32OS2__
-#define ICOM_CINTERFACE 1
-#include <odin.h>
-#include <winnls.h>
-#endif
 
 #include <stdlib.h>
 #include <string.h>
 
-#include "wine/obj_base.h"
-#include "wine/obj_shelllink.h"
-#include "wine/obj_shellfolder.h"
-#include "wine/obj_shellbrowser.h"
-#include "wine/obj_contextmenu.h"
-#include "wine/obj_shellextinit.h"
-#include "wine/obj_extracticon.h"
-
+#include "shlobj.h"
+#include "shellapi.h"
 #include "shlguid.h"
 #include "winreg.h"
+#include "wine/unicode.h"
 #include "winerror.h"
 #include "debugtools.h"
 
@@ -158,7 +147,7 @@ DWORD WINAPI SHCLSIDFromStringAW (LPVOID clsid, CLSID *id)
 DWORD WINAPI SHGetMalloc(LPMALLOC *lpmal) 
 {
 	TRACE("(%p)\n", lpmal);
-	return CoGetMalloc(0,lpmal);
+	return CoGetMalloc(MEMCTX_TASK, lpmal);
 }
 
 /*************************************************************************
@@ -358,7 +347,7 @@ static ICOM_VTABLE(IClassFactory) clfvt =
 #ifdef __WIN32OS2__
 typedef HRESULT (* CALLBACK LPFNCREATEINSTANCE)(IUnknown* pUnkOuter, REFIID riid, LPVOID* ppvObject);
 #else
-typedef HRESULT (CALLBACK * LPFNCREATEINSTANCE)(IUnknown* pUnkOuter, REFIID riid, LPVOID* ppvObject);
+typedef HRESULT CALLBACK (*LPFNCREATEINSTANCE)(IUnknown* pUnkOuter, REFIID riid, LPVOID* ppvObject);
 #endif
 
 typedef struct
@@ -503,9 +492,9 @@ static ICOM_VTABLE(IClassFactory) dclfvt =
 HRESULT WINAPI SHCreateDefClassObject(
 	REFIID	riid,				
 	LPVOID*	ppv,	
-	LPFNCREATEINSTANCE lpfnCI,	/* create instance callback entry */
-	PLONG	pcRefDll,		/* ref count of the dll */
-	REFIID	riidInst)		/* optional interface to the instance */
+	LPFNCREATEINSTANCE lpfnCI,	/* [in] create instance callback entry */
+	PLONG	pcRefDll,		/* [in/out] ref count of the dll */
+	REFIID	riidInst)		/* [in] optional interface to the instance */
 {
 	TRACE("\n\tIID:\t%s %p %p %p \n\tIIDIns:\t%s\n",
               debugstr_guid(riid), ppv, lpfnCI, pcRefDll, debugstr_guid(riidInst));
@@ -553,15 +542,15 @@ void WINAPI DragFinish(HDROP h)
  */
 BOOL WINAPI DragQueryPoint(HDROP hDrop, POINT *p)
 {
-	LPDROPFILESTRUCT lpDropFileStruct;  
+        DROPFILES *lpDropFileStruct;
 	BOOL bRet;
 
 	TRACE("\n");
 
-	lpDropFileStruct = (LPDROPFILESTRUCT) GlobalLock(hDrop);
-  
-	memcpy(p,&lpDropFileStruct->ptMousePos,sizeof(POINT));
-	bRet = lpDropFileStruct->fInNonClientArea;
+	lpDropFileStruct = (DROPFILES *) GlobalLock(hDrop);
+
+        *p = lpDropFileStruct->pt;
+	bRet = lpDropFileStruct->fNC;
   
 	GlobalUnlock(hDrop);
 	return bRet;
@@ -578,13 +567,13 @@ UINT WINAPI DragQueryFileA(
 {
 	LPSTR lpDrop;
 	UINT i = 0;
-	LPDROPFILESTRUCT lpDropFileStruct = (LPDROPFILESTRUCT) GlobalLock(hDrop); 
+	DROPFILES *lpDropFileStruct = (DROPFILES *) GlobalLock(hDrop);
     
 	TRACE("(%08x, %x, %p, %u)\n",	hDrop,lFile,lpszFile,lLength);
     
 	if(!lpDropFileStruct) goto end;
 
-	lpDrop = (LPSTR) lpDropFileStruct + lpDropFileStruct->lSize;
+	lpDrop = (LPSTR) lpDropFileStruct + lpDropFileStruct->pFiles;
 
 	while (i++ < lFile)
 	{
@@ -617,13 +606,13 @@ UINT WINAPI DragQueryFileW(
 {
 	LPWSTR lpwDrop;
 	UINT i = 0;
-	LPDROPFILESTRUCT lpDropFileStruct = (LPDROPFILESTRUCT) GlobalLock(hDrop); 
+	DROPFILES *lpDropFileStruct = (DROPFILES *) GlobalLock(hDrop);
     
 	TRACE("(%08x, %x, %p, %u)\n", hDrop,lFile,lpszwFile,lLength);
     
 	if(!lpDropFileStruct) goto end;
 
-	lpwDrop = (LPWSTR) lpDropFileStruct + lpDropFileStruct->lSize;
+	lpwDrop = (LPWSTR) lpDropFileStruct + lpDropFileStruct->pFiles;
 
 	i = 0;
 	while (i++ < lFile)
@@ -636,7 +625,7 @@ UINT WINAPI DragQueryFileW(
 	  }
 	}
     
-	i = lstrlenW(lpwDrop);
+	i = strlenW(lpwDrop);
 	i++;
 	if ( !lpszwFile) goto end;   /* needed buffer size */
 

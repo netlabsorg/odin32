@@ -1,14 +1,9 @@
-/* $Id: shv_bg_cmenu.c,v 1.1 2000-08-30 13:53:00 sandervl Exp $ */
 /*
  *	IContextMenu
  *	ShellView Background Context Menu (shv_bg_cm)
  *
  *	Copyright 1999	Juergen Schmied <juergen.schmied@metronet.de>
  */
-#ifdef __WIN32OS2__
-#define ICOM_CINTERFACE 1
-#include <odin.h>
-#endif
 #include <string.h>
 
 #include "debugtools.h"
@@ -21,10 +16,9 @@
 
 #include "shell32_main.h"
 #include "shellfolder.h"
-#include "shell.h" /* DROPFILESTRUCT */
 #include "wine/undocshell.h"
 
-DEFAULT_DEBUG_CHANNEL(shell)
+DEFAULT_DEBUG_CHANNEL(shell);
 
 /**************************************************************************
 *  IContextMenu Implementation
@@ -200,7 +194,7 @@ static BOOL DoPaste(
 	
 	TRACE("\n");
 
-	if(SUCCEEDED(pOleGetClipboard(&pda)));
+	if(SUCCEEDED(pOleGetClipboard(&pda)))
 	{
 	  STGMEDIUM medium;
 	  FORMATETC formatetc;
@@ -369,7 +363,7 @@ static HRESULT WINAPI ISVBgCm_fnGetCommandString(
 
 	TRACE("(%p)->(idcom=%x flags=%x %p name=%p len=%x)\n",This, idCommand, uFlags, lpReserved, lpszName, uMaxNameLen);
 
-	/* test the existance of the menu items, the file dialog enables 
+	/* test the existence of the menu items, the file dialog enables 
 	   the buttons according to this */
 	if (uFlags == GCS_VALIDATEA)
 	{
