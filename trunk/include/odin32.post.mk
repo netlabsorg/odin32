@@ -1,4 +1,4 @@
-# $Id: odin32.post.mk,v 1.2 2001-07-30 22:50:51 bird Exp $
+# $Id: odin32.post.mk,v 1.3 2001-08-04 14:27:25 bird Exp $
 
 #
 # Odin32 API
@@ -49,3 +49,24 @@ dummy.c:
 /* dummy file */
 <<KEEP
 
+
+#
+# Dummy .lib dependencies.
+#
+OS2386.LIB \
+mmpm2.lib \
+so32dll.lib \
+tcp32dll.lib \
+rexx.lib \
+$(SOMLIB) \
+$(RTLLIB) \
+$(RTLLIB_O) \
+$(RTLLIB_NRE) \
+    :
+
+
+#
+# Nothing rule used for makefile debugging.
+#
+nothing:
+    @echo Did nothing with makefile $(MAKEDIR)\$(MAKEFILE)
