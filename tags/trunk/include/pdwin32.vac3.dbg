@@ -1,4 +1,4 @@
-# $Id: pdwin32.vac3.dbg,v 1.31 2000-11-19 08:31:20 bird Exp $
+# $Id: pdwin32.vac3.dbg,v 1.32 2000-11-19 23:53:47 bird Exp $
 # ODIN / win32os2 Project
 #
 # DEBUG makefile for the VAC3 compiler environment
@@ -6,12 +6,22 @@
 # phaller@gmx.net, 1999/05/27
 #
 
+
+#
+# Library macros.
+#
 SOMLIB   = somtk.lib
 RTLLIB   = cppom30.lib
 RTLLIB_O = cppom30o.lib
 DLLENTRY = $(PDWIN32_LIB)\dllentry.obj
+ODINCRT  = odincrtd
 
+
+#
+# Object directory.
+#
 OBJDIR   = .\bin\debug
+
 
 #
 # Tools
@@ -26,52 +36,70 @@ ILIB   = ilib
 RC     = $(PDWIN32_TOOLS)\wrc
 OS2RC  = rc
 
-ODINCRT = odincrtd
 
 #
 # Tool Flags
 #
-CFLAGS           = -Q  -Si -Ti -Tm+ -Ge- -Ss+ -W3 -Gm+ /Gn+
-CXXFLAGS         = -Q  -Si -Ti -Tm+ -Ge- -Ss+ -W3 -Gm+ /Gn+ /Gx+
-CXXFLAGS_ODINCRT = -Q  -Si -Ti -Tm+ -Ge- -Ss+ -W3 -Gm+ /Gn- /Gx+
-CFLAGS_WIN32APP  = -Q  -Si -Ti -Tm+ -Ge- -Ss+ -W3 -Gm+ /Gn+
-CXXFLAGS_WIN32APP= -Q  -Si -Ti -Tm+ -Ge- -Ss+ -W3 -Gm+ /Gn+
-
-CINCLUDES        = -I$(PDWIN32_INCLUDE)\Win -I. -I$(PDWIN32_INCLUDE)
-CDEFINES         = -DDEBUG -D__WIN32OS2__ -D__i386__ -D__WINE__ -DTCPV40HDRS -DCOMCTL32UNDOC
-CDEFINES_ODINCRT = -DDEBUG -D__WIN32OS2__ -D__i386__ -D__WINE__
-CDEFINES_WIN32APP= -DDEBUG -D__WIN32OS2__ -D__i386__
-
-!ifdef DEBUGALL
-CFLAGS           = $(CFLAGS) -DDEBUG_ENABLELOG_LEVEL2
-CXXFLAGS         = $(CXXFLAGS) -DDEBUG_ENABLELOG_LEVEL2
-!endif
-
 ASFLAGS          = -Mb -Sc -Sv:ALP +Od -D:DEBUG
-LDFLAGS          = -Q  -Si -Ti -Ge- -Ss+ -W3 -Gm+ /B"/noe /map /NOD /dbgpack /packcode /packdata /exepack:2"
-LDFLAGS_ODINCRT  = -Q  -Si -Ti -Ge- -Ss+ -W3 -Gm+ /B"/noe /map /dbgpack /packcode /packdata /exepack:2"
-LD2FLAGS         = /nologo /DE /noe /map /NOD /dbgpack /packcode /packdata /exepack:2
-LD2FLAGS_ODINCRT = /nologo /DE /noe /map /dbgpack /packcode /packdata /exepack:2
 IMPLIBFLAGS      = /nologo
 ILIBFLAGS        = /quiet /nologo
 RCFLAGS          = -s -I. -I$(CPPMAIN)\include
 OS2RCFLAGS       = -r -n
 OS2RCLFLAGS      = -x2 -n
 
+
+#
+# C Compiler flags.
+#   This may look a bit like a mess but, there is usually a reason behind
+#   every line and the way it is done. We have some problems with nmake
+#   when we add new flags to for example CXXFLAGS too many times.
+#
+!ifdef EXETARGET
+CTARGETFLAGS     = -Ge+
+CXXTARGETFLAGS   = -Ge+
+!else
+CTARGETFLAGS     = -Ge-
+CXXTARGETFLAGS   = -Ge-
+!endif
+CFLAGS           = -Q -Si -Ti -Tm+ -Ss+ -W3 -Gm+ /Gn+ $(CTARGETFLAGS)
+CXXFLAGS         = -Q -Si -Ti -Tm+ -Ss+ -W3 -Gm+ /Gn+ $(CXXTARGETFLAGS) /Gx+
+CXXFLAGS_ODINCRT = -Q -Si -Ti -Tm+ -Ss+ -W3 -Gm+ /Gn- $(CXXTARGETFLAGS) /Gx+
+CFLAGS_WIN32APP  = -Q -Si -Ti -Tm+ -Ss+ -W3 -Gm+ /Gn+ $(CTARGETFLAGS)
+CXXFLAGS_WIN32APP= -Q -Si -Ti -Tm+ -Ss+ -W3 -Gm+ /Gn+ $(CXXTARGETFLAGS)
+CINCLUDES        = -I$(PDWIN32_INCLUDE)\Win -I. -I$(PDWIN32_INCLUDE)
+CDEFINES_WIN32APP= -DDEBUG -D__WIN32OS2__ -D__i386__
+CDEFINES_ODINCRT = -DDEBUG -D__WIN32OS2__ -D__i386__ -D__WINE__
+CDEFINES         = -DDEBUG -D__WIN32OS2__ -D__i386__ -D__WINE__ -DTCPV40HDRS -DCOMCTL32UNDOC \
+!ifdef DEBUGALL
+                   -DDEBUG_ENABLELOG_LEVEL2 \
+!endif
 !ifdef NODEBUGINFO
-LDFLAGS          = $(LDFLAGS) /B"/nodebug /nodbgpack"
-LDFLAGS_ODINCRT  = $(LDFLAGS_ODINCRT) /B"/nodebug /nodbgpack"
-LD2FLAGS         = $(LD2FLAGS) /nodebug /nodbgpack
-LD2FLAGS_ODINCRT = $(LD2FLAGS_ODINCRT) /nodebug  /nodbgpack
-CFLAGS           = $(CFLAGS) -DDEFAULT_LOGGING_OFF
-CXXFLAGS         = $(CXXFLAGS) -DDEFAULT_LOGGING_OFF
+                   -DDEFAULT_LOGGING_OFF
 !endif
 
+
+#
+# Linker flags.
+#   This may look a bit like a mess but, there is usually a reason behind
+#   every line and the way it is done. We have some problems with nmake
+#   when we add new flags to for example LD2FLAGS too many times.
+#
 !ifdef EXETARGET
-CFLAGS           = $(CFLAGS) -Ge+ -Gn-
-CXXFLAGS         = $(CXXFLAGS) -Ge+ -Gn-
-LDFLAGS          = $(LDFLAGS) -Ge+
-LDFLAGS_ODINCRT  = $(LDFLAGS_ODINCRT) -Ge+
-LD2FLAGS         = $(LD2FLAGS) /EXEC
-LD2FLAGS_ODINCRT = $(LD2FLAGS_ODINCRT) /EXEC
+LDTARGETFLAGS    = -Ge+
+LD2TARGETFLAGS   = /EXEC
+!else
+LDTARGETFLAGS    = -Ge-
+LD2TARGETFLAGS   = /DLL
 !endif
+!ifdef NODEBUGINFO
+LDFLAGS          = -Q   /B"/noe /map /packcode /packdata /exepack:2 /nodebug /nodbgpack /nod" -Si -W3 -Gm+ $(LDTARGETFLAGS)
+LDFLAGS_ODINCRT  = -Q   /B"/noe /map /packcode /packdata /exepack:2 /nodebug /nodbgpack"      -Si -W3 -Gm+ $(LDTARGETFLAGS)
+LD2FLAGS         = /nologo /noe /map /packcode /packdata /exepack:2 /nodebug /nodbgpack /nod $(LD2TARGETFLAGS)
+LD2FLAGS_ODINCRT = /nologo /noe /map /packcode /packdata /exepack:2 /nodebug /nodbgpack      $(LD2TARGETFLAGS)
+!else
+LDFLAGS          = -Q   /B"/noe /map /packcode /packdata /exepack:2 /dbgpack /nod" -Ti -Si -W3 -Gm+ $(LDTARGETFLAGS)
+LDFLAGS_ODINCRT  = -Q   /B"/noe /map /packcode /packdata /exepack:2 /dbgpack "     -Ti -Si -W3 -Gm+ $(LDTARGETFLAGS)
+LD2FLAGS         = /nologo /noe /map /packcode /packdata /exepack:2 /dbgpack /nod /debug $(LD2TARGETFLAGS)
+LD2FLAGS_ODINCRT = /nologo /noe /map /packcode /packdata /exepack:2 /dbgpack      /debug $(LD2TARGETFLAGS)
+!endif
+
