@@ -1,4 +1,4 @@
-/* $Id: changelog,v 1.2110 2002-05-29 15:40:43 sandervl Exp $ */
+/* $Id: changelog,v 1.2111 2002-05-29 16:05:15 sandervl Exp $ */
 
  2002-05-29: Sander van Leeuwen <sandervl@innotek.de>
     - USER32:   o Fix for ToAscii(Ex) & GetKeyboardState (WinTranslateChar2 call)
@@ -7,6 +7,8 @@
                 o mixerGetLineInfoW fix
     - COMCTL32: o Match behaviour of ImageList_LoadImageA wrt cx parameter (when set to zero)
                   (fixes properties dialog of sndvol32.exe (windows mixer app))
+                o Updated status control to latest Wine & applied two
+                  bugfixes (already sent to wine-patches)
 
  2002-05-29: Platon Fomichev <platon@innotek.de>
     - USER32:   o GetAsyncKeyState fix for VK_MENU
