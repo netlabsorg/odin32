@@ -1,4 +1,4 @@
-/* $Id: imagehlp.h,v 1.1 1999-05-24 20:19:12 ktk Exp $ */
+/* $Id: imagehlp.h,v 1.2 2002-02-21 22:59:08 sandervl Exp $ */
 
 /*
  *      imagehlp.h   -       Declarations for IMAGEHLP
@@ -144,86 +144,9 @@ typedef enum _SYM_TYPE {
  * Structures
  */
 
-typedef struct _IMAGE_DATA_DIRECTORY {
-  DWORD VirtualAddress;
-  DWORD Size;
-} IMAGE_DATA_DIRECTORY, *PIMAGE_DATA_DIRECTORY;
 
 #define IMAGE_NUMBEROF_DIRECTORY_ENTRIES 16
 
-typedef struct _IMAGE_OPTIONAL_HEADER {
-
-  /* Standard fields */
-
-  WORD  Magic;
-  BYTE  MajorLinkerVersion;
-  BYTE  MinorLinkerVersion;
-  DWORD SizeOfCode;
-  DWORD SizeOfInitializedData;
-  DWORD SizeOfUninitializedData;
-  DWORD AddressOfEntryPoint;
-  DWORD BaseOfCode;
-  DWORD BaseOfData;
-
-  /* NT additional fields */
-
-  DWORD ImageBase;
-  DWORD SectionAlignment;
-  DWORD FileAlignment;
-  WORD  MajorOperatingSystemVersion;
-  WORD  MinorOperatingSystemVersion;
-  WORD  MajorImageVersion;
-  WORD  MinorImageVersion;
-  WORD  MajorSubsystemVersion;
-  WORD  MinorSubsystemVersion;
-  DWORD Win32VersionValue;
-  DWORD SizeOfImage;
-  DWORD SizeOfHeaders;
-  DWORD CheckSum;
-  WORD  Subsystem;
-  WORD  DllCharacteristics;
-  DWORD SizeOfStackReserve;
-  DWORD SizeOfStackCommit;
-  DWORD SizeOfHeapReserve;
-  DWORD SizeOfHeapCommit;
-  DWORD LoaderFlags;
-  DWORD NumberOfRvaAndSizes;
-  IMAGE_DATA_DIRECTORY DataDirectory[IMAGE_NUMBEROF_DIRECTORY_ENTRIES];
-} IMAGE_OPTIONAL_HEADER, *PIMAGE_OPTIONAL_HEADER;
-
-typedef struct _IMAGE_FILE_HEADER {
-  WORD  Machine;
-  WORD  NumberOfSections;
-  DWORD TimeDateStamp;
-  DWORD PointerToSymbolTable;
-  DWORD NumberOfSymbols;
-  WORD  SizeOfOptionalHeader;
-  WORD  Characteristics;
-} IMAGE_FILE_HEADER, *PIMAGE_FILE_HEADER;
-
-typedef struct _IMAGE_NT_HEADERS {
-  DWORD Signature;
-  IMAGE_FILE_HEADER FileHeader;
-  IMAGE_OPTIONAL_HEADER OptionalHeader;
-} IMAGE_NT_HEADERS, *PIMAGE_NT_HEADERS;
-
-#define IMAGE_SIZEOF_SHORT_NAME 8
-
-typedef struct _IMAGE_SECTION_HEADER {
-  BYTE  Name[IMAGE_SIZEOF_SHORT_NAME];
-  union {
-    DWORD PhysicalAddress;
-    DWORD VirtualSize;
-  } Misc;
-  DWORD VirtualAddress;
-  DWORD SizeOfRawData;
-  DWORD PointerToRawData;
-  DWORD PointerToRelocations;
-  DWORD PointerToLinenumbers;
-  WORD  NumberOfRelocations;
-  WORD  NumberOfLinenumbers;
-  DWORD Characteristics;
-} IMAGE_SECTION_HEADER, *PIMAGE_SECTION_HEADER;
 
 typedef struct _LOADED_IMAGE {
   LPSTR                   ModuleName;
@@ -240,26 +163,6 @@ typedef struct _LOADED_IMAGE {
   ULONG                   SizeOfImage;
 } LOADED_IMAGE, *PLOADED_IMAGE;
 
-typedef struct _IMAGE_LOAD_CONFIG_DIRECTORY {
-  DWORD Characteristics;
-  DWORD TimeDateStamp;
-  WORD  MajorVersion;
-  WORD  MinorVersion;
-  DWORD GlobalFlagsClear;
-  DWORD GlobalFlagsSet;
-  DWORD CriticalSectionDefaultTimeout;
-  DWORD DeCommitFreeBlockThreshold;
-  DWORD DeCommitTotalFreeThreshold;
-  PVOID LockPrefixTable;
-  DWORD MaximumAllocationSize;
-  DWORD VirtualMemoryThreshold;
-  DWORD ProcessHeapFlags;
-  DWORD ProcessAffinityMask;
-  WORD  CSDVersion;
-  WORD  Reserved1;
-  PVOID EditList;
-  DWORD Reserved[1];
-} IMAGE_LOAD_CONFIG_DIRECTORY, *PIMAGE_LOAD_CONFIG_DIRECTORY;
 
 typedef struct _WIN_CERTIFICATE {
   DWORD dwLength;
@@ -280,17 +183,6 @@ typedef struct _IMAGE_FUNCTION_ENTRY {
   DWORD EndingAddress;
   DWORD EndOfPrologue;
 } IMAGE_FUNCTION_ENTRY, *PIMAGE_FUNCTION_ENTRY;
-
-typedef struct _IMAGE_DEBUG_DIRECTORY {
-  DWORD Characteristics;
-  DWORD TimeDateStamp;
-  WORD  MajorVersion;
-  WORD  MinorVersion;
-  DWORD Type;
-  DWORD SizeOfData;
-  DWORD AddressOfRawData;
-  DWORD PointerToRawData;
-} IMAGE_DEBUG_DIRECTORY, *PIMAGE_DEBUG_DIRECTORY;
 
 typedef struct _IMAGE_COFF_SYMBOLS_HEADER {
   DWORD NumberOfSymbols;
@@ -434,60 +326,7 @@ typedef struct _IMAGEHLP_DUPLICATE_SYMBOL {
   ULONG              SelectedSymbol;
 } IMAGEHLP_DUPLICATE_SYMBOL, *PIMAGEHLP_DUPLICATE_SYMBOL;
 
-typedef struct _IMAGE_DOS_HEADER {
-  WORD e_magic;
-  WORD e_cblp;
-  WORD e_cp;
-  WORD e_crlc;
-  WORD e_cparhdr;
-  WORD e_minalloc;
-  WORD e_maxalloc;
-  WORD e_ss;
-  WORD e_sp;
-  WORD e_csum;
-  WORD e_ip;
-  WORD e_cs;
-  WORD e_lfarlc;
-  WORD e_ovno;
-  WORD e_res[4];
-  WORD e_oemid;
-  WORD e_oeminfo;
-  WORD e_res2[10];
-  LONG e_lfanew;
-} IMAGE_DOS_HEADER, *PIMAGE_DOS_HEADER;
 
-typedef struct _IMAGE_OS2_HEADER {
-  WORD ne_magic;
-  CHAR ne_ver;
-  CHAR ne_rev;
-  WORD ne_enttab;
-  WORD ne_cbenttab;
-  LONG ne_crc;
-  WORD ne_flags;
-  WORD ne_autodata;
-  WORD ne_heap;
-  WORD ne_stack;
-  LONG ne_csip;
-  LONG ne_sssp;
-  WORD ne_cseg;
-  WORD ne_cmod;
-  WORD ne_cbnrestab;
-  WORD ne_segtab;
-  WORD ne_rsrctab;
-  WORD ne_restab;
-  WORD ne_modtab;
-  WORD ne_imptab;
-  LONG ne_nrestab;
-  WORD ne_cmovent;
-  WORD ne_align;
-  WORD ne_cres;
-  BYTE ne_exetyp;
-  BYTE ne_flagsothers;
-  WORD ne_pretthunks;
-  WORD ne_psegrefbytes;
-  WORD ne_swaparea;
-  WORD ne_expver;
-} IMAGE_OS2_HEADER, *PIMAGE_OS2_HEADER;
 
 typedef struct _IMAGE_VXD_HEADER {
   WORD  e32_magic;
