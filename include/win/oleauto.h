@@ -167,7 +167,6 @@ SafeArrayRedim(struct tagSAFEARRAY *psa, struct tagSAFEARRAYBOUND *psaboundNew);
 #else
 #define V_DECIMAL(A)     ((A)->decVal)
 #endif
-#define V_DECIMAL(A)	 V_UNION(A, decVal)
 #define V_DECIMALREF(A)  V_UNION(A, pdecVal)
 
 #ifndef LOCALE_USE_NLS
