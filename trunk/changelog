@@ -1,4 +1,7 @@
-/* $Id: changelog,v 1.2064 2002-05-07 13:29:08 sandervl Exp $ */
+/* $Id: changelog,v 1.2065 2002-05-07 16:15:07 sandervl Exp $ */
+
+ 2002-05-07: Sander van Leeuwen <sandervl@xs4all.nl>
+    - USER32:   o WH_MOUSE_LL hook fixes
 
  2002-05-07: Platon Fomichev <platon@innotek.de>
     - USER32:   o Listbox/combobox fix for MFC apps
