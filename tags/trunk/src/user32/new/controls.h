@@ -1,4 +1,4 @@
-/* $Id: controls.h,v 1.1 2000-01-01 14:54:51 cbratschi Exp $ */
+/* $Id: controls.h,v 1.2 2000-01-02 19:30:42 cbratschi Exp $ */
 /*
  * Win32 common controls
  *
@@ -32,7 +32,7 @@ void CONTROLS_Unregister();
 #define ICONTITLE_CONTROL       11
 #define MAX_CONTROLS            12
 
-BOOL WIDGETS_IsControl(Win32BaseWindow *window, int control);
+BOOL CONTROLS_IsControl(Win32BaseWindow *window, int control);
 
 
 #endif // __CONTROLS_H

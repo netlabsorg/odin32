@@ -1,4 +1,4 @@
-/* $Id: oslibmsgtranslate.cpp,v 1.2 2000-01-01 17:07:41 cbratschi Exp $ */
+/* $Id: oslibmsgtranslate.cpp,v 1.3 2000-01-02 19:30:43 cbratschi Exp $ */
 /*
  * Window message translation functions for OS/2
  *
@@ -112,7 +112,7 @@ BOOL OS2ToWinMsgTranslate(void *pThdb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode
   memset(winMsg, 0, sizeof(MSG));
   win32wnd = Win32BaseWindow::GetWindowFromOS2Handle(os2Msg->hwnd);
   //PostThreadMessage posts WIN32APP_POSTMSG msg without window handle
-  if((win32wnd == 0 && os2Msg->msg != WM_CREATE && os2Msg->msg != WIN32APP_POSTMSG))
+  if((win32wnd == 0) && (os2Msg->msg != WM_CREATE) && (os2Msg->msg != WIN32APP_POSTMSG))
   {
         goto dummymessage; //not a win32 client window
   }
@@ -297,7 +297,8 @@ BOOL OS2ToWinMsgTranslate(void *pThdb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode
         OSLibMapSWPtoWINDOWPOS(pswp, &thdb->wp, &swpOld, hParent, win32wnd->getOS2FrameWindowHandle());
 
         if (!win32wnd->CanReceiveSizeMsgs())    goto dummymessage;
-
+//CB: todo: send WM_NCCALCSIZE
+#if 0   //CB: ignore it
         dprintf(("Set client rectangle to (%d,%d)(%d,%d)", swpOld.x, swpOld.y, swpOld.x + swpOld.cx, swpOld.y + swpOld.cy));
         win32wnd->setClientRect(swpOld.x, swpOld.y, swpOld.x + swpOld.cx, swpOld.y + swpOld.cy);
 
@@ -320,6 +321,9 @@ BOOL OS2ToWinMsgTranslate(void *pThdb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode
             win32wnd->setWindowRect(thdb->wp.x, thdb->wp.y, thdb->wp.x+thdb->wp.cx, thdb->wp.y+thdb->wp.cy);
             goto dummymessage;
         }
+#else
+        goto dummymessage;
+#endif
     }
 
     case WM_ACTIVATE:
