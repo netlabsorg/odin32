@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.48 1999-10-30 15:16:57 dengert Exp $ */
+/* $Id: pmwindow.cpp,v 1.49 1999-10-31 01:23:15 sandervl Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -153,7 +153,7 @@ BOOL InitPM()
      (PSZ)WIN32_STDCLASS,               /* Window class name            */
      (PFNWP)Win32WindowProc,            /* Address of window procedure  */
 //     CS_SIZEREDRAW | CS_HITTEST | CS_MOVENOTIFY,
-     CS_SIZEREDRAW | CS_HITTEST | CS_SYNCPAINT,
+     CS_SIZEREDRAW | CS_HITTEST,
      NROF_WIN32WNDBYTES)) {
         dprintf(("WinRegisterClass Win32BaseWindow failed"));
         return(FALSE);
