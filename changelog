@@ -1,4 +1,11 @@
- /* $Id: changelog,v 1.947 2000-05-19 12:07:41 sandervl Exp $ */
+ /* $Id: changelog,v 1.948 2000-05-19 13:06:08 sandervl Exp $ */
+
+ 2000-05-19: Yuri Dario <mc6530@mclink.it>
+    - USER32:   Don't send WM_PARENTNOTIFY if parent has already been destroyed
+
+ 2000-05-19: Przemyslaw Dobrowolski <dobrawka@asua.org.pl>
+    - WNASPI32: Unique id & buffer length bugfixes -> CDRWIN 3.8a
+                works now (recording on SCSI only for now)
 
  2000-05-19: Sander van Leeuwen <sandervl@xs4all.nl>
     - SHELL32:  Fixed some exports
