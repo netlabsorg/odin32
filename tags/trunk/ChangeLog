@@ -1,4 +1,4 @@
-/* $Id: ChangeLog,v 1.1533 2001-06-22 07:32:03 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.1534 2001-06-22 18:34:22 sandervl Exp $ */
 
  2001-06-22: Dietrich Teickner <Dietrich_Teickner@t-online.de>
     - COMCTL32: o Check for invalid lpItem in LISTVIEW_GetItemA
@@ -6,6 +6,7 @@
  2001-06-22: Sander van Leeuwen <sandervl@xs4all.nl>
     - USER32:   o Don't fill background of system icon if no system icon
                   is present (could be seen in os/2 look mode)
+                o Reserved one window ulong (QWL_USER) for Odin apps (like Opera)
 
  2001-06-21: Sander van Leeuwen <sandervl@xs4all.nl>
     - KERNEL32: o Semaphore updates (still not activated)
