@@ -1,4 +1,4 @@
-/* $Id: vprntf16.c,v 1.1 2000-02-25 18:15:02 bird Exp $
+/* $Id: vprntf16.c,v 1.2 2000-02-26 17:49:28 bird Exp $
  *
  * vprintf and printf - 16-bit.
  *
@@ -28,6 +28,7 @@
 
 #define INCL_DOSPROCESS
 #define INCL_DOSERRORS
+#define INCL_NOPMAPI
 
 /*******************************************************************************
 *   Header Files                                                               *
