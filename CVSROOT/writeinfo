@@ -21,6 +21,8 @@
 /src/oleaut32                              sandervl davidr
 /src/olesvr32                              sandervl davidr
 /src/olecli32                              sandervl davidr
+/src/imm32                                 sandervl
+/src/imagehlp                              sandervl
 /src/odincrt                               sandervl phaller achimha hugh
 /src/OMFDUMP                               sandervl phaller achimha bird
 /src/pe2lx                                 sandervl bird achimha
