@@ -1,4 +1,4 @@
-/* $Id: oslibgpi.cpp,v 1.15 2003-12-01 13:27:39 sandervl Exp $ */
+/* $Id: oslibgpi.cpp,v 1.16 2004-01-08 11:11:55 sandervl Exp $ */
 
 /*
  * GPI interface code
@@ -264,7 +264,7 @@ VOID calcDimensions(POINTLOS2 box[],PPOINTLOS2 point)
 
   if (box[TXTBOX_BOTTOMLEFT].y == box[TXTBOX_BOTTOMRIGHT].y)
   {
-    point->y = labs (box[TXTBOX_BOTTOMLEFT].y-box[TXTBOX_TOPLEFT].y) + 1;
+    point->y = labs (box[TXTBOX_BOTTOMLEFT].y-box[TXTBOX_TOPLEFT].y);
     point->x = labs (box[TXTBOX_CONCAT].x - box[TXTBOX_BOTTOMLEFT].x);
 
     if (box[TXTBOX_BOTTOMLEFT].x != box[TXTBOX_TOPLEFT].x)
@@ -277,12 +277,12 @@ VOID calcDimensions(POINTLOS2 box[],PPOINTLOS2 point)
     }
   } else
   {
-    cx = labs (box[TXTBOX_BOTTOMLEFT].x-box[TXTBOX_TOPLEFT].x) + 1;
-    cy = labs (box[TXTBOX_BOTTOMLEFT].y-box[TXTBOX_TOPLEFT].y) + 1;
+    cx = labs (box[TXTBOX_BOTTOMLEFT].x-box[TXTBOX_TOPLEFT].x);
+    cy = labs (box[TXTBOX_BOTTOMLEFT].y-box[TXTBOX_TOPLEFT].y);
     point->y = (ULONG)hypot(cx,cy);
 
-    cx = labs (box[TXTBOX_TOPRIGHT].x-box[TXTBOX_TOPLEFT].x) + 1;
-    cy = labs (box[TXTBOX_TOPRIGHT].y-box[TXTBOX_TOPLEFT].y) + 1;
+    cx = labs (box[TXTBOX_TOPRIGHT].x-box[TXTBOX_TOPLEFT].x);
+    cy = labs (box[TXTBOX_TOPRIGHT].y-box[TXTBOX_TOPLEFT].y);
     point->x  = (ULONG)hypot(cx,cy);
   }
 }

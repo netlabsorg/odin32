@@ -1,4 +1,4 @@
-/* $Id: font.cpp,v 1.33 2003-12-01 13:28:10 sandervl Exp $ */
+/* $Id: font.cpp,v 1.34 2004-01-08 11:11:55 sandervl Exp $ */
 
 /*
  * GDI32 font apis
@@ -166,38 +166,41 @@ LPWSTR FONT_mbtowc(HDC hdc, LPCSTR str, INT count, INT *plenW, UINT *pCP)
     CHARSETINFO csi;
     int charset = GetTextCharset(hdc);
 
+    if( IsDBCSEnv() && ( charset == 0 ))
+        cp = CP_ACP;
+    else
     /* Hmm, nicely designed api this one! */
     if(TranslateCharsetInfo((DWORD*)charset, &csi, TCI_SRCCHARSET))
         cp = csi.ciACP;
     else {
         switch(charset) {
-	case OEM_CHARSET:
-	    cp = GetOEMCP();
-	    break;
-	case DEFAULT_CHARSET:
-	    cp = GetACP();
-	    break;
+    case OEM_CHARSET:
+        cp = GetOEMCP();
+        break;
+    case DEFAULT_CHARSET:
+        cp = GetACP();
+        break;
 
-	case VISCII_CHARSET:
-	case TCVN_CHARSET:
-	case KOI8_CHARSET:
-	case ISO3_CHARSET:
-	case ISO4_CHARSET:
-	  /* FIXME: These have no place here, but because x11drv
-	     enumerates fonts with these (made up) charsets some apps
-	     might use them and then the FIXME below would become
-	     annoying.  Now we could pick the intended codepage for
-	     each of these, but since it's broken anyway we'll just
-	     use CP_ACP and hope it'll go away...
-	  */
-	    cp = CP_ACP;
-	    break;
+    case VISCII_CHARSET:
+    case TCVN_CHARSET:
+    case KOI8_CHARSET:
+    case ISO3_CHARSET:
+    case ISO4_CHARSET:
+      /* FIXME: These have no place here, but because x11drv
+         enumerates fonts with these (made up) charsets some apps
+         might use them and then the FIXME below would become
+         annoying.  Now we could pick the intended codepage for
+         each of these, but since it's broken anyway we'll just
+         use CP_ACP and hope it'll go away...
+      */
+        cp = CP_ACP;
+        break;
 
 
-	default:
-	    dprintf(("Can't find codepage for charset %d\n", charset));
-	    break;
-	}
+    default:
+        dprintf(("Can't find codepage for charset %d\n", charset));
+        break;
+    }
     }
 
     dprintf(("cp == %d\n", cp));
@@ -205,12 +208,12 @@ LPWSTR FONT_mbtowc(HDC hdc, LPCSTR str, INT count, INT *plenW, UINT *pCP)
     if(count == -1) count = strlen(str);
     if(cp != CP_SYMBOL) {
         lenW = MultiByteToWideChar(cp, 0, str, count, NULL, 0);
-	strW = (WCHAR*)HeapAlloc(GetProcessHeap(), 0, (lenW + 1) * sizeof(WCHAR));
-	MultiByteToWideChar(cp, 0, str, count, strW, lenW);
+    strW = (WCHAR*)HeapAlloc(GetProcessHeap(), 0, (lenW + 1) * sizeof(WCHAR));
+    MultiByteToWideChar(cp, 0, str, count, strW, lenW);
     } else {
         lenW = count;
-	strW = (WCHAR*)HeapAlloc(GetProcessHeap(), 0, (lenW + 1) * sizeof(WCHAR));
-	for(i = 0; i < count; i++) strW[i] = (BYTE)str[i];
+    strW = (WCHAR*)HeapAlloc(GetProcessHeap(), 0, (lenW + 1) * sizeof(WCHAR));
+    for(i = 0; i < count; i++) strW[i] = (BYTE)str[i];
     }
     strW[lenW] = '\0';
     dprintf(("mapped %s -> %ls\n", str, strW));
