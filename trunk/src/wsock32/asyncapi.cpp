@@ -1,4 +1,4 @@
-/* $Id: asyncapi.cpp,v 1.11 2001-07-07 14:29:40 achimha Exp $ */
+/* $Id: asyncapi.cpp,v 1.12 2001-07-07 17:53:15 achimha Exp $ */
 
 /*
  *
@@ -758,11 +758,11 @@ int WSAEnumNetworkEventsWorker(SOCKET s, WSAEVENT hEvent, LPWSANETWORKEVENTS lpE
       return SOCKET_ERROR;
    }
 
-   // post semaphore if present
+   // reset event semaphore if present
    if (hEvent)
    {
 //      dprintf(("posting event semaphore 0x%x", hEvent));
-      SetEvent(hEvent);
+      ResetEvent(hEvent);
    }
 
    WSASetLastError(NO_ERROR);
