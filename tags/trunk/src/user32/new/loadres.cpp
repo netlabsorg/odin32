@@ -1,4 +1,4 @@
-/* $Id: loadres.cpp,v 1.1 1999-07-14 08:35:34 sandervl Exp $ */
+/* $Id: loadres.cpp,v 1.2 1999-07-19 11:50:04 sandervl Exp $ */
 
 /*
  *
@@ -200,6 +200,9 @@ HMENU WIN32API LoadMenuA(HINSTANCE hinst, LPCSTR lpszMenu)
 {
  HMENU rc;
 
+#if 1
+    rc = (HMENU)FindResourceA(hinst, lpszMenu, RT_MENUA);
+#else
     if((int)lpszMenu >> 16 != 0) {//convert string name identifier to numeric id
          dprintf(("lpszMenu %s\n", lpszMenu));
 
@@ -208,8 +211,33 @@ HMENU WIN32API LoadMenuA(HINSTANCE hinst, LPCSTR lpszMenu)
     else dprintf(("lpszMenu %d\n", (int)lpszMenu));
 
     rc = O32_LoadMenu(hinst, lpszMenu);
-
+#endif
     dprintf(("LoadMenuA (%X) returned %d\n", hinst, rc));
+    return(rc);
+}
+//******************************************************************************
+//******************************************************************************
+HMENU WIN32API LoadMenuW(HINSTANCE hinst, LPCWSTR lpszMenu)
+{
+ HMENU rc;
+
+#if 1
+    rc = (HMENU)FindResourceW(hinst, lpszMenu, RT_MENUW);
+#else
+ char  *astring = NULL;
+    if((int)lpszMenu >> 16 != 0) {//convert string name identifier to numeric id
+	 astring = UnicodeToAsciiString((LPWSTR)lpszMenu);
+
+         dprintf(("lpszMenu %s\n", astring));
+	 lpszMenu = (LPWSTR)ConvertNameId(hinst, (char *)astring);
+    }
+    else dprintf(("lpszMenu %d\n", (int)lpszMenu));
+
+    rc  = O32_LoadMenu(hinst, (char *)lpszMenu);
+    if(astring)
+	FreeAsciiString(astring);
+#endif
+    dprintf(("LoadMenuW (%X) returned %d\n", hinst, rc));
     return(rc);
 }
 //******************************************************************************
@@ -235,28 +263,6 @@ HMENU WIN32API LoadMenuIndirectW(const MENUITEMTEMPLATEHEADER * arg1)
 
     return 0;
 //    return O32_LoadMenuIndirect(arg1);
-}
-//******************************************************************************
-//******************************************************************************
-HMENU WIN32API LoadMenuW(HINSTANCE hinst, LPCWSTR lpszMenu)
-{
- char  *astring = NULL;
- HMENU rc;
-
-    if((int)lpszMenu >> 16 != 0) {//convert string name identifier to numeric id
-	 astring = UnicodeToAsciiString((LPWSTR)lpszMenu);
-
-         dprintf(("lpszMenu %s\n", astring));
-	 lpszMenu = (LPWSTR)ConvertNameId(hinst, (char *)astring);
-    }
-    else dprintf(("lpszMenu %d\n", (int)lpszMenu));
-
-    rc  = O32_LoadMenu(hinst, (char *)lpszMenu);
-    if(astring)
-	FreeAsciiString(astring);
-
-    dprintf(("LoadMenuA (%X) returned %d\n", hinst, rc));
-    return(rc);
 }
 //******************************************************************************
 //TODO: Far from complete, but works for loading resources from exe
