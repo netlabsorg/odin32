@@ -1,4 +1,4 @@
-/* $Id: k32.h,v 1.9 2001-02-23 02:57:54 bird Exp $
+/* $Id: k32.h,v 1.10 2001-07-08 03:02:31 bird Exp $
  *
  * k32 API - definitions.
  *
@@ -26,6 +26,7 @@ APIRET _System k32QueryOTEs(HMTE hMTE, PQOTEBUFFER pQOte, ULONG cbOte);
 APIRET _System k32QueryOptionsStatus(PK32OPTIONS pOptions, PK32STATUS pStatus);
 APIRET _System k32SetOptions(PK32OPTIONS pOptions);
 APIRET _System k32ProcessReadWrite(PID pid, ULONG cb, PVOID pvSource, PVOID pvTarget, BOOL fRead);
+APIRET _System k32SetEnvironment(PSZ pszzEnvironment, ULONG cchEnvironment, PID pid);
 
 
 #ifdef __cplusplus
