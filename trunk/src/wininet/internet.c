@@ -1,4 +1,4 @@
-/* $Id: internet.c,v 1.6 2001-11-07 11:08:13 phaller Exp $
+/* $Id: internet.c,v 1.7 2002-11-27 14:28:17 sandervl Exp $
  *
  * Wininet
  *
@@ -22,8 +22,10 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
+#include <win/windef.h>
 #define strncasecmp strnicmp
 #define TLS_OUT_OF_INDEXES -1
+#define MAXHOSTNAME 100
 #else
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -81,6 +83,11 @@ WININET_LibMain (HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved)
 
         switch (fdwReason) {
                 case DLL_PROCESS_ATTACH:
+                {
+#ifdef __WIN32OS2__
+                        WORD ver = MAKEWORD (2, 2);
+                        WSADATA data;
+#endif
                         g_dwTlsErrIndex = TlsAlloc();
 
                         if(g_dwTlsErrIndex == TLS_OUT_OF_INDEXES)
@@ -92,7 +99,10 @@ WININET_LibMain (HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved)
 
                         dwNumThreads=0;
                         dwNumIdleThreads=0;
-
+#ifdef __WIN32OS2__
+                        WSAStartup ( ver, &data );
+#endif
+                }
                 case DLL_THREAD_ATTACH:
                     {
                       LPWITHREADERROR lpwite = HeapAlloc(GetProcessHeap(), 0, sizeof(WITHREADERROR));
@@ -125,6 +135,9 @@ WININET_LibMain (HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved)
                     CloseHandle(hQuitEvent);
                     CloseHandle(hWorkEvent);
                     DeleteCriticalSection(&csQueue);
+#ifdef __WIN32OS2__
+ 		    WSACleanup();
+#endif
                     break;
         }
 
@@ -455,226 +468,31 @@ BOOL WINAPI InternetCloseHandle(HINTERNET hInternet)
  *    FALSE on failure
  *
  */
-BOOL SetUrlComponentValue(LPSTR* lppszComponent, LPDWORD dwComponentLen, LPCSTR lpszStart, INT len)
+BOOL SetUrlComponentValue(LPSTR* lppszComponent, LPDWORD dwComponentLen, 
+    LPCSTR lpszStart, INT len)
 {
     TRACE("%s (%d)\n", lpszStart, len);
 
     if (*dwComponentLen != 0)
     {
-       if (*lppszComponent == NULL)
-       {
-             *lppszComponent = (LPSTR)lpszStart;
-             *dwComponentLen = len;
-         }
-         else
-         {
+	if (*lppszComponent == NULL)
+	{
+            *lppszComponent = (LPSTR)lpszStart;
+	    *dwComponentLen = len;
+	}
+	else
+	{
             INT ncpylen = min((*dwComponentLen)-1, len);
-            strncpy(*lppszComponent, lpszStart, ncpylen);
+            if (lpszStart)
+                strncpy(*lppszComponent, lpszStart, ncpylen);
             (*lppszComponent)[ncpylen] = '\0';
-            *dwComponentLen = ncpylen;
-        }
+	    *dwComponentLen = ncpylen;
+	}
     }
 
     return TRUE;
 }
 
-
-/***********************************************************************
- *           InternetCrackUrlA (WININET.95)
- *
- * Break up URL into its components
- *
- * RETURNS
- *    TRUE on success
- *    FALSE on failure
- *
- */
-BOOL WINAPI InternetCrackUrlA(LPCSTR lpszUrl, DWORD dwUrlLength, DWORD dwFlags,
-                LPURL_COMPONENTSA lpUrlComponents)
-{
-  /*
-   * RFC 1808
-   * <protocol>:[//<net_loc>][/path][;<params>][?<query>][#<fragment>]
-   *
-   */
-   LPSTR lpszParam    = NULL;
-   BOOL  bIsAbsolute = FALSE;
-   LPSTR lpszap = (char*)lpszUrl;
-   LPSTR lpszcp = NULL;
-
-   TRACE("\n");
-
-   /* Determine if the URI is absolute. */
-   while (*lpszap != '\0')
-   {
-      if (isalnum(*lpszap))
-      {
-           lpszap++;
-           continue;
-      }
-      if ((*lpszap == ':') && (lpszap - lpszUrl >= 2))
-      {
-           bIsAbsolute = TRUE;
-           lpszcp = lpszap;
-      }
-      else
-      {
-           lpszcp = (LPSTR)lpszUrl; /* Relative url */
-      }
-
-      break;
-   }
-
-   /* Parse <params> */
-   lpszParam = strpbrk(lpszap, ";?");
-   if (lpszParam != NULL)
-   {
-         if (!SetUrlComponentValue(&lpUrlComponents->lpszExtraInfo,
-              &lpUrlComponents->dwExtraInfoLength, lpszParam+1, strlen(lpszParam+1)))
-         {
-            return FALSE;
-         }
-   }
-
-   if (bIsAbsolute) /* Parse <protocol>:[//<net_loc>] */
-   {
-     LPSTR lpszNetLoc;
-
-     /* Get scheme first. */
-     lpUrlComponents->nScheme = GetInternetScheme(lpszUrl, lpszcp - lpszUrl);
-     if (!SetUrlComponentValue(&lpUrlComponents->lpszScheme,
-                 &lpUrlComponents->dwSchemeLength, lpszUrl, lpszcp - lpszUrl))
-         return FALSE;
-
-     /* Eat ':' in protocol. */
-     lpszcp++;
-
-     /* Skip over slashes. */
-     if (*lpszcp == '/')
-     {
-            lpszcp++;
-            if (*lpszcp == '/')
-            {
-                  lpszcp++;
-                  if (*lpszcp == '/')
-                      lpszcp++;
-            }
-     }
-
-     lpszNetLoc = strpbrk(lpszcp, "/");
-     if (lpszParam)
-     {
-           if (lpszNetLoc)
-              lpszNetLoc = min(lpszNetLoc, lpszParam);
-       else
-              lpszNetLoc = lpszParam;
-     }
-     else if (!lpszNetLoc)
-          lpszNetLoc = lpszcp + strlen(lpszcp);
-
-     /* Parse net-loc */
-     if (lpszNetLoc)
-     {
-           LPSTR lpszHost;
-           LPSTR lpszPort;
-
-           /* [<user>[<:password>]@]<host>[:<port>] */
-           /* First find the user and password if they exist */
-
-           lpszHost = strchr(lpszcp, '@');
-           if (lpszHost == NULL || lpszHost > lpszNetLoc)
-           {
-             /* username and password not specified. */
-             SetUrlComponentValue(&lpUrlComponents->lpszUserName,
-                     &lpUrlComponents->dwUserNameLength, NULL, 0);
-             SetUrlComponentValue(&lpUrlComponents->lpszPassword,
-                     &lpUrlComponents->dwPasswordLength, NULL, 0);
-           }
-           else /* Parse out username and password */
-           {
-               LPSTR lpszUser = lpszcp;
-               LPSTR lpszPasswd = lpszHost;
-
-               while (lpszcp < lpszHost)
-               {
-                    if (*lpszcp == ':')
-                        lpszPasswd = lpszcp;
-
-                    lpszcp++;
-               }
-
-               SetUrlComponentValue(&lpUrlComponents->lpszUserName,
-                         &lpUrlComponents->dwUserNameLength, lpszUser, lpszPasswd - lpszUser);
-
-               SetUrlComponentValue(&lpUrlComponents->lpszPassword,
-                         &lpUrlComponents->dwPasswordLength,
-                         lpszPasswd == lpszHost ? NULL : ++lpszPasswd,
-                         lpszHost - lpszPasswd);
-
-               lpszcp++; /* Advance to beginning of host */
-           }
-
-             /* Parse <host><:port> */
-
-           lpszHost = lpszcp;
-           lpszPort = lpszNetLoc;
-
-           while (lpszcp < lpszNetLoc)
-           {
-             if (*lpszcp == ':')
-                 lpszPort = lpszcp;
-
-             lpszcp++;
-           }
-
-           SetUrlComponentValue(&lpUrlComponents->lpszHostName,
-                &lpUrlComponents->dwHostNameLength, lpszHost, lpszPort - lpszHost);
-
-           if (lpszPort != lpszNetLoc)
-             lpUrlComponents->nPort = atoi(++lpszPort);
-     }
-   }
-
- /* Here lpszcp points to:
-  *
-  * <protocol>:[//<net_loc>][/path][;<params>][?<query>][#<fragment>]
-  *                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  */
-   if (lpszcp != 0 && *lpszcp != '\0' && (!lpszParam || lpszcp < lpszParam))
-   {
-       INT len;
-
-       /* Only truncate the parameter list if it's already been saved
-        * in lpUrlComponents->lpszExtraInfo.
-        */
-       if (lpszParam && lpUrlComponents->dwExtraInfoLength)
-           len = lpszParam - lpszcp;
-       else
-       {
-             /* Leave the parameter list in lpszUrlPath.  Strip off any trailing
-              * newlines if necessary.
-              */
-             LPSTR lpsznewline = strchr (lpszcp, '\n');
-             if (lpsznewline != NULL)
-                 len = lpsznewline - lpszcp;
-             else
-                 len = strlen(lpszcp);
-        }
-
-        if (!SetUrlComponentValue(&lpUrlComponents->lpszUrlPath,
-               &lpUrlComponents->dwUrlPathLength, lpszcp, len))
-          return FALSE;
-   }
-   else
-   {
-        lpUrlComponents->dwUrlPathLength = 0;
-   }
-
-   TRACE("%s: host(%s) path(%s) extra(%s)\n", lpszUrl, lpUrlComponents->lpszHostName,
-          lpUrlComponents->lpszUrlPath, lpUrlComponents->lpszExtraInfo);
-
-   return TRUE;
-}
 
 
 /***********************************************************************
@@ -1488,3 +1306,329 @@ BOOL WINAPI InternetQueryDataAvailable(HINTERNET hFile,LPDWORD lpdwNumberOfBytes
 
     return TRUE;
 }
+
+
+/**********************************************************
+ *	InternetOpenUrlA (WININET.@)
+ *
+ * Opens an URL
+ *
+ * RETURNS
+ *   handle of connection or NULL on failure
+ */
+HINTERNET WINAPI InternetOpenUrlA(HINTERNET hInternet, LPCSTR lpszUrl,
+    LPCSTR lpszHeaders, DWORD dwHeadersLength, DWORD dwFlags, DWORD dwContext)
+{
+  URL_COMPONENTSA urlComponents;
+  char protocol[32], hostName[MAXHOSTNAME], userName[1024];
+  char password[1024], path[2048], extra[1024];
+  HINTERNET client = NULL, client1 = NULL;
+  urlComponents.dwStructSize = sizeof(URL_COMPONENTSA);
+  urlComponents.lpszScheme = protocol;
+  urlComponents.dwSchemeLength = 32;
+  urlComponents.lpszHostName = hostName;
+  urlComponents.dwHostNameLength = MAXHOSTNAME;
+  urlComponents.lpszUserName = userName;
+  urlComponents.dwUserNameLength = 1024;
+  urlComponents.lpszPassword = password;
+  urlComponents.dwPasswordLength = 1024;
+  urlComponents.lpszUrlPath = path;
+  urlComponents.dwUrlPathLength = 2048;
+  urlComponents.lpszExtraInfo = extra;
+  urlComponents.dwExtraInfoLength = 1024;
+  if(!InternetCrackUrlA(lpszUrl, strlen(lpszUrl), 0, &urlComponents))
+    return NULL;
+  switch(urlComponents.nScheme) {
+  case INTERNET_SCHEME_FTP:
+    if(urlComponents.nPort == 0)
+      urlComponents.nPort = INTERNET_DEFAULT_FTP_PORT;
+    client = InternetConnectA(hInternet, hostName, urlComponents.nPort,
+        userName, password, INTERNET_SERVICE_FTP, dwFlags, dwContext);
+    return FtpOpenFileA(client, path, GENERIC_READ, dwFlags, dwContext);
+    break;
+  case INTERNET_SCHEME_HTTP:
+  case INTERNET_SCHEME_HTTPS:
+  {
+    LPCSTR accept[2] = { "*/*", NULL };
+    char *hostreq=(char*)malloc(strlen(hostName)+9);
+    sprintf(hostreq, "Host: %s\r\n", hostName);
+    if(urlComponents.nPort == 0) {
+      if(urlComponents.nScheme == INTERNET_SCHEME_HTTP)
+        urlComponents.nPort = INTERNET_DEFAULT_HTTP_PORT;
+      else
+	urlComponents.nPort = INTERNET_DEFAULT_HTTPS_PORT;
+    }
+    client = InternetConnectA(hInternet, hostName, urlComponents.nPort, userName,
+        password, INTERNET_SERVICE_HTTP, dwFlags, dwContext);
+    if(client == NULL)
+      return NULL;
+    client1 = HttpOpenRequestA(client, NULL, path, NULL, NULL, accept, dwFlags, dwContext);
+    if(client1 == NULL) {
+      InternetCloseHandle(client);
+      return NULL;
+    }
+    if (lpszHeaders) 
+      HttpAddRequestHeadersA(client1, lpszHeaders, dwHeadersLength, HTTP_ADDREQ_FLAG_ADD);
+    HttpAddRequestHeadersA(client1, hostreq, -1L, HTTP_ADDREQ_FLAG_ADD_IF_NEW);
+    if(!HttpSendRequestA(client1, NULL, 0, NULL, 0)) {
+      InternetCloseHandle(client1);
+      InternetCloseHandle(client);
+      return NULL;
+    }
+    return client1;
+    break;
+  }
+  case INTERNET_SCHEME_GOPHER:
+    /* gopher doesn't seem to be implemented in wine, but it's supposed
+     * to be supported by InternetOpenUrlA. */
+  default:
+    return NULL;
+  }
+  if(client != NULL)
+    InternetCloseHandle(client);
+}
+
+/**********************************************************
+ *	InternetOpenUrlW (WININET.@)
+ *
+ * Opens an URL
+ *
+ * RETURNS
+ *   handle of connection or NULL on failure
+ */
+HINTERNET WINAPI InternetOpenUrlW(HINTERNET hInternet, LPCWSTR lpszUrl,
+    LPCWSTR lpszHeaders, DWORD dwHeadersLength, DWORD dwFlags, DWORD dwContext)
+{
+    HINTERNET rc = (HINTERNET)NULL;
+
+    INT lenUrl = lstrlenW(lpszUrl)+1;
+    INT lenHeaders = lstrlenW(lpszHeaders)+1;
+    CHAR *szUrl = (CHAR *)malloc(lenUrl*sizeof(CHAR));
+    CHAR *szHeaders = (CHAR *)malloc(lenHeaders*sizeof(CHAR));
+
+    if (!szUrl || !szHeaders)
+    {
+        if (szUrl)
+            free(szUrl);
+        if (szHeaders)
+            free(szHeaders);
+        return (HINTERNET)NULL;
+    }
+
+    WideCharToMultiByte(CP_ACP, -1, lpszUrl, -1, szUrl, lenUrl,
+        NULL, NULL);
+    WideCharToMultiByte(CP_ACP, -1, lpszHeaders, -1, szHeaders, lenHeaders,
+        NULL, NULL);
+
+    rc = InternetOpenUrlA(hInternet, szUrl, szHeaders,
+        dwHeadersLength, dwFlags, dwContext);
+
+    free(szUrl);
+    free(szHeaders);
+
+    return rc;
+}
+
+/***********************************************************************
+ *           InternetCrackUrlA (WININET.@)
+ *
+ * Break up URL into its components
+ *
+ * TODO: Handle dwFlags
+ *
+ * RETURNS
+ *    TRUE on success
+ *    FALSE on failure
+ *
+ */
+BOOL WINAPI InternetCrackUrlA(LPCSTR lpszUrl, DWORD dwUrlLength, DWORD dwFlags,
+    LPURL_COMPONENTSA lpUrlComponents)
+{
+  /*
+   * RFC 1808
+   * <protocol>:[//<net_loc>][/path][;<params>][?<query>][#<fragment>]
+   *
+   */
+    LPSTR lpszParam    = NULL;
+    BOOL  bIsAbsolute = FALSE;
+    LPSTR lpszap = (char*)lpszUrl;
+    LPSTR lpszcp = NULL;
+
+    TRACE("\n");
+
+    /* Determine if the URI is absolute. */
+    while (*lpszap != '\0')
+    {
+        if (isalnum(*lpszap))
+        {
+            lpszap++;
+            continue;
+        }
+        if ((*lpszap == ':') && (lpszap - lpszUrl >= 2))
+        {
+            bIsAbsolute = TRUE;
+            lpszcp = lpszap;
+        }
+	else
+	{
+	    lpszcp = (LPSTR)lpszUrl; /* Relative url */
+        }
+
+        break;
+    }
+
+    /* Parse <params> */
+    lpszParam = strpbrk(lpszap, ";?");
+    if (lpszParam != NULL)
+    {
+        if (!SetUrlComponentValue(&lpUrlComponents->lpszExtraInfo,
+	     &lpUrlComponents->dwExtraInfoLength, lpszParam+1, strlen(lpszParam+1)))
+        {
+	    return FALSE;
+        }
+        }
+
+    if (bIsAbsolute) /* Parse <protocol>:[//<net_loc>] */
+        {
+	LPSTR lpszNetLoc;
+
+        /* Get scheme first. */
+        lpUrlComponents->nScheme = GetInternetScheme(lpszUrl, lpszcp - lpszUrl);
+        if (!SetUrlComponentValue(&lpUrlComponents->lpszScheme,
+		    &lpUrlComponents->dwSchemeLength, lpszUrl, lpszcp - lpszUrl))
+	    return FALSE;
+
+        /* Eat ':' in protocol. */
+        lpszcp++;
+
+        /* Skip over slashes. */
+        if (*lpszcp == '/')
+        {
+            lpszcp++;
+            if (*lpszcp == '/')
+            {
+                lpszcp++;
+                if (*lpszcp == '/')
+                    lpszcp++;
+            }
+        }
+
+        lpszNetLoc = strpbrk(lpszcp, "/");
+	if (lpszParam)
+        {
+	    if (lpszNetLoc)
+               lpszNetLoc = min(lpszNetLoc, lpszParam);
+        else
+               lpszNetLoc = lpszParam;
+        }
+        else if (!lpszNetLoc)
+            lpszNetLoc = lpszcp + strlen(lpszcp);
+
+        /* Parse net-loc */
+        if (lpszNetLoc)
+        {
+	    LPSTR lpszHost;
+	    LPSTR lpszPort;
+
+                /* [<user>[<:password>]@]<host>[:<port>] */
+            /* First find the user and password if they exist */
+
+            lpszHost = strchr(lpszcp, '@');
+            if (lpszHost == NULL || lpszHost > lpszNetLoc)
+                {
+                /* username and password not specified. */
+		SetUrlComponentValue(&lpUrlComponents->lpszUserName,
+			&lpUrlComponents->dwUserNameLength, NULL, 0);
+		SetUrlComponentValue(&lpUrlComponents->lpszPassword,
+			&lpUrlComponents->dwPasswordLength, NULL, 0);
+                }
+            else /* Parse out username and password */
+                {
+		LPSTR lpszUser = lpszcp;
+		LPSTR lpszPasswd = lpszHost;
+
+		while (lpszcp < lpszHost)
+                        {
+		   if (*lpszcp == ':')
+		       lpszPasswd = lpszcp;
+
+		   lpszcp++;
+                    }
+
+		SetUrlComponentValue(&lpUrlComponents->lpszUserName,
+			&lpUrlComponents->dwUserNameLength, lpszUser, lpszPasswd - lpszUser);
+
+                if (lpszPasswd != lpszHost)
+                    lpszPasswd++;
+		SetUrlComponentValue(&lpUrlComponents->lpszPassword,
+			&lpUrlComponents->dwPasswordLength,
+			lpszPasswd == lpszHost ? NULL : lpszPasswd,
+			lpszHost - lpszPasswd);
+
+		lpszcp++; /* Advance to beginning of host */
+                }
+
+            /* Parse <host><:port> */
+
+	    lpszHost = lpszcp;
+	    lpszPort = lpszNetLoc;
+
+	    while (lpszcp < lpszNetLoc)
+		    {
+		if (*lpszcp == ':')
+                    lpszPort = lpszcp;
+
+		lpszcp++;
+                }
+
+            SetUrlComponentValue(&lpUrlComponents->lpszHostName,
+               &lpUrlComponents->dwHostNameLength, lpszHost, lpszPort - lpszHost);
+
+	    if (lpszPort != lpszNetLoc)
+                lpUrlComponents->nPort = atoi(++lpszPort);
+            else
+                lpUrlComponents->nPort = 0;
+            }
+        }
+
+    /* Here lpszcp points to:
+     *
+     * <protocol>:[//<net_loc>][/path][;<params>][?<query>][#<fragment>]
+     *                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     */
+    if (lpszcp != 0 && *lpszcp != '\0' && (!lpszParam || lpszcp < lpszParam))
+    {
+        INT len;
+
+        /* Only truncate the parameter list if it's already been saved
+         * in lpUrlComponents->lpszExtraInfo.
+         */
+        if (lpszParam && lpUrlComponents->dwExtraInfoLength)
+            len = lpszParam - lpszcp;
+        else
+        {
+            /* Leave the parameter list in lpszUrlPath.  Strip off any trailing
+             * newlines if necessary.
+             */
+            LPSTR lpsznewline = strchr (lpszcp, '\n');
+            if (lpsznewline != NULL)
+                len = lpsznewline - lpszcp;
+            else
+                len = strlen(lpszcp);
+        }
+
+        if (!SetUrlComponentValue(&lpUrlComponents->lpszUrlPath,
+         &lpUrlComponents->dwUrlPathLength, lpszcp, len))
+         return FALSE;
+    }
+    else
+    {
+        lpUrlComponents->dwUrlPathLength = 0;
+    }
+
+    TRACE("%s: host(%s) path(%s) extra(%s)\n", lpszUrl, lpUrlComponents->lpszHostName,
+          lpUrlComponents->lpszUrlPath, lpUrlComponents->lpszExtraInfo);
+
+    return TRUE;
+}
+
