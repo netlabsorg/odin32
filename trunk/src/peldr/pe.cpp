@@ -1,4 +1,4 @@
-/* $Id: pe.cpp,v 1.17 2000-07-01 09:50:24 sandervl Exp $ */
+/* $Id: pe.cpp,v 1.18 2000-07-15 09:13:54 sandervl Exp $ */
 
 /*
  * PELDR main exe loader code
@@ -120,7 +120,14 @@ int main(int argc, char *argv[])
  		}
 		if(fQuote) win32cmdline++;
 		while(*win32cmdline == ' ') win32cmdline++; //skip spaces
-
+		if(*win32cmdline == '"') {
+			win32cmdline++;
+			cmdline = win32cmdline + strlen(win32cmdline) - 1;
+			while(*cmdline == ' ') cmdline--;
+			if(*cmdline == '"') {
+				*cmdline = 0;
+			}
+                }
 		cmdline = exeName + strlen(exeName) - 1;
 		while(*cmdline == ' ') cmdline--;
 		cmdline[1] = 0;
