@@ -1,4 +1,34 @@
- /* $Id: ChangeLog,v 1.352 1999-10-21 19:25:45 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.353 1999-10-22 18:02:17 sandervl Exp $ */
+
+ 99-10-22: Sander van Leeuwen <sandervl@xs4all.nl>
+	- WINMM: Fixes for waveout playback (don't use callback when there
+                 were errors when opening the device; return the correct
+                 number of devices present) (Pinball no longer crashes when
+                 there's no soundcard (driver) in OS/2)
+                 Disabled logging of timeGetTime
+ 	- KERNEL32: Disabled logging for _lread (calls ReadFile which does it's own logging)
+                    Return XCPT_CONTINUE_SEARCH for unhandled exceptions if
+                    an OS/2 app uses the Odin32 api. (instead of killing the app)
+
+        - COMCTL32: Fixed tab width bug. (GetTextExtentPoint32A used for unicode strings)
+                    Use Wine resource compiled with wrc. Removed all Native* resource loading.
+                    Added version resource.
+
+	- USER32: Fixed corruption of OS/2 exception chain in dc.cpp & caret.cpp
+                  (fixes dll loading after the exe has started; i.e. after clicking
+                   on the Find tab in winhlp32's Search dialog)
+                  Do not send WM_COMMAND messages to the window handler before
+                  it has receive it's WM_CREATE msg.
+                  Winhlp32 crashes when that's done before WM_INITDIALOG, but
+                  VPBuddy no longer responds to buttons when you refuse to
+                  send messages before WM_INITDIALOG. (TODO)
+                  Send WM_WINDOWPOSCHANGING/CHANGED messages from frame handler.
+                  Fixed MapWindowPoints.
+	- INCLUDE\os2wrap.h: Fixed infinite recursion in GpiDestroyPS
+
+ 99-10-22: Edgar Buerkle <Edgar.Buerkle@gmx.net>
+	- USER32: TrackPopupMenu(Ex) fixes (window handle translation)
+	- KERNEL32: HeapReAlloc bugfix (copy min(oldsize, newsize) bytes)
 
  99-10-21: Sander van Leeuwen <sandervl@xs4all.nl>
 	- KERNEL32: Increase reference count for LX dlls. (RegisterLxDll)
