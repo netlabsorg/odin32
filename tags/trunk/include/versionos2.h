@@ -1,4 +1,4 @@
-/* $Id: versionos2.h,v 1.27 2004-01-15 10:27:10 sandervl Exp $ */
+/* $Id: versionos2.h,v 1.28 2004-05-24 08:52:51 sandervl Exp $ */
 
 #ifndef __VERSIONOS2__H__
 #define __VERSIONOS2__H__
@@ -57,6 +57,8 @@ ULONG SYSTEM GetVersionSize(char *modname);
 #define SHELL32_MINORIMAGE_VERSION  ODINNT_MINOR_VERSION
 #define USER32_MAJORIMAGE_VERSION   ODINNT_MAJOR_VERSION
 #define USER32_MINORIMAGE_VERSION   ODINNT_MINOR_VERSION
+#define IMM32_MAJORIMAGE_VERSION    ODINNT_MAJOR_VERSION
+#define IMM32_MINORIMAGE_VERSION    ODINNT_MINOR_VERSION
 
 
 //profile key in odin.ini for windows version

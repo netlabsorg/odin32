@@ -1,4 +1,4 @@
-/* $Id: oslibmisc.cpp,v 1.18 2003-03-03 16:38:20 sandervl Exp $ */
+/* $Id: oslibmisc.cpp,v 1.19 2004-05-24 08:56:07 sandervl Exp $ */
 /*
  * Misc OS/2 util. procedures
  *
@@ -16,16 +16,21 @@
 #define INCL_DOSERRORS
 #define INCL_DOSSEL
 #define INCL_DOSNLS        /* National Language Support values */
-#include <os2wrap.h>	//Odin32 OS/2 api wrappers
+#include <os2wrap.h>    //Odin32 OS/2 api wrappers
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>  /*PLF Wed  98-03-18 05:15:04*/
 #include <malloc.h>  /*PLF Wed  98-03-18 05:15:04*/
 #include "oslibmisc.h"
 #include <misc.h>
+#include <heapstring.h>
 
-#define DBG_LOCALLOG	DBG_oslibmisc
+#define DBG_LOCALLOG    DBG_oslibmisc
 #include "dbglocal.h"
+
+typedef APIRET ( APIENTRY *PFN_IMSETMSGQUEUEPROPERTY )( HMQ, ULONG );
+
+PFN_IMSETMSGQUEUEPROPERTY pfnImSetMsgQueueProperty = NULL;
 
 //******************************************************************************
 //TODO: not reentrant!
@@ -35,7 +40,7 @@ char *OSLibGetDllName(ULONG hModule)
  static char modname[CCHMAXPATH] = {0};
 
   if(DosQueryModuleName(hModule, CCHMAXPATH, modname) != 0) {
-	return NULL;
+    return NULL;
   }
   return(modname);
 }
@@ -186,16 +191,16 @@ ULONG OSLibGetTIB(int tiboff)
 
    rc = DosGetInfoBlocks(&ptib, &ppib);
    if(rc) {
-	return 0;
+    return 0;
    }
    switch(tiboff)
    {
-   	case TIB_STACKTOP:
-		return (ULONG)ptib->tib_pstacklimit;
-	case TIB_STACKLOW:
-		return (ULONG)ptib->tib_pstack;
-	default:
-		return 0;
+    case TIB_STACKTOP:
+        return (ULONG)ptib->tib_pstacklimit;
+    case TIB_STACKLOW:
+        return (ULONG)ptib->tib_pstack;
+    default:
+        return 0;
    }
 }
 
@@ -216,7 +221,7 @@ ULONG OSLibGetPIB(int iPIB)
     rc = DosGetInfoBlocks(&ptib, &ppib);
     if (rc)
     {
-	    dprintf(("KERNEL32: OSLibGetPIB(%d): DosGetInfoBlocks failed with rc=%d\n", iPIB, rc));
+        dprintf(("KERNEL32: OSLibGetPIB(%d): DosGetInfoBlocks failed with rc=%d\n", iPIB, rc));
         return 0;
     }
 
@@ -247,8 +252,8 @@ ULONG OSLibAllocThreadLocalMemory(int nrdwords)
 
    rc = DosAllocThreadLocalMemory(nrdwords, &thrdaddr);
    if(rc) {
-	dprintf(("DosAllocThreadLocalMemory failed %d", rc));
-	return 0;
+    dprintf(("DosAllocThreadLocalMemory failed %d", rc));
+    return 0;
    }
    return (ULONG)thrdaddr;
 }
@@ -334,7 +339,24 @@ ULONG OSLibQueryCountry()
 //******************************************************************************
 BOOL OSLibDisablePopups()
 {
-   return DosError(FERR_DISABLEEXCEPTION | FERR_DISABLEHARDERR) == NO_ERROR;   
+   return DosError(FERR_DISABLEEXCEPTION | FERR_DISABLEHARDERR) == NO_ERROR;
 }
 //******************************************************************************
 //******************************************************************************
+ULONG OSLibImSetMsgQueueProperty( ULONG hmq, ULONG ulFlag )
+{
+    USHORT sel;
+    APIRET rc;
+
+    if( !pfnImSetMsgQueueProperty )
+        return 1;
+
+    sel = RestoreOS2FS();
+    rc = pfnImSetMsgQueueProperty( hmq, ulFlag );
+    SetFS( sel );
+
+    return rc;
+}
+//******************************************************************************
+//******************************************************************************
+
