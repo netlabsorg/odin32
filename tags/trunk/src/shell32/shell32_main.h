@@ -1,4 +1,3 @@
-/* $Id: shell32_main.h,v 1.10 2001-09-15 09:26:23 sandervl Exp $ */
 /*
  * 	internal Shell32 Library definitions
  */
@@ -61,6 +60,14 @@ extern BOOL	(* WINAPI pCOMCTL32_Free) (LPVOID);
 
 #define pLookupIconIdFromDirectoryEx LookupIconIdFromDirectoryEx
 #define pCreateIconFromResourceEx    CreateIconFromResourceEx
+
+#include <wine\undoccomctl32.h>
+
+#define pAddMRUData	AddMRUData
+#define pFindMRUData	FindMRUData
+#define pEnumMRUListA	EnumMRUListA
+#define pFreeMRUListA	FreeMRUListA
+#define pCreateMRUListA CreateMRUListA
 
 /* ole2 */
 /*
