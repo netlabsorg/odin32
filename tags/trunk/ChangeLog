@@ -1,4 +1,16 @@
- /* $Id: ChangeLog,v 1.438 1999-11-11 19:08:27 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.439 1999-11-12 11:38:35 sandervl Exp $ */
+
+ 99-11-12: Sander van Leeuwen <sandervl@xs4all.nl>
+	- GDI32: Changes + fixes in DIBSection bitblt (fixes Quake 2)
+
+ 99-11-12: Edgar Buerkle <Edgar.Buerkle@gmx.net>
+	- KERNEL32: Wrote file io replacement apis (preliminary version)
+                    (not enabled)
+
+ 99-11-12: Jens Wiessner <wiessnej@rfi.de>
+	- IMAGEHLP,IMM32,OLECLI32,OLEDLG,OLESVR32,PSAPI,RASAPI32
+                    Updates
+	- MSVCRT: Added stubs
 
  99-11-11: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32: Implemented GetWindowContextHelpId & SetWindowContextHelpId

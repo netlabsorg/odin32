@@ -1,4 +1,4 @@
-/* $Id: imm32.cpp,v 1.3 1999-11-05 09:17:59 sandervl Exp $ */
+/* $Id: imm32.cpp,v 1.4 1999-11-12 11:38:39 sandervl Exp $ */
 /*
  *	IMM32 library
  *
@@ -7,15 +7,12 @@
  */
 
 #include <os2win.h>
+#include <odinwrap.h>
 #include <imm.h>
-#include <debugdefs.h>
-#include "winversion.h"
+#include <winversion.h>
 #include "imm32.h"
-#include "debugtools.h"
 
-
-
-DEFAULT_DEBUG_CHANNEL(imm)
+ODINDEBUGCHANNEL(imm)
 
 /***********************************************************************
  *           ImmAssociateContext (IMM32.1)

@@ -1,4 +1,4 @@
-/* $Id: psapi.cpp,v 1.2 1999-09-23 09:38:06 sandervl Exp $ */
+/* $Id: psapi.cpp,v 1.3 1999-11-12 11:38:44 sandervl Exp $ */
 /*
  *      PSAPI library
  *
@@ -7,16 +7,12 @@
  */
 
 #include <os2win.h>
+#include <odinwrap.h>
 #include <winerror.h>
 #include <psapi.h>
-#include <debugstr.h>
-#include "debugtools.h"
-#include <debugdefs.h>
-
-
-DEFAULT_DEBUG_CHANNEL(psapi)
-
 #include <string.h>
+
+ODINDEBUGCHANNEL(psapi)
 
 /***********************************************************************
  *           EmptyWorkingSet (PSAPI.1)

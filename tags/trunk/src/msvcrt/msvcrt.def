@@ -1,4 +1,4 @@
-; $Id: msvcrt.def,v 1.5 1999-10-30 09:20:59 sandervl Exp $
+; $Id: msvcrt.def,v 1.6 1999-11-12 11:38:41 sandervl Exp $
 
 ;Created by BLAST for IBM's compiler
 LIBRARY MSVCRT INITINSTANCE TERMINSTANCE
@@ -525,55 +525,55 @@ IMPORTS
 	__mb_cur_max_dll 	= CRTDLL.__mb_cur_max_dll
 
 EXPORTS
-;   ??0__non_rtti_object@@QAE@ABV0@@Z				@1
-;   ??0__non_rtti_object@@QAE@PBD@Z				@2
-;   ??0bad_cast@@QAE@ABQBD@Z					@3
-;   ??0bad_cast@@QAE@ABV0@@Z					@4
-;   ??0bad_typeid@@QAE@ABV0@@Z					@5
-;   ??0bad_typeid@@QAE@PBD@Z					@6
-;   ??0exception@@QAE@ABQBD@Z					@7
-;   ??0exception@@QAE@ABV0@@Z					@8
-;   ??0exception@@QAE@XZ					@9
-;   ??1__non_rtti_object@@UAE@XZ				@10
-;   ??1bad_cast@@UAE@XZ						@11
-;   ??1bad_typeid@@UAE@XZ					@12
-;   ??1exception@@UAE@XZ					@13
+    ??0__non_rtti_object@@QAE@ABV0@@Z = _MSVCRT_EXP1		@1
+    ??0__non_rtti_object@@QAE@PBD@Z = _MSVCRT_EXP2		@2
+    ??0bad_cast@@QAE@ABQBD@Z	= _MSVCRT_EXP3			@3
+    ??0bad_cast@@QAE@ABV0@@Z	= _MSVCRT_EXP4			@4
+    ??0bad_typeid@@QAE@ABV0@@Z	= _MSVCRT_EXP5			@5
+    ??0bad_typeid@@QAE@PBD@Z	= _MSVCRT_EXP6			@6
+    ??0exception@@QAE@ABQBD@Z	= _MSVCRT_EXP7			@7
+    ??0exception@@QAE@ABV0@@Z	= _MSVCRT_EXP8			@8
+    ??0exception@@QAE@XZ	= _MSVCRT_EXP9			@9
+    ??1__non_rtti_object@@UAE@XZ = _MSVCRT_EXP10		@10
+    ??1bad_cast@@UAE@XZ		= _MSVCRT_EXP11			@11
+    ??1bad_typeid@@UAE@XZ	= _MSVCRT_EXP12			@12
+    ??1exception@@UAE@XZ	= _MSVCRT_EXP13			@13
     ??1type_info@@UAE@XZ	= _MSVCRT_EXP14			@14
     ??2@YAPAXI@Z		= _MSVCRT_EXP15			@15
     ??3@YAXPAX@Z		= _MSVCRT_EXP16			@16
-;   ??4__non_rtti_object@@QAEAAV0@ABV0@@Z			@17
-;   ??4bad_cast@@QAEAAV0@ABV0@@Z				@18
-;   ??4bad_typeid@@QAEAAV0@ABV0@@Z				@19
-;   ??4exception@@QAEAAV0@ABV0@@Z				@20
-;   ??8type_info@@QBEHABV0@@Z					@21
-;   ??9type_info@@QBEHABV0@@Z					@22
-;   ??_7__non_rtti_object@@6B@					@23
-;   ??_7bad_cast@@6B@						@24
-;   ??_7bad_typeid@@6B@						@25
-;   ??_7exception@@6B@						@26
-;   ??_E__non_rtti_object@@UAEPAXI@Z				@27
-;   ??_Ebad_cast@@UAEPAXI@Z					@28
-;   ??_Ebad_typeid@@UAEPAXI@Z					@29
-;   ??_Eexception@@UAEPAXI@Z					@30
-;   ??_G__non_rtti_object@@UAEPAXI@Z				@31
-;   ??_Gbad_cast@@UAEPAXI@Z					@32
-;   ??_Gbad_typeid@@UAEPAXI@Z					@33
-;   ??_Gexception@@UAEPAXI@Z					@34
-;   ?_query_new_handler@@YAP6AHI@ZXZ				@35
-;   ?_query_new_mode@@YAHXZ					@36
-;   ?_set_new_handler@@YAP6AHI@ZP6AHI@Z@Z			@37
-;   ?_set_new_mode@@YAHH@Z					@38
-;   ?_set_se_translator@@YAP6AXIPAU_EXCEPTION_POINTERS@@@ZP6AXI0@Z@Z	@39
-;   ?before@type_info@@QBEHABV1@@Z				@40
-;   ?name@type_info@@QBEPBDXZ					@41
-;   ?raw_name@type_info@@QBEPBDXZ				@42
-;   ?set_new_handler@@YAP6AXXZP6AXXZ@Z				@43
-;   ?set_terminate@@YAP6AXXZP6AXXZ@Z				@44
-;   ?set_unexpected@@YAP6AXXZP6AXXZ@Z				@45
-;   ?terminate@@YAXXZ						@46
-;   ?unexpected@@YAXXZ						@47
-;   ?what@exception@@UBEPBDXZ					@48
-;   $I10_OUTPUT							@49
+    ??4__non_rtti_object@@QAEAAV0@ABV0@@Z = _MSVCRT_EXP17	@17
+    ??4bad_cast@@QAEAAV0@ABV0@@Z = _MSVCRT_EXP18		@18
+    ??4bad_typeid@@QAEAAV0@ABV0@@Z = _MSVCRT_EXP19		@19
+    ??4exception@@QAEAAV0@ABV0@@Z = _MSVCRT_EXP20		@20
+    ??8type_info@@QBEHABV0@@Z	= _MSVCRT_EXP21			@21
+    ??9type_info@@QBEHABV0@@Z	= _MSVCRT_EXP22			@22
+    ??_7__non_rtti_object@@6B@	= _MSVCRT_EXP23			@23
+    ??_7bad_cast@@6B@		= _MSVCRT_EXP24			@24
+    ??_7bad_typeid@@6B@		= _MSVCRT_EXP25			@25
+    ??_7exception@@6B@		= _MSVCRT_EXP26			@26
+    ??_E__non_rtti_object@@UAEPAXI@Z = _MSVCRT_EXP27		@27
+    ??_Ebad_cast@@UAEPAXI@Z	= _MSVCRT_EXP28			@28
+    ??_Ebad_typeid@@UAEPAXI@Z	= _MSVCRT_EXP29			@29
+    ??_Eexception@@UAEPAXI@Z	= _MSVCRT_EXP30			@30
+    ??_G__non_rtti_object@@UAEPAXI@Z = _MSVCRT_EXP31		@31
+    ??_Gbad_cast@@UAEPAXI@Z	= _MSVCRT_EXP32			@32
+    ??_Gbad_typeid@@UAEPAXI@Z	= _MSVCRT_EXP34			@33
+    ??_Gexception@@UAEPAXI@Z	= _MSVCRT_EXP34			@34
+    ?_query_new_handler@@YAP6AHI@ZXZ = _MSVCRT_EXP35		@35
+    ?_query_new_mode@@YAHXZ	= _MSVCRT_EXP36			@36
+    ?_set_new_handler@@YAP6AHI@ZP6AHI@Z@Z = _MSVCRT_EXP37	@37
+    ?_set_new_mode@@YAHH@Z	= _MSVCRT_EXP38			@38
+    ?_set_se_translator@@YAP6AXIPAU_EXCEPTION_POINTERS@@@ZP6AXI0@Z@Z = _MSVCRT_EXP39	@39
+    ?before@type_info@@QBEHABV1@@Z = _MSVCRT_EXP40		@40
+    ?name@type_info@@QBEPBDXZ	= _MSVCRT_EXP41			@41
+    ?raw_name@type_info@@QBEPBDXZ = _MSVCRT_EXP42		@42
+    ?set_new_handler@@YAP6AXXZP6AXXZ@Z = _MSVCRT_EXP43		@43
+    ?set_terminate@@YAP6AXXZP6AXXZ@Z = _MSVCRT_EXP44		@44
+    ?set_unexpected@@YAP6AXXZP6AXXZ@Z = _MSVCRT_EXP45		@45
+    ?terminate@@YAXXZ		= _MSVCRT_EXP46			@46
+    ?unexpected@@YAXXZ		= _MSVCRT_EXP47			@47
+    ?what@exception@@UBEPBDXZ	= _MSVCRT_EXP48			@48
+    $I10_OUTPUT			= _MSVCRT_EXP49			@49
     _CIacos			= CRTDLL__CIacos		@50
     _CIasin			= CRTDLL__CIasin		@51
     _CIatan			= CRTDLL__CIatan		@52

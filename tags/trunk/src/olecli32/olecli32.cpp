@@ -1,4 +1,4 @@
-/* $Id: olecli32.cpp,v 1.2 1999-09-23 09:38:05 sandervl Exp $ */
+/* $Id: olecli32.cpp,v 1.3 1999-11-12 11:38:42 sandervl Exp $ */
 /*
  *	OLECLI32 library
  *
@@ -10,14 +10,11 @@
  */
 
 #include <os2win.h>
+#include <odinwrap.h>
 #include <ole.h>
 #include "olecli32.h"
-#include "debugtools.h"
-#include <debugdefs.h>
 
-
-DEFAULT_DEBUG_CHANNEL(ole)
-
+ODINDEBUGCHANNEL(olecli32)
 
 /******************************************************************************
  *		OleDelete		[OLECLI32.2]

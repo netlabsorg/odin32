@@ -1,4 +1,4 @@
-/* $Id: rasapi32.cpp,v 1.3 1999-10-19 12:55:05 sandervl Exp $ */
+/* $Id: rasapi32.cpp,v 1.4 1999-11-12 11:38:45 sandervl Exp $ */
 /*
  * RASAPI32
  * 
@@ -11,13 +11,9 @@
 
 #include <os2win.h>
 #include <ras.h>
-#include "debugtools.h"
-#include <debugdefs.h>
+#include <odinwrap.h>
 
-
-DEFAULT_DEBUG_CHANNEL(ras)
-
-
+ODINDEBUGCHANNEL(rasapi32)
 
 /**************************************************************************
  *                 RasConnectionNotificationA	[RASAPI32.550]

@@ -1,4 +1,4 @@
-/* $Id: imagehlp.cpp,v 1.2 1999-09-23 09:38:04 sandervl Exp $ */
+/* $Id: imagehlp.cpp,v 1.3 1999-11-12 11:38:39 sandervl Exp $ */
 /*
  *	IMAGEHLP library
  *
@@ -7,13 +7,11 @@
  */
 
 #include <os2win.h>
-#include <debugdefs.h>
+#include <odinwrap.h>
 #include <imagehlp.h>
 #include <heapstring.h>
-#include "debugtools.h"
 
-DEFAULT_DEBUG_CHANNEL(imagehlp)
-
+ODINDEBUGCHANNEL(imagehlp)
 
 /***********************************************************************
  *           Data

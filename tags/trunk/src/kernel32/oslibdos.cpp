@@ -1,4 +1,4 @@
-/* $Id: oslibdos.cpp,v 1.7 1999-11-10 14:16:01 sandervl Exp $ */
+/* $Id: oslibdos.cpp,v 1.8 1999-11-12 11:38:40 sandervl Exp $ */
 
 /*
  * Wrappers for OS/2 Dos* API
@@ -179,17 +179,6 @@ DWORD OSLibDosClose(DWORD hFile)
 }
 //******************************************************************************
 //******************************************************************************
-DWORD OSLibDosGetFileSize(DWORD hFile)
-{
- ULONG  ulLocal, filesize = 0;
-
-  DosSetFilePtr(hFile, 0L, FILE_BEGIN, &ulLocal);
-  DosSetFilePtr(hFile, 0L, FILE_END, &filesize);
-  DosSetFilePtr(hFile, 0L, FILE_BEGIN, &ulLocal);
-  return filesize;
-}
-//******************************************************************************
-//******************************************************************************
 DWORD OSLibDosRead(DWORD hFile, LPVOID lpBuffer, DWORD size, DWORD *nrBytesRead)
 {
   return DosRead(hFile, lpBuffer, size, nrBytesRead);
@@ -289,12 +278,6 @@ BOOL OSLibDosGetFileAttributesEx(PSZ   pszName,
 }
 //******************************************************************************
 //******************************************************************************
-
-#define OSLIB_SEARCHDIR		1
-#define OSLIB_SEARCHCURDIR	2
-#define OSLIB_SEARCHFILE	3
-#define OSLIB_SEARCHENV		4
-
 DWORD OSLibDosSearchPath(DWORD cmd, char *path, char *name, char *full_name, 
                          DWORD length_fullname)
 {
@@ -342,6 +325,163 @@ DWORD OSLibDosSearchPath(DWORD cmd, char *path, char *name, char *full_name,
   }
   }
   return 0;
+}
+//******************************************************************************
+//******************************************************************************
+DWORD OSLibDosCreate(CHAR *lpFileName,
+                     DWORD dwAccess,
+                     DWORD dwShare,
+                     LPSECURITY_ATTRIBUTES lpSecurityAttributes,
+                     DWORD dwCreation,
+                     DWORD dwFlags,
+                     HANDLE hTemplate,
+                     DWORD *dwFile)
+{
+   APIRET rc;
+   HFILE  hFile;
+   ULONG  ulAction=0;
+   DWORD  os2Attrib=0;
+   DWORD  os2Flags = 0; //OPEN_FLAGS_NOINHERIT;
+   DWORD  os2Open=0;
+
+#define GENERIC_READ               0x80000000
+#define GENERIC_WRITE              0x40000000
+    if(dwAccess == (GENERIC_READ | GENERIC_WRITE))
+      os2Flags |= OPEN_ACCESS_READWRITE;
+    else if(dwAccess & GENERIC_WRITE)
+      os2Flags |= OPEN_ACCESS_WRITEONLY;
+    else if(dwAccess & GENERIC_READ)
+      os2Flags |= OPEN_ACCESS_READONLY;
+
+#define FILE_SHARE_READ         0x00000001L
+#define FILE_SHARE_WRITE        0x00000002L
+    if(dwShare == 0)
+      os2Flags |= OPEN_SHARE_DENYREADWRITE;
+    else if(dwShare == (FILE_SHARE_READ | FILE_SHARE_WRITE))
+      os2Flags |= OPEN_SHARE_DENYNONE;
+    else if(dwShare & FILE_SHARE_READ)
+      os2Flags |= OPEN_SHARE_DENYWRITE;
+    else if(dwShare & FILE_SHARE_WRITE)
+      os2Flags |= OPEN_SHARE_DENYREAD;
+
+#define CREATE_NEW              1
+#define CREATE_ALWAYS           2
+#define OPEN_EXISTING           3
+#define OPEN_ALWAYS             4
+#define TRUNCATE_EXISTING       5
+    if(dwCreation == CREATE_NEW)
+      os2Open = OPEN_ACTION_FAIL_IF_EXISTS | OPEN_ACTION_CREATE_IF_NEW;
+    else if(dwCreation == CREATE_ALWAYS)
+      os2Open = OPEN_ACTION_REPLACE_IF_EXISTS | OPEN_ACTION_CREATE_IF_NEW;
+    else if(dwCreation == OPEN_EXISTING)
+      os2Open = OPEN_ACTION_OPEN_IF_EXISTS | OPEN_ACTION_FAIL_IF_NEW;
+    else if(dwCreation == OPEN_ALWAYS)
+      os2Open = OPEN_ACTION_OPEN_IF_EXISTS | OPEN_ACTION_CREATE_IF_NEW;
+    else if(dwCreation == TRUNCATE_EXISTING)
+      os2Open = OPEN_ACTION_REPLACE_IF_EXISTS;// |OPEN_ACTION_FAIL_IF_NEW;
+
+#define FILE_ATTRIBUTE_READONLY         0x00000001L
+#define FILE_ATTRIBUTE_HIDDEN           0x00000002L
+#define FILE_ATTRIBUTE_SYSTEM           0x00000004L
+#define FILE_ATTRIBUTE_DIRECTORY        0x00000010L
+#define FILE_ATTRIBUTE_ARCHIVE          0x00000020L
+#define FILE_ATTRIBUTE_NORMAL           0x00000080L
+#define FILE_ATTRIBUTE_TEMPORARY        0x00000100L
+    if(dwFlags & FILE_ATTRIBUTE_READONLY)
+      os2Attrib |= FILE_READONLY;
+    if(dwFlags & FILE_ATTRIBUTE_HIDDEN)
+      os2Attrib |= FILE_HIDDEN;
+    if(dwFlags & FILE_ATTRIBUTE_SYSTEM)
+      os2Attrib |= FILE_SYSTEM;
+    if(dwFlags & FILE_ATTRIBUTE_DIRECTORY)
+      os2Attrib |= FILE_DIRECTORY;
+    if(dwFlags & FILE_ATTRIBUTE_ARCHIVE)
+      os2Attrib |= FILE_ARCHIVED;
+    if(dwFlags & FILE_ATTRIBUTE_NORMAL)
+      os2Attrib |= FILE_NORMAL;
+
+#define FILE_FLAG_WRITE_THROUGH    0x80000000UL
+#define FILE_FLAG_OVERLAPPED       0x40000000L
+#define FILE_FLAG_NO_BUFFERING     0x20000000L
+#define FILE_FLAG_RANDOM_ACCESS    0x10000000L
+#define FILE_FLAG_SEQUENTIAL_SCAN  0x08000000L
+#define FILE_FLAG_DELETE_ON_CLOSE  0x04000000L
+#define FILE_FLAG_BACKUP_SEMANTICS 0x02000000L
+#define FILE_FLAG_POSIX_SEMANTICS  0x01000000L
+    if(dwFlags & FILE_FLAG_WRITE_THROUGH)
+      os2Flags |= OPEN_FLAGS_WRITE_THROUGH;
+    if(dwFlags & FILE_FLAG_NO_BUFFERING)
+      os2Flags |= OPEN_FLAGS_NO_CACHE;
+    if(dwFlags & FILE_FLAG_RANDOM_ACCESS)
+      os2Flags |= OPEN_FLAGS_RANDOM;
+    if(dwFlags & FILE_FLAG_SEQUENTIAL_SCAN)
+      os2Flags |= OPEN_FLAGS_SEQUENTIAL;
+
+    // TODO:
+    // if(dwFlags & FILE_FLAG_OVERLAPPED)
+    // if(dwFlags & FILE_FLAG_DELETE_ON_CLOSE
+
+    rc = DosOpen(lpFileName, &hFile, &ulAction, 0,
+                 os2Attrib, os2Open, os2Flags, 0);
+
+    if(rc)
+    {
+      // TODO: TEST TEST
+      dprintf(("DosOpen Error rc:%d, try without GENERIC_WRITE", rc));
+      if(dwAccess & GENERIC_WRITE)
+        os2Flags &= ~(OPEN_ACCESS_READWRITE | OPEN_ACCESS_WRITEONLY);
+      rc = DosOpen(lpFileName, &hFile, &ulAction, 0,
+                   os2Attrib, os2Open, os2Flags, 0);
+      if(rc)
+      {
+        dprintf(("DosOpen Error rc:%d os2Attrib:%X os2Open:%X os2Flags:%X",
+                 rc, os2Attrib, os2Open, os2Flags));
+        hFile = -1;
+      }
+    }
+
+    *dwFile = hFile;
+    return rc;
+}
+//******************************************************************************
+//(without changing file pointer)
+//******************************************************************************
+DWORD OSLibDosGetFileSize(DWORD hFile)
+{
+  FILESTATUS3  fsts3ConfigInfo = {{0}};
+  ULONG        ulBufSize     = sizeof(FILESTATUS3);
+
+  DosQueryFileInfo(hFile, FIL_STANDARD, &fsts3ConfigInfo, ulBufSize);
+  return fsts3ConfigInfo.cbFile;
+}
+//******************************************************************************
+//******************************************************************************
+DWORD OSLibDosSetFilePtr2(DWORD hFile, DWORD offset, DWORD method)
+{
+ DWORD  newoffset;
+ APIRET rc;
+
+
+  rc = DosSetFilePtr(hFile, offset, method, &newoffset);
+  if(rc) {
+    dprintf(("DosSetFilePtr Error rc:%d", rc));
+    return -1;
+  }
+  else	return newoffset;
+}
+//******************************************************************************
+//(FlushBuffer)
+//******************************************************************************
+DWORD OSLibDosResetBuffer(DWORD hFile)
+{
+  return DosResetBuffer(hFile);
+}
+//******************************************************************************
+//******************************************************************************
+DWORD OSLibDosDupHandle(DWORD hFile, DWORD *hNew)
+{
+  *hNew = -1;
+  return DosDupHandle(hFile, hNew);
 }
 //******************************************************************************
 //******************************************************************************

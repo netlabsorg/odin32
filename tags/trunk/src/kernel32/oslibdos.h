@@ -1,4 +1,4 @@
-/* $Id: oslibdos.h,v 1.6 1999-11-08 13:43:12 sandervl Exp $ */
+/* $Id: oslibdos.h,v 1.7 1999-11-12 11:38:40 sandervl Exp $ */
 
 /*
  * Wrappers for OS/2 Dos* API
@@ -78,5 +78,19 @@ DWORD OSLibDosSetFilePtr(DWORD hFile, DWORD offset, DWORD method);
 #define OSLIB_SEARCHENV		4
 
 DWORD OSLibDosSearchPath(DWORD cmd, char *path, char *name, char *full_name, DWORD length_fullname);
+
+
+DWORD OSLibDosCreate(CHAR *lpFileName,
+                     DWORD dwAccess,
+                     DWORD dwShare,
+                     LPSECURITY_ATTRIBUTES lpSecurityAttributes,
+                     DWORD dwCreation,
+                     DWORD dwFlags,
+                     HANDLE hTemplate,
+                     DWORD *dwFile);
+
+DWORD OSLibDosResetBuffer(DWORD hFile);
+DWORD OSLibDosDupHandle(DWORD hFile, DWORD *hNew);
+DWORD OSLibDosSetFilePtr2(DWORD hFile, DWORD offset, DWORD method);
 
 #endif
