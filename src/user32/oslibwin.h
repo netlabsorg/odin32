@@ -1,4 +1,4 @@
-/* $Id: oslibwin.h,v 1.17 1999-10-17 12:17:43 cbratschi Exp $ */
+/* $Id: oslibwin.h,v 1.18 1999-10-17 16:42:39 sandervl Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -273,5 +273,8 @@ BOOL  OSLibWinSetScrollPageSize(HWND hwndParent, HWND hwndScroll, int pagesize,
 void  OSLibTranslateScrollCmdAndMsg(ULONG *msg, ULONG *scrollcmd);
 
 PVOID OSLibWinSubclassWindow(HWND hwnd,PVOID newWndProc);
+
+BOOL OSLibSetWindowRestoreRect(HWND hwnd, PRECT pRect);
+BOOL OSLibSetWindowMinPos(HWND hwnd, ULONG x, ULONG y);
 
 #endif //__OSLIBWIN_H__

@@ -1,4 +1,4 @@
-/* $Id: oslibwin.cpp,v 1.30 1999-10-17 12:17:43 cbratschi Exp $ */
+/* $Id: oslibwin.cpp,v 1.31 1999-10-17 16:42:38 sandervl Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -961,4 +961,28 @@ PVOID OSLibWinSubclassWindow(HWND hwnd,PVOID newWndProc)
 }
 //******************************************************************************
 //******************************************************************************
+BOOL OSLibSetWindowRestoreRect(HWND hwnd, PRECT pRect)
+{
+ ULONG yHeight = OSLibGetWindowHeight(WinQueryWindow(hwnd, QW_PARENT));
 
+  WinSetWindowUShort(hwnd, QWS_XRESTORE,  (USHORT)pRect->left );
+  WinSetWindowUShort(hwnd, QWS_YRESTORE,  (USHORT)(yHeight - pRect->top -
+                                                   (pRect->bottom - pRect->top)));
+  WinSetWindowUShort(hwnd, QWS_CXRESTORE, (USHORT)(pRect->right - pRect->left));
+  WinSetWindowUShort(hwnd, QWS_CYRESTORE, (USHORT)(pRect->bottom - pRect->top));
+  return TRUE;
+}
+//******************************************************************************
+//******************************************************************************
+BOOL OSLibSetWindowMinPos(HWND hwnd, ULONG x, ULONG y)
+{
+ ULONG yHeight = OSLibGetWindowHeight(WinQueryWindow(hwnd, QW_PARENT));
+
+  WinSetWindowUShort(hwnd, QWS_XMINIMIZE, (USHORT)x );
+  WinSetWindowUShort(hwnd, QWS_YMINIMIZE, (USHORT)(yHeight - y -
+                    ( 2 * WinQuerySysValue( HWND_DESKTOP, SV_CYSIZEBORDER)) -
+                      WinQuerySysValue( HWND_DESKTOP, SV_CYICON)));
+  return TRUE;
+}
+//******************************************************************************
+//******************************************************************************
