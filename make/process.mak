@@ -1,4 +1,4 @@
-# $Id: process.mak,v 1.39 2004-02-02 22:26:57 bird Exp $
+# $Id: process.mak,v 1.40 2004-03-08 19:56:42 bird Exp $
 #
 # Generic Buildsystem
 #
@@ -449,6 +449,8 @@ MAKEFILE = $(BUILD_MAKEFILE)
 !ifndef TARGET_IGNORE_LINKER_WARNINGS
 ! if "$(TARGET_MODE)" == "DLL"
 TARGET_IGNORE_LINKER_WARNINGS = 1
+! else
+TARGET_IGNORE_LINKER_WARNINGS = 0
 ! endif
 !endif
 
@@ -1571,7 +1573,7 @@ $(LINK_LNK5)
 !ifndef BUILD_VERBOSE
     @ \
 !endif
-!ifdef TARGET_IGNORE_LINKER_WARNINGS
+!if $(TARGET_IGNORE_LINKER_WARNINGS)
     -4 \
 !endif
 !if "$(TARGET_MODE)" == "EXE"

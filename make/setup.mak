@@ -1,4 +1,4 @@
-# $Id: setup.mak,v 1.26 2003-12-12 11:54:11 bird Exp $
+# $Id: setup.mak,v 1.27 2004-03-08 19:56:42 bird Exp $
 #
 #   The common build setup.
 #
@@ -62,6 +62,9 @@ SHT_BLDENV=vac4
 !if "$(BUILD_ENV)" == "EMX"
 SHT_BLDENV=emx
 !endif
+!if "$(BUILD_ENV)" == "IGCC"
+SHT_BLDENV=igcc
+!endif
 !if "$(BUILD_ENV)" == "MSCV6"
 SHT_BLDENV=mscv6
 !endif
@@ -95,6 +98,9 @@ SHT_BLDENVFRC=vac4
 !endif
 !if "$(BUILD_ENV_FORCE)" == "EMX"
 SHT_BLDENVFRC=emx
+!endif
+!if "$(BUILD_ENV_FORCE)" == "IGCC"
+SHT_BLDENVFRC=igcc
 !endif
 !if "$(BUILD_ENV_FORCE)" == "MSCV6"
 SHT_BLDENVFRC=mscv6
