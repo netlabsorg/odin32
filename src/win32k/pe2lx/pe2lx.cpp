@@ -1,4 +1,4 @@
-/* $Id: pe2lx.cpp,v 1.24 2001-02-02 08:35:54 bird Exp $
+/* $Id: pe2lx.cpp,v 1.25 2001-02-10 11:11:47 bird Exp $
  *
  * Pe2Lx class implementation. Ring 0 and Ring 3
  *
@@ -16,10 +16,12 @@
 *******************************************************************************/
 #define FOR_EXEHDR 1                    /* To make all object flags OBJ???. */
 #define INCL_DOSERRORS                  /* DOS Error codes. */
+#define INCL_OS2KRNL_LDR                /* Loader definitions. */
 #ifdef RING0
     #define INCL_NOAPI                  /* RING0: No apis. */
 #else /*RING3*/
     #define INCL_DOSPROCESS             /* RING3: DosSleep. */
+    #define INCL_OS2KRNL_LDR_NOAPIS     /* No apis */
 #endif
 
 
@@ -95,7 +97,6 @@
 #include "dev32.h"                      /* 32-Bit part of the device driver. (SSToDS) */
 #include "OS2Krnl.h"                    /* kernel structs.  (SFN) */
 #ifdef RING0
-    #include "ldrCalls.h"               /* ldr* calls. (ldrRead) */
     #include "avl.h"                    /* AVL tree. (ldr.h need it) */
     #include "ldr.h"                    /* ldr helpers. (ldrGetExePath) */
     #include "env.h"                    /* Environment helpers. */
@@ -557,7 +558,7 @@ ULONG Pe2Lx::init(PCSZ pszFilename)
     /* 11.Align section. (Fix which is applied to EXEs/Dlls which contain no fixups and has an
      *    alignment which is not a multiple of 64Kb. The sections are concatenated into one big object. */
     /* TODO! this test has to be enhanced a bit. WWPack32, new Borland++ depends on image layout. */
-    fAllInOneObject =  !isPEOneObjectDisabled() 
+    fAllInOneObject =  !isPEOneObjectDisabled()
                        && (   isPEOneObjectForced()
                            || (pNtHdrs->FileHeader.Characteristics & IMAGE_FILE_RELOCS_STRIPPED) == IMAGE_FILE_RELOCS_STRIPPED
                            );

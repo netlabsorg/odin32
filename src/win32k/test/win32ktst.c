@@ -1,4 +1,4 @@
-/* $Id: win32ktst.c,v 1.6 2001-01-19 02:28:33 bird Exp $
+/* $Id: win32ktst.c,v 1.7 2001-02-10 11:11:48 bird Exp $
  *
  * Win32k test module.
  *
@@ -49,7 +49,6 @@
 #include "os2krnl.h"
 #include "avl.h"
 #include "ldr.h"
-#include "ldrCalls.h"
 #include "test.h"
 #include "asmutils.h"
 #include "macros.h"

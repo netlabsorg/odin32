@@ -1,4 +1,4 @@
-/* $Id: k32SetOptions.cpp,v 1.5 2001-02-02 08:38:34 bird Exp $
+/* $Id: k32SetOptions.cpp,v 1.6 2001-02-10 11:11:44 bird Exp $
  *
  * k32SetOptions - Sets the changable options of win32k.sys the options.
  *
@@ -18,6 +18,7 @@
 
 #define INCL_OS2KRNL_TK
 #define INCL_OS2KRNL_SEM
+#define INCL_OS2KRNL_LDR
 
 #define NO_WIN32K_LIB_FUNCTIONS
 
@@ -45,7 +46,6 @@
 #include "dev1632.h"                    /* Common 16- and 32-bit parts */
 #include "dev32.h"                      /* 32-Bit part of the device driver. (SSToDS) */
 #include "OS2Krnl.h"                    /* kernel structs.  (SFN) */
-#include "ldrCalls.h"                   /* ldr* calls. (ldrRead) */
 #include "log.h"                        /* Logging. */
 #include "avl.h"                        /* AVL tree. (ldr.h need it) */
 #include "ldr.h"                        /* ldr helpers. (ldrGetExePath) */

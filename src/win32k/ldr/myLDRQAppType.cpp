@@ -1,4 +1,4 @@
-/* $Id: myLDRQAppType.cpp,v 1.4 2000-09-02 21:08:07 bird Exp $
+/* $Id: myLDRQAppType.cpp,v 1.5 2001-02-10 11:11:45 bird Exp $
  *
  * _myLDRQAppType - _LDRQAppType overload.
  *
@@ -16,6 +16,7 @@
 
 #define INCL_OS2KRNL_PTDA
 #define INCL_OS2KRNL_SEM
+#define INCL_OS2KRNL_LDR
 
 /*******************************************************************************
 *   Header Files                                                               *
@@ -26,7 +27,6 @@
 #include "OS2Krnl.h"
 #include "avl.h"
 #include "ldr.h"
-#include "ldrCalls.h"
 #include "log.h"
 
 

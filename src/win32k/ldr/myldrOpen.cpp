@@ -1,4 +1,4 @@
-/* $Id: myldrOpen.cpp,v 1.13 2000-12-11 06:30:59 bird Exp $
+/* $Id: myldrOpen.cpp,v 1.14 2001-02-10 11:11:46 bird Exp $
  *
  * myldrOpen - ldrOpen.
  *
@@ -19,6 +19,7 @@
 #define INCL_OS2KRNL_TCB
 #define INCL_OS2KRNL_SEM
 #define INCL_OS2KRNL_SEC
+#define INCL_OS2KRNL_LDR
 
 /*******************************************************************************
 *   Header Files                                                               *
@@ -42,7 +43,6 @@
 #include "OS2Krnl.h"
 #include "dev32.h"
 #include "ldr.h"
-#include "ldrCalls.h"
 #include "ModuleBase.h"
 #include "pe2lx.h"
 #include "myExecPgm.h"

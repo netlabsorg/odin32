@@ -1,4 +1,4 @@
-/* $Id: myldrCheckInternalName.cpp,v 1.2 2001-01-08 18:04:23 bird Exp $
+/* $Id: myldrCheckInternalName.cpp,v 1.3 2001-02-10 11:11:45 bird Exp $
  *
  * ldrCheckInternalName - ldrCheckInternalName replacement with support for
  *                  long DLL names and no .DLL-extention dependency.
@@ -15,6 +15,7 @@
 *******************************************************************************/
 #define INCL_DOSERRORS
 #define INCL_NOPMAPI
+#define INCL_OS2KRNL_LDR
 
 
 /*******************************************************************************
@@ -34,7 +35,6 @@
 #include "OS2Krnl.h"
 #include "dev32.h"
 #include "ldr.h"
-#include "ldrCalls.h"
 #include "options.h"
 
 
