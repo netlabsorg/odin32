@@ -1,4 +1,4 @@
-/* $Id: hmfile.cpp,v 1.25 2000-11-23 19:39:51 sandervl Exp $ */
+/* $Id: hmfile.cpp,v 1.26 2001-04-26 13:22:45 sandervl Exp $ */
 
 /*
  * File IO win32 apis
@@ -393,7 +393,7 @@ BOOL HMDeviceFileClass::DuplicateHandle(PHMHANDLEDATA pHMHandleData,
 }
 
 /*****************************************************************************
- * Name      : DWORD HMDeviceFileClass::CloseHandle
+ * Name      : BOOL HMDeviceFileClass::CloseHandle
  * Purpose   : close the handle
  * Parameters: PHMHANDLEDATA pHMHandleData
  * Variables :
@@ -404,7 +404,7 @@ BOOL HMDeviceFileClass::DuplicateHandle(PHMHANDLEDATA pHMHandleData,
  * Author    : Patrick Haller [Wed, 1998/02/11 20:44]
  *****************************************************************************/
 
-DWORD HMDeviceFileClass::CloseHandle(PHMHANDLEDATA pHMHandleData)
+BOOL HMDeviceFileClass::CloseHandle(PHMHANDLEDATA pHMHandleData)
 {
   HMFileInfo *fileInfo = (HMFileInfo *)pHMHandleData->dwUserData;
   BOOL        bRC;

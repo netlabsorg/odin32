@@ -1,4 +1,4 @@
-/* $Id: hmdevio.cpp,v 1.8 2001-01-29 00:47:55 bird Exp $ */
+/* $Id: hmdevio.cpp,v 1.9 2001-04-26 13:22:44 sandervl Exp $ */
 
 /*
  * Win32 Device IOCTL API functions for OS/2
@@ -146,7 +146,7 @@ tryopen:
 }
 //******************************************************************************
 //******************************************************************************
-DWORD HMDeviceDriver::CloseHandle(PHMHANDLEDATA pHMHandleData)
+BOOL HMDeviceDriver::CloseHandle(PHMHANDLEDATA pHMHandleData)
 {
  DWORD rc = 0;
 

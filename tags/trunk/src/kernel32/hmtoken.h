@@ -1,4 +1,4 @@
-/* $Id: hmtoken.h,v 1.2 2000-01-05 19:39:56 sandervl Exp $ */
+/* $Id: hmtoken.h,v 1.3 2001-04-26 13:22:48 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -41,7 +41,7 @@ public:
   	 	 	          DWORD   dwUserData,
                                   HANDLE  ProcessHandle);
 
-  virtual DWORD  CloseHandle(PHMHANDLEDATA pHMHandleData);
+  virtual BOOL  CloseHandle(PHMHANDLEDATA pHMHandleData);
 };
 
 

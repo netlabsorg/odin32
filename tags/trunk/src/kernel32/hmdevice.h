@@ -1,4 +1,4 @@
-/* $Id: hmdevice.h,v 1.25 2001-01-22 18:26:50 sandervl Exp $ */
+/* $Id: hmdevice.h,v 1.26 2001-04-26 13:22:44 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -107,7 +107,7 @@ public:
                              UINT          fuMode);
 
                       /* this is a handler method for calls to CloseHandle() */
-  virtual DWORD  CloseHandle(PHMHANDLEDATA pHMHandleData);
+  virtual BOOL   CloseHandle(PHMHANDLEDATA pHMHandleData);
 
                            /* this is a handler method for calls to ReadFile() */
   virtual BOOL   ReadFile   (PHMHANDLEDATA pHMHandleData,
@@ -441,6 +441,14 @@ public:
                            LPSECURITY_ATTRIBUTES lpsa,
                            DWORD         cbPipe);
 
+  virtual BOOL GetMailslotInfo(PHMHANDLEDATA pHMHandleData,
+                               LPDWORD lpMaxMessageSize,
+                               LPDWORD lpNextSize,
+                               LPDWORD lpMessageCount,
+                               LPDWORD lpReadTimeout);
+
+  virtual BOOL SetMailslotInfo(PHMHANDLEDATA pHMHandleData,
+                               DWORD  dwReadTimeout);
 };
 
 

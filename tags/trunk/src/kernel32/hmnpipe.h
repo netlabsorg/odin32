@@ -1,4 +1,4 @@
-/* $Id: hmnpipe.h,v 1.1 2000-07-12 18:21:44 sandervl Exp $ */
+/* $Id: hmnpipe.h,v 1.2 2001-04-26 13:22:46 sandervl Exp $ */
 /*
  * Project Odin Software License can be found in LICENSE.TXT
  *
@@ -27,6 +27,15 @@ class HMDeviceNamedPipeClass : public HMDeviceFileClass
                                 DWORD  nMaxInstances, DWORD  nOutBufferSize,
                                 DWORD  nInBufferSize, DWORD  nDefaultTimeOut,
                                 LPSECURITY_ATTRIBUTES lpSecurityAttributes);
+
+  /* this is a handler method for calls to CreateFile() */
+  virtual DWORD  CreateFile (LPCSTR        lpFileName,
+                             PHMHANDLEDATA pHMHandleData,
+                             PVOID         lpSecurityAttributes,
+                             PHMHANDLEDATA pHMHandleDataTemplate);
+
+  /* this is a handler method for calls to CloseHandle() */
+  virtual BOOL CloseHandle(PHMHANDLEDATA pHMHandleData);
 
   virtual BOOL ConnectNamedPipe(PHMHANDLEDATA pHMHandleData, LPOVERLAPPED lpOverlapped);
 

@@ -1,4 +1,4 @@
-/* $Id: oslibdos.cpp,v 1.60 2001-03-28 16:21:41 sandervl Exp $ */
+/* $Id: oslibdos.cpp,v 1.61 2001-04-26 13:22:48 sandervl Exp $ */
 /*
  * Wrappers for OS/2 Dos* API
  *
@@ -1478,8 +1478,8 @@ DWORD OSLibDosCreateNamedPipe(LPCTSTR lpName,
    DWORD dwOS2PipeMode = 0;
    LPSTR lpOS2Name;
    DWORD hPipe;
-   DWORD rc;
-
+   DWORD rc, ulAction;
+   
   if (dwOpenMode & PIPE_ACCESS_DUPLEX_W)
     dwOS2Mode |= NP_ACCESS_DUPLEX;
   else
@@ -1527,6 +1527,19 @@ DWORD OSLibDosCreateNamedPipe(LPCTSTR lpName,
   else lpOS2Name = (LPSTR)lpName;
 
   dprintf(("DosCreateNPipe(%s,%x,%x,%x,%x,%x)",lpOS2Name,dwOS2Mode,dwOS2PipeMode,nInBufferSize,nOutBufferSize,nDefaultTimeOut));
+
+  //if the windows app tries to open another instance of an existing pipe, then
+  //we must use DosOpen here. So first try DosOpen, if that fails then we can
+  //create the named pipe
+  rc = DosOpen(lpOS2Name, &hPipe, &ulAction, 0, FILE_NORMAL, FILE_OPEN,
+               ((dwOpenMode & PIPE_ACCESS_INBOUND_W) ? OPEN_ACCESS_READWRITE : OPEN_ACCESS_READONLY) | 
+               OPEN_SHARE_DENYNONE, NULL);
+
+  if(rc == NO_ERROR) {
+      dprintf(("Opening of existing named pipe succeeded"));
+      return hPipe;
+  }
+
   rc=DosCreateNPipe(lpOS2Name,
                     &hPipe,
                     dwOS2Mode,
@@ -1542,6 +1555,123 @@ DWORD OSLibDosCreateNamedPipe(LPCTSTR lpName,
     return -1; // INVALID_HANDLE_VALUE
   }
   return hPipe;
+}
+//******************************************************************************
+//******************************************************************************
+BOOL OSLibSetNamedPipeState(DWORD hNamedPipe, DWORD dwPipeMode)
+{
+ ULONG  dwOS2PipeMode = 0;
+ APIRET rc;
+
+  if (dwPipeMode & PIPE_WAIT_W)
+    dwOS2PipeMode |= NP_WAIT;
+  if (dwPipeMode & PIPE_NOWAIT_W)
+    dwOS2PipeMode |= NP_NOWAIT;
+  if (dwPipeMode & PIPE_READMODE_BYTE_W)
+    dwOS2PipeMode |= NP_READMODE_BYTE;
+  if (dwPipeMode & PIPE_READMODE_MESSAGE_W)
+    dwOS2PipeMode |= NP_READMODE_MESSAGE;
+
+  rc = DosSetNPHState(hNamedPipe, dwOS2PipeMode);
+  if(rc) {
+    SetLastError(error2WinError(rc, ERROR_INVALID_PARAMETER_W));
+    return FALSE;
+  }
+  return TRUE;
+}
+//******************************************************************************
+//******************************************************************************
+DWORD OSLibDosOpenPipe(LPCTSTR lpName,
+                       DWORD fuAccess,
+                       DWORD fuShare,
+                       LPSECURITY_ATTRIBUTES lpSecurityAttributes,
+                       DWORD fuCreate,
+                       DWORD fuAttrFlags)
+{  
+  LPSTR lpOS2Name;
+  ULONG hPipe;
+  ULONG rc, ulAction;
+  ULONG openFlag = 0;
+  ULONG openMode = 0;
+   
+
+   switch(fuCreate)
+   {
+   case CREATE_NEW_W:
+        openFlag |= OPEN_ACTION_CREATE_IF_NEW | OPEN_ACTION_FAIL_IF_EXISTS;
+        break;
+   case CREATE_ALWAYS_W:
+       /* kso 2000-11-26: Not sure if OPEN_ACTION_REPLACE_IF_EXISTS is correct here! It is correct according to
+        *   MSDN, but not according to "The Win32 API SuperBible". Anyway I haven't got time to check it out in
+        *   NT now.
+        *   The problem is that OPEN_ACTION_REPLACE_IF_EXISTS requires write access. It failes with
+        *   rc = ERROR_ACCESS_DENIED (5). Quick fix, use OPEN_IF_EXIST if readonly access.
+        */
+       if (fuAccess & GENERIC_WRITE_W)
+           openFlag |= OPEN_ACTION_CREATE_IF_NEW | OPEN_ACTION_REPLACE_IF_EXISTS;
+       else
+           openFlag |= OPEN_ACTION_CREATE_IF_NEW | OPEN_ACTION_OPEN_IF_EXISTS;
+        break;
+   case OPEN_EXISTING_W:
+        openFlag |= OPEN_ACTION_FAIL_IF_NEW | OPEN_ACTION_OPEN_IF_EXISTS;
+        break;
+   case OPEN_ALWAYS_W:
+        openFlag |= OPEN_ACTION_CREATE_IF_NEW | OPEN_ACTION_OPEN_IF_EXISTS;
+        break;
+   case TRUNCATE_EXISTING_W:
+        openFlag |= OPEN_ACTION_FAIL_IF_NEW | OPEN_ACTION_REPLACE_IF_EXISTS;
+        break;
+   }
+
+   if(fuAttrFlags & FILE_FLAG_WRITE_THROUGH_W)   openMode |= OPEN_FLAGS_WRITE_THROUGH;
+   if(fuAttrFlags & FILE_FLAG_NO_BUFFERING_W)    openMode |= OPEN_FLAGS_NO_CACHE;
+   if(fuAttrFlags & FILE_FLAG_RANDOM_ACCESS_W)   openMode |= OPEN_FLAGS_RANDOM;
+   if(fuAttrFlags & FILE_FLAG_SEQUENTIAL_SCAN_W) openMode |= OPEN_FLAGS_SEQUENTIAL;
+   // TODO: FILE_FLAG_BACKUP_SEMANTICS_W
+   //       FILE_FLAG_POSIX_SEMANTICS_W are not supported
+
+   //TODO: FILE_SHARE_DELETE
+   if((fuShare & (FILE_SHARE_READ_W | FILE_SHARE_WRITE_W)) == 0 )
+        openMode |= OPEN_SHARE_DENYREADWRITE;
+   else
+   if((fuShare & (FILE_SHARE_READ_W | FILE_SHARE_WRITE_W)) == (FILE_SHARE_READ_W | FILE_SHARE_WRITE_W))
+        openMode |= OPEN_SHARE_DENYNONE;
+   else
+   if(fuShare & FILE_SHARE_READ_W)
+        openMode |= OPEN_SHARE_DENYWRITE;
+   else
+   if(fuShare & FILE_SHARE_WRITE_W)
+        openMode |= OPEN_SHARE_DENYREAD;
+
+   if(fuAccess == (GENERIC_READ_W | GENERIC_WRITE_W))
+        openMode |= OPEN_ACCESS_READWRITE;
+   else
+   if(fuAccess & GENERIC_READ_W)
+        openMode |= OPEN_ACCESS_READONLY;
+   else
+   if(fuAccess & GENERIC_WRITE_W)
+        openMode |= OPEN_ACCESS_WRITEONLY;
+
+  if (strstr(lpName,"\\\\."))
+  {
+       // If pipe is created on the local machine
+       // we must delete string \\. because
+       // in Windows named pipes scheme is a \\.\PIPE\pipename
+       // but in OS/2 only \PIPE\pipename
+       lpOS2Name = (LPSTR)lpName + 3;
+  }
+  else lpOS2Name = (LPSTR)lpName;
+
+  rc = DosOpen(lpOS2Name, &hPipe, &ulAction, 0, 0, 
+               openFlag, openMode, NULL);
+
+  if(rc == NO_ERROR) {
+      dprintf(("Opening of existing named pipe succeeded"));
+      return hPipe;
+  }
+
+  SetLastError(error2WinError(rc,ERROR_INVALID_PARAMETER_W));
+  return -1; // INVALID_HANDLE_VALUE
 }
 
 //******************************************************************************

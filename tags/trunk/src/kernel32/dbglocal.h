@@ -118,7 +118,10 @@ void ParseLogStatus();
 #define DBG_hmdisk         98
 #define DBG_version        99
 #define DBG_hmstd          100
-#define DBG_MAXFILES       101
+#define DBG_module         101
+#define DBG_mailslot       102
+#define DBG_hmmailslot     103
+#define DBG_MAXFILES       104
 
 extern USHORT DbgEnabled[DBG_MAXFILES];
 extern USHORT DbgEnabledLvl2[DBG_MAXFILES];

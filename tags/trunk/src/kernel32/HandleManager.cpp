@@ -1,4 +1,4 @@
-/* $Id: HandleManager.cpp,v 1.62 2001-01-23 18:31:25 sandervl Exp $ */
+/* $Id: HandleManager.cpp,v 1.63 2001-04-26 13:22:42 sandervl Exp $ */
 
 /*
  * Win32 Unified Handle Manager for OS/2
@@ -61,6 +61,8 @@
 #include "HMThread.h"
 #include "HMNPipe.h"
 #include "HMStd.h"
+#include "HMMailslot.h"
+
 #include <vmutex.h>
 #include <win\thread.h>
 
@@ -141,6 +143,7 @@ struct _HMGlobals
   HMDeviceHandler        *pHMToken;         /* security tokens */
   HMDeviceHandler        *pHMThread;
   HMDeviceHandler        *pHMNamedPipe;
+  HMDeviceHandler        *pHMMailslot;
 
   ULONG         ulHandleLast;                   /* index of last used handle */
 } HMGlobals;
@@ -421,6 +424,7 @@ DWORD HMInitialize(void)
     HMGlobals.pHMToken      = new HMDeviceTokenClass("\\\\TOKEN\\");
     HMGlobals.pHMThread     = new HMDeviceThreadClass("\\\\THREAD\\");
     HMGlobals.pHMNamedPipe  = new HMDeviceNamedPipeClass("\\\\PIPE\\");
+    HMGlobals.pHMMailslot   = new HMMailslotClass("\\MAILSLOT\\");
   }
   return (NO_ERROR);
 }
@@ -462,6 +466,8 @@ DWORD HMTerminate(void)
     delete HMGlobals.pHMThread;
   if(HMGlobals.pHMNamedPipe)
     delete HMGlobals.pHMNamedPipe;
+  if(HMGlobals.pHMMailslot)
+    delete HMGlobals.pHMMailslot;
   if(HMGlobals.pHMDisk)
     delete HMGlobals.pHMDisk;
   if(HMGlobals.pHMStandard);
@@ -4197,10 +4203,10 @@ DWORD HMCreateNamedPipe(LPCTSTR lpName,
                                        nOutBufferSize,nInBufferSize,
                                        nDefaultTimeOut,lpSecurityAttributes);
 
-  if (rc == 0)     /* oops, creation failed within the device handler */
+  if (rc == -1)     /* oops, creation failed within the device handler */
   {
       TabWin32Handles[iIndexNew].hmHandleData.hHMHandle = INVALID_HANDLE_VALUE;
-  return 0;                                           /* signal error */
+      return 0;                                           /* signal error */
   }
 
   dprintf(("Win32 Handle -> %08x",iIndexNew));
@@ -4532,4 +4538,138 @@ BOOL HMCreatePipe(PHANDLE phRead,
   *phWrite = iIndexNewWrite;
 
   return TRUE;
+}
+
+/*****************************************************************************
+ * Name      : HMCreateMailslotA
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : 
+ *
+ * Author    : SvL
+ *****************************************************************************/
+HANDLE HMCreateMailslotA(LPCSTR lpName, DWORD nMaxMessageSize,
+                         DWORD lReadTimeout,
+                         LPSECURITY_ATTRIBUTES lpSecurityAttributes)
+{
+  int             iIndex;                     /* index into the handle table */
+  int             iIndexNew;                  /* index into the handle table */
+  HMMailslotClass *pDeviceHandler;            /* device handler for this handle */
+  PHMHANDLEDATA   pHMHandleData;
+  BOOL            rc;                                     /* API return code */
+
+  SetLastError(ERROR_SUCCESS);
+
+  pDeviceHandler = (HMMailslotClass *)HMGlobals.pHMMailslot;         /* device is predefined */
+
+  iIndexNew = _HMHandleGetFree();                         /* get free handle */
+  if (-1 == iIndexNew)                            /* oops, no free handles ! */
+  {
+    SetLastError(ERROR_NOT_ENOUGH_MEMORY);      /* use this as error message */
+    return 0;
+  }
+
+  /* initialize the complete HMHANDLEDATA structure */
+  pHMHandleData = &TabWin32Handles[iIndexNew].hmHandleData;
+  pHMHandleData->dwType     = FILE_TYPE_UNKNOWN;
+  pHMHandleData->dwAccess   = 0;
+  pHMHandleData->dwShare    = 0;
+  pHMHandleData->dwCreation = 0;
+  pHMHandleData->dwFlags    = 0;
+  pHMHandleData->lpHandlerData = NULL;
+
+  /* we've got to mark the handle as occupied here, since another device */
+  /* could be created within the device handler -> deadlock */
+
+  /* write appropriate entry into the handle table if open succeeded */
+  TabWin32Handles[iIndexNew].hmHandleData.hHMHandle = iIndexNew;
+  TabWin32Handles[iIndexNew].pDeviceHandler         = pDeviceHandler;
+
+  /* call the device handler */
+
+  rc = pDeviceHandler->CreateMailslotA(&TabWin32Handles[iIndexNew].hmHandleData,
+                                       lpName, nMaxMessageSize,
+                                       lReadTimeout, lpSecurityAttributes);
+
+  if (rc == FALSE)     /* oops, creation failed within the device handler */
+  {
+      TabWin32Handles[iIndexNew].hmHandleData.hHMHandle = INVALID_HANDLE_VALUE;
+      return 0;                                           /* signal error */
+  }
+
+  return iIndexNew;
+}
+/*****************************************************************************
+ * Name      : HMGetMailslotInfo
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : 
+ *
+ * Author    : SvL
+ *****************************************************************************/
+BOOL HMGetMailslotInfo(HANDLE  hMailslot,
+                       LPDWORD lpMaxMessageSize,
+                       LPDWORD lpNextSize,
+                       LPDWORD lpMessageCount,
+                       LPDWORD lpReadTimeout)
+{
+  int       iIndex;                           /* index into the handle table */
+  BOOL      lpResult;                /* result from the device handler's API */
+  PHMHANDLE pHMHandle;       /* pointer to the handle structure in the table */
+
+  SetLastError(ERROR_SUCCESS);
+                                                          /* validate handle */
+  iIndex = _HMHandleQuery(hMailslot);              /* get the index */
+  if (-1 == iIndex)                                               /* error ? */
+  {
+    SetLastError(ERROR_INVALID_HANDLE);       /* set win32 error information */
+    return FALSE;                                         /* signal failure */
+  }
+
+  pHMHandle = &TabWin32Handles[iIndex];               /* call device handler */
+  lpResult = pHMHandle->pDeviceHandler->GetMailslotInfo(&TabWin32Handles[iIndex].hmHandleData,
+                                                        lpMaxMessageSize,
+                                                        lpNextSize,
+                                                        lpMessageCount,
+                                                        lpReadTimeout);
+  return (lpResult);                                  /* deliver return code */
+}
+/*****************************************************************************
+ * Name      : HMSetMailslotInfo
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : 
+ *
+ * Author    : SvL
+ *****************************************************************************/
+BOOL HMSetMailslotInfo(HANDLE hMailslot,
+                       DWORD  dwReadTimeout)
+{
+  int       iIndex;                           /* index into the handle table */
+  BOOL      lpResult;                /* result from the device handler's API */
+  PHMHANDLE pHMHandle;       /* pointer to the handle structure in the table */
+
+  SetLastError(ERROR_SUCCESS);
+                                                          /* validate handle */
+  iIndex = _HMHandleQuery(hMailslot);              /* get the index */
+  if (-1 == iIndex)                                               /* error ? */
+  {
+    SetLastError(ERROR_INVALID_HANDLE);       /* set win32 error information */
+    return FALSE;                                         /* signal failure */
+  }
+
+  pHMHandle = &TabWin32Handles[iIndex];               /* call device handler */
+  lpResult = pHMHandle->pDeviceHandler->SetMailslotInfo(&TabWin32Handles[iIndex].hmHandleData,
+                                                       dwReadTimeout);
+
+  return (lpResult);                                  /* deliver return code */
 }

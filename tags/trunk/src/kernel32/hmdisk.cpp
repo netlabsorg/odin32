@@ -1,4 +1,4 @@
-/* $Id: hmdisk.cpp,v 1.5 2001-03-29 17:39:51 sandervl Exp $ */
+/* $Id: hmdisk.cpp,v 1.6 2001-04-26 13:22:45 sandervl Exp $ */
 
 /*
  * Win32 Disk API functions for OS/2
@@ -118,7 +118,7 @@ DWORD HMDeviceDiskClass::CreateFile (LPCSTR        lpFileName,
 }
 //******************************************************************************
 //******************************************************************************
-DWORD HMDeviceDiskClass::CloseHandle(PHMHANDLEDATA pHMHandleData)
+BOOL HMDeviceDiskClass::CloseHandle(PHMHANDLEDATA pHMHandleData)
 {
     if(pHMHandleData->hHMHandle) {
         return OSLibDosClose(pHMHandleData->hHMHandle);
