@@ -1,3 +1,14 @@
+/* $Id: OS2D3D.CPP,v 1.9 1999-12-21 01:28:15 hugh Exp $ */
+
+/*
+ * DX clipper class routines
+ *
+ * Copyright 1998 Sander van Leeuwen
+ *
+ * Project Odin Software License can be found in LICENSE.TXT
+ *
+ */
+
 #include <memory.h>
 
 #define INITGUID

@@ -1,3 +1,16 @@
+/* $Id: rectangle.cpp,v 1.3 1999-12-21 01:28:17 hugh Exp $ */
+
+/*
+ * Rectangle class Implementaion
+ *
+ * Copyright 1999 Markus Montkowski
+ *
+ * Project Odin Software License can be found in LICENSE.TXT
+ *
+ */
+
+typedef long BOOL;
+
 #include "rectangle.h"
 
 DDRectangle::DDRectangle ( Coord y1,
@@ -12,17 +25,17 @@ DDRectangle::DDRectangle ( Coord y1,
   pMemPtr = 0;
 }
 
-IBase::Boolean DDRectangle::operator == ( const DDRectangle &aRect ) const
+BOOL DDRectangle::operator == ( const DDRectangle &aRect ) const
   {
   return ( lTop == aRect.lTop && lLeft == aRect.lLeft
            &&
            lBottom == aRect.lBottom && lRight == aRect.lRight);
   }
-IBase::Boolean DDRectangle::operator != ( const DDRectangle& aRect ) const
+BOOL DDRectangle::operator != ( const DDRectangle& aRect ) const
   {
   return !( *this == aRect );
   }
-IBase::Boolean DDRectangle::intersects ( const DDRectangle &aRect ) const
+BOOL DDRectangle::intersects ( const DDRectangle &aRect ) const
 {
   return ( lTop < aRect.lBottom && lLeft<aRect.lRight
            &&

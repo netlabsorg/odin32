@@ -1,7 +1,12 @@
-#
-# PD-Win32 API
+# $Id: makefile,v 1.16 1999-12-21 01:28:20 hugh Exp $
 #
 # ddraw.dll makefile
+#
+# Copyright 1998 Sander van Leeuwen
+#           1999 Markus Montkowski
+#
+# Project Odin Software License can be found in LICENSE.TXT
+#
 #
 
 PDWIN32_INCLUDE = ..\..\include
@@ -19,10 +24,12 @@ TARGET = ddraw
 
 OBJS =  ddraw.obj os2ddraw.obj os2clipper.obj os2d3d.obj iccio1.obj asmutil.obj\
         os2surface.obj os2palette.obj os2palset.obj rectangle.obj initterm.obj \
-        os2util.obj bltFunc.obj
+        os2util.obj bltFunc.obj fillfunc.obj colorconv.obj
 
 
-LIBS =  ..\..\lib\pmwinx.lib mmpm2.lib ..\..\lib\comctl32.lib $(PDWIN32_LIB)\advapi32.lib $(PDWIN32_LIB)\kernel32.lib $(PDWIN32_LIB)\gdi32.lib $(PDWIN32_LIB)\comctl32.lib $(PDWIN32_LIB)\kernel32.lib $(PDWIN32_LIB)/odincrt.lib OS2386.LIB $(RTLLIB_O)
+LIBS =  $(PDWIN32_LIB)\pmwinx.lib $(PDWIN32_LIB)\advapi32.lib $(PDWIN32_LIB)\gdi32.lib \
+        $(PDWIN32_LIB)\comctl32.lib $(PDWIN32_LIB)\kernel32.lib $(PDWIN32_LIB)\odincrt.lib \
+        $(PDWIN32_LIB)\user32.lib mmpm2.lib OS2386.LIB $(RTLLIB_O)
 
 all: $(TARGET).dll $(TARGET).lib
 
@@ -77,16 +84,23 @@ os2surface.obj: os2surface.cpp  \
     os2clipper.h \
     os2surface.h \
     os2ddraw.h\
+    rectangle.h \
     $(PDWIN32_INCLUDE)\win\ddraw.h \
     $(PDWIN32_INCLUDE)\win\d3d.h
 
-rectangle.obj: rectangle.cpp
+rectangle.obj: rectangle.cpp rectangle.h
 
 initterm.obj: initterm.cpp initterm.h
 
 os2util.obj:  os2util.cpp os2util.h
 
 bltFunc.obj: bltFunc.cpp bltFunc.h \
+    $(PDWIN32_INCLUDE)\misc.h
+
+fillfunc.obj: fillfunc.cpp fillfunc.h \
+    $(PDWIN32_INCLUDE)\misc.h
+
+colorconv.obj: colorconv.cpp colorconv.h \
     $(PDWIN32_INCLUDE)\misc.h
 
 iccio1.obj: iccio1.asm

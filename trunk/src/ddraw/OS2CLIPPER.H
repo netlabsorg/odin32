@@ -1,3 +1,13 @@
+/* $Id: OS2CLIPPER.H,v 1.6 1999-12-21 01:28:19 hugh Exp $ */
+
+/*
+ * DX clipper class definition
+ *
+ * Copyright 1998 Sander va Leeuwen
+ *
+ * Project Odin Software License can be found in LICENSE.TXT
+ *
+ */
 #ifndef __OS2CLIPPER_H__
 #define __OS2CLIPPER_H__
 

@@ -1,11 +1,18 @@
+/* $Id: rectangle.h,v 1.4 1999-12-21 01:28:19 hugh Exp $ */
+
+/*
+ * Rectangle class used to keep track of locked rects in surfaces
+ *
+ * Copyright 1999 Markus Montkowski
+ *
+ * Project Odin Software License can be found in LICENSE.TXT
+ *
+ */
+
 #ifndef __DDRectandle
   #define __DDRectandle
 
-#include <ibase.hpp>
-
-class DDRectangle : public IBase {
-typedef IBase
-  Inherited;
+class DDRectangle {
 public:
 /*------------------------------ Related Types -------------------------------*/
  typedef long Coord;
@@ -21,12 +28,12 @@ public:
 
 
 /*------------------------------- Comparisons --------------------------------*/
-Boolean
+BOOL
   operator == ( const DDRectangle& rectangle ) const,
   operator != ( const DDRectangle& rectangle ) const;
 
 /*--------------------------------- Testing ----------------------------------*/
-Boolean
+BOOL
   intersects ( const DDRectangle& rectangle ) const;
 
 Coord

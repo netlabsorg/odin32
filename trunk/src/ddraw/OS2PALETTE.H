@@ -1,3 +1,15 @@
+/* $Id: OS2PALETTE.H,v 1.7 1999-12-21 01:28:19 hugh Exp $ */
+
+/*
+ * DX palette class definition
+ *
+ * Copyright 1998 Sander va Leeuwen
+ * Copyright 1999 Markus Montkowski
+ *
+ * Project Odin Software License can be found in LICENSE.TXT
+ *
+ */
+
 #ifndef __OS2PALETTE_H__
 #define __OS2PALETTE_H__
 

@@ -1,3 +1,14 @@
+/* $Id: OS2DDRAW.CPP,v 1.18 1999-12-21 01:28:15 hugh Exp $ */
+
+/*
+ * DX Draw base class implementation
+ *
+ * Copyright 1998 Sander va Leeuwen
+ * Copyright 1999 Markus Montkowski
+ *
+ * Project Odin Software License can be found in LICENSE.TXT
+ *
+ */
 #include <stdlib.h>
 #include <string.h>
 #include <memory.h>
@@ -1478,7 +1489,13 @@ HRESULT __stdcall DrawSetCooperativeLevel(THIS This, HWND hwndClient, DWORD dwFl
   #ifdef DEBUG
     dprintf(("DDRAW: SetCooperativeLevel: hwnd %X, Flags %X\n", hwndClient, dwFlags));
   #endif
-
+  me->dwCoopMode = dwFlags;
+  if(!(DDSCL_NORMAL & dwFlags))
+  {
+    // client window req. for all none DDSCL_NORMAL modes
+    if(NULL==hwndClient)
+      return(DDERR_INVALIDPARAMS);
+  }
   me->hwndClient = hwndClient;
   #if 0
     OS2DDSubclassWindow(hwndClient);
@@ -1503,6 +1520,11 @@ HRESULT __stdcall DrawSetDisplayMode2(THIS This, DWORD dwWidth, DWORD dwHeight,
   me->screenwidth  = dwWidth;
   me->screenheight = dwHeight;
   me->screenbpp    = dwBPP;
+
+  if(me->dwCoopMode & DDSCL_FULLSCREEN)
+  {
+    SetWindowPos(me->hwndClient, HWND_TOP,0,0,dwWidth,dwHeight,0);
+  }
 
   memset(&sBlt,0,sizeof(sBlt));
   sBlt.ulStructLen = sizeof(sBlt);
@@ -1540,6 +1562,11 @@ HRESULT __stdcall DrawSetDisplayMode(THIS This, DWORD dwWidth, DWORD dwHeight,
   me->screenwidth  = dwWidth;
   me->screenheight = dwHeight;
   me->screenbpp    = dwBPP;
+
+  if(me->dwCoopMode & DDSCL_FULLSCREEN)
+  {
+    SetWindowPos(me->hwndClient, HWND_TOP,0,0,dwWidth,dwHeight,0);
+  }
 
   memset(&sBlt,0,sizeof(sBlt));
   sBlt.ulStructLen = sizeof(sBlt);

@@ -1,3 +1,14 @@
+/* $Id: OS2SURFACE.H,v 1.13 1999-12-21 01:28:19 hugh Exp $ */
+
+/*
+ * Direct/X Surface class
+ *
+ * Copyright 1999 Markus Montkowski
+ *
+ * Project Odin Software License can be found in LICENSE.TXT
+ *
+ */
+
 #ifndef __OS2SURFACE_H__
 #define __OS2SURFACE_H__
 #define FAR
@@ -51,7 +62,7 @@ class OS2IDirectDrawSurface
           void          ColorConversion(LPRECT lpRect);
 
  private:
-        HRESULT         ColorFill(LPRECT, DWORD);
+        HRESULT         DoColorFill(LPRECT, DWORD);
         void (__cdecl *BltSolid)( char *pDBDst,
                                 char *pFBDst,
                                 DWORD dwDstTop,
@@ -67,6 +78,27 @@ class OS2IDirectDrawSurface
                                 DWORD dwPitchDBSrc,
                                 DWORD dwPitchFBSrc
                                );
+        void (__cdecl *ColorConv)( char *pDB,
+                                   char *pFB,
+                                   DWORD dwTop,
+                                   DWORD dwLeft,
+                                   DWORD dwWidth,
+                                   DWORD dwHeight,
+                                   DWORD dwPitchDB,
+                                   DWORD dwPitchFB,
+                                   VOID  *pPalette
+                                   );
+        void (__cdecl *ColorFill)( char *pDBDst,
+                                   char *pFBDst,
+                                   DWORD dwDstTop,
+                                   DWORD dwDstLeft,
+                                   DWORD dwWidth,
+                                   DWORD dwHeight,
+                                   DWORD dwPitchDBDst,
+                                   DWORD dwPitchFBDst,
+                                   DWORD dwColor,
+                                   VOID  *pPalette
+                                 );
  protected:
         HRESULT                lastError;
         HDIVE                  hDive;

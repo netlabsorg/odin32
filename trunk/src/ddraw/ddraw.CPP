@@ -1,3 +1,15 @@
+/* $Id: ddraw.CPP,v 1.10 1999-12-21 01:28:15 hugh Exp $ */
+
+/*
+ * DXDraw DLL implementaion
+ *
+ * Copyright 1998 Sander va Leeuwen
+ * Copyright 1999 Markus Montkowski
+ *
+ * Project Odin Software License can be found in LICENSE.TXT
+ *
+ */
+
 #include <memory.h>
 
 #include <builtin.h>

@@ -1,3 +1,13 @@
+/* $Id: divewrap.h,v 1.3 1999-12-21 01:28:18 hugh Exp $ */
+
+/*
+ * Wrapper for DIVE functions calls
+ *
+ * Copyright 1999 Markus Montkowski
+ *
+ * Project Odin Software License can be found in LICENSE.TXT
+ *
+ */
 
 
 #ifndef __DIVEWRAP_H__
