@@ -1,4 +1,4 @@
-/* $Id: window.cpp,v 1.3 1999-09-17 18:49:53 dengert Exp $ */
+/* $Id: window.cpp,v 1.4 1999-09-21 08:24:05 sandervl Exp $ */
 /*
  * Win32 window apis for OS/2
  *
@@ -689,7 +689,7 @@ BOOL WIN32API AdjustWindowRectEx( PRECT arg1, DWORD arg2, BOOL arg3, DWORD  arg4
 HWND WIN32API GetDesktopWindow(void)
 {
     dprintf(("USER32:  GetDesktopWindow\n"));
-    return OSLIB_HWND_DESKTOP;
+    return 0;
 }
 //******************************************************************************
 //******************************************************************************

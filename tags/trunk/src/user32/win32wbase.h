@@ -1,4 +1,4 @@
-/* $Id: win32wbase.h,v 1.1 1999-09-15 23:19:01 sandervl Exp $ */
+/* $Id: win32wbase.h,v 1.2 1999-09-21 08:24:05 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -73,6 +73,7 @@ virtual  ULONG  MsgCreate(HWND hwndOS2, ULONG initParam);
          ULONG  MsgActivate(BOOL fActivate, HWND hwnd);
          ULONG  MsgSetFocus(HWND hwnd);
          ULONG  MsgKillFocus(HWND hwnd);
+         ULONG  MsgTimer(ULONG TimerID);
          ULONG  MsgCommand(ULONG cmd, ULONG Id, HWND hwnd);
          ULONG  MsgSysCommand(ULONG win32sc, ULONG x, ULONG y);
          ULONG  MsgChar(ULONG cmd, ULONG repeatcnt, ULONG scancode, ULONG vkey, ULONG keyflags);
