@@ -1,8 +1,12 @@
-/* $Id: changelog,v 1.1478 2001-06-03 12:01:13 sandervl Exp $ */
+/* $Id: changelog,v 1.1479 2001-06-03 14:52:13 sandervl Exp $ */
 
  2001-06-03: Sander van Leeuwen <sandervl@xs4all.nl>
     - USER32:   o Ported & fixed ScrollDC (Wine)
                   (fixes scrolling in Adobe Framemaker 5.5)
+    - GDI32:    o RGB 565->555 conversion in GetDIBits
+                o RGB 555->565 conversion in DIB Section sync
+                o Sync DIB section in RealizePalette if any colors changed
+                  (fixes PowerDVD colors)
 
  2001-06-02: knut st. osmundsen <knut.stange.osmundsen@mynd.no>
     - Win32k/configure.cmd:
