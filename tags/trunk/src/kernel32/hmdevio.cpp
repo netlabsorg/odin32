@@ -1,4 +1,4 @@
-/* $Id: hmdevio.cpp,v 1.28 2002-07-05 17:59:30 sandervl Exp $ */
+/* $Id: hmdevio.cpp,v 1.29 2002-12-20 10:38:56 sandervl Exp $ */
 
 /*
  * Win32 Device IOCTL API functions for OS/2
@@ -26,7 +26,6 @@
 #include <misc.h>
 #include <win\winioctl.h>
 #include "hmdevio.h"
-#include "cio.h"
 #include "map.h"
 #include "exceptutil.h"
 #include "oslibdos.h"
@@ -34,25 +33,12 @@
 #define DBG_LOCALLOG	DBG_hmdevio
 #include "dbglocal.h"
 
-static BOOL fX86Init  = FALSE;
-//SvL: Used in iccio.asm (how can you put these in the .asm data segment without messing things up?)
-ULONG  ioentry   = 0;
-USHORT gdt       = 0;
-char   devname[] = "/dev/fastio$";
-
-static BOOL GpdDevIOCtl(HANDLE hDevice, DWORD dwIoControlCode, LPVOID lpInBuffer, DWORD nInBufferSize, LPVOID lpOutBuffer, DWORD nOutBufferSize, LPDWORD lpBytesReturned, LPOVERLAPPED lpOverlapped);
-static BOOL MAPMEMIOCtl(HANDLE hDevice, DWORD dwIoControlCode, LPVOID lpInBuffer, DWORD nInBufferSize, LPVOID lpOutBuffer, DWORD nOutBufferSize, LPDWORD lpBytesReturned, LPOVERLAPPED lpOverlapped);
-static BOOL FXMEMMAPIOCtl(HANDLE hDevice, DWORD dwIoControlCode, LPVOID lpInBuffer, DWORD nInBufferSize, LPVOID lpOutBuffer, DWORD nOutBufferSize, LPDWORD lpBytesReturned, LPOVERLAPPED lpOverlapped);
-static BOOL VPCIOCtl(HANDLE hDevice, DWORD dwIoControlCode, LPVOID lpInBuffer, DWORD nInBufferSize, LPVOID lpOutBuffer, DWORD nOutBufferSize, LPDWORD lpBytesReturned, LPOVERLAPPED lpOverlapped);
-
 static WIN32DRV knownDriver[] =
-    {{"\\\\.\\GpdDev", "",      TRUE,  666,   GpdDevIOCtl},
-    { "\\\\.\\MAPMEM", "PMAP$", FALSE, 0,     MAPMEMIOCtl},
-    { "FXMEMMAP.VXD",  "PMAP$", FALSE, 0,     FXMEMMAPIOCtl},
+    { {0}
     };
 
-static int nrKnownDrivers = sizeof(knownDriver)/sizeof(WIN32DRV);
-BOOL fVirtualPC = FALSE;
+static int nrKnownDrivers = 0;
+// = sizeof(knownDriver)/sizeof(WIN32DRV);
 
 //******************************************************************************
 //******************************************************************************
@@ -258,134 +244,6 @@ BOOL HMDeviceDriver::DeviceIoControl(PHMHANDLEDATA pHMHandleData, DWORD dwIoCont
 {
    return devIOCtl(pHMHandleData->hHMHandle, dwIoControlCode, lpInBuffer, nInBufferSize,
                    lpOutBuffer, nOutBufferSize, lpBytesReturned, lpOverlapped);
-}
-//******************************************************************************
-//******************************************************************************
-static BOOL GpdDevIOCtl(HANDLE hDevice, DWORD dwIoControlCode, LPVOID lpInBuffer, DWORD nInBufferSize, LPVOID lpOutBuffer, DWORD nOutBufferSize, LPDWORD lpBytesReturned, LPOVERLAPPED lpOverlapped)
-{
- ULONG port, val = 0;
-
-  if(fX86Init == FALSE) {
-    	if(io_init() == 0)
-        	fX86Init = TRUE;
-    	else   	return(FALSE);
-  }
-
-  *lpBytesReturned = 0;
-
-  port = ((GENPORT_WRITE_INPUT *)lpInBuffer)->PortNumber;
-
-  switch((dwIoControlCode >> 2) & 0xFFF) {
-    case IOCTL_GPD_READ_PORT_UCHAR:
-        if(nOutBufferSize < sizeof(char))
-            return(FALSE);
-
-        val = c_inb(port);
-        *(char *)lpOutBuffer = val;
-        *lpBytesReturned = sizeof(char);
-        break;
-    case IOCTL_GPD_READ_PORT_USHORT:
-        if(nOutBufferSize < sizeof(USHORT))
-            return(FALSE);
-
-        val = c_inw(port);
-        *(USHORT *)lpOutBuffer = val;
-        *lpBytesReturned = sizeof(USHORT);
-        break;
-    case IOCTL_GPD_READ_PORT_ULONG:
-        if(nOutBufferSize < sizeof(ULONG))
-            return(FALSE);
-
-        val = c_inl(port);
-        *(ULONG *)lpOutBuffer = val;
-        *lpBytesReturned = sizeof(ULONG);
-        break;
-    case IOCTL_GPD_WRITE_PORT_UCHAR:
-        val   = ((GENPORT_WRITE_INPUT *)lpInBuffer)->CharData;
-        c_outb(port, val);
-        break;
-    case IOCTL_GPD_WRITE_PORT_USHORT:
-        val   = ((GENPORT_WRITE_INPUT *)lpInBuffer)->ShortData;
-        c_outw(port, val);
-        break;
-    case IOCTL_GPD_WRITE_PORT_ULONG:
-        val   = ((GENPORT_WRITE_INPUT *)lpInBuffer)->LongData;
-        c_outl(port, val);
-        break;
-    default:
-        dprintf(("GpdDevIOCtl unknown func %X\n", (dwIoControlCode >> 2) & 0xFFF));
-        return(FALSE);
-  }
-
-  return(TRUE);
-}
-//******************************************************************************
-//******************************************************************************
-static BOOL MAPMEMIOCtl(HANDLE hDevice, DWORD dwIoControlCode, LPVOID lpInBuffer, DWORD nInBufferSize, LPVOID lpOutBuffer, DWORD nOutBufferSize, LPDWORD lpBytesReturned, LPOVERLAPPED lpOverlapped)
-{
- PHYSICAL_MEMORY_INFO *meminfo = (PHYSICAL_MEMORY_INFO *)lpInBuffer;
- struct map_ioctl memmap;
-
-  *lpBytesReturned = 0;
-
-  switch((dwIoControlCode >> 2) & 0xFFF) {
-    case IOCTL_MAPMEM_MAP_USER_PHYSICAL_MEMORY:
-        if(nInBufferSize != sizeof(PHYSICAL_MEMORY_INFO))
-            return(FALSE);
-
-        memmap.a.phys = meminfo->BusAddress.u.LowPart;
-        memmap.size = meminfo->Length;
-        dprintf(("DeviceIoControl map phys address %X length %X\n", memmap.a.phys, memmap.size));
-        if(mpioctl((HFILE)hDevice, IOCTL_MAP, &memmap) == -1) {
-            dprintf(("mpioctl failed!\n"));
-            return(FALSE);
-        }
-
-        dprintf(("DeviceIoControl map virt address = %X\n", memmap.a.user));
-        *(ULONG *)lpOutBuffer = (ULONG)memmap.a.user;
-        break;
-    case IOCTL_MAPMEM_UNMAP_USER_PHYSICAL_MEMORY:
-        dprintf(("Unmap mapping %X\n", *(ULONG *)lpInBuffer));
-        memmap.a.phys = *(ULONG *)lpInBuffer;
-        memmap.size = 0;
-        if(mpioctl((HFILE)hDevice, IOCTL_MAP, &memmap) == -1)
-            return(FALSE);
-        break;
-    default:
-        dprintf(("MAPMEMIOCtl unknown func %X\n", (dwIoControlCode >> 2) & 0xFFF));
-        return(FALSE);
-  }
-
-  return(TRUE);
-}
-//******************************************************************************
-//******************************************************************************
-static BOOL FXMEMMAPIOCtl(HANDLE hDevice, DWORD dwIoControlCode, LPVOID lpInBuffer, DWORD nInBufferSize, LPVOID lpOutBuffer, DWORD nOutBufferSize, LPDWORD lpBytesReturned, LPOVERLAPPED lpOverlapped)
-{
- struct map_ioctl memmap;
- MAPDEVREQUEST *vxdmem = (MAPDEVREQUEST *)lpInBuffer;
-
-  switch(dwIoControlCode) {
-    case 1:
-        break;
-    case 2:
-        memmap.a.phys = (DWORD)vxdmem->mdr_PhysicalAddress;
-        memmap.size = vxdmem->mdr_SizeInBytes;
-        dprintf(("DeviceIoControl map phys address %X length %X\n", memmap.a.phys, memmap.size));
-        if(mpioctl((HFILE)hDevice, IOCTL_MAP, &memmap) == -1) {
-            dprintf(("mpioctl failed!\n"));
-            return(FALSE);
-        }
-
-        dprintf(("DeviceIoControl map virt address = %X\n", memmap.a.user));
-        vxdmem->mdr_LinearAddress = (PVOID)memmap.a.user;
-        break;
-    default:
-        dprintf(("FXMEMMAPIOCtl unknown func %X\n", (dwIoControlCode >> 2) & 0xFFF));
-        return(FALSE);
-  }
-
-  return(TRUE);
 }
 //******************************************************************************
 //******************************************************************************

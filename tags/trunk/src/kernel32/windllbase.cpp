@@ -1,4 +1,4 @@
-/* $Id: windllbase.cpp,v 1.30 2002-07-26 10:48:40 sandervl Exp $ */
+/* $Id: windllbase.cpp,v 1.31 2002-12-20 10:38:57 sandervl Exp $ */
 
 /*
  * Win32 Dll base class
@@ -38,7 +38,6 @@
 #include <wprocess.h>
 #include "exceptions.h"
 #include "exceptutil.h"
-#include "cio.h"
 #include "vmutex.h"
 #include "oslibmisc.h"
 #include "oslibdos.h"
