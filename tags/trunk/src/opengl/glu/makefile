@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.2 2000-02-09 09:04:10 jeroen Exp $
+# $Id: makefile,v 1.3 2000-02-09 12:08:31 bird Exp $
 #
 # PD-Win32
 #
@@ -13,8 +13,13 @@ PDWIN32_TOOLS = ..\..\..\tools\bin
 !include $(PDWIN32_INCLUDE)/pdwin32.mk
 
 !ifdef DEBUG
+!ifdef NODEBUGINFO
+MAKE_CMD = nmake -nologo DEBUG=1 NODEBUGINFO=1
+L=/NODEBUG
+!else
 MAKE_CMD = nmake -nologo DEBUG=1
-L=/CO
+L=/DE
+!endif
 !else
 MAKE_CMD = nmake -nologo
 !endif
