@@ -1,4 +1,4 @@
-/* $Id: defaulthandler.cpp,v 1.1 1999-09-24 21:49:43 davidr Exp $ */
+/* $Id: defaulthandler.cpp,v 1.2 2000-09-17 10:31:03 davidr Exp $ */
 /* 
  *  OLE 2 default object handler
  * 
@@ -100,8 +100,8 @@ struct DefaultHandler
   /*
    * Name of the container and object contained
    */
-  BSTR containerApp; 
-  BSTR containerObj;
+  LPWSTR containerApp; 
+  LPWSTR containerObj;
 
 };
 
@@ -829,15 +829,15 @@ static HRESULT WINAPI DefaultHandler_SetHostNames(
   /*
    * Be sure to cleanup before re-assinging the strings.
    */ 
-  if (This->containerApp!=NULL)
+  if (This->containerApp != NULL)
   {
-    SysFreeString(This->containerApp);
+    HeapFree( GetProcessHeap(), 0, This->containerApp );
     This->containerApp = NULL;
   }
 
-  if (This->containerObj!=NULL)
+  if (This->containerObj != NULL)
   {
-    SysFreeString(This->containerObj);
+    HeapFree( GetProcessHeap(), 0, This->containerObj );
     This->containerObj = NULL;
   }
 
@@ -845,11 +845,19 @@ static HRESULT WINAPI DefaultHandler_SetHostNames(
    * Copy the string supplied.
    */
   if (szContainerApp != NULL)
-    This->containerApp = SysAllocString(szContainerApp);
+  {
+      if ((This->containerApp = (LPWSTR)HeapAlloc( GetProcessHeap(), 0,
+				       (lstrlenW(szContainerApp) + 1) * sizeof(WCHAR) )) != NULL)
+          lstrcpyW( This->containerApp, szContainerApp );
+  }
 
   if (szContainerObj != NULL)
-    This->containerObj = SysAllocString(szContainerObj);
- 
+  {
+      if ((This->containerObj = (LPWSTR)HeapAlloc( GetProcessHeap(), 0,
+				       (lstrlenW(szContainerObj) + 1) * sizeof(WCHAR) )) != NULL)
+          lstrcpyW( This->containerObj, szContainerObj );
+  }
+
   return S_OK;
 }
 
@@ -1306,13 +1314,39 @@ static ULONG WINAPI DefaultHandler_IDataObject_Release(
   return IUnknown_Release(This->outerUnknown);  
 }
 
+/************************************************************************
+ * DefaultHandler_GetData
+ *
+ * Get Data from a source dataobject using format pformatetcIn->cfFormat
+ * See Windows documentation for more details on GetData.
+ * Default handler's implementation of this method delegates to the cache.
+ */
 static HRESULT WINAPI DefaultHandler_GetData(
-	    IDataObject*     iface,
-	    LPFORMATETC      pformatetcIn, 
-	    STGMEDIUM*       pmedium)
+            IDataObject*     iface,
+            LPFORMATETC      pformatetcIn,
+            STGMEDIUM*       pmedium)
 {
-  FIXME(": Stub\n");
-  return E_NOTIMPL;
+  IDataObject* cacheDataObject = NULL;
+  HRESULT      hres;
+
+  _ICOM_THIS_From_IDataObject(DefaultHandler, iface);
+
+  TRACE("(%p, %p, %p)\n", iface, pformatetcIn, pmedium);
+
+  hres = IUnknown_QueryInterface(This->dataCache,
+                                 &IID_IDataObject,
+                                 (void**)&cacheDataObject);
+
+  if (FAILED(hres))
+    return E_UNEXPECTED;
+
+  hres = IDataObject_GetData(cacheDataObject,
+                             pformatetcIn,
+                             pmedium);
+
+  IDataObject_Release(cacheDataObject);
+
+  return hres;
 }
 
 static HRESULT WINAPI DefaultHandler_GetDataHere(

@@ -1,4 +1,4 @@
-/* $Id: storage.h,v 1.2 2000-03-19 15:35:15 davidr Exp $ */
+/* $Id: storage.h,v 1.3 2000-09-17 10:29:44 davidr Exp $ */
 /*
  * Compound Storage (32 bit version)
  *
@@ -863,6 +863,10 @@ ULARGE_INTEGER SmallBlockChainStream_GetSize(
 
 ULONG SmallBlockChainStream_GetCount(
          SmallBlockChainStream* This);
+
+// Temp
+void OLECONVERT_CreateEmbeddedOleStream(LPSTORAGE pStorage);
+HRESULT OLECONVERT_CreateCompObjStream(LPSTORAGE pStorage, LPCSTR strOleTypeName);
 
 
 #endif /* __STORAGE32_H__ */
