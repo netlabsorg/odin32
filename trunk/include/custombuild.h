@@ -214,7 +214,7 @@ void WIN32API ODIN_SetTIBSwitch(BOOL fSwitchTIB);
 //******************************************************************************
 // ODIN_DisableFolderShellLink
 //
-// Disable object creation in Odin folder. Desktop shortcuts will still be 
+// Disable object creation in Odin folder. Desktop shortcuts will still be
 // created as WPS objects on the desktop.
 //
 //******************************************************************************
@@ -228,7 +228,7 @@ void WIN32API ODIN_DisableFolderShellLink();
 //
 // NOTE: This will only work in very specific cases; it is not a good general
 //       purpose solution.
-// 
+//
 //******************************************************************************
 void WIN32API ODIN_waveOutSetFixedBuffers();
 
@@ -242,9 +242,21 @@ void WIN32API ODIN_waveOutSetFixedBuffers();
 //
 // NOTE: This will only work in very specific cases; it is not a good general
 //       purpose solution.
-// 
+//
 //******************************************************************************
 void WIN32API ODIN_waveInSetFixedBuffers();
+
+
+/** Enter odin context with this thread. */
+USHORT WIN32API ODIN_ThreadEnterOdinContext(void *pExceptionRegRec, BOOL fForceFSSwitch);
+/** Leave odin context with this thread. */
+void   WIN32API ODIN_ThreadLeaveOdinContext(void *pExceptionRegRec, USHORT selFSOld);
+
+/** Leave odin context to call back into OS/2 code. */
+USHORT WIN32API ODIN_ThreadLeaveOdinContextNested(void *pExceptionRegRec, BOOL fRemoveOdinExcpt);
+/** Re-enter Odin context after being back in OS/2 code. */
+void   WIN32API ODIN_ThreadEnterOdinContextNested(void *pExceptionRegRec, BOOL fRestoreOdinExcpt, USHORT selFSOld);
+
 
 #endif  /*__CUSTOMBUILD_H__*/
 
