@@ -1,4 +1,4 @@
-/* $Id: reg.cpp,v 1.1 2000-05-15 02:43:16 phaller Exp $ */
+/* $Id: reg.cpp,v 1.2 2000-06-12 08:09:39 phaller Exp $ */
 
 /*
  * Win32 URL-handling APIs for OS/2
@@ -36,6 +36,70 @@
 
 
 ODINDEBUGCHANNEL(SHLWAPI-REG)
+
+
+/*****************************************************************************
+ * Name      : DWORD SHRegCreateUSKeyA
+ * Purpose   : 
+ * Parameters: 
+ * Variables :
+ * Result    : 
+ * Remark    : SHLWAPI.594 SHLWAPI.SHRegCreateUSKeyA
+ * Status    : UNTESTED
+ *
+ * Author    : Patrick Haller [Wed, 1999/12/29 23:02]
+ *****************************************************************************/
+
+ODINFUNCTION5(DWORD,  SHRegCreateUSKeyA,
+              LPSTR,  lpszKeyName,
+              DWORD,  arg1,
+              DWORD,  arg2,
+              DWORD,  arg3,
+              DWORD,  arg4)
+{
+  dprintf(("not implemented\n"));
+  return 0;
+}
+
+
+/*****************************************************************************
+ * Name      : DWORD SHRegCreateUSKeyW
+ * Purpose   : 
+ * Parameters: 
+ * Variables :
+ * Result    : 
+ * Remark    : SHLWAPI.595 SHLWAPI.SHRegCreateUSKeyW
+ * Status    : UNTESTED
+ *
+ * Author    : Patrick Haller [Wed, 1999/12/29 23:02]
+ *****************************************************************************/
+
+ODINFUNCTION5(DWORD,  SHRegCreateUSKeyW,
+              LPWSTR, lpszKeyName,
+              DWORD,  arg1,
+              DWORD,  arg2,
+              DWORD,  arg3,
+              DWORD,  arg4)
+{
+  char szBuffer[256];
+  
+  // convert unicode to ascii
+  if (0 == WideCharToMultiByte(0,
+                               0,
+                               lpszKeyName,
+                               -1,
+                               szBuffer,
+                               sizeof(szBuffer),
+                               0,
+                               0))
+    return GetLastError();
+  
+  return SHRegCreateUSKeyA(szBuffer,
+                         arg1,
+                         arg2,
+                         arg3,
+                         arg4);
+}
 
 
 
@@ -156,6 +220,94 @@ ODINFUNCTION5(LONG,    SHRegGetBoolUSValueW,
   dprintf(("(%p),stub!\n", pSubKey));
 
   return ERROR_SUCCESS;  /* return success */
+}
+
+
+/*****************************************************************************
+ * Name      : DWORD SHRegSetUSValueA
+ * Purpose   : 
+ * Parameters: 
+ * Variables :
+ * Result    : 
+ * Remark    : SHLWAPI.SHRegSetUSValueA SHLWAPI.615
+ * Status    : UNTESTED
+ *
+ * Author    : Patrick Haller [Wed, 1999/12/29 23:02]
+ *****************************************************************************/
+
+ODINFUNCTION6(LONG,    SHRegSetUSValueA,
+              HKEY,    hKey,
+              DWORD,   arg2,
+              DWORD,   arg3,
+              DWORD,   arg4,
+              DWORD,   arg5,
+              DWORD,   arg6)
+{
+  LONG rc;
+  
+#if 0
+  rc = SHRegCreateUSKeyA(hKey,
+                         3,
+                         0,
+                         &hKey);
+  if (rc == ERROR_SUCCESS)
+  {
+    rc = SHRegWriteUSValueA(hKey,
+                            arg2,
+                            arg3,
+                            arg4,
+                            arg5,
+                            arg6);
+    SHRegCloseUSKey(hKey);
+  }
+#endif
+  
+  return rc;
+}
+
+
+
+
+/*****************************************************************************
+ * Name      : DWORD SHRegSetUSValueW
+ * Purpose   : 
+ * Parameters: 
+ * Variables :
+ * Result    : 
+ * Remark    : SHLWAPI.SHRegSetUSValueW SHLWAPI.616
+ * Status    : UNTESTED
+ *
+ * Author    : Patrick Haller [Wed, 1999/12/29 23:02]
+ *****************************************************************************/
+
+ODINFUNCTION6(LONG,    SHRegSetUSValueW,
+              HKEY,    hKey,
+              DWORD,   arg2,
+              DWORD,   arg3,
+              DWORD,   arg4,
+              DWORD,   arg5,
+              DWORD,   arg6)
+{
+  LONG rc;
+  
+#if 0
+  rc = SHRegCreateUSKeyW(hKey,
+                         3,
+                         0,
+                         &hKey);
+  if (rc == ERROR_SUCCESS)
+  {
+    rc = SHRegWriteUSValueW(hKey,
+                            arg2,
+                            arg3,
+                            arg4,
+                            arg5,
+                            arg6);
+    SHRegCloseUSKey(hKey);
+  }
+#endif
+  
+  return rc;
 }
 
 

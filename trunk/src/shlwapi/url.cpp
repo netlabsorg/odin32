@@ -1,4 +1,4 @@
-/* $Id: url.cpp,v 1.2 2000-05-15 02:42:35 phaller Exp $ */
+/* $Id: url.cpp,v 1.3 2000-06-12 08:09:48 phaller Exp $ */
 
 /*
  * Win32 Lightweight SHELL32 API for OS/2
@@ -72,12 +72,16 @@ typedef enum tagURLIS
 static URLSCHEME arrUrlSchemes[] =
 { /* scheme     opaque hist   type */
   {"http://",   FALSE, FALSE, 0},
+  {"https://",  FALSE, FALSE, 0},
+  {"shttp://",  FALSE, FALSE, 0},
   {"file://",   FALSE, FALSE, 0},
   {"ftp://",    FALSE, FALSE, 0},
   {"telnet://", FALSE, TRUE,  0},
   {"news://",   FALSE, TRUE,  0},
+  {"snews://",  FALSE, TRUE,  0},
   {"mailto:",   TRUE,  TRUE,  0},
   {"gopher://", FALSE, FALSE, 0},
+  {"wais://",   FALSE, FALSE, 0},
 };
 
 
