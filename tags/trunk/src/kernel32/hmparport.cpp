@@ -1,4 +1,4 @@
-/* $Id: hmparport.cpp,v 1.18 2001-12-07 11:28:10 sandervl Exp $ */
+/* $Id: hmparport.cpp,v 1.19 2002-05-13 12:12:42 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -20,7 +20,7 @@
 #include "hmdevice.h"
 #include "hmparport.h"
 #include "oslibdos.h"
-
+#include "rmioctl.h"
 #define DBG_LOCALLOG  DBG_hmparport
 #include "dbglocal.h"
 
@@ -48,7 +48,7 @@
 #define PRT_QUERDEVICEID                   0x0074
 
 // Hardwired parallel port configuration information.
-// @@@PH better query the Resource Manager
+// for the cases where real thing will fail
 typedef struct tagParallelPortConfiguration
 {
   ULONG ulNumber;
@@ -82,17 +82,119 @@ typedef struct _HMDEVPARPORTDATA
 //******************************************************************************
 static VOID *CreateDevData()
 {
-  PHMDEVPARPORTDATA pData;
-  pData = new HMDEVPARPORTDATA();
-  if(NULL!=pData)
-  {
-    memset(pData,0,sizeof(HMDEVPARPORTDATA));
-    pData->ulMagic = MAGIC_PARPORT;
-    pData->CommCfg.dwSize   = sizeof(COMMCONFIG);
-    pData->CommCfg.wVersion = 1;
-    pData->CommCfg.dwProviderSubType = PST_PARALLELPORT;
+   HFILE  hfFileHandle = 0L;    
+   UCHAR   uchParms[2] = {0, RM_COMMAND_PHYS}; 
+   ULONG   ulParmLen = 0; 
+   UCHAR   uchDataArea[MAX_ENUM_SIZE] = {0};
+   UCHAR   uchDataArea2[MAX_RM_NODE_SIZE] = {0}; 
+   ULONG   ulDataLen = 0;            
+   int rc,portCount = 0;
+  
+   PRM_ENUMNODES_DATA enumData;
+   PNODEENTRY pNode;
+   RM_GETNODE_PARM inputData;
+   PRM_GETNODE_DATA poutputData;
+   PHMDEVPARPORTDATA pData;
+
+   hfFileHandle = OSLibDosOpen("RESMGR$",
+                                OSLIB_ACCESS_READWRITE |
+                                OSLIB_ACCESS_SHAREDENYNONE);
+
+  if (!hfFileHandle) {
+      dprintf(("HMDeviceParPortClass: Failed to open Resource Manager device %d\n", GetLastError()));
   }
-  return pData;
+  else
+  { 
+	    dprintf(("HMDeviceParPortClass: Succesfully opened Resource Manager"));
+
+	    ulParmLen = sizeof(uchParms);                        /* Length of input parameters */
+	    ulDataLen = sizeof(uchDataArea);                      /* Length of data  */
+
+	    rc = OSLibDosDevIOCtl(hfFileHandle,           /* Handle to device */
+                    CAT_RM,FUNC_RM_ENUM_NODES, uchParms, sizeof(uchParms),
+                    &ulParmLen,
+                    uchDataArea,         
+                    sizeof(uchDataArea), 
+                    &ulDataLen);         
+                                        
+	    if (rc)
+	    {
+	          dprintf(("HMDeviceParPortClass: Failed to get resource list (IOCTL)"));      
+            goto resourceLoopEnd;
+	    }
+
+	    enumData = (PRM_ENUMNODES_DATA)uchDataArea;
+  
+	    inputData.RMHandle = enumData->NodeEntry[0].RMHandle;
+	    inputData.Linaddr = (ULONG)&uchDataArea2[0];
+         
+        for (int i=0;i<enumData->NumEntries;i++)
+        {
+            ulParmLen = sizeof(inputData);                        /* Length of input parameters */
+            ulDataLen = sizeof(uchDataArea2);                      /* Length of data  */
+        
+            rc = OSLibDosDevIOCtl(hfFileHandle,           /* Handle to device */
+                   CAT_RM,FUNC_RM_GET_NODEINFO,
+                   &inputData,            /* Input/Output parameter list */
+                   sizeof(inputData),                   /* Maximum output parameter size */
+                   &ulParmLen,          /* Input:  size of parameter list */
+                                        /* Output: size of parameters returned */
+                   uchDataArea2,         /* Input/Output data area */
+                   sizeof(uchDataArea2), /* Maximum output data size */
+                   &ulDataLen);         /* Input:  size of input data area */
+                                        /* Output: size of data returned   */
+            if (rc)
+            {
+                dprintf(("HMDeviceParPortClass: Failed to get resource node (IOCTL)"));      
+                break;  
+            }
+            inputData.RMHandle = enumData->NodeEntry[i].RMHandle;
+            poutputData = (PRM_GETNODE_DATA) uchDataArea2;
+            // @@PF Ports always follow numbering i.e. LPT0,LPT1, etc so
+            // no sorting needed
+            if ( (poutputData->RMNode.pAdapterNode->AdaptDescriptName) &&
+              (lstrncmpiA(poutputData->RMNode.pAdapterNode->AdaptDescriptName,"PARALLEL",8) == 0) &&
+              (poutputData->RMNode.pResourceList->Resource[0].ResourceType == RS_TYPE_IO) )
+            {
+                if (!portCount) memset(arrParallelPorts,0,sizeof(arrParallelPorts));
+                arrParallelPorts[portCount].ulNumber = portCount;
+                arrParallelPorts[portCount].ulPortBase = poutputData->RMNode.pResourceList->Resource[0].IOResource.BaseIOPort;
+                arrParallelPorts[portCount].ulPortSpan = 8;
+                // @@PF Hack, but what to do no ECP info from Resource Manager!
+	            if (arrParallelPorts[portCount].ulPortBase == 0x378)
+                {	
+                    arrParallelPorts[portCount].ulEcpPortBase = 0x778;
+                    arrParallelPorts[portCount].ulEcpPortSpan = 3;
+                }
+	            else	
+	            if (arrParallelPorts[portCount].ulPortBase == 0x278)
+                {	
+                    arrParallelPorts[portCount].ulEcpPortBase = 0x678;
+                    arrParallelPorts[portCount].ulEcpPortSpan = 3;
+                }
+                else
+                    arrParallelPorts[portCount].ulEcpPortBase = 0;
+
+                arrParallelPorts[portCount].ulEcpPortSpan = 0;
+                dprintf(("HMDeviceParPortClass: Found and registered LPT%d with Base I/O: 0x%x",portCount,arrParallelPorts[portCount].ulPortBase));
+                portCount ++ ;   
+            }
+        }
+    }
+resourceLoopEnd:
+    OSLibDosClose(hfFileHandle);  
+
+    pData = new HMDEVPARPORTDATA();
+    if(NULL!=pData)
+    {
+        memset(pData,0,sizeof(HMDEVPARPORTDATA));
+        pData->ulMagic = MAGIC_PARPORT;
+        pData->CommCfg.dwSize   = sizeof(COMMCONFIG);
+        pData->CommCfg.wVersion = 1;
+        pData->CommCfg.dwProviderSubType = PST_PARALLELPORT;
+    }
+    
+    return pData;
 }
 //******************************************************************************
 //******************************************************************************
