@@ -20,21 +20,33 @@ CXXFLAGS = $(CXXFLAGS) -I$(PDWIN32_INCLUDE)
 TARGET = ole32
 
 OBJS =  ole32.obj \
-        moniker.obj \
         antimoniker.obj \
-	initterm.obj \
-	oString.obj \
+	bindctx.obj \
 	clsid.obj \
+        compositemoniker.obj \
+        datacache.obj \
+        defaulthandler.obj \
+        filemoniker.obj \
 	guid.obj \
+	hglobalstream.obj \
 	initialise.obj \
-	taskmem.obj \
-	library.obj \
+	initterm.obj \
+	itemmoniker.obj \
 	iunknown.obj \
+	library.obj \
+        memlockbytes.obj \
+        moniker.obj \
+	oString.obj \
 	ole2.obj \
-	oleMenu.obj \
-	oleDrag.obj \
+	oleobj.obj \
 	oleClip.obj \
-	stubs.obj
+	oleDrag.obj \
+	oleMenu.obj \
+	stg_bigblockfile.obj \
+	stg_stream.obj \
+	storage.obj \
+	stubs.obj \
+	taskmem.obj
 
 all: $(TARGET).dll $(TARGET).lib regsvr32.exe
 
@@ -59,21 +71,34 @@ $(TARGET)exp.def: $(TARGET).def
         $(IMPDEF) $** $@
 
 
-oString.obj:	oString.cpp 
-ole32.obj:	ole32.cpp 
-ole2.obj:	ole2.cpp 
-oleClip.obj:	oleClip.cpp 
-oleDrag.obj:	oleDrag.cpp 
-oleMenu.obj:	oleMenu.cpp 
-initialise.obj:	initialise.cpp 
-clsid.obj:	clsid.cpp 
-guid.obj:	guid.cpp 
-stubs.obj:	stubs.cpp 
-initterm.obj:	initterm.cpp
-moniker.obj:	moniker.cpp
-taskmem.obj:	taskmem.cpp
-library.obj:	library.cpp
-iunknown.obj:	iunknown.cpp
+antimoniker.obj:	antimoniker.cpp
+bindctx.obj:		bindctx.cpp
+clsid.obj:		clsid.cpp 
+compositemoniker.obj:	compositemoniker.cpp
+datacache.obj:		datacache.cpp
+defaulthandler.obj:	defaulthandler.cpp
+filemoniker.obj:	filemoniker.cpp
+guid.obj:		guid.cpp 
+hglobalstream.obj:	hglobalstream.cpp
+initialise.obj:		initialise.cpp 
+initterm.obj:		initterm.cpp
+iunknown.obj:		iunknown.cpp
+itemmoniker.obj:	itemmoniker.cpp
+library.obj:		library.cpp
+memlockbytes.obj:	memlockbytes.cpp
+moniker.obj:		moniker.cpp
+oString.obj:		oString.cpp 
+ole2.obj:		ole2.cpp 
+oleobj.obj:		oleobj.cpp 
+ole32.obj:		ole32.cpp 
+oleClip.obj:		oleClip.cpp 
+oleDrag.obj:		oleDrag.cpp 
+oleMenu.obj:		oleMenu.cpp 
+stg_bigblockfile.obj:	stg_bigblockfile.cpp
+stg_stream.obj:		stg_stream.cpp
+storage.obj:		storage.cpp
+stubs.obj:		stubs.cpp 
+taskmem.obj:		taskmem.cpp
 
 regsvr32.obj:	regsvr32.cpp
     $(CC) -C $(CXXFLAGS) -Ge+ -Tm+ $**

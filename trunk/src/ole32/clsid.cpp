@@ -1,4 +1,4 @@
-/* $Id: clsid.cpp,v 1.7 1999-09-08 15:39:55 davidr Exp $ */
+/* $Id: clsid.cpp,v 1.8 1999-09-24 21:49:42 davidr Exp $ */
 /*
  *
  * Project Odin Software License can be found in LICENSE.TXT
@@ -290,5 +290,13 @@ int WIN32API StringFromGUID2(REFGUID rguid, LPOLESTR lpsz, int cbMax)
     AsciiToUnicode(tmp, lpsz);
 
     return(strLen * 2 + 1);  // including 0 terminator
+}
+
+// ----------------------------------------------------------------------
+// CONCRETE_IsEqualGUID
+// ----------------------------------------------------------------------
+int WIN32API CONCRETE_IsEqualGUID(REFGUID rguid1, REFGUID rguid2)
+{
+    return IsEqualGUID(rguid1, rguid2);
 }
 
