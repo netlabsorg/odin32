@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.293 2001-10-18 11:02:22 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.294 2001-10-24 10:26:45 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -2833,21 +2833,20 @@ Win32BaseWindow *Win32BaseWindow::getParent()
 //******************************************************************************
 HWND Win32BaseWindow::GetParent()
 {
-  if((!(getStyle() & (WS_POPUP|WS_CHILD)))) {
-    return 0;
-  }
-
   Win32BaseWindow *wndparent = (Win32BaseWindow *)ChildWindow::getParentOfChild();
 
   if(getStyle() & WS_CHILD) {
-    if(wndparent) {
-        return wndparent->getWindowHandle();
-    }
-    dprintf(("WARNING: GetParent: WS_CHILD but no parent!!"));
-    DebugInt3();
-    return 0;
+      if(wndparent) {
+          return wndparent->getWindowHandle();
+      }
+      dprintf(("WARNING: GetParent: WS_CHILD but no parent!!"));
+      DebugInt3();
+      return 0;
   }
-  else  return (getOwner()) ? getOwner()->getWindowHandle() : 0;
+  else 
+  if(getStyle() & WS_POPUP)
+       return (getOwner()) ? getOwner()->getWindowHandle() : 0;
+  else return 0;
 }
 //******************************************************************************
 //******************************************************************************
