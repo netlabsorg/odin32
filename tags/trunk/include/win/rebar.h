@@ -1,4 +1,4 @@
-/* $Id: rebar.h,v 1.1 1999-05-24 20:19:18 ktk Exp $ */
+/* $Id: rebar.h,v 1.2 1999-12-18 19:50:04 achimha Exp $ */
 
 /*
  * Rebar class extra info
@@ -58,6 +58,7 @@ typedef struct tagREBAR_INFO
     HCURSOR  hcurHorz;    /* handle to the EW cursor */
     HCURSOR  hcurVert;    /* handle to the NS cursor */
     HCURSOR  hcurDrag;    /* handle to the drag cursor */
+    INT      iVersion     /* version number */
 
     REBAR_BAND *bands;      /* pointer to the array of rebar bands */
 
