@@ -1,4 +1,4 @@
-/* $Id: wsock32.cpp,v 1.27 2000-03-30 20:52:56 sandervl Exp $ */
+/* $Id: wsock32.cpp,v 1.28 2000-05-02 13:09:44 bird Exp $ */
 
 /*
  *
@@ -62,6 +62,10 @@
 #define DBG_LOCALLOG	DBG_wsock32
 #include "dbglocal.h"
 
+//kso: dirty fix to make this compile! not permanent!
+BOOL WINAPI QueryPerformanceCounter(LARGE_INTEGER *p);
+#define LowPart u.LowPart
+
 
 ODINDEBUGCHANNEL(WSOCK32-WSOCK32)
 
@@ -104,7 +108,7 @@ tryagain:
 BOOL WINSOCK_CreateIData(void)
 {
     LPWSINFO iData;
-    
+
     iData = (LPWSINFO)HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, sizeof(WSINFO));
     if (!iData)
 	return FALSE;
@@ -121,7 +125,7 @@ void WINSOCK_DeleteIData(void)
 
     if (iData) {
 	ppid = lpFirstIData;
-	while(ppid) 
+	while(ppid)
 	{
 		iData = ppid;
 		ppid  = ppid->lpNextIData;
@@ -170,14 +174,14 @@ ODINFUNCTION2(int,OS2shutdown,
    if(!fWSAInitialized) {
       	WSASetLastError(WSANOTINITIALISED);
       	return SOCKET_ERROR;
-   } 
-   else 
+   }
+   else
    if(WSAIsBlocking()) {
       	WSASetLastError(WSAEINPROGRESS);
       	return SOCKET_ERROR;
-   } 
+   }
    ret = shutdown(s, how);
-   
+
    if(ret == SOCKET_ERROR) {
  	WSASetLastError(wsaErrno());
    }
@@ -196,14 +200,14 @@ ODINFUNCTION3(SOCKET,OS2socket,
    if(!fWSAInitialized) {
       	WSASetLastError(WSANOTINITIALISED);
       	return SOCKET_ERROR;
-   } 
-   else 
+   }
+   else
    if(WSAIsBlocking()) {
       	WSASetLastError(WSAEINPROGRESS);
       	return SOCKET_ERROR;
-   } 
+   }
    s = socket(af, type, protocol);
-   
+
    if(s == SOCKET_ERROR && sock_errno() == SOCEPFNOSUPPORT) {
 	//map SOCEPFNOSUPPORT to SOCEPFNOSUPPORT
        	WSASetLastError(SOCEPFNOSUPPORT);
@@ -224,16 +228,16 @@ ODINFUNCTION1(int,OS2closesocket,SOCKET, s)
    if(!fWSAInitialized) {
       	WSASetLastError(WSANOTINITIALISED);
       	return SOCKET_ERROR;
-   } 
-   else 
+   }
+   else
    if(WSAIsBlocking()) {
       	WSASetLastError(WSAEINPROGRESS);
       	return SOCKET_ERROR;
-   } 
+   }
    ret = soclose(s);
    //Close WSAAsyncSelect thread if one was created for this socket
    FindAndSetAsyncEvent(s, 0, 0, 0);
-  
+
    if(ret == SOCKET_ERROR) {
  	WSASetLastError(wsaErrno());
    }
@@ -252,12 +256,12 @@ ODINFUNCTION3(int,OS2connect,
    if(!fWSAInitialized) {
       	WSASetLastError(WSANOTINITIALISED);
       	return SOCKET_ERROR;
-   } 
-   else 
+   }
+   else
    if(WSAIsBlocking()) {
       	WSASetLastError(WSAEINPROGRESS);
       	return SOCKET_ERROR;
-   } 
+   }
    ret = connect(s, (sockaddr *)name, namelen);
    // map BSD error codes
    if(ret == SOCKET_ERROR) {
@@ -267,8 +271,8 @@ ODINFUNCTION3(int,OS2connect,
 	}
       	if(sockerror == SOCEINPROGRESS) {
          	WSASetLastError(WSAEWOULDBLOCK);
-      	} 
-	else 
+      	}
+	else
 	if(sockerror == SOCEOPNOTSUPP) {
          	WSASetLastError(WSAEINVAL);
       	}
@@ -289,12 +293,12 @@ ODINFUNCTION3(int,OS2ioctlsocket,
    if(!fWSAInitialized) {
       	WSASetLastError(WSANOTINITIALISED);
       	return SOCKET_ERROR;
-   } 
-   else 
+   }
+   else
    if(WSAIsBlocking()) {
       	WSASetLastError(WSAEINPROGRESS);
       	return SOCKET_ERROR;
-   } 
+   }
    // clear high word (not used in OS/2's tcpip stack)
    cmd = LOUSHORT(cmd);
 
@@ -353,13 +357,13 @@ ODINFUNCTION3(int,OS2getpeername,
    if(!fWSAInitialized) {
       	WSASetLastError(WSANOTINITIALISED);
       	return SOCKET_ERROR;
-   } 
-   else 
+   }
+   else
    if(WSAIsBlocking()) {
       	WSASetLastError(WSAEINPROGRESS);
       	return SOCKET_ERROR;
-   } 
-   else 
+   }
+   else
    if (namelen == NULL || *namelen < (int)sizeof(struct sockaddr_in)) {
       	WSASetLastError(WSAEFAULT);
       	return SOCKET_ERROR;
@@ -383,13 +387,13 @@ ODINFUNCTION3(int,OS2getsockname,
    if(!fWSAInitialized) {
       	WSASetLastError(WSANOTINITIALISED);
       	return SOCKET_ERROR;
-   } 
-   else 
+   }
+   else
    if(WSAIsBlocking()) {
       	WSASetLastError(WSAEINPROGRESS);
       	return SOCKET_ERROR;
-   } 
-   else 
+   }
+   else
    if (namelen == NULL || *namelen < (int)sizeof(struct sockaddr_in)) {
       	WSASetLastError(WSAEFAULT);
       	return SOCKET_ERROR;
@@ -459,13 +463,13 @@ ODINFUNCTION3(SOCKET,OS2accept, SOCKET,           s,
    if(!fWSAInitialized) {
       	WSASetLastError(WSANOTINITIALISED);
       	return SOCKET_ERROR;
-   } 
-   else 
+   }
+   else
    if(WSAIsBlocking()) {
       	WSASetLastError(WSAEINPROGRESS);
       	return SOCKET_ERROR;
-   } 
-   else 
+   }
+   else
    if ((addr != NULL) && (addrlen != NULL)) {
         if (*addrlen < (int)sizeof(struct sockaddr_in)) {
       		WSASetLastError(WSAEFAULT);
@@ -504,13 +508,13 @@ ODINFUNCTION3(int,OS2bind,
    if(!fWSAInitialized) {
       	WSASetLastError(WSANOTINITIALISED);
       	return SOCKET_ERROR;
-   } 
-   else 
+   }
+   else
    if(WSAIsBlocking()) {
       	WSASetLastError(WSAEINPROGRESS);
       	return SOCKET_ERROR;
-   } 
-   else 
+   }
+   else
    if(namelen < (int)sizeof(struct sockaddr_in)) {
       	WSASetLastError(WSAEFAULT);
       	return SOCKET_ERROR;
@@ -535,12 +539,12 @@ ODINFUNCTION2(int,OS2listen,
    if(!fWSAInitialized) {
       	WSASetLastError(WSANOTINITIALISED);
       	return SOCKET_ERROR;
-   } 
-   else 
+   }
+   else
    if(WSAIsBlocking()) {
       	WSASetLastError(WSAEINPROGRESS);
       	return SOCKET_ERROR;
-   } 
+   }
    namelen = sizeof(name);
    ret = getsockname(s, (struct sockaddr *)&name, &namelen);
    if (ret == 0) {
@@ -548,7 +552,7 @@ ODINFUNCTION2(int,OS2listen,
             	// Socket is not bound
             	WSASetLastError(WSAEINVAL);
             	return SOCKET_ERROR;
-        } 
+        }
       	ret = ioctl(s, FIOBSTATUS, (char *)&tmp, sizeof(tmp)) &
                    (SS_ISCONNECTING | SS_ISCONNECTED | SS_ISDISCONNECTING);
         if(ret) {
@@ -578,12 +582,12 @@ ODINFUNCTION4(int,OS2recv,
    if(!fWSAInitialized) {
       	WSASetLastError(WSANOTINITIALISED);
       	return SOCKET_ERROR;
-   } 
-   else 
+   }
+   else
    if(WSAIsBlocking()) {
       	WSASetLastError(WSAEINPROGRESS);
       	return SOCKET_ERROR;
-   } 
+   }
    ret = recv(s, buf, len, flags);
 
    if(ret == SOCKET_ERROR) {
@@ -610,13 +614,13 @@ ODINFUNCTION6(int,OS2recvfrom,
    if(!fWSAInitialized) {
       	WSASetLastError(WSANOTINITIALISED);
       	return SOCKET_ERROR;
-   } 
-   else 
+   }
+   else
    if(WSAIsBlocking()) {
       	WSASetLastError(WSAEINPROGRESS);
       	return SOCKET_ERROR;
-   } 
-   else 
+   }
+   else
    if(fromlen == NULL || *fromlen < (int)sizeof(struct sockaddr_in)) {
       	WSASetLastError(WSAEFAULT);
       	return SOCKET_ERROR;
@@ -645,12 +649,12 @@ ODINFUNCTION4(int,OS2send,
    if(!fWSAInitialized) {
       	WSASetLastError(WSANOTINITIALISED);
       	return SOCKET_ERROR;
-   } 
-   else 
+   }
+   else
    if(WSAIsBlocking()) {
       	WSASetLastError(WSAEINPROGRESS);
       	return SOCKET_ERROR;
-   } 
+   }
    ret = send(s, (char *)buf, len, flags);
 
    if(ret == SOCKET_ERROR) {
@@ -677,13 +681,13 @@ ODINFUNCTION6(int,OS2sendto,
    if(!fWSAInitialized) {
       	WSASetLastError(WSANOTINITIALISED);
       	return SOCKET_ERROR;
-   } 
-   else 
+   }
+   else
    if(WSAIsBlocking()) {
       	WSASetLastError(WSAEINPROGRESS);
       	return SOCKET_ERROR;
-   } 
-   else 
+   }
+   else
    if(tolen < (int)sizeof(struct sockaddr_in)) {
       	WSASetLastError(WSAEFAULT);
       	return SOCKET_ERROR;
@@ -718,12 +722,12 @@ ODINFUNCTION5(int,OS2select,
    if(!fWSAInitialized) {
       	WSASetLastError(WSANOTINITIALISED);
       	return SOCKET_ERROR;
-   } 
-   else 
+   }
+   else
    if(WSAIsBlocking()) {
       	WSASetLastError(WSAEINPROGRESS);
       	return SOCKET_ERROR;
-   } 
+   }
    else {
 	nrread = nrwrite = nrexcept = 0;
 	if(readfds) {
@@ -745,9 +749,9 @@ ODINFUNCTION5(int,OS2select,
       	}
         if(timeout == NULL) {
             	ttimeout = -1L; // no timeout
-        } 
+        }
 	else    ttimeout = timeout->tv_sec * 1000 + timeout->tv_usec / 1000;
-	
+
 	sockets = (int *)malloc(sizeof(int) * (nrread+nrwrite+nrexcept));
 	if(readfds) {
 		memcpy(&sockets[0], readfds->fd_array, nrread * sizeof(SOCKET));
@@ -761,7 +765,7 @@ ODINFUNCTION5(int,OS2select,
 
         ret = select(sockets, nrread, nrwrite, nrexcept, ttimeout);
 
-      	if(ret == SOCKET_ERROR) 
+      	if(ret == SOCKET_ERROR)
 	{
             	if(readfds != NULL)
                		readfds->fd_count = 0;
@@ -775,7 +779,7 @@ ODINFUNCTION5(int,OS2select,
  		WSASetLastError(wsaErrno());
 		free(sockets);
 		return SOCKET_ERROR;
-      	} 
+      	}
 
         if(ret != 0) {
 		socktmp = sockets;
@@ -812,7 +816,7 @@ ODINFUNCTION5(int,OS2select,
 	                }
 	               	exceptfds->fd_count = j;
             	}
-         } 
+         }
 	else {
             if(readfds != NULL)
                readfds->fd_count = 0;
@@ -844,12 +848,12 @@ ODINFUNCTION5(int,OS2setsockopt,
    if(!fWSAInitialized) {
       	WSASetLastError(WSANOTINITIALISED);
       	return SOCKET_ERROR;
-   } 
-   else 
+   }
+   else
    if(WSAIsBlocking()) {
       	WSASetLastError(WSAEINPROGRESS);
       	return SOCKET_ERROR;
-   } 
+   }
    if (level == SOL_SOCKET) {
 	switch(optname) {
 	case SO_DONTLINGER:
@@ -895,13 +899,13 @@ tryagain:
             	}
                 ret = setsockopt(s, level, optname, (char *)optval, optlen);
 		break;
-	default: 
+	default:
 		dprintf(("setsockopt: unknown option %x", optname));
             	WSASetLastError(WSAENOPROTOOPT);
             	return SOCKET_ERROR;
-        } 
+        }
    }
-   else 
+   else
    if(level == IPPROTO_TCP) {
        	if(optname == TCP_NODELAY) {
             	if(optlen < (int)sizeof(int)) {
@@ -909,13 +913,13 @@ tryagain:
                		return SOCKET_ERROR;
             	}
                	ret = setsockopt(s, level, optname, (char *)optval, optlen);
-        } 
+        }
 	else {
 		dprintf(("setsockopt: unknown option %x", optname));
        		WSASetLastError(WSAENOPROTOOPT);
       		return SOCKET_ERROR;
         }
-   } 
+   }
    else {
        	WSASetLastError(WSAEINVAL);
 	return SOCKET_ERROR;
@@ -944,12 +948,12 @@ ODINFUNCTION5(int,OS2getsockopt,
    if(!fWSAInitialized) {
       	WSASetLastError(WSANOTINITIALISED);
       	return SOCKET_ERROR;
-   } 
-   else 
+   }
+   else
    if(WSAIsBlocking()) {
       	WSASetLastError(WSAEINPROGRESS);
       	return SOCKET_ERROR;
-   } 
+   }
    if (level == SOL_SOCKET) {
 	switch(optname) {
 	case SO_DONTLINGER:
@@ -993,13 +997,13 @@ ODINFUNCTION5(int,OS2getsockopt,
                    	*optlen = sizeof(BOOL);
                 }
 		break;
-	default: 
+	default:
 		dprintf(("getsockopt: unknown option %x", optname));
             	WSASetLastError(WSAENOPROTOOPT);
             	return SOCKET_ERROR;
-        } 
+        }
    }
-   else 
+   else
    if(level == IPPROTO_TCP) {
        	if(optname == TCP_NODELAY) {
             	if(optlen == NULL || *optlen < sizeof(int)) {
@@ -1007,13 +1011,13 @@ ODINFUNCTION5(int,OS2getsockopt,
                		return SOCKET_ERROR;
             	}
                	ret = getsockopt(s, level, optname, (char *)optval, optlen);
-        } 
+        }
 	else {
 		dprintf(("getsockopt: unknown option %x", optname));
        		WSASetLastError(WSAENOPROTOOPT);
       		return SOCKET_ERROR;
         }
-   } 
+   }
    else {
        	WSASetLastError(WSAEINVAL);
 	return SOCKET_ERROR;
@@ -1109,7 +1113,7 @@ ODINFUNCTION2(struct ws_servent *,OS2getservbyport,
 		else 	WSASetLastError(WSAENOBUFS);
 	}
 	else 	WSASetLastError(WSANO_DATA);
-    } 
+    }
     else WSASetLastError(WSANOTINITIALISED);
     return NULL;
 }
@@ -1132,7 +1136,7 @@ ODINFUNCTION2(struct ws_servent *,OS2getservbyname,
 		else 	WSASetLastError(WSAENOBUFS);
     	}
    	else 	WSASetLastError(WSANO_DATA);
-    } 
+    }
     else WSASetLastError(WSANOTINITIALISED);
     return NULL;
 }
