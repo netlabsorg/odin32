@@ -1,17 +1,19 @@
-/*
- *
+/* 
+ * 
  * Project Odin Software License can be found in LICENSE.TXT
- *
+ * 
  */
-/*
- * Win32 OLE stubs for OS/2
- *
- * 1998/06/12
- *
- * Copyright 1998 Sander van Leeuwen
+/* 
+ * Concrete defintions of all IID's
+ * 
+ * 1/7/99
+ * 
+ * Copyright 1999 David J. Raison
+ * 
  */
 
-// This causes all the DEFINE_GUID's to instantiate their GUID's
-#define INITGUID
+// This causes all the DEFINE_GUID macros to instantiate their GUID's
+#define INITGUID 1
 
 #include "ole32.h"
+

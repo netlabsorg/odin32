@@ -1,14 +1,20 @@
-/*
- *
+/* 
+ * 
  * Project Odin Software License can be found in LICENSE.TXT
- *
+ * 
  */
-/*
- * Win32 OLE stubs for OS/2
- *
- * 1998/06/12
- *
- * Copyright 1998 Sander van Leeuwen
+/* 
+ * ClassID Manipulation.
+ * 
+ * 1/7/99
+ * 
+ * Copyright 1999 David J. Raison
+ * 
+ * Some portions from Wine Implementation
+ *   Copyright 1995  Martin von Loewis
+ *   Copyright 1998  Justin Bradford
+ *   Copyright 1999  Francis Beaudet
+ *   Copyright 1999  Sylvain St-Germain
  */
 
 #include "ole32.h"
@@ -16,18 +22,65 @@
 #include "oString.h"
 
 // ----------------------------------------------------------------------
-// CLSIDFromStringA() [Internal]
+// CLSIDFromProgID()
 // ----------------------------------------------------------------------
-static HRESULT CLSIDFromStringA(
-    const char *	lpsz,		// [in] - ASCII string to convert
-    LPCLSID		pclisid)	// [out] - CLSID
+HRESULT WIN32API CLSIDFromProgID(
+    LPCOLESTR		lpszProgID,	// [in] - UNICODE program id as found in registry
+    LPCLSID		pclsid)		// [out] - CLSID
 {
-    dprintf(("OLE32.CLSIDFromStringA [Internal]\n"));
+    dprintf(("OLE32: CLSIDFromProgID"));
 
-    BYTE *s = (BYTE *) lpsz;
-    BYTE *p;
+    LONG		lDataLen = 80;
+    oStringW		szKey(lpszProgID);
+    oStringW		szCLSID(lDataLen);
+    HKEY		hKey;
+    HRESULT		rc;
+
+    // Create the registry lookup string...
+    szKey += L"\\CLSID";
+
+    // Try to open the key in the registry...
+    rc = RegOpenKeyW(HKEY_CLASSES_ROOT, szKey, &hKey);
+    if (rc != 0)
+    	return OLE_ERROR_GENERIC;
+
+    // Now get the data from the _default_ entry on this key...
+    rc = RegQueryValueW(hKey, NULL, szCLSID, &lDataLen);
+    RegCloseKey(hKey);
+    if (rc != 0)
+    	return OLE_ERROR_GENERIC;
+
+    // Now convert from a string to a UUID
+    return CLSIDFromString(szCLSID, pclsid);
+}
+
+// ----------------------------------------------------------------------
+// IIDFromString
+// ----------------------------------------------------------------------
+HRESULT WIN32API IIDFromString(LPSTR lpsz, LPIID lpiid)
+{
+    dprintf(("OLE32: IIDFromString"));
+    return CLSIDFromString((LPCOLESTR)lpsz, (LPCLSID)lpiid);
+}
+
+// ----------------------------------------------------------------------
+// CLSIDFromString()
+// ----------------------------------------------------------------------
+HRESULT WIN32API CLSIDFromString(
+    LPCOLESTR		lpsz,		// [in] - Unicode string CLSID
+    LPCLSID		pclsid)		// [out] - Binary CLSID
+{
+    dprintf(("OLE32: CLSIDFromString"));
+
+    oStringA		tClsId(lpsz);
+
+    HRESULT		ret = OLE_ERROR_GENERIC;
+
+    // Convert to binary CLSID
+    char *s = (char *) tClsId;
+    char *p;
     int   i;
-    BYTE table[256];
+    char table[256];
 
     /* quick lookup table */
     memset(table, 0, 256);
@@ -44,10 +97,10 @@ static HRESULT CLSIDFromStringA(
 
     /* in form {XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX} */
 
-    if (strlen(lpsz) != 38)
+    if (lstrlenW(lpsz) != 38)
 	return OLE_ERROR_OBJECT;
 
-    p = (BYTE *) pclisid;
+    p = (char *) pclsid;
 
     s++;  /* skip leading brace  */
     for (i = 0; i < 4; i++)
@@ -92,51 +145,116 @@ static HRESULT CLSIDFromStringA(
 }
 
 // ----------------------------------------------------------------------
-// CLSIDFromProgID()
+// CoCreateGuid()
 // ----------------------------------------------------------------------
-HRESULT WIN32API CLSIDFromProgID(
-    LPCOLESTR		lpszProgID,	// [in] - UNICODE program id as found in registry
-    LPCLSID		pclsid)		// [out] - CLSID
+HRESULT WIN32API CoCreateGuid(GUID *pguid)
 {
-    dprintf(("OLE32.CLSIDFromProgID\n"));
-
-    LONG		lDataLen = 80;
-    oStringA		szKey(lpszProgID);
-    oStringA		szCLSID(lDataLen);
-    HKEY		hKey;
-    HRESULT		rc;
-
-    // Create the registry lookup string...
-    szKey += "\\CLSID";
-
-    // Try to open the key in the registry...
-    rc = RegOpenKeyA(HKEY_CLASSES_ROOT, szKey, &hKey);
-    if (rc != 0)
-    	return OLE_ERROR_GENERIC;
-
-    // Now get the data from the _default_ entry on this key...
-    rc = RegQueryValueA(hKey, NULL, szCLSID, &lDataLen);
-    RegCloseKey(hKey);
-    if (rc != 0)
-    	return OLE_ERROR_GENERIC;
-
-    // Now convert from a string to a UUID
-    return CLSIDFromStringA(szCLSID, pclsid);
+   dprintf(("OLE32: CoCreateGuid"));
+   memset(pguid, 0, sizeof(GUID));      //TODO: should be random GUID
+   return S_OK;
 }
 
 // ----------------------------------------------------------------------
-// CLSIDFromString()
+// StringFromCLSID
+// Memory allocated here on behalf of application should be freed using CoTaskMemFree()
 // ----------------------------------------------------------------------
-HRESULT WIN32API CLSIDFromString(
-    LPCOLESTR		lpsz,		// [in] - Unicode string CLSID
-    LPCLSID		pclsid)		// [out] - Binary CLSID
+HRESULT WIN32API StringFromCLSID(REFCLSID rclsid, LPOLESTR *ppsz)
 {
-    dprintf(("OLE32.CLSIDFromString\n"));
+    char	tmp[50];
+    LPWSTR	szclsid;
+    size_t	strLen;
 
-    HRESULT		ret = OLE_ERROR_GENERIC;
-    oStringA		szCLSID(lpsz);
+    dprintf(("OLE32: StringFromCLSID"));
 
-    // Convert to binary CLSID
-    return CLSIDFromStringA(szCLSID, pclsid);
+    // Setup new string...
+    strLen  = sprintf(tmp, "{%08X-%04X-%04X-%02X%02X-%02X%02X%02X%02X%02X%02X}",
+	    rclsid->Data1,
+	    rclsid->Data2,
+	    rclsid->Data3,
+	    rclsid->Data4[0],
+	    rclsid->Data4[1],
+	    rclsid->Data4[2],
+	    rclsid->Data4[3],
+	    rclsid->Data4[4],
+	    rclsid->Data4[5],
+	    rclsid->Data4[6],
+	    rclsid->Data4[7]);
+
+    // Grab buffer for string...
+    szclsid = (LPWSTR)CoTaskMemAlloc((strLen + 1) * sizeof(WCHAR));
+
+    AsciiToUnicode(tmp, szclsid);
+
+    *ppsz = (LPOLESTR)szclsid;
+
+    return S_OK;
+}
+
+// ----------------------------------------------------------------------
+// StringFromIID
+// Memory allocated here on behalf of application should be freed using CoTaskMemFree()
+// ----------------------------------------------------------------------
+HRESULT WIN32API StringFromIID(REFIID riid, LPOLESTR *ppsz)
+{
+    char	tmp[50];
+    LPWSTR	sziid;
+    size_t	strLen;
+
+    dprintf(("OLE32: StringFromIID"));
+
+    // Setup new string...
+    strLen  = sprintf(tmp, "{%08X-%04X-%04X-%02X%02X-%02X%02X%02X%02X%02X%02X}",
+	    riid->Data1,
+	    riid->Data2,
+	    riid->Data3,
+	    riid->Data4[0],
+	    riid->Data4[1],
+	    riid->Data4[2],
+	    riid->Data4[3],
+	    riid->Data4[4],
+	    riid->Data4[5],
+	    riid->Data4[6],
+	    riid->Data4[7]);
+
+    // Grab buffer for string...
+    sziid = (LPWSTR)CoTaskMemAlloc((strLen + 1) * sizeof(WCHAR));
+
+    AsciiToUnicode(tmp, sziid);
+
+    *ppsz = (LPOLESTR)sziid;
+
+    return S_OK;
+}
+
+// ----------------------------------------------------------------------
+// StringFromGUID2
+// ----------------------------------------------------------------------
+int WIN32API StringFromGUID2(REFGUID rguid, LPOLESTR lpsz, int cbMax)
+{
+    char 	tmp[64];
+    size_t	strLen;
+
+    dprintf(("OLE32: StringFromGUID2"));
+
+    // Setup new string...
+    strLen  = sprintf(tmp, "{%08X-%04X-%04X-%02X%02X-%02X%02X%02X%02X%02X%02X}",
+	    rguid->Data1,
+	    rguid->Data2,
+	    rguid->Data3,
+	    rguid->Data4[0],
+	    rguid->Data4[1],
+	    rguid->Data4[2],
+	    rguid->Data4[3],
+	    rguid->Data4[4],
+	    rguid->Data4[5],
+	    rguid->Data4[6],
+	    rguid->Data4[7]);
+
+    if(cbMax < (strLen * 2 + 1))
+	return 0;
+
+    AsciiToUnicode(tmp, lpsz);
+
+    return(strLen * 2 + 1);  // including 0 terminator
 }
 
