@@ -1,3 +1,5 @@
+; $Id: mmap.asm,v 1.2 1999-06-10 20:48:00 phaller Exp $
+
 	title	mmap.cpp
 	.386
 	.387

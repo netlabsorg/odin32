@@ -1,3 +1,5 @@
+/* $Id: directory.cpp,v 1.4 1999-06-10 20:47:58 phaller Exp $ */
+
 /*
  * Win32 Directory functions for OS/2
  *

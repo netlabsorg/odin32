@@ -1,3 +1,5 @@
+; $Id: kernel32exp.def,v 1.4 1999-06-10 20:47:59 phaller Exp $
+
 ;Created by BLAST for IBM's compiler
 ;Basis is Windows95 KERNEL32
 LIBRARY KERNEL32 INITINSTANCE TERMINSTANCE

@@ -1,3 +1,5 @@
+/* $Id: devio.cpp,v 1.2 1999-06-10 20:47:56 phaller Exp $ */
+
 /*
  * Win32 Device IOCTL API functions for OS/2
  *

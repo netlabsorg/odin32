@@ -1,3 +1,5 @@
+/* $Id: async.cpp,v 1.3 1999-06-10 20:47:54 phaller Exp $ */
+
 /*
  * Win32 Asynchronous I/O Subsystem for OS/2
  *

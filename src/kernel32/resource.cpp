@@ -1,3 +1,5 @@
+/* $Id: resource.cpp,v 1.6 1999-06-10 20:48:01 phaller Exp $ */
+
 /*
  *
  * Project Odin Software License can be found in LICENSE.TXT

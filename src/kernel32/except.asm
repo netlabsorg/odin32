@@ -1,9 +1,7 @@
+; $Id: except.asm,v 1.3 1999-06-10 20:47:58 phaller Exp $
+
 ;/*
-; *
 ; * Project Odin Software License can be found in LICENSE.TXT
-; *
-; */
-;/*
 ; * Win32 Exception handling + misc functions for OS/2
 ; *
 ; * Copyright 1998 Sander van Leeuwen

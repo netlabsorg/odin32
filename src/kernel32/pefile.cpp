@@ -1,3 +1,5 @@
+/* $Id: pefile.cpp,v 1.3 1999-06-10 20:48:01 phaller Exp $ */
+
 /*
  * PE2LX PE utility functions
  *

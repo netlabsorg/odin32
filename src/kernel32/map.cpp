@@ -1,3 +1,5 @@
+/* $Id: map.cpp,v 1.2 1999-06-10 20:48:00 phaller Exp $ */
+
 /* Copyright (C) 1995 by Holger Veit (Holger.Veit@gmd.de)
  * Use at your own risk! No Warranty! The author is not responsible for
  * any damage or loss of data caused by proper or improper use of this
