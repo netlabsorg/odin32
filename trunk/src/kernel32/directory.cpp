@@ -1,4 +1,4 @@
-/* $Id: directory.cpp,v 1.24 2000-06-12 13:03:00 phaller Exp $ */
+/* $Id: directory.cpp,v 1.25 2000-06-12 14:59:37 phaller Exp $ */
 
 /*
  * Win32 Directory functions for OS/2
@@ -42,6 +42,11 @@
 #include "dbglocal.h"
 
 ODINDEBUGCHANNEL(KERNEL32-DIRECTORY)
+
+
+/*****************************************************************************
+ * Local Prototypes                                                          *
+ *****************************************************************************/
 
 
 static char DIR_Windows[MAX_PATHNAME_LEN];
@@ -223,7 +228,8 @@ ODINFUNCTION2(BOOL,                CreateDirectoryA,
   int len = strlen(lpstrDirectory);
   
   // cut off trailing backslashes
-  if (lpstrDirectory[len - 1] == '\\')
+  if ( (lpstrDirectory[len - 1] == '\\') ||
+       (lpstrDirectory[len - 1] == '/') )
   {
     lstrcpynA(szBuffer,
               lpstrDirectory,
@@ -235,7 +241,17 @@ ODINFUNCTION2(BOOL,                CreateDirectoryA,
   dprintf(("CreateDirectoryA %s", 
             lpstrDirectory));
   
-  return(O32_CreateDirectory(szBuffer,
+  // PH Note 2000/06/12:
+  // Creation of an existing directory is NO ERROR it seems.
+  DWORD dwAttr = GetFileAttributesA(lpstrDirectory);
+  if (dwAttr != -1)
+    if (dwAttr & FILE_ATTRIBUTE_DIRECTORY)
+    {
+      SetLastError(ERROR_SUCCESS);
+      return TRUE;
+    }
+  
+  return(O32_CreateDirectory(lpstrDirectory,
                              arg2));
 }
 
@@ -406,7 +422,8 @@ ODINFUNCTION1(BOOL,   RemoveDirectoryA,
   int len = strlen(lpstrDirectory);
   
   // cut off trailing backslashes
-  if (lpstrDirectory[len - 1] == '\\')
+  if ( (lpstrDirectory[len - 1] == '\\') ||
+       (lpstrDirectory[len - 1] == '/') )
   {
     lstrcpynA(szBuffer,
               lpstrDirectory,
