@@ -1,4 +1,4 @@
-/* $Id: uitools.cpp,v 1.32 2001-12-30 16:51:17 sandervl Exp $ */
+/* $Id: uitools.cpp,v 1.33 2003-01-28 16:21:18 sandervl Exp $ */
 /*
  * User Interface Functions
  *
@@ -1615,37 +1615,32 @@ BOOL WIN32API DrawStateW(HDC hdc, HBRUSH hbc, DRAWSTATEPROC lpOutputFunc, LPARAM
 //******************************************************************************
 BOOL WIN32API DrawFocusRect( HDC hdc, const RECT *lpRect)
 {
-#if 0
-    //TODO: This doesn't work. Find out why (SetBkMode!)
+    //TODO: This doesn't work. Find out why (SetROP2!)
+    //NOTE: Executing this code in NT4 shows the same problem. No visible
+    //      rectangle. Commenting out SetROP2 creates a solid rectangle in
+    //      in NT4. (instead of dotted)
 
     HBRUSH hOldBrush;
     HPEN hOldPen, hNewPen;
     INT oldDrawMode, oldBkMode;
 
-    dprintf(("USER32: DrawFocusRect %x %x", hdc, lpRect));
+    dprintf(("USER32: DrawFocusRect %x (%d,%d)(%d,%d)", hdc, lpRect->left, lpRect->top, lpRect->right, lpRect->bottom));
 
     hOldBrush = SelectObject(hdc, GetStockObject(NULL_BRUSH));
     hNewPen = CreatePen(PS_ALTERNATE, 1, GetSysColor(COLOR_WINDOWTEXT));
     hOldPen = SelectObject(hdc, hNewPen);
-    oldDrawMode = SetROP2(hdc, R2_XORPEN);
+////    oldDrawMode = SetROP2(hdc, R2_XORPEN);
     oldBkMode = SetBkMode(hdc, TRANSPARENT);
 
     Rectangle(hdc, lpRect->left, lpRect->top, lpRect->right, lpRect->bottom);
 
     SetBkMode(hdc, oldBkMode);
-    SetROP2(hdc, oldDrawMode);
+////    SetROP2(hdc, oldDrawMode);
     SelectObject(hdc, hOldPen);
     DeleteObject(hNewPen);
     SelectObject(hdc, hOldBrush);
 
     return TRUE;
-#else
- BOOL rc;
-
-    rc = O32_DrawFocusRect(hdc, lpRect);
-    dprintf(("USER32:  DrawFocusRect %x %x returned %d", hdc, lpRect, rc));
-    return rc;
-#endif
 }
 //******************************************************************************
 //******************************************************************************
