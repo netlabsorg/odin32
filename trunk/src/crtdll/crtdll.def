@@ -1,4 +1,4 @@
-; $Id: crtdll.def,v 1.8 1999-10-07 09:28:48 sandervl Exp $
+; $Id: crtdll.def,v 1.9 1999-12-20 11:09:41 sandervl Exp $
 
 ;Created by BLAST for IBM's compiler
 LIBRARY CRTDLL INITINSTANCE TERMINSTANCE
@@ -448,7 +448,7 @@ EXPORTS
     atof			= _CRTDLL_atof			@343
     atoi			= NTDLL_atoi			@344
     atol			= NTDLL_atol			@345
-    bsearch			= _CRTDLL_bsearch		@346
+    bsearch                     = _bsearch							@346
     calloc			= _CRTDLL_calloc		@347
     ceil			= NTDLL_ceil			@348
     clearerr			= _CRTDLL_clearerr		@349
