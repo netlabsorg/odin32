@@ -1,4 +1,4 @@
-/* $Id: odininst.cpp,v 1.3 2001-04-04 09:00:04 sandervl Exp $ */
+/* $Id: odininst.cpp,v 1.4 2001-04-22 10:55:25 sandervl Exp $ */
 /*
  * Odin WarpIn installation app
  *
@@ -557,6 +557,32 @@ BOOL InitSystemAndRegistry()
    if(GetPrivateProfileStringA(szMci, szCDAudio, szMciCDA, &temp, 0, shellpath) <= 1) {
       WritePrivateProfileStringA(szMci, szCDAudio, szMciCDA, shellpath);
    }
+
+   //Font registry keys (not complete)
+   //[HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Fonts]
+   //"Courier 10,12,15 (VGA res)"="COURE.FON"
+   //"MS Sans Serif 8,10,12,14,18,24 (VGA res)"="SSERIFE.FON"
+   //"MS Serif 8,10,12,14,18,24 (VGA res)"="SERIFE.FON"
+
+
+   if(RegCreateKey(HKEY_LOCAL_MACHINE,"SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Fonts",&hkey)!=ERROR_SUCCESS) {
+    goto initreg_error;
+   }
+   #define FONT_COURIER    "COURE.FON"
+   #define FONT_SANSSERIF  "SSERIFE.FON"
+   #define FONT_SERIF      "SERIFE.FON"
+   RegSetValueEx(hkey, "Courier 10,12,15 (VGA res)",0,REG_SZ, (LPBYTE)FONT_COURIER, sizeof(FONT_COURIER));
+   RegSetValueEx(hkey, "MS Sans Serif 8,10,12,14,18,24 (VGA res)",0,REG_SZ, (LPBYTE)FONT_SANSSERIF, sizeof(FONT_SANSSERIF));
+   RegSetValueEx(hkey, "MS Serif 8,10,12,14,18,24 (VGA res)",0,REG_SZ, (LPBYTE)FONT_SERIF, sizeof(FONT_SERIF));
+   RegCloseKey(hkey);
+
+   if(RegCreateKey(HKEY_LOCAL_MACHINE,"SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Fonts",&hkey)!=ERROR_SUCCESS) {
+    goto initreg_error;
+   }
+   RegSetValueEx(hkey, "Courier 10,12,15 (VGA res)",0,REG_SZ, (LPBYTE)FONT_COURIER, sizeof(FONT_COURIER));
+   RegSetValueEx(hkey, "MS Sans Serif 8,10,12,14,18,24 (VGA res)",0,REG_SZ, (LPBYTE)FONT_SANSSERIF, sizeof(FONT_SANSSERIF));
+   RegSetValueEx(hkey, "MS Serif 8,10,12,14,18,24 (VGA res)",0,REG_SZ, (LPBYTE)FONT_SERIF, sizeof(FONT_SERIF));
+   RegCloseKey(hkey);
    return TRUE;
 
 initreg_error:
@@ -679,6 +705,7 @@ BOOL CreateSystemDirectories()
     CreateDirectory(dirname, NULL);
     RegSetValueEx(hkey,"Templates",0,REG_SZ, (LPBYTE)dirname, strlen(dirname)+1);
     RegCloseKey(hkey);
+
     return TRUE;
 }
 //******************************************************************************
