@@ -1,4 +1,8 @@
- /* $Id: ChangeLog,v 1.428 1999-11-09 17:05:29 cbratschi Exp $ */
+ /* $Id: ChangeLog,v 1.429 1999-11-09 19:24:58 sandervl Exp $ */
+
+ 99-11-09: Rene Pronk <R.Pronk@twi.tudelft.nl>
+	- USER32: Added support for control mnemonics (Alt-key sends BM_CLICK
+                  to buttons if key == mnemonic for that control)
 
  99-11-09: Christoph Bratschi <cbratschi@datacomm.ch>
 	- GDI32: fixed line functions -> don't draw end pixel
@@ -21,6 +25,13 @@
           NOTE 2: We might need to add some code to the file io apis in case
                   dirty apps try to read directly from system dlls.
 	- KERNEL32: No need to export private apis by name & ordinal (ord is enough)
+	- INCLUDE\odinwrap.h 
+                  added wrappers that don't print dbg messages (regardless
+                  of whether DEBUG is defined or not)
+	- INCLUDE\misc.h: Added dprintf2 function for extensive logging
+	- KERNEL32,USER32, replaced commented out dprintf calls with dprintf2
+                           Changed makefiles to enable dprintf2 (DEBUGALL)
+	- KERNEL32: Wrapper heap apis with ODIN* macros. -> fixes FS corruption
 
  99-11-09: Patrick Haller <phaller@gmx.net>
 	- NTDLL:	Add:	various new functions added (DbgXXX)
