@@ -1,4 +1,15 @@
-/* $Id: ChangeLog,v 1.1494 2001-06-10 02:41:20 bird Exp $ */
+/* $Id: ChangeLog,v 1.1495 2001-06-10 12:07:28 sandervl Exp $ */
+
+ 2001-06-10: Sander van Leeuwen <sandervl@xs4all.nl>
+    - USER32:   o SetParent bugfix (caused crashes in user32 after yesterday's changes)
+                o Preliminary support added for OS/2 look and feel (not finished)
+                  Odin.ini option:
+                  [ODINSYSTEM]
+                  OS2Look=1      (default = 0)
+                  Creates OS/2 Titlebar, system menu & min/max/close buttons. 
+                  Also overrides UseWinColors option (uses OS/2 colors).
+                  NOTE: Can interfere with windows applications that draw their 
+                        own custom titlebar. (e.g. RealPlayer)
 
  2001-06-09: knut st. osmundsen <knut.stange.osmundsen@mynd.no>
     - Win32API.h:
