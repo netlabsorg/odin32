@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.67 1999-12-20 19:56:35 cbratschi Exp $ */
+/* $Id: pmwindow.cpp,v 1.68 1999-12-22 18:09:31 cbratschi Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -570,15 +570,15 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
     case WM_MOUSEMOVE:
     {
         ULONG keystate = 0;
-        if(WinGetKeyState(HWND_DESKTOP, VK_BUTTON1))
+        if(WinGetKeyState(HWND_DESKTOP, VK_BUTTON1) & 0x8000)
             keystate |= WMMOVE_LBUTTON;
-        if(WinGetKeyState(HWND_DESKTOP, VK_BUTTON2))
+        if(WinGetKeyState(HWND_DESKTOP, VK_BUTTON2) & 0x8000)
             keystate |= WMMOVE_MBUTTON;
-        if(WinGetKeyState(HWND_DESKTOP, VK_BUTTON3))
+        if(WinGetKeyState(HWND_DESKTOP, VK_BUTTON3) & 0x8000)
             keystate |= WMMOVE_RBUTTON;
-        if(WinGetKeyState(HWND_DESKTOP, VK_SHIFT))
+        if(WinGetKeyState(HWND_DESKTOP, VK_SHIFT) & 0x8000)
             keystate |= WMMOVE_SHIFT;
-        if(WinGetKeyState(HWND_DESKTOP, VK_CTRL))
+        if(WinGetKeyState(HWND_DESKTOP, VK_CTRL) & 0x8000)
             keystate |= WMMOVE_CTRL;
 
         //OS/2 Window coordinates -> Win32 Window coordinates
