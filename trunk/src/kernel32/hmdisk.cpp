@@ -1,4 +1,4 @@
-/* $Id: hmdisk.cpp,v 1.58 2002-10-03 10:36:36 sandervl Exp $ */
+/* $Id: hmdisk.cpp,v 1.59 2002-10-07 16:42:13 sandervl Exp $ */
 
 /*
  * Win32 Disk API functions for OS/2
@@ -1201,8 +1201,31 @@ writecheckfail:
                                NULL,
                                0,
                                &dwDataSize);
+
+        //@@PF Windows IOCTL pause playback before seeking and re-seek
+        if ( ret == ERROR_DEVICE_IN_USE && drvInfo->fCDPlaying)
+        {
+
+        ioctlCDROMSimple(pHMHandleData,
+                              0x81,   // IOCTL_CDROMAUDIO
+                              0x51,   // CDROMAUDIO_STOPAUDIO
+                              lpBytesReturned, drvInfo);
+
+        drvInfo->fCDPlaying = FALSE;
+
+        ret = OSLibDosDevIOCtl(pHMHandleData->hHMHandle,
+                               0x80,  // IOCTL_CDROMDISK
+                               0x50,  // CDROMDISK_SEEK
+                               &ParameterBlock,
+                               sizeof( ParameterBlock ),
+                               &dwParameterSize,
+                               NULL,
+                               0,
+                               &dwDataSize);
+        }
+
         if(ret != ERROR_SUCCESS) {
-            dprintf(("IOCTL_CDROMDISK, CDROMDISK_SEEK %x failed!!", ParameterBlock.ulStartingMSF));
+            dprintf(("IOCTL_CDROMDISK, CDROMDISK_SEEK %x failed with rc= %x !!", ParameterBlock.ulStartingMSF,ret));
         }
         return (ret == ERROR_SUCCESS);
     }
