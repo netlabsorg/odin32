@@ -1,4 +1,19 @@
-/* $Id: changelog,v 1.1573 2001-07-07 19:11:16 sandervl Exp $ */
+/* $Id: changelog,v 1.1574 2001-07-08 03:43:44 bird Exp $ */
+
+ 2001-07-08: knut st. osmundsen <kosmunds@csc.com>:
+    - KERNEL32: o Added call in initterm to tell win32k where the Odin32
+                  environment block is. (Its in Open32, and I don't think
+                  it is reallocated.)
+                o Added early initiation of Win32k loaded EXE. This corrected
+                  problems with GetModuleHandleA returing -1 to MSVCRT.
+    - WIN32K:   o Fixed environment block problem. The environment variables is
+                  not updated in the original env.block. So, win32k needs to
+                  be told where to find the Odin32 environment block to correctly
+                  find dlls using the PATH.
+                o Corrected crosspage fixup bug.
+                o Set no internal fixups flag in LX header for most executables
+                  in an attempt to convice OS/2 to load them where they wanna be
+                  loaded (usually 0x00400000).
 
  2001-07-07: Sander van Leeuwen <sandervl@xs4all.nl>
     - KERNEL32: o Rewrote atom functions (no longer relies on Open32)
@@ -17,7 +32,7 @@
                 o implemented WSAEventSelect
                 o implemented WSAEnumNetworkEvents (not correct)
 
- 2001-07-03: knut st. osmundsen <kosmunds@csc.com>:
+ 2001-07-07: knut st. osmundsen <kosmunds@csc.com>:
     - URLMON:   o Stubbed HlinkSimpleNavigateToString and RegisterBindStatusCallback
                   to fix SYS2048 during RealPlayer install.
     - WIN32K:   o Fixed the DBExpert bug in the longdllname code.
