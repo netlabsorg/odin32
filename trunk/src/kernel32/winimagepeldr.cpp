@@ -1,4 +1,4 @@
-/* $Id: winimagepeldr.cpp,v 1.85 2001-06-06 10:33:16 sandervl Exp $ */
+/* $Id: winimagepeldr.cpp,v 1.86 2001-06-08 11:04:25 sandervl Exp $ */
 
 /*
  * Win32 PE loader Image base class
@@ -1383,22 +1383,26 @@ BOOL Win32PeLdrImage::processExports(char *win32file)
         }
     }
   }
-  
+
   return(TRUE);
 }
 //******************************************************************************
 //******************************************************************************
 void Win32PeLdrImage::AddNameExport(ULONG virtaddr, char *apiname, ULONG ordinal, BOOL fAbsoluteAddress)
 {
- ULONG nsize;
+    ULONG nsize;
+    int iApiNameLength = strlen(apiname);
 
     if(nameexports == NULL) {
-        nameExportSize= 4096;
+        // think of a maximum of bytes per export name,
+        // verify if this is true for MFC-DLLs, etc.
+        nameExportSize = nrNameExports * (sizeof(NameExport) + 32);
+
         nameexports   = (NameExport *)malloc(nameExportSize);
         curnameexport = nameexports;
     }
     nsize = (ULONG)curnameexport - (ULONG)nameexports;
-    if(nsize + sizeof(NameExport) + strlen(apiname) > nameExportSize) {
+    if(nsize + sizeof(NameExport) + iApiNameLength > nameExportSize) {
         nameExportSize += 4096;
         char *tmp = (char *)nameexports;
         nameexports = (NameExport *)malloc(nameExportSize);
@@ -1412,9 +1416,10 @@ void Win32PeLdrImage::AddNameExport(ULONG virtaddr, char *apiname, ULONG ordinal
     else curnameexport->virtaddr = realBaseAddress + (virtaddr - oh.ImageBase);
     curnameexport->ordinal  = ordinal;
     *(ULONG *)curnameexport->name = 0;
-    strcpy(curnameexport->name, apiname);
 
-    curnameexport->nlength = strlen(apiname) + 1;
+    curnameexport->nlength = iApiNameLength + 1;
+    memcpy(curnameexport->name, apiname,  curnameexport->nlength);
+
     if(curnameexport->nlength < sizeof(curnameexport->name))
         curnameexport->nlength = sizeof(curnameexport->name);
 
@@ -1441,30 +1446,39 @@ void Win32PeLdrImage::AddOrdExport(ULONG virtaddr, ULONG ordinal, BOOL fAbsolute
 //******************************************************************************
 BOOL Win32PeLdrImage::AddForwarder(ULONG virtaddr, char *apiname, ULONG ordinal)
 {
- char         *forward = (char *)(realBaseAddress + (virtaddr - oh.ImageBase));
- char         *forwarddll, *forwardapi;
- Win32DllBase *WinDll;
- DWORD         exportaddr;
- int           forwardord;
+    char         *forward = (char *)(realBaseAddress + (virtaddr - oh.ImageBase));
+    char         *forwarddll, *forwardapi;
+    Win32DllBase *WinDll;
+    DWORD         exportaddr;
+    int           forwardord;
+    int           iForwardDllLength = strlen(forward);
+    int           iForwardApiLength;
 
-    forwarddll = strdup(forward);
+    if(iForwardDllLength == 0)
+        return FALSE;
+
+    forwarddll = (char*)alloca(iForwardDllLength);
     if(forwarddll == NULL) {
+        DebugInt3();
         return FALSE;
     }
+    memcpy(forwarddll, forward, iForwardDllLength + 1);
+
     forwardapi = strchr(forwarddll, '.');
     if(forwardapi == NULL) {
-        goto fail;
+        return FALSE;
     }
     *forwardapi++ = 0;
-    if(strlen(forwarddll) == 0 || strlen(forwardapi) == 0) {
-        goto fail;
+    iForwardApiLength = strlen(forwardapi);
+    if(iForwardApiLength == 0) {
+        return FALSE;
     }
     WinDll = Win32DllBase::findModule(forwarddll);
     if(WinDll == NULL) {
         WinDll = loadDll(forwarddll);
         if(WinDll == NULL) {
             dprintf((LOG, "ERROR: couldn't find forwarder %s.%s", forwarddll, forwardapi));
-            goto fail;
+            return FALSE;
         }
     }
     //check if name or ordinal forwarder
@@ -1472,10 +1486,10 @@ BOOL Win32PeLdrImage::AddForwarder(ULONG virtaddr, char *apiname, ULONG ordinal)
     if(*forwardapi >= '0' && *forwardapi <= '9') {
         forwardord = atoi(forwardapi);
     }
-    if(forwardord != 0 || (strlen(forwardapi) == 1 && *forwardapi == '0')) {
-        exportaddr = WinDll->getApi(forwardord);
+    if(forwardord != 0 || (iForwardApiLength == 1 && *forwardapi == '0')) {
+         exportaddr = WinDll->getApi(forwardord);
     }
-    else  exportaddr = WinDll->getApi(forwardapi);
+    else exportaddr = WinDll->getApi(forwardapi);
 
     if(apiname) {
         dprintf((LOG, "address 0x%x %s @%d (0x%08x) forwarder %s.%s", virtaddr - oh.ImageBase, apiname, ordinal, virtaddr, forwarddll, forwardapi));
@@ -1483,14 +1497,9 @@ BOOL Win32PeLdrImage::AddForwarder(ULONG virtaddr, char *apiname, ULONG ordinal)
     }
     else {
         dprintf((LOG, "address 0x%x @%d (0x%08x) forwarder %s.%s", virtaddr - oh.ImageBase, ordinal, virtaddr, forwarddll, forwardapi));
-         AddOrdExport(exportaddr, ordinal, TRUE);
+        AddOrdExport(exportaddr, ordinal, TRUE);
     }
-    free(forwarddll);
     return TRUE;
-
-fail:
-  free(forwarddll);
-  return FALSE;
 }
 //******************************************************************************
 //******************************************************************************
@@ -1585,6 +1594,7 @@ Win32DllBase *Win32PeLdrImage::loadDll(char *pszCurModule)
 
     return WinDll;
 }
+
 //******************************************************************************
 /** All initial processing of imports is done here
  *  Should now detect most Borland styled files including the GifCon32.exe and
@@ -1595,230 +1605,232 @@ Win32DllBase *Win32PeLdrImage::loadDll(char *pszCurModule)
 //******************************************************************************
 BOOL Win32PeLdrImage::processImports(char *win32file)
 {
- PIMAGE_IMPORT_DESCRIPTOR pID;
- IMAGE_SECTION_HEADER     shID;
- IMAGE_SECTION_HEADER     shExtra = {0};
- PIMAGE_OPTIONAL_HEADER   pOH;
- int    i,j, nrPages;
- BOOL   fBorland = 0;
- int    cModules;
- char  *pszModules;
- char  *pszCurModule;
- char  *pszTmp;
- ULONG *pulImport;
- ULONG  ulCurFixup;
- int    Size;
- Win32DllBase    *WinDll;
- Win32ImageBase  *WinImage = NULL;
- Section *section;
+    PIMAGE_IMPORT_DESCRIPTOR pID;
+    IMAGE_SECTION_HEADER     shID;
+    IMAGE_SECTION_HEADER     shExtra = {0};
+    PIMAGE_OPTIONAL_HEADER   pOH;
+    int    i,j, nrPages;
+    BOOL   fBorland = 0;
+    int    cModules;
+    char  *pszModules;
+    char  *pszCurModule;
+    char  *pszTmp;
+    ULONG *pulImport;
+    ULONG  ulCurFixup;
+    int    Size;
+    Win32DllBase    *WinDll;
+    Win32ImageBase  *WinImage = NULL;
+    Section *section;
 
-/* "algorithm:"
- *      1) get module names and store them
- *          a) check dwRVAModuleName is within .idata seg - if not find section
- *      2) iterate thru functions of each module
- *          a) check OriginalFirstThunk is not 0 and that it points to a RVA.
- *          b) if not a) borland-styled PE-file - ARG!!!
- *              check FirstThunk
- *          c) check OriginalFirstThunk/FirstThunk ok RVAs and find right section
- *          d) store ordinal/name import
- *      3) finished
- */
+    /* "algorithm:"
+     *      1) get module names and store them
+     *          a) check dwRVAModuleName is within .idata seg - if not find section
+     *      2) iterate thru functions of each module
+     *          a) check OriginalFirstThunk is not 0 and that it points to a RVA.
+     *          b) if not a) borland-styled PE-file - ARG!!!
+     *              check FirstThunk
+     *          c) check OriginalFirstThunk/FirstThunk ok RVAs and find right section
+     *          d) store ordinal/name import
+     *      3) finished
+     */
 
-   /* 1) get module names */
-   pID = (PIMAGE_IMPORT_DESCRIPTOR)ImageDirectoryOffset(win32file, IMAGE_DIRECTORY_ENTRY_IMPORT);
-   if (pID == NULL)
+    /* 1) get module names */
+    pID = (PIMAGE_IMPORT_DESCRIPTOR)ImageDirectoryOffset(win32file, IMAGE_DIRECTORY_ENTRY_IMPORT);
+    if (pID == NULL)
         return TRUE;
-   if (!GetSectionHdrByImageDir(win32file, IMAGE_DIRECTORY_ENTRY_IMPORT, &shID))
+    if (!GetSectionHdrByImageDir(win32file, IMAGE_DIRECTORY_ENTRY_IMPORT, &shID))
         return TRUE;
 
-   //calc size of module list
-   i = Size = cModules = 0;
-   while (pID[i].Name != 0)
-   {
-    //test RVA inside ID-Section
-    if (pID[i].Name >= shID.VirtualAddress && pID[i].Name < shID.VirtualAddress + max(shID.Misc.VirtualSize, shID.SizeOfRawData)) {
-        pszTmp = (char*)(pID[i].Name + (ULONG)win32file);
-    }
-    else {
-        //is the "Extra"-section already found or do we have to find it?
-        if (pID[i].Name < shExtra.VirtualAddress || pID[i].Name >= shExtra.VirtualAddress + max(shExtra.Misc.VirtualSize, shExtra.SizeOfRawData)) {
-            if (!GetSectionHdrByRVA(win32file, &shExtra, pID[i].Name))
-                 return FALSE;
-        }
-        pszTmp = (char*)(pID[i].Name + (ULONG)win32file);
-    }
-    Size += strlen(pszTmp) + 1;
-    i++;
-    cModules++;
-  }
-
-  pszModules = (char*)malloc(Size);
-  assert(pszModules != NULL);
-  j = 0;
-  for (i = 0; i < cModules; i++)
-  {
-    //test RVA inside ID-Section
-    if (pID[i].Name >= shID.VirtualAddress && pID[i].Name < shID.VirtualAddress + max(shID.Misc.VirtualSize, shID.SizeOfRawData)) {
-        pszTmp = (char*)(pID[i].Name + (ULONG)win32file);
-    }
-    else {
-        fBorland = TRUE;
-        //is the "Extra"-section already found or do we have to find it?
-        if (pID[i].Name < shExtra.VirtualAddress || pID[i].Name >= shExtra.VirtualAddress + max(shExtra.Misc.VirtualSize, shExtra.SizeOfRawData))
-        {
-            if (GetSectionHdrByRVA(win32file, &shExtra, pID[i].Name)) {
-                free(pszModules);
-                return FALSE;
-            }
-        }
-        pszTmp = (char*)(pID[i].Name + (ULONG)win32file);
-    }
-
-    strcpy(pszModules+j, pszTmp);
-    j += strlen(pszTmp) + 1;
-  }
-  if (fBorland)
-    dprintf((LOG, "Borland-styled PE-File." ));
-
-  //Store modules
-  dprintf((LOG, "%d imported Modules: ", cModules ));
-
-  /* 2) functions */
-  pszCurModule = pszModules;
-  pOH = (PIMAGE_OPTIONAL_HEADER)OPTHEADEROFF(win32file);
-  for (i = 0; i < cModules; i++)
-  {
-    dprintf((LOG, "Module %s", pszCurModule ));
-    if(pID[i].ForwarderChain) {
-        dprintf((LOG, "ForwarderChain: %x", pID[i].ForwarderChain));
-    }
-    //  a) check that OriginalFirstThunk not is 0 and look for Borland-styled PE
-    if (i == 0)
+    //calc size of module list
+    i = Size = cModules = 0;
+    while (pID[i].Name != 0)
     {
-        //heavy borland-style test - assume array of thunks is within that style does not change
-        if((ULONG)pID[i].u.OriginalFirstThunk == 0 ||
-           (ULONG)pID[i].u.OriginalFirstThunk < shID.VirtualAddress ||
-           (ULONG)pID[i].u.OriginalFirstThunk >= shID.VirtualAddress + max(shID.Misc.VirtualSize, shID.SizeOfRawData) ||
-           (ULONG)pID[i].u.OriginalFirstThunk >= pOH->DataDirectory[IMAGE_DIRECTORY_ENTRY_IMPORT].VirtualAddress &&
-           (ULONG)pID[i].u.OriginalFirstThunk < sizeof(*pID)*cModules + pOH->DataDirectory[IMAGE_DIRECTORY_ENTRY_IMPORT].VirtualAddress)
-        {
-            fBorland = TRUE;
-        }
-    }
-    //light borland-style test
-    if (pID[i].u.OriginalFirstThunk == 0 || fBorland) {
-            pulImport = (ULONG*)pID[i].FirstThunk;
-    }
-    else    pulImport = (ULONG*)pID[i].u.OriginalFirstThunk;
-
-    //  b) check if RVA ok
-    if (!(pulImport > 0 && (ULONG)pulImport < pOH->SizeOfImage)) {
-        dprintf((LOG, "Invalid RVA %x", pulImport ));
-        break;
-    }
-    // check section
-    if ((ULONG)pulImport < shExtra.VirtualAddress || (ULONG)pulImport >= shExtra.VirtualAddress + max(shExtra.Misc.VirtualSize, shExtra.SizeOfRawData))
-    {
-        if (!GetSectionHdrByRVA(win32file, &shExtra, (ULONG)pulImport))
-        {
-            dprintf((LOG, "warning: could not find section for Thunk RVA %x", pulImport ));
-            break;
-        }
-    }
-
-    //SvL: Load dll if needed
-    dprintf((LOG, "**********************************************************************" ));
-    dprintf((LOG, "************** Import Module %s ", pszCurModule ));
-    dprintf((LOG, "**********************************************************************" ));
-    WinDll = Win32DllBase::findModule(pszCurModule);
-
-    if(WinDll == NULL)
-    {  //not found, so load it
-        if (WinExe != NULL && WinExe->matchModName(pszCurModule)) {
-             WinImage = (Win32ImageBase *)WinExe;
+        //test RVA inside ID-Section
+        if (pID[i].Name >= shID.VirtualAddress && pID[i].Name < shID.VirtualAddress + max(shID.Misc.VirtualSize, shID.SizeOfRawData)) {
+            pszTmp = (char*)(pID[i].Name + (ULONG)win32file);
         }
         else {
-             WinDll = loadDll(pszCurModule);
-             if(WinDll == NULL) {
-                 return FALSE;
-             }
+            //is the "Extra"-section already found or do we have to find it?
+            if (pID[i].Name < shExtra.VirtualAddress || pID[i].Name >= shExtra.VirtualAddress + max(shExtra.Misc.VirtualSize, shExtra.SizeOfRawData)) {
+                if (!GetSectionHdrByRVA(win32file, &shExtra, pID[i].Name))
+                    return FALSE;
+            }
+            pszTmp = (char*)(pID[i].Name + (ULONG)win32file);
         }
+        Size += strlen(pszTmp) + 1;
+        i++;
+        cModules++;
     }
-    else {
-        WinDll->AddRef();
-        dprintf((LOG, "Already found ", pszCurModule));
-    }
-    if(WinDll != NULL) {
-        //add the dll we just loaded to dependency list for this image
-        addDependency(WinDll);
 
-        //Make sure the dependency list is correct (already done
-        //in the ctor of Win32DllBase, but for LX dlls the parent is
-        //then set to NULL; so change it here again
-        WinDll->setUnloadOrder(this);
-        WinImage = (Win32ImageBase *)WinDll;
-    }
-    else 
-    if(WinImage == NULL) {
-        dprintf((LOG, "Unable to load dll %s", pszCurModule ));
+    pszModules = (char*)alloca(Size);
+    if(pszModules == NULL) {
+        DebugInt3();
         return FALSE;
     }
-
-    pulImport  = (PULONG)((ULONG)pulImport + (ULONG)win32file);
-    j          = 0;
-    ulCurFixup = (ULONG)pID[i].FirstThunk + (ULONG)win32file;
-
-    section    = findSectionByOS2Addr(ulCurFixup);
-    if(section == NULL) {
-        dprintf((LOG, "Unable to find section for %x", ulCurFixup ));
-        return FALSE;
-    }
-    //SvL: Read page from disk
-    commitPage(ulCurFixup & ~0xfff, FALSE, SINGLE_PAGE);
-    //SvL: Enable write access
-    DosSetMem((PVOID)(ulCurFixup & ~0xfff), PAGE_SIZE, PAG_READ|PAG_WRITE);
-    nrPages    = 1;
-
-    while (pulImport[j] != 0) {
-        if (pulImport[j] & IMAGE_ORDINAL_FLAG) { //ordinal
-            dprintf((LOG, "0x%08x Imported function %s @%d", ulCurFixup , pszCurModule, (pulImport[j] & ~IMAGE_ORDINAL_FLAG) ));
-            StoreImportByOrd(WinImage, pulImport[j] & ~IMAGE_ORDINAL_FLAG, ulCurFixup);
+    j = 0;
+    for (i = 0; i < cModules; i++)
+    {
+        //test RVA inside ID-Section
+        if (pID[i].Name >= shID.VirtualAddress && pID[i].Name < shID.VirtualAddress + max(shID.Misc.VirtualSize, shID.SizeOfRawData)) {
+            pszTmp = (char*)(pID[i].Name + (ULONG)win32file);
         }
-        else {  //name
-            //check
-            if (pulImport[j] < shExtra.VirtualAddress || pulImport[j] >= shExtra.VirtualAddress + max(shExtra.Misc.VirtualSize, shExtra.SizeOfRawData)) {
-                if (!GetSectionHdrByRVA(win32file, &shExtra, pulImport[j]))
-                {
-                    dprintf((LOG, "warning: could not find section for Import Name RVA ", pulImport[j] ));
-                    break;
+        else {
+            fBorland = TRUE;
+            //is the "Extra"-section already found or do we have to find it?
+            if (pID[i].Name < shExtra.VirtualAddress || pID[i].Name >= shExtra.VirtualAddress + max(shExtra.Misc.VirtualSize, shExtra.SizeOfRawData))
+            {
+                if (GetSectionHdrByRVA(win32file, &shExtra, pID[i].Name)) {
+                    return FALSE;
                 }
             }
-            //KSO - Aug 6 1998 1:15am:this eases comparing...
-            char *pszFunctionName = (char*)(pulImport[j] + (ULONG)win32file + 2);
-            dprintf((LOG, "0x%08x Imported function %s (0x%08x)", ulCurFixup,  pszFunctionName, WinImage->getApi(pszFunctionName)));
-            StoreImportByName(WinImage, pszFunctionName, ulCurFixup);
+            pszTmp = (char*)(pID[i].Name + (ULONG)win32file);
         }
-        ulCurFixup += sizeof(IMAGE_THUNK_DATA);
-        j++;
-        if((ulCurFixup & 0xfff) == 0) {
-            commitPage(ulCurFixup & ~0xfff, FALSE, SINGLE_PAGE);
-            DosSetMem((PVOID)(ulCurFixup & ~0xfff), PAGE_SIZE, PAG_READ|PAG_WRITE);
-            nrPages++;
-        }
+
+        int iTmpLength = strlen(pszTmp) + 1;
+        memcpy(pszModules+j, pszTmp, iTmpLength);
+        j += iTmpLength;
     }
-    //SvL: And restore original protection flags
-    ulCurFixup = (ULONG)pID[i].FirstThunk + pOH->ImageBase;
-    DosSetMem((PVOID)(ulCurFixup & ~0xfff), PAGE_SIZE*nrPages, section->pageflags);
+    if (fBorland)
+        dprintf((LOG, "Borland-styled PE-File." ));
 
-    dprintf((LOG, "**********************************************************************" ));
-    dprintf((LOG, "************** End Import Module %s ", pszCurModule ));
-    dprintf((LOG, "**********************************************************************" ));
+    //Store modules
+    dprintf((LOG, "%d imported Modules: ", cModules ));
 
-    pszCurModule += strlen(pszCurModule) + 1;
-  }//for (i = 0; i < cModules; i++)
+    /* 2) functions */
+    pszCurModule = pszModules;
+    pOH = (PIMAGE_OPTIONAL_HEADER)OPTHEADEROFF(win32file);
+    for (i = 0; i < cModules; i++)
+    {
+        dprintf((LOG, "Module %s", pszCurModule ));
+        if(pID[i].ForwarderChain) {
+            dprintf((LOG, "ForwarderChain: %x", pID[i].ForwarderChain));
+        }
+        //  a) check that OriginalFirstThunk not is 0 and look for Borland-styled PE
+        if (i == 0)
+        {
+            //heavy borland-style test - assume array of thunks is within that style does not change
+            if((ULONG)pID[i].u.OriginalFirstThunk == 0 ||
+               (ULONG)pID[i].u.OriginalFirstThunk < shID.VirtualAddress ||
+               (ULONG)pID[i].u.OriginalFirstThunk >= shID.VirtualAddress + max(shID.Misc.VirtualSize, shID.SizeOfRawData) ||
+               (ULONG)pID[i].u.OriginalFirstThunk >= pOH->DataDirectory[IMAGE_DIRECTORY_ENTRY_IMPORT].VirtualAddress &&
+               (ULONG)pID[i].u.OriginalFirstThunk < sizeof(*pID)*cModules + pOH->DataDirectory[IMAGE_DIRECTORY_ENTRY_IMPORT].VirtualAddress)
+            {
+                fBorland = TRUE;
+            }
+        }
+        //light borland-style test
+        if (pID[i].u.OriginalFirstThunk == 0 || fBorland) {
+             pulImport = (ULONG*)pID[i].FirstThunk;
+        }
+        else pulImport = (ULONG*)pID[i].u.OriginalFirstThunk;
 
-  free(pszModules);
-  return TRUE;
+        //  b) check if RVA ok
+        if (!(pulImport > 0 && (ULONG)pulImport < pOH->SizeOfImage)) {
+            dprintf((LOG, "Invalid RVA %x", pulImport ));
+            break;
+        }
+        // check section
+        if ((ULONG)pulImport < shExtra.VirtualAddress || (ULONG)pulImport >= shExtra.VirtualAddress + max(shExtra.Misc.VirtualSize, shExtra.SizeOfRawData))
+        {
+            if (!GetSectionHdrByRVA(win32file, &shExtra, (ULONG)pulImport))
+            {
+                dprintf((LOG, "warning: could not find section for Thunk RVA %x", pulImport ));
+                break;
+            }
+        }
+
+        //Load dll if needed
+        dprintf((LOG, "**********************************************************************" ));
+        dprintf((LOG, "************** Import Module %s ", pszCurModule ));
+        dprintf((LOG, "**********************************************************************" ));
+        WinDll = Win32DllBase::findModule(pszCurModule);
+
+        if(WinDll == NULL)
+        {  //not found, so load it
+            if (WinExe != NULL && WinExe->matchModName(pszCurModule)) {
+                WinImage = (Win32ImageBase *)WinExe;
+            }
+            else {
+                WinDll = loadDll(pszCurModule);
+                if(WinDll == NULL) {
+                    return FALSE;
+                }
+            }
+        }
+        else {
+            WinDll->AddRef();
+            dprintf((LOG, "Already found ", pszCurModule));
+        }
+        if(WinDll != NULL) {
+            //add the dll we just loaded to dependency list for this image
+            addDependency(WinDll);
+
+            //Make sure the dependency list is correct (already done
+            //in the ctor of Win32DllBase, but for LX dlls the parent is
+            //then set to NULL; so change it here again
+            WinDll->setUnloadOrder(this);
+            WinImage = (Win32ImageBase *)WinDll;
+        }
+        else
+        if(WinImage == NULL) {
+            dprintf((LOG, "Unable to load dll %s", pszCurModule ));
+            return FALSE;
+        }
+
+        pulImport  = (PULONG)((ULONG)pulImport + (ULONG)win32file);
+        j          = 0;
+        ulCurFixup = (ULONG)pID[i].FirstThunk + (ULONG)win32file;
+
+        section    = findSectionByOS2Addr(ulCurFixup);
+        if(section == NULL) {
+            dprintf((LOG, "Unable to find section for %x", ulCurFixup ));
+            return FALSE;
+        }
+        //Read page from disk
+        commitPage(ulCurFixup & ~0xfff, FALSE, SINGLE_PAGE);
+        //Enable write access
+        DosSetMem((PVOID)(ulCurFixup & ~0xfff), PAGE_SIZE, PAG_READ|PAG_WRITE);
+        nrPages    = 1;
+
+        while (pulImport[j] != 0) {
+            if (pulImport[j] & IMAGE_ORDINAL_FLAG) { //ordinal
+                dprintf((LOG, "0x%08x Imported function %s @%d", ulCurFixup , pszCurModule, (pulImport[j] & ~IMAGE_ORDINAL_FLAG) ));
+                StoreImportByOrd(WinImage, pulImport[j] & ~IMAGE_ORDINAL_FLAG, ulCurFixup);
+            }
+            else {  //name
+                //check
+                if (pulImport[j] < shExtra.VirtualAddress || pulImport[j] >= shExtra.VirtualAddress + max(shExtra.Misc.VirtualSize, shExtra.SizeOfRawData))
+                {
+                    if (!GetSectionHdrByRVA(win32file, &shExtra, pulImport[j]))
+                    {
+                        dprintf((LOG, "warning: could not find section for Import Name RVA ", pulImport[j] ));
+                        break;
+                    }
+                }
+                //KSO - Aug 6 1998 1:15am:this eases comparing...
+                char *pszFunctionName = (char*)(pulImport[j] + (ULONG)win32file + 2);
+                dprintf((LOG, "0x%08x Imported function %s (0x%08x)", ulCurFixup,  pszFunctionName, WinImage->getApi(pszFunctionName)));
+                StoreImportByName(WinImage, pszFunctionName, ulCurFixup);
+            }
+            ulCurFixup += sizeof(IMAGE_THUNK_DATA);
+            j++;
+            if((ulCurFixup & 0xfff) == 0) {
+                commitPage(ulCurFixup & ~0xfff, FALSE, SINGLE_PAGE);
+                DosSetMem((PVOID)(ulCurFixup & ~0xfff), PAGE_SIZE, PAG_READ|PAG_WRITE);
+                nrPages++;
+            }
+        }
+        //SvL: And restore original protection flags
+        ulCurFixup = (ULONG)pID[i].FirstThunk + pOH->ImageBase;
+        DosSetMem((PVOID)(ulCurFixup & ~0xfff), PAGE_SIZE*nrPages, section->pageflags);
+
+        dprintf((LOG, "**********************************************************************" ));
+        dprintf((LOG, "************** End Import Module %s ", pszCurModule ));
+        dprintf((LOG, "**********************************************************************" ));
+
+        pszCurModule += strlen(pszCurModule) + 1;
+    }//for (i = 0; i < cModules; i++)
+    return TRUE;
 }
 //******************************************************************************
 //******************************************************************************
@@ -1897,15 +1909,15 @@ ULONG Win32PeLdrImage::getApi(int ordinal)
    * When the step size is too small, we continue
    * with the linear search.
    */
-  
+
   // start in the middle of the tree
   i = nrOrdExportsRegistered >> 1;
   int iStep = i;
-  
+
   for(;;)
   {
     int iThisExport = curexport[i].ordinal;
-    
+
     iStep >>= 1;                    // next step will be narrower
 
     if (iThisExport < ordinal)
@@ -1959,7 +1971,7 @@ ULONG Win32PeLdrImage::getApi(int ordinal)
               break;
         }
       }
-      
+
       // not found yet.
       break;
     }

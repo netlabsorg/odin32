@@ -1,4 +1,4 @@
-/* $Id: profile.cpp,v 1.28 2000-12-05 13:04:48 sandervl Exp $ */
+/* $Id: profile.cpp,v 1.29 2001-06-08 11:04:24 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -308,7 +308,6 @@ static BOOL PROFILE_DeleteSection( PROFILESECTION **section, LPCSTR name )
     return FALSE;
 }
 
-
 /***********************************************************************
  *           PROFILE_DeleteKey
  *
@@ -341,6 +340,32 @@ static BOOL PROFILE_DeleteKey( PROFILESECTION **section,
     return FALSE;
 }
 
+/***********************************************************************
+ *           PROFILE_DeleteAllKeys
+ *
+ * Delete all keys from a profile tree.
+ */
+void PROFILE_DeleteAllKeys( LPCSTR section_name)
+{
+    PROFILESECTION **section= &CurProfile->section;
+    while (*section)
+    {
+        if ((*section)->name && !strcasecmp( (*section)->name, section_name ))
+        {
+            PROFILEKEY **key = &(*section)->key;
+            while (*key)
+            {
+                PROFILEKEY *to_del = *key;
+		*key = to_del->next;
+		if (to_del->name) HeapFree( GetProcessHeap(), 0, to_del->name );
+		if (to_del->value) HeapFree( GetProcessHeap(), 0, to_del->value);
+		HeapFree( GetProcessHeap(), 0, to_del );
+		CurProfile->changed =TRUE;
+            }
+        }
+        section = &(*section)->next;
+    }
+}
 
 /***********************************************************************
  *           PROFILE_Find
@@ -1387,10 +1412,37 @@ ODINFUNCTION3(BOOL, WritePrivateProfileSectionA,
               LPCSTR, string,
               LPCSTR, filename)
 {
-  char *p =(char*)string;
+    BOOL ret = FALSE;
+    LPSTR p ;
 
-  dprintf(("Kernel32:Profile:fixme WritePrivateProfileSection32A empty stub\n"));
-  return FALSE;
+    dprintf(("WritePrivateProfileSectionA %s %s %s", section, string, filename));
+
+    EnterCriticalSection( &PROFILE_CritSect );
+
+    if (PROFILE_Open( filename )) {
+        if (!section && !string)
+            PROFILE_ReleaseFile();  /* always return FALSE in this case */
+        else if (!string) /* delete the named section*/
+	    ret = PROFILE_SetString(section,NULL,NULL);
+        else {
+	    PROFILE_DeleteAllKeys(section);
+	    ret = TRUE;
+	    while(*string) {
+	        LPSTR buf=HEAP_strdupA( GetProcessHeap(), 0, string );
+                if((p=strchr( buf, '='))){
+                    *p='\0';
+                    ret = PROFILE_SetString( section, buf, p+1 );
+                    
+                }
+                HeapFree( GetProcessHeap(), 0, buf );
+                string += strlen(string)+1;
+            }
+            
+        }
+    }
+
+    LeaveCriticalSection( &PROFILE_CritSect );
+    return ret;
 }
 
 /***********************************************************************
