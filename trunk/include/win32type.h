@@ -1,5 +1,3 @@
-/* $Id: win32type.h,v 1.44 2000-12-30 13:26:53 sandervl Exp $ */
-
 /*
  * Win32 type definitions for OS/2
  *
@@ -548,6 +546,11 @@ typedef struct tagPOINT
     LONG  y;
 } POINT, *PPOINT, *LPPOINT;
 
+typedef struct tagPOINT16
+{
+    SHORT  x;
+    SHORT  y;
+} POINT16, *PPOINT16, *LPPOINT16;
 
 typedef struct
 {
