@@ -1,9 +1,12 @@
-/* $Id: ChangeLog,v 1.1331 2001-03-30 23:58:36 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.1332 2001-03-31 10:40:19 sandervl Exp $ */
 
  2001-03-31: Sander van Leeuwen <sandervl@xs4all.nl>   
     - KERNEL32: o Fix for loading executable with sections not starting on
                   page boundary (LOAD_LIBRARY_AS_DATAFILE).
                   (fixes crash during install of latest RealPlayer 8)
+                o Change default code page back from 1252 to 0. 
+                  (fixes umlauts in StarOffice 5.2)
+                  TODO: Need to find out how SO determines the codepage
     - USER32:   o WindowFromPoint now works with overlapping siblings too
                 o Bugfix in mouse message translation
 
