@@ -1,4 +1,4 @@
-/* $Id: dialog.cpp,v 1.5 1999-07-02 12:43:30 sandervl Exp $ */
+/* $Id: dialog.cpp,v 1.6 1999-07-04 19:02:37 sandervl Exp $ */
 
 /*
  * PE2LX dialog conversion code
@@ -31,6 +31,8 @@
 #ifndef BS_TEXT /*PLF Sun  97-06-22 03:07:13  not in watcom's os/2 header */
    #define BS_TEXT                 0x0010
 #endif
+
+#define DEFAULT_DLGFONT "9.WarpSans"
 
 static int  ConvertClassAndStyle(int winclass, int style, USHORT *os2class, BOOL *fIconBmp);
 static int  ConvertDlgStyle(int style);
@@ -212,7 +214,27 @@ void ShowDialog(int id, DialogBoxHeader *dhdr, int size)
                 dlgpparam->cb           = dlgpparam->aparam[0].cb;
                 dlgitem->offPresParams  = (USHORT)((int)dlgpparam - (int)dlgt);
                 dlgcurdata             += dlgpparam->cb + sizeof(ULONG);
+        } else
+        { //CB: set default font
+          dlgpparam = (PRESPARAMS*)dlgcurdata;
+          dlgpparam->aparam[0].id = PP_FONTNAMESIZE;
+          dlgpparam->aparam[0].cb = strlen(DEFAULT_DLGFONT)+1;
+          strcpy((char*)&dlgpparam->aparam[0].ab,DEFAULT_DLGFONT);
+          dlgpparam->cb           = dlgpparam->aparam[0].cb+2*sizeof(ULONG);
+          dlgitem->offPresParams  = (USHORT)((int)dlgpparam-(int)dlgt);
+          dlgt->coffPresParams++;
+          dlgcurdata             += dlgpparam->cb+sizeof(dlgpparam->cb);
         }
+  } else
+  { //CB: set default font
+    dlgpparam = (PRESPARAMS*)dlgcurdata;
+    dlgpparam->aparam[0].id = PP_FONTNAMESIZE;
+    dlgpparam->aparam[0].cb = strlen(DEFAULT_DLGFONT)+1;
+    strcpy((char*)&dlgpparam->aparam[0].ab,DEFAULT_DLGFONT);
+    dlgpparam->cb           = dlgpparam->aparam[0].cb+2*sizeof(ULONG);
+    dlgitem->offPresParams  = (USHORT)((int)dlgpparam-(int)dlgt);
+    dlgt->coffPresParams++;
+    dlgcurdata             += dlgpparam->cb+sizeof(dlgpparam->cb);
   }
   dlgitem++;
 
@@ -262,7 +284,8 @@ void ShowDialog(int id, DialogBoxHeader *dhdr, int size)
         if(*(USHORT *)szCaption == 0xFFFF) {
                 szCaption += 2;
                 dlgitem->cchText = 0;
-                dlgitem->offText = 0;
+                dlgitem->offText = (USHORT)((int)dlgcurdata-(int)dlgt);
+                dlgcurdata += 1; //CB: offText == empty string
         }
         else {  //Handle Caption
                 ctrltext = UnicodeToAscii(szCaption);
@@ -458,7 +481,27 @@ void ShowDialogEx(int id, WINDLGTEMPLATEEX *dhdr, int size)
                 dlgpparam->cb           = sizeof(ULONG) + dlgpparam->aparam[0].cb;
                 dlgt->coffPresParams    = (USHORT)((int)dlgpparam - (int)dlgt);
                 dlgcurdata             += dlgpparam->cb;
+        } else
+        { //CB: set default font
+          dlgpparam = (PRESPARAMS*)dlgcurdata;
+          dlgpparam->aparam[0].id = PP_FONTNAMESIZE;
+          dlgpparam->aparam[0].cb = strlen(DEFAULT_DLGFONT)+1;
+          strcpy((char*)&dlgpparam->aparam[0].ab,DEFAULT_DLGFONT);
+          dlgpparam->cb           = dlgpparam->aparam[0].cb+2*sizeof(ULONG);
+          dlgitem->offPresParams  = (USHORT)((int)dlgpparam-(int)dlgt);
+          dlgt->coffPresParams++;
+          dlgcurdata             += dlgpparam->cb+sizeof(dlgpparam->cb);
         }
+  } else
+  { //CB: set default font
+    dlgpparam = (PRESPARAMS*)dlgcurdata;
+    dlgpparam->aparam[0].id = PP_FONTNAMESIZE;
+    dlgpparam->aparam[0].cb = strlen(DEFAULT_DLGFONT)+1;
+    strcpy((char*)&dlgpparam->aparam[0].ab,DEFAULT_DLGFONT);
+    dlgpparam->cb           = dlgpparam->aparam[0].cb+2*sizeof(ULONG);
+    dlgitem->offPresParams  = (USHORT)((int)dlgpparam-(int)dlgt);
+    dlgt->coffPresParams++;
+    dlgcurdata             += dlgpparam->cb+sizeof(dlgpparam->cb);
   }
   ctrldata = (WINDLGITEMTEMPLATEEX *)(((int)ctrldata+3) & ~3);
   for(i=0;i<dhdr->NumberOfItems;i++) {
@@ -559,7 +602,7 @@ static int ConvertClassAndStyle(int    winclass,
         case WIN_BUTTON:
 #if 0
                 if(style & WINBS_LEFTTEXT)
-                        os2style |= ;
+                        os2style |= ; //not supported
 #endif
                 style &= 0xF;
 //BS_TEXT, BS_BITMAP, BS_ICON, BS_MINIICON can only be used with BS_PUSHBUTTON
@@ -859,6 +902,7 @@ static int ConvertFont(char *font, PRESPARAMS *dlgpparam, int fsize)
         return(TRUE);
 //  }
 //  else TODO: More fonts!!!
+// "MS Sans Serif"
 //  return(FALSE);      //not found
 #else
     return(FALSE);

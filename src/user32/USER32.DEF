@@ -1,4 +1,4 @@
-; $Id: USER32.DEF,v 1.7 1999-06-24 08:25:21 phaller Exp $
+; $Id: USER32.DEF,v 1.8 1999-07-04 19:02:38 sandervl Exp $
 
 ;Created by BLAST for IBM's compiler
 LIBRARY USER32 INITINSTANCE
@@ -598,7 +598,10 @@ EXPORTS
     MonitorFromPoint              = _MonitorFromPoint@12        @1004
     EnumDisplayMonitors        = _EnumDisplayMonitors@16        @1005
 
-    CreateWindowProc     		@2000
+    CreateWindowProc                    @2000
     GetOS2Callback__15Win32WindowProcFv @2001
 ; Wine helper function
     GetSysColorPen              = _GetSysColorPen@4              @2002
+; COMCTL32 helper functions
+    NativeDlgBoxIP             = _NativeDlgBoxIP@24          @2003
+    NativeCreateDlgIP          = _NativeCreateDlgIP@24       @2004

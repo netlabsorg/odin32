@@ -1,4 +1,4 @@
-/* $Id: dialog.cpp,v 1.5 1999-06-26 13:46:21 sandervl Exp $ */
+/* $Id: dialog.cpp,v 1.6 1999-07-04 19:02:38 sandervl Exp $ */
 
 /*
  * Win32 dialog API functions for OS/2
@@ -19,9 +19,9 @@
 //TODO: dlgproc == NULL
 //******************************************************************************
 //******************************************************************************
-HWND WIN32API CreateDialogParamA(HINSTANCE hinst, LPCSTR lpszTemplate, 
-				 HWND hwndOwner, DLGPROC dlgproc, 
-				 LPARAM lParamInit)
+HWND WIN32API CreateDialogParamA(HINSTANCE hinst, LPCSTR lpszTemplate,
+                                 HWND hwndOwner, DLGPROC dlgproc,
+                                 LPARAM lParamInit)
 {
  HWND rc;
  Win32WindowProc *dialog = NULL;
@@ -30,20 +30,20 @@ HWND WIN32API CreateDialogParamA(HINSTANCE hinst, LPCSTR lpszTemplate,
 #ifdef DEBUG
          WriteLog("OS2CreateDialogParamA %s\n", lpszTemplate);
 #endif
-	 lpszTemplate = (LPCSTR)ConvertNameId(hinst, (char *)lpszTemplate);
+         lpszTemplate = (LPCSTR)ConvertNameId(hinst, (char *)lpszTemplate);
     }
 #ifdef DEBUG
     else WriteLog("OS2CreateDialogParamA %d\n", (int)lpszTemplate);
 #endif
 
     if(dlgproc) {
-	 dialog = new Win32WindowProc((WNDPROC)dlgproc);
-	 rc = O32_CreateDialogParam(hinst, lpszTemplate, hwndOwner, (DLGPROC_O32)dialog->GetOS2Callback(), lParamInit);
+         dialog = new Win32WindowProc((WNDPROC)dlgproc);
+         rc = O32_CreateDialogParam(hinst, lpszTemplate, hwndOwner, (DLGPROC_O32)dialog->GetOS2Callback(), lParamInit);
     }
     else rc = O32_CreateDialogParam(hinst, lpszTemplate, hwndOwner, (DLGPROC_O32)O32_DefDlgProc, lParamInit);
-    
+
     if(rc == 0 && dialog) {
-	 delete(dialog);
+         delete(dialog);
     }
 
 #ifdef DEBUG
@@ -53,29 +53,29 @@ HWND WIN32API CreateDialogParamA(HINSTANCE hinst, LPCSTR lpszTemplate,
 }
 //******************************************************************************
 //******************************************************************************
-HWND WIN32API CreateDialogParamW(HINSTANCE hinst, LPCWSTR lpszTemplate, 
-				 HWND hwndOwner, DLGPROC dlgproc, 
-				 LPARAM lParamInit)
+HWND WIN32API CreateDialogParamW(HINSTANCE hinst, LPCWSTR lpszTemplate,
+                                 HWND hwndOwner, DLGPROC dlgproc,
+                                 LPARAM lParamInit)
 {
  HWND rc;
 
     if((int)lpszTemplate >> 16 != 0) {//convert string name identifier to numeric id
-	 char *astring = UnicodeToAsciiString((LPWSTR)lpszTemplate);
+         char *astring = UnicodeToAsciiString((LPWSTR)lpszTemplate);
 #ifdef DEBUG
          WriteLog("OS2CreateDialogParamW %s\n", astring);
 #endif
-	 lpszTemplate = (LPWSTR)ConvertNameId(hinst, astring);
-	 FreeAsciiString(astring);
+         lpszTemplate = (LPWSTR)ConvertNameId(hinst, astring);
+         FreeAsciiString(astring);
     }
 #ifdef DEBUG
     else WriteLog("OS2CreateDialogParamW %d\n", (int)lpszTemplate);
 #endif
 
     Win32WindowProc *dialog = new Win32WindowProc((WNDPROC)dlgproc);
-    
+
     rc = O32_CreateDialogParam(hinst, (LPCSTR)lpszTemplate, hwndOwner, (DLGPROC_O32)dialog->GetOS2Callback(), lParamInit);
     if(rc == 0) {
-	 delete(dialog);
+         delete(dialog);
     }
 
 #ifdef DEBUG
@@ -85,12 +85,12 @@ HWND WIN32API CreateDialogParamW(HINSTANCE hinst, LPCWSTR lpszTemplate,
 }
 //******************************************************************************
 //******************************************************************************
-HWND WIN32API CreateDialogIndirectParamA(HINSTANCE hinst, 
-				         DLGTEMPLATE *dlgtemplate, 
-				         HWND hwndParent, DLGPROC dlgproc, 
-				         LPARAM lParamInit)
+HWND WIN32API CreateDialogIndirectParamA(HINSTANCE hinst,
+                                         DLGTEMPLATE *dlgtemplate,
+                                         HWND hwndParent, DLGPROC dlgproc,
+                                         LPARAM lParamInit)
 {
- HWND	      hwnd;
+ HWND         hwnd;
  DLGTEMPLATE *os2dlg;
 
     os2dlg = ConvertWin32DlgTemplate(dlgtemplate);
@@ -98,7 +98,7 @@ HWND WIN32API CreateDialogIndirectParamA(HINSTANCE hinst,
 
     hwnd = O32_CreateDialogIndirectParam(hinst, os2dlg, hwndParent, (DLGPROC_O32)dialog->GetOS2Callback(), lParamInit);
     if(hwnd == 0) {
-	 delete(dialog);
+         delete(dialog);
     }
 #ifdef DEBUG
     WriteLog("CreateDialogIndirectParamA returned %X\n", hwnd);
@@ -107,12 +107,12 @@ HWND WIN32API CreateDialogIndirectParamA(HINSTANCE hinst,
 }
 //******************************************************************************
 //******************************************************************************
-HWND WIN32API CreateDialogIndirectParamW(HINSTANCE hinst, 
-				         DLGTEMPLATE *dlgtemplate, 
-				         HWND hwndParent, DLGPROC dlgproc, 
-				         LPARAM lParamInit)
+HWND WIN32API CreateDialogIndirectParamW(HINSTANCE hinst,
+                                         DLGTEMPLATE *dlgtemplate,
+                                         HWND hwndParent, DLGPROC dlgproc,
+                                         LPARAM lParamInit)
 {
- HWND	      hwnd;
+ HWND         hwnd;
  DLGTEMPLATE *os2dlg;
 
     os2dlg = ConvertWin32DlgTemplate(dlgtemplate);
@@ -120,22 +120,23 @@ HWND WIN32API CreateDialogIndirectParamW(HINSTANCE hinst,
 
     hwnd = O32_CreateDialogIndirectParam(hinst, os2dlg, hwndParent, (DLGPROC_O32)dialog->GetOS2Callback(), lParamInit);
     if(hwnd == 0) {
-	 delete(dialog);
+         delete(dialog);
     }
     dprintf(("CreateDialogIndirectParamW returned %X\n", hwnd));
     return(hwnd);
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API DialogBoxIndirectParamA(HINSTANCE hinst, 
-				      DLGTEMPLATE *dlgtemplate, 
-				      HWND hwndParent, DLGPROC dlgproc, 
- 				      LPARAM lParamInit)
+BOOL WIN32API DialogBoxIndirectParamA(HINSTANCE hinst,
+                                      DLGTEMPLATE *dlgtemplate,
+                                      HWND hwndParent, DLGPROC dlgproc,
+                                      LPARAM lParamInit)
 {
  BOOL rc;
  DLGTEMPLATE *os2dlg;
 
     os2dlg = ConvertWin32DlgTemplate(dlgtemplate);
+
     Win32WindowProc *dialog = new Win32WindowProc((WNDPROC)dlgproc, os2dlg);
 
     rc = O32_DialogBoxIndirectParam(hinst, os2dlg, hwndParent, (DLGPROC_O32)dialog->GetOS2Callback(), lParamInit);
@@ -145,10 +146,10 @@ BOOL WIN32API DialogBoxIndirectParamA(HINSTANCE hinst,
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API DialogBoxIndirectParamW(HINSTANCE hinst, 
-				      DLGTEMPLATE *dlgtemplate, 
-				      HWND hwndParent, DLGPROC dlgproc, 
-				      LPARAM lParamInit)
+BOOL WIN32API DialogBoxIndirectParamW(HINSTANCE hinst,
+                                      DLGTEMPLATE *dlgtemplate,
+                                      HWND hwndParent, DLGPROC dlgproc,
+                                      LPARAM lParamInit)
 {
  BOOL rc;
  DLGTEMPLATE *os2dlg;
@@ -164,16 +165,16 @@ BOOL WIN32API DialogBoxIndirectParamW(HINSTANCE hinst,
 //******************************************************************************
 //******************************************************************************
 int WIN32API DialogBoxParamA(HINSTANCE hinst, LPCSTR lpszTemplate, HWND hwndOwner,
- 	  	    	     DLGPROC dlgprc, LPARAM  lParamInit)
+                             DLGPROC dlgprc, LPARAM  lParamInit)
 {
  int rc;
 
     if((int)lpszTemplate >> 16 != 0) {//convert string name identifier to numeric id
-	dprintf(("DialogBoxParam %s\n", lpszTemplate));
-	lpszTemplate = (LPCSTR)ConvertNameId(hinst, (char *)lpszTemplate);
+        dprintf(("DialogBoxParam %s\n", lpszTemplate));
+        lpszTemplate = (LPCSTR)ConvertNameId(hinst, (char *)lpszTemplate);
     }
-    else {	
-	dprintf(("DialogBoxParam %d\n", (int)lpszTemplate));
+    else {
+        dprintf(("DialogBoxParam %d\n", (int)lpszTemplate));
     }
 
     Win32WindowProc *dialog = new Win32WindowProc((WNDPROC)dlgprc);
@@ -184,28 +185,95 @@ int WIN32API DialogBoxParamA(HINSTANCE hinst, LPCSTR lpszTemplate, HWND hwndOwne
 }
 //******************************************************************************
 //******************************************************************************
-int WIN32API DialogBoxParamW(HINSTANCE arg1, LPCWSTR arg2, HWND arg3, 
-		  	     DLGPROC arg4, LPARAM arg5)
+int WIN32API DialogBoxParamW(HINSTANCE arg1, LPCWSTR arg2, HWND arg3,
+                             DLGPROC arg4, LPARAM arg5)
 {
  int   rc;
  char *astring = NULL;
 
 
     if((int)arg2 >> 16 != 0) {
-	    astring = UnicodeToAsciiString((LPWSTR)arg2);
+            astring = UnicodeToAsciiString((LPWSTR)arg2);
     }
     else    astring = (char *)arg2;
     dprintf(("OS2DialogBoxParamW\n"));
 
     Win32WindowProc *dialog = new Win32WindowProc((WNDPROC)arg4);
     rc = DialogBoxParamA(arg1, astring, arg3, arg4, arg5);
- 
-    if((int)astring >> 16 != 0)	FreeAsciiString(astring);
+
+    if((int)astring >> 16 != 0) FreeAsciiString(astring);
 
     dprintf(("OS2DialogBoxIndirectParamA returned %d\n", rc));
 
     return(rc);
 }
 //******************************************************************************
+// CB: Loads and starts a native OS/2 dialog with Win32 DlgProc
+//     (used in COMCTL32)
+// full name: NativeDialogBoxIndirectParam
 //******************************************************************************
+INT WINAPI NativeDlgBoxIP(HMODULE hmodule,
+                          HINSTANCE hinst, LPCSTR lpszName,
+                          HWND hwndParent, DLGPROC dlgproc,
+                          LPARAM lParamInit)
+{
+  BOOL rc;
+  DLGTEMPLATE *os2dlg;
+  HRSRC hRes;
 
+  dprintf(("NativeDlgBoxIP"));
+
+  hRes = O32_FindResource(hmodule,lpszName,RT_DIALOGA);
+  if (hRes == 0) return (INT)-1;
+
+  dprintf((" hRes = %d",hRes));
+
+  os2dlg = (DLGTEMPLATE*)O32_LoadResource(hmodule,hRes);
+  if (os2dlg == NULL) return (INT)-1;
+
+  dprintf((" os2dlg = %d",os2dlg));
+
+  Win32WindowProc *dialog = new Win32WindowProc((WNDPROC)dlgproc,os2dlg);
+  rc = O32_DialogBoxIndirectParam(hinst,os2dlg,hwndParent,(DLGPROC_O32)dialog->GetOS2Callback(),lParamInit);
+  //dialog already destroyed when this returns
+  dprintf(("NativeDlgBoxIP returned %X\n", rc));
+
+  return rc;
+}
+//******************************************************************************
+//******************************************************************************
+//******************************************************************************
+// CB: Loads and starts a native OS/2 dialog with Win32 DlgProc
+//     (used in COMCTL32)
+// full name: NativeCreateDialogIndirectParam
+//******************************************************************************
+INT WINAPI NativeCreateDlgIP(HMODULE hmodule,
+                                HINSTANCE hinst, LPCSTR lpszName,
+                                HWND hwndParent, DLGPROC dlgproc,
+                                LPARAM lParamInit)
+{
+  BOOL rc;
+  DLGTEMPLATE *os2dlg;
+  HRSRC hRes;
+
+  dprintf(("NativeCreateDlgBoxIP"));
+
+  hRes = O32_FindResource(hmodule,lpszName,RT_DIALOGA);
+  if (hRes == 0) return (INT)-1;
+
+  dprintf((" hRes = %d",hRes));
+
+  os2dlg = (DLGTEMPLATE*)O32_LoadResource(hmodule,hRes);
+  if (os2dlg == NULL) return (INT)-1;
+
+  dprintf((" os2dlg = %d",os2dlg));
+
+  Win32WindowProc *dialog = new Win32WindowProc((WNDPROC)dlgproc,os2dlg);
+  rc = O32_CreateDialogIndirectParam(hinst,os2dlg,hwndParent,(DLGPROC_O32)dialog->GetOS2Callback(),lParamInit);
+  //dialog already destroyed when this returns
+  dprintf(("NativeDlgBoxIP returned %X\n", rc));
+
+  return rc;
+}
+//******************************************************************************
+//******************************************************************************
