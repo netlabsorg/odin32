@@ -1,4 +1,4 @@
-/* $Id: initsystem.cpp,v 1.13 2000-08-25 09:02:54 sandervl Exp $ */
+/* $Id: initsystem.cpp,v 1.14 2000-08-31 12:47:51 sandervl Exp $ */
 /*
  * Odin system initialization (registry, directories & environment)
  *
@@ -57,9 +57,13 @@
 #define DSOUND_CLASSID		"{47D4D946-62E8-11cf-93BC-444553540000}"
 #define DSOUND_DEFAULT		"DirectSound Object"
 #define DSOUND_DLL		"dsound.dll"
+#define CLASS_DESKTOP    	"Desktop"
+#define CLASS_SHORTCUT          "Shortcut"
+#define CLASS_SHELL32DLL 	"shell32.dll"
 #define COM_CLASS_ID		"CLSID"
 #define COM_INPROCSERVER        "InprocServer32"
 #define COM_THREADMODEL		"ThreadingModel"
+#define COM_THREAD_APARTMENT    "Apartment"
 #define THREAD_BOTH		"Both"
 #define INITREG_ERROR		"InitRegistry: Unable to register system information"
 #define DIR_PROGRAM             "ProgramFilesDir"
@@ -240,6 +244,47 @@ BOOL InitSystemAndRegistry()
    	CreateDirectoryA(shellpath, NULL);
    	RegSetValueExA(hkey,"Templates",0,REG_SZ, (LPBYTE)shellpath, strlen(shellpath)+1);
 //   }
+   RegCloseKey(hkey);
+
+   //Shell32 & IE related keys
+   //[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\CLSID\{00021400-0000-0000-C000-000000000046}]
+   //@="Desktop"
+   //[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\CLSID\{00021400-0000-0000-C000-000000000046}\InProcServer32]
+   //@="shell32.dll"
+   //ThreadingModel="Apartment"
+   if(RegCreateKeyA(HKEY_LOCAL_MACHINE,"SOFTWARE\\Classes\\CLSID\\{00021400-0000-0000-C000-000000000046}",&hkey)!=ERROR_SUCCESS) {
+   	goto initreg_error;
+   }
+   RegSetValueExA(hkey, "", 0, REG_SZ, (LPBYTE)CLASS_DESKTOP, sizeof(CLASS_DESKTOP));
+   RegCloseKey(hkey);
+   if(RegCreateKeyA(HKEY_LOCAL_MACHINE,"SOFTWARE\\Classes\\CLSID\\{00021400-0000-0000-C000-000000000046}\\InProcServer32",&hkey)!=ERROR_SUCCESS) {
+   	goto initreg_error;
+   }
+   RegSetValueExA(hkey, "", 0, REG_SZ, (LPBYTE)CLASS_SHELL32DLL, sizeof(CLASS_SHELL32DLL));
+   RegSetValueExA(hkey, COM_THREADMODEL, 0, REG_SZ, (LPBYTE)COM_THREAD_APARTMENT, sizeof(COM_THREAD_APARTMENT));
+   RegCloseKey(hkey);
+   //[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\CLSID\{00021401-0000-0000-C000-000000000046}]
+   //@="Shortcut"
+   //[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\CLSID\{00021401-0000-0000-C000-000000000046}\InProcServer32]
+   //@="shell32.dll"
+   //"ThreadingModel"="Apartment"
+   //[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\CLSID\{00021401-0000-0000-C000-000000000046}\shellex\MayChangeDefaultMenu]
+   //@=""
+   if(RegCreateKeyA(HKEY_LOCAL_MACHINE,"SOFTWARE\\Classes\\CLSID\\{00021401-0000-0000-C000-000000000046}",&hkey)!=ERROR_SUCCESS) {
+   	goto initreg_error;
+   }
+   RegSetValueExA(hkey, "", 0, REG_SZ, (LPBYTE)CLASS_SHORTCUT, sizeof(CLASS_SHORTCUT));
+   RegCloseKey(hkey);
+   if(RegCreateKeyA(HKEY_LOCAL_MACHINE,"SOFTWARE\\Classes\\CLSID\\{00021401-0000-0000-C000-000000000046}\\InProcServer32",&hkey)!=ERROR_SUCCESS) {
+   	goto initreg_error;
+   }
+   RegSetValueExA(hkey, "", 0, REG_SZ, (LPBYTE)CLASS_SHELL32DLL, sizeof(CLASS_SHELL32DLL));
+   RegSetValueExA(hkey, COM_THREADMODEL, 0, REG_SZ, (LPBYTE)COM_THREAD_APARTMENT, sizeof(COM_THREAD_APARTMENT));
+   RegCloseKey(hkey);
+   if(RegCreateKeyA(HKEY_LOCAL_MACHINE,"SOFTWARE\\Classes\\CLSID\\{00021401-0000-0000-C000-000000000046}\\shellex\\MayChangeDefaultMenu",&hkey)!=ERROR_SUCCESS) {
+   	goto initreg_error;
+   }
+   RegSetValueExA(hkey, "", 0, REG_SZ, (LPBYTE)"", 0);
    RegCloseKey(hkey);
 
    //Now the Ddraw & dsound registry keys:
