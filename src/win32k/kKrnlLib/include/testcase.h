@@ -1,4 +1,4 @@
-/* $Id: testcase.h,v 1.2 2001-09-26 04:01:56 bird Exp $
+/* $Id: testcase.h,v 1.3 2001-11-09 07:39:33 bird Exp $
  *
  * Definitions and declarations for testcase moduls.
  *
@@ -155,6 +155,15 @@ ULONG KRNLCALL  fakeKSEMRequestMutex(HKSEMMTX hkmtx, ULONG ulTimeout);
 ULONG KRNLCALL  fakeKSEMReleaseMutex(HKSEMMTX hkmtx);
 BOOL  KRNLCALL  fakeKSEMQueryMutex(HKSEMMTX hkmtx, PUSHORT pcusNest);
 VOID  KRNLCALL  fakeKSEMInit(PKSEM pksem, ULONG fulType, ULONG fulFlags);
+ULONG KRNLCALL  fakeKSEMRequestExclusive(HKSEMSHR hkshr, ULONG ulTimeout);
+ULONG KRNLCALL  fakeKSEMRequestShared(HKSEMSHR hkshr, ULONG ulTimeout);
+VOID  KRNLCALL  fakeKSEMRelease(HKSEM hksem);
+VOID  KRNLCALL  fakeKSEMQuery(HKSEM hksem, PULONG pul);
+VOID  KRNLCALL  fakeKSEMResetEvent(HKSEMEVT hkev);
+VOID  KRNLCALL  fakeKSEMPostEvent(HKSEMEVT hkev);
+ULONG KRNLCALL  fakeKSEMWaitEvent(HKSEMEVT hkev, ULONG ulTimeout);
+
+
 extern KSEMMTX  fakeLdrSem;
 extern char *   fakeLDRLibPath;
 ULONG KRNLCALL  fakeTKFuBuff(PVOID pv, PVOID pvUsr, ULONG cb, ULONG fl);
