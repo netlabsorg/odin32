@@ -79,10 +79,20 @@ extern const char * const debug_ch_name[];
 #ifdef __WIN32OS2__
 #  undef TRACE
 #  define TRACE WriteLog
+#  undef TRACE_
+#  define TRACE_(ch) WriteLog
 #  undef FIXME
 #  define FIXME WriteLog
+#  undef FIXME_
+#  define FIXME_(ch) WriteLog
 #  undef WARN
 #  define WARN  WriteLog
+#  undef WARN_
+#  define WARN_(ch) WriteLog
+#  undef ERR
+#  define ERR  WriteLog
+#  undef ERR_
+#  define ERR_(ch) WriteLog
 #endif
 
 
