@@ -1,7 +1,9 @@
-/* $Id: changelog,v 1.1926 2001-12-26 18:52:06 sandervl Exp $ */
+/* $Id: changelog,v 1.1927 2001-12-26 19:06:57 achimha Exp $ */
 
  2001-12-26: Achim Hasenmueller <achimha@innotek.de>
-    - USER32:   o use correct size for WarpSans as menu font in OS2Look=1 mode
+    - USER32:   o don't use hardcoded font height values for menu fonts. Query
+                  graphics driver instead (DevQueryCaps) so that we correctly
+                  take font settings into account (small, medium, large)
 
  2001-12-26: Sander van Leeuwen <sandervl@xs4all.nl>
     - USER32:   o Use Wine version of DrawText(Ex)A/W
