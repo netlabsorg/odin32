@@ -1,4 +1,7 @@
- /* $Id: changelog,v 1.882 2000-04-10 19:45:13 sandervl Exp $ */
+ /* $Id: changelog,v 1.883 2000-04-12 16:35:28 cbratschi Exp $ */
+
+ 2000-04-12: Christoph Bratschi <cbratschi@datacomm.ch>
+	- COMCTL32: listview: completed most version 4 features
 
  2000-04-10: Sander van Leeuwen <sandervl@xs4all.nl>
         - USER32: Added support for topmost windows
