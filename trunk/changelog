@@ -1,4 +1,9 @@
-/* $Id: changelog,v 1.1657 2001-08-25 10:28:01 sandervl Exp $ */
+/* $Id: changelog,v 1.1658 2001-08-25 10:37:37 sandervl Exp $ */
+
+ 2001-08-25: Sander van Leeuwen <sandervl@xs4all.nl>
+    - KERNEL32: o Set last error to ERROR_ALREADY_EXISTS when CreateMutex,
+                  CreateEvent or CreateSemaphore is called with existing
+                  semaphore name.
 
  2000-08-25: Yuri Dario <mc6530@mclink.it>
     - USER32:   o Button: don't send BN_PAINT/HILITE/UNHILITE/DISABLE/SETFOCUS/KILLFOCUS
