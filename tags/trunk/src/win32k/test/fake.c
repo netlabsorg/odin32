@@ -1,4 +1,4 @@
-/* $Id: fake.c,v 1.5 2000-12-11 06:53:57 bird Exp $
+/* $Id: fake.c,v 1.6 2000-12-16 23:03:31 bird Exp $
  *
  * Fake stubs for the ldr and kernel functions we imports or overloads.
  *
@@ -74,6 +74,17 @@ PSZ             fakeldrpFileNameBuf = &szldrpFileNameBuf[0];
 static CHAR     achHeaderBuffer[256];   /* Buffer to read exe header into. */
 PVOID           pheaderbuf = &achHeaderBuffer[0];
 
+/*
+ * Mte list pointers.
+ */
+PMTE            fakemte_h;
+PMTE            fakeglobal_h;
+PMTE            fakeglobal_l;
+PMTE            fakespecific_h;
+PMTE            fakespecific_l;
+PMTE            fakeprogram_h;
+PMTE            fakeprogram_l;
+
 
 /*
  * table use by fakeldrMTEValidatePtrs.
@@ -119,7 +130,6 @@ ULONG LDRCALL   fakeldrGetMte(PCHAR pachFilename, USHORT cchFilename, UCHAR fchT
 ULONG LDRCALL   fakeldrOpenNewExe(PCHAR pachFilename, USHORT cchFilename, ldrlv_t *plv, PUSHORT pus);
 ULONG LDRCALL   fakeldrCreateMte(struct e32_exe * pe32, ldrlv_t *plv);
 ULONG LDRCALL   fakeldrLoadImports(PMTE pmte);
-VOID  LDRCALL   fakeldrUCaseString(PCHAR pachString, USHORT cchString);
 ULONG LDRCALL   fakeldrMTEValidatePtrs(PSMTE psmte, ULONG ulMaxAddr, ULONG off);
 unsigned short  getSlot(void);
 
@@ -407,8 +417,9 @@ APIRET KRNLCALL fakeIOSftClose(
 /**
  * Probably this function will expand a relative path to a full path.
  * @returns  NO_ERROR on success. OS/2 error code on error.
- * @param    pszPath  Pointer to path to expand. Contains the full path upon return. (?)
- *                    This buffer should probably be of CCHMAXPATH length.
+ *           The ldr filename buffer will hold the expanded
+ *           pathname upon successfull return.
+ * @param    pszPath  Pointer to path to expand.  (?)
  * @status   completely implemented.
  */
 APIRET KRNLCALL fakeIOSftTransPath(
@@ -1801,6 +1812,84 @@ ULONG LDRCALL   fakeldrLoadImports(PMTE pmte)
 }
 
 
+/**
+ * Checks if the internal name (first name in the resident nametable) matches
+ * the filename.
+ * @returns     NO_ERROR on success (the name matched).
+ *              ERROR_INVALID_NAME if mismatch.
+ * @param       pMTE    Pointer to the MTE of the module to check.<br>
+ *                      Assumes! that the filename for this module is present in ldrpFileNameBuf.
+ */
+ULONG LDRCALL   fakeldrCheckInternalName(PMTE pMTE)
+{
+    PCHAR   pachName;                   /* Pointer to the name part of pachFilename. */
+    int     cchName;                    /* Length of the name part of pachFilename.
+                                         * Includes extention if extention is not .DLL.
+                                         * this is the length relative to pachName used to match the internal name. */
+    PCHAR   pachExt;                    /* Pointer to the extention part of pachFilename. (not dot!) */
+    int     cchExt;                     /* Length of the extention part of pachFilename. (not dot!) */
+
+
+    /* Return successfully if not library module. */
+    if (!(pMTE->mte_flags1 & LIBRARYMOD))
+        return NO_ERROR;
+
+    /* Uppercase and parse filename in ldrpFileNameBuf */
+    cchName = (int)fakeldrGetFileName(ldrpFileNameBuf, (PCHAR*)SSToDS(&pachName), (PCHAR*)SSToDS(&pachExt));
+    cchExt = (pachExt) ? strlen(pachExt) : 0;
+    ldrUCaseString(pachName, cchName + cchExt + 1);
+
+    /* Compare the internal name with the filename and return accordingly. */
+    return (    cchName <= 8
+            &&  !memcmp(pMTE->mte_modname, pachName, cchName)
+            &&  (cchName == 8 || pMTE->mte_modname[cchName] == '\0')
+            )
+            ? NO_ERROR
+            : ERROR_INVALID_NAME;
+}
+
+
+/**
+ * Translates a relative filename to a full qualified filename.
+ * @returns NO_ERROR on success.
+ *          Errorcode on error.
+ * @param   pszFilename     Pointer to nullterminated filename.
+ */
+ULONG LDRCALL   fakeldrTransPath(PSZ pszFilename)
+{
+    return  fakeIOSftTransPath(pszFilename);
+}
+
+
+/**
+ * Parses a filename to find the name and extention.
+ * @returns Length of the filename without the extention.
+ * @param   pachFilename    Pointer to filename to parse - must have path!
+ * @param   ppachName       Pointer to pointer which should hold the name pointer upon successfull return.
+ * @param   ppachExt        Pointer to pointer which should hold the extention pointer upon successfull return.
+ */
+ULONG LDRCALL   fakeldrGetFileName(PSZ pszFilename, PCHAR *ppchName, PCHAR *ppchExt)
+{
+    int     cchName;
+    PSZ     pchName;
+    PSZ     pchExt = NULL;
+
+    while (*pszFilename)
+    {
+        if (*pszFilename == '\\' || *pszFilename == '/')
+            pchName = pszFilename + 1;
+        else if (*pszFilename == '.')
+            pchExt = pszFilename + 1;
+        pszFilename++;
+    }
+
+    cchName = (pchExt <= pchName) ? strlen(pchName) : pchExt - pchName - 1;
+    *ppchExt = pchExt;
+    *ppchName = pchName;
+
+    return cchName;
+}
+
 
 /**
  * Uppercases the string.
@@ -1811,7 +1900,7 @@ ULONG LDRCALL   fakeldrLoadImports(PMTE pmte)
  * @author    knut st. osmundsen (knut.stange.osmundsen@mynd.no)
  * @remark    This is probably written in assembly and does DBCS checks...
  */
-VOID LDRCALL    fakeldrUCaseString(PCHAR pachString, USHORT cchString)
+VOID LDRCALL    fakeldrUCaseString(PCHAR pachString, unsigned cchString)
 {
     printf("fakeldrUCaseString:             pachString = %.*s, cchString = %#8x\n",
            cchString, pachString, cchString);
