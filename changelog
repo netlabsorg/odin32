@@ -1,4 +1,8 @@
- /* $Id: changelog,v 1.564 1999-12-20 22:22:34 sandervl Exp $ */
+ /* $Id: changelog,v 1.565 1999-12-21 00:30:14 sandervl Exp $ */
+
+ 99-12-21: Sander van Leeuwen <sandervl@xs4all.nl>
+	- ADVAPI32: Fixed some bugs in service.cpp; implemented some service apis
+	- INCLUDE\WIN: Added winsvc.h; removed service definitions from winbase.h & winreg.h
 
  99-12-20: Rene Pronk <R.Pronk@twi.tudelft.nl>
 	- WINMM: Bugfixes in waveOutOpen (flags) for winamp
