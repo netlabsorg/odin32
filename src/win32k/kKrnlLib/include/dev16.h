@@ -1,4 +1,4 @@
-/* $Id: dev16.h,v 1.2 2001-11-18 04:07:29 bird Exp $
+/* $Id: dev16.h,v 1.3 2001-11-19 03:07:05 bird Exp $
  * dev16 - 16-bit specific. Should not be used in 32-bit C/C++.
  *
  * Copyright (c) 1999 knut st. osmundsen
@@ -85,6 +85,7 @@ USHORT NEAR initGetDosTableData(void);
 ULONG  NEAR GetR0InitPtr(void);
 ULONG  NEAR GetVerifyImportTab32Ptr(void);
 ULONG  NEAR GetGetKernelInfo32Ptr(void);
+ULONG  NEAR GetLookupKrnlEntry32Ptr(void);
 
 /*
  * Thunking "functions" prototypes
