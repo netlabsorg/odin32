@@ -48,6 +48,16 @@
 #define FD_ADDRESS_LIST_CHANGE_BIT      9
 #define FD_ADDRESS_LIST_CHANGE          (1 << FD_ADDRESS_LIST_CHANGE_BIT)
 
+/* Constants for LPCONDITIONPROC */
+#define CF_ACCEPT                  0x0000
+#define CF_REJECT                  0x0001
+#define CF_DEFER                   0x0002
+
+/* Constants for shutdown() */
+#define SD_RECEIVE                 0x00
+#define SD_SEND                    0x01
+#define SD_BOTH                    0x02
+
 /*
  * Constants for WSAIoctl()
  */
@@ -263,6 +273,60 @@ typedef struct _WSABUF
 typedef struct _OVERLAPPED *  LPWSAOVERLAPPED;
 typedef HANDLE WSAEVENT;
 typedef unsigned int   GROUP;
+
+#define WSA_IO_PENDING             (ERROR_IO_PENDING)
+#define WSA_IO_INCOMPLETE          (ERROR_IO_INCOMPLETE)
+#define WSA_INVALID_HANDLE         (ERROR_INVALID_HANDLE)
+#define WSA_INVALID_PARAMETER      (ERROR_INVALID_PARAMETER)
+#define WSA_NOT_ENOUGH_MEMORY      (ERROR_NOT_ENOUGH_MEMORY)
+#define WSA_OPERATION_ABORTED      (ERROR_OPERATION_ABORTED)
+
+#define WSA_INVALID_EVENT          ((WSAEVENT)NULL)
+#define WSA_MAXIMUM_WAIT_EVENTS    (MAXIMUM_WAIT_OBJECTS)
+#define WSA_WAIT_FAILED            ((DWORD)-1L)
+#define WSA_WAIT_EVENT_0           (WAIT_OBJECT_0)
+#define WSA_WAIT_IO_COMPLETION     (WAIT_IO_COMPLETION)
+#define WSA_WAIT_TIMEOUT           (WAIT_TIMEOUT)
+#define WSA_INFINITE               (INFINITE)
+
+typedef unsigned int   GROUP;
+#define SG_UNCONSTRAINED_GROUP   0x01
+#define SG_CONSTRAINED_GROUP     0x02
+
+/*
+ * FLOWSPEC and SERVICETYPE should eventually move to qos.h
+ */
+
+typedef ULONG   SERVICETYPE;
+
+typedef struct _FLOWSPEC {
+       unsigned int      TokenRate;
+       unsigned int      TokenBucketSize;
+       unsigned int      PeakBandwidth;
+       unsigned int      Latency;
+        unsigned int      DelayVariation;
+       SERVICETYPE       ServiceType;
+       unsigned int      MaxSduSize;
+       unsigned int      MinimumPolicedSize;
+   } FLOWSPEC, *PFLOWSPEC, *LPFLOWSPEC;
+
+typedef struct _QUALITYOFSERVICE {
+        FLOWSPEC           SendingFlowspec;
+        FLOWSPEC           ReceivingFlowspec;
+        WSABUF             ProviderSpecific; 
+   } QOS, *LPQOS;
+
+typedef int (* CALLBACK LPCONDITIONPROC)
+(
+    LPWSABUF lpCallerId,
+    LPWSABUF lpCallerData,
+    LPQOS lpSQOS,
+    LPQOS lpGQOS,
+    LPWSABUF lpCalleeId,
+    LPWSABUF lpCalleeData,
+    GROUP *g,
+    DWORD dwCallbackData
+);
 
 typedef void (* CALLBACK LPWSAOVERLAPPED_COMPLETION_ROUTINE)
 (
