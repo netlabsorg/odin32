@@ -1,4 +1,4 @@
-/* $Id: dibitmap.cpp,v 1.38 2003-01-04 18:18:05 sandervl Exp $ */
+/* $Id: dibitmap.cpp,v 1.39 2003-02-06 20:28:09 sandervl Exp $ */
 
 /*
  * GDI32 dib & bitmap code
@@ -237,23 +237,19 @@ HBITMAP WIN32API CreateDIBSection( HDC hdc, BITMAPINFO *pbmi, UINT iUsage,
         if(dsect != NULL)
         {
             PalSize = dsect->GetBitCount();
-            if(PalSize <= 8)
+
+            if(!ppvBits && PalSize <= 8)
             {
                 ULONG Pal[256], nrcolors;
                 LOGPALETTE tmpPal = { 0x300,1,{0,0,0,0}};
-                HPALETTE hpalCur, hpalTmp;
+                HPALETTE hpalCur;
 
                 // Now get the current Palette from the DC
-                hpalTmp = CreatePalette(&tmpPal);
-                hpalCur = SelectPalette(hdc, hpalTmp, FALSE);
+                hpalCur = GetCurrentObject(hdc, OBJ_PAL);
 
                 // and use it to set the DIBColorTable
                 nrcolors = GetPaletteEntries( hpalCur, 0, 1<<PalSize, (LPPALETTEENTRY)&Pal);
                 dsect->SetDIBColorTable(0, nrcolors, (LPPALETTEENTRY)&Pal);
-
-                // Restore the DC Palette
-                SelectPalette(hdc,hpalCur,FALSE);
-                DeleteObject(hpalTmp);
             }
 
             if(ppvBits!=NULL)
