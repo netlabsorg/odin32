@@ -17,8 +17,8 @@ CODE32	segment
 ; 23 LARGE_INTEGER WINAPI RtlpLargeIntegerAdd( LARGE_INTEGER *a, LARGE_INTEGER *b )
 	align 4h
 
-	public RtlpLargeIntegerAdd
-RtlpLargeIntegerAdd	proc
+	public _RtlpLargeIntegerAdd@8
+_RtlpLargeIntegerAdd@8	proc
 
 ; 25     return a + b;
         push    ebp
@@ -44,7 +44,7 @@ RtlpLargeIntegerAdd	proc
         pop     esi
         pop     ebp
 	ret	0Ch
-RtlpLargeIntegerAdd	endp
+_RtlpLargeIntegerAdd@8	endp
 
 CODE32	ends
 end

@@ -426,7 +426,6 @@ NTSTATUS WINAPI RtlLocalTimeToSystemTime( const LARGE_INTEGER *LocalTime,
     TIME_ZONE_INFORMATION tzinfo;
 
     TRACE("(%p, %p)\n", LocalTime, SystemTime);
-
     RtlQueryTimeZoneInformation(&tzinfo);
     SystemTime->QuadPart = LocalTime->QuadPart + tzinfo.Bias * 60 * (LONGLONG)10000000;
     return STATUS_SUCCESS;

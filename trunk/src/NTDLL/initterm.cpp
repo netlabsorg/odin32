@@ -39,6 +39,10 @@
 extern "C" {
  void __ctordtorInit (void);
  void __ctordtorTerm (void);
+ void __ehInit();
+ //InitOverrides deals with EMX runtime FS setting and allows us to
+ //switch to using our own funcs namely _errno & _thread in runtime
+ void InitOverrides(void);
  int _CRT_init (void);
  void _CRT_term (void);
 }
@@ -58,7 +62,6 @@ extern "C"
 unsigned long _DLL_InitTerm(unsigned long hModule, unsigned long
                                    ulFlag)
 {
-   size_t i;
    APIRET rc;
 
    /*-------------------------------------------------------------------------*/
@@ -72,8 +75,10 @@ unsigned long _DLL_InitTerm(unsigned long hModule, unsigned long
          if (_CRT_init () != 0)
            return 0;
          __ctordtorInit ();
+         __ehInit();
+        InitOverrides();
 
-         rc = DosExitList(EXITLIST_NONCRITDLL|EXLST_ADD, cleanup);
+        rc = DosExitList(EXITLIST_NONCRITDLL|EXLST_ADD, cleanup);
          if (rc)
             return 0UL;
 

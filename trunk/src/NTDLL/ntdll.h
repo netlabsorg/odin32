@@ -1,4 +1,4 @@
-/* $Id: ntdll.h,v 1.15 2003-02-13 17:17:06 sandervl Exp $ */
+/* $Id: ntdll.h,v 1.16 2003-04-07 18:40:50 sandervl Exp $ */
 
 /*
    this file defines interfaces mainly exposed to device drivers and

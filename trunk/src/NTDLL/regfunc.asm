@@ -1,4 +1,4 @@
-; $Id: regfunc.asm,v 1.4 2003-01-16 15:22:39 sandervl Exp $
+; $Id: regfunc.asm,v 1.5 2003-04-07 18:40:51 sandervl Exp $
 
 ;/*
 ; * register functions in NTDLL

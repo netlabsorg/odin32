@@ -59,7 +59,6 @@ ULONG APIENTRY inittermNTDLL(ULONG hModule, ULONG ulFlag)
              return 0UL;
 
          dprintf(("ntdll init %s %s (%x)", __DATE__, __TIME__, inittermNTDLL));
-
          break;
       case 1 :
          if(dllHandle) {
