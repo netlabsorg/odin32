@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.160 2000-02-09 13:42:38 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.161 2000-02-14 17:30:11 cbratschi Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -332,6 +332,15 @@ BOOL Win32BaseWindow::CreateWindowExA(CREATESTRUCTA *cs, ATOM classAtom)
         cs->cx = 600; /* FIXME */
         cs->cy = 400;
         fCXDefault = TRUE;
+  }
+  if (cs->style & (WS_POPUP | WS_CHILD))
+  {
+    fXDefault = FALSE;
+    if (fCXDefault)
+    {
+      fCXDefault = FALSE;
+      cs->cx = cs->cy = 0;
+    }
   }
   if (fXDefault && !fCXDefault) fXDefault = FALSE; //CB: only x positioning doesn't work (calc.exe,cdrlabel.exe)
 
@@ -1351,7 +1360,7 @@ LRESULT Win32BaseWindow::DefWindowProcA(UINT Msg, WPARAM wParam, LPARAM lParam)
     case WM_SETCURSOR:
     {
         dprintf(("DefWndProc: WM_SETCURSOR for %x Msg %s", Win32Hwnd, GetMsgText(HIWORD(lParam))));
-        if(getStyle() & WS_CHILD && !(getExStyle() & WS_EX_NOPARENTNOTIFY) )
+        if((getStyle() & WS_CHILD) && !(getExStyle() & WS_EX_NOPARENTNOTIFY))
         {
             if(getParent()) {
                 LRESULT rc = getParent()->SendInternalMessageA(WM_SETCURSOR, wParam, lParam);

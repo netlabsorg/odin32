@@ -1,4 +1,4 @@
-/* $Id: combo.cpp,v 1.24 2000-01-18 20:10:31 sandervl Exp $ */
+/* $Id: combo.cpp,v 1.25 2000-02-14 17:30:10 cbratschi Exp $ */
 /*
  * Combo controls
  *
@@ -7,7 +7,8 @@
  *
  * FIXME: roll up in Netscape 3.01.
  *
- * WINE version: 991212
+ * Corel version: 20000212
+ * (WINE version: 991212)
  *
  * Status:  in progress
  * Version: ?.??
@@ -441,7 +442,7 @@ static LRESULT COMBO_Create(HWND hwnd,WPARAM wParam,LPARAM lParam)
   LPCREATESTRUCTA  lpcs = (CREATESTRUCTA*)lParam;
 
   if( !CB_GETTYPE(lphc) ) lphc->dwStyle |= CBS_SIMPLE;
-  else if( CB_GETTYPE(lphc) != CBS_DROPDOWNLIST ) lphc->wState |= CBF_EDIT;
+  if( CB_GETTYPE(lphc) != CBS_DROPDOWNLIST ) lphc->wState |= CBF_EDIT;
 
   lphc->hwndself  = hwnd;
   lphc->owner = lpcs->hwndParent;
@@ -520,7 +521,10 @@ static LRESULT COMBO_Create(HWND hwnd,WPARAM wParam,LPARAM lParam)
         lbeExStyle |= WS_EX_CLIENTEDGE;
       }
       else                                      /* popup listbox */
+      {
         lbeStyle |= WS_POPUP;
+        lbeStyle |= WS_EX_TOOLWINDOW;
+      }
 
      /* Dropdown ComboLBox is not a child window and we cannot pass
       * ID_CB_LISTBOX directly because it will be treated as a menu handle.
@@ -534,7 +538,7 @@ static LRESULT COMBO_Create(HWND hwnd,WPARAM wParam,LPARAM lParam)
                                        lphc->droppedRect.right - lphc->droppedRect.left,
                                        lphc->droppedRect.bottom - lphc->droppedRect.top,
                                        lphc->hwndself,
-                       (lphc->dwStyle & CBS_DROPDOWN)? (HMENU)0 : (HMENU)ID_CB_LISTBOX,
+                                       (lphc->dwStyle & CBS_DROPDOWN)? (HMENU)0 : (HMENU)ID_CB_LISTBOX,
                                        GetWindowLongA(lphc->hwndself,GWL_HINSTANCE),
                                        (LPVOID)lphc );
 
@@ -550,9 +554,36 @@ static LRESULT COMBO_Create(HWND hwnd,WPARAM wParam,LPARAM lParam)
       if ( (lphc->hWndLBox!= 0) &&
            (CB_GETTYPE(lphc) != CBS_SIMPLE) )
       {
-        SetWindowLongA(lphc->hWndLBox,
-                       GWL_STYLE,
-                       (GetWindowLongA(lphc->hWndLBox, GWL_STYLE) | WS_CHILD) & ~WS_POPUP);
+        /*  Not using SetWindowLongA here because it doesn't allow us to
+         *  change the WS_CHILD style. This code should be equivalent (excluding
+         *  the change in owner) to:
+         *       SetWindowLongA(lphc->hWndLBox, GWL_STYLE,
+         *      (GetWindowLongA(lphc->hWndLBox,GWL_STYLE) | WS_CHILD) & ~WS_POPUP);
+         */
+        STYLESTRUCT style;
+        Win32BaseWindow *win32wnd = Win32BaseWindow::GetWindowFromHandle(lphc->hWndLBox);
+
+        if (!win32wnd)
+        {
+          /* Is this the right error? */
+          SetLastError( ERROR_INVALID_WINDOW_HANDLE );
+          return 0;
+        }
+
+        /* save old style, set new style */
+        style.styleOld = win32wnd->getStyle();
+        style.styleNew = (style.styleOld | WS_CHILD) & ~WS_POPUP;
+
+        SendMessageA(lphc->hWndLBox,WM_STYLECHANGING,GWL_STYLE,(LPARAM)&style);
+#if 0 //CB: our code doesn't work with this style change
+        win32wnd->setStyle(style.styleNew);
+#endif
+        SendMessageA(lphc->hWndLBox,WM_STYLECHANGED,GWL_STYLE,(LPARAM)&style);
+
+        /* Set owner to NULL - it seems to be what Windows does to a ComboLBox
+         * after creation.
+         */
+        win32wnd->setOwner(NULL);
       }
 
       if( lphc->hWndLBox )
@@ -1015,6 +1046,9 @@ static void CBUpdateEdit( LPHEADCOMBO lphc , INT index )
    lphc->wState |= CBF_NOEDITNOTIFY;
 
    SendMessageA( lphc->hWndEdit, WM_SETTEXT, 0, pText ? (LPARAM)pText : (LPARAM)"" );
+   if( lphc->wState & CBF_FOCUSED )
+     SendMessageA( lphc->hWndEdit, EM_SETSEL, 0, (LPARAM)(-1) );
+
 
    if( pText )
        HeapFree( GetProcessHeap(), 0, pText );
@@ -1032,6 +1066,7 @@ static void CBDropDown( LPHEADCOMBO lphc )
    int i;
    int nHeight;
    int nDroppedHeight,nTempDroppedHeight;
+   int screenH
 
    //TRACE("[%04x]: drop down\n", CB_HWND(lphc));
 
@@ -1090,11 +1125,22 @@ static void CBDropDown( LPHEADCOMBO lphc )
 
    nDroppedHeight = nTempDroppedHeight;
 
-   SetWindowPos( lphc->hWndLBox, HWND_TOP, rect.left, rect.bottom,
+   /*If height of dropped rectangle gets beyond a screen size it should go up, otherwise down.*/
+   screenH = GetSystemMetrics(SM_CYSCREEN);
+   if((rect.bottom + nDroppedHeight) >= screenH)
+   {
+     SetWindowPos( lphc->hWndLBox, HWND_TOP, rect.left, rect.top - nDroppedHeight,
                  lphc->droppedRect.right - lphc->droppedRect.left,
                  nDroppedHeight,
                  SWP_NOACTIVATE | SWP_NOREDRAW);
-
+   }
+   else
+   {
+     SetWindowPos( lphc->hWndLBox, HWND_TOP, rect.left, rect.bottom,
+                 lphc->droppedRect.right - lphc->droppedRect.left,
+                 nDroppedHeight,
+                 SWP_NOACTIVATE | SWP_NOREDRAW);
+   }
 
    if( !(lphc->wState & CBF_NOREDRAW) )
      RedrawWindow( lphc->hwndself, NULL, 0, RDW_INVALIDATE |
@@ -1324,7 +1370,14 @@ static LRESULT COMBO_Command(HWND hwnd,WPARAM wParam,LPARAM lParam)
                   CB_NOTIFY( lphc, CBN_EDITCHANGE );
                 }
 
-                CBUpdateLBox( lphc );
+                if (lphc->wState & CBF_NOLBSELECT)
+                {
+                  lphc->wState &= ~CBF_NOLBSELECT;
+                }
+                else
+                {
+                  CBUpdateLBox( lphc );
+                }
                 break;
 
            case (EN_UPDATE >> 8):
@@ -1356,13 +1409,18 @@ static LRESULT COMBO_Command(HWND hwnd,WPARAM wParam,LPARAM lParam)
                 /* do not roll up if selection is being tracked
                  * by arrowkeys in the dropdown listbox */
 
-                if( (lphc->wState & CBF_DROPPED) && !(lphc->wState & CBF_NOROLLUP) )
-                     CBRollUp( lphc, (HIWORD(wParam) == LBN_SELCHANGE), TRUE );
+                if( (lphc->dwStyle & CBS_SIMPLE) ||
+                    ((lphc->wState & CBF_DROPPED) && !(lphc->wState & CBF_NOROLLUP)) )
+                {
+                   CBRollUp( lphc, (HIWORD(wParam) == LBN_SELCHANGE), TRUE );
+                }
                 else lphc->wState &= ~CBF_NOROLLUP;
 
                 if( lphc->wState & CBF_EDIT )
                 {
                     INT index = SendMessageA(lphc->hWndLBox, LB_GETCURSEL, 0, 0);
+
+                    lphc->wState |= CBF_NOLBSELECT;
                     CBUpdateEdit( lphc, index );
                     /* select text in edit, as Windows does */
                     SendMessageA( lphc->hWndEdit, EM_SETSEL, 0, (LPARAM)(-1) );
@@ -1736,6 +1794,17 @@ static LRESULT COMBO_MouseMove(HWND hwnd,WPARAM wParam,LPARAM lParam)
    return 0;
 }
 
+static LRESULT COMBO_MouseWheel(HWND hwnd,WPARAM wParam,LPARAM lParam)
+{
+  if (wParam & (MK_SHIFT | MK_CONTROL))
+    return DefWindowProcA(hwnd,WM_MOUSEWHEEL,wParam,lParam);
+
+  if ((short) HIWORD(wParam) > 0) return SendMessageA(hwnd,WM_KEYDOWN,VK_UP,0);
+  if ((short) HIWORD(wParam) < 0) return SendMessageA(hwnd,WM_KEYDOWN,VK_DOWN,0);
+
+  return TRUE;
+}
+
 static LRESULT COMBO_Enable(HWND hwnd,WPARAM wParam,LPARAM lParam)
 {
   LPHEADCOMBO lphc = (LPHEADCOMBO)GetInfoPtr(hwnd);
@@ -2028,6 +2097,8 @@ static LRESULT COMBO_SetCurSel(HWND hwnd,WPARAM wParam,LPARAM lParam)
   LPHEADCOMBO lphc = (LPHEADCOMBO)GetInfoPtr(hwnd);
 
   lParam = SendMessageA( lphc->hWndLBox, LB_SETCURSEL, wParam, 0);
+  if( lParam >= 0 )
+    SendMessageA( lphc->hWndLBox, LB_SETTOPINDEX, wParam, 0);
   if( lphc->wState & CBF_SELCHANGE )
   {
     /* no LBN_SELCHANGE in this case, update manually */
@@ -2212,6 +2283,9 @@ LRESULT WINAPI ComboWndProc( HWND hwnd, UINT message,
 
         case WM_MOUSEMOVE:
           return COMBO_MouseMove(hwnd,wParam,lParam);
+
+        case WM_MOUSEWHEEL:
+          return COMBO_MouseWheel(hwnd,wParam,lParam);
 
         /* Combo messages */
 
