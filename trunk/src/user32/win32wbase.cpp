@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.27 1999-10-07 23:21:31 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.28 1999-10-08 12:10:27 cbratschi Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -481,11 +481,11 @@ BOOL Win32BaseWindow::CreateWindowExA(CREATESTRUCTA *cs, ATOM classAtom)
 
   if (cs->style & WS_HSCROLL)
   {
-	hwndHorzScroll = OSLibWinQueryScrollBarHandle(OS2HwndFrame, OSLIB_HSCROLL);
+        hwndHorzScroll = OSLibWinQueryScrollBarHandle(OS2HwndFrame, OSLIB_HSCROLL);
   }
 
   if (cs->style & WS_VSCROLL) {
-	hwndVertScroll = OSLibWinQueryScrollBarHandle(OS2HwndFrame, OSLIB_VSCROLL);
+        hwndVertScroll = OSLibWinQueryScrollBarHandle(OS2HwndFrame, OSLIB_VSCROLL);
   }
 
   fakeWinBase.hwndThis     = OS2Hwnd;
@@ -506,7 +506,7 @@ BOOL Win32BaseWindow::CreateWindowExA(CREATESTRUCTA *cs, ATOM classAtom)
   }
   else
   {
-	setWindowId((DWORD)cs->hMenu);
+        setWindowId((DWORD)cs->hMenu);
   }
 
   //Set icon from class
@@ -1303,7 +1303,7 @@ LONG Win32BaseWindow::setScrollInfo(int nBar, SCROLLINFO *info, int fRedraw)
             return 0;
         }
         infoPtr = horzScrollInfo;
-	hwndScroll = hwndHorzScroll;
+        hwndScroll = hwndHorzScroll;
         scrollType = OSLIB_HSCROLL;
         break;
     case SB_VERT:
@@ -1311,7 +1311,7 @@ LONG Win32BaseWindow::setScrollInfo(int nBar, SCROLLINFO *info, int fRedraw)
             return 0;
         }
         infoPtr = vertScrollInfo;
-	hwndScroll = hwndVertScroll;
+        hwndScroll = hwndVertScroll;
         scrollType = OSLIB_VSCROLL;
         break;
     default:
@@ -1418,8 +1418,8 @@ LRESULT Win32BaseWindow::DefWindowProcA(UINT Msg, WPARAM wParam, LPARAM lParam)
     switch(Msg)
     {
     case WM_CLOSE:
-	DestroyWindow();
-	return 0;
+        DestroyWindow();
+        return 0;
 
     case WM_GETTEXTLENGTH:
         return wndNameLength;
@@ -1429,10 +1429,10 @@ LRESULT Win32BaseWindow::DefWindowProcA(UINT Msg, WPARAM wParam, LPARAM lParam)
         return min(wndNameLength, wParam);
 
     case WM_SETTEXT:
-	if(!fInternalMsg) {
-        	return SetWindowTextA((LPSTR)lParam);
-	}
-	else	return 0;
+        if(!fInternalMsg) {
+                return SetWindowTextA((LPSTR)lParam);
+        }
+        else    return 0;
 
     case WM_SETREDRAW:
         if(wParam)
@@ -1589,10 +1589,10 @@ LRESULT Win32BaseWindow::DefWindowProcW(UINT Msg, WPARAM wParam, LPARAM lParam)
         return min(wndNameLength, wParam);
 
     case WM_SETTEXT:
-	if(!fInternalMsg) {
-        	return SetWindowTextW((LPWSTR)lParam);
-	}
-	else	return 0;
+        if(!fInternalMsg) {
+                return SetWindowTextW((LPWSTR)lParam);
+        }
+        else    return 0;
 
     default:
         return DefWindowProcA(Msg, wParam, lParam);
@@ -1621,31 +1621,31 @@ LRESULT Win32BaseWindow::SendMessageA(ULONG Msg, WPARAM wParam, LPARAM lParam)
                 if(win32wndproc(getWindowHandle(), WM_CREATE, 0, lParam) == -1) {
                         dprintf(("WM_CREATE returned -1\n"));
                         rc = -1; //don't create window
-			break;
+                        break;
                 }
                 NotifyParent(Msg, wParam, lParam);
 
                 rc = 0;
-		break;
+                break;
         }
         case WM_SETTEXT:
                 rc = win32wndproc(getWindowHandle(), WM_SETTEXT, wParam, lParam);
-		break;
+                break;
 
         case WM_LBUTTONDOWN:
         case WM_MBUTTONDOWN:
         case WM_RBUTTONDOWN:
                 NotifyParent(Msg, wParam, lParam);
                 rc = win32wndproc(getWindowHandle(), Msg, wParam, lParam);
-		break;
+                break;
 
         case WM_DESTROY:
                 rc = win32wndproc(getWindowHandle(), WM_DESTROY, 0, 0);
-		break;
+                break;
 
         default:
- 		rc = win32wndproc(getWindowHandle(), Msg, wParam, lParam);
-		break;
+                rc = win32wndproc(getWindowHandle(), Msg, wParam, lParam);
+                break;
   }
   fInternalMsg = fInternalMsgBackup;
   return rc;
@@ -1673,33 +1673,33 @@ LRESULT Win32BaseWindow::SendMessageW(ULONG Msg, WPARAM wParam, LPARAM lParam)
                 if(win32wndproc(getWindowHandle(), WM_CREATE, 0, lParam) == -1) {
                         dprintf(("WM_CREATE returned -1\n"));
                         rc = -1; //don't create window
-			break;
+                        break;
                 }
                 NotifyParent(Msg, wParam, lParam);
 
                 rc = 0;
-		break;
+                break;
         }
         case WM_SETTEXT:
                 rc = win32wndproc(getWindowHandle(), WM_SETTEXT, wParam, lParam);
-		break;
+                break;
 
         case WM_LBUTTONDOWN:
         case WM_MBUTTONDOWN:
         case WM_RBUTTONDOWN:
                 NotifyParent(Msg, wParam, lParam);
                 rc = win32wndproc(getWindowHandle(), Msg, wParam, lParam);
-		break;
+                break;
 
         case WM_DESTROY:
                 win32wndproc(getWindowHandle(), WM_NCDESTROY, 0, 0);
                 NotifyParent(Msg, wParam, lParam);
                 rc = win32wndproc(getWindowHandle(), WM_DESTROY, 0, 0);
-		break;
+                break;
 
         default:
- 		rc = win32wndproc(getWindowHandle(), Msg, wParam, lParam);
-		break;
+                rc = win32wndproc(getWindowHandle(), Msg, wParam, lParam);
+                break;
   }
   fInternalMsg = fInternalMsgBackup;
   return rc;
@@ -1726,27 +1726,27 @@ LRESULT Win32BaseWindow::SendInternalMessageA(ULONG Msg, WPARAM wParam, LPARAM l
                 if(win32wndproc(getWindowHandle(), WM_CREATE, 0, lParam) == -1) {
                         dprintf(("WM_CREATE returned -1\n"));
                         rc = -1; //don't create window
-			break;
+                        break;
                 }
                 NotifyParent(Msg, wParam, lParam);
                 rc = 0;
-		break;
+                break;
         }
         case WM_LBUTTONDOWN:
         case WM_MBUTTONDOWN:
         case WM_RBUTTONDOWN:
                 NotifyParent(Msg, wParam, lParam);
                 rc = win32wndproc(getWindowHandle(), Msg, wParam, lParam);
-		break;
+                break;
 
         case WM_DESTROY:
                 win32wndproc(getWindowHandle(), WM_NCDESTROY, 0, 0);
                 NotifyParent(Msg, wParam, lParam);
                 rc = win32wndproc(getWindowHandle(), WM_DESTROY, 0, 0);
-		break;
+                break;
         default:
- 		rc = win32wndproc(getWindowHandle(), Msg, wParam, lParam);
-		break;
+                rc = win32wndproc(getWindowHandle(), Msg, wParam, lParam);
+                break;
   }
   fInternalMsg = fInternalMsgBackup;
   return rc;
@@ -1774,7 +1774,7 @@ LRESULT Win32BaseWindow::SendInternalMessageW(ULONG Msg, WPARAM wParam, LPARAM l
                 if(win32wndproc(getWindowHandle(), WM_CREATE, 0, lParam) == -1) {
                         dprintf(("WM_CREATE returned -1\n"));
                         rc = -1; //don't create window
-			break;
+                        break;
                 }
                 NotifyParent(Msg, wParam, lParam);
                 rc = 0;
@@ -1785,16 +1785,16 @@ LRESULT Win32BaseWindow::SendInternalMessageW(ULONG Msg, WPARAM wParam, LPARAM l
         case WM_RBUTTONDOWN:
                 NotifyParent(Msg, wParam, lParam);
                 rc = win32wndproc(getWindowHandle(), Msg, wParam, lParam);
-		break;
+                break;
 
         case WM_DESTROY:
                 win32wndproc(getWindowHandle(), WM_NCDESTROY, 0, 0);
                 NotifyParent(Msg, wParam, lParam);
                 rc = win32wndproc(getWindowHandle(), WM_DESTROY, 0, 0);
-		break;
+                break;
         default:
- 		rc = win32wndproc(getWindowHandle(), Msg, wParam, lParam);
-		break;
+                rc = win32wndproc(getWindowHandle(), Msg, wParam, lParam);
+                break;
   }
   fInternalMsg = fInternalMsgBackup;
   return rc;
@@ -2362,8 +2362,8 @@ BOOL Win32BaseWindow::SetWindowTextA(LPSTR lpsz)
     if(lpsz == NULL)
         return FALSE;
 
-    if(windowNameA)	free(windowNameA);
-    if(windowNameW)	free(windowNameW);
+    if(windowNameA)     free(windowNameA);
+    if(windowNameW)     free(windowNameW);
 
     windowNameA = (LPSTR)_smalloc(strlen(lpsz)+1);
     strcpy(windowNameA, lpsz);
@@ -2383,8 +2383,8 @@ BOOL Win32BaseWindow::SetWindowTextW(LPWSTR lpsz)
     if(lpsz == NULL)
         return FALSE;
 
-    if(windowNameA)	free(windowNameA);
-    if(windowNameW)	free(windowNameW);
+    if(windowNameA)     free(windowNameA);
+    if(windowNameW)     free(windowNameW);
 
     windowNameW = (LPWSTR)_smalloc((lstrlenW((LPWSTR)lpsz)+1)*sizeof(WCHAR));
     lstrcpyW(windowNameW, (LPWSTR)lpsz);
@@ -2405,14 +2405,30 @@ LONG Win32BaseWindow::SetWindowLongA(int index, ULONG value)
 
    switch(index) {
         case GWL_EXSTYLE:
-                oldval = dwExStyle;
-                setExStyle(value);
-                return oldval;
+                {
+                  STYLESTRUCT ss;
+
+                  ss.styleOld = dwExStyle;
+                  ss.styleNew = value;
+                  SendInternalMessageA(WM_STYLECHANGING,GWL_EXSTYLE,(LPARAM)&ss);
+                  oldval = dwExStyle;
+                  setExStyle(value);
+                  SendInternalMessageA(WM_STYLECHANGED,GWL_EXSTYLE,(LPARAM)&ss);
+                  return oldval;
+                }
         case GWL_STYLE:
-                oldval = dwStyle;
-                setStyle(value);
-                OSLibSetWindowStyle(OS2HwndFrame, dwStyle);
-                return oldval;
+                {
+                  STYLESTRUCT ss;
+
+                  ss.styleOld = dwStyle;
+                  ss.styleNew = value;
+                  SendInternalMessageA(WM_STYLECHANGING,GWL_STYLE,(LPARAM)&ss);
+                  oldval = dwStyle;
+                  setStyle(value);
+                  OSLibSetWindowStyle(OS2HwndFrame, dwStyle);
+                  SendInternalMessageA(WM_STYLECHANGED,GWL_STYLE,(LPARAM)&ss);
+                  return oldval;
+                }
         case GWL_WNDPROC:
                 oldval = (LONG)getWindowProc();
                 setWindowProc((WNDPROC)value);

@@ -1,4 +1,4 @@
-/* $Id: scroll.cpp,v 1.5 1999-10-07 09:28:01 sandervl Exp $ */
+/* $Id: scroll.cpp,v 1.6 1999-10-08 12:10:27 cbratschi Exp $ */
 /*
  * Scrollbar control
  *
@@ -108,18 +108,23 @@ static void SCROLL_DrawInterior_9x( HWND hwnd, HDC hdc, INT nBar,
  */
 static void SCROLL_LoadBitmaps(void)
 {
-    hUpArrow  = LoadBitmapA( 0, MAKEINTRESOURCEA(OBM_UPARROW) );
-    hDnArrow  = LoadBitmapA( 0, MAKEINTRESOURCEA(OBM_DNARROW) );
-    hLfArrow  = LoadBitmapA( 0, MAKEINTRESOURCEA(OBM_LFARROW) );
-    hRgArrow  = LoadBitmapA( 0, MAKEINTRESOURCEA(OBM_RGARROW) );
-    hUpArrowD = LoadBitmapA( 0, MAKEINTRESOURCEA(OBM_UPARROWD) );
-    hDnArrowD = LoadBitmapA( 0, MAKEINTRESOURCEA(OBM_DNARROWD) );
-    hLfArrowD = LoadBitmapA( 0, MAKEINTRESOURCEA(OBM_LFARROWD) );
-    hRgArrowD = LoadBitmapA( 0, MAKEINTRESOURCEA(OBM_RGARROWD) );
-    hUpArrowI = LoadBitmapA( 0, MAKEINTRESOURCEA(OBM_UPARROWI) );
-    hDnArrowI = LoadBitmapA( 0, MAKEINTRESOURCEA(OBM_DNARROWI) );
-    hLfArrowI = LoadBitmapA( 0, MAKEINTRESOURCEA(OBM_LFARROWI) );
-    hRgArrowI = LoadBitmapA( 0, MAKEINTRESOURCEA(OBM_RGARROWI) );
+    HINSTANCE hinst;
+
+    //CB: Open32 hack to load our own bitmap
+    hinst = LoadLibraryA("USER32.DLL");
+    hUpArrow  = NativeLoadBitmap( hinst, MAKEINTRESOURCEA(OBM_UPARROW) );
+    hDnArrow  = NativeLoadBitmap( hinst, MAKEINTRESOURCEA(OBM_DNARROW) );
+    hLfArrow  = NativeLoadBitmap( hinst, MAKEINTRESOURCEA(OBM_LFARROW) );
+    hRgArrow  = NativeLoadBitmap( hinst, MAKEINTRESOURCEA(OBM_RGARROW) );
+    hUpArrowD = NativeLoadBitmap( hinst, MAKEINTRESOURCEA(OBM_UPARROWD) );
+    hDnArrowD = NativeLoadBitmap( hinst, MAKEINTRESOURCEA(OBM_DNARROWD) );
+    hLfArrowD = NativeLoadBitmap( hinst, MAKEINTRESOURCEA(OBM_LFARROWD) );
+    hRgArrowD = NativeLoadBitmap( hinst, MAKEINTRESOURCEA(OBM_RGARROWD) );
+    hUpArrowI = NativeLoadBitmap( hinst, MAKEINTRESOURCEA(OBM_UPARROWI) );
+    hDnArrowI = NativeLoadBitmap( hinst, MAKEINTRESOURCEA(OBM_DNARROWI) );
+    hLfArrowI = NativeLoadBitmap( hinst, MAKEINTRESOURCEA(OBM_LFARROWI) );
+    hRgArrowI = NativeLoadBitmap( hinst, MAKEINTRESOURCEA(OBM_RGARROWI) );
+    FreeLibrary(hinst);
 }
 
 /***********************************************************************
@@ -1553,13 +1558,13 @@ BOOL WINAPI ShowScrollBar(
      BOOL rc;
 
         if(nBar == SB_HORZ || nBar == SB_BOTH)
-            rc = OSLibWinShowScrollBar(window->getOS2FrameWindowHandle(), 
-                                       window->getHorzScrollHandle(), 
+            rc = OSLibWinShowScrollBar(window->getOS2FrameWindowHandle(),
+                                       window->getHorzScrollHandle(),
                                        OSLIB_HSCROLL, fShow);
 
         if(nBar == SB_VERT || ( rc == TRUE && nBar == SB_BOTH))
             rc = OSLibWinShowScrollBar(window->getOS2FrameWindowHandle(),
-                                       window->getVertScrollHandle(), 
+                                       window->getVertScrollHandle(),
                                        OSLIB_VSCROLL, fShow);
 
         return rc;
