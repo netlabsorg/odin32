@@ -1,6 +1,10 @@
- /* $Id: changelog,v 1.1131 2000-09-17 22:30:04 davidr Exp $ */
+ /* $Id: changelog,v 1.1132 2000-09-18 19:27:40 sandervl Exp $ */
 
- 2000-09-15: David Raison <djr@lemur.co.uk>
+ 2000-09-16: Sander van Leeuwen <sandervl@xs4all.nl>
+    - KERNEL32: Fixed matchModName bugs. (compare name without extension)
+    - WNASPI32: Restore win32 FS selector before calling post procedure
+
+ 2000-09-16: David Raison <djr@lemur.co.uk>
     - OLE32: Further updates from Wine
              IMessageFilter stubs.
     - OLEAUT32: Updates from Wine
