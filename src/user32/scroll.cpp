@@ -1,4 +1,4 @@
-/* $Id: scroll.cpp,v 1.12 1999-10-20 16:27:00 cbratschi Exp $ */
+/* $Id: scroll.cpp,v 1.13 1999-10-23 16:45:21 cbratschi Exp $ */
 /*
  * Scrollbar control
  *
@@ -41,24 +41,17 @@ static HBITMAP hRgArrowI = 0;
 #define RIGHT_ARROW(flags,pressed) \
    (((flags)&ESB_DISABLE_RIGHT) ? hRgArrowI : ((pressed) ? hRgArrowD:hRgArrow))
 
+#define SCROLL_MIN_RECT  4 /* Minimum size of the rectangle between the arrows */
+#define SCROLL_MIN_THUMB 6 /* Minimum size of the thumb in pixels */
 
-  /* Minimum size of the rectangle between the arrows */
-#define SCROLL_MIN_RECT  4
+#define SCROLL_ARROW_THUMB_OVERLAP 0 /* Overlap between arrows and thumb */
 
-  /* Minimum size of the thumb in pixels */
-#define SCROLL_MIN_THUMB 6
+#define SCROLL_FIRST_DELAY   200 /* Delay (in ms) before first repetition when holding the button down */
+#define SCROLL_REPEAT_DELAY  50  /* Delay (in ms) between scroll repetitions */
+#define SCROLL_BLINK_DELAY   1000
 
-  /* Overlap between arrows and thumb */
-#define SCROLL_ARROW_THUMB_OVERLAP 0
-
-  /* Delay (in ms) before first repetition when holding the button down */
-#define SCROLL_FIRST_DELAY   200
-
-  /* Delay (in ms) between scroll repetitions */
-#define SCROLL_REPEAT_DELAY  50
-
-  /* Scroll timer id */
-#define SCROLL_TIMER   0
+#define SCROLL_TIMER   0 /* Scroll timer id */
+#define BLINK_TIMER    1
 
   /* Scroll-bar hit testing */
 enum SCROLL_HITTEST
@@ -82,6 +75,11 @@ static HWND SCROLL_TrackingWin = 0;
 static INT  SCROLL_TrackingBar = 0;
 static INT  SCROLL_TrackingPos = 0;
 static INT  SCROLL_TrackingVal = 0;
+ /* Focus info */
+static HWND SCROLL_FocusWin    = 0;
+static BOOL SCROLL_HasFocus    = FALSE;
+static BOOL SCROLL_Highlighted = FALSE;
+
  /* Hit test code of the last button-down event */
 static enum SCROLL_HITTEST SCROLL_trackHitTest;
 static BOOL SCROLL_trackVertical;
@@ -154,6 +152,7 @@ static SCROLLBAR_INFO *SCROLL_GetInfoPtr( HWND hwnd, INT nBar )
     return NULL;
 }
 
+/* Scrollbar Functions */
 
 /***********************************************************************
  *           SCROLL_GetScrollBarRect
@@ -239,39 +238,6 @@ static BOOL SCROLL_GetScrollBarRect( HWND hwnd, INT nBar, RECT *lprect,
     return vertical;
 }
 
-
-/***********************************************************************
- *           SCROLL_GetThumbVal
- *
- * Compute the current scroll position based on the thumb position in pixels
- * from the top of the scroll-bar.
- */
-static UINT SCROLL_GetThumbVal( SCROLLBAR_INFO *infoPtr, RECT *rect,
-                                  BOOL vertical, INT pos )
-{
-    INT thumbSize;
-    INT pixels = vertical ? rect->bottom-rect->top : rect->right-rect->left;
-
-    if ((pixels -= 2*(GetSystemMetrics(SM_CXVSCROLL) - SCROLL_ARROW_THUMB_OVERLAP)) <= 0)
-        return infoPtr->MinVal;
-
-    if (infoPtr->Page)
-    {
-        thumbSize = pixels * infoPtr->Page/(infoPtr->MaxVal-infoPtr->MinVal+1);
-        if (thumbSize < SCROLL_MIN_THUMB) thumbSize = SCROLL_MIN_THUMB;
-    }
-    else thumbSize = GetSystemMetrics(SM_CXVSCROLL);
-
-    if ((pixels -= thumbSize) <= 0) return infoPtr->MinVal;
-
-    pos = MAX( 0, pos - (GetSystemMetrics(SM_CXVSCROLL) - SCROLL_ARROW_THUMB_OVERLAP) );
-    if (pos > pixels) pos = pixels;
-
-    if (!infoPtr->Page) pos *= infoPtr->MaxVal - infoPtr->MinVal;
-    else pos *= infoPtr->MaxVal - infoPtr->MinVal - infoPtr->Page + 1;
-    return infoPtr->MinVal + ((pos + pixels / 2) / pixels);
-}
-
 /***********************************************************************
  *           SCROLL_PtInRectEx
  */
@@ -291,27 +257,6 @@ static BOOL SCROLL_PtInRectEx( LPRECT lpRect, POINT pt, BOOL vertical )
     }
     return PtInRect( &rect, pt );
 }
-
-/***********************************************************************
- *           SCROLL_ClipPos
- */
-static POINT SCROLL_ClipPos( LPRECT lpRect, POINT pt )
-{
-    if( pt.x < lpRect->left )
-        pt.x = lpRect->left;
-    else
-    if( pt.x > lpRect->right )
-        pt.x = lpRect->right;
-
-    if( pt.y < lpRect->top )
-        pt.y = lpRect->top;
-    else
-    if( pt.y > lpRect->bottom )
-        pt.y = lpRect->bottom;
-
-    return pt;
-}
-
 
 /***********************************************************************
  *           SCROLL_HitTest
@@ -356,9 +301,9 @@ static enum SCROLL_HITTEST SCROLL_HitTest( HWND hwnd, INT nBar,
  *
  * Draw the scroll bar arrows.
  */
-static void SCROLL_DrawArrows_9x( HDC hdc, SCROLLBAR_INFO *infoPtr,
-                                  RECT *rect, INT arrowSize, BOOL vertical,
-                                  BOOL top_pressed, BOOL bottom_pressed )
+static void SCROLL_DrawArrows( HDC hdc, SCROLLBAR_INFO *infoPtr,
+                               RECT *rect, INT arrowSize, BOOL vertical,
+                               BOOL top_pressed, BOOL bottom_pressed )
 {
   RECT r;
 
@@ -384,16 +329,6 @@ static void SCROLL_DrawArrows_9x( HDC hdc, SCROLLBAR_INFO *infoPtr,
             | (bottom_pressed ? (DFCS_PUSHED | DFCS_FLAT) : 0 )
             | (infoPtr->flags&ESB_DISABLE_RTDN ? DFCS_INACTIVE : 0) );
 }
-//******************************************************************************
-//******************************************************************************
-static void SCROLL_DrawArrows( HDC hdc, SCROLLBAR_INFO *infoPtr,
-                   RECT *rect, INT arrowSize, BOOL vertical,
-                   BOOL top_pressed, BOOL bottom_pressed )
-{
-  SCROLL_DrawArrows_9x( hdc, infoPtr, rect, arrowSize,
-                        vertical, top_pressed,bottom_pressed );
-}
-
 
 /***********************************************************************
  *           SCROLL_DrawMovingThumb
@@ -424,6 +359,232 @@ static void SCROLL_DrawMovingThumb( HDC hdc, RECT *rect, BOOL vertical,
 
   SCROLL_MovingThumb = !SCROLL_MovingThumb;
 }
+
+static void SCROLL_DrawInterior( HWND hwnd, HDC hdc, INT nBar,
+                                 RECT *rect, INT arrowSize,
+                                 INT thumbSize, INT thumbPos,
+                                 UINT flags, BOOL vertical,
+                                 BOOL top_selected, BOOL bottom_selected )
+{
+    RECT r;
+    HPEN hSavePen;
+    HBRUSH hSaveBrush,hBrush;
+    BOOL Save_SCROLL_MovingThumb = SCROLL_MovingThumb;
+
+//SCROLL_DrawInterior_9x(hwnd,hdc,nBar,rect,arrowSize,thumbSize,thumbPos,flags,vertical,top_selected,bottom_selected);
+//return; //CB: improve!
+
+    if (Save_SCROLL_MovingThumb &&
+        (SCROLL_TrackingWin == hwnd) &&
+        (SCROLL_TrackingBar == nBar))
+        SCROLL_DrawMovingThumb( hdc, rect, vertical, arrowSize, thumbSize );
+
+      /* Select the correct brush and pen */
+
+    /* Only scrollbar controls send WM_CTLCOLORSCROLLBAR.
+     * The window-owned scrollbars need to call DEFWND_ControlColor
+     * to correctly setup default scrollbar colors
+     */
+    if (nBar == SB_CTL) {
+        hBrush = (HBRUSH)SendMessageA( GetParent(hwnd), WM_CTLCOLORSCROLLBAR,
+                                       (WPARAM)hdc,(LPARAM)hwnd);
+    } else {
+        hBrush = (HBRUSH)SendMessageA( hwnd, WM_CTLCOLORSCROLLBAR,
+                                       (WPARAM)hdc,(LPARAM)hwnd);
+
+    }
+
+    hSavePen = SelectObject( hdc, GetSysColorPen(COLOR_WINDOWFRAME) );
+    hSaveBrush = SelectObject( hdc, hBrush );
+
+      /* Calculate the scroll rectangle */
+
+    r = *rect;
+    if (vertical)
+    {
+        r.top    += arrowSize - SCROLL_ARROW_THUMB_OVERLAP;
+        r.bottom -= (arrowSize - SCROLL_ARROW_THUMB_OVERLAP);
+    }
+    else
+    {
+        r.left  += arrowSize - SCROLL_ARROW_THUMB_OVERLAP;
+        r.right -= (arrowSize - SCROLL_ARROW_THUMB_OVERLAP);
+    }
+
+      /* Draw the scroll rectangles and thumb */
+
+    if (!thumbPos)  /* No thumb to draw */
+    {
+        INT offset = 0;
+
+        PatBlt( hdc, r.left+offset, r.top+offset,
+                     r.right - r.left - 2*offset, r.bottom - r.top - 2*offset,
+                     PATCOPY );
+
+        /* cleanup and return */
+        SelectObject( hdc, hSavePen );
+        SelectObject( hdc, hSaveBrush );
+        return;
+    }
+
+    if (vertical)
+    {
+        INT offset = 0;
+
+        PatBlt( hdc, r.left + offset, r.top + offset,
+                  r.right - r.left - offset*2,
+                  thumbPos - (arrowSize - SCROLL_ARROW_THUMB_OVERLAP) - offset,
+                  top_selected ? 0x0f0000 : PATCOPY );
+        r.top += thumbPos - (arrowSize - SCROLL_ARROW_THUMB_OVERLAP);
+        PatBlt( hdc, r.left + offset, r.top + thumbSize,
+                  r.right - r.left - offset*2,
+                  r.bottom - r.top - thumbSize - offset,
+                  bottom_selected ? 0x0f0000 : PATCOPY );
+        r.bottom = r.top + thumbSize;
+    }
+    else  /* horizontal */
+    {
+        INT offset = 0;
+
+        PatBlt( hdc, r.left + offset, r.top + offset,
+                  thumbPos - (arrowSize - SCROLL_ARROW_THUMB_OVERLAP),
+                  r.bottom - r.top - offset*2,
+                  top_selected ? 0x0f0000 : PATCOPY );
+        r.left += thumbPos - (arrowSize - SCROLL_ARROW_THUMB_OVERLAP);
+        PatBlt( hdc, r.left + thumbSize, r.top + offset,
+                  r.right - r.left - thumbSize - offset,
+                  r.bottom - r.top - offset*2,
+                  bottom_selected ? 0x0f0000 : PATCOPY );
+        r.right = r.left + thumbSize;
+    }
+
+      /* Draw the thumb */
+
+    SelectObject(hdc,(SCROLL_FocusWin == hwnd && SCROLL_Highlighted) ? GetSysColorBrush(COLOR_3DHILIGHT):GetSysColorBrush(COLOR_BTNFACE));
+
+    Rectangle(hdc,r.left+1,r.top+1,r.right-1,r.bottom-1);
+
+    DrawEdge( hdc, &r, EDGE_RAISED, BF_RECT );
+
+    if (Save_SCROLL_MovingThumb &&
+        (SCROLL_TrackingWin == hwnd) &&
+        (SCROLL_TrackingBar == nBar))
+        SCROLL_DrawMovingThumb( hdc, rect, vertical, arrowSize, thumbSize );
+
+    /* cleanup */
+    SelectObject( hdc, hSavePen );
+    SelectObject( hdc, hSaveBrush );
+}
+
+/***********************************************************************
+ *           SCROLL_ClipPos
+ */
+static POINT SCROLL_ClipPos( LPRECT lpRect, POINT pt )
+{
+    if( pt.x < lpRect->left )
+        pt.x = lpRect->left;
+    else
+    if( pt.x > lpRect->right )
+        pt.x = lpRect->right;
+
+    if( pt.y < lpRect->top )
+        pt.y = lpRect->top;
+    else
+    if( pt.y > lpRect->bottom )
+        pt.y = lpRect->bottom;
+
+    return pt;
+}
+
+/***********************************************************************
+ *           SCROLL_GetThumbVal
+ *
+ * Compute the current scroll position based on the thumb position in pixels
+ * from the top of the scroll-bar.
+ */
+static UINT SCROLL_GetThumbVal( SCROLLBAR_INFO *infoPtr, RECT *rect,
+                                  BOOL vertical, INT pos )
+{
+    INT thumbSize;
+    INT pixels = vertical ? rect->bottom-rect->top : rect->right-rect->left;
+
+    if ((pixels -= 2*(GetSystemMetrics(SM_CXVSCROLL) - SCROLL_ARROW_THUMB_OVERLAP)) <= 0)
+        return infoPtr->MinVal;
+
+    if (infoPtr->Page)
+    {
+        thumbSize = pixels * infoPtr->Page/(infoPtr->MaxVal-infoPtr->MinVal+1);
+        if (thumbSize < SCROLL_MIN_THUMB) thumbSize = SCROLL_MIN_THUMB;
+    }
+    else thumbSize = GetSystemMetrics(SM_CXVSCROLL);
+
+    if ((pixels -= thumbSize) <= 0) return infoPtr->MinVal;
+
+    pos = MAX( 0, pos - (GetSystemMetrics(SM_CXVSCROLL) - SCROLL_ARROW_THUMB_OVERLAP) );
+    if (pos > pixels) pos = pixels;
+
+    if (!infoPtr->Page) pos *= infoPtr->MaxVal - infoPtr->MinVal;
+    else pos *= infoPtr->MaxVal - infoPtr->MinVal - infoPtr->Page + 1;
+    return infoPtr->MinVal + ((pos + pixels / 2) / pixels);
+}
+
+/***********************************************************************
+ *           SCROLL_DrawScrollBar
+ *
+ * Redraw the whole scrollbar.
+ */
+void SCROLL_DrawScrollBar( HWND hwnd, HDC hdc, INT nBar,
+                           BOOL arrows, BOOL interior )
+{
+    INT arrowSize, thumbSize, thumbPos;
+    RECT rect;
+    BOOL vertical;
+    SCROLLBAR_INFO *infoPtr = SCROLL_GetInfoPtr( hwnd, nBar );
+    BOOL Save_SCROLL_MovingThumb = SCROLL_MovingThumb;
+
+    if (nBar == SB_CTL)
+    {
+      DWORD dwStyle = GetWindowLongA(hwnd,GWL_STYLE);
+
+      if (dwStyle & (SBS_SIZEBOX | SBS_SIZEGRIP))
+      {
+        //CB: todo
+
+        return;
+      }
+    }
+
+    vertical = SCROLL_GetScrollBarRect( hwnd, nBar, &rect,
+                                        &arrowSize, &thumbSize, &thumbPos );
+
+    if (Save_SCROLL_MovingThumb &&
+        (SCROLL_TrackingWin == hwnd) &&
+        (SCROLL_TrackingBar == nBar))
+        SCROLL_DrawMovingThumb( hdc, &rect, vertical, arrowSize, thumbSize );
+
+      /* Draw the arrows */
+
+    if (arrows && arrowSize)
+    {
+        if( vertical == SCROLL_trackVertical && GetCapture() == hwnd )
+            SCROLL_DrawArrows( hdc, infoPtr, &rect, arrowSize, vertical,
+                               (SCROLL_trackHitTest == SCROLL_TOP_ARROW),
+                               (SCROLL_trackHitTest == SCROLL_BOTTOM_ARROW) );
+        else
+            SCROLL_DrawArrows( hdc, infoPtr, &rect, arrowSize, vertical,
+                                                               FALSE, FALSE );
+    }
+    if( interior )
+        SCROLL_DrawInterior( hwnd, hdc, nBar, &rect, arrowSize, thumbSize,
+                         thumbPos, infoPtr->flags, vertical, FALSE, FALSE );
+
+    if (Save_SCROLL_MovingThumb &&
+        (SCROLL_TrackingWin == hwnd) &&
+        (SCROLL_TrackingBar == nBar))
+        SCROLL_DrawMovingThumb( hdc, &rect, vertical, arrowSize, thumbSize );
+
+}
+
 /***********************************************************************
  *           SCROLL_DrawInterior
  *
@@ -517,171 +678,7 @@ static void SCROLL_DrawInterior_9x( HWND hwnd, HDC hdc, INT nBar,
     SelectObject( hdc, hSavePen );
     SelectObject( hdc, hSaveBrush );
 }
-//******************************************************************************
-//******************************************************************************
-static void SCROLL_DrawInterior( HWND hwnd, HDC hdc, INT nBar,
-                                 RECT *rect, INT arrowSize,
-                                 INT thumbSize, INT thumbPos,
-                                 UINT flags, BOOL vertical,
-                                 BOOL top_selected, BOOL bottom_selected )
-{
-    RECT r;
-    HPEN hSavePen;
-    HBRUSH hSaveBrush,hBrush;
-    BOOL Save_SCROLL_MovingThumb = SCROLL_MovingThumb;
 
-//SCROLL_DrawInterior_9x(hwnd,hdc,nBar,rect,arrowSize,thumbSize,thumbPos,flags,vertical,top_selected,bottom_selected);
-//return; //CB: improve!
-
-    if (Save_SCROLL_MovingThumb &&
-        (SCROLL_TrackingWin == hwnd) &&
-        (SCROLL_TrackingBar == nBar))
-        SCROLL_DrawMovingThumb( hdc, rect, vertical, arrowSize, thumbSize );
-
-      /* Select the correct brush and pen */
-
-    /* Only scrollbar controls send WM_CTLCOLORSCROLLBAR.
-     * The window-owned scrollbars need to call DEFWND_ControlColor
-     * to correctly setup default scrollbar colors
-     */
-    if (nBar == SB_CTL) {
-        hBrush = (HBRUSH)SendMessageA( GetParent(hwnd), WM_CTLCOLORSCROLLBAR,
-                                       (WPARAM)hdc,(LPARAM)hwnd);
-    } else {
-        hBrush = (HBRUSH)SendMessageA( hwnd, WM_CTLCOLORSCROLLBAR,
-                                       (WPARAM)hdc,(LPARAM)hwnd);
-
-    }
-
-    hSavePen = SelectObject( hdc, GetSysColorPen(COLOR_WINDOWFRAME) );
-    hSaveBrush = SelectObject( hdc, hBrush );
-
-      /* Calculate the scroll rectangle */
-
-    r = *rect;
-    if (vertical)
-    {
-        r.top    += arrowSize - SCROLL_ARROW_THUMB_OVERLAP;
-        r.bottom -= (arrowSize - SCROLL_ARROW_THUMB_OVERLAP);
-    }
-    else
-    {
-        r.left  += arrowSize - SCROLL_ARROW_THUMB_OVERLAP;
-        r.right -= (arrowSize - SCROLL_ARROW_THUMB_OVERLAP);
-    }
-
-      /* Draw the scroll bar frame */
-
-    /* Only draw outline if Win 3.1.  Mar 24, 1999 - Ronald B. Cemer */
-
-      /* Draw the scroll rectangles and thumb */
-
-    if (!thumbPos)  /* No thumb to draw */
-    {
-        INT offset = 0;
-
-        PatBlt( hdc, r.left+offset, r.top+offset,
-                     r.right - r.left - 2*offset, r.bottom - r.top - 2*offset,
-                     PATCOPY );
-
-        /* cleanup and return */
-        SelectObject( hdc, hSavePen );
-        SelectObject( hdc, hSaveBrush );
-        return;
-    }
-
-    if (vertical)
-    {
-        INT offset = 0;
-
-        PatBlt( hdc, r.left + offset, r.top + offset,
-                  r.right - r.left - offset*2,
-                  thumbPos - (arrowSize - SCROLL_ARROW_THUMB_OVERLAP) - offset,
-                  top_selected ? 0x0f0000 : PATCOPY );
-        r.top += thumbPos - (arrowSize - SCROLL_ARROW_THUMB_OVERLAP);
-        PatBlt( hdc, r.left + offset, r.top + thumbSize,
-                  r.right - r.left - offset*2,
-                  r.bottom - r.top - thumbSize - offset,
-                  bottom_selected ? 0x0f0000 : PATCOPY );
-        r.bottom = r.top + thumbSize;
-    }
-    else  /* horizontal */
-    {
-        INT offset = 0;
-
-        PatBlt( hdc, r.left + offset, r.top + offset,
-                  thumbPos - (arrowSize - SCROLL_ARROW_THUMB_OVERLAP),
-                  r.bottom - r.top - offset*2,
-                  top_selected ? 0x0f0000 : PATCOPY );
-        r.left += thumbPos - (arrowSize - SCROLL_ARROW_THUMB_OVERLAP);
-        PatBlt( hdc, r.left + thumbSize, r.top + offset,
-                  r.right - r.left - thumbSize - offset,
-                  r.bottom - r.top - offset*2,
-                  bottom_selected ? 0x0f0000 : PATCOPY );
-        r.right = r.left + thumbSize;
-    }
-
-      /* Draw the thumb */
-
-    SelectObject( hdc, GetSysColorBrush(COLOR_BTNFACE) );
-
-    Rectangle( hdc, r.left+1, r.top+1, r.right-1, r.bottom-1 );
-
-    DrawEdge( hdc, &r, EDGE_RAISED, BF_RECT );
-
-    if (Save_SCROLL_MovingThumb &&
-        (SCROLL_TrackingWin == hwnd) &&
-        (SCROLL_TrackingBar == nBar))
-        SCROLL_DrawMovingThumb( hdc, rect, vertical, arrowSize, thumbSize );
-
-    /* cleanup */
-    SelectObject( hdc, hSavePen );
-    SelectObject( hdc, hSaveBrush );
-}
-/***********************************************************************
- *           SCROLL_DrawScrollBar
- *
- * Redraw the whole scrollbar.
- */
-void SCROLL_DrawScrollBar( HWND hwnd, HDC hdc, INT nBar,
-                           BOOL arrows, BOOL interior )
-{
-    INT arrowSize, thumbSize, thumbPos;
-    RECT rect;
-    BOOL vertical;
-    SCROLLBAR_INFO *infoPtr = SCROLL_GetInfoPtr( hwnd, nBar );
-    BOOL Save_SCROLL_MovingThumb = SCROLL_MovingThumb;
-
-    vertical = SCROLL_GetScrollBarRect( hwnd, nBar, &rect,
-                                        &arrowSize, &thumbSize, &thumbPos );
-
-    if (Save_SCROLL_MovingThumb &&
-        (SCROLL_TrackingWin == hwnd) &&
-        (SCROLL_TrackingBar == nBar))
-        SCROLL_DrawMovingThumb( hdc, &rect, vertical, arrowSize, thumbSize );
-
-      /* Draw the arrows */
-
-    if (arrows && arrowSize)
-    {
-        if( vertical == SCROLL_trackVertical && GetCapture() == hwnd )
-            SCROLL_DrawArrows( hdc, infoPtr, &rect, arrowSize, vertical,
-                               (SCROLL_trackHitTest == SCROLL_TOP_ARROW),
-                               (SCROLL_trackHitTest == SCROLL_BOTTOM_ARROW) );
-        else
-            SCROLL_DrawArrows( hdc, infoPtr, &rect, arrowSize, vertical,
-                                                               FALSE, FALSE );
-    }
-    if( interior )
-        SCROLL_DrawInterior( hwnd, hdc, nBar, &rect, arrowSize, thumbSize,
-                         thumbPos, infoPtr->flags, vertical, FALSE, FALSE );
-
-    if (Save_SCROLL_MovingThumb &&
-        (SCROLL_TrackingWin == hwnd) &&
-        (SCROLL_TrackingBar == nBar))
-        SCROLL_DrawMovingThumb( hdc, &rect, vertical, arrowSize, thumbSize );
-
-}
 /***********************************************************************
  *           SCROLL_RefreshScrollBar
  *
@@ -723,31 +720,53 @@ static void SCROLL_RefreshScrollBar( HWND hwnd, INT nBar,
     SCROLL_DrawScrollBar( hwndScroll, hdc, nBar, arrows, interior );
     ReleaseDC( hwndScroll, hdc );
 }
-/***********************************************************************
- *           SCROLL_HandleKbdEvent
- *
- * Handle a keyboard event (only for SB_CTL scrollbars).
- */
-static void SCROLL_HandleKbdEvent( HWND hwnd, WPARAM wParam )
-{
-    DWORD dwStyle = GetWindowLongA(hwnd,GWL_STYLE);
-    WPARAM msg;
 
-    switch(wParam)
-    {
-    case VK_PRIOR: msg = SB_PAGEUP; break;
-    case VK_NEXT:  msg = SB_PAGEDOWN; break;
-    case VK_HOME:  msg = SB_TOP; break;
-    case VK_END:   msg = SB_BOTTOM; break;
-    case VK_UP:    msg = SB_LINEUP; break;
-    case VK_DOWN:  msg = SB_LINEDOWN; break;
-    default:
-        return;
-    }
-    SendMessageA( GetParent(hwnd),
-                    (dwStyle & SBS_VERT) ? WM_VSCROLL : WM_HSCROLL,
-                    msg, hwnd );
+/* Message Handler */
+
+LRESULT SCROLL_NCCreate(HWND hwnd,WPARAM wParam,LPARAM lParam)
+{
+  SCROLLBAR_INFO *infoPtr = (SCROLLBAR_INFO*)malloc(sizeof(SCROLLBAR_INFO));
+
+  infoPtr->MinVal = infoPtr->CurVal = infoPtr->Page = 0;
+  infoPtr->MaxVal = 100;
+  infoPtr->flags  = ESB_ENABLE_BOTH;
+
+  SetInfoPtr(hwnd,(DWORD)infoPtr);
+
+  if (!bitmapsLoaded) SCROLL_LoadBitmaps();
+
+  return TRUE;
 }
+
+LRESULT SCROLL_Create(HWND hwnd,WPARAM wParam,LPARAM lParam)
+{
+  CREATESTRUCTA *lpCreat = (CREATESTRUCTA *)lParam;
+
+  if (lpCreat->style & SBS_VERT)
+  {
+    if (lpCreat->style & SBS_LEFTALIGN)
+      MoveWindow( hwnd, lpCreat->x, lpCreat->y,
+                                  GetSystemMetrics(SM_CXVSCROLL), lpCreat->cy, FALSE );
+    else if (lpCreat->style & SBS_RIGHTALIGN)
+      MoveWindow( hwnd,
+                  lpCreat->x+lpCreat->cx-GetSystemMetrics(SM_CXVSCROLL)-1,
+                  lpCreat->y,
+                  GetSystemMetrics(SM_CXVSCROLL), lpCreat->cy, FALSE );
+  } else  /* SBS_HORZ */
+  {
+    if (lpCreat->style & SBS_TOPALIGN)
+      MoveWindow( hwnd, lpCreat->x, lpCreat->y,
+                  lpCreat->cx, GetSystemMetrics(SM_CYHSCROLL), FALSE );
+    else if (lpCreat->style & SBS_BOTTOMALIGN)
+      MoveWindow( hwnd,
+                  lpCreat->x,
+                  lpCreat->y+lpCreat->cy-GetSystemMetrics(SM_CYHSCROLL)-1,
+                  lpCreat->cx, GetSystemMetrics(SM_CYHSCROLL), FALSE );
+  }
+
+  return 0;
+}
+
 /***********************************************************************
  *           SCROLL_HandleScrollEvent
  *
@@ -755,16 +774,12 @@ static void SCROLL_HandleKbdEvent( HWND hwnd, WPARAM wParam )
  * 'pt' is the location of the mouse event in client (for SB_CTL) or
  * windows coordinates.
  */
-void SCROLL_HandleScrollEvent( HWND hwnd, INT nBar, UINT msg, POINT pt)
+LRESULT SCROLL_HandleScrollEvent(HWND hwnd,WPARAM wParam,LPARAM lParam,INT nBar,UINT msg)
 {
-      /* Previous mouse position for timer events */
-    static POINT prevPt;
-      /* Thumb position when tracking started. */
-    static UINT trackThumbPos;
-      /* Position in the scroll-bar of the last button-down event. */
-    static INT lastClickPos;
-      /* Position in the scroll-bar of the last mouse event. */
-    static INT lastMousePos;
+    static POINT prevPt;       /* Previous mouse position for timer events */
+    static UINT trackThumbPos; /* Thumb position when tracking started. */
+    static INT lastClickPos;   /* Position in the scroll-bar of the last button-down event. */
+    static INT lastMousePos;   /* Position in the scroll-bar of the last mouse event. */
 
     enum SCROLL_HITTEST hittest;
     HWND hwndOwner, hwndCtl;
@@ -772,11 +787,26 @@ void SCROLL_HandleScrollEvent( HWND hwnd, INT nBar, UINT msg, POINT pt)
     INT arrowSize, thumbSize, thumbPos;
     RECT rect;
     HDC hdc;
+    POINT pt;
+    LRESULT res = (msg == WM_MOUSEMOVE) ? 1:0;
 
     SCROLLBAR_INFO *infoPtr = SCROLL_GetInfoPtr( hwnd, nBar );
-    if (!infoPtr) return;
-    if ((SCROLL_trackHitTest == SCROLL_NOWHERE) && (msg != WM_LBUTTONDOWN))
-                  return;
+    if (!infoPtr) return res;
+
+    if (nBar == SB_CTL)
+    {
+      DWORD dwStyle = GetWindowLongA(hwnd,GWL_STYLE);
+
+      if ((dwStyle & (SBS_SIZEBOX | SBS_SIZEGRIP)))
+      {
+        //CB: todo
+
+        return res;
+      }
+    }
+
+    if ((SCROLL_trackHitTest == SCROLL_NOWHERE) && (msg == WM_MOUSEMOVE || msg == WM_LBUTTONUP))
+      return res;
 
     vertical = SCROLL_GetScrollBarRect( hwnd, nBar, &rect,
                                         &arrowSize, &thumbSize, &thumbPos );
@@ -786,58 +816,100 @@ void SCROLL_HandleScrollEvent( HWND hwnd, INT nBar, UINT msg, POINT pt)
       HWND hwndFrame;
 
       win32wnd = Win32BaseWindow::GetWindowFromHandle(hwnd);
-      if (!win32wnd) return;
+      if (!win32wnd) return res;
       hwndFrame = OSLibWinQueryWindow(win32wnd->getOS2WindowHandle(),QWOS_PARENT);
       win32wnd = Win32BaseWindow::GetWindowFromOS2FrameHandle(hwndFrame);
-      if (!win32wnd) return;
+      if (!win32wnd) return res;
       hwndOwner = win32wnd->getWindowHandle();
     }
 
     hwndCtl   = (nBar == SB_CTL) ? hwnd : 0;
 
-    switch(msg)
+    switch (msg)
     {
       case WM_LBUTTONDOWN:  /* Initialise mouse tracking */
-          SCROLL_trackVertical = vertical;
-          SCROLL_trackHitTest  = hittest = SCROLL_HitTest( hwnd, nBar, pt, FALSE );
-          lastClickPos  = vertical ? (pt.y - rect.top) : (pt.x - rect.left);
-          lastMousePos  = lastClickPos;
-          trackThumbPos = thumbPos;
-          prevPt = pt;
-          SetCapture( hwnd );
-          if (nBar == SB_CTL) SetFocus( hwnd );
-          break;
+        pt.x = (SHORT)LOWORD(lParam);
+        pt.y = (SHORT)HIWORD(lParam);
+        SCROLL_trackVertical = vertical;
+        SCROLL_trackHitTest  = hittest = SCROLL_HitTest( hwnd, nBar, pt, FALSE );
+        lastClickPos  = vertical ? (pt.y - rect.top) : (pt.x - rect.left);
+        lastMousePos  = lastClickPos;
+        trackThumbPos = thumbPos;
+        prevPt = pt;
+        SetCapture( hwnd );
+        if (nBar == SB_CTL) SetFocus( hwnd );
+        break;
 
       case WM_MOUSEMOVE:
-          hittest = SCROLL_HitTest( hwnd, nBar, pt, TRUE );
-          prevPt = pt;
-          break;
+        pt.x = (SHORT)LOWORD(lParam);
+        pt.y = (SHORT)HIWORD(lParam);
+        hittest = SCROLL_HitTest( hwnd, nBar, pt, TRUE );
+        prevPt = pt;
+        break;
 
       case WM_LBUTTONUP:
-          hittest = SCROLL_NOWHERE;
-          ReleaseCapture();
-          break;
+        pt.x = (SHORT)LOWORD(lParam);
+        pt.y = (SHORT)HIWORD(lParam);
+        hittest = SCROLL_NOWHERE;
+        ReleaseCapture();
+        break;
+
+      case WM_SETFOCUS:
+        if (nBar == SB_CTL)
+        {
+          SCROLL_FocusWin   = hwnd;
+          SCROLL_HasFocus   = TRUE;
+          SCROLL_Highlighted = FALSE;
+          SetSystemTimer(hwnd,BLINK_TIMER,SCROLL_BLINK_DELAY,(TIMERPROC)0);
+        }
+        return res;
+
+      case WM_KILLFOCUS:
+        if (SCROLL_FocusWin == hwnd)
+        {
+          SCROLL_FocusWin    = 0;
+          SCROLL_HasFocus    = FALSE;
+          if (SCROLL_Highlighted)
+          {
+            SCROLL_Highlighted = FALSE;
+            hdc = GetDCEx(hwnd,0,DCX_CACHE);
+            SCROLL_DrawScrollBar(hwnd,hdc,nBar,FALSE,TRUE);
+            ReleaseDC(hwnd,hdc);
+          }
+          KillSystemTimer(hwnd,BLINK_TIMER);
+        }
+        return res;
 
       case WM_SYSTIMER:
+        if (wParam == SCROLL_TIMER)
+        {
           pt = prevPt;
           hittest = SCROLL_HitTest( hwnd, nBar, pt, FALSE );
           break;
+        } else if (wParam == BLINK_TIMER)
+        {
+          SCROLL_Highlighted = ~SCROLL_Highlighted;
+          hdc = GetDCEx(hwnd,0,DCX_CACHE);
+          SCROLL_DrawScrollBar(hwnd,hdc,nBar,FALSE,TRUE);
+          ReleaseDC(hwnd,hdc);
+          return res;
+        } else return res;
 
       default:
-          return;  /* Should never happen */
+        return res;  /* Should never happen */
     }
 
-    hdc = GetDCEx( hwnd, 0, DCX_CACHE | ((nBar == SB_CTL) ? 0 : DCX_WINDOW));
+    hdc = GetDCEx(hwnd,0,DCX_CACHE | ((nBar == SB_CTL) ? 0:DCX_WINDOW));
 
     //TRACE("Event: hwnd=%04x bar=%d msg=%x pt=%ld,%ld hit=%d\n",
     //             hwnd, nBar, msg, pt.x, pt.y, hittest );
 
     switch(SCROLL_trackHitTest)
     {
-    case SCROLL_NOWHERE:  /* No tracking in progress */
+      case SCROLL_NOWHERE:  /* No tracking in progress */
         break;
 
-    case SCROLL_TOP_ARROW:
+      case SCROLL_TOP_ARROW:
         SCROLL_DrawArrows( hdc, infoPtr, &rect, arrowSize, vertical,
                            (hittest == SCROLL_trackHitTest), FALSE );
         if (hittest == SCROLL_trackHitTest)
@@ -854,7 +926,7 @@ void SCROLL_HandleScrollEvent( HWND hwnd, INT nBar, UINT msg, POINT pt)
         else KillSystemTimer( hwnd, SCROLL_TIMER );
         break;
 
-    case SCROLL_TOP_RECT:
+      case SCROLL_TOP_RECT:
         SCROLL_DrawInterior( hwnd, hdc, nBar, &rect, arrowSize, thumbSize,
                              thumbPos, infoPtr->flags, vertical,
                              (hittest == SCROLL_trackHitTest), FALSE );
@@ -872,7 +944,7 @@ void SCROLL_HandleScrollEvent( HWND hwnd, INT nBar, UINT msg, POINT pt)
         else KillSystemTimer( hwnd, SCROLL_TIMER );
         break;
 
-    case SCROLL_THUMB:
+      case SCROLL_THUMB:
         if (msg == WM_LBUTTONDOWN)
         {
             SCROLL_TrackingWin = hwnd;
@@ -920,7 +992,7 @@ void SCROLL_HandleScrollEvent( HWND hwnd, INT nBar, UINT msg, POINT pt)
         }
         break;
 
-    case SCROLL_BOTTOM_RECT:
+      case SCROLL_BOTTOM_RECT:
         SCROLL_DrawInterior( hwnd, hdc, nBar, &rect, arrowSize, thumbSize,
                              thumbPos, infoPtr->flags, vertical,
                              FALSE, (hittest == SCROLL_trackHitTest) );
@@ -938,7 +1010,7 @@ void SCROLL_HandleScrollEvent( HWND hwnd, INT nBar, UINT msg, POINT pt)
         else KillSystemTimer( hwnd, SCROLL_TIMER );
         break;
 
-    case SCROLL_BOTTOM_ARROW:
+      case SCROLL_BOTTOM_ARROW:
         SCROLL_DrawArrows( hdc, infoPtr, &rect, arrowSize, vertical,
                            FALSE, (hittest == SCROLL_trackHitTest) );
         if (hittest == SCROLL_trackHitTest)
@@ -974,131 +1046,120 @@ void SCROLL_HandleScrollEvent( HWND hwnd, INT nBar, UINT msg, POINT pt)
     }
 
     ReleaseDC( hwnd, hdc );
+
+    return res;
 }
+
+/***********************************************************************
+ *           SCROLL_HandleKbdEvent
+ *
+ * Handle a keyboard event (only for SB_CTL scrollbars).
+ */
+LRESULT SCROLL_KeyDown(HWND hwnd,WPARAM wParam,LPARAM lParam)
+{
+  DWORD dwStyle = GetWindowLongA(hwnd,GWL_STYLE);
+  UINT msg;
+
+  if (dwStyle & (SBS_SIZEBOX | SBS_SIZEGRIP)) return 0;
+
+  switch(wParam)
+  {
+    case VK_PRIOR: msg = SB_PAGEUP; break;
+    case VK_NEXT:  msg = SB_PAGEDOWN; break;
+    case VK_HOME:  msg = SB_TOP; break;
+    case VK_END:   msg = SB_BOTTOM; break;
+    case VK_UP:    msg = SB_LINEUP; break;
+    case VK_DOWN:  msg = SB_LINEDOWN; break;
+    default:
+      return 0;
+  }
+  SendMessageA( GetParent(hwnd),
+                (dwStyle & SBS_VERT) ? WM_VSCROLL : WM_HSCROLL,
+                msg, hwnd );
+
+  return 0;
+}
+
+LRESULT SCROLL_Paint(HWND hwnd,WPARAM wParam,LPARAM lParam,INT nBar)
+{
+  PAINTSTRUCT ps;
+  HDC hdc = wParam ? (HDC)wParam:BeginPaint( hwnd, &ps );
+
+  SCROLL_DrawScrollBar( hwnd, hdc, nBar, TRUE, TRUE );
+  if (!wParam) EndPaint( hwnd, &ps );
+
+  return 0;
+}
+
+LRESULT SCROLL_SetRange(HWND hwnd,WPARAM wParam,LPARAM lParam,INT nBar,BOOL redraw)
+{
+  SCROLLBAR_INFO *infoPtr = SCROLL_GetInfoPtr(hwnd,nBar);
+  INT oldPos = infoPtr->CurVal;
+
+  SetScrollRange(hwnd,nBar,wParam,lParam,redraw);
+  return (oldPos != infoPtr->CurVal) ? infoPtr->CurVal:0;
+}
+
+/* Window Procedures */
+
 /***********************************************************************
  *           ScrollBarWndProc
  */
 LRESULT WINAPI ScrollBarWndProc( HWND hwnd, UINT message, WPARAM wParam,
                                  LPARAM lParam )
 {
-    switch(message)
-    {
+  switch(message)
+  {
     case WM_NCCREATE:
-      {
-        SCROLLBAR_INFO *infoPtr = (SCROLLBAR_INFO*)malloc(sizeof(SCROLLBAR_INFO));
+      return SCROLL_NCCreate(hwnd,wParam,lParam);
 
-        infoPtr->MinVal = infoPtr->CurVal = infoPtr->Page = 0;
-        infoPtr->MaxVal = 100;
-        infoPtr->flags  = ESB_ENABLE_BOTH;
-
-        SetInfoPtr(hwnd,(DWORD)infoPtr);
-
-        if (!bitmapsLoaded) SCROLL_LoadBitmaps();
-
-        return TRUE;
-      }
     case WM_CREATE:
-        {
-            CREATESTRUCTA *lpCreat = (CREATESTRUCTA *)lParam;
-            if (lpCreat->style & SBS_SIZEBOX)
-            {
-                //FIXME("Unimplemented style SBS_SIZEBOX.\n" );
-                return 0; //CB: implement! (for frames/toolbar already done)
-            }
-
-            if (lpCreat->style & SBS_VERT)
-            {
-                if (lpCreat->style & SBS_LEFTALIGN)
-                    MoveWindow( hwnd, lpCreat->x, lpCreat->y,
-                                  GetSystemMetrics(SM_CXVSCROLL)+1, lpCreat->cy, FALSE );
-                else if (lpCreat->style & SBS_RIGHTALIGN)
-                    MoveWindow( hwnd,
-                                  lpCreat->x+lpCreat->cx-GetSystemMetrics(SM_CXVSCROLL)-1,
-                                  lpCreat->y,
-                                  GetSystemMetrics(SM_CXVSCROLL)+1, lpCreat->cy, FALSE );
-            }
-            else  /* SBS_HORZ */
-            {
-                if (lpCreat->style & SBS_TOPALIGN)
-                    MoveWindow( hwnd, lpCreat->x, lpCreat->y,
-                                  lpCreat->cx, GetSystemMetrics(SM_CYHSCROLL)+1, FALSE );
-                else if (lpCreat->style & SBS_BOTTOMALIGN)
-                    MoveWindow( hwnd,
-                                  lpCreat->x,
-                                  lpCreat->y+lpCreat->cy-GetSystemMetrics(SM_CYHSCROLL)-1,
-                                  lpCreat->cx, GetSystemMetrics(SM_CYHSCROLL)+1, FALSE );
-            }
-        }
-
-        //TRACE("ScrollBar creation, hwnd=%04x\n", hwnd );
-        return 0;
+      return SCROLL_Create(hwnd,wParam,lParam);
 
     case WM_LBUTTONDOWN:
     case WM_LBUTTONUP:
     case WM_MOUSEMOVE:
     case WM_SYSTIMER:
-        {
-            POINT pt;
-            CONV_POINT16TO32( (POINT16 *)&lParam, &pt );
-            SCROLL_HandleScrollEvent( hwnd, SB_CTL, message, pt );
-        }
-        break;
+    case WM_SETFOCUS:
+    case WM_KILLFOCUS:
+      return SCROLL_HandleScrollEvent(hwnd,wParam,lParam,SB_CTL,message);
 
     case WM_KEYDOWN:
-        SCROLL_HandleKbdEvent( hwnd, wParam );
-        break;
+      return SCROLL_KeyDown(hwnd,wParam,lParam);
 
     case WM_ERASEBKGND:
-         return 1;
+      return 1;
 
     case WM_GETDLGCODE:
-         return DLGC_WANTARROWS; /* Windows returns this value */
+      return DLGC_WANTARROWS; /* Windows returns this value */
 
     case WM_PAINT:
-        {
-            PAINTSTRUCT ps;
-            HDC hdc = BeginPaint( hwnd, &ps );
-            SCROLL_DrawScrollBar( hwnd, hdc, SB_CTL, TRUE, TRUE );
-            EndPaint( hwnd, &ps );
-        }
-        break;
+      return SCROLL_Paint(hwnd,wParam,lParam,SB_CTL);
 
     case SBM_SETPOS:
-        return SetScrollPos( hwnd, SB_CTL, wParam, (BOOL)lParam );
+      return SetScrollPos( hwnd, SB_CTL, wParam, (BOOL)lParam );
 
     case SBM_GETPOS:
-        return GetScrollPos( hwnd, SB_CTL );
+      return GetScrollPos( hwnd, SB_CTL );
 
     case SBM_SETRANGE:
-        {
-          SCROLLBAR_INFO *infoPtr = SCROLL_GetInfoPtr(hwnd,SB_CTL);
-          INT oldPos = infoPtr->CurVal;
-
-          SetScrollRange(hwnd,SB_CTL,wParam,lParam,FALSE);
-          return (oldPos != infoPtr->CurVal) ? infoPtr->CurVal:0;
-        }
+      return SCROLL_SetRange(hwnd,wParam,lParam,SB_CTL,FALSE);
 
     case SBM_GETRANGE:
-        GetScrollRange( hwnd, SB_CTL, (LPINT)wParam, (LPINT)lParam );
-        return 0;
+      GetScrollRange( hwnd, SB_CTL, (LPINT)wParam, (LPINT)lParam );
+      return 0;
 
     case SBM_ENABLE_ARROWS:
-        return EnableScrollBar( hwnd, SB_CTL, wParam );
+      return EnableScrollBar( hwnd, SB_CTL, wParam );
 
     case SBM_SETRANGEREDRAW:
-        {
-          SCROLLBAR_INFO *infoPtr = SCROLL_GetInfoPtr(hwnd,SB_CTL);
-          INT oldPos = infoPtr->CurVal;
-
-          SetScrollRange(hwnd,SB_CTL,wParam,lParam,TRUE);
-          return (oldPos != infoPtr->CurVal) ? infoPtr->CurVal:0;
-        }
+      return SCROLL_SetRange(hwnd,wParam,lParam,SB_CTL,TRUE);
 
     case SBM_SETSCROLLINFO:
-        return SetScrollInfo( hwnd, SB_CTL, (SCROLLINFO *)lParam, wParam );
+      return SetScrollInfo( hwnd, SB_CTL, (SCROLLINFO *)lParam, wParam );
 
     case SBM_GETSCROLLINFO:
-        return GetScrollInfo( hwnd, SB_CTL, (SCROLLINFO *)lParam );
+      return GetScrollInfo( hwnd, SB_CTL, (SCROLLINFO *)lParam );
 
     case 0x00e5:
     case 0x00e7:
@@ -1114,26 +1175,17 @@ LRESULT WINAPI ScrollBarWndProc( HWND hwnd, UINT message, WPARAM wParam,
 
     default:
       return DefWindowProcA( hwnd, message, wParam, lParam );
-    }
-    return 0;
+  }
+
+  return 0;
 }
 
 /* frame handlers */
 
 VOID SCROLL_SubclassScrollBars(HWND hwndHorz,HWND hwndVert)
 {
-  if (hwndHorz)
-  {
-    SetWindowLongA(hwndHorz,GWL_WNDPROC,(ULONG)HorzScrollBarWndProc);
-    //windowClass = Win32WndClass::FindClass(cs->hInstance, (LPSTR)classAtom);
-//    InvalidateRect(hwndHorz,NULL,FALSE);
-  }
-
-  if (hwndVert)
-  {
-    SetWindowLongA(hwndVert,GWL_WNDPROC,(ULONG)VertScrollBarWndProc);
-//    InvalidateRect(hwndVert,NULL,FALSE);
-  }
+  if (hwndHorz) SetWindowLongA(hwndHorz,GWL_WNDPROC,(ULONG)HorzScrollBarWndProc);
+  if (hwndVert) SetWindowLongA(hwndVert,GWL_WNDPROC,(ULONG)VertScrollBarWndProc);
 
   if (!bitmapsLoaded) SCROLL_LoadBitmaps();
 }
@@ -1146,68 +1198,43 @@ LRESULT WINAPI HorzScrollBarWndProc(HWND hwnd,UINT message,WPARAM wParam,LPARAM 
     case WM_LBUTTONUP:
     case WM_MOUSEMOVE:
     case WM_SYSTIMER:
-        {
-            POINT pt;
-            CONV_POINT16TO32( (POINT16 *)&lParam, &pt );
-            SCROLL_HandleScrollEvent( hwnd, SB_HORZ, message, pt );
-            if(message == WM_MOUSEMOVE) {
-                return 1; //SvL: Let PM change the mouse cursor to the default
-            }
-        }
-        break;
+    case WM_SETFOCUS:
+    case WM_KILLFOCUS:
+      return SCROLL_HandleScrollEvent(hwnd,wParam,lParam,SB_HORZ,message);
 
     case WM_ERASEBKGND:
-         return 1;
+      return 1;
 
     case WM_GETDLGCODE:
-         return DLGC_WANTARROWS; /* Windows returns this value */
+      return DLGC_WANTARROWS; /* Windows returns this value */
 
     case WM_PAINT:
-      {
-        PAINTSTRUCT ps;
-
-        HDC hdc = BeginPaint( hwnd, &ps );
-        SCROLL_DrawScrollBar( hwnd, hdc, SB_HORZ, TRUE, TRUE );
-        EndPaint( hwnd, &ps );
-      }
-      break;
+      return SCROLL_Paint(hwnd,wParam,lParam,SB_HORZ);
 
     case SBM_SETPOS:
       return SetScrollPos( hwnd, SB_HORZ, wParam, (BOOL)lParam );
 
     case SBM_GETPOS:
-        return GetScrollPos( hwnd, SB_HORZ );
+      return GetScrollPos( hwnd, SB_HORZ );
 
     case SBM_SETRANGE:
-        {
-          SCROLLBAR_INFO *infoPtr = SCROLL_GetInfoPtr(hwnd,SB_HORZ);
-          INT oldPos = infoPtr->CurVal;
-
-          SetScrollRange(hwnd,SB_HORZ,wParam,lParam,FALSE);
-          return (oldPos != infoPtr->CurVal) ? infoPtr->CurVal:0;
-        }
+      return SCROLL_SetRange(hwnd,wParam,lParam,SB_HORZ,FALSE);
 
     case SBM_GETRANGE:
-        GetScrollRange( hwnd, SB_HORZ, (LPINT)wParam, (LPINT)lParam );
-        return 0;
+      GetScrollRange( hwnd, SB_HORZ, (LPINT)wParam, (LPINT)lParam );
+      return 0;
 
     case SBM_ENABLE_ARROWS:
-        return EnableScrollBar( hwnd, SB_HORZ, wParam );
+      return EnableScrollBar( hwnd, SB_HORZ, wParam );
 
     case SBM_SETRANGEREDRAW:
-        {
-          SCROLLBAR_INFO *infoPtr = SCROLL_GetInfoPtr(hwnd,SB_HORZ);
-          INT oldPos = infoPtr->CurVal;
-
-          SetScrollRange(hwnd,SB_HORZ,wParam,lParam,TRUE);
-          return (oldPos != infoPtr->CurVal) ? infoPtr->CurVal:0;
-        }
+      return SCROLL_SetRange(hwnd,wParam,lParam,SB_HORZ,TRUE);
 
     case SBM_SETSCROLLINFO:
-        return SetScrollInfo( hwnd, SB_HORZ, (SCROLLINFO *)lParam, wParam );
+      return SetScrollInfo( hwnd, SB_HORZ, (SCROLLINFO *)lParam, wParam );
 
     case SBM_GETSCROLLINFO:
-        return GetScrollInfo( hwnd, SB_HORZ, (SCROLLINFO *)lParam );
+      return GetScrollInfo( hwnd, SB_HORZ, (SCROLLINFO *)lParam );
 
     default:
       return DefWindowProcA(hwnd,message,wParam,lParam);
@@ -1224,68 +1251,43 @@ LRESULT WINAPI VertScrollBarWndProc(HWND hwnd,UINT message,WPARAM wParam,LPARAM 
     case WM_LBUTTONUP:
     case WM_MOUSEMOVE:
     case WM_SYSTIMER:
-        {
-            POINT pt;
-            CONV_POINT16TO32( (POINT16 *)&lParam, &pt );
-            SCROLL_HandleScrollEvent( hwnd, SB_VERT, message, pt );
-            if(message == WM_MOUSEMOVE) {
-                return 1; //SvL: Let PM change the mouse cursor to the default
-            }
-        }
-        break;
+    case WM_SETFOCUS:
+    case WM_KILLFOCUS:
+      return SCROLL_HandleScrollEvent(hwnd,wParam,lParam,SB_VERT,message);
 
     case WM_ERASEBKGND:
-         return 1;
+      return 1;
 
     case WM_GETDLGCODE:
-         return DLGC_WANTARROWS; /* Windows returns this value */
+      return DLGC_WANTARROWS; /* Windows returns this value */
 
     case WM_PAINT:
-      {
-        PAINTSTRUCT ps;
-
-        HDC hdc = BeginPaint( hwnd, &ps );
-        SCROLL_DrawScrollBar( hwnd, hdc, SB_VERT, TRUE, TRUE );
-        EndPaint( hwnd, &ps );
-      }
-      break;
+      return SCROLL_Paint(hwnd,wParam,lParam,SB_VERT);
 
     case SBM_SETPOS:
       return SetScrollPos( hwnd, SB_VERT, wParam, (BOOL)lParam );
 
     case SBM_GETPOS:
-        return GetScrollPos( hwnd, SB_VERT );
+      return GetScrollPos( hwnd, SB_VERT );
 
     case SBM_SETRANGE:
-        {
-          SCROLLBAR_INFO *infoPtr = SCROLL_GetInfoPtr(hwnd,SB_VERT);
-          INT oldPos = infoPtr->CurVal;
-
-          SetScrollRange(hwnd,SB_VERT,wParam,lParam,FALSE);
-          return (oldPos != infoPtr->CurVal) ? infoPtr->CurVal:0;
-        }
+      return SCROLL_SetRange(hwnd,wParam,lParam,SB_VERT,FALSE);
 
     case SBM_GETRANGE:
-        GetScrollRange( hwnd, SB_VERT, (LPINT)wParam, (LPINT)lParam );
-        return 0;
+      GetScrollRange( hwnd, SB_VERT, (LPINT)wParam, (LPINT)lParam );
+      return 0;
 
     case SBM_ENABLE_ARROWS:
-        return EnableScrollBar( hwnd, SB_VERT, wParam );
+      return EnableScrollBar( hwnd, SB_VERT, wParam );
 
     case SBM_SETRANGEREDRAW:
-        {
-          SCROLLBAR_INFO *infoPtr = SCROLL_GetInfoPtr(hwnd,SB_VERT);
-          INT oldPos = infoPtr->CurVal;
-
-          SetScrollRange(hwnd,SB_VERT,wParam,lParam,TRUE);
-          return (oldPos != infoPtr->CurVal) ? infoPtr->CurVal:0;
-        }
+      return SCROLL_SetRange(hwnd,wParam,lParam,SB_VERT,TRUE);
 
     case SBM_SETSCROLLINFO:
-        return SetScrollInfo( hwnd, SB_VERT, (SCROLLINFO *)lParam, wParam );
+      return SetScrollInfo( hwnd, SB_VERT, (SCROLLINFO *)lParam, wParam );
 
     case SBM_GETSCROLLINFO:
-        return GetScrollInfo( hwnd, SB_VERT, (SCROLLINFO *)lParam );
+      return GetScrollInfo( hwnd, SB_VERT, (SCROLLINFO *)lParam );
 
     default:
       return DefWindowProcA(hwnd,message,wParam,lParam);
@@ -1294,6 +1296,9 @@ LRESULT WINAPI VertScrollBarWndProc(HWND hwnd,UINT message,WPARAM wParam,LPARAM 
   return 0;
 }
 
+/* Scrollbar API */
+
+//CB: fix hide/show bugs
 
 /*************************************************************************
  *           SetScrollInfo32   (USER32.501)

@@ -1,4 +1,4 @@
-/* $Id: timer.cpp,v 1.5 1999-10-22 18:11:47 sandervl Exp $ */
+/* $Id: timer.cpp,v 1.6 1999-10-23 16:45:21 cbratschi Exp $ */
 
 /*
  * timer functions for USER32
@@ -26,7 +26,8 @@
 #define OPEN32API _System
 #endif
 
-#define WM_TIMER_W 0x0113
+#define WM_TIMER_W    0x0113
+#define WM_SYSTIMER_W 0x0118
 typedef VOID (CALLBACK *TIMERPROC)(HWND hwnd, UINT msg, UINT id, DWORD dwTime);
 
 typedef struct tagTIMER
@@ -61,6 +62,24 @@ inline void LeaveCriticalSection (void)
    DosReleaseMutexSem (hSemTimer);
 }
 
+BOOL TIMER_GetTimerInfo(HWND PMhwnd,ULONG PMid,PBOOL sys,PULONG id)
+{
+  int i;
+  TIMER *pTimer;
+
+  for (i = 0, pTimer = TimersArray; i < NB_TIMERS; i++, pTimer++)
+      if (pTimer->inUse && (pTimer->PMhwnd == PMhwnd) && (pTimer->PMid == PMid))
+          break;
+
+  if (i == NB_TIMERS)  /* no matching timer found */
+      return (FALSE);  /* forward message */
+
+  *sys = pTimer->inUse == TIMER::SystemTimer;
+  *id  = pTimer->id;
+
+  return TRUE;
+}
+
 BOOL TIMER_HandleTimer (PQMSG pMsg)
 {
     int i;
@@ -75,13 +94,12 @@ BOOL TIMER_HandleTimer (PQMSG pMsg)
     if (i == NB_TIMERS)  /* no matching timer found */
         return (FALSE);  /* forward message */
 
-    pMsg->mp1 = MPFROMLONG (pTimer->id);
     pMsg->mp2 = MPFROMLONG (TRUE);   /* mark for Win32 */
     if (!pTimer->proc)
         return (FALSE);  /* forward message */
 
     if (!WinInSendMsg (GetThreadHAB()))
-        pTimer->proc (pTimer->hwnd, WM_TIMER_W, pTimer->id, pMsg->time);
+        pTimer->proc (pTimer->hwnd, (pTimer->inUse == TIMER::SystemTimer) ? WM_SYSTIMER_W:WM_TIMER_W, pTimer->id, pMsg->time);
 
     return (TRUE);
 }
@@ -99,7 +117,7 @@ static UINT TIMER_SetTimer (HWND hwnd, UINT id, UINT timeout, TIMERPROC proc, BO
     /* Check if there's already a timer with the same hwnd and id */
 
     for (i = 0, pTimer = TimersArray; i < NB_TIMERS; i++, pTimer++)
-        if (pTimer->inUse && (pTimer->hwnd == hwnd) && (pTimer->id == id))
+        if (pTimer->inUse && (pTimer->hwnd == hwnd) && (pTimer->id == id) && ((sys && pTimer->inUse == TIMER::SystemTimer) || !sys))
             break;
 
     if (i == NB_TIMERS)  /* no matching timer found */
@@ -150,7 +168,7 @@ static BOOL TIMER_KillTimer (HWND hwnd, UINT id, BOOL sys)
 
     for (i = 0, pTimer = TimersArray; i < NB_TIMERS; i++, pTimer++)
         if (pTimer->inUse &&
-            (pTimer->hwnd == hwnd) && (pTimer->id == id)) break;
+            (pTimer->hwnd == hwnd) && (pTimer->id == id) && ((sys && pTimer->inUse == TIMER::SystemTimer) || !sys)) break;
 
     if ((i >= NB_TIMERS) ||
         (!sys && (i >= NB_TIMERS-NB_RESERVED_TIMERS)) ||

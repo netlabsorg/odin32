@@ -1,4 +1,4 @@
-/* $Id: user32.cpp,v 1.46 1999-10-20 22:35:54 sandervl Exp $ */
+/* $Id: user32.cpp,v 1.47 1999-10-23 16:45:22 cbratschi Exp $ */
 
 /*
  * Win32 misc user32 API functions for OS/2
@@ -950,9 +950,30 @@ int WIN32API GetSystemMetrics(int nIndex)
     case SM_MIDEASTENABLED:
         rc = FALSE;
         break;
+    case SM_MOUSEWHEELPRESENT:
+        rc = FALSE;
+        break;
+    case SM_XVIRTUALSCREEN:
+        rc = 0;
+        break;
+    case SM_YVIRTUALSCREEN:
+        rc = 0;
+        break;
+    case SM_CXVIRTUALSCREEN:
+        rc = OSLibWinQuerySysValue(OSLIB_HWND_DESKTOP,SVOS_CXSCREEN);
+        break;
+    case SM_CYVIRTUALSCREEN:
+        rc = OSLibWinQuerySysValue(OSLIB_HWND_DESKTOP,SVOS_CYSCREEN);
+        break;
+    case SM_CMONITORS:
+        rc = 1;
+        break;
+    case SM_SAMEDISPLAYFORMAT:
+        rc = TRUE;
+        break;
     case SM_CMETRICS:
-        //CB: replace with const
-        rc = O32_GetSystemMetrics(44);  //Open32 changed this one
+        rc = 81;
+        //rc = O32_GetSystemMetrics(44);  //Open32 changed this one
         break;
     default:
         //better than nothing

@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.60 1999-10-23 10:21:44 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.61 1999-10-23 16:45:23 cbratschi Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -813,6 +813,13 @@ ULONG Win32BaseWindow::MsgTimer(ULONG TimerID)
 {
   // TODO: call TIMERPROC if not NULL
   return SendInternalMessageA(WM_TIMER, TimerID, 0);
+}
+//******************************************************************************
+//******************************************************************************
+ULONG Win32BaseWindow::MsgSysTimer(ULONG TimerID)
+{
+  // TODO: call TIMERPROC if not NULL
+  return SendInternalMessageA(WM_SYSTIMER, TimerID, 0);
 }
 //******************************************************************************
 //******************************************************************************
