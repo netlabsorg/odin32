@@ -1,4 +1,4 @@
-/* $Id: LdrCalls.h,v 1.6 2000-09-22 09:22:37 bird Exp $
+/* $Id: LdrCalls.h,v 1.7 2000-12-11 06:45:03 bird Exp $
  *
  * Prototypes for the loader overrided function.
  *
@@ -18,6 +18,9 @@ extern "C" {
 *   Defined Constants And Macros                                               *
 *******************************************************************************/
 #define LDRCALL __stdcall
+
+/** Additional ldrFindModule flag. Or together with the class. */
+#define SEARCH_FULL_NAME    0x0001
 
 
 /**
@@ -224,7 +227,14 @@ ULONG LDRCALL myldrOpenPath(PCHAR pachFilename, USHORT cchFilename, ldrlv_t *plv
  * @param       ppMTE           Pointer to pMTE found.
  * @sketch
  */
-ULONG LDRCALL ldrFindModule(PCHAR pachFilename, USHORT cchFilename, USHORT usClass, PPMTE ppMTE);
+ULONG LDRCALL ldrFindModule(        /* retd  0x10 */
+    PCHAR       pachFilename,       /* ebp + 0x08 */
+    USHORT      cchFilename,        /* ebp + 0x0c */
+    USHORT      usClass,            /* ebp + 0x10 */
+    PPMTE       ppMTE               /* ebp + 0x14 */
+    );
+
+ULONG LDRCALL myldrFindModule(PCHAR pachFilename, USHORT cchFilename, USHORT usClass, PPMTE ppMTE);
 
 
 /**
@@ -273,6 +283,15 @@ extern PMTE KRNLCALL ldrASMpMTEFromHandle(HMTE  hMTE);
 
 
 /**
+ * Translates a relative filename to a full qualified filename.
+ * @returns NO_ERROR on success.
+ *          Errorcode on error.
+ * @param   pszFilename     Pointer to nullterminated filename.
+ */
+extern ULONG LDRCALL ldrTransPath(PSZ pszFilename);
+
+
+/**
  * Sets the VM flags for an executable object.
  * @returns     void
  * @param       pMTE        Pointer to the module table entry.
@@ -288,6 +307,50 @@ extern VOID LDRCALL  ldrSetVMflags( /* retd  0x10 */
     );
 
 VOID LDRCALL myldrSetVMflags(PMTE pMTE, ULONG flObj, PULONG pflFlags1, PULONG pflFlags2);
+
+
+/**
+ * Checks if the internal name (first name in the resident nametable) matches
+ * the filename.
+ * @returns     NO_ERROR on success (the name matched).
+ *              ERROR_INVALID_NAME if mismatch.
+ * @param       pMTE    Pointer to the MTE of the module to check.<br>
+ *                      Assumes! that the filename for this module is present in ldrpFileNameBuf.
+ */
+extern ULONG LDRCALL    ldrCheckInternalName( /* retd  0x04 */
+    PMTE        pMTE                /* ebp + 0x08 */
+    );
+
+ULONG LDRCALL myldrCheckInternalName(PMTE pMTE);
+
+
+/**
+ * Parses a filename to find the name and extention.
+ * @returns Length of the filename without the extention.
+ * @param   pachFilename    Pointer to filename to parse - must have path!
+ * @param   ppachName       Pointer to pointer which should hold the name pointer upon successfull return.
+ * @param   ppachExt        Pointer to pointer which should hold the extention pointer upon successfull return.
+ */
+extern ULONG LDRCALL    ldrGetFileName(PSZ pszFilename, PCHAR *ppchName, PCHAR *ppchExt);
+
+
+/**
+ * Parses a filename to find the name and extention.
+ * @returns Length of the filename without the extention.
+ * @param   pachFilename    Pointer to filename to parse - path not needed.
+ * @param   ppachName       Pointer to pointer which should hold the name pointer upon successfull return.
+ * @param   ppachExt        Pointer to pointer which should hold the extention pointer upon successfull return.
+ */
+extern ULONG LDRCALL    ldrGetFileName2(PSZ pszFilename, PCHAR *ppchName, PCHAR *ppchExt);
+
+
+/**
+ * Uppercase a string.
+ * @returns void
+ * @param   pach    String to uppercase.
+ * @param   cch     Length of string. (may include terminator)
+ */
+extern VOID LDRCALL     ldrUCaseString(PCHAR pch, unsigned cch);
 
 
 /**
