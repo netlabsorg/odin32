@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.1 1999-12-28 13:02:56 sandervl Exp $
+# $Id: makefile,v 1.2 2000-02-03 22:50:28 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -21,7 +21,7 @@ CXXFLAGS = $(CXXFLAGS) -I$(PDWIN32_INCLUDE)
 
 TARGET = wininet
 
-OBJS =  wininet.obj initterm.obj
+OBJS =  wininet.obj initterm.obj ftp.obj utility.obj internet.obj
 
 all: $(TARGET).dll $(TARGET).lib
 
@@ -30,7 +30,7 @@ $(TARGET).dll: $(OBJS) $(TARGET).def
 	$(LD) $(LDFLAGS) -Fm -Fe$@ $(OBJS) $(TARGET).def \
               $(PDWIN32_LIB)/pmwinx.lib $(PDWIN32_LIB)/kernel32.lib \
               $(PDWIN32_LIB)/user32.lib $(PDWIN32_LIB)/odincrt.lib \
-              OS2386.LIB $(RTLLIB_O)
+              $(PDWIN32_LIB)/wsock32.lib OS2386.LIB $(RTLLIB_O)
 	$(CP) $@ $(PDWIN32_BIN)
 
 
@@ -44,9 +44,12 @@ $(TARGET)exp.def: $(TARGET).def
 
 wininet.obj: wininet.cpp
 initterm.obj: initterm.cpp
+ftp.obj: ftp.c internet.h
+utility.obj: utility.c internet.h
+internet.obj: internet.c internet.h
 
 clean:
-	$(RM) *.obj *.lib *.dll *.map *.pch
+	$(RM) *.obj *.lib *.dll *exp.def *.map *.pch
 	$(RM) $(PDWIN32_BIN)\$(TARGET).dll
 	$(RM) $(PDWIN32_LIB)\$(TARGET).lib
 
