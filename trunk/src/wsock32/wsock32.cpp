@@ -1,4 +1,4 @@
-/* $Id: wsock32.cpp,v 1.50 2003-02-17 12:27:28 sandervl Exp $ */
+/* $Id: wsock32.cpp,v 1.51 2003-02-24 11:14:56 sandervl Exp $ */
 
 /*
  *
@@ -1491,9 +1491,18 @@ ODINFUNCTION1(ws_hostent *,OS2gethostbyname,
 
   if( pwsi )
   {
-    struct hostent*     host;
-    
+    struct hostent* host;
+    char            localhostname[256];
+
     dprintf(("gethostbyname %s", name));
+    if(gethostname(localhostname, sizeof(localhostname)) == NO_ERROR) 
+    {
+        if(!strcmp(name, localhostname)) {
+            strcpy(localhostname, "localhost");
+            name = localhostname;
+            dprintf(("using localhost"));
+        }
+    }
 
     host = gethostbyname( (char*) name);
     
