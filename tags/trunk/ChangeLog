@@ -1,4 +1,4 @@
- /* $Id: ChangeLog,v 1.1018 2000-07-01 09:52:22 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.1019 2000-07-01 12:52:22 sandervl Exp $ */
 
  2000-06-30: Sander van Leeuwen <sandervl@xs4all.nl>
     - PELDR:       Fixed bug in command line parser
@@ -7,6 +7,7 @@
                    rest is not)
                    Fixed alias check in ReadFile (include offset & size) and 
                    added the same check to WriteFile
+                   Fixed bug in OpenFile (don't set structure to 0 for OF_REOPEN mode)
     - USER32:      Don't send WM_ACTIVATE in WM_WINDOWPOSCHANGED if window
                    already active (endless loop in Lotus Notes)
                    Move children if client area changed (only if window
