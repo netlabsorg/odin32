@@ -1,4 +1,4 @@
-# $Id: odin32.dbg.wat.mk,v 1.7 2002-02-23 23:51:49 bird Exp $
+# $Id: odin32.dbg.wat.mk,v 1.8 2002-05-16 12:13:35 sandervl Exp $
 
 #
 # Odin32 API
@@ -85,9 +85,9 @@ CXXFLAGS_WIN32APP= -w4 -wcd=726 -e25 -od -d2 -hw -bm -mf -5r -bt=os2 -zq -fp5 -f
 CINCLUDES        = -I$(%WATCOM)\h -I$(ODIN32_INCLUDE)\Win -I. -I$(ODIN32_INCLUDE)
 CDEFINES_WIN32APP= -DDEBUG -D__WIN32OS2__ -D__i386__
 CDEFINES_ODINCRT = -DDEBUG -D__WIN32OS2__ -D__i386__ -D__WINE__
-CDEFINES         = -DDEBUG -D__WIN32OS2__ -D__i386__ -D__WINE__ -DTCPV40HDRS -DCOMCTL32UNDOC \
+CDEFINES         = -DDEBUG -D__WIN32OS2__ -D__i386__ -D__WINE__ -DTCPV40HDRS -DCOMCTL32UNDOC 
 !ifdef DEBUGALL
-                   -DDEBUG_ENABLELOG_LEVEL2 \
+                   -DDEBUG_ENABLELOG_LEVEL2 
 !endif
 !ifdef NODEBUGINFO
                    -DDEFAULT_LOGGING_OFF

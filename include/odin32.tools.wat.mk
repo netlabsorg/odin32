@@ -1,4 +1,4 @@
-# $Id: odin32.tools.wat.mk,v 1.6 2001-09-30 09:46:17 bird Exp $
+# $Id: odin32.tools.wat.mk,v 1.7 2002-05-16 12:13:36 sandervl Exp $
 
 #
 # Odin32 API
@@ -58,16 +58,16 @@ MAKE_CMD    = $(MAKE_CMDLINE) # -f makefile.os2 # What is this?
 
 .c.obj:   .AUTODEPEND
 !ifdef USERAPP
-    $(CC) $(CFLAGS) $(CINCLUDES) $(CDEFINES_WIN32APP) -fo$(OBJDIR)\$^&.obj $^&.c
+    $(CC) $(CFLAGS) $(CINCLUDES) $(CDEFINES_WIN32APP) -fo=$(OBJDIR)\$^&.obj $^&.c
 !else
-    $(CC) $(CFLAGS) $(CINCLUDES) $(CDEFINES) -fo$(OBJDIR)\$^&.obj $^&.c
+    $(CC) $(CFLAGS) $(CINCLUDES) $(CDEFINES) -fo=$(OBJDIR)\$^&.obj $^&.c
 !endif
 
 .cpp.obj: .AUTODEPEND
 !ifdef USERAPP
-    $(CC) $(CXXFLAGS) $(CINCLUDES) $(CDEFINES_WIN32APP) -fo$(OBJDIR)\$^&.obj $^&.c
+    $(CC) $(CXXFLAGS) $(CINCLUDES) $(CDEFINES_WIN32APP) -fo=$(OBJDIR)\$^&.obj $^&.c
 !else
-    $(CXX) $(CXXFLAGS) $(CINCLUDES) $(CDEFINES) -fo$(OBJDIR)\$^&.obj $^&.cpp
+    $(CXX) $(CXXFLAGS) $(CINCLUDES) $(CDEFINES) -fo=$(OBJDIR)\$^&.obj $^&.cpp
 !endif
 
 .asm.obj:
