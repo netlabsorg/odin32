@@ -1,4 +1,4 @@
-; $Id: ntdll.def,v 1.32 2000-01-31 22:31:25 sandervl Exp $
+; $Id: ntdll.def,v 1.33 2000-03-29 17:37:04 sandervl Exp $
 
 ;
 ; Based on NT 4.0 SP6: NTDLL.DLL 
@@ -587,7 +587,7 @@ EXPORTS
     RtlUnicodeToOemN              = _RtlUnicodeToOemN@20              	@572
 ;   RtlUniform								@573
 ;   RtlUnlockHeap							@574
-    RtlUnwind                  = RtlUnwindAsm                   	@575
+    RtlUnwind                  = _RtlUnwind@16                   	@575
 ;   RtlUpcaseUnicodeChar						@576
     RtlUpcaseUnicodeString        = _RtlUpcaseUnicodeString@12          @577
     RtlUnicodeStringToAnsiString  = _RtlUnicodeStringToAnsiString@12  	@578
