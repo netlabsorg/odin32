@@ -1,6 +1,12 @@
- /* $Id: changelog,v 1.152 1999-08-29 14:57:11 sandervl Exp $ */
+ /* $Id: changelog,v 1.153 1999-08-29 20:04:42 sandervl Exp $ */
 
  99-08-29: Sander van Leeuwen <sandervl@xs4all.nl>
+	- USER32\NEW: Changed behaviour of mouse messages (send NC messages
+                      when in non-client area + send WM_SETCURSOR msgs)
+	              Don't send WM_MOUSEMOVE when mouse is captured.
+		      Changed CreateMDIWindowA/W (don't call Open32 api anymore,
+                      but post WM_MDICREATE msg)
+                      
 	- KERNEL32 Interlock apis ported from Wine (with help of Patrick Haller)
 	- INC: Removed Masm compatible flag for ALP and enabled debugging
                info in debug build
