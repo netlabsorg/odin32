@@ -1,4 +1,4 @@
-/* $Id: winimage.h,v 1.9 1999-08-22 14:25:13 sandervl Exp $ */
+/* $Id: winimage.h,v 1.10 1999-08-23 17:04:14 sandervl Exp $ */
 
 /*
  *
@@ -155,6 +155,8 @@ static  BOOL  isPEImage(char *szFileName);
 
 	void  tlsAttachThread();	//setup TLS structures for new thread
 	void  tlsDetachThread();	//destroy TLS structures
+
+virtual BOOL  isDll() = 0;
 
 protected:
 	void tlsAlloc();		//Allocate TLS index for this module
