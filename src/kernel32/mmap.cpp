@@ -1,4 +1,4 @@
-/* $Id: mmap.cpp,v 1.70 2004-03-18 13:13:50 sandervl Exp $ */
+/* $Id: mmap.cpp,v 1.71 2004-04-02 15:46:33 sandervl Exp $ */
 
 /*
  * Win32 Memory mapped file & view classes
@@ -274,7 +274,7 @@ BOOL Win32MemMap::commitRange(ULONG ulFaultAddr, ULONG offset, BOOL fWriteAccess
 
     if(fWriteAccess) 
     {//writes are handled on a per-page basis
-        for(int i=i;i<nrpages;i++) 
+        for(int i=0;i<nrpages;i++) 
         {
             if(commitPage(ulFaultAddr, offset, TRUE, 1) == FALSE) {
                 dprintf(("Win32MemMap::commit: commitPage failed!!"));
