@@ -1,4 +1,4 @@
-/* $Id: string.cpp,v 1.2 2000-05-19 12:10:04 sandervl Exp $ */
+/* $Id: string.cpp,v 1.3 2000-06-11 08:44:55 phaller Exp $ */
 
 /*
  * Win32 Lightweight SHELL32 for OS/2
@@ -502,7 +502,7 @@ ODINFUNCTION2(LPWSTR,  StrStrIW,
  * Parameters: Unknown (wrong)
  * Variables :
  * Result    : Unknown
- * Remark    :
+ * Remark    : SHLWAPI.675
  * Status    : UNTESTED STUB
  *
  * Author    : Christoph Bratschi [Wed, 2000/03/29 19:47]

@@ -1,4 +1,4 @@
-; $Id: shlwapi.def,v 1.14 2000-05-19 12:10:04 sandervl Exp $
+; $Id: shlwapi.def,v 1.15 2000-06-11 08:44:55 phaller Exp $
 
 ; updated export ordinals to NT4 SP6 version of SHLWAPI.DLL
 ; Note: W95/W98 has DIFFERENT export ordinals
@@ -8,6 +8,58 @@ DATA MULTIPLE NONSHARED
 
 
 EXPORTS
+
+; --------------------
+; Ordinal-only exports
+; --------------------
+
+
+                             _SHLWAPI_1@8                         @1
+                             _SHLWAPI_2@8                         @2
+                             _SHLWAPI_3@8                         @3
+                             _SHLWAPI_4@8                         @4
+                             _SHLWAPI_5@12                        @5
+                             _SHLWAPI_6@12                        @6
+                             _SHLWAPI_7@12                        @7
+                             _SHLWAPI_8@8                         @8
+                             _SHLWAPI_9@4                         @9
+                             _SHLWAPI_10@8                        @10
+                             _SHLWAPI_11@20                       @11
+                             _SHLWAPI_12@8                        @12
+                             _SHLWAPI_13@8                        @13
+                             _SHLWAPI_14@8                        @14
+                             _SHLWAPI_15@8                        @15
+    SHCreateThread         = _SHCreateThread@16                   @16
+
+                             _SHLWAPI_23@12                       @23
+                             _SHLWAPI_28@4                        @28
+                             _CallWindowProcAW@20                 @37
+                             _SHLWAPI_38@4                        @38
+                             _SHLWAPI_40@4                        @40
+                             _SHLWAPI_43@4                        @43
+                             _SHLWAPI_53@4                        @53
+                             _sDefWindowProcAW@16                 @56
+                             _SHLWAPI_59@20                       @59
+                             _DispatchMessageAW@4                 @60
+                             _SHLWAPI_74@16                       @74
+                             _GetModuleHandleAW@4                 @83
+                             _GetWindowLongAW@8                   @94
+                             _SHLWAPI_95@12                       @95
+                             _LoadCursorAW@8                      @102
+                             _PeekMessageAW@20                    @116
+                             _PostMessageAW@16                    @117
+                             _SHLWAPI_158@8                       @158
+                             _SHLWAPI_197@12                      @197
+                             _DefWindowProcAW@16                  @240
+    StrToIntA              = _StrToIntA@4                         @675
+    PathFindOnPathA        = _PathFindOnPathA@8                   @479
+
+
+
+; --------------
+; Export by name
+; --------------
+
   ; ChrCmpIA               = _ChrCmpIA@?                          @162
   ; ChrCmpIW               = _ChrCmpIW@?                          @163
   ; DllGetVersion          = _DllGetVersion@?                     @164
@@ -43,7 +95,6 @@ EXPORTS
     PathFindFileNameW      = _PathFindFileNameW@4                 @194
     PathFindNextComponentA = _PathFindNextComponentA@4            @195
     PathFindNextComponentW = _PathFindNextComponentW@4            @196
-    PathFindOnPathA        = _PathFindOnPathA@8                   @197
     PathFindOnPathW        = _PathFindOnPathW@8                   @198
     PathGetArgsA           = _PathGetArgsA@4                      @199
     PathGetArgsW           = _PathGetArgsW@4                      @200
@@ -205,7 +256,8 @@ EXPORTS
     StrStrIA               = _StrStrIA@8                          @355
     StrStrIW               = _StrStrIW@8                          @356
   ; StrStrW                = _StrStrW@8                           @357
-    StrToIntA              = _StrToIntA@4                         @358
+
+
   ; StrToIntExA            = _StrToIntExA@?                       @359
   ; StrToIntExW            = _StrToIntExW@?                       @360
   ; StrToIntW              = _StrToIntW@4                         @361
