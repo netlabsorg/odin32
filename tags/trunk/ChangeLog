@@ -1,4 +1,8 @@
- /* $Id: ChangeLog,v 1.103 1999-08-19 12:52:12 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.104 1999-08-19 13:15:04 phaller Exp $ */
+
+ 99-08-19: Patrick Haller <phaller@gmx.net>
+        - WNETAP32: odinwrap macros
+
  99-08-19: Sander van Leeuwen <sandervl@xs4all.nl>
 	- KERNEL32: PE loader resource fixes + ConvertNameId bugfix
 	- KERNEL32: Used Odin wrappers for profile apis (mess up FS)
