@@ -17,7 +17,7 @@ DEFAULT_DEBUG_CHANNEL(setupapi);
 /***********************************************************************
  *		SetupCloseFileQueue
  */
-VOID WINAPI SetupCloseFileQueue(HSPFILEQ QueueHandle)
+BOOL WINAPI SetupCloseFileQueue(HSPFILEQ QueueHandle)
 {
 	FIXME("not implemented (setupapi.dll) \n");
 }
@@ -57,7 +57,7 @@ BOOL WINAPI SetupIterateCabinetW(PWSTR CabinetFile, DWORD Reserved,
 /***********************************************************************
  *		SetupGetLineTextA
  */
-BOOL WINAPI SetupGetLineTextA (PINFCONTEXT Context, HINF InfHandle,
+BOOL WINAPI SetupGetLineTextA (const INFCONTEXT *Context, HINF InfHandle,
                         PCSTR Section, PCSTR Key, LPSTR ReturnBuffer,
                         DWORD ReturnBufferSize, PDWORD RequiredSize)
 {
@@ -68,7 +68,7 @@ BOOL WINAPI SetupGetLineTextA (PINFCONTEXT Context, HINF InfHandle,
 /***********************************************************************
  *		SetupGetStringFieldA
  */
-BOOL WINAPI SetupGetStringFieldA(PINFCONTEXT Context, DWORD FieldIndex, 
+BOOL WINAPI SetupGetStringFieldA(const INFCONTEXT *Context, DWORD FieldIndex, 
                                  LPSTR ReturnBuffer, DWORD ReturnBufferSize,
                                  PDWORD RequiredSize)
 {
@@ -80,7 +80,7 @@ BOOL WINAPI SetupGetStringFieldA(PINFCONTEXT Context, DWORD FieldIndex,
 /***********************************************************************
  *		SetupFindNextLine
  */
-BOOL WINAPI SetupFindNextLine (PINFCONTEXT ContextIn, PINFCONTEXT ContextOut)
+BOOL WINAPI SetupFindNextLine (const INFCONTEXT *ContextIn, PINFCONTEXT ContextOut)
 {
 	FIXME("not implemented (setupapi.dll) \n");
 	return 0;
@@ -122,7 +122,7 @@ VOID WINAPI SetupCloseInfFile (HINF InfHandle)
  *		SetupDefaultQueueCallbackA
  */
 UINT WINAPI SetupDefaultQueueCallbackA (PVOID Context, UINT Notification,
-                                        UINT Param1, UINT Param2)
+                                        UINT_PTR Param1, UINT_PTR Param2)
 {
 	FIXME("not implemented (setupapi.dll) \n");
 	return 0;
