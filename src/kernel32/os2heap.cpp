@@ -1,4 +1,4 @@
-/* $Id: os2heap.cpp,v 1.29 2001-10-22 23:28:11 phaller Exp $ */
+/* $Id: os2heap.cpp,v 1.30 2001-11-16 12:57:00 phaller Exp $ */
 
 /*
  * Heap class for OS/2
@@ -49,10 +49,8 @@ void   _LNK_CONV releaseHeapMem(Heap_t pHeap, void *block, size_t size);
 // Fast Heap Handle Management
 //******************************************************************************
 
-//static int fhhm_hit = 0;
-//static int fhhm_miss = 0;
-static HANDLE   fhhm_lastHandle = 0;
-static OS2Heap* fhhm_lastHeap   = NULL;
+HANDLE   fhhm_lastHandle = 0;
+OS2Heap* fhhm_lastHeap   = NULL;
 
 
 //******************************************************************************
@@ -236,10 +234,6 @@ BOOL OS2Heap::Free(DWORD dwFlags, LPVOID lpMem)
 {
   HEAPELEM *helem = GET_HEAPOBJ(lpMem);
 
-  if(lpMem == NULL) {
-    	dprintf(("OS2Heap::Free lpMem == NULL\n"));
-    	return(FALSE);
-  }
   /* verify lpMem address */
   if (lpMem >= (LPVOID)ulMaxAddr || lpMem < (LPVOID)0x10000)
   {
@@ -306,16 +300,16 @@ BOOL OS2Heap::Walk(void *lpEntry)
 //******************************************************************************
 OS2Heap *OS2Heap::find(HANDLE hHeap)
 {
-  // check against cache first
-  if (fhhm_lastHeap)
-    if (hHeap == fhhm_lastHandle)
-    {
-//      fhhm_hit++;
-      return fhhm_lastHeap;
-    }
-  
-//  fhhm_miss++;
-  
+/* PH moved to inlineable macro ...
+ *  // check against cache first
+ * if (fhhm_lastHeap)
+ *   if (hHeap == fhhm_lastHandle)
+ *   {
+ *     return fhhm_lastHeap;
+ *   }
+ *
+ */
+ 
   OS2Heap *curheap = OS2Heap::heap;
   
   //@@@PH NT programs seem to assume heap 0 is always valid?!
