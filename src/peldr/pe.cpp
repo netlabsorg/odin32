@@ -1,4 +1,4 @@
-/* $Id: pe.cpp,v 1.30 2001-07-08 11:00:48 sandervl Exp $ */
+/* $Id: pe.cpp,v 1.31 2001-07-14 07:44:40 sandervl Exp $ */
 
 /*
  * PELDR main exe loader code
@@ -92,7 +92,7 @@ int main(int argc, char *argv[])
  PTIB   ptib;
  PPIB   ppib;
  char  *cmdline, *win32cmdline, *peoptions, *newcmdline;
- BOOL   fQuote = FALSE, fVioConsole, fIsNEExe;
+ BOOL   fQuote = FALSE, fVioConsole, fIsNEExe, fEndOfCmdLine = FALSE;
  int    nrTries = 1;
 
   if(argc >= 2) {
@@ -132,8 +132,7 @@ tryagain:
 				}
 			}
                         if(nrTries > 1 && *p == 0) {
-                            pszErrorMsg = szFileNotFound;
-                            goto failerror;
+                            fEndOfCmdLine = TRUE;
                         }
 		}
 		*p = 0;
@@ -162,6 +161,11 @@ tryagain:
 		if(DosQueryPathInfo(exeName, FIL_STANDARD, (PVOID)&fstat3, sizeof(fstat3))) 
 		{
 			nrTries++;
+                        if(fEndOfCmdLine) {
+                            pszErrorMsg = szFileNotFound;
+                            goto failerror;
+                        }
+
 			if(*win32cmdline != NULL && !fQuote) {
 				goto tryagain;
 			}
