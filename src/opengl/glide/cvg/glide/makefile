@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.3 2000-03-06 23:33:43 bird Exp $
+# $Id: makefile,v 1.4 2000-05-02 14:09:14 bird Exp $
 
 #
 # Odin32 API
@@ -24,7 +24,7 @@ LOCALCLEAN = 1
 # Flag overloads and local macros.
 CLEANEXTRAS = glidersrc.asm
 
-CINCLUDE = -I..\incsrc;..\..\swlibs\fxmisc;..\init\initvg;..\init;..\texus;..\..\swlibs\pcilib;
+CINCLUDE = -I..\incsrc -I..\..\swlibs\fxmisc -I..\init\initvg -I..\init -I..\texus -I..\..\swlibs\pcilib
 CFLAGS   = $(CFLAGS) $(CINCLUDE) /Os-
 CXXFLAGS = $(CXXFLAGS) $(CINCLUDE) /Os-
 RCFLAGS  = $(RCFLAGS) $(CINCLUDE)
