@@ -1,4 +1,4 @@
-/* $Id: static.cpp,v 1.19 2000-03-18 16:13:37 cbratschi Exp $ */
+/* $Id: static.cpp,v 1.20 2000-10-22 10:01:34 sandervl Exp $ */
 /*
  * Static control
  *
@@ -612,10 +612,21 @@ static void STATIC_PaintTextfn(HWND hwnd, HDC hdc )
     if (dwStyle & SS_WORDELLIPSIS) wFormat |= DT_WORD_ELLIPSIS;
 
     if (infoPtr->hFont) SelectObject( hdc, infoPtr->hFont );
+//SvL: This is what the latest Wine code does. Fixes the common color dialog
+#if 1
+    if ((dwStyle & SS_NOPREFIX) || ((dwStyle & SS_TYPEMASK) != SS_SIMPLE))
+    {
+        hBrush = SendMessageA( GetParent(hwnd), WM_CTLCOLORSTATIC,
+                             hdc, hwnd );
+        if (!hBrush) hBrush = GetStockObject(WHITE_BRUSH);
+        FillRect( hdc, &rc, hBrush );    
+    }
+#else
     hBrush = SendMessageA( GetParent(hwnd), WM_CTLCOLORSTATIC,
                              hdc, hwnd );
     if (!hBrush) hBrush = GetStockObject(WHITE_BRUSH);
     FillRect( hdc, &rc, hBrush );
+#endif
 
     if (!IsWindowEnabled(hwnd)) SetTextColor(hdc,GetSysColor(COLOR_GRAYTEXT));
 
