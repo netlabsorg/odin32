@@ -1,4 +1,4 @@
-/* $Id: stubs.cpp,v 1.13 2002-02-15 15:07:40 sandervl Exp $ */
+/* $Id: stubs.cpp,v 1.14 2002-05-16 19:35:15 sandervl Exp $ */
 /* 
  * Win32 COM/OLE stubs for OS/2
  * 
@@ -11,6 +11,8 @@
  */
 
 #include "oleaut32.h"
+#include "olectl.h"
+#include "oleauto.h"
 
 //*****************************************************************************
 //*****************************************************************************
@@ -681,3 +683,23 @@ HCURSOR WIN32API OleIconToCursor(HINSTANCE hinstExe, HICON hIcon)
 }
 //*****************************************************************************
 //*****************************************************************************
+/***********************************************************************
+ * OleCreatePropertyFrameIndirect (OLEAUT32.416)
+ */
+HRESULT WINAPI OleCreatePropertyFrameIndirect( LPOCPFIPARAMS lpParams)
+{
+        dprintf(("not implemented"));
+	return S_OK;
+}
+ 
+/***********************************************************************
+ * OleCreatePropertyFrame (OLEAUT32.417)
+ */
+HRESULT WINAPI OleCreatePropertyFrame(
+    HWND hwndOwner, UINT x, UINT y, LPCOLESTR lpszCaption,ULONG cObjects,
+    LPUNKNOWN* ppUnk, ULONG cPages, LPCLSID pPageClsID, LCID lcid, 
+    DWORD dwReserved, LPVOID pvReserved )
+{
+        dprintf(("not implemented"));
+	return S_OK;
+}

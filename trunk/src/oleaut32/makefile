@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.32 2002-02-15 15:07:36 sandervl Exp $
+# $Id: makefile,v 1.33 2002-05-16 19:35:14 sandervl Exp $
 
 #
 # Odin32 API
@@ -46,7 +46,6 @@ $(OBJDIR)\hash.obj \
 $(OBJDIR)\safearray.obj \
 $(OBJDIR)\connpt.obj \
 $(OBJDIR)\dispatch.obj \
-$(OBJDIR)\propertyframe.obj \
 $(OBJDIR)\stubs.obj \
 !if "$(DEBUG)" == "1"
 $(OBJDIR)\dbgwrap.obj \
