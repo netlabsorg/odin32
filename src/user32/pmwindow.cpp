@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.141 2001-07-15 14:36:40 sandervl Exp $ */
+/* $Id: pmwindow.cpp,v 1.142 2001-08-02 14:50:42 sandervl Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -571,6 +571,19 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
         dprintf(("OS2: %s %x %x %x", (msg == WM_HSCROLL) ? "WM_HSCROLL" : "WM_VSCROLL", win32wnd->getWindowHandle(), mp1, mp2));
         win32wnd->DispatchMsgA(pWinMsg);
         break;
+
+    case WM_DDE_INITIATE:
+    case WM_DDE_INITIATEACK:
+    case WM_DDE_REQUEST:
+    case WM_DDE_ACK:
+    case WM_DDE_DATA:
+    case WM_DDE_ADVISE:
+    case WM_DDE_UNADVISE:
+    case WM_DDE_POKE:
+    case WM_DDE_EXECUTE:
+    case WM_DDE_TERMINATE:
+        dprintf(("OS2: WM_DDE %x %x", msg, win32wnd->getWindowHandle()));
+        goto RunDefWndProc;
 
     case WM_INITMENU:
     case WM_MENUSELECT:
@@ -1370,6 +1383,19 @@ PosChangedEnd:
         dprintf(("PMFRAME: WM_SYSCOMMAND %x", win32wnd->getWindowHandle()));
         win32wnd->DispatchMsgA(pWinMsg);
         break;
+
+    case WM_DDE_INITIATE:
+    case WM_DDE_INITIATEACK:
+    case WM_DDE_REQUEST:
+    case WM_DDE_ACK:
+    case WM_DDE_DATA:
+    case WM_DDE_ADVISE:
+    case WM_DDE_UNADVISE:
+    case WM_DDE_POKE:
+    case WM_DDE_EXECUTE:
+    case WM_DDE_TERMINATE:
+         dprintf(("PMFRAME: WM_DDE %x %x", msg, win32wnd->getWindowHandle()));
+         break;
 
     default:
         goto RunDefFrameWndProc;
