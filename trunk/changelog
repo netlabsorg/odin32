@@ -1,9 +1,15 @@
-/* $Id: changelog,v 1.1798 2001-10-26 19:51:54 achimha Exp $ */
+/* $Id: changelog,v 1.1799 2001-10-27 08:24:13 sandervl Exp $ */
+
+ 2001-10-26: Sander van Leeuwen <sandervl@xs4all.nl>
+    - KERNEL32: o IOCTL_SCSI_GET_ADDRESS: fail if wnaspi32 not loaded
+    - WINMM:    o Add option to turn off audio by setting a key in the registry
+                  HKEY_LOCAL_MACHINE\\System\\CustomBuild
+                  DisableAudio = [0|1] (DWORD type)
 
  2001-10-26: Achim Hasenmueller <achimha@innotek.de>
     - WNASPI32: o don't fail DLL loading if ASPI library fails to init
 
- 2001-10-25: Sander van Leeuwen <sandervl@xs4all.nl>
+ 2001-10-26: Sander van Leeuwen <sandervl@xs4all.nl>
     - KERNEL32: o Better implementation of IOCTL_CDROM(DISK/STORAGE)_CHECK_VERIFY
                 o CDROM ioctls: Use signature returned by IOCD_IDENTIFY ioctl
                 o Implemented IOCTL_CDROM_READ_TOC
