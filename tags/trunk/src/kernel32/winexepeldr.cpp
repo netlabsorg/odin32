@@ -1,4 +1,4 @@
-/* $Id: winexepeldr.cpp,v 1.21 2002-12-20 11:39:41 sandervl Exp $ */
+/* $Id: winexepeldr.cpp,v 1.22 2003-01-13 16:51:40 sandervl Exp $ */
 
 /*
  * Win32 PE loader Exe class
@@ -175,6 +175,13 @@ Win32PeLdrExe::Win32PeLdrExe(char *szFileName, BOOL fConsoleApp) :
 Win32PeLdrExe::~Win32PeLdrExe()
 {
     fExitProcess = TRUE;
+}
+//******************************************************************************
+//Default stack size is 1MB; the PE loader reads it from the executable header
+//******************************************************************************
+ULONG Win32PeLdrExe::getDefaultStackSize()
+{
+    return (oh.SizeOfStackReserve > 128*1024) ? oh.SizeOfStackReserve : 128*1024;
 }
 //******************************************************************************
 //******************************************************************************
