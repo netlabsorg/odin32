@@ -1,4 +1,4 @@
-/* $Id: malloc_old.c,v 1.1 2000-01-24 12:48:42 bird Exp $
+/* $Id: malloc_old.c,v 1.2 2000-01-24 18:19:00 bird Exp $
  *
  * Heap.
  *
@@ -39,11 +39,8 @@
 #include <os2.h>
 #ifdef RING0
     #include "dev32hlp.h"
-    #include "asmutils.h"
-#else
-    #include <builtin.h>
-    #define Int3() __interrupt(3)
 #endif
+#include "asmutils.h"
 #include "log.h"
 #include "malloc.h"
 #include <memory.h>

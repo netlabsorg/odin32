@@ -1,4 +1,4 @@
-/* $Id: asmutils.h,v 1.3 1999-11-10 01:45:32 bird Exp $
+/* $Id: asmutils.h,v 1.4 2000-01-24 18:18:59 bird Exp $
  *
  * Assembly utilities.
  *
@@ -24,8 +24,13 @@ extern unsigned short _System GetSS(void);
 extern void _System DisableInterrupts(void); /* uniprocessor only */
 extern void _System EnableInterrupts(void);  /* uniprocessor only */
 
-//extern void _System Int3(void);
-extern int _System Int3(void);
+#if 0
+    //extern void _System Int3(void);
+    extern int _System Int3(void);
+#else
+    #include <builtin.h>
+    #define Int3() __interrupt(3)
+#endif
 
 //Negative offsets don't work yet?
 extern void __stdcall memmov(void *p, signed int off, unsigned int len);

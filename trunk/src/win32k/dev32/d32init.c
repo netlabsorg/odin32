@@ -1,4 +1,4 @@
-/* $Id: d32init.c,v 1.5 2000-01-22 18:20:57 bird Exp $
+/* $Id: d32init.c,v 1.6 2000-01-24 18:18:59 bird Exp $
  *
  * d32init.c - 32-bits init routines.
  *
@@ -128,9 +128,9 @@ USHORT _loadds _Far32 _Pascal R0Init32(RP32INIT *pRpInit)
                     if (ul > 0x1000UL && ul < 0x2000000UL) /* 4KB < ul < 32MB */
                     {
                         if (strnicmp(pszTmp, "heapm", 5) == 0)
-                            options.cbHeapMax = ul;
+                            options.cbSwpHeapMax = ul;
                         else
-                            options.cbHeap = ul;
+                            options.cbSwpHeapInit = ul;
                     }
                 }
                 break;
@@ -188,9 +188,9 @@ USHORT _loadds _Far32 _Pascal R0Init32(RP32INIT *pRpInit)
                     if (ul > 0x1000UL && ul < 0x700000UL) /* 4KB < ul < 7MB */
                     {
                         if (strnicmp(pszTmp, "resheapm", 8) == 0)
-                            options.cbHeapMaxResident = ul;
+                            options.cbResHeapMax = ul;
                         else
-                            options.cbHeapResident = ul;
+                            options.cbResHeapInit = ul;
                     }
                 }
                 break;
@@ -242,10 +242,10 @@ USHORT _loadds _Far32 _Pascal R0Init32(RP32INIT *pRpInit)
     }
 
     /* heap min/max corrections */
-    if (options.cbHeap > options.cbHeapMax)
-        options.cbHeapMax = options.cbHeap;
-    if (options.cbHeapResident > options.cbHeapMaxResident)
-        options.cbHeapMaxResident = options.cbHeapResident;
+    if (options.cbSwpHeapInit > options.cbSwpHeapMax)
+        options.cbSwpHeapMax = options.cbSwpHeapInit;
+    if (options.cbResHeapInit > options.cbResHeapMax)
+        options.cbResHeapMax = options.cbResHeapInit;
 
     /* Transfer version and build number from 16-bit probkrnl.c */
     options.ulBuild    = _ulBuild;
@@ -276,7 +276,8 @@ USHORT _loadds _Far32 _Pascal R0Init32(RP32INIT *pRpInit)
      * init sub-parts
      */
     /* heap */
-    if (heapInit(options.cbHeap) != NO_ERROR)
+    if (heapInit(options.cbResHeapInit, options.cbResHeapMax,
+                 options.cbSwpHeapInit, options.cbSwpHeapMax) != NO_ERROR)
         return STATUS_DONE | STERR | ERROR_I24_QUIET_INIT_FAIL;
 
     /* loader */
