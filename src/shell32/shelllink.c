@@ -26,6 +26,7 @@
 #include "shlobj.h"
 #include "undocshell.h"
 #ifdef __WIN32OS2__
+#include <winbase.h>
 #define NO_DCDATA
 #include <winuser32.h>
 #include <winres.h>
@@ -264,34 +265,34 @@ static HRESULT WINAPI IPersistFile_fnLoad(IPersistFile* iface, LPCOLESTR pszFile
 #ifdef __WIN32OS2__
 static BOOL SaveIconFileAsOS2ICO(char *szFileName, char *szXPMFileName)
 {
-    FILE *fXPMFile = NULL, *fICOFile = NULL;
+    HFILE fXPMFile = NULL, fICOFile = NULL;
     void *lpOS2Icon = NULL, *lpWinIcon = NULL;
     DWORD ressize, filesize;
     BOOL  ret = FALSE;
 
-    if (!(fICOFile = fopen(szFileName, "r")))
+    if (!(fICOFile = _lopen(szFileName, OF_READ)))
         goto failure;
-    fseek(fICOFile, 0, SEEK_END);
-    filesize = ftell(fICOFile);
-    fseek(fICOFile, 0, SEEK_SET);
+    _llseek(fICOFile, 0, FILE_END);
+    filesize = _llseek(fICOFile, 0, FILE_CURRENT);
+    _llseek(fICOFile, 0, FILE_BEGIN);
 
     lpWinIcon = malloc(filesize);
     if(lpWinIcon == NULL) goto failure;
-    if (fread(lpWinIcon, filesize, 1, fICOFile) != 1) 
+    if (_lread(fICOFile, lpWinIcon, filesize) != filesize) 
         goto failure;
 
-    if (!(fXPMFile = fopen(szXPMFileName, "wb")))
+    if (!(fXPMFile = _lcreat(szXPMFileName, OF_READWRITE)))
         goto failure;
 
     lpOS2Icon = ConvertIconGroupIndirect(lpWinIcon, filesize, &ressize);
     if(lpOS2Icon) {
-        fwrite(lpOS2Icon, 1, ressize, fXPMFile);
+        _lwrite(fXPMFile, lpOS2Icon, ressize);
     }
     ret = TRUE;
 
 failure:
-    if(fICOFile) fclose(fICOFile);
-    if(fXPMFile) fclose(fXPMFile);
+    if(fICOFile) _lclose(fICOFile);
+    if(fXPMFile) _lclose(fXPMFile);
     if(lpWinIcon) free(lpWinIcon);
     if(lpOS2Icon) free(lpOS2Icon);
     return ret;
