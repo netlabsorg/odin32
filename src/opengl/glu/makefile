@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.3 2000-02-09 12:08:31 bird Exp $
+# $Id: makefile,v 1.4 2000-02-09 13:44:32 sandervl Exp $
 #
 # PD-Win32
 #
@@ -32,7 +32,6 @@ TARGET = GLU32
 all: $(TARGET).DLL $(TARGET).LIB
 
 SOURCES = \
-  initterm.cpp \
   nurbs\interface\bezierEval.cpp \
   nurbs\interface\bezierPatch.cpp \
   nurbs\interface\bezierPatchMesh.cpp \
@@ -222,7 +221,8 @@ SOURCES = \
   util\gluint.h
 
 OBJS = \
-  initterm.obj \
+  $(PDWIN32_LIB)/dllentry.obj \
+  resource.obj \
   nurbs\interface\bezierEval.obj \
   nurbs\interface\bezierPatch.obj \
   nurbs\interface\bezierPatchMesh.obj \
@@ -313,7 +313,7 @@ OBJS = \
   util\quad.obj \
   util\registry.obj
 
-$(TARGET).DLL: $(SOURCES) initterm.obj $(TARGET).lrf $(TARGET).def
+$(TARGET).DLL: $(SOURCES) resource.obj $(TARGET).lrf $(TARGET).def
     cd util
     $(MAKE_CMD)
     cd ..\tess
@@ -343,8 +343,13 @@ $(TARGET).lib: $(TARGET)exp.def
 $(TARGET)exp.def: $(TARGET).def
         $(IMPDEF) $** $@
 
+resource.asm: $(TARGET).rc
+    $(RC) $(RCFLAGS) -o resource.asm $(TARGET).rc
+
+resource.obj: resource.asm
+
 clean:
-        $(RM) *.obj *.dll *.lib *.lrf
+        $(RM) *.obj *.dll *.lib *.lrf *exp.def resource.asm
         $(RM) $(PDWIN32_BIN)\$(TARGET).dll
         $(RM) $(PDWIN32_LIB)\$(TARGET).lib
         cd util
