@@ -1,4 +1,4 @@
-/* $Id: path.cpp,v 1.1 2000-05-15 02:43:16 phaller Exp $ */
+/* $Id: path.cpp,v 1.2 2000-05-16 20:17:30 phaller Exp $ */
 
 /*
  * Win32 SHELL32 for OS/2
@@ -250,12 +250,12 @@ ODINFUNCTION1(LPVOID, PathRemoveBlanksAW,
 
 
 /*************************************************************************
- * PathFindFilename [SHELL32.34]
+ * PathFindFileName [SHELL32.34]
  *
  * NOTES
  *     basename(char *fn);
  */
-ODINFUNCTION1(LPCSTR, PathFindFilenameA,
+ODINFUNCTION1(LPCSTR, PathFindFileNameA,
               LPCSTR, aptr)
 {
   int iLength = strlen(aptr);
@@ -275,7 +275,7 @@ ODINFUNCTION1(LPCSTR, PathFindFilenameA,
   return aptr; // no slash and no drive found
 }
 
-ODINFUNCTION1(LPCWSTR, PathFindFilenameW,
+ODINFUNCTION1(LPCWSTR, PathFindFileNameW,
               LPCWSTR, wptr)
 {  LPCWSTR wslash;
    wslash = wptr;
@@ -288,12 +288,12 @@ ODINFUNCTION1(LPCWSTR, PathFindFilenameW,
    }
    return wslash;
 }
-ODINFUNCTION1(LPCVOID, PathFindFilenameAW,
+ODINFUNCTION1(LPCVOID, PathFindFileNameAW,
               LPCVOID, fn)
 {
    if(VERSION_OsIsUnicode())
-     return PathFindFilenameW((LPWSTR)fn);
-   return PathFindFilenameA((LPSTR)fn);
+     return PathFindFileNameW((LPWSTR)fn);
+   return PathFindFileNameA((LPSTR)fn);
 }
 
 /*************************************************************************
