@@ -1,4 +1,9 @@
-/* $Id: changelog,v 1.2542 2003-04-03 14:05:08 sandervl Exp $ */
+/* $Id: changelog,v 1.2543 2003-04-07 18:39:25 sandervl Exp $ */
+
+ 2003-04-04: Platon Fomichev <platon@innotek   >
+    - NTDLL:    o Massive update. NTDLL internal tests, almost all
+                  string and conversion funcs. Corrected and beautified .def file
+    - DOC:      o Updated GCCBuildInstructions.txt for GCC 3.2.1
 
  2003-04-03: Sander van Leeuwen <sandervl@innotek   >
     - WINMM:    o Different method for detecting DirectAudio (uniaud, sblive, c-media)
