@@ -1,4 +1,4 @@
-/* $Id: HOOK.CPP,v 1.25 2001-10-08 20:46:44 phaller Exp $ */
+/* $Id: HOOK.CPP,v 1.26 2001-10-22 17:00:58 phaller Exp $ */
 
 /*
  * Windows hook functions
@@ -828,10 +828,22 @@ BOOL ProcessKbdHookLL(LPMSG msg, BOOL flagRemove, BOOL flagInjected )
   
   kbhs.vkCode      = msg->wParam;
   kbhs.scanCode    = ( (msg->lParam & 0x00ff0000) >> 16);
+  
+  BOOL fKeyUp      = (msg->message == WM_KEYUP) ||
+                     (msg->message == WM_SYSKEYUP);
+  kbhs.flags       = fKeyUp ? LLKHF_UP : 0;
+  
+  // @@@PH seems not to work properly
+  kbhs.flags      |= fAltDown ? LLKHF_ALTDOWN : 0;
+  kbhs.flags      |= flagInjected ? LLKHF_INJECTED : 0;
+  kbhs.flags      |= (msg->lParam & (1 << 24)) ? LLKHF_EXTENDED : 0;
+  
+/*
   kbhs.flags       = ( (msg->lParam & (1 << 24)) ? LLKHF_EXTENDED : 0 ) |
                      ( flagInjected ? LLKHF_INJECTED : 0) |
                      fAltDown ? LLKHF_ALTDOWN : 0 |
                      ( (msg->lParam & (1 << 31)) ? LLKHF_UP : 0);
+                     */
   kbhs.time        = msg->time;
   kbhs.dwExtraInfo = 0; // @@@PH not supported?
   
