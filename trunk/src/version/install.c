@@ -1,4 +1,4 @@
-/* $Id: install.c,v 1.1 2000-01-06 20:10:07 sandervl Exp $ */
+/* $Id: install.c,v 1.2 2000-01-08 14:27:33 sandervl Exp $ */
 /* 
  * Implementation of VERSION.DLL - File Installer routines (Wine 991212)
  * 
@@ -17,6 +17,7 @@
 #include "lzexpand.h"
 #include "xmalloc.h"
 #include "debugtools.h"
+#include <misc.h>
 
 DEFAULT_DEBUG_CHANNEL(ver)
 
