@@ -1,4 +1,4 @@
-/* $Id: scroll.cpp,v 1.40 2001-06-17 21:08:00 sandervl Exp $ */
+/* $Id: scroll.cpp,v 1.41 2001-06-18 09:00:50 sandervl Exp $ */
 /*
  * Scrollbar control
  *
@@ -678,8 +678,14 @@ LRESULT SCROLL_Create(HWND hwnd,WPARAM wParam,LPARAM lParam)
       INT w,h;
 
       w = GetSystemMetrics(SM_CXVSCROLL);
+#ifdef __WIN32OS2__
+      if(lpCreat->style & (SBS_SIZEBOX | SBS_SIZEGRIP)) {
+           h = GetSystemMetrics(SM_CYHSCROLL);
+      }
+      else h = lpCreat->cy;
+#else
       h = lpCreat->cy;
-
+#endif
       if (lpCreat->style & SBS_LEFTALIGN)
         MoveWindow(hwnd,lpCreat->x,lpCreat->y,w,h,FALSE);
       else if (lpCreat->style & SBS_RIGHTALIGN)
@@ -688,7 +694,15 @@ LRESULT SCROLL_Create(HWND hwnd,WPARAM wParam,LPARAM lParam)
     {
       INT w,h;
 
+#ifdef __WIN32OS2__
+      if(lpCreat->style & (SBS_SIZEBOX | SBS_SIZEGRIP)) {
+           w = GetSystemMetrics(SM_CXVSCROLL);
+      }
+      else w = lpCreat->cx;
+#else
       w = lpCreat->cx;
+#endif
+
       h = GetSystemMetrics(SM_CYHSCROLL);
 
       if (lpCreat->style & SBS_TOPALIGN)
@@ -1599,8 +1613,6 @@ BOOL WINAPI EnableScrollBar( HWND hwnd, INT nBar, UINT flags)
     SCROLL_RefreshScrollBar( hwnd, nBar, TRUE, TRUE );
     return TRUE;
 }
-
-//CB: not listed in user32.exp -> don't know the id!
 
 BOOL WINAPI GetScrollBarInfo(HWND hwnd,LONG idObject,PSCROLLBARINFO psbi)
 {
