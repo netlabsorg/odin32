@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.42 2000-01-14 14:45:16 sandervl Exp $ */
+/* $Id: pmwindow.cpp,v 1.43 2000-01-15 15:05:37 sandervl Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -396,6 +396,7 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
     }
 
     case WM_PAINT:
+        dprintf(("OS2: WM_PAINT"));
         win32wnd->DispatchMsgA(pWinMsg);
         goto RunDefWndProc;
 

@@ -1,4 +1,4 @@
-/* $Id: win32wbasenonclient.cpp,v 1.8 2000-01-15 14:18:18 cbratschi Exp $ */
+/* $Id: win32wbasenonclient.cpp,v 1.9 2000-01-15 15:05:37 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2 (non-client methods)
  *
@@ -193,7 +193,8 @@ VOID Win32BaseWindow::TrackScrollBar(WPARAM wParam,POINT pt)
   {
     if ((wParam & 0x0f) != HTHSCROLL) return;
     scrollbar = SB_HORZ;
-  } else  /* SC_VSCROLL */
+  }
+  else  /* SC_VSCROLL */
   {
     if ((wParam & 0x0f) != HTVSCROLL) return;
     scrollbar = SB_VERT;
@@ -202,32 +203,41 @@ VOID Win32BaseWindow::TrackScrollBar(WPARAM wParam,POINT pt)
   pt.x -= rectWindow.left;
   pt.y -= rectWindow.top;
   SCROLL_HandleScrollEvent(Win32Hwnd,0,MAKELONG(pt.x,pt.y),scrollbar,WM_LBUTTONDOWN);
-  if (GetCapture() != Win32Hwnd) return;
+  if (GetCapture() != getWindowHandle()) return;
   do
   {
-    GetMessageA(&msg,Win32Hwnd,0,0);
-    switch(msg.message)
+    GetMessageA(&msg, 0, 0, 0);
+    if(msg.hwnd == getWindowHandle())
     {
-      case WM_LBUTTONUP:
-      case WM_MOUSEMOVE:
-        pt.x = msg.pt.x-rectWindow.left;
-        pt.y = msg.pt.y-rectWindow.top;
-        msg.lParam = MAKELONG(pt.x,pt.y);
-      case WM_SYSTIMER:
-        SCROLL_HandleScrollEvent(Win32Hwnd,msg.wParam,msg.lParam,scrollbar,msg.message);
-        break;
+        switch(msg.message)
+        {
+        case WM_LBUTTONUP:
+        case WM_MOUSEMOVE:
+            pt.x = msg.pt.x-rectWindow.left;
+            pt.y = msg.pt.y-rectWindow.top;
+            msg.lParam = MAKELONG(pt.x,pt.y);
 
-      default:
+        case WM_SYSTIMER:
+            SCROLL_HandleScrollEvent(Win32Hwnd,msg.wParam,msg.lParam,scrollbar,msg.message);
+            break;
+
+        default:
+            TranslateMessage(&msg);
+            DispatchMessageA(&msg);
+            break;
+        }
+    }
+    else {
         TranslateMessage(&msg);
         DispatchMessageA(&msg);
-        break;
     }
     if (!IsWindow())
     {
       ReleaseCapture();
       break;
     }
-  } while (msg.message != WM_LBUTTONUP);
+  }
+  while (msg.message != WM_LBUTTONUP);
 }
 //******************************************************************************
 //******************************************************************************
