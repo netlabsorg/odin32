@@ -1,4 +1,7 @@
- /* $Id: changelog,v 1.141 1999-08-26 17:56:50 sandervl Exp $ */
+ /* $Id: changelog,v 1.142 1999-08-27 12:46:39 phaller Exp $ */
+
+ 99-08-27: Patrick Haller <phaller@gmx.net>
+	- KERNEL32: removed logging page faults if mmapped i/o
 
  99-08-26: Sander van Leeuwen <sandervl@xs4all.nl>
 	- KERNEL32: Cleaned up. (removed os2native.cpp & os2util.cpp and
