@@ -1,4 +1,4 @@
-/* $Id: dibsect.cpp,v 1.57 2001-09-23 20:14:08 sandervl Exp $ */
+/* $Id: dibsect.cpp,v 1.58 2001-10-18 17:01:34 sandervl Exp $ */
 
 /*
  * GDI32 DIB sections
@@ -678,6 +678,10 @@ void DIBSection::sync(HDC hdc, DWORD nYdest, DWORD nDestHeight, BOOL orgYInversi
 
         rc = GpiQueryBitmapBits(hdc, nYdest, nDestHeight, destBuf,
                                 tmphdr);
+        if(rc == GPI_ALTERROR) {
+            dprintf(("ERROR: GpiQueryBitmapBits failed with %x", WinGetLastError(0)));
+        }
+
         //manually reverse bitmap data
         char *src = destBuf;
         char *dst = GetDIBObject() + (nYdest+nDestHeight-1)*dibinfo.dsBm.bmWidthBytes;
@@ -698,8 +702,7 @@ void DIBSection::sync(HDC hdc, DWORD nYdest, DWORD nDestHeight, BOOL orgYInversi
         destBuf = GetDIBObject() + nYdest*dibinfo.dsBm.bmWidthBytes;
         rc = GpiQueryBitmapBits(hdc, nYdest, nDestHeight, destBuf,
                                 tmphdr);
-
-        if(rc) {
+        if(rc == GPI_ALTERROR) {
             dprintf(("ERROR: GpiQueryBitmapBits failed with %x", WinGetLastError(0)));
         }
 #ifdef DEBUG_PALETTE
