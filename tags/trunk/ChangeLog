@@ -1,4 +1,4 @@
- /* $Id: ChangeLog,v 1.1162 2000-10-02 21:33:24 phaller Exp $ */
+ /* $Id: ChangeLog,v 1.1163 2000-10-02 22:54:40 bird Exp $ */
 
  2000-10-02: Sander van Leeuwen <sandervl@xs4all.nl>
     - SHLWAPI:  Rewrote VERSION_OsIsUnicode (same as SHELL_OsIsUnicode now)
@@ -10,7 +10,7 @@
                 Windows 98 or Windows NT 4.0 (default = NT40)
                 Odin.ini:
                 [WinVersion]
-                Version=Win98   
+                Version=Win98
     - OLE32:    Added stubs for CoGetInstanceFromFile & CoGetInstanceFromIStorage
     - KERNEL32, WSOCK32, WINMM, include\odinwrap.h, SHLWAPI, WNASPI32
                 Changes/fixes for new ODINFUNCTION macros
@@ -29,6 +29,8 @@
     - KERNEL32: Fixed Pe2Lx (ie. Win32k) TLS problem. Beyond Compare works.
     - Common:   Added very limited dump capability to kFilePE. (Used to
                 understand TLS.)
+    - Win32k    Added symbols for kernel 14050 (Warp4) and
+                14054 (Warp4, WS4eB SMP and UNI).
 
  2000-10-01: Patrick Haller <phaller@gmx.net>
     - KERNEL32: Optimization of PROFILE calls
