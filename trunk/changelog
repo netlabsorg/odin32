@@ -1,4 +1,21 @@
- /* $Id: changelog,v 1.843 2000-03-28 15:24:40 cbratschi Exp $ */
+ /* $Id: changelog,v 1.844 2000-03-28 17:09:22 sandervl Exp $ */
+
+ 2000-03-28: Sander van Leeuwen <sandervl@xs4all.nl>
+	- KERNEL32: Fixed VirtualQuery; cbLength is length of memory structure,
+                    not range of pages
+                    Fixed OpenFile; if filename doesn't contain path, look for
+                    it in:
+		    1: dir from which the app loaded
+                    2: current dir
+                    3: windows system dir
+                    4: windows dir
+                    5: dirs in path path environment variable
+          NOTE: Icon extraction in shell32 is broken; expects PE
+                images even when looking for icons in shell32.
+                (it should use FindResourceExA/W when looking for resources
+                 in that case)
+	- USER32:   Fixed combobox focus changes when showing dropdown window
+        - WSOCK32:  Added support for warp 4 error messages (0 based)
 
  2000-03-28: Christoph Bratschi <cbratschi@datacomm.ch>
 	- SHELL32: don't use pdump() in release build
