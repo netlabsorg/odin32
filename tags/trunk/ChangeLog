@@ -1,4 +1,4 @@
-/* $Id: ChangeLog,v 1.1574 2001-07-08 03:43:44 bird Exp $ */
+/* $Id: ChangeLog,v 1.1575 2001-07-08 03:58:58 bird Exp $ */
 
  2001-07-08: knut st. osmundsen <kosmunds@csc.com>:
     - KERNEL32: o Added call in initterm to tell win32k where the Odin32
@@ -14,6 +14,7 @@
                 o Set no internal fixups flag in LX header for most executables
                   in an attempt to convice OS/2 to load them where they wanna be
                   loaded (usually 0x00400000).
+                o Can now tell difference between the debug kernels.
 
  2001-07-07: Sander van Leeuwen <sandervl@xs4all.nl>
     - KERNEL32: o Rewrote atom functions (no longer relies on Open32)
