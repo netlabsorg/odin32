@@ -1,4 +1,9 @@
-/* $Id: ChangeLog,v 1.1196 2000-12-29 18:41:44 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.1197 2000-12-30 10:18:03 sandervl Exp $ */
+
+ 2000-12-30: Sander van Leeuwen <sandervl@xs4all.nl>
+    - INSTALL:  o Don't include odin.ini anymore. 
+    - KERNEL32: o Create 'Font Mapping' Odin.ini entry during WarpIn install
+                  (odininst execution)
 
  2000-12-29: Sander van Leeuwen <sandervl@xs4all.nl>
     - USER32:   o Export OS2ToWin32Handle & Win32ToOS2Handle with stdcall
