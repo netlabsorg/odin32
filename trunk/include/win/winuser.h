@@ -3437,9 +3437,9 @@ HCURSOR   WINAPI CreateCursor(HINSTANCE,INT,INT,INT,INT,LPCVOID,LPCVOID);
 #define     CreateDialogIndirectW(inst,ptr,hwnd,dlg) \
            CreateDialogIndirectParamW(inst,ptr,hwnd,dlg,0)
 #define     CreateDialogIndirect WINELIB_NAME_AW(CreateDialogIndirect)
-HWND      WINAPI CreateDialogIndirectParamA(HINSTANCE,LPCDLGTEMPLATEA,HWND,
+HWND      WINAPI CreateDialogIndirectParamA(HINSTANCE,LPCVOID,HWND,
                                             DLGPROC,LPARAM);
-HWND      WINAPI CreateDialogIndirectParamW(HINSTANCE,LPCDLGTEMPLATEW,HWND,
+HWND      WINAPI CreateDialogIndirectParamW(HINSTANCE,LPCVOID,HWND,
                                             DLGPROC,LPARAM);
 #define     CreateDialogIndirectParam WINELIB_NAME_AW(CreateDialogIndirectParam)
 HWND      WINAPI CreateDialogParamA(HINSTANCE,LPCSTR,HWND,DLGPROC,LPARAM);
@@ -3501,8 +3501,8 @@ BOOL      WINAPI DestroyWindow(HWND);
 #define     DialogBoxIndirectW(inst,template,owner,func) \
             DialogBoxIndirectParamW(inst,template,owner,func,0)
 #define     DialogBoxIndirect WINELIB_NAME_AW(DialogBoxIndirect)
-INT       WINAPI DialogBoxIndirectParamA(HINSTANCE,LPCDLGTEMPLATEA,HWND,DLGPROC,LPARAM);
-INT       WINAPI DialogBoxIndirectParamW(HINSTANCE,LPCDLGTEMPLATEW,HWND,DLGPROC,LPARAM);
+INT       WINAPI DialogBoxIndirectParamA(HINSTANCE,LPCVOID,HWND,DLGPROC,LPARAM);
+INT       WINAPI DialogBoxIndirectParamW(HINSTANCE,LPCVOID,HWND,DLGPROC,LPARAM);
 #define     DialogBoxIndirectParam WINELIB_NAME_AW(DialogBoxIndirectParam)
 INT       WINAPI DialogBoxParamA(HINSTANCE,LPCSTR,HWND,DLGPROC,LPARAM);
 INT       WINAPI DialogBoxParamW(HINSTANCE,LPCWSTR,HWND,DLGPROC,LPARAM);
@@ -3607,8 +3607,8 @@ HWND      WINAPI GetDesktopWindow(void);
 INT       WINAPI GetDlgCtrlID(HWND);
 HWND      WINAPI GetDlgItem(HWND,INT);
 UINT      WINAPI GetDlgItemInt(HWND,INT,BOOL*,BOOL);
-UINT      WINAPI GetDlgItemTextA(HWND,INT,LPSTR,UINT);
-UINT      WINAPI GetDlgItemTextW(HWND,INT,LPWSTR,UINT);
+INT       WINAPI GetDlgItemTextA(HWND,INT,LPSTR,UINT);
+INT       WINAPI GetDlgItemTextW(HWND,INT,LPWSTR,UINT);
 #define     GetDlgItemText WINELIB_NAME_AW(GetDlgItemText)
 UINT      WINAPI GetDoubleClickTime(void);
 HWND      WINAPI GetFocus(void);
@@ -3725,7 +3725,7 @@ BOOL      WINAPI IsClipboardFormatAvailable(UINT);
 BOOL      WINAPI IsDialogMessageA(HWND,LPMSG);
 BOOL      WINAPI IsDialogMessageW(HWND,LPMSG);
 #define     IsDialogMessage WINELIB_NAME_AW(IsDialogMessage)
-BOOL      WINAPI IsDlgButtonChecked(HWND,UINT);
+UINT      WINAPI IsDlgButtonChecked(HWND,UINT);
 BOOL      WINAPI IsIconic(HWND);
 BOOL      WINAPI IsMenu(HMENU);
 BOOL      WINAPI IsRectEmpty(const RECT*);
@@ -3756,8 +3756,8 @@ HANDLE    WINAPI LoadImageW(HINSTANCE,LPCWSTR,UINT,INT,INT,UINT);
 HMENU     WINAPI LoadMenuA(HINSTANCE,LPCSTR);
 HMENU     WINAPI LoadMenuW(HINSTANCE,LPCWSTR);
 #define     LoadMenu WINELIB_NAME_AW(LoadMenu)
-HMENU     WINAPI LoadMenuIndirectA(const MENUITEMTEMPLATEHEADER *);
-HMENU     WINAPI LoadMenuIndirectW(const MENUITEMTEMPLATEHEADER *);
+HMENU     WINAPI LoadMenuIndirectA(LPCVOID);
+HMENU     WINAPI LoadMenuIndirectW(LPCVOID);
 #define     LoadMenuIndirect WINELIB_NAME_AW(LoadMenuIndirect)
 INT       WINAPI LoadStringA(HINSTANCE,UINT,LPSTR,INT);
 INT       WINAPI LoadStringW(HINSTANCE,UINT,LPWSTR,INT);

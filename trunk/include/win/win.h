@@ -80,6 +80,8 @@ typedef struct tagWND
     struct tagWND *child;
     struct tagWND *next;
     struct tagWND *owner;
+    void          *pVScroll;      /* Vertical scroll-bar info */
+    void          *pHScroll;      /* Horizontal scroll-bar info */
     HWND           hwndSelf;      /* Handle of this window */
     HINSTANCE      hInstance;     /* Window hInstance (from CreateWindow) */
     DWORD          dwStyle;       /* Window style (from CreateWindow) */
@@ -90,6 +92,7 @@ typedef struct tagWND
     RECT           rectWindow;
     LPWSTR         text;           /* Window text */
     DWORD          cbWndExtra;
+    DWORD          flags;
     DWORD          wExtra[1];
 } WND;
 
@@ -208,10 +211,23 @@ extern BOOL WIDGETS_Init( void );
 extern BOOL WIDGETS_IsControl( WND* pWnd, BUILTIN_CLASS32 cls );  
 
 /* controls/icontitle.c */
-extern HWND ICONTITLE_Create( WND* );
+extern HWND ICONTITLE_Create( HWND );
 extern BOOL ICONTITLE_Init( void );
 
 /* windows/focus.c */
 extern void FOCUS_SwitchFocus( MESSAGEQUEUE *pMsgQ, HWND , HWND );
+
+
+/* Built-in class descriptor */
+struct builtin_class_descr
+{
+    LPCSTR  name;    /* class name */
+    UINT    style;   /* class style */
+    WNDPROC procA;   /* ASCII window procedure */
+    WNDPROC procW;   /* Unicode window procedure */
+    INT     extra;   /* window extra bytes */
+    LPCSTR  cursor;  /* cursor name */
+    HBRUSH  brush;   /* brush or system color */
+};
 
 #endif  /* __WINE_WIN_H */
