@@ -1,4 +1,4 @@
-/* $Id: buildenv.cmd,v 1.4 2002-04-16 00:10:12 bird Exp $
+/* $Id: buildenv.cmd,v 1.5 2002-04-22 02:01:37 bird Exp $
  *
  * This is the master environment script. It contains settings for many
  * enviroment configurations. Environments may be set and unset
@@ -19,6 +19,7 @@
  *       those the original value, for example of no_NO, is not restored.
  */
 
+    Address CMD '@echo off';
 
     /*
      * Create argument array with lowercase arguments.
@@ -55,7 +56,7 @@
      */
     do i = 1 to sEnv.0
         /* uses dash to mark end of arguments */
-        if (sEnv.i = '-') then
+        if ((sEnv.i = '-') | (sEnv.i = '*')) then
             leave;
 
         /*
@@ -76,8 +77,8 @@
          */
         rc = 0;
         select
-            when (sEnv.i = 'mode8050') then     Address CMD 'mode 80,50'
-            when (sEnv.i = 'mode12050') then    Address CMD 'mode 120,50'
+            when (sEnv.i = 'mode8050') then     Address CMD '@mode 80,50'
+            when (sEnv.i = 'mode12050') then    Address CMD '@mode 120,50'
             when (sEnv.i = 'cvs') then          rc = CVS(fRM);
             when (sEnv.i = 'db2v52') then       rc = db2v52(fRM);
             when (sEnv.i = 'debug') then do
@@ -144,17 +145,25 @@
 
     /*
      * Check for command to execute.
-     * (I.e. if there are more arguments left. after the dash.)
+     * (I.e. if there are more arguments left. after the dash/star.)
      */
     if (i < sEnv.0) then
     do
+        chType = sEnv.i;
+
         sCmd = '';
         do while (i < sEnv.0)
             i = i + 1;
             sCmd = sCmd ||' '||sEnv.i;
         end
-        Address CMD 'start /F' sCMD;
-        Address CMD 'exit';
+
+        if (chType = '-') then
+        do
+            Address CMD 'start /F' sCMD;
+            Address CMD 'exit';
+        end
+        else
+            Address CMD sCMD;
         exit(rc);
     end
 
@@ -940,7 +949,7 @@ WatComC11c: procedure
     sPathWatcom = QueryPath('watcom11c');
     call EnvVar_Set      fRM, 'PATH_WATCOM', sPathWatcom
     call EnvVar_Set      fRM, 'CCENV',      'WAT'
-    call EnvVar_Set      fRM, 'BUILD_ENV',  'WAT11'
+    call EnvVar_Set      fRM, 'BUILD_ENV',  'WAT11C'
     call EnvVar_Set      fRM, 'BUILD_PLATFORM', 'OS2'
 
     call EnvVar_Set      fRM, 'watcom',      sPathWatcom
@@ -1164,10 +1173,10 @@ FixCMDEnv: procedure
 
     /* force environment expansion by setting a lot of variables and freeing them. */
     do i = 1 to 100
-        Address CMD 'set dummyenvvar'||i'=abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        Address CMD '@set dummyenvvar'||i'=abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
     end
     do i = 1 to 100
-        Address CMD 'set dummyenvvar'||i'=';
+        Address CMD '@set dummyenvvar'||i'=';
     end
 return 0;
 
