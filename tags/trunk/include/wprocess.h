@@ -19,9 +19,13 @@
 typedef ULONG PDB;
 #endif
 #include <thread.h>
+#include <FastInfoBlocks.h>
 
 #define MAKE_THREADID(processid, threadid) 	((processid << 16) | threadid)
 #define ODIN_TO_OS2_THREADID(threadid)          (threadid & 0xFFFF)
+
+#define ODIN_GetCurrentThreadId()    MAKE_THREADID(fibGetPid(), fibGetTid())
+#define ODIN_GetCurrentProcessId()   fibGetPid()
 
 TEB   *WIN32API CreateTEB(HANDLE hThread, DWORD dwThreadId);
 TEB   *WIN32API InitializeMainThread();
