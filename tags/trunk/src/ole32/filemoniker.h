@@ -1,4 +1,4 @@
-/* $Id: filemoniker.h,v 1.2 2000-03-19 15:35:14 davidr Exp $ */
+/* $Id: filemoniker.h,v 1.3 2000-09-17 10:29:43 davidr Exp $ */
 /*
  *
  * Project Odin Software License can be found in LICENSE.TXT
@@ -32,5 +32,6 @@ HRESULT WINAPI FileMonikerImpl_Construct(FileMonikerImpl* iface, LPCOLESTR lpszP
 HRESULT WINAPI FileMonikerImpl_Destroy(FileMonikerImpl* iface);
 int     WINAPI FileMonikerImpl_DecomposePath(LPOLESTR str, LPOLESTR** tabStr);
 void WINAPI FileMonikerImpl_CheckFileFormat(FileMonikerImpl* iface, LPCOLESTR lpszPathName);
+HRESULT FileMonikerImpl_GetSizeToSave(IMoniker* iface,ULARGE_INTEGER* pcbSize);
 
 #endif /* FILEMONIKER_INCLUDED */

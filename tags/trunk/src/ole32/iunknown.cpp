@@ -1,4 +1,4 @@
-/* $Id: iunknown.cpp,v 1.3 1999-09-08 11:29:27 davidr Exp $ */
+/* $Id: iunknown.cpp,v 1.4 2000-09-17 10:31:05 davidr Exp $ */
 /* 
  * 
  * Project Odin Software License can be found in LICENSE.TXT
@@ -22,22 +22,23 @@
 // ======================================================================
 // Local Data
 // ======================================================================
+
 typedef struct
 {
-    /* IUnknown fields */
     ICOM_VTABLE(IUnknown)* lpvtbl;
     DWORD                  ref;
 } IUnknownImpl;
 
-static ULONG WIN32API IUnknown_fnAddRef(LPUNKNOWN iface);
-static ULONG WIN32API IUnknown_fnRelease(LPUNKNOWN iface);
-static HRESULT WIN32API IUnknown_fnQueryInterface(LPUNKNOWN iface, REFIID refiid, LPVOID * obj);
+static ULONG	WIN32API IUnknownImpl_AddRef(LPUNKNOWN iface);
+static ULONG	WIN32API IUnknownImpl_Release(LPUNKNOWN iface);
+static HRESULT	WIN32API IUnknownImpl_QueryInterface(LPUNKNOWN iface,
+				REFIID riid, LPVOID * ppvObject);
 
-static ICOM_VTABLE(IUnknown) uvt = 
+static ICOM_VTABLE(IUnknown) IUnknownVt = 
 {
-    IUnknown_fnQueryInterface,
-    IUnknown_fnAddRef,
-    IUnknown_fnRelease
+    IUnknownImpl_QueryInterface,
+    IUnknownImpl_AddRef,
+    IUnknownImpl_Release
 };
 
 // ======================================================================
@@ -45,25 +46,25 @@ static ICOM_VTABLE(IUnknown) uvt =
 // ======================================================================
 
 // ----------------------------------------------------------------------
-// IUnknown_fnAddRef
+// IUnknownImpl_AddRef
 // ----------------------------------------------------------------------
-static ULONG WIN32API IUnknown_fnAddRef(LPUNKNOWN iface)
+static ULONG WIN32API IUnknownImpl_AddRef(LPUNKNOWN iface)
 { 
     ICOM_THIS(IUnknownImpl, iface);
 
-    dprintf(("OLE32: (%p)->AddRef()", This));
+    dprintf(("OLE32: IUnknown(%p)->AddRef()", This));
 
     return ++(This->ref);
 }
 
 // ----------------------------------------------------------------------
-// IUnknown_fnRelease
+// IUnknownImpl_Release
 // ----------------------------------------------------------------------
-static ULONG WIN32API IUnknown_fnRelease(LPUNKNOWN iface)
+static ULONG WIN32API IUnknownImpl_Release(LPUNKNOWN iface)
 {
     ICOM_THIS(IUnknownImpl, iface);
 
-    dprintf(("OLE32: (%p)->Release()\n", This));
+    dprintf(("OLE32: IUnknown(%p)->Release()\n", This));
 
     if (--(This->ref) == 0)
     {
@@ -74,34 +75,43 @@ static ULONG WIN32API IUnknown_fnRelease(LPUNKNOWN iface)
 }
 
 // ----------------------------------------------------------------------
-// Initialize
+// IUnknownImpl_QueryInterface
 // ----------------------------------------------------------------------
-static HRESULT WIN32API IUnknown_fnQueryInterface(LPUNKNOWN iface, REFIID refiid, LPVOID *obj)
+static HRESULT WIN32API IUnknownImpl_QueryInterface(LPUNKNOWN iface, REFIID riid, LPVOID *ppvObject)
 {
     ICOM_THIS(IUnknownImpl, iface);
 
 #ifdef DEBUG
-    oStringA	tRefiid(refiid);
-    dprintf(("OLE32: (%p)->QueryInterface(%s, %p)\n", This, (char *)tRefiid, obj));
+    oStringA	tRiid(riid);
+    dprintf(("OLE32: IUnknown(%p)->QueryInterface(%s)\n", This, (char *)tRiid));
 #endif
 
-    if (!memcmp(&IID_IUnknown, refiid, sizeof(IID_IUnknown)))
+    if (IsEqualIID(&IID_IUnknown, riid))
     {
-	*obj = This;
-	return 0; 
+        dprintf(("       ->IUnknown"));
+	*ppvObject = &(This->lpvtbl);
     }
-    return OLE_E_ENUM_NOMORE; 
+    else
+    {
+        dprintf(("       ->E_NOINTERFACE"));
+	return E_NOINTERFACE; 
+    }
+
+    // Query Interface always increases the reference count by one...
+    IUnknownImpl_AddRef(iface);
+
+    return S_OK;
 }
 
 // ----------------------------------------------------------------------
-// Initialize
+// IUnknownImpl_Constructor
 // ----------------------------------------------------------------------
-LPUNKNOWN IUnknown_Constructor()
+LPUNKNOWN IUnknownImpl_Constructor()
 {
     IUnknownImpl *	unk;
 
     unk = (IUnknownImpl*)HeapAlloc(GetProcessHeap(), 0, sizeof(IUnknownImpl));
-    unk->lpvtbl	= &uvt;
+    unk->lpvtbl	= &IUnknownVt;
     unk->ref	= 1;
     return (LPUNKNOWN)unk;
 }

@@ -1,4 +1,4 @@
-/* $Id: stubs.cpp,v 1.13 2000-03-21 00:38:38 davidr Exp $ */
+/* $Id: stubs.cpp,v 1.14 2000-09-17 10:31:06 davidr Exp $ */
 /* 
  * Win32 COM/OLE stubs for OS/2
  * 
@@ -170,16 +170,6 @@ HRESULT WIN32API CoRegisterMallocSpy(LPMALLOCSPY pMallocSpy)
 {
     dprintf(("OLE32: CoRegisterMallocSpy - stub"));
     return CO_E_OBJISREG;
-}
-//*******************************************************************************
-//*******************************************************************************
-HRESULT WIN32API CoRegisterMessageFilter(LPMESSAGEFILTER lpMessageFilter,
-                                            LPMESSAGEFILTER *lplpMessageFilter)
-{
-    dprintf(("OLE32: CoRegisterMessageFilter - stub"));
-    if (lplpMessageFilter)
-	*lplpMessageFilter = NULL;
-    return S_FALSE;
 }
 //*******************************************************************************
 //*******************************************************************************
