@@ -1,4 +1,4 @@
-/* $Id: path.c,v 1.1 2000-05-18 14:10:17 sandervl Exp $ */
+/* $Id: path.c,v 1.2 2000-06-11 08:44:54 phaller Exp $ */
 
 /*
  * Path Functions
@@ -1648,7 +1648,7 @@ BOOL WINAPI PathYetAnotherMakeUniqueNameAW(
  */
 
 /*************************************************************************
- * PathFindOnPathA	[SHELL32.145]
+ * PathFindOnPathA	[SHELL32.479]
  */
 BOOL WINAPI PathFindOnPathA(LPSTR sFile, LPCSTR sOtherDirs)
 {
