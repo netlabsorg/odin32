@@ -1,4 +1,4 @@
-/* $Id: gdi32.cpp,v 1.31 2000-01-21 22:35:05 sandervl Exp $ */
+/* $Id: gdi32.cpp,v 1.32 2000-01-26 23:19:55 sandervl Exp $ */
 
 /*
  * GDI32 apis
@@ -669,7 +669,7 @@ HBITMAP WIN32API CreateBitmap(int nWidth, int nHeight, UINT cPlanes,
  HBITMAP rc;
 
     rc = O32_CreateBitmap(nWidth, nHeight, cPlanes, cBitsPerPel, lpvBits);
-    dprintf(("GDI32: CreateBitmap (%d,%d) bps %d returned %d\n", nWidth, nHeight, cBitsPerPel, rc));
+    dprintf(("GDI32: CreateBitmap (%d,%d) bps %d returned %x\n", nWidth, nHeight, cBitsPerPel, rc));
     return(rc);
 }
 //******************************************************************************
@@ -2402,14 +2402,6 @@ DWORD WIN32API GetGlyphOutlineW(HDC hdc, UINT uChar, UINT uFormat, LPGLYPHMETRIC
                                    DWORD cbBuffer, LPVOID lpvBuffer, CONST MAT2 *lpmat2)
 {
   dprintf(("GDI32: GetGlyphOutLineW, not implemented\n"));
-  return(GDI_ERROR);
-}
-//******************************************************************************
-
-//******************************************************************************
-int WIN32API DescribePixelFormat(HDC, int, UINT, LPPIXELFORMATDESCRIPTOR)
-{
-  dprintf(("GDI32: DescribePixelFormat, not implemented (GDI_ERROR)\n"));
   return(GDI_ERROR);
 }
 //******************************************************************************

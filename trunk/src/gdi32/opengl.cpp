@@ -1,4 +1,4 @@
-/* $Id: opengl.cpp,v 1.4 1999-08-17 13:28:36 phaller Exp $ */
+/* $Id: opengl.cpp,v 1.5 2000-01-26 23:19:55 sandervl Exp $ */
 
 /*
  * GDI32 OpenGl stubs
@@ -32,16 +32,22 @@ ODINDEBUGCHANNEL(GDI32-OPENGL)
 typedef int  (* WIN32API CHOOSEPIXELFMT) (HDC, CONST PIXELFORMATDESCRIPTOR *);
 typedef BOOL (* WIN32API SETPIXELFMT) (HDC, int, CONST PIXELFORMATDESCRIPTOR *);
 typedef BOOL (* WIN32API SWAPBUFFERS) (HDC hdc);
+// JVDH MOD STARTS
+typedef int  (* WIN32API DESCRIBEPIXELFMT) (HDC, int, UINT, LPPIXELFORMATDESCRIPTOR);
+// JVDH MOD ENDS
 
 
 /****************************************************************************
  * Module Global Variables                                                  *
  ****************************************************************************/
 
-static CHOOSEPIXELFMT glChoosePixelFormat = NULL;
-static SETPIXELFMT    glSetPixelFormat    = NULL;
-static SWAPBUFFERS    glSwapBuffers       = NULL;
-static HINSTANCE      hOpenGL             = NULL;
+static CHOOSEPIXELFMT    glChoosePixelFormat   = NULL;
+static SETPIXELFMT       glSetPixelFormat      = NULL;
+static SWAPBUFFERS       glSwapBuffers         = NULL;
+// JVDH MOD STARTS
+static DESCRIBEPIXELFMT  glDescribePixelFormat = NULL;
+// JVDH MOD ENDS
+static HINSTANCE         hOpenGL               = NULL;
 
 
 /*****************************************************************************
@@ -83,7 +89,15 @@ static BOOL internalOpenGLEnable(void)
                 return(FALSE);
   }
 
-  return(TRUE); /* OpenGL is initialized and enabled */
+// JVDH MOD STARTS
+  if(glDescribePixelFormat == NULL) {
+        glDescribePixelFormat = (DESCRIBEPIXELFMT)O32_GetProcAddress(hOpenGL, "OS2wglDescribePixelFormat");
+        if(glDescribePixelFormat == NULL)
+                return(FALSE);
+  }
+// JVDH MOD ENDS
+
+  return(TRUE);                        /* OpenGL is initialized and enabled*/
 }
 
 
@@ -109,6 +123,18 @@ ODINFUNCTION2(int,ChoosePixelFormat,HDC,                         hdc,
       return(0);
 
   return(glChoosePixelFormat(hdc, pformat));
+}
+
+ODINFUNCTION4(int,DescribePixelFormat,HDC,hdc,
+                                      int,iFormat,
+                                      UINT,nBytes,
+                                      LPPIXELFORMATDESCRIPTOR,pformat)
+{
+  if (glDescribePixelFormat == NULL)
+    if (internalOpenGLEnable() == FALSE)
+      return(0);
+
+  return(glDescribePixelFormat(hdc, iFormat, nBytes, pformat));
 }
 
 
