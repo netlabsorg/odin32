@@ -1,4 +1,4 @@
- /* $Id: ChangeLog,v 1.336 1999-10-17 18:08:24 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.337 1999-10-17 19:33:01 cbratschi Exp $ */
 
  99-10-17: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32: Ported AdjustWindowRectEx from Wine (990815)
@@ -25,6 +25,9 @@
 		       GetDC returns a wrong DC, BeginPaint works as it should
 		  Send as few WM_ENTERIDLE messages as possible -> low CPU usage
 		  pmframe: removed WinFillRect
+		  implemented: DrawIcon/DrawIconEx
+		  fixed static icon size
+		  pmframe: added PSF_CLIPSIBLINGS
 
  99-10-17: knut st. osmundsen <knut.stange.osmundsen@pmsc.no>
      	- KERNEL32: Removed exception throwing from Pe2Lx classes.
