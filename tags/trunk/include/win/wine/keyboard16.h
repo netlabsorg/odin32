@@ -1,6 +1,5 @@
-/* $Id: keyboard16.h,v 1.3 1999-06-10 16:21:52 achimha Exp $ */
-#ifndef _KEYBOARD16_H
-#define _KEYBOARD16_H
+#ifndef __WINE_WINE_KEYBOARD16_H
+#define __WINE_WINE_KEYBOARD16_H
 
 #include "windef.h"
 
@@ -12,4 +11,4 @@ INT16       WINAPI OemToAnsi16(LPCSTR,LPSTR);
 VOID        WINAPI OemToAnsiBuff16(LPCSTR,LPSTR,UINT16);
 
 
-#endif /* _KEYBOARD16_H */
+#endif /* __WINE_WINE_KEYBOARD16_H */

@@ -1,4 +1,3 @@
-/* $Id: obj_oleview.h,v 1.3 1999-06-10 16:21:55 achimha Exp $ */
 /*
  * Defines the COM interfaces and APIs related to ViewObject
  *
@@ -11,6 +10,9 @@
 
 #include "winbase.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif /* defined(__cplusplus) */
 
 /*****************************************************************************
  * Declare the structures
@@ -34,7 +36,7 @@ typedef BOOL    (CALLBACK* IVO_ContCallback)(DWORD);
 
 #define ICOM_INTERFACE IViewObject
 #define IViewObject_METHODS \
-	ICOM_METHOD10(HRESULT,Draw, DWORD,dwDrawAspect, LONG,lindex, void*,pvAspect, DVTARGETDEVICE*,ptd, HDC,hdcTargetDev, HDC,hdcDraw, LPCRECTL,lprcBounds, LPCRECTL,lprcWBounds, IVO_ContCallback, pfnContinue, DWORD,dwContinue)
+	ICOM_METHOD10(HRESULT,Draw, DWORD,dwDrawAspect, LONG,lindex, void*,pvAspect, DVTARGETDEVICE*,ptd, HDC,hdcTargetDev, HDC,hdcDraw, LPCRECTL,lprcBounds, LPCRECTL,lprcWBounds, IVO_ContCallback, pfnContinue, DWORD,dwContinue) \
 	ICOM_METHOD6(HRESULT,GetColorSet, DWORD,dwDrawAspect, LONG,lindex, void*,pvAspect, DVTARGETDEVICE*,ptd, HDC,hicTargetDevice, LOGPALETTE**,ppColorSet) \
 	ICOM_METHOD4(HRESULT,Freeze, DWORD,dwDrawAspect, LONG,lindex, void*,pvAspect, DWORD*,pdwFreeze) \
 	ICOM_METHOD1(HRESULT,Unfreeze, DWORD,dwFreeze) \
@@ -90,7 +92,9 @@ ICOM_DEFINE(IViewObject2,IViewObject)
 #define IViewObject2_GetExtent(p,a,b,c,d)         ICOM_CALL4(GetExtent,p,a,b,c,d)
 #endif
 
-
+#ifdef __cplusplus
+} /* extern "C" */
+#endif /* defined(__cplusplus) */
 
 #endif /* __WINE_WINE_OBJ_OLEVIEW_H */
 

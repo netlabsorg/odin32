@@ -1,4 +1,3 @@
-/* $Id: obj_propertystorage.h,v 1.3 1999-06-10 16:21:56 achimha Exp $ */
 /*
  * Defines the COM interfaces and APIs related to saving properties to file.
  */
@@ -8,6 +7,10 @@
 
 #include "wine/obj_base.h"
 #include "wine/obj_storage.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif /* defined(__cplusplus) */
 
 /*****************************************************************************
  * Predeclare the interfaces
@@ -32,6 +35,9 @@ typedef struct IPropertyStorage IPropertyStorage,*LPPROPERTYSTORAGE;
 typedef struct tagSTATPROPSETSTG STATPROPSETSTG;
 typedef struct tagSTATPROPSTG STATPROPSTG;
 
+extern const FMTID FMTID_SummaryInformation;
+extern const FMTID FMTID_DocSummaryInformation;
+extern const FMTID FMTID_UserDefinedProperties;
 
 /*****************************************************************************
  * PROPSPEC structure
@@ -133,7 +139,8 @@ struct tagSTATPROPSTG
     ICOM_METHOD (HRESULT,Reset) \
     ICOM_METHOD1(HRESULT,Clone, IEnumSTATPROPSETSTG**,ppenum)
 #define IEnumSTATPROPSETSTG_IMETHODS \
-    ICOM_INHERITS(IEnumSTATPROPSETSTG,IUnknown)
+		IUnknown_IMETHODS \
+		IEnumSTATPROPSETSTG_METHODS
 ICOM_DEFINE(IEnumSTATPROPSETSTG,IUnknown)
 #undef ICOM_INTERFACE
 
@@ -160,7 +167,8 @@ ICOM_DEFINE(IEnumSTATPROPSETSTG,IUnknown)
     ICOM_METHOD (HRESULT,Reset) \
     ICOM_METHOD1(HRESULT,Clone, IEnumSTATPROPSTG**,ppenum)
 #define IEnumSTATPROPSTG_IMETHODS \
-    ICOM_INHERITS(IEnumSTATPROPSTG,IUnknown)
+		IUnknown_IMETHODS \
+		IEnumSTATPROPSTG_METHODS 
 ICOM_DEFINE(IEnumSTATPROPSTG,IUnknown)
 #undef ICOM_INTERFACE
 
@@ -187,7 +195,8 @@ ICOM_DEFINE(IEnumSTATPROPSTG,IUnknown)
     ICOM_METHOD1(HRESULT,Delete, REFFMTID,rfmtid) \
     ICOM_METHOD1(HRESULT,Enum,   IEnumSTATPROPSETSTG**,ppenum)
 #define IPropertySetStorage_IMETHODS \
-    ICOM_INHERITS(IPropertySetStorage,IUnknown)
+		IUnknown_IMETHODS \
+		IPropertySetStorage_METHODS
 ICOM_DEFINE(IPropertySetStorage,IUnknown)
 #undef ICOM_INTERFACE
 
@@ -408,7 +417,8 @@ struct tagPROPVARIANT
     ICOM_METHOD1(HRESULT,SetClass,            REFCLSID,clsid) \
     ICOM_METHOD1(HRESULT,Stat,                STATPROPSETSTG*,pstatpsstg)
 #define IPropertyStorage_IMETHODS \
-    ICOM_INHERITS(IPropertyStorage,IUnknown)
+		IUnknown_IMETHODS \
+		IPropertyStorage_METHODS
 ICOM_DEFINE(IPropertyStorage,IUnknown)
 #undef ICOM_INTERFACE
 
@@ -432,5 +442,8 @@ ICOM_DEFINE(IPropertyStorage,IUnknown)
 #define IPropertyStorage_Stat(p,a)                   ICOM_CALL1(Stat,p,a)
 #endif
 
+#ifdef __cplusplus
+} /* extern "C" */
+#endif /* defined(__cplusplus) */
 
 #endif /* __WINE_WINE_OBJ_PROPERTYSTORAGE_H */

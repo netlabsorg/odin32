@@ -1,4 +1,3 @@
-/* $Id: obj_storage.h,v 1.3 1999-06-10 16:21:56 achimha Exp $ */
 /*
  * Defines the COM interfaces and APIs related to structured data storage.
  */
@@ -9,6 +8,10 @@
 
 #include "winnt.h"
 #include "wine/obj_base.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif /* defined(__cplusplus) */
 
 /*****************************************************************************
  * Predeclare the structures
@@ -280,7 +283,7 @@ ICOM_DEFINE(ILockBytes,IUnknown)
  */
 #define ICOM_INTERFACE IPersist
 #define IPersist_METHODS \
-    ICOM_CMETHOD1(HRESULT,GetClassID, CLSID*,pClassID)
+    ICOM_METHOD1(HRESULT,GetClassID, CLSID*,pClassID)
 #define IPersist_IMETHODS \
     IUnknown_IMETHODS \
     IPersist_METHODS
@@ -302,11 +305,11 @@ ICOM_DEFINE(IPersist,IUnknown)
  */
 #define ICOM_INTERFACE IPersistFile
 #define IPersistFile_METHODS \
-    ICOM_CMETHOD (HRESULT,IsDirty) \
+    ICOM_METHOD (HRESULT,IsDirty) \
     ICOM_METHOD2 (HRESULT,Load,          LPCOLESTR,pszFileName, DWORD,dwMode) \
     ICOM_METHOD2 (HRESULT,Save,          LPCOLESTR,pszFileName, BOOL,fRemember) \
     ICOM_METHOD1 (HRESULT,SaveCompleted, LPCOLESTR,pszFileName) \
-    ICOM_CMETHOD1(HRESULT,GetCurFile,    LPOLESTR*,ppszFileName)
+    ICOM_METHOD1(HRESULT,GetCurFile,    LPOLESTR*,ppszFileName)
 #define IPersistFile_IMETHODS \
     IPersist_IMETHODS \
     IPersistFile_METHODS
@@ -691,6 +694,7 @@ HRESULT WINAPI StgCreateDocfile(LPCOLESTR pwcsName,DWORD grfMode,DWORD reserved,
 
 HRESULT WINAPI StgIsStorageFile16(LPCOLESTR16 fn);
 HRESULT WINAPI StgIsStorageFile(LPCOLESTR fn);
+HRESULT WINAPI StgIsStorageILockBytes(ILockBytes *plkbyt);
 
 HRESULT WINAPI StgOpenStorage16(const OLECHAR16* pwcsName,IStorage16* pstgPriority,DWORD grfMode,SNB16 snbExclude,DWORD reserved,IStorage16**ppstgOpen);
 HRESULT WINAPI StgOpenStorage(const OLECHAR* pwcsName,IStorage* pstgPriority,DWORD grfMode,SNB snbExclude,DWORD reserved,IStorage**ppstgOpen);
@@ -711,5 +715,8 @@ BOOL WINAPI CoDosDateTimeToFileTime(WORD nDosDate, WORD nDosTime, FILETIME* lpFi
 /* FIXME: not implemented */
 BOOL WINAPI CoFileTimeToDosDateTime(FILETIME* lpFileTime, WORD* lpDosDate, WORD* lpDosTime);
 
+#ifdef __cplusplus
+} /* extern "C" */
+#endif /* defined(__cplusplus) */
 
 #endif /* __WINE_WINE_OBJ_STORAGE_H */

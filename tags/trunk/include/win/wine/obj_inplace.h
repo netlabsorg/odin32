@@ -1,4 +1,3 @@
-/* $Id: obj_inplace.h,v 1.3 1999-06-10 16:21:54 achimha Exp $ */
 /*
  * Defines the COM interfaces and APIs related to structured data storage.
  * 
@@ -12,6 +11,10 @@
 #include "winbase.h"
 #include "winuser.h"
 #include "wine/obj_moniker.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif /* defined(__cplusplus) */
 
 /*****************************************************************************
  * Predeclare the structures
@@ -94,6 +97,15 @@ typedef enum tagBINDSPEED
 	BINDSPEED_IMMEDIATE = 3
 } BINDSPEED;
 
+typedef enum tagOLECONTF
+{
+	OLECONTF_EMBEDDINGS = 1,
+	OLECONTF_LINKS = 2,
+	OLECONTF_OTHERS = 4,
+	OLECONTF_OLNYUSER = 8,
+	OLECONTF_ONLYIFRUNNING = 16
+} OLECONTF;
+ 
 typedef HGLOBAL HOLEMENU;
 typedef LPRECT LPBORDERWIDTHS;
 typedef LPCRECT LPCBORDERWIDTHS;
@@ -420,8 +432,8 @@ ICOM_DEFINE(IOleContainer,IParseDisplayName)
  */
 #define ICOM_INTERFACE IOleItemContainer
 #define IOleItemContainer_METHODS \
-	ICOM_METHOD5(HRESULT,GetObject, LPOLESTR,pszItem, DWORD,dwSpeedNeeded, IBindCtx*,pbc, REFIID,riid, void*,ppvObject) \
-	ICOM_METHOD4(HRESULT,GetObjectStorage, LPOLESTR,pszItem, IBindCtx*,pbc, REFIID,riid, void*,ppvStorage) \
+	ICOM_METHOD5(HRESULT,GetObject, LPOLESTR,pszItem, DWORD,dwSpeedNeeded, IBindCtx*,pbc, REFIID,riid, void**,ppvObject) \
+	ICOM_METHOD4(HRESULT,GetObjectStorage, LPOLESTR,pszItem, IBindCtx*,pbc, REFIID,riid, void**,ppvStorage) \
 	ICOM_METHOD1(HRESULT,IsRunning, LPOLESTR,pszItem)
 #define IOleItemContainer_IMETHODS \
 	IOleContainer_IMETHODS \
@@ -482,6 +494,9 @@ ICOM_DEFINE(IOleLink,IUnknown)
 #define IOleLink_Update(p,a)                 ICOM_CALL1(Update,p,a)
 #endif
 
+#ifdef __cplusplus
+} /* extern "C" */
+#endif /* defined(__cplusplus) */
 
 #endif /* __WINE_WINE_OBJ_INPLACE_H */
 

@@ -1,4 +1,3 @@
-/* $Id: obj_marshal.h,v 1.3 1999-06-10 16:21:54 achimha Exp $ */
 /*
  * Defines the COM interfaces and APIs that allow an interface to 
  * specify a custom marshaling for its objects.
@@ -9,6 +8,10 @@
 
 #include "wine/obj_base.h"
 #include "wine/obj_storage.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif /* defined(__cplusplus) */
 
 /*****************************************************************************
  * Predeclare the interfaces
@@ -108,5 +111,8 @@ HRESULT WINAPI CoUnmarshalHresult(LPSTREAM pstm, HRESULT* phresult);
 /* FIXME: not implemented */
 HRESULT WINAPI CoUnmarshalInterface(LPSTREAM pStm, REFIID riid, LPVOID* ppv);
 
+#ifdef __cplusplus
+} /* extern "C" */
+#endif /* defined(__cplusplus) */
 
 #endif /* __WINE_WINE_OBJ_MARSHAL_H */

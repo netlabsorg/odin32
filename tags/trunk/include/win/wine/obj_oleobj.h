@@ -1,4 +1,3 @@
-/* $Id: obj_oleobj.h,v 1.3 1999-06-10 16:21:55 achimha Exp $ */
 /*
  * Defines IOleObject COM and other oleidl.h interfaces
  * 
@@ -12,6 +11,10 @@
 #include "winbase.h"
 #include "winuser.h"
 #include "wine/obj_base.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif /* defined(__cplusplus) */
 
 /*****************************************************************************
  * Declare the structures
@@ -40,7 +43,7 @@ typedef enum tagOLEMISC
 	OLEMISC_INSIDEOUT = 0x80,
 	OLEMISC_ACTIVATEWHENVISIBLE = 0x100,
 	OLEMISC_RENDERINGISDEVICEINDEPENDENT = 0x200,
-	OLEMISC_INVISABLEATRUNTIME = 0x400,
+	OLEMISC_INVISIBLEATRUNTIME = 0x400,
 	OLEMISC_ALWAYSRUN = 0x800,
 	OLEMISC_ACTSLIKEBUTTON = 0x1000,
 	OLEMISC_ACTSLIKELABEL = 0x2000,
@@ -110,7 +113,7 @@ ICOM_DEFINE(IOleObject,IUnknown)
 #define IOleObject_AddRef(p)                  ICOM_CALL (AddRef,p)
 #define IOleObject_Release(p)                 ICOM_CALL (Release,p)
 /*** IOleObject methods ***/
-#define IOleObject_SetClientSite(p,a,b,c,d) ICOM_CALL1(SetClientSite,p,a)
+#define IOleObject_SetClientSite(p,a)       ICOM_CALL1(SetClientSite,p,a)
 #define IOleObject_GetClientSite(p,a,b)     ICOM_CALL1(GetClientSite,p,a)
 #define IOleObject_SetHostNames(p,a,b)      ICOM_CALL2(SetHostNames,p,a,b)
 #define IOleObject_Close(p,a,b)             ICOM_CALL1(Close,p,a)
@@ -157,12 +160,12 @@ ICOM_DEFINE(IOleAdviseHolder,IUnknown)
 #define IOleAdviseHolder_AddRef(p)                  ICOM_CALL (AddRef,p)
 #define IOleAdviseHolder_Release(p)                 ICOM_CALL (Release,p)
 /*** IOleAdviseHolder methods ***/
-#define IOleAdviseHolder_Advise(p,a,b)              ICOM_CALL2(UpdateCache,p,a,b)
-#define IOleAdviseHolder_Unadvise(p,a)              ICOM_CALL1(OnStop,p,a)
-#define IOleAdviseHolder_EnumAdvise(p,a)            ICOM_CALL1(OnStop,p,a)
-#define IOleAdviseHolder_SendOnRename(p,a)          ICOM_CALL1(OnStop,p,a)
-#define IOleAdviseHolder_SendOnSave(p)              ICOM_CALL (OnStop,p)
-#define IOleAdviseHolder_SendOnClose(p)             ICOM_CALL (OnStop,p)
+#define IOleAdviseHolder_Advise(p,a,b)              ICOM_CALL2(Advise,p,a,b)
+#define IOleAdviseHolder_Unadvise(p,a)              ICOM_CALL1(Unadvise,p,a)
+#define IOleAdviseHolder_EnumAdvise(p,a)            ICOM_CALL1(EnumAdvise,p,a)
+#define IOleAdviseHolder_SendOnRename(p,a)          ICOM_CALL1(SendOnRename,p,a)
+#define IOleAdviseHolder_SendOnSave(p)              ICOM_CALL (SendOnSave,p)
+#define IOleAdviseHolder_SendOnClose(p)             ICOM_CALL (SendOnClose,p)
 #endif
 				 
 
@@ -192,6 +195,10 @@ ICOM_DEFINE(IEnumOLEVERB,IUnknown)
 #define IEnumOLEVERB_Reset(p,a)             ICOM_CALL (Reset,p)
 #define IEnumOLEVERB_Clone(p,a)             ICOM_CALL1(Clone,p,a)
 #endif
+
+#ifdef __cplusplus
+} /* extern "C" */
+#endif /* defined(__cplusplus) */
 				  
 #endif /* __WINE_WINE_OBJ_OLEOBJ_H */
 

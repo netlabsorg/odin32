@@ -1,4 +1,3 @@
-/* $Id: obj_property.h,v 1.3 1999-06-10 16:21:55 achimha Exp $ */
 /*
  * Defines the COM interfaces and APIs from ocidl.h related to property
  *
@@ -11,6 +10,10 @@
 
 #include "winbase.h"
 #include "wine/obj_oleaut.h" /* for DISPID */
+
+#ifdef __cplusplus
+extern "C" {
+#endif /* defined(__cplusplus) */
 
 /*****************************************************************************
  * Declare the structures
@@ -430,6 +433,9 @@ ICOM_DEFINE(IPerPropertyBrowsing,IUnknown)
 #define IPerPropertyBrowsing_GetPredefinedValue(p,a,b,c)   ICOM_CALL3(GetPredefinedValue,p,a,b,c)
 #endif
 
+#ifdef __cplusplus
+} /* extern "C" */
+#endif /* defined(__cplusplus) */
 
 #endif /* __WINE_WINE_OBJ_PROPERTY_H */
 

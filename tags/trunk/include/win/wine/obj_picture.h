@@ -1,4 +1,3 @@
-/* $Id: obj_picture.h,v 1.3 1999-06-10 16:21:55 achimha Exp $ */
 /*
  * Defines the COM interfaces and APIs related to OLE picture support.
  *
@@ -10,6 +9,10 @@
 
 #include "windows.h"
 #include "windef.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif /* defined(__cplusplus) */
 
 /*****************************************************************************
  * Predeclare the structures
@@ -103,7 +106,9 @@ ICOM_DEFINE(IPictureDisp,IDispatch)
 /*** IPictureDisp methods ***/
 #endif
 
-
+#ifdef __cplusplus
+} /* extern "C" */
+#endif /* defined(__cplusplus) */
 
 #endif /* __WINE_WINE_OBJ_PICTURE_H */
 

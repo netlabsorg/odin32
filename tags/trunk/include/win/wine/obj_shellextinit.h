@@ -1,15 +1,18 @@
-/* $Id: obj_shellextinit.h,v 1.3 1999-06-10 16:21:56 achimha Exp $ */
 /************************************************************
  *    IShellExtInit
  */
 
-#ifndef __WINE_WINE_OBJ_ISHELLEXTINIT_H
-#define __WINE_WINE_OBJ_ISHELLEXTINIT_H
+#ifndef __WINE_WINE_OBJ_SHELLEXTINIT_H
+#define __WINE_WINE_OBJ_SHELLEXTINIT_H
 
 #include "winbase.h"
 #include "winuser.h"
 #include "wine/obj_base.h"
 #include "wine/obj_dataobject.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif /* defined(__cplusplus) */
 
 typedef struct 	IShellExtInit IShellExtInit, *LPSHELLEXTINIT;
 DEFINE_SHLGUID(IID_IShellExtInit,       0x000214E8L, 0, 0);
@@ -30,5 +33,8 @@ ICOM_DEFINE(IShellExtInit,IUnknown)
 #define IShellExtInit_Initialize(p,a,b,c)	ICOM_CALL3(Initialize,p,a,b,c)
 #endif
 
+#ifdef __cplusplus
+} /* extern "C" */
+#endif /* defined(__cplusplus) */
 
-#endif /* __WINE_WINE_OBJ_ISHELLEXTINIT_H */
+#endif /* __WINE_WINE_OBJ_SHELLEXTINIT_H */
