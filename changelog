@@ -1,8 +1,9 @@
- /* $Id: changelog,v 1.523 1999-12-09 00:50:07 sandervl Exp $ */
+ /* $Id: changelog,v 1.524 1999-12-09 00:55:31 sandervl Exp $ */
 
  99-12-09: Sander van Leeuwen <sandervl@xs4all.nl>
 	- KERNEL32: Fixes in lstrcpynWtoA
-                    Added code heap.
+                    Added code heap
+                    Temporarily removed winres fix. (breaks Lotus Notes for some reason)
 	- USER32: Major changes for window procedures
                   Now identical to Wine. Window is unicode only if it's
                   window procedure comes from a unicode class.
