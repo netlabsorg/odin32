@@ -1,4 +1,8 @@
-/* $Id: changelog,v 1.1710 2001-09-30 10:02:54 bird Exp $ */
+/* $Id: changelog,v 1.1711 2001-09-30 15:33:16 sandervl Exp $ */
+
+ 2001-09-30: Sander van Leeuwen <sandervl@xs4all.nl>
+    - INCLUDE:  o Hook constants added to winconst.h
+                  (adding them to winuser.h only completely breaks Odin)
 
  2001-09-30: knut st. osmundsen <kosmunds@csc.com>
     - Makefiles:
