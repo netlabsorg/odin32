@@ -1,4 +1,8 @@
- /* $Id: ChangeLog,v 1.540 1999-12-17 16:55:57 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.541 1999-12-17 17:15:59 cbratschi Exp $ */
+
+ 99-12-17: Christoph Bratschi <cbratschi@datacomm.ch>
+	- USER32: WM_NOTIFYPARENT: map cursor pos
+		  implemented MDI cascade/tile
 
  99-12-17: Sander van Leeuwen <sandervl@xs4all.nl>
 	- KERNEL32: Delete thread's THDB structure when it quits
@@ -13,6 +17,7 @@
 	- USER32: fixed 'dancing characters' in edit control
 		  ported GrayString from WINE
 		  desktop: terminate string in WM_GETTEXT
+		  free timers after WM_DESTROY
 	- GDI32: several bug fixes for text output functions
 		 implemented PolyTextOutA/W
 
