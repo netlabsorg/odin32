@@ -1,9 +1,16 @@
- /* $Id: changelog,v 1.633 2000-01-11 10:39:26 sandervl Exp $ */
+ /* $Id: changelog,v 1.634 2000-01-11 13:05:41 sandervl Exp $ */
 
  2000-01-11: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32\NEW: Put nonclient code in win32wbasenonclient.cpp
                       Removed hardcoded dependancy on shell32; load it on-demand
                       Fixed LoadBitmap (OBM_RADIOCHECK was missing from system bitmap list)
+                      Fixed wrong return value for OSLibWinGetMsg
+                      Workaround for bug in GDI32 FillRect (menu items painted
+                      black instead of gray) (menu.cpp, MENU_DrawMenuItem)
+                      Applied patch to Wine menu code for RealPlayer
+                      Fixed default return value of DefWndProc (0)
+                      Fixed SetMenu (menus should be set when a window is no child)
+                      Call correct SetMenu function from MsgCreate Win32BaseWindow method
 
  2000-01-10: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32: Fixed message translation for WM_TIMER with no window handle or timer proc
