@@ -1,4 +1,4 @@
-/* $Id: os2heap.cpp,v 1.4 1999-06-19 10:54:42 sandervl Exp $ */
+/* $Id: os2heap.cpp,v 1.5 1999-08-03 17:38:59 phaller Exp $ */
 
 /*
  * Heap class for OS/2
@@ -215,10 +215,26 @@ int OS2Heap::GetLockCnt(LPVOID lpMem)
 }
 //******************************************************************************
 //******************************************************************************
+DWORD OS2Heap::Size(DWORD dwFlags, PVOID lpMem)
+{
+//  dprintf(("OS2Heap::Size, %X\n", lpMem));
+  if(lpMem == NULL)
+    return(0);
+
+  return(_msize((char *)lpMem - sizeof(HEAPELEM)) - HEAP_OVERHEAD);
+}
+//******************************************************************************
+//******************************************************************************
 LPVOID OS2Heap::ReAlloc(DWORD dwFlags, LPVOID lpMem, DWORD dwBytes)
 {
- LPVOID lpNewMem;
- int    i;
+  LPVOID lpNewMem;
+  int    i;
+
+  if (dwBytes == 0) return NULL;         // intercept stupid parameters
+  if (lpMem == 0)   return NULL;
+
+  if (Size(0,lpMem) == dwBytes) return lpMem; // if reallocation with same size
+                                                // don't do anything
 
 //  dprintf(("OS2Heap::ReAlloc %X %X %d\n", dwFlags, lpMem, dwBytes));
   lpNewMem = Alloc(dwFlags, dwBytes);
@@ -260,16 +276,6 @@ BOOL OS2Heap::Free(DWORD dwFlags, LPVOID lpMem)
 
   free((void *)helem);
   return(TRUE);
-}
-//******************************************************************************
-//******************************************************************************
-DWORD OS2Heap::Size(DWORD dwFlags, PVOID lpMem)
-{
-//  dprintf(("OS2Heap::Size, %X\n", lpMem));
-  if(lpMem == NULL)
-    return(0);
-
-  return(_msize((char *)lpMem - sizeof(HEAPELEM)) - HEAP_OVERHEAD);
 }
 //******************************************************************************
 //******************************************************************************
