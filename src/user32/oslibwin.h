@@ -1,4 +1,4 @@
-/* $Id: oslibwin.h,v 1.1 1999-09-15 23:18:55 sandervl Exp $ */
+/* $Id: oslibwin.h,v 1.2 1999-09-17 18:49:53 dengert Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -29,8 +29,8 @@ typedef struct _SWP    /* swp */
 } SWP, *PSWP;
 #endif
 
-#define OSLIB_HWND_DESKTOP      0
-#define OSLIB_HWND_OBJECT       1
+#define OSLIB_HWND_DESKTOP      1
+#define OSLIB_HWND_OBJECT       2
 
 BOOL  OSLibWinSetParent(HWND hwnd, HWND hwndParent, ULONG fRedraw = TRUE);
 
@@ -54,7 +54,7 @@ BOOL OSLibWinAlarm(HWND hwndDeskTop,ULONG flStyle);
 ULONG OSLibDosBeep(ULONG freg,ULONG dur);
 HWND OSLibWinQueryFocus(HWND hwndDeskTop);
 HWND OSLibWinWindowFromID(HWND hwndParent,ULONG id);
-BOOL OSLibWinSetFocus(HWND hwndDeskTop,HWND hwndNewFocus);
+BOOL OSLibWinSetFocus(HWND hwndDeskTop,HWND hwndNewFocus, BOOL activate);
 ULONG OSLibGetWindowHeight(HWND hwnd); //for point transformation
 
 extern ULONG ScreenHeight;
@@ -194,6 +194,7 @@ BOOL  OSLibWinShowWindow(HWND hwnd, ULONG fl);
 BOOL  OSLibWinDestroyWindow(HWND hwnd);
 
 BOOL  OSLibWinIsIconic(HWND hwnd);
+BOOL  OSLibWinIsChild (HWND hwnd, HWND hwndOf);
 BOOL  OSLibWinSetActiveWindow(HWND hwnd);
 BOOL  OSLibWinSetFocus(HWND hwnd);
 BOOL  OSLibWinEnableWindow(HWND hwnd, BOOL fEnable);

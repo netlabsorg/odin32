@@ -1,4 +1,4 @@
-/* $Id: window.cpp,v 1.2 1999-09-16 18:00:43 dengert Exp $ */
+/* $Id: window.cpp,v 1.3 1999-09-17 18:49:53 dengert Exp $ */
 /*
  * Win32 window apis for OS/2
  *
@@ -455,15 +455,19 @@ BOOL WIN32API IsWindowVisible( HWND hwnd)
 }
 //******************************************************************************
 //******************************************************************************
-HWND WIN32API SetFocus( HWND hwnd)
+HWND WIN32API SetFocus (HWND hwnd)
 {
- HWND lastFocus;
+    HWND lastFocus, lastFocus_W, hwnd_O;
+    BOOL activate;
 
-    dprintf(("USER32:  SetFocus\n"));
+    hwnd_O    = Win32BaseWindow::Win32ToOS2Handle (hwnd);
+    lastFocus = OSLibWinQueryFocus (OSLIB_HWND_DESKTOP);
+    activate  = ((hwnd_O == lastFocus) || OSLibWinIsChild (lastFocus, hwnd_O));
+    lastFocus_W = Win32BaseWindow::OS2ToWin32Handle (lastFocus);
 
-    lastFocus = GetFocus();
-    hwnd = Win32BaseWindow::Win32ToOS2Handle(hwnd);
-    return (OSLibWinSetFocus(OSLIB_HWND_DESKTOP,hwnd)) ? lastFocus:0;
+    dprintf(("USER32:  SetFocus %x (%x) -> %x (%x)\n", lastFocus_W, lastFocus, hwnd, hwnd_O));
+
+    return (OSLibWinSetFocus (OSLIB_HWND_DESKTOP, hwnd_O, activate)) ? lastFocus_W : 0;
 }
 //******************************************************************************
 //******************************************************************************
