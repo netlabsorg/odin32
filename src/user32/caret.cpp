@@ -1,4 +1,4 @@
-/* $Id: caret.cpp,v 1.3 1999-09-28 18:31:24 dengert Exp $ */
+/* $Id: caret.cpp,v 1.4 1999-09-29 09:31:18 dengert Exp $ */
 
 /*
  * Caret functions for USER32
@@ -261,9 +261,11 @@ void recreateCaret (HWND hwndFocus)
 {
    CURSORINFO cursorInfo;
 
-   if ((hwndCaret == hwndFocus) &&
+   if ((hwndFocus != 0) && (hwndCaret == hwndFocus) &&
        !WinQueryCursorInfo (HWND_DESKTOP, &cursorInfo))
    {
+      dprintf(("recreateCaret for %x", hwndFocus));
+
       CreateCaret (hwndCaret, hbmCaret, CaretWidth, CaretHeight);
       SetCaretPos (CaretPosX, CaretPosY);
       if (CaretIsVisible)
