@@ -1,4 +1,4 @@
-/* $Id: hmdevice.h,v 1.27 2001-06-21 21:07:53 sandervl Exp $ */
+/* $Id: hmdevice.h,v 1.28 2001-06-22 19:40:27 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -24,13 +24,16 @@
  * defines                                                                   *
  *****************************************************************************/
 
-#define HMTYPE_UNKNOWN    0
-#define HMTYPE_MEMMAP   1
-#define HMTYPE_DEVICE     2
-#define HMTYPE_PROCESSTOKEN   3
-#define HMTYPE_THREADTOKEN  4
+#define HMTYPE_UNKNOWN          0
+#define HMTYPE_MEMMAP           1
+#define HMTYPE_DEVICE           2
+#define HMTYPE_PROCESSTOKEN     3
+#define HMTYPE_THREADTOKEN      4
 #define HMTYPE_THREAD           5
 #define HMTYPE_PIPE             6
+#define HMTYPE_EVENTSEM         7
+#define HMTYPE_MUTEXSEM         8
+#define HMTYPE_SEMAPHORE        9
 //.....
 
 /*****************************************************************************

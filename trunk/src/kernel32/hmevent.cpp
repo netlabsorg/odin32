@@ -1,4 +1,4 @@
-/* $Id: hmevent.cpp,v 1.6 2001-06-21 21:07:53 sandervl Exp $ */
+/* $Id: hmevent.cpp,v 1.7 2001-06-22 19:40:28 sandervl Exp $ */
 
 /*
  * Win32 Event Semaphore implementation
@@ -121,6 +121,7 @@ DWORD HMDeviceEventClass::CreateEvent(PHMHANDLEDATA         pHMHandleData,
   pHMHandleData->dwAccess  = EVENT_ALL_ACCESS_W;
   pHMHandleData->dwFlags   = fManualReset;
   pHMHandleData->hHMHandle = hev;
+  pHMHandleData->dwInternalType = HMTYPE_EVENTSEM;
   return ERROR_SUCCESS_W;
 #else
   HANDLE hOpen32;
@@ -187,6 +188,7 @@ DWORD HMDeviceEventClass::OpenEvent(PHMHANDLEDATA         pHMHandleData,
       pHMHandleData->hHMHandle = 0;
       return error2WinError(rc);
   }
+  pHMHandleData->dwInternalType = HMTYPE_EVENTSEM;
   pHMHandleData->hHMHandle = hev;
   return ERROR_SUCCESS_W;
 #else
@@ -287,6 +289,7 @@ BOOL HMDeviceEventClass::DuplicateHandle(PHMHANDLEDATA pHMHandleData, HANDLE  sr
   pHMHandleData->dwAccess  = fdwAccess;
   pHMHandleData->dwFlags   = pHMSrcHandle->dwFlags; //fManualReset
   pHMHandleData->hHMHandle = hev;
+  pHMHandleData->dwInternalType = HMTYPE_EVENTSEM;
   SetLastError(ERROR_SUCCESS_W);
   return TRUE;
 }

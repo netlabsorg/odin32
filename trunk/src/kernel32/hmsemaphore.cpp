@@ -1,4 +1,4 @@
-/* $Id: hmsemaphore.cpp,v 1.5 2001-06-21 21:07:54 sandervl Exp $ */
+/* $Id: hmsemaphore.cpp,v 1.6 2001-06-22 19:40:28 sandervl Exp $ */
 
 /*
  * Win32 Semaphore implementation
@@ -7,9 +7,8 @@
  * TODO: Does DCE_POSTONE work in Warp 3 or 4 with no FP applied?
  * TODO: No inheritance when CreateSemaphore is called for existing named event semaphore?
  *       (see HMCreateSemaphore in handlemanager.cpp)
- * TODO: OpenSemaphore does not work right now! initialcount/maximumcount)
+ * TODO: OpenSemaphore does not work. (get SEM_INFO pointer)
  * TODO: Name collisions with files & mutex not allowed. Check if this can happen in OS/2
- * TODO: Does NOT work for sharing semaphores between processes!!
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *
@@ -43,6 +42,7 @@
 #endif
 #include <stdlib.h>
 #include <string.h>
+#include <heapshared.h>
 #include "unicode.h"
 #include "misc.h"
 
@@ -61,6 +61,12 @@
                                 /* there are multiple waiters.             */
 #endif
 
+typedef struct {
+    LONG currentCount;
+    LONG maximumCount;
+    LONG refCount;
+    HEV  hev;
+} SEM_INFO, *PSEM_INFO;
 
 /*****************************************************************************
  * Defines                                                                   *
@@ -124,9 +130,13 @@ DWORD HMDeviceSemaphoreClass::CreateSemaphore(PHMHANDLEDATA         pHMHandleDat
       return error2WinError(rc);
   }
   pHMHandleData->dwAccess  = SEMAPHORE_ALL_ACCESS_W;
-  pHMHandleData->dwFlags   = lMaximumCount;
-  pHMHandleData->dwCreation= lInitialCount;
-  pHMHandleData->hHMHandle = hev;
+  PSEM_INFO pSemInfo       = (PSEM_INFO)_smalloc(sizeof(SEM_INFO));
+  pSemInfo->refCount       = 1;
+  pSemInfo->hev            = hev;
+  pSemInfo->maximumCount   = lMaximumCount;
+  pSemInfo->currentCount   = lInitialCount;
+  pHMHandleData->hHMHandle = (DWORD)pSemInfo;
+  pHMHandleData->dwInternalType = HMTYPE_SEMAPHORE;
   return ERROR_SUCCESS_W;
 #else
   HANDLE hOpen32;
@@ -195,6 +205,7 @@ DWORD HMDeviceSemaphoreClass::OpenSemaphore(PHMHANDLEDATA         pHMHandleData,
       return error2WinError(rc);
   }
   pHMHandleData->hHMHandle = hev;
+  pHMHandleData->dwInternalType = HMTYPE_SEMAPHORE;
   return ERROR_SUCCESS_W;
 #else
   HANDLE hOpen32;
@@ -234,13 +245,17 @@ DWORD HMDeviceSemaphoreClass::OpenSemaphore(PHMHANDLEDATA         pHMHandleData,
 BOOL HMDeviceSemaphoreClass::CloseHandle(PHMHANDLEDATA pHMHandleData)
 {
   APIRET rc;
+  PSEM_INFO pSemInfo  = (PSEM_INFO)pHMHandleData->hHMHandle;
 
-  if(pHMHandleData->hHMHandle) {
-      rc = DosCloseEventSem((HEV)pHMHandleData->hHMHandle);
+  if(pSemInfo) {
+      rc = DosCloseEventSem(pSemInfo->hev);
       if(rc) {
-          dprintf(("DosCloseEventSem %x failed with rc %d", pHMHandleData->hHMHandle, rc));
+          dprintf(("DosCloseEventSem %x failed with rc %d", pSemInfo->hev, rc));
           SetLastError(error2WinError(rc));
           return FALSE;
+      }
+      if(InterlockedDecrement(&pSemInfo->refCount) == 0) {
+          free(pSemInfo);
       }
   }
   return TRUE;
@@ -272,7 +287,8 @@ BOOL HMDeviceSemaphoreClass::DuplicateHandle(PHMHANDLEDATA pHMHandleData, HANDLE
                                DWORD   fdwOdinOptions)
 {
   APIRET rc; 
-  HEV hev;
+  HEV    hev;
+  PSEM_INFO pSemInfo  = (PSEM_INFO)pHMSrcHandle->hHMHandle;
   
   dprintf(("KERNEL32:HandleManager::DuplicateHandle %s(%08x,%08x,%08x,%08x,%08x)",
            lpHMDeviceName,
@@ -284,18 +300,10 @@ BOOL HMDeviceSemaphoreClass::DuplicateHandle(PHMHANDLEDATA pHMHandleData, HANDLE
       SetLastError(ERROR_ACCESS_DENIED_W);
       return FALSE;
   }
-  hev = (HEV)pHMSrcHandle->hHMHandle;
-  rc = DosOpenEventSem(NULL, &hev);
-  if(rc) {
-      dprintf(("DosOpenEventSem %x failed with rc %d", pHMSrcHandle->hHMHandle, rc));
-      pHMHandleData->hHMHandle = 0;
-      SetLastError(error2WinError(rc));
-      return FALSE;
-  }
+  InterlockedIncrement(&pSemInfo->refCount);
   pHMHandleData->dwAccess  = fdwAccess;
-  pHMHandleData->dwFlags   = pHMSrcHandle->dwFlags;    //lMaximumCount;
-  pHMHandleData->dwCreation= pHMSrcHandle->dwCreation; //lInitialCount;
-  pHMHandleData->hHMHandle = hev;
+  pHMHandleData->hHMHandle = (DWORD)pSemInfo;
+  pHMHandleData->dwInternalType = HMTYPE_SEMAPHORE;
   SetLastError(ERROR_SUCCESS_W);
   return TRUE;
 }
@@ -316,7 +324,7 @@ BOOL HMDeviceSemaphoreClass::DuplicateHandle(PHMHANDLEDATA pHMHandleData, HANDLE
  *****************************************************************************/
 
 DWORD HMDeviceSemaphoreClass::WaitForSingleObject(PHMHANDLEDATA pHMHandleData,
-                                               DWORD         dwTimeout)
+                                                  DWORD         dwTimeout)
 {
  DWORD rc;
 
@@ -330,9 +338,16 @@ DWORD HMDeviceSemaphoreClass::WaitForSingleObject(PHMHANDLEDATA pHMHandleData,
       return WAIT_FAILED_W;
   }
 
-  rc = DosWaitEventSem(pHMHandleData->hHMHandle, dwTimeout);
+  PSEM_INFO pSemInfo  = (PSEM_INFO)pHMHandleData->hHMHandle;
+
+  if(InterlockedDecrement(&pSemInfo->currentCount) >= 0) {
+      SetLastError(ERROR_SUCCESS_W);
+      return WAIT_OBJECT_0_W;  
+  }
+
+  rc = DosWaitEventSem(pSemInfo->hev, dwTimeout);
   if(rc && rc != ERROR_INTERRUPT && rc != ERROR_TIMEOUT && rc != ERROR_SEM_OWNER_DIED) {
-      dprintf(("DosWaitEventSem %x failed with rc %d", pHMHandleData->hHMHandle, rc));
+      dprintf(("DosWaitEventSem %x failed with rc %d", pSemInfo->hev, rc));
       SetLastError(error2WinError(rc));
       return WAIT_FAILED_W;
   }
@@ -476,9 +491,20 @@ BOOL HMDeviceSemaphoreClass::ReleaseSemaphore(PHMHANDLEDATA pHMHandleData,
       return FALSE;
   }
 
-  rc = DosResetEventSem(pHMHandleData->hHMHandle, &count);
+  PSEM_INFO pSemInfo  = (PSEM_INFO)pHMHandleData->hHMHandle;
+
+  if(InterlockedIncrement(&pSemInfo->currentCount) > 0) {
+      //TODO: this is NOT thread safe:
+      if(pSemInfo->currentCount > pSemInfo->maximumCount) { 
+          pSemInfo->currentCount = pSemInfo->maximumCount;
+      }
+      SetLastError(ERROR_SUCCESS_W);
+      return TRUE;  
+  }
+
+  rc = DosResetEventSem(pSemInfo->hev, &count);
   if(rc) {
-      dprintf(("DosResetEventSem %x failed with rc %d", pHMHandleData->hHMHandle, rc));
+      dprintf(("DosResetEventSem %x failed with rc %d", pSemInfo->hev, rc));
       SetLastError(error2WinError(rc));
       return FALSE;
   }
