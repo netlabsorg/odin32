@@ -249,11 +249,11 @@ call directory dlldir;
 if cmdline = "debug"
 then
 do
-"wic.exe "curdir"\"installarchive" -a 2 *.dll *.sym pe.exe pec.exe odininst.exe regsvr32.exe *.ini win32k.sys win32k.ddp Win32kCC.exe kRx.exe";
+"wic.exe "curdir"\"installarchive" -a 2 *.dll winspool.drv *.sym pe.exe pec.exe odininst.exe regsvr32.exe *.ini win32k.sys win32k.ddp Win32kCC.exe kRx.exe";
 end
 else
 do
-"wic.exe "curdir"\"installarchive" -a 2 *.dll pe.exe pec.exe odininst.exe regsvr32.exe *.ini win32k.sys win32k.ddp Win32kCC.exe kRx.exe";
+"wic.exe "curdir"\"installarchive" -a 2 *.dll winspool.drv pe.exe pec.exe odininst.exe regsvr32.exe *.ini win32k.sys win32k.ddp Win32kCC.exe kRx.exe";
 end
 
 call directory "Glide"
