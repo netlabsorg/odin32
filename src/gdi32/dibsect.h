@@ -1,4 +1,4 @@
-/* $Id: dibsect.h,v 1.17 2000-05-12 19:14:56 sandervl Exp $ */
+/* $Id: dibsect.h,v 1.18 2000-05-23 18:46:20 sandervl Exp $ */
 
 /*
  * GDI32 DIB sections
@@ -70,7 +70,8 @@ public:
 
               char *GetDIBObject()           { return bmpBits;  };
               void  SelectDIBObject(HDC hdc);
-              char  GetBitCount();
+              int   GetBitCount();
+              int   GetHeight();
               void  UnSelectDIBObject()      { this->hdc = 0;   };
 
 	      DWORD GetBitmapHandle()	     { return handle; };
