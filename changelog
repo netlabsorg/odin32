@@ -1,11 +1,31 @@
- /* $Id: changelog,v 1.955 2000-05-22 17:17:30 cbratschi Exp $ */
+ /* $Id: changelog,v 1.956 2000-05-22 18:48:18 sandervl Exp $ */
+
+ 2000-05-22: Sander van Leeuwen <sandervl@xs4all.nl>
+    - KERNEL32: GetFileAttributes bugfix:
+                Open32 returns FILE_ATTRIBUTE_DIRECTORY|FILE_ATTRIBUTE_NORMAL for
+                directories whereas NT 4 (SP6) only returns FILE_ATTRIBUTE_DIRECTORY
+                Fixed GetFileTime; wasn't updated for handle manager
+                (InstallShield now continues after initial window (used to
+                 stop at 99%))
+                Create thread security objects during THDB creation (not complete)
+                -> fixes crash in NTDLL for thread tokens
+                -> PowerDVD 2.55 install now completes
+                FindResource(Ex)A/W: if resource not found, then try:
+                       - resource with user default language
+                       - resource with system default language 
+                       - first available resource (any language)
+                (TODO: Need to check what NT really does)
+                -> fixes wrong strings (i.e. menu & buttons) in PowerDVD
+    - GDI32:    Sync dib section in StretchDIBits if destination hdc contains
+                selected dib section
+                -> fixes black windows in PowerDVD (todo: palette still wrong)
 
  2000-05-21: Christoph Bratschi <cbratschi@datacomm.ch>
     - USER32: merged controls with Corel WINE 20000513
-	      fixed titlebar double click -> restore/maximize
-	      show window text changes (why was this disabled?)
+                fixed titlebar double click -> restore/maximize
+                show window text changes (why was this disabled?)
     - COMCTL32: merged with Corel WINE 20000513
-		added APIs used by IE5 (credit: Patrick Haller)
+                added APIs used by IE5 (credit: Patrick Haller)
 
  2000-05-20: Sander van Leeuwen <sandervl@xs4all.nl>
     - USER32:   BroadcastMessageA/W bugfix
