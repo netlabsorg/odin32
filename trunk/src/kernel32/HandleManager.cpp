@@ -1,4 +1,4 @@
-/* $Id: HandleManager.cpp,v 1.60 2001-01-22 18:26:49 sandervl Exp $ */
+/* $Id: HandleManager.cpp,v 1.61 2001-01-23 11:59:44 sandervl Exp $ */
 
 /*
  * Win32 Unified Handle Manager for OS/2
@@ -693,8 +693,6 @@ DWORD HMHandleTranslateToOS2i (ULONG  hHandle16)
 
   return(TabWin32Handles[hHandle16].hmHandleData.hHMHandle);
 }
-
-
 
 /*****************************************************************************
  * Name      : HANDLE  _HMGetStdHandle
@@ -4463,8 +4461,7 @@ BOOL HMCreatePipe(PHANDLE phRead,
   iIndexNewWrite = _HMHandleGetFree();              /* get free handle */
   if (-1 == iIndexNewWrite)                         /* oops, no free handles ! */
   {
-    //free handle
-    TabWin32Handles[iIndexNewRead].hmHandleData.hHMHandle = INVALID_HANDLE_VALUE;
+    HMHandleFree(iIndexNewRead);
     SetLastError(ERROR_NOT_ENOUGH_MEMORY);      /* use this as error message */
     return 0;
   }
@@ -4510,9 +4507,9 @@ BOOL HMCreatePipe(PHANDLE phRead,
 
   if (rc == 0)     /* oops, creation failed within the device handler */
   {
-      TabWin32Handles[iIndexNewRead].hmHandleData.hHMHandle = INVALID_HANDLE_VALUE;
-      TabWin32Handles[iIndexNewWrite].hmHandleData.hHMHandle = INVALID_HANDLE_VALUE;
-  return FALSE;                                           /* signal error */
+      HMHandleFree(iIndexNewRead);
+      HMHandleFree(iIndexNewWrite);
+      return FALSE;                                           /* signal error */
   }
 
   *phRead  = iIndexNewRead;
