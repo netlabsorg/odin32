@@ -863,6 +863,17 @@ HRESULT WINAPI SHRegOpenKeyW (HKEY hkey, LPCWSTR lpszSubKey, LPHKEY retkey)
 	return RegOpenKeyW( hkey, lpszSubKey, retkey );
 }
 /*************************************************************************
+ * SHRegQueryValueA				[NT4.0:SHELL32.?]
+ *
+ */
+HRESULT WINAPI SHRegQueryValueA (HKEY hkey, LPSTR lpszSubKey,
+				 LPSTR lpszData, LPDWORD lpcbData )
+{	WARN("0x%04x %s %p %p semi-stub\n",
+		hkey, lpszSubKey, lpszData, lpcbData);
+	return RegQueryValueA( hkey, lpszSubKey, lpszData, (LPLONG)lpcbData );
+}
+
+/*************************************************************************
  * SHRegQueryValueExA				[SHELL32.509]
  *
  */

@@ -396,8 +396,6 @@ typedef struct
 #define		DROP_FIELD_TOP		(-15)
 #define		DROP_FIELD_HEIGHT	15
 
-extern HICON hIconTitleFont;
-
 static BOOL __get_dropline( HWND hWnd, LPRECT lprect )
 { HWND hWndCtl = GetDlgItem(hWnd, IDC_WINE_TEXT);
     if( hWndCtl )
@@ -466,13 +464,46 @@ DWORD WINAPI SHLoadInProc (DWORD dwArg1)
 /*************************************************************************
  * ShellExecuteA			[SHELL32.245]
  */
+
 HINSTANCE WINAPI ShellExecuteA( HWND hWnd, LPCSTR lpOperation,
                                     LPCSTR lpFile, LPCSTR lpParameters,
                                     LPCSTR lpDirectory, INT iShowCmd )
-{   TRACE_(shell)("\n");
-    return ShellExecute16( hWnd, lpOperation, lpFile, lpParameters,
-                           lpDirectory, iShowCmd );
+{   HINSTANCE retval=31;
+    char old_dir[1024];
+    char cmd[256];
+
+    TRACE_(shell)("(%04x,'%s','%s','%s','%s',%x)\n",
+		hWnd, lpOperation ? lpOperation:"<null>", lpFile ? lpFile:"<null>",
+		lpParameters ? lpParameters : "<null>",
+		lpDirectory ? lpDirectory : "<null>", iShowCmd);
+
+    if (lpFile==NULL) return 0; /* should not happen */
+    if (lpOperation==NULL) /* default is open */
+      lpOperation="open";
+
+    if (lpDirectory)
+    { GetCurrentDirectoryA( sizeof(old_dir), old_dir );
+        SetCurrentDirectoryA( lpDirectory );
+    }
+
+    retval = SHELL_FindExecutable( lpFile, lpOperation, cmd );
+
+    if (retval > 32)  /* Found */
+    {
+        if (lpParameters)
+        {
+            strcat(cmd," ");
+            strcat(cmd,lpParameters);
+        }
+
+        TRACE_(shell)("starting %s\n",cmd);
+        retval = WinExec( cmd, iShowCmd );
+    }
+    if (lpDirectory)
+      SetCurrentDirectoryA( old_dir );
+    return retval;
 }
+
 
 /*************************************************************************
  * ShellExecuteW			[SHELL32.294]
@@ -517,7 +548,6 @@ BOOL WINAPI AboutDlgProc( HWND hWnd, UINT msg, WPARAM wParam,
                                   info->szOtherStuff );
                 hWndCtl = GetDlgItem(hWnd, IDC_LISTBOX);
                 SendMessageA( hWndCtl, WM_SETREDRAW, 0, 0 );
-                SendMessageA( hWndCtl, WM_SETFONT, hIconTitleFont, 0 );
                 while (*pstr)
           { SendMessageA( hWndCtl, LB_ADDSTRING, (WPARAM)-1, (LPARAM)*pstr );
                     pstr++;
@@ -684,17 +714,6 @@ INT WINAPI ShellAboutW( HWND hWnd, LPCWSTR szApp, LPCWSTR szOtherStuff,
 }
 
 /*************************************************************************
- * Shell_NotifyIcon			[SHELL32.296]
- *	FIXME
- *	This function is supposed to deal with the systray.
- *	Any ideas on how this is to be implimented?
- */
-BOOL WINAPI Shell_NotifyIcon(	DWORD dwMessage, PNOTIFYICONDATAA pnid )
-{   TRACE_(shell)("\n");
-    return FALSE;
-}
-
-/*************************************************************************
  * Shell_NotifyIcon			[SHELL32.297]
  *	FIXME
  *	This function is supposed to deal with the systray.
@@ -703,6 +722,32 @@ BOOL WINAPI Shell_NotifyIcon(	DWORD dwMessage, PNOTIFYICONDATAA pnid )
 BOOL WINAPI Shell_NotifyIconA(DWORD dwMessage, PNOTIFYICONDATAA pnid )
 {   TRACE_(shell)("\n");
     return FALSE;
+}
+
+/*************************************************************************
+ * Shell_NotifyIcon			[SHELL32.?]
+ *	FIXME
+ *	This function is supposed to deal with the systray.
+ *	Any ideas on how this is to be implimented?
+ */
+BOOL WINAPI Shell_NotifyIconW(DWORD dwMessage, PNOTIFYICONDATAW pnid )
+{   TRACE_(shell)("\n");
+    return FALSE;
+}
+
+
+/*************************************************************************
+ * Shell_NotifyIcon			[SHELL32.296]
+ *	FIXME
+ *	This function is supposed to deal with the systray.
+ *	Any ideas on how this is to be implimented?
+ */
+BOOL WINAPI Shell_NotifyIcon(	DWORD dwMessage, PNOTIFYICONDATAA pnid )
+{   TRACE_(shell)("\n");
+  if (VERSION_OsIsUnicode())
+    return(Shell_NotifyIconW(dwMessage,(PNOTIFYICONDATAW)pnid));
+  else
+    return(Shell_NotifyIconA(dwMessage,pnid));
 }
 
 /*************************************************************************
