@@ -1,4 +1,4 @@
-/* $Id: misc.h,v 1.3 1999-05-31 17:04:19 phaller Exp $ */
+/* $Id: misc.h,v 1.4 1999-05-31 17:12:38 phaller Exp $ */
 
 #ifndef __MISC_H__
 #define __MISC_H__
@@ -11,7 +11,7 @@
  * Compiler Environment Definition
  */
 
-/* --- WATCOM C --- */
+/* ---------- WATCOM C ---------- */
 #ifdef __WATCOMC__
   #define CDECL     _cdecl
   #define EXPORT    _export
@@ -19,7 +19,7 @@
   #define SYSTEM    __stdcall
 #else
 
-/* --- GCC/EMX --- */
+/* ---------- GCC/EMX ---------- */
 #ifdef __GNUC__
   #define CDECL     _cdecl
   #define EXPORT    _export
@@ -27,7 +27,7 @@
   #define SYSTEM    __stdcall
 #else
 
-/* --- VAC --- */
+/* ---------- VAC ---------- */
 #ifdef __IBMCPP__
   #define CDECL     _Cdecl
   #define EXPORT    _Export
@@ -35,7 +35,7 @@
   #define SYSTEM    _System
 #else
 
-/* --- ??? --- */
+/* ---------- ??? ---------- */
 #error No known compiler.
 #endif
 #endif
