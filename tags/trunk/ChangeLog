@@ -1,4 +1,4 @@
- /* $Id: ChangeLog,v 1.186 1999-09-08 15:24:37 davidr Exp $ */
+ /* $Id: ChangeLog,v 1.187 1999-09-08 19:38:44 sandervl Exp $ */
 
  99-09-08: David Raison
 	- Src\OleAut32 Added stubs for undefined exports in OLEAut32
@@ -35,6 +35,7 @@
 	- Minor changes to odin.h (nameless union allowed in VAC 3.6.5) & windowsx.h
 	- USER32\NEW: Use fixed user32exp.def. Doesn't work for GetOS2Callback__15Win32WindowProcFv
                       (causes link failure for comdlg32)
+	- TOOLS\WRC: Ported Wine wrc. Needs EMX+GCC
 
  99-09-07: Jens Wiessner <wiessnej@rfi.de>
 	- CRTDLL: Created dll (Wine port)
