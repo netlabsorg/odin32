@@ -1,4 +1,4 @@
-/* $Id: oslibmsgtranslate.cpp,v 1.57 2001-07-08 15:51:42 sandervl Exp $ */
+/* $Id: oslibmsgtranslate.cpp,v 1.58 2001-07-15 14:36:38 sandervl Exp $ */
 /*
  * Window message translation functions for OS/2
  *
@@ -780,6 +780,30 @@ VirtualKeyFound:
 
     case WM_DESTROYCLIPBOARD:
         winMsg->message = WINWM_DESTROYCLIPBOARD;
+        break;
+
+    case WM_HSCROLL:
+    case WM_VSCROLL:
+        winMsg->message = (os2Msg->msg == WM_HSCROLL) ? WINWM_HSCROLL : WINWM_VSCROLL;
+        winMsg->lParam  = 0;
+	winMsg->wParam  = 0;
+        switch(SHORT2FROMMP(os2Msg->mp2)) {
+        case SB_LINERIGHT:
+            winMsg->wParam = SB_LINERIGHT_W;
+            break;
+        case SB_LINELEFT:
+            winMsg->wParam = SB_LINELEFT_W;
+            break;
+        case SB_PAGELEFT:
+            winMsg->wParam = SB_PAGELEFT_W;
+            break;
+        case SB_PAGERIGHT:
+            winMsg->wParam = SB_PAGERIGHT_W;
+            break;
+        default:
+            dprintf(("Unsupported WM_H/VSCROLL message %x!!", SHORT2FROMMP(os2Msg->mp2)));
+            goto dummymessage;
+        }
         break;
 
     case WM_INITMENU:
