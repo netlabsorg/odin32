@@ -1,4 +1,7 @@
-/* $Id: changelog,v 1.2450 2003-01-20 10:44:55 sandervl Exp $ */
+/* $Id: changelog,v 1.2451 2003-01-21 11:20:01 sandervl Exp $ */
+
+ 2003-01-21: Sander van Leeuwen <sandervl@innotek   >
+    - DDRAW:    o Removed dependency on dive.dll. Load it on demand.
 
  2003-01-19: Sander van Leeuwen <sandervl@innotek   >
     - KERNEL32: o Only load LVM.DLL when we actually need it.
