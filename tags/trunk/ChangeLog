@@ -1,7 +1,12 @@
- /* $Id: ChangeLog,v 1.257 1999-09-29 08:26:18 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.258 1999-09-29 09:15:59 sandervl Exp $ */
 
  99-09-29: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32: Almost completed standard window scrollbars.
+                  Fixed WM_ACTIVATE message, generate WM_ACTIVATEAPP message
+                  when WM_ACTIVATE is received. (instead of WM_SETFOCUS)
+                  NOTE: Still not working correctly. Too many WM_ACTIVATEAPP msgs generated.
+                  Always send Odin window handles from pmwindow.cpp to win32wbase.cpp.
+                  Send WM_CHILDACTIVATE msg to MDI child windows.
 
  99-09-28: Daniela Engert <dani@ngrt.de>
 	- USER32: CreateCaret fixed
