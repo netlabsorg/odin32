@@ -1,4 +1,4 @@
-/* $Id: oslibdos.cpp,v 1.91 2001-12-30 11:04:19 sandervl Exp $ */
+/* $Id: oslibdos.cpp,v 1.92 2002-01-04 14:11:23 sandervl Exp $ */
 /*
  * Wrappers for OS/2 Dos* API
  *
@@ -2549,6 +2549,197 @@ BOOL  OSLibDosGetDiskGeometry(HANDLE hDisk, DWORD cDisk, PVOID pdiskgeom)
    dprintf(("OSLibDosGetDiskGeometry: error %d -> %d", rc, error2WinError(rc)));
    SetLastError(error2WinError(rc));
    return FALSE;
+}
+//******************************************************************************
+
+#define FSAttachSpace 100
+
+#define CDType         0x8000
+#define FloppyType     0x4000
+#define LanType        0x2000
+#define LogicalType    0x1000
+#define VDISKType      0x0800
+#define OpticalType    0x0400
+#define NonRemovable   0x01
+
+#define FirstDrive             0
+#define B_Drive_0_Based        1
+#define Base_1_offset          1
+#define Binary_to_Printable 0x41
+#define LastDrive             26
+#define OpticalSectorsPerCluster 4
+
+#define DisketteCylinders 80
+
+#ifndef DEVTYPE_OPTICAL
+#define DEVTYPE_OPTICAL                    0x0008
+#endif
+
+// used for input to logical disk Get device parms Ioctl
+struct {
+        UCHAR Infotype;
+        UCHAR DriveUnit;
+        } DriveRequest;
+
+// used for CD number of units Ioctl
+struct {
+        USHORT count;
+        USHORT first;
+        } cdinfo;
+
+//******************************************************************************
+ULONG OSLibGetDriveType(ULONG DriveIndex)
+{
+ ULONG  ulDriveNum = 0;
+ ULONG  ulDriveMap = 0;
+ APIRET rc;
+ ULONG  parmsize,datasize;
+ ULONG  mask,Action;
+ HFILE  handle;
+ UCHAR  devname[5]="c:";
+ PFSQBUFFER2 fsinfo;
+ ULONG  len;
+ PSZ    name;
+ BIOSPARAMETERBLOCK device = {0};
+ UINT   type;
+
+    rc = DosQueryCurrentDisk(&ulDriveNum, &ulDriveMap);
+    mask = 1 << DriveIndex;
+
+    if(rc == NO_ERROR && (mask & ulDriveMap))
+    {//drive present??
+        parmsize=sizeof(DriveRequest);
+        datasize=sizeof(device);
+        DriveRequest.Infotype  = 0; 
+        DriveRequest.DriveUnit = (UCHAR)DriveIndex;
+
+        // Get BIOS parameter block
+        if(DosDevIOCtl(-1, IOCTL_DISK,DSK_GETDEVICEPARAMS,
+                       (PVOID)&DriveRequest, sizeof(DriveRequest),
+                       &parmsize, (PVOID)&device,
+                       sizeof(BIOSPARAMETERBLOCK), &datasize) == NO_ERROR)
+        {
+            if(device.bDeviceType == 0 && device.fsDeviceAttr == 0) 
+            {   // fix for LAN type drives
+                device.fsDeviceAttr = LanType;
+            }
+        }
+        else {//could be a LAN drive
+            device.fsDeviceAttr = LanType;
+        }
+    }
+    else {
+        //drive not present -> fail
+        return DRIVE_DOESNOTEXIST_W;
+    }
+
+    // check for CD drives
+    if(DosOpen("\\DEV\\CD-ROM2$", &handle,&Action,
+               0, FILE_NORMAL, OPEN_ACTION_OPEN_IF_EXISTS,
+               OPEN_SHARE_DENYNONE|OPEN_ACCESS_READONLY, NULL) == 0)
+    {
+        datasize=sizeof(cdinfo);
+        rc = DosDevIOCtl(handle, 0x82, 0x60,
+                         NULL, 0,
+                         NULL, (PVOID)&cdinfo,
+                         sizeof(cdinfo),
+                         &datasize);
+        if(rc == NO_ERROR) 
+        {
+            // this is a CDROM/DVD drive
+            if(cdinfo.first <= DriveIndex && DriveIndex < cdinfo.first + cdinfo.count)
+                device.fsDeviceAttr |= CDType;
+        }
+        DosClose(handle);
+    }
+
+    // disable error popups
+    DosError(FERR_DISABLEEXCEPTION | FERR_DISABLEHARDERR);
+
+    fsinfo = (PFSQBUFFER2)malloc(FSAttachSpace);
+
+    // if the device is removable and NOT a CD
+    if(device.bDeviceType || device.fsDeviceAttr == LanType)
+    {
+        if((device.fsDeviceAttr & (CDType | NonRemovable)) == 0)
+        {
+            devname[0] = (UCHAR)(DriveIndex+Binary_to_Printable);
+            len        = FSAttachSpace;
+            rc = DosQueryFSAttach((PSZ) devname, 0L, FSAIL_QUERYNAME,
+                                  fsinfo, &len);
+            if(rc == NO_ERROR)
+            {
+                if(fsinfo->iType == FSAT_REMOTEDRV) {
+                   device.fsDeviceAttr |= LanType;
+                }
+                else 
+                if(fsinfo->iType == FSAT_LOCALDRV)
+                {
+                    name = (char *) fsinfo->szName;
+                    name += strlen(name)+1;
+                    if(strcmp(name,"FAT") == 0)
+                    {
+                        // device is a removable FAT drive, so it MUST be diskette
+                        // as Optical has another name as does LAN and SRVIFS
+                        if(device.bSectorsPerCluster != OpticalSectorsPerCluster) 
+                        {
+                             device.fsDeviceAttr |= FloppyType;
+                        }
+                        else device.fsDeviceAttr |= OpticalType;
+                    }
+                 }
+            }
+            else // must be no media or audio only (for CDs at least)
+            {
+                if(device.cCylinders <= DisketteCylinders) // floppies will always be 80
+                {                                          // or less cylinders
+                    if(device.bSectorsPerCluster != OpticalSectorsPerCluster) {
+                         device.fsDeviceAttr |= FloppyType;
+                    }
+                    else device.fsDeviceAttr |= OpticalType;
+                }
+            }
+        }
+        else      
+        {// non removable or CD type. maybe RAM disk
+            if(!(device.fsDeviceAttr & CDType))       // if NOT CD
+            {
+                if(device.cFATs == 1)                 // is there only one FAT?
+                   device.fsDeviceAttr |= VDISKType;  // -> RAM disk
+            }
+        }
+    }
+    free(fsinfo);
+
+    if(device.fsDeviceAttr & FloppyType) {
+        type = DRIVE_REMOVABLE_W;
+    }
+    else 
+    if(device.fsDeviceAttr & CDType) {
+        type = DRIVE_CDROM_W;
+    }
+    else 
+    if(device.fsDeviceAttr & LanType) {
+        type = DRIVE_REMOTE_W;
+    }
+    else 
+    if(device.fsDeviceAttr & VDISKType) {
+        type = DRIVE_RAMDISK_W;
+    }
+    else 
+    if(device.fsDeviceAttr & OpticalType || device.bDeviceType == DEVTYPE_OPTICAL) {
+        type = DRIVE_FIXED_W;
+    }
+    else 
+    if(device.bDeviceType == DEVTYPE_FIXED) {
+        type = DRIVE_FIXED_W;
+    }
+    else type = 0;
+
+    //Enable error popups again
+    DosError(FERR_ENABLEEXCEPTION | FERR_ENABLEHARDERR);
+
+    return type;
 }
 //******************************************************************************
 //Returns bit map where with the mapping of the logical drives
