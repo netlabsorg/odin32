@@ -1,6 +1,8 @@
- /* $Id: changelog,v 1.105 1999-08-19 16:26:29 phaller Exp $ */
+ /* $Id: changelog,v 1.106 1999-08-19 16:53:57 phaller Exp $ */
 
  99-08-19: Patrick Haller <phaller@gmx.net>
+        - MPR:      odinwrap macros
+        - COMDLG32: odinwrap macros
         - WNETAP32: odinwrap macros
         - WINSPOOL: odinwrap macros
 
