@@ -1,4 +1,4 @@
-/* $Id: edit.cpp,v 1.3 1999-10-12 18:14:54 sandervl Exp $ */
+/* $Id: edit.cpp,v 1.4 1999-10-12 20:16:22 sandervl Exp $ */
 /*
  *      Edit control
  *
@@ -1852,12 +1852,16 @@ static INT EDIT_EM_GetLine(HWND hwnd, EDITSTATE *es, INT line, LPSTR lpch)
                 line = 0;
         i = EDIT_EM_LineIndex(hwnd, es, line);
         src = es->text + i;
-        len = MIN(*(WORD *)lpch, EDIT_EM_LineLength(hwnd, es, i));
+        //SvL: Shouldn't this be *lpch-1? For terminating 0
+        //len = MIN(*(WORD *)lpch-1, EDIT_EM_LineLength(hwnd, es, i));
+	len = MIN(*(WORD *)lpch, EDIT_EM_LineLength(hwnd, es, i));
         for (i = 0 ; i < len ; i++) {
                 *lpch = *src;
                 src++;
                 lpch++;
         }
+        //SvL: Terminate string
+        //*lpch = 0;
         return (LRESULT)len;
 }
 
@@ -3171,6 +3175,9 @@ static LRESULT EDIT_WM_LButtonDown(HWND hwnd, EDITSTATE *es, DWORD keys, INT x, 
         INT e;
         BOOL after_wrap;
 
+        //SvL: Set focus
+        SetFocus(hwnd);
+
         if (!(es->flags & EF_FOCUSED))
                 return 0;
 
@@ -3456,7 +3463,8 @@ static void EDIT_WM_SetFocus(HWND hwnd, EDITSTATE *es, HWND window_losing_focus)
         if(!(es->style & ES_NOHIDESEL))
                 EDIT_InvalidateText(hwnd, es, es->selection_start, es->selection_end);
         ShowCaret(hwnd);
-        EDIT_NOTIFY_PARENT(hwnd, EN_SETFOCUS, "EN_SETFOCUS");
+//SvL: TEST
+//        EDIT_NOTIFY_PARENT(hwnd, EN_SETFOCUS, "EN_SETFOCUS");
 }
 
 
