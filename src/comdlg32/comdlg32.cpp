@@ -1,4 +1,4 @@
-/* $Id: comdlg32.cpp,v 1.6 1999-06-24 16:54:24 achimha Exp $ */
+/* $Id: comdlg32.cpp,v 1.7 1999-06-29 15:54:10 cbratschi Exp $ */
 
 /*
  * COMDLG32 implementation
@@ -221,6 +221,7 @@ BOOL WIN32API ChooseFontA(LPCHOOSEFONTA lpcf)
  * Status    :
  *
  * Author    : Patrick Haller [Tue, 1998/02/10 01:55]
+ *             Edgar Buerkle  [Mon, 1999/06/28 19:35]
  *****************************************************************************/
 
 BOOL WIN32API ChooseFontW(LPCHOOSEFONTW lpcf)
@@ -246,21 +247,20 @@ BOOL WIN32API ChooseFontW(LPCHOOSEFONTW lpcf)
 
   asciicf.lpLogFont = &asciilf; // update pointer
 
-
-  // now translate the strings
+  // lpTemplatenName bug in open32 ?  This doesn't work.
+  // TODO: CF_ENABLETEMPLATEHANDLE
   if (lpcf->Flags & CF_ENABLETEMPLATE)
-    asciicf.lpTemplateName = UnicodeToAsciiString((LPWSTR)lpcf->lpTemplateName);
-  else
-    asciicf.lpTemplateName = NULL;
+    if((int)asciicf.lpTemplateName >> 16 != 0)
+      asciicf.lpTemplateName = UnicodeToAsciiString((LPWSTR)lpcf->lpTemplateName);
 
   UnicodeToAsciiN(lpcf->lpszStyle,
                   szAsciiStyle,
-                  sizeof(szAsciiStyle));
+                  sizeof(szAsciiStyle) - 1);
   asciicf.lpszStyle = szAsciiStyle;
 
   UnicodeToAsciiN(lpcf->lpLogFont->lfFaceName,
                   asciilf.lfFaceName,
-                  LF_FACESIZE);
+                  LF_FACESIZE-1);
 
   // LPCFHOOKPROC != WNDPROC ?
   COMDLG32_CHECKHOOK(lpcf, CF_ENABLEHOOK, WNDPROC)
@@ -271,13 +271,14 @@ BOOL WIN32API ChooseFontW(LPCHOOSEFONTW lpcf)
   // transfer BACK resulting strings !!!
   AsciiToUnicodeN(asciicf.lpLogFont->lfFaceName,
                   lpcf->lpLogFont->lfFaceName,
-                  LF_FACESIZE);
+                  LF_FACESIZE-1);
 
   AsciiToUnicode(asciicf.lpszStyle,
                  lpcf->lpszStyle);
 
-  if(asciicf.lpTemplateName != NULL)
-    FreeAsciiString((char*)asciicf.lpTemplateName);
+  if (lpcf->Flags & CF_ENABLETEMPLATE)
+    if((int)asciicf.lpTemplateName >> 16 != 0)
+      FreeAsciiString((char*)asciicf.lpTemplateName);
 
   // copy back fields
   lpcf->Flags = asciicf.Flags;
