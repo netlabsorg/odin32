@@ -1,4 +1,4 @@
-/* $Id: winmouse.cpp,v 1.14 2001-04-27 17:36:39 sandervl Exp $ */
+/* $Id: winmouse.cpp,v 1.15 2001-05-19 11:16:02 sandervl Exp $ */
 /*
  * Mouse handler for DINPUT
  *
@@ -196,6 +196,19 @@ VOID WIN32API mouse_event(DWORD dwFlags, DWORD dx, DWORD dy, DWORD cButtons,
   dprintf(("USER32:mouse_event (%08xh,%u,%u,%u,%08x) not implemented",
           dwFlags, dx, dy, cButtons, dwExtraInfo));
 }
+
+DWORD WIN32API TrackMouseEvent(DWORD param1)
+{
+  dprintf(("USER32: TrackMouseEvent %x not implemented", param1));
+  return 0;
+}
+
+DWORD WIN32API SendInput(DWORD param1, DWORD param2, DWORD param3)
+{
+  dprintf(("USER32: SendInput %x %x %x not implemented", param1, param2, param3));
+  return 0;
+}
+
 /*****************************************************************************
  * Name      : BOOL WIN32API DragDetect
  * Purpose   : The DragDetect function captures the mouse and tracks its movement
