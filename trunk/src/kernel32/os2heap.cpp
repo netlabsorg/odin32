@@ -1,4 +1,4 @@
-/* $Id: os2heap.cpp,v 1.30 2001-11-16 12:57:00 phaller Exp $ */
+/* $Id: os2heap.cpp,v 1.31 2001-11-16 14:52:55 phaller Exp $ */
 
 /*
  * Heap class for OS/2
@@ -39,10 +39,10 @@
   #define HEAP_ZERO_MEMORY  8
 #endif
 
-VMutex heaplistmutex;   //protects linked lists of heaps
-
 void * _LNK_CONV getmoreHeapMem(Heap_t pHeap, size_t *size, int *clean);
 void   _LNK_CONV releaseHeapMem(Heap_t pHeap, void *block, size_t size);
+
+VMutex heaplistmutex;   //protects linked lists of heaps
 
 
 //******************************************************************************
@@ -59,7 +59,9 @@ OS2Heap::OS2Heap(DWORD flOptions, DWORD dwInitialSize, DWORD dwMaximumSize)
 {
   OS2Heap *curheap = OS2Heap::heap;
   
+#ifdef DEBUG
   totalAlloc   = 0;
+#endif
   fInitialized = 0;
   nrHeaps      = 0;
   heapelem     = NULL;
@@ -157,8 +159,11 @@ LPVOID OS2Heap::Alloc(DWORD dwFlags, DWORD dwBytes)
   if(dwFlags & HEAP_ZERO_MEMORY) {
       memset(lpMem, 0, dwBytes+HEAP_OVERHEAD);
   }
+  
+#ifdef DEBUG
   totalAlloc += dwBytes;
-
+#endif
+  
   //align at 8 byte boundary
   lpHeapObj = (HEAPELEM *)(((ULONG)lpMem+7) & ~7);
   lpHeapObj->lpMem = lpMem;
@@ -250,7 +255,9 @@ BOOL OS2Heap::Free(DWORD dwFlags, LPVOID lpMem)
 #ifdef DEBUG1
   int size = Size(0, lpMem);
   dprintf(("OS2Heap::Free lpMem = %X, size %d\n", lpMem, size));
+#ifdef DEBUG
   totalAlloc -= size;
+#endif
 #endif
 
   free(helem->lpMem);
@@ -271,10 +278,6 @@ BOOL OS2Heap::Validate(DWORD dwFlags, LPCVOID lpMem)
 
   dprintf(("OS2Heap::Validate, %X %X", dwFlags, lpMem));
 
-  if(lpMem == NULL) {
-    	dprintf(("OS2Heap::Validate lpMem == NULL\n"));
-    	return(FALSE);
-  }
   /* verify lpMem address */
   if (lpMem >= (LPVOID)ulMaxAddr || lpMem < (LPVOID)0x10000)
   {
@@ -340,6 +343,7 @@ OS2Heap *OS2Heap::find(HANDLE hHeap)
 //******************************************************************************
 OS2Heap *OS2Heap::heap = NULL;
 
+
 //******************************************************************************
 //******************************************************************************
 void * _LNK_CONV getmoreHeapMem(Heap_t pHeap, size_t *size, int *clean)
@@ -352,7 +356,7 @@ void * _LNK_CONV getmoreHeapMem(Heap_t pHeap, size_t *size, int *clean)
   /* round the size up to a multiple of 64K */
   //NOTE: MUST use 64kb here or else we are at risk of running out of virtual
   //      memory space. (when allocating 4kb we actually get 4kb + 60k uncommited)
-  *size = (*size / 65536) * 65536 + 65536;
+  *size = ( (*size / 65536) + 1) * 65536;
 
   rc = DosAllocMem(&newblock, *size, PAG_READ|PAG_WRITE|PAG_COMMIT|PAG_EXECUTE);
 ////  rc = DosAllocMem(&newblock, *size, flAllocMem|PAG_READ|PAG_WRITE|PAG_COMMIT|PAG_EXECUTE);

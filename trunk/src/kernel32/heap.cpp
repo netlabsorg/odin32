@@ -18,6 +18,7 @@
 #define  _WIN32
 #include "os2heap.h"
 #include <heap.h>
+#include "os2heap.h"
 #include <odinwrap.h>
 #include "initterm.h"
 
@@ -26,10 +27,31 @@
 
 ODINDEBUGCHANNEL(KERNEL32-HEAP)
 
+//******************************************************************************
+// Local variables
+//******************************************************************************
 
-static HANDLE processheap = NULL;
-OS2Heap *OS2ProcessHeap = NULL;
+static OS2Heap *OS2ProcessHeap = NULL;
 
+static HANDLE i_initializeProcessHeap()
+{
+  HANDLE _processheap;
+  
+  //SvL: Only one process heap per process
+  OS2ProcessHeap = new OS2Heap(HEAP_GENERATE_EXCEPTIONS, 0x4000, 0);
+
+  if(OS2ProcessHeap == NULL)
+    return(NULL);
+  _processheap = OS2ProcessHeap->getHeapHandle();
+  
+  return _processheap;
+}
+
+static HANDLE processheap = i_initializeProcessHeap();
+
+// This macro could be mapped to GetProcessHeap() if there
+// is any change in functionality
+#define GETPROCESSHEAP processheap
 
 
 //******************************************************************************
@@ -45,6 +67,7 @@ extern OS2Heap* fhhm_lastHeap;
     curheap = fhhm_lastHeap;         \
   else                               \
     curheap = OS2Heap::find(hHeap);  \
+  
 
 
 //******************************************************************************
@@ -201,15 +224,6 @@ ODINFUNCTIONNODBG2(BOOL, HeapWalk, HANDLE, hHeap, LPVOID, lpEntry)
 HANDLE WIN32API GetProcessHeap()
 {
 //    dprintf2(("KERNEL32: GetProcessHeap\n"));
-    //SvL: Only one process heap per process
-    if(processheap == NULL) {
-      OS2ProcessHeap = new OS2Heap(HEAP_GENERATE_EXCEPTIONS, 0x4000, 0);
-
-      if(OS2ProcessHeap == NULL) {
-               	return(NULL);
-      }
-      processheap = OS2ProcessHeap->getHeapHandle();
-    }
     return(processheap);
 }
 #if 1
@@ -269,20 +283,20 @@ ODINFUNCTION2(HGLOBAL, GlobalAlloc,
     
    if((flags & GMEM_MOVEABLE)==0) /* POINTER */
    {
-      palloc=HeapAlloc(GetProcessHeap(), hpflags, size);
+      palloc=HeapAlloc(GETPROCESSHEAP, hpflags, size);
       return (HGLOBAL) palloc;
    }
    else  /* HANDLE */
    {
       /* HeapLock(heap); */
 
-      pintern=(PGLOBAL32_INTERN)HeapAlloc(GetProcessHeap(), 0,  sizeof(GLOBAL32_INTERN));
+      pintern=(PGLOBAL32_INTERN)HeapAlloc(GETPROCESSHEAP, 0,  sizeof(GLOBAL32_INTERN));
       if (!pintern) return 0;
       if(size)
       {
          //SvL: 2*sizeof for 8 byte alignment
-	 if (!(palloc=HeapAlloc(GetProcessHeap(), hpflags, size+HGLOBAL_SIZE))) {
-	    HeapFree(GetProcessHeap(), 0, pintern);
+	 if (!(palloc=HeapAlloc(GETPROCESSHEAP, hpflags, size+HGLOBAL_SIZE))) {
+	    HeapFree(GETPROCESSHEAP, 0, pintern);
 	    return 0;
 	 }
 	 *(HGLOBAL *)palloc=INTERN_TO_HANDLE(pintern);
@@ -326,7 +340,7 @@ ODINFUNCTION1(LPVOID, GlobalLock,
     	return 0;
    }
 
-   /* HeapLock(GetProcessHeap()); */
+   /* HeapLock(GETPROCESSHEAP); */
    
    pintern=HANDLE_TO_INTERN(hmem);
    if(pintern->Magic==MAGIC_GLOBAL_USED)
@@ -341,7 +355,7 @@ ODINFUNCTION1(LPVOID, GlobalLock,
       palloc=(LPVOID) NULL;
       SetLastError(ERROR_INVALID_HANDLE);
    }
-   /* HeapUnlock(GetProcessHeap()); */;
+   /* HeapUnlock(GETPROCESSHEAP); */;
 
    dprintf(("KERNEL32: GlobalLock %x returned %x", hmem, palloc));
    return palloc;
@@ -371,7 +385,7 @@ ODINFUNCTION1(BOOL, GlobalUnlock,
     	return 0;
    }
 
-   /* HeapLock(GetProcessHeap()); */
+   /* HeapLock(GETPROCESSHEAP); */
    pintern=HANDLE_TO_INTERN(hmem);
    
    if(pintern->Magic==MAGIC_GLOBAL_USED)
@@ -388,7 +402,7 @@ ODINFUNCTION1(BOOL, GlobalUnlock,
       SetLastError(ERROR_INVALID_HANDLE);
       locked=FALSE;
    }
-   /* HeapUnlock(GetProcessHeap()); */
+   /* HeapUnlock(GETPROCESSHEAP); */
    return locked;
 }
 
@@ -421,7 +435,7 @@ ODINFUNCTION1(HGLOBAL, GlobalHandle,
         /* GlobalAlloc with GMEM_MOVEABLE then magic test in HeapValidate  */
         /* will fail.                                                      */
         if (ISPOINTER(pmem)) {
-            if (HeapValidate( GetProcessHeap(), 0, pmem )) {
+            if (HeapValidate( GETPROCESSHEAP, 0, pmem )) {
                 handle = (HGLOBAL)pmem;  /* valid fixed block */
                 return handle;
             }
@@ -439,8 +453,8 @@ ODINFUNCTION1(HGLOBAL, GlobalHandle,
         if (maybe_intern->Magic == MAGIC_GLOBAL_USED) {
             test = maybe_intern->Pointer;
             //SvL: -2 for 8 byte alignment
-            if (HeapValidate( GetProcessHeap(), 0, ((HGLOBAL *)test)-2 ) && /* obj(-handle) valid arena? */
-                HeapValidate( GetProcessHeap(), 0, maybe_intern ))  /* intern valid arena? */
+            if (HeapValidate( GETPROCESSHEAP, 0, ((HGLOBAL *)test)-2 ) && /* obj(-handle) valid arena? */
+                HeapValidate( GETPROCESSHEAP, 0, maybe_intern ))  /* intern valid arena? */
             {
                 return handle;
             }
@@ -456,7 +470,7 @@ ODINFUNCTION1(HGLOBAL, GlobalHandle,
         /* GlobalAlloc with GMEM_MOVEABLE then magic test in HeapValidate  */
         /* will fail.                                                      */
         if (ISPOINTER(pmem)) {
-            if (HeapValidate( GetProcessHeap(), 0, pmem )) {
+            if (HeapValidate( GETPROCESSHEAP, 0, pmem )) {
                 handle = (HGLOBAL)pmem;  /* valid fixed block */
                 break;
             }
@@ -468,8 +482,8 @@ ODINFUNCTION1(HGLOBAL, GlobalHandle,
         maybe_intern = HANDLE_TO_INTERN( handle );
         if (maybe_intern->Magic == MAGIC_GLOBAL_USED) {
             test = maybe_intern->Pointer;
-            if (HeapValidate( GetProcessHeap(), 0, ((HGLOBAL *)test)-1 ) && /* obj(-handle) valid arena? */
-                HeapValidate( GetProcessHeap(), 0, maybe_intern ))  /* intern valid arena? */
+            if (HeapValidate( GETPROCESSHEAP, 0, ((HGLOBAL *)test)-1 ) && /* obj(-handle) valid arena? */
+                HeapValidate( GETPROCESSHEAP, 0, maybe_intern ))  /* intern valid arena? */
                 break;  /* valid moveable block */
         }
         handle = 0;
@@ -524,7 +538,7 @@ ODINFUNCTION3(HGLOBAL, GlobalReAlloc,
              SetLastError( ERROR_NOACCESS );
     	     return 0;
          }
-	 size=HeapSize(GetProcessHeap(), 0, (LPVOID) hmem);
+	 size=HeapSize(GETPROCESSHEAP, 0, (LPVOID) hmem);
 	 hnew=GlobalAlloc( flags, size);
 	 palloc=GlobalLock(hnew);
 	 memcpy(palloc, (LPVOID) hmem, size);
@@ -549,7 +563,7 @@ ODINFUNCTION3(HGLOBAL, GlobalReAlloc,
       if(ISPOINTER(hmem))
       {
 	 /* reallocate fixed memory */
-	 hnew=(HGLOBAL)HeapReAlloc(GetProcessHeap(), heap_flags, (LPVOID) hmem, size);
+	 hnew=(HGLOBAL)HeapReAlloc(GETPROCESSHEAP, heap_flags, (LPVOID) hmem, size);
       }
       else
       {
@@ -569,7 +583,7 @@ ODINFUNCTION3(HGLOBAL, GlobalReAlloc,
 	    hnew=hmem;
 	    if(pintern->Pointer)
 	    {
-	       if((palloc = HeapReAlloc(GetProcessHeap(), heap_flags,
+	       if((palloc = HeapReAlloc(GETPROCESSHEAP, heap_flags,
 				   (char *) pintern->Pointer-HGLOBAL_SIZE,
 				   size+HGLOBAL_SIZE)) == NULL)
 		   return 0; /* Block still valid */
@@ -577,7 +591,7 @@ ODINFUNCTION3(HGLOBAL, GlobalReAlloc,
 	    }
 	    else
 	    {
-	        if((palloc=HeapAlloc(GetProcessHeap(), heap_flags, size+HGLOBAL_SIZE))
+	        if((palloc=HeapAlloc(GETPROCESSHEAP, heap_flags, size+HGLOBAL_SIZE))
 		   == NULL)
 		    return 0;
 	       *(HGLOBAL *)palloc=hmem;
@@ -588,7 +602,7 @@ ODINFUNCTION3(HGLOBAL, GlobalReAlloc,
 	 {
 	    if(pintern->Pointer)
 	    {
-	       HeapFree(GetProcessHeap(), 0, (char *) pintern->Pointer-HGLOBAL_SIZE);
+	       HeapFree(GETPROCESSHEAP, 0, (char *) pintern->Pointer-HGLOBAL_SIZE);
 	       pintern->Pointer=NULL;
 	    }
 	 }
@@ -627,7 +641,7 @@ ODINFUNCTION1(HGLOBAL, GlobalFree,
   
    if(ISPOINTER(hmem)) /* POINTER */
    {
-     if(HeapFree(GetProcessHeap(), 0, (LPVOID) hmem) == TRUE)
+     if(HeapFree(GETPROCESSHEAP, 0, (LPVOID) hmem) == TRUE)
        hreturned = 0;    // success
      else
        hreturned = hmem; // failure
@@ -646,9 +660,9 @@ ODINFUNCTION1(HGLOBAL, GlobalFree,
       /*    SetLastError(ERROR_INVALID_HANDLE);  */
 
 	 if(pintern->Pointer)
-	    if(!HeapFree(GetProcessHeap(), 0, (char *)(pintern->Pointer)-HGLOBAL_SIZE))
+	    if(!HeapFree(GETPROCESSHEAP, 0, (char *)(pintern->Pointer)-HGLOBAL_SIZE))
 	       hreturned=hmem;
-	 if(!HeapFree(GetProcessHeap(), 0, pintern))
+	 if(!HeapFree(GETPROCESSHEAP, 0, pintern))
 	    hreturned=hmem;
       }      
       else
@@ -679,7 +693,7 @@ ODINFUNCTION1(DWORD, GlobalSize,
 
    if(ISPOINTER(hmem)) 
    {
-      retval=HeapSize(GetProcessHeap(), 0,  (LPVOID) hmem);
+      retval=HeapSize(GETPROCESSHEAP, 0,  (LPVOID) hmem);
    }
    else
    {
@@ -690,7 +704,7 @@ ODINFUNCTION1(DWORD, GlobalSize,
       {
         if (!pintern->Pointer) /* handle case of GlobalAlloc( ??,0) */
             return 0;
-	 retval=HeapSize(GetProcessHeap(), 0,
+	 retval=HeapSize(GETPROCESSHEAP, 0,
 	                 (char *)(pintern->Pointer)-HGLOBAL_SIZE)-HGLOBAL_SIZE;
          //SvL: ???
 	 if (retval == 0xffffffff-HGLOBAL_SIZE) retval = 0;
@@ -772,7 +786,7 @@ ODINFUNCTION1(UINT, GlobalFlags,
    }
    else
    {
-      /* HeapLock(GetProcessHeap()); */
+      /* HeapLock(GETPROCESSHEAP); */
       pintern=HANDLE_TO_INTERN(hmem);
       if(pintern->Magic==MAGIC_GLOBAL_USED)
       {               
@@ -785,7 +799,7 @@ ODINFUNCTION1(UINT, GlobalFlags,
          dprintf(("ERROR: GlobalFlags invalid handle %x", hmem));
 	 retval=0;
       }
-      /* HeapUnlock(GetProcessHeap()); */
+      /* HeapUnlock(GETPROCESSHEAP); */
    }
    return retval;
 }

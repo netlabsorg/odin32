@@ -1,4 +1,4 @@
-/* $Id: os2heap.h,v 1.9 2001-10-17 13:38:50 phaller Exp $ */
+/* $Id: os2heap.h,v 1.10 2001-11-16 14:52:56 phaller Exp $ */
 
 /*
  *
@@ -50,7 +50,10 @@ public:
 private:
 protected:
 
-    DWORD     dwMaximumSize, dwInitialSize, flOptions, totalAlloc, nrHeaps;
+    DWORD     dwMaximumSize, dwInitialSize, flOptions, nrHeaps;
+#ifdef DEBUG
+    DWORD totalAlloc;
+#endif
     HANDLE    hPrimaryHeap;
     BOOL      fInitialized;
     HEAPELEM *heapelem;
