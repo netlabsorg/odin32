@@ -1,4 +1,4 @@
-/* $Id: libDosAllocMemEx.c,v 1.3 2000-02-26 19:59:55 bird Exp $
+/* $Id: libDosAllocMemEx.c,v 1.3.4.1 2000-08-29 19:47:03 bird Exp $
  *
  * DosAllocMemEx - Extened Edition of DosAllocMem.
  *                 Allows you to suggest an address of the memory.
@@ -16,7 +16,6 @@
 #define INCL_DOSERRORS
 #define INCL_DOSFILEMGR
 #define INCL_DOSDEVICES
-#define INCL_WIN32K_LIB
 
 
 /*******************************************************************************

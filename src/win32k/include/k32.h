@@ -1,4 +1,4 @@
-/* $Id: k32.h,v 1.2 2000-02-15 23:39:19 bird Exp $
+/* $Id: k32.h,v 1.2.4.1 2000-08-29 19:47:01 bird Exp $
  *
  * k32 - definitions.
  *
@@ -19,6 +19,7 @@ extern "C" {
 *   Exported Functions                                                         *
 *******************************************************************************/
 APIRET k32AllocMemEx(PPVOID ppb, ULONG cb, ULONG flag, ULONG ulCS, ULONG ulEIP);
+APIRET k32QueryOTEs(HMTE hMTE, PQOTEBUFFER pQOte, ULONG cbOte);
 
 
 #ifdef __cplusplus
