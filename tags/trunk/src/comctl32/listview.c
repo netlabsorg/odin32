@@ -6148,6 +6148,11 @@ static LRESULT LISTVIEW_GetItemRect(HWND hwnd, INT nItem, LPRECT lprc)
       }
     }
   }
+#ifdef __WIN32OS2__
+          if(GetWindowLongA(hwnd, GWL_STYLE) & LVS_OWNERDRAWFIXED && lprc->left == REPORT_MARGINX) {
+              lprc->left = 0;
+          }
+#endif
   return bResult;
 }
 
