@@ -80,10 +80,13 @@ extern void              WIN32API dbg_DecThreadCallDepth(void); // kernel32
 // PH: this is for profiling cumulative method call times
 #ifdef PROFILE
 
+#define FNINIT \
+  LARGE_INTEGER liStart;       \
+  LARGE_INTEGER liEnd;         \
+  unsigned long ulElapsed;     \
+  unsigned short sel;
+
 #  define PROFILE_START(a)        \
-     LARGE_INTEGER liStart;       \
-     LARGE_INTEGER liEnd;         \
-     unsigned long ulElapsed;     \
      QueryPerformanceCounter(&liStart);
 
 
@@ -103,8 +106,10 @@ extern void              WIN32API dbg_DecThreadCallDepth(void); // kernel32
 #  define PROFILE_STOP(a)
 #endif
 
+#ifndef FNINIT
 #define FNINIT \
   unsigned short sel;
+#endif
 
 #define FNPROLOGUE(a)   \
   sel = GetFS(); \
