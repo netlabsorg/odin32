@@ -1,4 +1,4 @@
-/* $Id: hmdevio.cpp,v 1.13 2001-06-17 11:16:42 achimha Exp $ */
+/* $Id: hmdevio.cpp,v 1.14 2001-06-23 19:43:49 sandervl Exp $ */
 
 /*
  * Win32 Device IOCTL API functions for OS/2
@@ -42,14 +42,20 @@ char   devname[] = "/dev/fastio$";
 static BOOL GpdDevIOCtl(HANDLE hDevice, DWORD dwIoControlCode, LPVOID lpInBuffer, DWORD nInBufferSize, LPVOID lpOutBuffer, DWORD nOutBufferSize, LPDWORD lpBytesReturned, LPOVERLAPPED lpOverlapped);
 static BOOL MAPMEMIOCtl(HANDLE hDevice, DWORD dwIoControlCode, LPVOID lpInBuffer, DWORD nInBufferSize, LPVOID lpOutBuffer, DWORD nOutBufferSize, LPDWORD lpBytesReturned, LPOVERLAPPED lpOverlapped);
 static BOOL FXMEMMAPIOCtl(HANDLE hDevice, DWORD dwIoControlCode, LPVOID lpInBuffer, DWORD nInBufferSize, LPVOID lpOutBuffer, DWORD nOutBufferSize, LPDWORD lpBytesReturned, LPOVERLAPPED lpOverlapped);
+static BOOL VPCIOCtl(HANDLE hDevice, DWORD dwIoControlCode, LPVOID lpInBuffer, DWORD nInBufferSize, LPVOID lpOutBuffer, DWORD nOutBufferSize, LPDWORD lpBytesReturned, LPOVERLAPPED lpOverlapped);
 
 static WIN32DRV knownDriver[] =
     {{"\\\\.\\GpdDev", "",      TRUE,  666,   GpdDevIOCtl},
     { "\\\\.\\MAPMEM", "PMAP$", FALSE, 0,     MAPMEMIOCtl},
-    { "FXMEMMAP.VXD",  "PMAP$", FALSE, 0,     FXMEMMAPIOCtl}
+    { "FXMEMMAP.VXD",  "PMAP$", FALSE, 0,     FXMEMMAPIOCtl},
+#if 1
+    { "\\\\.\\VPCAppSv", "", TRUE,  667,   VPCIOCtl}};
+#else
     };
+#endif
 
 static int nrKnownDrivers = sizeof(knownDriver)/sizeof(WIN32DRV);
+BOOL fVirtualPC = FALSE;
 
 //******************************************************************************
 //******************************************************************************
@@ -355,6 +361,81 @@ static BOOL FXMEMMAPIOCtl(HANDLE hDevice, DWORD dwIoControlCode, LPVOID lpInBuff
 }
 //******************************************************************************
 //******************************************************************************
+static BOOL VPCIOCtl(HANDLE hDevice, DWORD dwIoControlCode, LPVOID lpInBuffer, DWORD nInBufferSize, LPVOID lpOutBuffer, DWORD nOutBufferSize, LPDWORD lpBytesReturned, LPOVERLAPPED lpOverlapped)
+{
+  APIRET rc;
+
+  dprintf(("VPCIOCtl func %x: %x %d %x %d %x %x", dwIoControlCode, lpInBuffer, nInBufferSize, lpOutBuffer, nOutBufferSize, lpBytesReturned, lpOverlapped));
+  switch(dwIoControlCode) {
+  case 0x9C402880: //0x00
+        if(nOutBufferSize < 4) {
+            SetLastError(ERROR_BAD_LENGTH);
+            return FALSE;
+        }
+        *(DWORD *)lpOutBuffer = 0x60001;
+        *lpBytesReturned = 4;
+        return TRUE;
+
+  case 0x9C402894: //0x14 (get IDT table)
+  {
+        DWORD *lpBuffer = (DWORD *)lpOutBuffer;
+        if(nOutBufferSize < 0x800) {
+            SetLastError(ERROR_BAD_LENGTH);
+            return FALSE;
+        }
+        memset(lpOutBuffer, 0, nOutBufferSize);
+        for(int i=0;i<32;i++) {
+            lpBuffer[i*2]   = 0x0178c4c8;
+            lpBuffer[i*2+1] = 0xfff18F00;
+        }
+        for(i=0x50;i<0x57;i++) {
+            lpBuffer[i*2]   = 0x0178c4c8;
+            lpBuffer[i*2+1] = 0xfff18E00;
+        }
+        for(i=0x70;i<0x77;i++) {
+            lpBuffer[i*2]   = 0x0178c4c8;
+            lpBuffer[i*2+1] = 0xfff18E00;
+        }
+        lpBuffer[0x4F*2]   = 0x0178c4c8;
+        lpBuffer[0x4F*2+1] = 0xfff18E00;
+        lpBuffer[0xEF*2]   = 0x0178c4c8;
+        lpBuffer[0xEF*2+1] = 0xfff18E00;
+        *lpBytesReturned = 0xFF*8;
+        return TRUE;
+  }
+  case 0x9C40288C: //0x0C change IDT
+        if(nInBufferSize < 0x22) {
+            SetLastError(ERROR_BAD_LENGTH);
+            return FALSE;
+        }
+        fVirtualPC = TRUE;
+        return TRUE;
+
+  case 0x9C402884: //0x04 ExAllocatePoolWithTag
+  {
+        DWORD *lpBuffer = (DWORD *)lpInBuffer;
+        if(nInBufferSize < 0x08) {
+            SetLastError(ERROR_BAD_LENGTH);
+            return FALSE;
+        }
+        dprintf(("In: %x %x", lpBuffer[0], lpBuffer[1]));
+        return TRUE;
+  }
+
+  case 0x9C402898: //0x18 Remove IDT patch
+        if(nInBufferSize < 0x01) {
+            SetLastError(ERROR_BAD_LENGTH);
+            return FALSE;
+        }
+        fVirtualPC = FALSE;
+        return TRUE;
+  default:
+        dprintf(("VPCIOCtl unknown func %X\n", dwIoControlCode));
+        return FALSE;
+  }
+}
+//******************************************************************************
+//******************************************************************************
 HMCustomDriver::HMCustomDriver(HINSTANCE hInstance, LPCSTR lpDeviceName)
                 : HMDeviceDriver(lpDeviceName)
 {
@@ -399,8 +480,12 @@ BOOL HMCustomDriver::DeviceIoControl(PHMHANDLEDATA pHMHandleData, DWORD dwIoCont
                                      LPVOID lpOutBuffer, DWORD nOutBufferSize,
                                      LPDWORD lpBytesReturned, LPOVERLAPPED lpOverlapped)
 {
-   return driverIOCtl(pHMHandleData->hHMHandle, dwIoControlCode, lpInBuffer, nInBufferSize,
-                      lpOutBuffer, nOutBufferSize, lpBytesReturned, lpOverlapped);
+   BOOL ret;
+
+   ret = driverIOCtl(pHMHandleData->hHMHandle, dwIoControlCode, lpInBuffer, nInBufferSize,
+                     lpOutBuffer, nOutBufferSize, lpBytesReturned, lpOverlapped);
+   dprintf(("DeviceIoControl %x returned %d", dwIoControlCode, ret));
+   return ret;
 }
 //******************************************************************************
 //******************************************************************************

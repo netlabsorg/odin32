@@ -1,4 +1,4 @@
-/* $Id: hmsemaphore.cpp,v 1.8 2001-06-23 16:59:28 sandervl Exp $ */
+/* $Id: hmsemaphore.cpp,v 1.9 2001-06-23 19:43:50 sandervl Exp $ */
 
 /*
  * Win32 Semaphore implementation
@@ -455,7 +455,7 @@ DWORD HMSemMsgWaitForMultipleObjects(DWORD   cObjects,
         {
             PSEM_INFO pSemInfo  = (PSEM_INFO)pHandle->hHMHandle;
 
-            dprintf(("KERNEL32: HMWaitForMultipleObjects: handle 0: ODIN-%08xh, OS/2-%08xh",
+            dprintf(("KERNEL32: HMWaitForMultipleObjects(S): handle 0: ODIN-%08xh, OS/2-%08xh",
                      lphObjects[0], pSemInfo->hev));
             if(InterlockedDecrement(&pSemInfo->currentCount) >= 0) {
                 return WAIT_OBJECT_0_W;
@@ -464,12 +464,12 @@ DWORD HMSemMsgWaitForMultipleObjects(DWORD   cObjects,
             break;
         }
         case HMTYPE_EVENTSEM:
-            dprintf(("KERNEL32: HMWaitForMultipleObjects: handle 0: ODIN-%08xh, OS/2-%08xh",
+            dprintf(("KERNEL32: HMWaitForMultipleObjects(E): handle 0: ODIN-%08xh, OS/2-%08xh",
                      lphObjects[0], pHandle->hHMHandle));
             rc = WinWaitEventSem((HEV)pHandle->hHMHandle, dwTimeout);
             break;
         case HMTYPE_MUTEXSEM:
-            dprintf(("KERNEL32: HMWaitForMultipleObjects: handle %3i: ODIN-%08xh, OS/2-%08xh",
+            dprintf(("KERNEL32: HMWaitForMultipleObjects(M): handle 0: ODIN-%08xh, OS/2-%08xh",
                      lphObjects[0], pHandle->hHMHandle));
             rc = WinRequestMutexSem((HMTX)pHandle->hHMHandle, dwTimeout);
             break;
@@ -481,21 +481,21 @@ DWORD HMSemMsgWaitForMultipleObjects(DWORD   cObjects,
         }
         SetLastError(ERROR_SUCCESS_W);
         if(rc == ERROR_INTERRUPT || rc == ERROR_SEM_OWNER_DIED) {
-            dprintf(("WAIT_ABANDONED_W"));
+            dprintf(("WAIT_ABANDONED_W (rc %d)", rc));
             return WAIT_ABANDONED_W;
         }
         else 
         if(rc == ERROR_TIMEOUT) {
-            dprintf(("WAIT_TIMEOUT_W"));
+            dprintf(("WAIT_TIMEOUT_W (rc %d)", rc));
             return WAIT_TIMEOUT_W;
         }
         MSG msg ;
    
         if(pfnPeekMessageA(&msg, NULL, 0, 0, PM_NOREMOVE_W) == TRUE) {
-            dprintf(("WAIT_OBJECT_0_W+1"));
+            dprintf(("WAIT_OBJECT_0_W+1 (rc %d)", rc));
             return WAIT_OBJECT_0_W + 1;
         }
-        dprintf(("WAIT_OBJECT_0_W+1"));
+        dprintf(("WAIT_OBJECT_0_W+1 (rc %d)", rc));
         return WAIT_OBJECT_0_W;
     }
     pHandles = (PHMHANDLEDATA *)alloca(cObjects * sizeof(PHMHANDLEDATA));

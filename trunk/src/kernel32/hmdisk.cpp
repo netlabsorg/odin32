@@ -1,4 +1,4 @@
-/* $Id: hmdisk.cpp,v 1.11 2001-06-20 20:51:57 sandervl Exp $ */
+/* $Id: hmdisk.cpp,v 1.12 2001-06-23 19:43:50 sandervl Exp $ */
 
 /*
  * Win32 Disk API functions for OS/2
@@ -24,9 +24,14 @@
 #define DBG_LOCALLOG    DBG_hmdisk
 #include "dbglocal.h"
 
-static HINSTANCE hInstAspi                           = 0;
-static DWORD (WIN32API *GetASPI32SupportInfo)()      = NULL;
-static DWORD (CDECL *SendASPI32Command)(LPSRB lpSRB) = NULL;
+typedef struct 
+{
+    HINSTANCE hInstAspi;
+    DWORD (WIN32API *GetASPI32SupportInfo)();
+    DWORD (CDECL *SendASPI32Command)(LPSRB lpSRB);
+    ULONG     driveLetter;
+    CHAR      signature[8];
+} DRIVE_INFO;
 
 HMDeviceDiskClass::HMDeviceDiskClass(LPCSTR lpDeviceName) : HMDeviceKernelObjectClass(lpDeviceName)
 {
@@ -116,18 +121,35 @@ DWORD HMDeviceDiskClass::CreateFile (LPCSTR        lpFileName,
         }
         else pHMHandleData->hHMHandle  = hFile;
 
-        pHMHandleData->dwUserData = *lpFileName; //save drive letter
-        if(pHMHandleData->dwUserData >= 'a') {
-            pHMHandleData->dwUserData = pHMHandleData->dwUserData - ((int)'a' - (int)'A');
+        DRIVE_INFO *drvInfo = (DRIVE_INFO *)malloc(sizeof(DRIVE_INFO));
+        if(drvInfo == NULL) {
+             if(pHMHandleData->hHMHandle) OSLibDosClose(pHMHandleData->hHMHandle);
+             return ERROR_OUTOFMEMORY;
+        }
+        pHMHandleData->dwUserData = (DWORD)drvInfo;
+
+        memset(drvInfo, 0, sizeof(DRIVE_INFO));
+        drvInfo->driveLetter = *lpFileName; //save drive letter
+        if(drvInfo->driveLetter >= 'a') {
+            drvInfo->driveLetter = drvInfo->driveLetter - ((int)'a' - (int)'A');
         }
 
-        if(GetDriveTypeA(lpFileName) == DRIVE_CDROM && hInstAspi == NULL) {
-            hInstAspi = LoadLibraryA("WNASPI32.DLL");
-            if(hInstAspi == NULL) {
+        if(GetDriveTypeA(lpFileName) == DRIVE_CDROM) {
+            drvInfo->hInstAspi = LoadLibraryA("WNASPI32.DLL");
+            if(drvInfo->hInstAspi == NULL) {
+                if(pHMHandleData->hHMHandle) OSLibDosClose(pHMHandleData->hHMHandle);
+                free(drvInfo);
                 return ERROR_INVALID_PARAMETER;
             }
-            *(FARPROC *)&GetASPI32SupportInfo = GetProcAddress(hInstAspi, "GetASPI32SupportInfo");
-            *(FARPROC *)&SendASPI32Command    = GetProcAddress(hInstAspi, "SendASPI32Command");
+            *(FARPROC *)&drvInfo->GetASPI32SupportInfo = GetProcAddress(drvInfo->hInstAspi, "GetASPI32SupportInfo");
+            *(FARPROC *)&drvInfo->SendASPI32Command    = GetProcAddress(drvInfo->hInstAspi, "SendASPI32Command");
+   
+            //get cdrom signature (TODO: why doesn't this work???)
+            DWORD parsize = 4;
+            DWORD datasize = 4;
+            strcpy(drvInfo->signature, "CD01");
+            OSLibDosDevIOCtl(pHMHandleData->hHMHandle, 0x81, 0x60, &drvInfo->signature[0], 4, &parsize,
+                             &drvInfo->signature[0], 4, &datasize);
         }
         return (NO_ERROR);
     }
@@ -140,10 +162,17 @@ DWORD HMDeviceDiskClass::CreateFile (LPCSTR        lpFileName,
 //******************************************************************************
 BOOL HMDeviceDiskClass::CloseHandle(PHMHANDLEDATA pHMHandleData)
 {
+    BOOL ret = TRUE;
+
     if(pHMHandleData->hHMHandle) {
-        return OSLibDosClose(pHMHandleData->hHMHandle);
+        ret = OSLibDosClose(pHMHandleData->hHMHandle);
     }
-    return TRUE;
+    if(pHMHandleData->dwUserData) {
+       DRIVE_INFO *drvInfo = (DRIVE_INFO*)pHMHandleData->dwUserData;
+       if(drvInfo->hInstAspi)    FreeLibrary(drvInfo->hInstAspi);
+       free(drvInfo);
+    }
+    return ret;
 }
 //******************************************************************************
 //******************************************************************************
@@ -348,10 +377,18 @@ BOOL HMDeviceDiskClass::DeviceIoControl(PHMHANDLEDATA pHMHandleData, DWORD dwIoC
         break;
     }
     if(msg) {
-        dprintf(("HMDeviceDiskClass::DeviceIoControl %s", msg));
+        dprintf(("HMDeviceDiskClass::DeviceIoControl %s %x %d %x %d %x %x", msg, lpInBuffer, nInBufferSize,
+                 lpOutBuffer, nOutBufferSize, lpBytesReturned, lpOverlapped));
     }
 #endif
 
+    DRIVE_INFO *drvInfo = (DRIVE_INFO*)pHMHandleData->dwUserData;
+    if(drvInfo == NULL) {
+        dprintf(("ERROR: DeviceIoControl: drvInfo == NULL!!!"));
+        DebugInt3();
+        SetLastError(ERROR_INVALID_HANDLE);
+        return FALSE;
+    }
     switch(dwIoControlCode)
     {
     case FSCTL_DELETE_REPARSE_POINT:
@@ -384,7 +421,7 @@ BOOL HMDeviceDiskClass::DeviceIoControl(PHMHANDLEDATA pHMHandleData, DWORD dwIoC
         if(lpBytesReturned) {
             *lpBytesReturned = 0;
         }
-        if(OSLibDosGetDiskGeometry(pHMHandleData->hHMHandle, pHMHandleData->dwUserData, pGeom) == FALSE) {
+        if(OSLibDosGetDiskGeometry(pHMHandleData->hHMHandle, drvInfo->driveLetter, pGeom) == FALSE) {
             return FALSE;
         }
         if(lpBytesReturned) {
@@ -413,8 +450,75 @@ BOOL HMDeviceDiskClass::DeviceIoControl(PHMHANDLEDATA pHMHandleData, DWORD dwIoC
     case IOCTL_CDROM_STOP_AUDIO:
     case IOCTL_CDROM_PAUSE_AUDIO:
     case IOCTL_CDROM_RESUME_AUDIO:
+        break;
+
     case IOCTL_CDROM_GET_VOLUME:
+    {
+        PVOLUME_CONTROL pVol = (PVOLUME_CONTROL)lpOutBuffer;
+        char volbuf[8];
+        DWORD parsize, datasize, ret;
+
+        if(nOutBufferSize < sizeof(VOLUME_CONTROL) || !pVol) {
+            SetLastError(ERROR_INSUFFICIENT_BUFFER);
+            return FALSE;
+        }
+        if(lpBytesReturned) {
+            *lpBytesReturned = 0;
+        }
+        parsize = 4;
+        datasize = 8;
+        ret = OSLibDosDevIOCtl(pHMHandleData->hHMHandle, 0x81, 0x60, "CD01", 4, &parsize,
+                               volbuf, 8, &datasize);
+
+        if(ret) {
+            SetLastError(error2WinError(ret));
+            return FALSE;
+        }
+        if(lpBytesReturned) {
+            *lpBytesReturned = sizeof(VOLUME_CONTROL);
+        }
+        pVol->PortVolume[0] = volbuf[1];
+        pVol->PortVolume[1] = volbuf[3];
+        pVol->PortVolume[2] = volbuf[5];
+        pVol->PortVolume[3] = volbuf[7];
+        SetLastError(ERROR_SUCCESS);
+        return TRUE;
+    }
+
     case IOCTL_CDROM_SET_VOLUME:
+    {
+        PVOLUME_CONTROL pVol = (PVOLUME_CONTROL)lpInBuffer;
+        char volbuf[8];
+        DWORD parsize, datasize, ret;
+
+        if(nInBufferSize < sizeof(VOLUME_CONTROL) || !pVol) {
+            SetLastError(ERROR_INSUFFICIENT_BUFFER);
+            return FALSE;
+        }
+        if(lpBytesReturned) {
+            *lpBytesReturned = 0;
+        }
+        parsize = 4;
+        datasize = 8;
+        volbuf[0] = 0;
+        volbuf[1] = pVol->PortVolume[0];
+        volbuf[2] = 1;
+        volbuf[3] = pVol->PortVolume[1];
+        volbuf[4] = 2;
+        volbuf[5] = pVol->PortVolume[2];
+        volbuf[6] = 3;
+        volbuf[7] = pVol->PortVolume[3];
+        dprintf(("Set CD volume (%d,%d)(%d,%d)", pVol->PortVolume[0], pVol->PortVolume[1], pVol->PortVolume[2], pVol->PortVolume[3]));
+        ret = OSLibDosDevIOCtl(pHMHandleData->hHMHandle, 0x81, 0x40, "CD01", 4, &parsize,
+                               volbuf, 8, &datasize);
+
+        if(ret) {
+            SetLastError(error2WinError(ret));
+            return FALSE;
+        }
+        SetLastError(ERROR_SUCCESS);
+        return TRUE;
+    }
     case IOCTL_CDROM_READ_Q_CHANNEL:
     case IOCTL_CDROM_GET_LAST_SESSION:
     case IOCTL_CDROM_RAW_READ:
@@ -431,7 +535,7 @@ BOOL HMDeviceDiskClass::DeviceIoControl(PHMHANDLEDATA pHMHandleData, DWORD dwIoC
 
     case IOCTL_STORAGE_CHECK_VERIFY:
         if(lpBytesReturned) {
-            lpBytesReturned = 0;
+            *lpBytesReturned = 0;
         }
         //TODO: check if disk has been inserted or removed
         if(pHMHandleData->hHMHandle == 0) {
@@ -457,7 +561,7 @@ BOOL HMDeviceDiskClass::DeviceIoControl(PHMHANDLEDATA pHMHandleData, DWORD dwIoC
         PSCSI_PASS_THROUGH_DIRECT pPacket = (PSCSI_PASS_THROUGH_DIRECT)lpOutBuffer;
         SRB_ExecSCSICmd *psrb;
 
-        if(hInstAspi == NULL) {
+        if(drvInfo->hInstAspi == NULL) {
             SetLastError(ERROR_ACCESS_DENIED);
             return FALSE;
         }
@@ -507,7 +611,7 @@ BOOL HMDeviceDiskClass::DeviceIoControl(PHMHANDLEDATA pHMHandleData, DWORD dwIoC
             memcpy(&psrb->SenseArea[0], (char *)pPacket + pPacket->SenseInfoOffset, psrb->SRB_SenseLen);
         }
         //TODO: pPacket->TimeOutValue ignored
-        int rc = SendASPI32Command((LPSRB)psrb);
+        int rc = drvInfo->SendASPI32Command((LPSRB)psrb);
         if(rc != SS_COMP) {
             dprintf(("SendASPI32Command failed with error %d", rc));
             if(rc == SS_ERR) {
@@ -541,15 +645,15 @@ BOOL HMDeviceDiskClass::DeviceIoControl(PHMHANDLEDATA pHMHandleData, DWORD dwIoC
         addr->Length = sizeof(SCSI_ADDRESS);
         addr->PortNumber = 0;
         addr->PathId     = 0;
-        numAdapters = GetASPI32SupportInfo();
+        numAdapters = drvInfo->GetASPI32SupportInfo();
         if(LOBYTE(numAdapters) == 0) goto failure;
 
         memset(&srb, 0, sizeof(srb));
         srb.common.SRB_Cmd = SC_HA_INQUIRY;
-        rc = SendASPI32Command(&srb);
+        rc = drvInfo->SendASPI32Command(&srb);
 
         char drivename[3];
-        drivename[0] = (char)pHMHandleData->dwUserData;
+        drivename[0] = (char)drvInfo->driveLetter;
         drivename[1] = ':';
         drivename[2] = 0;
 
@@ -561,7 +665,7 @@ BOOL HMDeviceDiskClass::DeviceIoControl(PHMHANDLEDATA pHMHandleData, DWORD dwIoC
                     srb.devtype.SRB_HaId   = i;
                     srb.devtype.SRB_Target = j;
                     srb.devtype.SRB_Lun    = k;
-                    rc = SendASPI32Command(&srb);
+                    rc = drvInfo->SendASPI32Command(&srb);
                     if(rc == SS_COMP) {
                         if(srb.devtype.SRB_DeviceType == SS_DEVTYPE_CDROM &&
                            GetDriveTypeA(drivename) == DRIVE_CDROM)
