@@ -1,4 +1,4 @@
-# $Id: setup.os2debmscv6-16.mk,v 1.15 2002-09-20 04:10:03 bird Exp $
+# $Id: setup.os2debmscv6-16.mk,v 1.16 2002-09-22 07:05:57 bird Exp $
 
 # ---OS2, DEBUG, MSCV6-------------------------
 ENV_NAME="OS/2, Debug, Microsoft C v6.0a 16-bit"
@@ -48,7 +48,7 @@ CXX_FLAGS=
 CXX_FLAGS_EXE=
 CXX_FLAGS_DLL=
 CXX_FLAGS_SYS=
-CC_FLAGS_IFS=
+CXX_FLAGS_IFS=
 CXX_OBJ_OUT=
 CXX_PC_2_STDOUT=
 
