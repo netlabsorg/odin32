@@ -1,4 +1,4 @@
-/* $Id: win32wmdiclient.cpp,v 1.4 1999-09-03 15:09:46 sandervl Exp $ */
+/* $Id: win32wmdiclient.cpp,v 1.5 1999-09-04 19:42:29 sandervl Exp $ */
 /*
  * Win32 MDI Client Window Class for OS/2
  *
@@ -818,12 +818,12 @@ BOOL MDICLIENT_Register()
     if (GlobalFindAtomA(MDICLIENTCLASSNAMEA)) return FALSE;
 
     ZeroMemory(&wndClass,sizeof(WNDCLASSA));
-    wndClass.style         = CS_GLOBALCLASS | CS_HREDRAW | CS_VREDRAW | CS_PARENTDC | CS_DBLCLKS;
+    wndClass.style         = CS_GLOBALCLASS;
     wndClass.lpfnWndProc   = (WNDPROC)MDIClientWndProc;
     wndClass.cbClsExtra    = 0;
     wndClass.cbWndExtra    = 0;
     wndClass.hCursor       = 0;
-    wndClass.hbrBackground = (HBRUSH)0;
+    wndClass.hbrBackground = (HBRUSH)LTGRAY_BRUSH;
     wndClass.lpszClassName = MDICLIENTCLASSNAMEA;
 
     return RegisterClassA(&wndClass);
