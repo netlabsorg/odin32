@@ -22,8 +22,8 @@
 #else
   #define dprintf(a)      WriteLog a
 #endif
-  #define eprintf(a)      WriteLog a ; WriteLogError a
-  #define dassert(a, b)   if(!(a)) WriteLogError b
+  #define eprintf(a)      WriteLog a 
+  #define dassert(a, b)   if(!(a)) dprintf b
   #define dbgCheckObj(a)   a->checkObject()
 
 #ifdef DEBUG_ENABLELOG_LEVEL2
@@ -47,7 +47,6 @@
 
 int  SYSTEM WriteLog(char *tekst, ...);
 int  SYSTEM WritePrivateLog(void *logfile, char *tekst, ...);
-int  SYSTEM WriteLogError(char *tekst, ...);
 
 void SYSTEM DecreaseLogCount();
 void SYSTEM IncreaseLogCount();

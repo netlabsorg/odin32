@@ -1,4 +1,4 @@
-# $Id: odin32.profile.vac3.mk,v 1.13 2002-04-17 04:06:24 bird Exp $
+# $Id: odin32.profile.vac3.mk,v 1.14 2003-01-22 17:05:17 sandervl Exp $
 
 #
 # Odin32 API
@@ -18,8 +18,7 @@ DLLENTRY = $(ODIN32_LIB)\dllentry.obj
 ODINCRT  = odincrtp
 LIB_DEMANGLE = demangl.lib
 !ifndef DEBUG
-#OBJ_PROFILE = $(ODIN32_LIB)\cppopa3.obj $(ODIN32_LIB)\cppopa3_fix2.obj
-OBJ_PROFILE = $(ODIN32_LIB)\cpppan40.obj
+OBJ_PROFILE = $(ODIN32_LIB)\cppopa3.obj $(ODIN32_LIB)\cppopa3_fix2.obj
 NO_LXLITE = 1
 !endif
 
@@ -81,7 +80,7 @@ CXXFLAGS         = -c -Q -Si -G5 -O- -Oi- -Ss+ -W3 -Gm+ /Gn+ -Ti+ $(PROFILEFLAGS
 CXXFLAGS_ODINCRT = -c -Q -Si -G5 -O- -Oi- -Ss+ -W3 -Gm+ /Gn- -Ti+ $(PROFILEFLAGS) $(CXXTARGETFLAGS) -Gx+
 CFLAGS_WIN32APP  = -c -Q -Si -G5 -O- -Oi- -Ss+ -W3 -Gm+ /Gn+ -Ti+ $(PROFILEFLAGS) $(CTARGETFLAGS)
 CXXFLAGS_WIN32APP= -c -Q -Si -G5 -O- -Oi- -Ss+ -W3 -Gm+ /Gn+ -Ti+ $(PROFILEFLAGS) $(CXXTARGETFLAGS)
-CINCLUDES        = -I$(ODIN32_INCLUDE)\Win -I. -I$(ODIN32_INCLUDE)
+CINCLUDES        = -I$(ODIN32_INCLUDE)\incl_vac -I$(ODIN32_INCLUDE)\Win -I. -I$(ODIN32_INCLUDE) 
 CDEFINES         = -D__WIN32OS2__ -D__WINE__ -D__i386__ -DTCPV40HDRS -DCOMCTL32UNDOC
 CDEFINES_ODINCRT = -D__WIN32OS2__ -D__WINE__ -D__i386__
 CDEFINES_WIN32APP= -D__WIN32OS2__ -D__i386__
