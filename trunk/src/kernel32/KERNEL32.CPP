@@ -1,4 +1,4 @@
-/* $Id: KERNEL32.CPP,v 1.52 2000-09-03 18:04:55 phaller Exp $ */
+/* $Id: KERNEL32.CPP,v 1.53 2000-09-25 04:35:01 phaller Exp $ */
 
 /*
  * Win32 compatibility file functions for OS/2
@@ -35,6 +35,7 @@
 #include "heap.h"
 #include "handlemanager.h"
 #include "wprocess.h"
+#include "oslibdos.h"
 #include <versionos2.h>
 
 #define DBG_LOCALLOG	DBG_kernel32
@@ -183,10 +184,53 @@ UINT WIN32API GetACP(VOID)
 }
 //******************************************************************************
 //******************************************************************************
-VOID WIN32API GlobalMemoryStatus( MEMORYSTATUS *arg1)
+
+/*
+ * PH 2000/09/25 This is an experiment to overcome some problems
+ * with Open32's GMS variant.
+ */
+void _GlobalMemoryStatus(MEMORYSTATUS *lpMemStat)
+{
+  ULONG  sys[5];
+  // Note: QSV_TOTPHYSMEM = 17, QSV_MAXSHMEM = 21
+  lpMemStat->dwLength = sizeof(MEMORYSTATUS);
+  
+  if(!OSLibDosQuerySysInfo( 17, 21, (PVOID)sys, sizeof(sys)))
+  {
+    // Specified a number between 0 and 100 that gives a general idea of
+    // current memory utilization, in which 0 indicates no memory use and
+    // 100 indicates full memory use
+
+    //#define MB512 0x1c000000
+    //lpMemStat->dwMemoryLoad = (MB512-sys[20]) * 100 / MB512;
+    lpMemStat->dwMemoryLoad = (sys[1] * 100) / sys[0];
+    
+    // bytes of physical memory
+    lpMemStat->dwTotalPhys = sys[0];
+      
+    // free physical memory bytes
+    lpMemStat->dwAvailPhys = sys[0] - sys[1];
+
+    // bytes of paging file
+    lpMemStat->dwTotalPageFile = sys[2] - sys[0];
+
+    // free bytes of paging file
+    // @@@PH subtract swapper.dat size?
+    lpMemStat->dwAvailPageFile = lpMemStat->dwTotalPageFile;
+
+    // user bytes of address space
+    lpMemStat->dwTotalVirtual = max(sys[2], sys[3]);
+    lpMemStat->dwAvailVirtual = min(sys[2], sys[3]);
+  }
+}
+
+
+
+VOID WIN32API GlobalMemoryStatus(MEMORYSTATUS *arg1)
 {
     dprintf(("KERNEL32:  GlobalMemoryStatus\n"));
-    O32_GlobalMemoryStatus(arg1);
+    //O32_GlobalMemoryStatus(arg1);
+    _GlobalMemoryStatus(arg1);
     dprintf(("dwMemoryLoad    %X\n", arg1->dwMemoryLoad));
     dprintf(("dwTotalPhys     %X\n", arg1->dwTotalPhys));
     dprintf(("dwAvailPhys     %X\n", arg1->dwAvailPhys));

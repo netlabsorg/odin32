@@ -1,4 +1,4 @@
-/* $Id: oslibdos.h,v 1.23 2000-09-20 21:32:55 hugh Exp $ */
+/* $Id: oslibdos.h,v 1.24 2000-09-25 04:35:00 phaller Exp $ */
 
 /*
  * Wrappers for OS/2 Dos* API
@@ -202,6 +202,8 @@ BOOL OSLibGetDiskFreeSpace(LPSTR lpRootPathName, LPDWORD lpSectorsPerCluster,
                            LPDWORD lpBytesPerSector, LPDWORD lpNumberOfFreeClusters,
                            LPDWORD lpTotalNumberOfClusters);
 
+ULONG OSLibDosQuerySysInfo(ULONG iStart, ULONG iLast, PVOID pBuf, ULONG cbBuf);
+
 
 #ifdef OS2DEF_INCLUDED
 #ifndef FIL_STANDARDL
@@ -281,5 +283,3 @@ BOOL OSLibGetDiskFreeSpace(LPSTR lpRootPathName, LPDWORD lpSectorsPerCluster,
 #endif
 
 ULONG OSLibDosQueryModuleName(ULONG hModule, int cchName, char *pszName);
-
-
