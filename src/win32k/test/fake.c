@@ -1,4 +1,4 @@
-/* $Id: fake.c,v 1.7 2001-02-10 11:11:48 bird Exp $
+/* $Id: fake.c,v 1.8 2001-02-11 15:27:25 bird Exp $
  *
  * Fake stubs for the ldr and kernel functions we imports or overloads.
  *
@@ -102,6 +102,35 @@ USHORT          validatetbl[] =
 };
 
 
+/*
+ * More fake variables.
+ */
+ULONG fakeSMcDFInuse;
+ULONG fakesmFileSize;
+ULONG fakeSMswapping;
+ULONG fakesmcBrokenDF;
+ULONG fakepgPhysPages;
+ULONG fakeSMcInMemFile;
+ULONG fakeSMCFGMinFree;
+ULONG fakesmcGrowFails;
+ULONG fakePGSwapEnabled;
+ULONG fakepgcPageFaults;
+ULONG fakeSMCFGSwapSize;
+ULONG fakepgResidentPages;
+ULONG fakepgSwappablePages;
+ULONG fakepgDiscardableInmem;
+ULONG fakepgDiscardablePages;
+ULONG fakeSMMinFree;
+ULONG fakepgcPageFaultsActive;
+ULONG fakepgPhysMax;
+ULONG fakeVirtualAddressLimit;
+
+VMAH  fakeahvmShr;
+VMAH  fakeahvmSys;
+VMAH  fakeahvmhShr;
+
+
+
 /*******************************************************************************
 *   External Functions                                                         *
 *******************************************************************************/
@@ -165,6 +194,27 @@ void  workersinit(void)
     rc = DosQueryExtLIBPATH(szBeginLibPath, BEGIN_LIBPATH);
     rc = DosQueryHeaderInfo(NULLHANDLE, 0, szLibPath, sizeof(szLibPath), QHINF_LIBPATH);
     rc = DosQueryExtLIBPATH(szEndLibPath, END_LIBPATH);
+
+    if (_usFakeVerMinor < 45)
+        fakeVirtualAddressLimit = 0xFFFFFFFF;
+    else
+        fakeVirtualAddressLimit = 0x80000000;
+
+
+    if (fakeVirtualAddressLimit != 0xFFFFFFFF)
+    {   /* high memory supported */
+        fakeahvmSys.ah_laddrMax = 0xFFFE0000;
+        fakeahvmSys.ah_laddrMin = 0x80000000;
+        fakeahvmShr.ah_laddrMin = 0x08000000;
+        fakeahvmhShr.ah_laddrMin = 0x70000000;
+    }
+    else
+    {   /* high memory not supported */
+        fakeahvmSys.ah_laddrMax = 0xFFFE0000;
+        fakeahvmSys.ah_laddrMin = 0x40000000;
+        fakeahvmShr.ah_laddrMin = 0x08000000;
+        fakeahvmhShr.ah_laddrMin = 0xffffffff;
+    }
 
     rc = rc;
 }
@@ -2013,4 +2063,66 @@ ULONG KRNLCALL  fakeTKPidToPTDA(PID pid, PPPTDA ppPTDA)
     printf("fakeTKPidToPTDA:                       - not implemented - pid = 0x%04x, ppPTDA=%p\n", pid, ppPTDA);
     return ERROR_NOT_SUPPORTED;
 }
+
+
+/**
+ * Returns the number of bytes of physical memory available.
+ */
+ULONG KRNLCALL fakePGPhysAvail(void)
+{
+    DUMMY();
+    printf("fakePGPhysAvail                        - returns 0x234563\n");
+    return 0x234563;
+}
+
+
+/**
+ * Returns the number of pageframes currently in use.
+ */
+ULONG KRNLCALL fakePGPhysPresent(void)
+{
+    DUMMY();
+    printf("fakePGPhysPresent                      - returns 0x123534\n");
+    return 0x123534;
+}
+
+
+/**
+ * This function seems to find the top of the private arena.
+ * And for high arena kernels (AURORA and W3SMP?) it is modified
+ * to calc the top of the high private arena, given flFlag = 4.
+ * --
+ * This function is really intented for resizing / recaling the size of
+ * the shared arena(s). But, it's useful for finding the highest used
+ * private arena(s).
+ * @param   flFlags             VMRSBF_* flags.
+ * @param   pulSentinelAddress  Pointer to return variable (optional).
+ */
+VOID    KRNLCALL fakevmRecalcShrBound(
+    ULONG   flFlags,
+    PULONG  pulSentinelAddress)
+{
+    ULONG ulRet;
+    DUMMY();
+
+    if ((flFlags & 6) == 0)
+    {   /* shared  tiled memory */
+        ulRet = 128*1024*1024;
+    }
+    else
+    {
+        ulRet = 0x2c000000;
+        if (_usFakeVerMinor < 45)        /* bad emulation for Warp 3 SMP - FIXME */
+            printf("fakePGPhysPresent                      - error: bad flags for non-highmem OS/2 versionn");
+    }
+
+    if (pulSentinelAddress)
+        *pulSentinelAddress = ulRet;
+
+    printf("fakePGPhysPresent                      - returns %x - flFlags=0x%02x, pulSentinelAddress=0x%08x\n",
+           ulRet, flFlags, pulSentinelAddress);
+
+    return;
+}
+
 
