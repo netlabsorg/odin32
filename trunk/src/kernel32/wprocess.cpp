@@ -1,4 +1,4 @@
-/* $Id: wprocess.cpp,v 1.178 2003-02-04 13:40:37 sandervl Exp $ */
+/* $Id: wprocess.cpp,v 1.179 2003-02-13 15:30:53 sandervl Exp $ */
 
 /*
  * Win32 process functions
@@ -65,6 +65,8 @@ ODINDEBUGCHANNEL(KERNEL32-WPROCESS)
 *******************************************************************************/
 BOOL    fIsOS2Image = FALSE;            /* TRUE  -> Odin32 OS/2 application (not converted!) */
                                         /* FALSE -> otherwise */
+BOOL    fSwitchTIBSel = TRUE;           // TRUE  -> switch TIB selectors
+                                        // FALSE -> don't
 BOOL    fExitProcess = FALSE;
 
 //Commandlines
@@ -425,9 +427,9 @@ void WIN32API RestoreOS2TIB()
  SHORT  orgtibsel;
  TEB   *winteb;
 
-   //If we're running an Odin32 OS/2 application (not converted!), then we
-   //we don't switch FS selectors
-    if(fIsOS2Image) {
+    //If we're running an Odin32 OS/2 application (not converted!), then we
+    //we don't switch FS selectors
+    if(!fSwitchTIBSel) {
         return;
     }
 
@@ -451,7 +453,7 @@ USHORT WIN32API SetWin32TIB(BOOL fForceSwitch)
 
     //If we're running an Odin32 OS/2 application (not converted!), then we
     //we don't switch FS selectors
-    if(fIsOS2Image && !fForceSwitch) {
+    if(!fSwitchTIBSel && !fForceSwitch) {
         return GetFS();
     }
 
@@ -469,6 +471,24 @@ USHORT WIN32API SetWin32TIB(BOOL fForceSwitch)
     //else DebugInt3();
 
     return GetFS();
+}
+//******************************************************************************
+// ODIN_SetTIBSwitch: override TIB switching
+// 
+// Parameters:
+//      BOOL fSwitchTIB
+//              FALSE  -> no TIB selector switching
+//              TRUE   -> force TIB selector switching
+//
+//******************************************************************************
+void WIN32API ODIN_SetTIBSwitch(BOOL fSwitchTIB)
+{
+    dprintf(("ODIN_SetTIBSwitch %d", fSwitchTIB));
+    fSwitchTIBSel = fSwitchTIB;
+    if(fSwitchTIBSel) {
+         SetWin32TIB();
+    }
+    else RestoreOS2TIB();
 }
 //******************************************************************************
 //******************************************************************************
