@@ -1,4 +1,4 @@
-/* $Id: initcomctl32.cpp,v 1.5 2003-05-15 14:25:13 sandervl Exp $ */
+/* $Id: initcomctl32.cpp,v 1.6 2003-05-15 14:26:27 sandervl Exp $ */
 /*
  * COMCTL32 DLL entry point
  *

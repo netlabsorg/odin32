@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.39 2003-05-15 14:25:14 sandervl Exp $
+# $Id: makefile,v 1.40 2003-05-15 14:26:27 sandervl Exp $
 
 #
 # Odin32 API

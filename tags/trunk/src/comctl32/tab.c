@@ -58,6 +58,8 @@ typedef struct
   UINT       uNumRows;	      /* number of tab rows */
   INT        tabHeight;       /* height of the tab row */
   INT        tabWidth;        /* width of tabs */
+  USHORT     uHItemPadding;   /* amount of horizontal padding, in pixels */
+  USHORT     uVItemPadding;   /* amount of vertical padding, in pixels */
   HFONT      hFont;           /* handle to the current font */
   HCURSOR    hcurArrow;       /* handle to the current cursor */
   HIMAGELIST himl;            /* handle to a image list (may be 0) */
@@ -80,8 +82,6 @@ typedef struct
  * Positioning constants
  */
 #define SELECTED_TAB_OFFSET     2
-#define HORIZONTAL_ITEM_PADDING 6
-#define VERTICAL_ITEM_PADDING   3
 #define ROUND_CORNER_SIZE       2
 #define DISPLAY_AREA_PADDINGX   2
 #define DISPLAY_AREA_PADDINGY   2
@@ -172,7 +172,7 @@ TAB_DumpItemInternal(TAB_INFO *infoPtr, UINT iItem)
 	TRACE("tab %d, mask=0x%08x, dwState=0x%08lx, pszText=%s, iImage=%d\n",
 	      iItem, ti->mask, ti->dwState, debugstr_w(ti->pszText),
 	      ti->iImage);
-	TRACE("tab %d, lParam=0x%08lx, rect.left=%d, rect.top(row)=%d\n",
+	TRACE("tab %d, lParam=0x%08lx, rect.left=%ld, rect.top(row)=%ld\n",
 	      iItem, ti->lParam, ti->rect.left, ti->rect.top);
     }
 }
@@ -255,6 +255,17 @@ TAB_SetToolTips (HWND hwnd, WPARAM wParam, LPARAM lParam)
 
     if (infoPtr == NULL) return 0;
     infoPtr->hwndToolTip = (HWND)wParam;
+    return 0;
+}
+
+static LRESULT
+TAB_SetPadding (HWND hwnd, WPARAM wParam, LPARAM lParam)
+{
+    TAB_INFO *infoPtr = TAB_GetInfoPtr(hwnd);
+    
+    if (infoPtr == NULL) return 0;
+    infoPtr->uHItemPadding=LOWORD(lParam);
+    infoPtr->uVItemPadding=HIWORD(lParam);
     return 0;
 }
 
@@ -366,7 +377,7 @@ static BOOL TAB_InternalGetItemRect(
 	     SELECTED_TAB_OFFSET,
 	     0);
   }
-  TRACE("item %d tab h=%d, rect=(%d,%d)-(%d,%d)\n",
+  TRACE("item %d tab h=%d, rect=(%ld,%ld)-(%ld,%ld)\n",
 	itemIndex, infoPtr->tabHeight,
 	itemRect->left, itemRect->top, itemRect->right, itemRect->bottom);
 
@@ -487,7 +498,7 @@ static LRESULT TAB_FocusChanging(
    */
   if (isVisible)
   {
-      TRACE("invalidate (%d,%d)-(%d,%d)\n",
+      TRACE("invalidate (%ld,%ld)-(%ld,%ld)\n",
 	    selectedRect.left,selectedRect.top,
 	    selectedRect.right,selectedRect.bottom);
     InvalidateRect(hwnd, &selectedRect, TRUE);
@@ -986,14 +997,14 @@ static void TAB_SetupScrolling(
 					  controlPos.right - controlPos.left,
 					  controlPos.bottom - controlPos.top,
 					  hwnd,
-					  (HMENU)NULL,
-					  (HINSTANCE)NULL,
+					  NULL,
+					  NULL,
 					  NULL);
     }
     else
     {
       SetWindowPos(infoPtr->hwndUpDown,
-		   (HWND)NULL,
+		   NULL,
 		   controlPos.left, controlPos.top,
 		   controlPos.right - controlPos.left,
 		   controlPos.bottom - controlPos.top,
@@ -1099,7 +1110,7 @@ static void TAB_SetItemBounds (HWND hwnd)
 
     /* Take the highest between font or icon */
     if (fontMetrics.tmHeight > icon_height)
-      item_height = fontMetrics.tmHeight;
+      item_height = fontMetrics.tmHeight + 2;
     else
       item_height = icon_height;
 
@@ -1107,20 +1118,15 @@ static void TAB_SetItemBounds (HWND hwnd)
      * Make sure there is enough space for the letters + icon + growing the
      * selected item + extra space for the selected item.
      */
-#ifdef __WIN32OS2__
-    //Code below doesn't always work
-    infoPtr->tabHeight = item_height + 2 * VERTICAL_ITEM_PADDING +
-        SELECTED_TAB_OFFSET;
-#else
     infoPtr->tabHeight = item_height + SELECTED_TAB_OFFSET +
 	                 ((lStyle & TCS_BUTTONS) ? 2 : 1) *
-                          VERTICAL_ITEM_PADDING;
-#endif
+                          infoPtr->uVItemPadding;
+
     TRACE("tabH=%d, tmH=%ld, iconh=%d\n",
 	  infoPtr->tabHeight, fontMetrics.tmHeight, icon_height);
   }
 
-  TRACE("client right=%d\n", clientRect.right);
+  TRACE("client right=%ld\n", clientRect.right);
 
   for (curItem = 0; curItem < infoPtr->uNumItem; curItem++)
   {
@@ -1131,7 +1137,7 @@ static void TAB_SetItemBounds (HWND hwnd)
     {
       infoPtr->items[curItem].rect.right = infoPtr->items[curItem].rect.left +
                                            infoPtr->tabWidth +
-                                           2 * HORIZONTAL_ITEM_PADDING;
+                                           2 * infoPtr->uHItemPadding;
     }
     else
     {
@@ -1156,8 +1162,8 @@ static void TAB_SetItemBounds (HWND hwnd)
 
       infoPtr->items[curItem].rect.right = infoPtr->items[curItem].rect.left +
                                            size.cx + icon_width +
-                                           num * HORIZONTAL_ITEM_PADDING;
-      TRACE("for <%s>, l,r=%d,%d, num=%d\n",
+                                           num * infoPtr->uHItemPadding;
+      TRACE("for <%s>, l,r=%ld,%ld, num=%d\n",
 	  debugstr_w(infoPtr->items[curItem].pszText),
 	  infoPtr->items[curItem].rect.left,
 	  infoPtr->items[curItem].rect.right,
@@ -1181,7 +1187,7 @@ static void TAB_SetItemBounds (HWND hwnd)
 
 	infoPtr->items[curItem].rect.left = 0;
         curItemRowCount++;
-	TRACE("wrapping <%s>, l,r=%d,%d\n",
+	TRACE("wrapping <%s>, l,r=%ld,%ld\n",
 	    debugstr_w(infoPtr->items[curItem].pszText),
 	    infoPtr->items[curItem].rect.left,
 	    infoPtr->items[curItem].rect.right);
@@ -1191,7 +1197,7 @@ static void TAB_SetItemBounds (HWND hwnd)
     infoPtr->items[curItem].rect.top = curItemRowCount - 1;
 
     TRACE("TextSize: %li\n", size.cx);
-    TRACE("Rect: T %i, L %i, B %i, R %i\n",
+    TRACE("Rect: T %li, L %li, B %li, R %li\n",
 	  infoPtr->items[curItem].rect.top,
 	  infoPtr->items[curItem].rect.left,
 	  infoPtr->items[curItem].rect.bottom,
@@ -1255,7 +1261,7 @@ static void TAB_SetItemBounds (HWND hwnd)
             infoPtr->items[iItm].rect.left;
           infoPtr->items[iItm].rect.left = 0;
 
-	  TRACE("r=%d, cl=%d, cl.r=%d, iCount=%d, iRow=%d, uNumRows=%d, remTab=%d, tabPerRow=%d\n",
+	  TRACE("r=%ld, cl=%d, cl.r=%ld, iCount=%d, iRow=%d, uNumRows=%d, remTab=%d, tabPerRow=%d\n",
 	      infoPtr->items[iItm].rect.right,
 	      curItemLeftPos, clientRect.right,
 	      iCount, iRow, infoPtr->uNumRows, remTab, tabPerRow);
@@ -1304,7 +1310,7 @@ static void TAB_SetItemBounds (HWND hwnd)
           else
             curItemLeftPos = infoPtr->items[iItm].rect.right;
 
-	  TRACE("arranging <%s>, l,r=%d,%d, row=%d\n",
+	  TRACE("arranging <%s>, l,r=%ld,%ld, row=%ld\n",
 	      debugstr_w(infoPtr->items[iItm].pszText),
 	      infoPtr->items[iItm].rect.left,
 	      infoPtr->items[iItm].rect.right,
@@ -1352,7 +1358,7 @@ static void TAB_SetItemBounds (HWND hwnd)
               infoPtr->items[iIndex].rect.left += iCount * widthDiff;
               infoPtr->items[iIndex].rect.right += (iCount + 1) * widthDiff;
 
-	      TRACE("adjusting 1 <%s>, l,r=%d,%d\n",
+	      TRACE("adjusting 1 <%s>, l,r=%ld,%ld\n",
 		  debugstr_w(infoPtr->items[iIndex].pszText),
 		  infoPtr->items[iIndex].rect.left,
 		  infoPtr->items[iIndex].rect.right);
@@ -1365,7 +1371,7 @@ static void TAB_SetItemBounds (HWND hwnd)
           infoPtr->items[iIndexStart].rect.left = clientRect.left;
           infoPtr->items[iIndexStart].rect.right = clientRect.right - 4;
 
-	  TRACE("adjusting 2 <%s>, l,r=%d,%d\n",
+	  TRACE("adjusting 2 <%s>, l,r=%ld,%ld\n",
 	      debugstr_w(infoPtr->items[iIndexStart].pszText),
 	      infoPtr->items[iIndexStart].rect.left,
 	      infoPtr->items[iIndexStart].rect.right);
@@ -1482,14 +1488,6 @@ TAB_DrawItemInterior
   SetTextColor(hdc, (iItem == infoPtr->iHotTracked) ?
                      comctl32_color.clrHighlight : comctl32_color.clrBtnText);
 
-  /*
-   * Deflate the rectangle to acount for the padding
-   */
-  if(lStyle & TCS_VERTICAL)
-    InflateRect(drawRect, -VERTICAL_ITEM_PADDING, -HORIZONTAL_ITEM_PADDING);
-  else
-    InflateRect(drawRect, -HORIZONTAL_ITEM_PADDING, -VERTICAL_ITEM_PADDING);
-
 
   /*
    * if owner draw, tell the owner to draw
@@ -1511,13 +1509,14 @@ TAB_DrawItemInterior
     dis.CtlID      = id;
     dis.itemID     = iItem;
     dis.itemAction = ODA_DRAWENTIRE;
+    dis.itemState = 0;
     if ( iItem == infoPtr->iSelected )
-      dis.itemState = ODS_SELECTED;
-    else
-      dis.itemState = 0;
+      dis.itemState |= ODS_SELECTED;
+    if (infoPtr->uFocus == iItem) 
+      dis.itemState |= ODS_FOCUS;
     dis.hwndItem = hwnd;		/* */
     dis.hDC      = hdc;
-    dis.rcItem   = *drawRect;		/* */
+    CopyRect(&dis.rcItem,drawRect);
     dis.itemData = infoPtr->items[iItem].lParam;
 
     /*
@@ -1543,6 +1542,14 @@ TAB_DrawItemInterior
     /* used to center the icon and text in the tab */
     RECT rcText;
     INT center_offset;
+
+    /*
+     * Deflate the rectangle to acount for the padding
+     */
+    if(lStyle & TCS_VERTICAL)
+      InflateRect(drawRect, -infoPtr->uVItemPadding, -infoPtr->uHItemPadding);
+    else
+      InflateRect(drawRect, -infoPtr->uHItemPadding, -infoPtr->uVItemPadding);
 
     /* set rcImage to drawRect, we will use top & left in our ImageList_Draw call */
     rcImage = *drawRect;
@@ -1572,11 +1579,11 @@ TAB_DrawItemInterior
       ImageList_GetIconSize(infoPtr->himl, &cx, &cy);
 
       if(lStyle & TCS_VERTICAL)
-        center_offset = ((drawRect->bottom - drawRect->top) - (cy + HORIZONTAL_ITEM_PADDING + (rcText.right - rcText.left))) / 2;
+        center_offset = ((drawRect->bottom - drawRect->top) - (cy + infoPtr->uHItemPadding + (rcText.right - rcText.left))) / 2;
       else
-        center_offset = ((drawRect->right - drawRect->left) - (cx + HORIZONTAL_ITEM_PADDING + (rcText.right - rcText.left))) / 2;
+        center_offset = ((drawRect->right - drawRect->left) - (cx + infoPtr->uHItemPadding + (rcText.right - rcText.left))) / 2;
 
-      TRACE("for <%s>, c_o=%d, draw=(%d,%d)-(%d,%d), textlen=%d\n",
+      TRACE("for <%s>, c_o=%d, draw=(%ld,%ld)-(%ld,%ld), textlen=%ld\n",
 	  debugstr_w(infoPtr->items[iItem].pszText), center_offset,
 	  drawRect->left, drawRect->top, drawRect->right, drawRect->bottom,
 	  (rcText.right-rcText.left));
@@ -1587,22 +1594,22 @@ TAB_DrawItemInterior
         rcImage.left = drawRect->right - cx; /* if tab is TCS_VERTICAL and TCS_BOTTOM, the text is drawn from the */
                                              /* right side of the tab, but the image still uses the left as its x position */
                                              /* this keeps the image always drawn off of the same side of the tab */
-        drawRect->top = rcImage.top + (cx + HORIZONTAL_ITEM_PADDING);
+        drawRect->top = rcImage.top + (cx + infoPtr->uHItemPadding);
       }
       else if(lStyle & TCS_VERTICAL)
       {
         rcImage.top = drawRect->bottom - cy - center_offset;
 	rcImage.left--;
-        drawRect->bottom = rcImage.top - HORIZONTAL_ITEM_PADDING;
+        drawRect->bottom = rcImage.top - infoPtr->uHItemPadding;
       }
       else /* normal style, whether TCS_BOTTOM or not */
       {
         rcImage.left = drawRect->left + center_offset + 3;
-        drawRect->left = rcImage.left + cx + HORIZONTAL_ITEM_PADDING;
+        drawRect->left = rcImage.left + cx + infoPtr->uHItemPadding;
 	rcImage.top -= (lStyle & TCS_BOTTOM) ? 2 : 1;
       }
 
-      TRACE("drawing image=%d, left=%d, top=%d\n",
+      TRACE("drawing image=%d, left=%ld, top=%ld\n",
 	    infoPtr->items[iItem].iImage, rcImage.left, rcImage.top-1);
       ImageList_Draw
         (
@@ -1860,7 +1867,7 @@ static void TAB_DrawItem(
 	  /* Adjust both rectangles to match native */
 	  r.left += (1-ZZ);
 
-	  TRACE("<left> item=%d, fill=(%d,%d)-(%d,%d), edge=(%d,%d)-(%d,%d)\n",
+	  TRACE("<left> item=%d, fill=(%ld,%ld)-(%ld,%ld), edge=(%ld,%ld)-(%ld,%ld)\n",
 		iItem,
 		fillRect.left,fillRect.top,fillRect.right,fillRect.bottom,
 		r.left,r.top,r.right,r.bottom);
@@ -1904,7 +1911,7 @@ static void TAB_DrawItem(
 	  /* Adjust both rectangles to match native */
 	  fillRect.right += (1-ZZ);
 
-	  TRACE("<left> item=%d, fill=(%d,%d)-(%d,%d), edge=(%d,%d)-(%d,%d)\n",
+	  TRACE("<left> item=%d, fill=(%ld,%ld)-(%ld,%ld), edge=(%ld,%ld)-(%ld,%ld)\n",
 		iItem,
 		fillRect.left,fillRect.top,fillRect.right,fillRect.bottom,
 		r.left,r.top,r.right,r.bottom);
@@ -1961,7 +1968,7 @@ static void TAB_DrawItem(
 	  r.bottom--;
 	  r.top -= ZZ;
 
-	  TRACE("<bottom> item=%d, fill=(%d,%d)-(%d,%d), edge=(%d,%d)-(%d,%d)\n",
+	  TRACE("<bottom> item=%d, fill=(%ld,%ld)-(%ld,%ld), edge=(%ld,%ld)-(%ld,%ld)\n",
 		iItem,
 		fillRect.left,fillRect.top,fillRect.right,fillRect.bottom,
 		r.left,r.top,r.right,r.bottom);
@@ -2006,7 +2013,7 @@ static void TAB_DrawItem(
 	  /* Adjust both rectangles to match native */
 	  fillRect.bottom += (1-ZZ);
 
-	  TRACE("<top> item=%d, fill=(%d,%d)-(%d,%d), edge=(%d,%d)-(%d,%d)\n",
+	  TRACE("<top> item=%d, fill=(%ld,%ld)-(%ld,%ld), edge=(%ld,%ld)-(%ld,%ld)\n",
 		iItem,
 		fillRect.left,fillRect.top,fillRect.right,fillRect.bottom,
 		r.left,r.top,r.right,r.bottom);
@@ -2101,7 +2108,7 @@ static void TAB_DrawBorder (HWND hwnd, HDC hdc)
     }
   }
 
-  TRACE("border=(%d,%d)-(%d,%d)\n",
+  TRACE("border=(%ld,%ld)-(%ld,%ld)\n",
 	rect.left, rect.top, rect.right, rect.bottom);
 
   DrawEdge(hdc, &rect, EDGE_RAISED, BF_SOFT|BF_RECT);
@@ -2318,7 +2325,7 @@ static void TAB_InvalidateTabArea(
   HWND      hwnd,
   TAB_INFO* infoPtr)
 {
-  RECT clientRect;
+  RECT clientRect, r;
   DWORD lStyle = GetWindowLongA(hwnd, GWL_STYLE);
   INT lastRow = infoPtr->uNumRows - 1;
 
@@ -2352,10 +2359,17 @@ static void TAB_InvalidateTabArea(
                       lastRow * (infoPtr->tabHeight - 2) +
                       ((lStyle & TCS_BUTTONS) ? lastRow * BUTTON_SPACINGY : 0) + 2;
   }
-
-  TRACE("invalidate (%d,%d)-(%d,%d)\n",
+  
+  /* Punch out the updown control */
+  if (infoPtr->needsScrolling && (clientRect.right > 0)) {
+    GetClientRect(infoPtr->hwndUpDown, &r);
+    clientRect.right = clientRect.right - (r.right - r.left);
+  }
+  
+  TRACE("invalidate (%ld,%ld)-(%ld,%ld)\n",
 	clientRect.left,clientRect.top,
 	clientRect.right,clientRect.bottom);
+ 
   InvalidateRect(hwnd, &clientRect, TRUE);
 }
 
@@ -2367,7 +2381,7 @@ TAB_Paint (HWND hwnd, WPARAM wParam)
 
   hdc = wParam== 0 ? BeginPaint (hwnd, &ps) : (HDC)wParam;
 
-  TRACE("erase %d, rect=(%d,%d)-(%d,%d)\n",
+  TRACE("erase %d, rect=(%ld,%ld)-(%ld,%ld)\n",
 	ps.fErase,
 	ps.rcPaint.left,ps.rcPaint.top,ps.rcPaint.right,ps.rcPaint.bottom);
 
@@ -2391,7 +2405,7 @@ TAB_InsertItemA (HWND hwnd, WPARAM wParam, LPARAM lParam)
   RECT rect;
 
   GetClientRect (hwnd, &rect);
-  TRACE("Rect: %p T %i, L %i, B %i, R %i\n", hwnd,
+  TRACE("Rect: %p T %li, L %li, B %li, R %li\n", hwnd,
         rect.top, rect.left, rect.bottom, rect.right);
 
   pti = (TCITEMA *)lParam;
@@ -2466,7 +2480,7 @@ TAB_InsertItemW (HWND hwnd, WPARAM wParam, LPARAM lParam)
   RECT rect;
 
   GetClientRect (hwnd, &rect);
-  TRACE("Rect: %p T %i, L %i, B %i, R %i\n", hwnd,
+  TRACE("Rect: %p T %li, L %li, B %li, R %li\n", hwnd,
         rect.top, rect.left, rect.bottom, rect.right);
 
   pti = (TCITEMW *)lParam;
@@ -2542,8 +2556,9 @@ TAB_SetItemSize (HWND hwnd, WPARAM wParam, LPARAM lParam)
   if ((lStyle & TCS_FIXEDWIDTH) || (lStyle & TCS_OWNERDRAWFIXED))
   {
     lResult = MAKELONG(infoPtr->tabWidth, infoPtr->tabHeight);
-    infoPtr->tabWidth = (INT)LOWORD(lParam);
-    infoPtr->tabHeight = (INT)HIWORD(lParam);
+    /* UNDOCUMENTED: If requested Width or Height is 0 this means that program wants to use default. */    
+    if (LOWORD(lParam)) infoPtr->tabWidth = (INT)LOWORD(lParam);
+    if (HIWORD(lParam)) infoPtr->tabHeight = (INT)HIWORD(lParam);
     TRACE("was h=%d,w=%d, now h=%d,w=%d\n",
 	  HIWORD(lResult), LOWORD(lResult),
 	  infoPtr->tabHeight, infoPtr->tabWidth);
@@ -2898,6 +2913,8 @@ TAB_Create (HWND hwnd, WPARAM wParam, LPARAM lParam)
 
   infoPtr->uNumItem        = 0;
   infoPtr->uNumRows        = 0;
+  infoPtr->uHItemPadding   = 6;
+  infoPtr->uVItemPadding   = 3;
   infoPtr->hFont           = 0;
   infoPtr->items           = 0;
   infoPtr->hcurArrow       = LoadCursorA (0, IDC_ARROWA);
@@ -2958,7 +2975,7 @@ TAB_Create (HWND hwnd, WPARAM wParam, LPARAM lParam)
    */
   infoPtr->tabHeight = fontMetrics.tmHeight + SELECTED_TAB_OFFSET +
 	               ((dwStyle & TCS_BUTTONS) ? 2 : 1) *
-                        VERTICAL_ITEM_PADDING;
+                        infoPtr->uVItemPadding;
 
   /* Initialize the width of a tab. */
   infoPtr->tabWidth = DEFAULT_TAB_WIDTH;
@@ -3072,8 +3089,7 @@ TAB_WindowProc (HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
       return 0;
 
     case TCM_SETPADDING:
-      FIXME("Unimplemented msg TCM_SETPADDING\n");
-      return 0;
+      return TAB_SetPadding (hwnd, wParam, lParam);
 
     case TCM_GETROWCOUNT:
       return TAB_GetRowCount(hwnd);
@@ -3201,7 +3217,7 @@ TAB_Register (void)
   wndClass.cbClsExtra    = 0;
   wndClass.cbWndExtra    = sizeof(TAB_INFO *);
   wndClass.hCursor       = LoadCursorA (0, IDC_ARROWA);
-  wndClass.hbrBackground = (HBRUSH)NULL;
+  wndClass.hbrBackground = NULL;
   wndClass.lpszClassName = WC_TABCONTROLA;
 
   RegisterClassA (&wndClass);
@@ -3211,5 +3227,5 @@ TAB_Register (void)
 VOID
 TAB_Unregister (void)
 {
-    UnregisterClassA (WC_TABCONTROLA, (HINSTANCE)NULL);
+    UnregisterClassA (WC_TABCONTROLA, NULL);
 }

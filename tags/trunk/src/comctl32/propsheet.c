@@ -25,12 +25,13 @@
 
 #include <string.h>
 
+#define NONAMELESSUNION
+#define NONAMELESSSTRUCT
 #include "winbase.h"
 #include "commctrl.h"
 #include "prsht.h"
 #include "winnls.h"
 #include "comctl32.h"
-#include "heap.h"
 
 #include "wine/debug.h"
 #include "wine/unicode.h"
@@ -112,14 +113,12 @@ const WCHAR PropSheetInfoStr[] =
 #define MAX_TABTEXT_LENGTH 255
 #define MAX_BUTTONTEXT_LENGTH 64
 
-#define PSH_WIZARD97_OLD   0x00002000
-#define PSH_WIZARD97_NEW   0x01000000
 #define INTRNL_ANY_WIZARD (PSH_WIZARD | PSH_WIZARD97_OLD | PSH_WIZARD97_NEW | PSH_WIZARD_LITE)
 
 /******************************************************************************
  * Prototypes
  */
-static BOOL PROPSHEET_CreateDialog(PropSheetInfo* psInfo);
+static int PROPSHEET_CreateDialog(PropSheetInfo* psInfo);
 static BOOL PROPSHEET_SizeMismatch(HWND hwndDlg, PropSheetInfo* psInfo);
 static BOOL PROPSHEET_AdjustSize(HWND hwndDlg, PropSheetInfo* psInfo);
 static BOOL PROPSHEET_AdjustButtons(HWND hwndParent, PropSheetInfo* psInfo);
@@ -289,7 +288,7 @@ static BOOL PROPSHEET_CollectSheetInfoA(LPCPROPSHEETHEADERA lppsh,
 
   psInfo->hasHelp = dwFlags & PSH_HASHELP;
   psInfo->hasApply = !(dwFlags & PSH_NOAPPLYNOW);
-  psInfo->useCallback = dwFlags & PSH_USECALLBACK;
+  psInfo->useCallback = (dwFlags & PSH_USECALLBACK )&& (lppsh->pfnCallback);
   psInfo->isModeless = dwFlags & PSH_MODELESS;
 
   memcpy(&psInfo->ppshheader,lppsh,dwSize);
@@ -340,7 +339,7 @@ static BOOL PROPSHEET_CollectSheetInfoW(LPCPROPSHEETHEADERW lppsh,
 
   psInfo->hasHelp = dwFlags & PSH_HASHELP;
   psInfo->hasApply = !(dwFlags & PSH_NOAPPLYNOW);
-  psInfo->useCallback = dwFlags & PSH_USECALLBACK;
+  psInfo->useCallback = (dwFlags & PSH_USECALLBACK) && (lppsh->pfnCallback);
   psInfo->isModeless = dwFlags & PSH_MODELESS;
 
   memcpy(&psInfo->ppshheader,lppsh,dwSize);
@@ -553,7 +552,7 @@ BOOL PROPSHEET_CollectPageInfo(LPCPROPSHEETPAGEW lppsp,
  *
  * Creates the actual property sheet.
  */
-BOOL PROPSHEET_CreateDialog(PropSheetInfo* psInfo)
+int PROPSHEET_CreateDialog(PropSheetInfo* psInfo)
 {
   LRESULT ret;
   LPCVOID template;
@@ -569,10 +568,10 @@ BOOL PROPSHEET_CreateDialog(PropSheetInfo* psInfo)
   if(!(hRes = FindResourceW(COMCTL32_hModule,
                             MAKEINTRESOURCEW(resID),
                             RT_DIALOGW)))
-    return FALSE;
+    return -1;
 
   if(!(template = (LPVOID)LoadResource(COMCTL32_hModule, hRes)))
-    return FALSE;
+    return -1;
 
   /*
    * Make a copy of the dialog template.
@@ -582,7 +581,7 @@ BOOL PROPSHEET_CreateDialog(PropSheetInfo* psInfo)
   temp = COMCTL32_Alloc(resSize);
 
   if (!temp)
-    return FALSE;
+    return -1;
 
   memcpy(temp, template, resSize);
 
@@ -596,11 +595,14 @@ BOOL PROPSHEET_CreateDialog(PropSheetInfo* psInfo)
                                     PROPSHEET_DialogProc,
                                     (LPARAM)psInfo);
   else
-      ret = CreateDialogIndirectParamW(psInfo->ppshheader.hInstance,
-                                       (LPDLGTEMPLATEW) temp,
-                                       psInfo->ppshheader.hwndParent,
-                                       PROPSHEET_DialogProc,
-                                       (LPARAM)psInfo) ? TRUE : FALSE;
+  {
+      ret = (int)CreateDialogIndirectParamW(psInfo->ppshheader.hInstance,
+                                            (LPDLGTEMPLATEW) temp,
+                                            psInfo->ppshheader.hwndParent,
+                                            PROPSHEET_DialogProc,
+                                            (LPARAM)psInfo);
+      if ( !ret ) ret = -1;
+  }
 
   COMCTL32_Free(temp);
 
@@ -622,7 +624,7 @@ static BOOL PROPSHEET_SizeMismatch(HWND hwndDlg, PropSheetInfo* psInfo)
    * Original tab size.
    */
   GetClientRect(hwndTabCtrl, &rcOrigTab);
-  TRACE("orig tab %d %d %d %d\n", rcOrigTab.left, rcOrigTab.top,
+  TRACE("orig tab %ld %ld %ld %ld\n", rcOrigTab.left, rcOrigTab.top,
         rcOrigTab.right, rcOrigTab.bottom);
 
   /*
@@ -634,7 +636,7 @@ static BOOL PROPSHEET_SizeMismatch(HWND hwndDlg, PropSheetInfo* psInfo)
   rcPage.bottom = psInfo->height;
 
   MapDialogRect(hwndDlg, &rcPage);
-  TRACE("biggest page %d %d %d %d\n", rcPage.left, rcPage.top,
+  TRACE("biggest page %ld %ld %ld %ld\n", rcPage.left, rcPage.top,
         rcPage.right, rcPage.bottom);
 
   if ( (rcPage.right - rcPage.left) != (rcOrigTab.right - rcOrigTab.left) )
@@ -676,7 +678,7 @@ static BOOL PROPSHEET_IsTooSmallWizard(HWND hwndDlg, PropSheetInfo* psInfo)
   rcPage.bottom = psInfo->height;
 
   MapDialogRect(hwndDlg, &rcPage);
-  TRACE("biggest page %d %d %d %d\n", rcPage.left, rcPage.top,
+  TRACE("biggest page %ld %ld %ld %ld\n", rcPage.left, rcPage.top,
         rcPage.right, rcPage.bottom);
 
   if (rcPage.right > rcSheetClient.right)
@@ -747,14 +749,14 @@ static BOOL PROPSHEET_AdjustSize(HWND hwndDlg, PropSheetInfo* psInfo)
 
   rc.right -= rc.left;
   rc.bottom -= rc.top;
-  TRACE("setting tab %08lx, rc (0,0)-(%d,%d)\n",
+  TRACE("setting tab %08lx, rc (0,0)-(%ld,%ld)\n",
         (DWORD)hwndTabCtrl, rc.right, rc.bottom);
   SetWindowPos(hwndTabCtrl, 0, 0, 0, rc.right, rc.bottom,
                SWP_NOMOVE | SWP_NOZORDER | SWP_NOACTIVATE);
 
   GetClientRect(hwndTabCtrl, &rc);
 
-  TRACE("tab client rc %d %d %d %d\n",
+  TRACE("tab client rc %ld %ld %ld %ld\n",
         rc.left, rc.top, rc.right, rc.bottom);
 
   rc.right += ((padding.x * 2) + tabOffsetX);
@@ -763,7 +765,7 @@ static BOOL PROPSHEET_AdjustSize(HWND hwndDlg, PropSheetInfo* psInfo)
   /*
    * Resize the property sheet.
    */
-  TRACE("setting dialog %08lx, rc (0,0)-(%d,%d)\n",
+  TRACE("setting dialog %08lx, rc (0,0)-(%ld,%ld)\n",
         (DWORD)hwndDlg, rc.right, rc.bottom);
   SetWindowPos(hwndDlg, 0, 0, 0, rc.right, rc.bottom,
                SWP_NOMOVE | SWP_NOZORDER | SWP_NOACTIVATE);
@@ -821,7 +823,7 @@ static BOOL PROPSHEET_AdjustSizeWizard(HWND hwndDlg, PropSheetInfo* psInfo)
       psInfo->width  = MulDiv((rc.right - rc.left), 4, units.left);
   }
 
-  TRACE("Biggest page %d %d %d %d\n", rc.left, rc.top, rc.right, rc.bottom);
+  TRACE("Biggest page %ld %ld %ld %ld\n", rc.left, rc.top, rc.right, rc.bottom);
   TRACE("   constants padx=%d, pady=%d, butH=%d, lH=%d\n",
 	padding.x, padding.y, buttonHeight, lineHeight);
 
@@ -832,7 +834,7 @@ static BOOL PROPSHEET_AdjustSizeWizard(HWND hwndDlg, PropSheetInfo* psInfo)
   /*
    * Resize the property sheet.
    */
-  TRACE("setting dialog %08lx, rc (0,0)-(%d,%d)\n",
+  TRACE("setting dialog %08lx, rc (0,0)-(%ld,%ld)\n",
         (DWORD)hwndDlg, rc.right, rc.bottom);
   SetWindowPos(hwndDlg, 0, 0, 0, rc.right, rc.bottom,
                SWP_NOMOVE | SWP_NOZORDER | SWP_NOACTIVATE);
@@ -1424,7 +1426,7 @@ static BOOL PROPSHEET_CreatePage(HWND hwndParent,
       pageHeight = rc.bottom - rc.top;
 
       padding = PROPSHEET_GetPaddingInfoWizard(hwndParent, psInfo);
-      TRACE("setting page %08lx, rc (%d,%d)-(%d,%d) w=%d, h=%d, padx=%d, pady=%d\n",
+      TRACE("setting page %08lx, rc (%ld,%ld)-(%ld,%ld) w=%d, h=%d, padx=%d, pady=%d\n",
 	    (DWORD)hwndPage, rc.left, rc.top, rc.right, rc.bottom,
 	    pageWidth, pageHeight, padding.x, padding.y);
       SetWindowPos(hwndPage, HWND_TOP,
@@ -1440,7 +1442,7 @@ static BOOL PROPSHEET_CreatePage(HWND hwndParent,
       PROPSHEET_GetPageRect(psInfo, hwndParent, &rc);
       pageWidth = rc.right - rc.left;
       pageHeight = rc.bottom - rc.top;
-      TRACE("setting page %08lx, rc (%d,%d)-(%d,%d) w=%d, h=%d\n",
+      TRACE("setting page %08lx, rc (%ld,%ld)-(%ld,%ld) w=%d, h=%d\n",
 	    (DWORD)hwndPage, rc.left, rc.top, rc.right, rc.bottom,
 	    pageWidth, pageHeight);
       SetWindowPos(hwndPage, HWND_TOP,
@@ -1616,7 +1618,6 @@ static BOOL PROPSHEET_Apply(HWND hwndDlg, LPARAM lParam)
   int i;
   HWND hwndPage;
   PSHNOTIFY psn;
-  LRESULT msgResult;
   PropSheetInfo* psInfo = (PropSheetInfo*) GetPropW(hwndDlg,
                                                     PropSheetInfoStr);
 
@@ -1650,9 +1651,14 @@ static BOOL PROPSHEET_Apply(HWND hwndDlg, LPARAM lParam)
     hwndPage = psInfo->proppage[i].hwndPage;
     if (hwndPage)
     {
-       msgResult = SendMessageA(hwndPage, WM_NOTIFY, 0, (LPARAM) &psn);
-       if (msgResult == PSNRET_INVALID_NOCHANGEPAGE)
-          return FALSE;
+       switch (SendMessageA(hwndPage, WM_NOTIFY, 0, (LPARAM) &psn))
+       {
+       case PSNRET_INVALID:
+           PROPSHEET_ShowPage(hwndDlg, i, psInfo);
+           /* fall through */
+       case PSNRET_INVALID_NOCHANGEPAGE:
+           return FALSE;
+       }
     }
   }
 
@@ -2384,7 +2390,7 @@ INT WINAPI PropertySheetA(LPCPROPSHEETHEADERA lppsh)
   int bRet = 0;
   PropSheetInfo* psInfo = (PropSheetInfo*) GlobalAlloc(GPTR,
                                                        sizeof(PropSheetInfo));
-  int i, n;
+  UINT i, n;
   BYTE* pByte;
 
   TRACE("(%p)\n", lppsh);
@@ -2428,7 +2434,7 @@ INT WINAPI PropertySheetW(LPCPROPSHEETHEADERW lppsh)
   int bRet = 0;
   PropSheetInfo* psInfo = (PropSheetInfo*) GlobalAlloc(GPTR,
                                                        sizeof(PropSheetInfo));
-  int i, n;
+  UINT i, n;
   BYTE* pByte;
 
   TRACE("(%p)\n", lppsh);
