@@ -1,13 +1,13 @@
-/* $Id: changelog,v 1.1308 2001-03-19 14:54:03 bird Exp $ */
+/* $Id: changelog,v 1.1309 2001-03-19 18:56:55 mike Exp $ */
+
+ 2001-03-19: Michal Necasek <michalnec@volny.cz>
+    - include:  o Few updates/fixes for wmake. Enabled .AUTOEPEND which
+                  seems to be working fine for DSOUND
 
  2001-03-19: knut st. osmundsen <knut.stange.osmundsen@mynd.no>
     - Pe2Lx:    o Convert CUI subsystem to VIO apps. CUI applications will
                   now work as executed thru pec.exe.
     - Kernel32: o Init VIO Console for Pe2Lx CUI images.
-
- 2001-03-18: Michal Necasek <michalnec@volny.cz>
-    - DDRAW:    o Finally merged DDRAW and DDRAW\NEW. A new key in ODIN.INI
-                  controls which version to use:
 
                   [DirectDraw]
                   Fullscreen=[True|False|0|1]

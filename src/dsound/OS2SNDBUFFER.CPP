@@ -1,4 +1,4 @@
-/* $Id: OS2SNDBUFFER.CPP,v 1.10 2001-03-10 06:21:06 mike Exp $ */
+/* $Id: OS2SNDBUFFER.CPP,v 1.11 2001-03-19 18:56:57 mike Exp $ */
 
 /*
  * DirectSound SoundBuffer class
@@ -546,8 +546,6 @@ HRESULT __stdcall SoundBufLock(THIS_ DWORD dwWriteCursor, DWORD dwWriteBytes,
 HRESULT __stdcall SoundBufPlay(THIS_ DWORD dwRes1, DWORD dwRes2, DWORD dwFlags)
 {
    OS2IDirectSoundBuffer *me = (OS2IDirectSoundBuffer *)This;
-
-   ULONG ulBytesToPlay;
 
    dprintf(("DSOUND-OS2IDirectSoundBuffer::SoundBufPlay (buf=%X)", me));
    if (me == NULL) {

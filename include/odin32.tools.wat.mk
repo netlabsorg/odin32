@@ -1,4 +1,4 @@
-# $Id: odin32.tools.wat.mk,v 1.3 2001-03-06 21:44:39 mike Exp $
+# $Id: odin32.tools.wat.mk,v 1.4 2001-03-19 18:56:56 mike Exp $
 
 #
 # Odin32 API
@@ -53,10 +53,10 @@ MAKE_CMD    = $(MAKE_CMDLINE) # -f makefile.os2 # What is this?
 .obj : $(OBJDIR)
 .res : $(OBJDIR)
 
-.c.obj:   # .AUTODEPEND
+.c.obj:   .AUTODEPEND
     $(CC) $(CFLAGS) $(CINCLUDES) $(CDEFINES) -fo$(OBJDIR)\$^&.obj $^&.c
 
-.cpp.obj: # .AUTODEPEND
+.cpp.obj: .AUTODEPEND
     $(CXX) $(CXXFLAGS) $(CINCLUDES) $(CDEFINES) -fo$(OBJDIR)\$^&.obj $^&.cpp
 
 .asm.obj:
