@@ -1,4 +1,4 @@
-/* $Id: winres.cpp,v 1.27 2000-05-28 16:45:14 sandervl Exp $ */
+/* $Id: winres.cpp,v 1.28 2000-11-09 18:18:11 sandervl Exp $ */
 
 /*
  * Win32 resource class
@@ -56,24 +56,11 @@ PVOID WIN32API ConvertResourceToOS2(HINSTANCE hInstance, LPSTR restype, HRSRC hR
   ressize = SizeofResource(hInstance, hResource);
 
   switch((int)restype) {
-    case NTRT_NEWBITMAP:
-    case NTRT_BITMAP:
-    	return ConvertBitmap((WINBITMAPINFOHEADER *)resdata, ressize, (PULONG)&cvtressize);
-
     case NTRT_CURSOR:
     	return ConvertCursor((CursorComponent *)resdata, ressize, &cvtressize);
 
     case NTRT_GROUP_CURSOR:
     	return ConvertCursorGroup((CursorHeader *)resdata, ressize, module);
-
-    case NTRT_GROUP_ICON:
-    	return ConvertIconGroup((IconHeader *)resdata, ressize, module);
-
-    case NTRT_ICON:
-    	return ConvertIcon((WINBITMAPINFOHEADER *)resdata, ressize, &cvtressize);
-
-    case NTRT_ACCELERATORS:
-    	return ConvertAccelerator((WINACCEL *)resdata, ressize);
 
     case NTRT_NEWMENU:
     case NTRT_MENU:
@@ -95,6 +82,22 @@ PVOID WIN32API ConvertResourceToOS2(HINSTANCE hInstance, LPSTR restype, HRSRC hR
 }
 //******************************************************************************
 //******************************************************************************
+PVOID WIN32API ConvertCursorToOS2(LPVOID lpWinResData)
+{
+ int ressize, cvtressize;
+ 
+  ressize = QueryConvertedCursorSize((CursorComponent *)lpWinResData, 0);
+
+  return ConvertCursor((CursorComponent *)lpWinResData, ressize, &cvtressize);
+}
+//******************************************************************************
+//******************************************************************************
+VOID WIN32API FreeOS2Resource(LPVOID lpResource)
+{
+  free(lpResource);
+}
+//******************************************************************************
+//******************************************************************************
 ULONG WIN32API QueryConvertedResourceSize(HINSTANCE hInstance, LPSTR restype, HRSRC hResource)
 {
  PIMAGE_RESOURCE_DATA_ENTRY pData = (PIMAGE_RESOURCE_DATA_ENTRY)hResource;
@@ -112,15 +115,8 @@ ULONG WIN32API QueryConvertedResourceSize(HINSTANCE hInstance, LPSTR restype, HR
   ressize = SizeofResource(hInstance, hResource);
 
   switch((int)restype) {
-    case NTRT_NEWBITMAP:
-    case NTRT_BITMAP:
-    	return QueryConvertedBitmapSize((WINBITMAPINFOHEADER *)resdata, ressize);
-
     case NTRT_CURSOR:
     	return QueryConvertedCursorSize((CursorComponent *)resdata, ressize);
-
-    case NTRT_ICON:
-    	return QueryConvertedIconSize((WINBITMAPINFOHEADER *)resdata, ressize);
 
     case NTRT_GROUP_ICON:
     case NTRT_GROUP_CURSOR:

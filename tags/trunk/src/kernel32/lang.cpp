@@ -1,4 +1,4 @@
-/* $Id: lang.cpp,v 1.29 2000-10-02 18:39:33 sandervl Exp $ */
+/* $Id: lang.cpp,v 1.30 2000-11-09 18:18:10 sandervl Exp $ */
 /*
  * Win32 language API functions for OS/2
  *
@@ -28,12 +28,11 @@
 
 ODINDEBUGCHANNEL(KERNEL32-LANG)
 
+static ULONG defaultLanguage = 0;
 //******************************************************************************
 //******************************************************************************
 ULONG GetLanguageId()
 {
- static ULONG defaultLanguage = 0;
-
   if(defaultLanguage == 0) {
 	switch(OSLibQueryCountry()) {
 	case CC_USA:
@@ -302,6 +301,10 @@ ODINFUNCTION4(int, GetLocaleInfoW, LCID, lcid, LCTYPE, LCType, LPWSTR, wbuf,
 
        case LOCALE_STHOUSAND:
         LocaleFromUniStr(puni_lconv->thousands_sep,wbuf,&ulInfoLen);
+        //MN: hack for Czech language; weird value returned here (0xA0 instead of 0x20)
+        if(defaultLanguage == CC_CZECH_REPUBLIC) {
+           ((BYTE*)wbuf)[0] = ((BYTE*)wbuf)[0] & 0x7F;
+        }
         break;
 
       case LOCALE_SGROUPING: // tested only with Polish & English
