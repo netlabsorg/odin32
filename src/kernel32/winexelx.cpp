@@ -1,4 +1,4 @@
-/* $Id: winexelx.cpp,v 1.12 2003-02-13 15:30:53 sandervl Exp $ */
+/* $Id: winexelx.cpp,v 1.13 2004-01-15 10:39:10 sandervl Exp $ */
 
 /*
  * Win32 LX Exe class (compiled in OS/2 using Odin32 api)

@@ -1,4 +1,4 @@
-/* $Id: winexepe2lx.cpp,v 1.13 2002-12-20 12:40:43 sandervl Exp $ */
+/* $Id: winexepe2lx.cpp,v 1.14 2004-01-15 10:39:10 sandervl Exp $ */
 
 /*
  * Win32 PE2LX Exe class

@@ -1,4 +1,4 @@
-/* $Id: winimagepe2lx.h,v 1.9 2002-12-20 11:39:42 sandervl Exp $ */
+/* $Id: winimagepe2lx.h,v 1.10 2004-01-15 10:39:13 sandervl Exp $ */
 
 /*
  * Win32 PE2LX Image base class
@@ -42,10 +42,6 @@ public:
     virtual         ~Win32Pe2LxImage();
     virtual DWORD   init();
 
-    /** @cat Exports */
-    virtual ULONG   getApi(char *name);
-    virtual ULONG   getApi(int ordinal);
-
     /** @cat Queries */
     /** Get the OS/2 module handle.
      * @returns OS/2 module handle. */
@@ -55,26 +51,39 @@ private:
     /** @cat constructor helpers */
     ULONG           getSections();
     ULONG           setSectionRVAs();
+    ULONG           doResources();
+    ULONG           doTLS();
+    ULONG           doImports();
+    Win32ImageBase *importsGetModule(const char *pszModName);
+    Win32DllBase   *importsLoadModule(const char *pszModName);
+    ULONG           importsByOrdinal(Win32ImageBase *pModule, unsigned uOrdinal, void **ppvAddr);
+    ULONG           importsByName(Win32ImageBase *pModule, const char *pszSymName, void **ppvAddr);
     VOID            cleanup();
 
 protected:
     /** @cat RVA -> pointer */
     /* these should be moved to winimagebase some day... */
-    PVOID           getPointerFromRVA(ULONG ulRVA);
+    void *          getPointerFromRVA(ULONG ulRVA, BOOL fOverride = FALSE);
+    ULONG           getRVAFromPointer(void *pv, BOOL fOverride = FALSE);
     PVOID           getPointerFromPointer(PVOID pv);
     LONG            getSectionIndexFromRVA(ULONG ulRVA);
     BOOL            validateRealPointer(PVOID pv);
 
-    PSECTION            paSections; /* Used by getPointerFromRVA and created by getSections and
-                                     * setSectionRVAs. */
-    WORD                cSections;  /* Count of entires in the section array (paSection) */
+    /** Used by getPointerFromRVA and created by getSections and setSectionRVAs. */
+    PSECTION            paSections;
+    /** Count of entires in the section array (paSection) */
+    int                 cSections;
 
     /** @cat Misc */
-    PIMAGE_NT_HEADERS   pNtHdrs;    /* Pointer to NT headers. */
-    BOOL                fWin32k;    /* flag which indicates wether this is a Win32k loaded
-                                     * module (TRUE) or and Pe2Lx module (FALSE). */
-    HMODULE             hmod;       /* OS/2 handle of the module. */
-    BOOL                fDll;       /* Set by Win32Pe2LxDll. */
+    /** Pointer to NT headers. */
+    PIMAGE_NT_HEADERS   pNtHdrs;
+    /** Flag which indicates wether this is a Win32k loaded
+     * module (TRUE) or and Pe2Lx module (FALSE). */
+    BOOL                fWin32k;
+    /** OS/2 handle of the module. */
+    HMODULE             hmod;
+    /** Set by Win32Pe2LxDll. */
+    BOOL                fDll;
 };
 
 

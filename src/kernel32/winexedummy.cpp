@@ -1,4 +1,4 @@
-/* $Id: winexedummy.cpp,v 1.5 2004-01-12 17:27:28 sandervl Exp $ */
+/* $Id: winexedummy.cpp,v 1.6 2004-01-15 10:39:09 sandervl Exp $ */
 
 /*
  * Win32 Dummy Exe class
