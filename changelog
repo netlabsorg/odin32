@@ -1,4 +1,8 @@
-/* $Id: changelog,v 1.2009 2002-02-27 15:22:44 sandervl Exp $ */
+/* $Id: changelog,v 1.2010 2002-02-28 19:27:20 sandervl Exp $ */
+
+ 2002-02-28: Platon Fomichev <platon@innotek.de>
+    - KERNEL32: o Implemented IOCTL_DISK_IS_WRITABLE ioctl & fixes writing
+                  to floppy (DASD mode)
 
  2002-02-27: Sander van Leeuwen <sandervl@xs4all.nl>
     - USER32:   o Removed WindowFromPoint change; has bad effect on many things
