@@ -1,10 +1,15 @@
- /* $Id: ChangeLog,v 1.675 2000-01-29 14:57:46 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.676 2000-01-29 20:45:58 sandervl Exp $ */
 
  2000-01-29: Sander van Leeuwen <sandervl@xs4all.nl>
 	- GDI32: Save and restore FPU control word when calling
                  Open32's DrawText. DrawText trashes it which causes drawing
                  problems in RealPlayer 7.
 	- USER32: Call DrawTextA in uitools.cpp, not Open32's DrawText.
+                  Fix for SetWindowPos for showing hidden windows
+                  (call ShowWindow) -> fixed non-visible button bar in mIRC
+                  Don't set WS_VISIBLE on by default. Windows are made visible
+                  during creation by calling ShowWindow.    
+                  Call UpdateWindow for client window, not the frame.
 	- INCLUDE\WIN\wingdi.h: Added GdiFlush declaration
 	- INCLUDE\makefiles: Added c/c++ definitions for win32 apps (without
           -D__WINE__ so you don't need to specify whether you use the ascii
