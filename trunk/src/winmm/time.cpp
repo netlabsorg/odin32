@@ -1,4 +1,4 @@
-/* $Id: time.cpp,v 1.16 2002-05-22 15:50:26 sandervl Exp $ */
+/* $Id: time.cpp,v 1.17 2003-03-05 14:48:45 sandervl Exp $ */
 
 /*
  * Timer MM apis
@@ -86,6 +86,9 @@ MMRESULT WINAPI timeGetDevCaps(LPTIMECAPS ptc, UINT cbtc)
 
 MMRESULT WINAPI timeBeginPeriod(UINT cMilliseconds)
 {
+  if (cMilliseconds < OS2TIMER_RESOLUTION_MINIMUM || cMilliseconds > OS2TIMER_RESOLUTION_MAXIMUM)
+      return TIMERR_NOCANDO;
+
   if (TRUE == OS2TimerResolution::enterResolutionScope(cMilliseconds))
     return TIMERR_NOERROR;
   else
@@ -107,6 +110,9 @@ MMRESULT WINAPI timeBeginPeriod(UINT cMilliseconds)
 
 MMRESULT WINAPI timeEndPeriod(UINT cMilliseconds)
 {
+  if (cMilliseconds < OS2TIMER_RESOLUTION_MINIMUM || cMilliseconds > OS2TIMER_RESOLUTION_MAXIMUM)
+      return TIMERR_NOCANDO;
+
   if (TRUE == OS2TimerResolution::leaveResolutionScope(cMilliseconds))
     return TIMERR_NOERROR;
   else

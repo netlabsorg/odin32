@@ -1,4 +1,4 @@
-/* $Id: os2timer.h,v 1.11 2001-10-03 13:47:58 sandervl Exp $ */
+/* $Id: os2timer.h,v 1.12 2003-03-05 14:48:45 sandervl Exp $ */
 
 #ifndef __OS2TIMER_H__
 #define __OS2TIMER_H__
@@ -31,7 +31,7 @@
   Note:
   we need to add support for dynamic detection of this feature.
   */
-#define OS2TIMER_RESOLUTION_MINIMUM 2
+#define OS2TIMER_RESOLUTION_MINIMUM 1
 #define OS2TIMER_RESOLUTION_MAXIMUM 0x7ffffffe
 
 
