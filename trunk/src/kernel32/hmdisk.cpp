@@ -1,4 +1,4 @@
-/* $Id: hmdisk.cpp,v 1.36 2001-12-08 14:28:53 sandervl Exp $ */
+/* $Id: hmdisk.cpp,v 1.37 2001-12-08 16:06:49 sandervl Exp $ */
 
 /*
  * Win32 Disk API functions for OS/2
@@ -107,6 +107,7 @@ DWORD HMDeviceDiskClass::CreateFile (LPCSTR        lpFileName,
 {
     HFILE hFile;
     HFILE hTemplate;
+    DWORD dwDriveType;
 
     dprintf2(("KERNEL32: HMDeviceDiskClass::CreateFile %s(%s,%08x,%08x,%08x)\n",
              lpHMDeviceName,
@@ -120,7 +121,9 @@ DWORD HMDeviceDiskClass::CreateFile (LPCSTR        lpFileName,
         dprintf(("Invalid creation flags %x!!", pHMHandleData->dwCreation));
         return ERROR_INVALID_PARAMETER;
     }
-  
+
+    dwDriveType = GetDriveTypeA(lpFileName);
+
     //Disable error popus. NT allows an app to open a cdrom/dvd drive without a disk inside
     //OS/2 fails in that case with error ERROR_NOT_READY
     ULONG oldmode = SetErrorMode(SEM_FAILCRITICALERRORS);
@@ -131,6 +134,23 @@ DWORD HMDeviceDiskClass::CreateFile (LPCSTR        lpFileName,
                                pHMHandleData->dwCreation,
                                pHMHandleData->dwFlags,
                                hTemplate);
+
+    //It is not allowed to open a readonly device with GENERIC_WRITE in OS/2; 
+    //try with readonly again if that happened
+    //NOTE: Some applications open it with GENERIC_WRITE as Windows 2000 requires
+    //      this for some aspi functions
+    if(hFile == INVALID_HANDLE_ERROR && dwDriveType == DRIVE_CDROM && 
+       (pHMHandleData->dwAccess & GENERIC_WRITE)) 
+    {
+        pHMHandleData->dwAccess &= ~GENERIC_WRITE;
+        hFile = OSLibDosCreateFile((LPSTR)lpFileName,
+                                   pHMHandleData->dwAccess,
+                                   pHMHandleData->dwShare,
+                                   (LPSECURITY_ATTRIBUTES)lpSecurityAttributes,
+                                   pHMHandleData->dwCreation,
+                                   pHMHandleData->dwFlags,
+                                   hTemplate);
+    }
     SetErrorMode(oldmode);
 
     if (hFile != INVALID_HANDLE_ERROR || GetLastError() == ERROR_NOT_READY)
@@ -163,7 +183,7 @@ DWORD HMDeviceDiskClass::CreateFile (LPCSTR        lpFileName,
             drvInfo->driveLetter = drvInfo->driveLetter - ((int)'a' - (int)'A');
         }
 
-        drvInfo->driveType = GetDriveTypeA(lpFileName);
+        drvInfo->driveType = dwDriveType;
         if(drvInfo->driveType == DRIVE_CDROM) 
         {
             drvInfo->hInstAspi = LoadLibraryA("WNASPI32.DLL");
