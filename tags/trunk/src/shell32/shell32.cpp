@@ -1,4 +1,4 @@
-/* $Id: shell32.cpp,v 1.2 1999-06-01 08:05:42 phaller Exp $ */
+/* $Id: shell32.cpp,v 1.3 1999-06-09 09:17:14 phaller Exp $ */
 
 /*
  * Win32 SHELL32 for OS/2
@@ -57,7 +57,7 @@
 VOID WIN32API DragAcceptFiles(HWND hwnd,
                                  BOOL fAccept)
 {
-  dprintf(("SHELL32: DragAcceptFiles (%0uxh, %08xh) not implemented.\n",
+  dprintf(("SHELL32: DragAcceptFiles (%08uxh, %08xh) not implemented.\n",
            hwnd,
            fAccept));
 }

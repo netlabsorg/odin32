@@ -1,98 +1,151 @@
 ;Created by BLAST for IBM's compiler
+;based on Windows NT4, SP3
 LIBRARY SHELL32 INITINSTANCE
 DATA MULTIPLE NONSHARED
 
 EXPORTS
-    CommandLineToArgvW       = _CommandLineToArgvW@8      @5
-    DragAcceptFiles          = _DragAcceptFiles@8         @41
-    DragFinish               = _DragFinish@4              @42
-    DragQueryFile            = _DragQueryFileA@16         @44
-    DragQueryFileA           = _DragQueryFileA@16         @50
-    DragQueryFileAorW        = _DragQueryFileAorW@16      @53
-    DragQueryFileW           = _DragQueryFileW@16         @54
-    DragQueryPoint           = _DragQueryPoint@8          @76
-    ExtractIconA             = _ExtractIconA@12           @131
-    ExtractIconW             = _ExtractIconW@12           @178
+
+;   CheckEscapesA              = _CheckEscapesA@?                   @1
+                                 _SHELL32_2@24                      @2
+;   CheckEscapesW              = _CheckEscapesW@?                   @4
+                                 _SHELL32_4@4                       @4
+    CommandLineToArgvW         = _CommandLineToArgvW@8              @5
+;   Control_FillCache_RunDLL   = _Control_FillCache_RunDLL@?        @6
+;   Control_RunDLL             = _Control_RunDLL@?                  @10
+;   DllGetClassObject          = _DllGetClassObject@?               @12
+                                 _SHELL32_16@4                      @16
+                                 _SHELL32_18@4                      @18
+;   DoEnvironmentSubstA        = _DoEnvironmentSubstA@?             @20
+                                 _SHELL32_25@8                      @25
+                                 _SHELL32_29@4                      @29
+                                 _SHELL32_30@8                      @30
+                                 _SHELL32_31@4                      @31
+                                 _SHELL32_32@4                      @32
+                                 _SHELL32_33@4                      @33
+                                 _SHELL32_34@4                      @34
+                                 _SHELL32_35@4                      @35
+;   DoEnvironmentSubstW        = _DoEnvironmentSubstW@?             @36
+                                 _SHELL32_36@8                      @36
+                                 _SHELL32_37@12                     @37
+                                 _SHELL32_39@4                      @39
+    DragAcceptFiles            = _DragAcceptFiles@8                 ; conflict! @39
+    DragFinish                 = _DragFinish@4                      @40
+    DragQueryFile              = _DragQueryFileA@16                 @42
+                                 _SHELL32_43@4                      @43
+                                 _SHELL32_45@4                      @45
+    DragQueryFileA             = _DragQueryFileA@16                 @48
+    DragQueryFileAorW          = _DragQueryFileAorW@16              ; conflict! @51
+                                 _SHELL32_51@12                     @51
+    DragQueryFileW             = _DragQueryFileW@16                 ; conflict! @52
+                                 _SHELL32_52@4                      @52
+                                 _SHELL32_55@4                      @55
+                                 _SHELL32_56@4                      @56
+                                 _SHELL32_58@16                     @58
+                                 _SHELL32_59@0                      @59
+                                 _SHELL32_62@16                     @62
+                                 _SHELL32_63@28                     @63
+                                 _SHELL32_68@12                     @68
+                                 _SHELL32_71@8                      @71
+                                 _SHELL32_72@12                     @72
+    DragQueryPoint             = _DragQueryPoint@8                  @74
+                                 _SHELL32_75@8                      @75
+                                 _SHELL32_77@12                     @77
+;   DuplicateIcon              = _DuplicateIcon@?                   @78
+                                 _SHELL32_79@8                      @79
+;   ExtractAssociatedIconA     = _ExtractAssociatedIconA@?          @80
+                                 _SHELL32_85@16                     @85
+                                 _SHELL32_89@12                     @89
+;   ExtractAssociatedIconExA   = _ExtractAssociatedIconExA@?        @99
+                                 _SHELL32_100@4                     @100
+                                 _SHELL32_102@20                    @102
+                                 _SHELL32_119@4                     @119
+;   ExtractAssociatedIconExW   = _ExtractAssociatedIconExW@?        @122
+;   ExtractAssociatedIconW     = _ExtractAssociatedIconW@?          @123
+    ExtractIconA               = _ExtractIconA@12                   @131
+    ExtractIconEx              = _ExtractIconExA@20                 @133
+    ExtractIconExA             = _ExtractIconExA@20                 @136
+    ExtractIconExW             = _ExtractIconExW@20                        ; NT4 doesn't use it!
+                                 _SHELL32_145@8                     @145
+;   ExtractIconResInfoA        = _ExtractIconResInfoA@?             @146
+;   ExtractIconResInfoW        = _ExtractIconResInfoW@?             @148
+                                 _SHELL32_152@4                     @152
+                                 _SHELL32_155@4                     @155
+                                 _SHELL32_158@12                    @158
+                                 _SHELL32_162@4                     @162
+                                 _SHELL32_165@8                     @165
+                                 _SHELL32_175@16                    @175
+    ExtractIconW               = _ExtractIconW@12                   @178
+;   ExtractVersionResource16W  = _ExtractVersionResource16W@?       @180
+                                 _SHELL32_181@8                     @181
+    FindExecutableA            = _FindExecutableA@12                @184
+    FindExecutableW            = _FindExecutableW@12                @185
+;   FreeIconList               = _FreeIconList@?                    @186
+;   InternalExtractIconListA   = _InternalExtractIconListA@?        @187
+;   InternalExtractIconListW   = _InternalExtractIconListW@?        @188
+;   OpenAs_RunDLL              = _OpenAs_RunDLL@?                   @189
+;   PrintersGetCommand_RunDLL  = _PrintersGetCommand_RunDLL@?       @190
+;   RealShellExecuteA          = _RealShellExecuteA@?               @191
+;   RealShellExecuteExA        = _RealShellExecuteExA@?             @192
+                                 _SHELL32_195@4                     @195
+                                 _SHELL32_196@4                     @196
+;   RealShellExecuteExW        = _RealShellExecuteExW@?             @201
+;   RealShellExecuteW          = _RealShellExecuteW@?               @202
+;   RegenerateUserEnvironment  = _RegenerateUserEnvironment@?       @203
+    SHAddToRecentDocs          = _SHAddToRecentDocs@8               @204
+;   SHAppBarMessage            = _SHAppBarMessage@?                 @205
+    SHBrowseForFolder          = _SHBrowseForFolder@4               @206
+    SHBrowseForFolderA         = _SHBrowseForFolder@4               @207
+    SHChangeNotify             = _SHChangeNotify@16                 @208
+    SHFileOperation            = _SHFileOperationA@4                @209
+    SHFileOperationA           = _SHFileOperationA@4                @210
+    SHFileOperationW           = _SHFileOperationW@4                       ; NT4 doesn't use it!
+;   SHFormatDrive              = _SHFormatDrive@?                   @211
+;   SHFreeNameMappings         = _SHFreeNameMappings@?              @212
+;   SHGetDataFromIDListA       = _SHGetDataFromIDListA@?            @213
+    SHGetDesktopFolder         = _SHGetDesktopFolder@4              @214
+    SHGetFileInfo              = _SHGetFileInfoA@20                 @215
+    SHGetFileInfoA             = _SHGetFileInfoA@20                 @216
+    SHGetFileInfoW             = _SHGetFileInfoW@20                        ; NT4 doesn't use it!
+;   SHGetInstanceExplorer      = _SHGetInstanceExplorer@?           @217
+    SHGetMalloc                = _SHGetMalloc@4                     @218
+    SHGetPathFromIDList        = _SHGetPathFromIDListA@8            @219
+    SHGetPathFromIDListA       = _SHGetPathFromIDListA@8            @220
+    SHGetSpecialFolderLocation = _SHGetSpecialFolderLocation@12     @221
+;   SHHelpShortcuts_RunDLL     = _SHHelpShortcuts_RunDLL@?          @222
+;   SHLoadInProc               = _SHLoadInProc@?                    @223
+;   SheChangeDirA              = _SheChangeDirA@?                   @224
+;   SheChangeDirExA            = _SheChangeDirExA@?                 @225
+;   SheChangeDirExW            = _SheChangeDirExW@?                 @226
+;   SheChangeDirW              = _SheChangeDirW@?                   @227
+;   SheConvertPathW            = _SheConvertPathW@?                 @228
+;   SheFullPathA               = _SheFullPathA@?                    @229
+;   SheFullPathW               = _SheFullPathW@?                    @230
+;   SheSetCurDrive             = _SheSetCurDrive@?                  @231
+;   SheGetDirA                 = _SheGetDirA@?                      @232
+;   SheGetDirExW               = _SheGetDirExW@?                    @233
+;   SheGetDirW                 = _SheGetDirW@?                      @234
+;   SheGetPathOffsetW          = _SheGetPathOffsetW@?               @235
+;   SheRemoveQuotesA           = _SheRemoveQuotesA@?                @236
+;   SheRemoveQuotesW           = _SheRemoveQuotesW@?                @237
+;   SheSetCurDrive             = _SheSetCurDrive@?                  @238
+;   SheShortenPathA            = _SheShortenPathA@?                 @239
+;   SheShortenPathW            = _SheShortenPathW@?                 @240
+    ShellAboutA                = _ShellAboutA@16                    @241
+    ShellAboutW                = _ShellAboutW@16                    @242
+    ShellExecuteA              = _ShellExecuteA@24                  @243
+    ShellExecuteEx             = _ShellExecuteExA@4                 @244
+    ShellExecuteExA            = _ShellExecuteExA@4                 @245
+    ShellExecuteExW            = _ShellExecuteExW@4                        ; NT4 doesn't use it!
+;   ShellExecuteW              = _ShellExecuteW@24                  @246
+    ShellExecute               = _ShellExecuteA@24                         ; NT4 doesn't use it!
+    Shell_NotifyIcon           = _Shell_NotifyIconA@8               @247
+    Shell_NotifyIconA          = _Shell_NotifyIconA@8               @248
+    Shell_NotifyIconW          = _Shell_NotifyIconW@8                      ; NT4 doesn't use it!
+;   Shl1632_ThunkData32        = _Shl1632_ThunkData32@?             @249
+;   Shl3216_ThunkData32        = _Shl3216_ThunkData32@?             @250
+
+
+
     ShellMessageBoxW         = _ShellMessageBoxW@24       @182
     ShellMessageBoxA         = _ShellMessageBoxA@24       @183
-    FindExecutableA          = _FindExecutableA@12        @184
-    FindExecutableW          = _FindExecutableW@12
-    SHAddToRecentDocs        = _SHAddToRecentDocs@8       @204
-    SHBrowseForFolder        = _SHBrowseForFolder@4       @206
-    SHBrowseForFolderA       = _SHBrowseForFolder@4       @207
-    SHChangeNotify           = _SHChangeNotify@16         @208
-    SHFileOperation          = _SHFileOperationA@4        @209
-    SHFileOperationA         = _SHFileOperationA@4        @210
-    SHFileOperationW         = _SHFileOperationW@4
-    SHGetDesktopFolder       = _SHGetDesktopFolder@4      @214
-    SHGetFileInfo            = _SHGetFileInfoA@20         @215
-    SHGetFileInfoA           = _SHGetFileInfoA@20         @216
-    SHGetFileInfoW           = _SHGetFileInfoW@20         @1056
-    SHGetMalloc              = _SHGetMalloc@4             @218
-    SHGetPathFromIDList      = _SHGetPathFromIDListA@8    @219
-    SHGetPathFromIDListA     = _SHGetPathFromIDListA@8    @220
-    SHGetSpecialFolderLocation = _SHGetSpecialFolderLocation@12 @221
-    ShellAboutA              = _ShellAboutA@16            @243
-    ShellAboutW              = _ShellAboutW@16            @244
-    ShellExecute             = _ShellExecuteA@24          @245
-    ShellExecuteA            = _ShellExecuteA@24          @246
-    Shell_NotifyIcon         = _Shell_NotifyIconA@8       @249
-    Shell_NotifyIconA        = _Shell_NotifyIconA@8       @250
-    Shell_NotifyIconW        = _Shell_NotifyIconW@8
-
-    ShellExecuteEx           = _ShellExecuteExA@4
-    ShellExecuteExA          = _ShellExecuteExA@4
-    ShellExecuteExW          = _ShellExecuteExW@4
-    ExtractIconEx            = _ExtractIconExA@20
-    ExtractIconExA           = _ExtractIconExA@20
-    ExtractIconExW           = _ExtractIconExW@20
-
-
-; @@@PH 98/06/15 from WINE
-                               _SHELL32_2@24              @2
-                               _SHELL32_4@4               @4
-                               _SHELL32_16@4              @16
-                               _SHELL32_18@4              @18
-                               _SHELL32_25@8              @25
-                               _SHELL32_29@4              @29
-                               _SHELL32_30@8              @30
-                               _SHELL32_31@4              @31
-                               _SHELL32_32@4              @32
-                               _SHELL32_33@4              @33
-                               _SHELL32_34@4              @34
-                               _SHELL32_35@4              @35
-                               _SHELL32_36@8              @36
-                               _SHELL32_37@12             @37
-                               _SHELL32_39@4              @39
-                               _SHELL32_43@4              @43
-                               _SHELL32_45@4              @45
-                               _SHELL32_51@12             @51
-                               _SHELL32_52@4              @52
-                               _SHELL32_55@4              @55
-                               _SHELL32_56@4              @56
-                               _SHELL32_58@16             @58
-                               _SHELL32_59@0              @59
-                               _SHELL32_62@16             @62
-                               _SHELL32_63@28             @63
-                               _SHELL32_68@12             @68
-                               _SHELL32_71@8              @71
-                               _SHELL32_72@12             @72
-                               _SHELL32_75@8              @75
-                               _SHELL32_77@12             @77
-                               _SHELL32_79@8              @79
-                               _SHELL32_85@16             @85
-                               _SHELL32_89@12             @89
-                               _SHELL32_100@4             @100
-                               _SHELL32_102@20            @102
-                               _SHELL32_119@4             @119
-                               _SHELL32_145@8             @145
-                               _SHELL32_152@4             @152
-                               _SHELL32_155@4             @155
-                               _SHELL32_158@12            @158
-                               _SHELL32_162@4             @162
-                               _SHELL32_165@8             @165
-                               _SHELL32_175@16            @175
-                               _SHELL32_181@8             @181
-                               _SHELL32_195@4             @195
-                               _SHELL32_196@4             @196
 
