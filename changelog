@@ -1,4 +1,4 @@
-/* $Id: changelog,v 1.1236 2001-02-01 18:00:36 sandervl Exp $ */
+/* $Id: changelog,v 1.1237 2001-02-01 18:00:56 sandervl Exp $ */
 
  2001-02-01: Sander van Leeuwen <sandervl@xs4all.nl>
     - GDI32:    o LineDDA fix (wrong calling convention)
@@ -7,4 +7,8 @@
                   (pHps can be NULL)
                   (fixes crash in Solitaire)
     - INSTALL:  o Include ChangeLog-2001 in daily build
-
+    - COMDLG32: o Merged some changes from Wine (extra notification in 
+                  FileOpenDlgProc95 & OFN_NOCHANGEDIR support (also added
+                  to Unicode version of file open dialog))
+                o Removed workaround for Acrobat Reader file open dialog
+                  (Wine update fixed it)
