@@ -134,9 +134,13 @@ BOOL WIN32API ODIN_SetSysColors(INT nChanges, const INT *lpSysColor,
                                 const COLORREF *lpColorValues);
 
 //Override loader names (PEC, PE, W16ODIN)
-//NOTE: String must be resident
 BOOL WIN32API ODIN_SetLoaders(LPCSTR pszPECmdLoader, LPCSTR pszPEGUILoader,
                               LPCSTR pszNELoader);
+
+//Returns path of loaders
+BOOL WIN32API ODIN_QueryLoaders(LPSTR pszPECmdLoader, INT cchPECmdLoader,
+                                LPSTR pszPEGUILoader, INT cchPEGUILoader,
+                                LPSTR pszNELoader, INT cchNELoader);
 
 //Custom build function to disable loading of LX dlls
 void WIN32API ODIN_DisableLXDllLoading();
