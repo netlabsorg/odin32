@@ -1,11 +1,13 @@
-/* $Id: crtdll.cpp,v 1.25 2000-04-13 18:46:15 sandervl Exp $ */
+/* $Id: crtdll.cpp,v 1.26 2000-06-21 18:39:32 phaller Exp $ */
 
 /*
  * The C RunTime DLL
  * 
  * Implements C run-time functionality as known from UNIX.
  *
- * TODO: Check setjmp(3) 
+ * TODO: 
+ *   - Check setjmp(3)
+ *   - fix *ALL* functions for the FS: wrapper problem
  *
  * Partialy based on Wine
  *
@@ -16,11 +18,17 @@
  * Copyright 2000 Przemyslaw Dobrowolski
  */
 
+
+#include <odin.h>
+#include <odinwrap.h>
+#include <os2sel.h>
+
+
+
 #include <os2win.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <odinwrap.h>
 #include <misc.h>
 #include <unicode.h>
 #include <heapstring.h>
@@ -55,7 +63,14 @@
 #include "crtinc.h"
 
 
-DEFAULT_DEBUG_CHANNEL(crtdll)
+ODINDEBUGCHANNEL(CRTDLL)
+
+
+
+#define FS_OS2   unsigned short sel = RestoreOS2FS();
+#define FS_WIN32 SetFS(sel);
+
+#define dprintf2 dprintf
 
 
 /*********************************************************************
@@ -63,18 +78,22 @@ DEFAULT_DEBUG_CHANNEL(crtdll)
  */
 BOOL WINAPI CRTDLL_Init(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved)
 {
-	if (fdwReason == DLL_PROCESS_ATTACH) {
-		_fdopen(0,"r");
-		_fdopen(1,"w");
-		_fdopen(2,"w");
-	     	CRTDLL_hHeap = HeapCreate(0, 0x10000, 0);
-	}
-	else 
-	if (fdwReason == DLL_PROCESS_DETACH) {
-        	HeapDestroy(CRTDLL_hHeap);
-        	CRTDLL_hHeap = 0;
-	}	
-	return TRUE;
+  FS_OS2
+    
+    if (fdwReason == DLL_PROCESS_ATTACH) {
+      _fdopen(0,"r");
+      _fdopen(1,"w");
+      _fdopen(2,"w");
+      CRTDLL_hHeap = HeapCreate(0, 0x10000, 0);
+    }
+    else
+      if (fdwReason == DLL_PROCESS_DETACH) {
+        HeapDestroy(CRTDLL_hHeap);
+        CRTDLL_hHeap = 0;
+      }
+  
+  FS_WIN32
+  return TRUE;
 }
 
 
@@ -673,7 +692,8 @@ unsigned int CDECL CRTDLL__clearfp( void )
 int CDECL CRTDLL__close(int handle)
 {
   dprintf2(("CRTDLL: _close\n"));
-  return (_close(handle));
+  
+  return CloseHandle(handle);
 }
 
 
