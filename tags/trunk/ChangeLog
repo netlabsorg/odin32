@@ -1,4 +1,8 @@
-/* $Id: ChangeLog,v 1.2754 2005-01-26 18:56:54 abwillis Exp $ */
+/* $Id: ChangeLog,v 1.2755 2005-02-11 19:33:54 sao2l02 Exp $ */
+2005-02-08: Dietrich Teickner <dietrich_teickner@arcor   >  
+    - kernel32: o src\kernel32\wintls.cpp
+                  src\kernel32\asmutil.asm
+                  faster tls-handling, one check more.
 2005-01-26: vladest <vladest@voliacable >  
     - kernel32: o src\kernel32\wintls.cpp
                   tls - problems, workaround. 
