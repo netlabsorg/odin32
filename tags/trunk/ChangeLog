@@ -1,4 +1,4 @@
- /* $Id: ChangeLog,v 1.545 1999-12-18 16:02:24 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.546 1999-12-18 16:19:48 sandervl Exp $ */
 
  99-12-18: Sander van Leeuwen <sandervl@xs4all.nl>
 	- MSACM32: Compile fixes (internal.cpp)
@@ -6,6 +6,8 @@
                   SetMenuItemInfoA bugfix (for novamatic) (still not completely
                   implemented though)
 	- AVIFIL32: updated with the latest code from Wine 991212.
+	- KERNEL32: Partly implemented GetCurrencyFormatA/W (not correct, but 
+                    to make apps happy)
 
  99-12-18: Jens Wiessner <wiessnej@rfi.de>
 	- MSACM32: Updated with latest Wine code (991212)
