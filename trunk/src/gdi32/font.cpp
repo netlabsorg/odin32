@@ -1,4 +1,4 @@
-/* $Id: font.cpp,v 1.5 1999-11-11 13:16:40 sandervl Exp $ */
+/* $Id: font.cpp,v 1.6 1999-11-11 19:09:34 sandervl Exp $ */
 
 /*
  * GDI32 font apis
@@ -329,6 +329,7 @@ int  EXPENTRY_O32 EnumFontProcExA(LPENUMLOGFONTA lpLogFont, LPNEWTEXTMETRICA
   memcpy(&textM.ntmetm, lpTextM, sizeof(textM.ntmetm));
   memset(&textM.ntmeFontSignature, 0, sizeof(textM.ntmeFontSignature));
 
+  dprintf(("EnumFontProcExA %s", logFont.elfLogFont.lfFaceName));
   return proc(&logFont, &textM, arg3, lpEnumData->userData);
 }
 //******************************************************************************
@@ -375,6 +376,7 @@ int EXPENTRY_O32 EnumFontProcExW(LPENUMLOGFONTA lpLogFont, LPNEWTEXTMETRICA lpTe
   textM.ntmetm.ntmAvgWidth = 0;
   memset(&textM.ntmeFontSignature, 0, sizeof(textM.ntmeFontSignature));
 
+  dprintf(("EnumFontProcExW %s", lpLogFont->elfLogFont.lfFaceName));
   return proc(&LogFont, &textM, arg3, lpEnumData->userData);
 }
 //******************************************************************************
