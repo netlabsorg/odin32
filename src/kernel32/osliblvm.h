@@ -1,4 +1,4 @@
-/* $Id: osliblvm.h,v 1.2 2002-05-10 14:55:13 sandervl Exp $ */
+/* $Id: osliblvm.h,v 1.3 2002-09-26 16:06:07 sandervl Exp $ */
 /*
  * OS/2 LVM (Logical Volume Management) functions
  *
@@ -342,5 +342,6 @@ DWORD  OSLibLVMQueryVolumeFS(LPSTR lpszVolume, LPSTR lpFileSystemNameBuffer, DWO
 DWORD  OSLibLVMQueryVolumeSerialAndName(LPSTR lpszVolume, LPDWORD lpVolumeSerialNumber, LPSTR lpVolumeNameBuffer, DWORD nVolumeNameSize);
 
 BOOL   OSLibLVMStripVolumeName(LPCSTR lpszWin32VolumeName, LPSTR lpszOS2VolumeName, DWORD cchBufferLength);
+BOOL   OSLibLVMGetDiskGeometry(DWORD dwDiskNr, PDISK_GEOMETRY pGeom);
 
 #endif //__OSLIBLVM_H__

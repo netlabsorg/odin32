@@ -1,4 +1,4 @@
-/* $Id: osliblvm.cpp,v 1.2 2002-05-10 14:55:13 sandervl Exp $ */
+/* $Id: osliblvm.cpp,v 1.3 2002-09-26 16:06:07 sandervl Exp $ */
 
 /*
  * OS/2 LVM (Logical Volume Management) functions
@@ -318,10 +318,20 @@ BOOL OSLibLVMQueryVolumeName(HANDLE hVolumeControlData, ULONG volindex,
     if(volindex >= volctrl->Count) {
         return FALSE;   //no more volumes
     }
-    volinfo = Get_Volume_Information(volctrl->Volume_Control_Data[volindex].Volume_Handle, &lasterror);
-    if(lasterror != LVM_ENGINE_NO_ERROR) {
-        DebugInt3();
-        return FALSE;
+    while(volindex < volctrl->Count) {
+        volinfo = Get_Volume_Information(volctrl->Volume_Control_Data[volindex].Volume_Handle, &lasterror);
+        if(lasterror != LVM_ENGINE_NO_ERROR) {
+            DebugInt3();
+            return FALSE;
+        }
+        //Don't report anything about LVM volumes until we support all those
+        //fancy features (like spanned volumes)
+        if(volinfo.Compatibility_Volume == TRUE) break;
+        dprintf(("Ignoring LVM volume %s", volinfo.Volume_Name));
+        volindex++;
+    }
+    if(volindex >= volctrl->Count) {
+        return FALSE;   //no more volumes
     }
     strncpy(lpszVolumeName, volinfo.Volume_Name, min(sizeof(volinfo.Volume_Name), cchBufferLength)-1);
     return TRUE;
@@ -427,6 +437,9 @@ BOOL OSLibLVMGetPartitionInfo(ULONG driveLetter, LPSTR lpszVolumeName, PPARTITIO
 
     pPartition->StartingOffset.u.HighPart = partctrl.Partition_Array[0].Partition_Start >> 23;
     pPartition->StartingOffset.u.LowPart  = partctrl.Partition_Array[0].Partition_Start << 9;
+//    pPartition->PartitionLength.u.HighPart= partctrl.Partition_Array[0].True_Partition_Size >> 23;
+//    pPartition->PartitionLength.u.LowPart = partctrl.Partition_Array[0].True_Partition_Size << 9;
+//    pPartition->HiddenSectors             = 0;
     pPartition->PartitionLength.u.HighPart= partctrl.Partition_Array[0].Usable_Partition_Size >> 23;
     pPartition->PartitionLength.u.LowPart = partctrl.Partition_Array[0].Usable_Partition_Size << 9;
     pPartition->HiddenSectors           = partctrl.Partition_Array[0].True_Partition_Size - partctrl.Partition_Array[0].Usable_Partition_Size;
@@ -465,17 +478,15 @@ BOOL OSLibLVMGetVolumeExtents(ULONG driveLetter, LPSTR lpszVolumeName, PVOLUME_D
         return FALSE;
     }
 
+    //TODO: spanned volumes
     pVolExtent->NumberOfDiskExtents = 1;
     pVolExtent->Extents[0].DiskNumber  = 0;
     pVolExtent->Extents[0].StartingOffset.u.HighPart = partctrl.Partition_Array[0].Partition_Start >> 23;;
     pVolExtent->Extents[0].StartingOffset.u.LowPart  = partctrl.Partition_Array[0].Partition_Start << 9;
+//    pVolExtent->Extents[0].ExtentLength.u.HighPart   = partctrl.Partition_Array[0].True_Partition_Size >> 23;
+//    pVolExtent->Extents[0].ExtentLength.u.LowPart    = partctrl.Partition_Array[0].True_Partition_Size << 9;
     pVolExtent->Extents[0].ExtentLength.u.HighPart   = partctrl.Partition_Array[0].Usable_Partition_Size >> 23;
     pVolExtent->Extents[0].ExtentLength.u.LowPart    = partctrl.Partition_Array[0].Usable_Partition_Size << 9;
-
-    dprintf(("pVolExtent->NumberOfDiskExtents       %d", pVolExtent->NumberOfDiskExtents));
-    dprintf(("pVolExtent->Extents[0].DiskNumber     %d",  pVolExtent->Extents[0].DiskNumber));
-    dprintf(("pVolExtent->Extents[0].StartingOffset %08x%08x", pVolExtent->Extents[0].StartingOffset.u.HighPart, pVolExtent->Extents[0].StartingOffset.u.LowPart));
-    dprintf(("pVolExtent->Extents[0].ExtentLength   %08x%08x", pVolExtent->Extents[0].ExtentLength.u.HighPart, pVolExtent->Extents[0].ExtentLength.u.LowPart));
 
     //find number of disk on which this volume is located
     diskinfo = Get_Drive_Control_Data(&lasterror);
@@ -484,13 +495,22 @@ BOOL OSLibLVMGetVolumeExtents(ULONG driveLetter, LPSTR lpszVolumeName, PVOLUME_D
     }
     for(int i=0;i<diskinfo.Count;i++) {
         if(diskinfo.Drive_Control_Data[i].Drive_Handle == partctrl.Partition_Array[0].Drive_Handle) {
-            pVolExtent->Extents[0].DiskNumber = diskinfo.Drive_Control_Data[i].Drive_Number;
+            //win32 base = 0, os2 base = 1
+            pVolExtent->Extents[0].DiskNumber = diskinfo.Drive_Control_Data[i].Drive_Number - 1;
+#ifdef DEBUG
+            if(diskinfo.Drive_Control_Data[i].Drive_Number == 0) DebugInt3();
+#endif
             break;
         }
     }
     if(i == diskinfo.Count) {
         ret = FALSE;
     }
+    dprintf(("pVolExtent->NumberOfDiskExtents       %d", pVolExtent->NumberOfDiskExtents));
+    dprintf(("pVolExtent->Extents[0].DiskNumber     %d",  pVolExtent->Extents[0].DiskNumber));
+    dprintf(("pVolExtent->Extents[0].StartingOffset %08x%08x", pVolExtent->Extents[0].StartingOffset.u.HighPart, pVolExtent->Extents[0].StartingOffset.u.LowPart));
+    dprintf(("pVolExtent->Extents[0].ExtentLength   %08x%08x", pVolExtent->Extents[0].ExtentLength.u.HighPart, pVolExtent->Extents[0].ExtentLength.u.LowPart));
+
     if(pfLVMVolume) {
         *pfLVMVolume = (volinfo.Compatibility_Volume == FALSE);
     }
@@ -654,4 +674,45 @@ BOOL OSLibLVMStripVolumeName(LPCSTR lpszWin32VolumeName, LPSTR lpszOS2VolumeName
 }
 //******************************************************************************
 //******************************************************************************
+BOOL OSLibLVMGetDiskGeometry(DWORD dwDiskNr, PDISK_GEOMETRY pGeom)
+{
+    Drive_Control_Array   driveinfo;
+    Drive_Control_Record *pDriveRec;
+    CARDINAL32            lasterror;
+    BOOL                  ret = FALSE;
+    int                   i;
 
+    driveinfo = Get_Drive_Control_Data(&lasterror);
+    if(lasterror != LVM_ENGINE_NO_ERROR) {
+        DebugInt3();
+        return FALSE;
+    }
+    pDriveRec = driveinfo.Drive_Control_Data;
+    if(pDriveRec == NULL) {
+        DebugInt3();
+        return FALSE;
+    }
+    if(dwDiskNr > driveinfo.Count) {
+        DebugInt3();
+        ret = FALSE;
+        goto endfunc;
+    }
+    for(i=0;i<driveinfo.Count;i++) {
+        if(pDriveRec->Drive_Number == dwDiskNr) {
+            pGeom->Cylinders.u.LowPart  = pDriveRec->Cylinder_Count;
+            pGeom->Cylinders.u.HighPart = 0;
+            pGeom->TracksPerCylinder    = pDriveRec->Heads_Per_Cylinder;
+            pGeom->SectorsPerTrack      = pDriveRec->Sectors_Per_Track;
+            pGeom->BytesPerSector       = 512;
+            pGeom->MediaType            = FixedMedia;
+
+            ret = TRUE;
+            break;
+        }
+    }
+endfunc:
+    Free_Engine_Memory((ULONG)driveinfo.Drive_Control_Data);
+    return ret;
+}
+//******************************************************************************
+//******************************************************************************

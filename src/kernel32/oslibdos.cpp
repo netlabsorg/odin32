@@ -1,4 +1,4 @@
-/* $Id: oslibdos.cpp,v 1.108 2002-08-22 14:21:26 sandervl Exp $ */
+/* $Id: oslibdos.cpp,v 1.109 2002-09-26 16:06:07 sandervl Exp $ */
 /*
  * Wrappers for OS/2 Dos* API
  *
@@ -995,7 +995,7 @@ DWORD OSLibDosCreateFile(CHAR *lpszFile,
    {
       // @@@AH 2001-06-02 Win2k SP2 returns error 2 in this case
       int winError = error2WinError(rc);
-      if (winError == ERROR_OPEN_FAILED_W)
+      if (winError == ERROR_OPEN_FAILED_W || winError == ERROR_PATH_NOT_FOUND_W)
         winError = ERROR_FILE_NOT_FOUND_W;
       SetLastError(winError);
       return INVALID_HANDLE_VALUE_W;
@@ -2472,7 +2472,7 @@ BOOL OSLibGetDiskFreeSpace(LPSTR lpRootPathName, LPDWORD lpSectorsPerCluster,
 }
 //******************************************************************************
 //******************************************************************************
-BOOL  OSLibDosGetDiskGeometry(HANDLE hDisk, DWORD cDisk, PVOID pdiskgeom)
+BOOL OSLibDosGetDiskGeometry(HANDLE hDisk, DWORD cDisk, PVOID pdiskgeom)
 {
    PDISK_GEOMETRY pGeom = (PDISK_GEOMETRY)pdiskgeom;
    BYTE  param[2] = {0, 0};
@@ -2486,43 +2486,43 @@ BOOL  OSLibDosGetDiskGeometry(HANDLE hDisk, DWORD cDisk, PVOID pdiskgeom)
    rc = DosDevIOCtl((hDisk) ? hDisk : -1, IOCTL_DISK, DSK_GETDEVICEPARAMS, param, 2, &parsize, &bpb, sizeof(bpb), &datasize);
    if(rc == 0)
    {
-        pGeom->SectorsPerTrack   = bpb.usSectorsPerTrack;
-        pGeom->BytesPerSector    = bpb.usBytesPerSector;
-        pGeom->TracksPerCylinder = 80;  //TODO:!!!!!
-        pGeom->Cylinders.u.LowPart  = bpb.cCylinders;
-        pGeom->Cylinders.u.HighPart = 0;
-        switch(bpb.bDeviceType) {
-        case DEVTYPE_48TPI:
-            pGeom->MediaType = F5_360_512;  //?????
-            break;
-        case DEVTYPE_96TPI:
-            pGeom->MediaType = F5_1Pt2_512; //?????
-            break;
-        case DEVTYPE_35:
-            pGeom->MediaType = F3_720_512;
-            break;
-        case DEVTYPE_8SD:
-        case DEVTYPE_8DD:
-            pGeom->MediaType = RemovableMedia;
-            break;
-        case DEVTYPE_FIXED:
-            pGeom->MediaType = FixedMedia;
-            break;
-        case DEVTYPE_TAPE:
-            pGeom->MediaType = RemovableMedia;
-            break;
-        case DEVTYPE_UNKNOWN: //others, include 1.44 3.5 inch disk drive
-            pGeom->MediaType = F3_1Pt44_512;
-            break;
-        case 8: //RW optical disk
-            pGeom->MediaType = RemovableMedia;
-            break;
-        case 9: //2.88 3.5 inch disk
-            pGeom->MediaType = F3_2Pt88_512;
-            break;
-        }
-        SetLastError(ERROR_SUCCESS_W);
-        return TRUE;
+            pGeom->SectorsPerTrack   = bpb.usSectorsPerTrack;
+            pGeom->BytesPerSector    = bpb.usBytesPerSector;
+            pGeom->TracksPerCylinder = 80;  //TODO:!!!!!
+            pGeom->Cylinders.u.LowPart  = bpb.cCylinders;
+            pGeom->Cylinders.u.HighPart = 0;
+            switch(bpb.bDeviceType) {
+            case DEVTYPE_48TPI:
+                pGeom->MediaType = F5_360_512;  //?????
+                break;
+            case DEVTYPE_96TPI:
+                pGeom->MediaType = F5_1Pt2_512; //?????
+                break;
+            case DEVTYPE_35:
+                pGeom->MediaType = F3_720_512;
+                break;
+            case DEVTYPE_8SD:
+            case DEVTYPE_8DD:
+                pGeom->MediaType = RemovableMedia;
+                break;
+            case DEVTYPE_FIXED:
+                pGeom->MediaType = FixedMedia;
+                break;
+            case DEVTYPE_TAPE:
+                pGeom->MediaType = RemovableMedia;
+                break;
+            case DEVTYPE_UNKNOWN: //others, include 1.44 3.5 inch disk drive
+                pGeom->MediaType = F3_1Pt44_512;
+                break;
+            case 8: //RW optical disk
+                pGeom->MediaType = RemovableMedia;
+                break;
+            case 9: //2.88 3.5 inch disk
+                pGeom->MediaType = F3_2Pt88_512;
+                break;
+            }
+            SetLastError(ERROR_SUCCESS_W);
+            return TRUE;
    }
    dprintf(("OSLibDosGetDiskGeometry: error %d -> %d", rc, error2WinError(rc)));
    SetLastError(error2WinError(rc));
