@@ -74,8 +74,8 @@ public:
   virtual  ~IRTMidi();
 
 public:
-  void            startTimer() const;
-  void            stopTimer()  const;
+  void            startTimer();
+  void            stopTimer();
   MINSTANCE       addInstance(IMidiInstance* theInstance, ULONG classNum, char * );
   void            delInstance(IMidiInstance* theInstance);
   void            resetLastRC();
@@ -102,21 +102,37 @@ public:
                   { return *iCurrentTime; };
 
   // Methods for calls to RTMIDI functions
-  ULONG (*APIENTRY MidiCreateInstance)    ( ULONG, MINSTANCE*, PSZ, ULONG );
-  ULONG (*APIENTRY MidiDeleteInstance)    ( MINSTANCE, ULONG );
-  ULONG (*APIENTRY MidiEnableInstance)    ( MINSTANCE, ULONG );
-  ULONG (*APIENTRY MidiDisableInstance)   ( MINSTANCE, ULONG );
-  ULONG (*APIENTRY MidiAddLink)           ( MINSTANCE, MINSTANCE, ULONG, ULONG );
-  ULONG (*APIENTRY MidiRemoveLink)        ( MINSTANCE, MINSTANCE, ULONG, ULONG );
-  ULONG (*APIENTRY MidiQueryClassList)    ( ULONG, PMIDICLASSINFO, ULONG );
-  ULONG (*APIENTRY MidiQueryInstanceList) ( ULONG, PMIDIINSTANCEINFO, ULONG );
-  ULONG (*APIENTRY MidiQueryNumClasses)   ( PULONG, ULONG );
-  ULONG (*APIENTRY MidiQueryNumInstances) ( PULONG, ULONG );
-  ULONG (*APIENTRY MidiSendMessages)      ( PMESSAGE, ULONG, ULONG );
-  ULONG (*APIENTRY MidiSendSysexMessage)  ( PMESSAGE, ULONG, ULONG );
-  ULONG (*APIENTRY MidiRetrieveMessages)  ( MINSTANCE, PVOID, PULONG, ULONG );
-  ULONG (*APIENTRY MidiSetup)             ( PMIDISETUP, ULONG );
-  ULONG (*APIENTRY MidiTimer)             ( ULONG, ULONG );
+  ULONG (*APIENTRY pfnMidiCreateInstance)    ( ULONG, MINSTANCE*, PSZ, ULONG );
+  ULONG (*APIENTRY pfnMidiDeleteInstance)    ( MINSTANCE, ULONG );
+  ULONG (*APIENTRY pfnMidiEnableInstance)    ( MINSTANCE, ULONG );
+  ULONG (*APIENTRY pfnMidiDisableInstance)   ( MINSTANCE, ULONG );
+  ULONG (*APIENTRY pfnMidiAddLink)           ( MINSTANCE, MINSTANCE, ULONG, ULONG );
+  ULONG (*APIENTRY pfnMidiRemoveLink)        ( MINSTANCE, MINSTANCE, ULONG, ULONG );
+  ULONG (*APIENTRY pfnMidiQueryClassList)    ( ULONG, PMIDICLASSINFO, ULONG );
+  ULONG (*APIENTRY pfnMidiQueryInstanceList) ( ULONG, PMIDIINSTANCEINFO, ULONG );
+  ULONG (*APIENTRY pfnMidiQueryNumClasses)   ( PULONG, ULONG );
+  ULONG (*APIENTRY pfnMidiQueryNumInstances) ( PULONG, ULONG );
+  ULONG (*APIENTRY pfnMidiSendMessages)      ( PMESSAGE, ULONG, ULONG );
+  ULONG (*APIENTRY pfnMidiSendSysexMessage)  ( PMESSAGE, ULONG, ULONG );
+  ULONG (*APIENTRY pfnMidiRetrieveMessages)  ( MINSTANCE, PVOID, PULONG, ULONG );
+  ULONG (*APIENTRY pfnMidiSetup)             ( PMIDISETUP, ULONG );
+  ULONG (*APIENTRY pfnMidiTimer)             ( ULONG, ULONG );
+
+  ULONG MidiCreateInstance    ( ULONG, MINSTANCE*, PSZ, ULONG );
+  ULONG MidiDeleteInstance    ( MINSTANCE, ULONG );
+  ULONG MidiEnableInstance    ( MINSTANCE, ULONG );
+  ULONG MidiDisableInstance   ( MINSTANCE, ULONG );
+  ULONG MidiAddLink           ( MINSTANCE, MINSTANCE, ULONG, ULONG );
+  ULONG MidiRemoveLink        ( MINSTANCE, MINSTANCE, ULONG, ULONG );
+  ULONG MidiQueryClassList    ( ULONG, PMIDICLASSINFO, ULONG );
+  ULONG MidiQueryInstanceList ( ULONG, PMIDIINSTANCEINFO, ULONG );
+  ULONG MidiQueryNumClasses   ( PULONG, ULONG );
+  ULONG MidiQueryNumInstances ( PULONG, ULONG );
+  ULONG MidiSendMessages      ( PMESSAGE, ULONG, ULONG );
+  ULONG MidiSendSysexMessage  ( PMESSAGE, ULONG, ULONG );
+  ULONG MidiRetrieveMessages  ( MINSTANCE, PVOID, PULONG, ULONG );
+  ULONG MidiSetup             ( PMIDISETUP, ULONG );
+  ULONG MidiTimer             ( ULONG, ULONG );
 
 private:
   unsigned long              getRTMidiProcs();

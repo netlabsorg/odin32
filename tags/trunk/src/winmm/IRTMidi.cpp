@@ -1,4 +1,4 @@
-/* $Id: IRTMidi.cpp,v 1.6 2000-02-17 14:09:29 sandervl Exp $ */
+/* $Id: IRTMidi.cpp,v 1.7 2001-02-26 20:14:38 sandervl Exp $ */
 
 /*******************************************************************************
 * FILE NAME: IRTMidi.cpp                                                       *
@@ -60,7 +60,7 @@ IRTMidi::IRTMidi()
   iSetup.hwndCallback           = 0;
   iSetup.hqueueCallback         = 0;
   if ( rc == 0 )
-    rc = (*MidiSetup)( &iSetup, 0 );
+    rc = MidiSetup( &iSetup, 0 );
 //fprintf( stderr, "MidiSetup rc=%d\n", rc );
 
   // Clear all Instance slots
@@ -92,63 +92,63 @@ unsigned long IRTMidi::getRTMidiProcs()
 
   rc = DosQueryProcAddr( iRTMidiModule, 0L, "MIDICreateInstance", &modAddr );
   if ( rc ) return rc;
-  MidiCreateInstance =  (ULONG(*APIENTRY )( ULONG, MINSTANCE*, PSZ, ULONG)) modAddr;
+  pfnMidiCreateInstance =  (ULONG(*APIENTRY )( ULONG, MINSTANCE*, PSZ, ULONG)) modAddr;
 
   rc = DosQueryProcAddr( iRTMidiModule, 0L, "MIDIDeleteInstance", &modAddr );
   if ( rc ) return rc;
-  MidiDeleteInstance =  (ULONG(*APIENTRY )(MINSTANCE, ULONG)) modAddr;
+  pfnMidiDeleteInstance =  (ULONG(*APIENTRY )(MINSTANCE, ULONG)) modAddr;
 
   rc = DosQueryProcAddr( iRTMidiModule, 0L, "MIDIEnableInstance", &modAddr );
   if ( rc ) return rc;
-  MidiEnableInstance =  (ULONG(*APIENTRY )(MINSTANCE, ULONG)) modAddr;
+  pfnMidiEnableInstance =  (ULONG(*APIENTRY )(MINSTANCE, ULONG)) modAddr;
 
   rc = DosQueryProcAddr( iRTMidiModule, 0L, "MIDIDisableInstance", &modAddr );
   if ( rc ) return rc;
-  MidiDisableInstance = (ULONG(*APIENTRY )(MINSTANCE, ULONG)) modAddr;
+  pfnMidiDisableInstance = (ULONG(*APIENTRY )(MINSTANCE, ULONG)) modAddr;
 
   rc = DosQueryProcAddr( iRTMidiModule, 0L, "MIDIAddLink", &modAddr );
   if ( rc ) return rc;
-  MidiAddLink =         (ULONG(*APIENTRY )(MINSTANCE, MINSTANCE, ULONG, ULONG)) modAddr;
+  pfnMidiAddLink =         (ULONG(*APIENTRY )(MINSTANCE, MINSTANCE, ULONG, ULONG)) modAddr;
 
   rc = DosQueryProcAddr( iRTMidiModule, 0L, "MIDIRemoveLink", &modAddr );
   if ( rc ) return rc;
-  MidiRemoveLink =      (ULONG(*APIENTRY )(MINSTANCE, MINSTANCE, ULONG, ULONG)) modAddr;
+  pfnMidiRemoveLink =      (ULONG(*APIENTRY )(MINSTANCE, MINSTANCE, ULONG, ULONG)) modAddr;
 
   rc = DosQueryProcAddr( iRTMidiModule, 0L, "MIDIQueryClassList", &modAddr );
   if ( rc ) return rc;
-  MidiQueryClassList    = (ULONG(*APIENTRY )(ULONG, PMIDICLASSINFO, ULONG)) modAddr;
+  pfnMidiQueryClassList    = (ULONG(*APIENTRY )(ULONG, PMIDICLASSINFO, ULONG)) modAddr;
 
   rc = DosQueryProcAddr( iRTMidiModule, 0L, "MIDIQueryInstanceList", &modAddr );
   if ( rc ) return rc;
-  MidiQueryInstanceList = (ULONG(*APIENTRY )(ULONG, PMIDIINSTANCEINFO, ULONG)) modAddr;
+  pfnMidiQueryInstanceList = (ULONG(*APIENTRY )(ULONG, PMIDIINSTANCEINFO, ULONG)) modAddr;
 
   rc = DosQueryProcAddr( iRTMidiModule, 0L, "MIDIQueryNumClasses", &modAddr );
   if ( rc ) return rc;
-  MidiQueryNumClasses   = (ULONG(*APIENTRY )(PULONG, ULONG)) modAddr;
+  pfnMidiQueryNumClasses   = (ULONG(*APIENTRY )(PULONG, ULONG)) modAddr;
 
   rc = DosQueryProcAddr( iRTMidiModule, 0L, "MIDIQueryNumInstances", &modAddr );
   if ( rc ) return rc;
-  MidiQueryNumInstances = (ULONG(*APIENTRY )(PULONG, ULONG)) modAddr;
+  pfnMidiQueryNumInstances = (ULONG(*APIENTRY )(PULONG, ULONG)) modAddr;
 
   rc = DosQueryProcAddr( iRTMidiModule, 0L, "MIDISendMessages", &modAddr );
   if ( rc ) return rc;
-  MidiSendMessages      = (ULONG(*APIENTRY )(PMESSAGE, ULONG, ULONG)) modAddr;
+  pfnMidiSendMessages      = (ULONG(*APIENTRY )(PMESSAGE, ULONG, ULONG)) modAddr;
 
   rc = DosQueryProcAddr( iRTMidiModule, 0L, "MIDISendSysexMessage", &modAddr );
   if ( rc ) return rc;
-  MidiSendSysexMessage  = (ULONG(*APIENTRY )(PMESSAGE, ULONG, ULONG)) modAddr;
+  pfnMidiSendSysexMessage  = (ULONG(*APIENTRY )(PMESSAGE, ULONG, ULONG)) modAddr;
 
   rc = DosQueryProcAddr( iRTMidiModule, 0L, "MIDIRetrieveMessages", &modAddr );
   if ( rc ) return rc;
-  MidiRetrieveMessages  = (ULONG(*APIENTRY )(MINSTANCE, PVOID, PULONG, ULONG)) modAddr;
+  pfnMidiRetrieveMessages  = (ULONG(*APIENTRY )(MINSTANCE, PVOID, PULONG, ULONG)) modAddr;
 
   rc = DosQueryProcAddr( iRTMidiModule, 0L, "MIDISetup", &modAddr );
   if ( rc ) return rc;
-  MidiSetup             = (ULONG(*APIENTRY)(PMIDISETUP, ULONG)) modAddr;
+  pfnMidiSetup             = (ULONG(*APIENTRY)(PMIDISETUP, ULONG)) modAddr;
 
   rc = DosQueryProcAddr( iRTMidiModule, 0L, "MIDITimer", &modAddr );
   if ( rc ) return rc;
-  MidiTimer             = (ULONG(*APIENTRY )(ULONG, ULONG)) modAddr;
+  pfnMidiTimer             = (ULONG(*APIENTRY )(ULONG, ULONG)) modAddr;
 
   return 0;
 }
@@ -266,11 +266,11 @@ unsigned long IRTMidi::getClasses()
    PMIDICLASSINFO ci = NULL;
 
    // Query classes and get the Hardware & Application class numbers
-   rc = (*MidiQueryNumClasses)( &nc, 0 );
+   rc = MidiQueryNumClasses( &nc, 0 );
    if ( rc == 0 && nc > 0 )
    {
       ci = new MIDICLASSINFO[ nc ];
-      rc = (*MidiQueryClassList)( nc, ci, 0 );
+      rc = MidiQueryClassList( nc, ci, 0 );
    }
    if ( rc == 0 && ci )
    {
@@ -312,18 +312,18 @@ MINSTANCE IRTMidi::addInstance( IMidiInstance * theInstance,
    PMIDIINSTANCEINFO ci = NULL;
 
    // Add new instance
-   rc = (*MidiCreateInstance)( classNum,
+   rc = MidiCreateInstance( classNum,
                             &newInstance,
                             instanceName,
                             0 );
    // Now find it to initialize the Instance Object
    if ( rc == 0 )
    {
-      rc = (*MidiQueryNumInstances)( &ni, 0 );
+      rc = MidiQueryNumInstances( &ni, 0 );
       if ( rc == 0 && ni > 0 )
       {
          ci = new MIDIINSTANCEINFO[ ni ];
-         rc = (*MidiQueryInstanceList)( ni, ci, 0 );
+         rc = MidiQueryInstanceList( ni, ci, 0 );
       }
    }
    if ( rc == 0 && ci )
@@ -362,7 +362,7 @@ void IRTMidi::delInstance( IMidiInstance * theInstance )
    }
 
    // Delete MIDI Instance
-   rc = (*MidiDeleteInstance)( theInstance->instance(), 0 );
+   rc = MidiDeleteInstance( theInstance->instance(), 0 );
    setLastRC( rc );
 }
 
@@ -396,11 +396,11 @@ unsigned long IRTMidi::getInstances()
   iNumOutInstances = 0;
 
   // Query instances and post them
-  rc = (*MidiQueryNumInstances)( &ni, 0 );
+  rc = MidiQueryNumInstances( &ni, 0 );
   if ( rc == 0 && ni > 0 )
   {
     ci = new MIDIINSTANCEINFO[ ni ];
-    rc = (*MidiQueryInstanceList)( ni, ci, 0 );
+    rc = MidiQueryInstanceList( ni, ci, 0 );
   }
   if ( rc == 0 && ci )
   {
@@ -431,14 +431,14 @@ unsigned long IRTMidi::getInstances()
   return rc;
 }
 
-void IRTMidi::startTimer() const
+void IRTMidi::startTimer() 
 {
-  ((IRTMidi*)this)->setLastRC( (*MidiTimer)( MIDI_START_TIMER, 0 ) );
+  ((IRTMidi*)this)->setLastRC( MidiTimer( MIDI_START_TIMER, 0 ) );
 }
 
-void IRTMidi::stopTimer() const
+void IRTMidi::stopTimer() 
 {
-  ((IRTMidi*)this)->setLastRC( (*MidiTimer)( MIDI_STOP_TIMER, 0 ) );
+  ((IRTMidi*)this)->setLastRC( MidiTimer( MIDI_STOP_TIMER, 0 ) );
 }
 
 IRTMidi* IRTMidi::instance()
@@ -457,6 +457,128 @@ void IRTMidi::shutdown()
 {
   if ( iTheIRTMidiSingleton != NULL )
     delete iTheIRTMidiSingleton;
+}
+
+ULONG IRTMidi::MidiCreateInstance( ULONG a, MINSTANCE* b, PSZ c, ULONG d)
+{
+  ULONG ret;
+  USHORT sel = GetFS();
+  ret = (*pfnMidiCreateInstance)(a,b,c,d);
+  SetFS(sel);
+  return ret;
+}
+ULONG IRTMidi::MidiDeleteInstance( MINSTANCE a, ULONG b)
+{
+  ULONG ret;
+  USHORT sel = GetFS();
+  ret = (*pfnMidiDeleteInstance)(a,b);
+  SetFS(sel);
+  return ret;
+}
+ULONG IRTMidi::MidiEnableInstance( MINSTANCE a, ULONG b )
+{
+  ULONG ret;
+  USHORT sel = GetFS();
+  ret = (*pfnMidiEnableInstance)(a,b);
+  SetFS(sel);
+  return ret;
+}
+ULONG IRTMidi::MidiDisableInstance( MINSTANCE a, ULONG b)
+{
+  ULONG ret;
+  USHORT sel = GetFS();
+  ret = (*pfnMidiDisableInstance)(a,b);
+  SetFS(sel);
+  return ret;
+}
+ULONG IRTMidi::MidiAddLink( MINSTANCE a, MINSTANCE b, ULONG c, ULONG d )
+{
+  ULONG ret;
+  USHORT sel = GetFS();
+  ret = (*pfnMidiAddLink)(a,b,c,d);
+  SetFS(sel);
+  return ret;
+}
+ULONG IRTMidi::MidiRemoveLink( MINSTANCE a, MINSTANCE b, ULONG c, ULONG d )
+{
+  ULONG ret;
+  USHORT sel = GetFS();
+  ret = (*pfnMidiRemoveLink)(a,b,c,d);
+  SetFS(sel);
+  return ret;
+}
+ULONG IRTMidi::MidiQueryClassList( ULONG a, PMIDICLASSINFO b, ULONG c)
+{
+  ULONG ret;
+  USHORT sel = GetFS();
+  ret = (*pfnMidiQueryClassList)(a,b,c);
+  SetFS(sel);
+  return ret;
+}
+ULONG IRTMidi::MidiQueryInstanceList ( ULONG a, PMIDIINSTANCEINFO b, ULONG c)
+{
+  ULONG ret;
+  USHORT sel = GetFS();
+  ret = (*pfnMidiQueryInstanceList)(a,b,c);
+  SetFS(sel);
+  return ret;
+}
+ULONG IRTMidi::MidiQueryNumClasses   ( PULONG a, ULONG b)
+{
+  ULONG ret;
+  USHORT sel = GetFS();
+  ret = (*pfnMidiQueryNumClasses)(a,b);
+  SetFS(sel);
+  return ret;
+}
+ULONG IRTMidi::MidiQueryNumInstances ( PULONG a, ULONG b)
+{
+  ULONG ret;
+  USHORT sel = GetFS();
+  ret = (*pfnMidiQueryNumInstances)(a,b);
+  SetFS(sel);
+  return ret;
+}
+ULONG IRTMidi::MidiSendMessages( PMESSAGE a, ULONG b, ULONG c )
+{
+  ULONG ret;
+  USHORT sel = GetFS();
+  ret = (*pfnMidiSendMessages)(a,b,c);
+  SetFS(sel);
+  return ret;
+}
+ULONG IRTMidi::MidiSendSysexMessage( PMESSAGE a, ULONG b, ULONG c )
+{
+  ULONG ret;
+  USHORT sel = GetFS();
+  ret = (*pfnMidiSendSysexMessage)(a,b,c);
+  SetFS(sel);
+  return ret;
+}
+ULONG IRTMidi::MidiRetrieveMessages( MINSTANCE a, PVOID b, PULONG c, ULONG d)
+{
+  ULONG ret;
+  USHORT sel = GetFS();
+  ret = (*pfnMidiRetrieveMessages)(a,b,c,d);
+  SetFS(sel);
+  return ret;
+}
+ULONG IRTMidi::MidiSetup( PMIDISETUP a, ULONG b)
+{
+  ULONG ret;
+  USHORT sel = GetFS();
+  ret = (*pfnMidiSetup)(a,b);
+  SetFS(sel);
+  return ret;
+}
+
+ULONG IRTMidi::MidiTimer( ULONG a, ULONG b )
+{
+  ULONG ret;
+  USHORT sel = GetFS();
+  ret = (*pfnMidiTimer)(a,b);
+  SetFS(sel);
+  return ret;
 }
 
 //------------------------------------------------------------------------------
@@ -524,14 +646,14 @@ IMidiInstance& IMidiInstance::enableSend(BOOL enable)
     if ( enable )
     {
       // Enable send
-      rc = (*IRTMIDI->MidiEnableInstance)( instance(), MIDI_ENABLE_SEND );
+      rc = IRTMIDI->MidiEnableInstance( instance(), MIDI_ENABLE_SEND );
       if ( rc == 0 )
          iInfo.ulAttributes |= MIDI_INST_ATTR_ENABLE_S;
     }
     else
     {
       // Disable send
-      rc = (*IRTMIDI->MidiDisableInstance)( instance(), MIDI_DISABLE_SEND );
+      rc = IRTMIDI->MidiDisableInstance( instance(), MIDI_DISABLE_SEND );
       if ( rc == 0 )
          iInfo.ulAttributes &= ~MIDI_INST_ATTR_ENABLE_S;
     }
@@ -553,14 +675,14 @@ IMidiInstance& IMidiInstance::enableReceive(BOOL enable)
     if ( enable )
     {
       // Enable receive
-      rc = (*IRTMIDI->MidiEnableInstance)( instance(), MIDI_ENABLE_RECEIVE );
+      rc = IRTMIDI->MidiEnableInstance( instance(), MIDI_ENABLE_RECEIVE );
       if ( rc == 0 )
          iInfo.ulAttributes |= MIDI_INST_ATTR_ENABLE_R;
     }
     else
     {
       // Disable receive
-      rc = (*IRTMIDI->MidiDisableInstance)( instance(), MIDI_DISABLE_RECEIVE );
+      rc = IRTMIDI->MidiDisableInstance( instance(), MIDI_DISABLE_RECEIVE );
       if ( rc == 0 )
          iInfo.ulAttributes &= ~MIDI_INST_ATTR_ENABLE_R;
     }
@@ -584,7 +706,7 @@ IMidiInstance& IMidiInstance::removeLink(IMidiInstance* toLink)
   if ( canSend() && toLink->canReceive() )
   {
     IRTMIDI->setLastRC(
-         (*IRTMIDI->MidiRemoveLink)( instance(), toLink->instance(),
+         IRTMIDI->MidiRemoveLink( instance(), toLink->instance(),
                       0,       // slot?
                       0 ) );
   }
@@ -604,7 +726,7 @@ IMidiInstance& IMidiInstance::addLink(IMidiInstance* toLink)
       toLink->enableReceive();
     }
     IRTMIDI->setLastRC(
-       (*IRTMIDI->MidiAddLink)( instance(), toLink->instance(),
+       IRTMIDI->MidiAddLink( instance(), toLink->instance(),
                     0,       // slot ?
                     0 ) );
    }
@@ -625,7 +747,7 @@ void IMidiInstance::sendMessage( UCHAR b1, UCHAR b2, UCHAR b3, UCHAR b4 ) const
    msg.msg.abData[1]    = b2;
    msg.msg.abData[2]    = b3;
    msg.msg.abData[3]    = b4;
-   IRTMIDI->setLastRC( (*IRTMIDI->MidiSendMessages)( &msg, 1, 0 ) );
+   IRTMIDI->setLastRC( IRTMIDI->MidiSendMessages( &msg, 1, 0 ) );
 }
 
 //------------------------------------------------------------------------------
@@ -639,7 +761,7 @@ void IMidiInstance::sendMessage( ULONG inMsg ) const
    msg.ulTime           = 0;
    msg.ulTrack          = 0;
    msg.msg.ulMessage    = inMsg;
-   IRTMIDI->setLastRC( (*IRTMIDI->MidiSendMessages)( &msg, 1, 0 ) );
+   IRTMIDI->setLastRC( IRTMIDI->MidiSendMessages( &msg, 1, 0 ) );
 }
 
 //------------------------------------------------------------------------------
@@ -656,7 +778,7 @@ void IMidiInstance::sendSysexMessage( UCHAR* theMsg, ULONG msgLen ) const
    msg->ulTime           = 0;
    msg->ulTrack          = 0;
    memcpy( msg->msg.abData, theMsg, outLen );
-   IRTMIDI->setLastRC( (*IRTMIDI->MidiSendSysexMessage)( msg, outLen, 0 ) );
+   IRTMIDI->setLastRC( IRTMIDI->MidiSendSysexMessage( msg, outLen, 0 ) );
    free(msg);
 }
 
@@ -666,7 +788,7 @@ unsigned long IMidiInstance::getMessage( ULONG * pTime, ULONG * pMsg )
    unsigned long numUCHARs;
    unsigned long rc = 0;
    numUCHARs = sizeof( theMessage );
-   rc = (*IRTMIDI->MidiRetrieveMessages)( instance(), &theMessage, &numUCHARs, 0 );
+   rc = IRTMIDI->MidiRetrieveMessages( instance(), &theMessage, &numUCHARs, 0 );
    if ( rc == 0 )
    {
       *pTime = theMessage.ulTime;
