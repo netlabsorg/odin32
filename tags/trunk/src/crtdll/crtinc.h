@@ -1,16 +1,48 @@
-/* $Id: crtinc.h,v 1.5 1999-10-07 09:28:49 sandervl Exp $ */
+/* $Id: crtinc.h,v 1.6 1999-10-09 09:39:13 sandervl Exp $ */
 
 /* Definitions for the CRTDLL library (CRTDLL.DLL)
  *
  * Copyright 1999 Jens Wiessner
  */
 
-
 #define MB_LEN_MAX	2
 #ifndef MAX_PATHNAME_LEN 
 #define MAX_PATHNAME_LEN 260 
 #endif 
 
+// Errno Defs
+#define	EAGAIN		11	/* Resource temporarily unavailable */
+#define	EINVAL		22	/* Invalid argument */
+
+
+// MBC Defs
+#define _MBC_SINGLE	 0	
+#define _MBC_LEAD	 1	
+#define _MBC_TRAIL	 2		
+#define _MBC_ILLEGAL	-1		
+
+#define _MB_CP_SBCS      0
+#define _MB_CP_OEM      -2
+#define _MB_CP_ANSI     -3
+#define _MB_CP_LOCALE   -4
+
+#define _KNJ_M  ((char)0x01)    /* Non-punctuation of Kana-set */
+#define _KNJ_P  ((char)0x02)    /* Punctuation of Kana-set */
+#define _KNJ_1  ((char)0x04)    /* Legal 1st byte of double byte stream */
+#define _KNJ_2  ((char)0x08)    /* Legal 2nd btye of double byte stream */
+
+#define ___     0
+#define _1_     _KNJ_1 /* Legal 1st byte of double byte code */
+#define __2     _KNJ_2 /* Legal 2nd byte of double byte code */
+#define _M_     _KNJ_M /* Non-puntuation in Kana-set */
+#define _P_     _KNJ_P /* Punctuation of Kana-set */
+#define _12     (_1_|__2)
+#define _M2     (_M_|__2)
+#define _P2     (_P_|__2)
+
+#define CASE_DIFF (0x8281 - 0x8260)
+
+// Defs
 #define DOSFS_GetFullName(a,b,c) strcpy(c,a) 
 
 #if defined(__GNUC__) && defined(__i386__)
@@ -33,6 +65,19 @@ typedef struct
     char  short_name[MAX_PATHNAME_LEN]; /* Short pathname in DOS 8.3 format */
     int   drive;
 } DOS_FULL_NAME;
+
+
+#ifndef _DISKFREE_T_DEFINED
+#define _DISKFREE_T_DEFINED
+#define _DISKFREE_T_DEFINED_
+struct _diskfree_t {
+        unsigned total_clusters;
+        unsigned avail_clusters;
+        unsigned sectors_per_cluster;
+        unsigned bytes_per_sector;
+};
+#define diskfree_t _diskfree_t
+#endif
 
 
 typedef VOID (*new_handler_type)(VOID);
@@ -88,3 +133,97 @@ VOID *		CDECL CRTDLL_malloc(DWORD size);
 long 		CDECL CRTDLL__lseek(int handle,long offset,int origin);
 long 		CDECL CRTDLL__filelength( int i );
 VOID 		CDECL CRTDLL__exit(DWORD ret);
+INT		CDECL CRTDLL_isalnum(int i);
+int 		CDECL CRTDLL_isgraph(int i);
+int 		CDECL CRTDLL__access(const char *path,int mode);
+int 		CDECL CRTDLL__getch(void);
+size_t 		CDECL CRTDLL_fread( void *ptr, size_t size, size_t n, FILE *fp );
+int 		CDECL CRTDLL__mbbtype( unsigned char c, int type );
+LPSTR 		CDECL CRTDLL__mbsinc( LPCSTR str );
+int 		CDECL CRTDLL__ismbbkalnum( unsigned int c );
+int 		CDECL CRTDLL__ismbbkana( unsigned int c );
+int 		CDECL CRTDLL__ismbbalpha( unsigned int c );
+int 		CDECL CRTDLL__ismbbtrail( unsigned int c );
+int 		CDECL CRTDLL__ismbblead( unsigned int c );
+char * 		CDECL CRTDLL_getenv( const char *name );
+
+//
+// Definitions for internal functions
+//
+int 		__set_errno (int error);
+unsigned int 	_mbbtoupper(unsigned int c);
+unsigned int 	_mbbtolower(unsigned int c);
+size_t 		_mbclen2(const unsigned int s);
+
+
+//
+// MBC Includes
+//
+static unsigned short han_to_zen_ascii_table[0x5f] = {
+  0x8140, 0x8149, 0x8168, 0x8194, 0x8190, 0x8193, 0x8195, 0x8166,
+  0x8169, 0x816a, 0x8196, 0x817b, 0x8143, 0x817c, 0x8144, 0x815e,
+  0x824f, 0x8250, 0x8251, 0x8252, 0x8253, 0x8254, 0x8255, 0x8256,
+  0x8257, 0x8258, 0x8146, 0x8147, 0x8183, 0x8181, 0x8184, 0x8148,
+  0x8197, 0x8260, 0x8261, 0x8262, 0x8263, 0x8264, 0x8265, 0x8266,
+  0x8267, 0x8268, 0x8269, 0x826a, 0x826b, 0x826c, 0x826d, 0x826e,
+  0x826f, 0x8270, 0x8271, 0x8272, 0x8273, 0x8274, 0x8275, 0x8276,
+  0x8277, 0x8278, 0x8279, 0x816d, 0x818f, 0x816e, 0x814f, 0x8151,
+  0x8165, 0x8281, 0x8282, 0x8283, 0x8284, 0x8285, 0x8286, 0x8287,
+  0x8288, 0x8289, 0x828a, 0x828b, 0x828c, 0x828d, 0x828e, 0x828f,
+  0x8290, 0x8291, 0x8292, 0x8293, 0x8294, 0x8295, 0x8296, 0x8297,
+  0x8298, 0x8299, 0x829a, 0x816f, 0x8162, 0x8170, 0x8150
+};
+static unsigned short han_to_zen_kana_table[0x40] = {
+  0x8140, 0x8142, 0x8175, 0x8176, 0x8141, 0x8145, 0x8392, 0x8340,
+  0x8342, 0x8344, 0x8346, 0x8348, 0x8383, 0x8385, 0x8387, 0x8362,
+  0x815b, 0x8341, 0x8343, 0x8345, 0x8347, 0x8349, 0x834a, 0x834c,
+  0x834e, 0x8350, 0x8352, 0x8354, 0x8356, 0x8358, 0x835a, 0x835c,
+  0x835e, 0x8360, 0x8363, 0x8365, 0x8367, 0x8369, 0x836a, 0x836b,
+  0x836c, 0x836d, 0x836e, 0x8371, 0x8374, 0x8377, 0x837a, 0x837d,
+  0x837e, 0x8380, 0x8381, 0x8382, 0x8384, 0x8386, 0x8388, 0x8389,
+  0x838a, 0x838b, 0x838c, 0x838d, 0x838f, 0x8393, 0x814a, 0x814b
+};
+static unsigned char zen_to_han_kana_table[0x8396-0x8340+1] = {
+  0xa7, 0xb1, 0xa8, 0xb2, 0xa9, 0xb3, 0xaa, 0xb4,
+  0xab, 0xb5, 0xb6, 0xb6, 0xb7, 0xb7, 0xb8, 0xb8,
+  0xb9, 0xb9, 0xba, 0xba, 0xbb, 0xbb, 0xbc, 0xbc,
+  0xbd, 0xbd, 0xbe, 0xbe, 0xbf, 0xbf, 0xc0, 0xc0,
+  0xc1, 0xc1, 0xaf, 0xc2, 0xc2, 0xc3, 0xc3, 0xc4,
+  0xc4, 0xc5, 0xc6, 0xc7, 0xc8, 0xc9, 0xca, 0xca,
+  0xca, 0xcb, 0xcb, 0xcb, 0xcc, 0xcc, 0xcc, 0xcd,
+  0xcd, 0xcd, 0xce, 0xce, 0xce, 0xcf, 0xd0, 0,
+  0xd1, 0xd2, 0xd3, 0xac, 0xd4, 0xad, 0xd5, 0xae,
+  0xd6, 0xd7, 0xd8, 0xd9, 0xda, 0xdb, 0xdc, 0xdc,
+  0xb2, 0xb4, 0xa6, 0xdd, 0xb3, 0xb6, 0xb9
+};
+#define ZTOH_SYMBOLS 9
+static unsigned short zen_to_han_symbol_table_1[ZTOH_SYMBOLS] = {
+  0x8142, 0x8175, 0x8176, 0x8141, 0x8145, 0x815b, 0x814a, 0x814b
+};
+static unsigned char zen_to_han_symbol_table_2[ZTOH_SYMBOLS] = {
+  0xa1, 0xa2, 0xa3, 0xa4, 0xa5, 0xb0, 0xde, 0xdf
+};
+#define ISKANA(c) ((c) >= 0xa1 && (c) <= 0xdf)
+#define JISHIRA(c) ((c) >= 0x829f && (c) <= 0x82f1)
+#define JISKANA(c) ((c) >= 0x8340 && (c) <= 0x8396 && (c) != 0x837f)
+#define JTOKANA(c) ((c) <= 0x82dd ? (c) + 0xa1 : (c) + 0xa2)
+
+char _jctype[257] = {
+/*-1*/  ___,
+/*0x*/  ___,___,___,___,___,___,___,___,___,___,___,___,___,___,___,___,
+/*1x*/  ___,___,___,___,___,___,___,___,___,___,___,___,___,___,___,___,
+/*2x*/  ___,___,___,___,___,___,___,___,___,___,___,___,___,___,___,___,
+/*3x*/  ___,___,___,___,___,___,___,___,___,___,___,___,___,___,___,___,
+/*4x*/  __2,__2,__2,__2,__2,__2,__2,__2,__2,__2,__2,__2,__2,__2,__2,__2,
+/*5x*/  __2,__2,__2,__2,__2,__2,__2,__2,__2,__2,__2,__2,__2,__2,__2,__2,
+/*6x*/  __2,__2,__2,__2,__2,__2,__2,__2,__2,__2,__2,__2,__2,__2,__2,__2,
+/*7x*/  __2,__2,__2,__2,__2,__2,__2,__2,__2,__2,__2,__2,__2,__2,__2,___,
+/*8x*/  __2,_12,_12,_12,_12,_12,_12,_12,_12,_12,_12,_12,_12,_12,_12,_12,
+/*9x*/  _12,_12,_12,_12,_12,_12,_12,_12,_12,_12,_12,_12,_12,_12,_12,_12,
+/*Ax*/  __2,_P2,_P2,_P2,_P2,_P2,_M2,_M2,_M2,_M2,_M2,_M2,_M2,_M2,_M2,_M2,
+/*Bx*/  _M2,_M2,_M2,_M2,_M2,_M2,_M2,_M2,_M2,_M2,_M2,_M2,_M2,_M2,_M2,_M2,
+/*Cx*/  _M2,_M2,_M2,_M2,_M2,_M2,_M2,_M2,_M2,_M2,_M2,_M2,_M2,_M2,_M2,_M2,
+/*Dx*/  _M2,_M2,_M2,_M2,_M2,_M2,_M2,_M2,_M2,_M2,_M2,_M2,_M2,_M2,_M2,_M2,
+/*Ex*/  _12,_12,_12,_12,_12,_12,_12,_12,_12,_12,_12,_12,_12,_12,_12,_12,
+/*Fx*/  _12,_12,_12,_12,_12,_12,_12,_12,_12,_12,_12,_12,_12,___,___,___
+};
