@@ -1,4 +1,4 @@
-/* $Id: listbox.cpp,v 1.2 1999-10-08 21:24:40 cbratschi Exp $ */
+/* $Id: listbox.cpp,v 1.3 1999-10-12 18:14:55 sandervl Exp $ */
 /*
  * Listbox controls
  *
@@ -184,7 +184,7 @@ static void LISTBOX_UpdateScroll( HWND hwnd, LB_DESCR *descr )
     if (descr->style & LBS_MULTICOLUMN)
     {
         info.nMin  = 0;
-        info.nMax  = (descr->nb_items - 1) / descr->page_size;
+        info.nMax = (descr->nb_items - 1) / descr->page_size;
         info.nPos  = descr->top_item / descr->page_size;
         info.nPage = descr->width / descr->column_width;
         if (info.nPage < 1) info.nPage = 1;
@@ -199,13 +199,23 @@ static void LISTBOX_UpdateScroll( HWND hwnd, LB_DESCR *descr )
     else
     {
         info.nMin  = 0;
-        info.nMax  = descr->nb_items - 1;
-        info.nPos  = descr->top_item;
+        info.nMax = descr->nb_items - 1;
+//        info.nPos  = descr->top_item;
+        info.nPos = descr->selected_item - 1;
         info.nPage = LISTBOX_GetCurrentPageSize( hwnd, descr );
         info.fMask = SIF_RANGE | SIF_POS | SIF_PAGE;
         if (descr->style & LBS_DISABLENOSCROLL)
             info.fMask |= SIF_DISABLENOSCROLL;
-        SetScrollInfo( hwnd, SB_VERT, &info, TRUE );
+
+	if(info.nMax > (INT)info.nPage) {
+	    ShowScrollBar(hwnd, SB_VERT, TRUE);
+	    EnableScrollBar(hwnd, SB_VERT, ESB_ENABLE_BOTH);		
+            SetScrollInfo( hwnd, SB_VERT, &info, TRUE );
+	}
+	else {
+	    ShowScrollBar(hwnd, SB_VERT, FALSE);
+	    EnableScrollBar(hwnd, SB_VERT, ESB_DISABLE_BOTH);		
+	}
 
         if (descr->horz_extent)
         {
@@ -2548,7 +2558,9 @@ LRESULT WINAPI ListBoxWndProc( HWND hwnd, UINT msg,
         if (GetCapture() == hwnd)
             LISTBOX_HandleMouseMove( hwnd, descr, (INT16)LOWORD(lParam),
                                      (INT16)HIWORD(lParam) );
-        return 0;
+	return 1; //SvL: Bugfix -> PMWINDOW expects non-zero return value if
+                  //               we want to restore the default mouse cursor
+
     case WM_LBUTTONUP:
         return LISTBOX_HandleLButtonUp( hwnd, descr );
     case WM_KEYDOWN:
