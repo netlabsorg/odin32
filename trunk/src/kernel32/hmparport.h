@@ -1,4 +1,4 @@
-/* $Id: hmparport.h,v 1.6 2001-12-05 14:16:05 sandervl Exp $ */
+/* $Id: hmparport.h,v 1.7 2001-12-07 11:28:10 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -27,32 +27,12 @@ class HMDeviceParPortClass : public HMDeviceHandler
                              PVOID         lpSecurityAttributes,
                              PHMHANDLEDATA pHMHandleDataTemplate);
 
+  /* this is a handler method for calls to GetFileType() */
+  virtual DWORD GetFileType (PHMHANDLEDATA pHMHandleData);
+
   /* this is the handler method for calls to CloseHandle() */
   virtual BOOL CloseHandle(PHMHANDLEDATA pHMHandleData);
 
-  virtual BOOL GetCommProperties( PHMHANDLEDATA pHMHandleData,
-                                 LPCOMMPROP lpcmmp);
-  
-  virtual BOOL ClearCommError( PHMHANDLEDATA pHMHandleData,
-                               LPDWORD lpdwErrors,
-                               LPCOMSTAT lpcst);
-  
-  virtual BOOL SetCommConfig( PHMHANDLEDATA pHMHandleData,
-                              LPCOMMCONFIG lpCC,
-                              DWORD dwSize );
-  
-  virtual BOOL GetCommConfig( PHMHANDLEDATA pHMHandleData,
-                              LPCOMMCONFIG lpCC,
-                              LPDWORD lpdwSize );
-  
-  virtual BOOL SetDefaultCommConfig( PHMHANDLEDATA pHMHandleData,
-                                     LPCOMMCONFIG lpCC,
-                                     DWORD dwSize);
-  
-  virtual BOOL GetDefaultCommConfig( PHMHANDLEDATA pHMHandleData,
-                                     LPCOMMCONFIG lpCC,
-                                     LPDWORD lpdwSize);
-  
   /* this is a handler method for calls to DeviceIoControl() */
   virtual BOOL   DeviceIoControl    (PHMHANDLEDATA pHMHandleData, DWORD dwIoControlCode,
                                      LPVOID lpInBuffer, DWORD nInBufferSize,

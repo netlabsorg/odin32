@@ -1,4 +1,4 @@
-/* $Id: overlappedio.h,v 1.4 2001-12-06 15:57:52 sandervl Exp $ */
+/* $Id: overlappedio.h,v 1.5 2001-12-07 11:28:11 sandervl Exp $ */
 
 /*
  * Win32 overlapped IO class
@@ -12,15 +12,15 @@
 #ifndef __OVERLAPPEDIO_H__
 #define __OVERLAPPEDIO_H__
 
-#define NR_ASYNC_OPERATIONS	3
+#define NR_ASYNC_OPERATIONS 3
 #define ASYNC_INDEX_READ        0
 #define ASYNC_INDEX_WRITE       1
 #define ASYNC_INDEX_POLL        2
 
-#define ASYNCIO_READ		1
-#define ASYNCIO_WRITE		2
-#define ASYNCIO_READWRITE	4
-#define ASYNCIO_POLL		8
+#define ASYNCIO_READ        1
+#define ASYNCIO_WRITE       2
+#define ASYNCIO_READWRITE   4
+#define ASYNCIO_POLL        8
 
 //forward decl
 class OverlappedIOHandler;
@@ -34,7 +34,8 @@ typedef struct tagOVERLAPPED_ODIN{
   DWORD               dwAsyncType;
   HANDLE              hHandle;
   LPCVOID             lpBuffer;
-  ULONG               nNumberOfBytes;
+  DWORD               nNumberOfBytes;
+  DWORD               dwTimeOut;
   LPOVERLAPPED        lpOverlapped;
   LPOVERLAPPED_COMPLETION_ROUTINE lpCompletionRoutine;
   DWORD              *lpdwResult;
@@ -43,7 +44,7 @@ typedef struct tagOVERLAPPED_ODIN{
   tagOVERLAPPED_ODIN *next;
 } ASYNCIOREQUEST, *LPASYNCIOREQUEST;
 
-typedef BOOL (* SYSTEM LPOVERLAPPED_HANDLER)(LPASYNCIOREQUEST lpRequest, DWORD *lpdwResult, DWORD *lpdwTimeOut);
+typedef BOOL (* LPOVERLAPPED_HANDLER)(LPASYNCIOREQUEST lpRequest, DWORD *lpdwResult, DWORD *lpdwTimeOut);
 
 enum OverlappedIOError {
   InvalidParameter, OutOfMemory, EventCreationFailed, ThreadCreationFailed
@@ -52,8 +53,8 @@ enum OverlappedIOError {
 class OverlappedIOHandler
 {
 public:
-     OverlappedIOHandler(LPOVERLAPPED_HANDLER lpReadHandler, 
-                         LPOVERLAPPED_HANDLER lpWriteHandler, 
+     OverlappedIOHandler(LPOVERLAPPED_HANDLER lpReadHandler,
+                         LPOVERLAPPED_HANDLER lpWriteHandler,
                          LPOVERLAPPED_HANDLER lpPollHandler = NULL);
     ~OverlappedIOHandler();
 
@@ -63,7 +64,8 @@ public:
                       LPDWORD       lpNumberOfBytesWritten,
                       LPOVERLAPPED  lpOverlapped,
                       LPOVERLAPPED_COMPLETION_ROUTINE lpCompletionRoutine,
-                      DWORD         dwUserData);
+                      DWORD         dwUserData,
+                      DWORD         dwTimeOut = INFINITE);
 
      BOOL   ReadFile(HANDLE        hHandle,
                      LPCVOID       lpBuffer,
@@ -71,20 +73,22 @@ public:
                      LPDWORD       lpNumberOfBytesRead,
                      LPOVERLAPPED  lpOverlapped,
                      LPOVERLAPPED_COMPLETION_ROUTINE lpCompletionRoutine,
-                     DWORD         dwUserData);
+                     DWORD         dwUserData,
+                     DWORD         dwTimeOut = INFINITE);
 
      BOOL   WaitForEvent(HANDLE        hHandle,
                          LPDWORD       lpfdwEvtMask,
                          LPOVERLAPPED  lpOverlapped,
                          LPOVERLAPPED_COMPLETION_ROUTINE lpCompletionRoutine,
-                         DWORD         dwUserData);
+                         DWORD         dwUserData,
+                         DWORD         dwTimeOut = INFINITE);
 
      BOOL   CancelIo(HANDLE hHandle);
 
      BOOL   GetOverlappedResult(HANDLE        hHandle,
                                 LPOVERLAPPED  lpoOverlapped,
                                 LPDWORD       lpcbTransfer,
-                                DWORD         dwTimeout);
+                                BOOL          fWait);
 
 protected:
 
