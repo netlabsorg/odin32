@@ -1,4 +1,8 @@
-/* $Id: changelog,v 1.1837 2001-11-16 16:56:09 sandervl Exp $ */
+/* $Id: changelog,v 1.1838 2001-11-17 17:52:58 sandervl Exp $ */
+
+ 2000-11-17: Yuri Dario <mc6530@mclink.it>
+    - USER32:   o WM_SETTEXT (unicode) fix 
+                  (latest changes broke Opera among other things)
 
  2001-11-16: Sander van Leeuwen <sandervl@xs4all.nl>
     - COMCTL32: o LISTVIEW_UpdateScroll update (from old control)
