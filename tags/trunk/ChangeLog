@@ -1,4 +1,4 @@
-/* $Id: ChangeLog,v 1.1363 2001-04-16 17:01:52 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.1364 2001-04-16 17:04:27 sandervl Exp $ */
 
  2001-04-16: Sander van Leeuwen <sandervl@xs4all.nl>
     - KERNEL32: o Fix for LoadLibrary(Ex)W. (free must not be called for
@@ -8,6 +8,7 @@
                 o Open files in binary mode only; fixes load failures for 
                   shell32 icons (newlines were translated; bytes removed from
                   icon data)
+    - DPLAYX:   o Compile fixes for header changes.
     - include\odin.h:
                 o Changes for wrc. It chokes on calling conventions.
                 o Got rid of annoying 'unused struct' warnings
