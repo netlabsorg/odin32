@@ -1,4 +1,4 @@
-/* $Id: MapSym.cmd,v 1.3 2002-04-30 04:17:20 bird Exp $
+/* $Id: MapSym.cmd,v 1.4 2002-04-30 19:51:42 bird Exp $
  *
  * Helper script for calling MAPSYM.EXE.
  *
@@ -11,10 +11,10 @@
 /*
  * Configuration.
  */
-sWatcom = ';wat11c;wat11;watcom;'
-sIBMOld = ';vac3xx;vac365;vac308;link386;emx;emxpgcc;mscv6;ibmold;'
+sWatcom = ';wat11c;wat11;watcom;wat11c-16;wat11-16;'
+sIBMOld = ';vac3xx;vac365;vac308;link386;emx;emxpgcc;mscv6;mscv6-16;ibmold;'
 sVAC40  = ';vac40;'
-sLinkers = ';vac3xx;vac365;vac308;vac40;link386;mscv6;watcom;wat11;wat11c;emx;emxpgcc;ibmold;'
+sLinkers = strip(sVAC40, 'T', ';')||strip(sIBMOld, 'T', ';')||strip(sWatcom, 'T', ';')||';'
 
 /*
  * Parse arguments.
