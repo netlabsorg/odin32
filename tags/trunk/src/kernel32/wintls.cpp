@@ -1,4 +1,4 @@
-/* $Id: wintls.cpp,v 1.19 2005-01-26 18:47:00 sao2l02 Exp $ */
+/* $Id: wintls.cpp,v 1.20 2005-01-31 04:57:30 sao2l02 Exp $ */
 /*
  * Win32 TLS API functions
  *
@@ -223,7 +223,7 @@ LPVOID WIN32API TlsGetValue(DWORD index)
  LPVOID rc;
  TEB   *teb = GetThreadTEB();
 
-  if ((index >= TLS_MINIMUM_AVAILABLE) || !teb)
+  if ((index >= TLS_MINIMUM_AVAILABLE) | (index < 0) | !teb)
   {
         SetLastError(ERROR_INVALID_PARAMETER);
         return NULL;
@@ -242,7 +242,7 @@ BOOL WIN32API TlsSetValue(DWORD index, LPVOID val)
  TEB *teb = GetThreadTEB();
 
   dprintf2(("KERNEL32: TlsSetValue %d %x", index, val));
-  if ((index >= TLS_MINIMUM_AVAILABLE) || !teb)
+  if ((index >= TLS_MINIMUM_AVAILABLE) | (index < 0) | !teb)
   {
         SetLastError(ERROR_INVALID_PARAMETER);
         return FALSE;
