@@ -1,4 +1,4 @@
-/* $Id: versionos2.h,v 1.23 2002-04-01 09:00:04 bird Exp $ */
+/* $Id: versionos2.h,v 1.24 2002-05-09 13:54:39 sandervl Exp $ */
 
 #ifndef __VERSIONOS2__H__
 #define __VERSIONOS2__H__
@@ -79,6 +79,9 @@ ULONG SYSTEM GetVersionSize(char *modname);
 #ifdef WIN32API
 void WIN32API OdinSetVersion(ULONG version);
 #endif
+
+
+#define VERSION_IS_WIN2000_OR_HIGHER()  (LOBYTE(GetVersion()) >= 5)
 
 #endif
 
