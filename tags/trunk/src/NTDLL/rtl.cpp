@@ -1,4 +1,4 @@
-/* $Id: rtl.cpp,v 1.10 2000-08-02 16:31:34 bird Exp $ */
+/* $Id: rtl.cpp,v 1.11 2000-08-20 15:16:59 phaller Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -16,17 +16,33 @@
  */
 
 #include <stdlib.h>
+#include <stdio.h>
 #include <string.h>
 #include <odinwrap.h>
+#include <os2win.h>
 
+#include "debugtools.h"
 #include "ntdll.h"
 
 #include "winuser.h"
+#include "windef.h"
 #include "winerror.h"
+#include "stackframe.h"
+#include "ntddk.h"
+#include "imagehlp.h"
 #include "winreg.h"
 #include "heapstring.h"
 
+#include <misc.h>
+
+
 ODINDEBUGCHANNEL(NTDLL-RTL)
+
+
+/*
+ *  WINE Adoption -  we won't support the Win64 model.
+ */
+#define SIZE_T UINT
 
 /*
  * resource functions
@@ -522,31 +538,48 @@ extern LARGE_INTEGER WINAPI RtlExtendedIntegerMultiply(LARGE_INTEGER factor1,
 /******************************************************************************
  *  RtlFormatCurrentUserKeyPath             [NTDLL.371]
  */
-DWORD WINAPI RtlFormatCurrentUserKeyPath(DWORD x)
+DWORD WINAPI RtlFormatCurrentUserKeyPath(PUNICODE_STRING pustrKeyPath)
 {
-  dprintf(("NTDLL: RtlFormatCurrentUserKeyPath(%08xh) not implemented.\n",
-           x));
-
-  return 1;
+  dprintf(("NTDLL: RtlFormatCurrentUserKeyPath(%08xh) not correctly implemented.\n",
+           pustrKeyPath));
+  
+  LPSTR Path = "\\REGISTRY\\USER\\.DEFAULT";
+  ANSI_STRING AnsiPath;
+  
+  RtlInitAnsiString(&AnsiPath, Path);
+  return RtlAnsiStringToUnicodeString(pustrKeyPath, &AnsiPath, TRUE);
 }
 
 
 /******************************************************************************
  *  RtlOpenCurrentUser                      [NTDLL]
  */
-DWORD WINAPI RtlOpenCurrentUser(DWORD x1,
-                                DWORD *x2)
+ODINFUNCTION2(DWORD,      RtlOpenCurrentUser,
+              ACCESS_MASK,DesiredAccess,
+              PHANDLE,    pKeyHandle)
 {
   /* Note: this is not the correct solution,
    * But this works pretty good on wine and NT4.0 binaries
    */
-  if (x1 == 0x2000000 )
+
+  if (DesiredAccess == 0x2000000 )
   {
-    *x2 = HKEY_CURRENT_USER;
+    *pKeyHandle = HKEY_CURRENT_USER;
     return TRUE;
   }
-
+  
   return FALSE;
+/*  PH 2000/08/18 currently disabled
+  OBJECT_ATTRIBUTES ObjectAttributes;
+  UNICODE_STRING ObjectName;
+  NTSTATUS ret;
+  
+  RtlFormatCurrentUserKeyPath(&ObjectName);
+  InitializeObjectAttributes(&ObjectAttributes,&ObjectName,OBJ_CASE_INSENSITIVE,0, NULL);
+  ret = NtOpenKey(pKeyHandle, DesiredAccess, &ObjectAttributes);
+  RtlFreeUnicodeString(&ObjectName);
+  return ret;
+  */
 }
 
 
@@ -574,6 +607,22 @@ BOOLEAN  WINAPI RtlDosPathNameToNtPathName_U(LPWSTR          from,
   return TRUE;
 }
 
+
+/***********************************************************************
+ *           RtlImageNtHeader   (NTDLL)
+ */
+PIMAGE_NT_HEADERS WINAPI RtlImageNtHeader(HMODULE hModule)
+{
+    IMAGE_NT_HEADERS *ret = NULL;
+    IMAGE_DOS_HEADER *dos = (IMAGE_DOS_HEADER *)hModule;
+
+    if (dos->e_magic == IMAGE_DOS_SIGNATURE)
+    {
+        ret = (IMAGE_NT_HEADERS *)((char *)dos + dos->e_lfanew);
+        if (ret->Signature != IMAGE_NT_SIGNATURE) ret = NULL;
+    }
+    return ret;
+}
 
 /******************************************************************************
  *  RtlCreateEnvironment                    [NTDLL]
@@ -616,6 +665,111 @@ DWORD WINAPI RtlQueryEnvironmentVariable_U(DWORD           x1,
   return 0;
 }
 
+/******************************************************************************
+ *  RtlInitializeGenericTable		[NTDLL] 
+ */
+DWORD WINAPI RtlInitializeGenericTable(void)
+{
+	FIXME("\n");
+	return 0;
+}
+
+/******************************************************************************
+ *  RtlInitializeBitMap			[NTDLL] 
+ * 
+ */
+NTSTATUS WINAPI RtlInitializeBitMap(DWORD x1,DWORD x2,DWORD x3)
+{
+	FIXME("(0x%08lx,0x%08lx,0x%08lx),stub\n",x1,x2,x3);
+	return 0;
+}
+
+/******************************************************************************
+ *  RtlSetBits				[NTDLL] 
+ * 
+ */
+NTSTATUS WINAPI RtlSetBits(DWORD x1,DWORD x2,DWORD x3)
+{
+	FIXME("(0x%08lx,0x%08lx,0x%08lx),stub\n",x1,x2,x3);
+	return 0;
+}
+
+/******************************************************************************
+ *  RtlFindClearBits			[NTDLL] 
+ * 
+ */
+NTSTATUS WINAPI RtlFindClearBits(DWORD x1,DWORD x2,DWORD x3)
+{
+	FIXME("(0x%08lx,0x%08lx,0x%08lx),stub\n",x1,x2,x3);
+	return 0;
+}
+
+/******************************************************************************
+ *  RtlClearBits			[NTDLL] 
+ * 
+ */
+NTSTATUS WINAPI RtlClearBits(DWORD x1,DWORD x2,DWORD x3)
+{
+	FIXME("(0x%08lx,0x%08lx,0x%08lx),stub\n",x1,x2,x3);
+	return 0;
+}
+
+/******************************************************************************
+ *  RtlCopyMemory   [NTDLL] 
+ * 
+ */
+#undef RtlCopyMemory
+VOID WINAPI RtlCopyMemory( VOID *Destination, CONST VOID *Source, SIZE_T Length )
+{
+    memcpy(Destination, Source, Length);
+}	
+
+/******************************************************************************
+ *  RtlMoveMemory   [NTDLL] 
+ */
+#undef RtlMoveMemory
+VOID WINAPI RtlMoveMemory( VOID *Destination, CONST VOID *Source, SIZE_T Length )
+{
+    memmove(Destination, Source, Length);
+}
+
+/******************************************************************************
+ *  RtlFillMemory   [NTDLL] 
+ */
+#undef RtlFillMemory
+VOID WINAPI RtlFillMemory( VOID *Destination, SIZE_T Length, UINT Fill )
+{
+    memset(Destination, Fill, Length);
+}
+
+/******************************************************************************
+ *  RtlZeroMemory   [NTDLL] 
+ */
+#undef RtlZeroMemory
+VOID WINAPI RtlZeroMemory( VOID *Destination, SIZE_T Length )
+{
+    memset(Destination, 0, Length);
+}
+
+/******************************************************************************
+ *  RtlCompareMemory   [NTDLL] 
+ */
+SIZE_T WINAPI RtlCompareMemory( const VOID *Source1, const VOID *Source2, SIZE_T Length)
+{
+    int i;
+    for(i=0; (i<Length) && (((LPBYTE)Source1)[i]==((LPBYTE)Source2)[i]); i++);
+    return i;
+}
+
+/******************************************************************************
+ *  RtlAssert                           [NTDLL]
+ *
+ * Not implemented in non-debug versions.
+ */
+void WINAPI RtlAssert(LPVOID x1,LPVOID x2,DWORD x3, DWORD x4)
+{
+	FIXME("(%p,%p,0x%08lx,0x%08lx),stub\n",x1,x2,x3,x4);
+}
 
 /*****************************************************************************
  * Name      : RtlCopyLuid

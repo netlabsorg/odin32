@@ -1,4 +1,4 @@
-/* $Id: sync.cpp,v 1.3 1999-08-18 21:45:14 phaller Exp $ */
+/* $Id: sync.cpp,v 1.4 2000-08-20 15:17:00 phaller Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -157,3 +157,40 @@ NTSTATUS WIN32API NtResetEvent(HANDLE hEvent)
   return 0;
 }
 
+/**************************************************************************
+ *                 NtClearEvent                   [NTDLL.?]
+ */
+NTSTATUS WIN32API NtClearEvent(HANDLE hEvent)
+{
+  dprintf(("NTDLL: NtClearEvent(%08xh) not implemented.\n",
+           hEvent));
+
+  return 0;
+}
+
+/**************************************************************************
+ *                 NtPulseEvent                   [NTDLL.?]
+ */
+NTSTATUS WIN32API NtPulseEvent(HANDLE hEvent,
+                               PULONG PulseCount)
+{
+  dprintf(("NTDLL: NtPulseEvent(%08xh,%08xh) not implemented.\n",
+           hEvent,
+          PulseCount));
+
+  return 0;
+}
+
+/**************************************************************************
+ *                 NtQueryEvent                   [NTDLL.?]
+ */
+NTSTATUS WIN32API NtQueryEvent(HANDLE hEvent,
+                               UINT   EventInformationClass,
+                               PVOID  EventInformation,
+                               ULONG  EventInformationLength,
+                               PULONG ReturnLength)
+{
+  dprintf(("NTDLL: NtQueryEvent() not implemented.\n"));
+
+  return 0;
+}
