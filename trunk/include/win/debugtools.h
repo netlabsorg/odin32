@@ -77,22 +77,40 @@ extern const char * const debug_ch_name[];
 #endif  /* __WINE__ */
 
 #ifdef __WIN32OS2__
+#  undef DECLARE_DEBUG_CHANNEL
+#  define DECLARE_DEBUG_CHANNEL(ch)
+#  undef DEFAULT_DEBUG_CHANNEL
+#  define DEFAULT_DEBUG_CHANNEL(ch)
 #  undef TRACE
 #  define TRACE WriteLog
 #  undef TRACE_
 #  define TRACE_(ch) WriteLog
+#  undef TRACE_ON
+#  define TRACE_ON(ch) 0
 #  undef FIXME
 #  define FIXME WriteLog
 #  undef FIXME_
 #  define FIXME_(ch) WriteLog
+#  undef FIXME_ON
+#  define FIXME_ON(ch) 0
 #  undef WARN
 #  define WARN  WriteLog
 #  undef WARN_
 #  define WARN_(ch) WriteLog
+#  undef WARN_ON
+#  define WARN_ON(ch)  0
 #  undef ERR
 #  define ERR  WriteLog
 #  undef ERR_
 #  define ERR_(ch) WriteLog
+#  undef ERR_ON
+#  define ERR_ON(ch)   0
+
+#undef __GET_DEBUGGING
+#define __GET_DEBUGGING(dbcl,dbch)
+#undef  __SET_DEBUGGING
+#define __SET_DEBUGGING(dbcl,dbch,on)
+
 #endif
 
 
