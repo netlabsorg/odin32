@@ -1,10 +1,14 @@
-/* $Id: changelog,v 1.1672 2001-09-05 14:58:40 bird Exp $ */
+/* $Id: changelog,v 1.1673 2001-09-06 03:21:51 bird Exp $ */
 
- 2001-09-04: knut st. osmundsen <kosmunds@csc.com>
-    - src\*:    o Added/fixed CVS $Id tag in source files. Sorry, if this
-                  caused long checkout and compilation.
+ 2001-09-05: knut st. osmundsen <kosmunds@csc.com>
+    - src\*:    o Added/fixed CVS $Id tag in source files.
+                  Sorry, if this caused long checkout and compilation. :-)
     - tools\database:
                 o Fixed a couple of bugs, just in case we get it online some day :-).
+                o More or less implemented @design notes.
+    - tools\dailybuild:
+                o Added automatic uploading of current odin32 api database.
+                  (_test_ it at http://odin.netlabs.org/Odin32DBTest/Odin32DB.phtml)
 
  2001-09-04: knut st. osmundsen <kosmunds@csc.com>
     - FastDep:  o Synced FastDep with OS2Tools.
