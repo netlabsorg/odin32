@@ -1,4 +1,4 @@
-/*$Id: listview.cpp,v 1.5 2000-03-22 16:56:36 cbratschi Exp $*/
+/*$Id: listview.cpp,v 1.6 2000-03-23 17:14:34 cbratschi Exp $*/
 /*
  * Listview control
  *
@@ -11,9 +11,7 @@
  * Listview control implementation.
  *
  * TODO:
- *   1. No horizontal scrolling when header is larger than the client area.
- *   2. Drawing optimizations.
- *   3. Hot item handling.
+ *   - Hot item handling.
  *
  * Notifications:
  *   LISTVIEW_Notify : most notifications from children (editbox and header)
@@ -34,7 +32,6 @@
  *   LISTVIEW_Scroll : not implemented
  *   LISTVIEW_RedrawItems : empty stub
  *   LISTVIEW_Update : not completed
- * WM_SETREDRAW not implemented
  *
  * the sort algorithm isn't stable (order of same items isn't fixed)!!!
  */
@@ -155,7 +152,7 @@ static LRESULT LISTVIEW_SetItemState(HWND hwnd,INT nItem,DWORD data,DWORD mask);
 static BOOL    LISTVIEW_SetItemPosition(HWND hwnd, INT nItem, INT nPosX, INT nPosY);
 static LRESULT LISTVIEW_GetStringWidth(HWND hwnd,HDC hdc,LPWSTR lpszText,BOOL unicode);
 static BOOL    LISTVIEW_EnsureVisible(HWND hwnd,INT nItem,BOOL bPartial);
-static VOID    LISTVIEW_UpdateHeaderSize(HWND hwnd, INT nNewScrollPos);
+static VOID    LISTVIEW_UpdateHeaderSize(HWND hwnd,INT nNewScrollPos,INT xScroll);
 
 static VOID LISTVIEW_Refresh(HWND hwnd)
 {
@@ -174,8 +171,8 @@ static VOID LISTVIEW_Refresh(HWND hwnd)
     RECT rect,rect2;
 
     GetClientRect(hwnd,&rect);
-    GetClientRect(infoPtr->hwndHeader,&rect2);
-    rect.top += rect2.bottom;
+    GetWindowRect(infoPtr->hwndHeader,&rect2);
+    rect.top += rect2.bottom-rect2.top;
     InvalidateRect(hwnd,&rect,TRUE);
   } else InvalidateRect(hwnd,NULL,TRUE);
 }
@@ -223,6 +220,7 @@ static VOID LISTVIEW_RefreshItem(HWND hwnd,INT nItem)
 
   if (infoPtr->refreshFlags & (RF_REFRESH | RF_NOREDRAW)) return;
   LISTVIEW_GetItemRect(hwnd,nItem,&rect,LVIR_SELECTBOUNDS);
+//CB: todo: clip header
   InvalidateRect(hwnd,&rect,TRUE);
 }
 
@@ -230,11 +228,11 @@ static VOID LISTVIEW_RefreshSubItem(HWND hwnd,INT nItem,INT nSubItem)
 {
   LISTVIEW_INFO *infoPtr = (LISTVIEW_INFO*)LISTVIEW_GetInfoPtr(hwnd);
   RECT rect,header;
-  INT xOffset = infoPtr->lefttop.x*LISTVIEW_SCROLL_DIV_SIZE;
+  INT xOffset = infoPtr->lefttop.x*infoPtr->scrollStep.x;
 
   if (infoPtr->refreshFlags & (RF_REFRESH | RF_NOREDRAW)) return;
   LISTVIEW_GetItemRect(hwnd,nItem,&rect,LVIR_SELECTBOUNDS);
-
+//CB: todo: clip header
   //get header rect
   Header_GetItemRect(infoPtr->hwndHeader,nSubItem,&header);
   rect.left = header.left+REPORT_MARGINX;
@@ -259,26 +257,36 @@ static VOID LISTVIEW_ScrollWindow(HWND hwnd,INT xScroll,INT yScroll,UINT uView)
 
     //clip header
     GetClientRect(hwnd,&rect);
-    GetClientRect(infoPtr->hwndHeader,&header);
+    GetWindowRect(infoPtr->hwndHeader,&header);
+
     if (yScroll < 0)
-    {
-      //up
-      rect.top += header.bottom-yScroll;
-      ScrollWindowEx(hwnd,xScroll,yScroll,&rect,NULL,0,NULL,0);
-      rect.top = rect.bottom+yScroll;
-      if (rect.top < header.bottom) rect.top = header.bottom;
-      InvalidateRect(hwnd,&rect,TRUE);//CB: still wrong pixels
+    { //up
+      INT headerH = header.bottom-header.top;
+
+      rect.top += headerH-yScroll;
+      if (rect.top < rect.bottom)
+      {
+        ScrollWindowEx(hwnd,xScroll,yScroll,&rect,NULL,0,NULL,0);
+        rect.top = rect.bottom+yScroll;
+        if (rect.top < headerH) rect.top = headerH;
+        InvalidateRect(hwnd,&rect,TRUE);//CB: still wrong pixels
+      } else
+      {
+        rect.top = headerH;
+        InvalidateRect(hwnd,&rect,TRUE);
+      }
     } else if (yScroll > 0)
     { //down
-      rect.top += header.bottom;
+      rect.top += header.bottom-header.top;
       ScrollWindowEx(hwnd,xScroll,yScroll,&rect,NULL,0,NULL,SW_INVALIDATE);
     }
     if (yScroll == 0)
     {
-      rect.top += header.bottom;
+      rect.top += header.bottom-header.top;
       ScrollWindowEx(hwnd,xScroll,yScroll,&rect,NULL,0,NULL,SW_INVALIDATE);
     }
-    if (xScroll != 0) LISTVIEW_UpdateHeaderSize(hwnd,infoPtr->lefttop.x);
+
+    if (xScroll != 0) LISTVIEW_UpdateHeaderSize(hwnd,infoPtr->lefttop.x,xScroll);
   } else ScrollWindowEx(hwnd,xScroll,yScroll,NULL,NULL,0,NULL,SW_INVALIDATE);
 }
 
@@ -296,7 +304,7 @@ static VOID LISTVIEW_ScrollWindow(HWND hwnd,INT xScroll,INT yScroll,UINT uView)
  *
  * NOTES
  */
-static VOID LISTVIEW_UpdateHeaderSize(HWND hwnd, INT nNewScrollPos)
+static VOID LISTVIEW_UpdateHeaderSize(HWND hwnd, INT nNewScrollPos,INT xScroll)
 {
     LISTVIEW_INFO *infoPtr = (LISTVIEW_INFO*)LISTVIEW_GetInfoPtr(hwnd);
     RECT winRect;
@@ -309,12 +317,11 @@ static VOID LISTVIEW_UpdateHeaderSize(HWND hwnd, INT nNewScrollPos)
     point[1].y = winRect.bottom;
 
     MapWindowPoints(HWND_DESKTOP, hwnd, point, 2);
-    point[0].x = -(nNewScrollPos * LISTVIEW_SCROLL_DIV_SIZE);
-    point[1].x += (nNewScrollPos * LISTVIEW_SCROLL_DIV_SIZE);
+    point[0].x = -nNewScrollPos*infoPtr->scrollStep.x;
+    point[1].x += nNewScrollPos*infoPtr->scrollStep.x;
 
-    SetWindowPos(infoPtr->hwndHeader,0,
-        point[0].x,point[0].y,point[1].x,point[1].y,
-        SWP_NOZORDER | SWP_NOACTIVATE);
+    //CB: todo: smoother scrolling (BTW: SWP_NOREDRAW doesn't work!)
+    SetWindowPos(infoPtr->hwndHeader,0,point[0].x,point[0].y,point[1].x,point[1].y,SWP_NOZORDER | SWP_NOACTIVATE | SWP_NOREDRAW);
 }
 
 /***
@@ -339,6 +346,11 @@ static VOID LISTVIEW_UpdateScroll(HWND hwnd)
 
   if (dwStyle & LVS_NOSCROLL)
   {
+    infoPtr->lefttop.x = 0;
+    infoPtr->lefttop.y = 0;
+    infoPtr->maxScroll = infoPtr->lefttop;
+    infoPtr->scrollPage = infoPtr->lefttop;
+    infoPtr->scrollStep = infoPtr->lefttop;
     ShowScrollBar(hwnd,SB_BOTH,FALSE);
     return;
   }
@@ -352,13 +364,14 @@ static VOID LISTVIEW_UpdateScroll(HWND hwnd)
     INT nCountPerColumn = LISTVIEW_GetCountPerColumn(hwnd);
     INT nCountPerRow = LISTVIEW_GetCountPerRow(hwnd);
     INT nNumOfItems = GETITEMCOUNT(infoPtr);
-//CB: todo: doesn't work!
-    infoPtr->maxScroll.x = nNumOfItems / nCountPerColumn+1;
+
+    infoPtr->maxScroll.x = nNumOfItems / nCountPerColumn;
     if ((nNumOfItems % nCountPerColumn) == 0)
       infoPtr->maxScroll.x--;
 
     infoPtr->lefttop.x = LISTVIEW_GetTopIndex(hwnd) / nCountPerColumn;
     infoPtr->scrollPage.x = nCountPerRow;
+    infoPtr->scrollStep.x = infoPtr->nItemWidth;
 
     scrollInfo.nMin  = 0;
     scrollInfo.nMax  = infoPtr->maxScroll.x-1;
@@ -372,6 +385,7 @@ static VOID LISTVIEW_UpdateScroll(HWND hwnd)
     infoPtr->maxScroll.y = GETITEMCOUNT(infoPtr);
     infoPtr->lefttop.y = LISTVIEW_GetTopIndex(hwnd);
     infoPtr->scrollPage.y = LISTVIEW_GetCountPerColumn(hwnd);
+    infoPtr->scrollStep.y = infoPtr->nItemHeight;
 
     scrollInfo.nMin  = 0;
     scrollInfo.nMax  = infoPtr->maxScroll.y-1;
@@ -387,6 +401,7 @@ static VOID LISTVIEW_UpdateScroll(HWND hwnd)
 
     infoPtr->scrollPage.x = nListWidth / LISTVIEW_SCROLL_DIV_SIZE;
     infoPtr->maxScroll.x = max(infoPtr->nItemWidth / LISTVIEW_SCROLL_DIV_SIZE, 0);
+    infoPtr->scrollStep.x = LISTVIEW_SCROLL_DIV_SIZE;
 
     scrollInfo.nMin  = 0;
     scrollInfo.nMax  = infoPtr->maxScroll.x-1;
@@ -396,7 +411,7 @@ static VOID LISTVIEW_UpdateScroll(HWND hwnd)
     SetScrollInfo(hwnd,SB_HORZ,&scrollInfo,TRUE);
 
     /* Update the Header Control */
-    LISTVIEW_UpdateHeaderSize(hwnd,infoPtr->lefttop.x);
+    LISTVIEW_UpdateHeaderSize(hwnd,infoPtr->lefttop.x,0);
   } else
   {
     RECT rcView;
@@ -411,6 +426,7 @@ static VOID LISTVIEW_UpdateScroll(HWND hwnd)
         infoPtr->lefttop.x = 0;
       infoPtr->maxScroll.x = max(nViewWidth / LISTVIEW_SCROLL_DIV_SIZE, 0);
       infoPtr->scrollPage.x = nListWidth / LISTVIEW_SCROLL_DIV_SIZE;
+      infoPtr->scrollStep.x = LISTVIEW_SCROLL_DIV_SIZE;
 
       scrollInfo.nMin  = 0;
       scrollInfo.nMax  = infoPtr->maxScroll.x-1;
@@ -425,6 +441,7 @@ static VOID LISTVIEW_UpdateScroll(HWND hwnd)
         infoPtr->lefttop.x = 0;
       infoPtr->maxScroll.y = max(nViewHeight / LISTVIEW_SCROLL_DIV_SIZE,0);
       infoPtr->scrollPage.y = nListHeight / LISTVIEW_SCROLL_DIV_SIZE;
+      infoPtr->scrollStep.y = LISTVIEW_SCROLL_DIV_SIZE;
 
       scrollInfo.nMin  = 0;
       scrollInfo.nMax  = infoPtr->maxScroll.y-1;
@@ -614,7 +631,7 @@ static LRESULT LISTVIEW_SetViewRect(HWND hwnd, LPRECT lprcView)
 //  TRACE("(hwnd=%x, left=%d, top=%d, right=%d, bottom=%d)\n", hwnd,
 //        lprcView->left, lprcView->top, lprcView->right, lprcView->bottom);
 
-  if (lprcView != NULL)
+  if (lprcView)
   {
     bResult = TRUE;
     infoPtr->rcView.left = lprcView->left;
@@ -644,21 +661,16 @@ static LRESULT LISTVIEW_GetViewRect(HWND hwnd, LPRECT lprcView)
   BOOL bResult = FALSE;
   POINT ptOrigin;
 
-//  TRACE("(hwnd=%x, lprcView=%p)\n", hwnd, lprcView);
-
-  if (lprcView != NULL)
+  if (lprcView)
   {
     bResult = LISTVIEW_GetOrigin(hwnd, &ptOrigin);
-    if (bResult != FALSE)
+    if (bResult)
     {
       lprcView->left = infoPtr->rcView.left + ptOrigin.x;
       lprcView->top = infoPtr->rcView.top + ptOrigin.y;
       lprcView->right = infoPtr->rcView.right + ptOrigin.x;
       lprcView->bottom = infoPtr->rcView.bottom + ptOrigin.y;
     }
-
-//    TRACE("(left=%d, top=%d, right=%d, bottom=%d)\n",
-//          lprcView->left, lprcView->top, lprcView->right, lprcView->bottom);
   }
 
   return bResult;
@@ -718,8 +730,6 @@ static INT LISTVIEW_GetItemWidth(HWND hwnd)
   INT nLabelWidth;
   INT i;
 
-//  TRACE("(hwnd=%x)\n", hwnd);
-
   if (uView == LVS_ICON)
   {
     nItemWidth = infoPtr->iconSpacing.cx;
@@ -730,7 +740,7 @@ static INT LISTVIEW_GetItemWidth(HWND hwnd)
     nHeaderItemCount = Header_GetItemCount(infoPtr->hwndHeader);
     for (i = 0; i < nHeaderItemCount; i++)
     {
-      if (Header_GetItemRect(infoPtr->hwndHeader, i, &rcHeaderItem) != 0)
+      if (Header_GetItemRect(infoPtr->hwndHeader, i, &rcHeaderItem))
       {
         nItemWidth += (rcHeaderItem.right - rcHeaderItem.left);
       }
@@ -2060,7 +2070,7 @@ static VOID LISTVIEW_DrawReport(HWND hwnd,HDC hdc,RECT *updateRect)
   INT nDrawPosY = infoPtr->rcList.top;
   INT nColumnCount = Header_GetItemCount(infoPtr->hwndHeader);
   RECT rcItem,rcClient,*rcHeader;
-  INT  j,nItem,nLast,xOffset = infoPtr->lefttop.x*LISTVIEW_SCROLL_DIV_SIZE;
+  INT  j,nItem,nLast,xOffset = infoPtr->lefttop.x*infoPtr->scrollStep.x;
 
   nItem = LISTVIEW_GetTopIndex(hwnd);
 
@@ -2247,7 +2257,7 @@ static VOID LISTVIEW_DrawList(HWND hwnd,HDC hdc,RECT *updateRect)
   nItem = LISTVIEW_GetTopIndex(hwnd);
 
   GetClientRect(hwnd,&rcClient);
-//CB: todo: hscroll!
+
   for (i = 0; i < nColumnCount; i++)
   {
     for (j = 0; j < nCountPerColumn; j++, nItem++)
@@ -2976,7 +2986,7 @@ static BOOL LISTVIEW_EnsureVisible(HWND hwnd,INT nItem,BOOL bPartial)
   /* ALWAYS bPartial == FALSE, FOR NOW! */
 
   rcItem.left = LVIR_BOUNDS;
-  if (LISTVIEW_GetItemRect(hwnd, nItem, &rcItem) != FALSE)
+  if (LISTVIEW_GetItemRect(hwnd, nItem, &rcItem))
   {
     if (rcItem.left < infoPtr->rcList.left)
     {
@@ -2985,17 +2995,17 @@ static BOOL LISTVIEW_EnsureVisible(HWND hwnd,INT nItem,BOOL bPartial)
         /* scroll left */
         if (uView == LVS_LIST)
         {
-          nScrollPosWidth = infoPtr->nItemWidth;
+          nScrollPosWidth = infoPtr->scrollStep.x;
           rcItem.left += infoPtr->rcList.left;
         } else if ((uView == LVS_SMALLICON) || (uView == LVS_ICON))
         {
-          nScrollPosWidth = LISTVIEW_SCROLL_DIV_SIZE;
+          nScrollPosWidth = infoPtr->scrollStep.x;
           rcItem.left += infoPtr->rcList.left;
         }
 
         /* When in LVS_REPORT view, the scroll position should
            not be updated. */
-        if (nScrollPosWidth != 0)
+        if (nScrollPosWidth)
         {
           if (rcItem.left % nScrollPosWidth == 0)
             infoPtr->lefttop.x += rcItem.left / nScrollPosWidth;
@@ -3017,16 +3027,16 @@ static BOOL LISTVIEW_EnsureVisible(HWND hwnd,INT nItem,BOOL bPartial)
         if (uView == LVS_LIST)
         {
           rcItem.right -= infoPtr->rcList.right;
-          nScrollPosWidth = infoPtr->nItemWidth;
+          nScrollPosWidth = infoPtr->scrollStep.x;
         } else if ((uView == LVS_SMALLICON) || (uView == LVS_ICON))
         {
           rcItem.right -= infoPtr->rcList.right;
-          nScrollPosWidth = LISTVIEW_SCROLL_DIV_SIZE;
+          nScrollPosWidth = infoPtr->scrollStep.x;
         }
 
         /* When in LVS_REPORT view, the scroll position should
            not be updated. */
-        if (nScrollPosWidth != 0)
+        if (nScrollPosWidth)
         {
           SCROLLINFO scrollInfo;
 
@@ -3052,11 +3062,11 @@ static BOOL LISTVIEW_EnsureVisible(HWND hwnd,INT nItem,BOOL bPartial)
         if (uView == LVS_REPORT)
         {
           rcItem.top -= infoPtr->rcList.top;
-          nScrollPosHeight = infoPtr->nItemHeight;
+          nScrollPosHeight = infoPtr->scrollStep.y;
         }
         else if ((uView == LVS_ICON) || (uView == LVS_SMALLICON))
         {
-          nScrollPosHeight = LISTVIEW_SCROLL_DIV_SIZE;
+          nScrollPosHeight = infoPtr->scrollStep.y;
           rcItem.top += infoPtr->rcList.top;
         }
 
@@ -3071,8 +3081,7 @@ static BOOL LISTVIEW_EnsureVisible(HWND hwnd,INT nItem,BOOL bPartial)
           SetScrollInfo(hwnd,SB_VERT,&scrollInfo,TRUE);
         }
       }
-    }
-    else if (rcItem.bottom > infoPtr->rcList.bottom)
+    } else if (rcItem.bottom > infoPtr->rcList.bottom)
     {
       /* scroll down */
       if (dwStyle & WS_VSCROLL)
@@ -3080,11 +3089,10 @@ static BOOL LISTVIEW_EnsureVisible(HWND hwnd,INT nItem,BOOL bPartial)
         if (uView == LVS_REPORT)
         {
           rcItem.bottom -= infoPtr->rcList.bottom;
-          nScrollPosHeight = infoPtr->nItemHeight;
-        }
-        else if ((uView == LVS_ICON) || (uView == LVS_SMALLICON))
+          nScrollPosHeight = infoPtr->scrollStep.y;
+        } else if ((uView == LVS_ICON) || (uView == LVS_SMALLICON))
         {
-          nScrollPosHeight = LISTVIEW_SCROLL_DIV_SIZE;
+          nScrollPosHeight = infoPtr->scrollStep.x;
           rcItem.bottom -= infoPtr->rcList.bottom;
         }
 
@@ -3102,7 +3110,7 @@ static BOOL LISTVIEW_EnsureVisible(HWND hwnd,INT nItem,BOOL bPartial)
   }
 
   if ((oldlefttop.x != infoPtr->lefttop.x) || (oldlefttop.y != infoPtr->lefttop.y))
-    LISTVIEW_ScrollWindow(hwnd,(oldlefttop.x-infoPtr->lefttop.x)*LISTVIEW_SCROLL_DIV_SIZE,(oldlefttop.y-infoPtr->lefttop.y)*infoPtr->nItemHeight,uView);
+    LISTVIEW_ScrollWindow(hwnd,(oldlefttop.x-infoPtr->lefttop.x)*infoPtr->scrollStep.x,(oldlefttop.y-infoPtr->lefttop.y)*infoPtr->scrollStep.y,uView);
 
   return TRUE;
 }
@@ -4804,12 +4812,12 @@ static LRESULT LISTVIEW_GetOrigin(HWND hwnd, LPPOINT lpptOrigin)
   if ((uView == LVS_SMALLICON) || (uView == LVS_ICON))
   {
     if (dwStyle & WS_HSCROLL)
-      lpptOrigin->x = -infoPtr->lefttop.x*LISTVIEW_SCROLL_DIV_SIZE;
+      lpptOrigin->x = -infoPtr->lefttop.x*infoPtr->scrollStep.x;
     else
       lpptOrigin->x = 0;
 
     if (dwStyle & WS_VSCROLL)
-      lpptOrigin->y = -infoPtr->lefttop.y*LISTVIEW_SCROLL_DIV_SIZE;
+      lpptOrigin->y = -infoPtr->lefttop.y*infoPtr->scrollStep.y;
     else
       lpptOrigin->y = 0;
 
@@ -6459,7 +6467,7 @@ static LRESULT LISTVIEW_HScroll(HWND hwnd,INT nScrollCode,SHORT nCurrentPos,HWND
     RECT rect;
     DWORD dwStyle = GetWindowLongA(hwnd,GWL_STYLE);
     UINT uView =  dwStyle & LVS_TYPEMASK;
-    INT xScroll = (oldX-infoPtr->lefttop.x)* LISTVIEW_SCROLL_DIV_SIZE;//CB:tocheck
+    INT xScroll = (oldX-infoPtr->lefttop.x)*infoPtr->scrollStep.x;
 
     ZeroMemory(&scrollInfo, sizeof(SCROLLINFO));
     scrollInfo.cbSize = sizeof(SCROLLINFO);
@@ -7102,37 +7110,29 @@ static LRESULT LISTVIEW_Notify(HWND hwnd, INT nCtrlId, LPNMHDR lpnmh)
   if (lpnmh->hwndFrom == infoPtr->hwndHeader)
   {
     /* handle notification from header control */
-    if ((lpnmh->code == HDN_ENDTRACKA) || (lpnmh->code == HDN_ENDTRACKW))
+    if ((lpnmh->code == HDN_ITEMCHANGEDA) || (lpnmh->code == HDN_ITEMCHANGEDW))
     {
-      infoPtr->nItemWidth = LISTVIEW_GetItemWidth(hwnd);
-      LISTVIEW_Refresh(hwnd);
-    }
-    else if((lpnmh->code ==  HDN_ITEMCLICKA) || (lpnmh->code ==  HDN_ITEMCLICKW))
+      INT width;
+
+      width = LISTVIEW_GetItemWidth(hwnd);
+      if (width != infoPtr->nItemWidth)
+      {
+        infoPtr->nItemWidth = width;
+        LISTVIEW_UpdateScroll(hwnd);
+        LISTVIEW_Refresh(hwnd);
+      }
+    } else if((lpnmh->code ==  HDN_ITEMCLICKA) || (lpnmh->code ==  HDN_ITEMCLICKW))
     {
-        /* Handle sorting by Header Column */
-        NMLISTVIEW nmlv;
-        LPNMHEADERA pnmHeader = (LPNMHEADERA) lpnmh;
+      /* Handle sorting by Header Column */
+      NMLISTVIEW nmlv;
+      LPNMHEADERA pnmHeader = (LPNMHEADERA)lpnmh;
 
-        ZeroMemory(&nmlv, sizeof(NMLISTVIEW));
-        nmlv.iItem = -1;
-        nmlv.iSubItem = pnmHeader->iItem;
+      ZeroMemory(&nmlv, sizeof(NMLISTVIEW));
+      nmlv.iItem = -1;
+      nmlv.iSubItem = pnmHeader->iItem;
 
-        sendNotify(hwnd,LVN_COLUMNCLICK,&nmlv.hdr);
-
+      sendNotify(hwnd,LVN_COLUMNCLICK,&nmlv.hdr);
     }
-    else if(lpnmh->code == NM_RELEASEDCAPTURE)
-    {
-      /* Idealy this should be done in HDN_ENDTRACKA
-       * but since SetItemBounds in Header.c is called after
-       * the notification is sent, it is neccessary to handle the
-       * update of the scroll bar here (Header.c works fine as it is,
-       * no need to disturb it)
-       */
-      infoPtr->nItemWidth = LISTVIEW_GetItemWidth(hwnd);
-      LISTVIEW_UpdateScroll(hwnd);
-      LISTVIEW_Refresh(hwnd);
-    }
-
   }
 
   return 0;
@@ -7408,27 +7408,19 @@ static LRESULT LISTVIEW_SetRedraw(HWND hwnd,BOOL bRedraw)
 static LRESULT LISTVIEW_Size(HWND hwnd, int Width, int Height)
 {
   LISTVIEW_INFO *infoPtr = (LISTVIEW_INFO*)LISTVIEW_GetInfoPtr(hwnd);
-  LONG lStyle = GetWindowLongA(hwnd, GWL_STYLE);
-  UINT uView = lStyle & LVS_TYPEMASK;
+  DWORD dwStyle = GetWindowLongA(hwnd,GWL_STYLE);
+  UINT uView = dwStyle & LVS_TYPEMASK;
 
   LISTVIEW_UpdateSize(hwnd);
+  LISTVIEW_UpdateScroll(hwnd);
 
   if ((uView == LVS_SMALLICON) || (uView == LVS_ICON))
   {
-    if (lStyle & LVS_ALIGNLEFT)
-    {
+    if (dwStyle & LVS_ALIGNLEFT)
       LISTVIEW_AlignLeft(hwnd);
-    }
     else
-    {
       LISTVIEW_AlignTop(hwnd);
-    }
   }
-
-  /* invalidate client area + erase background */
-  infoPtr->refreshFlags |= RF_UPDATESCROLL;
-  LISTVIEW_QueueRefresh(hwnd);
-
   return 0;
 }
 
@@ -7445,8 +7437,8 @@ static LRESULT LISTVIEW_Size(HWND hwnd, int Width, int Height)
 static VOID LISTVIEW_UpdateSize(HWND hwnd)
 {
   LISTVIEW_INFO *infoPtr = (LISTVIEW_INFO*)LISTVIEW_GetInfoPtr(hwnd);
-  LONG lStyle = GetWindowLongA(hwnd, GWL_STYLE);
-  UINT uView = lStyle & LVS_TYPEMASK;
+  LONG dwStyle = GetWindowLongA(hwnd,GWL_STYLE);
+  UINT uView = dwStyle & LVS_TYPEMASK;
   RECT rcList;
 
   GetClientRect(hwnd, &rcList);
@@ -7457,7 +7449,7 @@ static VOID LISTVIEW_UpdateSize(HWND hwnd)
 
   if (uView == LVS_LIST)
   {
-    if ((lStyle & WS_HSCROLL) == 0)
+    if (!(dwStyle & WS_HSCROLL))
     {
       INT nHScrollHeight = GetSystemMetrics(SM_CYHSCROLL);
       if (infoPtr->rcList.bottom > nHScrollHeight)
@@ -7465,19 +7457,18 @@ static VOID LISTVIEW_UpdateSize(HWND hwnd)
         infoPtr->rcList.bottom -= nHScrollHeight;
       }
     }
-  }
-  else if (uView == LVS_REPORT)
+  } else if (uView == LVS_REPORT)
   {
-    HDLAYOUT hl;
-    WINDOWPOS wp;
-
-    hl.prc = &rcList;
-    hl.pwpos = &wp;
-    Header_Layout(infoPtr->hwndHeader, &hl);
-    SetWindowPos(infoPtr->hwndHeader,hwnd,wp.x,wp.y,wp.cx,wp.cy,wp.flags);
-    if (!(LVS_NOCOLUMNHEADER & lStyle))
+    if (!(dwStyle & LVS_NOCOLUMNHEADER))
     {
-      infoPtr->rcList.top = max(wp.cy, 0);
+      HDLAYOUT hl;
+      WINDOWPOS wp;
+
+      hl.prc = &rcList;
+      hl.pwpos = &wp;
+      Header_Layout(infoPtr->hwndHeader, &hl);
+      SetWindowPos(infoPtr->hwndHeader,hwnd,wp.x,wp.y,wp.cx,wp.cy,wp.flags);
+      infoPtr->rcList.top = max(wp.cy,0);
     }
   }
 }
@@ -7497,13 +7488,10 @@ static VOID LISTVIEW_UpdateSize(HWND hwnd)
 static INT LISTVIEW_StyleChanged(HWND hwnd, WPARAM wStyleType,
                                  LPSTYLESTRUCT lpss)
 {
-  LISTVIEW_INFO *infoPtr = (LISTVIEW_INFO *)LISTVIEW_GetInfoPtr(hwnd);
+  LISTVIEW_INFO *infoPtr = (LISTVIEW_INFO*)LISTVIEW_GetInfoPtr(hwnd);
   UINT uNewView = lpss->styleNew & LVS_TYPEMASK;
   UINT uOldView = lpss->styleOld & LVS_TYPEMASK;
   RECT rcList = infoPtr->rcList;
-
-//  TRACE("(hwnd=%x, styletype=%x, stylestruct=%p)\n",
-//        hwnd, wStyleType, lpss);
 
   if (wStyleType == GWL_STYLE)
   {
@@ -8209,7 +8197,7 @@ VOID LISTVIEW_Register(VOID)
   WNDCLASSA wndClass;
 
   ZeroMemory(&wndClass, sizeof(WNDCLASSA));
-  wndClass.style = CS_GLOBALCLASS | CS_DBLCLKS;
+  wndClass.style = CS_GLOBALCLASS | CS_DBLCLKS | CS_HREDRAW | CS_VREDRAW;
   wndClass.lpfnWndProc = (WNDPROC)LISTVIEW_WindowProc;
   wndClass.cbClsExtra = 0;
   wndClass.cbWndExtra = sizeof(LISTVIEW_INFO *);
