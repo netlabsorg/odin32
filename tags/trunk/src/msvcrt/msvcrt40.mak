@@ -1,4 +1,4 @@
-# $Id: msvcrt40.mak,v 1.6 2003-01-10 13:13:50 sandervl Exp $
+# $Id: msvcrt40.mak,v 1.7 2003-01-15 10:43:16 sandervl Exp $
 
 #
 # Odin32 API
@@ -50,6 +50,7 @@ $(TARGET).lib:
     @copy $(OBJDIR)\$(TARGET).lib $(ODIN32_LIB_)\Release
     @copy $(OBJDIR)\$(TARGET).lib $(ODIN32_LIB_)\Debug
 
+lib: $(TARGET).lib
 
 #
 # Includes the common rules.
