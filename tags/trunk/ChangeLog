@@ -1,4 +1,10 @@
- /* $Id: ChangeLog,v 1.446 1999-11-14 01:27:36 davidr Exp $ */
+ /* $Id: ChangeLog,v 1.447 1999-11-14 11:59:26 sandervl Exp $ */
+
+ 99-11-14: Sander van Leeuwen <sandervl@xs4all.nl>
+	- USER32: Implemented GetMenuItemRect
+
+ 99-11-14: Edgar Buerkle <Edgar.Buerkle@gmx.net>
+	- USER32: Fixed WindowFromPoint
 
  99-11-14: David Raison <djr@lemur.co.uk>
  	- OLEAUT32: Added beginnings of IPicture interface for VB6 support.
