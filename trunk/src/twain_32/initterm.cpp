@@ -1,4 +1,4 @@
-/* $Id: initterm.cpp,v 1.3 2000-01-05 19:52:37 sandervl Exp $ */
+/* $Id: initterm.cpp,v 1.4 2000-01-05 23:28:26 sandervl Exp $ */
 
 /*
  * DLL entry point
@@ -46,9 +46,10 @@ extern DWORD _Resource_PEResTab;
 extern FARPROC   WINAPI GetProcAddress(HMODULE,LPCSTR);
 extern HMODULE   WINAPI LoadLibraryA(LPCSTR);
 extern BOOL      WINAPI FreeLibrary(HMODULE);
+extern int WINAPI PROFILE_GetOdinIniInt(LPCSTR section,LPCSTR key_name,int def);
 TW_UINT16 (APIENTRY *TWAINOS2_DSM_Entry)( pTW_IDENTITY, pTW_IDENTITY,
 	   TW_UINT32, TW_UINT16, TW_UINT16, TW_MEMREF) = 0;
-static HINSTANCE hTWAINOS2 = 0;
+static HINSTANCE hTWAIN = 0;
 
 }
 
@@ -87,6 +88,57 @@ unsigned long SYSTEM _DLL_InitTerm(unsigned long hModule, unsigned long
 
          CheckVersionFromHMOD(PE2LX_VERSION, hModule); /*PLF Wed  98-03-18 05:28:48*/
 
+         if (PROFILE_GetOdinIniInt("TWAIN","TwainIF",1) == 1)
+         {
+            dprintf(("TWAIN_32: Using CFM-Twain as Twain Source.\n\n"));
+            hTWAIN = LoadLibraryA("TWAINOS2.DLL");
+            if(hTWAIN) 
+            {   
+                *(VOID **)&TWAINOS2_DSM_Entry=(void*)GetProcAddress(hTWAIN, (LPCSTR)"DSM_Entry");
+            }
+	    else
+	    {
+              return 0UL;
+	    }
+         }
+
+         if (PROFILE_GetOdinIniInt("TWAIN","TwainIF",0) == 2)
+         {
+            dprintf(("TWAIN_32: Using STI-Twain as Twain Source (currently not supported).\n\n"));
+//            hTWAIN = LoadLibraryA("TWAIN.DLL");
+//            if(hTWAIN) 
+//            {   
+//                *(VOID **)&TWAINOS2_DSM_Entry=(void*)GetProcAddress(hTWAIN, (LPCSTR)"DSM_Entry");
+//            }
+            return 0UL;
+         }
+
+         if (PROFILE_GetOdinIniInt("TWAIN","TwainIF",0) == 3)
+         {
+            dprintf(("TWAIN_32: Using SANE as Twain Source  (currently not supported).\n\n"));
+//            hTWAIN = LoadLibraryA("TWAINSNE.DLL");
+//            if(hTWAIN) 
+//            {   
+//                *(VOID **)&TWAINOS2_DSM_Entry=(void*)GetProcAddress(hTWAIN, (LPCSTR)"DSM_Entry");
+//            }
+            return 0UL;
+         }
+         if (PROFILE_GetOdinIniInt("TWAIN","TwainIF",0) != 1 &&
+	     PROFILE_GetOdinIniInt("TWAIN","TwainIF",0) != 2 &&
+	     PROFILE_GetOdinIniInt("TWAIN","TwainIF",0) != 3)
+	 {
+            dprintf(("TWAIN_32: No or wrong TwainIF specified, using CFM-Twain as Twain Source.\n\n"));
+            hTWAIN = LoadLibraryA("TWAINOS2.DLL");
+            if(hTWAIN) 
+            {   
+                *(VOID **)&TWAINOS2_DSM_Entry=(void*)GetProcAddress(hTWAIN, (LPCSTR)"DSM_Entry");
+            }
+	    else
+	    {
+              return 0UL;
+	    }
+	 }
+
          /*******************************************************************/
          /* A DosExitList routine must be used to clean up if runtime calls */
          /* are required and the runtime is dynamically linked.             */
@@ -99,18 +151,11 @@ unsigned long SYSTEM _DLL_InitTerm(unsigned long hModule, unsigned long
          if(rc)
                 return 0UL;
 
-         hTWAINOS2 = LoadLibraryA("TWAINOS2.DLL");
-         if(hTWAINOS2) 
-         {   
-                *(VOID **)&TWAINOS2_DSM_Entry=(void*)GetProcAddress(hTWAINOS2, (LPCSTR)"DSM_Entry");
-         }
-	 else 	return 0;	//SvL: fail to load otherwise
-
          break;
       case 1 :
-         if(hTWAINOS2) 
-	 	FreeLibrary(hTWAINOS2);
-         hTWAINOS2 = 0;
+         if(hTWAIN) 
+	 	FreeLibrary(hTWAIN);
+         hTWAIN = 0;
 	 UnregisterLxDll(hModule);
          break;
       default  :
