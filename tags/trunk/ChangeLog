@@ -1,4 +1,8 @@
- /* $Id: ChangeLog,v 1.1025 2000-07-06 21:16:01 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.1026 2000-07-07 19:05:44 sandervl Exp $ */
+
+ 2000-07-07: Sander van Leeuwen <sandervl@xs4all.nl>
+    - NTDLL:    Bugfix for NtQueryInformationToken (TOKEN_USER); updated
+                with latest Wine code (TODO: NTDLL needs to be resynced)
 
  2000-07-06: Sander van Leeuwen <sandervl@xs4all.nl>
     - KERNEL32: Store user default language in thread database struct
