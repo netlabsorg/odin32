@@ -1,4 +1,4 @@
-/* $Id: commdlg.h,v 1.9 2001-01-10 20:53:46 sandervl Exp $ */
+/* $Id: commdlg.h,v 1.10 2001-04-24 20:36:39 sandervl Exp $ */
 /* 
  * COMMDLG - Common Wine Dialog ... :-)
  */
@@ -382,13 +382,34 @@ DECL_WINELIB_TYPE_AW(LPCHOOSEFONT)
 #define WM_CHOOSEFONT_SETLOGFONT	(WM_USER + 101)
 #define WM_CHOOSEFONT_SETFLAGS		(WM_USER + 102)
 
-#define LBSELCHSTRING  "commdlg_LBSelChangedNotify"
-#define SHAREVISTRING  "commdlg_ShareViolation"
-#define FILEOKSTRING   "commdlg_FileNameOK"
-#define COLOROKSTRING  "commdlg_ColorOK"
-#define SETRGBSTRING   "commdlg_SetRGBColor"
-#define FINDMSGSTRING  "commdlg_FindReplace"
-#define HELPMSGSTRING  "commdlg_help"
+#define LBSELCHSTRINGA  "commdlg_LBSelChangedNotify"
+#define LBSELCHSTRINGW  L"commdlg_LBSelChangedNotify"
+#define LBSELCHSTRING   WINELIB_NAME_AW(LBSELCHSTRING)
+
+#define SHAREVISTRINGA  "commdlg_ShareViolation"
+#define SHAREVISTRINGW  L"commdlg_ShareViolation"
+#define SHAREVISTRING   WINELIB_NAME_AW(SHAREVISTRING)
+
+#define FILEOKSTRINGA   "commdlg_FileNameOK"
+#define FILEOKSTRINGW   L"commdlg_FileNameOK"
+#define FILEOKSTRING    WINELIB_NAME_AW(FILEOKSTRING)
+
+#define COLOROKSTRINGA  "commdlg_ColorOK"
+#define COLOROKSTRINGW  L"commdlg_ColorOK"
+#define COLOROKSTRING   WINELIB_NAME_AW(COLOROKSTRING)
+
+#define SETRGBSTRINGA   "commdlg_SetRGBColor"
+#define SETRGBSTRINGW   L"commdlg_SetRGBColor"
+#define SETRGBSTRING    WINELIB_NAME_AW(SETRGBSTRING)
+
+#define FINDMSGSTRINGA  "commdlg_FindReplace"
+#define FINDMSGSTRINGW  L"commdlg_FindReplace"
+#define FINDMSGSTRING   WINELIB_NAME_AW(FINDMSGSTRING)
+
+#define HELPMSGSTRINGA  "commdlg_help"
+#define HELPMSGSTRINGW  L"commdlg_help"
+#define HELPMSGSTRING   WINELIB_NAME_AW(HELPMSGSTRING)
+
 
 #define CD_LBSELNOITEMS -1
 #define CD_LBSELCHANGE   0
