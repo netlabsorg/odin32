@@ -1,4 +1,4 @@
-; $Id: KERNEL32.DEF,v 1.139 2002-06-11 16:36:53 sandervl Exp $
+; $Id: KERNEL32.DEF,v 1.140 2002-06-15 10:41:43 sandervl Exp $
 
 ;Basis is Windows95 KERNEL32
 LIBRARY KERNEL32 INITINSTANCE TERMINSTANCE
@@ -1207,6 +1207,8 @@ EXPORTS
     strcmpiW                                                      @2020 NONAME
     strstrW                                                       @2021 NONAME
     strncmpiW                                                     @2022 NONAME
+    strtolW                                                       @2027 NONAME
+    strtoulW                                                      @2028 NONAME
 
     cp_wcstombs                                                   @2023 NONAME
     cp_mbstowcs                                                   @2024 NONAME
