@@ -1,9 +1,9 @@
-# $Id: makefile,v 1.1 2001-11-19 12:32:25 sandervl Exp $
+# $Id: makefile,v 1.2 2001-11-22 20:45:09 bird Exp $
 
 #
 # Odin32 API
 #
-#       common.lib makefile
+#       guidlib.lib makefile
 #
 
 
@@ -25,7 +25,7 @@ PUBLICLIB = 1
 # Object files. Prefix with OBJDIR and one space before the '\'.
 #
 OBJS = \
-$(OBJDIR)\guid.obj 
+$(OBJDIR)\guid.obj
 
 #
 # Target name - name of the library without extention and path.
