@@ -1,4 +1,7 @@
- /* $Id: changelog,v 1.563 1999-12-20 19:57:56 cbratschi Exp $ */
+ /* $Id: changelog,v 1.564 1999-12-20 22:22:34 sandervl Exp $ */
+
+ 99-12-20: Rene Pronk <R.Pronk@twi.tudelft.nl>
+	- WINMM: Bugfixes in waveOutOpen (flags) for winamp
 
  99-12-20  Markus Montkowski <mmontkowski@gmx.de>
 	- USER32: Fixed Coordinate conversion in WM_HITTEST (don't use handles as a coordinates)
@@ -8,14 +11,14 @@
 		  fixed DrawIcon/DrawIconEx
 		  fixed GetIconInfo (still bugs in load/create code)
 
- 99-12-19: Sander van Leeuwen <sandervl@xs4all.nl>
+ 99-12-20: Sander van Leeuwen <sandervl@xs4all.nl>
 	- CRTDLL: Added bsearch from EMX
-	- MSVCRT: Copy dlls into bin directory. Most apps seems to work
+	- MSVCRT: Copy dlls into bin directory. Most apps seem to work
                   (Notes, solitaire, winhlp32)
 	- NTDLL: Added qsort, ftol, CIpow, ltoa, ultoa
                  (ftol fixes black Notes toolbars)
 
- 99-12-19: Jens Wiessner <wiessnej@rfi.de>
+ 99-12-20: Jens Wiessner <wiessnej@rfi.de>
 	- MSVCRT: Added stubs
 
  99-12-19: Christoph Bratschi <cbratschi@datacomm.ch>
