@@ -1,4 +1,4 @@
-; $Id: calltab.asm,v 1.3 2000-01-22 18:21:01 bird Exp $
+; $Id: calltab.asm,v 1.4 2000-02-08 12:38:39 bird Exp $
 ;
 ; callTab - Call back again table - table with entry for each function which is overrided.
 ;           It holds the part of the prolog which was replaced by a jmp instruction.
@@ -23,11 +23,13 @@
     public _ldrRead@24
     public _LDRQAppType@8
     public _ldrEnum32bitRelRecs@24
+if 0    ; /* Currently problems with with WS4eB */
     public _IOSftOpen@20
     public _IOSftClose@4
     public _IOSftTransPath@4
     public _IOSftReadAt@20
     public _IOSftWriteAt@20
+endif
 
 ;
 ; Constants
