@@ -369,3 +369,14 @@ HRESULT WINAPI UrlHashA(LPCSTR pszUrl, unsigned char *lpDest, INT nDestLen)
   return NOERROR;
 }
 
+/*************************************************************************
+ *      UrlApplySchemeW	[SHLWAPI.@]
+ */
+HRESULT WINAPI UrlApplySchemeW(LPCWSTR pszIn, LPWSTR pszOut, LPDWORD pcchOut, DWORD dwFlags)
+{
+    HRESULT err = NOERROR;
+    FIXME("(%s %p %p %08lx): stub !\n", debugstr_w(pszIn), pszOut, pcchOut, dwFlags);
+    lstrcpyW(pszOut, pszIn);
+    *pcchOut = (err != E_POINTER) ? lstrlenW(pszOut) : 0;
+    return err;
+}

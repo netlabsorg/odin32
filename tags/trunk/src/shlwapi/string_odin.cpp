@@ -1,4 +1,4 @@
- /* $Id: string_odin.cpp,v 1.3 2001-07-20 15:37:53 sandervl Exp $ */
+ /* $Id: string_odin.cpp,v 1.4 2001-08-30 19:19:59 phaller Exp $ */
 
 /*
  * Win32 Lightweight SHELL32 for OS/2
@@ -270,5 +270,191 @@ ODINFUNCTIONNODBG2(LPSTR,  StrCpyA,
 }
 
 
+/*****************************************************************************
+ * Name      : StrSpnA
+ * Purpose   : find the first occurence of a character in string1
+ *             that is not contained in the set of characters specified by
+ *             string2.
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    : COMCTL32undoc.StrSpnW, CRTDLL.strspn
+ * Status    : UNTESTED
+ *
+ * Author    :
+ *****************************************************************************/
+
+ODINFUNCTION2(INT,    StrSpnA,
+              LPCSTR, lpString1,
+              LPCSTR, lpString2)
+{
+  // 2001-08-30 PH
+  // copied from implementation in COMCTL32
+  if ( (lpString1 == NULL) ||
+       (lpString2 == NULL) )
+    return 0;
+  
+  LPSTR lpLoop = (LPSTR)lpString1;
+  
+  for (; (*lpLoop != 0); lpLoop++ )
+    if ( StrChrA( lpString2, *lpLoop ) )
+      return (INT) (lpLoop - lpString1);
+  
+  return (INT) (lpLoop - lpString1);
+}
 
 
+/*****************************************************************************
+ * Name      : StrSpnW
+ * Purpose   : find the first occurence of a character in string1
+ *             that is not contained in the set of characters specified by
+ *             string2.
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    : COMCTL32undoc.StrSpnW, CRTDLL.strspn
+ * Status    : UNTESTED
+ *
+ * Author    :
+ *****************************************************************************/
+
+ODINFUNCTION2(INT,     StrSpnW,
+              LPCWSTR, lpString1,
+              LPCWSTR, lpString2)
+{
+  // 2001-08-30 PH
+  // copied from implementation in COMCTL32
+  if ( (lpString1 == NULL) ||
+       (lpString2 == NULL) )
+    return 0;
+  
+  LPWSTR lpLoop = (LPWSTR)lpString1;
+  
+  for (; (*lpLoop != 0); lpLoop++ )
+    if ( StrChrW( lpString2, *lpLoop ) )
+      return (INT) (lpLoop - lpString1);
+  
+  return (INT) (lpLoop - lpString1);
+}
+
+
+/*****************************************************************************
+ * Name      : StrPBrkA
+ * Purpose   : find the first occurence in string1 of any character from string2
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    : 
+ * Status    : UNTESTED
+ *
+ * Author    :
+ *****************************************************************************/
+
+ODINFUNCTION2(LPSTR,   StrPBrkA,
+              LPCSTR,  lpString1,
+              LPCSTR,  lpString2)
+{
+  register LPSTR s1;
+  
+  while (*lpString1)
+  {
+    for (s1 = (LPSTR)lpString2;
+         *s1 && *s1 != *lpString1;
+         s1++)
+         /* empty */
+      ;
+
+    if (*s1)
+      return (LPSTR)lpString1;
+
+    lpString1++;
+  }
+  
+  return (LPSTR)NULL;
+}
+
+
+/*****************************************************************************
+ * Name      : StrPBrkW
+ * Purpose   : find the first occurence in string1 of any character from string2
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    : 
+ * Status    : UNTESTED
+ *
+ * Author    :
+ *****************************************************************************/
+
+ODINFUNCTION2(LPWSTR,   StrPBrkW,
+              LPCWSTR,  lpString1,
+              LPCWSTR,  lpString2)
+{
+  register LPWSTR s1;
+  
+  while (*lpString1)
+  {
+    for (s1 = (LPWSTR)lpString2;
+         *s1 && *s1 != *lpString1;
+         s1++)
+         /* empty */
+      ;
+
+    if (*s1)
+      return (LPWSTR)lpString1;
+
+    lpString1++;
+  }
+  
+  return (LPWSTR)NULL;
+}
+
+
+/*************************************************************************
+ * StrRStrIA					[SHLWAPI]
+ */
+LPSTR WINAPI StrRStrIA(LPCSTR lpFirst, LPCSTR lpSrch)
+{
+  INT   iLen = lstrlenA(lpFirst) - lstrlenA(lpSrch);
+  
+  // lpSrch cannot fit into lpFirst
+  if (iLen < 0)
+    return (LPSTR)NULL;
+  
+  LPSTR lpThis = (LPSTR)lpFirst + iLen;
+  
+  while (lpThis >= lpFirst)
+  {
+    LPCSTR p1 = lpThis, p2 = lpSrch;
+    while (*p1 && *p2 && toupper(*p1) == toupper(*p2)) { p1++; p2++; }
+    if (!*p2) return (LPSTR)lpThis;
+    lpThis--;
+  }
+  
+  return NULL;
+}
+
+
+/*************************************************************************
+ * StrRStrIW					[SHLWAPI]
+ */
+LPWSTR WINAPI StrRStrIW(LPCWSTR lpFirst, LPCWSTR lpSrch)
+{
+  INT   iLen = lstrlenW(lpFirst) - lstrlenW(lpSrch);
+  
+  // lpSrch cannot fit into lpFirst
+  if (iLen < 0)
+    return (LPWSTR)NULL;
+  
+  LPWSTR lpThis = (LPWSTR)lpFirst + iLen;
+  
+  while (lpThis >= lpFirst)
+  {
+    LPCWSTR p1 = lpThis, p2 = lpSrch;
+    while (*p1 && *p2 && toupperW(*p1) == toupperW(*p2)) { p1++; p2++; }
+    if (!*p2) return (LPWSTR)lpThis;
+    lpThis--;
+  }
+  
+  return NULL;
+}
