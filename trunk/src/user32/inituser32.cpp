@@ -1,4 +1,4 @@
-/* $Id: inituser32.cpp,v 1.7 2001-11-20 09:53:56 sandervl Exp $ */
+/* $Id: inituser32.cpp,v 1.8 2001-12-13 12:24:42 sandervl Exp $ */
 /*
  * USER32 DLL entry point
  *
@@ -70,7 +70,7 @@ DWORD hInstanceUser32 = 0;
 /* If this fails, some hotkeys may not arrive properly at the */
 /* targetted window, but no more harmful things will happen.  */
 /**************************************************************/
-#define PMKBDHK_MODULE "PMKBDHK"
+static char PMKBDHK_MODULE[16] = "PMKBDHK";
 #define PMKBDHK_HOOK_INIT "hookInit"
 #define PMKBDHK_HOOK_TERM "hookKill"
 
@@ -83,6 +83,14 @@ static BOOL  (*APIENTRY pfnHookTerm)(void);
 // defined initialized in pmwindow.cpp: InitPM()
 extern HAB hab;
 
+//******************************************************************************
+//******************************************************************************
+void WIN32API SetCustomPMHookDll(LPSTR pszKbdDllName)
+{
+   strcpy(PMKBDHK_MODULE, pszKbdDllName);
+}
+//******************************************************************************
+//******************************************************************************
 void pmkbdhk_initialize(HAB _hab)
 {
   APIRET rc;
@@ -136,7 +144,8 @@ void pmkbdhk_initialize(HAB _hab)
     pmkbdhk_installed = TRUE;
   }
 }
-
+//******************************************************************************
+//******************************************************************************
 void pmkbdhk_terminate(void)
 {
   if (pmkbdhk_installed == TRUE)
@@ -161,8 +170,6 @@ void pmkbdhk_terminate(void)
     }
   }
 }
-
-
 /****************************************************************************/
 /* _DLL_InitTerm is the function that gets called by the operating system   */
 /* loader when it loads and frees this DLL for each process that accesses   */
@@ -233,7 +240,8 @@ ULONG APIENTRY inittermUser32(ULONG hModule, ULONG ulFlag)
    /***********************************************************/
    return 1UL;
 }
-
+//******************************************************************************
+//******************************************************************************
 void APIENTRY cleanupUser32(ULONG ulReason)
 {
   dprintf(("user32 exit\n"));
@@ -255,4 +263,5 @@ void APIENTRY cleanupUser32(ULONG ulReason)
    CloseSpyQueue();
    dprintf(("user32 exit done\n"));
 }
-
+//******************************************************************************
+//******************************************************************************
