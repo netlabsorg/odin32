@@ -1,4 +1,4 @@
-/* $Id: dev32.h,v 1.5 2001-09-26 04:00:29 bird Exp $
+/* $Id: dev32.h,v 1.6 2001-10-19 01:49:06 bird Exp $
  *
  * dev32 - header file for 32-bit part of the driver.
  *
@@ -69,6 +69,7 @@ ULONG  _Optlink x86DisableWriteProtect(void);
 ULONG  _Optlink x86RestoreWriteProtect(ULONG flWP);
 int     interpretFunctionProlog32(char *pach);
 int     interpretFunctionProlog16(char *pach);
+int     InitkKrnlLibLog(void);
 int     krnlInit(void);
 int     krnlInit2(void);
 
