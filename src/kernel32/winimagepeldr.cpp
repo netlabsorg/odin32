@@ -1,4 +1,4 @@
-/* $Id: winimagepeldr.cpp,v 1.47 2000-06-08 18:08:57 sandervl Exp $ */
+/* $Id: winimagepeldr.cpp,v 1.48 2000-06-26 12:23:54 sandervl Exp $ */
 
 /*
  * Win32 PE loader Image base class
@@ -104,7 +104,7 @@ Win32PeLdrImage::Win32PeLdrImage(char *pszFileName, BOOL isExe, int loadtype) :
     nrsections(0), imageSize(0),
     imageVirtBase(-1), realBaseAddress(0), imageVirtEnd(0),
     nrNameExports(0), nrOrdExports(0), nameexports(NULL), ordexports(NULL),
-    memmap(NULL), pFixups(NULL)
+    memmap(NULL), pFixups(NULL), dwFixupSize(0)
 {
  HFILE  dllfile;
 
@@ -463,7 +463,8 @@ BOOL Win32PeLdrImage::init(ULONG reservedMem)
    }
 
    if(realBaseAddress != oh.ImageBase) {
-	pFixups = (PIMAGE_BASE_RELOCATION)ImageDirectoryOffset(win32file, IMAGE_DIRECTORY_ENTRY_BASERELOC);
+	pFixups     = (PIMAGE_BASE_RELOCATION)ImageDirectoryOffset(win32file, IMAGE_DIRECTORY_ENTRY_BASERELOC);
+        dwFixupSize = ImageDirectorySize(win32file, IMAGE_DIRECTORY_ENTRY_BASERELOC);
 	commitPage((ULONG)pFixups, FALSE);
    }
 #ifdef COMMIT_ALL
@@ -620,9 +621,7 @@ BOOL Win32PeLdrImage::commitPage(ULONG virtAddress, BOOL fWriteAccess, int fPage
 		dprintf((LOG, "Win32PeLdrImage::commitPage: DosRead failed to read %x (%x) bytes at %x for 0x%x!", size, ulRead, fileoffset, virtAddress));
     		return FALSE;
 	}
-   	if(realBaseAddress != oh.ImageBase) {
-		setFixups(virtAddress, sectionsize);
-	}
+	setFixups(virtAddress, sectionsize);
 
   	rc = DosSetMem((PVOID)virtAddress, sectionsize, protflags);
   	if(rc) {
@@ -636,9 +635,8 @@ BOOL Win32PeLdrImage::commitPage(ULONG virtAddress, BOOL fWriteAccess, int fPage
 		dprintf((LOG, "Win32PeLdrImage::commitPage: DosSetMem failed (%d)!", rc));
     		return FALSE;
 	}
-   	if(realBaseAddress != oh.ImageBase) {
-		setFixups(virtAddress, sectionsize);
-	}
+	setFixups(virtAddress, sectionsize);
+
   	rc = DosSetMem((PVOID)virtAddress, sectionsize, protflags);
   	if(rc) {
 		dprintf((LOG, "Win32PeLdrImage::commitPage: DosSetMem failed (%d)!", rc));
@@ -871,7 +869,7 @@ BOOL Win32PeLdrImage::setFixups(ULONG virtAddress, ULONG size)
  Section *section;
  PIMAGE_BASE_RELOCATION prel = pFixups;
 
-  if(fh.Characteristics & IMAGE_FILE_RELOCS_STRIPPED) {
+  if(realBaseAddress == oh.ImageBase || fh.Characteristics & IMAGE_FILE_RELOCS_STRIPPED) {
     	return(TRUE);
   }
 
@@ -882,10 +880,14 @@ BOOL Win32PeLdrImage::setFixups(ULONG virtAddress, ULONG size)
  
   if(prel) {
  	j = 1;
-	while(prel->VirtualAddress && prel->VirtualAddress < virtAddress) {
+	while(((ULONG)prel < (ULONG)pFixups+dwFixupSize) && 
+              prel->VirtualAddress && prel->VirtualAddress < virtAddress) 
+        {
       		prel = (PIMAGE_BASE_RELOCATION)((char*)prel + prel->SizeOfBlock);
 	}
-    	while(prel->VirtualAddress && prel->VirtualAddress < virtAddress + size) {
+	while(((ULONG)prel < (ULONG)pFixups+dwFixupSize) && 
+              prel->VirtualAddress && prel->VirtualAddress < virtAddress + size) 
+        {
       		page = (char *)((char *)prel + (ULONG)prel->VirtualAddress);
       		count  = (prel->SizeOfBlock - 8)/2;
       		j++;
