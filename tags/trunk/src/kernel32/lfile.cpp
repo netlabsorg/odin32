@@ -1,4 +1,4 @@
-/* $Id: lfile.cpp,v 1.3 1999-06-10 20:47:59 phaller Exp $ */
+/* $Id: lfile.cpp,v 1.4 1999-10-06 15:00:27 phaller Exp $ */
 
 /*
  *
@@ -148,7 +148,11 @@ HFILE WIN32API _lopen(LPCSTR pszFileName,
    dprintf(("KERNEL32: _lopen returns %08xh.\n",
             hFile));
 
-   return hFile;
+   // map correct return code for _lopen
+   if (hFile != INVALID_HANDLE_VALUE)
+     return hFile;
+   else
+     return HFILE_ERROR;
 }
 
 
