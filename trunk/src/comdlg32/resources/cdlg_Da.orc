@@ -1,3 +1,21 @@
+/*
+ * Copyright 1995 Morten Welinder
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ */
+
 LANGUAGE LANG_DANISH, SUBLANG_DEFAULT
 
 OPEN_FILE DIALOG LOADONCALL MOVEABLE DISCARDABLE 36, 24, 275, 134
@@ -113,7 +131,7 @@ FONT 8, "Helv"
     PUSHBUTTON      "&Hjælp" , 1038,218,57,40,14,WS_GROUP
     GROUPBOX        "Effekter",1072,6,72,84,34,WS_GROUP
     CHECKBOX        "&Gennemstreget", 1040, 10,82,50,10, BS_AUTOCHECKBOX | WS_TABSTOP
-    CHECKBOX        "&Understreget", 1041, 10,94,50,10, BS_AUTOCHECKBOX 
+    CHECKBOX        "&Understreget", 1041, 10,94,50,10, BS_AUTOCHECKBOX
     LTEXT           "&Farve:", 1091 ,6,110,30,9
     COMBOBOX        1139,6,120,84,100,CBS_DROPDOWNLIST | CBS_OWNERDRAWFIXED | CBS_HASSTRINGS |
                     CBS_AUTOHSCROLL |  WS_BORDER | WS_VSCROLL | WS_TABSTOP
