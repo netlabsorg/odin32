@@ -1,3 +1,4 @@
+/* $Id: twain.h,v 1.2 2000-01-04 22:18:19 sandervl Exp $ */
 /* ======================================================================== *\
 
   Copyright (C) 1991, 1992 TWAIN Working Group: Aldus, Caere, Eastman-Kodak,
