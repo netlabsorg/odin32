@@ -1,4 +1,4 @@
-# $Id: setup.os2prfvac308.mk,v 1.7 2002-04-30 19:47:35 bird Exp $
+# $Id: setup.os2prfvac308.mk,v 1.8 2002-04-30 22:42:48 bird Exp $
 
 # ---OS2, PROFILE, VAC308-------------------------
 ENV_NAME="OS/2, Profile, IBM VisualAge for C++ 3.08"
@@ -62,7 +62,7 @@ CXX_PC_2_STDOUT=/Pd+ /P+
 
 IMPLIB_FLAGS=/NOI /Nologo
 
-LINK_FLAGS=/nofree /nologo /de /map /NOE /NOD /Optfunc /PACKCODE /PACKDATA
+LINK_FLAGS=/nofree /nologo /de /map /linenumbers /NOIgnorecase /NOE /NOD /Optfunc /PACKCODE /PACKDATA
 LINK_FLAGS_EXE=$(LINK_FLAGS) /EXECutable /STACK:$(TARGET_STACKSIZE)
 LINK_FLAGS_DLL=$(LINK_FLAGS) /DLL
 LINK_FLAGS_SYS=$(LINK_FLAGS) /PDD /Align:16 /NOIgnorecase

@@ -1,4 +1,4 @@
-# $Id: setup.os2debvac308.mk,v 1.8 2002-04-30 19:47:35 bird Exp $
+# $Id: setup.os2debvac308.mk,v 1.9 2002-04-30 22:42:48 bird Exp $
 
 # ---OS2, DEBUG, VAC308-------------------------
 ENV_NAME="OS/2, Debug, IBM VisualAge for C++ 3.08"
@@ -62,11 +62,11 @@ CXX_PC_2_STDOUT=/Pd+ /P+
 
 IMPLIB_FLAGS=/NOI /Nologo
 
-LINK_FLAGS=/nofree /nologo /de /map /NOE /NOD /Optfunc /PACKCODE /PACKDATA
+LINK_FLAGS=/nofree /nologo /de /map /linenumbers /NOIgnorecase /NOE /NOD /Optfunc /PACKCODE /PACKDATA
 LINK_FLAGS_EXE=$(LINK_FLAGS) /EXECutable /STACK:$(TARGET_STACKSIZE)
 LINK_FLAGS_DLL=$(LINK_FLAGS) /DLL
-LINK_FLAGS_SYS=$(LINK_FLAGS) /PDD /Align:16 /NOIgnorecase
-LINK_FLAGS_VDD=$(LINK_FLAGS) /VDD /Align:16 /NOIgnorecase
+LINK_FLAGS_SYS=$(LINK_FLAGS) /PDD /Align:16
+LINK_FLAGS_VDD=$(LINK_FLAGS) /VDD /Align:16
 LINK_FLAGS_IFS=$(LINK_FLAGS_DLL)
 LINK_CMD_EXE=$(LINK) $(LINK_FLAGS_EXE) @$(TARGET_LNK)
 LINK_CMD_DLL=$(LINK) $(LINK_FLAGS_DLL) @$(TARGET_LNK)
