@@ -1,4 +1,4 @@
-/* $Id: relaywin.h,v 1.1 1999-12-07 20:25:48 achimha Exp $ */
+/* $Id: relaywin.h,v 1.2 2000-03-20 20:31:30 sandervl Exp $ */
 
 /*
  *
@@ -46,11 +46,14 @@
 #define  ASYNCREQUEST_SELECT            106
 
 
+#define  NO_SOCKET                      -1
+
 typedef struct tagHwndMsgPair
 {
   HWND  hwnd;  /* target window            */
   ULONG ulMsg; /* the message code to send */
   ULONG ulRequestType; /* the type of request that this belongs to */
+  ULONG socket;
   PVOID pvUserData1; /* request specific data field */
   PVOID pvUserData2; /* request specific data field */
   PVOID pvUserData3; /* request specific data field */
@@ -64,6 +67,7 @@ typedef struct tagHwndMsgPair
 ULONG            RelayAlloc     (HWND  hwnd,
                                  ULONG ulMsg, 
                                  ULONG ulRequestType,
+				 ULONG socket,
                                  BOOL  fSingleRequestPerWindow,
                                  PVOID pvUserData1 = 0, 
                                  PVOID pvUserData2 = 0,
@@ -71,7 +75,7 @@ ULONG            RelayAlloc     (HWND  hwnd,
 
 ULONG            RelayFree      (ULONG ulID);
 
-ULONG            RelayFreeByHwnd(HWND  hwnd);
+ULONG            RelayFreeByHwnd(ULONG socket, HWND  hwnd);
 
 PHWNDMSGPAIR     RelayQuery     (ULONG ulID);
 
