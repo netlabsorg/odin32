@@ -1,5 +1,3 @@
-/* $Id: char.cpp,v 1.1 2002-02-11 15:22:39 achimha Exp $ */
-
 #include <odinwrap.h>
 #include <os2sel.h>
 
