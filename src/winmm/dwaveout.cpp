@@ -1,4 +1,4 @@
-/* $Id: dwaveout.cpp,v 1.5 1999-08-19 18:46:04 phaller Exp $ */
+/* $Id: dwaveout.cpp,v 1.6 1999-08-24 21:21:11 phaller Exp $ */
 
 /*
  * Wave playback class
@@ -15,15 +15,17 @@
  * Includes                                                                 *
  ****************************************************************************/
 
+
+
 #define  INCL_BASE
 #define  INCL_OS2MM
 #include <os2wrap.h>   //Odin32 OS/2 api wrappers
 #include <os2me.h>
 #include <stdlib.h>
 #include <string.h>
-
 #define  OS2_ONLY
 #include "win32type.h"
+#include <wprocess.h>
 
 #include "misc.h"
 #include "dwaveout.h"
@@ -47,7 +49,7 @@ DartWaveOut::DartWaveOut(LPWAVEFORMATEX pwfx, ULONG nCallback, ULONG dwInstance)
 {
    Init(pwfx);
 
-   callback         = (LPDRVCALLBACK)nCallback;
+   mthdCallback         = (LPDRVCALLBACK)nCallback;
    this->dwInstance = dwInstance;
 
    callback((ULONG)this, WOM_OPEN, dwInstance, 0, 0);
@@ -64,6 +66,14 @@ DartWaveOut::DartWaveOut(LPWAVEFORMATEX pwfx, HWND hwndCallback)
 }
 /******************************************************************************/
 /******************************************************************************/
+void DartWaveOut::callback(HDRVR h, UINT uMessage, DWORD dwUser, DWORD dw1, DWORD dw2)
+{
+  USHORT selTIB = SetWin32TIB();
+  mthdCallback(h,uMessage,dwUser,dw1,dw2);
+  SetFS(selTIB);
+}
+/******************************************************************************/
+/******************************************************************************/
 void DartWaveOut::Init(LPWAVEFORMATEX pwfx)
 {
  MCI_GENERIC_PARMS  GenericParms;
@@ -76,7 +86,7 @@ void DartWaveOut::Init(LPWAVEFORMATEX pwfx)
    next          = NULL;
    wavehdr       = NULL;
    curhdr        = NULL;
-   callback      = NULL;
+   mthdCallback  = NULL;
    hwndCallback  = 0;
    dwInstance    = 0;
    ulError       = 0;

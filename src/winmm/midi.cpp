@@ -1,4 +1,4 @@
-/* $Id: midi.cpp,v 1.4 1999-08-19 18:46:04 phaller Exp $ */
+/* $Id: midi.cpp,v 1.5 1999-08-24 21:21:11 phaller Exp $ */
 
 /*
  * RTMIDI code
@@ -25,7 +25,7 @@
 
 #include "midi.hpp"
 #include <winos2def.h>
-
+#include <wprocess.h>
 
 ODINDEBUGCHANNEL(WINMM-MIDI)
 
@@ -883,10 +883,15 @@ void Midi::setCallback( DWORD dwCallback,
 
 void Midi::callback( UINT msg, DWORD p1, DWORD p2)
 {
+  USHORT selTIB;
+
+  dprintf(("WINMM: callback %x %lx %lx\n", msg, p1, p2 ));
+
    if ( iCallbackFunction )
    {
-      dprintf(("WINMM: callback %x %lx %lx\n", msg, p1, p2 ));
-      iCallbackFunction( (ULONG)this, msg, iCallbackInstance, p1, p2 );
+     selTIB = SetWin32TIB();
+     iCallbackFunction( (ULONG)this, msg, iCallbackInstance, p1, p2 );
+     SetFS(selTIB);
    }
    else
    if ( iCallbackWindow )
@@ -968,7 +973,6 @@ MMRESULT MidiIn::close()
 {
    // Disable the link
    iHwdInstance->removeLink( iAppInstance );
-
    callback( MIM_CLOSE, 0, 0 );
    return MMSYSERR_NOERROR;
 }
