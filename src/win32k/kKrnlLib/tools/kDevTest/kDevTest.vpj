@@ -1,0 +1,50 @@
+[COMPILER]
+compile=concur|capture|clear|:Compile:&Compile,nmake %n.obj
+make=concur|capture|:Build:&Build,nmake
+rebuild=concur|capture|:Rebuild:&Rebuild,nmake /A
+debug=:Debug:&Debug,ipmd kDevTest.exe
+execute=:Execute:E&xecute,kDevTest.exe
+user1=hide|:User 1:User 1,
+user2=hide|:User 2:User 2,
+usertool_resource_editor=hide|:Resource Editor:Resource Editor,dlgedit
+workingdir=G:\Odin32\Tree\src\win32k\kKrnlLib\tools\kDevTest
+includedirs=f:\ddk\april02\base\h;f:\ddk\april02\base\inc;f:\toolkit\v452\h;.;
+tagfiles=
+reffile=
+MACRO=\n
+FILTEREXPANSION=0 0 0 0 0
+[FILES]
+G:\Odin32\Tree\src\win32k\kKrnlLib\tools\kDevTest\kDevTest.c
+G:\Odin32\Tree\src\win32k\kKrnlLib\tools\kDevTest\kDevTest.def
+G:\Odin32\Tree\src\win32k\kKrnlLib\tools\kDevTest\kDevTest.h
+G:\Odin32\Tree\src\win32k\kKrnlLib\tools\kDevTest\kdtDevHelp.asm
+G:\Odin32\Tree\src\win32k\kKrnlLib\tools\kDevTest\kdtInit.c
+G:\Odin32\Tree\src\win32k\kKrnlLib\tools\kDevTest\kdtLoad.c
+G:\Odin32\Tree\src\win32k\kKrnlLib\tools\kDevTest\kdtSegDef.inc
+G:\Odin32\Tree\src\win32k\kKrnlLib\tools\kDevTest\Makefile
+[ASSOCIATION]
+[STATE]
+SCREEN: 1600 1280 880 21 1094 1233 0 0 M 0 0 0 0 1591 953
+CWD: G:\Odin32\Tree\src\win32k\kKrnlLib\tools\kDevTest
+BUFFER: BN="F:\VSLICK40\OS2\vrestore.slk"
+BI: MA=1 254 1  TABS=1 9  WWS=3 IWT=0 ST=0 IN=0 BW=0 US=0 RO=0 SE=0 SN=0 BIN=0 MN=Fundamental	HM=0 MF=1
+VIEW: LN=.0 CL=1 LE=0 CX=0 CY=1 WI=5 BI=4 HT=0 HN=0 HF=0 HC=4
+BUFFER: BN="G:\odin32\tree\src\win32k\kKrnlLib\tools\kDevTest\kdtDevHelp.asm"
+BI: MA=1 74 1  TABS=1 5  WWS=1 IWT=0 ST=0 IN=1 BW=0 US=32000 RO=0 SE=1 SN=0 BIN=0 MN=Assembly	HM=0 MF=872
+VIEW: LN=.16763 CL=5 LE=0 CX=4 CY=40 WI=5 BI=19 HT=0 HN=0 HF=0 HC=4
+WINDOW: 0 -4 1073 645 -1 -1 M  WF=0 WT=2 "System VIO,12,0,1"
+BUFFER: BN="G:\odin32\tree\src\win32k\kKrnlLib\tools\kDevTest\kdtDevHelp.asm"
+VIEW: LN=.18570 CL=2 LE=0 CX=1 CY=40 WI=88 BI=19 HT=0 HN=0 HF=0 HC=4
+FILEHIST: 9
+G:\UNIMAC\TREE\GPL\DevInitBase.c
+G:\UNIMAC\TREE\GPL\hello.s
+G:\UNIMAC\TREE\make\setup.os2debvac308.mk
+G:\UNIMAC\TREE\GPL\DevHelp32\DH32GetDOSVar.asm
+G:\UNIMAC\TREE\GPL\DevStackA.asm
+G:\UNIMAC\TREE\GPL\DevStrategyA.asm
+G:\UNIMAC\TREE\ChangeLog
+G:\odin32\tree\src\win32k\kKrnlLib\tools\kDevTest\kdtDevHelp.asm
+f:\ddk\april02\base\inc\devhlp.inc
+PRINTER: 2
+PRINTER: 2
+DEFAULT,
