@@ -1,4 +1,8 @@
- /* $Id: ChangeLog,v 1.501 1999-12-03 12:01:06 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.502 1999-12-03 17:50:16 cbratschi Exp $ */
+
+ 99-12-03: Christoph Bratschi <cbratschi@datacomm.ch>
+	- USER32: removed WS_* check in scrollbar code
+	- GDI32: moved line API's to line.cpp
 
  99-12-03: Edgar Buerkle <Edgar.Buerkle@gmx.net>
 	- GDI32: Fixes for CreateDCW & CreateICW
