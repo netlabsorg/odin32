@@ -1,4 +1,4 @@
-/* $Id: window.cpp,v 1.13 1999-10-11 20:54:26 sandervl Exp $ */
+/* $Id: window.cpp,v 1.14 1999-10-12 14:47:24 sandervl Exp $ */
 /*
  * Win32 window apis for OS/2
  *
@@ -178,6 +178,7 @@ HWND WIN32API CreateWindowExW(DWORD exStyle, LPCWSTR className,
     if(!lstrcmpiW(className, (LPWSTR)MDICLIENTCLASSNAMEW)) {
         window = (Win32BaseWindow *) new Win32MDIClientWindow(&cs, classAtom, TRUE);
     }
+    else
     if(!lstrcmpiW(className, (LPWSTR)DIALOG_CLASS_NAMEW)) 
     {
       DLG_TEMPLATE dlgTemplate = {0};
@@ -738,25 +739,12 @@ BOOL WIN32API SetForegroundWindow(HWND hwnd)
 BOOL WIN32API GetClientRect( HWND hwnd, PRECT pRect)
 {
  BOOL rc;
+ HWND hwndWin32 = hwnd;
 
-#if 1
     hwnd = Win32BaseWindow::Win32ToOS2Handle(hwnd);
     rc = OSLibWinQueryWindowRect(hwnd, pRect);
-    dprintf(("USER32:  GetClientRect of %X returned (%d,%d) (%d,%d)\n", hwnd, pRect->left, pRect->top, pRect->right, pRect->bottom));
+    dprintf(("GetClientRect of %X returned (%d,%d) (%d,%d)\n", hwndWin32, pRect->left, pRect->top, pRect->right, pRect->bottom));
     return rc;
-#else
-   Win32BaseWindow *window;
-
-    window = Win32BaseWindow::GetWindowFromHandle(hwnd);
-    if(!window) {
-        dprintf(("GetClientRect, window %x not found", hwnd));
-	SetLastError(ERROR_INVALID_WINDOW_HANDLE);
-        return 0;
-    }
-    *pRect = *window->getClientRect();
-    dprintf(("GetClientRect of %X returned (%d,%d) (%d,%d)\n", hwnd, pRect->left, pRect->top, pRect->right, pRect->bottom));
-    return TRUE;
-#endif
 }
 //******************************************************************************
 //******************************************************************************
