@@ -1,4 +1,4 @@
-/* $Id: syscolor.cpp,v 1.19 2000-02-22 17:07:40 cbratschi Exp $ */
+/* $Id: syscolor.cpp,v 1.20 2000-02-23 17:05:16 cbratschi Exp $ */
 
 /*
  * Win32 system color API functions for OS/2
@@ -287,18 +287,18 @@ BOOL SYSCOLOR_GetUseWinColors(VOID)
   return USEWINCOLORS;
 }
 /*********************************************************************
- *	CACHE_GetPattern55AABrush
+ *      GetPattern55AABrush - doesn't exist in Win32
  */
-HBRUSH CACHE_GetPattern55AABrush(void)
+HBRUSH WIN32API GetPattern55AABrush(void)
 {
     if (!hPattern55AABrush)
-        hPattern55AABrush = CreatePatternBrush(CACHE_GetPattern55AABitmap());
+        hPattern55AABrush = CreatePatternBrush(GetPattern55AABitmap());
     return hPattern55AABrush;
 }
 /*********************************************************************
- *	CACHE_GetPattern55AABitmap
+ *      GetPattern55AABitmap - doesn't exist in Win32
  */
-HBITMAP CACHE_GetPattern55AABitmap(void)
+HBITMAP WIN32API GetPattern55AABitmap(void)
 {
     if (!hPattern55AABitmap)
         hPattern55AABitmap = CreateBitmap( 8, 8, 1, 1, wPattern55AA );
