@@ -1,4 +1,4 @@
-/* $Id: winimage.cpp,v 1.12 1999-08-21 19:47:30 sandervl Exp $ */
+/* $Id: winimage.cpp,v 1.13 1999-08-22 14:24:35 sandervl Exp $ */
 
 /*
  * Win32 PE Image class
@@ -61,7 +61,7 @@ Win32Image::Win32Image(char *szFileName) :
     errorState(NO_ERROR), entryPoint(0), nrsections(0), imageSize(0),
     imageVirtBase(-1), realBaseAddress(0), imageVirtEnd(0),
     nrNameExports(0), nrOrdExports(0), nameexports(NULL), ordexports(NULL),
-    szFileName(NULL), NameTable(NULL), Win32Table(NULL), fullpath(NULL),
+    NameTable(NULL), Win32Table(NULL), fullpath(NULL),
     tlsAddress(0), tlsIndexAddr(0), tlsInitSize(0), tlsTotalSize(0), tlsCallBackAddr(0), tlsIndex(-1),
     pResSection(NULL), pResDir(NULL), winres(NULL), VersionId(-1)
 {
@@ -74,7 +74,7 @@ Win32Image::Win32Image(char *szFileName) :
     fout.open("pe.log", ios::out | ios::trunc);
     foutInit = TRUE;
   }
-  this->szFileName = szFileName;
+  strcpy(this->szFileName, szFileName);
 
   strcpy(szModule, StripPath(szFileName));
   strupr(szModule);
@@ -97,7 +97,7 @@ Win32Image::Win32Image(HINSTANCE hinstance, int NameTableId, int Win32TableId) :
     errorState(NO_ERROR), entryPoint(0), nrsections(0), imageSize(0),
     imageVirtBase(-1), realBaseAddress(0), imageVirtEnd(0),
     nrNameExports(0), nrOrdExports(0), nameexports(NULL), ordexports(NULL),
-    szFileName(NULL), NameTable(NULL), Win32Table(NULL), fullpath(NULL),
+    NameTable(NULL), Win32Table(NULL), fullpath(NULL),
     tlsAddress(0), tlsIndexAddr(0), tlsInitSize(0), tlsTotalSize(0), tlsCallBackAddr(0), tlsIndex(-1),
     pResSection(NULL), pResDir(NULL), winres(NULL)
 {
@@ -105,6 +105,8 @@ Win32Image::Win32Image(HINSTANCE hinstance, int NameTableId, int Win32TableId) :
   magic = MAGIC_WINIMAGE;
 #endif
   OS2ImageInit(hinstance, NameTableId, Win32TableId);
+
+  szFileName[0] = 0;
 
   char *name = OS2GetDllName(hinstance);
   strcpy(szModule, name);
@@ -421,7 +423,13 @@ BOOL Win32Image::init(ULONG reservedMem)
     	fout << "Failed to store sections, rc " << errorState << endl;
     	return(FALSE);
   }
-  entryPoint = realBaseAddress + oh.AddressOfEntryPoint;
+  if(oh.AddressOfEntryPoint) {
+  	entryPoint = realBaseAddress + oh.AddressOfEntryPoint;
+  }
+  else {
+	fout << "EntryPoint == NULL" << endl;
+	entryPoint = NULL;
+  }
 
   if(tlsDir != NULL) {
    Section *sect = findSection(SECTION_TLS);

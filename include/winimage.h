@@ -1,4 +1,4 @@
-/* $Id: winimage.h,v 1.8 1999-08-19 19:51:18 sandervl Exp $ */
+/* $Id: winimage.h,v 1.9 1999-08-22 14:25:13 sandervl Exp $ */
 
 /*
  *
@@ -205,7 +205,8 @@ protected:
         ULONG                 realBaseAddress;
         Section               section[MAX_SECTION];
 
-        char                 *szFileName, *fullpath;
+        char                 *fullpath;
+	char                  szFileName[CCHMAXPATH];
 	char      	      szModule[CCHMAXPATH];
 
         HINSTANCE             hinstance;
