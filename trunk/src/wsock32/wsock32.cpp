@@ -1,4 +1,4 @@
-/* $Id: wsock32.cpp,v 1.28 2000-05-02 13:09:44 bird Exp $ */
+/* $Id: wsock32.cpp,v 1.29 2000-05-03 18:34:26 sandervl Exp $ */
 
 /*
  *
@@ -844,6 +844,7 @@ ODINFUNCTION5(int,OS2setsockopt,
   struct linger     xx;
   int               ret;
   ULONG             size;
+  char             *safeoptval;
 
    if(!fWSAInitialized) {
       	WSASetLastError(WSANOTINITIALISED);
@@ -854,6 +855,17 @@ ODINFUNCTION5(int,OS2setsockopt,
       	WSASetLastError(WSAEINPROGRESS);
       	return SOCKET_ERROR;
    }
+   //SvL: The 16 bits TCP/IP stack doesn't like high addresses, so copy
+   //     the option value(s) on the stack.
+   safeoptval = (char *)alloca(optlen);
+   if(safeoptval == NULL) { 
+	DebugInt3();
+      	WSASetLastError(WSAEFAULT);
+	return SOCKET_ERROR;
+   }
+   memcpy(safeoptval, optval, optlen);
+   optval = safeoptval;
+
    if (level == SOL_SOCKET) {
 	switch(optname) {
 	case SO_DONTLINGER:
