@@ -1,4 +1,4 @@
-/* $Id: buildenv.cmd,v 1.3 2002-04-10 15:20:42 bird Exp $
+/* $Id: buildenv.cmd,v 1.4 2002-04-16 00:10:12 bird Exp $
  *
  * This is the master environment script. It contains settings for many
  * enviroment configurations. Environments may be set and unset
@@ -123,6 +123,7 @@
             when (sEnv.i = 'warpin') then       rc = WarpIn(fRM);
             when (sEnv.i = 'watcomc11') then    rc = WatComC11(fRM);
             when (sEnv.i = 'watcomc11c') then   rc = WatComC11c(fRM);
+            when (sEnv.i = 'odin32testcase') then rc = Odin32Testcase(fRM);
 
             otherwise
                 say 'error: unknown environment! - 'sEnv.i;
@@ -203,6 +204,21 @@ QueryPath: procedure
         when (sProgram = 'warpin') then     return 'f:\warpin';
         when (sProgram = 'watcom11') then   return 'f:\watcom';
         when (sProgram = 'watcom11c') then  return 'f:\watcom11c';
+
+        /*
+         * Testcase stuff for odin.
+         */
+        when (sProgram = 'testcase_drive_unused')   then  return 'l'; /* reqired */
+        when (sProgram = 'testcase_drive_fixed')    then  return 'c'; /* reqired */
+        when (sProgram = 'testcase_drive_floppy')   then  return 'a'; /* reqired */
+        when (sProgram = 'testcase_drive_cdrom')    then  return 'k'; /* optional */
+        when (sProgram = 'testcase_drive_network')  then  return 's'; /* optional */
+        when (sProgram = 'testcase_drive_ramdisk')  then  return '';  /* optional */
+/*        when (sProgram = '') then  return '';
+        when (sProgram = '') then  return '';
+        when (sProgram = '') then  return '';
+        when (sProgram = '') then  return '';*/
+
 
         otherwise
         do
@@ -525,6 +541,18 @@ NetQOS2: procedure
 return 0;
 
 
+/*
+ * Odin32 testcase setup.
+ */
+Odin32Testcase: procedure
+    parse arg fRM
+    call EnvVar_Set      fRM, 'odin32_testcase_drive_unused',       QueryPath('testcase_drive_unused');
+    call EnvVar_Set      fRM, 'odin32_testcase_drive_fixed',        QueryPath('testcase_drive_fixed')
+    call EnvVar_Set      fRM, 'odin32_testcase_drive_floppy',       QueryPath('testcase_drive_floppy')
+    call EnvVar_Set      fRM, 'odin32_testcase_drive_cdrom',        QueryPath('testcase_drive_cdrom')
+    call EnvVar_Set      fRM, 'odin32_testcase_drive_network',      QueryPath('testcase_drive_network')
+    call EnvVar_Set      fRM, 'odin32_testcase_drive_ramdisk',      QueryPath('testcase_drive_ramdisk')
+return 0;
 
 /*
  * PERL 5005_53
