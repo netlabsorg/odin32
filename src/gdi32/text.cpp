@@ -1,4 +1,4 @@
-/* $Id: text.cpp,v 1.41 2004-01-14 11:07:35 sandervl Exp $ */
+/* $Id: text.cpp,v 1.42 2004-01-14 16:53:25 sandervl Exp $ */
 
 /*
  * GDI32 text apis
@@ -462,7 +462,7 @@ BOOL WIN32API GetTextExtentPointW(HDC    hdc,
    POINTLOS2  widthHeight = { 0, 0};
    pDCData    pHps = (pDCData)OSLibGpiQueryDCData((HPS)hdc);
 
-   dprintf(("GDI32: GetTextExtentPointW %ls", lpString));
+   dprintf(("GDI32: GetTextExtentPointW %.*ls", cbString, lpString));
    if(pHps == NULL)
    {
       SetLastError(ERROR_INVALID_HANDLE);
