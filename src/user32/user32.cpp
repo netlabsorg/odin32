@@ -1,4 +1,4 @@
-/* $Id: user32.cpp,v 1.50 1999-11-04 18:35:42 phaller Exp $ */
+/* $Id: user32.cpp,v 1.51 1999-11-08 13:44:14 sandervl Exp $ */
 
 /*
  * Win32 misc user32 API functions for OS/2
@@ -32,6 +32,7 @@
 #include "user32.h"
 #include <winicon.h>
 #include "syscolor.h"
+#include "pmwindow.h"
 
 #include <wchar.h>
 #include <stdlib.h>
@@ -816,6 +817,12 @@ int WIN32API GetSystemMetrics(int nIndex)
     case SM_YVIRTUALSCREEN:
         rc = 0;
         break;
+    case SM_CXSCREEN:
+
+	return ScreenWidth;
+    case SM_CYSCREEN:
+	return ScreenHeight;
+
     case SM_CXVIRTUALSCREEN:
         rc = OSLibWinQuerySysValue(OSLIB_HWND_DESKTOP,SVOS_CXSCREEN);
         break;

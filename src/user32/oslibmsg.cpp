@@ -1,4 +1,4 @@
-/* $Id: oslibmsg.cpp,v 1.8 1999-11-05 12:54:10 sandervl Exp $ */
+/* $Id: oslibmsg.cpp,v 1.9 1999-11-08 13:44:14 sandervl Exp $ */
 /*
  * Window message translation functions for OS/2
  *
@@ -224,6 +224,12 @@ BOOL  OSLibWinPeekMsg(LPMSG pMsg, HWND hwnd, UINT uMsgFilterMin, UINT uMsgFilter
                   TranslateWinMsg(uMsgFilterMax), (fRemove == MSG_REMOVE) ? PM_REMOVE : PM_NOREMOVE);
   OS2ToWinMsgTranslate(MsgThreadPtr, pMsg, isUnicode);
   return rc;
+}
+//******************************************************************************
+//******************************************************************************
+ULONG OSLibWinQueryMsgTime()
+{
+  return WinQueryMsgTime(GetThreadHAB());
 }
 //******************************************************************************
 //******************************************************************************

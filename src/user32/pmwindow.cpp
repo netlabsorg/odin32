@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.51 1999-11-03 22:04:22 cbratschi Exp $ */
+/* $Id: pmwindow.cpp,v 1.52 1999-11-08 13:44:14 sandervl Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -12,7 +12,6 @@
 #define INCL_WIN
 #define INCL_GPI
 
-#include <os2.h>                        /* PM header file               */
 #include <os2wrap.h>
 #include <stdlib.h>
 #include "win32type.h"
