@@ -1,4 +1,4 @@
-/* $Id: winuser.h,v 1.9 1999-10-02 13:55:46 cbratschi Exp $ */
+/* $Id: winuser.h,v 1.10 1999-10-04 09:55:52 sandervl Exp $ */
 
 #ifndef __INCLUDE_WINUSER_H
 #define __INCLUDE_WINUSER_H
@@ -683,6 +683,17 @@ typedef struct
 
 #define WM_PRINT             0x0317
 #define WM_PRINTCLIENT       0x0318
+
+#define WM_HANDHELDFIRST     0x0358
+#define WM_HANDHELDLAST      0x035F
+ 
+#define WM_AFXFIRST          0x0360
+#define WM_AFXLAST           0x037F
+ 
+#define WM_PENWINFIRST       0x0380
+#define WM_PENWINLAST        0x038F
+
+#define WM_APP               0x8000
 
   /* FIXME: This does not belong to any libwine interface header */
   /* MFC messages [360-38f] */
@@ -3052,9 +3063,9 @@ HCURSOR   WINAPI CreateCursor(HINSTANCE,INT,INT,INT,INT,LPCVOID,LPCVOID);
 #define     CreateDialogIndirectW(inst,ptr,hwnd,dlg) \
            CreateDialogIndirectParamW(inst,ptr,hwnd,dlg,0)
 #define     CreateDialogIndirect WINELIB_NAME_AW(CreateDialogIndirect)
-HWND      WINAPI CreateDialogIndirectParamA(HINSTANCE,DLGTEMPLATE *,HWND,
+HWND      WINAPI CreateDialogIndirectParamA(HINSTANCE,LPCDLGTEMPLATEA,HWND,
                                             DLGPROC,LPARAM);
-HWND      WINAPI CreateDialogIndirectParamW(HINSTANCE,DLGTEMPLATE *,HWND,
+HWND      WINAPI CreateDialogIndirectParamW(HINSTANCE,LPCDLGTEMPLATEW,HWND,
                                             DLGPROC,LPARAM);
 #define     CreateDialogIndirectParam WINELIB_NAME_AW(CreateDialogIndirectParam)
 HWND      WINAPI CreateDialogParamA(HINSTANCE,LPCSTR,HWND,DLGPROC,LPARAM);
@@ -3115,8 +3126,8 @@ BOOL      WINAPI DestroyWindow(HWND);
 #define     DialogBoxIndirectW(inst,template,owner,func) \
             DialogBoxIndirectParamW(inst,template,owner,func,0)
 #define     DialogBoxIndirect WINELIB_NAME_AW(DialogBoxIndirect)
-INT       WINAPI DialogBoxIndirectParamA(HINSTANCE,DLGTEMPLATE *,HWND,DLGPROC,LPARAM);
-INT       WINAPI DialogBoxIndirectParamW(HINSTANCE,DLGTEMPLATE *,HWND,DLGPROC,LPARAM);
+INT       WINAPI DialogBoxIndirectParamA(HINSTANCE,LPCDLGTEMPLATEA,HWND,DLGPROC,LPARAM);
+INT       WINAPI DialogBoxIndirectParamW(HINSTANCE,LPCDLGTEMPLATEW,HWND,DLGPROC,LPARAM);
 #define     DialogBoxIndirectParam WINELIB_NAME_AW(DialogBoxIndirectParam)
 INT       WINAPI DialogBoxParamA(HINSTANCE,LPCSTR,HWND,DLGPROC,LPARAM);
 INT       WINAPI DialogBoxParamW(HINSTANCE,LPCWSTR,HWND,DLGPROC,LPARAM);

@@ -1,4 +1,4 @@
-/* $Id: wprocess.cpp,v 1.33 1999-09-25 17:55:21 sandervl Exp $ */
+/* $Id: wprocess.cpp,v 1.34 1999-10-04 09:55:57 sandervl Exp $ */
 
 /*
  * Win32 process functions
@@ -645,20 +645,14 @@ FARPROC WIN32API GetProcAddress(HMODULE hModule, LPCSTR lpszProc)
 //******************************************************************************
 BOOL SYSTEM GetVersionStruct(char *modname, char *verstruct, ULONG bufLength)
 {
- HINSTANCE       hinstance;
  Win32ImageBase *winimage;
 
   dprintf(("GetVersionStruct"));
-  hinstance = OSLibQueryModuleHandle(modname);
-  if(hinstance == 0) {
-    	dprintf(("GetVersionStruct can't find handle for %s\n", modname));
-    	return(FALSE);
-  }
-  if(WinExe && WinExe->getInstanceHandle() == hinstance) {
+  if(WinExe && !strcmp(WinExe->getFullPath(), modname)) {
     	winimage = (Win32ImageBase *)WinExe;
   }
   else {
-    	winimage = (Win32ImageBase *)Win32DllBase::findModule(hinstance);
+    	winimage = (Win32ImageBase *)Win32DllBase::findModule(modname);
     	if(winimage == NULL) {
         	dprintf(("GetVersionStruct can't find Win32Image for %s\n", modname));
         	return(FALSE);
@@ -670,21 +664,15 @@ BOOL SYSTEM GetVersionStruct(char *modname, char *verstruct, ULONG bufLength)
 //******************************************************************************
 ULONG SYSTEM GetVersionSize(char *modname)
 {
- HINSTANCE       hinstance;
  Win32ImageBase *winimage;
 
   dprintf(("GetVersionSize of %s\n", modname));
-  hinstance = OSLibQueryModuleHandle(modname);
-  if(hinstance == 0) {
-    	dprintf(("GetVersionSize can't find handle for %s\n", modname));
-    	return(FALSE);
-  }
 
-  if(WinExe && WinExe->getInstanceHandle() == hinstance) {
+  if(WinExe && !strcmp(WinExe->getFullPath(), modname)) {
     	winimage = (Win32ImageBase *)WinExe;
   }
   else {
-    	winimage = (Win32ImageBase *)Win32DllBase::findModule(hinstance);
+    	winimage = (Win32ImageBase *)Win32DllBase::findModule(modname);
     	if(winimage == NULL) {
         	dprintf(("GetVersionSize can't find Win32Image for %s\n", modname));
         	return(FALSE);

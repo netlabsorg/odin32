@@ -1,4 +1,4 @@
-/* $Id: pe2lx.h,v 1.1 1999-09-06 02:19:59 bird Exp $
+/* $Id: pe2lx.h,v 1.2 1999-10-04 09:56:04 sandervl Exp $
  *
  * Common header file for pe2lx.
  *
@@ -31,7 +31,7 @@
 
         #include <string.h>
         #include <builtin.h>
-        #if 0
+        #if 1
             #define __malloc_h /* to prevent using the VAC++ malloc.h */
             #include <stdlib.h>
         #endif

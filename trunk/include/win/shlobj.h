@@ -1,7 +1,11 @@
-/* $Id: shlobj.h,v 1.2 1999-09-02 10:51:14 phaller Exp $ */
+/* $Id: shlobj.h,v 1.3 1999-10-04 09:55:50 sandervl Exp $ */
 
 #ifndef __WINE_SHLOBJ_H
 #define __WINE_SHLOBJ_H
+
+#ifndef DECLSPEC_IMPORT
+#define DECLSPEC_IMPORT
+#endif
 
 #include "wine/obj_base.h"
 #include "wine/obj_shelllink.h"
@@ -250,6 +254,8 @@ typedef struct tagBROWSEINFOW {
 #define BFFM_ENABLEOK           (WM_USER+101)
 #define BFFM_SETSELECTIONA      (WM_USER+102)
 #define BFFM_SETSELECTIONW      (WM_USER+103)
+#define BFFM_SETSELECTION       WINELIB_NAME_AW(BFFM_SETSELECTION)
+
 #define BFFM_SETSTATUSTEXTW     (WM_USER+104)
 
 /*
