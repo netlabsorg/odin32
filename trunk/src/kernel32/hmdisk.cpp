@@ -1,4 +1,4 @@
-/* $Id: hmdisk.cpp,v 1.48 2002-06-26 11:08:32 sandervl Exp $ */
+/* $Id: hmdisk.cpp,v 1.49 2002-06-26 13:35:13 sandervl Exp $ */
 
 /*
  * Win32 Disk API functions for OS/2
@@ -783,7 +783,9 @@ writecheckfail:
 
         if(!pHMHandleData->hHMHandle) {
             pHMHandleData->hHMHandle = OpenDisk(drvInfo);
-            if(!pHMHandleData->hHMHandle) {
+            //IOCTL_DISK_GET_DRIVE_GEOMETRY must fail if no disk inserted
+            //the other two shouldn't
+            if(!pHMHandleData->hHMHandle && dwIoControlCode == IOCTL_DISK_GET_DRIVE_GEOMETRY) {
                 dprintf(("No disk inserted; aborting"));
                 SetLastError(ERROR_NOT_READY);
                 return FALSE;
@@ -795,7 +797,7 @@ writecheckfail:
         //volume label from the disk and return ERROR_MEDIA_CHANGED if the volume
         //label has changed
         //TODO: Find better way to determine if floppy was removed or switched
-        if(drvInfo->driveType != DRIVE_FIXED) 
+        if(drvInfo->driveType != DRIVE_FIXED && pHMHandleData->hHMHandle) 
         {
             rc = OSLibDosQueryVolumeSerialAndName(1 + drvInfo->driveLetter - 'A', &volumelabel, NULL, 0);
             if(rc) {
