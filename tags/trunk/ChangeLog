@@ -1,4 +1,12 @@
- /* $Id: ChangeLog,v 1.216 1999-09-20 20:42:29 davidr Exp $ */
+ /* $Id: ChangeLog,v 1.217 1999-09-21 08:23:13 sandervl Exp $ */
+
+ 99-09-21: Sander van Leeuwen <sandervl@xs4all.nl>
+	- KERNEL32: Fixed cursor group conversion
+
+ 99-09-21: Edgar Buerkle <100566.557@compuserve.com>
+	- USER32:   Fixed GetDesktopWindow, added message handling for WM_TIMER
+                    added code to choose best icon from icon group. (in OSLibWinCreateIcon)
+	- KERNEL32: Fix for converting icons & icon groups
 
  99-09-19: David Raison <djr@lemur.co.uk>
         - OLE32: Added AntiMoniker,
