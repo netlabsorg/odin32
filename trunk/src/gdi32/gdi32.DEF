@@ -1,4 +1,4 @@
-; $Id: gdi32.DEF,v 1.20 2001-09-19 15:38:42 sandervl Exp $
+; $Id: gdi32.DEF,v 1.21 2001-12-26 11:33:10 sandervl Exp $
 
 ;Created by BLAST for IBM's compiler
 LIBRARY GDI32 INITINSTANCE
@@ -364,12 +364,6 @@ EXPORTS
 ;
 ; Function exported to USER32
 ;
-    InternalDrawTextExA                                         @1205 NONAME
-    InternalDrawTextExW                                         @1206 NONAME
-;;    InternalTabbedTextOutA                                      @1207 NONAME
-;;    InternalTabbedTextOutW                                      @1208 NONAME
-;;    InternalGetTabbedTextExtentA                                @1209 NONAME
-;;    InternalGetTabbedTextExtentW                                @1210 NONAME
     _setWinDeviceRegionFromPMDeviceRegion@16                    @1211 NONAME
 
     _UnselectGDIObjects@4                                       @1212 NONAME
