@@ -1,4 +1,4 @@
-/* $Id: dibsect.cpp,v 1.18 2000-02-16 14:18:09 sandervl Exp $ */
+/* $Id: dibsect.cpp,v 1.19 2000-02-21 10:34:46 sandervl Exp $ */
 
 /*
  * GDI32 DIB sections
@@ -62,19 +62,19 @@ DIBSection::DIBSection(BITMAPINFOHEADER_W *pbmi, char *pColors, DWORD iUsage, DW
                 break;
         case 8:
                 os2bmpsize += ((1 << pbmi->biBitCount)-1)*sizeof(RGB2);
+        	bmpsize = (bmpsize + 3) & ~3;
                 break;
         case 16:
                 bmpsize *= 2;
+        	bmpsize = (bmpsize + 3) & ~3;
                 break;
         case 24:
                 bmpsize *= 3;
+        	bmpsize = (bmpsize + 3) & ~3;
                 break;
         case 32:
                 bmpsize *= 4;
                 break;
-   }
-   if(bmpsize & 3) {
-        bmpsize = (bmpsize + 3) & ~3;
    }
 
    this->hSection = hSection;
@@ -225,26 +225,32 @@ int DIBSection::SetDIBits(HDC hdc, HBITMAP hbitmap, UINT startscan, UINT
     case 8:
       palsize = ((1 << pbmi->biBitCount))*sizeof(RGB2);
       os2bmpsize += palsize;
+      bmpsize = (bmpsize + 3) & ~3;
       break;
     case 16:
       bmpsize *= 2;
+      bmpsize = (bmpsize + 3) & ~3;
       break;
     case 24:
       bmpsize *= 3;
+      bmpsize = (bmpsize + 3) & ~3;
       break;
     case 32:
       bmpsize *= 4;
       break;
    }
 
-   if(bmpsize & 3)
+   //SvL: TODO: Correct??
+   if(!hSection && pOS2bmp->cx != pbmi->biWidth && pOS2bmp->cy != pbmi->biHeight &&
+      pOS2bmp->cBitCount != pbmi->biBitCount) 
    {
-     	bmpsize = (bmpsize + 3) & ~3;
+	char *oldbits = bmpBits;
+
+	DosAllocMem((PPVOID)&bmpBits, bmpsize*pbmi->biHeight, PAG_READ|PAG_WRITE|PAG_COMMIT);
+	memcpy(bmpBits, oldbits, bmpsize*pbmi->biHeight);
+	DosFreeMem(oldbits);
    }
-
-   bmpBits    = (char *)realloc(bmpBits, bmpsize*pbmi->biHeight);
    pOS2bmp    = (BITMAPINFO2 *)realloc(pOS2bmp, os2bmpsize);
-
    pOS2bmp->cbFix         = sizeof(BITMAPINFO2) - sizeof(RGB2);
    pOS2bmp->cx            = pbmi->biWidth;
    pOS2bmp->cy            = pbmi->biHeight;
@@ -253,15 +259,40 @@ int DIBSection::SetDIBits(HDC hdc, HBITMAP hbitmap, UINT startscan, UINT
    pOS2bmp->ulCompression = pbmi->biCompression;
    pOS2bmp->cbImage       = pbmi->biSizeImage;
 
-   dprintf(("DIBSection::SetDIBits (%d,%d), %d %d", pbmi->biWidth, pbmi->biHeight, pbmi->biBitCount, pbmi->biCompression));
+   // clear DIBSECTION structure
+   memset(&dibinfo, 0, sizeof(dibinfo));
 
+   // copy BITMAPINFOHEADER data into DIBSECTION structure
+   memcpy(&dibinfo.dsBmih, pbmi, sizeof(*pbmi));
+   dibinfo.dsBm.bmType      = 0;
+   dibinfo.dsBm.bmWidth     = pbmi->biWidth;
+   dibinfo.dsBm.bmHeight    = pbmi->biHeight;
+   dibinfo.dsBm.bmWidthBytes= bmpsize;
+   dibinfo.dsBm.bmPlanes    = pbmi->biPlanes;
+   dibinfo.dsBm.bmBitsPixel = pbmi->biBitCount;
+   dibinfo.dsBm.bmBits      = bmpBits;
+
+   dibinfo.dshSection       = hSection;
+   dibinfo.dsOffset         = 0; // TODO: put the correct value here (if createdibsection with file handle)
+
+   if(pbmi->biCompression == BI_BITFIELDS) 
+   {
+	char *pColors = (char *)pbmi + 1;
+
+   	dibinfo.dsBitfields[0] = *((DWORD *)pColors);
+   	dibinfo.dsBitfields[1] = *((DWORD *)pColors+1);
+   	dibinfo.dsBitfields[2] = *((DWORD *)pColors+2);
+	dprintf(("BI_BITFIELDS %x %x %x", dibinfo.dsBitfields[0], dibinfo.dsBitfields[1], dibinfo.dsBitfields[2]));
+   }
+
+   dprintf(("DIBSection::SetDIBits (%d,%d), %d %d", pbmi->biWidth, pbmi->biHeight, pbmi->biBitCount, pbmi->biCompression));
    if(palsize)
-     memcpy(pOS2bmp->argbColor, (char *)pbmi + 1 , palsize);
+   	memcpy(pOS2bmp->argbColor, (char *)pbmi + 1 , palsize);
 
    if(bits)
    {
-     int size = bmpsize*lines;
-     memcpy(bmpBits+bmpsize*startscan, bits, size);
+     	int size = bmpsize*lines;
+     	memcpy(bmpBits+bmpsize*startscan, bits, size);
    }
    return(lines);
 }
