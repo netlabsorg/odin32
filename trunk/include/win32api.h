@@ -177,4 +177,9 @@ UINT    WIN32API SetErrorMode(UINT);
 
 UINT    WIN32API GetDriveTypeA(LPCSTR);
 
+BOOL    WIN32API SetProcessAffinityMask( HANDLE hProcess, DWORD affmask );
+BOOL    WIN32API GetProcessAffinityMask(HANDLE  hProcess,
+                                        LPDWORD lpProcessAffinityMask,
+                                        LPDWORD lpSystemAffinityMask);
+
 #endif
