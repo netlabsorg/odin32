@@ -1,13 +1,20 @@
-# $Id: setup.os2relmscv6.mk,v 1.3 2002-04-13 04:40:00 bird Exp $
+# $Id: setup.os2relmscv6.mk,v 1.4 2002-04-22 02:09:28 bird Exp $
 
 # ---OS2, RELEASE, MSCV6-------------------------
 ENV_NAME="OS/2, Debug, Microsoft C v6.0a"
 ENV_STATUS=OK
+!if "$(ENV_ENVS)" == ""
+ENV_ENVS=mscv6
+!else
+ENV_ENVS_FORCE=mscv6
+!endif
+
 
 #
 # Include some shared standard stuff: ALP.
 #
 !include $(PATH_MAKE)\setup.os2relalp.mk
+
 
 #
 # The tools
@@ -20,6 +27,7 @@ IMPLIB=implib.exe
 RC=rc.exe
 RL=rc.exe
 EXEPACK=lxlite.exe
+
 
 #
 # The flags
@@ -70,6 +78,7 @@ LINK_LNK5=$(TARGET_DEF)
 
 RC_FLAGS=-r -n -i $(PATH_INCLUDES:;= -i ) $(RC_DEFINES) $(RC_INCLUDES)
 RL_FLAGS=-x2 -n
+
 
 #
 # Libraries and object files.
