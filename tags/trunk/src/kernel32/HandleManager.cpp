@@ -1,4 +1,4 @@
-/* $Id: HandleManager.cpp,v 1.93 2003-01-10 15:19:53 sandervl Exp $ */
+/* $Id: HandleManager.cpp,v 1.94 2003-02-04 11:28:55 sandervl Exp $ */
 
 /*
  * Win32 Unified Handle Manager for OS/2
@@ -958,7 +958,8 @@ BOOL HMDuplicateHandle(HANDLE  srcprocess,
   TabWin32Handles[iIndexNew].hmHandleData.hHMHandle = iIndexNew;
   TabWin32Handles[iIndexNew].pDeviceHandler         = pDeviceHandler;
                                                   /* call the device handler */
-  rc = pDeviceHandler->DuplicateHandle(&TabWin32Handles[iIndexNew].hmHandleData,
+  rc = pDeviceHandler->DuplicateHandle(srchandle,
+                                       &TabWin32Handles[iIndexNew].hmHandleData,
                                        srcprocess,
                                        &TabWin32Handles[srchandle].hmHandleData,
                                        destprocess,
@@ -4280,6 +4281,41 @@ BOOL HMSetThreadContext(HANDLE hThread, const CONTEXT *lpContext)
 
   pHMHandle = &TabWin32Handles[iIndex];               /* call device handler */
   lpResult = pHMHandle->pDeviceHandler->SetThreadContext(hThread, &TabWin32Handles[iIndex].hmHandleData, lpContext);
+
+  return (lpResult);                                  /* deliver return code */
+}
+/*****************************************************************************
+ * Name      : HMGetThreadTimes
+ * Purpose   : router function for HMGetThreadTimes
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    :
+ *
+ * Author    : SvL
+ *****************************************************************************/
+BOOL HMGetThreadTimes(HANDLE hThread, LPFILETIME lpCreationTime,
+                      LPFILETIME lpExitTime, LPFILETIME lpKernelTime,
+                      LPFILETIME lpUserTime)
+{
+  int       iIndex;                           /* index into the handle table */
+  BOOL      lpResult;                /* result from the device handler's API */
+  PHMHANDLE pHMHandle;       /* pointer to the handle structure in the table */
+
+  SetLastError(ERROR_SUCCESS);
+                                                          /* validate handle */
+  iIndex = _HMHandleQuery(hThread);              /* get the index */
+  if (-1 == iIndex)                                               /* error ? */
+  {
+    SetLastError(ERROR_INVALID_HANDLE);       /* set win32 error information */
+    return FALSE;                                         /* signal failure */
+  }
+
+  pHMHandle = &TabWin32Handles[iIndex];               /* call device handler */
+  lpResult = pHMHandle->pDeviceHandler->GetThreadTimes(hThread, &TabWin32Handles[iIndex].hmHandleData, 
+                                                       lpCreationTime, lpExitTime, 
+                                                       lpKernelTime, lpUserTime);
 
   return (lpResult);                                  /* deliver return code */
 }
