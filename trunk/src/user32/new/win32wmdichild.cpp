@@ -1,4 +1,4 @@
-/* $Id: win32wmdichild.cpp,v 1.6 2000-01-01 14:57:31 cbratschi Exp $ */
+/* $Id: win32wmdichild.cpp,v 1.7 2000-01-02 19:30:45 cbratschi Exp $ */
 /*
  * Win32 MDI Child Window Class for OS/2
  *
@@ -505,10 +505,11 @@ BOOL Win32MDIChildWindow::menuDeleteItem()
 void Win32MDIChildWindow::calcDefaultChildPos(Win32MDIClientWindow *client, WORD n, LPPOINT lpPos, INT delta)
 {
     INT  nstagger;
-    RECT rect = *client->getClientRect();
+    RECT rect;
     INT  spacing = GetSystemMetrics(SM_CYCAPTION) +
                    GetSystemMetrics(SM_CYFRAME) - 1;
 
+    client->getClientRect(&rect);
     if( rect.bottom - rect.top - delta >= spacing )
         rect.bottom -= delta;
 
@@ -527,8 +528,9 @@ void Win32MDIChildWindow::calcDefaultChildPos(Win32MDIClientWindow *client, WORD
 void Win32MDIChildWindow::childGetMinMaxInfo(MINMAXINFO* lpMinMax )
 {
     Win32MDIClientWindow *client = (Win32MDIClientWindow *)getParent();
-    RECT rect = *client->getClientRect();
+    RECT rect;
 
+    getClientRect(&rect);
     if(client->getParent() == NULL) {
         dprintf(("Win32MDIChildWindow::childGetMinMaxInfo:: client parent == NULL!!"));
         return;

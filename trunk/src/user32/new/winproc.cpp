@@ -1,4 +1,4 @@
-/* $Id: winproc.cpp,v 1.1 2000-01-01 14:57:38 cbratschi Exp $ */
+/* $Id: winproc.cpp,v 1.2 2000-01-02 19:30:47 cbratschi Exp $ */
 /*
  * Window procedure callbacks
  *
@@ -48,7 +48,7 @@ typedef struct tagWINDOWPROC
             (WNDPROC)((LONG)(pproc)->jmp.proc + (LONG)(&(pproc)->jmp.proc+1))
 
 /**********************************************************************
- *	     WINPROC_GetPtr
+ *           WINPROC_GetPtr
  *
  * Return a pointer to the win proc.
  */
@@ -58,7 +58,7 @@ static WINDOWPROC *WINPROC_GetPtr( WNDPROC handle )
     WINDOWPROC *proc;
 
     if(ptr == NULL) {
-	return NULL;
+        return NULL;
     }
 
     ptr = (BYTE *)handle;
@@ -75,7 +75,7 @@ static WINDOWPROC *WINPROC_GetPtr( WNDPROC handle )
 
 
 /**********************************************************************
- *	     WINPROC_AllocWinProc
+ *           WINPROC_AllocWinProc
  *
  * Allocate a new window procedure.
  */
@@ -90,7 +90,8 @@ static WINDOWPROC *WINPROC_AllocWinProc( WNDPROC func, WINDOWPROCTYPE type,
 
     /* Check if the function is already a win proc */
 
-    if ((oldproc = WINPROC_GetPtr( func )))
+    oldproc = WINPROC_GetPtr( func );
+    if (oldproc)
     {
         *proc = *oldproc;
     }
@@ -118,7 +119,7 @@ static WINDOWPROC *WINPROC_AllocWinProc( WNDPROC func, WINDOWPROCTYPE type,
 
 
 /**********************************************************************
- *	     WINPROC_GetProc
+ *           WINPROC_GetProc
  *
  * Get a window procedure pointer that can be passed to the Windows program.
  */
@@ -134,23 +135,23 @@ WNDPROC WINPROC_GetProc( HWINDOWPROC proc, WINDOWPROCTYPE type )
 
 
 /**********************************************************************
- *	     WINPROC_SetProc
+ *           WINPROC_SetProc
  *
  * Set the window procedure for a window or class. There are
  * three tree classes of winproc callbacks:
  *
- * 1) class  -> wp                 	-	not subclassed
- *    class  -> wp -> wp -> wp -> wp 	-	SetClassLong()
+ * 1) class  -> wp                      -       not subclassed
+ *    class  -> wp -> wp -> wp -> wp    -       SetClassLong()
  *             /           /
- * 2) window -'           /		-	not subclassed
- *    window -> wp -> wp '           	-	SetWindowLong()
+ * 2) window -'           /             -       not subclassed
+ *    window -> wp -> wp '              -       SetWindowLong()
  *
- * 3) timer  -> wp                   	-	SetTimer()
+ * 3) timer  -> wp                      -       SetTimer()
  *
- * Initially, winproc of the window points to the current winproc 
- * thunk of its class. Subclassing prepends a new thunk to the 
- * window winproc chain at the head of the list. Thus, window thunk 
- * list includes class thunks and the latter are preserved when the 
+ * Initially, winproc of the window points to the current winproc
+ * thunk of its class. Subclassing prepends a new thunk to the
+ * window winproc chain at the head of the list. Thus, window thunk
+ * list includes class thunks and the latter are preserved when the
  * window is destroyed.
  *
  */
@@ -161,8 +162,8 @@ BOOL WINPROC_SetProc( HWINDOWPROC *pFirst, WNDPROC func,
     WINDOWPROC *proc, **ppPrev;
 
     if(func == NULL) {
-	*(WINDOWPROC **)pFirst = 0;
-	return TRUE;
+        *(WINDOWPROC **)pFirst = 0;
+        return TRUE;
     }
 
     /* Check if function is already in the list */
@@ -176,16 +177,16 @@ BOOL WINPROC_SetProc( HWINDOWPROC *pFirst, WNDPROC func,
             if (*ppPrev == proc)
             {
                 if ((*ppPrev)->user != user)
-		{
-		    /* terminal thunk is being restored */
+                {
+                    /* terminal thunk is being restored */
 
-		    WINPROC_FreeProc( *pFirst, (*ppPrev)->user );
-		    *(WINDOWPROC **)pFirst = *ppPrev;
-		    return TRUE;
-		}
-		bRecycle = TRUE;
-		break;
-	    }
+                    WINPROC_FreeProc( *pFirst, (*ppPrev)->user );
+                    *(WINDOWPROC **)pFirst = *ppPrev;
+                    return TRUE;
+                }
+                bRecycle = TRUE;
+                break;
+            }
         }
         else
         {
@@ -196,7 +197,7 @@ BOOL WINPROC_SetProc( HWINDOWPROC *pFirst, WNDPROC func,
                 break;
             }
         }
-           
+
         /* WPF_CLASS thunk terminates window thunk list */
         if ((*ppPrev)->user != user) break;
         ppPrev = &(*ppPrev)->next;
@@ -228,7 +229,7 @@ BOOL WINPROC_SetProc( HWINDOWPROC *pFirst, WNDPROC func,
 
 
 /**********************************************************************
- *	     WINPROC_FreeProc
+ *           WINPROC_FreeProc
  *
  * Free a list of win procs.
  */
@@ -245,7 +246,7 @@ void WINPROC_FreeProc( HWINDOWPROC proc, WINDOWPROCUSER user )
 
 
 /**********************************************************************
- *	     WINPROC_GetProcType
+ *           WINPROC_GetProcType
  *
  * Return the window procedure type.
  */
@@ -258,7 +259,7 @@ WINDOWPROCTYPE WINPROC_GetProcType( HWINDOWPROC proc )
 }
 
 /**********************************************************************
- *	     CallWindowProc32A    (USER32.18) 
+ *           CallWindowProc32A    (USER32.18)
  *
  * The CallWindowProc() function invokes the windows procedure _func_,
  * with _hwnd_ as the target window, the message specified by _msg_, and
@@ -279,9 +280,9 @@ WINDOWPROCTYPE WINPROC_GetProcType( HWINDOWPROC proc )
  *
  * CONFORMANCE
  *
- *   ECMA-234, Win32 
+ *   ECMA-234, Win32
  */
-LRESULT WINAPI CallWindowProcA( 
+LRESULT WINAPI CallWindowProcA(
     WNDPROC func, /* window procedure */
     HWND hwnd, /* target window */
     UINT msg,  /* message */
@@ -318,7 +319,7 @@ LRESULT WINAPI CallWindowProcA(
 
 
 /**********************************************************************
- *	     CallWindowProc32W    (USER32.19)
+ *           CallWindowProc32W    (USER32.19)
  */
 LRESULT WINAPI CallWindowProcW( WNDPROC func, HWND hwnd, UINT msg,
                                 WPARAM wParam, LPARAM lParam )

@@ -1,4 +1,4 @@
-/* $Id: oslibwin.cpp,v 1.30 2000-01-01 17:07:41 cbratschi Exp $ */
+/* $Id: oslibwin.cpp,v 1.31 2000-01-02 19:30:43 cbratschi Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -51,13 +51,13 @@ BOOL OSLibWinSetOwner(HWND hwnd, HWND hwndOwner)
 }
 //******************************************************************************
 //******************************************************************************
-HWND OSLibWinCreateWindow(HWND hwndParent, ULONG dwWinStyle, ULONG dwFrameStyle,
+HWND OSLibWinCreateWindow(HWND hwndParent,ULONG dwWinStyle,
                           char *pszName, HWND Owner, ULONG fHWND_BOTTOM, HWND *hwndFrame,
                           ULONG id, BOOL fTaskList)
 {
  HWND  hwndClient;
 
-  dprintf(("WinCreateWindow %x %x %x %s", hwndParent, dwWinStyle, dwFrameStyle, pszName));
+  dprintf(("WinCreateWindow %x %x %x %s", hwndParent, pszName));
 
   if(pszName && *pszName == 0) {
         pszName = NULL;
@@ -68,12 +68,11 @@ HWND OSLibWinCreateWindow(HWND hwndParent, ULONG dwWinStyle, ULONG dwFrameStyle,
   if(Owner == OSLIB_HWND_DESKTOP) {
         Owner = HWND_DESKTOP;
   }
-  ULONG dwClientStyle;
+  ULONG dwClientStyle = 0;
+  ULONG dwFrameStyle = 0;
 #if 1
 
   BOOL TopLevel = hwndParent == HWND_DESKTOP;
-//  if(dwFrameStyle & FCF_TITLEBAR)
-//      TopLevel = TRUE;
 
   FRAMECDATA FCData = {sizeof (FRAMECDATA), 0, 0, 0};
 
@@ -93,13 +92,11 @@ HWND OSLibWinCreateWindow(HWND hwndParent, ULONG dwWinStyle, ULONG dwFrameStyle,
                                 pszName, dwWinStyle, 0, 0, 50, 30,
                                 hwndParent, HWND_TOP,
                                 id, &FCData, NULL);
+
   if (*hwndFrame) {
     hwndClient = WinCreateWindow (*hwndFrame, WIN32_STDCLASS,
                                   NULL, dwClientStyle, 0, 0, 0, 0,
                                   *hwndFrame, HWND_TOP, FID_CLIENT, NULL, NULL);
-    if (hwndClient != NULLHANDLE)
-      WinSendMsg (*hwndFrame, WM_UPDATEFRAME, 0, 0);
-
     return hwndClient;
   }
   dprintf(("OSLibWinCreateWindow: (FRAME) WinCreateStdWindow failed (%x)", WinGetLastError(GetThreadHAB())));

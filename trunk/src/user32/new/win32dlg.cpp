@@ -1,4 +1,4 @@
-/* $Id: win32dlg.cpp,v 1.9 2000-01-01 14:57:27 cbratschi Exp $ */
+/* $Id: win32dlg.cpp,v 1.10 2000-01-02 19:30:43 cbratschi Exp $ */
 /*
  * Win32 Dialog Code for OS/2
  *
@@ -790,11 +790,11 @@ LRESULT Win32Dialog::DefDlg_Proc(UINT msg, WPARAM wParam, LPARAM lParam)
             if(wndFocus)
             {
                 /* always make combo box hide its listbox control */
-                if( WIDGETS_IsControl( wndFocus, COMBOBOX_CONTROL ) )
+                if( CONTROLS_IsControl( wndFocus, COMBOBOX_CONTROL ) )
                     wndFocus->SendMessageA(CB_SHOWDROPDOWN, FALSE, 0 );
                 else
-                if( WIDGETS_IsControl( wndFocus, EDIT_CONTROL ) &&
-                    WIDGETS_IsControl( wndFocus->getParent(), COMBOBOX_CONTROL ))
+                if( CONTROLS_IsControl( wndFocus, EDIT_CONTROL ) &&
+                    CONTROLS_IsControl( wndFocus->getParent(), COMBOBOX_CONTROL ))
                     wndFocus->SendMessageA(CB_SHOWDROPDOWN, FALSE, 0 );
             }
         }

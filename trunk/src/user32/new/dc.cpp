@@ -1,4 +1,4 @@
-/* $Id: dc.cpp,v 1.6 2000-01-01 14:57:10 cbratschi Exp $ */
+/* $Id: dc.cpp,v 1.7 2000-01-02 19:30:42 cbratschi Exp $ */
 
 /*
  * DC functions for USER32
@@ -1242,7 +1242,7 @@ BOOL WIN32API ScrollWindow(HWND hwnd, int dx, int dy, const RECT *pScroll, const
         return 0;
     }
     dprintf(("ScrollWindow %x %d %d %x %x", hwnd, dx, dy, pScroll, pClip));
-    mapWin32ToOS2Rect(window,window->getClientRect(), (PRECTLOS2)&clientRect);
+    mapWin32ToOS2Rect(window,window->getClientRectPtr(),(PRECTLOS2)&clientRect);
     //Rectangle could be relative to parent window, so fix this
     if(clientRect.yBottom != 0) {
         clientRect.yTop   -= clientRect.yBottom;

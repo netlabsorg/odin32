@@ -1,4 +1,4 @@
-/* $Id: window.cpp,v 1.27 2000-01-01 14:57:34 cbratschi Exp $ */
+/* $Id: window.cpp,v 1.28 2000-01-02 19:30:46 cbratschi Exp $ */
 /*
  * Win32 window apis for OS/2
  *
@@ -767,14 +767,18 @@ BOOL WIN32API GetClientRect( HWND hwnd, PRECT pRect)
 
  Win32BaseWindow *window;
 
+    if (!pRect)
+    {
+      SetLastError(ERROR_INVALID_PARAMETER);
+      return FALSE;
+    }
     window = Win32BaseWindow::GetWindowFromHandle(hwnd);
     if(!window) {
         dprintf(("GetClientRect, window %x not found", hwnd));
         SetLastError(ERROR_INVALID_WINDOW_HANDLE);
-        return 0;
+        return FALSE;
     }
-    *pRect = *window->getClientRect();
-    OffsetRect(pRect, -pRect->left, -pRect->top);
+    window->getClientRect(pRect);
     dprintf(("GetClientRect of %X returned (%d,%d) (%d,%d)\n", hwndWin32, pRect->left, pRect->top, pRect->right, pRect->bottom));
     return TRUE;
 }
@@ -798,10 +802,10 @@ BOOL WIN32API AdjustWindowRectEx( PRECT rect, DWORD style, BOOL menu, DWORD exSt
     exStyle &= (WS_EX_DLGMODALFRAME | WS_EX_CLIENTEDGE |
         WS_EX_STATICEDGE | WS_EX_TOOLWINDOW);
     if (exStyle & WS_EX_DLGMODALFRAME) style &= ~WS_THICKFRAME;
-
+#if 0  //CB: todo
     Win32BaseWindow::NC_AdjustRectOuter( rect, style, menu, exStyle );
     Win32BaseWindow::NC_AdjustRectInner( rect, style, exStyle );
-
+#endif
     dprintf(("AdjustWindowRectEx returned (%d,%d)(%d,%d)\n", rect->left, rect->top, rect->right, rect->bottom));
     return TRUE;
 }

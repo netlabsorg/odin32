@@ -1,4 +1,4 @@
-/* $Id: win32wmdiclient.cpp,v 1.8 2000-01-01 14:57:31 cbratschi Exp $ */
+/* $Id: win32wmdiclient.cpp,v 1.9 2000-01-02 19:30:46 cbratschi Exp $ */
 /*
  * Win32 MDI Client Window Class for OS/2
  *
@@ -100,7 +100,7 @@ LRESULT Win32MDIClientWindow::MDIClientWndProc(UINT message, WPARAM wParam, LPAR
 
         AppendMenuA( hWindowMenu, MF_SEPARATOR, 0, NULL );
 
-        setClientRect(frameWnd->getClientRect());
+        setClientRect(frameWnd->getClientRectPtr());
 
         dprintf(("MDIClient created - hwnd = %04x, idFirst = %u\n", getWindowHandle(), idFirstChild ));
 
@@ -693,10 +693,11 @@ void Win32MDIClientWindow::releaseWindowArray(Win32BaseWindow **wndArray)
 void Win32MDIClientWindow::calcDefaultChildPos(WORD n,LPPOINT lpPos,INT delta)
 {
     INT  nstagger;
-    RECT rect = *this->getClientRect();
+    RECT rect;
     INT  spacing = GetSystemMetrics(SM_CYCAPTION) +
                      GetSystemMetrics(SM_CYFRAME) - 1;
 
+    getClientRect(&rect);
     if( rect.bottom - rect.top - delta >= spacing )
         rect.bottom -= delta;
 

@@ -1,4 +1,4 @@
-/* $Id: controls.cpp,v 1.13 2000-01-01 14:57:10 cbratschi Exp $ */
+/* $Id: controls.cpp,v 1.14 2000-01-02 19:30:42 cbratschi Exp $ */
 /* File: controls.cpp -- Win32 common controls
  *
  * Copyright (c) 1999 Christoph Bratschi
@@ -115,7 +115,7 @@ void CONTROLS_Unregister()
 }
 
 
-BOOL WIDGETS_IsControl(Win32BaseWindow *window, int control)
+BOOL CONTROLS_IsControl(Win32BaseWindow *window, int control)
 {
   if(control >= MAX_CONTROLS || window == NULL || window->getClass() == NULL)
         return FALSE;

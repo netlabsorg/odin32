@@ -1,4 +1,4 @@
-/* $Id: winuser.h,v 1.24 1999-12-26 17:28:36 cbratschi Exp $ */
+/* $Id: winuser.h,v 1.25 2000-01-02 19:29:24 cbratschi Exp $ */
 
 #ifndef __INCLUDE_WINUSER_H
 #define __INCLUDE_WINUSER_H
@@ -2254,6 +2254,9 @@ typedef struct
 
 #define WS_EX_OVERLAPPEDWINDOW (WS_EX_WINDOWEDGE|WS_EX_CLIENTEDGE)
 #define WS_EX_PALETTEWINDOW    (WS_EX_WINDOWEDGE|WS_EX_TOOLWINDOW|WS_EX_TOPMOST)
+
+/* WINE internal... */
+#define WS_EX_TRAYWINDOW	0x80000000L
 
 /* Window scrolling */
 #define SW_SCROLLCHILDREN      0x0001
