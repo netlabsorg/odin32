@@ -1,4 +1,4 @@
-/* $Id: initterm.cpp,v 1.2 1999-07-14 21:05:58 cbratschi Exp $ */
+/* $Id: initterm.cpp,v 1.3 1999-07-20 15:51:06 cbratschi Exp $ */
 
 /*
  * USER32 DLL entry point
@@ -110,9 +110,6 @@ unsigned long SYSTEM _DLL_InitTerm(unsigned long hModule, unsigned long
          if(rc)
                 return 0UL;
 
-         //SvL: 18-7-'98, Register system window classes (button, listbox etc etc)
-         RegisterSystemClasses(hModule);
-
          //SvL: Try to start communication with our message spy queue server
          InitSpyQueue();
 
@@ -120,6 +117,11 @@ unsigned long SYSTEM _DLL_InitTerm(unsigned long hModule, unsigned long
          if(InitPM() == FALSE) {
                 return 0UL;
          }
+
+         //SvL: 18-7-'98, Register system window classes (button, listbox etc etc)
+         //CB: register internal classes
+         RegisterSystemClasses(hModule);
+
          break;
       case 1 :
          break;

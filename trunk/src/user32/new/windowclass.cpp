@@ -1,4 +1,4 @@
-/* $Id: windowclass.cpp,v 1.5 1999-07-16 11:32:09 sandervl Exp $ */
+/* $Id: windowclass.cpp,v 1.6 1999-07-20 15:51:06 cbratschi Exp $ */
 /*
  * Win32 Window Class Code for OS/2
  *
@@ -18,16 +18,21 @@
 #include <misc.h>
 #include <win32class.h>
 #include <win32wnd.h>
+#include <controls.h>
 
 //******************************************************************************
 //******************************************************************************
 void RegisterSystemClasses(ULONG hModule)
 {
+  dprintf(("RegisterSystemClasses\n"));
+  CONTROLS_Register();
 }
 //******************************************************************************
 //******************************************************************************
 void UnregisterSystemClasses()
 {
+  dprintf(("UnregisterSystemClasses\n"));
+  CONTROLS_Unregister();
 }
 //******************************************************************************
 //******************************************************************************
