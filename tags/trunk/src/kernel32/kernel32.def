@@ -1,4 +1,4 @@
-; $Id: kernel32.def,v 1.124 2001-10-03 13:48:56 sandervl Exp $
+; $Id: kernel32.def,v 1.125 2001-10-11 00:59:42 phaller Exp $
 
 ;Basis is Windows95 KERNEL32
 LIBRARY KERNEL32 INITINSTANCE TERMINSTANCE
@@ -1198,3 +1198,6 @@ EXPORTS
     _dbg_GetThreadCallDepth@0                                     @3100 NONAME
     _dbg_IncThreadCallDepth@0                                     @3101 NONAME
     _dbg_DecThreadCallDepth@0                                     @3102 NONAME
+    PerfView_RegisterCall                                         @3103 NONAME
+    PerfView_DumpProfile                                          @3104 NONAME
+    PerfView_Write                                                @3105 NONAME
