@@ -1,4 +1,4 @@
-/* $Id: ModuleBase.h,v 1.4 2000-09-02 21:07:59 bird Exp $
+/* $Id: ModuleBase.h,v 1.5 2000-09-22 09:22:36 bird Exp $
  *
  * ModuleBase - Declaration of the Basic module class.
  *
@@ -119,7 +119,7 @@ public:
     virtual ULONG   read(ULONG offLXFile, PVOID pvBuffer, ULONG fpBuffer, ULONG cbToRead, PMTE pMTE) = 0;
     virtual ULONG   applyFixups(PMTE pMTE, ULONG iObject, ULONG iPageTable, PVOID pvPage,
                                 ULONG ulPageAddress, PVOID pvPTDA); /*(ldrEnum32bitRelRecs)*/
-    virtual ULONG   openPath(PCHAR pachFilename, USHORT cchFilename, ldrlv_t *pLdrLv, PULONG pful); /* (ldrOpenPath) */
+    virtual ULONG   openPath(PCHAR pachFilename, USHORT cchFilename, ldrlv_t *pLdrLv, PULONG pful, ULONG lLibPath); /* (ldrOpenPath) */
     #ifndef RING0
     virtual ULONG   writeFile(PCSZ pszLXFilename);
     #endif

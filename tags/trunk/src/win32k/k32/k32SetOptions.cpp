@@ -1,4 +1,4 @@
-/* $Id: k32SetOptions.cpp,v 1.2 2000-09-02 21:08:06 bird Exp $
+/* $Id: k32SetOptions.cpp,v 1.3 2000-09-22 09:22:38 bird Exp $
  *
  * k32SetOptions - Sets the changable options of win32k.sys the options.
  *
@@ -145,7 +145,7 @@ APIRET k32SetOptions(PK32OPTIONS pOptions)
          * Apply changes
          */
         options.usCom       = TmpOptions.usCom;         /* Output port no. */
-        options.fLogging    = TmpOptions.fLogging;      /* Logging. */
+        options.fLogging    = (USHORT)TmpOptions.fLogging;/* Logging. */
         options.fPE         = TmpOptions.fPE;           /* Flags set the type of conversion. */
         options.ulInfoLevel = TmpOptions.ulInfoLevel;   /* Pe2Lx InfoLevel. */
         options.fElf        = TmpOptions.fElf;          /* Elf flags. */

@@ -1,4 +1,4 @@
-/* $Id: pe2lx.cpp,v 1.20 2000-09-22 03:47:37 bird Exp $
+/* $Id: pe2lx.cpp,v 1.21 2000-09-22 09:22:41 bird Exp $
  *
  * Pe2Lx class implementation. Ring 0 and Ring 3
  *
@@ -1340,7 +1340,7 @@ ULONG  Pe2Lx::applyFixups(PMTE pMTE, ULONG iObject, ULONG iPageTable, PVOID pvPa
  *          endloop
  *      endif
  */
-ULONG  Pe2Lx::openPath(PCHAR pachFilename, USHORT cchFilename, ldrlv_t *pLdrLv, PULONG pful) /* (ldrOpenPath) */
+ULONG  Pe2Lx::openPath(PCHAR pachFilename, USHORT cchFilename, ldrlv_t *pLdrLv, PULONG pful, ULONG lLibPath) /* (ldrOpenPath) */
 {
     #ifdef RING0
 
@@ -1348,13 +1348,14 @@ ULONG  Pe2Lx::openPath(PCHAR pachFilename, USHORT cchFilename, ldrlv_t *pLdrLv, 
      * Mark the SFN invalid in the case of error.
      * Initiate the Odin32 Path static variable and call worker.
      */
-    return openPath2(pachFilename, cchFilename, pLdrLv, pful, initOdin32Path());
+    return openPath2(pachFilename, cchFilename, pLdrLv, pful, lLibPath, initOdin32Path());
 
     #else
     NOREF(pachFilename);
     NOREF(cchFilename);
     NOREF(pLdrLv);
     NOREF(pful);
+    NOREF(lLibPath);
     return ERROR_NOT_SUPPORTED;
     #endif
 }
@@ -1385,7 +1386,7 @@ ULONG  Pe2Lx::openPath(PCHAR pachFilename, USHORT cchFilename, ldrlv_t *pLdrLv, 
  *              (cchFilename should have been USHORT. But, then the compiler would
  *               treat it as an ULONG.)
  */
-ULONG  Pe2Lx::openPath2(PCHAR pachFilename, ULONG cchFilename, ldrlv_t *pLdrLv, PULONG pful, BOOL fOdin32PathValid)
+ULONG  Pe2Lx::openPath2(PCHAR pachFilename, ULONG cchFilename, ldrlv_t *pLdrLv, PULONG pful, ULONG lLibPath, BOOL fOdin32PathValid)
 {
     #ifdef RING0
 
@@ -1593,13 +1594,14 @@ ULONG  Pe2Lx::openPath2(PCHAR pachFilename, ULONG cchFilename, ldrlv_t *pLdrLv, 
      * Since we haven't found the file yet we'll return thru ldrOpenPath.
      */
     rfree(pVars);
-    return ldrOpenPath(pachFilename, (USHORT)cchFilename, pLdrLv, pful);
+    return ldrOpenPath(pachFilename, (USHORT)cchFilename, pLdrLv, pful, lLibPath);
 
     #else
     NOREF(pachFilename);
     NOREF(cchFilename);
     NOREF(pLdrLv);
     NOREF(pful);
+    NOREF(lLibPath);
     NOREF(fOdin32PathValid);
     return ERROR_NOT_SUPPORTED;
     #endif
@@ -4784,7 +4786,7 @@ BOOL Pe2Lx::initOdin32Path()
     ul = options.fNoLoader;
     options.fNoLoader = TRUE;
     lv.lv_class = CLASS_GLOBAL;
-    rc = openPath2("KERNEL32", 8, (ldrlv_t*)SSToDS(&lv), (PULONG)SSToDS(&ful), FALSE);
+    rc = openPath2("KERNEL32", 8, (ldrlv_t*)SSToDS(&lv), (PULONG)SSToDS(&ful), 3, FALSE);
     options.fNoLoader = ul;
     if (rc == NO_ERROR)
     {
