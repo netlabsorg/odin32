@@ -1,3 +1,5 @@
+/* $Id: pe.h,v 1.3 1999-06-10 16:56:36 phaller Exp $ */
+
 /*
  *
  * Project Odin Software License can be found in LICENSE.TXT
@@ -22,11 +24,11 @@ extern char szInteralErrorMsg[];
 
 #define DWORD  ULONG
 #define LPVOID VOID *
-#define WORD   USHORT 
+#define WORD   USHORT
 #define UNALIGNED
 #define PDWORD DWORD *
 #define PWORD  WORD *
-#define NTAPI  
+#define NTAPI
 #define BOOLEAN ULONG
 #define WCHAR   USHORT
 #define HANDLE  ULONG

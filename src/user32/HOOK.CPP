@@ -1,3 +1,5 @@
+/* $Id: HOOK.CPP,v 1.3 1999-06-10 16:50:35 phaller Exp $ */
+
 /*
  * Win32 hook API functions for OS/2
  *

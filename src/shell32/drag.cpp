@@ -1,3 +1,5 @@
+/* $Id: drag.cpp,v 1.2 1999-06-10 16:56:08 phaller Exp $ */
+
 /*
  * Win32 SHELL32 for OS/2
  * Copyright 1989 Patrick Haller

@@ -1,3 +1,5 @@
+/* $Id: wndclass.cpp,v 1.3 1999-06-10 16:50:37 phaller Exp $ */
+
 /*
  * Win32 Window Class Managment Code for OS/2
  *
