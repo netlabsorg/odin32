@@ -1,4 +1,4 @@
-# $Id: ole32.mak,v 1.19 2002-02-19 13:26:08 sandervl Exp $
+# $Id: ole32.mak,v 1.20 2002-05-16 19:26:29 sandervl Exp $
 
 #
 # Odin32 API
@@ -84,6 +84,7 @@ $(ODIN32_LIB)/advapi32.lib \
 $(ODIN32_LIB)/kernel32.lib \
 $(ODIN32_LIB)/oleaut32.lib \
 $(ODIN32_LIB)/guidlib.lib \
+$(ODIN32_LIB)/ntdll.lib \
 $(ODIN32_LIB)/$(ODINCRT).lib \
 OS2386.LIB \
 $(RTLLIB_O)
