@@ -1,4 +1,4 @@
-/* $Id: wndclass.cpp,v 1.4 1999-06-20 14:02:13 sandervl Exp $ */
+/* $Id: wndclass.cpp,v 1.5 1999-06-20 16:47:38 sandervl Exp $ */
 
 /*
  * Win32 Window Class Managment Code for OS/2
@@ -42,10 +42,36 @@ WNDPROC_O32 EditHandler = 0;
 WNDPROC_O32 MdiClientHandler = 0;
 WNDPROC_O32 ScrollbarHandler = 0;
 WNDPROC_O32 StaticHandler = 0;
+
+HWND hwndButton = 0;
+HWND hwndListbox = 0;
+HWND hwndEdit = 0;
+HWND hwndCombobox = 0;
+HWND hwndScrollbar = 0;
+HWND hwndMdiClient = 0;
+HWND hwndStatic = 0;
+
+Win32WindowClass *ButtonClass = 0;
+Win32WindowClass *ListboxClass = 0;
+Win32WindowClass *EditClass = 0;
+Win32WindowClass *ComboboxClass = 0;
+Win32WindowClass *MdiClientClass = 0;
+Win32WindowClass *ScrollbarClass = 0;
+Win32WindowClass *StaticClass = 0;
 //******************************************************************************
 //******************************************************************************
 LRESULT WIN32API ButtonCallback(HWND hwnd, UINT Msg, WPARAM wParam, LPARAM lParam)
 {
+  switch(Msg)
+  {
+	case WM_CREATE:
+	case WM_DESTROY:
+	case WM_LBUTTONDOWN:
+	case WM_MBUTTONDOWN:
+	case WM_RBUTTONDOWN:
+		NotifyParent(hwnd, Msg, wParam, lParam);
+		break;
+  }
   return ButtonHandler(hwnd, Msg, wParam, lParam);
 }
 //******************************************************************************
@@ -90,36 +116,107 @@ LRESULT WIN32API StaticCallback(HWND hwnd, UINT Msg, WPARAM wParam, LPARAM lPara
 void RegisterSystemClasses(ULONG hModule)
 {
  WNDCLASSA wndclass;
+ HWND hwnd;
 
    if(O32_GetClassInfo(NULL, "BUTTON", &wndclass)) {
-	new Win32WindowClass(ButtonCallback, "BUTTON", hModule);
+	dprintf(("Create BUTTON System class"));
+	ButtonClass = new Win32WindowClass(ButtonCallback, "BUTTON", hModule);
 	ButtonHandler = (WNDPROC_O32)wndclass.lpfnWndProc;
+	hwndButton = O32_CreateWindow("BUTTON", "BUTTON", 0, 0, 0, 0, 0, 0, 0, 0, 0);
+	if(hwndButton == 0) {
+		dprintf(("RegisterSystemClasses failed!!"));
+	}
+	O32_SetClassLong(hwndButton, GCL_WNDPROC, (LONG)ButtonCallback);
    }
    if(O32_GetClassInfo(NULL, "LISTBOX", &wndclass)) {
-	new Win32WindowClass(ListboxCallback, "LISTBOX", hModule);
+	dprintf(("Create LISTBOX System class"));
+	ListboxClass = new Win32WindowClass(ListboxCallback, "LISTBOX", hModule);
 	ListboxHandler = (WNDPROC_O32)wndclass.lpfnWndProc;
+	hwndListbox = O32_CreateWindow("LISTBOX", "LISTBOX", 0, 0, 0, 0, 0, 0, 0, 0, 0);
+	if(hwndListbox == 0) {
+		dprintf(("RegisterSystemClasses failed!!"));
+	}
+	O32_SetClassLong(hwndListbox, GCL_WNDPROC, (LONG)ListboxCallback);
    }
    if(O32_GetClassInfo(NULL, "COMBOBOX", &wndclass)) {
-	new Win32WindowClass(ComboboxCallback, "COMBOBOX", hModule);
+	dprintf(("Create COMBOBOX System class"));
+	ComboboxClass = new Win32WindowClass(ComboboxCallback, "COMBOBOX", hModule);
 	ComboboxHandler = (WNDPROC_O32)wndclass.lpfnWndProc;
+	hwndCombobox = O32_CreateWindow("COMBOBOX", "COMBOBOX", 0, 0, 0, 0, 0, 0, 0, 0, 0);
+	if(hwndCombobox == 0) {
+		dprintf(("RegisterSystemClasses failed!!"));
+	}
+	O32_SetClassLong(hwndCombobox, GCL_WNDPROC, (LONG)ComboboxCallback);
    }
    if(O32_GetClassInfo(NULL, "EDIT", &wndclass)) {
-	new Win32WindowClass(EditCallback, "EDIT", hModule);
+	dprintf(("Create EDIT System class"));
+	EditClass = new Win32WindowClass(EditCallback, "EDIT", hModule);
 	EditHandler = (WNDPROC_O32)wndclass.lpfnWndProc;
+	hwndEdit = O32_CreateWindow("EDIT", "EDIT", 0, 0, 0, 0, 0, 0, 0, 0, 0);
+	if(hwndEdit == 0) {
+		dprintf(("RegisterSystemClasses failed!!"));
+	}
+	O32_SetClassLong(hwndEdit, GCL_WNDPROC, (LONG)EditCallback);
    }
+   //TODO: This doens't work yet!! (need to create a normal window as parent)
    if(O32_GetClassInfo(NULL, "MDICLIENT", &wndclass)) {
-	new Win32WindowClass(MdiClientCallback, "MDICLIENT", hModule);
+	dprintf(("Create MDICLIENT System class"));
+	MdiClientClass = new Win32WindowClass(MdiClientCallback, "MDICLIENT", hModule);
 	MdiClientHandler = (WNDPROC_O32)wndclass.lpfnWndProc;
+	hwndMdiClient = O32_CreateWindow("MDICLIENT", "MDICLIENT", WS_CHILD, 0, 0, 0, 0, hwndListbox, 0, 0, 0);
+	if(hwndMdiClient == 0) {
+		dprintf(("RegisterSystemClasses failed!!"));
+	}
+	O32_SetClassLong(hwndMdiClient, GCL_WNDPROC, (LONG)MdiClientCallback);
    }
    if(O32_GetClassInfo(NULL, "SCROLLBAR", &wndclass)) {
-	new Win32WindowClass(ScrollbarCallback, "SCROLLBAR", hModule);
+	dprintf(("Create SCROLLBAR System class"));
+	ScrollbarClass = new Win32WindowClass(ScrollbarCallback, "SCROLLBAR", hModule);
 	ScrollbarHandler = (WNDPROC_O32)wndclass.lpfnWndProc;
+	hwndScrollbar = O32_CreateWindow("SCROLLBAR", "SCROLLBAR", 0, 0, 0, 0, 0, 0, 0, 0, 0);
+	if(hwndScrollbar == 0) {
+		dprintf(("RegisterSystemClasses failed!!"));
+	}
+	O32_SetClassLong(hwndScrollbar, GCL_WNDPROC, (LONG)ScrollbarCallback);
    }
    if(O32_GetClassInfo(NULL, "STATIC", &wndclass)) {
-	new Win32WindowClass(StaticCallback, "STATIC", hModule);
+	dprintf(("Create STATIC System class"));
+	StaticClass = new Win32WindowClass(StaticCallback, "STATIC", hModule);
 	StaticHandler = (WNDPROC_O32)wndclass.lpfnWndProc;
+	hwndStatic = O32_CreateWindow("STATIC", "STATIC", 0, 0, 0, 0, 0, 0, 0, 0, 0);
+	if(hwndStatic == 0) {
+		dprintf(("RegisterSystemClasses failed!!"));
+	}
+	O32_SetClassLong(hwndStatic, GCL_WNDPROC, (LONG)StaticCallback);
    }
 //TODO: More standard classes in win95/NT4?
+}
+//******************************************************************************
+//******************************************************************************
+void UnregisterSystemClasses()
+{
+   dprintf(("KERNEL32: UnregisterSystemClasses"));
+   if(hwndButton)    O32_DestroyWindow(hwndButton);
+   if(hwndListbox)   O32_DestroyWindow(hwndListbox);
+   if(hwndCombobox)  O32_DestroyWindow(hwndCombobox);
+   if(hwndMdiClient) O32_DestroyWindow(hwndMdiClient);
+   if(hwndEdit)      O32_DestroyWindow(hwndEdit);
+   if(hwndScrollbar) O32_DestroyWindow(hwndScrollbar);
+   if(hwndStatic)    O32_DestroyWindow(hwndStatic);
+   if(ButtonClass)    delete ButtonClass;
+   if(ListboxClass)   delete ListboxClass;
+   if(EditClass)      delete EditClass;
+   if(ComboboxClass)  delete ComboboxClass;
+   if(MdiClientClass) delete MdiClientClass;
+   if(ScrollbarClass) delete ScrollbarClass;
+   if(StaticClass)    delete StaticClass;
+   ButtonClass    = NULL;
+   EditClass      = NULL;
+   ListboxClass   = NULL;
+   ComboboxClass  = NULL;
+   MdiClientClass = NULL;
+   ScrollbarClass = NULL;
+   StaticClass    = NULL;
 }
 //******************************************************************************
 //SvL: 18-7-'98: Moved here from user32.cpp
@@ -217,17 +314,7 @@ ATOM WIN32API RegisterClassExA(const WNDCLASSEXA *lpWndClass)
 #endif
     //These are not supported by Open32
     wc.style &= ~(CS_PARENTDC | CS_CLASSDC);
-  
-//SvL: 18-7-'98 Breaks apps (solitaire, rasmol..)  
-#if 0
-    /* @@@PH 98/06/21 experimental fix for WInhlp32 */
-#ifndef CS_SYNCPAINT
-  #define CS_SYNCPAINT 0x02000000L
-#endif
-  
-    wc.style |= CS_SYNCPAINT;
-#endif  
-  
+   
     wc.lpfnWndProc = (WNDPROC)Win32WindowClass::GetOS2ClassCallback();
 
     rc = O32_RegisterClass((WNDCLASSA *)&wc.style);
@@ -707,6 +794,10 @@ LRESULT EXPENTRY_O32 OS2ToWinCallback(HWND hwnd, UINT Msg, WPARAM wParam, LPARAM
 {
  char                  szClass[128];
  Win32WindowClass     *wclass;
+ LRESULT               rc;
+ DWORD                 dwStyle, dwExStyle;
+ HWND                  parentHwnd;
+ Win32WindowProc      *window;
 
 #ifdef DEBUG
   dprintf(("OS2ToWinCallback for message %s", GetMsgText(Msg)));
@@ -719,25 +810,47 @@ LRESULT EXPENTRY_O32 OS2ToWinCallback(HWND hwnd, UINT Msg, WPARAM wParam, LPARAM
   if(O32_GetClassName(hwnd, szClass, sizeof(szClass))) {
         wclass = Win32WindowClass::FindClass(szClass);
         if(wclass) {
-                //SvL: Correct Open32 key mapping bug
-                if(Msg == WM_KEYDOWN || Msg == WM_KEYUP || Msg == WM_CHAR) {
-//                        dprintf(("WM_KEYDOWN %X %08X\n", wParam, lParam));
-                        lParam = MapOEMToRealKey(wParam, lParam);
-                }
-
-                if(Msg == WM_CREATE) {//Open32 isn't sending WM_NCCREATE messages!!
+		switch(Msg) 
+		{
+		case WM_CREATE://Open32 isn't sending WM_NCCREATE messages!!
+		      	window = Win32WindowProc::FindProc(hwnd, GetCurrentThreadId());
+			if(window) {
+				dprintf(("OS2ToWinCallback (class): New window object!"));
+				window->SetWindowHandle(hwnd);
+    			}
+		
                         if(wclass->GetWinCallback()(hwnd, WM_NCCREATE, 0, lParam) == 0) {
                                 dprintf(("WM_NCCREATE returned FALSE\n"));
                                 return(-1); //don't create window
                         }
-                }
-                if(Msg == WM_ACTIVATE && LOWORD(wParam) != WA_INACTIVE)
-                {//SvL: Bugfix, Open32 is NOT sending this to the window (messes up Solitaire)
-                  HDC hdc = GetDC(hwnd);
+			//Send WM_CREATE message before notifying parent
+			rc = wclass->GetWinCallback()(hwnd, Msg, wParam, lParam);
 
-                        wclass->GetWinCallback()(hwnd, WM_ERASEBKGND, hdc, 0);
-                        ReleaseDC(hwnd, hdc);
-                }
+			NotifyParent(hwnd, WM_CREATE, wParam, lParam);
+			return(rc);
+
+		case WM_DESTROY: //nofity parent
+		case WM_LBUTTONDOWN:
+		case WM_MBUTTONDOWN:
+		case WM_RBUTTONDOWN:
+			NotifyParent(hwnd, Msg, wParam, lParam);
+			break;
+
+		case WM_KEYDOWN:
+		case WM_KEYUP:
+		case WM_CHAR:	//SvL: Correct Open32 key mapping bug
+                        lParam = MapOEMToRealKey(wParam, lParam);
+			break;
+		case WM_ACTIVATE:
+                	if(LOWORD(wParam) != WA_INACTIVE)
+                	{//SvL: Bugfix, Open32 is NOT sending this to the window (messes up Solitaire)
+                  	 HDC hdc = GetDC(hwnd);
+
+                        	wclass->GetWinCallback()(hwnd, WM_ERASEBKGND, hdc, 0);
+                        	ReleaseDC(hwnd, hdc);
+                	}
+			break;
+		}
 		return wclass->GetWinCallback()(hwnd, Msg, wParam, lParam);
 	}
   }

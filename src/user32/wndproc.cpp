@@ -1,4 +1,4 @@
-/* $Id: wndproc.cpp,v 1.5 1999-06-20 14:02:13 sandervl Exp $ */
+/* $Id: wndproc.cpp,v 1.6 1999-06-20 16:47:39 sandervl Exp $ */
 
 /*
  * Win32 window procedure class for OS/2
@@ -27,6 +27,36 @@
 char *GetMsgText(int Msg);
 #endif
 
+
+void NotifyParent(HWND hwnd, UINT Msg, WPARAM wParam, LPARAM lParam)
+{
+ DWORD   dwStyle, dwExStyle;
+ HWND    hwndParent = GetParent(hwnd);;
+
+   while(hwndParent) {
+	dwStyle   = GetWindowLongA(hwnd, GWL_STYLE);
+	dwExStyle = GetWindowLongA(hwnd, GWL_EXSTYLE);
+	//SvL: Taken from Wine
+	if(dwStyle & WS_CHILD && !(dwExStyle & WS_EX_NOPARENTNOTIFY) )
+	{
+		hwndParent = GetParent(hwnd);
+		dprintf(("%s Send WM_PARENTNOTIFY from child %x to parent %x", GetMsgText(Msg), hwnd, hwndParent));
+		/* Notify the parent window only */
+		Win32WindowProc *parentwnd = Win32WindowProc::FindProc(hwndParent);
+		if(parentwnd) {
+			if(Msg == WM_CREATE || Msg == WM_DESTROY) {
+				//Todo: Set IdChild!!
+				parentwnd->GetWin32Callback()(hwndParent, WM_PARENTNOTIFY, MAKEWPARAM(Msg, 0), (LPARAM)hwnd );
+			}
+			else	parentwnd->GetWin32Callback()(hwndParent, WM_PARENTNOTIFY, MAKEWPARAM(Msg, 0), lParam );
+		}
+	}
+	if(hwnd == hwndParent) {
+		break;
+	}
+	hwnd = hwndParent;
+   }
+}
 //******************************************************************************
 //******************************************************************************
 Win32WindowProc *SYSTEM CreateWindowProc(WNDPROC pUserCallback)
@@ -66,8 +96,11 @@ Win32WindowProc::Win32WindowProc(HINSTANCE hinst, LPCSTR lpszClassName)
                         : hwnd(0), next(NULL), os2dlg(NULL)
 {
  WNDCLASSA wc;
+ BOOL rc;
 
-  assert(GetClassInfoA(hinst, lpszClassName, &wc) == TRUE);
+  rc = GetClassInfoA(hinst, lpszClassName, &wc);
+  assert(rc == TRUE);
+
 //  pCallback = Win32WindowClass::GetClassCallback(hinst, (LPSTR)wc.lpszClassName);
   pCallback = Win32WindowClass::GetClassCallback((LPSTR)wc.lpszClassName);
 //test (8nov)
@@ -154,6 +187,22 @@ Win32WindowProc *Win32WindowProc::FindProc(HWND hwnd)
   return(NULL);
 }
 //******************************************************************************
+//Find newly created window
+//******************************************************************************
+Win32WindowProc *Win32WindowProc::FindProc(HWND hwnd, DWORD threadid)
+{
+  Win32WindowProc *window = Win32WindowProc::windows;
+
+  while(window != NULL) {
+        if(window->hwnd == 0 && window->threadid == threadid) {
+                return(window);
+        }
+        window = window->next;
+  }
+  dprintf(("Win32WindowProc::FindProc, can't find window %X %d!\n", hwnd, threadid));
+  return(NULL);
+}
+//******************************************************************************
 //******************************************************************************
 void Win32WindowProc::DeleteWindow(HWND hwnd)
 {
@@ -224,102 +273,71 @@ DWORD MapOEMToRealKey(DWORD wParam, DWORD lParam)
 //******************************************************************************
 LRESULT EXPENTRY_O32 WndCallback(HWND hwnd, UINT Msg, WPARAM wParam, LPARAM lParam)
 {
- Win32WindowProc *curwnd = Win32WindowProc::windows;
+ Win32WindowProc *curwnd;
  LRESULT rc;
 
   if(HkCBT::OS2HkCBTProc(hwnd, Msg, wParam, lParam) == TRUE) {//hook swallowed msg
         return(0);
   }
-  while(curwnd != NULL) {
-        if(curwnd->hwnd == hwnd) {
-                //SvL: Correct Open32 key mapping bug
-                if(Msg == WM_KEYDOWN || Msg == WM_KEYUP || Msg == WM_CHAR) {
-//                        dprintf(("WM_KEYDOWN %X %08X\n", wParam, lParam));
-                        lParam = MapOEMToRealKey(wParam, lParam);
-                }
+  
+  curwnd = Win32WindowProc::FindProc(hwnd);
+  if(!curwnd) {
+	curwnd = Win32WindowProc::FindProc(0, GetCurrentThreadId());
+	if(curwnd)	curwnd->SetWindowHandle(hwnd);
+  }
+  if(curwnd != NULL) {
 #ifdef DEBUG
-                WriteLog("***************Message %s for window/dialog %X\n", GetMsgText(Msg), hwnd);
+        WriteLog("***************Message %s for window/dialog %X\n", GetMsgText(Msg), hwnd);
 #endif
-//              if(Msg == WM_CREATE || Msg == WM_INITDIALOG) {//Open32 isn't sending WM_NCCREATE messages!!
-                if(Msg == WM_CREATE) {//Open32 isn't sending WM_NCCREATE messages!!
-#ifdef DEBUG1
-                        WriteLog("WM_NCCREATE\n");
-#endif
-                        if(curwnd->pCallback(hwnd, WM_NCCREATE, 0, lParam) == 0) {
-                                dprintf(("WM_NCCREATE returned FALSE\n"));
-                                return(-1); //don't create window
-                        }
+	switch(Msg) 
+	{
+	case WM_KEYDOWN:
+	case WM_KEYUP:
+	case WM_CHAR:
+	        //SvL: Correct Open32 key mapping bug
+                lParam = MapOEMToRealKey(wParam, lParam);
+		break;
+	case WM_CREATE:  //Open32 isn't sending WM_NCCREATE messages!!
+                if(curwnd->pCallback(hwnd, WM_NCCREATE, 0, lParam) == 0) {
+                       dprintf(("WM_NCCREATE returned FALSE\n"));
+                       return(-1); //don't create window
+                }
+	
+		NotifyParent(hwnd, WM_CREATE, wParam, lParam);
 //TODO
 #if 0
-                        if(curwnd->pCallback(hwnd, WM_NCCALCSIZE, 0, lParam) == 0) {
-#ifdef DEBUG1
-                                WriteLog("WM_NCCREATE returned FALSE\n");
-#endif
-                                return(-1); //don't create window
-                        }
-#endif
-#ifdef DEBUG1
-                        WriteLog("WM_NCCREATE, continue window creation\n");
-#endif
+                if(curwnd->pCallback(hwnd, WM_NCCALCSIZE, 0, lParam) == 0) {
+                        return(-1); //don't create window
                 }
-#if 1
-                if(Msg == WM_ACTIVATE && LOWORD(wParam) != WA_INACTIVE)
-                {//SvL: Bugfix, Open32 is NOT sending this to the window (messes up Solitaire)
-                  HDC hdc = GetDC(hwnd);
+#endif
+		break;
 
-                        curwnd->pCallback(hwnd, WM_ERASEBKGND, hdc, 0);
-                        ReleaseDC(hwnd, hdc);
-                }
-#endif
-                rc = curwnd->pCallback(hwnd, Msg, wParam, lParam);
-#ifdef DEBUG1
-                WriteLog("***************Message processed rc = %d\n", rc);
-#endif
-                if(Msg == WM_NCDESTROY) {
-                        dprintf(("WM_NCDESTROY received for window/dialog %X\n", curwnd->hwnd));
-                        Win32WindowSubProc::DeleteSubWindow(hwnd); //if present
-                        delete curwnd;
-                }
-                return rc;
+	case WM_LBUTTONDOWN:
+	case WM_MBUTTONDOWN:
+	case WM_RBUTTONDOWN:
+	case WM_DESTROY: //nofity parent
+		NotifyParent(hwnd, Msg, wParam, lParam);	
+		break;
+
+	case WM_ACTIVATE:
+		if(LOWORD(wParam) != WA_INACTIVE)
+        	{//SvL: Bugfix, Open32 is NOT sending this to the window (messes up Solitaire)
+          	  HDC hdc = GetDC(hwnd);
+
+                 	curwnd->pCallback(hwnd, WM_ERASEBKGND, hdc, 0);
+                 	ReleaseDC(hwnd, hdc);
+        	}
+		break;
+	}
+        rc = curwnd->pCallback(hwnd, Msg, wParam, lParam);
+        if(Msg == WM_NCDESTROY) {
+                dprintf(("WM_NCDESTROY received for window/dialog %X\n", curwnd->hwnd));
+                Win32WindowSubProc::DeleteSubWindow(hwnd); //if present
+                delete curwnd;
         }
-        curwnd = curwnd->next;
+        return rc;
   }
-  //Message for window/dialog that's just been created
-  //TODO: This should be thread safe, right?
-  DWORD threadid = (DWORD)GetCurrentThreadId();
-  curwnd = (Win32WindowProc *)Win32WindowProc::windows;
-  while(curwnd != NULL) {
-        if(curwnd->hwnd == 0 && curwnd->threadid == threadid) {
-#ifdef DEBUG1
-                WriteLog("***************First message %s for window/dialog %X\n", GetMsgText(Msg), hwnd);
-#endif
-                curwnd->SetWindowHandle(hwnd);
-//              if(Msg == WM_CREATE || Msg == WM_INITDIALOG) {//Open32 isn't sending WM_NCCREATE messages!!
-                if(Msg == WM_CREATE) {//Open32 isn't sending WM_NCCREATE messages!!
-#ifdef DEBUG1
-                        WriteLog("WM_NCCREATE\n");
-#endif
-                        if(curwnd->pCallback(hwnd, WM_NCCREATE, 0, lParam) == 0) {
-                                dprintf(("WM_NCCREATE returned FALSE\n"));
-                                return(-1); //don't create window
-                        }
-#ifdef DEBUG1
-                        WriteLog("WM_NCCREATE, continue window creation\n");
-#endif
-                }
-                rc = curwnd->pCallback(hwnd, Msg, wParam, lParam);
-                if(Msg == WM_NCDESTROY) {
-                        dprintf(("WM_NCDESTROY received for window/dialog %X\n", curwnd->hwnd));
-                        Win32WindowSubProc::DeleteSubWindow(hwnd); //if present
-                        delete curwnd;
-                }
-                return rc;
-        }
-        curwnd = curwnd->next;
-  }
-#ifdef DEBUG1
-  WriteLog("Dialog control??\n");
-#endif
+
   //Could be a dialog control using a registered class, so check this:
   char                  szClass[128];
   Win32WindowClass     *wclass;
