@@ -359,6 +359,12 @@ HRESULT WINAPI RegisterDragDrop(
   dropTargetInfo->prevDropTarget = NULL;
   dropTargetInfo->nextDropTarget = NULL;
 
+#ifdef __WIN32OS2__
+  dropTargetInfo->hDrop          = 0;
+  dropTargetInfo->pDataObject    = NULL;
+  dropTargetInfo->fDragEnter     = FALSE;
+  dropTargetInfo->dwEffect       = 0;
+#endif
   /*
    * Don't forget that this is an interface pointer, need to nail it down since
    * we keep a copy of it.
