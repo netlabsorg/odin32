@@ -1,4 +1,4 @@
-/* $Id: d32init.c,v 1.38 2001-02-23 02:57:53 bird Exp $
+/* $Id: d32init.c,v 1.39 2001-06-14 01:13:34 bird Exp $
  *
  * d32init.c - 32-bits init routines.
  *
@@ -592,12 +592,12 @@ USHORT _loadds _Far32 _Pascal GetKernelInfo32(PKRNLINFO pKrnlInfo)
 
                                 /* Check for any revision flag */
                                 pKrnlInfo->fKernel = 0;
-                                if ((*psz >= 'A' && *psz <= 'E') || (*psz >= 'a' && *psz <= 'e'))
+                                if ((*psz >= 'A' && *psz <= 'Z') || (*psz >= 'a' && *psz <= 'z'))
                                 {
                                     pKrnlInfo->fKernel = (USHORT)((*psz - (*psz >= 'a' ? 'a'-1 : 'A'-1)) << KF_REV_SHIFT);
                                     psz++;
                                 }
-                                if (*psz == 'F' || *psz == 'f' || *psz == ',') /* These are ignored! */
+                                if (*psz == ',') /* This is ignored! */
                                     *psz++;
 
                                 /* If this is an Aurora/Warp 4.5 or Warp 3 kernel there is more info! */
