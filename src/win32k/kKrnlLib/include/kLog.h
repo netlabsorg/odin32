@@ -1,4 +1,4 @@
-/* $Id: kLog.h,v 1.8 2001-11-15 04:32:39 bird Exp $
+/* $Id: kLog.h,v 1.9 2001-11-18 04:09:43 bird Exp $
  *
  * kLog - Generic Logging and Trace Routines.
  *
@@ -253,11 +253,11 @@ void        KLIBCALL kLogFixPrintf2(HKLOGMOD hLogMod, KLOGPOS_DECL, int iType, i
     #define KLOGINITMOD(pMod)                                           KLOGMODHANDLE = kLogInitMod(pMod, KLOGPOS_EXT)
     #define KLOGTERMMOD()                                               kLogTermMod(KLOGMODHANDLE, KLOGPOS_EXT)
 
-    #define KLOGSTARTPARMS                                              KLOGMODHANDLE, KLOGPOS_EXT, &KLOGSEQHANDLE
+    #define KLOGSTARTPARMS                                              KLOGMODHANDLE, KLOGPOS_EXT, SSToDS(&KLOGSEQHANDLE)
     #define KLOGENTRYPARMS                                              KLOGMODHANDLE, KLOGPOS_EXT
     #define KLOGSTARTVARS(pszRetType)                                   static const char   KLOGFUNCTION[] = KLOGFUNCTIONDEF; \
                                                                         static const char   KLOGRETURNTYPE[] = pszRetType; \
-                                                                        HLOGSEQ             KLOGSEQHANDLE; \
+                                                                        HKLOGSEQ            KLOGSEQHANDLE; \
                                                                         int                 kLogDummyVariable
     #define KLOGENTRYVARS(pszRetType)                                   static const char   KLOGFUNCTION[] = KLOGFUNCTIONDEF; \
                                                                         static const char   KLOGRETURNTYPE[] = pszRetType; \
@@ -294,8 +294,8 @@ void        KLIBCALL kLogFixPrintf2(HKLOGMOD hLogMod, KLOGPOS_DECL, int iType, i
     #define KLOGEXIT(uValue)                                            kLogExit( KLOGMODHANDLE, KLOGPOS_EXT,                 KLOGRETURNTYPE, uValue);  kLogDummyVariable = kLogDummyVariable
     #define KLOGEXITVOID()                                              kLogExit( KLOGMODHANDLE, KLOGPOS_EXT,                 KLOGRETURNTYPE, NULL);    kLogDummyVariable = kLogDummyVariable
 
-    #define KLOGSTOP(uValue)                                            kLogStop( KLOGMODHANDLE, KLOGPOS_EXT, &KLOGSEQHANDLE, KLOGRETURNTYPE, uValue);  kLogDummyVariable = kLogDummyVariable
-    #define KLOGSTOPVOID(uValue)                                        kLogStop( KLOGMODHANDLE, KLOGPOS_EXT, &KLOGSEQHANDLE, KLOGRETURNTYPE, NULL);    kLogDummyVariable = kLogDummyVariable
+    #define KLOGSTOP(uValue)                                            kLogStop( KLOGMODHANDLE, KLOGPOS_EXT, SSToDS(&KLOGSEQHANDLE), KLOGRETURNTYPE, uValue);  kLogDummyVariable = kLogDummyVariable
+    #define KLOGSTOPVOID(uValue)                                        kLogStop( KLOGMODHANDLE, KLOGPOS_EXT, SSToDS(&KLOGSEQHANDLE), KLOGRETURNTYPE, NULL);    kLogDummyVariable = kLogDummyVariable
 
     #ifdef KLOG_USE_RETURN
         #if KLOG_USE_RETURN
