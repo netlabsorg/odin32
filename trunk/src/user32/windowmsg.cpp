@@ -1,4 +1,4 @@
-/* $Id: windowmsg.cpp,v 1.33 2002-02-05 17:59:02 sandervl Exp $ */
+/* $Id: windowmsg.cpp,v 1.34 2002-06-15 17:17:17 sandervl Exp $ */
 /*
  * Win32 window message APIs for OS/2
  *
@@ -40,40 +40,40 @@ ODINDEBUGCHANNEL(USER32-WINDOWMSG)
 //******************************************************************************
 LONG WIN32API DispatchMessageA(const MSG * msg)
 {
-  dprintf2(("DispatchMessageA %x %x %x %x %x", msg->hwnd, msg->message, msg->wParam, msg->lParam, msg->time));
-  return OSLibWinDispatchMsg((MSG *)msg);
+    dprintf2(("DispatchMessageA %x %x %x %x %x", msg->hwnd, msg->message, msg->wParam, msg->lParam, msg->time));
+    return OSLibWinDispatchMsg((MSG *)msg);
 }
 //******************************************************************************
 //******************************************************************************
 LONG WIN32API DispatchMessageW( const MSG * msg)
 {
-  dprintf2(("DispatchMessageW %x %x %x %x %x", msg->hwnd, msg->message, msg->wParam, msg->lParam, msg->time));
-  return OSLibWinDispatchMsg((MSG *)msg, TRUE);
+    dprintf2(("DispatchMessageW %x %x %x %x %x", msg->hwnd, msg->message, msg->wParam, msg->lParam, msg->time));
+    return OSLibWinDispatchMsg((MSG *)msg, TRUE);
 }
 //******************************************************************************
 //******************************************************************************
 BOOL WIN32API TranslateMessage(const MSG *msg)
 {
-  // check the message code
-  if ( (msg->message <  WM_KEYDOWN) ||
-       (msg->message >  WM_SYSKEYUP)||
-       (msg->message == WM_CHAR)    ||
-       (msg->message == WM_DEADCHAR) )
-  {
-    SetLastError(ERROR_INVALID_PARAMETER);
-    return FALSE;
-  }
+    // check the message code
+    if ( (msg->message <  WM_KEYDOWN) ||
+         (msg->message >  WM_SYSKEYUP)||
+         (msg->message == WM_CHAR)    ||
+         (msg->message == WM_DEADCHAR) )
+    {
+        SetLastError(ERROR_INVALID_PARAMETER);
+        return FALSE;
+    }
   
-  // only WM_KEYDOWN, WM_KEYUP, WM_SYSKEYDOWN, WM_SYSKEYUP
-  // can go into TranslateMessage
+    // only WM_KEYDOWN, WM_KEYUP, WM_SYSKEYDOWN, WM_SYSKEYUP
+    // can go into TranslateMessage
   
-  return OSLibWinTranslateMessage((MSG *)msg);
+    return OSLibWinTranslateMessage((MSG *)msg);
 }
 //******************************************************************************
 //******************************************************************************
 BOOL WIN32API GetMessageA( LPMSG pMsg, HWND hwnd, UINT uMsgFilterMin, UINT uMsgFilterMax)
 {
-  BOOL ret;
+    BOOL ret;
 
     dprintf2(("GetMessageA %x %x-%x", hwnd, uMsgFilterMin, uMsgFilterMax));
     ret = OSLibWinGetMsg(pMsg, hwnd, uMsgFilterMin, uMsgFilterMax);
@@ -85,7 +85,7 @@ BOOL WIN32API GetMessageA( LPMSG pMsg, HWND hwnd, UINT uMsgFilterMin, UINT uMsgF
 //******************************************************************************
 BOOL WIN32API GetMessageW( LPMSG pMsg, HWND hwnd, UINT uMsgFilterMin, UINT uMsgFilterMax)
 {
-  BOOL ret;
+    BOOL ret;
 
     dprintf2(("GetMessageW %x %x-%x", hwnd, uMsgFilterMin, uMsgFilterMax));
     ret = OSLibWinGetMsg(pMsg, hwnd, uMsgFilterMin, uMsgFilterMax, TRUE);
@@ -97,7 +97,7 @@ BOOL WIN32API GetMessageW( LPMSG pMsg, HWND hwnd, UINT uMsgFilterMin, UINT uMsgF
 BOOL WIN32API PeekMessageA(LPMSG msg, HWND hwndOwner, UINT uMsgFilterMin,
                            UINT uMsgFilterMax, UINT fuRemoveMsg)
 {
- BOOL fFoundMsg;
+    BOOL fFoundMsg;
  
     dprintf2(("PeekMessageA %x %d-%d %d", hwndOwner, uMsgFilterMin, uMsgFilterMax, fuRemoveMsg));
     fFoundMsg = OSLibWinPeekMsg(msg, hwndOwner, uMsgFilterMin, uMsgFilterMax,
@@ -116,7 +116,7 @@ BOOL WIN32API PeekMessageA(LPMSG msg, HWND hwndOwner, UINT uMsgFilterMin,
 BOOL WIN32API PeekMessageW(LPMSG msg, HWND hwndOwner, UINT uMsgFilterMin,
                            UINT uMsgFilterMax, UINT fuRemoveMsg)
 {
- BOOL fFoundMsg;
+    BOOL fFoundMsg;
 
     dprintf2(("PeekMessageW %x %d-%d %d", hwndOwner, uMsgFilterMin, uMsgFilterMax, fuRemoveMsg));
     fFoundMsg = OSLibWinPeekMsg(msg, hwndOwner, uMsgFilterMin, uMsgFilterMax,
@@ -142,14 +142,14 @@ LONG WIN32API GetMessageExtraInfo()
 //******************************************************************************
 LPARAM WIN32API SetMessageExtraInfo(LPARAM lParam)
 {
-  dprintf(("USER32: SetMessageExtraInfo %x", lParam));
-  return SetThreadMessageExtraInfo(lParam);
+    dprintf(("USER32: SetMessageExtraInfo %x", lParam));
+    return SetThreadMessageExtraInfo(lParam);
 }
 //******************************************************************************
 //******************************************************************************
 DWORD WIN32API GetMessagePos(void)
 {
- DWORD pos;
+    DWORD pos;
 
     pos = OSLibWinGetMessagePos();
     dprintf(("USER32: GetMessagePos -> (%d,%d)", HIWORD(pos), LOWORD(pos)));
@@ -194,7 +194,7 @@ VOID WIN32API PostQuitMessage( int nExitCode)
 //******************************************************************************
 UINT WIN32API RegisterWindowMessageA(LPCSTR lpString)
 {
- UINT rc;
+    UINT rc;
 
     rc = GlobalAddAtomA(lpString);
     dprintf(("USER32:  RegisterWindowMessageA %s returned %X\n", lpString, rc));
@@ -212,8 +212,8 @@ UINT WIN32API RegisterWindowMessageW( LPCWSTR lpString)
 //******************************************************************************
 BOOL WIN32API SetMessageQueue(int cMessagesMax)
 {
-  dprintf(("USER32:  SetMessageQueue\n"));
-  return(TRUE);
+    dprintf(("USER32:  SetMessageQueue\n"));
+    return(TRUE);
 }
 //******************************************************************************
 //******************************************************************************
