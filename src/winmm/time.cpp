@@ -1,4 +1,4 @@
-/* $Id: time.cpp,v 1.11 2001-03-24 13:23:48 sandervl Exp $ */
+/* $Id: time.cpp,v 1.12 2001-07-30 10:19:54 sandervl Exp $ */
 
 /*
  * Timer MM apis
@@ -204,6 +204,21 @@ ODINFUNCTION5(MMRESULT,       timeSetEvent,
   return(MMRESULT)timer;
 }
 
+ULONG OPEN32API WinGetCurrentTime(ULONG hab);
+
+inline ULONG _WinGetCurrentTime(ULONG a)
+{
+ ULONG yyrc;
+ USHORT sel = RestoreOS2FS();
+
+    yyrc = WinGetCurrentTime(a);
+    SetFS(sel);
+
+    return yyrc;
+} 
+
+#undef  WinGetCurrentTime
+#define WinGetCurrentTime _WinGetCurrentTime
 
 /*****************************************************************************
  * Name      :
@@ -218,11 +233,20 @@ ODINFUNCTION5(MMRESULT,       timeSetEvent,
  *****************************************************************************/
 
 ODINFUNCTION2(MMRESULT, timeGetSystemTime,
-              LPMMTIME, arg1,
-              UINT,     arg2)
+              LPMMTIME, pTime,
+              UINT,     cbTime)
 {
-  dprintf2(("timeGetSystemTime %x %d", arg1, arg2));
-  return O32_timeGetSystemTime(arg1, arg2);
+  dprintf2(("timeGetSystemTime %x %d", pTime, cbTime));
+
+  if(pTime == NULL || cbTime < sizeof(MMTIME)) {
+      SetLastError(ERROR_INVALID_PARAMETER);
+      return 0;
+  }
+  pTime->wType = TIME_MS;
+  pTime->u.ms = WinGetCurrentTime(0);
+
+  SetLastError(ERROR_SUCCESS);
+  return 0;
 }
 
 
@@ -256,7 +280,7 @@ DWORD WIN32API timeGetTime()
   dprintf2(("timeGetTime %x (%x:%x)", time, lint.LowPart, lint.HighPart));
 #else
   //SvL: TODO: Inaccurate
-  time = O32_timeGetTime();
+  time = WinGetCurrentTime(0);
   dprintf2(("timeGetTime %x", time));
 #endif
   return time;
