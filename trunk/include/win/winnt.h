@@ -1302,7 +1302,7 @@ typedef struct _TOKEN_GROUPS  {
 /*
  * LUID_AND_ATTRIBUTES
  */
-#ifdef __WIN32OS2__
+#if defined(__WIN32OS2__) && !defined(WINE_LARGE_INTEGER)
 typedef struct _LARGE_INTEGER {
        	ULONG LowPart;
        	LONG HighPart;
@@ -1317,7 +1317,7 @@ typedef union _LARGE_INTEGER {
     struct {
         DWORD    LowPart;
         LONG     HighPart;
-    } DUMMYSTRUCTNAME;
+    } s;
     LONGLONG QuadPart;
 } LARGE_INTEGER, *LPLARGE_INTEGER, *PLARGE_INTEGER;
 
@@ -1325,7 +1325,7 @@ typedef union _ULARGE_INTEGER {
     struct {
         DWORD    LowPart;
         LONG     HighPart;
-    } DUMMYSTRUCTNAME;
+    } s;
     LONGLONG QuadPart;
 } ULARGE_INTEGER, *LPULARGE_INTEGER, *PULARGE_INTEGER;
 #endif
