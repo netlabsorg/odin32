@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.368 2003-04-24 13:59:14 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.369 2003-04-28 08:41:08 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -1830,21 +1830,30 @@ LRESULT Win32BaseWindow::DefWindowProcA(UINT Msg, WPARAM wParam, LPARAM lParam)
     case WM_ERASEBKGND:
     case WM_ICONERASEBKGND:
     {
-      RECT rect;
-      int rc;
+      HBRUSH hBrush;
+      RECT   rect;
+      int    rc;
+     
+        if (!windowClass || (!windowClass->getBackgroundBrush() 
+                              && !(getStyle() & WS_MINIMIZE))) return 0;
 
-        if (!windowClass || !windowClass->getBackgroundBrush()) return 0;
+        //PF For PM desktop/MDI icons allocate brush as well to avoid
+        //garbage in icons
+
+        if (!windowClass->getBackgroundBrush())
+            hBrush = GetStockObject(GRAY_BRUSH);
+        else
+        {
+            hBrush = windowClass->getBackgroundBrush();
+            if (hBrush <= (HBRUSH)(SYSCOLOR_GetLastColor()+1))
+                hBrush = GetSysColorBrush(hBrush-1);
+        }
+             
 
         rc = GetClipBox( (HDC)wParam, &rect );
         if ((rc == SIMPLEREGION) || (rc == COMPLEXREGION))
-        {
-            HBRUSH hBrush = windowClass->getBackgroundBrush();
-
-            if (hBrush <= (HBRUSH)(SYSCOLOR_GetLastColor()+1))
-                hBrush = GetSysColorBrush(hBrush-1);
-
             FillRect( (HDC)wParam, &rect, hBrush);
-        }
+
         return 1;
     }
 
