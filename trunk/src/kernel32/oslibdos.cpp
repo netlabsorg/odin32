@@ -1,4 +1,4 @@
-/* $Id: oslibdos.cpp,v 1.83 2001-11-05 15:00:36 sandervl Exp $ */
+/* $Id: oslibdos.cpp,v 1.84 2001-11-10 12:47:46 sandervl Exp $ */
 /*
  * Wrappers for OS/2 Dos* API
  *
@@ -2811,6 +2811,72 @@ ULONG OSLibDosGetProcAddress(HMODULE hModule, LPCSTR lpszProc)
    SetLastError(error2WinError(rc,ERROR_INVALID_HANDLE));
 
    return (ULONG)pfn;
+}
+//******************************************************************************
+//******************************************************************************
+BOOL OSLibDosSetThreadAffinity(DWORD dwThreadAffinityMask)
+{
+  static PROC_DosSetThreadAffinity pfnDosSetThreadAffinity = NULL;
+  static BOOL fInit = FALSE;
+  MPAFFINITY mask;
+
+    if(fInit == FALSE && pfnDosSetThreadAffinity == NULL) {
+        HMODULE hDoscalls;
+        if(DosQueryModuleHandle("DOSCALLS", &hDoscalls) == NO_ERROR) {
+            DosQueryProcAddr(hDoscalls, 564, NULL, (PFN *)&pfnDosSetThreadAffinity);
+        }
+        fInit = TRUE;
+    }
+    if(fInit && pfnDosSetThreadAffinity == NULL) {
+        SetLastError(ERROR_SUCCESS_W);
+        return TRUE;
+    }
+    APIRET rc;
+    USHORT sel = RestoreOS2FS();
+
+    mask.mask[0] = dwThreadAffinityMask;
+    mask.mask[1] = 0; //TODO: this might not be a good idea, but then again, not many people have > 32 cpus
+
+    rc = pfnDosSetThreadAffinity(&mask);
+    SetFS(sel);
+
+    SetLastError(error2WinError(rc,ERROR_INVALID_PARAMETER));
+    return (rc == NO_ERROR);
+}
+//******************************************************************************
+//******************************************************************************
+BOOL OSLibDosQueryAffinity(DWORD fMaskType, DWORD *pdwThreadAffinityMask)
+{
+  static PROC_DosQueryThreadAffinity pfnDosQueryThreadAffinity = NULL;
+  static BOOL fInit = FALSE;
+  MPAFFINITY mask;
+
+    if(fInit == FALSE && pfnDosQueryThreadAffinity == NULL) {
+        HMODULE hDoscalls;
+        if(DosQueryModuleHandle("DOSCALLS", &hDoscalls) == NO_ERROR) {
+            DosQueryProcAddr(hDoscalls, 563, NULL, (PFN *)&pfnDosQueryThreadAffinity);
+        }
+        fInit = TRUE;
+    }
+    if(fInit && pfnDosQueryThreadAffinity == NULL) {
+        *pdwThreadAffinityMask = 1;
+        SetLastError(ERROR_SUCCESS_W);
+        return TRUE;
+    }
+
+    ULONG scope = (fMaskType == MASK_SYSTEM) ? AFNTY_SYSTEM : AFNTY_THREAD;
+
+    APIRET rc;
+    USHORT sel = RestoreOS2FS();
+
+    rc = pfnDosQueryThreadAffinity(scope, &mask);
+    SetFS(sel);
+
+    if(rc == NO_ERROR) {
+        *pdwThreadAffinityMask = mask.mask[0];
+    }
+    SetLastError(error2WinError(rc,ERROR_INVALID_PARAMETER));
+    return (rc == NO_ERROR);
 }
 //******************************************************************************
 //******************************************************************************

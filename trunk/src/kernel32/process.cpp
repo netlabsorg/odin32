@@ -1,4 +1,4 @@
-/* $Id: process.cpp,v 1.8 2000-11-21 11:35:09 sandervl Exp $ */
+/* $Id: process.cpp,v 1.9 2001-11-10 12:47:47 sandervl Exp $ */
 
 /*
  * Win32 process functions for OS/2
@@ -124,6 +124,8 @@ DWORD WIN32API GetProcessVersion(DWORD Processid)
 BOOL WINAPI SetProcessAffinityMask( HANDLE hProcess, DWORD affmask )
 {
     ProcessAffinityMask = affmask;
+    //TODO: should update all threads, but that doesn't seem possible in OS/2
+    SetThreadAffinityMask(GetCurrentThread(), ProcessAffinityMask);
     return TRUE;
 }
 //******************************************************************************
@@ -136,8 +138,10 @@ BOOL WIN32API GetProcessAffinityMask(HANDLE  hProcess,
        it is running :-) */
     if(lpProcessAffinityMask)
     	*lpProcessAffinityMask=ProcessAffinityMask;
-    if(lpSystemAffinityMask)
-        *lpSystemAffinityMask=1;
+
+    if(lpSystemAffinityMask) {
+        OSLibDosQueryAffinity(MASK_SYSTEM, lpSystemAffinityMask);
+    }
     return TRUE;
 }
 /***********************************************************************

@@ -1,4 +1,4 @@
-/* $Id: initkernel32.cpp,v 1.7 2001-09-05 12:57:58 bird Exp $
+/* $Id: initkernel32.cpp,v 1.8 2001-11-10 12:47:46 sandervl Exp $
  *
  * KERNEL32 DLL entry point
  *
@@ -38,6 +38,7 @@
 #include <options.h>
 #include "initterm.h"
 #include <win32type.h>
+#include <win32api.h>
 #include <odinlx.h>
 #include "oslibmisc.h"
 #include <heapshared.h>
@@ -178,6 +179,11 @@ ULONG APIENTRY inittermKernel32(ULONG hModule, ULONG ulFlag)
             //InitDynamicRegistry creates/changes keys that may change (i.e. odin.ini
             //keys that affect windows version)
             InitDynamicRegistry();
+
+            //Set the process affinity mask to the system affinity mask
+            DWORD dwProcessAffinityMask, dwSystemAffinityMask;
+            GetProcessAffinityMask(GetCurrentProcess(), &dwProcessAffinityMask, &dwSystemAffinityMask);
+            SetProcessAffinityMask(GetCurrentProcess(), dwSystemAffinityMask);
             break;
         }
 

@@ -1,4 +1,4 @@
-/* $Id: stubs.cpp,v 1.32 2001-09-05 12:58:00 bird Exp $
+/* $Id: stubs.cpp,v 1.33 2001-11-10 12:47:47 sandervl Exp $
  *
  * Win32 KERNEL32 Subsystem for OS/2
  *
@@ -1787,35 +1787,6 @@ BOOL WIN32API SetTapePosition(HANDLE hDevice,
   return (ERROR_NOT_SUPPORTED);
 }
 
-
-/*****************************************************************************
- * Name      : DWORD SetThreadAffinityMask
- * Purpose   : The SetThreadAffinityMask function sets a processor affinity
- *             mask for a specified thread.
- *             A thread affinity mask is a bit vector in which each bit
- *             represents the processors that a thread is allowed to run on.
- *             A thread affinity mask must be a proper subset of the process
- *             affinity mask for the containing process of a thread. A thread
- *             is only allowed to run on the processors its process is allowed to run on.
- * Parameters: HANDLE hThread              handle to the thread of interest
- *             DWORD  dwThreadAffinityMask a thread affinity mask
- * Variables :
- * Result    : TRUE / FALSE
- * Remark    :
- * Status    : UNTESTED STUB
- *
- * Author    : Patrick Haller [Mon, 1998/06/15 08:00]
- *****************************************************************************/
-
-DWORD WIN32API SetThreadAffinityMask(HANDLE hThread,
-                                        DWORD  dwThreadAffinityMask)
-{
-  dprintf(("KERNEL32: SetThreadAffinityMask(%08xh,%08xh) not implemented.\n",
-           hThread,
-           dwThreadAffinityMask));
-
-  return (0);
-}
 
 
 
