@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.6 2001-01-09 19:14:07 bird Exp $
+# $Id: makefile,v 1.7 2001-09-29 20:19:10 bird Exp $
 
 #
 # Odin32 API
@@ -69,4 +69,11 @@ clean:
 # Dummy rules.
 #
 dep lib:
+
+
+#
+# Nothing rule used for makefile debugging.
+#
+nothing:
+    @echo Did nothing with makefile $(MAKEDIR)\$(MAKEFILE)
 
