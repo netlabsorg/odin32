@@ -1,4 +1,4 @@
-/* $Id: winimgres.cpp,v 1.36 2000-05-18 09:08:38 sandervl Exp $ */
+/* $Id: winimgres.cpp,v 1.37 2000-05-22 19:08:00 sandervl Exp $ */
 
 /*
  * Win32 PE Image class (resource methods)
@@ -34,12 +34,17 @@
 //SvL: VPBuddy bugfix, seems to load bitmaps with type name 'DIB'
 #define BITMAP_TYPENAME2    "DIB"
 
+#define RESERR_SUCCESS          0
+#define RESERR_IDNOTFOUND	1
+#define RESERR_TYPENOTFOUND     2
+#define RESERR_LANGNOTFOUND     3
+
 //******************************************************************************
 //Assuming names are case insensitive
 //PE spec says names & ids are sorted; keep on searching just to be sure
 //******************************************************************************
 PIMAGE_RESOURCE_DATA_ENTRY
- Win32ImageBase::getPEResourceEntry(ULONG id, ULONG type, ULONG lang)
+ Win32ImageBase::getPEResourceEntry(ULONG id, ULONG type, ULONG lang, int *error)
 {
  PIMAGE_RESOURCE_DIRECTORY       prdType;
  PIMAGE_RESOURCE_DIRECTORY_ENTRY prde;
@@ -47,6 +52,8 @@ PIMAGE_RESOURCE_DATA_ENTRY
  PIMAGE_RESOURCE_DATA_ENTRY      pData = NULL;
  ULONG  nodeData[3], i, j, nameOffset;
  BOOL  fFound = FALSE, fNumType;
+
+  *error = RESERR_TYPENOTFOUND;
 
   //PH: our system LX DLLs might not have a resource segment
   if (pResDir == NULL)
@@ -119,7 +126,7 @@ PIMAGE_RESOURCE_DATA_ENTRY
     }
     if(fFound) {
         if((ULONG)prdType & 0x80000000) {//subdirectory?
-            pData = ProcessResSubDir(prdType, &nodeData[0], 2);
+            pData = ProcessResSubDir(prdType, &nodeData[0], 2, error);
         }
         else {
             pData = (PIMAGE_RESOURCE_DATA_ENTRY)prdType;
@@ -130,6 +137,9 @@ PIMAGE_RESOURCE_DATA_ENTRY
     /* increment to next entry */
     prde++;
   }
+  if(pData) {
+	*error = RESERR_SUCCESS; //found it
+  }
   return pData;
 }
 //******************************************************************************
@@ -138,7 +148,7 @@ PIMAGE_RESOURCE_DATA_ENTRY
 //******************************************************************************
 PIMAGE_RESOURCE_DATA_ENTRY
     Win32ImageBase::ProcessResSubDir(PIMAGE_RESOURCE_DIRECTORY prdType,
-                                     ULONG *nodeData, int level)
+                                     ULONG *nodeData, int level, int *error)
 {
  PIMAGE_RESOURCE_DIRECTORY       prdType2;
  PIMAGE_RESOURCE_DIRECTORY_ENTRY prde;
@@ -157,6 +167,12 @@ PIMAGE_RESOURCE_DATA_ENTRY
   prdType = (PIMAGE_RESOURCE_DIRECTORY)((ULONG)prdType & ~0x80000000);
   prde    = (PIMAGE_RESOURCE_DIRECTORY_ENTRY)((DWORD)prdType + sizeof(IMAGE_RESOURCE_DIRECTORY));
 
+  if(level == 2) {
+	*error = RESERR_IDNOTFOUND;
+  }
+  else {
+	*error = RESERR_LANGNOTFOUND;
+  }
   //level 2 (id)   -> get first id?
   //level 3 (lang) -> get first language?
   if(*nodeData == IDLANG_GETFIRST) {
@@ -203,7 +219,7 @@ PIMAGE_RESOURCE_DATA_ENTRY
 
         if(fFound) {
             if((ULONG)prdType2 & 0x80000000) {//subdirectory?
-                    return ProcessResSubDir(prdType2, nodeData+1, 3);
+                    return ProcessResSubDir(prdType2, nodeData+1, 3, error);
             }
             else {
                     pData = (PIMAGE_RESOURCE_DATA_ENTRY)prdType2;
@@ -221,7 +237,8 @@ PIMAGE_RESOURCE_DATA_ENTRY
 //******************************************************************************
 ULONG Win32ImageBase::getPEResourceSize(ULONG id, ULONG type, ULONG lang)
 {
- PIMAGE_RESOURCE_DATA_ENTRY      pData = NULL;
+ PIMAGE_RESOURCE_DATA_ENTRY pData = NULL;
+ int                        error;
 
     switch(lang) {
     case LOCALE_SYSTEM_DEFAULT:
@@ -236,7 +253,7 @@ ULONG Win32ImageBase::getPEResourceSize(ULONG id, ULONG type, ULONG lang)
 	break;    
     }
 
-    pData = getPEResourceEntry(id, type, lang);
+    pData = getPEResourceEntry(id, type, lang, &error);
     if(pData == NULL) {
         dprintf(("Win32ImageBase::getPEResourceSize: couldn't find resource %d (type %d, lang %x)", id, type, lang));
         return 0;
@@ -245,14 +262,14 @@ ULONG Win32ImageBase::getPEResourceSize(ULONG id, ULONG type, ULONG lang)
 }
 //******************************************************************************
 //******************************************************************************
-HRSRC Win32ImageBase::findResourceA(LPCSTR lpszName, LPSTR lpszType, ULONG lang)
+HRSRC Win32ImageBase::findResourceA(LPCSTR lpszName, LPSTR lpszType, ULONG langid)
 {
  PIMAGE_RESOURCE_DATA_ENTRY      pData = NULL;
  Win32Resource                  *res;
  BOOL   fNumType;
  char  *winres = NULL;
- ULONG  id, type;
- int    i, j;
+ ULONG  id, type, lang;
+ int    i, j, error;
 
     fNumType = TRUE;    //assume numeric
     if(HIWORD(lpszType) != 0) {//string id?
@@ -274,7 +291,7 @@ HRSRC Win32ImageBase::findResourceA(LPCSTR lpszName, LPSTR lpszType, ULONG lang)
     }
     else  type = (ULONG)lpszType;
 
-    switch(lang) {
+    switch(langid) {
     case LOCALE_SYSTEM_DEFAULT:
 	lang = GetSystemDefaultLangID();
 	break;    
@@ -284,17 +301,33 @@ HRSRC Win32ImageBase::findResourceA(LPCSTR lpszName, LPSTR lpszType, ULONG lang)
     case LOCALE_NEUTRAL:
 	//TODO: Not correct; should take language associated with current thread
 	lang = IDLANG_GETFIRST;
-	break;    
+	break; 
+    case IDLANG_GETFIRST:
+        lang = GetUserDefaultLangID();
+        break;   
     }
     id = (ULONG)lpszName;
 
-    pData = getPEResourceEntry(id, type, lang);
+    pData = getPEResourceEntry(id, type, lang, &error);
     if(pData == NULL) {
-        if(HIWORD(id)) {
-                dprintf(("Win32ImageBase::getPEResource %s: couldn't find resource %s (type %d, lang %x)", szModule, id, type, lang));
-        }
-        else    dprintf(("Win32ImageBase::getPEResource %s: couldn't find resource %d (type %d, lang %x)", szModule, id, type, lang));
-        return 0;
+        //TODO: Optimize this; check if language wasn't found
+        //try system default language
+	if(error == RESERR_LANGNOTFOUND) {
+	    	pData = getPEResourceEntry(id, type, GetSystemDefaultLangID(), &error);
+	}
+	if(pData == NULL) {
+        	//finally try first available language
+		if(error == RESERR_LANGNOTFOUND) {
+    			pData = getPEResourceEntry(id, type, IDLANG_GETFIRST, &error);
+		}
+		if(pData == NULL) {
+		        if(HIWORD(id)) {
+		                dprintf(("Win32ImageBase::getPEResource %s: couldn't find resource %s (type %d, lang %x)", szModule, id, type, lang));
+		        }
+		        else    dprintf(("Win32ImageBase::getPEResource %s: couldn't find resource %d (type %d, lang %x)", szModule, id, type, lang));
+		       	return 0;
+		}
+	}
     }
     if(HIWORD(id)) {
             dprintf(("FindResource %s: resource %s (type %d, lang %x)", szModule, id, type, lang));
@@ -373,12 +406,13 @@ ULONG Win32ImageBase::getVersionSize()
 BOOL Win32ImageBase::getVersionStruct(char *verstruct, ULONG bufLength)
 {
  PIMAGE_RESOURCE_DATA_ENTRY      pData = NULL;
+ int                             error;
 
     if(verstruct == NULL || bufLength == 0) {
         SetLastError(ERROR_INVALID_PARAMETER);
         return FALSE;
     }
-    pData = getPEResourceEntry(ID_GETFIRST, NTRT_VERSION);
+    pData = getPEResourceEntry(ID_GETFIRST, NTRT_VERSION, IDLANG_GETFIRST, &error);
     if(pData == NULL) {
         dprintf(("Win32PeLdrImage::getVersionStruct: couldn't find version resource!"));
         SetLastError(ERROR_RESOURCE_DATA_NOT_FOUND);

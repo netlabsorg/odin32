@@ -1,4 +1,4 @@
-/* $Id: time.cpp,v 1.7 2000-02-16 14:23:12 sandervl Exp $ */
+/* $Id: time.cpp,v 1.8 2000-05-22 19:07:59 sandervl Exp $ */
 
 /*
  * Win32 time/date API functions
@@ -113,13 +113,6 @@ BOOL WIN32API DosDateTimeToFileTime( WORD arg1, WORD arg2, LPFILETIME arg3)
 {
     dprintf(("KERNEL32:  DosDateTimeToFileTime\n"));
     return O32_DosDateTimeToFileTime(arg1, arg2, arg3);
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API GetFileTime( HANDLE arg1, LPFILETIME arg2, LPFILETIME arg3, LPFILETIME  arg4)
-{
-    dprintf(("KERNEL32:  GetFileTime\n"));
-    return O32_GetFileTime(arg1, arg2, arg3, arg4);
 }
 //******************************************************************************
 //******************************************************************************
