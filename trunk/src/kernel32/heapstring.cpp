@@ -1,4 +1,4 @@
-/* $Id: heapstring.cpp,v 1.49 2002-02-07 16:34:52 sandervl Exp $ */
+/* $Id: heapstring.cpp,v 1.50 2002-02-08 15:09:29 sandervl Exp $ */
 /*
  * Project Odin Software License can be found in LICENSE.TXT
  *
@@ -492,9 +492,7 @@ ODINFUNCTIONNODBG2(int, lstrcmpiA,
  * Author    : Patrick Haller [Thu, 1999/08/05 20:46]
  *****************************************************************************/
 
-ODINFUNCTIONNODBG2(int, lstrcmpiW,
-                   LPCWSTR, str1,
-                   LPCWSTR, str2)
+int WINAPI lstrcmpiW(LPCWSTR str1, LPCWSTR str2)
 {
   if (!str1 || !str2) {
     
@@ -508,10 +506,7 @@ ODINFUNCTIONNODBG2(int, lstrcmpiW,
 //lstrcpynWtoA and lstrcpynAtoW must zero-terminate the string
 //because Wine code depends on this behaviour (i.e. comdlg32)
 //*****************************************************************************
-ODINFUNCTIONNODBG3(int, lstrcpynWtoA,
-                   LPSTR,   astring,
-                   LPCWSTR, ustring,
-                   int,     length)
+int WIN32API lstrcpynWtoA(LPSTR astring, LPCWSTR ustring, int length)
 {
  int ret;
 
@@ -533,10 +528,7 @@ ODINFUNCTIONNODBG3(int, lstrcpynWtoA,
 
 //lstrcpynWtoA and lstrcpynAtoW must zero-terminate the string
 //because Wine code depends on this behaviour (i.e. comdlg32)
-ODINFUNCTIONNODBG3(int,     lstrcpynAtoW,
-                   LPWSTR,  unicode,
-                   LPCSTR,  ascii,
-                   int ,    asciilen)
+int WIN32API lstrcpynAtoW(LPWSTR unicode, LPCSTR ascii, int asciilen)
 {
  int ret;
 
@@ -570,9 +562,7 @@ ODINFUNCTIONNODBG3(int,     lstrcpynAtoW,
  * Author    : Patrick Haller [Thu, 1999/08/05 20:46]
  *****************************************************************************/
 
-ODINFUNCTIONNODBG2(LPSTR, lstrcpyWtoA,
-                   LPSTR, ascii,
-                   LPCWSTR, unicode)
+LPSTR WIN32API lstrcpyWtoA(LPSTR ascii, LPCWSTR unicode)
 {
     //@@@PH huh? wuz dat?
     if (unicode == NULL)
@@ -608,9 +598,7 @@ ODINFUNCTIONNODBG2(LPSTR, lstrcpyWtoA,
  * Author    : Patrick Haller [Thu, 1999/08/05 20:46]
  *****************************************************************************/
 
-ODINFUNCTIONNODBG2(LPWSTR, lstrcpyAtoW,
-                   LPWSTR, unicode,
-                   LPCSTR, ascii)
+LPWSTR WIN32API lstrcpyAtoW(LPWSTR unicode, LPCSTR ascii)
 {
     /* achimha for security, strlen might trap if garbage in */
     /* @@@PH 98/06/07 */
@@ -646,10 +634,7 @@ ODINFUNCTIONNODBG2(LPWSTR, lstrcpyAtoW,
  * Author    : Patrick Haller [Thu, 1999/08/05 20:46]
  *****************************************************************************/
 
-ODINFUNCTIONNODBG3(LPVOID, HEAP_xalloc,
-                   HANDLE, heap,
-                   DWORD, flags,
-                   DWORD, size )
+LPVOID WIN32API HEAP_xalloc(HANDLE heap, DWORD flags, DWORD size )
 {
   LPVOID p = HeapAlloc( heap, flags, size );
   if (!p)

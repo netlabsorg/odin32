@@ -124,7 +124,8 @@ void ParseLogStatusKERNEL32();
 #define DBG_hmparport      104
 #define DBG_hmnul          105
 #define DBG_overlappedio   106
-#define DBG_MAXFILES       107
+#define DBG_trace          107
+#define DBG_MAXFILES       108
 
 extern USHORT DbgEnabledKERNEL32[DBG_MAXFILES];
 extern USHORT DbgEnabledLvl2KERNEL32[DBG_MAXFILES];

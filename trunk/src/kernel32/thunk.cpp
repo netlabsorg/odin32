@@ -1,4 +1,4 @@
-/* $Id: thunk.cpp,v 1.6 2001-03-13 18:45:34 sandervl Exp $ */
+/* $Id: thunk.cpp,v 1.7 2002-02-08 15:09:30 sandervl Exp $ */
 
 /*
  * Win32 thunking API functions (mostly stubs)
@@ -50,7 +50,7 @@ VOID WINAPI RestoreThunkLock(DWORD mutex_count)
 
 //******************************************************************************
 //******************************************************************************
-DWORD WIN32API MapLS(void *address)
+DWORD WIN32API MapLS(LPCVOID address)
 {
 //  _interrupt(3);
   dprintf(("MapLS %X, not supported\n", address));
