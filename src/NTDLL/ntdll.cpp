@@ -1,4 +1,4 @@
-/* $Id: ntdll.cpp,v 1.4 1999-12-18 20:01:14 sandervl Exp $ */
+/* $Id: ntdll.cpp,v 1.5 1999-12-18 21:45:13 sandervl Exp $ */
 
 /*
  *
@@ -37,7 +37,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
-#include "misc.h"
+#include <misc.h>
 #include "unicode.h"
 
 #include "ntdll.h"
@@ -51,6 +51,8 @@
 
 //SvL: per process heap for NTDLL
 HANDLE NTDLL_hHeap = 0;
+
+PROCESSTHREAD_SECURITYINFO ProcSecInfo = {0};
 
 /*****************************************************************************
  * Name      : DbgPrint
@@ -86,8 +88,29 @@ BOOL WINAPI NTDLL_LibMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserve
 
     switch (fdwReason) {
     case DLL_PROCESS_ATTACH:
-        NTDLL_hHeap = HeapCreate(0, 0x10000, 0);
+    {
+     SID_IDENTIFIER_AUTHORITY sidIdAuth = {0};
+
+     	NTDLL_hHeap = HeapCreate(0, 0x10000, 0);
+
+	ProcSecInfo.dwType = SECTYPE_PROCESS;
+        RtlAllocateAndInitializeSid(&sidIdAuth, 1, 0, 0, 0, 0, 0, 0, 0, 0, &ProcSecInfo.SidUser.User.Sid);
+	ProcSecInfo.SidUser.User.Attributes = 0; //?????????
+
+        ProcSecInfo.pTokenGroups = (TOKEN_GROUPS*)Heap_Alloc(sizeof(TOKEN_GROUPS));
+	ProcSecInfo.pTokenGroups->GroupCount = 1;
+        RtlAllocateAndInitializeSid(&sidIdAuth, 1, 0, 0, 0, 0, 0, 0, 0, 0, &ProcSecInfo.PrimaryGroup.PrimaryGroup);
+	ProcSecInfo.pTokenGroups->Groups[0].Sid = ProcSecInfo.PrimaryGroup.PrimaryGroup;
+	ProcSecInfo.pTokenGroups->Groups[0].Attributes = 0; //????
+
+//        pPrivilegeSet   = NULL;
+//        pTokenPrivileges= NULL;
+//        TokenOwner      = {0};
+//        DefaultDACL     = {0};
+//        TokenSource     = {0};
+        ProcSecInfo.TokenType = TokenPrimary;
 	break;
+    }
     case DLL_PROCESS_DETACH:
         HeapDestroy(NTDLL_hHeap);
         NTDLL_hHeap = 0;
