@@ -1,4 +1,9 @@
- /* $Id: ChangeLog,v 1.918 2000-04-30 17:05:13 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.919 2000-04-30 23:18:48 phaller Exp $ */
+
+ 2000-04-30: Patrick Haller <phaller@gmx.net>
+        - ODINWRAP: added profiling support. The odin wrapper macros now
+                    can measure function calls, this is the cumulative
+                    method call time with 838ns accuracy (tick unit).
 
  2000-04-30: Sander van Leeuwen <sandervl@xs4all.nl>
 	- KERNEL32: LocalFlags fix (low byte = lock count, hight byte (of low word) = memory flags)
