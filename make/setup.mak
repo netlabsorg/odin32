@@ -1,4 +1,4 @@
-# $Id: setup.mak,v 1.11 2002-08-20 07:05:24 bird Exp $
+# $Id: setup.mak,v 1.12 2002-08-24 04:51:09 bird Exp $
 
 #
 # Generic makefile system.
@@ -123,7 +123,7 @@ PATH_TOOLS      = $(PATH_ROOT)\tools\bin
 # (default) PATH_DEF        = $(SHT_TRGPLTFRM)
 PATH_DEF        = .
 # Where the include files are located.
-PATH_INCLUDES   = $(PATH_ROOT)\include;$(PATH_ROOT)\include\win
+PATH_INCLUDES   = $(PATH_ROOT)\include\win;.;$(PATH_ROOT)\include
 
 # Where the temporary files goes.
 PATH_OBJ    = $(PATH_ROOT)\obj\$(SHT_TRGPLTFRM)$(SHT_BLDMD)$(SHT_BLDENV)
@@ -173,14 +173,25 @@ PATH_ROOT = $(PATH_ROOT_ABS)
 # -----------------------------------------------------------------------------
 
 # The default definitions.
-BUILD_DEFINES           = -D__WIN32OS2__ -D__WINE__
+BUILD_DEFINES           = -D__WIN32OS2__ -D__WINE__ -DTCPV40HDRS -DCOMCTL32UNDOC
 BUILD_BLDLEVEL_FLAGS    = -V^"^#define=ODIN32_VERSION,$(PATH_ROOT)\include\odinbuild.h^" \
                           -M^"^#define=ODIN32_BUILD_NR,$(PATH_ROOT)\include\odinbuild.h^"
 BUILD_PROJECT           = Odin32
 
+# Project Specific definitions.
+!if "$(BUILD_MODE)" != "DEBUG"
+LIB_ODINCRT             = $(PATH_LIB)\odincrt.$(EXT_LIB)
+!else
+LIB_ODINCRT             = $(PATH_LIB)\odincrtd.$(EXT_LIB)
+!endif
+!ifndef CUSTOMBUILD
+OBJ_DLLENTRY            = $(PATH_LIB)\dllentry.$(EXT_OBJ)
+!else
+OBJ_DLLENTRY            =
+!endif
+
 # This is the process file to include at end of the makefile.
 MAKE_INCLUDE_PROCESS    = $(PATH_MAKE)\process.mak
-
 
 
 # -----------------------------------------------------------------------------
