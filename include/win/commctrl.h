@@ -1,4 +1,4 @@
-/* $Id: commctrl.h,v 1.21 2000-02-16 17:20:28 cbratschi Exp $ */
+/* $Id: commctrl.h,v 1.22 2000-02-20 18:26:07 cbratschi Exp $ */
 /*
  * Common controls definitions
  */
@@ -119,6 +119,7 @@ BOOL WINAPI InitCommonControlsEx (LPINITCOMMONCONTROLSEX);
 #define LPSTR_TEXTCALLBACK WINELIB_NAME_AW(LPSTR_TEXTCALLBACK)
 
 #define I_IMAGECALLBACK          (-1)
+#define I_IMAGENONE              (-2)
 #define I_INDENTCALLBACK         (-1)
 #define I_CHILDRENCALLBACK       (-1)
 
@@ -338,6 +339,8 @@ typedef struct tagUDACCEL
 #define UDM_GETBASE        (WM_USER+110)
 #define UDM_SETRANGE32     (WM_USER+111)
 #define UDM_GETRANGE32     (WM_USER+112)
+#define UDM_SETPOS32       (WM_USER+113)
+#define UDM_GETPOS32       (WM_USER+114)
 
 HWND WINAPI CreateUpDownControl (DWORD, INT, INT, INT, INT,
                                    HWND, INT, HINSTANCE, HWND,
@@ -879,19 +882,36 @@ typedef struct tagNMHDFILTERBTNCLICK
 #define TBSTATE_ELLIPSES        0x40
 #define TBSTATE_MARKED          0x80
 
-#define TBSTYLE_BUTTON          0x00
-#define TBSTYLE_SEP             0x01
-#define TBSTYLE_CHECK           0x02
-#define TBSTYLE_GROUP           0x04
+#define TBSTYLE_BUTTON          0x00 //obsolete
+#define TBSTYLE_SEP             0x01 //obsolete
+#define TBSTYLE_CHECK           0x02 //obsolete
+#define TBSTYLE_GROUP           0x04 //obsolete
 #define TBSTYLE_CHECKGROUP      (TBSTYLE_GROUP | TBSTYLE_CHECK)
-#define TBSTYLE_DROPDOWN        0x08
-
+#define TBSTYLE_DROPDOWN        0x08 //obsolete
+#define TBSTYLE_AUTOSIZE        0x0010 //obsolete
+#define TBSTYLE_NOPREFIX        0x0020 //obsolete
 #define TBSTYLE_TOOLTIPS        0x0100
 #define TBSTYLE_WRAPABLE        0x0200
 #define TBSTYLE_ALTDRAG         0x0400
 #define TBSTYLE_FLAT            0x0800
 #define TBSTYLE_LIST            0x1000
 #define TBSTYLE_CUSTOMERASE     0x2000
+#define TBSTYLE_REGISTERDROP    0x4000
+#define TBSTYLE_TRANSPARENT     0x8000
+#define TBSTYLE_EX_DRAWDDARROWS       0x00000001
+#define TBSTYLE_EX_MIXEDBUTTONS       0x00000008
+#define TBSTYLE_EX_HIDECLIPPEDBUTTONS 0x00000010
+
+#define BTNS_BUTTON     TBSTYLE_BUTTON      // 0x0000
+#define BTNS_SEP        TBSTYLE_SEP         // 0x0001
+#define BTNS_CHECK      TBSTYLE_CHECK       // 0x0002
+#define BTNS_GROUP      TBSTYLE_GROUP       // 0x0004
+#define BTNS_CHECKGROUP TBSTYLE_CHECKGROUP  // (TBSTYLE_GROUP | TBSTYLE_CHECK)
+#define BTNS_DROPDOWN   TBSTYLE_DROPDOWN    // 0x0008
+#define BTNS_AUTOSIZE   TBSTYLE_AUTOSIZE    // 0x0010
+#define BTNS_NOPREFIX   TBSTYLE_NOPREFIX    // 0x0020
+#define BTNS_SHOWTEXT   0x0040
+#define BTNS_WHOLEDROPDOWN  0x0080
 
 #define TBIF_IMAGE              0x00000001
 #define TBIF_TEXT               0x00000002
@@ -1239,6 +1259,9 @@ CreateMappedBitmap (HINSTANCE, INT, UINT, LPCOLORMAP, INT);
 
 #define TTS_ALWAYSTIP           0x01
 #define TTS_NOPREFIX            0x02
+#define TTS_NOANIMATE           0x10
+#define TTS_NOFADE              0x20
+#define TTS_BALLOON             0x40
 
 #define TTF_IDISHWND            0x0001
 #define TTF_CENTERTIP           0x0002
@@ -1442,6 +1465,8 @@ typedef struct tagNMTTDISPINFOW
 #define RBBS_VARIABLEHEIGHT     0x00000040
 #define RBBS_GRIPPERALWAYS      0x00000080
 #define RBBS_NOGRIPPER          0x00000100
+#define RBBS_USECHEVRON         0x00000200
+#define RBBS_HIDETITLE          0x00000400
 
 #define RBNM_ID                 0x00000001
 #define RBNM_STYLE              0x00000002
@@ -1490,6 +1515,7 @@ typedef struct tagNMTTDISPINFOW
 #define RB_SETPALETTE           (WM_USER+37)
 #define RB_GETPALETTE           (WM_USER+38)
 #define RB_MOVEBAND             (WM_USER+39)
+#define RB_PUSHCHEVRON          (WM_USER + 43)
 #define RB_GETDROPTARGET        CCM_GETDROPTARGET
 #define RB_SETCOLORSCHEME       CCM_SETCOLORSCHEME
 #define RB_GETCOLORSCHEME       CCM_GETCOLORSCHEME
@@ -1943,6 +1969,9 @@ typedef struct
 #define TVC_BYMOUSE           0x01
 #define TVC_BYKEYBOARD        0x02
 
+#define TVNRET_DEFAULT          0
+#define TVNRET_SKIPOLD          1
+#define TVNRET_SKIPNEW          2
 
 typedef struct _TREEITEM *HTREEITEM;
 
@@ -2526,6 +2555,9 @@ typedef struct tagNMTVGETINFOTIPW
 
 #define LVN_FIRST               (0U-100U)
 #define LVN_LAST                (0U-199U)
+
+// Property sheet reserved      (0U-200U) -  (0U-299U) - see prsht.h
+
 #define LVN_ITEMCHANGING        (LVN_FIRST-0)
 #define LVN_ITEMCHANGED         (LVN_FIRST-1)
 #define LVN_INSERTITEM          (LVN_FIRST-2)
