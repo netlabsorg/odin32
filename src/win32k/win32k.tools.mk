@@ -1,4 +1,4 @@
-# $Id: win32k.tools.mk,v 1.10.2.5 2001-10-19 02:07:59 bird Exp $
+# $Id: win32k.tools.mk,v 1.10.2.6 2001-11-19 03:17:48 bird Exp $
 
 #
 # Win32k common tools makefile.
@@ -30,8 +30,13 @@
 # IBM VisualAge for C++ v3.08 or IBM C/C++ Tools v3.6.5
 #
 CC16        = $(WIN32KBIN)\clfix.exe $(MSCPATH)\binp\cl.exe
+!ifdef DEBUG
 CC          = $(WIN32KBIN)\ignore.exe -EDC0506 icc
 CCPP        = icc
+!else
+CC          = $(WIN32KBIN)\ignore.exe -EDC0506 -EDC0435 -EDC0137 -szFileId icc
+CCPP        = $(WIN32KBIN)\ignore.exe -EDC0435 -EDC0137 -szFileId icc
+!endif
 LD          = ilink
 ILIB        = ilib /nobackup /nologo
 !if "$(CCENV)" == "VAC36"
