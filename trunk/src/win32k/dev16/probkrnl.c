@@ -1,4 +1,4 @@
-/* $Id: probkrnl.c,v 1.7 2000-02-01 08:08:54 bird Exp $
+/* $Id: probkrnl.c,v 1.8 2000-02-08 12:38:38 bird Exp $
  *
  * Description:   Autoprobes the os2krnl file and os2krnl[*].sym files.
  *                Another Hack!
@@ -94,13 +94,15 @@ PROCS aProcTab[NUMBER_OF_PROCS] =
     {FALSE, -1,  8, "_ldrOpen",             -1,  -1, EPT_PROC},        /* 1 */
     {FALSE, -1,  9, "_ldrClose",            -1,  -1, EPT_PROC},        /* 2 */
     {FALSE, -1, 12, "_LDRQAppType",         -1,  -1, EPT_PROC},        /* 3 */
-    {FALSE, -1, 20, "_ldrEnum32bitRelRecs", -1,  -1, EPT_PROC},        /* 4 */
-
+    {FALSE, -1, 20, "_ldrEnum32bitRelRecs", -1,  -1, EPT_PROC}         /* 4 */
+#if 0 /* Currently problems with with WS4eB */
+    ,
     {FALSE, -1, 10, "_IOSftOpen",           -1,  -1, EPT_PROCIMPORT},  /* 5 */
     {FALSE, -1, 11, "_IOSftClose",          -1,  -1, EPT_PROCIMPORT},  /* 6 */
     {FALSE, -1, 15, "_IOSftTransPath",      -1,  -1, EPT_PROCIMPORT},  /* 7 */
     {FALSE, -1, 12, "_IOSftReadAt",         -1,  -1, EPT_PROCIMPORT},  /* 8 */
     {FALSE, -1, 13, "_IOSftWriteAt",        -1,  -1, EPT_PROCIMPORT}   /* 9 */
+#endif
 };
 
 unsigned long int   ulBuild          = 0;

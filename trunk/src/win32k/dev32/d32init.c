@@ -1,4 +1,4 @@
-/* $Id: d32init.c,v 1.6 2000-01-24 18:18:59 bird Exp $
+/* $Id: d32init.c,v 1.7 2000-02-08 12:38:38 bird Exp $
  *
  * d32init.c - 32-bits init routines.
  *
@@ -559,12 +559,15 @@ static int procInit(void)
                         (unsigned)myldrOpen,
                         (unsigned)myldrClose,
                         (unsigned)myLDRQAppType,
-                        (unsigned)myldrEnum32bitRelRecs,
+                        (unsigned)myldrEnum32bitRelRecs
+                        #if 0 /* Currently problems with with WS4eB */
+                        ,
                         0,
                         0,
                         0,
                         0,
-                        0,
+                        0
+                        #endif
                     };
 
                     /* copy function prolog */
