@@ -1,4 +1,4 @@
-/* $Id: window.cpp,v 1.129 2003-01-02 15:21:45 sandervl Exp $ */
+/* $Id: window.cpp,v 1.130 2003-01-02 17:02:06 sandervl Exp $ */
 /*
  * Win32 window apis for OS/2
  *
@@ -755,7 +755,8 @@ HWND WIN32API SetFocus(HWND hwnd)
  HWND lastFocus, lastFocus_W, hwnd_O, hwndTopParent, hwndTop;
  BOOL activate, ret;
  TEB *teb;
-    
+
+    dprintf(("SetFocus %x", hwnd));    
     teb = GetThreadTEB();
     if(teb == NULL) {
         DebugInt3();
