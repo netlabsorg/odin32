@@ -1,4 +1,4 @@
-/* $Id: obj_commdlgbrowser.h,v 1.5 1999-08-22 22:52:06 sandervl Exp $ */
+/* $Id: obj_commdlgbrowser.h,v 1.6 2000-08-18 02:04:16 phaller Exp $ */
 /************************************************************
  *    ICommDlgBrowser
  */
@@ -15,7 +15,6 @@
 extern "C" {
 #endif /* defined(__cplusplus) */
 
-DEFINE_SHLGUID(IID_ICommDlgBrowser,     0x000214F1L, 0, 0);
 typedef struct 	ICommDlgBrowser ICommDlgBrowser, *LPCOMMDLGBROWSER;
 
 /* for OnStateChange*/

@@ -1,4 +1,4 @@
-/* $Id: obj_enumidlist.h,v 1.5 1999-08-22 22:52:07 sandervl Exp $ */
+/* $Id: obj_enumidlist.h,v 1.6 2000-08-18 02:04:17 phaller Exp $ */
 /*
  * Defines the COM interfaces and APIs related to EnumIDList
  *
@@ -19,7 +19,6 @@ extern "C" {
 /*****************************************************************************
  * Predeclare the interfaces
  */
-DEFINE_SHLGUID(IID_IEnumIDList,         0x000214F2L, 0, 0);
 typedef struct IEnumIDList IEnumIDList, *LPENUMIDLIST;
 
 #define ICOM_INTERFACE IEnumIDList

@@ -1,4 +1,4 @@
-/* $Id: obj_shellbrowser.h,v 1.5 1999-08-22 22:52:10 sandervl Exp $ */
+/* $Id: obj_shellbrowser.h,v 1.6 2000-08-18 02:04:19 phaller Exp $ */
 /************************************************************
  *    IShellBrowser
  */
@@ -21,7 +21,6 @@ extern "C" {
    typedef struct IShellBrowser IShellBrowser, *LPSHELLBROWSER;
 */
 
-DEFINE_SHLGUID(IID_IShellBrowser,       0x000214E2L, 0, 0);
 #define SID_SShellBrowser IID_IShellBrowser
 
 /* targets for GetWindow/SendControlMsg */
@@ -57,14 +56,6 @@ DEFINE_SHLGUID(IID_IShellBrowser,       0x000214E2L, 0, 0);
 #define FCT_CONFIGABLE  0x0002
 #define FCT_ADDTOEND    0x0004
 
-/* undocumented, found in the web posted by Chris Becke */ 
-#define CWM_SETPATH	(WM_USER+2)
-#define CWM_WANTIDLE	(WM_USER+3)
-#define CWM_GETSETCURRENTINFO	(WM_USER+4)
-#define CWM_SELECTITEM	(WM_USER+5)
-#define CWM_STOPWAITING	(WM_USER+6)
-#define CWM_GETISHELLBROWSER (WM_USER+7)
-
 #define ICOM_INTERFACE IShellBrowser
 #define IShellBrowser_METHODS \
 	ICOM_METHOD2(HRESULT, InsertMenusSB, HMENU, hmenuShared, LPOLEMENUGROUPWIDTHS, lpMenuWidths) \
@@ -87,9 +78,11 @@ ICOM_DEFINE(IShellBrowser,IOleWindow)
 #undef ICOM_INTERFACE
 
 #ifdef ICOM_CINTERFACE
+/*** IUnknown methods ***/
 #define IShellBrowser_QueryInterface(p,a,b)		ICOM_CALL2(QueryInterface,p,a,b)
 #define IShellBrowser_AddRef(p)				ICOM_CALL(AddRef,p)
 #define IShellBrowser_Release(p)			ICOM_CALL(Release,p)
+/*** IShellBrowser methods ***/
 #define IShellBrowser_GetWindow(p,a)			ICOM_CALL1(GetWindow,p,a)
 #define IShellBrowser_ContextSensitiveHelp(p,a)		ICOM_CALL1(ContextSensitiveHelp,p,a)
 #define IShellBrowser_InsertMenusSB(p,a,b)		ICOM_CALL2(InsertMenusSB,p,a,b)

@@ -1,4 +1,4 @@
-/* $Id: shlobj.h,v 1.6 2000-04-09 11:09:11 sandervl Exp $ */
+/* $Id: shlobj.h,v 1.7 2000-08-18 02:04:08 phaller Exp $ */
 #ifndef __WINE_SHLOBJ_H
 #define __WINE_SHLOBJ_H
 
@@ -82,8 +82,6 @@ extern UINT cfFileContents;
 
 typedef GUID SHELLVIEWID;
 #define SV_CLASS_NAME   ("SHELLDLL_DefView")
-
-UINT WINAPI SHMapPIDLToSystemImageListIndex(LPSHELLFOLDER sh, LPITEMIDLIST pidl, UINT * pIndex);
 
 /****************************************************************************
  * IShellIcon interface
@@ -270,7 +268,7 @@ typedef struct tagBROWSEINFOW {
 */
 
 LPITEMIDLIST WINAPI SHBrowseForFolderA(LPBROWSEINFOA lpbi);
-/*LPITEMIDLIST WINAPI SHBrowseForFolder32W(LPBROWSEINFO32W lpbi);*/
+LPITEMIDLIST WINAPI SHBrowseForFolder32W(LPBROWSEINFOW lpbi);
 #define  SHBrowseForFolder WINELIB_NAME_AW(SHBrowseForFolder)
 
 /****************************************************************************
@@ -351,50 +349,27 @@ typedef struct _SHELLVIEWDATA   /* idl */
 
 DWORD WINAPI SHGetMalloc(LPMALLOC *lpmal) ;
 
-/****************************************************************************
- *	Shell File Menu API
- */
-/* FileMenu_Create nSelHeight */
-#define	FM_FULL_SELHEIGHT	-1;
-#define	FM_DEFAULT_SELHEIGHT	0
-
-/* FileMenu_Create uFlags */
-#define	FMF_SMALL_ICONS		0x00
-#define	FMF_LARGE_ICONS		0x08
-#define	FMF_NO_COLUMN_BREAK	0x10
-
-/* FileMenu_InsertUsingPidl uFlags */
-#define	FMF_NO_EMPTY_ITEM	0x01
-#define	FMF_NO_PROGRAM_GROUPS	0x04
-
-typedef void (* CALLBACK  LPFNFMCALLBACK)(LPCITEMIDLIST pidlFolder, LPCITEMIDLIST pidlFile);
-
-/* FileMenu_AppendItem lpszText */
-#define	FM_SEPARATOR		(LPCSTR)1
-#define	FM_BLANK_ICON		-1
-#define	FM_DEFAULT_HEIGHT	0
-
 /**********************************************************************
  * SHGetSettings ()
  */
 typedef struct
-{	unsigned int fShowAllObjects : 1;
-	unsigned int fShowExtensions : 1;
-	unsigned int fNoConfirmRecycle : 1;
-	unsigned int fShowSysFiles : 1;
+{	BOOL fShowAllObjects : 1;
+	BOOL fShowExtensions : 1;
+	BOOL fNoConfirmRecycle : 1;
+	BOOL fShowSysFiles : 1;
 
-	unsigned int fShowCompColor : 1;
-	unsigned int fDoubleClickInWebView : 1;
-	unsigned int fDesktopHTML : 1;
-	unsigned int fWin95Classic : 1;
+	BOOL fShowCompColor : 1;
+	BOOL fDoubleClickInWebView : 1;
+	BOOL fDesktopHTML : 1;
+	BOOL fWin95Classic : 1;
 
-	unsigned int fDontPrettyPath : 1;
-	unsigned int fShowAttribCol : 1;
-	unsigned int fMapNetDrvBtn : 1;
-	unsigned int fShowInfoTip : 1;
+	BOOL fDontPrettyPath : 1;
+	BOOL fShowAttribCol : 1;
+	BOOL fMapNetDrvBtn : 1;
+	BOOL fShowInfoTip : 1;
 
-	unsigned int fHideIcons : 1;
-	unsigned int fRestFlags : 3;
+	BOOL fHideIcons : 1;
+	UINT fRestFlags : 3;
 } SHELLFLAGSTATE, * LPSHELLFLAGSTATE;
 
 void WINAPI SHGetSettings(LPSHELLFLAGSTATE lpsfs, DWORD dwMask, DWORD dwx);
@@ -413,7 +388,119 @@ void WINAPI SHGetSettings(LPSHELLFLAGSTATE lpsfs, DWORD dwMask, DWORD dwx);
 #define SSF_NOCONFIRMRECYCLE		0x8000
 #define SSF_HIDEICONS			0x4000
 
-/**********************************************************************/
+/**********************************************************************
+ * SHChangeNotify
+ */
+#define SHCNE_RENAMEITEM	0x00000001
+#define SHCNE_CREATE		0x00000002
+#define SHCNE_DELETE		0x00000004
+#define SHCNE_MKDIR		0x00000008
+#define SHCNE_RMDIR		0x00000010
+#define SHCNE_MEDIAINSERTED	0x00000020
+#define SHCNE_MEDIAREMOVED	0x00000040
+#define SHCNE_DRIVEREMOVED	0x00000080
+#define SHCNE_DRIVEADD		0x00000100
+#define SHCNE_NETSHARE		0x00000200
+#define SHCNE_NETUNSHARE	0x00000400
+#define SHCNE_ATTRIBUTES	0x00000800
+#define SHCNE_UPDATEDIR		0x00001000
+#define SHCNE_UPDATEITEM	0x00002000
+#define SHCNE_SERVERDISCONNECT	0x00004000
+#define SHCNE_UPDATEIMAGE	0x00008000
+#define SHCNE_DRIVEADDGUI	0x00010000
+#define SHCNE_RENAMEFOLDER	0x00020000
+#define SHCNE_FREESPACE		0x00040000
+
+#define SHCNE_EXTENDED_EVENT	0x04000000
+#define SHCNE_ASSOCCHANGED	0x08000000
+#define SHCNE_DISKEVENTS	0x0002381F
+#define SHCNE_GLOBALEVENTS	0x0C0581E0
+#define SHCNE_ALLEVENTS		0x7FFFFFFF
+#define SHCNE_INTERRUPT		0x80000000
+
+#define SHCNEE_ORDERCHANGED	0x00000002
+
+#define SHCNF_IDLIST		0x0000
+#define SHCNF_PATHA		0x0001
+#define SHCNF_PRINTERA		0x0002
+#define SHCNF_DWORD		0x0003
+#define SHCNF_PATHW		0x0005
+#define SHCNF_PRINTERW		0x0006
+#define SHCNF_TYPE		0x00FF
+#define SHCNF_FLUSH		0x1000
+#define SHCNF_FLUSHNOWAIT	0x2000
+
+void WINAPI SHChangeNotifyA(LONG wEventId, UINT uFlags, LPCVOID dwItem1, LPCVOID dwItem2);
+void WINAPI SHChangeNotifyW(LONG wEventId, UINT uFlags, LPCVOID dwItem1, LPCVOID dwItem2);
+#define  SHChangeNotify WINELIB_NAME_AW(SHChangeNotify)
+
+/****************************************************************************
+* SHGetSpecialFolderLocation API
+*/
+HRESULT WINAPI SHGetSpecialFolderLocation(HWND, INT, LPITEMIDLIST *);
+
+#define	CSIDL_DESKTOP		0x0000
+#define CSIDL_INTERNET		0x0001
+#define	CSIDL_PROGRAMS		0x0002
+#define	CSIDL_CONTROLS		0x0003
+#define	CSIDL_PRINTERS		0x0004
+#define	CSIDL_PERSONAL		0x0005
+#define	CSIDL_FAVORITES		0x0006
+#define	CSIDL_STARTUP		0x0007
+#define	CSIDL_RECENT		0x0008
+#define	CSIDL_SENDTO		0x0009
+#define	CSIDL_BITBUCKET		0x000a
+#define	CSIDL_STARTMENU		0x000b
+#define	CSIDL_DESKTOPDIRECTORY	0x0010
+#define	CSIDL_DRIVES		0x0011
+#define	CSIDL_NETWORK		0x0012
+#define	CSIDL_NETHOOD		0x0013
+#define	CSIDL_FONTS		0x0014
+#define	CSIDL_TEMPLATES		0x0015
+#define CSIDL_COMMON_STARTMENU	0x0016
+#define CSIDL_COMMON_PROGRAMS	0X0017
+#define CSIDL_COMMON_STARTUP	0x0018
+#define CSIDL_COMMON_DESKTOPDIRECTORY	0x0019
+#define CSIDL_APPDATA		0x001a
+#define CSIDL_PRINTHOOD		0x001b
+#define CSIDL_ALTSTARTUP	0x001d
+#define CSIDL_COMMON_ALTSTARTUP	0x001e
+#define CSIDL_COMMON_FAVORITES  0x001f
+#define CSIDL_INTERNET_CACHE	0x0020
+#define CSIDL_COOKIES		0x0021
+#define CSIDL_HISTORY		0x0022
+#define CSIDL_COMMON_APPDATA	0x0023
+#define CSIDL_WINDOWS		0x0024
+#define CSIDL_SYSTEM		0x0025
+#define CSIDL_PROGRAM_FILES	0x0026
+#define CSIDL_MYPICTURES	0x0027
+#define CSIDL_PROFILE		0x0028
+#define CSIDL_SYSTEMX86		0x0029
+#define CSIDL_PROGRAM_FILESX86	0x002a
+#define CSIDL_PROGRAM_FILES_COMMON	0x002b
+#define CSIDL_PROGRAM_FILES_COMMONX86	0x002c
+#define CSIDL_COMMON_TEMPLATES	0x002d
+#define CSIDL_COMMON_DOCUMENTS	0x002e
+#define CSIDL_COMMON_ADMINTOOLS	0x002f
+#define CSIDL_ADMINTOOLS	0x0030
+#define CSIDL_CONNECTIONS	0x0031
+#define CSIDL_FOLDER_MASK	0x00ff
+
+#define CSIDL_FLAG_DONT_VERIFY	0x4000
+#define CSIDL_FLAG_CREATE	0x8000
+
+#define CSIDL_FLAG_MASK		0xff00
+
+/*
+ * DROPFILES for CF_HDROP and CF_PRINTERS
+ */
+typedef struct _DROPFILES
+{
+  DWORD pFiles;
+  POINT pt;
+  BOOL  fNC;
+  BOOL  fWide;
+} DROPFILES;
 
 #ifdef __cplusplus
 } /* extern "C" */
