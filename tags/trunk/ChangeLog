@@ -1,4 +1,4 @@
-/* $Id: ChangeLog,v 1.2611 2003-07-31 16:00:46 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.2612 2003-07-31 16:07:28 sandervl Exp $ */
 
  2003-07-31: KO Myung-Hun <komh@chollian    >
     - USER32:   o fixed GetMenuStringA() to truncate DBCS string correctly.
@@ -27,6 +27,8 @@
                   is ascii length not unicode length.
                 o improved WINPROC_CallProc32ATo32W() and WINPROC_CallProc32WTo32A() to process WM_CHAR
                   and WM_GETTEXTLENGTH, LB-GETTEXTLEN, CB_GETLBTEXTLEN.
+                o fixed edit control to process WM_CHAR including splitted DBCS chars.
+                o fixed listbox control to process WM_CHAR including splitted DBCS chars.    
 
  2002-07-31: Dmitry Froloff <froloff@os2   >
     - USER32:   o Convert WM_CHAR characters to UTF-16 for unicode windows
