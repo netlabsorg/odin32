@@ -1,4 +1,4 @@
-/* $Id: win32type.h,v 1.18 1999-09-02 20:56:29 phaller Exp $ */
+/* $Id: win32type.h,v 1.19 1999-09-04 19:20:44 sandervl Exp $ */
 
 /*
  * Win32 type definitions for OS/2
@@ -322,6 +322,7 @@ typedef unsigned short  WCHAR;
 #define HCURSOR DWORD
 #define HBRUSH  DWORD
 #define HMENU   DWORD
+#define HFONT   DWORD
 #define WNDPROC DWORD
 #define DLGPROC DWORD
 #define WNDPROC_O32 DWORD
@@ -362,6 +363,11 @@ typedef unsigned long   ULONG_PTR;
 #define DECLSPEC_IMPORT
 
 
+typedef struct tagSIZE
+{
+    INT  cx;
+    INT  cy;
+} SIZE, *PSIZE, *LPSIZE;
 
 /* The security attributes structure */
 typedef struct
@@ -543,6 +549,7 @@ typedef struct
 //               Win32 has BOOL == int.
 typedef int             BOOL32_W;
 typedef int             BOOL_W;
+
 
 
 

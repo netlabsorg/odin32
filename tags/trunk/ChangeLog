@@ -1,10 +1,12 @@
- /* $Id: ChangeLog,v 1.174 1999-09-04 17:55:55 dengert Exp $ */
+ /* $Id: ChangeLog,v 1.175 1999-09-04 19:23:45 sandervl Exp $ */
 
  99-09-04: Daniela Engert <dani@ngrt.de>
 	- USER32\NEW: beginning with 'DAXifying' of our windows
 
  99-09-04: Sander van Leeuwen <sandervl@xs4all.nl>
 	- KERNEL32: Fixed icon- & cursorgroup conversion (Solitaire icon now correct again)
+	- USER32\NEW: Started with Wine dialog code port. Dialog creation done,
+                      but not tested.
 
  99-09-04: Jens Wiessner <wiessnej@rfi.de>
 	- MSVFW32: Created stub (partly) dll (Based on Wine 990815)
