@@ -1,4 +1,4 @@
-/* $Id: wprocess.h,v 1.15 2000-01-05 19:35:52 sandervl Exp $ */
+/* $Id: wprocess.h,v 1.16 2000-09-10 21:55:04 sandervl Exp $ */
 /*
  * Process help functions
  *
@@ -32,6 +32,7 @@ extern BOOL fExeStarted;
 extern BOOL fFreeLibrary;
 extern BOOL fIsOS2Image; //TRUE  -> Odin32 OS/2 application (not converted!)
                          //FALSE -> otherwise
+extern BOOL fExitProcess;
 
 //Flat pointer to thread TIB structure
 extern DWORD  *TIBFlatPtr;
