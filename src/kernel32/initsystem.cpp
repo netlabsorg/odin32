@@ -1,4 +1,4 @@
-/* $Id: initsystem.cpp,v 1.21 2000-10-21 14:30:46 sandervl Exp $ */
+/* $Id: initsystem.cpp,v 1.22 2000-10-25 19:46:59 sandervl Exp $ */
 /*
  * Odin system initialization (registry, directories & environment)
  *
@@ -615,6 +615,23 @@ BOOL InitSystemAndRegistry()
    RegSetValueExA(hkey, "NtfsDisable8dot3NameCreation",0,REG_DWORD, (LPBYTE)&val, sizeof(DWORD));
    val = 0x1;
    RegSetValueExA(hkey, "Win95TruncatedExtensions",0,REG_DWORD, (LPBYTE)&val, sizeof(DWORD));
+   RegCloseKey(hkey);
+
+
+//[HKEY_LOCAL_MACHINE\Software\Microsoft\OLE]
+//# allow cross-machine calls (RPC) (default Y)
+//"EnableDCOM"="Y"
+//# allow incoming connections ? (def. N)
+//"EnableRemoteConnect"="N"
+   if(RegCreateKeyA(HKEY_LOCAL_MACHINE,"Software\\Microsoft\\OLE",&hkey)!=ERROR_SUCCESS) {
+    goto initreg_error;
+   }
+   digbuf[0] = 'Y';
+   digbuf[1] = 0;
+   RegSetValueExA(hkey, "EnableDCOM",0,REG_SZ, (LPBYTE)digbuf, 2);
+   digbuf[0] = 'N';
+   digbuf[1] = 0;
+   RegSetValueExA(hkey, "EnableRemoteConnect",0,REG_SZ, (LPBYTE)digbuf, 2);
    RegCloseKey(hkey);
 
    return TRUE;
