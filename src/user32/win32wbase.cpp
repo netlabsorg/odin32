@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.239 2001-02-20 17:22:05 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.240 2001-02-21 20:51:06 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -848,9 +848,12 @@ ULONG Win32BaseWindow::MsgShow(BOOL fShow)
     }
 
     if(fShow) {
-            setStyle(getStyle() | WS_VISIBLE);
+         setStyle(getStyle() | WS_VISIBLE);
+         if(getStyle() & WS_MINIMIZE) {
+            return ShowWindow(SW_RESTORE);
+         }
     }
-    else    setStyle(getStyle() & ~WS_VISIBLE);
+    else setStyle(getStyle() & ~WS_VISIBLE);
 
     return SendInternalMessageA(WM_SHOWWINDOW, fShow, 0);
 }
@@ -1057,7 +1060,7 @@ ULONG Win32BaseWindow::MsgButton(MSG *msg)
 }
 //******************************************************************************
 //******************************************************************************
-ULONG Win32BaseWindow::MsgPaint(ULONG tmp1, BOOL select)
+ULONG Win32BaseWindow::MsgPaint(ULONG tmp, ULONG select)
 {
     if (select && IsWindowIconic())
         return SendInternalMessageA(WM_PAINTICON, 1, 0);
@@ -1587,14 +1590,14 @@ LRESULT Win32BaseWindow::DefWindowProcA(UINT Msg, WPARAM wParam, LPARAM lParam)
         HDC hdc = BeginPaint(getWindowHandle(), &ps );
         if( hdc )
         {
-          if( (getStyle() & WS_MINIMIZE) && (getWindowClass()->getIcon() && hIcon))
-          {
-            int x = (rectWindow.right - rectWindow.left - GetSystemMetrics(SM_CXICON))/2;
-            int y = (rectWindow.bottom - rectWindow.top - GetSystemMetrics(SM_CYICON))/2;
-            dprintf(("Painting class icon: vis rect=(%i,%i - %i,%i)\n", ps.rcPaint.left, ps.rcPaint.top, ps.rcPaint.right, ps.rcPaint.bottom ));
-            DrawIcon(hdc, x, y, hIcon ? hIcon:getWindowClass()->getIcon() );
-          }
-          EndPaint(getWindowHandle(), &ps );
+            if( (getStyle() & WS_MINIMIZE) && (getWindowClass()->getIcon() || hIcon))
+            {
+                int x = (rectWindow.right - rectWindow.left - GetSystemMetrics(SM_CXICON))/2;
+                int y = (rectWindow.bottom - rectWindow.top - GetSystemMetrics(SM_CYICON))/2;
+                dprintf(("Painting class icon: vis rect=(%i,%i - %i,%i)\n", ps.rcPaint.left, ps.rcPaint.top, ps.rcPaint.right, ps.rcPaint.bottom ));
+                DrawIcon(hdc, x, y, hIcon ? hIcon:getWindowClass()->getIcon() );
+            }
+            EndPaint(getWindowHandle(), &ps );
         }
         return 0;
     }
@@ -2169,6 +2172,7 @@ BOOL Win32BaseWindow::ShowWindow(ULONG nCmdShow)
  HWND  hWinAfter;
  BOOL  rc,wasVisible,showFlag;
  RECT  newPos = {0, 0, 0, 0};
+ BOOL  fInvalidate = FALSE;
 
     dprintf(("ShowWindow %x %x", getWindowHandle(), nCmdShow));
     wasVisible = (getStyle() & WS_VISIBLE) != 0;
@@ -2181,29 +2185,42 @@ BOOL Win32BaseWindow::ShowWindow(ULONG nCmdShow)
         SWP_NOACTIVATE | SWP_NOZORDER;
         break;
 
-    case SW_SHOWMINNOACTIVE:
+	case SW_SHOWMINNOACTIVE:
         swp |= SWP_NOACTIVATE | SWP_NOZORDER;
         /* fall through */
     case SW_SHOWMINIMIZED:
         swp |= SWP_SHOWWINDOW;
         /* fall through */
     case SW_MINIMIZE:
-        swp |= SWP_FRAMECHANGED;
-        if( !(getStyle() & WS_MINIMIZE) )
-             swp |= MinMaximize(SW_MINIMIZE, &newPos );
-        else swp |= SWP_NOSIZE | SWP_NOMOVE;
+//testesteest
+        if(!(getStyle() & WS_CHILD))
+        {
+            if( !(getStyle() & WS_MINIMIZE) )
+                 swp |= MinMaximize(SW_MINIMIZE, &newPos );
+
+            swp |= SWP_NOSIZE | SWP_NOMOVE | SWP_HIDEWINDOW;
+        }
+        else {
+            swp |= SWP_FRAMECHANGED;
+            if( !(getStyle() & WS_MINIMIZE) ) {
+                 swp |= MinMaximize(SW_MINIMIZE, &newPos );
+                 fInvalidate = TRUE;
+            }
+            else swp |= SWP_NOSIZE | SWP_NOMOVE;
+        }
+//testesteest
         break;
 
     case SW_SHOWMAXIMIZED: /* same as SW_MAXIMIZE */
-            swp |= SWP_SHOWWINDOW | SWP_FRAMECHANGED;
-            if( !(getStyle() & WS_MAXIMIZE) )
-         swp |= MinMaximize(SW_MAXIMIZE, &newPos );
-            else swp |= SWP_NOSIZE | SWP_NOMOVE;
-            break;
+        swp |= SWP_SHOWWINDOW | SWP_FRAMECHANGED;
+        if( !(getStyle() & WS_MAXIMIZE) )
+             swp |= MinMaximize(SW_MAXIMIZE, &newPos );
+        else swp |= SWP_NOSIZE | SWP_NOMOVE;
+        break;
 
     case SW_SHOWNA:
-            swp |= SWP_NOACTIVATE | SWP_NOZORDER;
-            /* fall through */
+        swp |= SWP_NOACTIVATE | SWP_NOZORDER;
+        /* fall through */
     case SW_SHOW:
         swp |= SWP_SHOWWINDOW | SWP_NOSIZE | SWP_NOMOVE;
 
@@ -2267,6 +2284,9 @@ BOOL Win32BaseWindow::ShowWindow(ULONG nCmdShow)
                      MAKELONG(rectClient.right-rectClient.left,
                               rectClient.bottom-rectClient.top));
         SendInternalMessageA(WM_MOVE,0,MAKELONG(rectClient.left,rectClient.top));
+    }
+    if(fInvalidate) {
+        InvalidateRect(getWindowHandle(), NULL, 1);
     }
 END:
     return wasVisible;
@@ -2410,15 +2430,15 @@ BOOL Win32BaseWindow::SetWindowPos(HWND hwndInsertAfter, int x, int y, int cx, i
         setStyle(getStyle() | WS_VISIBLE);
         if(hTaskList) {
             dprintf(("Adding window %x to tasklist", getWindowHandle()));
-            OSLibWinChangeTaskList(hTaskList, OS2Hwnd, getWindowNameA(), (getStyle() & WS_VISIBLE) ? 1 : 0);
+            OSLibWinChangeTaskList(hTaskList, OS2Hwnd, getWindowNameA(), 1);
         }
     }
     else
-    if(fuFlags & SWP_HIDEWINDOW && IsWindowVisible()) {
+    if((fuFlags & SWP_HIDEWINDOW) && IsWindowVisible()) {
         setStyle(getStyle() & ~WS_VISIBLE);
-        if(hTaskList) {
+        if(hTaskList && !(getStyle() & WS_MINIMIZE)) {
             dprintf(("Removing window %x from tasklist", getWindowHandle()));
-            OSLibWinChangeTaskList(hTaskList, OS2Hwnd, getWindowNameA(), (getStyle() & WS_VISIBLE) ? 1 : 0);
+            OSLibWinChangeTaskList(hTaskList, OS2Hwnd, getWindowNameA(), 0);
         }
     }
     dprintf (("WinSetWindowPos %x %x (%d,%d)(%d,%d) %x", swp.hwnd, swp.hwndInsertBehind, swp.x, swp.y, swp.cx, swp.cy, swp.fl));
@@ -2533,11 +2553,11 @@ BOOL Win32BaseWindow::SetWindowPlacement(WINDOWPLACEMENT *wndpl)
 
    if(getStyle() & WS_MINIMIZE )
    {
-    //TODO: Why can't this be (0,0)?
-    if(wndpl->flags & WPF_SETMINPOSITION && !(!windowpos.ptMinPosition.x && !windowpos.ptMinPosition.y)) {
-        SetWindowPos(0, windowpos.ptMinPosition.x, windowpos.ptMinPosition.y,
-                     0, 0, SWP_NOSIZE | SWP_NOZORDER | SWP_NOACTIVATE);
-    }
+        //TODO: Why can't this be (0,0)?
+        if(wndpl->flags & WPF_SETMINPOSITION && !(!windowpos.ptMinPosition.x && !windowpos.ptMinPosition.y)) {
+            SetWindowPos(0, windowpos.ptMinPosition.x, windowpos.ptMinPosition.y,
+                         0, 0, SWP_NOSIZE | SWP_NOZORDER | SWP_NOACTIVATE);
+        }
    }
    else
    if(getStyle() & WS_MAXIMIZE )

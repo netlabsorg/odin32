@@ -1,4 +1,4 @@
-/* $Id: win32wbasenonclient.cpp,v 1.28 2001-02-20 17:22:06 sandervl Exp $ */
+/* $Id: win32wbasenonclient.cpp,v 1.29 2001-02-21 20:51:07 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2 (non-client methods)
  *
@@ -1012,148 +1012,150 @@ VOID Win32BaseWindow::DrawCaption(HDC hdc,RECT *rect,BOOL active)
 //******************************************************************************
 VOID Win32BaseWindow::DoNCPaint(HRGN clip,BOOL suppress_menupaint)
 {
-  BOOL active  = flags & WIN_NCACTIVATED;
-  HDC hdc;
-  RECT rect,rectClip,rfuzz;
+    BOOL active  = flags & WIN_NCACTIVATED;
+    HDC hdc;
+    RECT rect,rectClip,rfuzz;
 
-  /* MSDN docs are pretty idiotic here, they say app CAN use clipRgn in
-     the call to GetDCEx implying that it is allowed not to use it either.
-     However, the suggested GetDCEx(    , DCX_WINDOW | DCX_INTERSECTRGN)
-     will cause clipRgn to be deleted after ReleaseDC().
-     Now, how is the "system" supposed to tell what happened?
-   */
+    /* MSDN docs are pretty idiotic here, they say app CAN use clipRgn in
+       the call to GetDCEx implying that it is allowed not to use it either.
+       However, the suggested GetDCEx(    , DCX_WINDOW | DCX_INTERSECTRGN)
+       will cause clipRgn to be deleted after ReleaseDC().
+       Now, how is the "system" supposed to tell what happened?
+    */
 
-  dprintf(("DoNCPaint %x %x %d", getWindowHandle(), clip, suppress_menupaint));
-  DecreaseLogCount();
+    dprintf(("DoNCPaint %x %x %d", getWindowHandle(), clip, suppress_menupaint));
+    DecreaseLogCount();
 
-  rect.top    = rect.left = 0;
-  rect.right  = rectWindow.right - rectWindow.left;
-  rect.bottom = rectWindow.bottom - rectWindow.top;
+    rect.top    = rect.left = 0;
+    rect.right  = rectWindow.right - rectWindow.left;
+    rect.bottom = rectWindow.bottom - rectWindow.top;
 
-  if (clip > 1)
-  {
-    //only redraw caption
-    GetRgnBox(clip,&rectClip);
+    if (clip > 1)
+    {
+        //only redraw caption
+        GetRgnBox(clip,&rectClip);
 #if 1
-    //SvL: I'm getting paint problems when clipping a dc created in GetDCEx
-    //     with a region that covers the entire window (RealPlayer 7 Update 1)
-    //     As we don't need to clip anything when that occurs, this workaround
-    //     solves the problem.
-    if(rectClip.right == getWindowWidth() && rectClip.bottom == getWindowHeight())
+        //SvL: I'm getting paint problems when clipping a dc created in GetDCEx
+        //     with a region that covers the entire window (RealPlayer 7 Update 1)
+        //     As we don't need to clip anything when that occurs, this workaround
+        //     solves the problem.
+        if(rectClip.right == getWindowWidth() && rectClip.bottom == getWindowHeight())
+        {
+            clip = 0;
+            rectClip = rect;
+        }
+#endif
+    }
+    else
     {
         clip = 0;
         rectClip = rect;
     }
-#endif
-  }
-  else
-  {
-    clip = 0;
-    rectClip = rect;
-  }
 
-  if (!(hdc = GetDCEx( Win32Hwnd, (clip > 1) ? clip : 0, DCX_USESTYLE | DCX_WINDOW |
-                      ((clip > 1) ?(DCX_INTERSECTRGN /*| DCX_KEEPCLIPRGN*/) : 0) ))) return;
+    if (!(hdc = GetDCEx( Win32Hwnd, (clip > 1) ? clip : 0, DCX_USESTYLE | DCX_WINDOW |
+                         ((clip > 1) ?(DCX_INTERSECTRGN /*| DCX_KEEPCLIPRGN*/) : 0) ))) return;
 
-  SelectObject( hdc, GetSysColorPen(COLOR_WINDOWFRAME) );
+    SelectObject( hdc, GetSysColorPen(COLOR_WINDOWFRAME) );
 
-  if (HAS_BIGFRAME( dwStyle, dwExStyle))
-  {
-    DrawEdge (hdc, &rect, EDGE_RAISED, BF_RECT | BF_ADJUST);
-  }
-  if (HAS_THICKFRAME( dwStyle, dwExStyle ))
-    DrawFrame(hdc, &rect, FALSE, active );
-  else if (HAS_DLGFRAME( dwStyle, dwExStyle ))
-    DrawFrame( hdc, &rect, TRUE, active );
-  else if (HAS_THINFRAME( dwStyle ))
-  {
-    SelectObject( hdc, GetStockObject(NULL_BRUSH) );
-    Rectangle( hdc, 0, 0, rect.right, rect.bottom );
-  }
-
-  if ((dwStyle & WS_CAPTION) == WS_CAPTION)
-  {
-    RECT  r = rect;
-    if (dwExStyle & WS_EX_TOOLWINDOW)
+    if (HAS_BIGFRAME( dwStyle, dwExStyle))
     {
-      r.bottom = rect.top + GetSystemMetrics(SM_CYSMCAPTION);
-      rect.top += GetSystemMetrics(SM_CYSMCAPTION);
+        DrawEdge (hdc, &rect, EDGE_RAISED, BF_RECT | BF_ADJUST);
     }
+    if (HAS_THICKFRAME( dwStyle, dwExStyle ))
+        DrawFrame(hdc, &rect, FALSE, active );
     else
+    if (HAS_DLGFRAME( dwStyle, dwExStyle ))
+        DrawFrame( hdc, &rect, TRUE, active );
+    else
+    if (HAS_THINFRAME( dwStyle ))
     {
-      r.bottom = rect.top + GetSystemMetrics(SM_CYCAPTION);
-      rect.top += GetSystemMetrics(SM_CYCAPTION);
+        SelectObject( hdc, GetStockObject(NULL_BRUSH) );
+        Rectangle( hdc, 0, 0, rect.right, rect.bottom );
     }
-    if( !clip || IntersectRect( &rfuzz, &r, &rectClip ) )
-      DrawCaption(hdc,&r,active);
-  }
 
-  if (HAS_MENU())
-  {
-    RECT r = rect;
-    r.bottom = rect.top + GetSystemMetrics(SM_CYMENU);
-
-    rect.top += MENU_DrawMenuBar(hdc,&r,Win32Hwnd,suppress_menupaint)+1;
-  }
-
-  if (dwExStyle & WS_EX_CLIENTEDGE)
-    DrawEdge (hdc, &rect, EDGE_SUNKEN, BF_RECT | BF_ADJUST);
-
-  if (dwExStyle & WS_EX_STATICEDGE)
-    DrawEdge (hdc, &rect, BDR_SUNKENOUTER, BF_RECT | BF_ADJUST);
-
-  /* Draw the scroll-bars */
-  if (dwStyle & WS_VSCROLL)
-    SCROLL_DrawScrollBar(Win32Hwnd,hdc,SB_VERT,TRUE,TRUE);
-  if (dwStyle & WS_HSCROLL)
-    SCROLL_DrawScrollBar(Win32Hwnd,hdc,SB_HORZ,TRUE,TRUE);
-
-  /* Draw the "size-box" */
-  if ((dwStyle & WS_VSCROLL) && (dwStyle & WS_HSCROLL))
-  {
-    RECT r = rect;
-    r.left = r.right - GetSystemMetrics(SM_CXVSCROLL) + 1;
-    r.top  = r.bottom - GetSystemMetrics(SM_CYHSCROLL) + 1;
-    FillRect( hdc, &r,  GetSysColorBrush(COLOR_SCROLLBAR) );
-    //CB: todo: child windows have sometimes a size grip (i.e. Notepad)
-    //    WS_SIZEBOX isn't set in these cases
-    if (!(dwStyle & WS_CHILD))
+    if ((dwStyle & WS_CAPTION) == WS_CAPTION)
     {
-      POINT p1,p2;
-      HPEN penDark = GetSysColorPen(COLOR_3DSHADOW);
-      HPEN penWhite = GetSysColorPen(COLOR_3DHILIGHT);
-      HPEN oldPen = SelectObject(hdc,penDark);
-      INT x;
-
-      p1.x = r.right-1;
-      p1.y = r.bottom;
-      p2.x = r.right;
-      p2.y = r.bottom-1;
-      for (x = 0;x < 3;x++)
-      {
-        SelectObject(hdc,penDark);
-        MoveToEx(hdc,p1.x,p1.y,NULL);
-        LineTo(hdc,p2.x,p2.y);
-        p1.x--;
-        p2.y--;
-        MoveToEx(hdc,p1.x,p1.y,NULL);
-        LineTo(hdc,p2.x,p2.y);
-        SelectObject(hdc,penWhite);
-        p1.x--;
-        p2.y--;
-        MoveToEx(hdc,p1.x,p1.y,NULL);
-        LineTo(hdc,p2.x,p2.y);
-        p1.x -= 2;
-        p2.y -= 2;
-      }
-
-      SelectObject(hdc,oldPen);
+        RECT  r = rect;
+        if (dwExStyle & WS_EX_TOOLWINDOW)
+        {
+            r.bottom = rect.top + GetSystemMetrics(SM_CYSMCAPTION);
+            rect.top += GetSystemMetrics(SM_CYSMCAPTION);
+        }
+        else
+        {
+            r.bottom = rect.top + GetSystemMetrics(SM_CYCAPTION);
+            rect.top += GetSystemMetrics(SM_CYCAPTION);
+        }
+        if( !clip || IntersectRect( &rfuzz, &r, &rectClip ) )
+            DrawCaption(hdc,&r,active);
     }
-  }
 
-  ReleaseDC(getWindowHandle(),hdc);
-  IncreaseLogCount();
-  dprintf(("**DoNCPaint %x DONE", getWindowHandle()));
+    if (HAS_MENU())
+    {
+        RECT r = rect;
+        r.bottom = rect.top + GetSystemMetrics(SM_CYMENU);
+
+        rect.top += MENU_DrawMenuBar(hdc,&r,Win32Hwnd,suppress_menupaint)+1;
+    }
+
+    if (dwExStyle & WS_EX_CLIENTEDGE)
+        DrawEdge (hdc, &rect, EDGE_SUNKEN, BF_RECT | BF_ADJUST);
+
+    if (dwExStyle & WS_EX_STATICEDGE)
+        DrawEdge (hdc, &rect, BDR_SUNKENOUTER, BF_RECT | BF_ADJUST);
+
+    /* Draw the scroll-bars */
+    if (dwStyle & WS_VSCROLL)
+        SCROLL_DrawScrollBar(Win32Hwnd,hdc,SB_VERT,TRUE,TRUE);
+    if (dwStyle & WS_HSCROLL)
+        SCROLL_DrawScrollBar(Win32Hwnd,hdc,SB_HORZ,TRUE,TRUE);
+
+    /* Draw the "size-box" */
+    if ((dwStyle & WS_VSCROLL) && (dwStyle & WS_HSCROLL))
+    {
+        RECT r = rect;
+        r.left = r.right - GetSystemMetrics(SM_CXVSCROLL) + 1;
+        r.top  = r.bottom - GetSystemMetrics(SM_CYHSCROLL) + 1;
+        FillRect( hdc, &r,  GetSysColorBrush(COLOR_SCROLLBAR) );
+        //CB: todo: child windows have sometimes a size grip (i.e. Notepad)
+        //    WS_SIZEBOX isn't set in these cases
+        if (!(dwStyle & WS_CHILD))
+        {
+            POINT p1,p2;
+            HPEN penDark = GetSysColorPen(COLOR_3DSHADOW);
+            HPEN penWhite = GetSysColorPen(COLOR_3DHILIGHT);
+            HPEN oldPen = SelectObject(hdc,penDark);
+            INT x;
+
+            p1.x = r.right-1;
+            p1.y = r.bottom;
+            p2.x = r.right;
+            p2.y = r.bottom-1;
+            for (x = 0;x < 3;x++)
+            {
+                SelectObject(hdc,penDark);
+                MoveToEx(hdc,p1.x,p1.y,NULL);
+                LineTo(hdc,p2.x,p2.y);
+                p1.x--;
+                p2.y--;
+                MoveToEx(hdc,p1.x,p1.y,NULL);
+                LineTo(hdc,p2.x,p2.y);
+                SelectObject(hdc,penWhite);
+                p1.x--;
+                p2.y--;
+                MoveToEx(hdc,p1.x,p1.y,NULL);
+                LineTo(hdc,p2.x,p2.y);
+                p1.x -= 2;
+                p2.y -= 2;
+            }
+
+            SelectObject(hdc,oldPen);
+        }
+    }
+
+    ReleaseDC(getWindowHandle(),hdc);
+    IncreaseLogCount();
+    dprintf(("**DoNCPaint %x DONE", getWindowHandle()));
 }
 //******************************************************************************
 //******************************************************************************

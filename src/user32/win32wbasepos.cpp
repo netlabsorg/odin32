@@ -1,4 +1,4 @@
-/* $Id: win32wbasepos.cpp,v 1.19 2001-02-20 15:40:23 sandervl Exp $ */
+/* $Id: win32wbasepos.cpp,v 1.20 2001-02-21 20:51:07 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2 (nonclient/position methods)
  *
@@ -226,70 +226,69 @@ UINT Win32BaseWindow::MinMaximize(UINT cmd, LPRECT lpRect)
     size.y = rectWindow.top;
 
     if(IsRectEmpty(&windowpos.rcNormalPosition)) {
-    CopyRect(&windowpos.rcNormalPosition, &rectWindow);
+        CopyRect(&windowpos.rcNormalPosition, &rectWindow);
     }
     if(!HOOK_CallHooksA(WH_CBT, HCBT_MINMAX, getWindowHandle(), cmd))
     {
-    if(getStyle() & WS_MINIMIZE )
-    {
-        if(!SendInternalMessageA(WM_QUERYOPEN, 0, 0L))
-        return (SWP_NOSIZE | SWP_NOMOVE);
-    }
-    switch( cmd )
-    {
-        case SW_MINIMIZE:
-        if( getStyle() & WS_MAXIMIZE)
-        {
-                setFlags(getFlags() | WIN_RESTORE_MAX);
-                setStyle(getStyle() & ~WS_MAXIMIZE);
-                }
-                else    setFlags(getFlags() & ~WIN_RESTORE_MAX);
-
-        setStyle(getStyle() | WS_MINIMIZE);
-
-        SetRect(lpRect, windowpos.ptMinPosition.x, windowpos.ptMinPosition.y,
-                GetSystemMetrics(SM_CXICON), GetSystemMetrics(SM_CYICON) );
-        break;
-
-        case SW_MAXIMIZE:
-                GetMinMaxInfo(&size, &windowpos.ptMaxPosition, NULL, NULL );
-
         if(getStyle() & WS_MINIMIZE )
         {
-             setStyle(getStyle() & ~WS_MINIMIZE);
+            if(!SendInternalMessageA(WM_QUERYOPEN, 0, 0L))
+                return (SWP_NOSIZE | SWP_NOMOVE);
         }
-                setStyle(getStyle() | WS_MAXIMIZE);
+        switch( cmd )
+        {
+        case SW_MINIMIZE:
+            if( getStyle() & WS_MAXIMIZE)
+            {
+                 setFlags(getFlags() | WIN_RESTORE_MAX);
+                 setStyle(getStyle() & ~WS_MAXIMIZE);
+            }
+            else setFlags(getFlags() & ~WIN_RESTORE_MAX);
 
-        SetRect(lpRect, windowpos.ptMaxPosition.x, windowpos.ptMaxPosition.y,
-                size.x, size.y );
-        break;
+            setStyle(getStyle() | WS_MINIMIZE);
+
+            SetRect(lpRect, windowpos.ptMinPosition.x, windowpos.ptMinPosition.y,
+                    GetSystemMetrics(SM_CXICON), GetSystemMetrics(SM_CYICON) );
+            break;
+
+        case SW_MAXIMIZE:
+            GetMinMaxInfo(&size, &windowpos.ptMaxPosition, NULL, NULL );
+
+            if(getStyle() & WS_MINIMIZE )
+            {
+                 setStyle(getStyle() & ~WS_MINIMIZE);
+            }
+            setStyle(getStyle() | WS_MAXIMIZE);
+
+            SetRect(lpRect, windowpos.ptMaxPosition.x, windowpos.ptMaxPosition.y,
+                    size.x, size.y );
+            break;
 
         case SW_RESTORE:
-        if(getStyle() & WS_MINIMIZE)
-        {
+            if(getStyle() & WS_MINIMIZE)
+            {
                 setStyle(getStyle() & ~WS_MINIMIZE);
 
                 if( getFlags() & WIN_RESTORE_MAX)
                 {
-                /* Restore to maximized position */
-                            GetMinMaxInfo(&size, &windowpos.ptMaxPosition, NULL, NULL);
-                setStyle(getStyle() | WS_MAXIMIZE);
-                SetRect(lpRect, windowpos.ptMaxPosition.x, windowpos.ptMaxPosition.y, size.x, size.y);
-                break;
+                    /* Restore to maximized position */
+                    GetMinMaxInfo(&size, &windowpos.ptMaxPosition, NULL, NULL);
+                    setStyle(getStyle() | WS_MAXIMIZE);
+                    SetRect(lpRect, windowpos.ptMaxPosition.x, windowpos.ptMaxPosition.y, size.x, size.y);
+                    break;
                 }
-        }
-        else
+            }
+            else
             if( !(getStyle() & WS_MAXIMIZE) )
-            return 0;
-            else    setStyle(getStyle() & ~WS_MAXIMIZE);
+                 return 0;
+            else setStyle(getStyle() & ~WS_MAXIMIZE);
 
-        /* Restore to normal position */
-
-        *lpRect = windowpos.rcNormalPosition;
-        lpRect->right -= lpRect->left;
-        lpRect->bottom -= lpRect->top;
-        break;
-    }
+            /* Restore to normal position */
+            *lpRect = windowpos.rcNormalPosition;
+            lpRect->right -= lpRect->left;
+            lpRect->bottom -= lpRect->top;
+            break;
+        }
     }
     else swpFlags |= SWP_NOSIZE | SWP_NOMOVE;
 
