@@ -1,4 +1,4 @@
-; $Id: asmutil.asm,v 1.7 2005-02-08 20:48:46 sao2l02 Exp $
+; $Id: asmutil.asm,v 1.8 2005-02-09 19:09:07 sao2l02 Exp $
 
 ;/*
 ; * Project Odin Software License can be found in LICENSE.TXT
@@ -243,7 +243,7 @@ _clear_bit proc near
 _clear_bit endp
 
 	public _search_zero_bit
-;int CDECL search_zero_bit(int bitcount, void *addr);
+;int CDECL search_zero_bit(int bytecount, void *addr);
 _search_zero_bit proc near
     push esi
     push edx
@@ -255,7 +255,8 @@ loop:
     add  esi, 4
     mov  eax, -1
     dec  edx
-    jz   short none
+;not found
+    jz   short found
     xor  eax, dword ptr [esi - 4]
     jz   loop
     bsf  eax, eax
@@ -264,10 +265,6 @@ loop:
     sub  esi, [esp+16]
     shl  esi, 5-2
     add  eax, esi
-    jmp  short found    
-none:
-    setnz al
-    movsx eax, al
 found:
 
     pop  edx
