@@ -1,4 +1,4 @@
-/* $Id: HandleManager.cpp,v 1.22 1999-11-08 13:43:11 sandervl Exp $ */
+/* $Id: HandleManager.cpp,v 1.23 1999-11-12 11:12:24 achimha Exp $ */
 
 /*
  *
@@ -1023,7 +1023,7 @@ BOOL HMCloseHandle(HANDLE hObject)
 
   if (fResult == TRUE)                   /* remove handle if close succeeded */
   {
-    pHMHandle->hmHandleData.hHMHandle = 0;            /* mark handle as free */
+    pHMHandle->hmHandleData.hHMHandle = INVALID_HANDLE; /* mark handle as free */
     SetLastError(ERROR_SUCCESS); //@@@PH 1999/10/27 rc5desg requires this?
   }
 
