@@ -52,7 +52,7 @@
 /src/winmm                                 sandervl
 /src/winspool                              sandervl,bird
 /src/wnetap32                              sandervl,bird
-/src/wsock32                               sandervl
+/src/wsock32                               sandervl,bird
 /src/win32k                                bird,sandervl
 /src/win32k/dev16                          bird,sandervl
 /src/win32k/dev32                          bird,sandervl
