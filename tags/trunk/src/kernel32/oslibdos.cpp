@@ -1,4 +1,4 @@
-/* $Id: oslibdos.cpp,v 1.39 2000-08-14 08:10:16 sandervl Exp $ */
+/* $Id: oslibdos.cpp,v 1.40 2000-09-04 18:24:42 sandervl Exp $ */
 /*
  * Wrappers for OS/2 Dos* API
  *
@@ -1937,8 +1937,41 @@ DWORD OSLibDosQueryVolumeSerialAndName(int drive, LPDWORD lpVolumeSerialNumber,
 }
 //******************************************************************************
 //******************************************************************************
+BOOL OSLibGetDiskFreeSpace(LPSTR lpRootPathName, LPDWORD lpSectorsPerCluster,
+                           LPDWORD lpBytesPerSector, LPDWORD lpNumberOfFreeClusters,
+                           LPDWORD lpTotalNumberOfClusters)
+{
+ ULONG diskNum;
+ FSALLOCATE fsAlloc;
+ APIRET rc;
 
+   if(lpRootPathName == 0)
+      diskNum = 0;
+   else 
+   if('A' <= *lpRootPathName && *lpRootPathName <= 'Z' )
+      diskNum = *lpRootPathName - 'A' + 1;
+   else 
+   if('a' <= *lpRootPathName && *lpRootPathName <= 'z' )
+      diskNum = *lpRootPathName - 'a' + 1;
+   else
+      diskNum = 0;
 
+   DosError(FERR_DISABLEHARDERR);
+   rc = DosQueryFSInfo(diskNum, FSIL_ALLOC, &fsAlloc, sizeof(fsAlloc));
+   DosError(FERR_ENABLEHARDERR);
+
+   if(rc == 0)
+   {
+        *lpSectorsPerCluster     = fsAlloc.cSectorUnit;
+        *lpBytesPerSector        = fsAlloc.cbSector;
+        *lpNumberOfFreeClusters  = fsAlloc.cUnitAvail;
+        *lpTotalNumberOfClusters = fsAlloc.cUnit;
+	SetLastError(ERROR_SUCCESS_W);
+        return TRUE;
+   }
+   SetLastError(error2WinError(rc));
+   return FALSE;
+}
 //******************************************************************************
 //******************************************************************************
 BOOL OSLibDosCreatePipe(PHANDLE phfRead,
