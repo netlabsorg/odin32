@@ -1,4 +1,4 @@
-/* $Id: Win32kCC.c,v 1.2 2000-09-02 21:08:22 bird Exp $
+/* $Id: Win32kCC.c,v 1.3 2000-09-03 23:53:18 bird Exp $
  *
  * Win32CC - Win32k Control Center.
  *
@@ -83,6 +83,7 @@ MRESULT EXPENTRY    Win32kCCDlgProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2
 BOOL                Complain(HWND hwndOwner, int id, ...);
 PCSZ                getLastErrorMsg(HAB hab);
 PSZ                 getMessage(ULONG id);
+int                 GetFixpackDesc(ULONG ulBuild, ULONG flKernel, PSZ pszBuffer);
 
 
 
@@ -360,7 +361,8 @@ MRESULT EXPENTRY Win32kCCDlgProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
         case WM_SETCONTROLS:
         {
             APIRET  rc;
-            CHAR    szNumber[16];
+            CHAR    szNumber[32];
+            CHAR    szBuffer[100];
 
 
             /*
@@ -383,6 +385,17 @@ MRESULT EXPENTRY Win32kCCDlgProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
             /*
              * Set the controls.
              */
+            /* win32k */
+            sprintf(szBuffer, "%d.%d", 0, pThis->Status.ulVersion);
+            WinSetDlgItemText(hwnd, TX_W32K_VERSION_VAL,        szBuffer);
+            sprintf(szBuffer, "%s %s", pThis->Status.szBuildTime, pThis->Status.szBuildDate);
+            WinSetDlgItemText(hwnd, TX_W32K_BUILD_DATETIME_VAL, szBuffer);
+            WinSetDlgItemText(hwnd, TX_W32K_SYMBOLFILE_VAL,     pThis->Status.szSymFile);
+            sprintf(szBuffer, "%d - ", pThis->Status.ulBuild);
+            if (GetFixpackDesc(pThis->Status.ulBuild, pThis->Status.fKernel, szBuffer + strlen(szBuffer)))
+                sprintf(szBuffer, "%d", pThis->Status.ulBuild);
+            WinSetDlgItemText(hwnd, TX_W32K_KERNELBUILD_VAL,    szBuffer);
+
             /* logging */
             WinSendDlgItemMsg(hwnd, CB_LOGGING_ENABLED,     BM_SETCHECK,    (MPARAM)(pThis->Options.fLogging),                  NULL);
             WinSendDlgItemMsg(hwnd, RB_LOGGING_COM1,        BM_SETCHECK,    (MPARAM)(pThis->Options.usCom == 0x3f8),            NULL);
@@ -398,9 +411,13 @@ MRESULT EXPENTRY Win32kCCDlgProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
             WinSendDlgItemMsg(hwnd, RB_LDR_PE_PE,           BM_SETCHECK,    (MPARAM)(pThis->Options.fPE == FLAGS_PE_PE),        NULL);
             WinSendDlgItemMsg(hwnd, RB_LDR_PE_NOT,          BM_SETCHECK,    (MPARAM)(pThis->Options.fPE == FLAGS_PE_NOT),       NULL);
             WinSendDlgItemMsg(hwnd, SB_LDR_PE_INFOLEVEL,    SPBM_SETCURRENTVALUE, (MPARAM)(pThis->Options.ulInfoLevel),         NULL); /* FIXME to be changed */
+            sprintf(szNumber, "%d", pThis->Status.cPe2LxModules);
+            WinSetDlgItemText(hwnd, TX_LDR_PE_MODULES_VAL, szNumber);
             /* Elf */
             WinSendDlgItemMsg(hwnd, CB_LDR_ELF_ENABLED,     BM_SETCHECK,    (MPARAM)(pThis->Options.fElf),                      NULL);
             WinSendDlgItemMsg(hwnd, SB_LDR_ELF_INFOLEVEL,   SPBM_SETCURRENTVALUE, (MPARAM)(pThis->Options.ulInfoLevel),         NULL); /* FIXME to be changed */
+            sprintf(szNumber, "%d", pThis->Status.cElf2LxModules);
+            WinSetDlgItemText(hwnd, TX_LDR_ELF_MODULES_VAL, szNumber);
             /* UNIX Shell Scripts */
             WinSendDlgItemMsg(hwnd, CB_LDR_SHELL_SCRIPTS,   BM_SETCHECK,    (MPARAM)(pThis->Options.fUNIXScript),               NULL);
             /* JAVA */
@@ -413,14 +430,30 @@ MRESULT EXPENTRY Win32kCCDlgProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
             WinSendDlgItemMsg(hwnd, SB_HEAP_RES_MAX,        SPBM_SETCURRENTVALUE, (MPARAM)(pThis->Options.cbResHeapMax / 1024), NULL);
             sprintf(szNumber, "%d", pThis->Status.cbResHeapInit / 1024);
             WinSetDlgItemText(hwnd, TX_HEAP_RES_INIT_VAL,   szNumber);
+            sprintf(szNumber, "%d", pThis->Status.cbResHeapSize / 1024);
+            WinSetDlgItemText(hwnd, TX_HEAP_RES_SIZE_VAL,   szNumber);
             sprintf(szNumber, "%d", pThis->Status.cbResHeapUsed / 1024);
             WinSetDlgItemText(hwnd, TX_HEAP_RES_USED_VAL,   szNumber);
+            sprintf(szNumber, "%d", pThis->Status.cbResHeapFree / 1024);
+            WinSetDlgItemText(hwnd, TX_HEAP_RES_FREE_VAL,   szNumber);
+            sprintf(szNumber, "%d", pThis->Status.cResBlocksUsed);
+            WinSetDlgItemText(hwnd, TX_HEAP_RES_USED_BLOCKS_VAL,   szNumber);
+            sprintf(szNumber, "%d", pThis->Status.cResBlocksFree);
+            WinSetDlgItemText(hwnd, TX_HEAP_RES_FREE_BLOCKS_VAL,   szNumber);
             /* Swappable */
             WinSendDlgItemMsg(hwnd, SB_HEAP_SWP_MAX,        SPBM_SETCURRENTVALUE, (MPARAM)(pThis->Options.cbSwpHeapMax / 1024), NULL);
             sprintf(szNumber, "%d", pThis->Status.cbSwpHeapInit / 1024);
             WinSetDlgItemText(hwnd, TX_HEAP_SWP_INIT_VAL,   szNumber);
+            sprintf(szNumber, "%d", pThis->Status.cbSwpHeapSize / 1024);
+            WinSetDlgItemText(hwnd, TX_HEAP_SWP_SIZE_VAL,   szNumber);
             sprintf(szNumber, "%d", pThis->Status.cbSwpHeapUsed / 1024);
             WinSetDlgItemText(hwnd, TX_HEAP_SWP_USED_VAL,   szNumber);
+            sprintf(szNumber, "%d", pThis->Status.cbSwpHeapFree / 1024);
+            WinSetDlgItemText(hwnd, TX_HEAP_SWP_FREE_VAL,   szNumber);
+            sprintf(szNumber, "%d", pThis->Status.cSwpBlocksUsed);
+            WinSetDlgItemText(hwnd, TX_HEAP_SWP_USED_BLOCKS_VAL,   szNumber);
+            sprintf(szNumber, "%d", pThis->Status.cSwpBlocksFree);
+            WinSetDlgItemText(hwnd, TX_HEAP_SWP_FREE_BLOCKS_VAL,   szNumber);
 
             pThis->fDirty = FALSE;
             return NULL;
@@ -663,3 +696,64 @@ PSZ getMessage(ULONG id)
 }
 
 
+/**
+ * Determin the fixpack+kernel description from build no. and kernel flags.
+ * @returns     0 on success. Description i szBuffer.
+ *              -1 on error.
+ * @param       ulBuild     Kernel build no.
+ * @param       flKernel    Win32k kernel flags.
+ * @param       szBuffer    Pointer to buffer
+ */
+int GetFixpackDesc(ULONG ulBuild, ULONG flKernel, PSZ pszBuffer)
+{
+
+    pszBuffer[0] = '\0';
+    if (ulBuild == 9023)
+        strcpy(pszBuffer, "Warp 4 GA");
+    else if (ulBuild > 9023 && ulBuild <= 9036)
+        sprintf(pszBuffer, "Warp 4 FP %d", ulBuild - 9024);
+    else if (ulBuild == 14039)
+        strcpy(pszBuffer, "WS4eB GA");
+    else if (ulBuild == 14040)
+        strcpy(pszBuffer, flKernel & KF_W4 ? "Warp 4 FP13" : "WS4eB FP1");
+    else if (ulBuild >= 14041 && ulBuild <= 14046)
+        strcpy(pszBuffer, "Warp 4 FP14");
+    else if (ulBuild >= 14048)
+    {
+        if (flKernel & KF_W4)
+            sprintf(pszBuffer, "Warp 4 FP%d", ulBuild - 14049 + 15); //???
+        else
+            sprintf(pszBuffer, "WS4eB FP%d", ulBuild - 14048 + 2); //???
+    }
+    else if (ulBuild >= 8255 && ulBuild <= 8270)
+        sprintf(pszBuffer, "Warp 3 FP%d", ulBuild - 8255 + 32);
+    else
+        return -1;
+
+    /*
+     * Check type.
+     */
+    if (pszBuffer[0] != '\0')
+    {
+        char *pszAdd;
+
+        if (flKernel & KF_SMP)
+            pszAdd = "SMP ";
+        else
+            pszAdd = " ";
+        strcpy(pszBuffer + strlen(pszBuffer), pszAdd);
+
+        if (flKernel & KF_DEBUG)
+        {
+            if (flKernel & KF_HAS_DEBUGTYPE)
+                pszAdd = (flKernel & KF_ALLSTRICT) ? "(Allstrict)" : "(Halfstrict)";
+            else
+                pszAdd = "(Debug)";
+        }
+        else
+            pszAdd = "(Retail)";
+        strcpy(pszBuffer + strlen(pszBuffer), pszAdd);
+    }
+
+    return 0;
+}

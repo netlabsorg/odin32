@@ -1,66 +1,106 @@
 #ifndef OS2_INCLUDED
    #include <os2.h>
-   #include "win32kcc.h"
 #endif
-DLGINCLUDE 1 "win32kcc.h"
+DLGINCLUDE 1 "Win32kCC.h"
 
 DLGTEMPLATE DL_WIN32KCC LOADONCALL MOVEABLE DISCARDABLE
 BEGIN
-    DIALOG  "Win32k Control Center", DL_WIN32KCC, 173, 69, 274, 256, WS_VISIBLE, FCF_SYSMENU |
-            FCF_TITLEBAR | FCF_TASKLIST
+    DIALOG  "Win32k Control Center", DL_WIN32KCC, 159, 30, 274, 300,
+            WS_VISIBLE, FCF_SYSMENU | FCF_TITLEBAR | FCF_TASKLIST | FCF_ICON
     BEGIN
+        GROUPBOX        "", GR_W32K, 6, 252, 262, 46
+        LTEXT           "Symbol file", TX_W32K_SYMBOLFILE, 14, 264, 84, 8
+        LTEXT           "Kernel Build", TX_W32K_KERNELBUILD, 14, 256, 84, 8
+        LTEXT           "c:\\os2\\pdpsi\\pmdf\\warp4\\os2krnl.sym",
+                        TX_W32K_SYMBOLFILE_VAL, 100, 264, 165, 8
+        LTEXT           "Win32k version", TX_W32K_VERSION, 14, 280, 84, 8
+        LTEXT           "0.5", TX_W32K_VERSION_VAL, 100, 280, 165, 8
+        LTEXT           "Build time/date", TX_W32K_BUILD_DATETIME, 14, 272,
+                        84, 8
+        LTEXT           "04:30:12 Sep 01 2000", TX_W32K_BUILD_DATETIME_VAL,
+                        100, 272, 165, 8
+        LTEXT           "9.036", TX_W32K_KERNELBUILD_VAL, 100, 256, 165, 8
+        GROUPBOX        "Logging", GR_LOGGING, 6, 224, 262, 24
         AUTOCHECKBOX    "Enabled", CB_LOGGING_ENABLED, 14, 228, 50, 10
-        GROUPBOX        "Logging", GR_LOGGING, 6, 225, 216, 25
-        AUTORADIOBUTTON "COM1", RB_LOGGING_COM1, 68, 228, 36, 10, WS_TABSTOP
-        AUTORADIOBUTTON "COM2", RB_LOGGING_COM2, 106, 228, 36, 10,
+        AUTORADIOBUTTON "COM1", RB_LOGGING_COM1, 76, 228, 36, 10, WS_TABSTOP
+        AUTORADIOBUTTON "COM2", RB_LOGGING_COM2, 123, 228, 36, 10,
                         WS_TABSTOP
-        AUTORADIOBUTTON "COM3", RB_LOGGING_COM3, 142, 228, 36, 10,
+        AUTORADIOBUTTON "COM3", RB_LOGGING_COM3, 167, 228, 36, 10,
                         WS_TABSTOP
-        AUTORADIOBUTTON "COM4", RB_LOGGING_COM4, 180, 228, 36, 10,
+        AUTORADIOBUTTON "COM4", RB_LOGGING_COM4, 213, 228, 36, 10,
                         WS_TABSTOP
-        GROUPBOX        "Loaders", GR_LOADERS, 6, 100, 262, 118
-        AUTOCHECKBOX    "Disable all loaders", CB_LDR_DISABLE_ALL, 14, 196,
+        GROUPBOX        "Loaders", GR_LOADERS, 6, 116, 262, 104
+        AUTOCHECKBOX    "Disable all loaders", CB_LDR_DISABLE_ALL, 14, 200,
                         112, 10
-        GROUPBOX        "PE Loader", 101, 14, 142, 118, 48
-        AUTORADIOBUTTON "Pure", RB_LDR_PE_PURE, 22, 170, 44, 10, WS_TABSTOP
-        AUTORADIOBUTTON "Mixed", RB_LDR_PE_MIXED, 22, 160, 44, 10,
+        GROUPBOX        "~PE Loader", GR_LDR_PE, 14, 144, 118, 54,
+                        DT_MNEMONIC
+        AUTORADIOBUTTON "Pure", RB_LDR_PE_PURE, 22, 179, 44, 9, WS_TABSTOP
+        AUTORADIOBUTTON "Mixed", RB_LDR_PE_MIXED, 22, 170, 44, 9, WS_TABSTOP
+        AUTORADIOBUTTON "PE.EXE", RB_LDR_PE_PE, 78, 179, 44, 9, WS_TABSTOP
+        AUTORADIOBUTTON "Disabled", RB_LDR_PE_NOT, 78, 170, 51, 9,
                         WS_TABSTOP
-        AUTORADIOBUTTON "PE.EXE", RB_LDR_PE_PE, 78, 170, 44, 10, WS_TABSTOP
-        AUTORADIOBUTTON "Disabled", RB_LDR_PE_NOT, 78, 160, 51, 10,
-                        WS_TABSTOP
-        SPINBUTTON      SB_LDR_PE_INFOLEVEL, 78, 148, 28, 12,
+        SPINBUTTON      SB_LDR_PE_INFOLEVEL, 96, 158, 28, 12,
                         SPBS_NUMERICONLY | SPBS_MASTER | WS_GROUP
-        LTEXT           "Infolevel:", TX_LDR_PE_INFOLEVEL, 26, 148, 48, 8
-        GROUPBOX        "ELF Loader", GR_LDR_ELF, 142, 152, 118, 37
-        AUTOCHECKBOX    "Enabled", CB_LDR_ELF_ENABLED, 150, 168, 55, 10
-        LTEXT           "Infolevel:", TX_LDR_ELF_INFOLEVEL, 154, 157, 48, 8
-        SPINBUTTON      SB_LDR_ELF_INFOLEVEL, 206, 157, 28, 12, SPBS_NUMERICONLY |
-                        SPBS_MASTER | WS_GROUP
-        AUTOCHECKBOX    "UNIX Shell Scripts", CB_LDR_SHELL_SCRIPTS, 14, 124,
-                        160, 10
-        AUTOCHECKBOX    "JAVA", CB_LDR_JAVA, 14, 114, 160, 10
+        LTEXT           "Infolevel:", TX_LDR_PE_INFOLEVEL, 22, 158, 48, 8
+        GROUPBOX        "~ELF Loader", GR_LDR_ELF, 142, 154, 118, 44,
+                        DT_MNEMONIC | WS_DISABLED
+        AUTOCHECKBOX    "Enabled", CB_LDR_ELF_ENABLED, 150, 178, 55, 10,
+                        WS_DISABLED
+        LTEXT           "Infolevel:", TX_LDR_ELF_INFOLEVEL, 150, 168, 48, 8,
+                        WS_DISABLED
+        SPINBUTTON      SB_LDR_ELF_INFOLEVEL, 224, 168, 28, 12,
+                        SPBS_NUMERICONLY | SPBS_MASTER | WS_GROUP |
+                        WS_DISABLED
+        AUTOCHECKBOX    "UNIX Shell Scripts", CB_LDR_SHELL_SCRIPTS, 14, 130,
+                        118, 10
+        AUTOCHECKBOX    "JAVA", CB_LDR_JAVA, 142, 130, 118, 10
         AUTOCHECKBOX    "(Pure) REXX Scripts (.RX/.REX)", CB_LDR_REXX, 14,
-                        104, 160, 10
-        GROUPBOX        "Heaps", GR_HEAPS, 6, 26, 262, 65
-        GROUPBOX        "Resident Heap", GR_HEAP_RES, 14, 33, 118, 48
-        LTEXT           "Max (KB):", TX_HEAP_RES_MAX, 22, 62, 53, 8
-        SPINBUTTON      SB_HEAP_RES_MAX, 80, 62, 42, 8, SPBS_NUMERICONLY |
-                        SPBS_MASTER | WS_GROUP | SPBS_FASTSPIN
-
-        LTEXT           "Initial (KB)", TX_HEAP_RES_INIT, 22, 50, 50, 8
-        RTEXT           "256", TX_HEAP_RES_INIT_VAL, 78, 50, 46, 8
-        LTEXT           "Used (KB)", TX_HEAP_RES_USED, 22, 38, 50, 8
-        RTEXT           "256", TX_HEAP_RES_USED_VAL, 78, 38, 46, 8
-        GROUPBOX        "Swappable Heap", GR_HEAP_SWP, 142, 33, 118, 48
-        LTEXT           "Max (KB):", TX_HEAP_SWP_MAX, 150, 62, 53, 8
-        SPINBUTTON      SB_HEAP_SWP_MAX, 208, 62, 42, 8, SPBS_NUMERICONLY |
-                        SPBS_MASTER | WS_GROUP | SPBS_FASTSPIN
-        LTEXT           "Initial (KB)", TX_HEAP_SWP_INIT, 150, 50, 50, 8
-        RTEXT           "256", TX_HEAP_SWP_INIT_VAL, 206, 50, 46, 8
-        LTEXT           "Used (KB)", TX_HEAP_SWP_USED, 150, 38, 50, 8
-        RTEXT           "256", TX_HEAP_SWP_USED_VAL, 206, 38, 46, 8
-        DEFPUSHBUTTON   "~Refresh", PB_REFRESH, 6, 4, 40, 14
-        PUSHBUTTON      "Apply", PB_APPLY, 49, 4, 40, 14
-        PUSHBUTTON      "Close", DID_OK, 92, 4, 40, 14
+                        120, 160, 10
+        GROUPBOX        "Heaps", GR_HEAPS, 6, 26, 262, 85
+        GROUPBOX        "Resident Heap", GR_HEAP_RES, 14, 30, 118, 73
+        LTEXT           "Max (KB):", TX_HEAP_RES_MAX, 22, 84, 53, 8
+        SPINBUTTON      SB_HEAP_RES_MAX, 82, 84, 42, 8, SPBS_NUMERICONLY |
+                        SPBS_MASTER | SPBS_FASTSPIN | WS_GROUP
+        LTEXT           "Initial (KB)", TX_HEAP_RES_INIT, 22, 74, 50, 8
+        RTEXT           "257", TX_HEAP_RES_INIT_VAL, 78, 74, 46, 8
+        LTEXT           "Used (KB)", TX_HEAP_RES_USED, 22, 58, 50, 8
+        RTEXT           "257", TX_HEAP_RES_USED_VAL, 78, 58, 46, 8
+        GROUPBOX        "Swappable Heap", GR_HEAP_SWP, 142, 30, 118, 73
+        LTEXT           "Max (KB):", TX_HEAP_SWP_MAX, 150, 84, 53, 8
+        SPINBUTTON      SB_HEAP_SWP_MAX, 210, 84, 42, 8, SPBS_NUMERICONLY |
+                        SPBS_MASTER | SPBS_FASTSPIN | WS_GROUP
+        LTEXT           "Initial (KB)", TX_HEAP_SWP_INIT, 150, 74, 50, 8
+        RTEXT           "257", TX_HEAP_SWP_INIT_VAL, 206, 74, 46, 8
+        LTEXT           "Used (KB)", TX_HEAP_SWP_USED, 150, 58, 50, 8
+        RTEXT           "257", TX_HEAP_SWP_USED_VAL, 206, 58, 46, 8
+        DEFPUSHBUTTON   "~Refresh", PB_REFRESH, 6, 5, 40, 14
+        PUSHBUTTON      "Apply", PB_APPLY, 49, 5, 40, 14
+        PUSHBUTTON      "Close", IDS_ERR_DIALOGLOAD, 92, 5, 40, 14
+        LTEXT           "Free (KB)", TX_HEAP_RES_FREE, 22, 50, 50, 8
+        RTEXT           "257", TX_HEAP_RES_FREE_VAL, 78, 50, 46, 8
+        LTEXT           "Current (KB)", TX_HEAP_RES_SIZE, 22, 66, 56, 8
+        RTEXT           "257", TX_HEAP_RES_SIZE_VAL, 78, 66, 46, 8
+        LTEXT           "Used Blocks", TX_HEAP_RES_USED_BLOCKS, 22, 42, 53,
+                        8
+        RTEXT           "10", TX_HEAP_RES_USED_BLOCKS_VAL, 78, 42, 46, 8
+        LTEXT           "Free Blocks", TX_HEAP_RES_FREE_BLOCKS, 22, 34, 53,
+                        8
+        RTEXT           "10", TX_HEAP_RES_FREE_BLOCKS_VAL, 78, 34, 46, 8
+        LTEXT           "Free (KB)", TX_HEAP_SWP_FREE, 150, 50, 50, 8
+        RTEXT           "257", TX_HEAP_SWP_FREE_VAL, 206, 50, 46, 8
+        LTEXT           "Current (KB)", TX_HEAP_SWP_SIZE, 150, 66, 56, 8
+        RTEXT           "257", TX_HEAP_SWP_SIZE_VAL, 206, 66, 46, 8
+        LTEXT           "Used Blocks", TX_HEAP_SWP_USED_BLOCKS, 150, 42, 53,
+                        8
+        RTEXT           "11", TX_HEAP_SWP_USED_BLOCKS_VAL, 206, 42, 46, 8
+        LTEXT           "Free Blocks", TX_HEAP_SWP_FREE_BLOCKS, 150, 34, 53,
+                        8
+        RTEXT           "11", TX_HEAP_SWP_FREE_BLOCKS_VAL, 206, 34, 46, 8
+        LTEXT           "Modules", TX_LDR_PE_MODULES, 22, 148, 48, 8
+        RTEXT           "3", TX_LDR_PE_MODULES_VAL, 77, 148, 47, 8
+        LTEXT           "Modules", TX_LDR_ELF_MODULES, 150, 158, 48, 8,
+                        WS_DISABLED
+        RTEXT           "3", TX_LDR_ELF_MODULES_VAL, 205, 158, 47, 8,
+                        WS_DISABLED
     END
 END
