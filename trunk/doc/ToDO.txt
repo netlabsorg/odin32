@@ -1,9 +1,12 @@
-/* $Id: ToDO.txt,v 1.3 2000-07-10 20:35:38 phaller Exp $ */
+/* $Id: ToDO.txt,v 1.4 2000-07-12 20:02:40 phaller Exp $ */
 
 /* -- History --------------------------------------------------------------
 
    $Log: ToDO.txt,v $
-   Revision 1.3  2000-07-10 20:35:38  phaller
+   Revision 1.4  2000-07-12 20:02:40  phaller
+   .
+
+   Revision 1.3  2000/07/10 20:35:38  phaller
    Assigned some tasks as requested by the assignees
 
    Revision 1.2  2000/07/09 22:36:49  phaller
@@ -18,7 +21,7 @@ To Do list for ODIN:
 
 Assigned Status Topic -------------------------------------------------------
 
-PD              Handle named pipes via HandleManager
+PD       DONE   Handle named pipes via HandleManager
 
 AH              Do COM (serial port) support for ODIN (requires
                 pseudo-device in HM)
