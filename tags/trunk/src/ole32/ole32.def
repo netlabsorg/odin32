@@ -182,4 +182,5 @@ EXPORTS
 ;   Helper Functions
 ;
     WINE_StringFromCLSID       = _WINE_StringFromCLSID@8     @1000
+    CLSIDFromStringA           = _CLSIDFromStringA@8         @1001
 

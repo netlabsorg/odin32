@@ -63,6 +63,33 @@ HRESULT WIN32API IIDFromString(LPSTR lpsz, LPIID lpiid)
     return CLSIDFromString((LPCOLESTR)lpsz, (LPCLSID)lpiid);
 }
 
+
+// ----------------------------------------------------------------------
+// CLSIDFromStringA()
+// @@@PH: this is not a WINE API, but a replacement for CLSIDFromString16
+//        which used to accept ASCII strings instead of OLE strings
+// ----------------------------------------------------------------------
+
+// missing prototype
+LPWSTR WIN32API HEAP_strdupAtoW( HANDLE heap, DWORD flags, LPCSTR str );
+
+HRESULT WIN32API CLSIDFromStringA(
+    LPSTR		lpsz,		// [in] - ASCII string CLSID
+    LPCLSID		pclsid)		// [out] - Binary CLSID
+{
+  LPWSTR  lpszOle = HEAP_strdupAtoW(GetProcessHeap(),
+                                    0,
+                                    lpsz);
+  HRESULT hRes;
+
+  dprintf(("OLE32: CLSIDFromStringA"));
+
+  hRes = CLSIDFromString(lpszOle, pclsid);
+  HeapFree(GetProcessHeap(), 0, lpszOle);
+  return hRes;
+}
+
+
 // ----------------------------------------------------------------------
 // CLSIDFromString()
 // ----------------------------------------------------------------------
