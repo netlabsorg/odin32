@@ -1,4 +1,4 @@
-/* $Id: wsock32.cpp,v 1.5 1999-11-29 22:23:07 phaller Exp $ */
+/* $Id: wsock32.cpp,v 1.6 1999-12-01 01:10:55 phaller Exp $ */
 
 /*
  *
@@ -45,6 +45,7 @@
 #include <win32wnd.h>
 
 #include "wsock32.h"
+#include "relaywin.h"
 
 
 ODINDEBUGCHANNEL(WSOCK32-WSOCK32)
@@ -589,7 +590,7 @@ ODINFUNCTION6(int,OS2recvfrom,
               struct sockaddr *,from,
               int *,fromlen)
 {
-  
+
   return(recvfrom(s,
                 buf,
                 len,
@@ -794,7 +795,7 @@ ODINFUNCTION3(struct Whostent *,OS2gethostbyaddr,
 
   xx = gethostbyaddr((char *)addr,len,type);
   //PH: we assume PMWSOCK sets WSASetLastError correctly!
-  
+
   if(xx == NULL)
      return (WHOSTENT *)NULL;
 
@@ -833,7 +834,7 @@ ODINFUNCTION1(struct Whostent *,OS2gethostbyname,
 
   xx = gethostbyname((char *)name);
   //PH: we assume PMWSOCK sets WSASetLastError correctly!
-  
+
   if(xx == NULL)
     return (WHOSTENT *)NULL;
 
@@ -1340,27 +1341,47 @@ ODINFUNCTION4(int,OS2WSAAsyncSelect,
               u_int,wMsg,
               long,lEvent)
 {
-  int rc;
-  int iError;
-  HWND hwndOS2;
-  
+  int   rc;
+  int   iError;
+  HWND  hwndOS2 = Win32ToOS2Handle(hWnd);
+  ULONG ulNewID;
+
+  static HWND hwndRelay; // handle to our relay window
+
+  if (hwndRelay == NULL) // already initialized ?
+    hwndRelay = RelayInitialize(hwndOS2);
+
   /* @@@PH: our source window doesn't seem to have an anchor block.
             Docs suggest we've missed to call WinInitialize on the
             caller thread.
-            
+
             Cause however is the Open32 handle is (of course!) invalid
             in plain PM Window Manager! -> use DAPWSOCK
-            
+
             Unfortunately, DAPWSOCK calls WinQueryAnchorBlock(hOpen32), too.
             So, we're stuck until I resolve hWnd to it's valid PM
             counterpart.
+
+            new problem: we've ultimately got to use PostMessageA instead
+            anything else. => create invisible msg relay window:
+            - hMsg = registerMessage(hWnd, wMsg)
+            - call WSAAsyncSelect with object window handle
+            - overwrite hWnd relay for "same handles"
    */
-  
-  hwndOS2 = Win32ToOS2Handle(hWnd);
-  
+
+  // add event to list or remove any list entry in case of WSAAsyncSelect(hwnd,0,0)
+  if ( (wMsg == 0) && (lEvent == 0) )
+  {
+    // remove entry from list
+    RelayFreeByHwnd(hWnd);
+  }
+  else
+    // add entry to list
+    ulNewID = RelayAlloc(hWnd, wMsg);
+
   rc = WSAAsyncSelect(s,
-                      hwndOS2,
-                      wMsg,
+                      hwndRelay,
+                      ulNewID,
                       lEvent);
 
   iError = WSAGetLastError();
