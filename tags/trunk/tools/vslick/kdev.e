@@ -1,4 +1,4 @@
-/* $Id: kdev.e,v 1.6 2003-05-31 20:11:21 bird Exp $
+/* $Id: kdev.e,v 1.7 2003-05-31 20:14:47 bird Exp $
  *
  * Visual SlickEdit Documentation Macros.
  *
@@ -1056,8 +1056,8 @@ static void k_javadoc_box_end()
     else
     {
         sText = sRight;
-        if (substr(sText, 1, 1) != '*')
-            sText = '*':+sText;
+        /*if (substr(sText, 1, 1) != '*')
+            sText = '*':+sText;*/
         sText = ' ':+sText;
     }
     sText = sText:+"\n";
