@@ -22,7 +22,11 @@
 /*
  * Return values from the actual exception handlers
  */
-#ifndef ExceptionContinueExecution
+
+#undef  ExceptionContinueExecution
+#undef  ExceptionContinueSearch
+#undef  ExceptionNestedException
+#undef  ExceptionCollidedUnwind
 
 typedef enum _EXCEPTION_DISPOSITION
 {
@@ -39,7 +43,6 @@ typedef enum _EXCEPTION_DISPOSITION
 #define EXCEPTION_CONTINUE_SEARCH        0
 #define EXCEPTION_CONTINUE_EXECUTION    -1
 
-#endif
 
 
 #endif /* __WINE_EXCPT_H */

@@ -39,11 +39,11 @@
 #define _FREEENTRY     0
 #define _USEDENTRY     1
 
-
 #ifndef MSVCRT_SIZE_T_DEFINED
 typedef unsigned int MSVCRT(size_t);
 #define MSVCRT_SIZE_T_DEFINED
 #endif
+
 
 typedef struct _heapinfo
 {

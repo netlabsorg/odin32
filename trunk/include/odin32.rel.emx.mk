@@ -1,4 +1,4 @@
-# $Id: odin32.rel.emx.mk,v 1.7 2002-02-23 23:51:50 bird Exp $
+# $Id: odin32.rel.emx.mk,v 1.8 2003-01-06 13:24:19 sandervl Exp $
 
 #
 # Odin32 API
@@ -37,6 +37,7 @@ LIB_DEMANGLE =
 CC     = gcc
 CXX    = gcc
 AS     = alp
+AS_EMX = as
 LD     = gcc
 LD2    = link386
 IMPLIB = emximp
@@ -73,15 +74,15 @@ CTARGETFLAGS     = -Zdll
 CXXTARGETFLAGS   = -Zdll
 !endif
 CXXEXCEPTIONS    = -fhandle-exceptions
-CFLAGS           = -c -Zomf -mprobe -pipe -Wall -Zmt -s -O2 -mcpu=i586 $(CTARGETFLAGS)
-CXXFLAGS         = -c -Zomf -mprobe -pipe -Wall -Zmt -s -O2 -mcpu=i586 $(CXXTARGETFLAGS)
-CXXFLAGS_ODINCRT = -c -Zomf -mprobe -pipe -Wall -Zmt -s -O2 -mcpu=i586 $(CXXTARGETFLAGS)
-CFLAGS_WIN32APP  = -c -Zomf -mprobe -pipe -Wall -Zmt -s -O2 -mcpu=i586 $(CTARGETFLAGS)
-CXXFLAGS_WIN32APP= -c -Zomf -mprobe -pipe -Wall -Zmt -s -O2 -mcpu=i586 $(CXXTARGETFLAGS) $(CXXEXCEPTIONS)
+CFLAGS           = -Zomf -pipe -Wall -Zmt -s -O6 -mcpu=pentium $(CTARGETFLAGS)
+CXXFLAGS         = -Zomf -pipe -Wall -Zmt -s -O6 -mcpu=pentium $(CXXTARGETFLAGS)
+CXXFLAGS_ODINCRT = -Zomf -pipe -Wall -Zmt -s -O6 -mcpu=pentium $(CXXTARGETFLAGS)
+CFLAGS_WIN32APP  = -Zomf -pipe -Wall -Zmt -s -O6 -mcpu=pentium $(CTARGETFLAGS)
+CXXFLAGS_WIN32APP= -Zomf -pipe -Wall -Zmt -s -O6 -mcpu=pentium $(CXXTARGETFLAGS) $(CXXEXCEPTIONS)
 CINCLUDES        = -I$(ODIN32_INCLUDE)\Win -I. -I$(ODIN32_INCLUDE)
-CDEFINES_WIN32APP= -DDEBUG -D__WIN32OS2__ -D__i386__
-CDEFINES_ODINCRT = -DDEBUG -D__WIN32OS2__ -D__i386__ -D__WINE__
-CDEFINES         = -DDEBUG -D__WIN32OS2__ -D__i386__ -D__WINE__ -DTCPV40HDRS -DCOMCTL32UNDOC \
+CDEFINES_WIN32APP= -D__WIN32OS2__ -D__i386__
+CDEFINES_ODINCRT = -D__WIN32OS2__ -D__i386__ -D__WINE__
+CDEFINES         = -D__WIN32OS2__ -D__i386__ -D__WINE__ -DTCPV40HDRS -DCOMCTL32UNDOC \
 !ifdef DEBUGALL
                    -DDEBUG_ENABLELOG_LEVEL2 \
 !endif
@@ -113,8 +114,8 @@ LD2TARGETFLAGS   = /pmtype:pm  /stack:$(STACKSIZE)
 LDTARGETFLAGS    = -Zdll
 LD2TARGETFLAGS   = /DLL
 !endif
-LDFLAGS          = -Zmt -Zomf -Zmap $(LDTARGETFLAGS)  -s -ZLinker /EXEPACK:2 -ZLinker /NOD
-LDFLAGS_ODINCRT  = -Zmt -Zomf -Zmap $(LDTARGETFLAGS)  -s -ZLinker /EXEPACK:2
+LDFLAGS          = -Zomf -Zmap $(LDTARGETFLAGS)  -s 
+LDFLAGS_ODINCRT  = -Zso -Zsys -Zomf -Zmap $(LDTARGETFLAGS)  -s 
 LD2FLAGS         = /nologo /noe /map /packcode /packdata /exepack:2 /nodebug /nod $(LD2TARGETFLAGS)
 LD2FLAGS_ODINCRT = /nologo /noe /map /packcode /packdata /exepack:2 /nodebug      $(LD2TARGETFLAGS)
 

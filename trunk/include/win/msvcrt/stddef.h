@@ -31,6 +31,13 @@ typedef unsigned int MSVCRT(size_t);
 #define MSVCRT_SIZE_T_DEFINED
 #endif
 
+#ifndef MSVCRT_WCHAR_T_DEFINED
+#define MSVCRT_WCHAR_T_DEFINED
+#ifndef __cplusplus
+typedef unsigned short MSVCRT(wchar_t);
+#endif
+#endif
+
 /* Best to leave this one alone: wchar_t */
 
 

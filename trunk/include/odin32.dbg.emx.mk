@@ -1,4 +1,4 @@
-# $Id: odin32.dbg.emx.mk,v 1.7 2002-02-23 23:51:48 bird Exp $
+# $Id: odin32.dbg.emx.mk,v 1.8 2003-01-06 13:24:19 sandervl Exp $
 
 #
 # Odin32 API
@@ -73,11 +73,11 @@ CTARGETFLAGS     = -Zdll
 CXXTARGETFLAGS   = -Zdll
 !endif
 CXXEXCEPTIONS    = -fhandle-exceptions
-CFLAGS           = -c -Zomf -mprobe -pipe -Wall -Zmt -g $(CTARGETFLAGS)
-CXXFLAGS         = -c -Zomf -mprobe -pipe -Wall -Zmt -g $(CXXTARGETFLAGS)
-CXXFLAGS_ODINCRT = -c -Zomf -mprobe -pipe -Wall -Zmt -g $(CXXTARGETFLAGS)
-CFLAGS_WIN32APP  = -c -Zomf -mprobe -pipe -Wall -Zmt -g $(CTARGETFLAGS)
-CXXFLAGS_WIN32APP= -c -Zomf -mprobe -pipe -Wall -Zmt -g $(CXXTARGETFLAGS) $(CXXEXCEPTIONS)
+CFLAGS           = -Zomf -pipe -Wall -Zmt -g $(CTARGETFLAGS)
+CXXFLAGS         = -Zomf -pipe -Wall -Zmt -g $(CXXTARGETFLAGS)
+CXXFLAGS_ODINCRT = -Zomf -pipe -Wall -Zmt -g $(CXXTARGETFLAGS)
+CFLAGS_WIN32APP  = -Zomf -pipe -Wall -Zmt -g $(CTARGETFLAGS)
+CXXFLAGS_WIN32APP= -Zomf -pipe -Wall -Zmt -g $(CXXTARGETFLAGS) $(CXXEXCEPTIONS)
 CINCLUDES        = -I$(ODIN32_INCLUDE)\Win -I. -I$(ODIN32_INCLUDE)
 CDEFINES_WIN32APP= -DDEBUG -D__WIN32OS2__ -D__i386__
 CDEFINES_ODINCRT = -DDEBUG -D__WIN32OS2__ -D__i386__ -D__WINE__
@@ -114,15 +114,15 @@ LDTARGETFLAGS    = -Zdll
 LD2TARGETFLAGS   = /DLL
 !endif
 !ifdef NODEBUGINFO
-LDFLAGS          = -Zmt -Zomf -Zmap $(LDTARGETFLAGS)  -s -ZLinker /EXEPACK:2 -ZLinker /NOD
-LDFLAGS_ODINCRT  = -Zmt -Zomf -Zmap $(LDTARGETFLAGS)  -s -ZLinker /EXEPACK:2
+LDFLAGS          = -Zmt -Zomf -Zmap $(LDTARGETFLAGS) -g
+LDFLAGS_ODINCRT  = -Zmt -Zomf -Zmap $(LDTARGETFLAGS) -g
 LD2FLAGS         = $(LD2TARGETFLAGS) -s -O/EXEPACK:2        -O/NOD
 LD2FLAGS_ODINCRT = $(LD2TARGETFLAGS) -s -O/EXEPACK:2
 LD2FLAGS         = /nologo /noe /map /packcode /packdata /exepack:2 /nodebug /nod $(LD2TARGETFLAGS)
 LD2FLAGS_ODINCRT = /nologo /noe /map /packcode /packdata /exepack:2 /nodebug      $(LD2TARGETFLAGS)
 !else
-LDFLAGS          = -Zmt -Zomf -Zmap $(LDTARGETFLAGS)  -ZLinker /NOD
-LDFLAGS_ODINCRT  = -Zmt -Zomf -Zmap $(LDTARGETFLAGS)
+LDFLAGS          = -Zomf -Zmap $(LDTARGETFLAGS) -g
+LDFLAGS_ODINCRT  = -Zso -Zsys -Zomf -Zmap $(LDTARGETFLAGS) -g
 LD2FLAGS         = /nologo /noe /map /packcode /packdata /exepack:2 /nod /debug $(LD2TARGETFLAGS)
 LD2FLAGS_ODINCRT = /nologo /noe /map /packcode /packdata /exepack:2      /debug $(LD2TARGETFLAGS)
 !endif

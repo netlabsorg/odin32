@@ -1,4 +1,4 @@
-# $Id: odin32.tools.emx.mk,v 1.5 2001-09-30 09:46:16 bird Exp $
+# $Id: odin32.tools.emx.mk,v 1.6 2003-01-06 13:24:20 sandervl Exp $
 
 #
 # Odin32 API
@@ -38,7 +38,7 @@ MAKE_CMD    = $(MAKE_CMD) NODEP=1
 #
 # Interference rules.
 #
-.SUFFIXES: .orc_asm .orc .pre-c .pre-cpp
+.SUFFIXES: .orc_asm .orc .pre-c .pre-cpp .S
 
 .c{$(OBJDIR)}.obj:
 !ifdef USERAPP
@@ -96,4 +96,12 @@ MAKE_CMD    = $(MAKE_CMD) NODEP=1
 
 .rc{$(OBJDIR)}.res:
     $(CMDQD_SUB) $(OS2RC) $(OS2RCFLAGS) $(CINCLUDES:-I=-i ) $< $@
+
+.S{$(OBJDIR)}.obj:
+!ifdef USERAPP
+    $(CMDQD_SUB) $(CXX) $(CXXFLAGS) $(CINCLUDES) $(CDEFINES_WIN32APP) -o$(OBJDIR)\$(@B).obj -c $<
+!else
+    $(CMDQD_SUB) $(CXX) $(CXXFLAGS) $(CINCLUDES) $(CDEFINES) -o$(OBJDIR)\$(@B).obj -c $<
+!endif
+
 

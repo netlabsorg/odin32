@@ -234,11 +234,19 @@ typedef double          DATE;
 typedef long            LONG_PTR;
 typedef unsigned long   ULONG_PTR;
 typedef double          DOUBLE;
-#if (__IBMC__ < 360) && (__IBMCPP__ < 360)
+#if (__IBMC__ < 360) && (__IBMCPP__ < 360) && !defined (__EMX__)
 typedef double          LONGLONG;
 typedef double          ULONGLONG;
 typedef double          ULONGULONG;
 typedef double          DWORDLONG;
+#elif defined (__EMX__)
+typedef	long long		  int64_t; /* LONGLONG */
+typedef	unsigned long long	u_int64_t; /* LONGLONG */
+typedef	unsigned long long	 uint64_t; /* LONGLONG */
+typedef int64_t         LONGLONG;
+typedef uint64_t        ULONGLONG;
+typedef uint64_t        ULONGULONG;
+typedef uint64_t        DWORDLONG;
 #else
 #include <inttypes.h>
 typedef int64_t         LONGLONG;

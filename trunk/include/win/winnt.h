@@ -92,8 +92,9 @@ typedef LPCSTR LPCTSTR;
 #endif   /* __WINE__ */
 #define TEXT(quote) __TEXT(quote)
 
-typedef BYTE     BOOLEAN;
-typedef BOOLEAN *PBOOLEAN;
+typedef char            CCHAR;
+typedef BYTE		BOOLEAN;
+typedef BOOLEAN         *PBOOLEAN;
 typedef DWORD		EXECUTION_STATE;
 
 typedef struct _LIST_ENTRY {
