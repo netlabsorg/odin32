@@ -21,7 +21,7 @@ static DWORD dwLastScrollTime = 0;
 
 BOOL WINAPI MakeDragList (HWND hwndLB)
 {
-    FIXME("(0x%x)\n", hwndLB);
+    //FIXME("(0x%x)\n", hwndLB);
 
 
     return FALSE;
@@ -30,7 +30,7 @@ BOOL WINAPI MakeDragList (HWND hwndLB)
 
 VOID WINAPI DrawInsert (HWND hwndParent, HWND hwndLB, INT nItem)
 {
-    FIXME("(0x%x 0x%x %d)\n", hwndParent, hwndLB, nItem);
+    //FIXME("(0x%x 0x%x %d)\n", hwndParent, hwndLB, nItem);
 
 
 }
@@ -42,8 +42,8 @@ INT WINAPI LBItemFromPt (HWND hwndLB, POINT pt, BOOL bAutoScroll)
     INT nIndex;
     DWORD dwScrollTime;
 
-    FIXME("(0x%x %ld x %ld %s)\n",
-	   hwndLB, pt.x, pt.y, bAutoScroll ? "TRUE" : "FALSE");
+    //FIXME("(0x%x %ld x %ld %s)\n",
+    //       hwndLB, pt.x, pt.y, bAutoScroll ? "TRUE" : "FALSE");
 
     ScreenToClient (hwndLB, &pt);
     GetClientRect (hwndLB, &rcClient);
@@ -51,40 +51,40 @@ INT WINAPI LBItemFromPt (HWND hwndLB, POINT pt, BOOL bAutoScroll)
 
     if (PtInRect (&rcClient, pt))
     {
-	/* point is inside -- get the item index */
-	while (TRUE)
-	{
-	    if (SendMessageA (hwndLB, LB_GETITEMRECT, nIndex, (LPARAM)&rcClient) == LB_ERR)
-		return -1;
+        /* point is inside -- get the item index */
+        while (TRUE)
+        {
+            if (SendMessageA (hwndLB, LB_GETITEMRECT, nIndex, (LPARAM)&rcClient) == LB_ERR)
+                return -1;
 
-	    if (PtInRect (&rcClient, pt))
-		return nIndex;
+            if (PtInRect (&rcClient, pt))
+                return nIndex;
 
-	    nIndex++;
-	}
+            nIndex++;
+        }
     }
     else
     {
-	/* point is outside */
-	if (!bAutoScroll)
-	    return -1;
+        /* point is outside */
+        if (!bAutoScroll)
+            return -1;
 
-	if ((pt.x > rcClient.right) || (pt.x < rcClient.left))
-	    return -1;
+        if ((pt.x > rcClient.right) || (pt.x < rcClient.left))
+            return -1;
 
-	if (pt.y < 0)
-	    nIndex--;
-	else
-	    nIndex++;
+        if (pt.y < 0)
+            nIndex--;
+        else
+            nIndex++;
 
-	dwScrollTime = GetTickCount ();
+        dwScrollTime = GetTickCount ();
 
-	if ((dwScrollTime - dwLastScrollTime) < 200)
-	    return -1;
+        if ((dwScrollTime - dwLastScrollTime) < 200)
+            return -1;
 
-	dwLastScrollTime = dwScrollTime;
+        dwLastScrollTime = dwScrollTime;
 
-	SendMessageA (hwndLB, LB_SETTOPINDEX, (WPARAM)nIndex, 0);
+        SendMessageA (hwndLB, LB_SETTOPINDEX, (WPARAM)nIndex, 0);
     }
 
     return -1;
