@@ -1,4 +1,7 @@
-/* $Id: changelog,v 1.1992 2002-02-20 09:45:19 sandervl Exp $ */
+/* $Id: changelog,v 1.1993 2002-02-20 10:02:54 sandervl Exp $ */
+
+ 2002-02-20: Sander van Leeuwen <sandervl@xs4all.nl>
+    - WSOCK32:  o Changed reported winsock version to 2.0 (from 1.1)
 
  2002-02-20: Dmitry Froloff <froloff@os2.ru>
     - PELDR:    o Added support for WINDOWSPATH environment variable; PE
