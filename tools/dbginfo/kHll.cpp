@@ -1,4 +1,4 @@
-/* $Id: kHll.cpp,v 1.12 2000-04-24 21:38:12 bird Exp $
+/* $Id: kHll.cpp,v 1.13 2000-05-27 02:15:41 bird Exp $
  *
  * kHll - Implementation of the class kHll.
  *        That class is used to create HLL debuginfo.
@@ -28,14 +28,18 @@
 #include <exe386.h>
 
 #include <malloc.h>
+#define  free(a)    memset(a, '7', _msize(a))  //overload free for debugging purposes.
+#define  malloc(a)  memset(malloc(a), '3', a)  //overload free for debugging purposes.
 #include <stdio.h>
 #include <string.h>
 #include <stddef.h>
 #include <stdlib.h>
 #include <assert.h>
 
+#include <kList.h>
+#include <kFile.h>
+
 #include "hll.h"
-#include "kList.h"
 #include "kHll.h"
 
 
@@ -89,6 +93,27 @@ int kHllBaseEntry::writeList(FILE *phFile, kHllBaseEntry *pEntry)
 
 
 
+/**
+ * Loops thru the given list and call the dump function for each
+ * node with the passed in parameters.
+ * @param       ph          Dump file handle.
+ * @param       cchIndent   Indent.
+ * @param       pEntry      Indent.
+ */
+void kHllBaseEntry::dumpList(FILE *ph, int cchIndent, kHllBaseEntry *pEntry)
+{
+    /*
+     * Loop thru the list staring at pEntry and call dump for each entry.
+     */
+    while (pEntry != NULL)
+    {
+        pEntry->dump(ph, cchIndent);
+        pEntry = (kHllBaseEntry*)pEntry->getNext();
+    }
+}
+
+
+
 
 
 
@@ -99,6 +124,8 @@ int kHllBaseEntry::writeList(FILE *phFile, kHllBaseEntry *pEntry)
 *   kHllPubSymEntry                                                            *
 *                                                                              *
 *******************************************************************************/
+
+
 
 
 
@@ -159,6 +186,27 @@ int kHllPubSymEntry::write(FILE *phFile)
                   1,
                   offsetof(HLLPUBLICSYM, achName) + pPubSym->cchName,
                   phFile);
+}
+
+
+/**
+ * Dumps the HLL entry to ph in a human readable fashion.
+ * @param       ph          Output file handle the dump is to be written to.
+ * @param       cchIndent   Number of char to indents the output dump.
+ */
+void            kHllPubSymEntry::dump(FILE *ph, int cchIndent)
+{
+    /*
+     * Dump public symbol entry
+     */
+    fprintf(ph, "%*.s0x%04x:0x%08x  type:%04d(0x%04)  name: %.*s\n",
+            cchIndent, "",
+            pPubSym->iObject,
+            pPubSym->off,
+            pPubSym->iType,
+            pPubSym->iType,
+            pPubSym->cchName, pPubSym->achName
+            );
 }
 
 
@@ -282,6 +330,58 @@ int     kHllLineNumberChunk::write(FILE *phFile)
 
     return cbWritten + sizeof(FirstEntry.hll04);
 }
+
+
+
+/**
+ * Dumps the HLL entry to ph in a human readable fashion.
+ * @param       ph          Output file handle the dump is to be written to.
+ * @param       cchIndent   Number of char to indents the output dump.
+ */
+void            kHllLineNumberChunk::dump(FILE *ph, int cchIndent)
+{
+    int     i;
+
+    /*
+     * Write header.
+     * Dump first entry.
+     * Dump linenumbers.
+     * Write footer.
+     */
+    fprintf(ph, "%*.s------- start kHllLineNumberChunk object 0x%08x -------\n",
+            cchIndent, "", this);
+
+    /* ASSUMES - TODO - FIXME: HLL version 3 or 4. */
+    fprintf(ph, "%*.sBaseLine: %04d  Type: 0x%02x  Entries: 0x%04(%d) iSeg: 0x04x(%d) ",
+            cchIndent, "",
+            FirstEntry.hll04.usLine,
+            FirstEntry.hll04.uchType,
+            FirstEntry.hll04.cEntries,
+            FirstEntry.hll04.cEntries,
+            FirstEntry.hll04.iSeg,
+            FirstEntry.hll04.iSeg
+            );
+    if (FirstEntry.hll04.uchType == 0)
+        fprintf(ph, "offBase: 0x%08x\n", FirstEntry.hll04.u1.offBase);
+    else
+        fprintf(ph, "u1: 0x%08x\n", FirstEntry.hll04.u1.offBase);
+
+
+    /* ASSUMES - TODO - FIXME: HLL version 3 or 4. */
+    for (i = 0; i < FirstEntry.hll04.cEntries; i++)
+        fprintf(ph, "%*.sFile: %04d  Line: %04d  Offset: 0x%08x\n",
+                cchIndent, "",
+                paLines[i].hll04.iusSourceFile,
+                paLines[i].hll04.usLine,
+                paLines[i].hll04.off
+                );
+
+
+    fprintf(ph, "%*.s-------  end  kHllLineNumberChunk object 0x%08x -------\n",
+            cchIndent, "", this);
+}
+
+
 
 
 
@@ -493,6 +593,39 @@ int                 kHllSrcEntry::write(FILE *phFile)
 
 
 
+/**
+ * Dumps the HLL entry to ph in a human readable fashion.
+ * @param       ph          Output file handle the dump is to be written to.
+ * @param       cchIndent   Number of char to indents the output dump.
+ */
+void            kHllSrcEntry::dump(FILE *ph, int cchIndent)
+{
+    int     i;
+    char *  pach;
+
+    /*
+     * Write header with filename count.
+     * Write filenames.
+     * Dump linenumber list.
+     * Write footer with filename count.
+     */
+    fprintf(ph, "%*.s------- start kHllSrcEntry object 0x%08x --- %d -------\n",
+            cchIndent, "", this, cFilenames);
+
+    for (i = 0, pach = pachFilenames; i < cFilenames; i++, pach += 1 + *pach)
+        fprintf(ph, "%*.s%.2d - %.*s\n",
+                cchIndent, "",
+                i, *pach, pach + 1);
+
+    kHllBaseEntry::dumpList(ph, cchIndent + 4, Lines.getFirst());
+
+    fprintf(ph, "%*.s-------  end  kHllSrcEntry object 0x%08x --- %d -------\n",
+            cchIndent, "", this, cFilenames);
+}
+
+
+
+
 
 
 /*******************************************************************************
@@ -538,12 +671,13 @@ kHllModuleEntry::kHllModuleEntry(
      * Allocate data storage and fill HLL structure.
      */
     cchName = strlen(pszName);
+    cchName = min(cchName, 255);
     pModule = (PHLLMODULE)malloc(sizeof(HLLMODULE) + cchName +
-                                 sizeof(HLLSEGINFO) * max((cSegInfo - 1), 3));
+                                 (sizeof(HLLSEGINFO) * max((cSegInfo - 1), 3)));
     assert(pModule != NULL);
     memset(pModule, 0, sizeof(*pModule));
     pModule->cchName = (unsigned char)cchName;
-    strcpy((char*)&pModule->achName[0], pszName);
+    memcpy(&pModule->achName[0], pszName, cchName);
     pModule->chVerMajor = 4;
     pModule->chVerMinor = 0;
     pModule->cSegInfo = cSegInfo;
@@ -874,8 +1008,54 @@ int         kHllModuleEntry::writeDirEntries(FILE *phFile, unsigned short iMod)
 }
 
 
+/**
+ * Dumps this module entry to the given file.
+ * @param       ph  Filehandle to dump this module entry to.
+ */
+void            kHllModuleEntry::dump(FILE *ph)
+{
+    PHLLSEGINFO     pSegInfo;
+    int             i;
+
+    fprintf(ph, "    ------- start dumping kHllModuleEntry object 0x%08x -------\n", this);
+
+    /*
+     * Dump HLL module entry.
+     */
+    fprintf(ph, "    Modulename: %.*s  Style: %.2s  HLL ver: %d.%d  #SegInfos: %d\n",
+            pModule->cchName, pModule->achName,
+            &pModule->usDebugStyle,
+            pModule->chVerMajor, pModule->chVerMinor,
+            pModule->cSegInfo
+            );
+
+    for (i = 0, pSegInfo = &pModule->SegInfo0; i < pModule->cSegInfo; i++)
+    {
+        fprintf(ph, "    Obj.no.: 0x%04x  Offset: 0x%08x  Size: 0x%08x(%d)\n",
+                pSegInfo->iObject, pSegInfo->off, pSegInfo->cb, pSegInfo->cb);
+
+        /* next */
+        if (i == 0)
+            pSegInfo = (PHLLSEGINFO)&pModule->achName[pModule->cchName];
+        else
+            pSegInfo++;
+    }
 
 
+    /*
+     * Dump the sub-entries.
+     */
+    kHllBaseEntry::dumpList(ph, 8, PublicSymbols.getFirst());
+    /*
+    kHllBaseEntry::dumpList(ph, 8, Types.getFirst());
+    kHllBaseEntry::dumpList(ph, 8, Symbols.getFirst());
+    kHllBaseEntry::dumpList(ph, 8, Source.getFirst());
+    */
+    Source.dump(ph, 8);
+
+
+    fprintf(ph, "    -------  end  dumping kHllModuleEntry object 0x%08x -------\n", this);
+}
 
 
 
@@ -1019,6 +1199,138 @@ kHll::kHll()
 }
 
 
+/**
+ * Creates a kHll object from debugdata found in a file (LX layout).
+ * @param       pFile   Pointer to file object which the data is to be read from.
+ *                      The file object is positioned at the start of the debuginfo.
+ *                      start of the debuginfo.
+ *                      Note. The file object is set to throw on errors.
+ */
+kHll::kHll(kFile *pFile) throw (int)
+{
+    long            offHllHdr;          /* Offset of debug data in file. */
+    HLLHDR          hllHdr;             /* HLL data header. */
+    HLLDIR          hllDir;             /* HLL directory (header only) */
+    PHLLDIR         pHllDir;            /* HLL directory (all) */
+    PHLLDIRENTRY    pDirEntry;          /* Current HLL directory entry. */
+    int             iDir;
+
+    /* auto throw */
+    pFile->setThrowOnErrors();
+
+    /* Save file offset of debugdata.  */
+    offHllHdr = pFile->getPos();
+
+    /* Read HLL header */
+    pFile->read(&hllHdr, sizeof(hllHdr));
+    if (memcmp(hllHdr.achSignature, "NB04", 4) != 0)
+        throw(ERROR_INVALID_EXE_SIGNATURE);
+
+    /*
+     * Read the Directory head to get the directory size.
+     * Allocate memory for the entire directory and read it.
+     */
+    pFile->readAt(&hllDir, sizeof(hllDir), offHllHdr + hllHdr.offDirectory);
+    pHllDir = (PHLLDIR)malloc((size_t)(hllDir.cbEntry * hllDir.cEntries + hllDir.cb));
+    if (pHllDir == NULL) throw(ERROR_NOT_ENOUGH_MEMORY);
+    pFile->readAt(pHllDir, hllDir.cbEntry * hllDir.cEntries + hllDir.cb, offHllHdr + hllHdr.offDirectory);
+
+
+    /*
+     * Loop thru the directory entries and add them we have implemented.
+     */
+    unsigned long    ulHLLVersion = 0;  /* HLL version of the last module. */
+    kHllModuleEntry *pCurMod = NULL;    /* Current Module. */
+    int              iCurMod = 0;       /* Current Module index (import). */
+
+    for (iDir = 0,  pDirEntry = (PHLLDIRENTRY)((char*)pHllDir + hllDir.cb);
+         iDir < pHllDir->cEntries;
+         iDir++,    pDirEntry = (PHLLDIRENTRY)((char*)pDirEntry + hllDir.cbEntry)
+         )
+    {
+        CHAR szName[1024];
+
+        switch (pDirEntry->usType)
+        {
+            /*
+             * Source filename(=Module) entry.
+             */
+            case HLL_DE_MODULES:
+            {
+                HLLMODULE   hllMod;
+                PHLLSEGINFO paSegInfo;
+
+                /*
+                 * Read hllmod, filename and seginfo table if any.
+                 */
+                pFile->readAt(&hllMod, sizeof(hllMod), offHllHdr + pDirEntry->off);
+                pFile->move(-1);
+                pFile->read(szName, hllMod.cchName);
+                szName[hllMod.cchName] = '\0';
+                if (hllMod.cSegInfo != 0)
+                {
+                    paSegInfo = (PHLLSEGINFO)malloc(sizeof(HLLSEGINFO) * hllMod.cSegInfo);
+                    if (pHllDir == NULL) throw(ERROR_NOT_ENOUGH_MEMORY);
+                    memcpy(paSegInfo, &hllMod.SegInfo0, sizeof(HLLSEGINFO));
+                    if (hllMod.cSegInfo > 1)
+                        pFile->read(&paSegInfo[1], sizeof(HLLSEGINFO) * (hllMod.cSegInfo - 1));
+                }
+                else
+                    paSegInfo = NULL;
+
+                /*
+                 * Add the module and save module data for later use.
+                 * Cleanup seginfo.
+                 */
+                pCurMod = this->addModule(szName, hllMod.cchName, NULL, hllMod.cSegInfo, paSegInfo);
+                iCurMod = pDirEntry->iMod;
+                ulHLLVersion = HLLMAKEVER(hllMod.chVerMajor, hllMod.chVerMinor);
+
+                if (paSegInfo != NULL)
+                    free(paSegInfo);
+                fprintf(stderr, "Module directory entry: %s\n", szName);
+                break;
+            }
+
+            case HLL_DE_PUBLICS:        /* Public symbols */
+                fprintf(stderr, "Publics directory entry\n");
+                break;
+
+            case HLL_DE_TYPES:          /* Types */
+                fprintf(stderr, "Types directory entry\n");
+                break;
+
+            case HLL_DE_SYMBOLS:        /* Symbols */
+                fprintf(stderr, "Symbols directory entry\n");
+                break;
+
+            case HLL_DE_LIBRARIES:      /* Libraries */
+                fprintf(stderr, "Libraries directory entry\n");
+                break;
+
+            case HLL_DE_SRCLINES:       /* Line numbers - (IBM C/2 1.1) */
+                fprintf(stderr, "SRCLINES directory entry\n");
+                break;
+
+            case HLL_DE_SRCLNSEG:       /* Line numbers - (MSC 6.00) */
+                fprintf(stderr, "SRCLNSEG directory entry\n");
+                break;
+
+            case HLL_DE_IBMSRC:         /* Line numbers - (IBM HLL) */
+                fprintf(stderr, "IBMSRC directory entry\n");
+                break;
+
+            default:
+                /* Unsupported directory entry - ignore */
+                fprintf(stderr, "Unsupported directory entry %d\n", pDirEntry->usType);
+                break;
+        }
+    }
+
+    /* cleanup */
+    free(pHllDir);
+}
+
 
 /**
  * Destructor.
@@ -1090,6 +1402,80 @@ kHllModuleEntry *   kHll::addModule(
     return pEntry;
 }
 
+
+/**
+ * Dump the object in a human readable fashion to stdout.
+ */
+void            kHll::dump()
+{
+    FILE *ph = stdout;
+
+    fprintf(ph,
+            "------- start dumping kHll object 0x%08x --- %d modules -------\n",
+            this, Modules.getCount());
+
+    kHllModuleEntry *   pMod =  Modules.getFirst();
+    while (pMod != NULL)
+    {
+        /* Dump it */
+        pMod->dump(ph);
+
+        /* Next module */
+        pMod = (kHllModuleEntry*)pMod->getNext();
+    }
+
+    fprintf(ph,
+            "-------  end  dumping kHll object 0x%08x --- %d modules -------\n",
+            this, Modules.getCount());
+}
+
+
+/**
+ * Creates a kHll object of the HLL debug information found a LX file.
+ * (An empty object is returned when no info is found.)
+ * @return      Pointer to kHll object on success.
+ *              NULL on error. Message is printed.
+ */
+kHll *          kHll::readLX(
+                    const char *pszFilename
+                    )
+{
+    try
+    {
+        struct exe_hdr      ehdr;
+        struct e32_exe      e32;
+        long                offLXHdr;
+
+        kFile               file(pszFilename);
+
+        /*
+         * Find and read the LX header.
+         */
+        file.read(&ehdr, sizeof(ehdr));
+        if (ehdr.e_magic == EMAGIC)
+            offLXHdr = ehdr.e_lfanew;
+        else
+            offLXHdr = 0;
+        file.readAt(&e32, sizeof(e32), offLXHdr);
+        if (*(PSHORT)&e32.e32_magic[0] != E32MAGIC)
+            throw (ERROR_INVALID_EXE_SIGNATURE);
+
+        /*
+         * Is there any debug info in this LX header?
+         */
+        if (e32.e32_debuginfo != 0UL && e32.e32_debuglen != 0UL
+            && file.set(e32.e32_debuginfo))
+            return new kHll(&file);
+        else
+            return new kHll();
+    }
+    catch (int iOS2Error)
+    {
+        fprintf(stderr, "failed to create kHll object for file %s. Failed with OS2 error %d.\n",
+                pszFilename, iOS2Error);
+    }
+    return NULL;
+}
 
 
 /**
@@ -1270,3 +1656,32 @@ signed long fsize(FILE *phFile)
     return cb;
 }
 
+
+
+#if 1
+/**
+ * Debugging entry point for the readLX constructor.
+ * It reads this executable and dumps it.
+ * @param    argc   Argument count.
+ * @param    argv   Argument vector - only the first entry is used.
+ */
+void main(int argc, char **argv)
+{
+    kHll *pHll;
+
+    /* read my self */
+    pHll = kHll::readLX(argv[0]);
+    if (pHll)
+    {
+        printf("Successfully read %s\n", argv[0]);
+        pHll->dump();
+    }
+    argc = argc;
+    delete (pHll);
+}
+
+#ifdef __IBMCPP__
+#include "klist.cpp"
+#endif
+
+#endif

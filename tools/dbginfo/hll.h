@@ -1,4 +1,4 @@
-/* $Id: hll.h,v 1.5 2000-03-31 15:35:09 bird Exp $
+/* $Id: hll.h,v 1.6 2000-05-27 02:15:41 bird Exp $
  *
  * HLL definitions.
  *
@@ -16,6 +16,14 @@
 /*******************************************************************************
 *   Defined Constants And Macros                                               *
 *******************************************************************************/
+/*
+ * HLL version macros
+ */
+#define HLLVERSION100       0x0100
+#define HLLVERSION300       0x0300
+#define HLLVERSION400       0x0400
+#define HLLVERSION500       0x0500
+#define HLLMAKEVER(major, minor) (int)( ((int)(char)(major) << 8) | (int)(char)(minor) )
 
 /*
  * HLL Directory entry types.
