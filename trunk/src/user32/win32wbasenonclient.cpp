@@ -1,4 +1,4 @@
-/* $Id: win32wbasenonclient.cpp,v 1.3 2000-01-18 20:10:55 sandervl Exp $ */
+/* $Id: win32wbasenonclient.cpp,v 1.4 2000-01-20 16:48:57 cbratschi Exp $ */
 /*
  * Win32 Window Base Class for OS/2 (non-client methods)
  *
@@ -1221,7 +1221,7 @@ LONG Win32BaseWindow::HandleNCRButtonUp(WPARAM wParam,LPARAM lParam)
       if (GetActiveWindow() != Win32Hwnd)
         SetActiveWindow();
 
-      if ((GetActiveWindow() == Win32Hwnd) && (dwStyle & WS_SYSMENU))
+      if (((GetActiveWindow() == Win32Hwnd) || isMDIChild()) && (dwStyle & WS_SYSMENU))
       {
         SendInternalMessageA(WM_SYSCOMMAND,SC_MOUSEMENU+HTCAPTION,lParam);
       }

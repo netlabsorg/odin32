@@ -1,4 +1,4 @@
-/* $Id: window.cpp,v 1.49 2000-01-18 20:11:08 sandervl Exp $ */
+/* $Id: window.cpp,v 1.50 2000-01-20 16:48:58 cbratschi Exp $ */
 /*
  * Win32 window apis for OS/2
  *
@@ -639,21 +639,20 @@ BOOL WIN32API LockWindowUpdate(HWND hwnd)
 BOOL WIN32API GetWindowRect( HWND hwnd, PRECT pRect)
 {
   Win32BaseWindow *window;
-  BOOL rc;
 
     window = Win32BaseWindow::GetWindowFromHandle(hwnd);
     if(!window) {
         dprintf(("GetWindowRect, window %x not found", hwnd));
         SetLastError(ERROR_INVALID_WINDOW_HANDLE);
-        return 0;
+        return FALSE;
     }
     if(pRect == NULL) {
         SetLastError(ERROR_INVALID_PARAMETER);
-	return 0;
+        return FALSE;
     }
     *pRect = *window->getWindowRect();
     dprintf(("GetWindowRect %x (%d,%d) (%d,%d)", hwnd, pRect->left, pRect->top, pRect->right, pRect->bottom));
-    return rc;
+    return TRUE;
 }
 //******************************************************************************
 //******************************************************************************
@@ -766,9 +765,7 @@ BOOL WIN32API SetForegroundWindow(HWND hwnd)
 //******************************************************************************
 BOOL WIN32API GetClientRect( HWND hwnd, PRECT pRect)
 {
- BOOL rc;
  HWND hwndWin32 = hwnd;
-
  Win32BaseWindow *window;
 
     if (!pRect)

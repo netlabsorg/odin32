@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.142 2000-01-18 20:10:53 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.143 2000-01-20 16:48:56 cbratschi Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -1054,6 +1054,7 @@ ULONG Win32BaseWindow::MsgFormatFrame(WINDOWPOS *lpWndPos)
   if(lpWndPos) {
     //set new window rectangle
     setWindowRect(lpWndPos->x, lpWndPos->y, lpWndPos->x + lpWndPos->cx, lpWndPos->y + lpWndPos->cy);
+    if (getParent()) mapWin32Rect(getParent()->getOS2WindowHandle(),OSLIB_HWND_DESKTOP,&rectWindow);
     newWindowRect= rectWindow;
   }
   else {
@@ -1412,17 +1413,18 @@ LRESULT Win32BaseWindow::DefWindowProcA(UINT Msg, WPARAM wParam, LPARAM lParam)
         {
             DWORD lParam;
 
-            if(getParent()) {//in parent coordinates
-                POINT point;
+            if (dwStyle & WS_CHILD)
+            {
+              lParam = MAKELONG(rectClient.left,rectClient.top);
+            } else
+            {
+              POINT point;
 
-                point.x = rectClient.left;
-                point.y = rectClient.top;
-                ClientToScreen(getParent()->getWindowHandle(),&point);
+              point.x = rectClient.left;
+              point.y = rectClient.top;
+              if (getParent()) ClientToScreen(getParent()->getWindowHandle(),&point);
 
-                lParam = MAKELONG(point.x, point.y);
-            }
-            else {//in screen coordinates
-                lParam = MAKELONG(rectClient.left,rectClient.top);
+              lParam = MAKELONG(point.x, point.y);
             }
             SendInternalMessageA(WM_MOVE, 0, lParam);
         }
@@ -2045,8 +2047,6 @@ BOOL Win32BaseWindow::SetWindowPos(HWND hwndInsertAfter, int x, int y, int cx, i
    Win32BaseWindow *window;
    HWND hParent = 0;
 
-    dprintf (("SetWindowPos %x %x (%d,%d)(%d,%d) %x", Win32Hwnd, hwndInsertAfter, x, y, cx, cy, fuFlags));
-
     if (fuFlags &
        ~(SWP_NOSIZE     | SWP_NOMOVE     | SWP_NOZORDER     |
          SWP_NOREDRAW   | SWP_NOACTIVATE | SWP_FRAMECHANGED |
@@ -2063,6 +2063,12 @@ BOOL Win32BaseWindow::SetWindowPos(HWND hwndInsertAfter, int x, int y, int cx, i
     }
     WINDOWPOS wpos;
     SWP swp, swpOld;
+
+#if 0 //CB: test: MSIE 2.0 displays the tool-/addressbar this way -> to check
+  //CB: cx or cy are 0
+if (cx == 0) cx = 50;
+if (cy == 0) cy = 50;
+#endif
 
     wpos.flags            = fuFlags;
     wpos.cy               = cy;

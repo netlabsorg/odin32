@@ -1,4 +1,4 @@
-/* $Id: oslibwin.cpp,v 1.61 2000-01-18 20:10:43 sandervl Exp $ */
+/* $Id: oslibwin.cpp,v 1.62 2000-01-20 16:48:55 cbratschi Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -611,11 +611,14 @@ void OSLibMapSWPtoWINDOWPOSFrame(PSWP pswp, struct tagWINDOWPOS *pwpos, PSWP psw
     {
         point.x = x;
         point.y = y;
-        if(hParent)
+
+        if (hParent)
         {
-                WinMapWindowPoints(hParent, HWND_DESKTOP, &point, 1);
-        }
-        point.y = ScreenHeight-point.y-cy;
+          RECTL parentRect;
+
+          WinQueryWindowRect(hParent,&parentRect);
+          point.y = parentRect.yTop-point.y-cy;
+        } else point.y = ScreenHeight-point.y-cy;
 
         x  = point.x;
         y  = point.y;
