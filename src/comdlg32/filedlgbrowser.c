@@ -1,4 +1,4 @@
-/* $Id: filedlgbrowser.c,v 1.4 2000-03-27 15:07:23 cbratschi Exp $ */
+/* $Id: filedlgbrowser.c,v 1.5 2000-03-28 15:26:48 cbratschi Exp $ */
 /*
  *  Implementation of IShellBrowser for the File Open common dialog
  *
@@ -761,7 +761,6 @@ HRESULT WINAPI IShellBrowserImpl_ICommDlgBrowser_IncludeObject(ICommDlgBrowser *
     ulAttr = SFGAO_HIDDEN | SFGAO_FOLDER | SFGAO_FILESYSTEM | SFGAO_FILESYSANCESTOR | SFGAO_LINK;
     IShellFolder_GetAttributesOf(fodInfos->Shell.FOIShellFolder, 1, &pidl, &ulAttr);
 
-
     if( (ulAttr & SFGAO_HIDDEN)                                         /* hidden */
       | !(ulAttr & (SFGAO_FILESYSTEM | SFGAO_FILESYSANCESTOR))) /* special folder */
         return S_FALSE;
@@ -774,10 +773,11 @@ HRESULT WINAPI IShellBrowserImpl_ICommDlgBrowser_IncludeObject(ICommDlgBrowser *
         return S_OK;
 
     if (SUCCEEDED(IShellFolder_GetDisplayNameOf(fodInfos->Shell.FOIShellFolder, pidl, SHGDN_FORPARSING, &str)))
-    { if (SUCCEEDED(StrRetToBufW(&str, pidl,szPathW, MAX_PATH)))
+    {
+      if (SUCCEEDED(StrRetToBufW(&str, pidl,szPathW, MAX_PATH)))
       {
           if (COMDLG32_PathMatchSpecW(szPathW, fodInfos->ShellInfos.lpstrCurrentFilter))
-          return S_OK;
+            return S_OK;
       }
     }
     return S_FALSE;
