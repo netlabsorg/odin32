@@ -1,4 +1,7 @@
-/* $Id: changelog,v 1.2277 2002-08-21 01:57:39 bird Exp $ */
+/* $Id: changelog,v 1.2278 2002-08-21 12:33:56 sandervl Exp $ */
+
+ 2002-08-21: Platon Fomichev <platon@innotek   >
+    - USER32:   o Added OSLibWinControlWindow; fixed OSLibWinSetSysValue
 
  2002-08-20: knut st. osmundsen <bird@anduin   >
     - FASTDEP:  o Support for special makefile chars.
