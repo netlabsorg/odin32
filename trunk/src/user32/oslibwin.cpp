@@ -1,4 +1,4 @@
-/* $Id: oslibwin.cpp,v 1.121 2002-05-29 09:56:43 sandervl Exp $ */
+/* $Id: oslibwin.cpp,v 1.122 2002-07-11 18:14:20 achimha Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -954,8 +954,10 @@ ULONG OSLibWinGetLastError()
 //******************************************************************************
 void OSLibWinShowTaskList(HWND hwndFrame)
 {
-  //CB: don't know if this works on all machines
-  WinSetActiveWindow(HWND_DESKTOP,0x8000000E);
+  SWBLOCK swblk;
+  // the first entry returned is always the window list itself
+  if (WinQuerySwitchList(0, &swblk, sizeof(SWBLOCK)) > 0)
+    WinSetActiveWindow(HWND_DESKTOP, swblk.aswentry[0].swctl.hwnd);
 }
 //******************************************************************************
 //******************************************************************************
