@@ -1,4 +1,4 @@
-/* $Id: treeview.c,v 1.15 1999-11-09 17:09:27 cbratschi Exp $ */
+/* $Id: treeview.c,v 1.16 1999-11-19 16:22:01 achimha Exp $ */
 /* Treeview control
  *
  * Copyright 1998 Eric Kohl <ekohl@abo.rhein-zeitung.de>
@@ -41,7 +41,7 @@
 
  */
 
-/* WINE 991031 level */
+/* WINE 991114 level */
 
 #include <string.h>
 #include "winbase.h"
@@ -925,6 +925,8 @@ TREEVIEW_SetItemA (HWND hwnd, WPARAM wParam, LPARAM lParam)
                 wineItem->pszText = LPSTR_TEXTCALLBACKA;
                 }
    }
+
+  wineItem->mask |= tvItem->mask;
 
   return TRUE;
 }
@@ -2461,6 +2463,7 @@ TREEVIEW_SendDispInfoNotify (HWND hwnd, TREEVIEW_ITEM *wineItem,
   tvdi.item.state       = wineItem->state;
   tvdi.item.lParam      = wineItem->lParam;
   tvdi.item.pszText = COMCTL32_Alloc (128*sizeof(char));
+  tvdi.item.cchTextMax = 128;
   buf = tvdi.item.pszText;
 
   retval=(BOOL)SendMessageA (
