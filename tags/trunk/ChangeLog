@@ -1,4 +1,10 @@
- /* $Id: ChangeLog,v 1.132 1999-08-25 09:06:59 phaller Exp $ */
+ /* $Id: ChangeLog,v 1.133 1999-08-25 10:29:08 sandervl Exp $ */
+
+ 99-08-25: Sander van Leeuwen <sandervl@xs4all.nl>
+	- KERNEL32: Several changes for memory mapped files.
+                    Not yet tested, but I'm going to do so right now.
+                    Put back handlemanager changes. (i.e. MapViewOfFile)
+	- USER32\NEW: Deleted win32type.h
 
  99-08-24: Patrick Haller <phaller@gmx.net>
 	- USER32:   added extended Open32 WinX control styles (OS2CTLWX)
