@@ -1,4 +1,8 @@
- /* $Id: changelog,v 1.170 1999-09-03 15:10:25 sandervl Exp $ */
+ /* $Id: changelog,v 1.171 1999-09-04 09:06:32 sandervl Exp $ */
+
+ 99-09-04: Jens Wiessner <wiessnej@rfi.de>
+	- MSVFW32: Created stub (partly) dll
+	- PSAPI: Created stub dll
 
  99-09-03: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32\NEW: MDI child/client improvement (not all wine code has
