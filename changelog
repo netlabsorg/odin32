@@ -1,4 +1,15 @@
-/* $Id: changelog,v 1.1825 2001-11-12 23:06:03 phaller Exp $ */
+/* $Id: changelog,v 1.1826 2001-11-13 13:19:56 sandervl Exp $ */
+
+ 2001-11-13: Sander van Leeuwen <sandervl@xs4all.nl>
+    - KERNEL32: o Added missing entry in debug log table for hmparport
+                  (fixes crash in debug build with selective logging)
+    - GDI32:    o CalcBitmapSize bugfix
+                o SetDIBitsToDevice workaround for bug in Matrox driver.
+                  When blitting 32 bpp data, the GpiDrawBits call will
+                  fail with an insufficient memory error. When that happens,
+                  convert data to 24 bpp and try again.
+                  (TODO: This can happen in more functions!!)
+                o Fixes for wrong bit masks in several functions (24 & 32 bpp)
 
  2001-11-12: Patrick Haller <patrick.haller@innotek.de>
     - ODINWRAP: o improved thread call path tracking
