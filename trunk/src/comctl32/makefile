@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.12 1999-08-14 17:10:51 achimha Exp $
+# $Id: makefile,v 1.13 1999-08-16 16:28:02 sandervl Exp $
 #
 # PD-Win32 API
 #
@@ -32,11 +32,11 @@ rsrc.res: rsrc.rc
 
 
 $(TARGET).dll: $(OBJS) $(TARGET).def rsrc.res
-        $(LD) $(LDFLAGS) -Fm -Fe$@ $(OBJS) sbsstub.obj $(TARGET).def \
+        $(LD) $(LDFLAGS) -Fm -Fe$@ $(OBJS) $(TARGET).def \
               $(PDWIN32_LIB)/kernel32.lib \
               $(PDWIN32_LIB)/gdi32.lib \
               $(PDWIN32_LIB)/user32.lib  $(PDWIN32_LIB)/odincrt.lib \
-              OS2386.LIB
+              OS2386.LIB cppom30O.lib
               rc rsrc.res comctl32.dll
         $(CP) $@ $(PDWIN32_BIN)
 

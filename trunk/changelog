@@ -1,6 +1,9 @@
- /* $Id: changelog,v 1.86 1999-08-16 13:56:54 sandervl Exp $ */
+ /* $Id: changelog,v 1.87 1999-08-16 16:28:00 sandervl Exp $ */
  99-08-16: Sander van Leeuwen <sandervl@xs4all.nl>
 	- PE loader: Started with rewrite
+	- ODINCRT: Changed compile & link options
+	- ALL: Makefile changes & initterm.cpp no longer calls c/c++ library
+               init & termination functions (should only be done in odincrt.dll)
 
  99-08-16: Patrick Haller <phaller@gmx.net>
         - SHELL32: integrated Christoph Bratschis SHELL32 stubs

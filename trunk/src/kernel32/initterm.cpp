@@ -1,4 +1,4 @@
-/* $Id: initterm.cpp,v 1.7 1999-06-21 08:21:55 phaller Exp $ */
+/* $Id: initterm.cpp,v 1.8 1999-08-16 16:28:02 sandervl Exp $ */
 
 /*
  * KERNEL32 DLL entry point
@@ -34,22 +34,6 @@
 #include <misc.h>
 #include <wprocess.h>
 #include "handlemanager.h"
-
-extern "C" {
-/*-------------------------------------------------------------------*/
-/* _CRT_init is the C run-time environment initialization function.  */
-/* It will return 0 to indicate success and -1 to indicate failure.  */
-/*-------------------------------------------------------------------*/
-int CDECL CRT_init(void);
-/*-------------------------------------------------------------------*/
-/* _CRT_term is the C run-time environment termination function.     */
-/* It only needs to be called when the C run-time functions are      */
-/* statically linked.                                                */
-/*-------------------------------------------------------------------*/
-void CDECL CRT_term(void);
-void CDECL _ctordtorInit( void );
-void CDECL _ctordtorTerm( void );
-}
 
 /*-------------------------------------------------------------------*/
 /* A clean up routine registered with DosExitList must be used if    */
@@ -96,17 +80,6 @@ unsigned long SYSTEM _DLL_InitTerm(unsigned long hModule, unsigned long
     switch (ulFlag)
     {
         case 0 :
-
-            /*******************************************************************/
-            /* The C run-time environment initialization function must be      */
-            /* called before any calls to C run-time functions that are not    */
-            /* inlined.                                                        */
-            /*******************************************************************/
-
-            if (CRT_init() == -1)
-                return 0UL;
-            _ctordtorInit();
-
             dprintf(("kernel32 init\n"));
             CheckVersionFromHMOD(PE2LX_VERSION, hModule); /*PLF Wed  98-03-18 05:28:48*/
             /*******************************************************************/
@@ -114,7 +87,7 @@ unsigned long SYSTEM _DLL_InitTerm(unsigned long hModule, unsigned long
             /* are required and the runtime is dynamically linked.             */
             /*******************************************************************/
 
-            rc = DosExitList(0x0000FF00|EXLST_ADD, cleanup);
+            rc = DosExitList(0x0000F000|EXLST_ADD, cleanup);
             if (rc)
                 return 0UL;
 
@@ -146,10 +119,7 @@ unsigned long SYSTEM _DLL_InitTerm(unsigned long hModule, unsigned long
 static void APIENTRY cleanup(ULONG ulReason)
 {
     dprintf(("kernel32 exit %d\n", ulReason));
-    _dump_allocated(10);    /*PLF Wed  98-03-18 23:55:07*/
     DestroyTIB();
-    _ctordtorTerm();
-    CRT_term();
     DosExitList(EXLST_EXIT, cleanup);
     return ;
 }

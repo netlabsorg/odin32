@@ -1,4 +1,4 @@
-/* $Id: initterm.cpp,v 1.3 1999-06-19 10:54:48 sandervl Exp $ */
+/* $Id: initterm.cpp,v 1.4 1999-08-16 16:28:04 sandervl Exp $ */
 
 /*
  * WINMM DLL entry point
@@ -38,20 +38,6 @@
 
 extern "C" {
 void IRTMidiShutdown();  // IRTMidi shutdown routine
-
-/*-------------------------------------------------------------------*/
-/* _CRT_init is the C run-time environment initialization function.  */
-/* It will return 0 to indicate success and -1 to indicate failure.  */
-/*-------------------------------------------------------------------*/
-int CDECL CRT_init(void);
-/*-------------------------------------------------------------------*/
-/* _CRT_term is the C run-time environment termination function.     */
-/* It only needs to be called when the C run-time functions are      */
-/* statically linked.                                                */
-/*-------------------------------------------------------------------*/
-void CDECL CRT_term(void);
-void CDECL _ctordtorInit( void );
-void CDECL _ctordtorTerm( void );
 }
 
 /*-------------------------------------------------------------------*/
@@ -87,16 +73,6 @@ unsigned long _System _DLL_InitTerm(unsigned long hModule, unsigned long
    switch (ulFlag) {
       case 0 :
 
-         /*******************************************************************/
-         /* The C run-time environment initialization function must be      */
-         /* called before any calls to C run-time functions that are not    */
-         /* inlined.                                                        */
-         /*******************************************************************/
-
-         if (CRT_init() == -1)
-            return 0UL;
-         _ctordtorInit();
-
          CheckVersionFromHMOD(PE2LX_VERSION, hModule); /*PLF Wed  98-03-18 05:28:48*/
 
          /*******************************************************************/
@@ -104,7 +80,7 @@ unsigned long _System _DLL_InitTerm(unsigned long hModule, unsigned long
          /* are required and the runtime is dynamically linked.             */
          /*******************************************************************/
 
-         rc = DosExitList(0x0000FF00|EXLST_ADD, cleanup);
+         rc = DosExitList(0x0000F000|EXLST_ADD, cleanup);
          if(rc)
                 return 0UL;
 
@@ -127,8 +103,6 @@ static void APIENTRY cleanup(ULONG ulReason)
 {
    auxOS2Close();  /* SvL: Close aux device if necessary */
    IRTMidiShutdown;  /* JT: Shutdown RT Midi subsystem, if running. */
-   _ctordtorTerm();
-   CRT_term();
    DosExitList(EXLST_EXIT, cleanup);
    return ;
 }

@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.5 1999-08-16 13:54:06 sandervl Exp $
+# $Id: makefile,v 1.6 1999-08-16 16:28:03 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -14,10 +14,11 @@ PDWIN32_BIN = ..\..\bin
 !include $(PDWIN32_INCLUDE)/pdwin32.mk
 
 
-CFLAGS = $(CFLAGS) -Ge+ /Gd-  -I$(PDWIN32_INCLUDE)
-CXXFLAGS = $(CXXFLAGS) -Ge+ /Gd- -I$(PDWIN32_INCLUDE)
-LDFLAGSEXE = $(LDFLAGS) -Ge+ /B"/pmtype:pm /stack:0x30000 /NOBASE /Map" \
-             $(PDWIN32_LIB)\peldr.lib os2386.lib $(PDWIN32_LIB)\odincrt.lib cppom30.lib
+CFLAGS = $(CFLAGS) /Ge+ -I$(PDWIN32_INCLUDE)
+CXXFLAGS = $(CXXFLAGS) /Ge+ -I$(PDWIN32_INCLUDE)
+LDFLAGSEXE = $(LDFLAGS) /Ge+ /B"/pmtype:pm /stack:0x30000 /NOBASE /Map" \
+             $(PDWIN32_LIB)\peldr.lib os2386.lib $(PDWIN32_LIB)\odincrt.lib cppom30O.lib
+
 
 TARGET = pe
 TARGETDLL = peldr

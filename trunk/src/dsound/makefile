@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.4 1999-08-09 18:38:55 achimha Exp $
+# $Id: makefile,v 1.5 1999-08-16 16:28:02 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -26,9 +26,9 @@ all: $(TARGET).dll $(TARGET).lib
 
 
 $(TARGET).dll: $(OBJS) $(TARGET).def
-        $(LD) $(LDFLAGS) -Fm -Fe$@ $(OBJS) sbsstub.obj $(TARGET).def \
+        $(LD) $(LDFLAGS) -Fm -Fe$@ $(OBJS) $(TARGET).def \
               pmwinx.lib  $(PDWIN32_LIB)/kernel32.lib \
-              $(PDWIN32_LIB)/odincrt.lib OS2386.LIB
+              $(PDWIN32_LIB)/odincrt.lib OS2386.LIB cppom30O.lib
         $(CP) $@ $(PDWIN32_BIN)
 
 
@@ -40,20 +40,17 @@ $(TARGET).lib: $(TARGET).dll
 
 dsound.obj: dsound.cpp \
     $(PDWIN32_INCLUDE)/misc.h \
-    os2dsound.h \
-    no.h
+    os2dsound.h 
 
 os2dsound.obj: os2dsound.cpp \
     $(PDWIN32_INCLUDE)/misc.h \
     os2sndbuffer.h \
-    os2dsound.h \
-    no.h
+    os2dsound.h 
 
 os2sndbuffer.obj: os2sndbuffer.cpp \
     $(PDWIN32_INCLUDE)/misc.h \
     os2sndbuffer.h \
-    os2dsound.h \
-    no.h
+    os2dsound.h 
 
 misc.obj: misc.c \
           $(PDWIN32_INCLUDE)\misc.h
