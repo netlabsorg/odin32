@@ -1,4 +1,8 @@
-/* $Id: changelog,v 1.1240 2001-02-03 18:51:13 sandervl Exp $ */
+/* $Id: changelog,v 1.1241 2001-02-05 18:49:02 sandervl Exp $ */
+
+ 2001-02-04: Sander van Leeuwen <sandervl@xs4all.nl>
+    - USER32:   o Wrong error set in GetDlgItem. Must be ERROR_CONTROL_ID_NOT_FOUND.
+                  (verified in NT4, SP6)
 
  2001-02-03: Sander van Leeuwen <sandervl@xs4all.nl>
     - USER32:   o Get/SetWindowLongA/W, Get/SetWindowWord: must set
