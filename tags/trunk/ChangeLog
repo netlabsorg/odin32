@@ -1,4 +1,4 @@
-/* $Id: ChangeLog,v 1.1741 2001-10-11 17:04:40 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.1742 2001-10-11 19:25:20 sandervl Exp $ */
 
  2001-10-11: Sander van Leeuwen <sandervl@xs4all.nl>
     - USER32:   o SetScrollRange: return error if min > max or out of range
@@ -9,7 +9,9 @@
                   and call EnableScrollbar)
                 o Forward WM_SYSCOMMAND to Parent (for scrollbar control window
                   with size grip style)
-    - WSOCK32:  o Fake IP_HDRINCL & IP_TTL
+    - WSOCK32:  o Implemented IP_HDRINCL, IP_TTL & IP_TOS for set/getsockopt
+    - WS2_32:   o Translate IPPROTO_IP options in getsockopt before calling
+                  wsock32
 
  2001-10-11: Patrick Haller <patrick.haller@innotek.de>
     - KERNEL32: o added ODIN performance profiler 
