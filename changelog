@@ -1,9 +1,10 @@
-/* $Id: changelog,v 1.1595 2001-07-13 19:35:47 sandervl Exp $ */
+/* $Id: changelog,v 1.1596 2001-07-13 19:37:31 sandervl Exp $ */
 
  2001-07-13: Sander van Leeuwen <sandervl@xs4all.nl>
     - COMDLG32: o Fix for windows 3.1 style file dialog
     - COMCTL32: o Bad listview pointer checks cause crashes in details
                   view of file dialogs
+                  (TODO: Details view is still not right)
     - KERNEL32: o Check for NULL pointer in lstrlenA/W
                   (fixes crash during AutoCAD 14 install)
     - USER32:   o Removed very old check for negative x or y coordinates during
