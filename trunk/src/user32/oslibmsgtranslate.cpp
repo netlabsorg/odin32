@@ -1,4 +1,4 @@
-/* $Id: oslibmsgtranslate.cpp,v 1.113 2003-07-31 15:56:44 sandervl Exp $ */
+/* $Id: oslibmsgtranslate.cpp,v 1.114 2003-08-06 11:00:45 sandervl Exp $ */
 /*
  * Window message translation functions for OS/2
  *
@@ -61,8 +61,7 @@ static MSG  doubleClickMsg = {0};
 // setThreadQueueExtraCharMessage: queues WM_CHAR message so it is retrieved
 //                                 by GetMessage & PeekMessage
 //
-// NOTE: Automatically converts ascii character code to UTF-16 if the target
-//       window is unicode.
+// NOTE: WM_CHAR message always in ascii format
 //
 //******************************************************************************
 BOOL setThreadQueueExtraCharMessage(TEB* teb, MSG* pExtraMsg)
@@ -71,18 +70,6 @@ BOOL setThreadQueueExtraCharMessage(TEB* teb, MSG* pExtraMsg)
   if (teb->o.odin.fTranslated == TRUE)
     // there's still an already translated message to be processed
     return FALSE;
-
-  //Unicode windows expect the character code in UTF-16
-  if(IsWindowUnicode(pExtraMsg->hwnd))
-  {
-      CHAR  charA;
-      WCHAR charW;
-
-      charA = pExtraMsg->wParam;
-      MultiByteToWideChar(CP_ACP, 0, &charA, 1, &charW, 1);
-      pExtraMsg->wParam= charW;
-      dprintf(("setThreadQueueExtraCharMessage: Convert to Unicode src=%x res=%x", charA, charW ));
-  }
 
   teb->o.odin.fTranslated = TRUE;
   memcpy(&teb->o.odin.msgWCHAR, pExtraMsg, sizeof(MSG));

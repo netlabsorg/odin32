@@ -1,4 +1,4 @@
-/* $Id: oslibmsg.cpp,v 1.73 2003-08-04 17:06:50 sandervl Exp $ */
+/* $Id: oslibmsg.cpp,v 1.74 2003-08-06 11:00:44 sandervl Exp $ */
 /*
  * Window message translation functions for OS/2
  *
@@ -45,6 +45,7 @@
 #include "timer.h"
 #include <thread.h>
 #include <wprocess.h>
+#include <winnls.h>
 #include "pmwindow.h"
 #include "oslibwin.h"
 #include <win\hook.h>
@@ -230,6 +231,83 @@ LONG OSLibWinDispatchMsg(MSG *msg, BOOL isUnicode)
   }
 }
 //******************************************************************************
+// ReturnQueuedWMCHAR:
+//
+// Check for a queued WM_CHAR message (e.g. inserted by TranslateMessage)
+//******************************************************************************
+BOOL ReturnQueuedWMCHAR(LPMSG pMsg, TEB *teb, HWND hwnd, UINT uMsgFilterMin, UINT uMsgFilterMax, 
+                        BOOL isUnicode, BOOL fRemove)
+{
+    if(teb->o.odin.fTranslated && (!hwnd || hwnd == teb->o.odin.msgWCHAR.hwnd))
+    {
+        dprintf(("Return queued WM_CHAR message hwnd=%x msg=%d wParam=%x lParam=%x", teb->o.odin.msgWCHAR.hwnd, teb->o.odin.msgWCHAR.message, teb->o.odin.msgWCHAR.wParam, teb->o.odin.msgWCHAR.lParam));
+
+        if(uMsgFilterMin) {
+            if(teb->o.odin.msgWCHAR.message < uMsgFilterMin)
+                return FALSE;
+        }
+        if(uMsgFilterMax) {
+            if(teb->o.odin.msgWCHAR.message > uMsgFilterMax)
+                return FALSE;
+        }
+    
+        if(fRemove & PM_REMOVE_W) {
+            teb->o.odin.fTranslated = FALSE;
+            teb->o.odin.os2msg.msg  = 0;
+            teb->o.odin.os2msg.hwnd = 0;
+        }
+        memcpy(pMsg, &teb->o.odin.msgWCHAR, sizeof(MSG));
+        //After SetFocus(0), all keystrokes are converted in WM_SYS*
+        if(pMsg->message == WINWM_CHAR && fIgnoreKeystrokes) {
+            pMsg->message = WINWM_SYSCHAR;
+        }
+
+        if(!IsWindow(pMsg->hwnd)) {
+            //could be a queued char message for a window that was just destroyed
+            //when that's the case, we ignore it (MFC assertions are triggered by this)
+            teb->o.odin.fTranslated = FALSE;
+            teb->o.odin.os2msg.msg  = 0;
+            teb->o.odin.os2msg.hwnd = 0;
+            return FALSE;
+        }
+
+        // @@@PH verify this
+        // if this is a keyup or keydown message, we've got to
+        // call the keyboard hook here
+        // send keyboard messages to the registered hooks
+        if(fRemove & PM_REMOVE_W) 
+        {
+            switch (pMsg->message)
+            {
+            case WINWM_KEYDOWN:
+            case WINWM_KEYUP:
+            case WINWM_SYSKEYDOWN:
+            case WINWM_SYSKEYUP:
+                // only supposed to be called upon WM_KEYDOWN
+                // and WM_KEYUP according to docs.
+                if(ProcessKbdHook(pMsg, fRemove))
+                    return FALSE;
+                break;
+            }
+        }
+    
+        //GetMessageW and PeekMessageW expect the character code in UTF-16
+        //(we save it in ascii format)
+        if(isUnicode && (pMsg->message == WINWM_CHAR ||  pMsg->message == WINWM_SYSCHAR))
+        {
+            CHAR  charA;
+            WCHAR charW;
+    
+            charA = pMsg->wParam;
+            MultiByteToWideChar(CP_ACP, 0, &charA, 1, &charW, 1);
+            pMsg->wParam= charW;
+            dprintf(("ReturnQueuedWMCHAR: Convert to Unicode src=%x res=%x", charA, charW));
+        }
+        return TRUE;
+    }
+    return FALSE;
+}
+//******************************************************************************
 //******************************************************************************
 BOOL OSLibWinGetMsg(LPMSG pMsg, HWND hwnd, UINT uMsgFilterMin, UINT uMsgFilterMax,
                     BOOL isUnicode)
@@ -256,51 +334,9 @@ BOOL OSLibWinGetMsg(LPMSG pMsg, HWND hwnd, UINT uMsgFilterMin, UINT uMsgFilterMa
         return TRUE;
     }
 
-    if(teb->o.odin.fTranslated && (!hwnd || hwnd == teb->o.odin.msgWCHAR.hwnd))
+    //check for a queued WM_CHAR message (e.g. inserted by TranslateMessage)
+    if(ReturnQueuedWMCHAR(pMsg, teb, hwnd, uMsgFilterMin, uMsgFilterMax, isUnicode, PM_REMOVE_W) == TRUE)
     {
-        dprintf(("Return queued WM_CHAR message hwnd=%x msg=%d wParam=%x lParam=%x", teb->o.odin.msgWCHAR.hwnd, teb->o.odin.msgWCHAR.message, teb->o.odin.msgWCHAR.wParam, teb->o.odin.msgWCHAR.lParam));
-        if(uMsgFilterMin) {
-            if(teb->o.odin.msgWCHAR.message < uMsgFilterMin)
-                goto continuegetmsg;
-        }
-        if(uMsgFilterMax) {
-            if(teb->o.odin.msgWCHAR.message > uMsgFilterMax)
-                goto continuegetmsg;
-        }
-        teb->o.odin.fTranslated = FALSE;
-        memcpy(pMsg, &teb->o.odin.msgWCHAR, sizeof(MSG));
-
-        //After SetFocus(0), all keystrokes are converted in WM_SYS*
-        if(pMsg->message == WINWM_CHAR && fIgnoreKeystrokes) {
-            pMsg->message = WINWM_SYSCHAR;
-        }
-
-        teb->o.odin.os2msg.msg  = 0;
-        teb->o.odin.os2msg.hwnd = 0;
-
-        if(!IsWindow(pMsg->hwnd)) {
-            //could be a queued char message for a window that was just destroyed
-            //when that's the case, we ignore it (MFC assertions are triggered by this)
-            goto continuegetmsg;
-        }
-
-        // @@@PH verify this
-        // if this is a keyup or keydown message, we've got to
-        // call the keyboard hook here
-        // send keyboard messages to the registered hooks
-        switch (pMsg->message)
-        {
-          case WINWM_KEYDOWN:
-          case WINWM_KEYUP:
-          case WINWM_SYSKEYDOWN:
-          case WINWM_SYSKEYUP:
-            // only supposed to be called upon WM_KEYDOWN
-            // and WM_KEYUP according to docs.
-            if(ProcessKbdHook(pMsg, TRUE))
-                goto continuegetmsg;
-            break;
-        }
-
         return (pMsg->message != WINWM_QUIT);
     }
 
@@ -400,12 +436,12 @@ BOOL OSLibWinPeekMsg(LPMSG pMsg, HWND hwnd, UINT uMsgFilterMin, UINT uMsgFilterM
         return FALSE;
     }
     if(hwnd && hwnd != -1) {
-            hwndOS2 = Win32ToOS2Handle(hwnd);
-            if(hwndOS2 == NULL) {
-                dprintf(("PeekMsg: window %x NOT FOUND!", hwnd));
-                    SetLastError(ERROR_INVALID_WINDOW_HANDLE_W);
-                    return FALSE;
-            }
+        hwndOS2 = Win32ToOS2Handle(hwnd);
+        if(hwndOS2 == NULL) {
+            dprintf(("PeekMsg: window %x NOT FOUND!", hwnd));
+            SetLastError(ERROR_INVALID_WINDOW_HANDLE_W);
+            return FALSE;
+        }
     }
 
     teb = GetThreadTEB();
@@ -414,58 +450,9 @@ BOOL OSLibWinPeekMsg(LPMSG pMsg, HWND hwnd, UINT uMsgFilterMin, UINT uMsgFilterM
         return FALSE;
     }
 
-    if(teb->o.odin.fTranslated && (!hwnd || hwnd == teb->o.odin.msgWCHAR.hwnd))
+    //check for a queued WM_CHAR message (e.g. inserted by TranslateMessage)
+    if(ReturnQueuedWMCHAR(pMsg, teb, hwnd, uMsgFilterMin, uMsgFilterMax, isUnicode, fRemove) == TRUE)
     {
-        dprintf(("Return queued WM_CHAR message hwnd=%x msg=%d wParam=%x lParam=%x", teb->o.odin.msgWCHAR.hwnd, teb->o.odin.msgWCHAR.message, teb->o.odin.msgWCHAR.wParam, teb->o.odin.msgWCHAR.lParam));
-        if(uMsgFilterMin) {
-            if(teb->o.odin.msgWCHAR.message < uMsgFilterMin)
-                goto continuepeekmsg;
-        }
-        if(uMsgFilterMax) {
-            if(teb->o.odin.msgWCHAR.message > uMsgFilterMax)
-                goto continuepeekmsg;
-        }
-
-        if(fRemove & PM_REMOVE_W) {
-            teb->o.odin.fTranslated = FALSE;
-            teb->o.odin.os2msg.msg  = 0;
-            teb->o.odin.os2msg.hwnd = 0;
-        }
-        memcpy(pMsg, &teb->o.odin.msgWCHAR, sizeof(MSG));
-        //After SetFocus(0), all keystrokes are converted in WM_SYS*
-        if(pMsg->message == WINWM_CHAR && fIgnoreKeystrokes) {
-            pMsg->message = WINWM_SYSCHAR;
-        }
-
-
-        if(!IsWindow(pMsg->hwnd)) {
-            //could be a queued char message for a window that was just destroyed
-            //when that's the case, we ignore it (MFC assertions are triggered by this)
-            teb->o.odin.fTranslated = FALSE;
-            teb->o.odin.os2msg.msg  = 0;
-            teb->o.odin.os2msg.hwnd = 0;
-            goto continuepeekmsg;
-        }
-
-        // @@@PH verify this
-        // if this is a keyup or keydown message, we've got to
-        // call the keyboard hook here
-        // send keyboard messages to the registered hooks
-        if(fRemove & PM_REMOVE_W) {
-            switch (pMsg->message)
-            {
-            case WINWM_KEYDOWN:
-            case WINWM_KEYUP:
-            case WINWM_SYSKEYDOWN:
-            case WINWM_SYSKEYUP:
-                // only supposed to be called upon WM_KEYDOWN
-                // and WM_KEYUP according to docs.
-                if(ProcessKbdHook(pMsg, fRemove))
-                    goto continuepeekmsg;
-                break;
-            }
-        }
-
         return TRUE;
     }
 
