@@ -1,4 +1,4 @@
-/* $Id: cpu.cpp,v 1.4 1999-12-09 11:59:27 sandervl Exp $ */
+/* $Id: cpu.cpp,v 1.5 2000-02-03 18:56:39 sandervl Exp $ */
 /*
  * Odin win32 CPU apis
  *
@@ -19,7 +19,7 @@
 #include "winerror.h"
 #include "winreg.h"
 #include "debugtools.h"
-#include "cpuhlp.h"
+#include <cpuhlp.h>
 #include "initsystem.h"
 
 DEFAULT_DEBUG_CHANNEL(CPU)
