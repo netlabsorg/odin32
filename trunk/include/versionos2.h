@@ -1,4 +1,4 @@
-/* $Id: versionos2.h,v 1.24 2002-05-09 13:54:39 sandervl Exp $ */
+/* $Id: versionos2.h,v 1.25 2002-12-20 11:38:28 sandervl Exp $ */
 
 #ifndef __VERSIONOS2__H__
 #define __VERSIONOS2__H__
@@ -18,7 +18,7 @@
  *
  *
  */
-#define PE2LX_VERSION 7
+#define PE2LX_VERSION 8
 
 
 #ifndef SYSTEM
