@@ -1,4 +1,7 @@
-/* $Id: changelog,v 1.1936 2002-01-02 18:35:06 sandervl Exp $ */
+/* $Id: changelog,v 1.1937 2002-01-04 14:10:38 sandervl Exp $ */
+
+ 2001-01-04: Sander van Leeuwen <sandervl@xs4all.nl>
+    - KERNEL32: o Rewrote GetDriveType (fixes detection of LAN drives)
 
  2001-01-02: Sander van Leeuwen <sandervl@xs4all.nl>
     - GDI32:    o Better logging for some text functions
