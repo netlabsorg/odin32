@@ -1,4 +1,4 @@
-/* $Id: pmkbdhk.cpp,v 1.2 2001-12-11 11:10:38 phaller Exp $ */
+/* $Id: pmkbdhk.cpp,v 1.3 2002-02-11 13:45:33 sandervl Exp $ */
 /*
  * OS/2 native Presentation Manager hooks
  *
@@ -474,6 +474,8 @@ BOOL EXPENTRY hookPreAccelHook(HAB hab, PQMSG pqmsg, ULONG option)
             case PMSCAN_ALTLEFT:
             case PMSCAN_ALTRIGHT:
             case PMSCAN_SCROLLLOCK:
+            case PMSCAN_ENTER:
+            case PMSCAN_PADENTER:
             case PMSCAN_CAPSLOCK:
             case PMSCAN_SHIFTLEFT:
             case PMSCAN_SHIFTRIGHT:
