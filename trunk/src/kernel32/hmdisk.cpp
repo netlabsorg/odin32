@@ -1,4 +1,4 @@
-/* $Id: hmdisk.cpp,v 1.6 2001-04-26 13:22:45 sandervl Exp $ */
+/* $Id: hmdisk.cpp,v 1.7 2001-05-23 17:00:44 sandervl Exp $ */
 
 /*
  * Win32 Disk API functions for OS/2
@@ -43,7 +43,7 @@ HMDeviceDiskClass::HMDeviceDiskClass(LPCSTR lpDeviceName) : HMDeviceKernelObject
  *****************************************************************************/
 BOOL HMDeviceDiskClass::FindDevice(LPCSTR lpClassDevName, LPCSTR lpDeviceName, int namelength)
 {
-    //\\.\\x:               -> length 6
+    //\\.\x:                -> length 6
     //\\.\PHYSICALDRIVEn    -> length 18
     if(namelength != 6 && namelength != 18) {
         return FALSE;
@@ -105,9 +105,12 @@ DWORD HMDeviceDiskClass::CreateFile (LPCSTR        lpFileName,
 
     if (hFile != INVALID_HANDLE_ERROR || GetLastError() == ERROR_NOT_READY)
     {
-        if(hFile == INVALID_HANDLE_ERROR) SetLastError(NO_ERROR);
-
-        pHMHandleData->hHMHandle  = hFile;
+        if(hFile == INVALID_HANDLE_ERROR) {
+             SetLastError(NO_ERROR);
+             pHMHandleData->hHMHandle  = 0; //handle lookup fails if this is set to -1
+        }
+        else pHMHandleData->hHMHandle  = hFile;
+        
         pHMHandleData->dwUserData = GetDriveTypeA(lpFileName);
         return (NO_ERROR);
     }
@@ -132,6 +135,140 @@ BOOL HMDeviceDiskClass::DeviceIoControl(PHMHANDLEDATA pHMHandleData, DWORD dwIoC
                              LPVOID lpOutBuffer, DWORD nOutBufferSize,
                              LPDWORD lpBytesReturned, LPOVERLAPPED lpOverlapped)
 {
+#ifdef DEBUG
+    char *msg = NULL;
+
+    switch(dwIoControlCode)
+    {
+    case FSCTL_DELETE_REPARSE_POINT:
+        msg = "FSCTL_DELETE_REPARSE_POINT";
+        break;
+    case FSCTL_DISMOUNT_VOLUME:
+        msg = "FSCTL_DISMOUNT_VOLUME";
+        break;
+    case FSCTL_GET_COMPRESSION:
+        msg = "FSCTL_GET_COMPRESSION";
+        break;
+    case FSCTL_GET_REPARSE_POINT:
+        msg = "FSCTL_GET_REPARSE_POINT";
+        break;
+    case FSCTL_LOCK_VOLUME:
+        msg = "FSCTL_LOCK_VOLUME";
+        break;
+    case FSCTL_QUERY_ALLOCATED_RANGES:
+        msg = "FSCTL_QUERY_ALLOCATED_RANGES";
+        break;
+    case FSCTL_SET_COMPRESSION:
+        msg = "FSCTL_SET_COMPRESSION";
+        break;
+    case FSCTL_SET_REPARSE_POINT:
+        msg = "FSCTL_SET_REPARSE_POINT";
+        break;
+    case FSCTL_SET_SPARSE:
+        msg = "FSCTL_SET_SPARSE";
+        break;
+    case FSCTL_SET_ZERO_DATA:
+        msg = "FSCTL_SET_ZERO_DATA";
+        break;
+    case FSCTL_UNLOCK_VOLUME:
+        msg = "FSCTL_UNLOCK_VOLUME";
+        break;
+    case IOCTL_DISK_CHECK_VERIFY:
+        msg = "IOCTL_DISK_CHECK_VERIFY";
+        break;
+    case IOCTL_DISK_EJECT_MEDIA:
+        msg = "IOCTL_DISK_EJECT_MEDIA";
+        break;
+    case IOCTL_DISK_FORMAT_TRACKS:
+        msg = "IOCTL_DISK_FORMAT_TRACKS";
+        break;
+    case IOCTL_DISK_GET_DRIVE_GEOMETRY:
+        msg = "IOCTL_DISK_GET_DRIVE_GEOMETRY";
+        break;
+    case IOCTL_DISK_GET_DRIVE_LAYOUT:
+        msg = "IOCTL_DISK_GET_DRIVE_LAYOUT";
+        break;
+    case IOCTL_DISK_GET_MEDIA_TYPES:
+        msg = "IOCTL_DISK_GET_MEDIA_TYPES";
+        break;
+    case IOCTL_DISK_GET_PARTITION_INFO:
+        msg = "IOCTL_DISK_GET_PARTITION_INFO";
+        break;
+    case IOCTL_DISK_LOAD_MEDIA:
+        msg = "IOCTL_DISK_LOAD_MEDIA";
+        break;
+    case IOCTL_DISK_MEDIA_REMOVAL:
+        msg = "IOCTL_DISK_MEDIA_REMOVAL";
+        break;
+    case IOCTL_DISK_PERFORMANCE:
+        msg = "IOCTL_DISK_PERFORMANCE";
+        break;
+    case IOCTL_DISK_REASSIGN_BLOCKS:
+        msg = "IOCTL_DISK_REASSIGN_BLOCKS";
+        break;
+    case IOCTL_DISK_SET_DRIVE_LAYOUT:
+        msg = "IOCTL_DISK_SET_DRIVE_LAYOUT";
+        break;
+    case IOCTL_DISK_SET_PARTITION_INFO:
+        msg = "IOCTL_DISK_SET_PARTITION_INFO";
+        break;
+    case IOCTL_DISK_VERIFY:
+        msg = "IOCTL_DISK_VERIFY";
+        break;
+    case IOCTL_SERIAL_LSRMST_INSERT:
+        msg = "IOCTL_SERIAL_LSRMST_INSERT";
+        break;
+    case IOCTL_STORAGE_CHECK_VERIFY:
+        msg = "IOCTL_STORAGE_CHECK_VERIFY";
+        break;
+    case IOCTL_STORAGE_EJECT_MEDIA:
+        msg = "IOCTL_STORAGE_EJECT_MEDIA";
+        break;
+    case IOCTL_STORAGE_GET_MEDIA_TYPES:
+        msg = "IOCTL_STORAGE_GET_MEDIA_TYPES";
+        break;
+    case IOCTL_STORAGE_LOAD_MEDIA:
+        msg = "IOCTL_STORAGE_LOAD_MEDIA";
+        break;
+    case IOCTL_STORAGE_MEDIA_REMOVAL:
+        msg = "IOCTL_STORAGE_MEDIA_REMOVAL";
+        break;
+    case IOCTL_SCSI_PASS_THROUGH:
+        msg = "IOCTL_SCSI_PASS_THROUGH";
+        break;
+    case IOCTL_SCSI_MINIPORT:
+        msg = "IOCTL_SCSI_MINIPORT";
+        break;
+    case IOCTL_SCSI_GET_INQUIRY_DATA:
+        msg = "IOCTL_SCSI_GET_INQUIRY_DATA";
+        break;
+    case IOCTL_SCSI_GET_CAPABILITIES:
+        msg = "IOCTL_SCSI_GET_CAPABILITIES";
+        break;
+    case IOCTL_SCSI_PASS_THROUGH_DIRECT:
+        msg = "IOCTL_SCSI_PASS_THROUGH_DIRECT";
+        break;
+    case IOCTL_SCSI_GET_ADDRESS:
+        msg = "IOCTL_SCSI_GET_ADDRESS";
+        break;
+    case IOCTL_SCSI_RESCAN_BUS:
+        msg = "IOCTL_SCSI_RESCAN_BUS";
+        break;
+    case IOCTL_SCSI_GET_DUMP_POINTERS:
+        msg = "IOCTL_SCSI_GET_DUMP_POINTERS";
+        break;
+    case IOCTL_SCSI_FREE_DUMP_POINTERS:
+        msg = "IOCTL_SCSI_FREE_DUMP_POINTERS";
+        break;
+    case IOCTL_IDE_PASS_THROUGH:
+        msg = "IOCTL_IDE_PASS_THROUGH";
+        break;
+    }
+    if(msg) {
+        dprintf(("HMDeviceDiskClass::DeviceIoControl %s", msg));
+    }
+#endif
+
     switch(dwIoControlCode)
     {
     case FSCTL_DELETE_REPARSE_POINT:
@@ -145,6 +282,8 @@ BOOL HMDeviceDiskClass::DeviceIoControl(PHMHANDLEDATA pHMHandleData, DWORD dwIoC
     case FSCTL_SET_SPARSE:
     case FSCTL_SET_ZERO_DATA:
     case FSCTL_UNLOCK_VOLUME:
+        break;
+
     case IOCTL_DISK_CHECK_VERIFY:
     case IOCTL_DISK_EJECT_MEDIA:
     case IOCTL_DISK_FORMAT_TRACKS:
@@ -160,7 +299,20 @@ BOOL HMDeviceDiskClass::DeviceIoControl(PHMHANDLEDATA pHMHandleData, DWORD dwIoC
     case IOCTL_DISK_SET_PARTITION_INFO:
     case IOCTL_DISK_VERIFY:
     case IOCTL_SERIAL_LSRMST_INSERT:
+        break;
+
     case IOCTL_STORAGE_CHECK_VERIFY:
+        if(lpBytesReturned) {
+            lpBytesReturned = 0;
+        }
+        //TODO: check if disk has been inserted or removed
+        if(pHMHandleData->hHMHandle == 0) {
+            SetLastError(ERROR_NOT_READY);
+            return FALSE;
+        }
+        SetLastError(NO_ERROR);
+        return TRUE;
+
     case IOCTL_STORAGE_EJECT_MEDIA:
     case IOCTL_STORAGE_GET_MEDIA_TYPES:
     case IOCTL_STORAGE_LOAD_MEDIA:
