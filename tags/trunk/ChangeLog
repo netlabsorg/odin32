@@ -1,14 +1,28 @@
- /* $Id: ChangeLog,v 1.432 1999-11-10 12:19:42 phaller Exp $ */
+ /* $Id: ChangeLog,v 1.433 1999-11-10 14:19:20 sandervl Exp $ */
+
+ 99-11-10: Sander van Leeuwen <sandervl@xs4all.nl>
+	- KERNEL32: Rewrote OSLibDosAllocMem to only return addresses
+                    aligned at 64kb boundaries (that's what NT's VirtualAlloc
+                    does and it fixes problems with MS Word & StarCraft)
+	            Fixed wrong dprintf in GetProcAddress.
+                    Added code to VirtualAlloc for committing pages of memory mapped
+                    files. (Word needs this)
+	- USER32: Implemented WindowFromDC
+                  Call WinWaitMsg from WaitMessage instead of calling Open32 api.
+                  Added wvsnprintfA export (required for NTDLL)
+   	- NTDLL: Link with user32.lib, don't import by name directly
+                 (needs to be done for the kernel32 forwards too)
+	- GDI32: Removed flipping of bitmaps in dibsection (no longer necessary)
 
  99-11-10: Patrick Haller <phaller@gmx.net>
 	- COMDLG32:	Fix: erroneous filter data for GetOpenFileName now tolerated
 			Open32 keeps to close to the docs :)
 
  99-11-10: knut.st.osmundsen <knut.stange.osmundsen@pmsc.no>
-    - PE2LX: Added OLE32 to the lie list. New Base class.
-    - WIN32K: Disabled Yield - this solves problems running win32k
-              at SMP kernels and logging problems on all kernels.
-              Added some parameters.
+    	- PE2LX: Added OLE32 to the lie list. New Base class.
+    	- WIN32K: Disabled Yield - this solves problems running win32k
+                  at SMP kernels and logging problems on all kernels.
+                  Added some parameters.
 
  99-11-09: Rene Pronk <R.Pronk@twi.tudelft.nl>
 	- USER32: Added support for control mnemonics (Alt-key sends BM_CLICK
