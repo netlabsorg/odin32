@@ -1,10 +1,9 @@
-/* $Id: changelog,v 1.2393 2002-12-20 11:38:02 sandervl Exp $ */
+/* $Id: changelog,v 1.2394 2002-12-20 11:40:24 sandervl Exp $ */
 
  2002-12-20: Sander van Leeuwen <sandervl@innotek   >
     - KERNEL32: o Removed obsolete code for Glide drivers and IOPL
                 o Don't display message boxes for module load errors. Pass
                   errors back to the PE loader.
-                o Version increased due to incompatible changes (versionos2.h)
     - DDRAW:    o Removed IOPL override code
     - PELDR:    o Error handling changes
 
