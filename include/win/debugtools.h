@@ -25,8 +25,6 @@
   #define eprintf(a)      WriteLog a ; WriteLogError a
   #define dassert(a, b)   if(!(a)) WriteLogError b
   #define dbgCheckObj(a)   a->checkObject()
-  #define DisableLogging  DecreaseLogCount
-  #define EnableLogging   IncreaseLogCount
 
 #ifdef DEBUG_ENABLELOG_LEVEL2
 #ifdef PRIVATE_LOGGING
@@ -45,8 +43,6 @@
   #define eprintf(a)
   #define dassert(a, b)
   #define dbgCheckObj(a)
-  #define DisableLogging
-  #define EnableLogging
 #endif
 
 int  SYSTEM WriteLog(char *tekst, ...);
