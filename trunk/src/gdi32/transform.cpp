@@ -1,4 +1,4 @@
-/* $Id: transform.cpp,v 1.4 2001-05-19 19:43:54 sandervl Exp $ */
+/* $Id: transform.cpp,v 1.5 2001-05-20 09:47:58 sandervl Exp $ */
 
 /*
  * GDI32 coordinate & transformation code
@@ -42,35 +42,16 @@ LONG hdcWidth(HWND hwnd, pDCData pHps);
 BOOL WIN32API LPtoDP(HDC hdc, PPOINT lpPoints, int nCount)
 {
  BOOL ret;
- DWORD hdcwidth, hdcheight;
- pDCData pHps;
-
-    pHps = (pDCData)OSLibGpiQueryDCData((HPS)hdc);
-    if(!pHps)
-    {
-        dprintf(("WARNING: LPtoDP %x invalid handle!!", hdc));
-        SetLastError(ERROR_INVALID_HANDLE_W);
-        return FALSE;
-    }
 
     dprintf(("LPtoDP %x %x %d", hdc, lpPoints, nCount));
 
-    //GpiConvert doesn't like illegal values; TODO: check what NT does
+#ifdef DEBUG
     if(nCount && lpPoints) {
-        hdcwidth  = hdcWidth(0, pHps);
-        hdcheight = hdcHeight(0, pHps);
         for(int i=0;i<nCount;i++) {
             dprintf(("LPtoDP in (%d,%d)", lpPoints[i].x, lpPoints[i].y));
-            if(lpPoints[i].x > hdcwidth) {
-                dprintf(("WARNING: LPtoDP correcting x value; hdcwidth = %d", hdcwidth));
-                lpPoints[i].x = 0;
-            }
-            if(lpPoints[i].y > hdcwidth) {
-                dprintf(("WARNING: LPtoDP correcting y value; hdcheight = %d", hdcheight));
-                lpPoints[i].y = 0;
-            }
         }
     }
+#endif
     ret = O32_LPtoDP(hdc, lpPoints, nCount);
 #ifdef DEBUG
     if(nCount && lpPoints) {
@@ -107,11 +88,11 @@ BOOL WIN32API DPtoLP(HDC hdc, PPOINT lpPoints, int nCount)
             dprintf(("DPtoLP in (%d,%d)", lpPoints[i].x, lpPoints[i].y));
             if(lpPoints[i].x > hdcwidth) {
                 dprintf(("WARNING: DPtoLP correcting x value; hdcwidth = %d", hdcwidth));
-                lpPoints[i].x = 0;
+                lpPoints[i].x = hdcwidth;
             }
-            if(lpPoints[i].y > hdcwidth) {
+            if(lpPoints[i].y > hdcheight) {
                 dprintf(("WARNING: DPtoLP correcting y value; hdcheight = %d", hdcheight));
-                lpPoints[i].y = 0;
+                lpPoints[i].y = hdcheight;
             }
         }
     }
