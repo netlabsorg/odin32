@@ -1,4 +1,4 @@
-/* $Id: probkrnl.c,v 1.31 2001-02-10 11:11:42 bird Exp $
+/* $Id: probkrnl.c,v 1.32 2001-02-11 15:14:34 bird Exp $
  *
  * Description:   Autoprobes the os2krnl file and os2krnl[*].sym files.
  *                Another Hack!
@@ -131,6 +131,9 @@ IMPORTKRNLSYM DATA16_GLOBAL aImportTab[NBR_OF_KRNLIMPORTS] =
     {FALSE, -1, 10, "f_FuStrLen",           "",    -1,  -1,  -1,  -1, EPT_PROCIMPORT16},
     {FALSE, -1,  8, "f_FuBuff",             "",    -1,  -1,  -1,  -1, EPT_PROCIMPORT16},
     {FALSE, -1, 12, "_SftFileSize",         "@8",  -1,  -1,  -1,  -1, EPT_PROCIMPORT32},
+    {FALSE, -1, 12, "_PGPhysAvail",         "@0",  -1,  -1,  -1,  -1, EPT_PROCIMPORT32},
+    {FALSE, -1, 14, "_PGPhysPresent",       "@0",  -1,  -1,  -1,  -1, EPT_PROCIMPORT32},
+    {FALSE, -1, 17, "_vmRecalcShrBound",    "@8",  -1,  -1,  -1,  -1, EPT_PROCIMPORT32},
     {FALSE, -1, 16, "_ldrpFileNameBuf",     "",    -1,  -1,  -1,  -1, EPT_VARIMPORT32},
     {FALSE, -1,  7, "_LdrSem",              "",    -1,  -1,  -1,  -1, EPT_VARIMPORT32},
     {FALSE, -1,  8, "_pTCBCur",             "",    -1,  -1,  -1,  -1, EPT_VARIMPORT16},
@@ -149,6 +152,28 @@ IMPORTKRNLSYM DATA16_GLOBAL aImportTab[NBR_OF_KRNLIMPORTS] =
     {FALSE, -1, 11, "_specific_l",          "",    -1,  -1,  -1,  -1, EPT_VARIMPORT32},
     {FALSE, -1, 10, "_program_h",           "",    -1,  -1,  -1,  -1, EPT_VARIMPORT32},
     {FALSE, -1, 10, "_program_l",           "",    -1,  -1,  -1,  -1, EPT_VARIMPORT32},
+    {FALSE, -1, 11, "_SMcDFInuse",          "",    -1,  -1,  -1,  -1, EPT_VARIMPORT32},
+    {FALSE, -1, 11, "_smFileSize",          "",    -1,  -1,  -1,  -1, EPT_VARIMPORT32},
+    {FALSE, -1, 11, "_SMswapping",          "",    -1,  -1,  -1,  -1, EPT_VARIMPORT32},
+    {FALSE, -1, 12, "_smcBrokenDF",         "",    -1,  -1,  -1,  -1, EPT_VARIMPORT32},
+    {FALSE, -1, 12, "_pgPhysPages",         "",    -1,  -1,  -1,  -1, EPT_VARIMPORT32},
+    {FALSE, -1, 13, "_SMcInMemFile",        "",    -1,  -1,  -1,  -1, EPT_VARIMPORT32},
+    {FALSE, -1, 13, "_SMCFGMinFree",        "",    -1,  -1,  -1,  -1, EPT_VARIMPORT32},
+    {FALSE, -1, 13, "_smcGrowFails",        "",    -1,  -1,  -1,  -1, EPT_VARIMPORT32},
+    {FALSE, -1, 14, "_PGSwapEnabled",       "",    -1,  -1,  -1,  -1, EPT_VARIMPORT32},
+    {FALSE, -1, 14, "_pgcPageFaults",       "",    -1,  -1,  -1,  -1, EPT_VARIMPORT32},
+    {FALSE, -1, 14, "_SMCFGSwapSize",       "",    -1,  -1,  -1,  -1, EPT_VARIMPORT32},
+    {FALSE, -1, 16, "_pgResidentPages",     "",    -1,  -1,  -1,  -1, EPT_VARIMPORT32},
+    {FALSE, -1, 17, "_pgSwappablePages",    "",    -1,  -1,  -1,  -1, EPT_VARIMPORT32},
+    {FALSE, -1,  8, "_ahvmShr",             "",    -1,  -1,  -1,  -1, EPT_VARIMPORT32},
+    {FALSE, -1,  8, "_ahvmSys",             "",    -1,  -1,  -1,  -1, EPT_VARIMPORT32},
+    {FALSE, -1, 19, "_pgDiscardableInmem",  "",    -1,  -1,  -1,  -1, EPT_VARIMPORT32},
+    {FALSE, -1, 19, "_pgDiscardablePages",  "",    -1,  -1,  -1,  -1, EPT_VARIMPORT32},
+    {FALSE, -1, 10, "_SMMinFree",           "",    -1,  -1,  -1,  -1, EPT_VARIMPORT32},
+    {FALSE, -1, 20, "_pgcPageFaultsActive", "",    -1,  -1,  -1,  -1, EPT_VARIMPORT32},
+    {FALSE, -1, 10, "_pgPhysMax",           "",    -1,  -1,  -1,  -1, EPT_VARIMPORT32},
+    {FALSE, -1,  9, "_ahvmhShr",            "",    -1,  -1,  -1,  -1, EPT_VARIMPORTNR32},
+    {FALSE, -1, 20, "_VirtualAddressLimit", "",    -1,  -1,  -1,  -1, EPT_VARIMPORTNR32},
     {FALSE, -1, 14, "SecPathFromSFN",       "",    -1,  -1,  -1,  -1, EPT_PROCIMPORTNR32},
 #if 0 /* not used */
     {FALSE, -1,  9, "_KSEMInit",            "@12", -1,  -1,  -1,  -1, EPT_PROCIMPORT32},
@@ -162,6 +187,7 @@ IMPORTKRNLSYM DATA16_GLOBAL aImportTab[NBR_OF_KRNLIMPORTS] =
     {FALSE, -1, 14, "_ldrSetVMflags",       "@16", -1,  -1,  -1,  -1, EPT_PROC32},
 #endif
 };
+
 
 /**
  * szSymbolFile holds the name of the symbol file used.
@@ -830,6 +856,7 @@ int ProbeSymFile(const char * pszFilename)
     {
         aImportTab[i].fFound = 0;
         #ifdef DEBUG
+        aImportTab[i].iObject = 0;
         aImportTab[i].offObject = 0;
         aImportTab[i].ulAddress = 0;
         aImportTab[i].usSel = 0;
