@@ -1,4 +1,7 @@
-/* $Id: changelog,v 1.2229 2002-07-21 09:16:47 sandervl Exp $ */
+/* $Id: changelog,v 1.2230 2002-07-22 11:06:18 sandervl Exp $ */
+
+ 2002-07-22: Sander van Leeuwen <sandervl@innotek.de> 
+    - GDI32:    o Check delete flag in DeleteObject. WGSS doesn't do it for us.
 
  2002-07-21: Sander van Leeuwen <sandervl@innotek.de> 
     - KERNEL32: o Use shared memory in high region (> 512MB) if available
