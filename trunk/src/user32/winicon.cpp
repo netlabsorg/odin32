@@ -1,4 +1,4 @@
-/* $Id: winicon.cpp,v 1.35 2002-07-15 10:16:29 sandervl Exp $ */
+/* $Id: winicon.cpp,v 1.36 2002-11-12 14:19:17 sandervl Exp $ */
 /*
  * Win32 Icon Code for OS/2
  *
@@ -883,7 +883,7 @@ static HGLOBAL CURSORICON_CreateFromResource( HINSTANCE hInstance, DWORD dwResGr
     DoStretch = (bmi->bmiHeader.biHeight/2 != height) || (bmi->bmiHeader.biWidth != width);
 
     colorsize = DIB_GetDIBImageBytes(bmi->bmiHeader.biWidth, bmi->bmiHeader.biHeight/2, bmi->bmiHeader.biBitCount);
-    bwsize    = (bmi->bmiHeader.biWidth * bmi->bmiHeader.biHeight/2)/8;
+    bwsize    = BITMAP_GetWidthBytes(bmi->bmiHeader.biWidth, 1) * bmi->bmiHeader.biHeight/2;
 
     /* Check bitmap header */
     if((bmi->bmiHeader.biSize != sizeof(BITMAPCOREHEADER)) &&
