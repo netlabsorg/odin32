@@ -1,4 +1,4 @@
- /* $Id: ChangeLog,v 1.520 1999-12-07 20:35:40 achimha Exp $ */
+ /* $Id: ChangeLog,v 1.521 1999-12-07 20:46:18 sandervl Exp $ */
 
  99-12-07: Achim Hasenmueller <achimha@innotek.de>
         - WSOCK32: Moved old implementation to wsock32/old and promoted
@@ -12,6 +12,7 @@
                   painting problems for i.e. memory SDK sample & AbiWord
                   Disabled CS_OWNDC support for now -> otherwise certain
                   windows never receive a WM_ERASEBKGND message. (memory SDK sample)
+                  Fix for Abiword & memory.exe -> extra check for owndc in Begin/EndPaint
 
  99-12-06: Sander van Leeuwen <sandervl@xs4all.nl>
 	- KERNEL32/OLEAUT32: Renamed OLEAUT32 to OLAUTOS2 to avoid conflicts
