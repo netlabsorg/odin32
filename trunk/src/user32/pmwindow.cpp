@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.20 1999-10-07 19:38:27 sandervl Exp $ */
+/* $Id: pmwindow.cpp,v 1.21 1999-10-07 23:21:30 sandervl Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -148,7 +148,8 @@ BOOL InitPM()
      hab,                               /* Anchor block handle          */
      (PSZ)WIN32_STDCLASS,               /* Window class name            */
      (PFNWP)Win32WindowProc,            /* Address of window procedure  */
-     CS_SIZEREDRAW | CS_HITTEST | CS_MOVENOTIFY,
+//     CS_SIZEREDRAW | CS_HITTEST | CS_MOVENOTIFY,
+     CS_SIZEREDRAW | CS_HITTEST,
      NROF_WIN32WNDBYTES)) {
         dprintf(("WinRegisterClass Win32BaseWindow failed"));
         return(FALSE);
@@ -341,21 +342,16 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
         if (yDelta != 0)
         {
             POINT pt;
-#if 1
             if(GetCaretPos (&pt) == TRUE)
             {
                 pt.y -= yDelta;
                 SetCaretPos (pt.x, pt.y);
             }
-#else
-            GetCaretPos (&pt);
-            pt.y -= yDelta;
-            SetCaretPos (pt.x, pt.y);
-#endif
         }
         win32wnd->MsgPosChanged((LPARAM)&wp);
 
-        break;
+	goto RunDefWndProc;
+//        break;
     }
 
     case WM_ERASEBACKGROUND:
@@ -386,10 +382,9 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
         swp.fl = SWP_MOVE | SWP_NOREDRAW;
         swp.hwnd             = hwnd;
         swp.hwndInsertBehind = NULLHANDLE;
+        dprintf(("OS2: WM_MOVE %x %x (%d,%d) (%d,%d)", hwnd, swp.fl, swp.x, swp.y, swp.cx, swp.cy));
 
         OSLibMapSWPtoWINDOWPOS(&swp, &wp, &swpo, NULLHANDLE, hFrame);
-
-        dprintf(("OS2: WM_MOVE %x %x (%d,%d) (%d,%d)", hwnd, swp.fl, swp.x, swp.y, swp.cx, swp.cy));
 
         wp.flags &= ~SWP_NOMOVE_W;
         wp.hwnd = win32wnd->getWindowHandle();
@@ -398,6 +393,7 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
         win32wnd->MsgPosChanged((LPARAM)&wp);
         break;
     }
+
     case WM_SIZE:
     {
         break;
