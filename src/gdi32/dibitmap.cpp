@@ -1,4 +1,4 @@
-/* $Id: dibitmap.cpp,v 1.35 2002-11-26 10:53:07 sandervl Exp $ */
+/* $Id: dibitmap.cpp,v 1.36 2002-12-30 14:05:21 sandervl Exp $ */
 
 /*
  * GDI32 dib & bitmap code
@@ -52,7 +52,8 @@ HBITMAP WIN32API CreateDIBitmap(HDC hdc, const BITMAPINFOHEADER *lpbmih,
         //TODO: doesn't work if memory is readonly!!
         ((BITMAPINFOHEADER *)lpbmih)->biHeight = -lpbmih->biHeight;
 
-        if(lpbInit && fdwInit == CBM_INIT) {
+        if(lpbInit && fdwInit == CBM_INIT) 
+        {
             // upside down
             HBITMAP rc = 0;
             long lLineByte = DIB_GetDIBWidthBytes(lpbmih->biWidth, lpbmih->biBitCount);
@@ -68,7 +69,7 @@ HBITMAP WIN32API CreateDIBitmap(HDC hdc, const BITMAPINFOHEADER *lpbmih,
                     pbSrc -= lLineByte;
                 }
                 rc = CreateDIBitmap(hdc, lpbmih, fdwInit, newbits, lpbmi, fuUsage);
-		        free( newbits );
+                free( newbits );
             }
 
             ((BITMAPINFOHEADER *)lpbmih)->biHeight = iHeight;
@@ -543,10 +544,40 @@ int WIN32API SetDIBits(HDC hdc, HBITMAP hBitmap, UINT startscan, UINT numlines, 
         pBits = newbits;
     }
 
-    if(pBitmapInfo->bmiHeader.biHeight < 0) {
-        dprintf(("!WARNING! Negative height!!"));
+    //If upside down, reverse scanlines and call SetDIBits again
+    if(pBitmapInfo->bmiHeader.biHeight < 0 && (pBitmapInfo->bmiHeader.biCompression == BI_RGB ||
+       pBitmapInfo->bmiHeader.biCompression == BI_BITFIELDS)) 
+    {
+        // upside down
+        INT rc = -1;
+        long lLineByte;
+
+        //TODO: doesn't work if memory is readonly!!
+        ((BITMAPINFO *)pBitmapInfo)->bmiHeader.biHeight = -pBitmapInfo->bmiHeader.biHeight;
+
+        lLineByte = DIB_GetDIBWidthBytes(pBitmapInfo->bmiHeader.biWidth, pBitmapInfo->bmiHeader.biBitCount);
+
+        dprintf(("Reverse bitmap (negative height)"));
+        char *pNewBits = (char *)malloc( lLineByte * numlines );
+        if(pNewBits) {
+            unsigned char *pbSrc = (unsigned char *)pBits + lLineByte * (numlines - 1);
+            unsigned char *pbDst = (unsigned char *)pNewBits;
+            for(int y = 0; y < numlines; y++) {
+                memcpy( pbDst, pbSrc, lLineByte );
+                pbDst += lLineByte;
+                pbSrc -= lLineByte;
+            }
+            ret = O32_SetDIBits(hdc, hBitmap, startscan, numlines, pNewBits, pBitmapInfo, usage);
+            free(pNewBits);
+        }
+        else DebugInt3();
+
+        //TODO: doesn't work if memory is readonly!!
+        ((BITMAPINFO *)pBitmapInfo)->bmiHeader.biHeight = -pBitmapInfo->bmiHeader.biHeight;
     }
-    ret = O32_SetDIBits(hdc, hBitmap, startscan, numlines, pBits, pBitmapInfo, usage);
+    else {
+        ret = O32_SetDIBits(hdc, hBitmap, startscan, numlines, pBits, pBitmapInfo, usage);
+    }
     if(newbits) free(newbits);
 
     if(DIBSection::getSection() != NULL)
