@@ -1,7 +1,13 @@
-/* $Id: changelog,v 1.2084 2002-05-17 10:11:47 sandervl Exp $ */
+/* $Id: changelog,v 1.2085 2002-05-17 13:10:58 sandervl Exp $ */
+
+ 2002-05-17: Platon Fomichev <platon@innotek.de>
+    - USER23:   o Experimental DIALOG_IsAccelerator fix; return FALSE
+                  if window is not visible (fixes endless loop in
+                  property sheet when switching page with keyboard)
 
  2002-05-17: Sander van Leeuwen <sandervl@xs4all.nl>
     - OLEAUT32: o Resync with latest Wine
+    - KERNEL32: o Implemented IOCTL_CDROM_SEEK_AUDIO_MSF
 
  2002-05-16: knut st. osmundsen <bird@anduin.net>
     - MAKE:     o Merged in latest changes.
