@@ -1,4 +1,4 @@
-/* $Id: edit.cpp,v 1.42 2000-12-16 15:42:11 sandervl Exp $ */
+/* $Id: edit.cpp,v 1.43 2001-07-08 15:51:41 sandervl Exp $ */
 /*
  *      Edit control
  *
@@ -1704,6 +1704,7 @@ static void EDIT_PaintLine(HWND hwnd, EDITSTATE *es, HDC dc, INT line, BOOL rev)
             newRgn = CreateRectRgnIndirect(&rect);
             combRgn = CreateRectRgnIndirect(&rect); //dummy parameter
             CombineRgn(combRgn,oldRgn,newRgn,RGN_XOR);
+            CombineRgn(combRgn,oldRgn,combRgn,RGN_AND);
             SelectClipRgn(dc,combRgn);
             EDIT_PaintText(hwnd,es,dc,x,y,line,0,ll,FALSE);
             CombineRgn(combRgn,oldRgn,newRgn,RGN_AND);
