@@ -1,4 +1,4 @@
-/* $Id: Fileio.cpp,v 1.63 2002-01-02 18:37:51 sandervl Exp $ */
+/* $Id: Fileio.cpp,v 1.64 2002-02-03 21:06:40 sandervl Exp $ */
 
 /*
  * Win32 File IO API functions for OS/2
@@ -724,28 +724,6 @@ ODINFUNCTION4(UINT, GetTempFileNameW,
   FreeAsciiString(asciiprefix);
   FreeAsciiString(asciipath);
   free(asciitemp);
-  return(rc);
-}
-//******************************************************************************
-//******************************************************************************
-ODINFUNCTION2(UINT, GetTempPathA,
-              UINT, arg1,
-              LPSTR, arg2)
-{
-  return O32_GetTempPath(arg1, arg2);
-}
-//******************************************************************************
-//******************************************************************************
-ODINFUNCTION2(UINT, GetTempPathW,
-              UINT, nBufferLength,
-              LPWSTR, lpBuffer)
-{
-  char *asciibuffer = (char *)malloc(nBufferLength+1);
-  DWORD rc;
-
-  rc = O32_GetTempPath(nBufferLength, asciibuffer);
-  if(rc)      AsciiToUnicode(asciibuffer, lpBuffer);
-  free(asciibuffer);
   return(rc);
 }
 //******************************************************************************

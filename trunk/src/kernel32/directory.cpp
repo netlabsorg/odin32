@@ -1,4 +1,4 @@
-/* $Id: directory.cpp,v 1.42 2001-11-14 18:38:45 sandervl Exp $ */
+/* $Id: directory.cpp,v 1.43 2002-02-03 21:06:40 sandervl Exp $ */
 
 /*
  * Win32 Directory functions for OS/2
@@ -753,3 +753,41 @@ DWORD WINAPI SearchPathW(LPCWSTR path, LPCWSTR name, LPCWSTR ext,
     SetLastError(0);
     return ret;
 }
+//******************************************************************************
+//******************************************************************************
+ODINFUNCTION2(UINT, GetTempPathA,
+              UINT, count, LPSTR, path)
+{
+    UINT ret;
+    if (!(ret = GetEnvironmentVariableA( "TMP", path, count )))
+        if (!(ret = GetEnvironmentVariableA( "TEMP", path, count )))
+            if (!(ret = GetCurrentDirectoryA( count, path )))
+                return 0;
+    if (count && (ret < count - 1) && (path[ret-1] != '\\'))
+    {
+        path[ret++] = '\\';
+        path[ret]   = '\0';
+    }
+    return ret;
+}
+//******************************************************************************
+//******************************************************************************
+ODINFUNCTION2(UINT, GetTempPathW,
+              UINT, count, LPWSTR, path)
+{
+    static const WCHAR tmp[]  = { 'T', 'M', 'P', 0 };
+    static const WCHAR temp[] = { 'T', 'E', 'M', 'P', 0 };
+    UINT ret;
+    if (!(ret = GetEnvironmentVariableW( tmp, path, count )))
+        if (!(ret = GetEnvironmentVariableW( temp, path, count )))
+            if (!(ret = GetCurrentDirectoryW( count, path )))
+                return 0;
+    if (count && (ret < count - 1) && (path[ret-1] != '\\'))
+    {
+        path[ret++] = '\\';
+        path[ret]   = '\0';
+    }
+    return ret;
+}
+//******************************************************************************
+//******************************************************************************
