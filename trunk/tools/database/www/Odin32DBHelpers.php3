@@ -2288,7 +2288,6 @@ function Odin32DBDesignNote($db, $iRefcode)
             {
                 while ($iLevel > 0 && $iLevel < $array["level"])
                 {
-                    echo "debug ".$iLevel." < ".$array["level"]."<br>\n";
                     $sSection .= '.0';
                     $iLevel = $iLevel + 1;
                 }
