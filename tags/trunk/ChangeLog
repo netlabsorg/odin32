@@ -1,11 +1,13 @@
-/* $Id: ChangeLog,v 1.1549 2001-06-27 13:37:36 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.1550 2001-06-27 15:34:09 sandervl Exp $ */
 
- 2001-06-28: Sander van Leeuwen <sandervl@xs4all.nl>
+ 2001-06-27: Sander van Leeuwen <sandervl@xs4all.nl>
     - KERNEL32: o CreateProcess fixes for finding executables
                 o Don't load debug information
                 o Minor fix for PROCESSOR_IDENTIFIER environment variable
                   (model & stepping were reversed)
-                o Reset FPU before calling executable entrypoint or thread handler
+                o FPU hack before calling executable & thread entrypoints.
+                  For some weird reason this affects performance of floating 
+                  point apps. (at least for one fortan benchmark)
 
  2001-06-25: knut st. osmundsen <knut.stange.osmundsen@mynd.no>
     - include\odin.h:
@@ -62,7 +64,6 @@
                   This is very useful in when you wanna check a declaration...
 
  2001-06-25: Sander van Leeuwen <sandervl@xs4all.nl>
->>>>>>> 1.1548
     - USER32:   o Minor WM_TIMER translation fix (weird check removed)
 
  2001-06-24: Sander van Leeuwen <sandervl@xs4all.nl>
