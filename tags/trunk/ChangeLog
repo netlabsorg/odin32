@@ -1,4 +1,7 @@
-/* $Id: ChangeLog,v 1.2493 2003-02-22 09:55:25 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.2494 2003-02-22 10:05:59 sandervl Exp $ */
+
+ 2003-02-22: Sander van Leeuwen <sandervl@innotek   >
+    - WS2_32:   o Added WSARecv(From) & WSASend(To) stubs
 
  2003-02-22: Platon Fomichev <stauff@innotek   >
     - USER32:   o Restoring maximized window from iconic state caused window
