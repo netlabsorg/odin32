@@ -1,4 +1,4 @@
-/* $Id: winimgres.cpp,v 1.38 2000-05-28 16:45:13 sandervl Exp $ */
+/* $Id: winimgres.cpp,v 1.39 2000-06-16 21:23:40 sandervl Exp $ */
 
 /*
  * Win32 PE Image class (resource methods)
@@ -63,6 +63,14 @@ PIMAGE_RESOURCE_DATA_ENTRY
   //PH: our system LX DLLs might not have a resource segment
   if (pResDir == NULL)
     return NULL;
+
+  if(HIWORD(id)) {
+    	char *lpszName = (char *)id;
+	//"#102" really means numeric id 102
+	if(lpszName[0] == '#') {
+		id = atoi(&lpszName[1]);
+	}
+  }
 
   /* set pointer to first resource type entry */
   prde = (PIMAGE_RESOURCE_DIRECTORY_ENTRY)((ULONG)pResDir + sizeof(IMAGE_RESOURCE_DIRECTORY));
@@ -340,7 +348,6 @@ HRSRC Win32ImageBase::findResourceA(LPCSTR lpszName, LPSTR lpszType, ULONG langi
         break;   
     }
     id = (ULONG)lpszName;
-
     pData = getPEResourceEntry(id, type, lang, &error);
     if(pData == NULL) {
         //TODO: Optimize this; check if language wasn't found
