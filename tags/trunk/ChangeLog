@@ -1,4 +1,8 @@
-/* $Id: ChangeLog,v 1.2726 2004-04-27 08:28:58 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.2727 2004-04-30 13:24:38 sandervl Exp $ */
+
+ 2004-04-30: Sander van Leeuwen <sandervl@innotek   >
+    - COMDLG32: o Always turn off collate support
+    - GDI32:    o drawSingleLinePoint: wrong pen style checks
 
  2004-04-27: Andy Willis <abwillis@comcast    >
     - IMM32:    o Renamed to IMM32OS2
