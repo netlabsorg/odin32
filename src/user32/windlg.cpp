@@ -1,4 +1,4 @@
-/* $Id: windlg.cpp,v 1.30 2002-02-12 18:07:21 sandervl Exp $ */
+/* $Id: windlg.cpp,v 1.31 2002-02-26 11:12:25 sandervl Exp $ */
 /*
  * Win32 dialog apis for OS/2
  *
@@ -68,19 +68,19 @@ HWND WIN32API CreateDialogParamW(HINSTANCE hInst, LPCWSTR lpszTemplate,
 //This function can be used by a custom Odin build to register a hook procedure
 //that gets called before or after dialog creation
 //******************************************************************************
-static HOOKPROC pfnDialogHook = NULL;
+static HOOKPROC pfnCustomDialogHook = NULL;
 //******************************************************************************
-BOOL WIN32API SetDialogHook(HOOKPROC pfnDialogProc)
+BOOL WIN32API SetCustomDialogHook(HOOKPROC pfnDialogProc)
 {
-    dprintf(("SetDialogHook %x", pfnDialogProc));
-    pfnDialogHook = pfnDialogProc;
+    dprintf(("SetCustomDialogHook %x", pfnDialogProc));
+    pfnCustomDialogHook = pfnDialogProc;
     return TRUE;
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API ClearDialogHook()
+BOOL WIN32API ClearCustomDialogHook()
 {
-    pfnDialogHook = NULL;
+    pfnCustomDialogHook = NULL;
     return TRUE;
 }
 //******************************************************************************
@@ -112,9 +112,9 @@ HWND WIN32API CreateDialogIndirectParamA(HINSTANCE hInst,
     }
     HWND hwnd = dialog->getWindowHandle();
 
-    if(pfnDialogHook) {
+    if(pfnCustomDialogHook) {
         dprintf(("Calling Dialog hook for dialog %x", hwnd));
-        pfnDialogHook(HCUSTOM_POSTDIALOGCREATION, hwnd, 0);
+        pfnCustomDialogHook(HCUSTOM_POSTDIALOGCREATION, hwnd, 0);
     }
 
     RELEASE_WNDOBJ(dialog);
@@ -149,9 +149,9 @@ HWND WIN32API CreateDialogIndirectParamW(HINSTANCE hInst,
     }
     HWND hwnd = dialog->getWindowHandle();
 
-    if(pfnDialogHook) {
+    if(pfnCustomDialogHook) {
         dprintf(("Calling Dialog hook for dialog %x", hwnd));
-        pfnDialogHook(HCUSTOM_POSTDIALOGCREATION, hwnd, 0);
+        pfnCustomDialogHook(HCUSTOM_POSTDIALOGCREATION, hwnd, 0);
     }
 
     RELEASE_WNDOBJ(dialog);
