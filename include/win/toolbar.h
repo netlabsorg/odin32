@@ -1,4 +1,4 @@
-/* $Id: toolbar.h,v 1.4 1999-07-12 05:37:38 achimha Exp $ */
+/* $Id: toolbar.h,v 1.5 1999-12-18 20:52:07 achimha Exp $ */
 
 /*
  * Toolbar class extra info
@@ -63,11 +63,13 @@ typedef struct tagTOOLBAR_INFO
     HWND     hwndNotify;      /* handle to the window that gets notifications */
     BOOL     bTransparent;    /* background transparency flag */
     BOOL     bAutoSize;       /* auto size deadlock indicator */
+    BOOL     bAnchor;         /* anchor highlight enabled */
     DWORD      dwExStyle;       /* extended toolbar style */
     DWORD      dwDTFlags;       /* DrawText flags */
 
     COLORREF   clrInsertMark;   /* insert mark color */
     RECT     rcBound;         /* bounding rectangle */
+    INT      iVersion;
 
     TBUTTON_INFO *buttons;      /* pointer to button array */
     LPWSTR       *strings;      /* pointer to string array */
