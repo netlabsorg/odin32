@@ -1,4 +1,4 @@
-/* $Id: critsection.cpp,v 1.5 2000-03-29 17:17:17 sandervl Exp $ */
+/* $Id: critsection.cpp,v 1.6 2000-07-26 18:06:22 sandervl Exp $ */
 /*
  * Win32 critical sections
  * 
@@ -114,6 +114,7 @@ void WINAPI EnterCriticalSection( CRITICAL_SECTION *crit )
             rec.ExceptionInformation[0] = (DWORD)crit;
             RtlRaiseException( &rec );
 #endif
+            dprintf(("ERROR: EnterCritSection: WaitForSingleObject returned %d -> RaiseException", res));
             RaiseException(EXCEPTION_CRITICAL_SECTION_WAIT, 0, 1, (DWORD *)crit);
         }
     }
