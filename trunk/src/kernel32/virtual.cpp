@@ -1,4 +1,4 @@
-/* $Id: virtual.cpp,v 1.15 1999-10-06 10:02:34 phaller Exp $ */
+/* $Id: virtual.cpp,v 1.16 1999-10-09 22:28:59 phaller Exp $ */
 
 /*
  * Win32 virtual memory functions
@@ -255,14 +255,14 @@ HANDLE WINAPI VIRTUAL_MapFileA( LPCSTR name , LPVOID *lpMapping)
 
 //******************************************************************************
 //******************************************************************************
-LPVOID WIN32API VirtualAlloc(LPVOID lpvAddress, DWORD cbSize, DWORD fdwAllocationType,
-                             DWORD fdwProtect)
+ODINFUNCTION4(LPVOID, VirtualAlloc, LPVOID, lpvAddress,
+                                    DWORD,  cbSize,
+                                    DWORD,  fdwAllocationType,
+                                    DWORD,  fdwProtect)
 {
- PVOID Address = lpvAddress;
- ULONG flag = 0, base;
- DWORD rc;
-
-  dprintf(("VirtualAlloc at %X; %d bytes, fAlloc %d, fProtect %d\n", (int)lpvAddress, cbSize, fdwAllocationType, fdwProtect));
+  PVOID Address = lpvAddress;
+  ULONG flag = 0, base;
+  DWORD rc;
 
   if (cbSize > 0x7fc00000)  /* 2Gb - 4Mb */
   {
@@ -396,15 +396,18 @@ ODINFUNCTION3(BOOL, VirtualFree, LPVOID, lpvAddress,
   return(TRUE);
 }
 //******************************************************************************
-//LPVOID lpvAddress;            /* address of region of committed pages */
-//DWORD  cbSize;                /* size of the region   */
-//DWORD  fdwNewProtect;         /* desired access protection    */
-//PDWORD pfdwOldProtect;        /* address of variable to get old protection    */
+//LPVOID lpvAddress;            /* address of region of committed pages       */
+//DWORD  cbSize;                /* size of the region                         */
+//DWORD  fdwNewProtect;         /* desired access protection                  */
+//PDWORD pfdwOldProtect;        /* address of variable to get old protection  */
 //TODO: Not 100% complete
 //TODO: SetLastError on failure
 //******************************************************************************
-BOOL WIN32API VirtualProtect(LPVOID lpvAddress, DWORD cbSize, DWORD fdwNewProtect,
-                             DWORD *pfdwOldProtect)
+
+ODINFUNCTION4(BOOL, VirtualProtect, LPVOID, lpvAddress,
+                                    DWORD,  cbSize,
+                                    DWORD,  fdwNewProtect,
+                                    DWORD*, pfdwOldProtect)
 {
  DWORD rc;
  ULONG  pageFlags = 0;
@@ -472,11 +475,12 @@ BOOL WIN32API VirtualProtect(LPVOID lpvAddress, DWORD cbSize, DWORD fdwNewProtec
 }
 //******************************************************************************
 //******************************************************************************
-DWORD WIN32API VirtualQuery(LPCVOID lpvAddress, LPMEMORY_BASIC_INFORMATION pmbiBuffer,
-                            DWORD cbLength)
+ODINFUNCTION3(DWORD, VirtualQuery, LPCVOID, lpvAddress,
+                                   LPMEMORY_BASIC_INFORMATION, pmbiBuffer,
+                                   DWORD,   cbLength)
 {
- ULONG  cbRangeSize, dAttr;
- DWORD rc;
+  ULONG  cbRangeSize, dAttr;
+  DWORD rc;
 
   if(lpvAddress == NULL || pmbiBuffer == NULL || cbLength == 0) {
    	return 0;
@@ -542,14 +546,16 @@ DWORD WIN32API VirtualQuery(LPCVOID lpvAddress, LPMEMORY_BASIC_INFORMATION pmbiB
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API VirtualLock( LPVOID lpAddress, DWORD dwSize )
+ODINFUNCTION2(BOOL, VirtualLock, LPVOID, lpAddress,
+                                 DWORD,  dwSize)
 {
   dprintf(("VirtualLock at %d; %d bytes - stub (TRUE)\n", (int)lpAddress, dwSize));
   return TRUE;
 }
 
 //******************************************************************************
-BOOL WIN32API VirtualUnlock( LPVOID lpAddress, DWORD dwSize )
+ODINFUNCTION2(BOOL, VirtualUnlock, LPVOID, lpAddress,
+                                   DWORD,  dwSize)
 {
   dprintf(("VirtualUnlock at %d; %d bytes - stub (TRUE)\n", (int)lpAddress, dwSize));
   return TRUE;
@@ -574,19 +580,12 @@ BOOL WIN32API VirtualUnlock( LPVOID lpAddress, DWORD dwSize )
  * Author    : Patrick Haller [Mon, 1998/06/15 08:00]
  *****************************************************************************/
 
-BOOL WIN32API VirtualProtectEx(HANDLE hProcess,
-                                  LPVOID lpvAddress,
-                                  DWORD  cbSize,
-                                  DWORD  fdwNewProtect,
-                                  LPDWORD pfdwOldProtect)
+ODINFUNCTION5(BOOL, VirtualProtectEx, HANDLE,  hProcess,
+                                      LPVOID,  lpvAddress,
+                                      DWORD,   cbSize,
+                                      DWORD,   fdwNewProtect,
+                                      LPDWORD, pfdwOldProtect)
 {
-  dprintf(("KERNEL32: VirtualProtectEx(%08x,%08xh,%08xh,%08xh,%08xh) not implemented for different processes.\n",
-           hProcess,
-           lpvAddress,
-           cbSize,
-           fdwNewProtect,
-           pfdwOldProtect));
-
   return VirtualProtect(lpvAddress, cbSize, fdwNewProtect, pfdwOldProtect);
 }
 
@@ -607,18 +606,10 @@ BOOL WIN32API VirtualProtectEx(HANDLE hProcess,
  * Author    : Patrick Haller [Mon, 1998/06/15 08:00]
  *****************************************************************************/
 
-DWORD WIN32API VirtualQueryEx(HANDLE  hProcess,
-                                 LPCVOID  lpvAddress,
-                                 LPMEMORY_BASIC_INFORMATION pmbiBuffer,
-                                 DWORD   cbLength)
+ODINFUNCTION4(DWORD, VirtualQueryEx, HANDLE,  hProcess,
+                                     LPCVOID, lpvAddress,
+                                     LPMEMORY_BASIC_INFORMATION, pmbiBuffer,
+                                     DWORD,   cbLength)
 {
-  dprintf(("KERNEL32: VirtualQueryEx(%08x,%08xh,%08xh,%08xh) not implemented for different processes.\n",
-           hProcess,
-           lpvAddress,
-           pmbiBuffer,
-           cbLength));
-
   return VirtualQuery(lpvAddress, pmbiBuffer, cbLength);
 }
-//******************************************************************************
-//******************************************************************************
