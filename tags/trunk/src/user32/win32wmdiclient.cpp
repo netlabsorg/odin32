@@ -1,4 +1,4 @@
-/* $Id: win32wmdiclient.cpp,v 1.2 1999-09-23 14:39:53 phaller Exp $ */
+/* $Id: win32wmdiclient.cpp,v 1.3 1999-10-03 20:38:02 sandervl Exp $ */
 /*
  * Win32 MDI Client Window Class for OS/2
  *
@@ -58,6 +58,12 @@ Win32MDIClientWindow::~Win32MDIClientWindow()
 {
     if(frameTitle)
         HeapFree(GetProcessHeap(), 0, frameTitle);
+}
+//******************************************************************************
+//******************************************************************************
+BOOL Win32MDIClientWindow::isMDIClient()
+{
+    return TRUE;
 }
 //******************************************************************************
 //******************************************************************************
