@@ -1,4 +1,4 @@
-/* $Id: scroll.cpp,v 1.25 1999-11-24 18:21:37 cbratschi Exp $ */
+/* $Id: scroll.cpp,v 1.26 1999-12-01 18:23:28 cbratschi Exp $ */
 /*
  * Scrollbar control
  *
@@ -82,10 +82,14 @@ static HWND SCROLL_GetScrollHandle(HWND hwnd,INT nBar)
     case SB_VERT:
       {
         Win32BaseWindow *win32wnd = Win32BaseWindow::GetWindowFromHandle(hwnd);
+
         if (!win32wnd) return 0;
-        if (nBar == SB_HORZ) return  Win32BaseWindow::OS2ToWin32Handle(win32wnd->getHorzScrollHandle());
-        else return  Win32BaseWindow::OS2ToWin32Handle(win32wnd->getVertScrollHandle());
+        if (nBar == SB_HORZ)
+          return  (win32wnd->getStyle() & WS_HSCROLL) ? Win32BaseWindow::OS2ToWin32Handle(win32wnd->getHorzScrollHandle()):0;
+        else
+          return (win32wnd->getStyle() & WS_VSCROLL) ? Win32BaseWindow::OS2ToWin32Handle(win32wnd->getVertScrollHandle()):0;
       }
+
     case SB_CTL:
       return hwnd;
 
@@ -1421,6 +1425,7 @@ INT WINAPI SetScrollInfo(HWND hwnd,INT nBar,const SCROLLINFO *info,BOOL bRedraw)
         } else if (nBar != SB_CTL)
         {
           action = SA_SSI_HIDE;
+          infoPtr->flags = 0;
           goto done;
         }
       } else  /* Show and enable scroll-bar */
@@ -1629,7 +1634,7 @@ BOOL WINAPI ShowScrollBar(
       {
         dprintf(("ShowScrollBar window not found!"));
         SetLastError(ERROR_INVALID_WINDOW_HANDLE);
-        return 0;
+        return FALSE;
       }
 
       return window->showScrollBars(nBar == SB_HORZ || nBar == SB_BOTH,nBar == SB_VERT || nBar == SB_BOTH,fShow);
@@ -1662,6 +1667,7 @@ BOOL WINAPI EnableScrollBar( HWND hwnd, INT nBar, UINT flags)
   } else
   {
     Win32BaseWindow *window = Win32BaseWindow::GetWindowFromHandle(hwnd);
+
     if(!window)
     {
       dprintf(("EnableScrollBar window not found!"));
@@ -1673,7 +1679,7 @@ BOOL WINAPI EnableScrollBar( HWND hwnd, INT nBar, UINT flags)
     {
       BOOL rc = FALSE;
 
-      if (nBar == SB_VERT || nBar == SB_BOTH)
+      if ((nBar == SB_VERT || nBar == SB_BOTH) && window->getStyle() & WS_VSCROLL)
       {
         HWND hwndScroll =  Win32BaseWindow::OS2ToWin32Handle(window->getVertScrollHandle());
 
@@ -1689,9 +1695,9 @@ BOOL WINAPI EnableScrollBar( HWND hwnd, INT nBar, UINT flags)
           rc = TRUE;
         }
       }
-      if (nBar == SB_HORZ || (rc && nBar == SB_BOTH))
+      if ((nBar == SB_HORZ || (rc && nBar == SB_BOTH)) && window->getStyle() & WS_HSCROLL)
       {
-        HWND hwndScroll =  Win32BaseWindow::OS2ToWin32Handle(window->getVertScrollHandle());
+        HWND hwndScroll =  Win32BaseWindow::OS2ToWin32Handle(window->getHorzScrollHandle());
 
         infoPtr = SCROLL_GetInfoPtr(hwndScroll,SB_VERT);
         if (infoPtr)
