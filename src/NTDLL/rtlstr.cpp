@@ -1,13 +1,10 @@
 /*
  * Project Odin Software License can be found in LICENSE.TXT
  * Win32 NT Runtime / NTDLL for OS/2
- *
- * Copyright 1998       original WINE Author
- * Copyright 1998, 1999 Patrick Haller (phaller@gmx.net)
- *
  * Rtl string functions
  *
  * Copyright 1996-1998 Marcus Meissner
+ * Copyright 1998, 1999 Patrick Haller (phaller@gmx.net)
  */
 
 #include "config.h"
@@ -15,6 +12,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
+
+#include <os2win.h>
+#include <unicode.h>
 
 #include "ntdll.h"
 #include "windef.h"
@@ -60,7 +60,9 @@ DWORD WINAPI RtlAnsiStringToUnicodeString(PUNICODE_STRING uni,
   if (unilen>uni->MaximumLength)
     return STATUS_BUFFER_OVERFLOW;
 
-  lstrcpynAtoW(uni->Buffer,ansi->Buffer,unilen/2);
+  AsciiToUnicodeN(ansi->Buffer,
+                  uni->Buffer,
+                  unilen/2);
 
   return STATUS_SUCCESS;
 }
@@ -98,8 +100,8 @@ DWORD WINAPI RtlOemStringToUnicodeString(PUNICODE_STRING uni,
   if (unilen>uni->MaximumLength)
     return STATUS_BUFFER_OVERFLOW;
 
-  lstrcpynAtoW(uni->Buffer,
-               ansi->Buffer,
+  AsciiToUnicodeN(ansi->Buffer,
+               uni->Buffer,
                unilen/2);
   return STATUS_SUCCESS;
 }
@@ -134,9 +136,9 @@ DWORD WINAPI RtlMultiByteToUnicodeN(LPWSTR  unistr,
                       HEAP_ZERO_MEMORY,
                       (len+1)*sizeof(WCHAR));
 
-  lstrcpynAtoW(x,
-               oemstr,
-               len+1);
+  AsciiToUnicodeN(oemstr,
+                  x,
+                  len+1);
 
   memcpy(unistr,
          x,
@@ -177,9 +179,9 @@ DWORD WINAPI RtlOemToUnicodeN(LPWSTR  unistr,
                       HEAP_ZERO_MEMORY,
                       (len+1)*sizeof(WCHAR));
 
-  lstrcpynAtoW(x,
-               oemstr,
-               len+1);
+  AsciiToUnicodeN(oemstr,
+                  x,
+                  len+1);
 
   memcpy(unistr,
          x,
@@ -213,7 +215,7 @@ VOID WINAPI RtlInitAnsiString(PANSI_STRING target,
 
 
 /**************************************************************************
- *                 RtlInitOemString           
+ *                 RtlInitOemString
  */
 VOID WINAPI RtlInitOemString(POEM_STRING target,
                               LPCSTR       source)
@@ -347,9 +349,9 @@ DWORD WINAPI RtlUnicodeToOemN(LPSTR   oemstr,
                      HEAP_ZERO_MEMORY,
                      len+1);
 
-  lstrcpynWtoA(x,
-               unistr,
-               len+1);
+  UnicodeToAsciiN(unistr,
+                  x,
+                  len+1);
 
   memcpy(oemstr,
          x,
@@ -383,9 +385,9 @@ DWORD WINAPI RtlUnicodeStringToOemString(PANSI_STRING    oem,
   }
 
   oem->Length = uni->Length/2;
-  lstrcpynWtoA(oem->Buffer,
-               uni->Buffer,
-               uni->Length/2+1);
+  UnicodeToAsciiN(uni->Buffer,
+                  oem->Buffer,
+                  oem->MaximumLength);
   return 0;
 }
 
@@ -410,9 +412,9 @@ DWORD WINAPI RtlUnicodeStringToAnsiString(PANSI_STRING    oem,
   }
 
   oem->Length = uni->Length/2;
-  lstrcpynWtoA(oem->Buffer,
-               uni->Buffer,
-               uni->Length/2+1);
+  UnicodeToAsciiN(uni->Buffer,
+                  oem->Buffer,
+                  oem->MaximumLength);
 
   return 0;
 }
