@@ -1,4 +1,8 @@
-/* $Id: ChangeLog,v 1.1651 2001-08-16 21:33:59 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.1652 2001-08-18 03:51:47 phaller Exp $ */
+
+ 2001-08-16: Patrick Haller <patrick.haller@innotek.de>
+    - GDI32:    o Optimization for dibsect::findSection()
+    		  (helps DeleteObject)
 
  2001-08-16: Sander van Leeuwen <sandervl@xs4all.nl>
     - INSTALL:  o Add date when odininst was last run to odin.ini
