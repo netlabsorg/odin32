@@ -1,4 +1,4 @@
- /* $Id: ChangeLog,v 1.444 1999-11-13 16:41:06 cbratschi Exp $ */
+ /* $Id: ChangeLog,v 1.445 1999-11-13 18:50:54 sandervl Exp $ */
 
  99-11-13: Christoph Bratschi <cbratschi@datacomm.ch>
 	- USER32: fixed more edit bugs
@@ -10,6 +10,8 @@
                      returned by DosAliasMem -> search for original
                      memory mapped pointer and use that one)
                     -> fixes problems in Lotus Notes 5.0
+                    Also commit these pages before calling DosRead as exceptions
+                    in the kernel can't be handled by us.
 	- KERNEL32\PELDR:
                     Better error reporting
 	- COMDLG32: Fixed bug in strlen: first check if pointer != NULL (FILEDLG95_InitUI)
