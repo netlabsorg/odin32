@@ -1,4 +1,4 @@
-/* $Id: win32wbase.h,v 1.63 2000-01-01 14:37:35 cbratschi Exp $ */
+/* $Id: win32wbase.h,v 1.64 2000-01-02 20:20:02 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -153,6 +153,9 @@ Win32BaseWindow *getParent();
          BOOL   SetIcon(HICON hIcon);
          HICON  GetIcon()                           { return (HICON) iconResource; };
 
+	 void   SetWindowRegion(HRGN hRegion)       { hWindowRegion = hRegion; };
+	 HRGN   GetWindowRegion()		    { return hWindowRegion; };
+
          BOOL   ShowWindow(ULONG nCmdShow);
          BOOL   SetWindowPos(HWND hwndInsertAfter, int x, int y, int cx, int cy, UINT fuFlags);
          BOOL   SetWindowPlacement(WINDOWPLACEMENT *winpos);
@@ -193,12 +196,9 @@ Win32BaseWindow *GetTopParent();
          BOOL   SetWindowTextA(LPSTR lpsz);
          BOOL   SetWindowTextW(LPWSTR lpsz);
          BOOL   hasWindowName(LPSTR wndname, BOOL fUnicode = 0);
-         CHAR  *getWindowNamePtrA();
-         WCHAR *getWindowNamePtrW();
-         VOID   freeWindowNamePtr(PVOID namePtr);
-         CHAR  *getWindowNameA()              { return windowNameA; }; //only for MDI windows!
-         WCHAR *getWindowNameW()              { return windowNameW; }; //only for MDI windows!
 Win32WndClass  *getClass()  { return windowClass; };
+        //CB: windowNameA isn't always the window name!
+        char   *getWindowNameA()                    { return windowNameA; };
 Win32BaseWindow *getOwner()                         { return owner; };
         void    setOwner(Win32BaseWindow *newOwner) { owner = newOwner; };
 
@@ -306,6 +306,8 @@ protected:
         BOOL    fCreated;
         BOOL    fTaskList;              //should be listed in PM tasklist or not
         BOOL    fParentDC;
+
+ 	HRGN    hWindowRegion;
 
         DWORD   dwThreadId;             //id of thread that created this window
         DWORD   dwProcessId;            //id of process that created this window

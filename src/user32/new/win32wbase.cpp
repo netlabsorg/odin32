@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.19 2000-01-02 19:30:44 cbratschi Exp $ */
+/* $Id: win32wbase.cpp,v 1.20 2000-01-02 20:20:02 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -226,6 +226,7 @@ void Win32BaseWindow::Init()
   hwndVertScroll     = 0;
 
   ownDC              = 0;
+  hWindowRegion      = 0;
 
   if(currentProcessId == -1)
   {
