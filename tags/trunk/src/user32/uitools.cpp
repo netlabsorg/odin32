@@ -1,4 +1,4 @@
-/* $Id: uitools.cpp,v 1.18 1999-12-16 16:53:57 cbratschi Exp $ */
+/* $Id: uitools.cpp,v 1.19 1999-12-20 16:45:16 cbratschi Exp $ */
 /*
  * User Interface Functions
  *
@@ -1649,18 +1649,26 @@ BOOL WIN32API DrawIcon( HDC hDC, int X, int Y, HICON  hIcon)
   }
 
   if (!GetIconInfo(hIcon,&ii)) return FALSE;
-  GetObjectA(ii.hbmColor,sizeof(BITMAP),(LPVOID)&bmp);
   oldFg = SetTextColor(hDC,RGB(0,0,0));
   oldBg = SetBkColor(hDC,RGB(255,255,255));
   hMemDC = CreateCompatibleDC(hDC);
   oldBmp = SelectObject(hMemDC,ii.hbmMask);
-  BitBlt(hDC,X,Y,bmp.bmWidth,bmp.bmHeight,hMemDC,0,0,SRCAND);
-  SelectObject(hMemDC,ii.hbmColor);
-  BitBlt(hDC,X,Y,bmp.bmWidth,bmp.bmHeight,hMemDC,0,0,SRCPAINT);
-  SelectObject(hMemDC,ii.hbmMask);
-  BitBlt(hDC,X,Y,bmp.bmWidth,bmp.bmHeight,hMemDC,0,bmp.bmHeight,SRCINVERT);
+  if (ii.hbmColor)
+  {
+    GetObjectA(ii.hbmColor,sizeof(BITMAP),(LPVOID)&bmp);
+    BitBlt(hDC,X,Y,bmp.bmWidth,bmp.bmHeight,hMemDC,0,0,SRCAND);
+    SelectObject(hMemDC,ii.hbmColor);
+    BitBlt(hDC,X,Y,bmp.bmWidth,bmp.bmHeight,hMemDC,0,0,SRCINVERT);
+  } else
+  {
+    GetObjectA(ii.hbmMask,sizeof(BITMAP),(LPVOID)&bmp);
+    BitBlt(hDC,X,Y,bmp.bmWidth,bmp.bmHeight/2,hMemDC,0,0,SRCAND);
+    BitBlt(hDC,X,Y,bmp.bmWidth,bmp.bmHeight/2,hMemDC,0,bmp.bmHeight/2,SRCINVERT);
+  }
   SelectObject(hMemDC,oldBmp);
   DeleteObject(hMemDC);
+  if (ii.hbmColor) DeleteObject(ii.hbmColor);
+  if (ii.hbmMask) DeleteObject(ii.hbmMask);
   SetTextColor(hDC,oldFg);
   SetBkColor(hDC,oldBg);
 
@@ -1693,22 +1701,22 @@ BOOL WIN32API DrawIconEx(HDC hdc, int xLeft, int yTop, HICON hIcon,
   }
 
   if (!GetIconInfo(hIcon,&ii)) return FALSE;
-  GetObjectA(ii.hbmColor,sizeof(BITMAP),(LPVOID)&bmp);
+  if (ii.hbmColor)
+    GetObjectA(ii.hbmColor,sizeof(BITMAP),(LPVOID)&bmp);
+  else
+    GetObjectA(ii.hbmMask,sizeof(BITMAP),(LPVOID)&bmp);
 
   /* Calculate the size of the destination image.  */
-  if (cxWidth == 0)
+  if (diFlags & DI_DEFAULTSIZE)
   {
-    if (diFlags & DI_DEFAULTSIZE)
-      cxWidth = GetSystemMetrics(SM_CXICON);
-    else
-      cxWidth = bmp.bmWidth;
-  }
-  if (cyWidth == 0)
+    cxWidth = GetSystemMetrics(SM_CXICON);
+    cyWidth = GetSystemMetrics(SM_CYICON);
+  } else if (cxWidth == 0)
   {
-    if (diFlags & DI_DEFAULTSIZE)
-      cyWidth = GetSystemMetrics(SM_CYICON);
-    else
-      cyWidth = bmp.bmHeight;
+    cxWidth = bmp.bmWidth;
+  } else if (cyWidth == 0)
+  {
+    cyWidth = ii.hbmColor ? bmp.bmHeight:bmp.bmHeight/2;
   }
 
   if (hbrFlickerFreeDraw)
@@ -1728,11 +1736,20 @@ BOOL WIN32API DrawIconEx(HDC hdc, int xLeft, int yTop, HICON hIcon,
     hMemDC = CreateCompatibleDC(hdc);
     oldBmp = SelectObject(hMemDC,ii.hbmMask);
     oldStretchMode = SetStretchBltMode(hBmpDC,STRETCH_DELETESCANS);
-    StretchBlt(hBmpDC,0,0,cxWidth,cyWidth,hMemDC,0,0,bmp.bmWidth,bmp.bmHeight,SRCAND);
-    SelectObject(hMemDC,ii.hbmColor);
-    StretchBlt(hBmpDC,0,0,cxWidth,cyWidth,hMemDC,0,0,bmp.bmWidth,bmp.bmHeight,SRCPAINT);
-    SelectObject(hMemDC,ii.hbmMask);
-    StretchBlt(hBmpDC,0,0,cxWidth,cyWidth,hMemDC,0,bmp.bmHeight,bmp.bmWidth,bmp.bmHeight,SRCINVERT);
+    if (ii.hbmColor)
+    {
+      if (diFlags & DI_MASK)
+        StretchBlt(hBmpDC,0,0,cxWidth,cyWidth,hMemDC,0,0,bmp.bmWidth,bmp.bmHeight,SRCAND);
+      if (diFlags & DI_IMAGE)
+      {
+        SelectObject(hMemDC,ii.hbmColor);
+        StretchBlt(hBmpDC,0,0,cxWidth,cyWidth,hMemDC,0,0,bmp.bmWidth,bmp.bmHeight,SRCINVERT);
+      }
+    } else if (diFlags & DI_MASK)
+    {
+      StretchBlt(hBmpDC,0,0,cxWidth,cyWidth,hMemDC,0,0,bmp.bmWidth,bmp.bmHeight/2,SRCAND);
+      StretchBlt(hBmpDC,0,0,cxWidth,cyWidth,hMemDC,0,bmp.bmHeight/2,bmp.bmWidth,bmp.bmHeight/2,SRCINVERT);
+    }
     BitBlt(hdc,xLeft,yTop,cxWidth,cyWidth,hBmpDC,0,0,SRCCOPY);
     SelectObject(hMemDC,oldBmp);
     DeleteObject(hMemDC);
@@ -1749,17 +1766,28 @@ BOOL WIN32API DrawIconEx(HDC hdc, int xLeft, int yTop, HICON hIcon,
     hMemDC = CreateCompatibleDC(hdc);
     oldBmp = SelectObject(hMemDC,ii.hbmMask);
     oldStretchMode = SetStretchBltMode(hdc,STRETCH_DELETESCANS);
-    StretchBlt(hdc,xLeft,yTop,cxWidth,cyWidth,hMemDC,0,0,bmp.bmWidth,bmp.bmHeight,SRCAND);
-    SelectObject(hMemDC,ii.hbmColor);
-    StretchBlt(hdc,xLeft,yTop,cxWidth,cyWidth,hMemDC,0,0,bmp.bmWidth,bmp.bmHeight,SRCPAINT);
-    SelectObject(hMemDC,ii.hbmMask);
-    StretchBlt(hdc,xLeft,yTop,cxWidth,cyWidth,hMemDC,0,bmp.bmHeight,bmp.bmWidth,bmp.bmHeight,SRCINVERT);
+    if (ii.hbmColor)
+    {
+      if (diFlags & DI_MASK)
+        StretchBlt(hdc,xLeft,yTop,cxWidth,cyWidth,hMemDC,0,0,bmp.bmWidth,bmp.bmHeight,SRCAND);
+      if (diFlags & DI_IMAGE)
+      {
+        SelectObject(hMemDC,ii.hbmColor);
+        StretchBlt(hdc,xLeft,yTop,cxWidth,cyWidth,hMemDC,0,0,bmp.bmWidth,bmp.bmHeight,SRCINVERT);
+      }
+    } else if (diFlags & DI_MASK)
+    {
+      StretchBlt(hdc,xLeft,yTop,cxWidth,cyWidth,hMemDC,0,0,bmp.bmWidth,bmp.bmHeight,SRCAND);
+      StretchBlt(hdc,xLeft,yTop,cxWidth,cyWidth,hMemDC,0,bmp.bmHeight/2,bmp.bmWidth,bmp.bmHeight/2,SRCINVERT);
+    }
     SelectObject(hMemDC,oldBmp);
     DeleteObject(hMemDC);
     SetTextColor(hdc,oldFg);
     SetBkColor(hdc,oldBg);
     SetStretchBltMode(hdc,oldStretchMode);
   }
+  if (ii.hbmColor) DeleteObject(ii.hbmColor);
+  if (ii.hbmMask) DeleteObject(ii.hbmMask);
 
   return TRUE;
 }
