@@ -1,4 +1,4 @@
-/* $Id: windll.cpp,v 1.7 1999-07-07 08:11:10 sandervl Exp $ */
+/* $Id: windll.cpp,v 1.8 1999-07-07 08:42:48 sandervl Exp $ */
 
 /*
  * Win32 DLL class
@@ -340,6 +340,7 @@ BOOL Win32Dll::detachProcess()
   rc = dllEntryPoint(hinstance, DLL_PROCESS_DETACH, 0);
   SetFS(sel);
   tlsDetachThread();	//destroy TLS (main thread)
+  tlsDelete();
   return rc;
 }
 //******************************************************************************
