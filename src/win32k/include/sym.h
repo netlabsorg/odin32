@@ -1,4 +1,4 @@
-/* $Id: sym.h,v 1.2 1999-11-10 01:45:34 bird Exp $
+/* $Id: sym.h,v 1.3 2000-02-19 23:52:00 bird Exp $
  *
  * Sym-file definitions and structs.
  *
@@ -50,6 +50,10 @@ typedef struct
     unsigned char      cbSegName;     /* length of segment name                */
     char               achSegName[1]; /* cbSegName Bytes of segment-name member*/
 } SEGDEF;
+
+#define SEG_FLAGS_32BIT     0x01      /* 32bit segment is set. 16-bit segment if clear */
+#define SEG32BitSegment(a)  (((a).bFlags & 0x01) == SEG_FLAGS_32BIT)
+#define SEG16BitSegment(a)  (((a).bFlags & 0x01) == 0)
 
 typedef struct
 {
