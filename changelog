@@ -1,4 +1,4 @@
-/* $Id: changelog,v 1.1221 2001-01-18 18:09:22 sandervl Exp $ */
+/* $Id: changelog,v 1.1222 2001-01-18 19:39:13 sandervl Exp $ */
 
  2001-01-18: Sander van Leeuwen <sandervl@xs4all.nl>
     - GDI32:    o More logging
@@ -13,6 +13,9 @@
                 o MultiByteToWideChar bugfix (calculate string length if input 
                   length is -1 before checking if dest length is 0)
                   (MS Word 97 no longer crashes)
+                o RegQueryValueExW bugfix 
+                  (causing stack corruption in Excel and probably many other
+                   apps that use this function too)
     - OLEAUT32: o Ported David's typelib changes.
                   (MS Word 97 starts immediately and doesn't spend an hour
                    searching for typelibs in dlls)
