@@ -20,4 +20,4 @@
 # in addition to the first matching regex or "DEFAULT".
 #
 # Sorry, but this doesn't work. (bird)
-# ALL C:\NOSAADM\cvssec.cmd CHECKTAG
+# ALL C:\NOSAADM\bin\cvssec.exe CHECKTAG
