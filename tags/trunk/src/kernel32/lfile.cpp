@@ -1,4 +1,4 @@
-/* $Id: lfile.cpp,v 1.4 1999-10-06 15:00:27 phaller Exp $ */
+/* $Id: lfile.cpp,v 1.5 1999-10-22 18:07:21 sandervl Exp $ */
 
 /*
  *
@@ -174,10 +174,10 @@ UINT WIN32API _lread(HFILE arg1,
 {
    ULONG rc;
 
-   dprintf(("KERNEL32: _lread(%08xh, %08xh, %08xh)\n",
-            arg1,
-            arg2,
-            arg3));
+//   dprintf(("KERNEL32: _lread(%08xh, %08xh, %08xh)\n",
+//            arg1,
+//            arg2,
+//            arg3));
 
    if (!ReadFile(arg1,
                  arg2,
@@ -186,8 +186,8 @@ UINT WIN32API _lread(HFILE arg1,
                  NULL))
       rc = -1;
 
-   dprintf(("KERNEL32: _lread returns %08xh.",
-            rc));
+//   dprintf(("KERNEL32: _lread returns %08xh.",
+//            rc));
 
    return rc;
 }

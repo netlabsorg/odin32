@@ -1,4 +1,4 @@
-/* $Id: os2heap.cpp,v 1.11 1999-10-04 09:55:56 sandervl Exp $ */
+/* $Id: os2heap.cpp,v 1.12 1999-10-22 18:07:21 sandervl Exp $ */
 
 /*
  * Heap class for OS/2
@@ -261,7 +261,7 @@ LPVOID OS2Heap::ReAlloc(DWORD dwFlags, LPVOID lpMem, DWORD dwBytes)
 {
   HEAPELEM *helem = (HEAPELEM *)((char *)lpMem - sizeof(HEAPELEM));
   LPVOID lpNewMem;
-  int    i;
+  int    i, oldSize;
 
   if (dwBytes == 0) return NULL;         // intercept stupid parameters
  
@@ -276,15 +276,17 @@ LPVOID OS2Heap::ReAlloc(DWORD dwFlags, LPVOID lpMem, DWORD dwBytes)
     return lpMem;
   }
 
-  if (Size(0,lpMem) == dwBytes) return lpMem; // if reallocation with same size
-                                                // don't do anything
-
-//  dprintf(("OS2Heap::ReAlloc %X %X %d\n", dwFlags, lpMem, dwBytes));
+  oldSize = Size(0,lpMem);
+  if (oldSize == dwBytes) return lpMem; // if reallocation with same size
+                                        // don't do anything
   lpNewMem = Alloc(dwFlags, dwBytes);
-  memcpy(lpNewMem, lpMem, Size(0, lpMem));
+  memcpy(lpNewMem, lpMem, dwBytes < oldSize ? dwBytes : oldSize);
   Free(0, lpMem);
 
-  dassert(lpNewMem, ("OS2Heap::ReAlloc, no more memory left\n"));
+  if(lpNewMem == NULL)
+  {
+     dprintf(("OS2Heap::ReAlloc, no more memory left\n"));
+  }
 
   return(lpNewMem);
 }
