@@ -1,4 +1,4 @@
-/* $Id: time.cpp,v 1.3 1999-08-18 18:49:18 phaller Exp $ */
+/* $Id: time.cpp,v 1.4 1999-08-18 19:35:30 phaller Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -211,6 +211,22 @@ BOOLEAN WINAPI RtlTimeToSecondsSince1980(LPFILETIME ft,
   return 1;
 }
 
+
+/******************************************************************************
+ *  RtlSecondsSince1980ToTime             [NTDLL.477]
+ */
+BOOLEAN WINAPI RtlSecondsSince1980ToTime(LPFILETIME ft,
+                                         LPDWORD    timeret)
+{
+  dprintf(("NTDLL: RtlSecondsSince1980ToTime(%08xh,%08xh) not implemented.\n",
+           ft,
+           timeret));
+
+  //*timeret = DOSFS_UnixTimeToFileTime(st,NULL);
+  return 1;
+}
+
+
 /******************************************************************************
  *  RtlToTimeInSecondsSince1970             [NTDLL]
  */
@@ -227,13 +243,13 @@ BOOLEAN WINAPI RtlTimeToSecondsSince1970(LPFILETIME ft,
 
 
 /******************************************************************************
- *  RtlSecondsSince1970ToTime             [NTDLL]
+ *  RtlSecondsSince1970ToTime             [NTDLL.476]
  */
-BOOLEAN WINAPI RtlSecondsSince1970ToTime(LPSYSTEMTIME st,
-                                         LPDWORD      timeret)
+BOOLEAN WINAPI RtlSecondsSince1970ToTime(LPFILETIME ft,
+                                         LPDWORD    timeret)
 {
   dprintf(("NTDLL: RtlSecondsSince1970ToTime(%08xh,%08xh) not implemented.\n",
-           st,
+           ft,
            timeret));
 
   //*timeret = DOSFS_UnixTimeToFileTime(st,NULL);

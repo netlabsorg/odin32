@@ -1,4 +1,4 @@
-/* $Id: unknown.cpp,v 1.2 1999-08-05 23:28:33 phaller Exp $ */
+/* $Id: unknown.cpp,v 1.3 1999-08-18 19:35:31 phaller Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -143,6 +143,33 @@ DWORD WIN32API RtlLargeIntegerToChar(LARGE_INTEGER li,
 
   return 0;
 }
+
+
+/*****************************************************************************
+ * Name      : RtlQueryTimeZoneInformation
+ * Purpose   : unknown
+ * Parameters: unknown, probably wrong
+ * Variables :
+ * Result    :
+ * Remark    : NTDLL.?
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Tue, 1999/06/01 09:00]
+ *****************************************************************************/
+
+DWORD WIN32API RtlQueryTimeZoneInformation(DWORD x1,
+                                           DWORD x2,
+                                           DWORD x3)
+{
+  dprintf(("NTDLL: RtlQueryTimeZoneInformation(%08xh,%08xh,%08xh) not implemented.\n",
+           x1,
+           x2,
+           x3));
+
+  return 0;
+}
+
+
 
 
 

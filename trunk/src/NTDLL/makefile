@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.7 1999-08-16 16:28:01 sandervl Exp $
+# $Id: makefile,v 1.8 1999-08-18 19:35:30 phaller Exp $
 
 #
 # PD-Win32 API
@@ -20,6 +20,7 @@ CXXFLAGS = $(CXXFLAGS) -I$(PDWIN32_INCLUDE)
 
 OBJS = NTDLL.obj\
        file.obj\
+       exception.obj\
        nt.obj\
        om.obj\
        reg.obj\
@@ -74,6 +75,9 @@ initterm.obj: .\initterm.cpp
 crt.obj:    .\crt.cpp    .\ntdll.h
 
 unknown.obj: .\unknown.cpp .\ntdll.h
+
+exception.obj: .\exception.cpp .\ntdll.h
+
 
 clean:
         $(RM) *.obj *.lib *.dll *~ *.map *.pch
