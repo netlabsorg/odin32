@@ -1,4 +1,10 @@
-/* $Id: changelog,v 1.1884 2001-12-05 14:14:04 sandervl Exp $ */
+/* $Id: changelog,v 1.1885 2001-12-06 10:15:56 sandervl Exp $ */
+
+ 2001-12-06: Sander van Leeuwen <sandervl@xs4all.nl>
+    - KERNEL32: o Added (incomplete) FindFirstFileExA/FindFirstFileExW
+                  (TODO)
+    - DINPUT:   o Link with guidlib.lib
+    - GUIDLIB:  o Include dinput.h for DirectInput GUIDs
 
  2001-12-05: Sander van Leeuwen <sandervl@xs4all.nl>
     - KERNEL32: o Merged WriteFile & WriteFileEx, ReadFile & ReadFileEx
@@ -6,6 +12,8 @@
                 o Removed dwType handle manager structure member; added
                   win32 handle to structure
                   (NOTE: All work in progress for new framework for overlapped IO)
+                o ReadFileEx/WriteFileEx: lpOverlapped->Offset & lpOverlapped->OffsetHigh 
+                  must be 0 if used with named pipes
 
  2001-12-04: Patrick Haller <patrick.haller@innotek.de>
     - KERNEL32: o parallel port support restricted to physical ports
