@@ -1,4 +1,4 @@
- /* $Id: changelog,v 1.945 2000-05-18 20:37:06 mike Exp $ */
+ /* $Id: changelog,v 1.946 2000-05-18 22:55:17 sandervl Exp $ */
 
  2000-05-18: Michal Necasek <mike@mendelu.cz>
     - DSOUND: An updated version, hopefully not too many bugs were introduced
@@ -10,6 +10,8 @@
                 exceptions inside WriteLog.
     - WSOCK32:  Mark cancelled async select to avoid finding it before the
                 thread removes itself from the queue
+                Check if async select thread is blocking inside select before
+                calling so_cancel to cancel or change the async select.
     - SHELL32:  Removed Path* functions; added forwarders to shlwapi.dll
     - SHLWAPI:  Merged path function with Wine 20000430 (shellpath.cpp)
                 Added DllGetVersion export.
