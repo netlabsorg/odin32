@@ -1,4 +1,4 @@
-/* $Id: dwaveout.cpp,v 1.11 1999-12-29 08:33:55 phaller Exp $ */
+/* $Id: dwaveout.cpp,v 1.12 1999-12-29 10:44:16 sandervl Exp $ */
 
 /*
  * Wave playback class
@@ -20,7 +20,7 @@
 #define  INCL_BASE
 #define  INCL_OS2MM
 #include <os2wrap.h>   //Odin32 OS/2 api wrappers
-#include <os2me.h>
+#include <os2mewrap.h> //Odin32 OS/2 MMPM/2 api wrappers
 #include <stdlib.h>
 #include <string.h>
 #define  OS2_ONLY
@@ -612,7 +612,7 @@ BOOL DartWaveOut::find(DartWaveOut *dwave)
   }
 
 #ifdef DEBUG
-  WriteLog("WINMM:DartWaveOut not found!\n");
+//  WriteLog("WINMM:DartWaveOut not found!\n");
 #endif
   return(FALSE);
 }
