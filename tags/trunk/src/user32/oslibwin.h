@@ -1,4 +1,4 @@
-/* $Id: oslibwin.h,v 1.29 1999-12-27 17:08:08 cbratschi Exp $ */
+/* $Id: oslibwin.h,v 1.30 1999-12-29 12:39:44 sandervl Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -48,10 +48,6 @@ void  OSLibSetWindowStyle(HWND hwnd, ULONG dwStyle, BOOL fTaskList);
 BOOL  OSLibWinSetWindowULong(HWND hwnd, ULONG offset, ULONG value);
 ULONG OSLibWinGetWindowULong(HWND hwnd, ULONG offset);
 BOOL  OSLibSetWindowID(HWND hwnd, ULONG value);
-
-BOOL  OSLibPostMessage(HWND hwnd, ULONG msg, ULONG wParam, ULONG lParam);
-ULONG OSLibSendMessage(HWND hwnd, ULONG msg, ULONG wParam, ULONG lParam);
-ULONG OSLibWinBroadcastMsg(ULONG msg, ULONG wParam, ULONG lParam, BOOL fSend);
 
 #define WAOS_WARNING                 0
 #define WAOS_NOTE                    1

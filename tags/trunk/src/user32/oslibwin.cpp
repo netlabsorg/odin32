@@ -1,4 +1,4 @@
-/* $Id: oslibwin.cpp,v 1.54 1999-12-27 22:53:53 cbratschi Exp $ */
+/* $Id: oslibwin.cpp,v 1.55 1999-12-29 12:39:44 sandervl Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -247,25 +247,6 @@ ULONG OSLibWinGetWindowULong(HWND hwnd, ULONG offset)
     offset = QWL_USER;
 
   return WinQueryWindowULong(hwnd, offset);
-}
-//******************************************************************************
-//******************************************************************************
-BOOL OSLibPostMessage(HWND hwnd, ULONG msg, ULONG wParam, ULONG lParam)
-{
-  return WinPostMsg(hwnd, msg, (MPARAM)wParam, (MPARAM)lParam);
-}
-//******************************************************************************
-//******************************************************************************
-ULONG OSLibSendMessage(HWND hwnd, ULONG msg, ULONG wParam, ULONG lParam)
-{
-  return (ULONG)WinSendMsg(hwnd, msg, (MPARAM)wParam, (MPARAM)lParam);
-}
-//******************************************************************************
-//******************************************************************************
-ULONG OSLibWinBroadcastMsg(ULONG msg, ULONG wParam, ULONG lParam, BOOL fSend)
-{
-  return WinBroadcastMsg(HWND_DESKTOP, msg, (MPARAM)wParam, (MPARAM)lParam,
-                         (fSend) ? BMSG_SEND : BMSG_POST);
 }
 //******************************************************************************
 //******************************************************************************

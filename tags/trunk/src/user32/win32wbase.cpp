@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.122 1999-12-27 22:53:53 cbratschi Exp $ */
+/* $Id: win32wbase.cpp,v 1.123 1999-12-29 12:39:45 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -27,6 +27,7 @@
 #include <winres.h>
 #include "wndmsg.h"
 #include "oslibwin.h"
+#include "oslibmsg.h"
 #include "oslibutil.h"
 #include "oslibgdi.h"
 #include "oslibres.h"
@@ -656,13 +657,13 @@ BOOL Win32BaseWindow::MsgCreate(HWND hwndFrame, HWND hwndClient)
   }
   else
   if (windowClass->getStyle() & CS_PARENTDC)  {
-    dprintf(("ERROR: Class with CS_PARENTDC style -> NOT IMPLEMENTED!"));
+    dprintf(("WARNING: Class with CS_PARENTDC style!"));
     fParentDC = TRUE;
     ownDC = 0;
   }
   else
   if (windowClass->getStyle() & CS_CLASSDC)  {
-    dprintf(("ERROR: Class with CS_CLASSDC style -> NOT IMPLEMENTED!"));
+    dprintf(("WARNING: Class with CS_CLASSDC style!"));
     ownDC = 0;
   }
   /* Set the window menu */
@@ -2153,11 +2154,12 @@ BOOL Win32BaseWindow::PostThreadMessageA(ULONG threadid, UINT msg, WPARAM wParam
 {
  POSTMSG_PACKET *packet = (POSTMSG_PACKET *)_smalloc(sizeof(POSTMSG_PACKET));
 
+    dprintf(("PostThreadMessageA %x %x %x %x", threadid, msg, wParam, lParam));
     packet->Msg = msg;
     packet->wParam = wParam;
     packet->lParam = lParam;
     packet->fUnicode = FALSE;
-    return O32_PostThreadMessage(threadid, WIN32APP_POSTMSG, WIN32PM_MAGIC, (DWORD)packet);
+    return OSLibPostThreadMessage(threadid, WIN32APP_POSTMSG, WIN32PM_MAGIC, (LPARAM)packet);
 }
 //******************************************************************************
 //******************************************************************************
@@ -2165,11 +2167,12 @@ BOOL Win32BaseWindow::PostThreadMessageW(ULONG threadid, UINT msg, WPARAM wParam
 {
  POSTMSG_PACKET *packet = (POSTMSG_PACKET *)_smalloc(sizeof(POSTMSG_PACKET));
 
+    dprintf(("PostThreadMessageW %x %x %x %x", threadid, msg, wParam, lParam));
     packet->Msg = msg;
     packet->wParam = wParam;
     packet->lParam = lParam;
     packet->fUnicode = TRUE;
-    return O32_PostThreadMessage(threadid, WIN32APP_POSTMSG, WIN32PM_MAGIC, (DWORD)packet);
+    return OSLibPostThreadMessage(threadid, WIN32APP_POSTMSG, WIN32PM_MAGIC, (LPARAM)packet);
 }
 //******************************************************************************
 //******************************************************************************
