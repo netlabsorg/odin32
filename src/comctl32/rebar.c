@@ -20,9 +20,23 @@
 
 
 /*
- * Rebar control    rev 8b
+ * Rebar control    rev 8e
  *
  * Copyright 1998, 1999 Eric Kohl
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * NOTES
  *   An author is needed! Any volunteers?
@@ -93,6 +107,14 @@
  * 18. Fix _AdjustBand processing of RBBS_FIXEDSIZE.
  * rev 8c
  * 19. Fix problem in _Layout when all lengths are 0.
+ * 20. If CLR_NONE specified, we will use default BtnFace color when drawing.
+ * 21. Fix test in REBAR_Layout.
+ * rev 8d
+ * 22. Add support for WM_WINDOWPOSCHANGED to save new origin of window.
+ * 23. Correct RBN_CHILDSIZE rect value for CCS_VERT rebar.
+ * 24. Do UpdateWindow only if doing redraws.
+ * rev 8e
+ * 25. Adjust setting of offChild.cx based on RBBS_CHILDEDGE.
  *
  *
  *    Still to do:
@@ -125,9 +147,9 @@
 #include "wine/unicode.h"
 #include "commctrl.h"
 /* #include "spy.h" */
-#include "debugtools.h"
+#include "wine/debug.h"
 
-DEFAULT_DEBUG_CHANNEL(rebar);
+WINE_DEFAULT_DEBUG_CHANNEL(rebar);
 
 typedef struct
 {
@@ -224,6 +246,7 @@ typedef struct
     POINTS   dragNow;     /* x,y of this MouseMove */
     INT      ihitBand;    /* band number of band whose gripper was grabbed */
     INT      ihitoffset;  /* offset of hotspot from gripper.left */
+    POINT    origin;      /* left/upper corner of client */
 
     REBAR_ROW  *rows;       /* pointer to row indexes              */
     REBAR_BAND *bands;      /* pointer to the array of rebar bands */
@@ -1197,9 +1220,11 @@ REBAR_ForceResize (REBAR_INFO *infoPtr)
     else {
 	width += infoPtr->calcSize.cx;
 	height += infoPtr->calcSize.cy;
+	x = infoPtr->origin.x;
+	y = infoPtr->origin.y;
     }
 
-    TRACE("hwnd %04x, style=%08lx, setting at (%d,%d) for (%d,%d)\n",
+    TRACE("hwnd %08x, style=%08lx, setting at (%d,%d) for (%d,%d)\n",
 	infoPtr->hwndSelf, infoPtr->dwStyle,
 	x, y, width, height);
     SetWindowPos (infoPtr->hwndSelf, 0, x, y, width, height,
@@ -1233,7 +1258,10 @@ REBAR_MoveChildWindows (REBAR_INFO *infoPtr, UINT start, UINT endplus)
 	    rbcz.wID = lpBand->wID;
 	    rbcz.rcChild = lpBand->rcChild;
 	    rbcz.rcBand = lpBand->rcBand;
-	    rbcz.rcBand.left += lpBand->cxHeader;
+	    if (infoPtr->dwStyle & CCS_VERT) 
+		rbcz.rcBand.top += lpBand->cxHeader;
+	    else
+		rbcz.rcBand.left += lpBand->cxHeader;
 	    REBAR_Notify ((NMHDR *)&rbcz, infoPtr, RBN_CHILDSIZE);
 	    if (!EqualRect (&lpBand->rcChild, &rbcz.rcChild)) {
 		TRACE("Child rect changed by NOTIFY for band %u\n", i);
@@ -1302,7 +1330,8 @@ REBAR_MoveChildWindows (REBAR_INFO *infoPtr, UINT start, UINT endplus)
     if (!EndDeferWindowPos(deferpos))
         ERR("EndDeferWindowPos returned NULL\n");
 
-    UpdateWindow (infoPtr->hwndSelf);
+    if (infoPtr->DoRedraw)
+	UpdateWindow (infoPtr->hwndSelf);
 
     if (infoPtr->fStatus & NTF_HGHTCHG) {
         infoPtr->fStatus &= ~NTF_HGHTCHG;
@@ -1405,7 +1434,7 @@ REBAR_Layout (REBAR_INFO *infoPtr, LPRECT lpRect, BOOL notify, BOOL resetclient)
 	/* Set the offset of the child window */
 	if ((lpBand->fMask & RBBIM_CHILD) &&
 	    !(lpBand->fStyle & RBBS_FIXEDSIZE)) {
-	    lpBand->offChild.cx = 4;   /* ??? */
+	    lpBand->offChild.cx = ((lpBand->fStyle & RBBS_CHILDEDGE) ? 4 : 0);
 	}
 	lpBand->offChild.cy = ((lpBand->fStyle & RBBS_CHILDEDGE) ? 2 : 0);
 
@@ -1731,7 +1760,7 @@ REBAR_Layout (REBAR_INFO *infoPtr, LPRECT lpRect, BOOL notify, BOOL resetclient)
 	    iband = infoPtr->rows[i-1].istartband;
 	    lpBand = &infoPtr->bands[iband];
 	    if(HIDDENBAND(lpBand)) continue;
-	    if (!(lpBand->fMask & RBBS_VARIABLEHEIGHT)) continue;
+	    if (lpBand->fMask & RBBS_VARIABLEHEIGHT) continue;
 	    if (((INT)lpBand->cyMaxChild < 1) || 
 		((INT)lpBand->cyIntegral < 1)) {
 		if (lpBand->cyMaxChild + lpBand->cyIntegral == 0) continue;
@@ -2140,8 +2169,19 @@ REBAR_InternalEraseBkGnd (REBAR_INFO *infoPtr, WPARAM wParam, LPARAM lParam, REC
 	    /* testing only - make background green to see it */
 	    new = RGB(0,128,0);
 #endif
-	    old = SetBkColor (hdc, new);
 	}
+	else {
+	    /* In the absence of documentation for Rebar vs. CLR_NONE,
+	     * we will use the default BtnFace color. Note documentation
+	     * exists for Listview and Imagelist.
+	     */
+	    new = infoPtr->clrBtnFace;
+#if GLATESTING
+	    /* testing only - make background green to see it */
+	    new = RGB(0,128,0);
+#endif
+	}
+	old = SetBkColor (hdc, new);
 
 	rect = lpBand->rcBand;
 	TRACE("%s background color=0x%06lx, band (%d,%d)-(%d,%d), clip (%d,%d)-(%d,%d)\n",
@@ -3740,7 +3780,7 @@ REBAR_MouseMove (REBAR_INFO *infoPtr, WPARAM wParam, LPARAM lParam)
     REBAR_BAND *band1, *band2;
     POINTS ptsmove;
 
-    /* Validate entry as hit on Gripper has occured */
+    /* Validate entry as hit on Gripper has occurred */
     if (GetCapture() != infoPtr->hwndSelf) return 0;
     if (infoPtr->ihitBand == -1) return 0;
 
@@ -4196,6 +4236,25 @@ REBAR_StyleChanged (REBAR_INFO *infoPtr, WPARAM wParam, LPARAM lParam)
 }
 
 
+static LRESULT
+REBAR_WindowPosChanged (REBAR_INFO *infoPtr, WPARAM wParam, LPARAM lParam)
+{
+    WINDOWPOS *lpwp = (WINDOWPOS *)lParam;
+    LRESULT ret;
+    RECT rc;
+
+    /* Save the new origin of this window - used by _ForceResize */
+    infoPtr->origin.x = lpwp->x;
+    infoPtr->origin.y = lpwp->y;
+    ret = DefWindowProcA(infoPtr->hwndSelf, WM_WINDOWPOSCHANGED, 
+			 wParam, lParam);
+    GetWindowRect(infoPtr->hwndSelf, &rc);
+    TRACE("hwnd %08x new pos (%d,%d)-(%d,%d)\n",
+	  infoPtr->hwndSelf, rc.left, rc.top, rc.right, rc.bottom);
+    return ret;
+}
+
+
 static LRESULT WINAPI
 REBAR_WindowProc (HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
@@ -4408,6 +4467,9 @@ REBAR_WindowProc (HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
 /*      case WM_VKEYTOITEM:     supported according to ControlSpy */
 /*	case WM_WININICHANGE: */
+
+        case WM_WINDOWPOSCHANGED:
+	    return REBAR_WindowPosChanged (infoPtr, wParam, lParam);
 
 	default:
 	    if (uMsg >= WM_USER)

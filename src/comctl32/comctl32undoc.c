@@ -5,6 +5,20 @@
  *           1998 Juergen Schmied <j.schmied@metronet.de>
  *           2000 Eric Kohl for CodeWeavers
  *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
  * NOTES
  *     All of these functions are UNDOCUMENTED!! And I mean UNDOCUMENTED!!!!
  *     Do NOT rely on names or contents of undocumented structures and types!!!
@@ -33,9 +47,9 @@
 #include "wine/unicode.h"
 #include "comctl32.h"
 
-#include "debugtools.h"
+#include "wine/debug.h"
 
-DEFAULT_DEBUG_CHANNEL(commctrl);
+WINE_DEFAULT_DEBUG_CHANNEL(commctrl);
 
 
 extern HANDLE COMCTL32_hHeap; /* handle to the private heap */
@@ -205,7 +219,7 @@ DPA_Merge (const HDPA hdpa1, const HDPA hdpa2, DWORD dwFlags,
 {
     INT nCount;
     LPVOID *pWork1, *pWork2;
-    INT nResult;
+    INT nResult, i;
     INT nIndex;
 
     TRACE("%p %p %08lx %p %p %08lx)\n",
@@ -223,7 +237,7 @@ DPA_Merge (const HDPA hdpa1, const HDPA hdpa2, DWORD dwFlags,
     if (IsBadCodePtr ((FARPROC)pfnMerge))
 	return FALSE;
 
-    if (dwFlags & DPAM_SORT) {
+    if (!(dwFlags & DPAM_NOSORT)) {
 	TRACE("sorting dpa's!\n");
 	if (hdpa1->nItemCount > 0)
 	DPA_Sort (hdpa1, pfnCompare, lParam);
@@ -250,7 +264,23 @@ DPA_Merge (const HDPA hdpa1, const HDPA hdpa2, DWORD dwFlags,
 
     do
     {
-        if (nIndex < 0) break;
+        if (nIndex < 0) {
+	    if ((nCount >= 0) && (dwFlags & DPAM_INSERT)) {
+		/* Now insert the remaining new items into DPA 1 */
+		TRACE("%d items to be inserted at start of DPA 1\n",
+		      nCount+1);
+		for (i=nCount; i>=0; i--) {
+		    PVOID ptr;
+
+		    ptr = (pfnMerge)(3, *pWork2, NULL, lParam);
+		    if (!ptr)
+			return FALSE;
+		    DPA_InsertPtr (hdpa1, 0, ptr);
+		    pWork2--;
+		}
+	    }
+	    break;
+	}
 	nResult = (pfnCompare)(*pWork1, *pWork2, lParam);
 	TRACE("compare result=%d, dpa1.cnt=%d, dpa2.cnt=%d\n", 
 	      nResult, nIndex, nCount);
@@ -269,10 +299,12 @@ DPA_Merge (const HDPA hdpa1, const HDPA hdpa2, DWORD dwFlags,
 	    nIndex--;
 	    pWork1--;
 	}
-	else if (nResult < 0)
+	else if (nResult > 0)
 	{
-	    if (!(dwFlags & 8))
+	    /* item in DPA 1 missing from DPA 2 */
+	    if (dwFlags & DPAM_DELETE)
 	    {
+		/* Now delete the extra item in DPA1 */
 		PVOID ptr;
 
 		ptr = DPA_DeletePtr (hdpa1, hdpa1->nItemCount - 1);
@@ -284,14 +316,16 @@ DPA_Merge (const HDPA hdpa1, const HDPA hdpa2, DWORD dwFlags,
 	}
 	else
 	{
-	    if (!(dwFlags & 4))
+	    /* new item in DPA 2 */
+	    if (dwFlags & DPAM_INSERT)
 	    {
+		/* Now insert the new item in DPA 1 */
 		PVOID ptr;
 
 		ptr = (pfnMerge)(3, *pWork2, NULL, lParam);
 		if (!ptr)
 		    return FALSE;
-		DPA_InsertPtr (hdpa1, nIndex, ptr);
+		DPA_InsertPtr (hdpa1, nIndex+1, ptr);
 	    }
 	    nCount--;
 	    pWork2--;
@@ -2799,4 +2833,3 @@ BOOL WINAPI COMCTL32_419( DWORD a, DWORD b, DWORD c, DWORD d)
 
    return TRUE;
 }
-
