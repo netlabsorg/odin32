@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.243 2001-02-22 18:18:59 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.244 2001-02-23 14:52:41 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -104,6 +104,7 @@ void Win32BaseWindow::Init()
   fComingToTop     = FALSE;
   fCreateSetWindowPos = FALSE;
   fCreationFinished= FALSE;
+  fMinMaxChange    = FALSE;
 
   windowNameA      = NULL;
   windowNameW      = NULL;
@@ -1488,14 +1489,14 @@ LRESULT Win32BaseWindow::DefWindowProcA(UINT Msg, WPARAM wParam, LPARAM lParam)
     case WM_SETCURSOR:
     {
         dprintf(("DefWndProc: WM_SETCURSOR for %x Msg %s", Win32Hwnd, GetMsgText(HIWORD(lParam))));
-        if((getStyle() & WS_CHILD) && !(getExStyle() & WS_EX_NOPARENTNOTIFY))
+        if((getStyle() & WS_CHILD))
         {
             if(getParent()) {
                 LRESULT rc = getParent()->SendInternalMessageA(WM_SETCURSOR, wParam, lParam);
                 if(rc)  return rc;
             }
         }
-        if (wParam == Win32Hwnd)
+        if (wParam == getWindowHandle())
         {
           HCURSOR hCursor;
 
@@ -2209,6 +2210,7 @@ BOOL Win32BaseWindow::ShowWindow(ULONG nCmdShow)
             swp |= SWP_FRAMECHANGED;
             if( !(getStyle() & WS_MINIMIZE) ) {
                  swp |= MinMaximize(SW_MINIMIZE, &newPos );
+                 fMinMaxChange = TRUE; //-> invalidate entire window in WM_CALCINVALIDRECT
             }
             else swp |= SWP_NOSIZE | SWP_NOMOVE;
         }
@@ -2216,8 +2218,10 @@ BOOL Win32BaseWindow::ShowWindow(ULONG nCmdShow)
 
     case SW_SHOWMAXIMIZED: /* same as SW_MAXIMIZE */
         swp |= SWP_SHOWWINDOW | SWP_FRAMECHANGED;
-        if( !(getStyle() & WS_MAXIMIZE) )
+        if( !(getStyle() & WS_MAXIMIZE) ) {
              swp |= MinMaximize(SW_MAXIMIZE, &newPos );
+             fMinMaxChange = TRUE; //-> invalidate entire window in WM_CALCINVALIDRECT
+        }
         else swp |= SWP_NOSIZE | SWP_NOMOVE;
         break;
 
@@ -2250,6 +2254,7 @@ BOOL Win32BaseWindow::ShowWindow(ULONG nCmdShow)
 
          if( getStyle() & (WS_MINIMIZE | WS_MAXIMIZE) ) {
               swp |= MinMaximize(SW_RESTORE, &newPos );
+              fMinMaxChange = TRUE; //-> invalidate entire window in WM_CALCINVALIDRECT
          }
          else swp |= SWP_NOSIZE | SWP_NOMOVE;
          break;
@@ -2290,6 +2295,7 @@ BOOL Win32BaseWindow::ShowWindow(ULONG nCmdShow)
         SendInternalMessageA(WM_MOVE,0,MAKELONG(rectClient.left,rectClient.top));
     }
 END:
+    fMinMaxChange = FALSE;
     return wasVisible;
 }
 //******************************************************************************

@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.119 2001-02-22 18:18:59 sandervl Exp $ */
+/* $Id: pmwindow.cpp,v 1.120 2001-02-23 14:52:41 sandervl Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -471,6 +471,11 @@ MRESULT ProcessPMMessage(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2, Win32Base
                 }
                 else redrawAll = TRUE;
 
+                if(win32wnd->IsMixMaxStateChanging()) {
+                    dprintf(("WM_CALCVALIDRECT: window changed min/max/restore state, invalidate entire window"));
+                    redrawAll = TRUE;
+                }
+
                 if (redrawAll)
                 {
                     //CB: redraw all children for now
@@ -580,7 +585,7 @@ PosChangedEnd:
         PSWP      pswp = (PSWP)mp2;
         SWP       swpOld;
         WINDOWPOS wp;
-        RECTL     newClientrect, oldClientRect;
+        RECTL     newClientRect, oldClientRect;
         ULONG     nccalcret;
 //        UINT      res = CVR_ALIGNLEFT | CVR_ALIGNTOP;
         UINT      res = 0;
@@ -615,7 +620,7 @@ PosChangedEnd:
         nccalcret = win32wnd->MsgFormatFrame(&wp);
 
         //Get new client rectangle
-        mapWin32ToOS2Rect(pswp->cy, win32wnd->getClientRectPtr(), (PRECTLOS2)&newClientrect);
+        mapWin32ToOS2Rect(pswp->cy, win32wnd->getClientRectPtr(), (PRECTLOS2)&newClientRect);
 
         if(nccalcret == 0) {
             res = CVR_ALIGNTOP | CVR_ALIGNLEFT;
@@ -646,8 +651,15 @@ PosChangedEnd:
                 //res = 0;
             }
         }
-        if(res != 0) {
-
+        if(win32wnd->IsMixMaxStateChanging()) {
+            dprintf(("WM_CALCVALIDRECT: window changed min/max/restore state, invalidate entire window"));
+            res |= CVR_REDRAW;
+        }
+        if(res == (CVR_ALIGNTOP|CVR_ALIGNLEFT)) {
+            oldRect->xRight  -= oldClientRect.xLeft;
+            oldRect->yBottom += oldClientRect.yBottom;
+            newRect->xRight  -= newClientRect.xLeft;
+            newRect->yBottom += newClientRect.yBottom;
         }
 
 #if 0

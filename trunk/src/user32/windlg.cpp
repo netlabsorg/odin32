@@ -1,4 +1,4 @@
-/* $Id: windlg.cpp,v 1.21 2001-02-17 14:49:26 sandervl Exp $ */
+/* $Id: windlg.cpp,v 1.22 2001-02-23 14:52:42 sandervl Exp $ */
 /*
  * Win32 dialog apis for OS/2
  *
@@ -694,7 +694,7 @@ static INT DIALOG_DlgDirList( HWND hDlg, LPSTR spec, INT idLBox,
         int drive = DRIVE_GetCurrentDrive();
         strcpy( temp, "A:\\" );
         temp[0] += drive;
-        lstrcpynA( temp + 3, DRIVE_GetDosCwd(curpath, drive), sizeof(temp)-3 );
+        lstrcpynA( temp + 3, DRIVE_GetDosCwd(curpath, drive, sizeof(curpath)), sizeof(temp)-3 );
         CharLowerA( temp );
         /* Can't use PostMessage() here, because the string is on the stack */
         SetDlgItemTextA( hDlg, idStatic, temp );

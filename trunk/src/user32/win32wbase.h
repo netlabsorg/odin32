@@ -1,4 +1,4 @@
-/* $Id: win32wbase.h,v 1.110 2001-02-22 10:37:31 sandervl Exp $ */
+/* $Id: win32wbase.h,v 1.111 2001-02-23 14:52:42 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -257,6 +257,7 @@ Win32BaseWindow *GetTopParent();
          BOOL   IsWindowIconic();
          //Window procedure type
          BOOL   IsWindowUnicode();
+         BOOL   IsMixMaxStateChanging()       { return fMinMaxChange; };
 
          int    GetWindowTextLength();
          int    GetWindowTextA(LPSTR lpsz, int cch);
@@ -332,7 +333,6 @@ protected:
         HWND    OS2Hwnd;
         HMENU   hSysMenu;
         HWND    Win32Hwnd;
-        BOOL    isUnicode;
 
         int     posx, posy, width, height;
 
@@ -352,26 +352,29 @@ protected:
         DWORD   hotkey;
         LONG    lastHitTestVal;         //Last value returned by WM_NCHITTEST handler
 
-        BOOL    fFirstShow;
-        BOOL    fIsDialog;
-        BOOL    fIsModalDialog;
-        BOOL    fIsModalDialogOwner;
         HWND    OS2HwndModalDialog;
-        BOOL    fInternalMsg;           //Used to distinguish between messages
-                                        //sent by PM and those sent by apps
-        BOOL    fNoSizeMsg;
-        BOOL    fIsDestroyed;
-        BOOL    fDestroyWindowCalled;   //DestroyWindow was called for this window
-        BOOL    fCreated;
-        BOOL    fCreationFinished;      //True when window or dialog has been created successfully
-                                        //Needed to prevent DestroyWindow from deleting the window
-                                        //object during construction
-        BOOL    fTaskList;              //should be listed in PM tasklist or not
-        BOOL    fXDefault;
-        BOOL    fCXDefault;
-        BOOL    fParentDC;
-	BOOL    fComingToTop;
-        BOOL    fCreateSetWindowPos;    //FALSE -> SetWindowPos in Win32BaseWindow::MsgCreate not yet called
+
+        unsigned fFirstShow:1;
+        unsigned fIsDialog:1;
+        unsigned fIsModalDialog:1;
+        unsigned fIsModalDialogOwner:1;
+        unsigned fInternalMsg:1;         //Used to distinguish between messages
+                                         //sent by PM and those sent by apps
+        unsigned fNoSizeMsg:1;
+        unsigned fIsDestroyed:1;
+        unsigned fDestroyWindowCalled:1; //DestroyWindow was called for this window
+        unsigned fCreated:1;
+        unsigned fCreationFinished:1;    //True when window or dialog has been created successfully
+                                         //Needed to prevent DestroyWindow from deleting the window
+                                         //object during construction
+        unsigned fTaskList:1;            //should be listed in PM tasklist or not
+        unsigned fXDefault:1;
+        unsigned fCXDefault:1;
+        unsigned fParentDC:1;
+	unsigned fComingToTop:1;
+        unsigned fCreateSetWindowPos:1;  //FALSE -> SetWindowPos in Win32BaseWindow::MsgCreate not yet called
+        unsigned isUnicode:1;
+        unsigned fMinMaxChange:1;        //set when switching between min/max/restored state
 
         HRGN    hWindowRegion;
         HRGN    hClipRegion;
