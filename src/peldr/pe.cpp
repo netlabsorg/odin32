@@ -1,4 +1,4 @@
-/* $Id: pe.cpp,v 1.32 2002-02-20 09:45:49 sandervl Exp $ */
+/* $Id: pe.cpp,v 1.33 2002-02-23 10:48:19 sandervl Exp $ */
 
 /*
  * PELDR main exe loader code
@@ -168,13 +168,19 @@ tryagain:
                 strcpy(exeShortName, fname);
                 strcat(exeShortName, ext);
 
-                if ( strlen(fullpath) == 0 ) {
-                        DosSearchPath( SEARCH_CUR_DIRECTORY | SEARCH_ENVIRONMENT | SEARCH_IGNORENETERRS
+                if ( strlen(fullpath) == 0 ) 
+                {
+                    char newExeName[CCHMAXPATH];
+
+                        if(DosSearchPath( SEARCH_CUR_DIRECTORY | SEARCH_ENVIRONMENT | SEARCH_IGNORENETERRS
                                      , "WINDOWSPATH"           /* environment value */
                                      , exeShortName            /* Name of file to look for */
-                                     , exeName                 /* Result of the search     */
-                                     , sizeof(exeName)         /* Length of search buffer  */
-                                     );
+                                     , newExeName              /* Result of the search     */
+                                     , sizeof(newExeName)      /* Length of search buffer  */
+                                     ) == NO_ERROR) 
+                        {
+                            strcpy(exeName, newExeName);
+                        }
                 }
 
 		FILESTATUS3 fstat3;
