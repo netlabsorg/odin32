@@ -1,4 +1,4 @@
-/* $Id: window.cpp,v 1.42 1999-12-16 00:11:48 sandervl Exp $ */
+/* $Id: window.cpp,v 1.43 1999-12-18 16:31:52 cbratschi Exp $ */
 /*
  * Win32 window apis for OS/2
  *
@@ -457,7 +457,7 @@ BOOL WIN32API ShowWindow(HWND hwnd, int nCmdShow)
     window = Win32BaseWindow::GetWindowFromHandle(hwnd);
     if(!window) {
         dprintf(("ShowWindow, window %x not found", hwnd));
-    	SetLastError(ERROR_INVALID_WINDOW_HANDLE);
+        SetLastError(ERROR_INVALID_WINDOW_HANDLE);
         return 0;
     }
     dprintf(("ShowWindow %x", hwnd));
@@ -1144,7 +1144,7 @@ BOOL WIN32API EndDeferWindowPos( HDWP hdwp)
 
     pDWP = (DWP *) hdwp;
     if (!pDWP) {
-    	dprintf(("**EndDeferWindowPos invalid parameter\n"));
+        dprintf(("**EndDeferWindowPos invalid parameter\n"));
         SetLastError(ERROR_INVALID_PARAMETER);
         return FALSE;
     }
@@ -1168,14 +1168,9 @@ HWND WIN32API ChildWindowFromPoint( HWND hwnd, POINT pt)
     dprintf(("USER32:  ChildWindowFromPoint\n"));
     return ChildWindowFromPointEx(hwnd, pt, 0);
 }
-//******************************************************************************
-//******************************************************************************
 /*****************************************************************************
  * Name      : HWND WIN32API ChildWindowFromPointEx
- * Purpose   : The GetWindowRect function retrieves the dimensions of the
- *             bounding rectangle of the specified window. The dimensions are
- *             given in screen coordinates that are relative to the upper-left
- *             corner of the screen.
+ * Purpose   : pt: client coordinates
  * Parameters:
  * Variables :
  * Result    : If the function succeeds, the return value is the window handle.
@@ -1185,12 +1180,11 @@ HWND WIN32API ChildWindowFromPoint( HWND hwnd, POINT pt)
  *
  * Author    : Rene Pronk [Sun, 1999/08/08 23:30]
  *****************************************************************************/
-
 HWND WIN32API ChildWindowFromPointEx (HWND hwndParent, POINT pt, UINT uFlags)
 {
         RECT rect;
         HWND hWnd;
-        POINT absolutePt;
+        POINT framePt;
 
         dprintf(("ChildWindowFromPointEx(%08xh,%08xh,%08xh).\n",
                  hwndParent, pt, uFlags));
@@ -1201,21 +1195,12 @@ HWND WIN32API ChildWindowFromPointEx (HWND hwndParent, POINT pt, UINT uFlags)
                 return NULL;
         }
 
-        // absolutePt has its top in the upper-left corner of the screen
-        absolutePt = pt;
-        ClientToScreen (hwndParent, &absolutePt);
-
-        // make rect the size of the parent window
-        GetWindowRect (hwndParent, &rect);
-        rect.right = rect.right - rect.left;
-        rect.bottom = rect.bottom - rect.top;
-        rect.left = 0;
-        rect.top = 0;
-
-        if (PtInRect (&rect, pt) == 0) {
+        MapWindowPoints(hwndParent,GetParent(hwndParent),&framePt,1);
+        if (PtInRect (&rect, framePt) == 0) {
                 // point is outside window
                 return NULL;
         }
+
 
         // get first child
         hWnd = GetWindow (hwndParent, GW_CHILD);
@@ -1237,7 +1222,7 @@ HWND WIN32API ChildWindowFromPointEx (HWND hwndParent, POINT pt, UINT uFlags)
 
                 // is the point in this window's rect?
                 GetWindowRect (hWnd, &rect);
-                if (PtInRect (&rect, absolutePt) == FALSE) {
+                if (PtInRect (&rect,pt) == FALSE) {
                         hWnd = GetWindow (hWnd, GW_HWNDNEXT);
                         continue;
                 }
@@ -1279,12 +1264,19 @@ HWND WIN32API WindowFromPoint( POINT point)
     wPoint.y = windowDesktop->getWindowHeight() - point.y;
 
     hwndOS2 = OSLibWinWindowFromPoint(OSLIB_HWND_DESKTOP, (PVOID)&wPoint);
-    if(hwndOS2) {
+    if(hwndOS2)
+    {
+      hwnd = Win32BaseWindow::OS2ToWin32Handle(hwndOS2);
+      if (!hwnd)
+      {
+        //CB: could be a frame control
+        hwndOS2 = OSLibWinQueryWindow(hwndOS2,QWOS_PARENT);
         hwnd = Win32BaseWindow::OS2ToWin32Handle(hwndOS2);
-        if(hwnd) {
-		dprintf(("WindowFromPoint (%d,%d) %x->%x\n", point.x, point.y, hwndOS2, hwnd));
-          	return hwnd;
-	}
+      }
+      if(hwnd) {
+              dprintf(("WindowFromPoint (%d,%d) %x->%x\n", point.x, point.y, hwndOS2, hwnd));
+              return hwnd;
+      }
     }
     dprintf(("WindowFromPoint (%d,%d) %x->1\n", point.x, point.y, hwndOS2));
     return windowDesktop->getWindowHandle();
@@ -1303,39 +1295,6 @@ BOOL WIN32API IsWindowUnicode(HWND hwnd)
     }
     return window->IsWindowUnicode();
 }
-/*****************************************************************************
- * Name      : WORD WIN32API CascadeWindows
- * Purpose   : The CascadeWindows function cascades the specified windows or
- *             the child windows of the specified parent window.
- * Parameters: HWND hwndParent         handle of parent window
- *             UINT wHow               types of windows not to arrange
- *             CONST RECT * lpRect     rectangle to arrange windows in
- *             UINT cKids              number of windows to arrange
- *             const HWND FAR * lpKids array of window handles
- * Variables :
- * Result    : If the function succeeds, the return value is the number of windows arranged.
- *             If the function fails, the return value is zero.
- * Remark    :
- * Status    : UNTESTED STUB
- *
- * Author    : Patrick Haller [Thu, 1998/02/26 11:55]
- *****************************************************************************/
-
-WORD WIN32API CascadeWindows(HWND       hwndParent,
-                             UINT       wHow,
-                             CONST LPRECT lpRect,
-                             UINT       cKids,
-                             const HWND *lpKids)
-{
-  dprintf(("USER32:CascadeWindows(%08xh,%u,%08xh,%u,%08x) not implemented.\n",
-         hwndParent,
-         wHow,
-         lpRect,
-         cKids,
-         lpKids));
-
-  return (0);
-}
 /***********************************************************************
  *             SwitchToThisWindow   (USER32.539)
  */
@@ -1347,7 +1306,7 @@ DWORD WINAPI SwitchToThisWindow( HWND hwnd, BOOL restore )
 //******************************************************************************
 BOOL WIN32API EnumThreadWindows(DWORD dwThreadId, WNDENUMPROC lpfn, LPARAM lParam)
 {
-  return windowDesktop->EnumThreadWindows(dwThreadId, lpfn, lParam); 
+  return windowDesktop->EnumThreadWindows(dwThreadId, lpfn, lParam);
 }
 //******************************************************************************
 //******************************************************************************
@@ -1375,7 +1334,7 @@ BOOL WIN32API EnumChildWindows(HWND hwnd, WNDENUMPROC lpfn, LPARAM lParam)
 //******************************************************************************
 BOOL WIN32API EnumWindows(WNDENUMPROC lpfn, LPARAM lParam)
 {
-  return windowDesktop->EnumWindows(lpfn, lParam); 
+  return windowDesktop->EnumWindows(lpfn, lParam);
 }
 //******************************************************************************
 //******************************************************************************

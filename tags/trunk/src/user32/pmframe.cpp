@@ -1,4 +1,4 @@
-/* $Id: pmframe.cpp,v 1.26 1999-12-05 00:31:47 sandervl Exp $ */
+/* $Id: pmframe.cpp,v 1.27 1999-12-18 16:31:49 cbratschi Exp $ */
 /*
  * Win32 Frame Managment Code for OS/2
  *
@@ -324,9 +324,9 @@ MRESULT EXPENTRY Win32FrameProc(HWND hwnd,ULONG msg,MPARAM mp1,MPARAM mp2)
 
         dprintf(("PMFRAME: WM_WINDOWPOSCHANGED (%x) %x %x (%d,%d) (%d,%d)", mp2, win32wnd->getWindowHandle(), pswp->fl, pswp->x, pswp->y, pswp->cx, pswp->cy));
 
- 	//Save height so WM_WINDOWPOSCHANGED handler in pmwindow.cpp 
+        //Save height so WM_WINDOWPOSCHANGED handler in pmwindow.cpp
         //(for client) doesn't overwrite the client rectangle (breaks ydelta calculation)
-	clientHeight = win32wnd->getWindowHeight();
+        clientHeight = win32wnd->getWindowHeight();
 
         RestoreOS2TIB();
         rc = OldFrameProc(hwnd,msg,mp1,mp2);
@@ -384,7 +384,8 @@ MRESULT EXPENTRY Win32FrameProc(HWND hwnd,ULONG msg,MPARAM mp1,MPARAM mp2)
                          yDelta, swp[i].x, swp[i].y, swp[i].cx, swp[i].cy, swp[i].fl));
 #endif
 
-                if(swp[i].y != 0) {
+                if(swp[i].y != 0) //CB: y value of 0 is valid!
+                {
                     //child window at offset <> 0 from client area -> offset now changes
                     swp[i].y  += yDelta;
                     swp[i].fl &= ~(SWP_NOREDRAW);
