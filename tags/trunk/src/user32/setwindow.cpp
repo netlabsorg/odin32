@@ -1,4 +1,4 @@
-/* $Id: setwindow.cpp,v 1.1 1999-06-26 13:21:12 sandervl Exp $ */
+/* $Id: setwindow.cpp,v 1.2 1999-06-27 16:23:23 sandervl Exp $ */
 
 /*
  * Win32 Get/SetWindowLong/Word user32 API functions for OS/2
@@ -35,6 +35,7 @@ LONG WIN32API SetWindowLongA(HWND hwnd, int nIndex, LONG  arg3)
                         rc = (LONG)wndproc->GetWin32Callback();
                         dprintf(("USER32:  SetWindowLong change WindowProc %X to %X\n", rc, arg3));
                         wndproc->SetWin32Callback((WNDPROC)arg3);
+			O32_SetWindowLong(hwnd, nIndex, (LONG)wndproc->GetOS2Callback());
                         return(rc);
                 }
                 //else window that accesses it's normal window data

@@ -1,4 +1,7 @@
- /* $Id: ChangeLog,v 1.26 1999-06-26 18:34:45 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.27 1999-06-27 16:24:19 sandervl Exp $ */
+ 99-06-27: Sander van Leeuwen
+	- USER32: Message handler updates & lots of bugfixes 
+
  99-06-26: Sander van Leeuwen
 	- USER32: Changes for message spy & several message handler changes
 	- USER32: Restore win32 tib in window msg callback

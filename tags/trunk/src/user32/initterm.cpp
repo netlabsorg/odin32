@@ -1,4 +1,4 @@
-/* $Id: initterm.cpp,v 1.4 1999-06-20 16:47:39 sandervl Exp $ */
+/* $Id: initterm.cpp,v 1.5 1999-06-27 16:23:23 sandervl Exp $ */
 
 /*
  * USER32 DLL entry point
@@ -34,6 +34,7 @@
 #include <misc.h>       /*PLF Wed  98-03-18 23:18:29*/
 #include <win32type.h>
 #include <wndclass.h>
+#include <spy.h>
 
 extern "C" {
 /*-------------------------------------------------------------------*/
@@ -58,6 +59,7 @@ void CDECL _ctordtorTerm( void );
 /* library DLL is terminated.                                        */
 /*-------------------------------------------------------------------*/
 static void APIENTRY cleanup(ULONG reason);
+static void APIENTRY cleanupQueue(ULONG ulReason);
 
 
 
@@ -104,8 +106,15 @@ unsigned long SYSTEM _DLL_InitTerm(unsigned long hModule, unsigned long
          if(rc)
         	return 0UL;
 
+         rc = DosExitList(0x00008000|EXLST_ADD, cleanupQueue);
+         if(rc)
+        	return 0UL;
+
          //SvL: 18-7-'98, Register system window classes (button, listbox etc etc)
      	 RegisterSystemClasses(hModule);
+
+	 //SvL: Try to start communication with our message spy queue server
+	 InitSpyQueue();
          break;
       case 1 :
          break;
@@ -119,6 +128,10 @@ unsigned long SYSTEM _DLL_InitTerm(unsigned long hModule, unsigned long
    return 1UL;
 }
 
+static void APIENTRY cleanupQueue(ULONG ulReason)
+{
+   CloseSpyQueue();
+}
 
 static void APIENTRY cleanup(ULONG ulReason)
 {

@@ -1,4 +1,4 @@
-/* $Id: spy.cpp,v 1.2 1999-06-26 13:21:12 sandervl Exp $ */
+/* $Id: spy.cpp,v 1.3 1999-06-27 16:23:23 sandervl Exp $ */
 
 /*
  * Queue procedures to send messages to the spy server
@@ -64,8 +64,18 @@ BOOL InitSpyQueue()
 
 void CloseSpyQueue()
 {
-   if(hqQueue)
+ APIRET rc;
+
+   dprintf(("CloseSpyQueue"));
+   if(hqQueue) {
+	if(pvdQMemory) {
+	  	rc = DosWriteQueue(hqQueue, Q_SPYMSG_KILLSERVER, 0, 0, 0);
+		if(rc) {
+			dprintf(("CloseSpyQueue: DosWriteQueue returned %d", rc));
+		}
+	}
    	DosCloseQueue(hqQueue);
+   }
    if(pvdQMemory)
    	DosFreeMem(pvdQMemory);
 }

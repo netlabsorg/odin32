@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.9 1999-06-26 13:21:10 sandervl Exp $
+# $Id: Makefile,v 1.10 1999-06-27 16:23:22 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -24,7 +24,7 @@ OBJS =  user32.obj resstring.obj dialog.obj loadres.obj \
         wndproc.obj wndclass.obj dde.obj \
         dlgconvert.obj icon.obj hook.obj hooks.obj menu.obj \
         usrcall.obj defwndproc.obj syscolor.obj char.obj initterm.obj \
-        uitools.obj unknown.obj spy.obj setwindow.obj
+        uitools.obj unknown.obj spy.obj setwindow.obj wndmsg.obj
 
 
 all: $(TARGET).dll $(TARGET).lib
@@ -64,11 +64,12 @@ wndproc.obj: wndproc.cpp \
              $(PDWIN32_INCLUDE)\wndproc.h $(PDWIN32_INCLUDE)\wndclass.h \
              dlgconvert.h hooks.h
 wndclass.obj: wndclass.cpp \
-              $(PDWIN32_INCLUDE)\wndproc.h $(PDWIN32_INCLUDE)\wndclass.h
+              $(PDWIN32_INCLUDE)\wndproc.h $(PDWIN32_INCLUDE)\wndclass.h  wndmsg.h
 initterm.obj: initterm.cpp $(PDWIN32_INCLUDE)\spy.h
 uitools.obj: uitools.cpp
 unknown.obj: unknown.cpp
-setwindow.obj: setwindow.cpp $(PDWIN32_INCLUDE)\wndproc.h $(PDWIN32_INCLUDE)\wndclass.h
+setwindow.obj: setwindow.cpp $(PDWIN32_INCLUDE)\wndproc.h $(PDWIN32_INCLUDE)\wndclass.h  wndmsg.h
+wndmsg.obj: wndmsg.cpp wndmsg.h
 
 spy.obj: spy.cpp $(PDWIN32_INCLUDE)\spy.h
 
