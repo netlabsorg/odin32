@@ -1,4 +1,4 @@
-/* $Id: winmenu.cpp,v 1.4 1999-08-31 17:14:52 sandervl Exp $ */
+/* $Id: winmenu.cpp,v 1.5 1999-09-09 21:01:34 phaller Exp $ */
 
 /*
  * Win32 menu API functions for OS/2
@@ -17,6 +17,7 @@
  */
 #include <os2win.h>
 #include <stdlib.h>
+#include <string.h>
 #include <win32wbase.h>
 #include "oslibmenu.h"
 #include <winresmenu.h>
@@ -802,3 +803,110 @@ UINT WIN32API MenuItemFromPoint(HWND  hWnd,
 
   return (-1);
 }
+
+
+/*****************************************************************************
+ * Name      : BOOL WIN32API GetMenuInfo
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB win98/NT5.0
+ *
+ * Author    : Patrick Haller [Thu, 1998/02/26 11:55]
+ *****************************************************************************/
+
+BOOL WIN32API GetMenuInfo (HMENU hMenu, LPMENUINFO lpmi)
+{
+  dprintf(("USER32: GetMenuInfo(%08xh,%08xh) not implemented.\n",
+         hMenu,
+         lpmi));
+
+  memset(lpmi,0,sizeof(MENUINFO));
+  return 0;
+}
+#if 0
+   POPUPMENU *menu;
+
+    TRACE("(0x%04x %p)\n", hMenu, lpmi);
+
+    if (lpmi && (menu = (POPUPMENU *) USER_HEAP_LIN_ADDR(hMenu)))
+    {
+
+   if (lpmi->fMask & MIM_BACKGROUND)
+       lpmi->hbrBack = menu->hbrBack;
+
+   if (lpmi->fMask & MIM_HELPID)
+       lpmi->dwContextHelpID = menu->dwContextHelpID;
+
+   if (lpmi->fMask & MIM_MAXHEIGHT)
+       lpmi->cyMax = menu->cyMax;
+
+   if (lpmi->fMask & MIM_MENUDATA)
+       lpmi->dwMenuData = menu->dwMenuData;
+
+   if (lpmi->fMask & MIM_STYLE)
+       lpmi->dwStyle = menu->dwStyle;
+
+   return TRUE;
+    }
+    return FALSE;
+}
+#endif
+
+
+/*****************************************************************************
+ * Name      : BOOL WIN32API SetMenuInfo
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * FIXME
+ * MIM_APPLYTOSUBMENUS
+ * actually use the items to draw the menu
+ * Status    : UNTESTED STUB win98/NT5.0
+ *
+ * Author    : Patrick Haller [Thu, 1998/02/26 11:55]
+ *****************************************************************************/
+
+BOOL WIN32API SetMenuInfo (HMENU hMenu, LPCMENUINFO lpmi)
+{
+  dprintf(("USER32: SetMenuInfo(%08xh,%08xh) not implemented.\n",
+         hMenu,
+         lpmi));
+
+  return 0;
+}
+#if 0
+    POPUPMENU *menu;
+
+    TRACE("(0x%04x %p)\n", hMenu, lpmi);
+
+
+
+    if (lpmi && (lpmi->cbSize==sizeof(MENUINFO)) && (menu=(POPUPMENU*)USER_HEAP_LIN_ADDR(hMenu)))
+    {
+
+   if (lpmi->fMask & MIM_BACKGROUND)
+       menu->hbrBack = lpmi->hbrBack;
+
+   if (lpmi->fMask & MIM_HELPID)
+       menu->dwContextHelpID = lpmi->dwContextHelpID;
+
+   if (lpmi->fMask & MIM_MAXHEIGHT)
+       menu->cyMax = lpmi->cyMax;
+
+   if (lpmi->fMask & MIM_MENUDATA)
+       menu->dwMenuData = lpmi->dwMenuData;
+
+   if (lpmi->fMask & MIM_STYLE)
+       menu->dwStyle = lpmi->dwStyle;
+
+   return TRUE;
+    }
+    return FALSE;
+}
+#endif
+

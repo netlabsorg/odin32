@@ -1,4 +1,4 @@
-/* $Id: menu.cpp,v 1.5 1999-07-10 15:58:52 sandervl Exp $ */
+/* $Id: menu.cpp,v 1.6 1999-09-09 20:59:33 phaller Exp $ */
 
 /*
  * Win32 menu API functions for OS/2
@@ -87,10 +87,10 @@ int WIN32API GetMenuStringW(HMENU hmenu, UINT idItem, LPWSTR lpsz, int cchMax, U
     rc = O32_GetMenuString(hmenu, idItem, astring, cchMax, fuFlags);
     free(astring);
     if(rc) {
-		dprintf(("USER32: OS2GetMenuStringW %s\n", astring));
-		AsciiToUnicode(astring, lpsz);
+      dprintf(("USER32: OS2GetMenuStringW %s\n", astring));
+      AsciiToUnicode(astring, lpsz);
     }
-    else	lpsz[0] = 0;
+    else lpsz[0] = 0;
     return(rc);
 }
 //******************************************************************************
@@ -157,14 +157,14 @@ BOOL WIN32API TrackPopupMenuEx(HMENU hmenu, UINT flags, int X, int Y, HWND hwnd,
   WriteLog("USER32:  TrackPopupMenuEx, not completely implemented\n");
 #endif
   if(lpPM->cbSize != 0)
-	rect = &lpPM->rcExclude;
+   rect = &lpPM->rcExclude;
 
   return O32_TrackPopupMenu(hmenu, flags, X, Y, 0, hwnd, rect);
 }
 //******************************************************************************
 //******************************************************************************
 BOOL WIN32API AppendMenuA(HMENU hMenu, UINT uFlags, UINT ulDNewItem,
-			     LPCSTR lpNewItem)
+              LPCSTR lpNewItem)
 {
 #ifdef DEBUG
 BOOL rc;
@@ -172,7 +172,7 @@ BOOL rc;
     WriteLog("USER32:  OS2AppendMenuA uFlags = %X\n", uFlags);
 
     if(uFlags & MF_STRING || uFlags == 0)
-	    WriteLog("USER32:  OS2AppendMenuA %s\n", lpNewItem);
+       WriteLog("USER32:  OS2AppendMenuA %s\n", lpNewItem);
 
     rc = O32_AppendMenu(hMenu, uFlags, ulDNewItem, lpNewItem);
     WriteLog("USER32:  OS2AppendMenuA returned %d\n", rc);
@@ -357,7 +357,7 @@ DWORD WIN32API GetMenuContextHelpId(HMENU hmenu)
 //******************************************************************************
 //******************************************************************************
 BOOL WIN32API CheckMenuRadioItem(HMENU hmenu, UINT idFirst, UINT idLast,
-				    UINT idCheck, UINT uFlags)
+                UINT idCheck, UINT uFlags)
 {
 #ifdef DEBUG
   WriteLog("USER32:  OS2CheckMenuRadioItem, not implemented\n");
@@ -406,7 +406,7 @@ BOOL WIN32API ChangeMenuW(HMENU hMenu, UINT pos, LPCWSTR data,
 //******************************************************************************
 //******************************************************************************
 BOOL WIN32API SetMenuItemInfoA(HMENU hmenu, UINT par1, BOOL par2,
-			       const MENUITEMINFOA * lpMenuItemInfo)
+                const MENUITEMINFOA * lpMenuItemInfo)
 {
 #ifdef DEBUG
   WriteLog("USER32:  SetMenuItemInfoA, faked\n");
@@ -609,6 +609,8 @@ BOOL WIN32API InsertMenuItemW(HMENU           hMenu,
 
    return (FALSE);
 }
+
+
 /*****************************************************************************
  * Name      : UINT WIN32API MenuItemFromPoint
  * Purpose   : The MenuItemFromPoint function determines which menu item, if
@@ -634,3 +636,110 @@ UINT WIN32API MenuItemFromPoint(HWND  hWnd,
 
   return (-1);
 }
+
+
+/*****************************************************************************
+ * Name      : BOOL WIN32API GetMenuInfo
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB win98/NT5.0
+ *
+ * Author    : Patrick Haller [Thu, 1998/02/26 11:55]
+ *****************************************************************************/
+
+BOOL WIN32API GetMenuInfo (HMENU hMenu, LPMENUINFO lpmi)
+{
+  dprintf(("USER32: GetMenuInfo(%08xh,%08xh) not implemented.\n",
+         hMenu,
+         lpmi));
+
+  memset(lpmi,0,sizeof(MENUINFO));
+  return 0;
+}
+#if 0
+   POPUPMENU *menu;
+
+    TRACE("(0x%04x %p)\n", hMenu, lpmi);
+
+    if (lpmi && (menu = (POPUPMENU *) USER_HEAP_LIN_ADDR(hMenu)))
+    {
+
+   if (lpmi->fMask & MIM_BACKGROUND)
+       lpmi->hbrBack = menu->hbrBack;
+
+   if (lpmi->fMask & MIM_HELPID)
+       lpmi->dwContextHelpID = menu->dwContextHelpID;
+
+   if (lpmi->fMask & MIM_MAXHEIGHT)
+       lpmi->cyMax = menu->cyMax;
+
+   if (lpmi->fMask & MIM_MENUDATA)
+       lpmi->dwMenuData = menu->dwMenuData;
+
+   if (lpmi->fMask & MIM_STYLE)
+       lpmi->dwStyle = menu->dwStyle;
+
+   return TRUE;
+    }
+    return FALSE;
+}
+#endif
+
+
+/*****************************************************************************
+ * Name      : BOOL WIN32API SetMenuInfo
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * FIXME
+ * MIM_APPLYTOSUBMENUS
+ * actually use the items to draw the menu
+ * Status    : UNTESTED STUB win98/NT5.0
+ *
+ * Author    : Patrick Haller [Thu, 1998/02/26 11:55]
+ *****************************************************************************/
+
+BOOL WIN32API SetMenuInfo (HMENU hMenu, LPCMENUINFO lpmi)
+{
+  dprintf(("USER32: SetMenuInfo(%08xh,%08xh) not implemented.\n",
+         hMenu,
+         lpmi));
+
+  return 0;
+}
+#if 0
+    POPUPMENU *menu;
+
+    TRACE("(0x%04x %p)\n", hMenu, lpmi);
+
+
+
+    if (lpmi && (lpmi->cbSize==sizeof(MENUINFO)) && (menu=(POPUPMENU*)USER_HEAP_LIN_ADDR(hMenu)))
+    {
+
+   if (lpmi->fMask & MIM_BACKGROUND)
+       menu->hbrBack = lpmi->hbrBack;
+
+   if (lpmi->fMask & MIM_HELPID)
+       menu->dwContextHelpID = lpmi->dwContextHelpID;
+
+   if (lpmi->fMask & MIM_MAXHEIGHT)
+       menu->cyMax = lpmi->cyMax;
+
+   if (lpmi->fMask & MIM_MENUDATA)
+       menu->dwMenuData = lpmi->dwMenuData;
+
+   if (lpmi->fMask & MIM_STYLE)
+       menu->dwStyle = lpmi->dwStyle;
+
+   return TRUE;
+    }
+    return FALSE;
+}
+#endif
+
