@@ -1,4 +1,4 @@
-/* $Id: overlappedio.h,v 1.1 2001-12-14 12:45:49 sandervl Exp $ */
+/* $Id: overlappedio.h,v 1.2 2002-06-11 12:52:03 sandervl Exp $ */
 
 /*
  * Win32 overlapped IO class
@@ -112,6 +112,8 @@ protected:
 
 private:
      LPASYNCIOREQUEST findAndRemoveRequest(int index, HANDLE hHandle);
+     void             addRequest(int index, LPASYNCIOREQUEST lpRequest);
+     void             removeRequest(int index, LPASYNCIOREQUEST lpRequest);
 
      DWORD        threadHandler(DWORD fEvent);
 
