@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.53 1999-10-18 10:54:04 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.54 1999-10-18 11:59:58 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -606,12 +606,12 @@ BOOL Win32BaseWindow::MsgCreate(HWND hwndFrame, HWND hwndClient)
   if (dwStyle & WS_HSCROLL)
   {
         hwndHorzScroll = OSLibWinQueryScrollBarHandle(OS2HwndFrame, OSLIB_HSCROLL);
-        OSLibWinShowScrollBar(OS2HwndFrame, hwndHorzScroll, OSLIB_HSCROLL, FALSE, TRUE);
+//        OSLibWinShowScrollBar(OS2HwndFrame, hwndHorzScroll, OSLIB_HSCROLL, FALSE, TRUE);
   }
 
   if (dwStyle & WS_VSCROLL) {
         hwndVertScroll = OSLibWinQueryScrollBarHandle(OS2HwndFrame, OSLIB_VSCROLL);
-        OSLibWinShowScrollBar(OS2HwndFrame, hwndVertScroll, OSLIB_VSCROLL, FALSE, TRUE);
+//        OSLibWinShowScrollBar(OS2HwndFrame, hwndVertScroll, OSLIB_VSCROLL, FALSE, TRUE);
   }
 
   //CB: switch off -> OS/2 scrollbars
@@ -2168,6 +2168,44 @@ BOOL Win32BaseWindow::UpdateWindow()
 BOOL Win32BaseWindow::IsIconic()
 {
     return OSLibWinIsIconic(OS2Hwnd);
+}
+//******************************************************************************
+//TODO: Should not enumerate children that are created during the enumeration!
+//******************************************************************************
+BOOL Win32BaseWindow::EnumChildWindows(WNDENUMPROC lpfn, LPARAM lParam)
+{
+ BOOL rc = TRUE;
+ HWND hwnd;
+ Win32BaseWindow *prevchild = 0, *child = 0;
+
+	dprintf(("EnumChildWindows of %x parameter %x %x (%x)", getWindowHandle(), lpfn, lParam, getFirstChild()));
+    for (child = (Win32BaseWindow *)getFirstChild(); child; child = (Win32BaseWindow *)child->getNextChild())
+    {
+        dprintf(("EnumChildWindows: enumerating child %x", child->getWindowHandle()));
+        hwnd = child->getWindowHandle();
+        if(lpfn(hwnd, lParam) == FALSE)
+        {
+                rc = FALSE;
+                break;
+        }
+        //check if the window still exists
+        if(!::IsWindow(hwnd))
+        {
+            child = prevchild;
+            continue;
+        }
+        if(child->getFirstChild() != NULL)
+        {
+            dprintf(("EnumChildWindows: Enumerate children of %x", child->getWindowHandle()));
+            if(child->EnumChildWindows(lpfn, lParam) == FALSE)
+            {
+                rc = FALSE;
+                break;
+            }
+        }
+        prevchild = child;
+    }
+    return rc;
 }
 //******************************************************************************
 //******************************************************************************
