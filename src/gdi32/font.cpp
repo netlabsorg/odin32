@@ -1,4 +1,4 @@
-/* $Id: font.cpp,v 1.1 1999-10-20 22:36:53 sandervl Exp $ */
+/* $Id: font.cpp,v 1.2 1999-11-09 19:52:33 phaller Exp $ */
 
 /*
  * GDI32 font apis
@@ -12,6 +12,11 @@
  * Project Odin Software License can be found in LICENSE.TXT
  *
  */
+
+#include <odin.h>
+#include <odinwrap.h>
+#include <os2sel.h>
+
 #include <os2win.h>
 #include <stdlib.h>
 #include <stdarg.h>
@@ -19,6 +24,10 @@
 #include "misc.h"
 #include "unicode.h"
 #include <vmutex.h>
+
+
+ODINDEBUGCHANNEL(GDI32-FONT)
+
 
 VMutex mutexProcWinA;
 VMutex mutexProcWinW;
@@ -78,36 +87,16 @@ HFONT WIN32API CreateFontIndirectA(const LOGFONTA *lplf)
 }
 //******************************************************************************
 //******************************************************************************
-HFONT WIN32API CreateFontIndirectW(const LOGFONTW *lplf)
+ODINFUNCTION1(HFONT, CreateFontIndirectW,const LOGFONTW *, lplf)
 {
- LOGFONTA afont;
- HFONT    hfont;
+  LOGFONTA afont;
+  HFONT    hfont;
 
-    memcpy(&afont, lplf, ((int)&afont.lfFaceName - (int)&afont));
-    memcpy(&afont, lplf, ((int)&afont.lfFaceName - (int)&afont));
-    UnicodeToAsciiN((WCHAR *)lplf->lfFaceName, afont.lfFaceName, LF_FACESIZE-1);
-
-    hfont = O32_CreateFontIndirect(&afont);
-    dprintf(("GDI32: CreateFontIndirectW\n"));
-    dprintf(("GDI32: lfHeight        = %d\n", lplf->lfHeight));
-    dprintf(("GDI32: lfWidth          = %d\n", lplf->lfWidth));
-    dprintf(("GDI32: lfHeight        = %d\n", afont.lfHeight));
-    dprintf(("GDI32: lfWidth          = %d\n", afont.lfWidth));
-    dprintf(("GDI32: lfEscapement    = %d\n", afont.lfEscapement));
-    dprintf(("GDI32: lfOrientation   = %d\n", afont.lfOrientation));
-    dprintf(("GDI32: lfWeight        = %d\n", afont.lfWeight));
-    dprintf(("GDI32: lfItalic        = %d\n", afont.lfItalic));
-    dprintf(("GDI32: lfUnderline     = %d\n", afont.lfUnderline));
-    dprintf(("GDI32: lfStrikeOut     = %d\n", afont.lfStrikeOut));
-    dprintf(("GDI32: lfCharSet       = %X\n", afont.lfCharSet));
-    dprintf(("GDI32: lfOutPrecision  = %X\n", afont.lfOutPrecision));
-    dprintf(("GDI32: lfClipPrecision = %X\n", afont.lfClipPrecision));
-    dprintf(("GDI32: lfQuality       = %X\n", afont.lfQuality));
-    dprintf(("GDI32: lfPitchAndFamily= %X\n", afont.lfPitchAndFamily));
-    dprintf(("GDI32: lfFaceName      = %s\n", afont.lfFaceName));
-    dprintf(("GDI32: CreateFontIndirectW %s returned %X\n", afont.lfFaceName, hfont));
-
-    return(hfont);
+  //memcpy(&afont, lplf, ((int)&afont.lfFaceName - (int)&afont));
+  memcpy(&afont, lplf, sizeof(LOGFONTA));
+  UnicodeToAsciiN((WCHAR *)lplf->lfFaceName, afont.lfFaceName, LF_FACESIZE-1);
+  hfont = CreateFontIndirectA(&afont);
+  return(hfont);
 }
 //******************************************************************************
 //******************************************************************************
@@ -118,7 +107,7 @@ int  EXPENTRY_O32 EnumFontProcA(LPENUMLOGFONTA lpLogFont, LPNEWTEXTMETRICA
 }
 //******************************************************************************
 //******************************************************************************
-int  EXPENTRY_O32 EnumFontProcW(LPENUMLOGFONTA lpLogFont, LPNEWTEXTMETRICA lpTextM, 
+int  EXPENTRY_O32 EnumFontProcW(LPENUMLOGFONTA lpLogFont, LPNEWTEXTMETRICA lpTextM,
                                 DWORD arg3, LPARAM arg4)
 {
   ENUMLOGFONTW LogFont;
