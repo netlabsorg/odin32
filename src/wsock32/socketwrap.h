@@ -464,6 +464,304 @@ inline int _Rlisten(int a, int b)
 #undef  Rlisten
 #define Rlisten _Rlisten
 
+inline int _gethostname(char *a, int b)
+{
+ int yyrc;
+ USHORT sel = RestoreOS2FS();
+
+    yyrc = gethostname(a, b);
+    SetFS(sel);
+
+    return yyrc;
+} 
+
+#undef  gethostname
+#define gethostname _gethostname
+
+inline struct hostent *_gethostbyname(char *a)
+{
+ struct hostent * yyrc;
+ USHORT sel = RestoreOS2FS();
+
+    yyrc = gethostbyname(a);
+    SetFS(sel);
+
+    return yyrc;
+} 
+
+#undef  gethostbyname
+#define gethostbyname _gethostbyname
+
+inline struct hostent *_gethostbyaddr(char *a, int b, int c)
+{
+ struct hostent * yyrc;
+ USHORT sel = RestoreOS2FS();
+
+    yyrc = gethostbyaddr(a, b, c);
+    SetFS(sel);
+
+    return yyrc;
+} 
+
+#undef  gethostbyaddr
+#define gethostbyaddr _gethostbyaddr
+
+inline struct netent *_getnetbyname(char *a)
+{
+ struct netent * yyrc;
+ USHORT sel = RestoreOS2FS();
+
+    yyrc = getnetbyname(a);
+    SetFS(sel);
+
+    return yyrc;
+} 
+
+#undef  getnetbyname
+#define getnetbyname _getnetbyname
+
+inline struct netent *_getnetbyaddr(unsigned a, int b)
+{
+ struct netent * yyrc;
+ USHORT sel = RestoreOS2FS();
+
+    yyrc = getnetbyaddr(a, b);
+    SetFS(sel);
+
+    return yyrc;
+} 
+
+#undef  getnetbyaddr
+#define getnetbyaddr _getnetbyaddr
+
+inline struct servent *_getservbyname(char *a, char *b)
+{
+ struct servent * yyrc;
+ USHORT sel = RestoreOS2FS();
+
+    yyrc = getservbyname(a, b);
+    SetFS(sel);
+
+    return yyrc;
+} 
+
+#undef  getservbyname
+#define getservbyname _getservbyname
+
+inline struct servent *_getservbyport(int a, char *b)
+{
+ struct servent * yyrc;
+ USHORT sel = RestoreOS2FS();
+
+    yyrc = getservbyport(a, b);
+    SetFS(sel);
+
+    return yyrc;
+} 
+
+#undef  getservbyport
+#define getservbyport _getservbyport
+
+inline struct protoent *_getprotobyname(char *a)
+{
+ struct protoent * yyrc;
+ USHORT sel = RestoreOS2FS();
+
+    yyrc = getprotobyname(a);
+    SetFS(sel);
+
+    return yyrc;
+} 
+
+#undef  getprotobyname
+#define getprotobyname _getprotobyname
+
+inline struct protoent *_getprotobynumber(int a)
+{
+ struct protoent * yyrc;
+ USHORT sel = RestoreOS2FS();
+
+    yyrc = getprotobynumber(a);
+    SetFS(sel);
+
+    return yyrc;
+} 
+
+#undef  getprotobynumber
+#define getprotobynumber _getprotobynumber
+
+inline void _sethostent(int a)
+{
+ USHORT sel = RestoreOS2FS();
+
+    sethostent(a);
+    SetFS(sel);
+} 
+
+#undef  sethostent
+#define sethostent _sethostent
+
+inline struct hostent *_gethostent()
+{
+ struct hostent * yyrc;
+ USHORT sel = RestoreOS2FS();
+
+    yyrc = gethostent();
+    SetFS(sel);
+
+    return yyrc;
+} 
+
+#undef  gethostent
+#define gethostent _gethostent
+
+inline void _endhostent()
+{
+ USHORT sel = RestoreOS2FS();
+
+    endhostent();
+    SetFS(sel);
+} 
+
+#undef  endhostent
+#define endhostent _endhostent
+
+inline void _setnetent(int a)
+{
+ USHORT sel = RestoreOS2FS();
+
+    setnetent(a);
+    SetFS(sel);
+} 
+
+#undef  setnetent
+#define setnetent _setnetent
+
+inline struct netent *_getnetent()
+{
+ struct netent * yyrc;
+ USHORT sel = RestoreOS2FS();
+
+    yyrc = getnetent();
+    SetFS(sel);
+
+    return yyrc;
+} 
+
+#undef  getnetent
+#define getnetent _getnetent
+
+inline void _endnetent()
+{
+ USHORT sel = RestoreOS2FS();
+
+    endnetent();
+    SetFS(sel);
+} 
+
+#undef  endnetent
+#define endnetent _endnetent
+
+inline void _setprotoent(int a)
+{
+ USHORT sel = RestoreOS2FS();
+
+    setprotoent(a);
+    SetFS(sel);
+} 
+
+#undef  setprotoent
+#define setprotoent _setprotoent
+
+inline struct protoent *_getprotoent()
+{
+ struct protoent * yyrc;
+ USHORT sel = RestoreOS2FS();
+
+    yyrc = getprotoent();
+    SetFS(sel);
+
+    return yyrc;
+} 
+
+#undef  getprotoent
+#define getprotoent _getprotoent
+
+inline void _endprotoent()
+{
+ USHORT sel = RestoreOS2FS();
+
+    endprotoent();
+    SetFS(sel);
+} 
+
+#undef  endprotoent
+#define endprotoent _endprotoent
+
+inline void _setservent(int a)
+{
+ USHORT sel = RestoreOS2FS();
+
+    setservent(a);
+    SetFS(sel);
+} 
+
+#undef  setservent
+#define setservent _setservent
+
+inline struct servent *_getservent()
+{
+ struct servent * yyrc;
+ USHORT sel = RestoreOS2FS();
+
+    yyrc = getservent();
+    SetFS(sel);
+
+    return yyrc;
+} 
+
+#undef  getservent
+#define getservent _getservent
+
+inline void _endservent()
+{
+ USHORT sel = RestoreOS2FS();
+
+    endservent();
+    SetFS(sel);
+} 
+
+#undef  endservent
+#define endservent _endservent
+
+inline int _tcp_h_errno()
+{
+ int yyrc;
+ USHORT sel = RestoreOS2FS();
+
+    yyrc = tcp_h_errno();
+    SetFS(sel);
+
+    return yyrc;
+} 
+
+#undef  tcp_h_errno
+#define tcp_h_errno _tcp_h_errno
+
+inline struct hostent *_Rgethostbyname(char *a)
+{
+ struct hostent * yyrc;
+ USHORT sel = RestoreOS2FS();
+
+    yyrc = Rgethostbyname(a);
+    SetFS(sel);
+
+    return yyrc;
+} 
+
+#undef  Rgethostbyname
+#define Rgethostbyname _Rgethostbyname
+
 
 #endif  //__SOCKETWRAP_H__
 
