@@ -1,4 +1,4 @@
-/* $Id: scroll.cpp,v 1.9 1999-10-17 12:17:44 cbratschi Exp $ */
+/* $Id: scroll.cpp,v 1.10 1999-10-17 18:09:22 sandervl Exp $ */
 /*
  * Scrollbar control
  *
@@ -1132,6 +1132,9 @@ LRESULT WINAPI HorzScrollBarWndProc(HWND hwnd,UINT message,WPARAM wParam,LPARAM 
             POINT pt;
             CONV_POINT16TO32( (POINT16 *)&lParam, &pt );
             SCROLL_HandleScrollEvent( hwnd, SB_HORZ, message, pt );
+	    if(message == WM_MOUSEMOVE) {
+		return 1; //SvL: Let PM change the mouse cursor to the default
+	    }
         }
         break;
 
@@ -1207,6 +1210,9 @@ LRESULT WINAPI VertScrollBarWndProc(HWND hwnd,UINT message,WPARAM wParam,LPARAM 
             POINT pt;
             CONV_POINT16TO32( (POINT16 *)&lParam, &pt );
             SCROLL_HandleScrollEvent( hwnd, SB_VERT, message, pt );
+	    if(message == WM_MOUSEMOVE) {
+		return 1; //SvL: Let PM change the mouse cursor to the default
+	    }
         }
         break;
 
