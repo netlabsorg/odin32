@@ -1,16 +1,9 @@
-/* $Id: conprop.cpp,v 1.2 1999-05-25 19:29:30 phaller Exp $ */
-
-/*
- *
- * Project Odin Software License can be found in LICENSE.TXT
- *
- */
 /*
  * Win32 Console API Translation for OS/2
  *
  * 1998/03/06 Patrick Haller (haller@zebra.fh-weingarten.de)
  *
- * @(#) conprop.cpp         1.0.0   1998/03/06 PH Start from scratch
+ * @(#) conprop.cpp     	1.0.0   1998/03/06 PH Start from scratch
  */
 
 
@@ -236,6 +229,7 @@ static VOID ErrorMsg( PSZ szFormat,
                        1,
                        MB_OK | MB_MOVEABLE );
   free( szMsg );
+  return;
 }
 
 
@@ -268,7 +262,11 @@ MRESULT EXPENTRY ConsolePropertyDlgProc(HWND   hwnd,
     {
       PCONSOLEOPTIONS pConsoleOptions = (PCONSOLEOPTIONS)mp2;    /* save ptr */
       HWND            hwndNotebook;                /* notebook window handle */
-
+      
+      
+      /* @@@PH we should work on a copy of the console options for */
+      /* UNDO and APPLY to work properly */
+      
       WinSetWindowULong (hwnd,            /* store the data pointer in local */
                          QWL_USER,        /* variable storage attached to the*/
                          (ULONG)pConsoleOptions); /* window itself.          */
@@ -279,7 +277,7 @@ MRESULT EXPENTRY ConsolePropertyDlgProc(HWND   hwnd,
                                       nbpage,
                                       PAGE_COUNT(nbpage),
                                       (PVOID)NULL);
-
+      
       /* this message makes the client pages to write new values into their  */
       /* controls.                                                           */
       WinBroadcastMsg(hwnd,                      /* broadcast to all dialogs */
@@ -288,7 +286,7 @@ MRESULT EXPENTRY ConsolePropertyDlgProc(HWND   hwnd,
                       (MPARAM)NULL,
                       BMSG_SEND |
                       BMSG_DESCENDANTS);
-
+      
       return ((MPARAM)FALSE);
     }
 
@@ -300,11 +298,11 @@ MRESULT EXPENTRY ConsolePropertyDlgProc(HWND   hwnd,
     case WM_COMMAND:
     {
       PCONSOLEOPTIONS pConsoleOptions;      /* the console options structure */
-
+      
       pConsoleOptions = (PCONSOLEOPTIONS)
                         WinQueryWindowULong(hwnd,  /* query pointer from wnd */
                                             QWL_USER);
-
+      
       switch (SHORT1FROMMP(mp1))
       {
         case ID_BTN_UNDO:
@@ -316,25 +314,26 @@ MRESULT EXPENTRY ConsolePropertyDlgProc(HWND   hwnd,
                           BMSG_SEND |
                           BMSG_DESCENDANTS);
           return ( (MPARAM) FALSE);
-
-
+        
+        case ID_BTN_SAVE:
+          /* @@@PH save console option work buffer */
+          /* @@@PH ConsolePropertyWrite(pConsoleOptions) */
+          WinDismissDlg(hwnd,
+                        ID_BTN_SAVE);
+          return ( (MPARAM) FALSE);        
+        
         case ID_BTN_APPLY:
-          WinBroadcastMsg(hwnd,                  /* broadcast to all dialogs */
-                          UM_PROPERTY_APPLY,
-                          (MPARAM)pConsoleOptions,
-                          (MPARAM)NULL,
-                          BMSG_SEND |
-                          BMSG_DESCENDANTS);
-        /*  WinDismissDlg(hwnd,
-                        ID_BTN_APPLY);*/
+          /* @@@PH save console option work buffer */
+          WinDismissDlg(hwnd,
+                        ID_BTN_APPLY);
           return ( (MPARAM) FALSE);
-
+      
         case BS_HELP:
           return ( (MPARAM) FALSE);
       }
     }
   }
-
+  
   return WinDefDlgProc(hwnd,                   /* default message processing */
                        ulMessage,
                        mp1,
@@ -1029,22 +1028,22 @@ static MRESULT EXPENTRY wpDlgProcPage1(HWND   hwnd,
     /*************************************************************************
      * user messages                                                         *
      *************************************************************************/
-
+    
     case UM_PROPERTY_UNDO:
     {
       PCONSOLEOPTIONS pOpt = (PCONSOLEOPTIONS)mp1;            /* get pointer */
-
+      
       ConPropPage1Set(hwnd,                                    /* set values */
                       pOpt);
-
+      
       return ( (MPARAM) FALSE);
     }
-
-
+    
+    
     case UM_PROPERTY_APPLY:
     {
       PCONSOLEOPTIONS pOpt = (PCONSOLEOPTIONS)mp1;            /* get pointer */
-
+      
       pOpt->fTerminateAutomatically = WinQueryButtonCheckstate(hwnd,
                                                  CB_CONSOLE_CLOSEWINDOWONEXIT);
       pOpt->fInsertMode             = WinQueryButtonCheckstate(hwnd,
@@ -1053,26 +1052,26 @@ static MRESULT EXPENTRY wpDlgProcPage1(HWND   hwnd,
                                                        CB_CONSOLE_QUICKINSERT);
       pOpt->fToolbarActive          = WinQueryButtonCheckstate(hwnd,
                                                            CB_CONSOLE_TOOLBAR);
-
+      
       WinSendDlgItemMsg(hwnd,                             /* query the value */
                         SPN_CONSOLE_TAB,
                         SPBM_QUERYVALUE,
                         MPFROMP(&pOpt->ulTabSize),
                         MPFROM2SHORT(0,SPBQ_ALWAYSUPDATE)
                         );
-
+        
       WinSendDlgItemMsg(hwnd,                             /* query the value */
                         SPN_CONSOLE_CURSORBLINK,
                         SPBM_QUERYVALUE,
                         MPFROMP(&pOpt->ucCursorDivisor),
                         MPFROM2SHORT(0,SPBQ_ALWAYSUPDATE)
                        );
-
+      
       return ( (MPARAM) FALSE);
     }
   }
-
-
+  
+  
   return WinDefDlgProc(hwnd,                   /* default message processing */
                        ulMessage,
                        mp1,
@@ -1101,33 +1100,69 @@ static MRESULT EXPENTRY wpDlgProcPage2(HWND   hwnd,
 {
   switch (ulMessage)
   {
+    case WM_COMMAND:
+    {
+      PCONSOLEOPTIONS pConsoleOptions;      /* the console options structure */
+      HWND            hwndNotebook = WinQueryWindow(WinQueryWindow(hwnd,
+                                                                   QW_PARENT),
+                                                    QW_PARENT);
+      
+      pConsoleOptions = (PCONSOLEOPTIONS)          /* query pointer from wnd */
+                        WinQueryWindowULong(hwndNotebook,
+                                            QWL_USER);
+      
+      switch (SHORT1FROMMP(mp1))
+      {
+        case ID_BTN_SPEAKERTEST:
+          /* test speaker */
+          DosBeep(pConsoleOptions->ulSpeakerFrequency,
+                  pConsoleOptions->ulSpeakerDuration);
+        
+          return ( (MPARAM) FALSE);
+      }
+    }
+    
+    
     /*************************************************************************
      * user messages                                                         *
      *************************************************************************/
-
+    
     case UM_PROPERTY_UNDO:
     {
       PCONSOLEOPTIONS pOpt = (PCONSOLEOPTIONS)mp1;            /* get pointer */
-
+      
       ConPropPage2Set(hwnd,                                    /* set values */
                       pOpt);
-
+      
       return ( (MPARAM) FALSE);
     }
-
-
+    
+    
     case UM_PROPERTY_APPLY:
     {
       PCONSOLEOPTIONS pOpt = (PCONSOLEOPTIONS)mp1;            /* get pointer */
-
-//      pOpt->fTerminateAutomatically = WinQueryButtonCheckstate(hwnd,
-//                                                 CB_CONSOLE_CLOSEWINDOWONEXIT);
-
+      
+      pOpt->fSpeakerEnabled    = WinQueryButtonCheckstate(hwnd,
+                                                          CB_CONSOLE_SPEAKERENABLE);
+      pOpt->ulSpeakerDuration  = (ULONG)WinSendDlgItemMsg(hwnd,
+                                                          SLB_CONSOLE_SPEAKERDURATION,
+                                                          SLM_QUERYSLIDERINFO,
+                                                          MPFROM2SHORT(SMA_SLIDERARMPOSITION,
+                                                                       SMA_INCREMENTVALUE),
+                                                          NULL);
+        
+      pOpt->ulSpeakerFrequency = (ULONG)WinSendDlgItemMsg(hwnd,
+                                                          SLB_CONSOLE_SPEAKERFREQUENCY,
+                                                          SLM_QUERYSLIDERINFO,
+                                                          MPFROM2SHORT(SMA_SLIDERARMPOSITION,
+                                                                       SMA_INCREMENTVALUE),
+                                                          NULL);
+      
       return ( (MPARAM) FALSE);
     }
   }
-
-
+  
+  
   return WinDefDlgProc(hwnd,                   /* default message processing */
                        ulMessage,
                        mp1,
@@ -1159,30 +1194,30 @@ static MRESULT EXPENTRY wpDlgProcPage3(HWND   hwnd,
     /*************************************************************************
      * user messages                                                         *
      *************************************************************************/
-
+    
     case UM_PROPERTY_UNDO:
     {
       PCONSOLEOPTIONS pOpt = (PCONSOLEOPTIONS)mp1;            /* get pointer */
-
+      
       ConPropPage3Set(hwnd,                                    /* set values */
                       pOpt);
-
+      
       return ( (MPARAM) FALSE);
     }
-
-
+    
+    
     case UM_PROPERTY_APPLY:
     {
       PCONSOLEOPTIONS pOpt = (PCONSOLEOPTIONS)mp1;            /* get pointer */
-
+      
 //      pOpt->fTerminateAutomatically = WinQueryButtonCheckstate(hwnd,
 //                                                 CB_CONSOLE_CLOSEWINDOWONEXIT);
-
+      
       return ( (MPARAM) FALSE);
     }
   }
-
-
+  
+  
   return WinDefDlgProc(hwnd,                   /* default message processing */
                        ulMessage,
                        mp1,
@@ -1214,30 +1249,63 @@ static MRESULT EXPENTRY wpDlgProcPage4(HWND   hwnd,
     /*************************************************************************
      * user messages                                                         *
      *************************************************************************/
-
+    
     case UM_PROPERTY_UNDO:
     {
       PCONSOLEOPTIONS pOpt = (PCONSOLEOPTIONS)mp1;            /* get pointer */
-
+      
       ConPropPage4Set(hwnd,                                    /* set values */
                       pOpt);
-
+      
       return ( (MPARAM) FALSE);
     }
-
-
+    
+    
     case UM_PROPERTY_APPLY:
     {
       PCONSOLEOPTIONS pOpt = (PCONSOLEOPTIONS)mp1;            /* get pointer */
-
-//      pOpt->fTerminateAutomatically = WinQueryButtonCheckstate(hwnd,
-//                                                 CB_CONSOLE_CLOSEWINDOWONEXIT);
-
+      
+      WinSendDlgItemMsg(hwnd,                             /* query the value */
+                        SPN_CONSOLE_X,
+                        SPBM_QUERYVALUE,
+                        MPFROMP(&pOpt->coordDefaultPosition.X),
+                        MPFROM2SHORT(0,SPBQ_ALWAYSUPDATE));
+      
+      WinSendDlgItemMsg(hwnd,                             /* query the value */
+                        SPN_CONSOLE_Y,
+                        SPBM_QUERYVALUE,
+                        MPFROMP(&pOpt->coordDefaultPosition.Y),
+                        MPFROM2SHORT(0,SPBQ_ALWAYSUPDATE));      
+      
+      WinSendDlgItemMsg(hwnd,                             /* query the value */
+                        SPN_CONSOLE_DEFAULTWIDTH,
+                        SPBM_QUERYVALUE,
+                        MPFROMP(&pOpt->coordDefaultSize.X),
+                        MPFROM2SHORT(0,SPBQ_ALWAYSUPDATE));      
+      
+      WinSendDlgItemMsg(hwnd,                             /* query the value */
+                        SPN_CONSOLE_DEFAULTHEIGHT,
+                        SPBM_QUERYVALUE,
+                        MPFROMP(&pOpt->coordDefaultSize.Y),
+                        MPFROM2SHORT(0,SPBQ_ALWAYSUPDATE));      
+      
+      WinSendDlgItemMsg(hwnd,                             /* query the value */
+                        SPN_CONSOLE_BUFFERWIDTH,
+                        SPBM_QUERYVALUE,
+                        MPFROMP(&pOpt->coordBufferSize.X),
+                        MPFROM2SHORT(0,SPBQ_ALWAYSUPDATE));      
+      
+      WinSendDlgItemMsg(hwnd,                             /* query the value */
+                        SPN_CONSOLE_BUFFERHEIGHT,
+                        SPBM_QUERYVALUE,
+                        MPFROMP(&pOpt->coordBufferSize.Y),
+                        MPFROM2SHORT(0,SPBQ_ALWAYSUPDATE));      
+      
       return ( (MPARAM) FALSE);
     }
   }
-
-
+  
+  
   return WinDefDlgProc(hwnd,                   /* default message processing */
                        ulMessage,
                        mp1,
@@ -1269,30 +1337,57 @@ static MRESULT EXPENTRY wpDlgProcPage5(HWND   hwnd,
     /*************************************************************************
      * user messages                                                         *
      *************************************************************************/
-
+    
     case UM_PROPERTY_UNDO:
     {
       PCONSOLEOPTIONS pOpt = (PCONSOLEOPTIONS)mp1;            /* get pointer */
-
+      
       ConPropPage5Set(hwnd,                                    /* set values */
                       pOpt);
-
+      
       return ( (MPARAM) FALSE);
     }
-
-
+    
+    
     case UM_PROPERTY_APPLY:
     {
       PCONSOLEOPTIONS pOpt = (PCONSOLEOPTIONS)mp1;            /* get pointer */
-
-//      pOpt->fTerminateAutomatically = WinQueryButtonCheckstate(hwnd,
-//                                                 CB_CONSOLE_CLOSEWINDOWONEXIT);
-
+      
+      WinSendDlgItemMsg(hwnd,                             /* query the value */
+                        SPN_CONSOLE_UPDATELIMIT,
+                        SPBM_QUERYVALUE,
+                        MPFROMP(&pOpt->ulUpdateLimit),
+                        MPFROM2SHORT(0,SPBQ_ALWAYSUPDATE));
+      
+      WinSendDlgItemMsg(hwnd,                             /* query the value */
+                        SPN_CONSOLE_CONSOLEPRIORITY,
+                        SPBM_QUERYVALUE,
+                        MPFROMP(&pOpt->ulConsoleThreadPriorityClass),
+                        MPFROM2SHORT(0,SPBQ_ALWAYSUPDATE));      
+      
+      WinSendDlgItemMsg(hwnd,                             /* query the value */
+                        SPN_CONSOLE_CONSOLEPRIODELTA,
+                        SPBM_QUERYVALUE,
+                        MPFROMP(&pOpt->ulConsoleThreadPriorityDelta),
+                        MPFROM2SHORT(0,SPBQ_ALWAYSUPDATE));
+      
+      WinSendDlgItemMsg(hwnd,                             /* query the value */
+                        SPN_CONSOLE_APPPRIORITY,
+                        SPBM_QUERYVALUE,
+                        MPFROMP(&pOpt->ulAppThreadPriorityClass),
+                        MPFROM2SHORT(0,SPBQ_ALWAYSUPDATE));      
+      
+      WinSendDlgItemMsg(hwnd,                             /* query the value */
+                        SPN_CONSOLE_APPPRIODELTA,
+                        SPBM_QUERYVALUE,
+                        MPFROMP(&pOpt->ulAppThreadPriorityDelta),
+                        MPFROM2SHORT(0,SPBQ_ALWAYSUPDATE));      
+      
       return ( (MPARAM) FALSE);
     }
   }
-
-
+  
+  
   return WinDefDlgProc(hwnd,                   /* default message processing */
                        ulMessage,
                        mp1,
@@ -1370,7 +1465,7 @@ static INT WinGetStringSize(HPS hps,
 /*****************************************************************************
  * Name      : static APIRET ConPropPage1Set
  * Funktion  : setup dialog elements for page 1
- * Parameter :
+ * Parameter : 
  * Variablen :
  * Ergebnis  : MRESULT
  * Bemerkung :
@@ -1383,7 +1478,7 @@ static APIRET ConPropPage1Set(HWND            hwndDlg,
 {
   if (pConsoleOptions == NULL)                           /* check parameters */
     return (ERROR_INVALID_PARAMETER);               /* raise error condition */
-
+  
   WinCheckButton(hwndDlg,                                /* auto-termination */
                  CB_CONSOLE_CLOSEWINDOWONEXIT,
                  pConsoleOptions->fTerminateAutomatically);
@@ -1391,22 +1486,22 @@ static APIRET ConPropPage1Set(HWND            hwndDlg,
   WinCheckButton(hwndDlg,                                     /* insert mode */
                  CB_CONSOLE_INSERTMODE,
                  pConsoleOptions->fInsertMode);
-
+  
   WinCheckButton(hwndDlg,                               /* quick insert mode */
                  CB_CONSOLE_QUICKINSERT,
                  pConsoleOptions->fQuickInsert);
-
+  
   WinCheckButton(hwndDlg,                                 /* console toolbar */
                  CB_CONSOLE_TOOLBAR,
                  pConsoleOptions->fToolbarActive);
-
+  
                        /* set spin limits for the SPN_CONSOLE_TAB spinbutton */
   WinSendDlgItemMsg(hwndDlg,
                     SPN_CONSOLE_TAB,
                     SPBM_SETLIMITS,
                     MPFROMSHORT(80),
                     MPFROMSHORT(0));
-
+  
   WinSendDlgItemMsg (hwndDlg,                           /* set current value */
                      SPN_CONSOLE_TAB,
                      SPBM_SETCURRENTVALUE,
@@ -1419,20 +1514,20 @@ static APIRET ConPropPage1Set(HWND            hwndDlg,
                     SPBM_SETLIMITS,
                     MPFROMSHORT(100),
                     MPFROMSHORT(1));
-
+  
   WinSendDlgItemMsg (hwndDlg,                           /* set current value */
                      SPN_CONSOLE_CURSORBLINK,
                      SPBM_SETCURRENTVALUE,
                      MPFROMLONG(pConsoleOptions->ucCursorDivisor),
                      0);
-
+    
   return (NO_ERROR);                                                   /* OK */
 }
 
 /*****************************************************************************
  * Name      : static APIRET ConPropPage2Set
  * Funktion  : setup dialog elements for page 2
- * Parameter :
+ * Parameter : 
  * Variablen :
  * Ergebnis  : MRESULT
  * Bemerkung :
@@ -1449,11 +1544,11 @@ static APIRET ConPropPage2Set(HWND            hwndDlg,
 
   if (pConsoleOptions == NULL)                           /* check parameters */
     return (ERROR_INVALID_PARAMETER);               /* raise error condition */
-
+  
   WinCheckButton(hwndDlg,                                /* Enable speaker */
                  CB_CONSOLE_SPEAKERENABLE,
                  pConsoleOptions->fSpeakerEnabled);
-
+  
   /* frequency slider */
   slcd.cbSize = sizeof(SLDCDATA);
   wp.pCtlData = &slcd;
@@ -1461,7 +1556,7 @@ static APIRET ConPropPage2Set(HWND            hwndDlg,
   WinSendDlgItemMsg(hwndDlg,
                     SLB_CONSOLE_SPEAKERFREQUENCY,
                     WM_QUERYWINDOWPARAMS,
-                    (MPARAM)&wp,
+                    (MPARAM)&wp, 
                     NULL);
 
   slcd.usScale1Increments=9;
@@ -1470,7 +1565,7 @@ static APIRET ConPropPage2Set(HWND            hwndDlg,
   WinSendDlgItemMsg(hwndDlg,
                     SLB_CONSOLE_SPEAKERFREQUENCY,
                     WM_SETWINDOWPARAMS,
-                    (MPARAM)&wp,
+                    (MPARAM)&wp, 
                     NULL);
 
   WinSendDlgItemMsg(hwndDlg,
@@ -1478,7 +1573,7 @@ static APIRET ConPropPage2Set(HWND            hwndDlg,
                     SLM_SETTICKSIZE,
                     MPFROM2SHORT(SMA_SETALLTICKS, 40),
                     NULL);
-
+  
   /* duration slider */
   slcd.cbSize = sizeof(SLDCDATA);
   wp.pCtlData = &slcd;
@@ -1486,7 +1581,7 @@ static APIRET ConPropPage2Set(HWND            hwndDlg,
   WinSendDlgItemMsg(hwndDlg,
                     SLB_CONSOLE_SPEAKERDURATION,
                     WM_QUERYWINDOWPARAMS,
-                    (MPARAM)&wp,
+                    (MPARAM)&wp, 
                     NULL);
 
   slcd.usScale1Increments=9;
@@ -1495,7 +1590,7 @@ static APIRET ConPropPage2Set(HWND            hwndDlg,
   WinSendDlgItemMsg(hwndDlg,
                     SLB_CONSOLE_SPEAKERDURATION,
                     WM_SETWINDOWPARAMS,
-                    (MPARAM)&wp,
+                    (MPARAM)&wp, 
                     NULL);
 
   WinSendDlgItemMsg(hwndDlg,
@@ -1503,15 +1598,15 @@ static APIRET ConPropPage2Set(HWND            hwndDlg,
                     SLM_SETTICKSIZE,
                     MPFROM2SHORT(SMA_SETALLTICKS, 40),
                     NULL);
-
-
+  
+  
   return (NO_ERROR);                                                   /* OK */
 }
 
 /*****************************************************************************
  * Name      : static APIRET ConPropPage3Set
  * Funktion  : setup dialog elements for page 3
- * Parameter :
+ * Parameter : 
  * Variablen :
  * Ergebnis  : MRESULT
  * Bemerkung :
@@ -1551,39 +1646,65 @@ static APIRET ConPropPage3Set(HWND            hwndDlg,
                     SPBM_SETLIMITS,
                     MPFROMSHORT(WinQuerySysValue(HWND_DESKTOP, SV_CXSCREEN)-1),
                     MPFROMSHORT(0));
-
+  
   WinSendDlgItemMsg(hwndDlg,
                     SPN_CONSOLE_DEFAULTHEIGHT,
                     SPBM_SETLIMITS,
                     MPFROMSHORT(WinQuerySysValue(HWND_DESKTOP, SV_CYSCREEN)-1),
                     MPFROMSHORT(0));
-
+  
+  WinSendDlgItemMsg(hwndDlg,
+                    SPN_CONSOLE_BUFFERWIDTH,
+                    SPBM_SETLIMITS,
+                    MPFROMSHORT(9999),
+                    MPFROMSHORT(0));
+  
+  WinSendDlgItemMsg(hwndDlg,
+                    SPN_CONSOLE_BUFFERHEIGHT,
+                    SPBM_SETLIMITS,
+                    MPFROMSHORT(9999),
+                    MPFROMSHORT(0));
+  
+  
   /* setup active values */
 
-  WinSendDlgItemMsg(hwndDlg,
+  WinSendDlgItemMsg(hwndDlg,                        
                     SPN_CONSOLE_X,
                     SPBM_SETCURRENTVALUE,
                     MPFROMLONG(pConsoleOptions->coordDefaultPosition.X),
                     0);
 
-  WinSendDlgItemMsg(hwndDlg,
+  WinSendDlgItemMsg(hwndDlg,                        
                     SPN_CONSOLE_Y,
                     SPBM_SETCURRENTVALUE,
                     MPFROMLONG(pConsoleOptions->coordDefaultPosition.Y),
                     0);
 
-  WinSendDlgItemMsg(hwndDlg,
+  WinSendDlgItemMsg(hwndDlg,                        
                     SPN_CONSOLE_DEFAULTWIDTH,
                     SPBM_SETCURRENTVALUE,
-                    MPFROMLONG(pConsoleOptions->coordDefaultPosition.X),
+                    MPFROMLONG(pConsoleOptions->coordDefaultSize.X),
                     0);
 
-  WinSendDlgItemMsg(hwndDlg,
+  WinSendDlgItemMsg(hwndDlg,                        
                     SPN_CONSOLE_DEFAULTHEIGHT,
                     SPBM_SETCURRENTVALUE,
-                    MPFROMLONG(pConsoleOptions->coordDefaultPosition.Y),
+                    MPFROMLONG(pConsoleOptions->coordDefaultSize.Y),
+                    0);
+  
+  WinSendDlgItemMsg(hwndDlg,                        
+                    SPN_CONSOLE_BUFFERWIDTH,
+                    SPBM_SETCURRENTVALUE,
+                    MPFROMLONG(pConsoleOptions->coordBufferSize.X),
                     0);
 
+  WinSendDlgItemMsg(hwndDlg,                        
+                    SPN_CONSOLE_BUFFERHEIGHT,
+                    SPBM_SETCURRENTVALUE,
+                    MPFROMLONG(pConsoleOptions->coordBufferSize.Y),
+                    0);
+  
+  
   return (NO_ERROR);                                                   /* OK */
 }
 
@@ -1591,7 +1712,7 @@ static APIRET ConPropPage3Set(HWND            hwndDlg,
 /*****************************************************************************
  * Name      : static APIRET ConPropPage4Set
  * Funktion  : setup dialog elements for page 4
- * Parameter :
+ * Parameter : 
  * Variablen :
  * Ergebnis  : MRESULT
  * Bemerkung :
@@ -1605,7 +1726,7 @@ static APIRET ConPropPage4Set(HWND            hwndDlg,
   ULONG ulColor;                              /* loop counter for the colors */
   ULONG ulRow;
   ULONG ulColumn;
-
+  
 #define MAX_TRANSCOLORS 16
   static const ULONG TabColorTranslation[MAX_TRANSCOLORS] =
   {          /*  RRGGBB */
@@ -1626,13 +1747,13 @@ static APIRET ConPropPage4Set(HWND            hwndDlg,
     /* 15 */ 0x00ffff80,
     /* 16 */ 0x00ffffff
   };
-
+  
 
   if (pConsoleOptions == NULL)                           /* check parameters */
     return (ERROR_INVALID_PARAMETER);               /* raise error condition */
-
+ 
   /* setup the value sets */
-  for (ulColor = 0;
+  for (ulColor = 0; 
        ulColor < MAX_TRANSCOLORS;
        ulColor++)
   {
@@ -1676,7 +1797,7 @@ static APIRET ConPropPage4Set(HWND            hwndDlg,
 /*****************************************************************************
  * Name      : static APIRET ConPropPage5Set
  * Funktion  : setup dialog elements for page 5
- * Parameter :
+ * Parameter : 
  * Variablen :
  * Ergebnis  : MRESULT
  * Bemerkung :
@@ -1719,7 +1840,7 @@ static APIRET ConPropPage5Set(HWND            hwndDlg,
                     MPFROMSHORT(PRTYD_MAXIMUM),
                     MPFROMSHORT(0));
 
-
+  
   WinSendDlgItemMsg(hwndDlg,                           /* set current value */
                     SPN_CONSOLE_APPPRIODELTA,
                     SPBM_SETCURRENTVALUE,
@@ -1746,7 +1867,7 @@ static APIRET ConPropPage5Set(HWND            hwndDlg,
                     MPFROMSHORT(PRTYD_MAXIMUM),
                     MPFROMSHORT(0));
 
-
+  
   WinSendDlgItemMsg(hwndDlg,                           /* set current value */
                     SPN_CONSOLE_CONSOLEPRIODELTA,
                     SPBM_SETCURRENTVALUE,
@@ -1770,64 +1891,29 @@ static APIRET ConPropPage5Set(HWND            hwndDlg,
 
 
 #if 0
-typedef struct _Options
-{
-  HMODULE hmodResources;                   /* module handle for PM resources */
+DLGTEMPLATE DLG_CONSOLE_PAGE3 
+   CONTROL "Sample", SPN_CONSOLE_X, 49, 60, 48, 12, WC_SPINBUTTON, SPBS_MASTER | SPBS_NUMERICONLY | SPBS_JUSTLEFT | WS_VISIBLE | WS_GROUP | WS_TABSTOP
+   CONTROL "Sample", SPN_CONSOLE_Y, 49, 45, 48, 12, WC_SPINBUTTON, SPBS_MASTER | SPBS_NUMERICONLY | SPBS_JUSTLEFT | WS_VISIBLE | WS_GROUP | WS_TABSTOP
+   CONTROL "Sample", SPN_CONSOLE_DEFAULTWIDTH, 155, 60, 48, 12, WC_SPINBUTTON, SPBS_MASTER | SPBS_NUMERICONLY | SPBS_JUSTLEFT | WS_VISIBLE | WS_GROUP | WS_TABSTOP
+   CONTROL "Sample", SPN_CONSOLE_DEFAULTHEIGHT, 155, 45, 48, 12, WC_SPINBUTTON, SPBS_MASTER | SPBS_NUMERICONLY | SPBS_JUSTLEFT | WS_VISIBLE | WS_GROUP | WS_TABSTOP
+   CONTROL "~Override default position and size", CB_CONSOLE_WINDOWPOSITION, 8, 80, 155, 10, WC_BUTTON, BS_AUTOCHECKBOX | WS_VISIBLE | WS_GROUP | WS_TABSTOP
+   CONTROL "Sample", SPN_CONSOLE_BUFFERWIDTH, 49, 19, 48, 12, WC_SPINBUTTON, SPBS_MASTER | SPBS_NUMERICONLY | SPBS_JUSTLEFT | WS_VISIBLE | WS_GROUP | WS_TABSTOP
+   CONTROL "Sample", SPN_CONSOLE_BUFFERHEIGHT, 155, 19, 48, 12, WC_SPINBUTTON, SPBS_MASTER | SPBS_NUMERICONLY | SPBS_JUSTLEFT | WS_VISIBLE | WS_GROUP | WS_TABSTOP
+   CONTROL "Buffer allocates .. MB memory.", ST_CONSOLE_BUFFERMEMORY, 8, 6, 194, 8, WC_STATIC, SS_TEXT | DT_LEFT | DT_TOP | DT_MNEMONIC | WS_VISIBLE | WS_GROUP
 
-  BOOL  fSpeakerEnabled;               /* whether we process BEL 0x07 or not */
-  ULONG ulSpeakerDuration;        /* duration and frequency for speaker beep */
-  ULONG ulSpeakerFrequency;
-  ULONG ulUpdateLimit;        /* when exceeding this line counter, automatic */
-                                               /* screen update is performed */
+DLGTEMPLATE DLG_CONSOLE_PAGE5 
+   CONTROL "Sample", SPN_CONSOLE_APPPRIORITY, 46, 52, 48, 12, WC_SPINBUTTON, SPBS_MASTER | SPBS_READONLY | SPBS_JUSTLEFT | WS_VISIBLE | WS_GROUP | WS_TABSTOP
+   CONTROL "Sample", SPN_CONSOLE_APPPRIODELTA, 154, 52, 48, 12, WC_SPINBUTTON, SPBS_MASTER | SPBS_ALLCHARACTERS | SPBS_JUSTLEFT | WS_VISIBLE | WS_GROUP | WS_TABSTOP
+   CONTROL "Sample", SPN_CONSOLE_CONSOLEPRIORITY, 46, 20, 48, 12, WC_SPINBUTTON, SPBS_MASTER | SPBS_ALLCHARACTERS | SPBS_JUSTLEFT | WS_VISIBLE | WS_GROUP | WS_TABSTOP
+   CONTROL "Sample", SPN_CONSOLE_CONSOLEPRIODELTA, 154, 20, 48, 12, WC_SPINBUTTON, SPBS_MASTER | SPBS_ALLCHARACTERS | SPBS_JUSTLEFT | WS_VISIBLE | WS_GROUP | WS_TABSTOP
+   CONTROL "Sample", SPN_CONSOLE_UPDATELIMIT, 113, 5, 89, 12, WC_SPINBUTTON, SPBS_MASTER | SPBS_ALLCHARACTERS | SPBS_JUSTLEFT | WS_VISIBLE | WS_GROUP | WS_TABSTOP
 
-  BOOL  fSetWindowPosition;           /* TRUE if window has to be positioned */
+DLGTEMPLATE DLG_CONSOLE_PAGE4 
+   CONTROL "...", VS_CONSOLE_FOREGROUND, 6, 56, 95, 34, WC_VALUESET, VS_RGB | VS_BORDER | VS_ITEMBORDER | WS_VISIBLE | WS_GROUP | WS_TABSTOP
+   CONTROL "...", VS_CONSOLE_BACKGROUND, 103, 56, 99, 34, WC_VALUESET, VS_RGB | VS_BORDER | VS_ITEMBORDER | WS_VISIBLE | WS_GROUP | WS_TABSTOP
+   CONTROL "Sample", LB_CONSOLE_FONTS, 6, 4, 95, 36, WC_LISTBOX, WS_VISIBLE | WS_GROUP | WS_TABSTOP
+   CONTROL "00 x 00", ST_CONSOLE_WINDOWSIZE, 156, 16, 47, 8, WC_STATIC, SS_TEXT | DT_LEFT | DT_TOP | DT_MNEMONIC | WS_VISIBLE | WS_GROUP
+   CONTROL "00 x 00", ST_CONSOLE_SCREENSIZE, 156, 4, 47, 8, WC_STATIC, SS_TEXT | DT_LEFT | DT_TOP | DT_MNEMONIC | WS_VISIBLE | WS_GROUP
 
-  COORD coordDefaultPosition;
-  COORD coordDefaultSize;
-
-  BOOL  fMouseActions;                  /* like Warp 4's "mouse action" mode */
-
-  UCHAR ucDefaultAttribute;                    /* the default text attribute */
-
-  ULONG ulConsoleThreadPriorityClass;       /* priority settings for message */
-  ULONG ulConsoleThreadPriorityDelta;                              /* thread */
-} CONSOLEOPTIONS, *PCONSOLEOPTIONS;
-
-
-DLGTEMPLATE DLG_CONSOLE_PAGE1
-  CONTROL "~Close window on exit", CB_CONSOLE_CLOSEWINDOWONEXIT, 5, 78, 196, 10, WC_BUTTON, BS_AUTOCHECKBOX | WS_VISIBLE | WS_GROUP | WS_TABSTOP
-  CONTROL "~Insert mode enabled", CB_CONSOLE_INSERTMODE, 5, 62, 196, 10, WC_BUTTON, BS_AUTOCHECKBOX | WS_VISIBLE | WS_GROUP | WS_TABSTOP
-  CONTROL "~Quickinsert enabled", CB_CONSOLE_QUICKINSERT, 5, 46, 196, 10, WC_BUTTON, BS_AUTOCHECKBOX | WS_VISIBLE | WS_GROUP | WS_TABSTOP
-  CONTROL "Console ~toolbar", CB_CONSOLE_TOOLBAR, 5, 30, 196, 10, WC_BUTTON, BS_AUTOCHECKBOX | WS_VISIBLE | WS_GROUP | WS_TABSTOP
-  CONTROL "tabwidth", SPN_CONSOLE_TAB, 122, 4, 55, 12, WC_SPINBUTTON, SPBS_MASTER | SPBS_NUMERICONLY | SPBS_JUSTLEFT | WS_VISIBLE | WS_GROUP | WS_TABSTOP
-  CONTROL "Tabulator ~width:", -1, 5, 4, 112, 8, WC_STATIC, SS_TEXT | DT_LEFT | DT_TOP | DT_MNEMONIC | WS_VISIBLE | WS_GROUP
-  CONTROL "tabwidth", SPN_CONSOLE_CURSORBLINK, 122, 17, 55, 12, WC_SPINBUTTON, SPBS_MASTER | SPBS_NUMERICONLY | SPBS_JUSTLEFT | WS_VISIBLE | WS_GROUP | WS_TABSTOP
-  CONTROL "Cursor blink ~frequency:", -1, 5, 17, 112, 8, WC_STATIC, SS_TEXT | DT_LEFT | DT_TOP | DT_MNEMONIC | WS_VISIBLE | WS_GROUP
-
-DLGTEMPLATE DLG_CONSOLE_PAGE2
-  CONTROL "~Enable speaker", CB_CONSOLE_SPEAKERENABLE, 6, 71, 195, 10, WC_BUTTON, BS_AUTOCHECKBOX | WS_VISIBLE | WS_GROUP | WS_TABSTOP
-  CONTROL "Speaker frequency", SLB_CONSOLE_SPEAKERFREQUENCY, 92, 52, 111, 16, WC_SLIDER, SLS_HORIZONTAL | SLS_CENTER | SLS_HOMELEFT | SLS_PRIMARYSCALE1 | SLS_SNAPTOINCREMENT | WS_VISIBLE | WS_GROUP | WS_TABSTOP
-  CONTROL "Speaker duration", SBL_CONSOLE_SPEAKERDURATION, 92, 35, 111, 16, WC_SLIDER, SLS_HORIZONTAL | SLS_CENTER | SLS_HOMELEFT | SLS_PRIMARYSCALE1 | SLS_SNAPTOINCREMENT | WS_VISIBLE | WS_GROUP | WS_TABSTOP
-
-DLGTEMPLATE DLG_CONSOLE_PAGE3
-  CONTROL "Sample", SPN_CONSOLE_X, 49, 60, 48, 12, WC_SPINBUTTON, SPBS_MASTER | SPBS_NUMERICONLY | SPBS_JUSTLEFT | WS_VISIBLE | WS_GROUP | WS_TABSTOP
-  CONTROL "Sample", SPN_CONSOLE_Y, 49, 45, 48, 12, WC_SPINBUTTON, SPBS_MASTER | SPBS_NUMERICONLY | SPBS_JUSTLEFT | WS_VISIBLE | WS_GROUP | WS_TABSTOP
-  CONTROL "~Width:", -1, 118, 60, 30, 8, WC_STATIC, SS_TEXT | DT_LEFT | DT_TOP | DT_MNEMONIC | WS_VISIBLE | WS_GROUP
-  CONTROL "Sample", 102, 155, 60, 48, 12, WC_SPINBUTTON, SPBS_MASTER | SPBS_NUMERICONLY | SPBS_JUSTLEFT | WS_VISIBLE | WS_GROUP | WS_TABSTOP
-  CONTROL "~Height:", -1, 119, 45, 30, 8, WC_STATIC, SS_TEXT | DT_LEFT | DT_TOP | DT_MNEMONIC | WS_VISIBLE | WS_GROUP
-  CONTROL "Sample", 104, 155, 45, 48, 12, WC_SPINBUTTON, SPBS_MASTER | SPBS_NUMERICONLY | SPBS_JUSTLEFT | WS_VISIBLE | WS_GROUP | WS_TABSTOP
-  CONTROL "~Override default position and size", CB_CONSOLE_WINDOWPOSITION, 8, 80, 155, 10, WC_BUTTON, BS_AUTOCHECKBOX | WS_VISIBLE | WS_GROUP | WS_TABSTOP
-  CONTROL "~Console buffer", -1, 2, 1, 205, 39, WC_STATIC, SS_GROUPBOX | DT_LEFT | DT_TOP | DT_MNEMONIC | WS_VISIBLE | WS_GROUP
-  CONTROL "~Width:", 101, 8, 19, 30, 8, WC_STATIC, SS_TEXT | DT_LEFT | DT_TOP | DT_MNEMONIC | WS_VISIBLE | WS_GROUP
-  CONTROL "Sample", 103, 49, 19, 48, 12, WC_SPINBUTTON, SPBS_MASTER | SPBS_NUMERICONLY | SPBS_JUSTLEFT | WS_VISIBLE | WS_GROUP | WS_TABSTOP
-  CONTROL "~Height:", 105, 119, 19, 30, 8, WC_STATIC, SS_TEXT | DT_LEFT | DT_TOP | DT_MNEMONIC | WS_VISIBLE | WS_GROUP
-  CONTROL "Sample", 106, 155, 19, 48, 12, WC_SPINBUTTON, SPBS_MASTER | SPBS_NUMERICONLY | SPBS_JUSTLEFT | WS_VISIBLE | WS_GROUP | WS_TABSTOP
-
-DLGTEMPLATE DLG_CONSOLE_PAGE5
-  CONTROL "Sample", SPN_CONSOLE_APPPRIORITY, 46, 52, 48, 12, WC_SPINBUTTON, SPBS_MASTER | SPBS_READONLY | SPBS_JUSTLEFT | WS_VISIBLE | WS_GROUP | WS_TABSTOP
-  CONTROL "Sample", SPN_CONSOLE_APPPRIODELTA, 154, 52, 48, 12, WC_SPINBUTTON, SPBS_MASTER | SPBS_ALLCHARACTERS | SPBS_JUSTLEFT | WS_VISIBLE | WS_GROUP | WS_TABSTOP
-  CONTROL "Sample", SPN_CONSOLE_CONSOLEPRIORITY, 46, 20, 48, 12, WC_SPINBUTTON, SPBS_MASTER | SPBS_ALLCHARACTERS | SPBS_JUSTLEFT | WS_VISIBLE | WS_GROUP | WS_TABSTOP
-  CONTROL "Sample", SPN_CONSOLE_CONSOLEPRIODELTA, 154, 20, 48, 12, WC_SPINBUTTON, SPBS_MASTER | SPBS_ALLCHARACTERS | SPBS_JUSTLEFT | WS_VISIBLE | WS_GROUP | WS_TABSTOP
-  CONTROL "Sample", SPN_CONSOLE_UPDATELIMIT, 113, 5, 89, 12, WC_SPINBUTTON, SPBS_MASTER | SPBS_ALLCHARACTERS | SPBS_JUSTLEFT | WS_VISIBLE | WS_GROUP | WS_TABSTOP
 #endif
 
