@@ -1,5 +1,5 @@
-/* $Id: waveout.cpp,v 1.6 1999-11-01 19:02:45 sandervl Exp $ */
-
+/* $Id: waveout.cpp,v 1.7 1999-12-20 22:22:07 sandervl Exp $ */
+#undef DEBUG
 /*
  * Wave out MM apis
  *
@@ -49,7 +49,7 @@ ODINFUNCTION6(MMRESULT, waveOutOpen,
   if(phwo == NULL)
         return(MMSYSERR_INVALPARAM);
 
-  if(fdwOpen & WAVE_FORMAT_QUERY) {
+  if(fdwOpen == WAVE_FORMAT_QUERY) {
         if(DartWaveOut::queryFormat(pwfx->wFormatTag, pwfx->nChannels,
                                     pwfx->nSamplesPerSec, pwfx->nBlockAlign) == TRUE) {
                 return(MMSYSERR_NOERROR);
@@ -57,11 +57,11 @@ ODINFUNCTION6(MMRESULT, waveOutOpen,
         else    return(WAVERR_BADFORMAT);
   }
 
-  if(fdwOpen & CALLBACK_WINDOW) {
+  if(fdwOpen == CALLBACK_WINDOW) {
         *phwo = (HWAVEOUT)new DartWaveOut(pwfx, (HWND)dwCallback);
   }
   else
-  if(fdwOpen & CALLBACK_FUNCTION) {
+  if(fdwOpen == CALLBACK_FUNCTION) {
         *phwo = (HWAVEOUT)new DartWaveOut(pwfx, dwCallback, dwInstance);
   }
   else  *phwo = (HWAVEOUT)new DartWaveOut(pwfx);
