@@ -1,4 +1,4 @@
-/* $Id: hmcomm.cpp,v 1.20 2001-11-29 00:20:47 phaller Exp $ */
+/* $Id: hmcomm.cpp,v 1.21 2001-11-29 13:38:50 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -220,7 +220,7 @@ DWORD HMDeviceCommClass::CreateFile(HANDLE hComm,
     if(rc)
     {
       delete pHMHandleData->lpHandlerData;
-      return error2WinError(rc);
+      return rc;
     }
     rc = SetBaud(pHMHandleData,9600);
     dprintf(("Init Baud to 9600 rc = %d",rc));
@@ -1340,6 +1340,7 @@ BOOL HMDeviceCommClass::EscapeCommFunction( PHMHANDLEDATA pHMHandleData,
                              ASYNC_STOPTRANSMIT,
                              0,0,0,
                              0,0,0);
+      dprintf(("SETXOFF: rc = %d", rc));
       break;
     case SETXON:
       rc = OSLibDosDevIOCtl( pHMHandleData->hHMHandle,
@@ -1347,6 +1348,7 @@ BOOL HMDeviceCommClass::EscapeCommFunction( PHMHANDLEDATA pHMHandleData,
                              ASYNC_STARTTRANSMIT,
                              0,0,0,
                              0,0,0);
+      dprintf(("SETXON: rc = %d", rc));
       break;
     default:
       dprintf(("!ERROR!: EscapeCommFunction: unknown function"));

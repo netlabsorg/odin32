@@ -1,4 +1,4 @@
-/* $Id: hmnpipe.cpp,v 1.5 2001-11-28 23:33:37 phaller Exp $ */
+/* $Id: hmnpipe.cpp,v 1.6 2001-11-29 13:38:51 sandervl Exp $ */
 /*
  * Project Odin Software License can be found in LICENSE.TXT
  *
@@ -139,11 +139,10 @@ DWORD HMDeviceNamedPipeClass::CreateFile (HANDLE        hHandle,
                                                (LPSECURITY_ATTRIBUTES)lpSecurityAttributes,
                                                pHMHandleData->dwCreation,
                                                pHMHandleData->dwFlags);
-  if(pHMHandleData->hHMHandle == -1) 
-  {
-    return GetLastError();
-  }
-  return ERROR_SUCCESS;
+   if(pHMHandleData->hHMHandle == -1) {
+      return GetLastError();
+   }
+   return ERROR_SUCCESS;
 }
 
 /*****************************************************************************

@@ -1,4 +1,4 @@
-/* $Id: oslibdos.cpp,v 1.87 2001-11-29 10:53:28 phaller Exp $ */
+/* $Id: oslibdos.cpp,v 1.88 2001-11-29 13:38:51 sandervl Exp $ */
 /*
  * Wrappers for OS/2 Dos* API
  *
@@ -2683,7 +2683,8 @@ DWORD OSLibDosDevIOCtl( DWORD hFile, DWORD dwCat, DWORD dwFunc,
   if (flagTiledData)
     DosFreeMem(pTiledData);
   
-  SetLastError(error2WinError(rc, ERROR_INVALID_HANDLE));
+  rc = error2WinError(rc, ERROR_INVALID_HANDLE);
+  SetLastError(rc);
   return (DWORD)rc;
 }
 
