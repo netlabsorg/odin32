@@ -1,4 +1,4 @@
-/* $Id: HOOK.CPP,v 1.21 2001-06-12 17:02:33 sandervl Exp $ */
+/* $Id: HOOK.CPP,v 1.22 2001-06-14 14:49:16 sandervl Exp $ */
 
 /*
  * Windows hook functions
@@ -98,13 +98,16 @@ static CRITICAL_SECTION systemCritSect = {0};
 #endif
 static HANDLE HOOK_threadHooks[WH_NB_HOOKS] = { 0 };
 static CRITICAL_SECTION threadCritSect = {0};
+static BOOL fInitHook = FALSE;
 
 #ifdef GLOBAL_HOOKS
 #define SYSTEMHOOK_LOCK()	systemHookMutex.enter(VMUTEX_WAIT_FOREVER, &hGlobalHookMutex);
 #define SYSTEMHOOK_UNLOCK()	systemHookMutex.leave(&hGlobalHookMutex);
+#define INIT_SYSTEMHOOK()       aldkjfslfjsdlkfj
 #else
 #define SYSTEMHOOK_LOCK()	EnterCriticalSection(&systemCritSect);
 #define SYSTEMHOOK_UNLOCK()	LeaveCriticalSection(&systemCritSect);
+#define INIT_SYSTEMHOOK()       InitializeCriticalSection(&systemCritSect);
 #endif
 
 typedef VOID (*HOOK_MapFunc)(INT, INT, WPARAM *, LPARAM *);
@@ -301,6 +304,12 @@ static HHOOK HOOK_SetHook( INT id, LPVOID proc, INT type,
         return 0;
     }
 
+    if(!fInitHook) {
+        InitializeCriticalSection(&threadCritSect);
+        INIT_SYSTEMHOOK();
+        fInitHook = TRUE;
+    }
+
     dprintf(("Setting hook %d: %08x %04x %08lx\n", id, (UINT)proc, hModule, dwThreadId ));
 
 #ifndef __WIN32OS2__
@@ -366,6 +375,12 @@ static BOOL HOOK_RemoveHook( HOOKDATA *data )
   TEB       *teb;
 
     dprintf(("Removing hook %08x\n", data));
+
+    if(!fInitHook) {
+        InitializeCriticalSection(&threadCritSect);
+        INIT_SYSTEMHOOK();
+        fInitHook = TRUE;
+    }
 
     if (data->flags & HOOK_INUSE)
     {
