@@ -1,4 +1,4 @@
-/* $Id: blit.cpp,v 1.20 2000-10-26 17:20:28 sandervl Exp $ */
+/* $Id: blit.cpp,v 1.21 2000-11-22 21:03:53 sandervl Exp $ */
 
 /*
  * GDI32 blit code
@@ -33,8 +33,8 @@ BOOL WIN32API StretchBlt(HDC hdcDest, int nXOriginDest, int nYOriginDest,
 {
  BOOL rc;
 
-  dprintf(("GDI32: StretchBlt Dest: %x (%d, %d) size (%d, %d)\n",
-           hdcDest, nXOriginDest, nYOriginDest, nWidthDest, nHeightDest));
+  dprintf(("GDI32: StretchBlt Dest: %x (%d, %d) size (%d, %d) ROP %x",
+           hdcDest, nXOriginDest, nYOriginDest, nWidthDest, nHeightDest, dwRop));
   dprintf(("GDI32: StretchBlt Src : %x (%d, %d) size (%d, %d)\n",
            hdcSrc, nXOriginSrc, nYOriginSrc, nWidthSrc, nHeightSrc));
   SetLastError(ERROR_SUCCESS);
@@ -250,6 +250,10 @@ INT WIN32API StretchDIBits(HDC hdc, INT xDst, INT yDst, INT widthDst,
  INT rc;
 
     dprintf(("GDI32: StretchDIBits %x to (%d,%d) (%d,%d) from (%d,%d) (%d,%d), %x %x %x %x", hdc, xDst, yDst, widthDst, heightDst, xSrc, ySrc, widthSrc, heightSrc, bits, info, wUsage, dwRop));
+
+    if(info->bmiHeader.biBitCount == 1) {
+        dprintf(("WARNING: StretchDIBits does NOT work correctly for 1 bpp bitmaps!!"));
+    }
 
     if(wUsage == DIB_PAL_COLORS && info->bmiHeader.biSize == sizeof(BITMAPINFOHEADER))
     {
