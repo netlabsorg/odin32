@@ -1,4 +1,4 @@
-/* $Id: wprocess.cpp,v 1.134 2001-09-26 16:02:54 phaller Exp $ */
+/* $Id: wprocess.cpp,v 1.135 2001-10-11 01:00:12 phaller Exp $ */
 
 /*
  * Win32 process functions
@@ -428,7 +428,17 @@ VOID WIN32API ExitProcess(DWORD exitcode)
         teb = teb->o.odin.next;
     }
     threadListMutex.leave();
+  
+  
+#ifdef PROFILE
+  // Note: after this point we do not expect any more Win32-API calls,
+  // so this is probably the best time to dump the gathered profiling
+  // information
+  PerfView_Write();
+#endif /* PROFILE */
+  
 
+  
     //Restore original OS/2 TIB selector
     DestroyTIB();
     SetExceptionChain((ULONG)-1);

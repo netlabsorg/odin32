@@ -1,4 +1,4 @@
-/* $Id: ccollection.cpp,v 1.6 2001-06-01 01:21:13 phaller Exp $ */
+/* $Id: ccollection.cpp,v 1.7 2001-10-11 00:59:43 phaller Exp $ */
 
 /*
  * Collection class:
@@ -776,6 +776,38 @@ void  CHashtableLookup::setSize(int iNewSize)
     // the given number.
     if (iSize < iNewSize)
         setSize0(nextPrime(iNewSize));
+}
+
+
+int CHashtableLookup::getElementMap(PHASHTABLEENTRY pBuffer)
+{
+  int iIndex = 0;
+  
+  // iterate over all registered entries and dump them to the buffer
+  // giving the caller direct access to the hashtable internals.
+  for (int i = 0;
+       i < iSize;
+       i++)
+  {
+    // check if slot was occupied
+    if (parrLists[i] != NULL)
+    {
+      // walk along any entry in that linear list
+      PLINEARLISTENTRY pLLE = parrLists[i]->getFirst();
+      
+      while (pLLE)
+      {
+        PHASHTABLEENTRY pHTE = (PHASHTABLEENTRY)pLLE->pObject;
+        memcpy(&pBuffer[iIndex], pHTE, sizeof( HASHTABLEENTRY ) );
+        iIndex++;
+        
+        pLLE = parrLists[i]->getNext(pLLE);
+      }
+    }
+  }
+  
+  // return number of elements copied
+  return iIndex;
 }
 
 

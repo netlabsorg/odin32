@@ -1,4 +1,4 @@
-# $Id: kernel32.mak,v 1.14 2001-09-30 08:50:59 bird Exp $
+# $Id: kernel32.mak,v 1.15 2001-10-11 00:59:44 phaller Exp $
 
 #
 # Odin32 API
@@ -24,6 +24,7 @@ WRC_PREFIX_RESOURCE=1
 OBJS = \
 $(OBJDIR)\kernel32.obj \
 $(OBJDIR)\ccollection.obj \
+$(OBJDIR)\perfview.obj \
 $(OBJDIR)\kobjects.obj \
 $(OBJDIR)\console.obj \
 $(OBJDIR)\conin.obj \
