@@ -1,10 +1,11 @@
-/* $Id: changelog,v 1.1972 2002-02-12 13:10:43 sandervl Exp $ */
+/* $Id: changelog,v 1.1973 2002-02-12 18:06:38 sandervl Exp $ */
 
  2002-02-11: Sander van Leeuwen <sandervl@xs4all.nl>
     - KERNEL32/USER32:
                 o Moved Char*, IsChar*, Oem* functions to kernel32
                   (forwarders in user32)
-    - USER32:   o Fixed reference count leak in SetFocus
+    - USER32:   o Fixed reference count leak in SetFocus, GetDlgCtrlID, 
+                  EndDialog & window dtor
 
  2002-02-10: Sander van Leeuwen <sandervl@xs4all.nl>
     - USER32:   o Extended logging added
