@@ -1,4 +1,7 @@
-/* $Id: changelog,v 1.2125 2002-06-03 12:49:36 sandervl Exp $ */
+/* $Id: changelog,v 1.2126 2002-06-04 10:11:30 sandervl Exp $ */
+
+ 2002-06-04: Sander van Leeuwen <sandervl@innotek.de>
+    - USER32:   o Fix for AltGr key combinations
 
  2002-06-03: Sander van Leeuwen <sandervl@innotek.de>
     - USER32, OLE32:
