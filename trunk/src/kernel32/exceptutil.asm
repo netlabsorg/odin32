@@ -1,4 +1,4 @@
-; $Id: exceptutil.asm,v 1.13 2001-03-22 18:16:40 sandervl Exp $
+; $Id: exceptutil.asm,v 1.14 2001-03-25 22:05:36 sandervl Exp $
 
 ;/*
 ; * Project Odin Software License can be found in LICENSE.TXT
@@ -236,7 +236,7 @@ _AsmCallThreadHandler proc near
         push	ebp
         mov	ebp, esp
 
-        push    [ebp+12]
+        push    dword ptr [ebp+12]
         mov     eax, dword ptr [ebp+8]
         call    eax
 
