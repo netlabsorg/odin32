@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.75 1999-12-29 18:49:50 sandervl Exp $
+# $Id: makefile,v 1.76 1999-12-31 10:47:11 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -46,7 +46,8 @@ winexepe2lx.obj winexelx.obj winexepeldr.obj WINRES.OBJ critsection.obj \
 pefile.OBJ winimgres.OBJ wintls.obj async.OBJ fileio.obj hmtoken.obj kernelrsrc.obj \
 atom.obj disk.obj directory.obj cvtbitmap.obj hmmmap.obj winfakepeldr.obj \
 cvtaccel.obj cvticon.obj cvticongrp.obj oslibexcept.obj cpu.obj process.obj \
-cvtcursor.obj cvtcursorgrp.obj stubs.obj interlock.obj toolhelp.obj codepage.obj
+cvtcursor.obj cvtcursorgrp.obj stubs.obj interlock.obj toolhelp.obj codepage.obj \
+debug.obj oslibdebug.obj 
 
 
 TARGET = kernel32
@@ -210,6 +211,7 @@ wprocess.OBJ: \
     $(PDWIN32_INCLUDE)\versionos2.h \
     $(PDWIN32_INCLUDE)\wprocess.h \
     $(PDWIN32_INCLUDE)\win\thread.h \
+    oslibdebug.h \
     console2.h \
     mmap.h \
     cio.h \
@@ -411,6 +413,9 @@ cpu.obj: cpu.cpp cpuhlp.h
 cpuhlp.obj: cpuhlp.asm
 environ.obj: environ.cpp $(PDWIN32_INCLUDE)\misc.h
 codepage.obj: codepage.cpp oslibdos.h profile.h $(PDWIN32_INCLUDE)\codepage.h
+
+debug.obj:      debug.cpp oslibdebug.h
+oslibdebug.obj: oslibdebug.cpp oslibdebug.h
 
 clean:
         $(RM) *.OBJ *.LIB *.dll *.lrf *.res *.map *.pch kernelrsrc.asm
