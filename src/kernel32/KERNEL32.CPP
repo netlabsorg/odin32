@@ -1,4 +1,4 @@
-/* $Id: KERNEL32.CPP,v 1.42 2000-02-16 14:25:29 sandervl Exp $ */
+/* $Id: KERNEL32.CPP,v 1.43 2000-04-08 20:09:42 sandervl Exp $ */
 
 /*
  * Win32 compatibility file functions for OS/2
@@ -417,6 +417,8 @@ UINT WIN32API CompareStringA(LCID lcid, DWORD fdwStyle, LPCSTR lpString1,
   int fEqual = TRUE;
   char *string1 = (char *)lpString1, *string2 = (char *)lpString2;
 
+   SetLastError(0);
+
 #ifdef DEBUG
    if(fdwStyle & SORT_STRINGSORT)
          dprintf(("KERNEL32:  SORT_STRINGSORT not supported!\n"));
@@ -425,6 +427,13 @@ UINT WIN32API CompareStringA(LCID lcid, DWORD fdwStyle, LPCSTR lpString1,
    if(fdwStyle & NORM_IGNORESYMBOLS)
          dprintf(("KERNEL32:  NORM_IGNORESYMBOLS not supported!\n"));
 #endif
+
+   if(lpString1 == NULL || lpString2 == NULL)
+   {    
+    	dprintf(("CompareStringA: (s1=%s,s2=%s): Invalid NULL string\n", lpString1, lpString2));
+    	SetLastError(ERROR_INVALID_PARAMETER);
+    	return 0;
+   }
 
    if(cch1 == -1) cch1 = strlen(string1);
    if(cch2 == -1) cch2 = strlen(string2);
@@ -462,16 +471,29 @@ UINT WIN32API CompareStringW(LCID lcid, DWORD fdwStyle, LPCWSTR lpString1,
 {
  int i;
  int fEqual = TRUE;
- char *string1 = UnicodeToAsciiString((LPWSTR)lpString1);
- char *string2 = UnicodeToAsciiString((LPWSTR)lpString2);
+ char *string1;
+ char *string2;
 
-  dprintf2(("KERNEL32:  OS2CompareStringW '%s' - '%s'\n", string1, string2));
+   dprintf2(("KERNEL32:  OS2CompareStringW '%s' - '%s'\n", string1, string2));
 
-  fEqual = CompareStringA(lcid, fdwStyle, string1, cch1, string2, cch2);
-  FreeAsciiString(string1);
-  FreeAsciiString(string2);
+   if(lpString1 == NULL || lpString2 == NULL)
+   {    
+    	dprintf(("CompareStringW: (s1=%s,s2=%s): Invalid NULL string\n", lpString1, lpString2));
+    	SetLastError(ERROR_INVALID_PARAMETER);
+    	return 0;
+   }
 
-  return(fEqual);
+   if(cch1 == -1) cch1 = lstrlenW(lpString1);
+   if(cch2 == -1) cch2 = lstrlenW(lpString2);
+
+   string1 = UnicodeToAsciiStringN((LPWSTR)lpString1, cch1);
+   string2 = UnicodeToAsciiStringN((LPWSTR)lpString2, cch2);
+
+   fEqual = CompareStringA(lcid, fdwStyle, string1, cch1, string2, cch2);
+   FreeAsciiString(string1);
+   FreeAsciiString(string2);
+
+   return(fEqual);
 }
 //******************************************************************************
 //Borrowed from Wine
