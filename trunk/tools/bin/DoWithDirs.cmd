@@ -1,4 +1,4 @@
-/* $Id: DoWithDirs.cmd,v 1.13 2002-08-20 04:07:11 bird Exp $
+/* $Id: DoWithDirs.cmd,v 1.14 2002-08-24 04:29:06 bird Exp $
  *
  * Syntax: dowithdirs.cmd [-e<list of excludes>] [-c] [-i] [-l] [-r] <cmd with args...>
  *    -e      Exclude directories.
@@ -11,7 +11,10 @@
  *            Processing stops (rc=0) on the first locked directory.
  *            <tag> is a name of the lock.
  *    -s      Skip locked directories in stead of stopping.
+ *
+ * Copyright (c) 1999-2002 knut st. osmundsen (bird@anduin.net)
  */
+signal on novalue name NoValueHandler
 
 if (RxFuncQuery('SysLoadFuncs') = 1) then
 do
@@ -286,4 +289,11 @@ unlockdir: procedure
 getenv: procedure
 parse arg sVar
 return value(sVar,,'OS2ENVIRONMENT');
+
+/**
+ * No value handler
+ */
+NoValueHandler:
+    say 'NoValueHandler: line 'SIGL;
+return 0;
 

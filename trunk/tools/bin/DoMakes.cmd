@@ -1,4 +1,4 @@
-/* $Id: DoMakes.cmd,v 1.2 2002-08-20 04:07:11 bird Exp $
+/* $Id: DoMakes.cmd,v 1.3 2002-08-24 04:29:06 bird Exp $
  *
  * Rexx script which executes a given command with each of
  * the spesified makefiles using the option -f.
@@ -9,6 +9,7 @@
  *
  * Project Odin Software License can be found in LICENSE.TXT
  */
+signal on novalue name NoValueHandler
 
 parse arg '"'sMakefiles'" 'sCommand
 
@@ -89,4 +90,11 @@ exit(0);
 getenv: procedure
 parse arg sVar
 return value(sVar,,'OS2ENVIRONMENT');
+
+/**
+ * No value handler
+ */
+NoValueHandler:
+    say 'NoValueHandler: line 'SIGL;
+return 0;
 
