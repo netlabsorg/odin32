@@ -1,9 +1,18 @@
-/* $Id: ToDO.txt,v 1.14 2001-06-01 08:11:15 sandervl Exp $ */
+/* $Id: ToDO.txt,v 1.15 2001-10-19 09:33:36 phaller Exp $ */
 
 To Do list for ODIN:
 
 
 Assigned Status Topic -------------------------------------------------------
+
+                Implement support for Parallel Port Devices
+
+                Fix wrong reference count after window creation
+                (unable to unregister window class)
+
+                Reimplement Global / Local / Heap mgmt
+
+PH       DONE   WSOCK32 calls are not FS: safe (OS2gethostbyname)
 
 PH              Implement WaitForSingleObject() for process handles
 
@@ -66,3 +75,5 @@ NOONE           Setup a test /verification plan and freeze some modules such
                 as LZ32, VERSION which are considered complete.
                 Also ensure the source code is well documented and structured.
 
+NOONE		OLE32/COM: support (broker) for Out-of-process COM
+		objects
