@@ -1,4 +1,4 @@
-/* $Id: odin32pack.cmd,v 1.13 2001-01-12 16:05:21 bird Exp $
+/* $Id: odin32pack.cmd,v 1.14 2001-03-24 19:22:02 bird Exp $
  *
  * Make the two zip files.
  *
@@ -11,13 +11,18 @@
  */
     sStartDir = directory();
 
+    if (DATE('B')//7 = 4) then  /* weekly on Thursdays */
+        sType = '-Weekly';
+    else
+        sType = '-Daily';
+
     /*
      * Make .WPI files.
      */
     call ChDir 'tools\install';
-    'call odin.cmd debug'
+    'call odin.cmd 'sType' debug'
     if (RC <> 0) then call failure rc, 'odin.cmd debug failed.';
-    'call odin.cmd release'
+    'call odin.cmd 'sType' release'
     if (RC <> 0) then call failure rc, 'odin.cmd release failed.';
     'move *.wpi' sStartDir;
     if (RC <> 0) then call failure rc, 'failed to move the *.wpi ->' sStartDir;
