@@ -1,4 +1,4 @@
-/* $Id: waveout.cpp,v 1.23 2002-05-22 15:50:26 sandervl Exp $ */
+/* $Id: waveout.cpp,v 1.24 2002-05-28 14:09:25 sandervl Exp $ */
 //#undef DEBUG
 /*
  * Wave out MM apis
@@ -48,7 +48,7 @@ MMRESULT WINAPI waveOutOpen(LPHWAVEOUT phwo, UINT uDeviceID, const LPWAVEFORMATE
     if(pwfx == NULL)
         return(WAVERR_BADFORMAT);
 
-    if(fdwOpen == WAVE_FORMAT_QUERY)
+    if(fdwOpen & WAVE_FORMAT_QUERY) 
     {
         if(DartWaveOut::queryFormat(pwfx->wFormatTag, pwfx->nChannels, pwfx->nSamplesPerSec,
                                     pwfx->wBitsPerSample) == TRUE) {
