@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.18 2000-07-19 19:05:12 sandervl Exp $
+# $Id: makefile,v 1.19 2000-09-17 22:28:55 davidr Exp $
 
 #
 # Odin32 API
@@ -44,6 +44,7 @@ $(OBJDIR)\iPictureIcon.obj \
 $(OBJDIR)\iPictureEmf.obj \
 $(OBJDIR)\typelib.obj \
 $(OBJDIR)\itypelib.obj \
+$(OBJDIR)\itypecomp.obj \
 $(OBJDIR)\itypeinfo.obj \
 $(OBJDIR)\hash.obj \
 $(OBJDIR)\safearray.obj \
