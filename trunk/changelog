@@ -1,4 +1,7 @@
- /* $Id: changelog,v 1.607 2000-01-04 19:50:11 sandervl Exp $ */
+ /* $Id: changelog,v 1.608 2000-01-04 22:19:25 sandervl Exp $ */
+
+ 2000-01-04: Jens Wiessner <wiessnej@rfi.de>
+	- TWAIN_32: Created twain dll for usage with CFM Twain for OS/2.
 
  2000-01-04: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32: InsertMenu bugfix (RealPlayer calls InsertMenu with flag 0 & pos -1)
