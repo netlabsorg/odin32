@@ -1,4 +1,4 @@
-/* $Id: wintimer.h,v 1.3 1999-06-10 16:24:35 phaller Exp $ */
+/* $Id: time.h,v 1.1 1999-08-31 15:04:11 phaller Exp $ */
 
 /*
  *
@@ -23,9 +23,43 @@ typedef TIMECALLBACK *LPTIMECALLBACK;
 #define TIME_CALLBACK_EVENT_SET     0x0010
 #define TIME_CALLBACK_EVENT_PULSE   0x0020
 
-typedef struct {
+#if 0
+typedef struct
+{
     UINT    wPeriodMin;
     UINT    wPeriodMax;
 } TIMECAPS, *LPTIMECAPS;
+
+
+typedef struct mmtime_tag
+{
+  UINT wType;
+
+  union
+  {
+    DWORD ms;
+    DWORD sample;
+    DWORD cb;
+    DWORD ticks;
+
+    struct
+    {
+      BYTE hour;
+      BYTE min;
+      BYTE sec;
+      BYTE frame;
+      BYTE fps;
+      BYTE dummy;
+      BYTE pad[2];
+    } smpte;
+
+    struct
+    {
+      DWORD songptrpos;
+    } midi;
+  } u;
+} MMTIME, *PMMTIME, *LPMMTIME;
+#endif
+
 
 #endif
