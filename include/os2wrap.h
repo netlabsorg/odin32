@@ -1,4 +1,4 @@
-/* $Id: os2wrap.h,v 1.6 1999-06-26 18:24:22 sandervl Exp $ */
+/* $Id: os2wrap.h,v 1.7 1999-07-13 10:39:16 sandervl Exp $ */
 #ifndef __OS2WRAP_H__
 #define __OS2WRAP_H__
 
@@ -949,6 +949,20 @@ inline ULONG _DosSearchPath(ULONG a, PCSZ b, PCSZ c, PBYTE d, ULONG e)
 #undef  DosSearchPath
 #define DosSearchPath _DosSearchPath
 
+inline ULONG  _DosError(ULONG error)
+{
+ ULONG yyrc;
+ USHORT sel = RestoreOS2FS();
+
+    yyrc = DosError(error);
+    SetFS(sel);
+
+    return yyrc;
+} 
+
+#undef  DosError
+#define DosError _DosError
+
 #endif
 #ifdef INCL_DOSDEVICES
 inline ULONG _DosDevConfig(PVOID a, ULONG b)
@@ -1461,6 +1475,7 @@ inline ULONG _DosWaitThread(PTID a, ULONG b)
 #define DosWaitThread _DosWaitThread
 
 #endif
+
 #ifdef INCL_DOSSESMGR
 inline ULONG _DosQueryAppType(PCSZ a, PULONG b)
 {
