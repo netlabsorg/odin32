@@ -1,4 +1,20 @@
-/* $Id: changelog,v 1.2187 2002-06-25 18:09:52 sandervl Exp $ */
+/* $Id: changelog,v 1.2188 2002-06-26 07:17:33 sandervl Exp $ */
+
+ 2002-06-26: knut st. osmundsen <bird@anduin.net>
+    - KERNEL32\testcase:
+                o Added testcase for Test of SetConsoleCtrlHandler() and 
+                  GenerateConsoleCtrlEvent().
+                  Note. The last part of it is known to fail since the 
+                  functions aren't 100% implemented yet.
+                o Added mini testcase for MultiByteToWideChar().
+                o Use the testsuite tools for unit testcases too.
+    - KERNEL32: o Partial implementation of Console Ctrl Handlers.
+                  (Ctrl-Break and Ctrl-C)
+                o GetFileType on std files doesn't always return TYPE_CHAR.
+                  Ask what kind of filehandle we have.
+                  (Solves 'press key' problem with "wcc386.exe > file".)
+                o Enable writing to STDERR. (This might have brought into
+                  light a redirection problem.)
 
  2002-06-25: Sander van Leeuwen <sandervl@innotek.de>
     - KERNEL32: o RegQueryValueExA(/W) fix for querying the length of string
