@@ -1,4 +1,4 @@
-/* $Id: winmenu.cpp,v 1.6 1999-09-23 17:36:16 phaller Exp $ */
+/* $Id: winmenu.cpp,v 1.7 1999-09-24 12:47:51 sandervl Exp $ */
 
 /*
  * Win32 menu API functions for OS/2
@@ -33,7 +33,16 @@ ODINFUNCTION2(HMENU,     LoadMenuA,
               HINSTANCE, hinst,
               LPCSTR,    lpszMenu)
 {
-  return (HMENU)FindResourceA(hinst, lpszMenu, RT_MENUA);
+  Win32MenuRes *winres;
+  HMENU hMenu;
+
+  winres = (Win32MenuRes *)FindResourceA(hinst, lpszMenu, RT_MENUA);
+  if(winres) {
+	hMenu = O32_LoadMenuIndirect((MENUITEMTEMPLATEHEADER *)winres->lockOS2Resource());
+	delete winres;
+	return hMenu;
+  }
+  return 0;
 }
 //******************************************************************************
 //******************************************************************************
@@ -41,22 +50,33 @@ ODINFUNCTION2(HMENU, LoadMenuW,
               HINSTANCE, hinst,
               LPCWSTR, lpszMenu)
 {
-  return (HMENU)FindResourceW(hinst, lpszMenu, RT_MENUW);
+  Win32MenuRes *winres;
+  HMENU hMenu;
+
+  winres = (Win32MenuRes *)FindResourceW(hinst, lpszMenu, RT_MENUW);
+  if(winres) {
+	hMenu = O32_LoadMenuIndirect((MENUITEMTEMPLATEHEADER *)winres->lockOS2Resource());
+	delete winres;
+	return hMenu;
+  }
+  return 0;
 }
 //******************************************************************************
-//TODO: Create PM object?
 //NOTE: menutemplate strings are always in Unicode format
 //******************************************************************************
 ODINFUNCTION1(HMENU, LoadMenuIndirectA,
               const MENUITEMTEMPLATEHEADER *, menuTemplate)
 {
   Win32MenuRes *winres;
+  HMENU hMenu;
 
   winres = new Win32MenuRes((LPVOID)menuTemplate);
   if(winres == NULL)
     return 0;
-  else
-    return (HMENU)winres;
+
+  hMenu = O32_LoadMenuIndirect((MENUITEMTEMPLATEHEADER *)winres->lockOS2Resource());
+  delete winres;
+  return (HMENU)winres;
 }
 //******************************************************************************
 //******************************************************************************
@@ -64,29 +84,22 @@ ODINFUNCTION1(HMENU, LoadMenuIndirectW,
               const MENUITEMTEMPLATEHEADER *, menuTemplate)
 {
   Win32MenuRes *winres;
+  HMENU hMenu;
 
   winres = new Win32MenuRes((LPVOID)menuTemplate);
   if(winres == NULL)
     return 0;
-  else
-    return (HMENU)winres;
+
+  hMenu = O32_LoadMenuIndirect((MENUITEMTEMPLATEHEADER *)winres->lockOS2Resource());
+  delete winres;
+  return (HMENU)winres;
 }
 //******************************************************************************
 //******************************************************************************
 ODINFUNCTION1(BOOL,  DestroyMenu,
-              HMENU, hmenu)
+              HMENU, hMenu)
 {
-  Win32MenuRes *winres;
-
-  if(HIWORD(hmenu) == 0)
-  {
-    SetLastError(ERROR_INVALID_PARAMETER);
-    return FALSE;
-  }
-
-  winres = (Win32MenuRes *)hmenu;
-  delete winres;
-  return TRUE;
+  return O32_DestroyMenu(hMenu);
 }
 //******************************************************************************
 //******************************************************************************
@@ -108,7 +121,7 @@ ODINFUNCTION1(HMENU, GetMenu,
 //******************************************************************************
 ODINFUNCTION2(BOOL,  SetMenu,
               HWND,  hwnd,
-              HMENU, hmenu)
+              HMENU, hMenu)
 {
   Win32BaseWindow *window;
 
@@ -119,7 +132,7 @@ ODINFUNCTION2(BOOL,  SetMenu,
     return 0;
   }
 
-  window->SetMenu(hmenu);
+  window->SetMenu(hMenu);
   return TRUE;
 }
 //******************************************************************************
@@ -133,15 +146,12 @@ ODINFUNCTION0(DWORD, GetMenuCheckMarkDimensions)
 ODINFUNCTION1(int,   GetMenuItemCount,
               HMENU, hMenu)
 {
-  Win32MenuRes *menu = (Win32MenuRes *)hMenu;
-
-  if(menu == NULL || menu->getOS2Handle() == 0)
+  if(hMenu == 0)
   {
     SetLastError(ERROR_INVALID_PARAMETER);
     return 0;
   }
-
-  return OSLibGetMenuItemCount(menu->getOS2Handle());
+  return OSLibGetMenuItemCount(hMenu);
 }
 //******************************************************************************
 //******************************************************************************
@@ -149,15 +159,12 @@ ODINFUNCTION2(UINT,  GetMenuItemID,
               HMENU, hMenu,
               int,   nPos)
 {
-  Win32MenuRes *menu = (Win32MenuRes *)hMenu;
-
-  if(menu == NULL || menu->getOS2Handle() == 0)
+  if(hMenu == 0)
   {
     SetLastError(ERROR_INVALID_PARAMETER);
     return 0;
   }
-
-  return O32_GetMenuItemID(menu->getOS2Handle(), nPos);
+  return O32_GetMenuItemID(hMenu, nPos);
 }
 //******************************************************************************
 //******************************************************************************
@@ -166,15 +173,13 @@ ODINFUNCTION3(UINT,  GetMenuState,
               UINT,  arg2,
               UINT,  arg3)
 {
-  Win32MenuRes *menu = (Win32MenuRes *)hMenu;
-
-  if(menu == NULL || menu->getOS2Handle() == 0)
+  if(hMenu == 0)
   {
     SetLastError(ERROR_INVALID_PARAMETER);
     return 0;
   }
 
-  return O32_GetMenuState(menu->getOS2Handle(), arg2, arg3);
+  return O32_GetMenuState(hMenu, arg2, arg3);
 }
 //******************************************************************************
 //******************************************************************************
@@ -185,15 +190,13 @@ ODINFUNCTION5(int,   GetMenuStringA,
               int,   arg4,
               UINT,  arg5)
 {
-  Win32MenuRes *menu = (Win32MenuRes *)hMenu;
-
-  if(menu == NULL || menu->getOS2Handle() == 0)
+  if(hMenu == 0)
   {
     SetLastError(ERROR_INVALID_PARAMETER);
     return 0;
   }
 
-  return O32_GetMenuString(menu->getOS2Handle(), arg2, arg3, arg4, arg5);
+  return O32_GetMenuString(hMenu, arg2, arg3, arg4, arg5);
 }
 //******************************************************************************
 //******************************************************************************
@@ -204,17 +207,16 @@ ODINFUNCTION5(int,   GetMenuStringW,
               int,   cchMax,
               UINT,  fuFlags)
 {
-  Win32MenuRes *menu = (Win32MenuRes *)hMenu;
   char *astring = (char *)malloc(cchMax);
   int   rc;
 
-  if(menu == NULL || menu->getOS2Handle() == 0)
+  if(hMenu == 0)
   {
     SetLastError(ERROR_INVALID_PARAMETER);
     return 0;
   }
 
-  rc = O32_GetMenuString(menu->getOS2Handle(), idItem, astring, cchMax, fuFlags);
+  rc = O32_GetMenuString(hMenu, idItem, astring, cchMax, fuFlags);
   free(astring);
   if(rc)
   {
@@ -235,15 +237,13 @@ ODINFUNCTION5(BOOL, SetMenuItemBitmaps,
               HBITMAP, arg4,
               HBITMAP, arg5)
 {
- Win32MenuRes *menu = (Win32MenuRes *)hMenu;
-
-    dprintf(("USER32:  SetMenuItemBitmaps\n"));
-    if(menu == NULL || menu->getOS2Handle() == 0)
-    {
-        SetLastError(ERROR_INVALID_PARAMETER);
-        return 0;
-    }
-    return O32_SetMenuItemBitmaps(menu->getOS2Handle(), arg2, arg3, arg4, arg5);
+  dprintf(("USER32:  SetMenuItemBitmaps\n"));
+  if(hMenu == 0)
+  {
+    SetLastError(ERROR_INVALID_PARAMETER);
+    return 0;
+  }
+  return O32_SetMenuItemBitmaps(hMenu, arg2, arg3, arg4, arg5);
 }
 //******************************************************************************
 //******************************************************************************
@@ -251,21 +251,13 @@ ODINFUNCTION2(HMENU, GetSubMenu,
               HWND, hMenu,
               int, arg2)
 {
-  Win32MenuRes *menu = (Win32MenuRes *)hMenu;
-  Win32MenuRes *menuReturned;
-  HMENU        hMenuReturned;
-
-  if(menu == NULL || menu->getOS2Handle() == 0)
+  if(hMenu == 0)
   {
-     SetLastError(ERROR_INVALID_PARAMETER);
-     return 0;
+    SetLastError(ERROR_INVALID_PARAMETER);
+    return 0;
   }
 
-  hMenuReturned = O32_GetSubMenu(menu->getOS2Handle(), arg2);
-  /* @@@PH allocate Win32MenuRes object ! */
-  /* @@@PH WARNING, memory leak! */
-  menuReturned = new Win32MenuRes(hMenuReturned);
-  return ((HMENU)menuReturned);
+  return O32_GetSubMenu(hMenu, arg2);
 }
 //******************************************************************************
 //******************************************************************************
@@ -273,8 +265,6 @@ ODINFUNCTION2(HMENU, GetSystemMenu,
               HWND,  hSystemWindow,
               BOOL,  bRevert)
 {
-  Win32MenuRes *menuReturned;
-  HMENU        hMenuReturned;
   Win32BaseWindow *window;
 
   window = Win32BaseWindow::GetWindowFromHandle(hSystemWindow);
@@ -284,28 +274,15 @@ ODINFUNCTION2(HMENU, GetSystemMenu,
     return 0;
   }
 
-  //hMenuReturned = window->GetSystemMenu();
-  hMenuReturned =  O32_GetSystemMenu(hSystemWindow, bRevert);
-
-  /* @@@PH allocate Win32MenuRes object ! */
-  /* @@@PH WARNING, memory leak! */
-  menuReturned = new Win32MenuRes(hMenuReturned);
-  return ((HMENU)menuReturned);
+  return O32_GetSystemMenu(window->getOS2FrameWindowHandle(), bRevert);
 }
 //******************************************************************************
 //******************************************************************************
 ODINFUNCTION1(BOOL, IsMenu,
               HMENU, hMenu)
 {
- Win32MenuRes *menu = (Win32MenuRes *)hMenu;
-
     dprintf(("USER32:  IsMenu\n"));
-    if(menu == NULL || menu->getOS2Handle() == 0)
-    {
-        SetLastError(ERROR_INVALID_PARAMETER);
-        return 0;
-    }
-    return O32_IsMenu(menu->getOS2Handle());
+    return O32_IsMenu(hMenu);
 }
 //******************************************************************************
 //******************************************************************************
@@ -318,15 +295,13 @@ ODINFUNCTION7(BOOL, TrackPopupMenu,
               HWND, arg6,
               const RECT *, arg7)
 {
- Win32MenuRes *menu = (Win32MenuRes *)hMenu;
-
     dprintf(("USER32:  TrackPopupMenu\n"));
-    if(menu == NULL || menu->getOS2Handle() == 0)
+    if(hMenu == 0)
     {
         SetLastError(ERROR_INVALID_PARAMETER);
         return 0;
     }
-    return O32_TrackPopupMenu(menu->getOS2Handle(), arg2, arg3, arg4, arg5, arg6, arg7);
+    return O32_TrackPopupMenu(hMenu, arg2, arg3, arg4, arg5, arg6, arg7);
 }
 //******************************************************************************
 //******************************************************************************
@@ -338,20 +313,18 @@ ODINFUNCTION6(BOOL, TrackPopupMenuEx,
               HWND, hwnd,
               LPTPMPARAMS, lpPM)
 {
- Win32MenuRes *menu = (Win32MenuRes *)hMenu;
  RECT *rect = NULL;
-
 
     dprintf(("USER32:  TrackPopupMenuEx, not completely implemented\n"));
     if(lpPM->cbSize != 0)
         rect = &lpPM->rcExclude;
 
-    if(menu == NULL || menu->getOS2Handle() == 0)
+    if(hMenu == 0)
     {
         SetLastError(ERROR_INVALID_PARAMETER);
         return 0;
     }
-    return O32_TrackPopupMenu(menu->getOS2Handle(), flags, X, Y, 0, hwnd, rect);
+    return O32_TrackPopupMenu(hMenu, flags, X, Y, 0, hwnd, rect);
 }
 //******************************************************************************
 //******************************************************************************
@@ -361,7 +334,6 @@ ODINFUNCTION4(BOOL, AppendMenuA,
               UINT, ulDNewItem,
               LPCSTR, lpNewItem)
 {
- Win32MenuRes *menu = (Win32MenuRes *)hMenu;
  BOOL rc;
 
     dprintf(("USER32:  OS2AppendMenuA uFlags = %X\n", uFlags));
@@ -369,13 +341,13 @@ ODINFUNCTION4(BOOL, AppendMenuA,
     if(uFlags & MF_STRING || uFlags == 0)
             dprintf(("USER32:  OS2AppendMenuA %s\n", lpNewItem));
 
-    if(menu == NULL || menu->getOS2Handle() == 0)
+    if(hMenu == 0)
     {
         SetLastError(ERROR_INVALID_PARAMETER);
         return 0;
     }
-    rc = O32_AppendMenu(menu->getOS2Handle(), uFlags, ulDNewItem, lpNewItem);
-    dprintf(("USER32:  OS2AppendMenuA returned %d\n", rc));
+    rc = O32_AppendMenu(hMenu, uFlags, ulDNewItem, lpNewItem);
+    dprintf(("USER32:  AppendMenuA returned %d\n", rc));
     return rc;
 }
 //******************************************************************************
@@ -386,7 +358,6 @@ ODINFUNCTION4(BOOL, AppendMenuW,
               UINT, arg3,
               LPCWSTR, arg4)
 {
-    Win32MenuRes *menu = (Win32MenuRes *)hMenu;
     BOOL  rc;
     char *astring = NULL;
 
@@ -397,12 +368,12 @@ ODINFUNCTION4(BOOL, AppendMenuW,
     else
       astring = (char *) arg4;
 
-    if(menu == NULL || menu->getOS2Handle() == 0)
+    if(hMenu == 0)
     {
         SetLastError(ERROR_INVALID_PARAMETER);
         return 0;
     }
-    rc = O32_AppendMenu(menu->getOS2Handle(), arg2, arg3, astring);
+    rc = O32_AppendMenu(hMenu, arg2, arg3, astring);
     if(arg2 & MF_STRING  && (int)arg4 >> 16 != 0)
       FreeAsciiString(astring);
     return(rc);
@@ -414,49 +385,27 @@ ODINFUNCTION3(DWORD, CheckMenuItem,
               UINT, arg2,
               UINT, arg3)
 {
- Win32MenuRes *menu = (Win32MenuRes *)hMenu;
-
     dprintf(("USER32:  OS2CheckMenuItem\n"));
-    if(menu == NULL || menu->getOS2Handle() == 0)
+    if(hMenu == 0)
     {
         SetLastError(ERROR_INVALID_PARAMETER);
         return 0;
     }
-    return O32_CheckMenuItem(menu->getOS2Handle(), arg2, arg3);
+    return O32_CheckMenuItem(hMenu, arg2, arg3);
 }
 //******************************************************************************
 //******************************************************************************
 ODINFUNCTION0(HMENU, CreateMenu)
 {
-  Win32MenuRes *menu = 0;
-  HMENU hMenu;
-
-  hMenu = O32_CreateMenu();
-  if(hMenu)
-  {
-    menu = new Win32MenuRes(hMenu);
-    if(menu == NULL)
-      return 0;
-  }
-
-  return (HMENU)menu;
+    dprintf(("USER32:  CreateMenu\n"));
+    return O32_CreateMenu();
 }
 //******************************************************************************
 //******************************************************************************
 ODINFUNCTION0(HMENU, CreatePopupMenu)
 {
-  Win32MenuRes *menu = 0;
-  HMENU hMenu;
-
-  hMenu = O32_CreatePopupMenu();
-  if(hMenu)
-  {
-    menu = new Win32MenuRes(hMenu);
-    if(menu == NULL)
-      return 0;
-  }
-
-  return (HMENU)menu;
+    dprintf(("USER32:  CreateMenu\n"));
+    return O32_CreatePopupMenu();
 }
 //******************************************************************************
 //******************************************************************************
@@ -464,17 +413,15 @@ ODINFUNCTION3(BOOL,EnableMenuItem,HMENU,hMenu,
                                   UINT, uIDEnableItem,
                                   UINT, uEnable)
 {
-  Win32MenuRes *menu = (Win32MenuRes *)hMenu;
+    if(hMenu == 0)
+    {
+        SetLastError(ERROR_INVALID_PARAMETER);
+        return 0;
+    }
 
-  if(menu == NULL || menu->getOS2Handle() == 0)
-  {
-    SetLastError(ERROR_INVALID_PARAMETER);
-    return 0;
-  }
-
-  return O32_EnableMenuItem(menu->getOS2Handle(),
-                            uIDEnableItem,
-                            uEnable);
+    return O32_EnableMenuItem(hMenu,
+                              uIDEnableItem,
+                              uEnable);
 }
 //******************************************************************************
 //******************************************************************************
@@ -485,15 +432,13 @@ ODINFUNCTION5(BOOL, ModifyMenuA,
               UINT, arg4,
               LPCSTR, arg5)
 {
- Win32MenuRes *menu = (Win32MenuRes *)hMenu;
-
     dprintf(("USER32:  OS2ModifyMenuA\n"));
-    if(menu == NULL || menu->getOS2Handle() == 0)
+    if(hMenu == 0)
     {
         SetLastError(ERROR_INVALID_PARAMETER);
         return 0;
     }
-    return O32_ModifyMenu(menu->getOS2Handle(), arg2, arg3, arg4, arg5);
+    return O32_ModifyMenu(hMenu, arg2, arg3, arg4, arg5);
 }
 //******************************************************************************
 //******************************************************************************
@@ -506,11 +451,10 @@ ODINFUNCTION5(BOOL, ModifyMenuW,
 {
  BOOL  rc;
  char *astring = NULL;
- Win32MenuRes *menu = (Win32MenuRes *)hMenu;
 
     dprintf(("USER32: OS2ModifyMenuW %s\n", astring));
 
-    if(menu == NULL || menu->getOS2Handle() == 0)
+    if(hMenu == 0)
     {
         SetLastError(ERROR_INVALID_PARAMETER);
         return 0;
@@ -521,7 +465,7 @@ ODINFUNCTION5(BOOL, ModifyMenuW,
     else
       astring = (char *) arg5;
 
-    rc = O32_ModifyMenu(menu->getOS2Handle(), arg2, arg3, arg4, astring);
+    rc = O32_ModifyMenu(hMenu, arg2, arg3, arg4, astring);
     if(arg3 & MF_STRING  && (int)arg5 >> 16 != 0)
       FreeAsciiString(astring);
     return(rc);
@@ -533,16 +477,14 @@ ODINFUNCTION3(BOOL, RemoveMenu,
               UINT, arg2,
               UINT, arg3)
 {
- Win32MenuRes *menu = (Win32MenuRes *)hMenu;
-
     dprintf(("USER32:  OS2RemoveMenu\n"));
-    if(menu == NULL || menu->getOS2Handle() == 0)
+    if(hMenu == 0)
     {
         SetLastError(ERROR_INVALID_PARAMETER);
         return 0;
     }
 
-    return O32_RemoveMenu(menu->getOS2Handle(), arg2, arg3);
+    return O32_RemoveMenu(hMenu, arg2, arg3);
 }
 //******************************************************************************
 //******************************************************************************
@@ -551,16 +493,14 @@ ODINFUNCTION3(BOOL, DeleteMenu,
               UINT, arg2,
               UINT, arg3)
 {
- Win32MenuRes *menu = (Win32MenuRes *)hMenu;
-
     dprintf(("USER32:  OS2DeleteMenu\n"));
-    if(menu == NULL || menu->getOS2Handle() == 0)
+    if(hMenu == 0)
     {
         SetLastError(ERROR_INVALID_PARAMETER);
         return 0;
     }
 
-    return O32_DeleteMenu(menu->getOS2Handle(), arg2, arg3);
+    return O32_DeleteMenu(hMenu, arg2, arg3);
 }
 //******************************************************************************
 //******************************************************************************
@@ -570,16 +510,14 @@ ODINFUNCTION4(BOOL, HiliteMenuItem,
               UINT, arg3,
               UINT, arg4)
 {
- Win32MenuRes *menu = (Win32MenuRes *)hMenu;
-
     dprintf(("USER32:  OS2HiliteMenuItem\n"));
-    if(menu == NULL || menu->getOS2Handle() == 0)
+    if(hMenu == 0)
     {
         SetLastError(ERROR_INVALID_PARAMETER);
         return 0;
     }
 
-    return O32_HiliteMenuItem(menu->getOS2Handle(), arg2, arg3, arg4);
+    return O32_HiliteMenuItem(hMenu, arg2, arg3, arg4);
 }
 //******************************************************************************
 //******************************************************************************
@@ -590,16 +528,14 @@ ODINFUNCTION5(BOOL, InsertMenuA,
               UINT, arg4,
               LPCSTR, arg5)
 {
- Win32MenuRes *menu = (Win32MenuRes *)hMenu;
-
     dprintf(("USER32:  OS2InsertMenuA\n"));
-    if(menu == NULL || menu->getOS2Handle() == 0)
+    if(hMenu == 0)
     {
         SetLastError(ERROR_INVALID_PARAMETER);
         return 0;
     }
 
-    return O32_InsertMenu(menu->getOS2Handle(), arg2, arg3, arg4, arg5);
+    return O32_InsertMenu(hMenu, arg2, arg3, arg4, arg5);
 }
 //******************************************************************************
 //******************************************************************************
@@ -612,20 +548,15 @@ ODINFUNCTION5(BOOL, InsertMenuW,
 {
  BOOL  rc;
  char *astring = NULL;
- Win32MenuRes *menu = (Win32MenuRes *)hMenu;
 
     dprintf(("USER32:  OS2InsertMenuW %s\n", astring));
-    if(menu == NULL || menu->getOS2Handle() == 0)
-    {
-        SetLastError(ERROR_INVALID_PARAMETER);
-        return 0;
-    }
+
     if(arg3 & MF_STRING  && (int)arg5 >> 16 != 0)
       astring = UnicodeToAsciiString((LPWSTR)arg5);
     else
       astring = (char *) arg5;
 
-    rc = O32_InsertMenu(menu->getOS2Handle(), arg2, arg3, arg4, astring);
+    rc = O32_InsertMenu(hMenu, arg2, arg3, arg4, astring);
     if(arg3 & MF_STRING  && (int)arg5 >> 16 != 0)
       FreeAsciiString(astring);
     return(rc);
@@ -633,7 +564,7 @@ ODINFUNCTION5(BOOL, InsertMenuW,
 //******************************************************************************
 //******************************************************************************
 ODINFUNCTION2(BOOL, SetMenuContextHelpId,
-              HMENU, hmenu,
+              HMENU, hMenu,
               DWORD, dwContextHelpId)
 {
   dprintf(("USER32:  OS2SetMenuContextHelpId, not implemented\n"));
@@ -642,7 +573,7 @@ ODINFUNCTION2(BOOL, SetMenuContextHelpId,
 //******************************************************************************
 //******************************************************************************
 ODINFUNCTION1(DWORD, GetMenuContextHelpId,
-              HMENU, hmenu)
+              HMENU, hMenu)
 {
   dprintf(("USER32:  OS2GetMenuContextHelpId, not implemented\n"));
   return(0);
@@ -650,7 +581,7 @@ ODINFUNCTION1(DWORD, GetMenuContextHelpId,
 //******************************************************************************
 //******************************************************************************
 ODINFUNCTION5(BOOL, CheckMenuRadioItem,
-              HMENU, hmenu,
+              HMENU, hMenu,
               UINT, idFirst,
               UINT, idLast,
               UINT, idCheck,
@@ -706,7 +637,7 @@ ODINFUNCTION5(BOOL, ChangeMenuW,
 //******************************************************************************
 //******************************************************************************
 ODINFUNCTION4(BOOL, SetMenuItemInfoA,
-              HMENU, hmenu,
+              HMENU, hMenu,
               UINT, par1,
               BOOL, par2,
               const MENUITEMINFOA *, lpMenuItemInfo)
@@ -748,7 +679,7 @@ ODINFUNCTION4(BOOL, SetMenuItemInfoW,
 //******************************************************************************
 //******************************************************************************
 ODINFUNCTION3(BOOL, SetMenuDefaultItem,
-              HMENU, hmenu,
+              HMENU, hMenu,
               UINT, uItem,
               UINT, fByPos)
 {
@@ -758,7 +689,7 @@ ODINFUNCTION3(BOOL, SetMenuDefaultItem,
 //******************************************************************************
 //******************************************************************************
 ODINFUNCTION4(BOOL, GetMenuItemInfoA,
-              HMENU, hmenu,
+              HMENU, hMenu,
               UINT, uItem,
               BOOL, aBool,
               MENUITEMINFOA *, lpMenuItemInfo)

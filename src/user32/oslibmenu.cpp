@@ -1,4 +1,4 @@
-/* $Id: oslibmenu.cpp,v 1.1 1999-09-15 23:18:53 sandervl Exp $ */
+/* $Id: oslibmenu.cpp,v 1.2 1999-09-24 12:47:50 sandervl Exp $ */
 /*
  * Window Menu wrapper functions for OS/2
  *
@@ -24,9 +24,27 @@
 
 //******************************************************************************
 //******************************************************************************
-HWND OSLibWinCreateMenu(HWND hwndParent, PVOID menutemplate)
+HWND OSLibWinSetMenu(HWND hwndParent, HMENU hMenu)
 {
-  return WinCreateMenu(hwndParent, menutemplate);
+   // Remove current menu from window
+   HWND currMenu = WinWindowFromID( (HWND)hwndParent, FID_MENU );
+   if (currMenu)
+   {
+      WinSetOwner (currMenu, HWND_OBJECT);
+      WinSetParent(currMenu, HWND_OBJECT, FALSE);
+   }
+
+   if (hMenu)
+   {
+      if(WinIsWindow(GetThreadHAB(), hMenu) == TRUE) {
+         WinSetOwner (hMenu, hwndParent);
+         WinSetParent(hMenu, hwndParent, FALSE );
+         WinSetWindowUShort(hMenu, QWS_ID, FID_MENU);
+	 WinSendMsg(hwndParent, WM_UPDATEFRAME, (MPARAM)FCF_MENU, 0);
+	 return hMenu;
+      }
+   }
+   return 0;
 }
 //******************************************************************************
 //******************************************************************************

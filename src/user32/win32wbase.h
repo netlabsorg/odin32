@@ -1,4 +1,4 @@
-/* $Id: win32wbase.h,v 1.5 1999-09-23 16:44:33 sandervl Exp $ */
+/* $Id: win32wbase.h,v 1.6 1999-09-24 12:47:51 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -133,7 +133,7 @@ Win32BaseWindow *getParent()                    { return (Win32BaseWindow *)Chil
          HACCEL GetAccelTable()                     { return (HACCEL) acceltableResource; };
          BOOL   SetAccelTable(ULONG hAccel);
 
-         HMENU  GetMenu()                           { return (HMENU) menuResource; };
+         HMENU  GetMenu()                           { return (HMENU) OS2HwndMenu; };
          BOOL   SetMenu(ULONG hMenu);
 
          BOOL   SetIcon(HICON hIcon);
@@ -229,7 +229,6 @@ protected:
    Win32BaseWindow *owner;
 
  Win32Resource *acceltableResource;
- Win32Resource *menuResource;
  Win32Resource *iconResource;
 
         char   *windowNameA;
