@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.26 1999-10-08 16:13:07 cbratschi Exp $
+# $Id: Makefile,v 1.27 1999-10-08 18:39:33 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -91,7 +91,7 @@ nativerc.obj: nativerc.cpp
 msgbox.obj:    msgbox.cpp
 window.obj:    window.cpp win32class.h win32wbase.h win32wndchild.h oslibwin.h win32wmdiclient.h win32wdesktop.h
 windowmsg.obj: windowmsg.cpp win32class.h win32wbase.h win32wndchild.h oslibmsg.h
-winprop.obj:   winprop.cpp
+winprop.obj:   winprop.cpp win32wbase.h
 wingdi.obj:    wingdi.cpp win32wbase.h oslibgdi.h
 windowclass.obj: windowclass.cpp win32class.h win32wbase.h win32wndchild.h
 windowword.obj:  windowword.cpp win32class.h win32wbase.h win32dlg.h win32wndchild.h

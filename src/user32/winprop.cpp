@@ -1,4 +1,4 @@
-/* $Id: winprop.cpp,v 1.1 1999-09-15 23:19:03 sandervl Exp $ */
+/* $Id: winprop.cpp,v 1.2 1999-10-08 18:39:35 sandervl Exp $ */
 /*
  * Win32 Property apis for OS/2
  *
@@ -11,32 +11,33 @@
  */
 #include <user32.h>
 #include <misc.h>
+#include "win32wbase.h"
 
 //******************************************************************************
 //******************************************************************************
-int WIN32API EnumPropsA(HWND arg1, PROPENUMPROCA arg2)
+int WIN32API EnumPropsA(HWND hwnd, PROPENUMPROCA arg2)
 {
 #ifdef DEBUG
     WriteLog("USER32:  EnumPropsA DOES NOT WORK\n");
 #endif
     //calling convention problems
     return 0;
-//    return O32_EnumProps(arg1, (PROPENUMPROC_O32)arg2);
+//    return O32_EnumProps(hwnd, (PROPENUMPROC_O32)arg2);
 }
 //******************************************************************************
 //******************************************************************************
-int WIN32API EnumPropsExA( HWND arg1, PROPENUMPROCEXA arg2, LPARAM  arg3)
+int WIN32API EnumPropsExA( HWND hwnd, PROPENUMPROCEXA arg2, LPARAM  arg3)
 {
 #ifdef DEBUG
     WriteLog("USER32:  EnumPropsExA DOES NOT WORK\n");
 #endif
     //calling convention problems
     return 0;
-//    return O32_EnumPropsEx(arg1, arg2, (PROPENUMPROCEX_O32)arg3);
+//    return O32_EnumPropsEx(hwnd, arg2, (PROPENUMPROCEX_O32)arg3);
 }
 //******************************************************************************
 //******************************************************************************
-int WIN32API EnumPropsExW( HWND arg1, PROPENUMPROCEXW arg2, LPARAM  arg3)
+int WIN32API EnumPropsExW( HWND hwnd, PROPENUMPROCEXW arg2, LPARAM  arg3)
 {
 #ifdef DEBUG
     WriteLog("USER32:  EnumPropsExW\n");
@@ -44,11 +45,11 @@ int WIN32API EnumPropsExW( HWND arg1, PROPENUMPROCEXW arg2, LPARAM  arg3)
     // NOTE: This will not work as is (needs UNICODE support)
     //calling convention problems
     return 0;
-//    return O32_EnumPropsEx(arg1, arg2, arg3);
+//    return O32_EnumPropsEx(hwnd, arg2, arg3);
 }
 //******************************************************************************
 //******************************************************************************
-int WIN32API EnumPropsW( HWND arg1, PROPENUMPROCW  arg2)
+int WIN32API EnumPropsW( HWND hwnd, PROPENUMPROCW  arg2)
 {
 #ifdef DEBUG
     WriteLog("USER32:  EnumPropsW\n");
@@ -56,93 +57,116 @@ int WIN32API EnumPropsW( HWND arg1, PROPENUMPROCW  arg2)
     // NOTE: This will not work as is (needs UNICODE support)
     //calling convention problems
     return 0;
-//    return O32_EnumProps(arg1, arg2);
+//    return O32_EnumProps(hwnd, arg2);
 }
 //******************************************************************************
 //******************************************************************************
-HANDLE WIN32API GetPropA( HWND arg1, LPCSTR  arg2)
+HANDLE WIN32API GetPropA(HWND hwnd, LPCSTR arg2)
 {
+  Win32BaseWindow *window;
+  HANDLE rc;
+
+    window = Win32BaseWindow::GetWindowFromHandle(hwnd);
+    if(!window) {
+        dprintf(("GetPropA, window %x not found", hwnd));
+	SetLastError(ERROR_INVALID_WINDOW_HANDLE);
+        return 0;
+    }
+    rc = O32_GetProp(window->getOS2WindowHandle(), arg2);
 #ifdef DEBUG
-    if((int)arg2 >> 16 != 0)
-     WriteLog("USER32:  GetPropA %s\n", arg2);
-    else WriteLog("USER32:  GetPropA %X\n", arg2);
+    if(HIWORD(arg2) != 0)
+         dprintf(("USER32: GetPropA %s returned %x\n", arg2, rc));
+    else dprintf(("USER32: GetPropA %X returned %x\n", arg2, rc));
 #endif
-    return O32_GetProp(arg1, arg2);
+    return rc;
 }
 //******************************************************************************
 //******************************************************************************
-HANDLE WIN32API GetPropW(HWND arg1, LPCWSTR arg2)
+HANDLE WIN32API GetPropW(HWND hwnd, LPCWSTR arg2)
 {
  BOOL  handle;
  char *astring;
 
-    if((int)arg2 >> 16 != 0)
+    if(HIWORD(arg2) != 0)
          astring = UnicodeToAsciiString((LPWSTR)arg2);
     else astring = (char *)arg2;
-#ifdef DEBUG
-    if((int)arg2 >> 16 != 0)
-         WriteLog("USER32:  GetPropW %s\n", astring);
-    else WriteLog("USER32:  GetPropW %X\n", astring);
-#endif
-    handle = GetPropA(arg1, (LPCSTR)astring);
-    if((int)arg2 >> 16 != 0)
+
+    handle = GetPropA(hwnd, (LPCSTR)astring);
+    if(HIWORD(astring) != 0)
         FreeAsciiString(astring);
 
     return(handle);
 }
 //******************************************************************************
 //******************************************************************************
-HANDLE WIN32API RemovePropA( HWND arg1, LPCSTR  arg2)
+HANDLE WIN32API RemovePropA( HWND hwnd, LPCSTR  arg2)
 {
+ Win32BaseWindow *window;
+
+    window = Win32BaseWindow::GetWindowFromHandle(hwnd);
+    if(!window) {
+        dprintf(("RemovePropA, window %x not found", hwnd));
+	SetLastError(ERROR_INVALID_WINDOW_HANDLE);
+        return 0;
+    }
 #ifdef DEBUG
-    WriteLog("USER32:  RemovePropA\n");
+    if(HIWORD(arg2) != 0)
+         dprintf(("USER32: RemovePropA %S\n", arg2));
+    else dprintf(("USER32: RemovePropA %X\n", arg2));
 #endif
-    return O32_RemoveProp(arg1, arg2);
+    return O32_RemoveProp(window->getWindowHandle(), arg2);
 }
 //******************************************************************************
 //******************************************************************************
-HANDLE WIN32API RemovePropW( HWND arg1, LPCWSTR  arg2)
+HANDLE WIN32API RemovePropW( HWND hwnd, LPCWSTR arg2)
 {
- char *astring = UnicodeToAsciiString((LPWSTR)arg2);
+ char  *astring;
  HANDLE rc;
 
-#ifdef DEBUG
-    WriteLog("USER32:  RemovePropW\n");
-#endif
-    rc = O32_RemoveProp(arg1, astring);
-    FreeAsciiString(astring);
+    if(HIWORD(arg2) != 0)
+         astring = UnicodeToAsciiString((LPWSTR)arg2);
+    else astring = (char *)arg2;
+
+    rc = RemovePropA(hwnd, astring);
+
+    if(HIWORD(astring) != 0)
+        FreeAsciiString(astring);
     return rc;
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API SetPropA( HWND arg1, LPCSTR arg2, HANDLE  arg3)
+BOOL WIN32API SetPropA( HWND hwnd, LPCSTR arg2, HANDLE  arg3)
 {
+ Win32BaseWindow *window;
+
+    window = Win32BaseWindow::GetWindowFromHandle(hwnd);
+    if(!window) {
+        dprintf(("SetPropA, window %x not found", hwnd));
+	SetLastError(ERROR_INVALID_WINDOW_HANDLE);
+        return 0;
+    }
 #ifdef DEBUG
-    if((int)arg2 >> 16 != 0)
-     WriteLog("USER32:  SetPropA %S\n", arg2);
-    else WriteLog("USER32:  SetPropA %X\n", arg2);
+    if(HIWORD(arg2) != 0)
+         dprintf(("USER32: SetPropA %S to %x\n", arg2, arg3));
+    else dprintf(("USER32: SetPropA %X to %x\n", arg2, arg3));
 #endif
-    return O32_SetProp(arg1, arg2, arg3);
+    return O32_SetProp(window->getWindowHandle(), arg2, arg3);
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API SetPropW(HWND arg1, LPCWSTR arg2, HANDLE arg3)
+BOOL WIN32API SetPropW(HWND hwnd, LPCWSTR arg2, HANDLE arg3)
 {
  BOOL  rc;
  char *astring;
 
-    if((int)arg2 >> 16 != 0)
+    if(HIWORD(arg2) != 0)
          astring = UnicodeToAsciiString((LPWSTR)arg2);
     else astring = (char *)arg2;
 
-#ifdef DEBUG
-    if((int)arg2 >> 16 != 0)
-         WriteLog("USER32:  SetPropW %S\n", astring);
-    else WriteLog("USER32:  SetPropW %X\n", astring);
-#endif
-    rc = O32_SetProp(arg1, astring, arg3);
-    if((int)astring >> 16 != 0)
+    rc = SetPropA(hwnd, astring, arg3);
+    if(HIWORD(astring) != 0)
         FreeAsciiString(astring);
+
     return(rc);
 }
 //******************************************************************************

@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.30 1999-10-08 16:13:08 cbratschi Exp $ */
+/* $Id: win32wbase.cpp,v 1.31 1999-10-08 18:39:35 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -305,6 +305,7 @@ BOOL Win32BaseWindow::CreateWindowExA(CREATESTRUCTA *cs, ATOM classAtom)
         if(owner == NULL)
         {
             dprintf(("HwGetWindowHandleData couldn't find owner window %x!!!", cs->hwndParent));
+            SetLastError(ERROR_INVALID_WINDOW_HANDLE);
             return FALSE;
         }
   }
@@ -319,6 +320,7 @@ BOOL Win32BaseWindow::CreateWindowExA(CREATESTRUCTA *cs, ATOM classAtom)
             if(owner == NULL)
             {
                 dprintf(("HwGetWindowHandleData couldn't find owner window %x!!!", cs->hwndParent));
+                SetLastError(ERROR_INVALID_WINDOW_HANDLE);
                 return FALSE;
             }
         }
@@ -449,35 +451,42 @@ BOOL Win32BaseWindow::CreateWindowExA(CREATESTRUCTA *cs, ATOM classAtom)
 
   if(OS2Hwnd == 0) {
         dprintf(("Window creation failed!!"));
+        SetLastError(ERROR_OUTOFMEMORY); //TODO: Better error
         return FALSE;
   }
 
   if(OSLibWinSetWindowULong(OS2Hwnd, OFFSET_WIN32WNDPTR, (ULONG)this) == FALSE) {
         dprintf(("WM_CREATE: WinSetWindowULong %X failed!!", OS2Hwnd));
+        SetLastError(ERROR_OUTOFMEMORY); //TODO: Better error
         return FALSE;
   }
   if(OSLibWinSetWindowULong(OS2Hwnd, OFFSET_WIN32PM_MAGIC, WIN32PM_MAGIC) == FALSE) {
         dprintf(("WM_CREATE: WinSetWindowULong2 %X failed!!", OS2Hwnd));
+        SetLastError(ERROR_OUTOFMEMORY); //TODO: Better error
         return FALSE;
   }
   //SvL: Need to store the shared memory base, or else other apps can map it into their memory space
   if(OSLibWinSetWindowULong(OS2Hwnd, OFFSET_WIN32PM_SHAREDMEM, HeapGetSharedMemBase()) == FALSE) {
         dprintf(("WM_CREATE: WinSetWindowULong2 %X failed!!", OS2Hwnd));
+        SetLastError(ERROR_OUTOFMEMORY); //TODO: Better error
         return FALSE;
   }
 #if 0
   if(OS2Hwnd != OS2HwndFrame) {
     if(OSLibWinSetWindowULong(OS2HwndFrame, OFFSET_WIN32WNDPTR, (ULONG)this) == FALSE) {
             dprintf(("WM_CREATE: WinSetWindowULong %X failed!!", OS2HwndFrame));
+            SetLastError(ERROR_OUTOFMEMORY); //TODO: Better error
             return FALSE;
     }
     if(OSLibWinSetWindowULong(OS2HwndFrame, OFFSET_WIN32PM_MAGIC, WIN32PM_MAGIC) == FALSE) {
             dprintf(("WM_CREATE: WinSetWindowULong2 %X failed!!", OS2HwndFrame));
+            SetLastError(ERROR_OUTOFMEMORY); //TODO: Better error
             return FALSE;
     }
     //SvL: Need to store the shared memory base, or else other apps can map it into their memory space
     if(OSLibWinSetWindowULong(OS2HwndFrame, OFFSET_WIN32PM_SHAREDMEM, HeapGetSharedMemBase()) == FALSE) {
             dprintf(("WM_CREATE: WinSetWindowULong2 %X failed!!", OS2HwndFrame));
+            SetLastError(ERROR_OUTOFMEMORY); //TODO: Better error
             return FALSE;
     }
   }
@@ -575,10 +584,12 @@ BOOL Win32BaseWindow::CreateWindowExA(CREATESTRUCTA *cs, ATOM classAtom)
             return TRUE;
         }
   }
+  dprintf(("Window creation FAILED (NCCREATE cancelled creation)"));
   fCreated = FALSE;
   OSLibWinSetWindowULong(OS2Hwnd, OFFSET_WIN32WNDPTR, 0);
   OSLibWinSetWindowULong(OS2Hwnd, OFFSET_WIN32PM_MAGIC, 0);
   DestroyWindow();
+  SetLastError(ERROR_OUTOFMEMORY); //TODO: Better error
   return FALSE;
 }
 #if 0
