@@ -1,4 +1,10 @@
-/* $Id: changelog,v 1.2563 2003-04-28 08:40:43 sandervl Exp $ */
+/* $Id: changelog,v 1.2564 2003-04-29 10:26:47 sandervl Exp $ */
+
+ 2003-04-25: knut st. osmundsen <bird-odin-spam@anduin   >
+    - USER32:   o Implemented SW_SHOWDEFAULT.
+    - KERNEL32: o Changed initialization of StartupInfo to take the actual
+                  values of the CreateProcess call (but for the strings).
+                  (not complete)
 
  2003-04-27: Platon Fomichev <stauff@innotek   >
     - USER32:   o Correctly finish PM restore procedure from minimized state.
