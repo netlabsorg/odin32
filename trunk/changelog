@@ -1,4 +1,9 @@
-/* $Id: changelog,v 1.1965 2002-02-08 15:08:25 sandervl Exp $ */
+/* $Id: changelog,v 1.1966 2002-02-09 13:37:42 achimha Exp $ */
+
+ 2002-02-09: Achim Hasenmueller <achimha@innotek.de>
+    - KERNEL32: o export DbgHEAP functions also under their stdcall
+                  mangled non debug names, otherwise USER32/SHELL32
+                  don't build
 
  2002-02-08: Sander van Leeuwen <sandervl@xs4all.nl>
     - KERNEL32: o Implemented tracing of all exported functions
