@@ -1,4 +1,4 @@
-; $Id: interlock.asm,v 1.3 1999-12-06 08:34:59 phaller Exp $
+; $Id: interlock.asm,v 1.4 1999-12-06 19:48:11 achimha Exp $
 
 ;/*
 ; * Interlocked apis
@@ -32,7 +32,7 @@ CODE32         SEGMENT DWORD PUBLIC USE32 'CODE'
        public  _InterlockedIncrement@4
 _InterlockedIncrement@4 proc near
 
-;@@@PH NT4 implementation
+;@@@PH similar to NT4 
          mov      ecx, [esp+4]
          mov      eax, 1
          nop
@@ -40,7 +40,7 @@ _InterlockedIncrement@4 proc near
          inc      eax
          retn 4
 
-; @@@PH 1999/12/06 old implementation from W95
+; @@@PH 1999/12/06 old implementation similar to W95
 ;var_4   = dword ptr -4
 ;arg_0   = dword ptr  4
 ;
@@ -83,7 +83,7 @@ _InterlockedIncrement@4 endp
        public  _InterlockedDecrement@4
 _InterlockedDecrement@4 proc near
 
-;@@@PH NT4 implementation
+;@@@PH similar to NT4
          mov      ecx, [esp+4]
          mov      eax, 0ffffffffh
          nop
@@ -92,7 +92,7 @@ _InterlockedDecrement@4 proc near
          retn 4
 
 
-; @@@PH 1999/12/06 old implementation from W95
+; @@@PH 1999/12/06 old implementation similar to W95
 ;var_4  = dword ptr -4
 ;arg_0  = dword ptr  4
 ;
@@ -135,7 +135,7 @@ _InterlockedDecrement@4 endp
        public  _InterlockedExchange@8
 _InterlockedExchange@8 proc near
 
-;@@@PH NT4 implementation
+;@@@PH similar to NT4
          mov      ecx, [esp+8]
          mov      edx, [esp+4]
          mov      eax, dword ptr [ecx]
@@ -145,7 +145,7 @@ _ie_1:
          jnz      _ie_1
          retn 8
 
-; @@@PH 1999/12/06 old implementation from W95
+; @@@PH 1999/12/06 old implementation similar to W95
 ;var_4   = dword ptr -4
 ;arg_0   = dword ptr  8
 ;arg_4   = dword ptr  0Ch
@@ -186,7 +186,7 @@ _InterlockedExchange@8 endp
 ;************************************************************************
 _InterlockedCompareExchange@12 proc near
 
-;@@@PH NT4 implementation
+;@@@PH similar to NT4
         mov     ecx, dword ptr [esp + 12]
         mov     edx, dword ptr [esp + 8]
         mov     eax, dword ptr [esp + 4]
@@ -229,7 +229,7 @@ _InterlockedCompareExchange@12 endp
 		public _InterlockedExchangeAdd@8
 _InterlockedExchangeAdd@8 proc near
 
-;@@@PH NT4 implementation
+;@@@PH similar to NT4
         mov     ecx, dword ptr [esp + 4]
         mov     eax, dword ptr [esp + 8]
         nop
