@@ -1,4 +1,4 @@
-; $Id: comctl32.def,v 1.13 1999-11-14 13:09:58 achimha Exp $
+; $Id: comctl32.def,v 1.14 1999-11-21 11:04:36 achimha Exp $
 LIBRARY COMCTL32 INITINSTANCE
 DESCRIPTION 'COMCTL32 Common Controls Library'
 DATA MULTIPLE NONSHARED
@@ -48,6 +48,7 @@ EXPORTS
   ImageList_LoadImage          = _ImageList_LoadImageA@28            @63
   ImageList_LoadImageW         = _ImageList_LoadImageW@28            @64
   ImageList_Merge              = _ImageList_Merge@24                 @65
+  ImageList_Read               = _ImageList_Read@4                   @66
 
   ImageList_Remove             = _ImageList_Remove@8                 @67
   ImageList_Replace            = _ImageList_Replace@16               @68
@@ -58,6 +59,7 @@ EXPORTS
   ImageList_SetIconSize        = _ImageList_SetIconSize@12           @77
   ImageList_SetImageCount      = _ImageList_SetImageCount@8          @78
   ImageList_SetOverlayImage    = _ImageList_SetOverlayImage@12       @79
+  ImageList_Write              = _ImageList_Write@8                  @80
 
   PropertySheetA               = _PropertySheetA@4                   @84
   PropertySheet                = _PropertySheetA@4                   @83
