@@ -1,9 +1,13 @@
-/* $Id: changelog,v 1.1197 2000-12-30 10:18:03 sandervl Exp $ */
+/* $Id: changelog,v 1.1198 2000-12-30 13:26:33 sandervl Exp $ */
 
  2000-12-30: Sander van Leeuwen <sandervl@xs4all.nl>
     - INSTALL:  o Don't include odin.ini anymore. 
     - KERNEL32: o Create 'Font Mapping' Odin.ini entry during WarpIn install
                   (odininst execution)
+    - GDI32:    o System object can't be deleted (e.g. system pens & brushes)
+                  Check for those in DeleteObject.
+                  (TODO: also check for others (fonts)??)
+                  (Fixes missing background in DreamWeaver 4 demo install dialogs)
 
  2000-12-29: Sander van Leeuwen <sandervl@xs4all.nl>
     - USER32:   o Export OS2ToWin32Handle & Win32ToOS2Handle with stdcall
