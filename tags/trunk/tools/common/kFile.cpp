@@ -1,4 +1,4 @@
-/* $Id: kFile.cpp,v 1.3 2000-05-29 19:45:57 bird Exp $
+/* $Id: kFile.cpp,v 1.4 2000-08-31 03:00:12 bird Exp $
  *
  * kFile - Simple (for the time being) file class.
  *
@@ -38,10 +38,10 @@ BOOL    kFile::refreshFileStatus()
 {
     if (!fStatusClean)
     {
-        rc = (int)DosQueryFileInfo(hFile, FIL_QUERYEASIZE, &filestatus, sizeof(filestatus));
+        rc = DosQueryFileInfo(hFile, FIL_QUERYEASIZE, &filestatus, sizeof(filestatus));
         fStatusClean = (rc == NO_ERROR);
         if (!fStatusClean && fThrowErrors)
-            throw (rc);
+            throw ((int)rc);
     }
     else
         rc = NO_ERROR;
@@ -63,11 +63,11 @@ BOOL    kFile::position()
     if (offVirtual != offReal)
     {
         ULONG   off;
-        rc = (int)DosSetFilePtr(hFile, offVirtual, FILE_BEGIN, &off);
+        rc = DosSetFilePtr(hFile, offVirtual, FILE_BEGIN, &off);
         if (rc != NO_ERROR || off != offVirtual)
         {
             if (fThrowErrors)
-                throw (rc);
+                throw ((int)rc);
             return FALSE;
         }
         offReal = offVirtual;
@@ -85,14 +85,15 @@ BOOL    kFile::position()
  * @param       fReadOnly       TRUE:  Open the file readonly. (default)
  *                              FALSE: Open the file readwrite appending
  *                                     existing files.
- * @author    knut st. osmundsen (knut.stange.osmundsen@pmsc.no)
+ * @author      knut st. osmundsen (knut.stange.osmundsen@pmsc.no)
  */
 kFile::kFile(const char *pszFilename, BOOL fReadOnly/*=TRUE*/)
 :   fReadOnly(fReadOnly),
     fStatusClean(FALSE),
     fThrowErrors(FALSE),
     offVirtual(0),
-    offReal(0)
+    offReal(0),
+    pszFilename(NULL)
 {
     ULONG   fulOpenFlags;
     ULONG   fulOpenMode;
@@ -112,13 +113,20 @@ kFile::kFile(const char *pszFilename, BOOL fReadOnly/*=TRUE*/)
         fulOpenMode  = OPEN_SHARE_DENYWRITE | OPEN_ACCESS_READWRITE;
     }
 
-    rc = (int)DosOpen((PCSZ)pszFilename, &hFile, &ulAction, 0, FILE_NORMAL,
-                      fulOpenFlags, fulOpenMode, NULL);
+    rc = DosOpen((PCSZ)pszFilename, &hFile, &ulAction, 0, FILE_NORMAL,
+                 fulOpenFlags, fulOpenMode, NULL);
     if (rc != NO_ERROR)
-        throw (rc);
+        throw ((int)rc);
 
     if (!refreshFileStatus())
-        throw (rc);
+        throw ((int)rc);
+
+    char szFullName[CCHMAXPATH];
+    if (DosQueryPathInfo(pszFilename, FIL_QUERYFULLNAME, szFullName, sizeof(szFullName)))
+        strcpy(szFullName, pszFilename);
+    this->pszFilename = strdup(szFullName);
+    if (this->pszFilename == NULL)
+        throw (ERROR_NOT_ENOUGH_MEMORY);
 }
 
 
@@ -142,7 +150,7 @@ BOOL            kFile::read(void *pvBuffer, long cbBuffer)
     if (position())
     {
         ULONG   cbRead;
-        rc = (int)DosRead(hFile, pvBuffer, cbBuffer, &cbRead);
+        rc = DosRead(hFile, pvBuffer, cbBuffer, &cbRead);
         if (rc == NO_ERROR)
         {
             offVirtual = offReal += cbRead;
@@ -151,7 +159,7 @@ BOOL            kFile::read(void *pvBuffer, long cbBuffer)
     }
 
     if (fThrowErrors)
-        throw (rc);
+        throw ((int)rc);
     return FALSE;
 }
 
@@ -166,6 +174,35 @@ BOOL            kFile::read(void *pvBuffer, long cbBuffer)
 BOOL            kFile::readAt(void *pvBuffer, long cbBuffer, long off)
 {
     return set(off) && read(pvBuffer, cbBuffer);
+}
+
+
+/**
+ * Reads the entire file into a single memory block.
+ * (The memory block has a '\0' at the end just in case you
+ *  are using it as a long string.)
+ * @returns     Pointer to file in memory.
+ */
+void *          kFile::readFile() throw(int)
+{
+    void *pv;
+
+    /* allocate memory for the file */
+    pv = calloc((size_t)this->getSize() + 1, 1);
+    if (pv == NULL)
+    {
+        if (fThrowErrors)
+            throw(ERROR_NOT_ENOUGH_MEMORY);
+        return NULL;
+    }
+
+    /* go the start of the file and read it. */
+    if (start() && read(pv, this->getSize()))
+        return pv; // successfull exit!
+
+    /* we failed, cleanup and return NULL */
+    free(pv);
+    return NULL;
 }
 
 
@@ -185,7 +222,7 @@ BOOL            kFile::write(void *pvBuffer, long cbBuffer)
         {
             ULONG   cbWrote;
 
-            rc = (int)DosWrite(hFile, pvBuffer, cbBuffer, &cbWrote);
+            rc = DosWrite(hFile, pvBuffer, cbBuffer, &cbWrote);
             if (rc == NO_ERROR)
             {
                 fStatusClean = FALSE;
@@ -196,7 +233,7 @@ BOOL            kFile::write(void *pvBuffer, long cbBuffer)
     }
 
     if (fThrowErrors)
-        throw(rc);
+        throw ((int)rc);
     return FALSE;
 }
 
@@ -252,9 +289,27 @@ int             kFile::printf(const char *pszFormat, ...) throw (int)
     write(pszBuffer, pszEnd - pszBuffer);
     free(pszBuffer);
 
-    return getPos() - offStart;
+    return (int)(getPos() - offStart);
 }
 
+
+/**
+ * Sets the filesize.
+ * @returns     Success indicator.
+ * @param       cbFile      New filesize.
+ *                          Defaults to 0xffffffff, which results in
+ *                          cutting the file at the current position.
+ */
+BOOL            kFile::setSize(unsigned long cbFile/*= ~0UL*/)
+{
+    if (cbFile == ~0UL)
+        cbFile = offVirtual;
+    rc = DosSetFileSize(hFile, cbFile);
+    if (rc != NO_ERROR && fThrowErrors)
+        throw ((int)rc);
+
+    return rc == NO_ERROR;
+}
 
 
 
@@ -279,7 +334,7 @@ BOOL            kFile::move(long off)
     }
 
     if (fThrowErrors)
-        throw(rc);
+        throw ((int)rc);
     return FALSE;
 }
 
@@ -305,7 +360,7 @@ BOOL            kFile::set(long off)
         }
     }
     if (fThrowErrors)
-        throw(rc);
+        throw ((int)rc);
     return FALSE;
 }
 

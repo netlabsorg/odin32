@@ -1,4 +1,4 @@
-/* $Id: kFileFormatBase.h,v 1.2 2000-03-27 10:18:40 bird Exp $
+/* $Id: kFileFormatBase.h,v 1.3 2000-08-31 03:00:13 bird Exp $
  *
  * kFileFormatBase - Base class for kFile<format> classes.
  *
@@ -28,9 +28,14 @@
  */
 typedef struct _ExportEntry
 {
-    unsigned long  ulOrdinal;
-    char           achName[MAXEXPORTNAME];
-    char           achIntName[MAXEXPORTNAME]; /* not used by PEFile */
+    unsigned long   ulOrdinal;
+    char            achName[MAXEXPORTNAME];
+    char            achIntName[MAXEXPORTNAME]; /* not used by PEFile */
+
+    /* these don't apply for .DEF files. (should have a flag for that...) */
+    unsigned long   offset;
+    unsigned long   iObject;
+
     /* internal - do not use! */
     void          *pv;
 } EXPORTENTRY, *PEXPORTENTRY;
