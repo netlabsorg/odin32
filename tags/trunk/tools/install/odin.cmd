@@ -1,4 +1,4 @@
-/* $Id: odin.cmd,v 1.47 2005-01-26 22:29:57 abwillis Exp $
+/* $Id: odin.cmd,v 1.48 2005-01-27 02:26:01 abwillis Exp $
  *
  * Odin32 API WarpIn installation script generator.
  *
@@ -435,19 +435,8 @@ rc = lineout(sInstFile, '<TEXT>');
 rc = lineout(sInstFile, 'List of changes and bugfixes for this Odin 'sType);
 rc = lineout(sInstFile, '('sVer'  - 'date()')');
 rc = lineout(sInstFile, '</TEXT>');
-rc = lineout(sInstFile, '<README>');
+rc = lineout(sInstFile, '<READMEFORMAT=PLAIN EXTRACTFROMPCK="1">ChangeLog</README></PAGE>');
 
-/* Insert ChangeLog. */
-sChangeLog = '..\..\ChangeLog';
-sLogLine   = linein(sChangeLog);
-do while (lines(sChangeLog) > 0)
-    rc = lineout(sInstFile, sLogLine);
-    sLogLine = linein(sChangeLog);
-end
-call stream sChangeLog, 'c', 'close';
-
-rc = lineout(sInstFile, '</README>');
-rc = lineout(sInstFile, '</PAGE>');
 rc = lineout(sInstFile, '<PAGE INDEX=5 TYPE=CONTAINER>');
 rc = lineout(sInstFile, '<NEXTBUTTON TARGET=6>~Next</NEXTBUTTON>');
 rc = lineout(sInstFile, '<TEXT>');
