@@ -1,20 +1,14 @@
+/* $Id: changenotify.c,v 1.1 2000-08-30 13:52:50 sandervl Exp $ */
 /*
  *	shell change notification
  *
  *	Juergen Schmied <juergen.schmied@debitel.de>
  *
  */
-/*****************************************************************************
- * Includes                                                                  *
- *****************************************************************************/
-
-#include <stdlib.h>
-#include <string.h>
-#include <odin.h>
-#include <odinwrap.h>
-#include <os2sel.h>
-
+#ifdef __WIN32OS2__
 #define ICOM_CINTERFACE 1
+#include <odin.h>
+#endif
 
 #include <string.h>
 
@@ -23,11 +17,7 @@
 #include "shell32_main.h"
 #include "wine/undocshell.h"
 
-/*****************************************************************************
- * Local Variables                                                           *
- *****************************************************************************/
-
-ODINDEBUGCHANNEL(shell32-changenotify)
+DEFAULT_DEBUG_CHANNEL(shell);
 
 static CRITICAL_SECTION SHELL32_ChangenotifyCS = CRITICAL_SECTION_INIT;
 
@@ -159,7 +149,7 @@ SHChangeNotifyRegister(
 	LPNOTIFICATIONLIST item;
 	int i;
 
-	item = (LPNOTIFICATIONLIST)SHAlloc(sizeof(NOTIFICATIONLIST));
+	item = SHAlloc(sizeof(NOTIFICATIONLIST));
 
 	TRACE("(0x%04x,0x%08lx,0x%08lx,0x%08lx,0x%08x,%p) item=%p\n",
 		hwnd,dwFlags,wEventMask,uMsg,cItems,lpItems,item);
@@ -167,7 +157,7 @@ SHChangeNotifyRegister(
 	item->next = NULL;
 	item->prev = NULL;
 	item->cidl = cItems;
-	item->apidl = (LPNOTIFYREGISTER)SHAlloc(sizeof(NOTIFYREGISTER) * cItems);
+	item->apidl = SHAlloc(sizeof(NOTIFYREGISTER) * cItems);
 	for(i=0;i<cItems;i++)
 	{
 	  item->apidl[i].pidlPath = ILClone(lpItems[i].pidlPath);

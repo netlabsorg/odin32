@@ -1,18 +1,11 @@
+/* $Id: dialogs.c,v 1.1 2000-08-30 13:52:51 sandervl Exp $ */
 /*
  *	common shell dialogs
  */
-/*****************************************************************************
- * Includes                                                                  *
- *****************************************************************************/
-
-#include <stdlib.h>
-#include <string.h>
-#include <odin.h>
-#include <odinwrap.h>
-#include <os2sel.h>
-
+#ifdef __WIN32OS2__
 #define ICOM_CINTERFACE 1
- 
+#include <odin.h>
+#endif
 #include <string.h>
 #include <stdio.h>
 #include "winerror.h"
@@ -23,12 +16,7 @@
 #include "shell32_main.h"
 #include "wine/undocshell.h"
 
-
-/*****************************************************************************
- * Local Variables                                                           *
- *****************************************************************************/
-
-ODINDEBUGCHANNEL(shell32-dialogs)
+DEFAULT_DEBUG_CHANNEL(shell);
 
 
 /*************************************************************************
@@ -73,7 +61,7 @@ void WINAPI RunFileDlg(
 void WINAPI ExitWindowsDialog (HWND hWndOwner)
 {
 	TRACE("(0x%08x)\n", hWndOwner);
-	if (MessageBoxA( hWndOwner, "Do you want to exit ODIN?", "Shutdown", MB_YESNO|MB_ICONQUESTION) == IDOK)
+	if (MessageBoxA( hWndOwner, "Do you want to exit WINE?", "Shutdown", MB_YESNO|MB_ICONQUESTION) == IDOK)
 	{
 	  SendMessageA ( hWndOwner, WM_QUIT, 0, 0);
 	}

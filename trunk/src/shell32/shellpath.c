@@ -1,57 +1,29 @@
-/* $Id: shellpath.c,v 1.1 2000-08-24 12:01:42 sandervl Exp $ */
-
+/* $Id: shellpath.c,v 1.2 2000-08-30 13:51:02 sandervl Exp $ */
 /*
- * Win32 SHELL32 for OS/2
- *
- * Copyright 1997 Marcus Meissner
- * Copyright 1999 Patrick Haller (haller@zebra.fh-weingarten.de)
- * Project Odin Software License can be found in LICENSE.TXT
- *
  * Path Functions
- *
- * NOTE: SHGetSpecialFolderPathA: StartMenu changed in 'Start Menu'
- *       Odin changes in #ifdef __WIN32OS2__ statements!
  *
  * Many of this functions are in SHLWAPI.DLL also
  *
- * Corel WINE 20000324 level (without CRTDLL_* calls)
  */
-
-
-/*****************************************************************************
- * Includes                                                                  *
- *****************************************************************************/
-
+#ifdef __WIN32OS2__
+#define ICOM_CINTERFACE 1
 #include <odin.h>
-#include <odinwrap.h>
-#include <os2sel.h>
-
+#endif
 #include <string.h>
 #include <ctype.h>
-#include <wctype.h>
-#define HAVE_WCTYPE_H
-#include <odin.h>
-
-#define ICOM_CINTERFACE 1
-#define CINTERFACE 1
-
 #include "debugtools.h"
 #include "winnls.h"
-#include "winversion.h"
 #include "winreg.h"
-#include "crtdll.h"
 
 #include "shlobj.h"
 #include "shell32_main.h"
-#include <shlwapi.h>
-#include <wine/undocshell.h>
+#include "windef.h"
+#include "options.h"
+#include "wine/undocshell.h"
+#include "wine/unicode.h"
+#include "shlwapi.h"
 
-#include <heapstring.h>
-#include <misc.h>
-
-
-ODINDEBUGCHANNEL(SHELL32-SHELLPATH)
-
+DEFAULT_DEBUG_CHANNEL(shell);
 
 #define isSlash(x) ((x)=='\\' || (x)=='/')
 /*
@@ -508,7 +480,7 @@ BOOL WINAPI PathYetAnotherMakeUniqueNameA(
      lpszBuffer, lpszPathName, lpszShortName, lpszLongName);
     return TRUE;
 }
-
+#ifdef __WIN32OS2__
 /*************************************************************************
  * PathYetAnotherMakeUniqueNameA [SHELL32.75]
  * 
@@ -536,7 +508,7 @@ BOOL WINAPI PathYetAnotherMakeUniqueNameAW(
 	  return PathYetAnotherMakeUniqueNameW((LPWSTR)lpszBuffer,(LPCWSTR)lpszPathName, (LPCWSTR)lpszShortName,(LPCWSTR)lpszLongName);
 	return PathYetAnotherMakeUniqueNameA(lpszBuffer, lpszPathName, lpszShortName,lpszLongName);
 }
-
+#endif
 
 /*
 	########## cleaning and resolving paths ##########
@@ -553,31 +525,12 @@ BOOL WINAPI PathFindOnPathAW(LPVOID sFile, LPCVOID sOtherDirs)
 }
 
 /*************************************************************************
- * PathCleanupSpecA	[SHELL32.171]
- */
-DWORD WINAPI PathCleanupSpecA(LPSTR x, LPSTR y)
-{
-	FIXME("(%p %s, %p %s) stub\n",x,debugstr_a(x),y,debugstr_a(y));
-	return TRUE;
-}
-
-/*************************************************************************
- * PathCleanupSpecA	[SHELL32]
- */
-DWORD WINAPI PathCleanupSpecW(LPWSTR x, LPWSTR y)
-{
-	FIXME("(%p %s, %p %s) stub\n",x,debugstr_w(x),y,debugstr_w(y));
-	return TRUE;
-}
-
-/*************************************************************************
  * PathCleanupSpecAW	[SHELL32]
  */
 DWORD WINAPI PathCleanupSpecAW (LPVOID x, LPVOID y)
 {
-	if (VERSION_OsIsUnicode())
-	  return PathCleanupSpecW(x,y);
-	return PathCleanupSpecA(x,y);
+    FIXME("(%p, %p) stub\n",x,y);
+    return TRUE;
 }
 
 /*************************************************************************
@@ -673,7 +626,7 @@ HRESULT WINAPI PathProcessCommandW (
 {
 	FIXME("(%s, %p, 0x%04lx, 0x%04lx) stub\n",
 	debugstr_w(lpszPath), lpszBuff, dwBuffSize, dwFlags);
-	lstrcpyW(lpszBuff, lpszPath);
+	strcpyW(lpszBuff, lpszPath);
 	return 0;
 }
 
@@ -703,6 +656,7 @@ BOOL WINAPI PathSetDlgItemPathAW(HWND hDlg, int id, LPCVOID pszPath)
 	  return PathSetDlgItemPathW(hDlg, id, pszPath);
 	return PathSetDlgItemPathA(hDlg, id, pszPath);
 }
+
 
 /*************************************************************************
  * SHGetSpecialFolderPathA [SHELL32.175]
@@ -803,7 +757,7 @@ BOOL WINAPI SHGetSpecialFolderPathA (
 	  case CSIDL_PROGRAMS:
 	    hRootKey = HKEY_CURRENT_USER;
 	    strcpy(szValueName, "Programs");
-	    strcpy(szDefaultPath, "Start Menu\\Programs");
+	    strcpy(szDefaultPath, "StartMenu\\Programs");
 	    break;
 
 	  case CSIDL_COMMON_PROGRAMS:
@@ -826,23 +780,14 @@ BOOL WINAPI SHGetSpecialFolderPathA (
 
 	  case CSIDL_STARTMENU:
 	    hRootKey = HKEY_CURRENT_USER;
-#ifdef __WIN32OS2__
-	    strcpy(szValueName, "Start Menu");
-	    strcpy(szDefaultPath, "Start Menu");
-#else
 	    strcpy(szValueName, "StartMenu");
 	    strcpy(szDefaultPath, "StartMenu");
-#endif
 	    break;
 
 	  case CSIDL_COMMON_STARTMENU:
 	    hRootKey = HKEY_LOCAL_MACHINE;
-	    strcpy(szValueName, "Common StartMenu"); //TODO: Start Menu?
-#ifdef __WIN32OS2__
+	    strcpy(szValueName, "Common StartMenu");
 	    strcpy(szDefaultPath, "StartMenu");
-#else
-	    strcpy(szDefaultPath, "Start Menu");
-#endif
 	    break;
 
 	  case CSIDL_STARTUP:

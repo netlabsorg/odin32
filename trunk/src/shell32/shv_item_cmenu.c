@@ -1,26 +1,17 @@
+/* $Id: shv_item_cmenu.c,v 1.1 2000-08-30 13:53:01 sandervl Exp $ */
 /*
  *	IContextMenu for items in the shellview
  *
  *	1998, 2000	Juergen Schmied <juergen.schmied@debitel.net>
  */
-/*****************************************************************************
- * Includes                                                                  *
- *****************************************************************************/
-
-#include <stdlib.h>
-#include <string.h>
-#include <odin.h>
-#include <odinwrap.h>
-#include <os2sel.h>
-
+#ifdef __WIN32OS2__
 #define ICOM_CINTERFACE 1
-#define CINTERFACE 1
- 
+#include <odin.h>
+#endif
 #include <string.h>
 
 #include "winerror.h"
 #include "debugtools.h"
-#include "heapstring.h"
 
 #include "pidl.h"
 #include "shlguid.h"
@@ -29,26 +20,12 @@
 #include "wine/obj_shellbrowser.h"
 #include "wine/obj_shellextinit.h"
 #include "wine/undocshell.h"
+
 #include "shell32_main.h"
 #include "shellfolder.h"
 #include "shell.h" /* DROPFILESTRUCT */
 
-
-/*****************************************************************************
- * Local Variables                                                           *
- *****************************************************************************/
-
-ODINDEBUGCHANNEL(shell32-shv_item_cmenu)
-
-// forwarder to contmenu.cpp
-extern void WINAPI _InsertMenuItem (
-	HMENU hmenu,
-	UINT indexMenu,
-	BOOL fByPosition,
-	UINT wID,
-	UINT fType,
-	LPSTR dwTypeData,
-	UINT fState);
+DEFAULT_DEBUG_CHANNEL(shell)
 
 /**************************************************************************
 *  IContextMenu Implementation
@@ -64,7 +41,7 @@ typedef struct
 } ItemCmImpl;
 
 
-extern struct ICOM_VTABLE(IContextMenu) cmvt;
+static struct ICOM_VTABLE(IContextMenu) cmvt;
 
 /**************************************************************************
 * ISvItemCm_CanRenameItems()
@@ -123,7 +100,7 @@ static HRESULT WINAPI ISvItemCm_fnQueryInterface(IContextMenu *iface, REFIID rii
 {
 	ICOM_THIS(ItemCmImpl, iface);
 
-	//TRACE("(%p)->(\n\tIID:\t%s,%p)\n",This,debugstr_guid(riid),ppvObj);
+	TRACE("(%p)->(\n\tIID:\t%s,%p)\n",This,debugstr_guid(riid),ppvObj);
 
 	*ppvObj = NULL;
 
@@ -196,8 +173,7 @@ static ULONG WINAPI ISvItemCm_fnRelease(IContextMenu *iface)
 /**************************************************************************
 *  ICM_InsertItem()
 */ 
-/* PH disabled duplicate code
-static void WINAPI _InsertMenuItem (
+void WINAPI _InsertMenuItem (
 	HMENU hmenu,
 	UINT indexMenu,
 	BOOL fByPosition,
@@ -224,7 +200,6 @@ static void WINAPI _InsertMenuItem (
 	mii.fType = fType;
 	InsertMenuItemA( hmenu, indexMenu, fByPosition, &mii);
 }
-*/
 /**************************************************************************
 * ISvItemCm_fnQueryContextMenu()
 */
@@ -548,7 +523,7 @@ static HRESULT WINAPI ISvItemCm_fnHandleMenuMsg(
 	return E_NOTIMPL;
 }
 
-struct ICOM_VTABLE(IContextMenu) cmvt = 
+static struct ICOM_VTABLE(IContextMenu) cmvt = 
 {	
 	ICOM_MSVTABLE_COMPAT_DummyRTTIVALUE
 	ISvItemCm_fnQueryInterface,
