@@ -1067,7 +1067,7 @@ void WINAPIV DbgPrint(LPCSTR fmt, ...);
 DWORD WINAPI RtlAdjustPrivilege(DWORD x1,DWORD x2,DWORD x3,DWORD x4);
 DWORD WINAPI RtlIntegerToChar(DWORD x1,DWORD x2,DWORD x3,DWORD x4);
 LPVOID WINAPI RtlNormalizeProcessParams(LPVOID x);
-DWORD WINAPI RtlNtStatusToDosError(DWORD error);
+DWORD WINAPI RtlNtStatusToDosError(NTSTATUS status);
 BOOLEAN WINAPI RtlGetNtProductType(LPDWORD type);
 PIMAGE_NT_HEADERS WINAPI RtlImageNtHeader(HMODULE hModule);
 
