@@ -1,4 +1,4 @@
-/* $Id: changelog,v 1.1381 2001-04-26 16:59:30 sandervl Exp $ */
+/* $Id: changelog,v 1.1382 2001-04-26 19:24:26 sandervl Exp $ */
 
  2001-04-26: Sander van Leeuwen <sandervl@xs4all.nl>
     - KERNEL32: o Implemented FreeLibraryAndExitThread
@@ -12,6 +12,7 @@
                 o GetEnvironmentVariableW fix (breakpoint hit in debug build)
     - ADVAPI32: o IsTextUnicode forwarded to RtlIsTextUnicode (ntdll)
     - GDI32:    o InternalTextOutW fix (breakpoint hit in debug build)
+    - OLE32:    o Resync with latest Wine build (20010418)
 
  2001-04-25: Sander van Leeuwen <sandervl@xs4all.nl>
     - USER32:   o Check visibility of parents in IsWindowVisible
