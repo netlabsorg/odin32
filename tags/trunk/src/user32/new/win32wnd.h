@@ -1,4 +1,4 @@
-/* $Id: win32wnd.h,v 1.27 1999-08-28 14:09:30 sandervl Exp $ */
+/* $Id: win32wnd.h,v 1.28 1999-08-28 19:32:47 sandervl Exp $ */
 /*
  * Win32 Window Code for OS/2
  *
@@ -22,11 +22,15 @@
 
 class Win32Window;
 
-#define OFFSET_WIN32WNDPTR      0
-#define OFFSET_WIN32PM_MAGIC    4
+#define OFFSET_WIN32WNDPTR        0
+#define OFFSET_WIN32PM_MAGIC      4
+#define OFFSET_WIN32PM_SHAREDMEM  8
+#define NROF_WIN32WNDBYTES        12
 
 #define WIN32PM_MAGIC           0x12345678
 #define CheckMagicDword(a)      (a==WIN32PM_MAGIC)
+
+#define WIN32APP_USERMSGBASE		0x1000
 
 typedef struct {
         USHORT          cb;

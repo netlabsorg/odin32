@@ -1,4 +1,4 @@
-/* $Id: win32wnd.cpp,v 1.33 1999-08-28 17:24:45 dengert Exp $ */
+/* $Id: win32wnd.cpp,v 1.34 1999-08-28 19:32:47 sandervl Exp $ */
 /*
  * Win32 Window Code for OS/2
  *
@@ -22,7 +22,6 @@
 #include <stdarg.h>
 #include <assert.h>
 #include <misc.h>
-#include <handlemanager.h>
 #include <heapstring.h>
 #include <win32wnd.h>
 #include <spy.h>
@@ -32,8 +31,11 @@
 #include <oslibutil.h>
 #include <oslibgdi.h>
 #include <oslibres.h>
+#include "oslibdos.h"
 #include <winres.h>
 #include "syscolor.h"
+#include "win32wndhandle.h"
+#include "heapshared.h"
 
 #define HAS_DLGFRAME(style,exStyle) \
     (((exStyle) & WS_EX_DLGMODALFRAME) || \
@@ -85,13 +87,11 @@ void Win32Window::Init()
   OS2HwndMenu      = 0;
   Win32Hwnd        = 0;
 
-  if(HMHandleAllocate(&Win32Hwnd, (ULONG)this) != 0)
+  if(HwAllocateWindowHandle(&Win32Hwnd, (ULONG)this) == FALSE)
   {
-        dprintf(("Win32Window::Init HMHandleAllocate failed!!"));
+        dprintf(("Win32Window::Init HwAllocateWindowHandle failed!!"));
         DebugInt3();
   }
-  Win32Hwnd       &= 0xFFFF;
-  Win32Hwnd       |= 0x68000000;
 
   posx = posy      = 0;
   width = height   = 0;
@@ -123,7 +123,8 @@ Win32Window::~Win32Window()
   OSLibWinSetWindowULong(OS2Hwnd, OFFSET_WIN32PM_MAGIC, 0);
 
   if(Win32Hwnd)
-        HMHandleFree(Win32Hwnd & 0xFFFF);
+        HwFreeWindowHandle(Win32Hwnd);
+
   if(userWindowLong)
         free(userWindowLong);
   if(windowNameA) {
@@ -268,7 +269,7 @@ BOOL Win32Window::CreateWindowExA(CREATESTRUCTA *cs, ATOM classAtom)
         owner = GetWindowFromHandle(cs->hwndParent);
         if(owner == NULL)
         {
-            dprintf(("HMHandleTranslateToOS2 couldn't find owner window %x!!!", cs->hwndParent));
+            dprintf(("HwGetWindowHandleData couldn't find owner window %x!!!", cs->hwndParent));
             return FALSE;
         }
   }
@@ -282,7 +283,7 @@ BOOL Win32Window::CreateWindowExA(CREATESTRUCTA *cs, ATOM classAtom)
             owner = GetWindowFromHandle(cs->hwndParent);
             if(owner == NULL)
             {
-                dprintf(("HMHandleTranslateToOS2 couldn't find owner window %x!!!", cs->hwndParent));
+                dprintf(("HwGetWindowHandleData couldn't find owner window %x!!!", cs->hwndParent));
                 return FALSE;
             }
         }
@@ -402,6 +403,11 @@ BOOL Win32Window::CreateWindowExA(CREATESTRUCTA *cs, ATOM classAtom)
         dprintf(("WM_CREATE: WinSetWindowULong2 %X failed!!", OS2Hwnd));
         return FALSE;
   }
+  //SvL: Need to store the shared memory base, or else other apps can map it into their memory space
+  if(OSLibWinSetWindowULong(OS2Hwnd, OFFSET_WIN32PM_SHAREDMEM, HeapGetSharedMemBase()) == FALSE) {
+        dprintf(("WM_CREATE: WinSetWindowULong2 %X failed!!", OS2Hwnd));
+        return FALSE;
+  }
 #if 0
   if(OS2Hwnd != OS2HwndFrame) {
     if(OSLibWinSetWindowULong(OS2HwndFrame, OFFSET_WIN32WNDPTR, (ULONG)this) == FALSE) {
@@ -409,6 +415,11 @@ BOOL Win32Window::CreateWindowExA(CREATESTRUCTA *cs, ATOM classAtom)
             return FALSE;
     }
     if(OSLibWinSetWindowULong(OS2HwndFrame, OFFSET_WIN32PM_MAGIC, WIN32PM_MAGIC) == FALSE) {
+            dprintf(("WM_CREATE: WinSetWindowULong2 %X failed!!", OS2HwndFrame));
+            return FALSE;
+    }
+    //SvL: Need to store the shared memory base, or else other apps can map it into their memory space
+    if(OSLibWinSetWindowULong(OS2HwndFrame, OFFSET_WIN32PM_SHAREDMEM, HeapGetSharedMemBase()) == FALSE) {
             dprintf(("WM_CREATE: WinSetWindowULong2 %X failed!!", OS2HwndFrame));
             return FALSE;
     }
@@ -1333,33 +1344,13 @@ LRESULT Win32Window::SendInternalMessageW(ULONG Msg, WPARAM wParam, LPARAM lPara
 //******************************************************************************
 BOOL Win32Window::PostMessageA(ULONG msg, WPARAM wParam, LPARAM lParam)
 {
- POSTMSG_PACKET *postmsg;
-
-  postmsg = (POSTMSG_PACKET *)malloc(sizeof(POSTMSG_PACKET));
-  if(postmsg == NULL) {
-    dprintf(("Win32Window::PostMessageA: malloc returned NULL!!"));
-    return 0;
-  }
-  postmsg->Msg    = msg;
-  postmsg->wParam = wParam;
-  postmsg->lParam = lParam;
-  return OSLibPostMessage(OS2Hwnd, WM_WIN32_POSTMESSAGEA, (ULONG)postmsg, 0);
+  return OSLibPostMessage(OS2Hwnd, WIN32APP_USERMSGBASE+msg, wParam, lParam);
 }
 //******************************************************************************
 //******************************************************************************
 BOOL Win32Window::PostMessageW(ULONG msg, WPARAM wParam, LPARAM lParam)
 {
- POSTMSG_PACKET *postmsg;
-
-  postmsg = (POSTMSG_PACKET *)malloc(sizeof(POSTMSG_PACKET));
-  if(postmsg == NULL) {
-    dprintf(("Win32Window::PostMessageW: malloc returned NULL!!"));
-    return 0;
-  }
-  postmsg->Msg    = msg;
-  postmsg->wParam = wParam;
-  postmsg->lParam = lParam;
-  return OSLibPostMessage(OS2Hwnd, WM_WIN32_POSTMESSAGEW, (ULONG)postmsg, 0);
+  return OSLibPostMessage(OS2Hwnd, WIN32APP_USERMSGBASE+msg, wParam, lParam);
 }
 //******************************************************************************
 //TODO: do we need to inform the parent of the parent (etc) of the child window?
@@ -1742,20 +1733,26 @@ HWND Win32Window::FindWindowEx(HWND hwndParent, HWND hwndChildAfter, LPSTR lpszC
 
         while(hwnd)
         {
-            HWND hwndClient;
-
             wnd = GetWindowFromOS2Handle(hwnd);
             if(wnd == NULL) {
-                hwndClient = OSLibWinQueryClientWindow(hwnd);
-                if(hwndClient)  wnd = GetWindowFromOS2Handle(hwndClient);
+                hwnd = OSLibWinQueryClientWindow(hwnd);
+                if(hwnd)  wnd = GetWindowFromOS2Handle(hwnd);
             }
 
-            if(wnd && wnd->getWindowClass()->hasClassName(lpszClass, fUnicode) &&
-               (!lpszWindow || wnd->hasWindowName(lpszWindow, fUnicode)))
-            {
-                OSLibWinEndEnumWindows(henum);
-                dprintf(("FindWindowEx: Found window %x", wnd->getWindowHandle()));
-                return wnd->getWindowHandle();
+            if(wnd) {
+                LPVOID sharedmembase = (LPVOID)OSLibWinGetWindowULong(hwnd, OFFSET_WIN32PM_SHAREDMEM);
+
+                if(OSLibDosGetSharedMem(sharedmembase, MAX_HEAPSIZE, OSLIB_PAG_READ) != 0) {
+                    dprintf(("OSLibDosGetSharedMem returned error for %x", wnd));
+                    break;
+                }
+                if(wnd->getWindowClass()->hasClassName(lpszClass, fUnicode) &&
+                   (!lpszWindow || wnd->hasWindowName(lpszWindow, fUnicode)))
+                {
+                    OSLibWinEndEnumWindows(henum);
+                    dprintf(("FindWindowEx: Found window %x", wnd->getWindowHandle()));
+                    return wnd->getWindowHandle();
+                }
             }
             hwnd = OSLibWinGetNextWindow(henum);
         }
@@ -2032,11 +2029,7 @@ Win32Window *Win32Window::GetWindowFromHandle(HWND hwnd)
 {
  Win32Window *window;
 
-   if(HIWORD(hwnd) != 0x6800) {
-        return NULL;
-   }
-
-   if(HMHandleTranslateToOS2(LOWORD(hwnd), (PULONG)&window) == NO_ERROR) {
+   if(HwGetWindowHandleData(hwnd, (DWORD *)&window) == TRUE) {
         return window;
    }
    else return NULL;
