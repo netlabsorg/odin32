@@ -1,4 +1,4 @@
-/* $Id: dwaveout.h,v 1.3 1999-06-10 16:24:33 phaller Exp $ */
+/* $Id: dwaveout.h,v 1.4 1999-08-24 21:21:11 phaller Exp $ */
 
 /*
  * Wave playback class
@@ -70,7 +70,10 @@ private:
     int curPlayBuf, curFillBuf;
     int curFillPos, curPlayPos; //fillpos == pos in os2 mix buffer, bufpos == pos in win buffer
 
- LPDRVCALLBACK callback;
+  // callback interface
+  LPDRVCALLBACK mthdCallback;
+  void          callback(HDRVR h, UINT uMessage, DWORD dwUser, DWORD dw1, DWORD dw2);
+
          HWND hwndCallback;
         DWORD dwInstance;
     WAVEHDR  *wavehdr, *curhdr;
