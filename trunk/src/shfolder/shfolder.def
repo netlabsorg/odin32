@@ -1,0 +1,10 @@
+; $Id: shfolder.def,v 1.1 2000-08-24 12:00:30 sandervl Exp $
+
+LIBRARY SHFOLDER INITINSTANCE TERMINSTANCE
+DATA MULTIPLE NONSHARED
+
+EXPORTS
+
+;which ordinals???
+SHGetFolderPathA = _SHGetFolderPathA@20		@1
+SHGetFolderPathW = _SHGetFolderPathW@20		@2
