@@ -1,4 +1,4 @@
-# $Id: ole32.mak,v 1.18 2002-02-19 13:24:06 sandervl Exp $
+# $Id: ole32.mak,v 1.19 2002-02-19 13:26:08 sandervl Exp $
 
 #
 # Odin32 API
@@ -64,8 +64,8 @@ $(OBJDIR)\marshal.obj \
 $(OBJDIR)\oleproxy.obj \
 $(OBJDIR)\rpc.obj \
 $(OBJDIR)\moniker.obj \
-$(OBJDIR)\stubs.obj \
 $(OBJDIR)\ifs.obj \
+$(OBJDIR)\stubs.obj \
 !if "$(DEBUG)" == "1"
 $(OBJDIR)\dbgwrap.obj \
 !endif
