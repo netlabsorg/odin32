@@ -1,14 +1,12 @@
-/* $Id: thread.cpp,v 1.5 1999-06-19 17:58:33 sandervl Exp $ */
+/* $Id: thread.cpp,v 1.6 1999-06-20 10:55:36 sandervl Exp $ */
 
-/*
- *
- * Project Odin Software License can be found in LICENSE.TXT
- *
- */
 /*
  * Win32 Thread API functions
  *
  * Copyright 1998 Sander van Leeuwen (sandervl@xs4all.nl)
+ *
+ *
+ * Project Odin Software License can be found in LICENSE.TXT
  *
  */
 #include <os2win.h>
@@ -160,6 +158,18 @@ static DWORD OPEN32API Win32ThreadProc(LPVOID lpData)
   dprintf(("Win32ThreadProc %d\n", GetCurrentThreadId()));
 
 #ifdef WIN32_TIBSEL
+  TEB *winteb = (TEB *)InitializeTIB();
+  if(winteb == NULL) {
+	dprintf(("Win32ThreadProc: InitializeTIB failed!!"));
+	DebugInt3();
+	return 0;
+  }
+  winteb->flags = me->dwFlags;
+
+  THDB *thdb   = (THDB *)(winteb+1);
+  thdb->entry_point = (void *)winthread;
+  thdb->entry_arg   = (void *)userdata;
+  SetWin32TIB();
 #else
   ReplaceExceptionHandler();
 #endif

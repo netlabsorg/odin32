@@ -1,14 +1,12 @@
-/* $Id: thread.H,v 1.4 1999-06-19 17:58:33 sandervl Exp $ */
+/* $Id: thread.H,v 1.5 1999-06-20 10:55:36 sandervl Exp $ */
 
-/*
- *
- * Project Odin Software License can be found in LICENSE.TXT
- *
- */
 /*
  * Win32 Thread API functions
  *
  * Copyright 1998 Sander van Leeuwen (sandervl@xs4all.nl)
+ *
+ *
+ * Project Odin Software License can be found in LICENSE.TXT
  *
  */
 #ifndef __THREAD_H__

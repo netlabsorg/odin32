@@ -1,51 +1,7 @@
-/* $Id: conwin.h,v 1.1 1999-06-17 18:22:43 phaller Exp $ */
+/* $Id: conwin.h,v 1.2 1999-06-20 10:55:36 sandervl Exp $ */
 
 #ifndef _CONWIN_H_
 #define _CONWIN_H_
-
-#ifndef _FILETIME_
-#define _FILETIME_
-/* 64 bit number of 100 nanoseconds intervals since January 1, 1601 */
-typedef struct
-{
-  DWORD  dwLowDateTime;
-  DWORD  dwHighDateTime;
-} FILETIME, *LPFILETIME;
-#endif /* _FILETIME_ */
-
-typedef struct
-{
-  int dwFileAttributes;
-  FILETIME ftCreationTime;
-  FILETIME ftLastAccessTime;
-  FILETIME ftLastWriteTime;
-  int dwVolumeSerialNumber;
-  int nFileSizeHigh;
-  int nFileSizeLow;
-  int nNumberOfLinks;
-  int nFileIndexHigh;
-  int nFileIndexLow;
-} BY_HANDLE_FILE_INFORMATION ;
-
-
-#define OFS_MAXPATHNAME 128
-typedef struct
-{
-    BYTE cBytes;
-    BYTE fFixedDisk;
-    WORD nErrCode;
-    BYTE reserved[4];
-    BYTE szPathName[OFS_MAXPATHNAME];
-} OFSTRUCT, *LPOFSTRUCT;
-
-
-/* The security attributes structure */
-typedef struct
-{
-    DWORD   nLength;
-    LPVOID  lpSecurityDescriptor;
-    BOOL  bInheritHandle;
-} SECURITY_ATTRIBUTES, *PSECURITY_ATTRIBUTES, *LPSECURITY_ATTRIBUTES;
 
 #ifndef INVALID_HANDLE_VALUE
 #define INVALID_HANDLE_VALUE ((HANDLE)-1)

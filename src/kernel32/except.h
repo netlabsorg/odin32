@@ -1,4 +1,4 @@
-/* $Id: except.h,v 1.4 1999-06-19 13:57:51 sandervl Exp $ */
+/* $Id: except.h,v 1.5 1999-06-20 10:55:36 sandervl Exp $ */
 
 /*
  * Exception + misc functions for OS/2
@@ -13,10 +13,13 @@ extern "C" {
 #endif
 
 //SvL: Replace original startup code exception handler
+#ifndef WIN32_TIBSEL
 void  ReplaceExceptionHandler(void);
-void  DisableFPUExceptions();
-void __cdecl SetExceptionChain(DWORD);
 void  ChangeTIBStack();
+#endif
+void __cdecl SetExceptionChain(DWORD);
+
+void  DisableFPUExceptions();
 ULONG GetDllEntryPoint();
 
 ULONG  getEAX();
