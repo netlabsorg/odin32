@@ -36,11 +36,11 @@ DECLARE_DEBUG_CHANNEL(typelib);
  * Calls method of an object through its IDispatch interface.
  *
  * NOTES
- *      - Defer method invocation to ITypeInfo::Invoke()
+ * 		- Defer	method invocation to ITypeInfo::Invoke()
  *
  * RETURNS
  *
- *      S_OK on success.
+ * 		S_OK on success.
  */
 HRESULT WINAPI
 DispInvoke(VOID*            _this,          /* object instance */
@@ -75,15 +75,15 @@ DispInvoke(VOID*            _this,          /* object instance */
 /******************************************************************************
  *         DispGetIDsOfNames (OLEAUT32.29)
  *
- * Convert a set of names to dispids, based on information
+ * Convert a set of names to dispids, based on information 
  * contained in object's type library.
- *
+ * 
  * NOTES
- *      - Defers to ITypeInfo::GetIDsOfNames()
+ * 		- Defers to ITypeInfo::GetIDsOfNames()
  *
  * RETURNS
  *
- *      S_OK on success.
+ * 		S_OK on success.
  */
 HRESULT WINAPI
 DispGetIDsOfNames(ITypeInfo* ptinfo,
@@ -108,11 +108,11 @@ DispGetIDsOfNames(ITypeInfo* ptinfo,
  * specified variant type
  *
  * NOTES
- *      Coercion is done using system (0) locale.
+ * 		Coercion is done using system (0) locale.
  *
  * RETURNS
  *
- *      S_OK on success.
+ * 		S_OK on success.
  */
 HRESULT WINAPI DispGetParam(DISPPARAMS* pdispparams, UINT position,
             VARTYPE vtTarg, VARIANT* pvarResult, UINT* puArgErr)
