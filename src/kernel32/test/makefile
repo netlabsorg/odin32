@@ -1,24 +1,20 @@
-# $Id: makefile,v 1.1 1999-11-28 23:10:08 bird Exp $
+# $Id: makefile,v 1.2 2000-12-03 00:34:40 bird Exp $
 
 #
-# PD-Win32 API
+# Odin32 API
 #
 #       kernel32test.exe makefile
 #
 
-PDWIN32_INCLUDE = ..\..\..\include
-PDWIN32_LIB = ..\..\..\lib
-PDWIN32_BIN = ..\..\..\bin
-PDWIN32_TOOLS = ..\..\..\tools\bin
 
+OLD_STYLE=1
+!include ../../../makefile.inc
 
-!include $(PDWIN32_INCLUDE)/pdwin32.mk
+RC = $(ODIN32_TOOLS)\wrc
+RCFLAGS = -s -I. -I$(CPPMAIN)\include -I$(ODIN32_INCLUDE) -I$(ODIN32_INCLUDE)\win
 
-RC = $(PDWIN32_TOOLS)\wrc
-RCFLAGS = -s -I. -I$(CPPMAIN)\include -I$(PDWIN32_INCLUDE) -I$(PDWIN32_INCLUDE)\win
-
-CFLAGS = $(CFLAGS) -I$(PDWIN32_INCLUDE) /Tm+ -Ge+
-CXXFLAGS = $(CXXFLAGS) -I$(PDWIN32_INCLUDE) /Tm+ -Ge+
+CFLAGS = $(CFLAGS) -I$(ODIN32_INCLUDE) /Tm+ -Ge+
+CXXFLAGS = $(CXXFLAGS) -I$(ODIN32_INCLUDE) /Tm+ -Ge+
 
 OBJS =  os2main.obj \
         kernel32test.obj \
@@ -34,8 +30,8 @@ all: $(TARGET).exe
 
 $(TARGET).exe: $(OBJS)
     $(LD) $(LDFLAGS) -Ge+ -Fe$@ $(OBJS) \
-        $(PDWIN32_LIB)\odincrt.lib \
-        $(PDWIN32_LIB)\kernel32.lib \
+        $(ODIN32_LIB)\odincrt.lib \
+        $(ODIN32_LIB)\kernel32.lib \
         OS2386.LIB $(RTLLIB_O)
 
 rsrc.obj: rsrc.asm
@@ -45,3 +41,4 @@ rsrc.asm: rsrc.rc rsrc.h
 
 clean:
     $(RM) *.OBJ $(TARGET).exe rsrc.asm $(TARGET).map *.pch
+
