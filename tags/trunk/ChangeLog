@@ -1,4 +1,4 @@
- /* $Id: ChangeLog,v 1.369 1999-10-26 11:19:16 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.370 1999-10-26 17:52:00 sandervl Exp $ */
 
  99-10-26: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32: Fixed bugs in menu apis (Append/InsertMenuA/W)
@@ -8,6 +8,16 @@
                   logging and increases speed.
 
 	- KERNEL32: Removed menu resource + non-used resource methods
+                    Fixed FS selector corruption in GetLocaleInfoA/W (use
+                    ODINFUNCTION wrapper as it calls a OS/2 unicode api that has no
+                    FS wrapper)
+
+	- PELDR:  Increased stack from 192k to 640k (Quake 2 ran out of stack)
+	- DSOUND/DDRAW: Fixed FS selector corruption in logging procedures
+          ---> Quake 2 works again (Yeah! :) )
+          NOTE: Quake 2 3.20 only starts the first time. Seems to change something
+                in the config.cfg file that crashes it the next time you run it.
+                (workaround: save original config.sys and restore it afterwards)
 
  99-10-26: Patrick Haller <phaller@gmx.net>
 	- USER32: Ported Wine menu(ex) parser and integrated it into menu code
