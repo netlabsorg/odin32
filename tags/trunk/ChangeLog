@@ -1,4 +1,4 @@
- /* $Id: ChangeLog,v 1.1094 2000-08-31 12:44:46 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.1095 2000-08-31 21:02:13 sandervl Exp $ */
 
  2000-08-31: Sander van Leeuwen <sandervl@xs4all.nl>
     - DDRAW:    Extra debug logging
@@ -6,8 +6,8 @@
                 QueryInterface; don't change the vtbl of the directdraw object
                 return pointer to new virtual table instead
                 (fixes crashes in dxview)
-                Don't return Direct3D object in DirectDrawEnumerateA; crashes
-                dxview.exe (need to figure out why)
+                Don't setup DirectDraw3D interface when creating IID_IDirect3D object
+                (fixes another crash in dxview.exe)
                 Video memory set to zero for HEL caps + no DDCAPS_COLORKEYHWASSIST
                 Fixed HEL caps. (dwFXcaps)
                 Fixed Driver caps (memset for HEL caps overwrote driver structure)
