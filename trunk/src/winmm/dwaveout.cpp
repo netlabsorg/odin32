@@ -1,4 +1,4 @@
-/* $Id: dwaveout.cpp,v 1.6 1999-08-24 21:21:11 phaller Exp $ */
+/* $Id: dwaveout.cpp,v 1.7 1999-09-23 09:35:24 sandervl Exp $ */
 
 /*
  * Wave playback class
@@ -34,6 +34,9 @@
 #define min(a, b) ((a > b) ? b : a)
 #endif
 
+//SvL: 23/09/99: WinPostMsg no longer works, as win32 window handles are no longer PM handles
+BOOL WIN32API PostMessageA(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
+
 LONG APIENTRY WaveOutHandler(ULONG ulStatus, PMCI_MIX_BUFFER pBuffer, ULONG ulFlags);
 
 //TODO: mulaw, alaw & adpcm
@@ -62,7 +65,7 @@ DartWaveOut::DartWaveOut(LPWAVEFORMATEX pwfx, HWND hwndCallback)
 
    this->hwndCallback = hwndCallback;
 
-   WinPostMsg(hwndCallback, WOM_OPEN, 0, 0);
+   PostMessageA(hwndCallback, WOM_OPEN, 0, 0);
 }
 /******************************************************************************/
 /******************************************************************************/
@@ -216,7 +219,7 @@ DartWaveOut::~DartWaveOut()
    }
    else
    if(hwndCallback)
-    WinPostMsg(hwndCallback, WOM_CLOSE, 0, 0);
+    PostMessageA(hwndCallback, WOM_CLOSE, 0, 0);
 
    if(wmutex)
     delete wmutex;
@@ -443,7 +446,7 @@ MMRESULT DartWaveOut::reset()
     }
     else
         if(hwndCallback)
-        WinPostMsg(hwndCallback, WOM_DONE, (MPARAM)wavehdr->dwUser, (MPARAM)wavehdr);
+        PostMessageA(hwndCallback, WOM_DONE, wavehdr->dwUser, (ULONG)wavehdr);
 
     wmutex->enter(VMUTEX_WAIT_FOREVER);
     wavehdr = wavehdr->lpNext;
@@ -598,7 +601,7 @@ void DartWaveOut::handler(ULONG ulStatus, PMCI_MIX_BUFFER pBuffer, ULONG ulFlags
         }
         else
             if(hwndCallback)
-            WinPostMsg(hwndCallback, WOM_DONE, (MPARAM)whdr->dwUser, (MPARAM)whdr);
+            PostMessageA(hwndCallback, WOM_DONE, whdr->dwUser, (ULONG)whdr);
 
         wmutex->enter(VMUTEX_WAIT_FOREVER);
     }
