@@ -1,4 +1,4 @@
-/* $Id: dde.cpp,v 1.13 2001-07-31 07:56:48 sandervl Exp $ */
+/* $Id: dde.cpp,v 1.14 2001-08-11 12:03:35 sandervl Exp $ */
 
 /*
  * Win32 default window API functions for OS/2
@@ -207,9 +207,9 @@ UINT WIN32API DdeInitializeW(PDWORD lpidInst, PFNCALLBACK pfnCallback,
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API DdeKeepStringHandle(DWORD arg1, HSZ  arg2)
+BOOL WIN32API DdeKeepStringHandle(DWORD arg1, HSZ arg2)
 {
-    dprintf(("USER32:  DdeKeepStringHandle\n"));
+    dprintf(("USER32: DdeKeepStringHandle %x %x", arg1, arg2));
 
     return O32_DdeKeepStringHandle(arg1, arg2);
 }
@@ -217,7 +217,7 @@ BOOL WIN32API DdeKeepStringHandle(DWORD arg1, HSZ  arg2)
 //******************************************************************************
 HDDEDATA WIN32API DdeNameService( DWORD arg1, HSZ  arg2, HSZ  arg3, UINT  arg4)
 {
-    dprintf(("USER32:  DdeNameService\n"));
+    dprintf(("USER32: DdeNameService %x %x %x %x", arg1, arg2, arg3, arg4));
 
     return O32_DdeNameService(arg1, arg2, arg3, arg4);
 }
