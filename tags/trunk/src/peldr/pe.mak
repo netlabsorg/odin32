@@ -1,4 +1,4 @@
-# $Id: pe.mak,v 1.1 2000-11-19 08:57:05 bird Exp $
+# $Id: pe.mak,v 1.2 2000-11-19 20:55:24 sandervl Exp $
 
 #
 # Odin32 API
@@ -22,7 +22,7 @@ EXETARGET = 1
 # Overrides.
 #
 !if "$(VAC3)" == "1" || "$(VAC36)" == "1"
-LD2FLAGS = /PMTYPE:pm /STACK:0x100000 /NOBASE
+LD2FLAGS = $(LD2FLAGS) /PMTYPE:pm /STACK:0x100000 /NOBASE
 !else
 !error Compiler not supported yet
 !endif
@@ -39,7 +39,9 @@ $(OBJDIR)\pe.obj
 # Libraries. One space before the '\'.
 #
 LIBS = \
-os2386.lib
+$(PDWIN32_LIB)/$(ODINCRT).lib \
+$(RTLLIB_O) \
+os2386.lib 
 
 
 #
