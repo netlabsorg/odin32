@@ -164,3 +164,4 @@ EXPORTS
     _WriteOleStg@0                            @161
     _WriteStringStream@0                      @162
     _WINE_StringFromCLSID@8                   @1000
+    _CLSIDFromStringA@8                       @1001
