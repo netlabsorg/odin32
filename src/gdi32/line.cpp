@@ -1,4 +1,4 @@
-/* $Id: line.cpp,v 1.15 2004-03-25 14:52:32 sandervl Exp $ */
+/* $Id: line.cpp,v 1.16 2004-03-25 15:06:37 sandervl Exp $ */
 /*
  * Line API's
  *
@@ -35,8 +35,8 @@ VOID toWin32LineEnd(pDCData pHps, PPOINTLOS2 startPt,INT nXEnd,INT nYEnd,PPOINTL
       LONG horzRes = hdcWidth(pHps->hwnd, pHps);
 
       // LineTo will return an error if the coordinates are outside the DC
-      pt->x = (nXEnd >= vertRes) ? vertRes-1 : nXEnd;
-      pt->y = (nYEnd >= horzRes) ? horzRes-1 : nYEnd;
+      pt->x = (nXEnd >= horzRes) ? horzRes-1 : nXEnd;
+      pt->y = (nYEnd >= vertRes) ? vertRes-1 : nYEnd;
   }
   else 
   if ((startPt->x != nXEnd) || (startPt->y != nYEnd))
