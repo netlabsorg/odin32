@@ -1,124 +1,128 @@
+/* $Id: gpci.c,v 1.2 2001-09-05 14:30:53 bird Exp $ */
 /*
  ** THIS SOFTWARE IS SUBJECT TO COPYRIGHT PROTECTION AND IS OFFERED ONLY
  ** PURSUANT TO THE 3DFX GLIDE GENERAL PUBLIC LICENSE. THERE IS NO RIGHT
  ** TO USE THE GLIDE TRADEMARK WITHOUT PRIOR WRITTEN PERMISSION OF 3DFX
- ** INTERACTIVE, INC. A COPY OF THIS LICENSE MAY BE OBTAINED FROM THE 
- ** DISTRIBUTOR OR BY CONTACTING 3DFX INTERACTIVE INC(info@3dfx.com). 
- ** THIS PROGRAM IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER 
+ ** INTERACTIVE, INC. A COPY OF THIS LICENSE MAY BE OBTAINED FROM THE
+ ** DISTRIBUTOR OR BY CONTACTING 3DFX INTERACTIVE INC(info@3dfx.com).
+ ** THIS PROGRAM IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER
  ** EXPRESSED OR IMPLIED. SEE THE 3DFX GLIDE GENERAL PUBLIC LICENSE FOR A
- ** FULL TEXT OF THE NON-WARRANTY PROVISIONS.  
- ** 
+ ** FULL TEXT OF THE NON-WARRANTY PROVISIONS.
+ **
  ** USE, DUPLICATION OR DISCLOSURE BY THE GOVERNMENT IS SUBJECT TO
  ** RESTRICTIONS AS SET FORTH IN SUBDIVISION (C)(1)(II) OF THE RIGHTS IN
  ** TECHNICAL DATA AND COMPUTER SOFTWARE CLAUSE AT DFARS 252.227-7013,
  ** AND/OR IN SIMILAR OR SUCCESSOR CLAUSES IN THE FAR, DOD OR NASA FAR
  ** SUPPLEMENT. UNPUBLISHED RIGHTS RESERVED UNDER THE COPYRIGHT LAWS OF
- ** THE UNITED STATES.  
- ** 
+ ** THE UNITED STATES.
+ **
  ** COPYRIGHT 3DFX INTERACTIVE, INC. 1999, ALL RIGHTS RESERVED
  **
- ** $Header: /home/ktk/tmp/odin/odin32xp/src/opengl/glide/sst1/glide/gpci.c,v 1.1 2000-02-25 00:31:17 sandervl Exp $
+ ** $Header: /home/ktk/tmp/odin/odin32xp/src/opengl/glide/sst1/glide/gpci.c,v 1.2 2001-09-05 14:30:53 bird Exp $
  ** $Log: gpci.c,v $
- ** Revision 1.1  2000-02-25 00:31:17  sandervl
+ ** Revision 1.2  2001-09-05 14:30:53  bird
+ ** Added $Id:$ keyword.
+ **
+ ** Revision 1.1  2000/02/25 00:31:17  sandervl
  ** Created new Voodoo 1 Glide dir
  **
- * 
+ *
  * 45    11/01/97 12:11p Pgj
  * glide.dll ---> glide2x.dll
- * 
+ *
  * 44    10/21/97 8:20p Atai
  * initialize vid timing to NLLL
- * 
+ *
  * 43    8/18/97 3:11p Atai
  * fix vg96 fb ram configuration
- * 
+ *
  * 42    7/18/97 5:30p Jdt
  * Fixes for open/shutdown symmetry
- * 
+ *
  * 41    7/12/97 4:58p Dow
  * Added DllMain
- * 
+ *
  * 40    7/07/97 8:33a Jdt
  * New tracing macros.
- * 
+ *
  * 39    6/19/97 7:35p Dow
  * More P6 Stuff
- * 
+ *
  * 38    5/27/97 2:03p Dow
  * added new env variable
- * 
+ *
  * 37    5/19/97 7:35p Pgj
  * Print cogent error message if h/w not found
- * 
+ *
  * 36    4/15/97 12:59p Dow
  * Bandaid for SST96/P6
- * 
+ *
  * 35    4/13/97 8:11p Jdt
  * Change in init.h
- * 
+ *
  * 34    4/13/97 2:06p Pgj
  * eliminate all anonymous unions (use hwDep)
- * 
+ *
  * 33    3/24/97 7:37p Dow
  * Now sets n tmus for hwConfig
- * 
+ *
  * 32    3/18/97 9:08p Dow
  * Added FX_GLIDE_NO_DITHER_SUB environment variable
- * 
+ *
  * 31    3/17/97 6:27a Jdt
  * Removed enumCB and pass 0 to enumHardware.
- * 
+ *
  * 30    3/16/97 12:51a Jdt
  * fix num_sst when detecting vg96
- * 
+ *
  * 29    3/16/97 12:39a Jdt
  * Programmatic type-os
- * 
+ *
  * 28    3/16/97 12:19a Jdt
  * Completely re-wrote grSstDetectResources
- * 
+ *
  * 27    3/06/97 4:54p Dow
  * Fixed SLI
- * 
+ *
  * 26    3/04/97 9:08p Dow
  * Neutered multiplatform multiheaded monster
- * 
+ *
  * 25    3/02/97 7:05p Dow
  * Changes to support DOS DLLs
- * 
+ *
  * 24    2/26/97 2:18p Dow
  * moved all debug set macros to __cdecl
- * 
+ *
  * 23    2/26/97 11:57a Jdt
  * Fixed stack bug, fixed splash screen bug
- * 
+ *
  * 22    2/19/97 4:42p Dow
  * Fixed debug build for Watcom
- * 
+ *
  * 21    2/18/97 10:39a Dow
  * Added call to initRegisters for AT3D
- * 
+ *
  * 20    2/18/97 9:51a Jdt
  * Did some casting to remove warnings.
- * 
+ *
  * 19    2/14/97 12:55p Dow
  * moved vg96 fifo wrap into init code
- * 
+ *
  * 18    2/12/97 8:15p Dow
  * Fixed VG base_pointe
- * 
+ *
  * 17    2/12/97 9:20a Dow
  * Fixed Watcom error wrt GDBG_ERROR call
- * 
+ *
  * 16    2/11/97 6:59p Dow
  * Changes to support vid tiles and ser status
- * 
+ *
  * 15    1/18/97 11:48p Dow
  * Re-added error callback set
  * Added support for GMT's register debugging
- * 
+ *
  * 14    1/14/97 6:41p Dow
- * 
+ *
  * 13    12/23/96 1:37p Dow
  * chagnes for multiplatform glide
 **
@@ -143,8 +147,8 @@
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 
-BOOL WINAPI 
-DllMain(HANDLE hInst, ULONG  ul_reason_for_call, LPVOID lpReserved) 
+BOOL WINAPI
+DllMain(HANDLE hInst, ULONG  ul_reason_for_call, LPVOID lpReserved)
 {
   switch( ul_reason_for_call ) {
   case DLL_PROCESS_DETACH:
@@ -164,7 +168,7 @@ DllMain(HANDLE hInst, ULONG  ul_reason_for_call, LPVOID lpReserved)
     GDBG_INFO((80, "DllMain: Unhandled message.\n"));
     break;
   }
-  
+
   return TRUE;
 
 } /* DllMain */
@@ -180,20 +184,20 @@ DllMain(HANDLE hInst, ULONG  ul_reason_for_call, LPVOID lpReserved)
   Description:
   Discover devices on the PCI bus.
   Discover configuration of detected devices.
-  Initialize all Glide GC's 
-  
+  Initialize all Glide GC's
+
   Recognized devices depend upon compile time flags
-  
-  This code should NOT initialize the hardware 
-  any more than is necessary for discovery of 
+
+  This code should NOT initialize the hardware
+  any more than is necessary for discovery of
   configuration
-  
+
   Arguments: none
-  Return: 
+  Return:
   FXTRUE  - at least one device was detected
   FXFALSE - no devices were detected.
   -------------------------------------------------------------------*/
-FxBool 
+FxBool
 _grSstDetectResources(void)
 {
   InitDeviceInfo info;
@@ -205,16 +209,16 @@ _grSstDetectResources(void)
   initEnumHardware( 0 );
 
   _GlideRoot.hwConfig.num_sst = 0;
-  for( ctx = 0, device = 0; 
-      device < INIT_MAX_DEVICES; 
+  for( ctx = 0, device = 0;
+      device < INIT_MAX_DEVICES;
       device++ ) {
     if ( initGetDeviceInfo( device, &info ) ) {
 #if   ( GLIDE_PLATFORM & GLIDE_HW_SST1 )
       if ( info.hwClass == INIT_VOODOO ) {
         int tmu;
-        
+
         _GlideRoot.hwConfig.SSTs[ctx].type = GR_SSTTYPE_VOODOO;
-        
+
         _GlideRoot.GCs[ctx].base_ptr  = (FxU32 *)info.hwDep.vgInfo.vgBaseAddr;
         _GlideRoot.GCs[ctx].reg_ptr   = (FxU32 *)info.hwDep.vgInfo.vgBaseAddr;
         _GlideRoot.GCs[ctx].lfb_ptr   = (FxU32 *)SST_LFB_ADDRESS(info.hwDep.vgInfo.vgBaseAddr);
@@ -227,16 +231,16 @@ _grSstDetectResources(void)
         _GlideRoot.GCs[ctx].num_tmu              = info.hwDep.vgInfo.nTFX;
         _GlideRoot.GCs[ctx].fbuf_size            = info.hwDep.vgInfo.pfxRam;
         _GlideRoot.GCs[ctx].vidTimings           = NULL;
-        
+
         _GlideRoot.hwConfig.num_sst++;
-        _GlideRoot.hwConfig.SSTs[ctx].sstBoard.VoodooConfig.fbiRev = 
+        _GlideRoot.hwConfig.SSTs[ctx].sstBoard.VoodooConfig.fbiRev =
           info.hwDep.vgInfo.pfxRev;
         _GlideRoot.hwConfig.SSTs[ctx].sstBoard.VoodooConfig.fbRam =
           info.hwDep.vgInfo.pfxRam;
         _GlideRoot.hwConfig.SSTs[ctx].sstBoard.VoodooConfig.sliDetect =
           info.hwDep.vgInfo.sliDetect;
-        
-        _GlideRoot.hwConfig.SSTs[ctx].sstBoard.VoodooConfig.nTexelfx = 
+
+        _GlideRoot.hwConfig.SSTs[ctx].sstBoard.VoodooConfig.nTexelfx =
           info.hwDep.vgInfo.nTFX;
 
         for (tmu = 0; tmu < _GlideRoot.GCs[ctx].num_tmu; tmu++) {
@@ -244,7 +248,7 @@ _grSstDetectResources(void)
             info.hwDep.vgInfo.tfxRam;
           _GlideRoot.hwConfig.SSTs[ctx].sstBoard.VoodooConfig.tmuConfig[tmu].tmuRev =
             info.hwDep.vgInfo.tfxRev;
-          
+
           memset(&_GlideRoot.GCs[ctx].tmu_state[tmu], 0, sizeof(_GlideRoot.GCs[ctx].tmu_state[tmu]));
           _GlideRoot.GCs[ctx].tmu_state[tmu].ncc_mmids[0] = GR_NULL_MIPMAP_HANDLE;
           _GlideRoot.GCs[ctx].tmu_state[tmu].ncc_mmids[1] = GR_NULL_MIPMAP_HANDLE;
@@ -271,9 +275,9 @@ _grSstDetectResources(void)
         _GlideRoot.GCs[ctx].fbuf_size            = info.hwDep.vg96Info.vg96Ram;
 
         _GlideRoot.hwConfig.num_sst++;
-        _GlideRoot.hwConfig.SSTs[ctx].sstBoard.SST96Config.nTexelfx = 
+        _GlideRoot.hwConfig.SSTs[ctx].sstBoard.SST96Config.nTexelfx =
           info.hwDep.vg96Info.nTFX;
-        _GlideRoot.hwConfig.SSTs[ctx].sstBoard.SST96Config.fbRam = 
+        _GlideRoot.hwConfig.SSTs[ctx].sstBoard.SST96Config.fbRam =
           info.hwDep.vg96Info.vg96Ram >> 20;
         _GlideRoot.hwConfig.SSTs[ctx].sstBoard.SST96Config.tmuConfig.tmuRev =
           info.hwDep.vg96Info.tfxRev;
@@ -284,10 +288,10 @@ _grSstDetectResources(void)
         _GlideRoot.GCs[ctx].tmu_state[0].ncc_mmids[0] = GR_NULL_MIPMAP_HANDLE;
         _GlideRoot.GCs[ctx].tmu_state[0].ncc_mmids[1] = GR_NULL_MIPMAP_HANDLE;
         _GlideRoot.GCs[ctx].tmu_state[0].total_mem    = info.hwDep.vg96Info.tfxRam<<20;
-        
-        _GlideRoot.GCs[ctx].hwDep.sst96Dep.serialStatus     = 
+
+        _GlideRoot.GCs[ctx].hwDep.sst96Dep.serialStatus     =
           (FxU32*)info.regs.hwDep.VG96RegDesc.serialStatus;
-        _GlideRoot.GCs[ctx].hwDep.sst96Dep.fifoApertureBase = 
+        _GlideRoot.GCs[ctx].hwDep.sst96Dep.fifoApertureBase =
           (FxU32*)info.regs.hwDep.VG96RegDesc.fifoApertureBase;
 
         initDeviceSelect( ctx );
@@ -296,13 +300,13 @@ _grSstDetectResources(void)
         ctx++;
       }
 #else
-#error "Need to define detection parameters for this device"    
+#error "Need to define detection parameters for this device"
 #endif
     } else {
       break;
     }
   }
-  
+
   return rv;
 } /* _grSstDetectResources */
 
@@ -391,18 +395,18 @@ _GlideInitEnvironment( void )
   _GlideRoot.CPUType = _cpu_detect_asm();
 
   if (getenv("FX_CPU")) _GlideRoot.CPUType = atoi(getenv("FX_CPU"));
-  _GlideRoot.environment.triBoundsCheck = 
+  _GlideRoot.environment.triBoundsCheck =
     getenv("FX_GLIDE_BOUNDS_CHECK") != NULL;
   _GlideRoot.environment.swapInterval = -1;
   _GlideRoot.environment.swFifoLWM = -1;
-  _GlideRoot.environment.noSplash = 
+  _GlideRoot.environment.noSplash =
     getenv("FX_GLIDE_NO_SPLASH") != NULL;
-  _GlideRoot.environment.shamelessPlug = 
+  _GlideRoot.environment.shamelessPlug =
     getenv("FX_GLIDE_SHAMELESS_PLUG") != NULL;
   if (getenv("FX_GLIDE_LWM"))
     _GlideRoot.environment.swFifoLWM = atoi(getenv("FX_GLIDE_LWM"));
   if (getenv("FX_GLIDE_SWAPINTERVAL")) {
-    _GlideRoot.environment.swapInterval = 
+    _GlideRoot.environment.swapInterval =
       atoi(getenv("FX_GLIDE_SWAPINTERVAL"));
     if (_GlideRoot.environment.swapInterval < 0)
       _GlideRoot.environment.swapInterval = 0;
@@ -417,7 +421,7 @@ _GlideInitEnvironment( void )
 
   if (getenv("FX_SNAPSHOT"))
     _GlideRoot.environment.snapshot = atoi(getenv("FX_SNAPSHOT"));
-  
+
   GDBG_INFO((80,"    triBoundsCheck: %d\n",_GlideRoot.environment.triBoundsCheck));
   GDBG_INFO((80,"      swapInterval: %d\n",_GlideRoot.environment.swapInterval));
   GDBG_INFO((80,"          noSplash: %d\n",_GlideRoot.environment.noSplash));
@@ -425,7 +429,7 @@ _GlideInitEnvironment( void )
   GDBG_INFO((80,"        rsrchFlags: %d\n",_GlideRoot.environment.rsrchFlags));
   GDBG_INFO((80,"               cpu: %d\n",_GlideRoot.CPUType));
   GDBG_INFO((80,"          snapshot: %d\n",_GlideRoot.environment.snapshot));
-  GDBG_INFO((80,"  disableDitherSub: %d\n",_GlideRoot.environment.disableDitherSub));  
+  GDBG_INFO((80,"  disableDitherSub: %d\n",_GlideRoot.environment.disableDitherSub));
   /* GMT: BUG these are hardware dependent and really should come from the init code */
   _GlideRoot.stats.minMemFIFOFree = 0xffff;
   _GlideRoot.stats.minPciFIFOFree = 0x3f;
@@ -684,7 +688,7 @@ static regInfo regsInfo[] = {
   "TEXCHIPSEL",
   "SWAPPENDCMD",
   "reserved96",
-        
+
   "reserved96",
   "reserved96",
   "reserved96",
@@ -756,7 +760,7 @@ _GR_GET(void *addr)
     GDBG_INFO((120,"       GET(0x%x,%11d(0x%08x)) 0\tLFB\n",
                                iaddr,data,data));
   }
-  else {                        
+  else {
     /* check for valid register read */
     int reg;
     regInfo *ri;
@@ -810,7 +814,7 @@ _GR_SET(void *addr, unsigned long data)
     GDBG_INFO((120,"       SET(0x%x,%11d(0x%08x)) 0\tLFB\n",
                                iaddr,data,data));
   }
-  else {                        
+  else {
     /* check for valid register read */
     int reg;
     regInfo *ri;
@@ -847,7 +851,7 @@ _GR_SET16(void *addr, unsigned short data)
 
 #endif /* defined(GLIDE_DEBUG) */
 
-#if defined( GLIDE_DEBUG ) && ( GLIDE_PLATFORM & GLIDE_HW_SST96 ) 
+#if defined( GLIDE_DEBUG ) && ( GLIDE_PLATFORM & GLIDE_HW_SST96 )
 
 extern char *regNames[];
 
@@ -864,13 +868,13 @@ _GR_SET_GW_CMD( volatile void *addr, unsigned long data ) {
         FxU32 min = (FxU32)gc->fifoData.hwDep.vg96FIFOData.fifoVirt;
         FxU32 max = min + (FxU32)gc->fifoData.hwDep.vg96FIFOData.fifoMax;
         if ( ((FxU32)addr) < min || ((FxU32)addr) > max ) {
-            GDBG_ERROR( "SET GW CMD", 
+            GDBG_ERROR( "SET GW CMD",
                         "Fifo address 0x%x out of range(0x%x, 0x%x)\n",
-                        addr, 
+                        addr,
                         gc->fifoData.hwDep.vg96FIFOData.fifoVirt,
                         gc->fifoData.hwDep.vg96FIFOData.fifoMax );
         }
-                    
+
     }
     /* validate alignment */
     if ( ((FxU32)addr) & 0x7 ) {
@@ -879,28 +883,28 @@ _GR_SET_GW_CMD( volatile void *addr, unsigned long data ) {
                     addr );
     }
     /* validate enable bit */
-    if ( ! (data&0x80000000) ) { 
+    if ( ! (data&0x80000000) ) {
         GDBG_ERROR( "SET GW CMD",
                     "Fifo command 0x%x missing flag bit\n",
                     data );
     }
     /* validate reserved bits */
-    if ( data&0x7fE00300 ) { 
+    if ( data&0x7fE00300 ) {
         GDBG_ERROR( "SET GW CMD",
                     "Fifo command 0x%x reserved bits set!\n",
                     data );
     }
 
-    GDBG_INFO((128, 
+    GDBG_INFO((128,
                "Writing Group Write Command: 0x%x\n",
                data ));
-    GDBG_INFO((128, 
+    GDBG_INFO((128,
                "  FIFO ADDR: 0x%.08x\n", addr ));
     /* dump chip field */
     {
         FxU32 field = ( (data<<2) & 0xf0000 ) >> 16;
         GDBG_INFO((128, "  Chip Field: 0x%x\n", field ));
-    } 
+    }
     /* dump wrap field */
     {
         FxU32 field = ( (data<<2) & 0x0f000 ) >> 12;
@@ -923,13 +927,13 @@ _GR_SET_GW_HEADER( volatile void *addr, unsigned long data ) {
     FxU32 min = (FxU32)gc->fifoData.hwDep.vg96FIFOData.fifoVirt;
     FxU32 max = min + (FxU32)gc->fifoData.hwDep.vg96FIFOData.fifoMax;
     if ( ((FxU32)addr) < min || ((FxU32)addr) > max ) {
-      GDBG_ERROR( "SET GW CMD", 
+      GDBG_ERROR( "SET GW CMD",
                  "Fifo address 0x%x out of range(0x%x, 0x%x)\n",
-                 addr, 
+                 addr,
                  gc->fifoData.hwDep.vg96FIFOData.fifoVirt,
                  gc->fifoData.hwDep.vg96FIFOData.fifoMax );
     }
-                    
+
   }
   /* validate alignment */
   if ( ((FxU32)addr) & 0x3 ) {
@@ -937,10 +941,10 @@ _GR_SET_GW_HEADER( volatile void *addr, unsigned long data ) {
                "Fifo address 0x%x is not DWORD aligned\n",
                addr );
   }
-  GDBG_INFO((128, 
+  GDBG_INFO((128,
              "Writing Group Write Header: 0x%x\n",
              data ));
-  GDBG_INFO((128, 
+  GDBG_INFO((128,
              "  FIFO ADDR: 0x%.08x\n", addr ));
   /* validate bits - at least one must be set*/
   {
@@ -975,13 +979,13 @@ _GR_SET_GW_ENTRY( volatile void *addr, unsigned long data ) {
     FxU32 min = (FxU32)gc->fifoData.hwDep.vg96FIFOData.fifoVirt;
     FxU32 max = min + (FxU32)gc->fifoData.hwDep.vg96FIFOData.fifoMax;
     if ( ((FxU32)addr) < min || ((FxU32)addr) > max ) {
-      GDBG_ERROR( "SET GW CMD", 
+      GDBG_ERROR( "SET GW CMD",
                  "Fifo address 0x%x out of range(0x%x, 0x%x)\n",
-                 addr, 
+                 addr,
                  gc->fifoData.hwDep.vg96FIFOData.fifoVirt,
                  gc->fifoData.hwDep.vg96FIFOData.fifoMax );
     }
-                    
+
   }
   /* validate alignment */
   if ( ((FxU32)addr) & 0x3 ) {
@@ -993,10 +997,10 @@ _GR_SET_GW_ENTRY( volatile void *addr, unsigned long data ) {
   if ( !thisMask || thisWrite > maxWrites ) {
     GDBG_ERROR( "SET GW ENTRY",
                "Group write entry attempted outside of a packet\n" );
-  }   
-  GDBG_INFO((128, 
+  }
+  GDBG_INFO((128,
              "Writing Group Write Entry\n" ));
-  GDBG_INFO((128, 
+  GDBG_INFO((128,
              "  FIFO ADDR: 0x%.08x\n", addr ));
   /* decode write */
   {
@@ -1004,7 +1008,7 @@ _GR_SET_GW_ENTRY( volatile void *addr, unsigned long data ) {
     reg   = 2;
     bit   = 1;
     write = 0;
-        
+
     while( bit ) {
       if ( bit & thisMask ) {
         if ( write == thisWrite ) break;
@@ -1013,15 +1017,15 @@ _GR_SET_GW_ENTRY( volatile void *addr, unsigned long data ) {
       bit <<= 1;
       reg++;
     }
-        
+
     if ( bit ) {
-      GDBG_INFO((128, 
+      GDBG_INFO((128,
                  "  REG: %s DATA: 0x%x(%f)\n",
                  regNames[reg],
                  data,
                  *(float*)&data ));
     } else {
-      GDBG_INFO((128, 
+      GDBG_INFO((128,
                  "  PADDING\n" ));
     }
   }

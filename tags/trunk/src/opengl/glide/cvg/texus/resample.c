@@ -1,25 +1,26 @@
+/* $Id: resample.c,v 1.2 2001-09-05 14:30:46 bird Exp $ */
 
 /*
 ** THIS SOFTWARE IS SUBJECT TO COPYRIGHT PROTECTION AND IS OFFERED ONLY
 ** PURSUANT TO THE 3DFX GLIDE GENERAL PUBLIC LICENSE. THERE IS NO RIGHT
 ** TO USE THE GLIDE TRADEMARK WITHOUT PRIOR WRITTEN PERMISSION OF 3DFX
-** INTERACTIVE, INC. A COPY OF THIS LICENSE MAY BE OBTAINED FROM THE 
-** DISTRIBUTOR OR BY CONTACTING 3DFX INTERACTIVE INC(info@3dfx.com). 
-** THIS PROGRAM IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER 
+** INTERACTIVE, INC. A COPY OF THIS LICENSE MAY BE OBTAINED FROM THE
+** DISTRIBUTOR OR BY CONTACTING 3DFX INTERACTIVE INC(info@3dfx.com).
+** THIS PROGRAM IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER
 ** EXPRESSED OR IMPLIED. SEE THE 3DFX GLIDE GENERAL PUBLIC LICENSE FOR A
-** FULL TEXT OF THE NON-WARRANTY PROVISIONS.  
-** 
+** FULL TEXT OF THE NON-WARRANTY PROVISIONS.
+**
 ** USE, DUPLICATION OR DISCLOSURE BY THE GOVERNMENT IS SUBJECT TO
 ** RESTRICTIONS AS SET FORTH IN SUBDIVISION (C)(1)(II) OF THE RIGHTS IN
 ** TECHNICAL DATA AND COMPUTER SOFTWARE CLAUSE AT DFARS 252.227-7013,
 ** AND/OR IN SIMILAR OR SUCCESSOR CLAUSES IN THE FAR, DOD OR NASA FAR
 ** SUPPLEMENT. UNPUBLISHED RIGHTS RESERVED UNDER THE COPYRIGHT LAWS OF
-** THE UNITED STATES.  
-** 
+** THE UNITED STATES.
+**
 ** COPYRIGHT 3DFX INTERACTIVE, INC. 1999, ALL RIGHTS RESERVED
 **
-** $Revision: 1.1 $
-** $Date: 2000-02-25 00:38:00 $
+** $Revision: 1.2 $
+** $Date: 2001-09-05 14:30:46 $
 */
 
 #include <stdio.h>
@@ -37,9 +38,9 @@
  * Imagine also that ox output pixels are each divided into ix fragments, for a
  * total of ox * ix fragments, same as before.
  * Initialize an accumulator to 0. Add the first input pixel, multiplied by ox
- * the number of fragments per input pixel. Keep track of the number of 
+ * the number of fragments per input pixel. Keep track of the number of
  * fragments in the accumulator; when this is >= ix, (the number of fragments
- * it takes to make an output pixel), multiply the accumulator by 
+ * it takes to make an output pixel), multiply the accumulator by
  */
 
 static void
@@ -64,13 +65,13 @@ _txResampleX(FxU32 *out, const FxU32 *in, int ox, int ix)
         int          ef;
         int    oa, or, og, ob;
 
-        // Yes, we have (possibly more than) enough to generate an output 
-        // pixel. Of the nf new fragments, use up enough to generate an 
+        // Yes, we have (possibly more than) enough to generate an output
+        // pixel. Of the nf new fragments, use up enough to generate an
         // output pixel.
 
         ef = ix - accf;         // the excessive # of fragments.
 
-            // printf("New: accf = %3d, nf = %3d, ef = %3d, ix = %3d, ox = %3d\n", 
+            // printf("New: accf = %3d, nf = %3d, ef = %3d, ix = %3d, ox = %3d\n",
     //  accf, nf, ef, ix, ox);
 
         acca += a * ef;
@@ -93,7 +94,7 @@ _txResampleX(FxU32 *out, const FxU32 *in, int ox, int ix)
         }
 
         *out++ = (oa << 24) | (or << 16) | (og << 8) | ob;
-        // printf("Output pixel %4d: %.02x %.02x %.02x %.02x\n", 
+        // printf("Output pixel %4d: %.02x %.02x %.02x %.02x\n",
            //  o, oa, or, og, ob);
         o++;
         acca = accr = accg = accb = accf  = 0;
@@ -123,7 +124,7 @@ static  FxU32 AccB[MAX_TEXWIDTH];
 static  FxU32 argb[MAX_TEXWIDTH];
 
 static void
-_txImgResample(FxU32 *out, int ox, int oy, 
+_txImgResample(FxU32 *out, int ox, int oy,
                const FxU32 *in, int ix, int iy)
 {
     int r, g, b, a;
@@ -146,8 +147,8 @@ _txImgResample(FxU32 *out, int ox, int oy,
     while ((accf + nf) >= iy) {
         int          ef;
 
-        // Yes, we have (possibly more than) enough to generate an output 
-        // pixel. Of the nf new fragments, use up enough to generate an 
+        // Yes, we have (possibly more than) enough to generate an output
+        // pixel. Of the nf new fragments, use up enough to generate an
         // output pixel.
 
         ef = iy - accf;         // the excessive # of fragments.
@@ -242,7 +243,7 @@ txMipResample(TxMip *destMip, TxMip *srcMip)
         if( txVerbose )
           printf("Resampling to %dx%d: ", destMip->width, destMip->height);
 
-        
+
         sw = srcMip->width;
         sh = srcMip->height;
         dw = destMip->width;

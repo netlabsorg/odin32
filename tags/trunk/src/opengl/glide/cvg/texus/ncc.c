@@ -1,24 +1,25 @@
+/* $Id: ncc.c,v 1.2 2001-09-05 14:30:45 bird Exp $ */
 /*
 ** THIS SOFTWARE IS SUBJECT TO COPYRIGHT PROTECTION AND IS OFFERED ONLY
 ** PURSUANT TO THE 3DFX GLIDE GENERAL PUBLIC LICENSE. THERE IS NO RIGHT
 ** TO USE THE GLIDE TRADEMARK WITHOUT PRIOR WRITTEN PERMISSION OF 3DFX
-** INTERACTIVE, INC. A COPY OF THIS LICENSE MAY BE OBTAINED FROM THE 
-** DISTRIBUTOR OR BY CONTACTING 3DFX INTERACTIVE INC(info@3dfx.com). 
-** THIS PROGRAM IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER 
+** INTERACTIVE, INC. A COPY OF THIS LICENSE MAY BE OBTAINED FROM THE
+** DISTRIBUTOR OR BY CONTACTING 3DFX INTERACTIVE INC(info@3dfx.com).
+** THIS PROGRAM IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER
 ** EXPRESSED OR IMPLIED. SEE THE 3DFX GLIDE GENERAL PUBLIC LICENSE FOR A
-** FULL TEXT OF THE NON-WARRANTY PROVISIONS.  
-** 
+** FULL TEXT OF THE NON-WARRANTY PROVISIONS.
+**
 ** USE, DUPLICATION OR DISCLOSURE BY THE GOVERNMENT IS SUBJECT TO
 ** RESTRICTIONS AS SET FORTH IN SUBDIVISION (C)(1)(II) OF THE RIGHTS IN
 ** TECHNICAL DATA AND COMPUTER SOFTWARE CLAUSE AT DFARS 252.227-7013,
 ** AND/OR IN SIMILAR OR SUCCESSOR CLAUSES IN THE FAR, DOD OR NASA FAR
 ** SUPPLEMENT. UNPUBLISHED RIGHTS RESERVED UNDER THE COPYRIGHT LAWS OF
-** THE UNITED STATES.  
-** 
+** THE UNITED STATES.
+**
 ** COPYRIGHT 3DFX INTERACTIVE, INC. 1999, ALL RIGHTS RESERVED
 **
-** $Revision: 1.1 $
-** $Date: 2000-02-25 00:37:59 $
+** $Revision: 1.2 $
+** $Date: 2001-09-05 14:30:45 $
 */
 
 #include <stdio.h>
@@ -28,10 +29,10 @@
 
 #include "texusint.h"
 
-static int 
-dithmat[4][4] = {       0,  8,  2, 10, 
-                           12,  4, 14,  6, 
-                            3, 11,  1,  9, 
+static int
+dithmat[4][4] = {       0,  8,  2, 10,
+                           12,  4, 14,  6,
+                            3, 11,  1,  9,
                            15,  7, 13,  5 };
 
 static struct   {
@@ -44,7 +45,7 @@ static struct   {
 static int
 _txPixQuantize_YIQ422 (unsigned long argb, int x, int y, int w)
 {
-    int         r, g, b; 
+    int         r, g, b;
     int         iy, ii, iq;
 
     r = (argb >> 16) & 0xFF;
@@ -124,7 +125,7 @@ _txPixQuantize_YIQ422_D4x4 (unsigned long argb, int x, int y, int w)
 }
 
 static void
-_txImgNcc(char *odata, unsigned long *idata, int w, int h, int format, 
+_txImgNcc(char *odata, unsigned long *idata, int w, int h, int format,
     int dither)
 {
     int (*quantizer)(unsigned long argb, int x, int y, int w);
@@ -152,12 +153,12 @@ _txImgNcc(char *odata, unsigned long *idata, int w, int h, int format,
    The basics are as follows:
 
    RGB values can be converted to YIQ using the equation:
-  
+
    Y = 0.30F * R + 0.59F * G + 0.11F * B;
    I = 0.60F * R - 0.28F * G - 0.32F * B;
    Q = 0.21F * R - 0.52F * G + 0.31F * B;
 
-   Assuming that each of the RGB components are in the range 0..255, 
+   Assuming that each of the RGB components are in the range 0..255,
    Y ranges from (0 .. 255)
    I ranges from (-0.60 * 255 .. 0.60 * 255) i.e, (-153 to 153)
    Q ranges from (-0.52 * 255 .. 0.52 * 255) i.e, (-132 to 133)
@@ -165,12 +166,12 @@ _txImgNcc(char *odata, unsigned long *idata, int w, int h, int format,
 */
 
 
-static void     
+static void
 _txMipNccStatTable(TxMip *txMip)
 {
     int i, w, h;
 
-    for (i=0; i<256; i++) 
+    for (i=0; i<256; i++)
         ncc.yhist[i] = ncc.ihist[i] = ncc.qhist[i] = 0;
     ncc.npixels = 0;
 
@@ -249,13 +250,13 @@ _txMipNccStatTable(TxMip *txMip)
 }
 
 
-void    
+void
 txMipNcc(TxMip *pxMip, TxMip *txMip, int format, FxU32 dither, FxU32 compression)
 {
     int         i, w, h, pixsize;
 
     switch (compression & TX_COMPRESSION_MASK) {
-    case        TX_COMPRESSION_HEURISTIC:                               
+    case        TX_COMPRESSION_HEURISTIC:
                 _txMipNccStatTable(txMip);
                 for (i=0; i< 16; i++) pxMip->pal[ 0 + i] = ncc.y[i];
                 for (i=0; i< 12; i++) pxMip->pal[16 + i] = ncc.a[i];

@@ -1,70 +1,74 @@
+/* $Id: fifo.c,v 1.2 2001-09-05 14:30:22 bird Exp $ */
 /*
  ** THIS SOFTWARE IS SUBJECT TO COPYRIGHT PROTECTION AND IS OFFERED ONLY
  ** PURSUANT TO THE 3DFX GLIDE GENERAL PUBLIC LICENSE. THERE IS NO RIGHT
  ** TO USE THE GLIDE TRADEMARK WITHOUT PRIOR WRITTEN PERMISSION OF 3DFX
- ** INTERACTIVE, INC. A COPY OF THIS LICENSE MAY BE OBTAINED FROM THE 
- ** DISTRIBUTOR OR BY CONTACTING 3DFX INTERACTIVE INC(info@3dfx.com). 
- ** THIS PROGRAM IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER 
+ ** INTERACTIVE, INC. A COPY OF THIS LICENSE MAY BE OBTAINED FROM THE
+ ** DISTRIBUTOR OR BY CONTACTING 3DFX INTERACTIVE INC(info@3dfx.com).
+ ** THIS PROGRAM IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER
  ** EXPRESSED OR IMPLIED. SEE THE 3DFX GLIDE GENERAL PUBLIC LICENSE FOR A
- ** FULL TEXT OF THE NON-WARRANTY PROVISIONS.  
- ** 
+ ** FULL TEXT OF THE NON-WARRANTY PROVISIONS.
+ **
  ** USE, DUPLICATION OR DISCLOSURE BY THE GOVERNMENT IS SUBJECT TO
  ** RESTRICTIONS AS SET FORTH IN SUBDIVISION (C)(1)(II) OF THE RIGHTS IN
  ** TECHNICAL DATA AND COMPUTER SOFTWARE CLAUSE AT DFARS 252.227-7013,
  ** AND/OR IN SIMILAR OR SUCCESSOR CLAUSES IN THE FAR, DOD OR NASA FAR
  ** SUPPLEMENT. UNPUBLISHED RIGHTS RESERVED UNDER THE COPYRIGHT LAWS OF
- ** THE UNITED STATES.  
- ** 
+ ** THE UNITED STATES.
+ **
  ** COPYRIGHT 3DFX INTERACTIVE, INC. 1999, ALL RIGHTS RESERVED
  **
- ** $Header: /home/ktk/tmp/odin/odin32xp/src/opengl/glide/cvg/glide/fifo.c,v 1.1 2000-02-25 00:37:36 sandervl Exp $
+ ** $Header: /home/ktk/tmp/odin/odin32xp/src/opengl/glide/cvg/glide/fifo.c,v 1.2 2001-09-05 14:30:22 bird Exp $
  ** $Log: fifo.c,v $
- ** Revision 1.1  2000-02-25 00:37:36  sandervl
+ ** Revision 1.2  2001-09-05 14:30:22  bird
+ ** Added $Id:$ keyword.
+ **
+ ** Revision 1.1  2000/02/25 00:37:36  sandervl
  ** Created Voodoo 2 dir
  **
-** 
+**
 ** 22    3/14/98 1:07p Peter
 ** mac port happiness
-** 
+**
 ** 21    2/20/98 9:05a Peter
 ** removed remnants of comdex grot
-** 
+**
 ** 20    2/11/98 5:22p Peter
 ** added fifo get stuff for hanson
-** 
+**
 ** 19    2/01/98 7:44p Peter
 ** parameter dumping level
- * 
+ *
  * 18    12/17/97 4:45p Peter
  * groundwork for CrybabyGlide
- * 
+ *
  * 17    12/09/97 12:20p Peter
  * mac glide port
- * 
+ *
  * 16    12/09/97 10:28a Peter
  * cleaned up some frofanity
- * 
+ *
  * 15    12/05/97 4:26p Peter
  * watcom warnings
- * 
+ *
  * 14    12/03/97 11:34a Peter
  * dos debugging
- * 
+ *
  * 13    11/21/97 3:53p Peter
  * reset messages are controlled by gdbg_level
- * 
+ *
  * 12    11/19/97 6:04p Peter
  * actually exit if not reset
- * 
+ *
  * 11    11/18/97 4:36p Peter
  * chipfield stuff cleanup and w/ direct writes
- * 
+ *
  * 10    11/17/97 4:55p Peter
  * watcom warnings/chipfield stuff
- * 
+ *
  * 9     11/15/97 9:20p Peter
  * I am the sorriest f*cker on the face of the planet
- * 
+ *
  **
  */
 
@@ -343,7 +347,7 @@ cvgRegNames[] = {
   "reserved0FC",                /* 0xfc */
   "reserved0FD",                /* 0xfd */
   "reserved0FE",                /* 0xfe */
-  "reserved0FF",                /* 0xff */  
+  "reserved0FF",                /* 0xff */
 };
 
 #define GEN_INDEX(a) ((((FxU32) a) - ((FxU32) gc->reg_ptr)) >> 2)
@@ -355,14 +359,14 @@ _grFifoWriteDebug(FxU32 addr, FxU32 val, FxU32 fifoPtr)
   FxU32 index = GEN_INDEX(addr);
 
   GDBG_INFO(gc->myLevel + 199, "Storing to FIFO:\n");
-  GDBG_INFO(gc->myLevel + 199, "  FIFO Ptr:    0x%x : 0x%X\n", fifoPtr, gc->cmdTransportInfo.fifoRoom);  
-  if (index <= 0xff) { 
+  GDBG_INFO(gc->myLevel + 199, "  FIFO Ptr:    0x%x : 0x%X\n", fifoPtr, gc->cmdTransportInfo.fifoRoom);
+  if (index <= 0xff) {
     GDBG_INFO(gc->myLevel + 199, "  Reg Name:    %s\n", cvgRegNames[index]);
     GDBG_INFO(gc->myLevel + 199, "  Reg Num:     0x%X\n", index);
   } else {
     const char* strP;
     const FxU32 offset = (addr - (FxU32)gc->reg_ptr);
-     
+
     if (offset >= HW_TEXTURE_OFFSET) {
       strP = "Texture";
     } else if (offset >= HW_LFB_OFFSET) {
@@ -379,7 +383,7 @@ _grFifoWriteDebug(FxU32 addr, FxU32 val, FxU32 fifoPtr)
   GDBG_INFO(gc->myLevel + 199, "  Value:       0x%X 0x%X\n", (index << 2), val);
 
   GDBG_INFO(120, "        SET(0x%X, %ld(0x%X)) 0 %s (0x%X)\n",
-            0x10000000UL + (FxU32)(index << 2), val, val, 
+            0x10000000UL + (FxU32)(index << 2), val, val,
             cvgRegNames[index & 0xFF], fifoPtr);
 } /* _grFifoWriteDebug */
 
@@ -397,8 +401,8 @@ _grFifoFWriteDebug(FxU32 addr, float val, FxU32 fifoPtr)
   }
   GDBG_INFO(gc->myLevel + 200, "  Value:       %4.2f\n", val);
 
-  GDBG_INFO(120, "        SET(0x%X, %4.2f (0x%X)) 0 %s\n", 
-            0x10000000UL + (FxU32)(index << 2), val, *(const FxU32*)&val, 
+  GDBG_INFO(120, "        SET(0x%X, %4.2f (0x%X)) 0 %s\n",
+            0x10000000UL + (FxU32)(index << 2), val, *(const FxU32*)&val,
             cvgRegNames[index & 0xFF]);
 } /* _grFifoFWriteDebug */
 
@@ -409,7 +413,7 @@ _grCVGFifoDump_TriHdr(const FxU32 hdrVal)
 
   /* Dump Packet Header */
   GDBG_INFO(gc->myLevel + 200, "CMD Fifo Triangle Packet (0x%X)\n", hdrVal);
-  GDBG_INFO(gc->myLevel + 200, "  # Vertex: 0x%X\n", 
+  GDBG_INFO(gc->myLevel + 200, "  # Vertex: 0x%X\n",
             (hdrVal & SSTCP_PKT3_NUMVERTEX) >> SSTCP_PKT3_NUMVERTEX_SHIFT);
   GDBG_INFO(gc->myLevel + 200, "  RGB: %s\n",
             (hdrVal & SSTCP_PKT3_PACKEDCOLOR) ? "Packed" : "Separate");
@@ -425,7 +429,7 @@ _grCVGFifoDump_TriHdr(const FxU32 hdrVal)
 
   GDBG_INFO(gc->myLevel + 200, "  PingPongSign: %s\n",
             (((hdrVal & (0x01 << 25)) == 0) ? "Normal" : "Disable"));
-  
+
   if (GDBG_GET_DEBUGLEVEL(gc->myLevel + 200)) {
     const FxU32 temp = (hdrVal & SSTCP_PKT3_PMASK);
     int i;
@@ -434,7 +438,7 @@ _grCVGFifoDump_TriHdr(const FxU32 hdrVal)
 
     for(i = 10; i <= 17; i++) {
       static const char* paramSel[] = { "RGB", "Alpha", "Z", "Wb", "W0", "ST[0]", "W1", "ST[1]" };
-      
+
       if ((temp & (0x01UL << i)) != 0) GDBG_PRINTF("%s ", paramSel[i - 10]);
     }
     GDBG_INFO(gc->myLevel + 200, "\n");
@@ -469,7 +473,7 @@ _grErrorCallback(const char* const procName,
 
   if (!inProcP) {
     static char errMsgBuf[1024];
-    
+
     inProcP = FXTRUE;
     {
       extern void (*GrErrorCallback)( const char *string, FxBool fatal );
@@ -507,7 +511,7 @@ _grSet32(volatile FxU32* const sstAddr, const FxU32 val)
 extern FxU32
 _grGet32(volatile FxU32* const sstAddr)
 {
-  return GR_GET(*sstAddr); 
+  return GR_GET(*sstAddr);
 }
 
 #if FIFO_ASSERT_FULL
@@ -527,12 +531,12 @@ _FifoMakeRoom(const FxI32 blockSize, const char* fName, const int fLine)
   FIFO_ASSERT();
 
   /* Update the roomToXXX values w/ the # of writes since the last
-   * fifo stall/wrap.  
+   * fifo stall/wrap.
    */
   {
     const FxI32 writes = (MIN(gc->cmdTransportInfo.roomToReadPtr, gc->cmdTransportInfo.roomToEnd) -
                           gc->cmdTransportInfo.fifoRoom);
-    
+
     gc->cmdTransportInfo.roomToReadPtr   -= writes;
     gc->cmdTransportInfo.roomToEnd       -= writes;
 
@@ -543,7 +547,7 @@ _FifoMakeRoom(const FxI32 blockSize, const char* fName, const int fLine)
                    "\tfifo hw: (0x%X : 0x%X)\n",
                    ((fName == NULL) ? "Unknown" : fName), fLine,
                    (FxU32)gc->cmdTransportInfo.fifoPtr, blockSize,
-                   gc->cmdTransportInfo.roomToReadPtr, gc->cmdTransportInfo.roomToEnd, 
+                   gc->cmdTransportInfo.roomToReadPtr, gc->cmdTransportInfo.roomToEnd,
                    gc->cmdTransportInfo.fifoRoom, writes,
                    HW_FIFO_PTR(FXTRUE), gc->cmdTransportInfo.fifoRead);
 
@@ -552,15 +556,15 @@ _FifoMakeRoom(const FxI32 blockSize, const char* fName, const int fLine)
       SstRegs* slaveHw = (SstRegs*)gc->slave_ptr;
 
       GDBG_INFO_MORE(gc->myLevel, "\tsli: 0x%X : (0x%X : 0x%X : 0x%X)\n",
-                     HW_FIFO_PTR(FXFALSE), 
-                     GR_GET(slaveHw->cmdFifoDepth), 
-                     GR_GET(slaveHw->cmdFifoHoles), 
+                     HW_FIFO_PTR(FXFALSE),
+                     GR_GET(slaveHw->cmdFifoDepth),
+                     GR_GET(slaveHw->cmdFifoHoles),
                      GR_GET(slaveHw->status));
     }
 #endif /* !GLIDE_INIT_HAL */
 #endif /* GDBG_INFO_ON */
 
-    ASSERT_FAULT_IMMED((gc->cmdTransportInfo.roomToReadPtr >= 0) && 
+    ASSERT_FAULT_IMMED((gc->cmdTransportInfo.roomToReadPtr >= 0) &&
                        (gc->cmdTransportInfo.roomToEnd >= 0));
   }
 
@@ -596,15 +600,15 @@ again:
 
         /* Is the slave closer than the master? */
         if (distSlave < distMaster) {
-#if GDBG_INFO_ON  
+#if GDBG_INFO_ON
           {
-            SstRegs* slaveHw = (SstRegs*)gc->slave_ptr; 
+            SstRegs* slaveHw = (SstRegs*)gc->slave_ptr;
             GDBG_INFO(gc->myLevel, "  Wait sli: 0x%X : (0x%X : 0x%X : 0x%X)\n"
                       "\tMaster: 0x%X : 0x%X\n"
                       "\tSlave : 0x%X : 0x%X\n",
-                      HW_FIFO_PTR(FXFALSE), 
-                      GR_GET(slaveHw->cmdFifoDepth), 
-                      GR_GET(slaveHw->cmdFifoHoles), 
+                      HW_FIFO_PTR(FXFALSE),
+                      GR_GET(slaveHw->cmdFifoDepth),
+                      GR_GET(slaveHw->cmdFifoHoles),
                       GR_GET(slaveHw->status),
                       curReadPtr, curReadDist,
                       slaveReadPtr, slaveReadDist);
@@ -635,18 +639,18 @@ again:
     gc->cmdTransportInfo.fifoRead = lastHwRead;
     gc->cmdTransportInfo.roomToReadPtr = roomToReadPtr;
 
-    GDBG_INFO(gc->myLevel, "  Wait: (0x%X : 0x%X) : 0x%X\n", 
+    GDBG_INFO(gc->myLevel, "  Wait: (0x%X : 0x%X) : 0x%X\n",
               gc->cmdTransportInfo.roomToReadPtr, gc->cmdTransportInfo.roomToEnd,
               gc->cmdTransportInfo.fifoRead);
   }
-  
+
   /* Do we need to wrap to front? */
   if (gc->cmdTransportInfo.roomToEnd <= blockSize) {
-    GDBG_INFO(gc->myLevel + 10, "  Pre-Wrap: (0x%X : 0x%X) : 0x%X\n", 
+    GDBG_INFO(gc->myLevel + 10, "  Pre-Wrap: (0x%X : 0x%X) : 0x%X\n",
               gc->cmdTransportInfo.roomToReadPtr, gc->cmdTransportInfo.roomToEnd,
               gc->cmdTransportInfo.fifoRead);
 
-    /* Set the jsr packet. 
+    /* Set the jsr packet.
      * NB: This command must be fenced.
      */
     FIFO_ASSERT();
@@ -655,7 +659,7 @@ again:
       P6FENCE;
     }
     FIFO_ASSERT();
-    
+
     wrapAddr = (FxU32)gc->cmdTransportInfo.fifoPtr;
 
     /* Update roomXXX fields for the actual wrap */
@@ -667,55 +671,55 @@ again:
     _GlideRoot.stats.fifoWrapDepth += GR_GET(hw->cmdFifoDepth);
 #endif
 
-    /* Reset fifo ptr to start */ 
+    /* Reset fifo ptr to start */
     gc->cmdTransportInfo.fifoPtr = gc->cmdTransportInfo.fifoStart;
 
 #if GLIDE_USE_SHADOW_FIFO
     {
       FxU32* fifoPtr = gc->cmdTransportInfo.fifoShadowPtr;
 
-      while(fifoPtr < gc->cmdTransportInfo.fifoShadowBase + (kDebugFifoSize >> 2)) 
+      while(fifoPtr < gc->cmdTransportInfo.fifoShadowBase + (kDebugFifoSize >> 2))
         *fifoPtr++ = 0x00UL;
       gc->cmdTransportInfo.fifoShadowPtr = gc->cmdTransportInfo.fifoShadowBase;
     }
 #endif /* GLIDE_USE_SHADOW_FIFO */
 
-    GDBG_INFO(gc->myLevel + 10, "  Post-Wrap: (0x%X : 0x%X) : 0x%X\n", 
+    GDBG_INFO(gc->myLevel + 10, "  Post-Wrap: (0x%X : 0x%X) : 0x%X\n",
               gc->cmdTransportInfo.roomToReadPtr, gc->cmdTransportInfo.roomToEnd,
               gc->cmdTransportInfo.fifoRead);
 
     goto again;
   }
-  
+
   /* compute room left */
   gc->cmdTransportInfo.fifoRoom = MIN(gc->cmdTransportInfo.roomToReadPtr, gc->cmdTransportInfo.roomToEnd);
 
-#if GDBG_INFO_ON  
+#if GDBG_INFO_ON
 #if (GLIDE_PLATFORM & GLIDE_HW_CVG)
   GDBG_INFO(gc->myLevel, FN_NAME"_Done:\n"
             "\tfifoBlock: (0x%X : 0x%X)\n"
             "\tfifoRoom: (0x%X : 0x%X : 0x%X)\n"
             "\tfifo hw: (0x%X : 0x%X) : (0x%X : 0x%X : 0x%X)\n",
             (FxU32)gc->cmdTransportInfo.fifoPtr, blockSize,
-            gc->cmdTransportInfo.roomToReadPtr, 
+            gc->cmdTransportInfo.roomToReadPtr,
             gc->cmdTransportInfo.roomToEnd, gc->cmdTransportInfo.fifoRoom,
-            HW_FIFO_PTR(FXTRUE), gc->cmdTransportInfo.fifoRead, 
+            HW_FIFO_PTR(FXTRUE), gc->cmdTransportInfo.fifoRead,
             GR_GET(hw->cmdFifoDepth), GR_GET(hw->cmdFifoHoles), GR_GET(hw->status));
 #endif
 
 #if !GLIDE_INIT_HAL
   if (gc->scanline_interleaved) {
     SstRegs* slaveHw = (SstRegs*)gc->slave_ptr;
-    
+
     GDBG_INFO_MORE(gc->myLevel, "\tsli: 0x%X : (0x%X : 0x%X : 0x%X)\n",
-                   HW_FIFO_PTR(FXFALSE), 
-                   GR_GET(slaveHw->cmdFifoDepth), 
-                   GR_GET(slaveHw->cmdFifoHoles), 
+                   HW_FIFO_PTR(FXFALSE),
+                   GR_GET(slaveHw->cmdFifoDepth),
+                   GR_GET(slaveHw->cmdFifoHoles),
                    GR_GET(slaveHw->status));
   }
 #endif /* !GLIDE_INIT_HAL */
 #endif /* GDBG_INFO_ON */
-  
+
   FIFO_ASSERT();
   GR_TRACE_EXIT(FN_NAME);
 #undef FN_NAME

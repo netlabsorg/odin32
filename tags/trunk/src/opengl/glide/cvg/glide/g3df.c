@@ -1,57 +1,61 @@
+/* $Id: g3df.c,v 1.2 2001-09-05 14:30:23 bird Exp $ */
 /*
 ** THIS SOFTWARE IS SUBJECT TO COPYRIGHT PROTECTION AND IS OFFERED ONLY
 ** PURSUANT TO THE 3DFX GLIDE GENERAL PUBLIC LICENSE. THERE IS NO RIGHT
 ** TO USE THE GLIDE TRADEMARK WITHOUT PRIOR WRITTEN PERMISSION OF 3DFX
-** INTERACTIVE, INC. A COPY OF THIS LICENSE MAY BE OBTAINED FROM THE 
-** DISTRIBUTOR OR BY CONTACTING 3DFX INTERACTIVE INC(info@3dfx.com). 
-** THIS PROGRAM IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER 
+** INTERACTIVE, INC. A COPY OF THIS LICENSE MAY BE OBTAINED FROM THE
+** DISTRIBUTOR OR BY CONTACTING 3DFX INTERACTIVE INC(info@3dfx.com).
+** THIS PROGRAM IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER
 ** EXPRESSED OR IMPLIED. SEE THE 3DFX GLIDE GENERAL PUBLIC LICENSE FOR A
-** FULL TEXT OF THE NON-WARRANTY PROVISIONS.  
-** 
+** FULL TEXT OF THE NON-WARRANTY PROVISIONS.
+**
 ** USE, DUPLICATION OR DISCLOSURE BY THE GOVERNMENT IS SUBJECT TO
 ** RESTRICTIONS AS SET FORTH IN SUBDIVISION (C)(1)(II) OF THE RIGHTS IN
 ** TECHNICAL DATA AND COMPUTER SOFTWARE CLAUSE AT DFARS 252.227-7013,
 ** AND/OR IN SIMILAR OR SUCCESSOR CLAUSES IN THE FAR, DOD OR NASA FAR
 ** SUPPLEMENT. UNPUBLISHED RIGHTS RESERVED UNDER THE COPYRIGHT LAWS OF
-** THE UNITED STATES.  
-** 
+** THE UNITED STATES.
+**
 ** COPYRIGHT 3DFX INTERACTIVE, INC. 1999, ALL RIGHTS RESERVED
 **
-** $Header: /home/ktk/tmp/odin/odin32xp/src/opengl/glide/cvg/glide/g3df.c,v 1.1 2000-02-25 00:37:37 sandervl Exp $
+** $Header: /home/ktk/tmp/odin/odin32xp/src/opengl/glide/cvg/glide/g3df.c,v 1.2 2001-09-05 14:30:23 bird Exp $
 ** $Log: g3df.c,v $
-** Revision 1.1  2000-02-25 00:37:37  sandervl
+** Revision 1.2  2001-09-05 14:30:23  bird
+** Added $Id:$ keyword.
+**
+** Revision 1.1  2000/02/25 00:37:37  sandervl
 ** Created Voodoo 2 dir
 **
-** 
+**
 ** 17    2/20/98 11:00a Peter
 ** removed glide3 from glid2 tree
- * 
+ *
  * 16    1/13/98 7:48p Atai
  * fixed gu3dfGetInfo, grBufferClear, and GrState size
- * 
+ *
  * 15    1/13/98 12:42p Atai
  * fixed grtexinfo, grVertexLayout, and draw triangle
- * 
+ *
  * 14    1/09/98 6:48p Atai
  * grTexInfo, GR_LOD_* and GR_ASPECT_*
- * 
+ *
  * 12    12/17/97 4:45p Peter
  * groundwork for CrybabyGlide
- * 
+ *
  * 11    12/09/97 12:20p Peter
  * mac glide port
- * 
+ *
  * 10    6/06/97 5:56p Peter
  * fixed gcc/dural compilation things
- * 
+ *
  * 9     6/02/97 4:09p Peter
  * Compile w/ gcc for Dural
- * 
+ *
  * 8     5/27/97 1:16p Peter
- * Basic cvg, w/o cmd fifo stuff. 
- * 
+ * Basic cvg, w/o cmd fifo stuff.
+ *
  * 7     5/21/97 6:05a Peter
- * 
+ *
  * 6     3/09/97 10:31a Dow
  * Added GR_DIENTRY for di glide functions
 **
@@ -92,17 +96,17 @@ typedef struct
 } CfTableEntry;
 
 
-static FxBool 
+static FxBool
 _grGet3dfHeader(FILE* stream, char* const buffer, const FxU32 bufSize)
 {
   int numLines = 0;
   FxU32 bufPos = 0;
-  
+
   while(numLines < 4) {
     /* Handle stream errors */
     if (fgets(buffer + bufPos, bufSize - bufPos, stream) == NULL) break;
     bufPos += strlen(buffer + bufPos);
-    
+
     /* fgets includes the '\n' in the buffer. If this is not there
      * then the buffer is too small so fail.
      */
@@ -142,7 +146,7 @@ GR_DIENTRY(gu3dfGetInfo, FxBool,
     GR_ASPECT_4x1,
     GR_ASPECT_8x1
   };
-  CfTableEntry cftable[] = 
+  CfTableEntry cftable[] =
   {
     { "I8",       GR_TEXFMT_INTENSITY_8,        FXTRUE },
     { "A8",       GR_TEXFMT_ALPHA_8,            FXTRUE },
@@ -397,7 +401,7 @@ GR_DIENTRY(gu3dfLoad, FxBool, (const char *filename, Gu3dfInfo *info))
       packedvalue |= ((FxU32) info->table.nccTable.yRGB[index*4+1]) << 8;
       packedvalue |= ((FxU32) info->table.nccTable.yRGB[index*4+2]) << 16;
       packedvalue |= ((FxU32) info->table.nccTable.yRGB[index*4+3]) << 24;
-                                           
+
       info->table.nccTable.packed_data[index] = packedvalue;
     }
 
@@ -449,9 +453,9 @@ GR_DIENTRY(gu3dfLoad, FxBool, (const char *filename, Gu3dfInfo *info))
   case GR_TEXFMT_YIQ_422:
   case GR_TEXFMT_RGB_332:
   case GR_TEXFMT_P_8:
-    Read8Bit(info->data, image_file, 
-             info->header.small_lod, 
-             info->header.large_lod, 
+    Read8Bit(info->data, image_file,
+             info->header.small_lod,
+             info->header.large_lod,
              info->header.aspect_ratio);
     break;
 
@@ -462,7 +466,7 @@ GR_DIENTRY(gu3dfLoad, FxBool, (const char *filename, Gu3dfInfo *info))
   case GR_TEXFMT_ARGB_4444:
   case GR_TEXFMT_ALPHA_INTENSITY_88:
   case GR_TEXFMT_AP_88:
-    Read16Bit(info->data, image_file, 
+    Read16Bit(info->data, image_file,
               info->header.small_lod,
               info->header.large_lod,
               info->header.aspect_ratio);
@@ -485,9 +489,9 @@ GR_DIENTRY(gu3dfLoad, FxBool, (const char *filename, Gu3dfInfo *info))
 **
 ** Read in an 8-bit texture map, unpacked.
 */
-static void 
-Read8Bit(FxU8 *data, FILE *image_file, 
-         int small_lod, int large_lod, 
+static void
+Read8Bit(FxU8 *data, FILE *image_file,
+         int small_lod, int large_lod,
          GrAspectRatio_t aspect_ratio)
 {
   int lod;
@@ -507,8 +511,8 @@ Read8Bit(FxU8 *data, FILE *image_file,
 **
 ** Read in a 16-bit texture map, unpacked.
 */
-static void Read16Bit(FxU16 *data, FILE *image_file, 
-                      int small_lod, int large_lod, 
+static void Read16Bit(FxU16 *data, FILE *image_file,
+                      int small_lod, int large_lod,
                       GrAspectRatio_t aspect_ratio)
 {
   int index;
@@ -533,7 +537,7 @@ static FxU16 ReadDataShort(FILE *fp)
 {
   FxU16 b1 = (FxU16)getc(fp);
   FxU16 b2 = (FxU16)getc(fp);
-  
+
 #define kShiftB1        8
 #define kShiftB2        0
 

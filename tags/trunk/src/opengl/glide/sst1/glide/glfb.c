@@ -1,82 +1,86 @@
+/* $Id: glfb.c,v 1.2 2001-09-05 14:30:53 bird Exp $ */
 /*
 ** THIS SOFTWARE IS SUBJECT TO COPYRIGHT PROTECTION AND IS OFFERED ONLY
 ** PURSUANT TO THE 3DFX GLIDE GENERAL PUBLIC LICENSE. THERE IS NO RIGHT
 ** TO USE THE GLIDE TRADEMARK WITHOUT PRIOR WRITTEN PERMISSION OF 3DFX
-** INTERACTIVE, INC. A COPY OF THIS LICENSE MAY BE OBTAINED FROM THE 
-** DISTRIBUTOR OR BY CONTACTING 3DFX INTERACTIVE INC(info@3dfx.com). 
-** THIS PROGRAM IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER 
+** INTERACTIVE, INC. A COPY OF THIS LICENSE MAY BE OBTAINED FROM THE
+** DISTRIBUTOR OR BY CONTACTING 3DFX INTERACTIVE INC(info@3dfx.com).
+** THIS PROGRAM IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER
 ** EXPRESSED OR IMPLIED. SEE THE 3DFX GLIDE GENERAL PUBLIC LICENSE FOR A
-** FULL TEXT OF THE NON-WARRANTY PROVISIONS.  
-** 
+** FULL TEXT OF THE NON-WARRANTY PROVISIONS.
+**
 ** USE, DUPLICATION OR DISCLOSURE BY THE GOVERNMENT IS SUBJECT TO
 ** RESTRICTIONS AS SET FORTH IN SUBDIVISION (C)(1)(II) OF THE RIGHTS IN
 ** TECHNICAL DATA AND COMPUTER SOFTWARE CLAUSE AT DFARS 252.227-7013,
 ** AND/OR IN SIMILAR OR SUCCESSOR CLAUSES IN THE FAR, DOD OR NASA FAR
 ** SUPPLEMENT. UNPUBLISHED RIGHTS RESERVED UNDER THE COPYRIGHT LAWS OF
-** THE UNITED STATES.  
-** 
+** THE UNITED STATES.
+**
 ** COPYRIGHT 3DFX INTERACTIVE, INC. 1999, ALL RIGHTS RESERVED
 **
-** $Header: /home/ktk/tmp/odin/odin32xp/src/opengl/glide/sst1/glide/glfb.c,v 1.1 2000-02-25 00:31:14 sandervl Exp $
+** $Header: /home/ktk/tmp/odin/odin32xp/src/opengl/glide/sst1/glide/glfb.c,v 1.2 2001-09-05 14:30:53 bird Exp $
 ** $Log: glfb.c,v $
-** Revision 1.1  2000-02-25 00:31:14  sandervl
+** Revision 1.2  2001-09-05 14:30:53  bird
+** Added $Id:$ keyword.
+**
+** Revision 1.1  2000/02/25 00:31:14  sandervl
 ** Created new Voodoo 1 Glide dir
 **
- * 
+ *
  * 23    6/30/97 10:51a Dow
  * Changed size check in grLfbLock to warning
- * 
+ *
  * 22    6/03/97 3:50p Pgj
  * fix bugs 580 and 581
- * 
+ *
  * 21    5/05/97 2:25p Hanson
  * Fixed unlock bug with grLfbUnlock. On Rush it would always return
  * false.
- * 
+ *
  * 20    5/02/97 9:43a Dow
  * Changed indentation to match rest of file, made grLfbLock idle on Jr.
- * 
+ *
  * 19    4/08/97 12:47p Jdt
  * Bug in grLfbUnlock()
- * 
+ *
  * 18    4/02/97 3:24a Hanson
  * Fixed bug with locking read of Auxbuffer on SST1
- * 
+ *
  * 17    3/27/97 9:30p Hanson
  * Fixed my mistake of masking out the no idle bit to late in the
  * grLfbUnlock code.
- * 
+ *
  * 16    3/26/97 5:04p Hanson
- * 
+ *
  * 15    3/19/97 1:37a Jdt
  * Added real stride computation.
- * 
+ *
  * 14    3/18/97 9:07p Dow
  * Got rid of #$#%#$ // comments
- * 
+ *
  * 13    3/13/97 1:18a Jdt
  * Re-wrote grLfbWriteRegion to be faster and also be nice to the fifo.
  * Added grLfbReadRegion for sli boards.  Need an sli setup on whihc to
  * test.
- * 
+ *
  * 12    3/12/97 2:54p Jdt
  * Fixes for vg96
- * 
+ *
  * 11    3/12/97 11:11a Jdt
  * Fixed format bug.  Fixed yorigin problem. Fixed locking bug.
- * 
+ *
  * 10    3/06/97 9:03p Jdt
- * Removed Watcom Warning.  
- * 
+ * Removed Watcom Warning.
+ *
  * 9     3/05/97 9:35p Jdt
  * Added grLfbWriteRegion
- * 
+ *
  * 8     3/04/97 9:08p Dow
  * Neutered multiplatform multiheaded monster
- * 
+ *
  * 7     2/26/97 11:56a Jdt
  * changed lfb api
- * 
+ *
  * 6     12/23/96 1:37p Dow
  * chagnes for multiplatform glide
 **
@@ -138,14 +142,14 @@ GR_ENTRY(grLfbConstantDepth, void, ( FxU16 depth ))
   FXFALSE - lock fails
   -------------------------------------------------------------------*/
 
-GR_ENTRY(grLfbLock, FxBool,( GrLock_t type, GrBuffer_t buffer,  GrLfbWriteMode_t writeMode, GrOriginLocation_t origin,  FxBool pixelPipeline, GrLfbInfo_t *info ) ) 
+GR_ENTRY(grLfbLock, FxBool,( GrLock_t type, GrBuffer_t buffer,  GrLfbWriteMode_t writeMode, GrOriginLocation_t origin,  FxBool pixelPipeline, GrLfbInfo_t *info ) )
 {
   FxBool rv = FXTRUE;
   FxU32  lockIdle;
-  
+
   GR_BEGIN_NOFIFOCHECK("grLfbLock",82);
   GDBG_INFO_MORE((gc->myLevel,"(%d,%d,0x%x)\n", type, buffer, info));
-  
+
   GR_CHECK_F( myName, !info,
              "Null info structure passed." );
 
@@ -153,10 +157,10 @@ GR_ENTRY(grLfbLock, FxBool,( GrLock_t type, GrBuffer_t buffer,  GrLfbWriteMode_t
 
   GR_CHECK_W(myName, (info->size != sizeof( GrLfbInfo_t )),
              "Invalid size sent to grLfbLock()");
-  
+
   lockIdle = !(type & GR_LFB_NOIDLE);
   type = type & ~(GR_LFB_NOIDLE);
-  
+
 #if ( GLIDE_PLATFORM & GLIDE_HW_SST1 )
   {
     switch( type ) {
@@ -169,15 +173,15 @@ GR_ENTRY(grLfbLock, FxBool,( GrLock_t type, GrBuffer_t buffer,  GrLfbWriteMode_t
           rv = FXFALSE;
         } else {
           lfbMode = gc->state.fbi_config.lfbMode;
-          lfbMode &= ~( SST_LFB_READBUFSELECT | 
+          lfbMode &= ~( SST_LFB_READBUFSELECT |
                        SST_LFB_YORIGIN );
-                    
+
           GR_SET_EXPECTED_SIZE( 4 );
 
           /* You may not read-lock an SLI board */
           if ( (gc->scanline_interleaved == FXTRUE) &&
               (gc->lfbSliOk==1) ) {
-            GDBG_INFO((83, 
+            GDBG_INFO((83,
                        "Read lock failure: read lock"
                        " disallowed for SLI, use "
                        "grLfbReadRegion()\n" ));
@@ -195,8 +199,8 @@ GR_ENTRY(grLfbLock, FxBool,( GrLock_t type, GrBuffer_t buffer,  GrLfbWriteMode_t
             lfbMode |= SST_LFB_READAUXBUFFER;
             break;
           default:
-            GR_CHECK_F( myName, 
-                       1, 
+            GR_CHECK_F( myName,
+                       1,
                        "illegal buffer parameter passed" );
             rv = FXFALSE;
             break;
@@ -220,13 +224,13 @@ GR_ENTRY(grLfbLock, FxBool,( GrLock_t type, GrBuffer_t buffer,  GrLfbWriteMode_t
       {
         FxU32 lfbMode, zaColor, fbzMode;
 
-                
+
         if ( gc->lockPtrs[type] != (FxU32)-1 ) {
           GDBG_INFO(( 83, "Write failure due to existing lock" ));
           rv = FXFALSE;
         } else {
           GR_SET_EXPECTED_SIZE( 12 );
-                    
+
           /*
            ** Set up the constant depth register because it may have been
            ** trashed by a call to grDepthBiasLevel (depthbiaslevel and
@@ -236,19 +240,19 @@ GR_ENTRY(grLfbLock, FxBool,( GrLock_t type, GrBuffer_t buffer,  GrLfbWriteMode_t
           zaColor = ((( FxU32 ) gc->state.lfb_constant_depth ) << SST_ZACOLOR_DEPTH_SHIFT );
           zaColor |= (gc->state.lfb_constant_alpha << SST_ZACOLOR_ALPHA_SHIFT);
           GR_SET( hw->zaColor, zaColor );
-                    
+
           /*
            ** disable depth biasing
            */
           fbzMode = gc->state.fbi_config.fbzMode;
           fbzMode &= ~( SST_ENZBIAS );
-                    
+
           lfbMode = gc->state.fbi_config.lfbMode;
           lfbMode &= ~( SST_LFB_WRITEBUFSELECT |
                        SST_LFB_YORIGIN        |
                        SST_LFB_FORMAT         |
                        SST_LFB_ENPIXPIPE );
-                    
+
           switch( writeMode ) {
           case GR_LFBWRITEMODE_RESERVED1:
           case GR_LFBWRITEMODE_RESERVED2:
@@ -286,8 +290,8 @@ GR_ENTRY(grLfbLock, FxBool,( GrLock_t type, GrBuffer_t buffer,  GrLfbWriteMode_t
             lfbMode |= SST_LFB_WRITEFRONTBUFFER;
             break;
           default:
-            GR_CHECK_F( myName, 
-                       1, 
+            GR_CHECK_F( myName,
+                       1,
                        "illegal buffer parameter passed" );
             break;
           } /* end switch(buffer) */
@@ -312,14 +316,14 @@ GR_ENTRY(grLfbLock, FxBool,( GrLock_t type, GrBuffer_t buffer,  GrLfbWriteMode_t
              if a direct LFB read is done aftewards, the lfbMode register might
              not have settled in yet, and the pixel may be read in the wrong
              mode.  However, the 2 write above help reduce the chance of this.
-             The proper thing to do is to call grSstIdle() here, but that's 
+             The proper thing to do is to call grSstIdle() here, but that's
              too slow.
              */
 
           info->lfbPtr    = gc->lfb_ptr;
           info->origin    = origin;
           info->writeMode = writeMode;
-                    
+
           switch( lfbMode & SST_LFB_FORMAT ) {
           case SST_LFB_565:
           case SST_LFB_555:
@@ -335,8 +339,8 @@ GR_ENTRY(grLfbLock, FxBool,( GrLock_t type, GrBuffer_t buffer,  GrLfbWriteMode_t
             info->strideInBytes = gc->fbStride * 4;
             break;
           }
-                    
-          if ( rv == FXTRUE ) 
+
+          if ( rv == FXTRUE )
             gc->lockPtrs[type] = buffer;
         }
       }
@@ -347,7 +351,7 @@ GR_ENTRY(grLfbLock, FxBool,( GrLock_t type, GrBuffer_t buffer,  GrLfbWriteMode_t
       break;
     }
   }
-  
+
 #elif ( GLIDE_PLATFORM & GLIDE_HW_SST96 )
   switch( type ) {
   case GR_LFB_READ_ONLY:
@@ -357,13 +361,13 @@ GR_ENTRY(grLfbLock, FxBool,( GrLock_t type, GrBuffer_t buffer,  GrLfbWriteMode_t
     } else {
       info->lfbPtr = initGetBufferPtr( buffer, &info->strideInBytes );
       if ( origin != GR_ORIGIN_UPPER_LEFT ) {
-        GDBG_INFO((gc->myLevel,  
+        GDBG_INFO((gc->myLevel,
                    "Lock failed because of unsu"
                    "pported origin." ));
         rv = FXFALSE;
       }
       info->origin = GR_ORIGIN_UPPER_LEFT;
-      if ( rv == FXTRUE ) 
+      if ( rv == FXTRUE )
         gc->lockPtrs[type] = buffer;
     }
     break;
@@ -374,12 +378,12 @@ GR_ENTRY(grLfbLock, FxBool,( GrLock_t type, GrBuffer_t buffer,  GrLfbWriteMode_t
     } else {
       info->lfbPtr = initGetBufferPtr( buffer, &info->strideInBytes );
       if ( !info->lfbPtr ) {
-        GDBG_INFO((gc->myLevel,  
+        GDBG_INFO((gc->myLevel,
                    "Lock failed because buffer doesn't exist" ));
         rv = FXFALSE;
       }
       if ( origin != GR_ORIGIN_UPPER_LEFT ) {
-        GDBG_INFO((gc->myLevel,  
+        GDBG_INFO((gc->myLevel,
                    "Lock failed because of unsupported origin." ));
         rv = FXFALSE;
       }
@@ -413,15 +417,15 @@ GR_ENTRY(grLfbLock, FxBool,( GrLock_t type, GrBuffer_t buffer,  GrLfbWriteMode_t
       } /* end switch(buffer) */
 
       if ( pixelPipeline ) {
-        GDBG_INFO((gc->myLevel,  
+        GDBG_INFO((gc->myLevel,
                    "Lock failed because pixelpipeline is not available on VG96." ));
         rv = FXFALSE;
       }
       info->writeMode = writeMode;
       info->origin = GR_ORIGIN_UPPER_LEFT;
-      if ( rv == FXTRUE ) 
+      if ( rv == FXTRUE )
         gc->lockPtrs[type] = buffer;
-      GDBG_INFO(( gc->myLevel, 
+      GDBG_INFO(( gc->myLevel,
                  "Write Lock Successful: ptr=0x%.08x stride=%.04d\n",
                  info->lfbPtr,
                  info->strideInBytes ));
@@ -444,7 +448,7 @@ GR_ENTRY(grLfbLock, FxBool,( GrLock_t type, GrBuffer_t buffer,  GrLfbWriteMode_t
     grSstIdle();
   GR_RETURN( rv );
 } /* grLfbLock */
-    
+
 /*-------------------------------------------------------------------
   Function: grLfbUnlock
   Date: 2/21
@@ -454,7 +458,7 @@ GR_ENTRY(grLfbLock, FxBool,( GrLock_t type, GrBuffer_t buffer,  GrLfbWriteMode_t
   Unlock a previously locked buffer
   Arguments:
   type - type of lock ( read only/write only )
-  buffer - which buffer to unlock 
+  buffer - which buffer to unlock
   Return:
   FXTRUE  - success
   FXFALSE - failure
@@ -463,24 +467,24 @@ GR_ENTRY(grLfbLock, FxBool,( GrLock_t type, GrBuffer_t buffer,  GrLfbWriteMode_t
 GR_ENTRY(grLfbUnlock, FxBool, ( GrLock_t type, GrBuffer_t buffer ) )
 {
   FxBool rval = FXFALSE;
-  
+
   GR_BEGIN_NOFIFOCHECK("grLfbUnLock",83 );
   GDBG_INFO_MORE((gc->myLevel,"(%d, %d)\n", type, buffer ));
-  
+
   type = type & ~(GR_LFB_NOIDLE);
-  
-  GR_CHECK_F( myName, 
+
+  GR_CHECK_F( myName,
              type != GR_LFB_WRITE_ONLY &&
              type != GR_LFB_READ_ONLY,
              "Bad type" );
-  
-  GR_CHECK_F( myName, 
+
+  GR_CHECK_F( myName,
              buffer != GR_BUFFER_FRONTBUFFER &&
              buffer != GR_BUFFER_BACKBUFFER  &&
              buffer != GR_BUFFER_AUXBUFFER,
              "Bad buffer" );
-  
-#if ( GLIDE_PLATFORM & GLIDE_HW_SST1 )  
+
+#if ( GLIDE_PLATFORM & GLIDE_HW_SST1 )
   if ( gc->lockPtrs[type] == (FxU32)buffer ) {
     rval = FXTRUE;
 
@@ -492,11 +496,11 @@ GR_ENTRY(grLfbUnlock, FxBool, ( GrLock_t type, GrBuffer_t buffer ) )
 
     /* Restore depth bias level */
     GR_SET( hw->zaColor, gc->state.fbi_config.zaColor );
-  
+
     /* turn back on depth biasing */
     GR_SET( hw->fbzMode, gc->state.fbi_config.fbzMode );
 
-    if ( gc->scanline_interleaved == FXTRUE ) 
+    if ( gc->scanline_interleaved == FXTRUE )
       GR_SET( hw->nopCMD, 0x0 );
 
     gc->lockPtrs[type] = (FxU32)-1;
@@ -541,7 +545,7 @@ GR_ENTRY(grLfbWriteColorFormat, void, (GrColorFormat_t colorFormat))
 
   GR_SET( hw->lfbMode, lfbMode );
   gc->state.fbi_config.lfbMode = lfbMode;
-  if ( gc->scanline_interleaved == FXTRUE ) 
+  if ( gc->scanline_interleaved == FXTRUE )
     GR_SET( hw-> nopCMD, 0x0 );
   GR_END_SLOPPY();
 #else
@@ -579,7 +583,7 @@ GR_ENTRY(grLfbWriteColorSwizzle, void, (FxBool swizzleBytes, FxBool swapWords))
 
   GR_SET( hw->lfbMode, lfbMode );
   gc->state.fbi_config.lfbMode = lfbMode;
-  if ( gc->scanline_interleaved == FXTRUE ) 
+  if ( gc->scanline_interleaved == FXTRUE )
     GR_SET( hw-> nopCMD, 0x0 );
   GR_END_SLOPPY();
 #else
@@ -598,42 +602,42 @@ GR_ENTRY(grLfbWriteColorSwizzle, void, (FxBool swizzleBytes, FxBool swapWords))
   dst_buffer  - buffer to which to copy data
   dst_x,dst_y - destination image start coordinates
   src_format  - data format of source image
-  src_width, src_height 
+  src_width, src_height
               - dimensions of source image
   src_stride  - stride of source image in bytes, not meaningful
                 for RLE images
-  src_data    - pointer to source data memory           
+  src_data    - pointer to source data memory
   Return:
   FXTRUE  succeed
   FXFALSE fail
   -------------------------------------------------------------------*/
-GR_ENTRY(grLfbWriteRegion, FxBool, ( GrBuffer_t dst_buffer, 
-                                     FxU32 dst_x, FxU32 dst_y, 
-                                     GrLfbSrcFmt_t src_format, 
-                                     FxU32 src_width, FxU32 src_height, 
+GR_ENTRY(grLfbWriteRegion, FxBool, ( GrBuffer_t dst_buffer,
+                                     FxU32 dst_x, FxU32 dst_y,
+                                     GrLfbSrcFmt_t src_format,
+                                     FxU32 src_width, FxU32 src_height,
                                      FxI32 src_stride, void *src_data ))
 {
   FxBool           rv = FXTRUE;
   GrLfbInfo_t      info;
   GrLfbWriteMode_t writeMode;
-  
+
   GR_BEGIN_NOFIFOCHECK("grLfbWriteRegion",82);
   GDBG_INFO_MORE((gc->myLevel,
-                  "(0x%x,%d,%d,%d,%d,%d,%d,0x%x)\n", 
-                  dst_buffer, dst_x, dst_y, 
+                  "(0x%x,%d,%d,%d,%d,%d,%d,0x%x)\n",
+                  dst_buffer, dst_x, dst_y,
                   src_format, src_width, src_height,
                   src_stride, src_data ));
-  
+
 #if ( GLIDE_PLATFORM & GLIDE_HW_SST1 )
-  if ( src_format == GR_LFB_SRC_FMT_RLE16 ) 
+  if ( src_format == GR_LFB_SRC_FMT_RLE16 )
     writeMode = GR_LFBWRITEMODE_565;
-  else 
+  else
     writeMode = src_format;
-  
+
   info.size = sizeof( info );
-  
-  if ( grLfbLock( GR_LFB_WRITE_ONLY | GR_LFB_NOIDLE, 
-                 dst_buffer, 
+
+  if ( grLfbLock( GR_LFB_WRITE_ONLY | GR_LFB_NOIDLE,
+                 dst_buffer,
                  writeMode,
                  GR_ORIGIN_UPPER_LEFT,
                  FXFALSE,
@@ -646,13 +650,13 @@ GR_ENTRY(grLfbWriteRegion, FxBool, ( GrBuffer_t dst_buffer,
     FxU32 length;               /* bytes to copy in scanline */
     FxU32 scanline;             /* scanline number */
     int   aligned;              /* word aligned? */
-    
-    
+
+
     srcData = ( FxU32 * ) src_data;
     dstData = ( FxU32 * ) ( ((char*)info.lfbPtr)+
                            (dst_y*info.strideInBytes) );
     scanline = src_height;
-    
+
     switch( src_format ) {
       /* 16-bit aligned */
     case GR_LFB_SRC_FMT_565:
@@ -673,14 +677,14 @@ GR_ENTRY(grLfbWriteRegion, FxBool, ( GrBuffer_t dst_buffer,
             dstData++;
             srcData++;
           }
-                    
+
           if ( ((int)length) & 0x2 ) {
             GR_SET16( (*(FxU16*)&(dstData[0])),
                      (*(FxU16*)&(srcData[0])) );
             dstData = (FxU32*)(((FxU16*)dstData) + 1 );
             srcData = (FxU32*)(((FxU16*)srcData) + 1 );
           }
-                    
+
           dstData = (FxU32*)(((char*)dstData)+dstJump);
           srcData = (FxU32*)(((char*)srcData)+srcJump);
           GR_CHECK_SIZE_SLOPPY();
@@ -689,25 +693,25 @@ GR_ENTRY(grLfbWriteRegion, FxBool, ( GrBuffer_t dst_buffer,
         while( scanline-- ) {
           GR_SET_EXPECTED_SIZE(length);
           end = (FxU32*)((char*)srcData + length - 2);
-                    
+
           GR_SET16( (*(FxU16*)&(dstData[0])),
                    (*(FxU16*)&(srcData[0])) );
           dstData = (FxU32*)(((FxU16*)dstData) + 1 );
           srcData = (FxU32*)(((FxU16*)srcData) + 1 );
-                    
+
           while( srcData < end ) {
             GR_SET( dstData[0], srcData[0] );
             dstData++;
             srcData++;
           }
-                    
+
           if ( !(length & 0x2) ) {
             GR_SET16( (*(FxU16*)&(dstData[0])),
                      (*(FxU16*)&(srcData[0])) );
             dstData = (FxU32*)(((FxU16*)dstData) + 1 );
             srcData = (FxU32*)(((FxU16*)srcData) + 1 );
           }
-                    
+
           dstData = (FxU32*)(((char*)dstData)+dstJump);
           srcData = (FxU32*)(((char*)srcData)+srcJump);
           GR_CHECK_SIZE_SLOPPY();
@@ -750,13 +754,13 @@ GR_ENTRY(grLfbWriteRegion, FxBool, ( GrBuffer_t dst_buffer,
   if ( src_format == GR_LFB_SRC_FMT_RLE16 ) {
     rv = FXFALSE;
     GR_RETURN( rv );
-  } else 
+  } else
     writeMode = src_format;
-  
+
   info.size = sizeof( info );
-  
+
   if ( grLfbLock( GR_LFB_WRITE_ONLY,
-                 dst_buffer, 
+                 dst_buffer,
                  writeMode,
                  GR_ORIGIN_UPPER_LEFT,
                  FXFALSE,
@@ -769,8 +773,8 @@ GR_ENTRY(grLfbWriteRegion, FxBool, ( GrBuffer_t dst_buffer,
     FxU32 length;               /* bytes to copy in scanline */
     FxU32 scanline;             /* scanline number */
     int   aligned;              /* word aligned? */
-    
-    
+
+
     srcData = ( FxU32 * ) src_data;
     dstData = ( FxU32 * ) ( ((char*)info.lfbPtr)+
                            (dst_y*info.strideInBytes)+
@@ -783,35 +787,35 @@ GR_ENTRY(grLfbWriteRegion, FxBool, ( GrBuffer_t dst_buffer,
     if ( aligned ) {
       while( scanline-- ) {
         end = (FxU32*)((char*)srcData + length - 2);
-        while( srcData < end ) 
+        while( srcData < end )
           *dstData++ = *srcData++;
-                
+
         if ( ((int)length) & 0x2 ) {
           *(FxU16*)dstData = *(FxU16*)srcData;
           dstData = (FxU32*)(((FxU16*)dstData) + 1 );
           srcData = (FxU32*)(((FxU16*)srcData) + 1 );
         }
-                
+
         dstData = (FxU32*)(((char*)dstData)+dstJump);
         srcData = (FxU32*)(((char*)srcData)+srcJump);
       }
     } else {
       while( scanline-- ) {
         end = (FxU32*)((char*)srcData + length - 2);
-                
+
         *(FxU16*)dstData = *(FxU16*)srcData;
         dstData = (FxU32*)(((FxU16*)dstData) + 1 );
         srcData = (FxU32*)(((FxU16*)srcData) + 1 );
-                
-        while( srcData < end ) 
+
+        while( srcData < end )
           *dstData++ = *srcData++;
-                
+
         if ( !(((int)length) & 0x2) ) {
           *(FxU16*)dstData = *(FxU16*)srcData;
           dstData = (FxU32*)(((FxU16*)dstData) + 1 );
           srcData = (FxU32*)(((FxU16*)srcData) + 1 );
         }
-                
+
         dstData = (FxU32*)(((char*)dstData)+dstJump);
         srcData = (FxU32*)(((char*)srcData)+srcJump);
       }
@@ -820,8 +824,8 @@ GR_ENTRY(grLfbWriteRegion, FxBool, ( GrBuffer_t dst_buffer,
   } else {
     rv = FXFALSE;
   }
-#else 
-#  error "No grLfbWriteRegion Implementation for this platform"     
+#else
+#  error "No grLfbWriteRegion Implementation for this platform"
 #endif
   GR_RETURN( rv );
 } /* grLfbWriteRegion */
@@ -835,7 +839,7 @@ GR_ENTRY(grLfbWriteRegion, FxBool, ( GrBuffer_t dst_buffer,
   Description:
   Grab a rectangle from the frame buffer into user supplied memory
   Arguments:
-  src_buffer - buffer to read from 
+  src_buffer - buffer to read from
   src_x      - x coordinate of upper left corner rectangle to read
   src_y      - y coordinate of upper left corner of rectangle to read
   src_width  - width of rectangle to read
@@ -846,25 +850,25 @@ GR_ENTRY(grLfbWriteRegion, FxBool, ( GrBuffer_t dst_buffer,
   FXTRUE - success
   FXFALSE - failure
   -------------------------------------------------------------------*/
-GR_ENTRY(grLfbReadRegion, FxBool, ( GrBuffer_t src_buffer, 
-                                    FxU32 src_x, FxU32 src_y, 
-                                    FxU32 src_width, FxU32 src_height, 
+GR_ENTRY(grLfbReadRegion, FxBool, ( GrBuffer_t src_buffer,
+                                    FxU32 src_x, FxU32 src_y,
+                                    FxU32 src_width, FxU32 src_height,
                                     FxU32 dst_stride, void *dst_data ))
 {
   FxBool rv = FXTRUE;
   GrLfbInfo_t info;
-  
+
   GR_BEGIN_NOFIFOCHECK("grLfbReadRegion",82);
   GDBG_INFO_MORE((gc->myLevel,
                   "(0x%x,%d,%d,%d,%d,%d,0x%x)\n",
                   src_buffer, src_x, src_y,
                   src_width, src_height, dst_stride, dst_data ));
-  
+
 #if ( GLIDE_PLATFORM & GLIDE_HW_SST1 )
   gc->lfbSliOk = 1;
   info.size = sizeof( info );
   if ( grLfbLock( GR_LFB_READ_ONLY,
-                 src_buffer, 
+                 src_buffer,
                  GR_LFBWRITEMODE_ANY,
                  GR_ORIGIN_UPPER_LEFT,
                  FXFALSE,
@@ -878,7 +882,7 @@ GR_ENTRY(grLfbReadRegion, FxBool, ( GrBuffer_t src_buffer,
     FxU32 scanline;             /* scanline number */
     int   aligned;              /* word aligned? */
     FxU32 odd;                  /* is src_y odd? ( for sli ) */
-    
+
     dstData = ( FxU32 * ) dst_data;
     srcData = ( FxU32 * ) ( ((char*)info.lfbPtr)+
                            (src_y*info.strideInBytes) +
@@ -889,7 +893,7 @@ GR_ENTRY(grLfbReadRegion, FxBool, ( GrBuffer_t src_buffer,
     srcJump  = info.strideInBytes - length;
     aligned  = !((int)srcData&0x2);
     odd      = (src_y+src_height) & 0x1;
-    
+
     if ( aligned ) {
       while( scanline-- ) {
         end = (FxU32*)((char*)srcData + length - 2);
@@ -901,22 +905,22 @@ GR_ENTRY(grLfbReadRegion, FxBool, ( GrBuffer_t src_buffer,
             sst1InitSliPciOwner(gc->base_ptr, SST_SLI_SLAVE_OWNPCI);
         }
 
-        while( srcData < end ) 
+        while( srcData < end )
           *dstData++ = *srcData++;
-                
+
         if ( ((int)length) & 0x2 ) {
           (*(FxU16*)dstData) = (*(FxU16*)srcData);
           dstData = (FxU32*)(((FxU16*)dstData) + 1 );
           srcData = (FxU32*)(((FxU16*)srcData) + 1 );
         }
-                
+
         dstData = (FxU32*)(((char*)dstData)+dstJump);
         srcData = (FxU32*)(((char*)srcData)+srcJump);
       }
     } else {
       while( scanline-- ) {
         end = (FxU32*)((char*)srcData + length - 2);
-                
+
         if(gc->scanline_interleaved == FXTRUE) {
           if((scanline+odd) & 0x1)
             sst1InitSliPciOwner(gc->base_ptr, SST_SLI_MASTER_OWNPCI);
@@ -936,13 +940,13 @@ GR_ENTRY(grLfbReadRegion, FxBool, ( GrBuffer_t src_buffer,
           dstData = (FxU32*)(((FxU16*)dstData) + 1 );
           srcData = (FxU32*)(((FxU16*)srcData) + 1 );
         }
-                
+
         dstData = (FxU32*)(((char*)dstData)+dstJump);
         srcData = (FxU32*)(((char*)srcData)+srcJump);
       }
     }
     grLfbUnlock( GR_LFB_READ_ONLY, src_buffer );
-    if ( gc->scanline_interleaved ) 
+    if ( gc->scanline_interleaved )
       sst1InitSliPciOwner( gc->base_ptr, SST_SLI_MASTER_OWNPCI );
   } else {
     rv = FXFALSE;
@@ -950,7 +954,7 @@ GR_ENTRY(grLfbReadRegion, FxBool, ( GrBuffer_t src_buffer,
 #elif ( GLIDE_PLATFORM & GLIDE_HW_SST96 )
   info.size = sizeof( info );
   if ( grLfbLock( GR_LFB_READ_ONLY,
-                 src_buffer, 
+                 src_buffer,
                  GR_LFBWRITEMODE_ANY,
                  GR_ORIGIN_UPPER_LEFT,
                  FXFALSE,
@@ -963,7 +967,7 @@ GR_ENTRY(grLfbReadRegion, FxBool, ( GrBuffer_t src_buffer,
     FxU32 length;               /* bytes to copy in scanline */
     FxU32 scanline;             /* scanline number */
     int   aligned;              /* word aligned? */
-    
+
     dstData = ( FxU32 * ) dst_data;
     srcData = ( FxU32 * ) ( ((char*)info.lfbPtr)+
                            (src_y*info.strideInBytes) +
@@ -973,27 +977,27 @@ GR_ENTRY(grLfbReadRegion, FxBool, ( GrBuffer_t src_buffer,
     dstJump  = dst_stride - length;
     srcJump  = info.strideInBytes - length;
     aligned  = !((int)srcData&0x2);
-    
+
     if ( aligned ) {
       while( scanline-- ) {
         end = (FxU32*)((char*)srcData + length - 2);
 
-        while( srcData < end ) 
+        while( srcData < end )
           *dstData++ = *srcData++;
-                
+
         if ( ((int)length) & 0x2 ) {
           (*(FxU16*)dstData) = (*(FxU16*)srcData);
           dstData = (FxU32*)(((FxU16*)dstData) + 1 );
           srcData = (FxU32*)(((FxU16*)srcData) + 1 );
         }
-                
+
         dstData = (FxU32*)(((char*)dstData)+dstJump);
         srcData = (FxU32*)(((char*)srcData)+srcJump);
       }
     } else {
       while( scanline-- ) {
         end = (FxU32*)((char*)srcData + length - 2);
-                
+
         (*(FxU16*)dstData) = (*(FxU16*)srcData);
         dstData = (FxU32*)(((FxU16*)dstData) + 1 );
         srcData = (FxU32*)(((FxU16*)srcData) + 1 );
@@ -1006,7 +1010,7 @@ GR_ENTRY(grLfbReadRegion, FxBool, ( GrBuffer_t src_buffer,
           dstData = (FxU32*)(((FxU16*)dstData) + 1 );
           srcData = (FxU32*)(((FxU16*)srcData) + 1 );
         }
-                
+
         dstData = (FxU32*)(((char*)dstData)+dstJump);
         srcData = (FxU32*)(((char*)srcData)+srcJump);
       }
@@ -1015,8 +1019,8 @@ GR_ENTRY(grLfbReadRegion, FxBool, ( GrBuffer_t src_buffer,
   } else {
     rv = FXFALSE;
   }
-#else 
-#  error "No grLfbReadRegion Implementation for this platform"     
+#else
+#  error "No grLfbReadRegion Implementation for this platform"
 #endif
   GR_RETURN( rv );
 }/* grLfbReadRegion */

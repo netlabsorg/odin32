@@ -1,12 +1,13 @@
+/* $Id: 3df.c,v 1.2 2001-09-05 14:30:43 bird Exp $ */
 /*
  * THIS SOFTWARE IS SUBJECT TO COPYRIGHT PROTECTION AND IS OFFERED ONLY
  * PURSUANT TO THE 3DFX GLIDE GENERAL PUBLIC LICENSE. THERE IS NO RIGHT
  * TO USE THE GLIDE TRADEMARK WITHOUT PRIOR WRITTEN PERMISSION OF 3DFX
- * INTERACTIVE, INC. A COPY OF THIS LICENSE MAY BE OBTAINED FROM THE 
- * DISTRIBUTOR OR BY CONTACTING 3DFX INTERACTIVE INC(info@3dfx.com). 
- * THIS PROGRAM IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER 
+ * INTERACTIVE, INC. A COPY OF THIS LICENSE MAY BE OBTAINED FROM THE
+ * DISTRIBUTOR OR BY CONTACTING 3DFX INTERACTIVE INC(info@3dfx.com).
+ * THIS PROGRAM IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER
  * EXPRESSED OR IMPLIED. SEE THE 3DFX GLIDE GENERAL PUBLIC LICENSE FOR A
- * FULL TEXT OF THE NON-WARRANTY PROVISIONS.  
+ * FULL TEXT OF THE NON-WARRANTY PROVISIONS.
  *
  * USE, DUPLICATION OR DISCLOSURE BY THE GOVERNMENT IS SUBJECT TO
  * RESTRICTIONS AS SET FORTH IN SUBDIVISION (C)(1)(II) OF THE RIGHTS IN
@@ -24,7 +25,7 @@
 
 /*************************************** 3df files ****************************/
 /* Read word, msb first */
-static FxBool 
+static FxBool
 _txRead16 (FILE *stream, FxU16* data)
 {
     FxU8 byte[2];
@@ -35,7 +36,7 @@ _txRead16 (FILE *stream, FxU16* data)
 }
 
 /* Read long word, msb first */
-static FxBool 
+static FxBool
 _txRead32 (FILE *stream, FxU32* data)
 {
     FxU8 byte[4];
@@ -52,7 +53,7 @@ _txRead32 (FILE *stream, FxU32* data)
 
 
 /* Read NCC table */
-static FxBool 
+static FxBool
 _txRead3DFNCCTable (FILE* stream, FxI32* ncc_table)
 {
     FxU32 i;
@@ -86,7 +87,7 @@ _txRead3DFNCCTable (FILE* stream, FxI32* ncc_table)
     return FXTRUE;
 }
 
-static FxBool 
+static FxBool
 _txRead3DFPalTable (FILE* stream, FxI32* pal)
 {
     FxU32 i;
@@ -113,7 +114,7 @@ _txRead3DFHeader(FILE* stream, FxU32 cookie, TxMip *txMip)
     // printf("3df file header\n");
     if (fscanf (stream, "f v%6s", version) != 1) return FXFALSE;
 
-    /* 
+    /*
      * skip comments
      */
     while (((c = getc (stream)) != EOF) && (c == '#')) {

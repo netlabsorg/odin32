@@ -1,28 +1,32 @@
+/* $Id: g3df.c,v 1.2 2001-09-05 14:30:50 bird Exp $ */
 /*
 ** THIS SOFTWARE IS SUBJECT TO COPYRIGHT PROTECTION AND IS OFFERED ONLY
 ** PURSUANT TO THE 3DFX GLIDE GENERAL PUBLIC LICENSE. THERE IS NO RIGHT
 ** TO USE THE GLIDE TRADEMARK WITHOUT PRIOR WRITTEN PERMISSION OF 3DFX
-** INTERACTIVE, INC. A COPY OF THIS LICENSE MAY BE OBTAINED FROM THE 
-** DISTRIBUTOR OR BY CONTACTING 3DFX INTERACTIVE INC(info@3dfx.com). 
-** THIS PROGRAM IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER 
+** INTERACTIVE, INC. A COPY OF THIS LICENSE MAY BE OBTAINED FROM THE
+** DISTRIBUTOR OR BY CONTACTING 3DFX INTERACTIVE INC(info@3dfx.com).
+** THIS PROGRAM IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER
 ** EXPRESSED OR IMPLIED. SEE THE 3DFX GLIDE GENERAL PUBLIC LICENSE FOR A
-** FULL TEXT OF THE NON-WARRANTY PROVISIONS.  
-** 
+** FULL TEXT OF THE NON-WARRANTY PROVISIONS.
+**
 ** USE, DUPLICATION OR DISCLOSURE BY THE GOVERNMENT IS SUBJECT TO
 ** RESTRICTIONS AS SET FORTH IN SUBDIVISION (C)(1)(II) OF THE RIGHTS IN
 ** TECHNICAL DATA AND COMPUTER SOFTWARE CLAUSE AT DFARS 252.227-7013,
 ** AND/OR IN SIMILAR OR SUCCESSOR CLAUSES IN THE FAR, DOD OR NASA FAR
 ** SUPPLEMENT. UNPUBLISHED RIGHTS RESERVED UNDER THE COPYRIGHT LAWS OF
-** THE UNITED STATES.  
-** 
+** THE UNITED STATES.
+**
 ** COPYRIGHT 3DFX INTERACTIVE, INC. 1999, ALL RIGHTS RESERVED
 **
-** $Header: /home/ktk/tmp/odin/odin32xp/src/opengl/glide/sst1/glide/g3df.c,v 1.1 2000-02-25 00:31:12 sandervl Exp $
+** $Header: /home/ktk/tmp/odin/odin32xp/src/opengl/glide/sst1/glide/g3df.c,v 1.2 2001-09-05 14:30:50 bird Exp $
 ** $Log: g3df.c,v $
-** Revision 1.1  2000-02-25 00:31:12  sandervl
+** Revision 1.2  2001-09-05 14:30:50  bird
+** Added $Id:$ keyword.
+**
+** Revision 1.1  2000/02/25 00:31:12  sandervl
 ** Created new Voodoo 1 Glide dir
 **
- * 
+ *
  * 6     3/09/97 10:31a Dow
  * Added GR_DIENTRY for di glide functions
 **
@@ -100,7 +104,7 @@ GR_DIENTRY(gu3dfGetInfo, FxBool,
     GR_ASPECT_4x1,
     GR_ASPECT_8x1
   };
-  CfTableEntry cftable[] = 
+  CfTableEntry cftable[] =
   {
       { "I8",       GR_TEXFMT_INTENSITY_8,        FXTRUE },
       { "A8",       GR_TEXFMT_ALPHA_8,            FXTRUE },
@@ -363,7 +367,7 @@ GR_DIENTRY(gu3dfLoad, FxBool, ( const char *filename, Gu3dfInfo *info ))
        packedvalue |= ( ( FxU32 ) info->table.nccTable.yRGB[index*4+1] ) << 8;
        packedvalue |= ( ( FxU32 ) info->table.nccTable.yRGB[index*4+2] ) << 16;
        packedvalue |= ( ( FxU32 ) info->table.nccTable.yRGB[index*4+3] ) << 24;
-                                           
+
        info->table.nccTable.packed_data[index] = packedvalue;
     }
 

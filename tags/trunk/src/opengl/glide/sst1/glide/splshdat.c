@@ -1,25 +1,29 @@
+/* $Id: splshdat.c,v 1.2 2001-09-05 14:30:57 bird Exp $ */
 /*
 ** THIS SOFTWARE IS SUBJECT TO COPYRIGHT PROTECTION AND IS OFFERED ONLY
 ** PURSUANT TO THE 3DFX GLIDE GENERAL PUBLIC LICENSE. THERE IS NO RIGHT
 ** TO USE THE GLIDE TRADEMARK WITHOUT PRIOR WRITTEN PERMISSION OF 3DFX
-** INTERACTIVE, INC. A COPY OF THIS LICENSE MAY BE OBTAINED FROM THE 
-** DISTRIBUTOR OR BY CONTACTING 3DFX INTERACTIVE INC(info@3dfx.com). 
-** THIS PROGRAM IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER 
+** INTERACTIVE, INC. A COPY OF THIS LICENSE MAY BE OBTAINED FROM THE
+** DISTRIBUTOR OR BY CONTACTING 3DFX INTERACTIVE INC(info@3dfx.com).
+** THIS PROGRAM IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER
 ** EXPRESSED OR IMPLIED. SEE THE 3DFX GLIDE GENERAL PUBLIC LICENSE FOR A
-** FULL TEXT OF THE NON-WARRANTY PROVISIONS.  
-** 
+** FULL TEXT OF THE NON-WARRANTY PROVISIONS.
+**
 ** USE, DUPLICATION OR DISCLOSURE BY THE GOVERNMENT IS SUBJECT TO
 ** RESTRICTIONS AS SET FORTH IN SUBDIVISION (C)(1)(II) OF THE RIGHTS IN
 ** TECHNICAL DATA AND COMPUTER SOFTWARE CLAUSE AT DFARS 252.227-7013,
 ** AND/OR IN SIMILAR OR SUCCESSOR CLAUSES IN THE FAR, DOD OR NASA FAR
 ** SUPPLEMENT. UNPUBLISHED RIGHTS RESERVED UNDER THE COPYRIGHT LAWS OF
-** THE UNITED STATES.  
-** 
+** THE UNITED STATES.
+**
 ** COPYRIGHT 3DFX INTERACTIVE, INC. 1999, ALL RIGHTS RESERVED
 **
-** $Header: /home/ktk/tmp/odin/odin32xp/src/opengl/glide/sst1/glide/splshdat.c,v 1.1 2000-02-25 00:31:21 sandervl Exp $
+** $Header: /home/ktk/tmp/odin/odin32xp/src/opengl/glide/sst1/glide/splshdat.c,v 1.2 2001-09-05 14:30:57 bird Exp $
 ** $Log: splshdat.c,v $
-** Revision 1.1  2000-02-25 00:31:21  sandervl
+** Revision 1.2  2001-09-05 14:30:57  bird
+** Added $Id:$ keyword.
+**
+** Revision 1.1  2000/02/25 00:31:21  sandervl
 ** Created new Voodoo 1 Glide dir
 **
 **
@@ -3577,7 +3581,7 @@ static Face face_2[] = {
 { 20, 24, 22, 2, 0 }
 };
 
-static Vert *vert[] = { 
+static Vert *vert[] = {
 vert_0,
 vert_1,
 vert_2
@@ -3589,7 +3593,7 @@ static int num_verts[] = {
 34
 };
 
-static Face *face[] = { 
+static Face *face[] = {
 face_0,
 face_1,
 face_2
@@ -4593,8 +4597,8 @@ static Matrix mat[76][3] = {
     -36.722248, 9.404100, 1373.684814, 1.000000}
 }
 };
-#define RAW_NAME text_3dfinfo_raw 
-#define IMAGE_NAME text_3dfinfo_image 
+#define RAW_NAME text_3dfinfo_raw
+#define IMAGE_NAME text_3dfinfo_image
 unsigned char RAW_NAME[] = {
 0x40,
 0x0,
@@ -11121,10 +11125,10 @@ unsigned char IMAGE_NAME[] = {
 0x0
 };
 
-#undef RAW_NAME 
-#undef IMAGE_NAME 
-#define RAW_NAME hilite_3dfinfo_raw 
-#define IMAGE_NAME hilite_3dfinfo_image 
+#undef RAW_NAME
+#undef IMAGE_NAME
+#define RAW_NAME hilite_3dfinfo_raw
+#define IMAGE_NAME hilite_3dfinfo_image
 unsigned char RAW_NAME[] = {
 0x20,
 0x0,
@@ -13555,10 +13559,10 @@ unsigned char IMAGE_NAME[] = {
 0x0
 };
 
-#undef RAW_NAME 
-#undef IMAGE_NAME 
-#define RAW_NAME shadow_3dfinfo_raw 
-#define IMAGE_NAME shadow_3dfinfo_image 
+#undef RAW_NAME
+#undef IMAGE_NAME
+#define RAW_NAME shadow_3dfinfo_raw
+#define IMAGE_NAME shadow_3dfinfo_image
 unsigned char RAW_NAME[] = {
 0x40,
 0x0,
@@ -17357,5 +17361,5 @@ unsigned char IMAGE_NAME[] = {
 0x0
 };
 
-#undef RAW_NAME 
-#undef IMAGE_NAME 
+#undef RAW_NAME
+#undef IMAGE_NAME

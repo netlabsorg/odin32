@@ -1,60 +1,64 @@
+/* $Id: ditex.c,v 1.2 2001-09-05 14:30:49 bird Exp $ */
 /*
 ** THIS SOFTWARE IS SUBJECT TO COPYRIGHT PROTECTION AND IS OFFERED ONLY
 ** PURSUANT TO THE 3DFX GLIDE GENERAL PUBLIC LICENSE. THERE IS NO RIGHT
 ** TO USE THE GLIDE TRADEMARK WITHOUT PRIOR WRITTEN PERMISSION OF 3DFX
-** INTERACTIVE, INC. A COPY OF THIS LICENSE MAY BE OBTAINED FROM THE 
-** DISTRIBUTOR OR BY CONTACTING 3DFX INTERACTIVE INC(info@3dfx.com). 
-** THIS PROGRAM IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER 
+** INTERACTIVE, INC. A COPY OF THIS LICENSE MAY BE OBTAINED FROM THE
+** DISTRIBUTOR OR BY CONTACTING 3DFX INTERACTIVE INC(info@3dfx.com).
+** THIS PROGRAM IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER
 ** EXPRESSED OR IMPLIED. SEE THE 3DFX GLIDE GENERAL PUBLIC LICENSE FOR A
-** FULL TEXT OF THE NON-WARRANTY PROVISIONS.  
-** 
+** FULL TEXT OF THE NON-WARRANTY PROVISIONS.
+**
 ** USE, DUPLICATION OR DISCLOSURE BY THE GOVERNMENT IS SUBJECT TO
 ** RESTRICTIONS AS SET FORTH IN SUBDIVISION (C)(1)(II) OF THE RIGHTS IN
 ** TECHNICAL DATA AND COMPUTER SOFTWARE CLAUSE AT DFARS 252.227-7013,
 ** AND/OR IN SIMILAR OR SUCCESSOR CLAUSES IN THE FAR, DOD OR NASA FAR
 ** SUPPLEMENT. UNPUBLISHED RIGHTS RESERVED UNDER THE COPYRIGHT LAWS OF
-** THE UNITED STATES.  
-** 
+** THE UNITED STATES.
+**
 ** COPYRIGHT 3DFX INTERACTIVE, INC. 1999, ALL RIGHTS RESERVED
 **
-** $Header: /home/ktk/tmp/odin/odin32xp/src/opengl/glide/sst1/glide/ditex.c,v 1.1 2000-02-25 00:31:10 sandervl Exp $
+** $Header: /home/ktk/tmp/odin/odin32xp/src/opengl/glide/sst1/glide/ditex.c,v 1.2 2001-09-05 14:30:49 bird Exp $
 ** $Log: ditex.c,v $
-** Revision 1.1  2000-02-25 00:31:10  sandervl
+** Revision 1.2  2001-09-05 14:30:49  bird
+** Added $Id:$ keyword.
+**
+** Revision 1.1  2000/02/25 00:31:10  sandervl
 ** Created new Voodoo 1 Glide dir
 **
- * 
+ *
  * 11    8/19/97 5:02p Atai
  * delete the hack for 4MB texture memory
- * 
+ *
  * 10    8/14/97 6:45p Pgj
  * Fixed bug per GMT
- * 
+ *
  * 9     8/11/97 3:56p Atai
  * fixed error message
- * 
+ *
  * 8     8/11/97 1:39p Atai
  * step 1: use environment variable to set up texture memory size
- * 
+ *
  * 7     7/18/97 6:46p Jdt
  * Protected access to vgInfo structure
- * 
+ *
  * 6     3/15/97 8:09p Jdt
  * Remove grTexDownloadTable from this file because I added SST-1 only
  * code to it
- * 
+ *
  * 5     3/09/97 10:31a Dow
  * Added GR_DIENTRY for di glide functions
- * 
+ *
  * 4     2/12/97 2:09p Hanson
- * Hopefully removed the rest of my muckage. 
- * 
+ * Hopefully removed the rest of my muckage.
+ *
  * 3     2/12/97 12:34p Dow
  * Fixed Hanson muckage
- * 
+ *
  * 2     1/18/97 11:41p Dow
  * Fixed Gary's "Last C Bug" analog
  * Fixed usage of _grMipMapOffset_Tsplit
- * 
+ *
  * 1     12/23/96 1:39p Dow
  * Changes for multiplatform
 **
@@ -80,7 +84,7 @@ FxU32 _gr_aspect_index_table[] =
 };
 
 /* size in texels  */
-FxU32 _grMipMapHostSize[4][16] = 
+FxU32 _grMipMapHostSize[4][16] =
 {
   {                             /* 1:1 aspect ratio */
     65536,                      /* 0 : 256x256  */
@@ -130,59 +134,59 @@ FxU32 _grMipMapHostSize[4][16] =
 
 const int _grMipMapHostWH[GR_ASPECT_1x8+1][GR_LOD_1+1][2] =
 {
-   { 
-     256 , 32, 
-     128 , 16, 
-     64  , 8, 
-     32  , 4, 
-     16  , 2, 
-     8   , 1, 
-     4   , 1, 
-     2   , 1, 
-     1   , 1 
+   {
+     256 , 32,
+     128 , 16,
+     64  , 8,
+     32  , 4,
+     16  , 2,
+     8   , 1,
+     4   , 1,
+     2   , 1,
+     1   , 1
    },
-   { 
-     256 , 64, 
-     128 , 32, 
-     64  , 16, 
-     32  , 8, 
-     16  , 4, 
+   {
+     256 , 64,
+     128 , 32,
+     64  , 16,
+     32  , 8,
+     16  , 4,
      8   , 2,
-     4   , 1, 
-     2   , 1, 
-     1   , 1 
+     4   , 1,
+     2   , 1,
+     1   , 1
    },
-   { 
-     256 , 128, 
-     128 , 64, 
-     64  , 32, 
+   {
+     256 , 128,
+     128 , 64,
+     64  , 32,
      32  , 16,
      16  , 8,
-     8   , 4, 
-     4   , 2, 
-     2   , 1, 
-     1   , 1 
+     8   , 4,
+     4   , 2,
+     2   , 1,
+     1   , 1
    },
-   { 
-     256 , 256, 
-     128 , 128, 
+   {
+     256 , 256,
+     128 , 128,
      64  , 64,
      32  , 32,
      16  , 16,
-     8   , 8, 
-     4   , 4, 
-     2   , 2, 
-     1   , 1 
+     8   , 8,
+     4   , 4,
+     2   , 2,
+     1   , 1
    },
-   { 
+   {
      128, 256,
      64,  128,
      32,  64 ,
      16,  32 ,
-     8,   16 , 
-     4,   8  , 
-     2,   4  , 
-     1,   2  , 
+     8,   16 ,
+     4,   8  ,
+     2,   4  ,
+     1,   2  ,
      1,   1
    },
    {
@@ -191,19 +195,19 @@ const int _grMipMapHostWH[GR_ASPECT_1x8+1][GR_LOD_1+1][2] =
      16,  64 ,
      8,   32 ,
      4,   16 ,
-     2,   8  , 
-     1,   4  , 
-     1,   2  , 
+     2,   8  ,
+     1,   4  ,
+     1,   2  ,
      1,   1
    },
-   { 
+   {
      32,  256,
      16,  128,
      8,   64 ,
      4,   32 ,
      2,   16 ,
-     1,   8  , 
-     1,   4  , 
+     1,   8  ,
+     1,   4  ,
      1,   2  ,
      1,   1
    }
@@ -221,7 +225,7 @@ FxU32 _gr_aspect_xlate_table[] =
     3<< SST_LOD_ASPECT_SHIFT
 };
 
-FxU32 _gr_evenOdd_xlate_table[] = 
+FxU32 _gr_evenOdd_xlate_table[] =
 {
   0xFFFFFFFF,                      /* invalid */
   SST_LOD_TSPLIT,                  /* even */
@@ -309,7 +313,7 @@ _grMipMapInit(void)
 **
 */
 FxU32
-_grTexTextureMemRequired( GrLOD_t small_lod, GrLOD_t large_lod, 
+_grTexTextureMemRequired( GrLOD_t small_lod, GrLOD_t large_lod,
                            GrAspectRatio_t aspect, GrTextureFormat_t format,
                            FxU32 evenOdd )
 {
@@ -329,7 +333,7 @@ _grTexTextureMemRequired( GrLOD_t small_lod, GrLOD_t large_lod,
   else {
     memrequired = 0;
     /* construct XOR mask   */
-    evenOdd = (evenOdd == GR_MIPMAPLEVELMASK_EVEN) ? 1 : 0;  
+    evenOdd = (evenOdd == GR_MIPMAPLEVELMASK_EVEN) ? 1 : 0;
     while (large_lod <= small_lod) {    /* sum up all the mipmap levels */
       if ((large_lod ^ evenOdd) & 1)    /* that match the XOR mask      */
         memrequired += _grMipMapSize[aspect][large_lod];
@@ -382,7 +386,7 @@ _grTexCalcBaseAddress( FxU32 start, GrLOD_t large_lod,
       large_lod += 1;
     sum_of_lod_sizes = _grMipMapOffset_Tsplit[aspect][large_lod];
   }
-    
+
   if ( format >= GR_TEXFMT_16BIT )
     sum_of_lod_sizes <<= 1;
   return ( start - sum_of_lod_sizes );
@@ -392,12 +396,12 @@ _grTexCalcBaseAddress( FxU32 start, GrLOD_t large_lod,
 ** grTexCalcMemRequired
 */
 GR_DIENTRY(grTexCalcMemRequired, FxU32,
-           ( GrLOD_t small_lod, GrLOD_t large_lod, 
+           ( GrLOD_t small_lod, GrLOD_t large_lod,
             GrAspectRatio_t aspect, GrTextureFormat_t format ))
 {
   FxU32 memrequired;
 
-  memrequired = _grTexTextureMemRequired(small_lod, large_lod, 
+  memrequired = _grTexTextureMemRequired(small_lod, large_lod,
                                          aspect, format,
                                          GR_MIPMAPLEVELMASK_BOTH );
   GDBG_INFO((88,"grTexCalcMemRequired(%d,%d,%d,%d) => 0x%x(%d)\n",
@@ -416,7 +420,7 @@ GR_DIENTRY(grTexDetailControl, void,
   FxU32 tDetail;
   FxU32 dmax    = ( FxU32 ) ( detail_max * _GlideRoot.pool.f255 );
   FxU32 dscale  = detail_scale;
-  
+
   GR_BEGIN_NOFIFOCHECK("grTexDetailControl",88);
   GDBG_INFO_MORE((gc->myLevel,"(%d,%d,%g)\n",tmu,detail_scale,detail_max));
   GR_CHECK_TMU( myName, tmu );
@@ -427,7 +431,7 @@ GR_DIENTRY(grTexDetailControl, void,
   tDetail  = ( ( lod_bias << SST_DETAIL_BIAS_SHIFT ) & SST_DETAIL_BIAS );
   tDetail |= ( ( dmax << SST_DETAIL_MAX_SHIFT ) & SST_DETAIL_MAX );
   tDetail |= ( ( dscale << SST_DETAIL_SCALE_SHIFT ) & SST_DETAIL_SCALE );
-  
+
   /* MULTIPLAT */
   _grTexDetailControl( tmu, tDetail );
   GR_END();
@@ -470,21 +474,21 @@ GR_DIENTRY(grTexMaxAddress, FxU32, ( GrChipID_t tmu ))
   Implementor(s): GaryMcT, Jdt
   Library: glide
   Description:
-    Returns the tmu memory required to store the specified mipmap    
-    ( Gary and I don't like the name of this function, but are 
-      a little backed into a corner because of the existence 
+    Returns the tmu memory required to store the specified mipmap
+    ( Gary and I don't like the name of this function, but are
+      a little backed into a corner because of the existence
       of grTexMemRequired() which does not imply any distinction
       between texture memory and system ram )
   Arguments:
     evenOdd  - which set of mipmap levels are to be stored
                 One of:
-                  GR_MIPMAPLEVELMASK_EVEN 
+                  GR_MIPMAPLEVELMASK_EVEN
                   GR_MIPMAPLEVELMASK_ODD
                   GR_MIPMAPLEVELMASK_BOTH
     info      - pointer to GrTexInfo structure defining dimensions
                 of texture
   Return:
-    offset to be added to current texture base address to calculate next 
+    offset to be added to current texture base address to calculate next
     valid texture memory download location
   -------------------------------------------------------------------*/
 GR_DIENTRY(grTexTextureMemRequired, FxU32,
@@ -493,10 +497,10 @@ GR_DIENTRY(grTexTextureMemRequired, FxU32,
   FxU32 memrequired;
 
   GR_CHECK_F( "grTexTextureMemRequired", !info, "invalid info pointer" );
-  memrequired = _grTexTextureMemRequired( info->smallLod, info->largeLod, 
+  memrequired = _grTexTextureMemRequired( info->smallLod, info->largeLod,
                                           info->aspectRatio, info->format,
                                           evenOdd );
-                        
+
   GDBG_INFO((88,"grTexTextureMemRequired(%d,0x%x) => 0x%x(%d)\n",
                 evenOdd,info,memrequired,memrequired));
   return memrequired;
@@ -525,7 +529,7 @@ GR_DIENTRY(grTexTextureMemRequired, FxU32,
   Return:
     none
   -------------------------------------------------------------------*/
-GR_DIENTRY(grTexDownloadMipMap, void, 
+GR_DIENTRY(grTexDownloadMipMap, void,
            ( GrChipID_t tmu, FxU32 startAddress, FxU32
             evenOdd, GrTexInfo  *info ))
 {
@@ -542,26 +546,26 @@ GR_DIENTRY(grTexDownloadMipMap, void,
                "insufficient texture ram at startAddress" );
   GR_CHECK_F( "grTexDownloadMipMap", evenOdd > 0x3, "evenOdd mask invalid" );
   GR_CHECK_F( "grTexDownloadMipMap", !info, "info invalid" );
-  
+
   if ((startAddress < 0x200000) && (startAddress + size > 0x200000))
       GrErrorCallback("grTexDownloadMipMap: mipmap "
                       " cannot span 2 Mbyte boundary",FXTRUE);
 
   src_base = (char *)info->data;
-  
+
   /*---------------------------------------------------------------
     Download one mipmap level at a time
     ---------------------------------------------------------------*/
   for( lod = info->largeLod; lod <= info->smallLod; lod++ ) {
-    grTexDownloadMipMapLevel( tmu, 
-                              startAddress, 
+    grTexDownloadMipMapLevel( tmu,
+                              startAddress,
                               lod,
                               info->largeLod,
                               info->aspectRatio,
                               info->format,
                               evenOdd,
                               src_base );
-               
+
     src_base += _grMipMapHostSize[_gr_aspect_index_table[info->aspectRatio]][lod]
                     << (info->format>=GR_TEXFMT_16BIT);
   }
@@ -587,7 +591,7 @@ GR_DIENTRY(grTexDownloadMipMap, void,
     none
   -------------------------------------------------------------------*/
 GR_DIENTRY(grTexDownloadTablePartial, void,
-           ( GrChipID_t tmu, GrTexTable_t type, 
+           ( GrChipID_t tmu, GrTexTable_t type,
             void *data, int start, int end ))
 {
   GR_BEGIN_NOFIFOCHECK("grTexDownloadTablePartial",89);
@@ -611,17 +615,17 @@ GR_DIENTRY(grTexDownloadTablePartial, void,
 /*---------------------------------------------------------------------------
 ** grTexDownloadMipMapLevel
 */
-GR_DIENTRY(grTexDownloadMipMapLevel, void, 
+GR_DIENTRY(grTexDownloadMipMapLevel, void,
            ( GrChipID_t tmu, FxU32 startAddress, GrLOD_t thisLod,
             GrLOD_t largeLod, GrAspectRatio_t aspectRatio,
-            GrTextureFormat_t format, FxU32 evenOdd, void *data )) 
+            GrTextureFormat_t format, FxU32 evenOdd, void *data ))
 {
   GR_BEGIN_NOFIFOCHECK("grTexDownloadMipMapLevel",89);
   GDBG_INFO_MORE((gc->myLevel,"(%d,0x%x, %d,%d,%d, %d,%d 0x%x)\n",
                   tmu,startAddress,thisLod,largeLod,aspectRatio,
                   format,evenOdd,data));
   grTexDownloadMipMapLevelPartial( tmu, startAddress,
-                                   thisLod, largeLod, 
+                                   thisLod, largeLod,
                                    aspectRatio, format,
                                    evenOdd, data,
                                    0, _grMipMapHostWH[aspectRatio][thisLod][1]-1 );

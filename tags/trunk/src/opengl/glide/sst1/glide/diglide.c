@@ -1,68 +1,72 @@
+/* $Id: diglide.c,v 1.2 2001-09-05 14:30:49 bird Exp $ */
 /*
 ** THIS SOFTWARE IS SUBJECT TO COPYRIGHT PROTECTION AND IS OFFERED ONLY
 ** PURSUANT TO THE 3DFX GLIDE GENERAL PUBLIC LICENSE. THERE IS NO RIGHT
 ** TO USE THE GLIDE TRADEMARK WITHOUT PRIOR WRITTEN PERMISSION OF 3DFX
-** INTERACTIVE, INC. A COPY OF THIS LICENSE MAY BE OBTAINED FROM THE 
-** DISTRIBUTOR OR BY CONTACTING 3DFX INTERACTIVE INC(info@3dfx.com). 
-** THIS PROGRAM IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER 
+** INTERACTIVE, INC. A COPY OF THIS LICENSE MAY BE OBTAINED FROM THE
+** DISTRIBUTOR OR BY CONTACTING 3DFX INTERACTIVE INC(info@3dfx.com).
+** THIS PROGRAM IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER
 ** EXPRESSED OR IMPLIED. SEE THE 3DFX GLIDE GENERAL PUBLIC LICENSE FOR A
-** FULL TEXT OF THE NON-WARRANTY PROVISIONS.  
-** 
+** FULL TEXT OF THE NON-WARRANTY PROVISIONS.
+**
 ** USE, DUPLICATION OR DISCLOSURE BY THE GOVERNMENT IS SUBJECT TO
 ** RESTRICTIONS AS SET FORTH IN SUBDIVISION (C)(1)(II) OF THE RIGHTS IN
 ** TECHNICAL DATA AND COMPUTER SOFTWARE CLAUSE AT DFARS 252.227-7013,
 ** AND/OR IN SIMILAR OR SUCCESSOR CLAUSES IN THE FAR, DOD OR NASA FAR
 ** SUPPLEMENT. UNPUBLISHED RIGHTS RESERVED UNDER THE COPYRIGHT LAWS OF
-** THE UNITED STATES.  
-** 
+** THE UNITED STATES.
+**
 ** COPYRIGHT 3DFX INTERACTIVE, INC. 1999, ALL RIGHTS RESERVED
 **
-** $Header: /home/ktk/tmp/odin/odin32xp/src/opengl/glide/sst1/glide/diglide.c,v 1.1 2000-02-25 00:31:09 sandervl Exp $
+** $Header: /home/ktk/tmp/odin/odin32xp/src/opengl/glide/sst1/glide/diglide.c,v 1.2 2001-09-05 14:30:49 bird Exp $
 ** $Log: diglide.c,v $
-** Revision 1.1  2000-02-25 00:31:09  sandervl
+** Revision 1.2  2001-09-05 14:30:49  bird
+** Added $Id:$ keyword.
+**
+** Revision 1.1  2000/02/25 00:31:09  sandervl
 ** Created new Voodoo 1 Glide dir
 **
- * 
+ *
  * 10    6/18/97 5:54p Dow
  * P6 adjustments
- * 
+ *
  * 9     3/13/97 2:51a Jdt
  * Removed splash from grGlideInit().
- * 
+ *
  * 8     3/09/97 10:31a Dow
  * Added GR_DIENTRY for di glide functions
- * 
+ *
  * 7     2/12/97 2:09p Hanson
- * Hopefully removed the rest of my muckage. 
- * 
+ * Hopefully removed the rest of my muckage.
+ *
  * 6     2/12/97 11:25a Hanson
- * 
+ *
  * 5     1/18/97 11:38p Dow
  * Removed _curGCFuncs Global (moved into _GlideRoot)
- * 
+ *
  * 4     1/16/97 3:37p Dow
  * Added _curGCFuncs global
- * 
+ *
  * 3     1/14/97 10:44a Dow
  * Modified grGlideInit to only call sstopen if splash screen is going to
  * happen && HW != SST96
- * 
+ *
  * 2     1/09/97 10:50a Dow
  * disabled splash screen for sst-96
- * 
+ *
  * 1     12/23/96 1:39p Dow
  * Changes for multiplatform
- * 
+ *
  * 32    11/17/96 11:16p Garymct
  * Updated grSplash code to set all of the necessary state itself rather
  * than expecting the caller to do so.
- * 
+ *
  * 31    11/18/96 1:37a Tarolli
  * fixed grAlphaBlendFunction warning bug
- * 
+ *
  * 29    11/15/96 3:40p Jdt
  * Fixed SST-96 build.
- * 
+ *
  * 28    11/15/96 3:24p Tarolli
  * renamed version.h to rcver.h ,  added some alpha blend function
  * checking
@@ -174,12 +178,12 @@ _grCanSupportDepthBuffer( void )
 /*---------------------------------------------------------------------------
 **
 */
-void 
+void
 _grSwizzleColor( GrColor_t *color )
 {
   GR_DCL_GC;
   unsigned long red, green, blue, alpha;
-  
+
   switch( gc->state.color_format ) {
   case GR_COLORFORMAT_ARGB:
     break;
@@ -251,7 +255,7 @@ GR_DIENTRY(grHints, void, (GrHint_t hintType, FxU32 hints))
       if (hints) {
         gc->state.checkFifo = FXTRUE;
         /* swFifoLWM is kept internally in bytes, hints are in fifo
-           entries */ 
+           entries */
         if (_GlideRoot.environment.swFifoLWM >= 0)
           gc->hwDep.sst1Dep.swFifoLWM =
             _GlideRoot.environment.swFifoLWM << 2;
@@ -279,7 +283,7 @@ GR_DIENTRY(grHints, void, (GrHint_t hintType, FxU32 hints))
 GR_DIENTRY(grGlideInit, void, ( void ))
 {
   GDBG_INIT();
-  
+
   GDBG_INFO((80,"grGlideInit()\n"));
   _GlideInitEnvironment();                      /* the main init code */
   FXUNUSED(*glideIdent);

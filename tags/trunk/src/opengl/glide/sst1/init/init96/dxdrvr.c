@@ -1,50 +1,54 @@
+/* $Id: dxdrvr.c,v 1.2 2001-09-05 14:31:01 bird Exp $ */
 /*
 ** THIS SOFTWARE IS SUBJECT TO COPYRIGHT PROTECTION AND IS OFFERED ONLY
 ** PURSUANT TO THE 3DFX GLIDE GENERAL PUBLIC LICENSE. THERE IS NO RIGHT
 ** TO USE THE GLIDE TRADEMARK WITHOUT PRIOR WRITTEN PERMISSION OF 3DFX
-** INTERACTIVE, INC. A COPY OF THIS LICENSE MAY BE OBTAINED FROM THE 
-** DISTRIBUTOR OR BY CONTACTING 3DFX INTERACTIVE INC(info@3dfx.com). 
-** THIS PROGRAM IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER 
+** INTERACTIVE, INC. A COPY OF THIS LICENSE MAY BE OBTAINED FROM THE
+** DISTRIBUTOR OR BY CONTACTING 3DFX INTERACTIVE INC(info@3dfx.com).
+** THIS PROGRAM IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER
 ** EXPRESSED OR IMPLIED. SEE THE 3DFX GLIDE GENERAL PUBLIC LICENSE FOR A
-** FULL TEXT OF THE NON-WARRANTY PROVISIONS.  
-** 
+** FULL TEXT OF THE NON-WARRANTY PROVISIONS.
+**
 ** USE, DUPLICATION OR DISCLOSURE BY THE GOVERNMENT IS SUBJECT TO
 ** RESTRICTIONS AS SET FORTH IN SUBDIVISION (C)(1)(II) OF THE RIGHTS IN
 ** TECHNICAL DATA AND COMPUTER SOFTWARE CLAUSE AT DFARS 252.227-7013,
 ** AND/OR IN SIMILAR OR SUCCESSOR CLAUSES IN THE FAR, DOD OR NASA FAR
 ** SUPPLEMENT. UNPUBLISHED RIGHTS RESERVED UNDER THE COPYRIGHT LAWS OF
-** THE UNITED STATES.  
-** 
+** THE UNITED STATES.
+**
 ** COPYRIGHT 3DFX INTERACTIVE, INC. 1999, ALL RIGHTS RESERVED
 **
 ** $Log: dxdrvr.c,v $
-** Revision 1.1  2000-02-25 00:31:28  sandervl
+** Revision 1.2  2001-09-05 14:31:01  bird
+** Added $Id:$ keyword.
+**
+** Revision 1.1  2000/02/25 00:31:28  sandervl
 ** Created new Voodoo 1 Glide dir
 **
- * 
+ *
  * 34    1/12/98 10:22p Dow
  * H3D Stereo Support
- * 
+ *
  * 33    11/06/97 9:51a Jdt
  * Fixes window resize events to not crash/hang
- * 
+ *
  * 32    10/01/97 3:21p Atai
  * fix 819, DOS tests flicker on glide
- * 
+ *
  * 31    9/08/97 12:05p Atai
  * fixed resize problem in dxControl()
- * 
+ *
  * 30    8/28/97 10:24a Odo
  * moved debugging varaible
- * 
+ *
  * 29    8/27/97 10:32a Dow
  * added more debugging info
- * 
+ *
  * 28    8/21/97 4:24p Dow
  * Fixed @#$%! C++ Comments, Added Debugging info
 **
-** $Revision: 1.1 $ 
-** $Date: 2000-02-25 00:31:28 $ 
+** $Revision: 1.2 $
+** $Date: 2001-09-05 14:31:01 $
 **
 */
 
@@ -86,15 +90,15 @@ static char *bufTypeNames[] = {
 #endif
 
 #if defined( __WIN32__) && defined(INIT_ACCESS_DDRAW)
-#define WIN32_LEAN_AND_MEAN 
-#include <windows.h> 
-#include <ddraw.h> 
+#define WIN32_LEAN_AND_MEAN
+#include <windows.h>
+#include <ddraw.h>
 
 #define NUM_BUFS 6
 
 static HWND                 hWndApp     = 0;
 static FxU32                FifoOffset  = 0;
-static FxU32                Width       = 0; 
+static FxU32                Width       = 0;
 static FxU32                Height      = 0;
 static FxBool               IsFullScreen = 0;
 static InitBufDesc_t        BufDesc[NUM_BUFS]  = {0};
@@ -132,18 +136,18 @@ FxBool
 _dxSurfaceToBufDesc(LPDIRECTDRAWSURFACE lpSurf, InitBufDesc_t *pDesc)
 {
   DDSURFACEDESC   ddsd;
-  
+
   ddsd.dwSize = sizeof(ddsd);
-  if (IDirectDrawSurface2_Lock(lpSurf, NULL, &ddsd, DDLOCK_WAIT, NULL) 
+  if (IDirectDrawSurface2_Lock(lpSurf, NULL, &ddsd, DDLOCK_WAIT, NULL)
       !=DD_OK) {
     return ErrorMessage(hWndApp, "_dxSurfaceToBufDesc: DdrawSurface Lock failed\n");
   }
-  
+
   /* pDesc->bufType should be filled in by caller */
   pDesc->bufOffset = (FxU32) (ddsd.lpSurface);        /* virtual address. */
   pDesc->bufStride = (FxI32) (ddsd.lPitch);           /* in bytes         */
   pDesc->bufBPP    = (FxI32) 16;
-  
+
   IDirectDrawSurface2_Unlock(lpSurf, NULL);
   return FXTRUE;
 } /* _dxSurfaceToBufDesc */
@@ -162,37 +166,37 @@ _dxDDrawToGlideDesc(InitBufDesc_t *pDesc)
   InitBufDesc_t   *dFifo   = &pDesc[3];
   InitBufDesc_t   *dScreen = &pDesc[4];
   InitBufDesc_t   *dTriple = &pDesc[5];
-  
+
   GDBG_INFO((80, "_dxDDrawToGlide entry\n"));
-  
+
   /* Initialize all descriptors. */
   dScreen->bufMagic  = VG96_BUF_MAGIC;
   dScreen->bufType   = INIT_BUFFER_SCREENBUFFER;
   dScreen->bufOffset = 0;
   dScreen->bufStride = 0;
   dScreen->bufBPP    = 0;
-  
+
   /* Get info about screen (primary display) */
   dScreen->bufType  = INIT_BUFFER_SCREENBUFFER;
   if (!_dxSurfaceToBufDesc( lpFront, dScreen))
     return ErrorMessage(hWndApp, "Couldn't get Screen Info");
-  
+
   *dFront = *dBack = *dAux = *dFifo =
   *dTriple =
   *dScreen;
-  
+
   dFront->bufType   = INIT_BUFFER_FRONTBUFFER;
 
   /* Get info about back buffer */
   dBack->bufType  = INIT_BUFFER_BACKBUFFER;
   if (!_dxSurfaceToBufDesc( lpBack, dBack))
     return ErrorMessage(hWndApp, "Couldn't get Backbuffer Info");
-  
+
   /* Get info about aux buffer */
   dAux->bufType = INIT_BUFFER_AUXBUFFER;
-  if (!_dxSurfaceToBufDesc( lpAux, dAux)) 
+  if (!_dxSurfaceToBufDesc( lpAux, dAux))
     return ErrorMessage(hWndApp, "Couldn't get AuxBuffer Info");
-  
+
   /* Get info about triple buffer */
   if (tripleBuffering) {
     dTriple->bufType  = INIT_BUFFER_TRIPLEBUFFER;
@@ -204,14 +208,14 @@ _dxDDrawToGlideDesc(InitBufDesc_t *pDesc)
   dFifo->bufType   = INIT_BUFFER_FIFOBUFFER;
   dFifo->bufOffset = FifoOffset;
   dFifo->bufStride = 65536 << 1; /* Fixme!!! what's this? */
-  
+
   /* Now convert buf addresses for draw buffers into video memory offsets */
   dFront->bufOffset -= dScreen->bufOffset;
   dBack ->bufOffset -= dScreen->bufOffset;
   dAux  ->bufOffset -= dScreen->bufOffset;
   if (tripleBuffering)
     dTriple->bufOffset -= dScreen->bufOffset;
-  
+
   GDBG_INFO((80, "_dxDDrawToGlideDesc: dFront->bufOffset = 0x%x\n", dFront->bufOffset));
   GDBG_INFO((80, "_dxDDrawToGlideDesc: dBack->bufOffset = 0x%x\n", dBack->bufOffset));
   GDBG_INFO((80, "_dxDDrawToGlideDesc: dAux->bufOffset = 0x%x\n", dAux->bufOffset));
@@ -242,15 +246,15 @@ _dxAllocSurfaces(int xRes, int yRes, int vRefresh, InitBufDesc_t *pDesc)
 #endif
 {
   DDSURFACEDESC   ddsd;
-  
+
 #ifdef H3D
-  GDBG_INFO((80, "_dxAS: hWnd = %x, fs=%d, xRes=%d, yRes=%d, vRefresh=%d, pageFlip=%d\n", 
+  GDBG_INFO((80, "_dxAS: hWnd = %x, fs=%d, xRes=%d, yRes=%d, vRefresh=%d, pageFlip=%d\n",
              hWndApp, IsFullScreen, xRes, yRes, vRefresh, pageFlip));
 #else
-  GDBG_INFO((80, "_dxAS: hWnd = %x, fs=%d, xRes=%d, yRes=%d, vRefresh=%d\n", 
+  GDBG_INFO((80, "_dxAS: hWnd = %x, fs=%d, xRes=%d, yRes=%d, vRefresh=%d\n",
              hWndApp, IsFullScreen, xRes, yRes, vRefresh));
 #endif
-  
+
   if (lpDD1 == NULL) {
     if (DirectDrawCreate( NULL, &lpDD1, NULL ) != DD_OK) {
       return ErrorMessage(hWndApp, "DirectDrawCreate Failed!");
@@ -261,7 +265,7 @@ _dxAllocSurfaces(int xRes, int yRes, int vRefresh, InitBufDesc_t *pDesc)
     GDBG_INFO((80, "_dxAS: DDraw Obj already existed!\n"));
   }
 
-  if (IDirectDraw_QueryInterface( lpDD1, &IID_IDirectDraw2, 
+  if (IDirectDraw_QueryInterface( lpDD1, &IID_IDirectDraw2,
                                    (LPVOID*)&lpDD) !=DD_OK) {
 
     IDirectDraw_Release( lpDD1 );
@@ -271,7 +275,7 @@ _dxAllocSurfaces(int xRes, int yRes, int vRefresh, InitBufDesc_t *pDesc)
   } else {
     GDBG_INFO((80, "_dxAS: DDraw2 Obj created!\n"));
   }
-  
+
   /*
    * Make sure this is done after creating direct draw object!!!
    * First time, only one time, get ourselves a command fifo.
@@ -280,7 +284,7 @@ _dxAllocSurfaces(int xRes, int yRes, int vRefresh, InitBufDesc_t *pDesc)
   if (FifoOffset == 0) {
     FifoOffset = init96GetFBVram() - 65536*3; /* fixme!!! why 3? */
   }
-  
+
   /*
    * If there are any previously allocated surfaces, free them now
    * before asking for more.
@@ -290,13 +294,13 @@ _dxAllocSurfaces(int xRes, int yRes, int vRefresh, InitBufDesc_t *pDesc)
   if( lpBack   ) IDirectDrawSurface2_Release( lpBack   );
   if( lpTriple ) IDirectDrawSurface2_Release( lpTriple    );
   if( lpFront  ) IDirectDrawSurface2_Release( lpFront  );
-  
+
   lpClipper = NULL;
   lpFront   = NULL;
   lpBack    = NULL;
   lpTriple    = NULL;
   lpAux     = NULL;
-  
+
   if ( !IsFullScreen ) {        /* In a window */
 
     GDBG_INFO((80, "_dxAS: Allocating buffers for a windowed mode\n"));
@@ -306,7 +310,7 @@ _dxAllocSurfaces(int xRes, int yRes, int vRefresh, InitBufDesc_t *pDesc)
     if (IDirectDraw2_GetDisplayMode( lpDD, &ddsd ) != DD_OK)
       return ErrorMessage(hWndApp,  "Couldn't get display mode!");
 
-    if (ddsd.ddpfPixelFormat.dwRGBBitCount / 8 != 2) 
+    if (ddsd.ddpfPixelFormat.dwRGBBitCount / 8 != 2)
       return ErrorMessage(hWndApp,  "Display is not in 16bpp format!");
 
     if (IDirectDraw2_SetCooperativeLevel(lpDD,hWndApp, DDSCL_NORMAL ) != DD_OK)
@@ -316,20 +320,20 @@ _dxAllocSurfaces(int xRes, int yRes, int vRefresh, InitBufDesc_t *pDesc)
     ddsd.dwSize         = sizeof( ddsd );
     ddsd.dwFlags        = DDSD_CAPS;
     ddsd.ddsCaps.dwCaps = DDSCAPS_PRIMARYSURFACE | DDSCAPS_3DDEVICE;
-        
-    if (IDirectDraw2_CreateSurface( lpDD, &ddsd, &lpFront, 0 ) != DD_OK) 
+
+    if (IDirectDraw2_CreateSurface( lpDD, &ddsd, &lpFront, 0 ) != DD_OK)
       return ErrorMessage(hWndApp, "Couldn't allocate primary surface!");
 
     GDBG_INFO((80, "_dxAS: Screen: xRes = %d, yRes = %d, stride = %d\n",
                xRes, yRes, ddsd.lPitch));
     /* From jdt */
-    if (IDirectDraw2_CreateClipper( lpDD, 0, &lpClipper, 0 ) != DD_OK) 
+    if (IDirectDraw2_CreateClipper( lpDD, 0, &lpClipper, 0 ) != DD_OK)
       return ErrorMessage(hWndApp, "Create Clipper failed!\n");
 
-    if (IDirectDrawClipper_SetHWnd( lpClipper, 0, hWndApp ) != DD_OK) 
+    if (IDirectDrawClipper_SetHWnd( lpClipper, 0, hWndApp ) != DD_OK)
       return ErrorMessage(hWndApp, "Clipper SethWnd failed!\n");
 
-    if (IDirectDrawSurface2_SetClipper( lpFront, lpClipper ) != DD_OK) 
+    if (IDirectDrawSurface2_SetClipper( lpFront, lpClipper ) != DD_OK)
       return ErrorMessage(hWndApp, "Set Clipper failed!\n");
 
     /* Always allocate back buffer.
@@ -340,14 +344,14 @@ _dxAllocSurfaces(int xRes, int yRes, int vRefresh, InitBufDesc_t *pDesc)
     ddsd.dwHeight       = yRes;
     ddsd.ddsCaps.dwCaps =
       DDSCAPS_OFFSCREENPLAIN | DDSCAPS_VIDEOMEMORY | DDSCAPS_3DDEVICE;
-        
-    if (IDirectDraw2_CreateSurface( lpDD, &ddsd, &lpBack, 0 ) != DD_OK) 
+
+    if (IDirectDraw2_CreateSurface( lpDD, &ddsd, &lpBack, 0 ) != DD_OK)
       return ErrorMessage(hWndApp,  "Couldn't allocate secondary surface!" );
 
     GDBG_INFO((80, "_dxAS: Back buffer allocated!\n"));
 
-    /* 
-     * Always allocate Aux Buffer Surface 
+    /*
+     * Always allocate Aux Buffer Surface
      * XXX - (use nAuxBuffers, and deal with 8bpp for alpha)
      */
     ddsd.dwSize         = sizeof( ddsd );
@@ -356,70 +360,70 @@ _dxAllocSurfaces(int xRes, int yRes, int vRefresh, InitBufDesc_t *pDesc)
     ddsd.dwHeight       = yRes;
     ddsd.ddsCaps.dwCaps = DDSCAPS_OFFSCREENPLAIN | DDSCAPS_VIDEOMEMORY
         | DDSCAPS_3DDEVICE;
-        
-    if (IDirectDraw2_CreateSurface( lpDD, &ddsd, &lpAux, 0 ) != DD_OK) 
+
+    if (IDirectDraw2_CreateSurface( lpDD, &ddsd, &lpAux, 0 ) != DD_OK)
       return ErrorMessage(hWndApp,  "Couldn't allocate aux surface" );
 
     GDBG_INFO((80, "_dxAS: Aux Buffer allocated!\n"));
 
   } else {
-    
+
     /* Full screen - Set Exclusive Mode, change resolution,  */
     GDBG_INFO((80, "_dxAS: Setting Full screen exclusive mode!\n"));
-    
-    if (IDirectDraw2_SetCooperativeLevel(lpDD, hWndApp, 
+
+    if (IDirectDraw2_SetCooperativeLevel(lpDD, hWndApp,
                                          DDSCL_EXCLUSIVE | DDSCL_FULLSCREEN ) != DD_OK)
       return ErrorMessage(hWndApp, "Couldn't set cooperative level!");
-    
+
     if (IDirectDraw2_SetDisplayMode( lpDD, xRes, yRes, 16, 0,0) != DD_OK)
       return ErrorMessage(hWndApp,  "Couldn't set display mode!");
-    
+
     /* Allocate Front/Back Buffer Surfaces, skip triple buffer XXX */
     ddsd.dwSize            = sizeof( ddsd );
     ddsd.dwFlags           = DDSD_CAPS | DDSD_BACKBUFFERCOUNT;
     ddsd.dwBackBufferCount = 1;
-    ddsd.ddsCaps.dwCaps    = DDSCAPS_PRIMARYSURFACE | 
-      DDSCAPS_FLIP | 
+    ddsd.ddsCaps.dwCaps    = DDSCAPS_PRIMARYSURFACE |
+      DDSCAPS_FLIP |
         DDSCAPS_COMPLEX |
           DDSCAPS_VIDEOMEMORY | DDSCAPS_3DDEVICE;
-    
-    if (IDirectDraw2_CreateSurface( lpDD, &ddsd, &lpFront, 0 ) != DD_OK) 
+
+    if (IDirectDraw2_CreateSurface( lpDD, &ddsd, &lpFront, 0 ) != DD_OK)
       return ErrorMessage(hWndApp, "Couldn't allocate primary surface!");
-    
+
     /* Get back buffer information */
     ddsd.ddsCaps.dwCaps = DDSCAPS_BACKBUFFER;
-    if (IDirectDrawSurface2_GetAttachedSurface( lpFront, &ddsd.ddsCaps, 
+    if (IDirectDrawSurface2_GetAttachedSurface( lpFront, &ddsd.ddsCaps,
                                                &lpBack) != DD_OK)
       return ErrorMessage(hWndApp, "Couldn't get back buffer info!\n");
-    
+
     GDBG_INFO((80, "_dxAS: Full Screen: front/back buffer allocated!\n"));
-    
+
     /* Allocate Aux Buffer Surface - XXX */
     ddsd.dwSize         = sizeof( ddsd );
     ddsd.dwFlags        = DDSD_CAPS | DDSD_HEIGHT | DDSD_WIDTH;
     ddsd.dwWidth        = xRes;
     ddsd.dwHeight       = yRes;
-    ddsd.ddsCaps.dwCaps = 
+    ddsd.ddsCaps.dwCaps =
       DDSCAPS_OFFSCREENPLAIN | DDSCAPS_VIDEOMEMORY | DDSCAPS_3DDEVICE;
-    
-    if (IDirectDraw2_CreateSurface( lpDD, &ddsd, &lpAux, 0 ) != DD_OK) 
+
+    if (IDirectDraw2_CreateSurface( lpDD, &ddsd, &lpAux, 0 ) != DD_OK)
       return ErrorMessage(hWndApp,  "Couldn't allocate aux surface" );
 
     GDBG_INFO((80, "_dxAS: Full Screen: aux buffer allocated!\n"));
-    
+
 /*
  * Triple buffer hack: full-screen only for now.  Allocate as Aux DD surf,
  * after everything else N.B. Allocation order may be important!!!
  * god knows how DD would implement dwBackBufferCount == 2
  */
     if (tripleBuffering) {
-      if (IDirectDraw2_CreateSurface( lpDD, &ddsd, &lpTriple, 0 ) != DD_OK) 
+      if (IDirectDraw2_CreateSurface( lpDD, &ddsd, &lpTriple, 0 ) != DD_OK)
         return ErrorMessage(hWndApp,  "Couldn't allocate triple buffer" );
 
       GDBG_INFO((80, "_dxAS: Triple buffer allocated!\n"));
     }
   }
-  
+
   /* Convert direct draw surfaces to Glide's idea of buffer descriptors */
   return _dxDDrawToGlideDesc(pDesc);
 } /* _dxAllocSurfaces */
@@ -431,7 +435,7 @@ _dxReallocSurfaces(int xRes, int yRes, int vRefresh, InitBufDesc_t *pDesc)
   DDSURFACEDESC   ddsd;
   const char      *errorMessage = "no error";
 
-  /* for now this is a goddamn baseball bat 
+  /* for now this is a goddamn baseball bat
      it can be trimmed down */
   if ( !IsFullScreen ) { /* this *REALLY* should be called for fullscreen */
     if( lpClipper) IDirectDrawClipper_Release( lpClipper);
@@ -439,13 +443,13 @@ _dxReallocSurfaces(int xRes, int yRes, int vRefresh, InitBufDesc_t *pDesc)
     if( lpBack   ) IDirectDrawSurface2_Release( lpBack   );
     if( lpTriple ) IDirectDrawSurface2_Release( lpTriple    );
     if( lpFront  ) IDirectDrawSurface2_Release( lpFront  );
-    
+
     lpClipper = NULL;
     lpFront   = NULL;
     lpBack    = NULL;
     lpTriple  = NULL;
     lpAux     = NULL;
-  
+
     /* Verify screen pixel format is 16bpp, and set cooperative level */
     ddsd.dwSize = sizeof( ddsd );
 
@@ -453,7 +457,7 @@ _dxReallocSurfaces(int xRes, int yRes, int vRefresh, InitBufDesc_t *pDesc)
     ddsd.dwSize         = sizeof( ddsd );
     ddsd.dwFlags        = DDSD_CAPS;
     ddsd.ddsCaps.dwCaps = DDSCAPS_PRIMARYSURFACE | DDSCAPS_3DDEVICE;
-        
+
     if (IDirectDraw2_CreateSurface( lpDD, &ddsd, &lpFront, 0 ) != DD_OK) {
       errorMessage =  "Couldn't allocate primary surface!";
       goto FUBAR;
@@ -483,14 +487,14 @@ _dxReallocSurfaces(int xRes, int yRes, int vRefresh, InitBufDesc_t *pDesc)
     ddsd.dwHeight       = yRes;
     ddsd.ddsCaps.dwCaps =
       DDSCAPS_OFFSCREENPLAIN | DDSCAPS_VIDEOMEMORY | DDSCAPS_3DDEVICE;
-        
+
     if (IDirectDraw2_CreateSurface( lpDD, &ddsd, &lpBack, 0 ) != DD_OK) {
       errorMessage = "Couldn't allocate secondary surface!";
       goto FUBAR;
     }
 
-    /* 
-     * Always allocate Aux Buffer Surface 
+    /*
+     * Always allocate Aux Buffer Surface
      * XXX - (use nAuxBuffers, and deal with 8bpp for alpha)
      */
     ddsd.dwSize         = sizeof( ddsd );
@@ -499,7 +503,7 @@ _dxReallocSurfaces(int xRes, int yRes, int vRefresh, InitBufDesc_t *pDesc)
     ddsd.dwHeight       = yRes;
     ddsd.ddsCaps.dwCaps = DDSCAPS_OFFSCREENPLAIN | DDSCAPS_VIDEOMEMORY
         | DDSCAPS_3DDEVICE;
-        
+
     if (IDirectDraw2_CreateSurface( lpDD, &ddsd, &lpAux, 0 ) != DD_OK) {
       errorMessage = "Couldn't allocate aux surface";
       goto FUBAR;
@@ -530,31 +534,31 @@ static FxBool
 _dxRestoreSurfaces(InitBufDesc_t *pDesc)
 {
   if (lpDD == NULL) return TRUE;
-  
+
   if (IDirectDrawSurface2_IsLost(lpFront) == DDERR_SURFACELOST) {
-    if (IDirectDrawSurface2_Restore(lpFront) != DD_OK) 
+    if (IDirectDrawSurface2_Restore(lpFront) != DD_OK)
       return ErrorMessage(hWndApp, "Front Buffer restore failure\n");
   }
-  
+
   if (!IsFullScreen) {
     if (IDirectDrawSurface2_IsLost(lpBack) == DDERR_SURFACELOST) {
-      if (IDirectDrawSurface2_Restore(lpBack) != DD_OK) 
+      if (IDirectDrawSurface2_Restore(lpBack) != DD_OK)
         return ErrorMessage(hWndApp, "Back  Buffer restore failure\n");
     }
   }
-  
+
   if (IDirectDrawSurface2_IsLost(lpAux) == DDERR_SURFACELOST) {
-    if (IDirectDrawSurface2_Restore(lpAux) != DD_OK) 
+    if (IDirectDrawSurface2_Restore(lpAux) != DD_OK)
       return ErrorMessage(hWndApp, "Aux   Buffer restore failure\n");
   }
-  
+
   if (!IsFullScreen) {
     if (IDirectDrawSurface2_IsLost(lpTriple) == DDERR_SURFACELOST) {
-      if (IDirectDrawSurface2_Restore(lpTriple) != DD_OK) 
+      if (IDirectDrawSurface2_Restore(lpTriple) != DD_OK)
         return ErrorMessage(hWndApp, "Back  Buffer restore failure\n");
     }
   }
-  
+
   GDBG_INFO((80, "_dxRS: restore surfaces OK\n"));
   return _dxDDrawToGlideDesc(pDesc);
 } /* _dxRestoreSurfaces */
@@ -586,7 +590,7 @@ dxOpen(
 #endif
 
   /*
-   * Get ourselves a valid window handle 
+   * Get ourselves a valid window handle
    */
   hWndApp = (hWindow == 0) ? GetActiveWindow() : (HWND) hWindow;
 
@@ -614,10 +618,10 @@ dxOpen(
 #ifdef H3D
     if ((sRes <  GR_RESOLUTION_MIN) ||
         (sRes >  GR_RESOLUTION_MAX) &&
-        (!GR_RESOLUTION_IS_AUTOFLIPPED(sRes)) ) 
+        (!GR_RESOLUTION_IS_AUTOFLIPPED(sRes)) )
 #else
     if ((sRes <  GR_RESOLUTION_320x200) ||
-        (sRes >  GR_RESOLUTION_512x256)) 
+        (sRes >  GR_RESOLUTION_512x256))
 #endif
       return ErrorMessage(hWndApp, "Bad Fullscreen resolution");
 
@@ -658,7 +662,7 @@ dxOpen(
     GDBG_INFO((80, "\tbufMagic = 0x%x\n", pBufDesc[i].bufMagic));
     GDBG_INFO((80, "\tbufType = 0x%x\n", pBufDesc[i].bufType));
     GDBG_INFO((80, "\tbufOffset = 0x%x\n", pBufDesc[i].bufOffset));
-    GDBG_INFO((80, "\tbufStride = 0x%x\n", pBufDesc[i].bufStride));    
+    GDBG_INFO((80, "\tbufStride = 0x%x\n", pBufDesc[i].bufStride));
     GDBG_INFO((80, "\tbufBPP = 0x%x\n", pBufDesc[i].bufBPP));
   }
 
@@ -667,7 +671,7 @@ dxOpen(
   *swapType = (IsFullScreen) ? INIT_SWAP_FLIP : INIT_SWAP_BLT;
 
   if ( curHALData->initSetVideo ) {
-    curHALData->initSetVideo( sRes, vRefresh, 
+    curHALData->initSetVideo( sRes, vRefresh,
                              (FxU32*)width, (FxU32*)height );
   }
 
@@ -682,14 +686,14 @@ dxControl(FxU32 code, InitBufDesc_t *pBufDesc, int *width, int *height)
 {
   RECT    rect;
   int     i;
-  
+
   GDBG_INFO((80, "dxControl: code = %d\n", code));
-  
+
   /* dx is not initizized */
   if ( lpDD== NULL ) {
     return TRUE;
   }
-  
+
   /* Why was I called? */
   switch(code) {
   case INIT_CONTROL_RESIZE:     /* recreate surfaces */
@@ -697,8 +701,8 @@ dxControl(FxU32 code, InitBufDesc_t *pBufDesc, int *width, int *height)
     if ((Width != (FxU32) rect.right) || (Height != (FxU32) rect.bottom)) {
       Width = rect.right;
       Height = rect.bottom;
-      GDBG_INFO((120, "W and H changed to %d %d\n", 
-                 Width, Height)); 
+      GDBG_INFO((120, "W and H changed to %d %d\n",
+                 Width, Height));
 
       if (!_dxReallocSurfaces(Width, Height, 0, BufDesc)) {
         /*
@@ -730,7 +734,7 @@ dxControl(FxU32 code, InitBufDesc_t *pBufDesc, int *width, int *height)
   *height = Height;
   GDBG_INFO((80, "dxControl: code = %d, w = %d, h = %d\n", code,
              Width, Height));
-  
+
   return FXTRUE;
 } /* dxControl */
 
@@ -758,14 +762,14 @@ dxClose()
     if( lpDD1    ) IDirectDraw_Release( lpDD1 );
     lpDD1     = NULL;
   }
-  
+
   lpClipper = NULL;
   lpFront   = NULL;
   lpBack    = NULL;
   lpTriple   = NULL;
   lpAux     = NULL;
   lpDD      = NULL;
-  
+
 #endif /* 0 */
   GDBG_INFO((80, "dxClose:  Returning TRUE\n"));
   return FXTRUE;
@@ -777,7 +781,7 @@ dxSwap(FxU32 code)
   static RECT    dest, src;
   static POINT   point;
   static HRESULT hr;
-  
+
   GDBG_INFO((80, "dxSwap:\n"));
   if ( !IsFullScreen ) {
     GDBG_INFO((120, "Swap: using BLTs\n"));
@@ -786,7 +790,7 @@ dxSwap(FxU32 code)
     src.right  = Width-1;
     src.top    = 0;
     src.bottom = Height-1;
-        
+
     dest = src;
     point.x = 0;
     point.y = 0;
@@ -796,22 +800,22 @@ dxSwap(FxU32 code)
     dest.top    += point.y;
     dest.bottom += point.y;
 
-    hr = IDirectDrawSurface_Blt( lpFront, 
+    hr = IDirectDrawSurface_Blt( lpFront,
                                 &dest,
                                 lpBack,
                                 &src,
                                 DDBLT_WAIT,
                                 NULL );
-        
+
     while( IDirectDrawSurface_GetBltStatus( lpFront, DDGBS_ISBLTDONE ) !=
           DD_OK );
-        
+
     if ( hr != DD_OK ) {
       ErrorMessage(hWndApp, "Couldn't blit!\n");
     }
   }
   return;
-  
+
 } /* dxSwap */
 #else /* it's either DOS or the Hoopti Lab Setup */
 FxBool
@@ -879,7 +883,7 @@ dxOpen(
     GDBG_INFO((80, "%s:  Unimplemented resolution\n", FN_NAME));
     break;
   }
-  
+
 
 #define WAITLOOP {\
   volatile int waitfoo;\
@@ -892,11 +896,11 @@ dxOpen(
 #define BUMP_PAGE(x) (BUMP(x, 1<<12))
 
   if ( curHALData->initSetVideo ) {
-    rv = curHALData->initSetVideo( sRes, vRefresh, 
+    rv = curHALData->initSetVideo( sRes, vRefresh,
                                   (FxU32*)width, (FxU32*)height );
     if ( !rv ) goto BAIL;
   }
-  
+
   /* Initialize all descriptors. */
   dFront->bufMagic  = VG96_BUF_MAGIC;
   dFront->bufType   = INIT_BUFFER_FRONTBUFFER;
@@ -951,16 +955,16 @@ dxOpen(
 
 #ifdef GDBG_INFO_ON
   {
-    int i;  
+    int i;
 
     for (i = 0; i < 5; i++) {
       GDBG_INFO((80, "%s:  pBufDesc[%d] = 0x%x:\n",
                  FN_NAME, i, &pBufDesc[i]));
       GDBG_INFO((80, "%s:  pBufDesc.bufType = %s\n",
                  FN_NAME, bufTypeNames[pBufDesc[i].bufType]));
-      GDBG_INFO((80, "%s:  pBufDesc.bufOffset = 0x%x\n", 
+      GDBG_INFO((80, "%s:  pBufDesc.bufOffset = 0x%x\n",
                  FN_NAME, pBufDesc[i].bufOffset ));
-      GDBG_INFO((80, "%s:  pBufDesc.bufStride = 0x%x\n", 
+      GDBG_INFO((80, "%s:  pBufDesc.bufStride = 0x%x\n",
                  FN_NAME, pBufDesc[i].bufStride));
       GDBG_INFO((80, "%s:  pBufDesc.bufBPP = 0x%x\n",
                  FN_NAME, pBufDesc[i].bufBPP));

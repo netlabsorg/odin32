@@ -1,14 +1,15 @@
+/* $Id: pal256.c,v 1.2 2001-09-05 14:30:45 bird Exp $ */
 /*
  * This software is copyrighted as noted below.  It may be freely copied,
- * modified, and redistributed, provided that the copyright notice is 
+ * modified, and redistributed, provided that the copyright notice is
  * preserved on all copies.
- * 
+ *
  * There is no warranty or other guarantee of fitness for this software,
  * it is provided solely "as is".  Bug reports or fixes may be sent
  * to the author, who may or may not act on them as he desires.
  *
  * You may not include this software in a program or other software product
- * without supplying the source, or without informing the end-user that the 
+ * without supplying the source, or without informing the end-user that the
  * source is available for no extra charge.
  *
  * If you modify this software, you should include a notice giving the
@@ -71,9 +72,9 @@ typedef unsigned short  ushort;
 /*
  * Readability constants.
  */
-#define REDI            0       
+#define REDI            0
 #define GREENI          1
-#define BLUEI           2       
+#define BLUEI           2
 #define TRUE            1
 #define FALSE           0
 #define bzero(ptr, sz)  memset(ptr, 0, sz)
@@ -110,13 +111,13 @@ static void     QuantHistogram(ulong *pixels, int npixels, Box *box);
 /*
  * Perform variance-based color quantization on a 24-bit image.
  */
-int     
+int
 txMipPal256(TxMip *pxMip, TxMip *txMip, int format, FxU32 dither, FxU32 compression)
 {
     int         w, h;
     int         i;                              /* Counter */
     int         OutColors;              /* # of entries computed */
-    int         Colormax;               /* quantized full-intensity */ 
+    int         Colormax;               /* quantized full-intensity */
     float       Cfactor;                /* Conversion factor */
 #if 0
     uchar       *rgbmap;                /* how to map colors to palette indices */
@@ -130,7 +131,7 @@ txMipPal256(TxMip *pxMip, TxMip *txMip, int format, FxU32 dither, FxU32 compress
     Colormax = ColormaxI - 1;
     Cfactor = (float)FULLINTENSITY / Colormax;
 
-    Boxes = _Boxes;     
+    Boxes = _Boxes;
 #if 0
     Histogram = (ulong *) txMalloc(ColormaxI*ColormaxI*ColormaxI * sizeof(long));
     rgbmap = txMalloc((1<<NBITS)*(1<<NBITS)*(1<<NBITS));
@@ -156,7 +157,7 @@ txMipPal256(TxMip *pxMip, TxMip *txMip, int format, FxU32 dither, FxU32 compress
     }
 
     OutColors = CutBoxes(Boxes, MAXCOLORS);
-    
+
     /*
      * We now know the set of representative colors.  We now
      * must fill in the colormap and convert the representatives
@@ -179,7 +180,7 @@ txMipPal256(TxMip *pxMip, TxMip *txMip, int format, FxU32 dither, FxU32 compress
 
         pxMip->pal[i] = (r<<16) | (g << 8) | b;
     }
-    ComputeRGBMap(Boxes, OutColors, rgbmap); 
+    ComputeRGBMap(Boxes, OutColors, rgbmap);
 
     /*
      * Now translate the colors to palette indices.
@@ -217,7 +218,7 @@ txMipPal256(TxMip *pxMip, TxMip *txMip, int format, FxU32 dither, FxU32 compress
                         if (pixsize == 1) {
                                 *dst++ = rgbmap[index];
                         } else {
-                                *(FxU16 *)dst = (rgbmap[index]) | 
+                                *(FxU16 *)dst = (rgbmap[index]) |
                                                 ((argb >> 16) & 0xFF00);
                                 dst+= 2;
                         }
@@ -252,9 +253,9 @@ QuantHistogram(ulong *pixels, int npixels, Box *box)
     /*
      * We compute both the histogram and the proj. frequencies of
      * the first box at the same time to save a pass through the
-     * entire image. 
+     * entire image.
      */
-    
+
     for (i = 0; i < npixels; i++) {
         rr = (uchar) (((*pixels >> 16) & 0xff) >> (8-NBITS));
         gg = (uchar) (((*pixels >>  8) & 0xff) >> (8-NBITS));
@@ -265,14 +266,14 @@ QuantHistogram(ulong *pixels, int npixels, Box *box)
         bf[bb]++;
         Histogram[(((rr<<NBITS)|gg)<<NBITS)|bb]++;
     }
-        
+
 }
 
 /*
  * Interatively cut the boxes.
  */
 static int
-CutBoxes(Box *boxes, int colors) 
+CutBoxes(Box *boxes, int colors)
 {
     int curbox;
 
@@ -362,7 +363,7 @@ CutBox(Box *box, Box *newbox)
     /*
      * Find 'optimal' cutpoint along each of the red, green and blue
      * axes.  Sum the variances of the two boxes which would result
-     * by making each cut and store the resultant boxes for 
+     * by making each cut and store the resultant boxes for
      * (possible) later use.
      */
     for (i = 0; i < 3; i++) {
@@ -460,7 +461,7 @@ UpdateFrequencies(Box *box1, Box *box2)
 
     bzero(box1->freq[0], ColormaxI * sizeof(ulong));
     bzero(box1->freq[1], ColormaxI * sizeof(ulong));
-    bzero(box1->freq[2], ColormaxI * sizeof(ulong)); 
+    bzero(box1->freq[2], ColormaxI * sizeof(ulong));
 
     for (r = box1->low[0]; r < box1->high[0]; r++) {
         roff = r << NBITS;
@@ -506,12 +507,12 @@ static void
 SetRGBmap(int boxnum, Box *box, uchar *rgbmap)
 {
     int r, g, b;
-    
+
     for (r = box->low[REDI]; r < box->high[REDI]; r++) {
         for (g = box->low[GREENI]; g < box->high[GREENI]; g++) {
                 for (b = box->low[BLUEI]; b < box->high[BLUEI]; b++) {
                         int     index;
-                        
+
                         index = (((r<<NBITS)|g)<<NBITS)|b;
                         rgbmap[index]=(char)boxnum;
                 }
@@ -527,7 +528,7 @@ unsigned char _txPixTrueToFixedPal( void *pix, const FxU32 *pal )
   long min_dist;
   int min_index;
   long r, g, b;
-  
+
   min_dist = 256 * 256 + 256 * 256 + 256 * 256;
   min_index = -1;
   /* 0 1 2 */
@@ -572,11 +573,11 @@ void _txImgTrueToFixedPal( unsigned char *dst, unsigned char *src, const FxU32 *
         {
           unsigned long index;
           unsigned long r_index, g_index, b_index;
-          
+
           r_index = ( ( ( unsigned long )src[i*4+2] ) >> ( 8 - INVERSE_PAL_R_BITS ) );
           g_index = ( ( ( unsigned long )src[i*4+1] ) >> ( 8 - INVERSE_PAL_G_BITS ) );
           b_index = ( ( ( unsigned long )src[i*4+0] ) >> ( 8 - INVERSE_PAL_B_BITS ) );
-          index = 
+          index =
             ( r_index << ( INVERSE_PAL_G_BITS + INVERSE_PAL_B_BITS ) ) |
             ( g_index << INVERSE_PAL_B_BITS ) |
             b_index;
@@ -617,7 +618,7 @@ void txMipTrueToFixedPal( TxMip *outputMip, TxMip *trueColorMip, const FxU32 *pa
   int             i, w, h;
   static          FxU32 last_pal[256];
   static          FxBool been_here = FXFALSE;
-  
+
   w = outputMip->width;
   h = outputMip->height;
 
@@ -631,7 +632,7 @@ void txMipTrueToFixedPal( TxMip *outputMip, TxMip *trueColorMip, const FxU32 *pa
         }
     }
 
-  for( i = 0; i < trueColorMip->depth; i++ ) 
+  for( i = 0; i < trueColorMip->depth; i++ )
     {
       _txImgTrueToFixedPal( outputMip->data[i], trueColorMip->data[i], pal,
                             w, h, flags );

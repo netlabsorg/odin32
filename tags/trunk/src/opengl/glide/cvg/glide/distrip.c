@@ -1,72 +1,76 @@
+/* $Id: distrip.c,v 1.2 2001-09-05 14:30:21 bird Exp $ */
 /*
 ** THIS SOFTWARE IS SUBJECT TO COPYRIGHT PROTECTION AND IS OFFERED ONLY
 ** PURSUANT TO THE 3DFX GLIDE GENERAL PUBLIC LICENSE. THERE IS NO RIGHT
 ** TO USE THE GLIDE TRADEMARK WITHOUT PRIOR WRITTEN PERMISSION OF 3DFX
-** INTERACTIVE, INC. A COPY OF THIS LICENSE MAY BE OBTAINED FROM THE 
-** DISTRIBUTOR OR BY CONTACTING 3DFX INTERACTIVE INC(info@3dfx.com). 
-** THIS PROGRAM IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER 
+** INTERACTIVE, INC. A COPY OF THIS LICENSE MAY BE OBTAINED FROM THE
+** DISTRIBUTOR OR BY CONTACTING 3DFX INTERACTIVE INC(info@3dfx.com).
+** THIS PROGRAM IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER
 ** EXPRESSED OR IMPLIED. SEE THE 3DFX GLIDE GENERAL PUBLIC LICENSE FOR A
-** FULL TEXT OF THE NON-WARRANTY PROVISIONS.  
-** 
+** FULL TEXT OF THE NON-WARRANTY PROVISIONS.
+**
 ** USE, DUPLICATION OR DISCLOSURE BY THE GOVERNMENT IS SUBJECT TO
 ** RESTRICTIONS AS SET FORTH IN SUBDIVISION (C)(1)(II) OF THE RIGHTS IN
 ** TECHNICAL DATA AND COMPUTER SOFTWARE CLAUSE AT DFARS 252.227-7013,
 ** AND/OR IN SIMILAR OR SUCCESSOR CLAUSES IN THE FAR, DOD OR NASA FAR
 ** SUPPLEMENT. UNPUBLISHED RIGHTS RESERVED UNDER THE COPYRIGHT LAWS OF
-** THE UNITED STATES.  
-** 
+** THE UNITED STATES.
+**
 ** COPYRIGHT 3DFX INTERACTIVE, INC. 1999, ALL RIGHTS RESERVED
 **
-** $Header: /home/ktk/tmp/odin/odin32xp/src/opengl/glide/cvg/glide/distrip.c,v 1.1 2000-02-25 00:37:35 sandervl Exp $
+** $Header: /home/ktk/tmp/odin/odin32xp/src/opengl/glide/cvg/glide/distrip.c,v 1.2 2001-09-05 14:30:21 bird Exp $
 ** $Log: distrip.c,v $
-** Revision 1.1  2000-02-25 00:37:35  sandervl
+** Revision 1.2  2001-09-05 14:30:21  bird
+** Added $Id:$ keyword.
+**
+** Revision 1.1  2000/02/25 00:37:35  sandervl
 ** Created Voodoo 2 dir
 **
- * 
+ *
  * 14    1/08/98 4:58p Atai
  * tex table broadcast, grVertexLayout enable/disable, stq, and some
  * defines
- * 
+ *
  * 13    12/12/97 10:59a Atai
  * clip space and viewport
- * 
+ *
  * 12    12/08/97 10:42a Atai
  * added grDrawVertexArrayLinear()
- * 
+ *
  * 11    11/21/97 6:05p Atai
  * use one datalist (tsuDataList) in glide3
- * 
+ *
  * 10    11/18/97 6:11p Peter
  * fixed glide3 muckage
- * 
+ *
  * 9     11/18/97 3:24p Atai
  * change grParameterData to grVertexLayout
  * define GR_PARAM_*
- * 
+ *
  * 8     11/07/97 11:22a Atai
  * remove GR_*_SMOOTH. use GR_SMOOTH
- * 
+ *
  * 7     11/06/97 6:10p Atai
  * update GrState size
  * rename grDrawArray to grDrawVertexArray
  * update _grDrawPoint and _grDrawVertexList
- * 
+ *
  * 6     10/21/97 8:36p Atai
  * added gr_lines routines
  * use dword offset
- * 
+ *
  * 5     10/17/97 2:11p Atai
  * added grContinueArray. We only support non aa mode for now.
- * 
+ *
  * 4     10/14/97 4:34p Atai
  * filled out the calls to different drawarray routines
- * 
+ *
  * 3     9/29/97 1:26p Dow
  * Fixed packed color strips/fans
- * 
+ *
  * 2     9/26/97 10:24a Dow
  * Fixed state muckage in Glide3 parameter data
- * 
+ *
  * 1     9/23/97 2:04p Dow
  * DI code for strips
 **
@@ -85,7 +89,7 @@
   Function: grVertexLayout
   Date: 17-Sep-97
   Implementor(s): dow
-  Library: Init Code for 
+  Library: Init Code for
   Description:
     This routine defines the format for vertex arrays.
 
@@ -97,7 +101,7 @@
 
 
         So, this table summarizes the legal combinations:
-        Param           Type            Size    Description 
+        Param           Type            Size    Description
         =======================================================================================================
         GR_PARAM_XY     FxFloat         8       X and Y coordinates.  Offset must be zero.
         GR_PARAM_Z      FxFloat         4       Z coordinate.
@@ -105,7 +109,7 @@
         GR_PARAM_RGB    FxFloat         12      RGB triplet.
         GR_PARAM_PARGB  FxU32           4       Packed ARGB.  High-order byte is A, followed by R, G, and B.
         GR_PARAM_STn    FxFloat         8       S and T coordinates for TMU , where n is in the range [0, TBD]
-        GR_PARAM_Wn     FxFloat         4       
+        GR_PARAM_Wn     FxFloat         4
 
   Return:
   Nothing ever.
@@ -122,7 +126,7 @@ GR_DIENTRY(grVertexLayout, void , (FxU32 param, FxI32 offset, FxU32 mode) )
   switch (param) {
   case GR_PARAM_XY:
     GR_CHECK_F(myName,
-               (offset != 0), 
+               (offset != 0),
                "Offset must be zero.");
 
     gc->state.vData.vertexInfo.offset = offset;
@@ -201,18 +205,18 @@ GR_DIENTRY(grVertexLayout, void , (FxU32 param, FxI32 offset, FxU32 mode) )
   case GR_VERTEX:
     GR_CHECK_F(myName,
                !((components == GR_VERTEX_XYZ) ||
-                (components == GR_VERTEX_XYZW)), 
+                (components == GR_VERTEX_XYZW)),
                "Bad Component for Vertex Parameter");
     gc->state.vData.vertexInfo.components = components;
 
-    GR_CHECK_F(myName, !(type == GR_FLOAT), "Bad Type for Vertex Parameter"); 
+    GR_CHECK_F(myName, !(type == GR_FLOAT), "Bad Type for Vertex Parameter");
     gc->state.vData.vertexInfo.type = type;
 
     gc->state.vData.vertexInfo.offset = offset;
 
     GDBG_INFO(gc->myLevel, "%s:  Vertex Offset = %d\n", FN_NAME,
               gc->state.vData.vertexInfo.offset);
-    
+
     break;
 
   case GR_COLOR:
@@ -221,16 +225,16 @@ GR_DIENTRY(grVertexLayout, void , (FxU32 param, FxI32 offset, FxU32 mode) )
                "Bad Component for Color Parameter");
     gc->state.vData.colorInfo.components = components;
 
-    GR_CHECK_F(myName, !((type == GR_FLOAT) || (type == GR_U8)), 
+    GR_CHECK_F(myName, !((type == GR_FLOAT) || (type == GR_U8)),
                "Bad Type for Color Parameter");
     gc->state.vData.colorInfo.type = type;
 
     gc->state.vData.colorInfo.offset = offset;
     GDBG_INFO(gc->myLevel, "%s:  Color Offset = %d\n", FN_NAME,
               gc->state.vData.colorInfo.offset);
-    
+
     break;
-    
+
   case GR_TEXTURE0:
     GR_CHECK_F(myName,
                !((components == GR_TEX_NONE) || (components == GR_TEX_ST) ||
@@ -244,7 +248,7 @@ GR_DIENTRY(grVertexLayout, void , (FxU32 param, FxI32 offset, FxU32 mode) )
     gc->state.vData.tex0Info.offset = offset;
     GDBG_INFO(gc->myLevel, "%s:  Tex0 Offset = %d\n", FN_NAME,
               gc->state.vData.tex0Info.offset);
-    
+
     break;
 
   case GR_TEXTURE1:
@@ -261,7 +265,7 @@ GR_DIENTRY(grVertexLayout, void , (FxU32 param, FxI32 offset, FxU32 mode) )
     GDBG_INFO(gc->myLevel, "%s:  Tex1 Offset = %d\n", FN_NAME,
               gc->state.vData.tex1Info.offset);
     break;
-    
+
   default:
     GR_CHECK_F(myName, 0, "Invalid Parameter");
     break;
@@ -280,11 +284,11 @@ GR_DIENTRY(grVertexLayout, void , (FxU32 param, FxI32 offset, FxU32 mode) )
   Date: 18-Sep-97
   Implementor(s): dow
   Description:
-  
+
   Arguments:
         mode:   GR_POINTS, GR_LINE_STRIP, GR_POLYGON, GR_TRIANLGE_STRIP,
                 GR_TRIANGLE_FAN, GR_TRIANGLES
-  
+
   Return:
         Nothing ever
   -------------------------------------------------------------------*/
@@ -330,7 +334,7 @@ GR_DIENTRY(grDrawVertexArray, void , (FxU32 mode, FxU32 Count, void *pointers) )
     else
       _grDrawVertexList(kSetupFan, GR_VTX_PTR_ARRAY, Count, pointers);
     break;
-    
+
   case GR_TRIANGLE_STRIP:
     if (gc->state.grEnableArgs.primitive_smooth_mode)
       _grAADrawVertexList(kSetupStrip, GR_VTX_PTR_ARRAY, Count, pointers);
@@ -344,14 +348,14 @@ GR_DIENTRY(grDrawVertexArray, void , (FxU32 mode, FxU32 Count, void *pointers) )
     else
       _grDrawVertexList(kSetupFan, GR_VTX_PTR_ARRAY, Count, pointers);
     break;
-      
+
   case GR_TRIANGLES:
     if (gc->state.grEnableArgs.primitive_smooth_mode)
       if (gc->state.grCoordinateSpaceArgs.coordinate_space_mode == GR_WINDOW_COORDS)
         _grAADrawTriangles(GR_VTX_PTR_ARRAY, GR_TRIANGLES, Count, pointers);
       else
         _grAAVpDrawTriangles(GR_VTX_PTR_ARRAY, GR_TRIANGLES, Count, pointers);
-    else 
+    else
       _grDrawTriangles(GR_VTX_PTR_ARRAY, Count, pointers);
     break;
 
@@ -365,11 +369,11 @@ GR_DIENTRY(grDrawVertexArray, void , (FxU32 mode, FxU32 Count, void *pointers) )
   Date: 04-Dec-97
   Implementor(s): atai
   Description:
-  
+
   Arguments:
         mode:   GR_POINTS, GR_LINE_STRIP, GR_POLYGON, GR_TRIANLGE_STRIP,
                 GR_TRIANGLE_FAN, GR_TRIANGLES
-  
+
   Return:
         Nothing ever
   -------------------------------------------------------------------*/
@@ -416,7 +420,7 @@ GR_DIENTRY(grDrawVertexArrayLinear, void , (FxU32 mode, FxU32 Count, void *point
     else
       _grDrawVertexList(kSetupFan, GR_VTX_PTR, Count, pointers);
     break;
-    
+
   case GR_TRIANGLE_STRIP:
     if (gc->state.grEnableArgs.primitive_smooth_mode)
       _grAADrawVertexList(kSetupStrip, GR_VTX_PTR, Count, pointers);
@@ -430,14 +434,14 @@ GR_DIENTRY(grDrawVertexArrayLinear, void , (FxU32 mode, FxU32 Count, void *point
     else
       _grDrawVertexList(kSetupFan, GR_VTX_PTR, Count, pointers);
     break;
-      
+
   case GR_TRIANGLES:
     if (gc->state.grEnableArgs.primitive_smooth_mode)
       if (gc->state.grCoordinateSpaceArgs.coordinate_space_mode == GR_WINDOW_COORDS)
         _grAADrawTriangles(GR_VTX_PTR, GR_TRIANGLES, Count, pointers);
       else
         _grAAVpDrawTriangles(GR_VTX_PTR, GR_TRIANGLES, Count, pointers);
-    else 
+    else
       _grDrawTriangles(GR_VTX_PTR, Count, pointers);
     break;
 
@@ -445,4 +449,4 @@ GR_DIENTRY(grDrawVertexArrayLinear, void , (FxU32 mode, FxU32 Count, void *point
 #undef FN_NAME
 } /* grDrawVertexArrayLinear */
 
-#endif /* GLIDE3 */  
+#endif /* GLIDE3 */

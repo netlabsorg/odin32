@@ -1,318 +1,322 @@
+/* $Id: gsst.c,v 1.2 2001-09-05 14:30:27 bird Exp $ */
 /*
 ** THIS SOFTWARE IS SUBJECT TO COPYRIGHT PROTECTION AND IS OFFERED ONLY
 ** PURSUANT TO THE 3DFX GLIDE GENERAL PUBLIC LICENSE. THERE IS NO RIGHT
 ** TO USE THE GLIDE TRADEMARK WITHOUT PRIOR WRITTEN PERMISSION OF 3DFX
-** INTERACTIVE, INC. A COPY OF THIS LICENSE MAY BE OBTAINED FROM THE 
-** DISTRIBUTOR OR BY CONTACTING 3DFX INTERACTIVE INC(info@3dfx.com). 
-** THIS PROGRAM IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER 
+** INTERACTIVE, INC. A COPY OF THIS LICENSE MAY BE OBTAINED FROM THE
+** DISTRIBUTOR OR BY CONTACTING 3DFX INTERACTIVE INC(info@3dfx.com).
+** THIS PROGRAM IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER
 ** EXPRESSED OR IMPLIED. SEE THE 3DFX GLIDE GENERAL PUBLIC LICENSE FOR A
-** FULL TEXT OF THE NON-WARRANTY PROVISIONS.  
-** 
+** FULL TEXT OF THE NON-WARRANTY PROVISIONS.
+**
 ** USE, DUPLICATION OR DISCLOSURE BY THE GOVERNMENT IS SUBJECT TO
 ** RESTRICTIONS AS SET FORTH IN SUBDIVISION (C)(1)(II) OF THE RIGHTS IN
 ** TECHNICAL DATA AND COMPUTER SOFTWARE CLAUSE AT DFARS 252.227-7013,
 ** AND/OR IN SIMILAR OR SUCCESSOR CLAUSES IN THE FAR, DOD OR NASA FAR
 ** SUPPLEMENT. UNPUBLISHED RIGHTS RESERVED UNDER THE COPYRIGHT LAWS OF
-** THE UNITED STATES.  
-** 
+** THE UNITED STATES.
+**
 ** COPYRIGHT 3DFX INTERACTIVE, INC. 1999, ALL RIGHTS RESERVED
 **
-** $Header: /home/ktk/tmp/odin/odin32xp/src/opengl/glide/cvg/glide/gsst.c,v 1.1 2000-02-25 00:37:41 sandervl Exp $
+** $Header: /home/ktk/tmp/odin/odin32xp/src/opengl/glide/cvg/glide/gsst.c,v 1.2 2001-09-05 14:30:27 bird Exp $
 ** $Log: gsst.c,v $
-** Revision 1.1  2000-02-25 00:37:41  sandervl
+** Revision 1.2  2001-09-05 14:30:27  bird
+** Added $Id:$ keyword.
+**
+** Revision 1.1  2000/02/25 00:37:41  sandervl
 ** Created Voodoo 2 dir
 **
-** 
+**
 ** 168   6/30/98 6:08p Jeske
 ** fixed bug where we tried to setup MTRRs on old (<p6) systems which
-** didn't have them. 
-** 
+** didn't have them.
+**
 ** 167   6/25/98 10:40a Peter
 ** more cb checks
-** 
+**
 ** 166   6/23/98 5:38p Peter
 ** lfb hinting
-** 
+**
 ** 165   6/04/98 12:13p Peter
 ** splash dll rename
-** 
+**
 ** 164   5/20/98 4:37p Peter
 ** doh
-** 
+**
 ** 163   5/20/98 3:51p Peter
 ** no fifo glide
-** 
+**
 ** 162   5/18/98 12:16p Peter
 ** culling enabling
-** 
+**
 ** 161   4/29/98 3:05p Peter
 ** triple buffering vs grLfbReadRegion
-** 
+**
 ** 160   4/21/98 5:53p Peter
 ** slidetect vs hw pointers
-** 
+**
 ** 159   4/09/98 5:24p Peter
 ** properly re-cache the hw base addresses after a re-init just in case
 ** the base addresses changed
-** 
+**
 ** 158   4/08/98 3:53p Peter
 ** allow different base addresses
-** 
+**
 ** 157   4/06/98 9:55a Peter
 ** sli slave detection for oem dll
-** 
+**
 ** 156   4/01/98 1:52p Peter
 ** sli origin thing vs grRenderBuffer/synced state when doing dynamic
 ** loading of the glide dll on sli
-** 
+**
 ** 155   3/31/98 6:09p Peter
 ** sli origin everywhere (I think) and grLfbReadRegion/grRenderBuffer vs
 ** triple buffering
-** 
+**
 ** 154   3/30/98 2:45p Peter
 ** update default gamma
-** 
+**
 ** 153   3/29/98 1:07p Peter
 ** yet another sli origin thing
-** 
+**
 ** 152   3/23/98 5:57p Peter
 ** warning cleanup
-** 
+**
 ** 151   3/20/98 12:45p Atai
 ** added strapping register in oem boardid field
-** 
+**
 ** 150   3/20/98 11:01a Peter
 ** sli swap interval thing
-** 
+**
 ** 149   3/18/98 7:25p Peter
 ** doh! checked in experiment again
-** 
+**
 ** 148   3/18/98 3:04p Peter
 ** cleaner origin swapping hacks
-** 
+**
 ** 147   3/17/98 6:50p Peter
 ** sli paired vs active
-** 
+**
 ** 146   3/17/98 1:57p Atai
 ** added boardid and requireoemdll registry
-** 
+**
 ** 145   3/14/98 1:07p Peter
 ** mac port happiness
-** 
+**
 ** 144   3/13/98 2:57p Atai
 ** update grSstWinOpen to detect tv connection
-** 
+**
 ** 143   3/13/98 1:27p Peter
 ** removed legacy variables
-** 
+**
 ** 142   3/10/98 9:20a Peter
 ** fixed checkin
-** 
+**
 ** 141   3/09/98 2:24p Peter
 ** change for new pci passthrough interface
-** 
+**
 ** 140   3/03/98 9:37p Peter
 ** more sli origin fun
-** 
+**
 ** 139   3/02/98 7:23p Peter
 ** clear slop on sli systems when changing y origin
-** 
+**
 ** 138   2/24/98 10:15a Peter
 ** oem dll muckage
-** 
+**
 ** 137   2/23/98 7:32p Atai
 ** modify for oem dll
-** 
+**
 ** 136   2/20/98 2:16p Peter
 ** correct error message when failing video init
-** 
+**
 ** 135   2/20/98 11:00a Peter
 ** removed glide3 from glid2 tree
-** 
+**
 ** 134   2/20/98 9:05a Peter
 ** removed remnants of comdex grot
-** 
+**
 ** 133   2/19/98 5:10p Peter
 ** moved passthrough stuff into glide
-** 
+**
 ** 132   2/19/98 3:16p Peter
 ** changes for initVideobuffers
-** 
+**
 ** 131   2/17/98 12:39p Peter
 ** sli monitor detect thing
-** 
+**
 ** 130   2/12/98 9:42p Peter
 ** fixed typo
-** 
+**
 ** 129   2/12/98 8:20p Pgj
-** 
+**
 ** 128   2/12/98 6:47p Atai
 ** fix typo
-** 
+**
 ** 127   2/12/98 4:01p Atai
 ** change refresh rate if oemdll updated for tv out
-** 
+**
 ** 126   2/12/98 3:40p Peter
 ** single buffering for opengl
-** 
+**
 ** 125   2/11/98 5:25p Peter
 ** properly turn off caching
-** 
+**
 ** 124   2/10/98 4:45p Pgj
 ** don't require fxoem2x..dll
-** 
+**
 ** 123   2/04/98 9:21p Pgj
 ** don't require fxoem2x.dll for static builds
-** 
+**
 ** 122   2/04/98 7:56p Pgj
 ** DOS sanity
-** 
+**
 ** 121   2/04/98 6:57p Atai
 ** added fxoem2x.dll for cvg
-** 
+**
 ** 120   2/02/98 4:41p Peter
-** 
+**
 ** 119   1/30/98 4:23p Peter
 ** renamed curSwapBuf->curRenderBuf for clarity
-** 
+**
 ** 118   1/24/98 12:29p Peter
 ** more caching fun
-** 
+**
 ** 117   1/20/98 11:03a Peter
 ** env var to force triple buffering
- * 
+ *
  * 116   1/16/98 4:18p Atai
  * fixed lfb and grLoadGammaTable
- * 
+ *
  * 115   1/16/98 10:47a Peter
  * fixed idle muckage
- * 
+ *
  * 114   1/16/98 10:16a Atai
  * fixed grSstIldle
- * 
+ *
  * 113   1/10/98 4:01p Atai
  * inititialize vertex layout, viewport, added defines
- * 
+ *
  * 110   1/06/98 6:47p Atai
  * undo grSplash and remove gu routines
- * 
+ *
  * 109   1/06/98 3:53p Atai
  * remove grHint, modify grLfbWriteRegion and grGet
- * 
+ *
  * 107   12/18/97 2:12p Peter
  * grSstControl on v2
- * 
+ *
  * 106   12/17/97 4:48p Peter
  * groundwork for CrybabyGlide
- * 
+ *
  * 105   12/17/97 4:06p Atai
  * added grChromaRange(), grGammaCorrecionRGB(), grRest(), and grGet()
  * functions
- * 
+ *
  * 104   12/16/97 1:33p Atai
  * added grGammaCorrectionRGB()
- * 
+ *
  * 103   12/16/97 10:03a Atai
  * fixed gutexmemreset for glide2
- * 
+ *
  * 101   12/09/97 12:20p Peter
  * mac glide port
- * 
+ *
  * 100   12/05/97 4:26p Peter
  * watcom warnings
- * 
+ *
  * 99    12/03/97 11:35a Peter
  * is busy thing
- * 
+ *
  * 98    11/25/97 12:09p Peter
  * nested calls to grLfbLock vs init code locking on v2
- * 
+ *
  * 97    11/21/97 1:02p Peter
  * v^2 supported resolutions
- * 
+ *
  * 96    11/21/97 11:19a Dow
  * Added RESOLUTION_NONE hack for Banshee
- * 
+ *
  * 95    11/19/97 2:49p Peter
  * env vars in registry for win32
- * 
+ *
  * 94    11/19/97 2:22p Dow
  * gsst.c
- * 
+ *
  * 93    11/18/97 4:50p Peter
  * chipfield stuff cleanup and w/ direct writes
- * 
+ *
  * 92    11/18/97 4:00p Atai
  * fixed the GR_BEGIN and GR_END error in previous check-in
- * 
+ *
  * 91    11/18/97 3:27p Atai
- * update vData 
+ * update vData
  * optimize state monster
- * 
+ *
  * 90    11/17/97 4:55p Peter
  * watcom warnings/chipfield stuff
- * 
+ *
  * 89    11/16/97 2:20p Peter
  * cleanup
- * 
+ *
  * 88    11/15/97 7:43p Peter
  * more comdex silliness
- * 
+ *
  * 87    11/14/97 11:10p Peter
  * open vs hw init confusion
- * 
+ *
  * 86    11/14/97 5:02p Peter
  * more comdex stuff
- * 
+ *
  * 85    11/14/97 4:47p Dow
  * New splash screen
- * 
+ *
  * 84    11/14/97 12:09a Peter
  * comdex thing and some other stuff
- * 
+ *
  * 83    11/12/97 9:37p Dow
  * Banshee crap
- * 
+ *
  * 82    11/12/97 2:27p Peter
- * 
+ *
  * 81    11/12/97 1:09p Dow
  * H3 Stuf
- * 
+ *
  * 80    11/12/97 9:22a Dow
  * H3 Mods
- * 
+ *
  * 79    11/06/97 3:46p Peter
  * sli shutdown problem
- * 
+ *
  * 78    11/06/97 3:38p Dow
  * More banshee stuff
- * 
+ *
  * 77    11/04/97 5:04p Peter
  * cataclysm part deux
- * 
+ *
  * 76    11/04/97 3:58p Dow
  * Banshee stuff
- * 
+ *
  * 75    11/03/97 3:43p Peter
  * h3/cvg cataclysm
- * 
+ *
  * 74    10/29/97 4:59p Peter
- * 
+ *
  * 73    10/29/97 2:45p Peter
  * C version of Taco's packing code
- * 
+ *
  * 72    10/23/97 5:28p Peter
  * sli fifo thing
- * 
+ *
  * 71    10/17/97 3:15p Peter
  * grSstVidMode thingee
- * 
+ *
  * 70    10/14/97 2:44p Peter
  * moved close flag set
- * 
+ *
  * 69    10/09/97 8:02p Dow
  * State Monster 1st Cut
- * 
+ *
 **
 */
 
@@ -322,7 +326,7 @@
 
 #include <glidesys.h>
 
-#if (GLIDE_PLATFORM & GLIDE_HW_SST96) 
+#if (GLIDE_PLATFORM & GLIDE_HW_SST96)
 #include <init.h>
 #endif
 
@@ -346,36 +350,36 @@
 
   Initialize the selected SST
 
-  Initialization has 4 Steps 
+  Initialization has 4 Steps
 
-  Video Init - 
+  Video Init -
      In the full screen case this includes setting the requested
-     resolution/refresh state and allocating any necessary OS 
-     resource for the GC.  
+     resolution/refresh state and allocating any necessary OS
+     resource for the GC.
 
      In the windowed case, this involves acquiring all necessary
      surfaces for rendering, back buffer and memory fifo
 
-     Also perform any work necessary to enable access to 3D 
+     Also perform any work necessary to enable access to 3D
      registers
 
   Command Transport Init:
      Assuming video registers are in a reset state, initialize
      the appropriate command transport mechanism.  All writes
-     to hardware prior to this action are direct writes, 
+     to hardware prior to this action are direct writes,
      afterwards, most commands will go throught the command
      transport
 
-  GC Init - 
+  GC Init -
      Initialize the current GC based on the user requested
      open parameters and command transport data reported
      during initialization.
 
-  3D State Init - 
-     Push an initial state onto all of the 3D state registers.   
-     
+  3D State Init -
+     Push an initial state onto all of the 3D state registers.
+
   Arguments:
-  hwnd - pointer to a window handle or null.  If NULL, then 
+  hwnd - pointer to a window handle or null.  If NULL, then
          the application window handle will be inferred though
          the GetActiveWindow() api.
   resolution - either one of the pre-defined glide resolutions,
@@ -397,17 +401,17 @@
   Return:
   FXTRUE - glide successfully acquired the necessary resources and a
            is ready for rendering
-  FXFALSE - glide was unsuccessful in getting the necessary resources, 
+  FXFALSE - glide was unsuccessful in getting the necessary resources,
             or the requested configuration is unavailble on the host
             hardware - any calls to glide rendering routines will result
             in undefined behavior.
   -------------------------------------------------------------------*/
 GR_ENTRY(grSstWinOpen, FxBool, (
   FxU32                   hWnd,
-  GrScreenResolution_t    resolution, 
-  GrScreenRefresh_t       refresh, 
-  GrColorFormat_t         format, 
-  GrOriginLocation_t      origin, 
+  GrScreenResolution_t    resolution,
+  GrScreenRefresh_t       refresh,
+  GrColorFormat_t         format,
+  GrOriginLocation_t      origin,
   int                     nColBuffers,
   int                     nAuxBuffers))
 {
@@ -420,7 +424,7 @@ GR_ENTRY(grSstWinOpen, FxBool, (
   sst1VideoTimingStruct *sstVideoRez = NULL, tvVidtiming;
   FxBool tv_swap_board = FXFALSE;
 #endif
-  
+
   GR_BEGIN_NOFIFOCHECK("grSstWinOpen",80);
   GDBG_INFO_MORE(gc->myLevel,
                  "(rez=%d,ref=%d,cformat=%d,origin=%s,#bufs=%d, #abufs=%d)\n",
@@ -428,13 +432,13 @@ GR_ENTRY(grSstWinOpen, FxBool, (
                  origin ? "LL" : "UL",
                  nColBuffers, nAuxBuffers);
   GR_CHECK_F(FN_NAME, !gc, "no SST selected as current (gc==NULL)");
-  
-#if (GLIDE_PLATFORM & GLIDE_HW_CVG)  
+
+#if (GLIDE_PLATFORM & GLIDE_HW_CVG)
   /* Voodoo^2 has a bug in sli mode where the video cannot really
    * support resolutions less than 512x384 on pc monitors. Rather than
    * saying sli is not fully compatible w/ single board systems the
    * 'solution' is to just not allow these resolutions.
-   * 
+   *
    * NB: The current assumption here is taht if the user passes
    * their own video timing structure then they know what the hell
    * they are doing for some weird-ass arcade monitor.
@@ -450,12 +454,12 @@ GR_ENTRY(grSstWinOpen, FxBool, (
   }
 
 #if (GLIDE_PLATFORM & GLIDE_OS_WIN32)
-  GR_CHECK_COMPATABILITY(FN_NAME, 
+  GR_CHECK_COMPATABILITY(FN_NAME,
                          ((hWnd == 0x00UL) && (GetActiveWindow() == NULL)),
                          "A valid active window or hWnd parameter is required.");
 #endif /* (GLIDE_PLATFORM & GLIDE_OS_WIN32) */
 #endif /* (GLIDE_PLATFORM & GLODE_HW_CVG) */
-  
+
 #if !GLIDE_INIT_HAL
 __tryReOpen:
   /* If we've been closed via grSstWinClose then we need to re-init
@@ -468,21 +472,21 @@ __tryReOpen:
    */
   if (!gc->hwInitP) {
     FxU32* sstRegs = NULL;
-    
+
     rv = pciOpen();
     if (!rv) {
       GDBG_INFO(gc->myLevel, "%s: pci bus could not be opened\n", FN_NAME);
       goto BAILOUT;
     }
-    
-    sstRegs = sst1InitMapBoard(_GlideRoot.current_sst);  
+
+    sstRegs = sst1InitMapBoard(_GlideRoot.current_sst);
     rv = (sstRegs != NULL);
     if (!rv) {
       GDBG_INFO(gc->myLevel, "%s: re-map of board failed (0x%X : 0x%x)\n",
                 FN_NAME, sstRegs, gc->reg_ptr);
       goto BAILOUT;
     }
-    
+
     /* Re-enabled write combining */
     if (_GlideRoot.CPUType >= 6) {
       sst1InitCaching(sstRegs, FXTRUE);
@@ -493,16 +497,16 @@ __tryReOpen:
       GDBG_INFO(gc->myLevel, "%s: Could not re-init hw registers\n", FN_NAME);
       goto BAILOUT;
     }
-    
+
     /* Reset up pointers to the various address spaces within the hw
      * since the hw base address can be different from the original
-     * map board.  
+     * map board.
      */
     gc->base_ptr  = (FxU32*)HW_BASE_PTR(sstRegs);
     gc->reg_ptr   = (FxU32*)HW_REG_PTR(sstRegs);
     gc->lfb_ptr   = (FxU32*)HW_LFB_PTR(sstRegs);
     gc->tex_ptr   = (FxU32*)HW_TEX_PTR(sstRegs);
-    
+
     /* Make sure that the sli-slave gets re-initted too.
      *
      * NB: This makes the same assumption as the sli-pairing code
@@ -516,16 +520,16 @@ __tryReOpen:
         GDBG_INFO(gc->myLevel, "%s: Could not re-map slave.\n", FN_NAME);
         goto BAILOUT;
       }
-      
+
       rv = sst1InitRegisters(sstRegs);
       if (!rv) {
         GDBG_INFO(gc->myLevel, "%s: Could not re-init slave registers\n", FN_NAME);
         goto BAILOUT;
       }
-      
+
       /* Reset up pointers to the various address spaces within the hw
        * since the hw base address can be different from the original
-       * map board.  
+       * map board.
        */
       (gc + 1)->base_ptr  = (FxU32*)HW_BASE_PTR(sstRegs);
       (gc + 1)->reg_ptr   = (FxU32*)HW_REG_PTR(sstRegs);
@@ -534,7 +538,7 @@ __tryReOpen:
 
       gc->slave_ptr = sstRegs;
     }
-    
+
     gc->hwInitP = FXTRUE;
   } else if (gc->open) {
     /* If this device is already open then it is probably an error to
@@ -550,12 +554,12 @@ __tryReOpen:
     goto __tryReOpen;
   }
 #endif /* !GLIDE_INIT_HAL */
-  
+
 #if (GLIDE_PLATFORM & GLIDE_OS_WIN32)
   /*
   ** load fxoem2x.dll and map board
   */
-  { 
+  {
     gc->oemInit = NULL;
     rv = sst1InitGetDeviceInfo(gc->reg_ptr, &devInfo);
     if (rv) {
@@ -573,7 +577,7 @@ __tryReOpen:
       gc->oemi.slaveAddress = gc->slave_ptr;
       gc->oemi.fxoemPciWriteConfig = (PciConfigProc)pciSetConfigData;
       gc->oemi.fxoemPciReadConfig = (PciConfigProc)pciGetConfigData;
-      
+
       boardIDStr = GETENV("FX_GLIDE_BOARDID");
       boardID = (boardIDStr == NULL) ? 0 : atol(boardIDStr);
       if ((boardID) && (devInfo.fbiBoardID != boardID)) {
@@ -611,9 +615,9 @@ __tryReOpen:
           exit(0);
         }
       }
-      
+
       /*
-      ** oem map board 
+      ** oem map board
       */
       if (gc->oemInit) {
         FARPROC oemInitMapBoard = NULL;
@@ -633,12 +637,12 @@ __tryReOpen:
 
   /*------------------------------------------------------
     Video Init
-    ------------------------------------------------------*/  
+    ------------------------------------------------------*/
 #if (GLIDE_PLATFORM & GLIDE_OS_WIN32)
   /*
   ** initialize video timing data for oemdll
   ** if tv out component exist, the oem dll need to modify the vidtiming
-  ** data in oemi. Glide will take the changes and pass it to 
+  ** data in oemi. Glide will take the changes and pass it to
   ** sst1InitVideoBuffers()
   */
   {
@@ -675,7 +679,7 @@ __tryReOpen:
             tvVidtiming.yDimension   = gc->oemi.vid.yDimension;
             tvVidtiming.clkFreq16bpp = gc->oemi.vid.clkFreq16bpp;
             tvVidtiming.clkFreq24bpp = gc->oemi.vid.clkFreq24bpp;
-            refresh = tvVidtiming.refreshRate  = gc->oemi.vid.refresh; 
+            refresh = tvVidtiming.refreshRate  = gc->oemi.vid.refresh;
         grSstVidMode(_GlideRoot.current_sst, &tvVidtiming);
       }
     }
@@ -687,12 +691,12 @@ __tryReOpen:
 #if GLIDE_INIT_HAL
   {
     GDBG_INFO(gc->myLevel, "  HAL Video Init\n");
-    
+
     rv = fxHalInitVideo((SstRegs*)gc->reg_ptr,
-                        ((resolution == GR_RESOLUTION_NONE) 
+                        ((resolution == GR_RESOLUTION_NONE)
                          ? GR_RESOLUTION_640x480
-                         : resolution), 
-                        refresh, 
+                         : resolution),
+                        refresh,
                         NULL);
     if (!rv) goto BAILOUT;
   }
@@ -713,7 +717,7 @@ __tryReOpen:
    * those settings before trying the actual program settings.
    *
    * NB: We cannot fail the allocation on the env settings since the
-   * user could have messed up and set something ridiculous.  
+   * user could have messed up and set something ridiculous.
    */
   {
     FxI32 curColorBuffers = ((_GlideRoot.environment.nColorBuffer == -1L)
@@ -728,8 +732,8 @@ __tryReOpen:
       triedParamsP = ((curColorBuffers == nColBuffers) &&
                       (curAuxBuffers == nAuxBuffers));
 
-      rv = sst1InitVideoBuffers(gc->reg_ptr, 
-                                resolution, refresh, 
+      rv = sst1InitVideoBuffers(gc->reg_ptr,
+                                resolution, refresh,
                                 ((curColorBuffers == 1) ? 2 : curColorBuffers),
                                 curAuxBuffers,
                                 gc->vidTimings,
@@ -739,9 +743,9 @@ __tryReOpen:
         curAuxBuffers   = nAuxBuffers;
       }
     } while(!rv && !triedParamsP);
-    
+
     /* Reset the parameters for the possible sli-slave video init and
-     * internal bookkeeping.  
+     * internal bookkeeping.
      */
     nColBuffers = curColorBuffers;
     nAuxBuffers  = curAuxBuffers;
@@ -754,10 +758,10 @@ __tryReOpen:
       GDBG_INFO(gc->myLevel, "  Invalid slave base address.\n");
       goto __errSliExit;
     }
-    
+
     rv = sst1InitVideoBuffers(gc->slave_ptr,
                               resolution, refresh,
-                              nColBuffers, nAuxBuffers, 
+                              nColBuffers, nAuxBuffers,
                               gc->vidTimings,
                               FXTRUE);
     if (!rv) {
@@ -777,14 +781,14 @@ __tryReOpen:
     FxI32 slimaster[2], slislave[2];
     if (oemInitSetVideo = GetProcAddress(gc->oemInit, "_fxoemInitSetVideo@4"))
       oemInitSetVideo(&gc->oemi);
-    
+
     if (oemGet = GetProcAddress(gc->oemInit, "_fxoemGet@12")) {
       oemGet(FX_OEM_TVOUT, 4, &tv_connected);
       /* Is tv connected to the board? */
       if (tv_connected) {
         oemGet(FX_OEM_SLIMASTER, 8, slimaster);
         oemGet(FX_OEM_SLISLAVE, 8, slislave);
-        if (((FxU32 *)slimaster[1] == gc->slave_ptr) && 
+        if (((FxU32 *)slimaster[1] == gc->slave_ptr) &&
             ((FxU32 *)slislave[1] == gc->base_ptr))
           tv_swap_board = FXTRUE;
         else
@@ -819,7 +823,7 @@ __tryReOpen:
      */
     rv = sst1InitGetDeviceInfo(gc->reg_ptr, &devInfo);
     if (!rv) {
-      GDBG_INFO(gc->myLevel, 
+      GDBG_INFO(gc->myLevel,
                 "  sst1InitGetDeviceInfo failed to determine master monitor connectivness.\n");
       goto __errSliExit;
     }
@@ -827,26 +831,26 @@ __tryReOpen:
       if (gc->scanline_interleaved) {
         rv = sst1InitGetDeviceInfo(gc->slave_ptr, &devInfo);
         if (!rv) {
-          GDBG_INFO(gc->myLevel, 
+          GDBG_INFO(gc->myLevel,
                     "  sst1InitGetDeviceInfo failed to determine slave monitor connectivness.\n");
           goto __errSliExit;
         }
-      
+
         rv = FXTRUE;
         if (devInfo.monitorDetected) {
-          GDBG_INFO(gc->myLevel, "  Swapping sli slave and master");          
+          GDBG_INFO(gc->myLevel, "  Swapping sli slave and master");
         } else {
           /* no monitors attached.
            * Just do the default init w/o any swapping.
            */
 #if (GLIDE_PLATFORM & GLIDE_OS_WIN32)
-          /* 
+          /*
           ** We need to check the if tv is connected.
           ** If not, then there is no output.
           */
-          if (tv_swap_board) 
-            GDBG_INFO(gc->myLevel, "  TV is connected. Swapping sli slave and master");          
-          else 
+          if (tv_swap_board)
+            GDBG_INFO(gc->myLevel, "  TV is connected. Swapping sli slave and master");
+          else
 #endif
           {
           GDBG_INFO(gc->myLevel, "  No monitor attached to slave or master.\n");
@@ -858,7 +862,7 @@ __tryReOpen:
           /* If there isn't a next board then there is not output. */
           rv = FXTRUE;
           goto __errSliExit;
-        } else 
+        } else
 #if (GLIDE_PLATFORM & GLIDE_OS_WIN32)
           if (!tv_swap_board)
 #endif
@@ -875,7 +879,7 @@ __tryReOpen:
             /* Make sure that the caching is toggled.
              *
              * NB: The order of the caching changes is relevant here since
-             * we don't want to waste mtrr's, even briefly.  
+             * we don't want to waste mtrr's, even briefly.
              */
             if (_GlideRoot.CPUType >= 6) {
               sst1InitCaching(gc->base_ptr, FXFALSE);
@@ -890,14 +894,14 @@ __tryReOpen:
              *
              * NB: However, we don't do this currently because it requires
              * odd semantics to the calling conventions of the oem dll.
-             */            
+             */
 #if (GLIDE_PLATFORM & GLIDE_OS_WIN32) && 0
             if (gc->oemInit) {
-              FARPROC oemRestoreVideo = GetProcAddress(gc->oemInit, "_fxoemRestoreVideo@4"); 
+              FARPROC oemRestoreVideo = GetProcAddress(gc->oemInit, "_fxoemRestoreVideo@4");
               if (oemRestoreVideo != NULL) oemRestoreVideo(&gc->oemi);
             }
 #endif /* (GLIDE_PLATFORM & GLIDE_OS_WIN32) */
-            
+
             gc->hwInitP = FXFALSE;
           }
 
@@ -907,7 +911,7 @@ __tryReOpen:
            * video next.
            */
           pciOpen();
-          
+
           /* Re-init the new master */
           {
             FxU32* sstRegs = sst1InitMapBoard(_GlideRoot.current_sst + 1);
@@ -922,16 +926,16 @@ __tryReOpen:
               GDBG_INFO(gc->myLevel, "%s: Could not re-init 'monitor swap slave' registers\n", FN_NAME);
               goto __errSliExit;
             }
-            
+
             /* Reset up pointers to the various address spaces within the hw
              * since the hw base address can be different from the original
-             * map board.  
+             * map board.
              */
             (gc + 1)->base_ptr  = (FxU32*)HW_BASE_PTR(sstRegs);
             (gc + 1)->reg_ptr   = (FxU32*)HW_REG_PTR(sstRegs);
             (gc + 1)->lfb_ptr   = (FxU32*)HW_LFB_PTR(sstRegs);
             (gc + 1)->tex_ptr   = (FxU32*)HW_TEX_PTR(sstRegs);
-            
+
             /* We're done setting up the new master's hw */
             (gc + 1)->hwInitP = FXTRUE;
           }
@@ -947,12 +951,12 @@ __tryReOpen:
           }
         }
       }
-    
-      /* Switch the senses of the master and slave in the gc's. 
-       * 
+
+      /* Switch the senses of the master and slave in the gc's.
+       *
        * NB: This only has to swap the hw addresses since the rest of
        * the information has to be the same in order for the boards to
-       * be sli-able.  
+       * be sli-able.
        */
 #define SwapPtrVal(__a, __b) do { FxU32* temp = (__a); (__a) = (__b); (__b) = temp; } while(0);
       SwapPtrVal(gc->base_ptr,  (gc + 1)->base_ptr);
@@ -972,14 +976,14 @@ __tryReOpen:
          * first time.
          *
          * NB: The order of the caching changes is relevant here since
-         * we don't want to waste mtrr's, even briefly.  
+         * we don't want to waste mtrr's, even briefly.
          */
         if (_GlideRoot.CPUType >= 6) {
           sst1InitCaching(gc->slave_ptr, FXFALSE);
           sst1InitCaching(gc->base_ptr, FXTRUE);
         }
       }
-    
+
       /* Save that we swapped teh master sense so that we can
        * restore these settings when we shut down.
        */
@@ -987,10 +991,10 @@ __tryReOpen:
 
 #if (GLIDE_PLATFORM & GLIDE_OS_WIN32)
       /* NB: We need to make sure that the oem structure reflects the
-       * 'new' sense of the master/slave relationship.  
+       * 'new' sense of the master/slave relationship.
        */
       gc->oemi.linearAddress = gc->base_ptr;
-      gc->oemi.slaveAddress = gc->slave_ptr;      
+      gc->oemi.slaveAddress = gc->slave_ptr;
 
       /* re-initialize oem vedio for the board */
       if (gc->oemInit) {
@@ -1006,10 +1010,10 @@ __tryReOpen:
    * NB: There are two ways to get here. In the case that a monitor
    * was detected we will get here straightline. If no monitors are
    * detected (sli or no) we will get here via an error goto to
-   * the label __errSliExit.  
+   * the label __errSliExit.
    */
 __errSliExit:
-  if (rv && gc->scanline_interleaved) {  
+  if (rv && gc->scanline_interleaved) {
     rv = sst1InitSli(gc->reg_ptr, gc->slave_ptr);
     if (!rv) {
       GDBG_INFO(gc->myLevel, "  sst1InitSli failed.\n");
@@ -1019,14 +1023,14 @@ __errSliExit:
     /* If the user has not set FX_GLIDE_SWAPINTERVAL == 0 then
      * override the swapInterval for grBufferSwap so that it always
      * goes w/ vsync. Otherwise it can look bad as the boards swap out
-     * of sync w/ each other.  
+     * of sync w/ each other.
      */
     if (_GlideRoot.environment.swapInterval < 0) _GlideRoot.environment.swapInterval = 1;
   }
 
   /* Explicitly set the pass through address that the vxd will be
    * using to toggle the passthrough. In sli mode this is the master,
-   * and otherwise it is the card driving the monitor's vidoe.  
+   * and otherwise it is the card driving the monitor's vidoe.
    * Currently, we set this to be a 16mb address space.
    */
 #if 0
@@ -1043,11 +1047,11 @@ __errSliExit:
     case GR_RESOLUTION_320x200:
       xres = 320; yres = 200;
       break;
-    
+
     case GR_RESOLUTION_320x240:
       xres = 320; yres = 240;
       break;
-    
+
     case GR_RESOLUTION_400x256:
       xres = 400; yres = 256;
       break;
@@ -1089,7 +1093,7 @@ __errSliExit:
       xres = 512; yres = 256;
       break;
 
-    case GR_RESOLUTION_1024x768: 
+    case GR_RESOLUTION_1024x768:
       xres = 1024; yres = 768;
       break;
 
@@ -1116,7 +1120,7 @@ __errSliExit:
   /* The current init code always sets this to 1024. */
   fbStride = 1024;
 
-  GDBG_INFO(gc->myLevel, 
+  GDBG_INFO(gc->myLevel,
             "  Video init succeeded. xRes:%.04d yRes:%.04d nCol:%d nAux:%d\n",
             xres, yres, gc->grColBuf, gc->grAuxBuf);
 
@@ -1126,12 +1130,12 @@ __errSliExit:
   {
 #if !((GLIDE_PLATFORM & GLIDE_HW_CVG))
     InitFIFOData fifoInfo;
-     
+
     GDBG_INFO(gc->myLevel, "  Command Transport Init\n");
     rv = initEnableTransport(&fifoInfo);
-    if (!rv) goto BAILOUT;     
+    if (!rv) goto BAILOUT;
 #endif
-     
+
 #if ((GLIDE_PLATFORM & GLIDE_HW_H3) || (GLIDE_PLATFORM & GLIDE_HW_CVG))
     /* Place cmd fifo into fbi memory.  There are actually two
      * 'placements' here, hw memory and virtual address space. In hw
@@ -1158,7 +1162,7 @@ __errSliExit:
 #if (GLIDE_PLATFORM & GLIDE_HW_CVG)
       xTileNum = devInfo.fbiVideoTilesInX;
 #endif
-       
+
 #if (GLIDE_PLATFORM & GLIDE_HW_CVG) && GLIDE_BLIT_CLEAR
       {
         /* Cache the # of pages for video tiles in the x direction
@@ -1166,7 +1170,7 @@ __errSliExit:
          */
         gc->hwDep.cvgDep.tileSlopP = ((xTileNum & 0x01) != 0x00);
         gc->hwDep.cvgDep.xTilePages = (xTileNum >> 1);
-        
+
         gc->hwDep.cvgDep.yTileShift = (gc->scanline_interleaved ? 6 : 5);
 
         /* Get the # of pages per buffer. */
@@ -1193,35 +1197,35 @@ __errSliExit:
 
         const FxU32 memEnd = MB2B(gc->fbuf_size);                                 /* size of hw memory */
         FxU32 maxOffset = ((xTileNum * yres) << 6) * (nColBuffers + nAuxBuffers); /* Bytes for buffers */
-        
+
         /* Align on a page boundary */
         if ((maxOffset & kPageBoundaryMask) != 0x00) {
           maxOffset = ((maxOffset + kPageBoundarySlop) & ~kPageBoundaryMask);
         }
-        
+
 #if GLIDE_USE_DEBUG_FIFO
         fifoSize = 0x1000UL;
 #else /* !GLIDE_USE_DEBUG_FIFO */
-        /* Too much memory claimed for other stuff? */     
+        /* Too much memory claimed for other stuff? */
         fifoSize = MIN(memEnd - maxOffset, (0x01 << 18));
         rv = (maxOffset < memEnd);
         if (!rv) {
           GDBG_INFO(0, "Error: Tried to place cmd fifo (0x%X) past end of fbi mem (0x%X).\n",
                     maxOffset, memEnd);
           goto BAILOUT;
-        }          
+        }
 #endif /* !GLIDE_USE_DEBUG_FIFO */
-        
+
         /* Place fifo in hw. Taking all of the remainging memory up to the
          * byte swizzling bit in the cmd fifo address.
-         */          
+         */
         gc->cmdTransportInfo.fifoOffset = memEnd - fifoSize;
 
 #if (GLIDE_PLATFORM & GLIDE_HW_CVG)
         rv = fxHalInitCmdFifo(hw, /* sst */
                               0, /* which fifo - always 0 for cvg */
                               /* V fifoStart - offset from hw base V */
-                              gc->cmdTransportInfo.fifoOffset,  
+                              gc->cmdTransportInfo.fifoOffset,
                               fifoSize, /* size - in bytes */
                               FXFALSE, /* directExec */
                               FXFALSE, /* disableHoles */
@@ -1235,7 +1239,7 @@ __errSliExit:
            * HW_FIFO_OFFSET (0x200000)
            */
           FxU32 fifoStart = 0;
-          
+
           rv = sst1InitCmdFifo(gc->reg_ptr, FXTRUE,
                                &fifoStart,
                                &gc->cmdTransportInfo.fifoOffset,
@@ -1251,10 +1255,10 @@ __errSliExit:
           if (fifoSize > debugFifoSize) fifoSize = debugFifoSize;
         }
 #endif /* GLIDE_USE_DEBUG_FIFO */
-        
+
 #if GLIDE_USE_SHADOW_FIFO
         /* If we're debugging its nice to know what we really wrote
-         * into the fifo space, just in case tracing is off.  
+         * into the fifo space, just in case tracing is off.
          */
         {
           FxU32* shadowPtr = (FxU32*)calloc(fifoSize + kPageBoundarySlop, sizeof(FxU32));
@@ -1290,18 +1294,18 @@ __errSliExit:
         gc->cmdTransportInfo.fifoEnd   = (FxU32*)((FxU32)gc->cmdTransportInfo.fifoStart + fifoSize);
         gc->cmdTransportInfo.fifoSize  = fifoSize;
 
-        /* Adjust room values. 
+        /* Adjust room values.
          * RoomToEnd needs enough room for the jmp packet since we
          * never allow the hw to auto-wrap. RoomToRead needs to be
          * adjusted so that we never acutally write onto the read ptr.
          *
          * fifoRoom is generally the min of roomToEnd and roomToRead,
-         * but we 'know' here that roomToRead < roomToEnd.  
+         * but we 'know' here that roomToRead < roomToEnd.
          */
         gc->cmdTransportInfo.roomToEnd       = fifoSize - FIFO_END_ADJUST;
         gc->cmdTransportInfo.fifoRoom        =
         gc->cmdTransportInfo.roomToReadPtr   =
-          gc->cmdTransportInfo.roomToEnd - sizeof(FxU32); 
+          gc->cmdTransportInfo.roomToEnd - sizeof(FxU32);
 
         /* Set initial fifo state. hw read and sw write pointers at
          * start of the fifo.
@@ -1309,7 +1313,7 @@ __errSliExit:
         gc->cmdTransportInfo.fifoPtr  = gc->cmdTransportInfo.fifoStart;
         gc->cmdTransportInfo.fifoRead = HW_FIFO_PTR(FXTRUE);
 
-        GDBG_INFO(gc->myLevel, 
+        GDBG_INFO(gc->myLevel,
                   "Fifo Parameters:\n"
                   "\tStart: 0x%X\n"
                   "\tHW Read: 0x%X\n"
@@ -1331,9 +1335,9 @@ __errSliExit:
     }
 
 #if !GLIDE_INIT_HAL && 0
-    /* dpc - 24 jan 1998 - FixMe!  
+    /* dpc - 24 jan 1998 - FixMe!
      * This is currently being done in _grDetectResources so that we
-     * can match the nt driver semantics in win95.  
+     * can match the nt driver semantics in win95.
      */
     if (_GlideRoot.CPUType >= 6) {
       sst1InitCaching(gc->reg_ptr, FXTRUE);
@@ -1343,7 +1347,7 @@ __errSliExit:
 #error "Need to write command transport init for glide for this hw"
 #endif
   }
-  
+
   /* We're effectively open now */
   gc->open = FXTRUE;
 
@@ -1361,7 +1365,7 @@ __errSliExit:
   gc->lockPtrs[GR_LFB_READ_ONLY]  = (FxU32)-1;
   gc->lockPtrs[GR_LFB_WRITE_ONLY] = (FxU32)-1;
   gc->fbStride = fbStride;
-  
+
   /* Initialize the read/write registers to all 0 */
   gc->state.fbi_config.fbzColorPath  = 0;
   gc->state.fbi_config.fogMode       = 0;
@@ -1381,7 +1385,7 @@ __errSliExit:
     const GrHwConfiguration* hwConfig = &_GlideRoot.hwConfig;
     FxU32 textureMode = (FxU32)SST_SEQ_8_DOWNLD;
 
-    if ((hwConfig->SSTs[_GlideRoot.current_sst].type == GR_SSTTYPE_VOODOO) && 
+    if ((hwConfig->SSTs[_GlideRoot.current_sst].type == GR_SSTTYPE_VOODOO) &&
         (hwConfig->SSTs[_GlideRoot.current_sst].sstBoard.VoodooConfig.tmuConfig[tmu].tmuRev == 0)) {
       textureMode = 0;
     }
@@ -1398,25 +1402,25 @@ __errSliExit:
     gc->state.tmu_config[tmu].largeLod        = GR_LOD_1;
     gc->state.tmu_config[tmu].evenOdd         = GR_MIPMAPLEVELMASK_BOTH;
     gc->state.tmu_config[tmu].nccTable        = GR_NCCTABLE_NCC0;
-  } 
+  }
 
   /*------------------------------------------------------
-    3D State Init 
+    3D State Init
     ------------------------------------------------------*/
   GDBG_INFO(gc->myLevel, "  3D State Init\n");
-  gc->state.fbi_config.fbzMode = (SST_ENRECTCLIP | 
-                                  SST_ENZBIAS    | 
+  gc->state.fbi_config.fbzMode = (SST_ENRECTCLIP |
+                                  SST_ENZBIAS    |
                                   SST_DRAWBUFFER_BACK);
-  
+
   grHints(GR_HINT_ALLOW_MIPMAP_DITHER, 0);
   grSstOrigin(origin);
-  grAlphaBlendFunction(GR_BLEND_ONE , GR_BLEND_ZERO, 
+  grAlphaBlendFunction(GR_BLEND_ONE , GR_BLEND_ZERO,
                        GR_BLEND_ONE, GR_BLEND_ZERO);
   grAlphaTestFunction(GR_CMP_ALWAYS);
   grAlphaTestReferenceValue(0);
   grChromakeyMode(GR_CHROMAKEY_DISABLE);
   grConstantColorValue((FxU32) ~0);
-  grClipWindow(0, 0, gc->state.screen_width, 
+  grClipWindow(0, 0, gc->state.screen_width,
                gc->state.screen_height);
   _grColorCombineDelta0Mode(FXFALSE);
   grColorCombine(GR_COMBINE_FUNCTION_SCALE_OTHER,
@@ -1445,7 +1449,7 @@ __errSliExit:
     char* gammaRGBStr;
     char* str;
     /*
-    ** if we decided to enable gammargb and gammatable, we need to 
+    ** if we decided to enable gammargb and gammatable, we need to
     ** bump the buffer size in GETENV
     */
     if (gammaRGBTableStr = GETENV("FX_GLIDE_GAMMATABLE_SIZE")) {
@@ -1516,7 +1520,7 @@ __errSliExit:
   case 3:
     grTexClampMode(GR_TMU2, GR_TEXTURECLAMP_CLAMP, GR_TEXTURECLAMP_CLAMP);
     grTexDetailControl(GR_TMU2, 0, 1, 1.0F);
-    grTexFilterMode(GR_TMU2, GR_TEXTUREFILTER_POINT_SAMPLED, 
+    grTexFilterMode(GR_TMU2, GR_TEXTUREFILTER_POINT_SAMPLED,
                     GR_TEXTUREFILTER_POINT_SAMPLED);
     grTexLodBiasValue(GR_TMU2, 0.0F);
     grTexMipMapMode(GR_TMU2, GR_MIPMAP_DISABLE, FXFALSE);
@@ -1527,7 +1531,7 @@ __errSliExit:
   case 2:
     grTexClampMode(GR_TMU1, GR_TEXTURECLAMP_CLAMP, GR_TEXTURECLAMP_CLAMP);
     grTexDetailControl(GR_TMU1, 0, 1, 1.0F);
-    grTexFilterMode(GR_TMU1, GR_TEXTUREFILTER_POINT_SAMPLED, 
+    grTexFilterMode(GR_TMU1, GR_TEXTUREFILTER_POINT_SAMPLED,
                     GR_TEXTUREFILTER_POINT_SAMPLED);
     grTexLodBiasValue(GR_TMU1, 0.0F);
     grTexMipMapMode(GR_TMU1, GR_MIPMAP_DISABLE, FXFALSE);
@@ -1537,7 +1541,7 @@ __errSliExit:
   case 1:
     grTexClampMode(GR_TMU0, GR_TEXTURECLAMP_CLAMP, GR_TEXTURECLAMP_CLAMP);
     grTexDetailControl(GR_TMU0, 0, 1, 1.0F);
-    grTexFilterMode(GR_TMU0, GR_TEXTUREFILTER_POINT_SAMPLED, 
+    grTexFilterMode(GR_TMU0, GR_TEXTUREFILTER_POINT_SAMPLED,
                     GR_TEXTUREFILTER_POINT_SAMPLED);
     grTexLodBiasValue(GR_TMU0, 0.0F);
     grTexMipMapMode(GR_TMU0, GR_MIPMAP_DISABLE, FXFALSE);
@@ -1560,15 +1564,15 @@ __errSliExit:
 
       if (fxSplash = GetProcAddress(newSplash, "_fxSplash@16")) {
         fxSplash(hWnd, gc->state.screen_width, gc->state.screen_height, nAuxBuffers);
-        _GlideRoot.environment.noSplash = 1;        
-      } 
+        _GlideRoot.environment.noSplash = 1;
+      }
     }
   }
 #endif /* (GLIDE_PLATFORM & GLIDE_OS_WIN32) */
 
         /* If it's still 0, then do the old one */
   if (!_GlideRoot.environment.noSplash) {
-    grSplash(0.0f, 0.0f, 
+    grSplash(0.0f, 0.0f,
              (float) gc->state.screen_width,
              (float) gc->state.screen_height,
              0);
@@ -1592,7 +1596,7 @@ BAILOUT:
 
   Shutdown has 4 steps
 
-  3D Idle 
+  3D Idle
     the 3D engine must be idled to make sure that there are no
     commands executing in the transport when the registers are
     reset
@@ -1643,7 +1647,7 @@ GR_ENTRY(grSstWinClose, void, (void))
      * initIdle();
      */
     sst1InitIdle(gc->reg_ptr);
-    
+
     /*--------------------------
       Command Transport Disable
       --------------------------*/
@@ -1654,12 +1658,12 @@ GR_ENTRY(grSstWinClose, void, (void))
      * initDisableTransport();
      */
     /* When disabling all of the parameters other than sstBase and the
-     * enable flag are ignored.  
+     * enable flag are ignored.
      */
     sst1InitCmdFifo(gc->reg_ptr, FXFALSE, NULL, NULL, NULL, NULL);
-    
+
     /*--------------------------
-      Video Restore 
+      Video Restore
       --------------------------*/
     GDBG_INFO(gc->myLevel, "  Restore Video");
     /* dpc - 5 sep 1997 - FixMe!
@@ -1690,20 +1694,20 @@ GR_ENTRY(grSstWinClose, void, (void))
       --------------------------*/
     GDBG_INFO(gc->myLevel, "  GC Reset");
 
-    /* open and hwInitP are really two different things.  
+    /* open and hwInitP are really two different things.
      *
      * hwInitP indicates whether the init code mapping/init sequence
-     * is active for this hw. 
+     * is active for this hw.
      *
      * open includes setting up video, command transport, and the
      * initial glide state.
      */
     gc->hwInitP = FXFALSE;
     if (gc->scanline_interleaved) (gc + 1)->hwInitP = FXFALSE;
-      
+
     /* If we swapped the monitor sense on open then switch these
      * back so that any later re-mappings of the board are in sync
-     * w/ the init code's mappings.  
+     * w/ the init code's mappings.
      */
     if (gc->swapMasterSenseP) {
 #define SwapPtrVal(__a, __b) do { FxU32* temp = (__a); (__a) = (__b); (__b) = temp; } while(0);
@@ -1718,7 +1722,7 @@ GR_ENTRY(grSstWinClose, void, (void))
         gc->slave_ptr = (gc + 1)->base_ptr;
         (gc + 1)->slave_ptr = NULL;
       }
-      
+
       gc->swapMasterSenseP = FXFALSE;
     }
 
@@ -1732,24 +1736,24 @@ GR_ENTRY(grSstWinClose, void, (void))
 #endif
   }
   gc->open = FXFALSE;
-    
+
   GR_END();
 #undef FN_NAME
 } /* grSstWinClose */
 
-GR_ENTRY(grSstControl, FxBool, (GrControl_t code)) 
+GR_ENTRY(grSstControl, FxBool, (GrControl_t code))
 {
   GR_DCL_GC;
-#define FN_NAME "grSstControl"  
+#define FN_NAME "grSstControl"
   GDBG_INFO(41, "%s:  code = 0x%x, windowsInit = %d\n", FN_NAME,
             code, _GlideRoot.windowsInit);
-  
+
   if (_GlideRoot.windowsInit && gc->open) {
 #if (GLIDE_PLATFORM & GLIDE_HW_SST96)
     /* For VG96, windows haven't been created, so there's no point
-     * trying to control it. 
+     * trying to control it.
      */
-    
+
     /* Believe it or not, the following code really should be bracketed
        like this.  The reason is that GR_BEGIN_NOFIFOCHECK seg faults
        when grSstControl is called before the Glide window is truly
@@ -1760,38 +1764,38 @@ GR_ENTRY(grSstControl, FxBool, (GrControl_t code))
       status,
       xRes, yRes,
       clipLeftRight, clipBottomTop;
-    
+
     GR_BEGIN_NOFIFOCHECK(FN_NAME,80);
-    
+
     xRes = initControl(code);
-    
+
     GDBG_INFO((80, "%s:  initControl returned 0x%x\n", FN_NAME, xRes));
 
     if (!xRes) return FXFALSE;
-  
+
     yRes = xRes >> 16;
     xRes = xRes & 0xffff;
-  
+
     /* !! FIXME +++ this call should properly update the gc->fbStride,
        this information is known only to the init layer and needs to be
        exposed, it is only really necessary to lfblock right now,
        and therefore is returned by initGetBufferPtr */
-  
+
     gc->state.screen_width = xRes;
     gc->state.screen_height = yRes;
 
     /* Wait for Idle. */
-  
+
     nTries = 0;
     do {
       if (nTries++ > 999) {
-        GDBG_INFO((80, "%s:  returning FALSE after %d checks for idle\n", 
+        GDBG_INFO((80, "%s:  returning FALSE after %d checks for idle\n",
                    FN_NAME, nTries));
         return FXFALSE;
       }
 
       status = GET(hw->status);
-        
+
     } while (status & 0x1);
 
     /* Set ClipRect Via direct writes */
@@ -1833,17 +1837,17 @@ GR_ENTRY(grSstControl, FxBool, (GrControl_t code))
 #endif
 
     }
-#endif    
+#endif
   }
 
   GDBG_INFO(41, "%s:  Returning TRUE\n", FN_NAME);
-  return FXTRUE;  
+  return FXTRUE;
 #undef FN_NAME
 } /* grSstControl */
 
 /*---------------------------------------------------------------------------
 **  grSstPerfStats
-*/ 
+*/
 GR_ENTRY(grSstPerfStats, void, (GrSstPerfStats_t *pStats))
 {
 #define FN_NAME "grSstPerfStats"
@@ -1886,9 +1890,9 @@ GR_ENTRY(grSstStatus, FxU32, (void))
 
   {
     const FxU32 stat = GR_GET(hw->status);
-    
+
     GDBG_INFO(84,"grSstStatus() => 0x%x\n", stat);
-    
+
     return stat;
   }
 }/* grSstStatus */
@@ -1946,7 +1950,7 @@ GR_ENTRY(grSstIsBusy, FxBool, (void))
 
   /* dpc - 22 may 1997 - FixMe!
    * Seems like the simplest way to do it, but is this really the way
-   * to do it?  
+   * to do it?
    */
   if (nopP) {
     GR_SET_EXPECTED_SIZE(sizeof(FxU32), 1);
@@ -2009,7 +2013,7 @@ GR_STATE_ENTRY(grSstOrigin, void, (GrOriginLocation_t origin))
   else
     fbzMode &= ~(SST_YORIGIN);
 
-  /* dpc - 22 may 1997 - FixMe! 
+  /* dpc - 22 may 1997 - FixMe!
    * Do we need to do anything here for the HAL?
    */
 #if !GLIDE_INIT_HAL
@@ -2017,7 +2021,7 @@ GR_STATE_ENTRY(grSstOrigin, void, (GrOriginLocation_t origin))
    * This is the old way. Is there anything else we
    * need to do here?
    *
-   * initOrigin(origin); 
+   * initOrigin(origin);
    */
 #endif
 

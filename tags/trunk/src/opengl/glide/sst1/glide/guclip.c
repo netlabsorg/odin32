@@ -1,36 +1,40 @@
+/* $Id: guclip.c,v 1.2 2001-09-05 14:30:55 bird Exp $ */
 /*
 ** THIS SOFTWARE IS SUBJECT TO COPYRIGHT PROTECTION AND IS OFFERED ONLY
 ** PURSUANT TO THE 3DFX GLIDE GENERAL PUBLIC LICENSE. THERE IS NO RIGHT
 ** TO USE THE GLIDE TRADEMARK WITHOUT PRIOR WRITTEN PERMISSION OF 3DFX
-** INTERACTIVE, INC. A COPY OF THIS LICENSE MAY BE OBTAINED FROM THE 
-** DISTRIBUTOR OR BY CONTACTING 3DFX INTERACTIVE INC(info@3dfx.com). 
-** THIS PROGRAM IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER 
+** INTERACTIVE, INC. A COPY OF THIS LICENSE MAY BE OBTAINED FROM THE
+** DISTRIBUTOR OR BY CONTACTING 3DFX INTERACTIVE INC(info@3dfx.com).
+** THIS PROGRAM IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER
 ** EXPRESSED OR IMPLIED. SEE THE 3DFX GLIDE GENERAL PUBLIC LICENSE FOR A
-** FULL TEXT OF THE NON-WARRANTY PROVISIONS.  
-** 
+** FULL TEXT OF THE NON-WARRANTY PROVISIONS.
+**
 ** USE, DUPLICATION OR DISCLOSURE BY THE GOVERNMENT IS SUBJECT TO
 ** RESTRICTIONS AS SET FORTH IN SUBDIVISION (C)(1)(II) OF THE RIGHTS IN
 ** TECHNICAL DATA AND COMPUTER SOFTWARE CLAUSE AT DFARS 252.227-7013,
 ** AND/OR IN SIMILAR OR SUCCESSOR CLAUSES IN THE FAR, DOD OR NASA FAR
 ** SUPPLEMENT. UNPUBLISHED RIGHTS RESERVED UNDER THE COPYRIGHT LAWS OF
-** THE UNITED STATES.  
-** 
+** THE UNITED STATES.
+**
 ** COPYRIGHT 3DFX INTERACTIVE, INC. 1999, ALL RIGHTS RESERVED
 **
-** $Header: /home/ktk/tmp/odin/odin32xp/src/opengl/glide/sst1/glide/guclip.c,v 1.1 2000-02-25 00:31:19 sandervl Exp $
+** $Header: /home/ktk/tmp/odin/odin32xp/src/opengl/glide/sst1/glide/guclip.c,v 1.2 2001-09-05 14:30:55 bird Exp $
 ** $Log: guclip.c,v $
-** Revision 1.1  2000-02-25 00:31:19  sandervl
+** Revision 1.2  2001-09-05 14:30:55  bird
+** Added $Id:$ keyword.
+**
+** Revision 1.1  2000/02/25 00:31:19  sandervl
 ** Created new Voodoo 1 Glide dir
 **
- * 
+ *
  * 6     8/14/97 5:32p Pgj
  * remove dead code per GMT
- * 
+ *
  * 5     6/27/97 4:16p Atai
  * fixed guDrawTriangleWithClip bug (#484) by removing +1.0F and -1.0F in
  * intersectTop(), intersectBottom(), intersectLeft(), and
  * intersectRight() routine
- * 
+ *
  * 4     3/09/97 10:31a Dow
  * Added GR_DIENTRY for di glide functions
 **
@@ -53,7 +57,7 @@ calcParams(const GrVertex *a, const GrVertex *b, GrVertex *isect, float d)
     isect->g = a->g + d * ( b->g - a->g );
     isect->b = a->b + d * ( b->b - a->b );
   }
-    
+
   if (gc->state.paramIndex & STATE_REQUIRES_IT_ALPHA) {
     isect->a        = a->a        + d * ( b->a - a->a );
   }
@@ -97,16 +101,16 @@ calcParams(const GrVertex *a, const GrVertex *b, GrVertex *isect, float d)
 
 } /* calcParams */
 
-static void 
+static void
 intersectTop( const GrVertex *a, const GrVertex *b, GrVertex *intersect )
 {
   GR_DCL_GC;
   float
     d = ( gc->state.clipwindowf_ymin - a->y ) / ( b->y - a->y );
-  
+
   intersect->x        = a->x        + d * ( b->x - a->x );
-  intersect->y        = gc->state.clipwindowf_ymin; 
-  
+  intersect->y        = gc->state.clipwindowf_ymin;
+
   calcParams(a, b, intersect, d);
 
 } /* intersectTop */
@@ -117,9 +121,9 @@ intersectBottom( const GrVertex *a, const GrVertex *b, GrVertex *intersect )
   GR_DCL_GC;
   float
     d = ( gc->state.clipwindowf_ymax - a->y ) / ( b->y - a->y );
-  
+
   intersect->x        = a->x        + d * ( b->x - a->x );
-  intersect->y        = gc->state.clipwindowf_ymax; 
+  intersect->y        = gc->state.clipwindowf_ymax;
 
   calcParams(a, b, intersect, d);
 
@@ -131,8 +135,8 @@ intersectRight( const GrVertex *a, const GrVertex *b, GrVertex *intersect )
   GR_DCL_GC;
   float
     d = ( gc->state.clipwindowf_xmax - a->x ) / ( b->x - a->x );
-  
-  intersect->x        = gc->state.clipwindowf_xmax; 
+
+  intersect->x        = gc->state.clipwindowf_xmax;
   intersect->y        = a->y        + d * ( b->y - a->y );
 
   calcParams(a, b, intersect, d);
@@ -145,7 +149,7 @@ intersectLeft( const GrVertex *a, const GrVertex *b, GrVertex *intersect )
   GR_DCL_GC;
   float
     d = ( gc->state.clipwindowf_xmin - a->x ) / ( b->x - a->x );
-  
+
   intersect->x        = gc->state.clipwindowf_xmin;
   intersect->y        = a->y        + d * ( b->y - a->y );
 
@@ -159,7 +163,7 @@ aboveYMin(const GrVertex *p)
   GR_DCL_GC;
   return (( p->y > gc->state.clipwindowf_ymin ) ? FXTRUE : FXFALSE);
 } /* aboveYMin */
-     
+
 
 static FxBool
 belowYMax(const GrVertex *p)
@@ -201,9 +205,9 @@ shClipPolygon(
     s, p /*, intersection */;
   int
     j;
-  
+
   *outlength = 0;
-  
+
   s = invertexarray[inlength-1];
   for ( j = 0; j < inlength; j++ ) {
     p = invertexarray[j];
@@ -290,12 +294,12 @@ GR_DIENTRY(guDrawTriangleWithClip, void,
   input_array[0] = *a;
   input_array[1] = *b;
   input_array[2] = *c;
-  
+
   shClipPolygon( input_array,   output_array,  3,         &outlength, belowXMax, intersectRight );
   shClipPolygon( output_array,  output_array2, outlength, &outlength, belowYMax, intersectBottom );
   shClipPolygon( output_array2, output_array,  outlength, &outlength, aboveXMin, intersectLeft );
   shClipPolygon( output_array,  output_array2, outlength, &outlength, aboveYMin, intersectTop );
-  
+
   /*
    ** snap vertices then decompose the n-gon into triangles
    */
@@ -359,12 +363,12 @@ GR_DIENTRY(guAADrawTriangleWithClip, void,
   input_array[0] = *a;
   input_array[1] = *b;
   input_array[2] = *c;
-  
+
   shClipPolygon( input_array,   output_array,  3,         &outlength, belowXMax, intersectRight );
   shClipPolygon( output_array,  output_array2, outlength, &outlength, belowYMax, intersectBottom );
   shClipPolygon( output_array2, output_array,  outlength, &outlength, aboveXMin, intersectLeft );
   shClipPolygon( output_array,  output_array2, outlength, &outlength, aboveYMin, intersectTop );
-  
+
   /*
    ** snap vertices then decompose the n-gon into triangles
    */

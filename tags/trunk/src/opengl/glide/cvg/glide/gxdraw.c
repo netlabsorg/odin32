@@ -1,128 +1,132 @@
+/* $Id: gxdraw.c,v 1.2 2001-09-05 14:30:31 bird Exp $ */
 /*
  ** THIS SOFTWARE IS SUBJECT TO COPYRIGHT PROTECTION AND IS OFFERED ONLY
  ** PURSUANT TO THE 3DFX GLIDE GENERAL PUBLIC LICENSE. THERE IS NO RIGHT
  ** TO USE THE GLIDE TRADEMARK WITHOUT PRIOR WRITTEN PERMISSION OF 3DFX
- ** INTERACTIVE, INC. A COPY OF THIS LICENSE MAY BE OBTAINED FROM THE 
- ** DISTRIBUTOR OR BY CONTACTING 3DFX INTERACTIVE INC(info@3dfx.com). 
- ** THIS PROGRAM IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER 
+ ** INTERACTIVE, INC. A COPY OF THIS LICENSE MAY BE OBTAINED FROM THE
+ ** DISTRIBUTOR OR BY CONTACTING 3DFX INTERACTIVE INC(info@3dfx.com).
+ ** THIS PROGRAM IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER
  ** EXPRESSED OR IMPLIED. SEE THE 3DFX GLIDE GENERAL PUBLIC LICENSE FOR A
- ** FULL TEXT OF THE NON-WARRANTY PROVISIONS.  
- ** 
+ ** FULL TEXT OF THE NON-WARRANTY PROVISIONS.
+ **
  ** USE, DUPLICATION OR DISCLOSURE BY THE GOVERNMENT IS SUBJECT TO
  ** RESTRICTIONS AS SET FORTH IN SUBDIVISION (C)(1)(II) OF THE RIGHTS IN
  ** TECHNICAL DATA AND COMPUTER SOFTWARE CLAUSE AT DFARS 252.227-7013,
  ** AND/OR IN SIMILAR OR SUCCESSOR CLAUSES IN THE FAR, DOD OR NASA FAR
  ** SUPPLEMENT. UNPUBLISHED RIGHTS RESERVED UNDER THE COPYRIGHT LAWS OF
- ** THE UNITED STATES.  
- ** 
+ ** THE UNITED STATES.
+ **
  ** COPYRIGHT 3DFX INTERACTIVE, INC. 1999, ALL RIGHTS RESERVED
  **
- ** $Header: /home/ktk/tmp/odin/odin32xp/src/opengl/glide/cvg/glide/gxdraw.c,v 1.1 2000-02-25 00:37:43 sandervl Exp $
+ ** $Header: /home/ktk/tmp/odin/odin32xp/src/opengl/glide/cvg/glide/gxdraw.c,v 1.2 2001-09-05 14:30:31 bird Exp $
  ** $Log: gxdraw.c,v $
- ** Revision 1.1  2000-02-25 00:37:43  sandervl
+ ** Revision 1.2  2001-09-05 14:30:31  bird
+ ** Added $Id:$ keyword.
+ **
+ ** Revision 1.1  2000/02/25 00:37:43  sandervl
  ** Created Voodoo 2 dir
  **
-** 
+**
 ** 61    3/17/98 3:00p Peter
 ** removed vertex sorting
- * 
+ *
  * 60    12/01/97 6:13p Peter
  * non-packet3 tsu triangles ooz vs z
- * 
+ *
  * 59    11/21/97 3:20p Peter
  * direct writes tsu registers
- * 
+ *
  * 58    11/18/97 4:36p Peter
  * chipfield stuff cleanup and w/ direct writes
- * 
+ *
  * 57    11/17/97 4:55p Peter
  * watcom warnings/chipfield stuff
- * 
+ *
  * 56    11/12/97 9:54p Peter
  * fixed all the muckage from new config
- * 
+ *
  * 55    11/03/97 4:38p Peter
  * yapc fix
- * 
+ *
  * 54    11/01/97 10:01a Peter
  * tri dispatch stuff
- * 
+ *
  * 53    10/29/97 2:45p Peter
  * C version of Taco's packing code
- * 
+ *
  * 52    10/27/97 5:59p Peter
  * removed some debugging code
- * 
+ *
  * 51    10/21/97 3:22p Peter
  * hand pack rgb
- * 
+ *
  * 50    10/19/97 12:51p Peter
  * no tsu happiness
- * 
+ *
  * 49    10/19/97 10:59a Peter
  * fixed p1 tsu writes
- * 
+ *
  * 48    10/17/97 3:15p Peter
  * removed unused addr field from datalist
- * 
+ *
  * 47    10/17/97 10:15a Peter
  * packed rgb state cleanup
- * 
+ *
  * 46    10/16/97 5:33p Peter
  * argb != rgba
- * 
+ *
  * 45    10/16/97 3:40p Peter
  * packed rgb
- * 
+ *
  * 44    10/16/97 10:31a Peter
  * fixed hoopti tsu-subtractor unsorted
- * 
+ *
  * 43    10/15/97 5:53p Peter
  * hoopti tri compare code
- * 
+ *
  * 42    10/10/97 4:33p Peter
  * non-packet3 tsu triangles
- * 
+ *
  * 41    10/08/97 5:19p Peter
  * optinally clamp only texture params
- * 
+ *
  * 40    10/08/97 11:32a Peter
  * pre-computed packet headers for packet 3
- * 
+ *
  * 39    9/20/97 4:42p Peter
  * tri_setf fixup/big fifo
- * 
+ *
  * 38    9/16/97 2:50p Peter
  * fixed watcom unhappiness w/ static initializers
- * 
+ *
  * 37    9/15/97 7:31p Peter
  * more cmdfifo cleanup, fixed normal buffer clear, banner in the right
  * place, lfb's are on, Hmmmm.. probably more
- * 
+ *
  * 36    9/10/97 10:13p Peter
  * fifo logic from GaryT, non-normalized fp first cut
- * 
+ *
  * 35    9/03/97 2:11p Peter
  * start gdbg_info cleanup, fixed zero area no-tsu triangle muckage
- * 
+ *
  * 34    9/01/97 3:19p Peter
  * no-tsu w from vertex not tmuvtx
- * 
+ *
  * 33    8/31/97 4:06p Peter
  * no tsu fix
- * 
+ *
  * 32    8/31/97 12:04p Peter
  * hacked no-tsu code
- * 
+ *
  * 31    7/25/97 11:40a Peter
  * removed dHalf, change field name to match real use for cvg
- * 
+ *
  * 30    6/30/97 3:22p Peter
  * cmd fifo sanity
- * 
+ *
  * 29    6/24/97 4:02p Peter
  * proper cmd fifo placement
- * 
+ *
  * 28    6/23/97 4:43p Peter
  * cleaned up #defines etc for a nicer tree
  **
@@ -138,7 +142,7 @@
 
 #ifdef GDBG_INFO_ON
 /* Some debugging information */
-static char *indexNames[] = {  
+static char *indexNames[] = {
   "GR_VERTEX_X_OFFSET",         /* 0 */
   "GR_VERTEX_Y_OFFSET",         /* 1 */
   "GR_VERTEX_Z_OFFSET",         /* 2 */
@@ -153,8 +157,8 @@ static char *indexNames[] = {
   "GR_VERTEX_OOW_TMU0_OFFSET",  /* 11 */
   "GR_VERTEX_SOW_TMU1_OFFSET",  /* 12 */
   "GR_VERTEX_TOW_TMU1_OFFSET",  /* 13 */
-  "GR_VERTEX_OOW_TMU1_OFFSET"	/* 14 */
-};  
+  "GR_VERTEX_OOW_TMU1_OFFSET"   /* 14 */
+};
 #endif
 
 /*
@@ -184,41 +188,41 @@ GR_DDFUNC(_trisetup_nogradients,
   const float *fb = &vb->x;
   const float *fc = &vc->x;
   float dxAB, dxBC, dyAB, dyBC;
-	
+
     /* Compute Area */
     dxAB = fa[GR_VERTEX_X_OFFSET] - fb[GR_VERTEX_X_OFFSET];
     dxBC = fb[GR_VERTEX_X_OFFSET] - fc[GR_VERTEX_X_OFFSET];
-    
+
     dyAB = fa[GR_VERTEX_Y_OFFSET] - fb[GR_VERTEX_Y_OFFSET];
     dyBC = fb[GR_VERTEX_Y_OFFSET] - fc[GR_VERTEX_Y_OFFSET];
-    
+
     /* Stash the area in the float pool for easy access */
     _GlideRoot.pool.ftemp1 = dxAB * dyBC - dxBC * dyAB;
-    
+
 #define FloatVal(__f) (((__f) < 786432.875) ? (__f) : ((__f) - 786432.875))
     {
       const FxI32 j = *(FxI32*)&_GlideRoot.pool.ftemp1;
       const FxU32 culltest = (gc->state.cull_mode << 31UL);
-      
+
       /* Zero-area triangles are BAD!! */
       if ((j & 0x7FFFFFFF) == 0) {
         GDBG_INFO(291, FN_NAME": Culling (%g %g) (%g %g) (%g %g) : (%g : 0x%X : 0x%X)\n",
-                  FloatVal(fa[0]), FloatVal(fa[1]), 
-                  FloatVal(fb[0]), FloatVal(fb[1]), 
-                  FloatVal(fc[0]), FloatVal(fc[1]), 
+                  FloatVal(fa[0]), FloatVal(fa[1]),
+                  FloatVal(fb[0]), FloatVal(fb[1]),
+                  FloatVal(fc[0]), FloatVal(fc[1]),
                   _GlideRoot.pool.ftemp1, gc->state.cull_mode, culltest);
 
         return 0;
       }
-      
+
       /* Backface culling, use sign bit as test */
       if ((gc->state.cull_mode != GR_CULL_DISABLE) && (((FxI32)(j ^ culltest)) >= 0)) {
         GDBG_INFO(291, FN_NAME": Culling (%g %g) (%g %g) (%g %g) : (%g : 0x%X : 0x%X)\n",
-                  FloatVal(fa[0]), FloatVal(fa[1]), 
-                  FloatVal(fb[0]), FloatVal(fb[1]), 
-                  FloatVal(fc[0]), FloatVal(fc[1]), 
+                  FloatVal(fa[0]), FloatVal(fa[1]),
+                  FloatVal(fb[0]), FloatVal(fb[1]),
+                  FloatVal(fc[0]), FloatVal(fc[1]),
                   _GlideRoot.pool.ftemp1, gc->state.cull_mode, culltest);
-        
+
         return -1;
       }
     }
@@ -243,11 +247,11 @@ GR_DDFUNC(_trisetup_nogradients,
 
       for(vectorIndex = 0; vectorIndex < sizeof(vectorArray) / sizeof(float*); vectorIndex++) {
         const float* const vector = vectorArray[vectorIndex];
-      
+
         /* Triangle vertex coordinages (x, y) */
         TRI_SETF(vector[GR_VERTEX_X_OFFSET]);
         TRI_SETF(vector[GR_VERTEX_Y_OFFSET]);
-      
+
         /* Other triangle parameters */
         {
           const int* dataList = gc->tsuDataList;
@@ -256,9 +260,9 @@ GR_DDFUNC(_trisetup_nogradients,
           {
             FxBool doColorP = FXFALSE;
             FxU32 packedColor = 0x00;
-            
+
             if (*dataList == (GR_VERTEX_R_OFFSET << 2)) {
-              packedColor = (RGBA_COMP_CLAMP(FARRAY(vector, (GR_VERTEX_B_OFFSET << 2)), B) | 
+              packedColor = (RGBA_COMP_CLAMP(FARRAY(vector, (GR_VERTEX_B_OFFSET << 2)), B) |
                              RGBA_COMP_CLAMP(FARRAY(vector, (GR_VERTEX_G_OFFSET << 2)), G) |
                              RGBA_COMP_CLAMP(FARRAY(vector, (GR_VERTEX_R_OFFSET << 2)), R));
               dataList++;
@@ -270,7 +274,7 @@ GR_DDFUNC(_trisetup_nogradients,
               dataList++;
               doColorP = FXTRUE;
             }
-            
+
             if (doColorP) TRI_SET(packedColor);
           }
 #endif /* GLIDE_PACKED_RGB */
@@ -283,12 +287,12 @@ GR_DDFUNC(_trisetup_nogradients,
 
           dataList++;
 #endif /* GLIDE_FP_CLAMP_TEX */
-         
+
           while(*dataList != 0) {
             TRI_SETF_CLAMP(FARRAY(vector, *dataList));
             dataList++;
           }
-        }         
+        }
       }
     }
     TRI_END;
@@ -364,10 +368,10 @@ GR_DDFUNC(_trisetup_nogradients,
         GR_SET_EXPECTED_SIZE(sizeof(FxU32), 1);
         GR_SET(BROADCAST_ID, hw, sSetupMode, sMode);
         GR_CHECK_SIZE();
-        
+
         for(vectorIndex = 0; vectorIndex < sizeof(vectorArray) / sizeof(float*); vectorIndex++) {
           const GrVertex* curVertex = (const GrVertex*)vectorArray[vectorIndex];
-          
+
           REG_GROUP_BEGIN(BROADCAST_ID, sVx, paramCount, paramMask);
           {
             REG_GROUP_SETF(hw, sVx, curVertex->x);
@@ -381,7 +385,7 @@ GR_DDFUNC(_trisetup_nogradients,
                                          (RGBA_COMP_CLAMP(curVertex->g) << 8UL) |
                                          (RGBA_COMP_CLAMP(curVertex->r) << 16UL));
               if (hasAlpha) packedVal |= (RGBA_COMP_CLAMP(curVertex->a) << 24UL);
-              
+
               REG_GROUP_SET(hw, sARGB, packedVal);
             }
 #else /* !GLIDE_PACKED_RGB */
@@ -440,25 +444,25 @@ GR_DDFUNC(_trisetup_nogradients,
     {
       const float ooa = _GlideRoot.pool.f1 / _GlideRoot.pool.ftemp1;
       volatile FxU32* hwAddr = &hw->FvA.x;
-            
+
       /* Divide the deltas by the area for gradient calculation. */
       dxBC *= ooa;
       dyAB *= ooa;
       dxAB *= ooa;
       dyBC *= ooa;
-	    
+
       GDBG_INFO(85, FN_NAME": No-TSU Triangle area: (%g %g) : (%g %g %g %g)\n",
                 _GlideRoot.pool.ftemp1, ooa,
                 dxAB, dxBC, dyAB, dyBC);
-      
-      /* write out X & Y for vertex A */  
+
+      /* write out X & Y for vertex A */
       TRI_NO_TSU_SETF(hwAddr++, fa[GR_VERTEX_X_OFFSET]);
       TRI_NO_TSU_SETF(hwAddr++, fa[GR_VERTEX_Y_OFFSET]);
 
       /* write out X & Y for vertex B */
       TRI_NO_TSU_SETF(hwAddr++, fb[GR_VERTEX_X_OFFSET]);
-      TRI_NO_TSU_SETF(hwAddr++, fb[GR_VERTEX_Y_OFFSET]);  
-  
+      TRI_NO_TSU_SETF(hwAddr++, fb[GR_VERTEX_Y_OFFSET]);
+
       /* write out X & Y for vertex C */
       TRI_NO_TSU_SETF(hwAddr++, fc[GR_VERTEX_X_OFFSET]);
       TRI_NO_TSU_SETF(hwAddr++, fc[GR_VERTEX_Y_OFFSET]);
@@ -492,27 +496,27 @@ GR_DDFUNC(_trisetup_nogradients,
         while(i < GR_VERTEX_OOW_OFFSET) {
           const float curGrad = (((fa[i] - fb[i]) * dyBC) -
                                  ((fb[i] - fc[i]) * dyAB));
-		    
+
           GDBG_INFO(285, FN_NAME": Gradient 0x%X : %g %g %g : %g\n",
                     ((FxU32)hwAddr - (FxU32)hw) >> 2,
                     fa[i], fb[i], fc[i], curGrad);
-		    
+
           TRI_NO_TSU_SETF(hwAddr++, curGrad);
           i++;
         }
 
         /* Skip fbi oow */
-        i++; 
+        i++;
 
         /* FixMe? We currently only do one tmu. */
         while(i < GR_VERTEX_OOW_TMU0_OFFSET) {
           const float curGrad = (((fa[i] - fb[i]) * dyBC) -
                                  ((fb[i] - fc[i]) * dyAB));
-		    
+
           GDBG_INFO(285, FN_NAME": Gradient 0x%X : %g %g %g : %g\n",
                     ((FxU32)hwAddr - (FxU32)hw) >> 2,
                     fa[i], fb[i], fc[i], curGrad);
-		    
+
           TRI_NO_TSU_SETF(hwAddr++, curGrad);
           i++;
         }
@@ -520,7 +524,7 @@ GR_DDFUNC(_trisetup_nogradients,
         {
           const float curGrad = (((fa[GR_VERTEX_OOW_OFFSET] - fb[GR_VERTEX_OOW_OFFSET]) * dyBC) -
                                  ((fb[GR_VERTEX_OOW_OFFSET] - fc[GR_VERTEX_OOW_OFFSET]) * dyAB));
-                    
+
           TRI_NO_TSU_SETF(hwAddr++, curGrad);
         }
       }
@@ -532,7 +536,7 @@ GR_DDFUNC(_trisetup_nogradients,
         while(i < GR_VERTEX_OOW_OFFSET) {
           const float curGrad = (((fb[i] - fc[i]) * dxAB) -
                                  ((fa[i] - fb[i]) * dxBC));
-		    
+
           GDBG_INFO(285, FN_NAME": Gradient 0x%X : %g %g %g : %g\n",
                     ((FxU32)hwAddr - (FxU32)hw) >> 2,
                     fa[i], fb[i], fc[i], curGrad);
@@ -548,11 +552,11 @@ GR_DDFUNC(_trisetup_nogradients,
         while(i < GR_VERTEX_OOW_TMU0_OFFSET) {
           const float curGrad = (((fb[i] - fc[i]) * dxAB) -
                                  ((fa[i] - fb[i]) * dxBC));
-		    
+
           GDBG_INFO(285, FN_NAME": Gradient 0x%X : %g %g %g : %g\n",
                     ((FxU32)hwAddr - (FxU32)hw) >> 2,
                     fa[i], fb[i], fc[i], curGrad);
-		    
+
           TRI_NO_TSU_SETF(hwAddr++, curGrad);
           i++;
         }
@@ -560,11 +564,11 @@ GR_DDFUNC(_trisetup_nogradients,
         {
           const float curGrad = (((fb[GR_VERTEX_OOW_OFFSET] - fc[GR_VERTEX_OOW_OFFSET]) * dxAB) -
                                  ((fa[GR_VERTEX_OOW_OFFSET] - fb[GR_VERTEX_OOW_OFFSET]) * dxBC));
-                    
+
           TRI_NO_TSU_SETF(hwAddr++, curGrad);
-        }                
-      }      
-	  
+        }
+      }
+
       /* Draw the triangle by writing the area to the triangleCMD register */
       TRI_NO_TSU_SETF(hwAddr, _GlideRoot.pool.ftemp1);
       _GlideRoot.stats.trisDrawn++;
@@ -581,6 +585,6 @@ __triDrawn:
   GR_CHECK_SIZE();
 
   return 1;
-    
+
 #undef FN_NAME
 } /* _trisetup_nogradients */

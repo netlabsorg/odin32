@@ -1,80 +1,84 @@
+/* $Id: gutex.c,v 1.2 2001-09-05 14:30:31 bird Exp $ */
 /*
 ** THIS SOFTWARE IS SUBJECT TO COPYRIGHT PROTECTION AND IS OFFERED ONLY
 ** PURSUANT TO THE 3DFX GLIDE GENERAL PUBLIC LICENSE. THERE IS NO RIGHT
 ** TO USE THE GLIDE TRADEMARK WITHOUT PRIOR WRITTEN PERMISSION OF 3DFX
-** INTERACTIVE, INC. A COPY OF THIS LICENSE MAY BE OBTAINED FROM THE 
-** DISTRIBUTOR OR BY CONTACTING 3DFX INTERACTIVE INC(info@3dfx.com). 
-** THIS PROGRAM IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER 
+** INTERACTIVE, INC. A COPY OF THIS LICENSE MAY BE OBTAINED FROM THE
+** DISTRIBUTOR OR BY CONTACTING 3DFX INTERACTIVE INC(info@3dfx.com).
+** THIS PROGRAM IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER
 ** EXPRESSED OR IMPLIED. SEE THE 3DFX GLIDE GENERAL PUBLIC LICENSE FOR A
-** FULL TEXT OF THE NON-WARRANTY PROVISIONS.  
-** 
+** FULL TEXT OF THE NON-WARRANTY PROVISIONS.
+**
 ** USE, DUPLICATION OR DISCLOSURE BY THE GOVERNMENT IS SUBJECT TO
 ** RESTRICTIONS AS SET FORTH IN SUBDIVISION (C)(1)(II) OF THE RIGHTS IN
 ** TECHNICAL DATA AND COMPUTER SOFTWARE CLAUSE AT DFARS 252.227-7013,
 ** AND/OR IN SIMILAR OR SUCCESSOR CLAUSES IN THE FAR, DOD OR NASA FAR
 ** SUPPLEMENT. UNPUBLISHED RIGHTS RESERVED UNDER THE COPYRIGHT LAWS OF
-** THE UNITED STATES.  
-** 
+** THE UNITED STATES.
+**
 ** COPYRIGHT 3DFX INTERACTIVE, INC. 1999, ALL RIGHTS RESERVED
 **
-** $Header: /home/ktk/tmp/odin/odin32xp/src/opengl/glide/cvg/glide/gutex.c,v 1.1 2000-02-25 00:37:43 sandervl Exp $
+** $Header: /home/ktk/tmp/odin/odin32xp/src/opengl/glide/cvg/glide/gutex.c,v 1.2 2001-09-05 14:30:31 bird Exp $
 ** $Log: gutex.c,v $
-** Revision 1.1  2000-02-25 00:37:43  sandervl
+** Revision 1.2  2001-09-05 14:30:31  bird
+** Added $Id:$ keyword.
+**
+** Revision 1.1  2000/02/25 00:37:43  sandervl
 ** Created Voodoo 2 dir
 **
-** 
+**
 ** 22    2/20/98 5:31p Peter
 ** crybaby glide
-** 
+**
 ** 21    2/20/98 11:00a Peter
 ** removed glide3 from glid2 tree
- * 
+ *
  * 20    1/07/98 10:22a Peter
  * lod dithering env var
- * 
+ *
  * 19    1/06/98 6:47p Atai
  * undo grSplash and remove gu routines
- * 
+ *
  * 18    12/17/97 4:45p Peter
  * groundwork for CrybabyGlide
- * 
+ *
  * 17    12/02/97 9:49a Dow
  * rid the world of the "Setting the same state twice" message
- * 
+ *
  * 16    11/20/97 6:59p Dow
  * Fixed baseAddress for Banshee (the Devil's Own Test still uses guTex
  * Stuff).
- * 
+ *
  * 15    11/18/97 4:36p Peter
  * chipfield stuff cleanup and w/ direct writes
- * 
+ *
  * 14    11/17/97 4:55p Peter
  * watcom warnings/chipfield stuff
- * 
+ *
  * 13    11/03/97 3:43p Peter
  * h3/cvg cataclysm
- * 
+ *
  * 12    9/15/97 7:31p Peter
  * more cmdfifo cleanup, fixed normal buffer clear, banner in the right
  * place, lfb's are on, Hmmmm.. probably more
- * 
+ *
  * 11    9/04/97 3:32p Peter
  * starting grouping serial reg writes
- * 
+ *
  * 10    6/06/97 10:47a Peter
  * texture downloading, fixed 640x480 dimension, changed cvg dep to be the
  * same as sst1
- * 
+ *
  * 9     5/27/97 1:16p Peter
- * Basic cvg, w/o cmd fifo stuff. 
- * 
+ * Basic cvg, w/o cmd fifo stuff.
+ *
  * 8     5/21/97 6:05a Peter
- * 
+ *
  * 7     3/04/97 9:08p Dow
- * 
+ *
  * 6     12/23/96 1:37p Dow
  * chagnes for multiplatform glide
- * 
+ *
  * 5     11/18/96 9:14a Sellers
  * added checking for crossing of 2 MByte texture boundry
 **
@@ -137,10 +141,10 @@ GR_ENTRY(guTexSource, void, (GrMipMapId_t mmid))
   tLod        = mminfo->tLOD;
 
   oldtexMode = gc->state.tmu_config[tmu].textureMode;
-  oldtexMode &= ~(SST_TFORMAT | SST_TCLAMPT | 
-                  SST_TCLAMPS | SST_TNCCSELECT | 
-                  SST_TLODDITHER | SST_TCLAMPW | 
-                  SST_TMAGFILTER | SST_TMINFILTER | 
+  oldtexMode &= ~(SST_TFORMAT | SST_TCLAMPT |
+                  SST_TCLAMPS | SST_TNCCSELECT |
+                  SST_TLODDITHER | SST_TCLAMPW |
+                  SST_TMAGFILTER | SST_TMINFILTER |
                   SST_TRILINEAR);
   texMode |= oldtexMode;
   if (!gc->state.allowLODdither) texMode &= ~SST_TLODDITHER;
@@ -206,7 +210,7 @@ GR_ENTRY(guTexSource, void, (GrMipMapId_t mmid))
   gc->state.tmu_config[tmu].texBaseAddr = baseAddress;
   gc->state.tmu_config[tmu].textureMode = texMode;
   gc->state.tmu_config[tmu].tLOD = tLod;
- 
+
   GR_END();
 #undef FN_NAME
 } /* guTexSource */

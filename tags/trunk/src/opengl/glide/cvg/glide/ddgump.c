@@ -1,73 +1,77 @@
+/* $Id: ddgump.c,v 1.2 2001-09-05 14:30:20 bird Exp $ */
 /*
 ** THIS SOFTWARE IS SUBJECT TO COPYRIGHT PROTECTION AND IS OFFERED ONLY
 ** PURSUANT TO THE 3DFX GLIDE GENERAL PUBLIC LICENSE. THERE IS NO RIGHT
 ** TO USE THE GLIDE TRADEMARK WITHOUT PRIOR WRITTEN PERMISSION OF 3DFX
-** INTERACTIVE, INC. A COPY OF THIS LICENSE MAY BE OBTAINED FROM THE 
-** DISTRIBUTOR OR BY CONTACTING 3DFX INTERACTIVE INC(info@3dfx.com). 
-** THIS PROGRAM IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER 
+** INTERACTIVE, INC. A COPY OF THIS LICENSE MAY BE OBTAINED FROM THE
+** DISTRIBUTOR OR BY CONTACTING 3DFX INTERACTIVE INC(info@3dfx.com).
+** THIS PROGRAM IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER
 ** EXPRESSED OR IMPLIED. SEE THE 3DFX GLIDE GENERAL PUBLIC LICENSE FOR A
-** FULL TEXT OF THE NON-WARRANTY PROVISIONS.  
-** 
+** FULL TEXT OF THE NON-WARRANTY PROVISIONS.
+**
 ** USE, DUPLICATION OR DISCLOSURE BY THE GOVERNMENT IS SUBJECT TO
 ** RESTRICTIONS AS SET FORTH IN SUBDIVISION (C)(1)(II) OF THE RIGHTS IN
 ** TECHNICAL DATA AND COMPUTER SOFTWARE CLAUSE AT DFARS 252.227-7013,
 ** AND/OR IN SIMILAR OR SUCCESSOR CLAUSES IN THE FAR, DOD OR NASA FAR
 ** SUPPLEMENT. UNPUBLISHED RIGHTS RESERVED UNDER THE COPYRIGHT LAWS OF
-** THE UNITED STATES.  
-** 
+** THE UNITED STATES.
+**
 ** COPYRIGHT 3DFX INTERACTIVE, INC. 1999, ALL RIGHTS RESERVED
 **
-** $Header: /home/ktk/tmp/odin/odin32xp/src/opengl/glide/cvg/glide/ddgump.c,v 1.1 2000-02-25 00:37:34 sandervl Exp $
+** $Header: /home/ktk/tmp/odin/odin32xp/src/opengl/glide/cvg/glide/ddgump.c,v 1.2 2001-09-05 14:30:20 bird Exp $
 ** $Log: ddgump.c,v $
-** Revision 1.1  2000-02-25 00:37:34  sandervl
+** Revision 1.2  2001-09-05 14:30:20  bird
+** Added $Id:$ keyword.
+**
+** Revision 1.1  2000/02/25 00:37:34  sandervl
 ** Created Voodoo 2 dir
 **
-** 
+**
 ** 16    2/20/98 11:00a Peter
 ** removed glide3 from glid2 tree
- * 
+ *
  * 15    12/17/97 4:45p Peter
  * groundwork for CrybabyGlide
- * 
+ *
  * 14    12/15/97 5:51p Atai
  * disable obsolete glide2 api for glide3
- * 
+ *
  * 13    12/08/97 12:06p Atai
  * change prototype for grDrawPoint, grDrawLine, grDrawTriangel
- * 
+ *
  * 12    11/18/97 4:36p Peter
  * chipfield stuff cleanup and w/ direct writes
- * 
+ *
  * 11    11/17/97 4:55p Peter
  * watcom warnings/chipfield stuff
- * 
+ *
  * 10    11/03/97 3:43p Peter
  * h3/cvg cataclysm
- * 
+ *
  * 9     10/27/97 1:16p Peter
  * fixed silliness
- * 
+ *
  * 8     10/27/97 11:10a Peter
  * starting cleanup
- * 
+ *
  * 7     9/15/97 7:31p Peter
  * more cmdfifo cleanup, fixed normal buffer clear, banner in the right
  * place, lfb's are on, Hmmmm.. probably more
- * 
+ *
  * 6     9/04/97 3:32p Peter
  * starting grouping serial reg writes
- * 
+ *
  * 5     6/06/97 10:47a Peter
  * texture downloading, fixed 640x480 dimension, changed cvg dep to be the
  * same as sst1
- * 
+ *
  * 4     5/27/97 1:16p Peter
- * Basic cvg, w/o cmd fifo stuff. 
- * 
+ * Basic cvg, w/o cmd fifo stuff.
+ *
  * 3     5/21/97 6:04a Peter
- * 
+ *
  * 2     3/04/97 9:08p Dow
- * 
+ *
  * 1     12/23/96 1:39p Dow
  * Changes for multiplatform
 **
@@ -91,7 +95,7 @@ extern GrMPState _gumpState;
 
 /*
 ** _gumpTexCombineFunction
-**                                                          
+**
 ** Sets the texture combine function.  For a dual TMU system this function
 ** will configure the TEXTUREMODE registers as appropriate.  For a
 ** single TMU system this function will configure TEXTUREMODE if
@@ -134,7 +138,7 @@ GR_DDFUNC(_gumpTexCombineFunction, void, (int virtual_tmu))
       texmode |= (SST_TC_REPLACE | SST_TCA_REPLACE);
     }
     break;
-    
+
   case GR_MPTEXTURECOMBINE_DETAIL0:
     /* tmu0: (other - local) * lod + local */
     /*     = lod * other + (1 - lod) * local */
@@ -149,7 +153,7 @@ GR_DDFUNC(_gumpTexCombineFunction, void, (int virtual_tmu))
     } else {
       texmode |= (SST_TC_BLEND_LOD | SST_TCA_BLEND_LOD |
                   SST_TC_REVERSE_BLEND | SST_TCA_REVERSE_BLEND |
-                  SST_TC_ZERO_OTHER | SST_TCA_ZERO_OTHER);      
+                  SST_TC_ZERO_OTHER | SST_TCA_ZERO_OTHER);
     }
     break;
 
@@ -210,7 +214,7 @@ GR_DDFUNC(_gumpTexCombineFunction, void, (int virtual_tmu))
 
   case GR_MPTEXTURECOMBINE_SUBTRACT:
     /*
-      tmu0: other - local 
+      tmu0: other - local
       tmu1: local
       doesn't work, alpha blender can't subtract
       */
@@ -227,7 +231,7 @@ GR_DDFUNC(_gumpTexCombineFunction, void, (int virtual_tmu))
   GR_SET_EXPECTED_SIZE(sizeof(FxU32), 1);
   {
     SstRegs* tmuRegs = SST_TMU(hw, 0);
-    
+
     GR_SET(eChipTMU0, tmuRegs, textureMode, texmode);
   }
   GR_CHECK_SIZE();
@@ -324,13 +328,13 @@ GR_ENTRY(guMPDrawTriangle, void, (const GrVertex *a, const GrVertex *b, const Gr
           /* this can change the parameters output */
           /* xxx the equivalent of GR_COLORCOMBINE_CCRGB_BLEND_ITRGB_ON_TEXALPHA
              does not work, you need to do this instead of below.
-             
+
              if (gc->state.cc_fnc == GR_COLORCOMBINE_CCRGB_BLEND_ITRGB_ON_TEXALPHA)
              {
              fbzcolorpath &= ~SST_CC_ADD_CLOCAL;
              }
              */
-      
+
           fbzcolorpath &= ~(SST_CC_ADD_CLOCAL | SST_CC_ADD_ALOCAL | SST_CC_SUB_CLOCAL);
           REG_GROUP_SET(hw, fbzColorPath, fbzcolorpath);
 
@@ -356,7 +360,7 @@ GR_ENTRY(guMPDrawTriangle, void, (const GrVertex *a, const GrVertex *b, const Gr
           /* if depth buffering, set to z= mode and disable writes */
           if (depthP) {
             fbzmode = fbzmode_orig = gc->state.fbi_config.fbzMode;
-            
+
             fbzmode &= ~(SST_ZAWRMASK | SST_ZFUNC);
             fbzmode |= GR_CMP_EQUAL;
 
@@ -379,13 +383,13 @@ GR_ENTRY(guMPDrawTriangle, void, (const GrVertex *a, const GrVertex *b, const Gr
 
           /* restore alpha blending state */
           REG_GROUP_SET(hw, alphaMode, alphamode_orig);
-          
+
           /* restore depth buffer state */
           if (depthP) REG_GROUP_SET(hw, fbzMode, fbzmode_orig);
         }
         REG_GROUP_END();
       }
-        
+
       goto all_done;
     } else if (_gumpState.tc_fnc == GR_MPTEXTURECOMBINE_MULTIPLY) {
       /* disable fog and color combine bias */
@@ -433,7 +437,7 @@ GR_ENTRY(guMPDrawTriangle, void, (const GrVertex *a, const GrVertex *b, const Gr
           /* xxx consult add path for switch version */
           /* xxx the equivalent of GR_COLORCOMBINE_CCRGB_BLEND_ITRGB_ON_TEXALPHA
              does not work, you need to do this instead of below.
-             
+
              if (gc->state.cc_fnc == GR_COLORCOMBINE_CCRGB_BLEND_ITRGB_ON_TEXALPHA)
              {
              fbzcolorpath &= ~SST_CC_ADD_CLOCAL;
@@ -453,13 +457,13 @@ GR_ENTRY(guMPDrawTriangle, void, (const GrVertex *a, const GrVertex *b, const Gr
           }
         }
         REG_GROUP_END();
-        
+
         /* render first pass */
         grDrawTriangle(a, b, c);
-        
+
         /* second pass */
         /* xxx may sometimes need to copy texture coordinates */
-        
+
         /* tmu setup */
         guTexSource(_gumpState.mmid[1]);
         _gumpTexCombineFunction(1);
@@ -480,10 +484,10 @@ GR_ENTRY(guMPDrawTriangle, void, (const GrVertex *a, const GrVertex *b, const Gr
                              SST_CC_ADD_ALOCAL |
                              SST_CC_INVERT_OUTPUT |
                              SST_CC_REVERSE_BLEND );
-          
+
           /* xxx the equivalent of GR_COLORCOMBINE_CCRGB_BLEND_ITRGB_ON_TEXALPHA
              does not work, you need to do this instead of below.
-             
+
              if ( gc->state.cc_fnc == GR_COLORCOMBINE_CCRGB_BLEND_ITRGB_ON_TEXALPHA )
              {
              xxx see implementation notes on why this isn't implemented yet
@@ -497,7 +501,7 @@ GR_ENTRY(guMPDrawTriangle, void, (const GrVertex *a, const GrVertex *b, const Gr
 
           /* disable fog */
           if (fogP) REG_GROUP_SET(hw, fogMode, 0);
-          
+
           /* enable alpha blend to multiply to destination buffers */
           /* xxx alpha component blender can only handle factors of
              0 and 1 */
@@ -509,13 +513,13 @@ GR_ENTRY(guMPDrawTriangle, void, (const GrVertex *a, const GrVertex *b, const Gr
                         (SST_A_ZERO << SST_ADSTFACT_SHIFT));
 
           REG_GROUP_SET(hw, alphaMode, alphamode);
-          
+
           /* if depth buffering, set to z= mode and disable writes */
           if (depthP) {
             fbzmode = fbzmode_orig = gc->state.fbi_config.fbzMode;
             fbzmode &= ~(SST_ZAWRMASK | SST_ZFUNC);
             fbzmode |= GR_CMP_EQUAL;
-            
+
             REG_GROUP_SET(hw, fbzMode, fbzmode);
           }
         }
@@ -523,7 +527,7 @@ GR_ENTRY(guMPDrawTriangle, void, (const GrVertex *a, const GrVertex *b, const Gr
 
         /* render second pass */
         grDrawTriangle(a, b, c);
-        
+
         /* if bias, third pass */
         if (fogP) {
           /* enable alpha blend to add to destination buffers */
@@ -534,7 +538,7 @@ GR_ENTRY(guMPDrawTriangle, void, (const GrVertex *a, const GrVertex *b, const Gr
             fogmode = fogmode_orig;
             fogmode |= SST_FOGMULT;
             REG_GROUP_SET(hw, fogMode, fogmode);
-            
+
             alphamode &= ~(SST_RGBSRCFACT | SST_RGBDSTFACT | SST_ASRCFACT | SST_ADSTFACT);
             alphamode |= (SST_ENALPHABLEND |
                           (SST_A_ONE << SST_RGBSRCFACT_SHIFT) |
@@ -544,7 +548,7 @@ GR_ENTRY(guMPDrawTriangle, void, (const GrVertex *a, const GrVertex *b, const Gr
             REG_GROUP_SET(hw, alphaMode, alphamode);
           }
           REG_GROUP_END();
-          
+
           /* render third pass */
           grDrawTriangle(a, b, c);
         }
@@ -559,7 +563,7 @@ GR_ENTRY(guMPDrawTriangle, void, (const GrVertex *a, const GrVertex *b, const Gr
 
           /* restore alpha blending state */
           REG_GROUP_SET(hw, alphaMode, alphamode_orig);
-          
+
           /* restore depth buffer state */
           if (depthP) REG_GROUP_SET(hw, fbzMode, fbzmode_orig);
         }

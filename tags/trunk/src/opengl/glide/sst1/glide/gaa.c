@@ -1,41 +1,45 @@
+/* $Id: gaa.c,v 1.2 2001-09-05 14:30:50 bird Exp $ */
 /*
 ** THIS SOFTWARE IS SUBJECT TO COPYRIGHT PROTECTION AND IS OFFERED ONLY
 ** PURSUANT TO THE 3DFX GLIDE GENERAL PUBLIC LICENSE. THERE IS NO RIGHT
 ** TO USE THE GLIDE TRADEMARK WITHOUT PRIOR WRITTEN PERMISSION OF 3DFX
-** INTERACTIVE, INC. A COPY OF THIS LICENSE MAY BE OBTAINED FROM THE 
-** DISTRIBUTOR OR BY CONTACTING 3DFX INTERACTIVE INC(info@3dfx.com). 
-** THIS PROGRAM IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER 
+** INTERACTIVE, INC. A COPY OF THIS LICENSE MAY BE OBTAINED FROM THE
+** DISTRIBUTOR OR BY CONTACTING 3DFX INTERACTIVE INC(info@3dfx.com).
+** THIS PROGRAM IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER
 ** EXPRESSED OR IMPLIED. SEE THE 3DFX GLIDE GENERAL PUBLIC LICENSE FOR A
-** FULL TEXT OF THE NON-WARRANTY PROVISIONS.  
-** 
+** FULL TEXT OF THE NON-WARRANTY PROVISIONS.
+**
 ** USE, DUPLICATION OR DISCLOSURE BY THE GOVERNMENT IS SUBJECT TO
 ** RESTRICTIONS AS SET FORTH IN SUBDIVISION (C)(1)(II) OF THE RIGHTS IN
 ** TECHNICAL DATA AND COMPUTER SOFTWARE CLAUSE AT DFARS 252.227-7013,
 ** AND/OR IN SIMILAR OR SUCCESSOR CLAUSES IN THE FAR, DOD OR NASA FAR
 ** SUPPLEMENT. UNPUBLISHED RIGHTS RESERVED UNDER THE COPYRIGHT LAWS OF
-** THE UNITED STATES.  
-** 
+** THE UNITED STATES.
+**
 ** COPYRIGHT 3DFX INTERACTIVE, INC. 1999, ALL RIGHTS RESERVED
 **
-** $Header: /home/ktk/tmp/odin/odin32xp/src/opengl/glide/sst1/glide/gaa.c,v 1.1 2000-02-25 00:31:12 sandervl Exp $
+** $Header: /home/ktk/tmp/odin/odin32xp/src/opengl/glide/sst1/glide/gaa.c,v 1.2 2001-09-05 14:30:50 bird Exp $
 ** $Log: gaa.c,v $
-** Revision 1.1  2000-02-25 00:31:12  sandervl
+** Revision 1.2  2001-09-05 14:30:50  bird
+** Added $Id:$ keyword.
+**
+** Revision 1.1  2000/02/25 00:31:12  sandervl
 ** Created new Voodoo 1 Glide dir
 **
- * 
+ *
  * 13    8/21/97 2:26p Atai
  * fix FIFO size
- * 
+ *
  * 12    7/25/97 2:55p Atai
  * Remove slope calculation in edge sense code, use cross product instead.
  * Move grAADrawTriEdgeSense() 1/area calculation after pci write command.
- * 
+ *
  * 11    7/24/97 5:59p Atai
  * optimize grAADrawPoint, grAADrawLine and grAADrawTriangle for sst1
- * 
+ *
  * 10    3/04/97 9:08p Dow
  * Neutered multiplatform multiheaded monster
- * 
+ *
  * 9     12/23/96 1:37p Dow
  * chagnes for multiplatform glide
 **
@@ -79,7 +83,7 @@
 **     8
 ** total = 29 + 3 * n
 */
-GR_ENTRY(grAADrawPoint, void, ( const GrVertex *e )) 
+GR_ENTRY(grAADrawPoint, void, ( const GrVertex *e ))
 {
   int i, j;
   float *fp;
@@ -215,7 +219,7 @@ static void grSetVertexParameter(const GrVertex *v1)
 **                                   \     |
 **                                      \ \|
 **                                         +F(x2,y2+1.0)
-**                                         
+**
 ** pci write command (x major line )
 ** 1st triangle A-B-V2
 **     10 + 3 * n
@@ -225,9 +229,9 @@ static void grSetVertexParameter(const GrVertex *v1)
 **     6 + n
 ** 4th triangle V1-V2-F
 **     5 + n
-** total = 
+** total =
 */
-GR_ENTRY(grAADrawLine, void, ( const GrVertex *v1, const GrVertex *v2 )) 
+GR_ENTRY(grAADrawLine, void, ( const GrVertex *v1, const GrVertex *v2 ))
 {
   float           adx;         /* |dX| */
   const GrVertex *tv;
@@ -247,13 +251,13 @@ GR_ENTRY(grAADrawLine, void, ( const GrVertex *v1, const GrVertex *v2 ))
   if ( v2->y < v1->y ) {
     tv = v1; v1 = v2; v2 = tv;
   }
-  
+
   /* compute deltas and absolute deltas */
   dx = adx = v1->x - v2->x;
   dy = v2->y - v1->y;
   if ( adx < 0 )
     adx = -adx;
-  
+
   if ( adx >= dy ) {           /* X major line */
 
     if (dx == 0.0f)
@@ -283,12 +287,12 @@ GR_ENTRY(grAADrawLine, void, ( const GrVertex *v1, const GrVertex *v2 ))
       }
       else {
         dp = FARRAY(v1,i);
-	GR_SETF( fp[0], dp );
-	dp -= FARRAY(v2, i);
-	GR_SETF( fp[DPDX_OFFSET>>2] , dp * dx);
-	dlp++;
-	i = dlp->i;
-	GR_SETF( fp[DPDY_OFFSET>>2] , _GlideRoot.pool.f0 );
+    GR_SETF( fp[0], dp );
+    dp -= FARRAY(v2, i);
+    GR_SETF( fp[DPDX_OFFSET>>2] , dp * dx);
+    dlp++;
+    i = dlp->i;
+    GR_SETF( fp[DPDY_OFFSET>>2] , _GlideRoot.pool.f0 );
       }
     }
     GR_SET( hw->Fa , 0 );
@@ -329,7 +333,7 @@ GR_ENTRY(grAADrawLine, void, ( const GrVertex *v1, const GrVertex *v2 ))
 
     grSetVertexParameter(v1);
 
-    GR_SETF( hw->Fdadx , dp ); 
+    GR_SETF( hw->Fdadx , dp );
     GR_SETF( hw->Fdady , -v2->a );
     P6FENCE_CMD( GR_SETF( hw->FtriangleCMD, -dx ) );
 
@@ -353,19 +357,19 @@ GR_ENTRY(grAADrawLine, void, ( const GrVertex *v1, const GrVertex *v2 ))
     while (i) {
       fp = dlp->addr;
       if (i & 1) {     /* packer bug check */
-	if (i & 2) P6FENCE;
-	GR_SETF( fp[0], 0.0f);
-	if (i & 2) P6FENCE;
-	dlp++;
-	i = dlp->i;
+    if (i & 2) P6FENCE;
+    GR_SETF( fp[0], 0.0f);
+    if (i & 2) P6FENCE;
+    dlp++;
+    i = dlp->i;
       }
       else {
-	dp = FARRAY(v1,i);
-	GR_SETF( fp[0], dp );
+    dp = FARRAY(v1,i);
+    GR_SETF( fp[0], dp );
         dp -= FARRAY(v2, i);
-	GR_SETF( fp[DPDX_OFFSET>>2] , _GlideRoot.pool.f0);
-	dlp++;
-	i = dlp->i;
+    GR_SETF( fp[DPDX_OFFSET>>2] , _GlideRoot.pool.f0);
+    dlp++;
+    i = dlp->i;
         GR_SETF( fp[DPDY_OFFSET>>2] , dp * dy );
       }
     }
@@ -467,15 +471,15 @@ grAADrawTriEdgeSense(const GrVertex *a,const GrVertex *b,const GrVertex *c)
 
     if (dx > 0.0f) {
       if (dx >= -dy)    /* X-major line */
-	sense = (cp > 0) ? aaEdgeSenseTop : aaEdgeSenseBottom;
+    sense = (cp > 0) ? aaEdgeSenseTop : aaEdgeSenseBottom;
       else              /* Y-major line */
-	sense = (cp > 0) ? aaEdgeSenseRight : aaEdgeSenseLeft;
+    sense = (cp > 0) ? aaEdgeSenseRight : aaEdgeSenseLeft;
     }
     else {
       if (dx <= dy)     /* X-major line */
-	sense = (cp < 0) ? aaEdgeSenseTop : aaEdgeSenseBottom;
+    sense = (cp < 0) ? aaEdgeSenseTop : aaEdgeSenseBottom;
       else              /* Y-major line */
-	sense = (cp < 0) ? aaEdgeSenseLeft : aaEdgeSenseRight;
+    sense = (cp < 0) ? aaEdgeSenseLeft : aaEdgeSenseRight;
     }
   }
 
@@ -491,35 +495,35 @@ grAADrawTriEdgeSense(const GrVertex *a,const GrVertex *b,const GrVertex *c)
     GR_SETF( hw->FvB.y, a->y + _GlideRoot.pool.f1);
     dp = a->a * dy;
     GR_SETF( hw->FvC.y, b->y + _GlideRoot.pool.f1);
-    
+
     grSetVertexParameter(a);
-    
+
     GR_SETF( hw->Fdady, -a->a);
     dp *= m;
     GR_SETF( hw->Fdadx, dp);
     P6FENCE_CMD( GR_SETF( hw->triangleCMD, dx ) );
-      
+
     dp = b->a * dy;
     GR_SETF( hw->FvB.x, b->x);
     dp = a->a - b->a + dp;
     GR_SETF( hw->FvB.y, b->y);
 
     grSetVertexParameter(a);
-    
+
     GR_SETF( hw->Fdady, -b->a);
     dp *= m;
     GR_SETF( hw->Fdadx, dp);
     P6FENCE_CMD( GR_SETF( hw->triangleCMD, -dx ) );
-    
+
     break;
-    
+
   case aaEdgeSenseLeft:
     /* pci comamnd 16 + 2 * n */
     GR_SET_EXPECTED_SIZE(8+(_GlideRoot.curTriSizeNoGradient << 1));
     GR_SETF( hw->FvA.y, a->y);
     GR_SETF( hw->FvB.x, a->x);
     GR_SETF( hw->FvB.y, a->y);
-    GR_SETF( hw->FvC.y, b->y);    
+    GR_SETF( hw->FvC.y, b->y);
     m = 1.0f / dy;
     GR_SETF( hw->FvA.x, a->x - _GlideRoot.pool.f1);
     GR_SETF( hw->FvC.x, b->x - _GlideRoot.pool.f1);
@@ -531,7 +535,7 @@ grAADrawTriEdgeSense(const GrVertex *a,const GrVertex *b,const GrVertex *c)
     dp = - a->a * dx * m;
     GR_SETF( hw->Fdady, dp);
     P6FENCE_CMD( GR_SETF( hw->triangleCMD, -dy ) );
-    
+
     GR_SETF( hw->FvA.x, a->x);
     dp = b->a * dx;
     GR_SETF( hw->FvB.x, b->x);
@@ -544,31 +548,31 @@ grAADrawTriEdgeSense(const GrVertex *a,const GrVertex *b,const GrVertex *c)
     dp *= m;
     GR_SETF( hw->Fdady, dp);
     P6FENCE_CMD( GR_SETF( hw->triangleCMD, -dy ) );
-    
+
     break;
-    
+
   case aaEdgeSenseBottom:
-    
+
     if (dy < -1.0f) {
       /* pci comamnd 17 + 2 * n */
       GR_SET_EXPECTED_SIZE(12+(_GlideRoot.curTriSizeNoGradient << 1));
       GR_SETF( hw->FvA.x, a->x);
       GR_SETF( hw->FvB.x, a->x);
       GR_SETF( hw->FvB.y, a->y);
-      GR_SETF( hw->FvC.x, b->x);      
+      GR_SETF( hw->FvC.x, b->x);
       m = 1.0f / dx;
       GR_SETF( hw->FvA.y, a->y - _GlideRoot.pool.f1);
       GR_SETF( hw->FvC.y, b->y - _GlideRoot.pool.f1);
 
       grSetVertexParameter(a);
       GR_SET(hw->Fa, 0);
-      
+
       dp = a->a * dy;
       dp *= m;
       GR_SETF( hw->Fdadx, -dp);
       GR_SETF( hw->Fdady, a->a);
       P6FENCE_CMD( GR_SETF( hw->triangleCMD, dx ) );
-    
+
       GR_SETF( hw->FvA.y, a->y);
       dp = b->a * dy;
       GR_SETF( hw->FvB.x, b->x);
@@ -576,7 +580,7 @@ grAADrawTriEdgeSense(const GrVertex *a,const GrVertex *b,const GrVertex *c)
       dp = a->a - b->a - dp;
       GR_SETF( hw->FvC.y, b->y);
       grSetVertexParameter(a);
-      
+
       GR_SETF( hw->Fdady, b->a);
       dp *= m;
       GR_SETF( hw->Fdadx, dp);
@@ -587,7 +591,7 @@ grAADrawTriEdgeSense(const GrVertex *a,const GrVertex *b,const GrVertex *c)
       /* pci comamnd 16 + 2 * n */
       GR_SET_EXPECTED_SIZE(8+(_GlideRoot.curTriSizeNoGradient << 1));
       GR_SETF( hw->FvA.x, a->x);
-      GR_SETF( hw->FvC.x, b->x);      
+      GR_SETF( hw->FvC.x, b->x);
       GR_SETF( hw->FvC.y, b->y);
       GR_SETF( hw->FvB.x, b->x);
       m = 1.0f / dx;
@@ -600,12 +604,12 @@ grAADrawTriEdgeSense(const GrVertex *a,const GrVertex *b,const GrVertex *c)
       GR_SET( hw->Fdadx, 0);
       GR_SETF( hw->Fdady, b->a);
       P6FENCE_CMD( GR_SETF( hw->triangleCMD, -dx ) );
-    
+
       GR_SETF( hw->FvB.x, a->x);
       GR_SETF( hw->FvB.y, a->y);
       grSetVertexParameter(a);
       GR_SET(hw->Fa, 0);
-    
+
       dp = a->a - b->a;
       GR_SETF( hw->Fdady, a->a);
       dp *= m;
@@ -618,7 +622,7 @@ grAADrawTriEdgeSense(const GrVertex *a,const GrVertex *b,const GrVertex *c)
       GR_SET_EXPECTED_SIZE(24+(_GlideRoot.curTriSizeNoGradient << 1));
       GR_SETF( hw->FvA.x, a->x);
       GR_SETF( hw->FvB.x, b->x);
-      GR_SETF( hw->FvC.x, a->x);      
+      GR_SETF( hw->FvC.x, a->x);
       GR_SETF( hw->FvC.y, a->y);
       m = 1.0f / dx;
       GR_SETF( hw->FvA.y, a->y - _GlideRoot.pool.f1);
@@ -626,7 +630,7 @@ grAADrawTriEdgeSense(const GrVertex *a,const GrVertex *b,const GrVertex *c)
 
       grSetVertexParameter(a);
       GR_SET(hw->Fa, 0);
-      
+
       dp = -a->a * dy * m;
       GR_SETF( hw->Fdadx, dp);
       GR_SETF( hw->Fdady, a->a);
@@ -637,7 +641,7 @@ grAADrawTriEdgeSense(const GrVertex *a,const GrVertex *b,const GrVertex *c)
       GR_SETF( hw->FvB.x, a->x);
       GR_SETF( hw->FvB.y, a->y);
       dp = b->a * dy;
-      GR_SETF( hw->FvC.x, b->x);      
+      GR_SETF( hw->FvC.x, b->x);
       GR_SETF( hw->FvC.y, b->y);
 
       grSetVertexParameter(b);
@@ -648,7 +652,7 @@ grAADrawTriEdgeSense(const GrVertex *a,const GrVertex *b,const GrVertex *c)
       GR_SETF( hw->Fdadx, dp);
       P6FENCE_CMD( GR_SETF( hw->triangleCMD, dx ) );
     }
-    
+
     break;
   case aaEdgeSenseRight:
     /* pci comamnd 16 + 2 * n */
@@ -669,18 +673,18 @@ grAADrawTriEdgeSense(const GrVertex *a,const GrVertex *b,const GrVertex *c)
     dp *= m;
     GR_SETF( hw->Fdady, dp);
     P6FENCE_CMD( GR_SETF( hw->triangleCMD, dy ) );
-    
+
     GR_SETF( hw->FvA.x, a->x);
     dp = b->a * dx;
     GR_SETF( hw->FvB.x, b->x);
     dp = dp + a->a - b->a;
     GR_SETF( hw->FvB.y, b->y);
     grSetVertexParameter(a);
-    
+
     GR_SETF( hw->Fdadx, -b->a);
     dp *= m;
     GR_SETF( hw->Fdady, dp);
-    P6FENCE_CMD( GR_SETF( hw->triangleCMD, dy ) );   
+    P6FENCE_CMD( GR_SETF( hw->triangleCMD, dy ) );
     break;
   }
   GR_END_SLOPPY();
@@ -689,7 +693,7 @@ grAADrawTriEdgeSense(const GrVertex *a,const GrVertex *b,const GrVertex *c)
 #if 0
 /*
 ** aaCalculateSignOfSinTheta
-**  
+**
 */
 float
 aaCalculateSignOfSinTheta(GrVertex *a, GrVertex *b, GrVertex *c)
@@ -700,19 +704,19 @@ aaCalculateSignOfSinTheta(GrVertex *a, GrVertex *b, GrVertex *c)
   /*
      Now, we make two vectors: ab [x1 y1] and ac [x2 y2]
      Fromt the cross product, we know that
-     
+
      x1*y2 - x2*y1 = |ab|*|ac|*sin(theta), where theta is the angle
      between the two lines.  If sin(theta) > 0, c is above the line ab,
      and if it's negative, it's below ab.
      */
   x1 = b->x - a->x;
   y1 = b->y - a->y;
-  
+
   x2 = c->x - a->x;
   y2 = c->y - a->y;
 
   return ((x1 * y2) - (x2 * y1));
-  
+
 } /* aaCalculateSignOfSinTheta */
 #endif
 
@@ -722,7 +726,7 @@ aaCalculateSignOfSinTheta(GrVertex *a, GrVertex *b, GrVertex *c)
 **
 **  NOTE:  This doesn't quite work yet
 */
-GR_ENTRY(grAADrawTriangle, void, (const GrVertex *a, const GrVertex *b, const GrVertex *c, FxBool ab_antialias, FxBool bc_antialias, FxBool ca_antialias ) ) 
+GR_ENTRY(grAADrawTriangle, void, (const GrVertex *a, const GrVertex *b, const GrVertex *c, FxBool ab_antialias, FxBool bc_antialias, FxBool ca_antialias ) )
 {
   FxU32
     fbzMode,                    /* What we write to fbzMode */
@@ -747,11 +751,11 @@ GR_ENTRY(grAADrawTriangle, void, (const GrVertex *a, const GrVertex *b, const Gr
   if ( ab_antialias ) {
     grAADrawTriEdgeSense(a, b, c);
   }
-  
+
   if ( bc_antialias ) {
     grAADrawTriEdgeSense(b, c, a);
   }
-  
+
   if ( ca_antialias ) {
     grAADrawTriEdgeSense(c, a, b);
   }
@@ -767,7 +771,7 @@ GR_ENTRY(grAADrawTriangle, void, (const GrVertex *a, const GrVertex *b, const Gr
 **  NOTE:  This routine does not do backface culling!!!
 */
 
-GR_ENTRY(grAADrawPolygon, void, (const int nverts, const int ilist[], const GrVertex vlist[])) 
+GR_ENTRY(grAADrawPolygon, void, (const int nverts, const int ilist[], const GrVertex vlist[]))
 {
   int
     i = 1;                      /* index into ilist */
@@ -794,7 +798,7 @@ GR_ENTRY(grAADrawPolygon, void, (const int nverts, const int ilist[], const GrVe
 
     } else if (i == (nverts - 2)) {
       grAADrawTriEdgeSense(c, a, b);
-    } 
+    }
 
     grAADrawTriEdgeSense(b, c, a);
 
@@ -807,7 +811,7 @@ GR_ENTRY(grAADrawPolygon, void, (const int nverts, const int ilist[], const GrVe
 **  NOTE:  This routine does not do backface culling!!!
 */
 
-GR_ENTRY(grAADrawPolygonVertexList, void, (const int nverts, const GrVertex vlist[])) 
+GR_ENTRY(grAADrawPolygonVertexList, void, (const int nverts, const GrVertex vlist[]))
 {
   int
     i = 1;                      /* index into ilist */
@@ -837,7 +841,7 @@ GR_ENTRY(grAADrawPolygonVertexList, void, (const int nverts, const GrVertex vlis
       grAADrawTriEdgeSense(a, b, c);
     } else if (i == (nverts - 2)) {
       grAADrawTriEdgeSense(c, a, b);
-    } 
+    }
 
     grAADrawTriEdgeSense(b, c, a);
 

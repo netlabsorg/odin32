@@ -1,42 +1,46 @@
+/* $Id: gu.c,v 1.2 2001-09-05 14:30:30 bird Exp $ */
 /*
 ** THIS SOFTWARE IS SUBJECT TO COPYRIGHT PROTECTION AND IS OFFERED ONLY
 ** PURSUANT TO THE 3DFX GLIDE GENERAL PUBLIC LICENSE. THERE IS NO RIGHT
 ** TO USE THE GLIDE TRADEMARK WITHOUT PRIOR WRITTEN PERMISSION OF 3DFX
-** INTERACTIVE, INC. A COPY OF THIS LICENSE MAY BE OBTAINED FROM THE 
-** DISTRIBUTOR OR BY CONTACTING 3DFX INTERACTIVE INC(info@3dfx.com). 
-** THIS PROGRAM IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER 
+** INTERACTIVE, INC. A COPY OF THIS LICENSE MAY BE OBTAINED FROM THE
+** DISTRIBUTOR OR BY CONTACTING 3DFX INTERACTIVE INC(info@3dfx.com).
+** THIS PROGRAM IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER
 ** EXPRESSED OR IMPLIED. SEE THE 3DFX GLIDE GENERAL PUBLIC LICENSE FOR A
-** FULL TEXT OF THE NON-WARRANTY PROVISIONS.  
-** 
+** FULL TEXT OF THE NON-WARRANTY PROVISIONS.
+**
 ** USE, DUPLICATION OR DISCLOSURE BY THE GOVERNMENT IS SUBJECT TO
 ** RESTRICTIONS AS SET FORTH IN SUBDIVISION (C)(1)(II) OF THE RIGHTS IN
 ** TECHNICAL DATA AND COMPUTER SOFTWARE CLAUSE AT DFARS 252.227-7013,
 ** AND/OR IN SIMILAR OR SUCCESSOR CLAUSES IN THE FAR, DOD OR NASA FAR
 ** SUPPLEMENT. UNPUBLISHED RIGHTS RESERVED UNDER THE COPYRIGHT LAWS OF
-** THE UNITED STATES.  
-** 
+** THE UNITED STATES.
+**
 ** COPYRIGHT 3DFX INTERACTIVE, INC. 1999, ALL RIGHTS RESERVED
 **
-** $Header: /home/ktk/tmp/odin/odin32xp/src/opengl/glide/cvg/glide/gu.c,v 1.1 2000-02-25 00:37:42 sandervl Exp $
+** $Header: /home/ktk/tmp/odin/odin32xp/src/opengl/glide/cvg/glide/gu.c,v 1.2 2001-09-05 14:30:30 bird Exp $
 ** $Log: gu.c,v $
-** Revision 1.1  2000-02-25 00:37:42  sandervl
+** Revision 1.2  2001-09-05 14:30:30  bird
+** Added $Id:$ keyword.
+**
+** Revision 1.1  2000/02/25 00:37:42  sandervl
 ** Created Voodoo 2 dir
 **
- * 
+ *
  * 14    12/18/97 2:13p Peter
  * fogTable cataclysm
- * 
+ *
  * 13    5/27/97 1:16p Peter
- * Basic cvg, w/o cmd fifo stuff. 
- * 
+ * Basic cvg, w/o cmd fifo stuff.
+ *
  * 12    5/21/97 6:05a Peter
- * 
+ *
  * 11    3/09/97 10:31a Dow
  * Added GR_DIENTRY for di glide functions
- * 
+ *
  * 10    3/05/97 9:36p Jdt
  * Added guEncodeRLE16
- * 
+ *
  * 9     12/23/96 1:37p Dow
  * chagnes for multiplatform glide
 **
@@ -63,34 +67,34 @@ GR_DIENTRY(guAlphaSource, void, ( GrAlphaSource_t mode ))
   GDBG_INFO(99,"guAlphaSource(%d)\n",mode);
   switch ( mode ) {
   case GR_ALPHASOURCE_CC_ALPHA:
-    grAlphaCombine( GR_COMBINE_FUNCTION_LOCAL, 
-                    GR_COMBINE_FACTOR_NONE, 
-                    GR_COMBINE_LOCAL_CONSTANT, 
-                    GR_COMBINE_OTHER_NONE, 
+    grAlphaCombine( GR_COMBINE_FUNCTION_LOCAL,
+                    GR_COMBINE_FACTOR_NONE,
+                    GR_COMBINE_LOCAL_CONSTANT,
+                    GR_COMBINE_OTHER_NONE,
                     FXFALSE );
     break;
 
   case GR_ALPHASOURCE_ITERATED_ALPHA:
-    grAlphaCombine( GR_COMBINE_FUNCTION_LOCAL, 
-                    GR_COMBINE_FACTOR_NONE, 
-                    GR_COMBINE_LOCAL_ITERATED, 
-                    GR_COMBINE_OTHER_NONE, 
+    grAlphaCombine( GR_COMBINE_FUNCTION_LOCAL,
+                    GR_COMBINE_FACTOR_NONE,
+                    GR_COMBINE_LOCAL_ITERATED,
+                    GR_COMBINE_OTHER_NONE,
                     FXFALSE );
     break;
 
   case GR_ALPHASOURCE_TEXTURE_ALPHA:
-    grAlphaCombine( GR_COMBINE_FUNCTION_SCALE_OTHER, 
-                    GR_COMBINE_FACTOR_ONE, 
-                    GR_COMBINE_LOCAL_NONE, 
-                    GR_COMBINE_OTHER_TEXTURE, 
+    grAlphaCombine( GR_COMBINE_FUNCTION_SCALE_OTHER,
+                    GR_COMBINE_FACTOR_ONE,
+                    GR_COMBINE_LOCAL_NONE,
+                    GR_COMBINE_OTHER_TEXTURE,
                     FXFALSE );
     break;
 
   case GR_ALPHASOURCE_TEXTURE_ALPHA_TIMES_ITERATED_ALPHA:
-    grAlphaCombine( GR_COMBINE_FUNCTION_SCALE_OTHER, 
-                    GR_COMBINE_FACTOR_LOCAL, 
-                    GR_COMBINE_LOCAL_ITERATED, 
-                    GR_COMBINE_OTHER_TEXTURE, 
+    grAlphaCombine( GR_COMBINE_FUNCTION_SCALE_OTHER,
+                    GR_COMBINE_FACTOR_LOCAL,
+                    GR_COMBINE_LOCAL_ITERATED,
+                    GR_COMBINE_OTHER_TEXTURE,
                     FXFALSE );
     break;
 
@@ -181,7 +185,7 @@ GR_DIENTRY(guColorCombineFunction, void, ( GrColorCombineFnc_t fnc ))
   case GR_COLORCOMBINE_ONE:
     grColorCombine( GR_COMBINE_FUNCTION_ZERO, GR_COMBINE_FACTOR_NONE, GR_COMBINE_LOCAL_NONE, GR_COMBINE_OTHER_NONE, FXTRUE );
     break;
-    
+
   default:
     GR_CHECK_F("grColorCombineFunction", 1, "unsupported color combine function");
     break;
@@ -216,7 +220,7 @@ GR_DIENTRY(guFogTableIndexToW, float, ( int i ))
 ** guFogGenerateExp
 */
 GR_DIENTRY(guFogGenerateExp, void,
-           ( GrFog_t fogtable[], float density )) 
+           ( GrFog_t fogtable[], float density ))
 {
   int   i;
   float f;
@@ -273,7 +277,7 @@ GR_DIENTRY(guFogGenerateExp2, void,
 /*---------------------------------------------------------------------------
 ** guFogGenerateLinear
 */
-GR_DIENTRY(guFogGenerateLinear, void, 
+GR_DIENTRY(guFogGenerateLinear, void,
            ( GrFog_t fogtable[kInternalFogTableEntryCount],
              float nearZ, float farZ ))
 {
@@ -286,7 +290,7 @@ GR_DIENTRY(guFogGenerateLinear, void,
     world_w = guFogTableIndexToW( i );
     if ( world_w > 65535.0F )
       world_w = 65535.0F;
-    
+
     f = ( world_w - nearZ ) / ( farZ - nearZ );
     if ( f > 1.0F )
       f = 1.0F;
@@ -429,7 +433,7 @@ GR_ENTRY( guEncodeRLE16, int, ( void *dst, void *src, FxU32 width, FxU32 height 
             byteCount+=4;
 
             srcPixels+=length;
-            sourceImageSizeInWords-=length;            
+            sourceImageSizeInWords-=length;
         }
     } else {
         while( sourceImageSizeInWords-- ) {
@@ -445,7 +449,7 @@ GR_ENTRY( guEncodeRLE16, int, ( void *dst, void *src, FxU32 width, FxU32 height 
 
             byteCount+=4;
             srcPixels+=length;
-            sourceImageSizeInWords-=length;            
+            sourceImageSizeInWords-=length;
         }
     }
     return byteCount;

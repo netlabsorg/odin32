@@ -1,25 +1,26 @@
+/* $Id: rgt.c,v 1.2 2001-09-05 14:30:46 bird Exp $ */
 
 /*
 ** THIS SOFTWARE IS SUBJECT TO COPYRIGHT PROTECTION AND IS OFFERED ONLY
 ** PURSUANT TO THE 3DFX GLIDE GENERAL PUBLIC LICENSE. THERE IS NO RIGHT
 ** TO USE THE GLIDE TRADEMARK WITHOUT PRIOR WRITTEN PERMISSION OF 3DFX
-** INTERACTIVE, INC. A COPY OF THIS LICENSE MAY BE OBTAINED FROM THE 
-** DISTRIBUTOR OR BY CONTACTING 3DFX INTERACTIVE INC(info@3dfx.com). 
-** THIS PROGRAM IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER 
+** INTERACTIVE, INC. A COPY OF THIS LICENSE MAY BE OBTAINED FROM THE
+** DISTRIBUTOR OR BY CONTACTING 3DFX INTERACTIVE INC(info@3dfx.com).
+** THIS PROGRAM IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER
 ** EXPRESSED OR IMPLIED. SEE THE 3DFX GLIDE GENERAL PUBLIC LICENSE FOR A
-** FULL TEXT OF THE NON-WARRANTY PROVISIONS.  
-** 
+** FULL TEXT OF THE NON-WARRANTY PROVISIONS.
+**
 ** USE, DUPLICATION OR DISCLOSURE BY THE GOVERNMENT IS SUBJECT TO
 ** RESTRICTIONS AS SET FORTH IN SUBDIVISION (C)(1)(II) OF THE RIGHTS IN
 ** TECHNICAL DATA AND COMPUTER SOFTWARE CLAUSE AT DFARS 252.227-7013,
 ** AND/OR IN SIMILAR OR SUCCESSOR CLAUSES IN THE FAR, DOD OR NASA FAR
 ** SUPPLEMENT. UNPUBLISHED RIGHTS RESERVED UNDER THE COPYRIGHT LAWS OF
-** THE UNITED STATES.  
-** 
+** THE UNITED STATES.
+**
 ** COPYRIGHT 3DFX INTERACTIVE, INC. 1999, ALL RIGHTS RESERVED
 **
-** $Revision: 1.1 $
-** $Date: 2000-02-25 00:38:00 $
+** $Revision: 1.2 $
+** $Date: 2001-09-05 14:30:46 $
 **
 */
 
@@ -35,7 +36,7 @@ const FxU16 ITYPE_RLE      = 0x01;
 const FxU16 ITYPE_NCC      = 0x02;
 const FxU16 ITYPE_BGR      = 0x04;
 const FxU16 ITYPE_RGT      = 0x08;
-    
+
 typedef struct _rgtHeader{
     FxU16 magic;
     FxU8 typeLo;
@@ -66,7 +67,7 @@ static void swapLongs(unsigned int *array, long length)
     unsigned int s;
     while (length--) {
         s = *array;
-        *array++ = (s << 24) | ((s >> 8)&0xFF00) | 
+        *array++ = (s << 24) | ((s >> 8)&0xFF00) |
                         ((s&0xFF00) << 8) | (s>>24);
     }
 }
@@ -82,7 +83,7 @@ static void swapRGB(unsigned int *array, long length)
 }
 
 
-FxBool 
+FxBool
 _txReadRGTHeader( FILE *stream, FxU32 cookie, TxMip *info)
 {
     RgtHeader   *rgtHeader = (RgtHeader *) info->pal;
@@ -92,7 +93,7 @@ _txReadRGTHeader( FILE *stream, FxU32 cookie, TxMip *info)
         txPanic("RGT file: Bad file handle.");
         return FXFALSE;
     }
-    
+
     if ( fread( &(rgtHeader->typeLo), 1, sizeof(RgtHeader)-2, stream ) != 10 ) {
         txPanic("RGT file: Unexpected end of file.");
         return FXFALSE;
@@ -103,14 +104,14 @@ _txReadRGTHeader( FILE *stream, FxU32 cookie, TxMip *info)
     }
 
 
-    info->format = GR_TEXFMT_ARGB_8888; 
+    info->format = GR_TEXFMT_ARGB_8888;
     info->width = rgtHeader->sizeXHi << 8 | rgtHeader->sizeXLo;
     info->height = rgtHeader->sizeYHi << 8 | rgtHeader->sizeYLo;
     info->depth = 1;
     info->size = info->width * info->height * 4;
     if( txVerbose )
       {
-        printf("Magic: %.04x w = %d, h = %d, z = %d, typehi = %d, typelo = %d, swap=%d\n", rgtHeader->magic, 
+        printf("Magic: %.04x w = %d, h = %d, z = %d, typehi = %d, typelo = %d, swap=%d\n", rgtHeader->magic,
                info->width, info->height, rgtHeader->sizeZLo, rgtHeader->typeHi, rgtHeader->typeLo, rgtHeader->magic == IMAGIC);
       }
     return FXTRUE;
@@ -118,14 +119,14 @@ _txReadRGTHeader( FILE *stream, FxU32 cookie, TxMip *info)
 
 // RGT is RGBA in memory (low byte to high byte), or ABGR in a register
 
-FxBool 
+FxBool
 _txReadRGTData( FILE *stream, TxMip *info)
 {
     RgtHeader   *rgtHeader = (RgtHeader *) info->pal;
     FxU16 type = (rgtHeader->typeHi);
-    FxU16 swap = (rgtHeader->magic == IMAGIC); 
+    FxU16 swap = (rgtHeader->magic == IMAGIC);
     int   x, y;
-    
+
     if ( stream == NULL ) {
         txPanic("RGT file: Bad file handle.");
         return FXFALSE;
@@ -138,7 +139,7 @@ _txReadRGTData( FILE *stream, TxMip *info)
         txPanic("RGT file: RGT RLE files not supported.");
         return FXFALSE;
     }
-    
+
     // load rgt, rgt's are bottom up
     for ( y = 0; y < info->height; y++ ) {
         FxU32 *data32;

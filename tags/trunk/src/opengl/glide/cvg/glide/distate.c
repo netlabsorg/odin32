@@ -1,72 +1,76 @@
+/* $Id: distate.c,v 1.2 2001-09-05 14:30:21 bird Exp $ */
 /*
  ** THIS SOFTWARE IS SUBJECT TO COPYRIGHT PROTECTION AND IS OFFERED ONLY
  ** PURSUANT TO THE 3DFX GLIDE GENERAL PUBLIC LICENSE. THERE IS NO RIGHT
  ** TO USE THE GLIDE TRADEMARK WITHOUT PRIOR WRITTEN PERMISSION OF 3DFX
- ** INTERACTIVE, INC. A COPY OF THIS LICENSE MAY BE OBTAINED FROM THE 
- ** DISTRIBUTOR OR BY CONTACTING 3DFX INTERACTIVE INC(info@3dfx.com). 
- ** THIS PROGRAM IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER 
+ ** INTERACTIVE, INC. A COPY OF THIS LICENSE MAY BE OBTAINED FROM THE
+ ** DISTRIBUTOR OR BY CONTACTING 3DFX INTERACTIVE INC(info@3dfx.com).
+ ** THIS PROGRAM IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER
  ** EXPRESSED OR IMPLIED. SEE THE 3DFX GLIDE GENERAL PUBLIC LICENSE FOR A
- ** FULL TEXT OF THE NON-WARRANTY PROVISIONS.  
- ** 
+ ** FULL TEXT OF THE NON-WARRANTY PROVISIONS.
+ **
  ** USE, DUPLICATION OR DISCLOSURE BY THE GOVERNMENT IS SUBJECT TO
  ** RESTRICTIONS AS SET FORTH IN SUBDIVISION (C)(1)(II) OF THE RIGHTS IN
  ** TECHNICAL DATA AND COMPUTER SOFTWARE CLAUSE AT DFARS 252.227-7013,
  ** AND/OR IN SIMILAR OR SUCCESSOR CLAUSES IN THE FAR, DOD OR NASA FAR
  ** SUPPLEMENT. UNPUBLISHED RIGHTS RESERVED UNDER THE COPYRIGHT LAWS OF
- ** THE UNITED STATES.  
- ** 
+ ** THE UNITED STATES.
+ **
  ** COPYRIGHT 3DFX INTERACTIVE, INC. 1999, ALL RIGHTS RESERVED
  **
- ** $Header: /home/ktk/tmp/odin/odin32xp/src/opengl/glide/cvg/glide/distate.c,v 1.1 2000-02-25 00:37:35 sandervl Exp $
+ ** $Header: /home/ktk/tmp/odin/odin32xp/src/opengl/glide/cvg/glide/distate.c,v 1.2 2001-09-05 14:30:21 bird Exp $
  ** $Log: distate.c,v $
- ** Revision 1.1  2000-02-25 00:37:35  sandervl
+ ** Revision 1.2  2001-09-05 14:30:21  bird
+ ** Added $Id:$ keyword.
+ **
+ ** Revision 1.1  2000/02/25 00:37:35  sandervl
  ** Created Voodoo 2 dir
  **
- * 
+ *
  * 17    1/13/98 12:42p Atai
  * fixed grtexinfo, grVertexLayout, and draw triangle
- * 
+ *
  * 16    1/10/98 4:01p Atai
  * inititialize vertex layout, viewport, added defines
- * 
+ *
  * 15    1/05/98 6:06p Atai
  * glide extension stuff
- * 
+ *
  * 14    12/17/97 4:05p Atai
  * added grChromaRange(), grGammaCorrecionRGB(), grRest(), and grGet()
  * functions
- * 
+ *
  * 13    12/16/97 11:38a Atai
  * added grChromaRange()
- * 
+ *
  * 12    12/15/97 5:52p Atai
  * disable obsolete glide2 api for glide3
- * 
+ *
  * 10    12/12/97 1:30p Atai
  * remove fp z  buffer
- * 
+ *
  * 8     12/08/97 10:44a Atai
  * added entry point for grCoordinateSpace(), grDepthRange(), and
  * grViewport()
- * 
+ *
  * 7     11/13/97 4:38p Atai
  * invalidate lfbMode and c0c1
- * 
+ *
  * 6     11/10/97 5:20p Atai
  * added factor for grAlphaCombine and remove extra  _grChromakeyMode
- * 
+ *
  * 5     11/07/97 11:22a Atai
  * remove GR_*_SMOOTH. use GR_SMOOTH
- * 
+ *
  * 4     10/15/97 7:33a Dow
  * Made _grValidateState use central routine for writing data
- * 
+ *
  * 3     10/14/97 4:18p Atai
  * added grEnable and grDisable
- * 
+ *
  * 2     10/10/97 2:57p Dow
  * Minor adjustments
- * 
+ *
  * 1     10/09/97 5:19p Dow
  * State Monster file
  */
@@ -122,7 +126,7 @@ gc->state.grEnableArgs.##mode## = GR_MODE_DISABLE;
   Description:
   Inform Glide that the Alpha Blend Function has been modified.
   Arguments:
-  
+
   Return:
   -------------------------------------------------------------------*/
 GR_DIENTRY(grAlphaBlendFunction, void , (GrAlphaBlendFnc_t rgb_sf, GrAlphaBlendFnc_t rgb_df, GrAlphaBlendFnc_t alpha_sf, GrAlphaBlendFnc_t alpha_df) )
@@ -146,9 +150,9 @@ GR_DIENTRY(grAlphaBlendFunction, void , (GrAlphaBlendFnc_t rgb_sf, GrAlphaBlendF
   Date: 06-Oct-97
   Implementor(s): dow
   Description:
-  
+
   Arguments:
-  
+
   Return:
   -------------------------------------------------------------------*/
 GR_DIENTRY(grAlphaTestFunction, void , (GrCmpFnc_t fnc) )
@@ -169,9 +173,9 @@ GR_DIENTRY(grAlphaTestFunction, void , (GrCmpFnc_t fnc) )
   Date: 06-Oct-97
   Implementor(s): dow
   Description:
-  
+
   Arguments:
-  
+
   Return:
   -------------------------------------------------------------------*/
 GR_DIENTRY(grAlphaTestReferenceValue, void , (GrAlpha_t value) )
@@ -191,13 +195,13 @@ GR_DIENTRY(grAlphaTestReferenceValue, void , (GrAlpha_t value) )
   Date: 06-Oct-97
   Implementor(s): dow
   Description:
-  
+
   Arguments:
-  
+
   Return:
   -------------------------------------------------------------------*/
 GR_DIENTRY(grAlphaCombine, void ,
-         (GrCombineFunction_t function, GrCombineFactor_t factor, 
+         (GrCombineFunction_t function, GrCombineFactor_t factor,
           GrCombineLocal_t local, GrCombineOther_t other, FxBool invert) )
 {
  #define FN_NAME "grAlphaCombine"
@@ -219,9 +223,9 @@ GR_DIENTRY(grAlphaCombine, void ,
   Date: 07-Oct-97
   Implementor(s): dow
   Description:
-  
+
   Arguments:
-  
+
   Return:
   -------------------------------------------------------------------*/
 GR_DIENTRY(grAlphaControlsITRGBLighting, void , (FxBool enable) )
@@ -241,9 +245,9 @@ GR_DIENTRY(grAlphaControlsITRGBLighting, void , (FxBool enable) )
   Date: 07-Oct-97
   Implementor(s): dow
   Description:
-  
+
   Arguments:
-  
+
   Return:
   -------------------------------------------------------------------*/
 GR_DIENTRY(grColorCombine, void , (GrCombineFunction_t function,
@@ -271,9 +275,9 @@ GR_DIENTRY(grColorCombine, void , (GrCombineFunction_t function,
   Date: 07-Oct-97
   Implementor(s): dow
   Description:
-  
+
   Arguments:
-  
+
   Return:
   -------------------------------------------------------------------*/
 GR_DIENTRY(grChromakeyMode, void , (GrChromakeyMode_t mode) )
@@ -294,9 +298,9 @@ GR_DIENTRY(grChromakeyMode, void , (GrChromakeyMode_t mode) )
   Date: 05-Jan-98
   Implementor(s): atai
   Description:
-  
+
   Arguments:
-  
+
   Return:
   -------------------------------------------------------------------*/
 void _grChromaModeExt(GrChromakeyMode_t mode)
@@ -316,9 +320,9 @@ void _grChromaModeExt(GrChromakeyMode_t mode)
   Date: 15-Dec-97
   Implementor(s): atai
   Description:
-  
+
   Arguments:
-  
+
   Return:
   -------------------------------------------------------------------*/
 void _grChromaRangeExt(GrColor_t color, GrColor_t range, GrChromaRangeMode_t mode)
@@ -345,9 +349,9 @@ void _grChromaRangeExt(GrColor_t color, GrColor_t range, GrChromaRangeMode_t mod
   Date: 09-Oct-97
   Implementor(s): dow
   Description:
-  
+
   Arguments:
-  
+
   Return:
   -------------------------------------------------------------------*/
 GR_ENTRY(grChromakeyValue, void , (GrColor_t color) )
@@ -367,9 +371,9 @@ GR_ENTRY(grChromakeyValue, void , (GrColor_t color) )
   Date: 07-Oct-97
   Implementor(s): dow
   Description:
-  
+
   Arguments:
-  
+
   Return:
   -------------------------------------------------------------------*/
 GR_DIENTRY(grDepthMask, void , (FxBool enable) )
@@ -391,9 +395,9 @@ GR_DIENTRY(grDepthMask, void , (FxBool enable) )
   Date: 07-Oct-97
   Implementor(s): dow
   Description:
-  
+
   Arguments:
-  
+
   Return:
   -------------------------------------------------------------------*/
 GR_DIENTRY(grDepthBufferFunction, void , (GrCmpFnc_t fnc) )
@@ -414,9 +418,9 @@ GR_DIENTRY(grDepthBufferFunction, void , (GrCmpFnc_t fnc) )
   Date: 07-Oct-97
   Implementor(s): dow
   Description:
-  
+
   Arguments:
-  
+
   Return:
   -------------------------------------------------------------------*/
 GR_DIENTRY(grDepthBufferMode, void , (GrDepthBufferMode_t mode) )
@@ -438,9 +442,9 @@ GR_DIENTRY(grDepthBufferMode, void , (GrDepthBufferMode_t mode) )
   Date: 07-Oct-97
   Implementor(s): dow
   Description:
-  
+
   Arguments:
-  
+
   Return:
   -------------------------------------------------------------------*/
 GR_DIENTRY(grDitherMode, void , (GrDitherMode_t mode) )
@@ -461,9 +465,9 @@ GR_DIENTRY(grDitherMode, void , (GrDitherMode_t mode) )
   Date: 07-Oct-97
   Implementor(s): dow
   Description:
-  
+
   Arguments:
-  
+
   Return:
   -------------------------------------------------------------------*/
 GR_DIENTRY(grRenderBuffer, void , (GrBuffer_t buffer) )
@@ -484,9 +488,9 @@ GR_DIENTRY(grRenderBuffer, void , (GrBuffer_t buffer) )
   Date: 08-Oct-97
   Implementor(s): dow
   Description:
-  
+
   Arguments:
-  
+
   Return:
   -------------------------------------------------------------------*/
 GR_ENTRY(grColorMask, void , (FxBool rgb, FxBool alpha) )
@@ -509,9 +513,9 @@ GR_ENTRY(grColorMask, void , (FxBool rgb, FxBool alpha) )
   Date: 08-Oct-97
   Implementor(s): dow
   Description:
-  
+
   Arguments:
-  
+
   Return:
   -------------------------------------------------------------------*/
 GR_DIENTRY(grSstOrigin, void , (GrOriginLocation_t origin) )
@@ -531,13 +535,13 @@ GR_DIENTRY(grSstOrigin, void , (GrOriginLocation_t origin) )
   Date: 08-Oct-97
   Implementor(s): dow
   Description:
-  
+
   Arguments:
-  
+
   Return:
   -------------------------------------------------------------------*/
 GR_DIENTRY(grClipWindow, void , (FxU32 minx, FxU32 miny, FxU32 maxx,
-                               FxU32 maxy) ) 
+                               FxU32 maxy) )
 {
 #define FN_NAME "grClipWindow"
 
@@ -558,9 +562,9 @@ GR_DIENTRY(grClipWindow, void , (FxU32 minx, FxU32 miny, FxU32 maxx,
   Date: 08-Oct-97
   Implementor(s): dow
   Description:
-  
+
   Arguments:
-  
+
   Return:
   -------------------------------------------------------------------*/
 GR_DIENTRY(grDepthBiasLevel, void , (FxI16 level) )
@@ -582,9 +586,9 @@ GR_DIENTRY(grDepthBiasLevel, void , (FxI16 level) )
   Date: 08-Oct-97
   Implementor(s): dow
   Description:
-  
+
   Arguments:
-  
+
   Return:
   -------------------------------------------------------------------*/
 GR_DIENTRY(grFogMode, void , (GrFogMode_t mode) )
@@ -606,9 +610,9 @@ GR_DIENTRY(grFogMode, void , (GrFogMode_t mode) )
   Date: 08-Oct-97
   Implementor(s): dow
   Description:
-  
+
   Arguments:
-  
+
   Return:
   -------------------------------------------------------------------*/
 GR_DIENTRY(grFogColorValue, void , (GrColor_t color) )
@@ -628,9 +632,9 @@ GR_DIENTRY(grFogColorValue, void , (GrColor_t color) )
   Date: 08-Oct-97
   Implementor(s): dow
   Description:
-  
+
   Arguments:
-  
+
   Return:
   -------------------------------------------------------------------*/
 GR_DIENTRY(grLfbWriteColorFormat, void , (GrColorFormat_t colorFormat) )
@@ -651,13 +655,13 @@ GR_DIENTRY(grLfbWriteColorFormat, void , (GrColorFormat_t colorFormat) )
   Date: 08-Oct-97
   Implementor(s): dow
   Description:
-  
+
   Arguments:
-  
+
   Return:
   -------------------------------------------------------------------*/
 GR_DIENTRY(grLfbWriteColorSwizzle, void , (FxBool swizzleBytes, FxBool
-                                         swapWords) ) 
+                                         swapWords) )
 {
 #define FN_NAME "grLfbWriteColorSwizzle"
   GR_BEGIN_NOFIFOCHECK(FN_NAME, 82);
@@ -676,9 +680,9 @@ GR_DIENTRY(grLfbWriteColorSwizzle, void , (FxBool swizzleBytes, FxBool
   Date: 08-Oct-97
   Implementor(s): dow
   Description:
-  
+
   Arguments:
-  
+
   Return:
   -------------------------------------------------------------------*/
 GR_DIENTRY(grConstantColorValue, void , (GrColor_t color) )
@@ -732,8 +736,8 @@ _grValidateState()
                     LOADARG(grAlphaCombine, other),
                     LOADARG(grAlphaCombine, invert));
     _grAlphaControlsITRGBLighting(LOADARG(grAlphaControlsITRGBLighting,
-                                          enable)); 
-    _grColorCombine(LOADARG(grColorCombine, function), 
+                                          enable));
+    _grColorCombine(LOADARG(grColorCombine, function),
                     LOADARG(grColorCombine, factor),
                     LOADARG(grColorCombine, local),
                     LOADARG(grColorCombine, other),
@@ -808,9 +812,9 @@ _grValidateState()
   Date: 10-Oct-97
   Implementor(s): atai
   Description:
-  
+
   Arguments:
-  
+
   Return:
   -------------------------------------------------------------------*/
 GR_DIENTRY(grEnable, void , (GrEnableMode_t mode) )
@@ -842,9 +846,9 @@ GR_DIENTRY(grEnable, void , (GrEnableMode_t mode) )
   Date: 10-Oct-97
   Implementor(s): atai
   Description:
-  
+
   Arguments:
-  
+
   Return:
   -------------------------------------------------------------------*/
 GR_DIENTRY(grDisable, void , (GrEnableMode_t mode) )
@@ -875,9 +879,9 @@ GR_DIENTRY(grDisable, void , (GrEnableMode_t mode) )
   Date: 01-Dec-97
   Implementor(s): atai
   Description:
-  
+
   Arguments:
-  
+
   Return:
   -------------------------------------------------------------------*/
 GR_DIENTRY(grCoordinateSpace, void , (GrCoordinateSpaceMode_t mode) )
@@ -902,9 +906,9 @@ GR_DIENTRY(grCoordinateSpace, void , (GrCoordinateSpaceMode_t mode) )
   Date: 01-Dec-97
   Implementor(s): atai
   Description:
-  
+
   Arguments:
-  
+
   Return:
   -------------------------------------------------------------------*/
 GR_DIENTRY(grDepthRange, void , (FxFloat n, FxFloat f) )
@@ -925,9 +929,9 @@ GR_DIENTRY(grDepthRange, void , (FxFloat n, FxFloat f) )
   Date: 01-Dec-97
   Implementor(s): atai
   Description:
-  
+
   Arguments:
-  
+
   Return:
   -------------------------------------------------------------------*/
 GR_DIENTRY(grViewport, void , (FxI32 x, FxI32 y, FxI32 width, FxI32 height) )

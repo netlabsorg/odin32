@@ -1,52 +1,56 @@
+/* $Id: disst.c,v 1.2 2001-09-05 14:30:49 bird Exp $ */
 /*
 ** THIS SOFTWARE IS SUBJECT TO COPYRIGHT PROTECTION AND IS OFFERED ONLY
 ** PURSUANT TO THE 3DFX GLIDE GENERAL PUBLIC LICENSE. THERE IS NO RIGHT
 ** TO USE THE GLIDE TRADEMARK WITHOUT PRIOR WRITTEN PERMISSION OF 3DFX
-** INTERACTIVE, INC. A COPY OF THIS LICENSE MAY BE OBTAINED FROM THE 
-** DISTRIBUTOR OR BY CONTACTING 3DFX INTERACTIVE INC(info@3dfx.com). 
-** THIS PROGRAM IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER 
+** INTERACTIVE, INC. A COPY OF THIS LICENSE MAY BE OBTAINED FROM THE
+** DISTRIBUTOR OR BY CONTACTING 3DFX INTERACTIVE INC(info@3dfx.com).
+** THIS PROGRAM IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER
 ** EXPRESSED OR IMPLIED. SEE THE 3DFX GLIDE GENERAL PUBLIC LICENSE FOR A
-** FULL TEXT OF THE NON-WARRANTY PROVISIONS.  
-** 
+** FULL TEXT OF THE NON-WARRANTY PROVISIONS.
+**
 ** USE, DUPLICATION OR DISCLOSURE BY THE GOVERNMENT IS SUBJECT TO
 ** RESTRICTIONS AS SET FORTH IN SUBDIVISION (C)(1)(II) OF THE RIGHTS IN
 ** TECHNICAL DATA AND COMPUTER SOFTWARE CLAUSE AT DFARS 252.227-7013,
 ** AND/OR IN SIMILAR OR SUCCESSOR CLAUSES IN THE FAR, DOD OR NASA FAR
 ** SUPPLEMENT. UNPUBLISHED RIGHTS RESERVED UNDER THE COPYRIGHT LAWS OF
-** THE UNITED STATES.  
-** 
+** THE UNITED STATES.
+**
 ** COPYRIGHT 3DFX INTERACTIVE, INC. 1999, ALL RIGHTS RESERVED
 **
-** $Header: /home/ktk/tmp/odin/odin32xp/src/opengl/glide/sst1/glide/disst.c,v 1.1 2000-02-25 00:31:10 sandervl Exp $
+** $Header: /home/ktk/tmp/odin/odin32xp/src/opengl/glide/sst1/glide/disst.c,v 1.2 2001-09-05 14:30:49 bird Exp $
 ** $Log: disst.c,v $
-** Revision 1.1  2000-02-25 00:31:10  sandervl
+** Revision 1.2  2001-09-05 14:30:49  bird
+** Added $Id:$ keyword.
+**
+** Revision 1.1  2000/02/25 00:31:10  sandervl
 ** Created new Voodoo 1 Glide dir
 **
- * 
+ *
  * 9     8/13/97 8:51a Pgj
  * Fix Bug 710
- * 
+ *
  * 8     7/24/97 10:55a Dow
  * Fixed bogus check in grSstQueryHardware
- * 
+ *
  * 7     5/02/97 2:07p Pgj
  * grSstScreenWidth/Height now FxU32
- * 
+ *
  * 6     3/17/97 6:25a Jdt
  * Added initDeviceSelect to grSstSelect()
- * 
+ *
  * 5     3/09/97 10:31a Dow
  * Added GR_DIENTRY for di glide functions
- * 
+ *
  * 4     3/04/97 9:08p Dow
  * Neutered multiplatform multiheaded monster
- * 
+ *
  * 3     1/18/97 11:39p Dow
  * Changed location of _curGCFuncs
- * 
+ *
  * 2     1/16/97 3:39p Dow
  * Added ref to _curGCFuncs during grSstSelect()
- * 
+ *
  * 1     12/23/96 1:39p Dow
  * Changes for multiplatform
 **
@@ -165,6 +169,6 @@ GR_DIENTRY(grSstVidMode, void,
   }
 #endif
 
-  _GlideRoot.GCs[whichSst].vidTimings = vidTimings;    
+  _GlideRoot.GCs[whichSst].vidTimings = vidTimings;
 } /* grSstVidMode */
 

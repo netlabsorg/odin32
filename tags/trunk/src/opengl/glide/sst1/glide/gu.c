@@ -1,37 +1,41 @@
+/* $Id: gu.c,v 1.2 2001-09-05 14:30:55 bird Exp $ */
 /*
 ** THIS SOFTWARE IS SUBJECT TO COPYRIGHT PROTECTION AND IS OFFERED ONLY
 ** PURSUANT TO THE 3DFX GLIDE GENERAL PUBLIC LICENSE. THERE IS NO RIGHT
 ** TO USE THE GLIDE TRADEMARK WITHOUT PRIOR WRITTEN PERMISSION OF 3DFX
-** INTERACTIVE, INC. A COPY OF THIS LICENSE MAY BE OBTAINED FROM THE 
-** DISTRIBUTOR OR BY CONTACTING 3DFX INTERACTIVE INC(info@3dfx.com). 
-** THIS PROGRAM IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER 
+** INTERACTIVE, INC. A COPY OF THIS LICENSE MAY BE OBTAINED FROM THE
+** DISTRIBUTOR OR BY CONTACTING 3DFX INTERACTIVE INC(info@3dfx.com).
+** THIS PROGRAM IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER
 ** EXPRESSED OR IMPLIED. SEE THE 3DFX GLIDE GENERAL PUBLIC LICENSE FOR A
-** FULL TEXT OF THE NON-WARRANTY PROVISIONS.  
-** 
+** FULL TEXT OF THE NON-WARRANTY PROVISIONS.
+**
 ** USE, DUPLICATION OR DISCLOSURE BY THE GOVERNMENT IS SUBJECT TO
 ** RESTRICTIONS AS SET FORTH IN SUBDIVISION (C)(1)(II) OF THE RIGHTS IN
 ** TECHNICAL DATA AND COMPUTER SOFTWARE CLAUSE AT DFARS 252.227-7013,
 ** AND/OR IN SIMILAR OR SUCCESSOR CLAUSES IN THE FAR, DOD OR NASA FAR
 ** SUPPLEMENT. UNPUBLISHED RIGHTS RESERVED UNDER THE COPYRIGHT LAWS OF
-** THE UNITED STATES.  
-** 
+** THE UNITED STATES.
+**
 ** COPYRIGHT 3DFX INTERACTIVE, INC. 1999, ALL RIGHTS RESERVED
 **
-** $Header: /home/ktk/tmp/odin/odin32xp/src/opengl/glide/sst1/glide/gu.c,v 1.1 2000-02-25 00:31:19 sandervl Exp $
+** $Header: /home/ktk/tmp/odin/odin32xp/src/opengl/glide/sst1/glide/gu.c,v 1.2 2001-09-05 14:30:55 bird Exp $
 ** $Log: gu.c,v $
-** Revision 1.1  2000-02-25 00:31:19  sandervl
+** Revision 1.2  2001-09-05 14:30:55  bird
+** Added $Id:$ keyword.
+**
+** Revision 1.1  2000/02/25 00:31:19  sandervl
 ** Created new Voodoo 1 Glide dir
 **
- * 
+ *
  * 12    12/19/97 8:09a Peter
  * fog table propogation
- * 
+ *
  * 11    3/09/97 10:31a Dow
  * Added GR_DIENTRY for di glide functions
- * 
+ *
  * 10    3/05/97 9:36p Jdt
  * Added guEncodeRLE16
- * 
+ *
  * 9     12/23/96 1:37p Dow
  * chagnes for multiplatform glide
 **
@@ -160,7 +164,7 @@ GR_DIENTRY(guColorCombineFunction, void, ( GrColorCombineFnc_t fnc ))
   case GR_COLORCOMBINE_ONE:
     grColorCombine( GR_COMBINE_FUNCTION_ZERO, GR_COMBINE_FACTOR_NONE, GR_COMBINE_LOCAL_NONE, GR_COMBINE_OTHER_NONE, FXTRUE );
     break;
-    
+
   default:
     GR_CHECK_F("grColorCombineFunction", 1, "unsupported color combine function");
     break;
@@ -195,7 +199,7 @@ GR_DIENTRY(guFogTableIndexToW, float, ( int i ))
 ** guFogGenerateExp
 */
 GR_DIENTRY(guFogGenerateExp, void,
-           ( GrFog_t fogtable[kInternalFogTableEntryCount], float density )) 
+           ( GrFog_t fogtable[kInternalFogTableEntryCount], float density ))
 {
   int   i;
   float f;
@@ -254,7 +258,7 @@ GR_DIENTRY(guFogGenerateExp2, void,
 /*---------------------------------------------------------------------------
 ** guFogGenerateLinear
 */
-GR_DIENTRY(guFogGenerateLinear, void, 
+GR_DIENTRY(guFogGenerateLinear, void,
            ( GrFog_t fogtable[kInternalFogTableEntryCount],
             float nearZ, float farZ ))
 {
@@ -411,7 +415,7 @@ GR_ENTRY( guEncodeRLE16, int, ( void *dst, void *src, FxU32 width, FxU32 height 
             byteCount+=4;
 
             srcPixels+=length;
-            sourceImageSizeInWords-=length;            
+            sourceImageSizeInWords-=length;
         }
     } else {
         while( sourceImageSizeInWords-- ) {
@@ -427,7 +431,7 @@ GR_ENTRY( guEncodeRLE16, int, ( void *dst, void *src, FxU32 width, FxU32 height 
 
             byteCount+=4;
             srcPixels+=length;
-            sourceImageSizeInWords-=length;            
+            sourceImageSizeInWords-=length;
         }
     }
     return byteCount;

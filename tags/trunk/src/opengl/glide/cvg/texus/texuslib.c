@@ -1,23 +1,24 @@
+/* $Id: texuslib.c,v 1.2 2001-09-05 14:30:47 bird Exp $ */
 /*
 ** THIS SOFTWARE IS SUBJECT TO COPYRIGHT PROTECTION AND IS OFFERED ONLY
 ** PURSUANT TO THE 3DFX GLIDE GENERAL PUBLIC LICENSE. THERE IS NO RIGHT
 ** TO USE THE GLIDE TRADEMARK WITHOUT PRIOR WRITTEN PERMISSION OF 3DFX
-** INTERACTIVE, INC. A COPY OF THIS LICENSE MAY BE OBTAINED FROM THE 
-** DISTRIBUTOR OR BY CONTACTING 3DFX INTERACTIVE INC(info@3dfx.com). 
-** THIS PROGRAM IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER 
+** INTERACTIVE, INC. A COPY OF THIS LICENSE MAY BE OBTAINED FROM THE
+** DISTRIBUTOR OR BY CONTACTING 3DFX INTERACTIVE INC(info@3dfx.com).
+** THIS PROGRAM IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER
 ** EXPRESSED OR IMPLIED. SEE THE 3DFX GLIDE GENERAL PUBLIC LICENSE FOR A
-** FULL TEXT OF THE NON-WARRANTY PROVISIONS.  
-** 
+** FULL TEXT OF THE NON-WARRANTY PROVISIONS.
+**
 ** USE, DUPLICATION OR DISCLOSURE BY THE GOVERNMENT IS SUBJECT TO
 ** RESTRICTIONS AS SET FORTH IN SUBDIVISION (C)(1)(II) OF THE RIGHTS IN
 ** TECHNICAL DATA AND COMPUTER SOFTWARE CLAUSE AT DFARS 252.227-7013,
 ** AND/OR IN SIMILAR OR SUCCESSOR CLAUSES IN THE FAR, DOD OR NASA FAR
 ** SUPPLEMENT. UNPUBLISHED RIGHTS RESERVED UNDER THE COPYRIGHT LAWS OF
-** THE UNITED STATES.  
-** 
+** THE UNITED STATES.
+**
 ** COPYRIGHT 3DFX INTERACTIVE, INC. 1999, ALL RIGHTS RESERVED
 **
-** $Id: texuslib.c,v 1.1 2000-02-25 00:38:01 sandervl Exp $
+** $Id: texuslib.c,v 1.2 2001-09-05 14:30:47 bird Exp $
 */
 #include <string.h>
 #include <glide.h>
@@ -58,7 +59,7 @@ void _txDefaultErrorCallback( const char *string, FxBool fatal )
 #endif
 
 /* size in texels  */
-static FxU32 _grMipMapHostSize[4][16] = 
+static FxU32 _grMipMapHostSize[4][16] =
 {
     {   /* 1:1 aspect ratio */
         65536, /* 0 : 256x256  */
@@ -70,7 +71,7 @@ static FxU32 _grMipMapHostSize[4][16] =
            16, /* 6 :   4x4    */
             4, /* 7 :   2x2    */
             1, /* 8 :   1x1    */
-    }, 
+    },
     {   /* 2:1 aspect ratio */
         32768, /* 0 : 256x128  */
          8192, /* 1 : 128x64   */
@@ -81,7 +82,7 @@ static FxU32 _grMipMapHostSize[4][16] =
             8, /* 6 :   4x2    */
             2, /* 7 :   2x1    */
             1, /* 8 :   1x1    */
-    }, 
+    },
     {   /* 4:1 aspect ratio */
         16384, /* 0 : 256x64   */
          4096, /* 1 : 128x32   */
@@ -128,7 +129,7 @@ txTexCalcMemRequired( GrLOD_t small_lod, GrLOD_t large_lod,
            _grMipMapHostSize[_gr_aspect_index_table[((aspect>=0)?aspect:-aspect)]] [8-lod] << (format>=GR_TEXFMT_16BIT);
 #else
            _grMipMapHostSize[_gr_aspect_index_table[aspect]] [lod] << (format>=GR_TEXFMT_16BIT);
-#endif 
+#endif
     }
     return memRequired ;
 }
@@ -295,7 +296,7 @@ static GrLOD_t _txSmallestLOD( GrAspectRatio_t aspect )
 #endif /* GLIDE3 */
 }
 
-void txNccToPal( FxU32 *pal, const GuNccTable *ncc_table ) 
+void txNccToPal( FxU32 *pal, const GuNccTable *ncc_table )
 {
   int i, j;
 
@@ -303,7 +304,7 @@ void txNccToPal( FxU32 *pal, const GuNccTable *ncc_table )
     {
       pal[i] = ncc_table->yRGB[i];
     }
-      
+
   for( i = 0; i < 4; i++ )
     {
       for( j = 0; j < 3; j++ )
@@ -321,7 +322,7 @@ void txPalToNcc( GuNccTable *ncc_table, const FxU32 *pal ) {
     {
       ncc_table->yRGB[i] = ( FxU8 )pal[i];
     }
-      
+
   for( i = 0; i < 4; i++ )
     {
       for( j = 0; j < 3; j++ )
@@ -330,14 +331,14 @@ void txPalToNcc( GuNccTable *ncc_table, const FxU32 *pal ) {
           ncc_table->qRGB[i][j] = ( FxI16 )( pal[28 + 3 * i + j] );
         }
     }
-  
+
   /*
   ** pack the table Y entries
   */
   for ( i = 0; i < 4; i++ )
     {
       FxU32 packedvalue;
-      
+
       packedvalue  = ( ( FxU32 )( ncc_table->yRGB[i*4+0] & 0xff ) );
       packedvalue |= ( ( FxU32 )( ncc_table->yRGB[i*4+1] & 0xff ) ) << 8;
       packedvalue |= ( ( FxU32 )( ncc_table->yRGB[i*4+2] & 0xff ) ) << 16;
@@ -345,38 +346,38 @@ void txPalToNcc( GuNccTable *ncc_table, const FxU32 *pal ) {
 
       ncc_table->packed_data[i] = packedvalue;
     }
-  
+
   /*
   ** pack the table I entries
   */
   for ( i = 0; i < 4; i++ )
     {
       FxU32 packedvalue;
-      
+
       packedvalue  = ( ( FxU32 )( ncc_table->iRGB[i][0] & 0x1ff ) ) << 18;
       packedvalue |= ( ( FxU32 )( ncc_table->iRGB[i][1] & 0x1ff ) ) << 9;
 
       packedvalue |= ( ( FxU32 )( ncc_table->iRGB[i][2] & 0x1ff ) ) << 0;
-      
+
       ncc_table->packed_data[i+4] = packedvalue;
     }
-  
+
   /*
   ** pack the table Q entries
   */
   for ( i = 0; i < 4; i++ )
     {
       FxU32 packedvalue;
-      
+
       packedvalue  = ( ( FxU32 )( ncc_table->qRGB[i][0] & 0x1ff ) ) << 18;
       packedvalue |= ( ( FxU32 )( ncc_table->qRGB[i][1] & 0x1ff ) ) << 9;;
       packedvalue |= ( ( FxU32 )( ncc_table->qRGB[i][2] & 0x1ff ) ) << 0;
-      
+
       ncc_table->packed_data[i+8] = packedvalue;
     }
 }
 
-size_t txInit3dfInfoFromFile( FILE *file, 
+size_t txInit3dfInfoFromFile( FILE *file,
                               Gu3dfInfo *info, GrTextureFormat_t destFormat,
                               int *destWidth, int *destHeight,
                               int mipLevels, FxU32 flags )
@@ -414,11 +415,11 @@ size_t txInit3dfInfoFromFile( FILE *file,
 
 
   /*
-   * Set the file offset back to where it was when we entered this 
+   * Set the file offset back to where it was when we entered this
    * function.
    */
   fseek( file, file_start_position, SEEK_SET );
-  
+
   /*
    * Return the memory required for this texture.
    */
@@ -451,7 +452,7 @@ size_t txInit3dfInfo( Gu3dfInfo *info, GrTextureFormat_t destFormat,
           *destWidth  = txCeilPow2( *destWidth );
           *destHeight = txCeilPow2( *destHeight );
         }
-      
+
       /*
        * Make sure the dimensions are in range.
        */
@@ -519,7 +520,7 @@ size_t txInit3dfInfo( Gu3dfInfo *info, GrTextureFormat_t destFormat,
    * Store the format of the texture.
    */
   info->header.format   = destFormat;
-  
+
   info->mem_required = txTexCalcMemRequired( info->header.small_lod,
                                              info->header.large_lod,
                                              info->header.aspect_ratio,
@@ -533,13 +534,13 @@ size_t txInit3dfInfo( Gu3dfInfo *info, GrTextureFormat_t destFormat,
 }
 
 
-FxBool txConvertFromFile( FILE *file, Gu3dfInfo *info, 
+FxBool txConvertFromFile( FILE *file, Gu3dfInfo *info,
                           FxU32 flags, const void *palNcc )
 {
   long file_start_position;
   FxBool retval;
   TxMip txMip;
-  
+
   /*
    * Save the current position of the input file so that we can
    * later recent it.
@@ -608,7 +609,7 @@ FxBool txConvert( Gu3dfInfo *info, GrTextureFormat_t srcFormat,
     return FXFALSE;
 
   /*
-   * Set to one level only since we only want to dequant the first 
+   * Set to one level only since we only want to dequant the first
    * level.
    */
   trueColorMip.depth          = 1;
@@ -619,7 +620,7 @@ FxBool txConvert( Gu3dfInfo *info, GrTextureFormat_t srcFormat,
   txMipDequantize( &trueColorMip, &srcMip );
 
   /*
-   * We realy have more than one level, so. . . 
+   * We realy have more than one level, so. . .
    */
 #ifdef GLIDE3
   trueColorMip.depth          = info->header.large_lod - info->header.small_lod + 1;
@@ -632,7 +633,7 @@ FxBool txConvert( Gu3dfInfo *info, GrTextureFormat_t srcFormat,
    */
 
   /*
-   * Resample the true color version of the input image to 
+   * Resample the true color version of the input image to
    * the passed in size. . . . this should be a valid
    * size for the hardware to handle.
    */
@@ -652,8 +653,8 @@ FxBool txConvert( Gu3dfInfo *info, GrTextureFormat_t srcFormat,
       txMipView( &tmpMip, "blah", FXTRUE, 0 );
 #endif
     }
-    
-  
+
+
 #if 0
   if( _heapchk() != _HEAPOK )
     txPanic( "_heapchk failed" );
@@ -690,15 +691,15 @@ FxBool txConvert( Gu3dfInfo *info, GrTextureFormat_t srcFormat,
 #else
   txMipSetMipPointers( &outputMip );
 #endif
-  
+
   if( ( flags & TX_TARGET_PALNCC_MASK ) == TX_TARGET_PALNCC_SOURCE )
     {
-      txMipTrueToFixedPal( &outputMip, &trueColorMip, palNcc, 
+      txMipTrueToFixedPal( &outputMip, &trueColorMip, palNcc,
                            flags & TX_FIXED_PAL_QUANT_MASK );
     }
   else
     {
-      txMipQuantize( &outputMip, &trueColorMip, outputMip.format, 
+      txMipQuantize( &outputMip, &trueColorMip, outputMip.format,
                      flags & TX_DITHER_MASK, flags & TX_COMPRESSION_MASK );
     }
 
@@ -709,7 +710,7 @@ FxBool txConvert( Gu3dfInfo *info, GrTextureFormat_t srcFormat,
     {
       txPalToNcc( &info->table.nccTable, outputMip.pal );
     }
-  
+
   if( info->header.format == GR_TEXFMT_P_8 || info->header.format == GR_TEXFMT_AP_88 )
     {
       memcpy( info->table.palette.data, outputMip.pal, sizeof( FxU32 ) * 256 );
