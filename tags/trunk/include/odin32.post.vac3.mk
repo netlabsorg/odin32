@@ -1,4 +1,4 @@
-# $Id: odin32.post.vac3.mk,v 1.20 2001-09-30 05:30:36 bird Exp $
+# $Id: odin32.post.vac3.mk,v 1.21 2001-09-30 09:46:16 bird Exp $
 
 #
 # Odin32 API
@@ -264,8 +264,8 @@ all:    $(OBJDIR) \
         $(OBJDIR)\$(TARGET).$(TARGET_EXTENSION) \
         $(ADDITIONAL_ALL)
 !else
-        $(OBJDIR)\$(TARGET).$(TARGET_EXTENSION) \
-        $(ODIN32_LIB)\$(TARGET).$(TARGET_EXTENSION) \
+        $(OBJDIR)\$(TARGET)$(CUST).$(TARGET_EXTENSION) \
+        $(ODIN32_LIB)\$(TARGET)$(CUST).$(TARGET_EXTENSION) \
         $(ADDITIONAL_ALL)
 !endif
 !endif
@@ -295,7 +295,7 @@ libs: all
 # Lib: Main target rule - builds the target internal library.
 #
 !ifndef NO_MAIN_RULE
-$(OBJDIR)\$(TARGET).$(TARGET_EXTENSION): $(OBJS)
+$(OBJDIR)\$(TARGET)$(CUST).$(TARGET_EXTENSION): $(OBJS)
     $(CMDQD_WAIT)
     $(RM) $@
 !if "$(CCENV)" != "EMX"
@@ -356,7 +356,7 @@ $(INTLIBS):
 !ifndef PUBLICLIB
 $(ODIN32_LIB)\$(ORGTARGET).lib: $(OBJDIR)\$(ORGTARGET).lib
 !else
-$(ODIN32_LIB)\$(TARGET).$(TARGET_EXTENSION): $(OBJDIR)\$(TARGET).$(TARGET_EXTENSION)
+$(ODIN32_LIB)\$(TARGET)$(CUST).$(TARGET_EXTENSION): $(OBJDIR)\$(TARGET)$(CUST).$(TARGET_EXTENSION)
 !endif
     @if not exist $(@D) $(CREATEPATH) $(@D)
     $(CP) $** $@
