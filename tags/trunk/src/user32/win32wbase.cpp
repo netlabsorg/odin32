@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.69 1999-10-30 18:40:48 cbratschi Exp $ */
+/* $Id: win32wbase.cpp,v 1.70 1999-10-31 01:14:42 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -15,7 +15,6 @@
  *
  */
 #include <os2win.h>
-#include <windowsx.h>
 #include <win.h>
 #include <stdlib.h>
 #include <string.h>
@@ -190,18 +189,6 @@ void Win32BaseWindow::Init()
   hwndVertScroll     = 0;
 
   ownDC              = 0;
-
-  //set dialog base units
-  if(fInitialized == FALSE) {
-    if(DIALOG_Init() == FALSE) {
-      dprintf(("DIALOG_Init FAILED!"));
-      DebugInt3();
-      SetLastError(ERROR_GEN_FAILURE);
-      return;
-    }
-    fInitialized = TRUE;
-  }
-
 }
 //******************************************************************************
 //todo get rid of resources (menu, accel, icon etc)
@@ -1596,7 +1583,7 @@ LRESULT Win32BaseWindow::DefWindowProcW(UINT Msg, WPARAM wParam, LPARAM lParam)
 
     case WM_SETTEXT:
     {
-        if(!fInternalMsg)
+        if(!fInternalMsg) 
         {
            LRESULT result;
            char *aText = (char *) malloc((lstrlenW((LPWSTR)lParam)+1)*sizeof(WCHAR));
@@ -2751,95 +2738,6 @@ HWND Win32BaseWindow::OS2ToWin32Handle(HWND hwnd)
     else    return 0;
 //    else    return hwnd;    //OS/2 window handle
 }
-/***********************************************************************
- *           DIALOG_Init
- *
- * Initialisation of the dialog manager.
- */
-BOOL Win32BaseWindow::DIALOG_Init(void)
-{
-    HDC hdc;
-    SIZE size;
-
-    /* Calculate the dialog base units */
-    if (!(hdc = CreateDCA( "DISPLAY", NULL, NULL, NULL ))) return FALSE;
-    if (!getCharSizeFromDC( hdc, 0, &size )) return FALSE;
-    DeleteDC( hdc );
-    xBaseUnit = size.cx;
-    yBaseUnit = size.cy;
-
-    return TRUE;
-}
-/***********************************************************************
- *           DIALOG_GetCharSizeFromDC
- *
- *
- *  Calculates the *true* average size of English characters in the
- *  specified font as oppposed to the one returned by GetTextMetrics.
- */
-BOOL Win32BaseWindow::getCharSizeFromDC( HDC hDC, HFONT hUserFont, SIZE * pSize )
-{
-    BOOL Success = FALSE;
-    HFONT hUserFontPrev = 0;
-    pSize->cx = xBaseUnit;
-    pSize->cy = yBaseUnit;
-
-    if ( hDC )
-    {
-        /* select the font */
-        TEXTMETRICA tm;
-        memset(&tm,0,sizeof(tm));
-        if (hUserFont) hUserFontPrev = SelectFont(hDC,hUserFont);
-        if (GetTextMetricsA(hDC,&tm))
-        {
-            pSize->cx = tm.tmAveCharWidth;
-            pSize->cy = tm.tmHeight;
-
-            /* if variable width font */
-            if (tm.tmPitchAndFamily & TMPF_FIXED_PITCH)
-            {
-                SIZE total;
-                static const char szAvgChars[53] = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
-
-                /* Calculate a true average as opposed to the one returned
-                 * by tmAveCharWidth. This works better when dealing with
-                 * proportional spaced fonts and (more important) that's
-                 * how Microsoft's dialog creation code calculates the size
-                 * of the font
-                 */
-                if (GetTextExtentPointA(hDC,szAvgChars,sizeof(szAvgChars),&total))
-                {
-                   /* round up */
-                    pSize->cx = ((2*total.cx/sizeof(szAvgChars)) + 1)/2;
-                    Success = TRUE;
-                }
-            }
-            else
-            {
-                Success = TRUE;
-            }
-        }
-
-        /* select the original font */
-        if (hUserFontPrev) SelectFont(hDC,hUserFontPrev);
-    }
-    return (Success);
-}
-/***********************************************************************
- *           DIALOG_GetCharSize
- *
- *
- *  Calculates the *true* average size of English characters in the
- *  specified font as oppposed to the one returned by GetTextMetrics.
- *  A convenient variant of DIALOG_GetCharSizeFromDC.
- */
-BOOL Win32BaseWindow::getCharSize( HFONT hUserFont, SIZE * pSize )
-{
-    HDC  hDC = GetDC(0);
-    BOOL Success = getCharSizeFromDC( hDC, hUserFont, pSize );
-    ReleaseDC(0, hDC);
-    return Success;
-}
 //******************************************************************************
 // GetNextDlgTabItem32   (USER32.276)
 //******************************************************************************
@@ -2994,21 +2892,6 @@ HWND Win32BaseWindow::getNextDlgGroupItem(HWND hwndCtrl, BOOL fPrevious)
 END:
     return retvalue;
 }
-//******************************************************************************
-//******************************************************************************
-BOOL Win32BaseWindow::MapDialogRect(LPRECT rect)
-{
-    rect->left   = (rect->left * xBaseUnit) / 4;
-    rect->right  = (rect->right * xBaseUnit) / 4;
-    rect->top    = (rect->top * yBaseUnit) / 8;
-    rect->bottom = (rect->bottom * yBaseUnit) / 8;
-    return TRUE;
-}
-//******************************************************************************
-//******************************************************************************
-BOOL Win32BaseWindow::fInitialized = FALSE;
-int  Win32BaseWindow::xBaseUnit    = 10;
-int  Win32BaseWindow::yBaseUnit    = 20;
 //******************************************************************************
 //******************************************************************************
 #ifdef DEBUG
