@@ -1,4 +1,4 @@
-/* $Id: trackbar.c,v 1.17 1999-09-12 16:52:46 cbratschi Exp $ */
+/* $Id: trackbar.c,v 1.18 1999-09-15 16:31:48 cbratschi Exp $ */
 /*
  * Trackbar control
  *
@@ -8,8 +8,10 @@
  * Copyright 1999 Christoph Bratschi <cbratschi@datacomm.ch>
  *
  *
- * Status: ready to use
+ * Status: complete
  * Version: 5.00
+ *
+ * Note: TBM_SETTHUMBLENGTH implemented, COMCTL32 5.00 ignores it
  */
 
 #include "winbase.h"
@@ -483,14 +485,14 @@ TRACKBAR_DrawTics (TRACKBAR_INFO *infoPtr, HDC hdc, LONG ticPos,
 
 //draw thumb, call only from draw!
 
-static VOID TRACKBAR_DrawThumb(TRACKBAR_INFO *infoPtr,HDC hdc,DWORD dwStyle)
+static VOID TRACKBAR_DrawThumb(TRACKBAR_INFO *infoPtr,HWND hwnd,HDC hdc,DWORD dwStyle)
 {
     if (!(dwStyle & TBS_NOTHUMB))
     {
       HBRUSH hbr,hbrOld;
       RECT thumb = infoPtr->rcThumb;
 
-      if (infoPtr->flags & TB_DRAG_MODE) hbr = CreateSolidBrush(GetSysColor(COLOR_3DHILIGHT));
+      if (infoPtr->flags & TB_DRAG_MODE || !IsWindowEnabled(hwnd)) hbr = CreateSolidBrush(GetSysColor(COLOR_3DHILIGHT));
       else hbr = CreateSolidBrush(GetSysColor(COLOR_3DFACE));
       hbrOld = SelectObject(hdc,hbr);
 
@@ -729,7 +731,11 @@ static VOID TRACKBAR_Draw(HWND hwnd,HDC hdc)
 
     if (infoPtr->flags & TB_THUMBCHANGED)
     {
-      if (infoPtr->flags & TB_THUMBSIZECHANGED) TRACKBAR_CalcChannel(hwnd,infoPtr);
+      if (infoPtr->flags & TB_THUMBSIZECHANGED)
+      {
+        TRACKBAR_CalcChannel(hwnd,infoPtr);
+        TRACKBAR_CalcSelection(hwnd,infoPtr);
+      }
       TRACKBAR_CalcThumb(hwnd,infoPtr);
     }
     if (infoPtr->flags & TB_SELECTIONCHANGED) TRACKBAR_CalcSelection(hwnd,infoPtr);
@@ -850,7 +856,7 @@ static VOID TRACKBAR_Draw(HWND hwnd,HDC hdc)
 
     if (!(cdres & CDRF_SKIPDEFAULT))
     {
-      TRACKBAR_DrawThumb(infoPtr,hdc,dwStyle);
+      TRACKBAR_DrawThumb(infoPtr,hwnd,hdc,dwStyle);
 
       if (cdctlres & CDRF_NOTIFYITEMDRAW)
       {
@@ -861,7 +867,7 @@ static VOID TRACKBAR_Draw(HWND hwnd,HDC hdc)
 
     }
 
-    if (infoPtr->bFocus) DrawFocusRect(hdc,&rcClient);
+    if (infoPtr->bFocus && IsWindowEnabled(hwnd)) DrawFocusRect(hdc,&rcClient);
 
     if (cdctlres & CDRF_NOTIFYPOSTPAINT)
     {
@@ -1221,8 +1227,11 @@ TRACKBAR_GetToolTips (HWND hwnd, WPARAM wParam, LPARAM lParam)
 }
 
 
-/*      case TBM_GETUNICODEFORMAT: */
-
+static
+TRACKBAR_GetUnicodeFormat(HWND hwnd,WPARAM wParam,LPARAM lParam)
+{
+  return FALSE; //Unicode not used
+}
 
 static LRESULT
 TRACKBAR_SetBuddy (HWND hwnd, WPARAM wParam, LPARAM lParam)
@@ -1621,10 +1630,6 @@ TRACKBAR_SetToolTips (HWND hwnd, WPARAM wParam, LPARAM lParam)
 
     return 0;
 }
-
-
-/*      case TBM_SETUNICODEFORMAT: */
-
 
 static LRESULT
 TRACKBAR_InitializeThumb (HWND hwnd)
@@ -2043,6 +2048,14 @@ static LRESULT TRACKBAR_Timer(HWND hwnd,WPARAM wParam,LPARAM lParam)
 }
 
 static LRESULT
+TRACKBAR_SetUnicodeFormat(HWND hwnd,WPARAM wParam,LPARAM lParam)
+{
+  //wParam = new format
+
+  return FALSE; //previous was no Unicode
+}
+
+static LRESULT
 TRACKBAR_CaptureChanged (HWND hwnd, WPARAM wParam, LPARAM lParam)
 {
     TRACKBAR_INFO *infoPtr = TRACKBAR_GetInfoPtr (hwnd);
@@ -2088,7 +2101,7 @@ TRACKBAR_SetFocus (HWND hwnd, WPARAM wParam, LPARAM lParam)
     RECT rcClient;
 
 //    TRACE (trackbar,"\n");
-    if (!infoPtr->bFocus)
+    if (!infoPtr->bFocus && IsWindowEnabled(hwnd))
     {
       infoPtr->bFocus = TRUE;
 
@@ -2111,7 +2124,7 @@ TRACKBAR_KillFocus (HWND hwnd, WPARAM wParam, LPARAM lParam)
 //    TRACE (trackbar,"\n");
 
     infoPtr->flags &= ~TB_DRAG_MODE;
-    if (infoPtr->bFocus)
+    if (infoPtr->bFocus && IsWindowEnabled(hwnd))
     {
       infoPtr->bFocus = FALSE;
 
@@ -2199,6 +2212,18 @@ TRACKBAR_MouseMove (HWND hwnd, WPARAM wParam, LPARAM lParam)
     return TRUE;
 }
 
+static LRESULT
+TRACKBAR_Enable(HWND hwnd,WPARAM wParam,LPARAM lParam)
+{
+  TRACKBAR_INFO *infoPtr = TRACKBAR_GetInfoPtr(hwnd);
+
+  if (wParam) infoPtr->bFocus = (GetFocus() == hwnd);
+  else infoPtr->bFocus = FALSE;
+
+  TRACKBAR_Refresh(hwnd);
+
+  return 0;
+}
 
 static LRESULT
 TRACKBAR_KeyDown (HWND hwnd, WPARAM wParam, LPARAM lParam)
@@ -2345,7 +2370,8 @@ TRACKBAR_WindowProc (HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
     case TBM_GETTOOLTIPS:
         return TRACKBAR_GetToolTips (hwnd, wParam, lParam);
 
-/*      case TBM_GETUNICODEFORMAT: */
+    case TBM_GETUNICODEFORMAT:
+        return TRACKBAR_GetUnicodeFormat(hwnd,wParam,lParam);
 
     case TBM_SETBUDDY:
         return TRACKBAR_SetBuddy (hwnd, wParam, lParam);
@@ -2392,8 +2418,8 @@ TRACKBAR_WindowProc (HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
     case TBM_SETTOOLTIPS:
         return TRACKBAR_SetToolTips (hwnd, wParam, lParam);
 
-/*      case TBM_SETUNICODEFORMAT: */
-
+    case TBM_SETUNICODEFORMAT:
+        return TRACKBAR_SetUnicodeFormat(hwnd,wParam,lParam);
 
     case WM_CAPTURECHANGED:
         return TRACKBAR_CaptureChanged (hwnd, wParam, lParam);
@@ -2404,10 +2430,11 @@ TRACKBAR_WindowProc (HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
     case WM_DESTROY:
         return TRACKBAR_Destroy (hwnd, wParam, lParam);
 
-/*      case WM_ENABLE: */
+    case WM_ENABLE:
+        return TRACKBAR_Enable(hwnd,wParam,lParam);
 
-/*      case WM_ERASEBKGND: */
-/*          return 0; */
+    case WM_ERASEBKGND:
+        return 1;
 
     case WM_GETDLGCODE:
         return DLGC_WANTARROWS;

@@ -1,4 +1,4 @@
-/* $Id: updown.c,v 1.7 1999-08-14 16:13:16 cbratschi Exp $ */
+/* $Id: updown.c,v 1.8 1999-09-15 16:31:49 cbratschi Exp $ */
 /*
  * Updown control
  *
@@ -17,7 +17,7 @@
  *     - horizontal arrows
  *     - listbox as buddy window
  *     - acceleration
- *     - base 16
+ *     - base 16 -> bug: 9->B (should be A)
  *     - UDS_ALIGNLEFT, ~UDS_WRAP
  *       (tested - they work)
  *     - integers with thousand separators.
@@ -132,8 +132,8 @@ static BOOL UPDOWN_HasBuddyBorder(HWND hwnd)
   DWORD        dwStyle = GetWindowLongA (hwnd, GWL_STYLE);
 
   return  ( ((dwStyle & (UDS_ALIGNLEFT | UDS_ALIGNRIGHT)) != 0) &&
-	    (SendMessageA(hwnd, UDM_GETBUDDY, 0, 0) != 0) &&
-	    (lstrcmpiA(infoPtr->szBuddyClass, "EDIT") == 0 ) );
+            (SendMessageA(hwnd, UDM_GETBUDDY, 0, 0) != 0) &&
+            (lstrcmpiA(infoPtr->szBuddyClass, "EDIT") == 0 ) );
 }
 
 /***********************************************************************
@@ -208,7 +208,7 @@ UPDOWN_GetArrowFromPoint (HWND hwnd, RECT *rect, POINT pt)
  *           UPDOWN_GetThousandSep
  * Returns the thousand sep. If an error occurs, it returns ','.
  */
-static char UPDOWN_GetThousandSep()
+static char UPDOWN_GetThousandSep(VOID)
 {
   char sep[2];
 
@@ -429,7 +429,7 @@ static BOOL UPDOWN_SetBuddyHandle (HWND hwnd, HWND hwndBud)
   DWORD        dwStyle = GetWindowLongA (hwnd, GWL_STYLE);
   RECT         budRect;  /* new coord for the buddy */
   int          x,width;  /* new x position and width for the up-down */
- 	
+
   /* Is it a valid bud? */
   if(!IsWindow(hwndBud))
     return FALSE;
@@ -475,7 +475,7 @@ static BOOL UPDOWN_SetBuddyHandle (HWND hwnd, HWND hwndBud)
   /* Get the rect of the buddy relative to its parent */
   GetWindowRect(infoPtr->Buddy, &budRect);
   MapWindowPoints(HWND_DESKTOP, GetParent(infoPtr->Buddy),
-		  (POINT *)(&budRect.left), 2);
+                  (POINT *)(&budRect.left), 2);
 
   /* now do the positioning */
   if(dwStyle & UDS_ALIGNRIGHT){
@@ -489,8 +489,8 @@ static BOOL UPDOWN_SetBuddyHandle (HWND hwnd, HWND hwndBud)
 
   /* first adjust the buddy to accomodate the up/down */
   SetWindowPos(infoPtr->Buddy, 0, budRect.left, budRect.top,
-	       budRect.right  - budRect.left, budRect.bottom - budRect.top,
-	       SWP_NOACTIVATE|SWP_NOZORDER);
+               budRect.right  - budRect.left, budRect.bottom - budRect.top,
+               SWP_NOACTIVATE|SWP_NOZORDER);
 
   /* now position the up/down */
   /* Since the UDS_ALIGN* flags were used, */
@@ -511,12 +511,12 @@ static BOOL UPDOWN_SetBuddyHandle (HWND hwnd, HWND hwndBud)
   }
 
   SetWindowPos (hwnd, infoPtr->Buddy,
-		x, budRect.top-DEFAULT_ADDTOP,
-		width, (budRect.bottom-budRect.top)+DEFAULT_ADDTOP+DEFAULT_ADDBOT,
-		SWP_NOACTIVATE);
+                x, budRect.top-DEFAULT_ADDTOP,
+                width, (budRect.bottom-budRect.top)+DEFAULT_ADDTOP+DEFAULT_ADDBOT,
+                SWP_NOACTIVATE);
 
   return TRUE;
-}	
+}
 
 /***********************************************************************
  *           UPDOWN_DoAction
@@ -1132,7 +1132,7 @@ UPDOWN_Buddy_SubclassProc (
         }
         else
         {
-	  UPDOWN_GetBuddyInt(upDownHwnd);
+          UPDOWN_GetBuddyInt(upDownHwnd);
           UPDOWN_DoAction(upDownHwnd, 1, wParam==VK_UP);
         }
 
