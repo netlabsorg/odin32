@@ -1,4 +1,4 @@
-# $Id: process.mak,v 1.4 2002-04-15 23:14:17 bird Exp $
+# $Id: process.mak,v 1.5 2002-04-16 00:09:35 bird Exp $
 
 #
 # Unix-like tools for OS/2
@@ -54,7 +54,7 @@ TARGET_EXT  = $(EXT_LIB)
 TARGET_EXT  = empty
 ! endif
 ! ifndef TARGET_EXT
-!error Error: TARGET_EXT not set
+!error Error: TARGET_EXT not set. (Probably invalid TARGET_MODE.)
 ! endif
 !endif
 
@@ -65,8 +65,11 @@ PATH_TARGET = $(PATH_OBJ)\$(TARGET_NAME).$(TARGET_EXT)
 
 # Default target file. (output)
 !ifndef TARGET
+! if "$(TARGET_MODE)" != "EMPTY"
 TARGET      = $(PATH_TARGET)\$(TARGET_NAME).$(TARGET_EXT)
+! endif
 !endif
+
 
 # Default object file. (output)
 !ifndef TARGET_OBJS
