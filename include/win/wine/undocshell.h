@@ -1,4 +1,4 @@
-/* $Id: undocshell.h,v 1.5 2000-08-20 09:46:16 sandervl Exp $ */
+/* $Id: undocshell.h,v 1.6 2000-08-29 21:20:50 sandervl Exp $ */
 #ifndef __WINE_UNDOCSHELL_H
 #define __WINE_UNDOCSHELL_H
 
@@ -968,6 +968,17 @@ BOOL WINAPI SHGetNewLinkInfoW(
 
 /* policy functions */
 BOOL WINAPI SHInitRestricted(LPSTR, LPSTR);
+
+
+#ifdef __WIN32OS2__
+HRESULT WINAPI SHGetFolderPathA(
+	HWND hwndOwner,
+	int nFolder,
+	HANDLE hToken,
+	DWORD dwFlags,
+	LPSTR pszPath);
+#endif
+
 
 #ifdef __cplusplus
 } /* extern "C" */
