@@ -1,4 +1,4 @@
-# $Id: ignore.mak,v 1.3 2002-08-22 02:09:44 bird Exp $
+# $Id: ignore.mak,v 1.4 2002-08-22 03:07:50 bird Exp $
 
 #
 # Makefile for the ignore tool.
@@ -11,7 +11,7 @@
 # Setup config
 #
 PATH_ROOT = ..\..\..\..
-!include $(PATH_ROOT)\make\setup.mak
+!include $(PATH_ROOT)\$(BUILD_SETUP_MAK)
 
 #
 # Target config
