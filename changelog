@@ -1,4 +1,10 @@
-/* $Id: changelog,v 1.2232 2002-07-23 13:51:05 sandervl Exp $ */
+/* $Id: changelog,v 1.2233 2002-07-24 18:42:36 sandervl Exp $ */
+
+ 2002-07-24: Platon Fomichev <platon@innotek.de>
+    - USER32:   o Pass on WM_PAINT of client window to default PM handler
+                  if window is minimized
+                  (fixes possible endless loop of WM_PAINT messages when 
+                   minimizing a window)
 
  2002-07-23: Sander van Leeuwen <sandervl@innotek.de> 
     - KERNEL32: o Enhanced CreateWin32PeLdrExe
