@@ -1,4 +1,4 @@
-/* $Id: window.cpp,v 1.37 1999-11-21 16:22:14 achimha Exp $ */
+/* $Id: window.cpp,v 1.38 1999-11-25 19:22:04 sandervl Exp $ */
 /*
  * Win32 window apis for OS/2
  *
@@ -1119,7 +1119,7 @@ BOOL WIN32API EndDeferWindowPos( HDWP hdwp)
 
     pDWP = (DWP *) hdwp;
     if (!pDWP) {
-    dprintf(("**EndDeferWindowPos invalid parameter\n"));
+    	dprintf(("**EndDeferWindowPos invalid parameter\n"));
         SetLastError(ERROR_INVALID_PARAMETER);
         return FALSE;
     }
@@ -1461,7 +1461,7 @@ HWND WIN32API GetLastActivePopup( HWND hWnd)
 //******************************************************************************
 DWORD WIN32API GetWindowThreadProcessId(HWND hWnd, PDWORD  lpdwProcessId)
 {
-    dprintf(("USER32:  GetWindowThreadProcessId"));
+    dprintf2(("USER32:  GetWindowThreadProcessId"));
     hWnd = Win32BaseWindow::Win32ToOS2Handle(hWnd);
 
     return O32_GetWindowThreadProcessId(hWnd,lpdwProcessId);
@@ -1470,19 +1470,32 @@ DWORD WIN32API GetWindowThreadProcessId(HWND hWnd, PDWORD  lpdwProcessId)
 //******************************************************************************
 DWORD WIN32API GetWindowContextHelpId(HWND hwnd)
 {
-  dprintf(("USER32:  GetWindowContextHelpId, not implemented\n"));
-  hwnd = Win32BaseWindow::Win32ToOS2Handle(hwnd);
+  Win32BaseWindow *window;
 
-  return(0);
+    window = Win32BaseWindow::GetWindowFromHandle(hwnd);
+    if(!window) {
+        dprintf(("GetWindowContextHelpId, window %x not found", hwnd));
+        SetLastError(ERROR_INVALID_WINDOW_HANDLE);
+        return 0;
+    }
+    dprintf(("GetWindowContextHelpId %x", hwnd));
+    return window->getWindowContextHelpId();
 }
 //******************************************************************************
 //******************************************************************************
 BOOL WIN32API SetWindowContextHelpId(HWND hwnd, DWORD dwContextHelpId)
 {
-  dprintf(("USER32:  SetWindowContextHelpId, not implemented"));
-  hwnd = Win32BaseWindow::Win32ToOS2Handle(hwnd);
+  Win32BaseWindow *window;
 
-  return(TRUE);
+    window = Win32BaseWindow::GetWindowFromHandle(hwnd);
+    if(!window) {
+        dprintf(("SetWindowContextHelpId, window %x not found", hwnd));
+        SetLastError(ERROR_INVALID_WINDOW_HANDLE);
+        return 0;
+    }
+    dprintf(("SetWindowContextHelpId %x %d", hwnd, dwContextHelpId));
+    window->setWindowContextHelpId(dwContextHelpId);
+    return(TRUE);
 }
 //******************************************************************************
 //******************************************************************************
