@@ -1,4 +1,7 @@
-/* $Id: ChangeLog,v 1.2511 2003-03-03 16:42:18 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.2512 2003-03-04 15:57:08 sandervl Exp $ */
+
+ 2003-03-04: Platon Fomichev <stauff@innotek   >
+    - USER32:   o We did not pay attention to numlock state on numpad keyboard.
 
  2003-03-03: Dietrich Teickner <Dietrich_Teickner@t-online   >
     - GDI32:    o ExtTextOutA: copy string and force zero termination
