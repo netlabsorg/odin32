@@ -1,4 +1,4 @@
-; $Id: shell32.def,v 1.18 1999-11-02 20:36:41 sandervl Exp $
+; $Id: shell32.def,v 1.19 1999-11-03 19:35:39 sandervl Exp $
 
 ;Created by BLAST for IBM's compiler
 ;based on Windows 95
@@ -104,8 +104,6 @@ EXPORTS
 ;   Win32RemoveDirectory              = _Win32RemoveDirectory@?               @94
     SHLogILFromFSIL                   = _SHLogILFromFSIL@4                    @95
     StrRetToStrN                      = _StrRetToStrN@16                      @96
-    StrRetToStrNA                     = _StrRetToStrNA@16                     @396
-    StrRetToStrNW                     = _StrRetToStrNW@16                     @397
     SHWaitForFileToOpen               = _SHWaitForFileToOpen@12               @97
     SHGetRealIDL                      = _SHGetRealIDL@12                      @98
     SetAppStartingCursor              = _SetAppStartingCursor@8               @99
@@ -376,4 +374,16 @@ EXPORTS
     
     StrRetToBufA                      = _StrRetToBufA@16	              @1000
     StrRetToBufW                      = _StrRetToBufW@16                      @1001
-    PathMatchSpecW                    = _PathMatchSpecW@8                     @1002
+    PathMatchSpecA                    = _PathMatchSpecA@8                     @1002
+    PathMatchSpecW                    = _PathMatchSpecW@8                     @1003
+    StrRetToStrNA                     = _StrRetToStrNA@16                     @1004
+    StrRetToStrNW                     = _StrRetToStrNW@16                     @1005
+    PathAddBackslashA                 = _PathAddBackslashA@4                  @1006
+    PathAddBackslashW                 = _PathAddBackslashW@4	              @1007
+    PathFindFilenameA                 = _PathFindFilenameA@4                  @1008
+    PathFindFilenameW                 = _PathFindFilenameW@4                  @1009
+    PathIsRootA                       = _PathIsRootA@4                        @1010
+    PathIsRootW                       = _PathIsRootW@4                        @1011 
+    PathRemoveBackslashA              = _PathRemoveBackslashA@4               @1012
+    PathRemoveBackslashW              = _PathRemoveBackslashW@4               @1013
+    PathRemoveFileSpecA               = _PathRemoveFileSpecA@4                @1014

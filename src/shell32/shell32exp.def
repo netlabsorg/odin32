@@ -71,8 +71,6 @@ EXPORTS
     _SHCloneSpecialIDList@12                  @89
     _SHLogILFromFSIL@4                        @95
     _StrRetToStrN@16                          @96
-    _StrRetToStrNA@16                         @396
-    _StrRetToStrNW@16                         @397
     _SHWaitForFileToOpen@12                   @97
     _SHGetRealIDL@12                          @98
     _SetAppStartingCursor@8                   @99
@@ -244,4 +242,16 @@ EXPORTS
     _IsUserAdmin@0                            @680
     _StrRetToBufA@16                          @1000
     _StrRetToBufW@16                          @1001
-    _PathMatchSpecW@8                         @1002
+    _PathMatchSpecA@8                         @1002
+    _PathMatchSpecW@8                         @1003
+    _StrRetToStrNA@16                         @1004
+    _StrRetToStrNW@16                         @1005
+    _PathAddBackslashA@4                      @1006
+    _PathAddBackslashW@4                      @1007
+    _PathFindFilenameA@4                      @1008
+    _PathFindFilenameW@4                      @1009
+    _PathIsRootA@4                            @1010
+    _PathIsRootW@4                            @1011
+    _PathRemoveBackslashA@4                   @1012
+    _PathRemoveBackslashW@4                   @1013
+    _PathRemoveFileSpecA@4                    @1014
