@@ -1,4 +1,4 @@
-# $Id: odin32.post.vac3.mk,v 1.17 2001-08-16 04:13:20 bird Exp $
+# $Id: odin32.post.vac3.mk,v 1.18 2001-09-30 00:53:28 bird Exp $
 
 #
 # Odin32 API
@@ -326,10 +326,9 @@ $(OBJS:  =^
 !ifndef NO_DEP_RULE
 dep: dep_internal $(ADDITIONAL_DEP)
 dep_internal:
-    $(DEPEND) $(CINCLUDES) *.c *.cpp *.h *.asm *.inc \
-        *.rc *.dlg $(ODIN32_INCLUDE)\*.h -robj *.orc
+    $(DEPEND) $(CINCLUDES) *.c *.cpp *.h *.asm *.inc *.rc *.dlg -robj *.orc
 !ifdef SUBDIRS
-    $(DODIRS) "$(SUBDIRS)"  $(MAKE_CMD) dep
+    @$(DODIRS) "$(SUBDIRS)"  $(MAKE_CMD) dep
 !endif
 !endif
 
@@ -341,7 +340,7 @@ dep_internal:
 !ifndef NO_INTERNAL_LIBS
 !ifdef INTLIBS
 $(INTLIBS):
-    $(DODIRS) "$(SUBDIRS)"  $(MAKE_CMD) libs
+    @$(DODIRS) "$(SUBDIRS)"  $(MAKE_CMD) libs
 !endif
 !endif
 
@@ -473,7 +472,7 @@ clean:  clean2
 !endif
 !endif
 !ifdef SUBDIRS
-    $(DODIRS) "$(SUBDIRS)"  $(MAKE_CMD) clean
+    @$(DODIRS) "$(SUBDIRS)"  $(MAKE_CMD) clean
 !endif
 
 
@@ -486,6 +485,12 @@ clean:  clean2
 !       include .depend
 !   else
 !       if [$(ECHO) .depend doesn't exist]
+!       endif
+!   endif
+!   if [$(EXISTS) $(ODIN32_INCLUDE)\.depend] == 0
+!       include $(ODIN32_INCLUDE)\.depend
+!   else
+!       if [$(ECHO) /include/.depend doesn't exist]
 !       endif
 !   endif
 !endif
