@@ -1,9 +1,12 @@
-/* $Id: crt.cpp,v 1.3 1999-12-24 18:40:41 sandervl Exp $ */
+/* $Id: crt.cpp,v 1.4 2000-01-06 20:08:06 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
  * Win32 NT Runtime / NTDLL for OS/2
+ *
  * Copyright 1999 Patrick Haller (phaller@gmx.net)
+ * Copyright 1999 Alexandre Julliard (CRTDLL__wcsnicmp)
+ *
  */
 
 /****************************************************************************
@@ -106,24 +109,20 @@ LPWSTR CDECL CRTDLL__wcslwr(LPWSTR str)
  * Author    : Patrick Haller [Thu, 1999/06/22 20:44]
  *****************************************************************************/
 
-int CDECL CRTDLL__wcsnicmp(LPWSTR str1, LPWSTR str2, long l)
+int CDECL CRTDLL__wcsnicmp(LPWSTR str1, LPWSTR str2, long n)
 {
-  LPWSTR w1;
-  LPWSTR w2;
-
   dprintf2(("CRTDLL: _wcsnicmp(%08xh,%08xh,%08xh)\n",
            str1,
            str2,
            l));
 
-  w1 = HEAP_strdupW(GetProcessHeap(),0,str1);
-  w2 = HEAP_strdupW(GetProcessHeap(),0,str2);
-  CRTDLL__wcsupr(w1);
-  CRTDLL__wcsupr(w2);
-
-  return (wcsncmp((wchar_t*)w1,
-                  (wchar_t*)w2,
-                  l));
+    if (!n) return 0;
+    while ((--n > 0) && *str1 && (towupper(*str1) == towupper(*str2)))
+    {
+        str1++;
+        str2++;
+    }
+    return towupper(*str1) - towupper(*str2);
 }
 
 
