@@ -1,10 +1,18 @@
- /* $Id: changelog,v 1.1101 2000-09-03 18:12:14 phaller Exp $ */
+ /* $Id: changelog,v 1.1102 2000-09-04 02:16:18 bird Exp $ */
+
+ 2000-09-04: knut st. osmundsen <knut.stange.osmundsen@mynd.no>
+    - doc/readme.txt: Updated Win32k sections.
+    - Win32k:   Fixed missing object in the 16-bit clib.lib which caused
+                linking of win32k.sys to fail in last daily build.
+                Support for comport 3 and 4.
+    - Win32kCC: Updated dialog to show all information provided by the
+                Win32k IOCtl interface.
 
  2000-09-03: Patrick Haller <phaller@gmx.net>
     - KERNEL32: - NLS sync with WINE
 
  2000-09-03: Sander van Leeuwen <sandervl@xs4all.nl>
-    - KERNEL32: More logging; 
+    - KERNEL32: More logging;
                 DeviceIoControl didn't have handlemanager wrapper
     - GDI32:    Missing wrapper for WinDrawTabbedText caused FS corruption.
                 PLEASE be more careful in the future!
@@ -17,11 +25,11 @@
                       order, and that the LIBPATH are also searched (last).
                     - PE.EXE may be invoked by Win32k.sys.
                       Win32k.sys will now operate in three modes:
-                        - Pure Pe2Lx mode. Only the Pe2Lx method is used.
+                        - Pe2Lx mode. Only the Pe2Lx method is used.
                         - Mixed Pe2Lx and Pe.exe mode. Pe.exe is invoked for
                           executables which Pe2Lx don't currently support.
                           (like WinWord, which BTW may trap you PC if invoked
-                          in Pure mode.)
+                          in Pe2Lx mode.)
                           This is the default mode.
                         - Pe.exe mode. Pe.exe is allways used.
                       (see readme.txt, I'll update it to ASAP but not to night.
