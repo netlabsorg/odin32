@@ -1,4 +1,4 @@
-/* $Id: authors.h,v 1.5 1999-12-27 18:41:41 sandervl Exp $ */
+/* $Id: authors.h,v 1.6 1999-12-30 09:29:10 sandervl Exp $ */
 #ifndef __WINE_AUTHORS_H
 #define __WINE_AUTHORS_H
 
@@ -13,6 +13,7 @@ static const char * const SHELL_People[] =
     "Adrian Gschwend",
     "Patrick Haller",
     "Achim Hasenmueller",
+    "Bart van Leeuwen",
     "Sander van Leeuwen",
     "Felix Maschek",
     "Chris McKillop",
