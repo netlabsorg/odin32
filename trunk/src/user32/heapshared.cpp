@@ -1,4 +1,4 @@
-/* $Id: heapshared.cpp,v 1.2 1999-09-23 14:24:57 phaller Exp $ */
+/* $Id: heapshared.cpp,v 1.3 1999-09-23 16:44:32 sandervl Exp $ */
 /*
  * Shared heap functions for OS/2
  *
@@ -114,10 +114,8 @@ void * _LNK_CONV getmoreShared(Heap_t pHeap, size_t *size, int *clean)
 			dprintf(("getmoreShared: DosSetMem failed with %d", rc));
 			return NULL;
   		}
-  		for(int j=0;
-        j < *size/PAGE_SIZE;
-        j++)
-  {
+  		for(int j=0;j < *size/PAGE_SIZE; j++)
+                {
   			pageBitmap[i+j] = 1; //mark as committed
   		}
 

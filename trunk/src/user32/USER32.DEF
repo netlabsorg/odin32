@@ -1,4 +1,4 @@
-; $Id: USER32.DEF,v 1.12 1999-09-15 23:18:47 sandervl Exp $
+; $Id: USER32.DEF,v 1.13 1999-09-23 16:44:32 sandervl Exp $
 
 ;Created by BLAST for IBM's compiler
 LIBRARY USER32 INITINSTANCE TERMINSTANCE
@@ -626,3 +626,5 @@ EXPORTS
     NativeDlgBoxIP	       = _NativeDlgBoxIP@24	     @2003
     NativeCreateDlgIP	       = _NativeCreateDlgIP@24	     @2004
     NativeLoadBitmap	       = _NativeLoadBitmap@8	     @2005
+
+    Win32ToOS2Handle__FUl      = Win32ToOS2Handle__15Win32BaseWindowFUl @2006
