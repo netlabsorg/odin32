@@ -1,4 +1,8 @@
-/* $Id: changelog,v 1.1781 2001-10-23 21:41:11 sandervl Exp $ */
+/* $Id: changelog,v 1.1782 2001-10-24 09:52:36 sandervl Exp $ */
+
+ 2001-10-24: Sander van Leeuwen <sandervl@xs4all.nl>
+    - USER32:   o SCROLLBAR: Only set focus to scrollbar control if it has
+                  the WS_TABSTOP style (bugfix taken from Wine)
 
  2001-10-23: Sander van Leeuwen <sandervl@xs4all.nl>
     - COMCTL32: o ListView: WM_KEYDOWN -> if WM_NOTIFY returns TRUE, then
