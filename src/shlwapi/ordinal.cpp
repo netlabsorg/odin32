@@ -1,4 +1,4 @@
-/* $Id: ordinal.cpp,v 1.2 2000-06-12 08:09:37 phaller Exp $ */
+/* $Id: ordinal.cpp,v 1.3 2000-06-12 11:35:13 phaller Exp $ */
 
 /*
  * Win32 Lightweight SHELL32 for OS/2
@@ -915,6 +915,132 @@ ODINFUNCTION1(LPSTR, SHLWAPI_170,
 }
 
 
+/*****************************************************************************
+ * Name      : SHLWAPI_185
+ * Purpose   : some M$ nag screen ?
+ * Parameters: 
+ * Variables :
+ * Result    : 
+ * Remark    : SHLWAPI.185
+ * Status    : UNTESTED
+ *
+ * Author    : Patrick Haller [Sun, 2000/06/10 04:02]
+ *****************************************************************************/
+
+ODINFUNCTION6(DWORD,   SHLWAPI_185,
+              DWORD, arg0,
+              LPSTR, lpStr1,
+              LPSTR, lpStr2,
+              DWORD, arg3,
+              DWORD, dwDefault,
+              LPSTR, lpstrValueName)
+{
+  BOOL  fDontShow;
+  WCHAR szValueNameW[256];
+  
+  fDontShow = SHRegGetBoolUSValueA("Software\\Microsoft\\Windows\\CurrentVersion\\"
+                                   "Explorer\\DontShowMeThisDialogAgain",
+                                   lpstrValueName,
+                                   0,
+                                   1);
+  if (fDontShow == FALSE)
+    return dwDefault;
+  
+  int iLength1 = lstrlenA(lpStr1)+1;
+  HLOCAL hLocal1 = LocalAlloc(LMEM_ZEROINIT,
+                              iLength1 << 1);
+  if (hLocal1 == NULL)
+    return dwDefault;
+  
+  int iLength2 = lstrlenA(lpStr2)+1;
+  HLOCAL hLocal2 = LocalAlloc(LMEM_ZEROINIT,
+                              iLength2 << 1);
+  if (hLocal2 == NULL)
+  {
+    LocalFree(hLocal1);
+    return dwDefault;
+  }
+  
+#if 0
+  // convert all ascii values to Unicode
+  SHLWAPI_215(lpStr1, (LPWSTR)hLocal1, iLength1);
+  SHLWAPI_215(lpStr2, (LPWSTR)hLocal2, iLength2);
+  SHLWAPI_215(lpstrValueName,  szValueNameW, 256);
+  
+  // do something
+  dwDefault = SHLWAPI_191(arg0,
+              (LPWSTR)hLocal1,
+              arg3,
+              dwDefault,
+              szValueNameW);
+#endif
+  
+  if (hLocal1)
+    LocalFree(hLocal1);
+  
+  if (hLocal2)
+    LocalFree(hLocal2);
+  
+  return dwDefault;
+}
+
+
+/*****************************************************************************
+ * Name      : SHLWAPI_191
+ * Purpose   : display some M$ nag screen if enabled
+ * Parameters: 
+ * Variables :
+ * Result    : 
+ * Remark    : SHLWAPI.191
+ * Status    : UNTESTED
+ *
+ * Author    : Patrick Haller [Sun, 2000/06/10 04:02]
+ *****************************************************************************/
+
+ODINFUNCTION6(DWORD,  SHLWAPI_191,
+              HWND,   hwndParent,
+              DWORD,  arg1,
+              DWORD,  arg2,
+              DWORD,  arg3,
+              DWORD,  dwDefault,
+              LPWSTR, lpstrDialog)
+{
+  BOOL rc = SHRegGetBoolUSValueW((LPCWSTR)L"Software\\Microsoft\\Windows\\CurrentVersion"
+                                 L"\\Explorer\\DontShowMeThisDialogAgain",
+                                 lpstrDialog,
+                                 0,
+                                 1);
+  if (rc == FALSE)
+    return dwDefault;
+  
+  static HINSTANCE hShellInstance; // @@@PH where to put / initialize?
+  
+#if 0
+  struct
+  {
+    DWORD s1;
+    DWORD s2;
+    DWORD s3;
+    DWORD s4;
+  } sInit;
+  
+  sInit.s1 = "software...";
+  sInit.s2 = arg1;
+  sInit.s3 = arg2;
+  sInit.s4 = arg3;
+  
+  return DialogBoxParamW(hShellInstance,
+                         0x1200,          // some template
+                         hwndParent,
+                         i_DialogProc,
+                         &sInit);
+#endif
+
+  return dwDefault;
+}
+
+
+
 /*************************************************************************
 *      SHLWAPI_193 [SHLWAPI]
 * query current color depth
@@ -1036,27 +1162,27 @@ ODINFUNCTION1(DWORD,       SHLWAPI_237,
 
 
 /*****************************************************************************
- * Name      : LRESULT DefWindowProcAW
- * Purpose   : 
+ * Name      : SHLWAPI_240
+ * Purpose   : universal window procedure
  * Parameters: 
  * Variables :
  * Result    : 
- * Remark    : SHLWAPI.240 - this version has dynamic unicode behaviour
+ * Remark    : SHLWAPI.240
  * Status    : UNTESTED
  *
  * Author    : Patrick Haller [Sun, 2000/06/10 04:02]
  *****************************************************************************/
 
-ODINFUNCTION4(LRESULT,      DefWindowProcAW,
-              HWND,         hWnd,
-              UINT,         Msg,
-              WPARAM,       wParam,
-              LPARAM,       lParam)
+ODINFUNCTION4(DWORD,  SHLWAPI_240,
+              HWND,   hwnd,
+              UINT,   Msg,
+              WPARAM, wParam,
+              LPARAM, lParam)
 {
-  if (IsWindowUnicode(hWnd))
-    return DefWindowProcW(hWnd, Msg, wParam, lParam);
+  if (IsWindowUnicode(hwnd))
+    return DefWindowProcW(hwnd, Msg, wParam, lParam);
   else
-    return DefWindowProcA(hWnd, Msg, wParam, lParam);
+    return DefWindowProcA(hwnd, Msg, wParam, lParam);
 }
 
 
@@ -1069,6 +1195,31 @@ ODINFUNCTION0(DWORD, SHLWAPI_241)
   FIXME("()stub\n");
   return 0xabba1243;
 }
+
+
+/*****************************************************************************
+ * Name      : SHLWAPI_243
+ * Purpose   : does something critical, even with performance counters
+ * Parameters: 
+ * Variables :
+ * Result    : 
+ * Remark    : SHLWAPI.243
+ * Status    : UNTESTED
+ *
+ * Author    : Patrick Haller [Sun, 2000/06/10 04:02]
+ *****************************************************************************/
+
+ODINFUNCTION5(DWORD, SHLWAPI_243,
+              DWORD, arg0,
+              DWORD, arg1,
+              DWORD, arg2,
+              DWORD, arg3,
+              DWORD, arg4)
+{
+  dprintf(("not implementes.\n"));
+  return 0;
+}
+
 
 /*************************************************************************
 *      SHLWAPI_266 [SHLWAPI]
@@ -1185,17 +1336,81 @@ ODINFUNCTION3(INT,   SHLWAPI_364,
 }
 
 
+/*****************************************************************************
+ * Name      : DWORD SHLWAPI_376
+ * Purpose   : Try to determine user interface language
+ * Parameters: 
+ * Variables :
+ * Result    : 
+ * Remark    : SHLWAPI.366
+ * Status    : UNTESTED
+ *
+ * Author    : Patrick Haller [Sun, 2000/06/10 04:02]
+ *****************************************************************************/
+
+ODINFUNCTION0(DWORD, SHLWAPI_376)
+{
+  /* Microsoft does a hell of a job here: looks for
+   * - Internet Explorer
+   * - Office
+   * - Lpk ?
+   * - Resource Locales
+   * - etc.
+   */
+  
+  return 0x0409; // @@@PH maybe this is 'nuf for now.
+}
+
+
 
 /*************************************************************************
 *      SHLWAPI_377 [SHLWAPI]
 */
-ODINFUNCTION3(DWORD,  SHLWAPI_377,
-              LPVOID, x,
-              LPVOID, y,
-              LPVOID, z)
+ODINFUNCTION3(DWORD,   SHLWAPI_377,
+              LPSTR,   lpstrModule,
+              HMODULE, hModule,
+              LPVOID,  z)
 {
-  FIXME("(%p %p %p)stub\n", x,y,z);
-  return 0xabba1246;
+  static BOOL flagSHLWAPI_377Initialized       = FALSE;
+  static BOOL flagInternetExplorerCheckVersion = FALSE;
+  
+  dprintf(("not (properly) implemented.\n"));
+  
+  char szModuleName[260]; // MAXPATHLEN
+  HMODULE hModLanguage;
+  
+  // initialize this subsystem
+  if (flagSHLWAPI_377Initialized == FALSE)
+  {
+    flagSHLWAPI_377Initialized = TRUE;
+    
+    flagInternetExplorerCheckVersion =
+    SHRegGetBoolUSValueA("Software\\Microsoft\\Internet Explorer\\International",
+                         "CheckVersion",
+                         1,
+                         1);
+  }
+  
+  if (lpstrModule == NULL) // Garbage in - garbage out
+    return 0;
+  
+  if (0 == GetModuleFileNameA(hModule,
+                              szModuleName,
+                              sizeof(szModuleName)))
+  {
+    // treat error
+  }
+  else
+  {
+    PathRemoveFileSpecA(szModuleName);
+    PathAppendA(szModuleName,
+                lpstrModule);
+    // @@@PH twiddle around with the current IE codepage
+    hModLanguage = LoadLibraryA(szModuleName);
+  }
+
+  
+  return hModLanguage;
 }
 
 
