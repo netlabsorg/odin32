@@ -1,4 +1,4 @@
-/* $Id: wndmsg.cpp,v 1.15 2000-05-03 18:35:56 sandervl Exp $ */
+/* $Id: wndmsg.cpp,v 1.16 2001-10-08 23:24:43 phaller Exp $ */
 /*
  * Win32 window message text function for OS/2
  *
@@ -66,6 +66,8 @@ MSGDESC gaMsgs[] =
     { "WM_SETFOCUS", WM_SETFOCUS,                           // 0x0007
         0},
     { "WM_KILLFOCUS", WM_KILLFOCUS,                         // 0x0008
+        0},
+    { "WM_SETVISIBLE", WM_SETVISIBLE,                       // 0x0009
         0},
     { "WM_ENABLE", WM_ENABLE,                               // 0x000A
         0},
@@ -439,6 +441,10 @@ MSGDESC gaMsgs[] =
         MTF_TYPE_STM},
     { "STM_GETICON", STM_GETICON,                           // 0x0171
         MTF_TYPE_STM},
+    { "STM_SETIMAGE", STM_SETIMAGE,                         // 0x0172
+        MTF_TYPE_STM},
+    { "STM_GETIMAGE", STM_GETIMAGE,                         // 0x0173
+        MTF_TYPE_STM},
     { "LB_ADDSTRING", LB_ADDSTRING,                         // 0x0180
         MTF_TYPE_LB},
     { "LB_INSERTSTRING", LB_INSERTSTRING,                   // 0x0181
@@ -508,6 +514,10 @@ MSGDESC gaMsgs[] =
     { "LB_GETITEMHEIGHT", LB_GETITEMHEIGHT,                 // 0x01A1
         MTF_TYPE_LB},
     { "LB_FINDSTRINGEXACT", LB_FINDSTRINGEXACT,             // 0x01A2
+        MTF_TYPE_LB},
+    { "LB_CARETON", LB_CARETON,                             // 0x01A3
+        MTF_TYPE_LB},
+    { "LB_CARETOFF", LB_CARETOFF,                           // 0x01A4
         MTF_TYPE_LB},
     { "LB_SETLOCALE", LB_SETLOCALE,                         // 0x01A5
         MTF_TYPE_LB},
