@@ -1,4 +1,4 @@
-/* $Id: oslibdos.cpp,v 1.115 2003-02-17 11:31:43 sandervl Exp $ */
+/* $Id: oslibdos.cpp,v 1.116 2003-02-27 11:27:11 sandervl Exp $ */
 /*
  * Wrappers for OS/2 Dos* API
  *
@@ -518,8 +518,46 @@ BOOL OSLibDosMoveFile(LPCSTR lpszOldFile, LPCSTR lpszNewFile)
   CharToOemA(lpszOldFile, lOemOldFile);
   CharToOemA(lpszNewFile, lOemNewFile);
 
-  rc = DosMove((PSZ)lOemOldFile, (PSZ)lOemNewFile);
-  SetLastError(error2WinError(rc));
+  // we need to know the current drive for relative paths
+  ULONG diskNum, logicalBitmap;
+  DosQueryCurrentDisk(&diskNum, &logicalBitmap);
+  char currentDrive = 'A' + diskNum - 1;
+
+  // first determine whether source and target paths are absolute
+  // (i.e. contain a drive letter)
+  BOOL sourcePathAbsolute = FALSE;
+  char sourceDrive = currentDrive;
+  if ((strlen(lOemOldFile) > 2) && (lOemOldFile[1] == ':'))
+  {
+      sourcePathAbsolute = TRUE;
+      sourceDrive = toupper(lOemOldFile[1]);
+  }
+  BOOL targetPathAbsolute = FALSE;
+  char targetDrive = currentDrive;
+  if ((strlen(lOemNewFile) > 2) && (lOemNewFile[1] == ':'))
+  {
+      targetPathAbsolute = TRUE;
+      targetDrive = toupper(lOemNewFile[1]);
+  }
+
+  // if the source and target drives are different, we have to do take
+  // the copy and delete path
+  if (sourceDrive != targetDrive)
+  {
+      dprintf(("OSLibDosMoveFile - different drives, doing the copy/delete approach (WARNING: non atomic file system operation!)"));
+      // @@@AH TODO: this is not atomic. Maybe it is on Windows - we have to check this
+      rc = DosCopy((PSZ)lOemOldFile, (PSZ)lOemNewFile, 0);
+      if (rc == NO_ERROR)
+      {
+          rc = DosDelete(lOemOldFile);
+      }
+      SetLastError(error2WinError(rc));
+  } else
+  {
+      // atomic DosMove will do fine
+      rc = DosMove((PSZ)lOemOldFile, (PSZ)lOemNewFile);
+      SetLastError(error2WinError(rc));
+  }     
   return (rc == NO_ERROR);
 }
 //******************************************************************************
@@ -1472,8 +1510,13 @@ DWORD OSLibDosSetFilePtr2(DWORD hFile, DWORD offset, DWORD method)
 //******************************************************************************
 DWORD OSLibDosDupHandle(DWORD hFile, DWORD *hNew)
 {
-   *hNew = -1;
-   return DosDupHandle(hFile, hNew);
+   DWORD dwNewHandle = -1, ret;
+
+   //Use the stack for storing the new handle; DosDupHandle doesn't like high
+   //addresses
+   ret = DosDupHandle(hFile, &dwNewHandle);
+   *hNew = dwNewHandle;
+   return ret;
 }
 //******************************************************************************
 //******************************************************************************
