@@ -1,4 +1,7 @@
- /* $Id: changelog,v 1.179 1999-09-07 20:27:43 phaller Exp $ */
+ /* $Id: changelog,v 1.180 1999-09-07 20:40:37 sandervl Exp $ */
+
+ 99-09-07: Jens Wiessner <wiessnej@rfi.de>
+	- CRTDLL: Created dll (Wine port)
 
  99-09-07: Patrick Haller <phaller@gmx.net>
 	- OLE32: WINE_StringFromCLSID is needed in other modules, too. (SHELL32)
