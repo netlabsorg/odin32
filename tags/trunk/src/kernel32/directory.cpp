@@ -1,4 +1,4 @@
-/* $Id: directory.cpp,v 1.13 1999-12-09 11:59:28 sandervl Exp $ */
+/* $Id: directory.cpp,v 1.14 1999-12-28 22:08:56 sandervl Exp $ */
 
 /*
  * Win32 Directory functions for OS/2
@@ -117,8 +117,12 @@ ODINFUNCTION2(UINT, GetCurrentDirectoryW, UINT,   nBufferLength,
  *****************************************************************************/
 
 
-ODINFUNCTIONNODBG1(BOOL,SetCurrentDirectoryA,LPCSTR,lpPathName)
+ODINFUNCTION1(BOOL,SetCurrentDirectoryA,LPCSTR,lpPathName)
 {
+  if(HIWORD(lpPathName) == 0) {
+	SetLastError(ERROR_INVALID_PARAMETER);
+	return FALSE;
+  }
   int len = strlen(lpPathName);
   char *tmp=(char *)alloca(len + 1);
 
