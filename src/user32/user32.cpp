@@ -1,4 +1,4 @@
-/* $Id: user32.cpp,v 1.83 2000-06-07 14:51:28 sandervl Exp $ */
+/* $Id: user32.cpp,v 1.84 2000-08-02 20:18:24 bird Exp $ */
 
 /*
  * Win32 misc user32 API functions for OS/2
@@ -1208,7 +1208,7 @@ WORD WIN32API GetAsyncKeyState(INT nVirtKey)
  *             value is not readable. For a list of OEM code-page identifiers,
  *             see GetOEMCP.
  * Remark    :
- * Status    : UNTESTED
+ * Status    : COMPLETELY IMPLEMENTED UNTESTED
  *
  * Author    : Patrick Haller [Thu, 1998/02/26 11:55]
  *****************************************************************************/
