@@ -36,6 +36,9 @@
 #include "winerror.h"
 #include "wine/debug.h"
 
+#define DBG_LOCALLOG    DBG_info
+#include "dbglocal.h"
+
 WINE_DEFAULT_DEBUG_CHANNEL(ver);
 
 

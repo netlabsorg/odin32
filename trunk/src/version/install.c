@@ -36,6 +36,9 @@
 #include "lzexpand.h"
 #include "wine/debug.h"
 
+#define DBG_LOCALLOG    DBG_install
+#include "dbglocal.h"
+
 WINE_DEFAULT_DEBUG_CHANNEL(ver);
 
 
@@ -139,10 +142,10 @@ DWORD WINAPI VerFindFileA(
     char  systemDir[MAX_PATH];
 
     /* Print out debugging information */
-    TRACE("flags = %x filename=%s windir=%s appdir=%s curdirlen=%p(%u) destdirlen=%p(%u)\n",
+    dprintf(("flags = %x filename=%s windir=%s appdir=%s curdirlen=%p(%u) destdirlen=%p(%u)\n",
           flags, debugstr_a(lpszFilename), debugstr_a(lpszWinDir), debugstr_a(lpszAppDir),
           lpuCurDirLen, lpuCurDirLen ? *lpuCurDirLen : 0,
-          lpuDestDirLen, lpuDestDirLen ? *lpuDestDirLen : 0 );
+          lpuDestDirLen, lpuDestDirLen ? *lpuDestDirLen : 0 ));
 
     /* Figure out where the file should go; shared files default to the
        system directory */
@@ -205,11 +208,11 @@ DWORD WINAPI VerFindFileA(
         *lpuCurDirLen = curDirSizeReq;
     }
 
-    TRACE("ret = %lu (%s%s%s) curdir=%s destdir=%s\n", retval,
+    dprintf(("ret = %lu (%s%s%s) curdir=%s destdir=%s\n", retval,
           (retval & VFF_CURNEDEST) ? "VFF_CURNEDEST " : "",
           (retval & VFF_FILEINUSE) ? "VFF_FILEINUSE " : "",
           (retval & VFF_BUFFTOOSMALL) ? "VFF_BUFFTOOSMALL " : "",
-          debugstr_a(lpszCurDir), debugstr_a(lpszDestDir));
+          debugstr_a(lpszCurDir), debugstr_a(lpszDestDir)));
 
     return retval;
 }
@@ -230,10 +233,10 @@ DWORD WINAPI VerFindFileW( UINT flags,LPCWSTR lpszFilename,LPCWSTR lpszWinDir,
     WCHAR systemDir[MAX_PATH];
 
     /* Print out debugging information */
-    TRACE("flags = %x filename=%s windir=%s appdir=%s curdirlen=%p(%u) destdirlen=%p(%u)\n",
+    dprintf(("flags = %x filename=%s windir=%s appdir=%s curdirlen=%p(%u) destdirlen=%p(%u)\n",
           flags, debugstr_w(lpszFilename), debugstr_w(lpszWinDir), debugstr_w(lpszAppDir),
           lpuCurDirLen, lpuCurDirLen ? *lpuCurDirLen : 0,
-          lpuDestDirLen, lpuDestDirLen ? *lpuDestDirLen : 0 );
+          lpuDestDirLen, lpuDestDirLen ? *lpuDestDirLen : 0 ));
 
     /* Figure out where the file should go; shared files default to the
        system directory */
@@ -296,11 +299,11 @@ DWORD WINAPI VerFindFileW( UINT flags,LPCWSTR lpszFilename,LPCWSTR lpszWinDir,
         *lpuCurDirLen = curDirSizeReq;
     }
 
-    TRACE("ret = %lu (%s%s%s) curdir=%s destdir=%s\n", retval,
+    dprintf(("ret = %lu (%s%s%s) curdir=%s destdir=%s\n", retval,
           (retval & VFF_CURNEDEST) ? "VFF_CURNEDEST " : "",
           (retval & VFF_FILEINUSE) ? "VFF_FILEINUSE " : "",
           (retval & VFF_BUFFTOOSMALL) ? "VFF_BUFFTOOSMALL " : "",
-          debugstr_w(lpszCurDir), debugstr_w(lpszDestDir));
+          debugstr_w(lpszCurDir), debugstr_w(lpszDestDir)));
     return retval;
 }
 
@@ -313,7 +316,7 @@ _fetch_versioninfo(LPSTR fn,VS_FIXEDFILEINFO **vffi) {
     alloclen = 1000;
     buf=HeapAlloc(GetProcessHeap(), 0, alloclen);
     if(buf == NULL) {
-        WARN("Memory exausted while fetching version info!\n");
+        dprintf(("Memory exausted while fetching version info!\n"));
         return NULL;
     }
     while (1) {
@@ -327,7 +330,7 @@ _fetch_versioninfo(LPSTR fn,VS_FIXEDFILEINFO **vffi) {
 	    HeapFree(GetProcessHeap(), 0, buf);
 	    buf = HeapAlloc(GetProcessHeap(), 0, alloclen);
             if(buf == NULL) {
-               WARN("Memory exausted while fetching version info!\n");
+               dprintf(("Memory exausted while fetching version info!\n"));
                return NULL;
             }
 	} else {
@@ -335,7 +338,7 @@ _fetch_versioninfo(LPSTR fn,VS_FIXEDFILEINFO **vffi) {
 	    if ((*vffi)->dwSignature == 0x004f0049) /* hack to detect unicode */
 	    	*vffi = (VS_FIXEDFILEINFO*)(buf+0x28);
 	    if ((*vffi)->dwSignature != VS_FFI_SIGNATURE)
-	    	WARN("Bad VS_FIXEDFILEINFO signature 0x%08lx\n",(*vffi)->dwSignature);
+	    	dprintf(("Bad VS_FIXEDFILEINFO signature 0x%08lx\n",(*vffi)->dwSignature));
 	    return buf;
 	}
     }
@@ -368,9 +371,9 @@ DWORD WINAPI VerInstallFileA(
     LPBYTE	buf1,buf2;
     OFSTRUCT	ofs;
 
-    TRACE("(%x,%s,%s,%s,%s,%s,%p,%d)\n",
+    dprintf(("(%x,%s,%s,%s,%s,%s,%p,%d)\n",
 	    flags,srcfilename,destfilename,srcdir,destdir,curdir,tmpfile,*tmpfilelen
-    );
+    ));
     xret = 0;
     sprintf(srcfn,"%s\\%s",srcdir,srcfilename);
     if (!destdir || !*destdir) pdest = srcdir;

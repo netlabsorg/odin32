@@ -44,6 +44,9 @@
 #include "wine/debug.h"
 #include <module.h>
 
+#define DBG_LOCALLOG    DBG_resource
+#include "dbglocal.h"
+
 WINE_DEFAULT_DEBUG_CHANNEL(ver);
 
 
@@ -191,7 +194,7 @@ static BOOL find_ne_resource( HFILE lzfd, LPCSTR typeid, LPCSTR resid,
     resTabSize = nehd.ne_restab - nehd.ne_rsrctab;
     if ( !resTabSize )
     {
-        TRACE("No resources in NE dll\n" );
+        dprintf(("No resources in NE dll\n" ));
         return FALSE;
     }
 
@@ -233,7 +236,7 @@ static BOOL find_ne_resource( HFILE lzfd, LPCSTR typeid, LPCSTR resid,
                                        typeInfo->count * sizeof(NE_NAMEINFO));
         }
     }
-    TRACE("No typeid entry found for %p\n", typeid );
+    dprintf(("No typeid entry found for %p\n", typeid ));
     HeapFree( GetProcessHeap(), 0, resTab );
     return FALSE;
 
@@ -256,7 +259,7 @@ static BOOL find_ne_resource( HFILE lzfd, LPCSTR typeid, LPCSTR resid,
         for (count = typeInfo->count; count > 0; count--, nameInfo++)
             if (nameInfo->id == id) goto found_name;
     }
-    TRACE("No resid entry found for %p\n", typeid );
+    dprintf(("No resid entry found for %p\n", typeid ));
     HeapFree( GetProcessHeap(), 0, resTab );
     return FALSE;
 
@@ -294,7 +297,7 @@ static BOOL find_pe_resource( HFILE lzfd, LPCSTR typeid, LPCSTR resid,
     resDataDir = pehd.OptionalHeader.DataDirectory+IMAGE_FILE_RESOURCE_DIRECTORY;
     if ( !resDataDir->Size )
     {
-        TRACE("No resources in PE dll\n" );
+        dprintf(("No resources in PE dll\n" ));
         return FALSE;
     }
 
@@ -326,7 +329,7 @@ static BOOL find_pe_resource( HFILE lzfd, LPCSTR typeid, LPCSTR resid,
     if ( i == nSections )
     {
         HeapFree( GetProcessHeap(), 0, sections );
-        TRACE("Couldn't find resource section\n" );
+        dprintf(("Couldn't find resource section\n" ));
         return FALSE;
     }
 
@@ -349,19 +352,19 @@ static BOOL find_pe_resource( HFILE lzfd, LPCSTR typeid, LPCSTR resid,
     resPtr = find_entry_by_name( resPtr, typeid, resDir );
     if ( !resPtr )
     {
-        TRACE("No typeid entry found for %p\n", typeid );
+        dprintf(("No typeid entry found for %p\n", typeid ));
         goto done;
     }
     resPtr = find_entry_by_name( resPtr, resid, resDir );
     if ( !resPtr )
     {
-        TRACE("No resid entry found for %p\n", resid );
+        dprintf(("No resid entry found for %p\n", resid ));
         goto done;
     }
     resPtr = find_entry_default( resPtr, resDir );
     if ( !resPtr )
     {
-        TRACE("No default language entry found for %p\n", resid );
+        dprintf(("No default language entry found for %p\n", resid ));
         goto done;
     }
 
@@ -375,7 +378,7 @@ static BOOL find_pe_resource( HFILE lzfd, LPCSTR typeid, LPCSTR resid,
 
     if ( i == nSections )
     {
-        TRACE("Couldn't find resource data section\n" );
+        dprintf(("Couldn't find resource data section\n" ));
         goto done;
     }
 
@@ -403,9 +406,9 @@ DWORD WINAPI GetFileResourceSize16( LPCSTR lpszFileName, LPCSTR lpszResType,
     OFSTRUCT ofs;
     DWORD reslen;
 
-    TRACE("(%s,type=0x%lx,id=0x%lx,off=%p)\n",
+    dprintf(("(%s,type=0x%lx,id=0x%lx,off=%p)\n",
                 debugstr_a(lpszFileName), (LONG)lpszResType, (LONG)lpszResId,
-                lpszResId );
+                lpszResId ));
 
     lzfd = LZOpenFileA( (LPSTR)lpszFileName, &ofs, OF_READ );
     if ( lzfd < 0 ) return 0;
@@ -440,9 +443,9 @@ DWORD WINAPI GetFileResource16( LPCSTR lpszFileName, LPCSTR lpszResType,
     OFSTRUCT ofs;
     DWORD reslen = dwResLen;
 
-    TRACE("(%s,type=0x%lx,id=0x%lx,off=%ld,len=%ld,data=%p)\n",
+    dprintf(("(%s,type=0x%lx,id=0x%lx,off=%ld,len=%ld,data=%p)\n",
 		debugstr_a(lpszFileName), (LONG)lpszResType, (LONG)lpszResId,
-                dwFileOffset, dwResLen, lpvData );
+                dwFileOffset, dwResLen, lpvData ));
 
     lzfd = LZOpenFileA( (LPSTR)lpszFileName, &ofs, OF_READ );
     if ( lzfd < 0 ) return 0;
