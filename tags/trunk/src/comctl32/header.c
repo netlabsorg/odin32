@@ -1,4 +1,4 @@
-/* $Id: header.c,v 1.16 1999-10-07 15:46:30 cbratschi Exp $ */
+/* $Id: header.c,v 1.17 1999-10-07 21:00:41 cbratschi Exp $ */
 /*
  *  Header control
  *
@@ -7,14 +7,13 @@
  *  Copyright 1999 Christoph Bratschi
  *
  *  TODO:
- *   - Order list support.
- *   - Control specific cursors (over dividers).
- *   - Custom draw support (including Notifications).
+ *   - Control specific cursors (over dividers)
+ *
  *   - HDS_FILTERBAR
+ *   - HEADER_SetHotDivider()
  *
- *
- * Status: Development in progress, a lot to do :)
- * Version: 5.00 (target)
+ * Status: ready (inconsistent parts in Microsoft SDK documentation)
+ * Version: 5.00
  */
 
 #include <string.h>
@@ -340,7 +339,7 @@ HEADER_DrawItem (HWND hwnd, HDC hdc, INT iItem, BOOL bHotTrack,BOOL bEraseTextBk
         }
       }
 
-      if (!(phdi->fmt & HDI_ORDER) || (phdi->iOrder & (HDF_LEFT | HDF_CENTER)))
+      if (!(phdi->fmt & HDF_JUSTIFYMASK) || (phdi->fmt & (HDF_LEFT | HDF_CENTER)))
       {
         HEADER_DrawItemImage(hwnd,hdc,infoPtr,phdi,&r,iItem);
         if (r.left < r.right)
@@ -388,35 +387,72 @@ HEADER_Draw(HWND hwnd,HDC hdc)
     RECT rect;
     HBRUSH hbrBk;
     INT i, x;
+    NMCUSTOMDRAW cdraw;
+    LRESULT cdctlres,cdres;
 
-    /* get rect for the bar, adjusted for the border */
-    GetClientRect (hwnd, &rect);
+    // get rect for the bar, adjusted for the border
+    GetClientRect (hwnd,&rect);
+
+    //Custom draw
+    cdraw.hdr.hwndFrom = hwnd;
+    cdraw.hdr.idFrom   = GetWindowLongA(hwnd,GWL_ID);
+    cdraw.hdr.code     = NM_CUSTOMDRAW;
+    cdraw.dwDrawStage  = CDDS_PREPAINT;
+    cdraw.hdc          = hdc;
+    cdraw.dwItemSpec   = 0;
+    cdraw.uItemState   = CDIS_DEFAULT;
+    cdraw.rc           = rect;
+    cdraw.lItemlParam  = 0;
+
+    cdctlres = SendMessageA(GetParent(hwnd),WM_NOTIFY,(WPARAM)cdraw.hdr.idFrom,(LPARAM)&cdraw);
+
+    if (cdctlres & CDRF_SKIPDEFAULT) return;
 
     hFont = infoPtr->hFont ? infoPtr->hFont : GetStockObject (SYSTEM_FONT);
     hOldFont = SelectObject (hdc, hFont);
 
-    /* draw Background */
+    // draw Background
     hbrBk = GetSysColorBrush(COLOR_3DFACE);
     FillRect(hdc, &rect, hbrBk);
 
     x = rect.left;
     for (i = 0; i < infoPtr->uNumItem; i++)
     {
-      x = HEADER_DrawItem(hwnd,hdc,i,infoPtr->iHotItem == i,FALSE);
-      if (x > rect.right)
+      if (cdctlres & CDRF_NOTIFYITEMDRAW)
       {
-        x = -1;
-        break;
+        cdraw.dwDrawStage    = CDDS_ITEMPREPAINT;
+        cdraw.dwItemSpec     = x;
+        cdraw.lItemlParam    = infoPtr->items[x].lParam;
+        cdraw.rc             = infoPtr->items[x].rect;
+
+        cdres = SendMessageA(GetParent(hwnd),WM_NOTIFY,(WPARAM)cdraw.hdr.idFrom,(LPARAM)&cdraw);
+      } else cdres = 0;
+
+      if (!(cdres & CDRF_SKIPDEFAULT))
+      {
+        x = HEADER_DrawItem(hwnd,hdc,i,infoPtr->iHotItem == i,FALSE);
+        if (x > rect.right)
+        {
+          x = -1;
+          break;
+        }
+
+        if (cdctlres & CDRF_NOTIFYITEMDRAW)
+        {
+          cdraw.dwDrawStage    = CDDS_ITEMPOSTPAINT;
+
+          SendMessageA(GetParent(hwnd),WM_NOTIFY,(WPARAM)cdraw.hdr.idFrom,(LPARAM)&cdraw);
+        }
       }
     }
 
     if (x != -1 && (x <= rect.right) && (infoPtr->uNumItem > 0))
     {
-        rect.left = x;
-        if (dwStyle & HDS_BUTTONS)
-            DrawEdge (hdc, &rect, EDGE_RAISED, BF_TOP|BF_LEFT|BF_BOTTOM|BF_SOFT);
-        else
-            DrawEdge (hdc, &rect, EDGE_ETCHED, BF_BOTTOM);
+      rect.left = x;
+      if (dwStyle & HDS_BUTTONS)
+        DrawEdge (hdc, &rect, EDGE_RAISED, BF_TOP|BF_LEFT|BF_BOTTOM|BF_SOFT);
+      else
+        DrawEdge (hdc, &rect, EDGE_ETCHED, BF_BOTTOM);
     }
 
     SelectObject (hdc, hOldFont);
@@ -457,6 +493,15 @@ HEADER_Draw(HWND hwnd,HDC hdc)
         DeleteObject(hPen);
       }
       ImageList_Draw(infoPtr->dragImage,0,hdc,infoPtr->items[infoPtr->iMoveItem].rect.left+infoPtr->dragPos.x-infoPtr->dragStart.x,0,ILD_NORMAL);
+    }
+
+    if (cdctlres & CDRF_NOTIFYPOSTPAINT)
+    {
+      cdraw.dwDrawStage    = CDDS_POSTPAINT;
+      cdraw.dwItemSpec     = 0;
+      GetClientRect(hwnd,&cdraw.rc);
+
+      SendMessageA(GetParent(hwnd),WM_NOTIFY,(WPARAM)cdraw.hdr.idFrom,(LPARAM)&cdraw);
     }
 }
 
@@ -994,12 +1039,19 @@ HEADER_CreateDragImage(HWND hwnd,WPARAM wParam,LPARAM lParam)
 static LRESULT
 HEADER_SetHotDivider(HWND hwnd,WPARAM wParam,LPARAM lParam)
 {
+  HEADER_INFO *infoPtr = HEADER_GetInfoPtr(hwnd);
+
   if (wParam)
   {
-    //CB:todo
+    POINT pt;
+
+    pt.x = LOWORD(lParam);
+    pt.y = HIWORD(lParam);
+
+    //CB: todo
   } else
   {
-    //CB:todo
+    //CB: todo
   }
 
   return 0;
@@ -1210,15 +1262,39 @@ HEADER_GetItemRect (HWND hwnd, WPARAM wParam, LPARAM lParam)
     return TRUE;
 }
 
+static BOOL
+HEADER_CheckOrderArray(HEADER_INFO* infoPtr,LPINT lpiArray)
+{
+  INT x,y;
+
+  for (x = 0;x < infoPtr->uNumItem;x++)
+  {
+    BOOL found = FALSE;
+
+    for (y = 0;y <= x;y++)
+      if (infoPtr->items[y].iOrder == lpiArray[x]) found = TRUE;
+    for (y = x+1;y < infoPtr->uNumItem;y++)
+    {
+      if (infoPtr->items[x].iOrder == infoPtr->items[y].iOrder  || lpiArray[x] == lpiArray[y]) return FALSE;
+      if (infoPtr->items[y].iOrder == lpiArray[x]) found = TRUE;
+    }
+
+    if (!found) return FALSE;
+  }
+
+  return TRUE;
+}
+
 static LRESULT
 HEADER_GetOrderArray(HWND hwnd,WPARAM wParam,LPARAM lParam)
 {
   HEADER_INFO *infoPtr = HEADER_GetInfoPtr(hwnd);
   LPINT lpiArray = (LPINT)lParam;
+  INT x;
 
-  if (wParam != infoPtr->uNumItem || !lpiArray) return FALSE;
+  if (wParam != infoPtr->uNumItem || !lpiArray || !HEADER_CheckOrderArray(infoPtr,lpiArray)) return FALSE;
 
-  //CB: todo
+  for (x = 0;x < infoPtr->uNumItem;x++) lpiArray[x] = infoPtr->items[x].iOrder;
 
   return TRUE;
 }
@@ -1228,10 +1304,19 @@ HEADER_SetOrderArray(HWND hwnd,WPARAM wParam,LPARAM lParam)
 {
   HEADER_INFO *infoPtr = HEADER_GetInfoPtr(hwnd);
   LPINT lpiArray = (LPINT)lParam;
+  HEADER_ITEM* newItems;
+  INT x,y;
 
-  if (wParam != infoPtr->uNumItem || !lpiArray) return FALSE;
+  if (wParam != infoPtr->uNumItem || !lpiArray || !HEADER_CheckOrderArray(infoPtr,lpiArray)) return FALSE;
+  if (infoPtr->uNumItem <= 1) return TRUE;
 
-  //CB: todo
+  newItems = COMCTL32_Alloc(infoPtr->uNumItem*sizeof(HEADER_ITEM));
+  for (x = 0;x < infoPtr->uNumItem;x++)
+    for (y = 0;y < infoPtr->uNumItem;y++)
+      if (infoPtr->items[x].iOrder == lpiArray[x]) memcpy(&newItems[x],&infoPtr->items[y],sizeof(HEADER_ITEM));
+  COMCTL32_Free(infoPtr->items);
+  infoPtr->items = newItems;
+
   HEADER_SetItemBounds(hwnd,0);
   HEADER_Refresh(hwnd);
 
@@ -1246,9 +1331,7 @@ HEADER_OrderToIndex(HWND hwnd,WPARAM wParam,LPARAM lParam)
   INT x;
 
   for (x = 0;x < infoPtr->uNumItem;x++)
-  {
-//CB:todo
-  }
+    if (infoPtr->items[x].iOrder == iOrder) return x;
 
   return iOrder;
 }
@@ -1343,7 +1426,7 @@ HEADER_InsertItemA (HWND hwnd, WPARAM wParam, LPARAM lParam)
 
     lpItem->iImage = (phdi->mask & HDI_IMAGE) ? phdi->iImage:0;
 
-    lpItem->iOrder = (phdi->mask & HDI_ORDER) ? phdi->iOrder:HDF_LEFT;
+    lpItem->iOrder = (phdi->mask & HDI_ORDER) ? phdi->iOrder:-1;
 
     lpItem->hbm = (phdi->mask & HDI_BITMAP) ? phdi->hbm:0;
 
@@ -1429,7 +1512,7 @@ HEADER_InsertItemW (HWND hwnd, WPARAM wParam, LPARAM lParam)
 
     lpItem->iImage = (phdi->mask & HDI_IMAGE) ? phdi->iImage:0;
 
-    lpItem->iOrder = (phdi->mask & HDI_ORDER) ? phdi->iOrder:HDF_LEFT;
+    lpItem->iOrder = (phdi->mask & HDI_ORDER) ? phdi->iOrder:-1;
 
     lpItem->hbm = (phdi->mask & HDI_BITMAP) ? phdi->hbm:0;
 
