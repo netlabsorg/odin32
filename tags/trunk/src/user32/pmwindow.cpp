@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.93 2000-06-08 18:10:10 sandervl Exp $ */
+/* $Id: pmwindow.cpp,v 1.94 2000-06-14 13:15:24 sandervl Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -199,6 +199,9 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
     //OS/2 msgs
     case WM_CREATE:
     {
+        RestoreOS2TIB();
+	PMFrameWindowProc(hwnd, msg, mp1, mp2);
+  	SetWin32TIB();
 
         if(thdb->newWindow == 0)
             goto createfail;
@@ -212,9 +215,6 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
             RestoreOS2TIB();
             return (MRESULT)TRUE; //discontinue window creation
         }
-        RestoreOS2TIB();
-	PMFrameWindowProc(hwnd, msg, mp1, mp2);
-  	SetWin32TIB();
     createfail:
         RestoreOS2TIB();
         return (MRESULT)FALSE;
@@ -234,7 +234,7 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
         dprintf(("OS2: WM_DESTROY %x", hwnd));
         win32wnd->MsgDestroy();
         WinSetVisibleRegionNotify(hwnd, FALSE);
-	goto RunDefWndProc;
+	goto RunDefFrameProc;
 
     case WM_ENABLE:
         dprintf(("OS2: WM_ENABLE %x", hwnd));
@@ -449,9 +449,9 @@ PosChangedEnd:
 
         dprintf(("OS2: WM_ACTIVATE %x %x %x", hwnd, mp1, mp2));
 
+        WinSetWindowUShort(hwnd,QWS_FLAGS, SHORT1FROMMP(mp1) ? (flags | FF_ACTIVE):(flags & ~FF_ACTIVE));
         if(win32wnd->IsWindowCreated()) 
         {
-          WinSetWindowUShort(hwnd,QWS_FLAGS,mp1 ? (flags | FF_ACTIVE):(flags & ~FF_ACTIVE));
           win32wnd->MsgActivate((LOWORD(pWinMsg->wParam) == WA_ACTIVE_W) ? 1 : 0, HIWORD(pWinMsg->wParam), pWinMsg->lParam, (HWND)mp2);
 
           //CB: show owner behind the dialog
@@ -462,16 +462,15 @@ PosChangedEnd:
             if(topOwner) WinSetWindowPos(topOwner->getOS2WindowHandle(),hwnd,0,0,0,0,SWP_ZORDER);
           }
         }
-
-        break;
+        RestoreOS2TIB();
+        return 0;
     }
 
     case WM_SIZE:
     {
         dprintf(("OS2: WM_SIZE (%d,%d) (%d,%d)", SHORT1FROMMP(mp2), SHORT2FROMMP(mp2), SHORT1FROMMP(mp1), SHORT2FROMMP(mp2)));
-        break;
+        goto RunDefWndProc;
     }
-
 
     case WM_MINMAXFRAME:
     {
@@ -736,8 +735,8 @@ PosChangedEnd:
 #endif
 
     case WM_FOCUSCHANGE:
-        dprintf(("OS2: WM_FOCUSCHANGE %x", win32wnd->getWindowHandle()));
-        goto RunDefWndProc;
+        dprintf(("OS2: WM_FOCUSCHANGE %x %x %x", win32wnd->getWindowHandle(), mp1, mp2));
+        goto RunDefFrameProc;  //partly responsible for activation of frame windows
 
     case WM_QUERYTRACKINFO:
     {

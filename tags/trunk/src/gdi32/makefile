@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.25 2000-06-01 11:27:06 sandervl Exp $
+# $Id: makefile,v 1.26 2000-06-14 13:17:50 sandervl Exp $
 
 #
 # Odin32 API
@@ -40,6 +40,7 @@ $(OBJDIR)\metafile.obj \
 $(OBJDIR)\dibitmap.obj \
 $(OBJDIR)\blit.obj \
 $(OBJDIR)\rgbcvt.obj \
+$(OBJDIR)\objhandle.obj \
 $(OBJDIR)\dbglocal.obj \
 $(OBJDIR)\gdi32rsrc.obj
 
