@@ -1,4 +1,4 @@
-/* $Id: hmthread.cpp,v 1.19 2003-03-27 15:27:37 sandervl Exp $ */
+/* $Id: hmthread.cpp,v 1.20 2004-11-28 11:41:09 sao2l02 Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -87,8 +87,21 @@ HANDLE HMDeviceThreadClass::CreateThread(PHMHANDLEDATA          pHMHandleData,
     if(winthread == 0) {
         DebugInt3();
         SetLastError(ERROR_NOT_ENOUGH_MEMORY);
+        pHMHandleData->dwUserData = 0;
+        free(threadobj);
         return(0);
     }
+
+    TEB *teb = GetTEBFromThreadHandle(hThread);
+    if(teb == 0) {
+        DebugInt3();
+        SetLastError(ERROR_NOT_ENOUGH_MEMORY);
+        free(winthread);
+        pHMHandleData->dwUserData = 0;
+        free(threadobj);
+        return(0);
+    }
+
     // @@@PH Note: with debug code enabled, ODIN might request more stack space!
     //SvL: Also need more stack in release build (RealPlayer 7 sometimes runs
     //     out of stack
@@ -108,19 +121,20 @@ HANDLE HMDeviceThreadClass::CreateThread(PHMHANDLEDATA          pHMHandleData,
                                                 (LPVOID)winthread, fdwCreate, lpIDThread);
 
     if(pHMHandleData->hHMHandle == 0) {
-        dprintf(("Thread creation failed!!"));
+        dprintf(("Thread creation failed!! hThread =%x, TEB = %x, LastError %d",hThread, teb, GetLastError()));
         DebugInt3();
+        DestroyTEB(teb);
+        free(winthread);
+        pHMHandleData->dwUserData = 0;
+        free(threadobj);
+        return (0); // DT, we need free for all rescources, not full implemented yet
     }
 
     *lpIDThread = MAKE_THREADID(O32_GetCurrentProcessId(), *lpIDThread);
     
-    TEB *teb = GetTEBFromThreadHandle(hThread);
-    if(teb) {
-        //store thread id in TEB
-        teb->o.odin.threadId  = *lpIDThread;
-        teb->o.odin.dwSuspend = (fdwCreate & CREATE_SUSPENDED) ? 1 : 0;
-    }
-    else DebugInt3();
+    //store thread id in TEB
+    teb->o.odin.threadId  = *lpIDThread;
+    teb->o.odin.dwSuspend = (fdwCreate & CREATE_SUSPENDED) ? 1 : 0;
 
     dprintf(("CreateThread created %08x, id %x", pHMHandleData->hHMHandle, *lpIDThread));
   

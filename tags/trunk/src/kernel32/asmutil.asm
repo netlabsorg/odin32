@@ -1,4 +1,4 @@
-; $Id: asmutil.asm,v 1.3 2003-03-27 14:13:10 sandervl Exp $
+; $Id: asmutil.asm,v 1.4 2004-11-28 11:42:11 sao2l02 Exp $
 
 ;/*
 ; * Project Odin Software License can be found in LICENSE.TXT
@@ -67,10 +67,9 @@ getDS   endp
 
         PUBLIC SetReturnFS
 SetReturnFS proc near
-        push    fs
-        mov     eax, [esp+8]
-        mov     fs, eax
-        pop     eax
+        mov     edx, [esp+4]
+        mov     eax, fs
+        mov     fs, edx
         ret
 SetReturnFS endp
 
@@ -100,9 +99,9 @@ getESP  endp
 
         PUBLIC RestoreOS2FS
 RestoreOS2FS proc near
-        push    Dos32TIB
-        mov     ax, fs
-        pop     fs
+        mov     edx, Dos32TIB
+        mov     eax, fs
+        mov     fs, edx
         ret
 RestoreOS2FS endp
 
