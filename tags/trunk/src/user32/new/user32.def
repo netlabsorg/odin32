@@ -1,4 +1,4 @@
-; $Id: user32.def,v 1.8 1999-09-09 18:08:19 dengert Exp $
+; $Id: user32.def,v 1.9 1999-09-09 21:01:34 phaller Exp $
 
 ;Created by BLAST for IBM's compiler
 LIBRARY USER32 INITINSTANCE TERMINSTANCE
@@ -602,6 +602,14 @@ EXPORTS
     wsprintfW		       = _wsprintfW		      @578
     wvsprintfA		       = _wvsprintfA@12 	     @579
     wvsprintfW		       = _wvsprintfW@12 	     @580
+
+;------------
+; Windows 98
+;------------
+    GetMenuInfo                = _GetMenuInfo@8              @800
+    SetMenuInfo                = _SetMenuInfo@8              @801
+
+
     GetMonitorInfoW		  = _GetMonitorInfoW@8		@1000
     GetMonitorInfoA		  = _GetMonitorInfoA@8		@1001
     MonitorFromWindow	       = _MonitorFromWindow@8		@1002
