@@ -1,4 +1,4 @@
-/* $Id: virtual.cpp,v 1.13 1999-10-06 09:58:24 phaller Exp $ */
+/* $Id: virtual.cpp,v 1.14 1999-10-06 10:02:09 phaller Exp $ */
 
 /*
  * Win32 virtual memory functions
@@ -387,6 +387,8 @@ ODINFUNCTION3(BOOL, VirtualFree, LPVOID, lpvAddress,
 
   if(rc)
   {
+    dprintf(("KERNEL32:VirtualFree rc = #%d\n",
+             rc);
     SetLastError(ERROR_GEN_FAILURE);
     return(FALSE);
   }
