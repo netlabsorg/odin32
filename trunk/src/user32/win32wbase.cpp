@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.229 2001-01-14 17:15:47 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.230 2001-01-19 23:03:45 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -1904,7 +1904,7 @@ LRESULT Win32BaseWindow::SendInternalMessageA(ULONG Msg, WPARAM wParam, LPARAM l
 
                     point.x = pt.x;
                     point.y = pt.y;
-            MapWindowPoints(getWindowHandle(), getParent()->getWindowHandle(), &point, 1);
+                    MapWindowPoints(getWindowHandle(), getParent()->getWindowHandle(), &point, 1);
                     NotifyParent(Msg,wParam,MAKELPARAM(point.x,point.y));
                 }
                 rc = win32wndproc(getWindowHandle(), Msg, wParam, lParam);
