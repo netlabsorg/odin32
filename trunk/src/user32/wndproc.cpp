@@ -1,4 +1,4 @@
-/* $Id: wndproc.cpp,v 1.12 1999-06-27 16:23:24 sandervl Exp $ */
+/* $Id: wndproc.cpp,v 1.13 1999-06-27 21:59:40 sandervl Exp $ */
 
 /*
  * Win32 window procedure class for OS/2
@@ -68,7 +68,7 @@ Win32WindowProc *SYSTEM CreateWindowProc(WNDPROC pUserCallback)
 //******************************************************************************
 //******************************************************************************
 Win32WindowProc::Win32WindowProc(WNDPROC pUserCallback)
-                        : hwnd(0), next(NULL), os2dlg(NULL), win32class(0)
+                        : hwnd(0), next(NULL), os2dlg(NULL), win32class(0), pOS2Callback(NULL)
 {
   //Insert it in front of the rest
   next       = windows;
@@ -80,8 +80,26 @@ Win32WindowProc::Win32WindowProc(WNDPROC pUserCallback)
 }
 //******************************************************************************
 //******************************************************************************
+Win32WindowProc::Win32WindowProc(WNDPROC pUserCallback, WNDPROC_O32 pOS2Callback)
+                        : hwnd(0), next(NULL), os2dlg(NULL), win32class(0), pOS2Callback(NULL)
+{
+  //Insert it in front of the rest
+  next       = windows;
+  windows    = this;
+  threadid   = (DWORD)GetCurrentThreadId();
+
+  pCallback  = pUserCallback;	//can be NULL (to be set in SetWindowLong call)
+  fIsWindow  = TRUE;
+  if(pOS2Callback == NULL) {
+	dprintf(("Win32WindowProc ctor: pOS2Callback == NULL"));
+	DebugInt3();
+  }
+  this->pOS2Callback = pOS2Callback;
+}
+//******************************************************************************
+//******************************************************************************
 Win32WindowProc::Win32WindowProc(WNDPROC pUserCallback, DLGTEMPLATE *os2dlg)
-                        : hwnd(0), next(NULL), os2dlg(NULL), win32class(0)
+                        : hwnd(0), next(NULL), os2dlg(NULL), win32class(0), pOS2Callback(NULL)
 {
   //Insert it in front of the rest
   next       = windows;
@@ -95,7 +113,7 @@ Win32WindowProc::Win32WindowProc(WNDPROC pUserCallback, DLGTEMPLATE *os2dlg)
 //******************************************************************************
 //******************************************************************************
 Win32WindowProc::Win32WindowProc(HINSTANCE hinst, LPCSTR lpszClassName)
-                        : hwnd(0), next(NULL), os2dlg(NULL)
+                        : hwnd(0), next(NULL), os2dlg(NULL), pOS2Callback(NULL)
 {
  WNDCLASSA wc;
  BOOL rc;
@@ -171,7 +189,13 @@ BOOL Win32WindowProc::FindWindowProc(Win32WindowProc *wndproc)
 //******************************************************************************
 WNDPROC_O32 Win32WindowProc::GetOS2Callback()
 {
-  return(WndCallback);
+  return(OS2ToWin32Callback);
+}
+//******************************************************************************
+//******************************************************************************
+WNDPROC Win32WindowProc::GetWin32ToOS2Callback()
+{
+  return(Win32ToOS2Callback);
 }
 //******************************************************************************
 //******************************************************************************
@@ -280,7 +304,7 @@ DWORD MapOEMToRealKey(DWORD wParam, DWORD lParam)
 //#undef DEBUG
 //#define DEBUG1
 //******************************************************************************
-LRESULT EXPENTRY_O32 WndCallback(HWND hwnd, UINT Msg, WPARAM wParam, LPARAM lParam)
+LRESULT EXPENTRY_O32 OS2ToWin32Callback(HWND hwnd, UINT Msg, WPARAM wParam, LPARAM lParam)
 {
  Win32WindowProc *curwnd;
  LRESULT rc;
@@ -373,13 +397,25 @@ LRESULT EXPENTRY_O32 WndCallback(HWND hwnd, UINT Msg, WPARAM wParam, LPARAM lPar
         if(wclass) {
                 wnd = new Win32WindowProc(wclass->GetClassCallback(szClass));
                 wnd->SetWindowHandle(hwnd);
-                rc = WndCallback(hwnd, Msg, wParam, lParam);
+                rc = OS2ToWin32Callback(hwnd, Msg, wParam, lParam);
 		RestoreOS2TIB();
 		return rc;
         }
   }
   dprintf(("wnd Callback, can't find window %X %d!!!!\n", hwnd, Msg));
   RestoreOS2TIB();
+  return 0;
+}
+//******************************************************************************
+//******************************************************************************
+LRESULT EXPENTRY Win32ToOS2Callback(HWND hwnd, UINT Msg, WPARAM wParam, LPARAM lParam)
+{
+  Win32WindowProc *curwnd = Win32WindowProc::FindProc(hwnd);
+  if(curwnd && curwnd->pOS2Callback) {
+	return curwnd->pOS2Callback(hwnd, Msg, wParam, lParam);
+  }
+  else 	DebugInt3();
+
   return 0;
 }
 //******************************************************************************
