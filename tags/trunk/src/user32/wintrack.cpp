@@ -693,9 +693,6 @@ void Frame_SysCommandSizeMove(Win32BaseWindow *win32wnd, WPARAM wParam )
 
     if (HOOK_CallHooksA( WH_CBT, HCBT_MOVESIZE, (WPARAM)hwnd, (LPARAM)&lastsizingRect )) moved = FALSE;
 
-    SendMessageA( hwnd, WM_EXITSIZEMOVE, 0, 0 );
-    SendMessageA( hwnd, WM_SETVISIBLE, !IsIconic(hwnd), 0L);
-
     /* window moved or resized */
     if (moved)
     {
@@ -732,6 +729,10 @@ void Frame_SysCommandSizeMove(Win32BaseWindow *win32wnd, WPARAM wParam )
             SetWindowPos(hwnd, HWND_TOP, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
         }
     }
+
+    // Needs to be sent *after* changing the window position/size
+    SendMessageA( hwnd, WM_EXITSIZEMOVE, 0, 0 );
+    SendMessageA( hwnd, WM_SETVISIBLE, !IsIconic(hwnd), 0L);
 
     if (IsIconic(hwnd))
     {
