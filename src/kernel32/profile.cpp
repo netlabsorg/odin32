@@ -1,4 +1,4 @@
-/* $Id: profile.cpp,v 1.35 2003-01-03 16:34:33 sandervl Exp $ */
+/* $Id: profile.cpp,v 1.36 2004-03-16 13:33:00 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -592,7 +592,7 @@ static INT PROFILE_GetSection( PROFILESECTION *section, LPCSTR section_name,
                 /* CW: This fixes a crash in Windows Media Player setup where GetPrivateProfileSectionA() is called with len=5
                    which is not enough for holding any key name. */
                 if(strlen(key->name)>len-2) {
-                  buffer += len;
+                  buffer += len-1;
                   len=1; /* Causes the funktion to end with a return code of len-2 */
                   break;
                 }
@@ -981,6 +981,11 @@ int WIN32API PROFILE_SetOdinIniBool(LPCSTR section, LPCSTR key_name, int value)
   return PROFILE_SetOdinIniString(section,key_name,value ? "1":"0");
 }
 
+int WINAPI PROFILE_Initialize (void)
+{
+    InitializeCriticalSection( &PROFILE_CritSect );
+    MakeCriticalSectionGlobal( &PROFILE_CritSect );
+}
 
 /***********************************************************************
  *           LoadOdinIni
@@ -992,9 +997,6 @@ int WINAPI PROFILE_LoadOdinIni()
     char buffer[MAX_PATHNAME_LEN];
     const char *p;
     FILE *f;
-
-    InitializeCriticalSection( &PROFILE_CritSect );
-    MakeCriticalSectionGlobal( &PROFILE_CritSect );
 
     if ( (p = getenv( "ODIN_INI" )) && (f = fopen( p, "r" )) )
     {
