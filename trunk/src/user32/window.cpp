@@ -1,4 +1,4 @@
-/* $Id: window.cpp,v 1.90 2001-03-30 11:14:36 sandervl Exp $ */
+/* $Id: window.cpp,v 1.91 2001-03-30 22:08:20 sandervl Exp $ */
 /*
  * Win32 window apis for OS/2
  *
@@ -154,7 +154,7 @@ HWND WIN32API CreateWindowExW(DWORD exStyle, LPCWSTR className,
        if (!HIWORD(className))
            dprintf(("CreateWindowEx32W: bad class name %04x",LOWORD(className)));
        else
-           dprintf(("CreateWindowEx32W: bad class name '%x'", className));
+           dprintf(("CreateWindowEx32W: bad class name '%ls'", className));
 
        SetLastError(ERROR_INVALID_PARAMETER);
        return 0;
@@ -289,7 +289,6 @@ HWND WIN32API CreateMDIWindowW(LPCWSTR lpszClassName, LPCWSTR lpszWindowName,
         return 0;
     }
 
-    dprintf(("USER32:  CreateMDIWindowW\n"));
     cs.szClass        = lpszClassName;
     cs.szTitle        = lpszWindowName;
     cs.hOwner         = hInstance;
@@ -299,6 +298,11 @@ HWND WIN32API CreateMDIWindowW(LPCWSTR lpszClassName, LPCWSTR lpszWindowName,
     cs.cy             = nWidth;
     cs.style          = dwStyle;
     cs.lParam         = lParam;
+
+    if(HIWORD(lpszClassName)) {
+         dprintf(("CreateMDIWindowW: class %ls parent %x (%d,%d) (%d,%d), %x %x lParam=%x", lpszClassName, hwndParent, x, y, nWidth, nHeight, dwStyle, lParam));
+    }
+    else dprintf(("CreateMDIWindowW: class %d parent %x (%d,%d) (%d,%d), %x %x lParam=%x", lpszClassName, hwndParent, x, y, nWidth, nHeight, dwStyle, lParam));
 
     return window->SendMessageW(WM_MDICREATE, 0, (LPARAM)&cs);
 }
@@ -838,12 +842,7 @@ int WIN32API GetWindowTextW(HWND hwnd, LPWSTR lpsz, int cch)
     }
 #ifdef DEBUG
     int rc = window->GetWindowTextW(lpsz, cch);
-    if(rc) {
-        LPSTR astring = UnicodeToAsciiString(lpsz);
-        dprintf(("GetWindowTextW %x %s", hwnd, lpsz));
-        free(astring);
-    }
-    else dprintf(("GetWindowTextW %x returned %d", hwnd, rc));
+    dprintf(("GetWindowTextW %x %ls", hwnd, lpsz));
     return rc;
 #else
     return window->GetWindowTextW(lpsz, cch);
@@ -876,11 +875,7 @@ BOOL WIN32API SetWindowTextW( HWND hwnd, LPCWSTR lpsz)
         SetLastError(ERROR_INVALID_WINDOW_HANDLE);
         return 0;
     }
-#ifdef DEBUG
-    LPSTR astring = UnicodeToAsciiString(lpsz);
-    dprintf(("SetWindowTextW %x %s", hwnd, astring));
-    free(astring);
-#endif
+    dprintf(("SetWindowTextW %x %ls", hwnd, lpsz));
     return window->SetWindowTextW((LPWSTR)lpsz);
 }
 /*******************************************************************

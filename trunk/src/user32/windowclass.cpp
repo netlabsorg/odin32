@@ -1,4 +1,4 @@
-/* $Id: windowclass.cpp,v 1.16 2001-02-22 10:37:31 sandervl Exp $ */
+/* $Id: windowclass.cpp,v 1.17 2001-03-30 22:08:20 sandervl Exp $ */
 /*
  * Win32 Window Class Code for OS/2
  *
@@ -50,6 +50,13 @@ ATOM WIN32API RegisterClassA(CONST WNDCLASSA *lpWndClass)
     wc.cbSize = sizeof(wc);
     memcpy(&wc.style, lpWndClass, sizeof(WNDCLASSA));
     wc.hIconSm = 0;
+ 
+    //TODO: not destroyed when class is unregistered (neither does Wine, but that might be a bug)
+    int iSmIconWidth  = GetSystemMetrics(SM_CXSMICON);
+    int iSmIconHeight = GetSystemMetrics(SM_CYSMICON);
+
+    wc.hIconSm = CopyImage(wc.hIcon, IMAGE_ICON, iSmIconWidth, iSmIconHeight,
+                           LR_COPYFROMRESOURCE);
 
     if(Win32WndClass::FindClass(wc.hInstance, (LPSTR)wc.lpszClassName)) {
         if(HIWORD(wc.lpszClassName)) {
@@ -102,14 +109,22 @@ WORD WIN32API RegisterClassW(CONST WNDCLASSW *lpwc)
  WNDCLASSEXA wc;
  Win32WndClass *winclass;
 
-    dprintf(("RegisterClassW\n"));
     //CB: size new in ex structure
     wc.cbSize = sizeof(wc);
     memcpy(&wc.style, lpwc, sizeof(WNDCLASSA));
-    wc.hIconSm = 0;
+
+    //TODO: not destroyed when class is unregistered (neither does Wine, but that might be a bug)
+    int iSmIconWidth  = GetSystemMetrics(SM_CXSMICON);
+    int iSmIconHeight = GetSystemMetrics(SM_CYSMICON);
+
+    wc.hIconSm = CopyImage(wc.hIcon, IMAGE_ICON, iSmIconWidth, iSmIconHeight,
+                           LR_COPYFROMRESOURCE);
 
     if(Win32WndClass::FindClass(wc.hInstance, (LPWSTR)wc.lpszClassName)) {
-        dprintf(("RegisterClassW %x %x already exists", wc.hInstance, wc.lpszClassName));
+        if(HIWORD(wc.lpszClassName)) {
+                dprintf(("RegisterClassW %x %ls already exists", wc.hInstance, wc.lpszClassName));
+        }
+        else    dprintf(("RegisterClassW %x %x already exists", wc.hInstance, wc.lpszClassName));
         SetLastError(ERROR_CLASS_ALREADY_EXISTS);
         return 0;
     }
@@ -137,7 +152,10 @@ ATOM WIN32API RegisterClassExW(CONST WNDCLASSEXW *lpwc)
     memcpy(&wc, lpwc, sizeof(WNDCLASSEXA));
 
     if(Win32WndClass::FindClass(wc.hInstance, (LPWSTR)wc.lpszClassName)) {
-        dprintf(("RegisterClassW %x %x already exists", wc.hInstance, wc.lpszClassName));
+        if(HIWORD(wc.lpszClassName)) {
+                dprintf(("RegisterClassExW %x %ls already exists", wc.hInstance, wc.lpszClassName));
+        }
+        else    dprintf(("RegisterClassExW %x %x already exists", wc.hInstance, wc.lpszClassName));
         SetLastError(ERROR_CLASS_ALREADY_EXISTS);
         return 0;
     }
@@ -305,7 +323,12 @@ BOOL WIN32API GetClassInfoExW(HINSTANCE     hInstance,
  Win32WndClass *wndclass;
  char          *astring = NULL;
 
-  dprintf(("USER32: GetClassInfoExW\n"));
+  if(HIWORD(lpszClass)) {
+       dprintf(("USER32:GetClassInfoExW (%08xh,%ls,%08x)",
+                 hInstance, lpszClass, lpwcx));
+  }
+  else dprintf(("USER32:GetClassInfoExW (%08xh,%x,%08x)",
+                 hInstance, lpszClass, lpwcx));
 
   if(HIWORD(lpszClass) != 0) {
         astring = UnicodeToAsciiString((LPWSTR)lpszClass);
