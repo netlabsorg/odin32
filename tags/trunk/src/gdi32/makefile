@@ -1,5 +1,3 @@
-# $Id: makefile,v 1.1 1999-05-24 20:19:40 ktk Exp $ 
-
 #
 # PD-Win32 API 
 #
@@ -54,7 +52,7 @@ callback.obj: callback.cpp \
     callback.h \
     $(PDWIN32_INCLUDE)\misc.h \
 
-initterm.obj: initterm.c
+initterm.obj: initterm.cpp
 
 
 clean:

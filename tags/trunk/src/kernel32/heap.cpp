@@ -1,5 +1,3 @@
-/* $Id: heap.cpp,v 1.5 1999-06-06 12:25:49 cbratschi Exp $ */
-
 /*
  *
  * Project Odin Software License can be found in LICENSE.TXT
@@ -14,9 +12,7 @@
 #include <os2win.h>
 #include <stdlib.h>
 #include <string.h>
-#include <builtin.h>
-#include "misc.h"
-
+#include <misc.h>
 #define  _WIN32
 #include "os2heap.h"
 
@@ -70,11 +66,11 @@ HANDLE WIN32API HeapCreate(DWORD flOptions, DWORD dwInitialSize, DWORD dwMaximum
 
   curheap = new OS2Heap(hHeap, flOptions, dwInitialSize, dwMaximumSize);
   if(curheap == NULL) {
-        O32_HeapDestroy(hHeap);
+    	O32_HeapDestroy(hHeap);
         return(NULL);
   }
   if(curheap->getHeapHandle() == NULL) {
-        O32_HeapDestroy(hHeap);
+    	O32_HeapDestroy(hHeap);
         delete curheap;
         return(NULL);
   }
@@ -95,10 +91,6 @@ BOOL WIN32API HeapDestroy(HANDLE hHeap)
 }
 //******************************************************************************
 //******************************************************************************
-/* PH: Though "HeapSize" is a reserved word for the linker, ILINK can be
-   tricked by placing the word HEAPSIZE in quotes. It then exports it properly
-   to the target DLL.
- */
 DWORD WIN32API HeapSize(HANDLE hHeap, DWORD arg2, PVOID  arg3)
 {
  OS2Heap *curheap = OS2Heap::find(hHeap);
@@ -153,14 +145,14 @@ HANDLE WIN32API GetProcessHeap(VOID)
     dprintf(("KERNEL32:  OS2GetProcessHeap\n"));
     //SvL: Only one process heap per process
     if(processheap == NULL) {
-        //TODO: I haven't thought real hard about this.  I added it just to make "hdr.exe" happy.
-        hHeap = O32_HeapCreate(HEAP_GENERATE_EXCEPTIONS, 1, 0x4000);
-        OS2ProcessHeap = new OS2Heap(hHeap, HEAP_GENERATE_EXCEPTIONS, 0x4000, 0);
-        if(OS2ProcessHeap == NULL) {
-                O32_HeapDestroy(hHeap);
-                return(NULL);
-        }
-        processheap = hHeap;
+     	//TODO: I haven't thought real hard about this.  I added it just to make "hdr.exe" happy.
+     	hHeap = O32_HeapCreate(HEAP_GENERATE_EXCEPTIONS, 1, 0x4000);
+     	OS2ProcessHeap = new OS2Heap(hHeap, HEAP_GENERATE_EXCEPTIONS, 0x4000, 0);
+     	if(OS2ProcessHeap == NULL) {
+        	O32_HeapDestroy(hHeap);
+            	return(NULL);
+     	}
+     	processheap = hHeap;
     }
     return(processheap);
 }
@@ -172,8 +164,8 @@ HLOCAL WIN32API LocalAlloc(UINT fuFlags, DWORD cbBytes)
  DWORD  dwFlags = 0;
 
   if(processheap == NULL) {
-        if(GetProcessHeap() == NULL)
-                return(NULL);
+    	if(GetProcessHeap() == NULL)
+        	return(NULL);
   }
   if(fuFlags & LMEM_ZEROINIT)
     dwFlags = HEAP_ZERO_MEMORY;
@@ -208,11 +200,11 @@ HLOCAL WIN32API LocalFree(HLOCAL hMem)
     dprintf(("KERNEL32: LocalFree %X\n", hMem));
 
     if(OS2ProcessHeap->GetLockCnt((LPVOID)hMem) != 0) {
-        dprintf(("LocalFree, lock count != 0\n"));
-        return(hMem);   //TODO: SetLastError
+    	dprintf(("LocalFree, lock count != 0\n"));
+    	return(hMem);   //TODO: SetLastError
     }
     if(OS2ProcessHeap->Free(0, (LPVOID)hMem) == FALSE) {
-        return(hMem);   //TODO: SetLastError
+    	return(hMem);   //TODO: SetLastError
     }
     return NULL; //success
 }
@@ -237,21 +229,16 @@ BOOL WIN32API LocalUnlock(HLOCAL hMem)
 //******************************************************************************
 HLOCAL WIN32API LocalReAlloc(HLOCAL hMem, DWORD cbBytes, UINT fuFlags)
 {
- HLOCAL lpMem;
+ LPVOID lpMem;
 
     dprintf(("KERNEL32: LocalReAlloc %X %d %X\n", hMem, cbBytes, fuFlags));
     //SvL: 8-8-'98: Notepad bugfix (assumes address is identical when new size < old size)
-    if(OS2ProcessHeap->Size(0, (LPVOID)hMem) >= cbBytes)
-    {
-        dprintf(("KERNEL32:  LocalReAlloc returned %X\n", hMem));
-        return hMem;
-    }
+    if(OS2ProcessHeap->Size(0, (LPVOID)hMem) > cbBytes)
+    	return hMem;
 
-    lpMem = LocalAlloc(fuFlags, cbBytes);
-    memcpy((LPVOID)lpMem, (LPVOID)hMem, min(cbBytes, OS2ProcessHeap->Size(0, (LPVOID)hMem)));
+    lpMem = (LPVOID)O32_LocalAlloc(fuFlags, cbBytes);
+    memcpy(lpMem, (LPVOID)hMem, min(cbBytes, OS2ProcessHeap->Size(0, (LPVOID)hMem)));
     OS2ProcessHeap->Free(0, (LPVOID)hMem);
-
-    dprintf(("KERNEL32:  LocalReAlloc returned %X\n", lpMem));
     return((HLOCAL)lpMem);
 }
 //******************************************************************************

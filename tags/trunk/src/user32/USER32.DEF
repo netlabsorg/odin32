@@ -592,6 +592,5 @@ EXPORTS
 
     CreateWindowProc     		@2000
     GetOS2Callback__15Win32WindowProcFv @2001
-
 ; Wine helper function
     GetSysColorPen              = _GetSysColorPen@4              @2002

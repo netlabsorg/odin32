@@ -1,5 +1,3 @@
-/* $Id: shell32.h,v 1.1 1999-05-24 20:19:58 ktk Exp $ */
-
 #ifndef __shell32_H__
 #define __shell32_H__
 

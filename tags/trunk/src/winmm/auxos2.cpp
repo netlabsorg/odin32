@@ -1,5 +1,3 @@
-/* $Id: auxos2.cpp,v 1.1 1999-05-24 20:20:06 ktk Exp $ */
-
 /*
  * Auxilary multimedia OS/2 implementation
  *

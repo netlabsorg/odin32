@@ -1,5 +1,3 @@
-# $Id: makefile,v 1.1 1999-05-24 20:19:34 ktk Exp $ 
-
 #
 # PD-Win32 API 
 #
@@ -38,7 +36,7 @@ $(TARGET).lib: $(TARGET).dll
 
 
 capi2032.obj: capi2032.cpp capi2032.h
-initterm.obj: initterm.c
+initterm.obj: initterm.cpp
 
 clean:
 	$(RM) *.obj *.lib *.dll *~ *.map *.pch	

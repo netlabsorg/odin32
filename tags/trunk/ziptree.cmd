@@ -8,7 +8,7 @@ zip win32os2.zip src\dsound\* -x *.obj *.sys *.map *.dll *.sym *.pch *.lib *.exe
 zip win32os2.zip src\gdi32\* -x *.obj *.sys *.map *.dll *.sym *.pch *.lib *.exe *.res *.vpj
 zip win32os2.zip src\kernel32\* -x *.obj *.sys *.map *.dll *.sym *.pch *.lib *.exe *.res *.vpj
 zip win32os2.zip src\mpr\* -x *.obj *.sys *.map *.dll *.sym *.pch *.lib *.exe *.res *.vpj
-zip win32os2.zip src\ntdll\* -x *.obj *.sys *.map *.dll *.sym *.pch *.lib *.exe *.res *.vpj
+zip win32os2.zip src\NTDLL\* -x *.obj *.sys *.map *.dll *.sym *.pch *.lib *.exe *.res *.vpj
 zip win32os2.zip src\ole32\* -x *.obj *.sys *.map *.dll *.sym *.pch *.lib *.exe *.res *.vpj
 zip win32os2.zip src\pe2lx\* -x *.obj *.sys *.map *.dll *.sym *.pch *.lib *.exe *.res *.vpj
 zip win32os2.zip src\peldr\* -x *.obj *.sys *.map *.dll *.sym *.pch *.lib *.exe *.res *.vpj
@@ -21,5 +21,5 @@ zip win32os2.zip src\winmm\* -x *.obj *.sys *.map *.dll *.sym *.pch *.lib *.exe 
 zip win32os2.zip src\winspool\* -x *.obj *.sys *.map *.dll *.sym *.pch *.lib *.exe *.res *.vpj
 zip win32os2.zip src\wnetap32\* -x *.obj *.sys *.map *.dll *.sym *.pch *.lib *.exe *.res *.vpj
 zip win32os2.zip src\wsock32\* -x *.obj *.sys *.map *.dll *.sym *.pch *.lib *.exe *.res *.vpj
-zip win32os2.zip lib\pmwinx.lib lib\pmwinx.def
+zip win32os2.zip lib\libconv.def lib\pmwinx.def lib\makefile
 rem zip -r win32os2.zip src\win32k -x *.obj *.sys *.map *.dll *.sym *.pch *.lib *.exe *.res *.vpj

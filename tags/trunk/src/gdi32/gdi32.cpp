@@ -1,4 +1,4 @@
-/* $Id: gdi32.cpp,v 1.2 1999-06-06 12:25:48 cbratschi Exp $ */
+/* $Id: gdi32.cpp,v 1.3 1999-06-07 20:57:59 sandervl Exp $ */
 
 /*
  * GDI32 DIB sections
@@ -42,6 +42,32 @@ typedef struct _POLYTEXTW
     int     *pdx;
 } POLYTEXTW;
 
+
+static ULONG QueryPaletteSize(BITMAPINFOHEADER *pBHdr)
+{
+        ULONG cbPalette;
+
+        switch (pBHdr->biBitCount)
+        {
+                case 1:
+                case 4:
+                case 8:
+                        cbPalette = (1 << pBHdr->biBitCount) * sizeof(RGBQUAD);
+                        break;
+
+                case 16:
+                case 24:
+                case 32:
+                        cbPalette = 0;
+                        break;
+
+                default:
+                        dprintf(("QueryPaletteSize: error pBHdr->biBitCount = %d", pBHdr->biBitCount));
+                        cbPalette = -1;
+        }
+
+   return cbPalette;
+}
 
 static ULONG CalcBitmapSize(ULONG cBits, LONG cx, LONG cy)
 {
@@ -1875,7 +1901,7 @@ INT WIN32API SetDIBitsToDevice(HDC hdc, INT xDest, INT yDest, DWORD cx,	DWORD cy
     // EB: ->>> Crazy. Nobody seen this Open32 bug ?
     // Dont't like dirty pointers, but Open32 needs a bit help.
     // Only tested with winmine.
-    palsize = (1 << info->bmiHeader.biBitCount) * sizeof(RGBQUAD);
+    palsize = QueryPaletteSize((BITMAPINFOHEADER*)&info->bmiHeader);
     imgsize = CalcBitmapSize(info->bmiHeader.biBitCount,
                              info->bmiHeader.biWidth, info->bmiHeader.biHeight);
     ptr = ((char *)info) + palsize + sizeof(BITMAPINFOHEADER);

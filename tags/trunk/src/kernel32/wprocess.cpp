@@ -1,5 +1,3 @@
-/* $Id: wprocess.cpp,v 1.2 1999-05-31 22:08:14 phaller Exp $ */
-
 /*
  *
  * Project Odin Software License can be found in LICENSE.TXT
@@ -18,8 +16,6 @@
 #include "unicode.h"
 #include "windll.h"
 #include "winexe.h"
-#include "misc.h"
-
 #ifdef __IBMCPP__
 #include <builtin.h>
 #endif
@@ -52,12 +48,9 @@ void RegisterExe(LONG Win32TableId, LONG NameTableId, LONG VersionResId,
     eprintf(("Win32Exe creation failed!\n"));
     DebugInt3();
   }
-
-  char *modname = getenv("WIN32MODULE");
-
-  if(modname != NULL)
-  {
-    dprintf(("KERNEL32: RegisterExe: Set full path for exe to %s", modname));
+  char *modname;
+  if(modname = getenv("WIN32MODULE")) {
+    dprintf(("Set full path for exe to %s", modname));
     winexe->setFullPath(modname);
   }
 

@@ -1,5 +1,3 @@
-# $Id: makefile,v 1.1 1999-05-24 20:19:35 ktk Exp $ 
-
 #
 # PD-Win32 API 
 #
@@ -37,7 +35,7 @@ $(TARGET).lib: $(TARGET)exp.def
 	$(CP) $@ $(PDWIN32_LIB)
 
 comdlg32.obj: comdlg32.cpp
-initterm.obj: initterm.c
+initterm.obj: initterm.cpp
 
 clean:
 	$(RM) *.obj *.lib *.dll *~ *.map *.pch	

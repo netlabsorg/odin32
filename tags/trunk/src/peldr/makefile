@@ -1,5 +1,3 @@
-# $Id: makefile,v 1.1 1999-05-24 20:19:56 ktk Exp $ 
-
 #
 # PD-Win32 API
 #

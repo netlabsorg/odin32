@@ -1,21 +1,15 @@
-/* $Id: directory.cpp,v 1.2 1999-05-31 22:08:11 phaller Exp $ */
-
-/*
- *
- * Project Odin Software License can be found in LICENSE.TXT
- *
- */
 /*
  * Win32 Directory functions for OS/2
  *
  * Copyright 1998 Sander van Leeuwen
  *
+ *
+ * Project Odin Software License can be found in LICENSE.TXT
+ *
  */
 #include <os2win.h>
 #include <stdlib.h>
 #include "unicode.h"
-#include "misc.h"
-
 
 //******************************************************************************
 //******************************************************************************

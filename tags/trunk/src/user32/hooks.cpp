@@ -1,5 +1,3 @@
-/* $Id: hooks.cpp,v 1.1 1999-05-24 20:20:01 ktk Exp $ */
-
 /*
  * Win32 hook class for OS/2
  *

@@ -1,5 +1,3 @@
-/* $Id: resource.cpp,v 1.4 1999-06-06 12:25:49 cbratschi Exp $ */
-
 /*
  *
  * Project Odin Software License can be found in LICENSE.TXT
@@ -13,13 +11,10 @@
  *
  */
 #include <os2win.h>
-#include "misc.h"
-
 #include "unicode.h"
 #include "winres.h"
 #include "winimage.h"
 #include "winexe.h"
-
 
 //******************************************************************************
 //lpszName = integer id (high word 0), else string (name or "#237")
@@ -30,31 +25,35 @@ HRSRC WIN32API FindResourceA(HINSTANCE hModule, LPCSTR lpszName, LPCSTR lpszType
  Win32Image *module;
 
     dprintf(("FindResourceA %X", hModule));
-    // EB: ->>> added real exe module handle
-    if(hModule == 0 || hModule == -1 || (WinExe != NULL && hModule == WinExe->getOS2InstanceHandle()))
-      module = (Win32Image *)WinExe;
-    else
-      module = (Win32Image *)Win32Dll::findModule(hModule);
+    if(hModule == 0 || hModule == -1 || (WinExe != NULL && hModule ==
+       WinExe->getOS2InstanceHandle()))
+    {
+         module = (Win32Image *)WinExe;
+    }
+    else module = (Win32Image *)Win32Dll::findModule(hModule);
 
     if(module == NULL)
-    return(NULL);
+    	return(NULL);
 
     return module->findResourceA(lpszName, (LPSTR)lpszType);
 }
 //******************************************************************************
 //******************************************************************************
 HRSRC WIN32API FindResourceW(HINSTANCE hModule, LPCWSTR lpszName,
-                             LPCWSTR lpszType)
+                    	     LPCWSTR lpszType)
 {
  Win32Image *module;
 
     dprintf(("FindResourceW %X", hModule));
-    if(hModule == 0 || hModule == -1)
+    if(hModule == 0 || hModule == -1 || (WinExe != NULL && hModule ==
+       WinExe->getOS2InstanceHandle()))
+    {
          module = (Win32Image *)WinExe;
+    }
     else module = (Win32Image *)Win32Dll::findModule(hModule);
 
     if(module == NULL)
-        return(NULL);
+	return(NULL);
 
     return module->findResourceW((LPWSTR)lpszName, (LPWSTR)lpszType);
 }

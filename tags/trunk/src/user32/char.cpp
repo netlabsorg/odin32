@@ -1,5 +1,3 @@
-/* $Id: char.cpp,v 1.1 1999-05-24 20:20:01 ktk Exp $ */
-
 /*
  * Win32 character API functions for OS/2
  *

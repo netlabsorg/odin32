@@ -1,5 +1,3 @@
-/* $Id: misc.c,v 1.1 1999-05-24 20:19:38 ktk Exp $ */
-
 /*
  * Logging procedures
  *

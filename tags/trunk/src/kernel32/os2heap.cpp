@@ -1,14 +1,10 @@
-/* $Id: os2heap.cpp,v 1.1 1999-05-24 20:19:47 ktk Exp $ */
-
-/*
- *
- * Project Odin Software License can be found in LICENSE.TXT
- *
- */
 /*
  * Heap class for OS/2
  *
  * Copyright 1998 Sander van Leeuwen
+ *
+ *
+ * Project Odin Software License can be found in LICENSE.TXT
  *
  */
 #define  INCL_DOSMEMMGR

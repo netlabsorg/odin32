@@ -85,7 +85,7 @@ EXPORTS
     GetRunningObjectTable      = _GetRunningObjectTable@8    @73
     IIDFromString              = _IIDFromString@8            @74
     IsAccelerator              = _IsAccelerator@16           @75
-    IsEqualGUID                = _IsEqualGUID@8              @76
+;    IsEqualGUID                = _IsEqualGUID@8              @76
     IsValidIid                 = _IsValidIid@4               @77
     IsValidInterface           = _IsValidInterface@4         @78
     IsValidPtrIn               = _IsValidPtrIn@4             @79

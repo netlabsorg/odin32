@@ -1,5 +1,3 @@
-# $Id: makefile,v 1.1 1999-05-24 20:20:09 ktk Exp $ 
-
 #
 # PD-Win32 API 
 #
@@ -36,9 +34,9 @@ $(TARGET).lib: $(TARGET).dll
         $(CP) $@ $(PDWIN32_LIB)
 
 
-wsock32.obj: wsock32.c wsock32.h
-notify.obj:  notify.c wsock32.h
-initterm.obj: initterm.c
+wsock32.obj: wsock32.cpp wsock32.h
+notify.obj:  notify.cpp wsock32.h
+initterm.obj: initterm.cpp
 
 clean:
 	$(RM) *.obj *.lib *.dll *~ *.map *.pch	

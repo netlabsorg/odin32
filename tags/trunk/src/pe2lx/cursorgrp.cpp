@@ -1,5 +1,3 @@
-/* $Id: cursorgrp.cpp,v 1.1 1999-05-24 20:19:53 ktk Exp $ */
-
 /*
  * PE2LX cursor group code
  *

@@ -1,5 +1,3 @@
-/* $Id: opengl.cpp,v 1.1 1999-05-24 20:19:40 ktk Exp $ */
-
 /*
  * GDI32 OpenGl stubs
  *

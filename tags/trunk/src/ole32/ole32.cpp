@@ -1,5 +1,3 @@
-/* $Id: ole32.cpp,v 1.1 1999-05-24 20:19:52 ktk Exp $ */
-
 /*
  *
  * Project Odin Software License can be found in LICENSE.TXT
@@ -13,46 +11,48 @@
  * Copyright 1998 Sander van Leeuwen
  */
 
-#include <os2win.h>
-#include <ole2.h>
+// ><DJR 17.05.99 Force to use C-interfaces for now to prevent CALLBACK definition compiler error
+#define CINTERFACE
 
+// ><DJR 17.05.99 Move standard includes to before os2win.h [memcmp]
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <memory.h>
 
-#include "misc.h"
-#include "unicode.h"
+// ><DJR 17.05.99 Prevent CALLCONV becoming _System
+#include <winbase.h>
+#include <uconv.h>
+#undef CALLCONV
 
-//******************************************************************************
-//******************************************************************************
-void WIN32API OleUninitialize(void)
-{
-  dprintf(("OleUninitialize - stub\n"));
-  return;
-}
-//******************************************************************************
-//******************************************************************************
-HRESULT WIN32API BindMoniker(LPMONIKER pmk, DWORD grfOpt, REFIID iidResult,
-                                LPVOID FAR *ppvResult)
-{
-   dprintf(("BindMoniker- stub\n"));
-   return MK_E_NOOBJECT;
-}
+#include <os2win.h>
+#include <ole2ver.h>
+#include <ole.h>
+
+#include "wine/obj_base.h"
+#include "wine/obj_misc.h"
+#include "wine/obj_inplace.h"
+#include "wine/obj_dataobject.h"
+#include "wine/obj_oleobj.h"
+#include "wine/obj_marshal.h"
+#include "wine/obj_moniker.h"
+#include "wine/obj_clientserver.h"
+#include "wine/obj_dragdrop.h"
+
 //*******************************************************************************
 //*******************************************************************************
 HRESULT WIN32API CLSIDFromProgID(LPCOLESTR lpszProgID, LPCLSID pclsid)
 {
    dprintf(("CLSIDFromProgID- stub\n"));
-   return CO_E_CLASSSTRING;
+   return OLE_ERROR_GENERIC;
 }
 //*******************************************************************************
 //*******************************************************************************
-HRESULT WIN32API CLSIDFromString(LPOLESTR lpsz, LPCLSID pclisid)
+HRESULT WIN32API CLSIDFromString(LPCOLESTR lpsz, LPCLSID pclisid)
 {
    dprintf(("CLSIDFromString- stub\n"));
-   return CO_E_CLASSSTRING;
+   return OLE_ERROR_GENERIC;
 }
 //*******************************************************************************
 //*******************************************************************************
@@ -117,7 +117,7 @@ BOOL WIN32API CoFileTimeToDosDateTime(FILETIME *lpFileTime, LPWORD lpDosDate,
                                          LPWORD lpDosTime)
 {
    dprintf(("CoFileTimeToDosDateTime\n"));
-   return FileTimeToDosDateTime(lpFileTime, lpDosDate, (PWORD)lpDosTime);
+   return FileTimeToDosDateTime(lpFileTime, lpDosDate, lpDosTime);
 }
 //*******************************************************************************
 //Frees all libs loaded with CoLoadLibrary
@@ -150,9 +150,8 @@ HRESULT WIN32API CoGetCallerTID()
 }
 //*******************************************************************************
 //*******************************************************************************
-HRESULT WIN32API CoGetClassObject(REFCLSID rclsid, DWORD dwClsContext,
-                                     COSERVERINFO *pServerInfo, REFIID riid,
-                                     LPVOID *ppv)
+//HRESULT WIN32API CoGetClassObject(REFCLSID rclsid, DWORD dwClsContext, COSERVERINFO *pServerInfo, REFIID riid, LPVOID *ppv)
+HRESULT WIN32API CoGetClassObject(REFCLSID rclsid, DWORD dwClsContext, LPVOID pServerInfo, REFIID riid, LPVOID *ppv)
 {
    dprintf(("CoGetClassObject - stub\n"));
    return REGDB_E_CLASSNOTREG;
@@ -206,7 +205,7 @@ HRESULT WIN32API CoGetPSClsid(REFIID riid, CLSID *pclsid)
 //*******************************************************************************
 HRESULT WIN32API CoGetStandardMarshal(REFIID riid, IUnknown *pUnk, DWORD dwDestContext,
                                          LPVOID pvDestContext, DWORD mshlflags,
-                                         LPMARSHALL *ppMarshal)
+                                         LPMARSHAL *ppMarshal)
 {
    dprintf(("CoGetStandardMarshal - stub\n"));
    return E_OUTOFMEMORY;
@@ -258,7 +257,7 @@ BOOL WIN32API CoIsOle1Class(REFCLSID rclsid)
 HINSTANCE WIN32API CoLoadLibrary(LPSTR lpszLibName, BOOL bAutoFree)
 {
    dprintf(("CoLoadLibrary\n"));
-   return LoadLibrary(lpszLibName);
+   return LoadLibraryA(lpszLibName);
 }
 //*******************************************************************************
 //*******************************************************************************
@@ -303,7 +302,7 @@ HRESULT WIN32API CoQueryReleaseObject()
 //*******************************************************************************
 HRESULT WIN32API CoRegisterClassObject(REFCLSID rclsid, IUnknown *pUnk,
                                           DWORD dwClsContext, DWORD flags,
-                                          LPDWORD *lpdwRegister)
+                                          LPDWORD lpdwRegister)
 {
    dprintf(("CoRegisterClassObject - stub\n"));
    return E_OUTOFMEMORY;
@@ -408,16 +407,32 @@ HRESULT WIN32API CoUnmarshalInterface(IStream *pSTm, REFIID riid, void **ppv)
    dprintf(("CoUnmarshalInterface - stub\n"));
    return S_OK;
 }
+
+//******************************************************************************
+//******************************************************************************
+void WIN32API OleUninitialize(void)
+{
+  dprintf(("OleUninitialize - stub\n"));
+  return;
+}
+//******************************************************************************
+//******************************************************************************
+HRESULT WIN32API BindMoniker(LPMONIKER pmk, DWORD grfOpt, REFIID iidResult,
+                                LPVOID *ppvResult)
+{
+   dprintf(("BindMoniker- stub\n"));
+   return MK_E_NOOBJECT;
+}
 //*******************************************************************************
 //*******************************************************************************
-HRESULT WIN32API CreateAntiMoniker(LPMONIKER FAR *ppmk)
+HRESULT WIN32API CreateAntiMoniker(LPMONIKER *ppmk)
 {
    dprintf(("CreateAntiMoniker - stub\n"));
    return E_OUTOFMEMORY;
 }
 //*******************************************************************************
 //*******************************************************************************
-HRESULT WIN32API CreateBindCtx(DWORD reserved, LPBC FAR *ppbc)
+HRESULT WIN32API CreateBindCtx(DWORD reserved, LPBC *ppbc)
 {
    dprintf(("CreateBindCtx - stub\n"));
    return E_OUTOFMEMORY;
@@ -432,14 +447,14 @@ HRESULT WIN32API CreateDataAdviseHolder(IDataAdviseHolder **ppDAHolder)
 //*******************************************************************************
 //*******************************************************************************
 HRESULT WIN32API CreateDataCache(LPUNKNOWN pUnkOuter, REFCLSID rclsid,
-                                    REFIID riid, LPVOID FAR *ppvObj)
+                                    REFIID riid, LPVOID *ppvObj)
 {
    dprintf(("CreateDataCache - stub\n"));
    return E_OUTOFMEMORY;
 }
 //*******************************************************************************
 //*******************************************************************************
-HRESULT WIN32API CreateFileMoniker(LPSTR lpszPathName, LPMONIKER FAR *ppmk)
+HRESULT WIN32API CreateFileMoniker(LPCOLESTR lpszPathName, LPMONIKER *ppmk)
 {
    dprintf(("CreateFileMoniker - stub\n"));
    return E_OUTOFMEMORY;
@@ -447,7 +462,7 @@ HRESULT WIN32API CreateFileMoniker(LPSTR lpszPathName, LPMONIKER FAR *ppmk)
 //*******************************************************************************
 //*******************************************************************************
 HRESULT WIN32API CreateGenericComposite(LPMONIKER pmkFirst, LPMONIKER pmkRest,
-                                           LPMONIKER FAR *ppmkComposite)
+                                           LPMONIKER *ppmkComposite)
 {
    dprintf(("CreateGenericComposite - stub\n"));
    return E_OUTOFMEMORY;
@@ -462,7 +477,7 @@ HRESULT WIN32API CreateILockBytesOnHGlobal(HGLOBAL hGlobal, BOOL fDeleteOnReleas
 }
 //*******************************************************************************
 //*******************************************************************************
-HRESULT WIN32API CreateItemMoniker(LPSTR lpszDelim, LPSTR lpszItem, LPMONIKER FAR *ppmk)
+HRESULT WIN32API CreateItemMoniker(LPCOLESTR lpszDelim, LPCOLESTR lpszItem, LPMONIKER *ppmk)
 {
    dprintf(("CreateItemMoniker - stub\n"));
    return E_OUTOFMEMORY;
@@ -476,7 +491,7 @@ HRESULT WIN32API CreateOleAdviseHolder(IOleAdviseHolder ppOAHolder)
 }
 //*******************************************************************************
 //*******************************************************************************
-HRESULT WIN32API CreatePointerMoniker(LPUNKNOWN punk, LPMONIKER FAR *ppmk)
+HRESULT WIN32API CreatePointerMoniker(LPUNKNOWN punk, LPMONIKER *ppmk)
 {
    dprintf(("CreatePointerMoniker - stub\n"));
    return E_OUTOFMEMORY;
@@ -569,7 +584,8 @@ HRESULT WIN32API GetHookInterface()
 }
 //*******************************************************************************
 //*******************************************************************************
-HRESULT WIN32API GetRunningObjectTable(DWORD reserved, LPRUNNINGOBJECTTABLE *pprot)
+//HRESULT WIN32API GetRunningObjectTable(DWORD reserved, LPRUNNINGOBJECTTABLE *pprot)
+HRESULT WIN32API GetRunningObjectTable(DWORD reserved, LPVOID *pprot)
 {
    dprintf(("GetRunningObjectTable - stub\n"));
    return E_UNEXPECTED;
@@ -591,7 +607,7 @@ BOOL WIN32API IsAccelerator(HACCEL hAccel, INT cAccelEntries, LPMSG lpMsg,
 }
 //*******************************************************************************
 //*******************************************************************************
-BOOL WIN32API IsEqualGUID(REFGUID rguid1, REFGUID rguid2)
+BOOL WIN32API CONCRETE_IsEqualGUID(REFGUID rguid1, REFGUID rguid2)
 {
    dprintf(("IsEqualGUID - stub\n"));
    return FALSE;
@@ -626,8 +642,8 @@ HRESULT WIN32API IsValidPtrOut(DWORD ptrOut)
 }
 //*******************************************************************************
 //*******************************************************************************
-HRESULT WIN32API MkParseDisplayName(LPBC pbc, LPSTR szUserName, ULONG FAR *lpchEaten,
-                                        LPMONIKER FAR *ppmk)
+HRESULT WIN32API MkParseDisplayName(LPBC pbc, LPSTR szUserName, ULONG *lpchEaten,
+                                        LPMONIKER *ppmk)
 {
    dprintf(("MkParseDisplayName - stub\n"));
    return E_OUTOFMEMORY;
@@ -635,7 +651,7 @@ HRESULT WIN32API MkParseDisplayName(LPBC pbc, LPSTR szUserName, ULONG FAR *lpchE
 //*******************************************************************************
 //*******************************************************************************
 HRESULT WIN32API MonikerCommonPrefixWith(LPMONIKER pmkThis, LPMONIKER pmkOther,
-                                            LPMONIKER FAR *ppmkCommon)
+                                            LPMONIKER *ppmkCommon)
 {
    dprintf(("MonikerCommonPrefixWith - stub\n"));
    return E_OUTOFMEMORY;
@@ -643,7 +659,7 @@ HRESULT WIN32API MonikerCommonPrefixWith(LPMONIKER pmkThis, LPMONIKER pmkOther,
 //*******************************************************************************
 //*******************************************************************************
 HRESULT WIN32API MonikerRelativePathTo(LPMONIKER pmkSrc, LPMONIKER pmkDest,
-                                          LPMONIKER FAR *ppmkRelPath, BOOL dwReserved )
+                                          LPMONIKER *ppmkRelPath, BOOL dwReserved )
 {
    dprintf(("MonikerRelativePathTo - stub\n"));
    return E_OUTOFMEMORY;
@@ -664,10 +680,13 @@ HRESULT WIN32API OleConvertIStorageToOLESTREAM(IStorage *pStg, LPOLESTREAM lpole
 }
 //*******************************************************************************
 //*******************************************************************************
-HRESULT WIN32API OleConvertIStorageToOLESTREAMEx(IStorage *pStg, CLIPFORMAT ctFormat,
-                                                    LONG lWidth, LONG lHeight,
-                                                    DWORD dwSize, STGMEDIUM pmedium,
-                                                    LPOLESTREAM lpolestream)
+HRESULT WIN32API OleConvertIStorageToOLESTREAMEx(LPSTORAGE	pStg,
+						 CLIPFORMAT	ctFormat,
+						 LONG		lWidth,
+						 LONG		lHeight,
+						 DWORD		dwSize,
+						 LPSTGMEDIUM	pmedium,
+						 LPOLESTREAM	lpolestream)
 {
    dprintf(("OleConvertIStorageToOLESTREAMEx - stub\n"));
    return(E_INVALIDARG);
@@ -683,10 +702,13 @@ HRESULT WIN32API OleConvertOLESTREAMToIStorage(LPOLESTREAM lpolestream,
 }
 //*******************************************************************************
 //*******************************************************************************
-HRESULT WIN32API OleConvertOLESTREAMToIStorageEx(LPOLESTREAM lpolestream,
-                                                    IStorage *pstg, CLIPFORMAT *ctFormat,
-                                                    LONG *plWidth, LONG *plHeight,
-                                                    DWORD *pdwSize, STGMEDIUM pmedium)
+HRESULT WIN32API OleConvertOLESTREAMToIStorageEx(LPOLESTREAM	lpolestream,
+                                                 LPSTORAGE	pstg,
+                                                 CLIPFORMAT *	ctFormat,
+                                                 LONG *		plWidth,
+                                                 LONG *		plHeight,
+                                                 DWORD *	pdwSize,
+                                                 LPSTGMEDIUM	pmedium)
 {
    dprintf(("OleConvertOLESTREAMToIStorageEx - stub\n"));
    return(E_OUTOFMEMORY);
@@ -703,7 +725,7 @@ HRESULT WIN32API OleCreate(REFCLSID rclsid, REFIID riid, DWORD renderopt,
 //*******************************************************************************
 //*******************************************************************************
 HRESULT WIN32API OleCreateDefaultHandler(REFCLSID clsid, LPUNKNOWN pUnkOuter,
-                                            REFIID riid, LPVOID FAR *ppvObj)
+                                            REFIID riid, LPVOID *ppvObj)
 {
    dprintf(("OleCreateDefaultHandler - stub\n"));
    return(E_OUTOFMEMORY);
@@ -722,7 +744,7 @@ HRESULT WIN32API OleCreateEmbeddingHelper(REFCLSID clsid, LPUNKNOWN pUnkOuter,
 HRESULT WIN32API OleCreateFromData(LPDATAOBJECT pSrcDataObj, REFIID riid,
                                       DWORD renderopt, LPFORMATETC pFormatEtc,
                                       LPOLECLIENTSITE pClientSite, LPSTORAGE pStg,
-                                      LPVOID FAR *ppvObj)
+                                      LPVOID *ppvObj)
 {
    dprintf(("OleCreateFromData - stub\n"));
    return(DV_E_FORMATETC);
@@ -733,7 +755,7 @@ HRESULT WIN32API OleCreateFromFile(REFCLSID rclsid, LPCOLESTR lpszFileName,
                                       REFIID riid,
                                       DWORD renderopt, LPFORMATETC pFormatEtc,
                                       LPOLECLIENTSITE pClientSite, LPSTORAGE pStg,
-                                      LPVOID FAR *ppvObj)
+                                      LPVOID *ppvObj)
 {
    dprintf(("OleCreateFromFile - stub\n"));
    return(E_OUTOFMEMORY);
@@ -743,24 +765,24 @@ HRESULT WIN32API OleCreateFromFile(REFCLSID rclsid, LPCOLESTR lpszFileName,
 HRESULT WIN32API OleCreateLink(LPMONIKER lpmkLinkSrc, REFIID riid,
                                   DWORD renderopt, LPFORMATETC pFormatEtc,
                                   LPOLECLIENTSITE lpClientSite, LPSTORAGE pStg,
-                                  LPVOID FAR *ppvObj)
+                                  LPVOID *ppvObj)
 {
    dprintf(("OleCreateLink - stub\n"));
-   return(OLE_E_CANT_BINDTOSOURCE);
+   return(E_OUTOFMEMORY);
 }
 //*******************************************************************************
 //*******************************************************************************
 HRESULT WIN32API OleCreateLinkFromData(LPDATAOBJECT pSrcDataObj, REFIID riid,
                                           DWORD renderopt, LPFORMATETC pFormatEtc,
                                           LPOLECLIENTSITE pClientSite, LPSTORAGE pStg,
-                                          LPVOID FAR *ppvObj)
+                                          LPVOID *ppvObj)
 {
    dprintf(("OleCreateLinkFromData - stub\n"));
-   return(OLE_E_CANT_BINDTOSOURCE);
+   return(E_OUTOFMEMORY);
 }
 //*******************************************************************************
 //*******************************************************************************
-HRESULT WIN32API OleCreateLinkToFile(LPWSTR lpszFileName, REFIID riid, DWORD renderopt,
+HRESULT WIN32API OleCreateLinkToFile(LPCOLESTR lpszFileName, REFIID riid, DWORD renderopt,
                                         LPFORMATETC pFormatEtc, IOleClientSite *pClientSite,
                                         IStorage *pStg, void **ppvObj)
 {
@@ -779,17 +801,17 @@ HOLEMENU WIN32API OleCreateMenuDescriptor(HMENU hmenuCombined, LPOLEMENUGROUPWID
 HRESULT WIN32API OleCreateStaticFromData(LPDATAOBJECT pSrcDataObj, REFIID riid,
                                             DWORD renderopt, LPFORMATETC pFormatEtc,
                                             LPOLECLIENTSITE pClientSite, LPSTORAGE pStg,
-                                            LPVOID FAR *ppvObj)
+                                            LPVOID *ppvObj)
 {
    dprintf(("OleCreateStaticFromData - stub\n"));
    return(E_OUTOFMEMORY);
 }
 //*******************************************************************************
 //*******************************************************************************
-void WIN32API OleDestroyMenuDescriptor(HOLEMENU holemenu)
+HRESULT WIN32API OleDestroyMenuDescriptor(HOLEMENU holemenu)
 {
    dprintf(("OleDestroyMenuDescriptor - stub\n"));
-   return;
+   return E_OUTOFMEMORY;
 }
 //*******************************************************************************
 //*******************************************************************************
@@ -992,7 +1014,7 @@ HRESULT WIN32API OleSetAutoConvert(REFCLSID clsidOld, REFCLSID clsidNew)
 HRESULT WIN32API OleSetClipboard(IDataObject *pDataObj)
 {
    dprintf(("OleSetClipboard - stub\n"));
-   return(CLIPBRD_E_CANT_OPEN);
+   return(E_OUTOFMEMORY);
 }
 //*******************************************************************************
 //*******************************************************************************
@@ -1115,7 +1137,7 @@ HRESULT WIN32API SetDocumentBitStg()
 }
 //*******************************************************************************
 //*******************************************************************************
-HRESULT WIN32API StgCreateDocfileOnILockBytes(const WCHAR *pwcsName, DWORD grfMode,
+HRESULT WIN32API StgCreateDocfileOnILockBytes(ILockBytes *plkbyt, DWORD grfMode,
                                                  DWORD reserved, IStorage **ppstgOpen)
 {
    dprintf(("StgCreateDocfileOnILockBytes - stub\n"));
@@ -1181,7 +1203,7 @@ HRESULT WIN32API StringFromCLSID(REFCLSID rclsid, LPOLESTR *ppsz)
 }
 //*******************************************************************************
 //*******************************************************************************
-DWORD WIN32API StringFromGUID2(REFGUID rguid, LPOLESTR lpsz, int cbMax)
+int WIN32API StringFromGUID2(REFGUID rguid, LPOLESTR lpsz, int cbMax)
 {
  char szclsid[64];
 

@@ -1,5 +1,3 @@
-/* $Id: wnetap32.cpp,v 1.1 1999-05-24 20:20:08 ktk Exp $ */
-
 /*
  *
  * Project Odin Software License can be found in LICENSE.TXT

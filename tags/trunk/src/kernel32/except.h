@@ -1,14 +1,10 @@
-/* $Id: except.h,v 1.1 1999-05-24 20:19:46 ktk Exp $ */
-
-/*
- *
- * Project Odin Software License can be found in LICENSE.TXT
- *
- */
 /*
  * Exception + misc functions for OS/2
  *
  * Copyright 1998 Sander van Leeuwen
+ *
+ *
+ * Project Odin Software License can be found in LICENSE.TXT
  *
  */
 #ifndef __EXCEPT_H__

@@ -1,5 +1,3 @@
-/* $Id: OS2UTIL.CPP,v 1.1 1999-05-24 20:19:37 ktk Exp $ */
-
 /*
  * OS/2 Utility functions
  *

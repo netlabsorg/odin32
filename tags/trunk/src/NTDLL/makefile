@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.2 1999-06-01 21:52:15 phaller Exp $
+# $Id: makefile,v 1.3 1999-06-07 20:57:55 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -27,6 +27,7 @@ OBJS = NTDLL.obj   \
        rtlstr.obj  \
        sec.obj     \
        sync.obj    \
+       initterm.obj \
        time.obj
 
 
@@ -46,26 +47,27 @@ $(TARGET).lib: $(TARGET).dll
 
 
 
-ntdll.obj:  .\ntdll.c  .\ntdll.h
+ntdll.obj:  .\ntdll.cpp  .\ntdll.h
 
-file.obj:   .\file.c   .\ntdll.h
+file.obj:   .\file.cpp   .\ntdll.h
 
-nt.obj:     .\nt.c     .\ntdll.h
+nt.obj:     .\nt.cpp     .\ntdll.h
 
-om.obj:     .\om.c     .\ntdll.h
+om.obj:     .\om.cpp     .\ntdll.h
 
-reg.obj:    .\reg.c    .\ntdll.h
+reg.obj:    .\reg.cpp    .\ntdll.h
 
-rtl.obj:    .\rtl.c    .\ntdll.h
+rtl.obj:    .\rtl.cpp    .\ntdll.h
 
-rtlstr.obj: .\rtlstr.c .\ntdll.h
+rtlstr.obj: .\rtlstr.cpp .\ntdll.h
 
-sec.obj:    .\sec.c    .\ntdll.h
+sec.obj:    .\sec.cpp    .\ntdll.h
 
-sync.obj:   .\sync.c   .\ntdll.h
+sync.obj:   .\sync.cpp   .\ntdll.h
 
-time.obj:   .\time.c   .\ntdll.h
+time.obj:   .\time.cpp   .\ntdll.h
 
+initterm.obj: .\initterm.cpp
 
 
 clean:

@@ -1,5 +1,3 @@
-/* $Id: user32.h,v 1.2 1999-05-31 22:08:16 phaller Exp $ */
-
 /*****************************************************************************
  * Name      : USER32.H
  * Purpose   : This module maps all Win32 functions contained in USER32.DLL
@@ -11,8 +9,6 @@
 #define __USER32_H_
 
 #include <os2win.h>
-#include "misc.h"
-
 #include <nameid.h>
 #include <stdlib.h>
 #include <string.h>

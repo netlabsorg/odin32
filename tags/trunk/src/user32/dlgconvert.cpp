@@ -1,5 +1,3 @@
-/* $Id: dlgconvert.cpp,v 1.1 1999-05-24 20:20:01 ktk Exp $ */
-
 /*
  * Win32 runtime dialog conversion functions for OS/2
  *

@@ -1,5 +1,3 @@
-/* $Id: HOOK.CPP,v 1.1 1999-05-24 20:19:59 ktk Exp $ */
-
 /*
  * Win32 hook API functions for OS/2
  *
