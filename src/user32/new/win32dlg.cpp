@@ -1,4 +1,4 @@
-/* $Id: win32dlg.cpp,v 1.5 1999-09-05 15:53:09 sandervl Exp $ */
+/* $Id: win32dlg.cpp,v 1.6 1999-09-05 17:11:25 sandervl Exp $ */
 /*
  * Win32 Dialog Code for OS/2
  *
@@ -189,14 +189,11 @@ Win32Dialog::Win32Dialog(HINSTANCE hInst, LPCSTR dlgTemplate, HWND owner,
         SendMessageA(WM_SETFONT, (WPARAM)hUserFont, 0 );
 
     /* Create controls */
+    //testesteest
     if (createControls(dlgTemplate, hInst))
     {
         /* Send initialisation messages and set focus */
         hwndFocus = GetNextDlgTabItem( getWindowHandle(), 0, FALSE );
-
-        if (::SendMessageA(hwndFocus, WM_INITDIALOG, (WPARAM)hwndFocus, param ))
-            SetFocus( hwndFocus );
-
         if (dlgInfo.style & WS_VISIBLE && !(getStyle() & WS_VISIBLE))
         {
             ShowWindow( SW_SHOWNORMAL );    /* SW_SHOW doesn't always work */
@@ -240,17 +237,28 @@ INT Win32Dialog::doDialogBox()
         topOwner->EnableWindow( FALSE );
         ShowWindow( SW_SHOW );
 
-        while (OSLibWinPeekMsg(&msg, getOS2FrameWindowHandle(), topOwner->getOS2FrameWindowHandle(),
-                               0, 0, MSG_REMOVE))
+        while (TRUE) {
 //        while (OSLibWinPeekMsg(&msg, getWindowHandle(), owner, MSGF_DIALOGBOX,
 //                                       MSG_REMOVE, !(getStyle() & DS_NOIDLEMSG), NULL ))
-        {
-            if (!IsDialogMessageA( getWindowHandle(), &msg))
+//            if(OSLibWinPeekMsg(&msg, topOwner->getOS2FrameWindowHandle(), 0, 0, MSG_REMOVE))
+            if(OSLibWinPeekMsg(&msg, 0, 0, 0, MSG_REMOVE))
             {
-                TranslateMessage( &msg );
-                DispatchMessageA( &msg );
+                if(msg.message == WM_QUIT) {
+                    dprintf(("Win32Dialog::doDialogBox: received  WM_QUIT"));
+                    break;
+                }
+                if (!IsDialogMessageA( getWindowHandle(), &msg))
+                {
+                    TranslateMessage( &msg );
+                    DispatchMessageA( &msg );
+                }
+                if (dialogFlags & DF_END) break;
             }
-            if (dialogFlags & DF_END) break;
+            else {
+                if(!(getStyle() & DS_NOIDLEMSG)) {
+                    topOwner->SendMessageA(WM_ENTERIDLE, MSGF_DIALOGBOX, getWindowHandle());
+                }
+            }
         }
         topOwner->EnableWindow( TRUE );
     }
@@ -922,6 +930,8 @@ Win32BaseWindow *Win32Dialog::getDlgItem(int id)
 //******************************************************************************
 BOOL Win32Dialog::endDialog(int retval)
 {
+    dialogFlags |= DF_END;
+    idResult = retval;
     return TRUE;
 }
 //******************************************************************************
