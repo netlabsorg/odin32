@@ -560,7 +560,7 @@ HRESULT WINAPI StgStreamImpl_Seek(
   }
 
 #if defined(__WIN32OS2__) && defined(__IBMC__)
-  *((LARGE_INTEGER*)&plibNewPosition )= RtlpLargeIntegerAdd( (LARGE_INTEGER *)plibNewPosition, &dlibMove );
+  *((LARGE_INTEGER*)plibNewPosition )= RtlpLargeIntegerAdd( (LARGE_INTEGER *)plibNewPosition, &dlibMove );
 #else
   plibNewPosition->QuadPart = RtlLargeIntegerAdd( plibNewPosition->QuadPart, dlibMove.QuadPart );
 #endif
