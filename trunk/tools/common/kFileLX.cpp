@@ -1,4 +1,4 @@
-/* $Id: kFileLX.cpp,v 1.5 2001-04-17 00:26:11 bird Exp $
+/* $Id: kFileLX.cpp,v 1.6 2001-10-03 01:44:49 bird Exp $
  *
  *
  *
@@ -356,20 +356,23 @@ BOOL kFileLX::exportFindNext(kExportEntry *pExport)
      */
     pExpState->pb32 = (struct b32_bundle*)((char*)(pExpState->pb32 + 1) +
                         pExpState->pb32->b32_cnt * acbEntry[pExpState->pb32->b32_type & ~TYPEINFO]);
+    pExpState->iOrdinal++;
     while (pExpState->pb32->b32_cnt != 0)
     {
         /* skip empty bundles */
-        while (pExpState->pb32->b32_cnt != 0 && pExpState->pb32->b32_type == EMPTY)
+        if (pExpState->pb32->b32_cnt != 0 && pExpState->pb32->b32_type == EMPTY)
         {
             pExpState->iOrdinal += pExpState->pb32->b32_cnt;
             pExpState->pb32 = (struct b32_bundle*)((char*)pExpState->pb32 + 2);
+            continue;
         }
 
         /* FIXME forwarders are not implemented so we'll skip them too. */
-        while (pExpState->pb32->b32_cnt != 0 && (pExpState->pb32->b32_type & ~TYPEINFO) == ENTRYFWD)
+        if (pExpState->pb32->b32_cnt != 0 && (pExpState->pb32->b32_type & ~TYPEINFO) == ENTRYFWD)
         {
             pExpState->iOrdinal += pExpState->pb32->b32_cnt;
             pExpState->pb32 = (struct b32_bundle*)((char*)(pExpState->pb32 + 1) + pExpState->pb32->b32_cnt * 7);
+            continue;
         }
 
         /* we'll ignore any flags for the moment - TODO */
@@ -399,6 +402,7 @@ BOOL kFileLX::exportFindNext(kExportEntry *pExport)
                 case GATE16:
                     pExport->ulOffset = pExpState->pe32->e32_variant.e32_callgate.offset;
                     break;
+
                 default:
                     assert(!"ARG!!!! invalid bundle type!");
             }
