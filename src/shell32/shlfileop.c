@@ -4,6 +4,7 @@
  * Copyright 2000 Juergen Schmied
  * Copyright 2002 Andriy Palamarchuk
  * Copyright 2002 Dietrich Teickner (from Odin)
+ * Copyright 2002 Rolf Kalbermatter
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -24,6 +25,7 @@
 #include "wine/port.h"
 
 #include <string.h>
+#include <ctype.h>
 
 #include "winreg.h"
 #include "shellapi.h"
@@ -38,292 +40,348 @@ WINE_DEFAULT_DEBUG_CHANNEL(shell);
 
 BOOL SHELL_ConfirmDialog (int nKindOfDialog, LPCSTR szDir)
 {
-	char szCaption[255], szText[255], szBuffer[MAX_PATH + 256];
+  char szCaption[255], szText[255], szBuffer[MAX_PATH + 256];
         UINT caption_resource_id, text_resource_id;
 
-	switch(nKindOfDialog) {
+  switch(nKindOfDialog) {
 
-	case ASK_DELETE_FILE:
-		caption_resource_id	= IDS_DELETEITEM_CAPTION;
-		text_resource_id	= IDS_DELETEITEM_TEXT;
-		break;
-	case ASK_DELETE_FOLDER:
-		caption_resource_id	= IDS_DELETEFOLDER_CAPTION;
-		text_resource_id	= IDS_DELETEITEM_TEXT;
-		break;
-	case ASK_DELETE_MULTIPLE_ITEM:
-		caption_resource_id	= IDS_DELETEITEM_CAPTION;
-		text_resource_id	= IDS_DELETEMULTIPLE_TEXT;
-		break;
-	case ASK_OVERWRITE_FILE:
-		caption_resource_id	= IDS_OVERWRITEFILE_CAPTION;
-		text_resource_id	= IDS_OVERWRITEFILE_TEXT;
-		break;
-	default:
-	  FIXME(" Unhandled nKindOfDialog %d stub\n", nKindOfDialog);
-		return FALSE;
-	}
+  case ASK_DELETE_FILE:
+    caption_resource_id  = IDS_DELETEITEM_CAPTION;
+    text_resource_id  = IDS_DELETEITEM_TEXT;
+    break;
+  case ASK_DELETE_FOLDER:
+    caption_resource_id  = IDS_DELETEFOLDER_CAPTION;
+    text_resource_id  = IDS_DELETEITEM_TEXT;
+    break;
+  case ASK_DELETE_MULTIPLE_ITEM:
+    caption_resource_id  = IDS_DELETEITEM_CAPTION;
+    text_resource_id  = IDS_DELETEMULTIPLE_TEXT;
+    break;
+  case ASK_OVERWRITE_FILE:
+    caption_resource_id  = IDS_OVERWRITEFILE_CAPTION;
+    text_resource_id  = IDS_OVERWRITEFILE_TEXT;
+    break;
+  default:
+    FIXME(" Unhandled nKindOfDialog %d stub\n", nKindOfDialog);
+    return FALSE;
+  }
 
-	LoadStringA(shell32_hInstance, caption_resource_id, szCaption, sizeof(szCaption));
-	LoadStringA(shell32_hInstance, text_resource_id, szText, sizeof(szText));
+  LoadStringA(shell32_hInstance, caption_resource_id, szCaption, sizeof(szCaption));
+  LoadStringA(shell32_hInstance, text_resource_id, szText, sizeof(szText));
 
-	FormatMessageA(FORMAT_MESSAGE_FROM_STRING|FORMAT_MESSAGE_ARGUMENT_ARRAY,
-	    szText, 0, 0, szBuffer, sizeof(szBuffer), (va_list*)&szDir);
+  FormatMessageA(FORMAT_MESSAGE_FROM_STRING|FORMAT_MESSAGE_ARGUMENT_ARRAY,
+      szText, 0, 0, szBuffer, sizeof(szBuffer), (va_list*)&szDir);
 
-	return (IDOK == MessageBoxA(GetActiveWindow(), szBuffer, szCaption, MB_OKCANCEL | MB_ICONEXCLAMATION));
+  return (IDOK == MessageBoxA(GetActiveWindow(), szBuffer, szCaption, MB_OKCANCEL | MB_ICONEXCLAMATION));
 }
 
 /**************************************************************************
- *	SHELL_DeleteDirectoryA()
+ *  SHELL_DeleteDirectoryA()
  *
  * like rm -r
  */
-
 BOOL SHELL_DeleteDirectoryA(LPCSTR pszDir, BOOL bShowUI)
 {
-	BOOL		ret = FALSE;
-	HANDLE		hFind;
-	WIN32_FIND_DATAA wfd;
-	char		szTemp[MAX_PATH];
+  BOOL    ret = FALSE;
+  HANDLE    hFind;
+  WIN32_FIND_DATAA wfd;
+  char    szTemp[MAX_PATH];
 
-	strcpy(szTemp, pszDir);
-	PathAddBackslashA(szTemp);
-	strcat(szTemp, "*.*");
+  strcpy(szTemp, pszDir);
+  PathAddBackslashA(szTemp);
+  strcat(szTemp, "*.*");
 
-	if (bShowUI && !SHELL_ConfirmDialog(ASK_DELETE_FOLDER, pszDir))
-	  return FALSE;
+  hFind = FindFirstFileA(szTemp, &wfd);
 
-	if(INVALID_HANDLE_VALUE != (hFind = FindFirstFileA(szTemp, &wfd)))
-	{
-	  do
-	  {
-	    if(strcasecmp(wfd.cFileName, ".") && strcasecmp(wfd.cFileName, ".."))
-	    {
-	      strcpy(szTemp, pszDir);
-	      PathAddBackslashA(szTemp);
-	      strcat(szTemp, wfd.cFileName);
+  ret = (INVALID_HANDLE_VALUE != hFind);
 
-	      if(FILE_ATTRIBUTE_DIRECTORY & wfd.dwFileAttributes)
-	        SHELL_DeleteDirectoryA(szTemp, FALSE);
-	      else
-	        DeleteFileA(szTemp);
-	    }
-	  } while(FindNextFileA(hFind, &wfd));
+  if (ret && (!bShowUI || SHELL_ConfirmDialog(ASK_DELETE_FOLDER, pszDir)))
+  {
+    do
+    {
+      if(strcasecmp(wfd.cFileName, ".") && strcasecmp(wfd.cFileName, ".."))
+      {
+        strcpy(szTemp, pszDir);
+        PathAddBackslashA(szTemp);
+        strcat(szTemp, wfd.cFileName);
 
-	  FindClose(hFind);
-	  ret = RemoveDirectoryA(pszDir);
-	}
-
-	return ret;
+        if(FILE_ATTRIBUTE_DIRECTORY & wfd.dwFileAttributes)
+          SHELL_DeleteDirectoryA(szTemp, FALSE);
+        else
+          DeleteFileA(szTemp);
+      }
+    } while(FindNextFileA(hFind, &wfd));
+    FindClose(hFind);
+    ret = RemoveDirectoryA(pszDir);
+  }
+  return ret;
 }
 
 /**************************************************************************
- *	SHELL_DeleteFileA()
+ *  SHELL_DeleteFileA()
  */
 
 BOOL SHELL_DeleteFileA(LPCSTR pszFile, BOOL bShowUI)
 {
-	if (bShowUI && !SHELL_ConfirmDialog(ASK_DELETE_FILE, pszFile))
-		return FALSE;
-
+  if (bShowUI && !SHELL_ConfirmDialog(ASK_DELETE_FILE, pszFile))
+    return FALSE;
         return DeleteFileA(pszFile);
 }
 
 /*************************************************************************
- * SHCreateDirectory				[SHELL32.165]
+ * SHCreateDirectory                       [SHELL32.165]
  *
  * NOTES
  *  exported by ordinal
- *  not sure about LPSECURITY_ATTRIBUTES
+ *  WinNT/2000 exports Unicode
  */
-DWORD WINAPI SHCreateDirectory(LPSECURITY_ATTRIBUTES sec,LPCSTR path)
+DWORD WINAPI SHCreateDirectory(HWND hWnd, LPCVOID path)
+{
+	if (SHELL_OsIsUnicode())
+	  return SHCreateDirectoryExW(hWnd, path, NULL);
+	return SHCreateDirectoryExA(hWnd, path, NULL);
+}
+
+/*************************************************************************
+ * SHCreateDirectoryExA                     [SHELL32.@]
+ */
+DWORD WINAPI SHCreateDirectoryExA(HWND hWnd, LPCSTR path, LPSECURITY_ATTRIBUTES sec)
 {
 	DWORD ret;
-	TRACE("(%p,%s)\n",sec,path);
-	if ((ret = CreateDirectoryA(path,sec)))
+	TRACE("(%p, %s, %p)\n",hWnd, path, sec);
+    ret = CreateDirectoryA(path, sec);
+	if (ret)
 	{
-	  SHChangeNotifyA(SHCNE_MKDIR, SHCNF_PATHA, path, NULL);
+	  SHChangeNotify(SHCNE_MKDIR, SHCNF_PATHA, path, NULL);
 	}
+	else if (hWnd)
+	  FIXME("Semi-stub, non zero hWnd should be used as parent for error dialog!");
+	return ret;
+}
+
+/*************************************************************************
+ * SHCreateDirectoryExW                     [SHELL32.@]
+ */
+DWORD WINAPI SHCreateDirectoryExW(HWND hWnd, LPCWSTR path, LPSECURITY_ATTRIBUTES sec)
+{
+	DWORD ret;
+	TRACE("(%p, %s, %p)\n",hWnd, debugstr_w(path), sec);
+	ret = CreateDirectoryW(path, sec);
+	if (ret)
+	{
+	  SHChangeNotify(SHCNE_MKDIR, SHCNF_PATHW, path, NULL);
+	}
+	else if (hWnd)
+	  FIXME("Semi-stub, non zero hWnd should be used as parent for error dialog!");
 	return ret;
 }
 
 /************************************************************************
- *      Win32DeleteFile                         [SHELL32.164]
+ * Win32DeleteFile                         [SHELL32.164]
  *
- * Deletes a file.  Also triggers a change notify if one exists.
+ * Deletes a file. Also triggers a change notify if one exists.
  *
- * FIXME:
- * Verified on Win98 / IE 5 (SHELL32 4.72, March 1999 build) to be
- * ANSI.  Is this Unicode on NT?
- *
+ * NOTES:
+ *  Verified on Win98 / IE 5 (SHELL32 4.72, March 1999 build) to be ANSI.
+ *  This is Unicode on NT/2000
  */
-
-BOOL WINAPI Win32DeleteFile(LPSTR fName)
+static BOOL Win32DeleteFileA(LPCSTR fName)
 {
+	DWORD ret;
 	TRACE("%p(%s)\n", fName, fName);
 
-	DeleteFileA(fName);
-	SHChangeNotifyA(SHCNE_DELETE, SHCNF_PATHA, fName, NULL);
-	return TRUE;
+	if (!(ret = DeleteFileA(fName)))
+	{
+	  /* File may be write protected or a system file */
+	  DWORD dwAttr = GetFileAttributesA(fName);
+	  if ((dwAttr != -1) && (dwAttr & FILE_ATTRIBUTE_READONLY | FILE_ATTRIBUTE_SYSTEM))
+	    if (SetFileAttributesA(fName, dwAttr & ~(FILE_ATTRIBUTE_READONLY | FILE_ATTRIBUTE_SYSTEM)))
+		  ret = DeleteFileA(fName);
+	}
+	if (ret)
+	  SHChangeNotify(SHCNE_DELETE, SHCNF_PATHA, fName, NULL);
+	return ret;
+}
+
+static BOOL Win32DeleteFileW(LPCWSTR fName)
+{
+	BOOL ret;
+	TRACE("%p(%s)\n", fName, debugstr_w(fName));
+
+	if (!(ret = DeleteFileW(fName)))
+	{
+	  /* File may be write protected or a system file */
+	  DWORD dwAttr = GetFileAttributesW(fName);
+	  if ((dwAttr != -1) && (dwAttr & FILE_ATTRIBUTE_READONLY | FILE_ATTRIBUTE_SYSTEM))
+	    if (SetFileAttributesW(fName, dwAttr & ~(FILE_ATTRIBUTE_READONLY | FILE_ATTRIBUTE_SYSTEM)))
+		  ret = DeleteFileW(fName);
+	}
+	if (ret)
+	  SHChangeNotify(SHCNE_DELETE, SHCNF_PATHW, fName, NULL);
+	return ret;
+}
+
+BOOL WINAPI Win32DeleteFileAW(LPCVOID fName)
+{
+	if (SHELL_OsIsUnicode())
+	  return Win32DeleteFileW(fName);
+	return Win32DeleteFileA(fName);
 }
 
 /*************************************************************************
  *
- * SHFileTyp (internal)
+ * SHFileStrCpyCat HelperFunction for SHFileOperationA
  *
  */
-DWORD SHFileTyp(LPSTR pFromTo, long *len, LPSTR pTemp, long *lenTemp, LPSTR *pFile, DWORD *PathAttr, DWORD *Attr) {
-#define TypisBad -1
-#define TypisUnkn 0
-#define TypisNewPath 1
-#define TypisRoot 2
-#define TypisDirS 3
-#define TypisDir  4
-#define TypisFile 5
-#define TypisName 6
-#define TypisNameS 7
-#define TypisMask 8
-	DWORD Typ = 										TypisUnkn;
-	DWORD i_Attr;
-	DWORD i_PathAttr;
-	BOOL  i_Slash = FALSE;
-	LPSTR i_pFile;
-	LPSTR i_pLastSlash;
-	long i_lenTemp;
-	long i_len = *len = strlen(pFromTo);
-	if (i_len == 0) return				  TypisUnkn;
-	strcpy(pTemp,pFromTo);
-	if (pTemp[1] == ':' && pTemp[0] >= 'a' && pTemp[0] <= 'z') pTemp[0] = (pTemp[0] & (0xff - ' '));
-	*pFile = i_pFile = &pTemp[i_len];
-	pTemp[i_len+1] = '\0';
-	if (i_len == 0) return	/* ?? */	  TypisBad;
-	if (PathIsRootA(pFromTo))		Typ = TypisRoot;
-	i_pLastSlash = strrchr(pTemp,'\\');
-	if (i_pLastSlash == NULL) return	  TypisBad /* ??? */;
-	i_Slash = (i_pLastSlash[1] == '\0');
-	*lenTemp = i_lenTemp = strlen(pTemp) - i_Slash;
-	*pFile   = i_pFile   = &pTemp[i_lenTemp];
-	if (Typ != TypisRoot) i_pFile[0] = '\0';
-	*PathAttr = *Attr = i_PathAttr = i_Attr = GetFileAttributesA(pTemp);
-	if (i_Attr == -1) {
-		if (Typ == TypisRoot)		Typ = TypisBad;
-	} else { 
-		if (i_Attr & FILE_ATTRIBUTE_DIRECTORY) {
-			if (Typ == TypisUnkn) {
-									Typ = TypisDir;
-				if (i_Slash)		Typ = TypisDirS;
-			}
-		} else {
-			if (Typ == TypisUnkn && !i_Slash) {
-									Typ = TypisFile;
-			} else					Typ = TypisBad;
-		}
-	}
-// is the directory exists with \*.* ?
-	i_pFile = strrchr(pTemp,'\\');
-	if (NULL == i_pFile)			Typ = TypisBad; 
-	if (Typ == TypisUnkn || Typ == TypisFile) {
-		PathRemoveFileSpecA(pTemp);
-// mask in Path ?
-		if (NULL != strpbrk(pTemp,"*?\0")) {
-									Typ = TypisBad;
-		} else {
-			while (-1 == (i_PathAttr = GetFileAttributesA(pTemp)) && !PathIsRootA(pTemp)) {
-				PathRemoveFileSpecA(pTemp);
-				Typ = TypisNewPath;
-			}
-			i_lenTemp = strlen(pTemp);
-			if (pTemp[i_lenTemp - 1] == '\\') i_lenTemp--;
-			*lenTemp = i_lenTemp;
-			*pFile   = i_pFile = &pTemp[i_lenTemp];
-			*PathAttr = i_PathAttr;
-			if (-1 == i_PathAttr || !(i_PathAttr & FILE_ATTRIBUTE_DIRECTORY)) Typ = TypisBad;
-		}
-		strcpy(&pTemp[1],&pFromTo[1]);
-		if (Typ == TypisUnkn && i_PathAttr != -1 && (i_PathAttr & FILE_ATTRIBUTE_DIRECTORY)) {
- 			if (NULL == strpbrk(i_pFile,"*?\0")) {
-				if (!i_Slash) {
-					*lenTemp = i_lenTemp = strlen(pTemp);
-					*pFile   = &pTemp[i_lenTemp];
-									Typ = TypisName;
-				} else				Typ = TypisNameS;
-			} else 					Typ = TypisMask;
-		}
-	}
-	i_pLastSlash[0] = '\\';
-	return Typ;
+LPSTR SHFileStrCpyCatA(LPSTR pTo, LPCSTR pFrom, LPCSTR pCatStr)
+{
+  LPSTR pToFile = NULL;
+  int  i_len;
+
+  if (pTo)
+	{
+	  if (pFrom)
+	    lstrcpyA(pTo, pFrom);
+	  if (pCatStr) /* lstrcatA(pTo, pCatStr); ?? */
+	  {
+	    i_len = lstrlenA(pTo);
+	    if ((i_len) && (pCatStr[0] == '\\') && (pTo[--i_len] == '\\'))
+	      pTo[i_len] = '\0';
+	    lstrcatA(pTo, pCatStr);
+    }
+    pToFile = strrchr(pTo,'\\');
+/* !! termination of the new string-group */
+	  pTo[(lstrlenA(pTo)) + 1] = '\0';
+  }
+  return pToFile;
 }
 
 /*************************************************************************
- * SHFileOperationA				[SHELL32.@]
+ *
+ * SHFileStrICmp HelperFunction for SHFileOperationA
+ *
+ */
+BOOL SHFileStrICmpA(LPSTR p1,LPSTR p2, LPSTR p1End, LPSTR p2End)
+{
+  CHAR C1 = '\0';
+  CHAR C2  = '\0';
+  int i_Temp = -1;
+	int i_len1 = lstrlenA(p1);
+	int i_len2 = lstrlenA(p2);
+
+  if (p1End && (&p1[i_len1] >= p1End) && ('\\' == p1End[0]))
+  {
+     C1 = p1End[0];
+    p1End[0] = '\0';
+	  i_len1 = lstrlenA(p1);
+  }
+  if (p2End)
+  {
+    if ((&p2[i_len2] >= p2End) && ('\\' == p2End[0]))
+    {
+      C2 = p2End[0];
+      if (C2)
+        p2End[0] = '\0';
+    }
+  }
+  else
+  {
+    if ((i_len1 <= i_len2) && ('\\' == p2[i_len1]))
+    {
+      C2 = p2[i_len1];
+      if (C2)
+        p2[i_len1] = '\0';
+    }
+  }
+	i_len2 = lstrlenA(p2);
+	if (i_len1 == i_len2)
+	  i_Temp = lstrcmpiA(p1,p2); 
+  if (C1)
+    p1[i_len1] = C1;
+  if (C2)
+    p2[i_len2] = C2;
+  return !(i_Temp);
+}
+
+#define IsAttribFile(x) (!(x == -1) && !(x & FILE_ATTRIBUTE_DIRECTORY))
+#define IsAttribDir(x)  (!(x == -1) && (x & FILE_ATTRIBUTE_DIRECTORY))
+#define TextFromPtr(x) (x ? x:"NULL")
+/*************************************************************************
+ * SHFileOperationA        [SHELL32.@]
  *
  * NOTES
  *     exported by name
  */
 DWORD WINAPI SHFileOperationA (LPSHFILEOPSTRUCTA lpFileOp)
 {
-	LPSTR pFrom = (LPSTR)lpFileOp->pFrom;
-	LPSTR pTo = (LPSTR)lpFileOp->pTo;
-	LPSTR pTempTo;
-	DWORD FromAttr;
-	DWORD ToAttr;
-	DWORD FromPathAttr;
-	DWORD ToPathAttr;
-	DWORD FromTyp;
-	DWORD ToTyp = TypisBad;
-	DWORD zTyp;
-	LPSTR pFromFile;
-	LPSTR pToFile;
-	LPSTR pTempFrom = NULL;
-	LPSTR pToSlash;
-	LPSTR pToFuncTXT = "FO_COPY";
-	FILEOP_FLAGS OFl = ((FILEOP_FLAGS)lpFileOp->fFlags & 0x7ff);
-	BOOL Multi = ((lpFileOp->fFlags & FOF_MULTIDESTFILES) != 0);
-	BOOL MakeDir = FALSE;
-	BOOL not_overwrite;
-	BOOL TargetisDir;
-	BOOL ask_overwrite;
-	BOOL ToSingle;
-	BOOL recurseinto;
-	long lenFrom = -1;
-	long lenTo   = -1;
-	long lenTempFrom;
-	long lenTempTo;
-	long retCode = 0x75;
-	long TempretCode = 0;
-	long where       = 0;
-	long FuncSwitch = (lpFileOp->wFunc & 15);
-	SHFILEOPSTRUCTA nlpFileOp = *(lpFileOp);
-	long level= nlpFileOp.wFunc>>4;
-	HANDLE hFind;
-	WIN32_FIND_DATAA wfd;
+  SHFILEOPSTRUCTA nlpFileOp = *(lpFileOp);
 
-/* default no error
-*/
-	lpFileOp->fAnyOperationsAborted=FALSE;
-	nlpFileOp.fAnyOperationsAborted=FALSE;
-	level++;
-	nlpFileOp.wFunc =  (level<<4) + FuncSwitch;
-	if (level == 1)
-        TRACE("flags (0x%04x) : %s%s%s%s%s%s%s%s%s%s%s%s \n", lpFileOp->fFlags,
-                lpFileOp->fFlags & FOF_MULTIDESTFILES ? "FOF_MULTIDESTFILES " : "",
-                lpFileOp->fFlags & FOF_CONFIRMMOUSE ? "FOF_CONFIRMMOUSE " : "",
-                lpFileOp->fFlags & FOF_SILENT ? "FOF_SILENT " : "",
-                lpFileOp->fFlags & FOF_RENAMEONCOLLISION ? "FOF_RENAMEONCOLLISION " : "",
-                lpFileOp->fFlags & FOF_NOCONFIRMATION ? "FOF_NOCONFIRMATION " : "",
-                lpFileOp->fFlags & FOF_WANTMAPPINGHANDLE ? "FOF_WANTMAPPINGHANDLE " : "",
-                lpFileOp->fFlags & FOF_ALLOWUNDO ? "FOF_ALLOWUNDO " : "",
-                lpFileOp->fFlags & FOF_FILESONLY ? "FOF_FILESONLY " : "",
-                lpFileOp->fFlags & FOF_SIMPLEPROGRESS ? "FOF_SIMPLEPROGRESS " : "",
-                lpFileOp->fFlags & FOF_NOCONFIRMMKDIR ? "FOF_NOCONFIRMMKDIR " : "",
-                lpFileOp->fFlags & FOF_NOERRORUI ? "FOF_NOERRORUI " : "",
-                lpFileOp->fFlags & 0xf800 ? "MORE-UNKNOWN-Flags" : "");
-	switch(FuncSwitch) {
-	case FO_MOVE:
-		retCode = 0xb7;
-		pToFuncTXT = "FO_MOVE";
-	case FO_COPY:
-        {
+  LPCSTR pNextFrom = nlpFileOp.pFrom;
+  LPCSTR pNextTo = nlpFileOp.pTo;
+  LPCSTR pFrom = pNextFrom;
+  LPCSTR pTo = NULL;
+  HANDLE hFind = INVALID_HANDLE_VALUE;
+  WIN32_FIND_DATAA wfd;
+  LPSTR pTempFrom = NULL;
+  LPSTR pTempTo = NULL;
+  LPSTR pFromFile;
+  LPSTR pToFile;
+  long retCode = 0;
+  DWORD ToAttr;
+  DWORD ToPathAttr;
+  FILEOP_FLAGS OFl = ((FILEOP_FLAGS)lpFileOp->fFlags & 0x7ff);
+
+  BOOL b_Multi = (nlpFileOp.fFlags & FOF_MULTIDESTFILES);
+
+  BOOL b_MultiTo = (FO_DELETE != (lpFileOp->wFunc & 0xf));
+  BOOL b_MultiFrom = FALSE;
+  BOOL not_overwrite;
+  BOOL ask_overwrite;
+  BOOL b_SameRoot;
+  BOOL b_SameTailName;
+  BOOL b_ToInvalidTail;
+  BOOL b_ToValid; /* for W98-Bug for FO_MOVE with source and taget in same rootdrive */
+  BOOL b_Mask; /* wird als Schalter benutzt, vieleicht finde ich die richtige bitposition */
+  BOOL b_ToTailSlash;
+  LPSTR pToFuncTXT;
+
+  long FuncSwitch = (nlpFileOp.wFunc & 0xf);
+  long level= nlpFileOp.wFunc>>4;
+
+/*  default no error */
+  nlpFileOp.fAnyOperationsAborted=FALSE;
+
+  switch(FuncSwitch)
+  {
+  case FO_MOVE:
+    pToFuncTXT = "FO_MOVE";break;
+  case FO_COPY:
+    pToFuncTXT = "FO_COPY";break;
+  case FO_DELETE:
+    pToFuncTXT = "FO_DELETE";break;
+  case FO_RENAME:
+    pToFuncTXT = "FO_RENAME";break;
+  default:
+    pToFuncTXT = "FO_????";
+    goto shfileop_normal;
+  }
+
+  if (level == 0)
+    TRACE("%s: flags (0x%04x) : %s%s%s%s%s%s%s%s%s%s%s%s \n",pToFuncTXT, nlpFileOp.fFlags,
+                nlpFileOp.fFlags & FOF_MULTIDESTFILES ? "FOF_MULTIDESTFILES " : "",
+                nlpFileOp.fFlags & FOF_CONFIRMMOUSE ? "FOF_CONFIRMMOUSE " : "",
+                nlpFileOp.fFlags & FOF_SILENT ? "FOF_SILENT " : "",
+                nlpFileOp.fFlags & FOF_RENAMEONCOLLISION ? "FOF_RENAMEONCOLLISION " : "",
+                nlpFileOp.fFlags & FOF_NOCONFIRMATION ? "FOF_NOCONFIRMATION " : "",
+                nlpFileOp.fFlags & FOF_WANTMAPPINGHANDLE ? "FOF_WANTMAPPINGHANDLE " : "",
+                nlpFileOp.fFlags & FOF_ALLOWUNDO ? "FOF_ALLOWUNDO " : "",
+                nlpFileOp.fFlags & FOF_FILESONLY ? "FOF_FILESONLY " : "",
+                nlpFileOp.fFlags & FOF_SIMPLEPROGRESS ? "FOF_SIMPLEPROGRESS " : "",
+                nlpFileOp.fFlags & FOF_NOCONFIRMMKDIR ? "FOF_NOCONFIRMMKDIR " : "",
+                nlpFileOp.fFlags & FOF_NOERRORUI ? "FOF_NOERRORUI " : "",
+                nlpFileOp.fFlags & 0xf800 ? "MORE-UNKNOWN-Flags" : "");
+  ;
+  {
                 /* establish when pTo is interpreted as the name of the destination file
                  * or the directory where the Fromfile should be copied to.
                  * This depends on:
@@ -340,490 +398,440 @@ DWORD WINAPI SHFileOperationA (LPSHFILEOPSTRUCTA lpFileOp)
                  * copy files to dir       1 0 1 1 0 0 1 0
                  * create dir              0 0 0 0 0 0 1 0
                  */
-			nlpFileOp.pFrom = pTempFrom = HeapAlloc(GetProcessHeap(), 0, 3 * MAX_PATH+6);
-			nlpFileOp.pTo   = pTempTo   = &pTempFrom[MAX_PATH+4];
 /* 
- * FOF_MULTIDESTFILES, FOF_NOCONFIRMATION, FOF_FILESONLY					are		implemented
- * FOF_CONFIRMMOUSE, FOF_SILENT, FOF_NOCONFIRMMKDIR, FOF_SIMPLEPROGRESS		are not implemented and ignored
- * FOF_RENAMEONCOLLISION							   						are		implemented partially and breaks if file exist
- * FOF_ALLOWUNDO, FOF_WANTMAPPINGHANDLE										are not implemented and breaks
+ * FOF_MULTIDESTFILES, FOF_NOCONFIRMATION, FOF_FILESONLY          are    implemented
+ * FOF_CONFIRMMOUSE, FOF_SILENT, FOF_NOCONFIRMMKDIR, FOF_SIMPLEPROGRESS    are not implemented and ignored
+ * FOF_RENAMEONCOLLISION                             are    implemented partially and breaks if file exist
+ * FOF_ALLOWUNDO, FOF_WANTMAPPINGHANDLE                    are not implemented and breaks
  * if any other flag set, an error occurs
  */  
-			TRACE(__FUNCTION__" %s level=%d lpFileOp->fFlags=0x%x\n", pToFuncTXT, level, lpFileOp->fFlags);
-//			OFl = (OFl & (-1 - (FOF_MULTIDESTFILES | FOF_FILESONLY)));
-//			OFl = (OFl ^ (FOF_SILENT | FOF_NOCONFIRMATION | FOF_SIMPLEPROGRESS | FOF_NOCONFIRMMKDIR));
-			OFl = (OFl & ( ~ (FOF_MULTIDESTFILES | FOF_NOCONFIRMATION | FOF_FILESONLY)));	// implemented
-			OFl = (OFl ^ (FOF_SILENT | FOF_NOCONFIRMMKDIR));								// ignored, if one
-			OFl = (OFl & ( ~ FOF_SIMPLEPROGRESS));											// ignored, only with FOF_SILENT
-			if (OFl) {
-				if (OFl & ( ~ (FOF_CONFIRMMOUSE | FOF_SILENT | FOF_RENAMEONCOLLISION | FOF_NOCONFIRMMKDIR))) {
-					TRACE(__FUNCTION__" %s level=%d lpFileOp->fFlags=0x%x not implemented, Aborted=TRUE, stub\n", pToFuncTXT, level, OFl);
-					nlpFileOp.fAnyOperationsAborted=TRUE;
-				} else {
-					TRACE(__FUNCTION__" %s level=%d lpFileOp->fFlags=0x%x not full implemented ,stub\n", pToFuncTXT, level, OFl);
-				} /* endif */
-			} /* endif */
+    TRACE(__FUNCTION__" %s level=%d nlpFileOp.fFlags=0x%x\n", pToFuncTXT, level, lpFileOp->fFlags);
 
-			ask_overwrite = (!(lpFileOp->fFlags & FOF_NOCONFIRMATION) && !(lpFileOp->fFlags & FOF_RENAMEONCOLLISION));
-			not_overwrite = (!(lpFileOp->fFlags & FOF_NOCONFIRMATION) ||  (lpFileOp->fFlags & FOF_RENAMEONCOLLISION));
+/*    OFl &= (-1 - (FOF_MULTIDESTFILES | FOF_FILESONLY));
+/*    OFl ^= (FOF_SILENT | FOF_NOCONFIRMATION | FOF_SIMPLEPROGRESS | FOF_NOCONFIRMMKDIR); */
+    OFl &= (~(FOF_MULTIDESTFILES | FOF_NOCONFIRMATION | FOF_FILESONLY));  /* implemented */
+    OFl ^= (FOF_SILENT | FOF_NOCONFIRMMKDIR);                /* ignored, if one */
+    OFl &= (~FOF_SIMPLEPROGRESS);                      /* ignored, only wit FOF_SILEN */
+    if (OFl)
+    {
+      if (OFl & ( ~ (FOF_CONFIRMMOUSE | FOF_SILENT | FOF_RENAMEONCOLLISION | FOF_NOCONFIRMMKDIR)))
+      {
+        TRACE("%s level=%d lpFileOp->fFlags=0x%x not implemented, Aborted=TRUE, stub\n", pToFuncTXT, level, OFl);
+        retCode = 0x403; /* we need a extension of shlfileop */
+        nlpFileOp.fAnyOperationsAborted=TRUE;
+      }
+      else
+      {
+        TRACE("%s level=%d lpFileOp->fFlags=0x%x not full implemented ,stub\n", pToFuncTXT, level, OFl);
+      } /* endif */
+    } /* endif */
 
-// need break at error before change sourcepointer
-			while(!nlpFileOp.fAnyOperationsAborted && (pFrom+=lenFrom+1)[0]) {
+    if ((pNextFrom) && (!(b_MultiTo) || (pNextTo)))
+    {
+      nlpFileOp.pFrom = pTempFrom = HeapAlloc(GetProcessHeap(), 0, (1+2*(b_MultiTo)) * MAX_PATH+6);
+      if (b_MultiTo) pTempTo = &pTempFrom[MAX_PATH+4];
+      nlpFileOp.pTo   = pTempTo;
+      ask_overwrite = (!(nlpFileOp.fFlags & FOF_NOCONFIRMATION) && !(nlpFileOp.fFlags & FOF_RENAMEONCOLLISION));
+      not_overwrite = (!(nlpFileOp.fFlags & FOF_NOCONFIRMATION) ||  (nlpFileOp.fFlags & FOF_RENAMEONCOLLISION));
+    }
+    else
+    {
+      nlpFileOp.fAnyOperationsAborted=TRUE;
+      retCode = 0x402;
+      goto shfileop_error;
+    }
+/* need break at error before change sourcepointer */
+    while(!nlpFileOp.fAnyOperationsAborted && (pNextFrom[0]))
+    {
+      nlpFileOp.wFunc =  ((level+1)<<4) + FuncSwitch;
+      nlpFileOp.fFlags = lpFileOp->fFlags;
 
-				if (Multi) pTo += lenTo + 1;
-				if(!pTo[0]) {
-						nlpFileOp.fAnyOperationsAborted=TRUE;
-						where = 200;
-						break;
-				} /* endif */
+      if (b_MultiTo)
+      {
+        pTo = pNextTo;
+	    pNextTo = &pNextTo[lstrlenA(pTo)+1];
+        b_MultiTo = (b_Multi && pNextTo[0]);
+      }
 
-                FromTyp = SHFileTyp(pFrom, &lenFrom,
-									pTempFrom, &lenTempFrom,
-									&pFromFile,
-									&FromPathAttr, &FromAttr);
+      pFrom = pNextFrom;
+	  pNextFrom = &pNextFrom[lstrlenA(pNextFrom)+1];
+      if (!b_MultiFrom && !b_MultiTo)
+        b_MultiFrom = (pNextFrom[0]);
 
-				zTyp  = ToTyp;
-                ToTyp = SHFileTyp(pTo, &lenTo,
-									pTempTo, &lenTempTo,
-									&pToFile,
-									&ToPathAttr, &ToAttr);
+	  pFromFile = SHFileStrCpyCatA(pTempFrom, pFrom, NULL);
 
-				TRACE(__FUNCTION__" %s level=%d From='%s'(%d,%d,%d) To='%s'(%d,%d,%d)\n", pToFuncTXT,
-				 	level, pTempFrom, FromTyp, lenFrom, lenTempFrom, pTempTo, ToTyp, lenTo, lenTempTo);
-
-/* Check Source */
-				if (FromTyp != TypisDir
-				 && FromTyp != TypisFile
-				 && FromTyp != TypisMask) {        		
-						nlpFileOp.fAnyOperationsAborted=TRUE;
-						where = 201;
-						retCode=0x402;
-						break;
-				} /* endif */
-/* fix for more then one source for one target */
-				if (ToTyp == TypisUnkn
-				 && zTyp  <  TypisFile
-				 && zTyp  >  TypisUnkn
-				 && lenTo == 0) {
-					pToFile[0] = '\0';
-					ToTyp = zTyp;
-					lenTo = strlen(pTempTo);
-				} /* endif */
-/* recursiv creating from directorys are not valid for FO_MOVE. */
-				if (FuncSwitch == FO_MOVE && ToTyp == TypisNewPath) ToTyp = TypisUnkn;
-/* Check Target */
-				if (ToTyp == TypisMask) {
-					nlpFileOp.fAnyOperationsAborted=TRUE;
-					where = 202;
-       				if (FromTyp != TypisMask) {
-						retCode=0x10003;
-					} else {
-						if ((lpFileOp->wFunc & 0xf) == FO_MOVE) TempretCode = 0x2;
-					}	
-					break;
-				} /* endif */
-				if (ToTyp == TypisBad) {
-					nlpFileOp.fAnyOperationsAborted=TRUE;
-					where = 203;
-					retCode=0x402;
-					break;
-				} /* endif */
-				TargetisDir = (ToTyp == TypisDir || ToTyp == TypisDirS || ToTyp == TypisRoot);
-				ToSingle = (pTo[lenTo+1]=='\0');
-				if (Multi && ToSingle) {
-					Multi = (!(pFrom[lenFrom+1]!='\0'));
-				}
-
-				switch(FromTyp) {
-				case TypisFile: { /* Source is File */
-						if (ToTyp  == TypisName) {
-							if (ToSingle && pFrom[lenFrom+1] == '\0') break;
-							if (Multi) break;
-						}
-						if (ToTyp  == TypisFile) {
-							if (0 == strcmp(pTempFrom,pTempTo)) { /* target is the same as source ? */
-								nlpFileOp.fAnyOperationsAborted=TRUE;
-								retCode = 0x71;
-								where = 221;
-								break;
-							} /* endif */
-							if (ask_overwrite && SHELL_ConfirmDialog (ASK_OVERWRITE_FILE, pTempTo)) break;
-							if (!not_overwrite)  break;
-							if (FuncSwitch == FO_MOVE && (!Multi)) TempretCode = 0x75;
-						}
-						if (!Multi && TargetisDir) {
-							strcpy(pToFile,pFromFile);
-							pTempTo[strlen(pTempTo)+1] = '\0';
-							ToAttr = GetFileAttributesA(pTempTo);
-							if (ToAttr == -1)  break;
-							if (!(ToAttr & FILE_ATTRIBUTE_DIRECTORY)) break;
-						} 
-						if (FuncSwitch == FO_MOVE && (ToTyp == TypisUnkn || ToTyp == TypisName || ToTyp == TypisNameS)) TempretCode = 0x75;
-						nlpFileOp.fAnyOperationsAborted=TRUE;
-						where = 210 + TypisFile;
-						break;
-					}
-				case TypisMask: { /* Source is Mask */
-						if (TargetisDir)  break;
-						nlpFileOp.fAnyOperationsAborted=TRUE;
-						where = 210 + TypisMask;
-						break;
-					}
-				case TypisRoot:  /* Source is Root, only small test with this */
-				case TypisDir: { /* Source is Dir  */
-						if (TargetisDir) {
-/* From Root to Root not full tested, also no Comparsion in W98 */
-							MakeDir = (!(lpFileOp->fFlags & FOF_MULTIDESTFILES) && ToTyp != TypisRoot);
-							break;
-						}
-						MakeDir = TRUE;
-						if ((ToTyp  == TypisName || ToTyp  == TypisNameS || ToTyp  == TypisNewPath)) break;
-						nlpFileOp.fAnyOperationsAborted=TRUE;
-						where = 210 + TypisDir;
-						break;
-					}
-				default: {
-						nlpFileOp.fAnyOperationsAborted=TRUE;
-						where = 210 + FromTyp;
-/*						retCode=0x750; */
-						break;
-					}
-				}
-				if (nlpFileOp.fAnyOperationsAborted) {
-					if (FuncSwitch == FO_MOVE && (ToTyp == TypisUnkn || ToTyp == TypisName || ToTyp == TypisNameS)) TempretCode = 0x75;
-					break;
-				}
-
-				recurseinto = FALSE;
-
-				if (FuncSwitch == FO_MOVE && ToTyp == TypisName  && (FromTyp == TypisDir || FromTyp == TypisFile)) {
-					if (':' == pTempFrom[1] && ':' == pTempTo[1] && pTempFrom[0] == pTempTo[0]) {
-						if (MoveFileA(pTempFrom, pTempTo)) continue;
-					}
-				}
-				if (FromTyp == TypisDir && TargetisDir && MakeDir) {
-					PathRemoveFileSpecA(pTempFrom);
-					lenTempTo = strlen(pTempFrom);
-					strcpy(&pTempFrom[1],&pFrom[1]);
-					if (pTempFrom[lenTempTo-1] == '\\') lenTempTo--;
-					strcpy(pToFile,&pFrom[lenTempTo]);
-					lenTempTo = strlen(pTempTo);
-					pTempTo[lenTempTo+1] = '\0';
-				}
-
-				if (MakeDir) {
-					pToSlash = NULL;
-					if ((ToTyp  == TypisNameS || ToTyp  == TypisNewPath)) {
-						pToSlash = strchr(&pToFile[1],'\\');
-						if (NULL != pToSlash) pToSlash[0] = '\0';
-					}						
-					TRACE(__FUNCTION__" %s level=%d Creating Directory '%s'\n", pToFuncTXT, level, pTempTo);
-					SHCreateDirectory(NULL,pTempTo);
-					ToPathAttr = GetFileAttributesA(pTempTo);
-					if (NULL != pToSlash) pToSlash[0] = '\\';
-					if (ToPathAttr == -1) {
-						nlpFileOp.fAnyOperationsAborted=TRUE;
-						retCode=0x10004;
-						where = 220;
-						break;
-					}
-					recurseinto = TRUE;
-				}
-				if (ToTyp  != TypisNewPath) {
-					if (FromTyp == TypisDir || FromTyp == TypisRoot) {
-						strcpy(pFromFile,"\\*.*");
-						pTempFrom[strlen(pTempFrom)+1] = '\0';
-						recurseinto = TRUE;
-					} else {
-						if (FromTyp == TypisFile) {
-							if (TargetisDir) { 
-								recurseinto = TRUE;
-							} else {
-								if (CopyFileA(pTempFrom, pTempTo, FALSE)) {
-									if (FuncSwitch == FO_COPY) continue;
-									if (DeleteFileA(pTempFrom)) continue;
-								}
-								nlpFileOp.fAnyOperationsAborted=TRUE;
-								where = 222;
-								break;
-							}
-						} /* endif */
-					}
-				}
-				if (recurseinto) {
-					TRACE(__FUNCTION__" %s level=%d Entering into Directory '%s'\n", pToFuncTXT, level, pTempTo);
-					TempretCode = SHFileOperationA (&nlpFileOp);
-					if (nlpFileOp.fAnyOperationsAborted) {where = 223;break;}
-					if (FuncSwitch == FO_MOVE && FromTyp == TypisDir) {
-						if (!(RemoveDirectoryA(pFrom))) {
-							nlpFileOp.fAnyOperationsAborted=TRUE;
-							where = 100;
-							break;
-						}
-					}
-					continue; /* next pTo/pFrom */
-				}
-       			if (FromTyp == TypisMask) {
-					hFind = FindFirstFileA(pTempFrom, &wfd);
-					if (INVALID_HANDLE_VALUE == hFind) {
-						nlpFileOp.fAnyOperationsAborted=TRUE;
-						retCode=0x79;
-						where = 224;
-						break;
-					}
-
-					TRACE(__FUNCTION__" %s level=%d between Subdir %s -> %s'\n", pToFuncTXT, level, nlpFileOp.pFrom, nlpFileOp.pTo);
-					nlpFileOp.fFlags = (nlpFileOp.fFlags & (-1 - (FOF_MULTIDESTFILES)));
-
-					do {
-						TRACE(__FUNCTION__" %s level=%d find '%s'\n", pToFuncTXT, level, wfd.cFileName);
-						if (0==strcmp(wfd.cFileName,".")) continue;
-						if (0==strcmp(wfd.cFileName,"..")) continue;
-						if ((nlpFileOp.fFlags & FOF_FILESONLY) && (FILE_ATTRIBUTE_DIRECTORY & wfd.dwFileAttributes)) {
-							continue; /* next name in pFrom(dir) */
-						} /* endif */
-
-						strcpy(&pFromFile[1],wfd.cFileName);
-						pTempFrom[strlen(pTempFrom)+1]='\0';
-
-						TempretCode = SHFileOperationA (&nlpFileOp);
-
-						if (nlpFileOp.fAnyOperationsAborted) {where = 230;break;}
-
-					} while(FindNextFileA(hFind, &wfd));
-				}
-			}
-			break;
+      if (pTo)
+      {
+	    pToFile = SHFileStrCpyCatA(pTempTo, pTo, NULL);
+        if (!(pToFile))
+        {
+          nlpFileOp.fAnyOperationsAborted=TRUE;
+          retCode = 0x402;
+          goto shfileop_error;
+        } /* endif */
+        b_ToTailSlash = (!pToFile[1]);
+        if (b_ToTailSlash)
+        {
+          pToFile[0] = '\0';
+          if (strchr(pTempTo,'\\'))
+          {
+	        pToFile = SHFileStrCpyCatA(pTempTo, NULL, NULL);
+          }
         }
+        b_ToInvalidTail = (NULL != strpbrk(&pToFile[1],"*?"));
+      }
 
-	case FO_DELETE:
-		TRACE(__FUNCTION__" FO_DELETE level=%d\n",level);
-/* need break at error before change sourcepointer */ 
-		while(!nlpFileOp.fAnyOperationsAborted && (pFrom+=lenFrom+1)[0]) {
-				lenFrom=strlen(pFrom);
-				FromAttr = GetFileAttributesA(pFrom);
-				if (!(FromAttr & FILE_ATTRIBUTE_DIRECTORY)) {
-					TRACE(__FUNCTION__" FO_DELETE level=%d File='%s'\n",level , pFrom);
-					if (DeleteFileA(pFrom)) continue;
-					nlpFileOp.fAnyOperationsAborted=TRUE;
-/*					retCode = 0x71; */
-					where = 301;
-					break;
-				}
-				if (!(pTempFrom)) pTempFrom = HeapAlloc(GetProcessHeap(), 0, MAX_PATH+2);
-				strcpy(pTempFrom,pFrom);
-				PathRemoveBackslashA(pTempFrom);
-				FromAttr = GetFileAttributesA(pTempFrom);
-				if (!(FromAttr & FILE_ATTRIBUTE_DIRECTORY) ) {
-					nlpFileOp.fAnyOperationsAborted=TRUE;
-/*					retCode = 0x71; */
-					where = 302;
-					break;
-				}
-/* is Source an existing directory\*.* ? */
-				if (FromAttr == -1) {
-					PathRemoveFileSpecA(pTempFrom);
-					FromAttr = GetFileAttributesA(pTempFrom);
-				}
+      if (FO_RENAME == FuncSwitch)
+      {
+/* tempor„r only for FO_RENAME */
+        b_Mask = (NULL != strpbrk(pFrom,"*?"));
+        if (b_MultiTo || (pNextFrom[0]) || (b_Mask && !b_ToInvalidTail))
+        {
+/* no work, only RC=0 */
+// /* ???? */    nlpFileOp.fAnyOperationsAborted=TRUE;
+          goto shfileop_normal;
+        }
+      }
+  
+      hFind = (!(pFromFile) || !(pFromFile[1])) ? INVALID_HANDLE_VALUE : FindFirstFileA(pFrom, &wfd);
+        if (INVALID_HANDLE_VALUE == hFind)
+      {
+/* root (without mask) is also not allowed as source, tested in W98 */ 
+        nlpFileOp.fAnyOperationsAborted=TRUE;
+        retCode = 0x402;
+        goto shfileop_error;
+      } /* endif */
 
-				PathAddBackslashA(pTempFrom);
-				lenTempFrom = strlen(pTempFrom);
-				pFromFile=&pTempFrom[lenTempFrom];
+/* for all */
+#define HIGH_ADR (LPSTR)0xffffffff
+	  b_Mask = (!SHFileStrICmpA(&pFromFile[1], &wfd.cFileName[0], HIGH_ADR, HIGH_ADR));
 
-				if (FromAttr == -1 ||
-				   ((lenTempFrom==lenFrom) && !PathIsRootA(pFrom)) ||
-				  !(FromAttr & FILE_ATTRIBUTE_DIRECTORY) ||
-				  !(('\0'==pFrom[lenTempFrom]) || (0==strcmp(&pFrom[lenTempFrom],"*.*"))) ) {
-					retCode=0x402;
-					nlpFileOp.fAnyOperationsAborted=TRUE;
-					where = 303;
-					break;
-				}
-				strcpy(pFromFile, "*.*");
-				lenTempFrom = strlen(pTempFrom);
-				if (lenFrom < lenTempFrom) {
-/* Source is without \*.* */
-					pTempFrom[lenTempFrom+1]='\0';
-					nlpFileOp.pFrom = pTempFrom;
+      if (!pTo) /* FO_DELETE */
+      {
+        do
+        {
+          if (wfd.cFileName[0] == '.')
+          {
+	        if (wfd.cFileName[1] == '\0')
+	          continue;
+	        if (wfd.cFileName[1] == '.' && wfd.cFileName[2] == '\0')
+	          continue;
+          }
+	      SHFileStrCpyCatA(&pFromFile[1], &wfd.cFileName[0], NULL);
+          if (IsAttribFile(wfd.dwFileAttributes))
+          {
+	        nlpFileOp.fAnyOperationsAborted = (!Win32DeleteFileA(pTempFrom));
+            retCode = 0x78; /* value unknown */
+          }
+          else
+          {
+            nlpFileOp.fAnyOperationsAborted = (!SHELL_DeleteDirectoryA(pTempFrom,FALSE));
+            retCode = 0x78; /* value unknown */
+          }
+        } while(!nlpFileOp.fAnyOperationsAborted && FindNextFileA(hFind, &wfd));
+        FindClose(hFind);
+        hFind = INVALID_HANDLE_VALUE;
+        if (nlpFileOp.fAnyOperationsAborted)
+        {
+          goto shfileop_error;
+        }
+        continue;
+      } /* FO_DELETE ends, pTo must be every valid from here */
 
-					TRACE(__FUNCTION__" FO_DELETE level=%d Entering Directory '%s'\n",level , nlpFileOp.pFrom);
-					TempretCode = SHFileOperationA (&nlpFileOp);
+      b_SameRoot = (toupper(pTempFrom[0]) == toupper(pTempTo[0]));
+	  b_SameTailName = SHFileStrICmpA(pToFile, pFromFile, NULL, NULL);
 
-					if (nlpFileOp.fAnyOperationsAborted) {break;}
-/* Call SHELL_DeleteDirectoryA ? */
-					if (RemoveDirectoryA(pFrom)) continue;
-					nlpFileOp.fAnyOperationsAborted=TRUE;
-					where = 304;
-					break;
-				}
-				hFind = FindFirstFileA(pTempFrom, &wfd);
-				if (INVALID_HANDLE_VALUE == hFind) {
-					nlpFileOp.fAnyOperationsAborted=TRUE;
-					retCode=0x79;
-					where = 303;
-					break;
-				}
+      /* W98 Bug with FO_MOVE(/RENAME ?) different to FO_COPY, better the same as FO_COPY */
 
-				nlpFileOp.pFrom  = pTempFrom;
+	  b_ToValid = ((b_SameTailName &&  b_SameRoot && (FO_COPY == FuncSwitch)) ||
+	              (b_SameTailName && !b_SameRoot) || (b_ToInvalidTail));
 
-				nlpFileOp.fFlags = (nlpFileOp.fFlags & (-1 - (FOF_MULTIDESTFILES)));
+      ToPathAttr = ToAttr = GetFileAttributesA(pTempTo);
+      if (!b_Mask && /* IsAttribDir(wfd.dwFileAttributes) && */(ToAttr -1))
+      {
+        if (pToFile)
+        {
+          pToFile[0] = '\0';
+          ToPathAttr = GetFileAttributesA(pTempTo);
+          /* if (-1 != ToPathAttr) */  pToFile[0] = '\\';
+        }
+      }
+      if (FO_RENAME == FuncSwitch)
+      {
+        if (!b_SameRoot || b_Mask /* FO_RENAME works not with Mask */
+	       || !SHFileStrICmpA(pTempFrom, pTempTo, pFromFile, NULL)
+	       || (SHFileStrICmpA(pTempFrom, pTempTo, pFromFile, HIGH_ADR) && !b_ToTailSlash))
+        {
+          retCode = 0x73;
+          nlpFileOp.fAnyOperationsAborted=TRUE;
+          goto shfileop_error;
+        }
+        if (b_ToInvalidTail)
+        {
+          nlpFileOp.fAnyOperationsAborted=TRUE;
+          retCode=0x2;
+          goto shfileop_error;
+        }
+        if (IsAttribDir(wfd.dwFileAttributes) && IsAttribDir(ToAttr))
+        {
+          if (b_ToTailSlash)
+          {
+            retCode = 0xb7;
+          }
+          else
+          {
+            retCode = 0x7b;
+          }
+          nlpFileOp.fAnyOperationsAborted=TRUE;
+          goto shfileop_error;
+        }
+        if (-1 == ToPathAttr)
+        {
+          nlpFileOp.fAnyOperationsAborted=TRUE;
+          retCode = 0x75;
+          goto shfileop_error;
+        } /* endif */
+        if (!MoveFileA(pTempFrom, pTempTo))
+        {
+          nlpFileOp.fAnyOperationsAborted=TRUE;
+/* we need still the value for the returncode, we use the mostly assumed */
+              retCode = 0xb7;
+          goto shfileop_error;
+        }
+        goto shfileop_normal;
+      }
 
-				TRACE(__FUNCTION__" FO_DELETE level=%d Delete in Subdir %s'\n",level , nlpFileOp.pFrom);
-
-				do {
-					TRACE(__FUNCTION__" FO_DELETE level=%d find '%s'\n",level , wfd.cFileName);
-					if (0==strcmp(wfd.cFileName,".")) continue;
-					if (0==strcmp(wfd.cFileName,"..")) continue;
-					if ((nlpFileOp.fFlags & FOF_FILESONLY) && (FILE_ATTRIBUTE_DIRECTORY & wfd.dwFileAttributes)) {
-						continue;
-						} /* endif */
-
-					strcpy(pFromFile,wfd.cFileName);
-					pTempFrom[strlen(pTempFrom)+1]='\0';
-
-					TempretCode = SHFileOperationA (&nlpFileOp);
-
-					if (nlpFileOp.fAnyOperationsAborted) {where = 304;break;}
-
-				} while(FindNextFileA(hFind, &wfd));
-
-				FindClose(hFind);
-				if (nlpFileOp.fAnyOperationsAborted) {where = 305;break;}
-				continue;
-			}
-			break;
-	case 0:
-			break;
-        case FO_RENAME:
-            TRACE("File Rename:\n");
-            if (pFrom[strlen(pFrom) + 1] != '\0')
+      if (!b_Mask && IsAttribDir(wfd.dwFileAttributes) && (ToAttr -1))
+      {
+        if (pToFile)
+        {
+          pToFile[0] = '\0';
+          ToPathAttr = GetFileAttributesA(pTempTo);
+          if ((ToPathAttr == -1) && b_ToValid)
+          {
+/* create dir k”nnte hier erfolgen, smple target D:\y\ *.* create with RC=10003 */
+            if(!SHCreateDirectory(NULL,pTempTo))
             {
-                WARN("Attempt to rename more than one file\n");
-				lpFileOp->fAnyOperationsAborted=TRUE;
-				retCode=0;
-				break;
+              nlpFileOp.fAnyOperationsAborted=TRUE;
+              retCode = 0x73;/* value unknown */
+              goto shfileop_error;
             }
-            TRACE("From %s, To %s\n", pFrom, pTo);
-			pTempFrom = HeapAlloc(GetProcessHeap(), 0, 2 * MAX_PATH+6);
-			pTempTo   = &pTempFrom[MAX_PATH+4];
+            ToPathAttr = GetFileAttributesA(pTempTo);
+          }
+          pToFile[0] = '\\';
+          if (b_ToInvalidTail)
+          {
+            nlpFileOp.fAnyOperationsAborted=TRUE;
+            retCode=0x10003;
+            goto shfileop_error;
+          }
+        }
+      }
 
-            FromTyp = SHFileTyp(pFrom, &lenFrom,
-							pTempFrom, &lenTempFrom,
-							&pFromFile,
-							&FromPathAttr, &FromAttr);
+/* handle mask in source */
+      if (b_Mask)
+      {
+        if (!IsAttribDir(ToAttr))
+        {
+          nlpFileOp.fAnyOperationsAborted=TRUE;
+          if (b_ToInvalidTail && b_SameTailName && (FO_MOVE == FuncSwitch))
+          {
+            retCode = 0x2;
+          }
+          else
+          {
+            retCode = 0x75;
+          }
+          goto shfileop_error;
+        }
+	    pToFile = SHFileStrCpyCatA(pTempTo,NULL, "\\");
+        nlpFileOp.fFlags = (nlpFileOp.fFlags | FOF_MULTIDESTFILES);
+        do
+        {
+          if (wfd.cFileName[0] == '.')
+          {
+            if (wfd.cFileName[1] == '\0')
+              continue;
+            if (wfd.cFileName[1] == '.' && wfd.cFileName[2] == '\0') continue;
+          }
+          if (IsAttribDir(wfd.dwFileAttributes) && (nlpFileOp.fFlags & FOF_FILESONLY))
+          {
+            continue; /* next name in pTempFrom(dir) */
+          }
+	      SHFileStrCpyCatA(&pToFile[1], &wfd.cFileName[0], NULL);
+	      SHFileStrCpyCatA(&pFromFile[1], &wfd.cFileName[0], NULL);
+          retCode = SHFileOperationA (&nlpFileOp);
+        } while(!nlpFileOp.fAnyOperationsAborted && FindNextFileA(hFind, &wfd));
+      }
+      FindClose(hFind);
+      hFind = INVALID_HANDLE_VALUE;
+      /* only FO_COPY/FO_MOVE without mask, FO_DELETE and FO_RENAME are solved */
+      if (b_Mask)
+        continue;
 
-			ToTyp = SHFileTyp(pTo, &lenTo,
-							pTempTo, &lenTempTo,
-							&pToFile,
-							&ToPathAttr, &ToAttr);
+/* tailling BackSlash is ever removed and pToFile points to BackSlash before */
+      if (!b_MultiTo && (b_MultiFrom || (!(b_Multi) && IsAttribDir(ToAttr))))
+      {
+        if ((FO_MOVE == FuncSwitch) && IsAttribDir(ToAttr) && IsAttribDir(wfd.dwFileAttributes))
+        {
+          if (b_Multi)
+          {
+            retCode = 0x73; /* !b_Multi = 0x8 ?? */ 
+            nlpFileOp.fAnyOperationsAborted=TRUE;
+            goto shfileop_error;
+          }
+        }
+	    pToFile = SHFileStrCpyCatA(&pTempTo[strlen(pTempTo)], "\\", wfd.cFileName);
+        ToAttr = GetFileAttributesA(pTempTo);
+      }
 
-			TRACE(__FUNCTION__" FO_RENAME level=%d From='%s'(%d,%d,%d) To='%s'(%d,%d,%d)\n",
-				 level, pTempFrom, FromTyp, lenFrom, lenTempFrom, pTempTo, ToTyp, lenTo, lenTempTo);
+      if (IsAttribDir(ToAttr))
+      {
+        if (IsAttribFile(wfd.dwFileAttributes))
+        {
+          if (FO_COPY == FuncSwitch)
+          {
+/* ????? */ retCode = 0x75;
+          }
+          else
+          {
+            retCode = 0xb7;
+          }
+          nlpFileOp.fAnyOperationsAborted=TRUE;
+          goto shfileop_error;
+        }
+      }
+      else
+      {
+        pToFile[0] = '\0';
+        ToPathAttr = GetFileAttributesA(pTempTo);
+        pToFile[0] = '\\';
+        if (IsAttribFile(ToPathAttr))
+        {
+/* fehler, ist das schon getestet ? */
+          nlpFileOp.fAnyOperationsAborted=TRUE;
+          retCode = 0x777402;
+          goto shfileop_error;
+        } /* endif */
+      }
 
-/* Check Target, Target = Dir is invalid, must be befor the next SourceCheck  */
-			if (FromTyp == TypisDir && ToTyp == TypisDir) {        		
-					nlpFileOp.fAnyOperationsAborted=TRUE;
-					retCode=0x7b;
-					break;
-			} /* endif */
-/* Check Source */
-			if (FromTyp == TypisDirS || FromTyp == TypisName
-/* for (FromTyp == TypisNewPath) to many, all are invalid and not are retCode 0x402  */ 
-			|| (FromTyp == TypisNewPath && (ToTyp != TypisDir && ToTyp != TypisName))) {        		
-					nlpFileOp.fAnyOperationsAborted=TRUE;
-					retCode=0x402;
-					break;
-			} /* endif */
-/* Check Target, Target = NewDir is invalid, must be after 0x402 ? */
-			if (ToTyp == TypisNewPath) {        		
-					nlpFileOp.fAnyOperationsAborted=TRUE;
-					retCode=0x75;
-					break;
-			} /* endif */
-			if (ToTyp == TypisDirS) {        		
-					nlpFileOp.fAnyOperationsAborted=TRUE;
-					retCode=0xb7;
-					break;
-			} /* endif */
-/* What is with existing Target, can we replace it ? */
-			if (((FromTyp == TypisFile || FromTyp == TypisDir) && ToTyp == TypisName)
-			  || (FromTyp == TypisDir && ToTyp == TypisNameS)) {
-				if (ToTyp == TypisNameS) pTempTo[--lenTo] = '\0';
-				lenTempTo = lenTempFrom = 2;
-/* FileRename only in the same path !! ?? */
-				if (FromTyp == TypisFile) {
-					pFromFile = strrchr(pTempFrom,'\\');
-					pToFile = strrchr(pTempTo,'\\');
-					if (pFromFile == NULL || pToFile == NULL) {
-						if (ToTyp == TypisNameS) pTempTo[lenTo++] = '\\';
-						break;
-					}
-					pFromFile[0] = '\0';
-					pToFile[0] = '\0';
-					lenTempTo = strlen(pTempTo);
-					lenTempFrom = strlen(pTempFrom);
-					pFromFile[0] = '\\';
-					pToFile[0] = '\\';
-				}
-				if (lenTempTo == lenTempFrom && 0 == memcmp(pTempTo,pTempFrom,lenTempTo)) {
-    	       		retCode = !MoveFileA(pTempFrom, pTempTo);
-					if (ToTyp == TypisNameS) pTempTo[lenTo++] = '\\';
-					if (retCode) nlpFileOp.fAnyOperationsAborted=TRUE;
-					break;
-				}
-			}
+/* singlesource + no mask */
+      if (-1 == (ToAttr & ToPathAttr))
+      {
+/* Target-dir does not exist, and can not created */
+        nlpFileOp.fAnyOperationsAborted=TRUE;
+        retCode=0x75;
+        goto shfileop_error;
+      }
 
-			retCode=0x73;
-			nlpFileOp.fAnyOperationsAborted=TRUE;
-			break;
+      switch(FuncSwitch)
+      {
+      case FO_MOVE:
+	      if ((ToAttr == -1) && SHFileStrICmpA(pTempFrom, pTempTo, pFromFile, NULL))
+        {  
+          nlpFileOp.wFunc =  ((level+1)<<4) + FO_RENAME;
+          retCode = SHFileOperationA(&nlpFileOp);
+        }
+        else
+        {
+          if (b_SameRoot && IsAttribDir(ToAttr) && IsAttribDir(wfd.dwFileAttributes))
+          {
+	          pToFile = SHFileStrCpyCatA(pTempFrom, NULL, "\\*.*");
+          	retCode = SHFileOperationA(&nlpFileOp);
+	          ((WORD*)pToFile)[0] = '\0';
+          }
+          else
+          {
+            nlpFileOp.wFunc =  ((level+1)<<4) + FO_COPY;
+          	retCode = SHFileOperationA(&nlpFileOp);
+          } /* endif */
+          if (!nlpFileOp.fAnyOperationsAborted)
+          {
+            nlpFileOp.wFunc =  ((level+1)<<4) + FO_DELETE;
+            retCode = SHFileOperationA(&nlpFileOp);
+          } /* endif */
+        }
+        continue;
+      case FO_COPY:
+	      if (SHFileStrICmpA(pTempFrom, pTempTo, NULL, NULL))
+        { /* target is the same as source ? */
+          nlpFileOp.fAnyOperationsAborted=TRUE;
+/* we need still the value for the returncode, we assume 0x71 */
+          retCode = 0x71;
+          goto shfileop_error;
+        } /* endif */
+	      if (IsAttribDir((ToAttr & wfd.dwFileAttributes)))
+        {
+          if (IsAttribDir(ToAttr) || SHCreateDirectory(NULL,pTempTo))
+          {
+/*  ??? nlpFileOp.fFlags = (nlpFileOp.fFlags | FOF_MULTIDESTFILES); */
+	          SHFileStrCpyCatA(pTempFrom, NULL, "\\*.*");
+            retCode = SHFileOperationA(&nlpFileOp);
+          }
+          else
+          {
+            nlpFileOp.fAnyOperationsAborted=TRUE;
+            retCode = 0x750;/* value unknown */
+          }
+        }
+        else
+        {
+          if (!(ask_overwrite && SHELL_ConfirmDialog (ASK_OVERWRITE_FILE, pTempTo))
+          && (not_overwrite))
+          {
+            nlpFileOp.fAnyOperationsAborted=TRUE;
+	          /* we need still the value for the returncode, we use the mostly assumed */
+            retCode = 0x73;
+            goto shfileop_error;
+          }
+          if (!(CopyFileA(pTempFrom, pTempTo, FALSE)))
+          {
+            nlpFileOp.fAnyOperationsAborted=TRUE;
+            retCode = 0x77; /* value unknown */
+          }
+        }
+      } /* end-switch */
+    } /* end-while */
+  }
+shfileop_normal:
+	if (!(nlpFileOp.fAnyOperationsAborted))
+	  retCode = 0;
+shfileop_error:
+	if (hFind != INVALID_HANDLE_VALUE)
+	  FindClose(hFind);
+  hFind = INVALID_HANDLE_VALUE;
+	if (pTempFrom)
+	  HeapFree(GetProcessHeap(), 0, pTempFrom);
 
-	default:
-		TRACE(__FUNCTION__" Unhandled shell file operation %d at level=%d stub\n",(lpFileOp->wFunc & 15), level );
-		lpFileOp->fAnyOperationsAborted=TRUE;
-	return 1;
-	}
-	if (pTempFrom) HeapFree(GetProcessHeap(), 0, pTempFrom);
+  TRACE("%s level=%d AnyOpsAborted=%s ret=0x%x, with %s%s%s\n",
+	      pToFuncTXT, level, nlpFileOp.fAnyOperationsAborted ? "TRUE":"FALSE",
+	      retCode, debugstr_a(pFrom), pTo ? " -> ":"", debugstr_a(pTo));
 
-	if (nlpFileOp.fAnyOperationsAborted) {
-		lpFileOp->fAnyOperationsAborted=TRUE;
-		if (TempretCode > 0 /* retCode */) {
-			retCode = TempretCode;
-		} /* endif */
-	}
-	if (lpFileOp->fAnyOperationsAborted==TRUE) {
-		if (FO_DELETE == (lpFileOp->wFunc & 15)) {
-			TRACE(__FUNCTION__" Setting AnyOpsAborted=TRUE level=%d ret=0x%x, at=%i with %s\n",level, retCode,where,pFrom);
-		} else {
-			TRACE(__FUNCTION__" Setting AnyOpsAborted=TRUE level=%d ret=0x%x, at=%i with %s -> %s\n",level, retCode,where,pFrom,pTo);
-		}
-		return retCode;
-	} /* endif */
-	TRACE(__FUNCTION__" Setting AnyOpsAborted=FALSE\n");
-	return 0;
-
+  lpFileOp->fAnyOperationsAborted = nlpFileOp.fAnyOperationsAborted;
+  return retCode;
 }
 
 /*************************************************************************
- * SHFileOperationW				[SHELL32.@]
+ * SHFileOperationW        [SHELL32.@]
  *
  * NOTES
  *     exported by name
  */
 DWORD WINAPI SHFileOperationW (LPSHFILEOPSTRUCTW lpFileOp)
 {
-	FIXME("(%p):stub.\n", lpFileOp);
-	return 1;
+  FIXME("(%p):stub.\n", lpFileOp);
+  return 1;
 }
 
 /*************************************************************************
- * SHFileOperation				[SHELL32.@]
+ * SHFileOperation        [SHELL32.@]
  *
  */
 DWORD WINAPI SHFileOperationAW(LPVOID lpFileOp)
 {
-	if (SHELL_OsIsUnicode())
-	  return SHFileOperationW(lpFileOp);
-	return SHFileOperationA(lpFileOp);
+  if (SHELL_OsIsUnicode())
+    return SHFileOperationW(lpFileOp);
+  return SHFileOperationA(lpFileOp);
 }
 
 /*************************************************************************
@@ -836,22 +844,53 @@ HRESULT WINAPI SheGetDirW(LPWSTR u, LPWSTR v)
 }
 
 /*************************************************************************
- * SheChangeDirW [SHELL32.274]
+ * SheChangeDir [SHELL32.@]
  *
  */
-HRESULT WINAPI SheChangeDirW(LPWSTR u)
-{	FIXME("(%s),stub\n",debugstr_w(u));
+HRESULT WINAPI SheChangeDirW(LPWSTR path)
+{	FIXME("(%s),stub\n",debugstr_w(path));
 	return 0;
 }
 
+HRESULT WINAPI SheChangeDirA(LPSTR path)
+{
+	WCHAR wPath[MAX_PATH];
+	
+	TRACE("(%s)\n", path);
+
+	if (!path)
+	  return 0;
+	MultiByteToWideChar(CP_ACP, 0, path, -1, wPath, MAX_PATH);
+	return SheChangeDirW(wPath);
+}
 /*************************************************************************
- * IsNetDrive			[SHELL32.66]
+ * SheChangeDirEx [SHELL32.@]
+ *
+ */
+HRESULT WINAPI SheChangeDirExW(LPWSTR path)
+{	FIXME("(%s),stub\n",debugstr_w(path));
+	return 0;
+}
+
+HRESULT WINAPI SheChangeDirExA(LPSTR path)
+{
+	WCHAR wPath[MAX_PATH];
+	
+	TRACE("(%s)\n", path);
+
+	if (!path)
+	  return 0;
+	MultiByteToWideChar(CP_ACP, 0, path, -1, wPath, MAX_PATH);
+	return SheChangeDirExW(wPath);
+}
+
+/*************************************************************************
+ * IsNetDrive      [SHELL32.66]
  */
 BOOL WINAPI IsNetDrive(DWORD drive)
 {
-	char root[4];
-	strcpy(root, "A:\\");
-	root[0] += drive;
-	return (GetDriveTypeA(root) == DRIVE_REMOTE);
+  char root[4];
+  strcpy(root, "A:\\");
+  root[0] += (char)drive;
+  return (GetDriveTypeA(root) == DRIVE_REMOTE);
 }
-

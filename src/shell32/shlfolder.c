@@ -1219,7 +1219,7 @@ static HRESULT WINAPI IShellFolder_fnSetNameOf(
 	if ( MoveFileA(szSrc, szDest) )
 	{
 	  if (pPidlOut) *pPidlOut = SHSimpleIDListFromPathA(szDest);
-	  SHChangeNotifyA( bIsFolder?SHCNE_RENAMEFOLDER:SHCNE_RENAMEITEM, SHCNF_PATHA, szSrc, szDest);
+	  SHChangeNotify( bIsFolder?SHCNE_RENAMEFOLDER:SHCNE_RENAMEITEM, SHCNF_PATHA, szSrc, szDest);
 	  return S_OK;
 	}
 	return E_FAIL;
@@ -1488,7 +1488,7 @@ static HRESULT WINAPI ISFHelper_fnAddFolder(
 	  pidlitem = SHSimpleIDListFromPathA(lpstrNewDir);
 
 	  pidl = ILCombine(This->absPidl, pidlitem);
-	  SHChangeNotifyA(SHCNE_MKDIR, SHCNF_IDLIST, pidl, NULL);
+	  SHChangeNotify(SHCNE_MKDIR, SHCNF_IDLIST, pidl, NULL);
 	  SHFree(pidl); 
 
 	  if (ppidlOut) *ppidlOut = pidlitem;
@@ -1553,7 +1553,7 @@ static HRESULT WINAPI ISFHelper_fnDeleteItems(
 	      return E_FAIL;
 	    }
 	    pidl = ILCombine(This->absPidl, apidl[i]);
-	    SHChangeNotifyA(SHCNE_RMDIR, SHCNF_IDLIST, pidl, NULL);
+	    SHChangeNotify(SHCNE_RMDIR, SHCNF_IDLIST, pidl, NULL);
 	    SHFree(pidl); 
 	  }
 	  else if (_ILIsValue(apidl[i]))
@@ -1567,7 +1567,7 @@ static HRESULT WINAPI ISFHelper_fnDeleteItems(
 	      return E_FAIL;
 	    }
 	    pidl = ILCombine(This->absPidl, apidl[i]);
-	    SHChangeNotifyA(SHCNE_DELETE, SHCNF_IDLIST, pidl, NULL);
+	    SHChangeNotify(SHCNE_DELETE, SHCNF_IDLIST, pidl, NULL);
 	    SHFree(pidl); 
 	  }
 
