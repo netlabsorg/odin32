@@ -1,6 +1,8 @@
-; $Id: oledlg.def,v 1.1 1999-08-30 22:16:48 sandervl Exp $
+; $Id: oledlg.def,v 1.2 1999-12-28 10:31:02 sandervl Exp $
 
-;Created by BLAST for IBM's compiler
+;
+; Based on NT 4.0 SP6: OLEDLG.DLL 
+;
 LIBRARY OLEDLG INITINSTANCE
 DATA MULTIPLE NONSHARED
 

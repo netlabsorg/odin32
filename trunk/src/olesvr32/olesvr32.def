@@ -1,6 +1,8 @@
-; $Id: olesvr32.def,v 1.1 1999-08-25 22:38:49 sandervl Exp $
+; $Id: olesvr32.def,v 1.2 1999-12-28 10:31:02 sandervl Exp $
 
-;Created by BLAST for IBM's compiler
+;
+; Based on NT 4.0 SP6: OLESVR32.DLL 
+;
 LIBRARY OLESVR32 INITINSTANCE
 DATA MULTIPLE NONSHARED
 

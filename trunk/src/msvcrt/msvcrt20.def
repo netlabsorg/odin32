@@ -1,6 +1,8 @@
-; $Id: msvcrt20.def,v 1.3 1999-12-21 20:42:27 sandervl Exp $
+; $Id: msvcrt20.def,v 1.4 1999-12-28 10:31:01 sandervl Exp $
 
-;Created by BLAST for IBM's compiler
+;
+; Based on Windows 98 : MSVCRT20.DLL (v2.11.000)
+;
 LIBRARY MSVCRT20 INITINSTANCE TERMINSTANCE
 DATA MULTIPLE NONSHARED
 

@@ -1,27 +1,33 @@
-; $Id: comdlg32.def,v 1.4 1999-11-02 20:37:42 sandervl Exp $
+; $Id: comdlg32.def,v 1.5 1999-12-28 10:30:59 sandervl Exp $
 
-;Created by BLAST for IBM's compiler
+;
+; Based on NT 4.0 SP6: COMDLG32.DLL 
+;
 LIBRARY COMDLG32 INITINSTANCE
 DATA MULTIPLE NONSHARED
 
 EXPORTS
-    ChooseColorA               = _ChooseColorA@4             @1
-    ChooseColorW               = _ChooseColorW@4             @2
-    ChooseFontA                = _ChooseFontA@4              @3
-    ChooseFontW                = _ChooseFontW@4              @4
-    CommDlgExtendedError       = _CommDlgExtendedError32@0   @5
-    FindTextA                  = _FindTextA@4                @6
-    FindTextW                  = _FindTextW@4                @7
-    GetFileTitleA              = _GetFileTitleA32@12           @8
-    GetFileTitleW              = _GetFileTitleW32@12           @9
-    GetOpenFileNameA           = _GetOpenFileNameA@4         @10
-    GetOpenFileNameW           = _GetOpenFileNameW@4         @11
-    GetSaveFileNameA           = _GetSaveFileNameA@4         @12
-    GetSaveFileNameW           = _GetSaveFileNameW@4         @13
-    PageSetupDlgA              = _PageSetupDlgA@4            @14
-    PageSetupDlgW              = _PageSetupDlgW@4            @15
-    PrintDlgA                  = _PrintDlgA@4                @16
-    PrintDlgW                  = _PrintDlgW@4                @17
-    ReplaceTextA               = _ReplaceTextA@4             @18
-    ReplaceTextW               = _ReplaceTextW@4             @19
-;    WEP                        = _WEP@??                     @20
+    ChooseColorA               = _ChooseColorA@4             @101
+    ChooseColorW               = _ChooseColorW@4             @102
+    ChooseFontA                = _ChooseFontA@4              @103
+    ChooseFontW                = _ChooseFontW@4              @104
+    CommDlgExtendedError       = _CommDlgExtendedError32@0   @105
+    FindTextA                  = _FindTextA@4                @106
+    FindTextW                  = _FindTextW@4                @107
+    GetFileTitleA              = _GetFileTitleA32@12         @108
+    GetFileTitleW              = _GetFileTitleW32@12         @109
+    GetOpenFileNameA           = _GetOpenFileNameA@4         @110
+    GetOpenFileNameW           = _GetOpenFileNameW@4         @111
+    GetSaveFileNameA           = _GetSaveFileNameA@4         @112
+    GetSaveFileNameW           = _GetSaveFileNameW@4         @113
+;   LoadAlterBitmap					     @114
+    PageSetupDlgA              = _PageSetupDlgA@4            @115
+    PageSetupDlgW              = _PageSetupDlgW@4            @116
+    PrintDlgA                  = _PrintDlgA@4                @117
+    PrintDlgW                  = _PrintDlgW@4                @118
+    ReplaceTextA               = _ReplaceTextA@4             @119
+    ReplaceTextW               = _ReplaceTextW@4             @120
+;   WantArrows						     @121
+;   dwLBSubclass					     @122
+;   dwOKSubclass					     @123
+
