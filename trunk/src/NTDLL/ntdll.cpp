@@ -1,4 +1,4 @@
-/* $Id: ntdll.cpp,v 1.6 2000-01-05 19:37:29 sandervl Exp $ */
+/* $Id: ntdll.cpp,v 1.7 2003-01-16 15:22:37 sandervl Exp $ */
 
 /*
  *
@@ -33,7 +33,9 @@
 #include <os2win.h>
 #include <winnt.h>
 #include <ntdef.h>
+#ifndef __EMX__
 #include <builtin.h>
+#endif
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>

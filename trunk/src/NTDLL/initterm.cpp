@@ -38,6 +38,8 @@
 extern "C" {
  //Win32 resource table (produced by wrc)
  extern DWORD _Resource_PEResTab;
+ void __ctordtorInit (void);
+ void __ctordtorTerm (void);
 }
 static HMODULE dllHandle = 0;
 
@@ -45,7 +47,7 @@ BOOL WINAPI NTDLL_LibMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserve
 
 //******************************************************************************
 //******************************************************************************
-BOOL WINAPI LibMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID fImpLoad)
+BOOL WIN32API LibMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID fImpLoad)
 {
    switch (fdwReason)
    {
@@ -56,7 +58,7 @@ BOOL WINAPI LibMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID fImpLoad)
 
    case DLL_PROCESS_DETACH:
 	NTDLL_LibMain(hinstDLL, fdwReason, fImpLoad);
-	ctordtorTerm();
+	__ctordtorTerm();
 	return TRUE;
    }
    return FALSE;
@@ -83,11 +85,11 @@ unsigned long SYSTEM _DLL_InitTerm(unsigned long hModule, unsigned long
 
    switch (ulFlag) {
       case 0 :
-         ctordtorInit();
+         __ctordtorInit();
 
          CheckVersionFromHMOD(PE2LX_VERSION, hModule); /*PLF Wed  98-03-18 05:28:48*/
 
-	 dllHandle = RegisterLxDll(hModule, LibMain, (PVOID)&_Resource_PEResTab);
+	 dllHandle = RegisterLxDll(hModule, (WIN32DLLENTRY)LibMain, (PVOID)&_Resource_PEResTab);
          if(dllHandle == 0) 
 		return 0UL;
 

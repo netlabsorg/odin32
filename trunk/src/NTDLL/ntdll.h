@@ -1,14 +1,14 @@
-/* $Id: ntdll.h,v 1.13 2001-04-22 10:38:59 sandervl Exp $ */
+/* $Id: ntdll.h,v 1.14 2003-01-16 15:22:38 sandervl Exp $ */
 
 /*
    this file defines interfaces mainly exposed to device drivers and
    native nt dll's
 
 */
-#ifndef __WINE_NTDDK_H
-#define __WINE_NTDDK_H
+#ifndef __WINE_INT_NTDLL_H
+#define __WINE_INT_NTDLL_H
 
-#include <os2win.h>
+#include <windows.h>
 #include <misc.h>
 
 #include <ntdef.h>
@@ -613,6 +613,21 @@ BOOL WINAPI LookupAccountSidA(LPCSTR,PSID,LPCSTR,LPDWORD,LPCSTR,LPDWORD,
 BOOL WINAPI LookupAccountSidW(LPCWSTR,PSID,LPCWSTR,LPDWORD,LPCWSTR,LPDWORD,
                                   PSID_NAME_USE);
 PSID_IDENTIFIER_AUTHORITY WINAPI GetSidIdentifierAuthority(PSID);
+DWORD WIN32API NtAlertThread(DWORD x1,DWORD x2);
+NTSTATUS WIN32API NtClearEvent(HANDLE hEvent);
+NTSTATUS WINAPI NtAccessCheck(
+	IN PSECURITY_DESCRIPTOR SecurityDescriptor,
+	IN HANDLE ClientToken,
+	IN ACCESS_MASK DesiredAccess,
+	IN PGENERIC_MAPPING GenericMapping,
+	OUT PPRIVILEGE_SET PrivilegeSet,
+	OUT PULONG ReturnLength,
+	OUT PULONG GrantedAccess,
+	OUT PBOOLEAN AccessStatus);
+
+NTSTATUS WINAPI NtCreateEvent(PHANDLE,ACCESS_MASK,const OBJECT_ATTRIBUTES *,BOOLEAN,BOOLEAN);
+NTSTATUS WINAPI NtCreateSemaphore(PHANDLE,ACCESS_MASK,const OBJECT_ATTRIBUTES*,ULONG,ULONG);
+NTSTATUS WINAPI NtOpenEvent(PHANDLE,ACCESS_MASK,const OBJECT_ATTRIBUTES *attr);
 
 #ifdef __cplusplus
 }

@@ -1,4 +1,4 @@
-/* $Id: ntdllrsrc.orc,v 1.1 2000-03-06 23:38:15 bird Exp $ */
+/* $Id: ntdllrsrc.orc,v 1.2 2003-01-16 15:22:38 sandervl Exp $ */
 
 #include "winuser.h"
 #include "odinrsrc.h"

@@ -1,4 +1,4 @@
-/* $Id: reg.cpp,v 1.5 2002-05-16 12:16:47 sandervl Exp $ */
+/* $Id: reg.c,v 1.3 2003-01-16 15:22:39 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -9,15 +9,14 @@
  *
  * registry functions
  */
-
-#include <os2win.h>
+#include <windows.h>
+#include <ntddk.h>
 #include <winnt.h>
 #include <ntdef.h>
 #include <winreg.h>
 
 #include <heapstring.h>
 #include "debugtools.h"
-#include "ntdll.h"
 
 
 /* translates predefined paths to HKEY_ constants */
@@ -90,9 +89,9 @@ static BOOLEAN _NtKeyToWinKey(
  */
 NTSTATUS WINAPI NtCreateKey(PHANDLE            KeyHandle,
                             ACCESS_MASK        DesiredAccess,
-                            POBJECT_ATTRIBUTES ObjectAttributes,
+                            const OBJECT_ATTRIBUTES* ObjectAttributes,
                             ULONG              TitleIndex,
-                            PUNICODE_STRING    Class,
+                            const UNICODE_STRING*  Class,
                             ULONG              CreateOptions,
                             PULONG             Disposition)
 {
@@ -107,7 +106,6 @@ NTSTATUS WINAPI NtCreateKey(PHANDLE            KeyHandle,
 
   return (0);
 }
-
 
 /******************************************************************************
  * NtDeleteKey [NTDLL]
@@ -127,7 +125,7 @@ NTSTATUS WINAPI NtDeleteKey(HANDLE KeyHandle)
  * ZwDeleteValueKey
  */
 NTSTATUS WINAPI NtDeleteValueKey(HANDLE          KeyHandle,
-                                 PUNICODE_STRING ValueName)
+                                 const UNICODE_STRING* ValueName)
 {
   dprintf(("NTDLL: NtDeleteValueKey(%08xh, %08xh) not implemented\n",
            KeyHandle,
@@ -200,8 +198,8 @@ NTSTATUS WINAPI NtFlushKey(HANDLE KeyHandle)
  *  NtLoadKey  [NTDLL]
  *  ZwLoadKey
  */
-NTSTATUS WINAPI NtLoadKey(PHANDLE            KeyHandle,
-                          POBJECT_ATTRIBUTES ObjectAttributes)
+NTSTATUS WINAPI NtLoadKey(const OBJECT_ATTRIBUTES *KeyHandle,
+                          const OBJECT_ATTRIBUTES *ObjectAttributes)
 {
   dprintf(("NTDLL: NtLoadKey(%08xh,%08xh) not implemented.\n",
            KeyHandle,
@@ -251,7 +249,7 @@ NTSTATUS WINAPI NtNotifyChangeKey(HANDLE           KeyHandle,
  */
 NTSTATUS WINAPI NtOpenKey(PHANDLE            KeyHandle,
                           ACCESS_MASK        DesiredAccess,
-                          POBJECT_ATTRIBUTES ObjectAttributes)
+                          const OBJECT_ATTRIBUTES *ObjectAttributes)
 {
   dprintf(("NTDLL: NtOpenKey(%08xh,%08xh,%08xh) not implemented.\n",
            KeyHandle,
@@ -311,7 +309,7 @@ NTSTATUS WINAPI NtQueryMultipleValueKey(HANDLE KeyHandle,
  * ZwQueryValueKey
  */
 NTSTATUS WINAPI NtQueryValueKey(HANDLE                      KeyHandle,
-                                PUNICODE_STRING             ValueName,
+                                const UNICODE_STRING        *ValueName,
                                 KEY_VALUE_INFORMATION_CLASS KeyValueInformationClass,
                                 PVOID                       KeyValueInformation,
                                 ULONG                       Length,
@@ -402,10 +400,10 @@ NTSTATUS WINAPI NtSetInformationKey(HANDLE    KeyHandle,
  * ZwSetValueKey
  */
 NTSTATUS WINAPI NtSetValueKey(HANDLE          KeyHandle,
-                              PUNICODE_STRING ValueName,
+                              const UNICODE_STRING *ValueName,
                               ULONG           TitleIndex,
                               ULONG           Type,
-                              PVOID           Data,
+                              const VOID      *Data,
                               ULONG           DataSize)
 {
   dprintf(("NTDLL: NtSetValueKey(%08xh,%08xh,%08xh,%08xh,%08xh,%08xh) not implemented.\n",

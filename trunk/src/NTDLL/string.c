@@ -29,7 +29,11 @@
 /*********************************************************************
  *                  _memicmp   (NTDLL.@)
  */
+#ifdef __WIN32OS2__
+INT __cdecl NTDLL_memicmp( LPCSTR s1, LPCSTR s2, DWORD len )
+#else
 INT __cdecl _memicmp( LPCSTR s1, LPCSTR s2, DWORD len )
+#endif
 {
     int ret = 0;
     while (len--)
