@@ -1,3 +1,4 @@
+/* $Id: filedlgbrowser.cpp,v 1.3 1999-11-02 20:38:15 sandervl Exp $ */
 /*
  *  Implementation of IShellBrowser for the File Open common dialog
  * 
