@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.100 2002-02-11 13:48:39 sandervl Exp $
+# $Id: Makefile,v 1.101 2002-02-12 12:00:02 sandervl Exp $
 
 #
 # Odin32 API
@@ -44,7 +44,6 @@ $(OBJDIR)\winmouse.obj \
 $(OBJDIR)\winevent.obj \
 $(OBJDIR)\defwndproc.obj \
 $(OBJDIR)\syscolor.obj \
-$(OBJDIR)\char.obj \
 $(OBJDIR)\initterm.obj \
 $(OBJDIR)\inituser32.obj \
 $(OBJDIR)\uitools.obj \
@@ -118,8 +117,8 @@ $(OBJDIR)\stats.obj
 #
 LIBS = \
 $(ODIN32_LIB)/gdi32.lib \
-$(ODIN32_LIB)/wgss50.lib \
 $(ODIN32_LIB)/kernel32.lib \
+$(ODIN32_LIB)/wgss50.lib \
 $(ODIN32_LIB)/libuls.lib \
 $(ODIN32_LIB)/$(ODINCRT).lib \
 OS2386.LIB \
