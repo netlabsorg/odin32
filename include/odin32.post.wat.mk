@@ -1,4 +1,4 @@
-# $Id: odin32.post.wat.mk,v 1.18 2001-10-29 14:20:13 bird Exp $
+# $Id: odin32.post.wat.mk,v 1.19 2002-02-09 17:26:36 sandervl Exp $
 
 #
 # Odin32 API
@@ -79,6 +79,9 @@ ORGTARGET=$(TARGET)
 !ifndef DEFFILE
 DEFFILE = $(ORGTARGET).def
 !endif
+!ifndef ORGDEFFILE
+ORGDEFFILE = $(ORGTARGET).def
+!endif
 
 # Set INTLIBS (interal) if SUBDIRS is defined and NO_INTERNAL_LIBS is undefined.
 !ifdef SUBDIRS
@@ -145,9 +148,9 @@ $(OBJDIR)\$(TARGET).$(TARGET_EXTENSION): $(LIBS) $(OBJS) $(OS2RES) $(OBJDIR)\$(T
 # Dll: Linker file - creates the parameter file passed on to the linker.
 #
 !ifndef NO_LNKFILE_RULE
-$(OBJDIR)\$(TARGET).lrf: $(__MAKEFILES__) $(OBJDIR)\bldlevel.$(DEFFILE) $(DEFFILE) $(ODIN32_INCLUDE)\odin32.post.wat.mk
+$(OBJDIR)\$(TARGET).lrf: $(__MAKEFILES__) $(OBJDIR)\bldlevel.$(ORGDEFFILE) $(DEFFILE) $(ODIN32_INCLUDE)\odin32.post.wat.mk
     $(RM) $(OBJDIR)\$(TARGET).lrf2 $@
-    $(KDEF2WAT) $(OBJDIR)\bldlevel.$(DEFFILE) $@ <<$(OBJDIR)\$(TARGET).lrf2
+    $(KDEF2WAT) $(OBJDIR)\bldlevel.$(ORGDEFFILE) $@ <<$(OBJDIR)\$(TARGET).lrf2
 $(LD2FLAGS)
 name $(OBJDIR)\$(TARGET).$(TARGET_EXTENSION)
 option map=$(OBJDIR)\$(TARGET).map
@@ -205,10 +208,10 @@ $(OBJDIR)\$(TARGET).$(TARGET_EXTENSION): $(LIBS) $(OBJS) $(OS2RES) $(OBJDIR)\$(T
 # Exe: Linker file - creates the parameter file passed on to the linker.
 #
 !ifndef NO_LNKFILE_RULE
-$(OBJDIR)\$(TARGET).lrf: $(__MAKEFILES__) $(ODIN32_INCLUDE)\odin32.post.wat.mk $(OBJDIR)\bldlevel.$(DEFFILE)
+$(OBJDIR)\$(TARGET).lrf: $(__MAKEFILES__) $(ODIN32_INCLUDE)\odin32.post.wat.mk $(OBJDIR)\bldlevel.$(ORGDEFFILE)
     $(RM) $(OBJDIR)\$(TARGET).lrf2 $@
 !ifdef DEFFILE
-    $(KDEF2WAT) $(OBJDIR)\bldlevel.$(DEFFILE) $@ <<$(OBJDIR)\$(TARGET).lrf2
+    $(KDEF2WAT) $(OBJDIR)\bldlevel.$(ORGDEFFILE) $@ <<$(OBJDIR)\$(TARGET).lrf2
 !else
     $(ECHO) Creating <<$@
 !endif
@@ -387,7 +390,7 @@ $(OBJDIR)\$(TARGET).lib: $(DEFFILE)
 #
 !ifndef LIBTARGET
 !ifndef NOTEXPDEF
-$(OBJDIR)\$(ORGTARGET)exp.def: $(DEFFILE)
+$(OBJDIR)\$(ORGTARGET)exp.def: $(ORGDEFFILE)
     $(IMPDEF) $(IMPDEF_FLAGS) $[@ $@
 !endif
 !endif
@@ -396,7 +399,7 @@ $(OBJDIR)\$(ORGTARGET)exp.def: $(DEFFILE)
 #
 # Common: Make .def-file with buildlevel info.
 #
-$(OBJDIR)\bldlevel.$(DEFFILE): $(DEFFILE)
+$(OBJDIR)\bldlevel.$(ORGDEFFILE): $(DEFFILE)
     $(BLDLEVELINF) $(DEFFILE) $@ -R"$(DEFFILE)" \
         -V"$#define=ODIN32_VERSION,$(ODIN32_INCLUDE)\odinbuild.h" \
         -M"$#define=ODIN32_BUILD_NR,$(ODIN32_INCLUDE)\odinbuild.h"
