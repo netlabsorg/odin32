@@ -1,4 +1,4 @@
-/* $Id: midi.cpp,v 1.10 2002-05-22 15:50:24 sandervl Exp $ */
+/* $Id: midi.cpp,v 1.11 2003-07-16 15:47:24 sandervl Exp $ */
 
 /*
  * RTMIDI code
@@ -27,7 +27,7 @@
 #include <winos2def.h>
 #include <wprocess.h>
 
-#define DBG_LOCALLOG	DBG_midi
+#define DBG_LOCALLOG    DBG_midi
 #include "dbglocal.h"
 
 /*
@@ -261,12 +261,12 @@ MMRESULT WINAPI midiInGetErrorTextW(MMRESULT wError, LPWSTR lpText,
   dprintf(("WINMM:midiInGetErrorTextW(%d)\n", wError ));
   char * theMsg = getWinmmMsg( wError );
   if ( theMsg )
-    AsciiToUnicode( theMsg, lpText );
+    AsciiToUnicodeN( theMsg, lpText, cchText );
   else
   {
     char errMsg[100];
     sprintf( errMsg, "Unknown error number %d", wError );
-    AsciiToUnicode( errMsg, lpText );
+    AsciiToUnicodeN( errMsg, lpText, cchText );
   }
   return MMSYSERR_NOERROR;
 }
@@ -580,12 +580,12 @@ MMRESULT WINAPI midiOutGetErrorTextW(MMRESULT wError, LPWSTR lpText, UINT cchTex
   dprintf(("WINMM:midiOutGetErrorTextW(%d) - need to translate\n", wError ));
   char * theMsg = getWinmmMsg( wError );
   if ( theMsg )
-    AsciiToUnicode( theMsg, lpText );
+    AsciiToUnicodeN( theMsg, lpText, cchText );
   else
   {
     char errMsg[100];
     sprintf( errMsg, "Unknown error number %d", wError );
-    AsciiToUnicode( errMsg, lpText );
+    AsciiToUnicodeN( errMsg, lpText, cchText );
   }
   return MMSYSERR_NOERROR;
 }
