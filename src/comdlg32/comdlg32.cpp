@@ -1,4 +1,4 @@
-/* $Id: comdlg32.cpp,v 1.24 2000-03-24 17:16:26 cbratschi Exp $ */
+/* $Id: comdlg32.cpp,v 1.25 2000-03-24 18:22:55 achimha Exp $ */
 
 /*
  * COMDLG32 implementation
@@ -25,7 +25,9 @@
 
 ODINDEBUGCHANNEL(COMDLG32-COMDLG32)
 
-BOOL useWinFileDlg = TRUE;
+// this controls whether we want to use the Open32 OS/2 file dialogs
+// or our own Win95 like file dialogs
+#define useWinFileDlg 1
 
 #if 0
 #define COMDLG32_CHECKHOOK(a,b,c)           \
