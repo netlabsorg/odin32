@@ -1,4 +1,4 @@
-/* $Id: header.cpp,v 1.11 2000-05-22 17:25:08 cbratschi Exp $ */
+/* $Id: header.cpp,v 1.12 2000-08-08 17:04:59 cbratschi Exp $ */
 /*
  *  Header control
  *
@@ -16,7 +16,7 @@
 
 /*
  Most identical with:
- - Corel 20000513 level
+ - Corel 20000807 level
 */
 
 #include <string.h>

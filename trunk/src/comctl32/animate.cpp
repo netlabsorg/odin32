@@ -1,4 +1,4 @@
-/* $Id: animate.cpp,v 1.4 2000-06-22 19:02:03 cbratschi Exp $ */
+/* $Id: animate.cpp,v 1.5 2000-08-08 17:04:59 cbratschi Exp $ */
 /*
  * Animation control
  *
@@ -18,7 +18,7 @@
  */
 
 /*
- - Corel WINE 20000513 level
+ - Corel WINE 20000807 level
 */
 
 #include "winbase.h"

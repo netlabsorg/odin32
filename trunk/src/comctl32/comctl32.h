@@ -1,4 +1,4 @@
-/* $Id: comctl32.h,v 1.14 2000-04-16 18:52:39 cbratschi Exp $ */
+/* $Id: comctl32.h,v 1.15 2000-08-08 17:04:59 cbratschi Exp $ */
 /*
  * Win32 common controls implementation
  *
@@ -11,7 +11,7 @@
  *
  */
 
-/* Status: WINE 991212 */
+/* Status: Corel WINE 20000807 */
 
 #ifndef _H_COMCTL32
 #define _H_COMCTL32
@@ -138,8 +138,5 @@ extern HMODULE COMCTL32_hModule;
 #define IDM_OCT                         310
 #define IDM_NOV                         311
 #define IDM_DEC                         312
-
-/* treeview checkboxes */
-#define IDT_CHECK 401
 
 #endif /* _H_COMCTL32 */
