@@ -1,4 +1,4 @@
-/* $Id: ntddk.h,v 1.3 1999-11-30 19:38:23 sandervl Exp $ */
+/* $Id: ntddk.h,v 1.4 1999-12-19 12:26:24 sandervl Exp $ */
 /*
 	this file defines interfaces mainly exposed to device drivers and
 	native nt dll's
@@ -363,16 +363,19 @@ BOOLEAN WINAPI RtlAllocateAndInitializeSid (
 	DWORD x8,
 	DWORD x9,
 	DWORD x10,
-	PSID pSid);
+	PSID *pSid);
 	
-DWORD WINAPI RtlEqualSid(DWORD x1,DWORD x2);
-DWORD WINAPI RtlFreeSid(DWORD x1);
+DWORD WINAPI RtlEqualSid(PSID pSid1, PSID pSid2);
+DWORD WINAPI RtlEqualPrefixSid (PSID pSid1, PSID pSid2);
+DWORD WINAPI RtlValidSid( PSID pSid );
+DWORD WINAPI RtlFreeSid(PSID x1);
 DWORD WINAPI RtlLengthRequiredSid(DWORD nrofsubauths);
 DWORD WINAPI RtlLengthSid(PSID sid);
 DWORD WINAPI RtlInitializeSid(PSID PSID,PSID_IDENTIFIER_AUTHORITY PSIDauth, DWORD c);
 LPDWORD WINAPI RtlSubAuthoritySid(PSID PSID,DWORD nr);
 LPBYTE WINAPI RtlSubAuthorityCountSid(PSID PSID);
 DWORD WINAPI RtlCopySid(DWORD len,PSID to,PSID from);
+PSID_IDENTIFIER_AUTHORITY WINAPI RtlIdentifierAuthoritySid( PSID pSid );
 
 /*
  *	security descriptor functions
