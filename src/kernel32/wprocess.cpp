@@ -1,4 +1,4 @@
-/* $Id: wprocess.cpp,v 1.77 2000-04-16 06:49:07 bird Exp $ */
+/* $Id: wprocess.cpp,v 1.78 2000-04-16 07:07:01 bird Exp $ */
 
 /*
  * Win32 process functions
@@ -779,107 +779,99 @@ HINSTANCE WIN32API LoadLibraryExA(LPCTSTR lpszLibFile, HANDLE hFile, DWORD dwFla
 
     /** @sketch
      *  If PE image THEN
-     *      Check again(!) if the module is allready loaded.
-     *      IF Allready loaded THEN
-     *          Inc dynamic ref count.
-     *          Inc ref count.
-     *          hDll <- instance handle.
-     *      ELSE
-     *          Try load the file using the Win32PeLdrDll class.
-     *          <sketch continued further down>
-     *      Endif
-     *      Try load the file using the peldr.
+     *      IF LOAD_LIBRARY_AS_DATAFILE or Executable THEN
+     *
+     *
+     *      Try load the file using the Win32PeLdrDll class.
+     *      <sketch continued further down>
      *  Else
      *      Set last error.
      *      (hDll is NULL)
      *  Endif
      *  return hDll.
      */
-
-    if ((fPE = Win32ImageBase::isPEImage(szModname)))
+    fPE = Win32ImageBase::isPEImage(szModname);
+    if (fPE)
     {
-        pModule = Win32DllBase::findModule(szModname); /* This should _NEVER_ succeed! */
-        if (pModule)
+        Win32PeLdrDll * peldrDll;
+        /* TODO!
+         * We might use the fake loader class to do the LOAD_LIBRARY_AS_DATAFILE and
+         * executable image loading. These are both loaded for accessing resource.
+         * But this requires that they behaves like Dlls...
+        if (dwFlags & LOAD_LIBRARY_AS_DATAFILE || fPE == 2)
         {
-            pModule->incDynamicLib();
-            pModule->AddRef();
-            hDll = pModule->getInstanceHandle();
-            dprintf(("KERNEL32: LoadLibraryExA(%s, 0x%x, 0x%x): returns 0x%x, Dll found (2) %s",
-                     lpszLibFile, hFile, dwFlags, pModule->getInstanceHandle(), pModule->getFullPath()));
+            peldrDll = new Win32PeLdrRsrcImg(szModname);
+        }
+        else
+        */
+
+        peldrDll = new Win32PeLdrDll(szModname);
+        if (peldrDll == NULL)
+        {
+            dprintf(("KERNEL32: LoadLibraryExA(%s, 0x%x, 0x%x): Failed to created instance of Win32PeLdrDll. returns NULL.",
+                     lpszLibFile, hFile, dwFlags));
+            SetLastError(ERROR_NOT_ENOUGH_MEMORY);
+            return NULL;
+        }
+
+        /** @sketch
+         * Process dwFlags
+         */
+        if (dwFlags & (DONT_RESOLVE_DLL_REFERENCES | LOAD_LIBRARY_AS_DATAFILE))
+        {
+            peldrDll->setNoEntryCalls();
+            //peldrDll->setDontProcessImports(); not implemented?
+        }
+        if (dwFlags & LOAD_WITH_ALTERED_SEARCH_PATH)
+        {
+            dprintf(("KERNEL32: LoadLibraryExA(%s, 0x%x, 0x%x): Warning dwFlags LOAD_WITH_ALTERED_SEARCH_PATH is not implemented.",
+                      lpszLibFile, hFile, dwFlags));
+            //peldrDll->setLoadWithAlteredSearchPath();
+        }
+        if (dwFlags & LOAD_LIBRARY_AS_DATAFILE)
+        {
+            dprintf(("KERNEL32: LoadLibraryExA(%s, 0x%x, 0x%x): Warning dwFlags LOAD_LIBRARY_AS_DATAFILE is not implemented.",
+                     lpszLibFile, hFile, dwFlags));
+            //peldrDll->setLoadAsDatafile();
+        }
+
+        /** @sketch
+         *  Initiate the peldr DLL.
+         *  IF successful init THEN
+         *      Inc dynamic ref count.
+         *      Inc ref count.
+         *      Attach to process
+         *      IF successful THEN
+         *          hDLL <- instance handle.
+         *      ELSE
+         *          set last error
+         *          delete Win32PeLdrDll instance.
+         *      Endif
+         *  ELSE
+         *      set last error
+         *      delete Win32PeLdrDll instance.
+         *  Endif.
+         */
+        if (peldrDll->init(0))
+        {
+            peldrDll->incDynamicLib();
+            peldrDll->AddRef();
+            if (peldrDll->attachProcess())
+                hDll = peldrDll->getInstanceHandle();
+            else
+            {
+                dprintf(("KERNEL32: LoadLibraryExA(%s, 0x%x, 0x%x): attachProcess call to Win32PeLdrDll instance failed. returns NULL.",
+                         lpszLibFile, hFile, dwFlags));
+                SetLastError(ERROR_DLL_INIT_FAILED);
+                delete peldrDll;
+            }
         }
         else
         {
-            /* TODO EXE loading - will use the Win32PeLdrRsrcImg for that */
-            Win32PeLdrDll * peldrDll;
-
-            peldrDll = new Win32PeLdrDll(szModname);
-            if (peldrDll == NULL)
-            {
-                dprintf(("KERNEL32: LoadLibraryExA(%s, 0x%x, 0x%x): Failed to created instance of Win32PeLdrDll. returns NULL.",
-                         lpszLibFile, hFile, dwFlags));
-                SetLastError(ERROR_NOT_ENOUGH_MEMORY);
-                return NULL;
-            }
-
-            /** @sketch
-             * Process dwFlags
-             */
-            if (dwFlags & (DONT_RESOLVE_DLL_REFERENCES | LOAD_LIBRARY_AS_DATAFILE))
-            {
-                peldrDll->setNoEntryCalls();
-                //peldrDll->setDontProcessImports(); not implemented?
-            }
-            if (dwFlags & LOAD_WITH_ALTERED_SEARCH_PATH)
-            {
-                dprintf(("KERNEL32: LoadLibraryExA(%s, 0x%x, 0x%x): Warning dwFlags LOAD_WITH_ALTERED_SEARCH_PATH is not implemented.",
-                          lpszLibFile, hFile, dwFlags));
-                //peldrDll->setLoadWithAlteredSearchPath();
-            }
-            if (dwFlags & LOAD_LIBRARY_AS_DATAFILE)
-            {
-                dprintf(("KERNEL32: LoadLibraryExA(%s, 0x%x, 0x%x): Warning dwFlags LOAD_LIBRARY_AS_DATAFILE is not implemented.",
-                         lpszLibFile, hFile, dwFlags));
-                //peldrDll->setLoadAsDatafile();
-            }
-
-            /** @sketch
-             *  Initiate the peldr DLL.
-             *  IF successful init THEN
-             *      Inc dynamic ref count.
-             *      Inc ref count.
-             *      Attach to process
-             *      IF successful THEN
-             *          hDLL <- instance handle.
-             *      ELSE
-             *          set last error
-             *          delete Win32PeLdrDll instance.
-             *      Endif
-             *  ELSE
-             *      set last error
-             *      delete Win32PeLdrDll instance.
-             *  Endif.
-             */
-            if (peldrDll->init(0))
-            {
-                peldrDll->incDynamicLib();
-                peldrDll->AddRef();
-                if (peldrDll->attachProcess())
-                    hDll = peldrDll->getInstanceHandle();
-                else
-                {
-                    dprintf(("KERNEL32: LoadLibraryExA(%s, 0x%x, 0x%x): attachProcess call to Win32PeLdrDll instance failed. returns NULL.",
-                             lpszLibFile, hFile, dwFlags));
-                    SetLastError(ERROR_DLL_INIT_FAILED);
-                    delete peldrDll;
-                }
-            }
-            else
-            {
-                dprintf(("KERNEL32: LoadLibraryExA(%s, 0x%x, 0x%x): Failed to init Win32PeLdrDll instance. error=%d returns NULL.",
-                         lpszLibFile, hFile, dwFlags, peldrDll->getError()));
-                SetLastError(ERROR_INVALID_EXE_SIGNATURE);
-                delete peldrDll;
-            }
+            dprintf(("KERNEL32: LoadLibraryExA(%s, 0x%x, 0x%x): Failed to init Win32PeLdrDll instance. error=%d returns NULL.",
+                     lpszLibFile, hFile, dwFlags, peldrDll->getError()));
+            SetLastError(ERROR_INVALID_EXE_SIGNATURE);
+            delete peldrDll;
         }
     }
     else
