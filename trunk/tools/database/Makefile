@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.1 1999-09-05 02:56:39 bird Exp $
+# $Id: Makefile,v 1.2 1999-12-06 18:11:50 bird Exp $
 
 #
 # Common makefile for database utils - EMX/GCC version
@@ -123,7 +123,7 @@ kHTMLPC.$(O): kHTMLPC.cpp kHTMLPC.h db.h ..\common\kLIFO.cpp    \
             gd/gdfontt.h
 
 
-gd/gdgcc.$(A): NUL
+gd/gdgcc.$(A): force
    @cd gd
    @nmake /nologo gdgcc.$(A)
    @cd ..
@@ -161,7 +161,6 @@ States: States.sql
    -mysqladmin refresh
 
 
-
 #
 # clean
 #
@@ -178,3 +177,5 @@ clean:
    @cd gd
    @nmake /nologo clean
 
+force:
+    @$(ECHO) -

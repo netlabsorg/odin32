@@ -1,4 +1,4 @@
-/* $Id: StateUpd.cpp,v 1.3 1999-12-02 14:29:14 bird Exp $ */
+/* $Id: StateUpd.cpp,v 1.4 1999-12-06 18:11:49 bird Exp $ */
 /*
  * StateUpd - Scans source files for API functions and imports data on them.
  *
@@ -213,13 +213,13 @@ int main(int argc, char **argv)
         if (!options.fIntegrityOnly)
         {
             /* processing */
-            if (argv[argi] == NULL)
+            if (argv[argi] == NULL || *argv[argi] == '\0')
                 ulRc = processDir(".", FALSE, &options);
             else
                 while (argv[argi] != NULL)
                 {
                     ulRc += processDir(argv[argi],
-                                       argv[argi][strlen(argv[argi])] == '\\' || argv[argi][strlen(argv[argi])] == '/',
+                                       argv[argi][strlen(argv[argi])-1] != '\\' && argv[argi][strlen(argv[argi])-1] != '/',
                                        &options);
                     argi++;
                 }
