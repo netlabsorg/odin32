@@ -1,4 +1,4 @@
-/* $Id: oslibwin.cpp,v 1.4 1999-09-22 14:58:23 dengert Exp $ */
+/* $Id: oslibwin.cpp,v 1.5 1999-09-25 09:27:07 dengert Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -652,6 +652,12 @@ BOOL OSLibWinEndEnumWindows(HWND hwndEnum)
 BOOL OSLibWinQueryWindowProcess(HWND hwnd, ULONG *pid, ULONG *tid)
 {
    return WinQueryWindowProcess(hwnd, pid, tid);
+}
+//******************************************************************************
+//******************************************************************************
+BOOL OSLibWinMapWindowPoints (HWND hwndFrom, HWND hwndTo, OSLIBPOINT *pptl, ULONG num)
+{
+   return WinMapWindowPoints (hwndFrom, hwndTo, (PPOINTL)pptl, num);
 }
 //******************************************************************************
 //******************************************************************************

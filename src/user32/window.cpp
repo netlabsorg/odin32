@@ -1,8 +1,9 @@
-/* $Id: window.cpp,v 1.7 1999-09-24 22:45:28 sandervl Exp $ */
+/* $Id: window.cpp,v 1.8 1999-09-25 09:27:08 dengert Exp $ */
 /*
  * Win32 window apis for OS/2
  *
  * Copyright 1999 Sander van Leeuwen
+ * Copyright 1999 Daniela Engert (dani@ngrt.de)
  *
  * Parts based on Wine Windows code (windows\win.c)
  *
@@ -777,12 +778,23 @@ BOOL WIN32API MoveWindow( HWND hwnd, INT x, INT y, INT cx, INT cy,
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API ClientToScreen( HWND arg1, PPOINT  arg2)
+BOOL WIN32API ClientToScreen (HWND hwnd, PPOINT pt)
 {
 #ifdef DEBUG
-////    WriteLog("USER32:  ClientToScreen\n");
+   WriteLog("USER32:  ClientToScreen\n");
 #endif
-    return O32_ClientToScreen(arg1, arg2);
+    Win32BaseWindow *wnd;
+    PRECT rcl;
+
+    if (!hwnd) return (TRUE);
+    wnd = Win32BaseWindow::GetWindowFromHandle (hwnd);
+    if (!wnd) return (TRUE);
+
+    rcl  = wnd->getClientRect();
+    pt->y = (rcl->bottom - rcl->top) - pt->y;
+    OSLibWinMapWindowPoints (wnd->getOS2WindowHandle(), OSLIB_HWND_DESKTOP, (OSLIBPOINT *)pt, 1);
+    pt->y = ScreenHeight - pt->y;
+    return (TRUE);
 }
 //******************************************************************************
 //******************************************************************************
@@ -1151,3 +1163,4 @@ BOOL WIN32API ShowOwnedPopups( HWND arg1, BOOL  arg2)
 }
 //******************************************************************************
 //******************************************************************************
+

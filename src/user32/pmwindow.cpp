@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.5 1999-09-22 08:58:35 sandervl Exp $ */
+/* $Id: pmwindow.cpp,v 1.6 1999-09-25 09:27:07 dengert Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -76,7 +76,7 @@ BOOL InitPM()
      hab,                               /* Anchor block handle          */
      (PSZ)WIN32_STDCLASS,               /* Window class name            */
      (PFNWP)Win32WindowProc,            /* Address of window procedure  */
-     CS_SIZEREDRAW | CS_HITTEST,
+     CS_SIZEREDRAW | CS_HITTEST | CS_MOVENOTIFY,
      NROF_WIN32WNDBYTES)) {
         dprintf(("WinRegisterClass Win32BaseWindow failed"));
         return(FALSE);
@@ -268,6 +268,36 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
             BOOL erased = sendEraseBkgnd (win32wnd);
             win32wnd->setEraseBkgnd (!erased, !erased);
         }
+        break;
+    }
+
+    case WM_MOVE:
+    {
+        if (!win32wnd->isFrameWindow()) break;
+
+        HWND      hFrame = win32wnd->getOS2FrameWindowHandle();
+        SWP       swp, swpo;
+        WINDOWPOS wp;
+        ULONG     parentHeight = 0;
+        RECTL     rcl;
+
+        WinQueryWindowRect (hwnd, &rcl);
+        WinMapWindowPoints (hwnd, hFrame, (PPOINTL)&rcl, 2);
+        swp.x  = swpo.x  = rcl.xLeft;
+        swp.y  = swpo.y  = rcl.yBottom;
+        swp.cx = swpo.cx = rcl.xRight - rcl.xLeft;
+        swp.cy = swpo.cy = rcl.yTop   - rcl.yBottom;
+        swp.fl = SWP_MOVE | SWP_NOREDRAW;
+        swp.hwnd             = hwnd;
+        swp.hwndInsertBehind = NULLHANDLE;
+
+        OSLibMapSWPtoWINDOWPOS(&swp, &wp, &swpo, NULLHANDLE, hFrame);
+
+        wp.flags &= ~SWP_NOMOVE_W;
+        wp.hwnd = win32wnd->getWindowHandle();
+        win32wnd->setWindowRect(wp.x, wp.y, wp.x + wp.cx, wp.y + wp.cy);
+        win32wnd->setClientRect(swpo.x, swpo.y, swpo.x + swpo.cx, swpo.y + swpo.cy);
+        win32wnd->MsgPosChanged((LPARAM)&wp);
         break;
     }
     case WM_SIZE:
