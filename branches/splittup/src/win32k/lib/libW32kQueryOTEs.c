@@ -1,9 +1,9 @@
-/* $Id: libW32kQueryOTEs.c,v 1.3 2001-02-21 07:47:59 bird Exp $
+/* $Id: libW32kQueryOTEs.c,v 1.3.2.1 2002-04-01 13:04:57 bird Exp $
  *
  * libW32kQueryOTEs - Get's the object table entries (OTEs) for a given
  *                    module (given by a module handle).
  *
- * Copyright (c) 2000-2001 knut st. osmundsen (knut.stange.osmundsen@mynd.no)
+ * Copyright (c) 2000-2002 knut st. osmundsen (bird@anduin.net)
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *
@@ -33,7 +33,7 @@
  * @param       pQOte   Pointer to output buffer.
  * @param       cbQOte  Size (in bytes) of the output buffer.
  * @status      completely implelemented.
- * @author      knut st. osmundsen (knut.stange.osmundsen@mynd.no)
+ * @author      knut st. osmundsen (bird@anduin.net)
  * @remark
  */
 APIRET APIENTRY  W32kQueryOTEs(HMODULE hMTE, PQOTEBUFFER pQOte, ULONG cbQOte)

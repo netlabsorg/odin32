@@ -1,9 +1,9 @@
-/* $Id: libDosAllocMemEx.c,v 1.8 2001-02-21 07:47:58 bird Exp $
+/* $Id: libDosAllocMemEx.c,v 1.8.2.1 2002-04-01 13:04:54 bird Exp $
  *
  * DosAllocMemEx - Extened Edition of DosAllocMem.
  *                 Allows you to suggest an address of the memory.
  *
- * Copyright (c) 2000-2001 knut st. osmundsen (knut.stange.osmundsen@mynd.no)
+ * Copyright (c) 2000-2002 knut st. osmundsen (bird@anduin.net)
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *

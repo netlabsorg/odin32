@@ -1,8 +1,8 @@
-/* $Id: libPrivate.h,v 1.1 2001-02-21 07:47:58 bird Exp $
+/* $Id: libPrivate.h,v 1.1.2.1 2002-04-01 13:04:55 bird Exp $
  *
  * Private headerfile for the win32k library.
  *
- * Copyright (c) 2001 knut st. osmundsen (knut.stange.osmundsen@mynd.no)
+ * Copyright (c) 2001-2002 knut st. osmundsen (bird@anduin.net)
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *
