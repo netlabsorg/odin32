@@ -1,4 +1,4 @@
-/* $Id: gdi32.cpp,v 1.28 1999-12-30 18:51:48 sandervl Exp $ */
+/* $Id: gdi32.cpp,v 1.29 2000-01-07 17:37:53 cbratschi Exp $ */
 
 /*
  * GDI32 apis
@@ -163,23 +163,23 @@ int WIN32API GetObjectA( HGDIOBJ hObject, int size, void *lpBuffer)
  int rc;
 
   if(size == 0 || lpBuffer == NULL) {
-	SetLastError(ERROR_INVALID_PARAMETER);
-	return 0;
+        SetLastError(ERROR_INVALID_PARAMETER);
+        return 0;
   }
 
   if(DIBSection::getSection() != NULL)
   {
-    	DIBSection *dsect = DIBSection::find(hObject);
-    	if(dsect)
-    	{
-      		rc = dsect->GetDIBSection(size, lpBuffer);
-		if(rc == 0) {
-			SetLastError(ERROR_INVALID_PARAMETER);
-			return 0;
-		}
-		SetLastError(ERROR_SUCCESS);
-		return rc;
-    	}
+        DIBSection *dsect = DIBSection::find(hObject);
+        if(dsect)
+        {
+                rc = dsect->GetDIBSection(size, lpBuffer);
+                if(rc == 0) {
+                        SetLastError(ERROR_INVALID_PARAMETER);
+                        return 0;
+                }
+                SetLastError(ERROR_SUCCESS);
+                return rc;
+        }
   }
 
   dprintf(("GDI32: GetObject %X %X %X\n", hObject, size, lpBuffer));
@@ -914,15 +914,15 @@ HRGN WIN32API CreateRectRgn( int nLeftRect, int nTopRect, int nRightRect, int nB
 HRGN WIN32API CreateRectRgnIndirect( const RECT * lpRect)
 {
     if(lpRect == NULL) {
-	SetLastError(ERROR_INVALID_PARAMETER);
-	return 0;
+        SetLastError(ERROR_INVALID_PARAMETER);
+        return 0;
     }
     dprintf(("GDI32: CreateRectRgnIndirect (%d,%d)(%d,%d)", lpRect->left, lpRect->top, lpRect->right, lpRect->bottom));
     return O32_CreateRectRgnIndirect(lpRect);
 }
 //******************************************************************************
 //******************************************************************************
-HRGN WIN32API CreateRoundRectRgn(int nLeftRect, int nTopRect, int nRightRect, int nBottomRect, 
+HRGN WIN32API CreateRoundRectRgn(int nLeftRect, int nTopRect, int nRightRect, int nBottomRect,
                                  int nWidthEllipse, int nHeightEllipse)
 {
     dprintf(("GDI32: CreateRoundRectRgn (%d,%d)(%d,%d) (%d,%d)", nLeftRect, nTopRect, nRightRect, nBottomRect, nWidthEllipse, nHeightEllipse));
@@ -994,12 +994,23 @@ BOOL WIN32API EnumEnhMetaFile( HDC arg1, HENHMETAFILE arg2, ENHMFENUMPROC arg3, 
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API PatBlt( HDC arg1, int arg2, int arg3, int arg4, int arg5, DWORD  arg6)
+BOOL WIN32API PatBlt(HDC hdc,int nXLeft,int nYLeft,int nWidth,int nHeight,DWORD dwRop)
 {
- BOOL rc;
+  BOOL rc;
 
-  rc = O32_PatBlt(arg1, arg2, arg3, arg4, arg5, arg6);
-  dprintf(("GDI32: PatBlt (%d,%d) (%d,%d) returned %d\n", arg2, arg3, arg4, arg5, rc));
+  //CB: Open32 bug: negative width/height not supported!
+  if (nWidth < 0)
+  {
+    nXLeft += nWidth+1;
+    nWidth = -nWidth;
+  }
+  if (nHeight < 0)
+  {
+    nYLeft += nHeight+1;
+    nHeight = -nHeight;
+  }
+  rc = O32_PatBlt(hdc,nXLeft,nYLeft,nWidth,nHeight,dwRop);
+  dprintf(("GDI32: PatBlt (%d,%d) (%d,%d) returned %d\n",nXLeft,nYLeft,nWidth,nHeight,rc));
   return(rc);
 }
 //******************************************************************************
