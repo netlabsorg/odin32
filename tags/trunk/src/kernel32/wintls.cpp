@@ -1,4 +1,4 @@
-/* $Id: wintls.cpp,v 1.2 1999-07-07 08:42:49 sandervl Exp $ */
+/* $Id: wintls.cpp,v 1.3 1999-07-09 15:58:54 sandervl Exp $ */
 /*
  * Win32 TLS API functions
  *
@@ -77,7 +77,7 @@ void Win32Image::tlsAttachThread()	//setup TLS structures for new thread
    memset(tibmem, 0, tlsTotalSize);
    memcpy(tibmem, tlsAddress, tlsInitSize);
 
-   winteb = (TEB *)TIBFlatPtr;
+   winteb = (TEB *)*TIBFlatPtr;
    winteb->tls_ptr[tlsIndex] = tibmem;
    *tlsIndexAddr = tlsIndex;
 
@@ -113,7 +113,7 @@ void Win32Image::tlsDetachThread()	//destroy TLS structures
 		*pCallback++;
 	}
    }
-   winteb = (TEB *)TIBFlatPtr;
+   winteb = (TEB *)*TIBFlatPtr;
    VirtualFree(winteb->tls_ptr[tlsIndex], tlsTotalSize, MEM_RELEASE);
    winteb->tls_ptr[tlsIndex] = 0;
 }
