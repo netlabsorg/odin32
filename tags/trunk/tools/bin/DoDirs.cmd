@@ -1,4 +1,4 @@
-/* $Id: DoDirs.cmd,v 1.2 2000-11-21 04:34:25 bird Exp $
+/* $Id: DoDirs.cmd,v 1.3 2001-04-17 04:00:41 bird Exp $
  *
  * Rexx script which executes a given command in each of the given
  * directories. It will fail when a command failes in one of the
@@ -49,7 +49,7 @@ do while (iStart <= length(sDirs))
             sCommand
             if (rc <> 0) then
             do
-                say '[Failed rc='rc']';
+                say '[Failed rc='rc' directory:' directory()']';
                 exit(rc);
             end
             say '[Leaving  directory:' directory()']'
