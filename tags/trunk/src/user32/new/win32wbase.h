@@ -1,4 +1,4 @@
-/* $Id: win32wbase.h,v 1.2 1999-08-31 10:36:23 sandervl Exp $ */
+/* $Id: win32wbase.h,v 1.3 1999-09-03 15:09:45 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -156,6 +156,9 @@ Win32BaseWindow *getParent()                    { return (Win32BaseWindow *)Chil
          int    GetWindowTextA(LPSTR lpsz, int cch);
          BOOL   SetWindowText(LPSTR lpsz);
           BOOL  hasWindowName(LPSTR wndname, BOOL fUnicode = 0);
+Win32WndClass  *getClass()  { return windowClass; };
+ 	char   *getWindowNameA()              { return windowNameA; };
+Win32BaseWindow *getOwner()                   { return owner; };
 
        LRESULT  SendMessageA(ULONG msg, WPARAM wParam, LPARAM lParam);
        LRESULT  SendMessageW(ULONG msg, WPARAM wParam, LPARAM lParam);
@@ -165,8 +168,6 @@ Win32BaseWindow *getParent()                    { return (Win32BaseWindow *)Chil
        LRESULT  DefWindowProcW(UINT msg, WPARAM wParam, LPARAM lParam);
 
          void   NotifyParent(UINT Msg, WPARAM wParam, LPARAM lParam);
-
-Win32WndClass  *getClass()  { return windowClass; };
 
     static HWND FindWindowEx(HWND hwndParent, HWND hwndChildAfter, LPSTR lpszClass, LPSTR lpszWindow,
                              BOOL fUnicode = 0);
@@ -198,8 +199,6 @@ protected:
        LRESULT  SendInternalMessageA(ULONG msg, WPARAM wParam, LPARAM lParam);
        LRESULT  SendInternalMessageW(ULONG msg, WPARAM wParam, LPARAM lParam);
         void    Init();
-
- 	char   *getWindowNameA()              { return windowNameA; };
 
         HWND    OS2Hwnd;
         HWND    OS2HwndFrame;

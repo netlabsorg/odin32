@@ -1,4 +1,4 @@
-/* $Id: user32.cpp,v 1.16 1999-09-01 19:12:21 phaller Exp $ */
+/* $Id: user32.cpp,v 1.17 1999-09-03 15:09:44 sandervl Exp $ */
 
 /*
  * Win32 misc user32 API functions for OS/2
@@ -1190,17 +1190,15 @@ BOOL WIN32API SwapMouseButton( BOOL arg1)
 //******************************************************************************
 BOOL WIN32API SystemParametersInfoA(UINT uiAction, UINT uiParam, PVOID pvParam, UINT fWinIni)
 {
- BOOL rc;
+ BOOL rc = TRUE;
  NONCLIENTMETRICSA *cmetric = (NONCLIENTMETRICSA *)pvParam;
 
   switch(uiAction) {
     case SPI_SCREENSAVERRUNNING:
         *(BOOL *)pvParam = FALSE;
-        rc = TRUE;
         break;
     case SPI_GETDRAGFULLWINDOWS:
         *(BOOL *)pvParam = FALSE;
-        rc = TRUE;
         break;
     case SPI_GETNONCLIENTMETRICS:
         memset(cmetric, 0, sizeof(NONCLIENTMETRICSA));
@@ -1224,8 +1222,21 @@ BOOL WIN32API SystemParametersInfoA(UINT uiAction, UINT uiParam, PVOID pvParam, 
         cmetric->iSmCaptionHeight = GetSystemMetrics(SM_CYSMSIZE);
         cmetric->iMenuWidth       = 32; //TODO
         cmetric->iMenuHeight      = GetSystemMetrics(SM_CYMENU);
-        rc = TRUE;
         break;
+    case SPI_GETICONTITLELOGFONT:
+	break;
+
+    case SPI_GETBORDER:
+	*(INT *)pvParam = GetSystemMetrics( SM_CXFRAME );
+	break;
+
+    case SPI_GETWORKAREA:
+	SetRect( (RECT *)pvParam, 0, 0,
+		GetSystemMetrics( SM_CXSCREEN ),
+		GetSystemMetrics( SM_CYSCREEN )
+	);
+	break;
+
     case 104: //TODO: Undocumented
         rc = 16;
         break;
