@@ -101,9 +101,8 @@ char* ODINAPI ODIN_strdup( const char *s1)
  ****************************************************************************/
 
 // operator new()
-// @@@PH wrong calling convention
-//void* _Optlink __nw__FUi(void* p1)
+//void* _Optlink ODIN__nw__FUi(unsigned int i)
 //  ODIN_TEB_OFF
-//  void *rc = __nw__FUi(p1);
+//  void* rc = __nw__FUi(i);
 //  ODIN_TEB_ON1(rc)
 

@@ -47,8 +47,10 @@ EXPORTS
 ; -----------------
 ; C++ wrappers
 ; -----------------
-       __nw__FUi               ; operator new()
 
+;      ODIN__nw__FUi
+;      __nw__FUi               = ODIN__nw__FUi   ; operator new()
+       __nw__FUi
 
 
 
