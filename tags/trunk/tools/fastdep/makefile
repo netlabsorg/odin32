@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.15 2002-09-05 02:53:36 bird Exp $
+# $Id: makefile,v 1.16 2002-09-05 02:55:42 bird Exp $
 
 #
 # Odin32 API
@@ -17,6 +17,7 @@
 #
 # Setup config
 #
+ALL_NO_DBGMEM = 1
 PATH_ROOT = ..\..
 !include $(PATH_ROOT)\$(BUILD_SETUP_MAK)
 
