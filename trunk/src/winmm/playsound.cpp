@@ -1,4 +1,4 @@
-/* $Id: playsound.cpp,v 1.5 2000-02-17 14:09:32 sandervl Exp $ */
+/* $Id: playsound.cpp,v 1.6 2000-05-02 13:29:59 bird Exp $ */
 
 /*
  * Playsound stubs
@@ -25,6 +25,11 @@
 
 #define DBG_LOCALLOG	DBG_playsound
 #include "dbglocal.h"
+
+//kso: dirty fix to make this compile! not permanent!
+BOOL WINAPI QueryPerformanceCounter(LARGE_INTEGER *);
+#define LowPart u.LowPart
+
 
 ODINDEBUGCHANNEL(WINMM-PLAYSOUND)
 
