@@ -1,4 +1,4 @@
-/* $Id: dc.h,v 1.3 2000-01-01 14:54:51 cbratschi Exp $ */
+/* $Id: dc.h,v 1.4 2000-01-12 17:37:29 cbratschi Exp $ */
 /*
  * public dc functions
  *
@@ -342,7 +342,7 @@ inline BOOL O32_ExcludeUpdateRgn(HDC a, HWND b)
     SetFS(sel);
 
     return yyrc;
-} 
+}
 
 BOOL OPEN32API _O32_CreateCaret (HWND hwnd, HBITMAP hbm, int width, int height);
 
@@ -352,6 +352,19 @@ inline BOOL O32_CreateCaret(HWND a, HBITMAP b, int c, int d)
  USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_CreateCaret(a, b, c, d);
+    SetFS(sel);
+
+    return yyrc;
+}
+
+BOOL OPEN32API _O32_SelectClipRgn(HDC hdc,HRGN hrgn);
+
+inline BOOL O32_SelectClipRgn(HDC hdc,HRGN hrgn)
+{
+ BOOL yyrc;
+ USHORT sel = RestoreOS2FS();
+
+    yyrc = _O32_SelectClipRgn(hdc,hrgn);
     SetFS(sel);
 
     return yyrc;
@@ -425,13 +438,13 @@ inline BOOL APIENTRY _ShowCaret (HWND hwnd)
 
    // from pmddi.h:
    /* CopyClipRegion */
-   
+
    #define COPYCRGN_ALLINTERSECT        0L
    #define COPYCRGN_VISRGN              1L
    #define COPYCRGN_CLIPRGN             2L
 
    /* SetupDC */
-   
+
    #define SETUPDC_VISRGN               0x00000001L
    #define SETUPDC_ORIGIN               0x00000002L
    #define SETUPDC_ACCUMBOUNDSON        0x00000004L

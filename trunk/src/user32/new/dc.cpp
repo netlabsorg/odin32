@@ -1,4 +1,4 @@
-/* $Id: dc.cpp,v 1.10 2000-01-07 17:38:46 cbratschi Exp $ */
+/* $Id: dc.cpp,v 1.11 2000-01-12 17:37:28 cbratschi Exp $ */
 
 /*
  * DC functions for USER32
@@ -552,6 +552,8 @@ BOOL WIN32API GetUpdateRect (HWND hwnd, LPRECT pRect, BOOL erase)
 
    if (updateRegionExists)
    {
+      //CB: for PM empty rect is valid
+      if ((rectl.xLeft == rectl.xRight) || (rectl.yTop == rectl.yBottom)) return FALSE;
       //SvL: Hack for memory.exe (doesn't get repainted properly otherwise)
 //      if (wnd->isOwnDC() && wnd->getOwnDC())
       if (wnd->isOwnDC())
@@ -603,9 +605,12 @@ BOOL SYSTEM GetOS2UpdateRect(HWND hwnd,LPRECT pRect)
      return (updateRegionExists);
 
    if (updateRegionExists)
+   {
+     //CB: for PM empty rect is valid
+     if ((rectl.xLeft == rectl.xRight) || (rectl.yTop == rectl.yBottom)) return FALSE;
      mapOS2ToWin32Rect(hwnd,(PRECTLOS2)&rectl,pRect);
-   else
-     pRect->left = pRect->top = pRect->right = pRect->bottom = 0;
+   } else
+       pRect->left = pRect->top = pRect->right = pRect->bottom = 0;
 
    return updateRegionExists;
 }
@@ -721,9 +726,9 @@ HDC WIN32API GetDCEx (HWND hwnd, HRGN hrgn, ULONG flags)
    {
       ULONG BytesNeeded;
       PRGNDATA_W RgnData;
-      PRECTL pr;
+      PRECT pr;
       int i;
-      LONG height = OSLibQueryScreenHeight();
+      RECTL rectl;
 
       if (!hrgn)
          goto error;
@@ -735,10 +740,12 @@ HDC WIN32API GetDCEx (HWND hwnd, HRGN hrgn, ULONG flags)
       O32_GetRegionData (hrgn, BytesNeeded, RgnData);
 
       i = RgnData->rdh.nCount;
-      pr = (PRECTL)(RgnData->Buffer);
+      pr = (PRECT)(RgnData->Buffer);
 
       success = TRUE;
       if (flags & DCX_EXCLUDERGN_W)
+      {
+#if 0 //CB: todo
          for (; (i > 0) && success; i--, pr++) {
             LONG y = pr->yBottom;
 
@@ -746,14 +753,11 @@ HDC WIN32API GetDCEx (HWND hwnd, HRGN hrgn, ULONG flags)
             pr->yTop    = height - y;
             success &= GpiExcludeClipRectangle (pHps->hps, pr);
          }
-      else
-         for (; (i > 0) && success; i--, pr++) {
-            LONG y = pr->yBottom;
-
-            pr->yBottom = height - pr->yTop;
-            pr->yTop    = height - y;
-            success &= GpiIntersectClipRectangle (pHps->hps, pr);
-         }
+#endif
+      } else //DCX_INTERSECTRGN_W
+      {
+        O32_SelectClipRgn(pHps->hps,hrgn); //CB: works so far
+      }
       if (!success)
          goto error;
    }
