@@ -1,7 +1,7 @@
-# $Id: makefile,v 1.88 2000-03-06 23:34:18 bird Exp $
+# $Id: makefile,v 1.89 2000-03-07 11:08:01 bird Exp $
 
 #
-# PD-Win32 API
+# Odin32 API
 #
 #       kernel32.dll makefile
 #
