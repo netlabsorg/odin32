@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.18 2000-02-09 23:40:48 bird Exp $
+# $Id: makefile,v 1.19 2000-02-09 23:46:59 bird Exp $
 
 #
 # PD-Win32 API
@@ -96,7 +96,7 @@ regsvr32.exe:   regsvr32.obj regsvr32.def \
 
 dep:
     $(DEPEND) -I$(PDWIN32_INCLUDE);$(PDWIN32_INCLUDE)\win \
-    *.c *.cpp *.h *.asm *.inc $(PDWIN32_INCLUDE)\*.h
+        *.c *.cpp *.h *.asm *.inc $(PDWIN32_INCLUDE)\*.h
 
 !ifndef NODEP
 !include .depend

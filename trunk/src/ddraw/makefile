@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.21 2000-02-09 23:40:43 bird Exp $
+# $Id: makefile,v 1.22 2000-02-09 23:46:54 bird Exp $
 #
 # ddraw.dll makefile
 #
@@ -60,7 +60,7 @@ resource.asm: $(TARGET).rc
 
 dep:
     $(DEPEND) -I$(PDWIN32_INCLUDE);$(PDWIN32_INCLUDE)\win \
-    *.c *.cpp *.h *.asm *.inc $(PDWIN32_INCLUDE)\*.h
+        *.c *.cpp *.h *.asm *.inc $(PDWIN32_INCLUDE)\*.h
 
 !ifndef NODEP
 !include .depend
