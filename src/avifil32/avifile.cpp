@@ -122,7 +122,9 @@ typedef struct IAVIFileImpl {
 static HRESULT WINAPI IAVIFile_fnQueryInterface(IAVIFile* iface,REFIID refiid,LPVOID *obj) {
 	ICOM_THIS(IAVIFileImpl,iface);
 
+#ifndef __WIN32OS2__
 	TRACE("(%p)->QueryInterface(%s,%p)\n",This,debugstr_guid(refiid),obj);
+#endif
 	if (	!memcmp(&IID_IUnknown,refiid,sizeof(IID_IUnknown)) ||
 		!memcmp(&IID_IAVIFile,refiid,sizeof(IID_IAVIFile))
 	) {
@@ -218,7 +220,9 @@ HRESULT WINAPI AVIFileOpenA(
 ) {
 	IAVIFileImpl	*iavi;
 
+#ifndef __WIN32OS2__
 	FIXME("(%p,%s,0x%08lx,%s),stub!\n",ppfile,szFile,(DWORD)uMode,debugstr_guid(lpHandler));
+#endif
 	iavi = (IAVIFileImpl*)HeapAlloc(GetProcessHeap(),HEAP_ZERO_MEMORY,sizeof(IAVIFileImpl));
 	iavi->ref = 1;
 	ICOM_VTBL(iavi) = &iavift;
@@ -233,7 +237,9 @@ HRESULT WINAPI AVIFileOpenA(
 static HRESULT WINAPI IAVIStream_fnQueryInterface(IAVIStream*iface,REFIID refiid,LPVOID *obj) {
 	ICOM_THIS(IAVIStreamImpl,iface);
 
+#ifndef __WIN32OS2__
 	TRACE("(%p)->QueryInterface(%s,%p)\n",This,debugstr_guid(refiid),obj);
+#endif
 	if (	!memcmp(&IID_IUnknown,refiid,sizeof(IID_IUnknown)) ||
 		!memcmp(&IID_IAVIStream,refiid,sizeof(IID_IAVIStream))
 	) {
