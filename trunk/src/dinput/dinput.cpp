@@ -1,4 +1,4 @@
-/* $Id: dinput.cpp,v 1.2 1999-11-08 13:50:41 sandervl Exp $ */
+/* $Id: dinput.cpp,v 1.3 2000-01-17 17:18:38 sandervl Exp $ */
 /*		DirectInput
  *
  * Copyright 1998 Marcus Meissner
@@ -544,7 +544,7 @@ static HRESULT WINAPI SysKeyboardAImpl_GetDeviceData(
 	  
 	n = 0;
   
-	for (int i=0;i<256 && (n<*entries);i++)
+	for (int i=0;i<256 && (n<xentries);i++)
 	{
 	      if (This->keystate[i] == (win32keys[i]&0x80))
 		continue;
@@ -552,8 +552,8 @@ static HRESULT WINAPI SysKeyboardAImpl_GetDeviceData(
 		/* add an entry */
 		dod[n].dwOfs		= i; /* scancode */
 		dod[n].dwData		= win32keys[i]&0x80;
-		dod[i].dwTimeStamp      = time(NULL);
-		dod[i].dwSequence       = evsequence++;
+		dod[n].dwTimeStamp      = time(NULL);
+		dod[n].dwSequence       = evsequence++;
 		n++;
 	      }
 	      if (!(flags & DIGDD_PEEK))
@@ -561,7 +561,7 @@ static HRESULT WINAPI SysKeyboardAImpl_GetDeviceData(
 	      
 	}
   
-	*entries = n;
+	if(entries) *entries = n;
 	ret = DI_OK;
 }
 #else

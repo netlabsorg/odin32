@@ -1,4 +1,4 @@
-/* $Id: oslibinput.cpp,v 1.3 1999-12-21 23:19:14 hugh Exp $ */
+/* $Id: oslibinput.cpp,v 1.4 2000-01-17 17:18:38 sandervl Exp $ */
 
 #define INCL_WIN
 #include <os2wrap.h>
@@ -31,11 +31,11 @@ BOOL OSLibGetDIState(DWORD len, LPVOID ptr)
 
   if(rc == TRUE && len==256)
   {
-      KeyTranslatePMToWinBuf((BYTE *)&PMKeyState, (BYTE *)&ptr, len);
-  for(int i=0;i<256;i++) {
-    winkeybuf[i] &= 0x80; //only high bit
-  }
-      return TRUE;
+      	KeyTranslatePMToWinBuf((BYTE *)&PMKeyState[0], (BYTE *)ptr, len);
+  	for(int i=0;i<256;i++) {
+    		winkeybuf[i] &= 0x80; //only high bit
+  	}
+      	return TRUE;
   }
   return FALSE;
 }
