@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.117 1999-12-24 18:39:12 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.118 1999-12-24 21:44:04 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -198,7 +198,7 @@ void Win32BaseWindow::Init()
 
   EraseBkgndFlag     = TRUE;
   PSEraseFlag        = FALSE;
-  SupressEraseFlag   = FALSE;
+  SuppressEraseFlag  = FALSE;
 
   horzScrollInfo     = NULL;
   vertScrollInfo     = NULL;

@@ -1,4 +1,4 @@
-/* $Id: dc.cpp,v 1.29 1999-12-24 18:39:10 sandervl Exp $ */
+/* $Id: dc.cpp,v 1.30 1999-12-24 21:44:03 sandervl Exp $ */
 
 /*
  * DC functions for USER32
@@ -435,6 +435,9 @@ HDC WIN32API BeginPaint (HWND hWnd, PPAINTSTRUCT_W lpps)
       return (HDC)NULLHANDLE;
    }
 
+   if(hWnd == 0x6800003a) {
+	hwnd = 0x6800003a; 
+   }
    Win32BaseWindow *wnd = Win32BaseWindow::GetWindowFromHandle(hwnd);
 
    if ((hwnd != HWND_DESKTOP) && wnd->isOwnDC())
@@ -468,9 +471,10 @@ HDC WIN32API BeginPaint (HWND hWnd, PPAINTSTRUCT_W lpps)
    pHps->hdcType = TYPE_3;
    lpps->hdc = (HDC)hps;
 
-//   if (wnd->isEraseBkgnd())
-       wnd->setEraseBkgnd (FALSE, !wnd->MsgEraseBackGround(lpps->hdc));
-   wnd->setSupressErase (FALSE);
+   if(!wnd->isSuppressErase()) {
+   	wnd->setSuppressErase(TRUE);
+        wnd->setEraseBkgnd (FALSE, !wnd->MsgEraseBackGround(lpps->hdc));
+   }
    lpps->fErase = wnd->isPSErase();
 
    if (!hPS_ownDC)
@@ -494,7 +498,7 @@ HDC WIN32API BeginPaint (HWND hWnd, PPAINTSTRUCT_W lpps)
 
 BOOL WIN32API EndPaint (HWND hwnd, const PAINTSTRUCT_W *pPaint)
 {
-dprintf (("USER32: EndPaint(%x)", hwnd));
+   dprintf (("USER32: EndPaint(%x)", hwnd));
 
    if (!pPaint || !pPaint->hdc )
       return TRUE;
@@ -517,6 +521,7 @@ dprintf (("USER32: EndPaint(%x)", hwnd));
    {
        O32_EndPaint (HWND_DESKTOP, pPaint);
    }
+   wnd->setSuppressErase(FALSE);
 
 exit:
    O32_SetLastError(0);
@@ -868,10 +873,11 @@ BOOL WIN32API RedrawWindow(HWND hwnd, const RECT* pRect, HRGN hrgn, DWORD redraw
    if (redraw & RDW_NOERASE_W)
       wnd->setEraseBkgnd (FALSE);
 
-   if (redraw & RDW_UPDATENOW_W)
-      wnd->setSupressErase (FALSE);
-   else if (redraw & RDW_ERASENOW_W)
-      wnd->setSupressErase (FALSE);
+//SvL: Test
+//   if (redraw & RDW_UPDATENOW_W)
+//      wnd->setSuppressErase (FALSE);
+//   else if (redraw & RDW_ERASENOW_W)
+//      wnd->setSuppressErase (FALSE);
 #if 0
    else
    {
@@ -881,7 +887,7 @@ BOOL WIN32API RedrawWindow(HWND hwnd, const RECT* pRect, HRGN hrgn, DWORD redraw
       erase = (WinPeekMsg (HABX, &qmsg, hwnd, WM_PAINT, WM_PAINT, PM_REMOVE)
                 && (redraw & RDW_NOERASE_W) == 0);
 
-      wnd->setSupressErase (!erase);
+      wnd->setSuppressErase (!erase);
    }
 
    if (redraw & (RDW_NOINTERNALPAINT_W | RDW_INTERNALPAINT_W))
@@ -981,10 +987,11 @@ error:
    if (hpsTemp)
       WinReleasePS (hpsTemp);
 
-   if ((redraw & RDW_INVALIDATE_W) == 0)
-      wnd->setSupressErase (FALSE);
-   else if ((redraw & RDW_ERASENOW_W) == RDW_ERASENOW_W)
-      wnd->setSupressErase (TRUE);
+//SvL: Test
+//   if ((redraw & RDW_INVALIDATE_W) == 0)
+//      wnd->setSuppressErase (FALSE);
+//   else if ((redraw & RDW_ERASENOW_W) == RDW_ERASENOW_W)
+//      wnd->setSuppressErase (TRUE);
 
    if (!success)
       O32_SetLastError (ERROR_INVALID_PARAMETER);
@@ -1382,7 +1389,11 @@ INT WIN32API ExcludeUpdateRgn( HDC hDC, HWND  hWnd)
 //******************************************************************************
 BOOL WIN32API ValidateRect( HWND hwnd, const RECT * lprc)
 {
-    dprintf(("USER32: ValidateRect %x (%d,%d)(%d,%d)", hwnd, lprc->left, lprc->top, lprc->right, lprc->bottom));
+    if(lprc) {
+    	 dprintf(("USER32: ValidateRect %x (%d,%d)(%d,%d)", hwnd, lprc->left, lprc->top, lprc->right, lprc->bottom));
+    } 
+    else dprintf(("USER32: ValidateRect %x", hwnd)); 
+   
     return RedrawWindow( hwnd, lprc, 0, RDW_VALIDATE_W | RDW_NOCHILDREN_W | (hwnd==0 ? RDW_UPDATENOW_W : 0));
 }
 //******************************************************************************
