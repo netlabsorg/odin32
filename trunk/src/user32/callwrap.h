@@ -1,4 +1,4 @@
-// $Id: callwrap.h,v 1.1 2004-01-11 12:03:13 sandervl Exp $
+// $Id: callwrap.h,v 1.2 2004-05-11 09:08:20 sandervl Exp $
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -17,6 +17,8 @@ extern "C" {
 // Callback wrapper that supports handlers with the wrong (non-stdcall) 
 // calling convention
 DWORD CDECL WrapCallback2(WNDPROC lpfnFunction, DWORD param1, DWORD param2);
+
+DWORD WIN32API WrapCallback4(WNDPROC lpfnFunction, DWORD param1, DWORD param2, DWORD param3, DWORD param4);
 
 #ifdef __cplusplus
 }
