@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.15 1999-12-29 18:51:45 sandervl Exp $
+# $Id: makefile,v 1.16 2000-02-01 12:53:30 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -25,7 +25,8 @@ RCFLAGS = -s -I. -I$(CPPMAIN)\include -I$(PDWIN32_INCLUDE) -I$(PDWIN32_INCLUDE)\
 TARGET = gdi32
 
 OBJS =  gdi32.obj opengl.obj callback.obj dibsect.obj initterm.obj resource.obj \
-        oslibgdi.obj font.obj text.obj palette.obj line.obj oslibgpi.obj
+        oslibgdi.obj font.obj text.obj palette.obj line.obj oslibgpi.obj region.obj \
+        metafile.obj dibitmap.obj blit.obj 
 
 
 all: $(TARGET).dll $(TARGET).lib
@@ -56,6 +57,13 @@ gdi32.obj: gdi32.cpp \
     dibsect.h \
     $(PDWIN32_INCLUDE)\misc.h \
 
+region.obj: region.cpp $(PDWIN32_INCLUDE)\misc.h
+
+metafile.obj: metafile.cpp $(PDWIN32_INCLUDE)\misc.h
+
+dibitmap.obj: dibitmap.cpp dibsect.h $(PDWIN32_INCLUDE)\misc.h
+blit.obj: blit.cpp dibsect.h $(PDWIN32_INCLUDE)\misc.h
+
 font.obj: font.cpp \
     $(PDWIN32_INCLUDE)\misc.h \
 
@@ -63,7 +71,7 @@ text.obj: text.cpp \
     $(PDWIN32_INCLUDE)\misc.h \
 
 palette.obj: palette.cpp \
-    $(PDWIN32_INCLUDE)\misc.h \
+    $(PDWIN32_INCLUDE)\misc.h dibsect.h \
 
 dibsect.obj: dibsect.cpp \
     dibsect.h \

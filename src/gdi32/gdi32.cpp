@@ -1,4 +1,4 @@
-/* $Id: gdi32.cpp,v 1.36 2000-01-31 22:30:08 sandervl Exp $ */
+/* $Id: gdi32.cpp,v 1.37 2000-02-01 12:53:30 sandervl Exp $ */
 
 /*
  * GDI32 apis
@@ -20,82 +20,6 @@
 #include <codepage.h>
 #include "oslibgpi.h"
 #include "oslibgdi.h"
-
-static ULONG QueryPaletteSize(BITMAPINFOHEADER *pBHdr)
-{
-        ULONG cbPalette;
-
-        switch (pBHdr->biBitCount)
-        {
-                case 1:
-                case 4:
-                case 8:
-                        cbPalette = (1 << pBHdr->biBitCount) * sizeof(RGBQUAD);
-                        break;
-
-                case 16:
-                case 24:
-                case 32:
-                        cbPalette = 0;
-                        break;
-
-                default:
-                        dprintf(("QueryPaletteSize: error pBHdr->biBitCount = %d", pBHdr->biBitCount));
-                        cbPalette = -1;
-        }
-
-   return cbPalette;
-}
-
-static ULONG CalcBitmapSize(ULONG cBits, LONG cx, LONG cy)
-{
-        ULONG alignment;
-        ULONG factor;
-        BOOL flag = TRUE;       //true: '*'     false: '/'
-
-        cy = cy < 0 ? -cy : cy;
-
-        switch(cBits)
-        {
-                case 1:
-                        factor = 8;
-                        flag = FALSE;
-                        break;
-
-                case 4:
-                        factor = 2;
-                        flag = FALSE;
-                        break;
-
-                case 8:
-                        factor = 1;
-                        break;
-
-                case 16:
-                        factor = 2;
-                        break;
-
-                case 24:
-                        factor = 3;
-                        break;
-
-                case 32:
-                        return cx*cy;
-
-                default:
-                        return 0;
-        }
-
-        if (flag)
-                alignment = (cx = (cx*factor)) % 4;
-        else
-                alignment = (cx = ((cx+factor-1)/factor)) % 4;
-
-        if (alignment != 0)
-                cx += 4 - alignment;
-
-        return cx*cy;
-}
 
 //******************************************************************************
 //******************************************************************************
@@ -151,13 +75,6 @@ HGDIOBJ WIN32API GetStockObject(int arg1)
     }
     dprintf(("GDI32: GetStockObject %d returned %X\n", arg1, obj));
     return(obj);
-}
-//******************************************************************************
-//******************************************************************************
-UINT WIN32API RealizePalette( HDC arg1)
-{
-    dprintf(("GDI32: RealizePalette(0x%08X)\n",arg1));
-    return O32_RealizePalette(arg1);
 }
 //******************************************************************************
 //******************************************************************************
@@ -219,21 +136,6 @@ BOOL WIN32API DeleteDC( HDC hdc)
 }
 //******************************************************************************
 //******************************************************************************
-HPALETTE WIN32API CreatePalette( const LOGPALETTE * arg1)
-{
-  HPALETTE rc;
-    dprintf(("GDI32: CreatePalette\n"));
-   for(int i=0; i<arg1->palNumEntries;i++)
-   {
-     dprintf2(("Index %d : 0x%08X\n",i, *((DWORD*)(&arg1->palPalEntry[i])) ));
-   }
-   rc = O32_CreatePalette(arg1);
-   dprintf(("  returns 0x%08X\n",rc));
-
-   return rc;
-}
-//******************************************************************************
-//******************************************************************************
 HBRUSH WIN32API CreatePatternBrush(HBITMAP arg1)
 {
  HBRUSH brush;
@@ -258,53 +160,10 @@ HPEN WIN32API CreatePenIndirect( const LOGPEN * arg1)
 }
 //******************************************************************************
 //******************************************************************************
-HRGN WIN32API CreatePolyPolygonRgn( const POINT * arg1, const INT * arg2, int arg3, int  arg4)
-{
-    dprintf(("GDI32: CreatePolyPolygonRgn\n"));
-    return O32_CreatePolyPolygonRgn(arg1, arg2, arg3, arg4);
-}
-//******************************************************************************
-//******************************************************************************
-HRGN WIN32API CreatePolygonRgn(const POINT * arg1, int arg2, int arg3)
-{
-    dprintf(("GDI32: CreatePolygonRgn"));
-    return O32_CreatePolygonRgn(arg1, arg2, arg3);
-}
-//******************************************************************************
-//******************************************************************************
 HBRUSH WIN32API CreateDIBPatternBrushPt( const VOID * arg1, UINT  arg2)
 {
     dprintf(("GDI32: CreateDIBPatternBrushPt\n"));
     return O32_CreateDIBPatternBrushPt(arg1, arg2);
-}
-//******************************************************************************
-//******************************************************************************
-HBITMAP WIN32API CreateDIBitmap(HDC arg1, const BITMAPINFOHEADER * arg2, DWORD arg3, const void * arg4, const BITMAPINFO * arg5, UINT  arg6)
-{
-  int iHeight;
-  HBITMAP rc;
-    dprintf(("GDI32: CreateDIBitmap\n"));
-
-    //TEMPORARY HACK TO PREVENT CRASH IN OPEN32 (WSeB GA)
-
-    iHeight = arg2->biHeight;
-    if(arg2->biHeight < 0)
-    {
-      ((BITMAPINFOHEADER *)arg2)->biHeight = -arg2->biHeight;
-    }
-
-    rc = O32_CreateDIBitmap(arg1, arg2, arg3, arg4, arg5, arg6);
-
-    ((BITMAPINFOHEADER *)arg2)->biHeight = iHeight;
-
-    return rc;
-}
-//******************************************************************************
-//******************************************************************************
-HBITMAP WIN32API CreateCompatibleBitmap( HDC arg1, int arg2, int  arg3)
-{
-    dprintf(("GDI32: CreateCompatibleBitmap\n"));
-    return O32_CreateCompatibleBitmap(arg1, arg2, arg3);
 }
 //******************************************************************************
 //******************************************************************************
@@ -368,31 +227,6 @@ INT WIN32API StretchDIBits(HDC hdc, INT xDst, INT yDst, INT widthDst,
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API StretchBlt(HDC hdcDest, int nXOriginDest, int nYOriginDest,
-                            int nWidthDest, int nHeightDest,
-                            HDC hdcSrc, int nXOriginSrc, int nYOriginSrc,
-                            int nWidthSrc, int nHeightSrc, DWORD dwRop)
-{
-  dprintf(("GDI32: StretchBlt Dest: (%d, %d) size (%d, %d)\n",
-           nXOriginDest, nYOriginDest, nWidthDest, nHeightDest));
-  dprintf(("GDI32: StretchBlt Src : (%d, %d) size (%d, %d)\n",
-           nXOriginSrc, nYOriginSrc, nWidthSrc, nHeightSrc));
-  if(DIBSection::getSection() != NULL)
-  {
-    DIBSection *dsect = DIBSection::findHDC(hdcSrc);
-    if(dsect)
-    {
-      dprintf((" Do stretched DIB Blt\n"));
-      return(dsect->BitBlt( hdcDest,
-                            nXOriginDest, nYOriginDest, nWidthDest, nHeightDest,
-                            nXOriginSrc, nYOriginSrc, nWidthSrc, nHeightSrc,
-                            dwRop));
-    }
-  }
-  return O32_StretchBlt(hdcDest, nXOriginDest, nYOriginDest, nWidthDest, nHeightDest, hdcSrc, nXOriginSrc, nYOriginSrc, nWidthSrc, nHeightSrc, dwRop);
-}
-//******************************************************************************
-//******************************************************************************
 BOOL WIN32API StrokeAndFillPath( HDC arg1)
 {
     dprintf(("GDI32: StrokeAndFillPath\n"));
@@ -407,27 +241,11 @@ BOOL WIN32API StrokePath( HDC arg1)
 }
 //******************************************************************************
 //******************************************************************************
-int WIN32API SetStretchBltMode( HDC arg1, int  arg2)
-{
-  dprintf(("GDI32: SetStretchBltMode 0x%08X, 0x%08X\n",arg1, arg2));
-
-  if(DIBSection::getSection() != NULL)
-  {
-    DIBSection *dsect = DIBSection::findHDC(arg1);
-    if(dsect)
-    {
-      dprintf(("       - DC is DIBSection\n"));
-    }
-  }
-  return O32_SetStretchBltMode(arg1, arg2);
-}
-//******************************************************************************
-//******************************************************************************
 HGDIOBJ WIN32API SelectObject(HDC hdc, HGDIOBJ hObj)
 {
  HGDIOBJ rc;
 
-////    dprintf(("GDI32: SelectObject\n"));
+    dprintf2(("GDI32: SelectObject %x %x", hdc, hObj));
 
     if(DIBSection::getSection() != NULL)
     {
@@ -455,29 +273,6 @@ HGDIOBJ WIN32API SelectObject(HDC hdc, HGDIOBJ hObj)
       }
     }
     return(rc);
-}
-//******************************************************************************
-//******************************************************************************
-HPALETTE WIN32API SelectPalette(HDC arg1, HPALETTE arg2, BOOL arg3)
-{
-  dprintf(("GDI32: SelectPalette (0x%08X, 0x%08X, 0x%08X)\n", arg1, arg2, arg3));
-  if(DIBSection::getSection() != NULL)
-  {
-    DIBSection *dsect = DIBSection::findHDC(arg1);
-    if(dsect)
-    {
-      PALETTEENTRY Pal[256];
-      char PalSize = dsect->GetBitCount();
-      dprintf(("       - Set Palette Values in DIBSection\n"));
-      if(PalSize<=8)
-      {
-        GetPaletteEntries( arg2, 0, 1<<PalSize, (LPPALETTEENTRY)&Pal);
-        dsect->SetDIBColorTable(0, 1<< PalSize, (RGBQUAD*)&Pal);
-      }
-
-    }
-  }
-  return O32_SelectPalette(arg1, arg2, arg3);
 }
 //******************************************************************************
 //******************************************************************************
@@ -551,13 +346,6 @@ BOOL WIN32API AngleArc( HDC arg1, int arg2, int arg3, DWORD arg4, float  arg5, f
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API AnimatePalette( HPALETTE arg1, UINT arg2, UINT arg3, const PALETTEENTRY * arg4)
-{
-    dprintf(("GDI32: AnimatePalette"));
-    return O32_AnimatePalette(arg1, arg2, arg3, arg4);
-}
-//******************************************************************************
-//******************************************************************************
 BOOL WIN32API Arc( HDC arg1, int arg2, int arg3, int arg4, int arg5, int arg6, int arg7, int arg8, int  arg9)
 {
     dprintf(("GDI32: Arc"));
@@ -579,19 +367,6 @@ BOOL WIN32API BeginPath( HDC arg1)
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API BitBlt(HDC hdcDest, int arg2, int arg3, int arg4, int arg5, HDC hdcSrc, int arg7, int arg8, DWORD  arg9)
-{
-    if(DIBSection::getSection() != NULL) {
-        DIBSection *dsect = DIBSection::findHDC(hdcSrc);
-        if(dsect) {
-                return(dsect->BitBlt(hdcDest, arg2, arg3, arg4, arg5, arg7, arg8, arg4, arg5, arg9));
-        }
-    }
-    dprintf(("GDI32: BitBlt to hdc %X from (%d,%d) to (%d,%d), (%d,%d) rop %X\n", hdcDest, arg7, arg8, arg2, arg3, arg4, arg5, arg9));
-    return O32_BitBlt(hdcDest, arg2, arg3, arg4, arg5, hdcSrc, arg7, arg8, arg9);
-}
-//******************************************************************************
-//******************************************************************************
 BOOL WIN32API Chord( HDC arg1, int arg2, int arg3, int arg4, int arg5, int  arg6, int  arg7, int  arg8, int  arg9)
 {
     dprintf(("GDI32: Chord"));
@@ -599,87 +374,10 @@ BOOL WIN32API Chord( HDC arg1, int arg2, int arg3, int arg4, int arg5, int  arg6
 }
 //******************************************************************************
 //******************************************************************************
-HENHMETAFILE WIN32API CloseEnhMetaFile( HDC arg1)
-{
-    dprintf(("GDI32: CloseEnhMetaFile"));
-    return O32_CloseEnhMetaFile(arg1);
-}
-//******************************************************************************
-//******************************************************************************
 BOOL WIN32API CloseFigure( HDC arg1)
 {
     dprintf(("GDI32: CloseFigure"));
     return O32_CloseFigure(arg1);
-}
-//******************************************************************************
-//******************************************************************************
-HMETAFILE WIN32API CloseMetaFile( HDC arg1)
-{
-    dprintf(("GDI32: CloseMetaFile"));
-    return O32_CloseMetaFile(arg1);
-}
-//******************************************************************************
-//******************************************************************************
-int WIN32API CombineRgn( HRGN arg1, HRGN  arg2, HRGN  arg3, int  arg4)
-{
-    dprintf(("GDI32: CombineRgn"));
-    return O32_CombineRgn(arg1, arg2, arg3, arg4);
-}
-//******************************************************************************
-//******************************************************************************
-HENHMETAFILE WIN32API CopyEnhMetaFileA( HENHMETAFILE arg1, LPCSTR  arg2)
-{
-    dprintf(("GDI32: CopyEnhMetaFileA"));
-    return O32_CopyEnhMetaFile(arg1, arg2);
-}
-//******************************************************************************
-//******************************************************************************
-HENHMETAFILE WIN32API CopyEnhMetaFileW( HENHMETAFILE arg1, LPCWSTR  arg2)
-{
- char        *astring = UnicodeToAsciiString((LPWSTR)arg2);
- HENHMETAFILE rc;
-
-    dprintf(("GDI32: CopyEnhMetaFileW"));
-    rc = O32_CopyEnhMetaFile(arg1, astring);
-    FreeAsciiString(astring);
-    return rc;
-}
-//******************************************************************************
-//******************************************************************************
-HMETAFILE WIN32API CopyMetaFileA( HMETAFILE arg1, LPCSTR  arg2)
-{
-    dprintf(("GDI32: CopyMetaFileA"));
-    return O32_CopyMetaFile(arg1, arg2);
-}
-//******************************************************************************
-//******************************************************************************
-HMETAFILE WIN32API CopyMetaFileW( HMETAFILE arg1, LPCWSTR  arg2)
-{
- char        *astring = UnicodeToAsciiString((LPWSTR)arg2);
- HMETAFILE rc;
-
-    dprintf(("GDI32: CopyMetaFileW"));
-    rc = O32_CopyMetaFile(arg1, astring);
-    FreeAsciiString(astring);
-    return rc;
-}
-//******************************************************************************
-//******************************************************************************
-HBITMAP WIN32API CreateBitmap(int nWidth, int nHeight, UINT cPlanes,
-                                 UINT cBitsPerPel, const void *lpvBits)
-{
- HBITMAP rc;
-
-    rc = O32_CreateBitmap(nWidth, nHeight, cPlanes, cBitsPerPel, lpvBits);
-    dprintf(("GDI32: CreateBitmap (%d,%d) bps %d returned %d\n", nWidth, nHeight, cBitsPerPel, rc));
-    return(rc);
-}
-//******************************************************************************
-//******************************************************************************
-HBITMAP WIN32API CreateBitmapIndirect( const BITMAP * arg1)
-{
-    dprintf(("GDI32: CreateBitmapIndirect"));
-    return O32_CreateBitmapIndirect(arg1);
 }
 //******************************************************************************
 //******************************************************************************
@@ -773,43 +471,6 @@ HDC WIN32API CreateDCW( LPCWSTR arg1, LPCWSTR arg2, LPCWSTR arg3, const DEVMODEW
 }
 //******************************************************************************
 //******************************************************************************
-HRGN WIN32API CreateEllipticRgn( int arg1, int arg2, int arg3, int  arg4)
-{
-    dprintf(("GDI32: CreateEllipticRgn"));
-    return O32_CreateEllipticRgn(arg1, arg2, arg3, arg4);
-}
-//******************************************************************************
-//******************************************************************************
-HRGN WIN32API CreateEllipticRgnIndirect( const RECT * arg1)
-{
-    dprintf(("GDI32: CreateEllipticRgnIndirect"));
-    return O32_CreateEllipticRgnIndirect(arg1);
-}
-//******************************************************************************
-//******************************************************************************
-HENHMETAFILE WIN32API CreateEnhMetaFileA( HDC arg1, LPCSTR arg2, const RECT * arg3, LPCSTR  arg4)
-{
-    dprintf(("GDI32: CreateEnhMetaFileA"));
-    return O32_CreateEnhMetaFile(arg1, arg2, arg3, arg4);
-}
-//******************************************************************************
-//******************************************************************************
-HENHMETAFILE WIN32API CreateEnhMetaFileW( HDC arg1, LPCWSTR arg2, const RECT * arg3, LPCWSTR  arg4)
-{
-    char *astring1 = UnicodeToAsciiString((LPWSTR)arg2);
-    char *astring2 = UnicodeToAsciiString((LPWSTR)arg4);
-    HENHMETAFILE   rc;
-
-    dprintf(("GDI32: CreateMetaFileW"));
-    rc = O32_CreateEnhMetaFile(arg1,astring1,arg3,astring2);
-    FreeAsciiString(astring1);
-    FreeAsciiString(astring2);
-    return rc;
-}
-//******************************************************************************
-//******************************************************************************
-//******************************************************************************
-//******************************************************************************
 HBRUSH WIN32API CreateHatchBrush( int arg1, COLORREF  arg2)
 {
     dprintf(("GDI32: CreateHatchBrush"));
@@ -896,51 +557,6 @@ HDC WIN32API CreateICW( LPCWSTR arg1, LPCWSTR arg2, LPCWSTR arg3, const DEVMODEW
 }
 //******************************************************************************
 //******************************************************************************
-HDC WIN32API CreateMetaFileA( LPCSTR arg1)
-{
-    dprintf(("GDI32: CreateMetaFileA"));
-    return O32_CreateMetaFile(arg1);
-}
-//******************************************************************************
-//******************************************************************************
-HDC WIN32API CreateMetaFileW( LPCWSTR arg1)
-{
- char *astring = UnicodeToAsciiString((LPWSTR)arg1);
- HDC   rc;
-
-    dprintf(("GDI32: CreateMetaFileW"));
-    rc = O32_CreateMetaFile(astring);
-    FreeAsciiString(astring);
-    return rc;
-}
-//******************************************************************************
-//******************************************************************************
-HRGN WIN32API CreateRectRgn( int nLeftRect, int nTopRect, int nRightRect, int nBottomRect)
-{
-    dprintf(("GDI32: CreateRectRgn (%d,%d)(%d,%d)", nLeftRect, nTopRect, nRightRect, nBottomRect));
-    return O32_CreateRectRgn(nLeftRect, nTopRect, nRightRect, nBottomRect);
-}
-//******************************************************************************
-//******************************************************************************
-HRGN WIN32API CreateRectRgnIndirect( const RECT * lpRect)
-{
-    if(lpRect == NULL) {
-        SetLastError(ERROR_INVALID_PARAMETER);
-        return 0;
-    }
-    dprintf(("GDI32: CreateRectRgnIndirect (%d,%d)(%d,%d)", lpRect->left, lpRect->top, lpRect->right, lpRect->bottom));
-    return O32_CreateRectRgnIndirect(lpRect);
-}
-//******************************************************************************
-//******************************************************************************
-HRGN WIN32API CreateRoundRectRgn(int nLeftRect, int nTopRect, int nRightRect, int nBottomRect,
-                                 int nWidthEllipse, int nHeightEllipse)
-{
-    dprintf(("GDI32: CreateRoundRectRgn (%d,%d)(%d,%d) (%d,%d)", nLeftRect, nTopRect, nRightRect, nBottomRect, nWidthEllipse, nHeightEllipse));
-    return O32_CreateRoundRectRgn(nLeftRect, nTopRect, nRightRect, nBottomRect, nWidthEllipse, nHeightEllipse);
-}
-//******************************************************************************
-//******************************************************************************
 HBRUSH WIN32API CreateSolidBrush( COLORREF arg1)
 {
     dprintf(("GDI32: CreateSolidBrush\n"));
@@ -952,20 +568,6 @@ BOOL WIN32API DPtoLP( HDC arg1, PPOINT arg2, int  arg3)
 {
     dprintf(("GDI32: DPtoLP\n"));
     return O32_DPtoLP(arg1, arg2, arg3);
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API DeleteEnhMetaFile( HENHMETAFILE arg1)
-{
-    dprintf(("GDI32: DeleteEnhMetaFile\n"));
-    return O32_DeleteEnhMetaFile(arg1);
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API DeleteMetaFile( HMETAFILE arg1)
-{
-    dprintf(("GDI32: DeleteMetaFile"));
-    return O32_DeleteMetaFile(arg1);
 }
 //******************************************************************************
 //******************************************************************************
@@ -997,35 +599,6 @@ BOOL WIN32API EndPath( HDC arg1)
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API EnumEnhMetaFile( HDC arg1, HENHMETAFILE arg2, ENHMFENUMPROC arg3, PVOID arg4, const RECT *  arg5)
-{
-    dprintf(("GDI32: EnumEnhMetaFile DOESN'T WORK!"));
-//    return O32_EnumEnhMetaFile(arg1, arg2, arg3, arg4, arg5);
-    return 0;
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API PatBlt(HDC hdc,int nXLeft,int nYLeft,int nWidth,int nHeight,DWORD dwRop)
-{
-  BOOL rc;
-
-  //CB: Open32 bug: negative width/height not supported!
-  if (nWidth < 0)
-  {
-    nXLeft += nWidth+1;
-    nWidth = -nWidth;
-  }
-  if (nHeight < 0)
-  {
-    nYLeft += nHeight+1;
-    nHeight = -nHeight;
-  }
-  rc = O32_PatBlt(hdc,nXLeft,nYLeft,nWidth,nHeight,dwRop);
-  dprintf(("GDI32: PatBlt (%d,%d) (%d,%d) returned %d\n",nXLeft,nYLeft,nWidth,nHeight,rc));
-  return(rc);
-}
-//******************************************************************************
-//******************************************************************************
 BOOL WIN32API Rectangle( HDC arg1, int arg2, int arg3, int arg4, int  arg5)
 {
     dprintf(("GDI32: Rectangle\n"));
@@ -1039,16 +612,6 @@ int WIN32API SetROP2( HDC hdc, int rop2)
     return O32_SetROP2(hdc, rop2);
 }
 //******************************************************************************
-//TODO: Callback
-//******************************************************************************
-BOOL WIN32API EnumMetaFile( HDC arg1, HMETAFILE arg2, MFENUMPROC arg3, LPARAM  arg4)
-{
-    dprintf(("GDI32: EnumMetaFile STUB"));
-    //calling convention differences
-//    return O32_EnumMetaFile(arg1, arg2, arg3, arg4);
-    return 0;
-}
-//******************************************************************************
 //******************************************************************************
 int WIN32API EnumObjects( HDC arg1, int arg2, GOBJENUMPROC arg3, LPARAM  arg4)
 {
@@ -1056,13 +619,6 @@ int WIN32API EnumObjects( HDC arg1, int arg2, GOBJENUMPROC arg3, LPARAM  arg4)
     //calling convention differences
 //    return O32_EnumObjects(arg1, arg2, arg3, arg4);
     return 0;
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API EqualRgn( HRGN arg1, HRGN  arg2)
-{
-    dprintf(("GDI32: EqualRgn"));
-    return O32_EqualRgn(arg1, arg2);
 }
 //******************************************************************************
 //******************************************************************************
@@ -1087,13 +643,6 @@ HPEN WIN32API ExtCreatePen( DWORD arg1, DWORD arg2, const LOGBRUSH * arg3, DWORD
 }
 //******************************************************************************
 //******************************************************************************
-HRGN WIN32API ExtCreateRegion( const XFORM * arg1, DWORD arg2, const RGNDATA *  arg3)
-{
-    dprintf(("GDI32: ExtCreateRegion"));
-    return O32_ExtCreateRegion(arg1, arg2, arg3);
-}
-//******************************************************************************
-//******************************************************************************
 BOOL WIN32API ExtFloodFill( HDC arg1, int arg2, int arg3, COLORREF arg4, UINT  arg5)
 {
     dprintf(("GDI32: ExtFloodFill"));
@@ -1101,24 +650,10 @@ BOOL WIN32API ExtFloodFill( HDC arg1, int arg2, int arg3, COLORREF arg4, UINT  a
 }
 //******************************************************************************
 //******************************************************************************
-int WIN32API ExtSelectClipRgn( HDC arg1, HRGN arg2, int  arg3)
-{
-    dprintf(("GDI32: ExtSelectClipRgn"));
-    return O32_ExtSelectClipRgn(arg1, arg2, arg3);
-}
-//******************************************************************************
-//******************************************************************************
 BOOL WIN32API FillPath( HDC arg1)
 {
     dprintf(("GDI32: FillPath"));
     return O32_FillPath(arg1);
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API FillRgn( HDC arg1, HRGN arg2, HBRUSH  arg3)
-{
-    dprintf(("GDI32: FillRgn"));
-    return O32_FillRgn(arg1, arg2, arg3);
 }
 //******************************************************************************
 //******************************************************************************
@@ -1136,13 +671,6 @@ BOOL WIN32API FloodFill(HDC arg1, int arg2, int arg3, COLORREF  arg4)
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API FrameRgn( HDC arg1, HRGN arg2, HBRUSH arg3, int arg4, int  arg5)
-{
-    dprintf(("GDI32: FrameRgn"));
-    return O32_FrameRgn(arg1, arg2, arg3, arg4, arg5);
-}
-//******************************************************************************
-//******************************************************************************
 int WIN32API GetArcDirection( HDC arg1)
 {
     dprintf(("GDI32: GetArcDirection"));
@@ -1154,20 +682,6 @@ BOOL WIN32API GetAspectRatioFilterEx( HDC arg1, PSIZE  arg2)
 {
     dprintf(("GDI32: GetAspectRatioFilterEx"));
     return O32_GetAspectRatioFilterEx(arg1, arg2);
-}
-//******************************************************************************
-//******************************************************************************
-LONG WIN32API GetBitmapBits( HBITMAP arg1, LONG arg2, PVOID  arg3)
-{
-    dprintf(("GDI32: GetBitmapBits"));
-    return O32_GetBitmapBits(arg1, arg2, arg3);
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API GetBitmapDimensionEx( HBITMAP arg1, PSIZE  arg2)
-{
-    dprintf(("GDI32: GetBitmapDimensionEx"));
-    return O32_GetBitmapDimensionEx(arg1, arg2);
 }
 //******************************************************************************
 //******************************************************************************
@@ -1239,13 +753,6 @@ int WIN32API GetClipBox( HDC arg1, PRECT  arg2)
 }
 //******************************************************************************
 //******************************************************************************
-int WIN32API GetClipRgn( HDC arg1, HRGN  arg2)
-{
-    dprintf(("GDI32: GetClipRgn"));
-    return O32_GetClipRgn(arg1, arg2);
-}
-//******************************************************************************
-//******************************************************************************
 HANDLE WIN32API GetCurrentObject( HDC hdc, UINT arg2)
 {
     dprintf(("GDI32: GetCurrentObject %x %x", hdc, arg2));
@@ -1260,23 +767,6 @@ BOOL WIN32API GetCurrentPositionEx( HDC arg1, PPOINT  arg2)
 }
 //******************************************************************************
 //******************************************************************************
-int WIN32API GetDIBits(HDC hdc, HBITMAP hBitmap, UINT uStartScan, UINT cScanLines, 
-                       void *lpvBits, PBITMAPINFO lpbi, UINT uUsage)
-{
-#if 1
-    dprintf(("GDI32: GetDIBits"));
-    return O32_GetDIBits(hdc, hBitmap, uStartScan, cScanLines, lpvBits, lpbi, uUsage);
-#else
- int rc;
-
-    rc = O32_GetDIBits(hdc, hBitmap, uStartScan, cScanLines, lpvBits, lpbi, uUsage);
-    dprintf(("GDI32: GetDIBits %x %x %d %d %x %x %d returned %d", hdc, hBitmap, uStartScan, cScanLines, lpvBits, lpbi, uUsage, rc));
-    //SvL: Wrong Open32 return value
-    return (rc == TRUE) ? cScanLines : 0;
-#endif
-}
-//******************************************************************************
-//******************************************************************************
 int WIN32API GetDeviceCaps(HDC hdc, int nIndex)
 {
  int rc;
@@ -1287,47 +777,6 @@ int WIN32API GetDeviceCaps(HDC hdc, int nIndex)
     if(nIndex == NUMCOLORS && rc > 256)
         return -1;
     return(rc);
-}
-//******************************************************************************
-//******************************************************************************
-HENHMETAFILE WIN32API GetEnhMetaFileA( LPCSTR arg1)
-{
-    dprintf(("GDI32: GetEnhMetaFileA"));
-    return O32_GetEnhMetaFile(arg1);
-}
-//******************************************************************************
-//******************************************************************************
-UINT WIN32API GetEnhMetaFileBits( HENHMETAFILE arg1, UINT arg2, PBYTE  arg3)
-{
-    dprintf(("GDI32: GetEnhMetaFileBits"));
-    return O32_GetEnhMetaFileBits(arg1, arg2, arg3);
-}
-//******************************************************************************
-//******************************************************************************
-UINT WIN32API GetEnhMetaFileHeader( HENHMETAFILE arg1, UINT arg2, LPENHMETAHEADER  arg3)
-{
-    dprintf(("GDI32: GetEnhMetaFileHeader"));
-    return O32_GetEnhMetaFileHeader(arg1, arg2, arg3);
-}
-//******************************************************************************
-//******************************************************************************
-UINT WIN32API GetEnhMetaFilePaletteEntries( HENHMETAFILE arg1, UINT arg2, PPALETTEENTRY  arg3)
-{
-    dprintf(("GDI32: GetEnhMetaFilePaletteEntries"));
-    return O32_GetEnhMetaFilePaletteEntries(arg1, arg2, arg3);
-}
-//******************************************************************************
-//******************************************************************************
-HENHMETAFILE WIN32API GetEnhMetaFileW( LPCWSTR arg1)
-{
- char *astring = UnicodeToAsciiString((LPWSTR)arg1);
- HENHMETAFILE rc;
-
-    dprintf(("GDI32: GetEnhMetaFileW"));
-    // NOTE: This will not work as is (needs UNICODE support)
-    rc = O32_GetEnhMetaFile(astring);
-    FreeAsciiString(astring);
-    return rc;
 }
 //******************************************************************************
 //******************************************************************************
@@ -1360,33 +809,6 @@ int WIN32API GetMapMode( HDC arg1)
 }
 //******************************************************************************
 //******************************************************************************
-HMETAFILE WIN32API GetMetaFileA( LPCSTR arg1)
-{
-    dprintf(("GDI32: GetMetaFileA"));
-    return O32_GetMetaFile(arg1);
-}
-//******************************************************************************
-//******************************************************************************
-UINT WIN32API GetMetaFileBitsEx( HMETAFILE arg1, UINT arg2, LPVOID  arg3)
-{
-    dprintf(("GDI32: GetMetaFileBitsEx"));
-    return O32_GetMetaFileBitsEx(arg1, arg2, arg3);
-}
-//******************************************************************************
-//******************************************************************************
-HMETAFILE WIN32API GetMetaFileW( LPCWSTR arg1)
-{
- char *astring = UnicodeToAsciiString((LPWSTR)arg1);
- HENHMETAFILE rc;
-
-    dprintf(("GDI32: GetMetaFileW"));
-    rc = O32_GetMetaFile(astring);
-    FreeAsciiString(astring);
-    return rc;
-
-}
-//******************************************************************************
-//******************************************************************************
 BOOL WIN32API GetMiterLimit( HDC arg1, float * arg2)
 {
     dprintf(("GDI32: GetMiterLimit"));
@@ -1398,16 +820,6 @@ COLORREF WIN32API GetNearestColor( HDC arg1, COLORREF  arg2)
 {
     dprintf(("GDI32: GetNearestColor\n"));
     return O32_GetNearestColor(arg1, arg2);
-}
-//******************************************************************************
-//******************************************************************************
-UINT WIN32API GetNearestPaletteIndex( HPALETTE arg1, COLORREF  arg2)
-{
-    UINT rc;
-    dprintf(("GDI32: GetNearestPaletteIndex (0x%08X ,0x%08X) ",arg1,arg2));
-    rc = O32_GetNearestPaletteIndex(arg1, arg2);
-    dprintf(("Returns %d\n",rc));
-    return rc;
 }
 //******************************************************************************
 //******************************************************************************
@@ -1424,13 +836,6 @@ UINT WIN32API GetOutlineTextMetricsW( HDC arg1, UINT arg2, LPOUTLINETEXTMETRICW 
     // NOTE: This will not work as is (needs UNICODE support)
 //    return O32_GetOutlineTextMetrics(arg1, arg2, arg3);
     return 0;
-}
-//******************************************************************************
-//******************************************************************************
-UINT WIN32API GetPaletteEntries( HPALETTE arg1, UINT arg2, UINT arg3, PPALETTEENTRY  arg4)
-{
-    dprintf(("GDI32: GetPaletteEntries"));
-    return O32_GetPaletteEntries(arg1, arg2, arg3, arg4);
 }
 //******************************************************************************
 //******************************************************************************
@@ -1459,38 +864,6 @@ BOOL WIN32API GetRasterizerCaps(LPRASTERIZER_STATUS arg1, UINT  arg2)
 {
     dprintf(("GDI32: GetRasterizerCaps"));
     return O32_GetRasterizerCaps(arg1, arg2);
-}
-//******************************************************************************
-//******************************************************************************
-DWORD WIN32API GetRegionData( HRGN arg1, DWORD arg2, PRGNDATA  arg3)
-{
-    dprintf(("GDI32: GetRegionData"));
-    return O32_GetRegionData(arg1, arg2, arg3);
-}
-//******************************************************************************
-//******************************************************************************
-int WIN32API GetRgnBox( HRGN arg1, PRECT  arg2)
-{
-    dprintf(("GDI32: GetRgnBox"));
-    return O32_GetRgnBox(arg1, arg2);
-}
-//******************************************************************************
-//******************************************************************************
-int WIN32API GetStretchBltMode( HDC arg1)
-{
-    dprintf(("GDI32: GetStretchBltMode"));
-    return O32_GetStretchBltMode(arg1);
-}
-//******************************************************************************
-//******************************************************************************
-UINT WIN32API GetSystemPaletteEntries( HDC arg1, UINT arg2, UINT arg3, PPALETTEENTRY  arg4)
-{
- UINT rc;
-
-    dprintf(("GDI32: GetSystemPaletteEntries start %d nr %d pal ptr %X", arg2, arg3, arg4));
-    rc = O32_GetSystemPaletteEntries(arg1, arg2, arg3, arg4);
-    dprintf((" GetSystemPaletteEntries returned %d", rc));
-    return(rc);
 }
 //******************************************************************************
 //******************************************************************************
@@ -1636,13 +1009,6 @@ BOOL WIN32API GetViewportOrgEx( HDC arg1, PPOINT  arg2)
 }
 //******************************************************************************
 //******************************************************************************
-UINT WIN32API GetWinMetaFileBits( HENHMETAFILE arg1, UINT arg2, PBYTE arg3, int arg4, HDC arg5)
-{
-    dprintf(("GDI32: GetWinMetaFileBits"));
-    return O32_GetWinMetaFileBits(arg1, arg2, arg3, arg4, arg5);
-}
-//******************************************************************************
-//******************************************************************************
 BOOL WIN32API GetWindowOrgEx( HDC arg1, PPOINT  arg2)
 {
     dprintf(("GDI32: GetWindowOrgEx"));
@@ -1667,13 +1033,6 @@ int WIN32API IntersectClipRect(HDC arg1, int arg2, int arg3, int arg4, int  arg5
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API InvertRgn( HDC arg1, HRGN  arg2)
-{
-    dprintf(("GDI32: InvertRgn"));
-    return O32_InvertRgn(arg1, arg2);
-}
-//******************************************************************************
-//******************************************************************************
 BOOL WIN32API LPtoDP( HDC arg1, PPOINT arg2, int  arg3)
 {
     dprintf(("GDI32: LPtoDP"));
@@ -1681,31 +1040,10 @@ BOOL WIN32API LPtoDP( HDC arg1, PPOINT arg2, int  arg3)
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API MaskBlt( HDC arg1, int arg2, int arg3, int arg4, int arg5, HDC   arg6, int arg7, int arg8, HBITMAP arg9, int arg10, int arg11, DWORD  arg12)
-{
-    dprintf(("GDI32: MaskBlt"));
-    return O32_MaskBlt(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12);
-}
-//******************************************************************************
-//******************************************************************************
 BOOL WIN32API ModifyWorldTransform( HDC arg1, const XFORM *arg2, DWORD  arg3)
 {
     dprintf(("GDI32: ModifyWorldTransform"));
     return O32_ModifyWorldTransform(arg1, (LPXFORM)arg2, arg3);
-}
-//******************************************************************************
-//******************************************************************************
-int WIN32API OffsetClipRgn( HDC arg1, int arg2, int  arg3)
-{
-    dprintf(("GDI32: OffsetClipRgn"));
-    return O32_OffsetClipRgn(arg1, arg2, arg3);
-}
-//******************************************************************************
-//******************************************************************************
-int WIN32API OffsetRgn( HRGN arg1, int arg2, int  arg3)
-{
-    dprintf(("GDI32: OffsetRgn"));
-    return O32_OffsetRgn(arg1, arg2, arg3);
 }
 //******************************************************************************
 //******************************************************************************
@@ -1723,20 +1061,6 @@ BOOL WIN32API OffsetWindowOrgEx( HDC arg1, int arg2, int arg3, PPOINT  arg4)
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API PaintRgn( HDC arg1, HRGN  arg2)
-{
-    dprintf(("GDI32: PaintRgn"));
-    return O32_PaintRgn(arg1, arg2);
-}
-//******************************************************************************
-//******************************************************************************
-HRGN WIN32API PathToRegion( HDC arg1)
-{
-    dprintf(("GDI32: PathToRegion"));
-    return O32_PathToRegion(arg1);
-}
-//******************************************************************************
-//******************************************************************************
 BOOL WIN32API Pie(HDC hdc, int nLeftRect, int nTopRect, int nRightRect,
                   int nBottomRect, int nXRadial1, int nYRadial1, int nXRadial2,
                   int nYRadial2)
@@ -1747,27 +1071,6 @@ BOOL WIN32API Pie(HDC hdc, int nLeftRect, int nTopRect, int nRightRect,
       return O32_Ellipse(hdc,nLeftRect,nTopRect,nRightRect,nBottomRect);
     else
       return O32_Pie(hdc,nLeftRect,nTopRect,nRightRect,nBottomRect,nXRadial1,nYRadial1,nXRadial2,nYRadial2);
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API PlayEnhMetaFile( HDC arg1, HENHMETAFILE arg2, const RECT *  arg3)
-{
-    dprintf(("GDI32: PlayEnhMetaFile"));
-    return O32_PlayEnhMetaFile(arg1, arg2, arg3);
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API PlayMetaFile( HDC arg1, HMETAFILE  arg2)
-{
-    dprintf(("GDI32: PlayMetaFile"));
-    return O32_PlayMetaFile(arg1, arg2);
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API PlayMetaFileRecord( HDC arg1, LPHANDLETABLE arg2, LPMETARECORD arg3, UINT  arg4)
-{
-    dprintf(("GDI32: PlayMetaFileRecord"));
-    return O32_PlayMetaFileRecord(arg1, arg2, arg3, (int)arg4);
 }
 //******************************************************************************
 //******************************************************************************
@@ -1814,24 +1117,10 @@ BOOL WIN32API Polygon( HDC arg1, const POINT * arg2, int  arg3)
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API PtInRegion( HRGN arg1, int arg2, int  arg3)
-{
-    dprintf(("GDI32: PtInRegion"));
-    return O32_PtInRegion(arg1, arg2, arg3);
-}
-//******************************************************************************
-//******************************************************************************
 BOOL WIN32API PtVisible( HDC arg1, int arg2, int  arg3)
 {
     dprintf(("GDI32: PtVisible"));
     return O32_PtVisible(arg1, arg2, arg3);
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API RectInRegion( HRGN arg1, const RECT *  arg2)
-{
-    dprintf(("GDI32: RectInRegion"));
-    return O32_RectInRegion(arg1, arg2);
 }
 //******************************************************************************
 //******************************************************************************
@@ -1854,13 +1143,6 @@ HDC WIN32API ResetDCW( HDC arg1, const DEVMODEW *  arg2)
     dprintf(("GDI32: ResetDCW\n"));
     // NOTE: This will not work as is (needs UNICODE support)
     return (HDC)O32_ResetDC(arg1, (const DEVMODEA *)arg2);
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API ResizePalette( HPALETTE arg1, UINT  arg2)
-{
-    dprintf(("GDI32: ResizePalette\n"));
-    return O32_ResizePalette(arg1, arg2);
 }
 //******************************************************************************
 //******************************************************************************
@@ -1899,31 +1181,10 @@ BOOL WIN32API ScaleWindowExtEx( HDC arg1, int arg2, int arg3, int arg4, int arg5
 }
 //******************************************************************************
 //******************************************************************************
-int WIN32API SelectClipRgn( HDC hdc, HRGN hRgn)
-{
-    dprintf(("GDI32: SelectClipRgn %x %x", hdc, hRgn));
-    return O32_SelectClipRgn(hdc, hRgn);
-}
-//******************************************************************************
-//******************************************************************************
 int WIN32API SetArcDirection( HDC arg1, int  arg2)
 {
     dprintf(("GDI32: SetArcDirection"));
     return O32_SetArcDirection(arg1, arg2);
-}
-//******************************************************************************
-//******************************************************************************
-LONG WIN32API SetBitmapBits( HBITMAP arg1, LONG arg2, const VOID *  arg3)
-{
-    dprintf(("GDI32: SetBitmapBits"));
-    return O32_SetBitmapBits(arg1, (DWORD)arg2, arg3);
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API SetBitmapDimensionEx( HBITMAP arg1, int arg2, int arg3, PSIZE  arg4)
-{
-    dprintf(("GDI32: SetBitmapDimensionEx"));
-    return O32_SetBitmapDimensionEx(arg1, arg2, arg3, arg4);
 }
 //******************************************************************************
 //******************************************************************************
@@ -1941,96 +1202,6 @@ BOOL WIN32API SetBrushOrgEx( HDC arg1, int arg2, int arg3, PPOINT  arg4)
     rc = O32_SetBrushOrgEx(arg1, arg2, arg3, arg4);
     dprintf(("GDI32: SetBrushOrgEx returned %d\n", rc));
     return(rc);
-}
-//******************************************************************************
-//******************************************************************************
-int WIN32API SetDIBits( HDC arg1, HBITMAP arg2, UINT arg3, UINT arg4, const VOID * arg5, const BITMAPINFO * arg6, UINT  arg7)
-{
-    dprintf(("GDI32: SetDIBits %x %x %x %x %x %x %x\n", arg1, arg2, arg3, arg4, arg5, arg6, arg7));
-
-    if(DIBSection::getSection() != NULL) {
-        DIBSection *dsect;
-
-        dsect = DIBSection::find((DWORD)arg2);
-        if(dsect) {
-           return dsect->SetDIBits(arg1, arg2, arg3, arg4, arg5, (WINBITMAPINFOHEADER *)&arg6->bmiHeader, arg7);
-        }
-    }
-    return O32_SetDIBits(arg1, arg2, arg3, arg4, arg5, arg6, arg7);
-}
-//******************************************************************************
-//******************************************************************************
-INT WIN32API SetDIBitsToDevice(HDC hdc, INT xDest, INT yDest, DWORD cx, 
-                               DWORD cy, INT xSrc, INT ySrc, 
-                               UINT startscan, UINT lines, LPCVOID bits, 
-                               const BITMAPINFO *info, UINT coloruse)
-{
-    INT result, imgsize, palsize, height, width;
-    char *ptr;
-
-    SetLastError(0);
-    if(info == NULL) {
-	goto invalid_parameter;
-    }
-    height = info->bmiHeader.biHeight;
-    width  = info->bmiHeader.biWidth;
-
-    if (height < 0) height = -height;
-    if (!lines || (startscan >= height)) {
-	goto invalid_parameter;
-    }
-    if (startscan + lines > height) lines = height - startscan;
-
-    if (ySrc < startscan) ySrc = startscan;
-    else if (ySrc >= startscan + lines) goto invalid_parameter;
-
-    if (xSrc >= width) goto invalid_parameter;
-
-    if (ySrc + cy >= startscan + lines) cy = startscan + lines - ySrc;
-
-    if (xSrc + cx >= width) cx = width - xSrc;
-
-    if (!cx || !cy) goto invalid_parameter;
-
-    // EB: ->>> Crazy. Nobody seen this Open32 bug ?
-    // Dont't like dirty pointers, but Open32 needs a bit help.
-    // Only tested with winmine.
-    palsize = QueryPaletteSize((BITMAPINFOHEADER*)&info->bmiHeader);
-    imgsize = CalcBitmapSize(info->bmiHeader.biBitCount,
-                             info->bmiHeader.biWidth, info->bmiHeader.biHeight);
-    ptr = ((char *)info) + palsize + sizeof(BITMAPINFOHEADER);
-    if(bits >= ptr && bits < ptr + imgsize)
-    {
-        bits = (char *)bits - imgsize +
-                   CalcBitmapSize(info->bmiHeader.biBitCount,
-                                  info->bmiHeader.biWidth, lines);
-    }
-    // EB: <<<-
-
-//    if(xDest == 0 && yDest == 0 && xSrc == 0 && ySrc == 0 && cx == width && cy == height) {
-//	result = OSLibSetDIBitsToDevice(hdc, xDest, yDest, cx, cy, xSrc, ySrc, startscan, lines, (PVOID) bits, (WINBITMAPINFOHEADER*)info, coloruse);
-//  	result = lines;
-//    }
-//    else {
-    	result = O32_SetDIBitsToDevice(hdc, xDest, yDest, cx, cy, xSrc, ySrc, startscan, lines, (PVOID) bits, (PBITMAPINFO)info, coloruse);
-	//SvL: Wrong Open32 return value
-	result = (result == TRUE) ? lines : 0;
-//    }
-
-    dprintf(("GDI32: SetDIBitsToDevice hdc:%X xDest:%d yDest:%d, cx:%d, cy:%d, xSrc:%d, ySrc:%d, startscan:%d, lines:%d, bits:%X, info%X, coloruse:%d returned %d",
-                 hdc, xDest, yDest, cx, cy, xSrc, ySrc, startscan, lines, (LPVOID) bits, (PBITMAPINFO)info, coloruse, result));
-    return result;
-
-invalid_parameter:
-    SetLastError(ERROR_INVALID_PARAMETER);
-    return 0;
-}
-//******************************************************************************
-//******************************************************************************
-HENHMETAFILE WIN32API SetEnhMetaFileBits( UINT arg1, const BYTE *  arg2)
-{
-    dprintf(("GDI32: SetEnhMetaFileBits"));
-    return O32_SetEnhMetaFileBits(arg1, arg2);
 }
 //******************************************************************************
 //******************************************************************************
@@ -2055,13 +1226,6 @@ DWORD WIN32API SetMapperFlags( HDC arg1, DWORD  arg2)
 }
 //******************************************************************************
 //******************************************************************************
-HMETAFILE WIN32API SetMetaFileBitsEx( UINT arg1, const BYTE * arg2)
-{
-    dprintf(("GDI32: SetMetaFileBitsEx"));
-    return O32_SetMetaFileBitsEx(arg1, (PBYTE)arg2);
-}
-//******************************************************************************
-//******************************************************************************
 BOOL WIN32API SetMiterLimit( HDC arg1, float  arg2, float *  arg3)
 {
     dprintf(("GDI32: SetMiterLimit"));
@@ -2069,24 +1233,10 @@ BOOL WIN32API SetMiterLimit( HDC arg1, float  arg2, float *  arg3)
 }
 //******************************************************************************
 //******************************************************************************
-UINT WIN32API SetPaletteEntries( HPALETTE arg1, UINT arg2, UINT arg3, PALETTEENTRY * arg4)
-{
-    dprintf(("GDI32: SetPaletteEntries"));
-    return O32_SetPaletteEntries(arg1, arg2, arg3, (const PALETTEENTRY *)arg4);
-}
-//******************************************************************************
-//******************************************************************************
 int WIN32API SetPolyFillMode( HDC arg1, int  arg2)
 {
     dprintf(("GDI32: SetPolyFillMode"));
     return O32_SetPolyFillMode(arg1, arg2);
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API SetRectRgn( HRGN arg1, int arg2, int arg3, int arg4, int  arg5)
-{
-    dprintf(("GDI32: SetRectRgn"));
-    return O32_SetRectRgn(arg1, arg2, arg3, arg4, arg5);
 }
 //******************************************************************************
 //******************************************************************************
@@ -2122,13 +1272,6 @@ BOOL WIN32API SetViewportOrgEx( HDC arg1, int arg2, int arg3, PPOINT  arg4)
 {
     dprintf(("GDI32: SetViewportOrgEx"));
     return O32_SetViewportOrgEx(arg1, arg2, arg3, arg4);
-}
-//******************************************************************************
-//******************************************************************************
-HENHMETAFILE WIN32API SetWinMetaFileBits( UINT arg1, const BYTE * arg2, HDC arg3, const METAFILEPICT *  arg4)
-{
-    dprintf(("GDI32: SetWinMetaFileBits"));
-    return O32_SetWinMetaFileBits(arg1, arg2, arg3, arg4);
 }
 //******************************************************************************
 //******************************************************************************
@@ -2189,14 +1332,6 @@ BOOL WIN32API WidenPath( HDC arg1)
     return O32_WidenPath(arg1);
 }
 //******************************************************************************
-//CreateDisardableBitmap is obsolete and can be replaced by CreateCompatibleBitmap
-//******************************************************************************
-HBITMAP WIN32API CreateDiscardableBitmap(HDC hDC, int nWidth, int nHeight)
-{
-    dprintf(("GDI32: CreateDisardableBitmap\n"));
-    return O32_CreateCompatibleBitmap(hDC, nWidth, nHeight);
-}
-//******************************************************************************
 //TODO: Not implemented
 //******************************************************************************
 int WIN32API SetAbortProc(HDC hdc, ABORTPROC lpAbortProc)
@@ -2223,141 +1358,6 @@ BOOL WIN32API SetColorAdjustment(HDC hdc, CONST COLORADJUSTMENT *lpca)
 {
   dprintf(("GDI32: SetColorAdjustment, not implemented!(TRUE)\n"));
   return(TRUE);
-}
-//******************************************************************************
-//WINE: OBJECTS\DIB.C
-//*********************************************************************************
-HBITMAP WIN32API CreateDIBSection( HDC hdc, BITMAPINFO *pbmi, UINT iUsage,
-                                   VOID **ppvBits, HANDLE hSection, DWORD dwOffset)
-{
- HBITMAP res = 0;
- BOOL    fFlip = 0;
- int iHeight, iWidth;
-
-  dprintf(("GDI32: CreateDIBSection %x %x %x %d", hdc, iUsage, hSection, dwOffset));
-  if(hSection)
-  {
-    dprintf(("GDI32: CreateDIBSection, hSection != NULL, not supported!\n"));
-    return NULL;
-  }
-
-  //SvL: 13-9-98: StarCraft uses bitmap with negative height
-  iWidth = pbmi->bmiHeader.biWidth;
-  if(pbmi->bmiHeader.biWidth < 0)
-  {
-	dprintf(("CreateDIBSection: width %d", pbmi->bmiHeader.biWidth));
-    	pbmi->bmiHeader.biWidth = -pbmi->bmiHeader.biWidth;
-    	fFlip = FLIP_HOR;
-  }
-  iHeight = pbmi->bmiHeader.biHeight;
-  if(pbmi->bmiHeader.biHeight < 0)
-  {
-	dprintf(("CreateDIBSection: height %d", pbmi->bmiHeader.biHeight));
-    	pbmi->bmiHeader.biHeight = -pbmi->bmiHeader.biHeight;
-    	fFlip |= FLIP_VERT;
-  }
-
-  res = O32_CreateDIBitmap(hdc, &pbmi->bmiHeader, 0, NULL, pbmi, 0);
-  if (res)
-  {
-    ULONG Pal[256];
-    char PalSize;
-    LOGPALETTE tmpPal = { 0x300,1,{0,0,0,0}};
-    HPALETTE hpalCur, hpalTmp;
-    DIBSection *dsect = new DIBSection((WINBITMAPINFOHEADER *)&pbmi->bmiHeader, (DWORD)res, fFlip);
-
-    if(NULL!=dsect)
-    {
-      PalSize = dsect->GetBitCount();
-      if(PalSize<=8)
-      {
-        // Now get the current Palette from the DC
-        hpalTmp = CreatePalette(&tmpPal);
-        hpalCur = SelectPalette(hdc, hpalTmp, FALSE);
-
-        // and use it to set the DIBColorTable
-        GetPaletteEntries( hpalCur, 0, 1<<PalSize, (LPPALETTEENTRY)&Pal);
-        dsect->SetDIBColorTable(0, 1<< PalSize, (RGBQUAD*)&Pal);
-
-        // Restore the DC Palette
-        SelectPalette(hdc,hpalCur,FALSE);
-        DeleteObject(hpalTmp);
-      }
-      // Set the hdc in the DIBSection so we can update the palete if a new
-      // Paletet etc. gets selected into the DC.
-
-      dsect->SelectDIBObject(hdc);
-
-      if(ppvBits!=NULL)
-        *ppvBits = dsect->GetDIBObject();
-
-      pbmi->bmiHeader.biWidth = iWidth;
-      pbmi->bmiHeader.biHeight = iHeight;
-
-      return(res);
-    }
-  }
-
-  /* Error.  */
-  if (res)
-    DeleteObject(res);
-  *ppvBits = NULL;
-#ifdef DEBUG
-  dprintf(("GDI32: CreateDIBSection, error!\n"));
-  dprintf(("pbmi->biWidth    %d", pbmi->bmiHeader.biWidth));
-  dprintf(("pbmi->biHeight   %d", pbmi->bmiHeader.biHeight));
-  dprintf(("pbmi->biBitCount %d", pbmi->bmiHeader.biBitCount));
-#endif
-
-  return 0;
-}
-//******************************************************************************
-//******************************************************************************
-UINT WIN32API GetDIBColorTable( HDC hdc, UINT uStartIndex, UINT cEntries,
-                                  RGBQUAD *pColors)
-{
- HPALETTE hpal = O32_GetCurrentObject(hdc, OBJ_PAL);
- UINT rc;
- int i;
-
-  rc = O32_GetPaletteEntries(hpal,
-                         uStartIndex,
-                         cEntries,
-                         (PALETTEENTRY *)pColors);
-  for(i=0;
-      i<cEntries;
-      i++)
-  {
-    BYTE tmp;
-    tmp = pColors[i].rgbBlue;
-    pColors[i].rgbBlue = pColors[i].rgbRed;
-    pColors[i].rgbRed = tmp;
-    pColors[i].rgbReserved = 0;
-  }
-  dprintf(("GDI32: GetDIBColorTable returns %d\n", rc));
-  return(rc);
-}
-//******************************************************************************
-//******************************************************************************
-UINT WIN32API SetDIBColorTable(HDC hdc, UINT uStartIndex, UINT cEntries,
-                                  RGBQUAD *pColors)
-{
- DIBSection *dsect = DIBSection::findHDC(hdc);
-
-  dprintf(("GDI32: SetDIBColorTable\n"));
-  if(dsect)
-  {
-    return(dsect->SetDIBColorTable(uStartIndex, cEntries, pColors));
-  }
-  else
-    return(0);
-}
-//******************************************************************************
-//******************************************************************************
-HPALETTE WIN32API CreateHalftonePalette(HDC hdc)
-{
-    dprintf(("GDI32: CreateHalftonePalette, not implemented\n"));
-    return(NULL);
 }
 //******************************************************************************
 //Maps colors to system palette; faster way to update window (instead of redrawing)
@@ -2433,15 +1433,6 @@ int WIN32API DrawEscape(HDC hdc, int nEscape, int cbInput, LPCSTR lpszInData)
 BOOL WIN32API GetColorAdjustment(HDC hdc, COLORADJUSTMENT *lpca)
 {
   dprintf(("GDI32: GetColorAdjustment, not implemented\n"));
-  return(FALSE);
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API PlgBlt(HDC hdcDest, CONST POINT *lpPoint, HDC hdcSrc, int nXSrc,
-                        int nYSrc, int nWidth, int nHeight, HBITMAP hbmMask,
-                        int xMast, int yMask)
-{
-  dprintf(("GDI32: PlgBlt, not implemented\n"));
   return(FALSE);
 }
 //******************************************************************************
@@ -2533,39 +1524,6 @@ BOOL WIN32API GetTextExtentExPointW(                                 /*KSO Thu 2
   rc = GetTextExtentExPointA(arg1, astring, arg3, arg4, arg5, arg6, arg7);
   FreeAsciiString(astring);
   return rc;
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API PlayEnhMetaFileRecord(                                 /*KSO Thu 21.05.1998*/
-        HDC                                     arg1,
-        LPHANDLETABLE           arg2,
-        CONST ENHMETARECORD *arg3,
-        UINT                            arg4
-        )
-{
-        dprintf(("GDI32: PlayEnhMetaFileRecord - stub\n"));
-        return FALSE;
-}
-//******************************************************************************
-UINT WIN32API GetEnhMetaFileDescriptionA(                    /*KSO Thu 21.05.1998*/
-        HENHMETAFILE    arg1,
-        UINT                    arg2,
-        LPSTR                   arg3
-        )
-{
-        dprintf(("GDI32: GetEnhMetaFileDescriptionA - stub\n"));
-        return FALSE;
-}
-//******************************************************************************
-//******************************************************************************
-UINT WIN32API GetEnhMetaFileDescriptionW(                    /*KSO Thu 21.05.1998*/
-        HENHMETAFILE    arg1,
-        UINT                    arg2,
-        LPWSTR                  arg3
-        )
-{
-        dprintf(("GDI32: GetEnhMetaFileDescriptionW - stub\n"));
-        return FALSE;
 }
 //******************************************************************************
 //******************************************************************************
@@ -3172,30 +2130,6 @@ BOOL WIN32API GetLogColorSpaceW(HCOLORSPACE     hColorSpace,
 
 
 /*****************************************************************************
- * Name      : int GetMetaRgn
- * Purpose   : The GetMetaRgn function retrieves the current metaregion for
- *             the specified device context.
- * Parameters: HDC  hdc   handle of device context
- *             HRGN hrgn  handle of region
- * Variables :
- * Result    : 0 / 1
- * Remark    :
- * Status    : UNTESTED STUB
- *
- * Author    : Patrick Haller [Mon, 1998/06/15 08:00]
- *****************************************************************************/
-
-int WIN32API GetMetaRgn(HDC  hdc,
-                           HRGN hrgn)
-{
-  dprintf(("GDI32: GetMetaRgn(%08xh, %08xh) not implemented.\n",
-           hdc,
-           hrgn));
-
-  return (0);
-}
-
-/*****************************************************************************
  * Name      : BOOL SetDeviceGammaRamp
  * Purpose   : The SetDeviceGammaRamp function sets the gamma ramp on direct
  *             color display boards.
@@ -3269,29 +2203,6 @@ BOOL WIN32API SetICMProfileW(HDC    hdc,
   return (FALSE);
 }
 
-
-/*****************************************************************************
- * Name      : int SetMetaRgn
- * Purpose   : The SetMetaRgn function intersects the current clipping region
- *             for the specified device context with the current metaregion
- *             and saves the combined region as the new metaregion for the
- *             specified device context. The clipping region is reset to a null region.
- * Parameters: HDC    hdc   handle of device context
- * Variables :
- * Result    : TRUE / FALSE
- * Remark    :
- * Status    : UNTESTED STUB
- *
- * Author    : Patrick Haller [Mon, 1998/06/15 08:00]
- *****************************************************************************/
-
-BOOL WIN32API SetMetaRgn(HDC hdc)
-{
-  dprintf(("GDI32: SetMetaRgn(%08xh) not implemented.\n",
-           hdc));
-
-  return (NULLREGION);
-}
 
 
 /*****************************************************************************
