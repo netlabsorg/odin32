@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.157 2001-10-24 15:41:54 sandervl Exp $ */
+/* $Id: pmwindow.cpp,v 1.158 2001-10-25 10:40:45 sandervl Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -61,6 +61,7 @@ BOOL    fOS2Look = FALSE;
 HBITMAP hbmFrameMenu[3] = {0};
 
 static PFNWP pfnFrameWndProc = NULL;
+static HWND  hwndFocusChange = 0;
 
 MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2);
 MRESULT EXPENTRY Win32FrameWindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2);
@@ -1252,7 +1253,6 @@ PosChangedEnd:
 //        goto RunDefFrameWndProc;
 #endif
 
-#ifdef DEBUG
     case WM_FOCUSCHANGE:
     {
         HWND   hwndFocus = (HWND)mp1;
@@ -1260,10 +1260,15 @@ PosChangedEnd:
         USHORT usSetFocus = SHORT1FROMMP(mp2);
         USHORT fsFocusChange = SHORT2FROMMP(mp2);
 
+        //Save window that gains focus so we can determine which
+        //process we lose activation to
+        hwndFocusChange = (HWND)mp1;
+
         dprintf(("PMFRAME:WM_FOCUSCHANGE %x %x (%x) %x %x", win32wnd->getWindowHandle(), OS2ToWin32Handle(hwndFocus), hwndFocus, usSetFocus, fsFocusChange));
         goto RunDefFrameWndProc;
     }
 
+#ifdef DEBUG
     case WM_SETFOCUS:
     {
         dprintf(("PMFRAME: WM_SETFOCUS %x %x", win32wnd->getWindowHandle(), hwnd));
@@ -1284,7 +1289,39 @@ PosChangedEnd:
                 dprintf(("TBM_QUERYHILITE returned %d", WinSendDlgItemMsg(hwnd, FID_TITLEBAR, TBM_QUERYHILITE, 0, 0)));
                 WinSendDlgItemMsg(hwnd, FID_TITLEBAR, TBM_SETHILITE, mp1, 0);
             }
-            WinSendDlgItemMsg(hwnd, FID_CLIENT, WM_ACTIVATE, mp1, mp2);
+            if(SHORT1FROMMP(mp1) == 0) {
+                //deactivate
+                WinSendDlgItemMsg(hwnd, FID_CLIENT, WM_ACTIVATE, mp1, mp2);
+            }
+            PID pidThis, pidPartner, pidTemp;
+            TID tidPartner;
+            HENUM henum;
+            HWND  hwndEnum;
+
+            WinQueryWindowProcess(hwnd, &pidThis, NULL);
+            WinQueryWindowProcess(hwndFocusChange, &pidPartner, &tidPartner);
+
+            if(pidThis != pidPartner) {
+                //Gain or lose activation to window in other process
+                //must send WM_ACTIVATEAPP to top-level windows
+
+                //Iterate over all child windows of the desktop
+                henum = WinBeginEnumWindows(HWND_DESKTOP);
+
+                while(hwndEnum = WinGetNextWindow(henum))
+                {
+                    WinQueryWindowProcess(hwndEnum, &pidTemp, NULL);
+                    if(pidTemp == pidThis)
+                    {
+                        SendMessageA(OS2ToWin32Handle(hwndEnum), WM_ACTIVATEAPP_W, (WPARAM)SHORT1FROMMP(mp1), (LPARAM)tidPartner);
+                    }
+                }
+                WinEndEnumWindows(henum);
+            }
+            if(SHORT1FROMMP(mp1)) {
+                //activate
+                WinSendDlgItemMsg(hwnd, FID_CLIENT, WM_ACTIVATE, mp1, mp2);
+            }
 
             //CB: show owner behind the dialog
             if (win32wnd->IsModalDialog())
