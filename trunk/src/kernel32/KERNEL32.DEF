@@ -1,4 +1,4 @@
-; $Id: KERNEL32.DEF,v 1.63 2000-01-05 19:39:55 sandervl Exp $
+; $Id: KERNEL32.DEF,v 1.64 2000-01-08 04:42:12 phaller Exp $
 
 ;Created by BLAST for IBM's compiler
 ;Basis is Windows95 KERNEL32
@@ -948,6 +948,9 @@ EXPORTS
     lstrcpyWtoA                = _lstrcpyWtoA@8              @784
     lstrncmpA                  = _lstrncmpA@12               @785
     lstrncmpW                  = _lstrncmpW@12               @786
+
+    GetDiskFreeSpaceExA        = _GetDiskFreeSpaceExA@16     @871
+    GetDiskFreeSpaceExW        = _GetDiskFreeSpaceExW@16     @873
 
     IsProcessorFeaturePresent  = _IsProcessorFeaturePresent@4 @880
 
