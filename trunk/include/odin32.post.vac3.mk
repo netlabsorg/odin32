@@ -1,4 +1,4 @@
-# $Id: odin32.post.vac3.mk,v 1.5 2000-12-03 01:34:30 bird Exp $
+# $Id: odin32.post.vac3.mk,v 1.6 2000-12-03 02:55:13 bird Exp $
 
 #
 # Odin32 API
@@ -216,7 +216,9 @@ $(DEFFILE)
 #
 # Localcleanup is default for internal object libraries.
 #
+!ifndef PUBLICLIB
 LOCALCLEAN = 1
+!endif
 
 
 #
@@ -238,7 +240,11 @@ all:    $(OBJDIR) \
 # Lib: Lib rule - dummy rule
 #
 !ifndef NO_LIB_RULE
+!ifndef PUBLICLIB
 lib:
+!else
+lib: all
+!endif
 !endif
 
 
@@ -393,8 +399,10 @@ clean:  clean2
 !ifndef LOCALCLEAN
         $(ODIN32_LIB)\$(ORGTARGET).lib \
         $(ORGTARGET)exp.def \
+!ifndef PUBLICLIB
         $(ODIN32_BIN)\$(TARGET).$(TARGET_EXTENSION) *.$(TARGET_EXTENSION) \
         $(ODIN32_BIN)\$(TARGET).sym *.sym \
+!endif
         $(CLEANEXTRAS)
 !else
         $(CLEANEXTRAS)
