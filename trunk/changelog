@@ -1,4 +1,7 @@
-/* $Id: changelog,v 1.2203 2002-07-02 09:54:39 sandervl Exp $ */
+/* $Id: changelog,v 1.2204 2002-07-03 09:47:09 sandervl Exp $ */
+
+ 2002-07-03: Sander van Leeuwen <sandervl@innotek.de> 
+    - WS2_32:   o Added WSASendDisconnect stub
 
  2002-07-02: Sander van Leeuwen <sandervl@innotek.de>
     - DDRAW:    o Removed RGB555->565 conversion in Fill16on16 & SurfReleaseDC
