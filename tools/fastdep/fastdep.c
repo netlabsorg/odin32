@@ -1,4 +1,4 @@
-/* $Id: fastdep.c,v 1.15 2000-03-18 23:56:24 bird Exp $
+/* $Id: fastdep.c,v 1.16 2000-03-19 16:23:55 bird Exp $
  *
  * Fast dependents. (Fast = Quick and Dirty!)
  *
@@ -229,6 +229,13 @@ static int      cSlashes;
 
 
 /*
+ * Environment variables used.
+ * (These has the correct case.)
+ */
+static char *   pszIncludeEnv;
+
+
+/*
  * Configuration stuff.
  */
 static const char pszDefaultDepFile[] = ".depend";
@@ -291,6 +298,7 @@ int main(int argc, char **argv)
     int         rc   = 0;
     int         argi = 1;
     int         i;
+    char *      psz;
     const char *pszDepFile = pszDefaultDepFile;
     char        achBuffer[4096];
 
@@ -348,6 +356,20 @@ int main(int argc, char **argv)
         szCurDir[i++] = '\\';
         szCurDir[i] = '\0';
     }
+
+
+    /*
+     * Initiate environment variables used: INCLUDE
+     */
+    psz = getenv("INCLUDE");
+    if (psz != NULL)
+    {
+        pszIncludeEnv = strdup(psz);
+        strlwr(pszIncludeEnv);
+    }
+    else
+        pszIncludeEnv = "";
+
 
     /*
      * parse arguments
@@ -415,6 +437,7 @@ int main(int argc, char **argv)
                         strcat(szExclude, argv[argi+1]);
                         argi++;
                     }
+                    strlwr(szExclude);
                     if (szExclude[strlen(szExclude)-1] != ';')
                         strcat(szExclude, ";");
                     break;
@@ -428,6 +451,7 @@ int main(int argc, char **argv)
                         strcat(szInclude, argv[argi+1]);
                         argi++;
                     }
+                    strlwr(szInclude);
                     if (szInclude[strlen(szInclude)-1] != ';')
                         strcat(szInclude, ";");
                     break;
@@ -607,6 +631,7 @@ int main(int argc, char **argv)
                     else
                         szSource[0]  = '\0';
                     strcat(szSource, pfindbuf3->achName);
+                    strlwr(szSource);
 
                     /*
                      * Analyse the file.
@@ -686,7 +711,7 @@ static void syntax(void)
  * Generates depend info on this file, these are stored internally
  * and written to file later.
  * @returns
- * @param     pszFilename  Pointer to source filename.
+ * @param     pszFilename  Pointer to source filename. Correct case is assumed!
  * @param     pOptions     Pointer to options struct.
  * @status    completely implemented.
  * @author    knut st. osmundsen
@@ -744,7 +769,7 @@ static int makeDependent(const char *pszFilename, POPTIONS pOptions)
  * and written to file later.
  * @returns   0 on success.
  *            !0 on error.
- * @param     pszFilename  Pointer to source filename.
+ * @param     pszFilename  Pointer to source filename. Correct case is assumed!
  * @param     pvFile       Pointer to file textbuffer.
  * @param     pOptions     Pointer to options struct.
  * @status    completely implemented.
@@ -884,11 +909,12 @@ int langC_CPP(const char *pszFilename, void *pvFile, BOOL fHeader, POPTIONS pOpt
                     /* copy filename */
                     strncpy(szFullname, &szBuffer[i], j);
                     szFullname[j] = '\0'; /* ensure terminatition. */
+                    strlwr(szFullname);
 
                     /* find include file! */
                     psz = pathlistFindFile(pOptions->pszInclude, szFullname, szBuffer, pOptions);
                     if (psz == NULL)
-                        psz = pathlistFindFile(getenv("INCLUDE"), szFullname, szBuffer, pOptions);
+                        psz = pathlistFindFile(pszIncludeEnv, szFullname, szBuffer, pOptions);
 
                     /* did we find the include? */
                     if (psz != NULL)
@@ -1023,7 +1049,7 @@ int langC_CPP(const char *pszFilename, void *pvFile, BOOL fHeader, POPTIONS pOpt
  * and written to file later.
  * @returns   0 on success.
  *            !0 on error.
- * @param     pszFilename  Pointer to source filename.
+ * @param     pszFilename  Pointer to source filename. Correct case is assumed!
  * @param     pvFile       Pointer to file textbuffer.
  * @param     pOptions     Pointer to options struct.
  * @status    completely implemented.
@@ -1109,11 +1135,12 @@ int langAsm(const char *pszFilename, void *pvFile, BOOL fHeader, POPTIONS pOptio
             /* copy filename */
             strncpy(szFullname, &szBuffer[i], j);
             szFullname[j] = '\0'; /* ensure terminatition. */
+            strlwr(szFullname);
 
             /* find include file! */
             psz = pathlistFindFile(pOptions->pszInclude, szFullname, szBuffer, pOptions);
             if (psz == NULL)
-                psz = pathlistFindFile(getenv("INCLUDE"), szFullname, szBuffer, pOptions);
+                psz = pathlistFindFile(pszIncludeEnv, szFullname, szBuffer, pOptions);
 
             /* Did we find the include? */
             if (psz != NULL)
@@ -1141,7 +1168,7 @@ int langAsm(const char *pszFilename, void *pvFile, BOOL fHeader, POPTIONS pOptio
  * and written to file later.
  * @returns   0 on success.
  *            !0 on error.
- * @param     pszFilename  Pointer to source filename.
+ * @param     pszFilename  Pointer to source filename. Correct case is assumed!
  * @param     pvFile       Pointer to file textbuffer.
  * @param     pOptions     Pointer to options struct.
  * @status    completely implemented.
@@ -1229,11 +1256,12 @@ int langRC(const char *pszFilename, void *pvFile, BOOL fHeader, POPTIONS pOption
             /* copy filename */
             strncpy(szFullname, &szBuffer[i], j);
             szFullname[j] = '\0'; /* ensure terminatition. */
+            strlwr(szFullname);
 
             /* find include file! */
             psz = pathlistFindFile(pOptions->pszInclude, szFullname, szBuffer, pOptions);
             if (psz == NULL)
-                psz = pathlistFindFile(getenv("INCLUDE"), szFullname, szBuffer, pOptions);
+                psz = pathlistFindFile(pszIncludeEnv, szFullname, szBuffer, pOptions);
 
             /* did we find the include? */
             if (psz != NULL)
@@ -1261,7 +1289,7 @@ int langRC(const char *pszFilename, void *pvFile, BOOL fHeader, POPTIONS pOption
  * and written to file later.
  * @returns   0 on success.
  *            !0 on error.
- * @param     pszFilename  Pointer to source filename.
+ * @param     pszFilename  Pointer to source filename. Correct case is assumed!
  * @param     pvFile       Pointer to file textbuffer.
  * @param     pOptions     Pointer to options struct.
  * @status    completely implemented.
@@ -1378,6 +1406,7 @@ int langCOBOL(const char *pszFilename, void *pvFile, BOOL fHeader, POPTIONS pOpt
             /* copy filename */
             strncpy(szFullname, &szBuffer[i], j);
             szFullname[j] = '\0'; /* ensure terminatition. */
+            strlwr(szFullname);
 
             /* add extention .cpy - hardcoded for the moment. */
             strcat(szFullname, ".cpy");
@@ -1542,7 +1571,7 @@ char *fileNormalize2(const char *pszFilename, char *pszBuffer)
         *pszBuffer++ = '\\';
 
     /* lower case it */
-    strlwr(psz);
+    /*strlwr(psz);*/
 
     return psz;
 }
@@ -1761,7 +1790,7 @@ static BOOL filecacheAddDir(const char *pszDir)
 
     /* Make path */
     filePathSlash2(pszDir, szDir);
-    strlwr(szDir); /* Convert name to lower case to allow faster searchs! */
+    //strlwr(szDir); /* Convert name to lower case to allow faster searchs! */
     cchDir = strlen(szDir);
 
 
@@ -1884,7 +1913,7 @@ static char *pathlistFindFile(const char *pszPathList, const char *pszFilename, 
             if (pszBuffer[pszNext - psz - 1] != '\\' && pszBuffer[pszNext - psz - 1] != '/')
                 strcpy(&pszBuffer[pszNext - psz], "\\");
             strcat(pszBuffer, pszFilename);
-            strlwr(pszBuffer); /* to speed up AVL tree search we'll lowercase all names. */
+            //strlwr(pszBuffer); /* to speed up AVL tree search we'll lowercase all names. */
             fileNormalize(pszBuffer);
 
             /*
@@ -2057,7 +2086,7 @@ static void *textbufferCreate(const char *pszFilename)
     void *pvFile = NULL;
     FILE *phFile;
 
-    phFile = fopen(pszFilename, "r");
+    phFile = fopen(pszFilename, "rb");
     if (phFile != NULL)
     {
         signed long cbFile = fsize(phFile);
@@ -2113,9 +2142,9 @@ static char *textbufferNextLine(void *pvBuffer, register char *psz)
         ch = *++psz;
 
     /* skip line end */
+    if (ch == '\r')
+        ch = *++psz;
     if (ch == '\n')
-        psz++;
-    if (*psz == '\r')
         psz++;
 
     return psz;
@@ -2154,9 +2183,9 @@ static char *textbufferGetNextLine(void *pvBuffer, void **ppv, char *pszLineBuff
     *pszLine = '\0';
 
     /* skip line end */
-    if (ch == '\n')
-        ch = *++psz;
     if (ch == '\r')
+        ch = *++psz;
+    if (ch == '\n')
         psz++;
 
     /* check if position has changed - if unchanged it's the end of file! */
