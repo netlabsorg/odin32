@@ -1,4 +1,4 @@
-/* $Id: winimagepe2lx.cpp,v 1.14 2000-09-02 21:14:50 bird Exp $ */
+/* $Id: winimagepe2lx.cpp,v 1.15 2000-09-22 04:35:09 bird Exp $ */
 
 /*
  * Win32 PE2LX Image base class
@@ -146,7 +146,8 @@
  */
 Win32Pe2LxImage::Win32Pe2LxImage(HINSTANCE hinstance, BOOL fWin32k)
     : Win32ImageBase(hinstance),
-    paSections(NULL), cSections(0), pNtHdrs(NULL), fWin32k(fWin32k)
+    paSections(NULL), cSections(0), pNtHdrs(NULL), fWin32k(fWin32k),
+    hmod(hinstance)
 {
     setFullPath(szFileName);
 }
@@ -173,6 +174,7 @@ Win32Pe2LxImage::~Win32Pe2LxImage()
  *            Set pNtHdrs pointer.
  *            Validate the NT headers.
  *            Read the PE section table the set the RVAs in paSections.
+ *            Set instance handle to address of header.
  *            Locate and set the entrypoint.
  *            Locate the resource directory (if any). (pResRootDir, ulRVAResourceSection)
  *            TLS - FIXME!
@@ -241,6 +243,9 @@ BOOL Win32Pe2LxImage::init()
         dprintf(("Win32Pe2LxImage::Win32Pe2LxImage: setSectionRVAs failed with rc=%d\n", rc));
         return FALSE;
     }
+
+    /* Set instance handle to address of header. */
+    hinstance = (HINSTANCE)paSections[0].ulAddress;
 
     /* Locate and set the entrypoint. */
     setEntryPoint((ULONG)getPointerFromRVA(pNtHdrs->OptionalHeader.AddressOfEntryPoint));
@@ -400,7 +405,7 @@ ULONG  Win32Pe2LxImage::getSections()
              * Get the query OTEs for this module.
              * If there is a buffer overflow we'll allocate more storage and retry.
              */
-            rc = W32kQueryOTEs(hinstance, pQOte, cbQte);
+            rc = W32kQueryOTEs(hmod, pQOte, cbQte);
             while (rc == ERROR_BUFFER_OVERFLOW && cbQte < 32000);
             {
                 PVOID pvOld = pQOte;
@@ -412,7 +417,7 @@ ULONG  Win32Pe2LxImage::getSections()
                     return ERROR_NOT_ENOUGH_MEMORY;
                 }
 
-                rc = W32kQueryOTEs(hinstance, pQOte, cbQte);
+                rc = W32kQueryOTEs(hmod, pQOte, cbQte);
             }
 
             /*
@@ -507,7 +512,7 @@ ULONG  Win32Pe2LxImage::getSections()
                     pLrec->pNextRec = (qsLrec_t*)((char*)pLrec->pObjInfo
                                                    + sizeof(qsLObjrec_t) * pLrec->ctObj);
                     }
-                if (pLrec->hmte == hinstance)
+                if (pLrec->hmte == hmod)
                     break;
 
                 /*
@@ -756,7 +761,7 @@ ULONG Win32Pe2LxImage::getApi(char *name)
     APIRET      rc;
     ULONG       ulApiAddr;
 
-    rc = DosQueryProcAddr(hinstance, 0, name, (PFN *)&ulApiAddr);
+    rc = DosQueryProcAddr(hmod, 0, name, (PFN *)&ulApiAddr);
     return rc == NO_ERROR ? ulApiAddr : 0;
 }
 
@@ -777,7 +782,7 @@ ULONG Win32Pe2LxImage::getApi(int ordinal)
     APIRET      rc;
     ULONG       ulApiAddr;
 
-    rc = DosQueryProcAddr(hinstance, ordinal, NULL, (PFN *)&ulApiAddr);
+    rc = DosQueryProcAddr(hmod, ordinal, NULL, (PFN *)&ulApiAddr);
 
     return rc == NO_ERROR ? ulApiAddr : 0;
 }
