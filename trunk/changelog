@@ -1,4 +1,11 @@
-/* $Id: changelog,v 1.2070 2002-05-09 13:54:00 sandervl Exp $ */
+/* $Id: changelog,v 1.2071 2002-05-10 14:52:35 sandervl Exp $ */
+
+ 2002-05-10: Sander van Leeuwen <sandervl@xs4all.nl>
+    - KERNEL32: o Applications are now allowed to read physical disks or
+                  mounted partitions. Write access is only allowed for
+                  unmounted partitions or floppy disks.
+                o Implemented GetFileSize for disk objects; corrected
+                  return value for some failures (-1)
 
  2002-05-09: Sander van Leeuwen <sandervl@xs4all.nl>
     - KERNEL32: o Implemented IOCTL_DISK_GET_PARTITION_INFO & 
@@ -9,6 +16,9 @@
                   availabe; else fail)
                 o Extended GetDriveType & GetVolumeInformation for volume
                   names (instead of only disk names (e.g. C:\))
+                o GetVolumeInformation change: keep file system name if
+                  NTFS or FAT32
+                o Implemented unmounted volume and physical disk access
 
  2002-05-08: Sander van Leeuwen <sandervl@xs4all.nl>
     - COMCTL32: o Merged progress, updown, rebar, animate, comboex, flatsb,
