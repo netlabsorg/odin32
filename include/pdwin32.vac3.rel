@@ -1,4 +1,4 @@
-# $Id: pdwin32.vac3.rel,v 1.15 2000-02-18 10:33:48 sandervl Exp $
+# $Id: pdwin32.vac3.rel,v 1.16 2000-02-26 13:28:15 bird Exp $
 # ODIN / win32os2 Project
 #
 # RELEASE makefile for the VAC3 compiler environment
@@ -7,7 +7,7 @@
 #
 
 
-SOMLIB   = 
+SOMLIB   =
 RTLLIB   = cppom30.lib
 RTLLIB_O = cppom30o.lib
 
@@ -36,5 +36,3 @@ LDFLAGS_ODINCRT  = -Q -Si -G5 -O+ -Ge- -Ss+ -W3 -Gm+ /B"/noe /packcode /packdata
 IMPLIBFLAGS      = /nologo
 ILIBFLAGS        = /quiet /nologo
 RCFLAGS          = -s -I. -I$(CPPMAIN)\include -I$(PDWIN32_INCLUDE) -I$(PDWIN32_INCLUDE)\win
-
-MAKE_CMD=nmake
