@@ -1,4 +1,4 @@
-/* $Id: hotkey.c,v 1.7 1999-09-20 15:59:27 cbratschi Exp $ */
+/* $Id: hotkey.c,v 1.8 1999-09-23 15:50:21 cbratschi Exp $ */
 /*
  * Hotkey control
  *
@@ -6,11 +6,8 @@
  * Copyright 1999 Achim Hasenmueller
  * Copyright 1999 Christoph Bratschi
  *
- * NOTES
- *   Development in progress.
- *
- * TODO:
- *   - keyboard messages
+ * Status: Development in progress
+ * Version: 5.00
  */
 
 #include "winbase.h"
@@ -23,7 +20,11 @@
 static VOID
 HOTKEY_Refresh(HWND hwnd)
 {
-  InvalidateRect(hwnd,NULL,FALSE);
+  RECT rect;
+
+  GetClientRect(hwnd,&rect);
+  InflateRect(&rect,-2,-2);
+  InvalidateRect(hwnd,&rect,FALSE);
 }
 
 
@@ -86,7 +87,15 @@ HOTKEY_SetRules(HWND hwnd,WPARAM wParam,LPARAM lParam)
 static LRESULT
 HOTKEY_Char(HWND hwnd,WPARAM wParam,LPARAM lParam,BOOL sysKey)
 {
- //CB:
+  HOTKEY_INFO *infoPtr = HOTKEY_GetInfoPtr(hwnd);
+
+  if (wParam != infoPtr->bVKHotKey)
+  {
+    infoPtr->bVKHotKey = wParam & 0xFF;
+    infoPtr->bfMods = HOTKEY_Check(infoPtr,infoPtr->bfMods);
+    HOTKEY_Refresh(hwnd);
+  }
+
   return 0;
 }
 
@@ -111,6 +120,7 @@ HOTKEY_Create (HWND hwnd, WPARAM wParam, LPARAM lParam)
     infoPtr->fwModInv  = 0;
     infoPtr->cursorPos.x = 3;
     infoPtr->cursorPos.y = 3;
+    infoPtr->bfModsDown = 0;
 
     /* get default font height */
     hdc = GetDC (hwnd);
@@ -143,7 +153,9 @@ HOTKEY_EraseBackground (HWND hwnd, WPARAM wParam, LPARAM lParam)
     hBrush = (HBRUSH)SendMessageA(GetParent(hwnd),WM_CTLCOLOREDIT,wParam,(LPARAM)hwnd);
     if (!hBrush) hBrush = (HBRUSH)GetStockObject(WHITE_BRUSH);
     GetClientRect(hwnd,&rc);
+    HideCaret(hwnd);
     FillRect((HDC)wParam,&rc,hBrush);
+    ShowCaret(hwnd);
 
     return -1;
 }
@@ -162,8 +174,10 @@ static LRESULT
 HOTKEY_KeyDown (HWND hwnd, WPARAM wParam, LPARAM lParam,BOOL sysKey)
 {
   HOTKEY_INFO *infoPtr = HOTKEY_GetInfoPtr (hwnd);
-  INT newMods = sysKey ? HOTKEYF_ALT:0;
+  INT newMods = (sysKey ? HOTKEYF_ALT:0) | infoPtr->bfModsDown;
+  INT newKey = (infoPtr->bfModsDown == 0) ? 0:infoPtr->bVKHotKey;
 
+  if (sysKey) infoPtr->bfModsDown |= HOTKEYF_ALT;
   switch (wParam)
   {
     case VK_RETURN:
@@ -176,20 +190,28 @@ HOTKEY_KeyDown (HWND hwnd, WPARAM wParam, LPARAM lParam,BOOL sysKey)
 
     case VK_SHIFT:
          newMods |= HOTKEYF_SHIFT;
+         infoPtr->bfModsDown |= HOTKEYF_SHIFT;
          break;
 
     case VK_CONTROL:
          newMods |= HOTKEYF_CONTROL;
+         infoPtr->bfModsDown |= HOTKEYF_CONTROL;
          break;
 
     default:
+         //CB:
          break;
     }
 
-    infoPtr->bfMods = newMods;
-    HOTKEY_Refresh(hwnd);
+    newMods = HOTKEY_Check(infoPtr,newMods);
+    if (infoPtr->bfMods != newMods)
+    {
+      infoPtr->bVKHotKey = newKey;
+      infoPtr->bfMods = newMods;
+      HOTKEY_Refresh(hwnd);
+    }
 
-    return TRUE;
+    return 0;
 }
 
 
@@ -197,10 +219,45 @@ static LRESULT
 HOTKEY_KeyUp (HWND hwnd, WPARAM wParam, LPARAM lParam,BOOL sysKey)
 {
   HOTKEY_INFO *infoPtr = HOTKEY_GetInfoPtr (hwnd);
+  INT newMods = infoPtr->bfModsDown;
 
-//    FIXME (hotkey, " %d\n", wParam);
+  if (sysKey)
+  {
+    newMods &= ~HOTKEYF_ALT;
+    infoPtr->bfModsDown &= ~HOTKEYF_ALT;
+  }
+  switch (wParam)
+  {
+    case VK_RETURN:
+    case VK_TAB:
+    case VK_SPACE:
+    case VK_DELETE:
+    case VK_ESCAPE:
+    case VK_BACK:
+         return DefWindowProcA (hwnd,sysKey ? WM_SYSKEYDOWN:WM_KEYDOWN, wParam, lParam);
 
-  return 0;
+    case VK_SHIFT:
+         newMods &= ~HOTKEYF_SHIFT;
+         infoPtr->bfModsDown &= ~HOTKEYF_SHIFT;
+         break;
+
+    case VK_CONTROL:
+         newMods &= ~HOTKEYF_CONTROL;
+         infoPtr->bfModsDown &= ~HOTKEYF_CONTROL;
+         break;
+
+    default:
+         break;
+    }
+
+    newMods = HOTKEY_Check(infoPtr,newMods);
+    if (infoPtr->bfMods != newMods)
+    {
+      infoPtr->bfMods = newMods;
+      HOTKEY_Refresh(hwnd);
+    }
+
+    return 0;
 }
 
 
@@ -209,8 +266,9 @@ HOTKEY_KillFocus (HWND hwnd, WPARAM wParam, LPARAM lParam)
 {
     HOTKEY_INFO *infoPtr = HOTKEY_GetInfoPtr (hwnd);
 
+    infoPtr->bfModsDown = 0;
     infoPtr->bFocus = FALSE;
-    DestroyCaret ();
+    DestroyCaret();
 
     return 0;
 }
@@ -219,8 +277,6 @@ HOTKEY_KillFocus (HWND hwnd, WPARAM wParam, LPARAM lParam)
 static LRESULT
 HOTKEY_LButtonDown (HWND hwnd, WPARAM wParam, LPARAM lParam)
 {
-/*    HOTKEY_INFO *infoPtr = HOTKEY_GetInfoPtr (hwnd); */
-
     SetFocus (hwnd);
 
     return 0;
@@ -270,7 +326,7 @@ HOTKEY_Draw(HWND hwnd,HDC hdc)
     char2[0] = (char)infoPtr->bVKHotKey;
     char2[1] = 0;
     strcat(text,char2);
-  }
+  } else if (infoPtr->bfModsDown) strcat(text,"+");
   if(infoPtr->hFont) oldFont = SelectObject(hdc,infoPtr->hFont);
   SetBkMode(hdc,TRANSPARENT);
   CopyRect(&newRect,&rect);
