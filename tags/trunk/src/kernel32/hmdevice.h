@@ -1,4 +1,4 @@
-/* $Id: hmdevice.h,v 1.1 1999-06-17 18:21:43 phaller Exp $ */
+/* $Id: hmdevice.h,v 1.2 1999-07-05 09:58:14 phaller Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -24,6 +24,22 @@
 /*****************************************************************************
  * Structures                                                                *
  *****************************************************************************/
+
+typedef struct _HMHANDLEDATA
+{
+  HANDLE          hHMHandle;             /* a copy of the OS/2 system handle */
+
+  DWORD           dwType;                          /* handle type identifier */
+
+  DWORD           dwAccess;                     /* access mode of the handle */
+  DWORD           dwShare;                       /* share mode of the handle */
+  DWORD           dwCreation;                       /* dwCreationDisposition */
+  DWORD           dwFlags;                           /* flags and attributes */
+
+  LPVOID          lpHandlerData;    /* for private use of the device handler */
+} HMHANDLEDATA, *PHMHANDLEDATA;
+
+
 
 class HMDeviceHandler
 {

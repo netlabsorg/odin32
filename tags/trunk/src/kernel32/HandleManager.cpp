@@ -1,4 +1,4 @@
-/* $Id: HandleManager.cpp,v 1.4 1999-06-17 21:52:00 phaller Exp $ */
+/* $Id: HandleManager.cpp,v 1.5 1999-07-05 09:58:14 phaller Exp $ */
 
 /*
  *
@@ -58,11 +58,7 @@
  *****************************************************************************/
 
                     /* this is the size of our currently static handle table */
-#define MAX_OS2_HMHANDLES 256
-
-        /* this is for the handle translation table, could by dynamic though */
-#define MAX_TRANSLATION_HANDLES 8192
-
+#define MAX_OS2_HMHANDLES 1024
 
 
 /*****************************************************************************
@@ -128,9 +124,7 @@ struct _HMGlobals
 
   HMDeviceHandler *pHMOpen32;             /* default handle manager instance */
 
-
   ULONG         ulHandleLast;                   /* index of last used handle */
-  HMTRANSHANDLE TabTranslationHandles[MAX_TRANSLATION_HANDLES];
 } HMGlobals;
 
 
@@ -142,10 +136,10 @@ struct _HMGlobals
 static HMDeviceHandler *_HMDeviceFind(PSZ pszDeviceName);
 
                                /* get next free handle from the handle table */
-static int              _HMHandleGetFree(void);
+static ULONG            _HMHandleGetFree(void);
 
                                        /* get handle table entry from handle */
-static int              _HMHandleQuery(HANDLE hHandle);
+static ULONG            _HMHandleQuery(HANDLE hHandle);
 
 
 
@@ -192,20 +186,20 @@ static HMDeviceHandler *_HMDeviceFind (PSZ pszDeviceName)
  * Author    : Patrick Haller [Wed, 1998/02/11 20:43]
  *****************************************************************************/
 
-static int _HMHandleGetFree(void)
+static ULONG _HMHandleGetFree(void)
 {
-  int iLoop;
+  register ULONG ulLoop;
 
-  for (iLoop = 0;
-       iLoop < MAX_OS2_HMHANDLES;
-       iLoop++)
+  for (ulLoop = 0;
+       ulLoop < MAX_OS2_HMHANDLES;
+       ulLoop++)
   {
-                                                      /* free handle found ? */
-    if (0 == TabWin32Handles[iLoop].hmHandleData.hHMHandle)
-      return (iLoop);                    /* OK, then return it to the caller */
+                                                       /* free handle found ? */
+    if (INVALID_HANDLE_VALUE == TabWin32Handles[ulLoop].hmHandleData.hHMHandle)
+      return (ulLoop);                    /* OK, then return it to the caller */
   }
 
-  return (-1);                              /* haven't found any free handle */
+  return (INVALID_HANDLE_VALUE);             /* haven't found any free handle */
 }
 
 
@@ -222,24 +216,16 @@ static int _HMHandleGetFree(void)
  * Author    : Patrick Haller [Wed, 1998/02/11 20:44]
  *****************************************************************************/
 
-static int _HMHandleQuery(HANDLE hHandle)
+static ULONG _HMHandleQuery(HANDLE hHandle)
 {
-  ULONG ulIndex;                              /* index into the handle table */
-
-                                                         /* check the handle */
-  ulIndex = hHandle & ~HM_HANDLE_MASK;        /* mask out the signature bits */
-  if (ulIndex != HM_HANDLE_ID)                       /* one of our handles ? */
-    return (-1);                               /* nope, ERROR_INVALID_HANDLE */
-
-  ulIndex = hHandle & HM_HANDLE_MASK;               /* get the relevant bits */
-  if (ulIndex > MAX_OS2_HMHANDLES)                  /* check the table range */
-    return (-1);                               /* nope, ERROR_INVALID_HANDLE */
+  if (hHandle > MAX_OS2_HMHANDLES)                  /* check the table range */
+    return (INVALID_HANDLE_VALUE);             /* nope, ERROR_INVALID_HANDLE */
 
                                                    /* Oops, invalid handle ! */
-  if (TabWin32Handles[ulIndex].hmHandleData.hHMHandle != hHandle)
-    return (-1);                               /* nope, ERROR_INVALID_HANDLE */
+  if (INVALID_HANDLE_VALUE == TabWin32Handles[hHandle].hmHandleData.hHMHandle)
+    return (INVALID_HANDLE_VALUE);              /* nope, ERROR_INVALID_HANDLE */
 
-  return ( (int) ulIndex);                 /* OK, we've got our handle index */
+  return ( hHandle);                       /* OK, we've got our handle index */
 }
 
 
@@ -257,7 +243,7 @@ static int _HMHandleQuery(HANDLE hHandle)
  *****************************************************************************/
 
 DWORD   HMDeviceRegister(PSZ             pszDeviceName,
-                                 HMDeviceHandler *pDeviceHandler)
+                         HMDeviceHandler *pDeviceHandler)
 {
   PHMDEVICE pHMDevice;                     /* our new device to be allocated */
 
@@ -301,9 +287,17 @@ DWORD   HMDeviceRegister(PSZ             pszDeviceName,
 
 DWORD HMInitialize(void)
 {
+  ULONG ulIndex;
+
   if (HMGlobals.fIsInitialized != TRUE)
   {
     HMGlobals.fIsInitialized = TRUE;                             /* OK, done */
+
+    // fill handle table
+    for (ulIndex = 0;
+         ulIndex < MAX_OS2_HMHANDLES;
+         ulIndex++)
+      TabWin32Handles[ulIndex].hmHandleData.hHMHandle = INVALID_HANDLE_VALUE;
 
     dprintf(("KERNEL32:HandleManager:HMInitialize() storing handles.\n"));
 
@@ -368,14 +362,14 @@ DWORD HMTerminate(void)
  *****************************************************************************/
 
 DWORD  HMHandleAllocate (PULONG phHandle16,
-                                 ULONG  hHandle32)
+                         ULONG  hHandleOS2)
 {
   register ULONG ulHandle;
 
 #ifdef DEBUG_LOCAL
   dprintf(("KERNEL32: HMHandleAllocate (%08xh,%08xh)\n",
            phHandle16,
-           hHandle32));
+           hHandleOS2));
 #endif
 
   ulHandle = HMGlobals.ulHandleLast;                      /* get free handle */
@@ -383,10 +377,10 @@ DWORD  HMHandleAllocate (PULONG phHandle16,
   do
   {
                                                   /* check if handle is free */
-    if (HMGlobals.TabTranslationHandles[ulHandle].hHandle32 == 0)
+    if (TabWin32Handles[ulHandle].hmHandleData.hHMHandle == INVALID_HANDLE_VALUE)
     {
       *phHandle16 = ulHandle;
-      HMGlobals.TabTranslationHandles[ulHandle].hHandle32 = hHandle32;
+      TabWin32Handles[ulHandle].hmHandleData.hHMHandle = hHandleOS2;
       HMGlobals.ulHandleLast = ulHandle;          /* to shorten search times */
 
       return (NO_ERROR);                                               /* OK */
@@ -394,7 +388,7 @@ DWORD  HMHandleAllocate (PULONG phHandle16,
 
     ulHandle++;                                        /* skip to next entry */
 
-    if (ulHandle >= MAX_TRANSLATION_HANDLES)               /* check boundary */
+    if (ulHandle >= MAX_OS2_HMHANDLES)                     /* check boundary */
       ulHandle = 0;
   }
   while (ulHandle != HMGlobals.ulHandleLast);
@@ -429,7 +423,8 @@ DWORD  HMHandleFree (ULONG hHandle16)
   if (rc != NO_ERROR)                                        /* check errors */
     return (rc);                                    /* raise error condition */
 
-  HMGlobals.TabTranslationHandles[hHandle16].hHandle32 = 0;      /* OK, done */
+  TabWin32Handles[hHandle16].hmHandleData.hHMHandle = INVALID_HANDLE_VALUE;
+                                                                 /* OK, done */
 
   return (NO_ERROR);
 }
@@ -454,10 +449,11 @@ DWORD  HMHandleValidate (ULONG hHandle16)
            hHandle16));
 #endif
 
-  if (hHandle16 >= MAX_TRANSLATION_HANDLES)                /* check boundary */
+  if (hHandle16 >= MAX_OS2_HMHANDLES)                      /* check boundary */
     return (ERROR_INVALID_HANDLE);                  /* raise error condition */
 
-  if (HMGlobals.TabTranslationHandles[hHandle16].hHandle32 == 0)  /* valid ? */
+  if (TabWin32Handles[hHandle16].hmHandleData.hHMHandle == INVALID_HANDLE_VALUE)
+                                                                  /* valid ? */
     return (ERROR_INVALID_HANDLE);                  /* raise error condition */
 
   return (NO_ERROR);
@@ -477,24 +473,24 @@ DWORD  HMHandleValidate (ULONG hHandle16)
  * Author    : Patrick Haller [Wed, 1998/02/11 20:44]
  *****************************************************************************/
 
-DWORD  HMHandleTranslateToWin (ULONG  hHandle32,
-                                       PULONG phHandle16)
+DWORD  HMHandleTranslateToWin (ULONG  hHandleOS2,
+                               PULONG phHandle16)
 {
            ULONG rc;                                       /* API returncode */
   register ULONG ulIndex;                    /* index counter over the table */
 
 #ifdef DEBUG_LOCAL
   dprintf(("KERNEL32: HMHandleTranslateToWin (%08xh, %08xh)\n",
-           hHandle32,
+           hHandleOS2,
            phHandle16));
 #endif
 
   for (ulIndex = 0;
-       ulIndex < MAX_TRANSLATION_HANDLES;
+       ulIndex < MAX_OS2_HMHANDLES;
        ulIndex++)
   {
                                                       /* look for the handle */
-    if (HMGlobals.TabTranslationHandles[ulIndex].hHandle32 == hHandle32)
+    if (TabWin32Handles[ulIndex].hmHandleData.hHMHandle == hHandleOS2)
     {
       *phHandle16 = ulIndex;                               /* deliver result */
       return (NO_ERROR);                                               /* OK */
@@ -519,17 +515,17 @@ DWORD  HMHandleTranslateToWin (ULONG  hHandle32,
  *****************************************************************************/
 
 DWORD  HMHandleTranslateToOS2 (ULONG  hHandle16,
-                                       PULONG phHandle32)
+                               PULONG phHandleOS2)
 {
 #ifdef DEBUG_LOCAL
   dprintf(("KERNEL32: HMHandleTranslateToOS2 (%08xh, %08xh)\n",
            hHandle16,
-           phHandle32));
+           phHandleOS2));
 #endif
 
   if (HMHandleValidate(hHandle16) == NO_ERROR)              /* verify handle */
   {
-    *phHandle32 = HMGlobals.TabTranslationHandles[hHandle16].hHandle32;
+    *phHandleOS2 = TabWin32Handles[hHandle16].hmHandleData.hHMHandle;
     return (NO_ERROR);
   }
 
@@ -556,7 +552,7 @@ DWORD  HMHandleTranslateToOS2i (ULONG  hHandle16)
            hHandle16));
 #endif
 
-  return(HMGlobals.TabTranslationHandles[hHandle16].hHandle32);
+  return(TabWin32Handles[hHandle16].hmHandleData.hHMHandle);
 }
 
 
@@ -707,8 +703,7 @@ HFILE HMCreateFile(LPCSTR lpFileName,
                    /* could be created within the device handler -> deadlock */
 
           /* write appropriate entry into the handle table if open succeeded */
-  hResult = (ULONG)iIndexNew | HM_HANDLE_ID;
-  HMHandleTemp.hHMHandle                      = hResult;
+  HMHandleTemp.hHMHandle                    = iIndexNew;
   TabWin32Handles[iIndexNew].pDeviceHandler = pDeviceHandler;
 
                                   /* now copy back our temporary handle data */
@@ -745,10 +740,10 @@ HFILE HMCreateFile(LPCSTR lpFileName,
 #ifdef DEBUG_LOCAL
   dprintf(("KERNEL32/HandleManager: CreateFile(%s)=%08xh\n",
            lpFileName,
-           hResult));
+           iIndexNew));
 #endif
 
-  return hResult;                                     /* return valid handle */
+  return (HFILE)iIndexNew;                             /* return valid handle */
 }
 
 
@@ -785,7 +780,7 @@ static void FILE_ConvertOFMode( INT mode, DWORD *access, DWORD *sharing )
       case OF_SHARE_EXCLUSIVE:  *sharing = 0; break;
       case OF_SHARE_DENY_WRITE: *sharing = FILE_SHARE_READ; break;
       case OF_SHARE_DENY_READ:  *sharing = FILE_SHARE_WRITE; break;
-       case OF_SHARE_DENY_NONE:
+      case OF_SHARE_DENY_NONE:
       case OF_SHARE_COMPAT:
       default:                  *sharing = FILE_SHARE_READ | FILE_SHARE_WRITE; break;
     }
@@ -798,7 +793,6 @@ HANDLE HMOpenFile(LPCSTR    lpFileName,
   int             iIndex;                     /* index into the handle table */
   int             iIndexNew;                  /* index into the handle table */
   HMDeviceHandler *pDeviceHandler;         /* device handler for this handle */
-  HANDLE          hResult;
   PHMHANDLEDATA   pHMHandleData;
   DWORD           rc;                                     /* API return code */
 
@@ -838,8 +832,7 @@ HANDLE HMOpenFile(LPCSTR    lpFileName,
                    /* could be created within the device handler -> deadlock */
 
           /* write appropriate entry into the handle table if open succeeded */
-  hResult = (ULONG)iIndexNew | HM_HANDLE_ID;
-  TabWin32Handles[iIndexNew].hmHandleData.hHMHandle = hResult;
+  TabWin32Handles[iIndexNew].hmHandleData.hHMHandle = iIndexNew;
   TabWin32Handles[iIndexNew].pDeviceHandler       = pDeviceHandler;
 
   rc = pDeviceHandler->OpenFile  (lpFileName,     /* call the device handler */
@@ -848,9 +841,10 @@ HANDLE HMOpenFile(LPCSTR    lpFileName,
                                   fuMode);
 
 #ifdef DEBUG_LOCAL
-    dprintf(("KERNEL32/HandleManager:CheckPoint3: %s lpHandlerData=%08xh\n",
+    dprintf(("KERNEL32/HandleManager:CheckPoint3: %s lpHandlerData=%08xh rc=%08xh\n",
              lpFileName,
-             HMHandleTemp.lpHandlerData));
+             &TabWin32Handles[iIndexNew].hmHandleData.lpHandlerData,
+             rc));
 #endif
 
   if (rc != NO_ERROR)     /* oops, creation failed within the device handler */
@@ -866,7 +860,7 @@ HANDLE HMOpenFile(LPCSTR    lpFileName,
            hResult));
 #endif
 
-  return hResult;                                     /* return valid handle */
+  return iIndexNew;                                   /* return valid handle */
 }
 
 
