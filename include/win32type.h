@@ -1,4 +1,4 @@
-/* $Id: win32type.h,v 1.21 1999-09-21 11:56:04 phaller Exp $ */
+/* $Id: win32type.h,v 1.22 1999-09-26 22:24:50 sandervl Exp $ */
 
 /*
  * Win32 type definitions for OS/2
@@ -357,6 +357,7 @@ typedef unsigned short  WCHAR;
 #define HANDLE16 WORD
 #define HDRV16   WORD
 #define HINSTANCE16 WORD
+#define HQUEUE16 WORD
 
 // other
 #ifndef HWND
@@ -606,6 +607,16 @@ typedef struct _MEMORY_BASIC_INFORMATION
 } MEMORY_BASIC_INFORMATION,*PMEMORY_BASIC_INFORMATION,*LPMEMORY_BASIC_INFORMATION;
 
 #endif
+
+/* Could this type be considered opaque? */
+typedef struct {
+	LPVOID	DebugInfo;
+	LONG LockCount;
+	LONG RecursionCount;
+	HANDLE OwningThread;
+	HANDLE LockSemaphore;
+	DWORD Reserved;
+}CRITICAL_SECTION;
 
 #pragma pack()
 
