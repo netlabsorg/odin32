@@ -1,4 +1,4 @@
-/* $Id: gdi32.cpp,v 1.43 2000-02-16 14:18:09 sandervl Exp $ */
+/* $Id: gdi32.cpp,v 1.44 2000-02-22 19:11:49 sandervl Exp $ */
 
 /*
  * GDI32 apis
@@ -1434,7 +1434,15 @@ BOOL WIN32API GetCharABCWidthsFloatW(HDC hdc,
 INT WIN32API ExtEscape(HDC hdc, INT nEscape, INT cbInput, LPCSTR lpszInData,
                        INT cbOutput, LPSTR lpszOutData)
 {
-  dprintf(("GDI32: ExtEscape, not implemented\n"));
+  dprintf(("GDI32: ExtEscape, %x %x %d %x %d %x not implemented", hdc, nEscape, cbInput, lpszInData, cbOutput, lpszOutData));
+#ifdef DEBUG
+  if(cbInput && lpszInData) {
+	ULONG *tmp = (ULONG *)lpszInData;
+	for(int i=0;i<cbInput/4;i++) {
+		dprintf(("GDI32: ExtEscape par %d: %x", i, *tmp++));
+	}
+  }
+#endif
   return(0);
 }
 //******************************************************************************

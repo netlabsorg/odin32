@@ -1,5 +1,4 @@
-
-/* $Id: dbglocal.cpp,v 1.1 2000-02-16 14:25:38 sandervl Exp $ */
+/* $Id: dbglocal.cpp,v 1.2 2000-02-22 19:12:52 sandervl Exp $ */
 
 /*
  * debug logging functions for OS/2
@@ -13,6 +12,8 @@
 #include <stdio.h>
 #include <string.h>
 #include "dbglocal.h"
+
+#ifdef DEBUG
 
 USHORT DbgEnabled[DBG_MAXFILES];
 char  *DbgFileNames[DBG_MAXFILES] =
@@ -149,3 +150,4 @@ void ParseLogStatus()
 //******************************************************************************
 //******************************************************************************
 
+#endif

@@ -1,9 +1,9 @@
-/* $Id: winimagepeldr.cpp,v 1.31 2000-02-15 00:14:28 sandervl Exp $ */
+/* $Id: winimagepeldr.cpp,v 1.32 2000-02-22 19:12:53 sandervl Exp $ */
 
 /*
  * Win32 PE loader Image base class
  *
- * Copyright 1998-1999 Sander van Leeuwen (sandervl@xs4all.nl)
+ * Copyright 1998-2000 Sander van Leeuwen (sandervl@xs4all.nl)
  * Copyright 1998 Knut St. Osmundsen
  *
  * Project Odin Software License can be found in LICENSE.TXT
@@ -18,7 +18,7 @@
  *       So an instance of this type can't be used for anything but resource lookup!
  *
  */
-
+#define DEBUG
 #define INCL_DOSFILEMGR          /* File Manager values      */
 #define INCL_DOSMODULEMGR
 #define INCL_DOSERRORS           /* DOS Error values         */
@@ -64,19 +64,17 @@ char szExeErrorMsg[]    = "File isn't an executable";
 char szInteralErrorMsg[]= "Internal Error";
 char szErrorModule[128] = "";
 
-#ifndef max
-#define max(a, b)  ((a>b) ? a : b)
+#ifdef DEBUG
+static FILE *_privateLogFile = NULL;
 #endif
 
-static FILE *_privateLogFile = NULL;
-
 ULONG MissingApi();
-extern ULONG flAllocMem;    /*Tue 03.03.1998: knut */
 
 //******************************************************************************
 //******************************************************************************
 void OpenPrivateLogFilePE()
 {
+#ifdef DEBUG
  char logname[CCHMAXPATH];
 
 	sprintf(logname, "pe_%d.log", loadNr);
@@ -86,15 +84,18 @@ void OpenPrivateLogFilePE()
     		_privateLogFile = fopen(logname, "w");
 	}
 	dprintfGlobal(("PE LOGFILE : %s", logname));
+#endif
 }
 //******************************************************************************
 //******************************************************************************
 void ClosePrivateLogFilePE()
 {
+#ifdef DEBUG
   	if(_privateLogFile) {
 		fclose(_privateLogFile);
 		_privateLogFile = NULL;
 	}
+#endif
 }
 //******************************************************************************
 //******************************************************************************

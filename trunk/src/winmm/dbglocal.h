@@ -1,4 +1,4 @@
-/* $Id: dbglocal.h,v 1.1 2000-02-17 14:10:18 sandervl Exp $ */
+/* $Id: dbglocal.h,v 1.2 2000-02-22 19:12:16 sandervl Exp $ */
 
 /*
  * debug logging functions for OS/2
@@ -50,7 +50,6 @@ extern USHORT DbgEnabled[DBG_MAXFILES];
 #else
 
 #define ParseLogStatus()
-#define DBG_LOCALLOG(a)
 
 #endif //DEBUG
 

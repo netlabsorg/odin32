@@ -1,4 +1,4 @@
-/* $Id: winimagebase.h,v 1.8 1999-11-30 19:39:14 sandervl Exp $ */
+/* $Id: winimagebase.h,v 1.9 2000-02-22 19:10:21 sandervl Exp $ */
 
 /*
  * Win32 PE Image base class
@@ -37,7 +37,6 @@ class Win32Resource;
 
 class Win32ImageBase
 {
-#ifdef DEBUG
 protected:
         DWORD magic;
 public:
@@ -48,7 +47,6 @@ public:
                         DebugInt3();
                 }
         };
-#endif
 
 public:
          // Constructors and destructors
