@@ -1,4 +1,4 @@
-/* $Id: hmopen32.cpp,v 1.6 1999-07-05 07:55:10 phaller Exp $ */
+/* $Id: hmopen32.cpp,v 1.7 1999-07-05 09:58:14 phaller Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -107,7 +107,7 @@ DWORD HMDeviceOpen32Class::CreateFile (LPCSTR        lpFileName,
 
   // create from template
   if (pHMHandleDataTemplate != NULL)
-     hTemplate = pHMHandleDataTemplate->hWinHandle;
+     hTemplate = pHMHandleDataTemplate->hHMHandle;
   else
      hTemplate = 0;
 
@@ -121,7 +121,7 @@ DWORD HMDeviceOpen32Class::CreateFile (LPCSTR        lpFileName,
                          hTemplate);
   if (hFile != INVALID_HANDLE_ERROR)
   {
-     pHMHandleData->hWinHandle = hFile;
+     pHMHandleData->hHMHandle = hFile;
      return (NO_ERROR);
   }
   else
@@ -146,9 +146,9 @@ DWORD HMDeviceOpen32Class::CloseHandle(PHMHANDLEDATA pHMHandleData)
   BOOL bRC;
 
   dprintfl(("KERNEL32: HandleManager::Open32::CloseHandle(%08x)\n",
-           pHMHandleData->hWinHandle));
+           pHMHandleData->hHMHandle));
 
-  bRC = O32_CloseHandle(pHMHandleData->hWinHandle);
+  bRC = O32_CloseHandle(pHMHandleData->hHMHandle);
 
   dprintfl(("KERNEL32: HandleManager::Open32::CloseHandle returned %08xh\n",
            bRC));
@@ -189,7 +189,7 @@ DWORD HMDeviceOpen32Class::ReadFile(PHMHANDLEDATA pHMHandleData,
            lpNumberOfBytesRead,
            lpOverlapped));
 
-  bRC = O32_ReadFile(pHMHandleData->hWinHandle,
+  bRC = O32_ReadFile(pHMHandleData->hHMHandle,
                      (PVOID)lpBuffer,
                      nNumberOfBytesToRead,
                      lpNumberOfBytesRead,
@@ -234,7 +234,7 @@ DWORD HMDeviceOpen32Class::WriteFile(PHMHANDLEDATA pHMHandleData,
            lpNumberOfBytesWritten,
            lpOverlapped));
 
-  bRC = O32_WriteFile(pHMHandleData->hWinHandle,
+  bRC = O32_WriteFile(pHMHandleData->hHMHandle,
                       lpBuffer,
                       nNumberOfBytesToWrite,
                       lpNumberOfBytesWritten,
@@ -265,7 +265,7 @@ DWORD HMDeviceOpen32Class::GetFileType(PHMHANDLEDATA pHMHandleData)
            lpHMDeviceName,
            pHMHandleData));
 
-  return O32_GetFileType(pHMHandleData->hWinHandle);
+  return O32_GetFileType(pHMHandleData->hHMHandle);
 }
 
 
@@ -290,7 +290,7 @@ DWORD HMDeviceOpen32Class::GetFileInformationByHandle(PHMHANDLEDATA             
            pHMHandleData,
            pHFI));
 
-  return O32_GetFileInformationByHandle(pHMHandleData->hWinHandle,
+  return O32_GetFileInformationByHandle(pHMHandleData->hHMHandle,
                                         pHFI);
 }
 
@@ -313,7 +313,7 @@ BOOL HMDeviceOpen32Class::SetEndOfFile(PHMHANDLEDATA pHMHandleData)
            lpHMDeviceName,
            pHMHandleData));
 
-  return O32_SetEndOfFile(pHMHandleData->hWinHandle);
+  return O32_SetEndOfFile(pHMHandleData->hHMHandle);
 }
 
 
@@ -344,7 +344,7 @@ BOOL HMDeviceOpen32Class::SetFileTime(PHMHANDLEDATA pHMHandleData,
            pFT2,
            pFT3));
 
-  return O32_SetFileTime(pHMHandleData->hWinHandle,
+  return O32_SetFileTime(pHMHandleData->hHMHandle,
                          pFT1,
                          pFT2,
                          pFT3);
@@ -372,7 +372,7 @@ DWORD HMDeviceOpen32Class::GetFileSize(PHMHANDLEDATA pHMHandleData,
            pHMHandleData,
            pSize));
 
-  return O32_GetFileSize(pHMHandleData->hWinHandle,
+  return O32_GetFileSize(pHMHandleData->hHMHandle,
                          pSize);
 }
 
@@ -404,7 +404,7 @@ DWORD HMDeviceOpen32Class::SetFilePointer(PHMHANDLEDATA pHMHandleData,
            lpDistanceToMoveHigh,
            dwMoveMethod));
 
-  return O32_SetFilePointer(pHMHandleData->hWinHandle,
+  return O32_SetFilePointer(pHMHandleData->hHMHandle,
                             lDistanceToMove,
                             lpDistanceToMoveHigh,
                             dwMoveMethod);
@@ -441,7 +441,7 @@ DWORD HMDeviceOpen32Class::LockFile(PHMHANDLEDATA pHMHandleData,
            arg4,
            arg5));
 
-  return O32_LockFile(pHMHandleData->hWinHandle,
+  return O32_LockFile(pHMHandleData->hHMHandle,
                       arg2,
                       arg3,
                       arg4,
@@ -485,7 +485,7 @@ DWORD HMDeviceOpen32Class::LockFileEx(PHMHANDLEDATA pHMHandleData,
            lpOverlapped));
 
 
-  return(O32_LockFile(pHMHandleData->hWinHandle,
+  return(O32_LockFile(pHMHandleData->hHMHandle,
                       lpOverlapped->Offset,
                       lpOverlapped->OffsetHigh,
                       nNumberOfBytesToLockLow,
@@ -539,7 +539,8 @@ DWORD HMDeviceOpen32Class::OpenFile (LPCSTR        lpFileName,
                        arg3);
   if (hFile != INVALID_HANDLE_ERROR)
   {
-    pHMHandleData->hWinHandle = hFile;
+    pHMHandleData->hHMHandle = hFile;
+
     GetFileTime(hFile,
                 NULL,
                 NULL,
@@ -550,15 +551,16 @@ DWORD HMDeviceOpen32Class::OpenFile (LPCSTR        lpFileName,
     memcpy(pOFStruct->reserved,
            filedatetime,
            sizeof(pOFStruct->reserved) );
+
     return (NO_ERROR);
   }
 
   // error branch
-  hFile = O32_GetLastError();
-  pOFStruct->nErrCode = hFile;
+  pOFStruct->nErrCode = O32_GetLastError();
   dprintf(("KERNEL32: HandleManager::Open32::OpenFile Error %08xh\n",
             pOFStruct->nErrCode));
 
+  // return != NO_ERROR => error code
   return(hFile);
 }
 
@@ -593,7 +595,7 @@ DWORD HMDeviceOpen32Class::UnlockFile(PHMHANDLEDATA pHMHandleData,
            arg4,
            arg5));
 
-  return O32_UnlockFile(pHMHandleData->hWinHandle,
+  return O32_UnlockFile(pHMHandleData->hHMHandle,
                         arg2,
                         arg3,
                         arg4,
@@ -636,7 +638,7 @@ DWORD HMDeviceOpen32Class::UnlockFileEx(PHMHANDLEDATA pHMHandleData,
            nNumberOfBytesToLockHigh,
            lpOverlapped));
 
-  return(O32_UnlockFile(pHMHandleData->hWinHandle,
+  return(O32_UnlockFile(pHMHandleData->hHMHandle,
                    lpOverlapped->Offset,
                    lpOverlapped->OffsetHigh,
                    nNumberOfBytesToLockLow,
