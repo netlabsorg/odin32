@@ -1,4 +1,4 @@
-/* $Id: odin32pack.cmd,v 1.12 2001-01-12 15:05:50 bird Exp $
+/* $Id: odin32pack.cmd,v 1.13 2001-01-12 16:05:21 bird Exp $
  *
  * Make the two zip files.
  *
@@ -11,7 +11,6 @@
  */
     sStartDir = directory();
 
-if (0) then do
     /*
      * Make .WPI files.
      */
@@ -23,7 +22,6 @@ if (0) then do
     'move *.wpi' sStartDir;
     if (RC <> 0) then call failure rc, 'failed to move the *.wpi ->' sStartDir;
     call ChDir '..\..';
-end
 
     /*
      * Make .ZIP files.
