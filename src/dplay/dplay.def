@@ -1,4 +1,4 @@
-;$Id: dplay.def,v 1.2 1999-12-28 10:31:00 sandervl Exp $
+;$Id: dplay.def,v 1.3 2000-03-24 18:02:32 achimha Exp $
 
 ;
 ; Based on Windows 98 DirectX7: DPLAY.DLL 
@@ -15,4 +15,5 @@ IMPORTS
 
 EXPORTS
   DirectPlayCreate           = _DirectPlayCreate@12            @1
-;  DirectPlayEnumerate       				       @2
+  DirectPlayEnumerateA       = _DirectPlayEnumerateA@8	       @2
+  DirectPlayEnumerateW       = _DirectPlayEnumerateW@8         @3
