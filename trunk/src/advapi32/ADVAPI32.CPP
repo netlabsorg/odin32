@@ -1,4 +1,4 @@
-/* $Id: ADVAPI32.CPP,v 1.17 2001-04-22 10:39:26 sandervl Exp $ */
+/* $Id: ADVAPI32.CPP,v 1.18 2001-04-26 17:00:33 sandervl Exp $ */
 
 /*
  * Win32 advanced API functions for OS/2
@@ -899,42 +899,6 @@ BOOL WIN32API InitiateSystemShutdownW(LPWSTR lpMachineName,
   return (FALSE); /* signal failure */
 }
 
-
-/*****************************************************************************
- * Name      : IsTextUnicode
- * Purpose   : The IsTextUnicode function determines whether a buffer probably
- *             contains a form of Unicode text. The function uses various
- *             statistical and deterministic methods to make its determination,
- *             under the control of flags passed via lpi. When the function
- *             returns, the results of such tests are reported via lpi. If all
- *             specified tests are passed, the function returns TRUE; otherwise,
- *             it returns FALSE.
- * Parameters: CONST LPVOID lpBuffer pointer to an input buffer to be examined
- *             int          cb       the size in bytes of the input buffer
- *             LPINT        lpi      pointer to flags that condition text examination and receive results
- * Variables :
- * Result    :
- * Remark    :
- * Status    : UNTESTED STUB
- *
- * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
- *****************************************************************************/
-
-DWORD WIN32API IsTextUnicode(CONST LPVOID  lpBuffer,
-                                int           cb,
-                                LPINT         lpi)
-{
-  DWORD dwResult = 0;
-
-  dprintf(("ADVAPI32: IsTextUnicode(%08xh,%08xh,%08xh) not implemented.\n",
-           lpBuffer,
-           cb,
-           lpi));
-
-  if (cb & 0x0001) dwResult |= IS_TEXT_UNICODE_ODD_LENGTH;
-
-  return (dwResult); /* signal failure */
-}
 
 
 /*****************************************************************************

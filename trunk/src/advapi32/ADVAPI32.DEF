@@ -1,4 +1,4 @@
-; $Id: ADVAPI32.DEF,v 1.15 2001-04-22 10:39:27 sandervl Exp $
+; $Id: ADVAPI32.DEF,v 1.16 2001-04-26 17:00:33 sandervl Exp $
 
 ;
 ; Based on NT 4.0 SP6: ADVAPI32.DLL 
@@ -304,7 +304,7 @@ EXPORTS
      InitializeSid              = _InitializeSid@12                  @174
      InitiateSystemShutdownA    = _InitiateSystemShutdownA@20        @175
      InitiateSystemShutdownW    = _InitiateSystemShutdownW@20        @176
-     IsTextUnicode              = _IsTextUnicode@12                  @177
+     IsTextUnicode              = _RtlIsTextUnicode@12               @177
      IsValidAcl                 = _IsValidAcl@4                      @178
      IsValidSecurityDescriptor  = _IsValidSecurityDescriptor@4       @179
      IsValidSid                 = _IsValidSid@4                      @180
