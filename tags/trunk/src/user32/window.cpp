@@ -1,4 +1,4 @@
-/* $Id: window.cpp,v 1.60 2000-04-13 18:50:44 sandervl Exp $ */
+/* $Id: window.cpp,v 1.61 2000-04-18 11:13:01 sandervl Exp $ */
 /*
  * Win32 window apis for OS/2
  *
@@ -657,7 +657,6 @@ BOOL WIN32API GetWindowRect( HWND hwnd, PRECT pRect)
     else
       window = windowDesktop;
 
-
     if(!window) {
         dprintf(("GetWindowRect, window %x not found", hwnd));
         SetLastError(ERROR_INVALID_WINDOW_HANDLE);
@@ -669,9 +668,6 @@ BOOL WIN32API GetWindowRect( HWND hwnd, PRECT pRect)
     }
     *pRect = *window->getWindowRect(); //always in screen coordinates
 
-    if(hwnd == 0x68000034) {
-        window = 0;
-    }
     dprintf(("GetWindowRect %x (%d,%d) (%d,%d)", hwnd, pRect->left, pRect->top, pRect->right, pRect->bottom));
     return TRUE;
 }
