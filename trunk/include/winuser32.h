@@ -1,4 +1,4 @@
-/* $Id: winuser32.h,v 1.6 2000-12-29 18:41:23 sandervl Exp $ */
+/* $Id: winuser32.h,v 1.7 2000-12-30 13:26:53 sandervl Exp $ */
 
 /*
  * Internal functions exported by user32
@@ -28,5 +28,8 @@ int  WIN32API BITMAP_GetWidthBytes( INT width, INT depth );
 
 HWND WIN32API Win32ToOS2Handle(HWND hwndWin32);
 HWND WIN32API OS2ToWin32Handle(HWND hwnd);
+
+BOOL WIN32API IsSystemPen(HPEN hPen);
+BOOL WIN32API IsSystemBrush(HBRUSH hBrush);
 
 #endif //__WINUSER32_H__

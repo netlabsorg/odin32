@@ -1,4 +1,4 @@
-/* $Id: win32type.h,v 1.43 2000-11-21 11:33:59 sandervl Exp $ */
+/* $Id: win32type.h,v 1.44 2000-12-30 13:26:53 sandervl Exp $ */
 
 /*
  * Win32 type definitions for OS/2
@@ -335,6 +335,7 @@ typedef unsigned short  WCHAR;
 #define HICON   DWORD
 #define HCURSOR DWORD
 #define HBRUSH  DWORD
+#define HPEN    DWORD
 #define HMENU   DWORD
 #define HFONT   DWORD
 #define WNDPROC DWORD
