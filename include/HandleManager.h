@@ -1,4 +1,4 @@
-/* $Id: HandleManager.h,v 1.3 1999-07-05 09:58:13 phaller Exp $ */
+/* $Id: HandleManager.h,v 1.4 1999-07-06 15:48:44 phaller Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -125,84 +125,147 @@ DWORD  HMHandleTranslateToOS2i(ULONG  hHandle16);
 extern "C" {
 #endif
 
-HFILE HMCreateFile(LPCSTR lpFileName,
-                   DWORD  dwDesiredAccess,
-                   DWORD  dwShareMode,
-                   LPSECURITY_ATTRIBUTES lpSecurityAttributes,
-                   DWORD  dwCreationDisposition,
-                   DWORD  dwFlagsAndAttributes,
-                   HANDLE hTemplateFile);
+HANDLE HMCreateEvent                (LPSECURITY_ATTRIBUTES      lpsa,
+                                     BOOL                       bManualReset,
+                                     BOOL                       bInitialState,
+                                     LPCSTR                     lpName);
 
-HANDLE HMOpenFile(LPCSTR    lpFileName,
-                  OFSTRUCT* pOFStruct,
-                  UINT      fuMode);
+HANDLE HMCreateMutex                (LPSECURITY_ATTRIBUTES      lpsa,
+                                     BOOL                       bInitialOwner,
+                                     LPCSTR                     lpName);
 
-BOOL HMCloseHandle(HANDLE hObject);
+HANDLE HMCreateFile                 (LPCSTR                     lpFileName,
+                                     DWORD                      dwDesiredAccess,
+                                     DWORD                      dwShareMode,
+                                     LPSECURITY_ATTRIBUTES      lpSecurityAttributes,
+                                     DWORD                      dwCreationDisposition,
+                                     DWORD                      dwFlagsAndAttributes,
+                                     HANDLE                     hTemplateFile);
 
-BOOL HMReadFile(HANDLE       hFile,
-                LPVOID       lpBuffer,
-                DWORD        nNumberOfBytesToRead,
-                LPDWORD      lpNumberOfBytesRead,
-                LPOVERLAPPED lpOverlapped);
+HANDLE HMOpenFile                   (LPCSTR                     lpFileName,
+                                     OFSTRUCT*                  pOFStruct,
+                                     UINT                       fuMode);
 
-BOOL HMWriteFile(HANDLE       hFile,
-                 LPCVOID      lpBuffer,
-                 DWORD        nNumberOfBytesToWrite,
-                 LPDWORD      lpNumberOfBytesWritten,
-                 LPOVERLAPPED lpOverlapped);
+HANDLE HMOpenEvent                  (DWORD                      fdwAccess,
+                                     BOOL                       fInherit,
+                                     LPCSTR                     lpName);
 
-DWORD HMGetFileType(HANDLE hFile);
+HANDLE HMOpenMutex                  (DWORD                      fdwAccess,
+                                     BOOL                       fInherit,
+                                     LPCSTR                    lpName);
 
-DWORD   HMDeviceRequest (HANDLE hFile,
-                         ULONG  ulRequestCode,
-                         ULONG  arg1,
-                         ULONG  arg2,
-                         ULONG  arg3,
-                         ULONG  arg4);
+BOOL   HMCloseHandle                (HANDLE                     hObject);
 
-DWORD HMGetFileInformationByHandle (HANDLE                     hFile,
-                                    BY_HANDLE_FILE_INFORMATION *pHFI);
+BOOL   HMReadFile                   (HANDLE                     hFile,
+                                     LPVOID                     lpBuffer,
+                                     DWORD                      nNumberOfBytesToRead,
+                                     LPDWORD                    lpNumberOfBytesRead,
+                                     LPOVERLAPPED               lpOverlapped);
 
-BOOL HMSetEndOfFile (HANDLE hFile);
+BOOL   HMWriteFile                  (HANDLE                     hFile,
+                                     LPCVOID                    lpBuffer,
+                                     DWORD                      nNumberOfBytesToWrite,
+                                     LPDWORD                    lpNumberOfBytesWritten,
+                                     LPOVERLAPPED               lpOverlapped);
 
-BOOL HMSetFileTime (HANDLE         hFile,
-                    const FILETIME *pFT1,
-                    const FILETIME *pFT2,
-                    const FILETIME *pFT3);
+DWORD  HMGetFileType                (HANDLE                     hFile);
 
-DWORD HMGetFileSize (HANDLE hFile,
-                     PDWORD pSize);
+DWORD  HMDeviceRequest              (HANDLE                     hFile,
+                                     ULONG                      ulRequestCode,
+                                     ULONG                      arg1,
+                                     ULONG                      arg2,
+                                     ULONG                      arg3,
+                                     ULONG                      arg4);
 
-DWORD HMSetFilePointer (HANDLE hFile,
-                        LONG   lDistanceToMove,
-                        PLONG  lpDistanceToMoveHigh,
-                        DWORD  dwMoveMethod);
+BOOL   HMGetFileInformationByHandle (HANDLE                     hFile,
+                                     BY_HANDLE_FILE_INFORMATION *pHFI);
 
-BOOL HMLockFile (HFILE         hFile,
-                 DWORD         arg2,
-                 DWORD         arg3,
-                 DWORD         arg4,
-                 DWORD         arg5);
+BOOL   HMSetEndOfFile               (HANDLE                     hFile);
 
-DWORD HMLockFileEx(HANDLE        hFile,
-                   DWORD         dwFlags,
-                   DWORD         dwReserved,
-                   DWORD         nNumberOfBytesToLockLow,
-                   DWORD         nNumberOfBytesToLockHigh,
-                   LPOVERLAPPED  lpOverlapped);
+BOOL   HMSetFileTime                (HANDLE                     hFile,
+                                     const FILETIME             *pFT1,
+                                     const FILETIME             *pFT2,
+                                     const FILETIME             *pFT3);
 
-BOOL HMUnlockFile (HFILE         hFile,
-                   DWORD         arg2,
-                   DWORD         arg3,
-                   DWORD         arg4,
-                   DWORD         arg5);
+DWORD  HMGetFileSize                (HANDLE                     hFile,
+                                     PDWORD                     pSize);
 
-BOOL HMUnlockFileEx(HANDLE        hFile,
-                    DWORD         dwFlags,
-                    DWORD         dwReserved,
-                    DWORD         nNumberOfBytesToLockLow,
-                    DWORD         nNumberOfBytesToLockHigh,
-                    LPOVERLAPPED  lpOverlapped);
+DWORD  HMSetFilePointer             (HANDLE                     hFile,
+                                     LONG                       lDistanceToMove,
+                                     PLONG                      lpDistanceToMoveHigh,
+                                     DWORD                      dwMoveMethod);
+
+BOOL   HMLockFile                   (HFILE                      hFile,
+                                     DWORD                      dwFileOffsetLow,
+                                     DWORD                      dwFileOffsetHigh,
+                                     DWORD                      nNumberOfBytesToLockLow,
+                                     DWORD                      nNumberOfBytesToLockHigh);
+
+BOOL   HMLockFileEx                 (HANDLE                     hFile,
+                                     DWORD                      dwFlags,
+                                     DWORD                      dwReserved,
+                                     DWORD                      nNumberOfBytesToLockLow,
+                                     DWORD                      nNumberOfBytesToLockHigh,
+                                     LPOVERLAPPED               lpOverlapped);
+
+BOOL   HMUnlockFile                 (HANDLE                     hFile,
+                                     DWORD                      dwFileOffsetLow,
+                                     DWORD                      dwFileOffsetHigh,
+                                     DWORD                      cbUnlockLow,
+                                     DWORD                      cbUnlockHigh);
+
+BOOL   HMUnlockFileEx               (HANDLE                     hFile,
+                                     DWORD                      dwFlags,
+                                     DWORD                      dwReserved,
+                                     DWORD                      nNumberOfBytesToLockLow,
+                                     DWORD                      nNumberOfBytesToLockHigh,
+                                     LPOVERLAPPED               lpOverlapped);
+
+DWORD  HMWaitForSingleObject        (HANDLE                     hObject,
+                                     DWORD                      dwTimeout);
+
+DWORD  HMWaitForSingleObjectEx      (HANDLE                     hObject,
+                                     DWORD                      dwTimeout,
+                                     BOOL                       fAlertable);
+
+DWORD  HMWaitForMultipleObjects     (DWORD                      cObjects,
+                                     HANDLE                    *lphObjects,
+                                     BOOL                       fWaitAll,
+                                     DWORD                      dwTimeout);
+
+DWORD  HMWaitForMultipleObjectsEx   (DWORD                      cObjects,
+                                     HANDLE                    *lphObjects,
+                                     BOOL                       fWaitAll,
+                                     DWORD                      dwTimeout,
+                                     BOOL                       fAlertable);
+
+BOOL   HMFlushFileBuffers           (HANDLE                     hObject);
+
+BOOL   HMGetOverlappedResult        (HANDLE                     hObject,
+                                     LPOVERLAPPED               lpOverlapped,
+                                     LPDWORD                    lpNumberOfBytesTransferred,
+                                     BOOL                       bWait);
+
+BOOL   HMReleaseMutex               (HANDLE                     hObject);
+
+BOOL   HMSetEvent                   (HANDLE                     hEvent);
+
+BOOL   HMPulseEvent                 (HANDLE                     hEvent);
+
+BOOL   HMResetEvent                 (HANDLE                     hEvent);
+
+HANDLE HMCreateSemaphore            (LPSECURITY_ATTRIBUTES      lpsa,
+                                     LONG                       lInitialCount,
+                                     LONG                       lMaximumCount,
+                                     LPCSTR                     lpszSemaphoreName);
+
+HANDLE HMOpenSemaphore              (DWORD                      fdwAccess,
+                                     BOOL                       fInheritHandle,
+                                     LPCSTR                     lpszSemaphoreName);
+
+BOOL   HMReleaseSemaphore           (HANDLE                     hSemaphore,
+                                     LONG                       cReleaseCount,
+                                     LPLONG                     lpPreviousCount);
 
 
 #ifdef __cplusplus__

@@ -1,4 +1,4 @@
-/* $Id: hmdevice.cpp,v 1.1 1999-06-17 18:21:43 phaller Exp $ */
+/* $Id: hmdevice.cpp,v 1.2 1999-07-06 15:48:46 phaller Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -535,7 +535,6 @@ DWORD HMDeviceHandler::UnlockFileEx(PHMHANDLEDATA pHMHandleData,
                                         DWORD         nNumberOfBytesToLockHigh,
                                         LPOVERLAPPED  lpOverlapped)
 {
-
   dprintf(("KERNEL32: HandleManager::DeviceHandler::UnlockFileEx %s(%08xh,%08xh,%08xh,%08xh,%08xh,%08xh)\n",
            lpHMDeviceName,
            pHMHandleData,
@@ -544,6 +543,381 @@ DWORD HMDeviceHandler::UnlockFileEx(PHMHANDLEDATA pHMHandleData,
            nNumberOfBytesToLockLow,
            nNumberOfBytesToLockHigh,
            lpOverlapped));
+
+  return(ERROR_INVALID_FUNCTION);
+}
+
+
+
+/*****************************************************************************
+ * Name      : HMCreateSemaphore
+ * Purpose   : router function for CreateSemaphore
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    :
+ *
+ * Author    : Patrick Haller [Tue, 1999/07/06 20:44]
+ *****************************************************************************/
+
+DWORD HMDeviceHandler::CreateSemaphore(PHMHANDLEDATA         pHMHandleData,
+                                       LPSECURITY_ATTRIBUTES lpsa,
+                                       LONG                  lInitialCount,
+                                       LONG                  lMaximumCount,
+                                       LPCTSTR               lpszSemaphoreName)
+{
+  dprintf(("KERNEL32: HandleManager::DeviceHandler::CreateSemaphore(%08xh,%08xh,%08xh,%08xh,%s)\n",
+           pHMHandleData,
+           lpsa,
+           lInitialCount,
+           lMaximumCount,
+           lpszSemaphoreName));
+
+  return (ERROR_INVALID_FUNCTION);
+}
+
+
+/*****************************************************************************
+ * Name      : HMOpenSemaphore
+ * Purpose   : router function for OpenSemaphore
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    :
+ *
+ * Author    : Patrick Haller [Tue, 1999/07/06 20:44]
+ *****************************************************************************/
+
+DWORD HMDeviceHandler::OpenSemaphore(PHMHANDLEDATA         pHMHandleData,
+                                     BOOL                  fInheritHandle,
+                                     LPCTSTR               lpszSemaphoreName)
+{
+  dprintf(("KERNEL32: HandleManager::DeviceHandler::OpenSemaphore(%08xh,%08xh,%s)\n",
+           pHMHandleData,
+           fInheritHandle,
+           lpszSemaphoreName));
+
+ return (ERROR_INVALID_FUNCTION);
+}
+
+
+/*****************************************************************************
+ * Name      : HMReleaseSemaphore
+ * Purpose   : router function for ReleaseSemaphore
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    :
+ *
+ * Author    : Patrick Haller [Tue, 1999/07/06 20:44]
+ *****************************************************************************/
+
+BOOL HMDeviceHandler::ReleaseSemaphore(PHMHANDLEDATA pHMHandleData,
+                                       LONG          cReleaseCount,
+                                       LPLONG        lpPreviousCount)
+{
+  dprintf(("KERNEL32: HandleManager::DeviceHandler::ReleaseSemaphore(%08xh,%08xh,%08xh)\n",
+           pHMHandleData->hHMHandle,
+           cReleaseCount,
+           lpPreviousCount));
+
+  return (ERROR_INVALID_FUNCTION);
+}
+
+
+
+/*****************************************************************************
+ * Name      : HMCreateMutex
+ * Purpose   : router function for CreateMutex
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    :
+ *
+ * Author    : Patrick Haller [Tue, 1999/07/06 20:44]
+ *****************************************************************************/
+
+DWORD HMDeviceHandler::CreateMutex(PHMHANDLEDATA         pHMHandleData,
+                                   LPSECURITY_ATTRIBUTES lpsa,
+                                   BOOL                  fInitialOwner,
+                                   LPCTSTR               lpszMutexName)
+{
+  dprintf(("KERNEL32: HandleManager::DeviceHandler::CreateMutex(%08xh,%08xh,%08xh,%s)\n",
+           pHMHandleData,
+           lpsa,
+           fInitialOwner,
+           lpszMutexName));
+
+  return (ERROR_INVALID_FUNCTION);
+}
+
+
+/*****************************************************************************
+ * Name      : HMOpenMutex
+ * Purpose   : router function for OpenMutex
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    :
+ *
+ * Author    : Patrick Haller [Tue, 1999/07/06 20:44]
+ *****************************************************************************/
+
+DWORD HMDeviceHandler::OpenMutex(PHMHANDLEDATA         pHMHandleData,
+                                 BOOL                  fInheritHandle,
+                                 LPCTSTR               lpszMutexName)
+{
+  dprintf(("KERNEL32: HandleManager::DeviceHandler::OpenMutex(%08xh,%08xh,%s)\n",
+           pHMHandleData,
+           fInheritHandle,
+           lpszMutexName));
+
+  return (ERROR_INVALID_FUNCTION);
+}
+
+
+/*****************************************************************************
+ * Name      : HMReleaseMutex
+ * Purpose   : router function for ReleaseMutex
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    :
+ *
+ * Author    : Patrick Haller [Tue, 1999/07/06 20:44]
+ *****************************************************************************/
+
+BOOL HMDeviceHandler::ReleaseMutex(PHMHANDLEDATA pHMHandleData)
+{
+  dprintf(("KERNEL32: HandleManager::DeviceHandler::ReleaseMutex(%08xh)\n",
+           pHMHandleData->hHMHandle));
+
+  return (ERROR_INVALID_FUNCTION);
+}
+
+
+/*****************************************************************************
+ * Name      : HMCreateEvent
+ * Purpose   : router function for CreateEvent
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    :
+ *
+ * Author    : Patrick Haller [Tue, 1999/07/06 20:44]
+ *****************************************************************************/
+
+DWORD HMDeviceHandler::CreateEvent(PHMHANDLEDATA         pHMHandleData,
+                                   LPSECURITY_ATTRIBUTES lpsa,
+                                   BOOL                  fManualReset,
+                                   BOOL                  fInitialState,
+                                   LPCTSTR               lpszEventName)
+{
+  dprintf(("KERNEL32: HandleManager::DeviceHandler::CreateEvent(%08xh,%08xh,%08xh,%08xh,%s)\n",
+           pHMHandleData,
+           lpsa,
+           fManualReset,
+           fInitialState,
+           lpszEventName));
+
+  return (ERROR_INVALID_FUNCTION);
+}
+
+
+/*****************************************************************************
+ * Name      : HMOpenEvent
+ * Purpose   : router function for OpenEvent
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    :
+ *
+ * Author    : Patrick Haller [Tue, 1999/07/06 20:44]
+ *****************************************************************************/
+
+DWORD HMDeviceHandler::OpenEvent(PHMHANDLEDATA         pHMHandleData,
+                                 BOOL                  fInheritHandle,
+                                 LPCTSTR               lpszEventName)
+{
+  dprintf(("KERNEL32: HandleManager::DeviceHandler::OpenEvent(%08xh,%08xh,%s)\n",
+           pHMHandleData,
+           fInheritHandle,
+           lpszEventName));
+
+  return (ERROR_INVALID_FUNCTION);
+}
+
+
+/*****************************************************************************
+ * Name      : HMSetEvent
+ * Purpose   : router function for SetEvent
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    :
+ *
+ * Author    : Patrick Haller [Tue, 1999/07/06 20:44]
+ *****************************************************************************/
+
+BOOL HMDeviceHandler::SetEvent(PHMHANDLEDATA pHMHandleData)
+{
+  dprintf(("KERNEL32: HandleManager::DeviceHandler::SetEvent(%08xh)\n",
+           pHMHandleData->hHMHandle));
+
+  return (ERROR_INVALID_FUNCTION);
+}
+
+
+/*****************************************************************************
+ * Name      : HMPulseEvent
+ * Purpose   : router function for PulseEvent
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    :
+ *
+ * Author    : Patrick Haller [Tue, 1999/07/06 20:44]
+ *****************************************************************************/
+
+BOOL HMDeviceHandler::PulseEvent(PHMHANDLEDATA pHMHandleData)
+{
+  dprintf(("KERNEL32: HandleManager::DeviceHandler::PulseEvent(%08xh)\n",
+           pHMHandleData->hHMHandle));
+
+  return (ERROR_INVALID_FUNCTION);
+}
+
+
+/*****************************************************************************
+ * Name      : HMResetEvent
+ * Purpose   : router function for ResetEvent
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    :
+ *
+ * Author    : Patrick Haller [Tue, 1999/07/06 20:44]
+ *****************************************************************************/
+
+BOOL HMDeviceHandler::ResetEvent(PHMHANDLEDATA pHMHandleData)
+{
+  dprintf(("KERNEL32: HandleManager::DeviceHandler::ResetEvent(%08xh)\n",
+           pHMHandleData->hHMHandle));
+
+  return (ERROR_INVALID_FUNCTION);
+}
+
+
+
+/*****************************************************************************
+ * Name      : DWORD HMDeviceHandler::WaitForSingleObject
+ * Purpose   : object synchronization
+ * Parameters: PHMHANDLEDATA pHMHandleData
+ *             DWORD dwTimeout
+ * Variables :
+ * Result    : API returncode
+ * Remark    :
+ * Status    :
+ *
+ * Author    : Patrick Haller [Wed, 1999/06/17 20:44]
+ *****************************************************************************/
+
+DWORD HMDeviceHandler::WaitForSingleObject(PHMHANDLEDATA pHMHandleData,
+                                               DWORD         dwTimeout)
+{
+  dprintf(("KERNEL32: HandleManager::DeviceHandler::WaitForSingleObject(%08xh,%08h)\n",
+           pHMHandleData->hHMHandle,
+           dwTimeout));
+
+  return(ERROR_INVALID_FUNCTION);
+}
+
+
+/*****************************************************************************
+ * Name      : DWORD HMDeviceHandler::WaitForSingleObjectEx
+ * Purpose   : object synchronization
+ * Parameters: PHMHANDLEDATA pHMHandleData
+ *             DWORD dwTimeout
+ *             BOOL  fAlertable
+ * Variables :
+ * Result    : API returncode
+ * Remark    :
+ * Status    :
+ *
+ * Author    : Patrick Haller [Wed, 1999/06/17 20:44]
+ *****************************************************************************/
+
+DWORD HMDeviceHandler::WaitForSingleObjectEx(PHMHANDLEDATA pHMHandleData,
+                                                 DWORD         dwTimeout,
+                                                 BOOL          fAlertable)
+{
+  dprintf(("KERNEL32: HandleManager::DeviceHandler::WaitForSingleObjectEx(%08xh,%08h,%08xh) not implemented correctly.\n",
+           pHMHandleData->hHMHandle,
+           dwTimeout,
+           fAlertable));
+
+  //@@@PH: WARNING mapped to WaitForSingleObject simply. fAlertable missing!
+  return(ERROR_INVALID_FUNCTION);
+}
+
+
+/*****************************************************************************
+ * Name      : DWORD HMDeviceHandler::FlushFileBuffers
+ * Purpose   : flush the buffers of a file
+ * Parameters: PHMHANDLEDATA pHMHandleData
+ * Variables :
+ * Result    : API returncode
+ * Remark    :
+ * Status    :
+ *
+ * Author    : Patrick Haller [Wed, 1999/06/17 20:44]
+ *****************************************************************************/
+
+BOOL HMDeviceHandler::FlushFileBuffers(PHMHANDLEDATA pHMHandleData)
+{
+  dprintf(("KERNEL32: HandleManager::Open32:FlushFileBuffers(%08xh)\n",
+           pHMHandleData->hHMHandle));
+
+  return(ERROR_INVALID_FUNCTION);
+}
+
+
+/*****************************************************************************
+ * Name      : DWORD HMDeviceHandler::GetOverlappedResult
+ * Purpose   : asynchronus I/O
+ * Parameters: PHMHANDLEDATA pHMHandleData
+ *             LPOVERLAPPED  arg2
+ *             LPDWORD       arg3
+ *             BOOL          arg4
+ * Variables :
+ * Result    : API returncode
+ * Remark    :
+ * Status    :
+ *
+ * Author    : Patrick Haller [Wed, 1999/06/17 20:44]
+ *****************************************************************************/
+
+BOOL HMDeviceHandler::GetOverlappedResult(PHMHANDLEDATA pHMHandleData,
+                                              LPOVERLAPPED  arg2,
+                                              LPDWORD       arg3,
+                                              BOOL          arg4)
+{
+  dprintf(("KERNEL32: HandleManager::DeviceHandler::GetOverlappedResult(%08xh,%08xh,%08xh,%08xh)\n",
+           pHMHandleData->hHMHandle,
+           arg2,
+           arg3,
+           arg4));
 
   return(ERROR_INVALID_FUNCTION);
 }

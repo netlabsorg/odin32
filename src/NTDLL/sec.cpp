@@ -1,4 +1,4 @@
-/* $Id: sec.cpp,v 1.2 1999-06-10 17:06:46 phaller Exp $ */
+/* $Id: sec.cpp,v 1.3 1999-07-06 15:48:45 phaller Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -304,7 +304,8 @@ NTSTATUS WINAPI RtlGetDaclSecurityDescriptor(PSECURITY_DESCRIPTOR pSecurityDescr
   if (pSecurityDescriptor->Revision != SECURITY_DESCRIPTOR_REVISION)
     return STATUS_UNKNOWN_REVISION ;
 
-  if ( (*lpbDaclPresent = (SE_DACL_PRESENT & pSecurityDescriptor->Control) ? 1 : 0) )
+  *lpbDaclPresent = (SE_DACL_PRESENT & pSecurityDescriptor->Control);
+  if (*lpbDaclPresent ? 1 : 0)
   {
     if ( SE_SELF_RELATIVE & pSecurityDescriptor->Control)
     {
@@ -377,7 +378,8 @@ NTSTATUS WINAPI RtlGetSaclSecurityDescriptor(PSECURITY_DESCRIPTOR pSecurityDescr
   if (pSecurityDescriptor->Revision != SECURITY_DESCRIPTOR_REVISION)
     return STATUS_UNKNOWN_REVISION ;
 
-  if ( (*lpbSaclPresent = (SE_SACL_PRESENT & pSecurityDescriptor->Control) ? 1 : 0) )
+  *lpbSaclPresent = (SE_SACL_PRESENT & pSecurityDescriptor->Control);
+  if (*lpbSaclPresent ? 1 : 0)
   {
     if ( SE_SELF_RELATIVE & pSecurityDescriptor->Control)
     {
