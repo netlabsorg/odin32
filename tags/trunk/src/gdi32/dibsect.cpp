@@ -1,4 +1,4 @@
-/* $Id: dibsect.cpp,v 1.63 2002-04-30 13:11:44 sandervl Exp $ */
+/* $Id: dibsect.cpp,v 1.64 2003-02-06 19:20:03 sandervl Exp $ */
 
 /*
  * GDI32 DIB sections
@@ -391,7 +391,7 @@ int DIBSection::SetDIBColorTable(int startIdx, int cEntries, RGBQUAD *rgb)
   for(i=startIdx;i<end;i++)
   {
     pOS2bmp->argbColor[i].fcOptions = 0;
-#ifdef DEBUG_PALETTE
+#ifdef DEBUG
     dprintf2(("Index %d : 0x%08X\n",i, *((ULONG*)(&pOS2bmp->argbColor[i])) ));
 #endif
   }
@@ -418,6 +418,9 @@ int DIBSection::SetDIBColorTable(int startIdx, int cEntries, PALETTEENTRY *palen
     pOS2bmp->argbColor[i].bBlue  = palentry[i].peBlue;
     pOS2bmp->argbColor[i].bGreen = palentry[i].peGreen;
     pOS2bmp->argbColor[i].bRed   = palentry[i].peRed;
+#ifdef DEBUG
+    dprintf2(("Index %d : 0x%08X\n",i, *((ULONG*)(&pOS2bmp->argbColor[i])) ));
+#endif
   }
 
   return end - startIdx;
@@ -521,22 +524,41 @@ BOOL DIBSection::BitBlt(HDC hdcDest, int nXdest, int nYdest, int nDestWidth,
   point[3].y = nYsrc + nSrcHeight - 1;
 #endif
 
-  dprintf(("DIBSection::BitBlt (%d,%d)(%d,%d) from (%d,%d)(%d,%d) dim (%d,%d)(%d,%d)", point[0].x, point[0].y,
-           point[1].x, point[1].y, point[2].x, point[2].y, point[3].x, point[3].y,
-           nDestWidth, nDestHeight, nSrcWidth, nSrcHeight));
-
 #ifdef INVERT
   oldyinversion = GpiQueryYInversion(hps);
   if(oldyinversion != 0) {
-#ifdef DEBUG
-        POINT point;
-        GetViewportOrgEx(hps, &point);
-        dprintf(("Viewport origin (%d,%d)", point.x, point.y));
-#endif
+        POINT viewpt, winpt;
+
+        GetViewportOrgEx(hps, &viewpt);
+        GetWindowOrgEx(hps, &winpt);
+
+        dprintf(("Viewport origin (%d,%d)", viewpt.x, viewpt.y));
+        dprintf(("Windows  origin (%d,%d)", winpt.x, winpt.y));
+        
+        /* By resetting y inversion to 0, we must take the new windows
+         * origin into account. The default matrix set up for the origin
+         * depends on y inversion. Therefor we must add the y origin value,
+         * multiplied by two, to the top & bottom coordinates 
+         */
+        point[0].y -= winpt.y*2;
+        point[1].y -= winpt.y*2;
+
+        /* By resetting y inversion to 0, we must take the new viewport
+         * origin into account. The default matrix set up for the origin
+         * depends on y inversion. Therefor we must subtract the y origin value,
+         * multiplied by two, from the top & bottom coordinates 
+         */
+        point[0].y -= viewpt.y*2;
+        point[1].y -= viewpt.y*2;
+
         GpiEnableYInversion(hps, 0);
         fRestoryYInversion = TRUE;
   }
 #endif
+
+  dprintf(("DIBSection::BitBlt (%d,%d)(%d,%d) from (%d,%d)(%d,%d) dim (%d,%d)(%d,%d)", point[0].x, point[0].y,
+           point[1].x, point[1].y, point[2].x, point[2].y, point[3].x, point[3].y,
+           nDestWidth, nDestHeight, nSrcWidth, nSrcHeight));
 
 #ifdef DEBUG
   RECTL rcltemp;
