@@ -1,4 +1,4 @@
-/* $Id: avl.c,v 1.3 2000-01-24 01:45:19 bird Exp $
+/* $Id: avl.c,v 1.4 2000-03-19 16:00:11 bird Exp $
  *
  * AVL-Tree (lookalike) implementation.
  *
@@ -24,7 +24,12 @@
 *******************************************************************************/
 #include <os2.h>
 #include "avl.h"
-#include "dev32.h"
+#if defined(RING0) || defined(RING3)
+    #include "dev32.h"
+#else
+    #define SSToDS(a) (a)
+#endif
+#include "string.h"
 
 #include <builtin.h>
 #define assert(a) ((a) ? (void)0 : __interrupt(3))
@@ -57,6 +62,8 @@ _Inline void AVLRebalance(PAVLSTACK pStack);
 
 /**
  * Inserts a node into the AVL-tree.
+ * @returns   TRUE if inserted.
+ *            FALSE if node exists in tree.
  * @param     ppTree  Pointer to the AVL-tree root node pointer.
  * @param     pNode   Pointer to the node which is to be added.
  * @sketch    Find the location of the node (using binary three algorithm.):
@@ -73,7 +80,7 @@ _Inline void AVLRebalance(PAVLSTACK pStack);
  * @status    completely implemented.
  * @author    knut st. osmundsen
  */
-void AVLInsert(PPAVLNODECORE ppTree, PAVLNODECORE pNode)
+BOOL AVLInsert(PPAVLNODECORE ppTree, PAVLNODECORE pNode)
 {
     AVLSTACK                AVLStack;
     PPAVLNODECORE           ppCurNode = ppTree;
@@ -86,17 +93,24 @@ void AVLInsert(PPAVLNODECORE ppTree, PAVLNODECORE pNode)
     {
         assert(AVLStack.cEntries < AVL_MAX_HEIGHT);
         AVLStack.aEntries[AVLStack.cEntries++] = ppCurNode;
-        if (pCurNode->Key > Key)
+        if (AVL_G(pCurNode->Key, Key))
             ppCurNode = &pCurNode->pLeft;
         else
             ppCurNode = &pCurNode->pRight;
     }
+
+#ifdef AVL_MAY_TRY_INSERT_EQUAL
+    /* check if equal */
+    if (AVLStack.cEntries > 0 && AVL_E((*AVLStack.aEntries[AVLStack.cEntries-1])->Key, pNode->Key))
+        return FALSE;
+#endif
 
     pNode->pLeft = pNode->pRight = NULL;
     pNode->uchHeight = 1;
     *ppCurNode = pNode;
 
     AVLRebalance(SSToDS(&AVLStack));
+    return TRUE;
 }
 
 
@@ -153,10 +167,10 @@ PAVLNODECORE AVLRemove(PPAVLNODECORE ppTree, AVLKEY Key)
     {
         assert(AVLStack.cEntries < AVL_MAX_HEIGHT);
         AVLStack.aEntries[AVLStack.cEntries++] = ppDeleteNode;
-        if (pDeleteNode->Key == Key)
+        if (AVL_E(pDeleteNode->Key, Key))
             break;
 
-        if (pDeleteNode->Key > Key)
+        if (AVL_G(pDeleteNode->Key, Key))
             ppDeleteNode = &pDeleteNode->pLeft;
         else
             ppDeleteNode = &pDeleteNode->pRight;
@@ -214,9 +228,9 @@ PAVLNODECORE AVLGet(PPAVLNODECORE ppTree, AVLKEY Key)
 {
     register PAVLNODECORE  pNode = *ppTree;
 
-    while (pNode != NULL && pNode->Key != Key)
+    while (pNode != NULL && AVL_NE(pNode->Key, Key))
     {
-        if (pNode->Key > Key)
+        if (AVL_G(pNode->Key, Key))
             pNode = pNode->pLeft;
         else
             pNode = pNode->pRight;
@@ -243,10 +257,10 @@ PAVLNODECORE    AVLGetWithParent(PPAVLNODECORE ppTree, PPAVLNODECORE ppParent, A
     register PAVLNODECORE  pNode = *ppTree;
     register PAVLNODECORE  pParent = NULL;
 
-    while (pNode != NULL && pNode->Key != Key)
+    while (pNode != NULL && AVL_NE(pNode->Key, Key))
     {
         pParent = pNode;
-        if (pNode->Key > Key)
+        if (AVL_G(pNode->Key, Key))
             pNode = pNode->pLeft;
         else
             pNode = pNode->pRight;
@@ -284,11 +298,11 @@ PAVLNODECORE AVLGetWithAdjecentNodes(PPAVLNODECORE ppTree, AVLKEY Key, PPAVLNODE
 
     AVLStack.cEntries = 0;
 
-    while ((pNode = *ppNode) != NULL && pNode->Key != Key)
+    while ((pNode = *ppNode) != NULL && AVL_NE(pNode->Key, Key))
     {
         assert(AVLStack.cEntries < AVL_MAX_HEIGHT);
         AVLStack.aEntries[AVLStack.cEntries++] = ppNode;
-        if (pNode->Key > Key)
+        if (AVL_G(pNode->Key, Key))
             ppNode = &pNode->pLeft;
         else
             ppNode = &pNode->pRight;
@@ -316,9 +330,9 @@ PAVLNODECORE AVLGetWithAdjecentNodes(PPAVLNODECORE ppTree, AVLKEY Key, PPAVLNODE
         while (AVLStack.cEntries-- > 0)
         {
             pCurNode = *AVLStack.aEntries[AVLStack.cEntries];
-            if (pCurNode->Key < Key && (*ppLeft == NULL || pCurNode->Key > (*ppLeft)->Key))
+            if (AVL_L(pCurNode->Key, Key) && (*ppLeft == NULL || AVL_G(pCurNode->Key, (*ppLeft)->Key)))
                 *ppLeft = pCurNode;
-            else if (pCurNode->Key > Key && (*ppRight == NULL || pCurNode->Key < (*ppRight)->Key))
+            else if (AVL_G(pCurNode->Key, Key) && (*ppRight == NULL || AVL_L(pCurNode->Key, (*ppRight)->Key)))
                 *ppRight = pCurNode;
         }
     }
@@ -555,9 +569,9 @@ PAVLNODECORE    AVLGetBestFit(PPAVLNODECORE ppTree, AVLKEY Key, int fAbove)
 
     if (fAbove)
     {   /* pNode->Key >= Key */
-        while (pNode != NULL && pNode->Key != Key)
+        while (pNode != NULL && AVL_NE(pNode->Key, Key))
         {
-            if (pNode->Key > Key)
+            if (AVL_G(pNode->Key, Key))
             {
                 pNodeLast = pNode;
                 pNode = pNode->pLeft;
@@ -568,9 +582,9 @@ PAVLNODECORE    AVLGetBestFit(PPAVLNODECORE ppTree, AVLKEY Key, int fAbove)
     }
     else
     {   /* pNode->Key <= Key */
-        while (pNode != NULL && pNode->Key != Key)
+        while (pNode != NULL && AVL_NE(pNode->Key, Key))
         {
-            if (pNode->Key < Key)
+            if (AVL_L(pNode->Key, Key))
             {
                 pNodeLast = pNode;
                 pNode = pNode->pRight;
