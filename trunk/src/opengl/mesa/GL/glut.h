@@ -1,4 +1,4 @@
-/* $Id: glut.h,v 1.2 2000-03-05 10:26:18 jeroen Exp $ */
+/* $Id: glut.h,v 1.3 2000-03-11 09:05:07 jeroen Exp $ */
 #ifndef __glut_h__
 #define __glut_h__
 
@@ -466,36 +466,36 @@ extern void GLAPIENTRY glutAttachMenu(int button);
 extern void GLAPIENTRY glutDetachMenu(int button);
 
 /* GLUT window callback sub-API. */
-extern void GLAPIENTRY glutDisplayFunc(void (* CDECL func)(void));
-extern void GLAPIENTRY glutReshapeFunc(void (* CDECL func)(int width, int height));
-extern void GLAPIENTRY glutKeyboardFunc(void (* CDECL func)(unsigned char key, int x, int y));
-extern void GLAPIENTRY glutMouseFunc(void (* CDECL func)(int button, int state, int x, int y));
-extern void GLAPIENTRY glutMotionFunc(void (* CDECL func)(int x, int y));
-extern void GLAPIENTRY glutPassiveMotionFunc(void (* CDECL func)(int x, int y));
-extern void GLAPIENTRY glutEntryFunc(void (* CDECL func)(int state));
-extern void GLAPIENTRY glutVisibilityFunc(void (* CDECL func)(int state));
-extern void GLAPIENTRY glutIdleFunc(void (* CDECL func)(void));
-extern void GLAPIENTRY glutTimerFunc(unsigned int millis, void (* CDECL func)(int value), int value);
-extern void GLAPIENTRY glutMenuStateFunc(void (* CDECL func)(int state));
+extern void GLAPIENTRY glutDisplayFunc(void (* GLCALLBACK func)(void));
+extern void GLAPIENTRY glutReshapeFunc(void (* GLCALLBACK func)(int width, int height));
+extern void GLAPIENTRY glutKeyboardFunc(void (* GLCALLBACK func)(unsigned char key, int x, int y));
+extern void GLAPIENTRY glutMouseFunc(void (* GLCALLBACK func)(int button, int state, int x, int y));
+extern void GLAPIENTRY glutMotionFunc(void (* GLCALLBACK func)(int x, int y));
+extern void GLAPIENTRY glutPassiveMotionFunc(void (* GLCALLBACK func)(int x, int y));
+extern void GLAPIENTRY glutEntryFunc(void (* GLCALLBACK func)(int state));
+extern void GLAPIENTRY glutVisibilityFunc(void (* GLCALLBACK func)(int state));
+extern void GLAPIENTRY glutIdleFunc(void (* GLCALLBACK func)(void));
+extern void GLAPIENTRY glutTimerFunc(unsigned int millis, void (* GLCALLBACK func)(int value), int value);
+extern void GLAPIENTRY glutMenuStateFunc(void (* GLCALLBACK func)(int state));
 #if (GLUT_API_VERSION >= 2)
-extern void GLAPIENTRY glutSpecialFunc(void (* CDECL func)(int key, int x, int y));
-extern void GLAPIENTRY glutSpaceballMotionFunc(void (* CDECL func)(int x, int y, int z));
-extern void GLAPIENTRY glutSpaceballRotateFunc(void (* CDECL func)(int x, int y, int z));
-extern void GLAPIENTRY glutSpaceballButtonFunc(void (* CDECL func)(int button, int state));
-extern void GLAPIENTRY glutButtonBoxFunc(void (* CDECL func)(int button, int state));
-extern void GLAPIENTRY glutDialsFunc(void (* CDECL func)(int dial, int value));
-extern void GLAPIENTRY glutTabletMotionFunc(void (* CDECL func)(int x, int y));
-extern void GLAPIENTRY glutTabletButtonFunc(void (* CDECL func)(int button, int state, int x, int y));
+extern void GLAPIENTRY glutSpecialFunc(void (* GLCALLBACK func)(int key, int x, int y));
+extern void GLAPIENTRY glutSpaceballMotionFunc(void (* GLCALLBACK func)(int x, int y, int z));
+extern void GLAPIENTRY glutSpaceballRotateFunc(void (* GLCALLBACK func)(int x, int y, int z));
+extern void GLAPIENTRY glutSpaceballButtonFunc(void (* GLCALLBACK func)(int button, int state));
+extern void GLAPIENTRY glutButtonBoxFunc(void (* GLCALLBACK func)(int button, int state));
+extern void GLAPIENTRY glutDialsFunc(void (* GLCALLBACK func)(int dial, int value));
+extern void GLAPIENTRY glutTabletMotionFunc(void (* GLCALLBACK func)(int x, int y));
+extern void GLAPIENTRY glutTabletButtonFunc(void (* GLCALLBACK func)(int button, int state, int x, int y));
 #if (GLUT_API_VERSION >= 3)
-extern void GLAPIENTRY glutMenuStatusFunc(void (* CDECL func)(int status, int x, int y));
-extern void GLAPIENTRY glutOverlayDisplayFunc(void (* CDECL func)(void));
+extern void GLAPIENTRY glutMenuStatusFunc(void (* GLCALLBACK func)(int status, int x, int y));
+extern void GLAPIENTRY glutOverlayDisplayFunc(void (* GLCALLBACK func)(void));
 #if (GLUT_API_VERSION >= 4 || GLUT_XLIB_IMPLEMENTATION >= 9)
-extern void GLAPIENTRY glutWindowStatusFunc(void (* CDECL func)(int state));
+extern void GLAPIENTRY glutWindowStatusFunc(void (* GLCALLBACK func)(int state));
 #endif
 #if (GLUT_API_VERSION >= 4 || GLUT_XLIB_IMPLEMENTATION >= 13)
-extern void GLAPIENTRY glutKeyboardUpFunc(void (* CDECL func)(unsigned char key, int x, int y));
-extern void GLAPIENTRY glutSpecialUpFunc(void (* CDECL func)(int key, int x, int y));
-extern void GLAPIENTRY glutJoystickFunc(void (* CDECL func)(unsigned int buttonMask, int x, int y, int z), int pollInterval);
+extern void GLAPIENTRY glutKeyboardUpFunc(void (* GLCALLBACK func)(unsigned char key, int x, int y));
+extern void GLAPIENTRY glutSpecialUpFunc(void (* GLCALLBACK func)(int key, int x, int y));
+extern void GLAPIENTRY glutJoystickFunc(void (* GLCALLBACK func)(unsigned int buttonMask, int x, int y, int z), int pollInterval);
 #endif
 #endif
 #endif
