@@ -1,4 +1,4 @@
-/* $Id: gen_object.cpp,v 1.1 1999-07-14 08:35:34 sandervl Exp $ */
+/* $Id: gen_object.cpp,v 1.2 1999-07-15 12:01:31 sandervl Exp $ */
 /*
  * Generic Object Class for OS/2
  *
@@ -43,7 +43,7 @@ GenericObject::GenericObject(GenericObject **head, DWORD objType)
 	*head = this;	
   }
   else {
-	GenericObject *cur = (*head)->next;
+	GenericObject *cur = *head;
 	while(cur->next)
 	{
 		cur = cur->next;
@@ -68,7 +68,7 @@ GenericObject::~GenericObject()
 	*head = next;	
   }
   else {
-	GenericObject *cur = (*head)->next;
+	GenericObject *cur = *head;
 	while(cur->next != this)
 	{
 		cur = cur->next;
