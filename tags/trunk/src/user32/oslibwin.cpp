@@ -1,4 +1,4 @@
-/* $Id: oslibwin.cpp,v 1.23 1999-10-12 18:14:55 sandervl Exp $ */
+/* $Id: oslibwin.cpp,v 1.24 1999-10-12 18:51:38 sandervl Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -140,7 +140,14 @@ BOOL OSLibWinConvertStyle(ULONG dwStyle, ULONG *dwExStyle, ULONG *OSWinStyle, UL
       *OSFrameStyle |= FCF_SIZEBORDER;
       *borderHeight = *borderWidth = 1;
 
-    } else if (*dwExStyle & WS_EX_WINDOWEDGE_W); //no border
+    } 
+    else
+    if(dwStyle & WS_BORDER_W)
+    {
+      *OSFrameStyle |= FCF_SIZEBORDER;
+      *borderHeight = *borderWidth = 1;
+    }
+    else if (*dwExStyle & WS_EX_WINDOWEDGE_W); //no border
 
     if(dwStyle & WS_VSCROLL_W)
           *OSFrameStyle |= FCF_VERTSCROLL;
