@@ -1,13 +1,68 @@
-/* $Id: changelog,v 1.1547 2001-06-25 20:51:22 sandervl Exp $ */
+/* $Id: changelog,v 1.1548 2001-06-26 00:35:33 bird Exp $ */
 
- 2001-06-26: Sander van Leeuwen <sandervl@xs4all.nl>
+ 2001-06-25: knut st. osmundsen <knut.stange.osmundsen@mynd.no>
+    - include\odin.h:
+                o Updated the EMX configuration so we can build WRC.exe
+                  using this definition. This also includes the check and
+                  calling convetions defined in windef.h.
+                  Just note that gcc don't decorate the stdcall function
+                  names like the other compilers.
+                o Made the other compilers ignore __attribute__ so they
+                  can compile WRC.exe as well.
+                o Defined INLINE, inline and __inline__ so they all make
+                  functions inline. (Someone should check this for Watcom C mode.)
+
+    - include\win\wine\unicode.h:
+                o Added extern "C" so the unicode libraries are compilable as C code.
+                  (kernel32\unicode was forced to compile as C++)
+                o Removed inline workaround for C compilers. (Odin stuff)
+                o Wrapped away static for those function which was declared as
+                  both static and inline. (the compiler was so noisy)
+
+    - kernel32\unicode, kernel32:
+                o Don't force it to C++.
+                o Demangled the one export from unicode, get_char_typeW.
+                o Curiosity: Made a minor correction to be able to compile
+                             unicode.lib with EMX.
+
+    - OpenGL:   o mesa\macros.h has been changed to not #define INLINE if
+                  allready defined.
+                  Hence inlining is now enabled!
+                  Concider this an experiment as we might run into VAC optimizer bugs...
+                  People are encouraged to play games ;-)
+
+    - WRC:      o Use semicolon when reading include paths.
+                  (This was what ALL I was supposed to fix today..)
+                o Made it compile with VAC and EMX using standard Odin32 makefiles.
+                  flex and bison is not needed normally. But when changes which
+                  requires running of these are made, define HAVE_FLEX
+                  and HAVE_BISON in your environment.
+                o WRC is now removed and made as a 'needed_tool' together
+                  with fastdep, impdef and the other stuff in the tools subdir.
+                  NB. Be careful not to accidentally resurrects the /tools/bin/wrc.exe
+                      archive! (May be we should rename the archive file later?)
+
+    - include\odin32.*.emx.mk:
+                o Made it working for WRC.exe. (release and debug, not profiling)
+                  Generats OMF. Linking using link386.
+
+    - include\odin32.tools.*.mk:
+                o Disabled historic current directory inference rules and replaced
+                  (some of them) with rules which puts object in OBJDIR.
+                o Added precompiler inference rules. These are generate a *.pre-c
+                  or *.pre-cpp file in the current directory containing the output
+                  from the precompiler. (not implemented for watcom yet)
+                  This is very useful in when you wanna check a declaration...
+
+
+ 2001-06-25: Sander van Leeuwen <sandervl@xs4all.nl>
     - USER32:   o Minor WM_TIMER translation fix (weird check removed)
 
  2001-06-24: Sander van Leeuwen <sandervl@xs4all.nl>
     - KERNEL32: o Rewrote CopyFile & MoveFile (just call DosCopy/Move)
-                o Rewrote CreateDirectory & RemoveDirectory 
+                o Rewrote CreateDirectory & RemoveDirectory
                   (call DosCreateDir & DosDeleteDir)
-                o Fix for HeapRealloc; recent HeapSize fix broke it 
+                o Fix for HeapRealloc; recent HeapSize fix broke it
                   (listboxes empty)
 
  2001-06-24: knut st. osmundsen <knut.stange.osmundsen@mynd.no>
