@@ -821,6 +821,20 @@ BOOLEAN WINAPI RtlTimeToSecondsSince1970( const FILETIME *time, LPDWORD res );
 void    WINAPI RtlSecondsSince1970ToTime( DWORD time, FILETIME *res );
 void    WINAPI RtlSecondsSince1980ToTime( DWORD time, FILETIME *res );
 
+typedef struct tagRTL_BITMAP {
+    ULONG  SizeOfBitMap; /* Number of bits in the bitmap */
+    LPBYTE BitMapBuffer; /* Bitmap data, assumed sized to a DWORD boundary */
+} RTL_BITMAP, *PRTL_BITMAP;
+
+typedef const RTL_BITMAP *PCRTL_BITMAP;
+
+typedef struct tagRTL_BITMAP_RUN {
+    ULONG StartOfRun; /* Bit position at which run starts - FIXME: Name? */
+    ULONG SizeOfRun;  /* Size of the run in bits - FIXME: Name? */
+} RTL_BITMAP_RUN, *PRTL_BITMAP_RUN;
+
+typedef const RTL_BITMAP_RUN *PCRTL_BITMAP_RUN;
+
 /*	heap functions */
 
 /* Data structure for heap definition. This includes various

@@ -262,6 +262,7 @@ typedef struct
 
 #define INVALID_HANDLE_VALUE16  ((HANDLE16) -1)
 #define INVALID_HANDLE_VALUE  ((HANDLE) -1)
+#define INVALID_SET_FILE_POINTER ((DWORD)-1)
 
 /* comm */
 

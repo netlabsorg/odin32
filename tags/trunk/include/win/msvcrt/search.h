@@ -28,12 +28,6 @@
 #endif
 
 
-#ifndef MSVCRT_SIZE_T_DEFINED
-typedef unsigned int MSVCRT(size_t);
-#define MSVCRT_SIZE_T_DEFINED
-#endif
-
-
 #ifdef __cplusplus
 extern "C" {
 #endif
