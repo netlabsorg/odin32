@@ -1,4 +1,7 @@
-/* $Id: changelog,v 1.2416 2003-01-03 11:27:06 sandervl Exp $ */
+/* $Id: changelog,v 1.2417 2003-01-03 16:33:40 sandervl Exp $ */
+
+ 2003-01-03: Sander van Leeuwen <sandervl@innotek   >
+    - USER32:   o Merged Rewind menu control
 
  2002-01-03: Dietrich Teickner <Dietrich_Teickner@t-online   >
     - KERNEL32: o Convert timezone names in Set/GetTimeZoneInformation as
