@@ -1,4 +1,4 @@
-/* $Id: asyncapi.cpp,v 1.7 2000-05-02 13:09:43 bird Exp $ */
+/* $Id: asyncapi.cpp,v 1.8 2000-05-18 22:54:20 sandervl Exp $ */
 
 /*
  *
@@ -461,7 +461,9 @@ asyncloopstart:
 
 ////        dprintf(("WSAsyncSelectThreadProc %x rds=%d, wrs=%d, oos =%d, pending = %x", pThreadParm->u.asyncselect.s, noread, nowrite, noexcept, lEventsPending));
 
+	pThreadParm->fWaitSelect = TRUE;
 	ret = select((int *)sockets, nr(noread), nr(nowrite), nr(noexcept), -1);
+	pThreadParm->fWaitSelect = FALSE;
 	if(ret == SOCKET_ERROR) {
 		int selecterr = sock_errno();
 ////        	dprintf(("WSAsyncSelectThreadProc %x rds=%d, wrs=%d, oos =%d, pending = %x select returned %x", pThreadParm->u.asyncselect.s, noread, nowrite, noexcept, lEventsPending, selecterr));

@@ -1,4 +1,4 @@
-/* $Id: asyncthread.cpp,v 1.5 2000-05-18 09:09:03 sandervl Exp $ */
+/* $Id: asyncthread.cpp,v 1.6 2000-05-18 22:54:21 sandervl Exp $ */
 
 /*
  * Async thread help functions
@@ -199,8 +199,10 @@ BOOL FindAndSetAsyncEvent(SOCKET s, HWND hwnd, int msg, ULONG lEvent)
 		//make sure this thread isn't used anymore
 		pThreadInfo->fRemoved = TRUE;
 	}
-	//cancel pending select in async select thread (if any)
-	so_cancel(s);
+	if(pThreadInfo->fWaitSelect) {
+		//cancel pending select in async select thread (if any)
+		so_cancel(s);
+	}
 
 	//unblock async thread if it was waiting
 	pThreadInfo->u.asyncselect.asyncSem->post();
@@ -222,7 +224,9 @@ void EnableAsyncEvent(SOCKET s, ULONG flags)
 	pThreadInfo->u.asyncselect.asyncSem->post();
 
 	//cancel pending select in async select thread (if any)
-	so_cancel(s);
+	if(pThreadInfo->fWaitSelect) {
+		so_cancel(s);
+	}
    }
    asyncThreadMutex.leave();
 }
