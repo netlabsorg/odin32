@@ -1,4 +1,4 @@
-/* $Id: region.cpp,v 1.40 2004-02-16 15:20:12 sandervl Exp $ */
+/* $Id: region.cpp,v 1.41 2004-04-30 13:27:18 sandervl Exp $ */
 
 /*
  * GDI32 region code
@@ -682,7 +682,7 @@ INT WIN32API GdiCombineVisRgnClipRgn(pDCData pHps, HRGN hrgn, INT operation)
             goto failure;
         }
         //SvL: Must check if origin changed here. Sometimes happens when
-        //     window looses focus. (don't know why....)
+        //     window loses focus. (don't know why....)
         checkOrigin(pHps);
 
         if(hrgnOldClip) GpiDestroyRegion(pHps->hps, hrgnOldClip);

@@ -1,4 +1,4 @@
-/* $Id: oslibgpi.cpp,v 1.18 2004-04-14 09:44:13 sandervl Exp $ */
+/* $Id: oslibgpi.cpp,v 1.19 2004-04-30 13:27:18 sandervl Exp $ */
 
 /*
  * GPI interface code
@@ -362,7 +362,10 @@ BOOL drawLinePointCircle(PVOID pHps,INT width,INT height,LONG color)
   arcp.lR = 0;
   arcp.lS = 0;
   if (!GpiSetArcParams(GetDCData(pHps)->hps,&arcp))
-    return FALSE;
+  {
+      dprintf(("drawLinePointCircle: GpiSetArcParams failed with %x!!", WinGetLastError(0)));
+      return FALSE;
+  }
 
   AREABUNDLE newAreaBundle, oldAreaBundle;
   LINEBUNDLE lineBundle;
@@ -377,10 +380,16 @@ BOOL drawLinePointCircle(PVOID pHps,INT width,INT height,LONG color)
   newAreaBundle.usSymbol  = PATSYM_SOLID;
 
   if (!GpiSetAttrs(GetDCData(pHps)->hps,PRIM_AREA,ABB_COLOR | ABB_MIX_MODE | ABB_SET | ABB_SYMBOL,0,(PBUNDLE)&newAreaBundle))
-    return FALSE;
+  {
+      dprintf(("drawLinePointCircle: GpiSetAttrs failed with %x!!", WinGetLastError(0)));
+      return FALSE;
+  }
 
   if (GpiFullArc(GetDCData(pHps)->hps,DRO_FILL,MAKEFIXED((width-1)>>1,0)) == GPI_ERROR)
-    rc = FALSE;
+  {
+      dprintf(("drawLinePointCircle: GpiFullArc failed with %x!!", WinGetLastError(0)));
+      rc = FALSE;
+  }
   GpiSetAttrs(GetDCData(pHps)->hps,PRIM_AREA,ABB_COLOR | ABB_MIX_MODE | ABB_SET | ABB_SYMBOL,0,(PBUNDLE)&oldAreaBundle);
 
   return rc;
