@@ -1,4 +1,4 @@
-; $Id: fakea.asm,v 1.3 2000-10-01 02:58:21 bird Exp $
+; $Id: fakea.asm,v 1.4 2001-02-20 05:05:23 bird Exp $
 ;
 ; Fake assembly imports.
 ;
@@ -41,6 +41,8 @@
     public faketkStartProcess
     public CalltkExecPgm
     public _fakeldrOpenPath@20
+    public fakeKMEnterKmodeSEF
+    public fakeKMExitKmodeSEF8
 
 
 ;
@@ -536,6 +538,42 @@ new:
     jmp     near ptr FLAT:CODE32:_fakeldrOpenPath_new@20
 _fakeldrOpenPath@20 ENDP
 
+
+
+;;
+; This is called at kernel entry.
+; @cproto   none
+; @returns  nothing
+; @param    none
+; @uses     nothing
+; @status   stub.
+; @author   knut st. osmundsen (knut.stange.osmundsen@mynd.no)
+fakeKMEnterKmodeSEF proc near
+    ; dummy prolog.
+    push    ebp
+    mov     ebp, esp
+    sub     esp, 10h
+    leave
+    ret
+fakeKMEnterKmodeSEF endp
+
+
+;;
+; This is called at kernel exit.
+; @cproto   none
+; @returns  nothing
+; @param    none
+; @uses     nothing
+; @status   stub.
+; @author   knut st. osmundsen (knut.stange.osmundsen@mynd.no)
+fakeKMExitKmodeSEF8 proc near
+    ; dummy prolog.
+    push    ebp
+    mov     ebp, esp
+    sub     esp, 10h
+    leave
+    ret
+fakeKMExitKmodeSEF8 endp
 
 CODE32 ENDS
 
