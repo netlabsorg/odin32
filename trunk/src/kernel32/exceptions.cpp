@@ -1,4 +1,4 @@
-/* $Id: exceptions.cpp,v 1.54 2001-07-03 13:17:42 bird Exp $ */
+/* $Id: exceptions.cpp,v 1.55 2001-07-03 13:24:25 bird Exp $ */
 
 /*
  * Win32 Exception functions for OS/2
@@ -591,6 +591,9 @@ LONG WIN32API UnhandledExceptionFilter(PWINEXCEPTION_POINTERS lpexpExceptionInfo
           {
               szModName[0] = '\0';
               strncat(szModName, pMod->getModuleName(), sizeof(szModName) - 1);
+              iObj = 0xFF;
+              offObj = (ULONG)lpexpExceptionInfo->ExceptionRecord->ExceptionAddress
+                       - (ULONG)pMod->getInstanceHandle();
           }
       }
       sprintf(message,
