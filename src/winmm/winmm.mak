@@ -1,4 +1,4 @@
-# $Id: winmm.mak,v 1.9 2002-05-22 15:50:26 sandervl Exp $
+# $Id: winmm.mak,v 1.10 2002-05-22 20:19:11 sandervl Exp $
 
 #
 # Odin32 API
@@ -41,6 +41,7 @@ $(OBJDIR)\time.obj \
 $(OBJDIR)\auxiliary.obj \
 $(OBJDIR)\auxos2.obj \
 $(OBJDIR)\mixer.obj \
+$(OBJDIR)\mixeros2.obj \
 $(OBJDIR)\midi.obj \
 $(OBJDIR)\irtmidi.obj \
 $(OBJDIR)\midistrm.obj \
