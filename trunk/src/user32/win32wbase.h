@@ -1,4 +1,4 @@
-/* $Id: win32wbase.h,v 1.108 2001-02-20 17:22:05 sandervl Exp $ */
+/* $Id: win32wbase.h,v 1.109 2001-02-21 21:30:44 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -112,6 +112,8 @@ public:
 
                 Win32BaseWindow(DWORD objType);
                 Win32BaseWindow(CREATESTRUCTA *lpCreateStructA, ATOM classAtom, BOOL isUnicode);
+                Win32BaseWindow(HWND hwndOS2, ULONG reserved);
+
 virtual        ~Win32BaseWindow();
 
 virtual  ULONG  MsgCreate(HWND hwndOS2);
