@@ -1,4 +1,4 @@
-/* $Id: overlappedio.cpp,v 1.13 2001-12-14 12:44:57 sandervl Exp $ */
+/* $Id: overlappedio.cpp,v 1.14 2001-12-14 13:45:19 sandervl Exp $ */
 
 /*
  * Win32 overlapped IO class
@@ -34,7 +34,7 @@ OverlappedIOHandler::OverlappedIOHandler(LPOVERLAPPED_HANDLER lpReadHandler,
 
     this->fFullDuplex = fFullDuplex;
 
-    if(lpReadHandler == NULL || lpPollHandler == NULL) {
+    if(lpReadHandler == NULL) {
         throw(InvalidParameter);
     }
 
