@@ -1,4 +1,4 @@
-/* $Id: scroll.cpp,v 1.44 2001-10-11 17:05:02 sandervl Exp $ */
+/* $Id: scroll.cpp,v 1.45 2001-10-24 09:53:14 sandervl Exp $ */
 /*
  * Scrollbar control
  *
@@ -836,7 +836,7 @@ LRESULT SCROLL_HandleScrollEvent(HWND hwnd,WPARAM wParam,LPARAM lParam,INT nBar,
         lastMousePos  = lastClickPos;
         trackThumbPos = thumbPos;
         prevPt = pt;
-        if (nBar == SB_CTL) SetFocus(hwnd);
+        if (nBar == SB_CTL && (GetWindowLongA(hwnd, GWL_STYLE) & WS_TABSTOP)) SetFocus( hwnd );
         SetCapture(hwnd);
         break;
 

@@ -1,4 +1,4 @@
-/* $Id: window.cpp,v 1.110 2001-10-17 14:30:10 sandervl Exp $ */
+/* $Id: window.cpp,v 1.111 2001-10-24 09:53:14 sandervl Exp $ */
 /*
  * Win32 window apis for OS/2
  *
@@ -1966,13 +1966,26 @@ ODINFUNCTION2(HANDLE,  GetPropW,
               HWND,    hwnd,
               LPCWSTR, str )
 {
-    LPSTR strA;
-    HANDLE ret;
+  Win32BaseWindow *window;
+  LPSTR strA;
+  HANDLE ret;
 
-    if (!HIWORD(str)) return GetPropA( hwnd, (LPCSTR)(UINT)LOWORD(str) );
-    strA = HEAP_strdupWtoA( GetProcessHeap(), 0, str );
-    ret = GetPropA( hwnd, strA );
-    HeapFree( GetProcessHeap(), 0, strA );
+    window = Win32BaseWindow::GetWindowFromHandle(hwnd);
+    if(!window) {
+        dprintf(("GetPropW, window %x not found", hwnd));
+        SetLastError(ERROR_INVALID_WINDOW_HANDLE);
+        return 0;
+    }
+
+    if(HIWORD(str)) {
+         strA = HEAP_strdupWtoA( GetProcessHeap(), 0, str );
+    }
+    else strA = (LPSTR)str;
+
+    ret = window->getProp(strA);
+
+    RELEASE_WNDOBJ(window);
+    if(HIWORD(str)) HeapFree( GetProcessHeap(), 0, strA );
     return ret;
 }
 //******************************************************************************
