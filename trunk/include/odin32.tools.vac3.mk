@@ -1,9 +1,9 @@
-# $Id: odin32.tools.vac3.mk,v 1.3 2001-04-02 12:38:04 sandervl Exp $
+# $Id: odin32.tools.vac3.mk,v 1.4 2001-06-25 23:41:26 bird Exp $
 
 #
 # Odin32 API
 #
-#       IBM Visual Age for C++ v3.08 tools and interference rules.
+#       IBM Visual Age for C++ v3.08 tools and inference rules.
 #
 
 
@@ -34,7 +34,7 @@ MAKE_CMD    = $(MAKE_CMD) NODEP=1
 #
 # Interference rules.
 #
-.SUFFIXES: .orc_asm .orc
+.SUFFIXES: .orc_asm .orc .pre-c .pre-cpp
 
 .c{$(OBJDIR)}.obj:
 !ifdef USERAPP
@@ -43,12 +43,42 @@ MAKE_CMD    = $(MAKE_CMD) NODEP=1
     $(CC) $(CFLAGS) $(CINCLUDES) $(CDEFINES) -Fo$(OBJDIR)\$(@B).obj -c $<
 !endif
 
+.c.obj:
+!ifdef USERAPP
+    $(CC) $(CFLAGS) $(CINCLUDES) $(CDEFINES_WIN32APP) -Fo$(OBJDIR)\$(@B).obj -c $<
+!else
+    $(CC) $(CFLAGS) $(CINCLUDES) $(CDEFINES) -Fo$(OBJDIR)\$(@B).obj -c $<
+!endif
+
+.c.pre-c:
+!ifdef USERAPP
+    $(CC) $(CFLAGS) $(CINCLUDES) $(CDEFINES_WIN32APP) -P+ -Pd -Pc+ -c $< > $@
+!else
+    $(CC) $(CFLAGS) $(CINCLUDES) $(CDEFINES) -P+ -Pd -Pc+ -c $< > $@
+!endif
+
+
 .cpp{$(OBJDIR)}.obj:
 !ifdef USERAPP
     $(CXX) $(CXXFLAGS) $(CINCLUDES) $(CDEFINES_WIN32APP) -Fo$(OBJDIR)\$(@B).obj -c $<
 !else
     $(CXX) $(CXXFLAGS) $(CINCLUDES) $(CDEFINES) -Fo$(OBJDIR)\$(@B).obj -c $<
 !endif
+
+.cpp.obj:
+!ifdef USERAPP
+    $(CXX) $(CXXFLAGS) $(CINCLUDES) $(CDEFINES_WIN32APP) -Fo$(OBJDIR)\$(@B).obj -c $<
+!else
+    $(CXX) $(CXXFLAGS) $(CINCLUDES) $(CDEFINES) -Fo$(OBJDIR)\$(@B).obj -c $<
+!endif
+
+.cpp.pre-cpp:
+!ifdef USERAPP
+    $(CXX) $(CXXFLAGS) $(CINCLUDES) $(CDEFINES_WIN32APP) -P+ -Pd -Pc+ -c $< > $@
+!else
+    $(CXX) $(CXXFLAGS) $(CINCLUDES) $(CDEFINES) -P+ -Pd -Pc+ -c $< > $@
+!endif
+
 
 .asm{$(OBJDIR)}.obj:
     $(AS) $(ASFLAGS) -Fdo:$(OBJDIR) $<
@@ -64,6 +94,7 @@ MAKE_CMD    = $(MAKE_CMD) NODEP=1
     $(OS2RC) $(OS2RCFLAGS) $(CINCLUDES:-I=-i ) $< $@
 
 
+!if 0 # disabled.
 #
 # Old Targets
 #
@@ -81,4 +112,4 @@ MAKE_CMD    = $(MAKE_CMD) NODEP=1
 
 .rc.res:
     $(OS2RC) $(OS2RCFLAGS) $< $@
-
+!endif
