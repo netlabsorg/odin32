@@ -1,4 +1,7 @@
- /* $Id: ChangeLog,v 1.76 1999-08-10 10:01:36 phaller Exp $ */
+ /* $Id: ChangeLog,v 1.77 1999-08-11 17:16:03 sandervl Exp $ */
+ 99-08-10: Sander van Leeuwen <sandervl@xs4all.nl>
+	- USER32/NEW: Fixed makefile (link with odincrt)
+
  99-08-10: Patrick Haller <phaller@gmx.net>
 	- LZ32: added preliminary support for independend LZ32 library
 
