@@ -1,4 +1,4 @@
-# $Id: process.mak,v 1.2 2002-04-07 22:43:25 bird Exp $
+# $Id: process.mak,v 1.3 2002-04-13 04:39:59 bird Exp $
 
 #
 # Unix-like tools for OS/2
@@ -9,83 +9,135 @@
 # current source path.
 #
 
-#
-# This makefile expects setup.mak and the specific setup to be included
-# already. Plus there are several prerequisite environment variables
-# subsystem makefiles need to set:
-# TARGET_NAME is obligatory
 
-!ifndef TARGET_NAME
-!error fatal error: TARGET_NAME is not defined!
+# -----------------------------------------------------------------------------
+# Assertions.
+#   This makefile expects setup.mak and the specific setup to be included
+#   already.
+#   It also requires the TARGET_NAME to be specified in the makefile.
+# -----------------------------------------------------------------------------
+!if "$(MAKE_SETUP_INCLUDED)" != "YES"
+!error Fatal error: You must include setup.mak before process.mak in the makefile.
+!endif
+!if "$(ENV_STATUS)" != "OK"
+!error Fatal error: The enironment is not valid. Bad setup.mak?
 !endif
 
-# provide overridable defaults
-!ifndef TARGET
-TARGET=$(PATH_TARGET)\$(TARGET_NAME).$(TARGET_EXT)
+!if "$(TARGET_NAME)" == ""
+!error Fatal error: TARGET_NAME is not defined! Should be set in the makefile.
 !endif
 
-!ifndef TARGET_OBJS
-TARGET_OBJS=$(PATH_TARGET)\$(TARGET_NAME).$(EXT_OBJ)
-!endif
+# -----------------------------------------------------------------------------
+# Provide overridable defaults
+# -----------------------------------------------------------------------------
 
-!ifndef TARGET_LIBS
-TARGET_LIBS=$(LIB_C_DLL) $(LIB_OS) $(LIB_C_RTDLL)
-!endif
-
-!ifndef TARGET_DEF
-TARGET_DEF=$(MAKEDIR)\$(PATH_DEF)\$(TARGET_NAME).def
-!endif
-
-!ifndef TARGET_IDEF
-TARGET_IDEF=$(TARGET_DEF)
-!endif
-
-!ifndef TARGET_MAP
-TARGET_MAP=$(PATH_TARGET)\$(TARGET_NAME).map
-!endif
-
-!ifndef TARGET_LNK
-TARGET_LNK=$(PATH_TARGET)\$(TARGET_NAME).lnk
-!endif
-
+# Default target mode is executable.
 !ifndef TARGET_MODE
-TARGET_MODE=EXE
+TARGET_MODE = EXE
 !endif
 
+# Default extension corresponds to the target mode.
 !ifndef TARGET_EXT
-!if "$(TARGET_MODE)" == "CRT" || "$(TARGET_MODE)" == "DLL"
-TARGET_EXT=$(EXT_DLL)
-!endif
-!if "$(TARGET_MODE)" == "SYS"
-TARGET_EXT=$(EXT_SYS)
-!endif
-!if "$(TARGET_MODE)" == "EXE"
-TARGET_EXT=$(EXT_EXE)
-!endif
-!if "$(TARGET_MODE)" == "LIB" || "$(TARGET_MODE)" == "PUBLIB" || "$(TARGET_MODE)" == "SYSLIB"
-TARGET_EXT=$(EXT_LIB)
-!endif
-!if "$(TARGET_MODE)" == "EMPTY"
-TARGET_EXT=empty
-!endif
-!ifndef TARGET_EXT
+! if "$(TARGET_MODE)" == "CRT" || "$(TARGET_MODE)" == "DLL"
+TARGET_EXT  = $(EXT_DLL)
+! endif
+! if "$(TARGET_MODE)" == "SYS"
+TARGET_EXT  = $(EXT_SYS)
+! endif
+! if "$(TARGET_MODE)" == "EXE"
+TARGET_EXT  = $(EXT_EXE)
+! endif
+! if "$(TARGET_MODE)" == "LIB" || "$(TARGET_MODE)" == "PUBLIB" || "$(TARGET_MODE)" == "SYSLIB"
+TARGET_EXT  = $(EXT_LIB)
+! endif
+! if "$(TARGET_MODE)" == "EMPTY"
+TARGET_EXT  = empty
+! endif
+! ifndef TARGET_EXT
 !error Error: TARGET_EXT not set
-!endif
+! endif
 !endif
 
+# Default target path. (where all the generated stuff for this target goes)
+!ifndef PATH_TARGET
+PATH_TARGET = $(PATH_OBJ)\$(TARGET_NAME).$(TARGET_EXT)
+!endif
+
+# Default target file. (output)
+!ifndef TARGET
+TARGET      = $(PATH_TARGET)\$(TARGET_NAME).$(TARGET_EXT)
+!endif
+
+# Default object file. (output)
+!ifndef TARGET_OBJS
+TARGET_OBJS = $(PATH_TARGET)\$(TARGET_NAME).$(EXT_OBJ)
+!endif
+
+# Default libraries. (input)
+!ifndef TARGET_LIBS
+TARGET_LIBS = $(LIB_C_DLL) $(LIB_OS) $(LIB_C_RTDLL)
+!endif
+
+# Default definition file. (input)
+!ifndef TARGET_DEF
+TARGET_DEF  = $(MAKEDIR)\$(PATH_DEF)\$(TARGET_NAME).def
+!endif
+
+# Default definition file for generating the import library. (input)
+!ifndef TARGET_IDEF
+TARGET_IDEF = $(TARGET_DEF)
+!endif
+
+# Default map file. (output)
+!ifndef TARGET_MAP
+TARGET_MAP  = $(PATH_TARGET)\$(TARGET_NAME).map
+!endif
+
+# Default link file. (output)
+!ifndef TARGET_LNK
+TARGET_LNK  = $(PATH_TARGET)\$(TARGET_NAME).lnk
+!endif
+
+# Default import library file. (output)
 !ifndef TARGET_ILIB
-!if "$(TARGET_MODE)" == "CRT" || "$(TARGET_MODE)" == "DLL"
-TARGET_ILIB=$(PATH_LIB)\$(TARGET_NAME).$(EXT_ILIB)
-!endif
+! if "$(TARGET_MODE)" == "CRT" || "$(TARGET_MODE)" == "DLL"
+TARGET_ILIB =$(PATH_LIB)\$(TARGET_NAME).$(EXT_ILIB)
+! endif
 !endif
 
-!if "$(TARGET_MODE)" == "PUBLIB"
+# Default public library name. (output)
+!ifndef TARGET_PUBLIB
+! if "$(TARGET_MODE)" == "PUBLIB"
 TARGET_PUBLIB=$(PATH_LIB)\$(TARGET_NAME).$(TARGET_EXT)
-!else
+! else
 TARGET_PUBLIB=
+! endif
+!endif
+
+# Default depend filename.
+!ifndef TARGET_DEPEND
+TARGET_DEPEND = $(PATH_TARGET)\.depend
+!endif
+
+# Default makefile name.
+!ifndef MAKEFILE
+MAKEFILE = makefile
+!endif
+
+# Ignore linker warnings for some target modes.
+!ifndef TARGET_IGNORE_LINKER_WARNINGS
+! if "$(TARGET_MODE)" == "DLL" || "$(TARGET_MODE)" == "CRT"
+TARGET_IGNORE_LINKER_WARNINGS = 1
+! endif
 !endif
 
 
+# Default stacksize
+#
+# BUGBUG/TODO/FIXME
+# kso:  Not sure if this is the *right* way to represent it!
+#       It can't be when we start changing it based on the
+#       current build environment.
 !ifndef TARGET_STACKSIZE
 # check if 16-bit target compiler
 ! if "$(BUILD_ENV)" == "MSCV6"
@@ -95,36 +147,41 @@ TARGET_STACKSIZE=0x10000
 ! endif
 !endif
 
-!ifndef MAKEFILE
-MAKEFILE = makefile
+
+
+# -----------------------------------------------------------------------------
+# Tell user what we're building.
+# -----------------------------------------------------------------------------
+!ifndef BUILD_QUIET
+!if [$(ECHO) Target is $(CLRFIL)$(TARGET)$(CLRRST)]
+!endif
 !endif
 
 
-# ensure the platform-specific target path exists
-PATH_TARGET=$(PATH_OBJ)\$(TARGET_NAME).$(TARGET_EXT)
-!if "$(PATH_TARGET)" != ""
-! if [$(TOOL_EXISTS) $(PATH_TARGET)] != 0
-!  if [$(ECHO) Target path $(CLRFIL)$(PATH_TARGET)$(CLRTXT) does NOT exist. Creating. $(CLRRST)]
-!  endif
-!  if [$(TOOL_CREATEPATH) $(PATH_TARGET)]
-!   error Could not create $(PATH_TARGET)
+# -----------------------------------------------------------------------------
+# Ensure the platform-specific target path exists
+# -----------------------------------------------------------------------------
+
+!if "$(TARGET_MODE)" != "EMPTY"
+! if "$(PATH_TARGET)" != ""
+!  if [$(TOOL_EXISTS) $(PATH_TARGET)] != 0
+!   ifndef BUILD_QUIET
+!    if [$(ECHO) Target path $(CLRFIL)$(PATH_TARGET)$(CLRTXT) does NOT exist. Creating. $(CLRRST)]
+!    endif
+!   endif
+!   if [$(TOOL_CREATEPATH) $(PATH_TARGET)]
+!    error Could not create $(PATH_TARGET)
+!   endif
 !  endif
 ! endif
 !endif
+# not 100% sure about the != EMPTY stuff, but this is way faster.
 
 
-# Tell user what we're building.
-!if [$(ECHO) Target is $(CLRFIL)$(TARGET)$(CLRRST)]
-!endif
 
-
-# build the target filenames
-BUILD_TARGET_DEPEND=$(PATH_TARGET)\.depend
-
-
-# ----------------------
-# common inference rules
-# ----------------------
+# -----------------------------------------------------------------------------
+# Common inference rules
+# -----------------------------------------------------------------------------
 
 .SUFFIXES:
 .SUFFIXES: .$(EXT_OBJ) .c .cpp .asm .$(EXT_RES) .rc .pre-c .pre-cpp # .h .def
@@ -167,7 +224,7 @@ BUILD_TARGET_DEPEND=$(PATH_TARGET)\.depend
 !if "$(TARGET_MODE)" == "IFS" || "$(TARGET_MODE)" == "IFSLIB"
         $(CXX_FLAGS_IFS) \
 !endif
-!ifdef CXX_LST_OUT
+!if "$(CXX_LST_OUT)" != ""
         $(CXX_LST_OUT)$(PATH_TARGET)\$(@B).s \
 !endif
         $(CXX_OBJ_OUT)$@ $<
@@ -190,7 +247,7 @@ BUILD_TARGET_DEPEND=$(PATH_TARGET)\.depend
 !if "$(TARGET_MODE)" == "IFS" || "$(TARGET_MODE)" == "IFSLIB"
         $(CXX_FLAGS_IFS) \
 !endif
-!ifdef CXX_LST_OUT
+!if "$(CXX_LST_OUT)" != ""
         $(CXX_LST_OUT)$(PATH_TARGET)\$(@B).s \
 !endif
         $(CXX_OBJ_OUT)$(PATH_TARGET)\$(@F) $<
@@ -237,7 +294,7 @@ BUILD_TARGET_DEPEND=$(PATH_TARGET)\.depend
 !if "$(TARGET_MODE)" == "IFS" || "$(TARGET_MODE)" == "IFSLIB"
         $(CC_FLAGS_IFS) \
 !endif
-!ifdef CC_LST_OUT
+!if "$(CC_LST_OUT)" != ""
         $(CC_LST_OUT)$(PATH_TARGET)\$(@B).s \
 !endif
         $(CC_OBJ_OUT)$@ $<
@@ -260,7 +317,7 @@ BUILD_TARGET_DEPEND=$(PATH_TARGET)\.depend
 !if "$(TARGET_MODE)" == "IFS" || "$(TARGET_MODE)" == "IFSLIB"
         $(CC_FLAGS_IFS) \
 !endif
-!ifdef CC_LST_OUT
+!if "$(CC_LST_OUT)" != ""
         $(CC_LST_OUT)$(PATH_TARGET)\$(@B).s \
 !endif
         $(CC_OBJ_OUT)$(PATH_TARGET)\$(@F) $<
@@ -298,17 +355,21 @@ BUILD_TARGET_DEPEND=$(PATH_TARGET)\.depend
     @$(RC) $(RC_FLAGS) $< $(PATH_TARGET)\$(@F)
 
 
-#
-# establish root dependency
-# by removing the extension from the BUILD_TARGET
-# and replacing it with .obj
-#
+
+
+
+# -----------------------------------------------------------------------------
+# The all rule - The default one, as it's the first rule in the file.
+# -----------------------------------------------------------------------------
 all: build
 
 
-#
-# Build the main target.
-#
+
+# -----------------------------------------------------------------------------
+# The build rule - Build the target.
+#   Must take into account any subdirectories and makefiles which is is to be
+#   made before and after the target. That makes it kind of messy, sorry.
+# -----------------------------------------------------------------------------
 !ifdef SUBDIRS
 SUBDIRS_BUILD = subbuild
 $(SUBDIRS_BUILD):
@@ -328,9 +389,12 @@ build: $(SUBDIRS_BUILD) $(PREMAKEFILES_BUILD) $(TARGET) $(TARGET_ILIB) $(TARGET_
 !endif
 
 
-#
-# Make Public libraries.
-#
+
+# -----------------------------------------------------------------------------
+# The lib rule - Make Public libraries.
+#   Must take into account any subdirectories and makefiles which is is to be
+#   made before and after the target. That makes it kind of messy, sorry.
+# -----------------------------------------------------------------------------
 !ifdef SUBDIRS
 SUBDIRS_LIB = subdir_lib
 $(SUBDIRS_LIB):
@@ -349,9 +413,12 @@ lib: $(SUBDIRS_LIB)  $(TARGET_ILIB) $(TARGET_PUBLIB)
 !endif
 
 
-#
-# Copies target to main binary directory.
-#
+
+# -----------------------------------------------------------------------------
+# The install rule - Copies target to main binary directory.
+#   Installation order is not concidered vital, so subdirectories and
+#   pre-makefiles are processed after this directory. This might be changed.
+# -----------------------------------------------------------------------------
 install:
 !if "$(TARGET_MODE)" == "EXE"
     if exist $(TARGET) $(TOOL_COPY) $(TARGET) $(PATH_BIN)
@@ -362,8 +429,21 @@ install:
 !if "$(TARGET_MODE)" == "SYS" || "$(TARGET_MODE)" == "IFS" || "$(TARGET_MODE)" == "IFSLIB"
     if exist $(TARGET) $(TOOL_COPY) $(TARGET) $(PATH_SYS)
 !endif
-!if "$(TARGET_MODE)" == "LIB" || "$(TARGET_MODE)" == "PUBLIB" || "$(TARGET_MODE)" == "SYSLIB"
+!if 0
+# Nothing to do here currently. These are either private or they're allready where they should be.
+#
+# TODO/BUGBUG/FIXME:
+#       The PUB stuff should be change to a separate variable.
+#       It will make life easier to just state that this target,
+#       what ever it is, should be public.
+#
+#       That's allow project to install targets during make without
+#       running the install command by setting some target modes
+#       public by default.
+#   (kso)
+#!if "$(TARGET_MODE)" == "LIB" || "$(TARGET_MODE)" == "PUBLIB" || "$(TARGET_MODE)" == "SYSLIB"
 #    if exist $(TARGET) $(TOOL_COPY) $(TARGET) $(PATH_LIB)
+#!endif
 !endif
 !if "$(TARGET_DOCS)" != ""
     $(TOOL_COPY) $(TARGET_DOCS) $(PATH_DOC)
@@ -379,9 +459,11 @@ install:
 !endif
 
 
-#
-# Run evt. testcase
-#
+
+# -----------------------------------------------------------------------------
+# The testcase rule - Execute testcases when present.
+#   Testcases are either a testcase.mak file or a testcase subdirectory.
+# -----------------------------------------------------------------------------
 !ifndef BUILD_NO_TESTCASE
 testcase: install
 !if [$(TOOL_EXISTS) testcase] == 0
@@ -402,12 +484,13 @@ testcase: install
 !endif
 
 
-#
-# Make dependencies.
-#
+
+# -----------------------------------------------------------------------------
+# The dep rule - Make dependencies.
+# -----------------------------------------------------------------------------
 dep:
     @$(ECHO) Building dependencies $(CLRRST)
-    @$(TOOL_DEP) $(TOOL_DEP_FLAGS) -o$$(PATH_TARGET) -d$(BUILD_TARGET_DEPEND)\
+    @$(TOOL_DEP) $(TOOL_DEP_FLAGS) -o$$(PATH_TARGET) -d$(TARGET_DEPEND)\
 !ifdef TARGET_NO_DEP
         -x$(TARGET_NO_DEP: =;)\
 !endif
@@ -423,9 +506,11 @@ dep:
 !endif
 
 
-#
-# Clean up output files (not the installed ones).
-#
+
+# -----------------------------------------------------------------------------
+# The clean rule - Clean up output files.
+#   The current setup doesn't clean the installed ones.
+# -----------------------------------------------------------------------------
 clean:
 !if "$(PATH_TARGET)" != ""              # paranoia
     $(TOOL_RM) \
@@ -457,20 +542,18 @@ clean:
 !endif
 
 
-#
-# EXE, DLL, SYS and IFS Targets
-#
+
+# -----------------------------------------------------------------------------
+# The $(TARGET) rule - For EXE, DLL, SYS and IFS targets
+# -----------------------------------------------------------------------------
 !if "$(TARGET_MODE)" == "EXE" || "$(TARGET_MODE)" == "DLL" || "$(TARGET_MODE)" == "CRT" || "$(TARGET_MODE)" == "SYS" || "$(TARGET_MODE)" == "IFS"
-! if "$(TARGET_MODE)" == "DLL" || "$(TARGET_MODE)" == "CRT"
-TARGET_IGNORE_LINKER_WARNINGS=1
-!endif
 $(TARGET): $(TARGET_OBJS) $(TARGET_RES) $(TARGET_DEF) $(TARGET_LNK) $(TARGET_DEPS)
     @$(ECHO) Linking $(TARGET_MODE) $(CLRFIL)$@ $(CLRRST)
 !ifdef TARGET_IGNORE_LINKER_WARNINGS
     -4 \
 !endif
 !if "$(TARGET_MODE)" == "EXE"
-    @$(LINK_CMD_EXE)
+    $(LINK_CMD_EXE)
 !endif
 !if "$(TARGET_MODE)" == "DLL" || "$(TARGET_MODE)" == "CRT"
     @$(LINK_CMD_DLL)
@@ -504,20 +587,10 @@ $(LINK_LNK5)
 <<KEEP
 
 
-#
-# DLL Import library
-#
-!ifdef TARGET_ILIB
-$(TARGET_ILIB): $(TARGET_IDEF)
-    @$(ECHO) Creating Import Library $(CLRFIL)$@ $(CLRRST)
-    $(IMPLIB) $(IMPLIB_FLAGS) $@ $(TARGET_IDEF)
-!endif
-!endif
 
-
-#
-# Lib Targets.
-#
+# -----------------------------------------------------------------------------
+# The $(TARGET) rule - For LIB, PUBLIB, and SYSLIB targets.
+# -----------------------------------------------------------------------------
 !if "$(TARGET_MODE)" == "LIB" || "$(TARGET_MODE)" == "PUBLIB" || "$(TARGET_MODE)" == "SYSLIB" || "$(TARGET_MODE)" == "IFSLIB"
 $(TARGET): $(TARGET_OBJS) $(TARGET_LNK) $(TARGET_DEPS)
     @$(ECHO) Creating Library $(CLRFIL)$@ $(CLRRST)
@@ -541,6 +614,7 @@ $(AR_LNK5)
 
 #
 # Copy rule for public libraries.
+#   BUGBUG/TODO/FIXME: get rid of the PUBLIB stuff. see commet in install.
 #
 !if "$(TARGET_MODE)" == "PUBLIB"
 $(TARGET_PUBLIB): $(TARGET)
@@ -549,35 +623,109 @@ $(TARGET_PUBLIB): $(TARGET)
 !endif
 
 
-#
-# Empty target.
-#
+
+# -----------------------------------------------------------------------------
+# The $(TARGET) rule - For EMPTY targets.
+# -----------------------------------------------------------------------------
 !if "$(TARGET_MODE)" == "EMPTY"
 $(TARGET):
     @$(ECHO) .
 !endif
 
 
-#
-# read dependency file from current directory
-#
+
+# -----------------------------------------------------------------------------
+# The $(TARGET_ILIB) rule - Make import library.
+# -----------------------------------------------------------------------------
+!ifdef TARGET_ILIB
+$(TARGET_ILIB): $(TARGET_IDEF)
+    @$(ECHO) Creating Import Library $(CLRFIL)$@ $(CLRRST)
+    $(IMPLIB) $(IMPLIB_FLAGS) $@ $(TARGET_IDEF)
+!endif
+!endif
+
+
+
+# -----------------------------------------------------------------------------
+# The .force rule - Force a remake of something everytime.
+# -----------------------------------------------------------------------------
+.force:
+    @$(ECHO) .
+
+
+
+# -----------------------------------------------------------------------------
+# Read Dependencies.
+# -----------------------------------------------------------------------------
+
 !if "$(TARGET_MODE)" != "EMPTY"
-! if [$(TOOL_EXISTS) $(BUILD_TARGET_DEPEND)] == 0
-!  if [$(ECHO) Including dependency $(CLRFIL)$(BUILD_TARGET_DEPEND)$(CLRRST)]
+
+#
+# Read dependency file for current directory
+#
+!if [$(TOOL_EXISTS) $(TARGET_DEPEND)] == 0
+! ifndef BUILD_QUIET
+!  if [$(ECHO) Including dependency $(CLRFIL)$(TARGET_DEPEND)$(CLRRST)]
 !  endif
-!  include $(BUILD_TARGET_DEPEND)
+! endif
+! include $(TARGET_DEPEND)
+!else
+! ifndef NODEP
+!   if [$(ECHO) $(CLRERR)WARNING: Please make dependencies first. $(TARGET_DEPEND) is missing.$(CLRRST)]
+!   endif
+! endif
+!endif
+
+
+#
+# Read global dependency files.
+#
+!ifdef BUILD_DEPEND1
+! if [$(TOOL_EXISTS) $(BUILD_DEPEND1)] == 0
+!  ifndef BUILD_QUIET
+!   if [$(ECHO) Including dependency $(CLRFIL)$(BUILD_DEPEND1)$(CLRRST)]
+!   endif
+!  endif
+!  include $(BUILD_DEPEND1)
 ! else
 !  ifndef NODEP
-!    if [$(ECHO) $(CLRERR)WARNING: Please make dependencies first. $(BUILD_TARGET_DEPEND) is missing.$(CLRRST)]
+!    if [$(ECHO) $(CLRERR)WARNING: Please make dependencies first. $(BUILD_DEPEND1) is missing.$(CLRRST)]
+!    endif
+!  endif
+! endif
+!endif
+
+!ifdef BUILD_DEPEND2
+! if [$(TOOL_EXISTS) $(BUILD_DEPEND2)] == 0
+!  ifndef BUILD_QUIET
+!   if [$(ECHO) Including dependency $(CLRFIL)$(BUILD_DEPEND2)$(CLRRST)]
+!   endif
+!  endif
+!  include $(BUILD_DEPEND2)
+! else
+!  ifndef NODEP
+!    if [$(ECHO) $(CLRERR)WARNING: Please make dependencies first. $(BUILD_DEPEND2) is missing.$(CLRRST)]
 !    endif
 !  endif
 ! endif
 !endif
 
 
-#
-# Force rule.
-#
-.force:
-    @$(ECHO) .
+!ifdef BUILD_DEPEND3
+! if [$(TOOL_EXISTS) $(BUILD_DEPEND3)] == 0
+!  ifndef BUILD_QUIET
+!   if [$(ECHO) Including dependency $(CLRFIL)$(BUILD_DEPEND3)$(CLRRST)]
+!   endif
+!  endif
+!  include $(BUILD_DEPEND3)
+! else
+!  ifndef NODEP
+!    if [$(ECHO) $(CLRERR)WARNING: Please make dependencies first. $(BUILD_DEPEND3) is missing.$(CLRRST)]
+!    endif
+!  endif
+! endif
+!endif
+
+
+!endif
 
