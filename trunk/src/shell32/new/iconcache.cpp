@@ -11,9 +11,9 @@
 #include "winbase.h"
 #include "winuser.h"
 #include "wingdi.h"
-#include "wine/winuser16.h"
-#include "wine/winbase16.h"
-#include "neexe.h"
+//#include "wine/winuser16.h"
+//#include "wine/winbase16.h"
+//#include "neexe.h"
 #include "cursoricon.h"
 #include "module.h"
 #include "heap.h"
@@ -66,6 +66,13 @@ static void dumpIcoDir ( LPicoICONDIR entry )
 	TRACE("type = 0x%08x count = 0x%08x\n", entry->idType, entry->idCount);
 }
 #endif
+
+
+static HDPA		sic_hdpa = 0;
+static CRITICAL_SECTION	SHELL32_SicCS;
+
+
+
 /*************************************************************************
  *				SHELL_GetResourceTable
  */
@@ -333,7 +340,7 @@ HGLOBAL WINAPI ICO_ExtractIconEx(LPCSTR lpszExeFileName, HICON * RetPtr, UINT nI
 	    goto end_2;		/* failure */
 	  }
 
-	  if ( !(peimage = MapViewOfFile(fmapping,FILE_MAP_READ,0,0,0)))
+	  if ( !(peimage = (BYTE*)MapViewOfFile(fmapping,FILE_MAP_READ,0,0,0)))
 	  { WARN("failed to mmap filemap.\n");
 	    hRet = ICO_INVALID_FILE;
 	    goto end_2;		/* failure */
@@ -465,9 +472,6 @@ typedef struct
 	DWORD dwAccessTime;
 } SIC_ENTRY, * LPSIC_ENTRY;
 
-static HDPA		sic_hdpa = 0;
-static CRITICAL_SECTION	SHELL32_SicCS;
-
 /*****************************************************************************
  * SIC_CompareEntrys			[called by comctl32.dll]
  *
@@ -480,7 +484,7 @@ INT CALLBACK SIC_CompareEntrys( LPVOID p1, LPVOID p2, LPARAM lparam)
 	if (((LPSIC_ENTRY)p1)->dwSourceIndex != ((LPSIC_ENTRY)p2)->dwSourceIndex) /* first the faster one*/
 	  return 1;
 
-	if (strcasecmp(((LPSIC_ENTRY)p1)->sSourceFile,((LPSIC_ENTRY)p2)->sSourceFile))
+	if (strcmp(((LPSIC_ENTRY)p1)->sSourceFile,((LPSIC_ENTRY)p2)->sSourceFile))
 	  return 1;
 
 	return 0;
@@ -786,8 +790,8 @@ INT WINAPI Shell_GetCachedImageIndexW(LPCWSTR szPath, INT nIndex, BOOL bSimulate
 
 INT WINAPI Shell_GetCachedImageIndexAW(LPCVOID szPath, INT nIndex, BOOL bSimulateDoc)
 {	if( VERSION_OsIsUnicode())
-	  return Shell_GetCachedImageIndexW(szPath, nIndex, bSimulateDoc);
-	return Shell_GetCachedImageIndexA(szPath, nIndex, bSimulateDoc);
+	  return Shell_GetCachedImageIndexW((LPWSTR)szPath, nIndex, bSimulateDoc);
+	return Shell_GetCachedImageIndexA((LPSTR)szPath, nIndex, bSimulateDoc);
 }
 
 /*************************************************************************
@@ -795,8 +799,8 @@ INT WINAPI Shell_GetCachedImageIndexAW(LPCVOID szPath, INT nIndex, BOOL bSimulat
  */
 HICON WINAPI ExtractIconExAW ( LPCVOID lpszFile, INT nIconIndex, HICON * phiconLarge, HICON * phiconSmall, UINT nIcons )
 {	if (VERSION_OsIsUnicode())
-	  return ExtractIconExW ( lpszFile, nIconIndex, phiconLarge, phiconSmall, nIcons);
-	return ExtractIconExA ( lpszFile, nIconIndex, phiconLarge, phiconSmall, nIcons);
+	  return ExtractIconExW ( (LPWSTR)lpszFile, nIconIndex, phiconLarge, phiconSmall, nIcons);
+	return ExtractIconExA ( (LPSTR)lpszFile, nIconIndex, phiconLarge, phiconSmall, nIcons);
 }
 /*************************************************************************
  * ExtracticonExA			[shell32.190]
