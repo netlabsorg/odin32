@@ -1,4 +1,9 @@
-/* $Id: changelog,v 1.1254 2001-02-14 11:39:30 sandervl Exp $ */
+/* $Id: changelog,v 1.1255 2001-02-14 12:56:10 bird Exp $ */
+
+ 2001-02-14: knut stange osmundsen <knut.stange.osmundsen@mynd.no>
+    - Win32k.lib:
+                o Corrected build breaker: log.h should not be included.
+                  log.h was removed from the CINLCUDES two days ago.
 
  2001-02-14: Sander van Leeuwen <sandervl@xs4all.nl>
     - KERNEL32: o Allocate TLS index of module before loading the dll it needs
@@ -6,7 +11,7 @@
                   (fixes crash in BrMSX)
                 o Must use EXC_CallHandler to call RtlUnwind handler
                   (fixes crash during RaiseException in BrMSX)
-    - OPENGL\GLU: 
+    - OPENGL\GLU:
                 o Removed initterm.cpp. Use dllentry.obj instead
     - INCLUDE\misc.h:
                 o Print file and function name before executing an int 3. (DebugInt3)
@@ -18,6 +23,10 @@
                   messages. Must check if the control style includes LB/CB_HASSTRINGS.
                   (CB_FINDSTRING, CB_FINDSTRINGEXACT, CB_SELECTSTRING,
                    LB_FINDSTRING, LB_FINDSTRINGEXACT, LB_SELECTSTRING)
+
+ 2001-02-12: knut st. osmundsen <knut.stange.osmundsen@mynd.no>
+    - Win32k.lib:
+                o Removed /src/win32k/include from the CFLAGS.
 
  2001-02-11: knut st. osmundsen <knut.stange.osmundsen@mynd.no>
     - Win32k:   o Added symbols for the 14062D kernels.
@@ -31,7 +40,7 @@
                 o Compile fixes for VAC 3.6.5
     - RASAPI32: o Can't use LXLITE as it crashes on this binary
     - KERNEL32: o Check handle in LocalLock and return NULL if invalid
-                  (some apps use LocalLock to get access to GDI objects; doesn't 
+                  (some apps use LocalLock to get access to GDI objects; doesn't
                    work in Odin (TODO))
 
  2001-02-10: Sander van Leeuwen <sandervl@xs4all.nl>
