@@ -1,10 +1,15 @@
-# $Id: kernel32.mak,v 1.4 2001-04-26 13:22:48 sandervl Exp $
+# $Id: kernel32.mak,v 1.5 2001-04-27 17:35:40 sandervl Exp $
 
 #
 # Odin32 API
 #
 #       kernel32.dll makefile
 #
+
+#
+# Alternate makefile name.
+#
+MAKEFILE=kernel32.mak
 
 #
 # Compiler, tools, and interference rules.

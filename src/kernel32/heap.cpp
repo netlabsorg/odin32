@@ -1,4 +1,4 @@
-/* $Id: heap.cpp,v 1.25 2001-02-11 17:24:09 sandervl Exp $ */
+/* $Id: heap.cpp,v 1.26 2001-04-27 17:35:40 sandervl Exp $ */
 
 /*
  * Win32 heap API functions for OS/2
@@ -36,7 +36,7 @@ ODINFUNCTIONNODBG3(LPVOID, HeapAlloc, HANDLE, hHeap, DWORD, dwFlags,
         return(NULL);
 
   rc = curheap->Alloc(dwFlags, dwBytes);
-  dprintf2(("HeapAlloc %X bytes -> %x", dwBytes, rc));
+  dprintf2(("HeapAlloc %d bytes -> %x", dwBytes, rc));
   return rc;
 }
 //******************************************************************************
