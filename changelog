@@ -1,4 +1,4 @@
-/* $Id: changelog,v 1.2440 2003-01-10 15:17:31 sandervl Exp $ */
+/* $Id: changelog,v 1.2441 2003-01-10 17:11:04 sandervl Exp $ */
 
  2003-01-10: Sander van Leeuwen <sandervl@innotek   >
     - KERNEL32: o Don't close handle in CloseHandle if HANDLE_FLAG_PROTECT_FROM_CLOSE
@@ -16,6 +16,8 @@
                 o PeekNamedPipe: - return ERROR_BROKEN_PIPE when used for unnamed
                                    pipes (which is not allowed in OS/2)
                                    (workaround)
+    - USER32:   o ScrollDC bugfix; must convert rectangle returned by GetClipBox
+                                   to device coordinates
 
  2003-01-10: Platon Fomichev <platon@innotek   >
     - MSVCRT:   o Updates
