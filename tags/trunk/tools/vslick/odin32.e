@@ -1,4 +1,4 @@
-/* $Id: odin32.e,v 1.6 2000-10-02 04:08:49 bird Exp $
+/* $Id: odin32.e,v 1.7 2001-10-22 03:54:53 bird Exp $
  *
  * Visual SlickEdit Documentation Macros.
  *
@@ -21,7 +21,11 @@
  * Ctrl+Shift+K: Const/macro box
  * Ctrl+Shift+S: Struct/Typedef box
  *
- * Ctrl+Shift+T: Makes tag file
+ * Ctrl+Shift+T:
+ *
+ * Ctrl+Shift+B: KLOGENTRYX(..)
+ * Ctrl+Shift+E: KLOGEXIT(..)
+ * Ctrl+Shift+Q: Do kLog stuff for the current file.
  *
  * Remember to set the correct sOdin32UserName, sOdin32UserEmail and sOdin32UserInitials
  * before compiling and loading the macros into Visual SlickEdit.
@@ -31,7 +35,9 @@
  */
 defeventtab default_keys
 def  'C-S-A' = odin32_signature
+def  'C-S-B' = odin32_klogentry
 def  'C-S-C' = odin32_classbox
+def  'C-S-E' = odin32_klogexit
 def  'C-S-F' = odin32_funcbox
 def  'C-S-G' = odin32_globalbox
 def  'C-S-H' = odin32_headerbox
@@ -39,6 +45,7 @@ def  'C-S-I' = odin32_intfuncbox
 def  'C-S-K' = odin32_constbox
 def  'C-S-M' = odin32_modulebox
 def  'C-S-O' = odin32_oneliner
+def  'C-S-Q' = odin32_klog_file
 def  'C-S-S' = odin32_structbox
 def  'C-S-T' = odin32_maketagfile
 
@@ -302,7 +309,7 @@ void odin32_modulebox()
     _begin_line();
     if (file_eq(p_extension, 'asm'))
     {
-        _insert_text("; $Id: odin32.e,v 1.6 2000-10-02 04:08:49 bird Exp $\n");
+        _insert_text("; $Id: odin32.e,v 1.7 2001-10-22 03:54:53 bird Exp $\n");
         _insert_text("; \n");
         _insert_text("; \n");
         _insert_text("; \n");
@@ -315,7 +322,7 @@ void odin32_modulebox()
     }
     else
     {
-        _insert_text("/* $Id: odin32.e,v 1.6 2000-10-02 04:08:49 bird Exp $\n");
+        _insert_text("/* $Id: odin32.e,v 1.7 2001-10-22 03:54:53 bird Exp $\n");
         _insert_text(" * \n");
         _insert_text(" * \n");
         _insert_text(" * \n");
@@ -347,3 +354,688 @@ _command void odin32_setcurrentdir()
     cd(strip_filename(_project_name, 'NE'));
 }
 
+
+/**
+ * Hot-Key: Inserts a KLOGENTRY statement at start of nearest function.
+ */
+void odin32_klogentry()
+{
+    _save_pos2(org_pos);
+
+    /*
+     * Go to nearest function.
+     */
+    if (!odin32_func_goto_nearest())
+    {
+        /*
+         * Get parameters.
+         */
+        _str sParams = odin32_getparams();
+        if (sParams)
+        {
+            /*
+             * Insert text.
+             */
+            if (!search("{"))
+            {
+                p_col++;
+                cArgs = odin32_countparams(sParams);
+                if (cArgs > 0)
+                {
+                    sArgs = "";
+                    for (i = 0; i < cArgs; i++)
+                    {
+                        _str sType, sName, sDefault
+                        if (!odin32_enumparams(sParams, i, sType, sName, sDefault))
+                            sArgs = sArgs', 'sName;
+                    }
+
+                    _insert_text("\n    KLOGENTRY"cArgs"(\""sParams"\""sArgs");"); /* todo tab size.. or smart indent */
+                }
+                else
+                    _insert_text("\n    KLOGENTRY0();"); /* todo tab size.. or smart indent */
+
+                /*
+                 * Check if the next word is KLOGENTRY.
+                 */
+                next_word();
+                if (def_next_word_style == 'E')
+                    prev_word();
+                if (substr(cur_word(iIgnorePos), 1, 9) == "KLOGENTRY")
+                    delete_line();
+
+            }
+            else
+                message("didn't find {");
+        }
+        else
+            message("odin32_getparams failed, sParams=" sParams);
+        return;
+    }
+
+    _restore_pos2(org_pos);
+}
+
+
+/**
+ * Hot-Key: Inserts a KLOGEXIT statement at cursor location.
+ */
+void odin32_klogexit()
+{
+    _save_pos2(org_pos);
+
+    /*
+     * Go to nearest function.
+     */
+    if (!prev_proc())
+    {
+        /*
+         * Get parameters.
+         */
+        _str sType = odin32_getreturntype(true);
+        _restore_pos2(org_pos);
+        if (sType)
+        {
+            /*
+             * Insert text.
+             */
+            cur_col = p_col;
+            if (sType == 'void' || sType == 'VOID')
+            {
+                while (p_col <= p_SyntaxIndent)
+                    keyin(" ");
+                _insert_text("KLOGEXITVOID();");
+            }
+            else
+            {
+                if (sType == 'unsigned' || sType == 'UNSIGNED' || sType == 'DWORD' || sType == 'ULONG' || sType == 'UINT')
+                    _insert_text("KLOGEXITUINT();");
+                else if (sType == 'unsigned' || sType == 'UNSIGNED' || sType == 'DWORD' || sType == 'ULONG' || sType == 'UINT')
+                    _insert_text("KLOGEXITINT();");
+                else if (sType == 'void *' || sType == 'VOID *' || sType == 'PVOID')
+                    _insert_text("KLOGEXITHEX();");
+                else
+                    _insert_text("KLOGEXIT(\""sType"\", );");
+                _insert_text("\n");
+                for (i = 1; i < cur_col; i++)
+                    _insert_text(" ");
+                search(")","E-");
+
+                /*
+                 * Check if it's a simple return statement.
+                 */
+                _save_pos2(valuepos);
+                next_word();
+                if (def_next_word_style == 'E')
+                    prev_word();
+                if (cur_word(iIgnorePos) == 'return')
+                {
+                    p_col += length('return');
+                    _save_pos2(posStart);
+                    offStart = _QROffset();
+                    if (!search(";", "E+"))
+                    {
+                        offEnd = _QROffset();
+                        _restore_pos2(posStart);
+                        _str sValue = strip(get_text(offEnd - offStart));
+                        if (substr(sValue, 1, 1) == '(' && substr(sValue, length(sValue), 1) == ')')
+                            sValue = strip(substr(sValue, 2, length(sValue) - 2));
+                        _restore_pos2(valuepos);
+                        _save_pos2(valuepos);
+                        _insert_text(sValue);
+                    }
+                }
+                _restore_pos2(valuepos);
+
+                /*
+                 * Remove old KLOGEXIT statement on previous line if any.
+                 */
+                _save_pos2(valuepos);
+                newexitline = p_line;
+                p_line--; p_col = 1;
+                next_word();
+                if (def_next_word_style == 'E')
+                    prev_word();
+                if (p_line == newexitline - 1 && substr(cur_word(iIgnorePos), 1, 8) == 'KLOGEXIT')
+                    delete_line();
+                _restore_pos2(valuepos);
+            }
+        }
+        else
+            message("odin32_getparams failed, sType=" sType);
+        return;
+    }
+
+    _restore_pos2(org_pos);
+}
+
+
+/**
+ * Goes thru a file.
+ */
+void odin32_klog_file()
+{
+    show_all();
+    bottom();
+    _refresh_scroll();
+
+    /* ask question so we can get to the right position somehow.. */
+    if (_message_box("kLog process this file?", "Visual SlickEdit", MB_YESNO | MB_ICONQUESTION) != IDYES)
+        return;
+
+    /*
+     * Entries.
+     */
+    while (!prev_proc())
+    {
+        /*
+         * Skip prototypes.
+         */
+        if (odin32_prototype())
+            continue;
+
+        /*
+         * Ask user.
+         */
+        center_line();
+        _refresh_scroll();
+        sFunction = odin32_getfunction();
+        rc = _message_box("Process this function ("sFunction")?", "Visual SlickEdit", MB_YESNOCANCEL | MB_ICONQUESTION);
+        if (rc == IDYES)
+        {
+            _save_pos2(procpos);
+            odin32_klogentry();
+            _restore_pos2(procpos);
+        }
+        else if (rc == IDNO)
+            continue;
+        else
+            break;
+    }
+
+    /*
+     * Exits.
+     */
+    bottom(); _refresh_scroll();
+    boolean fUserCancel = false;
+    while (!prev_proc() && !fUserCancel)
+    {
+        _save_pos2(procpos);
+        sCurFunction = odin32_getfunction();
+
+        /*
+         * Skip prototypes.
+         */
+        if (odin32_prototype())
+            continue;
+
+        /*
+         * Select procedure.
+         */
+        while (!search("return", "WE<+") && odin32_getfunction() == sCurFunction)
+        {
+            /*
+             * Ask User.
+             */
+            center_line();
+            _refresh_scroll();
+            sFunction = odin32_getfunction();
+            rc = _message_box("Process this exit from "sFunction"?", "Visual SlickEdit", MB_YESNOCANCEL | MB_ICONQUESTION);
+            deselect();
+            if (rc == IDYES)
+            {
+                _save_pos2(returnpos);
+                odin32_klogexit();
+                _restore_pos2(returnpos);
+                p_line++;
+            }
+            else if (rc != IDNO)
+            {
+                fUserCancel = true;
+                break;
+            }
+            p_line++;                       /* just so we won't hit it again. */
+        }
+
+        /*
+         * If void function we'll have to check if there is and return; prior to the ending '}'.
+         */
+        _restore_pos2(procpos);
+        _save_pos2(procpos);
+        sType = odin32_getreturntype(true);
+        if (!fUserCancel && sType && (sType == 'void' || sType == 'VOID'))
+        {
+            if (    !search("{", "E+")
+                &&  !find_matching_paren())
+            {
+                _save_pos2(funcend);
+                prev_word();
+                if (cur_word(iIgnorePos) != "return")
+                {
+                    /*
+                     * Ask User.
+                     */
+                    _restore_pos2(funcend);
+                    center_line();
+                    _refresh_scroll();
+                    sFunction = odin32_getfunction();
+                    rc = _message_box("Process this exit from "sFunction"?", "Visual SlickEdit", MB_YESNOCANCEL | MB_ICONQUESTION);
+                    deselect();
+                    if (rc == IDYES)
+                    {
+                        _save_pos2(returnpos);
+                        odin32_klogexit();
+                        _restore_pos2(returnpos);
+                    }
+                }
+            }
+        }
+
+        /*
+         * Next proc.
+         */
+        _restore_pos2(procpos);
+    }
+
+
+}
+
+
+
+/**
+ * Moves cursor to nearest function start.
+ */
+int odin32_func_goto_nearest()
+{
+    cur_line = p_line;
+    prev_line = -1;
+    next_line = -1;
+    _save_pos2(org_pos);
+
+    if (!prev_proc(1))
+    {
+        prev_line = p_line;
+        if (!next_proc(1) && p_line == cur_line)
+        {
+            _restore_pos2(org_pos);
+            return 0;
+        }
+        _restore_pos2(org_pos);
+        _save_pos2(org_pos);
+    }
+
+    if (!next_proc(1))
+    {
+        next_line = p_line;
+        if (!prev_proc(1) && p_line == cur_line)
+        {
+            _restore_pos2(org_pos);
+            return 0;
+        }
+        _restore_pos2(org_pos);
+        _save_pos2(org_pos);
+    }
+
+    if (prev_line != -1 && (next_line == -1 || cur_line - prev_line <= next_line - cur_line))
+    {
+        prev_proc(1);
+        return 0;
+    }
+
+    if (next_line != -1 && (prev_line == -1 || cur_line - prev_line > next_line - cur_line))
+    {
+        next_proc();
+        return 0;
+    }
+
+    return -1;
+}
+
+
+/**
+ * Check if nearest function is a prototype.
+ */
+boolean odin32_prototype()
+{
+    /*
+     * Check if this is a real function implementation.
+     */
+    _save_pos2(procpos);
+    if (!odin32_func_goto_nearest())
+    {
+        proc_line = p_line;
+
+        if (!search("{", "E+"))
+        {
+            prev_proc();
+            if (p_line != proc_line)
+            {
+                _restore_pos2(procpos);
+                return true;
+            }
+        }
+    }
+    _restore_pos2(procpos);
+
+    return false;
+}
+
+
+/**
+ * Gets the name fo the current function.
+ */
+static _str odin32_getfunction()
+{
+    return current_proc();
+}
+
+
+/**
+ * Goes to the neares function and gets its parameters.
+ * @remark  Should be reimplemented to use tags (if someone can figure out how to query that stuff).
+ */
+static _str odin32_getparams()
+{
+    _save_pos2(org_pos);
+
+    /*
+     * Go to nearest function.
+     */
+    if (    !odin32_func_goto_nearest()
+        &&  !search("(")               /* makes some assumptions. */
+        )
+    {
+        /*
+         * Get parameters.
+         */
+        _save_pos2(posStart);
+        offStart = _QROffset();
+        if (!find_matching_paren())
+        {
+            offEnd = _QROffset();
+            _restore_pos2(posStart);
+            p_col++;
+            _str sParamsRaw = strip(get_text(offEnd - offStart - 1));
+
+
+            /*
+             * Remove new lines and double spaces within params.
+             */
+            _str sParams = "";
+
+            int i;
+            for (i = 1, chPrev = ' '; i <= length(sParamsRaw); i++)
+            {
+                ch = substr(sParamsRaw, i, 1);
+
+                /*
+                 * Do fixups.
+                 */
+                if (ch == " " && chPrev == " ")
+                        continue;
+
+                if ((ch :== "\n") || (ch :== "\r") || (ch :== "\t"))
+                {
+                    if (chPrev == ' ')
+                        continue;
+                    ch = ' ';
+                }
+
+                if (ch == ',' && chPrev == ' ')
+                {
+                    sParams = substr(sParams, 1, length(sParams) - 1);
+                }
+
+                if (ch == '*')
+                {
+                    if (chPrev != ' ')
+                        sParams = sParams :+ ' * ';
+                    else
+                        sParams = sParams :+ '* ';
+                    chPrev = ' ';
+                }
+                else
+                {
+                    sParams = sParams :+ ch;
+                    chPrev = ch;
+                }
+
+            } /* for */
+
+            sParams = strip(sParams);
+            if (sParams == 'void' || sParams == 'VOID')
+                sParams = "";
+            _restore_pos2(org_pos);
+            return sParams;
+        }
+        else
+            message("find_matchin_paren failed");
+    }
+
+    _restore_pos2(org_pos);
+    return false;
+}
+
+
+
+/**
+ * Enumerates the parameters to the function.
+ * @param   sParams     Parameter string from odin32_getparams.
+ * @param   iParam      The index (0-based) of the parameter to get.
+ * @param   sType       Type. (output)
+ * @param   sName       Name. (output)
+ * @param   sDefault    Default value. (output)
+ * @remark  Doesn't perhaps handle function pointers very well (I think)?
+ * @remark  Should be reimplemented to use tags (if someone can figure out how to query that stuff).
+ */
+static int odin32_enumparams(_str sParams, int iParam, _str &sType, _str &sName, _str &sDefault)
+{
+    int     i;
+    int     iParLevel;
+    int     iCurParam;
+    int     iStartParam;
+
+    sType = sName = sDefault = "";
+
+    /* no use working on empty string! */
+    if (length(sParams) == 0)
+        return -1;
+
+    /* find the parameter in question */
+    for (iStartParam = i = 1, iParLevel = iCurParam = 0; i <= length(sParams); i++)
+    {
+        _str ch = substr(sParams, i, 1);
+        if (ch == ',' && iParLevel == 0)
+        {
+            /* is it this parameter ? */
+            if (iParam == iCurParam)
+                break;
+
+            iCurParam++;
+            iStartParam = i + 1;
+        }
+        else if (ch == '(')
+            iParLevel++;
+        else if (ch == ')')
+            iParLevel--;
+    }
+
+    /* did we find the parameter? */
+    if (iParam == iCurParam)
+    {   /* (yeah, we did!) */
+        sArg = strip(substr(sParams, iStartParam, i - 1));
+
+        /* lazy approach, which doens't support function types */
+
+        if (pos('=', sParams) > 0)      /* default */
+        {
+            sDefault = strip(substr(sParams, pos('=', sParams) + 1));
+            sArg = strip(substr(sArg, 1, pos('=', sParams) - 1));
+        }
+
+        for (i = length(sArg); i > 1; i--)
+        {
+            _str ch = substr(sArg, i, 1);
+            if (    !(ch >= 'a' &&  ch <= 'z')
+                &&  !(ch >= 'A' &&  ch <= 'Z')
+                &&  !(ch >= '0'  && ch <= '9')
+                &&  ch != '_' && ch != '$')
+                break;
+        }
+        sName = strip(substr(sArg, i + 1));
+        sType = strip(substr(sArg, 1, i));
+
+        return 0;
+    }
+
+    return -1;
+}
+
+
+/**
+ * Counts the parameters to the function.
+ * @param   sParams     Parameter string from odin32_getparams.
+ * @remark  Should be reimplemented to use tags (if someone can figure out how to query that stuff).
+ */
+static int odin32_countparams(_str sParams)
+{
+    int     i;
+    int     iParLevel;
+    int     iCurParam;
+
+    sType = sName = sDefault = "";
+
+    /* check for 0 parameters */
+    if (length(sParams) == 0)
+        return 0;
+
+    /* find the parameter in question */
+    for (i = 1, iParLevel = iCurParam = 0; i <= length(sParams); i++)
+    {
+        _str ch = substr(sParams, i, 1);
+        if (ch == ',' && iParLevel == 0)
+        {
+            iCurParam++;
+        }
+        else if (ch == '(')
+            iParLevel++;
+        else if (ch == ')')
+            iParLevel--;
+    }
+
+    say 'returntype='odin32_getreturntype(true);
+
+    return iCurParam + 1;
+}
+
+/**
+ * Gets the return type.
+ */
+static _str odin32_getreturntype(boolean fPureType = false)
+{
+    _save_pos2(org_pos);
+
+    /*
+     * Go to nearest function.
+     */
+    if (!odin32_func_goto_nearest())
+    {
+        /*
+         * Return type is from function start to function name...
+         */
+        _save_pos2(posStart);
+        offStart = _QROffset();
+
+        if (!search("("))               /* makes some assumptions. */
+        {
+            prev_word();
+            offEnd = _QROffset();
+            _restore_pos2(posStart);
+            _str sTypeRaw = strip(get_text(offEnd - offStart - 1));
+
+            /*
+             * Remove static, inline, _Optlink, stdcall, EXPENTRY etc.
+             */
+            if (fPureType)
+            {
+                sTypeRaw = stranslate(sTypeRaw, "", "__static__", "I");
+                sTypeRaw = stranslate(sTypeRaw, "", "__static", "I");
+                sTypeRaw = stranslate(sTypeRaw, "", "static__", "I");
+                sTypeRaw = stranslate(sTypeRaw, "", "static", "I");
+                sTypeRaw = stranslate(sTypeRaw, "", "__inline__", "I");
+                sTypeRaw = stranslate(sTypeRaw, "", "__inline", "I");
+                sTypeRaw = stranslate(sTypeRaw, "", "inline__", "I");
+                sTypeRaw = stranslate(sTypeRaw, "", "inline", "I");
+                sTypeRaw = stranslate(sTypeRaw, "", "EXPENTRY", "I");
+                sTypeRaw = stranslate(sTypeRaw, "", "_Optlink", "I");
+                sTypeRaw = stranslate(sTypeRaw, "", "__stdcall", "I");
+                sTypeRaw = stranslate(sTypeRaw, "", "__cdecl", "I");
+                sTypeRaw = stranslate(sTypeRaw, "", "_cdecl", "I");
+                sTypeRaw = stranslate(sTypeRaw, "", "cdecl", "I");
+                sTypeRaw = stranslate(sTypeRaw, "", "PASCAL", "I");
+                sTypeRaw = stranslate(sTypeRaw, "", "__far", "I");
+                sTypeRaw = stranslate(sTypeRaw, "", "_far", "I");
+                sTypeRaw = stranslate(sTypeRaw, "", "far", "I");
+                sTypeRaw = stranslate(sTypeRaw, "", "__near", "I");
+                sTypeRaw = stranslate(sTypeRaw, "", "_near", "I");
+                sTypeRaw = stranslate(sTypeRaw, "", "near", "I");
+                sTypeRaw = stranslate(sTypeRaw, "", "WIN32API", "I");
+                sTypeRaw = stranslate(sTypeRaw, "", "WINAPI", "I");
+            }
+
+            /*
+             * Remove new lines and double spaces within params.
+             */
+            _str sType = "";
+
+            int i;
+            for (i = 1, chPrev = ' '; i <= length(sTypeRaw); i++)
+            {
+                ch = substr(sTypeRaw, i, 1);
+
+                /*
+                 * Do fixups.
+                 */
+                if (ch == " " && chPrev == " ")
+                        continue;
+
+                if ((ch :== "\n") || (ch :== "\r") || (ch :== "\t"))
+                {
+                    if (chPrev == ' ')
+                        continue;
+                    ch = ' ';
+                }
+
+                if (ch == ',' && chPrev == ' ')
+                {
+                    sType = substr(sType, 1, length(sType) - 1);
+                }
+
+                if (ch == '*')
+                {
+                    if (chPrev != ' ')
+                        sType = sType :+ ' * ';
+                    else
+                        sType = sType :+ '* ';
+                    chPrev = ' ';
+                }
+                else
+                {
+                    sType = sType :+ ch;
+                    chPrev = ch;
+                }
+
+            } /* for */
+
+            sType = strip(sType);
+
+            _restore_pos2(org_pos);
+            return sType;
+        }
+        else
+            message('odin32_getreturntype: can''t find ''(''.');
+    }
+
+    _restore_pos2(org_pos);
+    return false;
+}
