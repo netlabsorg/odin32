@@ -1,4 +1,9 @@
-/* $Id: changelog,v 1.2571 2003-05-06 10:12:24 sandervl Exp $ */
+/* $Id: changelog,v 1.2572 2003-05-06 12:06:46 sandervl Exp $ */
+
+ 2003-05-06: Sander van Leeuwen <sandervl@innotek   >
+    - KERNEL32: o Fixed closing of parent file handle by duplicate memory map
+                o Compare file names instead of handles when checking for 
+                  duplicate file maps.
 
  2003-05-06: knut st. osmundsen <bird-odin-spam@anduin   >
     - KERNEL32: o Corrected the handling of OF_PARSE in OpenFile.
