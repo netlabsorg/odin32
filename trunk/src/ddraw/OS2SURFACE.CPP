@@ -1,4 +1,4 @@
-/* $Id: OS2SURFACE.CPP,v 1.41 2002-06-08 11:45:19 sandervl Exp $ */
+/* $Id: OS2SURFACE.CPP,v 1.42 2002-06-08 14:20:06 sandervl Exp $ */
 
 /*
  * DirectDraw Surface class implementaion
@@ -2478,10 +2478,12 @@ HRESULT WIN32API SurfBlt4(THIS This, LPRECT lpDestRect, LPDIRECTDRAWSURFACE4 lpD
                       dprintf(("visible region"));
                       for(i=0;i<lpRgnData->rdh.nCount;i++) 
                       {
+                          //win32 -> os2 coordinates (region data in screen coordinates)
                           temp               = pRectl[i].yTop;
-                          pRectl[i].yTop     = dest->DDSurfaceDesc.dwHeight - pRectl[i].yBottom;
-                          pRectl[i].yBottom  = dest->DDSurfaceDesc.dwHeight - temp;
+                          pRectl[i].yTop     = src->lpDraw->GetScreenHeight() - pRectl[i].yBottom;
+                          pRectl[i].yBottom  = src->lpDraw->GetScreenHeight() - temp;
                           dprintf(("(%d,%d)(%d,%d)", pRectl[i].xLeft, pRectl[i].yBottom, pRectl[i].xRight, pRectl[i].yTop));
+
                           //clip rectangle must be relative to lScreenPos
                           pRectl[i].xLeft   -= sBlt.lScreenPosX;
                           pRectl[i].xRight  -= sBlt.lScreenPosX;
