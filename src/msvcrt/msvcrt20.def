@@ -1,4 +1,4 @@
-; $Id: msvcrt20.def,v 1.7 2000-02-05 13:33:17 sandervl Exp $
+; $Id: msvcrt20.def,v 1.8 2000-06-21 17:33:37 phaller Exp $
 
 ;
 ; Based on Windows 98 : MSVCRT20.DLL (v2.11.000)
@@ -40,7 +40,7 @@ EXPORTS
     _HUGE			= MSVCRT__HUGE   		@456
     _XcptFilter			= _CRTDLL__XcptFilter		@457
     __CxxFrameHandler		= _MSVCRT___CxxFrameHandler	@458
-;   __CxxLongjmpUnwind						@459
+    __CxxLongjmpUnwind		= _MSVCRT___CxxLongjmpUnwind    @459
 ;   __STRINGTOLD						@460
     __argc			= MSVCRT___argc    		@461
     __argv			= MSVCRT___argv    		@462
