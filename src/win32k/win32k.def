@@ -1,10 +1,10 @@
 ;******************************************************************************
-; Copyright 1998-2000 knut st. osmundsen
+; Copyright 1998-2001 knut st. osmundsen
 ; Definition file for Win32k
 ; Project Odin Software License can be found in LICENSE.TXT
 ;******************************************************************************
-PHYSICAL DEVICE Grace
-DESCRIPTION "Odin32 Ring-0 support driver - copyright (c) 1998-2000 knut st. osmundsen"
+PHYSICAL DEVICE Win32k
+DESCRIPTION "Odin32 Ring-0 support driver - copyright (c) 1998-2001 knut st. osmundsen"
 
 CODE PRELOAD EXECUTEREAD
 DATA PRELOAD

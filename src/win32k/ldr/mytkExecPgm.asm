@@ -1,8 +1,8 @@
-; $Id: mytkExecPgm.asm,v 1.13 2001-02-23 02:57:55 bird Exp $
+; $Id: mytkExecPgm.asm,v 1.13.2.1 2001-09-27 03:08:28 bird Exp $
 ;
 ; mytkExecPgm - tkExecPgm overload
 ;
-; Copyright (c) 2000 knut st. osmundsen (knut.stange.osmundsen@pmsc.no)
+; Copyright (c) 2000-2001 knut st. osmundsen (kosmunds@csc.no)
 ;
 ; Project Odin Software License can be found in LICENSE.TXT
 ;
@@ -56,7 +56,7 @@ CCHMAXPATH      EQU CCHFILENAME - 1     ; Max path length
     ;
     ; LDR semaphore
     ;
-    extrn pLdrSem:DWORD
+    extrn _LdrSem:DWORD
     extrn _LDRClearSem@0:PROC
     extrn _KSEMRequestMutex@8:PROC
     extrn _KSEMQueryMutex@8:PROC
@@ -79,7 +79,7 @@ CCHMAXPATH      EQU CCHFILENAME - 1     ; Max path length
     ;
     ; TKSSBase (32-bit)
     ;
-    extrn pulTKSSBase32:DWORD
+    extrn _TKSSBase:DWORD
 
 ;
 ;   Exported symbols
@@ -221,7 +221,7 @@ tkepgm1:
     mov     es, ax
     ASSUME  DS:FLAT, ES:FLAT
 
-    mov     eax, pLdrSem                ; Get pointer to the loader semaphore.
+    mov     eax, offset _LdrSem         ; Get pointer to the loader semaphore.
     or      eax, eax                    ; Check if null. (paranoia)
     jz      tkepgm_backout              ; Fail if null.
 
@@ -331,11 +331,10 @@ tkepgm_callbehind:
     ; and clear loader state, current exe module and tkExecPgm global data flag.
     ;
     push    0                           ; Usage count variable.
-    mov     eax, pulTKSSBase32          ; Get TKSSBase
-    mov     eax, [eax]
+    mov     eax, _TKSSBase              ; Get TKSSBase
     add     eax, esp                    ; Added TKSSBase to the usage count pointer
     push    eax                         ; Push address of usage count pointer.
-    push    pLdrSem                     ; Push pointer to loader semaphore ( = handle).
+    push    offset _LdrSem              ; Push pointer to loader semaphore ( = handle).
     call    _KSEMQueryMutex@8
     or      eax, eax                    ; Check return code. (1 = our / free; 0 = not our but take)
     pop     eax                         ; Pops usage count.

@@ -1,10 +1,10 @@
-; $Id: devlast.asm,v 1.6 2000-09-02 21:07:58 bird Exp $
+; $Id: devlast.asm,v 1.6.2.1 2001-09-27 03:08:15 bird Exp $
 ;
 ; DevLast - the object file termintating the resident part of the objects.
 ; Code after the ???END labes and object files and which are linked in
 ; after this file is discarded after init.
 ;
-; Copyright (c) 1999 knut st. osmundsen
+; Copyright (c) 1999-2001 knut st. osmundsen (kosmunds@csc.com)
 ;
 ; Project Odin Software License can be found in LICENSE.TXT
 ;
@@ -35,104 +35,100 @@
     public _VFTEND
     public EH_DATAEND
 
-    public _CallR0Init32
-    public _CallVerifyImportTab32
+    public _GetR0InitPtr
 
-
+;
+;   External Functions
+;
+    extrn R0Init:PROC
 
 ;
 ; all segments have a <segmentname>END label at the end of the segment.
 ;
 DATA16 segment
-DATA16END db ?
+db 'DATA16END'
+DATA16END db 0
 DATA16 ends
 
 DATA16_BSS segment
-DATA16_BSSEND db ?
+db 'DATA16_BSSEND'
+DATA16_BSSEND db 0
 DATA16_BSS ends
 
 DATA16_CONST segment
-DATA16_CONSTEND db ?
+db 'DATA16_CONSTEND'
+DATA16_CONSTEND db 0
 DATA16_CONST ends
 
 DATA16_INIT segment
-DATA16_INITEND db ?
+db 'DATA16_INITEND'
+DATA16_INITEND db 0
 DATA16_INIT ends
 
 DATA16_INIT_BSS segment
-DATA16_INIT_BSSEND db ?
+db 'DATA16_INIT_BSSEND'
+DATA16_INIT_BSSEND db 0
 DATA16_INIT_BSS ends
 
 DATA16_INIT_CONST segment
-DATA16_INIT_CONSTEND db ?
+db 'DATA16_INIT_CONSTEND'
+DATA16_INIT_CONSTEND db 0
 DATA16_INIT_CONST ends
 
 CODE16 segment
-CODE16END db ?
+db 'CODE16END'
+CODE16END db 0
 CODE16 ends
 
-extrn R0INIT32:FAR
-extrn VERIFYIMPORTTAB32:FAR
 
 CODE16_INIT segment
 ;;
-; Thunk procedure for R0Init32.
-; @cproto    USHORT NEAR CallR0Init32(LIN pRpInit);
-; @returns   Same as R0Init32.
-; @param     pRpInit  32-bit pointer to request packet.
-; @status    completely implemented.
-; @author    knut st. osmundsen
-_CallR0Init32 PROC NEAR
-    ASSUME CS:CODE16_INIT
-    push    ds
-    push    word ptr [esp+6]            ; push high word.
-    push    word ptr [esp+6]            ; push low word.
-    call    far ptr FLAT:R0INIT32
-    pop     ds
+; Gets the 32-bit flat pointer of R0Init. (32-bit init function)
+; @cproto   ULONG GetR0InitPtr(void);
+; @returns  Flat pointer to R0Init. (ax:dx)
+; @uses     uses eax, edx.
+; @author   knut st. osmundsen (kosmunds@csc.com)
+_GetR0InitPtr PROC NEAR
+    assume ds:nothing, ss:nothing, es:nothing
+    mov     eax, offset FLAT:CODE32:R0Init
+    mov     edx, eax
+    shr     edx, 16
     ret
-_CallR0Init32 ENDP
+_GetR0InitPtr ENDP
 
-
-;;
-; Thunk procedure for VerifyImportTab32.
-; @cproto    USHORT NEAR CallVerifyImportTab32(void);
-; @returns   Same as VerifyImportTab32.
-; @status    completely implemented.
-; @author    knut st. osmundsen
-_CallVerifyImportTab32 PROC NEAR
-    ASSUME CS:CODE16_INIT
-    push    ds
-    call    far ptr FLAT:VERIFYIMPORTTAB32
-    pop     ds
-    ret
-_CallVerifyImportTab32 ENDP
-
-CODE16_INITEND LABEL BYTE
+db 'CODE16_INITEND'
+CODE16_INITEND db 0
 CODE16_INIT ends
 
 
 CODE32 segment
-CODE32END LABEL BYTE
+db 'CODE32END'
+CODE32END db 0
 CODE32 ends
 
 DATA32 segment
-DATA32END  LABEL BYTE
+db 'DATA32END'
+DATA32END  db 0
 DATA32 ends
 
 BSS32 segment
-BSS32END  LABEL BYTE
+db 'BSS32END'
+BSS32END  db 0
 BSS32 ends
 
 CONST32_RO segment
-CONST32_ROEND LABEL BYTE
+db 'CONST32_ROEND'
+CONST32_ROEND db 0
 CONST32_RO ends
 
 _VFT segment
-_VFTEND LABEL BYTE
+db '_VFTEND'
+_VFTEND db 0
 _VFT ends
 
 EH_DATA segment
-EH_DATAEND LABEL BYTE
+db 'EH_DATAEND'
+EH_DATAEND db 0
 EH_DATA ends
 
 

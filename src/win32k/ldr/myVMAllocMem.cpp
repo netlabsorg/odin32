@@ -1,4 +1,4 @@
-/* $Id: myVMAllocMem.cpp,v 1.3 2001-02-10 11:11:45 bird Exp $
+/* $Id: myVMAllocMem.cpp,v 1.3.2.1 2001-09-27 03:08:25 bird Exp $
  *
  * Debug module - overloads VMAllocMem to analyse input parameters....
  *
@@ -14,15 +14,17 @@
 #define INCL_DOSERRORS
 #define INCL_NOPMAPI
 #define INCL_OS2KRNL_LDR
+#define INCL_OS2KRNL_VM
+#define INCL_KKL_AVL
+#define INCL_KKL_LOG
 
 /*******************************************************************************
 *   Header Files                                                               *
 *******************************************************************************/
 #include <os2.h>
+#include <OS2Krnl.h>
+#include <kKrnlLib.h>
 
-#include "log.h"
-#include "OS2Krnl.h"
-#include "avl.h"
 #include "ldr.h"
 
 
@@ -50,7 +52,7 @@ APIRET KRNLCALL myVMAllocMem(ULONG p1, ULONG p2, ULONG p3, USHORT p4, USHORT p5,
 {
     APIRET rc;
 
-    rc = VMAllocMem(p1,p2,p3,p4,p5,p6,p7,p8,p9);
+    rc = VMAllocMem(p1,p2,p3,p4,p5,p6,p7,p8,(PVMAC)p9);
 
     return rc;
 }

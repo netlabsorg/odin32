@@ -1,9 +1,9 @@
-# $Id: win32k.mak,v 1.13 2001-07-31 21:34:08 bird Exp $
+# $Id: win32k.mak,v 1.13.2.1 2001-09-27 03:08:08 bird Exp $
 
 #
 # Win32k.sys makefile.
 #
-# Copyright 1998-2001 knut st. osmundsen (knut.stange.osmundsen@mynd.no)
+# Copyright 1998-2001 knut st. osmundsen (kosmunds@csc.com)
 #
 # Project Odin Software License can be found in LICENSE.TXT
 #
@@ -38,24 +38,9 @@ OBJS  =\
     $(WIN32KOBJ)\devfirst.obj \
     $(WIN32KOBJ)\d16strat.obj \
     $(WIN32KOBJ)\d32CallGate.obj \
-    $(WIN32KOBJ)\d32hlp.obj \
     $(WIN32KOBJ)\d32globals.obj \
     $(WIN32KOBJ)\d16globl.obj \
-    $(WIN32KOBJ)\abort.obj \
-    $(WIN32KOBJ)\asmutils.obj \
-    $(WIN32KOBJ)\calltaba.obj \
-    $(WIN32KOBJ)\locks.obj \
-    $(WIN32KOBJ)\malloc.obj \
-    $(WIN32KOBJ)\smalloc_avl.obj \
-    $(WIN32KOBJ)\avl.obj \
-    $(WIN32KOBJ)\rmalloc_avl.obj \
-    $(WIN32KOBJ)\new.obj \
-    $(WIN32KOBJ)\env.obj \
     $(WIN32KOBJ)\PerTaskW32kData.obj \
-    $(WIN32KOBJ)\stricmp.obj \
-    $(WIN32KOBJ)\yield.obj \
-    $(WIN32KOBJ)\vsprintf.obj \
-    $(WIN32KOBJ)\vprintf.obj \
     $(WIN32KOBJ)\ldr.obj \
     $(WIN32KOBJ)\myldrClose.obj \
     $(WIN32KOBJ)\myldrOpen.obj \
@@ -68,11 +53,8 @@ OBJS  =\
     $(WIN32KOBJ)\myldrCheckInternalName.obj \
     $(WIN32KOBJ)\myldrGetFileName.obj \
     $(WIN32KOBJ)\d32Events.obj \
-    $(WIN32KOBJ)\OS2KTCB.obj \
-    $(WIN32KOBJ)\OS2KPTDA.obj \
     $(WIN32KOBJ)\pe2lx.obj \
     $(WIN32KOBJ)\ModuleBase.obj \
-    $(WIN32KOBJ)\d32ElfIOCtl.obj \
     $(WIN32KOBJ)\d32Win32kIOCtl.obj \
     $(WIN32KOBJ)\d32Win32kOpenClose.obj \
     $(WIN32KOBJ)\k32AllocMemEx.obj \
@@ -89,9 +71,7 @@ OBJS  =\
     $(WIN32KOBJ)\mytkStartProcess.obj \
     $(WIN32KOBJ)\vprntf16.obj \
     $(WIN32KOBJ)\d32init.obj \
-    $(WIN32KOBJ)\d16init.obj_init \
-    $(WIN32KOBJ)\ProbKrnl.obj_init \
-    $(WIN32KOBJ)\SymDB.obj
+    $(WIN32KOBJ)\d16init.obj_init
 
 LASTOBJ =\
     $(WIN32KOBJ)\devlast.obj
@@ -100,7 +80,8 @@ LIBS =\
     $(VACPATH)\lib\$(RTLLIB_NRE) \
     $(DDKPATH)\lib\os2386.lib \
     $(WIN32KOBJ)\devhelp.lib \
-    $(WIN32KOBJ)\clib.lib
+    $(WIN32KOBJ)\clib.lib \
+    $(ODIN32_LIB)\kKrnlLib.lib
 
 
 #
@@ -108,7 +89,7 @@ LIBS =\
 #
 $(NAME).sys: $(WIN32KBIN)\$(NAME).sys
 
-$(WIN32KBIN)\$(NAME).sys:   clfix.exe \
+$(WIN32KBIN)\$(NAME).sys:   $(WIN32KBIN)\clfix.exe \
                             $(WIN32KINCLUDE)\options.inc \
                             $(WIN32KINCLUDE)\api.inc \
                             $(WIN32KINCLUDE)\win32k.inc \
@@ -151,7 +132,7 @@ $(WIN32KOBJ)\$(NAME)bldlevel.def
 <<KEEP
 
 # Add bldlevel signature to win32k.def - creates temporary win32kbldlevel.def.
-$(WIN32KOBJ)\$(NAME)bldlevel.def: $(NAME).def win32k.mak MakeDesc.cmd
+$(WIN32KOBJ)\$(NAME)bldlevel.def: $(NAME).def win32k.mak
     -$(ECHO) Creates $@ with bldlevel signature string.
     $(BLDLEVELINF) $(NAME).def $@ -R"$(NAME).def" \
         -V"#define=ODIN32_VERSION,$(ODIN32_INCLUDE)\odinbuild.h" \
@@ -165,34 +146,14 @@ $(WIN32KOBJ)\$(NAME)bldlevel.def: $(NAME).def win32k.mak MakeDesc.cmd
 #
 TSTOBJS =\
     $(WIN32KOBJ)\devfirst.obj \
-    $(WIN32KOBJ)\$(NAME)tst.obj \
-    $(WIN32KOBJ)\dh.obj \
-    $(WIN32KOBJ)\dos.obj \
-    $(WIN32KOBJ)\dosa.obj \
-    $(WIN32KOBJ)\init.obj \
-    $(WIN32KOBJ)\fake.obj \
-    $(WIN32KOBJ)\fakea.obj \
-    $(WIN32KOBJ)\TstFakers.obj \
     $(WIN32KOBJ)\d16strat.obj \
     $(WIN32KOBJ)\d32CallGate.obj \
     $(WIN32KOBJ)\d32hlp.obj \
     $(WIN32KOBJ)\d32globals.obj \
     $(WIN32KOBJ)\d16globl.obj \
-    $(WIN32KOBJ)\abort.obj \
     $(WIN32KOBJ)\asmutils.obj \
-    $(WIN32KOBJ)\calltaba.obj \
     $(WIN32KOBJ)\locks.obj \
-    $(WIN32KOBJ)\malloc.obj_tst. \
-    $(WIN32KOBJ)\smalloc_avl.obj \
-    $(WIN32KOBJ)\avl.obj \
-    $(WIN32KOBJ)\rmalloc_avl.obj \
-    $(WIN32KOBJ)\new.obj \
-    $(WIN32KOBJ)\env.obj \
     $(WIN32KOBJ)\PerTaskW32kData.obj \
-    $(WIN32KOBJ)\stricmp.obj \
-    $(WIN32KOBJ)\yield.obj \
-    $(WIN32KOBJ)\vsprintf.obj \
-    $(WIN32KOBJ)\vprintf.obj_tst. \
     $(WIN32KOBJ)\ldr.obj \
     $(WIN32KOBJ)\myldrClose.obj \
     $(WIN32KOBJ)\myldrOpen.obj \
@@ -209,7 +170,6 @@ TSTOBJS =\
     $(WIN32KOBJ)\OS2KPTDA.obj \
     $(WIN32KOBJ)\pe2lx.obj \
     $(WIN32KOBJ)\ModuleBase.obj \
-    $(WIN32KOBJ)\d32ElfIOCtl.obj \
     $(WIN32KOBJ)\d32Win32kIOCtl.obj \
     $(WIN32KOBJ)\d32Win32kOpenClose.obj \
     $(WIN32KOBJ)\k32AllocMemEx.obj \
@@ -227,8 +187,13 @@ TSTOBJS =\
     $(WIN32KOBJ)\vprntf16.obj_tst. \
     $(WIN32KOBJ)\d32init.obj_tst. \
     $(WIN32KOBJ)\d16init.obj_tst_init. \
-    $(WIN32KOBJ)\ProbKrnl.obj_tst_init. \
-    $(WIN32KOBJ)\SymDB.obj
+    $(WIN32KOBJ)\$(NAME)tst.obj \
+    $(WIN32KOBJ)\dh.obj \
+    $(WIN32KOBJ)\dos.obj \
+    $(WIN32KOBJ)\dosa.obj \
+    $(WIN32KOBJ)\init.obj \
+    $(WIN32KOBJ)\fake.obj \
+    $(WIN32KOBJ)\fakea.obj \
 
 TSTLASTOBJ = $(LASTOBJ)
 
@@ -347,22 +312,6 @@ $(WIN32KOBJ)\last.lib: $(WIN32KOBJ)\devlast.obj
 #
 
 #
-# Generate calltaba.asm
-#
-ldr\calltaba.asm \
-$(WIN32KBASE)\ldr\calltaba.asm : dev16\probkrnl.c $(WIN32KBIN)\mkcalltab.exe
-    $(WIN32KBIN)\mkcalltab.exe calltab > $@
-
-
-#
-# Generate TstFakers.c
-#
-test\TstFakers.c \
-$(WIN32KBASE)\test\TstFakers.c: dev16\probkrnl.c include\probkrnl.h $(WIN32KBIN)\mkcalltab.exe
-    $(WIN32KBIN)\mkcalltab.exe tstfakers > $@
-
-
-#
 # Make assembly version of options.h; options.inc
 #
 $(WIN32KINCLUDE)\options.inc:  $(WIN32KINCLUDE)\options.h
@@ -394,37 +343,8 @@ $(WIN32KINCLUDE)\win32k.inc:  $(ODIN32_INCLUDE)\win32k.h
 #
 # Make the convert tool.
 #
-$(WIN32KBIN)\libconv.exe: libconv.c
-    icc -Q+ -Ti+ -Fe$@ -Fo$(WIN32KOBJ)\$(*B).obj libconv.c
-
-
-#
-# Make the MkCallTab.exe utillity.
-#
-
-# MkCallTab objects.
-MKCALLTABOBJS = \
-    $(WIN32KOBJ)\mkcalltab.obj_c \
-    $(WIN32KOBJ)\probkrnl.obj_c \
-    $(WIN32KOBJ)\d16globl.obj_c \
-    $(WIN32KOBJ)\vprntf16.obj_c
-
-# Rule to build MkCallTab.exe
-mkcalltab.exe mkcalltab: $(WIN32KBIN)\mkcalltab.exe
-$(WIN32KBIN)\mkcalltab.exe: clfix.exe $(MKCALLTABOBJS)
-    $(LD) $(LFLAGS) /pmtype:vio @<<$(WIN32KOBJ)\$(@B).lnk
-        /OUT:$@
-        /MAP:$(WIN32KBIN)\$(@B).map
-        $(MKCALLTABOBJS)
-        $(TOOLKIT)\lib\os2286.lib
-        $(MSCPATH)\lib\clibcep.lib
-<<keep
-
-# Interference rule to make the MkCallTab objects.
-{dev16}.c.obj_c:
-    @$(ECHO) compiling 16bit (mkcalltab): $<
-    @$(CC16) -c -W3 -Asfw -G2s -Zp -Zl -nologo -Fa -Zi -Od -Lp -DDEBUG -DEXTRACT \
-        -Fa$(WIN32KLIST)\$(*B)_c.s -Fo$(WIN32KOBJ)\$(@B).obj_c $(CINCLUDES16) $<
+$(WIN32KBIN)\libconv.exe: kKrnlLib\tools\libconv.c
+    icc -Q+ -Ti+ -Fe$@ -Fo$(WIN32KOBJ)\$(*B).obj $**
 
 
 #
@@ -432,42 +352,8 @@ $(WIN32KBIN)\mkcalltab.exe: clfix.exe $(MKCALLTABOBJS)
 #   This should fix some of the problems we are experiencing with the
 #   MSC v6.0a compiler (cl.exe) (16-bit).
 #
-clfix.exe: clfix.c
-    $(CC) $(@B).c
-
-
-#
-# Make the symbol extract utillity - Extract.exe
-#
-
-# Extract object files.
-EXTRACTOBJS = \
-    $(WIN32KOBJ)\extract.obj_e \
-    $(WIN32KOBJ)\probkrnl.obj_e \
-    $(WIN32KOBJ)\d16globl.obj_e \
-    $(WIN32KOBJ)\vprntf16.obj_e
-
-# Rules to build Extract.exe.
-$(WIN32KBIN)\extract.exe: clfix.exe $(EXTRACTOBJS)
-    $(LD) $(LFLAGS) /pmtype:vio @<<$(WIN32KOBJ)\$(@B).lnk
-        /OUT:$@
-        /MAP:$(WIN32KBIN)\$(@B).map
-        $(EXTRACTOBJS)
-        $(TOOLKIT)\lib\os2286.lib
-        $(MSCPATH)\lib\clibcep.lib
-<<keep
-
-# Copy rule.
-extract.exe: $(WIN32KBIN)\extract.exe
-    $(CP) $** $@
-
-# Interference rule to make the Extract objects.
-{dev16}.c.obj_e:
-    @$(ECHO) compiling 16bit (extract): $<
-    @$(CC16) -c -W3 -Asfw -G2s -Zp -Zl -nologo -Fa -Zi -Od -Lp -DDEBUG -DEXTRACT \
-        -Fa$(WIN32KLIST)\$(*B)_e.s -Fo$(WIN32KOBJ)\$(@B).obj_e $(CINCLUDES16) $<
-
-
+$(WIN32KBIN)\clfix.exe: kKrnlLib\tools\clfix.c
+    icc -Q+ -Ti+ -Fe$@ -Fo$(WIN32KOBJ)\$(*B).obj $**
 
 
 #

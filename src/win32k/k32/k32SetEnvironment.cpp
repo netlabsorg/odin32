@@ -1,4 +1,4 @@
-/* $Id: k32SetEnvironment.cpp,v 1.2 2001-07-10 16:39:17 bird Exp $
+/* $Id: k32SetEnvironment.cpp,v 1.2.2.1 2001-09-27 03:08:23 bird Exp $
  *
  * k32SetEnvironment - Sets the Odin32 environment for a process.
  *
@@ -18,23 +18,24 @@
 #define INCL_OS2KRNL_SEM
 #define INCL_OS2KRNL_LDR
 #define NO_WIN32K_LIB_FUNCTIONS
+#define INCL_KKL_LOG
+#define INCL_KKL_AVL
 
 
 /*******************************************************************************
 *   Header Files                                                               *
 *******************************************************************************/
 #include <os2.h>
+#include <OS2Krnl.h>
+#include <kKrnlLib.h>
+
 #include <memory.h>
 #include "devSegDf.h"                   /* Win32k segment definitions. */
-#include "OS2Krnl.h"
 #include "win32k.h"
 #include "k32.h"
 #include "options.h"
 #include "dev32.h"
 #include "dev32hlp.h"
-#include "log.h"
-#include "macros.h"
-#include "avl.h"
 #include "PerTaskW32kData.h"
 
 

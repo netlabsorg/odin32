@@ -1,4 +1,4 @@
-/* $Id: ModuleBase.cpp,v 1.7 2001-02-10 11:11:44 bird Exp $
+/* $Id: ModuleBase.cpp,v 1.7.2.1 2001-09-27 03:08:24 bird Exp $
  *
  * ModuleBase - Implementetation.
  *
@@ -18,22 +18,24 @@
     #define INCL_DOSFILEMGR             /* RING3: DOS File api. */
 #endif
 #define INCL_OS2KRNL_LDR
+#define INCL_KKL_LOG
+#define INCL_KKL_AVL
+#define INCL_KKL_HEAP
+#define INCL_KKL_PRINTF
 
 
 /*******************************************************************************
 *   Header Files                                                               *
 *******************************************************************************/
 #include <os2.h>                        /* OS/2 header file. */
+#include <OS2Krnl.h>
+#include <kKrnlLib.h>
 
 #include "devSegDf.h"                   /* Win32k segment definitions. */
-#include "malloc.h"                     /* Win32k malloc. Not C library! */
 
 #include <string.h>                     /* C library string.h. */
-#include <stdarg.h>                     /* C library stdarg.h. */
 
-#include "vprintf.h"                    /* win32k printf and vprintf. Not C library! */
 #include "dev32.h"                      /* 32-Bit part of the device driver. (SSToDS) */
-#include "OS2Krnl.h"                    /* kernel structs.  (SFN) */
 #include "modulebase.h"                 /* ModuleBase class definitions, ++. */
 
 

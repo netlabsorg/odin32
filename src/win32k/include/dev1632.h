@@ -1,4 +1,4 @@
-/* $Id: dev1632.h,v 1.8 2001-07-08 03:03:51 bird Exp $
+/* $Id: dev1632.h,v 1.8.2.1 2001-09-27 03:08:17 bird Exp $
  * dev1632.h - Common header file for 16-bit and 32-bit C
  *
  * Copyright (c) 1999 knut st. osmundsen
@@ -47,25 +47,6 @@ typedef struct _RP32OPENCLOSE
     RPH32       rph;
     USHORT      sfn;
 } RP32OPENCLOSE, *PRP32OPENCLOSE;
-
-#ifdef _OS2KLDR_H_
-
-
-#define MAXKRNLOBJECTS 24
-typedef struct _KRNLINFO
-{
-    unsigned long   ulBuild;
-    unsigned short  fKernel;
-    unsigned char   cObjects;
-    unsigned char   chPadding;
-    OTE             aObjects[MAXKRNLOBJECTS];
-} KRNLINFO, FAR * PKRNLINFO;
-
-#else
-
-#define PKRNLINFO void *
-
-#endif
 
 #pragma pack()
 

@@ -1,4 +1,4 @@
-/* $Id: pe2lx.cpp,v 1.32 2001-08-08 17:24:45 bird Exp $
+/* $Id: pe2lx.cpp,v 1.32.2.1 2001-09-27 03:08:34 bird Exp $
  *
  * Pe2Lx class implementation. Ring 0 and Ring 3
  *
@@ -18,11 +18,16 @@
 #define INCL_DOSERRORS                  /* DOS Error codes. */
 #define INCL_OS2KRNL_LDR                /* Loader definitions. */
 #define INCL_OS2KRNL_PTDA               /* PTDA definitions. */
+#define INCL_KKL_LOG
+#define INCL_KKL_AVL
+#define INCL_KKL_HEAP
 #ifdef RING0
     #define INCL_NOAPI                  /* RING0: No apis. */
+    #define Yield() D32Hlp_Yield()
 #else /*RING3*/
     #define INCL_DOSPROCESS             /* RING3: DosSleep. */
     #define INCL_OS2KRNL_LDR_NOAPIS     /* No apis */
+    #define Yield() DosSleep(0)
 #endif
 
 
@@ -82,23 +87,18 @@
 #include <neexe.h>                      /* Wine NE structs and definitions. */
 #include <newexe.h>                     /* OS/2 NE structs and definitions. */
 #include <exe386.h>                     /* OS/2 LX structs and definitions. */
+#include <OS2Krnl.h>                    /* kernel structs.  (SFN) */
+#include <kKrnlLib.h>
 
 #include "devSegDf.h"                   /* Win32k segment definitions. */
-
-#include "malloc.h"                     /* win32k malloc (resident). Not C library! */
-#include "smalloc.h"                    /* win32k swappable heap. */
-#include "rmalloc.h"                    /* win32k resident heap. */
 
 #include <string.h>                     /* C library string.h. */
 #include <stdlib.h>                     /* C library stdlib.h. */
 #include <stddef.h>                     /* C library stddef.h. */
 #include <stdarg.h>                     /* C library stdarg.h. */
 
-#include "vprintf.h"                    /* win32k printf and vprintf. Not C library! */
 #include "dev32.h"                      /* 32-Bit part of the device driver. (SSToDS) */
-#include "OS2Krnl.h"                    /* kernel structs.  (SFN) */
 #ifdef RING0
-    #include "avl.h"                    /* AVL tree. (ldr.h need it) */
     #include "ldr.h"                    /* ldr helpers. (ldrGetExePath) */
     #include "env.h"                    /* Environment helpers. */
     #include "dev32hlp.h"               /* 32-bit devhlpers. Needs LOCKHANDLE. */
@@ -107,7 +107,6 @@
 #include "modulebase.h"                 /* ModuleBase class definitions, ++. */
 #include "pe2lx.h"                      /* Pe2Lx class definitions, ++. */
 #include <versionos2.h>                 /* Pe2Lx version. */
-#include "yield.h"                      /* Yield CPU. */
 #include "options.h"                    /* Win32k options. */
 
 
@@ -1790,7 +1789,7 @@ ULONG  Pe2Lx::openPath2(PCHAR pachFilename, ULONG cchFilename, ldrlv_t *pLdrLv, 
                 break;
 
             case FINDDLL_LIBPATH:
-                pszPath = *pLdrLibPath;
+                pszPath = LdrLibPath;
                 break;
 
             case FINDDLL_ENDLIBPATH:

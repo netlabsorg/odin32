@@ -1,4 +1,4 @@
-/* $Id: myldrRead.cpp,v 1.9 2001-02-10 11:11:47 bird Exp $
+/* $Id: myldrRead.cpp,v 1.9.2.1 2001-09-27 03:08:28 bird Exp $
  *
  * myldrRead - ldrRead.
  *
@@ -14,22 +14,23 @@
 #define INCL_DOSERRORS
 #define INCL_NOPMAPI
 #define INCL_OS2KRNL_LDR
+#define INCL_KKL_LOG
+#define INCL_KKL_AVL
 
 /*******************************************************************************
 *   Header Files                                                               *
 *******************************************************************************/
 #include <os2.h>
+#include <peexe.h>
+#include <exe386.h>
+#include <OS2Krnl.h>
+#include <kKrnlLib.h>
 
 #include <memory.h>
 #include <stdlib.h>
 
 #include "devSegDf.h"                   /* Win32k segment definitions. */
-#include "log.h"
-#include "avl.h"
 #include "dev32.h"
-#include <peexe.h>
-#include <exe386.h>
-#include "OS2Krnl.h"
 #include "ldr.h"
 #include "ModuleBase.h"
 #include "pe2lx.h"

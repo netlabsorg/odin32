@@ -1,4 +1,4 @@
-/* $Id: k32AllocMemEx.cpp,v 1.5 2001-02-19 05:49:05 bird Exp $
+/* $Id: k32AllocMemEx.cpp,v 1.5.2.1 2001-09-27 03:08:21 bird Exp $
  *
  * k32AllocMemEx - Equivalent to DosAllocMem, but this one
  *                 uses the address in ppv.
@@ -17,23 +17,22 @@
 #define INCL_DOSERRORS
 #define INCL_OS2KRNL_VM
 #define INCL_OS2KRNL_TK
-
 #define NO_WIN32K_LIB_FUNCTIONS
-
+#define INCL_KKL_LOG
 
 
 /*******************************************************************************
 *   Header Files                                                               *
 *******************************************************************************/
 #include <os2.h>
+#include <OS2Krnl.h>
+#include <kKrnlLib.h>
+
 #include "devSegDf.h"                   /* Win32k segment definitions. */
-#include "OS2Krnl.h"
 #include "win32k.h"
 #include "k32.h"
 #include "options.h"
 #include "dev32.h"
-#include "log.h"
-#include "macros.h"
 
 
 /* nasty! These should be imported from the kernel later! */
@@ -158,7 +157,7 @@ APIRET k32AllocMemEx(PPVOID ppv, ULONG cb, ULONG flFlags, ULONG ulCS, ULONG ulEI
         kprintf(("k32AllocMemEx: Location *ppv =0x%08x\n", vmac.ac_va));
         if (    vmac.ac_va < 0x10000
             ||  vmac.ac_va + cb < vmac.ac_va
-            ||  vmac.ac_va + cb > ((vmac.ac_va >= 0x20000000 && pahvmhShr) ? pahvmhShr : pahvmShr)->ah_laddrMax
+            ||  vmac.ac_va + cb > ((vmac.ac_va >= 0x20000000 && &ahvmhShr) ? ahvmhShr.ah_laddrMax : ahvmShr.ah_laddrMax)
                 )
         {
             kprintf(("k32AllocMemEx: *ppv has an invalid address. *ppv=0x%08x\n", vmac.ac_va));
@@ -185,7 +184,7 @@ APIRET k32AllocMemEx(PPVOID ppv, ULONG cb, ULONG flFlags, ULONG ulCS, ULONG ulEI
     cbCommit = flFlags & PAG_COMMIT ? cb : 0;
 
     flVMFlags =  VMA_USER | VMA_ZEROFILL | VMA_LOWMEM2 | VMA_ARENAPRIVATE /* 0x02010084*/
-        | ((flFlags & OBJ_ANY) && pahvmhShr ? VMA_ARENAHIGHA : VMA_SELALLOC | VMA_ALIGNSEL)
+        | ((flFlags & OBJ_ANY) && &ahvmhShr ? VMA_ARENAHIGHA : VMA_SELALLOC | VMA_ALIGNSEL)
         | vmApiF0[flFlags  & (PAG_READ | PAG_WRITE | PAG_EXECUTE | PAG_GUARD)]
         | vmApiF1[(flFlags & (PAG_COMMIT | PAG_DECOMMIT | OBJ_TILE | OBJ_PROTECTED)) >> 4];
 

@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.71 2001-09-05 09:29:06 bird Exp $
+# $Id: Makefile,v 1.71.2.1 2001-09-27 03:08:07 bird Exp $
 
 #
 # Win32k makefile.
@@ -28,7 +28,7 @@
 # Include Win32k tools and settings.
 #
 !include makefile.inc
-!if [..\..\tools\bin\Exists.cmd $(WIN32KINCLUDE)\OS2Krnl.h] == 1
+!if [..\..\tools\bin\Exists.cmd $(KKRNLLIBINCLUDE)\OS2Krnl.h] == 1
 !   if [echo Bad makefile.inc - Reconfiguring Win32k... & configure.cmd -noninteractive]
 !   endif
 !   include makefile.inc
@@ -41,6 +41,7 @@
 # Subdirectories.
 #
 SUBDIRS = \
+.\kKrnlLib \
 .\lib \
 .\rexx \
 .\utils
@@ -51,12 +52,12 @@ SUBDIRS = \
 #
 all:
 !if "$(DDKPATH)" == "" || "$(MSCPATH)" == ""  || "$(TOOLKIT)" == "" || "$(VACPATH)" == ""
-    $(MAKE_CMD) -f xx2lx.mak
     $(DODIRS) "lib" $(MAKE_CMD)
+    $(MAKE_CMD) -f xx2lx.mak
 !else
+    $(DODIRS) "$(SUBDIRS)" $(MAKE_CMD)
     $(MAKE_CMD) -f win32k.mak
     $(MAKE_CMD) -f xx2lx.mak
-    $(DODIRS) "$(SUBDIRS)" $(MAKE_CMD)
 !endif
 
 
@@ -68,8 +69,6 @@ $(WIN32KBIN)\xx2lx.exe  xx2lx.exe  xx2lx: .force
     $(MAKE_CMD) -f $(@B).mak
 
 $(WIN32KBIN)\win32ktst.exe win32ktst.exe win32ktst \
-$(WIN32KBIN)\extact.exe    extract.exe   extract \
-$(WIN32KBIN)\mkcalltab.exe mkcalltab.exe mkcalltab \
 $(WIN32KBIN)\libconv.exe   libconv.exe   libconv \
 clfix.exe: .force
     $(MAKE_CMD) -f win32k.mak $(@R).exe
@@ -79,12 +78,6 @@ $(WIN32KINCLUDE)\api.inc        api.inc \
 $(WIN32KINCLUDE)\options.inc    options.inc: .force
     $(MAKE_CMD) -f win32k.mak $(WIN32KINCLUDE)\$(@B).inc
 
-$(WIN32KBASE)\ldr\calltaba.asm ldr\calltaba.asm: .force
-    $(MAKE_CMD) -f $(WIN32KBASE)\ldr\calltaba.asm
-
-$(WIN32KBASE)\test\TstFakers.c test\TstFakers.c: .force
-    $(MAKE_CMD) -f $(WIN32KBASE)\test\TstFakers.c
-
 win32kcc.exe win32kcc:
     $(DODIRS) "utils" $(MAKE_CMD)
 
@@ -93,7 +86,7 @@ win32kcc.exe win32kcc:
 # Lib rule - make the win32k.lib object library.
 #
 lib:
-    $(DODIRS) ".\lib" $(MAKE_CMD) lib
+    $(DODIRS) ".\KrnlLib .\lib" $(MAKE_CMD) lib
 
 
 #
@@ -106,22 +99,18 @@ clean:
         $(ODIN32_BIN)\win32k.sym \
         $(ODIN32_BIN)\win32k.ddp
 !if "$(WIN32KBIN)" != ""
-    $(RM) $(WIN32KBIN)\*.*
+    $(RM) $(WIN32KBIN)\*
 !endif
 !if "$(WIN32KOBJ)" != ""
-    $(RM) $(WIN32KOBJ)\*obj* \
-        $(WIN32KOBJ)\*lnk* \
-        $(WIN32KOBJ)\*res* \
-        $(WIN32KOBJ)\*lib* \
-        $(WIN32KOBJ)\*def*
+    $(RM) $(WIN32KOBJ)\*
 !endif
 !if "$(WIN32KLIST)" != ""
-    $(RM) $(WIN32KLIST)\*lst* \
-        $(WIN32KLIST)\*.s* \
-        $(WIN32KLIST)\*as*
+    $(RM) $(WIN32KLIST)\*
 !endif
-!if "$(WIN32KBASE)" != ""
-    $(RM) $(WIN32KBASE)\ldr\calltaba.asm $(WIN32KBASE)\test\TstFakers.c
+!if "$(WIN32KINCLUDE)" != ""
+    $(RM) $(WIN32KBIN)\options.inc \
+          $(WIN32KBIN)\api.inc \
+          $(WIN32KBIN)\win32k.inc
 !endif
     $(DODIRS) "$(SUBDIRS)" $(MAKE_CMD) clean
 
@@ -130,16 +119,17 @@ clean:
 # Dependencies - all deps are autogenereated.
 #
 dep:
+    $(RM) .depend
     $(ODIN32_TOOLS)\fastdep @<<
-        -o$$(WIN32KOBJ) $(CINCLUDES) -xldr\calltaba.asm -xtest\TstFakers.c
+        -o$$(WIN32KOBJ) $(CINCLUDES)
         misc\*.c* ldr\*.c* dev32\*.c* pe2lx\*.c* k32\*.c* elf2lx\*.c* test\*.c*
         -objobj_tst
         misc\*.c* ldr\*.c* dev32\*.c* pe2lx\*.c* k32\*.c* elf2lx\*.c* test\*.c*
         $(WIN32KINCLUDE)\*.h
+        $(KKRNLLIBINCLUDE)\*.h
 <<
     $(ODIN32_TOOLS)\fastdep @<<
         -a+ -o$$(WIN32KOBJ) -I$(WIN32KINCLUDE) -I$(DDKPATH)\inc
-        -xldr\calltaba.asm -xtest\TstFakers.c
         dev16\*.asm ldr\*.asm misc\*.asm dev32\*.asm pe2lx\*.asm k32\*.asm elf2lx\*.asm test\*.asm
         $(WIN32KINCLUDE)\*.inc
 <<
@@ -168,20 +158,7 @@ win32k.vpj:
 StateUpd:
     ..\..\tools\bin\StateUpd.exe -Dll:Win32k dev16 dev32 misc ldr elf2lx mmf k32
     ..\..\tools\bin\StateUpd.exe -Dll:Pe2Lx Pe2Lx
-
-#
-# Documentation generation - require SDS - http://www.ii.uib.no/~stig/
-#  (Old SDS 0.33 - don't work anylonger.)
-#
-lxdoc:
-    cpp2sds -o DocsA\ -i include\modulebase.h include\pe2lx.h ldr\modulebase.cpp pe2lx\pe2lx.cpp
-    cd DocsA
-    exp sds2doc -ai *.sds
-
-fulldoc:
-    exp cpp2sds -o DocsA\ -i include\*.h *.cpp ldr\*.cpp misc\*.cpp pe2lx\*.cpp
-    cd DocsA
-    exp sds2doc -ai *.sds
+    $(DODIRS) ".\kKrnlLib" $(MAKE_CMD) $@
 
 
 #
@@ -194,5 +171,4 @@ fulldoc:
 # Stub the rest of the rules.
 #
 $(COMMONRULES:clean dep lib all=):
-
 

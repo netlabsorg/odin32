@@ -1,9 +1,9 @@
-/* $Id: myldrCheckInternalName.cpp,v 1.5 2001-07-07 04:39:57 bird Exp $
+/* $Id: myldrCheckInternalName.cpp,v 1.5.2.1 2001-09-27 03:08:25 bird Exp $
  *
  * ldrCheckInternalName - ldrCheckInternalName replacement with support for
  *                  long DLL names and no .DLL-extention dependency.
  *
- * Copyright (c) 1999-2000 knut st. osmundsen (knut.stange.osmundsen@mynd.no)
+ * Copyright (c) 1999-2001 knut st. osmundsen (kosmunds@csc.com)
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *
@@ -16,23 +16,24 @@
 #define INCL_DOSERRORS
 #define INCL_NOPMAPI
 #define INCL_OS2KRNL_LDR
+#define INCL_KKL_LOG
+#define INCL_KKL_AVL
 
 
 /*******************************************************************************
 *   Header Files                                                               *
 *******************************************************************************/
 #include <os2.h>
+#include <peexe.h>
+#include <exe386.h>
+#include <OS2Krnl.h>
+#include <kKrnlLib.h>
 
 #include <memory.h>
 #include <stdlib.h>
 #include <string.h>
 
 #include "devSegDf.h"                   /* Win32k segment definitions. */
-#include "log.h"
-#include "avl.h"
-#include <peexe.h>
-#include <exe386.h>
-#include "OS2Krnl.h"
 #include "dev32.h"
 #include "ldr.h"
 #include "options.h"

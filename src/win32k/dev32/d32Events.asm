@@ -1,4 +1,4 @@
-; $Id: d32Events.asm,v 1.2 2001-02-23 02:57:53 bird Exp $
+; $Id: d32Events.asm,v 1.2.2.1 2001-09-27 03:08:13 bird Exp $
 ;
 ; d32Events - Code for overriding system events.
 ;
@@ -24,7 +24,6 @@
 ; Externs
 ;
     extrn   aSysEventsOverrides:dword
-    extrn    _TKSSBase16:dword
     extrn   dh_SendEvent:near
     extrn   dh_SendEvent_sel:word
     extrn   RASRST:near

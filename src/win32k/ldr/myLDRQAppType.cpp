@@ -1,4 +1,4 @@
-/* $Id: myLDRQAppType.cpp,v 1.5 2001-02-10 11:11:45 bird Exp $
+/* $Id: myLDRQAppType.cpp,v 1.5.2.1 2001-09-27 03:08:25 bird Exp $
  *
  * _myLDRQAppType - _LDRQAppType overload.
  *
@@ -17,17 +17,18 @@
 #define INCL_OS2KRNL_PTDA
 #define INCL_OS2KRNL_SEM
 #define INCL_OS2KRNL_LDR
+#define INCL_KKL_LOG
+#define INCL_KKL_AVL
 
 /*******************************************************************************
 *   Header Files                                                               *
 *******************************************************************************/
 #include <os2.h>
+#include <OS2Krnl.h>
+#include <kKrnlLib.h>
 
 #include "devSegDf.h"                   /* Win32k segment definitions. */
-#include "OS2Krnl.h"
-#include "avl.h"
 #include "ldr.h"
-#include "log.h"
 
 
 /**

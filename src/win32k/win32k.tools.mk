@@ -1,4 +1,4 @@
-# $Id: win32k.tools.mk,v 1.10 2001-06-10 01:38:09 bird Exp $
+# $Id: win32k.tools.mk,v 1.10.2.1 2001-09-27 03:08:08 bird Exp $
 
 #
 # Win32k common tools makefile.
@@ -29,7 +29,7 @@
 #
 # IBM VisualAge for C++ v3.08 or IBM C/C++ Tools v3.6.5
 #
-CC16        = clfix.exe $(MSCPATH)\binp\cl.exe
+CC16        = $(WIN32KBIN)\clfix.exe $(MSCPATH)\binp\cl.exe
 CC          = icc
 CCPP        = icc
 LD          = ilink
@@ -88,13 +88,13 @@ H2INC   = $(DDKPATH)\tools\h2inc.exe -c -w -f -d
 # Defines
 #
 !ifdef DEBUG
-CDEFINES    = -DWIN32K -DRING0 -D__WIN32OS2__ -D__WINE__ -DDEBUG
-CDEFINES16  = -DRING0    -DDEBUG
-ADEFINES    = -D:WIN32K -D:DEBUG
+CDEFINES    = -DWIN32K -DRING0 -D__WIN32OS2__ -D__WINE__ -DDEBUG $(CDEFINESEXTRA)
+CDEFINES16  = -DRING0    -DDEBUG $(CDEFINESEXTRA16)
+ADEFINES    = -D:WIN32K -D:DEBUG $(ADEFINESEXTRA)
 !else
-CDEFINES    = -DWIN32K -DRING0 -D__WIN32OS2__ -D__WINE__ -DRELEASE
-CDEFINES16  = -DRING0    -DRELEASE
-ADEFINES    = -D:WIN32K -D:RELEASE
+CDEFINES    = -DWIN32K -DRING0 -D__WIN32OS2__ -D__WINE__ -DRELEASE $(CDEFINESEXTRA)
+CDEFINES16  = -DRING0    -DRELEASE $(CDEFINESEXTRA16)
+ADEFINES    = -D:WIN32K -D:RELEASE $(ADEFINESEXTRA)
 !endif
 
 CDEFINES_TST    = $(CDEFINES)   -DR3TST
@@ -105,6 +105,7 @@ CDEFINES16_TST  = $(CDEFINES16) -DR3TST
 # Includepaths
 #
 CINCLUDES  = -I$(WIN32KINCLUDE) \
+             -I$(KKRNLLIBINCLUDE) \
              -I$(TOOLKIT)\h \
              -I$(VACPATH)\include \
              -I$(DDKPATH)\h \
@@ -114,6 +115,7 @@ CINCLUDES  = -I$(WIN32KINCLUDE) \
              -I$(ODIN32_INCLUDE)\win
 
 CINCLUDES16= -I$(WIN32KINCLUDE) \
+             -I$(KKRNLLIBINCLUDE) \
              -I. \
              -I$(DDKPATH)\h \
              -I$(MSCPATH)\include \
@@ -121,6 +123,7 @@ CINCLUDES16= -I$(WIN32KINCLUDE) \
              -I$(TOOLKIT)\h
 
 AINCLUDES  = -Fdi:$(WIN32KINCLUDE) \
+             -Fdi:$(KKRNLLIBINCLUDE) \
              -Fdi:$(DDKPATH)\inc
 
 
@@ -320,6 +323,70 @@ SOURCEFILE  = $^.
     @$(CPPCOMPILE)
 
 
+{Krnl}.asm{$(WIN32KOBJ)}.obj:
+    @$(ECHO) assembling Krnl:       $(SOURCEFILE)
+    @$(ASMCOMPILE)
+{Krnl}.asm.obj:
+    @$(ECHO) assembling Krnl:       $(SOURCEFILE)
+    @$(ASMCOMPILE)
+
+{Krnl}.c{$(WIN32KOBJ)}.obj:
+    @$(ECHO) compiling 32bit Krnl:  $(SOURCEFILE)
+    @$(CCOMPILE)
+{Krnl}.c.obj:
+    @$(ECHO) compiling 32bit Krnl:  $(SOURCEFILE)
+    @$(CCOMPILE)
+
+{Krnl}.c{$(WIN32KOBJ)}.obj_tst:
+    @$(ECHO) compiling 32bit Krnl tst: $(SOURCEFILE)
+    @$(CCOMPILE_TST)
+    @$(CP) $@ $@.obj
+{Krnl}.c.obj_tst:
+    @$(ECHO) compiling 32bit Krnl tst: $(SOURCEFILE)
+    @$(CCOMPILE_TST)
+    @$(CP) $@ $@.obj
+
+{Krnl}.cpp{$(WIN32KOBJ)}.obj:
+    @$(ECHO) compiling 32bit Krnl:  $(SOURCEFILE)
+    @$(CCOMPILE)
+{Krnl}.cpp.obj:
+    @$(ECHO) compiling 32bit Krnl:  $(SOURCEFILE)
+    @$(CCOMPILE)
+
+
+{clib}.asm{$(WIN32KOBJ)}.obj:
+    @$(ECHO) assembling Krnl:       $(SOURCEFILE)
+    @$(ASMCOMPILE)
+{clib}.asm.obj:
+    @$(ECHO) assembling Krnl:       $(SOURCEFILE)
+    @$(ASMCOMPILE)
+
+{clib}.c{$(WIN32KOBJ)}.obj:
+    @$(ECHO) compiling 32bit Krnl:  $(SOURCEFILE)
+    @$(CCOMPILE)
+{clib}.c.obj:
+    @$(ECHO) compiling 32bit Krnl:  $(SOURCEFILE)
+    @$(CCOMPILE)
+
+{clib}.c{$(WIN32KOBJ)}.obj_tst:
+    @$(ECHO) compiling 32bit Krnl tst: $(SOURCEFILE)
+    @$(CCOMPILE_TST)
+    @$(CP) $@ $@.obj
+{clib}.c.obj_tst:
+    @$(ECHO) compiling 32bit Krnl tst: $(SOURCEFILE)
+    @$(CCOMPILE_TST)
+    @$(CP) $@ $@.obj
+
+{clib}.cpp{$(WIN32KOBJ)}.obj:
+    @$(ECHO) compiling 32bit Krnl:  $(SOURCEFILE)
+    @$(CCOMPILE)
+{clib}.cpp.obj:
+    @$(ECHO) compiling 32bit Krnl:  $(SOURCEFILE)
+    @$(CCOMPILE)
+
+
+
+
 {pe2lx}.c{$(WIN32KOBJ)}.obj:
     @$(ECHO) compiling 32bit pe2lx:  $(SOURCEFILE)
     @$(CCOMPILE)
@@ -356,4 +423,26 @@ SOURCEFILE  = $^.
     @$(ECHO) compiling 32bit test:   $(SOURCEFILE)
     @$(CPPCOMPILE_TST_TEST)
 
+
+
+{testcase}.asm{$(WIN32KOBJ)}.obj:
+    @$(ECHO) assembling testcase:    $(SOURCEFILE)
+    @$(ASMCOMPILE_TST)
+{testcase}.asm.obj:
+    @$(ECHO) assembling testcase:    $(SOURCEFILE)
+    @$(ASMCOMPILE_TST)
+
+{testcase}.c{$(WIN32KOBJ)}.obj:
+    @$(ECHO) compiling 32bit testcase: $(SOURCEFILE)
+    @$(CCOMPILE_TST_TEST)
+{testcase}.c.obj:
+    @$(ECHO) compiling 32bit testcase: $(SOURCEFILE)
+    @$(CCOMPILE_TST_TEST)
+
+{testcase}.cpp{$(WIN32KOBJ)}.obj:
+    @$(ECHO) compiling 32bit testcase: $(SOURCEFILE)
+    @$(CPPCOMPILE_TST_TEST)
+{testcase}.cpp.obj:
+    @$(ECHO) compiling 32bit testcase: $(SOURCEFILE)
+    @$(CPPCOMPILE_TST_TEST)
 

@@ -1,4 +1,4 @@
-/* $Id: d32Win32kOpenClose.c,v 1.2 2001-07-10 16:39:16 bird Exp $
+/* $Id: d32Win32kOpenClose.c,v 1.2.2.1 2001-09-27 03:08:13 bird Exp $
  *
  * Open and Close handlers for the Win32k driver.
  *
@@ -18,6 +18,8 @@
 #define INCL_OS2KRNL_SEM
 #define INCL_OS2KRNL_LDR
 #define INCL_OS2KRNL_PTDA
+#define INCL_KKL_AVL
+#define INCL_KKL_LOG
 
 #define NO_WIN32K_LIB_FUNCTIONS
 
@@ -26,16 +28,14 @@
 *   Header Files                                                               *
 *******************************************************************************/
 #include <os2.h>
+#include <OS2Krnl.h>
+#include <kKrnlLib.h>
 
 #include "devSegDf.h"
 #include "dev32hlp.h"
 #include "dev1632.h"
 #include "dev32.h"
-#include "OS2Krnl.h"
 #include "Win32k.h"
-#include "log.h"
-#include "asmutils.h"
-#include "avl.h"
 #include "PerTaskW32kData.h"
 
 

@@ -1,4 +1,4 @@
-/* $Id: vprntf16.c,v 1.6 2001-04-16 23:05:31 bird Exp $
+/* $Id: vprntf16.c,v 1.6.2.1 2001-09-27 03:08:12 bird Exp $
  *
  * vprintf and printf - 16-bit.
  *
@@ -40,6 +40,7 @@
 #include "vprntf16.h"
 #ifdef RING0
 #include "options.h"
+#define COMPORT 0x2f8
 #include "conio.h"
 #endif
 
@@ -486,11 +487,11 @@ static void chout(int ch)
         {
             if (ch == '\n')
             {
-                while (!(inp(options.usCom + 5) & 0x20));  /* Waits for the port to be ready. */
-                outp(options.usCom, chReturn);             /* Put the char. */
+                while (!(inp(COMPORT + 5) & 0x20));  /* Waits for the port to be ready. */
+                outp(COMPORT, chReturn);             /* Put the char. */
             }
-            while (!(inp(options.usCom + 5) & 0x20));  /* Waits for the port to be ready. */
-            outp(options.usCom, ch);                   /* Put the char. */
+            while (!(inp(COMPORT + 5) & 0x20));  /* Waits for the port to be ready. */
+            outp(COMPORT, ch);                   /* Put the char. */
             /* Yield(); - no 16-bit yield */
         }
     #else
@@ -530,8 +531,8 @@ static char *strout(char *psz, signed cchMax)
             /* write string part */
             for (ul = 0; ul < cch; ul++)
             {
-                while (!(inp(options.usCom + 5) & 0x20));  /* Waits for the port to be ready. */
-                outp(options.usCom, psz[ul]);              /* Put the char. */
+                while (!(inp(COMPORT + 5) & 0x20));  /* Waits for the port to be ready. */
+                outp(COMPORT, psz[ul]);              /* Put the char. */
             }
 
             /* cr and lf check + skip */
@@ -539,10 +540,10 @@ static char *strout(char *psz, signed cchMax)
             {
                 if (psz[cch] == '\n')
                 {
-                    while (!(inp(options.usCom + 5) & 0x20));  /* Waits for the port to be ready. */
-                    outp(options.usCom, chReturn);             /* Put the char. */
-                    while (!(inp(options.usCom + 5) & 0x20));  /* Waits for the port to be ready. */
-                    outp(options.usCom, chNewLine);            /* Put the char. */
+                    while (!(inp(COMPORT + 5) & 0x20));  /* Waits for the port to be ready. */
+                    outp(COMPORT, chReturn);             /* Put the char. */
+                    while (!(inp(COMPORT + 5) & 0x20));  /* Waits for the port to be ready. */
+                    outp(COMPORT, chNewLine);            /* Put the char. */
                     cchYield ++;
                 }
                 cch++;

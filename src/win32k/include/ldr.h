@@ -1,4 +1,4 @@
-/* $Id: ldr.h,v 1.7 2000-12-11 06:44:35 bird Exp $
+/* $Id: ldr.h,v 1.7.2.1 2001-09-27 03:08:18 bird Exp $
  *
  * ldr - Our loader "subsystem" public header file.
  *
@@ -22,8 +22,8 @@ extern "C" {
 /*
  * Fail if dependent header files is missing
  */
-#ifndef _AVL_H_
-#error "You'll have to include avl.h before ldr.h!"
+#ifndef _kAVL_h_
+#error "You'll have to include kKrnlLib.h with INCL_KKL_AVL before ldr.h!"
 #endif
 
 
@@ -169,8 +169,8 @@ typedef char Elf2Lx;
  */
 typedef struct _Module
 {
-    AVLNODECORE     coreKey;    /* Key is hFile. */
-    AVLNODECORE     coreMTE;    /* Key is pMTE. */
+    AVLULNODECORE   coreKey;    /* Key is hFile. */
+    AVLULNODECORE   coreMTE;    /* Key is pMTE. */
 
     SFN             hFile;      /* System file number or file handle if you prefer that. */
     PMTE            pMTE;       /* Pointer to MTE if we got one - NULL is allowed. */
@@ -237,6 +237,13 @@ ULONG _Optlink  tkExecPgmCopyEnv(char *pachBuffer, unsigned cchBuffer);
  */
 PSZ         ldrGetExePath(PSZ pszPath, BOOL fExecChild);
 ULONG       ldrInit(void);
+
+
+
+/*
+ * Overriding functions.
+ */
+extern ULONG LDRCALL myldrOpen(PSFN phFile, PSZ pszFilename, PULONG pfl);
 
 #ifdef __cplusplus
 }

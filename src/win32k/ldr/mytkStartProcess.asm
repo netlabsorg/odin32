@@ -1,9 +1,9 @@
-; $Id: mytkStartProcess.asm,v 1.4 2001-02-23 02:57:55 bird Exp $
+; $Id: mytkStartProcess.asm,v 1.4.2.1 2001-09-27 03:08:29 bird Exp $
 ;
 ; tkStartProcess overloader. Needed to clear the loader semaphore
 ; when a process is being started syncronously.
 ;
-; Copyright (c) 2000 knut st. osmundsen (knut.stange.osmundsen@mynd.no)
+; Copyright (c) 2000-2001 knut st. osmundsen (kosmunds@csc.no)
 ;
 ; Project Odin Software License can be found in LICENSE.TXT
 ;
@@ -23,7 +23,7 @@
     ;
     ; LDR semaphore
     ;
-    extrn pLdrSem:DWORD
+    extrn _LdrSem:DWORD
     extrn _LDRClearSem@0:PROC
     extrn _KSEMQueryMutex@8:PROC
 
@@ -45,7 +45,7 @@
     ;
     ; TKSSBase (32-bit)
     ;
-    extrn pulTKSSBase32:DWORD
+    extrn _TKSSBase:DWORD
 
     ;
     ; Calltable entry for tkStartProcess
@@ -82,11 +82,10 @@ _mytkStartProcess PROC NEAR
     push    edx
 
     push    0                           ; Usage count variable.
-    mov     eax, pulTKSSBase32          ; Get TKSSBase
-    mov     eax, [eax]
+    mov     eax, _TKSSBase              ; Get TKSSBase
     add     eax, esp                    ; Added TKSSBase to the usage count pointer
     push    eax                         ; Push address of usage count pointer.
-    push    pLdrSem                     ; Push pointer to loader semaphore ( = handle).
+    push    offset _LdrSem              ; Push pointer to loader semaphore ( = handle).
     call    _KSEMQueryMutex@8
     or      eax, eax                    ; Check return code. (1 = our / free; 0 = not our but take)
     pop     eax                         ; Pops usage count.
