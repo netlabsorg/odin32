@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.23 2003-08-14 10:39:30 sandervl Exp $
+# $Id: makefile,v 1.24 2003-08-14 10:43:26 sandervl Exp $
 
 #
 # Odin32 API
@@ -10,7 +10,6 @@
 #
 # Compiler, tools, and interference rules.
 #
-WRC_PREFIX_RESOURCE=1
 !include ../../makefile.inc
 
 
