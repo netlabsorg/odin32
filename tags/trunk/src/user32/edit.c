@@ -230,6 +230,9 @@ static LRESULT  EDIT_EM_GetThumb(HWND hwnd, EDITSTATE *es);
 static INT  EDIT_EM_LineFromChar(EDITSTATE *es, INT index);
 static INT  EDIT_EM_LineIndex(EDITSTATE *es, INT line);
 static INT  EDIT_EM_LineLength(EDITSTATE *es, INT index);
+#ifdef __WIN32OS2__
+static INT  EDIT_EM_LineLengthA(EDITSTATE *es, INT index);
+#endif
 static BOOL EDIT_EM_LineScroll(HWND hwnd, EDITSTATE *es, INT dx, INT dy);
 static BOOL EDIT_EM_LineScroll_internal(HWND hwnd, EDITSTATE *es, INT dx, INT dy);
 static LRESULT  EDIT_EM_PosFromChar(HWND hwnd, EDITSTATE *es, INT index, BOOL after_wrap);
@@ -458,13 +461,65 @@ static LRESULT WINAPI EditWndProc_common( HWND hwnd, UINT msg,
         if (SLOWORD(lParam) == -1)
             EDIT_EM_SetSel(hwnd, es, (UINT)-1, 0, FALSE);
         else
+#ifdef __WIN32OS2__
+        if( IsDBCSEnv() && SHIWORD( lParam ) != -1 )
+        {
+            INT countA = WideCharToMultiByte( CP_ACP, 0, es->text, -1, 0, 0, 0, 0 );
+            LPSTR textA = HeapAlloc( GetProcessHeap(), 0, countA );
+            WORD wLo, wHi;
+
+            if( textA )
+            {
+                WideCharToMultiByte( CP_ACP, 0, es->text, -1, textA, countA, 0, 0 );
+
+                wLo = LOWORD( lParam );
+                wHi = HIWORD( lParam );
+
+                if( wLo > countA )
+                    wLo = countA;
+                wLo = ( WPARAM )MultiByteToWideChar( CP_ACP, 0, textA, wLo, 0, 0 );
+
+                if( wHi > countA )
+                    wHi = countA;
+                wHi = ( LPARAM )MultiByteToWideChar( CP_ACP, 0, textA, wHi, 0, 0 );
+
+                lParam = MAKELPARAM( wLo, wHi );
+
+                HeapFree( GetProcessHeap(), 0, textA );
+            }
+#endif
             EDIT_EM_SetSel(hwnd, es, LOWORD(lParam), HIWORD(lParam), FALSE);
+#ifdef __WIN32OS2__
+        }
+#endif
         if (!wParam)
             EDIT_EM_ScrollCaret(hwnd, es);
         result = 1;
         break;
     case EM_SETSEL:
         DPRINTF_EDIT_MSG32("EM_SETSEL");
+#ifdef __WIN32OS2__
+        if( !unicode && IsDBCSEnv() && ( INT )wParam != -1 && ( INT )lParam != -1 )
+        {
+            INT countA = WideCharToMultiByte( CP_ACP, 0, es->text, -1, 0, 0, 0, 0 );
+            LPSTR textA = HeapAlloc( GetProcessHeap(), 0, countA );
+
+            if( textA )
+            {
+                WideCharToMultiByte( CP_ACP, 0, es->text, -1, textA, countA, 0, 0 );
+
+                if(( INT )wParam > countA )
+                    wParam = ( WPARAM ) countA;
+                wParam = ( WPARAM )MultiByteToWideChar( CP_ACP, 0, textA, ( INT )wParam, 0, 0 );
+
+                if(( INT )lParam > countA )
+                    lParam = ( LPARAM ) countA;
+                lParam = ( LPARAM )MultiByteToWideChar( CP_ACP, 0, textA, ( INT )lParam, 0, 0 );
+
+                HeapFree( GetProcessHeap(), 0, textA );
+            }
+        }
+#endif
         EDIT_EM_SetSel(hwnd, es, wParam, lParam, FALSE);
         EDIT_EM_ScrollCaret(hwnd, es);
         result = 1;
@@ -574,6 +629,10 @@ static LRESULT WINAPI EditWndProc_common( HWND hwnd, UINT msg,
     case EM_LINEINDEX:
         DPRINTF_EDIT_MSG32("EM_LINEINDEX");
         result = (LRESULT)EDIT_EM_LineIndex(es, (INT)wParam);
+#ifdef __WIN32OS2__
+        if( !unicode )
+            result = WideCharToMultiByte( CP_ACP, 0, es->text, result, 0, 0, 0, 0 );
+#endif
         break;
 
 #ifndef __WIN32OS2__
@@ -629,6 +688,11 @@ static LRESULT WINAPI EditWndProc_common( HWND hwnd, UINT msg,
         /* fall through */
     case EM_LINELENGTH:
         DPRINTF_EDIT_MSG32("EM_LINELENGTH");
+#ifdef __WIN32OS2__
+        if( !unicode )
+        result = ( LRESULT )EDIT_EM_LineLengthA(es, (INT)wParam);
+        else
+#endif
         result = (LRESULT)EDIT_EM_LineLength(es, (INT)wParam);
         break;
 
@@ -718,6 +782,25 @@ static LRESULT WINAPI EditWndProc_common( HWND hwnd, UINT msg,
         /* fall through */
     case EM_LINEFROMCHAR:
         DPRINTF_EDIT_MSG32("EM_LINEFROMCHAR");
+#ifdef __WIN32OS2__
+        if( !unicode && IsDBCSEnv() && ( INT )wParam != -1 )
+        {
+            INT countA = WideCharToMultiByte( CP_ACP, 0, es->text, -1, 0, 0, 0, 0 );
+            LPSTR textA = HeapAlloc( GetProcessHeap(), 0, countA );
+
+            if( textA )
+            {
+                WideCharToMultiByte( CP_ACP, 0, es->text, -1, textA, countA, 0, 0 );
+
+                if(( INT )wParam > countA )
+                    wParam = ( WPARAM )countA;
+
+                wParam = ( WPARAM )MultiByteToWideChar( CP_ACP, 0, textA, ( INT )wParam, 0, 0 );
+
+                HeapFree( GetProcessHeap(), 0, textA );
+            }
+        }
+#endif
         result = (LRESULT)EDIT_EM_LineFromChar(es, (INT)wParam);
         break;
 
@@ -853,12 +936,41 @@ static LRESULT WINAPI EditWndProc_common( HWND hwnd, UINT msg,
 
     case EM_POSFROMCHAR:
         DPRINTF_EDIT_MSG32("EM_POSFROMCHAR");
+#ifdef __WIN32OS2__
+        if( !unicode && IsDBCSEnv() )
+        {
+            INT countA = WideCharToMultiByte( CP_ACP, 0, es->text, -1, 0, 0, 0, 0 );
+            LPSTR textA = HeapAlloc( GetProcessHeap(), 0, countA );
+
+            if( textA )
+            {
+                WideCharToMultiByte( CP_ACP, 0, es->text, -1, textA, countA, 0, 0 );
+
+                if(( INT )wParam > countA )
+                    wParam = ( WPARAM ) countA;
+                wParam = ( WPARAM )MultiByteToWideChar( CP_ACP, 0, textA, ( INT )wParam, 0, 0 );
+
+                HeapFree( GetProcessHeap(), 0, textA );
+            }
+        }
+#endif
         result = EDIT_EM_PosFromChar(hwnd, es, (INT)wParam, FALSE);
         break;
 
     case EM_CHARFROMPOS:
         DPRINTF_EDIT_MSG32("EM_CHARFROMPOS");
         result = EDIT_EM_CharFromPos(hwnd, es, SLOWORD(lParam), SHIWORD(lParam));
+#ifdef __WIN32OS2__
+        if( !unicode )
+        {
+            WORD wLo = LOWORD( result );
+            WORD wHi = HIWORD( result );
+
+            wLo = WideCharToMultiByte( CP_ACP, 0, es->text, wLo, 0, 0, 0, 0 );
+            wHi = WideCharToMultiByte( CP_ACP, 0, es->text, wHi, 0, 0, 0, 0 );
+            result = ( LRESULT )MAKELONG( wLo, wHi );
+        }
+#endif
         break;
 
         /* End of the EM_ messages which were in numerical order; what order
@@ -977,6 +1089,10 @@ static LRESULT WINAPI EditWndProc_common( HWND hwnd, UINT msg,
     case WM_GETTEXTLENGTH:
         DPRINTF_EDIT_MSG32("WM_GETTEXTLENGTH");
         result = strlenW(es->text);
+#ifdef __WIN32OS2__
+        if( !unicode )
+            result = WideCharToMultiByte( CP_ACP, 0, es->text, result, 0, 0, 0, 0 );
+#endif
         break;
 
     case WM_HSCROLL:
@@ -2215,6 +2331,9 @@ static void EDIT_PaintLine(HWND hwnd, EDITSTATE *es, HDC dc, INT line, BOOL rev)
     INT x;
     INT y;
     LRESULT pos;
+    HBRUSH brush;
+    RECT rc;
+
 
     if (es->style & ES_MULTILINE) {
         INT vlc = (es->format_rect.bottom - es->format_rect.top) / es->line_height;
@@ -2228,6 +2347,7 @@ static void EDIT_PaintLine(HWND hwnd, EDITSTATE *es, HDC dc, INT line, BOOL rev)
     pos = EDIT_EM_PosFromChar(hwnd, es, EDIT_EM_LineIndex(es, line), FALSE);
     x = SLOWORD(pos);
     y = SHIWORD(pos);
+
     li = EDIT_EM_LineIndex(es, line);
     ll = EDIT_EM_LineLength(es, li);
     s = es->selection_start;
@@ -2242,6 +2362,26 @@ static void EDIT_PaintLine(HWND hwnd, EDITSTATE *es, HDC dc, INT line, BOOL rev)
         x += EDIT_PaintText(es, dc, x, y, line, e - li, li + ll - e, FALSE);
     } else
         x += EDIT_PaintText(es, dc, x, y, line, 0, ll, FALSE);
+
+#if 0
+#ifdef __WIN32OS2__
+    if ( get_app_version() >= 0x40000 &&(
+                !es->bEnableState || (es->style & ES_READONLY)))
+            brush = (HBRUSH)EDIT_SEND_CTLCOLORSTATIC(hwnd, dc);
+    else
+            brush = (HBRUSH)EDIT_SEND_CTLCOLOR(hwnd, dc);
+
+    if (!brush)
+            brush = (HBRUSH)GetStockObject(WHITE_BRUSH);
+
+    rc.left = x;
+    rc.right = es->format_rect.right;
+    rc.top = y;
+    rc.bottom = y + es->line_height;
+
+    FillRect(dc, &rc, brush);
+#endif
+#endif
 }
 
 
@@ -2775,6 +2915,14 @@ static LRESULT EDIT_EM_GetSel(EDITSTATE *es, LPUINT start, LPUINT end)
     UINT s = es->selection_start;
     UINT e = es->selection_end;
 
+#ifdef __WIN32OS2__
+    if( !es->is_unicode)
+    {
+        s = WideCharToMultiByte( CP_ACP, 0, es->text, s, 0, 0, 0, 0 );
+        e = WideCharToMultiByte( CP_ACP, 0, es->text, e, 0, 0, 0, 0 );
+    }
+#endif
+
     ORDER_UINT(s, e);
     if (start)
         *start = s;
@@ -2900,6 +3048,47 @@ static INT EDIT_EM_LineLength(EDITSTATE *es, INT index)
     return line_def->net_length;
 }
 
+#ifdef __WIN32OS2__
+/*********************************************************************
+ *
+ *  EM_LINELENGTH for ANSI
+ *
+ */
+static INT EDIT_EM_LineLengthA(EDITSTATE *es, INT index)
+{
+    LINEDEF *line_def;
+
+    if (!(es->style & ES_MULTILINE))
+        return ( WideCharToMultiByte( CP_ACP, 0, es->text, -1, 0, 0, 0, 0 ) - 1);
+
+    if (index == -1) {
+        /* get the number of remaining non-selected chars of selected lines */
+        INT32 l; /* line number */
+        INT32 li; /* index of first char in line */
+        INT32 count;
+        l = EDIT_EM_LineFromChar(es, es->selection_start);
+        li = EDIT_EM_LineIndex( es, l );
+        li = WideCharToMultiByte( CP_ACP, 0, es->text, li, 0, 0, 0, 0 );
+        /* # chars before start of selection area */
+        count = WideCharToMultiByte( CP_ACP, 0, es->text, es->selection_start, 0, 0, 0, 0 );
+        count -= li;
+        l = EDIT_EM_LineFromChar(es, es->selection_end);
+        /* # chars after end of selection */
+        li = EDIT_EM_LineIndex(es, l);
+        li = WideCharToMultiByte( CP_ACP, 0, es->text, li, 0, 0, 0, 0 );
+        count += li + EDIT_EM_LineLengthA(es, li);
+        count -= WideCharToMultiByte( CP_ACP, 0, es->text, es->selection_end, 0, 0, 0, 0 );
+        return count;
+    }
+    line_def = es->first_line_def;
+    index -= line_def->length;
+    while ((index >= 0) && line_def->next) {
+        line_def = line_def->next;
+        index -= line_def->length;
+    }
+    return WideCharToMultiByte( CP_ACP, 0, es->text + line_def->index, line_def->net_length, 0, 0, 0, 0 );
+}
+#endif
 
 /*********************************************************************
  *
