@@ -1,4 +1,4 @@
-/* $Id: myldrWasLoadModuled.cpp,v 1.1.2.1 2002-03-31 20:09:19 bird Exp $
+/* $Id: myldrWasLoadModuled.cpp,v 1.1.2.2 2002-04-01 09:06:10 bird Exp $
  *
  * ldrWasLoadModuled - Tells OS/2 that the executable module was LoadModuled
  *      too. This way DosQueryProcAddr and DosQueryProcType will work for
@@ -9,6 +9,9 @@
  * Project Odin Software License can be found in LICENSE.TXT
  *
  */
+#ifndef NOFILEID
+static const char szFileId[] = "$Id: myldrWasLoadModuled.cpp,v 1.1.2.2 2002-04-01 09:06:10 bird Exp $";
+#endif
 
 /*******************************************************************************
 *   Defined Constants And Macros                                               *
@@ -24,8 +27,9 @@
 *   Header Files                                                               *
 *******************************************************************************/
 #include <os2.h>
-#include <peexe.h>
-#include <exe386.h>
+#include "NEexe.h"                      /* Wine NE structs and definitions. */
+#include "LXexe.h"                      /* OS/2 LX structs and definitions. */
+#include "PEexe.h"                      /* Wine PE structs and definitions. */
 #include <OS2Krnl.h>
 #include <kKrnlLib.h>
 
@@ -61,6 +65,9 @@
  */
 ULONG LDRCALL myldrWasLoadModuled(HMTE hmte, PPTDA pptda, PULONG pcUsage)
 {
+    KLOGENTRY3("ULONG","HMTE hmte, PPTDA pptda, PULONG pcUsage", hmte, pptda, pcUsage);
+    ULONG   rc;
+
     /*
      * Check if the fix is enabled.
      */
@@ -81,6 +88,8 @@ ULONG LDRCALL myldrWasLoadModuled(HMTE hmte, PPTDA pptda, PULONG pcUsage)
     /*
      * Let the real function do the work.
      */
-    return ldrWasLoadModuled(hmte, pptda, pcUsage);
+    rc = ldrWasLoadModuled(hmte, pptda, pcUsage);
+    KLOGEXIT(rc);
+    return rc;
 }
 

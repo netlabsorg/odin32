@@ -1,4 +1,4 @@
-/* $Id: myldrEnum32bitRelRecs.cpp,v 1.1.2.1 2002-03-31 20:09:16 bird Exp $
+/* $Id: myldrEnum32bitRelRecs.cpp,v 1.1.2.2 2002-04-01 09:06:08 bird Exp $
  *
  * myldrEnum32bitRelRecs - ldrEnum32bitRelRecs
  *
@@ -7,6 +7,9 @@
  * Project Odin Software License can be found in LICENSE.TXT
  *
  */
+#ifndef NOFILEID
+static const char szFileId[] = "$Id: myldrEnum32bitRelRecs.cpp,v 1.1.2.2 2002-04-01 09:06:08 bird Exp $";
+#endif
 
 /*******************************************************************************
 *   Defined Constants And Macros                                               *
@@ -22,8 +25,8 @@
 *   Header Files                                                               *
 *******************************************************************************/
 #include <os2.h>
-#include <peexe.h>
-#include <exe386.h>
+#include "LXexe.h"                      /* OS/2 LX structs and definitions. */
+#include "PEexe.h"                      /* Wine PE structs and definitions. */
 #include <OS2Krnl.h>
 #include <kKrnlLib.h>
 
@@ -57,7 +60,9 @@ ULONG LDRCALL myldrEnum32bitRelRecs(
     PVOID pvPTDA
     )
 {
+    KLOGENTRY6("ULONG","PMTE pMTE, ULONG iObject, ULONG iPageTable, PVOID pvPage, ULONG ulPageAddress, PVOID pvPTDA", pMTE, iObject, iPageTable, pvPage, ulPageAddress, pvPTDA);
     PMODULE pMod;
+    ULONG   rc;
 
     pMod = getModuleByMTE(pMTE);
     if (pMod != NULL)
@@ -71,8 +76,11 @@ ULONG LDRCALL myldrEnum32bitRelRecs(
         #endif
         rc = pMod->Data.pModule->applyFixups(pMTE, iObject, iPageTable, pvPage, ulPageAddress, pvPTDA);
         if (rc != NO_ERROR)
+            KLOGEXIT(rc);
             return rc;
     }
 
-    return ldrEnum32bitRelRecs(pMTE, iObject, iPageTable, pvPage, ulPageAddress, pvPTDA);
+    rc = ldrEnum32bitRelRecs(pMTE, iObject, iPageTable, pvPage, ulPageAddress, pvPTDA);
+    KLOGEXIT(rc);
+    return rc;
 }

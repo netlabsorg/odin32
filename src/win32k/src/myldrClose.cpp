@@ -1,4 +1,4 @@
-/* $Id: myldrClose.cpp,v 1.1.2.1 2002-03-31 20:09:16 bird Exp $
+/* $Id: myldrClose.cpp,v 1.1.2.2 2002-04-01 09:06:08 bird Exp $
  *
  * myldrClose - ldrClose
  *
@@ -7,6 +7,9 @@
  * Project Odin Software License can be found in LICENSE.TXT
  *
  */
+#ifndef NOFILEID
+static const char szFileId[] = "$Id: myldrClose.cpp,v 1.1.2.2 2002-04-01 09:06:08 bird Exp $";
+#endif
 
 /*******************************************************************************
 *   Defined Constants And Macros                                               *
@@ -21,8 +24,8 @@
 *   Header Files                                                               *
 *******************************************************************************/
 #include <os2.h>
-#include <peexe.h>
-#include <exe386.h>
+#include "LXexe.h"                      /* OS/2 LX structs and definitions. */
+#include "PEexe.h"                      /* Wine PE structs and definitions. */
 #include <OS2Krnl.h>
 #include <kKrnlLib.h>
 
@@ -43,6 +46,8 @@
  */
 ULONG LDRCALL myldrClose(SFN hFile)
 {
+    KLOGENTRY1("ULONG","SFN hFile", hFile);
+    ULONG   rc;
     /* closes handle */
     kprintf(("myldrClose: hFile = %.4x\n", hFile));
     if (GetState(hFile) == HSTATE_OUR)
@@ -76,5 +81,7 @@ ULONG LDRCALL myldrClose(SFN hFile)
     /*
      * Finally call the real close function.
      */
-    return ldrClose(hFile);
+    rc = ldrClose(hFile);
+    KLOGEXIT(rc);
+    return rc;
 }

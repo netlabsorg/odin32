@@ -1,4 +1,4 @@
-/* $Id: k32QuerySystemMemInfo.cpp,v 1.1.2.1 2002-03-31 20:09:11 bird Exp $
+/* $Id: k32QuerySystemMemInfo.cpp,v 1.1.2.2 2002-04-01 09:06:06 bird Exp $
  *
  * k32QuerySystemMemInfo - Collects more or less useful information on the
  *                         memory state of the system.
@@ -8,6 +8,9 @@
  * Project Odin Software License can be found in LICENSE.TXT
  *
  */
+#ifndef NOFILEID
+static const char szFileId[] = "$Id: k32QuerySystemMemInfo.cpp,v 1.1.2.2 2002-04-01 09:06:06 bird Exp $";
+#endif
 
 
 /*******************************************************************************
@@ -30,10 +33,8 @@
 *   Header Files                                                               *
 *******************************************************************************/
 #include <os2.h>                        /* OS/2 header file. */
-#include <peexe.h>                      /* Wine PE structs and definitions. */
-#include <neexe.h>                      /* Wine NE structs and definitions. */
-#include <newexe.h>                     /* OS/2 NE structs and definitions. */
-#include <exe386.h>                     /* OS/2 LX structs and definitions. */
+#include "LXexe.h"                      /* OS/2 LX structs and definitions. */
+#include "PEexe.h"                      /* Wine PE structs and definitions. */
 #include <OS2Krnl.h>
 #include <kKrnlLib.h>
 
@@ -61,6 +62,7 @@
  */
 APIRET k32QuerySystemMemInfo(PK32SYSTEMMEMINFO pMemInfo)
 {
+    KLOGENTRY1("APIRET","PK32SYSTEMMEMINFO pMemInfo", pMemInfo);
     APIRET              rc;
     K32SYSTEMMEMINFO    MemInfo;
 
@@ -74,11 +76,20 @@ APIRET k32QuerySystemMemInfo(PK32SYSTEMMEMINFO pMemInfo)
 
     rc = TKFuBuff(SSToDS(&MemInfo.cb), &pMemInfo->cb, sizeof(ULONG)*2, TK_FUSU_NONFATAL);
     if (rc)
+    {
+        KLOGEXIT(rc);
         return rc;
+    }
     if (MemInfo.cb != sizeof(K32SYSTEMMEMINFO))
+    {
+        KLOGEXIT(ERROR_INVALID_PARAMETER);
         return ERROR_INVALID_PARAMETER;
+    }
     if (MemInfo.flFlags > 7)
+    {
+        KLOGEXIT(ERROR_INVALID_PARAMETER);
         return ERROR_INVALID_PARAMETER;
+    }
 
 
     /*
@@ -160,6 +171,7 @@ APIRET k32QuerySystemMemInfo(PK32SYSTEMMEMINFO pMemInfo)
     if (rc)
         kprintf(("k32QuerySystemMemInfo: Failed to copy meminfo to user memory. rc=%d\n", rc));
 
+    KLOGEXIT(rc);
     return rc;
 }
 

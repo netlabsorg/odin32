@@ -1,4 +1,4 @@
-/* $Id: pe2lx.cpp,v 1.1.2.1 2002-03-31 20:09:20 bird Exp $
+/* $Id: pe2lx.cpp,v 1.1.2.2 2002-04-01 09:06:10 bird Exp $
  *
  * Pe2Lx class implementation. Ring 0 and Ring 3
  *
@@ -9,6 +9,9 @@
  * Project Odin Software License can be found in LICENSE.TXT
  *
  */
+#ifndef NOFILEID
+static const char szFileId[] = "$Id: pe2lx.cpp,v 1.1.2.2 2002-04-01 09:06:10 bird Exp $";
+#endif
 
 
 /*******************************************************************************
@@ -29,7 +32,8 @@
     #define INCL_OS2KRNL_LDR_NOAPIS     /* No apis */
     #define Yield() DosSleep(0)
 #endif
-
+#define DWORD                       ULONG
+#define PDWORD                      PULONG
 
 /*
  * Configuration
@@ -83,10 +87,10 @@
 *   Header Files                                                               *
 *******************************************************************************/
 #include <os2.h>                        /* OS/2 header file. */
-#include <peexe.h>                      /* Wine PE structs and definitions. */
-#include <neexe.h>                      /* Wine NE structs and definitions. */
-#include <newexe.h>                     /* OS/2 NE structs and definitions. */
-#include <exe386.h>                     /* OS/2 LX structs and definitions. */
+#include "MZexe.h"                      /* Wine NE structs and definitions. */
+#include "NEexe.h"                      /* Wine NE structs and definitions. */
+#include "LXexe.h"                      /* OS/2 LX structs and definitions. */
+#include "PEexe.h"                      /* Wine PE structs and definitions. */
 #include <OS2Krnl.h>                    /* kernel structs.  (SFN) */
 #include <kKrnlLib.h>
 
@@ -106,6 +110,7 @@
 #endif
 #include "modulebase.h"                 /* ModuleBase class definitions, ++. */
 #include "pe2lx.h"                      /* Pe2Lx class definitions, ++. */
+#define WIN32API
 #include <versionos2.h>                 /* Pe2Lx version. */
 #include "options.h"                    /* Win32k options. */
 
@@ -1136,14 +1141,14 @@ ULONG  Pe2Lx::applyFixups(PMTE pMTE, ULONG iObject, ULONG iPageTable, PVOID pvPa
 
             if (pbr->VirtualAddress + PAGESIZE >= ulRVAPage)
             {
-                PWORD pwoffFixup   = &pbr->TypeOffset[0];
-                ULONG cRelocations = (pbr->SizeOfBlock - offsetof(IMAGE_BASE_RELOCATION, TypeOffset)) / sizeof(WORD); /* note that sizeof(BaseReloc) is 12 bytes! */
+                PUSHORT pwoffFixup   = &pbr->TypeOffset[0];
+                ULONG cRelocations = (pbr->SizeOfBlock - offsetof(IMAGE_BASE_RELOCATION, TypeOffset)) / sizeof(USHORT); /* note that sizeof(BaseReloc) is 12 bytes! */
 
                 /* Some bound checking just to be sure it works... */
                 if ((unsigned)pbr - (unsigned)pBaseRelocs + pbr->SizeOfBlock > cbBaseRelocs)
                 {
                     printWar(("Block ends after BaseRelocation datadirectory.\n"));
-                    cRelocations = (((unsigned)pBaseRelocs + cbBaseRelocs) - (unsigned)pbr - offsetof(IMAGE_BASE_RELOCATION, TypeOffset)) / sizeof(WORD);
+                    cRelocations = (((unsigned)pBaseRelocs + cbBaseRelocs) - (unsigned)pbr - offsetof(IMAGE_BASE_RELOCATION, TypeOffset)) / sizeof(USHORT);
                 }
 
 
@@ -1407,14 +1412,14 @@ ULONG  Pe2Lx::applyFixupsDelta(PVOID pvPage, ULONG ulDelta, ULONG ulRVAPage)
 
         if (pbr->VirtualAddress + PAGESIZE >= ulRVAPage)
         {
-            PWORD pwoffFixup   = &pbr->TypeOffset[0];
-            ULONG cRelocations = (pbr->SizeOfBlock - offsetof(IMAGE_BASE_RELOCATION, TypeOffset)) / sizeof(WORD); /* note that sizeof(BaseReloc) is 12 bytes! */
+            PUSHORT pwoffFixup   = &pbr->TypeOffset[0];
+            ULONG cRelocations = (pbr->SizeOfBlock - offsetof(IMAGE_BASE_RELOCATION, TypeOffset)) / sizeof(USHORT); /* note that sizeof(BaseReloc) is 12 bytes! */
 
             /* Some bound checking just to be sure it works... */
             if ((unsigned)pbr - (unsigned)pBaseRelocs + pbr->SizeOfBlock > cbBaseRelocs)
             {
                 printWar(("Block ends after BaseRelocation datadirectory.\n"));
-                cRelocations = (((unsigned)pBaseRelocs + cbBaseRelocs) - (unsigned)pbr - offsetof(IMAGE_BASE_RELOCATION, TypeOffset)) / sizeof(WORD);
+                cRelocations = (((unsigned)pBaseRelocs + cbBaseRelocs) - (unsigned)pbr - offsetof(IMAGE_BASE_RELOCATION, TypeOffset)) / sizeof(USHORT);
             }
 
 
@@ -2952,7 +2957,7 @@ ULONG Pe2Lx::makeFixups()
             if (rc == NO_ERROR)
             {
                 printInfA(("TibFix import fixup\n"));
-                rc = add32OrdImportFixup((WORD)((paObjects[iObj].Misc.offTIBFix + paObjects[iObj].ulRVA + TIBFIX_OFF_CALLADDRESS) & (PAGESIZE-1UL)),
+                rc = add32OrdImportFixup((USHORT)((paObjects[iObj].Misc.offTIBFix + paObjects[iObj].ulRVA + TIBFIX_OFF_CALLADDRESS) & (PAGESIZE-1UL)),
                                          ul,
                                          pNtHdrs->FileHeader.Characteristics & IMAGE_FILE_DLL ?
                                             ORD_REGISTERPE2LXDLL : ORD_REGISTERPE2LXEXE);
@@ -2974,7 +2979,7 @@ ULONG Pe2Lx::makeFixups()
                 if (Thunk.u1.Ordinal != 0UL)
                 {
                     if (Thunk.u1.Ordinal & (ULONG)IMAGE_ORDINAL_FLAG)
-                        rc = add32OrdImportFixup((WORD)(ulRVAFirstThunk & (PAGESIZE-1)),
+                        rc = add32OrdImportFixup((USHORT)(ulRVAFirstThunk & (PAGESIZE-1)),
                                                  ulModuleOrdinal, Thunk.u1.Ordinal & 0xffff);
                     else if (Thunk.u1.Ordinal > 0UL && Thunk.u1.Ordinal < pNtHdrs->OptionalHeader.SizeOfImage)
                     {
@@ -2982,7 +2987,7 @@ ULONG Pe2Lx::makeFixups()
                                                        (PSZ*)SSToDS(&psz));
                         if (rc != NO_ERROR)
                             break;
-                        rc = add32NameImportFixup((WORD)(ulRVAFirstThunk & (PAGESIZE-1)),
+                        rc = add32NameImportFixup((USHORT)(ulRVAFirstThunk & (PAGESIZE-1)),
                                                   ulModuleOrdinal, psz);
                         free(psz);
                     }
@@ -3044,22 +3049,22 @@ ULONG Pe2Lx::makeFixups()
         #ifndef RING0
         if (fBaseRelocs && BaseReloc.VirtualAddress == ulRVAPage)
         {
-            ULONG c = (BaseReloc.SizeOfBlock - sizeof(BaseReloc.SizeOfBlock) - sizeof(BaseReloc.VirtualAddress)) / sizeof(WORD); /* note that sizeof(BaseReloc) is 12 bytes! */
-            PWORD pawoffFixup = NULL;
+            ULONG c = (BaseReloc.SizeOfBlock - sizeof(BaseReloc.SizeOfBlock) - sizeof(BaseReloc.VirtualAddress)) / sizeof(USHORT); /* note that sizeof(BaseReloc) is 12 bytes! */
+            PUSHORT pawoffFixup = NULL;
 
             if (c != 0)
             {
-                pawoffFixup = (PWORD)malloc((size_t)(c * sizeof(WORD)));
+                pawoffFixup = (PUSHORT)malloc((size_t)(c * sizeof(USHORT)));
                 if (pawoffFixup != NULL)
                     rc = pRelocReader->readAtRVA(ulRVABaseReloc + offsetof(IMAGE_BASE_RELOCATION, TypeOffset),
-                                                 pawoffFixup, c * sizeof(WORD));
+                                                 pawoffFixup, c * sizeof(USHORT));
                 else
                     rc = ERROR_NOT_ENOUGH_MEMORY;
 
                 /* loop thru the baserelocation in this chunk. */
                 for (ul = 0; ul < c && rc == NO_ERROR; ul++)
                 {
-                    WORD  woffFixup;
+                    USHORT  woffFixup;
                     ULONG ulTarget;
                     /* Get relocation type/offset. */
                     if (pawoffFixup != NULL)
@@ -3073,7 +3078,7 @@ ULONG Pe2Lx::makeFixups()
                         switch (woffFixup >> 12)
                         {
                             case IMAGE_REL_BASED_HIGHLOW:
-                                rc = add32OffsetFixup((WORD)(woffFixup & 0x0FFF), ulTarget);
+                                rc = add32OffsetFixup((USHORT)(woffFixup & 0x0FFF), ulTarget);
                                 printInfA(("Fixup: 0x%03x target 0x%08x (rc = %d) %s\n",
                                            (woffFixup & 0x0FFF), ulTarget, rc,
                                            pvCrossPageFixup ? "crosspage" : ""));
@@ -3304,7 +3309,7 @@ ULONG Pe2Lx::makeExports()
                     && (ULONG)ExpDir.AddressOfNames < pNtHdrs->OptionalHeader.SizeOfImage
                     )
                 {
-                    WORD usOrdinal;
+                    USHORT usOrdinal;
 
                     for (ul = 0; ul < ExpDir.NumberOfNames && rc == NO_ERROR; ul++)
                     {
@@ -3312,7 +3317,7 @@ ULONG Pe2Lx::makeExports()
                                                    SSToDS(&ulRVA), sizeof(ulRVA));
                         if (rc != NO_ERROR)
                             break;
-                        rc = pFATFOTReader->readAtRVA((ULONG)ExpDir.AddressOfNameOrdinals + ul * sizeof(WORD),
+                        rc = pFATFOTReader->readAtRVA((ULONG)ExpDir.AddressOfNameOrdinals + ul * sizeof(USHORT),
                                                       SSToDS(&usOrdinal), sizeof(usOrdinal));
                         if (rc != NO_ERROR)
                             break;
@@ -3675,7 +3680,7 @@ ULONG  Pe2Lx::addPageFixupEntry(BOOL fLast/* = FALSE*/)
  * ---------------------
  * This code got a bit dirty while trying to optimize memory usage.
  */
-ULONG Pe2Lx::add32OffsetFixup(WORD offSource, ULONG ulTarget)
+ULONG Pe2Lx::add32OffsetFixup(USHORT offSource, ULONG ulTarget)
 {
     struct r32_rlc *prlc;
     ULONG           iObj;            /* target object. */
@@ -3826,7 +3831,7 @@ ULONG Pe2Lx::add32OffsetFixup(WORD offSource, ULONG ulTarget)
  * This code got a bit dirty while trying to optimize memory usage.
  *
  */
-ULONG  Pe2Lx::add32OrdImportFixup(WORD offSource, ULONG ulModuleOrdinal, ULONG ulFunctionOrdinal)
+ULONG  Pe2Lx::add32OrdImportFixup(USHORT offSource, ULONG ulModuleOrdinal, ULONG ulFunctionOrdinal)
 {
     struct r32_rlc *prlc;
     ULONG           cbFixup;         /* size of the fixup record. */
@@ -3951,7 +3956,7 @@ ULONG  Pe2Lx::add32OrdImportFixup(WORD offSource, ULONG ulModuleOrdinal, ULONG u
  * This code got a bit dirty while trying to optimize memory usage.
  *
  */
-ULONG  Pe2Lx::add32NameImportFixup(WORD offSource, ULONG ulModuleOrdinal, PCSZ pszFnName)
+ULONG  Pe2Lx::add32NameImportFixup(USHORT offSource, ULONG ulModuleOrdinal, PCSZ pszFnName)
 {
     APIRET          rc;
     struct r32_rlc *prlc;
@@ -5174,7 +5179,7 @@ VOID Pe2Lx::dumpNtHeaders(PIMAGE_NT_HEADERS pNtHdrs)
     if (pNtHdrs >= (PIMAGE_NT_HEADERS)0x10000)
     {
         int   i;
-        WORD  w;
+        USHORT  w;
 
         printInf(("\nPE-headers - File header\n"));
         printInf(("Signature               %.2s\n", &pNtHdrs->Signature));

@@ -1,4 +1,4 @@
-/* $Id: myVMAllocMem.cpp,v 1.1.2.1 2002-03-31 20:09:15 bird Exp $
+/* $Id: myVMAllocMem.cpp,v 1.1.2.2 2002-04-01 09:06:07 bird Exp $
  *
  * Debug module - overloads VMAllocMem to analyse input parameters....
  *
@@ -7,6 +7,9 @@
  * Project Odin Software License can be found in LICENSE.TXT
  *
  */
+#ifndef NOFILEID
+static const char szFileId[] = "$Id: myVMAllocMem.cpp,v 1.1.2.2 2002-04-01 09:06:07 bird Exp $";
+#endif
 
 /*******************************************************************************
 *   Defined Constants And Macros                                               *
@@ -50,10 +53,12 @@
  */
 APIRET KRNLCALL myVMAllocMem(ULONG p1, ULONG p2, ULONG p3, USHORT p4, USHORT p5, USHORT p6, ULONG p7, ULONG p8, ULONG p9)
 {
+    KLOGENTRY9("APIRET","ULONG p1, ULONG p2, ULONG p3, USHORT p4, USHORT p5, USHORT p6, ULONG p7, ULONG p8, ULONG p9", p1, p2, p3, p4, p5, p6, p7, p8, p9);
     APIRET rc;
 
     rc = VMAllocMem(p1,p2,p3,p4,p5,p6,p7,p8,(PVMAC)p9);
 
+    KLOGEXIT(rc);
     return rc;
 }
 

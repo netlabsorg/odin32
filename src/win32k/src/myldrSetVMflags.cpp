@@ -1,4 +1,4 @@
-/* $Id: myldrSetVMflags.cpp,v 1.1.2.1 2002-03-31 20:09:19 bird Exp $
+/* $Id: myldrSetVMflags.cpp,v 1.1.2.2 2002-04-01 09:06:10 bird Exp $
  *
  * myldrSetVMflags - ldrSetVMflags
  *
@@ -7,6 +7,9 @@
  * Project Odin Software License can be found in LICENSE.TXT
  *
  */
+#ifndef NOFILEID
+static const char szFileId[] = "$Id: myldrSetVMflags.cpp,v 1.1.2.2 2002-04-01 09:06:10 bird Exp $";
+#endif
 
 /*******************************************************************************
 *   Defined Constants And Macros                                               *
@@ -24,8 +27,8 @@
 *   Header Files                                                               *
 *******************************************************************************/
 #include <os2.h>
-#include <peexe.h>
-#include <exe386.h>
+#include "LXexe.h"                      /* OS/2 LX structs and definitions. */
+#include "PEexe.h"                      /* Wine PE structs and definitions. */
 #include <OS2Krnl.h>
 #include <kKrnlLib.h>
 
@@ -51,6 +54,7 @@
  */
 VOID LDRCALL myldrSetVMflags(PMTE pMTE, ULONG flObj, PULONG pflFlags1, PULONG pflFlags2)
 {
+    KLOGENTRY4("VOID","PMTE pMTE, ULONG flObj, PULONG pflFlags1, PULONG pflFlags2", pMTE, flObj, pflFlags1, pflFlags2);
     /*
      * call the orignal and let it do it's work.
      */
@@ -70,4 +74,5 @@ VOID LDRCALL myldrSetVMflags(PMTE pMTE, ULONG flObj, PULONG pflFlags1, PULONG pf
                  pMTE->mte_modname,  pMTE->mte_handle, flObj, ul, *pflFlags1
                  ));
     }
+    KLOGEXITVOID();
 }

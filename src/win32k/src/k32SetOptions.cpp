@@ -1,4 +1,4 @@
-/* $Id: k32SetOptions.cpp,v 1.1.2.1 2002-03-31 20:09:13 bird Exp $
+/* $Id: k32SetOptions.cpp,v 1.1.2.2 2002-04-01 09:06:06 bird Exp $
  *
  * k32SetOptions - Sets the changable options of win32k.sys the options.
  *
@@ -7,6 +7,9 @@
  * Project Odin Software License can be found in LICENSE.TXT
  *
  */
+#ifndef NOFILEID
+static const char szFileId[] = "$Id: k32SetOptions.cpp,v 1.1.2.2 2002-04-01 09:06:06 bird Exp $";
+#endif
 
 
 /*******************************************************************************
@@ -27,10 +30,8 @@
 *   Header Files                                                               *
 *******************************************************************************/
 #include <os2.h>                        /* OS/2 header file. */
-#include <peexe.h>                      /* Wine PE structs and definitions. */
-#include <neexe.h>                      /* Wine NE structs and definitions. */
-#include <newexe.h>                     /* OS/2 NE structs and definitions. */
-#include <exe386.h>                     /* OS/2 LX structs and definitions. */
+#include "LXexe.h"                      /* OS/2 LX structs and definitions. */
+#include "PEexe.h"                      /* Wine PE structs and definitions. */
 #include <OS2Krnl.h>
 #include <kKrnlLib.h>
 
@@ -64,6 +65,7 @@
  */
 APIRET k32SetOptions(PK32OPTIONS pOptions)
 {
+    KLOGENTRY1("APIRET","PK32OPTIONS pOptions", pOptions);
     APIRET  rc;
     ULONG   cb;
 
@@ -79,8 +81,12 @@ APIRET k32SetOptions(PK32OPTIONS pOptions)
     {
         rc = TKFuULongNF(SSToDS(&cb), &pOptions->cb);
         if (rc)
+        {
+            KLOGEXIT(rc);
             return rc;
+        }
         if (cb != sizeof(K32OPTIONS))
+            KLOGEXIT(ERROR_INVALID_PARAMETER);
             return ERROR_INVALID_PARAMETER;
     }
 
@@ -101,41 +107,92 @@ APIRET k32SetOptions(PK32OPTIONS pOptions)
             &&  TmpOptions.usCom != OUTPUT_COM2
             &&  TmpOptions.usCom != OUTPUT_COM3
             &&  TmpOptions.usCom != OUTPUT_COM4)
+        {
+            KLOGEXIT(ERROR_INVALID_PARAMETER);
             return ERROR_INVALID_PARAMETER;
+        }
         #endif
         if (TmpOptions.fLogging > 1)
+        {
+            KLOGEXIT(ERROR_INVALID_PARAMETER);
             return ERROR_INVALID_PARAMETER;
+        }
         if (TmpOptions.fPE > 4)
+        {
+            KLOGEXIT(ERROR_INVALID_PARAMETER);
             return ERROR_INVALID_PARAMETER;
+        }
         if (TmpOptions.fPEOneObject > 2)
+        {
+            KLOGEXIT(ERROR_INVALID_PARAMETER);
             return ERROR_INVALID_PARAMETER;
+        }
         if (TmpOptions.ulInfoLevel > 4)
+        {
+            KLOGEXIT(ERROR_INVALID_PARAMETER);
             return ERROR_INVALID_PARAMETER;
+        }
         if (TmpOptions.fElf > 1)
+        {
+            KLOGEXIT(ERROR_INVALID_PARAMETER);
             return ERROR_INVALID_PARAMETER;
+        }
         if (TmpOptions.fUNIXScript > 1)
+        {
+            KLOGEXIT(ERROR_INVALID_PARAMETER);
             return ERROR_INVALID_PARAMETER;
+        }
         if (TmpOptions.fREXXScript > 1)
+        {
+            KLOGEXIT(ERROR_INVALID_PARAMETER);
             return ERROR_INVALID_PARAMETER;
+        }
         if (TmpOptions.fJava > 1)
+        {
+            KLOGEXIT(ERROR_INVALID_PARAMETER);
             return ERROR_INVALID_PARAMETER;
+        }
         if (TmpOptions.fNoLoader > 1)
+        {
+            KLOGEXIT(ERROR_INVALID_PARAMETER);
             return ERROR_INVALID_PARAMETER;
+        }
         if (TmpOptions.fREXXScript > 1)
+        {
+            KLOGEXIT(ERROR_INVALID_PARAMETER);
             return ERROR_INVALID_PARAMETER;
+        }
         if (TmpOptions.fDllFixes > 1)
+        {
+            KLOGEXIT(ERROR_INVALID_PARAMETER);
             return ERROR_INVALID_PARAMETER;
+        }
         if (TmpOptions.fExeFixes > 1)
+        {
+            KLOGEXIT(ERROR_INVALID_PARAMETER);
             return ERROR_INVALID_PARAMETER;
+        }
         if (TmpOptions.fForcePreload > 1)
+        {
+            KLOGEXIT(ERROR_INVALID_PARAMETER);
             return ERROR_INVALID_PARAMETER;
+        }
         if (TmpOptions.fApiEnh > 1)
+        {
+            KLOGEXIT(ERROR_INVALID_PARAMETER);
             return ERROR_INVALID_PARAMETER;
+        }
         #if 0
         if (TmpOptions.cbSwpHeapMax > (32768*1024) || TmpOptions.cbSwpHeapMax < options.cbSwpHeapInit)
+        {
+            KLOGEXIT(ERROR_INVALID_PARAMETER);
             return ERROR_INVALID_PARAMETER;
+        }
         if (TmpOptions.cbResHeapMax > (32768*1024) || TmpOptions.cbResHeapMax < options.cbResHeapInit)
+        {
+            KLOGEXIT(ERROR_INVALID_PARAMETER);
             return ERROR_INVALID_PARAMETER;
+        }
         #endif
 
         /*
@@ -145,6 +202,7 @@ APIRET k32SetOptions(PK32OPTIONS pOptions)
         if (rc != NO_ERROR)
         {
             kprintf(("k32QueryOptionsStatus: LDRRequestSem failed with rc = %d\n", rc));
+            KLOGEXIT(rc);
             return rc;
         }
 
@@ -182,6 +240,7 @@ APIRET k32SetOptions(PK32OPTIONS pOptions)
         LDRClearSem();
     }
 
+    KLOGEXIT(rc);
     return rc;
 }
 

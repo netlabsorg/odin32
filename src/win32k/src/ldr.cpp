@@ -1,4 +1,4 @@
-/* $Id: ldr.cpp,v 1.1.2.1 2002-03-31 20:09:14 bird Exp $
+/* $Id: ldr.cpp,v 1.1.2.2 2002-04-01 09:06:07 bird Exp $
  *
  * ldr.cpp - Loader helpers.
  *
@@ -7,6 +7,9 @@
  * Project Odin Software License can be found in LICENSE.TXT
  *
  */
+#ifndef NOFILEID
+static const char szFileId[] = "$Id: ldr.cpp,v 1.1.2.2 2002-04-01 09:06:07 bird Exp $";
+#endif
 
 /*******************************************************************************
 *   Defined Constants And Macros                                               *
@@ -24,8 +27,8 @@
 *   Header Files                                                               *
 *******************************************************************************/
 #include <os2.h>
-#include <peexe.h>
-#include <exe386.h>
+#include "LXexe.h"                      /* OS/2 LX structs and definitions. */
+#include "PEexe.h"                      /* Wine PE structs and definitions. */
 #include <OS2Krnl.h>
 #include <kKrnlLib.h>
 
@@ -86,7 +89,10 @@ unsigned char   achHandleStates[MAX_FILE_HANDLES/8];
  */
 PMODULE     getModuleBySFN(SFN hFile)
 {
-    return (PMODULE)AVLULGet(&pSFNRoot, (AVLULKEY)hFile);
+    KLOGENTRY1("PMODULE","SFN hFile", hFile);
+    PMODULE pMod = (PMODULE)AVLULGet(&pSFNRoot, (AVLULKEY)hFile);
+    KLOGEXIT(pMod);
+    return pMod;
 }
 
 
@@ -112,6 +118,7 @@ PMODULE     getModuleBySFN(SFN hFile)
  */
 PMODULE     getModuleByMTE(PMTE pMTE)
 {
+    KLOGENTRY1("PMODULE","PMTE pMTE", pMTE);
     #if 0
         /* Not 100% sure that this will work correctly! */
         PMODULE pMod = (PMODULE)AVLULGet(&pMTERoot, (AVLULKEY)pMTE);
@@ -121,6 +128,7 @@ PMODULE     getModuleByMTE(PMTE pMTE)
                 if (pMTE <= (PMTE)0x10000)
                 {
                     kprintf(("getModuleByMTE: invalid pMTE pointer - %#8x\n", pMTE));
+                    KLOGEXIT(NULL);
                     return NULL;
                 }
             #endif
@@ -134,19 +142,28 @@ PMODULE     getModuleByMTE(PMTE pMTE)
         }
         else
             pMod = (PMODULE)((unsigned)pMod - offsetof(MODULE, coreMTE));
+    {
+        KLOGEXIT(pMod);
         return pMod;
+    }
     #else
         /* Use this for the time being. */
         #ifdef DEBUG
             if (pMTE <= (PMTE)0x10000)
             {
                 kprintf(("getModuleByMTE: invalid pMTE pointer - %#8x\n", pMTE));
+                KLOGEXIT(NULL);
                 return NULL;
             }
         #endif
         if (GetState(pMTE->mte_sfn) == HSTATE_OUR)
-            return (PMODULE)AVLULGet(&pSFNRoot, (AVLULKEY)pMTE->mte_sfn);
+        {
+            PMODULE pMod = (PMODULE)AVLULGet(&pSFNRoot, (AVLULKEY)pMTE->mte_sfn);
+            KLOGEXIT(pMod);
+            return pMod;
+        }
 
+        KLOGEXIT(NULL);
         return NULL;
     #endif
 }
@@ -163,12 +180,18 @@ PMODULE     getModuleByMTE(PMTE pMTE)
  */
 PMODULE     getModuleByhMTE(HMTE hMTE)
 {
+    KLOGENTRY1("PMODULE","HMTE hMTE", hMTE);
     PMTE pMTE;
 
     pMTE = ldrValidateMteHandle(hMTE);
     if (pMTE != NULL)
-        return getModuleByMTE(pMTE);
+    {
+        PMODULE pMod = getModuleByMTE(pMTE);
+        KLOGEXIT(pMod);
+        return pMod;
+    }
 
+    KLOGEXIT(NULL);
     return NULL;
 }
 
@@ -183,7 +206,9 @@ PMODULE     getModuleByhMTE(HMTE hMTE)
  */
 PMODULE     getModuleByFilename(PCSZ pszFilename)
 {
+    KLOGENTRY1("PMODULE","PCSZ pszFilename", pszFilename);
     pszFilename = pszFilename;
+    KLOGEXIT(NULL);
     return NULL;
 }
 
@@ -206,6 +231,7 @@ PMODULE     getModuleByFilename(PCSZ pszFilename)
  */
 ULONG       addModule(SFN hFile, PMTE pMTE, ULONG fFlags, ModuleBase *pModObj)
 {
+    KLOGENTRY4("ULONG","SFN hFile, PMTE pMTE, ULONG fFlags, ModuleBase * pModObj", hFile, pMTE, fFlags, pModObj);
     PMODULE pMod;
     #ifdef DEBUG
         if (AVLULGet(&pSFNRoot, (AVLULKEY)hFile) != NULL)
@@ -213,11 +239,13 @@ ULONG       addModule(SFN hFile, PMTE pMTE, ULONG fFlags, ModuleBase *pModObj)
         if (hFile == 0)
         {
             kprintf(("addModule: invalid parameter: hFile = 0\n"));
+            KLOGEXIT(ERROR_INVALID_PARAMETER);
             return ERROR_INVALID_PARAMETER;
         }
         if ((fFlags & MOD_TYPE_MASK) == 0 || (fFlags  & ~MOD_TYPE_MASK) != 0UL)
         {
             kprintf(("addModule: invalid parameter: fFlags = 0x%#8x\n", fFlags));
+            KLOGEXIT(ERROR_INVALID_PARAMETER);
             return ERROR_INVALID_PARAMETER;
         }
     #endif
@@ -227,6 +255,7 @@ ULONG       addModule(SFN hFile, PMTE pMTE, ULONG fFlags, ModuleBase *pModObj)
     if (pMod == NULL)
     {
         kprintf(("addModule: out of memory!\n"));
+        KLOGEXIT(ERROR_NOT_ENOUGH_MEMORY);
         return ERROR_NOT_ENOUGH_MEMORY;
     }
 
@@ -246,6 +275,7 @@ ULONG       addModule(SFN hFile, PMTE pMTE, ULONG fFlags, ModuleBase *pModObj)
         AVLULInsert(&pMTERoot, (PAVLULNODECORE)((unsigned)pMod + offsetof(MODULE, coreMTE)));
     }
 
+    KLOGEXIT(NO_ERROR);
     return NO_ERROR;
 }
 
@@ -264,10 +294,12 @@ ULONG       addModule(SFN hFile, PMTE pMTE, ULONG fFlags, ModuleBase *pModObj)
  */
 ULONG      removeModule(SFN hFile)
 {
+    KLOGENTRY1("ULONG","SFN hFile", hFile);
     PMODULE pMod = (PMODULE)AVLULRemove(&pSFNRoot, (AVLULKEY)hFile);
     if (pMod == NULL)
     {
         kprintf(("removeModule: Module not found! hFile=%#4x\n", hFile));
+        KLOGEXIT(ERROR_INVALID_PARAMETER);
         return ERROR_INVALID_PARAMETER;
     }
 
@@ -299,6 +331,7 @@ ULONG      removeModule(SFN hFile)
     /* Free the module node. */
     free(pMod);
 
+    KLOGEXIT(NO_ERROR);
     return NO_ERROR;
 }
 
@@ -316,6 +349,7 @@ ULONG      removeModule(SFN hFile)
  */
 PSZ ldrGetExePath(PSZ pszPath, BOOL fExecChild)
 {
+    KLOGENTRY2("PSZ","PSZ pszPath, BOOL fExecChild", pszPath, fExecChild);
     PCSZ    pszFilename;
     PCSZ    psz;
 
@@ -354,6 +388,7 @@ PSZ ldrGetExePath(PSZ pszPath, BOOL fExecChild)
         else
         {   /* Not called at task time? No current task! */
             kprintf(("ldrGetExePath: Failed to get current PTDA.\n"));
+            KLOGEXIT(NULL);
             return NULL;
         }
 
@@ -361,6 +396,7 @@ PSZ ldrGetExePath(PSZ pszPath, BOOL fExecChild)
         if (hMTE == NULLHANDLE)
         {
             kprintf(("ldrGetExePath: Failed to get hMTE from the PTDAs.\n"));
+            KLOGEXIT(NULL);
             return NULL;
         }
 
@@ -369,11 +405,13 @@ PSZ ldrGetExePath(PSZ pszPath, BOOL fExecChild)
         if (pMTE == NULL)
         {
             kprintf(("ldrGetExePath: ldrASMpMTEFromHandle failed for hMTE=0x%04.\n", hMTE));
+            KLOGEXIT(NULL);
             return NULL;
         }
         if (pMTE->mte_swapmte == NULL) /* paranoia */
         {
             kprintf(("ldrGetExePath: mte_swapmte is NULL.\n"));
+            KLOGEXIT(NULL);
             return NULL;
         }
 
@@ -382,6 +420,7 @@ PSZ ldrGetExePath(PSZ pszPath, BOOL fExecChild)
         if (pszFilename == NULL)
         {
             kprintf(("ldrGetExePath: smte_path is NULL.\n"));
+            KLOGEXIT(NULL);
             return NULL;
         }
     }
@@ -390,6 +429,7 @@ PSZ ldrGetExePath(PSZ pszPath, BOOL fExecChild)
     if (*pszFilename == '\0')
     {
         kprintf(("ldrGetExePath: pszFilename is empty!\n"));
+        KLOGEXIT(NULL);
         return NULL;
     }
 
@@ -406,6 +446,7 @@ PSZ ldrGetExePath(PSZ pszPath, BOOL fExecChild)
     if (psz <= pszFilename)
     {
         kprintf(("ldrGetExePath: Exepath is empty.\n"));
+        KLOGEXIT(NULL);
         return NULL;
     }
 
@@ -414,6 +455,7 @@ PSZ ldrGetExePath(PSZ pszPath, BOOL fExecChild)
      */
     memcpy(pszPath, pszFilename, psz - pszFilename);
     pszPath[psz - pszFilename] = '\0';
+    KLOGEXIT(pszPath);
     return pszPath;
 }
 
@@ -424,6 +466,7 @@ PSZ ldrGetExePath(PSZ pszPath, BOOL fExecChild)
  */
 ULONG ldrInit(void)
 {
+    KLOGENTRY0("ULONG");
     int rc = NO_ERROR;
 
     /* init state table */
@@ -436,6 +479,7 @@ ULONG ldrInit(void)
     /* ModuleBase logging. */
     ModuleBase::ulInfoLevel = options.ulInfoLevel;
 
+    KLOGEXIT(rc);
     return rc;
 }
 

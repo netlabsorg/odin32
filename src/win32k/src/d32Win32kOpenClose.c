@@ -1,4 +1,4 @@
-/* $Id: d32Win32kOpenClose.c,v 1.1.2.1 2002-03-31 20:09:06 bird Exp $
+/* $Id: d32Win32kOpenClose.c,v 1.1.2.2 2002-04-01 09:06:03 bird Exp $
  *
  * Open and Close handlers for the Win32k driver.
  *
@@ -7,6 +7,9 @@
  * Project Odin Software License can be found in LICENSE.TXT
  *
  */
+#ifndef NOFILEID
+static const char szFileId[] = "$Id: d32Win32kOpenClose.c,v 1.1.2.2 2002-04-01 09:06:03 bird Exp $";
+#endif
 
 
 /*******************************************************************************
@@ -53,6 +56,7 @@
  */
 USHORT _loadds _Far32 _Pascal Win32kOpen(PRP32OPENCLOSE pRpOpen)
 {
+    KLOGENTRY1("USHORT","PRP32OPENCLOSE pRpOpen", pRpOpen);
     APIRET  rc;
     PPTD    pptd;
 
@@ -72,6 +76,7 @@ USHORT _loadds _Far32 _Pascal Win32kOpen(PRP32OPENCLOSE pRpOpen)
 
     pRpOpen = pRpOpen;
     LDRClearSem();
+    KLOGEXIT(STATUS_DONE);
     return STATUS_DONE;
 }
 
@@ -85,6 +90,7 @@ USHORT _loadds _Far32 _Pascal Win32kOpen(PRP32OPENCLOSE pRpOpen)
  */
 USHORT _loadds _Far32 _Pascal Win32kClose(PRP32OPENCLOSE pRpClose)
 {
+    KLOGENTRY1("USHORT","PRP32OPENCLOSE pRpClose", pRpClose);
     APIRET  rc;
     PPTD    pptd;
 
@@ -109,6 +115,7 @@ USHORT _loadds _Far32 _Pascal Win32kClose(PRP32OPENCLOSE pRpClose)
     pRpClose = pRpClose;
 
     LDRClearSem();
+    KLOGEXIT(STATUS_DONE);
     return STATUS_DONE;
 }
 

@@ -1,4 +1,4 @@
-/* $Id: k32KillProcessEx.cpp,v 1.1.2.1 2002-03-31 20:09:09 bird Exp $
+/* $Id: k32KillProcessEx.cpp,v 1.1.2.2 2002-04-01 09:06:05 bird Exp $
  *
  * k32KillProcessEx - DosKillProcessEx extention.
  *
@@ -7,6 +7,9 @@
  * Project Odin Software License can be found in LICENSE.TXT
  *
  */
+#ifndef NOFILEID
+static const char szFileId[] = "$Id: k32KillProcessEx.cpp,v 1.1.2.2 2002-04-01 09:06:05 bird Exp $";
+#endif
 
 
 /*******************************************************************************
@@ -53,6 +56,7 @@
  */
 APIRET k32KillProcessEx(ULONG flAction, PID pid)
 {
+    KLOGENTRY2("APIRET","ULONG flAction, PID pid", flAction, pid);
     APIRET  rc;
 
     /*
@@ -62,6 +66,7 @@ APIRET k32KillProcessEx(ULONG flAction, PID pid)
         ||  flAction & ~(DKP_ACTION_MASK | DKP_FLAG_MASK))
     {
         kprintf(("k32KillProcessEx(flAction=0x%08x, pid=0x%04x): flags are invalid\n", flAction, pid));
+        KLOGEXIT(ERROR_INVALID_PARAMETER);
         return ERROR_INVALID_PARAMETER;
     }
 
@@ -69,6 +74,7 @@ APIRET k32KillProcessEx(ULONG flAction, PID pid)
         ||  (ULONG)pid >= 0x10000)
     {
         kprintf(("k32KillProcessEx(flAction=0x%08x, pid=0x%04x): pid is out of range\n", flAction, pid));
+        KLOGEXIT(ERROR_INVALID_PROCID);
         return ERROR_INVALID_PROCID;
     }
 
@@ -93,6 +99,7 @@ APIRET k32KillProcessEx(ULONG flAction, PID pid)
                            (USHORT)pid);
     }
 
+    KLOGEXIT(rc);
     return rc;
 }
 

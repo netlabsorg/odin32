@@ -1,4 +1,4 @@
-/* $Id: k32HandleSystemEvent.cpp,v 1.1.2.1 2002-03-31 20:09:09 bird Exp $
+/* $Id: k32HandleSystemEvent.cpp,v 1.1.2.2 2002-04-01 09:06:04 bird Exp $
  *
  * k32HandleSystemEvent - Override system events like Ctrl-Alt-Delete
  *          and Ctrl-Alt-2xNumLock.
@@ -8,6 +8,9 @@
  * Project Odin Software License can be found in LICENSE.TXT
  *
  */
+#ifndef NOFILEID
+static const char szFileId[] = "$Id: k32HandleSystemEvent.cpp,v 1.1.2.2 2002-04-01 09:06:04 bird Exp $";
+#endif
 
 
 /*******************************************************************************
@@ -87,6 +90,7 @@ struct
  */
 APIRET k32HandleSystemEvent(ULONG ulEvent, HEV hev, BOOL fHandle)
 {
+    KLOGENTRY3("APIRET","ULONG ulEvent, HEV hev, BOOL fHandle", ulEvent, hev, fHandle);
     /*
      * Validate parameters.
      *  Event identifier range.
@@ -95,7 +99,10 @@ APIRET k32HandleSystemEvent(ULONG ulEvent, HEV hev, BOOL fHandle)
     if (    ulEvent > K32_SYSEVENT_LAST
         ||  ((ULONG)hev & 0xFFFF0000UL) != 0x80010000UL /* 0x80010000 seems to be the shared event semaphore handle bits. */
         )
+    {
+        KLOGEXIT(ERROR_INVALID_PARAMETER);
         return ERROR_INVALID_PARAMETER;
+    }
 
 
     /*
@@ -104,7 +111,10 @@ APIRET k32HandleSystemEvent(ULONG ulEvent, HEV hev, BOOL fHandle)
     if (    (fHandle  && aSysEventsOverrides[ulEvent].hev && !aSysEventsOverrides[ulEvent].fBad)
         ||  (!fHandle && aSysEventsOverrides[ulEvent].hev != hev && !aSysEventsOverrides[ulEvent].fBad)
         )
+    {
+        KLOGEXIT(ERROR_ACCESS_DENIED);
         return ERROR_ACCESS_DENIED;
+    }
 
 
     /*
@@ -120,6 +130,7 @@ APIRET k32HandleSystemEvent(ULONG ulEvent, HEV hev, BOOL fHandle)
         aSysEventsOverrides[ulEvent].hev = NULLHANDLE;
     }
 
+    KLOGEXIT(NO_ERROR);
     return NO_ERROR;
 }
 

@@ -1,4 +1,4 @@
-/* $Id: elf2lx.cpp,v 1.1.2.1 2002-03-31 20:09:08 bird Exp $
+/* $Id: elf2lx.cpp,v 1.1.2.2 2002-04-01 09:06:04 bird Exp $
  *
  * Elf2Lx - implementation.
  *
@@ -7,6 +7,9 @@
  * Project Odin Software License can be found in LICENSE.TXT
  *
  */
+#ifndef NOFILEID
+static const char szFileId[] = "$Id: elf2lx.cpp,v 1.1.2.2 2002-04-01 09:06:04 bird Exp $";
+#endif
 
 
 /*******************************************************************************
@@ -15,6 +18,9 @@
 #define FOR_EXEHDR 1                    /* To make all object flags OBJ???. */
 #define INCL_DOSERRORS                  /* DOS Error codes. */
 #define INCL_OS2KRNL_LDR                /* LdrRead */
+#define INCL_KKL_LOG
+#define INCL_KKL_AVL
+#define INCL_KKL_HEAP
 #ifdef RING0
     #define INCL_NOAPI                  /* RING0: No apis. */
 #else /*RING3*/
@@ -26,26 +32,20 @@
 *   Header Files                                                               *
 *******************************************************************************/
 #include <os2.h>                        /* OS/2 header file. */
-#include "types.h"                      /* Types used by the next two files. */
-#include <newexe.h>                     /* OS/2 NE structs and definitions. */
-#include <exe386.h>                     /* OS/2 LX structs and definitions. */
-#include "elf.h"                        /* Elf binary format definitions. */
 
-#include "devSegDf.h"                   /* Win32k segment definitions. */
-
-#include "malloc.h"                     /* win32k malloc (resident). Not C library! */
-#include "smalloc.h"                    /* win32k swappable heap. */
-#include "rmalloc.h"                    /* win32k resident heap. */
+#include "NEexe.h"                      /* Wine NE structs and definitions. */
+#include "LXexe.h"                      /* OS/2 LX structs and definitions. */
+#include "ELFexe.h"                     /* Elf binary format definitions. */
+#include <OS2Krnl.h>                    /* kernel structs.  (SFN) */
+#include <kKrnlLib.h>
 
 #include <string.h>                     /* C library string.h. */
 #include <stdlib.h>                     /* C library stdlib.h. */
 #include <stddef.h>                     /* C library stddef.h. */
 #include <stdarg.h>                     /* C library stdarg.h. */
 
-#include "vprintf.h"                    /* win32k printf and vprintf. Not C library! */
+#include "devSegDf.h"                   /* Win32k segment definitions. */
 #include "dev32.h"                      /* 32-Bit part of the device driver. (SSToDS) */
-#include "OS2Krnl.h"                    /* kernel structs.  (SFN) */
-
 #include "modulebase.h"                 /* ModuleBase class definitions, ++. */
 #include "elf2lx.h"                     /* Elf2Lx class definitions.  */
 

@@ -1,4 +1,4 @@
-/* $Id: mmf.cpp,v 1.1.2.1 2002-03-31 20:09:14 bird Exp $
+/* $Id: mmf.cpp,v 1.1.2.2 2002-04-01 09:06:07 bird Exp $
  *
  * Memory Mapped Files.
  *
@@ -7,6 +7,9 @@
  * Project Odin Software License can be found in LICENSE.TXT
  *
  */
+#ifndef NOFILEID
+static const char szFileId[] = "$Id: mmf.cpp,v 1.1.2.2 2002-04-01 09:06:07 bird Exp $";
+#endif
 
 /** @design     Memory Mapped Files - Ring 0
 

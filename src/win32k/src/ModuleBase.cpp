@@ -1,4 +1,4 @@
-/* $Id: ModuleBase.cpp,v 1.1.2.1 2002-03-31 20:09:03 bird Exp $
+/* $Id: ModuleBase.cpp,v 1.1.2.2 2002-04-01 09:06:02 bird Exp $
  *
  * ModuleBase - Implementetation.
  *
@@ -7,6 +7,9 @@
  * Project Odin Software License can be found in LICENSE.TXT
  *
  */
+#ifndef NOFILEID
+static const char szFileId[] = "$Id: ModuleBase.cpp,v 1.1.2.2 2002-04-01 09:06:02 bird Exp $";
+#endif
 
 /*******************************************************************************
 *   Defined Constants And Macros                                               *

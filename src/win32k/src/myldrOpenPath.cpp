@@ -1,4 +1,4 @@
-/* $Id: myldrOpenPath.cpp,v 1.1.2.1 2002-03-31 20:09:18 bird Exp $
+/* $Id: myldrOpenPath.cpp,v 1.1.2.2 2002-04-01 09:06:09 bird Exp $
  *
  * myldrOpenPath - ldrOpenPath used to open executables we'll override
  * this to altern the search path for DLLs.
@@ -8,6 +8,9 @@
  * Project Odin Software License can be found in LICENSE.TXT
  *
  */
+#ifndef NOFILEID
+static const char szFileId[] = "$Id: myldrOpenPath.cpp,v 1.1.2.2 2002-04-01 09:06:09 bird Exp $";
+#endif
 
 /*******************************************************************************
 *   Defined Constants And Macros                                               *
@@ -24,8 +27,8 @@
 *   Header Files                                                               *
 *******************************************************************************/
 #include <os2.h>
-#include <peexe.h>
-#include <exe386.h>
+#include "LXexe.h"                      /* OS/2 LX structs and definitions. */
+#include "PEexe.h"                      /* Wine PE structs and definitions. */
 #include <OS2Krnl.h>
 #include <kKrnlLib.h>
 
@@ -90,7 +93,7 @@ ULONG LDRCALL myldrOpenPath(       /* retd  0x14 */
     ULONG       lLibPath            /* ebp + 0x18 */
     )
 {
-
+    KLOGENTRY5("ULONG","PCHAR pachFilename, USHORT cchFilename, ldrlv_t * plv, PULONG pful, ULONG lLibPath", pachFilename, cchFilename, plv, pful, lLibPath);
     APIRET  rc;
 
     #ifdef DEBUG
@@ -107,6 +110,7 @@ ULONG LDRCALL myldrOpenPath(       /* retd  0x14 */
                  "    pachFilename 0x%08x  cchFilename 0x%04x  plv 0x%08x  pful=0x%08x\n",
                  pachFilename, cchFilename, plv, pful
                  ));
+        KLOGEXIT(ldrOpenPath(pachFilename, cchFilename, plv, pful, lLibPath));
         return ldrOpenPath(pachFilename, cchFilename, plv, pful, lLibPath);
     }
     #endif
@@ -208,6 +212,7 @@ ULONG LDRCALL myldrOpenPath(       /* retd  0x14 */
      */
     fldrOpenExtentionFix = FALSE;
 
+    KLOGEXIT(rc);
     return rc;
 }
 
@@ -224,7 +229,10 @@ ULONG LDRCALL myldrOpenPath_old( /* retd  0x10 */
     PULONG      pful             /* ebp + 0x14 */
     )
 {
-    return myldrOpenPath(pachFilename, cchFilename, plv, pful, 3);
+    KLOGENTRY4("ULONG","PCHAR pachFilename, USHORT cchFilename, ldrlv_t * plv, PULONG pful", pachFilename, cchFilename, plv, pful);
+    ULONG   rc = myldrOpenPath(pachFilename, cchFilename, plv, pful, 3);
+    KLOGEXIT(rc);
+    return rc;
 }
 
 
