@@ -72,8 +72,8 @@
 
 /* ---------- GCC/EMX ---------- */
 #ifdef __GNUC__
-  #if defined(__GNUC__) && (__GNUC__ <= 2) && (__GNUC_MINOR__ < 7)
-    #error You need gcc >= 2.7 to build Odin32
+  #if defined(__GNUC__) && (__GNUC__ <= 3) && (__GNUC_MINOR__ < 2)
+    #error You need gcc >= 3.2 to build Odin32
   #endif
   #if !defined(__stdcall__)             /* this is also defined in windef.h if !defined(WIN32OS2) */
     #define __stdcall __attribute__((__stdcall__))
@@ -83,12 +83,15 @@
   #define EXPORT    _export
   #define WIN32API  __stdcall
   #define WINAPI    __stdcall
-  #define SYSTEM   
+  #define SYSTEM    CDECL
   #define PASCAL    __stdcall
   #define INLINE    __inline__
   #define UNALIGNED
   #define NONAMELESSUNION
   #define NONAMELESSSTRUCT
+  #undef  APIENTRY
+  #define APIENTRY  CDECL
+
 #else
 
 /* ---------- VAC ---------- */

@@ -1,5 +1,3 @@
-/* $Id: ntdef.h,v 1.2 1999-06-08 15:49:37 phaller Exp $ */
-
 #ifndef __WINE_NTDEF_H
 #define __WINE_NTDEF_H
 
@@ -30,6 +28,8 @@ extern "C" {
 
 typedef LONG NTSTATUS;
 typedef NTSTATUS *PNTSTATUS;
+
+typedef CONST char *PCSZ;
 
 typedef short CSHORT;
 typedef CSHORT *PCSHORT;  
