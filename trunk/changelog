@@ -1,10 +1,18 @@
- /* $Id: changelog,v 1.1173 2000-10-05 13:46:37 sandervl Exp $ */
+ /* $Id: changelog,v 1.1174 2000-10-05 18:36:11 sandervl Exp $ */
 
  2000-10-05: Sander van Leeuwen <sandervl@xs4all.nl>
     - KERNEL32: Don't print FS warnings for OS/2 Odin applications
     - USER32:   GetWindow GW_CHILD & GW_HWNDFIRST fixes
                 EnumDisplaySettingsA; always set refresh rate to 70hz
+                Z-order bugs fixed; GetWindow returns windows in correct order now
+                hack for groupbox (clipsiblings) no longer necessary. Same
+                goes for adding WS_CLIPSIBLINGS style for dialog controls.
+                Re-enabled usage of invalid region instead of invalid rectangle
+                in BeginPaint -> lots of paint problems gone (i.e. winzip)
 
+ 2000-10-05: Michal Necasek <mike@mendelu.cz>
+    - KERNEL32: Fixes for exception handling (as done by MSVCRT)
+     
  2000-10-05: knut st. osmundsen <knut.stange.osmundsen@mynd.no>
     - tools\common: Implemented read and write buffering for class kFile
                 to speed up kDef2Wat and ImpDef.
