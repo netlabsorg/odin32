@@ -1,4 +1,4 @@
-; $Id: user32dbg.def,v 1.3 2002-02-18 10:14:58 sandervl Exp $
+; $Id: user32dbg.def,v 1.4 2002-03-08 11:09:15 sandervl Exp $
 
 LIBRARY USER32 INITINSTANCE TERMINSTANCE
 DESCRIPTION 'Odin32 System Dll - User32'
@@ -656,6 +656,15 @@ EXPORTS
     WINNLSEnableIME            = _DbgWINNLSEnableIME@8             @1012
     WINNLSGetEnableStatus      = _DbgWINNLSGetEnableStatus@4       @1013
     WINNLSGetIMEHotkey         = _DbgWINNLSGetIMEHotkey@4          @1014
+
+;-------------------------------
+; Additional (undocumented) APIs
+;-------------------------------
+    PrivateExtractIconsW       = _PrivateExtractIconsW@32      @1015
+    PrivateExtractIconsA       = _PrivateExtractIconsA@32      @1016
+    PrivateExtractIconExW      = _PrivateExtractIconExW@20     @1017
+    PrivateExtractIconExA      = _PrivateExtractIconExA@20     @1018
+
 
 ;------------------------------------------------------------------------------
 ; Wine/Odin helper function
