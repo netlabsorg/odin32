@@ -1,6 +1,6 @@
-/* $Id: ChangeLog,v 1.1275 2001-02-20 05:16:42 bird Exp $ */
+/* $Id: ChangeLog,v 1.1276 2001-02-20 09:38:26 achimha Exp $ */
 
- 2000-02-19: Kai Sommerfeld <kai.sommerfeld@hamburg.de>
+ 2000-02-19: Oliver Braun <Oliver.Braun@hamburg.de>
     - KERNEL32: o OSLibDosAllocMem fix (better checks for errors + return
                   4kb aligned memory if 64kb alignment fails)
                   (fixes StarOffice 5.2 install)
