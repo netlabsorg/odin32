@@ -3,21 +3,28 @@
 #include <string.h>
 #include <memory.h>
 #define INITGUID
+#include "os2ddraw.h"
+#include "os2clipper.h"
 #include "os2palette.h"
+#include "os2surface.h"
 #define _OS2WIN_H
 #define FAR
 #include "misc.h"
 #include "os2palset.h"
 #include <winerror.h>
 
+#undef THIS
+#define THIS IDirectDrawPalette*
+
 //******************************************************************************
 //******************************************************************************
-OS2IDirectDrawPalette::OS2IDirectDrawPalette( OS2IDirectDraw *lpDirectDraw,
+OS2IDirectDrawPalette::OS2IDirectDrawPalette( VOID *lpDirectDraw,
                                               int palsize,
                                               LPPALETTEENTRY lpColorTable,
                                               DWORD dwPalFlags) :
                                               Referenced(0), os2pal(NULL),
                                               lastError(DD_OK), lpDraw(NULL)
+
 {
   lpVtbl              = &Vtbl;
   Vtbl.AddRef         = PalAddRef;
@@ -29,9 +36,10 @@ OS2IDirectDrawPalette::OS2IDirectDrawPalette( OS2IDirectDraw *lpDirectDraw,
   Vtbl.SetEntries     = PalSetEntries;
 
   lpDraw                        = lpDirectDraw;
-  lpDraw->Vtbl.AddRef(lpDraw);
-  hDive                         = lpDirectDraw->GetDiveInstance();
+  ((OS2IDirectDraw*)lpDraw)->Vtbl.AddRef(lpDraw);
+  hDive                         = ((OS2IDirectDraw*)lpDirectDraw)->GetDiveInstance();
   dwCaps                        = dwPalFlags;
+  hDiveCC                       = ((OS2IDirectDraw*)lpDirectDraw)->GetCCDiveInstance();
 
   dwSize = palsize;
   if(256==dwSize)
@@ -40,6 +48,16 @@ OS2IDirectDrawPalette::OS2IDirectDrawPalette( OS2IDirectDraw *lpDirectDraw,
 
   os2pal = (LPPALETTEENTRY)malloc(palsize*sizeof(PALETTEENTRY));
   memcpy((char *)os2pal, (char *)lpColorTable, palsize*sizeof(PALETTEENTRY));
+
+  for(DWORD i=0;i<dwSize;i++)
+  {
+    aPal16[i] = (lpColorTable[i].peBlue>>3) +
+                ((lpColorTable[i].peGreen>>2) <<5) +
+                ((lpColorTable[i].peRed>>3) << 11);
+    aPal24[i] = (lpColorTable[i].peBlue <<8) +
+                (lpColorTable[i].peGreen<<16) +
+                (lpColorTable[i].peRed<<24);
+  }
 }
 //******************************************************************************
 //******************************************************************************
@@ -47,7 +65,7 @@ OS2IDirectDrawPalette::~OS2IDirectDrawPalette()
 {
   if(os2pal)
     free(os2pal);
-  lpDraw->Vtbl.Release(lpDraw);
+  ((OS2IDirectDraw*)lpDraw)->Vtbl.Release((OS2IDirectDraw*)lpDraw);
 }
 //******************************************************************************
 //******************************************************************************
@@ -174,9 +192,45 @@ HRESULT __stdcall PalSetEntries(THIS This, DWORD dwFlags,
          (char *)lpNewEntries,
          dwNumEntries*sizeof(PALETTEENTRY));
 
-  if(me->fAttachedToPrimary)
-    me->SetPhysPalette();
+  for(DWORD i=0;i<dwNumEntries;i++)
+  {
+    me->aPal16[dwBase+i] = (lpNewEntries[i].peBlue>>3) +
+                           ((lpNewEntries[i].peGreen>>2) <<5) +
+                           ((lpNewEntries[i].peRed>>3) << 11);
+    me->aPal24[dwBase+i] = (lpNewEntries[i].peBlue <<8) +
+                           (lpNewEntries[i].peGreen<<16) +
+                           (lpNewEntries[i].peRed<<24);
+  }
 
+  if(8==((OS2IDirectDraw*)me->lpDraw)->dCaps.ulDepth)
+  {
+    if(me->fAttachedToPrimary)
+      me->SetPhysPalette();
+  }
+  else
+  {
+    if(NULL!=((OS2IDirectDraw*)me->lpDraw)->pPrimSurf)
+      ((OS2IDirectDrawSurface*)((OS2IDirectDraw*)me->lpDraw)->pPrimSurf)->ColorConversion(NULL);;
+  }
+  /*
+  if(NULL!=me->hDiveCC)
+  {
+    DiveSetSourcePalette( me->hDiveCC,
+                          dwBase,
+                          dwNumEntries,
+                          (PBYTE)lpNewEntries);
+
+  }
+  else
+  {
+    // Only usefull if system and game are in 8bit mode
+    // 16bit games don't use palettes and setting the Phys palette
+    // in >8Bit Modes has no effect.
+
+    if(me->fAttachedToPrimary)
+      me->SetPhysPalette();
+  }
+  */
   return(DD_OK);
 }
 //******************************************************************************
@@ -198,9 +252,19 @@ void OS2IDirectDrawPalette::SetIsPrimary(BOOL fNewVal)
   if(fNewVal==fAttachedToPrimary)
     return;
   fAttachedToPrimary = fNewVal;
-  if(fAttachedToPrimary)
-    SetPhysPalette();
 
+  /*
+  if(fAttachedToPrimary)
+  {
+    if(NULL!=hDiveCC)
+      DiveSetSourcePalette( hDiveCC,
+                            0,
+                            255,
+                            (PBYTE)os2pal);
+    else
+      SetPhysPalette();
+  }
+  */
 }
 //******************************************************************************
 //******************************************************************************

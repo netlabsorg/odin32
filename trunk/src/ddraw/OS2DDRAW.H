@@ -6,12 +6,12 @@
 #undef APIENTRY
 #define APIENTRY _System
 #include "divewrap.h"
-
 #define DEBUG 1
 #define mmioFOURCC( ch0, ch1, ch2, ch3 )                         \
                   ( (DWORD)(BYTE)(ch0) | ( (DWORD)(BYTE)(ch1) << 8 ) |    \
                   ( (DWORD)(BYTE)(ch2) << 16 ) | ( (DWORD)(BYTE)(ch3) << 24 ) )
 #include <fourcc.h>
+#undef THIS
 #define THIS VOID*
 class OS2IDirectDraw
 {
@@ -44,6 +44,7 @@ class OS2IDirectDraw
     // functions we need the physical screen size. Other information is later
     // also needed so get all the info we can get
     DIVE_CAPS dCaps;
+    VOID *pPrimSurf;
 
   private:
    VOID SwitchDisplay(HWND hwnd);
