@@ -1,4 +1,3 @@
-; $Id: wgss50.def,v 1.5 2001-07-07 19:04:50 sandervl Exp $
 LIBRARY WGSS50  INITINSTANCE  TERMINSTANCE
 
 EXPORTS
@@ -12,17 +11,17 @@ EXPORTS
    _O32_BeginPath @ 17
    _O32_BitBlt @ 18
    _O32_Chord @ 38
-   _O32_ClipCursor @ 40
+
    _O32_CloseFigure @ 43
    _O32_CloseMetaFile @ 45
-   _O32_CopyCursor @ 50
+
    _O32_CopyMetaFile @ 54
-   _O32_CopyRect @ 55
+
    _O32_CreateBitmap @ 58
    _O32_CreateBrushIndirect @ 59
    _O32_CreateCompatibleBitmap @ 61
    _O32_CreateCompatibleDC @ 62
-   _O32_CreateCursor @ 63
+
    _O32_CreateDC @ 64
    _O32_CreateDIBPatternBrushPt @ 65
    _O32_CreateDIBitmap @ 66
@@ -40,7 +39,7 @@ EXPORTS
    _O32_DeleteDC @ 135
    _O32_DeleteMetaFile @ 139
    _O32_DeleteObject @ 140
-   _O32_DestroyCursor @ 143
+
    _O32_DrawFocusRect @ 159
    _O32_Ellipse @ 164
    _O32_EndDoc @ 171
@@ -50,7 +49,7 @@ EXPORTS
    _O32_EnumFonts @ 180
    _O32_EnumMetaFile @ 181
    _O32_EnumObjects @ 182
-   _O32_EqualRect @ 187
+
    _O32_Escape @ 189
    _O32_ExtCreatePen @ 196
    _O32_ExtFloodFill @ 198
@@ -69,11 +68,11 @@ EXPORTS
    _O32_GetBrushOrgEx @ 234
    _O32_GetCharABCWidths @ 238
    _O32_GetCharWidth @ 239
-   _O32_GetClipCursor @ 246
+
    _O32_GetCurrentObject @ 254
    _O32_GetCurrentPositionEx @ 255
-   _O32_GetCursor @ 261
-   _O32_GetCursorPos @ 262
+
+
    _O32_GetDCOrgEx @ 265
    _O32_GetDIBColorTable @ 266
    _O32_GetDIBits @ 267
@@ -104,16 +103,15 @@ EXPORTS
    _O32_GetTextExtentPoint32 @ 369
    _O32_GetTextFace @ 370
    _O32_GetTextMetrics @ 371
-   _O32_InflateRect @ 417
-   _O32_IntersectRect @ 425
+
    _O32_InvertRect @ 428
-   _O32_IsRectEmpty @ 447
+
    _O32_LPtoDP @ 453
    _O32_LineDDA @ 455
    _O32_LineTo @ 456
    _O32_MaskBlt @ 485
    _O32_MulDiv @ 494
-   _O32_OffsetRect @ 498
+
    _O32_PatBlt @ 511
    _O32_Pie @ 514
    _O32_PlayMetaFile @ 517
@@ -126,8 +124,7 @@ EXPORTS
    _O32_Polygon @ 524
    _O32_Polyline @ 525
    _O32_PolylineTo @ 526
-   _O32_PrintDlg @ 530
-   _O32_PtInRect @ 531
+   _O32_PrintDlg @530
    _O32_RealizePalette @ 536
    _O32_RectVisible @ 538
    _O32_Rectangle @ 539
@@ -147,8 +144,8 @@ EXPORTS
    _O32_SetBkMode @ 594
    _O32_SetBoundsRect @ 595
    _O32_SetBrushOrgEx @ 596
-   _O32_SetCursor @ 605
-   _O32_SetCursorPos @ 606
+
+
    _O32_SetDIBColorTable @ 607
    _O32_SetDIBits @ 608
    _O32_SetMapperFlags @ 627
@@ -158,22 +155,21 @@ EXPORTS
    _O32_SetPixel @ 634
    _O32_SetPolyFillMode @ 635
    _O32_SetROP2 @ 638
-   _O32_SetRect @ 639
-   _O32_SetRectEmpty @ 640
+
+
    _O32_SetStretchBltMode @ 644
    _O32_SetTextAlign @ 647
    _O32_SetTextCharacterExtra @ 648
    _O32_SetTextColor @ 649
    _O32_SetTextJustification @ 650
-   _O32_ShowCursor @ 668
+
    _O32_StartDoc @ 674
    _O32_StartPage @ 675
    _O32_StretchBlt @ 676
    _O32_StretchDIBits @ 677
    _O32_StrokeAndFillPath @ 678
    _O32_StrokePath @ 679
-   _O32_SubtractRect @ 680
-   _O32_UnionRect @ 701
+
    _O32_UnrealizeObject @ 704
    _O32_WidenPath @ 713
    _O32_WindowFromDC @ 1000
@@ -184,6 +180,8 @@ EXPORTS
    _DeleteHDC @ 1023
    _O32_GetKerningPairs @ 1024
    _O32_PtVisible @ 1025
+   _O32_SetAbortProc @1031
+
    _O32_DeleteOwnDC @ 1900
    _O32_SetBitmapID @ 1901
    _O32_CreateHandleForMemory @ 1902
