@@ -1,4 +1,4 @@
-/* $Id: registry.cpp,v 1.7 1999-12-01 10:48:16 sandervl Exp $ */
+/* $Id: registry.cpp,v 1.8 1999-12-19 22:05:39 sandervl Exp $ */
 
 /*
  * Win32 registry API functions for OS/2
@@ -128,6 +128,7 @@ ODINFUNCTION3(LONG,RegCreateKeyW,HKEY,   hKey,
   char *astring = UnicodeToAsciiString((LPWSTR)lpszSubKey);
   LONG  rc;
 
+  dprintf(("RegCreateKeyW %x %s", hKey, astring));
   rc = _O32_RegCreateKey(ConvertKey(hKey),
                         astring,
                         phkResult);
