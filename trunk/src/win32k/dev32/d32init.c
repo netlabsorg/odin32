@@ -1,4 +1,4 @@
-/* $Id: d32init.c,v 1.43 2002-12-06 02:57:49 bird Exp $
+/* $Id: d32init.c,v 1.44 2002-12-06 03:00:13 bird Exp $
  *
  * d32init.c - 32-bits init routines.
  *
@@ -657,7 +657,7 @@ USHORT _loadds _Far32 _Pascal GetKernelInfo32(PKRNLINFO pKrnlInfo)
                                 fKrnlTypeOk = TRUE;
                                 if (psz[7] == 'D')
                                     pKrnlInfo->fKernel |= KF_ALLSTRICT;
-                                else if (psz[7] == 'B')
+                                else if (psz[7] == 'B' || psz[7] == 'H')
                                     pKrnlInfo->fKernel |= KF_HALFSTRICT;
                                 else if (psz[7] != 'R')
                                     fKrnlTypeOk = FALSE;
