@@ -1,4 +1,4 @@
-/* $Id: static.cpp,v 1.26 2002-11-04 13:31:14 sandervl Exp $ */
+/* $Id: static.cpp,v 1.27 2002-11-07 10:29:16 sandervl Exp $ */
 /*
  * Static control
  *
@@ -380,6 +380,10 @@ LRESULT STATIC_SetText(HWND hwnd,WPARAM wParam,LPARAM lParam)
             STATIC_SetBitmap(hwnd, hBitmap);
 	    break;
 	}
+        case SS_ENHMETAFILE:
+            STATIC_SetMetafile(hwnd,STATIC_LoadMetafile(hwnd,(LPCSTR)lParam));
+            break;
+
 	case SS_LEFT:
 	case SS_CENTER:
 	case SS_RIGHT:
@@ -399,6 +403,7 @@ LRESULT STATIC_SetText(HWND hwnd,WPARAM wParam,LPARAM lParam)
                 DefWindowProcA( hwnd, WM_SETTEXT, wParam, lParam );
     	    }
             InvalidateRect(hwnd, NULL, TRUE);
+            break;
 	}
         return 1; /* success. FIXME: check text length */
 }
