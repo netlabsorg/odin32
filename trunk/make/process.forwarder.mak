@@ -1,4 +1,4 @@
-# $Id: process.forwarder.mak,v 1.6 2002-08-20 04:05:40 bird Exp $
+# $Id: process.forwarder.mak,v 1.7 2002-08-20 07:05:43 bird Exp $
 
 #
 # Generic makefile system.
@@ -185,10 +185,14 @@ build rebuild clean dep lib executables miscellaneous \
 $(TARGET) \
 !endif
 $(TARGET_ILIB) \
+$(RULES_FORWARD) \
 install testcase nothing target:
     \
 !ifndef BUILD_VERBOSE
     @ \
+!endif
+!ifndef _BUILD_PROJECT # workaround for buggy SET implementation in NMAKE.
+    echo . && SET _BUILD_PROJECT=$(BUILD_PROJECT) && \
 !endif
     $(TOOL_BUILDENV) $(BUILD_ENVS_CHANGE) * $(TOOL_MAKE) -f $(MAKEFILE) $@
 
@@ -201,6 +205,9 @@ shell:
     \
 !ifndef BUILD_VERBOSE
     @ \
+!endif
+!ifndef _BUILD_PROJECT # workaround for buggy SET implementation in NMAKE.
+    echo . && SET _BUILD_PROJECT=$(BUILD_PROJECT) && \
 !endif
     $(TOOL_BUILDENV) $(BUILD_ENVS_CHANGE) * $(COMSPEC)
 
