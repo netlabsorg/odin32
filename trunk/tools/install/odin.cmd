@@ -1,4 +1,4 @@
-/* $Id: odin.cmd,v 1.26 2001-01-10 18:39:57 bird Exp $
+/* $Id: odin.cmd,v 1.27 2001-01-12 14:49:38 bird Exp $
  *
  * Odin32 API WarpIn installation script generator.
  *
@@ -335,7 +335,7 @@ sCurDir = directory();
 sMainDir = filespec('path', sCurDir);
 sMainDir = filespec('path', substr(sMainDir, 1, length(sMainDir) - 1));
 sMainDir = filespec('drive', sCurDir) || substr(sMainDir, 1, length(sMainDir) - 1);
-sDocDir = sMainDir||'\doc'
+sDocDir = sMainDir||'\doc';
 sBinDir = sMainDir||'\bin';
 sDllDir = sBinDir||'\'||sDllDir;
 sWICCmd = 'wic.exe '||sInstallArchive ' -a';
@@ -368,8 +368,17 @@ if (rc <> 0) then return rc;
 sWICCmd '2 -c'||sBinDir||' wgss50.dll';
 if (rc <> 0) then return rc;
 
-if (pos('DEBUG', translate(filespec('name', sDllDir))) > 0) then
+if (pos('DEBUG', translate(filespec('name', sDllDir)))) then
 do
+    iDbg = lastpos('DEBUG', translate(sDllDir));
+    sRelDir = substr(sDllDir, 1, iDbg - 1)||'release'||substr(sDllDir, iDbg + 5);
+    say sRelDir
+    say sRelDir
+    say sRelDir
+    say sRelDir
+    say sRelDir
+    sWICCmd '2 -c'||sRelDir 'odincrt.dll odincrt.sym';
+
     sWICCmd '2 -c'||sDllDir '*.sym';
     if (rc <> 0) then return rc;
 end
