@@ -1,4 +1,4 @@
-/* $Id: edit.cpp,v 1.20 1999-12-01 18:23:27 cbratschi Exp $ */
+/* $Id: edit.cpp,v 1.21 1999-12-02 16:34:43 cbratschi Exp $ */
 /*
  *      Edit control
  *
@@ -20,10 +20,10 @@
   - text alignment for single and multi line (ES_LEFT, ES_RIGHT, ES_CENTER)
     new in Win98, Win2k: for single line too
   - WinNT/Win2k: higher size limits (single: 0x7FFFFFFE, multi: none)
-  - problems with OS/2 PM font kerning:
-    TabbedTextOutA
-    GetTextExtentPoint32A
-    WINE code uses relative positions -> rewrite to absolute!
+  - problems with selection update: perhaps an Open32 bug
+    TextOutA: draws at wrong position
+    I've removed the workarounds, it makes no sense to fix GDI32 bugs here
+    -> rewrite TextOut and TabbedTextOut
 */
 
 #include <os2win.h>
@@ -1031,6 +1031,7 @@ static void EDIT_GetLineRect(HWND hwnd, EDITSTATE *es, INT line, INT scol, INT e
         else
                 rc->top = es->format_rect.top;
         rc->bottom = rc->top + es->line_height;
+
         rc->left = (scol == 0) ? es->format_rect.left : SLOWORD(EDIT_EM_PosFromChar(hwnd, es, line_index + scol, TRUE));
         rc->right = (ecol == -1) ? es->format_rect.right : SLOWORD(EDIT_EM_PosFromChar(hwnd, es, line_index + ecol, TRUE))+1;
 }
@@ -1099,10 +1100,6 @@ static void EDIT_SL_InvalidateText(HWND hwnd, EDITSTATE *es, INT start, INT end)
 
         EDIT_GetLineRect(hwnd, es, 0, start, end, &line_rect);
 
-        //CB: fix 1 pixel vertical line bug
-        line_rect.left--;
-        line_rect.right++;
-
         if (IntersectRect(&rc, &line_rect, &es->format_rect))
         {
           HideCaret(hwnd);
@@ -1151,11 +1148,6 @@ static void EDIT_ML_InvalidateText(HWND hwnd, EDITSTATE *es, INT start, INT end)
         HideCaret(hwnd);
         if (sl == el) {
                 EDIT_GetLineRect(hwnd, es, sl, sc, ec, &rcLine);
-
-                //CB: fix 1 pixel vertical line bug
-                rcLine.left--;
-                rcLine.right++;
-
 
                 if (IntersectRect(&rcUpdate, &rcWnd, &rcLine))
                         InvalidateRect(hwnd, &rcUpdate, FALSE);
@@ -1581,13 +1573,14 @@ static void EDIT_PaintLine(HWND hwnd, EDITSTATE *es, HDC dc, INT line, BOOL rev)
         ORDER_INT(s, e);
         s = MIN(li + ll, MAX(li, s));
         e = MIN(li + ll, MAX(li, e));
+
         if (rev && (s != e) &&
-                        ((es->flags & EF_FOCUSED) || (es->style & ES_NOHIDESEL))) {
-                x += EDIT_PaintText(hwnd, es, dc, x, y, line, 0, s - li, FALSE);
-                x += EDIT_PaintText(hwnd, es, dc, x, y, line, s - li, e - s, TRUE);
-                x += EDIT_PaintText(hwnd, es, dc, x, y, line, e - li, li + ll - e, FALSE);
-        } else
-                x += EDIT_PaintText(hwnd, es, dc, x, y, line, 0, ll, FALSE);
+                        ((es->flags & EF_FOCUSED) || (es->style & ES_NOHIDESEL)))
+        {
+          x += EDIT_PaintText(hwnd, es, dc, x, y, line, 0, s - li, FALSE);
+          x += EDIT_PaintText(hwnd, es, dc, x, y, line, s - li, e - s, TRUE);
+          x += EDIT_PaintText(hwnd, es, dc, x, y, line, e - li, li + ll - e, FALSE);
+        } else  EDIT_PaintText(hwnd, es, dc, x, y, line, 0, ll, FALSE);
 }
 
 
@@ -1602,7 +1595,6 @@ static INT EDIT_PaintText(HWND hwnd, EDITSTATE *es, HDC dc, INT x, INT y, INT li
         COLORREF TextColor;
         INT ret;
         INT li;
-        SIZE size;
 
         if (!count)
                 return 0;
@@ -1616,13 +1608,21 @@ static INT EDIT_PaintText(HWND hwnd, EDITSTATE *es, HDC dc, INT x, INT y, INT li
         if (es->style & ES_MULTILINE) {
                 ret = (INT)LOWORD(TabbedTextOutA(dc, x, y, es->text + li + col, count,
                                         es->tabs_count, es->tabs, es->format_rect.left - es->x_offset));
-        } else {
-                LPSTR text = EDIT_GetPasswordPointer_SL(hwnd, es);
-                TextOutA(dc, x, y, text + li + col, count);
-                GetTextExtentPoint32A(dc, text + li + col, count, &size);
-                ret = size.cx;
-                if (es->style & ES_PASSWORD)
-                        HeapFree(es->heap, 0, text);
+        } else
+        {
+          LPSTR text = EDIT_GetPasswordPointer_SL(hwnd, es);
+          POINT pt;
+          UINT oldAlign = GetTextAlign(dc);
+
+          MoveToEx(dc,x,y,NULL);
+          SetTextAlign(dc,(oldAlign & ~TA_NOUPDATECP) | TA_UPDATECP);
+
+          TextOutA(dc,x,y,text+li+col,count);
+          GetCurrentPositionEx(dc,&pt);
+          SetTextAlign(dc,oldAlign);
+          ret = pt.x-x;
+          if (es->style & ES_PASSWORD)
+            HeapFree(es->heap, 0, text);
         }
         if (rev) {
                 SetBkColor(dc, BkColor);
@@ -2196,20 +2196,20 @@ static LRESULT EDIT_EM_PosFromChar(HWND hwnd, EDITSTATE *es, INT index, BOOL aft
                 }
                 x = LOWORD(GetTabbedTextExtentA(dc, es->text + li, index - li,
                                 es->tabs_count, es->tabs)) - es->x_offset;
-        } else {
-                LPSTR text = EDIT_GetPasswordPointer_SL(hwnd, es);
-                if (index < es->x_offset) {
-                        GetTextExtentPoint32A(dc, text + index,
-                                        es->x_offset - index, &size);
-                        x = -size.cx;
-                } else {
-                        GetTextExtentPoint32A(dc, text + es->x_offset,
-                                        index - es->x_offset, &size);
-                         x = size.cx;
-                }
-                y = 0;
-                if (es->style & ES_PASSWORD)
-                        HeapFree(es->heap, 0 ,text);
+        } else
+        {
+          LPSTR text = EDIT_GetPasswordPointer_SL(hwnd, es);
+
+          GetTextExtentPoint32A(dc,text,index,&size);
+          x = size.cx;
+          if (es->x_offset)
+          {
+            GetTextExtentPoint32A(dc,text,es->x_offset,&size);
+            x -= size.cx;
+          }
+          y = 0;
+          if (es->style & ES_PASSWORD)
+            HeapFree(es->heap, 0 ,text);
         }
         x += es->format_rect.left;
         y += es->format_rect.top;
@@ -3777,7 +3777,7 @@ static void EDIT_WM_SetFont(HWND hwnd, EDITSTATE *es, HFONT font, BOOL redraw)
                 old_font = SelectObject(dc, font);
         if (!GetTextMetricsA(dc, &tm))
         {
-          SelectObject(dc,old_font);
+          if (font) SelectObject(dc,old_font);
           ReleaseDC(hwnd,dc);
 
           return;
