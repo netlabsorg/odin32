@@ -1,4 +1,4 @@
-/* $Id: ModuleBase.h,v 1.5 2000-09-22 09:22:36 bird Exp $
+/* $Id: ModuleBase.h,v 1.6 2001-02-11 14:59:20 bird Exp $
  *
  * ModuleBase - Declaration of the Basic module class.
  *
@@ -30,12 +30,18 @@
                                             /* aligns something, a,  up to nearest alignment boundrary-
                                              * Note: Aligment must be a 2**n number. */
 
+#ifndef PAGESHIFT
 #define PAGESHIFT                   12      /* bytes to pages or pages to bytes shift value. */
+#endif
 #ifndef PAGESIZE
 #define PAGESIZE                    0x1000  /* pagesize on i386 */
 #endif
+#ifndef PAGEOFFSET
 #define PAGEOFFSET(addr) ((addr) &  (PAGESIZE-1)) /* Gets the offset into the page addr points into. */
+#endif
+#ifndef PAGESTART
 #define PAGESTART(addr)  ((addr) & ~(PAGESIZE-1)) /* Gets the address of the page addr points into. */
+#endif
 
 
 /*
