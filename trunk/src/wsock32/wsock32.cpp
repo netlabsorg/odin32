@@ -1,4 +1,4 @@
-/* $Id: wsock32.cpp,v 1.33 2000-11-09 18:12:49 sandervl Exp $ */
+/* $Id: wsock32.cpp,v 1.34 2000-12-30 14:07:24 sandervl Exp $ */
 
 /*
  *
@@ -51,7 +51,8 @@
 #include <os2sel.h>
 #include <stdlib.h>
 #include <win32api.h>
-#include <win32wnd.h>
+#define NO_DCDATA
+#include <winuser32.h>
 #include <wprocess.h>
 #include <misc.h>
 

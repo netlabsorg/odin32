@@ -1,4 +1,4 @@
-/* $Id: winuser32.h,v 1.7 2000-12-30 13:26:53 sandervl Exp $ */
+/* $Id: winuser32.h,v 1.8 2000-12-30 14:06:41 sandervl Exp $ */
 
 /*
  * Internal functions exported by user32
@@ -8,6 +8,8 @@
  */
 #ifndef __WINUSER32_H__
 #define __WINUSER32_H__
+
+#ifndef NO_DCDATA
 
 #include <dcdata.h>
 
@@ -22,6 +24,7 @@ VOID WIN32API selectClientArea(pDCData pHps);
 VOID WIN32API removeClientArea(pDCData pHps);
 LONG WIN32API clientHeight(HWND hwnd, pDCData pHps);
 int  WIN32API setMapMode(pDCData pHps, int mode);
+#endif
 
 int  WIN32API DIB_GetDIBWidthBytes( int width, int depth );
 int  WIN32API BITMAP_GetWidthBytes( INT width, INT depth );
