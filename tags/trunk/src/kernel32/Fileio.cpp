@@ -1,4 +1,4 @@
-/* $Id: Fileio.cpp,v 1.28 2000-04-14 22:35:25 sandervl Exp $ */
+/* $Id: Fileio.cpp,v 1.29 2000-04-15 10:00:44 sandervl Exp $ */
 
 /*
  * Win32 File IO API functions for OS/2
@@ -79,7 +79,24 @@ ODINFUNCTION2(HANDLE, FindFirstFileA,
               LPCSTR, lpFileName,
               WIN32_FIND_DATAA *, lpFindFileData)
 {
-  return (HANDLE)OSLibDosFindFirst(lpFileName,lpFindFileData);
+ HANDLE hFind;
+ char  *filename;
+ int    namelen;
+
+  dprintf(("FindFirstFileA %s", lpFileName));
+  if(lpFileName == NULL || lpFindFileData == NULL) {
+	SetLastError(ERROR_INVALID_PARAMETER);
+	return -1;
+  }
+  namelen = strlen(lpFileName);
+  if(lpFileName[namelen-1] == '\\') {
+	filename = (char *)alloca(namelen+1);
+	strcpy(filename, lpFileName);
+	filename[namelen-1] = 0;
+  }
+  else	filename = (char *)lpFileName;
+
+  return (HANDLE)OSLibDosFindFirst(filename,lpFindFileData);
 }
 //******************************************************************************
 // internal function for faster access (SHELL32)
