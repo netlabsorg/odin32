@@ -295,11 +295,7 @@ typedef struct tagClipboardWindowInfo
  *    CLIPBRD_E_CANT_SET    SetClipboard failed
  */
 
-#ifdef __WIN32OS2__
-HRESULT     WINAPI OleSetClipboard(LPDATAOBJECT pDataObj)
-#else
 HRESULT WINAPI OleSetClipboard(IDataObject* pDataObj)
-#endif
 {
   HRESULT hr = S_OK;
   IEnumFORMATETC* penumFormatetc = NULL;
@@ -574,11 +570,7 @@ CLEANUP:
 /***********************************************************************
  *           OleIsCurrentClipboard [OLE32.110]
  */
-#ifdef __WIN32OS2__
-HRESULT     WINAPI OleIsCurrentClipboard(LPDATAOBJECT pDataObject)
-#else
 HRESULT WINAPI OleIsCurrentClipboard (  IDataObject *pDataObject) 
-#endif
 {
   TRACE("()\n");
   /*

@@ -1,4 +1,4 @@
-/* $Id: clsid.cpp,v 1.15 2002-02-18 23:24:09 phaller Exp $ */
+/* $Id: clsid.cpp,v 1.16 2002-02-19 12:34:49 sandervl Exp $ */
 /*
  *
  * Project Odin Software License can be found in LICENSE.TXT
@@ -28,11 +28,7 @@
 // ----------------------------------------------------------------------
 // IIDFromString
 // ----------------------------------------------------------------------
-#ifdef __WIN32OS2__
-HRESULT WINAPI IIDFromString(LPOLESTR lpsz, LPIID lpiid)
-#else
 HRESULT WIN32API IIDFromString(LPSTR lpsz, LPIID lpiid)
-#endif
 {
 //    dprintf(("OLE32: IIDFromString"));
     return CLSIDFromString((LPCOLESTR)lpsz, (LPCLSID)lpiid);
@@ -45,11 +41,7 @@ HRESULT WIN32API IIDFromString(LPSTR lpsz, LPIID lpiid)
 // StringFromIID
 // Memory allocated here on behalf of application should be freed using CoTaskMemFree()
 // ----------------------------------------------------------------------
-#ifdef __WIN32OS2__
-HRESULT WINAPI StringFromIID(REFIID riid, LPOLESTR * ppsz)
-#else
 HRESULT WIN32API StringFromIID(REFIID riid, LPOLESTR *ppsz)
-#endif
 {
     char	tmp[50];
     LPWSTR	sziid;
