@@ -1,4 +1,4 @@
-/* $Id: inituser32.cpp,v 1.12 2003-09-11 12:57:53 sandervl Exp $ */
+/* $Id: inituser32.cpp,v 1.13 2003-09-11 12:59:14 sandervl Exp $ */
 /*
  * USER32 DLL entry point
  *
@@ -97,7 +97,7 @@ void pmkbdhk_initialize(HAB _hab)
 {
   APIRET rc;
 
-  if (pmkbdhk_installed == FALSE && PMKBDHK_MODULE[0])
+  if ((pmkbdhk_installed == FALSE) && PMKBDHK_MODULE[0])
   {
     CHAR szBuf[260];
 
