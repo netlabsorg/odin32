@@ -1,4 +1,4 @@
-/* $Id: odinbuild.h,v 1.159 2001-09-09 03:38:57 bird Exp $
+/* $Id: odinbuild.h,v 1.160 2001-09-10 03:39:15 bird Exp $
  *
  * Odin32 version number and build numbers.
  *
@@ -23,9 +23,10 @@ int     WIN32API Odin32GetBuildNumber(void);
 #define ODIN32_VERSION_MAJOR    0
 #define ODIN32_VERSION_MINOR    5
 #define ODIN32_VERSION       "0.5"
-#define ODIN32_BUILD_NR       463        /* This started at 300 on the 17th Des 2000. */
+#define ODIN32_BUILD_NR       464        /* This started at 300 on the 17th Des 2000. */
 
 #endif
+
 
 
 
