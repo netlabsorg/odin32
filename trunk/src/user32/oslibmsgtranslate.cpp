@@ -1,4 +1,4 @@
-/* $Id: oslibmsgtranslate.cpp,v 1.91 2002-08-16 16:49:13 sandervl Exp $ */
+/* $Id: oslibmsgtranslate.cpp,v 1.92 2002-09-03 14:03:16 sandervl Exp $ */
 /*
  * Window message translation functions for OS/2
  *
@@ -637,6 +637,7 @@ BOOL OS2ToWinMsgTranslate(void *pTeb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode,
 
 #ifdef ALTGR_HACK
     
+
         if (usPMScanCode == PMSCAN_ALTRIGHT)
         {
           // Turn message into CTRL-event
@@ -682,6 +683,23 @@ BOOL OS2ToWinMsgTranslate(void *pTeb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode,
           }
         }     
 #endif
+
+        //@PF This looks ugly but this is just what we have in win32 both in win98/win2k
+        //what happens is that lParam is tweaked in win32 to contain some illegal codes
+        //I simply reproduce here all situation. Absolute values can be kept because
+        //Break scancode can be acheived only by pressing Ctrl-Break combination
+        if ((usPMScanCode == PMSCAN_BREAK) && !(flags & KC_KEYUP) && (flags & KC_CTRL)
+                && (fMsgRemoved && !(teb->o.odin.fTranslated)))
+        {
+            MSG extramsg;
+            memcpy(&extramsg, winMsg, sizeof(MSG));
+            // adjust our WM_CHAR code
+            extramsg.lParam = 0x01460001;
+            extramsg.message = WINWM_CHAR;
+            setThreadQueueExtraCharMessage(teb, &extramsg);
+            // and finally adjust our WM_KEYDOWN code
+            winMsg->lParam = 0x01460001;
+        }
       
         if (!(flags & KC_ALT))
         {
