@@ -1,4 +1,4 @@
-/* $Id: guid.c,v 1.2 2001-12-06 10:15:21 sandervl Exp $ */
+/* $Id: guid.c,v 1.3 2002-02-07 10:54:58 sandervl Exp $ */
 #define ICOM_CINTERFACE 1
 #include <odin.h>
 
@@ -37,6 +37,7 @@
 #include <wine/obj_shellextinit.h>
 #include <wine/obj_shellbrowser.h>
 #include <wine/obj_serviceprovider.h>
+#include <wine/obj_queryassociations.h>
 #include <wine/unicode.h>
 
 #include <misc.h>
