@@ -1,4 +1,4 @@
-/* $Id: commctrl.h,v 1.28 2000-04-09 11:09:08 sandervl Exp $ */
+/* $Id: commctrl.h,v 1.29 2000-04-15 14:20:15 cbratschi Exp $ */
 /*
  * Common controls definitions
  */
@@ -2790,6 +2790,38 @@ typedef struct tagNMLVCACHEHINT
 #define PNM_CACHEHINT  LPNMLVCACHEHINT
 #define NM_CACHEHINT   NMLVCACHEHINT
 
+typedef struct tagLVBKIMAGEA
+{
+    ULONG ulFlags;              // LVBKIF_*
+    HBITMAP hbm;
+    LPSTR pszImage;
+    UINT cchImageMax;
+    int xOffsetPercent;
+    int yOffsetPercent;
+} LVBKIMAGEA, *LPLVBKIMAGEA;
+
+typedef struct tagLVBKIMAGEW
+{
+    ULONG ulFlags;              // LVBKIF_*
+    HBITMAP hbm;
+    LPWSTR pszImage;
+    UINT cchImageMax;
+    int xOffsetPercent;
+    int yOffsetPercent;
+} LVBKIMAGEW, *LPLVBKIMAGEW;
+
+#define LVBKIMAGE   WINELIB_NAME_AW(LVBKIMAGE)
+#define LPLVBKIMAGE WINELIB_NAME_AW(LPLVBKIMAGE)
+
+
+#define LVBKIF_SOURCE_NONE      0x00000000
+#define LVBKIF_SOURCE_HBITMAP   0x00000001
+#define LVBKIF_SOURCE_URL       0x00000002
+#define LVBKIF_SOURCE_MASK      0x00000003
+#define LVBKIF_STYLE_NORMAL     0x00000000
+#define LVBKIF_STYLE_TILE       0x00000010
+#define LVBKIF_STYLE_MASK       0x00000010
+
 #define ListView_SetUnicodeFormat(hwnd, fUnicode)  \
     (BOOL)SendMessageA((hwnd), LVM_SETUNICODEFORMAT, (WPARAM)(fUnicode), 0)
 
@@ -3856,17 +3888,18 @@ typedef struct _DPA
 
 HDPA   WINAPI DPA_Create (INT);
 HDPA   WINAPI DPA_CreateEx (INT, HANDLE);
-BOOL WINAPI DPA_Destroy (const HDPA);
+BOOL   WINAPI DPA_Destroy (const HDPA);
 HDPA   WINAPI DPA_Clone (const HDPA, const HDPA);
 LPVOID WINAPI DPA_GetPtr (const HDPA, INT);
-INT  WINAPI DPA_GetPtrIndex (const HDPA, LPVOID);
-BOOL WINAPI DPA_Grow (const HDPA, INT);
-BOOL WINAPI DPA_SetPtr (const HDPA, INT, LPVOID);
-INT  WINAPI DPA_InsertPtr (const HDPA, INT, LPVOID);
+INT    WINAPI DPA_GetPtrIndex (const HDPA, LPVOID);
+BOOL   WINAPI DPA_Grow (const HDPA, INT);
+BOOL   WINAPI DPA_SetPtr (const HDPA, INT, LPVOID);
+INT    WINAPI DPA_InsertPtr (const HDPA, INT, LPVOID);
 LPVOID WINAPI DPA_DeletePtr (const HDPA, INT);
-BOOL WINAPI DPA_DeleteAllPtrs (const HDPA);
+BOOL   WINAPI DPA_DeleteAllPtrs (const HDPA);
 
 typedef INT (* CALLBACK PFNDPACOMPARE)(LPVOID, LPVOID, LPARAM);
+INT  DPA_InsertPtrSorted(const HDPA,LPVOID,PFNDPACOMPARE,LPARAM);
 BOOL WINAPI DPA_Sort (const HDPA, PFNDPACOMPARE, LPARAM);
 
 #define DPAS_SORTED             0x0001

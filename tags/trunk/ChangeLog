@@ -1,4 +1,9 @@
- /* $Id: ChangeLog,v 1.888 2000-04-15 12:44:07 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.889 2000-04-15 14:19:31 cbratschi Exp $ */
+
+ 2000-04-15: Christoph Bratschi <cbratschi@datacomm.ch>
+	- COMCTL32: rewrote listview item handling: sort bug fix,
+		    allows >= 4.70 support
+		    implemented several new messages
 
  2000-04-15: Sander van Leeuwen <sandervl@xs4all.nl>
 	- WSOCK32:  Async select fix (VPBuddy can connect again)
