@@ -1,4 +1,4 @@
-/* $Id: disk.cpp,v 1.20 2000-12-03 10:12:33 sandervl Exp $ */
+/* $Id: disk.cpp,v 1.21 2000-12-03 22:20:31 sandervl Exp $ */
 
 /*
  * Win32 Disk API functions for OS/2
@@ -82,6 +82,25 @@ ODINFUNCTION5(BOOL, GetDiskFreeSpaceA,
       *arg4 = dwNumberOfFreeClusters;
     if (arg5!=NULL)
       *arg5 = dwTotalNumberOfClusters;
+
+    /* CW: Windows Media Player setup complains about wrong clustersize when odin is installed on
+       a TVFS drive. This fakes the clustersizes to 32. The following
+       entry must be present in ODIN.INI:
+       
+       [DRIVESPACE]
+       TVFSTOHPFS = 1
+       */
+    if(arg2!=NULL) {
+      if(*arg2==1024 && PROFILE_GetOdinIniBool("DRIVESPACE","CLUSTERTO32",0)) {/* TVFS returns 1024 sectors per cluster */
+        dprintf(("KERNEL32:  GetDiskFreeSpaceA, TVFS-Drive detected. Faking clustersize to 32.\n"));
+        *arg2=32;
+        if (arg4!=NULL)
+          *arg4 = dwNumberOfFreeClusters<<0x5;
+        if (arg5!=NULL)
+          *arg5 = dwTotalNumberOfClusters<<0x5;
+      }
+    }
+
   }
   
   return rc;
