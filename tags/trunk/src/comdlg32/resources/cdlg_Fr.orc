@@ -1,3 +1,21 @@
+/*
+ * Copyright 1995 Alexandre Julliard
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ */
+
 LANGUAGE LANG_FRENCH, SUBLANG_DEFAULT
 
 OPEN_FILE DIALOG LOADONCALL MOVEABLE DISCARDABLE 36, 24, 275, 134
@@ -92,36 +110,6 @@ FONT 8, "Helv"
  COMBOBOX 1138, 155, 110, 92, 68, CBS_DROPDOWNLIST | CBS_OWNERDRAWFIXED | CBS_AUTOHSCROLL | CBS_SORT | CBS_HASSTRINGS | WS_BORDER | WS_VSCROLL | WS_TABSTOP
 }
 
-PAGESETUPDLGORD DIALOG LOADONCALL MOVEABLE DISCARDABLE 32, 32, 240, 240
-STYLE DS_MODALFRAME | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
-CAPTION "Mise en page"
-FONT 8, "Helv"
-BEGIN
-  CONTROL "", rct1, 130, 0x00020006, 80, 8, 80, 80,  SS_WHITERECT
-  CONTROL "", rct2, 130, 0x00020005, 160, 12, 4, 80, SS_GRAYRECT
-  CONTROL "", rct3, 130, 0x00020005, 84, 88, 80, 4,  SS_GRAYRECT
-  GROUPBOX "Papier", grp2, 8, 96, 224, 56, BS_GROUPBOX
-  LTEXT "&Taille:", stc2, 16, 112, 36, 8
-  COMBOBOX cmb2, 64, 110, 160, 160, CBS_SIMPLE|CBS_DROPDOWN|CBS_SORT|WS_GROUP|WS_TABSTOP|WS_VSCROLL
-  LTEXT "&Source:", stc3, 16, 132, 36, 8
-  COMBOBOX cmb3, 64, 130, 160, 160, CBS_SIMPLE|CBS_DROPDOWN|CBS_SORT|WS_GROUP|WS_TABSTOP|WS_VSCROLL
-  GROUPBOX "Orientation", grp1, 8, 156, 64, 56, BS_GROUPBOX
-  AUTORADIOBUTTON "&Portrait", rad1, 16, 170, 52, 12, BS_AUTORADIOBUTTON
-  AUTORADIOBUTTON "P&aysage", rad2, 16, 190, 52, 12, BS_AUTORADIOBUTTON
-  GROUPBOX "Marges", grp4, 80, 156, 152, 56, BS_GROUPBOX
-  LTEXT "&Droite:", stc15, 88, 172, 21, 8
-  EDITTEXT edt4, 111, 170, 39, 12, WS_TABSTOP|WS_GROUP|WS_BORDER
-  LTEXT "&Gauche:", stc16, 159, 172, 27, 8
-  EDITTEXT edt6, 187, 170, 39, 12, WS_TABSTOP|WS_GROUP|WS_BORDER
-  LTEXT "&Haut:", stc17, 88, 192, 21, 8
-  EDITTEXT edt5, 111, 190, 39, 12, WS_TABSTOP|WS_GROUP|WS_BORDER
-  LTEXT "&Bas:", stc18, 159, 192, 23, 8
-  EDITTEXT edt7, 187, 190, 39, 12, WS_TABSTOP|WS_GROUP|WS_BORDER
-  DEFPUSHBUTTON "OK", IDOK, 71, 220, 50, 14, BS_PUSHBUTTON
-  PUSHBUTTON "Annuler", IDCANCEL, 126, 220, 50, 14
-  PUSHBUTTON "&Imprimante...", psh3, 184, 220, 48, 14
-END
-
 
 CHOOSE_FONT DIALOG DISCARDABLE  13, 54, 264, 147
 STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
@@ -151,6 +139,7 @@ FONT 8, "Helv"
     CTEXT           "AaBbYyZz",1093,104,81,149,37,SS_NOPREFIX | WS_VISIBLE
 }
 
+
 CHOOSE_COLOR DIALOG LOADONCALL MOVEABLE DISCARDABLE 36, 24, 300, 185
 STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "Couleurs"
@@ -163,7 +152,7 @@ FONT 8, "Helv"
  EDITTEXT 706, 275,124,18,12, WS_BORDER | WS_GROUP | WS_TABSTOP
  LTEXT   "&Vert:",727/*1095*/,249,140,24,10
  EDITTEXT 707, 275,138,18,12, WS_BORDER | WS_GROUP | WS_TABSTOP
-  LTEXT   "Bl&eu:",728 /*1096*/,249,154,24,10
+ LTEXT   "Bl&eu:",728 /*1096*/,249,154,24,10
  EDITTEXT 708, 275,152,18,12, WS_BORDER | WS_GROUP | WS_TABSTOP
  LTEXT  "&Teinte:" ,723 /*1091*/,202,126,22,10
  EDITTEXT 703, 226,124,18,12, WS_BORDER | WS_GROUP | WS_TABSTOP
@@ -179,10 +168,11 @@ FONT 8, "Helv"
  DEFPUSHBUTTON "Ok",  1,  4, 166, 44, 14, BS_DEFPUSHBUTTON | WS_GROUP | WS_TABSTOP
  PUSHBUTTON "Annuler", 2, 52, 166, 44, 14, WS_GROUP | WS_TABSTOP
  PUSHBUTTON "&Aide", 1038,100,166, 44, 14
- PUSHBUTTON "A&jouter couleur personnalisées", 712/*1024*/, 152, 166, 142, 14, WS_GROUP | WS_TABSTOP 
+ PUSHBUTTON "A&jouter couleur personnalisées", 712/*1024*/, 152, 166, 142, 14, WS_GROUP | WS_TABSTOP
  PUSHBUTTON "&Définir couleurs personnalisées >>", 719/*1025*/,   4, 150, 142, 14, WS_GROUP | WS_TABSTOP
  PUSHBUTTON  "&i",713,300,200,4,14   /* just a dummy:  'i' is  like  &i in "sol&id" */
 }
+
 
 FINDDLGORD DIALOG LOADONCALL MOVEABLE DISCARDABLE 36, 24, 236, 62
 STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
@@ -196,6 +186,7 @@ FONT 8, "Helv"
  GROUPBOX "Direction", 1072, 107, 26, 68, 28
  CONTROL "&Haut", 1056, "BUTTON", BS_AUTORADIOBUTTON | WS_CHILD | WS_VISIBLE | WS_GROUP | WS_TABSTOP, 111, 38, 20, 12
  CONTROL "&Bas", 1057, "BUTTON", BS_AUTORADIOBUTTON | WS_CHILD | WS_VISIBLE | WS_TABSTOP, 138, 38, 30, 12
+
  DEFPUSHBUTTON "&Poursuivre", 1, 182, 5, 50, 14, WS_GROUP | WS_TABSTOP
  PUSHBUTTON "Annuler", 2, 182, 23, 50, 14, WS_GROUP | WS_TABSTOP
  PUSHBUTTON "&Aide", 1038, 182, 45, 50, 14, WS_GROUP | WS_TABSTOP
@@ -213,6 +204,7 @@ FONT 8, "Helv"
  EDITTEXT 1153, 54, 24, 114, 12, ES_AUTOHSCROLL | WS_BORDER | WS_GROUP | WS_TABSTOP
  CHECKBOX "M&ot seulement", 1040, 5, 46, 104, 12, BS_AUTOCHECKBOX | WS_GROUP | WS_TABSTOP
  CHECKBOX "Respect des &majuscules/minuscules", 1041, 5, 62, 59, 12, BS_AUTOCHECKBOX | WS_TABSTOP
+
  DEFPUSHBUTTON "&Poursuivre", 1, 174, 4, 50, 14, BS_DEFPUSHBUTTON | WS_GROUP | WS_TABSTOP
  PUSHBUTTON "Rempla&cer", 1024, 174, 21, 50, 14, WS_GROUP | WS_TABSTOP
  PUSHBUTTON "Remplacer &tout", 1025, 174, 38, 50, 14, WS_GROUP | WS_TABSTOP
@@ -220,30 +212,6 @@ FONT 8, "Helv"
  PUSHBUTTON "&Aide", 1038, 174, 75, 50, 14, WS_GROUP | WS_TABSTOP
 }
 
-NEWFILEOPENORD DIALOG LOADONCALL MOVEABLE DISCARDABLE 0, 0, 307, 165
-STYLE DS_MODALFRAME | DS_CONTEXTHELP | WS_POPUP | WS_CAPTION | WS_SYSMENU
-CAPTION "Ouvrir"
-FONT 8, "helv"
-{
-    LTEXT	"&Rechercher dans",IDC_LOOKINSTATIC,4,6,43,8, SS_NOTIFY
-    COMBOBOX	IDC_LOOKIN,49,3,132,100,CBS_DROPDOWNLIST | CBS_OWNERDRAWFIXED | CBS_HASSTRINGS | WS_VSCROLL | WS_TABSTOP
-
-    LTEXT	"" , IDC_TOOLBARSTATIC, 181, 2, 122, 17, NOT WS_GROUP | NOT WS_VISIBLE
-    LISTBOX	IDC_SHELLSTATIC,4,20,292,85, LBS_SORT | LBS_NOINTEGRALHEIGHT | LBS_MULTICOLUMN | WS_HSCROLL | NOT WS_VISIBLE
-    
-    LTEXT	"&Nom du fichier:",IDC_FILENAMESTATIC,5,112,46,8, SS_NOTIFY
-    EDITTEXT	IDC_FILENAME,54,110,155,12,ES_AUTOHSCROLL
-    
-    LTEXT	"&Type du fichier",IDC_FILETYPESTATIC,5,128,42,8, SS_NOTIFY
-    COMBOBOX	IDC_FILETYPE,54,126,155,53,CBS_DROPDOWN | WS_VSCROLL | WS_TABSTOP
-
-    CONTROL	"&Schreibgeschützt",IDC_OPENREADONLY,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,54,145,100,10
-
-
-    DEFPUSHBUTTON	"Ouvrir",		 IDOK,242,110,50,14
-    PUSHBUTTON		"Annuler",		 IDCANCEL,242,128,50,14
-    PUSHBUTTON		"&Aide",		 pshHelp,242,145,50,14
-}
 
 PRINT32 DIALOG LOADONCALL MOVEABLE DISCARDABLE  32, 32, 288, 186
 STYLE DS_MODALFRAME | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU |
@@ -300,39 +268,95 @@ BEGIN
     LTEXT           "&Nom:",          stc6,  16, 20,  36,8
     COMBOBOX                          cmb1,  52, 18, 152,152,CBS_DROPDOWNLIST | CBS_SORT | WS_VSCROLL | WS_GROUP | WS_TABSTOP
     LTEXT           "Etat:",          stc8,  16, 36,  36,10, SS_NOPREFIX
-    LTEXT           "[aucun]",        stc12, 52, 36, 224,10, SS_NOPREFIX | SS_LEFTNOWORDWRAP
+    LTEXT           "[aucun]",        stc12, 60, 36, 224,10, SS_NOPREFIX | SS_LEFTNOWORDWRAP
     LTEXT           "Type:",          stc7,  16, 48,  36,10, SS_NOPREFIX
-    LTEXT           "[keiner]",       stc11, 52, 48, 224,10, SS_NOPREFIX | SS_LEFTNOWORDWRAP
+    LTEXT           "[aucun]",       stc11, 60, 48, 224,10, SS_NOPREFIX | SS_LEFTNOWORDWRAP
     LTEXT           "Emplacement:",   stc10, 16, 60,  36,10, SS_NOPREFIX
-    LTEXT           "[aucun]",        stc14, 52, 60, 224,10, SS_NOPREFIX | SS_LEFTNOWORDWRAP
+    LTEXT           "[aucun]",        stc14, 60, 60, 224,10, SS_NOPREFIX | SS_LEFTNOWORDWRAP
     LTEXT           "Commentaire:",   stc9,  16, 72,  36,10, SS_NOPREFIX
-    LTEXT           "[aucun]",        stc13, 52, 72, 224,10, SS_NOPREFIX | SS_LEFTNOWORDWRAP
+    LTEXT           "[aucun]",        stc13, 60, 72, 224,10, SS_NOPREFIX | SS_LEFTNOWORDWRAP
 
     GROUPBOX        "Papier",         grp2,   8, 92, 164,56, WS_GROUP
     LTEXT           "&Taille:",       stc2,  16,108,  36, 8
     COMBOBOX                          cmb2,  52,106, 112,112,CBS_DROPDOWNLIST | CBS_SORT | WS_VSCROLL | WS_GROUP | WS_TABSTOP
     LTEXT           "Source:",        stc3,  16,128,  36, 8
     COMBOBOX                          cmb3,  52,126, 112,112,CBS_DROPDOWNLIST | CBS_SORT | WS_VSCROLL | WS_GROUP | WS_TABSTOP
-    
-    GROUPBOX        "Orientattion",   grp1, 180, 92, 100,56, WS_GROUP
+
+    GROUPBOX        "Orientation",   grp1, 180, 92, 100,56, WS_GROUP
     ICON            "",               ico1, 195,112,  18,20, WS_GROUP
     CONTROL         "&Portrait",      rad1,"Button",BS_AUTORADIOBUTTON | WS_GROUP |WS_TABSTOP,224,106,52,12
     CONTROL         "&Paysage",       rad2,"Button",BS_AUTORADIOBUTTON,224,126,52,12
 END
 
-STRINGTABLE DISCARDABLE 
+PAGESETUPDLGORD DIALOG LOADONCALL MOVEABLE DISCARDABLE 32, 32, 240, 240
+STYLE DS_MODALFRAME | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
+CAPTION "Mise en page"
+FONT 8, "Helv"
+BEGIN
+  CONTROL "", rct1, 130, 0x00020006, 80, 8, 80, 80,  SS_WHITERECT
+  CONTROL "", rct2, 130, 0x00020005, 160, 12, 4, 80, SS_GRAYRECT
+  CONTROL "", rct3, 130, 0x00020005, 84, 88, 80, 4,  SS_GRAYRECT
+  GROUPBOX "Papier", grp2, 8, 96, 224, 56, BS_GROUPBOX
+  LTEXT "&Taille:", stc2, 16, 112, 36, 8
+  COMBOBOX cmb2, 64, 110, 160, 160, CBS_SIMPLE|CBS_DROPDOWN|CBS_SORT|WS_GROUP|WS_TABSTOP|WS_VSCROLL
+  LTEXT "&Source:", stc3, 16, 132, 36, 8
+  COMBOBOX cmb3, 64, 130, 160, 160, CBS_SIMPLE|CBS_DROPDOWN|CBS_SORT|WS_GROUP|WS_TABSTOP|WS_VSCROLL
+  GROUPBOX "Orientation", grp1, 8, 156, 64, 56, BS_GROUPBOX
+  AUTORADIOBUTTON "&Portrait", rad1, 16, 170, 52, 12, BS_AUTORADIOBUTTON
+  AUTORADIOBUTTON "P&aysage", rad2, 16, 190, 52, 12, BS_AUTORADIOBUTTON
+  GROUPBOX "Marges", grp4, 80, 156, 152, 56, BS_GROUPBOX
+  LTEXT "&Droite:", stc15, 88, 172, 21, 8
+  EDITTEXT edt4, 111, 170, 39, 12, WS_TABSTOP|WS_GROUP|WS_BORDER
+  LTEXT "&Gauche:", stc16, 159, 172, 27, 8
+  EDITTEXT edt6, 187, 170, 39, 12, WS_TABSTOP|WS_GROUP|WS_BORDER
+  LTEXT "&Haut:", stc17, 88, 192, 21, 8
+  EDITTEXT edt5, 111, 190, 39, 12, WS_TABSTOP|WS_GROUP|WS_BORDER
+  LTEXT "&Bas:", stc18, 159, 192, 23, 8
+  EDITTEXT edt7, 187, 190, 39, 12, WS_TABSTOP|WS_GROUP|WS_BORDER
+  DEFPUSHBUTTON "OK", IDOK, 71, 220, 50, 14, BS_PUSHBUTTON
+  PUSHBUTTON "Annuler", IDCANCEL, 126, 220, 50, 14
+  PUSHBUTTON "&Imprimante...", psh3, 184, 220, 48, 14
+END
+
+
+
+NEWFILEOPENORD DIALOG LOADONCALL MOVEABLE DISCARDABLE 0, 0, 307, 165
+STYLE DS_MODALFRAME | DS_CONTEXTHELP | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Ouvrir"
+FONT 8, "helv"
+{
+    LTEXT	"&Rechercher dans",IDC_LOOKINSTATIC,4,6,43,8, SS_NOTIFY
+    COMBOBOX	IDC_LOOKIN,49,3,132,100,CBS_DROPDOWNLIST | CBS_OWNERDRAWFIXED | CBS_HASSTRINGS | WS_VSCROLL | WS_TABSTOP
+
+    LTEXT	"" , IDC_TOOLBARSTATIC, 181, 2, 122, 17, NOT WS_GROUP | NOT WS_VISIBLE
+    LISTBOX	IDC_SHELLSTATIC,4,20,292,85, LBS_SORT | LBS_NOINTEGRALHEIGHT | LBS_MULTICOLUMN | WS_HSCROLL | NOT WS_VISIBLE
+
+    LTEXT	"&Nom du fichier:",IDC_FILENAMESTATIC,5,112,46,8, SS_NOTIFY
+    EDITTEXT	IDC_FILENAME,54,110,155,12,ES_AUTOHSCROLL
+
+    LTEXT	"&Type du fichier",IDC_FILETYPESTATIC,5,128,42,8, SS_NOTIFY
+    COMBOBOX	IDC_FILETYPE,54,126,155,53,CBS_DROPDOWN | WS_VSCROLL | WS_TABSTOP
+
+    CONTROL	"&Protection écriture",IDC_OPENREADONLY,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,54,145,100,10
+
+    DEFPUSHBUTTON	"Ouvrir",		 IDOK,242,110,50,14
+    PUSHBUTTON		"Annuler",		 IDCANCEL,242,128,50,14
+    PUSHBUTTON		"&Aide",		 pshHelp,242,145,50,14
+}
+
+STRINGTABLE DISCARDABLE
 {
     IDS_ABOUTBOX            "A propos du choix de répertoires"
     IDS_DOCUMENTFOLDERS     "Répertoire Documents"
     IDS_PERSONAL            "Mes Documents"
     IDS_FAVORITES           "Mes Favoris"
-    IDS_PATH                "System Directory"
-    IDS_DESKTOP             "Desktop"
+    IDS_PATH                "Répertoire systême"
+    IDS_DESKTOP             "Bureau"
     IDS_FONTS               "Polices"
     IDS_MYCOMPUTER          "Poste de travail"
 }
 
-STRINGTABLE DISCARDABLE 
+STRINGTABLE DISCARDABLE
 {
     IDS_SYSTEMFOLDERS       "Répertoires système"
     IDS_LOCALHARDRIVES      "Disques locaux"
@@ -341,7 +365,7 @@ STRINGTABLE DISCARDABLE
     IDS_CREATEFILE          "Ce fichier n'existe pas.\nSouhaitez-vous le créer ?"
     IDL_OVERWRITEFILE       "Ce fichier existe déjà.\nVoulez-vous le remplacer ?"
     IDS_INVALID_FILENAME_TITLE "Le chemin d'accès contient des caractères invalides"
-    IDS_INVALID_FILENAME    "Une nom de fichier ne peut contenir un des caractères suivants : \n                          / : < > |"
+    IDS_INVALID_FILENAME    "Un nom de fichier ne peut contenir un des caractères suivants : \n                          / : < > |"
     IDS_PATHNOTEXISTING     "Le chemin d'accès n'existe pas"
     IDS_FILENOTEXISTING     "Le fichier n'existe pas"
 }
@@ -352,7 +376,7 @@ STRINGTABLE DISCARDABLE
     IDS_NEWFOLDER        "Créer un nouveau dossier"
     IDS_LISTVIEW         "Liste"
     IDS_REPORTVIEW       "Détails"
-    IDS_TODESKTOP        "Browse to Desktop"
+    IDS_TODESKTOP        "Voir le bureau"
 }
 
 STRINGTABLE DISCARDABLE
@@ -362,7 +386,8 @@ STRINGTABLE DISCARDABLE
     PD32_VALUE_UREADABLE                  "Entrée illisible"
     PD32_INVALID_PAGE_RANGE "Cette valeur n'est pas dans l'intervalle de pages\n\
 Veuillez indiquer une valeur entre %d et %d."
-    PD32_FROM_NOT_ABOVE_TO                "Le champ 'de' ne peut être plus grand que le champ 'à'."
+    PD32_FROM_NOT_ABOVE_TO                "Le champ 'de' ne peut être plus grand \
+que le champ 'à'."
     PD32_MARGINS_OVERLAP                  "Les marges se recouvrent ou dépassent du papier\n\
 Veuillez indiquer de nouvelles valeurs."
     PD32_NR_OF_COPIES_EMPTY               "Le champ 'Copies' est vide.\n\

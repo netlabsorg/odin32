@@ -1,3 +1,21 @@
+/*
+ * Copyright 1994 Martin von Loewis
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ */
+
 LANGUAGE LANG_GERMAN, SUBLANG_DEFAULT
 
 OPEN_FILE DIALOG LOADONCALL MOVEABLE DISCARDABLE 36, 24, 275, 134
@@ -143,7 +161,7 @@ FONT 8, "Helv"
     PUSHBUTTON      "&Hilfe" , pshHelp,218,57,40,14,WS_GROUP
     GROUPBOX        "Darstellung",1072,6,72,84,34,WS_GROUP
     CHECKBOX	    "&Durchgestrichen", 1040, 10,82,50,10, BS_AUTOCHECKBOX | WS_TABSTOP
-    CHECKBOX 	    "&Unterstrichen", 1041, 10,94,50,10, BS_AUTOCHECKBOX 
+    CHECKBOX 	    "&Unterstrichen", 1041, 10,94,50,10, BS_AUTOCHECKBOX
     LTEXT           "&Farbe:", 1091 ,6,110,30,9
     COMBOBOX        1139,6,120,84,100,CBS_DROPDOWNLIST | CBS_OWNERDRAWFIXED | CBS_HASSTRINGS |
 		    CBS_AUTOHSCROLL |  WS_BORDER | WS_VSCROLL | WS_TABSTOP
@@ -232,10 +250,10 @@ FONT 8, "helv"
 
     LTEXT	"" , IDC_TOOLBARSTATIC, 181, 2, 122, 17, NOT WS_GROUP | NOT WS_VISIBLE
     LISTBOX	IDC_SHELLSTATIC,4,20,292,85, LBS_SORT | LBS_NOINTEGRALHEIGHT | LBS_MULTICOLUMN | WS_HSCROLL | NOT WS_VISIBLE
-    
+
     LTEXT	"File&name:",IDC_FILENAMESTATIC,5,112,46,8, SS_NOTIFY
     EDITTEXT	IDC_FILENAME,54,110,155,12,ES_AUTOHSCROLL
-    
+
     LTEXT	"File&typen",IDC_FILETYPESTATIC,5,128,42,8, SS_NOTIFY
     COMBOBOX	IDC_FILETYPE,54,126,155,53,CBS_DROPDOWN | WS_VSCROLL | WS_TABSTOP
 
@@ -315,14 +333,14 @@ BEGIN
     COMBOBOX                          cmb2,  52,106, 112,112,CBS_DROPDOWNLIST | CBS_SORT | WS_VSCROLL | WS_GROUP | WS_TABSTOP
     LTEXT           "&Zufuhr:",       stc3,  16,128,  36, 8
     COMBOBOX                          cmb3,  52,126, 112,112,CBS_DROPDOWNLIST | CBS_SORT | WS_VSCROLL | WS_GROUP | WS_TABSTOP
-    
+
     GROUPBOX        "Orientierung",   grp1, 180, 92, 100,56, WS_GROUP
     ICON            "",               ico1, 195,112,  18,20, WS_GROUP
     CONTROL         "&Hochformat",    rad1,"Button",BS_AUTORADIOBUTTON | WS_GROUP |WS_TABSTOP,224,106,52,12
     CONTROL         "&Querformat",    rad2,"Button",BS_AUTORADIOBUTTON,224,126,52,12
 END
 
-STRINGTABLE DISCARDABLE 
+STRINGTABLE DISCARDABLE
 {
     IDS_ABOUTBOX            "Ü&ber den Folderpicker"
     IDS_DOCUMENTFOLDERS     "Dokumenten Ordner"
@@ -334,7 +352,7 @@ STRINGTABLE DISCARDABLE
     IDS_MYCOMPUTER          "Mein Computer"
 }
 
-STRINGTABLE DISCARDABLE 
+STRINGTABLE DISCARDABLE
 {
     IDS_SYSTEMFOLDERS       "System Ordner"
     IDS_LOCALHARDRIVES      "Lokale Hard Disks"
@@ -354,7 +372,7 @@ STRINGTABLE DISCARDABLE
     IDS_NEWFOLDER        "Neues Directory anlegen"
     IDS_LISTVIEW         "List"
     IDS_REPORTVIEW       "Details"
-    IDS_TODESKTOP        "Desktop anzeigen"
+    IDS_TODESKTOP        "Browse to Desktop"
 }
 
 STRINGTABLE DISCARDABLE

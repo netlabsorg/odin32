@@ -1,3 +1,21 @@
+/*
+ * Copyright 1999 Klaas van Gend
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ */
+
 LANGUAGE LANG_DUTCH, SUBLANG_DEFAULT
 
 OPEN_FILE DIALOG LOADONCALL MOVEABLE DISCARDABLE 36, 24, 275, 134
@@ -107,13 +125,13 @@ FONT 8, "Helv"
     LTEXT           "&Grootte:",1090,179,3,30,9
     COMBOBOX        1138,179,13,32,54, CBS_OWNERDRAWFIXED | CBS_HASSTRINGS | CBS_DISABLENOSCROLL |
                     WS_VSCROLL | WS_TABSTOP | CBS_SIMPLE | CBS_SORT
-    DEFPUSHBUTTON   "OK",IDOK,218,6,40,14, WS_GROUP | WS_TABSTOP | BS_DEFPUSHBUTTON 
+    DEFPUSHBUTTON   "OK",IDOK,218,6,40,14, WS_GROUP | WS_TABSTOP | BS_DEFPUSHBUTTON
     PUSHBUTTON      "Annuleren",IDCANCEL,218,23,40,14,WS_GROUP | WS_TABSTOP
     PUSHBUTTON      "&Toepassen", 1026,218,40,40,14,WS_GROUP | WS_TABSTOP
     PUSHBUTTON      "&Help" , 1038,218,57,40,14,WS_GROUP | WS_TABSTOP
     GROUPBOX        "Effecten",1072,6,72,84,34,WS_GROUP
     CHECKBOX	    "&Doorhalen", 1040, 10,82,50,10, BS_AUTOCHECKBOX | WS_TABSTOP
-    CHECKBOX 	    "&Onderstrepen", 1041, 10,94,50,10, BS_AUTOCHECKBOX 
+    CHECKBOX 	    "&Onderstrepen", 1041, 10,94,50,10, BS_AUTOCHECKBOX
     LTEXT           "&Kleur:", 1091 ,6,110,30,9
     COMBOBOX        1139,6,120,84,100,CBS_DROPDOWNLIST | CBS_OWNERDRAWFIXED | CBS_HASSTRINGS |
 		    CBS_AUTOHSCROLL |  WS_BORDER | WS_VSCROLL | WS_TABSTOP
@@ -169,7 +187,7 @@ FONT 8, "Helv"
  CONTROL "&Omhoog", 1056, "BUTTON", BS_AUTORADIOBUTTON | WS_CHILD | WS_VISIBLE | WS_GROUP | WS_TABSTOP, 111, 38, 20, 12
  CONTROL "Om&laag", 1057, "BUTTON", BS_AUTORADIOBUTTON | WS_CHILD | WS_VISIBLE | WS_TABSTOP, 138, 38, 30, 12
 
- DEFPUSHBUTTON "&Volgende zoeken", IDOK, 182,  5, 50, 14, WS_GROUP | WS_TABSTOP | BS_DEFPUSHBUTTON 
+ DEFPUSHBUTTON "&Volgende zoeken", IDOK, 182,  5, 50, 14, WS_GROUP | WS_TABSTOP | BS_DEFPUSHBUTTON
  PUSHBUTTON "Annuleren", IDCANCEL, 182, 23, 50, 14, WS_GROUP | WS_TABSTOP
  PUSHBUTTON "&Help", pshHelp	 , 182, 45, 50, 14, WS_GROUP | WS_TABSTOP
 }
@@ -187,7 +205,7 @@ FONT 8, "Helv"
  CHECKBOX "Heel &woord", 1040, 5, 46, 104, 12, BS_AUTOCHECKBOX | WS_GROUP | WS_TABSTOP
  CHECKBOX "Gelijke &hoofd-/kleine letters", 1041, 5, 62, 59, 12, BS_AUTOCHECKBOX | WS_TABSTOP
 
- DEFPUSHBUTTON "Volgende zoeken", IDOK, 174,  4, 50, 14, WS_GROUP | WS_TABSTOP | BS_DEFPUSHBUTTON 
+ DEFPUSHBUTTON "Volgende zoeken", IDOK, 174,  4, 50, 14, WS_GROUP | WS_TABSTOP | BS_DEFPUSHBUTTON
  PUSHBUTTON "Ve&rvangen", psh1	 , 174, 21, 50, 14, WS_GROUP | WS_TABSTOP
  PUSHBUTTON "&Alles vervangen", psh2 , 174, 38, 50, 14, WS_GROUP | WS_TABSTOP
  PUSHBUTTON "Annuleren", IDCANCEL, 174, 55, 50, 14, WS_GROUP | WS_TABSTOP

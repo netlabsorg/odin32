@@ -1,6 +1,24 @@
+/*
+ * Copyright 1999 Pablo Saratxaga
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ */
+
 LANGUAGE LANG_WALON, SUBLANG_DEFAULT
 
-/* 
+/*
  * Si vos voloz aider avou li ratoûrnaedje des libes programes è walon,
  * vos poloz scrîre a l' adresse emile <linux-wa@chanae.alphanet.ch>
  */
@@ -155,7 +173,7 @@ FONT 8, "Helv"
  DEFPUSHBUTTON "I Va",  IDOK,  4, 166, 44, 14, BS_DEFPUSHBUTTON | WS_GROUP | WS_TABSTOP
  PUSHBUTTON "Rinoncî", IDCANCEL, 52, 166, 44, 14, WS_GROUP | WS_TABSTOP
  PUSHBUTTON "&Aide", 1038,100,166, 44, 14
- PUSHBUTTON "Rad&jouter des coleur da vosse", 712/*1024*/, 152, 166, 142, 14, WS_GROUP | WS_TABSTOP 
+ PUSHBUTTON "Rad&jouter des coleur da vosse", 712/*1024*/, 152, 166, 142, 14, WS_GROUP | WS_TABSTOP
  PUSHBUTTON "&Defini les coleurs da vosse >>", 719/*1025*/,   4, 150, 142, 14, WS_GROUP | WS_TABSTOP
  PUSHBUTTON  "&u",713,300,200,4,14   /* just a dummy:  'i' is  like  &i in "sol&id" */
 }
@@ -198,5 +216,3 @@ FONT 8, "Helv"
  PUSHBUTTON "Rinoncî",IDCANCEL   , 174, 55, 50, 14, WS_GROUP | WS_TABSTOP
  PUSHBUTTON "&Aide", pshHelp     , 174, 75, 50, 14, WS_GROUP | WS_TABSTOP
 }
-
-
