@@ -13,20 +13,37 @@
 #include <stdio.h>
 #include <heapstring.h>
 #include <winuser.h>
-//#include "windowsx.h"
-//#include "wine/winuser16.h"
-//#include "wine/winbase16.h"
+#include <direct.h>
 #include "dialog.h"
-//#include "drive.h"
 #include "heap.h"
 #include "win.h"
 #include "ldt.h"
 #include "user.h"
 #include "winproc.h"
-//#include "message.h"
-//#include "debugtools.h"
 
 //ODINDEBUGCHANNEL(USER32-DIALOG)
+
+
+#define     SelectFont(hdc, hfont)  ((HFONT)SelectObject((hdc), (HGDIOBJ)(HFONT) (hfont)))
+
+int DRIVE_GetCurrentDrive(void)        {return(_getdrive());}
+int DRIVE_SetCurrentDrive( int drive ) {return(_chdrive(drive));}
+
+const char * DRIVE_GetDosCwd( int drive )
+{
+  static char szBuf[256];
+  return (_getcwd(szBuf,drive));
+}
+
+int DRIVE_Chdir( int drive, const char *path )
+{
+  _chdrive(drive);
+  return(_chdir((char*)path));
+}
+
+
+
+
 
 
   /* Dialog control information */
@@ -76,6 +93,11 @@ typedef struct
 
   /* Dialog base units */
 static WORD xBaseUnit = 0, yBaseUnit = 0;
+
+
+
+
+
 
 
 /***********************************************************************
@@ -158,12 +180,12 @@ static BOOL DIALOG_GetCharSize( HFONT hFont, SIZE * pSize )
  */
 BOOL DIALOG_Init(void)
 {
-    HDC16 hdc;
+    HDC  hdc;
     SIZE size;
 
       /* Calculate the dialog base units */
 
-    if (!(hdc = CreateDC16( "DISPLAY", NULL, NULL, NULL ))) return FALSE;
+    if (!(hdc = O32_CreateDC( "DISPLAY", NULL, NULL, NULL ))) return FALSE;
     if (!DIALOG_GetCharSizeFromDC( hdc, 0, &size )) return FALSE;
     DeleteDC( hdc );
     xBaseUnit = size.cx;
@@ -347,7 +369,7 @@ static const WORD *DIALOG_GetControl32( const WORD *p, DLG_CONTROL_INFO *info,
  */
 static BOOL DIALOG_CreateControls( WND *pWnd, LPCSTR strTemplate,
                                      const DLG_TEMPLATE *dlgTemplate,
-                                     HINSTANCE hInst, BOOL win32 )
+                                     HINSTANCE hInst)
 {
     DIALOGINFO *dlgInfo = (DIALOGINFO *)pWnd->wExtra;
     DLG_CONTROL_INFO info;
@@ -504,10 +526,12 @@ static LPCSTR DIALOG_ParseTemplate32( LPCSTR strTemplate, DLG_TEMPLATE * result 
 /***********************************************************************
  *           DIALOG_CreateIndirect
  */
-HWND DIALOG_CreateIndirect( HINSTANCE hInst, LPCSTR dlgTemplate,
-                              BOOL win32Template, HWND owner,
-                              DLGPROC16 dlgProc, LPARAM param,
-                              WINDOWPROCTYPE procType )
+HWND DIALOG_CreateIndirect( HINSTANCE hInst,
+                            LPCSTR dlgTemplate,
+                            HWND owner,
+                            DLGPROC16 dlgProc,
+                            LPARAM param,
+                            WINDOWPROCTYPE procType )
 {
     HMENU16 hMenu = 0;
     HFONT16 hFont = 0;
@@ -536,23 +560,10 @@ HWND DIALOG_CreateIndirect( HINSTANCE hInst, LPCSTR dlgTemplate,
           /* The font height must be negative as it is a point size */
           /* (see CreateFont() documentation in the Windows SDK).   */
 
-   if (win32Template)
        hFont = CreateFontW( -strTemplate.pointSize, 0, 0, 0,
                                    strTemplate.weight, strTemplate.italic, FALSE,
                                    FALSE, DEFAULT_CHARSET, 0, 0, PROOF_QUALITY,
                                    FF_DONTCARE, (LPCWSTR)strTemplate.faceName );
-   else
-       hFont = CreateFont16( -strTemplate.pointSize, 0, 0, 0, FW_DONTCARE,
-              FALSE, FALSE, FALSE, DEFAULT_CHARSET, 0, 0,
-              PROOF_QUALITY, FF_DONTCARE,
-              strTemplate.faceName );
-        if (hFont)
-        {
-            SIZE charSize;
-            DIALOG_GetCharSize(hFont,&charSize);
-            xUnit = charSize.cx;
-            yUnit = charSize.cy;
-        }
     }
 
     /* Create dialog main window */
@@ -569,7 +580,7 @@ HWND DIALOG_CreateIndirect( HINSTANCE hInst, LPCSTR dlgTemplate,
 
     if ((INT16)strTemplate.x == CW_USEDEFAULT16)
     {
-        rect.left = rect.top = win32Template? CW_USEDEFAULT : CW_USEDEFAULT16;
+        rect.left = rect.top = CW_USEDEFAULT;
     }
     else
     {
@@ -636,7 +647,7 @@ HWND DIALOG_CreateIndirect( HINSTANCE hInst, LPCSTR dlgTemplate,
     /* Create controls */
 
     if (DIALOG_CreateControls( wndPtr, dlgTemplate, &strTemplate,
-                               hInst, win32Template ))
+                               hInst))
     {
        /* Send initialisation messages and set focus */
 
@@ -692,12 +703,14 @@ HWND WINAPI CreateDialogParamW( HINSTANCE hInst, LPCWSTR name,
 /***********************************************************************
  *           CreateDialogIndirectParam32A   (USER32.69)
  */
+
 HWND WINAPI CreateDialogIndirectParamA( HINSTANCE hInst,
-                                            LPCVOID dlgTemplate,
-                                            HWND owner, DLGPROC dlgProc,
-                                            LPARAM param )
+                                        DLGTEMPLATE* dlgTemplate,
+                                        HWND owner,
+                                        DLGPROC dlgProc,
+                                        LPARAM param )
 {
-    return DIALOG_CreateIndirect( hInst, (LPCSTR)dlgTemplate, TRUE, owner,
+    return DIALOG_CreateIndirect( hInst, (LPCSTR)dlgTemplate, owner,
                                   (DLGPROC16)dlgProc, param, WIN_PROC_32A );
 }
 
@@ -705,12 +718,12 @@ HWND WINAPI CreateDialogIndirectParamA( HINSTANCE hInst,
  *           CreateDialogIndirectParam32AorW   (USER32.71)
  */
 HWND WINAPI CreateDialogIndirectParamAorW( HINSTANCE hInst,
-                                            LPCVOID dlgTemplate,
+                                            DLGTEMPLATE* dlgTemplate,
                                             HWND owner, DLGPROC dlgProc,
                                             LPARAM param )
 {
     dprintf(("USER32- FIXME-assume WIN_PROC_32W\n"));
-    return DIALOG_CreateIndirect( hInst, (LPCSTR)dlgTemplate, TRUE, owner,
+    return DIALOG_CreateIndirect( hInst, (LPCSTR)dlgTemplate, owner,
                                   (DLGPROC16)dlgProc, param, WIN_PROC_32W );
 }
 
@@ -718,11 +731,11 @@ HWND WINAPI CreateDialogIndirectParamAorW( HINSTANCE hInst,
  *           CreateDialogIndirectParam32W   (USER32.72)
  */
 HWND WINAPI CreateDialogIndirectParamW( HINSTANCE hInst,
-                                            LPCVOID dlgTemplate,
+                                            DLGTEMPLATE* dlgTemplate,
                                             HWND owner, DLGPROC dlgProc,
                                             LPARAM param )
 {
-    return DIALOG_CreateIndirect( hInst, (LPCSTR)dlgTemplate, TRUE, owner,
+    return DIALOG_CreateIndirect( hInst, (LPCSTR)dlgTemplate, owner,
                                   (DLGPROC16)dlgProc, param, WIN_PROC_32W );
 }
 
@@ -746,8 +759,10 @@ INT DIALOG_DoDialogBox( HWND hwnd, HWND owner )
     {
         EnableWindow( owner, FALSE );
         ShowWindow( hwnd, SW_SHOW );
-        while (MSG_InternalGetMessage(&msg, hwnd, owner, MSGF_DIALOGBOX,
-                                      PM_REMOVE, !(wndPtr->dwStyle & DS_NOIDLEMSG), NULL ))
+
+//        while (MSG_InternalGetMessage(&msg, hwnd, owner, MSGF_DIALOGBOX,
+//                                      PM_REMOVE, !(wndPtr->dwStyle & DS_NOIDLEMSG), NULL ))
+        while (GetMessageA(&msg, hwnd, owner, MSGF_DIALOGBOX))
         {
             if (!IsDialogMessageA( hwnd, &msg))
             {
@@ -792,9 +807,11 @@ INT WINAPI DialogBoxParamW( HINSTANCE hInst, LPCWSTR name,
 /***********************************************************************
  *           DialogBoxIndirectParam32A   (USER32.136)
  */
-INT WINAPI DialogBoxIndirectParamA(HINSTANCE hInstance, LPCVOID strTemplate,
-                                       HWND owner, DLGPROC dlgProc,
-                                       LPARAM param )
+INT WINAPI DialogBoxIndirectParamA(HINSTANCE hInstance,
+                                   DLGTEMPLATE* strTemplate,
+                                   HWND owner,
+                                   DLGPROC dlgProc,
+                                   LPARAM param )
 {
     HWND hwnd = CreateDialogIndirectParamA( hInstance, strTemplate,
                                                 owner, dlgProc, param );
@@ -806,9 +823,11 @@ INT WINAPI DialogBoxIndirectParamA(HINSTANCE hInstance, LPCVOID strTemplate,
 /***********************************************************************
  *           DialogBoxIndirectParam32W   (USER32.138)
  */
-INT WINAPI DialogBoxIndirectParamW(HINSTANCE hInstance, LPCVOID strTemplate,
-                                       HWND owner, DLGPROC dlgProc,
-                                       LPARAM param )
+INT WINAPI DialogBoxIndirectParamW(HINSTANCE hInstance,
+                                   DLGTEMPLATE* strTemplate,
+                                   HWND owner,
+                                   DLGPROC dlgProc,
+                                   LPARAM param )
 {
     HWND hwnd = CreateDialogIndirectParamW( hInstance, strTemplate,
                                                 owner, dlgProc, param );
@@ -1268,9 +1287,9 @@ BOOL WINAPI CheckDlgButton( HWND hwnd, INT id, UINT check )
 /***********************************************************************
  *           IsDlgButtonChecked32   (USER32.344)
  */
-UINT WINAPI IsDlgButtonChecked( HWND hwnd, UINT id )
+BOOL WINAPI IsDlgButtonChecked( HWND hwnd, UINT id )
 {
-    return (UINT)SendDlgItemMessageA( hwnd, id, BM_GETCHECK, 0, 0 );
+    return (BOOL)SendDlgItemMessageA( hwnd, id, BM_GETCHECK, 0, 0 );
 }
 
 
