@@ -1,0 +1,288 @@
+<?php
+$Title ="The Odin32 API Database";
+
+require "stilovi.php3";
+require "Odin32DBHelpers.php3";
+
+/*
+ * Connect to database
+ */
+$db = mysql_connect("127.0.0.1", "root", "");
+$rc = mysql_select_db("odin32", $db);
+
+
+/*
+ * Global Variables
+ */
+$iRefcode       = -1;                   /* Reference number. (< 0 is all members in the category) */
+$sCategory      = "dll";                /* Category name for internal use (equal to table name). */
+$sCategoryName  = "Dll";                /* Category name for presentation. */
+$fNoData        = 0;                    /* Flag which is set if refcode don't give matches in the DB. */
+
+
+/*
+ * What are we up to? We'll parse the input parameter (if any) to find out.
+ */
+if (isset($dllrefcode))
+{   /* DLLs by refcode */
+    $sCategory      = "dll";
+    $sCategoryName  = "Dll";
+    if ($dllrefcode != "")
+        $iRefcode = (int)$dllrefcode;
+}
+else if (isset($filerefcode))
+{   /* Files by refcode */
+    $sCategory      = "file";
+    $sCategoryName  = "File";
+    if ($filerefcode != "")
+        $iRefcode = (int)$filerefcode;
+}
+else if (isset($functionrefcode))
+{   /* Functions by refcode */
+    $sCategory      = "function";
+    $sCategoryName  = "Function";
+    if ($functionrefcode != "")
+        $iRefcode = (int)$functionrefcode;
+}
+else if (isset($apigrouprefcode))
+{   /* Api Group by refcode */
+    $sCategory      = "apigroup";
+    $sCategoryName  = "API Group";
+    if ($apigrouprefcode != "")
+        $iRefcode = (int)$apigrouprefcode;
+}
+else if (isset($authorrefcode))
+{   /* Author by refcode */
+    $sCategory      = "author";
+    $sCategoryName  = "Author";
+    if ($authorrefcode != "")
+        $iRefcode = (int)$authorrefcode;
+} /* else: defaults are set above (All dlls) */
+
+
+/*
+ * Get name of the item we're to display data on.
+ */
+if ($iRefcode < 0)
+    $sName = "All";
+else
+{
+    $sql = sprintf("SELECT name FROM %s WHERE refcode = %d",
+                   $sCategory, $iRefcode);
+    $result = mysql_query($sql, $db);
+    if (@mysql_num_rows($result) > 0 &&
+        ($aName = @mysql_fetch_row($result))
+        )
+    {
+        $sName = $aName[0];
+    }
+    else
+    {
+        $fNoData = 1;
+        $sName = "!Invalid Refcode!";
+    }
+    @mysql_free_result($result);
+}
+
+require "01-PreTitle.php3";
+echo $Title." - ".$sCategoryName.": ".$sName;
+require "02-PostTitle.php3";
+
+require "03-MainTableBeg.php3";
+require "04-ColumnOne.php3";
+
+require "05-ColumnTwoHeader.php3";
+echo $Title."<br>".$sCategoryName.": ".$sName;
+require "06-ColumnTwoHeader2.php3";
+
+TekstBeg();
+if (!$fNoData)
+{
+    switch ($sCategory)
+    {
+        case "dll":
+            {
+            echo $sCategoryName;
+            break;
+            }
+
+
+        case "file":
+            {
+            echo $sCategoryName;
+            break;
+            }
+
+        case "function":
+            {
+            $sql =  sprintf("
+                             SELECT
+                                    f.name          AS name,
+                                    f.intname       AS intname,
+                                    f.ordinal       AS ordinal,
+                                    f.return        AS return,
+                                    f.type          AS type,
+                                    f.description   AS description,
+                                    f.remark        AS remark,
+                                    f.returndesc    AS returndesc,
+                                    f.sketch        AS sketch,
+                                    f.equiv         AS equiv,
+                                    f.time          AS time,
+                                    g.name          AS apigroupname,
+                                    g.refcode       AS apigrouprefcode,
+                                    a.name          AS aliasname,
+                                    a.refcode       AS aliasrefcode,
+                                    ad.name         AS aliasdllname,
+                                    ad.refcode      AS aliasdllrefcode,
+                                    d.name          AS dllname,
+                                    d.refcode       AS dllrefcode,
+                                    i.name          AS filename,
+                                    i.refcode       AS filerefcode,
+                                    s.name          AS state
+                                FROM
+                                    function f
+                                    LEFT OUTER JOIN function a ON f.aliasfn  = a.refcode
+                                    LEFT OUTER JOIN dll ad     ON a.dll      = ad.refcode
+                                    LEFT OUTER JOIN apigroup g ON f.apigroup = g.refcode
+                                    LEFT       JOIN dll d      ON f.dll      = d.refcode
+                                    LEFT       JOIN state s    ON f.state    = s.refcode
+                                    LEFT OUTER JOIN file i     ON f.file     = i.refcode
+                                WHERE
+                                    f.refcode = %d",
+                            $iRefcode);
+                $result = mysql_query($sql, $db);
+                if (@mysql_num_rows($result) > 0 &&
+                    ($array = mysql_fetch_array($result))
+                    )
+                {
+                    Naslov("General", "General");
+                    echo "\n<table width=100% border=3 cellspacing cellpadding=0>\n";
+                    Odin32DBInfoRow1("Name", $array, "name","","","","");
+                    if (isset($array["intname"]))
+                        Odin32DBInfoRow1("Internal Name", $array, "intname","","","","");
+                    else
+                        Odin32DBInfoRow1("Internal Name", $array, "name","","","","");
+                    Odin32DBInfoRow1("Dll", $array, "dllname", "dllrefcode", "dllrefcode","","");
+                    Odin32DBInfoRow1("Ordinal", $array, "ordinal","","","not available","");
+                    if (isset($array["aliasrefcode"]))
+                        Odin32DBInfoRow2("Forwards", $array, "aliasdllname", "aliasdllrefcode", "dllrefcode","",".",
+                                                             "aliasname", "aliasrefcode", "functionrefcode");
+                    if (isset($array["apigroup"]))
+                        Odin32DBInfoRow1("API Group", $array, "apigroupname", "apigrouprefcode", "apigrouprefcode","","");
+                    Odin32DBInfoRow1("File", $array, "filename", "filerefcode", "filerefcode","not available","");
+
+                    echo "\n</table>\n";
+
+
+                    Naslov("Declaration", "declaration");
+                    echo "<pre>\n";
+                    if (isset($array["return"]))
+                        echo $array["return"]." ";
+                    echo $array["name"]."(";
+                    $sql = sprintf("
+                                    SELECT
+                                            name                AS name,
+                                            type                AS type
+                                        FROM
+                                            parameter
+                                        WHERE
+                                            function = %d
+                                        ORDER BY sequencenbr",
+                                   $iRefcode);
+                    $result2 = mysql_query($sql, $db);
+                    if ($result2 && ($cParams = @mysql_num_rows($result2)) > 0)
+                    {
+                        while ($param = mysql_fetch_array($result2))
+                        {
+                            if (--$cParams == 0)
+                                printf("\n        %-20s %s", $param["type"], $param["name"]);
+                            else
+                                printf("\n        %-20s %s,", $param["type"], $param["name"]);
+                        }
+                    }
+                    else
+                        echo "void";
+
+                    echo ");\n";
+                    echo "</pre>\n";
+
+                    Naslov("Documentation", "docs");
+                    Odin32DBDocRow1("Description", $array, "description");
+                    PodNaslov("Parameters");
+                    $sql = sprintf("
+                                    SELECT
+                                            name                AS name,
+                                            description         AS description
+                                        FROM
+                                            parameter
+                                        WHERE
+                                            function = %d
+                                        ORDER BY sequencenbr",
+                                   $iRefcode);
+                    $result2 = mysql_query($sql, $db);
+                    if ($result2 && @mysql_num_rows($result2) > 0)
+                    {
+                        echo "\n<table width=100% border=0 cellspacing cellpadding=0>\n";
+                        while ($param = mysql_fetch_array($result2))
+                        {
+                            Odin32DBInfoRow1($param["name"], $param, "description", "", "","","");
+                        }
+                        echo "\n</table>\n";
+                    }
+                    else
+                        echo "void";
+
+
+                    Odin32DBDocRow1("Returns", $array, "returndesc");
+                    Odin32DBDocRow1("Sketch/Algorithm", $array, "sketch");
+                    Odin32DBDocRow1("Remark", $array, "remark");
+
+                }
+                else
+                {
+                    echo "<p> No data!</p>";
+                    Odin32DBDumpSql($sql);
+                }
+                if (@mysql_num_rows($result) > 0 &&
+                    ($aName = @mysql_fetch_row($result))
+                    )
+            break;
+            }
+
+        case "apigroup":
+            {
+            echo $sCategoryName;
+            break;
+            }
+
+        case "author":
+            {
+            echo $sCategoryName;
+            break;
+            }
+
+        default:
+            echo "!IPE!";
+    }
+}
+else
+    echo "Sorry, but there is not data available!";
+
+TekstEnd();
+
+require "07-ColumnTwoFooter.php3";
+require "08-News.php3";
+// require "09-ContentsTitle.php3";
+
+TocBeg();
+
+TocEnd();
+
+require "10-EndOfContent.php3";
+require "11-NetlabsContact.php3";
+
+$Kada=date ("j M Y", filemtime(__file__));
+require "12-OdinBanner.php3";
+
+require "13-Closing.php3";
+?>
