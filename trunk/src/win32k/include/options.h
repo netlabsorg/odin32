@@ -1,4 +1,4 @@
-/* $Id: options.h,v 1.7 2000-02-21 04:45:47 bird Exp $
+/* $Id: options.h,v 1.8 2000-02-21 14:53:39 bird Exp $
  *
  * Options.
  *
@@ -43,7 +43,6 @@
             o.fQuiet        = FALSE;                \
             o.usCom         = OUTPUT_COM2;          \
             o.fLogging      = FALSE;                \
-//            o.fLogging      = TRUE;                 \
             o.fKernel       = KF_UNI;               \
             o.ulBuild       = ~0UL;                 \
             o.usVerMajor    = (unsigned short)~0;   \
@@ -51,7 +50,7 @@
             o.fPE           = FLAGS_PE_PE2LX;       \
             o.ulInfoLevel   = INFOLEVEL_QUIET;      \
             o.fElf          = FALSE;                \
-            o.fScript       = FALSE;                \
+            o.fScript       = TRUE;                 \
             o.fNoLoader     = FALSE;                \
             o.cbSwpHeapInit = CB_SWP_INIT;          \
             o.cbSwpHeapMax  = CB_SWP_MAX;           \

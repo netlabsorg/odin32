@@ -1,4 +1,4 @@
-; $Id: calltab.asm,v 1.10 2000-02-21 09:24:01 bird Exp $
+; $Id: calltab.asm,v 1.11 2000-02-21 14:53:39 bird Exp $
 ;
 ; callTab - Call back again table - table with entry for each function which is overrided.
 ;           It holds the part of the prolog which was replaced by a jmp instruction.
@@ -33,9 +33,9 @@
 
     public _VMAllocMem@36
     public _VMGetOwner@8
-    public g_tkExecPgm
-    public f_FuStrLenZ
-    public f_FuBuff
+    public _g_tkExecPgm
+    public _f_FuStrLenZ
+    public _f_FuBuff
 
 
 ;
@@ -109,22 +109,22 @@ _VMGetOwner@8 PROC NEAR
     db MAXSIZE_PROLOG dup(0cch)
 _VMGetOwner@8 ENDP
 
-g_tkExecPgm PROC NEAR
+_g_tkExecPgm PROC NEAR
     db MAXSIZE_PROLOG dup(0cch)
-g_tkExecPgm ENDP
+_g_tkExecPgm ENDP
 
 
-f_FuStrLenZ PROC FAR
+_f_FuStrLenZ PROC FAR
     db MAXSIZE_PROLOG dup(0cch)
-f_FuStrLenZ ENDP
+_f_FuStrLenZ ENDP
 
-f_FuStrLen PROC FAR
+_f_FuStrLen PROC FAR
     db MAXSIZE_PROLOG dup(0cch)
-f_FuStrLen ENDP
+_f_FuStrLen ENDP
 
-f_FuBuff PROC FAR
+_f_FuBuff PROC FAR
     db MAXSIZE_PROLOG dup(0cch)
-f_FuBuff ENDP
+_f_FuBuff ENDP
 
 CALLTAB ENDS
 
