@@ -1,4 +1,4 @@
-/* $Id: time.cpp,v 1.17 2003-03-05 14:48:45 sandervl Exp $ */
+/* $Id: time.cpp,v 1.18 2003-10-13 09:18:38 sandervl Exp $ */
 
 /*
  * Timer MM apis
@@ -144,9 +144,9 @@ MMRESULT WINAPI timeKillEvent(UINT IDEvent)
       return TIMERR_NOERROR; //TODO: should we return an error here??
   }
   HMHandleFree(IDEvent);
-  // return OS2Timer::killEvent(UINT IDEvent)
 
-  delete os2timer;
+  os2timer->KillTimer();
+  os2timer->release();
   return TIMERR_NOERROR;
 }
 
@@ -204,7 +204,7 @@ MMRESULT WINAPI timeSetEvent(UINT wDelay, UINT wResolution,
 
   if(HMHandleAllocate(&timerID, (ULONG)timer) != NO_ERROR) {
       dprintf(("HMHandleAllocate failed!!"));
-      delete timer;
+      timer->release();
       return 0;
   }
 
@@ -212,7 +212,7 @@ MMRESULT WINAPI timeSetEvent(UINT wDelay, UINT wResolution,
   if(timer->StartTimer(wDelay, wResolution, lptc, dwUser, fuEvent) == FALSE)
   {
     dprintf(("WINMM:timeSetEvent: couldn't start timer!\n"));
-    delete(timer);
+    timer->release();
     return(0);
   }
   return(MMRESULT)timerID;
