@@ -1,4 +1,7 @@
-/* $Id: ChangeLog,v 1.2676 2004-02-13 17:37:52 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.2677 2004-02-16 12:00:57 sandervl Exp $ */
+
+ 2004-02-16: Sander van Leeuwen <sandervl@innotek   >
+    - USER32:   o EndPaint; fixed region handle leaks
 
  2004-02-13: Sander van Leeuwen <sandervl@innotek   >
     - KERNEL32: o Allocate memory for the map during CreateFileMapping and
