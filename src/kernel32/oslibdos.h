@@ -1,4 +1,4 @@
-/* $Id: oslibdos.h,v 1.45 2002-05-09 13:55:34 sandervl Exp $ */
+/* $Id: oslibdos.h,v 1.46 2002-06-08 11:40:15 sandervl Exp $ */
 
 /*
  * Wrappers for OS/2 Dos* API
@@ -237,9 +237,9 @@ DWORD OSLibDosQueryVolumeSerialAndName(int drive, LPDWORD lpVolumeSerialNumber, 
 #define DSK_GETLOCKSTATUS                  0X0066
 #endif
 
-DWORD OSLibDosDevIOCtl( DWORD hFile, DWORD dwCat, DWORD dwFunc,
-                        PVOID pParm, DWORD dwParmMaxLen, DWORD *pdwParmLen,
-                        PVOID pData, DWORD dwDataMaxLen, DWORD *pdwDataLen);
+DWORD SYSTEM OSLibDosDevIOCtl( DWORD hFile, DWORD dwCat, DWORD dwFunc,
+                               PVOID pParm, DWORD dwParmMaxLen, DWORD *pdwParmLen,
+                               PVOID pData, DWORD dwDataMaxLen, DWORD *pdwDataLen);
 
 BOOL OSLibGetDiskFreeSpace(LPSTR lpRootPathName, LPDWORD lpSectorsPerCluster,
                            LPDWORD lpBytesPerSector, LPDWORD lpNumberOfFreeClusters,
