@@ -1,4 +1,4 @@
-; $Id: mytkExecPgm.asm,v 1.10.4.5 2000-08-22 03:00:21 bird Exp $
+; $Id: mytkExecPgm.asm,v 1.10.4.6 2000-08-24 01:36:25 bird Exp $
 ;
 ; mytkExecPgm - tkExecPgm overload
 ;
@@ -336,10 +336,10 @@ tkepgm_callbehind:
     add     eax, esp                    ; Added TKSSBase to the usage count pointer
     push    eax                         ; Push address of usage count pointer.
     push    pLdrSem                     ; Push pointer to loader semaphore ( = handle).
-    call    _KSEMQueryMutex@8
+    call    near ptr FLAT:_KSEMQueryMutex@8
     or      eax, eax                    ; Check return code. (1 = our / free; 0 = not our but take)
-    je      tkepgm_callbehindret        ; jmp if not taken by us (FALSE).
     pop     eax                         ; Pops usage count.
+    je      tkepgm_callbehindret        ; jmp if not taken by us (rc=FALSE).
     or      eax, eax                    ; Check usage count.
     jz      tkepgm_callbehindret        ; jmp if 0 (=free).
     mov     ulLDRState, 0               ; Clears loaderstate. (LDRSTATE_UNKNOWN)
