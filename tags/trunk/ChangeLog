@@ -1,4 +1,24 @@
- /* $Id: ChangeLog,v 1.755 2000-02-27 20:30:31 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.756 2000-02-29 00:55:49 sandervl Exp $ */
+
+ 2000-02-29: Sander van Leeuwen <sandervl@xs4all.nl>
+	- OPENGL\MESA: Added Odin port of Mesa Opengl library
+                       (Ported by Jeroen van den Horn)
+	  NOTE: The Mesa 3D graphics library has a different license
+                (see LICENSE.TXT in the Mesa directory)
+	- OPENGL\MESA\3DFX:
+		       Added Odin port of 3dfx Voodoo Mesa GL 
+                       (tested with simple opengl samples only, but
+                        this is the first hardware accelerated Opengl
+                        implementation for OS/2!)
+                       NOTE: This is not yet included in the daily build
+	  NOTE: The Mesa 3dfx graphics library has a different license
+                (see LICENSE.TXT in the Mesa\3dfx directory)
+                   
+ 2000-02-28: Sander van Leeuwen <sandervl@xs4all.nl>
+	- KERNEL32: Call ExitProcess in KillWin32Process to make sure
+                    the dll libmain handlers are called after a crash.
+                    (i.e. Glide needs this to restore the display)
+	- INCLUDE\WIN: Added wgl definitions to wingdi.h
 
  2000-02-27: Sander van Leeuwen <sandervl@xs4all.nl>
 	- WINMM: Implemented waveOutGetPosition
