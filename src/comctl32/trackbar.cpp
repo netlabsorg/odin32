@@ -1,4 +1,4 @@
-/* $Id: trackbar.cpp,v 1.5 2000-08-08 17:05:01 cbratschi Exp $ */
+/* $Id: trackbar.cpp,v 1.6 2001-03-31 13:25:27 sandervl Exp $ */
 /*
  * Trackbar control
  *
@@ -19,6 +19,7 @@
 #include "commctrl.h"
 #include "ccbase.h"
 #include "trackbar.h"
+#include "comctl32.h"
 #include <stdio.h>
 
 #define TRACKBAR_GetInfoPtr(hwnd) ((TRACKBAR_INFO*)getInfoPtr(hwnd))

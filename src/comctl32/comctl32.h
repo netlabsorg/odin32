@@ -1,4 +1,4 @@
-/* $Id: comctl32.h,v 1.18 2000-11-20 04:06:04 bird Exp $ */
+/* $Id: comctl32.h,v 1.19 2001-03-31 13:25:26 sandervl Exp $ */
 /*
  * Win32 common controls implementation
  *
@@ -21,7 +21,6 @@
 #include "winuser.h"
 #include <win/commctrl.h>
 #include "unicode.h"
-#include "wineuni.h"
 
 #define _OS2WIN_H
 #define NO_ULONG
@@ -156,5 +155,60 @@ extern HMODULE COMCTL32_hModule;
 
 /* DragList icon */
 #define IDI_DRAGARROW                   150
+
+#define COMCTL32_VERSION_MINOR 0 
+#define WINE_FILEVERSION 5, COMCTL32_VERSION_MINOR, 0, 0
+#define WINE_FILEVERSIONSTR "5.00"
+
+#define UINT_PTR DWORD
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+void ANIMATE_Register(void);
+void ANIMATE_Unregister(void);
+void COMBOEX_Register(void);
+void COMBOEX_Unregister(void);
+void DATETIME_Register(void);
+void DATETIME_Unregister(void);
+void FLATSB_Register(void);
+void FLATSB_Unregister(void);
+void HEADER_Register(void);
+void HEADER_Unregister(void);
+void HOTKEY_Register(void);
+void HOTKEY_Unregister(void);
+void IPADDRESS_Register(void);
+void IPADDRESS_Unregister(void);
+void LISTVIEW_Register(void);
+void LISTVIEW_Unregister(void);
+void MONTHCAL_Register(void);
+void MONTHCAL_Unregister(void);
+void NATIVEFONT_Register(void);
+void NATIVEFONT_Unregister(void);
+void PAGER_Register(void);
+void PAGER_Unregister(void);
+void PROGRESS_Register(void);
+void PROGRESS_Unregister(void);
+void REBAR_Register(void);
+void REBAR_Unregister(void);
+void STATUS_Register(void);
+void STATUS_Unregister(void);
+void TAB_Register(void);
+void TAB_Unregister(void);
+void TOOLBAR_Register(void);
+void TOOLBAR_Unregister(void);
+void TOOLTIPS_Register(void);
+void TOOLTIPS_Unregister(void);
+void TRACKBAR_Register(void);
+void TRACKBAR_Unregister(void);
+void TREEVIEW_Register(void);
+void TREEVIEW_Unregister(void);
+void UPDOWN_Register(void);
+void UPDOWN_Unregister(void);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* _H_COMCTL32 */

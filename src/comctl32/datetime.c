@@ -18,14 +18,21 @@
 
 #include "winbase.h"
 #include "wingdi.h"
-#include "wine/winestring.h"
 #include "commctrl.h"
 #include "debugtools.h"
+
+#ifdef __WIN32OS2__
+#include "ccbase.h"
+#define inline
+#endif
 
 DEFAULT_DEBUG_CHANNEL(datetime);
 
 typedef struct
 {
+#ifdef __WIN32OS2__
+        COMCTL32_HEADER header;
+#endif
 	HWND hMonthCal;
 	HWND hUpdown;
 	SYSTEMTIME date;
@@ -307,10 +314,10 @@ DATETIME_SetFormatW (HWND hwnd, WPARAM wParam, LPARAM lParam)
  if (lParam) {
 	LPSTR buf;
 	int retval;
- 	int len = lstrlenW ((LPWSTR) lParam)+1;
+        int len = WideCharToMultiByte( CP_ACP, 0, (LPWSTR)lParam, -1, NULL, 0, NULL, NULL );
 
  	buf = (LPSTR) COMCTL32_Alloc (len);
- 	lstrcpyWtoA (buf, (LPWSTR) lParam);
+        WideCharToMultiByte( CP_ACP, 0, (LPWSTR)lParam, -1, buf, len, NULL, NULL );
 	retval=DATETIME_SetFormat (hwnd, 0, (LPARAM) buf);
 	COMCTL32_Free (buf);
 	return retval;
@@ -1111,7 +1118,11 @@ DATETIME_Create (HWND hwnd, WPARAM wParam, LPARAM lParam)
 
   /* allocate memory for info structure */
   TRACE("%04x %08lx\n",wParam,lParam);
+#ifdef __WIN32OS2__
+  infoPtr = (DATETIME_INFO*)initControl(hwnd,sizeof(DATETIME_INFO));
+#else
   infoPtr = (DATETIME_INFO *)COMCTL32_Alloc (sizeof(DATETIME_INFO));
+#endif
   if (infoPtr == NULL) {
     ERR("could not allocate info memory!\n");
     return 0;
@@ -1165,6 +1176,7 @@ DATETIME_Destroy (HWND hwnd, WPARAM wParam, LPARAM lParam)
 	
     TRACE("\n");
     COMCTL32_Free (infoPtr);
+    SetWindowLongA( hwnd, 0, 0 );
     return 0;
 }
 
@@ -1172,6 +1184,9 @@ DATETIME_Destroy (HWND hwnd, WPARAM wParam, LPARAM lParam)
 static LRESULT WINAPI
 DATETIME_WindowProc (HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
+    if (!DATETIME_GetInfoPtr(hwnd) && (uMsg != WM_CREATE))
+	return DefWindowProcA( hwnd, uMsg, wParam, lParam );
+    
     switch (uMsg)
     {
 
@@ -1251,7 +1266,7 @@ DATETIME_WindowProc (HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		ERR("unknown msg %04x wp=%08x lp=%08lx\n",
 		     uMsg, wParam, lParam);
 #ifdef __WIN32OS2__
-            return defComCtl32ProcA (hwnd, uMsg, wParam, lParam);
+        return defComCtl32ProcA (hwnd, uMsg, wParam, lParam);
 #else
 	return DefWindowProcA (hwnd, uMsg, wParam, lParam);
 #endif
