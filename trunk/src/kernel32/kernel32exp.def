@@ -1,4 +1,4 @@
-; $Id: kernel32exp.def,v 1.14 1999-08-22 22:11:22 sandervl Exp $
+; $Id: kernel32exp.def,v 1.15 1999-08-25 12:30:47 sandervl Exp $
 
 ;Created by BLAST for IBM's compiler
 ;Basis is Windows95 KERNEL32
@@ -848,8 +848,8 @@ RestoreOS2FS                             @1230
 
    _CreateWin32Exe@4                       @1236
 
-_VIRTUAL_MapFileA@4              @1249
-_VIRTUAL_MapFileW@4              @1250
+_VIRTUAL_MapFileA@8              @1249
+_VIRTUAL_MapFileW@8              @1250
 
 ; HEAP Management (heap.cpp, heapstring.cpp)
 _HEAP_xalloc@12                  @1240
