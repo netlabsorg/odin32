@@ -1,4 +1,4 @@
-/* $Id: wndproc.cpp,v 1.13 1999-06-27 21:59:40 sandervl Exp $ */
+/* $Id: wndproc.cpp,v 1.14 1999-07-22 13:18:14 sandervl Exp $ */
 
 /*
  * Win32 window procedure class for OS/2
@@ -256,47 +256,47 @@ LRESULT Win32WindowProc::SendMessageA(HWND hwnd, UINT Msg, WPARAM wParam, LPARAM
 //******************************************************************************
 DWORD MapOEMToRealKey(DWORD wParam, DWORD lParam)
 {
-  switch(wParam) {
-        case VK_PRIOR:  //page up
-                lParam &= 0xFF00FFFF;
-                lParam |= 0x00510000;
-                break;
-        case VK_NEXT:   //page down
-                lParam &= 0xFF00FFFF;
-                lParam |= 0x00490000;
-                break;
-        case VK_END:
-                lParam &= 0xFF00FFFF;
-                lParam |= 0x004F0000;
-                break;
-        case VK_HOME:
-                lParam &= 0xFF00FFFF;
-                lParam |= 0x00470000;
-                break;
-        case VK_UP:
-                lParam &= 0xFF00FFFF;
-                lParam |= 0x00480000;
-                break;
-        case VK_LEFT:
-                lParam &= 0xFF00FFFF;
-                lParam |= 0x004B0000;
-                break;
-        case VK_DOWN:
-                lParam &= 0xFF00FFFF;
-                lParam |= 0x00500000;
-                break;
-        case VK_RIGHT:
-                lParam &= 0xFF00FFFF;
-                lParam |= 0x004D0000;
-                break;
-        case VK_DELETE:
-                lParam &= 0xFF00FFFF;
-                lParam |= 0x00530000;
-                break;
-        case VK_INSERT:
-                lParam &= 0xFF00FFFF;
-                lParam |= 0x00520000;
-                break;
+  switch((UCHAR)(lParam >> 16)) {
+        case 0x60: // VK_HOME
+          lParam &= 0xFF00FFFF;
+          lParam |= 0x00470000;
+          break;
+        case 0x61: // VK_UP
+          lParam &= 0xFF00FFFF;
+          lParam |= 0x00480000;
+          break;
+        case 0x62: // VK_PRIOR  //page up
+          lParam &= 0xFF00FFFF;
+          lParam |= 0x00490000;
+          break;
+        case 0x63: // VK_LEFT
+          lParam &= 0xFF00FFFF;
+          lParam |= 0x004B0000;
+          break;
+        case 0x64: // VK_RIGHT
+          lParam &= 0xFF00FFFF;
+          lParam |= 0x004D0000;
+          break;
+        case 0x65: // VK_END
+          lParam &= 0xFF00FFFF;
+          lParam |= 0x004F0000;
+          break;
+        case 0x66: // VK_DOWN:
+          lParam &= 0xFF00FFFF;
+          lParam |= 0x00500000;
+          break;
+        case 0x67: // VK_NEXT  //page down
+          lParam &= 0xFF00FFFF;
+          lParam |= 0x00510000;
+          break;
+        case 0x68: // VK_INSERT
+          lParam &= 0xFF00FFFF;
+          lParam |= 0x00520000;
+          break;
+        case 0x69: // VK_DELETE
+          lParam &= 0xFF00FFFF;
+          lParam |= 0x00530000;
+          break;
   }
   return(lParam);
 }
@@ -410,9 +410,14 @@ LRESULT EXPENTRY_O32 OS2ToWin32Callback(HWND hwnd, UINT Msg, WPARAM wParam, LPAR
 //******************************************************************************
 LRESULT EXPENTRY Win32ToOS2Callback(HWND hwnd, UINT Msg, WPARAM wParam, LPARAM lParam)
 {
+ LRESULT rc;
+
   Win32WindowProc *curwnd = Win32WindowProc::FindProc(hwnd);
   if(curwnd && curwnd->pOS2Callback) {
-	return curwnd->pOS2Callback(hwnd, Msg, wParam, lParam);
+	RestoreOS2TIB();	
+	rc = curwnd->pOS2Callback(hwnd, Msg, wParam, lParam);
+	SetWin32TIB();
+	return rc;	
   }
   else 	DebugInt3();
 
