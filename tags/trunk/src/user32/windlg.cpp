@@ -1,4 +1,4 @@
-/* $Id: windlg.cpp,v 1.31 2002-02-26 11:12:25 sandervl Exp $ */
+/* $Id: windlg.cpp,v 1.32 2002-03-28 16:20:07 sandervl Exp $ */
 /*
  * Win32 dialog apis for OS/2
  *
@@ -65,25 +65,6 @@ HWND WIN32API CreateDialogParamW(HINSTANCE hInst, LPCWSTR lpszTemplate,
                                       hwndOwner, dlgproc, lParamInit);
 }
 //******************************************************************************
-//This function can be used by a custom Odin build to register a hook procedure
-//that gets called before or after dialog creation
-//******************************************************************************
-static HOOKPROC pfnCustomDialogHook = NULL;
-//******************************************************************************
-BOOL WIN32API SetCustomDialogHook(HOOKPROC pfnDialogProc)
-{
-    dprintf(("SetCustomDialogHook %x", pfnDialogProc));
-    pfnCustomDialogHook = pfnDialogProc;
-    return TRUE;
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API ClearCustomDialogHook()
-{
-    pfnCustomDialogHook = NULL;
-    return TRUE;
-}
-//******************************************************************************
 //******************************************************************************
 HWND WIN32API CreateDialogIndirectParamA(HINSTANCE hInst,
                          LPCDLGTEMPLATEA dlgtemplate,
@@ -111,11 +92,7 @@ HWND WIN32API CreateDialogIndirectParamA(HINSTANCE hInst,
         return 0;
     }
     HWND hwnd = dialog->getWindowHandle();
-
-    if(pfnCustomDialogHook) {
-        dprintf(("Calling Dialog hook for dialog %x", hwnd));
-        pfnCustomDialogHook(HCUSTOM_POSTDIALOGCREATION, hwnd, 0);
-    }
+    HOOK_CallOdinHookA(HODIN_POSTDIALOGCREATION, hwnd, 0);
 
     RELEASE_WNDOBJ(dialog);
     return hwnd;
@@ -149,10 +126,7 @@ HWND WIN32API CreateDialogIndirectParamW(HINSTANCE hInst,
     }
     HWND hwnd = dialog->getWindowHandle();
 
-    if(pfnCustomDialogHook) {
-        dprintf(("Calling Dialog hook for dialog %x", hwnd));
-        pfnCustomDialogHook(HCUSTOM_POSTDIALOGCREATION, hwnd, 0);
-    }
+    HOOK_CallOdinHookA(HODIN_POSTDIALOGCREATION, hwnd, 0);
 
     RELEASE_WNDOBJ(dialog);
     return hwnd;
