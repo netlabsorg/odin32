@@ -1,4 +1,4 @@
-/* $Id: kKrnlLibTst.c,v 1.2 2001-09-23 06:51:07 bird Exp $
+/* $Id: kKrnlLibTst.c,v 1.3 2001-11-19 03:16:40 bird Exp $
  *
  * kKrnlLib test module.
  *
@@ -233,6 +233,7 @@
 *   Global Variables                                                           *
 *******************************************************************************/
 extern BOOL     fInited;                /* malloc.c */
+int             iTestcaseNo;
 int             cObjectsFake = 14;
 OTE             aKrnlOTE[24];
 
@@ -269,7 +270,6 @@ int     WritekKrnlLibDll(void);
  */
 int main(int argc, char **argv)
 {
-    int         iTest;
     int         rc;
 
     /*
@@ -281,7 +281,7 @@ int main(int argc, char **argv)
      * Parse arguments.
      * (printf don't work before dhinit is called...)
      */
-    if (argc < 2 || (iTest = atoi(argv[1])) <= 0)
+    if (argc < 2 || (iTestcaseNo = atoi(argv[1])) <= 0)
     {
         syntax();
         printf("syntax error\n");
@@ -296,7 +296,7 @@ int main(int argc, char **argv)
     /*
      * Init Kernel
      */
-    if (!kernelInit(iTest, argc, argv))
+    if (!kernelInit(iTestcaseNo, argc, argv))
         return -2;
 
     /*
@@ -307,7 +307,7 @@ int main(int argc, char **argv)
      */
     ThunkStack32To16();
 
-    rc = tests(iTest, argc, argv);
+    rc = tests(iTestcaseNo, argc, argv);
 
     /*
      * Thunk Stack back to 32-bits.
