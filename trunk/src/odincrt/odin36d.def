@@ -1,4 +1,4 @@
-; $Id: odin36d.def,v 1.4 2001-07-20 15:40:30 sandervl Exp $
+; $Id: odin36d.def,v 1.5 2002-04-07 14:35:25 sandervl Exp $
 ; Odin VAC++ 3.6.5 shared multithreaded runtime
 LIBRARY ODINCRTD INITINSTANCE TERMINSTANCE
 DESCRIPTION 'Odin32 System DLL - VAC++ 3.6.5 Debug OdinCRT'
@@ -983,3 +983,14 @@ EXPORTS
     __u64toflt                                         @1030 NONAME
     __divi64                                           @1031 NONAME
     __divu64                                           @1032 NONAME
+
+    _DosDeleteCriticalSection@4                        @1200 NONAME
+    _DosEnterCriticalSection@4                         @1201 NONAME
+    _DosInitializeCriticalSection@8                    @1202 NONAME
+    _DosAccessCriticalSection@8                        @1203 NONAME
+    _DosLeaveCriticalSection@4                         @1204 NONAME
+    _DosInterlockedCompareExchange@12                  @1205 NONAME
+    _DosInterlockedDecrement@4                         @1206 NONAME
+    _DosInterlockedExchange@8                          @1207 NONAME
+    _DosInterlockedExchangeAdd@8                       @1208 NONAME
+    _DosInterlockedIncrement@4                         @1209 NONAME
