@@ -1,4 +1,4 @@
-/* $Id: os2util.cpp,v 1.3 1999-06-19 10:54:42 sandervl Exp $ */
+/* $Id: os2util.cpp,v 1.4 1999-06-19 13:57:51 sandervl Exp $ */
 
 /*
  * Misc util. procedures
@@ -13,6 +13,7 @@
  */
 #define INCL_BASE
 #define INCL_DOSPROCESS
+#define INCL_DOSSEL
 #include <os2wrap.h>	//Odin32 OS/2 api wrappers
 #include <string.h>
 #include <stdlib.h>
@@ -206,10 +207,80 @@ BOOL OS2GetResource(HMODULE hinstance, int id, char *destbuf, int bufLength)
    return(FALSE);
 }
 
-
-
-
 void  OS2Wait(ULONG msec)
 {
    DosSleep(msec);
 }
+
+//******************************************************************************
+//Wrapper for Dos16AllocSeg
+//******************************************************************************
+BOOL OS2AllocSel(ULONG size, USHORT *selector)
+{ 
+   return (Dos16AllocSeg(size, selector, SEG_NONSHARED) == 0);
+}
+//******************************************************************************
+//Wrapper for Dos16FreeSeg
+//******************************************************************************
+BOOL OS2FreeSel(USHORT selector)
+{
+   return (Dos16FreeSeg(selector) == 0);
+}
+//******************************************************************************
+//Wrapper for Dos32SelToFlat
+//******************************************************************************
+PVOID OS2SelToFlat(USHORT selector)
+{
+   return (PVOID)DosSelToFlat(selector << 16);
+}
+//******************************************************************************
+//Get TIB data
+//******************************************************************************
+ULONG OS2GetTIB(int tiboff)
+{
+ PTIB   ptib;
+ PPIB   ppib;
+ APIRET rc;
+
+   rc = DosGetInfoBlocks(&ptib, &ppib);
+   if(rc) {
+	return 0;
+   }
+   switch(tiboff)
+   {
+   	case TIB_STACKTOP:
+		return (ULONG)ptib->tib_pstack;
+	case TIB_STACKLOW:
+		return (ULONG)ptib->tib_pstacklimit;
+	default:
+		return 0;
+   }
+}
+//******************************************************************************
+//Get PIB data
+//******************************************************************************
+ULONG OS2GetPIB(int piboff)
+{
+ PTIB   ptib;
+ PPIB   ppib;
+ APIRET rc;
+
+   rc = DosGetInfoBlocks(&ptib, &ppib);
+   if(rc) {
+	return 0;
+   }
+   switch(piboff) 
+   {
+   	case PIB_TASKHNDL:
+		return ppib->pib_hmte;
+	case PIB_TASKTYPE:
+		if(ppib->pib_ultype == 3) {
+			return TASKTYPE_PM;
+		}
+		else	return TASKTYPE_VIO;
+	default: 
+		return 0;
+   }
+}
+//******************************************************************************
+//******************************************************************************

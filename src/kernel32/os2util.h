@@ -1,4 +1,4 @@
-/* $Id: os2util.h,v 1.3 1999-06-10 19:11:31 phaller Exp $ */
+/* $Id: os2util.h,v 1.4 1999-06-19 13:57:51 sandervl Exp $ */
 
 /*
  *
@@ -39,6 +39,24 @@ ULONG OS2GetResourceSize(HMODULE hinstance, int id);
 BOOL  OS2GetResource(HMODULE hinstance, int id, char *destbuf, int bufLength);
 
 void  OS2Wait(ULONG msec);
+
+
+BOOL  OS2AllocSel(ULONG size, USHORT *selector);
+BOOL  OS2FreeSel(USHORT selector);
+PVOID OS2SelToFlat(USHORT selector);
+
+#define TIB_STACKTOP 	0
+#define TIB_STACKLOW 	1
+
+ULONG OS2GetTIB(int tiboff);
+
+#define PIB_TASKHNDL	0
+#define PIB_TASKTYPE    1
+
+#define TASKTYPE_PM	0
+#define TASKTYPE_VIO	1
+
+ULONG OS2GetPIB(int piboff);
 
 #ifdef __cplusplus
       }
