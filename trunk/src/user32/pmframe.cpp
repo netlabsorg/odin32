@@ -1,4 +1,4 @@
-/* $Id: pmframe.cpp,v 1.48 2000-04-10 19:40:45 sandervl Exp $ */
+/* $Id: pmframe.cpp,v 1.49 2000-04-10 19:42:38 sandervl Exp $ */
 /*
  * Win32 Frame Managment Code for OS/2
  *
@@ -479,7 +479,7 @@ PosChangedEnd:
       goto RunDefFrameProc;
 
     case WM_VRNENABLED:
-      	if(!win32wnd->isComingToTop() && ((win32wnd->getStyle() & WS_EX_TOPMOST_W) == WS_EX_TOPMOST_W))
+      	if(!win32wnd->isComingToTop() && ((win32wnd->getExStyle() & WS_EX_TOPMOST_W) == WS_EX_TOPMOST_W))
 	{
  	 	HWND hwndrelated;
 		Win32BaseWindow *topwindow;

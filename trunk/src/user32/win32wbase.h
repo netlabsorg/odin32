@@ -1,4 +1,4 @@
-/* $Id: win32wbase.h,v 1.91 2000-03-31 14:42:49 cbratschi Exp $ */
+/* $Id: win32wbase.h,v 1.92 2000-04-10 19:40:46 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -276,6 +276,10 @@ Win32BaseWindow *FindWindowById(int id);
          HWND   getNextDlgTabItem(HWND hwndCtrl, BOOL fPrevious);
          HWND   getNextDlgGroupItem(HWND hwndCtrl, BOOL fPrevious);
 
+	 BOOL   isComingToTop()			{ return fComingToTop; };
+	 void   setComingToTop(BOOL fTop) 	{ fComingToTop = fTop; };
+         BOOL   isInTasklist()                  { return fTaskList; };
+
     static HWND Win32ToOS2Handle(HWND hwnd);
     static HWND Win32ToOS2FrameHandle(HWND hwnd);
     static HWND OS2ToWin32Handle(HWND hwnd);
@@ -339,6 +343,7 @@ protected:
         BOOL    fXDefault;
         BOOL    fCXDefault;
         BOOL    fParentDC;
+	BOOL    fComingToTop;
 
         HRGN    hWindowRegion;
         HRGN    hClipRegion;
