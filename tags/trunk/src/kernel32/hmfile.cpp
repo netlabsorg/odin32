@@ -1,4 +1,4 @@
-/* $Id: hmfile.cpp,v 1.45 2003-05-06 12:06:09 sandervl Exp $ */
+/* $Id: hmfile.cpp,v 1.46 2004-04-02 15:14:54 sandervl Exp $ */
 
 /*
  * File IO win32 apis
@@ -519,7 +519,7 @@ BOOL HMDeviceFileClass::ReadFile(PHMHANDLEDATA pHMHandleData,
   map = Win32MemMapView::findMapByView((ULONG)lpBuffer, &offset, MEMMAP_ACCESS_WRITE);
   if(map) {
        lpRealBuf = (LPVOID)((ULONG)map->getMappingAddr() + offset);
-       DWORD nrpages = (nNumberOfBytesToRead+offset)/4096;
+       DWORD nrpages = nNumberOfBytesToRead/4096;
        if((nNumberOfBytesToRead+offset) & 0xfff)
            nrpages++;
 
@@ -615,7 +615,7 @@ BOOL HMDeviceFileClass::WriteFile(PHMHANDLEDATA pHMHandleData,
   map = Win32MemMapView::findMapByView((ULONG)lpBuffer, &offset, MEMMAP_ACCESS_READ);
   if(map) {
        lpRealBuf = (LPVOID)((ULONG)map->getMappingAddr() + offset);
-       DWORD nrpages = (nNumberOfBytesToWrite+offset)/4096;
+       DWORD nrpages = nNumberOfBytesToWrite/4096;
        if((nNumberOfBytesToWrite+offset) & 0xfff)
            nrpages++;
  
