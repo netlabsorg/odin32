@@ -1,4 +1,11 @@
- /* $Id: changelog,v 1.236 1999-09-25 09:25:58 dengert Exp $ */
+ /* $Id: changelog,v 1.237 1999-09-25 14:14:24 sandervl Exp $ */
+
+ 99-09-25: Sander van Leeuwen <sandervl@xs4all.nl>
+	- USER32:   Cursor fixes. Cursor almost correct in winhlp32.
+                    Don't call WinDefWindowProc for WM_MOUSEMOVE (resets
+                    cursor to system default)
+                    RedrawWindow: set window pointer to desktop window when hwnd == NULL
+	- KERNEL32: Cursor & cursorgroup fixes
 
  99-09-25: Daniela Engert <dani@ngrt.de>
 	- USER32: ClientToScreen and ScreenToClient didn't work -> fixed.
