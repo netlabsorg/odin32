@@ -1,4 +1,4 @@
-/* $Id: pmframe.cpp,v 1.24 1999-11-11 17:13:45 cbratschi Exp $ */
+/* $Id: pmframe.cpp,v 1.25 1999-12-01 18:23:28 cbratschi Exp $ */
 /*
  * Win32 Frame Managment Code for OS/2
  *
@@ -311,7 +311,7 @@ MRESULT EXPENTRY Win32FrameProc(HWND hwnd,ULONG msg,MPARAM mp1,MPARAM mp2)
         }
         goto RunDefFrameProc; //CB: must call def frame proc or frame control activation is broken
     }
-	
+
     case WM_WINDOWPOSCHANGED:
     {
       PSWP      pswp   = (PSWP)mp1;

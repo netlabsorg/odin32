@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.99 1999-12-01 10:49:45 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.100 1999-12-01 18:23:29 cbratschi Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -1345,6 +1345,7 @@ BOOL Win32BaseWindow::showScrollBars(BOOL changeHorz,BOOL changeVert,BOOL fShow)
     if (showVert || showHorz)
     {
       DWORD newFlags;
+
       rc = FrameShowScrollBars(this,showHorz,showVert,fShow,FALSE,&newFlags);
       flags |= newFlags;
       if (rc)
