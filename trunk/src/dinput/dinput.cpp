@@ -1,4 +1,4 @@
-/* $Id: dinput.cpp,v 1.7 2000-05-29 21:30:17 mike Exp $ */
+/* $Id: dinput.cpp,v 1.8 2000-06-27 18:20:46 mike Exp $ */
 /*              DirectInput
  *
  * Copyright 1998 Marcus Meissner
@@ -620,13 +620,67 @@ static HRESULT WINAPI SysKeyboardAImpl_GetDeviceData(
   }                                                             \
 }
 
+BYTE scan2dinput(BYTE scan) {
+   BYTE dscan;
+
+   switch (scan) {
+      case 0x61:
+         dscan = DIK_UP;
+         break;
+      case 0x63:
+         dscan = DIK_LEFT;
+         break;
+      case 0x64:
+         dscan = DIK_RIGHT;
+         break;
+      case 0x66:
+         dscan = DIK_DOWN;
+         break;
+      case 0x5C:
+         dscan = DIK_NUMPADSLASH;
+         break;
+      case 0x5A:
+         dscan = DIK_NUMPADENTER;
+         break;
+      case 0x68:
+         dscan = DIK_INSERT;
+         break;
+      case 0x60:
+         dscan = DIK_HOME;
+         break;
+      case 0x62:
+         dscan = DIK_PGUP;
+         break;
+      case 0x69:
+         dscan = DIK_DELETE;
+         break;
+      case 0x65:
+         dscan = DIK_END;
+         break;
+      case 0x67:
+         dscan = DIK_PGDN;
+         break;
+      case 0x5B:
+         dscan = DIK_RCONTROL;
+         break;
+      case 0x5E:
+         dscan = DIK_RALT;
+         break;
+      default:
+         dscan = scan;
+   }
+   return dscan;
+}
+
 LRESULT CALLBACK event_keyHandler(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
    TRACE("DINPUT-SKAI: keyHandler (msg=%x wParam=0x%X, lParam=0x%lX)\n", msg, wParam, lParam);
 
    SysKeyboardAImpl* This = (SysKeyboardAImpl*) current_keylock;
    BYTE  scan = (lParam >> 16) & 0xFF;
+   /* fix the scancode, DInput only uses real scancodes in 90% cases */
+   scan = scan2dinput(scan);
 
-   /* messages may arrive mustiple times; we need to check for duplicates */
+   /* messages may arrive multiple times; we need to check for duplicates */
    static HWND   oldhwnd = NULL;
    static UINT   oldmsg  = 0;
    static WPARAM oldwParam = 0;
