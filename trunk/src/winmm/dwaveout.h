@@ -1,4 +1,4 @@
-/* $Id: dwaveout.h,v 1.6 1999-12-29 08:33:56 phaller Exp $ */
+/* $Id: dwaveout.h,v 1.7 1999-12-31 13:55:51 sandervl Exp $ */
 
 /*
  * Wave playback class
@@ -40,6 +40,8 @@ public:
      MMRESULT write(LPWAVEHDR pwh, UINT cbwh);
      MMRESULT pause();
      MMRESULT restart();
+     MMRESULT setVolume(ULONG ulVol);
+     ULONG    getVolume() {return volume; };
      int      getState() { return State; };
      MMRESULT reset();
 
@@ -60,6 +62,7 @@ private:
         ULONG  ulBufSize;
 
     ULONG  ulError, State;
+    ULONG  volume;                        // Volume state
 
     MCI_MIX_BUFFER     *MixBuffer;          /* Device buffers          */
     MCI_MIXSETUP_PARMS *MixSetupParms;          /* Mixer parameters        */

@@ -1,5 +1,5 @@
-/* $Id: waveout.cpp,v 1.8 1999-12-29 08:33:56 phaller Exp $ */
-#undef DEBUG
+/* $Id: waveout.cpp,v 1.9 1999-12-31 13:55:51 sandervl Exp $ */
+//#undef DEBUG
 /*
  * Wave out MM apis
  *
@@ -380,7 +380,9 @@ ODINFUNCTION2(MMRESULT, waveOutGetVolume,
   DartWaveOut *dwave = (DartWaveOut *)hwo;
   if(DartWaveOut::find(dwave) == TRUE)
   {
-    return MMSYSERR_NOTSUPPORTED;
+    if (pdwVolume!=NULL)
+      *pdwVolume=dwave->getVolume();
+    return MMSYSERR_NOERROR;    
   }
   else
     return(MMSYSERR_INVALHANDLE);
@@ -393,7 +395,7 @@ ODINFUNCTION2(MMRESULT, waveOutSetVolume,
   DartWaveOut *dwave = (DartWaveOut *)hwo;
   if(DartWaveOut::find(dwave) == TRUE)
   {
-    return MMSYSERR_NOTSUPPORTED;
+    return(dwave->setVolume(dwVolume));
   }
   else
     return(MMSYSERR_INVALHANDLE);

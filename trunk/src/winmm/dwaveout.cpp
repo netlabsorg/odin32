@@ -1,4 +1,4 @@
-/* $Id: dwaveout.cpp,v 1.12 1999-12-29 10:44:16 sandervl Exp $ */
+/* $Id: dwaveout.cpp,v 1.13 1999-12-31 13:55:51 sandervl Exp $ */
 
 /*
  * Wave playback class
@@ -32,6 +32,10 @@
 
 #ifndef min
 #define min(a, b) ((a > b) ? b : a)
+#endif
+
+#ifndef max
+#define max(a, b) ((a > b) ? a : b)
 #endif
 
 //SvL: 23/09/99: WinPostMsg no longer works, as win32 window handles are no longer PM handles
@@ -113,6 +117,7 @@ void DartWaveOut::Init(LPWAVEFORMATEX pwfx)
    dwInstance    = 0;
    ulError       = 0;
    selCallback   = 0;
+   volume        = 0xFFFFFFFF;
    State         = STATE_STOPPED;
 
    MixBuffer     = (MCI_MIX_BUFFER *)malloc(PREFILLBUF_DART*sizeof(MCI_MIX_BUFFER));
@@ -168,6 +173,8 @@ void DartWaveOut::Init(LPWAVEFORMATEX pwfx)
     }
    }
    State    = STATE_STOPPED;
+
+   setVolume(volume);
 
    wmutex   = new VMutex();
    if(wmutex == NULL) {
@@ -729,6 +736,42 @@ LONG APIENTRY WaveOutHandler(ULONG ulStatus,
     dwave->handler(ulStatus, pBuffer, ulFlags);
   }
   return(TRUE);
+}
+
+/******************************************************************************/
+/******************************************************************************/
+MMRESULT DartWaveOut::setVolume(ULONG ulVol)
+{  
+  ULONG ulVolR     = (((ulVol & 0xffff0000) >> 16 )*100)/0xFFFF; // Right Volume 
+  ULONG ulVolL      = ((ulVol& 0x0000ffff)*100)/0xFFFF;          // Left Volume
+  MCI_SET_PARMS msp = {0};
+
+  volume = ulVol;
+
+// PD: My card (ESS 1868 PnP) driver can't change only
+//     one channel Left or Right :-(
+//
+#ifdef GOOD_AUDIO_CARD_DRIVER  
+
+  msp.ulAudio = MCI_SET_AUDIO_LEFT;
+  msp.ulLevel = ulVolL;
+
+  mciSendCommand(DeviceId, MCI_SET,
+                 MCI_WAIT | MCI_SET_AUDIO | MCI_SET_VOLUME,
+                 &msp, 0);
+
+  msp.ulAudio = MCI_SET_AUDIO_RIGHT;
+  msp.ulLevel = ulVolR;
+
+#else
+  msp.ulAudio = MCI_SET_AUDIO_ALL;
+  msp.ulLevel = max(ulVolR,ulVolL);
+#endif
+
+  mciSendCommand(DeviceId, MCI_SET,
+                 MCI_WAIT | MCI_SET_AUDIO | MCI_SET_VOLUME,
+                 &msp, 0);
+  return 0;
 }
 /******************************************************************************/
 /******************************************************************************/
