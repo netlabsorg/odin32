@@ -1,14 +1,14 @@
- /* $Id: changelog,v 1.1127 2000-09-16 00:27:23 bird Exp $ */
+ /* $Id: changelog,v 1.1128 2000-09-16 09:33:04 sandervl Exp $ */
 
- 2000-09-13: knut st. osmundsen <knut.stange.osmundsen@mynd.no>
+ 2000-09-15: knut st. osmundsen <knut.stange.osmundsen@mynd.no>
     - KERNEL32: Corrected logging for GetModuleFileNameA/W (a handle and
                 a string pointer was mixed - which proved fatal with
                 logging enabled).
 
- 2000-09-14: David Raison <djr@lemur.co.uk>
+ 2000-09-15: David Raison <djr@lemur.co.uk>
     - OLE32: Updates from Wine
 
- 2000-09-14: Sander van Leeuwen <sandervl@xs4all.nl>
+ 2000-09-15: Sander van Leeuwen <sandervl@xs4all.nl>
     - WNASPI32: Open and initialize aspirout during dll load; doing this
                 for *every* aspi command is very inefficient.
                 Not possible to share aspirout now, but that could be fixed
@@ -18,13 +18,13 @@
                 depends on it -> fixes crash in Lotus Notes)
                 Export WriteLogNoEOL
 
- 2000-09-13: Sander van Leeuwen <sandervl@xs4all.nl>
+ 2000-09-14: Sander van Leeuwen <sandervl@xs4all.nl>
     - WNASPI32: Fixed uninitialized variables in aspirout class
                 Fixed memory leaks (aspi object not deleted when something goes wrong)
     - KERNEL32: Implemented IOCTL_SCSI_GET_ADDRESS (not perfect; only works
                 for cdrom/dvd drives and only the first one)
 
- 2000-09-12: Sander van Leeuwen <sandervl@xs4all.nl>
+ 2000-09-13: Sander van Leeuwen <sandervl@xs4all.nl>
     - KERNEL32: InitCommandLine corrupted the heap
                 Created HandleManager class for physical disks
     - GDI32:    StretchDIBits: Open32 always returns height of bitmap (regardless of how many
