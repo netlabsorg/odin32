@@ -1,4 +1,4 @@
-/* $Id: blit.cpp,v 1.8 2000-04-02 12:24:39 sandervl Exp $ */
+/* $Id: blit.cpp,v 1.9 2000-04-07 17:07:16 sandervl Exp $ */
 
 /*
  * GDI32 blit code
@@ -123,7 +123,8 @@ INT WIN32API SetDIBitsToDevice(HDC hdc, INT xDest, INT yDest, DWORD cx,
     //SvL: RP7's bitmap size is not correct; fix it here or else
     //     the blit is messed up in Open32
     bmpsize = info->bmiHeader.biSizeImage;
-    if(info->bmiHeader.biSizeImage && info->bmiHeader.biSizeImage < imgsize)
+    if(info->bmiHeader.biCompression == 0 && info->bmiHeader.biSizeImage && 
+       info->bmiHeader.biSizeImage < imgsize)
     {
 	((BITMAPINFO *)info)->bmiHeader.biSizeImage = imgsize;
     }
