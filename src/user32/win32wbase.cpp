@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.163 2000-02-16 14:28:22 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.164 2000-02-16 17:21:06 cbratschi Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -682,7 +682,6 @@ BOOL Win32BaseWindow::MsgCreate(HWND hwndFrame, HWND hwndClient)
                 }
             }
 
-            //CB: timew32.exe, blockcad.exe -> children not shown!!!
             if (cs->style & WS_VISIBLE) ShowWindow(sw);
 
             /* Call WH_SHELL hook */
