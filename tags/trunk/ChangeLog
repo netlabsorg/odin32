@@ -1,4 +1,7 @@
-/* $Id: ChangeLog,v 1.1653 2001-08-19 01:32:00 bird Exp $ */
+/* $Id: ChangeLog,v 1.1654 2001-08-19 14:05:48 sandervl Exp $ */
+
+ 2001-08-19: Sander van Leeuwen <sandervl@xs4all.nl>
+    - QUARTZ:   o Added stub dll from Wine
 
  2001-08-19: knut st. osmundsen <kosmunds@csc.com>
     - Win32k.lib:
