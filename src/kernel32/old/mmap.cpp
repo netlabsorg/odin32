@@ -1,4 +1,4 @@
-/* $Id: mmap.cpp,v 1.1 1999-09-15 23:32:58 sandervl Exp $ */
+/* $Id: mmap.cpp,v 1.2 1999-09-25 19:06:17 sandervl Exp $ */
 
 /*
  * Win32 Memory mapped file & view classes
@@ -23,7 +23,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <win\virtual.h>
+#include <virtual.h>
 #include <vmutex.h>
 #include <handlemanager.h>
 #include "mmap.h"

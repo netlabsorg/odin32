@@ -1,4 +1,4 @@
-/* $Id: windll.cpp,v 1.1 1999-09-15 23:33:01 sandervl Exp $ */
+/* $Id: windll.cpp,v 1.2 1999-09-25 19:06:17 sandervl Exp $ */
 
 /*
  * Win32 DLL class
@@ -41,6 +41,15 @@ VMutex dlllistmutex;   //protects linked lists of heaps
 
 void _System SetLastError(ULONG ulError);
 
+BOOL WIN32API RegisterLxDll(HINSTANCE hInstance, WIN32DLLENTRY EntryPoint, 
+                            PVOID pResData)
+{
+  return TRUE;
+}
+BOOL WIN32API UnregisterLxDll(HINSTANCE hInstance)
+{
+  return TRUE;
+}
 //******************************************************************************
 //******************************************************************************
 Win32Dll::Win32Dll(char *szDllName, Win32Image *parentImage) 

@@ -1,3 +1,4 @@
+/* $Id: lang.cpp,v 1.3 1999-09-25 19:07:03 sandervl Exp $ */
 /*
  * Win32 language API functions for OS/2
  *

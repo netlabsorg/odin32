@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.1 1999-09-15 23:32:58 sandervl Exp $
+# $Id: makefile,v 1.2 1999-09-25 19:06:17 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -6,17 +6,17 @@
 #       kernel32.dll makefile
 #
 
-PDWIN32_INCLUDE = ..\..\include
-PDWIN32_LIB = ..\..\lib
-PDWIN32_BIN = ..\..\bin
-PDWIN32_TOOLS = ..\..\tools\bin
+PDWIN32_INCLUDE = ..\..\..\include\old
+PDWIN32_LIB = ..\..\..\lib
+PDWIN32_BIN = .
+PDWIN32_TOOLS = ..\..\..\tools\bin
 
 
 !include $(PDWIN32_INCLUDE)/pdwin32.mk
 
 
-CFLAGS = $(CFLAGS) -I$(PDWIN32_INCLUDE) /Tm+
-CXXFLAGS = $(CXXFLAGS) -I$(PDWIN32_INCLUDE) /Tm+
+CFLAGS = $(CFLAGS) -I$(PDWIN32_INCLUDE) -I$(PDWIN32_INCLUDE)\..\win
+CXXFLAGS = $(CXXFLAGS) -I$(PDWIN32_INCLUDE) -I$(PDWIN32_INCLUDE)\..\win
 
 
 OBJS = KERNEL32.OBJ KOBJECTS.OBJ CONSOLE.OBJ CONIN.OBJ \
@@ -50,7 +50,6 @@ $(TARGET).dll: $(OBJS) $(TARGET).def $(TARGET).lrf
 !endif
         rc -r console.rc console.res
         rc console.res $@
-        $(CP) $@ $(PDWIN32_BIN)
 
 $(TARGET).lrf: makefile
         @echo Creating file <<$(@B).lrf
@@ -66,7 +65,6 @@ $(TARGET).def
 
 $(TARGET).LIB: $(TARGET)exp.def
         $(IMPLIB) $(IMPLIBFLAGS) $@ $(TARGET)exp.def
-        $(CP) $@ $(PDWIN32_LIB)
 
 $(TARGET)exp.def: $(TARGET).def
         $(IMPDEF) $** $@
@@ -330,11 +328,11 @@ async.OBJ: \
         $(PDWIN32_INCLUDE)\misc.h \
         $(PDWIN32_INCLUDE)\unicode.h
 
-virtual.obj:   virtual.cpp $(PDWIN32_INCLUDE)\win\virtual.h $(PDWIN32_INCLUDE)\handlemanager.h mmap.h
+virtual.obj:   virtual.cpp $(PDWIN32_INCLUDE)\handlemanager.h mmap.h
 mmap.obj:      mmap.cpp mmap.h $(PDWIN32_INCLUDE)\vmutex.h oslibdos.h
 
 pefile.OBJ:    pefile.cpp $(PDWIN32_INCLUDE)\pefile.h
-winimage.OBJ:  winimage.cpp $(PDWIN32_INCLUDE)\winimage.h $(PDWIN32_INCLUDE)\windll.h $(PDWIN32_INCLUDE)\pefile.h $(PDWIN32_INCLUDE)\winres.h initterm.h $(PDWIN32_INCLUDE)\win\virtual.h oslibmisc.h
+winimage.OBJ:  winimage.cpp $(PDWIN32_INCLUDE)\winimage.h $(PDWIN32_INCLUDE)\windll.h $(PDWIN32_INCLUDE)\pefile.h $(PDWIN32_INCLUDE)\winres.h initterm.h  oslibmisc.h
 winimgres.OBJ: winimgres.cpp $(PDWIN32_INCLUDE)\winimage.h $(PDWIN32_INCLUDE)\windll.h $(PDWIN32_INCLUDE)\pefile.h $(PDWIN32_INCLUDE)\winexe.h $(PDWIN32_INCLUDE)\winres.h
 windll.OBJ:    windll.cpp $(PDWIN32_INCLUDE)\winimage.h $(PDWIN32_INCLUDE)\windll.h oslibmisc.h
 winexe.OBJ:    winexe.cpp $(PDWIN32_INCLUDE)\winimage.h $(PDWIN32_INCLUDE)\windll.h $(PDWIN32_INCLUDE)\winexe.h
