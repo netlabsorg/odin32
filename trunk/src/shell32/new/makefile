@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.9 1999-10-04 09:56:00 sandervl Exp $
+# $Id: makefile,v 1.10 1999-10-04 19:11:27 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -9,7 +9,7 @@
 PDWIN32_INCLUDE = ..\..\..\include
 PDWIN32_LIB = ..\..\..\lib
 PDWIN32_BIN = ..\..\..\bin
-PDWIN32_TOOLS = ..\..\tools\bin
+PDWIN32_TOOLS = ..\..\..\tools\bin
 
 
 !include $(PDWIN32_INCLUDE)/pdwin32.mk

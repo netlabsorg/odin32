@@ -1,4 +1,4 @@
-/* $Id: she.cpp,v 1.1 1999-09-09 13:04:55 phaller Exp $ */
+/* $Id: she.cpp,v 1.2 1999-10-04 19:11:27 sandervl Exp $ */
 
 /*
  * Win32 SHELL32 for OS/2
@@ -25,7 +25,7 @@
 #include "shell32_main.h"
 
 #include <misc.h>
-#include <nameid.h>
+//#include <nameid.h>
 #include <unicode.h>
 
 
