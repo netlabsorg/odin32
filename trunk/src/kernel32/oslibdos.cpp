@@ -1,4 +1,4 @@
-/* $Id: oslibdos.cpp,v 1.111 2003-01-10 12:57:13 sandervl Exp $ */
+/* $Id: oslibdos.cpp,v 1.112 2003-01-10 15:19:54 sandervl Exp $ */
 /*
  * Wrappers for OS/2 Dos* API
  *
@@ -1839,24 +1839,46 @@ BOOL OSLibDosTransactNamedPipe( DWORD  hNamedPipe,
 //******************************************************************************
 //******************************************************************************
 BOOL OSLibDosPeekNamedPipe(DWORD   hPipe,
-                        LPVOID  lpvBuffer,
-                        DWORD   cbBuffer,
-                        LPDWORD lpcbRead,
-                        LPDWORD lpcbAvail,
-                        LPDWORD lpcbMessage)
+                           LPVOID  lpvBuffer,
+                           DWORD   cbBuffer,
+                           LPDWORD lpcbRead,
+                           LPDWORD lpcbAvail,
+                           LPDWORD lpcbMessage)
 {
   DWORD     rc;
   AVAILDATA availData ={0};
-  ULONG     ulDummy;
+  ULONG     ulState, ulRead, ulMessage;
+  char      buffer;
 
-  rc=DosPeekNPipe(hPipe,lpvBuffer,cbBuffer,lpcbRead,&availData,&ulDummy);
+  if(lpcbRead == NULL) {
+      lpcbRead = &ulRead;
+  }
+  if(lpcbMessage == NULL) {
+      lpcbMessage = &ulMessage;
+  }
+  if(lpvBuffer == NULL) {
+      lpvBuffer = &buffer;
+      cbBuffer = 0;
+  }
+
+  rc = DosPeekNPipe(hPipe,lpvBuffer,cbBuffer,lpcbRead,&availData,&ulState);
 
   dprintf(("DosPeekNPipe returned rc=%d",rc));
 
-  if (!rc)
+  //OS/2 doesn't support DosPeekNPipe for unnamed pipes; win32 does
+  if (rc == 1) {
+     dprintf(("WARNING: Pretend broken pipe for PeekNamedPipe with unnamed pipe handle"));
+     SetLastError(ERROR_BROKEN_PIPE_W);
+     return FALSE;
+  }
+  if (rc == NO_ERROR)
   {
-    *lpcbAvail   = availData.cbpipe;
-    *lpcbMessage = availData.cbmessage;
+    if(lpcbAvail) {
+        *lpcbAvail   = availData.cbpipe;
+    }
+    if(lpcbMessage) {
+        *lpcbMessage = availData.cbmessage;
+    }
     SetLastError(ERROR_SUCCESS_W);
     return (TRUE);
   }

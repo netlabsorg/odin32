@@ -1,4 +1,4 @@
-/* $Id: wprocess.cpp,v 1.170 2003-01-06 14:43:51 sandervl Exp $ */
+/* $Id: wprocess.cpp,v 1.171 2003-01-10 15:19:54 sandervl Exp $ */
 
 /*
  * Win32 process functions
@@ -1807,6 +1807,7 @@ BOOL WINAPI CreateProcessA( LPCSTR lpApplicationName, LPSTR lpCommandLine,
                             LPSTARTUPINFOA lpStartupInfo,
                             LPPROCESS_INFORMATION lpProcessInfo )
 {
+ STARTUPINFOA startinfo;
  TEB *pThreadDB = (TEB*)GetThreadTEB();
  char *cmdline = NULL;
  BOOL  rc;
@@ -1817,23 +1818,41 @@ BOOL WINAPI CreateProcessA( LPCSTR lpApplicationName, LPSTR lpCommandLine,
 
 #ifdef DEBUG
     if(lpStartupInfo) {
-    dprintf(("lpStartupInfo->lpReserved %x", lpStartupInfo->lpReserved));
-    dprintf(("lpStartupInfo->lpDesktop %x", lpStartupInfo->lpDesktop));
-    dprintf(("lpStartupInfo->lpTitle %s", lpStartupInfo->lpTitle));
-    dprintf(("lpStartupInfo->dwX %x", lpStartupInfo->dwX));
-    dprintf(("lpStartupInfo->dwY %x", lpStartupInfo->dwY));
-    dprintf(("lpStartupInfo->dwXSize %x", lpStartupInfo->dwXSize));
-    dprintf(("lpStartupInfo->dwYSize %x", lpStartupInfo->dwYSize));
-    dprintf(("lpStartupInfo->dwXCountChars %x", lpStartupInfo->dwXCountChars));
-    dprintf(("lpStartupInfo->dwYCountChars %x", lpStartupInfo->dwYCountChars));
-    dprintf(("lpStartupInfo->dwFillAttribute %x", lpStartupInfo->dwFillAttribute));
-    dprintf(("lpStartupInfo->dwFlags %x", lpStartupInfo->dwFlags));
-    dprintf(("lpStartupInfo->wShowWindow %x", lpStartupInfo->wShowWindow));
-    dprintf(("lpStartupInfo->hStdInput %x", lpStartupInfo->hStdInput));
-    dprintf(("lpStartupInfo->hStdOutput %x", lpStartupInfo->hStdOutput));
-    dprintf(("lpStartupInfo->hStdError %x", lpStartupInfo->hStdError));
+        dprintf(("lpStartupInfo->lpReserved %x", lpStartupInfo->lpReserved));
+        dprintf(("lpStartupInfo->lpDesktop %x", lpStartupInfo->lpDesktop));
+        dprintf(("lpStartupInfo->lpTitle %s", lpStartupInfo->lpTitle));
+        dprintf(("lpStartupInfo->dwX %x", lpStartupInfo->dwX));
+        dprintf(("lpStartupInfo->dwY %x", lpStartupInfo->dwY));
+        dprintf(("lpStartupInfo->dwXSize %x", lpStartupInfo->dwXSize));
+        dprintf(("lpStartupInfo->dwYSize %x", lpStartupInfo->dwYSize));
+        dprintf(("lpStartupInfo->dwXCountChars %x", lpStartupInfo->dwXCountChars));
+        dprintf(("lpStartupInfo->dwYCountChars %x", lpStartupInfo->dwYCountChars));
+        dprintf(("lpStartupInfo->dwFillAttribute %x", lpStartupInfo->dwFillAttribute));
+        dprintf(("lpStartupInfo->dwFlags %x", lpStartupInfo->dwFlags));
+        dprintf(("lpStartupInfo->wShowWindow %x", lpStartupInfo->wShowWindow));
+        dprintf(("lpStartupInfo->hStdInput %x", lpStartupInfo->hStdInput));
+        dprintf(("lpStartupInfo->hStdOutput %x", lpStartupInfo->hStdOutput));
+        dprintf(("lpStartupInfo->hStdError %x", lpStartupInfo->hStdError));
     }
 #endif
+
+    if(bInheritHandles && lpStartupInfo->dwFlags & STARTF_USESTDHANDLES) 
+    {
+        //Translate standard handles if the child needs to inherit them
+        int retcode = 0;
+
+        memcpy(&startinfo, lpStartupInfo, sizeof(startinfo));
+        retcode |= HMHandleTranslateToOS2(lpStartupInfo->hStdInput, &startinfo.hStdInput);
+        retcode |= HMHandleTranslateToOS2(lpStartupInfo->hStdOutput, &startinfo.hStdOutput);
+        retcode |= HMHandleTranslateToOS2(lpStartupInfo->hStdError, &startinfo.hStdError);
+
+        if(retcode) {  
+            SetLastError(ERROR_INVALID_HANDLE);
+            return FALSE;
+        }
+
+        lpStartupInfo = &startinfo;
+    }
 
     // open32 does not support DEBUG_ONLY_THIS_PROCESS
     if(dwCreationFlags & DEBUG_ONLY_THIS_PROCESS)
