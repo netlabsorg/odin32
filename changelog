@@ -1,4 +1,10 @@
- /* $Id: changelog,v 1.683 2000-02-01 12:10:59 bird Exp $ */
+ /* $Id: changelog,v 1.684 2000-02-01 12:56:33 sandervl Exp $ */
+
+ 2000-02-01: Sander van Leeuwen <sandervl@xs4all.nl>
+	- GDI32: Cleaned up
+                 Fixes for dib section apis. RealPlayer 7 can play videos
+                 now (correct in 24 bps mode; upside down and wrong colors
+                 in 16 bps mode)
 
  2000-02-01: Knut Stange Osmundse <knut.stange.osmundsen>
         - Pe2Lx: Makefile should be working again.
