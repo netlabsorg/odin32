@@ -1,4 +1,4 @@
-/* $Id: Fileio.cpp,v 1.10 1999-10-10 09:00:57 sandervl Exp $ */
+/* $Id: Fileio.cpp,v 1.11 1999-10-25 22:45:17 phaller Exp $ */
 
 /*
  * Win32 File IO API functions for OS/2
@@ -10,6 +10,16 @@
  * Project Odin Software License can be found in LICENSE.TXT
  *
  */
+
+
+/*****************************************************************************
+ * Includes                                                                  *
+ *****************************************************************************/
+
+#include <odin.h>
+#include <odinwrap.h>
+#include <os2sel.h>
+
 #include <os2win.h>
 #include <stdlib.h>
 #include <string.h>
@@ -19,77 +29,66 @@
 #include "devio.h"
 #include "oslibdos.h"
 
+
+ODINDEBUGCHANNEL(KERNEL32-FILEIO)
+
 //******************************************************************************
 //******************************************************************************
-HFILE WIN32API CreateFileA(LPCSTR  lpszName,
-                           DWORD  fdwAccess,
-                           DWORD  fdwShareMode,
-                           LPSECURITY_ATTRIBUTES lpsa,
-                           DWORD  fdwCreate,
-                           DWORD  fdwAttrsAndFlags,
-                           HANDLE hTemplateFile)
+ODINFUNCTION7(HFILE,  CreateFileA,
+              LPCSTR, lpszName,
+              DWORD,  fdwAccess,
+              DWORD,  fdwShareMode,
+              LPSECURITY_ATTRIBUTES, lpsa,
+              DWORD,  fdwCreate,
+              DWORD,  fdwAttrsAndFlags,
+              HANDLE, hTemplateFile)
 {
-  HANDLE rc;
-
-  dprintf(("KERNEL32: CreateFileA(%s,%08xh,%08xh,%08xh,%08xh,%08xh,%08xh)\n",
-           lpszName,
-           fdwAccess,
-           fdwShareMode,
-           lpsa,
-           fdwCreate,
-           fdwAttrsAndFlags,
-           hTemplateFile));
-
-    rc = HMCreateFile(lpszName,
+  return(HMCreateFile(lpszName,
                       fdwAccess,
                       fdwShareMode,
                       lpsa,
                       fdwCreate,
                       fdwAttrsAndFlags,
-                      hTemplateFile);
+                      hTemplateFile));
+}
 
+//******************************************************************************
+//******************************************************************************
+ODINFUNCTION7(HFILE,   CreateFileW,
+              LPCWSTR, arg1,
+              DWORD,   arg2,
+              DWORD,   arg3,
+              PSECURITY_ATTRIBUTES, arg4,
+              DWORD,   arg5,
+              DWORD,   arg6,
+              HANDLE,  arg7)
+{
+  HANDLE rc;
+  char  *astring;
+
+  astring = UnicodeToAsciiString((LPWSTR)arg1);
+  rc = CreateFileA(astring, arg2, arg3, arg4, arg5, arg6, arg7);
+  FreeAsciiString(astring);
   return(rc);
 }
 //******************************************************************************
 //******************************************************************************
-HFILE  WIN32API CreateFileW(LPCWSTR  arg1,
-                            DWORD   arg2,
-                            DWORD   arg3,
-                            PSECURITY_ATTRIBUTES arg4,
-                            DWORD   arg5,
-                            DWORD   arg6,
-                            HANDLE  arg7)
+ODINFUNCTION2(HANDLE, FindFirstFileA,
+              LPCSTR, arg1,
+              WIN32_FIND_DATAA *, arg2)
 {
- HANDLE rc;
- char  *astring;
-
-   dprintf(("KERNEL32:  CreateFileW"));
-   astring = UnicodeToAsciiString((LPWSTR)arg1);
-   rc = CreateFileA(astring, arg2, arg3, arg4, arg5, arg6, arg7);
-   FreeAsciiString(astring);
-   return(rc);
+  return O32_FindFirstFile(arg1, arg2);
 }
-//******************************************************************************
-//******************************************************************************
-HANDLE WIN32API FindFirstFileA(LPCSTR arg1, WIN32_FIND_DATAA * arg2)
-{
-    dprintf(("KERNEL32:  FindFirstFile(%s,%08xh)\n",
-             arg1,
-             arg2));
 
-    return O32_FindFirstFile(arg1, arg2);
-}
 //******************************************************************************
 //******************************************************************************
-HANDLE WIN32API FindFirstFileW(LPCWSTR arg1, WIN32_FIND_DATAW *  arg2)
+ODINFUNCTION2(HANDLE,  FindFirstFileW,
+              LPCWSTR, arg1,
+              WIN32_FIND_DATAW *, arg2)
 {
   HANDLE           rc;
   char             *astring;
   WIN32_FIND_DATAA wfda;
-
-  dprintf(("KERNEL32: FindFirstFileW(%08xh, %08xh)",
-           arg1,
-           arg2));
 
   astring = UnicodeToAsciiString((LPWSTR)arg1);
   rc = FindFirstFileA(astring, &wfda);
@@ -112,22 +111,21 @@ HANDLE WIN32API FindFirstFileW(LPCWSTR arg1, WIN32_FIND_DATAW *  arg2)
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API FindNextFileA(HANDLE arg1, WIN32_FIND_DATAA * arg2)
+ODINFUNCTION2(BOOL,   FindNextFileA,
+              HANDLE, arg1,
+              WIN32_FIND_DATAA *, arg2)
 {
-    dprintf(("KERNEL32:  FindNextFile"));
-    return O32_FindNextFile(arg1, arg2);
+  return O32_FindNextFile(arg1, arg2);
 }
 //******************************************************************************
 //TODO: convert string in WIN32_FIND_DATAW * structure
 //******************************************************************************
-BOOL WIN32API FindNextFileW(HANDLE arg1, WIN32_FIND_DATAW * arg2)
+ODINFUNCTION2(BOOL, FindNextFileW,
+              HANDLE, arg1,
+              WIN32_FIND_DATAW *, arg2)
 {
   WIN32_FIND_DATAA wfda;
   BOOL             rc;
-
-  dprintf(("KERNEL32:  FindNextFileW(%08xh, %08xh)\n",
-           arg1,
-           arg2));
 
   rc = FindNextFileA(arg1, &wfda);
 
@@ -148,53 +146,41 @@ BOOL WIN32API FindNextFileW(HANDLE arg1, WIN32_FIND_DATAW * arg2)
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API FindClose(HANDLE arg1)
+ODINFUNCTION1(BOOL, FindClose,
+              HANDLE, arg1)
 {
-    dprintf(("KERNEL32:  FindClose\n"));
-    return O32_FindClose(arg1);
+  return O32_FindClose(arg1);
 }
 //******************************************************************************
 //******************************************************************************
-DWORD WIN32API GetFileType(HANDLE hFile)
+ODINFUNCTION1(DWORD, GetFileType,
+              HANDLE, hFile)
 {
-  dprintf(("KERNEL32: GetFileType(%08xh)\n",
-           hFile));
-
   return(HMGetFileType(hFile));
 }
 //******************************************************************************
 //******************************************************************************
-DWORD WIN32API GetFileInformationByHandle(HANDLE                      arg1,
-                                          BY_HANDLE_FILE_INFORMATION *arg2)
+ODINFUNCTION2(DWORD, GetFileInformationByHandle,
+              HANDLE, arg1,
+              BY_HANDLE_FILE_INFORMATION *, arg2)
 {
-  dprintf(("KERNEL32: GetFIleInformationByHandle(%08xh,%0xh)\n",
-           arg1,
-           arg2));
-
   return(HMGetFileInformationByHandle(arg1,arg2));
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API SetEndOfFile( HANDLE arg1)
+ODINFUNCTION1(BOOL, SetEndOfFile,
+              HANDLE, arg1)
 {
-  dprintf(("KERNEL32: SetEndOfFile(%08xh)\n",
-           arg1));
-
   return HMSetEndOfFile(arg1);
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API SetFileTime(HANDLE          arg1,
-                          const FILETIME *arg2,
-                          const FILETIME *arg3,
-                          const FILETIME *arg4)
+ODINFUNCTION4(BOOL, SetFileTime,
+              HANDLE, arg1,
+              const FILETIME *, arg2,
+              const FILETIME *, arg3,
+              const FILETIME *, arg4)
 {
-  dprintf(("KERNEL32: SetFileTime(%08xh,%08xh,%08xh,%08xh)\n",
-           arg1,
-           arg2,
-           arg3,
-           arg4));
-
   return HMSetFileTime(arg1,
                        arg2,
                        arg3,
@@ -202,140 +188,143 @@ BOOL WIN32API SetFileTime(HANDLE          arg1,
 }
 //******************************************************************************
 //******************************************************************************
-INT WIN32API CompareFileTime( FILETIME * arg1, FILETIME *  arg2)
+ODINFUNCTION2(INT, CompareFileTime,
+              FILETIME *, arg1,
+              FILETIME *, arg2)
 {
-    dprintf(("KERNEL32:  CompareFileTime\n"));
-    return O32_CompareFileTime(arg1, arg2);
+  return O32_CompareFileTime(arg1, arg2);
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API CopyFileA(LPCSTR arg1, LPCSTR arg2, BOOL arg3)
+ODINFUNCTION3(BOOL, CopyFileA,
+              LPCSTR, arg1,
+              LPCSTR, arg2,
+              BOOL, arg3)
 {
-    dprintf(("KERNEL32:  CopyFile %s %s\n", arg1, arg2));
-    return O32_CopyFile(arg1, arg2, arg3);
+  return O32_CopyFile(arg1, arg2, arg3);
 }
 //******************************************************************************
 //SvL: 24-6-'97 - Added
 //******************************************************************************
-BOOL WIN32API CopyFileW(LPCWSTR arg1, LPCWSTR arg2, BOOL  arg3)
+ODINFUNCTION3(BOOL, CopyFileW,
+              LPCWSTR, arg1,
+              LPCWSTR, arg2,
+              BOOL, arg3)
 {
- BOOL  rc;
- char *astring1, *astring2;
+  BOOL  rc;
+  char *astring1, *astring2;
 
-    astring1 = UnicodeToAsciiString((LPWSTR)arg1);
-    astring2 = UnicodeToAsciiString((LPWSTR)arg2);
-    dprintf(("KERNEL32:  CopyFileW\n"));
-    rc = O32_CopyFile(astring1, astring2, arg3);
-    FreeAsciiString(astring2);
-    FreeAsciiString(astring1);
-    return(rc);
+  astring1 = UnicodeToAsciiString((LPWSTR)arg1);
+  astring2 = UnicodeToAsciiString((LPWSTR)arg2);
+  rc = O32_CopyFile(astring1, astring2, arg3);
+  FreeAsciiString(astring2);
+  FreeAsciiString(astring1);
+  return(rc);
 }
 //******************************************************************************
 //******************************************************************************
-DWORD WIN32API GetFileSize( HANDLE arg1, PDWORD  arg2)
+ODINFUNCTION2(DWORD, GetFileSize,
+              HANDLE, arg1,
+              PDWORD, arg2)
 {
-  dprintf(("KERNEL32: GetFileSize (%08xh, %08xh)\n",
-           arg1,
-           arg2));
-
   return HMGetFileSize(arg1,
                        arg2);
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API DeleteFileA(LPCSTR arg1)
+ODINFUNCTION1(BOOL, DeleteFileA,
+              LPCSTR, arg1)
 {
-    dprintf(("KERNEL32:  DeleteFile %s\n", arg1));
-    return O32_DeleteFile(arg1);
+  return O32_DeleteFile(arg1);
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API DeleteFileW(LPCWSTR arg1)
+ODINFUNCTION1(BOOL, DeleteFileW,
+              LPCWSTR, arg1)
 {
- BOOL  rc;
- char *astring;
+  BOOL  rc;
+  char *astring;
 
-    dprintf(("KERNEL32:  DeleteFileW\n"));
-    astring = UnicodeToAsciiString((LPWSTR)arg1);
-    rc = O32_DeleteFile(astring);
-    FreeAsciiString(astring);
-    return(rc);
-}
-//******************************************************************************
-//******************************************************************************
-UINT WIN32API GetTempFileNameA(LPCSTR arg1, LPCSTR arg2, UINT arg3, LPSTR  arg4)
-{
-    dprintf(("KERNEL32:  GetTempFileName"));
-    return O32_GetTempFileName(arg1, arg2, arg3, arg4);
-}
-//******************************************************************************
-//******************************************************************************
-UINT WIN32API GetTempFileNameW(LPCWSTR lpPathName, LPCWSTR lpPrefixString,
-                               UINT uUnique, LPWSTR lpTempFileName)
-{
- char *asciipath, *asciiprefix;
- char *asciitemp = (char *)malloc(MAX_PATH+1);
- UINT rc;
-
-    dprintf(("KERNEL32:  GetTempFileNameW"));
-    asciipath   = UnicodeToAsciiString((LPWSTR)lpPathName);
-    asciiprefix = UnicodeToAsciiString((LPWSTR)lpPrefixString);
-    rc = O32_GetTempFileName(asciipath, asciiprefix, uUnique, asciitemp);
-    if(rc)      AsciiToUnicode(asciitemp, lpTempFileName);
-    FreeAsciiString(asciiprefix);
-    FreeAsciiString(asciipath);
-    free(asciitemp);
-    return(rc);
-}
-//******************************************************************************
-//******************************************************************************
-UINT WIN32API GetTempPathA(UINT arg1, LPSTR arg2)
-{
-    dprintf(("KERNEL32:  GetTempPath\n"));
-    return O32_GetTempPath(arg1, arg2);
-}
-//******************************************************************************
-//******************************************************************************
-UINT WIN32API GetTempPathW(UINT nBufferLength, LPWSTR lpBuffer)
-{
- char *asciibuffer = (char *)malloc(nBufferLength+1);
- DWORD rc;
-
-    dprintf(("KERNEL32:  GetTempPathW\n"));
-    rc = O32_GetTempPath(nBufferLength, asciibuffer);
-    if(rc)      AsciiToUnicode(asciibuffer, lpBuffer);
-    free(asciibuffer);
-    return(rc);
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API ReadFile(HANDLE arg1,
-                       PVOID  arg2,
-                       DWORD  arg3,
-                       PDWORD arg4,
-                       LPOVERLAPPED  arg5)
-{
-  BOOL rc;
-
-  rc = HMReadFile(arg1,
-                  arg2,
-                  arg3,
-                  arg4,
-                  arg5);
-
-  dprintf(("KERNEL32:  ReadFile %X %d bytes returned %d\n",
-           arg1,
-           arg3,
-           rc));
-
+  astring = UnicodeToAsciiString((LPWSTR)arg1);
+  rc = O32_DeleteFile(astring);
+  FreeAsciiString(astring);
   return(rc);
 }
 //******************************************************************************
 //******************************************************************************
-DWORD WIN32API SetFilePointer(HANDLE hFile,
-                              LONG   lDistanceToMove,
-                              PLONG  lpDistanceToMoveHigh,
-                              DWORD  dwMoveMethod)
+ODINFUNCTION4(UINT, GetTempFileNameA,
+              LPCSTR, arg1,
+              LPCSTR, arg2,
+              UINT, arg3,
+              LPSTR, arg4)
+{
+  return O32_GetTempFileName(arg1, arg2, arg3, arg4);
+}
+//******************************************************************************
+//******************************************************************************
+ODINFUNCTION4(UINT, GetTempFileNameW,
+              LPCWSTR, lpPathName,
+              LPCWSTR, lpPrefixString,
+              UINT, uUnique,
+              LPWSTR, lpTempFileName)
+{
+  char *asciipath, *asciiprefix;
+  char *asciitemp = (char *)malloc(MAX_PATH+1);
+  UINT rc;
+
+  asciipath   = UnicodeToAsciiString((LPWSTR)lpPathName);
+  asciiprefix = UnicodeToAsciiString((LPWSTR)lpPrefixString);
+  rc = O32_GetTempFileName(asciipath, asciiprefix, uUnique, asciitemp);
+  if(rc)      AsciiToUnicode(asciitemp, lpTempFileName);
+  FreeAsciiString(asciiprefix);
+  FreeAsciiString(asciipath);
+  free(asciitemp);
+  return(rc);
+}
+//******************************************************************************
+//******************************************************************************
+ODINFUNCTION2(UINT, GetTempPathA,
+              UINT, arg1,
+              LPSTR, arg2)
+{
+  return O32_GetTempPath(arg1, arg2);
+}
+//******************************************************************************
+//******************************************************************************
+ODINFUNCTION2(UINT, GetTempPathW,
+              UINT, nBufferLength,
+              LPWSTR, lpBuffer)
+{
+  char *asciibuffer = (char *)malloc(nBufferLength+1);
+  DWORD rc;
+
+  rc = O32_GetTempPath(nBufferLength, asciibuffer);
+  if(rc)      AsciiToUnicode(asciibuffer, lpBuffer);
+  free(asciibuffer);
+  return(rc);
+}
+//******************************************************************************
+//******************************************************************************
+ODINFUNCTION5(BOOL,         ReadFile,
+              HANDLE,       hFile,
+              PVOID,        pBuffer,
+              DWORD,        dwLength,
+              PDWORD,       lpNumberOfBytesRead,
+              LPOVERLAPPED, lpOverlapped)
+{
+  return (HMReadFile(hFile,
+                     pBuffer,
+                     dwLength,
+                     lpNumberOfBytesRead,
+                     lpOverlapped));
+}
+//******************************************************************************
+//******************************************************************************
+ODINFUNCTION4(DWORD, SetFilePointer,
+              HANDLE, hFile,
+              LONG, lDistanceToMove,
+              PLONG, lpDistanceToMoveHigh,
+              DWORD, dwMoveMethod)
 {
   dprintf(("KERNEL32: SetFilePointer(%08xh,%08xh,%08xh,%08xh)\n",
            hFile,
@@ -350,11 +339,12 @@ DWORD WIN32API SetFilePointer(HANDLE hFile,
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API WriteFile(HANDLE  hFile,
-                        LPCVOID buffer,
-                        DWORD   nrbytes,
-                        LPDWORD nrbyteswritten,
-                        LPOVERLAPPED lpOverlapped)
+ODINFUNCTION5(BOOL, WriteFile,
+              HANDLE, hFile,
+              LPCVOID, buffer,
+              DWORD, nrbytes,
+              LPDWORD, nrbyteswritten,
+              LPOVERLAPPED, lpOverlapped)
 {
   dprintf(("KERNEL32: WriteFile(%08xh,%08xh,%08xh,%08xh,%08xh)\n",
            hFile,
@@ -371,15 +361,26 @@ BOOL WIN32API WriteFile(HANDLE  hFile,
 }
 //******************************************************************************
 //******************************************************************************
-DWORD WIN32API SearchPathA( LPCSTR arg1, LPCSTR arg2, LPCSTR arg3, DWORD arg4, LPSTR arg5, LPSTR * arg6)
+ODINFUNCTION6(DWORD, SearchPathA,
+              LPCSTR, arg1,
+              LPCSTR, arg2,
+              LPCSTR, arg3,
+              DWORD, arg4,
+              LPSTR, arg5,
+              LPSTR *, arg6)
 {
     dprintf(("KERNEL32:  SearchPathA\n"));
     return O32_SearchPath(arg1, arg2, arg3, arg4, arg5, arg6);
 }
 //******************************************************************************
 //******************************************************************************
-DWORD WIN32API SearchPathW(LPCWSTR lpPath, LPCWSTR lpFileName, LPCWSTR lpExtension,
-                           DWORD nBufferLength, LPWSTR lpBuffer, LPWSTR *lpFilePart)
+ODINFUNCTION6(DWORD, SearchPathW,
+              LPCWSTR, lpPath,
+              LPCWSTR, lpFileName,
+              LPCWSTR, lpExtension,
+              DWORD, nBufferLength,
+              LPWSTR, lpBuffer,
+              LPWSTR *, lpFilePart)
 {
  char *asciipath, *asciifile, *asciiext, *asciibuffer, *asciipart;
  DWORD rc;
@@ -403,7 +404,8 @@ DWORD WIN32API SearchPathW(LPCWSTR lpPath, LPCWSTR lpFileName, LPCWSTR lpExtensi
 }
 //******************************************************************************
 //******************************************************************************
-DWORD WIN32API GetFileAttributesA(LPCSTR lpszFileName)
+ODINFUNCTION1(DWORD, GetFileAttributesA,
+              LPCSTR, lpszFileName)
 {
  DWORD rc, error;
 
@@ -423,7 +425,8 @@ DWORD WIN32API GetFileAttributesA(LPCSTR lpszFileName)
 }
 //******************************************************************************
 //******************************************************************************
-DWORD WIN32API GetFileAttributesW(LPCWSTR arg1)
+ODINFUNCTION1(DWORD, GetFileAttributesW,
+              LPCWSTR, arg1)
 {
  DWORD rc;
  char *astring;
@@ -436,14 +439,18 @@ DWORD WIN32API GetFileAttributesW(LPCWSTR arg1)
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API SetFileAttributesA(LPCSTR arg1, DWORD  arg2)
+ODINFUNCTION2(BOOL, SetFileAttributesA,
+              LPCSTR, arg1,
+              DWORD, arg2)
 {
     dprintf(("KERNEL32:  SetFileAttributes of %s\n", arg1));
     return O32_SetFileAttributes(arg1, arg2);
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API SetFileAttributesW(LPCWSTR lpFileName, DWORD dwFileAttributes)
+ODINFUNCTION2(BOOL, SetFileAttributesW,
+              LPCWSTR, lpFileName,
+              DWORD, dwFileAttributes)
 {
  char *asciifile;
  BOOL  rc;
@@ -456,15 +463,22 @@ BOOL WIN32API SetFileAttributesW(LPCWSTR lpFileName, DWORD dwFileAttributes)
 }
 //******************************************************************************
 //******************************************************************************
-DWORD WIN32API GetFullPathNameA(LPCSTR arg1, DWORD arg2, LPSTR arg3, LPSTR *arg4)
+ODINFUNCTION4(DWORD, GetFullPathNameA,
+              LPCSTR, arg1,
+              DWORD, arg2,
+              LPSTR, arg3,
+              LPSTR *, arg4)
 {
     dprintf(("KERNEL32:  GetFullPathName %s\n", arg1));
     return O32_GetFullPathName(arg1, arg2, arg3, arg4);
 }
 //******************************************************************************
 //******************************************************************************
-DWORD WIN32API GetFullPathNameW(LPCWSTR lpFileName, DWORD nBufferLength,
-                                LPWSTR lpBuffer, LPWSTR *lpFilePart)
+ODINFUNCTION4(DWORD, GetFullPathNameW,
+              LPCWSTR, lpFileName,
+              DWORD, nBufferLength,
+              LPWSTR, lpBuffer,
+              LPWSTR *, lpFilePart)
 {
  char *astring, *asciibuffer, *asciipart;
  DWORD rc;
@@ -495,11 +509,12 @@ DWORD WIN32API GetFullPathNameW(LPCWSTR lpFileName, DWORD nBufferLength,
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API LockFile(HANDLE arg1,
-                       DWORD  arg2,
-                       DWORD  arg3,
-                       DWORD  arg4,
-                       DWORD  arg5)
+ODINFUNCTION5(BOOL, LockFile,
+              HANDLE, arg1,
+              DWORD, arg2,
+              DWORD, arg3,
+              DWORD, arg4,
+              DWORD, arg5)
 {
   dprintf(("KERNEL32: LockFile (%08xh,%08xh,%08xh,%08xh,%08xh)\n",
            arg1,
@@ -533,12 +548,13 @@ BOOL WIN32API LockFile(HANDLE arg1,
  * Author    : Patrick Haller [Mon, 1998/06/15 08:00]
  *****************************************************************************/
 
-BOOL WIN32API LockFileEx(HANDLE       hFile,
-                         DWORD        dwFlags,
-                         DWORD        dwReserved,
-                         DWORD        nNumberOfBytesToLockLow,
-                         DWORD        nNumberOfBytesToLockHigh,
-                         LPOVERLAPPED lpOverlapped)
+ODINFUNCTION6(BOOL, LockFileEx,
+              HANDLE, hFile,
+              DWORD, dwFlags,
+              DWORD, dwReserved,
+              DWORD, nNumberOfBytesToLockLow,
+              DWORD, nNumberOfBytesToLockHigh,
+              LPOVERLAPPED, lpOverlapped)
 {
   dprintf(("Kernel32: LockFileEx(%08xh,%08xh,%08xh,%08xh,%08xh,%08xh)\n",
            hFile,
@@ -560,23 +576,28 @@ BOOL WIN32API LockFileEx(HANDLE       hFile,
 
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API MoveFileA( LPCSTR arg1, LPCSTR  arg2)
+ODINFUNCTION2(BOOL, MoveFileA,
+              LPCSTR, arg1,
+              LPCSTR, arg2)
 {
     dprintf(("KERNEL32:  MoveFileA\n"));
     return O32_MoveFile(arg1, arg2);
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API MoveFileExA(LPCSTR arg1,
-                             LPCSTR arg2,
-                             DWORD  fdwFlags)
+ODINFUNCTION3(BOOL, MoveFileExA,
+              LPCSTR, arg1,
+              LPCSTR, arg2,
+              DWORD, fdwFlags)
 {
     dprintf(("KERNEL32:  MoveFileExA %s to %s, not complete!\n", arg1, arg2));
     return O32_MoveFile(arg1, arg2);
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API MoveFileW(LPCWSTR lpSrc, LPCWSTR lpDest)
+ODINFUNCTION2(BOOL, MoveFileW,
+              LPCWSTR, lpSrc,
+              LPCWSTR, lpDest)
 {
  char *asciisrc, *asciidest;
  BOOL  rc;
@@ -591,17 +612,20 @@ BOOL WIN32API MoveFileW(LPCWSTR lpSrc, LPCWSTR lpDest)
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API MoveFileExW(LPCWSTR arg1,
-                          LPCWSTR arg2,
-                          DWORD  fdwFlags)
+ODINFUNCTION3(BOOL, MoveFileExW,
+              LPCWSTR, arg1,
+              LPCWSTR, arg2,
+              DWORD, fdwFlags)
 {
     dprintf(("KERNEL32:  MoveFileExW %s to %s, not complete!\n", arg1, arg2));
     return MoveFileW(arg1, arg2);
 }
 //******************************************************************************
 /*****************************************************************************
- * Name      : HFILE WIN32API OpenFile
- * Purpose   : forward OpenFile to Open32
+ODINFUNCTION3(*, :,
+              HFILE, WIN32API,
+              OpenFile *, Purpose,
+              :, forwardOpenFile to Open32
  * Parameters:
  * Variables :
  * Result    : API returncode
@@ -611,9 +635,10 @@ BOOL WIN32API MoveFileExW(LPCWSTR arg1,
  * Author    : Patrick Haller [Fri, 1998/06/12 02:53]
  *****************************************************************************/
 
-HFILE WIN32API OpenFile(LPCSTR    arg1,
-                        OFSTRUCT *arg2,
-                        UINT      arg3)
+ODINFUNCTION3(HFILE, OpenFile,
+              LPCSTR, arg1,
+              OFSTRUCT *, arg2,
+              UINT, arg3)
 {
   HFILE hFile;
 
@@ -630,11 +655,12 @@ HFILE WIN32API OpenFile(LPCSTR    arg1,
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API UnlockFile(HANDLE arg1,
-                         DWORD  arg2,
-                         DWORD  arg3,
-                         DWORD  arg4,
-                         DWORD  arg5)
+ODINFUNCTION5(BOOL, UnlockFile,
+              HANDLE, arg1,
+              DWORD, arg2,
+              DWORD, arg3,
+              DWORD, arg4,
+              DWORD, arg5)
 {
   dprintf(("KERNEL32: UnlockFile(%08xh,%08xh,%08xh,%08xh,%08xh)\n",
            arg1,
@@ -667,11 +693,12 @@ BOOL WIN32API UnlockFile(HANDLE arg1,
  * Author    : Patrick Haller [Mon, 1998/06/15 08:00]
  *****************************************************************************/
 
-BOOL WIN32API UnlockFileEx(HANDLE       hFile,
-                           DWORD        dwReserved,
-                           DWORD        nNumberOfBytesToLockLow,
-                           DWORD        nNumberOfBytesToLockHigh,
-                           LPOVERLAPPED lpOverlapped)
+ODINFUNCTION5(BOOL, UnlockFileEx,
+              HANDLE, hFile,
+              DWORD, dwReserved,
+              DWORD, nNumberOfBytesToLockLow,
+              DWORD, nNumberOfBytesToLockHigh,
+              LPOVERLAPPED, lpOverlapped)
 {
   dprintf(("Kernel32: UnlockFileEx(%08xh,%08xh,%08xh,%08xh,%08xh,%08xh)\n",
            hFile,
@@ -688,8 +715,10 @@ BOOL WIN32API UnlockFileEx(HANDLE       hFile,
 }
 //******************************************************************************
 //******************************************************************************
-DWORD WIN32API GetShortPathNameA(LPCTSTR lpszLongPath, LPTSTR lpszShortPath,
-                                 DWORD cchBuffer)
+ODINFUNCTION3(DWORD, GetShortPathNameA,
+              LPCTSTR, lpszLongPath,
+              LPTSTR, lpszShortPath,
+              DWORD, cchBuffer)
 {
  int length;
 
@@ -704,8 +733,10 @@ DWORD WIN32API GetShortPathNameA(LPCTSTR lpszLongPath, LPTSTR lpszShortPath,
 }
 //******************************************************************************
 //******************************************************************************
-DWORD WIN32API GetShortPathNameW(LPCWSTR lpszLongPath, LPWSTR lpszShortPath,
-                                 DWORD cchBuffer)
+ODINFUNCTION3(DWORD, GetShortPathNameW,
+              LPCWSTR, lpszLongPath,
+              LPWSTR, lpszShortPath,
+              DWORD, cchBuffer)
 {
  int length;
 
@@ -720,15 +751,18 @@ DWORD WIN32API GetShortPathNameW(LPCWSTR lpszLongPath, LPWSTR lpszShortPath,
 }
 //******************************************************************************
 //******************************************************************************
-HANDLE WIN32API FindFirstChangeNotificationA(LPCSTR lpPathName, BOOL bWatchSubtree,
-                                                DWORD dwNotifyFilter)
+ODINFUNCTION3(HANDLE, FindFirstChangeNotificationA,
+              LPCSTR, lpPathName,
+              BOOL, bWatchSubtree,
+              DWORD, dwNotifyFilter)
 {
   dprintf(("KERNEL32:  FindFirstChangeNotificationA, Not implemented\n"));
   return(0);
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API FindNextChangeNotification(HANDLE hChange)
+ODINFUNCTION1(BOOL, FindNextChangeNotification,
+              HANDLE, hChange)
 {
   dprintf(("KERNEL32: FindNextChangeNotification (%08xh), Not implemented\n",
            hChange));
@@ -737,7 +771,7 @@ BOOL WIN32API FindNextChangeNotification(HANDLE hChange)
 }
 //******************************************************************************
 //******************************************************************************
-VOID WIN32API SetFileApisToANSI( VOID ) /*PLF Tue  98-02-10 00:52:22*/
+ODINPROCEDURE0(SetFileApisToANSI)
 {
     dprintf(("SetFileApisToANSI() stub\n"));
 }
@@ -757,8 +791,9 @@ VOID WIN32API SetFileApisToANSI( VOID ) /*PLF Tue  98-02-10 00:52:22*/
  * Author    : Patrick Haller [Mon, 1998/06/15 08:00]
  *****************************************************************************/
 
-DWORD WIN32API GetCompressedFileSizeA(LPCTSTR  lpFileName,
-                                      LPDWORD  lpFileSizeHigh)
+ODINFUNCTION2(DWORD, GetCompressedFileSizeA,
+              LPCTSTR, lpFileName,
+              LPDWORD, lpFileSizeHigh)
 {
   dprintf(("KERNEL32: GetCompressedFileSizeA (%s, %08xh) not implemented.\n",
            lpFileName,
@@ -784,8 +819,9 @@ DWORD WIN32API GetCompressedFileSizeA(LPCTSTR  lpFileName,
  * Author    : Patrick Haller [Mon, 1998/06/15 08:00]
  *****************************************************************************/
 
-DWORD WIN32API GetCompressedFileSizeW(LPCWSTR  lpFileName,
-                                      LPDWORD  lpFileSizeHigh)
+ODINFUNCTION2(DWORD, GetCompressedFileSizeW,
+              LPCWSTR, lpFileName,
+              LPDWORD, lpFileSizeHigh)
 {
   LPCTSTR lpAsciiFileName;                             /* converted filename */
   DWORD   rc;                                             /* function result */
@@ -817,9 +853,10 @@ DWORD WIN32API GetCompressedFileSizeW(LPCWSTR  lpFileName,
  * Author    : Patrick Haller [Mon, 1998/06/15 08:00]
  *****************************************************************************/
 
-BOOL WIN32API GetFileAttributesExA(LPCSTR                 lpFileName,
-                                   GET_FILEEX_INFO_LEVELS fInfoLevelId,
-                                   LPVOID                 lpFileInformation)
+ODINFUNCTION3(BOOL, GetFileAttributesExA,
+              LPCSTR, lpFileName,
+              GET_FILEEX_INFO_LEVELS, fInfoLevelId,
+              LPVOID, lpFileInformation)
 {
   BOOL rc;
 
@@ -861,13 +898,15 @@ BOOL WIN32API GetFileAttributesExA(LPCSTR                 lpFileName,
  * Author    : Patrick Haller [Mon, 1998/06/15 08:00]
  *****************************************************************************/
 
-BOOL WINAPI GetFileAttributesExW(LPCWSTR                lpFileName,
-                                 GET_FILEEX_INFO_LEVELS fInfoLevelId,
-                                 LPVOID                 lpFileInformation)
+ODINFUNCTION3(BOOL, GetFileAttributesExW,
+              LPCWSTR, lpFileName,
+              GET_FILEEX_INFO_LEVELS, fInfoLevelId,
+              LPVOID, lpFileInformation)
 {
   LPSTR nameA = HEAP_strdupWtoA( GetProcessHeap(), 0, lpFileName );
   BOOL res = GetFileAttributesExA( nameA, fInfoLevelId, lpFileInformation);
   HeapFree( GetProcessHeap(), 0, nameA );
   return res;
 }
+
 
