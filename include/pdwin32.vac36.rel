@@ -1,4 +1,4 @@
-# $Id: pdwin32.vac36.rel,v 1.20 2000-11-19 08:31:21 bird Exp $
+# $Id: pdwin32.vac36.rel,v 1.21 2000-11-19 23:53:47 bird Exp $
 # ODIN / win32os2 Project
 #
 # RELEASE makefile for the VAC 3.6.5 compiler environment
@@ -6,12 +6,22 @@
 # phaller@gmx.net, 1999/05/27
 #
 
+
+#
+# Library macros.
+#
 SOMLIB   = somtk.lib
 RTLLIB   = cpprms36.lib
 RTLLIB_O = cpprmo36.lib
 DLLENTRY = $(PDWIN32_LIB)\dllentry.obj
+ODINCRT  = odincrt
 
+
+#
+# Object directory.
+#
 OBJDIR   = .\bin\release.vac36
+
 
 #
 # Tools
@@ -26,38 +36,56 @@ ILIB   = ilib
 RC     = $(PDWIN32_TOOLS)\wrc
 OS2RC  = rc
 
-ODINCRT = odincrt
 
 #
 # Tool Flags
 #
-CFLAGS           = -Q -Si -G5 -O+ -Oi+ -Ge- -Ss+ -W3 -Gm+ /Gn+
-CXXFLAGS         = -Q -Si -G5 -O+ -Oi+ -Ge- -Ss+ -W3 -Gm+ /Gn+ /Gx+
-CXXFLAGS_ODINCRT = -Q -Si -G5 -O+ -Oi+ -Ge- -Ss+ -W3 -Gm+ /Gn- /Gx+
-CFLAGS_WIN32APP  = -Q -Si -G5 -O+ -Oi+ -Ge- -Ss+ -W3 -Gm+ /Gn+
-CXXFLAGS_WIN32APP= -Q -Si -G5 -O+ -Oi+ -Ge- -Ss+ -W3 -Gm+ /Gn+
-
-CINCLUDES        = -I$(PDWIN32_INCLUDE)\Win -I. -I$(PDWIN32_INCLUDE)
-CDEFINES         = -D__WIN32OS2__ -D__WINE__ -D__i386__ -DTCPV40HDRS -DCOMCTL32UNDOC
-CDEFINES_ODINCRT = -D__WIN32OS2__ -D__WINE__ -D__i386__
-CDEFINES_WIN32APP= -D__WIN32OS2__ -D__i386__
-
 ASFLAGS          = -Mb -Sc -Sv:ALP
-LDFLAGS          = -Q -Si -G5 -O+ -Ge- -Ss+ -W3 -Gm+ /B"/noe /map /packcode /packdata /exepack:2 /nod"
-LDFLAGS_ODINCRT  = -Q -Si -G5 -O+ -Ge- -Ss+ -W3 -Gm+ /B"/noe /map /packcode /packdata /exepack:2"
-LD2FLAGS         = /nologo /noe /map /packcode /packdata /exepack:2 /nod /nodebug
-LD2FLAGS_ODINCRT = /nologo /noe /map /packcode /packdata /exepack:2 /nodebug
 IMPLIBFLAGS      = /nologo
 ILIBFLAGS        = /nofree /quiet /nologo
 RCFLAGS          = -s -I. -I$(CPPMAIN)\include
 OS2RCFLAGS       = -r -n
 OS2RCLFLAGS      = -x2 -n
 
+#
+# C Compiler flags.
+#   This may look a bit like a mess but, there is usually a reason behind
+#   every line and the way it is done. We have some problems with nmake
+#   when we add new flags to for example CXXFLAGS too many times.
+#
 !ifdef EXETARGET
-CFLAGS           = $(CFLAGS) -Ge+ -Gn-
-CXXFLAGS         = $(CXXFLAGS) -Ge+ -Gn-
-LDFLAGS          = $(LDFLAGS) -Ge+
-LDFLAGS_ODINCRT  = $(LDFLAGS_ODINCRT) -Ge+
-LD2FLAGS         = $(LD2FLAGS) /EXEC
-LD2FLAGS_ODINCRT = $(LD2FLAGS_ODINCRT) /EXEC
+CTARGETFLAGS     = -Ge+
+CXXTARGETFLAGS   = -Ge+
+!else
+CTARGETFLAGS     = -Ge-
+CXXTARGETFLAGS   = -Ge-
 !endif
+CFLAGS           = -Q -Si -G5 -O+ -Oi+ -Ss+ -W3 -Gm+ /Gn+ $(CTARGETFLAGS)
+CXXFLAGS         = -Q -Si -G5 -O+ -Oi+ -Ss+ -W3 -Gm+ /Gn+ $(CXXTARGETFLAGS) /Gx+
+CXXFLAGS_ODINCRT = -Q -Si -G5 -O+ -Oi+ -Ss+ -W3 -Gm+ /Gn- $(CXXTARGETFLAGS) /Gx+
+CFLAGS_WIN32APP  = -Q -Si -G5 -O+ -Oi+ -Ss+ -W3 -Gm+ /Gn+ $(CTARGETFLAGS)
+CXXFLAGS_WIN32APP= -Q -Si -G5 -O+ -Oi+ -Ss+ -W3 -Gm+ /Gn+ $(CXXTARGETFLAGS)
+CINCLUDES        = -I$(PDWIN32_INCLUDE)\Win -I. -I$(PDWIN32_INCLUDE)
+CDEFINES         = -D__WIN32OS2__ -D__WINE__ -D__i386__ -DTCPV40HDRS -DCOMCTL32UNDOC
+CDEFINES_ODINCRT = -D__WIN32OS2__ -D__WINE__ -D__i386__
+CDEFINES_WIN32APP= -D__WIN32OS2__ -D__i386__
+
+
+#
+# Linker flags.
+#   This may look a bit like a mess but, there is usually a reason behind
+#   every line and the way it is done. We have some problems with nmake
+#   when we add new flags to for example LD2FLAGS too many times.
+#
+!ifdef EXETARGET
+LDTARGETFLAGS    = -Ge+
+LD2TARGETFLAGS   = /EXEC
+!else
+LDTARGETFLAGS    = -Ge-
+LD2TARGETFLAGS   = /DLL
+!endif
+LDFLAGS          = -Q   /B"/noe /map /packcode /packdata /exepack:2 /nodebug /nod" $(LDTARGETFLAGS) -Si -G5 -O+ -W3 -Gm+
+LDFLAGS_ODINCRT  = -Q   /B"/noe /map /packcode /packdata /exepack:2 /nodebug"      $(LDTARGETFLAGS) -Si -G5 -O+ -W3 -Gm+
+LD2FLAGS         = /nologo /noe /map /packcode /packdata /exepack:2 /nodebug /nod $(LD2TARGETFLAGS)
+LD2FLAGS_ODINCRT = /nologo /noe /map /packcode /packdata /exepack:2 /nodebug      $(LD2TARGETFLAGS)
+
