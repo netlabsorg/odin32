@@ -41,6 +41,8 @@
 #define CLASS_SHORTCUT          "Shortcut"
 #define CLASS_SHELL32DLL        "shell32.dll"
 #define CLASS_SHDOCVW           "shdocvw.dll"
+#define CLASS_OLE32DLL          "ole32.dll"
+#define CLASS_OLEAUT32DLL       "oleaut32.dll"
 #define COM_CLASS_ID            "CLSID"
 #define COM_INPROCSERVER        "InprocServer32"
 #define COM_THREADMODEL         "ThreadingModel"
