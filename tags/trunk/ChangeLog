@@ -1,4 +1,4 @@
-/* $Id: ChangeLog,v 1.1515 2001-06-14 12:56:34 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.1516 2001-06-14 14:50:11 sandervl Exp $ */
 
  2001-06-14: Sander van Leeuwen <sandervl@xs4all.nl>
     - USER32:   o OSLibWinGetMsg: dispatch untranslated message immediately
@@ -11,6 +11,7 @@
                   and GetNextDlgTabItem will return the wrong one.
                   Happens in Opera preferences dialog (multimedia) where all 
                   autoradio buttons have the WS_TABSTOP style.
+                o Added temporary workaround for Open32 crashes in Opera
 
  2001-06-13: Sander van Leeuwen <sandervl@xs4all.nl>
     - USER32:   o Corrected position of PM titlebar control
