@@ -1,4 +1,4 @@
-/* $Id: winaccel.cpp,v 1.1 1999-07-18 17:12:52 sandervl Exp $ */
+/* $Id: winaccel.cpp,v 1.2 1999-07-18 18:04:30 sandervl Exp $ */
 /*
  * Win32 accelartor key functions for OS/2
  *
@@ -20,21 +20,21 @@ int WIN32API TranslateAcceleratorA(HWND hwnd, HACCEL haccel, LPMSG lpmsg)
     //WinTranslateAccel();
     //get hab, translate
     //SvL: OS/2 automatically translates accelerator keys
-    return TRUE;
+    return FALSE;
 }
 //******************************************************************************
 //******************************************************************************
 int WIN32API TranslateAccelerator( HWND arg1, HACCEL arg2, LPMSG  arg3)
 {
     //SvL: OS/2 automatically translates accelerator keys
-    return TRUE;
+    return FALSE;
 }
 //******************************************************************************
 //******************************************************************************
 int WIN32API TranslateAcceleratorW( HWND arg1, HACCEL arg2, LPMSG  arg3)
 {
     //SvL: OS/2 automatically translates accelerator keys
-    return TRUE;
+    return FALSE;
 }
 //******************************************************************************
 //******************************************************************************

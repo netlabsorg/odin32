@@ -1,4 +1,4 @@
-/* $Id: winscrollbar.cpp,v 1.1 1999-07-18 17:12:04 sandervl Exp $ */
+/* $Id: winscrollbar.cpp,v 1.2 1999-07-18 18:04:30 sandervl Exp $ */
 /*
  * Win32 scrollbar functions for OS/2
  *
@@ -11,6 +11,16 @@
 #include <os2win.h>
 #include <misc.h>
 
+//******************************************************************************
+//******************************************************************************
+BOOL WIN32API EnableScrollBar( HWND arg1, INT arg2, UINT arg3)
+{
+#ifdef DEBUG
+    WriteLog("USER32:  EnableScrollBar\n");
+#endif
+    //CB: implement in window class
+    return O32_EnableScrollBar(arg1, arg2, arg3);
+}
 //******************************************************************************
 //******************************************************************************
 int WIN32API SetScrollPos( HWND arg1, int arg2, int arg3, BOOL  arg4)
