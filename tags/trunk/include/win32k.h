@@ -1,4 +1,4 @@
-/* $Id: win32k.h,v 1.6 2001-02-11 23:43:22 bird Exp $
+/* $Id: win32k.h,v 1.7 2001-02-19 05:45:12 bird Exp $
  *
  * Top level make file for the Win32k library.
  * Contains library and 32-bit IOCtl definition.
@@ -35,6 +35,19 @@
  * Elf category
  */
 #define ELF_DUMMY               0x01
+
+
+/*
+ * DosAllocMemEx - Extra (bsememf.h) flag definitions.
+ */
+#define OBJ_ALIGNDEFAULT        0x00000000UL
+#define OBJ_ALIGN64K            0x10000000UL
+#define OBJ_ALIGNPAGE           0x20000000UL
+#define OBJ_ALIGNMASK           0x30000000UL
+#define OBJ_LOCATION            0x80000000UL
+#ifndef OBJ_SELMAPALL
+#define OBJ_SELMAPALL           0x00000800UL    /* This isn't ours. It just a dropout form bsememf.h */
+#endif
 
 
 /*
