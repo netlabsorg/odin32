@@ -31,4 +31,5 @@ SEGMENTS
     CONST32_RO          class 'CONST'
 
     CALLTAB16           class 'CALLTAB16_DATA'
+    LOGDATA_16BIT       class 'LOGDATA_16BIT'
 

@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.14 2001-10-14 22:55:52 bird Exp $
+# $Id: Makefile,v 1.15 2001-10-19 00:08:40 bird Exp $
 
 #
 # kKrnlLib.sys makefile.
@@ -60,6 +60,8 @@ OBJS  =\
     $(WIN32KOBJ)\kAVLStr.obj \
     $(WIN32KOBJ)\kAVLStrI.obj \
     $(WIN32KOBJ)\kAVLULM.obj \
+    $(WIN32KOBJ)\kLog.obj \
+    $(WIN32KOBJ)\kLoga.obj \
     $(WIN32KOBJ)\malloc.obj \
     $(WIN32KOBJ)\smalloc.obj \
     $(WIN32KOBJ)\rmalloc.obj \
@@ -125,7 +127,6 @@ $(WIN32KOBJ)\$(TARGET).lnk: Makefile makefile.inc ..\..\..\makefile.inc
 /MAP:$(WIN32KBIN)\$(TARGET).map
 $(OBJS:  =^
 )
-/IG
 $(LIBS:  =^
 )
 $(LASTLIB)
@@ -168,6 +169,8 @@ TSTOBJS =\
     $(WIN32KOBJ)\kAVLStr.obj \
     $(WIN32KOBJ)\kAVLStrI.obj \
     $(WIN32KOBJ)\kAVLULM.obj \
+    $(WIN32KOBJ)\kLog.obj \
+    $(WIN32KOBJ)\kLoga.obj \
     $(WIN32KOBJ)\malloc.obj_tst. \
     $(WIN32KOBJ)\smalloc.obj \
     $(WIN32KOBJ)\rmalloc.obj \
@@ -228,7 +231,6 @@ $(WIN32KOBJ)\$(TARGET)tst.lnk: Makefile makefile.inc ..\..\..\makefile.inc
 /MAP:$(WIN32KBIN)\$(TARGET)tst.map
 $(TSTOBJS:  =^
 )
-/IG
 $(TSTLIBS:  =^
 )
 $(TSTLASTLIB)
@@ -269,26 +271,25 @@ $(ODIN32_LIB)\$(TARGET)R3.lib: .force
 #
 
 # List of object files in the converted devhelp library.
-DHLPOBJS =  +$(WIN32KOBJ)\dhcall5b.obj +$(WIN32KOBJ)\dhcal11a.obj \
-            +$(WIN32KOBJ)\dhcal11g.obj +$(WIN32KOBJ)\dhret.obj \
-            +$(WIN32KOBJ)\dhcall2e.obj
+DHLPOBJS =  +$(WIN32KOBJ)\..\dhcall5b.obj +$(WIN32KOBJ)\..\dhcal11a.obj \
+            +$(WIN32KOBJ)\..\dhcal11g.obj +$(WIN32KOBJ)\..\dhret.obj \
+            +$(WIN32KOBJ)\..\dhcall2e.obj
 
 # Make corrected devhelp library with only the required object files.
-$(WIN32KOBJ)\devhelp.lib: $(DDKPATH)\lib\dhcalls.lib $(WIN32KBIN)\libconv.exe $(DHLPOBJS:+=)
+$(WIN32KOBJ)\devhelp.lib: $(DDKPATH)\lib\dhcalls.lib $(DHLPOBJS:+=)
     @$(RM) $@
     @cd $(WIN32KOBJ)
     $(DDKPATH)\tools\lib /nologo $@ $(DHLPOBJS);
     @cd $(MAKEDIR)
 
 # Convert devhelp library.
-$(WIN32KOBJ)\devhelp_.lib: $(DDKPATH)\lib\dhcalls.lib
-    $(WIN32KBIN)\libconv $** $@
+devhelp_.lib: $(WIN32KOBJ)\..\devhelp_.lib
+$(WIN32KOBJ)\..\devhelp_.lib: $(WIN32KBIN)\libconv.exe $(DDKPATH)\lib\dhcalls.lib
+    $** $@
 
 # Extract required object files from the converted devhelp library.
-$(DHLPOBJS:+=): $(WIN32KOBJ)\devhelp_.lib
-    @cd $(WIN32KOBJ)
-    $(DDKPATH)\tools\lib /nologo $** *$@;
-    @cd $(MAKEDIR)
+$(DHLPOBJS:+=): $(WIN32KOBJ)\..\devhelp_.lib
+    $(ILIB) $** *$@;
 
 
 # List of object files in the converted crt library.
@@ -300,7 +301,7 @@ CLIBOBJS =  +$(WIN32KOBJ)\..\inp.obj       +$(WIN32KOBJ)\..\outp.obj \
             +$(WIN32KOBJ)\..\__AHINCR.obj  +$(WIN32KOBJ)\..\anlshl.obj
 
 # Make corrected crt library with only the required object files.
-$(WIN32KOBJ)\clib.lib: $(MSCPATH)\lib\clibcep.lib $(WIN32KBIN)\libconv.exe $(CLIBOBJS:+=)
+$(WIN32KOBJ)\clib.lib: $(MSCPATH)\lib\clibcep.lib $(CLIBOBJS:+=)
     @$(RM) $@
     @cd $(WIN32KOBJ)
     $(DDKPATH)\tools\lib /nologo $@ @<<
@@ -309,14 +310,12 @@ $(CLIBOBJS);
     @cd $(MAKEDIR)
 
 # Convert devhelp library.
-$(WIN32KOBJ)\clib_.lib: $(MSCPATH)\lib\clibcep.lib
-    $(WIN32KBIN)\libconv $** $@ > nul
+$(WIN32KOBJ)\..\clib_.lib: $(WIN32KBIN)\libconv.exe $(MSCPATH)\lib\clibcep.lib
+    $** $@ > nul
 
 # Extract required object files from the converted crt library.
-$(CLIBOBJS:+=): $(WIN32KOBJ)\clib_.lib
-    @cd $(WIN32KOBJ)
+$(CLIBOBJS:+=): $(WIN32KOBJ)\..\clib_.lib
     $(ILIB) $** *$@;
-    @cd $(MAKEDIR)
 
 
 #
