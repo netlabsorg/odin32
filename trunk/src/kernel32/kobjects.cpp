@@ -1,4 +1,4 @@
-/* $Id: kobjects.cpp,v 1.13 2001-04-05 05:54:51 sandervl Exp $ */
+/* $Id: kobjects.cpp,v 1.14 2001-12-06 15:57:51 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -438,32 +438,6 @@ ODINFUNCTION4(HANDLE, CreateSemaphoreW,
     FreeAsciiString(astring);
   return(rc);
 }
-
-
-/*****************************************************************************
- * Name      : BOOL GetOverlappedResult
- * Purpose   : forward call to Open32
- * Parameters:
- * Variables :
- * Result    :
- * Remark    : handle translation is done in GetOverlappedResult
- * Status    :
- *
- * Author    : Patrick Haller [Fri, 1999/06/18 03:44]
- *****************************************************************************/
-
-ODINFUNCTION4(BOOL,         GetOverlappedResult,
-              HANDLE,       arg1,
-              LPOVERLAPPED, arg2,
-              LPDWORD,      arg3,
-              BOOL,         arg4)
-{
-  return HMGetOverlappedResult(arg1,
-                               arg2,
-                               arg3,
-                               arg4);
-}
-
 
 /*****************************************************************************
  * Name      : BOOL OpenEventA

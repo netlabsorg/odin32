@@ -1,4 +1,4 @@
-/* $Id: Fileio.cpp,v 1.60 2001-12-06 10:14:45 sandervl Exp $ */
+/* $Id: Fileio.cpp,v 1.61 2001-12-06 15:57:51 sandervl Exp $ */
 
 /*
  * Win32 File IO API functions for OS/2
@@ -265,16 +265,27 @@ ODINFUNCTION6(HANDLE, FindFirstFileExA,	LPCSTR, lpFileName,
   char  *filename;
   int    namelen;
 
-    if(lpFileName == NULL || lpFindFileData == NULL) 
+    if(lpFileName == NULL || lpFindFileData == NULL || lpSearchFilter != NULL) 
     {
+        dprintf(("!ERROR!: invalid parameter(s)"));
         SetLastError(ERROR_INVALID_PARAMETER);
         return INVALID_HANDLE_VALUE;
     }
 
-    if ((fSearchOp != FindExSearchNameMatch) || (dwAdditionalFlags != 0))
-    {
+    if(fSearchOp == FindExSearchLimitToDevices) {
+        dprintf(("!ERROR!: FindExSearchLimitToDevices not implemented"));
+        SetLastError(ERROR_NOT_SUPPORTED);
+        return INVALID_HANDLE_VALUE;
+    }
+    else
+    if(fSearchOp == FindExSearchLimitToDirectories) {     
+        //NOTE: According to the SDK docs we are allowed to silently ignore this option
+        dprintf(("!WARNING!: FindExSearchLimitToDirectories IGNORED"));
+        fSearchOp = FindExSearchNameMatch;
+    }
+    if(dwAdditionalFlags != 0) {
         dprintf(("!ERROR!: options not implemented 0x%08x 0x%08lx\n", fSearchOp, dwAdditionalFlags ));
-        SetLastError(ERROR_INVALID_PARAMETER);
+        SetLastError(ERROR_NOT_SUPPORTED);
         return INVALID_HANDLE_VALUE;
     }
 
@@ -295,7 +306,7 @@ ODINFUNCTION6(HANDLE, FindFirstFileExA,	LPCSTR, lpFileName,
       
         return (HANDLE)OSLibDosFindFirst(filename, (WIN32_FIND_DATAA *)lpFindFileData);
 
-    default: //TODO
+    default: //should never happen
         dprintf(("!ERROR! unsupported fInfoLevelId"));
         SetLastError(ERROR_INVALID_PARAMETER);
         break;
@@ -1629,6 +1640,35 @@ ODINFUNCTION8(BOOL, DeviceIoControl, HANDLE, hDevice, DWORD, dwIoControlCode,
 ODINFUNCTION1(BOOL, CancelIo, HANDLE, hFile)
 {
   return HMCancelIo(hFile);
+}
+/*****************************************************************************
+ * Name      : BOOL GetOverlappedResult
+ * Purpose   : forward call to Open32
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    : handle translation is done in GetOverlappedResult
+ * Status    :
+ *
+ * Author    : Patrick Haller [Fri, 1999/06/18 03:44]
+ *****************************************************************************/
+
+ODINFUNCTION4(BOOL, GetOverlappedResult,
+              HANDLE, hFile,              /* [in] handle of file to check on */
+              LPOVERLAPPED, lpOverlapped, /* [in/out] pointer to overlapped  */
+              LPDWORD, lpTransferred,     /* [in/out] number of bytes transferred  */
+              BOOL, bWait)                /* [in] wait for the transfer to complete ? */
+{
+  if(lpOverlapped == NULL || lpOverlapped->hEvent == 0) {
+      dprintf(("!ERROR!: lpOverlapped == NULL || lpOverlapped->hEvent == 0"));
+      SetLastError(ERROR_INVALID_PARAMETER);
+      return FALSE;
+  }
+
+  return HMGetOverlappedResult(hFile,
+                               lpOverlapped,
+                               lpTransferred,
+                               bWait);
 }
 //******************************************************************************
 //******************************************************************************
