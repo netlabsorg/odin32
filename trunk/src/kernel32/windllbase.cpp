@@ -1,4 +1,4 @@
-/* $Id: windllbase.cpp,v 1.16 2000-08-11 10:56:18 sandervl Exp $ */
+/* $Id: windllbase.cpp,v 1.17 2000-10-02 18:39:36 sandervl Exp $ */
 
 /*
  * Win32 Dll base class
@@ -648,23 +648,23 @@ void Win32DllBase::setDefaultRenaming()
 {
  char renameddll[CCHMAXPATH];
 
-  if(ODIN_PROFILE_GetOdinIniString(DLLRENAMEWIN_SECTION, "OLE32", "", renameddll, 
+  if(PROFILE_GetOdinIniString(DLLRENAMEWIN_SECTION, "OLE32", "", renameddll, 
                                    sizeof(renameddll)-1) <= 1) 
   {
-	ODIN_PROFILE_SetOdinIniString(DLLRENAMEWIN_SECTION, "OLE32", "OLE32OS2");
-	ODIN_PROFILE_SetOdinIniString(DLLRENAMEOS2_SECTION, "OLE32OS2", "OLE32");
+	PROFILE_SetOdinIniString(DLLRENAMEWIN_SECTION, "OLE32", "OLE32OS2");
+	PROFILE_SetOdinIniString(DLLRENAMEOS2_SECTION, "OLE32OS2", "OLE32");
   }
-  if(ODIN_PROFILE_GetOdinIniString(DLLRENAMEWIN_SECTION, "OLEAUT32", "", renameddll, 
+  if(PROFILE_GetOdinIniString(DLLRENAMEWIN_SECTION, "OLEAUT32", "", renameddll, 
                                    sizeof(renameddll)-1) <= 1) 
   {
-	ODIN_PROFILE_SetOdinIniString(DLLRENAMEWIN_SECTION, "OLEAUT32", "OLAUTOS2");
-	ODIN_PROFILE_SetOdinIniString(DLLRENAMEOS2_SECTION, "OLAUTOS2", "OLEAUT32");
+	PROFILE_SetOdinIniString(DLLRENAMEWIN_SECTION, "OLEAUT32", "OLAUTOS2");
+	PROFILE_SetOdinIniString(DLLRENAMEOS2_SECTION, "OLAUTOS2", "OLEAUT32");
   }
-  if(ODIN_PROFILE_GetOdinIniString(DLLRENAMEWIN_SECTION, "NETAPI32", "", renameddll, 
+  if(PROFILE_GetOdinIniString(DLLRENAMEWIN_SECTION, "NETAPI32", "", renameddll, 
                                    sizeof(renameddll)-1) <= 1) 
   {
-	ODIN_PROFILE_SetOdinIniString(DLLRENAMEWIN_SECTION, "NETAPI32", "WNETAP32");
-	ODIN_PROFILE_SetOdinIniString(DLLRENAMEOS2_SECTION, "WNETAP32", "NETAPI32");
+	PROFILE_SetOdinIniString(DLLRENAMEWIN_SECTION, "NETAPI32", "WNETAP32");
+	PROFILE_SetOdinIniString(DLLRENAMEOS2_SECTION, "WNETAP32", "NETAPI32");
   }
 }
 //******************************************************************************
@@ -692,7 +692,7 @@ void Win32DllBase::renameDll(char *dllname, BOOL fWinToOS2)
   if(dot)
 	*dot = 0;
   strupr(modname);
-  if(ODIN_PROFILE_GetOdinIniString(sectionname, modname, "", renameddll, 
+  if(PROFILE_GetOdinIniString(sectionname, modname, "", renameddll, 
                                    sizeof(renameddll)-1) > 1) 
   {
 	if(namestart == dllname) {

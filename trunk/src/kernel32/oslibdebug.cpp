@@ -1,11 +1,9 @@
-/* $Id: oslibdebug.cpp,v 1.3 2000-03-13 13:10:10 sandervl Exp $ */
+/* $Id: oslibdebug.cpp,v 1.4 2000-10-02 18:39:35 sandervl Exp $ */
 
 /*
  * OS/2 debug apis
  *
  * Copyright 1999 Edgar Buerkle
- *
- * NOTE: Including os2.h, so not automatic protection against FS trashing!
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *

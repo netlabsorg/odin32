@@ -1,4 +1,4 @@
-/* $Id: disk.cpp,v 1.16 2000-09-04 18:24:42 sandervl Exp $ */
+/* $Id: disk.cpp,v 1.17 2000-10-02 18:39:33 sandervl Exp $ */
 
 /*
  * Win32 Disk API functions for OS/2
@@ -323,7 +323,7 @@ ODINFUNCTION8(BOOL,    GetVolumeInformationW,
   else
     asciiroot = NULL;
 
-  rc = ODIN_GetVolumeInformationA(asciiroot,
+  rc = CALL_ODINFUNC(GetVolumeInformationA)(asciiroot,
                              asciivol,
                              nVolumeNameSize,
                              lpVolumeSerialNumber,

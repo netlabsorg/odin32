@@ -1,4 +1,4 @@
-/* $Id: lang.cpp,v 1.28 2000-09-08 04:28:47 phaller Exp $ */
+/* $Id: lang.cpp,v 1.29 2000-10-02 18:39:33 sandervl Exp $ */
 /*
  * Win32 language API functions for OS/2
  *
@@ -869,7 +869,7 @@ ODINFUNCTION4(int, GetLocaleInfoA, LCID, lcid, LCTYPE, LCType, LPSTR, buf,
   else
     lpWStr=NULL; // Query for buffer size
 
-  ret_len = ODIN_GetLocaleInfoW(lcid, LCType, lpWStr, len);
+  ret_len = CALL_ODINFUNC(GetLocaleInfoW)(lcid, LCType, lpWStr, len);
 
   if (ret_len && buf)
     UnicodeToAscii(lpWStr,buf);

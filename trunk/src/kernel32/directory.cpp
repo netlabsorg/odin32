@@ -1,4 +1,4 @@
-/* $Id: directory.cpp,v 1.29 2000-07-04 08:41:13 sandervl Exp $ */
+/* $Id: directory.cpp,v 1.30 2000-10-02 18:39:33 sandervl Exp $ */
 
 /*
  * Win32 Directory functions for OS/2
@@ -76,7 +76,7 @@ void InitDirectories()
    if(DIR_System[len-1] == '\\') {
 	DIR_System[len-1] = 0; 
    }
-   len = ODIN_PROFILE_GetOdinIniString(ODINDIRECTORIES,"WINDOWS","",DIR_Windows,sizeof(DIR_Windows));
+   len = PROFILE_GetOdinIniString(ODINDIRECTORIES,"WINDOWS","",DIR_Windows,sizeof(DIR_Windows));
    if (len > 2) {
 	if(DIR_Windows[len-1] == '\\') {
 		DIR_Windows[len-1] = 0; 

@@ -1,4 +1,4 @@
-/* $Id: ole2nls.cpp,v 1.3 2000-10-02 15:56:47 phaller Exp $ */
+/* $Id: ole2nls.cpp,v 1.4 2000-10-02 18:39:34 sandervl Exp $ */
 
 /*
  *	National Language Support library
@@ -1396,7 +1396,7 @@ ODINFUNCTION4(BOOL,    GetStringTypeW,
               int,     cchSrc,
               LPWORD,  lpCharType)
 {
-  return ODIN_GetStringTypeExW(0,
+  return CALL_ODINFUNC(GetStringTypeExW)(0,
                           dwInfoType,
                           lpSrcStr,
                           cchSrc,
