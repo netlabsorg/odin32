@@ -1,4 +1,7 @@
-/* $Id: changelog,v 1.1828 2001-11-14 14:39:29 phaller Exp $ */
+/* $Id: changelog,v 1.1829 2001-11-14 15:27:57 bird Exp $ */
+
+ 2001-11-13: Patrick Haller <patrick.haller@innotek.de>
+    - fastdep:  o IPF support.
 
  2001-11-13: Patrick Haller <patrick.haller@innotek.de>
     - KERNEL32: o provided faster alternatives to HEAP_strdupXXX
