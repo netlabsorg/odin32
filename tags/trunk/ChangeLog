@@ -1,4 +1,4 @@
-/* $Id: ChangeLog,v 1.1208 2001-01-08 22:56:53 bird Exp $ */
+/* $Id: ChangeLog,v 1.1209 2001-01-08 23:49:39 bird Exp $ */
 
  2001-01-08: knut st. osmundsen <knut.stange.osmundsen@mynd.no>
     - tools\dailybuild:
@@ -10,6 +10,8 @@
     - Win32k:   o Added support for the ldrCheckInternalName bug. :-)
                   (see /src/win32k/ldr/myldrCheckInternalName.cpp for details.)
                 o Made pe.exe default.
+                o Added UNI and SMP 14062 kernels (convenience pack).
+                  (Have anyone got the Warp 4 convenience pack with the right .sym files?)
 
     - bin\bldlevelinf.cmd:
                 o Removed colon after otherwise to make it work with Object REXX.
