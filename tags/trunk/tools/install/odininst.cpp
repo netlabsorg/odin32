@@ -1,4 +1,4 @@
-/* $Id: odininst.cpp,v 1.9 2001-08-11 09:34:11 sandervl Exp $ */
+/* $Id: odininst.cpp,v 1.10 2001-08-16 21:34:21 sandervl Exp $ */
 /*
  * Odin WarpIn installation app
  *
@@ -70,6 +70,13 @@ static char DIR_System[260];
 //******************************************************************************
 int main(int argc, char *argv[])
 {
+  char *installdate;
+  time_t anytime;
+
+  time(&anytime);
+  installdate = asctime(localtime(&anytime));
+  PROFILE_SetOdinIniString(ODINSYSTEM_SECTION, "INSTALLDATE", installdate);
+
   InitSystemAndRegistry();
   CreateSystemDirectories();
   SetupControlPanelKeys();
