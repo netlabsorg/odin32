@@ -1,4 +1,4 @@
-/* $Id: winnls.h,v 1.4 2000-08-16 08:03:57 sandervl Exp $ */
+/* $Id: winnls.h,v 1.5 2001-04-03 14:11:53 sandervl Exp $ */
 
 #ifndef __WINE_WINNLS_H
 #define __WINE_WINNLS_H
@@ -145,14 +145,21 @@
 #define NORM_IGNOREKANATYPE                     0x00010000
 #define NORM_IGNOREWIDTH                        0x00020000
 
-#define CP_ACP                                 0
-#define CP_OEMCP                               1
+#define CP_ACP                                  0
+#define CP_OEMCP                                1
+#define CP_MACCP				2
+#define CP_THREAD_ACP				3
+#define CP_SYMBOL				42
+#define CP_UTF7					65000
+#define CP_UTF8					65001
+
+#define WC_DISCARDNS                0x00000010
+#define WC_SEPCHARS                 0x00000020
+#define WC_DEFAULTCHAR              0x00000040
+#define WC_COMPOSITECHECK           0x00000200
+#define WC_NO_BEST_FIT_CHARS        0x00000400
 
 #define WC_DEFAULTCHECK                           0x00000100
-#define WC_COMPOSITECHECK                      0x00000200
-#define WC_DISCARDNS                              0x00000010
-#define WC_SEPCHARS                               0x00000020
-#define WC_DEFAULTCHAR                            0x00000040
 
 #define MAKELCID(l, s)                      (MAKELONG(l, s))
 
