@@ -1,4 +1,4 @@
-/* $Id: ChangeLog,v 1.1407 2001-05-11 17:10:10 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.1408 2001-05-11 19:02:55 sandervl Exp $ */
 
  2001-05-11: Sander van Leeuwen <sandervl@xs4all.nl>
     - USER32:   o Rewrote window handling. Back to using frame and client windows
@@ -28,6 +28,10 @@
                 o ScrollDC fix (window handle transation)
                 o ScrollDC and ScrollWindowEx bugfix (setting update region)
                   (fixes scrolling in MS Word 97)
+                o Don't call frame handler for WM_ADJUSTFRAMEPOS
+                  It changes the Z-order of the window when SetFocus is called.
+                  (fixes hotlist Opera window painting + activation problems
+                   with some (a lot of?) apps)
     - GDI32:    o SetDIBitsToDevice: RGB 555 is the default for 16 bits bitmaps
                   (fixes pictures in (some) documents for Word 97)
                   TODO: Probably need to check bitfields and convert for some
