@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.3 2002-08-20 19:09:59 bird Exp $
+# $Id: Makefile,v 1.4 2002-08-20 21:14:29 bird Exp $
 
 #
 # Makesystem Testcases
@@ -93,9 +93,8 @@ run-tests:
     @echo #   DLLs >> $@
     @echo # >> $@
     @echo #   CC_ENVIRONMENTS >> $@
-# WAT11C-16  doesn't work :((
     @for %%j in ($(MODES)) do $(COMSPEC) /C "echo   set BUILD_MODE=%%j >> $@ & \
-        for %%%%i in ($(CC_ENVIRONMENTS:WAT11C-16=)) do echo     $(TOOL_MAKE) -f dll-prog-c.mak BUILD_ENV_FORCE=%%%%i rebuild test clean >> $@"
+        for %%%%i in ($(CC_ENVIRONMENTS)) do echo     $(TOOL_MAKE) -f dll-prog-c.mak BUILD_ENV_FORCE=%%%%i rebuild test clean >> $@"
 !endif
 !if 1
     @echo # >> $@

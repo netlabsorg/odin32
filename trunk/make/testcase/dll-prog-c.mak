@@ -1,4 +1,4 @@
-# $Id: dll-prog-c.mak,v 1.2 2002-08-20 08:01:46 bird Exp $
+# $Id: dll-prog-c.mak,v 1.3 2002-08-20 21:14:29 bird Exp $
 
 # Testcase for makeing simple C DLLs.
 
@@ -12,8 +12,10 @@ MAKEFILE    = dll-prog-c.mak
 TARGET_LIBS = $(LIB_C_OBJ) $(LIB_OS)    # use the static library!
 
 # rules and more
+RULES_FORWARD = test
 !include $(MAKE_INCLUDE_PROCESS)
 
+!if !$(BUILD_FORWARDING)
 
 
 # some helpers for the output.
@@ -33,14 +35,14 @@ _STR2 = __32BIT__
 #
 # validate that the executable actually runs and produces the desired output.
 #
+OUTFILE = out
 test:
-!if "$(MAKE_INCLUDE_PROCESS:process.forwarder=)" == "$(MAKE_INCLUDE_PROCESS)"
     $(TOOL_MAKE) -f dll-c.mak rebuild
-    $(TARGET) $(PATH_OBJ)\dll-c.dll\dll-c.dll > out
+    $(TARGET) $(PATH_OBJ)\dll-c.dll\dll-c.dll > $(OUTFILE)
 ! ifdef BUILD_VERBOSE
-    type out
+    type $(OUTFILE)
 ! endif
-    $(TOOL_CMP) out <<
+    $(TOOL_CMP) $(OUTFILE) <<
 DLLInit
 $(_STR1)
 $(_STR2)
@@ -48,10 +50,6 @@ FOOName
 DLLTerm
 <<
     $(TOOL_MAKE) -f dll-c.mak clean
-!else
-! ifndef BUILD_VERBOSE
-    @ \
-! endif
-    $(TOOL_BUILDENV) $(BUILD_ENVS_CHANGE) * $(TOOL_MAKE) -f $(MAKEFILE) $@
+
 !endif
 

@@ -1,4 +1,4 @@
-# $Id: prog-cxx.mak,v 1.1 2002-05-16 11:37:08 bird Exp $
+# $Id: prog-cxx.mak,v 1.2 2002-08-20 21:14:30 bird Exp $
 
 # Testcase for makeing simple C++ programs.
 
@@ -12,7 +12,10 @@ MAKEFILE    = prog-cxx.mak
 TARGET_LIBS = $(LIB_C_OBJ) $(LIB_OS)    # use the static library!
 
 # rules and more
+RULES_FORWARD = test
 !include $(MAKE_INCLUDE_PROCESS)
+
+!if !$(BUILD_FORWARDING)
 
 
 # some helpers for the output.
@@ -33,7 +36,6 @@ _STR2 = __32BIT__
 # validate that the executable actually runs and produces the desired output.
 #
 test:
-!if "$(MAKE_INCLUDE_PROCESS:process.forwarder=)" == "$(MAKE_INCLUDE_PROCESS)"
     $(TARGET) > out
 ! ifdef BUILD_VERBOSE
     type out
@@ -44,9 +46,6 @@ $(_STR1)
 $(_STR2)
 
 <<
-!else
-! ifndef BUILD_VERBOSE
-    @ \
-! endif
-    $(TOOL_BUILDENV) $(BUILD_ENVS_CHANGE) * $(TOOL_MAKE) -f $(MAKEFILE) $@
+
 !endif
+
