@@ -1,10 +1,11 @@
-/* $Id: changelog,v 1.1417 2001-05-17 09:49:41 sandervl Exp $ */
+/* $Id: changelog,v 1.1418 2001-05-17 10:03:38 sandervl Exp $ */
 
  2001-05-17: Sander van Leeuwen <sandervl@xs4all.nl>
     - USER32:   o Destroy menu windows when they are no longer used.
                   (fixes activation problems with dialogs created after 
                    selecting a menu item)
                   (TODO: sync with latest wine menu control sourcecode)
+                o clientHeight bugfix (fixes crash in Solitaire)
 
  2001-05-16: Sander van Leeuwen <sandervl@xs4all.nl>
     - USER32:   o WM_SETREDRAW fix; must call WinEnableWindowUpdate for
