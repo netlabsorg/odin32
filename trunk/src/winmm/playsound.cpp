@@ -1,4 +1,4 @@
-/* $Id: playsound.cpp,v 1.7 2001-03-24 13:23:48 sandervl Exp $ */
+/* $Id: playsound.cpp,v 1.8 2002-05-22 15:50:25 sandervl Exp $ */
 
 /*
  * Playsound implementation
@@ -27,8 +27,6 @@
 
 #define DBG_LOCALLOG	DBG_playsound
 #include "dbglocal.h"
-
-ODINDEBUGCHANNEL(WINMM-PLAYSOUND)
 
 
 static HANDLE		PlaySound_hThread = 0;
@@ -317,10 +315,7 @@ static DWORD WINAPI PlaySound_Thread(LPVOID arg)
  * Author    : Patrick Haller [Tue, 1998/05/05 10:44]
  *****************************************************************************/
 
-ODINFUNCTION3(BOOL, PlaySoundA,
-              LPCSTR, pszSound,
-              HMODULE, hmod,
-              DWORD, fdwSound)
+BOOL WINAPI PlaySoundA(LPCSTR pszSound, HMODULE hmod, DWORD fdwSound)
 {
     static LPSTR StrDup = NULL;
     
@@ -403,10 +398,7 @@ ODINFUNCTION3(BOOL, PlaySoundA,
  * Author    : Patrick Haller [Tue, 1998/05/05 10:44]
  *****************************************************************************/
 
-ODINFUNCTION3(BOOL, PlaySoundW,
-              LPCWSTR, pszSound,
-              HMODULE, hmod,
-              DWORD, fdwSound)
+BOOL WINAPI PlaySoundW(LPCWSTR pszSound, HMODULE hmod, DWORD fdwSound)
 {
     LPSTR 	pszSoundA;
     BOOL	bSound;
@@ -435,9 +427,7 @@ ODINFUNCTION3(BOOL, PlaySoundW,
  * Author    : Patrick Haller [Tue, 1998/05/05 10:44]
  *****************************************************************************/
 
-ODINFUNCTION2(BOOL, sndPlaySoundA,
-              LPCSTR, lpszSoundName,
-              UINT, uFlags)
+BOOL WINAPI sndPlaySoundA(LPCSTR lpszSoundName, UINT uFlags)
 {
     PlaySound_SearchMode = 1;
     return PlaySoundA(lpszSoundName, 0, uFlags);
@@ -457,9 +447,7 @@ ODINFUNCTION2(BOOL, sndPlaySoundA,
  * Author    : Patrick Haller [Tue, 1998/05/05 10:44]
  *****************************************************************************/
 
-ODINFUNCTION2(BOOL, sndPlaySoundW,
-              LPCWSTR, lpszSoundName,
-              UINT, uFlags)
+BOOL WINAPI sndPlaySoundW(LPCWSTR lpszSoundName, UINT uFlags)
 {
     PlaySound_SearchMode = 1;
     return PlaySoundW(lpszSoundName, 0, uFlags);

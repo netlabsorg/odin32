@@ -1,4 +1,4 @@
-/* $Id: wavein.cpp,v 1.10 2001-10-24 22:47:42 sandervl Exp $ */
+/* $Id: wavein.cpp,v 1.11 2002-05-22 15:50:26 sandervl Exp $ */
 
 /*
  * Wave in MM apis
@@ -34,17 +34,10 @@
 #include "dbglocal.h"
 
 
-ODINDEBUGCHANNEL(WINMM-WAVEIN)
-
 /******************************************************************************/
 /******************************************************************************/
-ODINFUNCTION6(MMRESULT, waveInOpen,
-              LPHWAVEIN, phwi,
-              UINT, uDeviceID,
-              const LPWAVEFORMATEX, pwfx,
-              DWORD, dwCallback,
-              DWORD, dwInstance,
-              DWORD, fdwOpen)
+MMRESULT WINAPI waveInOpen(LPHWAVEIN phwi, UINT uDeviceID, const LPWAVEFORMATEX pwfx,
+                           DWORD  dwCallback, DWORD  dwInstance, DWORD  fdwOpen)
 {
   MMRESULT rc;
 
@@ -55,10 +48,11 @@ ODINFUNCTION6(MMRESULT, waveInOpen,
 
     if(fdwOpen == WAVE_FORMAT_QUERY) {
         if(DartWaveIn::queryFormat(pwfx->wFormatTag, pwfx->nChannels, pwfx->nSamplesPerSec,
-                                   pwfx->wBitsPerSample) == TRUE) {
-                return(MMSYSERR_NOERROR);
+                                   pwfx->wBitsPerSample) == TRUE) 
+        {
+             return(MMSYSERR_NOERROR);
         }
-        else    return(WAVERR_BADFORMAT);
+        else return(WAVERR_BADFORMAT);
     }
 
     if(phwi == NULL)
@@ -79,69 +73,63 @@ ODINFUNCTION6(MMRESULT, waveInOpen,
 }
 /******************************************************************************/
 /******************************************************************************/
-ODINFUNCTION1(MMRESULT, waveInClose,
-              HWAVEIN, hwi)
+MMRESULT WINAPI waveInClose(HWAVEIN hwi)
 {
-  DartWaveIn *dwave = (DartWaveIn *)hwi;
+    DartWaveIn *dwave = (DartWaveIn *)hwi;
 
-  if(DartWaveIn::find(dwave) == TRUE)
-  {
+    if(DartWaveIn::find(dwave) == TRUE)
+    {
         if(dwave->getState() == STATE_RECORDING)
             return(WAVERR_STILLPLAYING);
 
         delete dwave;
         return(MMSYSERR_NOERROR);
-  }
-  else  return(MMSYSERR_INVALHANDLE);
+    }
+    else return(MMSYSERR_INVALHANDLE);
 }
 /******************************************************************************/
 /******************************************************************************/
-ODINFUNCTION1(MMRESULT, waveInReset,
-              HWAVEIN, hwi)
+MMRESULT WINAPI waveInReset(HWAVEIN hwi)
 {
-  DartWaveIn *dwave = (DartWaveIn *)hwi;
+    DartWaveIn *dwave = (DartWaveIn *)hwi;
 
-  if(DartWaveIn::find(dwave) == TRUE)
-        return(dwave->reset());
-  else  return(MMSYSERR_INVALHANDLE);
+    if(DartWaveIn::find(dwave) == TRUE)
+         return(dwave->reset());
+    else return(MMSYSERR_INVALHANDLE);
 }
 /******************************************************************************/
 /******************************************************************************/
-ODINFUNCTION1(MMRESULT, waveInStart,
-              HWAVEIN, hwi)
+MMRESULT WINAPI waveInStart(HWAVEIN  hwi)
 {
-  DartWaveIn *dwave = (DartWaveIn *)hwi;
+    DartWaveIn *dwave = (DartWaveIn *)hwi;
 
-  if(DartWaveIn::find(dwave) == TRUE)
+    if(DartWaveIn::find(dwave) == TRUE)
         return(dwave->start());
-  else  return(MMSYSERR_INVALHANDLE);
+    else return(MMSYSERR_INVALHANDLE);
 }
 /******************************************************************************/
 /******************************************************************************/
-ODINFUNCTION1(MMRESULT, waveInStop,
-              HWAVEIN, hwi)
+MMRESULT WINAPI waveInStop(
+              HWAVEIN  hwi)
 {
-  DartWaveIn *dwave = (DartWaveIn *)hwi;
+    DartWaveIn *dwave = (DartWaveIn *)hwi;
 
-  if(DartWaveIn::find(dwave) == TRUE)
+    if(DartWaveIn::find(dwave) == TRUE)
         return(dwave->stop());
-  else  return(MMSYSERR_INVALHANDLE);
+    else return(MMSYSERR_INVALHANDLE);
 }
 /******************************************************************************/
 /******************************************************************************/
-ODINFUNCTION3(MMRESULT, waveInGetPosition,
-              HWAVEIN, hwi,
-              LPMMTIME, pmmt,
-              UINT, cbmmt)
+MMRESULT WINAPI waveInGetPosition(HWAVEIN  hwi, LPMMTIME pmmt, UINT cbmmt)
 {
-  DartWaveIn *dwave = (DartWaveIn *)hwi;
+    DartWaveIn *dwave = (DartWaveIn *)hwi;
 
-  if(pmmt == NULL)
+    if(pmmt == NULL)
         return MMSYSERR_INVALPARAM;
 
-  if(DartWaveIn::find(dwave) == TRUE)
-  {
-    ULONG position;
+    if(DartWaveIn::find(dwave) == TRUE)
+    {
+        ULONG position;
 
         position = dwave->getPosition();
         if(position == -1) {
@@ -176,15 +164,12 @@ ODINFUNCTION3(MMRESULT, waveInGetPosition,
             break;
         }
         return MMSYSERR_NOERROR;
-  }
-  else  return(MMSYSERR_INVALHANDLE);
+    }
+    else  return(MMSYSERR_INVALHANDLE);
 }
 /******************************************************************************/
 /******************************************************************************/
-ODINFUNCTION3(MMRESULT, waveInAddBuffer,
-              HWAVEIN, hwi,
-              LPWAVEHDR, pwh,
-              UINT, cbwh)
+MMRESULT WINAPI waveInAddBuffer(HWAVEIN  hwi, LPWAVEHDR pwh, UINT cbwh)
 {
     DartWaveIn *dwave = (DartWaveIn *)hwi;
 
@@ -206,10 +191,7 @@ ODINFUNCTION3(MMRESULT, waveInAddBuffer,
 }
 /******************************************************************************/
 /******************************************************************************/
-ODINFUNCTION3(MMRESULT, waveInPrepareHeader,
-              HWAVEIN, hwi,
-              LPWAVEHDR, pwh,
-              UINT, cbwh)
+MMRESULT WINAPI waveInPrepareHeader(HWAVEIN  hwi, LPWAVEHDR pwh, UINT  cbwh)
 {
     DartWaveIn *dwave = (DartWaveIn *)hwi;
 
@@ -223,14 +205,11 @@ ODINFUNCTION3(MMRESULT, waveInPrepareHeader,
         pwh->lpNext   = NULL;
         return(MMSYSERR_NOERROR);
     }
-    else  return(MMSYSERR_INVALHANDLE);
+    else return(MMSYSERR_INVALHANDLE);
 }
 /******************************************************************************/
 /******************************************************************************/
-ODINFUNCTION3(MMRESULT, waveInUnprepareHeader,
-              HWAVEIN, hwi,
-              LPWAVEHDR, pwh,
-              UINT, cbwh)
+MMRESULT WINAPI waveInUnprepareHeader(HWAVEIN  hwi, LPWAVEHDR pwh, UINT  cbwh)
 {
     DartWaveIn *dwave = (DartWaveIn *)hwi;
 
@@ -247,10 +226,7 @@ ODINFUNCTION3(MMRESULT, waveInUnprepareHeader,
 }
 /******************************************************************************/
 /******************************************************************************/
-ODINFUNCTION3(MMRESULT, waveInGetDevCapsA,
-              UINT, uDeviceID,
-              LPWAVEINCAPSA, pwic,
-              UINT, cbwic)
+MMRESULT WINAPI waveInGetDevCapsA(UINT  uDeviceID, LPWAVEINCAPSA pwic, UINT  cbwic)
 {
     if(fMMPMAvailable == FALSE) return MMSYSERR_NODRIVER;
 
@@ -278,10 +254,7 @@ ODINFUNCTION3(MMRESULT, waveInGetDevCapsA,
 }
 /******************************************************************************/
 /******************************************************************************/
-ODINFUNCTION3(MMRESULT, waveInGetDevCapsW,
-              UINT, uDeviceID,
-              LPWAVEINCAPSW, pwic,
-              UINT, cbwic)
+MMRESULT WINAPI waveInGetDevCapsW(UINT uDeviceID, LPWAVEINCAPSW pwic, UINT cbwic)
 {
     if(fMMPMAvailable == FALSE) return MMSYSERR_NODRIVER;
 
@@ -308,10 +281,7 @@ ODINFUNCTION3(MMRESULT, waveInGetDevCapsW,
 }
 /******************************************************************************/
 /******************************************************************************/
-ODINFUNCTION3(MMRESULT, waveInGetErrorTextA,
-              MMRESULT, wError,
-              LPSTR, lpText,
-              UINT, cchText)
+MMRESULT WINAPI waveInGetErrorTextA(MMRESULT wError, LPSTR lpText, UINT cchText)
 {
     dprintf(("WINMM:waveInGetErrorTextA(%d)\n", wError ));
     char * theMsg = getWinmmMsg( wError );
@@ -327,10 +297,7 @@ ODINFUNCTION3(MMRESULT, waveInGetErrorTextA,
 }
 /******************************************************************************/
 /******************************************************************************/
-ODINFUNCTION3(MMRESULT, waveInGetErrorTextW,
-              MMRESULT, wError,
-              LPWSTR, lpText,
-              UINT, cchText)
+MMRESULT WINAPI waveInGetErrorTextW(MMRESULT wError, LPWSTR lpText, UINT cchText)
 {
     dprintf(("WINMM:waveInGetErrorTextW(%d) - stub\n", wError ));
     char * theMsg = getWinmmMsg( wError );
@@ -346,9 +313,7 @@ ODINFUNCTION3(MMRESULT, waveInGetErrorTextW,
 }
 /******************************************************************************/
 /******************************************************************************/
-ODINFUNCTION2(MMRESULT, waveInGetID,
-              HWAVEIN, hwi,
-              LPUINT, puDeviceID)
+MMRESULT WINAPI waveInGetID(HWAVEIN hwi, LPUINT puDeviceID)
 {
     DartWaveIn *dwave = (DartWaveIn *)hwi;
     if(DartWaveIn::find(dwave) == TRUE)
@@ -360,17 +325,13 @@ ODINFUNCTION2(MMRESULT, waveInGetID,
 }
 /******************************************************************************/
 /******************************************************************************/
-ODINFUNCTION0(UINT, waveInGetNumDevs)
+UINT WINAPI waveInGetNumDevs()
 {
     return DartWaveIn::getNumDevices();
 }
 /******************************************************************************/
 /******************************************************************************/
-ODINFUNCTION4(MMRESULT, waveInMessage,
-              HWAVEIN, hwi,
-              UINT, uMsg,
-              DWORD, dw1,
-              DWORD, dw2)
+MMRESULT WINAPI waveInMessage(HWAVEIN hwi, UINT uMsg, DWORD dw1, DWORD dw2)
 {
     dprintf(("WINMM:waveInMessage - stub\n"));
 

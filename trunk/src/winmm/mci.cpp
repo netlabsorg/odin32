@@ -1,4 +1,4 @@
-/* $Id: mci.cpp,v 1.7 2001-04-04 09:02:16 sandervl Exp $ */
+/* $Id: mci.cpp,v 1.8 2002-05-22 15:50:24 sandervl Exp $ */
 
 /*
  * MCI functions
@@ -34,7 +34,6 @@
 #include "winmm.h"
 
 #define DBG_LOCALLOG	DBG_mci
-
 #include "dbglocal.h"
 
 
@@ -53,13 +52,8 @@ static UINT	MCI_GetDriverFromString(LPCSTR lpstrName);
 
 /****************************************************************************/
 
-ODINDEBUGCHANNEL(WINMM-MCI)
 
-
-ODINFUNCTION3(BOOL, mciDriverNotify,
-              HWND, hwndCallback,
-              UINT, uDeviceID,
-              UINT, uStatus)
+BOOL WINAPI mciDriverNotify(HWND hwndCallback, UINT uDeviceID, UINT uStatus)
 {
   TRACE("Entering mciDriverNotify (%08X, %04x, %04X)\n", hwndCallback, uDeviceID, uStatus);
   
@@ -72,59 +66,49 @@ ODINFUNCTION3(BOOL, mciDriverNotify,
   return TRUE;
 }
 
-ODINFUNCTION1(UINT, mciDriverYield,
-              UINT, uDeviceID)
+UINT WINAPI mciDriverYield(UINT uDeviceID)
 {
   dprintf(("WINMM:mciDriverYield - stub\n"));
   return 0;
 }
 
-ODINFUNCTION1(BOOL, mciExecute,
-              LPCSTR, pszCommand)
+BOOL WINAPI mciExecute(LPCSTR pszCommand)
 {
   dprintf(("WINMM:mciExecute(%s) - stub\n", pszCommand));
   return FALSE;
 }
 
-ODINFUNCTION1(BOOL, mciFreeCommandResource,
-              UINT, uTable)
+BOOL WINAPI mciFreeCommandResource(UINT uTable)
 {
   dprintf(("WINMM:mciFreeCommandResource - stub\n"));
   return FALSE;
 }
 
-ODINFUNCTION1(HTASK, mciGetCreatorTask,
-              MCIDEVICEID, mciId)
+HTASK mciGetCreatorTask(MCIDEVICEID mciId)
 {
   dprintf(("WINMM:mciGetCreatorTask - stub\n"));
   return 0;
 }
 
-ODINFUNCTION1(MCIDEVICEID, mciGetDeviceIDA,
-              LPCSTR, pszDevice)
+MCIDEVICEID WINAPI mciGetDeviceIDA(LPCSTR pszDevice)
 {
   WARN(("WINMM:mciGetDeviceIDA - untested\n"));
   return MCI_GetDriverFromString(pszDevice);
 }
 
-ODINFUNCTION1(MCIDEVICEID, mciGetDeviceIDW,
-              LPCWSTR, pszDevice)
+MCIDEVICEID WINAPI mciGetDeviceIDW(LPCWSTR pszDevice)
 {
   dprintf(("WINMM:mciGetDeviceIDW - stub\n"));
   return 0;
 }
 
-ODINFUNCTION2(MCIDEVICEID, mciGetDeviceIDFromElementIDA,
-              DWORD, dwElementID,
-              LPCSTR, lpstrType)
+MCIDEVICEID WINAPI mciGetDeviceIDFromElementIDA(DWORD dwElementID, LPCSTR lpstrType)
 {
   dprintf(("WINMM:mciGetDeviceIDFromElementIDA - stub\n"));
   return 0;
 }
 
-ODINFUNCTION2(MCIDEVICEID, mciGetDeviceIDFromElementIDW,
-              DWORD, dwElementID,
-              LPCWSTR, lpstrType)
+MCIDEVICEID WINAPI mciGetDeviceIDFromElementIDW(DWORD dwElementID, LPCWSTR lpstrType)
 {
   dprintf(("WINMM:mciGetDeviceIDFromElementIDW - stub\n"));
   return 0;
@@ -140,8 +124,7 @@ ODINFUNCTION2(MCIDEVICEID, mciGetDeviceIDFromElementIDW,
  *
  * @author   : Chris Wohlgemuth [Sun, 2000/11/19]
  *****************************************************************************/
-ODINFUNCTION1(DWORD, mciGetDriverData,
-              UINT, uDeviceID)
+DWORD WINAPI mciGetDriverData(UINT uDeviceID)
 {
   LPWINE_MCIDRIVER	wmd;
   
@@ -167,10 +150,7 @@ ODINFUNCTION1(DWORD, mciGetDriverData,
  *
  * @author   : Wine
  *****************************************************************************/
-ODINFUNCTION3(BOOL, mciGetErrorStringA,
-              MCIERROR, mcierr,
-              LPSTR, pszText,
-              UINT, cchText)
+BOOL WINAPI mciGetErrorStringA(MCIERROR mcierr, LPSTR pszText, UINT cchText)
 {
   dprintf(("WINMM:mciGetErrorStringA(%d)\n", mcierr ));
   char * theMsg = getWinmmMsg( mcierr );
@@ -197,10 +177,7 @@ ODINFUNCTION3(BOOL, mciGetErrorStringA,
  *
  * @author   : Wine
  *****************************************************************************/
-ODINFUNCTION3(BOOL, mciGetErrorStringW,
-              MCIERROR, mcierr,
-              LPWSTR, pszText,
-              UINT, cchText)
+BOOL WINAPI mciGetErrorStringW(MCIERROR mcierr, LPWSTR pszText, UINT cchText)
 {
   dprintf(("WINMM:mciGetErrorStringW(%d)\n", mcierr ));
   char * theMsg = getWinmmMsg( mcierr );
@@ -227,9 +204,7 @@ ODINFUNCTION3(BOOL, mciGetErrorStringW,
  *
  * @author    : Wine
  *****************************************************************************/
-ODINFUNCTION2(YIELDPROC, mciGetYieldProc,
-              MCIDEVICEID, mciId,
-              LPDWORD, pdwYieldData)
+YIELDPROC WINAPI mciGetYieldProc(MCIDEVICEID  mciId, LPDWORD pdwYieldData)
 {
   LPWINE_MCIDRIVER	wmd;
   
@@ -250,21 +225,16 @@ ODINFUNCTION2(YIELDPROC, mciGetYieldProc,
   return wmd->lpfnYieldProc;
 }
 
-ODINFUNCTION3(UINT, mciLoadCommandResource,
-              HINSTANCE, hInstance,
-              LPCWSTR, lpResName,
-              UINT, uType)
+UINT WINAPI mciLoadCommandResource(HINSTANCE hInstance, LPCWSTR lpResName,
+                                   UINT uType)
 {
   dprintf(("WINMM:mciLoadCOmmandResource - stub\n"));
   return 0;
 }
 
 
-ODINFUNCTION4(MCIERROR, mciSendCommandA,
-              MCIDEVICEID, mciId,
-              UINT, uMsg,
-              DWORD, dwParam1,
-              DWORD, dwParam2)
+MCIERROR WINAPI mciSendCommandA(MCIDEVICEID mciId, UINT uMsg, DWORD dwParam1,
+                                DWORD dwParam2)
 {
   DWORD dwRet;
   //  dprintf(("WINMM:mciSendCommandA - entering %X %X %X %X\n", mciId, uMsg, dwParam1, dwParam2));
@@ -273,21 +243,15 @@ ODINFUNCTION4(MCIERROR, mciSendCommandA,
 }
 
 
-ODINFUNCTION4(MCIERROR, mciSendCommandW,
-              MCIDEVICEID, mciId,
-              UINT, uMsg,
-              DWORD, dwParam1,
-              DWORD, dwParam2)
+MCIERROR WINAPI mciSendCommandW(MCIDEVICEID mciId, UINT uMsg, DWORD dwParam1,
+                                DWORD dwParam2)
 {
   dprintf(("WINMM:mciSendCommandW - stub %X %X %X %X\n", mciId, uMsg, dwParam1, dwParam2));
   return(MMSYSERR_NODRIVER);
 }
 
-ODINFUNCTION4(MCIERROR, mciSendStringA,
-              LPCSTR, lpstrCommand,
-              LPSTR, lpstrReturnString,
-              UINT, uReturnLength,
-              HWND, hwndCallback)
+MCIERROR WINAPI mciSendStringA(LPCSTR lpstrCommand, LPSTR lpstrReturnString,
+                               UINT uReturnLength, HWND hwndCallback)
 {
   dprintf(("WINMM:mciSendStringA - stub\n"));
   if(lpstrCommand)
@@ -295,19 +259,14 @@ ODINFUNCTION4(MCIERROR, mciSendStringA,
   return(MMSYSERR_NODRIVER);
 }
 
-ODINFUNCTION4(MCIERROR, mciSendStringW,
-              LPCWSTR, lpstrCommand,
-              LPWSTR, lpstrReturnString,
-              UINT, uReturnLength,
-              HWND, hwndCallback)
+MCIERROR WINAPI mciSendStringW(LPCWSTR lpstrCommand, LPWSTR lpstrReturnString,
+                               UINT uReturnLength, HWND hwndCallback)
 {
   dprintf(("WINMM:mciSendStringW - stub\n"));
   return(MMSYSERR_NODRIVER);
 }
 
-ODINFUNCTION2(BOOL, mciSetDriverData,
-              UINT, uDeviceID,
-              DWORD, dwData)
+BOOL WINAPI mciSetDriverData(UINT uDeviceID, DWORD dwData)
 {
   LPWINE_MCIDRIVER	wmd;
   
@@ -323,10 +282,7 @@ ODINFUNCTION2(BOOL, mciSetDriverData,
 }
 
 
-ODINFUNCTION3(BOOL, mciSetYieldProc,
-              MCIDEVICEID, mciId,
-              YIELDPROC, fpYieldProc,
-              DWORD, dwYieldData)
+BOOL WINAPI mciSetYieldProc(MCIDEVICEID mciId, YIELDPROC fpYieldProc, DWORD dwYieldData)
 {
   LPWINE_MCIDRIVER	wmd;
   

@@ -1,4 +1,4 @@
-/* $Id: midistrm.cpp,v 1.5 2000-02-17 14:09:31 sandervl Exp $ */
+/* $Id: midistrm.cpp,v 1.6 2002-05-22 15:50:25 sandervl Exp $ */
 
 /*
  * RTMIDI code
@@ -28,12 +28,8 @@
 #include "dbglocal.h"
 
 
-ODINDEBUGCHANNEL(WINMM-MIDISTRM)
-
-
 /******************************************************************************/
-ODINFUNCTION1(MMRESULT, midiStreamClose,
-              HMIDISTRM, hms)
+MMRESULT WINAPI midiStreamClose(HMIDISTRM hms)
 {
   dprintf(("WINMM:midiStreamClose - stub\n" ));
   MMRESULT rc;
@@ -42,13 +38,9 @@ ODINFUNCTION1(MMRESULT, midiStreamClose,
 }
 
 /******************************************************************************/
-ODINFUNCTION6(MMRESULT, midiStreamOpen,
-              LPHMIDISTRM, phms,
-              LPUINT, puDeviceID,
-              DWORD, cMidi,
-              DWORD, dwCallback,
-              DWORD, dwInstance,
-              DWORD, fdwOpen)
+MMRESULT WINAPI midiStreamOpen(LPHMIDISTRM phms, LPUINT puDeviceID,
+                               DWORD cMidi, DWORD dwCallback,
+                               DWORD dwInstance, DWORD fdwOpen)
 {
   dprintf(("WINMM:midiStreamOpen - stub\n" ));
   MMRESULT rc;
@@ -57,10 +49,8 @@ ODINFUNCTION6(MMRESULT, midiStreamOpen,
 }
 
 /******************************************************************************/
-ODINFUNCTION3(MMRESULT, midiStreamProperty,
-              HMIDISTRM, hms,
-              LPBYTE, lppropdata,
-              DWORD, dwProperty)
+MMRESULT WINAPI midiStreamProperty(HMIDISTRM hms, LPBYTE lppropdata,
+                                   DWORD dwProperty)
 {
   dprintf(("WINMM:midiStreamProperty - stub\n" ));
   MMRESULT rc;
@@ -69,10 +59,8 @@ ODINFUNCTION3(MMRESULT, midiStreamProperty,
 }
 
 /******************************************************************************/
-ODINFUNCTION3(MMRESULT, midiStreamPosition,
-              HMIDISTRM, hms,
-              LPMMTIME, lpmmt,
-              UINT, cbmmt)
+MMRESULT WINAPI midiStreamPosition(HMIDISTRM hms, LPMMTIME lpmmt,
+                                   UINT cbmmt)
 {
   dprintf(("WINMM:midiStreamPosition - stub\n" ));
   MMRESULT rc;
@@ -81,10 +69,7 @@ ODINFUNCTION3(MMRESULT, midiStreamPosition,
 }
 
 /******************************************************************************/
-ODINFUNCTION3(MMRESULT, midiStreamOut,
-              HMIDISTRM, hms,
-              LPMIDIHDR, pmh,
-              UINT, cbmh)
+MMRESULT WINAPI midiStreamOut(HMIDISTRM hms, LPMIDIHDR pmh, UINT cbmh)
 {
   dprintf(("WINMM:midiStreamOut - stub\n" ));
   MMRESULT rc;
@@ -93,8 +78,7 @@ ODINFUNCTION3(MMRESULT, midiStreamOut,
 }
 
 /******************************************************************************/
-ODINFUNCTION1(MMRESULT, midiStreamPause,
-              HMIDISTRM, hms)
+MMRESULT WINAPI midiStreamPause(HMIDISTRM hms)
 {
   dprintf(("WINMM:midiStreamPause - stub\n" ));
   MMRESULT rc;
@@ -103,8 +87,7 @@ ODINFUNCTION1(MMRESULT, midiStreamPause,
 }
 
 /******************************************************************************/
-ODINFUNCTION1(MMRESULT, midiStreamRestart,
-              HMIDISTRM, hms)
+MMRESULT WINAPI midiStreamRestart(HMIDISTRM hms)
 {
   dprintf(("WINMM:midiStreamRestart - stub\n" ));
   MMRESULT rc;
@@ -113,8 +96,7 @@ ODINFUNCTION1(MMRESULT, midiStreamRestart,
 }
 
 /******************************************************************************/
-ODINFUNCTION1(MMRESULT, midiStreamStop,
-              HMIDISTRM, hms)
+MMRESULT WINAPI midiStreamStop(HMIDISTRM hms)
 {
   dprintf(("WINMM:midiStreamStop - stub\n" ));
   MMRESULT rc;
