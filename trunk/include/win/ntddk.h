@@ -1,4 +1,4 @@
-/* $Id: ntddk.h,v 1.4 1999-12-19 12:26:24 sandervl Exp $ */
+/* $Id: ntddk.h,v 1.5 2000-02-07 14:29:22 sandervl Exp $ */
 /*
 	this file defines interfaces mainly exposed to device drivers and
 	native nt dll's
@@ -627,9 +627,9 @@ DWORD* WINAPI GetSidSubAuthority(PSID,DWORD);
 BYTE * WINAPI GetSidSubAuthorityCount(PSID);
 DWORD  WINAPI GetLengthSid(PSID);
 BOOL WINAPI CopySid(DWORD,PSID,PSID);
-BOOL WINAPI LookupAccountSidA(LPCSTR,PSID,LPCSTR,LPDWORD,LPCSTR,LPDWORD,
+BOOL WINAPI LookupAccountSidA(LPCSTR,PSID,LPSTR,LPDWORD,LPSTR,LPDWORD,
                                   PSID_NAME_USE);
-BOOL WINAPI LookupAccountSidW(LPCWSTR,PSID,LPCWSTR,LPDWORD,LPCWSTR,LPDWORD,
+BOOL WINAPI LookupAccountSidW(LPCWSTR,PSID,LPWSTR,LPDWORD,LPWSTR,LPDWORD,
                                   PSID_NAME_USE);
 PSID_IDENTIFIER_AUTHORITY WINAPI GetSidIdentifierAuthority(PSID);
 
