@@ -1,4 +1,4 @@
-/* $Id: dibitmap.cpp,v 1.7 2000-03-25 12:19:07 sandervl Exp $ */
+/* $Id: dibitmap.cpp,v 1.8 2000-08-18 18:14:56 sandervl Exp $ */
 
 /*
  * GDI32 dib & bitmap code
@@ -91,7 +91,7 @@ HBITMAP WIN32API CreateDIBSection( HDC hdc, BITMAPINFO *pbmi, UINT iUsage,
  int     iHeight, iWidth;
  BOOL    fCreateDC = FALSE;
 
-  dprintf(("GDI32: CreateDIBSection %x %x %x %x %d", hdc, iUsage, ppvBits, hSection, dwOffset));
+  dprintf(("GDI32: CreateDIBSection %x %x %x %x %x %d", hdc, pbmi, iUsage, ppvBits, hSection, dwOffset));
 
   //SvL: 13-9-98: StarCraft uses bitmap with negative height
   iWidth = pbmi->bmiHeader.biWidth;
@@ -127,7 +127,7 @@ HBITMAP WIN32API CreateDIBSection( HDC hdc, BITMAPINFO *pbmi, UINT iUsage,
       PalSize = dsect->GetBitCount();
       if(PalSize <= 8)
       {
-       ULONG Pal[256];
+       ULONG Pal[256], nrcolors;
        LOGPALETTE tmpPal = { 0x300,1,{0,0,0,0}};
        HPALETTE hpalCur, hpalTmp;
 
@@ -136,8 +136,8 @@ HBITMAP WIN32API CreateDIBSection( HDC hdc, BITMAPINFO *pbmi, UINT iUsage,
         hpalCur = SelectPalette(hdc, hpalTmp, FALSE);
 
         // and use it to set the DIBColorTable
-        GetPaletteEntries( hpalCur, 0, 1<<PalSize, (LPPALETTEENTRY)&Pal);
-        dsect->SetDIBColorTable(0, 1<< PalSize, (RGBQUAD*)&Pal);
+        nrcolors = GetPaletteEntries( hpalCur, 0, 1<<PalSize, (LPPALETTEENTRY)&Pal);
+        dsect->SetDIBColorTable(0, nrcolors, (RGBQUAD*)&Pal);
 
         // Restore the DC Palette
         SelectPalette(hdc,hpalCur,FALSE);

@@ -1,9 +1,9 @@
-/* $Id: dibsect.cpp,v 1.36 2000-06-26 10:27:45 sandervl Exp $ */
+/* $Id: dibsect.cpp,v 1.37 2000-08-18 18:14:57 sandervl Exp $ */
 
 /*
  * GDI32 DIB sections
  *
- * Copyright 1998 Sander van Leeuwen (sandervl@xs4all.nl)
+ * Copyright 1998-2000 Sander van Leeuwen (sandervl@xs4all.nl)
  * Copyright 1998 Patrick Haller
  *
  * Project Odin Software License can be found in LICENSE.TXT
@@ -130,7 +130,7 @@ DIBSection::DIBSection(BITMAPINFOHEADER_W *pbmi, char *pColors, DWORD iUsage, DW
    dibinfo.dsBm.bmBits      = bmpBits;
 
    dibinfo.dshSection       = handle;
-   dibinfo.dsOffset         = 0; // TODO: put the correct value here (if createdibsection with file handle)
+   dibinfo.dsOffset         = dwOffset;
 
    if(iUsage == DIB_PAL_COLORS || pbmi->biBitCount <= 8)
    {
@@ -554,11 +554,6 @@ void DIBSection::sync(HDC hdc, DWORD nYdest, DWORD nDestHeight)
 
   dprintf(("Sync destination dibsection %x (%x)", handle, hdc));
 
-  //todo: rgb 565 to 555 conversion if bpp == 16
-  if(GetBitCount() == 16) {
- 	dprintf(("WARNING: need to convert RGB 565 to RGB 555!!"));
-  }
-
   BITMAPINFO2 *tmphdr = (BITMAPINFO2 *)malloc(os2bmphdrsize);
   memcpy(tmphdr, pOS2bmp, os2bmphdrsize);
 
@@ -580,6 +575,16 @@ void DIBSection::sync(HDC hdc, DWORD nYdest, DWORD nDestHeight)
   	destBuf = GetDIBObject() + nYdest*dibinfo.dsBm.bmWidthBytes;
         rc = GpiQueryBitmapBits(hdc, nYdest, nDestHeight, destBuf,
                           tmphdr);
+  }
+  if(dibinfo.dsBitfields[1] == 0x3E0) {//RGB 555?
+ 	dprintf(("DIBSection::sync: convert RGB 565 to RGB 555"));
+
+  	destBuf = GetDIBObject() + nYdest*dibinfo.dsBm.bmWidthBytes;
+
+	if(CPUFeatures & CPUID_MMX) {
+		RGB565to555MMX((WORD *)destBuf, (WORD *)destBuf, (nDestHeight*dibinfo.dsBm.bmWidthBytes)/sizeof(WORD));
+	}
+	else   	RGB565to555((WORD *)destBuf, (WORD *)destBuf, (nDestHeight*dibinfo.dsBm.bmWidthBytes)/sizeof(WORD));
   }
   free(tmphdr);
   if(rc != nDestHeight) {

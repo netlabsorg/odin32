@@ -1,4 +1,4 @@
-/* $Id: dbglocal.h,v 1.3 2000-06-14 13:17:49 sandervl Exp $ */
+/* $Id: dbglocal.h,v 1.4 2000-08-18 18:14:56 sandervl Exp $ */
 
 /*
  * debug logging functions for OS/2
@@ -17,6 +17,7 @@
 void ParseLogStatus();
 
 #define DBG_ENVNAME        "dbg_gdi32"
+#define DBG_ENVNAME_LVL2   "dbg_user32_lvl2"
 
 #define DBG_gdi32           0
 #define DBG_opengl          1
@@ -39,12 +40,19 @@ void ParseLogStatus();
 #define DBG_MAXFILES        18
 
 extern USHORT DbgEnabled[DBG_MAXFILES];
+extern USHORT DbgEnabledLvl2[DBG_MAXFILES];
 
 #ifdef dprintf
 #undef dprintf
 #endif
 
 #define dprintf(a)      if(DbgEnabled[DBG_LOCALLOG] == 1) WriteLog a
+
+#ifdef dprintf2
+#undef dprintf2
+#endif
+
+#define dprintf2(a)     if(DbgEnabledLvl2[DBG_LOCALLOG] == 1) WriteLog a
 
 #else
 

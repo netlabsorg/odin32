@@ -1,4 +1,4 @@
-/* $Id: gdi32.cpp,v 1.53 2000-08-02 16:26:43 bird Exp $ */
+/* $Id: gdi32.cpp,v 1.54 2000-08-18 18:14:57 sandervl Exp $ */
 
 /*
  * GDI32 apis
@@ -101,10 +101,8 @@ HBRUSH WIN32API CreatePatternBrush(HBITMAP arg1)
 }
 //******************************************************************************
 //******************************************************************************
-HPEN WIN32API CreatePen( int fnPenStyle, int nWidth, COLORREF crColor)
+ODINFUNCTION3(HPEN, CreatePen, int, fnPenStyle, int, nWidth, COLORREF, crColor)
 {
-    dprintf(("GDI32: CreatePen\n"));
-
     //CB: todo: PS_DOT is different in Win32 (. . . . and not - - - -)
     //    Open32 looks like LINETYPE_SHORTDASH instead of LINETYPE_DOT!!!
     //    -> difficult to fix without performance decrease!
@@ -113,9 +111,9 @@ HPEN WIN32API CreatePen( int fnPenStyle, int nWidth, COLORREF crColor)
 }
 //******************************************************************************
 //******************************************************************************
-HPEN WIN32API CreatePenIndirect( const LOGPEN * lplgpn)
+HPEN WIN32API CreatePenIndirect(const LOGPEN * lplgpn)
 {
-    dprintf(("GDI32: CreatePenIndirect\n"));
+    dprintf(("GDI32: CreatePenIndirect %x", lplgpn));
     return O32_CreatePenIndirect(lplgpn);
 }
 //******************************************************************************
@@ -448,10 +446,9 @@ HDC WIN32API CreateICW( LPCWSTR arg1, LPCWSTR arg2, LPCWSTR arg3, const DEVMODEW
 }
 //******************************************************************************
 //******************************************************************************
-HBRUSH WIN32API CreateSolidBrush( COLORREF arg1)
+ODINFUNCTION1(HBRUSH, CreateSolidBrush, COLORREF, color)
 {
-    dprintf(("GDI32: CreateSolidBrush\n"));
-    return O32_CreateSolidBrush(arg1);
+    return O32_CreateSolidBrush(color);
 }
 //******************************************************************************
 //******************************************************************************
@@ -490,10 +487,9 @@ BOOL WIN32API EndPath( HDC arg1)
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API Rectangle( HDC arg1, int arg2, int arg3, int arg4, int  arg5)
+ODINFUNCTION5(BOOL, Rectangle, HDC, hdc, int, left, int, top, int, right, int, bottom)
 {
-    dprintf(("GDI32: Rectangle\n"));
-    return O32_Rectangle(arg1, arg2, arg3, arg4, arg5);
+    return O32_Rectangle(hdc, left, top, right, bottom);
 }
 //******************************************************************************
 //******************************************************************************
@@ -591,10 +587,17 @@ int WIN32API EnumObjects( HDC arg1, int arg2, GOBJENUMPROC arg3, LPARAM  arg4)
 }
 //******************************************************************************
 //******************************************************************************
-int WIN32API Escape( HDC arg1, int arg2, int arg3, LPCSTR arg4, PVOID  arg5)
+int WIN32API Escape( HDC hdc, int nEscape, int cbInput, LPCSTR lpvInData, PVOID lpvOutData)
 {
-    dprintf(("GDI32: Escape"));
-    return O32_Escape(arg1, arg2, arg3, arg4, arg5);
+ int rc;
+
+    rc = O32_Escape(hdc, nEscape, cbInput, lpvInData, lpvOutData);
+    if(rc == 0) {
+    	 dprintf(("GDI32: Escape %x %d %d %x %x returned %d (WARNING: might not be implemented!!) ", hdc, nEscape, cbInput, lpvInData, lpvOutData, rc));
+    } 
+    else dprintf(("GDI32: Escape %x %d %d %x %x returned %d ", hdc, nEscape, cbInput, lpvInData, lpvOutData, rc));
+
+    return rc;
 }
 //******************************************************************************
 //******************************************************************************
