@@ -133,6 +133,10 @@ ULONG DLLENTRYPOINT_CCONV DLLENTRYPOINT_NAME(ULONG hModule, ULONG ulFlag)
          if(rc == 0) 
                 return 0UL;
 
+         SetCustomBuildName("VERSION.DLL");        
+         if(RegisterLxDll(hModule, NULL, (PVOID)NULL) == 0)
+            return 0UL;
+
          SetCustomBuildName("WSOCK32.DLL");
          rc = inittermWsock32(hModule, ulFlag);
          if(rc == 0) 

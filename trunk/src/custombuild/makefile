@@ -1,11 +1,11 @@
-# $Id: makefile,v 1.1 2001-07-20 15:41:43 sandervl Exp $
+# $Id: makefile,v 1.2 2001-07-30 08:18:18 sandervl Exp $
 
 #
 # Odin32 API
 #
 #       gdi32.dll makefile
 #
-
+NOINTERNALFUNCTIONS=1
 
 #
 # Compiler, tools, and interference rules.
@@ -19,6 +19,7 @@ CXXFLAGS    = $(CXXFLAGS_ODINCRT)
 LD2FLAGS    = $(LD2FLAGS_ODINCRT)
 CDEFINES    = $(CDEFINES_ODINCRT)
 IMPLIBFLAGS = $(IMPLIBFLAGS) /NOIgnoreCase
+
 
 #
 # Object files. Prefix with OBJDIR and one space before the '\'.
@@ -68,4 +69,5 @@ TARGET = xxodin32
 # Includes the common rules.
 #
 !include $(ODIN32_POST_INC)
+
 

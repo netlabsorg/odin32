@@ -1,4 +1,4 @@
-# $Id: odin32.post.wat.mk,v 1.12 2001-03-19 18:56:56 mike Exp $
+# $Id: odin32.post.wat.mk,v 1.13 2001-07-30 08:18:01 sandervl Exp $
 
 #
 # Odin32 API
@@ -371,8 +371,13 @@ $(OBJDIR)\$(TARGET).lib: $(DEFFILE)
 #
 !ifndef LIBTARGET
 !ifndef NOTEXPDEF
+!ifdef NOINTERNALFUNCTIONS
+$(OBJDIR)\$(ORGTARGET)exp.def: $(DEFFILE)
+    $(IMPDEF) -I:20000 $[@ $@
+!else
 $(OBJDIR)\$(ORGTARGET)exp.def: $(DEFFILE)
     $(IMPDEF) $[@ $@
+!endif
 !endif
 !endif
 
