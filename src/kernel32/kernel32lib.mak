@@ -1,4 +1,4 @@
-# $Id: kernel32lib.mak,v 1.2 2001-07-29 19:00:31 sandervl Exp $
+# $Id: kernel32lib.mak,v 1.3 2001-08-02 14:50:13 sandervl Exp $
 
 #
 # Odin32 API
@@ -124,9 +124,7 @@ $(OBJDIR)\exceptstackdump.obj \
 $(OBJDIR)\module.obj \
 $(OBJDIR)\hmmailslot.obj \
 $(OBJDIR)\mailslot.obj \
-$(OBJDIR)\kernelrsrc.obj \
-$(ODIN32_LIB)\WIN32K.LIB \
-$(ODIN32_LIB)\UNICODE.LIB 
+$(OBJDIR)\kernelrsrc.obj 
 
 #
 # Target name - name of the library without extention and path.

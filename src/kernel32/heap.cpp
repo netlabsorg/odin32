@@ -1,4 +1,4 @@
-/* $Id: heap.cpp,v 1.33 2001-07-28 18:03:37 sandervl Exp $ */
+/* $Id: heap.cpp,v 1.34 2001-08-02 14:50:13 sandervl Exp $ */
 
 /*
  * Win32 heap API functions for OS/2
@@ -588,7 +588,7 @@ HGLOBAL WINAPI GlobalFree(
    if (hmem >= (HGLOBAL)ulMaxAddr || hmem < (HGLOBAL)0x10000)
    {
     	dprintf(("GlobalFree ERROR BAD HEAP POINTER:%X\n", hmem));
-        DebugInt3();
+//        DebugInt3();
     	return 0;
    }
 
