@@ -1,0 +1,3 @@
+;$Id: mini.def,v 1.1.2.1 2001-08-14 03:31:13 bird Exp $
+NAME '' WINDOWCOMPAT
+STUB NONE
