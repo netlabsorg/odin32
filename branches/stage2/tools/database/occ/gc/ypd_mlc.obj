@@ -1,0 +1,637 @@
+IBM(R) Library Manager for OS/2(R), Version 01.00.03 %1
+(C) Copyright IBM Corporation 1991, 1995.
+ - Licensed Material - Program-Property of IBM - All Rights Reserved.
+
+Library name : G:\odin32\tree\tools\database\occ\gc\.\bin\Debug\gc.lib
+
+Listing detail level : 1
+
+
+00000:alloc (OFFSET:0x000021de, SIZE:0x000042a0):
+ - Public Definitions:
+     GC_fail_count
+     GC_max_retries
+     GC_greatest_plausible_heap_addr
+     GC_least_plausible_heap_addr
+     GC_n_heap_sects
+     GC_deficit
+     GC_n_attempts
+     GC_free_space_divisor
+     GC_dont_expand
+     GC_version
+     GC_copyright
+     GC_full_freq
+     GC_incremental
+     GC_gc_no
+     GC_non_gc_bytes
+     GC_allocobj
+     GC_collect_or_expand
+     GC_expand_hp
+     GC_expand_hp_inner
+     GC_set_max_heap_size
+     GC_min
+     GC_max
+     GC_print_heap_sects
+     GC_add_to_heap
+     GC_gcollect
+     GC_try_to_collect
+     GC_collect_a_little
+     GC_collect_a_little_inner
+     GC_finish_collection
+     GC_stopped_mark
+     GC_try_to_collect_inner
+     GC_maybe_gc
+     GC_notify_full_gc
+     GC_should_collect
+     GC_clear_a_few_frames
+     GC_adj_words_allocd
+     GC_timeout_stop_func
+     GC_never_stop_func
+
+ - External Definitions:
+     clock
+     GC_stackbottom
+     GC_root_size
+     GC_arrays
+     GC_start_call_back
+     GC_promote_black_lists
+     GC_reclaim_all
+     GC_clear_marks
+     GC_collection_in_progress
+     GC_invalidate_mark_state
+     GC_unpromote_black_lists
+     GC_mark_some
+     GC_noop
+     GC_initiate_gc
+     GC_debugging_started
+     GC_check_heap
+     GC_finalize
+     GC_clean_changing_list
+     GC_n_kinds
+     GC_obj_kinds
+     GC_start_reclaim
+     GC_invoke_finalizers
+     GC_is_initialized
+     GC_init_inner
+     GC_abort
+     GC_install_header
+     GC_freehblk
+     GC_printf
+     GC_is_black_listed
+     GC_page_size
+     os2_alloc
+     GC_dont_gc
+     GC_black_list_spacing
+     GC_current_warn_proc
+     GC_continue_reclaim
+     GC_new_hblk
+
+
+00001:reclaim (OFFSET:0x0000648a, SIZE:0x000037c9):
+ - Public Definitions:
+     GC_mem_found
+     GC_reclaim_all
+     GC_continue_reclaim
+     GC_start_reclaim
+     GC_print_block_list
+     GC_print_block_descr
+     GC_n_set_marks
+     GC_reclaim_block
+     GC_reclaim_small_nonempty_block
+     GC_reclaim1
+     GC_reclaim_uninit4
+     GC_reclaim_uninit2
+     GC_reclaim_uninit
+     GC_reclaim_clear4
+     GC_reclaim_clear2
+     GC_reclaim_clear
+     GC_block_empty
+
+ - External Definitions:
+     GC_arrays
+     GC_gc_no
+     GC_obj_kinds
+     GC_write_hint
+     GC_set_hdr_marks
+     GC_freehblk
+     GC_printf
+     GC_apply_to_all_blocks
+     GC_n_kinds
+
+
+00002:allchblk (OFFSET:0x00009c61, SIZE:0x00002880):
+ - Public Definitions:
+     GC_freehblk_ptr
+     GC_max_hblk_size
+     GC_savhbp
+     GC_hblkfreelist
+     GC_freehblk
+     GC_allochblk
+     GC_print_hblkfreelist
+
+ - External Definitions:
+     GC_arrays
+     GC_printf
+     GC_is_black_listed
+     GC_add_map_entry
+     GC_obj_kinds
+     GC_clear_hdr_marks
+     GC_gc_no
+     GC_install_header
+     GC_black_list_spacing
+     GC_current_warn_proc
+     GC_debugging_started
+     memset
+     GC_invalidate_map
+     GC_write_hint
+     GC_install_counts
+     GC_remove_counts
+     GC_fail_count
+     GC_invalid_map
+     GC_remove_header
+
+
+00003:misc (OFFSET:0x0000c4f0, SIZE:0x00003a11):
+ - Public Definitions:
+     GC_current_warn_proc
+     GC_stderr
+     GC_stdout
+     GC_is_initialized
+     GC_stack_last_cleared
+     GC_oom_fn
+     GC_quiet
+     GC_dont_gc
+     GC_stackbottom
+     GC_start_call_back
+     GC_check_heap
+     GC_debugging_started
+     GC_dump
+     GC_set_warn_proc
+     GC_default_warn_proc
+     GC_printf
+     GC_set_files
+     GC_enable_incremental
+     GC_err_printf
+     GC_err_puts
+     GC_abort
+     GC_init_inner
+     GC_init
+     GC_get_bytes_since_gc
+     GC_get_heap_size
+     GC_size
+     GC_base
+     GC_clear_stack
+     GC_clear_stack_inner
+     GC_extend_size_map
+     GC_init_size_map
+     GC_default_oom_fn
+
+ - External Definitions:
+     memset
+     GC_noop1
+     GC_approx_sp
+     GC_gc_no
+     GC_invalid_map
+     GC_setpagesize
+     GC_obj_kinds
+     GC_exclude_static_roots
+     GC_get_stack_base
+     GC_register_data_segments
+     GC_init_headers
+     GC_bl_init
+     GC_mark_init
+     GC_expand_hp_inner
+     exit
+     GC_add_map_entry
+     GC_register_displacement_inner
+     GC_never_stop_func
+     GC_try_to_collect_inner
+     GC_stubborn_init
+     GC_incremental
+     GC_dirty_init
+     GC_read_dirty
+     stdout
+     stderr
+     _sprintfieee
+     strlen
+     fwrite
+     fflush
+     abort
+     GC_print_static_roots
+     GC_print_heap_sects
+     GC_print_hblkfreelist
+     GC_print_block_list
+
+
+00004:mach_dep (OFFSET:0x0000ff0c, SIZE:0x000004d1):
+ - Public Definitions:
+     GC_generic_push_regs
+
+ - External Definitions:
+     setjmp
+     GC_push_current_stack
+
+
+00005:os_dep (OFFSET:0x000103ec, SIZE:0x000028ee):
+ - Public Definitions:
+     GC_dirty_maintained
+     GC_push_other_roots
+     GC_write_hint
+     GC_is_fresh
+     GC_page_was_ever_dirty
+     GC_page_was_dirty
+     GC_read_dirty
+     GC_dirty_init
+     os2_alloc
+     GC_register_data_segments
+     GC_get_stack_base
+     GC_setpagesize
+     GC_enable_signals
+     GC_disable_signals
+
+ - External Definitions:
+     DosEnterMustComplete
+     GC_abort
+     DosExitMustComplete
+     DosGetInfoBlocks
+     GC_err_puts
+     DosQueryModuleName
+     fopen
+     fread
+     fseek
+     exit
+     GC_add_roots_inner
+     DosAllocMem
+
+
+00006:mark_rts (OFFSET:0x00012ce7, SIZE:0x00002530):
+ - Public Definitions:
+     GC_excl_table_entries
+     GC_root_size
+     GC_push_roots
+     GC_push_current_stack
+     GC_push_conditional_with_exclusions
+     GC_exclude_static_roots
+     GC_next_exclusion
+     GC_approx_sp
+     GC_remove_tmp_roots
+     GC_clear_roots
+     GC_add_roots_inner
+     GC_add_roots
+     GC_roots_present
+     GC_is_static_root
+     GC_print_static_roots
+
+ - External Definitions:
+     GC_arrays
+     GC_printf
+     GC_abort
+     GC_push_conditional
+     GC_stackbottom
+     GC_push_all_stack_partially_eager
+     GC_generic_push_regs
+     GC_push_other_roots
+
+
+00007:headers (OFFSET:0x00015226, SIZE:0x00001e53):
+ - Public Definitions:
+     GC_scratch_last_end_ptr
+     GC_scratch_end_ptr
+     GC_all_bottom_indices
+     GC_next_block
+     GC_apply_to_all_blocks
+     GC_remove_counts
+     GC_remove_header
+     GC_install_counts
+     GC_install_header
+     GC_init_headers
+     GC_scratch_alloc
+     GC_find_header
+
+ - External Definitions:
+     GC_arrays
+     GC_page_size
+     os2_alloc
+     memset
+     GC_invalid_map
+
+
+00008:mark (OFFSET:0x00017087, SIZE:0x00005b99):
+ - Public Definitions:
+     GC_objects_are_marked
+     GC_mark_stack_too_small
+     GC_mark_state
+     GC_mark_stack_size
+     GC_n_kinds
+     GC_obj_kinds
+     GC_n_mark_procs
+     GC_block_was_dirty
+     GC_push_marked
+     GC_push_marked4
+     GC_push_marked2
+     GC_push_marked1
+     GC_push_all_stack
+     GC_push_all_stack_partially_eager
+     GC_push_all_eager
+     GC_push_one_checked
+     GC_push_one
+     GC_push_conditional
+     GC_push_dirty
+     GC_push_all
+     GC_mark_init
+     GC_signal_mark_stack_overflow
+     GC_invalidate_mark_state
+     GC_find_start
+     GC_mark_stack_empty
+     GC_push_next_marked
+     GC_push_next_marked_uncollectable
+     GC_push_next_marked_dirty
+     GC_mark_from_mark_stack
+     GC_mark_some
+     GC_initiate_gc
+     GC_clear_marks
+     GC_is_marked
+     GC_clear_mark_bit
+     GC_set_mark_bit
+     GC_set_hdr_marks
+     GC_clear_hdr_marks
+     GC_collection_in_progress
+     GC_noop1
+     GC_noop
+
+ - External Definitions:
+     GC_arrays
+     memset
+     GC_apply_to_all_blocks
+     GC_dirty_maintained
+     GC_read_dirty
+     GC_read_changed
+     GC_abort
+     GC_push_roots
+     GC_add_to_black_list_stack
+     GC_greatest_plausible_heap_addr
+     GC_least_plausible_heap_addr
+     GC_scratch_alloc
+     GC_page_size
+     GC_add_to_heap
+     GC_err_puts
+     exit
+     GC_page_was_dirty
+     GC_base
+     GC_block_empty
+     GC_next_block
+     GC_page_was_changed
+
+
+00009:obj_map (OFFSET:0x0001cc2b, SIZE:0x00001113):
+ - Public Definitions:
+     GC_invalid_map
+     GC_add_map_entry
+     GC_register_displacement_inner
+     GC_register_displacement
+     GC_invalidate_map
+
+ - External Definitions:
+     GC_scratch_alloc
+     GC_err_puts
+     exit
+     GC_arrays
+
+
+00010:blacklst (OFFSET:0x0001dd4c, SIZE:0x00001cd8):
+ - Public Definitions:
+     GC_print_heap_obj
+     GC_black_list_spacing
+     GC_number_stack_black_listed
+     GC_is_black_listed
+     GC_add_to_black_list_stack
+     GC_unpromote_black_lists
+     GC_promote_black_lists
+     GC_copy_bl
+     GC_clear_bl
+     GC_bl_init
+     GC_print_source_ptr
+     GC_default_print_heap_obj_proc
+
+ - External Definitions:
+     GC_base
+     GC_size
+     GC_err_printf
+     GC_err_puts
+     GC_scratch_alloc
+     exit
+     memset
+     memcpy
+     GC_arrays
+     GC_n_heap_sects
+
+
+00011:finalize (OFFSET:0x0001fa33, SIZE:0x00003a61):
+ - Public Definitions:
+     GC_fo_entries
+     GC_finalize_now
+     GC_dl_entries
+     GC_finalization_failures
+     GC_call_with_alloc_lock
+     GC_invoke_finalizers
+     GC_finalize
+     GC_register_finalizer_no_order
+     GC_register_finalizer_ignore_self
+     GC_register_finalizer
+     GC_register_finalizer_inner
+     GC_null_finalize_mark_proc
+     GC_ignore_self_finalize_mark_proc
+     GC_normal_finalize_mark_proc
+     GC_unregister_disappearing_link
+     GC_general_register_disappearing_link
+     GC_register_disappearing_link
+     GC_grow_table
+
+ - External Definitions:
+     GC_generic_malloc_inner_ignore_off_page
+     GC_abort
+     GC_base
+     GC_malloc
+     GC_free
+     GC_arrays
+     GC_mark_stack_top
+     GC_mark_stack
+     GC_mark_stack_size
+     GC_signal_mark_stack_overflow
+     GC_least_plausible_heap_addr
+     GC_greatest_plausible_heap_addr
+     GC_push_one_checked
+     GC_size
+     GC_is_marked
+     GC_clear_mark_bit
+     GC_mark_stack_empty
+     GC_mark_from_mark_stack
+     GC_mark_state
+     GC_set_mark_bit
+     GC_mark_some
+     GC_current_warn_proc
+
+
+00012:new_hblk (OFFSET:0x000234a3, SIZE:0x00001a41):
+ - Public Definitions:
+     GC_new_hblk
+     GC_build_fl4
+     GC_build_fl2
+     GC_build_fl_clear4
+     GC_build_fl_clear3
+     GC_build_fl_clear2
+     GC_build_fl1
+
+ - External Definitions:
+     GC_obj_kinds
+     GC_allochblk
+     GC_arrays
+     GC_set_hdr_marks
+     memset
+
+
+00013:dbg_mlc (OFFSET:0x00024ef3, SIZE:0x000044a9):
+ - Public Definitions:
+     GC_debug_register_finalizer_ignore_self
+     GC_debug_register_finalizer_no_order
+     GC_debug_register_finalizer
+     GC_debug_invoke_finalizer
+     GC_make_closure
+     GC_check_heap_block
+     GC_debug_realloc
+     GC_debug_free
+     GC_debug_malloc_atomic_uncollectable
+     GC_debug_malloc_uncollectable
+     GC_debug_malloc_atomic
+     GC_debug_end_stubborn_change
+     GC_debug_change_stubborn
+     GC_debug_malloc_stubborn
+     GC_debug_malloc
+     GC_debug_register_displacement
+     GC_check_heap_proc
+     GC_start_debugging
+     GC_print_smashed_obj
+     GC_debug_print_heap_obj_proc
+     GC_print_obj
+     GC_check_annotated_obj
+     GC_store_debug_info
+     GC_has_debug_info
+
+ - External Definitions:
+     GC_size
+     GC_base
+     GC_err_printf
+     GC_err_puts
+     GC_default_print_heap_obj_proc
+     GC_check_heap
+     GC_print_heap_obj
+     GC_debugging_started
+     GC_register_displacement
+     GC_malloc
+     GC_malloc_stubborn
+     GC_abort
+     GC_arrays
+     GC_change_stubborn
+     GC_end_stubborn_change
+     GC_malloc_atomic
+     GC_malloc_uncollectable
+     GC_malloc_atomic_uncollectable
+     GC_free
+     GC_realloc
+     memcpy
+     GC_apply_to_all_blocks
+     GC_register_finalizer
+     GC_register_finalizer_no_order
+     GC_register_finalizer_ignore_self
+
+
+00014:malloc (OFFSET:0x000293aa, SIZE:0x0000254c):
+ - Public Definitions:
+     free
+     realloc
+     GC_free
+     GC_realloc
+     GC_generic_or_special_malloc
+     calloc
+     malloc
+     GC_malloc
+     GC_malloc_atomic
+     GC_generic_malloc
+     GC_generic_malloc_inner
+     GC_alloc_reclaim_list
+
+ - External Definitions:
+     GC_scratch_alloc
+     memset
+     GC_obj_kinds
+     GC_arrays
+     GC_is_initialized
+     GC_init_inner
+     GC_extend_size_map
+     GC_allocobj
+     GC_incremental
+     GC_dont_gc
+     GC_collect_a_little_inner
+     GC_allochblk
+     GC_collect_or_expand
+     GC_invoke_finalizers
+     GC_oom_fn
+     GC_clear_stack
+     GC_malloc_stubborn
+     GC_malloc_uncollectable
+     GC_malloc_atomic_uncollectable
+     GC_non_gc_bytes
+     GC_change_stubborn
+     memcpy
+     GC_freehblk
+
+
+00015:stubborn (OFFSET:0x0002b903, SIZE:0x00001e62):
+ - Public Definitions:
+     GC_clean_changing_list
+     GC_page_was_changed
+     GC_read_changed
+     GC_malloc_stubborn
+     GC_end_stubborn_change
+     GC_change_stubborn
+     GC_compact_changing_list
+     GC_stubborn_init
+
+ - External Definitions:
+     GC_generic_malloc_inner
+     memset
+     GC_err_puts
+     GC_abort
+     GC_arrays
+     GC_err_printf
+     GC_generic_malloc
+     GC_clear_stack
+     memcpy
+     GC_base
+     GC_is_marked
+
+
+00016:checksums (OFFSET:0x0002d774, SIZE:0x00000157):
+ - Public Definitions:
+
+ - External Definitions:
+
+
+00017:solaris_threads (OFFSET:0x0002d8db, SIZE:0x000001a3):
+ - Public Definitions:
+
+ - External Definitions:
+
+
+00018:irix_threads (OFFSET:0x0002da94, SIZE:0x0000019e):
+ - Public Definitions:
+
+ - External Definitions:
+
+
+00019:linux_threads (OFFSET:0x0002dc45, SIZE:0x0000015b):
+ - Public Definitions:
+
+ - External Definitions:
+
+
