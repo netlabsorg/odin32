@@ -1,4 +1,4 @@
-/* $Id: oslibwin.cpp,v 1.128 2002-09-17 10:24:02 sandervl Exp $ */
+/* $Id: oslibwin.cpp,v 1.129 2002-10-15 09:18:10 sandervl Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -102,7 +102,6 @@ HWND OSLibWinCreateWindow(HWND hwndParent,ULONG dwWinStyle, ULONG dwOSFrameStyle
                            id, (PVOID)&FCData, NULL);
     if(fOS2Look && *hwndFrame) {
         FCData.flCreateFlags = dwOSFrameStyle;
-//        FCData.flCreateFlags = FCF_TITLEBAR|FCF_SYSMENU|FCF_MINMAX;
         WinCreateFrameControls(*hwndFrame, &FCData, NULL);
     }
     hwndClient = WinCreateWindow (*hwndFrame, WIN32_STDCLASS,
@@ -155,7 +154,7 @@ BOOL OSLibWinConvertStyle(ULONG dwStyle, ULONG dwExStyle, ULONG *OSWinStyle, ULO
 //******************************************************************************
 //******************************************************************************
 BOOL OSLibWinPositionFrameControls(HWND hwndFrame, RECTLOS2 *pRect, DWORD dwStyle, 
-                                   DWORD dwExStyle, HICON hSysMenuIcon)
+                                   DWORD dwExStyle, HICON hSysMenuIcon, BOOL drawCloseButton)
 {
   SWP  swp[3];
   HWND hwndControl;
@@ -185,6 +184,7 @@ BOOL OSLibWinPositionFrameControls(HWND hwndFrame, RECTLOS2 *pRect, DWORD dwStyl
           pRect->xLeft += minmaxwidth/2;
           i++;
       }
+
   }
   else
   if((dwStyle & WS_SYSMENU_W) && !(dwExStyle & WS_EX_TOOLWINDOW_W) && hSysMenuIcon) {
@@ -208,8 +208,9 @@ BOOL OSLibWinPositionFrameControls(HWND hwndFrame, RECTLOS2 *pRect, DWORD dwStyl
           if((dwStyle & WS_MAXIMIZEBOX_W)) {
               swp[i].cx -= minmaxwidth/2;
           }
-          //there is no close button in warp 3
-          if((dwStyle & WS_SYSMENU_W) && !fVersionWarp3) {
+          //there is no close button in warp 3 and sometimes we do not 
+          //have close button as well
+          if((dwStyle & WS_SYSMENU_W) && !fVersionWarp3 && drawCloseButton) {
               swp[i].cx -= minmaxwidth/2;
           }
           swp[i].cy = minmaxheight;
@@ -237,8 +238,9 @@ BOOL OSLibWinPositionFrameControls(HWND hwndFrame, RECTLOS2 *pRect, DWORD dwStyl
           if((dwStyle & WS_MAXIMIZEBOX_W)) {
               swp[i].cx += minmaxwidth/2;
           }
-          //there is no close button in warp 3
-          if((dwStyle & WS_SYSMENU_W) && !fVersionWarp3) {
+          //there is no close button in warp 3 and sometimes we do not have
+          //close button as well
+          if((dwStyle & WS_SYSMENU_W) && !fVersionWarp3 && drawCloseButton) {
               swp[i].cx += minmaxwidth/2;
           }
           swp[i].cy = minmaxheight;
@@ -974,7 +976,8 @@ void OSLibWinShowTaskList(HWND hwndFrame)
   SWBLOCK swblk;
   // the first entry returned is always the window list itself
   if (WinQuerySwitchList(0, &swblk, sizeof(SWBLOCK)) > 0)
-    WinSetActiveWindow(HWND_DESKTOP, swblk.aswentry[0].swctl.hwnd);
+     WinSetActiveWindow(HWND_DESKTOP, swblk.aswentry[0].swctl.hwnd);
+//      WinShowWindow(swblk.aswentry[0].swctl.hwnd, TRUE);
 }
 //******************************************************************************
 //******************************************************************************
@@ -1081,8 +1084,16 @@ void OSLibSetWindowStyle(HWND hwndFrame, HWND hwndClient, ULONG dwStyle, ULONG d
 
             if (WinQueryActiveWindow(HWND_DESKTOP) == hwndFrame)
               WinSendMsg(WinWindowFromID(hwndFrame, FID_TITLEBAR), TBM_SETHILITE, (MPARAM)1, 0);
+
        }
    } // os2look
+}
+
+//******************************************************************************
+//******************************************************************************
+BOOL OSLibChangeCloseButtonState(HWND hwndFrame, BOOL State)
+{
+    return WinEnableMenuItem(WinWindowFromID(hwndFrame, FID_SYSMENU), SC_CLOSE, State);
 }
 //******************************************************************************
 //******************************************************************************
