@@ -1,4 +1,4 @@
-/* $Id: folders.c,v 1.5 2000-11-24 22:52:26 sandervl Exp $ */
+/* $Id: folders.c,v 1.6 2000-11-27 10:21:59 sandervl Exp $ */
 /*
  *  Copyright 1997  Marcus Meissner
  *  Copyright 1998  Juergen Schmied
@@ -155,7 +155,7 @@ static HRESULT WINAPI IExtractIconA_fnGetIconLocation(
     {
       lstrcpynA(szIconFile, "shell32.dll", cchMax);
 #ifdef __WIN32OS2__
-      *piIndex = -SHLICON_DESKTOP;
+      *piIndex = SHLICON_DESKTOP - 1;
 #else
       *piIndex = 34;
 #endif
@@ -193,7 +193,7 @@ static HRESULT WINAPI IExtractIconA_fnGetIconLocation(
     {
 #ifdef __WIN32OS2__
       lstrcpynA(szIconFile, "shell32.dll", cchMax);
-      *piIndex = -SHLICON_HARDDISK; /* hard disk */
+      *piIndex = SHLICON_HARDDISK - 1;
 
       if ( _ILGetDrive( pSimplePidl, sTemp, cchMax ) )
       {
@@ -201,7 +201,7 @@ static HRESULT WINAPI IExtractIconA_fnGetIconLocation(
              ( sTemp[ 0 ] == 'B' ) || ( sTemp[ 0 ] == 'b' ) )
         {
             /* FIXME determine 5.25 Floppy */
-            *piIndex = -SHLICON_FLOPPY35;
+            *piIndex = SHLICON_FLOPPY35 - 1;
         }
         else
         {
@@ -209,41 +209,41 @@ static HRESULT WINAPI IExtractIconA_fnGetIconLocation(
             switch ( nType )
             {
                 case DRIVE_REMOVABLE:
-                    *piIndex = -SHLICON_REMOVABLE_DISK;
+                    *piIndex = SHLICON_REMOVABLE_DISK - 1;
                     break;
 
                 case DRIVE_FIXED:
-                    *piIndex = -SHLICON_HARDDISK;
+                    *piIndex = SHLICON_HARDDISK - 1;
                     break;
 
                 case DRIVE_REMOTE:
                 {
-                    /* FIXME: connected (9) / disconnected (10)state */
+                    /* FIXME: connected / disconnected state */
                     BOOL connected = TRUE;
                     if ( connected )
-                        *piIndex = -SHLICON_NETDRIVE_CONN;
+                        *piIndex = SHLICON_NETDRIVE_CONN - 1;
                     else
-                        *piIndex = -SHLICON_NETDRIVE_DISCON;
+                        *piIndex = SHLICON_NETDRIVE_DISCON - 1;
                     break;
                 }
                 case DRIVE_CDROM:
-                    *piIndex = -SHLICON_CDROM_DRIVE;
+                    *piIndex = SHLICON_CDROM_DRIVE - 1;
                     break;
 
                 case DRIVE_RAMDISK:
-                    *piIndex = -SHLICON_RAMDRIVE;
+                    *piIndex = SHLICON_RAMDRIVE - 1;
                     break;
 
                 case DRIVE_UNKNOWN:
                 case DRIVE_NO_ROOT_DIR:
                 default:
-                    *piIndex = -SHLICON_HARDDISK;
+                    *piIndex = SHLICON_HARDDISK - 1;
                     break;
             }
         }
       }
 
-      if ( ( *piIndex == 8 ) &&
+      if ( ( *piIndex == ( SHLICON_HARDDISK - 1  ) ) &&
            HCR_GetDefaultIcon( "Drive", sTemp, MAX_PATH, &dwNr ) )
       {
         /* kso: Are there special registry keys for particular drives? */
@@ -274,7 +274,8 @@ static HRESULT WINAPI IExtractIconA_fnGetIconLocation(
       {
         lstrcpynA(szIconFile, "shell32.dll", cchMax);
 #ifdef __WIN32OS2__
-        *piIndex = (uFlags & GIL_OPENICON)? -SHLICON_FOLDER_OPEN : -SHLICON_FOLDER_CLOSED;
+        *piIndex = (uFlags & GIL_OPENICON)
+				 ? SHLICON_FOLDER_OPEN - 1 : SHLICON_FOLDER_CLOSED - 1;
 #else
         *piIndex = (uFlags & GIL_OPENICON)? 4 : 3;
 #endif
@@ -309,21 +310,13 @@ static HRESULT WINAPI IExtractIconA_fnGetIconLocation(
               {
                 SHGetPathFromIDListA(This->pidl, sTemp);
                 lstrcpynA(szIconFile, "shell32.dll", cchMax);
-#ifdef __WIN32OS2__
-                *piIndex = -SHLICON_COMPUTERS;
-#else
-                *piIndex = 42;
-#endif
+                *piIndex = SHLICON_COMPUTERS - 1;
               }
               else if (stricmp(sTemp,"COM") == 0)
               {
                 SHGetPathFromIDListA(This->pidl, sTemp);
                 lstrcpynA(szIconFile, "shell32.dll", cchMax);
-#ifdef __WIN32OS2__
-                *piIndex = -SHLICON_APPLICATION;
-#else
-                *piIndex = 2;
-#endif
+                *piIndex = SHLICON_APPLICATION - 1;
               }
 #if 0
     // icons not yet in resources
