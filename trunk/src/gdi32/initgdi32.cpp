@@ -1,4 +1,4 @@
-/* $Id: initgdi32.cpp,v 1.5 2001-09-05 12:53:52 bird Exp $
+/* $Id: initgdi32.cpp,v 1.6 2001-09-28 07:51:18 sandervl Exp $
  *
  * DLL entry point
  *
@@ -71,7 +71,7 @@ BOOL WINAPI OdinLibMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID fImpLoad)
 /* linkage convention MUST be used because the operating system loader is   */
 /* calling this function.                                                   */
 /****************************************************************************/
-ULONG inittermGdi32(ULONG hModule, ULONG ulFlag)
+ULONG APIENTRY inittermGdi32(ULONG hModule, ULONG ulFlag)
 {
    size_t i;
    APIRET rc;
