@@ -53,12 +53,12 @@ struct _PDB;
   PESHiELD  0x23/0x30 (win95)
 */
 
-#pragma pack(1)
+#pragma pack(4)
 /* Thread exception block */
 typedef struct _TEB
 {
 /* start of NT_TIB */
-    void        *except; /* 12- 00 Head of exception handling chain */
+    void        *except;         /* 12-  00 Head of exception handling chain */
     void        *stack_top;      /* 12-  04 Top of thread stack */
     void        *stack_low;      /* 12-  08 Stack low-water mark */
     HTASK16      htask16;        /* 1--  0c Win16 task handle */
@@ -143,7 +143,7 @@ typedef struct _TEB
           } odin;
 #endif
           /* the following are nt specific fields */
-          DWORD        pad6[633];                  /* --n 214 */
+          DWORD        pad6[639];                  /* --n 21c */
     } o;
     UNICODE_STRING StaticUnicodeString;      /* -2- bf8 used by advapi32 */
     USHORT       StaticUnicodeBuffer[261];   /* -2- c00 used by advapi32 */
