@@ -1,4 +1,4 @@
-/* $Id: win32wnd.cpp,v 1.2 1999-07-14 21:05:58 cbratschi Exp $ */
+/* $Id: win32wnd.cpp,v 1.3 1999-07-15 18:03:02 sandervl Exp $ */
 /*
  * Win32 Window Code for OS/2
  *
@@ -568,6 +568,77 @@ LRESULT Win32Window::SendMessageA(ULONG Msg, WPARAM wParam, LPARAM lParam)
         default:
                 return win32wndproc(getWindowHandle(), Msg, wParam, lParam);
   }
+}
+//******************************************************************************
+//todo, unicode msgs
+//******************************************************************************
+LRESULT Win32Window::SendMessageW(ULONG Msg, WPARAM wParam, LPARAM lParam)
+{
+  if(PostSpyMessage(getWindowHandle(), Msg, wParam, lParam) == FALSE)
+        dprintf(("SendMessageA %s for %x %x %x", GetMsgText(Msg), getWindowHandle(), wParam, lParam));
+
+  if(HkCBT::OS2HkCBTProc(getWindowHandle(), Msg, wParam, lParam) == TRUE) {//hook swallowed msg
+        return(0);
+  }
+  switch(Msg)
+  {
+        case WM_CREATE:
+        {
+                if(win32wndproc(getWindowHandle(), WM_NCCREATE, 0, lParam) == 0) {
+                        dprintf(("WM_NCCREATE returned FALSE\n"));
+                        return(0); //don't create window
+                }
+                if(win32wndproc(getWindowHandle(), WM_CREATE, 0, lParam) == 0) {
+                        dprintf(("WM_CREATE returned FALSE\n"));
+                        return(0); //don't create window
+                }
+                NotifyParent(Msg, wParam, lParam);
+
+                return(1);
+        }
+        case WM_LBUTTONDOWN:
+        case WM_MBUTTONDOWN:
+        case WM_RBUTTONDOWN:
+                NotifyParent(Msg, wParam, lParam);
+                return win32wndproc(getWindowHandle(), Msg, wParam, lParam);
+
+        case WM_DESTROY:
+                win32wndproc(getWindowHandle(), WM_NCDESTROY, 0, 0);
+                NotifyParent(Msg, wParam, lParam);
+                return win32wndproc(getWindowHandle(), WM_DESTROY, 0, 0);
+        default:
+                return win32wndproc(getWindowHandle(), Msg, wParam, lParam);
+  }
+}
+//******************************************************************************
+//******************************************************************************
+LRESULT Win32Window::PostMessageA(ULONG msg, WPARAM wParam, LPARAM lParam)
+{
+ POSTMSG_PACKET *postmsg;
+
+  postmsg = (POSTMSG_PACKET *)malloc(sizeof(POSTMSG_PACKET));
+  if(postmsg == NULL) {
+	dprintf(("Win32Window::PostMessageA: malloc returned NULL!!"));
+  }
+  postmsg->Msg    = msg;
+  postmsg->wParam = wParam;
+  postmsg->lParam = lParam;
+  return OSLibPostMessage(OS2Hwnd, WM_WIN32_POSTMESSAGEA, (ULONG)postmsg, 0);
+}
+//******************************************************************************
+//******************************************************************************
+LRESULT Win32Window::PostMessageW(ULONG msg, WPARAM wParam, LPARAM lParam)
+{
+ POSTMSG_PACKET *postmsg;
+
+  postmsg = (POSTMSG_PACKET *)malloc(sizeof(POSTMSG_PACKET));
+  if(postmsg == NULL) {
+	dprintf(("Win32Window::PostMessageW: malloc returned NULL!!"));
+  }
+  postmsg->Msg    = msg;
+  postmsg->wParam = wParam;
+  postmsg->lParam = lParam;
+  return OSLibPostMessage(OS2Hwnd, WM_WIN32_POSTMESSAGEW, (ULONG)postmsg, 0);
 }
 //******************************************************************************
 //******************************************************************************

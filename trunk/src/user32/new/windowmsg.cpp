@@ -1,8 +1,12 @@
-/* $Id: windowmsg.cpp,v 1.2 1999-07-14 21:05:59 cbratschi Exp $ */
+/* $Id: windowmsg.cpp,v 1.3 1999-07-15 18:03:03 sandervl Exp $ */
 /*
  * Win32 window message APIs for OS/2
  *
  * Copyright 1999 Sander van Leeuwen
+ *
+ * Parts based on Wine Windows code (windows\message.c)
+ *
+ * Copyright 1993, 1994 Alexandre Julliard
  *
  *
  * Project Odin Software License can be found in LICENSE.TXT
@@ -10,26 +14,10 @@
  */
 #include <os2win.h>
 #include <misc.h>
+#include <win32wnd.h>
+#include <handlemanager.h>
+#include <win.h>
 
-
-//******************************************************************************
-//******************************************************************************
-LONG WIN32API SendDlgItemMessageA( HWND arg1, int arg2, UINT arg3, WPARAM arg4, LPARAM  arg5)
-{
-#ifdef DEBUG
-    WriteLog("USER32:  SendDlgItemMessageA\n");
-#endif
-    return O32_SendDlgItemMessage(arg1, arg2, arg3, arg4, arg5);
-}
-//******************************************************************************
-//******************************************************************************
-LONG WIN32API SendDlgItemMessageW( HWND arg1, int arg2, UINT arg3, WPARAM arg4, LPARAM  arg5)
-{
-#ifdef DEBUG
-    WriteLog("USER32:  SendDlgItemMessageW\n");
-#endif
-    return O32_SendDlgItemMessage(arg1, arg2, arg3, arg4, arg5);
-}
 //******************************************************************************
 //******************************************************************************
 VOID WIN32API PostQuitMessage( int nExitCode)
@@ -40,20 +28,95 @@ VOID WIN32API PostQuitMessage( int nExitCode)
 }
 //******************************************************************************
 //******************************************************************************
-LONG WIN32API DispatchMessageA( const MSG * arg1)
+LONG WIN32API DispatchMessageA( const MSG * msg)
 {
-////    dprintf(("USER32:  DispatchMessage\n"));
-    return O32_DispatchMessage(arg1);
+  LONG         retval;
+  int          painting;
+  Win32Window *window;
+    
+      /* Process timer messages */
+    if ((msg->message == WM_TIMER) || (msg->message == WM_SYSTIMER))
+    {
+	if (msg->lParam)
+        {
+	    return SendMessageA(msg->hwnd, msg->message, msg->wParam, GetTickCount());
+        }
+    }
+
+    if (!msg->hwnd) return 0;
+
+    if(HMHandleTranslateToOS2(msg->hwnd, (PULONG)&window) != NO_ERROR) {
+	dprintf(("DispatchMessageA, window %x not found", msg->hwnd));
+	return 0;
+    }
+
+    painting = (msg->message == WM_PAINT);
+    if (painting) window->setFlags(window->getFlags() | WIN_NEEDS_BEGINPAINT);
+
+    retval = window->SendMessageA(msg->message, msg->wParam, msg->lParam );
+
+#if 0
+    if(HMHandleTranslateToOS2(msg->hwnd, (PULONG)&window) != NO_ERROR) {
+	dprintf(("DispatchMessageA, window %x not found", msg->hwnd));
+	return 0;
+    }
+
+    if (painting && (wndPtr->getFlags() & WIN_NEEDS_BEGINPAINT) && wndPtr->hrgnUpdate)
+    {
+	ERR_(msg)("BeginPaint not called on WM_PAINT for hwnd %04x!\n", 
+	    msg->hwnd);
+	wndPtr->flags &= ~WIN_NEEDS_BEGINPAINT;
+        /* Validate the update region to avoid infinite WM_PAINT loop */
+        ValidateRect( msg->hwnd, NULL );
+    }
+#endif
+    return retval;
 }
 //******************************************************************************
 //******************************************************************************
-LONG WIN32API DispatchMessageW( const MSG * arg1)
+LONG WIN32API DispatchMessageW( const MSG * msg)
 {
-#ifdef DEBUG
-    WriteLog("USER32:  DispatchMessageW\n");
+  LONG         retval;
+  int          painting;
+  Win32Window *window;
+    
+    /* Process timer messages */
+    if ((msg->message == WM_TIMER) || (msg->message == WM_SYSTIMER))
+    {
+	if (msg->lParam)
+        {
+	    return SendMessageW(msg->hwnd, msg->message, msg->wParam, GetTickCount());
+        }
+    }
+
+    if (!msg->hwnd) return 0;
+
+    if(HMHandleTranslateToOS2(msg->hwnd, (PULONG)&window) != NO_ERROR) {
+	dprintf(("DispatchMessageW, window %x not found", msg->hwnd));
+	return 0;
+    }
+
+    painting = (msg->message == WM_PAINT);
+    if (painting) window->setFlags(window->getFlags() | WIN_NEEDS_BEGINPAINT);
+
+    retval = window->SendMessageW(msg->message, msg->wParam, msg->lParam );
+
+#if 0
+    if(HMHandleTranslateToOS2(msg->hwnd, (PULONG)&window) != NO_ERROR) {
+	dprintf(("DispatchMessageW, window %x not found", msg->hwnd));
+	return 0;
+    }
+
+    if (painting && (wndPtr->getFlags() & WIN_NEEDS_BEGINPAINT) && wndPtr->hrgnUpdate)
+    {
+	ERR_(msg)("BeginPaint not called on WM_PAINT for hwnd %04x!\n", 
+	    msg->hwnd);
+	wndPtr->flags &= ~WIN_NEEDS_BEGINPAINT;
+        /* Validate the update region to avoid infinite WM_PAINT loop */
+        ValidateRect( msg->hwnd, NULL );
+    }
 #endif
-    // NOTE: This will not work as is (needs UNICODE support)
-    return O32_DispatchMessage(arg1);
+    return retval;
 }
 //******************************************************************************
 //******************************************************************************
@@ -66,51 +129,51 @@ BOOL WIN32API TranslateMessage( const MSG * arg1)
 }
 //******************************************************************************
 //******************************************************************************
-LRESULT WIN32API SendMessageA(HWND arg1, UINT arg2, WPARAM  arg3, LPARAM arg4)
+LRESULT WIN32API SendMessageA(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
- LRESULT rc;
+  Win32Window *window;
 
-#ifdef DEBUG1
-    WriteLog("USER32:  SendMessage....\n");
-#endif
-    rc = O32_SendMessage(arg1, arg2, arg3, arg4);
-#ifdef DEBUG1
-    WriteLog("USER32:  *****SendMessage %X %X %X %X returned %d\n", arg1, arg2, arg3, arg4, rc);
-#endif
-    return(rc);
+    if(HMHandleTranslateToOS2(hwnd, (PULONG)&window) != NO_ERROR) {
+	dprintf(("SendMessageA, window %x not found", hwnd));
+	return 0;
+    }
+    return window->SendMessageA(msg, wParam, lParam);
 }
 //******************************************************************************
 //******************************************************************************
-LRESULT WIN32API SendMessageW( HWND arg1, UINT arg2, WPARAM  arg3, LPARAM  arg4)
+LRESULT WIN32API SendMessageW(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
-LRESULT rc;
+  Win32Window *window;
 
-#ifdef DEBUG
-    WriteLog("USER32:  SendMessageW....\n");
-#endif
-    rc = O32_SendMessage(arg1, arg2, arg3, arg4);
-#ifdef DEBUG
-    WriteLog("USER32:  SendMessageW %X %X %X %X returned %d\n", arg1, arg2, arg3, arg4, rc);
-#endif
-    return(rc);
+    if(HMHandleTranslateToOS2(hwnd, (PULONG)&window) != NO_ERROR) {
+	dprintf(("SendMessageW, window %x not found", hwnd));
+	return 0;
+    }
+    return window->SendMessageW(msg, wParam, lParam);
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API IsDialogMessageA( HWND arg1, LPMSG  arg2)
+BOOL WIN32API PostMessageA(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
-#ifdef DEBUG
-////    WriteLog("USER32:  IsDialogMessage\n");
-#endif
-    return O32_IsDialogMessage(arg1, arg2);
+  Win32Window *window;
+
+    if(HMHandleTranslateToOS2(hwnd, (PULONG)&window) != NO_ERROR) {
+	dprintf(("PostMessageA, window %x not found", hwnd));
+	return 0;
+    }
+    return window->PostMessageA(msg, wParam, lParam);
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API PostMessageA( HWND arg1, UINT arg2, WPARAM  arg3, LPARAM  arg4)
+BOOL WIN32API PostMessageW(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
-#ifdef DEBUG
-    WriteLog("USER32:  PostMessageA %X %X %X %X\n", arg1, arg2, arg3, arg4);
-#endif
-    return O32_PostMessage(arg1, arg2, arg3, arg4);
+  Win32Window *window;
+
+    if(HMHandleTranslateToOS2(hwnd, (PULONG)&window) != NO_ERROR) {
+	dprintf(("PostMessageW, window %x not found", hwnd));
+	return 0;
+    }
+    return window->PostMessageW(msg, wParam, lParam);
 }
 //******************************************************************************
 //******************************************************************************
@@ -142,17 +205,6 @@ BOOL WIN32API PeekMessageW( LPMSG arg1, HWND arg2, UINT arg3, UINT arg4, UINT  a
 }
 //******************************************************************************
 //******************************************************************************
-// NOTE: Open32 function doesn't have the 'W'.
-BOOL WIN32API PostMessageW( HWND arg1, UINT arg2, WPARAM  arg3, LPARAM  arg4)
-{
-#ifdef DEBUG
-    WriteLog("USER32:  PostMessageW\n");
-#endif
-    // NOTE: This will not work as is (needs UNICODE support)
-    return O32_PostMessage(arg1, arg2, arg3, arg4);
-}
-//******************************************************************************
-//******************************************************************************
 BOOL WIN32API InSendMessage(void)
 {
 #ifdef DEBUG
@@ -161,15 +213,6 @@ BOOL WIN32API InSendMessage(void)
     return O32_InSendMessage();
 }
 //******************************************************************************
-//******************************************************************************
-BOOL WIN32API IsDialogMessageW( HWND arg1, LPMSG  arg2)
-{
-#ifdef DEBUG
-    WriteLog("USER32:  IsDialogMessageW\n");
-#endif
-    // NOTE: This will not work as is (needs UNICODE support)
-    return O32_IsDialogMessage(arg1, arg2);
-}
 //******************************************************************************
 //******************************************************************************
 BOOL WIN32API ReplyMessage( LRESULT arg1)

@@ -1,4 +1,4 @@
-/* $Id: oslibwin.h,v 1.1 1999-07-14 08:35:35 sandervl Exp $ */
+/* $Id: oslibwin.h,v 1.2 1999-07-15 18:03:02 sandervl Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -26,5 +26,7 @@ BOOL  OSLibWinConvertStyle(ULONG dwStyle, ULONG *OSWinStyle, ULONG *OSFrameStyle
 
 BOOL  OSLibWinSetWindowULong(HWND hwnd, ULONG offset, ULONG value);
 ULONG OSLibWinGetWindowULong(HWND hwnd, ULONG offset);
+
+BOOL  OSLibPostMessage(HWND hwnd, ULONG msg, ULONG wParam, ULONG lParam);
 
 #endif //__OSLIBWIN_H__

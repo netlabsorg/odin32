@@ -1,4 +1,4 @@
-/* $Id: oslibwin.cpp,v 1.2 1999-07-14 21:05:58 cbratschi Exp $ */
+/* $Id: oslibwin.cpp,v 1.3 1999-07-15 18:03:02 sandervl Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -124,3 +124,10 @@ ULONG OSLibWinGetWindowULong(HWND hwnd, ULONG offset)
 }
 //******************************************************************************
 //******************************************************************************
+BOOL OSLibPostMessage(HWND hwnd, ULONG msg, ULONG wParam, ULONG lParam)
+{
+  return WinPostMsg(hwnd, msg, (MPARAM)wParam, (MPARAM)lParam);
+}
+//******************************************************************************
+//******************************************************************************
+
