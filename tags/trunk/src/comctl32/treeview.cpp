@@ -1,4 +1,4 @@
-/* $Id: treeview.cpp,v 1.7 2000-04-08 18:32:55 cbratschi Exp $ */
+/* $Id: treeview.cpp,v 1.8 2000-04-12 16:39:00 cbratschi Exp $ */
 /* Treeview control
  *
  * Copyright 1998 Eric Kohl <ekohl@abo.rhein-zeitung.de>
@@ -3671,7 +3671,7 @@ TREEVIEW_EndEditLabelNow(HWND hwnd,BOOL bCancel)
         retval = (BOOL)sendNotify(hwnd,isUnicodeNotify(&infoPtr->header) ? TVN_SETDISPINFOW:TVN_SETDISPINFOA,&tvdi.hdr);
       } else
       {
-        if(NULL == COMCTL32_ReAlloc(text,(iLength+1)*sizeof(WCHAR)))
+        if (!COMCTL32_ReAlloc(text,(iLength+1)*sizeof(WCHAR)))
         {
           //ERR("OutOfMemory, cannot allocate space for label");
           DestroyWindow(infoPtr->hwndEdit);
