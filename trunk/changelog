@@ -1,4 +1,7 @@
- /* $Id: changelog,v 1.468 1999-11-23 20:02:20 sandervl Exp $ */
+ /* $Id: changelog,v 1.469 1999-11-23 20:39:36 davidr Exp $ */
+
+ 99-11-23: David Raison <djr@lemur.co.uk>
+ 	- OLE32: Fixed buffer size error in StringFromGUID2.
 
  99-11-23: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32: Added stubs for ChangeDisplaySettingsExA/W
