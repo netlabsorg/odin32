@@ -1,4 +1,4 @@
-; $Id: avifil32.def,v 1.5 2001-07-21 17:38:48 sandervl Exp $
+; $Id: avifil32.def,v 1.6 2002-06-15 12:14:23 sandervl Exp $
 
 ;
 ; Based on NT 4.0 SP6: AVIFIL32.DLL
@@ -72,10 +72,10 @@ EXPORTS
   AVIStreamReadData          = _AVIStreamReadData@16           @51
   AVIStreamReadFormat        = _AVIStreamReadFormat@16         @52
   AVIStreamRelease           = _AVIStreamRelease@4             @53
-  AVIStreamSampleToTime      = _AVIStreamSampleToTime@8        @54
+;;  AVIStreamSampleToTime      = _AVIStreamSampleToTime@8        @54
   AVIStreamSetFormat         = _AVIStreamSetFormat@16          @55
   AVIStreamStart             = _AVIStreamStart@4               @56
-  AVIStreamTimeToSample      = _AVIStreamTimeToSample@8        @57
+;;  AVIStreamTimeToSample      = _AVIStreamTimeToSample@8        @57
   AVIStreamWrite             = _AVIStreamWrite@32              @58
   AVIStreamWriteData         = _AVIStreamWriteData@16          @59
 ; CLSID_AVISimpleUnMarshal   = _CLSID_AVISimpleUnMarshal@?     @60
