@@ -1,4 +1,4 @@
-/* $Id: ChangeLog,v 1.1482 2001-06-05 16:46:01 phaller Exp $ */
+/* $Id: ChangeLog,v 1.1483 2001-06-05 21:35:53 sandervl Exp $ */
 
  2001-06-05: Patrick Haller <patrick.haller@innotek.de>
     - KERNEL32: o Fixed ordinal export resolving for PE executables
@@ -7,6 +7,9 @@
  2001-06-05: Sander van Leeuwen <sandervl@xs4all.nl>
     - COMCTL32: o Listview: Don't repaint subitem if changed text is the same as old one.
                   (fixes endless repainting loop in WinRAR 2.80)
+    - KERNEL32: o Optimized ordinal lookup even more.
+                  (6900 ordinal lookups takes (on average) 31 ms now instead 
+                   of 78)
 
  2001-06-04: Sander van Leeuwen <sandervl@xs4all.nl>
     - KERNEL32: o Added driver dll plugin for custom device driver emulation
