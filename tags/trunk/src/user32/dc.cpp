@@ -1,4 +1,4 @@
-/* $Id: dc.cpp,v 1.64 2000-06-26 10:27:10 sandervl Exp $ */
+/* $Id: dc.cpp,v 1.65 2000-07-04 08:42:05 sandervl Exp $ */
 
 /*
  * DC functions for USER32
@@ -1651,6 +1651,113 @@ HWND WIN32API WindowFromDC(HDC hdc)
       return Win32BaseWindow::OS2ToWin32Handle(pHps->hwnd);
    else
       return 0;
+}
+//******************************************************************************
+//******************************************************************************
+int WIN32API SetMapMode(HDC hdc, int mode)
+{
+  Win32BaseWindow *wnd;
+  pDCData          pHps = (pDCData)GpiQueryDCData((HPS)hdc);
+  if(!pHps)
+  {
+      SetLastError(ERROR_INVALID_HANDLE_W);
+      dprintf(("GDI32: SetMapMode %x %x -> invalid hdc!!", hdc, mode));
+      return 0;
+  }
+  wnd = Win32BaseWindow::GetWindowFromHandle(WindowFromDC(hdc));
+  //todo: metafile recording
+
+  dprintf(("GDI32: SetMapMode %x %x", hdc, mode));
+  return setMapMode(wnd, pHps, mode);
+}
+//******************************************************************************
+//******************************************************************************
+int WIN32API GetMapMode(HDC hdc)
+{
+   pDCData pHps = (pDCData)GpiQueryDCData((HPS)hdc);
+   if(pHps) {
+      dprintf(("GDI32: GetMapMode %x -> %x", hdc, pHps->MapMode));
+      return pHps->MapMode;
+   }
+   dprintf(("GDI32: GetMapMode: invalid hdc %x!!!", hdc));
+   SetLastError(ERROR_INVALID_HANDLE_W);
+   return 0;
+}
+//******************************************************************************
+//******************************************************************************
+BOOL WIN32API SetViewportExtEx(HDC hdc, int xExt, int yExt, LPSIZE pSize)
+{
+  Win32BaseWindow *wnd;
+  pDCData          pHps = (pDCData)GpiQueryDCData((HPS)hdc);
+
+   if(!pHps)
+   {
+      dprintf(("GDI32: SetViewportExtEx %x %d %d %x -> INVALID HDC", hdc, xExt, yExt, pSize));
+      SetLastError(ERROR_INVALID_HANDLE_W);
+      return FALSE;
+   }
+
+   if(pSize) {
+   	dprintf(("GDI32: SetViewportExtEx %x %d %d (%d,%d)", hdc, xExt, yExt, pSize->cx, pSize->cy));
+   }
+   else dprintf(("GDI32: SetViewportExtEx %x %d %d NULL", hdc, xExt, yExt));
+
+   if (xExt && yExt )
+   {
+      //todo: Metafile recording!! (done for any map mode)
+
+      if(pHps->MapMode == MM_ISOTROPIC_W || pHps->MapMode == MM_ANISOTROPIC_W)
+      {
+         wnd = Win32BaseWindow::GetWindowFromHandle(WindowFromDC(hdc));
+         if(changePageXForm(wnd, pHps, NULL, xExt, yExt, (PPOINTL) pSize))
+         {
+            SetLastError(ERROR_SUCCESS_W);
+            return TRUE;
+         }
+      }
+      else
+      {
+         pHps->lVwpXExtSave = xExt;
+         pHps->lVwpYExtSave = yExt;
+
+         //if map mode is not ISOTROPIC nor ANISOTROPIC, this function does
+         //nothing and returns TRUE (NT)
+         SetLastError(ERROR_SUCCESS_W);
+         return TRUE;
+      }
+
+      SetLastError(ERROR_SUCCESS_W);
+      return FALSE;
+   }
+
+   SetLastError(ERROR_INVALID_PARAMETER_W);
+   return FALSE;
+}
+//******************************************************************************
+//******************************************************************************
+BOOL WIN32API GetViewportExtEx(HDC hdc, LPSIZE pSize)
+{
+   pDCData pHps = (pDCData)GpiQueryDCData((HPS)hdc);
+   if(!pHps)
+   {
+      dprintf(("GDI32: GetViewportExtEx %x %x -> INVALID HDC", hdc, pSize));
+      SetLastError(ERROR_INVALID_HANDLE_W);
+      return FALSE;
+   }
+
+   if(!pSize)
+   {
+      dprintf(("GDI32: GetViewportExtEx %x NULL -> INVALID parameter", hdc));
+      SetLastError(ERROR_INVALID_PARAMETER_W);
+      return FALSE;
+   }
+
+   pSize->cx = (LONG)pHps->viewportXExt;
+   pSize->cy = (LONG)pHps->viewportYExt;
+   dprintf(("GDI32: GetViewportExtEx %x -> (%d,%d)", hdc, pSize->cx, pSize->cy));
+
+   SetLastError(ERROR_SUCCESS_W);
+   return TRUE;
 }
 //******************************************************************************
 //******************************************************************************
