@@ -1,4 +1,8 @@
- /* $Id: ChangeLog,v 1.853 2000-03-31 14:41:33 cbratschi Exp $ */
+ /* $Id: ChangeLog,v 1.854 2000-04-01 10:02:16 sandervl Exp $ */
+
+ 2000-04-01: Edgar Buerkle <Edgar.Buerkle@gmx.net>
+        - USER32: Fixed track frame width & height (now you can see actually
+                  see the tracking frame when moving a window)
 
  2000-03-31: Christoph Bratschi <cbratschi@datacomm.ch>
 	- USER32: readded CS_HITTEST for HT_TRANSPARENT handling, transparent
