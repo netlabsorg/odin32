@@ -1,4 +1,4 @@
-/* $Id: rebar.c,v 1.11 1999-12-18 20:57:00 achimha Exp $ */
+/* $Id: rebar.c,v 1.12 1999-12-30 21:27:05 sandervl Exp $ */
 /*
  * Rebar control
  *
@@ -307,7 +307,7 @@ REBAR_Layout (HWND hwnd, LPRECT lpRect)
     }
     else {
         cx = rcClient.right - rcClient.left;
-        cy = 20;    /* FIXME: fixed height */
+    	cy = 20;    /* FIXME: fixed height */
     }
 
     for (i = 0; i < infoPtr->uNumBands; i++) {
@@ -337,8 +337,10 @@ REBAR_Layout (HWND hwnd, LPRECT lpRect)
                 cy = lpBand->cyMaxChild;
             else if (lpBand->fStyle & RBBIM_CHILDSIZE)
                 cy = lpBand->cyMinChild;
-            else
-                cy = 20; /* FIXME */
+            else {
+//                cy = 20; /* FIXME */
+		cy = 36; //SvL: Better size of AbiWord (FIXME)
+	    }
 
             lpBand->rcBand.left   = x;
             lpBand->rcBand.right  = x + cx;
