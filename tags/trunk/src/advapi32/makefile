@@ -1,5 +1,3 @@
-# $Id: makefile,v 1.1 1999-05-24 20:19:33 ktk Exp $ 
-
 #
 # PD-Win32 API 
 #
@@ -36,8 +34,8 @@ $(TARGET).lib: $(TARGET)exp.def
         $(CP) $@ $(PDWIN32_LIB)
 
 
-advapi32.obj: advapi32.c advapi32.h
-initterm.obj: initterm.c
+advapi32.obj: advapi32.cpp advapi32.h
+initterm.obj: initterm.cpp
 
 clean:
 	$(RM) *.obj *.lib *.dll *~ *.map *.pch	

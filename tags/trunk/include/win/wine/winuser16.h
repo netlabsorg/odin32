@@ -1,5 +1,3 @@
-/* $Id: winuser16.h,v 1.1 1999-05-24 20:19:29 ktk Exp $ */
-
 #ifndef __WINE_WINUSER16_H
 #define __WINE_WINUSER16_H
 

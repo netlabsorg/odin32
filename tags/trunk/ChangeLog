@@ -1,3 +1,22 @@
+ 99-06-06: Sander van Leeuwen
+	- Bugfixes in VirtualAlloc (KERNEL32), GetScrollPos & RegisterSystemClasses (USER32)
+          as reported on mailinglist by Edgar Buerkle.
+	  Also FindResourceA/W.
+
+ 99-01-06: David Raison
+	- OLE32: Changed everything to make it compile with the new headers
+	- include/win/ole.2 - line 170
+	- include/wine/win/obj_oleview.h - line 32 & 36
+
+ 99-23-05: Sander van Leeuwen
+	- ADVAPI32: Fixed Open32 bugs in RegOpenKeyA (set return key to 0 when failed)
+                    Fixed key definition conflict in convertkey.
+	- KERNEL32: Fixed exception handler, don't continue after process termination 
+                    exception! (fixes annoying exitlist hangs)
+
+ 99-19-05: Sander van Leeuwen
+	- KERNEL32: Corrected wrong export for HeapSize (reported by Vit Timchishin)
+
  99-15-05: Sander van Leeuwen
 	- Fixed a number of bugs introduced during the Wine header update
  	- KERNEL32: Added high/low fixup support for pe loader

@@ -1,7 +1,9 @@
-/* $Id: win32type.h,v 1.5 1999-06-03 17:50:29 achimha Exp $ */
+/* $Id: win32type.h,v 1.6 1999-06-07 13:35:55 sandervl Exp $ */
 
 #ifndef __WIN32TYPE_H__
 #define __WIN32TYPE_H__
+
+#include <odin.h>
 
 #define NEAR
 #define FAR
@@ -68,6 +70,7 @@
 #define HBRUSH  DWORD
 #define HMENU   DWORD
 #define WNDPROC DWORD
+#define WNDPROC_O32 DWORD
 #define HRESULT DWORD
 
 //Wine types
@@ -108,7 +111,7 @@ typedef union _LARGE_INTEGER {
         ULONG LowPart;
         LONG HighPart;
     } u;
-    LONGLONG QuadPart;
+    ULONGULONG QuadPart;
 } LARGE_INTEGER;
 
 DECLARE_HANDLE(HTASK);

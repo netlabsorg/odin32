@@ -1,5 +1,3 @@
-/* $Id: winesound.h,v 1.1 1999-05-24 20:19:29 ktk Exp $ */
-
 #ifndef _WINE_SOUND_H
 #define _WINE_SOUND_H
 

@@ -1,5 +1,3 @@
-/* $Id: obj_base.h,v 1.1 1999-05-24 20:19:24 ktk Exp $ */
-
 /*
  * This file defines the macros and types necessary to define COM interfaces, 
  * and the three most basic COM interfaces: IUnknown, IMalloc and IClassFactory.
