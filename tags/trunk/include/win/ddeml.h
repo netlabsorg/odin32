@@ -1,5 +1,3 @@
-/* $Id: ddeml.h,v 1.2 1999-10-04 09:55:49 sandervl Exp $ */
-
 /*
  * DDEML library definitions
  *
@@ -7,10 +5,14 @@
  * Copyright 1997 Len White
  */
 
-#ifndef __WINE__DDEML_H
-#define __WINE__DDEML_H
+#ifndef __WINE_DDEML_H
+#define __WINE_DDEML_H
 
-#include "windef.h"
+#include <windef.h>
+
+#ifdef __cplusplus
+extern "C" {
+#endif /* defined(__cplusplus) */
 
 /* Codepage Constants
  */
@@ -23,7 +25,6 @@
 
 #define MSGF_DDEMGR 0x8001
 
-#define QID_SYNC16	-1L
 #define QID_SYNC	0xFFFFFFFF
 
 /*   Type variation for MS  deliberate departures from ANSI standards
@@ -31,11 +32,48 @@
 
 #define EXPENTRY CALLBACK
 
+#define SZDDESYS_TOPIC		TEXT("System")
+#define SZDDESYS_ITEM_TOPICS	TEXT("Topics")
+#define SZDDESYS_ITEM_SYSITEMS	TEXT("SysItems")
+#define SZDDESYS_ITEM_RTNMSG	TEXT("ReturnMessage")
+#define SZDDESYS_ITEM_STATUS	TEXT("Status")
+#define SZDDESYS_ITEM_FORMATS	TEXT("Formats")
+#define SZDDESYS_ITEM_HELP	TEXT("Help")
+#define SZDDE_ITEM_ITEMLIST	TEXT("TopicItemList")
+
 /***************************************************
 
       FLAGS Section - copied from Microsoft SDK as must be standard, probably Copyright Microsoft Corporation
 
 ***************************************************/
+
+#define     XST_NULL              0
+#define     XST_INCOMPLETE        1
+#define     XST_CONNECTED         2
+#define     XST_INIT1             3
+#define     XST_INIT2             4
+#define     XST_REQSENT           5
+#define     XST_DATARCVD          6
+#define     XST_POKESENT          7
+#define     XST_POKEACKRCVD       8
+#define     XST_EXECSENT          9
+#define     XST_EXECACKRCVD      10
+#define     XST_ADVSENT          11
+#define     XST_UNADVSENT        12
+#define     XST_ADVACKRCVD       13
+#define     XST_UNADVACKRCVD     14
+#define     XST_ADVDATASENT      15
+#define     XST_ADVDATAACKRCVD   16
+
+#define     ST_CONNECTED            0x0001
+#define     ST_ADVISE               0x0002
+#define     ST_ISLOCAL              0x0004
+#define     ST_BLOCKED              0x0008
+#define     ST_CLIENT               0x0010
+#define     ST_TERMINATED           0x0020
+#define     ST_INLIST               0x0040
+#define     ST_BLOCKNEXT            0x0080
+#define     ST_ISSELF               0x0100
 
 /*
  * Callback filter flags for use with standard apps.
@@ -118,25 +156,28 @@
 #define XCLASS_FLAGS		0x4000
 #define	XCLASS_NOTIFICATION	0x8000
 
+#define XTYP_ERROR		(0x0000 | XCLASS_NOTIFICATION | XTYPF_NOBLOCK)
+#define XTYP_ADVDATA		(0x0010 | XCLASS_FLAGS)
+#define XTYP_ADVREQ		(0x0020 | XCLASS_DATA | XTYPF_NOBLOCK)
+#define XTYP_ADVSTART		(0x0030 | XCLASS_BOOL)
+#define XTYP_ADVSTOP		(0x0040 | XCLASS_NOTIFICATION)
+#define XTYP_EXECUTE		(0x0050 | XCLASS_FLAGS)
+#define XTYP_CONNECT		(0x0060 | XCLASS_BOOL | XTYPF_NOBLOCK)
+#define XTYP_CONNECT_CONFIRM	(0x0070 | XCLASS_NOTIFICATION | XTYPF_NOBLOCK)
 #define XTYP_XACT_COMPLETE	(0x0080 | XCLASS_NOTIFICATION )
+#define XTYP_POKE		(0x0090 | XCLASS_FLAGS)
+#define XTYP_REGISTER		(0x00A0 | XCLASS_NOTIFICATION | XTYPF_NOBLOCK )
 #define XTYP_REQUEST		(0x00B0 | XCLASS_DATA )
+#define XTYP_DISCONNECT		(0x00C0 | XCLASS_NOTIFICATION | XTYPF_NOBLOCK )
+#define XTYP_UNREGISTER		(0x00D0 | XCLASS_NOTIFICATION | XTYPF_NOBLOCK )
+#define XTYP_WILDCONNECT	(0x00E0 | XCLASS_DATA | XTYPF_NOBLOCK)
 
-//Odin addition
-#define XTYP_ERROR              (0x0000 | XCLASS_NOTIFICATION | XTYPF_NOBLOCK )
-#define XTYP_ADVDATA            (0x0010 | XCLASS_FLAGS         )
-#define XTYP_ADVREQ             (0x0020 | XCLASS_DATA | XTYPF_NOBLOCK )
-#define XTYP_ADVSTART           (0x0030 | XCLASS_BOOL          )
-#define XTYP_ADVSTOP            (0x0040 | XCLASS_NOTIFICATION)
-#define XTYP_EXECUTE            (0x0050 | XCLASS_FLAGS         )
-#define XTYP_CONNECT            (0x0060 | XCLASS_BOOL | XTYPF_NOBLOCK)
-#define XTYP_CONNECT_CONFIRM    (0x0070 | XCLASS_NOTIFICATION | XTYPF_NOBLOCK)
-#define XTYP_XACT_COMPLETE      (0x0080 | XCLASS_NOTIFICATION  )
-#define XTYP_POKE               (0x0090 | XCLASS_FLAGS         )
-#define XTYP_REGISTER           (0x00A0 | XCLASS_NOTIFICATION | XTYPF_NOBLOCK)
-#define XTYP_REQUEST            (0x00B0 | XCLASS_DATA          )
-#define XTYP_DISCONNECT         (0x00C0 | XCLASS_NOTIFICATION | XTYPF_NOBLOCK)
-#define XTYP_UNREGISTER         (0x00D0 | XCLASS_NOTIFICATION | XTYPF_NOBLOCK)
-#define XTYP_WILDCONNECT        (0x00E0 | XCLASS_DATA | XTYPF_NOBLOCK)
+#define XTYP_MASK		0x00F0
+#define XTYP_SHIFT		4
+
+#define TIMEOUT_ASYNC           0xFFFFFFFF
+
+#define CADV_LATEACK		0xFFFF
 
 /**************************************************
 
@@ -159,6 +200,10 @@
 #define DDE_FAPPSTATUS		0x00FF
 #define DDE_FNOTPROCESSED	0x0000
 
+#define DDE_FACKRESERVED        (~(DDE_FACK | DDE_FBUSY | DDE_FAPPSTATUS))
+#define DDE_FADVRESERVED        (~(DDE_FACKREQ | DDE_FDEFERUPD))
+#define DDE_FDATRESERVED        (~(DDE_FACKREQ | DDE_FRELEASE | DDE_FREQUESTED))
+#define DDE_FPOKRESERVED        (~(DDE_FRELEASE))
 
 /*****************************************************
 
@@ -197,6 +242,8 @@
 
 #define     DMLERR_LAST                        0x4011
 
+#define     HDATA_APPOWNED          	       0x0001
+
 /*****************************************************
 
       End of Return Codes and Microsoft section
@@ -205,13 +252,11 @@
 
 
 
-typedef DWORD HCONVLIST;
-typedef DWORD HCONV;
-typedef DWORD HSZ;
-typedef DWORD HDDEDATA;
-#ifndef __WIN32OS2__
-typedef CHAR *LPTSTR;
-#endif
+typedef HANDLE HCONVLIST;
+typedef HANDLE HCONV;
+typedef HANDLE HSZ;
+typedef HANDLE HDDEDATA;
+
 
 
 /*******************************************************
@@ -220,10 +265,8 @@ typedef CHAR *LPTSTR;
 
 *******************************************************/
 
-typedef HDDEDATA (* CALLBACK PFNCALLBACK16)(UINT16,UINT16,HCONV,HSZ,HSZ,
-                                           HDDEDATA,DWORD,DWORD);
-typedef HDDEDATA (* CALLBACK PFNCALLBACK)(UINT,UINT,HCONV,HSZ,HSZ,
-                                           HDDEDATA,DWORD,DWORD);
+typedef HDDEDATA (* CALLBACK PFNCALLBACK)(UINT, UINT, HCONV, HSZ, HSZ,
+		 	 	 	  HDDEDATA, DWORD, DWORD);
 
 /***************************************************
 
@@ -231,17 +274,13 @@ typedef HDDEDATA (* CALLBACK PFNCALLBACK)(UINT,UINT,HCONV,HSZ,HSZ,
 
 ***************************************************/
 
-typedef struct
+typedef struct tagHSZPAIR
 {
-    UINT16  cb;
-    UINT16  wFlags;
-    UINT16  wCountryID;
-    INT16   iCodePage;
-    DWORD   dwLangID;
-    DWORD   dwSecurity;
-} CONVCONTEXT16, *LPCONVCONTEXT16;
+    HSZ hszSvc;
+    HSZ hszTopic;
+} HSZPAIR, *PHSZPAIR, *LPHSZPAIR;
 
-typedef struct
+typedef struct tagCONVCONTEXT
 {
     UINT  cb;
     UINT  wFlags;
@@ -251,25 +290,7 @@ typedef struct
     DWORD   dwSecurity;
 } CONVCONTEXT, *LPCONVCONTEXT;
 
-typedef struct
-{
-    DWORD		cb;
-    DWORD 		hUser;
-    HCONV		hConvPartner;
-    HSZ			hszSvcPartner;
-    HSZ			hszServiceReq;
-    HSZ			hszTopic;
-    HSZ			hszItem;
-    UINT16		wFmt;
-    UINT16		wType;
-    UINT16		wStatus;
-    UINT16		wConvst;
-    UINT16		wLastError;
-    HCONVLIST		hConvList;
-    CONVCONTEXT16	ConvCtxt;
-} CONVINFO16, *LPCONVINFO16;
-
-typedef struct
+typedef struct tagCONVINFO
 {
     DWORD		cb;
     DWORD 		hUser;
@@ -292,62 +313,44 @@ typedef struct
 /*            Interface Definitions		*/
 
 
-UINT16    WINAPI DdeInitialize16(LPDWORD,PFNCALLBACK16,DWORD,DWORD);
 UINT    WINAPI DdeInitializeA(LPDWORD,PFNCALLBACK,DWORD,DWORD);
 UINT    WINAPI DdeInitializeW(LPDWORD,PFNCALLBACK,DWORD,DWORD);
 #define   DdeInitialize WINELIB_NAME_AW(DdeInitialize)
-BOOL16    WINAPI DdeUninitialize16(DWORD);
 BOOL    WINAPI DdeUninitialize(DWORD);
-HCONVLIST WINAPI DdeConnectList16(DWORD,HSZ,HSZ,HCONVLIST,LPCONVCONTEXT16);
 HCONVLIST WINAPI DdeConnectList(DWORD,HSZ,HSZ,HCONVLIST,LPCONVCONTEXT);
-HCONV     WINAPI DdeQueryNextServer16(HCONVLIST, HCONV);
 HCONV     WINAPI DdeQueryNextServer(HCONVLIST, HCONV);
 DWORD     WINAPI DdeQueryStringA(DWORD, HSZ, LPSTR, DWORD, INT);
 DWORD     WINAPI DdeQueryStringW(DWORD, HSZ, LPWSTR, DWORD, INT);
 #define   DdeQueryString WINELIB_NAME_AW(DdeQueryString)
-BOOL16    WINAPI DdeDisconnectList16(HCONVLIST);
-BOOL    WINAPI DdeDisconnectList(HCONVLIST);
-HCONV     WINAPI DdeConnect16(DWORD,HSZ,HSZ,LPCONVCONTEXT16);
+BOOL      WINAPI DdeDisconnectList(HCONVLIST);
 HCONV     WINAPI DdeConnect(DWORD,HSZ,HSZ,LPCONVCONTEXT);
-BOOL16    WINAPI DdeDisconnect16(HCONV);
-BOOL    WINAPI DdeDisconnect(HCONV);
-BOOL16    WINAPI DdeSetUserHandle16(HCONV,DWORD,DWORD);
-HDDEDATA  WINAPI DdeCreateDataHandle16(DWORD,LPVOID,DWORD,DWORD,HSZ,UINT16,UINT16);
-HDDEDATA  WINAPI DdeCreateDataHandle(DWORD,LPVOID,DWORD,DWORD,HSZ,UINT,UINT);
+BOOL      WINAPI DdeDisconnect(HCONV);
+HDDEDATA  WINAPI DdeCreateDataHandle(DWORD,LPBYTE,DWORD,DWORD,HSZ,UINT,UINT);
 HCONV     WINAPI DdeReconnect(HCONV);
-HSZ       WINAPI DdeCreateStringHandle16(DWORD,LPCSTR,INT16);
 HSZ       WINAPI DdeCreateStringHandleA(DWORD,LPCSTR,INT);
 HSZ       WINAPI DdeCreateStringHandleW(DWORD,LPCWSTR,INT);
 #define   DdeCreateStringHandle WINELIB_NAME_AW(DdeCreateStringHandle)
-BOOL16    WINAPI DdeFreeStringHandle16(DWORD,HSZ);
-BOOL    WINAPI DdeFreeStringHandle(DWORD,HSZ);
-BOOL16    WINAPI DdeFreeDataHandle16(HDDEDATA);
-BOOL    WINAPI DdeFreeDataHandle(HDDEDATA);
-BOOL16    WINAPI DdeKeepStringHandle16(DWORD,HSZ);
-BOOL    WINAPI DdeKeepStringHandle(DWORD,HSZ);
-HDDEDATA  WINAPI DdeClientTransaction16(LPVOID,DWORD,HCONV,HSZ,UINT16,
-                                        UINT16,DWORD,LPDWORD);
-HDDEDATA  WINAPI DdeClientTransaction(PVOID,DWORD,HCONV,HSZ,UINT,
-                                        UINT,DWORD,LPDWORD);
-BOOL16    WINAPI DdeAbandonTransaction16(DWORD,HCONV,DWORD);
-BOOL16    WINAPI DdePostAdvise16(DWORD,HSZ,HSZ);
-BOOL    WINAPI DdePostAdvise(DWORD,HSZ,HSZ);
-HDDEDATA  WINAPI DdeAddData16(HDDEDATA,LPBYTE,DWORD,DWORD);
-DWORD     WINAPI DdeGetData(HDDEDATA,PVOID,DWORD,DWORD);
-LPBYTE    WINAPI DdeAccessData16(HDDEDATA,LPDWORD);
+BOOL      WINAPI DdeFreeStringHandle(DWORD,HSZ);
+BOOL      WINAPI DdeFreeDataHandle(HDDEDATA);
+BOOL      WINAPI DdeKeepStringHandle(DWORD,HSZ);
+HDDEDATA  WINAPI DdeClientTransaction(LPBYTE,DWORD,HCONV,HSZ,UINT,UINT,DWORD,LPDWORD);
+BOOL	  WINAPI DdeAbandonTransaction(DWORD idInst, HCONV hConv, DWORD idTransaction); 
+BOOL      WINAPI DdeImpersonateClient(HCONV);
+BOOL      WINAPI DdePostAdvise(DWORD,HSZ,HSZ);
+HDDEDATA  WINAPI DdeAddData(HDDEDATA,LPBYTE,DWORD,DWORD);
+DWORD     WINAPI DdeGetData(HDDEDATA,LPBYTE,DWORD,DWORD);
 LPBYTE    WINAPI DdeAccessData(HDDEDATA,LPDWORD);
-BOOL16    WINAPI DdeUnaccessData16(HDDEDATA);
-BOOL    WINAPI DdeUnaccessData(HDDEDATA);
-BOOL16    WINAPI DdeEnableCallback16(DWORD,HCONV,UINT16);
-BOOL    WINAPI DdeEnableCallback(DWORD,HCONV,UINT);
-int       WINAPI DdeCmpStringHandles16(HSZ,HSZ);
-int       WINAPI DdeCmpStringHandles(HSZ,HSZ);
+BOOL      WINAPI DdeUnaccessData(HDDEDATA);
+BOOL      WINAPI DdeEnableCallback(DWORD,HCONV,UINT);
+INT       WINAPI DdeCmpStringHandles(HSZ,HSZ);
+BOOL      WINAPI DdeSetUserHandle(HCONV,DWORD,DWORD);
 
-HDDEDATA  WINAPI DdeNameService16(DWORD,HSZ,HSZ,UINT16);
 HDDEDATA  WINAPI DdeNameService(DWORD,HSZ,HSZ,UINT);
-UINT16    WINAPI DdeGetLastError16(DWORD);
-UINT    WINAPI DdeGetLastError(DWORD);
-UINT16    WINAPI DdeQueryConvInfo16(HCONV,DWORD,LPCONVINFO16);
+UINT      WINAPI DdeGetLastError(DWORD);
 UINT      WINAPI DdeQueryConvInfo(HCONV,DWORD,LPCONVINFO);
 
-#endif  /* __WINE__DDEML_H */
+#ifdef __cplusplus
+} /* extern "C" */
+#endif /* defined(__cplusplus) */
+
+#endif  /* __WINE_DDEML_H */
