@@ -1,4 +1,4 @@
-/* $Id: kFileLX.h,v 1.2 2000-08-31 03:00:13 bird Exp $
+/* $Id: kFileLX.h,v 1.3 2000-12-04 08:48:09 bird Exp $
  *
  * kFileLX - Linear Executable file reader.
  *
@@ -14,13 +14,15 @@
 
 
 
-class kFileLX : public kFileFormatBase
+class kFileLX : public kFileFormatBase/*, public kPageI*/
 {
 protected:
-    PVOID               pvBase;
-    ULONG               offLXHdr;
-    struct e32_exe *    pe32;
-    struct o32_obj *    paObject;
+    PVOID               pvBase;         /* Pointer to filemapping. */
+    ULONG               cbFile;         /* Size of filemapping. */
+    ULONG               offLXHdr;       /* Offset of the LX header. */
+    struct e32_exe *    pe32;           /* Pointer to the exe header within the filemapping. */
+    struct o32_obj *    paObject;       /* Pointer to the objecttable. */
+    struct o32_map *    paMap;          /* Pointer to page map table. */
 
     BOOL                queryExportName(int iOrdinal, char *pszBuffer);
 
@@ -36,6 +38,23 @@ public:
     struct o32_obj *    getObject(int iObject);
     int                 getObjectCount();
 
+#if 0
+    /** @cat Get and put page methods. (the first ones are generic) */
+    BOOL                getPage(char *pachPage, ULONG ulAddress);
+    BOOL                getPage(char *pachPage, int iObject, int offObject);
+    BOOL                putPage(const char *pachPage, ULONG ulAddress);
+    BOOL                putPage(const char *pachPage, int iObject, int offObject);
 
+    BOOL                getPageLX(char *pachPage, int iObject, int iPage);
+    BOOL                getPageLX(char *pachPage, int iPage);
+    BOOL                putPageLX(const char *pachPage, int iObject, int iPage);
+    BOOL                putPageLX(const char *pachPage, int iPage);
+
+    /** @cat Compression and expansion methods compatible with exepack:1 and exepack:2. */
+    static BOOL         expandPage1(char *pachPage, const char * pachSrcPage, int cchSrcPage);
+    static BOOL         expandPage2(char *pachPage, const char * pachSrcPage, int cchSrcPage);
+    static int          compressPage1(char *pachPage, const char * pachSrcPage);
+    static int          compressPage2(char *pachPage, const char * pachSrcPage);
+#endif
 };
 #endif
