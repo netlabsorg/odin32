@@ -1,10 +1,11 @@
-/* $Id: propsheet.c,v 1.3 1999-06-10 16:22:01 achimha Exp $ */
+/* $Id: propsheet.c,v 1.4 1999-06-24 16:37:44 cbratschi Exp $ */
 /*
  * Property Sheets
  *
  * Copyright 1998 Francis Beaudet
  * Copyright 1999 Thuy Nguyen
  * Copyright 1999 Achim Hasenmueller
+ * Copyright 1999 Christoph Bratschi
  *
  * TODO:
  *   - Modeless mode
@@ -250,7 +251,7 @@ BOOL PROPSHEET_CollectPageInfo(LPCPROPSHEETPAGEA lppsp,
     default:
       p += lstrlenW( (LPCWSTR)p ) + 1;
       break;
-  } 
+  }
 
   /* class */
   switch ((WORD)*p)
@@ -285,12 +286,12 @@ BOOL PROPSHEET_CreateDialog(PropSheetInfo* psInfo)
   LPCVOID template;
   HRSRC hRes;
 
-  if(!(hRes = FindResourceA(COMCTL32_hModule,
+  if (!(hRes = FindResourceA(COMCTL32_hModule,
                             MAKEINTRESOURCEA(IDD_PROPSHEET),
                             RT_DIALOGA)))
     return FALSE;
 
-  if(!(template = (LPVOID)LoadResource(COMCTL32_hModule, hRes)))
+  if (!(template = (LPVOID)LoadResource(COMCTL32_hModule, hRes)))
     return FALSE;
 
   if (psInfo->useCallback)
@@ -314,7 +315,7 @@ BOOL PROPSHEET_CreateDialog(PropSheetInfo* psInfo)
 
 /******************************************************************************
  *            PROPSHEET_IsTooSmall
- * 
+ *
  * Verify that the resource property sheet is big enough.
  */
 static BOOL PROPSHEET_IsTooSmall(HWND hwndDlg, PropSheetInfo* psInfo)
@@ -436,10 +437,10 @@ static BOOL PROPSHEET_AdjustButtons(HWND hwndParent, PropSheetInfo* psInfo)
 
   /*
    * Get the size of the property sheet.
-   */ 
+   */
   GetClientRect(hwndParent, &rcSheet);
 
-  /* 
+  /*
    * All buttons will be at this y coordinate.
    */
   y = rcSheet.bottom - (padding.y + buttonHeight);
@@ -475,7 +476,7 @@ static BOOL PROPSHEET_AdjustButtons(HWND hwndParent, PropSheetInfo* psInfo)
       x = rcSheet.right - ((padding.x + buttonWidth) * 2);
     else
       x = rcSheet.right - (padding.x + buttonWidth);
-  
+
     SetWindowPos(hwndButton, 0, x, y, 0, 0,
                  SWP_NOSIZE | SWP_NOZORDER | SWP_NOACTIVATE);
 
@@ -492,7 +493,7 @@ static BOOL PROPSHEET_AdjustButtons(HWND hwndParent, PropSheetInfo* psInfo)
   if (psInfo->hasHelp)
   {
     x = rcSheet.right - (padding.x + buttonWidth);
-  
+
     SetWindowPos(hwndButton, 0, x, y, 0, 0,
                  SWP_NOSIZE | SWP_NOZORDER | SWP_NOACTIVATE);
   }
@@ -612,10 +613,10 @@ static int PROPSHEET_CreatePage(HWND hwndParent,
                                (LPPROPSHEETPAGEA)ppshpage);
 
   hwndPage = CreateDialogIndirectParamA(ppshpage->hInstance,
-					pTemplate,
-					hwndParent,
-					ppshpage->pfnDlgProc,
-					(LPARAM)ppshpage);
+                                        pTemplate,
+                                        hwndParent,
+                                        ppshpage->pfnDlgProc,
+                                        (LPARAM)ppshpage);
 
   ppInfo[index].hwndPage = hwndPage;
 
@@ -840,7 +841,7 @@ static void PROPSHEET_PressButton(HWND hwndDlg, int buttonID)
       break;
     default:
 //      FIXME(propsheet, "Invalid button index %d\n", buttonID);
-	break;
+        break;
   }
 }
 
@@ -1082,7 +1083,7 @@ static BOOL PROPSHEET_RemovePage(HWND hwndDlg,
   psInfo->nPages--;
   psInfo->proppage = COMCTL32_Alloc(sizeof(PropPageInfo) * psInfo->nPages);
 
-  if (index > 0)  
+  if (index > 0)
     memcpy(&psInfo->proppage[0], &oldPages[0], index * sizeof(PropPageInfo));
 
   if (index < psInfo->nPages)
@@ -1232,7 +1233,7 @@ PROPSHEET_DialogProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
         PROPSHEET_AdjustButtons(hwnd, psInfo);
       }
 
-      ppshpage = PROPSHEET_GetPSPPage(psInfo, psInfo->active_page);      
+      ppshpage = PROPSHEET_GetPSPPage(psInfo, psInfo->active_page);
       PROPSHEET_CreatePage(hwnd, psInfo->active_page, psInfo, ppshpage, TRUE);
       SendMessageA(hwndTabCtrl, TCM_SETCURSEL, psInfo->active_page, 0);
 
@@ -1391,7 +1392,7 @@ PROPSHEET_DialogProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
     case PSM_REBOOTSYSTEM:
     {
-      PropSheetInfo* psInfo = (PropSheetInfo*) GetPropA(hwnd, 
+      PropSheetInfo* psInfo = (PropSheetInfo*) GetPropA(hwnd,
                                                         PropSheetInfoStr);
 
       psInfo->rebootSystem = TRUE;

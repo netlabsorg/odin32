@@ -1,4 +1,4 @@
-/* $Id: tooltips.c,v 1.5 1999-06-16 20:25:44 cbratschi Exp $ */
+/* $Id: tooltips.c,v 1.6 1999-06-24 16:37:45 cbratschi Exp $ */
 /*
  * Tool tip control
  *
@@ -16,6 +16,11 @@
  *     curtool.exe, deltool.exe, enumtools.exe, getinfo.exe, getiptxt.exe,
  *     hittest.exe, needtext.exe, newrect.exe, updtext.exe and winfrpt.exe.
  */
+
+/* CB: Odin32 problems
+ - not defined colors: COLOR_INFOBK, COLOR_INFOTEXT
+ - WM_NCCREATE not handled first -> title bar visible if WS_POPUP wasn't set before
+*/
 
 #include <string.h>
 
@@ -52,139 +57,134 @@ TOOLTIPS_Refresh (HWND hwnd, HDC hdc)
     HBRUSH hBrush;
     UINT uFlags = DT_EXTERNALLEADING;
 
-    if (infoPtr->nMaxTipWidth > -1)
-        uFlags |= DT_WORDBREAK;
-    if (GetWindowLongA (hwnd, GWL_STYLE) & TTS_NOPREFIX)
-        uFlags |= DT_NOPREFIX;
-    GetClientRect (hwnd, &rc);
+    if (infoPtr->nMaxTipWidth > -1) uFlags |= DT_WORDBREAK;
+    if (GetWindowLongA(hwnd,GWL_STYLE) & TTS_NOPREFIX) uFlags |= DT_NOPREFIX;
+    GetClientRect(hwnd,&rc);
 
     /* fill the background */
-    hBrush = CreateSolidBrush (infoPtr->clrBk);
-    FillRect (hdc, &rc, hBrush);
-    DeleteObject (hBrush);
+    hBrush = CreateSolidBrush(infoPtr->clrBk);
+    FillRect(hdc,&rc,hBrush);
+    DeleteObject(hBrush);
 
     /* calculate text rectangle */
-    rc.left   += (2 + infoPtr->rcMargin.left);
-    rc.top    += (2 + infoPtr->rcMargin.top);
-    rc.right  -= (2 + infoPtr->rcMargin.right);
-    rc.bottom -= (2 + infoPtr->rcMargin.bottom);
+    rc.left   += (2+infoPtr->rcMargin.left);
+    rc.top    += (2+infoPtr->rcMargin.top);
+    rc.right  -= (2+infoPtr->rcMargin.right);
+    rc.bottom -= (2+infoPtr->rcMargin.bottom);
 
     /* draw text */
-    oldBkMode = SetBkMode (hdc, TRANSPARENT);
-    SetTextColor (hdc, infoPtr->clrText);
-    hOldFont = SelectObject (hdc, infoPtr->hFont);
-    DrawTextW (hdc, infoPtr->szTipText, -1, &rc, uFlags);
-    SelectObject (hdc, hOldFont);
-    if (oldBkMode != TRANSPARENT)
-        SetBkMode (hdc, oldBkMode);
+    oldBkMode = SetBkMode(hdc,TRANSPARENT);
+    SetTextColor(hdc,infoPtr->clrText);
+    hOldFont = SelectObject(hdc,infoPtr->hFont);
+    DrawTextW(hdc,infoPtr->szTipText,-1,&rc,uFlags);
+    SelectObject(hdc,hOldFont);
+    if (oldBkMode != TRANSPARENT) SetBkMode(hdc,oldBkMode);
 }
 
 
 static VOID
-TOOLTIPS_GetTipText (HWND hwnd, TOOLTIPS_INFO *infoPtr, INT nTool)
+TOOLTIPS_GetTipText(HWND hwnd,TOOLTIPS_INFO *infoPtr,INT nTool)
 {
     TTTOOL_INFO *toolPtr = &infoPtr->tools[nTool];
 
-    if ((toolPtr->hinst) && (HIWORD((UINT)toolPtr->lpszText) == 0)) {
-        /* load a resource */
-//      TRACE (tooltips, "load res string %x %x\n",
-//             toolPtr->hinst, (int)toolPtr->lpszText);
-        LoadStringW (toolPtr->hinst, (UINT)toolPtr->lpszText,
-                       infoPtr->szTipText, INFOTIPSIZE);
-    }
-    else if (toolPtr->lpszText) {
-        if (toolPtr->lpszText == LPSTR_TEXTCALLBACKW) {
-            NMTTDISPINFOA ttnmdi;
+    if ((toolPtr->hinst) && (HIWORD((UINT)toolPtr->lpszText) == 0))
+    {
+      /* load a resource */
+//    TRACE (tooltips,"load res string %x %x\n",toolPtr->hinst,(int)toolPtr->lpszText);
+      LoadStringW(toolPtr->hinst,(UINT)toolPtr->lpszText,infoPtr->szTipText,INFOTIPSIZE);
+    } else if (toolPtr->lpszText)
+    {
+      if (toolPtr->lpszText == LPSTR_TEXTCALLBACKW)
+      {
+        NMTTDISPINFOA ttnmdi;
 
-            /* fill NMHDR struct */
-            ZeroMemory (&ttnmdi, sizeof(NMTTDISPINFOA));
-            ttnmdi.hdr.hwndFrom = hwnd;
-            ttnmdi.hdr.idFrom = toolPtr->uId;
-            ttnmdi.hdr.code = TTN_GETDISPINFOA;
-            ttnmdi.lpszText = (LPSTR)&ttnmdi.szText;
-            ttnmdi.uFlags = toolPtr->uFlags;
-            ttnmdi.lParam = toolPtr->lParam;
+        /* fill NMHDR struct */
+        ZeroMemory (&ttnmdi,sizeof(NMTTDISPINFOA));
+        ttnmdi.hdr.hwndFrom = hwnd;
+        ttnmdi.hdr.idFrom = toolPtr->uId;
+        ttnmdi.hdr.code = TTN_GETDISPINFOA;
+        ttnmdi.lpszText = (LPSTR)&ttnmdi.szText;
+        ttnmdi.uFlags = toolPtr->uFlags;
+        ttnmdi.lParam = toolPtr->lParam;
+        //          TRACE (tooltips, "hdr.idFrom = %x\n", ttnmdi.hdr.idFrom);
+        SendMessageA (toolPtr->hwnd,WM_NOTIFY,(WPARAM)toolPtr->uId,(LPARAM)&ttnmdi);
 
-//          TRACE (tooltips, "hdr.idFrom = %x\n", ttnmdi.hdr.idFrom);
-            SendMessageA (toolPtr->hwnd, WM_NOTIFY,
-                            (WPARAM)toolPtr->uId, (LPARAM)&ttnmdi);
-
-            if ((ttnmdi.hinst) && (HIWORD((UINT)ttnmdi.szText) == 0)) {
-                LoadStringW (ttnmdi.hinst, (UINT)ttnmdi.szText,
-                               infoPtr->szTipText, INFOTIPSIZE);
-                if (ttnmdi.uFlags & TTF_DI_SETITEM) {
-                    toolPtr->hinst = ttnmdi.hinst;
-                    toolPtr->lpszText = (LPWSTR)ttnmdi.szText;
-                }
-            }
-            else if (ttnmdi.szText[0]) {
-                lstrcpynAtoW (infoPtr->szTipText, ttnmdi.szText, 80);
-                if (ttnmdi.uFlags & TTF_DI_SETITEM) {
-                    INT len = lstrlenA (ttnmdi.szText);
-                    toolPtr->hinst = 0;
-                    toolPtr->lpszText = COMCTL32_Alloc ((len+1)* sizeof(WCHAR));
-                    lstrcpyAtoW (toolPtr->lpszText, ttnmdi.szText);
-                }
-            }
-            else if (ttnmdi.lpszText == 0) {
-                /* no text available */
-                infoPtr->szTipText[0] = L'\0';
-            }
-            else if (ttnmdi.lpszText != LPSTR_TEXTCALLBACKA) {
-                lstrcpynAtoW (infoPtr->szTipText, ttnmdi.lpszText, INFOTIPSIZE);
-                if (ttnmdi.uFlags & TTF_DI_SETITEM) {
-                    INT len = lstrlenA (ttnmdi.lpszText);
-                    toolPtr->hinst = 0;
-                    toolPtr->lpszText = COMCTL32_Alloc ((len+1)*sizeof(WCHAR));
-                    lstrcpyAtoW (toolPtr->lpszText, ttnmdi.lpszText);
-                }
-            }
-            else {
-//              ERR (tooltips, "recursive text callback!\n");
-                infoPtr->szTipText[0] = '\0';
-            }
+        if ((ttnmdi.hinst) && (HIWORD((UINT)ttnmdi.szText) == 0))
+        {
+          LoadStringW (ttnmdi.hinst,(UINT)ttnmdi.szText,infoPtr->szTipText,INFOTIPSIZE);
+          if (ttnmdi.uFlags & TTF_DI_SETITEM)
+          {
+            toolPtr->hinst = ttnmdi.hinst;
+            toolPtr->lpszText = (LPWSTR)ttnmdi.szText;
+          }
+        } else if (ttnmdi.szText[0])
+        {
+          lstrcpynAtoW (infoPtr->szTipText,ttnmdi.szText,80);
+          if (ttnmdi.uFlags & TTF_DI_SETITEM)
+          {
+            INT len = lstrlenA(ttnmdi.szText);
+            toolPtr->hinst = 0;
+            toolPtr->lpszText = COMCTL32_Alloc((len+1)* sizeof(WCHAR));
+            lstrcpyAtoW(toolPtr->lpszText,ttnmdi.szText);
+          }
+        } else if (ttnmdi.lpszText == 0)
+        {
+          /* no text available */
+          infoPtr->szTipText[0] = L'\0';
+        } else if (ttnmdi.lpszText != LPSTR_TEXTCALLBACKA)
+        {
+          lstrcpynAtoW(infoPtr->szTipText,ttnmdi.lpszText,INFOTIPSIZE);
+          if (ttnmdi.uFlags & TTF_DI_SETITEM)
+          {
+            INT len = lstrlenA(ttnmdi.lpszText);
+            toolPtr->hinst = 0;
+            toolPtr->lpszText = COMCTL32_Alloc((len+1)*sizeof(WCHAR));
+            lstrcpyAtoW(toolPtr->lpszText,ttnmdi.lpszText);
+          }
+        } else
+        {
+//        ERR (tooltips, "recursive text callback!\n");
+          infoPtr->szTipText[0] = '\0';
         }
-        else {
-            /* the item is a usual (unicode) text */
-//          lstrcpynW (infoPtr->szTipText, toolPtr->lpszText, INFOTIPSIZE);
-            strncpy(infoPtr->szTipText, toolPtr->lpszText, INFOTIPSIZE);
-        }
+      } else
+      {
+        /* the item is a usual (unicode) text */
+      lstrcpynW (infoPtr->szTipText,toolPtr->lpszText,INFOTIPSIZE);
+      }
     }
-    else {
-        /* no text available */
-        infoPtr->szTipText[0] = L'\0';
+    else
+    {
+      /* no text available */
+      infoPtr->szTipText[0] = L'\0';
     }
 
 //    TRACE (tooltips, "\"%s\"\n", debugstr_w(infoPtr->szTipText));
 }
 
-
 static VOID
-TOOLTIPS_CalcTipSize (HWND hwnd, TOOLTIPS_INFO *infoPtr, LPSIZE lpSize)
+TOOLTIPS_CalcTipSize (HWND hwnd,TOOLTIPS_INFO *infoPtr,LPSIZE lpSize)
 {
     HDC hdc;
     HFONT hOldFont;
     UINT uFlags = DT_EXTERNALLEADING | DT_CALCRECT;
-    RECT rc = {0, 0, 0, 0};
+    RECT rc = {0,0,0,0};
 
-    if (infoPtr->nMaxTipWidth > -1) {
-        rc.right = infoPtr->nMaxTipWidth;
-        uFlags |= DT_WORDBREAK;
+    if (infoPtr->nMaxTipWidth > -1)
+    {
+      rc.right = infoPtr->nMaxTipWidth;
+      uFlags |= DT_WORDBREAK;
     }
-    if (GetWindowLongA (hwnd, GWL_STYLE) & TTS_NOPREFIX)
-        uFlags |= DT_NOPREFIX;
+    if (GetWindowLongA(hwnd,GWL_STYLE) & TTS_NOPREFIX) uFlags |= DT_NOPREFIX;
 //    TRACE (tooltips, "\"%s\"\n", debugstr_w(infoPtr->szTipText));
 
-    hdc = GetDC (hwnd);
-    hOldFont = SelectObject (hdc, infoPtr->hFont);
-    DrawTextW (hdc, infoPtr->szTipText, -1, &rc, uFlags);
-    SelectObject (hdc, hOldFont);
-    ReleaseDC (hwnd, hdc);
+    hdc = GetDC(hwnd);
+    hOldFont = SelectObject(hdc,infoPtr->hFont);
+    DrawTextW(hdc,infoPtr->szTipText,-1,&rc,uFlags);
+    SelectObject(hdc,hOldFont);
+    ReleaseDC(hwnd,hdc);
 
-    lpSize->cx = rc.right - rc.left + 4 +
-                 infoPtr->rcMargin.left + infoPtr->rcMargin.right;
-    lpSize->cy = rc.bottom - rc.top + 4 +
-                 infoPtr->rcMargin.bottom + infoPtr->rcMargin.top;
+    lpSize->cx = rc.right-rc.left+4+infoPtr->rcMargin.left+infoPtr->rcMargin.right;
+    lpSize->cy = rc.bottom-rc.top+4+infoPtr->rcMargin.bottom+infoPtr->rcMargin.top;
 }
 
 
@@ -197,7 +197,8 @@ TOOLTIPS_Show (HWND hwnd, TOOLTIPS_INFO *infoPtr)
     HDC  hdc;
     NMHDR  hdr;
 
-    if (infoPtr->nTool == -1) {
+    if (infoPtr->nTool == -1)
+    {
 //      TRACE (tooltips, "invalid tool (-1)!\n");
         return;
     }
@@ -206,9 +207,10 @@ TOOLTIPS_Show (HWND hwnd, TOOLTIPS_INFO *infoPtr)
 
 //    TRACE (tooltips, "Show tooltip pre %d!\n", infoPtr->nTool);
 
-    TOOLTIPS_GetTipText (hwnd, infoPtr, infoPtr->nCurrentTool);
+    TOOLTIPS_GetTipText(hwnd,infoPtr,infoPtr->nCurrentTool);
 
-    if (infoPtr->szTipText[0] == L'\0') {
+    if (infoPtr->szTipText[0] == L'\0')
+    {
         infoPtr->nCurrentTool = -1;
         return;
     }
@@ -219,28 +221,30 @@ TOOLTIPS_Show (HWND hwnd, TOOLTIPS_INFO *infoPtr)
     hdr.hwndFrom = hwnd;
     hdr.idFrom = toolPtr->uId;
     hdr.code = TTN_SHOW;
-    SendMessageA (toolPtr->hwnd, WM_NOTIFY,
-                    (WPARAM)toolPtr->uId, (LPARAM)&hdr);
+    SendMessageA(toolPtr->hwnd,WM_NOTIFY,
+                    (WPARAM)toolPtr->uId,(LPARAM)&hdr);
 
 //    TRACE (tooltips, "\"%s\"\n", debugstr_w(infoPtr->szTipText));
 
     TOOLTIPS_CalcTipSize (hwnd, infoPtr, &size);
 //    TRACE (tooltips, "size %d - %d\n", size.cx, size.cy);
 
-    if (toolPtr->uFlags & TTF_CENTERTIP) {
+    if (toolPtr->uFlags & TTF_CENTERTIP)
+    {
         RECT rc;
 
         if (toolPtr->uFlags & TTF_IDISHWND)
             GetWindowRect ((HWND)toolPtr->uId, &rc);
-        else {
+        else
+        {
             rc = toolPtr->rect;
             MapWindowPoints (toolPtr->hwnd, (HWND)0, (LPPOINT)&rc, 2);
         }
         rect.left = (rc.left + rc.right - size.cx) / 2;
         rect.top  = rc.bottom + 2;
-    }
-    else {
-        GetCursorPos ((LPPOINT)&rect);
+    } else
+    {
+        GetCursorPos((LPPOINT)&rect);
         rect.top += 20;
     }
 
@@ -251,19 +255,19 @@ TOOLTIPS_Show (HWND hwnd, TOOLTIPS_INFO *infoPtr)
     rect.right = rect.left + size.cx;
     rect.bottom = rect.top + size.cy;
 
-    AdjustWindowRectEx (&rect, GetWindowLongA (hwnd, GWL_STYLE),
-                        FALSE, GetWindowLongA (hwnd, GWL_EXSTYLE));
+    AdjustWindowRectEx (&rect,GetWindowLongA(hwnd, GWL_STYLE),
+                        FALSE,GetWindowLongA(hwnd, GWL_EXSTYLE));
 
-    SetWindowPos (hwnd, HWND_TOP, rect.left, rect.top,
-                    rect.right - rect.left, rect.bottom - rect.top,
+    SetWindowPos (hwnd,HWND_TOP,rect.left,rect.top,
+                    rect.right-rect.left,rect.bottom-rect.top,
                     SWP_SHOWWINDOW | SWP_NOACTIVATE);
 
     /* repaint the tooltip */
-    hdc = GetDC (hwnd);
-    TOOLTIPS_Refresh (hwnd, hdc);
-    ReleaseDC (hwnd, hdc);
+    hdc = GetDC(hwnd);
+    TOOLTIPS_Refresh(hwnd,hdc);
+    ReleaseDC(hwnd,hdc);
 
-    SetTimer (hwnd, ID_TIMERPOP, infoPtr->nAutoPopTime, 0);
+    SetTimer (hwnd,ID_TIMERPOP,infoPtr->nAutoPopTime,0);
 }
 
 
@@ -302,18 +306,20 @@ TOOLTIPS_TrackShow (HWND hwnd, TOOLTIPS_INFO *infoPtr)
     HDC  hdc;
     NMHDR hdr;
 
-    if (infoPtr->nTrackTool == -1) {
-//      TRACE (tooltips, "invalid tracking tool (-1)!\n");
-        return;
+    if (infoPtr->nTrackTool == -1)
+    {
+//    TRACE (tooltips, "invalid tracking tool (-1)!\n");
+      return;
     }
 
 //    TRACE (tooltips, "show tracking tooltip pre %d!\n", infoPtr->nTrackTool);
 
-    TOOLTIPS_GetTipText (hwnd, infoPtr, infoPtr->nTrackTool);
+    TOOLTIPS_GetTipText(hwnd,infoPtr,infoPtr->nTrackTool);
 
-    if (infoPtr->szTipText[0] == L'\0') {
-        infoPtr->nTrackTool = -1;
-        return;
+    if (infoPtr->szTipText[0] == L'\0')
+    {
+      infoPtr->nTrackTool = -1;
+      return;
     }
 
 //    TRACE (tooltips, "show tracking tooltip %d!\n", infoPtr->nTrackTool);
@@ -322,57 +328,61 @@ TOOLTIPS_TrackShow (HWND hwnd, TOOLTIPS_INFO *infoPtr)
     hdr.hwndFrom = hwnd;
     hdr.idFrom = toolPtr->uId;
     hdr.code = TTN_SHOW;
-    SendMessageA (toolPtr->hwnd, WM_NOTIFY,
-                    (WPARAM)toolPtr->uId, (LPARAM)&hdr);
+    SendMessageA(toolPtr->hwnd,WM_NOTIFY,(WPARAM)toolPtr->uId,(LPARAM)&hdr);
 
 //    TRACE (tooltips, "\"%s\"\n", debugstr_w(infoPtr->szTipText));
 
-    TOOLTIPS_CalcTipSize (hwnd, infoPtr, &size);
+    TOOLTIPS_CalcTipSize(hwnd,infoPtr,&size);
 //    TRACE (tooltips, "size %d - %d\n", size.cx, size.cy);
 
-    if (toolPtr->uFlags & TTF_ABSOLUTE) {
-        rect.left = infoPtr->xTrackPos;
-        rect.top  = infoPtr->yTrackPos;
+    if (toolPtr->uFlags & TTF_ABSOLUTE)
+    {
+      rect.left = infoPtr->xTrackPos;
+      rect.top  = infoPtr->yTrackPos;
 
-        if (toolPtr->uFlags & TTF_CENTERTIP) {
-            rect.left -= (size.cx / 2);
-            rect.top  -= (size.cy / 2);
-        }
-    }
-    else {
-        RECT rcTool;
+      if (toolPtr->uFlags & TTF_CENTERTIP)
+      {
+        rect.left -= (size.cx/2);
+        rect.top  -= (size.cy/2);
+      }
+    } else
+    {
+      RECT rcTool;
 
-        if (toolPtr->uFlags & TTF_IDISHWND)
-            GetWindowRect ((HWND)toolPtr->uId, &rcTool);
-        else {
-            rcTool = toolPtr->rect;
-            MapWindowPoints (toolPtr->hwnd, (HWND)0, (LPPOINT)&rcTool, 2);
-        }
+      if (toolPtr->uFlags & TTF_IDISHWND)
+      {
+        GetWindowRect((HWND)toolPtr->uId,&rcTool); //screen coordinates
+      } else
+      {
+        rcTool = toolPtr->rect;
+        MapWindowPoints(toolPtr->hwnd,(HWND)0,(LPPOINT)&rcTool,2);
+      }
 
-        GetCursorPos ((LPPOINT)&rect);
-        rect.top += 20;
+      GetCursorPos ((LPPOINT)&rect);
+      rect.top += 20;
 
-        if (toolPtr->uFlags & TTF_CENTERTIP) {
-            rect.left -= (size.cx / 2);
-            rect.top  -= (size.cy / 2);
-        }
+      if (toolPtr->uFlags & TTF_CENTERTIP)
+      {
+        rect.left -= (size.cx / 2);
+        rect.top  -= (size.cy / 2);
+      }
 
-        /* smart placement */
-        if ((rect.left + size.cx > rcTool.left) && (rect.left < rcTool.right) &&
-            (rect.top + size.cy > rcTool.top) && (rect.top < rcTool.bottom))
-            rect.left = rcTool.right;
+      /* smart placement */
+      if ((rect.left + size.cx > rcTool.left) && (rect.left < rcTool.right) &&
+          (rect.top + size.cy > rcTool.top) && (rect.top < rcTool.bottom))
+          rect.left = rcTool.right;
     }
 
 //    TRACE (tooltips, "pos %d - %d\n", rect.left, rect.top);
 
-    rect.right = rect.left + size.cx;
-    rect.bottom = rect.top + size.cy;
+    rect.right = rect.left+size.cx;
+    rect.bottom = rect.top+size.cy;
 
-    AdjustWindowRectEx (&rect, GetWindowLongA (hwnd, GWL_STYLE),
-                        FALSE, GetWindowLongA (hwnd, GWL_EXSTYLE));
+    AdjustWindowRectEx (&rect,GetWindowLongA(hwnd,GWL_STYLE),
+                        FALSE,GetWindowLongA(hwnd,GWL_EXSTYLE));
 
-    SetWindowPos (hwnd, HWND_TOP, rect.left, rect.top,
-                    rect.right - rect.left, rect.bottom - rect.top,
+    SetWindowPos (hwnd,HWND_TOP,rect.left,rect.top,
+                    rect.right-rect.left,rect.bottom-rect.top,
                     SWP_SHOWWINDOW | SWP_NOACTIVATE );
 
     hdc = GetDC (hwnd);
@@ -563,33 +573,33 @@ TOOLTIPS_Activate (HWND hwnd, WPARAM wParam, LPARAM lParam)
 
 
 static LRESULT
-TOOLTIPS_AddToolA (HWND hwnd, WPARAM wParam, LPARAM lParam)
+TOOLTIPS_AddToolA(HWND hwnd,WPARAM wParam,LPARAM lParam)
 {
-    TOOLTIPS_INFO *infoPtr = TOOLTIPS_GetInfoPtr (hwnd);
+    TOOLTIPS_INFO *infoPtr = TOOLTIPS_GetInfoPtr(hwnd);
     LPTTTOOLINFOA lpToolInfo = (LPTTTOOLINFOA)lParam;
     TTTOOL_INFO *toolPtr;
 
-    if (lpToolInfo == NULL)
-        return FALSE;
-    if (lpToolInfo->cbSize < TTTOOLINFO_V1_SIZEA)
-        return FALSE;
+    if (lpToolInfo == NULL) return FALSE;
+    if (lpToolInfo->cbSize < TTTOOLINFO_V1_SIZEA) return FALSE;
 
 //    TRACE (tooltips, "add tool (%x) %x %d%s!\n",
 //         hwnd, lpToolInfo->hwnd, lpToolInfo->uId,
 //         (lpToolInfo->uFlags & TTF_IDISHWND) ? " TTF_IDISHWND" : "");
 
-    if (infoPtr->uNumTools == 0) {
-        infoPtr->tools = COMCTL32_Alloc (sizeof(TTTOOL_INFO));
-        toolPtr = infoPtr->tools;
-    }
-    else {
-        TTTOOL_INFO *oldTools = infoPtr->tools;
-        infoPtr->tools =
-            COMCTL32_Alloc (sizeof(TTTOOL_INFO) * (infoPtr->uNumTools + 1));
-        memcpy (infoPtr->tools, oldTools,
-                infoPtr->uNumTools * sizeof(TTTOOL_INFO));
-        COMCTL32_Free (oldTools);
-        toolPtr = &infoPtr->tools[infoPtr->uNumTools];
+    if (infoPtr->uNumTools == 0)
+    {
+      infoPtr->tools = COMCTL32_Alloc(sizeof(TTTOOL_INFO));
+      toolPtr = infoPtr->tools;
+    } else
+    {
+      TTTOOL_INFO *oldTools = infoPtr->tools;
+
+      //CB: check if already exists!
+
+      infoPtr->tools = COMCTL32_Alloc (sizeof(TTTOOL_INFO)*(infoPtr->uNumTools+1));
+      memcpy (infoPtr->tools,oldTools,infoPtr->uNumTools*sizeof(TTTOOL_INFO));
+      COMCTL32_Free(oldTools);
+      toolPtr = &infoPtr->tools[infoPtr->uNumTools];
     }
 
     infoPtr->uNumTools++;
@@ -601,61 +611,62 @@ TOOLTIPS_AddToolA (HWND hwnd, WPARAM wParam, LPARAM lParam)
     toolPtr->rect   = lpToolInfo->rect;
     toolPtr->hinst  = lpToolInfo->hinst;
 
-    if ((lpToolInfo->hinst) && (HIWORD((INT)lpToolInfo->lpszText) == 0)) {
-//      TRACE (tooltips, "add string id %x!\n", (int)lpToolInfo->lpszText);
-        toolPtr->lpszText = (LPWSTR)lpToolInfo->lpszText;
-    }
-    else if (lpToolInfo->lpszText) {
-        if (lpToolInfo->lpszText == LPSTR_TEXTCALLBACKA) {
-//          TRACE (tooltips, "add CALLBACK!\n");
-            toolPtr->lpszText = LPSTR_TEXTCALLBACKW;
-        }
-        else {
-            INT len = lstrlenA (lpToolInfo->lpszText);
+    if ((lpToolInfo->hinst) && (HIWORD((INT)lpToolInfo->lpszText) == 0))
+    {
+//    TRACE (tooltips, "add string id %x!\n", (int)lpToolInfo->lpszText);
+      toolPtr->lpszText = (LPWSTR)lpToolInfo->lpszText;
+    } else if (lpToolInfo->lpszText)
+    {
+      if (lpToolInfo->lpszText == LPSTR_TEXTCALLBACKA)
+      {
+//      TRACE (tooltips, "add CALLBACK!\n");
+        toolPtr->lpszText = LPSTR_TEXTCALLBACKW;
+      } else
+      {
+        INT len = lstrlenA (lpToolInfo->lpszText);
 //          TRACE (tooltips, "add text \"%s\"!\n", lpToolInfo->lpszText);
-            toolPtr->lpszText = COMCTL32_Alloc ((len + 1)*sizeof(WCHAR));
-            lstrcpyAtoW (toolPtr->lpszText, lpToolInfo->lpszText);
-        }
-    }
+        toolPtr->lpszText = COMCTL32_Alloc((len+1)*sizeof(WCHAR));
+        lstrcpyAtoW (toolPtr->lpszText, lpToolInfo->lpszText);
+      }
+    } else toolPtr->lpszText = NULL;
 
     if (lpToolInfo->cbSize >= sizeof(TTTOOLINFOA))
         toolPtr->lParam = lpToolInfo->lParam;
 
     /* install subclassing hook */
-    if (toolPtr->uFlags & TTF_SUBCLASS) {
-        if (toolPtr->uFlags & TTF_IDISHWND) {
-            LPTT_SUBCLASS_INFO lpttsi =
-                (LPTT_SUBCLASS_INFO)GetPropA ((HWND)toolPtr->uId, COMCTL32_aSubclass);
-            if (lpttsi == NULL) {
-                lpttsi =
-                    (LPTT_SUBCLASS_INFO)COMCTL32_Alloc (sizeof(TT_SUBCLASS_INFO));
-                lpttsi->wpOrigProc =
-                    (WNDPROC)SetWindowLongA ((HWND)toolPtr->uId,
-                    GWL_WNDPROC,(LONG)TOOLTIPS_SubclassProc);
-                lpttsi->hwndToolTip = hwnd;
-                lpttsi->uRefCount++;
-                SetPropA ((HWND)toolPtr->uId, COMCTL32_aSubclass,
-                            (HANDLE)lpttsi);
-            }
+    if (toolPtr->uFlags & TTF_SUBCLASS)
+    {
+      if (toolPtr->uFlags & TTF_IDISHWND)
+      {
+        LPTT_SUBCLASS_INFO lpttsi =
+            (LPTT_SUBCLASS_INFO)GetPropA((HWND)toolPtr->uId,COMCTL32_aSubclass);
+        if (lpttsi == NULL)
+        {
+          lpttsi = (LPTT_SUBCLASS_INFO)COMCTL32_Alloc(sizeof(TT_SUBCLASS_INFO));
+          lpttsi->wpOrigProc =
+              (WNDPROC)SetWindowLongA ((HWND)toolPtr->uId,
+              GWL_WNDPROC,(LONG)TOOLTIPS_SubclassProc);
+          lpttsi->hwndToolTip = hwnd;
+          lpttsi->uRefCount++;
+          SetPropA ((HWND)toolPtr->uId,COMCTL32_aSubclass,(HANDLE)lpttsi);
+        }
 //          else
 //              WARN (tooltips, "A window tool must only be listed once!\n");
-        }
-        else {
-            LPTT_SUBCLASS_INFO lpttsi =
-                (LPTT_SUBCLASS_INFO)GetPropA (toolPtr->hwnd, COMCTL32_aSubclass);
-            if (lpttsi == NULL) {
-                lpttsi =
-                    (LPTT_SUBCLASS_INFO)COMCTL32_Alloc (sizeof(TT_SUBCLASS_INFO));
-                lpttsi->wpOrigProc =
-                    (WNDPROC)SetWindowLongA (toolPtr->hwnd,
-                    GWL_WNDPROC,(LONG)TOOLTIPS_SubclassProc);
-                lpttsi->hwndToolTip = hwnd;
-                lpttsi->uRefCount++;
-                SetPropA (toolPtr->hwnd, COMCTL32_aSubclass, (HANDLE)lpttsi);
-            }
-            else
-                lpttsi->uRefCount++;
-        }
+      } else
+      {
+        LPTT_SUBCLASS_INFO lpttsi =
+           (LPTT_SUBCLASS_INFO)GetPropA (toolPtr->hwnd, COMCTL32_aSubclass);
+        if (lpttsi == NULL)
+        {
+          lpttsi = (LPTT_SUBCLASS_INFO)COMCTL32_Alloc(sizeof(TT_SUBCLASS_INFO));
+          lpttsi->wpOrigProc =
+              (WNDPROC)SetWindowLongA (toolPtr->hwnd,
+              GWL_WNDPROC,(LONG)TOOLTIPS_SubclassProc);
+          lpttsi->hwndToolTip = hwnd;
+          lpttsi->uRefCount++;
+          SetPropA(toolPtr->hwnd,COMCTL32_aSubclass,(HANDLE)lpttsi);
+        } else lpttsi->uRefCount++;
+      }
 //      TRACE (tooltips, "subclassing installed!\n");
     }
 
@@ -1400,12 +1411,14 @@ TOOLTIPS_RelayEvent (HWND hwnd, WPARAM wParam, LPARAM lParam)
     LPMSG lpMsg = (LPMSG)lParam;
     POINT pt;
 
-    if (lParam == 0) {
-//      ERR (tooltips, "lpMsg == NULL!\n");
-        return 0;
+    if (lParam == 0)
+    {
+//    ERR (tooltips, "lpMsg == NULL!\n");
+      return 0;
     }
 
-    switch (lpMsg->message) {
+    switch (lpMsg->message)
+    {
         case WM_LBUTTONDOWN:
         case WM_LBUTTONUP:
         case WM_MBUTTONDOWN:
@@ -1413,9 +1426,9 @@ TOOLTIPS_RelayEvent (HWND hwnd, WPARAM wParam, LPARAM lParam)
         case WM_RBUTTONDOWN:
         case WM_RBUTTONUP:
             pt = lpMsg->pt;
-            ScreenToClient (lpMsg->hwnd, &pt);
+            ScreenToClient(lpMsg->hwnd,&pt);
             infoPtr->nOldTool = infoPtr->nTool;
-            infoPtr->nTool = TOOLTIPS_GetToolFromPoint (infoPtr, lpMsg->hwnd, &pt);
+            infoPtr->nTool = TOOLTIPS_GetToolFromPoint(infoPtr,lpMsg->hwnd,&pt);
 //          TRACE (tooltips, "tool (%x) %d %d\n",
 //                 hwnd, infoPtr->nOldTool, infoPtr->nTool);
             TOOLTIPS_Hide (hwnd, infoPtr);
@@ -1423,27 +1436,31 @@ TOOLTIPS_RelayEvent (HWND hwnd, WPARAM wParam, LPARAM lParam)
 
         case WM_MOUSEMOVE:
             pt = lpMsg->pt;
-            ScreenToClient (lpMsg->hwnd, &pt);
+            ScreenToClient(lpMsg->hwnd,&pt);
             infoPtr->nOldTool = infoPtr->nTool;
-            infoPtr->nTool = TOOLTIPS_GetToolFromPoint (infoPtr, lpMsg->hwnd, &pt);
+            infoPtr->nTool = TOOLTIPS_GetToolFromPoint(infoPtr,lpMsg->hwnd,&pt);
 //          TRACE (tooltips, "tool (%x) %d %d\n",
 //                 hwnd, infoPtr->nOldTool, infoPtr->nTool);
 //          TRACE (tooltips, "WM_MOUSEMOVE (%04x %ld %ld)\n",
 //                 hwnd, pt.x, pt.y);
-            if ((infoPtr->bActive) && (infoPtr->nTool != infoPtr->nOldTool)) {
-                if (infoPtr->nOldTool == -1) {
-                    SetTimer (hwnd, ID_TIMERSHOW, infoPtr->nInitialTime, 0);
-//                  TRACE (tooltips, "timer 1 started!\n");
-                }
-                else {
-                    TOOLTIPS_Hide (hwnd, infoPtr);
-                    SetTimer (hwnd, ID_TIMERSHOW, infoPtr->nReshowTime, 0);
-//                  TRACE (tooltips, "timer 2 started!\n");
-                }
+infoPtr->bActive = TRUE;//CB: somewhere reset, find it!!!
+            if (infoPtr->bActive && (infoPtr->nTool != infoPtr->nOldTool))
+            {
+              if (infoPtr->nOldTool == -1)
+              {
+                SetTimer(hwnd,ID_TIMERSHOW,infoPtr->nInitialTime,0);
+//              TRACE (tooltips, "timer 1 started!\n");
+              } else
+              {
+                TOOLTIPS_Hide(hwnd,infoPtr);
+                SetTimer (hwnd,ID_TIMERSHOW,infoPtr->nReshowTime,0);
+//              TRACE (tooltips, "timer 2 started!\n");
+              }
             }
-            if (infoPtr->nCurrentTool != -1) {
-                SetTimer (hwnd, ID_TIMERLEAVE, 100, 0);
-//              TRACE (tooltips, "timer 3 started!\n");
+            if (infoPtr->nCurrentTool != -1)
+            {
+              SetTimer(hwnd,ID_TIMERLEAVE,100,0);
+//            TRACE (tooltips, "timer 3 started!\n");
             }
             break;
     }
@@ -1654,26 +1671,26 @@ TOOLTIPS_TrackActivate (HWND hwnd, WPARAM wParam, LPARAM lParam)
     TOOLTIPS_INFO *infoPtr = TOOLTIPS_GetInfoPtr (hwnd);
     LPTTTOOLINFOA lpToolInfo = (LPTTTOOLINFOA)lParam;
 
-    if (lpToolInfo == NULL)
-        return 0;
-    if (lpToolInfo->cbSize < TTTOOLINFO_V1_SIZEA)
-        return FALSE;
+    if (lpToolInfo == NULL) return 0;
+    if (lpToolInfo->cbSize < TTTOOLINFO_V1_SIZEA) return FALSE;
 
-    if ((BOOL)wParam) {
-        /* activate */
-        infoPtr->nTrackTool = TOOLTIPS_GetToolFromInfoA (infoPtr, lpToolInfo);
-        if (infoPtr->nTrackTool != -1) {
-//          TRACE (tooltips, "activated!\n");
-            infoPtr->bTrackActive = TRUE;
-            TOOLTIPS_TrackShow (hwnd, infoPtr);
-        }
-    }
-    else {
-        /* deactivate */
-        TOOLTIPS_TrackHide (hwnd, infoPtr);
+    if ((BOOL)wParam)
+    {
+      /* activate */
+      infoPtr->nTrackTool = TOOLTIPS_GetToolFromInfoA(infoPtr,lpToolInfo);
+      if (infoPtr->nTrackTool != -1)
+      {
+//      TRACE (tooltips, "activated!\n");
+        infoPtr->bTrackActive = TRUE;
+        TOOLTIPS_TrackShow(hwnd,infoPtr);
+      }
+    } else
+    {
+      /* deactivate */
+      TOOLTIPS_TrackHide(hwnd,infoPtr);
 
-        infoPtr->bTrackActive = FALSE;
-        infoPtr->nTrackTool = -1;
+      infoPtr->bTrackActive = FALSE;
+      infoPtr->nTrackTool = -1;
 
 //      TRACE (tooltips, "deactivated!\n");
     }
@@ -1690,11 +1707,12 @@ TOOLTIPS_TrackPosition (HWND hwnd, WPARAM wParam, LPARAM lParam)
     infoPtr->xTrackPos = (INT)LOWORD(lParam);
     infoPtr->yTrackPos = (INT)HIWORD(lParam);
 
-    if (infoPtr->bTrackActive) {
+    if (infoPtr->bTrackActive)
+    {
 //      TRACE (tooltips, "[%d %d]\n",
 //             infoPtr->xTrackPos, infoPtr->yTrackPos);
 
-        TOOLTIPS_TrackShow (hwnd, infoPtr);
+      TOOLTIPS_TrackShow(hwnd,infoPtr);
     }
 
     return 0;
@@ -1721,12 +1739,10 @@ TOOLTIPS_UpdateTipTextA (HWND hwnd, WPARAM wParam, LPARAM lParam)
     TTTOOL_INFO *toolPtr;
     INT nTool;
 
-    if (lpToolInfo == NULL)
-        return 0;
-    if (lpToolInfo->cbSize < TTTOOLINFO_V1_SIZEA)
-        return FALSE;
+    if (lpToolInfo == NULL) return 0;
+    if (lpToolInfo->cbSize < TTTOOLINFO_V1_SIZEA) return FALSE;
 
-    nTool = TOOLTIPS_GetToolFromInfoA (infoPtr, lpToolInfo);
+    nTool = TOOLTIPS_GetToolFromInfoA(infoPtr,lpToolInfo);
     if (nTool == -1) return 0;
 
 //    TRACE (tooltips, "tool %d\n", nTool);
@@ -1736,30 +1752,31 @@ TOOLTIPS_UpdateTipTextA (HWND hwnd, WPARAM wParam, LPARAM lParam)
     /* copy tool text */
     toolPtr->hinst  = lpToolInfo->hinst;
 
-    if ((lpToolInfo->hinst) && (HIWORD((INT)lpToolInfo->lpszText) == 0)){
-        toolPtr->lpszText = (LPWSTR)lpToolInfo->lpszText;
-    }
-    else if (lpToolInfo->lpszText) {
-        if (lpToolInfo->lpszText == LPSTR_TEXTCALLBACKA)
-            toolPtr->lpszText = LPSTR_TEXTCALLBACKW;
-        else {
-            if (toolPtr->lpszText) {
-                COMCTL32_Free (toolPtr->lpszText);
-                toolPtr->lpszText = NULL;
-            }
-            if (lpToolInfo->lpszText) {
-                INT len = lstrlenA (lpToolInfo->lpszText);
-                toolPtr->lpszText = COMCTL32_Alloc ((len+1)*sizeof(WCHAR));
-                lstrcpyAtoW (toolPtr->lpszText, lpToolInfo->lpszText);
-            }
+    if ((lpToolInfo->hinst) && (HIWORD((INT)lpToolInfo->lpszText) == 0))
+    {
+      toolPtr->lpszText = (LPWSTR)lpToolInfo->lpszText;
+    } else if (lpToolInfo->lpszText)
+    {
+      if (lpToolInfo->lpszText == LPSTR_TEXTCALLBACKA) toolPtr->lpszText = LPSTR_TEXTCALLBACKW;
+      else
+      {
+        if (toolPtr->lpszText)
+        {
+          COMCTL32_Free(toolPtr->lpszText);
+          toolPtr->lpszText = NULL;
         }
+        if (lpToolInfo->lpszText)
+        {
+          INT len = lstrlenA(lpToolInfo->lpszText);
+          toolPtr->lpszText = COMCTL32_Alloc((len+1)*sizeof(WCHAR));
+          lstrcpyAtoW(toolPtr->lpszText,lpToolInfo->lpszText);
+        }
+      }
     }
 
     /* force repaint */
-    if (infoPtr->bActive)
-        TOOLTIPS_Show (hwnd, infoPtr);
-    else if (infoPtr->bTrackActive)
-        TOOLTIPS_TrackShow (hwnd, infoPtr);
+    if (infoPtr->bActive) TOOLTIPS_Show(hwnd,infoPtr);
+    else if (infoPtr->bTrackActive) TOOLTIPS_TrackShow(hwnd,infoPtr);
 
     return 0;
 }
@@ -1834,18 +1851,18 @@ TOOLTIPS_Create (HWND hwnd, WPARAM wParam, LPARAM lParam)
     INT nResult;
 
     /* allocate memory for info structure */
-    infoPtr = (TOOLTIPS_INFO *)COMCTL32_Alloc (sizeof(TOOLTIPS_INFO));
-    SetWindowLongA (hwnd, 0, (DWORD)infoPtr);
+    infoPtr = (TOOLTIPS_INFO *)COMCTL32_Alloc(sizeof(TOOLTIPS_INFO));
+    SetWindowLongA(hwnd,0,(DWORD)infoPtr);
 
     /* initialize info structure */
     infoPtr->bActive = TRUE;
     infoPtr->bTrackActive = FALSE;
-    infoPtr->clrBk   = GetSysColor (COLOR_INFOBK);
-    infoPtr->clrText = GetSysColor (COLOR_INFOTEXT);
+    infoPtr->clrBk   = RGB(0,0,0);//GetSysColor(COLOR_INFOBK);//CB: to change
+    infoPtr->clrText = RGB(255,255,255);//GetSysColor(COLOR_INFOTEXT);//CB: to change
 
     nclm.cbSize = sizeof(NONCLIENTMETRICSA);
-    SystemParametersInfoA (SPI_GETNONCLIENTMETRICS, 0, &nclm, 0);
-    infoPtr->hFont = CreateFontIndirectA (&nclm.lfStatusFont);
+    SystemParametersInfoA(SPI_GETNONCLIENTMETRICS,0,&nclm,0);
+    infoPtr->hFont = CreateFontIndirectA(&nclm.lfStatusFont);
 
     infoPtr->nMaxTipWidth = -1;
     infoPtr->nTool = -1;
@@ -1858,8 +1875,9 @@ TOOLTIPS_Create (HWND hwnd, WPARAM wParam, LPARAM lParam)
     infoPtr->nAutoPopTime   = 5000;
     infoPtr->nInitialTime   = 500;
 
-    nResult = (INT) SendMessageA (GetParent (hwnd), WM_NOTIFYFORMAT,
-                                  (WPARAM)hwnd, (LPARAM)NF_QUERY);
+    SetRectEmpty(&infoPtr->rcMargin);
+
+    nResult = (INT)SendMessageA(GetParent(hwnd),WM_NOTIFYFORMAT,(WPARAM)hwnd,(LPARAM)NF_QUERY);
 //    if (nResult == NFR_ANSI)
 //      TRACE (tooltips, " -- WM_NOTIFYFORMAT returns: NFR_ANSI\n");
 //    else if (nResult == NFR_UNICODE)
@@ -1867,7 +1885,7 @@ TOOLTIPS_Create (HWND hwnd, WPARAM wParam, LPARAM lParam)
 //    else
 //      FIXME (tooltips, " -- WM_NOTIFYFORMAT returns: error!\n");
 
-    SetWindowPos (hwnd, HWND_TOP, 0, 0, 0, 0, SWP_NOZORDER | SWP_HIDEWINDOW | SWP_NOACTIVATE);
+    SetWindowPos(hwnd,HWND_TOP,0,0,0,0,SWP_NOZORDER | SWP_HIDEWINDOW | SWP_NOACTIVATE);
 
     return 0;
 }
@@ -1876,44 +1894,47 @@ TOOLTIPS_Create (HWND hwnd, WPARAM wParam, LPARAM lParam)
 static LRESULT
 TOOLTIPS_Destroy (HWND hwnd, WPARAM wParam, LPARAM lParam)
 {
-    TOOLTIPS_INFO *infoPtr = TOOLTIPS_GetInfoPtr (hwnd);
+    TOOLTIPS_INFO *infoPtr = TOOLTIPS_GetInfoPtr(hwnd);
     TTTOOL_INFO *toolPtr;
     INT i;
 
     /* free tools */
-    if (infoPtr->tools) {
-        for (i = 0; i < infoPtr->uNumTools; i++) {
-            toolPtr = &infoPtr->tools[i];
-            if ((toolPtr->hinst) && (toolPtr->lpszText)) {
-                if (toolPtr->lpszText != LPSTR_TEXTCALLBACKW)
-                    COMCTL32_Free (toolPtr->lpszText);
-            }
-
-            /* remove subclassing */
-            if (toolPtr->uFlags & TTF_SUBCLASS) {
-                LPTT_SUBCLASS_INFO lpttsi;
-
-                if (toolPtr->uFlags & TTF_IDISHWND)
-                    lpttsi = (LPTT_SUBCLASS_INFO)GetPropA ((HWND)toolPtr->uId, COMCTL32_aSubclass);
-                else
-                    lpttsi = (LPTT_SUBCLASS_INFO)GetPropA (toolPtr->hwnd, COMCTL32_aSubclass);
-
-                if (lpttsi) {
-                    SetWindowLongA ((HWND)toolPtr->uId, GWL_WNDPROC,
-                                      (LONG)lpttsi->wpOrigProc);
-                    RemovePropA ((HWND)toolPtr->uId, COMCTL32_aSubclass);
-                    COMCTL32_Free (&lpttsi);
-                }
-            }
+    if (infoPtr->tools)
+    {
+      for (i = 0;i < infoPtr->uNumTools;i++)
+      {
+        toolPtr = &infoPtr->tools[i];
+        if ((toolPtr->hinst) && (toolPtr->lpszText))
+        {
+          if (toolPtr->lpszText != LPSTR_TEXTCALLBACKW) COMCTL32_Free(toolPtr->lpszText);
         }
-        COMCTL32_Free (infoPtr->tools);
+
+        /* remove subclassing */
+        if (toolPtr->uFlags & TTF_SUBCLASS)
+        {
+          LPTT_SUBCLASS_INFO lpttsi;
+
+          if (toolPtr->uFlags & TTF_IDISHWND)
+              lpttsi = (LPTT_SUBCLASS_INFO)GetPropA((HWND)toolPtr->uId,COMCTL32_aSubclass);
+          else
+              lpttsi = (LPTT_SUBCLASS_INFO)GetPropA(toolPtr->hwnd,COMCTL32_aSubclass);
+
+          if (lpttsi)
+          {
+            SetWindowLongA ((HWND)toolPtr->uId,GWL_WNDPROC,(LONG)lpttsi->wpOrigProc);
+            RemovePropA ((HWND)toolPtr->uId, COMCTL32_aSubclass);
+            COMCTL32_Free (&lpttsi);
+          }
+        }
+      }
+      COMCTL32_Free (infoPtr->tools);
     }
 
     /* delete font */
     DeleteObject (infoPtr->hFont);
 
     /* free tool tips info data */
-    COMCTL32_Free (infoPtr);
+    COMCTL32_Free(infoPtr);
 
     return 0;
 }
@@ -1958,11 +1979,14 @@ TOOLTIPS_MouseMessage (HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 static LRESULT
 TOOLTIPS_NCCreate (HWND hwnd, WPARAM wParam, LPARAM lParam)
 {
-    DWORD dwStyle = GetWindowLongA (hwnd, GWL_STYLE);
+    DWORD dwStyle = GetWindowLongA(hwnd,GWL_STYLE);
+    DWORD dwExStyle = GetWindowLongA(hwnd,GWL_EXSTYLE);
 
     dwStyle &= 0x0000FFFF;
     dwStyle |= (WS_POPUP | WS_BORDER | WS_CLIPSIBLINGS);
-    SetWindowLongA (hwnd, GWL_STYLE, dwStyle);
+    SetWindowLongA(hwnd,GWL_STYLE,dwStyle);
+
+    SetWindowLongA(hwnd,GWL_EXSTYLE,dwExStyle | WS_EX_TOOLWINDOW);
 
     return TRUE;
 }
@@ -2072,24 +2096,25 @@ TOOLTIPS_Timer (HWND hwnd, WPARAM wParam, LPARAM lParam)
 
     switch (wParam)
     {
-        case ID_TIMERSHOW:
-            KillTimer (hwnd, ID_TIMERSHOW);
-            if (TOOLTIPS_CheckTool (hwnd, TRUE) == infoPtr->nTool)
-                TOOLTIPS_Show (hwnd, infoPtr);
-            break;
+      case ID_TIMERSHOW:
+          KillTimer (hwnd,ID_TIMERSHOW);
+          if (TOOLTIPS_CheckTool(hwnd,TRUE) == infoPtr->nTool)
+              TOOLTIPS_Show(hwnd,infoPtr);
+          break;
 
-        case ID_TIMERPOP:
-            TOOLTIPS_Hide (hwnd, infoPtr);
-            break;
+      case ID_TIMERPOP:
+          TOOLTIPS_Hide (hwnd, infoPtr);
+          break;
 
-        case ID_TIMERLEAVE:
-            KillTimer (hwnd, ID_TIMERLEAVE);
-            if (TOOLTIPS_CheckTool (hwnd, FALSE) == -1) {
-                infoPtr->nTool = -1;
-                infoPtr->nOldTool = -1;
-                TOOLTIPS_Hide (hwnd, infoPtr);
-            }
-            break;
+      case ID_TIMERLEAVE:
+          KillTimer (hwnd,ID_TIMERLEAVE);
+          if (TOOLTIPS_CheckTool(hwnd,FALSE) == -1)
+          {
+            infoPtr->nTool = -1;
+            infoPtr->nOldTool = -1;
+            TOOLTIPS_Hide(hwnd,infoPtr);
+          }
+          break;
     }
     return 0;
 }
