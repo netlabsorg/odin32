@@ -1,4 +1,4 @@
-/* $Id: aspilib.cpp,v 1.6 2000-12-16 15:42:41 sandervl Exp $ */
+/* $Id: aspilib.cpp,v 1.7 2001-01-19 23:04:26 sandervl Exp $ */
 /*
  *  ASPI Router Library
  *  for Odin WNASPI32.DLL
@@ -208,7 +208,7 @@ BOOL scsiObj::init(ULONG bufsize)
 
 
    rc = DosCreateMutexSem(WNASPI32_MUTEX_NAME, (HMTX*)&hmtxDriver,
-                          0, TRUE);
+                          0, FALSE);
    if(rc == ERROR_DUPLICATE_NAME) {
 	rc = DosOpenMutexSem(WNASPI32_MUTEX_NAME, (HMTX*)&hmtxDriver);
    }
