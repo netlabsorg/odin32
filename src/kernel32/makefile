@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.45 1999-10-23 12:34:47 sandervl Exp $
+# $Id: makefile,v 1.46 1999-10-24 22:51:21 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -22,7 +22,7 @@ CXXFLAGS = $(CXXFLAGS) -I$(PDWIN32_INCLUDE) /Tm+
 OBJS = KERNEL32.OBJ KOBJECTS.OBJ CONSOLE.OBJ CONIN.OBJ \
 CONBUFFER.OBJ CONOUT.OBJ UNICODE.OBJ network.OBJ DEVIO.OBJ \
 profile.obj THREAD.OBJ virtual.obj THUNK.OBJ OBSOLETE.OBJ COMM.OBJ\
-MESSAGE.OBJ RESOURCE.OBJ EXCEPTIONS.OBJ \
+MESSAGE.OBJ RESOURCE.OBJ EXCEPTIONS.OBJ heapshared.obj \
 LFILE.OBJ NPIPE.OBJ oslibdos.obj oslibmisc.obj MISC.OBJ EXCEPTUTIL.OBJ \
 LANG.OBJ ICCIO.OBJ MAP.OBJ WIN32UTIL.OBJ heap.OBJ heapstring.obj \
 os2heap.OBJ vmutex.OBJ initterm.OBJ handlemanager.OBJ winresmenu.obj \
@@ -99,7 +99,7 @@ disk.obj: disk.cpp \
     $(PDWIN32_INCLUDE)\unicode.h
 
 atom.obj: atom.cpp \
-    $(PDWIN32_INCLUDE)\unicode.h
+    $(PDWIN32_INCLUDE)\unicode.h 
 
 time.obj: time.cpp \
     $(PDWIN32_INCLUDE)\unicode.h
@@ -131,7 +131,7 @@ os2heap.OBJ: \
     $(PDWIN32_INCLUDE)\win32type.h \
     os2heap.h
 
-initterm.OBJ: .\initterm.cpp initterm.h
+initterm.OBJ: .\initterm.cpp initterm.h  heapshared.h 
 
 thunk.OBJ: \
     .\thunk.cpp \
@@ -310,7 +310,7 @@ hmsemaphore.obj: \
         .\hmdevice.h \
         .\hmopen32.h
 
-hmmmap.obj: hmmmap.cpp hmdevice.h hmopen32.h mmap.h
+hmmmap.obj: hmmmap.cpp hmdevice.h hmopen32.h mmap.h heapshared.h
 
 conprop.OBJ: \
         .\conprop.h \
@@ -323,7 +323,7 @@ async.OBJ: \
         $(PDWIN32_INCLUDE)\unicode.h
 
 virtual.obj:   virtual.cpp $(PDWIN32_INCLUDE)\win\virtual.h $(PDWIN32_INCLUDE)\handlemanager.h mmap.h
-mmap.obj:      mmap.cpp mmap.h $(PDWIN32_INCLUDE)\vmutex.h oslibdos.h
+mmap.obj:      mmap.cpp mmap.h $(PDWIN32_INCLUDE)\vmutex.h oslibdos.h heapshared.h
 
 pefile.OBJ:    pefile.cpp $(PDWIN32_INCLUDE)\pefile.h $(PDWIN32_INCLUDE)\winres.h
 
@@ -360,6 +360,9 @@ cvtcursorgrp.obj: cvtcursorgrp.cpp $(PDWIN32_INCLUDE)\wincursor.h $(PDWIN32_INCL
 
 interlock.obj: interlock.asm
 toolhelp.obj: toolhelp.cpp
+
+heapshared.obj: heapshared.cpp heapshared.h
+
 
 clean:
         $(RM) *.OBJ *.LIB *.dll *.lrf *.res *.map *.pch

@@ -1,4 +1,4 @@
-/* $Id: initterm.cpp,v 1.16 1999-10-23 12:34:46 sandervl Exp $ */
+/* $Id: initterm.cpp,v 1.17 1999-10-24 22:51:21 sandervl Exp $ */
 
 /*
  * KERNEL32 DLL entry point
@@ -39,6 +39,7 @@
 #include <win32type.h>
 #include <odinlx.h>
 #include "oslibmisc.h"
+#include "heapshared.h"
 
 /*-------------------------------------------------------------------*/
 /* A clean up routine registered with DosExitList must be used if    */
@@ -99,6 +100,9 @@ unsigned long SYSTEM _DLL_InitTerm(unsigned long hModule, unsigned long
             _ctordtorInit();
 
             CheckVersionFromHMOD(PE2LX_VERSION, hModule); /*PLF Wed  98-03-18 05:28:48*/
+
+            if(InitializeSharedHeap() == FALSE)
+                return 0UL;
 
             if(RegisterLxDll(hModule, 0, 0) == FALSE)
                 return 0UL;
