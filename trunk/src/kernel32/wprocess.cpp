@@ -1,4 +1,4 @@
-/* $Id: wprocess.cpp,v 1.43 1999-10-27 18:11:40 sandervl Exp $ */
+/* $Id: wprocess.cpp,v 1.44 1999-11-05 14:06:44 sandervl Exp $ */
 
 /*
  * Win32 process functions
@@ -559,7 +559,7 @@ HANDLE WIN32API GetModuleHandleA(LPCTSTR lpszModule)
   	if(dot)
 		*dot = 0;
 
-  	if(!fDllModule && WinExe && !strcmpi(lpszModule, WinExe->getModuleName())) {
+  	if(!fDllModule && WinExe && !strcmpi(szModule, WinExe->getModuleName())) {
 		hMod = WinExe->getInstanceHandle();
 	}
 	else {
