@@ -1,4 +1,4 @@
- /* $Id: ChangeLog,v 1.1066 2000-08-14 08:11:48 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.1067 2000-08-14 15:52:08 cbratschi Exp $ */
 
  2000-08-14: Sander van Leeuwen <sandervl@xs4all.nl>
     - KERNEL32: Fixed sharing violations errors in OSLibDosCreateFile
@@ -7,6 +7,7 @@
 
  2000-08-13: Christoph Bratschi <cbratschi@datacomm.ch>
     - COMCTL32: added propsheet, treeview Corel WINE 20000807 changes
+    - GDI32: activated WinDrawText code
 
  2000-08-12: Sander van Leeuwen <sandervl@xs4all.nl>
     - KERNEL32: Do not set OPEN_ACCESS_READWRITE flag in OSLibDosCreateFile
