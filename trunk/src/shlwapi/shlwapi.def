@@ -1,4 +1,4 @@
-; $Id: shlwapi.def,v 1.2 1999-11-02 21:11:07 phaller Exp $
+; $Id: shlwapi.def,v 1.3 1999-11-03 19:36:34 sandervl Exp $
 
 LIBRARY SHLWAPI INITINSTANCE TERMINSTANCE
 DATA MULTIPLE NONSHARED
@@ -175,8 +175,10 @@ IMPORTS
     ; 166    stub    HashData
     ; 167    stub    IntlStrEqWorkerA
     ; 168    stub    IntlStrEqWorkerW
-    ; 169    stdcall PathAddBackslashA (ptr) PathAddBackslashA
-    ; 170    stdcall PathAddBackslashW (ptr) PathAddBackslashW
+
+;    PathAddBackslashA 				= SHELL32.PathAddBackslashA
+;    PathAddBackslashW 				= SHELL32.PathAddBackslashW
+
     ; 171    stub    PathAddExtensionA
     ; 172    stub    PathAddExtensionW
     ; 173    stdcall PathAppendA (str str) PathAppendA
@@ -199,8 +201,8 @@ IMPORTS
     ; 190    stub    PathFileExistsW
     ; 191    stdcall PathFindExtensionA (ptr) PathFindExtensionA
     ; 192    stdcall PathFindExtensionW (ptr) PathFindExtensionW
-    ; 193    stdcall PathFindFileNameA (ptr) PathFindFilenameA
-    ; 194    stdcall PathFindFileNameW (ptr) PathFindFilenameW
+;    PathFindFileNameA            		= SHELL32.PathFindFilenameA
+;    PathFindFileNameW            		= SHELL32.PathFindFilenameW
     ; 195    stub    PathFindNextComponentA
     ; 196    stub    PathFindNextComponentW
     ; 197    stdcall PathFindOnPathA (ptr ptr) PathFindOnPathA
@@ -221,8 +223,10 @@ IMPORTS
     ; 212    stub    PathIsPrefixW
     ; 213    stdcall PathIsRelativeA (ptr) PathIsRelativeA
     ; 214    stdcall PathIsRelativeW (ptr) PathIsRelativeW
-    ; 215    stdcall PathIsRootA(str) PathIsRootA
-    ; 216    stdcall PathIsRootW(wstr) PathIsRootW
+
+;    PathIsRootA				= SHELL32.PathIsRootA
+;    PathIsRootW				= SHELL32.PathIsRootW
+
     ; 217    stub    PathIsSameRootA
     ; 218    stub    PathIsSameRootW
     ; 219    stub    PathIsSystemFolderA
@@ -239,8 +243,10 @@ IMPORTS
     ; 230    stub    PathMakePrettyW
     ; 231    stub    PathMakeSystemFolderA
     ; 232    stub    PathMakeSystemFolderW
-    ; 233    stdcall PathMatchSpecA  (str str) PathMatchSpecA
-    ; 234    stdcall PathMatchSpecW  (str str) PathMatchSpecW
+
+;    PathMatchSpecA		       = SHELL32.PathMatchSpecA
+;    PathMatchSpecW		       = SHELL32.PathMatchSpecW
+
     ; 235    stub    PathParseIconLocationA
     ; 236    stub    PathParseIconLocationW
     ; 237    stdcall PathQuoteSpacesA (ptr) PathQuoteSpacesW
@@ -250,14 +256,16 @@ IMPORTS
     ; 241    stub    PathRemoveArgsA
     ; 242    stub    PathRemoveArgsW
 
-    PathRemoveBackslashA               = SHELL32.PathRemoveBackslashA
-    PathRemoveBackslashW               = SHELL32.PathRemoveBackslashW
+;    PathRemoveBackslashA               = SHELL32.PathRemoveBackslashA
+;    PathRemoveBackslashW               = SHELL32.PathRemoveBackslashW
 
     ; 245    stdcall PathRemoveBlanksA(str) PathRemoveBlanksA
     ; 246    stdcall PathRemoveBlanksW(wstr) PathRemoveBlanksW
     ; 247    stub    PathRemoveExtensionA
     ; 248    stub    PathRemoveExtensionW
-    ; 249    stdcall PathRemoveFileSpecA (str) PathRemoveFileSpecA
+
+;    PathRemoveFileSpecA			= SHELL32.PathRemoveFileSpec
+
     ; 250    stub    PathRemoveFileSpecW
     ; 251    stub    PathRenameExtensionA
     ; 252    stub    PathRenameExtensionW
@@ -408,6 +416,15 @@ IMPORTS
     ;
 
 EXPORTS
-    PathRemoveBackslashA              @243
-    PathRemoveBackslashW              @244
+    PathAddBackslashA = _PathAddBackslashA@4			@169
+    PathAddBackslashW = _PathAddBackslashW@4			@170
+    PathFindFileNameA = _PathFindFilenameA@4			@193
+    PathFindFileNameW = _PathFindFilenameW@4			@194
+    PathIsRootA	      = _PathIsRootA@4				@215
+    PathIsRootW	      = _PathIsRootW@4				@216
+    PathMatchSpecA    = _PathMatchSpecA@8			@233
+    PathMatchSpecW    = _PathMatchSpecA@8			@234
+    PathRemoveBackslashA = _PathRemoveBackslashA@4             	@243
+    PathRemoveBackslashW = _PathRemoveBackslashA@4             	@244
+    PathRemoveFileSpecA  = _PathRemoveFileSpecA@4		@249
 
