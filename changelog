@@ -1,4 +1,4 @@
-/* $Id: changelog,v 1.2310 2002-09-16 13:57:56 sandervl Exp $ */
+/* $Id: changelog,v 1.2311 2002-09-16 16:16:31 sandervl Exp $ */
 
  2002-09-16: Sander van Leeuwen <sandervl@innotek   >
     - COMCTL32: o LISTVIEW_ProcessLetterKeys bugfix
@@ -6,6 +6,10 @@
                   when unloaded.
                 o Don't recycle handles too soon. That makes it more difficult
                   to interpret the logfile.
+
+ 2002-09-16: Platon Fomichev <platon@innotek   >
+    - USER32:   o Combobox fix to update selected item when the control is rolled
+                  up
 
  2001-09-15: Dietrich Teickner <Dietrich_Teickner@t-online   >
     - SHELL32:  o Wine resync for shfileop.c
