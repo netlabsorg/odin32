@@ -1,4 +1,4 @@
-/* $Id: oslibmsgtranslate.cpp,v 1.5 1999-12-29 14:37:16 sandervl Exp $ */
+/* $Id: oslibmsgtranslate.cpp,v 1.6 1999-12-29 22:54:01 cbratschi Exp $ */
 /*
  * Window message translation functions for OS/2
  *
@@ -118,7 +118,7 @@ BOOL OS2ToWinMsgTranslate(void *pThdb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode
   }
   winMsg->time = os2Msg->time;
   winMsg->pt.x = os2Msg->ptl.x;
-  winMsg->pt.y = ScreenHeight - os2Msg->ptl.y - 1;
+  winMsg->pt.y = mapScreenY(os2Msg->ptl.y);
   if(win32wnd) //==0 for WM_CREATE
     winMsg->hwnd = win32wnd->getWindowHandle();
 
@@ -291,7 +291,7 @@ BOOL OS2ToWinMsgTranslate(void *pThdb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode
             point.x         = (*(POINTS *)&os2Msg->mp1).x;
             point.y         = (*(POINTS *)&os2Msg->mp1).y;
             ClientPoint.x   = point.x;
-            ClientPoint.y   = MapOS2ToWin32Y(os2Msg->hwnd, 1, point.y);
+            ClientPoint.y   = mapY(os2Msg->hwnd,point.y);
 
             winMsg->message = WINWM_LBUTTONDOWN + (os2Msg->msg - WM_BUTTON1DOWN);
             winMsg->lParam  = MAKELONG(ClientPoint.x, ClientPoint.y); //client coordinates
@@ -334,7 +334,7 @@ BOOL OS2ToWinMsgTranslate(void *pThdb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode
         } else
         {
           winMsg->wParam = (WPARAM)keystate;
-          winMsg->lParam  = MAKELONG(SHORT1FROMMP(os2Msg->mp1), MapOS2ToWin32Y(win32wnd, SHORT2FROMMP(os2Msg->mp1)));
+          winMsg->lParam  = MAKELONG(SHORT1FROMMP(os2Msg->mp1),mapY(win32wnd,SHORT2FROMMP(os2Msg->mp1)));
         }
         //OS/2 Window coordinates -> Win32 Window coordinates
         winMsg->message = setcursormsg;
@@ -362,7 +362,7 @@ BOOL OS2ToWinMsgTranslate(void *pThdb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode
             POINTL pointl;
             WinQueryPointerPos(HWND_DESKTOP, &pointl);
             x = pointl.x;
-            y = ScreenHeight - y;
+            y = mapScreenY(y);
         }
         switch(SHORT1FROMMP(os2Msg->mp1)) {
         case SC_MOVE:
@@ -570,7 +570,7 @@ VirtualKeyFound:
         pt.x = (*(POINTS *)&os2Msg->mp1).x;
         pt.y = (*(POINTS *)&os2Msg->mp1).y;
 
-        MapOS2ToWin32Point(OSLIB_HWND_DESKTOP,os2Msg->hwnd,&pt);
+        mapOS2ToWin32Point(os2Msg->hwnd,OSLIB_HWND_DESKTOP,&pt);
         winMsg->message  = WINWM_NCHITTEST;
         winMsg->wParam  = 0;
         winMsg->lParam  = MAKELONG((USHORT)pt.x, (USHORT)pt.y);
@@ -579,12 +579,11 @@ VirtualKeyFound:
 
     case WM_CONTEXTMENU:
     {
-        POINTL pt;
+        OSLIBPOINT pt;
 
         pt.x = (*(POINTS *)&os2Msg->mp1).x;
         pt.y = (*(POINTS *)&os2Msg->mp1).y;
-        WinMapWindowPoints(os2Msg->hwnd,HWND_DESKTOP,&pt,1);
-        pt.y = WinQuerySysValue(HWND_DESKTOP,SV_CYSCREEN) - pt.y -1;
+        mapOS2ToWin32Point(os2Msg->hwnd,OSLIB_HWND_DESKTOP,&pt);
         winMsg->message = WINWM_CONTEXTMENU;
         winMsg->wParam  = (WPARAM)win32wnd->getWindowHandle();
         winMsg->lParam  = MAKELONG((USHORT)pt.x, (USHORT)pt.y);

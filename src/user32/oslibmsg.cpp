@@ -1,4 +1,4 @@
-/* $Id: oslibmsg.cpp,v 1.18 1999-12-29 14:37:16 sandervl Exp $ */
+/* $Id: oslibmsg.cpp,v 1.19 1999-12-29 22:54:00 cbratschi Exp $ */
 /*
  * Window message translation functions for OS/2
  *
@@ -347,7 +347,7 @@ DWORD OSLibWinGetMessagePos()
       return 0;
    }
    //convert to windows coordinates
-   return MAKEULONG(ptl.x, ScreenHeight - ptl.y - 1);
+   return MAKEULONG(ptl.x,mapScreenY(ptl.y));
 }
 //******************************************************************************
 //******************************************************************************

@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.124 1999-12-29 14:37:17 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.125 1999-12-29 22:54:02 cbratschi Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -117,12 +117,8 @@ Win32BaseWindow::Win32BaseWindow(HWND os2Handle,VOID* win32WndProc) : GenericObj
         return;
   }
 
-  OSLibWinQueryWindowRect(OS2Hwnd,&rectWindow);
-  rectClient = rectWindow;
-  rectClient.bottom -= rectClient.top;
-  rectClient.top = 0;
-  rectClient.right -= rectClient.left;
-  rectClient.left = 0;
+  OSLibWinQueryWindowRect(OS2Hwnd,&rectClient,RELATIVE_TO_WINDOW);
+  OSLibWinQueryWindowRect(OS2Hwnd,&rectWindow,RELATIVE_TO_SCREEN);
 
   setOldWndProc(SubclassWithDefHandler(OS2Hwnd));
 }

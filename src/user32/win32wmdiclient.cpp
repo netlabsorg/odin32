@@ -1,4 +1,4 @@
-/* $Id: win32wmdiclient.cpp,v 1.19 1999-12-29 14:37:18 sandervl Exp $ */
+/* $Id: win32wmdiclient.cpp,v 1.20 1999-12-29 22:54:03 cbratschi Exp $ */
 /*
  * Win32 MDI Client Window Class for OS/2
  *
@@ -1033,13 +1033,13 @@ void WINAPI ScrollChildren(HWND hWnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
   {
     GetScrollRange(hWnd,SB_HORZ,&minPos,&maxPos);
     curPos = GetScrollPos(hWnd,SB_HORZ);
-    length = win32wnd->getWindowWidth()/2;
+    length = win32wnd->getClientWidth()/2;
     shift = GetSystemMetrics(SM_CYHSCROLL);
   } else if (uMsg == WM_VSCROLL)
   {
     GetScrollRange(hWnd,SB_VERT,&minPos,&maxPos);
     curPos = GetScrollPos(hWnd,SB_VERT);
-    length = win32wnd->getWindowHeight()/2;
+    length = win32wnd->getClientHeight()/2;
     shift = GetSystemMetrics(SM_CXVSCROLL);
   } else return;
 

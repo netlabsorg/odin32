@@ -1,4 +1,4 @@
-/* $Id: caret.cpp,v 1.8 1999-12-02 16:34:43 cbratschi Exp $ */
+/* $Id: caret.cpp,v 1.9 1999-12-29 22:53:59 cbratschi Exp $ */
 
 /*
  * Caret functions for USER32
@@ -147,7 +147,7 @@ BOOL WIN32API SetCaretPos (int x, int y)
         }
         else
         {
-           long height = wnd->getWindowHeight();
+           long height = wnd->getClientHeight();
            caretPos.y = height - caretPos.y - 1;
            xNew = caretPos.x;
            yNew = caretPos.y - cursorInfo.cy;
@@ -196,7 +196,7 @@ BOOL WIN32API GetCaretPos (PPOINT pPoint)
             cursorInfo.x = caretPos.x;
             cursorInfo.y = caretPos.y;
          } else {
-            long height  = wnd->getWindowHeight();
+            long height  = wnd->getClientHeight();
             caretPos.y  += cursorInfo.cy;
             cursorInfo.y = height - caretPos.y - 1;
          }
