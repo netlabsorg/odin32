@@ -1,4 +1,4 @@
-/* $Id: d16strat.c,v 1.3 1999-11-10 01:45:30 bird Exp $
+/* $Id: d16strat.c,v 1.4 2000-02-15 23:39:18 bird Exp $
  *
  * d16strat.c - 16-bit strategy routine, device headers, device_helper (ptr)
  *              and 16-bit IOClts.
@@ -29,6 +29,7 @@
 
 #include "dev1632.h"
 #include "dev16.h"
+#include "win32k.h"
 
 
 /*******************************************************************************
@@ -87,7 +88,6 @@ USHORT NEAR dev1GenIOCtl(PRP_GENIOCTL pRp);
  */
 USHORT NEAR strategy(PRPH pRpH, unsigned short usDev)
 {
-
     switch (pRpH->Cmd)
     {
         case CMDInit:                   /* INIT command */
@@ -144,7 +144,8 @@ USHORT dev0GenIOCtl(PRP_GENIOCTL pRp)
             case D16_IOCTL_GETKRNLOTES:
             {
                 ULONG ulLin;
-                if (DevHelp_VirtToLin(SELECTOROF(pRp->DataPacket), OFFSETOF(pRp->DataPacket), &ulLin) != NO_ERROR)
+                if (DevHelp_VirtToLin(SELECTOROF(pRp->DataPacket), OFFSETOF(pRp->DataPacket),
+                                      &ulLin) != NO_ERROR)
                     return STATUS_DONE | STERR | ERROR_I24_INVALID_PARAMETER;
                 return CallGetOTEs32(ulLin);
             }
@@ -155,6 +156,36 @@ USHORT dev0GenIOCtl(PRP_GENIOCTL pRp)
                 break;
         }
     }
+    else if (pRp->Category == IOCTL_W32K_K32 || pRp->Category == IOCTL_W32K_ELF)
+    {
+        RP32GENIOCTL rp32Init = {0};
+        rp32Init.rph.Len = pRp->rph.Len;
+        rp32Init.rph.Unit = pRp->rph.Unit;
+        rp32Init.rph.Cmd = pRp->rph.Cmd;
+        rp32Init.rph.Status = pRp->rph.Status;
+        rp32Init.rph.Flags = pRp->rph.Flags;
+        rp32Init.rph.Link = (ULONG)pRp->rph.Link;
+        rp32Init.Category = pRp->Category;
+        rp32Init.Function = pRp->Function;
+        rp32Init.sfn = pRp->sfn;
+        rp32Init.DataLen = pRp->DataLen;
+        rp32Init.ParmLen = pRp->ParmLen;
+
+        if (DevHelp_VirtToLin(SELECTOROF(pRp->DataPacket), OFFSETOF(pRp->DataPacket),
+                              (PLIN)&rp32Init.DataPacket) != NO_ERROR)
+            return STATUS_DONE | STERR | ERROR_I24_INVALID_PARAMETER;
+        if (DevHelp_VirtToLin(SELECTOROF(pRp->ParmPacket), OFFSETOF(pRp->ParmPacket),
+                              (PLIN)&rp32Init.ParmPacket) != NO_ERROR)
+            return STATUS_DONE | STERR | ERROR_I24_INVALID_PARAMETER;
+
+        if (pRp->Category == IOCTL_W32K_ELF)
+            rc = CallElfIOCtl(SSToDS_16a(&rp32Init));
+        else
+            rc = CallWin32kIOCtl(SSToDS_16a(&rp32Init));
+
+        return rc;
+    }
+
 
     return STATUS_DONE | STERR | ERROR_I24_INVALID_PARAMETER;
 }
@@ -168,7 +199,37 @@ USHORT dev0GenIOCtl(PRP_GENIOCTL pRp)
  */
 USHORT dev1GenIOCtl(PRP_GENIOCTL pRp)
 {
-    pRp = pRp;
+    if (pRp->Category == IOCTL_W32K_K32 || pRp->Category == IOCTL_W32K_ELF)
+    {
+        USHORT          rc;
+        RP32GENIOCTL    rp32Init = {0};
+        rp32Init.rph.Len = pRp->rph.Len;
+        rp32Init.rph.Unit = pRp->rph.Unit;
+        rp32Init.rph.Cmd = pRp->rph.Cmd;
+        rp32Init.rph.Status = pRp->rph.Status;
+        rp32Init.rph.Flags = pRp->rph.Flags;
+        rp32Init.rph.Link = (ULONG)pRp->rph.Link;
+        rp32Init.Category = pRp->Category;
+        rp32Init.Function = pRp->Function;
+        rp32Init.sfn = pRp->sfn;
+        rp32Init.DataLen = pRp->DataLen;
+        rp32Init.ParmLen = pRp->ParmLen;
+
+        if (DevHelp_VirtToLin(SELECTOROF(pRp->DataPacket), OFFSETOF(pRp->DataPacket),
+                              (PLIN)&rp32Init.DataPacket) != NO_ERROR)
+            return STATUS_DONE | STERR | ERROR_I24_INVALID_PARAMETER;
+        if (DevHelp_VirtToLin(SELECTOROF(pRp->ParmPacket), OFFSETOF(pRp->ParmPacket),
+                              (PLIN)&rp32Init.ParmPacket) != NO_ERROR)
+            return STATUS_DONE | STERR | ERROR_I24_INVALID_PARAMETER;
+
+        if (pRp->Category == IOCTL_W32K_ELF)
+            rc = CallElfIOCtl(SSToDS_16a(&rp32Init));
+        else
+            rc = CallWin32kIOCtl(SSToDS_16a(&rp32Init));
+
+        return rc;
+    }
+
     return STATUS_DONE | STERR | ERROR_I24_INVALID_PARAMETER;
 }
 

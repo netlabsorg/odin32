@@ -1,4 +1,4 @@
-; $Id: devfirst.asm,v 1.2 1999-10-27 02:02:54 bird Exp $
+; $Id: devfirst.asm,v 1.3 2000-02-15 23:39:19 bird Exp $
 ;
 ; DevFirst - entrypoint and segment definitions
 ;
@@ -31,6 +31,8 @@
     public _strategyAsm0
     public _strategyAsm1
     public _CallGetOTEs32
+    public _CallElfIOCtl
+    public _CallWin32kIOCtl
     public _SSToDS_16a
     public GetOS2KrnlMTE
 
@@ -40,6 +42,8 @@
 ;
     extrn _TKSSBase16:dword
     extrn GETOTES32:FAR
+    extrn ELFIOCTL:FAR
+    extrn WIN32KIOCTL:FAR
     .286p
     extrn _strategy:near
 
@@ -83,7 +87,7 @@ _strategyAsm endp
 ; Thunk procedure for R0Init32.
 ; @cproto    USHORT NEAR CallGetOTEs32(ULONG addressOTEBuf);
 ; @returns   Same as GetOTEs32.
-; @param     addressOTEBuf  32-bit pointer to request data.
+; @param     address of OTEBuf  32-bit pointer to request data.
 ; @status    completely implemented.
 ; @author    knut st. osmundsen
 _CallGetOTEs32 PROC NEAR
@@ -95,6 +99,44 @@ _CallGetOTEs32 PROC NEAR
     pop     ds
     retn
 _CallGetOTEs32 ENDP
+
+
+
+
+;;
+; Thunk procedure for .
+; @cproto    USHORT NEAR CallElfIOCtl(void);
+; @returns   Same as ElfIOCtl
+; @param     address of IOCtl request packet (32-bit pointer).
+; @status    completely implemented.
+; @author    knut st. osmundsen
+_CallElfIOCtl PROC NEAR
+    ASSUME CS:CODE16
+    push    ds
+    push    word ptr [esp+6]            ; push high word.
+    push    word ptr [esp+6]            ; push low word.
+    call    far ptr FLAT:ELFIOCTL
+    pop     ds
+    retn
+_CallElfIOCtl ENDP
+
+;;
+; Thunk procedure for .
+; @cproto    USHORT NEAR CallWin32kIOCtl(void);
+; @returns   Same as Win32kIOCtl
+; @param     address of IOCtl request packet (32-bit pointer).
+; @status    completely implemented.
+; @author    knut st. osmundsen
+_CallWin32kIOCtl PROC NEAR
+    ASSUME CS:CODE16
+    push    ds
+    push    word ptr [esp+6]            ; push high word.
+    push    word ptr [esp+6]            ; push low word.
+    call    far ptr FLAT:WIN32KIOCTL
+    pop     ds
+    retn
+_CallWin32kIOCtl ENDP
+
 
 
 ;;
