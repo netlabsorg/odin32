@@ -354,7 +354,7 @@ STRINGTABLE DISCARDABLE
     IDS_NEWFOLDER        "Neues Directory anlegen"
     IDS_LISTVIEW         "List"
     IDS_REPORTVIEW       "Details"
-    IDS_TODESKTOP        "Browse to Desktop"
+    IDS_TODESKTOP        "Desktop anzeigen"
 }
 
 STRINGTABLE DISCARDABLE
