@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.142 2001-08-02 14:50:42 sandervl Exp $ */
+/* $Id: pmwindow.cpp,v 1.143 2001-08-09 08:45:41 sandervl Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -74,7 +74,6 @@ VOID APIENTRY DspInitSystemDriverName(PSZ pszDriverName, ULONG lenDriverName);
 //******************************************************************************
 BOOL InitPM()
 {
-
     hab = WinInitialize(0);
     dprintf(("Winitialize returned %x", hab));
     hmq = WinCreateMsgQueue(hab, 0);
@@ -97,7 +96,12 @@ BOOL InitPM()
                 dprintf(("WinQueryAnchorBlock returned %x", hab));
             }
             if(!hmq) {
-                hmq = HMQ_CURRENT;
+                PTIB ptib;
+                PPIB ppib;
+
+                DosGetInfoBlocks(&ptib, &ppib);
+
+                hmq = WinQueueFromID(hab, ppib->pib_ulpid, ptib->tib_ptib2->tib2_ultid);
             }
         }
     }

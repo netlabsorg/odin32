@@ -1,4 +1,4 @@
-/* $Id: oslibmsg.cpp,v 1.40 2001-07-30 20:48:51 sandervl Exp $ */
+/* $Id: oslibmsg.cpp,v 1.41 2001-08-09 08:45:40 sandervl Exp $ */
 /*
  * Window message translation functions for OS/2
  *
@@ -506,21 +506,29 @@ inline BOOL O32_PostThreadMessage(DWORD a, UINT b, WPARAM c, LPARAM d)
 //******************************************************************************
 BOOL OSLibPostThreadMessage(ULONG threadid, UINT msg, WPARAM wParam, LPARAM lParam, BOOL fUnicode)
 {
-// TEB *teb = GetTEBFromThreadId(threadid);
+ TEB *teb = GetTEBFromThreadId(threadid);
  POSTMSG_PACKET *packet = (POSTMSG_PACKET *)_smalloc(sizeof(POSTMSG_PACKET));
+ BOOL ret;
 
-//    if(teb == NULL) {
-//        dprintf(("OSLibPostThreadMessage: thread %x not found!", threadid));
-//        return FALSE;
-//    }
-    dprintf(("PostThreadMessageA %x %x %x %x", threadid, msg, wParam, lParam));
+    if(teb == NULL) {
+        dprintf(("OSLibPostThreadMessage: thread %x not found!", threadid));
+        return FALSE;
+    }
+    dprintf(("PostThreadMessageA %x %x %x %x -> hmq %x", threadid, msg, wParam, lParam, teb->o.odin.hmq));
     packet->wParam   = wParam;
     packet->lParam   = lParam;
-#ifdef USING_OPEN32
-    return O32_PostThreadMessage(threadid, WIN32APP_POSTMSG-OPEN32_MSGDIFF+msg, ((fUnicode) ? WIN32MSG_MAGICW : WIN32MSG_MAGICA), (LPARAM)packet);
-#else
-    return O32_PostThreadMessage(threadid, WIN32APP_POSTMSG+msg, ((fUnicode) ? WIN32MSG_MAGICW : WIN32MSG_MAGICA), (LPARAM)packet);
-#endif
+
+    ret = WinPostQueueMsg((HMQ)teb->o.odin.hmq, WIN32APP_POSTMSG+msg, 
+                          (MPARAM)((fUnicode) ? WIN32MSG_MAGICW : WIN32MSG_MAGICA), 
+                          (MPARAM)packet);
+
+    if(ret == FALSE)
+    {
+       SetLastError(ERROR_INVALID_PARAMETER_W);
+       return FALSE;
+    }
+    SetLastError(ERROR_SUCCESS_W);
+    return TRUE;
 }
 //******************************************************************************
 //******************************************************************************
