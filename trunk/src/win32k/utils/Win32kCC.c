@@ -1,4 +1,4 @@
-/* $Id: Win32kCC.c,v 1.13 2001-02-17 20:25:44 bird Exp $
+/* $Id: Win32kCC.c,v 1.14 2001-02-21 07:52:33 bird Exp $
  *
  * Win32CC - Win32k Control Center.
  *
@@ -322,8 +322,8 @@ MRESULT EXPENTRY Win32kCCDlgProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
                 Complain(hwnd, IDS_ERR_SET_INSTANCEDATA,
                          WinGetLastError(pThis->hab),
                          getLastErrorMsg(pThis->hab));
-                WinDismissDlg(hwnd, 0);
                 WinPostMsg(hwnd, WM_QUIT, NULL, NULL);
+                WinDismissDlg(hwnd, 0);
                 free(pThis);
                 return FALSE;
             }
@@ -552,8 +552,8 @@ MRESULT EXPENTRY Win32kCCDlgProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
                     }
                     /* Close the dialog */
                     fNotExit = FALSE;
-                    WinDismissDlg(hwnd, 0);
                     WinPostMsg(hwnd, WM_QUIT, NULL, NULL);
+                    WinDismissDlg(hwnd, 0);
                     break;
 
                 /*
@@ -728,8 +728,8 @@ MRESULT EXPENTRY Win32kCCDlgProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
             {
                 Complain(hwnd, IDS_ERR_QUERYOPTIONSTATUS, rc);
                 fNotExit = FALSE;
-                WinDismissDlg(hwnd, 0);
                 WinPostMsg(hwnd, WM_QUIT, NULL, NULL);
+                WinDismissDlg(hwnd, 0);
                 return NULL;
             }
 
