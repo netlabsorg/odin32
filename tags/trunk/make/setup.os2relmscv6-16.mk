@@ -1,4 +1,4 @@
-# $Id: setup.os2relmscv6-16.mk,v 1.2 2002-04-30 22:42:49 bird Exp $
+# $Id: setup.os2relmscv6-16.mk,v 1.3 2002-05-16 11:37:04 bird Exp $
 
 # ---OS2, RELEASE, MSCV6-------------------------
 ENV_NAME="OS/2, Release, Microsoft C v6.0a 16-bit"
@@ -102,7 +102,7 @@ _CC_MODEL   = /AH
 
 _CC_OPTIONAL = $(_CC_SEG_TEXT) $(_CC_SEG_DATA) $(_CC_SEG_XCPT) $(_CC_DEFAULT_LIBS) $(_CC_PACK) $(_CC_MODEL)
 
-CC_FLAGS=/nologo /c /DDEBUG /DOS2 /D__16BIT__ /W0 /G2 /Ogeitln /Zi $(_CC_OPTIONAL) $(CC_DEFINES) $(ALL_DEFINES) $(BUILD_DEFINES) $(CC_INCLUDES) $(ALL_INCLUDES) /I$(PATH_INCLUDES)
+CC_FLAGS=/nologo /c /DOS2 /D__16BIT__ /W0 /G2 /Ogeitln /Zi $(_CC_OPTIONAL) $(CC_DEFINES) $(ALL_DEFINES) $(BUILD_DEFINES) $(CC_INCLUDES) $(ALL_INCLUDES) /I$(PATH_INCLUDES)
 CC_FLAGS_EXE=$(CC_FLAGS)
 CC_FLAGS_DLL=$(CC_FLAGS)
 CC_FLAGS_SYS=$(CC_FLAGS) /DRING0 /Gs
@@ -119,6 +119,17 @@ CXX_FLAGS_IFS=
 CXX_OBJ_OUT=
 CXX_LST_OUT=
 CXX_PC_2_STDOUT=
+
+!if "$(CC_AS_CXX)" != ""
+! if [@(ECHO) $(CLRERR)Error: CC_AS_CXX is not supported by this compiler!$(CLRRST)]
+! endif
+! error
+!endif
+!if "$(CXX_AS_CC)" != ""
+! if [@(ECHO) $(CLRERR)Error: CXX_AS_CC is not supported by this compiler!$(CLRRST)]
+! endif
+! error
+!endif
 
 IMPLIB_FLAGS=/NOI /Nologo
 
@@ -141,7 +152,7 @@ LINK_LNK4=$(TARGET_LIBS: =+^
 ),
 LINK_LNK5=$(TARGET_DEF_LINK)
 
-RC_FLAGS=-r -n -i $(PATH_INCLUDES:;= -i ) $(RC_DEFINES) $(RC_INCLUDES)
+RC_FLAGS=-r -n $(RC_DEFINES) $(ALL_DEFINES) $(BUILD_DEFINES) $(RC_INCLUDES:-I=-i ) $(ALL_INCLUDES:-I=-i ) -i $(PATH_INCLUDES:;= -i )
 RL_FLAGS=-x2 -n
 
 
