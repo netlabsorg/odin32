@@ -1,4 +1,4 @@
-/* $Id: changelog,v 1.1731 2001-10-10 14:39:27 sandervl Exp $ */
+/* $Id: changelog,v 1.1732 2001-10-10 14:48:57 phaller Exp $ */
 
  2001-10-10: Sander van Leeuwen <sandervl@xs4all.nl>
     - USER32:   o Do not blindly add ODIN_FUNCTION macros to functions that
@@ -15,8 +15,11 @@
                         IOCTL_CDROM_PAUSE_AUDIO
                         IOCTL_CDROM_STOP_AUDIO
                         IOCTL_CDROM_RESUME_AUDIO
+                        IOCTL_CDROM_PLAY_AUDIO_MSF
                 o added IOCTL_STORAGE_EJECT_MEDIA
                         IOCTL_STORAGE_LOAD_MEDIA
+                        IOCTL_DISK_EJECT_MEDIA
+                        IOCTL_DISK_CHECK_VERIFY
 
  2001-10-09: Sander van Leeuwen <sandervl@xs4all.nl>
     - KERNEL32: o Image header page must be readonly
