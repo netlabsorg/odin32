@@ -1,4 +1,4 @@
-/* $Id: user32rsrc.orc,v 1.2 2000-08-19 13:00:46 sandervl Exp $ */
+/* $Id: user32rsrc.orc,v 1.3 2000-10-17 17:11:08 sandervl Exp $ */
 /* converted from WINE */
 
 #include "winuser.h"
@@ -21,6 +21,7 @@ SYSMENU MENU LOADONCALL MOVEABLE DISCARDABLE
  MENUITEM "&About Odin ...", 61761
  MENUITEM SEPARATOR
  MENUITEM "&Put mark in debug log", 61762
+ MENUITEM "&DebugInt3", 61763
 }
 
 /* Frame */
