@@ -1,4 +1,4 @@
-# $Id: odin32.tools.emx.mk,v 1.6 2003-01-06 13:24:20 sandervl Exp $
+# $Id: odin32.tools.emx.mk,v 1.7 2003-01-15 10:41:12 sandervl Exp $
 
 #
 # Odin32 API
@@ -42,16 +42,16 @@ MAKE_CMD    = $(MAKE_CMD) NODEP=1
 
 .c{$(OBJDIR)}.obj:
 !ifdef USERAPP
-    $(CMDQD_SUB) $(CC) $(CFLAGS) $(CINCLUDES) $(CDEFINES_WIN32APP) -o$(OBJDIR)\$(@B).obj -c $<
+    $(CMDQD_SUB) $(CC) $(CFLAGS) $(CINCLUDES) $(CDEFINES_WIN32APP) -o $(OBJDIR)\$(@B).obj -c $<
 !else
-    $(CMDQD_SUB) $(CC) $(CFLAGS) $(CINCLUDES) $(CDEFINES) -o$(OBJDIR)\$(@B).obj -c $<
+    $(CMDQD_SUB) $(CC) $(CFLAGS) $(CINCLUDES) $(CDEFINES) -o $(OBJDIR)\$(@B).obj -c $<
 !endif
 
 .c.obj:
 !ifdef USERAPP
-    $(CMDQD_SUB) $(CC) $(CFLAGS) $(CINCLUDES) $(CDEFINES_WIN32APP) -o$(OBJDIR)\$(@B).obj -c $<
+    $(CMDQD_SUB) $(CC) $(CFLAGS) $(CINCLUDES) $(CDEFINES_WIN32APP) -o $(OBJDIR)\$(@B).obj -c $<
 !else
-    $(CMDQD_SUB) $(CC) $(CFLAGS) $(CINCLUDES) $(CDEFINES) -o$(OBJDIR)\$(@B).obj -c $<
+    $(CMDQD_SUB) $(CC) $(CFLAGS) $(CINCLUDES) $(CDEFINES) -o $(OBJDIR)\$(@B).obj -c $<
 !endif
 
 .c.pre-c:
@@ -64,16 +64,16 @@ MAKE_CMD    = $(MAKE_CMD) NODEP=1
 
 .cpp{$(OBJDIR)}.obj:
 !ifdef USERAPP
-    $(CMDQD_SUB) $(CXX) $(CXXFLAGS) $(CINCLUDES) $(CDEFINES_WIN32APP) -o$(OBJDIR)\$(@B).obj -c $<
+    $(CMDQD_SUB) $(CXX) $(CXXFLAGS) $(CINCLUDES) $(CDEFINES_WIN32APP) -o $(OBJDIR)\$(@B).obj -c $<
 !else
-    $(CMDQD_SUB) $(CXX) $(CXXFLAGS) $(CINCLUDES) $(CDEFINES) -o$(OBJDIR)\$(@B).obj -c $<
+    $(CMDQD_SUB) $(CXX) $(CXXFLAGS) $(CINCLUDES) $(CDEFINES) -o $(OBJDIR)\$(@B).obj -c $<
 !endif
 
 .cpp.obj:
 !ifdef USERAPP
-    $(CMDQD_SUB) $(CXX) $(CXXFLAGS) $(CINCLUDES) $(CDEFINES_WIN32APP) -o$(OBJDIR)\$(@B).obj -c $<
+    $(CMDQD_SUB) $(CXX) $(CXXFLAGS) $(CINCLUDES) $(CDEFINES_WIN32APP) -o $(OBJDIR)\$(@B).obj -c $<
 !else
-    $(CMDQD_SUB) $(CXX) $(CXXFLAGS) $(CINCLUDES) $(CDEFINES) -o$(OBJDIR)\$(@B).obj -c $<
+    $(CMDQD_SUB) $(CXX) $(CXXFLAGS) $(CINCLUDES) $(CDEFINES) -o $(OBJDIR)\$(@B).obj -c $<
 !endif
 
 .cpp.pre-cpp:
@@ -99,9 +99,9 @@ MAKE_CMD    = $(MAKE_CMD) NODEP=1
 
 .S{$(OBJDIR)}.obj:
 !ifdef USERAPP
-    $(CMDQD_SUB) $(CXX) $(CXXFLAGS) $(CINCLUDES) $(CDEFINES_WIN32APP) -o$(OBJDIR)\$(@B).obj -c $<
+    $(CMDQD_SUB) $(CXX) $(CXXFLAGS) $(CINCLUDES) $(CDEFINES_WIN32APP) -o $(OBJDIR)\$(@B).obj -c $<
 !else
-    $(CMDQD_SUB) $(CXX) $(CXXFLAGS) $(CINCLUDES) $(CDEFINES) -o$(OBJDIR)\$(@B).obj -c $<
+    $(CMDQD_SUB) $(CXX) $(CXXFLAGS) $(CINCLUDES) $(CDEFINES) -o $(OBJDIR)\$(@B).obj -c $<
 !endif
 
 

@@ -1,4 +1,4 @@
-/* $Id: exception.h,v 1.2 2002-04-07 17:33:06 sandervl Exp $ */
+/* $Id: exception.h,v 1.3 2003-01-15 10:41:13 sandervl Exp $ */
 /*
  * Wine exception handling
  *
@@ -76,7 +76,7 @@
          } else { \
              __f.frame.Handler = (PEXCEPTION_HANDLER)WINE_exception_handler; \
              __f.u.filter = (func); \
-             EXC_push_frame( &__f.frame ); \
+             __wine_push_frame( &__f.frame ); \
              if (setjmp( __f.jmp)) { \
                  const __WINE_FRAME * const __eptr WINE_UNUSED = &__f; \
                  do {
@@ -97,7 +97,7 @@
          } else { \
              __f.frame.Handler = (PEXCEPTION_HANDLER)WINE_finally_handler; \
              __f.u.finally_func = (func); \
-             EXC_push_frame( &__f.frame ); \
+             __wine_push_frame( &__f.frame ); \
              __first = 0; \
          } \
     } while (0);
@@ -136,7 +136,7 @@ extern DWORD WINAPI WINE_finally_handler( PEXCEPTION_RECORD record, EXCEPTION_FR
 
 #endif /* USE_COMPILER_EXCEPTIONS */
 
-static inline EXCEPTION_FRAME * WINE_UNUSED EXC_push_frame( EXCEPTION_FRAME *frame )
+static inline EXCEPTION_FRAME * WINE_UNUSED __wine_push_frame( EXCEPTION_FRAME *frame )
 {
 #if defined(__GNUC__) && defined(__i386__)
     EXCEPTION_FRAME *prev;
@@ -153,7 +153,7 @@ static inline EXCEPTION_FRAME * WINE_UNUSED EXC_push_frame( EXCEPTION_FRAME *fra
 #endif
 }
 
-static inline EXCEPTION_FRAME * WINE_UNUSED EXC_pop_frame( EXCEPTION_FRAME *frame )
+static inline EXCEPTION_FRAME * WINE_UNUSED __wine_pop_frame( EXCEPTION_FRAME *frame )
 {
 #if defined(__GNUC__) && defined(__i386__)
     __asm__ __volatile__(".byte 0x64\n\tmovl %0,(0)"

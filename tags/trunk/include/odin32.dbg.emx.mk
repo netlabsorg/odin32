@@ -1,4 +1,4 @@
-# $Id: odin32.dbg.emx.mk,v 1.8 2003-01-06 13:24:19 sandervl Exp $
+# $Id: odin32.dbg.emx.mk,v 1.9 2003-01-15 10:41:11 sandervl Exp $
 
 #
 # Odin32 API
@@ -39,7 +39,7 @@ CXX    = gcc
 AS     = alp
 LD     = gcc
 LD2    = link386
-IMPLIB = emximp
+IMPLIB = implib
 ILIB   = emxomfar
 RC     = $(ODIN32_TOOLS)\wrc
 OS2RC  = rc
@@ -49,7 +49,7 @@ OS2RC  = rc
 # Tool Flags
 #
 ASFLAGS          = -Mb -Sc -Sv:ALP +Od -D:DEBUG
-IMPLIBFLAGS      = -o
+IMPLIBFLAGS      = /nologo
 ILIBFLAGS        = rcv
 RCFLAGS          = -s -I. -I$(CPPMAIN)\include  -D__WIN32OS2__
 !ifdef WRC_PREFIX_RESOURCE
