@@ -109,9 +109,6 @@ void CFT2Module::init()
        pfnFt2QueryStringWidthW = (PFN_FT2QUERYSTRINGWIDTHW)QueryProcAddress("Ft2QueryStringWidthW");
        if(!pfnFt2QueryStringWidthW) dprintf(("Ft2QueryStringWidthW not found!!"));
 
-       pfnFt2GetCharacterPlacementW = (PFN_FT2GETCHARACTERPLACEMENTW)QueryProcAddress("Ft2GetCharacterPlacementW");
-       if(!pfnFt2GetCharacterPlacementW) dprintf(("pfnFt2GetCharacterPlacementW not found!!"));
-
        // Do not register functions for Mozilla plugins
        if(IsDummyExeLoaded() == FALSE) 
        {

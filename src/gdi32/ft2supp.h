@@ -93,7 +93,7 @@ class CFT2Module {
    DWORD Ft2GetGlyphIndices(HPS hps, LPCWSTR str, int c, LPWORD pgi, DWORD fl);
    DWORD Ft2GetGlyphOutline(HPS hps, UINT glyph, UINT format, LPGLYPHMETRICS lpgm, DWORD buflen, LPVOID buf, const MAT2* lpmat); 
 
-   BOOL  Ft2GetTextExtentW(HPS hps, LONG lCount1,LPCWSTR pchString,LONG lCount2,PPOINTLOS2 aptlPoints);
+   BOOL  Ft2GetTextExtentW(HPS hps, LONG lCount1,LPCWSTR pchString, PPOINTLOS2 pwidthHeight);
    BOOL  Ft2CharStringPosAtA(HPS hps,PPOINTLOS2 ptl,PRECTLOS2 rct,ULONG flOptions,LONG lCount,LPCSTR pchString,CONST INT *alAdx, ULONG fuWin32Options);
    BOOL  Ft2CharStringPosAtW(HPS hps,PPOINTLOS2 ptl,PRECTLOS2 rct,ULONG flOptions,LONG lCount,LPCWSTR pchString,CONST INT *alAdx, ULONG fuWin32Options);
 
