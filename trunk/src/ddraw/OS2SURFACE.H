@@ -1,4 +1,4 @@
-/* $Id: OS2SURFACE.H,v 1.14 2001-10-03 13:49:41 sandervl Exp $ */
+/* $Id: OS2SURFACE.H,v 1.15 2001-10-03 18:40:29 sandervl Exp $ */
 
 /*
  * Direct/X Surface class
@@ -21,7 +21,7 @@
 
 #define RECT_WIDTH(a)	((a)->right - (a)->left)
 #define RECT_HEIGHT(a)  ((a)->bottom - (a)->top) 
-#define RECT_EQUAL(a,b) memcmp(a, b, sizeof(RECT))
+#define RECT_EQUAL(a,b) (memcmp(a, b, sizeof(RECT)) == 0)
 
 inline BOOL intersects(LPRECT lprcSrc1, LPRECT lprcSrc2) 
 {
