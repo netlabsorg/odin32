@@ -1,4 +1,4 @@
-/* $Id: wsock32.h,v 1.9 1999-12-07 20:25:48 achimha Exp $ */
+/* $Id: wsock32.h,v 1.10 2000-03-17 16:06:42 sandervl Exp $ */
 
 /* WSOCK32.H--definitions & conversions for Odin's wsock32.dll.
  * Unused/unneeded Microsoft declarations removed.
@@ -83,6 +83,14 @@ typedef struct tagWsockThreadData
 // internal prototype
 PWSOCKTHREADDATA iQueryWsockThreadData(void);
 
+
+extern BOOL fWSAInitialized;
+
+void WIN32API OS2WSASetLastError(int iError);
+
+int  WIN32API OS2WSAGetLastError(void);
+
+BOOL WIN32API OS2WSAIsBlocking(void);
 
 #endif  /* _WINSOCK32CONST_ */
 

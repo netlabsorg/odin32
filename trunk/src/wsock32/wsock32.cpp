@@ -1,4 +1,4 @@
-/* $Id: wsock32.cpp,v 1.19 2000-03-14 14:59:43 sandervl Exp $ */
+/* $Id: wsock32.cpp,v 1.20 2000-03-17 16:06:42 sandervl Exp $ */
 
 /*
  *
@@ -50,6 +50,8 @@
 
 #include "wsock32.h"
 #include "relaywin.h"
+#define DBG_LOCALLOG	DBG_wsock32
+#include "dbglocal.h"
 
 
 ODINDEBUGCHANNEL(WSOCK32-WSOCK32)
@@ -66,6 +68,7 @@ static WSOCKTHREADDATA wstdFallthru; // for emergency only
 
 static HWND hwndRelay = NULL; // handle to our relay window
 
+BOOL fWSAInitialized = FALSE;
 
 /*****************************************************************************
  * Prototypes                                                                *
@@ -1069,6 +1072,7 @@ ODINFUNCTION2(int,OS2WSAStartup,
               USHORT,wVersionRequired,
               LPWSADATA,lpWSAData)
 {
+  fWSAInitialized = TRUE;
   return(WSAStartup(wVersionRequired,
                     lpWSAData));
 }
@@ -1088,6 +1092,7 @@ ODINFUNCTION2(int,OS2WSAStartup,
 
 ODINFUNCTION0(int,OS2WSACleanup)
 {
+  fWSAInitialized = FALSE;
   return(WSACleanup());
 }
 
@@ -1537,16 +1542,17 @@ ODINFUNCTION4(int,OS2WSAAsyncSelect,
     ulNewID = RelayAlloc(hWnd,
                          wMsg,
                          ASYNCREQUEST_SELECT,
-                         TRUE);
+			 FALSE); //SvL: allow multiple selects -> pmwsock should fail if it not allowed
+//                         TRUE);
 
   rc = WSAAsyncSelect(s,
                       hwndRelay,
                       ulNewID,
                       lEvent);
 
-//  iError = WSAGetLastError();
-//  dprintf(("res=%d, err=%d\n",
-//           rc,
-//           iError));
+  // if an error occurs, free the allocated relay entry
+  if (rc == SOCKET_ERROR)
+    RelayFree(ulNewID);
+
   return (rc);
 }
