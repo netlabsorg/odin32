@@ -1,4 +1,4 @@
-/* $Id: tab.c,v 1.17 1999-11-05 13:01:33 achimha Exp $ */
+/* $Id: tab.c,v 1.18 1999-12-18 20:57:00 achimha Exp $ */
 /*
  * Tab control
  *
@@ -14,7 +14,8 @@
  *  Unicode support
  */
 
-/* WINE 991031 level */
+/* inconsistent: report! */
+/* WINE 991212 level */
 
 #include <string.h>
 
@@ -848,6 +849,7 @@ static void TAB_DrawItem(
     HPEN   holdPen;
     INT    oldBkMode;
     INT    cx,cy;
+    BOOL deleteBrush = TRUE;
 
     if (lStyle & TCS_BUTTONS)
     {
@@ -865,8 +867,12 @@ static void TAB_DrawItem(
          */
         if (!(lStyle & TCS_OWNERDRAWFIXED))
         {
+          COLORREF bk = GetSysColor(COLOR_3DHILIGHT);
           DeleteObject(hbr);
-          hbr = CreateSolidBrush(GetSysColor(COLOR_3DHILIGHT));
+          hbr = GetSysColorBrush(COLOR_SCROLLBAR);
+          SetTextColor(hdc, GetSysColor(COLOR_3DFACE));
+          SetBkColor(hdc, bk);
+
         }
 
         /*
