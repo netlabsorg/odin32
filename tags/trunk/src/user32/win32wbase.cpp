@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.153 2000-02-05 16:24:59 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.154 2000-02-05 19:45:17 cbratschi Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -123,6 +123,7 @@ void Win32BaseWindow::Init()
   dwIDMenu         = 0; //0xFFFFFFFF; //default -1
   userData         = 0;
   contextHelpId    = 0;
+  hotkey           = 0;
 
   pOldFrameProc = NULL;
 
@@ -235,6 +236,7 @@ BOOL Win32BaseWindow::CreateWindowExA(CREATESTRUCTA *cs, ATOM classAtom)
 {
  char  buffer[256];
  POINT maxSize, maxPos, minTrack, maxTrack;
+ BOOL  xDefault = FALSE,cxDefault = FALSE;
 
 #ifdef DEBUG
     PrintWindowStyle(cs->style, cs->dwExStyle);
@@ -307,8 +309,6 @@ BOOL Win32BaseWindow::CreateWindowExA(CREATESTRUCTA *cs, ATOM classAtom)
   /* Fix the coordinates */
   if ((cs->x == CW_USEDEFAULT) || (cs->x == CW_USEDEFAULT16))
   {
-//        PDB *pdb = PROCESS_Current();
-
        /* Never believe Microsoft's documentation... CreateWindowEx doc says
         * that if an overlapped window is created with WS_VISIBLE style bit
         * set and the x parameter is set to CW_USEDEFAULT, the system ignores
@@ -328,34 +328,15 @@ BOOL Win32BaseWindow::CreateWindowExA(CREATESTRUCTA *cs, ATOM classAtom)
         if ((cs->y != CW_USEDEFAULT) && (cs->y != CW_USEDEFAULT16)) sw = cs->y;
 
         /* We have saved cs->y, now we can trash it */
-#if 0
-        if (   !(cs->style & (WS_CHILD | WS_POPUP))
-            &&  (pdb->env_db->startup_info->dwFlags & STARTF_USEPOSITION) )
-        {
-            cs->x = pdb->env_db->startup_info->dwX;
-            cs->y = pdb->env_db->startup_info->dwY;
-        }
-#endif
-            cs->x = 0;
-            cs->y = 0;
-//        }
+        cs->x = 0;
+        cs->y = 0;
+        xDefault = TRUE;
   }
   if ((cs->cx == CW_USEDEFAULT) || (cs->cx == CW_USEDEFAULT16))
   {
-#if 0
-        PDB *pdb = PROCESS_Current();
-        if (   !(cs->style & (WS_CHILD | WS_POPUP))
-            &&  (pdb->env_db->startup_info->dwFlags & STARTF_USESIZE) )
-        {
-            cs->cx = pdb->env_db->startup_info->dwXSize;
-            cs->cy = pdb->env_db->startup_info->dwYSize;
-        }
-        else
-        {
-#endif
-            cs->cx = 600; /* FIXME */
-            cs->cy = 400;
-//        }
+        cs->cx = 600; /* FIXME */
+        cs->cy = 400;
+        cxDefault = TRUE;
   }
 
   if (cs->x < 0) cs->x = 0;
@@ -460,37 +441,6 @@ BOOL Win32BaseWindow::CreateWindowExA(CREATESTRUCTA *cs, ATOM classAtom)
         vertScrollInfo->flags  = ESB_ENABLE_BOTH;
   }
 
-  /* Send the WM_GETMINMAXINFO message and fix the size if needed */
-  if ((cs->style & WS_THICKFRAME) || !(cs->style & (WS_POPUP | WS_CHILD)))
-  {
-        GetMinMaxInfo(&maxSize, &maxPos, &minTrack, &maxTrack);
-        if (maxSize.x < cs->cx) cs->cx = maxSize.x;
-        if (maxSize.y < cs->cy) cs->cy = maxSize.y;
-        if (cs->cx < minTrack.x) cs->cx = minTrack.x;
-        if (cs->cy < minTrack.y) cs->cy = minTrack.y;
-  }
-
-  if(cs->style & WS_CHILD)
-  {
-        if(cs->cx < 0) cs->cx = 0;
-        if(cs->cy < 0) cs->cy = 0;
-  }
-  else
-  {
-        if (cs->cx <= 0) cs->cx = 1;
-        if (cs->cy <= 0) cs->cy = 1;
-  }
-
-  if(((dwStyle & 0xC0000000) == WS_OVERLAPPED) && ((dwStyle & WS_CAPTION) == WS_CAPTION) && owner == NULL
-     && dwStyle & WS_SYSMENU)
-  {
-        fTaskList = TRUE;
-  }
-
-  DWORD dwOSWinStyle;
-
-  OSLibWinConvertStyle(dwStyle, &dwExStyle, &dwOSWinStyle);
-
   if(HIWORD(cs->lpszName))
   {
     if (!isUnicode)
@@ -529,15 +479,60 @@ BOOL Win32BaseWindow::CreateWindowExA(CREATESTRUCTA *cs, ATOM classAtom)
 
   thdb->newWindow = (ULONG)this;
 
+  DWORD dwOSWinStyle;
+
+  OSLibWinConvertStyle(dwStyle,dwExStyle,&dwOSWinStyle);
+  if (((dwStyle & (WS_CAPTION | WS_SYSMENU | 0xC0000000)) == (WS_CAPTION | WS_SYSMENU))) fTaskList = TRUE;
+
   OS2Hwnd = OSLibWinCreateWindow((getParent()) ? getParent()->getOS2WindowHandle() : OSLIB_HWND_DESKTOP,
                                  dwOSWinStyle,(char *)windowNameA,
                                  (owner) ? owner->getOS2WindowHandle() : OSLIB_HWND_DESKTOP,
                                  (hwndLinkAfter == HWND_BOTTOM) ? TRUE : FALSE,
-                                 &OS2HwndFrame, 0, fTaskList,windowClass->getStyle() & CS_SAVEBITS);
+                                 &OS2HwndFrame, 0, fTaskList,xDefault | cxDefault,windowClass->getStyle() & CS_SAVEBITS);
   if(OS2Hwnd == 0) {
         dprintf(("Window creation failed!!"));
         SetLastError(ERROR_OUTOFMEMORY); //TODO: Better error
         return FALSE;
+  }
+
+  //adjust CW_USEDEFAULT position
+  if (xDefault | cxDefault)
+  {
+    RECT rect;
+
+    OSLibWinQueryWindowRect(OS2HwndFrame,&rect,RELATIVE_TO_SCREEN);
+    if (getParent()) mapWin32Rect(OSLIB_HWND_DESKTOP,getParent()->getOS2FrameWindowHandle(),&rect);
+    if (xDefault)
+    {
+      cs->x = rect.left;
+      cs->y = rect.top;
+    }
+    if (cxDefault)
+    {
+      cs->cx = rect.right-rect.left;
+      cs->cy = rect.bottom-rect.top;
+    }
+  }
+
+  /* Send the WM_GETMINMAXINFO message and fix the size if needed */
+  if ((cs->style & WS_THICKFRAME) || !(cs->style & (WS_POPUP | WS_CHILD)))
+  {
+        GetMinMaxInfo(&maxSize, &maxPos, &minTrack, &maxTrack);
+        if (maxSize.x < cs->cx) cs->cx = maxSize.x;
+        if (maxSize.y < cs->cy) cs->cy = maxSize.y;
+        if (cs->cx < minTrack.x) cs->cx = minTrack.x;
+        if (cs->cy < minTrack.y) cs->cy = minTrack.y;
+  }
+
+  if(cs->style & WS_CHILD)
+  {
+        if(cs->cx < 0) cs->cx = 0;
+        if(cs->cy < 0) cs->cy = 0;
+  }
+  else
+  {
+        if (cs->cx <= 0) cs->cx = 1;
+        if (cs->cy <= 0) cs->cy = 1;
   }
 
   SetLastError(0);
@@ -1598,6 +1593,18 @@ LRESULT Win32BaseWindow::DefWindowProcA(UINT Msg, WPARAM wParam, LPARAM lParam)
             break;
     }
 
+    case WM_SETHOTKEY:
+        hotkey = wParam;
+        return 1; //CB: always successful
+
+    case WM_GETHOTKEY:
+        return hotkey;
+
+    case WM_CONTEXTMENU:
+        if ((dwStyle & WS_CHILD) && getParent())
+          getParent()->SendInternalMessageA(WM_CONTEXTMENU,wParam,lParam);
+        return 0;
+
     case WM_SHOWWINDOW:
         if (!lParam) return 0; /* sent from ShowWindow */
         if (!(dwStyle & WS_POPUP) || !owner) return 0;
@@ -1615,8 +1622,7 @@ LRESULT Win32BaseWindow::DefWindowProcA(UINT Msg, WPARAM wParam, LPARAM lParam)
         return DRAG_FILE;
 
     case WM_QUERYDROPOBJECT:
-        if (dwExStyle & WS_EX_ACCEPTFILES) return 1;
-        return 0;
+        return (dwExStyle & WS_EX_ACCEPTFILES) ? 1:0;
 
     case WM_QUERYDRAGICON:
         {
@@ -1638,8 +1644,7 @@ LRESULT Win32BaseWindow::DefWindowProcA(UINT Msg, WPARAM wParam, LPARAM lParam)
         return 1;
 
     case WM_NOTIFYFORMAT:
-        if (IsWindowUnicode()) return NFR_UNICODE;
-        else return NFR_ANSI;
+        return IsWindowUnicode() ? NFR_UNICODE:NFR_ANSI;
 
     case WM_SETICON:
     case WM_GETICON:

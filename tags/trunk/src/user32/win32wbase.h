@@ -1,4 +1,4 @@
-/* $Id: win32wbase.h,v 1.80 2000-02-05 16:25:00 sandervl Exp $ */
+/* $Id: win32wbase.h,v 1.81 2000-02-05 19:45:19 cbratschi Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -323,6 +323,7 @@ protected:
          HWND   hwndLinkAfter;
         DWORD   flags;
         DWORD   contextHelpId;
+        DWORD   hotkey;
         LONG    lastHitTestVal;         //Last value returned by WM_NCHITTEST handler
 
         BOOL    isIcon;
@@ -397,7 +398,8 @@ private:
         VOID  DrawCloseButton(HDC hdc,RECT *rect,BOOL down,BOOL bGrayed);
         VOID  DrawMaxButton(HDC hdc,RECT *rect,BOOL down,BOOL bGrayed);
         VOID  DrawMinButton(HDC hdc,RECT *rect,BOOL down,BOOL bGrayed);
-        VOID  DrawCaption(HDC hdc,RECT *rect,BOOL active,BOOL redrawText);
+        VOID  DrawHelpButton(HDC hdc,RECT *rect,BOOL down,BOOL bGrayed);
+        VOID  DrawCaption(HDC hdc,RECT *rect,BOOL active);
         VOID  DoNCPaint(HRGN clip,BOOL suppress_menupaint);
         LONG  HandleNCPaint(HRGN clip);
         LONG  HandleSysCommand(WPARAM wParam, POINT *pt32);
