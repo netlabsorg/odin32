@@ -239,5 +239,8 @@ HDC       WIN32API CreateCompatibleDC( HDC hdc);
 BOOL      WIN32API DeleteDC(HDC hdc);
 
 HANDLE    WINAPI GetCurrentObject(HDC,UINT);
+BOOL      WIN32API ValidateRgn( HWND hwnd, HRGN  hrgn);
+BOOL      WIN32API ValidateRect( HWND hwnd, const RECT * lprc);
+int       WIN32API GetRgnBox( HRGN  hrgn, PRECT pRect);
 
 #endif

@@ -1,4 +1,4 @@
-; $Id: gdi32.DEF,v 1.22 2002-07-15 10:02:28 sandervl Exp $
+; $Id: gdi32.DEF,v 1.23 2003-11-12 14:10:55 sandervl Exp $
 
 ;Created by BLAST for IBM's compiler
 LIBRARY GDI32 INITINSTANCE
@@ -15,11 +15,11 @@ IMPORTS
     WinDrawTabbedText          = PMMERGE.5432
 
 EXPORTS
-    _GDI_CallDevInstall16@20                                 @100
-    _GDI_CallExtDeviceModePropSheet16@16                     @101
-    _GDI_CallExtDeviceMode16@28                              @102
-    _GDI_CallAdvancedSetupDialog16@16                        @103
-    _GDI_CallDeviceCapabilities16@20                         @104
+    _GDI_CallDevInstall16@20                                 @100 NONAME
+    _GDI_CallExtDeviceModePropSheet16@16                     @101 NONAME
+    _GDI_CallExtDeviceMode16@28                              @102 NONAME
+    _GDI_CallAdvancedSetupDialog16@16                        @103 NONAME
+    _GDI_CallDeviceCapabilities16@20                         @104 NONAME
 
     AbortDoc                   = _AbortDoc@4                 @105
     AbortPath                  = _AbortPath@4                @106
@@ -206,7 +206,7 @@ EXPORTS
     GetPixelFormat             = _GetPixelFormat@4           @287
     GetPolyFillMode            = _GetPolyFillMode@4          @288
     GetROP2                    = _GetROP2@4                  @289
-;    GetRandomRgn               = _GetRandomRgn@??            @290
+    GetRandomRgn               = _GetRandomRgn@12            @290
     GetRasterizerCaps          = _GetRasterizerCaps@8        @291
     GetRegionData              = _GetRegionData@12           @292
     GetRgnBox                  = _GetRgnBox@8                @293
@@ -351,7 +351,13 @@ EXPORTS
 ;    gdiPlaySpoolStream         = _gdiPlaySpoolStream@??      @432
 ;    pfnRealizePalette          = _pfnRealizePalette@??       @433
 ;    pfnSelectPalette           = _pfnSelectPalette@??        @434
+    GetGlyphIndicesA           = _GetGlyphIndicesA@20         @435
+    GetGlyphIndicesW           = _GetGlyphIndicesW@20         @436
 
+;
+; ENDOFEXPORTS
+; Internal function marker
+;
 
 ;
 ; Internal functions. (starts at 1200)
@@ -373,3 +379,12 @@ EXPORTS
     
     OSLibGpiSetCp__FUlT1                                        @1213 NONAME
     _ConvertRGB555to565@12                                      @1214 NONAME
+
+    _FillRect@12                                                @1215 NONAME
+    _FrameRect@12                                               @1216 NONAME
+    _InvertRect@8                                               @1217 NONAME
+
+    _GdiCombineVisRgn@12                                        @1218 NONAME
+    _GdiSetVisRgn@8                                             @1219 NONAME
+    _GdiCombineVisRgnClipRgn@12                                 @1220 NONAME
+

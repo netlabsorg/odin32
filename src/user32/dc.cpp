@@ -1,4 +1,4 @@
-/* $Id: dc.cpp,v 1.121 2003-05-15 13:12:52 sandervl Exp $ */
+/* $Id: dc.cpp,v 1.122 2003-11-12 14:10:18 sandervl Exp $ */
 
 /*
  * DC functions for USER32
@@ -593,32 +593,20 @@ HDC sendEraseBkgnd (Win32BaseWindow *wnd)
    HWND  hwnd;
    HDC   hdc;
    HPS   hps;
-   HRGN  hrgnUpdate, hrgnOld, hrgnClip, hrgnCombined;
+   HRGN  hrgnUpdate;
    RECTL rectl = { 1, 1, 2, 2 };
+   pDCData pHps = NULLHANDLE;
 
    hwnd = wnd->getOS2WindowHandle();
    hps = WinGetPS(hwnd);
 
    hrgnUpdate = GpiCreateRegion (hps, 1, &rectl);
    WinQueryUpdateRegion (hwnd, hrgnUpdate);
-   hrgnClip = GpiQueryClipRegion (hps);
-
-   if (hrgnClip == NULLHANDLE)
-   {
-      GpiSetClipRegion (hps, hrgnUpdate, &hrgnOld);
-   }
-   else
-   {
-      hrgnCombined = GpiCreateRegion (hps, 1, &rectl);
-      GpiCombineRegion (hps, hrgnCombined, hrgnClip, hrgnUpdate, CRGN_AND);
-      GpiSetClipRegion (hps, hrgnCombined, &hrgnOld);
-      GpiDestroyRegion (hps, hrgnUpdate);
-      GpiDestroyRegion (hps, hrgnClip);
-   }
-   if (hrgnOld != NULLHANDLE)
-      GpiDestroyRegion (hps, hrgnOld);
 
    hdc = HPSToHDC (hwnd, hps, NULL, NULL);
+
+   pHps = (pDCData)GpiQueryDCData(hps);
+   GdiSetVisRgn(pHps, hrgnUpdate);
 
    erased = wnd->MsgEraseBackGround (hdc);
 
@@ -675,7 +663,6 @@ HDC WIN32API BeginPaint (HWND hWnd, PPAINTSTRUCT_W lpps)
         SetLastError(ERROR_INVALID_WINDOW_HANDLE_W); //(verified in NT4, SP6)
         return (HDC)0;
     }
-//    bIcon = (IsIconic(hwnd) && GetClassLongA(hWnd, GCL_HICON_W));
     bIcon = IsIconic(hwnd);
 
     //check if the application previously didn't handle a WM_PAINT msg properly
@@ -724,13 +711,20 @@ HDC WIN32API BeginPaint (HWND hWnd, PPAINTSTRUCT_W lpps)
             rectl.yTop   = wnd->getWindowHeight();
         }
 
-        HRGN hrgnClip = GpiCreateRegion(pHps->hps, 1, &rectl);
-        GpiSetClipRegion(pHps->hps, hrgnClip, &hrgnOldClip);
+        //save old clip and visible regions (restored for CS_OWNDC windows in EndPaint)
+        dprintf(("Old visible region %x; old clip region %x", pHps->hrgnWinVis, pHps->hrgnWin32Clip));
+        wnd->SaveClipRegion(pHps->hrgnWin32Clip);
+        wnd->SaveVisRegion(pHps->hrgnWinVis);
+
+        //clear visible and clip regions
+        pHps->hrgnWin32Clip = NULLHANDLE;
+        pHps->hrgnWinVis    = NULLHANDLE;
+
+        HRGN hrgnVis = GpiCreateRegion(pHps->hps, 1, &rectl);
+        GdiSetVisRgn(pHps, hrgnVis);
 
         selectClientArea(wnd, pHps);
 
-        //save old clip region (restored for CS_OWNDC windows in EndPaint)
-        wnd->SetClipRegion(hrgnOldClip);
         if(bIcon) {
               lComplexity = RGN_RECT;
         }
@@ -741,11 +735,11 @@ HDC WIN32API BeginPaint (HWND hWnd, PPAINTSTRUCT_W lpps)
         rectlClip.yTop = rectlClip.xRight = 1;
 
         //Query update region
-        HRGN hrgnClip = GpiCreateRegion(pHps->hps, 1, &rectlClip);
-        WinQueryUpdateRegion(hwndClient, hrgnClip);
-        WinValidateRegion(hwndClient, hrgnClip, FALSE);
+        HRGN hrgnVis = GpiCreateRegion(pHps->hps, 1, &rectlClip);
+        WinQueryUpdateRegion(hwndClient, hrgnVis);
+        WinValidateRegion(hwndClient, hrgnVis, FALSE);
 
-        dprintfRegion(pHps->hps, wnd->getWindowHandle(), hrgnClip);
+        dprintfRegion(pHps->hps, wnd->getWindowHandle(), hrgnVis);
 
 #ifdef DEBUG
         //Note: GpiQueryClipBox returns logical points
@@ -753,10 +747,19 @@ HDC WIN32API BeginPaint (HWND hWnd, PPAINTSTRUCT_W lpps)
         dprintf(("ClipBox (%d): (%d,%d)(%d,%d)", lComplexity, rectlClip.xLeft, rectlClip.yBottom, rectlClip.xRight, rectlClip.yTop));
 #endif
 
-        //set clip region
-        lComplexity = GpiSetClipRegion(pHps->hps, hrgnClip, &hrgnOldClip);
+        //save old clip and visible regions (restored for CS_OWNDC windows in EndPaint)
+        dprintf(("Old visible region %x; old clip region %x", pHps->hrgnWinVis, pHps->hrgnWin32Clip));
+        wnd->SaveClipRegion(pHps->hrgnWin32Clip);
+        wnd->SaveVisRegion(pHps->hrgnWinVis);
 
-        if(lComplexity == RGN_NULL) {
+        //clear visible and clip regions
+        pHps->hrgnWin32Clip = NULLHANDLE;
+        pHps->hrgnWinVis    = NULLHANDLE;
+
+        //set clip region
+        lComplexity = GdiSetVisRgn(pHps, hrgnVis);
+
+        if(lComplexity == NULLREGION_W) {
             dprintf (("BeginPaint %x: EMPTY update rectangle (vis=%d/%d show=%d/%d", hWnd,  WinIsWindowVisible(wnd->getOS2FrameWindowHandle()), WinIsWindowVisible(wnd->getOS2WindowHandle()),  WinIsWindowShowing(wnd->getOS2FrameWindowHandle()), WinIsWindowShowing(wnd->getOS2WindowHandle())));
         }
         else dprintf (("BeginPaint %x: (vis=%d/%d show=%d/%d)", hWnd,  WinIsWindowVisible(wnd->getOS2FrameWindowHandle()), WinIsWindowVisible(wnd->getOS2WindowHandle()),  WinIsWindowShowing(wnd->getOS2FrameWindowHandle()), WinIsWindowShowing(wnd->getOS2WindowHandle())));
@@ -768,8 +771,6 @@ HDC WIN32API BeginPaint (HWND hWnd, PPAINTSTRUCT_W lpps)
         GpiQueryClipBox(pHps->hps, &rectlClip);
         dprintf(("ClipBox (%d): (%d,%d)(%d,%d)", lComplexity, rectlClip.xLeft, rectlClip.yBottom, rectlClip.xRight, rectlClip.yTop));
 #endif
-        //save old clip region (restored for CS_OWNDC windows in EndPaint)
-        wnd->SetClipRegion(hrgnOldClip);
     }
 
     if(hPS_ownDC == 0)
@@ -782,10 +783,10 @@ HDC WIN32API BeginPaint (HWND hWnd, PPAINTSTRUCT_W lpps)
     HideCaret(hwnd);
     WinShowTrackRect(wnd->getOS2WindowHandle(), FALSE);
 
-    if((wnd->needsEraseBkgnd() || wnd->IsVisibleRegionChanged()) && lComplexity != RGN_NULL) {
-        wnd->setEraseBkgnd(FALSE);
-        wnd->SetVisibleRegionChanged(FALSE);
-        lpps->fErase = (wnd->MsgEraseBackGround(pHps->hps) == 0);
+    if((wnd->needsEraseBkgnd() || wnd->hasPMUpdateRegionChanged()) && lComplexity != RGN_NULL) {
+         wnd->setEraseBkgnd(FALSE);
+         wnd->SetPMUpdateRegionChanged(FALSE);
+         lpps->fErase = (wnd->MsgEraseBackGround(pHps->hps) == 0);
     }
     else lpps->fErase = TRUE;
 
@@ -816,7 +817,6 @@ HDC WIN32API BeginPaint (HWND hWnd, PPAINTSTRUCT_W lpps)
 BOOL WIN32API EndPaint (HWND hWnd, const PAINTSTRUCT_W *pPaint)
 {
   HWND    hwnd = hWnd ? hWnd : HWND_DESKTOP;
-  HRGN    hrgnOld;
   pDCData pHps;
 
     dprintf (("USER32: EndPaint(%x)", hwnd));
@@ -831,11 +831,16 @@ BOOL WIN32API EndPaint (HWND hWnd, const PAINTSTRUCT_W *pPaint)
     pHps = (pDCData)GpiQueryDCData((HPS)pPaint->hdc);
     if (pHps && (pHps->hdcType == TYPE_3))
     {
-        GpiSetClipRegion(pHps->hps, wnd->GetClipRegion(), &hrgnOld);
-        wnd->SetClipRegion(0);
-        if(hrgnOld) {
-            GpiDestroyRegion(pHps->hps, hrgnOld);
-        }
+        //restore previous visible and clip regions
+        pHps->hrgnWin32Clip = NULLHANDLE;
+        pHps->hrgnWinVis    = NULLHANDLE;
+
+        GdiSetVisRgn(pHps, wnd->GetVisRegion());
+        GdiCombineVisRgnClipRgn(pHps, wnd->GetClipRegion(), RGN_AND_W);
+
+        wnd->SaveClipRegion(0);
+        wnd->SaveVisRegion(0);
+
         pHps->hdcType = TYPE_1; //otherwise Open32's ReleaseDC fails
         ReleaseDC(hwnd, pPaint->hdc);
     }
@@ -878,9 +883,13 @@ int WIN32API ReleaseDC (HWND hwnd, HDC hdc)
             pDCData  pHps = (pDCData)GpiQueryDCData((HPS)hdc);
             if(pHps && pHps->psType == MICRO_CACHED) {
                 removeClientArea(wnd, pHps);
-                if(pHps->hrgnVis) {
-                    GreDestroyRegion(pHps->hps, pHps->hrgnVis);
-                    pHps->hrgnVis = 0;
+                if(pHps->hrgnWinVis) {
+                    GreDestroyRegion(pHps->hps, pHps->hrgnWinVis);
+                    pHps->hrgnWinVis = 0;
+                }
+                if(pHps->hrgnWin32Clip) {
+                    GreDestroyRegion(pHps->hps, pHps->hrgnWin32Clip);
+                    pHps->hrgnWin32Clip = 0;
                 }
             }
             else {
@@ -911,7 +920,8 @@ int WIN32API ReleaseDC (HWND hwnd, HDC hdc)
     return (rc);
 }
 //******************************************************************************
-// This implementation of GetDCEx supports
+// This implementation of GetDCEx supports:
+//
 // DCX_WINDOW
 // DCX_CACHE
 // DCX_EXCLUDERGN (complex regions allowed)
@@ -920,6 +930,14 @@ int WIN32API ReleaseDC (HWND hwnd, HDC hdc)
 // DCX_CLIPSIBLINGS
 // DCX_CLIPCHILDREN
 // DCX_PARENTCLIP
+//
+// Not supported:
+//
+// DCX_NORESETATTRS_W
+// DCX_INTERSECTUPDATE_W
+// DCX_LOCKWINDOWUPDATE_W
+// DCX_VALIDATE_W
+// DCX_EXCLUDEUPDATE_W
 //
 //TODO: WM_SETREDRAW affects drawingAllowed flag!!
 //******************************************************************************
@@ -934,6 +952,11 @@ HDC WIN32API GetDCEx (HWND hwnd, HRGN hrgn, ULONG flags)
    BOOL     isWindowOwnDC;
    BOOL     creatingOwnDC = FALSE;
    PS_Type  psType;
+
+    if(flags & (DCX_NORESETATTRS_W | DCX_INTERSECTUPDATE_W | DCX_LOCKWINDOWUPDATE_W | DCX_VALIDATE_W | DCX_EXCLUDEUPDATE_W)) {
+        dprintf(("ERROR: GetDCEx: unsupported flags %x!!", flags));
+        DebugInt3();
+    }
 
     if(hwnd == 0) {
         dprintf(("error: GetDCEx window %x not found", hwnd));
@@ -1065,40 +1088,12 @@ HDC WIN32API GetDCEx (HWND hwnd, HRGN hrgn, ULONG flags)
 
         success = TRUE;
         if (flags & DCX_EXCLUDERGN_W)
-        {
-#if 0 //CB: todo
-         long height;
-
-         BytesNeeded = GetRegionData (hrgn, 0, NULL);
-         RgnData = (PRGNDATA_W)_alloca (BytesNeeded);
-         if (RgnData == NULL)
-                goto error;
-         GetRegionData (hrgn, BytesNeeded, RgnData);
-
-         i = RgnData->rdh.nCount;
-         pr = (PRECT)(RgnData->Buffer);
-
-         if (flags & DCX_WINDOW_W)
-                height = wnd->getWindowHeight();
-         else   height = wnd->getClientHeight();
-
-         for (; (i > 0) && success; i--, pr++) {
-            LONG y = pr->yBottom;
-
-            pr->yBottom = height - pr->yTop;
-            pr->yTop    = height - y;
-            success &= GpiExcludeClipRectangle (pHps->hps, pr);
-         }
-#endif
+        {//exclude specified region from visible region
+            success = (GdiCombineVisRgn(pHps, hrgn, RGN_DIFF_W) != ERROR_W);
         }
         else //DCX_INTERSECTRGN_W
-        {
-            //SvL: I'm getting paint problems when clipping a dc created in GetDCEx
-            //     with a region that covers the entire window (RealPlayer 7 Update 1)
-            //     Using SelectClipRgn here doesn't make any difference.
-            if(ExtSelectClipRgn(pHps->hps, hrgn, RGN_AND_W) == ERROR_W) {
-                dprintf(("ExtSelectClipRgn failed!!"));
-            }
+        {//intersect visible region with specified region
+            success = (GdiCombineVisRgn(pHps, hrgn, RGN_AND_W) != ERROR_W);
         }
         if (!success)
             goto error;
@@ -1291,6 +1286,7 @@ BOOL WIN32API RedrawWindow(HWND hwnd, const RECT* pRect, HRGN hrgn, DWORD redraw
         //Don't clear erase background flag if the window is 
         //already (partly) invalidated
         if (!WinQueryUpdateRect (hwnd, NULL)) {
+            dprintf(("RDW_INVALIDATE: no update rectangle, disable %x WM_ERASEBKGND", wnd->getWindowHandle()));
             wnd->setEraseBkgnd(FALSE);
         }
 
@@ -1331,9 +1327,10 @@ BOOL WIN32API RedrawWindow(HWND hwnd, const RECT* pRect, HRGN hrgn, DWORD redraw
     }
     else if (redraw & RDW_VALIDATE_W)
     {
-        if (redraw & RDW_NOERASE_W)
+        if (redraw & RDW_NOERASE_W) {
+            dprintf(("RDW_NOERASE: disable %x WM_ERASEBKGND", wnd->getWindowHandle()));
             wnd->setEraseBkgnd(FALSE);
-
+        }
         if (WinQueryUpdateRect (hwnd, NULL))
         {
             if(!pRect && !hrgn) {

@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.379 2003-10-20 17:17:23 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.380 2003-11-12 14:10:20 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -116,7 +116,7 @@ void Win32BaseWindow::Init()
   fParentDC        = FALSE;
   fComingToTop     = FALSE;
   fMinMaxChange    = FALSE;
-  fVisibleRegionChanged = FALSE;
+  fPMUpdateRegionChanged = FALSE;
   fEraseBkgndFlag  = TRUE;
   fIsDragDropActive= FALSE;
   fDirtyUpdateRegion = FALSE;
@@ -177,6 +177,7 @@ void Win32BaseWindow::Init()
   ownDC              = 0;
   hWindowRegion      = 0;
   hClipRegion        = 0;
+  hVisRegion         = 0;
   hUpdateRegion      = 0;
 
   hTaskList          = 0;
@@ -1218,15 +1219,16 @@ ULONG Win32BaseWindow::MsgEraseBackGround(HDC hdc)
     ULONG rc;
     HDC   hdcErase = hdc;
 
-    if (hdcErase == 0)
-        hdcErase = GetDC(getWindowHandle());
+    if (hdcErase == 0) {
+        DebugInt3();
+        return 0;
+    }
 
     if(IsWindowIconic())
         rc = SendMessageA(getWindowHandle(),WM_ICONERASEBKGND, hdcErase, 0);
     else
         rc = SendMessageA(getWindowHandle(),WM_ERASEBKGND, hdcErase, 0);
-    if (hdc == 0)
-        ReleaseDC(getWindowHandle(), hdcErase);
+
     return (rc);
 }
 //******************************************************************************
@@ -1249,11 +1251,9 @@ ULONG Win32BaseWindow::MsgChar(MSG *msg)
     return IsWindowUnicode() ? DispatchMsgW( msg ) : DispatchMsgA( msg );
 }
 //******************************************************************************
-//TODO: Should use update region, not rectangle
 //******************************************************************************
-ULONG Win32BaseWindow::MsgNCPaint(PRECT pUpdateRect)
+ULONG Win32BaseWindow::MsgNCPaint(PRECT pUpdateRect, HRGN hrgnUpdate)
 {
-    HRGN hrgn;
     ULONG rc;
     RECT client = rectClient;
 
@@ -1266,18 +1266,13 @@ ULONG Win32BaseWindow::MsgNCPaint(PRECT pUpdateRect)
         return 0;
     }
 
-    dprintf(("MsgNCPaint (%d,%d)(%d,%d)", pUpdateRect->left, pUpdateRect->top, pUpdateRect->right, pUpdateRect->bottom));
-    hrgn = CreateRectRgnIndirect(pUpdateRect);
-
-    rc = SendMessageA(getWindowHandle(),WM_NCPAINT, hrgn, 0);
+    rc = SendMessageA(getWindowHandle(),WM_NCPAINT, hrgnUpdate, 0);
     //Send WM_PAINTICON here if minimized, because client window will
     //not receive a (valid) WM_PAINT message
     if (getStyle() & WS_MINIMIZE)
     {
         rc = SendMessageA(getWindowHandle(),WM_PAINTICON, 1, 0);
     }
-
-    DeleteObject(hrgn);
 
     return rc;
 }
@@ -2918,7 +2913,14 @@ Win32BaseWindow *Win32BaseWindow::getParent()
 #endif
 }
 //******************************************************************************
-//Note: does not set last error if no parent (verified in NT4, SP6)
+// Win32BaseWindow::GetParent
+//
+// If the window is a child window, then return the parent window handle.
+// If it's a popup window, then return the owner
+//
+// Returns window handle of parent or owner window
+//
+// Note: does not set last error if no parent (verified in NT4, SP6)
 //******************************************************************************
 HWND Win32BaseWindow::GetParent()
 {
