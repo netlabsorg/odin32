@@ -1,4 +1,4 @@
-/* $Id: shell32_main.cpp,v 1.4 1999-10-19 14:32:14 phaller Exp $ */
+/* $Id: shell32_main.cpp,v 1.5 1999-11-02 20:38:47 phaller Exp $ */
 
 /*
  * Win32 SHELL32 for OS/2
@@ -45,6 +45,7 @@
 #include "shell32_main.h"
 #include "shlguid.h"
 #include "wine/undocshell.h"
+#include "shpolicy.h"
 
 #include <heapstring.h>
 #include <misc.h>
@@ -158,6 +159,11 @@ ODINFUNCTION5(DWORD, SHGetFileInfoA, LPCSTR,       path,
    if (flags & SHGFI_PIDL)
    {
      pidl = (LPCITEMIDLIST) path;
+     if (!pidl )
+     {
+       dprintf(("pidl is null!\n"));
+       return FALSE;
+     }
    }
    else if (!(flags & SHGFI_USEFILEATTRIBUTES))
    {
@@ -199,23 +205,7 @@ ODINFUNCTION5(DWORD, SHGetFileInfoA, LPCSTR,       path,
    /* get the type name */
    if (SUCCEEDED(hr) && (flags & SHGFI_TYPENAME))
    {
-     if(_ILIsValue(pidlLast))
-     {
-       char sTemp[64];
-       if (_ILGetExtension (pidlLast, sTemp, 64))
-       {
-         if (!( HCR_MapTypeToValue(sTemp, sTemp, 64, TRUE)
-             && HCR_MapTypeToValue(sTemp, psfi->szTypeName, 80, FALSE )))
-         {
-           lstrcpynA (psfi->szTypeName, sTemp, 74);
-           strcat (psfi->szTypeName, "-file");
-         }
-       }
-     }
-     else
-     {
-       strcpy(psfi->szTypeName, "Folder");
-     }
+     _ILGetFileType(pidlLast, psfi->szTypeName, 80);
    }
 
    /* ### icons ###*/
@@ -568,7 +558,6 @@ ODINFUNCTION6(HINSTANCE, ShellExecuteW, HWND,    hWnd,
 /*************************************************************************
  * AboutDlgProc32                           (internal)
  */
-
 BOOL WINAPI AboutDlgProc( HWND hWnd, UINT msg, WPARAM wParam,
                               LPARAM lParam )
 {   HWND hWndCtl;
@@ -925,6 +914,11 @@ ODINFUNCTION3(BOOL, Shell32LibMain, HINSTANCE, hinstDLL,
        {
          dprintf(("shell32.dll instantiated twice in one address space!\n"));
        }
+       else
+       {
+         /* we only want to call this the first time shell32 is instantiated */
+         SHInitRestricted(NULL, NULL);
+       }
 
        shell32_hInstance = hinstDLL;
 
@@ -987,10 +981,6 @@ ODINFUNCTION3(BOOL, Shell32LibMain, HINSTANCE, hinstDLL,
      case DLL_PROCESS_DETACH:
        shell32_RefCount--;
 
-       pOleUninitialize();
-       FreeLibrary(hOle32);
-       FreeLibrary(hComctl32);
-
        if ( !shell32_RefCount )
        {
          shell32_hInstance = 0;
@@ -1009,6 +999,10 @@ ODINFUNCTION3(BOOL, Shell32LibMain, HINSTANCE, hinstDLL,
            dprintf(("leaving with %u objects left (memory leak)\n", shell32_ObjCount));
          }
        }
+
+       FreeLibrary(hOle32);
+       FreeLibrary(hComctl32);
+
        dprintf(("refcount=%u objcount=%u \n", shell32_RefCount, shell32_ObjCount));
        break;
    }
