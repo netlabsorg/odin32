@@ -1,4 +1,4 @@
-; $Id: exceptutil.asm,v 1.10 2000-09-04 18:24:42 sandervl Exp $
+; $Id: exceptutil.asm,v 1.11 2000-09-08 18:07:49 sandervl Exp $
 
 ;/*
 ; * Project Odin Software License can be found in LICENSE.TXT
@@ -52,6 +52,12 @@ _RaiseException@16 endp
         extrn   OS2RTLUNWIND : near
 
 _RtlUnwind@16 proc near
+        ; fudge return address
+        push eax
+        mov  eax, dword ptr [esp+12]
+        mov  dword ptr [esp+4], eax
+        pop  eax
+
         push dword ptr [esp+4]  ;PWINEXCEPTION_FRAME  pEndFrame
         push dword ptr [esp+12] ;LPVOID unusedEip
         push dword ptr [esp+20] ;PWINEXCEPTION_RECORD pRecord
@@ -134,101 +140,101 @@ _SetExceptionChain endp
 
         PUBLIC getEAX
         PUBLIC getEBX
-getEAX 	proc near
+getEAX  proc near
         ret
-getEAX 	endp
+getEAX  endp
 
-getEBX 	proc near
+getEBX  proc near
         mov  eax, ebx
         ret
-getEBX 	endp
+getEBX  endp
 
         PUBLIC GetFS
-GetFS  	proc near
-	mov	eax, fs
-	ret
-GetFS  	endp
+GetFS   proc near
+        mov     eax, fs
+        ret
+GetFS   endp
 
         PUBLIC SetFS
-SetFS	proc near
-	mov  	eax, [esp+4]
-	mov	fs, eax
-	ret
-SetFS	endp
+SetFS   proc near
+        mov     eax, [esp+4]
+        mov     fs, eax
+        ret
+SetFS   endp
 
         PUBLIC getCS
-getCS  	proc near
-	mov	eax, cs
-	ret
-getCS  	endp
+getCS   proc near
+        mov     eax, cs
+        ret
+getCS   endp
 
         PUBLIC getDS
-getDS  	proc near
-	mov	eax, ds
-	ret
-getDS  	endp
+getDS   proc near
+        mov     eax, ds
+        ret
+getDS   endp
 
-	PUBLIC SetReturnFS
+        PUBLIC SetReturnFS
 SetReturnFS proc near
-	push	fs
-	mov  	eax, [esp+8]
-	mov	fs, eax
-	pop	eax
-	ret
+        push    fs
+        mov     eax, [esp+8]
+        mov     fs, eax
+        pop     eax
+        ret
 SetReturnFS endp
 
         PUBLIC getSS
-getSS	proc near
-	mov	ax, ss
-	ret
-getSS	endp
+getSS   proc near
+        mov     ax, ss
+        ret
+getSS   endp
 
         PUBLIC getES
-getES  	proc near
-	mov	eax, es
-	ret
-getES  	endp
+getES   proc near
+        mov     eax, es
+        ret
+getES   endp
 
         PUBLIC getGS
-getGS  	proc near
-	mov	eax, gs
-	ret
-getGS  	endp
+getGS   proc near
+        mov     eax, gs
+        ret
+getGS   endp
 
-	PUBLIC getESP
+        PUBLIC getESP
 getESP  proc near
-	mov	eax, esp
-	ret
-getESP	endp
+        mov     eax, esp
+        ret
+getESP  endp
 
-	PUBLIC RestoreOS2FS
+        PUBLIC RestoreOS2FS
 RestoreOS2FS proc near
-	push	150bh
-	mov	ax, fs
-	pop	fs
-	ret
+        push    150bh
+        mov     ax, fs
+        pop     fs
+        ret
 RestoreOS2FS endp
 
-	PUBLIC _Mul32x32to64
+        PUBLIC _Mul32x32to64
 _Mul32x32to64 proc near
-	push	ebp
-	mov	ebp, esp
-	push	eax
-	push	edx
-	push	edi
+        push    ebp
+        mov     ebp, esp
+        push    eax
+        push    edx
+        push    edi
 
-	mov	edi, [ebp+8]	;64 bits result
-	mov	eax, [ebp+12]	;op1
-	mov	edx, [ebp+16]	;op2
-	mul	edx
-	mov	[edi], eax
-	mov	[edi+4], edx
+        mov     edi, [ebp+8]    ;64 bits result
+        mov     eax, [ebp+12]   ;op1
+        mov     edx, [ebp+16]   ;op2
+        mul     edx
+        mov     [edi], eax
+        mov     [edi+4], edx
 
-	pop	edi
-	pop	edx
-	pop	eax
-	pop	ebp
-	ret
+        pop     edi
+        pop     edx
+        pop     eax
+        pop     ebp
+        ret
 _Mul32x32to64 endp
 
 CODE32          ENDS

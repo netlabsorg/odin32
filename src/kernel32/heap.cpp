@@ -1,4 +1,4 @@
-/* $Id: heap.cpp,v 1.21 2000-09-08 04:28:46 phaller Exp $ */
+/* $Id: heap.cpp,v 1.22 2000-09-08 18:07:50 sandervl Exp $ */
 
 /*
  * Win32 heap API functions for OS/2
@@ -179,9 +179,7 @@ ODINFUNCTIONNODBG0(HANDLE, GetProcessHeap)
 }
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTIONNODBG2(HLOCAL, LocalAlloc,
-                   UINT,   fuFlags,
-                   DWORD,  cbBytes)
+HLOCAL WIN32API LocalAlloc(UINT fuFlags, DWORD cbBytes)
 {
  HLOCAL lmem;
  DWORD  dwFlags = 0;
@@ -218,17 +216,16 @@ UINT WIN32API LocalFlags(HLOCAL hMem)
 }
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTIONNODBG1(HLOCAL, LocalFree,
-                   HLOCAL, hMem)
+HLOCAL WIN32API LocalFree(HLOCAL hMem)
 {
-  if(OS2ProcessHeap->GetLockCnt((LPVOID)hMem) != 0)
-  {
-    dprintf(("LocalFree, lock count != 0\n"));
-    return(hMem);   //TODO: SetLastError
+  dprintf(("KERNEL32: LocalFree %X\n", hMem));
+
+  if(OS2ProcessHeap->GetLockCnt((LPVOID)hMem) != 0) {
+      	dprintf(("LocalFree, lock count != 0\n"));
+      	return(hMem);   //TODO: SetLastError
   }
-  if(OS2ProcessHeap->Free(0, (LPVOID)hMem) == FALSE) 
-  {
-    return(hMem);   //TODO: SetLastError
+  if(OS2ProcessHeap->Free(0, (LPVOID)hMem) == FALSE) {
+      	return(hMem);   //TODO: SetLastError
   }
   return NULL; //success
 }
@@ -251,13 +248,12 @@ BOOL WIN32API LocalUnlock(HLOCAL hMem)
 //******************************************************************************
 //TODO: cbBytes==0 && fuFlags & LMEM_MOVEABLE not handled!!
 //******************************************************************************
-ODINFUNCTIONNODBG3(HLOCAL, LocalReAlloc,
-                   HLOCAL, hMem,
-                   DWORD,  cbBytes,
-                   UINT,   fuFlags)
+HLOCAL WIN32API LocalReAlloc(HLOCAL hMem, DWORD cbBytes, UINT fuFlags)
 {
   HLOCAL hLocalNew;
   LPVOID lpMem;
+
+  dprintf(("KERNEL32: LocalReAlloc %X %d %X\n", hMem, cbBytes, fuFlags));
 
   //SvL: 8-8-'98: Notepad bugfix (assumes address is identical when new size < old size)
   if(OS2ProcessHeap->Size(0, (LPVOID)hMem) > cbBytes)
@@ -321,20 +317,33 @@ UINT WIN32API LocalCompact(UINT cbNewSize)
     return cbNewSize;
 }
 //******************************************************************************
+#ifdef DEBUG
+static ULONG totalGlobalAlloc = 0;
+#endif
 //******************************************************************************
 HGLOBAL WIN32API GlobalAlloc(UINT fuFlags, DWORD dwBytes)
 {
-    dprintf(("KERNEL32:  GlobalAlloc %d\n", dwBytes));
+ HGLOBAL ret;
 
-    return O32_GlobalAlloc(fuFlags, dwBytes);
+    ret = O32_GlobalAlloc(fuFlags, dwBytes);
+#ifdef DEBUG
+    totalGlobalAlloc += dwBytes;
+#endif
+    dprintf(("KERNEL32: GlobalAlloc %x %d returned %x (total %x)", fuFlags, dwBytes, ret, totalGlobalAlloc));
+    return ret;
 }
 //******************************************************************************
 //******************************************************************************
 HGLOBAL WIN32API GlobalFree( HGLOBAL arg1)
 {
-    dprintf(("KERNEL32:  GlobalFree\n"));
+ HGLOBAL ret;
 
-    return O32_GlobalFree(arg1);
+#ifdef DEBUG
+    totalGlobalAlloc -= O32_GlobalSize(arg1);
+#endif
+    ret = O32_GlobalFree(arg1);
+    dprintf(("KERNEL32: GlobalFree %x returned %x (lasterr=%x) total %x", arg1, ret, GetLastError(), totalGlobalAlloc));
+    return ret;
 }
 //******************************************************************************
 //******************************************************************************
@@ -364,9 +373,11 @@ DWORD WIN32API GlobalCompact(DWORD dwMinFree)
 //******************************************************************************
 PVOID WIN32API GlobalLock(HGLOBAL arg1)
 {
-    dprintf(("KERNEL32: GlobalLock\n"));
+ PVOID ret;
 
-    return O32_GlobalLock(arg1);
+    ret = O32_GlobalLock(arg1);
+    dprintf(("KERNEL32: GlobalLock %x returned %x", arg1, ret));
+    return ret;
 }
 //******************************************************************************
 //******************************************************************************

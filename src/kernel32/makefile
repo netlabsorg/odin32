@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.99 2000-09-03 18:04:54 phaller Exp $
+# $Id: makefile,v 1.100 2000-09-08 18:07:50 sandervl Exp $
 
 #
 # Odin32 API
@@ -180,3 +180,7 @@ dep:
 # Includes the common rules.
 !include $(PDWIN32_INCLUDE)/pdwin32.post
 
+
+#override flags for exceptions.cpp
+$(OBJDIR)\exceptions.obj: exceptions.cpp
+    $(CXX) $(CXXFLAGS) -Op- -Fo$(OBJDIR)\$(@B).obj -c exceptions.cpp
