@@ -1,4 +1,4 @@
-/* $Id: hmdisk.cpp,v 1.47 2002-06-08 11:40:14 sandervl Exp $ */
+/* $Id: hmdisk.cpp,v 1.48 2002-06-26 11:08:32 sandervl Exp $ */
 
 /*
  * Win32 Disk API functions for OS/2
@@ -262,10 +262,10 @@ DWORD HMDeviceDiskClass::CreateFile (LPCSTR        lpFileName,
 
         memset(drvInfo, 0, sizeof(DRIVE_INFO));
         drvInfo->dwAccess  = pHMHandleData->dwAccess;
-        drvInfo->dwAccess  = pHMHandleData->dwShare;
+        drvInfo->dwShare   = pHMHandleData->dwShare;
         drvInfo->lpSecurityAttributes  = (LPSECURITY_ATTRIBUTES)lpSecurityAttributes;
-        drvInfo->dwAccess  = pHMHandleData->dwCreation;
-        drvInfo->dwAccess  = pHMHandleData->dwFlags;
+        drvInfo->dwCreation= pHMHandleData->dwCreation;
+        drvInfo->dwFlags   = pHMHandleData->dwFlags;
         drvInfo->hTemplate = hTemplate;
 
         //save volume start & length if volume must be accessed through the physical disk 
