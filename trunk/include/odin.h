@@ -83,7 +83,7 @@
   #define EXPORT    _export
   #define WIN32API  __stdcall
   #define WINAPI    __stdcall
-  #define SYSTEM    __stdcall
+  #define SYSTEM   
   #define PASCAL    __stdcall
   #define INLINE    __inline__
   #define UNALIGNED
