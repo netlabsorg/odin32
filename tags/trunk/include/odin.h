@@ -1,4 +1,4 @@
-/* $Id: odin.h,v 1.11 1999-09-25 08:31:46 sandervl Exp $ */
+/* $Id: odin.h,v 1.12 2000-01-06 23:17:27 sandervl Exp $ */
 /*
  * ODIN - Build Environment Definition
  *
@@ -86,8 +86,10 @@
 
 #else
 
+#ifndef RC_INVOKED
 /* ---------- ??? ---------- */
 #error No known compiler.
+#endif
 #endif
 #endif
 #endif
