@@ -60,6 +60,7 @@ $(TARGET).dll: $(OBJS) $(ORGTARGET).def
               $(PDWIN32_LIB)\comctl32.lib \
               $(PDWIN32_LIB)\advapi32.lib \
               $(PDWIN32_LIB)\kernel32.lib \
+              $(PDWIN32_LIB)\oleaut32.lib \
               $(PDWIN32_LIB)/odincrt.lib OS2386.LIB $(RTLLIB_O)
 	$(CP) $@ $(PDWIN32_BIN)
 #              $(PDWIN32_LIB)\ntdll.lib \

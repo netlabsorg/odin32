@@ -2,11 +2,6 @@
 LIBRARY OLE32OS2 INITINSTANCE
 DATA MULTIPLE NONSHARED
 
-; These are defined to prevent a forward reference to OLEAUT32...
-IMPORTS
-    _SysAllocString@4 		= OLEAUT32.SysAllocString 
-    _SysFreeString@4 		= OLEAUT32.SysFreeString 
-
 EXPORTS
     BindMoniker                = _BindMoniker@16             @1
     CLSIDFromProgID            = _CLSIDFromProgID@8          @2
