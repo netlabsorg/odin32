@@ -2458,19 +2458,24 @@ typedef struct
     WORD   dmSize;
     WORD   dmDriverExtra;
     DWORD  dmFields;
-    INT16  dmOrientation;
-    INT16  dmPaperSize;
-    INT16  dmPaperLength;
-    INT16  dmPaperWidth;
-    INT16  dmScale;
-    INT16  dmCopies;
-    INT16  dmDefaultSource;
-    INT16  dmPrintQuality;
-    INT16  dmColor;
-    INT16  dmDuplex;
-    INT16  dmYResolution;
-    INT16  dmTTOption;
-    INT16  dmCollate;
+    union {
+      struct {
+	SHORT  dmOrientation;
+	SHORT  dmPaperSize;
+	SHORT  dmPaperLength;
+	SHORT  dmPaperWidth;
+      } DUMMYSTRUCTNAME1;
+      POINTL dmPosition;
+    } DUMMYUNIONNAME1;
+    SHORT  dmScale;
+    SHORT  dmCopies;
+    SHORT  dmDefaultSource;
+    SHORT  dmPrintQuality;
+    SHORT  dmColor;
+    SHORT  dmDuplex;
+    SHORT  dmYResolution;
+    SHORT  dmTTOption;
+    SHORT  dmCollate;
     BYTE   dmFormName[CCHFORMNAME];
     WORD   dmLogPixels;
     DWORD  dmBitsPerPel;
@@ -2484,6 +2489,8 @@ typedef struct
     DWORD  dmDitherType;
     DWORD  dmReserved1;
     DWORD  dmReserved2;
+    DWORD  dmPanningWidth;
+    DWORD  dmPanningHeight;
 } DEVMODEA, *PDEVMODEA, *LPDEVMODEA;
 
 typedef struct
@@ -2494,19 +2501,24 @@ typedef struct
     WORD   dmSize;
     WORD   dmDriverExtra;
     DWORD  dmFields;
-    INT16  dmOrientation;
-    INT16  dmPaperSize;
-    INT16  dmPaperLength;
-    INT16  dmPaperWidth;
-    INT16  dmScale;
-    INT16  dmCopies;
-    INT16  dmDefaultSource;
-    INT16  dmPrintQuality;
-    INT16  dmColor;
-    INT16  dmDuplex;
-    INT16  dmYResolution;
-    INT16  dmTTOption;
-    INT16  dmCollate;
+    union {
+      struct {
+	SHORT  dmOrientation;
+	SHORT  dmPaperSize;
+	SHORT  dmPaperLength;
+	SHORT  dmPaperWidth;
+      } DUMMYSTRUCTNAME1;
+      POINTL dmPosition;
+    } DUMMYUNIONNAME1;
+    SHORT  dmScale;
+    SHORT  dmCopies;
+    SHORT  dmDefaultSource;
+    SHORT  dmPrintQuality;
+    SHORT  dmColor;
+    SHORT  dmDuplex;
+    SHORT  dmYResolution;
+    SHORT  dmTTOption;
+    SHORT  dmCollate;
     WCHAR  dmFormName[CCHFORMNAME];
     WORD   dmLogPixels;
     DWORD  dmBitsPerPel;
@@ -2520,12 +2532,15 @@ typedef struct
     DWORD  dmDitherType;
     DWORD  dmReserved1;
     DWORD  dmReserved2;
+    DWORD  dmPanningWidth;
+    DWORD  dmPanningHeight;
 } DEVMODEW, *PDEVMODEW, *LPDEVMODEW;
 
 DECL_WINELIB_TYPE_AW(DEVMODE)
 DECL_WINELIB_TYPE_AW(PDEVMODE)
 DECL_WINELIB_TYPE_AW(LPDEVMODE)
 
+#define DM_SPECVERSION  0x401
 #define DM_UPDATE	1
 #define DM_COPY		2
 #define DM_PROMPT	4
@@ -2561,22 +2576,21 @@ DECL_WINELIB_TYPE_AW(LPDEVMODE)
 #define DM_PANNINGWIDTH         0x08000000L
 #define DM_PANNINGHEIGHT        0x10000000L
 
-/* etc.... */
-
 #define DMORIENT_PORTRAIT	1
 #define DMORIENT_LANDSCAPE	2
 
-#define DMPAPER_LETTER		1
+#define DMPAPER_FIRST              DMPAPER_LETTER
+#define DMPAPER_LETTER		   1
 #define DMPAPER_LETTERSMALL        2
 #define DMPAPER_TABLOID            3
 #define DMPAPER_LEDGER             4
-#define DMPAPER_LEGAL		5
+#define DMPAPER_LEGAL		   5
 #define DMPAPER_STATEMENT          6
-#define DMPAPER_EXECUTIVE	7
-#define DMPAPER_A3		8
-#define DMPAPER_A4		9
+#define DMPAPER_EXECUTIVE	   7
+#define DMPAPER_A3		   8
+#define DMPAPER_A4		   9
 #define DMPAPER_A4SMALL            10
-#define DMPAPER_A5		11
+#define DMPAPER_A5		   11
 #define DMPAPER_B4                 12
 #define DMPAPER_B5                 13
 #define DMPAPER_FOLIO              14
@@ -2585,71 +2599,169 @@ DECL_WINELIB_TYPE_AW(LPDEVMODE)
 #define DMPAPER_11X17              17
 #define DMPAPER_NOTE               18
 #define DMPAPER_ENV_9              19
-#define DMPAPER_ENV_10		20
+#define DMPAPER_ENV_10		   20
 #define DMPAPER_ENV_11             21
 #define DMPAPER_ENV_12             22
 #define DMPAPER_ENV_14             23
 #define DMPAPER_CSHEET             24
 #define DMPAPER_DSHEET             25
 #define DMPAPER_ESHEET             26
-#define DMPAPER_ENV_DL		27
-#define DMPAPER_ENV_C5		28
+#define DMPAPER_ENV_DL		   27
+#define DMPAPER_ENV_C5		   28
 #define DMPAPER_ENV_C3             29
 #define DMPAPER_ENV_C4             30
 #define DMPAPER_ENV_C6             31
 #define DMPAPER_ENV_C65            32
 #define DMPAPER_ENV_B4             33
-#define DMPAPER_ENV_B5		34
+#define DMPAPER_ENV_B5		   34
 #define DMPAPER_ENV_B6             35
 #define DMPAPER_ENV_ITALY          36
-#define DMPAPER_ENV_MONARCH	37
+#define DMPAPER_ENV_MONARCH	   37
 #define DMPAPER_ENV_PERSONAL       38
 #define DMPAPER_FANFOLD_US         39
 #define DMPAPER_FANFOLD_STD_GERMAN 40
 #define DMPAPER_FANFOLD_LGL_GERMAN 41
-#define DMPAPER_ISO_B4              42
-#define DMPAPER_JAPANESE_POSTCARD   43
-#define DMPAPER_9X11                44
-#define DMPAPER_10X11               45
-#define DMPAPER_15X11               46
-#define DMPAPER_ENV_INVITE          47
-#define DMPAPER_RESERVED_48         48
-#define DMPAPER_RESERVED_49         49
-#define DMPAPER_LETTER_EXTRA        50
-#define DMPAPER_LEGAL_EXTRA         51
-#define DMPAPER_TABLOID_EXTRA       52
-#define DMPAPER_A4_EXTRA            53
-#define DMPAPER_LETTER_TRANSVERSE   54
-#define DMPAPER_A4_TRANSVERSE       55
+#define DMPAPER_ISO_B4             42
+#define DMPAPER_JAPANESE_POSTCARD  43
+#define DMPAPER_9X11               44
+#define DMPAPER_10X11              45
+#define DMPAPER_15X11              46
+#define DMPAPER_ENV_INVITE         47
+#define DMPAPER_RESERVED_48        48
+#define DMPAPER_RESERVED_49        49
+#define DMPAPER_LETTER_EXTRA       50
+#define DMPAPER_LEGAL_EXTRA        51
+#define DMPAPER_TABLOID_EXTRA      52
+#define DMPAPER_A4_EXTRA           53
+#define DMPAPER_LETTER_TRANSVERSE  54
+#define DMPAPER_A4_TRANSVERSE      55
 #define DMPAPER_LETTER_EXTRA_TRANSVERSE 56
-#define DMPAPER_A_PLUS              57
-#define DMPAPER_B_PLUS              58
-#define DMPAPER_LETTER_PLUS         59
-#define DMPAPER_A4_PLUS             60
-#define DMPAPER_A5_TRANSVERSE       61
-#define DMPAPER_B5_TRANSVERSE       62
-#define DMPAPER_A3_EXTRA            63
-#define DMPAPER_A5_EXTRA            64
-#define DMPAPER_B5_EXTRA            65
-#define DMPAPER_A2                  66
-#define DMPAPER_A3_TRANSVERSE       67
-#define DMPAPER_A3_EXTRA_TRANSVERSE 68
+#define DMPAPER_A_PLUS             57
+#define DMPAPER_B_PLUS             58
+#define DMPAPER_LETTER_PLUS        59
+#define DMPAPER_A4_PLUS            60
+#define DMPAPER_A5_TRANSVERSE      61
+#define DMPAPER_B5_TRANSVERSE      62
+#define DMPAPER_A3_EXTRA           63
+#define DMPAPER_A5_EXTRA           64
+#define DMPAPER_B5_EXTRA           65
+#define DMPAPER_A2                 66
+#define DMPAPER_A3_TRANSVERSE      67
+#define DMPAPER_A3_EXTRA_TRANSVERSE           68
+#define DMPAPER_DBL_JAPANESE_POSTCARD         69
+#define DMPAPER_A6                 70
+#define DMPAPER_JENV_KAKU2         71
+#define DMPAPER_JENV_KAKU3         72
+#define DMPAPER_JENV_CHOU3         73
+#define DMPAPER_JENV_CHOU4         74
+#define DMPAPER_LETTER_ROTATED     75
+#define DMPAPER_A3_ROTATED         76
+#define DMPAPER_A4_ROTATED         77
+#define DMPAPER_A5_ROTATED         78
+#define DMPAPER_B4_JIS_ROTATED     79
+#define DMPAPER_B5_JIS_ROTATED     80
+#define DMPAPER_JAPANESE_POSTCARD_ROTATED     81
+#define DMPAPER_DBL_JAPANESE_POSTCARD_ROTATED 82
+#define DMPAPER_A6_ROTATED         83
+#define DMPAPER_JENV_KAKU2_ROTATED 84
+#define DMPAPER_JENV_KAKU3_ROTATED 85
+#define DMPAPER_JENV_CHOU3_ROTATED 86
+#define DMPAPER_JENV_CHOU4_ROTATED 87
+#define DMPAPER_B6_JIS             88
+#define DMPAPER_B6_JIS_ROTATED     89
+#define DMPAPER_12X11              90
+#define DMPAPER_JENV_YOU4          91
+#define DMPAPER_JENV_YOU4_ROTATED  92
+#define DMPAPER_P16K               93
+#define DMPAPER_P32K               94
+#define DMPAPER_P32KBIG            95
+#define DMPAPER_PENV_1             96
+#define DMPAPER_PENV_2             97
+#define DMPAPER_PENV_3             98
+#define DMPAPER_PENV_4             99
+#define DMPAPER_PENV_5             100
+#define DMPAPER_PENV_6             101
+#define DMPAPER_PENV_7             102
+#define DMPAPER_PENV_8             103
+#define DMPAPER_PENV_9             104
+#define DMPAPER_PENV_10            105
+#define DMPAPER_P16K_ROTATED       106
+#define DMPAPER_P32K_ROTATED       107
+#define DMPAPER_P32KBIG_ROTATED    108
+#define DMPAPER_PENV_1_ROTATED     109
+#define DMPAPER_PENV_2_ROTATED     110
+#define DMPAPER_PENV_3_ROTATED     111
+#define DMPAPER_PENV_4_ROTATED     112
+#define DMPAPER_PENV_5_ROTATED     113
+#define DMPAPER_PENV_6_ROTATED     114
+#define DMPAPER_PENV_7_ROTATED     115
+#define DMPAPER_PENV_8_ROTATED     116
+#define DMPAPER_PENV_9_ROTATED     117
+#define DMPAPER_PENV_10_ROTATED    118
 
+#define DMPAPER_LAST               DMPAPER_PENV_10_ROTATED
+#define DMPAPER_USER               256
+
+#define DMBIN_FIRST             DMBIN_UPPER
 #define DMBIN_UPPER		1
+#define DMBIN_ONLYONE           1
 #define DMBIN_LOWER		2
 #define DMBIN_MIDDLE		3
 #define DMBIN_MANUAL		4
 #define DMBIN_ENVELOPE		5
 #define DMBIN_ENVMANUAL		6
 #define DMBIN_AUTO		7
+#define DMBIN_TRACTOR           8
+#define DMBIN_SMALLFMT          9
+#define DMBIN_LARGEFMT          10
 #define DMBIN_LARGECAPACITY	11
+#define DMBIN_CASSETTE          14
+#define DMBIN_FORMSOURCE        15
+#define DMBIN_LAST              DMBIN_FORMSOURCE
+#define DMBIN_USER              256
+
+#define DMRES_DRAFT             (-1)
+#define DMRES_LOW               (-2)
+#define DMRES_MEDIUM            (-3)
+#define DMRES_HIGH              (-4)
 
 #define DMCOLOR_MONOCHROME	1
 #define DMCOLOR_COLOR		2
 
+#define DMDUP_SIMPLEX           1
+#define DMDUP_VERTICAL          2
+#define DMDUP_HORIZONTAL        3
+
 #define DMTT_BITMAP		1
 #define DMTT_DOWNLOAD		2
 #define DMTT_SUBDEV		3
+#define DMTT_DOWNLOAD_OUTLINE   4
+
+#define DMCOLLATE_FALSE         0
+#define DMCOLLATE_TRUE          1
+
+#define DMICMMETHOD_NONE        1
+#define DMICMMETHOD_SYSTEM      2
+#define DMICMMETHOD_DRIVER      3
+#define DMICMMETHOD_DEVICE      4
+#define DMICMMETHOD_USER        256
+
+#define DMICM_SATURATE          1
+#define DMICM_CONTRAST          2
+#define DMICM_COLORMETRIC       3
+#define DMICM_USER              256
+
+#define DMMEDIA_STANDARD        1
+#define DMMEDIA_TRANSPARENCY    2
+#define DMMEDIA_GLOSSY          3
+#define DMMEDIA_USER            256
+
+#define DMDITHER_NONE           1
+#define DMDITHER_COARSE         2
+#define DMDITHER_FINE           3
+#define DMDITHER_LINEART        4
+#define DMDITHER_GRAYSCALE      5
+#define DMDITHER_USER           256
 
 typedef struct
 {
@@ -2671,6 +2783,8 @@ typedef struct
 
 DECL_WINELIB_TYPE_AW(DOCINFO)
 DECL_WINELIB_TYPE_AW(LPDOCINFO)
+
+#define DI_APPBANDING     0x0001
 
 /* Flags for PolyDraw and GetPath */
 #define PT_CLOSEFIGURE          0x0001
