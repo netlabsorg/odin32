@@ -1,3 +1,4 @@
+/* $Id: icmp.cpp,v 1.2 2000-08-02 16:14:19 bird Exp $ */
 /*
  * ICMP
  *
@@ -5,9 +6,9 @@
  *   RW Hall, 1999, based on public domain code PING.C by Mike Muus (1983)
  *   and later works (c) 1989 Regents of Univ. of California - see copyright
  *   notice at end of source-code.
- */
-
-/* Future work:
+ *
+ *
+ * Future work:
  * - Systems like FreeBSD don't seem to support the IP_TTL option and maybe others.
  *   But using IP_HDRINCL and building the IP header by hand might work.
  * - Not all IP options are supported.
