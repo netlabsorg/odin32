@@ -11,6 +11,8 @@ static const char * const SHELL_People[] =
     "Przemyslaw Dobrowolski",
     "Daniela Engert",
     "Peter Fitzsimmons",
+    "Platon Fomichev",
+    "Dmitry Froloff",
     "Adrian Gschwend",
     "Jeroen van den Horn",
     "Patrick Haller",
