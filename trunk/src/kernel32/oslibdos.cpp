@@ -1,4 +1,4 @@
-/* $Id: oslibdos.cpp,v 1.72 2001-07-28 18:03:38 sandervl Exp $ */
+/* $Id: oslibdos.cpp,v 1.73 2001-09-27 16:34:00 phaller Exp $ */
 /*
  * Wrappers for OS/2 Dos* API
  *
@@ -179,7 +179,10 @@ DWORD error2WinError(APIRET rc,DWORD defaultCode)
 
     case ERROR_TOO_MANY_SEMAPHORES: //100
         return ERROR_TOO_MANY_SEMAPHORES_W;
-
+    
+    case ERROR_DISK_CHANGE: // 107
+        return ERROR_DISK_CHANGE_W;
+    
     case ERROR_DRIVE_LOCKED: //108
         return ERROR_DRIVE_LOCKED_W;
 
@@ -245,7 +248,60 @@ DWORD error2WinError(APIRET rc,DWORD defaultCode)
 
     case ERROR_EAS_DIDNT_FIT: //275
         return ERROR_EAS_DIDNT_FIT;
+    
+    // device driver specific error codes (I24)
+    case ERROR_USER_DEFINED_BASE + ERROR_I24_WRITE_PROTECT:
+       return ERROR_WRITE_PROTECT_W;
+    
+    case ERROR_USER_DEFINED_BASE + ERROR_I24_BAD_UNIT:
+       return ERROR_BAD_UNIT_W;
+    
+    case ERROR_USER_DEFINED_BASE + ERROR_I24_NOT_READY:
+       return ERROR_NOT_READY_W;
+    
+    case ERROR_USER_DEFINED_BASE + ERROR_I24_BAD_COMMAND:
+       return ERROR_BAD_COMMAND_W;
+    
+    case ERROR_USER_DEFINED_BASE + ERROR_I24_CRC:
+       return ERROR_CRC_W;
+    
+    case ERROR_USER_DEFINED_BASE + ERROR_I24_BAD_LENGTH:
+       return ERROR_BAD_LENGTH_W;
+    
+    case ERROR_USER_DEFINED_BASE + ERROR_I24_SEEK:
+       return ERROR_SEEK_W;
+    
+    case ERROR_USER_DEFINED_BASE + ERROR_I24_NOT_DOS_DISK:
+       return ERROR_NOT_DOS_DISK_W;
+    
+    case ERROR_USER_DEFINED_BASE + ERROR_I24_SECTOR_NOT_FOUND:
+       return ERROR_SECTOR_NOT_FOUND_W;
+    
+// @@@PH this error code is not defined in winconst.h
+//    case ERROR_USER_DEFINED_BASE + ERROR_I24_OUT_OF_PAPER:
+//       return 28;
 
+    case ERROR_USER_DEFINED_BASE + ERROR_I24_WRITE_FAULT:
+       return ERROR_WRITE_FAULT_W;
+  
+    case ERROR_USER_DEFINED_BASE + ERROR_I24_READ_FAULT:
+       return ERROR_READ_FAULT_W;
+    
+    case ERROR_USER_DEFINED_BASE + ERROR_I24_GEN_FAILURE:
+       return ERROR_GEN_FAILURE_W;
+    
+    case ERROR_USER_DEFINED_BASE + ERROR_I24_DISK_CHANGE:
+       return ERROR_DISK_CHANGE_W;
+    
+    case ERROR_USER_DEFINED_BASE + ERROR_I24_WRONG_DISK:
+       return ERROR_WRONG_DISK_W;
+    
+    case ERROR_USER_DEFINED_BASE + ERROR_I24_INVALID_PARAMETER:
+       return ERROR_INVALID_PARAMETER_W;
+  
+    case ERROR_USER_DEFINED_BASE + ERROR_I24_DEVICE_IN_USE:
+       return ERROR_DEVICE_IN_USE_W;
+    
     default:
         dprintf(("WARNING: error2WinError: error %d not included!!!!", rc));
         return defaultCode;

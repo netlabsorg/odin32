@@ -1,7 +1,8 @@
-/* $Id: changelog,v 1.1700 2001-09-27 13:14:53 phaller Exp $ */
+/* $Id: changelog,v 1.1701 2001-09-27 16:34:26 phaller Exp $ */
 
  2001-09-27: Patrick Haller <patrick.haller@innotek.de>
     - USER32:   o partial implementation of SendInput()
+    - KERNEL32: o improved error code mapping (error2WinError)
 
  2001-09-26: knut st. osmundsen <kosmunds@csc.com>
     - Win32k:   o Create development branch 'splittup' which in the
