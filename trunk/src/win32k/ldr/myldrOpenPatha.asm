@@ -1,4 +1,4 @@
-; $Id: myldrOpenPatha.asm,v 1.2 2000-09-28 03:32:39 bird Exp $
+; $Id: myldrOpenPatha.asm,v 1.3 2000-09-29 01:21:11 bird Exp $
 ;
 ; myldrOpenPatha - assembly helpers for myldrOpenPath.
 ;
@@ -39,6 +39,7 @@ _ldrOpenPath@20 PROC NEAR
     cmp     FLAT:DATA16:_options.ulBuild, 14053
     jge      new
 
+if 0
     ;
     ; We does now have one parameter more than necessary on the stack.
     ;
@@ -53,6 +54,18 @@ _ldrOpenPath@20 PROC NEAR
     mov     [esp +  04h], eax
     mov     eax, [esp - 04h]
     mov     [esp +  00h], eax
+else
+    ;
+    ; Call without the last parameter
+    ;
+    push    dword ptr [esp + 10h]
+    push    dword ptr [esp + 10h]
+    push    dword ptr [esp + 10h]
+    push    dword ptr [esp + 10h]
+    call    near ptr FLAT:CALLTAB:__ldrOpenPath
+    ret     14h
+endif
+
 
     ;
     ;
