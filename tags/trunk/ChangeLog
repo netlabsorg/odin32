@@ -1,7 +1,9 @@
-/* $Id: ChangeLog,v 1.1759 2001-10-17 10:23:13 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.1760 2001-10-17 13:43:09 phaller Exp $ */
 
  2001-10-17: Patrick Haller <patrick.haller@innotek.de>
     - SHELL32:  o WINE resync 20011017
+    - KERNEL32: o minor heap optimization
+    - USER32:   o minor handle mgmt optimizations
 
  2001-10-17: Sander van Leeuwen <sandervl@xs4all.nl>
     - DDRAW:    o Fixes for DDBLT_COLORFILL
