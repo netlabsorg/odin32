@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.188 2002-08-23 15:06:00 sandervl Exp $ */
+/* $Id: pmwindow.cpp,v 1.189 2002-09-26 16:04:34 sandervl Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -1376,7 +1376,7 @@ adjustend:
       HWND      hParent = NULLHANDLE;
       RECTL     rect;
 
-        dprintf(("PMFRAME:WM_WINDOWPOSCHANGED (%x) %x %x (%s) (%d,%d) (%d,%d)", mp2, win32wnd->getWindowHandle(), pswp->fl, DbgGetStringSWPFlags(pswp->fl), pswp->x, pswp->y, pswp->cx, pswp->cy));
+        dprintf(("PMFRAME:WM_WINDOWPOSCHANGED (%x) %x %x (%s) (%d,%d) (%d,%d) z %x", mp2, win32wnd->getWindowHandle(), pswp->fl, DbgGetStringSWPFlags(pswp->fl), pswp->x, pswp->y, pswp->cx, pswp->cy, Win32BaseWindow::GetWindowFromOS2Handle(pswp->hwndInsertBehind)));
         if(win32wnd->IsParentChanging()) {
             goto PosChangedEnd;
         }
@@ -1801,15 +1801,27 @@ PosChangedEnd:
         dprintf(("PMFRAME:WM_FORMATFRAME %x", win32wnd->getWindowHandle()));
         break;
 
-#ifdef DEBUG
     case WM_ADJUSTFRAMEPOS:
     {
         PSWP pswp   = (PSWP)mp1;
 
         dprintf(("PMFRAME:WM_ADJUSTFRAMEPOS %x %x %x (%s) (%d,%d) (%d,%d)", win32wnd->getWindowHandle(), pswp->hwnd, pswp->fl, DbgGetStringSWPFlags(pswp->fl), pswp->x, pswp->y, pswp->cx, pswp->cy));
+        //hack alert: the PM frame control changes the z-order of a child window
+        //            if it receives focus after a window has been destroyed
+        //            We can't let this happen as this messes up assumptions
+        //            elsewhere (e.g. GetNextDlgGroupItem)
+        //            By returning 0 here, we prevent the default frame handler
+        //            from messing things up. (one example is a group of radio buttons)
+        //NOTE: We really need to get rid of frame & client windows for each
+        //      win32 window
+        if(pswp->fl == SWP_FOCUSACTIVATE && win32wnd->isChild()) {
+            rc = 0;
+            break;
+        }
         goto RunDefFrameWndProc;
     }
 
+#ifdef DEBUG
     case WM_OWNERPOSCHANGE:
     {
         PSWP pswp   = (PSWP)mp1;
