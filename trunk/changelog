@@ -1,4 +1,14 @@
-/* $Id: changelog,v 1.2566 2003-04-30 11:03:08 sandervl Exp $ */
+/* $Id: changelog,v 1.2567 2003-05-02 15:32:03 sandervl Exp $ */
+
+ 2003-05-02: Sander van Leeuwen <sandervl@innotek   >
+    - USER32:   o Keep track of all open window DCs
+                o During WM_VRNENABLED we must query the visible region
+                  of all open DCs to ensure that GPI updates the visible
+                  region (e.g. when a window has moved).
+                  A bug in PM/GPI causes open DCs to get out of sync when
+                  moving windows with full window drag enabled.
+                  (without full window drag there is no such problem due
+                   to the use of LockWindowUpdate)
 
  2003-04-30: Dietrich Teickner <Dietrich_Teickner@t-online   >
     - SHLWAPI:  o Fixed PathIsUrlA/W
