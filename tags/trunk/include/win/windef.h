@@ -113,7 +113,7 @@ extern "C" {
 #endif
 
 #ifndef __export
-  #define __export
+  #define __export    
 #endif
 
 #ifndef CDECL
@@ -228,9 +228,16 @@ typedef double          DATE;
 typedef long            LONG_PTR;
 typedef unsigned long   ULONG_PTR;
 typedef double          DOUBLE;
+#if (__IBMC__ < 360) && (__IBMCPP__ < 360)
 typedef double          LONGLONG;
 typedef double          ULONGLONG;
 typedef double          ULONGULONG;
+#else
+#include <inttypes.h>
+typedef int64_t         LONGLONG;
+typedef uint64_t        ULONGLONG;
+typedef uint64_t        ULONGULONG;
+#endif
 
 /* FIXME: Wine does not compile with strict on, therefore strict
  * handles are presently only usable on machines where sizeof(UINT) ==
@@ -268,7 +275,7 @@ typedef WORD            LANGID;
 typedef DWORD           LCTYPE;
 typedef float           FLOAT;
 #ifdef __WIN32OS2__
-#if (__IBMC__ < 400) && (__IBMCPP__ < 360) && !defined(__WATCOMC__) && !defined(__EMX__)
+#if (__IBMC__ < 400) && (__IBMCPP__ < 360) && !defined(__WATCOMC__)
 typedef double	        __int64;
 #endif
 #else
