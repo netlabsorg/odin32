@@ -1,4 +1,7 @@
- /* $Id: changelog,v 1.1002 2000-06-21 20:53:22 sandervl Exp $ */
+ /* $Id: changelog,v 1.1003 2000-06-22 19:00:37 cbratschi Exp $ */
+
+ 2000-06-22: Christoph Bratschi <cbratschi@datacomm.ch>
+    - COMCTL32:    fixed ANIMATE_ThreadFunc's calling convention
 
  2000-06-21: Sander van Leeuwen <sandervl@xs4all.nl>
     - KERNEL32:    Setup enviroment similar to NT. I.e.:
