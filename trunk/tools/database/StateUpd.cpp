@@ -1,4 +1,4 @@
-/* $Id: StateUpd.cpp,v 1.17 2000-02-14 17:36:19 bird Exp $
+/* $Id: StateUpd.cpp,v 1.18 2000-02-15 13:37:52 bird Exp $
  *
  * StateUpd - Scans source files for API functions and imports data on them.
  *
@@ -982,10 +982,19 @@ static unsigned long analyseFnDcl2(PFNDESC pFnDesc, char **papszLines, int i, in
                 if (apszArgs[j][cch-1] != '*' || (apszArgs[j][cch - 1] == ']' && cch < 5))
                 {   /* nearly Normal case, Type [moretype] Name.*/
                     if (apszArgs[j][cch - 1] != ']')
-                    {   /* Normal case! */
-                        pFnDesc->apszParamName[j] = findStartOfWord(apszArgs[j] + cch - 1,
-                                                                    apszArgs[j]);
-                        pFnDesc->apszParamName[j][-1] = '\0';
+                    {
+                        if (strcmp(apszArgs[j], "...") != 0)
+                        {   /* Normal case! */
+                            pFnDesc->apszParamName[j] = findStartOfWord(apszArgs[j] + cch - 1,
+                                                                        apszArgs[j]);
+                            pFnDesc->apszParamName[j][-1] = '\0';
+                            pFnDesc->apszParamType[j] = trim(apszArgs[j]);
+                        }
+                        else
+                        {   /* eliptic */
+                            pFnDesc->apszParamName[j] = "...";
+                            pFnDesc->apszParamType[j] = "";
+                        }
                     }
                     else
                     {   /* arg yet another special case! 'fn(int argc, char *argv[])' */
@@ -1018,6 +1027,7 @@ static unsigned long analyseFnDcl2(PFNDESC pFnDesc, char **papszLines, int i, in
                             *pszEnd = '\0';
                             memset(psz, ' ', pszP2 - psz);
                         }
+                        pFnDesc->apszParamType[j] = trim(apszArgs[j]);
                     }
                 }
                 else
@@ -1026,8 +1036,8 @@ static unsigned long analyseFnDcl2(PFNDESC pFnDesc, char **papszLines, int i, in
                     pFnDesc->apszParamName[j] = pszEnd;
                     pszEnd = strlen(pszEnd) + pszEnd + 1;
                     *pszEnd = '\0';
+                    pFnDesc->apszParamType[j] = trim(apszArgs[j]);
                 }
-                pFnDesc->apszParamType[j] = trim(apszArgs[j]);
             }
             else
             {   /* Function pointer argument... */
