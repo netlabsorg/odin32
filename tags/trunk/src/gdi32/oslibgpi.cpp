@@ -1,4 +1,4 @@
-/* $Id: oslibgpi.cpp,v 1.7 2000-09-03 09:30:35 sandervl Exp $ */
+/* $Id: oslibgpi.cpp,v 1.8 2000-11-15 13:56:45 sandervl Exp $ */
 
 /*
  * GPI interface code
@@ -18,7 +18,8 @@
 #include "win32type.h"
 #include <winconst.h>
 #include "oslibgpi.h"
-#include "dcdata.h"
+#include <dcdata.h>
+#include <misc.h>
 
 #define DBG_LOCALLOG    DBG_oslibgpi
 #include "dbglocal.h"
@@ -403,3 +404,33 @@ BOOL OSLibGpiSetCp(HDC hdc, ULONG codepage)
 }
 
 
+int OSLibGpiQueryFontMaxHeight(HDC hdc) 
+{
+  FONTMETRICS metrics;
+  BOOL rc;
+
+  rc = GpiQueryFontMetrics(hdc, sizeof(metrics), &metrics);
+  if(rc) {
+  	return metrics.lMaxAscender;
+  }
+  else {
+	dprintf(("GpiQueryFontMetrics returned FALSE!!"));
+	return 0;
+  }
+}
+
+#ifdef DEBUG
+void dprintfOrigin(HDC hdc)
+{
+   POINTL point;
+
+    pDCData  pHps = (pDCData)OSLibGpiQueryDCData((HPS)hdc);
+    if(!pHps)
+    {
+	return;
+    }
+
+    GreGetDCOrigin(pHps->hps, &point);
+    dprintf2(("HDC origin (%d,%d) org (%d,%d)", point.x, point.y, pHps->ptlOrigin.x, pHps->ptlOrigin.y));
+}
+#endif
