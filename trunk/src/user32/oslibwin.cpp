@@ -1,4 +1,4 @@
-/* $Id: oslibwin.cpp,v 1.137 2003-01-03 16:35:55 sandervl Exp $ */
+/* $Id: oslibwin.cpp,v 1.138 2003-01-20 12:09:47 sandervl Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -104,6 +104,10 @@ HWND OSLibWinCreateWindow(HWND hwndParent,ULONG dwWinStyle, ULONG dwOSFrameStyle
         FCData.flCreateFlags = dwOSFrameStyle;
         WinCreateFrameControls(*hwndFrame, &FCData, NULL);
     }
+    if(*hwndFrame == 0) {
+        dprintf(("Frame window creation failed!! OS LastError %0x", WinGetLastError(0)));
+        return 0;
+    }
     hwndClient = WinCreateWindow (*hwndFrame, WIN32_STDCLASS,
                               NULL, dwWinStyle | WS_VISIBLE, 0, 0, 0, 0,
                               *hwndFrame, HWND_TOP, FID_CLIENT, NULL, NULL);
@@ -111,6 +115,11 @@ HWND OSLibWinCreateWindow(HWND hwndParent,ULONG dwWinStyle, ULONG dwOSFrameStyle
     //to show IBM wheel driver that we need WM_VSCROLL messages
     if (hwndParent == HWND_DESKTOP && *hwndFrame)
        OSLibWinCreateInvisibleScroller(*hwndFrame, SBS_VERT);
+
+
+    if(hwndClient == 0) {
+        dprintf(("Client window creation failed!! OS LastError %0x", WinGetLastError(0)));
+    }
     return hwndClient;
 }
 //******************************************************************************
@@ -1213,6 +1222,7 @@ BOOL OSLibWinChangeTaskList(HANDLE hTaskList, HWND hwndFrame, char *title, BOOL 
     swctrl.uchVisibility = (fVisible) ? SWL_VISIBLE : SWL_INVISIBLE;
     swctrl.fbJump        = SWL_JUMPABLE;
     swctrl.bProgType     = PROG_PM;
+    dprintf(("OSLibWinChangeTaskList %x %s swctrl %x size %d", hTaskList, title, &swctrl, sizeof(swctrl)));
     if(title) {
         CharToOemBuffA( title, swctrl.szSwtitle, min(strlen(title)+1,MAXNAMEL+4) );
         swctrl.szSwtitle[MAXNAMEL+4-1] = 0;
@@ -1221,6 +1231,16 @@ BOOL OSLibWinChangeTaskList(HANDLE hTaskList, HWND hwndFrame, char *title, BOOL 
         swctrl.szSwtitle[0] = 0;
         swctrl.uchVisibility    = SWL_INVISIBLE;
     }
+    dprintf(("hwnd           %x", swctrl.hwnd));
+    dprintf(("hwndIcon       %x", swctrl.hwndIcon));
+    dprintf(("hprog          %x", swctrl.hprog));
+    dprintf(("idProcess      %x", swctrl.idProcess));
+    dprintf(("idSession      %x", swctrl.idSession));
+    dprintf(("uchVisibility  %x", swctrl.uchVisibility));
+    dprintf(("fbJump         %x", swctrl.fbJump));
+    dprintf(("bProgType      %x", swctrl.bProgType));
+    dprintf(("szSwtitle      %s", swctrl.szSwtitle));
+
     return (WinChangeSwitchEntry(hTaskList, &swctrl)) ? FALSE : TRUE;
 }
 //******************************************************************************
