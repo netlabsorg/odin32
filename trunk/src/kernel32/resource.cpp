@@ -1,4 +1,4 @@
-/* $Id: resource.cpp,v 1.16 2000-05-28 16:45:12 sandervl Exp $ */
+/* $Id: resource.cpp,v 1.17 2000-09-08 18:07:50 sandervl Exp $ */
 
 /*
  * Misc resource procedures
@@ -205,7 +205,7 @@ BOOL WIN32API EnumResourceNamesA(HINSTANCE        hModule,
     pModule = Win32ImageBase::findModule(hModule);
     if (pModule == NULL)
     {
-        SetLastError(ERROR_RESOURCE_DATA_NOT_FOUND);
+        SetLastError(ERROR_RESOURCE_DATA_NOT_FOUND); //todo: right error????
         return FALSE;
     }
 
@@ -243,7 +243,7 @@ BOOL WIN32API EnumResourceNamesW(HMODULE          hModule,
     pModule = Win32ImageBase::findModule(hModule);
     if (pModule == NULL)
     {
-        SetLastError(ERROR_RESOURCE_DATA_NOT_FOUND);
+        SetLastError(ERROR_RESOURCE_DATA_NOT_FOUND); //todo: right error????
         return FALSE;
     }
 
@@ -276,12 +276,19 @@ BOOL WIN32API EnumResourceLanguagesA(HMODULE hModule, LPCSTR lpType,
                                      ENUMRESLANGPROCA lpEnumFunc,
                                      LONG lParam)
 {
+    Win32ImageBase *pModule;
 
-  dprintf(("KERNEL32:EnumResourceLanguagesA(%08x,%08x,%08x,%08x,%08x)\n not implemented",
-           hModule, lpType, lpName, lpEnumFunc, lParam
-          ));
+    dprintf(("KERNEL32:EnumResourceLanguagesA(%08x,%08x,%08x,%08x,%08x)",
+              hModule, lpType, lpName, lpEnumFunc, lParam));
 
-  return (FALSE);
+    pModule = Win32ImageBase::findModule(hModule);
+    if (pModule == NULL)
+    {
+        SetLastError(ERROR_RESOURCE_DATA_NOT_FOUND); //todo: right error????
+        return FALSE;
+    }
+
+    return pModule->enumResourceLanguagesA(hModule, lpType, lpName, lpEnumFunc, lParam);
 }
 
 /*****************************************************************************
@@ -310,15 +317,19 @@ BOOL WIN32API EnumResourceLanguagesW(HMODULE hModule, LPCWSTR lpType,
                                      ENUMRESLANGPROCW lpEnumFunc,
                                      LONG lParam)
 {
+    Win32ImageBase *pModule;
 
-  dprintf(("KERNEL32:EnumResourceLanguagesW(%08x,%08x,%08x,%08x,%08x)\n not implemented",
-           hModule, lpType, lpName, lpEnumFunc, lParam
-          ));
+    dprintf(("KERNEL32:EnumResourceLanguagesW(%08x,%08x,%08x,%08x,%08x)",
+              hModule, lpType, lpName, lpEnumFunc, lParam));
 
-  return (FALSE);
+    pModule = Win32ImageBase::findModule(hModule);
+    if (pModule == NULL)
+    {
+        SetLastError(ERROR_RESOURCE_DATA_NOT_FOUND); //todo: right error????
+        return FALSE;
+    }
+    return pModule->enumResourceLanguagesW(hModule, lpType, lpName, lpEnumFunc, lParam);
 }
-
-
 
 /*****************************************************************************
  * Name      : BOOL WIN32API EnumResourceTypesA
@@ -330,7 +341,7 @@ BOOL WIN32API EnumResourceLanguagesW(HMODULE hModule, LPCWSTR lpType,
  *             LONG lParam                         application-defined parameter
  * Variables :
  * Result    : If the function succeeds, the return value is nonzero.
- * If the function fails, the return value is zero
+ *             If the function fails, the return value is zero
  * Remark    :
  * Status    : UNTESTED STUB
  *
@@ -348,7 +359,7 @@ BOOL WIN32API EnumResourceTypesA(HMODULE hModule,
     pModule = Win32ImageBase::findModule(hModule);
     if (pModule == NULL)
     {
-        SetLastError(ERROR_RESOURCE_DATA_NOT_FOUND);
+        SetLastError(ERROR_RESOURCE_DATA_NOT_FOUND); //todo: right error????
         return FALSE;
     }
 
@@ -365,7 +376,7 @@ BOOL WIN32API EnumResourceTypesA(HMODULE hModule,
  *             LONG lParam                         application-defined parameter
  * Variables :
  * Result    : If the function succeeds, the return value is nonzero.
- * If the function fails, the return value is zero
+ *             If the function fails, the return value is zero
  * Remark    :
  * Status    : UNTESTED STUB
  *
@@ -383,7 +394,7 @@ BOOL WIN32API EnumResourceTypesW(HMODULE hModule,
     pModule = Win32ImageBase::findModule(hModule);
     if (pModule == NULL)
     {
-        SetLastError(ERROR_RESOURCE_DATA_NOT_FOUND);
+        SetLastError(ERROR_RESOURCE_DATA_NOT_FOUND); //todo: right error????
         return FALSE;
     }
 

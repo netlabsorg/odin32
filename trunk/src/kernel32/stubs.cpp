@@ -1738,19 +1738,24 @@ BOOL WIN32API WriteProcessMemory(HANDLE  hProcess,
                                  DWORD   cbWrite,
                                  LPDWORD lpNumberOfBytesWritten)
 {
-  dprintf(("Kernel32: WriteProcessMemory(%08xh,%08xh,%08xh,%08xh,%08xh) not implemented.\n",
+  // do some (faked) access check
+  if (hProcess != GetCurrentProcess())
+  {
+    dprintf(("Kernel32: WriteProcessMemory(%08xh,%08xh,%08xh,%08xh,%08xh) not implemented (different process!!)",
            hProcess,
            lpBaseAddress,
            lpBuffer,
            cbWrite,
            lpNumberOfBytesWritten));
-  
-  // do some (faked) access check
-  if (hProcess != GetCurrentProcess())
-  {
     SetLastError(ERROR_ACCESS_DENIED);
     return FALSE;
   }
+  dprintf(("Kernel32: WriteProcessMemory(%08xh,%08xh,%08xh,%08xh,%08xh))",
+           hProcess,
+           lpBaseAddress,
+           lpBuffer,
+           cbWrite,
+           lpNumberOfBytesWritten));
   
   // FIXME: check this, if we ever run win32 binaries in different addressspaces
   //    ... and add a sizecheck

@@ -1,4 +1,4 @@
-/* $Id: winimagebase.h,v 1.14 2000-08-16 08:04:44 sandervl Exp $ */
+/* $Id: winimagebase.h,v 1.15 2000-09-08 18:07:51 sandervl Exp $ */
 
 /*
  * Win32 PE Image base class
@@ -81,6 +81,10 @@ virtual void  setFullPath(char *name);
                                  LONG lParam);
 	BOOL  enumResourceTypesW(HMODULE hmod, ENUMRESTYPEPROCW lpEnumFunc, 
                                  LONG lParam);
+	BOOL  enumResourceLanguagesA(HMODULE hmod, LPCSTR lpType, LPCSTR lpName, 
+                                     ENUMRESLANGPROCA lpEnumFunc, LONG lParam);
+	BOOL  enumResourceLanguagesW(HMODULE hmod, LPCWSTR lpType, LPCWSTR lpName, 
+                                     ENUMRESLANGPROCW lpEnumFunc, LONG lParam);
 
 	ULONG getVersionSize();
 	BOOL  getVersionStruct(char *verstruct, ULONG bufLength);

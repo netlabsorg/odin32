@@ -1,4 +1,8 @@
-/* $Id: exceptions.cpp,v 1.42 2000-07-20 18:06:59 sandervl Exp $ */
+/* $Id: exceptions.cpp,v 1.43 2000-09-08 18:07:49 sandervl Exp $ */
+
+/* WARNING: Compiling this module with ICC with optimizations turned on   */
+/* currently breaks this module. To get correct code, it is not necessary */
+/* to turn all optimizations off, just use the -Op- flag.                 */
 
 /*
  * Win32 Exception functions for OS/2
@@ -66,7 +70,7 @@
 #include "oslibexcept.h"
 #include "exceptstackdump.h"
 
-#define DBG_LOCALLOG	DBG_exceptions
+#define DBG_LOCALLOG    DBG_exceptions
 #include "dbglocal.h"
 
 //Global Process Unhandled exception filter
@@ -79,6 +83,11 @@ extern "C" PWINEXCEPTION_FRAME GetExceptionRecord(ULONG offset, ULONG segment);
 LONG WIN32API UnhandledExceptionFilter(PWINEXCEPTION_POINTERS lpexpExceptionInfo);
 void KillWin32Process(void);
 
+#ifdef DEBUG
+void PrintWin32ExceptionChain(PWINEXCEPTION_FRAME pframe);
+#else
+#define PrintWin32ExceptionChain(a)
+#endif
 
 /*****************************************************************************
  * Name      : UINT SetErrorMode
@@ -142,6 +151,8 @@ VOID _Pascal OS2RaiseException(DWORD dwExceptionCode,
   dprintf(("KERNEL32: RaiseException(%08xh)\n",
            dwExceptionCode));
 
+  memset(&record, 0, sizeof(record));
+
   /* compose an exception record */
   record.ExceptionCode       = dwExceptionCode;
   record.ExceptionFlags      = dwExceptionFlags;
@@ -181,10 +192,14 @@ VOID _Pascal OS2RaiseException(DWORD dwExceptionCode,
   // and finally, the unhandled exception filter
   if(rc == ExceptionContinueSearch && UnhandledExceptionFilter != NULL)
   {
+    dprintf(("KERNEL32: RaiseException calling UnhandledExceptionFilter.\n"));
+
     ExceptionInfo.ExceptionRecord = &record;
     ExceptionInfo.ContextRecord   = &context;
 
     rc = UnhandledExceptionFilter(&ExceptionInfo);
+    //FIXME: UnhandledExceptionFilter does NOT return the same values as
+    //       other filters!!
   }
 
   // terminate the process
@@ -195,8 +210,11 @@ VOID _Pascal OS2RaiseException(DWORD dwExceptionCode,
     DosExit(EXIT_PROCESS, 0);
   }
 
+  dprintf(("KERNEL32: RaiseException returns.\n"));
   return;
 }
+
+
 //******************************************************************************
 //******************************************************************************
 DWORD RtlDispatchException(WINEXCEPTION_RECORD *pRecord, WINCONTEXT *pContext)
@@ -211,25 +229,42 @@ DWORD RtlDispatchException(WINEXCEPTION_RECORD *pRecord, WINCONTEXT *pContext)
   TEB *winteb = GetThreadTEB();
   pframe      = (PWINEXCEPTION_FRAME)winteb->except;
 
+  dprintf(("KERNEL32: RtlDispatchException entered"));
+
+  PrintWin32ExceptionChain(pframe);
+
   // walk the exception chain
   while( (pframe != NULL) && (pframe != ((void *)0xFFFFFFFF)) )
   {
-    	dispatch=0;
+        dprintf(("KERNEL32: RtlDispatchException - pframe=%08X, pframe->Prev=%08X", pframe, pframe->Prev));
+        if (pframe == pframe->Prev) {
+            dprintf(("KERNEL32: RtlDispatchException - Invalid exception frame!!"));
+            return 0;
+        }
 
-    	dprintf(("Calling exception handler %x", pframe->Handler));
+        dispatch=0;
+
         /* Check frame address */
         if (((void*)pframe < winteb->stack_low) ||
             ((void*)(pframe+1) > winteb->stack_top) ||
             (int)pframe & 3)
         {
+            dprintf(("Invalid stack! low=%08X, top=%08X, pframe = %08X",
+                    winteb->stack_low, winteb->stack_top, pframe));
+
             pRecord->ExceptionFlags |= EH_STACK_INVALID;
             break;
         }
 
-    	rc = pframe->Handler(pRecord,
+        dprintf(("KERNEL32: RtlDispatchException - calling exception handler %08X", pframe->Handler));
+
+        rc = pframe->Handler(pRecord,
                              pframe,
                              pContext,
                              dispatch);
+
+        dprintf(("KERNEL32: RtlDispatchException - exception handler returned %#x", rc));
+        PrintWin32ExceptionChain(pframe);
 
         if (pframe == nested_frame)
         {
@@ -238,12 +273,14 @@ DWORD RtlDispatchException(WINEXCEPTION_RECORD *pRecord, WINCONTEXT *pContext)
             pRecord->ExceptionFlags &= ~EH_NESTED_CALL;
         }
 
-    	dprintf(("exception handler returned %x", rc));
 
         switch(rc)
         {
         case ExceptionContinueExecution:
-            if (!(pRecord->ExceptionFlags & EH_NONCONTINUABLE)) return rc;
+            if (!(pRecord->ExceptionFlags & EH_NONCONTINUABLE)) {
+                dprintf(("KERNEL32: RtlDispatchException returns %#x (ContinueExecution)", rc));
+                return rc;
+            }
             break;
         case ExceptionContinueSearch:
             break;
@@ -255,8 +292,15 @@ DWORD RtlDispatchException(WINEXCEPTION_RECORD *pRecord, WINCONTEXT *pContext)
             break;
         }
 
+        dprintf(("KERNEL32: RtlDispatchException - going from frame %08X to previous frame %08X", pframe, pframe->Prev));
+        if (pframe == pframe->Prev) {
+            dprintf(("KERNEL32: RtlDispatchException - Invalid exception frame!!"));
+            break;
+        }
         pframe = pframe->Prev;
   }
+  dprintf(("KERNEL32: RtlDispatchException returns %#x", rc));
+  PrintWin32ExceptionChain(pframe);
   return rc;
 }
 /*****************************************************************************
@@ -283,9 +327,10 @@ int _Pascal OS2RtlUnwind(PWINEXCEPTION_FRAME  pEndFrame,
   PWINEXCEPTION_FRAME frame, dispatch;
   WINEXCEPTION_RECORD record, newrec;
   WINCONTEXT          context;
-  int                 rc;
+  DWORD               rc;
 
-  dprintf(("KERNEL32: RtlUnwind %x %x\n", pEndFrame, pRecord));
+  dprintf(("KERNEL32: RtlUnwind pEndFrame=%08X, unusedEip=%08X, pRecord=%08X, returnEax=%#x\n", pEndFrame, unusedEip, pRecord, returnEax));
+
 
   memset(&context, 0, sizeof(context));
   context.ContextFlags = WINCONTEXT_FULL;   //segments, integer, control
@@ -309,6 +354,7 @@ int _Pascal OS2RtlUnwind(PWINEXCEPTION_FRAME  pEndFrame,
   /* build an exception record, if we do not have one */
   if(!pRecord)
   {
+    memset(&record, 0, sizeof(record));
     record.ExceptionCode    = STATUS_UNWIND;
     record.ExceptionFlags   = 0;
     record.ExceptionRecord  = NULL;
@@ -324,6 +370,8 @@ int _Pascal OS2RtlUnwind(PWINEXCEPTION_FRAME  pEndFrame,
   TEB *winteb = GetThreadTEB();
   frame       = (PWINEXCEPTION_FRAME)winteb->except;
 
+  PrintWin32ExceptionChain(frame);
+
   while ((frame != (PWINEXCEPTION_FRAME)0xffffffff) && (frame != pEndFrame))
   {
         /* Check frame address */
@@ -333,8 +381,8 @@ int _Pascal OS2RtlUnwind(PWINEXCEPTION_FRAME  pEndFrame,
             newrec.ExceptionFlags   = EH_NONCONTINUABLE;
             newrec.ExceptionRecord  = pRecord;
             newrec.NumberParameters = 0;
-    	    dprintf(("KERNEL32: RtlUnwind terminating thread.\n"));
-	    DosExit(EXIT_THREAD, 0);
+            dprintf(("KERNEL32: RtlUnwind terminating thread.\n"));
+            DosExit(EXIT_THREAD, 0);
         }
         if (((void*)frame < winteb->stack_low) ||
             ((void*)(frame+1) > winteb->stack_top) ||
@@ -344,13 +392,15 @@ int _Pascal OS2RtlUnwind(PWINEXCEPTION_FRAME  pEndFrame,
             newrec.ExceptionFlags   = EH_NONCONTINUABLE;
             newrec.ExceptionRecord  = pRecord;
             newrec.NumberParameters = 0;
-    	    dprintf(("KERNEL32: RtlUnwind terminating thread.\n"));
-	    DosExit(EXIT_THREAD, 0);
+            dprintf(("KERNEL32: RtlUnwind terminating thread.\n"));
+            DosExit(EXIT_THREAD, 0);
         }
 
         /* Call handler */
-    	dprintf(("Calling exception handler %x", frame->Handler));
-        switch(frame->Handler(pRecord, frame, &context, &dispatch ))
+        dprintf(("KERNEL32: RtlUnwind - calling exception handler %08X", frame->Handler));
+        rc = frame->Handler(pRecord, frame, &context, &dispatch);
+        dprintf(("KERNEL32: RtlUnwind - handler returned %#x", rc));
+        switch (rc)
         {
         case ExceptionContinueSearch:
             break;
@@ -362,13 +412,77 @@ int _Pascal OS2RtlUnwind(PWINEXCEPTION_FRAME  pEndFrame,
             newrec.ExceptionFlags   = EH_NONCONTINUABLE;
             newrec.ExceptionRecord  = pRecord;
             newrec.NumberParameters = 0;
-    	    dprintf(("KERNEL32: RtlUnwind terminating thread.\n"));
-	    DosExit(EXIT_THREAD, 0);
+            dprintf(("KERNEL32: RtlUnwind terminating thread.\n"));
+            DosExit(EXIT_THREAD, 0);
             break;
         }
+        dprintf(("KERNEL32: RtlUnwind (before)- frame=%08X, frame->Prev=%08X", frame, frame->Prev));
         SetExceptionChain((DWORD)frame->Prev);
         frame = frame->Prev;
+        dprintf(("KERNEL32: RtlUnwind (after) - frame=%08X, frame->Prev=%08X", frame, frame->Prev));
   }
+
+
+  /* Note: I _think_ that on Win32, RtlUnwind unwinds exception handlers up  */
+  /*  and _including_ the handler in pEndFrame argument. My reasons are:     */
+  /*   - MSVCRT sometimes calls RtlUnwind with the address of the very first */
+  /*     exception handler - could be just inefficient code                  */
+  /*   - after a call to RtlUnwind, MSVCRT in some cases tries to restore    */
+  /*     the original exception handler. If RtlUnwind didn't remove it,      */
+  /*     the exception chain gets looped, spelling very bad mojo!            */
+  if (frame == pEndFrame)
+  {
+        /* Just repeat what we did in the while loop above */
+        /* Check frame address */
+        if (pEndFrame && (frame > pEndFrame))
+        {
+            newrec.ExceptionCode    = STATUS_INVALID_UNWIND_TARGET;
+            newrec.ExceptionFlags   = EH_NONCONTINUABLE;
+            newrec.ExceptionRecord  = pRecord;
+            newrec.NumberParameters = 0;
+            dprintf(("KERNEL32: RtlUnwind terminating thread.\n"));
+            DosExit(EXIT_THREAD, 0);
+        }
+        if (((void*)frame < winteb->stack_low) ||
+            ((void*)(frame+1) > winteb->stack_top) ||
+            (int)frame & 3)
+        {
+            newrec.ExceptionCode    = STATUS_BAD_STACK;
+            newrec.ExceptionFlags   = EH_NONCONTINUABLE;
+            newrec.ExceptionRecord  = pRecord;
+            newrec.NumberParameters = 0;
+            dprintf(("KERNEL32: RtlUnwind terminating thread.\n"));
+            DosExit(EXIT_THREAD, 0);
+        }
+
+        /* Call handler */
+        dprintf(("KERNEL32: RtlUnwind - calling exception handler %08X", frame->Handler));
+        rc = frame->Handler(pRecord, frame, &context, &dispatch);
+        dprintf(("KERNEL32: RtlUnwind - handler returned %#x", rc));
+        switch (rc)
+        {
+        case ExceptionContinueSearch:
+            break;
+        case ExceptionCollidedUnwind:
+            frame = dispatch;
+            break;
+        default:
+            newrec.ExceptionCode    = STATUS_INVALID_DISPOSITION;
+            newrec.ExceptionFlags   = EH_NONCONTINUABLE;
+            newrec.ExceptionRecord  = pRecord;
+            newrec.NumberParameters = 0;
+            dprintf(("KERNEL32: RtlUnwind terminating thread.\n"));
+            DosExit(EXIT_THREAD, 0);
+            break;
+        }
+        dprintf(("KERNEL32: RtlUnwind (before)- frame=%08X, frame->Prev=%08X", frame, frame->Prev));
+        SetExceptionChain((DWORD)frame->Prev);
+        frame = frame->Prev;
+        dprintf(("KERNEL32: RtlUnwind (after) - frame=%08X, frame->Prev=%08X", frame, frame->Prev));
+  }
+
+  dprintf(("KERNEL32: RtlUnwind returning.\n"));
+  PrintWin32ExceptionChain(frame);
   return(0);
 }
 
@@ -414,10 +528,13 @@ LONG WIN32API UnhandledExceptionFilter(PWINEXCEPTION_POINTERS lpexpExceptionInfo
                                       {"~terminate process",  103, BS_PUSHBUTTON | BS_TEXT | BS_AUTOSIZE} }
                                   };
 
-  dprintf(("KERNEL32: UnhandledExceptionFilter\n"));
+  dprintf(("KERNEL32: Default UnhandledExceptionFilter, CurrentErrorMode=%X", CurrentErrorMode));
 
-  if(CurrentUnhExceptionFlt && !(CurrentErrorMode & (SEM_FAILCRITICALERRORS | SEM_NOGPFAULTERRORBOX)))
+  // We must not care about ErrorMode here!! The app expects that its own
+  // UnhandledExceptionFilter will be cared even if it never touched ErrorMode.
+  if(CurrentUnhExceptionFlt) // && !(CurrentErrorMode & (SEM_FAILCRITICALERRORS | SEM_NOGPFAULTERRORBOX)))
   {
+    dprintf(("KERNEL32: Calling user UnhandledExceptionFilter"));
     rc = CurrentUnhExceptionFlt(lpexpExceptionInfo);
     if(rc != WINEXCEPTION_CONTINUE_SEARCH)
       return rc;
@@ -491,7 +608,7 @@ LPTOP_LEVEL_EXCEPTION_FILTER WIN32API SetUnhandledExceptionFilter(LPTOP_LEVEL_EX
 {
   LPTOP_LEVEL_EXCEPTION_FILTER old = CurrentUnhExceptionFlt;
 
-  dprintf(("KERNEL32: SetUnhandledExceptionFilter to %X\n",
+  dprintf(("KERNEL32: SetUnhandledExceptionFilter to %08X\n",
            lpTopLevelExceptionFilter));
 
   CurrentUnhExceptionFlt = lpTopLevelExceptionFilter;
@@ -523,9 +640,9 @@ void KillWin32Process(void)
  static BOOL fEntry = FALSE;
 
   if(fEntry == FALSE) {
-	fEntry = TRUE;
-  	ExitProcess(666);
-	return;
+        fEntry = TRUE;
+        ExitProcess(666);
+        return;
   }
   //Restore original OS/2 TIB selector
   RestoreOS2FS();
@@ -856,30 +973,30 @@ void static dprintfException(PEXCEPTIONREPORTRECORD       pERepRec,
   }
 
   if (pCtxRec->ContextFlags & CONTEXT_CONTROL)         /* check flags */
-    dprintf(("   SS:ESP=%04x:%08x EFLAGS=%08x\n"
-             "       CS:EIP=%04x:%08x EBP   =%08x\n",
+    dprintf(("   SS:ESP=%04x:%08x EFLAGS=%08x\n",
              pCtxRec->ctx_SegSs,
              pCtxRec->ctx_RegEsp,
-             pCtxRec->ctx_EFlags,
+             pCtxRec->ctx_EFlags));
+    dprintf(("   CS:EIP=%04x:%08x EBP   =%08x\n",
              pCtxRec->ctx_SegCs,
              pCtxRec->ctx_RegEip,
              pCtxRec->ctx_RegEbp));
 
   if (pCtxRec->ContextFlags & CONTEXT_INTEGER)         /* check flags */
-    dprintf(("   EAX=%08x EBX=%08x ESI=%08x\n"
-             "       ECX=%08x EDX=%08x EDI=%08x\n",
+    dprintf(("   EAX=%08x EBX=%08x ESI=%08x\n",
              pCtxRec->ctx_RegEax,
              pCtxRec->ctx_RegEbx,
-             pCtxRec->ctx_RegEsi,
+             pCtxRec->ctx_RegEsi));
+    dprintf(("   ECX=%08x EDX=%08x EDI=%08x\n",
              pCtxRec->ctx_RegEcx,
              pCtxRec->ctx_RegEdx,
              pCtxRec->ctx_RegEdi));
 
   if (pCtxRec->ContextFlags & CONTEXT_SEGMENTS)        /* check flags */
-    dprintf(("   DS=%04x     ES=%08x"
-             "       FS=%04x     GS=%04x\n",
+    dprintf(("   DS=%04x     ES=%08x",
               pCtxRec->ctx_SegDs,
-              pCtxRec->ctx_SegEs,
+              pCtxRec->ctx_SegEs));
+    dprintf(("   FS=%04x     GS=%04x\n",
               pCtxRec->ctx_SegFs,
               pCtxRec->ctx_SegGs));
 
@@ -935,9 +1052,16 @@ ULONG APIENTRY OS2ExceptionHandler(PEXCEPTIONREPORTRECORD       pERepRec,
                                    PCONTEXTRECORD               pCtxRec,
                                    PVOID                        p)
 {
+  //MN: If EH_NESTED_CALL is set, an exception occurred during the execution
+  //    of this exception handler. We better bail out ASAP or we'll likely
+  //    recurse infinitely until we run out of stack space!!
+  if (pERepRec->fHandlerFlags & EH_NESTED_CALL)
+      return XCPT_CONTINUE_SEARCH;
+
   //SvL: Check if exception inside debug fprintf -> if so, clear lock so
   //     next dprintf won't wait forever
   CheckLogException();
+
 
   /* Access violation at a known location */
   switch(pERepRec->ExceptionNum)
@@ -949,92 +1073,92 @@ ULONG APIENTRY OS2ExceptionHandler(PEXCEPTIONREPORTRECORD       pERepRec,
   case XCPT_FLOAT_OVERFLOW:
   case XCPT_FLOAT_STACK_CHECK:
   case XCPT_FLOAT_UNDERFLOW:
-  	dprintfException(pERepRec, pERegRec, pCtxRec, p);
-  	dprintf(("KERNEL32: OS2ExceptionHandler: FPU exception\n"));
-	if(fIsOS2Image == FALSE)  //Only for real win32 apps
-	{
-		if(OSLibDispatchException(pERepRec, pERegRec, pCtxRec, p) == FALSE)
-		{
-		        pCtxRec->ctx_env[0] |= 0x1F;
-		        pCtxRec->ctx_stack[0].losig = 0;
-		        pCtxRec->ctx_stack[0].hisig = 0;
-		        pCtxRec->ctx_stack[0].signexp = 0;
-		}
-  		dprintf(("KERNEL32: OS2ExceptionHandler: fix and continue\n"));
-	      	return (XCPT_CONTINUE_EXECUTION);
-	}
-	else
-	{
-	  	dprintf(("KERNEL32: OS2ExceptionHandler: continue search\n"));
-	  	return (XCPT_CONTINUE_SEARCH);
-	}
+        dprintfException(pERepRec, pERegRec, pCtxRec, p);
+        dprintf(("KERNEL32: OS2ExceptionHandler: FPU exception\n"));
+        if(fIsOS2Image == FALSE)  //Only for real win32 apps
+        {
+                if(OSLibDispatchException(pERepRec, pERegRec, pCtxRec, p) == FALSE)
+                {
+                        pCtxRec->ctx_env[0] |= 0x1F;
+                        pCtxRec->ctx_stack[0].losig = 0;
+                        pCtxRec->ctx_stack[0].hisig = 0;
+                        pCtxRec->ctx_stack[0].signexp = 0;
+                }
+                dprintf(("KERNEL32: OS2ExceptionHandler: fix and continue\n"));
+                return (XCPT_CONTINUE_EXECUTION);
+        }
+        else
+        {
+                dprintf(("KERNEL32: OS2ExceptionHandler: continue search\n"));
+                return (XCPT_CONTINUE_SEARCH);
+        }
 
   case XCPT_PROCESS_TERMINATE:
   case XCPT_ASYNC_PROCESS_TERMINATE:
-  	dprintfException(pERepRec, pERegRec, pCtxRec, p);
-      	SetExceptionChain((ULONG)-1);
-      	return (XCPT_CONTINUE_SEARCH);
+        dprintfException(pERepRec, pERegRec, pCtxRec, p);
+        SetExceptionChain((ULONG)-1);
+        return (XCPT_CONTINUE_SEARCH);
 
   case XCPT_ACCESS_VIOLATION:
-  {	
+  {
    Win32MemMap *map;
    BOOL  fWriteAccess = FALSE;
    ULONG offset, accessflag;
 
-	if(pERepRec->ExceptionInfo[1] == 0 && pERepRec->ExceptionInfo[1] == XCPT_DATA_UNKNOWN) {
-		goto continueFail;
-	}
-	switch(pERepRec->ExceptionInfo[0]) {
-	case XCPT_READ_ACCESS:
-		accessflag = MEMMAP_ACCESS_READ;
-		break;
-	case XCPT_WRITE_ACCESS:
-		accessflag = MEMMAP_ACCESS_WRITE;
-		fWriteAccess = TRUE;
-		break;
-	case XCPT_EXECUTE_ACCESS:
-		accessflag = MEMMAP_ACCESS_EXECUTE;
-		break;
-	default:
-		goto continueFail;
-	}
+        if(pERepRec->ExceptionInfo[1] == 0 && pERepRec->ExceptionInfo[1] == XCPT_DATA_UNKNOWN) {
+                goto continueFail;
+        }
+        switch(pERepRec->ExceptionInfo[0]) {
+        case XCPT_READ_ACCESS:
+                accessflag = MEMMAP_ACCESS_READ;
+                break;
+        case XCPT_WRITE_ACCESS:
+                accessflag = MEMMAP_ACCESS_WRITE;
+                fWriteAccess = TRUE;
+                break;
+        case XCPT_EXECUTE_ACCESS:
+                accessflag = MEMMAP_ACCESS_EXECUTE;
+                break;
+        default:
+                goto continueFail;
+        }
 
-       	map = Win32MemMapView::findMapByView(pERepRec->ExceptionInfo[1], &offset, accessflag);
-	if(map == NULL) {
-		goto continueFail;
-	}
-	if(map->commitPage(offset, fWriteAccess) == TRUE)
-		return (XCPT_CONTINUE_EXECUTION);
+        map = Win32MemMapView::findMapByView(pERepRec->ExceptionInfo[1], &offset, accessflag);
+        if(map == NULL) {
+                goto continueFail;
+        }
+        if(map->commitPage(offset, fWriteAccess) == TRUE)
+                return (XCPT_CONTINUE_EXECUTION);
 
-	//no break;
+        //no break;
   }
 continueFail:
 
 ////#define DEBUGSTACK
 #ifdef DEBUGSTACK
   if(pCtxRec->ContextFlags & CONTEXT_CONTROL) {
-    	ULONG *stackptr;
-    	APIRET rc;
-    	int    i;
-  	ULONG  ulOffset, ulModule, ulObject;
-  	CHAR   szModule[CCHMAXPATH];
+        ULONG *stackptr;
+        APIRET rc;
+        int    i;
+        ULONG  ulOffset, ulModule, ulObject;
+        CHAR   szModule[CCHMAXPATH];
 
-	stackptr = (ULONG *)pCtxRec->ctx_RegEsp;
-	dprintf(("Stack DUMP:"));
-	for(i=0;i<16;i++) {
-		rc = DosQueryModFromEIP(&ulModule,
-        	                        &ulObject,
+        stackptr = (ULONG *)pCtxRec->ctx_RegEsp;
+        dprintf(("Stack DUMP:"));
+        for(i=0;i<16;i++) {
+                rc = DosQueryModFromEIP(&ulModule,
+                                        &ulObject,
                                         sizeof(szModule),
                                         szModule,
                                         &ulOffset,
                                         (ULONG)*stackptr);
 
-  		if (rc == NO_ERROR)
-    			dprintf(("0x%8x: 0x%8x %s (#%u), obj #%u:%08x", stackptr, *stackptr, szModule, ulModule, ulObject, ulOffset));
-		else	dprintf(("0x%8x: 0x%8x", stackptr, *stackptr));
-		stackptr++;
-	}
-	dprintf(("Stack DUMP END"));
+                if (rc == NO_ERROR)
+                        dprintf(("0x%8x: 0x%8x %s (#%u), obj #%u:%08x", stackptr, *stackptr, szModule, ulModule, ulObject, ulOffset));
+                else    dprintf(("0x%8x: 0x%8x", stackptr, *stackptr));
+                stackptr++;
+        }
+        dprintf(("Stack DUMP END"));
   }
 #endif
 
@@ -1051,42 +1175,42 @@ continueFail:
   case XCPT_IN_PAGE_ERROR:
 CrashAndBurn:
 #ifdef DEBUG
-	dprintfException(pERepRec, pERegRec, pCtxRec, p);
-  	if(pCtxRec->ContextFlags & CONTEXT_CONTROL) {
-		dbgPrintStack(pERepRec, pERegRec, pCtxRec, p);
-	}
+        dprintfException(pERepRec, pERegRec, pCtxRec, p);
+        if(pCtxRec->ContextFlags & CONTEXT_CONTROL) {
+                dbgPrintStack(pERepRec, pERegRec, pCtxRec, p);
+        }
 #endif
-	if(fIsOS2Image == FALSE)  //Only for real win32 apps
-	{
-		if(OSLibDispatchException(pERepRec, pERegRec, pCtxRec, p) == TRUE)
-		{
-		      	return (XCPT_CONTINUE_EXECUTION);
-		}
-	}
-	else	return XCPT_CONTINUE_SEARCH; //pass on to OS/2 RTL or app exception handler
+        if(fIsOS2Image == FALSE)  //Only for real win32 apps
+        {
+                if(OSLibDispatchException(pERepRec, pERegRec, pCtxRec, p) == TRUE)
+                {
+                        return (XCPT_CONTINUE_EXECUTION);
+                }
+        }
+        else    return XCPT_CONTINUE_SEARCH; //pass on to OS/2 RTL or app exception handler
 
-    	dprintf(("KERNEL32: OS2ExceptionHandler: Continue and kill\n"));
-    	pCtxRec->ctx_RegEip = (ULONG)KillWin32Process;
-    	pCtxRec->ctx_RegEsp = pCtxRec->ctx_RegEsp + 0x10;
-    	pCtxRec->ctx_RegEax = pERepRec->ExceptionNum;
-    	pCtxRec->ctx_RegEbx = pCtxRec->ctx_RegEip;
-    	return (XCPT_CONTINUE_EXECUTION);
+        dprintf(("KERNEL32: OS2ExceptionHandler: Continue and kill\n"));
+        pCtxRec->ctx_RegEip = (ULONG)KillWin32Process;
+        pCtxRec->ctx_RegEsp = pCtxRec->ctx_RegEsp + 0x10;
+        pCtxRec->ctx_RegEax = pERepRec->ExceptionNum;
+        pCtxRec->ctx_RegEbx = pCtxRec->ctx_RegEip;
+        return (XCPT_CONTINUE_EXECUTION);
 
   //@@@PH: growing thread stacks might need special treatment
   case XCPT_GUARD_PAGE_VIOLATION:
-    dprintf(("KERNEL32: OS2ExceptionHandler: trying to grow stack (continue)\n"));
+    dprintf(("KERNEL32: OS2ExceptionHandler: trying to grow stack (continue search)"));
     return (XCPT_CONTINUE_SEARCH);
 
   case XCPT_SIGNAL:
       if(pERepRec->ExceptionInfo[0] == XCPT_SIGNAL_KILLPROC)          /* resolve signal information */
       {
-      	SetExceptionChain((ULONG)-1);
-      	return (XCPT_CONTINUE_SEARCH);
+        SetExceptionChain((ULONG)-1);
+        return (XCPT_CONTINUE_SEARCH);
       }
       goto CrashAndBurn;
 
   default: //non-continuable exceptions
-	dprintfException(pERepRec, pERegRec, pCtxRec, p);
+        dprintfException(pERepRec, pERegRec, pCtxRec, p);
         return (XCPT_CONTINUE_SEARCH);
   }
   return (XCPT_CONTINUE_SEARCH);
@@ -1128,11 +1252,25 @@ void PrintExceptionChain()
 
   dprintf(("Exception chain list:"));
   while(pExceptRec != 0 && (ULONG)pExceptRec != -1) {
-	dprintf(("record %x", pExceptRec));
-	pExceptRec = pExceptRec->prev_structure;
+        dprintf(("record %x", pExceptRec));
+        pExceptRec = pExceptRec->prev_structure;
   }
   SetFS(sel);
 }
+
+void PrintWin32ExceptionChain(PWINEXCEPTION_FRAME pframe)
+{
+  dprintf(("Win32 exception chain:"));
+  while ((pframe != NULL) && ((ULONG)pframe != 0xFFFFFFFF)) {
+        dprintf(("Record at %08X, Prev at %08X, handler at %08X", pframe, pframe->Prev, pframe->Handler));
+        if (pframe == pframe->Prev) {
+            dprintf(("Chain corrupted! Record at %08X pointing to itself!", pframe));
+            break;
+        }
+        pframe = pframe->Prev;
+  }
+}
+
 #endif
 
 
@@ -1172,13 +1310,13 @@ int _System CheckCurFS()
  PEXCEPTIONREGISTRATIONRECORD pExceptRec;
 
     if(sel == 0x150b) {
-	SetFS(sel);
-	return FALSE;
+        SetFS(sel);
+        return FALSE;
     }
     pExceptRec = (PEXCEPTIONREGISTRATIONRECORD)QueryExceptionChain();
     if(pExceptRec->ExceptionHandler != OS2ExceptionHandler) {
-	SetFS(sel);
-	return FALSE;
+        SetFS(sel);
+        return FALSE;
     }
     SetFS(sel);
     return TRUE;
