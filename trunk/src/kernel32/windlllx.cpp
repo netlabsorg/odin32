@@ -1,4 +1,4 @@
-/* $Id: windlllx.cpp,v 1.24 2002-05-20 14:22:37 sandervl Exp $ */
+/* $Id: windlllx.cpp,v 1.25 2002-05-21 14:42:40 sandervl Exp $ */
 
 /*
  * Win32 LX Dll class (compiled in OS/2 using Odin32 api)
@@ -144,6 +144,13 @@ DWORD WIN32API RegisterLxDll(HINSTANCE hInstance, WIN32DLLENTRY EntryPoint,
 
        offset += modsize + 1;
    }
+#ifdef HACK_NEVER_UNLOAD_LX_DLLS
+   //HACK ALERT!!
+   //This makes sure the LX dll never gets unloaded.
+   //Necessary since unloading doesn't work due to dependencies on dlls
+   //with exitlist handlers.
+   windll->AddRef();
+#endif
    return windll->getInstanceHandle();
 
 hdrerror:
@@ -194,12 +201,6 @@ Win32LxDll::Win32LxDll(HINSTANCE hInstance, WIN32DLLENTRY EntryPoint, PVOID pRes
   hinstance = (HINSTANCE)buildHeader(MajorImageVersion, MinorImageVersion,
                                      Subsystem);
   dprintf(("Fake PE header %x for dll %s", hinstance, getModuleName()));
-
-  //HACK ALERT!!
-  //This makes sure the LX dll never gets unloaded.
-  //Necessary since unloading doesn't work due to dependencies on dlls
-  //with exitlist handlers.
-  referenced++;
 }
 //******************************************************************************
 //******************************************************************************
