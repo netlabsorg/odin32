@@ -1,4 +1,4 @@
-/* $Id: HandleManager.cpp,v 1.40 2000-06-01 11:28:42 sandervl Exp $ */
+/* $Id: HandleManager.cpp,v 1.41 2000-06-08 18:08:54 sandervl Exp $ */
 
 /*
  * Win32 Unified Handle Manager for OS/2
@@ -1015,7 +1015,7 @@ HANDLE HMOpenFile(LPCSTR    lpFileName,
   if(rc != NO_ERROR)     /* oops, creation failed within the device handler */
   {
     	TabWin32Handles[iIndexNew].hmHandleData.hHMHandle = INVALID_HANDLE_VALUE;
-    	SetLastError(rc);          /* Hehe, OS/2 and NT are pretty compatible :) */
+    	SetLastError(pOFStruct->nErrCode);
     	return (INVALID_HANDLE_VALUE);                           /* signal error */
   }
   else {

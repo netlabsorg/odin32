@@ -1,4 +1,4 @@
-/* $Id: winimagebase.cpp,v 1.21 2000-05-28 16:45:12 sandervl Exp $ */
+/* $Id: winimagebase.cpp,v 1.22 2000-06-08 18:08:56 sandervl Exp $ */
 
 /*
  * Win32 PE Image base class
@@ -36,6 +36,7 @@
 #include "initterm.h"
 #include "directory.h"
 #include <win\virtual.h>
+#include <winconst.h>
 
 #define DBG_LOCALLOG	DBG_winimagebase
 #include "dbglocal.h"
@@ -199,8 +200,9 @@ BOOL Win32ImageBase::findDll(const char *szFileName, char *szFullName,
   return TRUE;
 }
 //******************************************************************************
+//returns ERROR_SUCCESS or error code
 //******************************************************************************
-BOOL Win32ImageBase::isPEImage(char *szFileName)
+ULONG Win32ImageBase::isPEImage(char *szFileName)
 {
  char   filename[CCHMAXPATH];
  char  *syspath;
@@ -218,7 +220,7 @@ BOOL Win32ImageBase::isPEImage(char *szFileName)
   {
         dprintf(("KERNEL32:Win32ImageBase::isPEImage(%s) findDll failed to find the file.\n",
                  szFileName, rc));
-        return FALSE;
+        return ERROR_FILE_NOT_FOUND_W;
   }
   rc = DosOpen(filename,                       /* File path name */
                &win32handle,                   /* File handle */
@@ -236,7 +238,7 @@ BOOL Win32ImageBase::isPEImage(char *szFileName)
   {
         dprintf(("KERNEL32:Win32ImageBase::isPEImage(%s) failed with %u\n",
                   szFileName, rc));
-        return(FALSE);
+        return ERROR_FILE_NOT_FOUND_W;
   }
 
   /* Move the file pointer back to the beginning of the file */
@@ -245,12 +247,12 @@ BOOL Win32ImageBase::isPEImage(char *szFileName)
   IMAGE_DOS_HEADER *pdoshdr = (IMAGE_DOS_HEADER *)malloc(sizeof(IMAGE_DOS_HEADER));
   if(pdoshdr == NULL)   {
         DosClose(win32handle);                /* Close the file */
-        return(FALSE);
+        return ERROR_INVALID_EXE_SIGNATURE_W;
   }
   rc = DosRead(win32handle, pdoshdr, sizeof(IMAGE_DOS_HEADER), &ulRead);
   if(rc != NO_ERROR) {
         DosClose(win32handle);                /* Close the file */
-        return(FALSE);
+        return ERROR_INVALID_EXE_SIGNATURE_W;
   }
   ULONG hdrsize = pdoshdr->e_lfanew + SIZE_OF_NT_SIGNATURE + sizeof(IMAGE_FILE_HEADER);
   free(pdoshdr);
@@ -261,7 +263,7 @@ BOOL Win32ImageBase::isPEImage(char *szFileName)
   win32file = malloc(hdrsize);
   if(win32file == NULL) {
         DosClose(win32handle);                /* Close the file */
-        return(FALSE);
+        return ERROR_NOT_ENOUGH_MEMORY_W;
   }
   rc = DosRead(win32handle, win32file, hdrsize, &ulRead);
   if(rc != NO_ERROR) {
@@ -283,12 +285,12 @@ BOOL Win32ImageBase::isPEImage(char *szFileName)
         goto failure;
   }
   DosClose(win32handle);
-  return(TRUE);
+  return ERROR_SUCCESS_W;
 
 failure:
   free(win32file);
   DosClose(win32handle);
-  return(FALSE);
+  return ERROR_INVALID_EXE_SIGNATURE_W;
 }
 //******************************************************************************
 //******************************************************************************

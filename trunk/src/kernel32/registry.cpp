@@ -1,4 +1,4 @@
-/* $Id: registry.cpp,v 1.1 2000-03-03 11:15:59 sandervl Exp $ */
+/* $Id: registry.cpp,v 1.2 2000-06-08 18:08:56 sandervl Exp $ */
 
 /*
  * Win32 registry API functions for OS/2
@@ -29,6 +29,9 @@
 #include <misc.h>
 #include "unicode.h"
 #include <winreg.h>
+
+#define DBG_LOCALLOG	DBG_registry
+#include "dbglocal.h"
 
 
 ODINDEBUGCHANNEL(ADVAPI32-REGISTRY)
@@ -788,9 +791,9 @@ ODINFUNCTION4(LONG,RegQueryValueA,HKEY,  arg1,
  *****************************************************************************/
 
 ODINFUNCTION4(LONG,RegQueryValueW,HKEY,   hkey,
-                                   LPCWSTR,lpszSubKey,
-                                   LPWSTR, lpszValue,
-                                   PLONG,  pcbValue)
+                                  LPCWSTR,lpszSubKey,
+                                  LPWSTR, lpszValue,
+                                  PLONG,  pcbValue)
 {
   char *astring1 = UnicodeToAsciiString((LPWSTR)lpszSubKey);
   char *astring2;
@@ -802,11 +805,14 @@ ODINFUNCTION4(LONG,RegQueryValueW,HKEY,   hkey,
                          pcbValue);
   if(rc == ERROR_SUCCESS)
   {
-    astring2 = (char *)malloc(*pcbValue);
-    strcpy(astring2, (char *)lpszValue);
-    AsciiToUnicode(astring2, lpszValue);
-    free(astring2);
+	if(pcbValue) {
+    		astring2 = (char *)malloc(*pcbValue);
+    		strcpy(astring2, (char *)lpszValue);
+    		AsciiToUnicode(astring2, lpszValue);
+    		free(astring2);
+	}
   }
+  FreeAsciiString(astring1);
   return(rc);
 }
 
@@ -917,10 +923,10 @@ ODINFUNCTION5(LONG,RegSetValueA,HKEY,  hkey,
  *****************************************************************************/
 
 ODINFUNCTION5(LONG,RegSetValueW,HKEY,   hkey,
-                                 LPCWSTR,lpSubKey,
-                                 DWORD,  dwType,
-                                 LPCWSTR,lpData,
-                                 DWORD,  cbData)
+                                LPCWSTR,lpSubKey,
+                                DWORD,  dwType,
+                                LPCWSTR,lpData,
+                                DWORD,  cbData)
 {
   char *astring1 = UnicodeToAsciiString((LPWSTR)lpSubKey);
   char *astring2 = UnicodeToAsciiString((LPWSTR)lpData);
@@ -955,11 +961,11 @@ ODINFUNCTION5(LONG,RegSetValueW,HKEY,   hkey,
  *****************************************************************************/
 
 ODINFUNCTION6(LONG,RegSetValueExA,HKEY,  arg1,
-                                   LPSTR, arg2,
-                                   DWORD, arg3,
-                                   DWORD, arg4,
-                                   BYTE*, arg5,
-                                   DWORD, arg6)
+                                  LPSTR, arg2,
+                                  DWORD, arg3,
+                                  DWORD, arg4,
+                                  BYTE*, arg5,
+                                  DWORD, arg6)
 {
   return _O32_RegSetValueEx(ConvertKey(arg1),
                            arg2,

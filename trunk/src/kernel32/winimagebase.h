@@ -1,4 +1,4 @@
-/* $Id: winimagebase.h,v 1.10 2000-05-28 16:45:12 sandervl Exp $ */
+/* $Id: winimagebase.h,v 1.11 2000-06-08 18:08:57 sandervl Exp $ */
 
 /*
  * Win32 PE Image base class
@@ -86,7 +86,8 @@ virtual BOOL  getVersionStruct(char *verstruct, ULONG bufLength);
         char *getResourceAddr(HRSRC hResource);
         ULONG getResourceSize(HRSRC hResource);
 
-static  BOOL  isPEImage(char *szFileName);
+        //returns ERROR_SUCCESS or error code
+static  ULONG isPEImage(char *szFileName);
 static  BOOL  findDll(const char *pszFileName, char *pszFullName,
                       int cchFullName, const char *pszAltPath = NULL);
 
