@@ -1,4 +1,4 @@
-/* $Id: initterm.cpp,v 1.23 1999-11-09 14:19:46 sandervl Exp $ */
+/* $Id: initterm.cpp,v 1.24 1999-11-12 14:57:15 sandervl Exp $ */
 
 /*
  * KERNEL32 DLL entry point
@@ -43,6 +43,7 @@
 #include <heapshared.h>
 #include "mmap.h"
 #include "directory.h"
+#include "hmdevio.h"
 
 /*-------------------------------------------------------------------*/
 /* A clean up routine registered with DosExitList must be used if    */
@@ -132,6 +133,7 @@ unsigned long SYSTEM _DLL_InitTerm(unsigned long hModule, unsigned long
             //(std handles can be used in win32 dll initialization routines
             HMInitialize();             /* store standard handles within HandleManager */
             InitDirectories();
+            RegisterDevices();
             break;
 	}
         case 1 :

@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.56 1999-11-11 19:10:09 sandervl Exp $
+# $Id: makefile,v 1.57 1999-11-12 14:57:15 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -29,7 +29,7 @@ CXXFLAGS = $(CXXFLAGS) -DDEBUG_ENABLELOG_LEVEL2
 !endif
 
 OBJS = KERNEL32.OBJ KOBJECTS.OBJ CONSOLE.OBJ CONIN.OBJ \
-CONBUFFER.OBJ CONOUT.OBJ UNICODE.OBJ network.OBJ DEVIO.OBJ \
+CONBUFFER.OBJ CONOUT.OBJ UNICODE.OBJ network.OBJ HMDEVIO.OBJ \
 profile.obj THREAD.OBJ virtual.obj THUNK.OBJ OBSOLETE.OBJ COMM.OBJ\
 MESSAGE.OBJ RESOURCE.OBJ EXCEPTIONS.OBJ heapshared.obj \
 LFILE.OBJ NPIPE.OBJ oslibdos.obj oslibmisc.obj MISC.OBJ EXCEPTUTIL.OBJ \
@@ -143,7 +143,7 @@ os2heap.OBJ: \
     $(PDWIN32_INCLUDE)\win32type.h \
     os2heap.h
 
-initterm.OBJ: .\initterm.cpp initterm.h  $(PDWIN32_INCLUDE)\heapshared.h  mmap.h directory.h
+initterm.OBJ: .\initterm.cpp initterm.h  $(PDWIN32_INCLUDE)\heapshared.h  mmap.h directory.h hmdevio.h
 
 thunk.OBJ: \
     .\thunk.cpp \
@@ -168,10 +168,10 @@ oslibexcept.obj: \
     $(PDWIN32_INCLUDE)\exceptions.h \
     oslibexcept.h
 
-devio.OBJ: \
-    .\devio.cpp \
+hmdevio.OBJ: \
+    .\hmdevio.cpp \
     exceptutil.h \
-    devio.h \
+    hmdevio.h \
     map.h \
     cio.h
 
