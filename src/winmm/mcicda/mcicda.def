@@ -1,7 +1,7 @@
-; $Id: mcicdos2.def,v 1.1 2000-12-02 11:37:34 sandervl Exp $
+; $Id: mcicda.def,v 1.3 2000-12-03 10:15:01 sandervl Exp $
 
 ;Created by BLAST for IBM's compiler
-LIBRARY MCICDOS2 INITINSTANCE
+LIBRARY MCICDA INITINSTANCE
 DATA MULTIPLE NONSHARED
 
 
