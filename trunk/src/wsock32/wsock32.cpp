@@ -1,4 +1,4 @@
-/* $Id: wsock32.cpp,v 1.18 2000-03-13 20:32:24 sandervl Exp $ */
+/* $Id: wsock32.cpp,v 1.19 2000-03-14 14:59:43 sandervl Exp $ */
 
 /*
  *
@@ -46,6 +46,7 @@
 #include <heapstring.h>
 #include <win32wnd.h>
 #include <stdlib.h>
+#include <win32api.h>
 
 #include "wsock32.h"
 #include "relaywin.h"
@@ -69,9 +70,6 @@ static HWND hwndRelay = NULL; // handle to our relay window
 /*****************************************************************************
  * Prototypes                                                                *
  *****************************************************************************/
-
-void __stdcall SetLastError(DWORD dwError);
-
 
 /*****************************************************************************
  * Name      :
@@ -734,9 +732,16 @@ ODINFUNCTION5(int,OS2setsockopt,
   if(level == SOL_SOCKET && (optname == SO_SNDBUF || optname == SO_RCVBUF)) {
 	ULONG size;
 
-	//SvL: Limit send & receive buffer length to 64k
-	size = min(*(ULONG *)optval, 65000);
-	rc = setsockopt(s,level,optname, (char *)&size,optlen);
+	size = *(ULONG *)optval;
+tryagain:
+	rc = setsockopt(s,level,optname, (char *)&size, sizeof(ULONG));
+	if(rc == SOCKET_ERROR && size > 65535) {
+		//SvL: Limit send & receive buffer length to 64k
+                //     (only happens with 16 bits tcpip stack?)
+		size = 65000;
+		goto tryagain;
+	}
+
   }
   else {
     rc = setsockopt(s,level,optname,(char *)optval,optlen);
@@ -1378,6 +1383,8 @@ ODINFUNCTION5(LHANDLE,OS2WSAAsyncGetHostByName,
   int   rc;
   HWND  hwndOS2 = Win32ToOS2Handle(hWnd);
   ULONG ulNewID;
+
+  dprintf(("WSAAsyncGetHostByName %s", name));
 
   if (hwndRelay == NULL) // already initialized ?
     hwndRelay = RelayInitialize(hwndOS2);

@@ -1,5 +1,3 @@
-
-
 /*
  *
  * Project Odin Software License can be found in LICENSE.TXT
@@ -217,7 +215,7 @@ MRESULT EXPENTRY RelayWindowProc(HWND   hwnd,
   {
     rc = SHORT1FROMMP(mp2);                /* asynchronous operation result */
 
-    dprintf(("WSOCK32: RelayWindowProc, message %d for window %d with "
+    dprintf(("WSOCK32: RelayWindowProc, message %x for window %x with "
              "mp1 = %d and mp2 = %d (rc = %d) received\n",
              ulMsg, hwnd, mp1, mp2, rc));
 
