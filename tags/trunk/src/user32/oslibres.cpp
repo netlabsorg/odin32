@@ -1,4 +1,4 @@
-/* $Id: oslibres.cpp,v 1.12 2001-03-27 16:17:52 sandervl Exp $ */
+/* $Id: oslibres.cpp,v 1.13 2001-04-15 14:29:48 sandervl Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -469,6 +469,39 @@ VOID OSLibWinDestroyPointer(HANDLE hPointer)
 BOOL OSLibWinSetPointer(HANDLE hPointer)
 {
     return WinSetPointer(HWND_DESKTOP, hPointer);
+}
+//******************************************************************************
+//******************************************************************************
+BOOL OSLibWinClipCursor(const RECT * pRect)
+{
+   RECTL  rectl;
+   PRECTL ptr = NULL;
+
+   if (pRect != NULL)
+   {
+      rectl.xLeft = max(pRect->left, 0);
+      rectl.xRight = min(pRect->right, ScreenWidth-1);
+      rectl.yBottom = max(ScreenHeight - pRect->bottom, 0);
+      rectl.yTop = min(ScreenHeight - pRect->top, ScreenHeight-1);
+      ptr = &rectl;
+   }
+   return WinSetPointerClipRect (HWND_DESKTOP, ptr);
+}
+//******************************************************************************
+//******************************************************************************
+BOOL OSLibWinGetClipCursor(LPRECT pRect)
+{
+   RECTL  rectl;
+
+   if (WinQueryPointerClipRect(HWND_DESKTOP, &rectl))
+   {
+      pRect->left   = rectl.xLeft;
+      pRect->right  = rectl.xRight;
+      pRect->bottom = ScreenHeight - rectl.yBottom;
+      pRect->top    = ScreenHeight - rectl.yTop;
+      return TRUE;
+   }
+   return FALSE;
 }
 //******************************************************************************
 //******************************************************************************

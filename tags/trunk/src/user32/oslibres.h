@@ -1,4 +1,4 @@
-/* $Id: oslibres.h,v 1.6 2001-03-27 16:17:52 sandervl Exp $ */
+/* $Id: oslibres.h,v 1.7 2001-04-15 14:29:48 sandervl Exp $ */
 /*
  * Window GUI resource wrapper functions for OS/2
  *
@@ -51,5 +51,34 @@ HANDLE  OSLibWinQuerySysPointer(ULONG type,INT w,INT h);
 HANDLE  OSLibWinQuerySysIcon(ULONG type,INT w,INT h);
 VOID    OSLibWinDestroyPointer(HANDLE hPointer);
 BOOL    OSLibWinSetPointer(HANDLE hPointer);
+BOOL    OSLibWinClipCursor(const RECT * pRect);
+BOOL    OSLibWinGetClipCursor(LPRECT pRect);
+
+
+
+BOOL APIENTRY _WinSetPointerClipRect(HWND hwnd, PRECTL pRect);
+BOOL APIENTRY _WinQueryPointerClipRect(HWND hwnd, PRECTL pRect);
+
+inline BOOL APIENTRY WinSetPointerClipRect(HWND hwnd, PRECTL pRect)
+{
+ BOOL yyrc;
+ USHORT sel = RestoreOS2FS();
+
+    yyrc = _WinSetPointerClipRect(hwnd, pRect);
+    SetFS(sel);
+
+    return yyrc;
+}
+
+inline BOOL APIENTRY WinQueryPointerClipRect(HWND hwnd, PRECTL pRect)
+{
+ BOOL yyrc;
+ USHORT sel = RestoreOS2FS();
+
+    yyrc = _WinQueryPointerClipRect(hwnd, pRect);
+    SetFS(sel);
+
+    return yyrc;
+}
 
 #endif //__OSLIBGDI_H__
