@@ -1,4 +1,4 @@
-/* $Id: hmdisk.cpp,v 1.51 2002-08-08 15:38:23 sandervl Exp $ */
+/* $Id: hmdisk.cpp,v 1.52 2002-08-09 13:17:22 sandervl Exp $ */
 
 /*
  * Win32 Disk API functions for OS/2
@@ -53,6 +53,7 @@ typedef struct
     BOOL      fPhysicalDisk;
     BOOL      fCDPlaying;
     BOOL      fShareViolation;
+    DWORD     fLocked;
     LARGE_INTEGER StartingOffset;
     LARGE_INTEGER PartitionSize;
     LARGE_INTEGER CurrentFilePointer;
@@ -279,6 +280,7 @@ DWORD HMDeviceDiskClass::CreateFile (LPCSTR        lpFileName,
         drvInfo->dwCreation= pHMHandleData->dwCreation;
         drvInfo->dwFlags   = pHMHandleData->dwFlags;
         drvInfo->hTemplate = hTemplate;
+        drvInfo->fLocked   = FALSE;
 
         //save volume start & length if volume must be accessed through the physical disk 
         //(no other choice for unmounted volumes)
@@ -317,6 +319,19 @@ DWORD HMDeviceDiskClass::CreateFile (LPCSTR        lpFileName,
            drvInfo->StartingOffset.LowPart != 0))
         {
             SetFilePointer(pHMHandleData, 0, NULL, FILE_BEGIN);
+        }
+        //If the disk handle was valid, then we must lock it if the drive
+        //was opened without share flags
+        if(pHMHandleData->hHMHandle && drvInfo->dwShare == 0) {
+            dprintf(("Locking drive"));
+            if(OSLibDosDevIOCtl(pHMHandleData->hHMHandle,IOCTL_DISK,DSK_LOCKDRIVE,0,0,0,0,0,0)) 
+            {
+                dprintf(("Sharing violation while attempting to lock the drive"));
+                OSLibDosClose(pHMHandleData->hHMHandle);
+                free(drvInfo);
+                return ERROR_SHARING_VIOLATION;
+            }
+            drvInfo->fLocked = TRUE;
         }
         return (NO_ERROR);
     }
@@ -367,6 +382,19 @@ DWORD HMDeviceDiskClass::OpenDisk(PVOID pDrvInfo)
                              &drvInfo->signature[0], 4, &datasize);
         }
         OSLibDosQueryVolumeSerialAndName(1 + drvInfo->driveLetter - 'A', &drvInfo->dwVolumelabel, NULL, 0);
+
+        //If the disk handle was valid, then we must lock it if the drive
+        //was opened without share flags
+        if(hFile && drvInfo->dwShare == 0) {
+            dprintf(("Locking drive"));
+            if(OSLibDosDevIOCtl(hFile,IOCTL_DISK,DSK_LOCKDRIVE,0,0,0,0,0,0)) 
+            {
+                dprintf(("Sharing violation while attempting to lock the drive"));
+                OSLibDosClose(hFile);
+                return 0;
+            }
+            drvInfo->fLocked = TRUE;
+        }
         return hFile;
     }
     return 0;
@@ -378,6 +406,11 @@ BOOL HMDeviceDiskClass::CloseHandle(PHMHANDLEDATA pHMHandleData)
     BOOL ret = TRUE;
 
     if(pHMHandleData->hHMHandle) {
+        DRIVE_INFO *drvInfo = (DRIVE_INFO*)pHMHandleData->dwUserData;
+        if(drvInfo && drvInfo->fLocked) {
+            dprintf(("Unlocking drive"));
+            OSLibDosDevIOCtl(pHMHandleData->hHMHandle,IOCTL_DISK,DSK_UNLOCKDRIVE,0,0,0,0,0,0);
+        }
         ret = OSLibDosClose(pHMHandleData->hHMHandle);
     }
     if(pHMHandleData->dwUserData) {
@@ -726,8 +759,6 @@ BOOL HMDeviceDiskClass::DeviceIoControl(PHMHANDLEDATA pHMHandleData, DWORD dwIoC
             return TRUE;
         }
 
-        OSLibDosDevIOCtl(pHMHandleData->hHMHandle,IOCTL_DISK,DSK_LOCKDRIVE,0,0,0,0,0,0);
-
         ULONG oldmode = SetErrorMode(SEM_FAILCRITICALERRORS);
 
         /* Read the first byte of the disk */
@@ -767,13 +798,11 @@ BOOL HMDeviceDiskClass::DeviceIoControl(PHMHANDLEDATA pHMHandleData, DWORD dwIoC
                goto writecheckfail;
            }
         }
-        OSLibDosDevIOCtl(pHMHandleData->hHMHandle,IOCTL_DISK,DSK_UNLOCKDRIVE,0,0,0,0,0,0);
         SetErrorMode(oldmode);
         SetLastError(ERROR_SUCCESS);
         return TRUE;
 
 writecheckfail:
-        OSLibDosDevIOCtl(pHMHandleData->hHMHandle,IOCTL_DISK,DSK_UNLOCKDRIVE,0,0,0,0,0,0);
         SetErrorMode(oldmode);
         return FALSE;
     }
@@ -842,7 +871,14 @@ writecheckfail:
             rc = OSLibDosQueryVolumeSerialAndName(1 + drvInfo->driveLetter - 'A', &volumelabel, NULL, 0);
             if(rc) {
                 dprintf(("IOCTL_DISK_GET_DRIVE_GEOMETRY: OSLibDosQueryVolumeSerialAndName failed with rc %d", GetLastError()));
-                if(pHMHandleData->hHMHandle) OSLibDosClose(pHMHandleData->hHMHandle);
+                if(pHMHandleData->hHMHandle) {
+                    if(drvInfo->fLocked) {
+                        dprintf(("Unlocking drive"));
+                        OSLibDosDevIOCtl(pHMHandleData->hHMHandle,IOCTL_DISK,DSK_UNLOCKDRIVE,0,0,0,0,0,0);
+                        drvInfo->fLocked = FALSE;
+                    }
+                    OSLibDosClose(pHMHandleData->hHMHandle);
+                }
                 pHMHandleData->hHMHandle = 0;
                 SetLastError(ERROR_MEDIA_CHANGED);
                 return FALSE;
@@ -1890,8 +1926,6 @@ BOOL HMDeviceDiskClass::WriteFile(PHMHANDLEDATA pHMHandleData,
     }
     else  lpRealBuf = (LPVOID)lpBuffer;
 
-    OSLibDosDevIOCtl(pHMHandleData->hHMHandle,IOCTL_DISK,DSK_LOCKDRIVE,0,0,0,0,0,0);
-
     if(pHMHandleData->dwFlags & FILE_FLAG_OVERLAPPED) {
         dprintf(("ERROR: Overlapped IO not yet implememented!!"));
     }
@@ -1902,7 +1936,6 @@ BOOL HMDeviceDiskClass::WriteFile(PHMHANDLEDATA pHMHandleData,
                             lpNumberOfBytesWritten);
 //  }
 
-    OSLibDosDevIOCtl(pHMHandleData->hHMHandle,IOCTL_DISK,DSK_UNLOCKDRIVE,0,0,0,0,0,0);
     dprintf2(("KERNEL32: HMDeviceDiskClass::WriteFile returned %08xh\n",
                bRC));
 
