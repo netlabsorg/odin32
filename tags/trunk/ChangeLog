@@ -1,4 +1,16 @@
- /* $Id: ChangeLog,v 1.1082 2000-08-22 02:44:58 phaller Exp $ */
+ /* $Id: ChangeLog,v 1.1083 2000-08-24 09:29:09 sandervl Exp $ */
+
+ 2000-08-24: Sander van Leeuwen <sandervl@xs4all.nl>
+    - USER32:   Export wvsnprintfW
+    - SHLWAPI:  Merged with latest Wine code; separated added/changed
+                functions to ease resync in the future
+                Removed all AW exports; they belong in shell32
+                More functions exported (Wine additions)
+    - SHELL32:  Merged Wine's shellpath.c
+                More exports (forwarders to shlwapi)
+
+ 2000-08-23: Michal Necasek <mike@mendelu.cz>
+    - KERNEL32: (cpu.c) lpMinimumApplicationAddress should be 4 MB
 
  2000-08-22: Patrick Haller <phaller@gmx.net>
     - MSVCRT: _lock() implemented
