@@ -1,4 +1,4 @@
-/* $Id: win32wbase.h,v 1.116 2001-05-11 08:39:45 sandervl Exp $ */
+/* $Id: win32wbase.h,v 1.117 2001-05-25 19:59:30 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -54,14 +54,14 @@ typedef struct tagPROPERTY
 
 //PM doesn't allow SetFocus during WM_SETFOCUS message processing; must delay
 //this by posting a message
-#define WIN32APP_SETFOCUSMSG      (0x1001+OPEN32_MSGDIFF)
+//NOTE Must be smaller than WIN32APP_POSTMSG!
+#define WIN32APP_SETFOCUSMSG      (WIN32APP_POSTMSG-1)
 
 #define WIN32MSG_MAGICA           0x12345678
 #define WIN32MSG_MAGICW           0x12345679
 
 typedef struct
 {
-        ULONG           Msg;
         ULONG           wParam;
         ULONG           lParam;
 } POSTMSG_PACKET;

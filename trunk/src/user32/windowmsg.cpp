@@ -1,4 +1,4 @@
-/* $Id: windowmsg.cpp,v 1.24 2001-04-27 17:36:39 sandervl Exp $ */
+/* $Id: windowmsg.cpp,v 1.25 2001-05-25 19:59:30 sandervl Exp $ */
 /*
  * Win32 window message APIs for OS/2
  *
@@ -84,11 +84,11 @@ BOOL WIN32API PeekMessageA(LPMSG msg, HWND hwndOwner, UINT uMsgFilterMin,
 {
  BOOL fFoundMsg;
  
-    dprintf2(("PeekMessagA %x %d-%d %d", hwndOwner, uMsgFilterMin, uMsgFilterMax, fuRemoveMsg));
+    dprintf2(("PeekMessageA %x %d-%d %d", hwndOwner, uMsgFilterMin, uMsgFilterMax, fuRemoveMsg));
     fFoundMsg = OSLibWinPeekMsg(msg, hwndOwner, uMsgFilterMin, uMsgFilterMax,
                                 fuRemoveMsg, FALSE);
     if(fFoundMsg) {
-        dprintf2(("PeekMessagA %x %d-%d %d found message %x %d %x %x", hwndOwner, uMsgFilterMin, uMsgFilterMax, fuRemoveMsg, msg->hwnd, msg->message, msg->wParam, msg->lParam));
+        dprintf2(("PeekMessageA %x %d-%d %d found message %x %d %x %x", hwndOwner, uMsgFilterMin, uMsgFilterMax, fuRemoveMsg, msg->hwnd, msg->message, msg->wParam, msg->lParam));
         HOOK_CallHooksA(WH_GETMESSAGE, HC_ACTION, fuRemoveMsg & PM_REMOVE, (LPARAM)msg );
         if (msg->message == WM_QUIT && (fuRemoveMsg & PM_REMOVE)) {
             //TODO: Post WM_QUERYENDSESSION message when WM_QUIT received and system is shutting down
@@ -103,11 +103,11 @@ BOOL WIN32API PeekMessageW(LPMSG msg, HWND hwndOwner, UINT uMsgFilterMin,
 {
  BOOL fFoundMsg;
 
-    dprintf2(("PeekMessagW %x %d-%d %d", hwndOwner, uMsgFilterMin, uMsgFilterMax, fuRemoveMsg));
+    dprintf2(("PeekMessageW %x %d-%d %d", hwndOwner, uMsgFilterMin, uMsgFilterMax, fuRemoveMsg));
     fFoundMsg = OSLibWinPeekMsg(msg, hwndOwner, uMsgFilterMin, uMsgFilterMax,
                                 fuRemoveMsg, FALSE);
     if(fFoundMsg) {
-        dprintf2(("PeekMessagW %x %d-%d %d found message %x %d %x %x", hwndOwner, uMsgFilterMin, uMsgFilterMax, fuRemoveMsg, msg->hwnd, msg->message, msg->wParam, msg->lParam));
+        dprintf2(("PeekMessageW %x %d-%d %d found message %x %d %x %x", hwndOwner, uMsgFilterMin, uMsgFilterMax, fuRemoveMsg, msg->hwnd, msg->message, msg->wParam, msg->lParam));
         HOOK_CallHooksW(WH_GETMESSAGE, HC_ACTION, fuRemoveMsg & PM_REMOVE, (LPARAM)msg );
         if (msg->message == WM_QUIT && (fuRemoveMsg & (PM_REMOVE))) {
             //TODO: Post WM_QUERYENDSESSION message when WM_QUIT received and system is shutting down
@@ -1050,10 +1050,10 @@ BOOL WIN32API GetInputState(VOID)
 //******************************************************************************
 /* Synchronization Functions */
 //******************************************************************************
-DWORD MsgWaitForMultipleObjects(DWORD nCount, LPHANDLE pHandles, BOOL fWaitAll,
-                                DWORD dwMilliseconds, DWORD dwWakeMask)
+DWORD WIN32API MsgWaitForMultipleObjects(DWORD nCount, LPHANDLE pHandles, BOOL fWaitAll,
+                                         DWORD dwMilliseconds, DWORD dwWakeMask)
 {
- DWORD curtime, endtime;
+ DWORD curtime, endtime, ret;
  MSG msg;
 
   dprintf(("MsgWaitForMultipleObjects %x %x %d %d %x", nCount, pHandles, fWaitAll, dwMilliseconds, dwWakeMask));
@@ -1096,5 +1096,7 @@ DWORD MsgWaitForMultipleObjects(DWORD nCount, LPHANDLE pHandles, BOOL fWaitAll,
         return WAIT_TIMEOUT;
   }
   //SvL: Call handlemanager function as we need to translate handles
-  return HMMsgWaitForMultipleObjects(nCount,pHandles,fWaitAll,dwMilliseconds,dwWakeMask);
+  //TODO: doesn't work at all if waiting for message
+  ret = HMMsgWaitForMultipleObjects(nCount,pHandles,fWaitAll,dwMilliseconds,dwWakeMask);
+  return ret;
 }

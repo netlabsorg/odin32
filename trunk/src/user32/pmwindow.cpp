@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.131 2001-05-22 09:33:12 sandervl Exp $ */
+/* $Id: pmwindow.cpp,v 1.132 2001-05-25 19:59:29 sandervl Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -166,6 +166,8 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
     teb = GetThreadTEB();
     win32wnd = Win32BaseWindow::GetWindowFromOS2Handle(hwnd);
 
+////    dprintf(("window %x msg %x", (win32wnd) ? win32wnd->getWindowHandle() : 0, msg));
+
     if(!teb || (msg != WM_CREATE && win32wnd == NULL)) {
         dprintf(("OS2: Invalid win32wnd pointer for window %x msg %x", hwnd, msg));
         goto RunDefWndProc;
@@ -198,14 +200,18 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
     }
     //NOTE-------------->>>>>> If this is changed, also change Win32WindowProc!! <<<<<<<<<<<-------------------- END
 
-    if(msg == WIN32APP_POSTMSG) {
+    if(msg >= WIN32APP_POSTMSG) {
         //probably win32 app user message
+        dprintf2(("Posted message %x->%x", msg, msg-WIN32APP_POSTMSG));
         if((ULONG)mp1 == WIN32MSG_MAGICA) {
             rc = (MRESULT)win32wnd->DispatchMsgA(pWinMsg);
         }
         else
         if((ULONG)mp1 == WIN32MSG_MAGICW) {
             rc = (MRESULT)win32wnd->DispatchMsgW(pWinMsg);
+        }
+        else {//broadcasted message
+            rc = (MRESULT)win32wnd->DispatchMsgA(pWinMsg);
         }
         RestoreOS2TIB();
         return rc;

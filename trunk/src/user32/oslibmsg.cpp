@@ -1,4 +1,4 @@
-/* $Id: oslibmsg.cpp,v 1.37 2001-04-27 17:36:37 sandervl Exp $ */
+/* $Id: oslibmsg.cpp,v 1.38 2001-05-25 19:59:29 sandervl Exp $ */
 /*
  * Window message translation functions for OS/2
  *
@@ -127,7 +127,7 @@ ULONG TranslateWinMsg(ULONG msg, BOOL fMinFilter)
         return 0;
 
     if(msg >= WINWM_USER)
-        return WIN32APP_POSTMSG;
+        return msg + WIN32APP_POSTMSG;
 
     for(int i=0;i<MAX_MSGTRANSTAB;i++)
     {
@@ -142,8 +142,9 @@ ULONG TranslateWinMsg(ULONG msg, BOOL fMinFilter)
         }
     }
 
-    //not found, probaby WIN32APP_POSTMSG
-    return WIN32APP_POSTMSG;
+    //not found, get everything
+    dprintf(("WARNING: TranslateWinMsg: message %x not found", msg));
+    return 0;
 }
 //******************************************************************************
 //******************************************************************************
@@ -350,15 +351,17 @@ continuepeekmsg:
   while (eaten && rc);
 
   if(rc == FALSE) {
-    return FALSE;
+      return FALSE;
   }
 
   if(OS2ToWinMsgTranslate((PVOID)teb, &os2msg, pMsg, isUnicode, (fRemove & PM_REMOVE_W) ? MSG_REMOVE : MSG_NOREMOVE) == FALSE) 
   {
      //unused PM message; dispatch immediately and grab next one
      dprintf2(("OSLibWinPeekMsg: Untranslated message; dispatched immediately"));
-     rc = WinPeekMsg(teb->o.odin.hab, &os2msg, hwndOS2, TranslateWinMsg(uMsgFilterMin, TRUE),
-                     TranslateWinMsg(uMsgFilterMax, FALSE), PM_REMOVE);
+     if(!(fRemove & PM_REMOVE_W)) {
+         rc = WinPeekMsg(teb->o.odin.hab, &os2msg, hwndOS2, TranslateWinMsg(uMsgFilterMin, TRUE),
+                         TranslateWinMsg(uMsgFilterMax, FALSE), PM_REMOVE);
+     }
      WinDispatchMsg(teb->o.odin.hab, &os2msg);
      return OSLibWinPeekMsg(pMsg, hwnd, uMsgFilterMin, uMsgFilterMax,
                             fRemove, isUnicode);
@@ -453,17 +456,16 @@ ULONG OSLibSendMessage(HWND hwnd, ULONG msg, ULONG wParam, ULONG lParam, BOOL fU
 {
  POSTMSG_PACKET *packet = (POSTMSG_PACKET *)_smalloc(sizeof(POSTMSG_PACKET));
 
-    packet->Msg    = msg;
-    packet->wParam = wParam;
-    packet->lParam = lParam;
+    packet->wParam   = wParam;
+    packet->lParam   = lParam;
 
-    return (ULONG)WinSendMsg(hwnd, WIN32APP_POSTMSG, (MPARAM)((fUnicode) ? WIN32MSG_MAGICW : WIN32MSG_MAGICA), (MPARAM)packet);
+    return (ULONG)WinSendMsg(hwnd, WIN32APP_POSTMSG+msg, (MPARAM)((fUnicode) ? WIN32MSG_MAGICW : WIN32MSG_MAGICA), (MPARAM)packet);
 }
 //******************************************************************************
 //******************************************************************************
 ULONG OSLibWinBroadcastMsg(ULONG msg, ULONG wParam, ULONG lParam, BOOL fSend)
 {
-    return WinBroadcastMsg(HWND_DESKTOP, msg, (MPARAM)wParam, (MPARAM)lParam,
+    return WinBroadcastMsg(HWND_DESKTOP, WIN32APP_POSTMSG+msg, (MPARAM)wParam, (MPARAM)lParam,
                            (fSend) ? BMSG_SEND : BMSG_POST);
 }
 //******************************************************************************
@@ -472,10 +474,9 @@ BOOL OSLibPostMessage(HWND hwnd, ULONG msg, ULONG wParam, ULONG lParam, BOOL fUn
 {
  POSTMSG_PACKET *packet = (POSTMSG_PACKET *)_smalloc(sizeof(POSTMSG_PACKET));
 
-    packet->Msg = msg;
-    packet->wParam = wParam;
-    packet->lParam = lParam;
-    return WinPostMsg(hwnd, WIN32APP_POSTMSG, (MPARAM)((fUnicode) ? WIN32MSG_MAGICW : WIN32MSG_MAGICA), (MPARAM)packet);
+    packet->wParam   = wParam;
+    packet->lParam   = lParam;
+    return WinPostMsg(hwnd, WIN32APP_POSTMSG+msg, (MPARAM)((fUnicode) ? WIN32MSG_MAGICW : WIN32MSG_MAGICA), (MPARAM)packet);
 }
 //******************************************************************************
 //Direct posting of messages that must remain invisible to the win32 app
@@ -508,10 +509,9 @@ BOOL OSLibPostThreadMessage(ULONG threadid, UINT msg, WPARAM wParam, LPARAM lPar
 //        return FALSE;
 //    }
     dprintf(("PostThreadMessageA %x %x %x %x", threadid, msg, wParam, lParam));
-    packet->Msg = msg;
-    packet->wParam = wParam;
-    packet->lParam = lParam;
-    return O32_PostThreadMessage(threadid, WIN32APP_POSTMSG-OPEN32_MSGDIFF, ((fUnicode) ? WIN32MSG_MAGICW : WIN32MSG_MAGICA), (LPARAM)packet);
+    packet->wParam   = wParam;
+    packet->lParam   = lParam;
+    return O32_PostThreadMessage(threadid, WIN32APP_POSTMSG-OPEN32_MSGDIFF+msg, ((fUnicode) ? WIN32MSG_MAGICW : WIN32MSG_MAGICA), (LPARAM)packet);
 }
 //******************************************************************************
 //******************************************************************************

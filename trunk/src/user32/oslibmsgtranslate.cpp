@@ -1,4 +1,4 @@
-/* $Id: oslibmsgtranslate.cpp,v 1.51 2001-05-15 14:31:38 sandervl Exp $ */
+/* $Id: oslibmsgtranslate.cpp,v 1.52 2001-05-25 19:59:29 sandervl Exp $ */
 /*
  * Window message translation functions for OS/2
  *
@@ -205,7 +205,7 @@ BOOL OS2ToWinMsgTranslate(void *pTeb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode,
 
     //PostThreadMessage posts WIN32APP_POSTMSG msg without window handle
     //Realplayer starts a timer with hwnd 0 & proc 0; check this here
-    if(win32wnd == 0 && (os2Msg->msg != WM_CREATE && os2Msg->msg != WM_QUIT && os2Msg->msg != WM_TIMER && os2Msg->msg != WIN32APP_POSTMSG))
+    if(win32wnd == 0 && (os2Msg->msg != WM_CREATE && os2Msg->msg != WM_QUIT && os2Msg->msg != WM_TIMER && os2Msg->msg < WIN32APP_POSTMSG))
     {
         goto dummymessage; //not a win32 client window
     }
@@ -217,21 +217,26 @@ BOOL OS2ToWinMsgTranslate(void *pTeb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode,
     if(win32wnd) //==0 for WM_CREATE/WM_QUIT
         winMsg->hwnd = win32wnd->getWindowHandle();
 
-    switch(os2Msg->msg)
-    {
-    case WIN32APP_POSTMSG:
-    {
+    if(os2Msg->msg >= WIN32APP_POSTMSG) {
         packet = (POSTMSG_PACKET *)os2Msg->mp2;
         if(packet && ((ULONG)os2Msg->mp1 == WIN32MSG_MAGICA || (ULONG)os2Msg->mp1 == WIN32MSG_MAGICW)) {
-            winMsg->message = packet->Msg;
+            winMsg->message = os2Msg->msg - WIN32APP_POSTMSG;
             winMsg->wParam  = packet->wParam;
             winMsg->lParam  = packet->lParam;
             if(fMsgRemoved == MSG_REMOVE) free(packet); //free the shared memory here
-            break;
+            return TRUE;
+        }
+        else {//broadcasted message (no packet present)
+            winMsg->message = os2Msg->msg - WIN32APP_POSTMSG;
+            winMsg->wParam  = (UINT)os2Msg->mp1;
+            winMsg->lParam  = (DWORD)os2Msg->mp2;
+            return TRUE;
         }
         goto dummymessage;
     }
 
+    switch(os2Msg->msg)
+    {
     //OS/2 msgs
     case WM_CREATE:
     {
