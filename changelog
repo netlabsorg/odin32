@@ -1,4 +1,8 @@
-/* $Id: changelog,v 1.2117 2002-05-31 09:57:59 sandervl Exp $ */
+/* $Id: changelog,v 1.2118 2002-06-01 11:06:41 sandervl Exp $ */
+
+ 2002-06-01: Sander van Leeuwen <sandervl@innotek.de>
+    - SHELL32:  o IShellFolder_fnCompareIDs shortcut added to improve
+                  performance
 
  2002-05-31: Sander van Leeuwen <sandervl@innotek.de>
     - DINPUT:   o Ignore injected mouse messages (hook; LLMHF_INJECTED flag)
