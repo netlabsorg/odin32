@@ -1,4 +1,4 @@
-/* $Id: os2sel.h,v 1.7 2000-08-23 18:05:54 sandervl Exp $ */
+/* $Id: os2sel.h,v 1.8 2000-08-24 07:07:21 sandervl Exp $ */
 /*
  *
  * Project Odin Software License can be found in LICENSE.TXT
@@ -28,13 +28,13 @@ unsigned short RestoreOS2FS(void);
    modify nomemory exact [ax];
 
 #else
-unsigned short SYSTEM GetFS       ();
-unsigned short SYSTEM RestoreOS2FS();
-void           SYSTEM SetFS       (unsigned short selector);
-unsigned short SYSTEM SetReturnFS (unsigned short selector);
+unsigned short _System GetFS       ();
+unsigned short _System RestoreOS2FS();
+void           _System SetFS       (unsigned short selector);
+unsigned short _System SetReturnFS (unsigned short selector);
 #endif
 
 //SvL: Checks if thread FS & exception structure are valid
-int            SYSTEM CheckCurFS();
+int            _System CheckCurFS();
 
 #endif //__OS2SEL_H__
