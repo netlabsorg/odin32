@@ -1,4 +1,4 @@
-/* $Id: oslibmsgtranslate.cpp,v 1.60 2001-09-17 13:31:29 sandervl Exp $ */
+/* $Id: oslibmsgtranslate.cpp,v 1.61 2001-10-22 23:14:32 phaller Exp $ */
 /*
  * Window message translation functions for OS/2
  *
@@ -32,6 +32,7 @@
 #include "pmwindow.h"
 #include "oslibwin.h"
 #include "winmouse.h"
+#include <pmkbdhk.h>
 
 #define DBG_LOCALLOG    DBG_oslibmsgtranslate
 #include "dbglocal.h"
@@ -599,6 +600,13 @@ BOOL OS2ToWinMsgTranslate(void *pTeb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode,
         winMsg->lParam = MAKELONG((USHORT)x, (USHORT)y);
         break;
     }
+      
+    case WM_CHAR_SPECIAL:
+        // @@@PH
+        // special char message from the keyboard hook
+        dprintf(("PM: WM_CHAR_SPECIAL\n"));
+        // NO BREAK! FALLTHRU CASE!
+      
     case WM_CHAR:
     {
         ULONG repeatCount=0, virtualKey=0, keyFlags=0, scanCode=0;
