@@ -1,4 +1,4 @@
-/* $Id: virtual.h,v 1.3 1999-10-24 22:48:42 sandervl Exp $ */
+/* $Id: virtual.h,v 1.4 1999-12-30 18:48:44 sandervl Exp $ */
 
 /*
  * Some help functions
@@ -9,8 +9,8 @@
 #ifndef __VIRTUAL_H
 #define __VIRTUAL_H
 
-HANDLE WINAPI VIRTUAL_MapFileA( LPCSTR name , LPVOID *lpMapping);
-HANDLE WINAPI VIRTUAL_MapFileW( LPCWSTR name , LPVOID *lpMapping);
+HANDLE WINAPI VIRTUAL_MapFileA( LPCSTR name , LPVOID *lpMapping, BOOL fReadIntoMemory = FALSE);
+HANDLE WINAPI VIRTUAL_MapFileW( LPCWSTR name , LPVOID *lpMapping, BOOL fReadIntoMemory = FALSE);
 
 LPVOID VirtualAllocShared(DWORD  cbSize, DWORD  fdwAllocationType,
                           DWORD  fdwProtect, LPSTR name);
