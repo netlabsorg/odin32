@@ -863,8 +863,6 @@ static ODINFUNCTION4(HRESULT, IShellFolder_fnCompareIDs,
 {
 	_ICOM_THIS_From_IShellFolder2(IGenericSFImpl, iface)
 
-	CHAR szTemp1[MAX_PATH];
-	CHAR szTemp2[MAX_PATH];
 	int   nReturn;
 	IShellFolder * psf;
 	HRESULT hr = E_OUTOFMEMORY;
@@ -903,10 +901,11 @@ static ODINFUNCTION4(HRESULT, IShellFolder_fnCompareIDs,
 	  }
 	  else						/* same type of pidl */
 	  {
-	    _ILSimpleGetText(pidl1, szTemp1, MAX_PATH);
-	    _ILSimpleGetText(pidl2, szTemp2, MAX_PATH);
-	    nReturn = strcasecmp(szTemp1, szTemp2);
-	
+//  	    _ILSimpleGetText(pidl1, szTemp1, MAX_PATH);
+//  	    _ILSimpleGetText(pidl2, szTemp2, MAX_PATH);
+//  	    nReturn = strcasecmp(szTemp1, szTemp2);
+            nReturn = _ILSimpleCompareText( pidl1, pidl2 );
+            
 	    if (nReturn == 0)				/* first pidl different ? */
 	    {
 	      pidl1 = ILGetNext(pidl1);

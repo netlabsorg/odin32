@@ -121,6 +121,7 @@ typedef struct tagPIDLDATA
  * getting special values from simple pidls
  */
 DWORD	_ILSimpleGetText	(LPCITEMIDLIST pidl, LPSTR pOut, UINT uOutSize);
+int     _ILSimpleCompareText    (LPCITEMIDLIST pidl1, LPCITEMIDLIST pidl2);
 BOOL	_ILGetFileDate 		(LPCITEMIDLIST pidl, LPSTR pOut, UINT uOutSize);
 DWORD	_ILGetFileSize		(LPCITEMIDLIST pidl, LPSTR pOut, UINT uOutSize);
 BOOL	_ILGetExtension		(LPCITEMIDLIST pidl, LPSTR pOut, UINT uOutSize);
