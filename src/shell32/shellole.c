@@ -655,12 +655,20 @@ UINT WINAPI DragQueryFileW(
             LPSTR lpszFileA = NULL;
  
             if(lpszwFile) {
+#ifdef __WIN32OS2__
+                lpszFileA = (LPSTR) HeapAlloc(GetProcessHeap(), 0, lLength * sizeof( WCHAR ));
+#else
                 lpszFileA = (LPSTR) HeapAlloc(GetProcessHeap(), 0, lLength);
+#endif
                 if(lpszFileA == NULL) {
                     goto end;
                 }
             }
+#ifdef __WIN32OS2__
+            i = DragQueryFileA(hDrop, lFile, lpszFileA, lLength * sizeof( WCHAR ));
+#else
             i = DragQueryFileA(hDrop, lFile, lpszFileA, lLength);
+#endif
 
             if(lpszFileA) {
                 MultiByteToWideChar(CP_ACP, 0, lpszFileA, -1, lpszwFile, lLength);
