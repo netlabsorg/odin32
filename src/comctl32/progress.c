@@ -1,4 +1,4 @@
-/* $Id: progress.c,v 1.12 2000-01-26 18:04:29 cbratschi Exp $ */
+/* $Id: progress.c,v 1.13 2000-02-16 17:22:18 cbratschi Exp $ */
 /*
  * Progress control
  *
@@ -21,13 +21,6 @@
 
 #define LED_GAP      2
 #define BORDER_WIDTH 1
-
-/* Work constants */
-
-//#define UNKNOWN_PARAM(msg, wParam, lParam) WARN(progress, \
-//        "Unknown parameter(s) for message " #msg     \
-//      "(%04x): wp=%04x lp=%08lx\n", msg, wParam, lParam);
-//#define UNKNOWN_PARAM(msg, wParam, lParam)
 
 #define PROGRESS_GetInfoPtr(hwnd) ((PROGRESS_INFO *)GetWindowLongA(hwnd,0))
 
