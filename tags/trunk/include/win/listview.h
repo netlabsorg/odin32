@@ -9,7 +9,7 @@
 #define __WINE_LISTVIEW_H
 
 /* Some definitions for inline edit control */
-typedef BOOL (*EditlblCallback)(HWND, LPSTR, DWORD);
+typedef BOOL (*EditlblCallback)(HWND,LPSTR,DWORD,BOOL);
 
 typedef struct tagEDITLABEL_ITEM
 {
