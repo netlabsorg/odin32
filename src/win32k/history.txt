@@ -1,3 +1,6 @@
+ 1999-11-10: KSO
+    - Uses root changelog.
+
  1999-09-08: KSO
     - Initial checkin of code into CVS for Odin32.
     - Don't work!!!
