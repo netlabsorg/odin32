@@ -1,4 +1,4 @@
-/* $Id: unicode.h,v 1.5 1999-08-04 00:45:01 phaller Exp $ */
+/* $Id: unicode.h,v 1.6 1999-08-19 10:24:52 sandervl Exp $ */
 
 /*
  *
@@ -32,7 +32,7 @@ void    WIN32API AsciiToUnicodeN(char *ascii, LPWSTR unicode, int asciilen);
 #endif
 
 #ifdef __cplusplus
-char *UnicodeToAscii(int length, WCHAR *NameString);
+char *  WIN32API UnicodeToAsciiStringN(WCHAR *ustring, ULONG length);
 #endif
 
 #endif
