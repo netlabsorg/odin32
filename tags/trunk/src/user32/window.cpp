@@ -1,4 +1,4 @@
-/* $Id: window.cpp,v 1.109 2001-10-10 14:39:58 sandervl Exp $ */
+/* $Id: window.cpp,v 1.110 2001-10-17 14:30:10 sandervl Exp $ */
 /*
  * Win32 window apis for OS/2
  *
@@ -805,13 +805,10 @@ ODINFUNCTION1(HWND, SetFocus,
         return lastFocus_W;
     }
     teb->o.odin.hwndFocus = 0;
-////    if(activate) {
-////        SetActiveWindow(hwndTopParent);
-////    }
     if(!IsWindow(hwnd)) return FALSE;       //abort if window destroyed
 
-    //Always activate window (3rd par) -> seems to fix activation problems
-    return (OSLibWinSetFocus(OSLIB_HWND_DESKTOP, hwnd_O, 1)) ? lastFocus_W : 0;
+    //NOTE: Don't always activate the window or else the z-order will be changed!!
+    return (OSLibWinSetFocus(OSLIB_HWND_DESKTOP, hwnd_O, activate)) ? lastFocus_W : 0;
 }
 //******************************************************************************
 //******************************************************************************
