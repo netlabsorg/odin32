@@ -1,4 +1,14 @@
-/* $Id: ChangeLog,v 1.1463 2001-05-30 19:35:54 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.1464 2001-06-01 01:24:14 phaller Exp $ */
+
+ 2001-06-01: Patrick Haller <patrick.haller@innotek.de>
+    - KERNEL32: o benchmarked new experimental loader and reverted to
+                  old but slightly optimized loader (processExport usually
+                  outweighs processImport, so lookup is less valuable than
+                  add to export list)
+    - SHELL32:  o SIC_Initialize took extremely long to pre-initialize 
+                  its icon cache. Revert to on-demand loading of the icons,
+                  speeds up loading of SHELL32 (therefore most apps) 
+                  by several seconds.
 
  2001-05-30: Patrick Haller <patrick.haller@innotek.de>
     - KERNEL32: o further performance improvement of hashtables
