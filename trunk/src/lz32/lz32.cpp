@@ -1,4 +1,4 @@
-/* $Id: lz32.cpp,v 1.1 1999-08-10 12:37:33 phaller Exp $ */
+/* $Id: lz32.cpp,v 1.2 1999-08-11 12:49:21 phaller Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -14,6 +14,7 @@
 #include <string.h>
 #include <ctype.h>
 #include <odincrt.h>
+#include <odinwrap.h>
 #include <windef.h>
 #include <winbase.h>
 
@@ -27,6 +28,8 @@
 // @@@PH WINE compatibility macros
 LPWSTR WINAPI lstrcpyAtoW    (LPWSTR unicode, LPSTR ascii);
 #define SystemHeap GetProcessHeap()
+#define dprintf(a)
+
 
 /****************************************************************************
  * Defines                                                                  *
@@ -85,11 +88,35 @@ static struct lzstate *lzstates[MAX_LZSTATES];
 
 
 /****************************************************************************
+ * Internal Prototypes                                                      *
+ ****************************************************************************/
+
+#define ODIN_INTERNAL _Optlink
+
+// internal interface
+VOID        ODIN_INTERNAL LZDone(void);
+LONG        ODIN_INTERNAL CopyLZFile(HFILE,HFILE);
+HFILE       ODIN_INTERNAL LZOpenFileA(LPCSTR,LPOFSTRUCT,UINT);
+HFILE       ODIN_INTERNAL LZOpenFileW(LPCWSTR,LPOFSTRUCT,UINT);
+INT         ODIN_INTERNAL LZRead(HFILE,LPVOID,UINT);
+INT         ODIN_INTERNAL LZStart(void);
+void        ODIN_INTERNAL LZClose(HFILE);
+LONG        ODIN_INTERNAL LZCopy(HFILE,HFILE);
+HFILE       ODIN_INTERNAL LZInit(HFILE);
+LONG        ODIN_INTERNAL LZSeek(HFILE,LONG,INT);
+INT         ODIN_INTERNAL GetExpandedNameA(LPCSTR,LPSTR);
+INT         ODIN_INTERNAL GetExpandedNameW(LPCWSTR,LPWSTR);
+
+static int _lzget(struct lzstate *lzs,BYTE *b);
+static INT read_header(HFILE fd,struct lzfileheader *head);
+
+
+/****************************************************************************
  * Implementation                                                           *
  ****************************************************************************/
 
-static int
-_lzget(struct lzstate *lzs,BYTE *b) {
+static int _lzget(struct lzstate *lzs,BYTE *b)
+{
    if (lzs->getcur<lzs->getlen) {
       *b    = lzs->get[lzs->getcur++];
       return      1;
@@ -105,6 +132,8 @@ _lzget(struct lzstate *lzs,BYTE *b) {
       return 1;
    }
 }
+
+
 /* internal function, reads lzheader
  * returns BADINHANDLE for non filedescriptors
  * return 0 for file not compressed using LZ
@@ -138,26 +167,14 @@ static INT read_header(HFILE fd,struct lzfileheader *head)
 }
 
 
-/*****************************************************************************
- * Name      :
- * Purpose   :
- * Parameters:
- * Variables :
- * Result    :
- * Remark    :
- * Status    :
- *
- * Author    : Patrick Haller [Tue, 1999/08/10 21:55]
- *****************************************************************************/
-
-
 /***********************************************************************
  *           LZStart32   (LZ32.6)
  */
-INT WINAPI LZStart(void)
+
+ODINFUNCTION0(INT,LZStart)
 {
-    TRACE("(void)\n");
-    return 1;
+  dprintf(("LZ32: LZStart32()\n"));
+  return 1;
 }
 
 
@@ -172,15 +189,16 @@ INT WINAPI LZStart(void)
  * since _llseek uses the same types as libc.lseek, we just use the macros of
  *  libc
  */
-HFILE WINAPI LZInit( HFILE hfSrc )
+ODINFUNCTION1(HFILE,LZInit,HFILE,hfSrc)
 {
-
    struct   lzfileheader                 head;
    struct   lzstate                         *lzs;
    DWORD ret;
         int i;
 
-   TRACE("(%d)\n",hfSrc);
+   dprintf(("LZ32: LZInit(%08xh)\n",
+            hfSrc));
+
    ret=read_header(hfSrc,&head);
    if (ret<=0) {
       _llseek(hfSrc,0,SEEK_SET);
@@ -211,7 +229,7 @@ HFILE WINAPI LZInit( HFILE hfSrc )
 /***********************************************************************
  *           LZDone   (LZEXPAND.9) (LZ32.8)
  */
-void WINAPI LZDone(void)
+ODINPROCEDURE0(LZDone)
 {
     TRACE("(void)\n");
 }
@@ -227,7 +245,7 @@ void WINAPI LZDone(void)
  * "FILE.BL_" (with lastchar 'a') is being translated to "FILE.BLA"
  */
 
-INT WINAPI GetExpandedNameA( LPCSTR in, LPSTR out )
+ODINFUNCTION2(INT,GetExpandedNameA,LPCSTR,in,LPSTR,out)
 {
    struct lzfileheader                   head;
    HFILE    fd;
@@ -235,7 +253,10 @@ INT WINAPI GetExpandedNameA( LPCSTR in, LPSTR out )
    INT      fnislowercased,ret,len;
    LPSTR    s,t;
 
-   TRACE("(%s)\n",in);
+   dprintf(("LZ32: GetExpandedNameA(%s,%08xh)\n",
+            in,
+            out));
+
    fd=OpenFile(in,&ofs,OF_READ);
    if (fd==HFILE_ERROR)
       return (INT)(INT16)LZERROR_BADINHANDLE;
@@ -297,10 +318,14 @@ INT WINAPI GetExpandedNameA( LPCSTR in, LPSTR out )
 /***********************************************************************
  *           GetExpandedName32W   (LZ32.11)
  */
-INT WINAPI GetExpandedNameW( LPCWSTR in, LPWSTR out )
+ODINFUNCTION2(INT,GetExpandedNameW,LPCWSTR,in,LPWSTR,out)
 {
    char  *xin,*xout;
    INT   ret;
+
+   dprintf(("LZ32: GetExpandedNameW(%08xh,%08xh)\n",
+            in,
+            out));
 
    xout  = (char*)HeapAlloc( GetProcessHeap(), 0, lstrlenW(in)+3 );
    xin   = HEAP_strdupWtoA( GetProcessHeap(), 0, in );
@@ -315,14 +340,18 @@ INT WINAPI GetExpandedNameW( LPCWSTR in, LPWSTR out )
 /***********************************************************************
  *           LZRead32   (LZ32.4)
  */
-INT WINAPI LZRead( HFILE fd, LPVOID vbuf, UINT toread )
+ODINFUNCTION3(INT,LZRead,HFILE,fd,LPVOID,vbuf,UINT,toread)
 {
    int   howmuch;
    BYTE  b,*buf;
    struct   lzstate                      *lzs;
 
+   dprintf(("LZ32: LZRead(%08xh,%08xh,%08h)\n",
+            fd,
+            vbuf,
+            toread));
+
    buf=(LPBYTE)vbuf;
-   TRACE("(%d,%p,%d)\n",fd,buf,toread);
    howmuch=toread;
    if (!(lzs = GET_LZ_STATE(fd))) return _lread(fd,buf,toread);
 
@@ -406,12 +435,17 @@ INT WINAPI LZRead( HFILE fd, LPVOID vbuf, UINT toread )
 /***********************************************************************
  *           LZSeek32   (LZ32.3)
  */
-LONG WINAPI LZSeek( HFILE fd, LONG off, INT type )
+
+ODINFUNCTION3(LONG,LZSeek,HFILE,fd,LONG,off,INT,type)
 {
    struct   lzstate                      *lzs;
    LONG  newwanted;
 
-   TRACE("(%d,%ld,%d)\n",fd,off,type);
+   dprintf(("LZ32: LZSeek(%08xh,%08xh,%08xh)\n",
+            fd,
+            off,
+            type));
+
    /* not compressed? just use normal _llseek() */
         if (!(lzs = GET_LZ_STATE(fd))) return _llseek(fd,off,type);
    newwanted = lzs->realwanted;
@@ -445,7 +479,7 @@ LONG WINAPI LZSeek( HFILE fd, LONG off, INT type )
 
 typedef  UINT (WINAPI *_readfun)(HFILE,LPVOID,UINT);
 
-LONG WINAPI LZCopy( HFILE src, HFILE dest )
+ODINFUNCTION2(LONG,LZCopy,HFILE,src,HFILE,dest)
 {
    int   usedlzinit=0,ret,wret;
    LONG  len;
@@ -458,7 +492,10 @@ LONG WINAPI LZCopy( HFILE src, HFILE dest )
 
    _readfun xread;
 
-   TRACE("(%d,%d)\n",src,dest);
+   dprintf(("LZ32: LZCopy(%08x,h%08xh)\n",
+            src,
+            dest));
+
    if (!IS_LZ_HANDLE(src)) {
       src = LZInit(src);
                 if ((INT)src <= 0) return 0;
@@ -515,11 +552,16 @@ static LPSTR LZEXPAND_MangleName( LPCSTR fn )
  *
  * Opens a file. If not compressed, open it as a normal file.
  */
-HFILE WINAPI LZOpenFileA( LPCSTR fn, LPOFSTRUCT ofs, UINT mode )
+
+ODINFUNCTION3(HFILE,LZOpenFileA,LPCSTR,fn,LPOFSTRUCT,ofs,UINT,mode)
 {
    HFILE fd,cfd;
 
-   TRACE("(%s,%p,%d)\n",fn,ofs,mode);
+   dprintf(("LZ32: LZOpenFileA(%s,%08xh,%08xh)\n",
+            fn,
+            ofs,
+            mode));
+
    /* 0x70 represents all OF_SHARE_* flags, ignore them for the check */
    fd=OpenFile(fn,ofs,mode);
    if (fd==HFILE_ERROR)
@@ -541,11 +583,16 @@ HFILE WINAPI LZOpenFileA( LPCSTR fn, LPOFSTRUCT ofs, UINT mode )
 /***********************************************************************
  *           LZOpenFile32W   (LZ32.10)
  */
-HFILE WINAPI LZOpenFileW( LPCWSTR fn, LPOFSTRUCT ofs, UINT mode )
+ODINFUNCTION3(HFILE,LZOpenFileW,LPCWSTR,fn,LPOFSTRUCT,ofs,UINT,mode)
 {
    LPSTR xfn;
    LPWSTR   yfn;
    HFILE ret;
+
+   dprintf(("LZ32: LZOpenFileW(%08xh,%08xh,%08xh)\n",
+            fn,
+            ofs,
+            mode));
 
    xfn   = HEAP_strdupWtoA( GetProcessHeap(), 0, fn);
    ret   = LZOpenFileA(xfn,ofs,mode);
@@ -563,11 +610,14 @@ HFILE WINAPI LZOpenFileW( LPCWSTR fn, LPOFSTRUCT ofs, UINT mode )
 /***********************************************************************
  *           LZClose32   (LZ32.5)
  */
-void WINAPI LZClose( HFILE fd )
+
+ODINPROCEDURE1(LZClose,HFILE,fd)
 {
    struct lzstate *lzs;
 
-   TRACE("(%d)\n",fd);
+   dprintf(("LZ32: LZClose(%08xh)\n",
+            fd));
+
         if (!(lzs = GET_LZ_STATE(fd))) _lclose(fd);
         else
         {
@@ -585,8 +635,12 @@ void WINAPI LZClose( HFILE fd )
  * Copy src to dest (including uncompressing src).
  * NOTE: Yes. This is exactly the same function as LZCopy.
  */
-LONG WINAPI CopyLZFile( HFILE src, HFILE dest )
+
+ODINFUNCTION2(LONG,CopyLZFile,HFILE,src,HFILE,dest)
 {
-    TRACE("(%d,%d)\n",src,dest);
-    return LZCopy(src,dest);
+  dprintf(("LZ32: CopyLZFile(%08xh,%08xh)\n",
+           src,
+           dest));
+
+  return LZCopy(src,dest);
 }
