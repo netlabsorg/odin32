@@ -1,4 +1,4 @@
-/* $Id: win32class.cpp,v 1.3 1999-07-14 21:05:58 cbratschi Exp $ */
+/* $Id: win32class.cpp,v 1.4 1999-07-15 18:54:55 sandervl Exp $ */
 /*
  * Win32 Window Class Managment Code for OS/2
  *
@@ -53,6 +53,10 @@ Win32WndClass::Win32WndClass(WNDCLASSEXA *wndclass, BOOL isUnicode) : GenericObj
         classNameW      = NULL;
         classAtom       = (DWORD)wndclass->lpszClassName;
   }
+  menuNameA = 0;
+  menuNameW = 0;
+  setMenuName((LPSTR)wndclass->lpszMenuName);
+
   this->isUnicode       = isUnicode;
 
   dprintf(("USER32:  Win32Class ctor\n"));
@@ -65,13 +69,13 @@ Win32WndClass::Win32WndClass(WNDCLASSEXA *wndclass, BOOL isUnicode) : GenericObj
   dprintf(("USER32:  wndclass->hCursor %X\n", wndclass->hCursor));
   dprintf(("USER32:  wndclass->hbrBackground %X\n", wndclass->hbrBackground));
   if(HIWORD(wndclass->lpszClassName))
-       dprintf(("USER32:  wndclass->lpszClassName %s\n", wndclass->lpszClassName));
+       dprintf(("USER32:  wndclass->lpszClassName %s\n", classNameA));
   else dprintf(("USER32:  wndclass->lpszClassName %X\n", wndclass->lpszClassName));
 
   if(HIWORD(wndclass->lpszMenuName)) {//convert string name identifier to numeric id
-       dprintf(("USER32:  lpszMenuName %s\n", wndclass->lpszMenuName));
+       dprintf(("USER32:  lpszMenuName %s\n", menuNameA));
   }
-  else dprintf(("USER32:  wndclass->lpszMenuName %X\n", wndclass->lpszMenuName));
+  else dprintf(("USER32:  wndclass->lpszMenuName %X\n", menuNameA));
 
   nrExtraClassWords     = wndclass->cbClsExtra;
   nrExtraWindowWords    = wndclass->cbWndExtra;
@@ -79,10 +83,6 @@ Win32WndClass::Win32WndClass(WNDCLASSEXA *wndclass, BOOL isUnicode) : GenericObj
   hCursor               = wndclass->hCursor;
   hIcon                 = wndclass->hIcon;
   hInstance             = wndclass->hInstance;
-
-  menuNameA = 0;
-  menuNameW = 0;
-  setMenuName((LPSTR)wndclass->lpszMenuName);
 
   windowStyle           = wndclass->style;
   windowProc            = wndclass->lpfnWndProc;

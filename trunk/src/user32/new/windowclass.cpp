@@ -1,4 +1,4 @@
-/* $Id: windowclass.cpp,v 1.3 1999-07-15 08:18:11 sandervl Exp $ */
+/* $Id: windowclass.cpp,v 1.4 1999-07-15 18:54:55 sandervl Exp $ */
 /*
  * Win32 Window Class Code for OS/2
  *
@@ -74,12 +74,7 @@ WORD WIN32API RegisterClassW(CONST WNDCLASSW *lpwc)
     //CB: size new in ex structure
     wclass.cbSize = sizeof(wclass);
     memcpy(&wclass.style, lpwc, sizeof(WNDCLASSA));
-    if(wclass.lpszMenuName && (HIWORD(wclass.lpszMenuName) != 0)) {
-        wclass.lpszMenuName = UnicodeToAsciiString((LPWSTR)lpwc->lpszMenuName);
-    }
-    if(wclass.lpszClassName && (HIWORD(wclass.lpszClassName) != 0)) {
-        wclass.lpszClassName = UnicodeToAsciiString((LPWSTR)lpwc->lpszClassName);
-    }
+
     winclass = new Win32WndClass((WNDCLASSEXA *)&wclass, TRUE);
     if(winclass == NULL) {
         dprintf(("RegisterClassW wclass == NULL!"));
@@ -87,12 +82,6 @@ WORD WIN32API RegisterClassW(CONST WNDCLASSW *lpwc)
     }
     rc = winclass->getAtom();
 
-    if(lpwc->lpszMenuName && (HIWORD(lpwc->lpszMenuName) != 0)) {
-        FreeAsciiString((char *)wclass.lpszMenuName);
-    }
-    if(lpwc->lpszClassName && (HIWORD(lpwc->lpszClassName) !=0)) {
-        FreeAsciiString((char *)wclass.lpszClassName);
-    }
     return(rc);
 }
 //******************************************************************************
@@ -105,12 +94,6 @@ ATOM WIN32API RegisterClassExW(CONST WNDCLASSEXW *lpwc)
 
     dprintf(("RegisterClassExW\n"));
     memcpy(&wclass, lpwc, sizeof(WNDCLASSEXA));
-    if(wclass.lpszMenuName && (HIWORD(wclass.lpszMenuName) != 0)) {
-        wclass.lpszMenuName = UnicodeToAsciiString((LPWSTR)lpwc->lpszMenuName);
-    }
-    if(wclass.lpszClassName && (HIWORD(wclass.lpszClassName) != 0)) {
-        wclass.lpszClassName = UnicodeToAsciiString((LPWSTR)lpwc->lpszClassName);
-    }
 
     winclass = new Win32WndClass((WNDCLASSEXA *)&wclass, TRUE);
     if(winclass == NULL) {
@@ -119,12 +102,6 @@ ATOM WIN32API RegisterClassExW(CONST WNDCLASSEXW *lpwc)
     }
     rc = winclass->getAtom();
 
-    if(lpwc->lpszMenuName && (HIWORD(lpwc->lpszMenuName) != 0)) {
-        FreeAsciiString((char *)wclass.lpszMenuName);
-    }
-    if(lpwc->lpszClassName && (HIWORD(lpwc->lpszClassName) != 0)) {
-        FreeAsciiString((char *)wclass.lpszClassName);
-    }
     return(rc);
 }
 //******************************************************************************
