@@ -1,0 +1,97 @@
+OdinTool version 0.5.003
+========================
+
+
+OdinTool is a little utility I wrote to accomplish a few tasks:
+
+1.) Make the installation of Odin daily buildfiles (which are currently
+    not available) a matter of a mouseclick. In addition a registry file
+    (Custom.REG) that can hold custom entries to override the default ones 
+    OdinInst.EXE writes into the registry.
+
+2.) Provide a frontend for Odin.INI settings. This did never work well
+    is incomplete and ought to be removed.
+
+3.) Workaround to make OdinBug happy for people that do not have 
+    buildfiles on their hard disk.
+
+ODINTOOL COMES AS IS, WITHOUT ANY PARTICULAR GUARANTEE, NEITHER 
+EXPLICIT OR IMPLICIT. USE IT AT YOUR OWN RISK!
+
+PLEASE READ THIS FILE COMPLETELY BEFORE USING ODINTOOL!
+
+1. Prerequsites:
+
+   - Odin installed at least once via WarpIN
+   - OdinBug 0.5.3a or better (0.5.010 recommended) installed 
+     and at least used once (in order to have the buildfile 
+     directory saved).
+   - VROBJ.DLL in LIBPATH (get it from your Warp4 CD-ROM
+     or download VROBJ.WPI from ftp://ftp.os2.org/odin/daily)
+   - REXXINI.DLL (it comes with OdinTool) in your LIBPATH
+     REXXINI.DLL belongs to:
+     
+   ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+   ³ R E X X I N I                                               ³
+   ³ Rexx API's for manipulation of Text Based INI Files (used   ³
+   ³ by WINOS2) Written: Steven Elliott - CompuServe 100032,1454 ³
+   ³ Useful for manipulating and fixing text ini files used by   ³
+   ³ DOS and windows programs. Freeware.                         ³
+   ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+   
+   - OdinTool *MUST* be in the same directory as OdinBug.EXE
+   - Eventually Regedit.EXE from Win95/98/ME (*NOT* the OS/2 
+     Regedit2.EXE)
+   - InfoZIP's UNZIP.EXE somewhere in your PATH
+     
+2. Features:
+
+2.1 Setup checking
+
+   It checks the WarpIN database to determine where Odin is
+   installed. It displays what it finds out. This cannot be
+   changed currently. This might be useful to take a quick 
+   look at the integrity...
+   
+2.2 Install button: 
+
+   Pressing this, will present you a file selection box of 
+   your buildfiles directory with all buildfiles available 
+   for selection.
+   
+   
+   Choose one and it will be unZIPped in the correct place,
+   OdinInst.EXE will be called.
+   
+   As a next step Regedit.EXE will be called with a file named
+   Custom.REG as its parameter (if Custom.REG exists). Using 
+   this feature, you can easily overwrite some registry keys, 
+   that OdinInst.EXE just has created (plus overwrite a previous 
+   setting).
+   
+   Calling OdinTool for the first time will create an appropriate
+   Custom.REG file in the directory where OdinTool resides (should
+   be the Odin directory).
+   
+   Note: If Regedit.EXE is not present in your Odin directory, 
+   you will get an error message about a missing file from Odin!
+
+   Note: Using the "Create/Update WPS object(s)" function in
+   the menu will associate odin32bin-*.ZIP files with OdinTool.
+   You may now double click on the buildfile and OdinTool is
+   fired up, ready to install the new buildfile.
+
+2.3. Execute Regedit
+
+   As the name suggests this calls Regedit.EXE (the Win32 version
+   as described above).
+   
+2.4 Odin.INI pages
+   
+   You may use these pages to modify some available settings in
+   Odin.INI. Look into the Project Odin User's Manual to find out
+   about these settings.
+      
+3. Author:
+
+Herwig Bauernfeind, 21-02-2004

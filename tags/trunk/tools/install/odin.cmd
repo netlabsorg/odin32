@@ -1,4 +1,4 @@
-/* $Id: odin.cmd,v 1.44 2005-01-26 18:29:40 abwillis Exp $
+/* $Id: odin.cmd,v 1.45 2005-01-26 19:06:58 abwillis Exp $
  *
  * Odin32 API WarpIn installation script generator.
  *
@@ -521,7 +521,7 @@ call lineout sWICFile, sInstallArchive '-s' sInstFile '-a'
  * Packet 1
  */
 call lineout sWICFile, '1 -c'||sMainDir 'ChangeLog LICENSE.TXT WGSS50.lic';
-call lineout sWICFile, '1 -c'||sDocDir 'ChangeLog-1999 ChangeLog-2000 ChangeLog-2001 ChangeLog-2002 ChangeLog-2003 Readme.txt ReportingBugs.txt Logging.txt Odin.ini.txt Readme.Odinbug OdinBug.HLP OdinUser.INF';
+call lineout sWICFile, '1 -c'||sDocDir 'ChangeLog-1999 ChangeLog-2000 ChangeLog-2001 ChangeLog-2002 ChangeLog-2003 Readme.txt ReportingBugs.txt Logging.txt Odin.ini.txt Readme.Odinbug  Readme.OdinTool OdinBug.HLP OdinUser.INF';
 call lineout sWICFile, '1 -c'||sBinDir||' Odinbug.exe';
 call lineout sWICFile, '1 -c'||sBinDir||' rexxweb.dll';
 call lineout sWICFile, '1 -c'||sBinDir||' OdinTool.exe';
