@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.76 2001-08-16 04:07:46 bird Exp $
+# $Id: makefile,v 1.77 2001-09-05 09:30:49 bird Exp $
 
 #
 # Odin32 API
@@ -118,14 +118,15 @@ StateUpd:
     ..\tools\bin\StateUpd.exe -io+
     -$(DOWITHDIRS) -e$(NOTWIN32DLLS) -cp -i \
         ..\..\tools\bin\StateUpd.cmd -ie- -ib-
+    $(DODIRS) ".\win32k" $(MAKE_CMD) StateUpd
     ..\tools\bin\StateUpd.exe -io+
 
 ReadSignals:
-    -$(DOWITHDIRS) -e$(NOTWIN32DLLS) -cp -i \
+    -$(DOWITHDIRS) -e$(NOTWIN32DLLS:win32k;=) -cp -i \
         IF EXIST signals.log list signals.log
 
 ReadStateUpdLogs:
-    -$(DOWITHDIRS) -e$(NOTWIN32DLLS) -cp -i \
+    -$(DOWITHDIRS) -e$(NOTWIN32DLLS:win32k;=) -cp -i \
         IF EXIST stateupd.log list stateupd.log
 
 ReadAPIImportLogs:
@@ -133,7 +134,7 @@ ReadAPIImportLogs:
         IF EXIST apiimport.log list apiimport.log
 
 CleanDBLogs:
-    $(DOWITHDIRS) -e$(NOTWIN32DLLS) -cp \
+    $(DOWITHDIRS) -e$(NOTWIN32DLLS:win32k;=) -cp \
         $(RM) apiimport.log signals.log stateupd.log apiimport.def
     $(RM) signals.log stateupd.log
 
