@@ -1,9 +1,14 @@
-/* $Id: ChangeLog,v 1.1775 2001-10-22 15:09:05 phaller Exp $ */
+/* $Id: ChangeLog,v 1.1776 2001-10-22 23:34:10 phaller Exp $ */
 
  2001-10-22: Patrick Haller <patrick.haller@innotek.de>
     - TESTAPP:  o added keyboard test program for low-level testing
                   of the keyboard routines 
                   (Queue, WH_KEYBOARD, WH_KEYBOARD_LL)
+    - PMKBDHK:  o added initial version
+    - USER32:   o enabled PMKBDHK
+                o fixed minor issue in WH_KEYBOARD_LL
+    - SHELL32:  o minor speedup in PIDL handling
+    - KERNEL32: o removed experimental heap handle cache stats
 
  2001-10-21: Sander van Leeuwen <sandervl@xs4all.nl>
     - WSOCK32:  o Fix for sending FD_CLOSE notification when connection
