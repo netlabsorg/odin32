@@ -140,7 +140,8 @@ void ParseLogStatusKERNEL32();
 #define DBG_mmapview       120
 #define DBG_mmapdup        121
 #define DBG_oslibthread    122
-#define DBG_MAXFILES       123
+#define DBG_mmapnotify     123
+#define DBG_MAXFILES       124
 
 extern USHORT DbgEnabledKERNEL32[DBG_MAXFILES];
 extern USHORT DbgEnabledLvl2KERNEL32[DBG_MAXFILES];
