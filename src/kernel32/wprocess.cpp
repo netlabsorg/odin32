@@ -1,4 +1,4 @@
-/* $Id: wprocess.cpp,v 1.188 2003-04-29 10:27:18 sandervl Exp $ */
+/* $Id: wprocess.cpp,v 1.189 2004-01-11 11:59:04 sandervl Exp $ */
 
 /*
  * Win32 process functions
@@ -2449,68 +2449,6 @@ FARPROC WIN32API ODIN_SetProcAddress(HMODULE hModule, LPCSTR lpszProc,
   }
   SetLastError(ERROR_INVALID_HANDLE);
   return (FARPROC)-1;
-}
-//******************************************************************************
-//Retrieve the version
-//******************************************************************************
-BOOL SYSTEM GetVersionStruct(char *lpszModName, char *verstruct, ULONG bufLength)
-{
- Win32ImageBase *winimage;
- HINSTANCE hDll;
- BOOL rc = FALSE;
-
-    dprintf(("GetVersionStruct of module %s %x %d", lpszModName, verstruct, bufLength));
-    if(verstruct == NULL) {
-        SetLastError(ERROR_INVALID_PARAMETER);
-        return FALSE;
-    }
-    if (WinExe != NULL && WinExe->matchModName(lpszModName)) {
-        return WinExe->getVersionStruct(verstruct, bufLength);
-    }
-    hDll = LoadLibraryExA(lpszModName, 0, LOAD_LIBRARY_AS_DATAFILE);
-    if(hDll == 0) {
-        dprintf(("ERROR: GetVersionStruct: Unable to load module!!"));
-        return 0;
-    }
-    winimage = (Win32ImageBase *)Win32DllBase::findModule(hDll);
-    if(winimage != NULL) {
-        rc = winimage->getVersionStruct(verstruct, bufLength);
-    }
-    else {
-        dprintf(("GetVersionStruct; just loaded dll %s, but can't find it now!", lpszModName));
-////        DebugInt3();
-    }
-    FreeLibrary(hDll);
-    return rc;
-}
-//******************************************************************************
-//******************************************************************************
-ULONG SYSTEM GetVersionSize(char *lpszModName)
-{
- Win32ImageBase *winimage;
- HINSTANCE hDll;
- ULONG size = 0;
-
-    dprintf(("GetVersionSize of %s", lpszModName));
-    if (WinExe != NULL && WinExe->matchModName(lpszModName)) {
-        return WinExe->getVersionSize();
-    }
-
-    hDll = LoadLibraryExA(lpszModName, 0, LOAD_LIBRARY_AS_DATAFILE);
-    if(hDll == 0) {
-        dprintf(("ERROR: GetVersionStruct: Unable to load module!!"));
-        return 0;
-    }
-    winimage = (Win32ImageBase *)Win32DllBase::findModule(hDll);
-    if(winimage != NULL) {
-        size = winimage->getVersionSize();
-    }
-    else {
-        dprintf(("GetVersionSize; just loaded dll %s, but can't find it now!", lpszModName));
-////        DebugInt3();
-    }
-    FreeLibrary(hDll);
-    return size;
 }
 //******************************************************************************
 //******************************************************************************
