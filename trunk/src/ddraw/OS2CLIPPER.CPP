@@ -1,4 +1,4 @@
-/* $Id: OS2CLIPPER.CPP,v 1.16 2001-10-18 07:49:37 sandervl Exp $ */
+/* $Id: OS2CLIPPER.CPP,v 1.17 2002-02-13 15:23:10 sandervl Exp $ */
 
 /*
  * DX clipper class routines
@@ -323,22 +323,9 @@ HRESULT WIN32API ClipSetHWnd(THIS This, DWORD reserved, HWND hwnd)
   me->clipWindow = hwnd;
   WinSetVisibleRgnNotifyProc(hwnd, ClipVisRgnCallback, (DWORD)me);
 
-#if 1
   me->lpRgnData = OSLibQueryVisibleRegion(hwnd, (me->lpDraw) ? me->lpDraw->GetScreenHeight() : 0);
   me->fClipListChanged    = TRUE;
   me->fClipListChangedInt = TRUE; //internal flag
-#else
-  me->lpRgnData = (LPRGNDATA)malloc(sizeof(RGNDATAHEADER) + sizeof(RECT));
-  me->lpRgnData->rdh.dwSize = sizeof(RGNDATAHEADER);
-  me->lpRgnData->rdh.iType  = RDH_RECTANGLES;
-  me->lpRgnData->rdh.nCount = 1;
-  me->lpRgnData->rdh.nRgnSize = sizeof(RECT);
-  //TODO: Do we need to return the window rectangle or the client
-  //      rectangle converted to screen coordinates??????
-  GetWindowRect(me->clipWindow, &me->lpRgnData->rdh.rcBound);
-  RECT *rect = (RECT *)&me->lpRgnData->Buffer;
-  *rect = me->lpRgnData->rdh.rcBound;
-#endif
 
   return(DD_OK);
 }

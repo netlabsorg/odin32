@@ -1,4 +1,4 @@
-/* $Id: OS2SURFACE.CPP,v 1.38 2001-10-17 08:08:52 sandervl Exp $ */
+/* $Id: OS2SURFACE.CPP,v 1.39 2002-02-13 15:23:10 sandervl Exp $ */
 
 /*
  * DirectDraw Surface class implementaion
@@ -545,8 +545,8 @@ static void _dump_DDPIXELFORMAT(DWORD flagmask) {
 
 static void _dump_pixelformat(LPDDPIXELFORMAT pf) {
   _dump_DDPIXELFORMAT(pf->dwFlags);
-  dprintf(("DDRAW: dwFourCC : %ld\n", pf->dwFourCC));
-  dprintf(("DDRAW: RBG bit count : %ld\n", pf->dwRGBBitCount));
+  dprintf(("DDRAW: dwFourCC : %4s", &pf->dwFourCC));
+  dprintf(("DDRAW: RBG bit count : %ld", pf->dwRGBBitCount));
   dprintf(("DDRAW: Masks : R %08lx  G %08lx  B %08lx  A %08lx\n",
        pf->dwRBitMask, pf->dwGBitMask, pf->dwBBitMask, pf->dwRGBAlphaBitMask));
 }
@@ -906,6 +906,24 @@ OS2IDirectDrawSurface::OS2IDirectDrawSurface(OS2IDirectDraw *lpDirectDraw,
 
   if( DDSurfaceDesc.dwFlags & DDSD_CAPS )
   {
+#if 0
+//TODO: Docs say this is done, but does it really happen in windows?
+    // check for invalid flag combinations
+    switch(lpDDSurfaceDesc->ddsCaps.dwCaps2 & (DDSCAPS2_OPAQUE|DDSCAPS2_HINTDYNAMIC|DDSCAPS2_HINTSTATIC)) 
+    {
+    case 0:
+    case DDSCAPS2_OPAQUE:
+    case DDSCAPS2_HINTDYNAMIC:
+    case DDSCAPS2_HINTSTATIC:
+       break;
+
+    default:
+       dprintf(("DDRAW: Internal : illegal ddscaps2 flag combination (static/dynamic/opaque)"));
+       lastError = DDERR_INVALIDCAPS ;
+       return;
+    }
+#endif
+
     // First check if we want to create a primary surface while the ddraw object already has one
     surfaceType = DDSurfaceDesc.ddsCaps.dwCaps;
 
