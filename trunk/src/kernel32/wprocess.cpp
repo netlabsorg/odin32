@@ -1,4 +1,4 @@
-/* $Id: wprocess.cpp,v 1.181 2003-02-20 09:47:01 sandervl Exp $ */
+/* $Id: wprocess.cpp,v 1.182 2003-02-24 17:02:17 sandervl Exp $ */
 
 /*
  * Win32 process functions
@@ -1801,6 +1801,15 @@ HMODULE WIN32API GetModuleHandleW(LPCWSTR lpwszModuleName)
     FreeAsciiString(astring);
 
   return(rc);
+}
+//******************************************************************************
+//Checks whether program is LX or PE
+//******************************************************************************
+BOOL WIN32API ODIN_IsWin32App(LPSTR lpszProgramPath)
+{
+    DWORD Characteristics;
+
+    return Win32ImageBase::isPEImage(lpszProgramPath, &Characteristics, NULL) == NO_ERROR;
 }
 //******************************************************************************
 //******************************************************************************

@@ -1,4 +1,4 @@
-; $Id: KERNEL32.DEF,v 1.151 2003-02-13 17:16:48 sandervl Exp $
+; $Id: KERNEL32.DEF,v 1.152 2003-02-24 17:02:16 sandervl Exp $
 
 ;Basis is Windows95 KERNEL32
 LIBRARY KERNEL32 INITINSTANCE TERMINSTANCE
@@ -1231,6 +1231,7 @@ EXPORTS
     _dbg_ThreadPopCall@0                                          @3108 NONAME
 
     _ODIN_QueryLoaders@24                                         @3109 NONAME
+    _ODIN_IsWin32App@4                                            @3110 NONAME
 
 ; Char functions (forwarders from user32)
     _CharLowerA@4                                                 @3127 NONAME
