@@ -123,6 +123,152 @@ VARTYPE_NOT_SUPPORTED 	/* VT_BYREF    [V]          void* for local use	*/
 static const int LAST_VARTYPE = sizeof(VARTYPE_SIZE)/sizeof(VARTYPE_SIZE[0]);
 
 
+/***********************************************************************
+ *		SafeArrayCreateEx (OLEAUT32.42)
+*
+ * Create a new SafeArray.
+ *
+ * PARAMS
+ *  vt        [I] Type to store in the safe array
+ *  cDims     [I] Number of array dimensions
+ *  rgsabound [I] Bounds of the array dimensions
+ *  pvExtra   [I] Extra data
+ *
+ * RETURNS
+ *  Success: A pointer to a new array object.
+ *  Failure: NULL, if any parameter is invalid or memory allocation fails.
+ *
+ * NOTES
+ * See SafeArray.
+ */
+SAFEARRAY* WINAPI SafeArrayCreateEx(VARTYPE vt, UINT cDims, SAFEARRAYBOUND *rgsabound, LPVOID pvExtra)
+#ifdef __WIN32OS2__
+{
+  FIXME("%s: Not implemented! (returning E_NOTIMPL)", __FUNCTION__);
+  return E_NOTIMPL;
+}
+#else
+{
+  ULONG ulSize = 0;
+  IRecordInfo* iRecInfo = (IRecordInfo*)pvExtra;
+  SAFEARRAY* psa;
+ 
+  TRACE("(%d->%s,%d,%p,%p)\n", vt, debugstr_vt(vt), cDims, rgsabound, pvExtra);
+ 
+  if (vt == VT_RECORD)
+  {
+    if  (!iRecInfo)
+      return NULL;
+    IRecordInfo_GetSize(iRecInfo, &ulSize);
+  }
+  psa = SAFEARRAY_Create(vt, cDims, rgsabound, ulSize);
+
+  if (pvExtra)
+  {
+    switch(vt)
+    {
+      case VT_RECORD:
+        SafeArraySetRecordInfo(psa, pvExtra);
+        break;
+      case VT_UNKNOWN:
+      case VT_DISPATCH:
+        SafeArraySetIID(psa, pvExtra);
+        break;
+    }
+  }
+  return psa;
+}
+#endif
+
+/***********************************************************************
+ *		SafeArraySetIID (OLEAUT32.57)
+*
+ * Set the IID for a SafeArray.
+ *
+ * PARAMS
+ *  psa  [I] Array to set the IID from
+ *  guid [I] IID
+ *
+ * RETURNS
+ *  Success: S_OK. The IID is stored with the array
+ *  Failure: An HRESULT error code indicating the error.
+ *
+ * NOTES
+ * See SafeArray.
+ */
+HRESULT WINAPI SafeArraySetIID(SAFEARRAY *psa, REFGUID guid)
+{
+  GUID* dest = (GUID*)psa;
+
+  TRACE("(%p,%s)\n", psa, debugstr_guid(guid));
+
+  if (!psa || !guid || !(psa->fFeatures & FADF_HAVEIID))
+    return E_INVALIDARG;
+
+  dest[-1] = *guid;
+  return S_OK;
+}
+
+
+/***********************************************************************
+ *		SafeArrayGetIID (OLEAUT32.67)
+ *
+ * Get the IID from a SafeArray.
+ *
+ * PARAMS
+ *  psa   [I] Array to get the ID from
+ *  pGuid [O] Destination for the IID
+ *
+ * RETURNS
+ *  Success: S_OK. pRinfo contains the IID, or NULL if there was none.
+ *  Failure: An HRESULT error code indicating the error.
+ *
+ * NOTES
+ * See SafeArray.
+ */
+HRESULT WINAPI SafeArrayGetIID(SAFEARRAY *psa, GUID *pGuid)
+{
+  GUID* src = (GUID*)psa;
+
+  TRACE("(%p,%p)\n", psa, pGuid);
+
+  if (!psa || !pGuid || !(psa->fFeatures & FADF_HAVEIID))
+    return E_INVALIDARG;
+
+  *pGuid = src[-1];
+  return S_OK;
+}
+
+
+/***********************************************************************
+ *		SafeArraySetRecordInfo (OLEAUT32.45)
+ */
+#ifdef __WIN32OS2__
+HRESULT WINAPI SafeArraySetRecordInfo(void* pFixMe, void* pFixMe2)
+#else
+HRESULT WINAPI SafeArraySetRecordInfo(SAFEARRAY* psa,  IRecordInfo *  psaboundNew)
+#endif
+{
+  FIXME("%s: Not implemented! (returning E_NOTIMPL)", __FUNCTION__);
+  return E_NOTIMPL;
+}
+
+
+/***********************************************************************
+ *		SafeArrayGetRecordInfo (OLEAUT32.45)
+ */
+/* IRecordInfo helpers */
+#ifdef __WIN32OS2__
+HRESULT WINAPI SafeArrayGetRecordInfo(void* pFixMe, void** ppFixMe)
+#else
+HRESULT WINAPI SafeArrayGetRecordInfo(SAFEARRAY* psa,IRecordInfo** prinfo)
+#endif
+{
+  FIXME("%s: Not implemented! (returning E_NOTIMPL)", __FUNCTION__);
+  return E_NOTIMPL;
+}
+
+
 /*************************************************************************
  *		SafeArrayAllocDescriptor (OLEAUT32.36)
  * Allocate the appropriate amount of memory for the SafeArray descriptor
