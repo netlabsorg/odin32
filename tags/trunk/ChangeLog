@@ -1,4 +1,4 @@
-/* $Id: ChangeLog,v 1.1332 2001-03-31 10:40:19 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.1333 2001-03-31 13:23:03 sandervl Exp $ */
 
  2001-03-31: Sander van Leeuwen <sandervl@xs4all.nl>   
     - KERNEL32: o Fix for loading executable with sections not starting on
@@ -9,6 +9,9 @@
                   TODO: Need to find out how SO determines the codepage
     - USER32:   o WindowFromPoint now works with overlapping siblings too
                 o Bugfix in mouse message translation
+    - COMCTL32: o Resynced with Wine (pager, datetime, flatsb, comboboxex, monthcal)
+                o Fixed previous merge (INFOPTR structures too small)
+                o Corrected ordinals of a lot of exports
 
  2001-03-30: Sander van Leeuwen <sandervl@xs4all.nl>   
     - USER32:   o Rewrote WM_NCHITTEST handling. No longer relies on PM.
