@@ -1,4 +1,4 @@
-/* $Id: wprocess.cpp,v 1.193 2004-01-30 22:17:18 bird Exp $ */
+/* $Id: wprocess.cpp,v 1.194 2004-02-24 11:46:10 sandervl Exp $ */
 
 /*
  * Win32 process functions
@@ -1978,6 +1978,8 @@ BOOL WINAPI CreateProcessA( LPCSTR lpApplicationName, LPSTR lpCommandLine,
     char buffer[MAX_PATH];
     DWORD fileAttr;
     char *exename;
+
+    szAppName[0] = 0;
 
     exename = buffer;
     strncpy(buffer, cmdline, sizeof(buffer));
