@@ -1,4 +1,4 @@
-/* $Id: oslibdos.cpp,v 1.21 2000-03-03 11:15:58 sandervl Exp $ */
+/* $Id: oslibdos.cpp,v 1.22 2000-03-10 16:12:00 sandervl Exp $ */
 /*
  * Wrappers for OS/2 Dos* API
  *
@@ -237,6 +237,51 @@ tryopen:
 DWORD OSLibDosClose(DWORD hFile)
 {
   return DosClose(hFile);
+}
+//******************************************************************************
+//******************************************************************************
+DWORD OSLibDosChangeMaxFileHandles()
+{
+ ULONG  CurMaxFH;
+ LONG   ReqCount = 0;
+ APIRET rc;
+
+	rc = DosSetRelMaxFH(&ReqCount, &CurMaxFH);
+	if(rc) {
+		dprintf(("DosSetRelMaxFH returned %d", rc));
+		return rc;
+	}
+	if(ReqCount + ODIN_INCREMENT_MAX_FILEHANDLES > CurMaxFH) {
+		ReqCount = CurMaxFH + ODIN_INCREMENT_MAX_FILEHANDLES;
+		rc = DosSetRelMaxFH(&ReqCount, &CurMaxFH);
+		if(rc) {
+			dprintf(("DosSetRelMaxFH returned %d", rc));
+			return rc;
+		}
+	}
+	return 0;
+}
+//******************************************************************************
+//******************************************************************************
+DWORD OSLibDosSetInitialMaxFileHandles(DWORD maxhandles)
+{
+ ULONG  CurMaxFH;
+ LONG   ReqCount = 0;
+ APIRET rc;
+
+	rc = DosSetRelMaxFH(&ReqCount, &CurMaxFH);
+	if(rc) {
+		dprintf(("DosSetRelMaxFH returned %d", rc));
+		return rc;
+	}
+	if(CurMaxFH < maxhandles) {
+		rc = DosSetMaxFH(maxhandles);
+		if(rc) {
+			dprintf(("DosSetMaxFH returned %d", rc));
+			return rc;
+		}
+	}
+	return 0;
 }
 //******************************************************************************
 //******************************************************************************

@@ -1,4 +1,4 @@
-/* $Id: initsystem.cpp,v 1.7 2000-03-04 19:52:36 sandervl Exp $ */
+/* $Id: initsystem.cpp,v 1.8 2000-03-10 16:11:59 sandervl Exp $ */
 /*
  * Odin system initialization (registry & directories)
  *
@@ -26,6 +26,20 @@
 #define DBG_LOCALLOG	DBG_initsystem
 #include "dbglocal.h"
 
+#define DDRAW_CLASSID 		"{D7B70EE0-4340-11CF-B063-0020AFC2CD35}"
+#define DDRAW_DEFAULT		"DirectDraw Object"
+#define DDRAW_CLIPPER_CLASSID	"{593817A0-7DB3-11CF-A2DE-00AA00B93356}"
+#define DDRAW_CLIPPER_DEFAULT	"DirectDraw Clipper Object"
+#define DDRAW_DLL		"ddraw.dll"
+#define DSOUND_CLASSID		"{47D4D946-62E8-11cf-93BC-444553540000}"
+#define DSOUND_DEFAULT		"DirectSound Object"
+#define DSOUND_DLL		"dsound.dll"
+#define COM_CLASS_ID		"CLSID"
+#define COM_INPROCSERVER        "InprocServer32"
+#define COM_THREADMODEL		"ThreadingModel"
+#define THREAD_BOTH		"Both"
+#define INITREG_ERROR		"InitRegistry: Unable to register system information"
+
 BOOL InitRegistry();
 
 //******************************************************************************
@@ -47,7 +61,7 @@ BYTE ShutdownTime[] = {0x44,0x5e,0xf2,0xbb,0x84,0x41,0xbf,0x01};
 //******************************************************************************
 BOOL InitRegistry()
 {
- HKEY hkey;
+ HKEY hkey, hkey1;
  char *buf;
  DWORD val;
  char  digbuf[16];
@@ -158,7 +172,99 @@ BOOL InitRegistry()
    	RegSetValueExA(hkey,"Personal",0,REG_SZ, (LPBYTE)shellpath, strlen(shellpath)+1);
 //   }
    RegCloseKey(hkey);
+
+   //Now the Ddraw & dsound registry keys:
+   //HKEY_CLASSES_ROOT\DirectDraw = DirectDraw Object
+   //HKEY_CLASSES_ROOT\DirectDraw\CLSID = {D7B70EE0-4340-11CF-B063-0020AFC2CD35}
+   //HKEY_CLASSES_ROOT\CLSID\{D7B70EE0-4340-11CF-B063-0020AFC2CD35} = DirectDraw Object
+   //HKEY_CLASSES_ROOT\CLSID\{D7B70EE0-4340-11CF-B063-0020AFC2CD35}\InprocServer32 = ddraw.dll
+   if(RegCreateKeyA(HKEY_CLASSES_ROOT,"DirectDraw",&hkey)!=ERROR_SUCCESS) {
+   	goto initreg_error;
+   }
+   RegSetValueExA(hkey, "", 0, REG_SZ, (LPBYTE)DDRAW_DEFAULT, sizeof(DDRAW_DEFAULT));
+   if(RegCreateKeyA(hkey,COM_CLASS_ID,&hkey1)!=ERROR_SUCCESS) {
+   	RegCloseKey(hkey);
+   	goto initreg_error;
+   }
+   RegSetValueExA(hkey1,"",0,REG_SZ, (LPBYTE)DDRAW_CLASSID, sizeof(DDRAW_CLASSID));
+   RegCloseKey(hkey1);
+   RegCloseKey(hkey);
+
+   if(RegCreateKeyA(HKEY_CLASSES_ROOT, COM_CLASS_ID"\\"DDRAW_CLASSID ,&hkey)!=ERROR_SUCCESS) {
+   	goto initreg_error;
+   }
+   RegSetValueExA(hkey,"",0,REG_SZ, (LPBYTE)DDRAW_DEFAULT, sizeof(DDRAW_DEFAULT));
+   if(RegCreateKeyA(hkey,COM_INPROCSERVER, &hkey1)!=ERROR_SUCCESS) {
+   	RegCloseKey(hkey);
+   	goto initreg_error;
+   }
+   RegSetValueExA(hkey1,"",0,REG_SZ, (LPBYTE)DDRAW_DLL, sizeof(DDRAW_DLL));
+   RegSetValueExA(hkey1, COM_THREADMODEL, 0,REG_SZ, (LPBYTE)THREAD_BOTH, sizeof(THREAD_BOTH));
+   RegCloseKey(hkey1);
+   RegCloseKey(hkey);
+
+   //HKEY_CLASSES_ROOT\DirectDrawClipper = DirectDraw Clipper Object
+   //HKEY_CLASSES_ROOT\DirectDrawClipper\CLSID = {593817A0-7DB3-11CF-A2DE-00AA00B93356}
+   //HKEY_CLASSES_ROOT\CLSID\{593817A0-7DB3-11CF-A2DE-00AA00B93356} = DirectDraw Clipper Object
+   //HKEY_CLASSES_ROOT\CLSID\{593817A0-7DB3-11CF-A2DE-00AA00B93356}\InprocServer32 = ddraw.dll
+   if(RegCreateKeyA(HKEY_CLASSES_ROOT,"DirectDrawClipper",&hkey)!=ERROR_SUCCESS) {
+   	goto initreg_error;
+   }
+   RegSetValueExA(hkey,"",0,REG_SZ, (LPBYTE)DDRAW_CLIPPER_DEFAULT, sizeof(DDRAW_CLIPPER_DEFAULT));
+   if(RegCreateKeyA(hkey,COM_CLASS_ID,&hkey1)!=ERROR_SUCCESS) {
+   	RegCloseKey(hkey);
+   	goto initreg_error;
+   }
+   RegSetValueExA(hkey1,"",0,REG_SZ, (LPBYTE)DDRAW_CLIPPER_CLASSID, sizeof(DDRAW_CLIPPER_CLASSID));
+   RegCloseKey(hkey1);
+   RegCloseKey(hkey);
+
+   if(RegCreateKeyA(HKEY_CLASSES_ROOT, COM_CLASS_ID"\\"DDRAW_CLIPPER_CLASSID,&hkey)!=ERROR_SUCCESS) {
+   	goto initreg_error;
+   }
+   RegSetValueExA(hkey,"",0,REG_SZ, (LPBYTE)DDRAW_CLIPPER_DEFAULT, sizeof(DDRAW_CLIPPER_DEFAULT));
+   if(RegCreateKeyA(hkey,COM_INPROCSERVER, &hkey1)!=ERROR_SUCCESS) {
+   	RegCloseKey(hkey);
+   	goto initreg_error;
+   }
+   RegSetValueExA(hkey1,"",0,REG_SZ, (LPBYTE)DDRAW_DLL, sizeof(DDRAW_DLL));
+   RegSetValueExA(hkey1, COM_THREADMODEL, 0,REG_SZ, (LPBYTE)THREAD_BOTH, sizeof(THREAD_BOTH));
+   RegCloseKey(hkey1);
+   RegCloseKey(hkey);
+
+   //HKEY_CLASSES_ROOT\DirectSound = DirectSound Object
+   //HKEY_CLASSES_ROOT\DirectSound\CLSID = {47D4D946-62E8-11cf-93BC-444553540000}
+   //HKEY_CLASSES_ROOT\CLSID\{47D4D946-62E8-11cf-93BC-444553540000} = DirectSound Object
+   //HKEY_CLASSES_ROOT\CLSID\{47D4D946-62E8-11cf-93BC-444553540000}\InprocServer32 = dsound.dll
+   if(RegCreateKeyA(HKEY_CLASSES_ROOT,"DirectSound",&hkey)!=ERROR_SUCCESS) {
+   	goto initreg_error;
+   }
+   RegSetValueExA(hkey,"",0,REG_SZ, (LPBYTE)DSOUND_DEFAULT, sizeof(DSOUND_DEFAULT));
+   if(RegCreateKeyA(hkey,COM_CLASS_ID,&hkey1)!=ERROR_SUCCESS) {
+   	RegCloseKey(hkey);
+   	goto initreg_error;
+   }
+   RegSetValueExA(hkey1,"",0,REG_SZ, (LPBYTE)DSOUND_CLASSID, sizeof(DSOUND_CLASSID));
+   RegCloseKey(hkey1);
+   RegCloseKey(hkey);
+
+   if(RegCreateKeyA(HKEY_CLASSES_ROOT, COM_CLASS_ID"\\"DSOUND_CLASSID ,&hkey)!=ERROR_SUCCESS) {
+   	goto initreg_error;
+   }
+   RegSetValueExA(hkey,"",0,REG_SZ, (LPBYTE)DSOUND_DEFAULT, sizeof(DSOUND_DEFAULT));
+   if(RegCreateKeyA(hkey,COM_INPROCSERVER, &hkey1)!=ERROR_SUCCESS) {
+   	RegCloseKey(hkey);
+   	goto initreg_error;
+   }
+   RegSetValueExA(hkey1,"",0,REG_SZ, (LPBYTE)DSOUND_DLL, sizeof(DSOUND_DLL));
+   RegSetValueExA(hkey1, COM_THREADMODEL, 0,REG_SZ, (LPBYTE)THREAD_BOTH, sizeof(THREAD_BOTH));
+   RegCloseKey(hkey1);
+   RegCloseKey(hkey);
    return TRUE;
+
+initreg_error:
+   dprintf((INITREG_ERROR));
+   return FALSE;
 }
 //******************************************************************************
 //******************************************************************************

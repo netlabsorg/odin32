@@ -1,4 +1,4 @@
-/* $Id: process.cpp,v 1.5 2000-02-16 14:23:11 sandervl Exp $ */
+/* $Id: process.cpp,v 1.6 2000-03-10 16:12:00 sandervl Exp $ */
 
 /*
  * Win32 process functions for OS/2
@@ -249,6 +249,18 @@ BOOL WINAPI SetProcessWorkingSetSize(HANDLE hProcess,DWORD minset,
         /* Swap the process out of physical RAM */
     }
     return TRUE;
+}
+
+/***********************************************************************
+ *           GetProcessFlags    (KERNEL32)
+ */
+DWORD WINAPI GetProcessFlags( DWORD processid )
+{
+//    PDB *pdb = PROCESS_IdToPDB( processid );
+//    if (!pdb) return 0;
+//    return pdb->flags;
+    dprintf(("STUB: GetProcessFlags %x", processid));
+    return 0;
 }
 
 /***********************************************************************
