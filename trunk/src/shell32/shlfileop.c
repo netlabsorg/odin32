@@ -256,7 +256,8 @@ DWORD WINAPI SHFileOperationA (LPSHFILEOPSTRUCTA lpFileOp)
 // fix for more then one source for one target 
             pToFile = pTempTo;
 
-            while((pFrom+=lenFrom+1)[0] && !nlpFileOp.fAnyOperationsAborted) {
+// need break at error before change sourcepointer
+            while(!nlpFileOp.fAnyOperationsAborted && (pFrom+=lenFrom+1)[0]) {
 
                 if (!withFileName && Multi && (pTo[lenTo+1]=='\0')) {
 // Win Bug ?
@@ -517,7 +518,8 @@ DWORD WINAPI SHFileOperationA (LPSHFILEOPSTRUCTA lpFileOp)
 	case FO_DELETE:
 		TRACE("File Delete:\n");
 #ifdef __WIN32OS2__
-            while((pFrom+=lenFrom+1)[0] && !nlpFileOp.fAnyOperationsAborted) {
+// need break at error before change sourcepointer
+            while(!nlpFileOp.fAnyOperationsAborted && (pFrom+=lenFrom+1)[0]) {
                 lenFrom=strlen(pFrom);
                 FromAttr = GetFileAttributesA(pFrom);
                 if (!(FromAttr & FILE_ATTRIBUTE_DIRECTORY)) {
