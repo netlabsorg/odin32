@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.1 2001-06-25 13:54:44 bird Exp $
+# $Id: makefile,v 1.2 2001-06-26 00:05:21 bird Exp $
 
 
 #
@@ -17,15 +17,9 @@ EXETARGET = 1
 #
 # include common definitions
 #
-CCENV=EMX
+#CCENV=EMX
 !include ../../../makefile.inc
 
-
-#
-# Addjust common definitions
-#
-#DEFS      = -D__WINE__ -D__WIN32OS2__ -idirafter ../../include/win -idirafter ../../include
-CDEFINES   = -D__EMX__ -DMASM -D__SEMICOLON__
 
 
 #
