@@ -1,4 +1,4 @@
-/* $Id: network.cpp,v 1.10 2000-07-06 21:18:43 sandervl Exp $ */
+/* $Id: network.cpp,v 1.11 2001-12-10 11:28:59 sandervl Exp $ */
 /*
  * Win32 Network apis
  *
@@ -59,23 +59,6 @@ BOOL WIN32API GetComputerNameW(LPWSTR name, LPDWORD size)
   ret = GetComputerNameA(nameA,size);
 
   if (ret) AsciiToUnicode(nameA,name);
-
-  free(nameA);
-
-  return ret;
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API GetComputerName32W(LPWSTR name, LPDWORD size)
-{
-  LPSTR nameA = NULL;
-  BOOL  ret;
-
-  if (name) nameA=(LPSTR)malloc(2**size);
-
-  ret = GetComputerNameA(nameA,size);
-
-  if (ret) AsciiToUnicode(nameA, name);
 
   free(nameA);
 
