@@ -1,4 +1,4 @@
-/* $Id: gdi32.cpp,v 1.78 2001-12-23 16:40:10 sandervl Exp $ */
+/* $Id: gdi32.cpp,v 1.79 2001-12-31 12:08:22 sandervl Exp $ */
 
 /*
  * GDI32 apis
@@ -226,7 +226,6 @@ HDC WIN32API CreateCompatibleDC( HDC hdc)
         oldcp = GetDisplayCodepage();
 
     if(newHdc) STATS_CreateCompatibleDC(hdc, newHdc);
-
     OSLibGpiSetCp(newHdc, oldcp);
     dprintf(("CreateCompatibleDC %X returned %x", hdc, newHdc));
     return newHdc;
@@ -921,11 +920,12 @@ int WIN32API GetTextCharacterExtra( HDC hdc)
 //******************************************************************************
 COLORREF WIN32API GetTextColor( HDC hdc)
 {
-    dprintf(("GDI32: GetTextColor %x", hdc));
-    return O32_GetTextColor(hdc);
+    COLORREF color;
+
+    color = O32_GetTextColor(hdc);
+    dprintf(("GDI32: GetTextColor %x -> %x", hdc, color));
+    return color;
 }
-//******************************************************************************
-//******************************************************************************
 //******************************************************************************
 //******************************************************************************
 int WIN32API GetTextFaceA( HDC hdc, int arg2, LPSTR  arg3)

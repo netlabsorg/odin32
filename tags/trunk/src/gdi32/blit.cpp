@@ -1,4 +1,4 @@
-/* $Id: blit.cpp,v 1.36 2001-12-30 22:19:04 sandervl Exp $ */
+/* $Id: blit.cpp,v 1.37 2001-12-31 12:08:20 sandervl Exp $ */
 
 /*
  * GDI32 blit code
@@ -37,6 +37,7 @@ BOOL WIN32API StretchBlt(HDC hdcDest, int nXOriginDest, int nYOriginDest,
            hdcDest, nXOriginDest, nYOriginDest, nWidthDest, nHeightDest, dwRop));
   dprintf(("GDI32: StretchBlt Src : %x (%d, %d) size (%d, %d)\n",
            hdcSrc, nXOriginSrc, nYOriginSrc, nWidthSrc, nHeightSrc));
+
   SetLastError(ERROR_SUCCESS);
   if(DIBSection::getSection() != NULL)
   {
@@ -47,6 +48,7 @@ BOOL WIN32API StretchBlt(HDC hdcDest, int nXOriginDest, int nYOriginDest,
                              nXOriginDest, nYOriginDest, nWidthDest, nHeightDest,
                              nXOriginSrc, nYOriginSrc, nWidthSrc, nHeightSrc,
                              dwRop);
+        dprintf(("GDI32: StretchBlt returned %d", rc));
         return rc;
     }
   }
@@ -56,6 +58,9 @@ BOOL WIN32API StretchBlt(HDC hdcDest, int nXOriginDest, int nYOriginDest,
       if(destdib) {
           destdib->sync(hdcDest, nYOriginDest, nHeightDest);
       }
+  }
+  if(rc == FALSE) {
+      dprintf(("!WARNING!: GDI32: StretchBlt returned FALSE; last error %x", rc, GetLastError()));
   }
   return rc;
 }
@@ -72,6 +77,11 @@ BOOL WIN32API BitBlt(HDC hdcDest,
                      DWORD  dwRop)
 {
   BOOL rc;
+
+  POINT point1, point2;
+  GetViewportOrgEx(hdcDest, &point1);
+  GetViewportOrgEx(hdcSrc, &point2);
+  dprintf(("BitBlt: Viewport origin dest (%d,%d) src (%d,%d)", point1.x, point1.y, point2.x, point2.y));
 
   SetLastError(ERROR_SUCCESS);
   if(DIBSection::getSection() != NULL) 
