@@ -13,6 +13,8 @@ EXPORTS
     DragQueryPoint           = _DragQueryPoint@8          @76
     ExtractIconA             = _ExtractIconA@12           @131
     ExtractIconW             = _ExtractIconW@12           @178
+    ShellMessageBoxW         = _ShellMessageBoxW@24       @182
+    ShellMessageBoxA         = _ShellMessageBoxA@24       @183
     FindExecutableA          = _FindExecutableA@12        @184
     FindExecutableW          = _FindExecutableW@12
     SHAddToRecentDocs        = _SHAddToRecentDocs@8       @204
@@ -91,7 +93,6 @@ EXPORTS
                                _SHELL32_165@8             @165
                                _SHELL32_175@16            @175
                                _SHELL32_181@8             @181
-                               _SHELL32_183@24            @183
                                _SHELL32_195@4             @195
                                _SHELL32_196@4             @196
 
