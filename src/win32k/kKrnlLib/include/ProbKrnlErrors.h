@@ -1,4 +1,4 @@
-/* $Id: ProbKrnlErrors.h,v 1.2 2001-11-18 04:06:59 bird Exp $
+/* $Id: ProbKrnlErrors.h,v 1.3 2001-11-19 03:06:38 bird Exp $
  *
  * Error definitions for Win32k.sys
  *
@@ -54,34 +54,28 @@
 #define ERROR_PROB_SYM_SEG_DEF_SEEK                 (ERROR_PROB_BASE + 34)
 #define ERROR_PROB_SYM_SEG_DEF_READ                 (ERROR_PROB_BASE + 35)
 #define ERROR_PROB_SYM_VERIFY_IOCTL                 (ERROR_PROB_BASE + 36)
-#define ERROR_PROB_SYM_D32_FIRST                    (ERROR_PROB_BASE + 37)
-#define ERROR_PROB_SYM_V_GETOS2KRNL                 (ERROR_PROB_SYM_D32_FIRST + ERROR_D32_GETOS2KRNL_FAILED     - ERROR_D32_FIRST)
-#define ERROR_PROB_SYM_V_NO_SWAPMTE                 (ERROR_PROB_SYM_D32_FIRST + ERROR_D32_NO_SWAPMTE            - ERROR_D32_FIRST)
-#define ERROR_PROB_SYM_V_OBJECTS                    (ERROR_PROB_SYM_D32_FIRST + ERROR_D32_TOO_MANY_OBJECTS      - ERROR_D32_FIRST)
-#define ERROR_PROB_SYM_V_OBJECT_TABLE               (ERROR_PROB_SYM_D32_FIRST + ERROR_D32_NO_OBJECT_TABLE       - ERROR_D32_FIRST)
-#define ERROR_PROB_SYM_V_BUILD_INFO                 (ERROR_PROB_SYM_D32_FIRST + ERROR_D32_BUILD_INFO_NOT_FOUND  - ERROR_D32_FIRST)
-#define ERROR_PROB_SYM_V_INVALID_BUILD              (ERROR_PROB_SYM_D32_FIRST + ERROR_D32_INVALID_BUILD         - ERROR_D32_FIRST)
-#define ERROR_PROB_SYM_V_VERIFY                     (ERROR_PROB_SYM_D32_FIRST + ERROR_D32_VERIFY_FAILED         - ERROR_D32_FIRST)
-#define ERROR_PROB_SYM_V_IPE                        (ERROR_PROB_SYM_D32_FIRST + ERROR_D32_IPE                   - ERROR_D32_FIRST)
-#define ERROR_PROB_SYM_V_HEAPINIT                   (ERROR_PROB_SYM_D32_FIRST + ERROR_D32_HEAPINIT_FAILED       - ERROR_D32_FIRST)
-#define ERROR_PROB_SYM_V_PROC_NOT_FND               (ERROR_PROB_SYM_D32_FIRST + ERROR_D32_PROC_NOT_FOUND        - ERROR_D32_FIRST)
-#define ERROR_PROB_SYM_V_OBJ_OR_ADDR                (ERROR_PROB_SYM_D32_FIRST + ERROR_D32_INVALID_OBJ_OR_ADDR   - ERROR_D32_FIRST)
-#define ERROR_PROB_SYM_V_ADDRESS                    (ERROR_PROB_SYM_D32_FIRST + ERROR_D32_INVALID_ADDRESS       - ERROR_D32_FIRST)
-#define ERROR_PROB_SYM_V_PROLOG                     (ERROR_PROB_SYM_D32_FIRST + ERROR_D32_TOO_INVALID_PROLOG    - ERROR_D32_FIRST)
-#define ERROR_PROB_SYM_V_NOT_IMPL                   (ERROR_PROB_SYM_D32_FIRST + ERROR_D32_NOT_IMPLEMENTED       - ERROR_D32_FIRST)
-#define ERROR_PROB_SYM_V_D32_LDR_INIT               (ERROR_PROB_SYM_D32_FIRST + ERROR_D32_LDR_INIT_FAILED       - ERROR_D32_FIRST)
-#define ERROR_PROB_SYM_D32_LAST                     ERROR_PROB_SYM_V_D32_LDR_INIT
 /* - reserved for future errors - */
+
 #define ERROR_PROB_SYM_IMPORTS_NOTFOUND             (ERROR_PROB_BASE + 100)
 #define ERROR_PROB_SYMDB_KRNL_NOT_FOUND             (ERROR_PROB_BASE + 101)
 
+/*
+ * Init errors.
+ */
+#define ERROR_D16_THUNKING_FAILED                   (ERROR_PROB_BASE + 120)
+#define ERROR_D16_OPEN_DEV_FAILED                   (ERROR_PROB_BASE + 121)
+#define ERROR_D16_IOCTL_FAILED                      (ERROR_PROB_BASE + 122)
 
+
+/*
+ * 32-bit errors (from 32-bit code that is).
+ */
+#define ERROR_D32_FIRST                              ERROR_PROB_BASE + 256
+#define ERROR_D32_LAST                               ERROR_D32_SYMDB_NOT_FOUND
 
 /*
  * GetKernelInfo32 Errors
  */
-#define ERROR_D32_FIRST                              0x0001
-#define ERROR_D32_LAST                               ERROR_D32_NOT_IMPLEMENTED
 #define ERROR_D32_GETOS2KRNL_FAILED                 (0x0000 + ERROR_D32_FIRST)
 #define ERROR_D32_NO_SWAPMTE                        (0x0001 + ERROR_D32_FIRST)
 #define ERROR_D32_TOO_MANY_OBJECTS                  (0x0002 + ERROR_D32_FIRST)
@@ -98,7 +92,7 @@
 #define ERROR_D32_LDR_INIT_FAILED                   (0x0009 + ERROR_D32_FIRST)
 
 /*
- * VerifyImportTab32 errors.
+ * VerifyImportTab32 Errors.
  */
 #define ERROR_D32_PROC_NOT_FOUND                    (0x000a + ERROR_D32_FIRST)
 #define ERROR_D32_INVALID_OBJ_OR_ADDR               (0x000b + ERROR_D32_FIRST)
@@ -107,10 +101,16 @@
 #define ERROR_D32_NOT_IMPLEMENTED                   (0x000e + ERROR_D32_FIRST)
 
 /*
+ * LookupKrnlEntry32 Errors.
+ */
+#define ERROR_D32_SYMDB_NOT_FOUND                   (0x000f + ERROR_D32_FIRST)
+
+
+/*
  * Procedure shift and mask.
  * Used to get or set the procedure number of an error code.
  */
-#define ERROR_D32_PROC_SHIFT                        0x16   /* code in probkrnl assumes this */
+#define ERROR_D32_PROC_SHIFT                        0x10   /* code in probkrnl assumes this */
 
 
 #endif
