@@ -1,4 +1,4 @@
-/* $Id: windllbase.cpp,v 1.19 2000-10-23 13:42:42 sandervl Exp $ */
+/* $Id: windllbase.cpp,v 1.20 2000-10-25 19:47:00 sandervl Exp $ */
 
 /*
  * Win32 Dll base class
@@ -665,6 +665,12 @@ void Win32DllBase::setDefaultRenaming()
     {
         PROFILE_SetOdinIniString(DLLRENAMEWIN_SECTION, "NETAPI32", "WNETAP32");
         PROFILE_SetOdinIniString(DLLRENAMEOS2_SECTION, "WNETAP32", "NETAPI32");
+    }
+    if(PROFILE_GetOdinIniString(DLLRENAMEWIN_SECTION, "WINSPOOL", "", renameddll,
+                                sizeof(renameddll)-1) <= 1)
+    {
+        PROFILE_SetOdinIniString(DLLRENAMEWIN_SECTION, "WINSPOOL", "WINSPOOL.DLL");
+        PROFILE_SetOdinIniString(DLLRENAMEOS2_SECTION, "WINSPOOL", "WINSPOOL.DRV");
     }
 }
 //******************************************************************************

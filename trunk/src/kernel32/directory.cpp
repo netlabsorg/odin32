@@ -1,4 +1,4 @@
-/* $Id: directory.cpp,v 1.32 2000-10-09 22:51:17 sandervl Exp $ */
+/* $Id: directory.cpp,v 1.33 2000-10-25 19:46:59 sandervl Exp $ */
 
 /*
  * Win32 Directory functions for OS/2
@@ -587,6 +587,14 @@ DWORD DIR_SearchPath( LPCSTR path, LPCSTR name, LPCSTR ext,
         strchr( name, '/' ) || strchr( name, '\\' ))
         path = NULL;  /* Ignore path if name already contains a path */
     if (path && !*path) path = NULL;  /* Ignore empty path */
+
+    /* See if path is a list of directories to search. If so, only search
+       those (according to SDK docs) */
+    if ((path != NULL) && strchr(path, ';')) {
+        ret = OSLibDosSearchPath(OSLIB_SEARCHDIR, (LPSTR)path, (LPSTR)name, 
+                                 full_name, MAX_PATHNAME_LEN);
+        goto done;
+    }
 
     len = strlen(name);
     if (ext) len += strlen(ext);

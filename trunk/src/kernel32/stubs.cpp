@@ -1685,12 +1685,12 @@ DWORD WIN32API QueryDosDeviceW(LPCWSTR lpDeviceName,
  *****************************************************************************/
 
 DWORD WIN32API ReadProcessMemory(HANDLE  hProcess,
-                                    LPCVOID lpBaseAddress,
-                                    LPVOID  lpBuffer,
-                                    DWORD   cbRead,
-                                    LPDWORD lpNumberOfBytesRead)
+                                 LPCVOID lpBaseAddress,
+                                 LPVOID  lpBuffer,
+                                 DWORD   cbRead,
+                                 LPDWORD lpNumberOfBytesRead)
 {
-  dprintf(("Kernel32: ReadProcessMemory(%08xh,%08xh,%08xh,%08xh,%08xh) not implemented.\n",
+  dprintf(("Kernel32: ReadProcessMemory(%08xh,%08xh,%08xh,%08xh,%08xh) not completely implemented",
            hProcess,
            lpBaseAddress,
            lpBuffer,
@@ -1698,19 +1698,27 @@ DWORD WIN32API ReadProcessMemory(HANDLE  hProcess,
            lpNumberOfBytesRead));
 
   // do some (faked) access check
-  if (hProcess != GetCurrentProcess())
+  if(hProcess != GetCurrentProcess())
   {
-    SetLastError(ERROR_ACCESS_DENIED);
-    return FALSE;
+        dprintf(("WARNING: ReadProcessMemory: can't read memory from other processes!"));
+        SetLastError(ERROR_ACCESS_DENIED);
+        return FALSE;
   }
 
-  
+  if(IsBadReadPtr(lpBaseAddress, cbRead)) {
+        dprintf(("ERROR: ReadProcessMemory bad source pointer!"));
+        if(lpNumberOfBytesRead)
+            *lpNumberOfBytesRead = 0;
+        SetLastError(ERROR_ACCESS_DENIED);
+        return FALSE;
+  }
   // FIXME: check this, if we ever run win32 binaries in different addressspaces
   //    ... and add a sizecheck
   memcpy(lpBuffer,lpBaseAddress,cbRead);
-  if (lpNumberOfBytesRead) 
-    *lpNumberOfBytesRead = cbRead;
-  
+  if(lpNumberOfBytesRead)
+        *lpNumberOfBytesRead = cbRead;
+
+  SetLastError(ERROR_SUCCESS);
   return TRUE;
 }
 
@@ -1739,30 +1747,32 @@ BOOL WIN32API WriteProcessMemory(HANDLE  hProcess,
                                  LPDWORD lpNumberOfBytesWritten)
 {
   // do some (faked) access check
-  if (hProcess != GetCurrentProcess())
+  if(hProcess != GetCurrentProcess())
   {
-    dprintf(("Kernel32: WriteProcessMemory(%08xh,%08xh,%08xh,%08xh,%08xh) not implemented (different process!!)",
-           hProcess,
-           lpBaseAddress,
-           lpBuffer,
-           cbWrite,
-           lpNumberOfBytesWritten));
-    SetLastError(ERROR_ACCESS_DENIED);
-    return FALSE;
+        dprintf(("Kernel32: WriteProcessMemory(%08xh,%08xh,%08xh,%08xh,%08xh) not implemented (different process!!)",
+                 hProcess, lpBaseAddress, lpBuffer, cbWrite, lpNumberOfBytesWritten));
+        SetLastError(ERROR_ACCESS_DENIED);
+        return FALSE;
   }
   dprintf(("Kernel32: WriteProcessMemory(%08xh,%08xh,%08xh,%08xh,%08xh))",
-           hProcess,
-           lpBaseAddress,
-           lpBuffer,
-           cbWrite,
-           lpNumberOfBytesWritten));
-  
+           hProcess,lpBaseAddress, lpBuffer, cbWrite, lpNumberOfBytesWritten));
+
+  if(IsBadWritePtr((LPVOID)lpBaseAddress, cbWrite))
+  {
+        dprintf(("ERROR: WriteProcessMemory bad destination pointer!"));
+        if(lpNumberOfBytesWritten)
+            *lpNumberOfBytesWritten = 0;
+        SetLastError(ERROR_ACCESS_DENIED);
+        return FALSE;
+  }
+
   // FIXME: check this, if we ever run win32 binaries in different addressspaces
   //    ... and add a sizecheck
   memcpy((void*)lpBaseAddress,lpBuffer,cbWrite);
-  if (lpNumberOfBytesWritten) 
-    *lpNumberOfBytesWritten = cbWrite;
-  
+  if(lpNumberOfBytesWritten)
+        *lpNumberOfBytesWritten = cbWrite;
+
+  SetLastError(ERROR_SUCCESS);
   return TRUE;
 }
 
