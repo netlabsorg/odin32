@@ -1,4 +1,4 @@
-/* $Id: winexepeldr.cpp,v 1.17 2001-11-22 10:41:29 phaller Exp $ */
+/* $Id: winexepeldr.cpp,v 1.18 2002-07-23 13:25:34 sandervl Exp $ */
 
 /*
  * Win32 PE loader Exe class
@@ -60,8 +60,8 @@ BOOL fPeLoader = FALSE;
 //******************************************************************************
 BOOL WIN32API CreateWin32PeLdrExe(char *szFileName, char *szCmdLine,
                                   char *peoptions, 
-                                  ULONG reservedMem, BOOL fConsoleApp,
-                                  BOOL  fVioConsole)
+                                  ULONG reservedMem, ULONG ulPEOffset,
+                                  BOOL fConsoleApp, BOOL fVioConsole)
 {
  APIRET  rc;
  PPIB   ppib;
