@@ -1,4 +1,20 @@
- /* $Id: ChangeLog,v 1.669 2000-01-26 18:03:32 cbratschi Exp $ */
+ /* $Id: ChangeLog,v 1.670 2000-01-27 21:47:34 sandervl Exp $ */
+
+ 2000-01-27: Jeroen van den Horn <J.vandenHorn@fibre.a2000.nl>
+	- OPENGL: First version of opengl implementation
+
+ 2000-01-27: Sander van Leeuwen <sandervl@xs4all.nl>
+	- USER32: Fixed FS corruption in OSLibPostThreadMessage
+                  Send WM_CHILDACTIVATE to child windows (not only
+                  to MDI children) instead of WM_ACTIVATE
+	- SHELL32: Fixed FS corruption in DragAcceptFiles
+
+ 2000-01-26: Yuri Dario <mc6530@mclink.it>
+	- INCLUDE\WIN: Additions & changes for compiling Opera.
+	- many dlls: create correct library (impdef)
+
+ 2000-01-26: Jeroen van den Horn <J.vandenHorn@fibre.a2000.nl>
+	- GDI32: Changes for Opengl support
 
  2000-01-26: Christoph Bratschi <cbratschi@datacomm.ch>
 	- USER32: fixed WM_MOVE, MsgFormatFrame and WM_WINDOWPOS* to use parent
@@ -9,6 +25,9 @@
  2000-01-26: Sander van Leeuwen <sandervl@xs4all.nl>
 	- OLEAUT32: Don't create logfile when logging is turned off
 	- PELDR:    Don't modify cmd line in PIB structure
+	- INCLUDE:  Removed string.h.
+	- KERNEL32: Added workaround for OS/2 DosSetMem bug in VirtualAlloc
+                    (if memory is reserved, set read & write page flags)
 
  2000-01-25: Sander van Leeuwen <sandervl@xs4all.nl>
 	- PELDR/KERNEL32: Allocate low memory at right address and with right size
