@@ -1,4 +1,4 @@
- /* $Id: ChangeLog,v 1.228 1999-09-23 14:40:42 phaller Exp $ */
+ /* $Id: ChangeLog,v 1.229 1999-09-23 14:54:04 phaller Exp $ */
 
  99-09-23: Patrick Haller <phaller@gmx.net>
 	- KERNEL32:	Fix: WinImgRes:findResourceW erroneously tried to free 
@@ -6,6 +6,8 @@
 			strings.
 	- USER32:	Fix: in USER32:HeapShared:getmoreShared()
 			Fix: in USER32:WIN32WMDIClient:childActivate()	
+			Fix: in USER32:WinMenu:GetSubMenu 
+				now returns Win32MenuRes object instead of PM handle
 
  99-09-23: Jens Wiessner <wiessnej@rfi.de>
 	- CRTDLL: Added stubs, implemented some stubs
