@@ -1123,7 +1123,7 @@ LPITEMIDLIST WINAPI _ILCreateValue(WIN32_FIND_DATAA * stffile)
 LPITEMIDLIST WINAPI _ILCreateSpecial(LPCSTR szGUID)
 {
 	IID	iid;
-	CLSIDFromString16(szGUID,&iid);
+	CLSIDFromStringA(szGUID,&iid);
 	return _ILCreate(PT_MYCOMP, &iid, sizeof(IID));
 }
 
