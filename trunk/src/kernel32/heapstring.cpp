@@ -17,6 +17,7 @@
 #include <string.h>
 #include <winnls.h>
 #include <unicode.h>
+#include <wcstr.h>
 #include "heap.h"
 #include <heapstring.h>
 #include "misc.h"
@@ -190,6 +191,30 @@ int WIN32API lstrcmpA(LPCSTR arg1, LPCSTR  arg2)
  * Author    : Patrick Haller [Thu, 1999/08/05 20:46]
  *****************************************************************************/
 
+int WIN32API lstrncmpA(LPCSTR arg1, LPCSTR  arg2, int l)
+{
+  dprintf(("KERNEL32: OS2lstrncmpA(%s,%s,%d)\n",
+           arg1,
+           arg2,
+           l));
+
+  return strncmp(arg1, arg2, l);
+}
+
+
+
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    :
+ *
+ * Author    : Patrick Haller [Thu, 1999/08/05 20:46]
+ *****************************************************************************/
+
 int WIN32API lstrcmpW(LPCWSTR arg1, LPCWSTR arg2)
 {
     dprintf(("KERNEL32: lstrcmpW\n"));
@@ -197,6 +222,30 @@ int WIN32API lstrcmpW(LPCWSTR arg1, LPCWSTR arg2)
                       (UniChar*)arg2 );
 }
 
+
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    :
+ *
+ * Author    : Patrick Haller [Thu, 1999/08/05 20:46]
+ *****************************************************************************/
+
+int WIN32API lstrncmpW(LPCWSTR arg1, LPCWSTR  arg2, int l)
+{
+  dprintf(("KERNEL32: OS2lstrncmpW(%08xh,%08xh,%d)\n",
+           arg1,
+           arg2,
+           l));
+
+  return wcsncmp((wchar_t*)arg1,
+                 (wchar_t*)arg2,
+                 l);
+}
 
 /*****************************************************************************
  * Name      :
