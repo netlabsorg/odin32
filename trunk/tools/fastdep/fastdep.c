@@ -1,4 +1,4 @@
-/* $Id: fastdep.c,v 1.45 2002-09-20 04:37:12 bird Exp $
+/* $Id: fastdep.c,v 1.46 2002-12-11 15:22:47 bird Exp $
  *
  * Fast dependents. (Fast = Quick and Dirty!)
  *
@@ -291,7 +291,7 @@ static char *   pszIncludeEnv;
  * Configuration stuff.
  */
 static const char pszDefaultDepFile[] = ".depend";
-static const char *apszExtC_CPP[] = {"c", "sqc", "cpp", "h", "hpp", NULL};
+static const char *apszExtC_CPP[] = {"c", "sqc", "cpp", "h", "hpp", "ih", NULL};
 static const char *apszExtAsm[]   = {"asm", "inc", NULL};
 static const char *apszExtRC[]    = {"rc",  "dlg", NULL};
 static const char *apszExtORC[]   = {"orc", "dlg", NULL};
