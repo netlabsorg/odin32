@@ -65,6 +65,7 @@
 # presentation formats
 *.pdf -k 'b'
 *.ps -k 'b'
+*.hlp -k 'b'
 
 
 # video and audio files
