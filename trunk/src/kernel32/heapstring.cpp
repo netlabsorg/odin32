@@ -1,4 +1,4 @@
-/* $Id: heapstring.cpp,v 1.47 2001-10-15 17:15:30 sandervl Exp $ */
+/* $Id: heapstring.cpp,v 1.48 2001-11-30 17:50:42 phaller Exp $ */
 /*
  * Project Odin Software License can be found in LICENSE.TXT
  *
@@ -33,11 +33,24 @@
 #define DBG_LOCALLOG    DBG_heapstring
 #include "dbglocal.h"
 
+
 /*****************************************************************************
  * Defines                                                                   *
  *****************************************************************************/
 
 ODINDEBUGCHANNEL(KERNEL32-HEAPSTRING)
+
+
+/*****************************************************************************
+ * Imported variables                                                        *
+ *****************************************************************************/
+
+// This macro could be mapped to GetProcessHeap() if there
+// is any change in functionality
+#define GetProcessHeap() Heap_ProcessHeap
+
+extern HANDLE Heap_ProcessHeap;
+
 
 /*****************************************************************************
  * Name      :
@@ -760,10 +773,10 @@ ODINFUNCTIONNODBG2(LPVOID, HEAP_realloc,
  * Author    : Patrick Haller [Thu, 1999/08/05 20:46]
  *****************************************************************************/
 
-ODINPROCEDURENODBG1(HEAP_free,
-                    LPVOID, lpMem)
+ODINFUNCTIONNODBG1(BOOL,   HEAP_free,
+                   LPVOID, lpMem)
 {
-  HeapFree( GetProcessHeap(), 0, lpMem);
+  return HeapFree( GetProcessHeap(), 0, lpMem);
 }
 
 
