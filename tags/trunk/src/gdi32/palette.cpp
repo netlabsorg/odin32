@@ -1,4 +1,4 @@
-/* $Id: palette.cpp,v 1.12 2004-01-11 11:42:20 sandervl Exp $ */
+/* $Id: palette.cpp,v 1.13 2004-04-14 09:44:14 sandervl Exp $ */
 
 /*
  * GDI32 palette apis
@@ -137,7 +137,7 @@ BOOL WIN32API ResizePalette( HPALETTE arg1, UINT  arg2)
 }
 //******************************************************************************
 //******************************************************************************
-UINT WIN32API SetPaletteEntries( HPALETTE hPalette, UINT arg2, UINT arg3, PALETTEENTRY * arg4)
+UINT WIN32API SetPaletteEntries( HPALETTE hPalette, UINT arg2, UINT arg3, const PALETTEENTRY * arg4)
 {
     dprintf(("GDI32: SetPaletteEntries %x %d-%d %x", hPalette, arg2, arg3, arg4));
     return O32_SetPaletteEntries(hPalette, arg2, arg3, (const PALETTEENTRY *)arg4);
@@ -166,7 +166,7 @@ HPALETTE WIN32API CreateHalftonePalette(HDC hdc)
 		Palette.aEntries[i].peRed = r * 51;
 		Palette.aEntries[i].peGreen = g * 51;
 		Palette.aEntries[i].peBlue = b * 51;
-	    }    
+	    }
 	  }
 	}
 	
