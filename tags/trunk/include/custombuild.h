@@ -96,6 +96,11 @@ void WIN32API SetCustomWndHandleSemName(LPSTR pszSemName);
 //list access (to avoid name clash with Odin)
 void WIN32API SetCustomMMapSemName(LPSTR pszSemName);
 
+//Override std class names used in Odin 
+void WIN32API SetCustomCDClassName(LPSTR pszCDClassName);
+void WIN32API SetCustomStdClassName(LPSTR pszStdClassName);
+void WIN32API SetCustomStdFrameClassName(LPSTR pszStdFrameClassName);
+
 //Turn off ASPI
 void WIN32API DisableASPI();
 

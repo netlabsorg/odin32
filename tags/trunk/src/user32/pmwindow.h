@@ -1,4 +1,4 @@
-/* $Id: pmwindow.h,v 1.19 2003-03-20 13:20:45 sandervl Exp $ */
+/* $Id: pmwindow.h,v 1.20 2003-04-01 09:58:38 sandervl Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -10,9 +10,9 @@
 
 #include <win32wbase.h>
 
-#define WIN32_CDCLASS       "Win32CDWindowClass"
-#define WIN32_STDCLASS      "Win32WindowClass"
-#define WIN32_STDFRAMECLASS "Win32FrameClass"
+extern char WIN32_CDCLASS[255];
+extern char WIN32_STDCLASS[255];
+extern char WIN32_STDFRAMECLASS[255];
 
 #define TIMERID_DRIVEPOLL 	0x1717
 
