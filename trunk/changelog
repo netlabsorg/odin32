@@ -1,4 +1,7 @@
-/* $Id: changelog,v 1.2100 2002-05-27 15:53:26 sandervl Exp $ */
+/* $Id: changelog,v 1.2101 2002-05-28 07:34:26 sandervl Exp $ */
+
+ 2002-05-28: Sander van Leeuwen <sandervl@innotek.de>
+    - REGSVR32: o Fixed startup
 
  2002-05-27: Sander van Leeuwen <sandervl@innotek.de>
     - WINMM:    o Completely implemented mixerGetControlDetailsA/W
