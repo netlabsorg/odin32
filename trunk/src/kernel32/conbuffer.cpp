@@ -1,4 +1,4 @@
-/* $Id: conbuffer.cpp,v 1.3 1999-06-21 18:53:50 phaller Exp $ */
+/* $Id: conbuffer.cpp,v 1.4 1999-07-12 17:45:50 phaller Exp $ */
 
 /*
  * Win32 Console API Translation for OS/2
@@ -1808,7 +1808,7 @@ DWORD HMDeviceConsoleBufferClass::ScrollConsoleScreenBufferA(PHMHANDLEDATA pHMHa
      **************/
     case 0:
       for (iY = 0;
-           iY <= srctDest.Bottom - srctDest.Top;
+           iY < srctDest.Bottom - srctDest.Top;
            iY++)
       {
                          /* calculate pointer to start of target screen line */
@@ -1833,7 +1833,7 @@ DWORD HMDeviceConsoleBufferClass::ScrollConsoleScreenBufferA(PHMHANDLEDATA pHMHa
      ***************/
     case 1:
       for (iY = 0;
-           iY <= srctDest.Bottom - srctDest.Top;
+           iY < srctDest.Bottom - srctDest.Top;
            iY++)
       {
                            /* calculate pointer to end of target screen line */
@@ -1857,7 +1857,7 @@ DWORD HMDeviceConsoleBufferClass::ScrollConsoleScreenBufferA(PHMHANDLEDATA pHMHa
      * lower left  *
      ***************/
     case 2:
-      for (iY = srctDest.Bottom - srctDest.Top;
+      for (iY = srctDest.Bottom - srctDest.Top - 1;
            iY >= 0;
            iY--)
       {
@@ -1882,7 +1882,7 @@ DWORD HMDeviceConsoleBufferClass::ScrollConsoleScreenBufferA(PHMHANDLEDATA pHMHa
      * lower right  *
      ****************/
     case 3:
-      for (iY = srctDest.Bottom - srctDest.Top;
+      for (iY = srctDest.Bottom - srctDest.Top - 1;
            iY >= 0;
            iY--)
       {
