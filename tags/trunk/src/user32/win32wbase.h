@@ -1,4 +1,4 @@
-/* $Id: win32wbase.h,v 1.25 1999-10-16 14:51:43 sandervl Exp $ */
+/* $Id: win32wbase.h,v 1.26 1999-10-17 12:17:45 cbratschi Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -57,6 +57,7 @@ public:
         DWORD   magic;
 
                 Win32BaseWindow(DWORD objType);
+                Win32BaseWindow(HWND os2Handle,VOID* win32WndProc);
                 Win32BaseWindow(CREATESTRUCTA *lpCreateStructA, ATOM classAtom, BOOL isUnicode);
 virtual        ~Win32BaseWindow();
 
@@ -162,9 +163,8 @@ Win32BaseWindow *GetTopParent();
          //Window handle has already been verified, so just return true
          BOOL   IsWindow()                    { return TRUE; };
          BOOL   IsDialog()                    { return fIsDialog; };
-
-	 BOOL   CanReceiveSizeMsgs()          { return !fNoSizeMsg; };
-	 BOOL   IsWindowDestroyed()           { return fIsDestroyed; };
+         BOOL   CanReceiveSizeMsgs()          { return !fNoSizeMsg; };
+         BOOL   IsWindowDestroyed()           { return fIsDestroyed; };
          BOOL   IsWindowEnabled();
          BOOL   IsWindowVisible();
          BOOL   IsUnicode()  { return isUnicode; };
@@ -184,6 +184,7 @@ Win32BaseWindow *getTopParent();
        LONG      setScrollInfo(int nBar, SCROLLINFO *info, int fRedraw);
        HWND      getVertScrollHandle()        { return hwndVertScroll; };
        HWND      getHorzScrollHandle()        { return hwndHorzScroll; };
+       VOID      subclassScrollBars(BOOL subHorz,BOOL subVert);
 
        LRESULT  SendMessageA(ULONG msg, WPARAM wParam, LPARAM lParam);
        LRESULT  SendMessageW(ULONG msg, WPARAM wParam, LPARAM lParam);
@@ -211,6 +212,10 @@ static Win32BaseWindow *GetWindowFromOS2FrameHandle(HWND hwnd);
        VOID  setOldFrameProc(PVOID aOldFrameProc) { pOldFrameProc = aOldFrameProc; };
        ULONG getBorderWidth() { return borderWidth; };
        ULONG getBorderHeight() { return borderHeight; };
+
+       PVOID getOldWndProc() { return pOldWndProc; }
+       VOID  setOldWndProc(PVOID aOldWndProc) { pOldWndProc = aOldWndProc; }
+       BOOL  isSubclassedOS2Wnd() { return fIsSubclassedOS2Wnd; };
 
 protected:
 #ifndef OS2_INCLUDED
@@ -248,12 +253,15 @@ protected:
         BOOL    fIsDialog;
         BOOL    fInternalMsg;           //Used to distinguish between messages
                                         //sent by PM and those sent by apps
-	BOOL    fNoSizeMsg;
-	BOOL    fIsDestroyed;
+        BOOL    fNoSizeMsg;
+        BOOL    fIsDestroyed;
 
         PVOID   pOldFrameProc;
         ULONG   borderWidth;
         ULONG   borderHeight;
+
+        PVOID   pOldWndProc;
+        BOOL    fIsSubclassedOS2Wnd;  //subclassed OS/2 window: Netscape plug-in/scrollbar
 
    Win32BaseWindow *owner;
 
@@ -285,14 +293,14 @@ static GenericObject *windows;
 private:
 #ifndef OS2_INCLUDED
         void  GetMinMaxInfo(POINT *maxSize, POINT *maxPos, POINT *minTrack, POINT *maxTrack );
-	LONG  HandleSysCommand(WPARAM wParam, POINT *pt32);
+        LONG  HandleSysCommand(WPARAM wParam, POINT *pt32);
 
         LONG  SendNCCalcSize(BOOL calcValidRect,
                              RECT *newWindowRect, RECT *oldWindowRect,
                              RECT *oldClientRect, WINDOWPOS *winpos,
                              RECT *newClientRect );
 
- 	LONG  NCHandleCalcSize(WPARAM wParam, NCCALCSIZE_PARAMS *ncsize);
+        LONG  NCHandleCalcSize(WPARAM wParam, NCCALCSIZE_PARAMS *ncsize);
 
      LRESULT  SendInternalMessage(ULONG msg, WPARAM wParam, LPARAM lParam)
      {
@@ -308,7 +316,7 @@ public:
 
          fakeOpen32WinBaseClass fakeWinBase;
 
-         BOOL   isOwnDC() { return (windowClass->getStyle() & CS_OWNDC_W); }
+         BOOL   isOwnDC() { return (windowClass && windowClass->getStyle() & CS_OWNDC_W); }
          HDC    getOwnDC() { return ownDC; }
          void   setOwnDC(HDC hdc) { ownDC = hdc; }
 protected:

@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.47 1999-10-16 14:51:42 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.48 1999-10-17 12:17:45 cbratschi Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -39,6 +39,7 @@
 #include "dc.h"
 #include "pmframe.h"
 #include "win32wdesktop.h"
+#include "pmwindow.h"
 #include <wprocess.h>
 
 #define HAS_DLGFRAME(style,exStyle) \
@@ -84,6 +85,39 @@ Win32BaseWindow::Win32BaseWindow(DWORD objType) : GenericObject(&windows, objTyp
 }
 //******************************************************************************
 //******************************************************************************
+Win32BaseWindow::Win32BaseWindow(HWND os2Handle,VOID* win32WndProc) : GenericObject(&windows,OBJTYPE_WINDOW)
+{
+  Init();
+  OS2Hwnd = OS2HwndFrame = os2Handle;
+  dwStyle = WS_VISIBLE;
+  setWindowProc((WNDPROC)win32WndProc);
+  fIsSubclassedOS2Wnd = TRUE;
+  fFirstShow = FALSE;
+
+  //CB: replace by a secure method
+
+  if(OSLibWinSetWindowULong(OS2Hwnd, OFFSET_WIN32WNDPTR, (ULONG)this) == FALSE) {
+        dprintf(("WM_CREATE: WinSetWindowULong %X failed!!", OS2Hwnd));
+        SetLastError(ERROR_OUTOFMEMORY); //TODO: Better error
+        return;
+  }
+  if(OSLibWinSetWindowULong(OS2Hwnd, OFFSET_WIN32PM_MAGIC, WIN32PM_MAGIC) == FALSE) {
+        dprintf(("WM_CREATE: WinSetWindowULong2 %X failed!!", OS2Hwnd));
+        SetLastError(ERROR_OUTOFMEMORY); //TODO: Better error
+        return;
+  }
+
+  OSLibWinQueryWindowRect(OS2Hwnd,&rectWindow);
+  rectClient = rectWindow;
+  rectClient.bottom -= rectClient.top;
+  rectClient.top = 0;
+  rectClient.right -= rectClient.left;
+  rectClient.left = 0;
+
+  setOldWndProc(SubclassWithDefHandler(OS2Hwnd));
+}
+//******************************************************************************
+//******************************************************************************
 Win32BaseWindow::Win32BaseWindow(CREATESTRUCTA *lpCreateStructA, ATOM classAtom, BOOL isUnicode)
                         : GenericObject(&windows, OBJTYPE_WINDOW), ChildWindow()
 {
@@ -96,6 +130,7 @@ Win32BaseWindow::Win32BaseWindow(CREATESTRUCTA *lpCreateStructA, ATOM classAtom,
 void Win32BaseWindow::Init()
 {
   isUnicode        = FALSE;
+  fIsSubclassedOS2Wnd = FALSE;
   fFirstShow       = TRUE;
   fIsDialog        = FALSE;
   fInternalMsg     = FALSE;
@@ -199,10 +234,6 @@ Win32BaseWindow::~Win32BaseWindow()
         free(horzScrollInfo);
         horzScrollInfo = NULL;
     }
-  //TODO: Destroy windows if they're not associated with our window anymore (showwindow false)?
-//  hwndHorzScroll
-//  hwndVertScroll
-
 }
 //******************************************************************************
 //******************************************************************************
@@ -583,6 +614,9 @@ BOOL Win32BaseWindow::MsgCreate(HWND hwndFrame, HWND hwndClient)
 //        OSLibWinShowScrollBar(OS2HwndFrame, hwndVertScroll, OSLIB_VSCROLL, FALSE, TRUE);
   }
 
+  //CB: switch off -> OS/2 scrollbars
+  subclassScrollBars(dwStyle & WS_HSCROLL,dwStyle & WS_VSCROLL);
+
   fakeWinBase.hwndThis     = OS2Hwnd;
   fakeWinBase.pWindowClass = windowClass;
 //  SetFakeOpen32();
@@ -689,6 +723,8 @@ ULONG Win32BaseWindow::MsgDestroy()
  ULONG rc;
  Win32BaseWindow *child;
 
+    if (isSubclassedOS2Wnd) OSLibWinSubclassWindow(OS2Hwnd,pOldWndProc);
+
     //According to the SDK, WM_PARENTNOTIFY messages are sent to the parent (this window)
     //before any window destruction has begun
     child = (Win32BaseWindow *)getFirstChild();
@@ -698,6 +734,9 @@ ULONG Win32BaseWindow::MsgDestroy()
         child = (Win32BaseWindow *)child->getNextChild();
     }
     SendInternalMessageA(WM_DESTROY, 0, 0);
+
+    if (hwndHorzScroll && OSLibWinQueryWindow(hwndHorzScroll,QWOS_PARENT) == OSLIB_HWND_OBJECT) OSLibWinDestroyWindow(hwndHorzScroll);
+    if (hwndVertScroll && OSLibWinQueryWindow(hwndVertScroll,QWOS_PARENT) == OSLIB_HWND_OBJECT) OSLibWinDestroyWindow(hwndVertScroll);
 
     fIsDestroyed = TRUE;
     if(getFirstChild() == NULL) {
@@ -1006,7 +1045,7 @@ ULONG Win32BaseWindow::MsgButton(ULONG msg, ULONG ncx, ULONG ncy, ULONG clx, ULO
                 win32ncmsg = WM_NCLBUTTONUP;
                 break;
         case BUTTON_LEFTDBLCLICK:
-                if (windowClass->getClassLongA(GCL_STYLE) & CS_DBLCLKS)
+                if (windowClass && windowClass->getClassLongA(GCL_STYLE) & CS_DBLCLKS)
                 {
                   win32msg = WM_LBUTTONDBLCLK;
                   win32ncmsg = WM_NCLBUTTONDBLCLK;
@@ -1025,7 +1064,7 @@ ULONG Win32BaseWindow::MsgButton(ULONG msg, ULONG ncx, ULONG ncy, ULONG clx, ULO
                 win32ncmsg = WM_NCRBUTTONDOWN;
                 break;
         case BUTTON_RIGHTDBLCLICK:
-                if (windowClass->getClassLongA(GCL_STYLE) & CS_DBLCLKS)
+                if (windowClass && windowClass->getClassLongA(GCL_STYLE) & CS_DBLCLKS)
                 {
                   win32msg = WM_RBUTTONDBLCLK;
                   win32ncmsg = WM_NCRBUTTONDBLCLK;
@@ -1044,7 +1083,7 @@ ULONG Win32BaseWindow::MsgButton(ULONG msg, ULONG ncx, ULONG ncy, ULONG clx, ULO
                 win32ncmsg = WM_NCMBUTTONDOWN;
                 break;
         case BUTTON_MIDDLEDBLCLICK:
-                if (windowClass->getClassLongA(GCL_STYLE) & CS_DBLCLKS)
+                if (windowClass && windowClass->getClassLongA(GCL_STYLE) & CS_DBLCLKS)
                 {
                   win32msg = WM_MBUTTONDBLCLK;
                   win32ncmsg = WM_NCMBUTTONDBLCLK;
@@ -1185,13 +1224,13 @@ SCROLLBAR_INFO *Win32BaseWindow::getScrollInfo(int nBar)
     switch(nBar) {
     case SB_HORZ:
         if(horzScrollInfo) {
-            horzScrollInfo->CurVal = OSLibWinGetScrollPos(OS2HwndFrame, hwndHorzScroll);
+            //CB:horzScrollInfo->CurVal = OSLibWinGetScrollPos(OS2HwndFrame, hwndHorzScroll);
             return horzScrollInfo;
         }
         break;
     case SB_VERT:
         if(vertScrollInfo) {
-            vertScrollInfo->CurVal = OSLibWinGetScrollPos(OS2HwndFrame, hwndVertScroll);
+            //CB:vertScrollInfo->CurVal = OSLibWinGetScrollPos(OS2HwndFrame, hwndVertScroll);
             return vertScrollInfo;
         }
         break;
@@ -1207,6 +1246,9 @@ LONG Win32BaseWindow::setScrollInfo(int nBar, SCROLLINFO *info, int fRedraw)
   HWND            hwndScroll;
   ULONG           scrollType;
   int             new_flags;
+
+//CB: handled internally
+return 0;
 
     switch(nBar) {
     case SB_HORZ:
@@ -1325,6 +1367,12 @@ done:
     /* Return current position */
 
     return infoPtr->CurVal;
+}
+/***********************************************************************/
+/***********************************************************************/
+VOID Win32BaseWindow::subclassScrollBars(BOOL subHorz,BOOL subVert)
+{
+  SCROLL_SubclassScrollBars(subHorz ? hwndHorzScroll:0,subVert ? hwndVertScroll:0);
 }
 /***********************************************************************
  *           NC_HandleSysCommand
@@ -1566,7 +1614,7 @@ LRESULT Win32BaseWindow::DefWindowProcA(UINT Msg, WPARAM wParam, LPARAM lParam)
       RECT rect;
       int rc;
 
-        if (!windowClass->getBackgroundBrush()) return 0;
+        if (!windowClass || !windowClass->getBackgroundBrush()) return 0;
 
         rc = GetClipBox( (HDC)wParam, &rect );
         if ((rc == SIMPLEREGION) || (rc == COMPLEXREGION))
@@ -1624,6 +1672,7 @@ LRESULT Win32BaseWindow::DefWindowProcA(UINT Msg, WPARAM wParam, LPARAM lParam)
     case WM_GETICON:
     {
             LRESULT result = 0;
+            if (!windowClass) return result;
             int index = GCL_HICON;
 
             if (wParam == ICON_SMALL)

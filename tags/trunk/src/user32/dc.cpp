@@ -1,4 +1,4 @@
-/* $Id: dc.cpp,v 1.13 1999-10-14 09:22:38 sandervl Exp $ */
+/* $Id: dc.cpp,v 1.14 1999-10-17 12:17:42 cbratschi Exp $ */
 
 /*
  * DC functions for USER32
@@ -666,7 +666,8 @@ HDC WIN32API BeginPaint (HWND hWnd, PPAINTSTRUCT_W lpps)
 //   if (wnd->isFrameWindow())
 //   {
 //      WinSendMsg( hwnd, /* WM_DRAW */ 0x20D, (MPARAM)hps, MPVOID );
-      selectClientArea(wnd, pHps, &rect);
+      //CB: subclassed window haven't got a frame
+      if (!wnd->isSubclassedOS2Wnd()) selectClientArea(wnd, pHps, &rect);
 //   }
 
    if (hPS_ownDC == 0)
