@@ -1,4 +1,4 @@
-/* $Id: StateUpd.cpp,v 1.33 2001-09-05 11:57:57 bird Exp $
+/* $Id: StateUpd.cpp,v 1.34 2001-09-05 13:59:03 bird Exp $
  *
  * StateUpd - Scans source files for API functions and imports data on them.
  *
@@ -2035,7 +2035,7 @@ static BOOL isFunction(char **papszLines, int i, POPTIONS pOptions)
                 {
                     /* 1. */
                     if (
-                        strncmp(pszFnName, "for", cchFnName) != 0 &&
+                        strncmp(pszFnName, "for", cchFnName) != 0   &&
                         strncmp(pszFnName, "while", cchFnName) != 0 &&
                         strncmp(pszFnName, "do", cchFnName) != 0    &&
                         strncmp(pszFnName, "if", cchFnName) != 0    &&

@@ -1,4 +1,4 @@
-/* $Id: db.cpp,v 1.23 2001-09-05 11:57:20 bird Exp $ *
+/* $Id: db.cpp,v 1.24 2001-09-05 13:59:03 bird Exp $ *
  *
  * DB - contains all database routines.
  *
@@ -1014,6 +1014,7 @@ unsigned long _System dbUpdateFunction(PFNDESC pFnDesc, signed long lDll, char *
                 row = mysql_fetch_row(pres);
             if (pres != NULL && row != NULL && mysql_num_rows(pres) == 1)
             {
+                #if 0 /* keep getting duplicate keys when parameter order/names are changed. */
                 if (atol(row[0]) == pFnDesc->cParams)
                 {   /* update parameters */
                     for (i = 0; i < pFnDesc->cParams; i++)
@@ -1038,6 +1039,7 @@ unsigned long _System dbUpdateFunction(PFNDESC pFnDesc, signed long lDll, char *
                     }
                 }
                 else
+                #endif
                 {
                     if (atol(row[0]) != 0)
                     {   /* delete old parameters */
