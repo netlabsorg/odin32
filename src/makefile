@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.59 2000-05-10 13:16:08 sandervl Exp $
+# $Id: makefile,v 1.60 2000-05-20 13:28:15 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -140,6 +140,8 @@ all: libs
     cd ..\twain_32
     $(MAKE_CMD)
     cd ..\riched32
+    $(MAKE_CMD)
+    cd ..\icmp
     $(MAKE_CMD)
 
 #
