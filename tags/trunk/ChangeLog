@@ -1,7 +1,9 @@
-/* $Id: ChangeLog,v 1.1586 2001-07-10 05:36:03 bird Exp $ */
+/* $Id: ChangeLog,v 1.1587 2001-07-10 16:47:33 bird Exp $ */
 
  2001-07-10: knut st. osmundsen <kosmunds@csc.com>:
     - WIN32K:   o Made DosKillProcessEx framework.
+                o Tried to fix missing unlocks of environment block.
+    - KERNEL32: o Tried to fix missing unlocks of environment block.
 
  2001-07-09: knut st. osmundsen <kosmunds@csc.com>:
     - CRTDLL:   o When renaming dlls we still use the original importlibrary
