@@ -163,3 +163,4 @@ EXPORTS
     _WriteFmtUserTypeStg@12                   @160
     _WriteOleStg@0                            @161
     _WriteStringStream@0                      @162
+    _WINE_StringFromCLSID@8                   @1000

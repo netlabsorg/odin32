@@ -1,15 +1,15 @@
-/* 
- * 
+/*
+ *
  * Project Odin Software License can be found in LICENSE.TXT
- * 
+ *
  */
-/* 
+/*
  * ClassID Manipulation.
- * 
+ *
  * 1/7/99
- * 
+ *
  * Copyright 1999 David J. Raison
- * 
+ *
  * Some portions from Wine Implementation
  *   Copyright 1995  Martin von Loewis
  *   Copyright 1998  Justin Bradford
@@ -85,11 +85,11 @@ HRESULT WIN32API CLSIDFromString(
     /* quick lookup table */
     memset(table, 0, 256);
 
-    for (i = 0; i < 10; i++) 
+    for (i = 0; i < 10; i++)
     {
 	table['0' + i] = i;
     }
-    for (i = 0; i < 6; i++) 
+    for (i = 0; i < 6; i++)
     {
 	table['A' + i] = i+10;
 	table['a' + i] = i+10;
@@ -119,7 +119,7 @@ HRESULT WIN32API CLSIDFromString(
     p += 2;
     s++;  /* skip - */
 
-    for (i = 0; i < 2; i++) 
+    for (i = 0; i < 2; i++)
     {
 	p[1-i] = table[*s]<<4 | table[*(s+1)];
 	s += 2;
@@ -128,14 +128,14 @@ HRESULT WIN32API CLSIDFromString(
     s++;  /* skip - */
 
     /* these are just sequential bytes */
-    for (i = 0; i < 2; i++) 
+    for (i = 0; i < 2; i++)
     {
 	*p++ = table[*s]<<4 | table[*(s+1)];
 	s += 2;
     }
     s++;  /* skip - */
 
-    for (i = 0; i < 6; i++) 
+    for (i = 0; i < 6; i++)
     {
 	*p++ = table[*s]<<4 | table[*(s+1)];
 	s += 2;
@@ -157,7 +157,7 @@ HRESULT WIN32API CoCreateGuid(GUID *pguid)
 // ----------------------------------------------------------------------
 // WINE_StringFromCLSID
 // ----------------------------------------------------------------------
-HRESULT WINE_StringFromCLSID(const CLSID *rclsid, LPSTR idstr)
+HRESULT WIN32API WINE_StringFromCLSID(const CLSID *rclsid, LPSTR idstr)
 {
     dprintf(("OLE32: WINE_StringFromCLSID"));
 
