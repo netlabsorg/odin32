@@ -1,4 +1,4 @@
-/* $Id: winkeyboard.cpp,v 1.30 2002-02-11 13:48:43 sandervl Exp $ */
+/* $Id: winkeyboard.cpp,v 1.31 2002-02-11 14:03:18 sandervl Exp $ */
 /*
  * Win32 <-> PM key translation
  *
@@ -345,7 +345,7 @@ WINVKEYTOPMSCAN abWinVKeyToPMScan[256] =
 /* 0x0A                   */ , 0x00                   , NULL
 /* 0x0B                   */ , 0x00                   , NULL
 /* 0x0C VK_CLEAR          */ , PMSCAN_PAD5            , "Num 5"
-/* 0x0D VK_RETURN         */ , PMSCAN_ENTER           , "Enter" // @@@PH BUG: identical to "Num Enter" !
+/* 0x0D VK_RETURN         */ , PMSCAN_ENTER           , "Enter" 
 /* 0x0E                   */ , 0x00                   , NULL
 /* 0x0F                   */ , 0x00                   , NULL
 /* 0x10 VK_SHIFT          */ , PMSCAN_SHIFTLEFT       , "Left Shift"
@@ -590,6 +590,8 @@ WINVKEYTOPMSCAN abWinVKeyToPMScan[256] =
 /* 0xFF                   */ , 0x00                   , NULL
                              };
 
+// @@PF reflect Num Enter key
+LPSTR lpstrNumEnter = "Num Enter";
 
 // @@@PH
 // Note: windows uses different scancodes if numlock is pressed
@@ -1309,21 +1311,18 @@ ODINFUNCTION6(int,    ToUnicode,
  * Author    : Patrick Haller [Thu, 1998/02/26 11:55]
  *****************************************************************************/
 
-ODINFUNCTION0(UINT, GetKBCodePage)
+UINT WIN32API GetKBCodePage()
 {
   return (GetOEMCP());
 }
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION3(int,    GetKeyNameTextA,
-              LPARAM, lParam, 
-              LPSTR,  lpString, 
-              int,    nSize)
+int WIN32API GetKeyNameTextA(LPARAM lParam, LPSTR  lpString, int nSize)
 {
   // check the scancodes if the extended key bit is set so
   // we can easily distinguish between "left" and "right" special keys, etc.
   BOOL  fDontCare = (lParam & WIN_KEY_DONTCARE) != 0;
-  BOOL  fExtended = (lParam & WIN_KEY_EXTENDED) != 0;
+  BOOL  fExtended = (lParam & WIN_KEY_EXTENDED) != 0,PMExtended;
   UCHAR ucWinScan = (lParam & 0x00ff0000) >> 16;
   UCHAR ucWinVKey;
   UCHAR ucPMScan;
@@ -1347,9 +1346,11 @@ ODINFUNCTION3(int,    GetKeyNameTextA,
            fExtended,
            ucPMScan));
   ucWinVKey = abPMScanToWinVKey[ucPMScan][0];
-  dprintf(("ucPMScan=%02xh translated to ucWinVKey=%02xh\n",
+  PMExtended = abPMScanToWinVKey[ucPMScan][1];
+
+  dprintf(("ucPMScan=%02xh translated to ucWinVKey=%02xh PMExtended=%d\n",
            ucPMScan,
-           ucWinVKey));
+           ucWinVKey,PMExtended));
 
   // Bug in Open32:
   // 0 - expects PMScancodes instead of WinScancodes
@@ -1359,7 +1360,15 @@ ODINFUNCTION3(int,    GetKeyNameTextA,
   
   memset(lpString, 0, nSize);
   
-  LPSTR lpstrKey = abWinVKeyToPMScan[ucWinVKey].lpstrName;
+  LPSTR lpstrKey;
+  lpstrKey = abWinVKeyToPMScan[ucWinVKey].lpstrName;
+
+  // handle Enter on Numeric Keypad here
+  if (PMExtended) 
+  {
+   if (ucWinVKey==VK_RETURN) lpstrKey = lpstrNumEnter;
+  }
+
   if (NULL == lpstrKey)
   {
     dprintf(("ERROR: keyname for winscan=%02xh winvkey=%02xh, fExtended=%d not found.\n",
@@ -1390,10 +1399,7 @@ ODINFUNCTION3(int,    GetKeyNameTextA,
 }
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION3(int,    GetKeyNameTextW,
-              LPARAM, lParam,
-              LPWSTR, lpString,
-              int,    nSize)
+int WIN32API GetKeyNameTextW(LPARAM lParam, LPWSTR lpString, int nSize)
 {
     dprintf(("USER32:  GetKeyNameTextW DOES NOT WORK (not implemented)\n"));
     // NOTE: This will not work as is (needs UNICODE support)
