@@ -1,4 +1,4 @@
-/* $Id: OS2KVM.h,v 1.3 2000-02-18 19:27:29 bird Exp $
+/* $Id: OS2KVM.h,v 1.4 2000-04-17 01:56:49 bird Exp $
  *
  * OS/2 kernel VM functions.
  *
@@ -102,6 +102,9 @@ APIRET KRNLCALL VMAllocMem(
     ULONG   SomeArg2,
     PVMAC   pvmac);
 
-
+APIRET KRNLCALL VMObjHandleInfo(
+    USHORT  usHob,
+    PULONG  pulAddr,
+    PUSHORT pushPTDA);
 
 #endif

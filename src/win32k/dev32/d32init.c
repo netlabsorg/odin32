@@ -1,4 +1,4 @@
-/* $Id: d32init.c,v 1.17 2000-04-05 18:40:40 bird Exp $
+/* $Id: d32init.c,v 1.18 2000-04-17 01:56:48 bird Exp $
  *
  * d32init.c - 32-bits init routines.
  *
@@ -1045,6 +1045,7 @@ static int importTabInit(void)
         (unsigned)&mytkExecPgm,
         0,
         0,
+        0,
         0
     };
 
@@ -1233,7 +1234,7 @@ static int importTabInit(void)
              * callTab-entry + 4 holds the offset of the variable into the object.
              * callTab-entry + 8 holds the selector for the object. (These two fields is the 16:32-bit pointer to the variable.)
              * callTab-entry + a holds the 16-bit offset for the variable.
-             * callTab-entry + c holds the selector for the object. (These two fiels is the 16:16-bit pointer to the variable.)
+             * callTab-entry + c holds the selector for the object. (These two fields is the 16:16-bit pointer to the variable.)
              */
             case EPT_VARIMPORT32:
             case EPT_VARIMPORT16:
@@ -1369,6 +1370,11 @@ void main(void)
         0x2d, 0xa8, 0x0a, 0x00, 0x00, 0x65, 0x67, 0xff,
         0xb5, 0xb4, 0x1f, 0x00, 0x00, 0x65, 0x67, 0x66
     };
+    char achf_VMObjHandleInfo[] =  {
+        0x55, 0x8B, 0x0D, 0x9C, 0xBF, 0x0D, 0x00, 0x8B,
+        0xEC, 0x83, 0xEC, 0x0C, 0x53, 0x57, 0x8D, 0x55,
+        0xF8
+    };
 
 
     char *aProcs[] =
@@ -1390,6 +1396,7 @@ void main(void)
         achf_FuStrLenZ         ,
         achf_FuStrLen          ,
         achf_FuBuff            ,
+        achf_VMObjHandleInfo   ,
         NULL
     };
     int i;
@@ -1399,7 +1406,7 @@ void main(void)
     {
         unsigned cb;
         printf("Proc.no.%i\n", i);
-        if (i < 14 )
+        if (i < 14 || i > 16)
             cb = interpretFunctionProlog32(aProcs[i], i < 5 || i == 13);
         else
             cb = interpretFunctionProlog16(aProcs[i], FALSE);

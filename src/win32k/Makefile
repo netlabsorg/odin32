@@ -1,5 +1,5 @@
 ################################################################################
-# $Id: Makefile,v 1.41 2000-04-05 18:40:36 bird Exp $
+# $Id: Makefile,v 1.42 2000-04-17 01:56:47 bird Exp $
 #
 # Win32k makefile.
 #
@@ -119,60 +119,127 @@ AINCLUDES  = -Fdi:$(WIN32KINCLUDE) \
 {dev16}.c{$(WIN32KOBJ)}.obj:
     @$(ECHO) compiling 16bit: $<
     @$(CC16) $(CFLAGS16) $(CDEFINES16) -Fa$(WIN32KLIST)\$(*B).s -Fo$@ $(CINCLUDES16) $<
+{dev16}.c.obj:
+    @$(ECHO) compiling 16bit: $<
+    @$(CC16) $(CFLAGS16) $(CDEFINES16) -Fa$(WIN32KLIST)\$(*B).s -Fo$(WIN32KOBJ)\$(@F) $(CINCLUDES16) $<
+
 
 {dev32}.asm{$(WIN32KOBJ)}.obj:
     @$(ECHO) assembling:      $<
     @$(AS) $(ASFLAGS) $(ADEFINES) $(AINCLUDES) $< -Fo:$@ -Fl:$(WIN32KLIST)\$(*B).lst
+{dev32}.asm.obj:
+    @$(ECHO) assembling:      $<
+    @$(AS) $(ASFLAGS) $(ADEFINES) $(AINCLUDES) $< -Fo:$(WIN32KOBJ)\$(@F) -Fl:$(WIN32KLIST)\$(*B).lst
+
 {dev32}.c{$(WIN32KOBJ)}.obj:
     @$(ECHO) compiling 32bit: $<
     @$(CC) -c $(CFLAGS) $(CDEFINES) -Fa$(WIN32KLIST)\$(*B).s -Fo$@ $(CINCLUDES) $<
+{dev32}.c.obj:
+    @$(ECHO) compiling 32bit: $<
+    @$(CC) -c $(CFLAGS) $(CDEFINES) -Fa$(WIN32KLIST)\$(*B).s -Fo$(WIN32KOBJ)\$(@F) $(CINCLUDES) $<
+
 {dev32}.cpp{$(WIN32KOBJ)}.obj:
     @$(ECHO) compiling 32bit: $<
     @$(CC) -c $(CPPFLAGS) $(CDEFINES) -Fa$(WIN32KLIST)\$(*B).s -Fo$@ $(CINCLUDES) $<
+{dev32}.cpp.obj:
+    @$(ECHO) compiling 32bit: $<
+    @$(CC) -c $(CPPFLAGS) $(CDEFINES) -Fa$(WIN32KLIST)\$(*B).s -Fo$(WIN32KOBJ)\$(@F) $(CINCLUDES) $<
+
 
 {k32}.asm{$(WIN32KOBJ)}.obj:
     @$(ECHO) assembling:      $<
     @$(AS) $(ASFLAGS) $(ADEFINES) $(AINCLUDES) $< -Fo:$@ -Fl:$(WIN32KLIST)\$(*B).lst
+{k32}.asm.obj:
+    @$(ECHO) assembling:      $<
+    @$(AS) $(ASFLAGS) $(ADEFINES) $(AINCLUDES) $< -Fo:$(WIN32KOBJ)\$(@F) -Fl:$(WIN32KLIST)\$(*B).lst
+
 {k32}.c{$(WIN32KOBJ)}.obj:
     @$(ECHO) compiling 32bit: $<
     @$(CC) -c $(CFLAGS) $(CDEFINES) -Fa$(WIN32KLIST)\$(*B).s -Fo$@ $(CINCLUDES) $<
+{k32}.c.obj:
+    @$(ECHO) compiling 32bit: $<
+    @$(CC) -c $(CFLAGS) $(CDEFINES) -Fa$(WIN32KLIST)\$(*B).s -Fo$(WIN32KOBJ)\$(@F) $(CINCLUDES) $<
+
 {k32}.cpp{$(WIN32KOBJ)}.obj:
     @$(ECHO) compiling 32bit: $<
     @$(CC) -c $(CPPFLAGS) $(CDEFINES) -Fa$(WIN32KLIST)\$(*B).s -Fo$@ $(CINCLUDES) $<
+{k32}.cpp.obj:
+    @$(ECHO) compiling 32bit: $<
+    @$(CC) -c $(CPPFLAGS) $(CDEFINES) -Fa$(WIN32KLIST)\$(*B).s -Fo$(WIN32KOBJ)\$(@F) $(CINCLUDES) $<
+
 
 {ldr}.asm{$(WIN32KOBJ)}.obj:
     @$(ECHO) assembling:      $<
     @$(AS) $(ASFLAGS) $(ADEFINES) $(AINCLUDES) $< -Fo:$@ -Fl:$(WIN32KLIST)\$(*B).lst
+{ldr}.asm.obj:
+    @$(ECHO) assembling:      $<
+    @$(AS) $(ASFLAGS) $(ADEFINES) $(AINCLUDES) $< -Fo:$(WIN32KOBJ)\$(@F) -Fl:$(WIN32KLIST)\$(*B).lst
+
 {ldr}.c{$(WIN32KOBJ)}.obj:
     @$(ECHO) compiling 32bit: $<
     @$(CC) -c $(CFLAGS) $(CDEFINES) -Fa$(WIN32KLIST)\$(*B).s -Fo$@ $(CINCLUDES) $<
+{ldr}.c.obj:
+    @$(ECHO) compiling 32bit: $<
+    @$(CC) -c $(CFLAGS) $(CDEFINES) -Fa$(WIN32KLIST)\$(*B).s -Fo$(WIN32KOBJ)\$(@F) $(CINCLUDES) $<
+
 {ldr}.cpp{$(WIN32KOBJ)}.obj:
     @$(ECHO) compiling 32bit: $<
     @$(CC) -c $(CPPFLAGS) $(CDEFINES) -Fa$(WIN32KLIST)\$(*B).s -Fo$@ $(CINCLUDES) $<
+{ldr}.cpp.obj:
+    @$(ECHO) compiling 32bit: $<
+    @$(CC) -c $(CPPFLAGS) $(CDEFINES) -Fa$(WIN32KLIST)\$(*B).s -Fo$(WIN32KOBJ)\$(@F) $(CINCLUDES) $<
+
 
 {misc}.asm{$(WIN32KOBJ)}.obj:
     @$(ECHO) assembling:      $<
     $(AS) $(ASFLAGS) $(ADEFINES) $(AINCLUDES) $< -Fo:$@ -Fl:$(WIN32KLIST)\$(*B).lst
+{misc}.asm.obj:
+    @$(ECHO) assembling:      $<
+    $(AS) $(ASFLAGS) $(ADEFINES) $(AINCLUDES) $< -Fo:$(WIN32KOBJ)\$(@F) -Fl:$(WIN32KLIST)\$(*B).lst
+
 {misc}.c{$(WIN32KOBJ)}.obj:
     @$(ECHO) compiling 32bit: $<
     @$(CC) -c $(CFLAGS) $(CDEFINES) -Fa$(WIN32KLIST)\$(*B).s -Fo$@ $(CINCLUDES) $<
+{misc}.c.obj:
+    @$(ECHO) compiling 32bit: $<
+    @$(CC) -c $(CFLAGS) $(CDEFINES) -Fa$(WIN32KLIST)\$(*B).s -Fo$(WIN32KOBJ)\$(@F) $(CINCLUDES) $<
+
 {misc}.cpp{$(WIN32KOBJ)}.obj:
     @$(ECHO) compiling 32bit: $<
     @$(CC) -c $(CPPFLAGS) $(CDEFINES) -Fa$(WIN32KLIST)\$(*B).s -Fo$@ $(CINCLUDES) $<
+{misc}.cpp.obj:
+    @$(ECHO) compiling 32bit: $<
+    @$(CC) -c $(CPPFLAGS) $(CDEFINES) -Fa$(WIN32KLIST)\$(*B).s -Fo$(WIN32KOBJ)\$(@F) $(CINCLUDES) $<
+
 
 {pe2lx}.c{$(WIN32KOBJ)}.obj 32bit:
     @$(ECHO) compiling: $<
     @$(CC) -c $(CFLAGS) $(CDEFINES) -Fa$(WIN32KLIST)\$(*B).s -Fo$@ $(CINCLUDES) $<
+{pe2lx}.c.obj 32bit:
+    @$(ECHO) compiling: $<
+    @$(CC) -c $(CFLAGS) $(CDEFINES) -Fa$(WIN32KLIST)\$(*B).s -Fo$(WIN32KOBJ)\$(@F) $(CINCLUDES) $<
+
 {pe2lx}.cpp{$(WIN32KOBJ)}.obj:
     @$(ECHO) compiling 32bit: $<
     @$(CC) -c $(CPPFLAGS) $(CDEFINES) -Fa$(WIN32KLIST)\$(*B).s -Fo$@ $(CINCLUDES) $<
+{pe2lx}.cpp.obj:
+    @$(ECHO) compiling 32bit: $<
+    @$(CC) -c $(CPPFLAGS) $(CDEFINES) -Fa$(WIN32KLIST)\$(*B).s -Fo$(WIN32KOBJ)\$(@F) $(CINCLUDES) $<
+
 
 {elf2lx}.c{$(WIN32KOBJ)}.obj 32bit:
     @$(ECHO) compiling: $<
     @$(CC) -c $(CFLAGS) $(CDEFINES) -Fa$(WIN32KLIST)\$(*B).s -Fo$@ $(CINCLUDES) $<
+{elf2lx}.c.obj 32bit:
+    @$(ECHO) compiling: $<
+    @$(CC) -c $(CFLAGS) $(CDEFINES) -Fa$(WIN32KLIST)\$(*B).s -Fo$(WIN32KOBJ)\$(@F) $(CINCLUDES) $<
+
 {elf2lx}.cpp{$(WIN32KOBJ)}.obj:
     @$(ECHO) compiling 32bit: $<
     @$(CC) -c $(CPPFLAGS) $(CDEFINES) -Fa$(WIN32KLIST)\$(*B).s -Fo$@ $(CINCLUDES) $<
+{elf2lx}.cpp.obj:
+    @$(ECHO) compiling 32bit: $<
+    @$(CC) -c $(CPPFLAGS) $(CDEFINES) -Fa$(WIN32KLIST)\$(*B).s -Fo$(WIN32KOBJ)\$(@F) $(CINCLUDES) $<
 
 
 
