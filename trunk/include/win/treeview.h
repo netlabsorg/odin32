@@ -1,4 +1,4 @@
-/* $Id: treeview.h,v 1.5 1999-12-18 18:56:20 achimha Exp $ */
+/* $Id: treeview.h,v 1.6 2000-02-10 18:47:36 cbratschi Exp $ */
 /*
  * Treeview class extra info
  *
@@ -12,7 +12,6 @@
 #include "commctrl.h"
 
 #define MINIMUM_INDENT 10
-#define TV_REFRESH_DELAY 100     /* 100 ms delay between two refreshes */
 #define TV_DEFAULTITEMHEIGHT 16
 #define TVITEM_ALLOC    16      /* default nr of items to allocate at first try */
 
@@ -41,7 +40,7 @@ typedef struct {
   RECT      rect;
   RECT      text;
   RECT      expandBox;      /* expand box (+/-) coordinate */
-  RECT		bitmap;
+  RECT          bitmap;
   RECT      statebitmap;
 } TREEVIEW_ITEM;
 
@@ -56,7 +55,7 @@ typedef struct tagTREEVIEW_INFO
   HTREEITEM     uMaxHandle;     /* needed for delete_item */
   HTREEITEM     TopRootItem;    /* handle to first item in treeview */
   INT           cdmode;         /* last custom draw setting */
-  UINT          uScrollTime;	/* max. time for scrolling in milliseconds*/
+  UINT          uScrollTime;    /* max. time for scrolling in milliseconds*/
   UINT          uItemHeight;    /* item height, -1 for default item height */
   UINT          uRealItemHeight;/* current item height in pixels */
   UINT          uVisibleHeight; /* visible height of treeview in pixels */
@@ -71,13 +70,13 @@ typedef struct tagTREEVIEW_INFO
   HTREEITEM     firstVisible;   /* handle to first visible item */
   HTREEITEM     dropItem;       /* handle to item selected by drag cursor */
   HTREEITEM     insertMarkItem; /* item after which insertion mark is placed */
-  BOOL			insertBeforeorAfter; /* flag used by TVM_SETINSERTMARK */
+  BOOL                  insertBeforeorAfter; /* flag used by TVM_SETINSERTMARK */
   HIMAGELIST    dragList;       /* Bitmap of dragged item */
   INT           cx,cy;          /* current x/y place in list */
   COLORREF      clrBk;
   COLORREF      clrText;
   COLORREF      clrLine;
-  COLORREF  	clrInsertMark;
+  COLORREF      clrInsertMark;
   HFONT         hFont;
   HFONT         hBoldFont;
   HWND          hwndToolTip;
@@ -105,10 +104,8 @@ typedef struct tagTREEVIEW_INFO
 
 /* bitflags for infoPtr->timer */
 
-#define TV_REFRESH_TIMER 1
-#define TV_EDIT_TIMER    2
-#define TV_REFRESH_TIMER_SET 1
-#define TV_EDIT_TIMER_SET 2
+#define TV_EDIT_TIMER    1
+#define TV_EDIT_TIMER_SET 1
 
 
 extern VOID TREEVIEW_Register (VOID);

@@ -1,4 +1,4 @@
-/* $Id: commctrl.h,v 1.17 2000-02-04 17:00:22 cbratschi Exp $ */
+/* $Id: commctrl.h,v 1.18 2000-02-10 18:47:35 cbratschi Exp $ */
 /*
  * Common controls definitions
  */
@@ -2302,10 +2302,6 @@ typedef struct tagNMTVGETINFOTIPW
   _TVi.state = data; \
   SendMessageA((hwndTV), TVM_SETITEM, 0, (LPARAM)(TV_ITEM *)&_TVi); \
 }
-
-
-
-
 
 /* Listview control */
 

@@ -1,4 +1,4 @@
-/* $Id: gdi32.cpp,v 1.39 2000-02-10 00:36:10 sandervl Exp $ */
+/* $Id: gdi32.cpp,v 1.40 2000-02-10 18:48:44 cbratschi Exp $ */
 
 /*
  * GDI32 apis
@@ -146,17 +146,22 @@ HBRUSH WIN32API CreatePatternBrush(HBITMAP arg1)
 }
 //******************************************************************************
 //******************************************************************************
-HPEN WIN32API CreatePen( int arg1, int arg2, COLORREF  arg3)
+HPEN WIN32API CreatePen( int fnPenStyle, int nWidth, COLORREF crColor)
 {
     dprintf(("GDI32: CreatePen\n"));
-    return O32_CreatePen(arg1, arg2, arg3);
+
+    //CB: todo: PS_DOT is different in Win32 (. . . . and not - - - -)
+    //    Open32 looks like LINETYPE_SHORTDASH instead of LINETYPE_DOT!!!
+    //    -> difficult to fix!
+
+    return O32_CreatePen(fnPenStyle,nWidth,crColor);
 }
 //******************************************************************************
 //******************************************************************************
-HPEN WIN32API CreatePenIndirect( const LOGPEN * arg1)
+HPEN WIN32API CreatePenIndirect( const LOGPEN * lplgpn)
 {
     dprintf(("GDI32: CreatePenIndirect\n"));
-    return O32_CreatePenIndirect(arg1);
+    return O32_CreatePenIndirect(lplgpn);
 }
 //******************************************************************************
 //******************************************************************************
