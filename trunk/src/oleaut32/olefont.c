@@ -19,6 +19,7 @@
 #include "winuser.h"
 #include "wine/unicode.h"
 #include "oleauto.h"    /* for SysAllocString(....) */
+#include "wine/obj_base.h"
 #include "wine/obj_olefont.h"
 #include "wine/obj_storage.h"
 #include "ole2.h"
@@ -955,6 +956,9 @@ static HRESULT WINAPI OLEFontImpl_Clone(
   IFont** ppfont)
 {
   OLEFontImpl* newObject = 0;
+  LOGFONTW logFont;
+  INT      fontHeight;
+  CY       cySize;
   _ICOM_THIS(OLEFontImpl, iface);
   TRACE("(%p)->(%p)\n", this, ppfont);
 
@@ -973,9 +977,38 @@ static HRESULT WINAPI OLEFontImpl_Clone(
 
   *newObject = *this;
 
-  /*
-   * That new object starts with a reference count of 1
+  /* We need to alloc new memory for the string, otherwise
+   * we free memory twice.
    */
+  newObject->description.lpstrName = HeapAlloc(
+	GetProcessHeap(),0,
+	(1+strlenW(this->description.lpstrName))*2
+  );
+  /* We need to clone the HFONT too. This is just cut & paste from above */
+  IFont_get_Size(iface, &cySize);
+
+  fontHeight = MulDiv(cySize.s.Lo, 2540L, 72L);
+  fontHeight = MulDiv(fontHeight, this->cyLogical,this->cyHimetric);
+
+  memset(&logFont, 0, sizeof(LOGFONTW));
+
+  logFont.lfHeight          = ((fontHeight%10000L)>5000L) ? (-fontHeight/10000L)-1 :
+							    (-fontHeight/10000L);
+  logFont.lfItalic          = this->description.fItalic;
+  logFont.lfUnderline       = this->description.fUnderline;
+  logFont.lfStrikeOut       = this->description.fStrikethrough;
+  logFont.lfWeight          = this->description.sWeight;
+  logFont.lfCharSet         = this->description.sCharset;
+  logFont.lfOutPrecision    = OUT_CHARACTER_PRECIS;
+  logFont.lfClipPrecision   = CLIP_DEFAULT_PRECIS;
+  logFont.lfQuality         = DEFAULT_QUALITY;
+  logFont.lfPitchAndFamily  = DEFAULT_PITCH;
+  strcpyW(logFont.lfFaceName,this->description.lpstrName);
+
+  newObject->gdiFont = CreateFontIndirectW(&logFont);
+
+
+  /* The cloned object starts with a reference count of 1 */
   newObject->ref          = 1;
 
   *ppfont = (IFont*)newObject;
@@ -1202,9 +1235,10 @@ static HRESULT WINAPI OLEFontImpl_Invoke(
   UINT*     puArgErr)
 {
   _ICOM_THIS_From_IDispatch(IFont, iface);
-  FIXME("(%p):Stub\n", this);
-
-  return E_NOTIMPL;
+  FIXME("%p->(%ld,%s,%lx,%x), stub!\n", this,dispIdMember,debugstr_guid(riid),lcid,
+    wFlags
+  );
+  return S_OK;
 }
 
 /************************************************************************
@@ -1592,3 +1626,76 @@ static HRESULT WINAPI OLEFontImpl_FindConnectionPoint(
   }
 }
 
+/*******************************************************************************
+ * StdFont ClassFactory
+ */
+typedef struct
+{
+    /* IUnknown fields */
+    ICOM_VFIELD(IClassFactory);
+    DWORD                       ref;
+} IClassFactoryImpl;
+
+static HRESULT WINAPI 
+SFCF_QueryInterface(LPCLASSFACTORY iface,REFIID riid,LPVOID *ppobj) {
+	ICOM_THIS(IClassFactoryImpl,iface);
+
+	FIXME("(%p)->(%s,%p),stub!\n",This,debugstr_guid(riid),ppobj);
+	return E_NOINTERFACE;
+}
+
+static ULONG WINAPI
+SFCF_AddRef(LPCLASSFACTORY iface) {
+	ICOM_THIS(IClassFactoryImpl,iface);
+	return ++(This->ref);
+}
+
+static ULONG WINAPI SFCF_Release(LPCLASSFACTORY iface) {
+	ICOM_THIS(IClassFactoryImpl,iface);
+	/* static class, won't be  freed */
+	return --(This->ref);
+}
+
+static HRESULT WINAPI SFCF_CreateInstance(
+	LPCLASSFACTORY iface,LPUNKNOWN pOuter,REFIID riid,LPVOID *ppobj
+) {
+	ICOM_THIS(IClassFactoryImpl,iface);
+
+	if (IsEqualGUID(riid,&IID_IFont)) {
+	    FONTDESC fd;
+
+	    WCHAR fname[] = { 'S','y','s','t','e','m',0 };
+
+	    fd.cbSizeofstruct = sizeof(fd);
+	    fd.lpstrName      = fname;
+	    fd.cySize.s.Lo    = 80000;
+	    fd.cySize.s.Hi    = 0;
+	    fd.sWeight 	      = 0;
+	    fd.sCharset       = 0;
+	    fd.fItalic	      = 0;
+	    fd.fUnderline     = 0;
+	    fd.fStrikethrough = 0;
+	    return OleCreateFontIndirect(&fd,riid,ppobj);
+	}
+
+	FIXME("(%p)->(%p,%s,%p)\n",This,pOuter,debugstr_guid(riid),ppobj);
+	return E_NOINTERFACE;
+}
+
+static HRESULT WINAPI SFCF_LockServer(LPCLASSFACTORY iface,BOOL dolock) {
+	ICOM_THIS(IClassFactoryImpl,iface);
+	FIXME("(%p)->(%d),stub!\n",This,dolock);
+	return S_OK;
+}
+
+static ICOM_VTABLE(IClassFactory) SFCF_Vtbl = {
+	ICOM_MSVTABLE_COMPAT_DummyRTTIVALUE
+	SFCF_QueryInterface,
+	SFCF_AddRef,
+	SFCF_Release,
+	SFCF_CreateInstance,
+	SFCF_LockServer
+};
+static IClassFactoryImpl STDFONT_CF = {&SFCF_Vtbl, 1 };
+
+void _get_STDFONT_CF(LPVOID *ppv) { *ppv = (LPVOID)&STDFONT_CF; }

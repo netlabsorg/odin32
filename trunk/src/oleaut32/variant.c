@@ -19,7 +19,6 @@
  *   - The date manipulations do not support dates prior to 1900.
  *   - The parsing does not accept as many formats as the Windows implementation.
  */
-
 #ifdef __WIN32OS2__
 #define HAVE_FLOAT_H
 #define WINE_LARGE_INTEGER
@@ -120,7 +119,7 @@ static const double DAYS_IN_ONE_YEAR = 365.2425;
  * the tm struct, tm_sec, tm_min, tm_hour, tm_year, tm_day, tm_mon.
  *
  ******************************************************************************/
-static BOOL DateTimeStringToTm( OLECHAR* strIn, LCID lcid, struct tm* pTm )
+static BOOL DateTimeStringToTm( OLECHAR* strIn, DWORD dwFlags, struct tm* pTm )
 {
 	BOOL res = FALSE;
 	double		fsec;
@@ -146,7 +145,7 @@ static BOOL DateTimeStringToTm( OLECHAR* strIn, LCID lcid, struct tm* pTm )
 		{
 			if( ParseDateTime( strDateTime, lowstr, field, ftype, MAXDATEFIELDS, &nf) == 0 )
 			{
-				if( lcid & VAR_DATEVALUEONLY )
+				if( dwFlags & VAR_DATEVALUEONLY )
 				{
 					/* Get the date information.
 					 * It returns 0 if date information was
@@ -164,7 +163,7 @@ static BOOL DateTimeStringToTm( OLECHAR* strIn, LCID lcid, struct tm* pTm )
 						res = TRUE;
 					}
 				}
-				if( lcid & VAR_TIMEVALUEONLY )
+				if( dwFlags & VAR_TIMEVALUEONLY )
 				{
 					/* Get time information only.
 					 */
@@ -337,7 +336,7 @@ static BOOL TmToDATE( struct tm* pTm, DATE *pDateOut )
  *
  * Returns TRUE if successful.
  */
-static BOOL DateToTm( DATE dateIn, LCID lcid, struct tm* pTm )
+static BOOL DateToTm( DATE dateIn, DWORD dwFlags, struct tm* pTm )
 {
 	/* Do not process dates smaller than January 1, 1900.
 	 * Which corresponds to 2.0 in the windows DATE format.
@@ -349,24 +348,24 @@ static BOOL DateToTm( DATE dateIn, LCID lcid, struct tm* pTm )
 
 		memset(pTm,0,sizeof(*pTm));
 	
-		/* Because of the nature of DATE format witch
+		/* Because of the nature of DATE format which
 		 * associates 2.0 to January 1, 1900. We will
 		 * remove 1.0 from the whole part of the DATE
 		 * so that in the following code 1.0
 		 * will correspond to January 1, 1900.
-		 * This simplyfies the processing of the DATE value.
+		 * This simplifies the processing of the DATE value.
 		 */
 		dateIn -= 1.0;
 
 		wholePart = (double) floor( dateIn );
 		decimalPart = fmod( dateIn, wholePart );
 
-		if( !(lcid & VAR_TIMEVALUEONLY) )
+		if( !(dwFlags & VAR_TIMEVALUEONLY) )
 		{
 			int nDay = 0;
 			int leapYear = 0;
 			double yearsSince1900 = 0;
-			/* Start at 1900, this where the DATE time 0.0 starts.
+			/* Start at 1900, this is where the DATE time 0.0 starts.
 			 */
 			pTm->tm_year = 1900;
 			/* find in what year the day in the "wholePart" falls into.
@@ -382,15 +381,15 @@ static BOOL DateToTm( DATE dateIn, LCID lcid, struct tm* pTm )
 				wholePart++;
 			}
 
-			/* find what day of that year does the "wholePart" corresponds to.
+			/* find what day of that year the "wholePart" corresponds to.
 			 * Note: nDay is in [1-366] format
 			 */
 			nDay = (int) ( wholePart - floor( yearsSince1900 * DAYS_IN_ONE_YEAR ) );
 			/* Set the tm_yday value.
-			 * Note: The day is must be converted from [1-366] to [0-365]
+			 * Note: The day must be converted from [1-366] to [0-365]
 			 */
 			/*pTm->tm_yday = nDay - 1;*/
-			/* find which mount this day corresponds to.
+			/* find which month this day corresponds to.
 			 */
 			if( nDay <= 31 )
 			{
@@ -453,7 +452,7 @@ static BOOL DateToTm( DATE dateIn, LCID lcid, struct tm* pTm )
 				pTm->tm_mon = 11;
 			}
 		}
-		if( !(lcid & VAR_DATEVALUEONLY) )
+		if( !(dwFlags & VAR_DATEVALUEONLY) )
 		{
 			/* find the number of seconds in this day.
 			 * fractional part times, hours, minutes, seconds.
@@ -478,7 +477,7 @@ static BOOL DateToTm( DATE dateIn, LCID lcid, struct tm* pTm )
 static int SizeOfVariantData( VARIANT* parg )
 {
     int size = 0;
-    switch( parg->vt & VT_TYPEMASK )
+    switch( V_VT(parg) & VT_TYPEMASK )
     {
     case( VT_I2 ):
         size = sizeof(short);
@@ -521,7 +520,7 @@ static int SizeOfVariantData( VARIANT* parg )
     case( VT_UNKNOWN ):
     case( VT_DECIMAL ):
     default:
-        FIXME("Add size information for type vt=%d\n", parg->vt & VT_TYPEMASK );
+        FIXME("Add size information for type vt=%d\n", V_VT(parg) & VT_TYPEMASK );
         break;
     }
 
@@ -878,12 +877,16 @@ static BOOL IsValidRealString( LPSTR strRealString )
  *
  * This function dispatches execution to the proper conversion API
  * to do the necessary coercion.
+ *
+ * FIXME: Passing down dwFlags to the conversion functions is wrong, this
+ * 	  is a different flagmask. Check MSDN.
  */
 static HRESULT Coerce( VARIANTARG* pd, LCID lcid, ULONG dwFlags, VARIANTARG* ps, VARTYPE vt )
 {
 	HRESULT res = S_OK;
 	unsigned short vtFrom = 0;
-	vtFrom = ps->vt & VT_TYPEMASK;
+	vtFrom = V_VT(ps) & VT_TYPEMASK;
+
 	
 	/* Note: Since "long" and "int" values both have 4 bytes and are
 	 * both signed integers "int" will be treated as "long" in the
@@ -909,7 +912,7 @@ static HRESULT Coerce( VARIANTARG* pd, LCID lcid, ULONG dwFlags, VARIANTARG* ps,
         res = VariantClear( pd );
         if( res == S_OK )
         {
-            pd->vt = VT_NULL;
+            V_VT(pd) = VT_NULL;
         }
         break;
 	case( VT_I1 ):
@@ -919,45 +922,45 @@ static HRESULT Coerce( VARIANTARG* pd, LCID lcid, ULONG dwFlags, VARIANTARG* ps,
             res = VariantCopy( pd, ps );
             break;
 		case( VT_I2 ):
-			res = VarI1FromI2( ps->u.iVal, &(pd->u.cVal) );
+			res = VarI1FromI2( V_UNION(ps,iVal), &V_UNION(pd,cVal) );
 			break;
 		case( VT_INT ):
 		case( VT_I4 ):
-			res = VarI1FromI4( ps->u.lVal, &(pd->u.cVal) );
+			res = VarI1FromI4( V_UNION(ps,lVal), &V_UNION(pd,cVal) );
 			break;
 		case( VT_UI1 ):
-			res = VarI1FromUI1( ps->u.bVal, &(pd->u.cVal) );
+			res = VarI1FromUI1( V_UNION(ps,bVal), &V_UNION(pd,cVal) );
 			break;
 		case( VT_UI2 ):
-			res = VarI1FromUI2( ps->u.uiVal, &(pd->u.cVal) );
+			res = VarI1FromUI2( V_UNION(ps,uiVal), &V_UNION(pd,cVal) );
 			break;
 		case( VT_UINT ):
 		case( VT_UI4 ):
-			res = VarI1FromUI4( ps->u.ulVal, &(pd->u.cVal) );
+			res = VarI1FromUI4( V_UNION(ps,ulVal), &V_UNION(pd,cVal) );
 			break;
 		case( VT_R4 ):
-			res = VarI1FromR4( ps->u.fltVal, &(pd->u.cVal) );
+			res = VarI1FromR4( V_UNION(ps,fltVal), &V_UNION(pd,cVal) );
 			break;
 		case( VT_R8 ):
-			res = VarI1FromR8( ps->u.dblVal, &(pd->u.cVal) );
+			res = VarI1FromR8( V_UNION(ps,dblVal), &V_UNION(pd,cVal) );
 			break;
 		case( VT_DATE ):
-			res = VarI1FromDate( ps->u.date, &(pd->u.cVal) );
+			res = VarI1FromDate( V_UNION(ps,date), &V_UNION(pd,cVal) );
 			break;
 		case( VT_BOOL ):
-			res = VarI1FromBool( ps->u.boolVal, &(pd->u.cVal) );
+			res = VarI1FromBool( V_UNION(ps,boolVal), &V_UNION(pd,cVal) );
 			break;
 		case( VT_BSTR ):
-			res = VarI1FromStr( ps->u.bstrVal, lcid, dwFlags, &(pd->u.cVal) );
+			res = VarI1FromStr( V_UNION(ps,bstrVal), lcid, 0, &V_UNION(pd,cVal) );
 			break;
 		case( VT_CY ):
-	     res = VarI1FromCy( ps->u.cyVal, &(pd->u.cVal) );
+			res = VarI1FromCy( V_UNION(ps,cyVal), &V_UNION(pd,cVal) );
+			break;
 		case( VT_DISPATCH ):
-			/*res = VarI1FromDisp32( ps->u.pdispVal, lcid, &(pd->u.cVal) );*/
-		case( VT_UNKNOWN ):
-			/*res = VarI1From32( ps->u.lVal, &(pd->u.cVal) );*/
+			/*res = VarI1FromDisp( V_UNION(ps,pdispVal), lcid, &V_UNION(pd,cVal) );*/
 		case( VT_DECIMAL ):
-			/*res = VarI1FromDec32( ps->u.decVal, &(pd->u.cVal) );*/
+			/*res = VarI1FromDec( V_UNION(ps,decVal), &V_UNION(pd,cVal) );*/
+		case( VT_UNKNOWN ):
 		default:
 			res = DISP_E_TYPEMISMATCH;
 			FIXME("Coercion from %d to %d\n", vtFrom, vt );
@@ -969,48 +972,48 @@ static HRESULT Coerce( VARIANTARG* pd, LCID lcid, ULONG dwFlags, VARIANTARG* ps,
 		switch( vtFrom )
 		{
 		case( VT_I1 ):
-			res = VarI2FromI1( ps->u.cVal, &(pd->u.iVal) );
+			res = VarI2FromI1( V_UNION(ps,cVal), &V_UNION(pd,iVal) );
 			break;
         case( VT_I2 ):
             res = VariantCopy( pd, ps );
             break;
 		case( VT_INT ):
 		case( VT_I4 ):
-			res = VarI2FromI4( ps->u.lVal, &(pd->u.iVal) );
+			res = VarI2FromI4( V_UNION(ps,lVal), &V_UNION(pd,iVal) );
 			break;
 		case( VT_UI1 ):
-			res = VarI2FromUI1( ps->u.bVal, &(pd->u.iVal) );
+			res = VarI2FromUI1( V_UNION(ps,bVal), &V_UNION(pd,iVal) );
 			break;
 		case( VT_UI2 ):
-			res = VarI2FromUI2( ps->u.uiVal, &(pd->u.iVal) );
+			res = VarI2FromUI2( V_UNION(ps,uiVal), &V_UNION(pd,iVal) );
 			break;
 		case( VT_UINT ):
 		case( VT_UI4 ):
-			res = VarI2FromUI4( ps->u.ulVal, &(pd->u.iVal) );
+			res = VarI2FromUI4( V_UNION(ps,ulVal), &V_UNION(pd,iVal) );
 			break;
 		case( VT_R4 ):
-			res = VarI2FromR4( ps->u.fltVal, &(pd->u.iVal) );
+			res = VarI2FromR4( V_UNION(ps,fltVal), &V_UNION(pd,iVal) );
 			break;
 		case( VT_R8 ):
-			res = VarI2FromR8( ps->u.dblVal, &(pd->u.iVal) );
+			res = VarI2FromR8( V_UNION(ps,dblVal), &V_UNION(pd,iVal) );
 			break;
 		case( VT_DATE ):
-			res = VarI2FromDate( ps->u.date, &(pd->u.iVal) );
+			res = VarI2FromDate( V_UNION(ps,date), &V_UNION(pd,iVal) );
 			break;
 		case( VT_BOOL ):
-			res = VarI2FromBool( ps->u.boolVal, &(pd->u.iVal) );
+			res = VarI2FromBool( V_UNION(ps,boolVal), &V_UNION(pd,iVal) );
 			break;
 		case( VT_BSTR ):
-			res = VarI2FromStr( ps->u.bstrVal, lcid, dwFlags, &(pd->u.iVal) );
+			res = VarI2FromStr( V_UNION(ps,bstrVal), lcid, 0, &V_UNION(pd,iVal) );
 			break;
 		case( VT_CY ):
-	     res = VarI2FromCy( ps->u.cyVal, &(pd->u.iVal) );
+			res = VarI2FromCy( V_UNION(ps,cyVal), &V_UNION(pd,iVal) );
+			break;
 		case( VT_DISPATCH ):
-			/*res = VarI2FromDisp32( ps->u.pdispVal, lcid, &(pd->u.iVal) );*/
-		case( VT_UNKNOWN ):
-			/*res = VarI2From32( ps->u.lVal, &(pd->u.iVal) );*/
+			/*res = VarI2FromDisp( V_UNION(ps,pdispVal), lcid, &V_UNION(pd,iVal) );*/
 		case( VT_DECIMAL ):
-			/*res = VarI2FromDec32( ps->u.deiVal, &(pd->u.iVal) );*/
+			/*res = VarI2FromDec( V_UNION(ps,deiVal), &V_UNION(pd,iVal) );*/
+		case( VT_UNKNOWN ):
 		default:
 			res = DISP_E_TYPEMISMATCH;
 			FIXME("Coercion from %d to %d\n", vtFrom, vt );
@@ -1023,10 +1026,10 @@ static HRESULT Coerce( VARIANTARG* pd, LCID lcid, ULONG dwFlags, VARIANTARG* ps,
 		switch( vtFrom )
 		{
 		case( VT_I1 ):
-			res = VarI4FromI1( ps->u.cVal, &(pd->u.lVal) );
+			res = VarI4FromI1( V_UNION(ps,cVal), &V_UNION(pd,lVal) );
 			break;
 		case( VT_I2 ):
-			res = VarI4FromI2( ps->u.iVal, &(pd->u.lVal) );
+			res = VarI4FromI2( V_UNION(ps,iVal), &V_UNION(pd,lVal) );
             break;
         case( VT_INT ):
         case( VT_I4 ):
@@ -1036,38 +1039,38 @@ static HRESULT Coerce( VARIANTARG* pd, LCID lcid, ULONG dwFlags, VARIANTARG* ps,
             res = VariantCopy( pd, ps );
             break;
 		case( VT_UI1 ):
-			res = VarI4FromUI1( ps->u.bVal, &(pd->u.lVal) );
+			res = VarI4FromUI1( V_UNION(ps,bVal), &V_UNION(pd,lVal) );
 			break;
 		case( VT_UI2 ):
-			res = VarI4FromUI2( ps->u.uiVal, &(pd->u.lVal) );
+			res = VarI4FromUI2( V_UNION(ps,uiVal), &V_UNION(pd,lVal) );
 			break;
 		case( VT_UINT ):
 		case( VT_UI4 ):
-			res = VarI4FromUI4( ps->u.ulVal, &(pd->u.lVal) );
+			res = VarI4FromUI4( V_UNION(ps,ulVal), &V_UNION(pd,lVal) );
 			break;
 		case( VT_R4 ):
-			res = VarI4FromR4( ps->u.fltVal, &(pd->u.lVal) );
+			res = VarI4FromR4( V_UNION(ps,fltVal), &V_UNION(pd,lVal) );
 			break;
 		case( VT_R8 ):
-			res = VarI4FromR8( ps->u.dblVal, &(pd->u.lVal) );
+			res = VarI4FromR8( V_UNION(ps,dblVal), &V_UNION(pd,lVal) );
 			break;
 		case( VT_DATE ):
-			res = VarI4FromDate( ps->u.date, &(pd->u.lVal) );
+			res = VarI4FromDate( V_UNION(ps,date), &V_UNION(pd,lVal) );
 			break;
 		case( VT_BOOL ):
-			res = VarI4FromBool( ps->u.boolVal, &(pd->u.lVal) );
+			res = VarI4FromBool( V_UNION(ps,boolVal), &V_UNION(pd,lVal) );
 			break;
 		case( VT_BSTR ):
-			res = VarI4FromStr( ps->u.bstrVal, lcid, dwFlags, &(pd->u.lVal) );
+			res = VarI4FromStr( V_UNION(ps,bstrVal), lcid, 0, &V_UNION(pd,lVal) );
 			break;
 		case( VT_CY ):
-	     res = VarI4FromCy( ps->u.cyVal, &(pd->u.lVal) );
+			res = VarI4FromCy( V_UNION(ps,cyVal), &V_UNION(pd,lVal) );
+			break;
 		case( VT_DISPATCH ):
-			/*res = VarI4FromDisp32( ps->u.pdispVal, lcid, &(pd->u.lVal) );*/
-		case( VT_UNKNOWN ):
-			/*res = VarI4From32( ps->u.lVal, &(pd->u.lVal) );*/
+			/*res = VarI4FromDisp( V_UNION(ps,pdispVal), lcid, &V_UNION(pd,lVal) );*/
 		case( VT_DECIMAL ):
-			/*res = VarI4FromDec32( ps->u.deiVal, &(pd->u.lVal) );*/
+			/*res = VarI4FromDec( V_UNION(ps,deiVal), &V_UNION(pd,lVal) );*/
+		case( VT_UNKNOWN ):
 		default:
 			res = DISP_E_TYPEMISMATCH;
 			FIXME("Coercion from %d to %d\n", vtFrom, vt );
@@ -1079,48 +1082,48 @@ static HRESULT Coerce( VARIANTARG* pd, LCID lcid, ULONG dwFlags, VARIANTARG* ps,
 		switch( vtFrom )
 		{
 		case( VT_I1 ):
-			res = VarUI1FromI1( ps->u.cVal, &(pd->u.bVal) );
+			res = VarUI1FromI1( V_UNION(ps,cVal), &V_UNION(pd,bVal) );
 			break;
 		case( VT_I2 ):
-			res = VarUI1FromI2( ps->u.iVal, &(pd->u.bVal) );
+			res = VarUI1FromI2( V_UNION(ps,iVal), &V_UNION(pd,bVal) );
 			break;
 		case( VT_INT ):
 		case( VT_I4 ):
-			res = VarUI1FromI4( ps->u.lVal, &(pd->u.bVal) );
+			res = VarUI1FromI4( V_UNION(ps,lVal), &V_UNION(pd,bVal) );
 			break;
         case( VT_UI1 ):
             res = VariantCopy( pd, ps );
             break;
 		case( VT_UI2 ):
-			res = VarUI1FromUI2( ps->u.uiVal, &(pd->u.bVal) );
+			res = VarUI1FromUI2( V_UNION(ps,uiVal), &V_UNION(pd,bVal) );
 			break;
 		case( VT_UINT ):
 		case( VT_UI4 ):
-			res = VarUI1FromUI4( ps->u.ulVal, &(pd->u.bVal) );
+			res = VarUI1FromUI4( V_UNION(ps,ulVal), &V_UNION(pd,bVal) );
 			break;
 		case( VT_R4 ):
-			res = VarUI1FromR4( ps->u.fltVal, &(pd->u.bVal) );
+			res = VarUI1FromR4( V_UNION(ps,fltVal), &V_UNION(pd,bVal) );
 			break;
 		case( VT_R8 ):
-			res = VarUI1FromR8( ps->u.dblVal, &(pd->u.bVal) );
+			res = VarUI1FromR8( V_UNION(ps,dblVal), &V_UNION(pd,bVal) );
 			break;
 		case( VT_DATE ):
-			res = VarUI1FromDate( ps->u.date, &(pd->u.bVal) );
+			res = VarUI1FromDate( V_UNION(ps,date), &V_UNION(pd,bVal) );
 			break;
 		case( VT_BOOL ):
-			res = VarUI1FromBool( ps->u.boolVal, &(pd->u.bVal) );
+			res = VarUI1FromBool( V_UNION(ps,boolVal), &V_UNION(pd,bVal) );
 			break;
 		case( VT_BSTR ):
-			res = VarUI1FromStr( ps->u.bstrVal, lcid, dwFlags, &(pd->u.bVal) );
+			res = VarUI1FromStr( V_UNION(ps,bstrVal), lcid, 0, &V_UNION(pd,bVal) );
 			break;
 		case( VT_CY ):
-	     res = VarUI1FromCy( ps->u.cyVal, &(pd->u.bVal) );
+			res = VarUI1FromCy( V_UNION(ps,cyVal), &V_UNION(pd,bVal) );
+			break;
 		case( VT_DISPATCH ):
-			/*res = VarUI1FromDisp32( ps->u.pdispVal, lcid, &(pd->u.bVal) );*/
-		case( VT_UNKNOWN ):
-			/*res = VarUI1From32( ps->u.lVal, &(pd->u.bVal) );*/
+			/*res = VarUI1FromDisp( V_UNION(ps,pdispVal), lcid, &V_UNION(pd,bVal) );*/
 		case( VT_DECIMAL ):
-			/*res = VarUI1FromDec32( ps->u.deiVal, &(pd->u.bVal) );*/
+			/*res = VarUI1FromDec( V_UNION(ps,deiVal), &V_UNION(pd,bVal) );*/
+		case( VT_UNKNOWN ):
 		default:
 			res = DISP_E_TYPEMISMATCH;
 			FIXME("Coercion from %d to %d\n", vtFrom, vt );
@@ -1132,48 +1135,48 @@ static HRESULT Coerce( VARIANTARG* pd, LCID lcid, ULONG dwFlags, VARIANTARG* ps,
 		switch( vtFrom )
 		{
 		case( VT_I1 ):
-			res = VarUI2FromI1( ps->u.cVal, &(pd->u.uiVal) );
+			res = VarUI2FromI1( V_UNION(ps,cVal), &V_UNION(pd,uiVal) );
 			break;
 		case( VT_I2 ):
-			res = VarUI2FromI2( ps->u.iVal, &(pd->u.uiVal) );
+			res = VarUI2FromI2( V_UNION(ps,iVal), &V_UNION(pd,uiVal) );
 			break;
 		case( VT_INT ):
 		case( VT_I4 ):
-			res = VarUI2FromI4( ps->u.lVal, &(pd->u.uiVal) );
+			res = VarUI2FromI4( V_UNION(ps,lVal), &V_UNION(pd,uiVal) );
 			break;
 		case( VT_UI1 ):
-			res = VarUI2FromUI1( ps->u.bVal, &(pd->u.uiVal) );
+			res = VarUI2FromUI1( V_UNION(ps,bVal), &V_UNION(pd,uiVal) );
 			break;
         case( VT_UI2 ):
             res = VariantCopy( pd, ps );
             break;
 		case( VT_UINT ):
 		case( VT_UI4 ):
-			res = VarUI2FromUI4( ps->u.ulVal, &(pd->u.uiVal) );
+			res = VarUI2FromUI4( V_UNION(ps,ulVal), &V_UNION(pd,uiVal) );
 			break;
 		case( VT_R4 ):
-			res = VarUI2FromR4( ps->u.fltVal, &(pd->u.uiVal) );
+			res = VarUI2FromR4( V_UNION(ps,fltVal), &V_UNION(pd,uiVal) );
 			break;
 		case( VT_R8 ):
-			res = VarUI2FromR8( ps->u.dblVal, &(pd->u.uiVal) );
+			res = VarUI2FromR8( V_UNION(ps,dblVal), &V_UNION(pd,uiVal) );
 			break;
 		case( VT_DATE ):
-			res = VarUI2FromDate( ps->u.date, &(pd->u.uiVal) );
+			res = VarUI2FromDate( V_UNION(ps,date), &V_UNION(pd,uiVal) );
 			break;
 		case( VT_BOOL ):
-			res = VarUI2FromBool( ps->u.boolVal, &(pd->u.uiVal) );
+			res = VarUI2FromBool( V_UNION(ps,boolVal), &V_UNION(pd,uiVal) );
 			break;
 		case( VT_BSTR ):
-			res = VarUI2FromStr( ps->u.bstrVal, lcid, dwFlags, &(pd->u.uiVal) );
+			res = VarUI2FromStr( V_UNION(ps,bstrVal), lcid, 0, &V_UNION(pd,uiVal) );
 			break;
 		case( VT_CY ):
-	     res = VarUI2FromCy( ps->u.cyVal, &(pd->u.uiVal) );
+			res = VarUI2FromCy( V_UNION(ps,cyVal), &V_UNION(pd,uiVal) );
+			break;
 		case( VT_DISPATCH ):
-			/*res = VarUI2FromDisp32( ps->u.pdispVal, lcid, &(pd->u.uiVal) );*/
-		case( VT_UNKNOWN ):
-			/*res = VarUI2From32( ps->u.lVal, &(pd->u.uiVal) );*/
+			/*res = VarUI2FromDisp( V_UNION(ps,pdispVal), lcid, &V_UNION(pd,uiVal) );*/
 		case( VT_DECIMAL ):
-			/*res = VarUI2FromDec32( ps->u.deiVal, &(pd->u.uiVal) );*/
+			/*res = VarUI2FromDec( V_UNION(ps,deiVal), &V_UNION(pd,uiVal) );*/
+		case( VT_UNKNOWN ):
 		default:
 			res = DISP_E_TYPEMISMATCH;
 			FIXME("Coercion from %d to %d\n", vtFrom, vt );
@@ -1186,47 +1189,47 @@ static HRESULT Coerce( VARIANTARG* pd, LCID lcid, ULONG dwFlags, VARIANTARG* ps,
 		switch( vtFrom )
 		{
 		case( VT_I1 ):
-			res = VarUI4FromI1( ps->u.cVal, &(pd->u.ulVal) );
+			res = VarUI4FromI1( V_UNION(ps,cVal), &V_UNION(pd,ulVal) );
 			break;
 		case( VT_I2 ):
-			res = VarUI4FromI2( ps->u.iVal, &(pd->u.ulVal) );
+			res = VarUI4FromI2( V_UNION(ps,iVal), &V_UNION(pd,ulVal) );
 			break;
 		case( VT_INT ):
 		case( VT_I4 ):
-			res = VarUI4FromI4( ps->u.lVal, &(pd->u.ulVal) );
+			res = VarUI4FromI4( V_UNION(ps,lVal), &V_UNION(pd,ulVal) );
 			break;
 		case( VT_UI1 ):
-			res = VarUI4FromUI1( ps->u.bVal, &(pd->u.ulVal) );
+			res = VarUI4FromUI1( V_UNION(ps,bVal), &V_UNION(pd,ulVal) );
 			break;
 		case( VT_UI2 ):
-			res = VarUI4FromUI2( ps->u.uiVal, &(pd->u.ulVal) );
+			res = VarUI4FromUI2( V_UNION(ps,uiVal), &V_UNION(pd,ulVal) );
 			break;
         case( VT_UI4 ):
             res = VariantCopy( pd, ps );
             break;
 		case( VT_R4 ):
-			res = VarUI4FromR4( ps->u.fltVal, &(pd->u.ulVal) );
+			res = VarUI4FromR4( V_UNION(ps,fltVal), &V_UNION(pd,ulVal) );
 			break;
 		case( VT_R8 ):
-			res = VarUI4FromR8( ps->u.dblVal, &(pd->u.ulVal) );
+			res = VarUI4FromR8( V_UNION(ps,dblVal), &V_UNION(pd,ulVal) );
 			break;
 		case( VT_DATE ):
-			res = VarUI4FromDate( ps->u.date, &(pd->u.ulVal) );
+			res = VarUI4FromDate( V_UNION(ps,date), &V_UNION(pd,ulVal) );
 			break;
 		case( VT_BOOL ):
-			res = VarUI4FromBool( ps->u.boolVal, &(pd->u.ulVal) );
+			res = VarUI4FromBool( V_UNION(ps,boolVal), &V_UNION(pd,ulVal) );
 			break;
 		case( VT_BSTR ):
-			res = VarUI4FromStr( ps->u.bstrVal, lcid, dwFlags, &(pd->u.ulVal) );
+			res = VarUI4FromStr( V_UNION(ps,bstrVal), lcid, 0, &V_UNION(pd,ulVal) );
 			break;
 		case( VT_CY ):
-	     res = VarUI4FromCy( ps->u.cyVal, &(pd->u.ulVal) );
+			res = VarUI4FromCy( V_UNION(ps,cyVal), &V_UNION(pd,ulVal) );
+			break;
 		case( VT_DISPATCH ):
-			/*res = VarUI4FromDisp32( ps->u.pdispVal, lcid, &(pd->u.ulVal) );*/
-		case( VT_UNKNOWN ):
-			/*res = VarUI4From32( ps->u.lVal, &(pd->u.ulVal) );*/
+			/*res = VarUI4FromDisp( V_UNION(ps,pdispVal), lcid, &V_UNION(pd,ulVal) );*/
 		case( VT_DECIMAL ):
-			/*res = VarUI4FromDec32( ps->u.deiVal, &(pd->u.ulVal) );*/
+			/*res = VarUI4FromDec( V_UNION(ps,deiVal), &V_UNION(pd,ulVal) );*/
+		case( VT_UNKNOWN ):
 		default:
 			res = DISP_E_TYPEMISMATCH;
 			FIXME("Coercion from %d to %d\n", vtFrom, vt );
@@ -1238,48 +1241,48 @@ static HRESULT Coerce( VARIANTARG* pd, LCID lcid, ULONG dwFlags, VARIANTARG* ps,
 		switch( vtFrom )
 		{
 		case( VT_I1 ):
-			res = VarR4FromI1( ps->u.cVal, &(pd->u.fltVal) );
+			res = VarR4FromI1( V_UNION(ps,cVal), &V_UNION(pd,fltVal) );
 			break;
 		case( VT_I2 ):
-			res = VarR4FromI2( ps->u.iVal, &(pd->u.fltVal) );
+			res = VarR4FromI2( V_UNION(ps,iVal), &V_UNION(pd,fltVal) );
 			break;
 		case( VT_INT ):
 		case( VT_I4 ):
-			res = VarR4FromI4( ps->u.lVal, &(pd->u.fltVal) );
+			res = VarR4FromI4( V_UNION(ps,lVal), &V_UNION(pd,fltVal) );
 			break;
 		case( VT_UI1 ):
-			res = VarR4FromUI1( ps->u.bVal, &(pd->u.fltVal) );
+			res = VarR4FromUI1( V_UNION(ps,bVal), &V_UNION(pd,fltVal) );
 			break;
 		case( VT_UI2 ):
-			res = VarR4FromUI2( ps->u.uiVal, &(pd->u.fltVal) );
+			res = VarR4FromUI2( V_UNION(ps,uiVal), &V_UNION(pd,fltVal) );
 			break;
 		case( VT_UINT ):
 		case( VT_UI4 ):
-			res = VarR4FromUI4( ps->u.ulVal, &(pd->u.fltVal) );
+			res = VarR4FromUI4( V_UNION(ps,ulVal), &V_UNION(pd,fltVal) );
 			break;
         case( VT_R4 ):
             res = VariantCopy( pd, ps );
             break;
 		case( VT_R8 ):
-			res = VarR4FromR8( ps->u.dblVal, &(pd->u.fltVal) );
+			res = VarR4FromR8( V_UNION(ps,dblVal), &V_UNION(pd,fltVal) );
 			break;
 		case( VT_DATE ):
-			res = VarR4FromDate( ps->u.date, &(pd->u.fltVal) );
+			res = VarR4FromDate( V_UNION(ps,date), &V_UNION(pd,fltVal) );
 			break;
 		case( VT_BOOL ):
-			res = VarR4FromBool( ps->u.boolVal, &(pd->u.fltVal) );
+			res = VarR4FromBool( V_UNION(ps,boolVal), &V_UNION(pd,fltVal) );
 			break;
 		case( VT_BSTR ):
-			res = VarR4FromStr( ps->u.bstrVal, lcid, dwFlags, &(pd->u.fltVal) );
+			res = VarR4FromStr( V_UNION(ps,bstrVal), lcid, 0, &V_UNION(pd,fltVal) );
 			break;
 		case( VT_CY ):
-	     res = VarR4FromCy( ps->u.cyVal, &(pd->u.fltVal) );
+			res = VarR4FromCy( V_UNION(ps,cyVal), &V_UNION(pd,fltVal) );
+			break;
 		case( VT_DISPATCH ):
-			/*res = VarR4FromDisp32( ps->u.pdispVal, lcid, &(pd->u.fltVal) );*/
-		case( VT_UNKNOWN ):
-			/*res = VarR4From32( ps->u.lVal, &(pd->u.fltVal) );*/
+			/*res = VarR4FromDisp( V_UNION(ps,pdispVal), lcid, &V_UNION(pd,fltVal) );*/
 		case( VT_DECIMAL ):
-			/*res = VarR4FromDec32( ps->u.deiVal, &(pd->u.fltVal) );*/
+			/*res = VarR4FromDec( V_UNION(ps,deiVal), &V_UNION(pd,fltVal) );*/
+		case( VT_UNKNOWN ):
 		default:
 			res = DISP_E_TYPEMISMATCH;
 			FIXME("Coercion from %d to %d\n", vtFrom, vt );
@@ -1291,48 +1294,48 @@ static HRESULT Coerce( VARIANTARG* pd, LCID lcid, ULONG dwFlags, VARIANTARG* ps,
 		switch( vtFrom )
 		{
 		case( VT_I1 ):
-			res = VarR8FromI1( ps->u.cVal, &(pd->u.dblVal) );
+			res = VarR8FromI1( V_UNION(ps,cVal), &V_UNION(pd,dblVal) );
 			break;
 		case( VT_I2 ):
-			res = VarR8FromI2( ps->u.iVal, &(pd->u.dblVal) );
+			res = VarR8FromI2( V_UNION(ps,iVal), &V_UNION(pd,dblVal) );
 			break;
 		case( VT_INT ):
 		case( VT_I4 ):
-			res = VarR8FromI4( ps->u.lVal, &(pd->u.dblVal) );
+			res = VarR8FromI4( V_UNION(ps,lVal), &V_UNION(pd,dblVal) );
 			break;
 		case( VT_UI1 ):
-			res = VarR8FromUI1( ps->u.bVal, &(pd->u.dblVal) );
+			res = VarR8FromUI1( V_UNION(ps,bVal), &V_UNION(pd,dblVal) );
 			break;
 		case( VT_UI2 ):
-			res = VarR8FromUI2( ps->u.uiVal, &(pd->u.dblVal) );
+			res = VarR8FromUI2( V_UNION(ps,uiVal), &V_UNION(pd,dblVal) );
 			break;
 		case( VT_UINT ):
 		case( VT_UI4 ):
-			res = VarR8FromUI4( ps->u.ulVal, &(pd->u.dblVal) );
+			res = VarR8FromUI4( V_UNION(ps,ulVal), &V_UNION(pd,dblVal) );
 			break;
 		case( VT_R4 ):
-			res = VarR8FromR4( ps->u.fltVal, &(pd->u.dblVal) );
+			res = VarR8FromR4( V_UNION(ps,fltVal), &V_UNION(pd,dblVal) );
 			break;
         case( VT_R8 ):
             res = VariantCopy( pd, ps );
             break;
 		case( VT_DATE ):
-			res = VarR8FromDate( ps->u.date, &(pd->u.dblVal) );
+			res = VarR8FromDate( V_UNION(ps,date), &V_UNION(pd,dblVal) );
 			break;
 		case( VT_BOOL ):
-			res = VarR8FromBool( ps->u.boolVal, &(pd->u.dblVal) );
+			res = VarR8FromBool( V_UNION(ps,boolVal), &V_UNION(pd,dblVal) );
 			break;
 		case( VT_BSTR ):
-			res = VarR8FromStr( ps->u.bstrVal, lcid, dwFlags, &(pd->u.dblVal) );
+			res = VarR8FromStr( V_UNION(ps,bstrVal), lcid, 0, &V_UNION(pd,dblVal) );
 			break;
 		case( VT_CY ):
-	     res = VarR8FromCy( ps->u.cyVal, &(pd->u.dblVal) );
+			res = VarR8FromCy( V_UNION(ps,cyVal), &V_UNION(pd,dblVal) );
+			break;
 		case( VT_DISPATCH ):
-			/*res = VarR8FromDisp32( ps->u.pdispVal, lcid, &(pd->u.dblVal) );*/
-		case( VT_UNKNOWN ):
-			/*res = VarR8From32( ps->u.lVal, &(pd->u.dblVal) );*/
+			/*res = VarR8FromDisp( V_UNION(ps,pdispVal), lcid, &V_UNION(pd,dblVal) );*/
 		case( VT_DECIMAL ):
-			/*res = VarR8FromDec32( ps->u.deiVal, &(pd->u.dblVal) );*/
+			/*res = VarR8FromDec( V_UNION(ps,deiVal), &V_UNION(pd,dblVal) );*/
+		case( VT_UNKNOWN ):
 		default:
 			res = DISP_E_TYPEMISMATCH;
 			FIXME("Coercion from %d to %d\n", vtFrom, vt );
@@ -1344,52 +1347,52 @@ static HRESULT Coerce( VARIANTARG* pd, LCID lcid, ULONG dwFlags, VARIANTARG* ps,
 		switch( vtFrom )
 		{
 		case( VT_I1 ):
-			res = VarDateFromI1( ps->u.cVal, &(pd->u.date) );
+			res = VarDateFromI1( V_UNION(ps,cVal), &V_UNION(pd,date) );
 			break;
 		case( VT_I2 ):
-			res = VarDateFromI2( ps->u.iVal, &(pd->u.date) );
+			res = VarDateFromI2( V_UNION(ps,iVal), &V_UNION(pd,date) );
 			break;
 		case( VT_INT ):
-			res = VarDateFromInt( ps->u.intVal, &(pd->u.date) );
+			res = VarDateFromInt( V_UNION(ps,intVal), &V_UNION(pd,date) );
 			break;
 		case( VT_I4 ):
-			res = VarDateFromI4( ps->u.lVal, &(pd->u.date) );
+			res = VarDateFromI4( V_UNION(ps,lVal), &V_UNION(pd,date) );
 			break;
 		case( VT_UI1 ):
-			res = VarDateFromUI1( ps->u.bVal, &(pd->u.date) );
+			res = VarDateFromUI1( V_UNION(ps,bVal), &V_UNION(pd,date) );
 			break;
 		case( VT_UI2 ):
-			res = VarDateFromUI2( ps->u.uiVal, &(pd->u.date) );
+			res = VarDateFromUI2( V_UNION(ps,uiVal), &V_UNION(pd,date) );
 			break;
 		case( VT_UINT ):
-			res = VarDateFromUint( ps->u.uintVal, &(pd->u.date) );
+			res = VarDateFromUint( V_UNION(ps,uintVal), &V_UNION(pd,date) );
 			break;
 		case( VT_UI4 ):
-			res = VarDateFromUI4( ps->u.ulVal, &(pd->u.date) );
+			res = VarDateFromUI4( V_UNION(ps,ulVal), &V_UNION(pd,date) );
 			break;
 		case( VT_R4 ):
-			res = VarDateFromR4( ps->u.fltVal, &(pd->u.date) );
+			res = VarDateFromR4( V_UNION(ps,fltVal), &V_UNION(pd,date) );
 			break;
 		case( VT_R8 ):
-			res = VarDateFromR8( ps->u.dblVal, &(pd->u.date) );
+			res = VarDateFromR8( V_UNION(ps,dblVal), &V_UNION(pd,date) );
 			break;
         case( VT_DATE ):
             res = VariantCopy( pd, ps );
             break;
 		case( VT_BOOL ):
-			res = VarDateFromBool( ps->u.boolVal, &(pd->u.date) );
+			res = VarDateFromBool( V_UNION(ps,boolVal), &V_UNION(pd,date) );
 			break;
 		case( VT_BSTR ):
-			res = VarDateFromStr( ps->u.bstrVal, lcid, dwFlags, &(pd->u.date) );
+			res = VarDateFromStr( V_UNION(ps,bstrVal), lcid, 0, &V_UNION(pd,date) );
 			break;
 		case( VT_CY ):
-	     res = VarDateFromCy( ps->u.cyVal, &(pd->u.date) );
+			res = VarDateFromCy( V_UNION(ps,cyVal), &V_UNION(pd,date) );
+			break;
 		case( VT_DISPATCH ):
-			/*res = VarDateFromDisp32( ps->u.pdispVal, lcid, &(pd->u.date) );*/
-		case( VT_UNKNOWN ):
-			/*res = VarDateFrom32( ps->u.lVal, &(pd->u.date) );*/
+			/*res = VarDateFromDisp( V_UNION(ps,pdispVal), lcid, &V_UNION(pd,date) );*/
 		case( VT_DECIMAL ):
-			/*res = VarDateFromDec32( ps->u.deiVal, &(pd->u.date) );*/
+			/*res = VarDateFromDec( V_UNION(ps,deiVal), &V_UNION(pd,date) );*/
+		case( VT_UNKNOWN ):
 		default:
 			res = DISP_E_TYPEMISMATCH;
 			FIXME("Coercion from %d to %d\n", vtFrom, vt );
@@ -1401,52 +1404,52 @@ static HRESULT Coerce( VARIANTARG* pd, LCID lcid, ULONG dwFlags, VARIANTARG* ps,
 		switch( vtFrom )
 		{
 		case( VT_I1 ):
-			res = VarBoolFromI1( ps->u.cVal, &(pd->u.boolVal) );
+			res = VarBoolFromI1( V_UNION(ps,cVal), &V_UNION(pd,boolVal) );
 			break;
 		case( VT_I2 ):
-			res = VarBoolFromI2( ps->u.iVal, &(pd->u.boolVal) );
+			res = VarBoolFromI2( V_UNION(ps,iVal), &V_UNION(pd,boolVal) );
 			break;
 		case( VT_INT ):
-			res = VarBoolFromInt( ps->u.intVal, &(pd->u.boolVal) );
+			res = VarBoolFromInt( V_UNION(ps,intVal), &V_UNION(pd,boolVal) );
 			break;
 		case( VT_I4 ):
-			res = VarBoolFromI4( ps->u.lVal, &(pd->u.boolVal) );
+			res = VarBoolFromI4( V_UNION(ps,lVal), &V_UNION(pd,boolVal) );
 			break;
 		case( VT_UI1 ):
-			res = VarBoolFromUI1( ps->u.bVal, &(pd->u.boolVal) );
+			res = VarBoolFromUI1( V_UNION(ps,bVal), &V_UNION(pd,boolVal) );
 			break;
 		case( VT_UI2 ):
-			res = VarBoolFromUI2( ps->u.uiVal, &(pd->u.boolVal) );
+			res = VarBoolFromUI2( V_UNION(ps,uiVal), &V_UNION(pd,boolVal) );
 			break;
 		case( VT_UINT ):
-			res = VarBoolFromUint( ps->u.uintVal, &(pd->u.boolVal) );
+			res = VarBoolFromUint( V_UNION(ps,uintVal), &V_UNION(pd,boolVal) );
 			break;
 		case( VT_UI4 ):
-			res = VarBoolFromUI4( ps->u.ulVal, &(pd->u.boolVal) );
+			res = VarBoolFromUI4( V_UNION(ps,ulVal), &V_UNION(pd,boolVal) );
 			break;
 		case( VT_R4 ):
-			res = VarBoolFromR4( ps->u.fltVal, &(pd->u.boolVal) );
+			res = VarBoolFromR4( V_UNION(ps,fltVal), &V_UNION(pd,boolVal) );
 			break;
 		case( VT_R8 ):
-			res = VarBoolFromR8( ps->u.dblVal, &(pd->u.boolVal) );
+			res = VarBoolFromR8( V_UNION(ps,dblVal), &V_UNION(pd,boolVal) );
 			break;
 		case( VT_DATE ):
-			res = VarBoolFromDate( ps->u.date, &(pd->u.boolVal) );
+			res = VarBoolFromDate( V_UNION(ps,date), &V_UNION(pd,boolVal) );
 			break;
         case( VT_BOOL ):
             res = VariantCopy( pd, ps );
             break;
 		case( VT_BSTR ):
-			res = VarBoolFromStr( ps->u.bstrVal, lcid, dwFlags, &(pd->u.boolVal) );
+			res = VarBoolFromStr( V_UNION(ps,bstrVal), lcid, 0, &V_UNION(pd,boolVal) );
 			break;
 		case( VT_CY ):
-	     res = VarBoolFromCy( ps->u.cyVal, &(pd->u.boolVal) );
+			res = VarBoolFromCy( V_UNION(ps,cyVal), &V_UNION(pd,boolVal) );
+			break;
 		case( VT_DISPATCH ):
-			/*res = VarBoolFromDisp32( ps->u.pdispVal, lcid, &(pd->u.boolVal) );*/
-		case( VT_UNKNOWN ):
-			/*res = VarBoolFrom32( ps->u.lVal, &(pd->u.boolVal) );*/
+			/*res = VarBoolFromDisp( V_UNION(ps,pdispVal), lcid, &V_UNION(pd,boolVal) );*/
 		case( VT_DECIMAL ):
-			/*res = VarBoolFromDec32( ps->u.deiVal, &(pd->u.boolVal) );*/
+			/*res = VarBoolFromDec( V_UNION(ps,deiVal), &V_UNION(pd,boolVal) );*/
+		case( VT_UNKNOWN ):
 		default:
 			res = DISP_E_TYPEMISMATCH;
 			FIXME("Coercion from %d to %d\n", vtFrom, vt );
@@ -1458,58 +1461,58 @@ static HRESULT Coerce( VARIANTARG* pd, LCID lcid, ULONG dwFlags, VARIANTARG* ps,
 		switch( vtFrom )
 		{
 		case( VT_EMPTY ):
-			if ((pd->u.bstrVal = SysAllocStringLen(NULL, 0)))
+			if ((V_UNION(pd,bstrVal) = SysAllocStringLen(NULL, 0)))
 				res = S_OK;
 			else
 				res = E_OUTOFMEMORY;
 			break;
 		case( VT_I1 ):
-			res = VarBstrFromI1( ps->u.cVal, lcid, dwFlags, &(pd->u.bstrVal) );
+			res = VarBstrFromI1( V_UNION(ps,cVal), lcid, 0, &V_UNION(pd,bstrVal) );
 			break;
 		case( VT_I2 ):
-			res = VarBstrFromI2( ps->u.iVal, lcid, dwFlags, &(pd->u.bstrVal) );
+			res = VarBstrFromI2( V_UNION(ps,iVal), lcid, 0, &V_UNION(pd,bstrVal) );
 			break;
 		case( VT_INT ):
-			res = VarBstrFromInt( ps->u.intVal, lcid, dwFlags, &(pd->u.bstrVal) );
+			res = VarBstrFromInt( V_UNION(ps,intVal), lcid, 0, &V_UNION(pd,bstrVal) );
 			break;
 		case( VT_I4 ):
-			res = VarBstrFromI4( ps->u.lVal, lcid, dwFlags, &(pd->u.bstrVal) );
+			res = VarBstrFromI4( V_UNION(ps,lVal), lcid, 0, &V_UNION(pd,bstrVal) );
 			break;
 		case( VT_UI1 ):
-			res = VarBstrFromUI1( ps->u.bVal, lcid, dwFlags, &(pd->u.bstrVal) );
+			res = VarBstrFromUI1( V_UNION(ps,bVal), lcid, 0, &V_UNION(pd,bstrVal) );
 			break;
 		case( VT_UI2 ):
-			res = VarBstrFromUI2( ps->u.uiVal, lcid, dwFlags, &(pd->u.bstrVal) );
+			res = VarBstrFromUI2( V_UNION(ps,uiVal), lcid, 0, &V_UNION(pd,bstrVal) );
 			break;
 		case( VT_UINT ):
-			res = VarBstrFromUint( ps->u.uintVal, lcid, dwFlags, &(pd->u.bstrVal) );
+			res = VarBstrFromUint( V_UNION(ps,uintVal), lcid, 0, &V_UNION(pd,bstrVal) );
 			break;
 		case( VT_UI4 ):
-			res = VarBstrFromUI4( ps->u.ulVal, lcid, dwFlags, &(pd->u.bstrVal) );
+			res = VarBstrFromUI4( V_UNION(ps,ulVal), lcid, 0, &V_UNION(pd,bstrVal) );
 			break;
 		case( VT_R4 ):
-			res = VarBstrFromR4( ps->u.fltVal, lcid, dwFlags, &(pd->u.bstrVal) );
+			res = VarBstrFromR4( V_UNION(ps,fltVal), lcid, 0, &V_UNION(pd,bstrVal) );
 			break;
 		case( VT_R8 ):
-			res = VarBstrFromR8( ps->u.dblVal, lcid, dwFlags, &(pd->u.bstrVal) );
+			res = VarBstrFromR8( V_UNION(ps,dblVal), lcid, 0, &V_UNION(pd,bstrVal) );
 			break;
 		case( VT_DATE ):
-			res = VarBstrFromDate( ps->u.date, lcid, dwFlags, &(pd->u.bstrVal) );
+			res = VarBstrFromDate( V_UNION(ps,date), lcid, 0, &V_UNION(pd,bstrVal) );
 			break;
 		case( VT_BOOL ):
-			res = VarBstrFromBool( ps->u.boolVal, lcid, dwFlags, &(pd->u.bstrVal) );
+			res = VarBstrFromBool( V_UNION(ps,boolVal), lcid, 0, &V_UNION(pd,bstrVal) );
 			break;
-        case( VT_BSTR ):
-            res = VariantCopy( pd, ps );
-            break;
+		case( VT_BSTR ):
+			res = VariantCopy( pd, ps );
+			break;
 		case( VT_CY ):
-	     /*res = VarBstrFromCy32( ps->u.cyVal, lcid, dwFlags, &(pd->u.bstrVal) );*/
+			res = VarBstrFromCy( V_UNION(ps,cyVal), lcid, 0, &V_UNION(pd,bstrVal) );
+			break;
 		case( VT_DISPATCH ):
-			/*res = VarBstrFromDisp32( ps->u.pdispVal, lcid, lcid, dwFlags, &(pd->u.bstrVal) );*/
-		case( VT_UNKNOWN ):
-			/*res = VarBstrFrom32( ps->u.lVal, lcid, dwFlags, &(pd->u.bstrVal) );*/
+			/*res = VarBstrFromDisp( V_UNION(ps,pdispVal), lcid, 0, &(pd,bstrVal) );*/
 		case( VT_DECIMAL ):
-			/*res = VarBstrFromDec32( ps->u.deiVal, lcid, dwFlags, &(pd->u.bstrVal) );*/
+			/*res = VarBstrFromDec( V_UNION(ps,deiVal), lcid, 0, &(pd,bstrVal) );*/
+		case( VT_UNKNOWN ):
 		default:
 			res = DISP_E_TYPEMISMATCH;
 			FIXME("Coercion from %d to %d\n", vtFrom, vt );
@@ -1521,52 +1524,53 @@ static HRESULT Coerce( VARIANTARG* pd, LCID lcid, ULONG dwFlags, VARIANTARG* ps,
 	switch( vtFrom )
 	  {
 	  case( VT_I1 ):
-	     res = VarCyFromI1( ps->u.cVal, &(pd->u.cyVal) );
+	     res = VarCyFromI1( V_UNION(ps,cVal), &V_UNION(pd,cyVal) );
 	     break;
 	  case( VT_I2 ):
-	     res = VarCyFromI2( ps->u.iVal, &(pd->u.cyVal) );
+	     res = VarCyFromI2( V_UNION(ps,iVal), &V_UNION(pd,cyVal) );
 	     break;
 	  case( VT_INT ):
-	     res = VarCyFromInt( ps->u.intVal, &(pd->u.cyVal) );
+	     res = VarCyFromInt( V_UNION(ps,intVal), &V_UNION(pd,cyVal) );
 	     break;
 	  case( VT_I4 ):
-	     res = VarCyFromI4( ps->u.lVal, &(pd->u.cyVal) );
+	     res = VarCyFromI4( V_UNION(ps,lVal), &V_UNION(pd,cyVal) );
 	     break;
 	  case( VT_UI1 ):
-	     res = VarCyFromUI1( ps->u.bVal, &(pd->u.cyVal) );
+	     res = VarCyFromUI1( V_UNION(ps,bVal), &V_UNION(pd,cyVal) );
 	     break;
 	  case( VT_UI2 ):
-	     res = VarCyFromUI2( ps->u.uiVal, &(pd->u.cyVal) );
+	     res = VarCyFromUI2( V_UNION(ps,uiVal), &V_UNION(pd,cyVal) );
 	     break;
 	  case( VT_UINT ):
-	     res = VarCyFromUint( ps->u.uintVal, &(pd->u.cyVal) );
+	     res = VarCyFromUint( V_UNION(ps,uintVal), &V_UNION(pd,cyVal) );
 	     break;
 	  case( VT_UI4 ):
-	     res = VarCyFromUI4( ps->u.ulVal, &(pd->u.cyVal) );
+	     res = VarCyFromUI4( V_UNION(ps,ulVal), &V_UNION(pd,cyVal) );
 	     break;
 	  case( VT_R4 ):
-	     res = VarCyFromR4( ps->u.fltVal, &(pd->u.cyVal) );
+	     res = VarCyFromR4( V_UNION(ps,fltVal), &V_UNION(pd,cyVal) );
 	     break;
 	  case( VT_R8 ):
-	     res = VarCyFromR8( ps->u.dblVal, &(pd->u.cyVal) );
+	     res = VarCyFromR8( V_UNION(ps,dblVal), &V_UNION(pd,cyVal) );
 	     break;
 	  case( VT_DATE ):
-	     res = VarCyFromDate( ps->u.date, &(pd->u.cyVal) );
+	     res = VarCyFromDate( V_UNION(ps,date), &V_UNION(pd,cyVal) );
 	     break;
 	  case( VT_BOOL ):
-	     res = VarCyFromBool( ps->u.date, &(pd->u.cyVal) );
+	     res = VarCyFromBool( V_UNION(ps,date), &V_UNION(pd,cyVal) );
 	     break;
 	  case( VT_CY ):
 	     res = VariantCopy( pd, ps );
 	     break;
 	  case( VT_BSTR ):
-	     /*res = VarCyFromStr32( ps->u.bstrVal, lcid, dwFlags, &(pd->u.cyVal) );*/
+	     res = VarCyFromStr( V_UNION(ps,bstrVal), lcid, 0, &V_UNION(pd,cyVal) );
+	     break;
 	  case( VT_DISPATCH ):
-	     /*res = VarCyFromDisp32( ps->u.pdispVal, lcid, &(pd->u.boolVal) );*/
-	  case( VT_UNKNOWN ):
-	     /*res = VarCyFrom32( ps->u.lVal, &(pd->u.boolVal) );*/
+	     /*res = VarCyFromDisp( V_UNION(ps,pdispVal), lcid, &V_UNION(pd,cyVal) );*/
 	  case( VT_DECIMAL ):
-	     /*res = VarCyFromDec32( ps->u.deiVal, &(pd->u.boolVal) );*/
+	     /*res = VarCyFromDec( V_UNION(ps,deiVal), &V_UNION(pd,cyVal) );*/
+	     break;
+	  case( VT_UNKNOWN ):
 	  default:
 	     res = DISP_E_TYPEMISMATCH;
 	     FIXME("Coercion from %d to %d\n", vtFrom, vt );
@@ -1683,7 +1687,7 @@ void WINAPI VariantInit(VARIANTARG* pvarg)
   TRACE("(%p),stub\n",pvarg);
 
   memset(pvarg, 0, sizeof (VARIANTARG));
-  pvarg->vt = VT_EMPTY;
+  V_VT(pvarg) = VT_EMPTY;
 
   return;
 }
@@ -1701,38 +1705,38 @@ HRESULT WINAPI VariantClear(VARIANTARG* pvarg)
   HRESULT res = S_OK;
   TRACE("(%p)\n",pvarg);
 
-  res = ValidateVariantType( pvarg->vt );
+  res = ValidateVariantType( V_VT(pvarg) );
   if( res == S_OK )
   {
-    if( !( pvarg->vt & VT_BYREF ) )
+    if( !( V_VT(pvarg) & VT_BYREF ) )
     {
       /*
        * The VT_ARRAY flag is a special case of a safe array.
        */
-      if ( (pvarg->vt & VT_ARRAY) != 0)
+      if ( (V_VT(pvarg) & VT_ARRAY) != 0)
       {
-	SafeArrayDestroy(pvarg->u.parray);
+	SafeArrayDestroy(V_UNION(pvarg,parray));
       }
       else
       {
-	switch( pvarg->vt & VT_TYPEMASK )
+	switch( V_VT(pvarg) & VT_TYPEMASK )
 	{
 	  case( VT_BSTR ):
-	    SysFreeString( pvarg->u.bstrVal );
+	    SysFreeString( V_UNION(pvarg,bstrVal) );
 	    break;
 	  case( VT_DISPATCH ):
-	    if(pvarg->u.pdispVal!=NULL)
-	      ICOM_CALL(Release,pvarg->u.pdispVal);
+	    if(V_UNION(pvarg,pdispVal)!=NULL)
+	      ICOM_CALL(Release,V_UNION(pvarg,pdispVal));
 	    break;
 	  case( VT_VARIANT ):
-	    VariantClear(pvarg->u.pvarVal);
+	    VariantClear(V_UNION(pvarg,pvarVal));
 	    break;
 	  case( VT_UNKNOWN ):
-	    if(pvarg->u.punkVal!=NULL)
-	      ICOM_CALL(Release,pvarg->u.punkVal);
+	    if(V_UNION(pvarg,punkVal)!=NULL)
+	      ICOM_CALL(Release,V_UNION(pvarg,punkVal));
 	    break;
 	  case( VT_SAFEARRAY ):
-	    SafeArrayDestroy(pvarg->u.parray);
+	    SafeArrayDestroy(V_UNION(pvarg,parray));
 	    break;
 	  default:
 	    break;
@@ -1744,7 +1748,7 @@ HRESULT WINAPI VariantClear(VARIANTARG* pvarg)
      * Empty all the fields and mark the type as empty.
      */
     memset(pvarg, 0, sizeof (VARIANTARG));
-    pvarg->vt = VT_EMPTY;
+    V_VT(pvarg) = VT_EMPTY;
   }
 
   return res;
@@ -1761,7 +1765,7 @@ HRESULT WINAPI VariantCopy(VARIANTARG* pvargDest, VARIANTARG* pvargSrc)
 
   TRACE("(%p, %p)\n", pvargDest, pvargSrc);
 
-  res = ValidateVariantType( pvargSrc->vt );
+  res = ValidateVariantType( V_VT(pvargSrc) );
 
   /* If the pointer are to the same variant we don't need
    * to do anything.
@@ -1772,22 +1776,22 @@ HRESULT WINAPI VariantCopy(VARIANTARG* pvargDest, VARIANTARG* pvargSrc)
 		
     if( res == S_OK )
     {
-      if( pvargSrc->vt & VT_BYREF )
+      if( V_VT(pvargSrc) & VT_BYREF )
       {
 	/* In the case of byreference we only need
 	 * to copy the pointer.
 	 */
-	pvargDest->u = pvargSrc->u;
-	pvargDest->vt = pvargSrc->vt;
+	pvargDest->n1.n2.n3 = pvargSrc->n1.n2.n3;
+	V_VT(pvargDest) = V_VT(pvargSrc);
       }
       else
       {
 	/*
 	 * The VT_ARRAY flag is another way to designate a safe array.
 	 */
-	if (pvargSrc->vt & VT_ARRAY)
+	if (V_VT(pvargSrc) & VT_ARRAY)
 	{
-	  SafeArrayCopy(pvargSrc->u.parray, &pvargDest->u.parray);
+	  SafeArrayCopy(V_UNION(pvargSrc,parray), &V_UNION(pvargDest,parray));
 	}
 	else
 	{
@@ -1797,34 +1801,34 @@ HRESULT WINAPI VariantCopy(VARIANTARG* pvargDest, VARIANTARG* pvargSrc)
 	   * if VT_DISPATCH or VT_IUNKNOWN AddReff is
 	   * called to increment the object's reference count.
 	   */
-	  switch( pvargSrc->vt & VT_TYPEMASK )
+	  switch( V_VT(pvargSrc) & VT_TYPEMASK )
 	  {
 	    case( VT_BSTR ):
-	      pvargDest->u.bstrVal = SysAllocString( pvargSrc->u.bstrVal );
+	      V_UNION(pvargDest,bstrVal) = SysAllocString( V_UNION(pvargSrc,bstrVal) );
 	      break;
 	    case( VT_DISPATCH ):
-	      pvargDest->u.pdispVal = pvargSrc->u.pdispVal;
-	      if (pvargDest->u.pdispVal!=NULL)
-		ICOM_CALL(AddRef,pvargDest->u.pdispVal);
+	      V_UNION(pvargDest,pdispVal) = V_UNION(pvargSrc,pdispVal);
+	      if (V_UNION(pvargDest,pdispVal)!=NULL)
+		ICOM_CALL(AddRef,V_UNION(pvargDest,pdispVal));
 	      break;
 	    case( VT_VARIANT ):
-	      VariantCopy(pvargDest->u.pvarVal,pvargSrc->u.pvarVal);
+	      VariantCopy(V_UNION(pvargDest,pvarVal),V_UNION(pvargSrc,pvarVal));
 	      break;
 	    case( VT_UNKNOWN ):
-	      pvargDest->u.punkVal = pvargSrc->u.punkVal;
-	      if (pvargDest->u.pdispVal!=NULL)
-		ICOM_CALL(AddRef,pvargDest->u.punkVal);
+	      V_UNION(pvargDest,punkVal) = V_UNION(pvargSrc,punkVal);
+	      if (V_UNION(pvargDest,pdispVal)!=NULL)
+		ICOM_CALL(AddRef,V_UNION(pvargDest,punkVal));
 	      break;
 	    case( VT_SAFEARRAY ):
-	      SafeArrayCopy(pvargSrc->u.parray, &pvargDest->u.parray);
+	      SafeArrayCopy(V_UNION(pvargSrc,parray), &V_UNION(pvargDest,parray));
 	      break;
 	    default:
-	      pvargDest->u = pvargSrc->u;
+	      pvargDest->n1.n2.n3 = pvargSrc->n1.n2.n3;
 	      break;
 	  }
 	}
 	
-	pvargDest->vt = pvargSrc->vt;
+	V_VT(pvargDest) = V_VT(pvargSrc);
       }      
     }
   }
@@ -1845,12 +1849,12 @@ HRESULT WINAPI VariantCopyInd(VARIANT* pvargDest, VARIANTARG* pvargSrc)
 
   TRACE("(%p, %p)\n", pvargDest, pvargSrc);
 
-  res = ValidateVariantType( pvargSrc->vt );
+  res = ValidateVariantType( V_VT(pvargSrc) );
 
   if( res != S_OK )
     return res;
   
-  if( pvargSrc->vt & VT_BYREF )
+  if( V_VT(pvargSrc) & VT_BYREF )
   {
     VARIANTARG varg;
     VariantInit( &varg );
@@ -1874,9 +1878,9 @@ HRESULT WINAPI VariantCopyInd(VARIANT* pvargDest, VARIANTARG* pvargSrc)
 	/*
 	 * The VT_ARRAY flag is another way to designate a safearray variant.
 	 */
-	if ( pvargSrc->vt & VT_ARRAY)
+	if ( V_VT(pvargSrc) & VT_ARRAY)
 	{
-	  SafeArrayCopy(*pvargSrc->u.pparray, &pvargDest->u.parray);
+	  SafeArrayCopy(*V_UNION(pvargSrc,pparray), &V_UNION(pvargDest,parray));
 	}
 	else
 	{
@@ -1886,10 +1890,10 @@ HRESULT WINAPI VariantCopyInd(VARIANT* pvargDest, VARIANTARG* pvargSrc)
 
 	  /* Get the variant type.
 	   */
-	  switch( pvargSrc->vt & VT_TYPEMASK )
+	  switch( V_VT(pvargSrc) & VT_TYPEMASK )
 	  {
 	    case( VT_BSTR ):
-	      pvargDest->u.bstrVal = SysAllocString( *(pvargSrc->u.pbstrVal) );
+	      V_UNION(pvargDest,bstrVal) = SysAllocString( *(V_UNION(pvargSrc,pbstrVal)) );
 	      break;
 	    case( VT_DISPATCH ):
 	      break;
@@ -1902,7 +1906,7 @@ HRESULT WINAPI VariantCopyInd(VARIANT* pvargDest, VARIANTARG* pvargSrc)
 		 * other inner variant the E_INVALIDARG error is
 		 * returned. 
 		 */
-		if( pvargSrc->wReserved1 & PROCESSING_INNER_VARIANT )
+		if( pvargSrc->n1.n2.wReserved1 & PROCESSING_INNER_VARIANT )
 		{
 		  /* If we get here we are attempting to deference
 		   * an inner variant that that is itself contained
@@ -1916,37 +1920,37 @@ HRESULT WINAPI VariantCopyInd(VARIANT* pvargDest, VARIANTARG* pvargSrc)
 		   * We will set this flag in the inner variant
 		   * that will be passed to the VariantCopyInd function.
 		   */
-		  (pvargSrc->u.pvarVal)->wReserved1 |= PROCESSING_INNER_VARIANT;
+		  (V_UNION(pvargSrc,pvarVal))->n1.n2.wReserved1 |= PROCESSING_INNER_VARIANT;
 		  
 		  /* Dereference the inner variant.
 		   */
-		  res = VariantCopyInd( pvargDest, pvargSrc->u.pvarVal );
+		  res = VariantCopyInd( pvargDest, V_UNION(pvargSrc,pvarVal) );
 		  /* We must also copy its type, I think.
 		   */
-		  pvargSrc->vt = pvargSrc->u.pvarVal->vt; 
+		  V_VT(pvargSrc) = V_VT(V_UNION(pvargSrc,pvarVal));
 		}
 	      }
 	      break;
 	    case( VT_UNKNOWN ):
 	      break;
 	    case( VT_SAFEARRAY ):
-	      SafeArrayCopy(*pvargSrc->u.pparray, &pvargDest->u.parray);
+	      SafeArrayCopy(*V_UNION(pvargSrc,pparray), &V_UNION(pvargDest,parray));
 	      break;
 	    default:
 	      /* This is a by reference Variant which means that the union
 	       * part of the Variant contains a pointer to some data of
-	       * type "pvargSrc->vt & VT_TYPEMASK".
+	       * type "V_VT(pvargSrc) & VT_TYPEMASK".
 	       * We will deference this data in a generic fashion using
 	       * the void pointer "Variant.u.byref".
 	       * We will copy this data into the union of the destination
 	       * Variant.
 	       */
-	      memcpy( &pvargDest->u, pvargSrc->u.byref, SizeOfVariantData( pvargSrc ) );
+	      memcpy( &pvargDest->n1.n2, V_UNION(pvargSrc,byref), SizeOfVariantData( pvargSrc ) );
 	      break;
 	  }
 	}
 	
-	pvargDest->vt = pvargSrc->vt & VT_TYPEMASK;
+	V_VT(pvargDest) = V_VT(pvargSrc) & VT_TYPEMASK;
       }
     }
 
@@ -1985,7 +1989,7 @@ HRESULT WINAPI VariantChangeTypeEx(VARIANTARG* pvargDest, VARIANTARG* pvargSrc,
 
 	/* validate our source argument.
 	 */
-	res = ValidateVariantType( pvargSrc->vt );
+	res = ValidateVariantType( V_VT(pvargSrc) );
 
 	/* validate the vartype.
 	 */
@@ -2011,7 +2015,7 @@ HRESULT WINAPI VariantChangeTypeEx(VARIANTARG* pvargDest, VARIANTARG* pvargSrc,
 
 	if( res == S_OK )
 	{
-		if( pvargSrc->vt & VT_BYREF )
+		if( V_VT(pvargSrc) & VT_BYREF )
 		{
 			/* Convert the source variant to a "byvalue" variant.
 			 */
@@ -2041,7 +2045,7 @@ HRESULT WINAPI VariantChangeTypeEx(VARIANTARG* pvargDest, VARIANTARG* pvargSrc,
 	/* set the type of the destination
 	 */
 	if ( res == S_OK )
-		pvargDest->vt = vt;
+		V_VT(pvargDest) = vt;
 
 	return res;
 }
@@ -2212,7 +2216,7 @@ HRESULT WINAPI VarUI1FromUI4(ULONG ulIn, BYTE* pbOut)
 
 
 /******************************************************************************
- *		VarUI1FromStr		[OLEAUT32.54]
+ *		VarUI1FromStr		[OLEAUT32.136]
  */
 HRESULT WINAPI VarUI1FromStr(OLECHAR* strIn, LCID lcid, ULONG dwFlags, BYTE* pbOut)
 {
@@ -2368,7 +2372,7 @@ HRESULT WINAPI VarI2FromBool(VARIANT_BOOL boolIn, short* psOut)
 }
 
 /******************************************************************************
- *		VarI2FromI1		[OLEAUT32.48]
+ *		VarI2FromI1		[OLEAUT32.205]
  */
 HRESULT WINAPI VarI2FromI1(CHAR cIn, short* psOut)
 {
@@ -2399,7 +2403,7 @@ HRESULT WINAPI VarI2FromUI2(USHORT uiIn, short* psOut)
 }
 
 /******************************************************************************
- *		VarI2FromUI4		[OLEAUT32.49]
+ *		VarI2FromUI4		[OLEAUT32.207]
  */
 HRESULT WINAPI VarI2FromUI4(ULONG ulIn, short* psOut)
 {
@@ -2835,7 +2839,7 @@ HRESULT WINAPI VarR4FromCy(CY cyIn, FLOAT* pfltOut) {
 }
 
 /******************************************************************************
- *		VarR8FromUI1		[OLEAUT32.68]
+ *		VarR8FromUI1		[OLEAUT32.78]
  */
 HRESULT WINAPI VarR8FromUI1(BYTE bIn, double* pdblOut)
 {
@@ -2847,7 +2851,7 @@ HRESULT WINAPI VarR8FromUI1(BYTE bIn, double* pdblOut)
 }
 
 /******************************************************************************
- *		VarR8FromI2		[OLEAUT32.69]
+ *		VarR8FromI2		[OLEAUT32.79]
  */
 HRESULT WINAPI VarR8FromI2(short sIn, double* pdblOut)
 {
@@ -2859,7 +2863,7 @@ HRESULT WINAPI VarR8FromI2(short sIn, double* pdblOut)
 }
 
 /******************************************************************************
- *		VarR8FromI4		[OLEAUT32.70]
+ *		VarR8FromI4		[OLEAUT32.80]
  */
 HRESULT WINAPI VarR8FromI4(LONG lIn, double* pdblOut)
 {
@@ -2985,7 +2989,7 @@ HRESULT WINAPI VarR8FromCy(CY cyIn, double* pdblOut) {
 }
 
 /******************************************************************************
- *		VarDateFromUI1		[OLEAUT32.]
+ *		VarDateFromUI1		[OLEAUT32.88]
  */
 HRESULT WINAPI VarDateFromUI1(BYTE bIn, DATE* pdateOut)
 {
@@ -2997,7 +3001,7 @@ HRESULT WINAPI VarDateFromUI1(BYTE bIn, DATE* pdateOut)
 }
 
 /******************************************************************************
- *		VarDateFromI2		[OLEAUT32.222]
+ *		VarDateFromI2		[OLEAUT32.89]
  */
 HRESULT WINAPI VarDateFromI2(short sIn, DATE* pdateOut)
 {
@@ -3093,7 +3097,7 @@ HRESULT WINAPI VarDateFromStr(OLECHAR* strIn, LCID lcid, ULONG dwFlags, DATE* pd
 
     TRACE("( %p, %lx, %lx, %p ), stub\n", strIn, lcid, dwFlags, pdateOut );
 
-    if( DateTimeStringToTm( strIn, lcid, &TM ) )
+    if( DateTimeStringToTm( strIn, dwFlags, &TM ) )
     {
         if( TmToDATE( &TM, pdateOut ) == FALSE )
         {
@@ -3255,7 +3259,7 @@ HRESULT WINAPI VarBstrFromCy(CY cyIn, LCID lcid, ULONG dwFlags, BSTR *pbstrOut) 
  *		VarBstrFromDate		[OLEAUT32.114]
  *
  * The date is implemented using an 8 byte floating-point number.
- * Days are represented by whole numbers increments starting with 0.00 has
+ * Days are represented by whole numbers increments starting with 0.00 as
  * being December 30 1899, midnight.
  * The hours are expressed as the fractional part of the number.
  * December 30 1899 at midnight = 0.00
@@ -3287,7 +3291,7 @@ HRESULT WINAPI VarBstrFromDate(DATE dateIn, LCID lcid, ULONG dwFlags, BSTR* pbst
 
     TRACE("( %f, %ld, %ld, %p ), stub\n", dateIn, lcid, dwFlags, pbstrOut );
 
-    if( DateToTm( dateIn, lcid, &TM ) == FALSE )
+    if( DateToTm( dateIn, dwFlags, &TM ) == FALSE )
 			{
         return E_INVALIDARG;
 		}
@@ -4285,7 +4289,7 @@ HRESULT WINAPI VarCyFromBool(VARIANT_BOOL boolIn, CY* pcyOut) {
  *              VarCyFromI1 [OLEAUT32.225]
  * Convert signed char to currency
  */
-HRESULT WINAPI VarCyFromI1(CHAR cIn, CY* pcyOut) {
+HRESULT WINAPI VarCyFromI1(signed char cIn, CY* pcyOut) {
    if (cIn < 0) pcyOut->s.Hi = -1;
    else pcyOut->s.Hi = 0;
    pcyOut->s.Lo = (ULONG)cIn * (ULONG)10000;
@@ -4338,5 +4342,366 @@ INT WINAPI DosDateTimeToVariantTime(USHORT wDosDate, USHORT wDosTime,
     t.tm_year = ((wDosDate & 0xfe00) >> 9) + 1980;
 
     return TmToDATE( &t, pvtime );
+}
+
+
+/**********************************************************************
+ *              VarParseNumFromStr [OLEAUT32.46]
+ */
+HRESULT WINAPI VarParseNumFromStr(OLECHAR * strIn, LCID lcid, ULONG dwFlags,
+                                  NUMPARSE * pnumprs, BYTE * rgbDig)
+{
+    int i,lastent=0;
+    int cDig;
+    FIXME("(%s,flags=%lx,....), partial stub!\n",debugstr_w(strIn),dwFlags);
+    FIXME("numparse: cDig=%d, InFlags=%lx\n",pnumprs->cDig,pnumprs->dwInFlags);
+
+    /* The other struct components are to be set by us */
+
+    memset(rgbDig,0,pnumprs->cDig);
+
+    cDig = 0;
+    for (i=0; strIn[i] ;i++) {
+	if ((strIn[i]>='0') && (strIn[i]<='9')) {
+	    if (pnumprs->cDig > cDig) {
+		*(rgbDig++)=strIn[i]-'0';
+		cDig++;
+		lastent = i;
+	    }
+	}
+    }
+    pnumprs->cDig	= cDig;
+
+    /* FIXME: Just patching some values in */
+    pnumprs->nPwr10	= 0;
+    pnumprs->nBaseShift	= 0;
+    pnumprs->cchUsed	= lastent;
+    pnumprs->dwOutFlags	= NUMPRS_DECIMAL;
+    return S_OK;
+}
+
+
+/**********************************************************************
+ *              VarNumFromParseNum [OLEAUT32.47]
+ */
+HRESULT WINAPI VarNumFromParseNum(NUMPARSE * pnumprs, BYTE * rgbDig,
+                                  ULONG dwVtBits, VARIANT * pvar)
+{
+    DWORD xint;
+    int i;
+    FIXME("(,dwVtBits=%lx,....), partial stub!\n",dwVtBits);
+
+    xint = 0;
+    for (i=0;i<pnumprs->cDig;i++)
+	xint = xint*10 + rgbDig[i];
+
+    VariantInit(pvar);
+    if (dwVtBits & VTBIT_I4) {
+	V_VT(pvar) = VT_I4;
+	V_UNION(pvar,intVal) = xint;
+	return S_OK;
+    }
+    if (dwVtBits & VTBIT_R8) {
+	V_VT(pvar) = VT_R8;
+	V_UNION(pvar,dblVal) = xint;
+	return S_OK;
+    } else {
+	FIXME("vtbitmask is unsupported %lx\n",dwVtBits);
+	return E_FAIL;
+    }
+}
+
+
+/**********************************************************************
+ *              VariantTimeToDosDateTime [OLEAUT32.??]
+ * Convert variant representation of time to the date and time representation
+ * stored in dos.
+ */
+INT WINAPI VariantTimeToDosDateTime(DATE pvtime, USHORT *wDosDate, USHORT *wDosTime)
+{
+    struct tm t;
+    wDosTime = 0;
+    wDosDate = 0;
+
+    TRACE("( 0x%x, 0x%x, 0x%p ), stub\n", *wDosDate, *wDosTime, &pvtime );
+
+    if (DateToTm(pvtime, 0, &t) < 0) return 0;
+
+    *wDosTime = *wDosTime | (t.tm_sec / 2);
+    *wDosTime = *wDosTime | (t.tm_min << 5);
+    *wDosTime = *wDosTime | (t.tm_hour << 11);
+
+    *wDosDate = *wDosDate | t.tm_mday ;
+    *wDosDate = *wDosDate | t.tm_mon << 5;
+    *wDosDate = *wDosDate | ((t.tm_year - 1980) << 9) ;
+
+    return 1;
+}
+
+
+HRESULT WINAPI SystemTimeToVariantTime( LPSYSTEMTIME  lpSystemTime, double *pvtime )
+{
+    static const BYTE Days_Per_Month[] = {0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
+    static const BYTE Days_Per_Month_LY[] = {0, 31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
+
+    struct tm t;
+
+    TRACE(" %d/%d/%d %d:%d:%d\n",
+          lpSystemTime->wMonth, lpSystemTime->wDay,
+          lpSystemTime->wYear, lpSystemTime->wHour,
+          lpSystemTime->wMinute, lpSystemTime->wSecond);
+
+    if (lpSystemTime->wYear >= 1900)
+    {
+        t.tm_sec = lpSystemTime->wSecond;
+        t.tm_min = lpSystemTime->wMinute;
+        t.tm_hour = lpSystemTime->wHour;
+
+        t.tm_mday = lpSystemTime->wDay;
+        t.tm_mon = lpSystemTime->wMonth;
+        t.tm_year = lpSystemTime->wYear;
+
+        return TmToDATE( &t, pvtime );
+    }
+    else
+    {
+        t.tm_sec = lpSystemTime->wSecond;
+        t.tm_min = lpSystemTime->wMinute;
+        t.tm_hour = lpSystemTime->wHour;
+
+        if (isleap(lpSystemTime->wYear) )
+            t.tm_mday = Days_Per_Month_LY[13 - lpSystemTime->wMonth] - lpSystemTime->wDay;
+        else
+            t.tm_mday = Days_Per_Month[13 - lpSystemTime->wMonth] - lpSystemTime->wDay;
+
+        t.tm_mon = 13 - lpSystemTime->wMonth;
+        t.tm_year = 1900 + 1899 - lpSystemTime->wYear;
+
+        TmToDATE( &t, pvtime );
+
+        *pvtime *= -1;
+
+        return 1;
+    }
+
+    return 0;
+}
+
+HRESULT WINAPI VariantTimeToSystemTime( double vtime, LPSYSTEMTIME  lpSystemTime )
+{
+    double t = 0, timeofday = 0;
+
+    static const BYTE Days_Per_Month[] =    {0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
+    static const BYTE Days_Per_Month_LY[] = {0, 31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
+
+    /* The Month_Code is used to find the Day of the Week (LY = LeapYear)*/
+    static const BYTE Month_Code[] =    {0, 1, 4, 4, 0, 2, 5, 0, 3, 6, 1, 4, 6};
+    static const BYTE Month_Code_LY[] = {0, 0, 3, 4, 0, 2, 5, 0, 3, 6, 1, 4, 6};
+
+    /* The Century_Code is used to find the Day of the Week */
+    static const BYTE Century_Code[]  = {0, 6, 4, 2};
+
+    struct tm r;
+
+    TRACE(" Variant = %f SYSTEMTIME ptr %p", vtime, lpSystemTime);
+
+    if (vtime >= 0)
+    {
+
+        if (DateToTm(vtime, 0, &r ) <= 0) return 0;
+
+        lpSystemTime->wSecond = r.tm_sec;
+        lpSystemTime->wMinute = r.tm_min;
+        lpSystemTime->wHour = r.tm_hour;
+        lpSystemTime->wDay = r.tm_mday;
+        lpSystemTime->wMonth = r.tm_mon;
+
+        if (lpSystemTime->wMonth == 12)
+            lpSystemTime->wMonth = 1;
+        else
+            lpSystemTime->wMonth++;
+
+        lpSystemTime->wYear = r.tm_year;
+    }
+    else
+    {
+        vtime = -1*vtime;
+
+        if (DateToTm(vtime, 0, &r ) <= 0) return 0;
+
+        lpSystemTime->wSecond = r.tm_sec;
+        lpSystemTime->wMinute = r.tm_min;
+        lpSystemTime->wHour = r.tm_hour;
+
+        lpSystemTime->wMonth = 13 - r.tm_mon;
+
+        if (lpSystemTime->wMonth == 1)
+            lpSystemTime->wMonth = 12;
+        else
+            lpSystemTime->wMonth--;
+
+        lpSystemTime->wYear = 1899 - (r.tm_year - 1900);
+
+        if (!isleap(lpSystemTime->wYear) )
+            lpSystemTime->wDay = Days_Per_Month[13 - lpSystemTime->wMonth] - r.tm_mday;
+        else
+            lpSystemTime->wDay = Days_Per_Month_LY[13 - lpSystemTime->wMonth] - r.tm_mday;
+
+
+    }
+
+    if (!isleap(lpSystemTime->wYear))
+    {
+        /*
+          (Century_Code+Month_Code+Year_Code+Day) % 7
+
+          The century code repeats every 400 years , so the array
+          works out like this,
+
+          Century_Code[0] is for 16th/20th Centry
+          Century_Code[1] is for 17th/21th Centry
+          Century_Code[2] is for 18th/22th Centry
+          Century_Code[3] is for 19th/23th Centry
+
+          The year code is found with the formula (year + (year / 4))
+          the "year" must be between 0 and 99 .
+
+          The Month Code (Month_Code[1]) starts with January and
+          ends with December.
+        */
+
+        lpSystemTime->wDayOfWeek = (
+            Century_Code[(( (lpSystemTime->wYear+100) - lpSystemTime->wYear%100) /100) %4]+
+            ((lpSystemTime->wYear%100)+(lpSystemTime->wYear%100)/4)+
+            Month_Code[lpSystemTime->wMonth]+
+            lpSystemTime->wDay) % 7;
+
+        if (lpSystemTime->wDayOfWeek == 0) lpSystemTime->wDayOfWeek = 7;
+        else lpSystemTime->wDayOfWeek -= 1;
+    }
+    else
+    {
+        lpSystemTime->wDayOfWeek = (
+            Century_Code[(((lpSystemTime->wYear+100) - lpSystemTime->wYear%100)/100)%4]+
+            ((lpSystemTime->wYear%100)+(lpSystemTime->wYear%100)/4)+
+            Month_Code_LY[lpSystemTime->wMonth]+
+            lpSystemTime->wDay) % 7;
+
+        if (lpSystemTime->wDayOfWeek == 0) lpSystemTime->wDayOfWeek = 7;
+        else lpSystemTime->wDayOfWeek -= 1;
+    }
+
+    t = floor(vtime);
+    timeofday = vtime - t;
+
+    lpSystemTime->wMilliseconds = (timeofday
+                                   - lpSystemTime->wHour*(1/24)
+                                   - lpSystemTime->wMinute*(1/1440)
+                                   - lpSystemTime->wSecond*(1/86400) )*(1/5184000);
+
+    return 1;
+}
+
+HRESULT WINAPI VarUdateFromDate( DATE datein, ULONG dwFlags, UDATE *pudateout)
+{
+    HRESULT i = 0;
+    static const BYTE Days_Per_Month[] =    {0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
+    static const BYTE Days_Per_Month_LY[] = {0, 31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
+
+    TRACE("DATE = %f\n", (double)datein);
+    i = VariantTimeToSystemTime(datein, &(pudateout->st) );
+
+    if (i)
+    {
+        pudateout->wDayOfYear = 0;
+
+        if (isleap(pudateout->st.wYear))
+        {
+            for (i =1; i<pudateout->st.wMonth; i++)
+                pudateout->wDayOfYear += Days_Per_Month[i];
+        }
+        else
+        {
+            for (i =1; i<pudateout->st.wMonth; i++)
+                pudateout->wDayOfYear += Days_Per_Month_LY[i];
+        }
+
+        pudateout->wDayOfYear += pudateout->st.wDay;
+        dwFlags = 0; /*VAR_VALIDDATE*/
+    }
+    else dwFlags = 0;
+
+    return i;
+}
+
+HRESULT WINAPI VarDateFromUdate(UDATE *pudateout,
+                                ULONG dwFlags, DATE *datein)
+{
+    HRESULT i;
+    double t = 0;
+    TRACE(" %d/%d/%d %d:%d:%d\n",
+          pudateout->st.wMonth, pudateout->st.wDay,
+          pudateout->st.wYear, pudateout->st.wHour,
+          pudateout->st.wMinute, pudateout->st.wSecond);
+
+
+    i = SystemTimeToVariantTime(&(pudateout->st), &t);
+    *datein = t;
+
+    if (i) dwFlags = 0; /*VAR_VALIDDATE*/
+    else dwFlags = 0;
+
+    return i;
+}
+
+
+/**********************************************************************
+ *              VarBstrCmp [OLEAUT32.440]
+ *
+ * flags can be: 
+ *   NORM_IGNORECASE, NORM_IGNORENONSPACE, NORM_IGNORESYMBOLS
+ *   NORM_IGNORESTRINGWIDTH, NORM_IGNOREKANATYPE, NORM_IGNOREKASHIDA
+ *
+ */
+HRESULT WINAPI VarBstrCmp(BSTR left, BSTR right, LCID lcid, DWORD flags)
+{
+    DWORD r;
+
+    FIXME("( %s %s %ld %lx ) partial stub\n", debugstr_w(left), debugstr_w(right), lcid, flags);
+
+    if((!left) || (!right))
+        return VARCMP_NULL;
+
+    if(flags&NORM_IGNORECASE)
+        r = lstrcmpiW(left,right);
+    else
+        r = lstrcmpW(left,right);
+
+    if(r<0)
+        return VARCMP_LT;
+    if(r>0)
+        return VARCMP_GT;
+
+    return VARCMP_EQ;
+}
+
+/**********************************************************************
+ *              VarBstrCat [OLEAUT32.439]
+ */
+HRESULT WINAPI VarBstrCat(BSTR left, BSTR right, BSTR *out)
+{
+    BSTR result;
+
+    TRACE("( %s %s %p )\n", debugstr_w(left), debugstr_w(right), out);
+
+    if( (!left) || (!right) || (!out) )
+        return 0;
+
+    result = SysAllocStringLen(left, lstrlenW(left)+lstrlenW(right));
+    lstrcatW(result,right);
+
+    *out = result;
+
+    return 1;
 }
 
