@@ -1,4 +1,4 @@
-/* $Id: Configure.cmd,v 1.3 2001-04-14 07:22:12 bird Exp $
+/* $Id: Configure.cmd,v 1.4 2002-04-29 11:34:59 bird Exp $
  *
  * Configuration script.
  * Generates global makefile.inc.
@@ -14,6 +14,8 @@
     /* Argument defaults */
     fInteractive    = 1;
     fWin32k         = 1;
+    fWithkLib       = 0;
+
 
     /* parse arguments */
     parse arg asArgs.1 asArgs.2 asArgs.3 asArgs.4 asArgs.5 asArgs.6 asArgs.7 asArgs.8 asArgs.9
@@ -34,13 +36,26 @@
                     fInteractive = 1;
                 when (ch = 'W') then
                     fWin32k = 0;
+                when (ch = '-') then
+                do
+                    parse var sArg sParm'='sOpt
+                    select
+                        when (sParm = '-WITH-KLIB') then
+                            fWithkLib = 1;
+                        otherwise
+                            say 'syntax error ('asArgs.i')';
+                            exit(2);
+                    end
+                end
+
                 when (ch = '?' | ch = 'H' | substr(sArg, 1, 2) = '-H') then
                 do
-                    say 'Odin32 Configure.cmd. $Revision: 1.3 $.'
+                    say 'Odin32 Configure.cmd. $Revision: 1.4 $.'
                     say 'syntax: Configure.cmd [-n] [-w]'
-                    say '  -n   Noninteractive.'
-                    say '  -w   Don''t build Win32k.'
-                    say '  -h   This text.'
+                    say '  -n           Noninteractive.'
+                    say '  -w           Don''t build Win32k.'
+                    say '  --with-klib  Build with kLib. (Will checkout kLib for you.)'
+                    say '  -h           This text.'
                     exit(1);
                 end
                 otherwise
@@ -79,6 +94,9 @@
         call lineout sIncFile, 'ODIN32_BIN_      =' sOdin32Base'\bin';
         call lineout sIncFile, 'ODIN32_INCLUDE   =' sOdin32Base'\include';
         call lineout sIncFile, 'ODIN32_TOOLS     =' sOdin32Base'\tools\bin';
+        if (fWithkLib) then
+            call lineout sIncFile, 'WITH_KLIB        = 1'
+        call lineout sIncFile, ''
         call lineout sIncFile, ''
         call lineout sIncFile, '################################################################################'
         call lineout sIncFile, '# Include the odin32.mk file'
