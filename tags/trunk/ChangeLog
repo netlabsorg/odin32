@@ -1,7 +1,12 @@
-/* $Id: ChangeLog,v 1.2532 2003-03-28 13:57:41 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.2533 2003-03-31 02:56:21 bird Exp $ */
+
+ 2003-03-31: knut st. osmundsen <bird-odin-spam@anduin   >
+    - PE2LX/WIN32K:
+                o Custombuild feature for excluding dlls. Cleanups.
+                o Option for making all object RW file.
 
  2003-03-28: Sander van Leeuwen <sandervl@innotek   >
-    - USER32:   o Removed changes for window tracking (move/size) with full 
+    - USER32:   o Removed changes for window tracking (move/size) with full
                   window dragging enabled (2003-03-27)
 
  2003-03-27: Sander van Leeuwen <sandervl@innotek   >
@@ -12,15 +17,15 @@
     - KERNEL32: o Memory map updates
 
  2003-03-26: Sander van Leeuwen <sandervl@innotek   >
-    - KERNEL32: o WaitForSingleObject/(Msg)WaitForMultipleObject fixes to 
-                  prevent thread priorities from being accidentally boosted to 
+    - KERNEL32: o WaitForSingleObject/(Msg)WaitForMultipleObject fixes to
+                  prevent thread priorities from being accidentally boosted to
                   time critical
 
  2003-03-22: Sander van Leeuwen <sandervl@innotek   >
-    - USER32:   o If an application doesn't validate the update region 
-                  while processing WM_PAINT, then we must remember it for 
-                  the next time. 
-                  Windows will only send a WM_PAINT once until another part of 
+    - USER32:   o If an application doesn't validate the update region
+                  while processing WM_PAINT, then we must remember it for
+                  the next time.
+                  Windows will only send a WM_PAINT once until another part of
                   the window is invalidated. Unfortunately PM keeps on sending
                   WM_PAINT messages until we validate the update region.
                   This affects UpdateWindow, RedrawWindow, GetUpdateRgn, GetUpdateRect,
@@ -34,7 +39,7 @@
 
  2003-03-18: Platon Fomichev <platon@innotek   >
     - USER32:   o Shift/Ctrl/Alt+Numpad keys illegal behaviour. Generic numpad
-                  keys like (/*-+) produced garbage. 
+                  keys like (/*-+) produced garbage.
 
  2003-03-12: Platon Fomichev <stauff@innotek   >
     - USER32:   o GetKeyState and GetAsyncKeyState fixes for numpad keyboard
