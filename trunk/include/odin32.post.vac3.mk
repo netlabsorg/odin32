@@ -1,4 +1,4 @@
-# $Id: odin32.post.vac3.mk,v 1.18 2001-09-30 00:53:28 bird Exp $
+# $Id: odin32.post.vac3.mk,v 1.19 2001-09-30 01:00:01 bird Exp $
 
 #
 # Odin32 API
@@ -8,7 +8,7 @@
 # If ORGTARGET is defined it is used to generate the importlibrary.
 #
 # Define NOTEXPDEF to remove the $(TARGET).lib and $(TARGET)exp.def rules.
-# Define EXETARGET to make an executable. (This also applies to pdwin32.mk.)
+# Define EXETARGET to make an executable. (This also applies to odin32.mk.)
 # Define LIBTARGET to make an internal library.
 # Define LOCALCLEAN if only the local directory is to be clean.
 # Define CLEAN2 to invoke a second clean rule named 'clean2'.
