@@ -1,4 +1,4 @@
-/* $Id: windll.cpp,v 1.10 1999-08-18 17:18:00 sandervl Exp $ */
+/* $Id: windll.cpp,v 1.11 1999-08-22 11:11:11 sandervl Exp $ */
 
 /*
  * Win32 DLL class
@@ -27,6 +27,8 @@
 #include <pefile.h>
 #include <windll.h>
 #include <wprocess.h>
+#include "exceptions.h"
+#include "exceptutil.h"
 #include "cio.h"
 
 /***********************************
@@ -267,8 +269,9 @@ ULONG Win32Dll::getApi(int ordinal)
 //******************************************************************************
 BOOL Win32Dll::attachProcess()
 {
- BOOL rc;
+ WINEXCEPTION_FRAME exceptFrame;
  USHORT sel;
+ BOOL rc;
 
   //Allocate TLS index for this module
   tlsAlloc();
@@ -281,17 +284,25 @@ BOOL Win32Dll::attachProcess()
 
   dprintf(("attachProcess to dll %s", szModule));
 
+  //Note: The Win32 exception structure references by FS:[0] is the same
+  //      in OS/2
+  OS2SetExceptionHandler((void *)&exceptFrame);
+
   sel = SetWin32TIB();
   rc = dllEntryPoint(hinstance, DLL_PROCESS_ATTACH, 0);
   SetFS(sel);
+
+  OS2UnsetExceptionHandler((void *)&exceptFrame);
+
   return rc;
 }
 //******************************************************************************
 //******************************************************************************
 BOOL Win32Dll::detachProcess()
 {
- BOOL   rc;
+ WINEXCEPTION_FRAME exceptFrame;
  USHORT sel;
+ BOOL rc;
 
   if(fSystemDll || fSkipEntryCalls) {
         tlsDetachThread();	//destroy TLS (main thread)
@@ -300,33 +311,61 @@ BOOL Win32Dll::detachProcess()
 
   dprintf(("detachProcess from dll %s", szModule));
 
+  //Note: The Win32 exception structure references by FS:[0] is the same
+  //      in OS/2
+  OS2SetExceptionHandler((void *)&exceptFrame);
+
   fUnloaded = TRUE;
   sel = SetWin32TIB();
   rc = dllEntryPoint(hinstance, DLL_PROCESS_DETACH, 0);
   SetFS(sel);
   tlsDetachThread();	//destroy TLS (main thread)
   tlsDelete();
+
+  OS2UnsetExceptionHandler((void *)&exceptFrame);
+
   return rc;
 }
 //******************************************************************************
 //******************************************************************************
 BOOL Win32Dll::attachThread()
 {
+ WINEXCEPTION_FRAME exceptFrame;
+ BOOL               rc;
+
   if(fSystemDll || fSkipEntryCalls)
 	return(TRUE);
 
   dprintf(("attachThread to dll %s", szModule));
-  return dllEntryPoint(hinstance, DLL_THREAD_ATTACH, 0);
+  //Note: The Win32 exception structure references by FS:[0] is the same
+  //      in OS/2
+  OS2SetExceptionHandler((void *)&exceptFrame);
+
+  rc = dllEntryPoint(hinstance, DLL_THREAD_ATTACH, 0);
+
+  OS2UnsetExceptionHandler((void *)&exceptFrame);
+  return rc;
 }
 //******************************************************************************
 //******************************************************************************
 BOOL Win32Dll::detachThread()
 {
+ WINEXCEPTION_FRAME exceptFrame;
+ BOOL               rc;
+
   if(fSystemDll || fSkipEntryCalls)
 	return(TRUE);
 
   dprintf(("attachThread from dll %s", szModule));
-  return dllEntryPoint(hinstance, DLL_THREAD_DETACH, 0);
+
+  //Note: The Win32 exception structure references by FS:[0] is the same
+  //      in OS/2
+  OS2SetExceptionHandler((void *)&exceptFrame);
+
+  rc =  dllEntryPoint(hinstance, DLL_THREAD_DETACH, 0);
+
+  OS2UnsetExceptionHandler((void *)&exceptFrame);
+  return rc;
 }
 //******************************************************************************
 //Send DLL_THREAD_ATTACH message to all dlls for a new thread
