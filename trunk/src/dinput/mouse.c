@@ -540,7 +540,7 @@ static HRESULT WINAPI SysMouseAImpl_GetDeviceState(
     This->m_state.lY = 0;
   }
 
-#ifndef TARGET_OS2
+#ifndef __WIN32OS2__
   //SvL: Completely breaks some apps
   /* Check if we need to do a mouse warping */
   if (This->need_warp == WARP_NEEDED) {
@@ -620,7 +620,7 @@ static HRESULT WINAPI SysMouseAImpl_GetDeviceData(LPDIRECTINPUTDEVICE2A iface,
 
   LeaveCriticalSection(&(This->crit));
 
-#ifndef TARGET_OS2
+#ifndef __WIN32OS2__
   //SvL: Completely breaks some apps
   /* Check if we need to do a mouse warping */
   if (This->need_warp == WARP_NEEDED) {
