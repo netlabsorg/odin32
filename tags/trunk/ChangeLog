@@ -1,4 +1,7 @@
- /* $Id: ChangeLog,v 1.406 1999-11-03 22:02:20 cbratschi Exp $ */
+ /* $Id: ChangeLog,v 1.407 1999-11-03 23:29:11 sandervl Exp $ */
+
+ 99-11-03: knut st. osmundsen <knut.stange.osmundsen@pmsc.no>
+	- Makefiles: Changes to build the libraries first
 
  99-11-03: Sander van Leeuwen <sandervl@xs4all.nl>
 	- COMDLG32: Import from shlwapi as the original Wine code does
