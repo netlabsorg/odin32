@@ -1,4 +1,4 @@
-/* $Id: winerror.h,v 1.9 2000-08-30 13:56:38 sandervl Exp $ */
+/* $Id: winerror.h,v 1.10 2001-04-26 19:23:33 sandervl Exp $ */
 #ifndef __WINE_WINERROR_H
 #define __WINE_WINERROR_H
 
@@ -816,8 +816,17 @@ extern int WIN32_LastError;
 
 
 /* registry errors */
-#define REGDB_E_READREGDB               0x80040150
-#define REGDB_E_CLASSNOTREG             0x80040154
+#define REGDB_S_FIRST                                      0x00040150L
+#define REGDB_S_LAST                                       0x0004015FL
+
+#define REGDB_E_FIRST                                      0x80040150L
+#define REGDB_E_READREGDB                                  0x80040150L
+#define REGDB_E_WRITEREGDB                                 0x80040151L
+#define REGDB_E_KEYMISSING                                 0x80040152L
+#define REGDB_E_INVALIDVALUE                               0x80040153L
+#define REGDB_E_CLASSNOTREG                                0x80040154L
+#define REGDB_E_IIDNOTREG                                  0x80040155L
+#define REGDB_E_LAST                                       0x8004015FL
 
 #define INPLACE_E_NOTUNDOABLE           0x800401A0
 #define INPLACE_E_NOTOOLSPACE           0x800401A1
