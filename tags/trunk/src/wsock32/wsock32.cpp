@@ -1,4 +1,4 @@
-/* $Id: wsock32.cpp,v 1.30 2000-05-05 18:22:23 sandervl Exp $ */
+/* $Id: wsock32.cpp,v 1.31 2000-05-09 19:01:23 sandervl Exp $ */
 
 /*
  *
@@ -592,6 +592,17 @@ ODINFUNCTION4(int,OS2recv,
 
    if(ret == SOCKET_ERROR) {
  	WSASetLastError(wsaErrno());
+   }
+   else 
+   if(ret == 0) {
+	int tmp, state;
+
+       	state = ioctl(s, FIOBSTATUS, (char *)&tmp, sizeof(tmp));
+	if(state & SS_ISCONNECTED && flags != MSG_PEEK) {
+		dprintf(("recv returned 0, but socket is still connected -> return WSAWOULDBLOCK"));
+ 		WSASetLastError(WSAEWOULDBLOCK);
+		ret = SOCKET_ERROR;
+	}
    }
    else WSASetLastError(NO_ERROR);
 
