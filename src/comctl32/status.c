@@ -1,4 +1,4 @@
-/* $Id: status.c,v 1.8 1999-07-04 21:05:59 cbratschi Exp $ */
+/* $Id: status.c,v 1.9 1999-07-12 15:58:48 cbratschi Exp $ */
 /*
  * Interface code to StatusWindow widget/control
  *
@@ -664,6 +664,7 @@ STATUSBAR_SetTextA (HWND hwnd, WPARAM wParam, LPARAM lParam)
 
     if (style & SBT_OWNERDRAW)
     {
+      if (!(part->style & SBT_OWNERDRAW) && part->text) COMCTL32_Free(part->text);
       part->text = (LPWSTR)text;
     } else
     {
@@ -719,9 +720,11 @@ STATUSBAR_SetTextW (HWND hwnd, WPARAM wParam, LPARAM lParam)
 
     if (style & SBT_OWNERDRAW)
     {
+      if (!(part->style & SBT_OWNERDRAW) && part->text) COMCTL32_Free(part->text);
       part->text = text;
     } else
     {
+      //compare
       if (lstrcmpW(part->text,text) == 0)
       {
         if (part->style != style)

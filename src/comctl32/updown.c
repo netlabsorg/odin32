@@ -1,4 +1,4 @@
-/* $Id: updown.c,v 1.5 1999-06-24 16:37:46 cbratschi Exp $ */
+/* $Id: updown.c,v 1.6 1999-07-12 15:58:51 cbratschi Exp $ */
 /*
  * Updown control
  *
@@ -194,7 +194,7 @@ static BOOL UPDOWN_GetBuddyInt (HWND hwnd)
   if (!IsWindow(infoPtr->Buddy)) return FALSE;
 
   /*if the buddy is a list window, we must set curr index */
-  if (!lstrcmpA(infoPtr->szBuddyClass,"ListBox"))
+  if (!lstrcmpiA(infoPtr->szBuddyClass,"ListBox"))
   {
     newVal = SendMessageA(infoPtr->Buddy,LB_GETCARETINDEX,0,0);
     if(newVal < 0) return FALSE;
@@ -244,7 +244,7 @@ static BOOL UPDOWN_SetBuddyInt (HWND hwnd)
 //             infoPtr->CurVal);
 
   /*if the buddy is a list window, we must set curr index */
-  if(!lstrcmpA(infoPtr->szBuddyClass, "ListBox"))
+  if(!lstrcmpiA(infoPtr->szBuddyClass, "ListBox"))
   {
     SendMessageA(infoPtr->Buddy,LB_SETCURSEL,infoPtr->CurVal,0);
   } else
@@ -363,6 +363,9 @@ static BOOL UPDOWN_SetBuddyHandle (HWND hwnd, HWND hwndBud)
   /* Is is a valid bud? */
   if(!IsWindow(hwndBud))
     return FALSE;
+
+  /* Store buddy wundow handle */
+  infoPtr->Buddy = hwndBud;
 
   /* Store buddy window clas name */
   GetClassNameA (hwndBud, infoPtr->szBuddyClass, 40);
@@ -528,7 +531,7 @@ static void UPDOWN_HandleMouseEvent (HWND hwnd, UINT msg, POINT pt)
       if (infoPtr->Flags & FLAG_CLICKED) return;
 
       /* If the buddy is an edit, will set focus to it */
-      if (!lstrcmpA(infoPtr->szBuddyClass,"Edit")) SetFocus(infoPtr->Buddy);
+      if (!lstrcmpiA(infoPtr->szBuddyClass,"Edit")) SetFocus(infoPtr->Buddy);
 
       /* Now see which one is the 'active' arrow */
       temp = UPDOWN_GetArrowFromPoint(hwnd,&rect,pt);
@@ -701,7 +704,7 @@ static LRESULT UPDOWN_LButtonUp(HWND hwnd,WPARAM wParam,LPARAM lParam)
   if (!UPDOWN_CancelMode(hwnd)) return 0;
    /*If we released the mouse and our buddy is an edit */
    /* we must select all text in it.                   */
-   if (!lstrcmpA(infoPtr->szBuddyClass,"Edit"))
+   if (!lstrcmpiA(infoPtr->szBuddyClass,"Edit"))
        SendMessageA(infoPtr->Buddy,EM_SETSEL,0,MAKELONG(0,-1));
 
    return 0;
