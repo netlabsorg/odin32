@@ -1,4 +1,4 @@
-; $Id: KERNEL32.DEF,v 1.126 2001-11-12 23:04:56 phaller Exp $
+; $Id: KERNEL32.DEF,v 1.127 2001-12-06 10:14:45 sandervl Exp $
 
 ;Basis is Windows95 KERNEL32
 LIBRARY KERNEL32 INITINSTANCE TERMINSTANCE
@@ -342,9 +342,8 @@ EXPORTS
      FindFirstChangeNotificationA  = _FindFirstChangeNotificationA@12 @248
      FindFirstChangeNotificationW  = _FindFirstChangeNotificationW@12 @249
      FindFirstFileA             = _FindFirstFileA@8               @250
-;@PH these functions may only be enabled if correctly implemented.
-;@PH FindFirstFileExA           = _FindFirstFileExA@24                   ;NT
-;@PH FindFirstFileExW           = _FindFirstFileExW@24                   ;NT
+     FindFirstFileExA           = _FindFirstFileExA@24            @850
+     FindFirstFileExW           = _FindFirstFileExW@24            @851
      FindFirstFileW             = _FindFirstFileW@8               @251
      FindNextChangeNotification = _FindNextChangeNotification@4   @252
      FindNextFileA              = _FindNextFileA@8                @253
