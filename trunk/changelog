@@ -1,4 +1,4 @@
-/* $Id: changelog,v 1.2514 2003-03-05 15:12:15 bird Exp $ */
+/* $Id: changelog,v 1.2515 2003-03-05 16:44:59 sandervl Exp $ */
 
  2003-03-05: knut st. osmundsen <bird-odin-spam@anduin   >
     - MAKE:     o Experimental OTHERS variable.
@@ -12,6 +12,8 @@
                 o Added ODIN_waveInSetFixedBuffers, renamed SetFixedWaveBufferSize
                   to ODIN_waveOutSetFixedBuffers. Used to tell WINMM to use
                   the waveOutWrite buffer size for the DART buffers.
+                o Don't pause the wave stream if no buffers left to add. Let
+                  DART detect the underrun condition.
 
  2003-03-04: Platon Fomichev <stauff@innotek   >
     - USER32:   o We did not pay attention to numlock state on numpad keyboard.
