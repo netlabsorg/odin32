@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.25 2000-12-02 23:32:40 bird Exp $
+# $Id: makefile,v 1.25.2.1 2001-10-14 22:59:29 bird Exp $
 
 #
 # Odin32 API
@@ -33,7 +33,7 @@ ADDITIONAL_DEP = mydep
 #
 # Tools and Flags Addjustments
 #
-CINCLUDES   = -I$(WIN32KINCLUDE) $(CINCLUDES)
+CINCLUDES   = -I$(WIN32KINCLUDE) -I$(KKRNLLIBINCLUDE) $(CINCLUDES)
 CDEFINES    = $(CDEFINES) -DRING3 -DPE2LX
 !if "$(VAC3)" == "1" || "$(VAC36)" == "1"
 CFLAGS      = $(CFLAGS)   -Ge+ -Gm- -Gn- -Ti+ -Rn     -Wall+ppt-ppc-inl-cnv-gnr-vft-gen-uni-ext-
@@ -76,20 +76,14 @@ LD2FLAGS    = $(LD2FLAGS) /A:16 /Stack:4096
 OBJS =\
 $(OBJDIR)\pe2lx.obj\
 $(OBJDIR)\pe2lxmain.obj\
-$(OBJDIR)\modulebase.obj\
-$(OBJDIR)\malloc.obj\
-$(OBJDIR)\smalloc_avl.obj\
-$(OBJDIR)\avl.obj\
-$(OBJDIR)\rmalloc_avl.obj\
-$(OBJDIR)\new.obj\
-$(OBJDIR)\stricmp.obj\
-$(OBJDIR)\vprintf.obj
+$(OBJDIR)\modulebase.obj
 
 
 #
 # Libraries. One space before the '\'.
 #
 LIBS = \
+$(ODIN32_LIB)\kKrnlLibR3.lib \
 $(RTLLIB_NRE) \
 os2386.lib
 
