@@ -1,4 +1,4 @@
-/* $Id: winkeyboard.cpp,v 1.6 2000-10-18 20:12:46 sandervl Exp $ */
+/* $Id: winkeyboard.cpp,v 1.7 2000-10-18 20:17:00 sandervl Exp $ */
 /*
  * Win32 <-> PM key translation
  *
@@ -418,7 +418,14 @@ INT WINAPI GetKeyboardLayoutList(INT nBuff,HKL *layouts)
  * Remark    :
  * Status    : UNTESTED STUB
  *
- * Author    : Patrick Haller [Thu, 1998/02/26 11:55]
+ * Author    : Based on Wine code (windows\x11drv\keyboard.c
+ * Copyright 1993 Bob Amstadt
+ * Copyright 1996 Albrecht Kleine 
+ * Copyright 1997 David Faure
+ * Copyright 1998 Morten Welinder
+ * Copyright 1998 Ulrich Weigand
+ * Copyright 1999 Ove Kåven
+ *
  *****************************************************************************/
 int WIN32API ToAscii(UINT   uVirtKey,
                      UINT   uScanCode,
