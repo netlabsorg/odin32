@@ -3,7 +3,7 @@
  * MCI CDAUDIO Driver for OS/2. Interface to OS/2 DosIOCtrl()
  *
  * Copyright 2000    Chris Wohlgemuth
- *
+ *           2001    Przemyslaw Dobrowolski
  * Project Odin Software License can be found in LICENSE.TXT
  *
  */
@@ -26,8 +26,21 @@ typedef struct{
 
 typedef struct
 {
+    int ADR_data_for_track:4;	// ADR data for track
+    int preemphasis:1;		// 0 = Audio without preemphasis
+                                // 1 = Audio with preemphasis
+    int cdda_permitted:1;	// 0 = Digital copy prohibited
+                                // 1 = Digital copy permitted
+    int type_of_track:1;	// 0 = Audio track
+                                // 1 = Data track
+    int channels:1;		// 0 = Two-channel audio
+                               // 1 = Four-channel audio
+}TRACKTYPE;
+
+typedef struct
+{
 	ULONG ulTrackAddress;
-	UCHAR ucTCInfo;
+	TRACKTYPE track_type;
 }CDTRACKINFO;
 
 typedef struct
@@ -156,10 +169,12 @@ int os2GetNumTracks(HFILE hfOS2Handle, ULONG *ulLeadOut)
     if(rc) {
         return 0;//Error
     }
-		
-    if(trackInfo.ucTCInfo & 0x40) {
-        return -1;//It's a data track
-    }
+
+// PD: Don't return error when data track is found.
+//  if(trackInfo.ucTCInfo & 0x40) {
+//      return -1;//It's a data track
+//  }
+
     *ulLeadOut=cdInfo.ulLeadOut;
     return cdInfo.ucLastTrack-cdInfo.ucFirstTrack+1;
 }	
@@ -213,7 +228,7 @@ BOOL os2GetCDAudioStatus(HFILE hfOS2Handle, USHORT  *usStatus)
 
 /* Returns sector info of track #numTrack */
 /* Starting with track 0 */
-ULONG  os2CDQueryTrackStartSector( HFILE hfDrive, ULONG numTrack)
+ULONG  os2CDQueryTrackStartSector( HFILE hfDrive, ULONG numTrack, BOOL *pflAudio)
 {	
     ULONG ulParamLen;
     ULONG ulDataLen;
@@ -249,6 +264,9 @@ ULONG  os2CDQueryTrackStartSector( HFILE hfDrive, ULONG numTrack)
                              sizeof(trackInfo[0]), &ulDataLen);
             if(rc) 
                 break;//Error
+
+           *pflAudio=!trackInfo[0].track_type.type_of_track;
+
         }else 
             return _CDCalculateSector((MSF*)&cdInfo.ulLeadOut);
         
