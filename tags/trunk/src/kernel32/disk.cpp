@@ -1,4 +1,4 @@
-/* $Id: disk.cpp,v 1.10 2000-03-28 17:24:27 sandervl Exp $ */
+/* $Id: disk.cpp,v 1.11 2000-05-20 13:30:27 sandervl Exp $ */
 
 /*
  * Win32 Disk API functions for OS/2
@@ -140,9 +140,31 @@ ODINFUNCTION4(BOOL,GetDiskFreeSpaceExA,
               PULARGE_INTEGER, lpTotalNumberOfBytes,
               PULARGE_INTEGER, lpTotalNumberOfFreeBytes )
 {
-  dprintf(("not yet implemented"));
+    BOOL rc;
+    DWORD dwSectorsPerCluster;	// address of sectors per cluster ter
+    DWORD dwBytesPerSector;	// address of bytes per sector
+    DWORD dwNumberOfFreeClusters;	// address of number of free clusters
+    DWORD dwTotalNumberOfClusters; 	// address of total number of clusters
 
-  return TRUE;
+    rc = O32_GetDiskFreeSpace(lpDirectoryName, &dwSectorsPerCluster, &dwBytesPerSector,
+                              &dwNumberOfFreeClusters, &dwTotalNumberOfClusters);
+    if(rc)
+    {
+        //TODO: Fill in high part (overflow possible)!!!!!!
+      	if(lpFreeBytesAvailableToCaller!=NULL) {
+        	lpFreeBytesAvailableToCaller->LowPart  = dwNumberOfFreeClusters*dwSectorsPerCluster*dwBytesPerSector;
+		lpFreeBytesAvailableToCaller->HighPart = 0;
+	}
+      	if(lpTotalNumberOfBytes!=NULL) {
+        	lpTotalNumberOfBytes->LowPart  = dwTotalNumberOfClusters*dwSectorsPerCluster*dwBytesPerSector;
+		lpTotalNumberOfBytes->HighPart = 0;
+	}
+      	if(lpTotalNumberOfFreeBytes!=NULL) {
+        	lpTotalNumberOfFreeBytes->LowPart  = dwNumberOfFreeClusters*dwSectorsPerCluster*dwBytesPerSector;
+		lpTotalNumberOfFreeBytes->HighPart = 0;
+	}
+    }
+    return rc;
 }
 
 
@@ -152,9 +174,14 @@ ODINFUNCTION4(BOOL,GetDiskFreeSpaceExW,
               PULARGE_INTEGER, lpTotalNumberOfBytes,
               PULARGE_INTEGER, lpTotalNumberOfFreeBytes )
 {
-  dprintf(("not yet implemented"));
+ BOOL  rc;
+ char *astring;
 
-  return TRUE;
+    dprintf(("KERNEL32:  OS2GetDiskFreeSpaceExW\n"));
+    astring = UnicodeToAsciiString((LPWSTR)lpDirectoryName);
+    rc = GetDiskFreeSpaceExA(astring, lpFreeBytesAvailableToCaller, lpTotalNumberOfBytes, lpTotalNumberOfFreeBytes);
+    FreeAsciiString(astring);
+    return(rc);
 }
 
 
