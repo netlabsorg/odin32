@@ -1,4 +1,4 @@
-/* $Id: dwaveout.cpp,v 1.7 1999-09-23 09:35:24 sandervl Exp $ */
+/* $Id: dwaveout.cpp,v 1.8 1999-10-22 18:09:15 sandervl Exp $ */
 
 /*
  * Wave playback class
@@ -55,7 +55,8 @@ DartWaveOut::DartWaveOut(LPWAVEFORMATEX pwfx, ULONG nCallback, ULONG dwInstance)
    mthdCallback         = (LPDRVCALLBACK)nCallback;
    this->dwInstance = dwInstance;
 
-   callback((ULONG)this, WOM_OPEN, dwInstance, 0, 0);
+   if(!ulError)
+   	callback((ULONG)this, WOM_OPEN, dwInstance, 0, 0);
 }
 /******************************************************************************/
 /******************************************************************************/
@@ -65,7 +66,8 @@ DartWaveOut::DartWaveOut(LPWAVEFORMATEX pwfx, HWND hwndCallback)
 
    this->hwndCallback = hwndCallback;
 
-   PostMessageA(hwndCallback, WOM_OPEN, 0, 0);
+   if(!ulError)
+   	PostMessageA(hwndCallback, WOM_OPEN, 0, 0);
 }
 /******************************************************************************/
 /******************************************************************************/
@@ -132,7 +134,7 @@ void DartWaveOut::Init(LPWAVEFORMATEX pwfx)
     WriteLog("MCI_OPEN failed\n");
 #endif
     mciError(rc);
-    ulError = MMSYSERR_NOTENABLED;
+    ulError = MMSYSERR_NODRIVER;
    }
    if(rc == 0) {
     //Grab exclusive rights to device instance (NOT entire device)
@@ -177,26 +179,28 @@ DartWaveOut::~DartWaveOut()
 {
    MCI_GENERIC_PARMS    GenericParms;
 
-   // Generic parameters
-   GenericParms.hwndCallback = 0;   //hwndFrame
+   if(!ulError) {
+	// Generic parameters
+   	GenericParms.hwndCallback = 0;   //hwndFrame
 
-   // Stop the playback.
-   mciSendCommand(DeviceId, MCI_STOP,MCI_WAIT, (PVOID)&GenericParms,0);
+   	// Stop the playback.
+   	mciSendCommand(DeviceId, MCI_STOP,MCI_WAIT, (PVOID)&GenericParms,0);
 
-   mciSendCommand(DeviceId,
+   	mciSendCommand(DeviceId,
                   MCI_BUFFER,
                   MCI_WAIT | MCI_DEALLOCATE_MEMORY,
                   (PVOID)&BufferParms,
                   0);
 
-   // Generic parameters
-   GenericParms.hwndCallback = 0;   //hwndFrame
+   	// Generic parameters
+   	GenericParms.hwndCallback = 0;   //hwndFrame
 
-   // Close the device
-   mciSendCommand(DeviceId, MCI_CLOSE, MCI_WAIT, (PVOID)&GenericParms, 0);
+   	// Close the device
+   	mciSendCommand(DeviceId, MCI_CLOSE, MCI_WAIT, (PVOID)&GenericParms, 0);
+   }
 
    if(wmutex)
-    wmutex->enter(VMUTEX_WAIT_FOREVER);
+    	wmutex->enter(VMUTEX_WAIT_FOREVER);
 
    State = STATE_STOPPED;
 
@@ -214,12 +218,14 @@ DartWaveOut::~DartWaveOut()
    if(wmutex)
     wmutex->leave();
 
-   if(callback) {
-    callback((ULONG)this, WOM_CLOSE, dwInstance, 0, 0);
+   if(!ulError) {
+   	if(callback) {
+    		callback((ULONG)this, WOM_CLOSE, dwInstance, 0, 0);
+   	}
+   	else
+   	if(hwndCallback)
+    		PostMessageA(hwndCallback, WOM_CLOSE, 0, 0);
    }
-   else
-   if(hwndCallback)
-    PostMessageA(hwndCallback, WOM_CLOSE, 0, 0);
 
    if(wmutex)
     delete wmutex;
@@ -236,6 +242,37 @@ DartWaveOut::~DartWaveOut()
 MMRESULT DartWaveOut::getError()
 {
   return(ulError);
+}
+/******************************************************************************/
+/******************************************************************************/
+int DartWaveOut::getNumDevices()
+{
+ MCI_GENERIC_PARMS  GenericParms;
+ MCI_AMP_OPEN_PARMS AmpOpenParms;
+ APIRET rc;
+
+   // Setup the open structure, pass the playlist and tell MCI_OPEN to use it
+   memset(&AmpOpenParms,0,sizeof(AmpOpenParms));
+
+   AmpOpenParms.usDeviceID = ( USHORT ) 0;
+   AmpOpenParms.pszDeviceType = ( PSZ ) MCI_DEVTYPE_AUDIO_AMPMIX;
+
+   rc = mciSendCommand(0, MCI_OPEN,
+                       MCI_WAIT | MCI_OPEN_TYPE_ID | MCI_OPEN_SHAREABLE,
+                       (PVOID) &AmpOpenParms,
+                       0);
+
+   if(rc) {
+	return 0; //no devices present
+   }
+
+   // Generic parameters
+   GenericParms.hwndCallback = 0;   //hwndFrame
+
+   // Close the device
+   mciSendCommand(AmpOpenParms.usDeviceID, MCI_CLOSE, MCI_WAIT, (PVOID)&GenericParms, 0);
+   
+   return 1;
 }
 /******************************************************************************/
 /******************************************************************************/

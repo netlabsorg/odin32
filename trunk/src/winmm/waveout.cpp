@@ -1,4 +1,4 @@
-/* $Id: waveout.cpp,v 1.4 1999-08-19 18:46:05 phaller Exp $ */
+/* $Id: waveout.cpp,v 1.5 1999-10-22 18:09:16 sandervl Exp $ */
 
 /*
  * Wave out MM apis
@@ -282,7 +282,7 @@ ODINFUNCTION3(MMRESULT, waveOutGetDevCapsW,
 /******************************************************************************/
 ODINFUNCTION0(UINT, waveOutGetNumDevs)
 {
-  return 1;
+  return DartWaveOut::getNumDevices();
 }
 /******************************************************************************/
 /******************************************************************************/
