@@ -1,4 +1,8 @@
- /* $Id: changelog,v 1.932 2000-05-10 13:58:21 sandervl Exp $ */
+ /* $Id: changelog,v 1.933 2000-05-10 19:49:16 cbratschi Exp $ */
+
+ 2000-05-10: Christoph Bratschi <cbratschi@datacomm.ch>
+	- COMCTL32: fixed treeview item height bug
+		    (reported by Markus Montkowski)
 
  2000-05-10: Sander van Leeuwen <sandervl@xs4all.nl>
     - USER32:
