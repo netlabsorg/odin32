@@ -1,4 +1,4 @@
-/* $Id: DoDirs.cmd,v 1.6 2002-08-24 04:29:06 bird Exp $
+/* $Id: DoDirs.cmd,v 1.7 2002-08-29 11:49:36 bird Exp $
  *
  * Rexx script which executes a given command in each of the given
  * directories. It will fail when a command failes in one of the
@@ -11,6 +11,7 @@
  * Project Odin Software License can be found in LICENSE.TXT
  */
 signal on novalue name NoValueHandler
+Address CMD '@echo off'
 
 parse arg '"'sDirs'" 'sCommand
 
