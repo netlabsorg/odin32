@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.19 2000-12-03 00:26:11 bird Exp $
+# $Id: makefile,v 1.20 2001-09-30 00:33:41 bird Exp $
 #
 # Odin32 API
 #
@@ -24,6 +24,6 @@ SUBDIRS = \
 
 # All the common rules like all, lib, clean and dep.
 $(COMMONRULES):
-    $(DODIRS) "$(SUBDIRS)" $(MAKE_CMD) $@
+    @$(DODIRS) "$(SUBDIRS)" $(MAKE_CMD) $@
 
 
