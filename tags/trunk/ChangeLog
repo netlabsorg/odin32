@@ -1,4 +1,7 @@
-/* $Id: ChangeLog,v 1.1783 2001-10-24 10:27:23 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.1784 2001-10-24 10:56:22 achimha Exp $ */
+
+ 2001-10-24: Achim Hasenmueller <achimha@innotek.de>
+    - PMKBDHK:  o link statically with C runtime
 
  2001-10-24: Sander van Leeuwen <sandervl@xs4all.nl>
     - USER32:   o SCROLLBAR: Only set focus to scrollbar control if it has
