@@ -1,4 +1,14 @@
-/* $Id: changelog,v 1.1486 2001-06-07 12:43:59 sandervl Exp $ */
+/* $Id: changelog,v 1.1487 2001-06-08 11:02:41 sandervl Exp $ */
+
+ 2001-06-08: Sander van Leeuwen <sandervl@xs4all.nl>
+    - KERNEL32: o WinExec fixes
+                o Ported Wine's WritePrivateProfileSectionA
+    - GDI32:    o DIB Section blits: translate all ROPs
+                o GetDIBits fix; RGB conversion was not always performed;
+                  now only for requested scanlines.
+
+ 2001-06-05: Patrick Haller <patrick.haller@innotek.de>
+    - KERNEL32: o Optimizations for loading of PE images
 
  2001-06-07: Sander van Leeuwen <sandervl@xs4all.nl>
     - OLE32:    o More VAC 3.6.5 compile fixes
