@@ -1,4 +1,4 @@
-/* $Id: security.cpp,v 1.2 1999-12-19 12:24:52 sandervl Exp $ */
+/* $Id: security.cpp,v 1.3 2000-01-06 20:05:00 sandervl Exp $ */
 /*
  * Win32 security API functions for OS/2
  *
@@ -99,6 +99,25 @@ OpenThreadToken( HANDLE ThreadHandle, DWORD DesiredAccess,
 {
         if (!Wine_HasSecurity()) return FALSE;
 	CallWin32ToNt (NtOpenThreadToken(ThreadHandle, DesiredAccess, OpenAsSelf, TokenHandle));
+}
+
+/*************************************************************************
+ * SetThreadToken [ADVAPI32.231]
+ *
+ * Assigns an "impersonation token" to a thread so it can assume the
+ * security privledges of another thread or process.  Can also remove
+ * a previously assigned token.  Only supported on NT - it's a stub 
+ * exactly like this one on Win9X.
+ *
+ */
+
+BOOL WINAPI SetThreadToken(PHANDLE thread, HANDLE token)
+{
+    FIXME(__FUNCTION__"(%p, %x): stub\n", thread, token);
+
+    SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+
+    return FALSE;
 }
 
 /******************************************************************************
@@ -345,7 +364,7 @@ BOOL WINAPI
 MakeSelfRelativeSD( PSECURITY_DESCRIPTOR lpabssecdesc,
                     PSECURITY_DESCRIPTOR lpselfsecdesc, LPDWORD lpbuflen )
 {
-	FIXME_(advapi)("(%p,%p,%p),stub!\n",lpabssecdesc,lpselfsecdesc,lpbuflen);
+	FIXME(__FUNCTION__"(%p,%p,%p),stub!\n",lpabssecdesc,lpselfsecdesc,lpbuflen);
 	return TRUE;
 }
 
@@ -355,7 +374,7 @@ MakeSelfRelativeSD( PSECURITY_DESCRIPTOR lpabssecdesc,
 
 BOOL WINAPI GetSecurityDescriptorControl ( PSECURITY_DESCRIPTOR  pSecurityDescriptor,
 		 PSECURITY_DESCRIPTOR_CONTROL pControl, LPDWORD lpdwRevision)
-{	FIXME_(advapi)("(%p,%p,%p),stub!\n",pSecurityDescriptor,pControl,lpdwRevision);
+{	FIXME(__FUNCTION__"(%p,%p,%p),stub!\n",pSecurityDescriptor,pControl,lpdwRevision);
 	return 1;
 }		
 
@@ -381,7 +400,7 @@ BOOL WINAPI GetSecurityDescriptorControl ( PSECURITY_DESCRIPTOR  pSecurityDescri
 BOOL WINAPI
 LookupPrivilegeValueW( LPCWSTR lpSystemName, LPCWSTR lpName, LPVOID lpLuid )
 {
-    FIXME_(advapi)("(%s,%s,%p): stub\n",debugstr_w(lpSystemName), 
+    FIXME(__FUNCTION__"(%s,%s,%p): stub\n",debugstr_w(lpSystemName), 
                   debugstr_w(lpName), lpLuid);
     return TRUE;
 }
@@ -413,7 +432,7 @@ GetFileSecurityA( LPCSTR lpFileName,
                     PSECURITY_DESCRIPTOR pSecurityDescriptor,
                     DWORD nLength, LPDWORD lpnLengthNeeded )
 {
-  FIXME_(advapi)("(%s) : stub\n", debugstr_a(lpFileName));
+  FIXME(__FUNCTION__"(%s) : stub\n", debugstr_a(lpFileName));
   return TRUE;
 }
 
@@ -437,10 +456,39 @@ GetFileSecurityW( LPCWSTR lpFileName,
                     PSECURITY_DESCRIPTOR pSecurityDescriptor,
                     DWORD nLength, LPDWORD lpnLengthNeeded )
 {
-  FIXME_(advapi)("(%s) : stub\n", debugstr_w(lpFileName) ); 
+  FIXME(__FUNCTION__"(%s) : stub\n", debugstr_w(lpFileName) ); 
   return TRUE;
 }
 
+/******************************************************************************
+ * SetFileSecurity32A [ADVAPI32.182]
+ * Sets the security of a file or directory
+ */
+BOOL WINAPI SetFileSecurityA( LPCSTR lpFileName,
+                                SECURITY_INFORMATION RequestedInformation,
+                                PSECURITY_DESCRIPTOR pSecurityDescriptor)
+{
+  FIXME(__FUNCTION__"(%s) : stub\n", debugstr_a(lpFileName));
+  return TRUE;
+}
+
+/******************************************************************************
+ * SetFileSecurity32W [ADVAPI32.183]
+ * Sets the security of a file or directory
+ *
+ * PARAMS
+ *   lpFileName           []
+ *   RequestedInformation []
+ *   pSecurityDescriptor  []
+ */
+BOOL WINAPI
+SetFileSecurityW( LPCWSTR lpFileName, 
+                    SECURITY_INFORMATION RequestedInformation,
+                    PSECURITY_DESCRIPTOR pSecurityDescriptor )
+{
+  FIXME(__FUNCTION__"(%s) : stub\n", debugstr_w(lpFileName) ); 
+  return TRUE;
+}
 
 /******************************************************************************
  * LookupAccountSid32A [ADVAPI32.86]
@@ -450,7 +498,7 @@ LookupAccountSidA( LPCSTR system, PSID sid, LPCSTR account,
                      LPDWORD accountSize, LPCSTR domain, LPDWORD domainSize,
                      PSID_NAME_USE name_use )
 {
-	FIXME_(security)("(%s,%p,%p,%p,%p,%p,%p): stub\n",
+	FIXME(__FUNCTION__"(%s,%p,%p,%p,%p,%p,%p): stub\n",
 	      system,sid,account,accountSize,domain,domainSize,name_use);
 	SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
 	return FALSE;
@@ -473,40 +521,10 @@ LookupAccountSidW( LPCWSTR system, PSID sid, LPCWSTR account,
                      LPDWORD accountSize, LPCWSTR domain, LPDWORD domainSize,
                      PSID_NAME_USE name_use )
 {
-	FIXME_(security)("(%p,%p,%p,%p,%p,%p,%p): stub\n",
+	FIXME(__FUNCTION__"(%p,%p,%p,%p,%p,%p,%p): stub\n",
 	      system,sid,account,accountSize,domain,domainSize,name_use);
 	SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
 	return FALSE;
-}
-
-/******************************************************************************
- * SetFileSecurity32A [ADVAPI32.182]
- * Sets the security of a file or directory
- */
-BOOL WINAPI SetFileSecurityA( LPCSTR lpFileName,
-                                SECURITY_INFORMATION RequestedInformation,
-                                PSECURITY_DESCRIPTOR pSecurityDescriptor)
-{
-  FIXME_(advapi)("(%s) : stub\n", debugstr_a(lpFileName));
-  return TRUE;
-}
-
-/******************************************************************************
- * SetFileSecurity32W [ADVAPI32.183]
- * Sets the security of a file or directory
- *
- * PARAMS
- *   lpFileName           []
- *   RequestedInformation []
- *   pSecurityDescriptor  []
- */
-BOOL WINAPI
-SetFileSecurityW( LPCWSTR lpFileName, 
-                    SECURITY_INFORMATION RequestedInformation,
-                    PSECURITY_DESCRIPTOR pSecurityDescriptor )
-{
-  FIXME_(advapi)("(%s) : stub\n", debugstr_w(lpFileName) ); 
-  return TRUE;
 }
 
 /******************************************************************************
@@ -518,7 +536,7 @@ SetFileSecurityW( LPCWSTR lpFileName,
 BOOL WINAPI
 QueryWindows31FilesMigration( DWORD x1 )
 {
-	FIXME_(advapi)("(%ld):stub\n",x1);
+	FIXME(__FUNCTION__"(%ld):stub\n",x1);
 	return TRUE;
 }
 
@@ -535,7 +553,7 @@ BOOL WINAPI
 SynchronizeWindows31FilesAndWindowsNTRegistry( DWORD x1, DWORD x2, DWORD x3,
                                                DWORD x4 )
 {
-	FIXME_(advapi)("(0x%08lx,0x%08lx,0x%08lx,0x%08lx):stub\n",x1,x2,x3,x4);
+	FIXME(__FUNCTION__"(0x%08lx,0x%08lx,0x%08lx,0x%08lx):stub\n",x1,x2,x3,x4);
 	return TRUE;
 }
 
@@ -554,7 +572,7 @@ LsaOpenPolicy(PLSA_UNICODE_STRING SystemName,
 	      ACCESS_MASK DesiredAccess,
 	      PLSA_HANDLE PolicyHandle)
 {
-	FIXME_(advapi)("(%p,%p,0x%08lx,%p):stub\n",
+	FIXME(__FUNCTION__"(%p,%p,0x%08lx,%p):stub\n",
 		       SystemName, ObjectAttributes,
 		       DesiredAccess, PolicyHandle);
 	return 0xc0000000; /* generic error */
@@ -569,7 +587,7 @@ LsaOpenPolicy(PLSA_UNICODE_STRING SystemName,
 BOOL WINAPI
 NotifyBootConfigStatus( DWORD x1 )
 {
-	FIXME_(advapi)("(0x%08lx):stub\n",x1);
+	FIXME(__FUNCTION__"(0x%08lx):stub\n",x1);
 	return 1;
 }
 
@@ -582,7 +600,7 @@ NotifyBootConfigStatus( DWORD x1 )
 BOOL WINAPI
 RevertToSelf( void )
 {
-	FIXME_(advapi)("(), stub\n");
+	FIXME(__FUNCTION__"(), stub\n");
 	return TRUE;
 }
 
@@ -592,7 +610,7 @@ RevertToSelf( void )
 BOOL WINAPI
 ImpersonateSelf(SECURITY_IMPERSONATION_LEVEL ImpersonationLevel)
 {
-    FIXME_(advapi)("(%08x), stub\n", ImpersonationLevel);
+    FIXME(__FUNCTION__"(%08x), stub\n", ImpersonationLevel);
     return TRUE;
 }
 
@@ -604,32 +622,36 @@ AccessCheck(PSECURITY_DESCRIPTOR pSecurityDescriptor, HANDLE ClientToken,
 	    DWORD DesiredAccess, PGENERIC_MAPPING GenericMapping, PPRIVILEGE_SET PrivilegeSet,
 	    LPDWORD PrivilegeSetLength, LPDWORD GrantedAccess, LPBOOL AccessStatus)
 {
-    FIXME_(advapi)("(%p, %04x, %08lx, %p, %p, %p, %p, %p), stub\n",
+    FIXME(__FUNCTION__"(%p, %04x, %08lx, %p, %p, %p, %p, %p), stub\n",
 		   pSecurityDescriptor, ClientToken, DesiredAccess, GenericMapping, 
 		   PrivilegeSet, PrivilegeSetLength, GrantedAccess, AccessStatus);
     *AccessStatus = TRUE;
     return TRUE;
 }
 
-/*************************************************************************
- * SetThreadToken [ADVAPI32.231]
+/*****************************************************************************
+ * Name      : InitializeAcl
+ * Purpose   : The InitializeAcl function creates a new ACL structure.
+ *             An ACL is an access-control list.
+ * Parameters: PACL  pAcl          address of access-control list
+ *             DWORD nAclLength    size of access-control list
+ *             DWORD dwAclRevision revision level of access-control list
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
  *
- * Assigns an "impersonation token" to a thread so it can assume the
- * security privledges of another thread or process.  Can also remove
- * a previously assigned token.  Only supported on NT - it's a stub 
- * exactly like this one on Win9X.
- *
- */
+ * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
+ *****************************************************************************/
 
-BOOL WINAPI SetThreadToken(PHANDLE thread, HANDLE token)
+BOOL WIN32API InitializeAcl(PACL  pAcl,
+                            DWORD nAclLength,
+                            DWORD dwAclRevision)
 {
-    FIXME_(advapi)("(%p, %x): stub\n", thread, token);
+  dprintf(("ADVAPI32: InitializeAcl(%08xh,%08xh,%08xh)",
+           pAcl,
+           nAclLength,
+           dwAclRevision));
 
-    SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
-
-    return FALSE;
+  CallWin32ToNt (RtlCreateAcl(pAcl, nAclLength, dwAclRevision));
 }
-
-
-
-
