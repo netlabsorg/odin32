@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.9 2001-02-11 15:23:28 bird Exp $
+# $Id: makefile,v 1.10 2001-02-12 21:09:18 bird Exp $
 
 #
 # Odin32 API
@@ -9,14 +9,11 @@
 
 #
 # Tell build environment we're build a public library which should
-# work with both exe and dlls (hence EXETARGET). It should also
-# invoke the additional dependency rule.
+# work with both exe and dlls (hence EXETARGET).
 #
 LIBTARGET=1
 PUBLICLIB=1
 EXETARGET=1
-ADDITIONAL_DEP = mydep
-WIN32KINCLUDE = ..\include
 
 
 #
@@ -28,11 +25,9 @@ WIN32KINCLUDE = ..\include
 #
 # Tools and Flags Addjustments
 #
-CINCLUDES  = -I$(WIN32KINCLUDE) $(CINCLUDES)
 CDEFINES   = -DRING3 -DWIN32KLIB
 !if "$(VAC3)" == "1" | "$(VAC36)" == "1"
 CFLAGS     = $(CFLAGS)    -Wall+ppt-ppc-inl-cnv-gnr-vft-gen-uni-ext- -Rn
-CXXFLAGS   = $(CINCLUDES) -Wall+ppt-ppc-inl-cnv-gnr-vft-             -Rn
 !endif
 
 
@@ -62,11 +57,4 @@ TARGET  = win32k
 # Includes the common rules.
 #
 !include $(ODIN32_POST_INC)
-
-
-#
-# Dependencies.
-#
-mydep:
-    $(DEPEND) -a -o$$(OBJDIR) $(CINCLUDES) $(WIN32KINCLUDE)\*.h
 

@@ -1,4 +1,4 @@
-# $Id: MemInfoTest.mak,v 1.1 2001-02-11 15:25:52 bird Exp $
+# $Id: MemInfoTest.mak,v 1.2 2001-02-12 21:09:18 bird Exp $
 
 #
 # Odin32 API
@@ -11,8 +11,6 @@
 # Tell buildenvironment that we're making an exe and to invoke additional dep rule
 #
 EXETARGET = 1
-ADDITIONAL_DEP = mydep
-WIN32KINCLUDE = ..\include
 VIO = 1
 
 
@@ -20,14 +18,6 @@ VIO = 1
 # Compiler, tools, and interference rules thru the win32k makefile.inc file.
 #
 !include ..\..\..\makefile.inc
-
-
-#
-# Tools and Flags Addjustments
-#  (The author of this is kinda SM when it comes to warnings... ;-)
-#
-CINCLUDES  = -I$(WIN32KINCLUDE) $(CINCLUDES)
-CDEFINES   = $(CDEFINES) -DRING3
 
 
 #
@@ -56,11 +46,4 @@ TARGET = MemInfoTest
 # Includes the common rules.
 #
 !include $(ODIN32_POST_INC)
-
-
-#
-# Dependencies.
-#
-mydep:
-    $(DEPEND) -a -o$$(OBJDIR) $(CINCLUDES) $(WIN32KINCLUDE)\*.h
 
