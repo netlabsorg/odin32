@@ -1,4 +1,4 @@
-/* $Id: shlmenu.cpp,v 1.5 2000-03-26 16:34:53 cbratschi Exp $ */
+/* $Id: shlmenu.cpp,v 1.6 2000-08-18 02:01:25 phaller Exp $ */
 
 /*
  * Win32 SHELL32 for OS/2
@@ -42,6 +42,7 @@
 #include "debugtools.h"
 #include "winversion.h"
 #include "shell32_main.h"
+#include "shlguid.h"
 
 #include "pidl.h"
 
@@ -142,7 +143,7 @@ static LPFMINFO FM_SetMenuParameter(
  */
 static int FM_InitMenuPopup(HMENU hmenu, LPITEMIDLIST pAlternatePidl)
 {  IShellFolder   *lpsf, *lpsf2;
-   ULONG    ulItemAttr;
+   ULONG    ulItemAttr = SFGAO_FOLDER;
    UINT     uID, uFlags, uEnumFlags;
    LPFNFMCALLBACK lpfnCallback;
    LPITEMIDLIST   pidl;
@@ -195,7 +196,7 @@ static int FM_InitMenuPopup(HMENU hmenu, LPITEMIDLIST pAlternatePidl)
       if (SUCCEEDED (IShellFolder_GetAttributesOf(lpsf, 1, &pidlTemp, &ulItemAttr)))
       {
         ILGetDisplayName( pidlTemp, sTemp);
-        if (! (PidlToSicIndex(lpsf, pidlTemp, FALSE, (UINT*)&iIcon)))
+        if (! (PidlToSicIndex(lpsf, pidlTemp, FALSE, 0, (UINT*)&iIcon)))
           iIcon = FM_BLANK_ICON;
         if ( SFGAO_FOLDER & ulItemAttr)
         {
@@ -472,7 +473,7 @@ ODINFUNCTION2(HMENU, FileMenu_FindSubMenuByPidl,
 /*************************************************************************
  * FileMenu_AppendFilesForPidl                 [SHELL32.124]
  */
-ODINFUNCTION3(HMENU, FileMenu_AppendFilesForPidl,
+ODINFUNCTION3(int,   FileMenu_AppendFilesForPidl,
               HMENU, hmenu,
               LPCITEMIDLIST, pidl,
               BOOL, bAddSeperator)
@@ -518,7 +519,7 @@ ODINFUNCTION7(int, FileMenu_AddFilesForPidl,
 /*************************************************************************
  * FileMenu_TrackPopupMenuEx                   [SHELL32.116]
  */
-ODINFUNCTION6(HRESULT, FileMenu_TrackPopupMenuEx,
+ODINFUNCTION6(BOOL,    FileMenu_TrackPopupMenuEx,
               HMENU, hMenu,
               UINT, uFlags,
               int, x,

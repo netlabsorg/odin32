@@ -1,4 +1,4 @@
-/* $Id: brsfolder.cpp,v 1.4 2000-03-26 16:34:38 cbratschi Exp $ */
+/* $Id: brsfolder.cpp,v 1.5 2000-08-18 02:01:14 phaller Exp $ */
 
 /*
  * Win32 SHELL32 for OS/2
@@ -45,6 +45,7 @@
 #include "pidl.h"
 #include "shell32_main.h"
 #include "shellapi.h"
+#include "shlguid.h"
 
 #include <misc.h>
 

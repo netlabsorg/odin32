@@ -1,4 +1,4 @@
-/* $Id: shellpath.cpp,v 1.10 2000-05-18 14:16:04 sandervl Exp $ */
+/* $Id: shellpath.cpp,v 1.11 2000-08-18 02:01:23 phaller Exp $ */
 
 /*
  * Win32 SHELL32 for OS/2
@@ -47,23 +47,3 @@
 
 ODINDEBUGCHANNEL(SHELL32-SHELLPATH)
 
-/*************************************************************************
- * SheGetDirW [SHELL32.281]
- *
- */
-ODINFUNCTION2(HRESULT, SheGetDirW,
-              LPWSTR, u,
-              LPWSTR, v)
-{  FIXME("%p %p stub\n",u,v);
-   return 0;
-}
-
-/*************************************************************************
- * SheChangeDirW [SHELL32.274]
- *
- */
-ODINFUNCTION1(HRESULT, SheChangeDirW,
-              LPWSTR, u)
-{  FIXME("(%s),stub\n",debugstr_w(u));
-   return 0;
-}
