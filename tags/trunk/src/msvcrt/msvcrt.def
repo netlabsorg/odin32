@@ -1,4 +1,4 @@
-; $Id: msvcrt.def,v 1.16 2000-02-05 13:33:16 sandervl Exp $
+; $Id: msvcrt.def,v 1.17 2000-06-21 17:33:37 phaller Exp $
 
 ;
 ; Based on Windows 98 : MSVCRT.DLL (v6.00.8397.0)
@@ -81,7 +81,7 @@ EXPORTS
 ;   _Strftime			= 				@72
     _XcptFilter			= _CRTDLL__XcptFilter		@73
     __CxxFrameHandler		= _MSVCRT___CxxFrameHandler	@74
-;   __CxxLongjmpUnwind						@75
+    __CxxLongjmpUnwind		= _MSVCRT___CxxLongjmpUnwind    @75
 ;   __RTCastToVoid						@76
 ;   __RTDynamicCast						@77
 ;   __RTtypeid							@78

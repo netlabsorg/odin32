@@ -1,4 +1,4 @@
-/* $Id: msvcrt.cpp,v 1.11 2000-03-18 19:48:54 sandervl Exp $ */
+/* $Id: msvcrt.cpp,v 1.12 2000-06-21 17:33:37 phaller Exp $ */
 
 /*
  * The Visual C RunTime DLL (MSVCRT/MSVCRT20/MSVCRT40)
@@ -624,6 +624,18 @@ INT CDECL MSVCRT__CxxThrowException(DWORD ret)
 INT CDECL MSVCRT___CxxFrameHandler(DWORD ret)
 {
   dprintf(("MSVCRT: __CxxFrameHandler not implemented.\n"));
+  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+  return FALSE;
+}
+
+
+/*********************************************************************
+ *                  __CxxLongjmpUnwind    (MSVCRT.75) ?
+ *	FIXME - Could not find anything about it
+ */
+INT CDECL MSVCRT___CxxLongjmpUnwind(DWORD ret)
+{
+  dprintf(("MSVCRT: __CxxLongjmpUnwind not implemented.\n"));
   SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
   return FALSE;
 }
