@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.8 1999-07-18 10:39:50 sandervl Exp $
+# $Id: makefile,v 1.9 1999-07-18 17:12:02 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -29,7 +29,7 @@ OBJS =  user32.obj resstring.obj dialog.obj loadres.obj \
         msgbox.obj window.obj windowmsg.obj windowclass.obj windlgmsg.obj \
         windowword.obj gen_object.obj oslibwin.obj win32wndchild.obj \
         controls.obj button.obj oslibutil.obj oslibmsg.obj windlg.obj \
-        winprop.obj wingdi.obj oslibgdi.obj
+        winprop.obj wingdi.obj oslibgdi.obj winacc.obj winscrollbar.obj
 
 
 all: $(TARGET).dll $(TARGET).lib
@@ -79,6 +79,8 @@ wingdi.obj:    wingdi.cpp win32wnd.h oslibgdi.h
 windlgmsg.obj: windlgmsg.cpp win32class.h win32wnd.h win32dlg.h win32wndchild.h
 windowclass.obj: windowclass.cpp win32class.h win32wnd.h win32wndchild.h
 windowword.obj:  windowword.cpp win32class.h win32wnd.h win32dlg.h win32wndchild.h
+winacc.obj:     winacc.cpp
+winscrollbar.obj: winscrollbar.cpp
 
 pmwindow.obj:   pmwindow.cpp win32class.h win32wnd.h win32dlg.h pmwindow.h win32wndchild.h $(PDWIN32_INCLUDE)\wprocess.h  oslibgdi.h
 win32class.obj: win32class.cpp win32class.h win32wnd.h win32dlg.h gen_object.h oslibwin.h win32wndchild.h
