@@ -1,4 +1,4 @@
-/* $Id: initterm.h,v 1.5 2000-06-21 20:51:52 sandervl Exp $ */
+/* $Id: initterm.h,v 1.6 2000-10-21 14:30:47 sandervl Exp $ */
 /*
  * KERNEL32 DLL entry point header
  *
@@ -37,5 +37,9 @@ extern ULONG ulMaxAddr; /* end of user address space */
 extern char  kernel32Path[];
 
 void InitEnvironment(int nrcpus); //initsystem.cpp
+
+//InitDynamicRegistry creates/changes keys that may change (i.e. odin.ini
+//keys that affect windows version)
+void InitDynamicRegistry();       //initsystem.cpp
 
 #endif

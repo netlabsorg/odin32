@@ -1,32 +1,32 @@
-/* $Id: initsystem.cpp,v 1.20 2000-10-21 12:48:40 sandervl Exp $ */
+/* $Id: initsystem.cpp,v 1.21 2000-10-21 14:30:46 sandervl Exp $ */
 /*
  * Odin system initialization (registry, directories & environment)
  *
- * Called from the WarpIn install program to create the desktop directories and 
+ * Called from the WarpIn install program to create the desktop directories and
  * to setup the registry
  *
  * InitSystemAndRegistry creates:
  *      - SYSTEMDIR\drivers
- *	- WINDOWSDIR\SYSTEM
+ *  - WINDOWSDIR\SYSTEM
  *      - WINDOWSDIR\AppData
  *      - WINDOWSDIR\Cache
  *      - WINDOWSDIR\Cookies
- *	- WINDOWSDIR\Desktop
- *	- WINDOWSDIR\Favorites
- *	- WINDOWSDIR\Fonts
+ *  - WINDOWSDIR\Desktop
+ *  - WINDOWSDIR\Favorites
+ *  - WINDOWSDIR\Fonts
  *      - WINDOWSDIR\History
- *	- WINDOWSDIR\NetHood
- *	- WINDOWSDIR\My Documents
- *	- WINDOWSDIR\PrintHood
- *	- WINDOWSDIR\Recent
- *	- WINDOWSDIR\SendTo
- *	- WINDOWSDIR\Start Menu
- *	- WINDOWSDIR\Start Menu\Programs
- *	- WINDOWSDIR\Start Menu\Programs\Startup
- *	- WINDOWSDIR\ShellNew
+ *  - WINDOWSDIR\NetHood
+ *  - WINDOWSDIR\My Documents
+ *  - WINDOWSDIR\PrintHood
+ *  - WINDOWSDIR\Recent
+ *  - WINDOWSDIR\SendTo
+ *  - WINDOWSDIR\Start Menu
+ *  - WINDOWSDIR\Start Menu\Programs
+ *  - WINDOWSDIR\Start Menu\Programs\Startup
+ *  - WINDOWSDIR\ShellNew
  *      - x:\Program Files
  *      - x:\Program Files\Common Files
- *	- and a minimal system registry
+ *  - and a minimal system registry
  *
  * Copyright 1999-2000 Sander van Leeuwen (sandervl@xs4all.nl)
  *
@@ -47,17 +47,17 @@
 #include "directory.h"
 #include <versionos2.h>
 
-#define DBG_LOCALLOG	DBG_initsystem
+#define DBG_LOCALLOG    DBG_initsystem
 #include "dbglocal.h"
 
-#define DDRAW_CLASSID 		"{D7B70EE0-4340-11CF-B063-0020AFC2CD35}"
-#define DDRAW_DEFAULT		"DirectDraw Object"
-#define DDRAW_CLIPPER_CLASSID	"{593817A0-7DB3-11CF-A2DE-00AA00B93356}"
-#define DDRAW_CLIPPER_DEFAULT	"DirectDraw Clipper Object"
-#define DDRAW_DLL		"ddraw.dll"
-#define DSOUND_CLASSID		"{47D4D946-62E8-11cf-93BC-444553540000}"
-#define DSOUND_DEFAULT		"DirectSound Object"
-#define DSOUND_DLL		"dsound.dll"
+#define DDRAW_CLASSID       "{D7B70EE0-4340-11CF-B063-0020AFC2CD35}"
+#define DDRAW_DEFAULT       "DirectDraw Object"
+#define DDRAW_CLIPPER_CLASSID   "{593817A0-7DB3-11CF-A2DE-00AA00B93356}"
+#define DDRAW_CLIPPER_DEFAULT   "DirectDraw Clipper Object"
+#define DDRAW_DLL       "ddraw.dll"
+#define DSOUND_CLASSID      "{47D4D946-62E8-11cf-93BC-444553540000}"
+#define DSOUND_DEFAULT      "DirectSound Object"
+#define DSOUND_DLL      "dsound.dll"
 #define DPLAYX_CLASSID          "{D1EB6D20-8923-11d0-9D97-00A0C90A43CB}"
 #define DPLAYX_DEFAULT          "DirectPlay Object"
 #define DPLAYX_DLL              "dplayx.dll"
@@ -65,17 +65,17 @@
 #define DPLAYX_LOBBY_DEFAULT    "DirectPlayLobby Object"
 #define DPLAYX_LOBBY_DLL        DPLAYX_DLL
 
-#define CLASS_DESKTOP    	"Desktop"
+#define CLASS_DESKTOP       "Desktop"
 #define CLASS_SHORTCUT          "Shortcut"
-#define CLASS_SHELL32DLL 	"shell32.dll"
-#define COM_CLASS_ID		"CLSID"
+#define CLASS_SHELL32DLL    "shell32.dll"
+#define COM_CLASS_ID        "CLSID"
 #define COM_INPROCSERVER        "InprocServer32"
-#define COM_THREADMODEL		"ThreadingModel"
+#define COM_THREADMODEL     "ThreadingModel"
 #define COM_THREAD_APARTMENT    "Apartment"
-#define THREAD_BOTH		"Both"
-#define INITREG_ERROR		"InitRegistry: Unable to register system information"
+#define THREAD_BOTH     "Both"
+#define INITREG_ERROR       "InitRegistry: Unable to register system information"
 #define DIR_PROGRAM             "ProgramFilesDir"
-#define DIR_PROGRAM_COMMON	"CommonFilesDir"
+#define DIR_PROGRAM_COMMON  "CommonFilesDir"
 #define DIR_SHARED              "SharedDir"
 #define HARDWARE_VIDEO_GRADD    "\\REGISTRY\\Machine\\System\\CurrentControlSet\\Services\\Gradd\\Device0"
 #define HARDWARE_VIDEO_GRADD_DESCRIPTION "OS/2 Display driver"
@@ -85,11 +85,11 @@
 #define DIRECTX_RC              "0"
 #define DIRECTX_VERSION         "4.04.1381.276"
 #define DIRECTX_INSTALLED_VERSION 0x0004
-#define ODIN_WINMM_PLAYBACK 	"OS/2 Dart Audio Playback"
-#define ODIN_WINMM_RECORD	"OS/2 Dart Audio Record"
+#define ODIN_WINMM_PLAYBACK     "OS/2 Dart Audio Playback"
+#define ODIN_WINMM_RECORD   "OS/2 Dart Audio Record"
 
-#define KEY_DEVICE_TYPE		"Type"
-#define KEY_DEVICE_START	"Start"
+#define KEY_DEVICE_TYPE     "Type"
+#define KEY_DEVICE_START    "Start"
 #define KEY_DEVICE_GROUP        "Group"
 #define KEY_DEVICE_ERRORCONTROL "ErrorControl"
 #define KEY_DEVICE_AUTORUN      "Autorun"
@@ -117,177 +117,177 @@ BOOL InitSystemAndRegistry()
  char  digbuf[16];
  char  shellpath[260];
 
-   if(RegCreateKeyA(HKEY_LOCAL_MACHINE,"SYSTEM\\CurrentControlSet\\Control\\Windows",&hkey)!=ERROR_SUCCESS) {
-      	dprintf(("InitRegistry: Unable to register system information\n"));
-	return FALSE;
-   }
-   buf = InternalGetWindowsDirectoryA();
-   RegSetValueExA(hkey,"Directory",0,REG_BINARY, (LPBYTE)buf, strlen(buf)+1);
-   buf = InternalGetSystemDirectoryA();
-   RegSetValueExA(hkey,"SystemDirectory",0,REG_BINARY, (LPBYTE)buf, strlen(buf)+1);
-   val = 0;
-   RegSetValueExA(hkey,"ErrorMode",0,REG_DWORD, (LPBYTE)&val, sizeof(DWORD));
-   val = 0;
-   RegSetValueExA(hkey,"NoInteractiveServices",0,REG_DWORD, (LPBYTE)&val, sizeof(DWORD));
-   val = ODINNT_BUILD_NR;
-   RegSetValueExA(hkey,"CSDVersion",0,REG_DWORD, (LPBYTE)&val, sizeof(DWORD));
-   RegSetValueExA(hkey,"ShutdownTime",0,REG_DWORD, (LPBYTE)ShutdownTime, sizeof(ShutdownTime));
-   RegCloseKey(hkey);
+    if(RegCreateKeyA(HKEY_LOCAL_MACHINE,"SYSTEM\\CurrentControlSet\\Control\\Windows",&hkey)!=ERROR_SUCCESS) {
+        dprintf(("InitRegistry: Unable to register system information\n"));
+        return FALSE;
+    }
+    buf = InternalGetWindowsDirectoryA();
+    RegSetValueExA(hkey,"Directory",0,REG_BINARY, (LPBYTE)buf, strlen(buf)+1);
+    buf = InternalGetSystemDirectoryA();
+    RegSetValueExA(hkey,"SystemDirectory",0,REG_BINARY, (LPBYTE)buf, strlen(buf)+1);
+    val = 0;
+    RegSetValueExA(hkey,"ErrorMode",0,REG_DWORD, (LPBYTE)&val, sizeof(DWORD));
+    val = 0;
+    RegSetValueExA(hkey,"NoInteractiveServices",0,REG_DWORD, (LPBYTE)&val, sizeof(DWORD));
+    val = ODINNT_BUILD_NR;
+    RegSetValueExA(hkey,"CSDVersion",0,REG_DWORD, (LPBYTE)&val, sizeof(DWORD));
+    RegSetValueExA(hkey,"ShutdownTime",0,REG_DWORD, (LPBYTE)ShutdownTime, sizeof(ShutdownTime));
+    RegCloseKey(hkey);
 
-   //Software\Microsoft\Windows\CurrentVersion\RunOnce
-   if(RegCreateKeyA(HKEY_LOCAL_MACHINE,"Software\\Microsoft\\Windows\\CurrentVersion\\RunOnce",&hkey)!=ERROR_SUCCESS) {
-      	dprintf(("InitRegistry: Unable to register system information (2)"));
-	return FALSE;
-   }
-   RegCloseKey(hkey);
+    //Software\Microsoft\Windows\CurrentVersion\RunOnce
+    if(RegCreateKeyA(HKEY_LOCAL_MACHINE,"Software\\Microsoft\\Windows\\CurrentVersion\\RunOnce",&hkey)!=ERROR_SUCCESS) {
+        dprintf(("InitRegistry: Unable to register system information (2)"));
+        return FALSE;
+    }
+    RegCloseKey(hkey);
 
-   //System\CurrentControlSet\Control\Session Manager
-   if(RegCreateKeyA(HKEY_LOCAL_MACHINE,"System\\CurrentControlSet\\Control\\Session Manager",&hkey)!=ERROR_SUCCESS) {
-      	dprintf(("InitRegistry: Unable to register system information (2)"));
-	return FALSE;
-   }
-   RegCloseKey(hkey);
+    //System\CurrentControlSet\Control\Session Manager
+    if(RegCreateKeyA(HKEY_LOCAL_MACHINE,"System\\CurrentControlSet\\Control\\Session Manager",&hkey)!=ERROR_SUCCESS) {
+        dprintf(("InitRegistry: Unable to register system information (2)"));
+        return FALSE;
+    }
+    RegCloseKey(hkey);
 
-   if(RegCreateKeyA(HKEY_LOCAL_MACHINE,"Software\\Microsoft\\Windows\\CurrentVersion\\App Paths\\iexplore.exe",&hkey)!=ERROR_SUCCESS) {
-      	dprintf(("InitRegistry: Unable to register system information (2)"));
-	return FALSE;
-   }
-   strcpy(shellpath, InternalGetWindowsDirectoryA());
-   strcat(shellpath, "\\IEXPLORE.EXE");
-   RegSetValueExA(hkey, "", 0, REG_SZ, (LPBYTE)shellpath, strlen(shellpath)+1);
-   RegCloseKey(hkey);
+    if(RegCreateKeyA(HKEY_LOCAL_MACHINE,"Software\\Microsoft\\Windows\\CurrentVersion\\App Paths\\iexplore.exe",&hkey)!=ERROR_SUCCESS) {
+        dprintf(("InitRegistry: Unable to register system information (2)"));
+        return FALSE;
+    }
+    strcpy(shellpath, InternalGetWindowsDirectoryA());
+    strcat(shellpath, "\\IEXPLORE.EXE");
+    RegSetValueExA(hkey, "", 0, REG_SZ, (LPBYTE)shellpath, strlen(shellpath)+1);
+    RegCloseKey(hkey);
 
 
-   if(RegCreateKeyA(HKEY_LOCAL_MACHINE,"SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion",&hkey)!=ERROR_SUCCESS) {
-      	dprintf(("InitRegistry: Unable to register system information (2)"));
-	return FALSE;
-   }
-   buf = InternalGetSystemDirectoryA();
-   RegSetValueExA(hkey,"SystemRoot",0,REG_SZ, (LPBYTE)buf, strlen(buf)+1);
-   RegSetValueExA(hkey,"PathName",0,REG_SZ, (LPBYTE)buf, strlen(buf)+1);
-   sprintf(digbuf, "%d", ODINNT_BUILD_NR);
-   RegSetValueExA(hkey,"CurrentBuildNumber",0,REG_SZ, (LPBYTE)digbuf, strlen(digbuf)+1);
-   RegSetValueExA(hkey,"CurrentType",0,REG_SZ, (LPBYTE)ODINNT_OSTYPE_UNI, sizeof(ODINNT_OSTYPE_UNI));
-   RegSetValueExA(hkey,"CSDVersion",0,REG_SZ, (LPBYTE)ODINNT_CSDVERSION, sizeof(ODINNT_CSDVERSION));
-   RegSetValueExA(hkey,"SoftwareType",0,REG_SZ, (LPBYTE)ODINNT_SOFTWARE_TYPE, sizeof(ODINNT_SOFTWARE_TYPE));
+    if(RegCreateKeyA(HKEY_LOCAL_MACHINE,"SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion",&hkey)!=ERROR_SUCCESS) {
+        dprintf(("InitRegistry: Unable to register system information (2)"));
+        return FALSE;
+    }
+    buf = InternalGetSystemDirectoryA();
+    RegSetValueExA(hkey,"SystemRoot",0,REG_SZ, (LPBYTE)buf, strlen(buf)+1);
+    RegSetValueExA(hkey,"PathName",0,REG_SZ, (LPBYTE)buf, strlen(buf)+1);
+    sprintf(digbuf, "%d", ODINNT_BUILD_NR);
+    RegSetValueExA(hkey,"CurrentBuildNumber",0,REG_SZ, (LPBYTE)digbuf, strlen(digbuf)+1);
+    RegSetValueExA(hkey,"CurrentType",0,REG_SZ, (LPBYTE)ODINNT_OSTYPE_UNI, sizeof(ODINNT_OSTYPE_UNI));
+    RegSetValueExA(hkey,"CSDVersion",0,REG_SZ, (LPBYTE)ODINNT_CSDVERSION, sizeof(ODINNT_CSDVERSION));
+    RegSetValueExA(hkey,"SoftwareType",0,REG_SZ, (LPBYTE)ODINNT_SOFTWARE_TYPE, sizeof(ODINNT_SOFTWARE_TYPE));
 
-   sprintf(digbuf, "%d.%d", ODINNT_MAJOR_VERSION, ODINNT_MINOR_VERSION);
-   RegSetValueExA(hkey,"CurrentVersion",0,REG_SZ, (LPBYTE)digbuf, strlen(digbuf)+1);
+    sprintf(digbuf, "%d.%d", ODINNT_MAJOR_VERSION, ODINNT_MINOR_VERSION);
+    RegSetValueExA(hkey,"CurrentVersion",0,REG_SZ, (LPBYTE)digbuf, strlen(digbuf)+1);
 
-   val = (DWORD)time(NULL); //todo: Correct format???
-   RegSetValueExA(hkey,"InstallDate",0,REG_DWORD, (LPBYTE)&val, sizeof(DWORD));
-   
-   RegCloseKey(hkey);
-   //todo: productid, registered org/owner, sourcepath,    
+    val = (DWORD)time(NULL); //todo: Correct format???
+    RegSetValueExA(hkey,"InstallDate",0,REG_DWORD, (LPBYTE)&val, sizeof(DWORD));
 
-   //Create Software\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders keys
-   //"Favorites"="C:\WINDOWS\Favorites"
-   //"StartUp"="C:\WINDOWS\Start Menu\Programs\Startup"
-   //"Desktop"="C:\WINDOWS\Desktop"
-   //"Programs"="C:\WINDOWS\Start Menu\Programs"
-   //"Fonts"="C:\WINDOWS\Fonts"
-   //"SendTo"="C:\WINDOWS\SendTo"
-   //"Start Menu"="C:\WINDOWS\Start Menu"
-   //"Templates"="C:\WINDOWS\ShellNew"
-   //"Recent"="C:\WINDOWS\Recent"
-   //"NetHood"="C:\WINDOWS\NetHood"
-   //"Personal"="C:\My Documents"
+    RegCloseKey(hkey);
+    //todo: productid, registered org/owner, sourcepath,
+
+    //Create Software\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders keys
+    //"Favorites"="C:\WINDOWS\Favorites"
+    //"StartUp"="C:\WINDOWS\Start Menu\Programs\Startup"
+    //"Desktop"="C:\WINDOWS\Desktop"
+    //"Programs"="C:\WINDOWS\Start Menu\Programs"
+    //"Fonts"="C:\WINDOWS\Fonts"
+    //"SendTo"="C:\WINDOWS\SendTo"
+    //"Start Menu"="C:\WINDOWS\Start Menu"
+    //"Templates"="C:\WINDOWS\ShellNew"
+    //"Recent"="C:\WINDOWS\Recent"
+    //"NetHood"="C:\WINDOWS\NetHood"
+    //"Personal"="C:\My Documents"
 
    if(RegCreateKeyA(HKEY_CURRENT_USER,"SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Shell Folders",&hkey)!=ERROR_SUCCESS) {
-   	dprintf(("InitRegistry: Unable to register system information (3)"));
-	return FALSE;
+    dprintf(("InitRegistry: Unable to register system information (3)"));
+    return FALSE;
    }
-//   if(RegOpenKeyA(HKEY_CURRENT_USER, "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Shell Folders", &hkey) != ERROR_SUCCESS) 
+//   if(RegOpenKeyA(HKEY_CURRENT_USER, "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Shell Folders", &hkey) != ERROR_SUCCESS)
 //   {
         //system32\drivers dir
-   	strcpy(shellpath, InternalGetSystemDirectoryA());
-   	strcat(shellpath, "\\Drivers");
-   	CreateDirectoryA(shellpath, NULL);
+    strcpy(shellpath, InternalGetSystemDirectoryA());
+    strcat(shellpath, "\\Drivers");
+    CreateDirectoryA(shellpath, NULL);
 
-	//SYSTEM dir
-   	strcpy(shellpath, InternalGetWindowsDirectoryA());
-   	strcat(shellpath, "\\SYSTEM");
-   	CreateDirectoryA(shellpath, NULL);
+    //SYSTEM dir
+    strcpy(shellpath, InternalGetWindowsDirectoryA());
+    strcat(shellpath, "\\SYSTEM");
+    CreateDirectoryA(shellpath, NULL);
 
-	//AppData
-   	strcpy(shellpath, InternalGetWindowsDirectoryA());
-   	strcat(shellpath, "\\Application Data");
-   	CreateDirectoryA(shellpath, NULL);
-   	RegSetValueExA(hkey,"AppData",0,REG_SZ, (LPBYTE)shellpath, strlen(shellpath)+1);
-	//Cache
-   	strcpy(shellpath, InternalGetWindowsDirectoryA());
-   	strcat(shellpath, "\\Temporary Internet Files");
-   	CreateDirectoryA(shellpath, NULL);
-   	RegSetValueExA(hkey,"Cache",0,REG_SZ, (LPBYTE)shellpath, strlen(shellpath)+1);
-	//Cookies
-   	strcpy(shellpath, InternalGetWindowsDirectoryA());
-   	strcat(shellpath, "\\Cookies");
-   	CreateDirectoryA(shellpath, NULL);
-   	RegSetValueExA(hkey,"Cookies",0,REG_SZ, (LPBYTE)shellpath, strlen(shellpath)+1);
-	//Desktop
-   	strcpy(shellpath, InternalGetWindowsDirectoryA());
-   	strcat(shellpath, "\\Desktop");
-   	CreateDirectoryA(shellpath, NULL);
-   	RegSetValueExA(hkey,"Desktop",0,REG_SZ, (LPBYTE)shellpath, strlen(shellpath)+1);
-	//Favorites
-   	strcpy(shellpath, InternalGetWindowsDirectoryA());
-   	strcat(shellpath, "\\Favorites");
-   	CreateDirectoryA(shellpath, NULL);
-   	RegSetValueExA(hkey,"Favorites",0,REG_SZ, (LPBYTE)shellpath, strlen(shellpath)+1);
-	//Fonts
-   	strcpy(shellpath, InternalGetWindowsDirectoryA());
-   	strcat(shellpath, "\\Fonts");
-   	CreateDirectoryA(shellpath, NULL);
-   	RegSetValueExA(hkey,"Fonts",0,REG_SZ, (LPBYTE)shellpath, strlen(shellpath)+1);
-	//History
-   	strcpy(shellpath, InternalGetWindowsDirectoryA());
-   	strcat(shellpath, "\\History");
-   	CreateDirectoryA(shellpath, NULL);
-   	RegSetValueExA(hkey,"History",0,REG_SZ, (LPBYTE)shellpath, strlen(shellpath)+1);
-	//NetHood
-   	strcpy(shellpath, InternalGetWindowsDirectoryA());
-   	strcat(shellpath, "\\NetHood");
-   	CreateDirectoryA(shellpath, NULL);
-   	RegSetValueExA(hkey,"NetHood",0,REG_SZ, (LPBYTE)shellpath, strlen(shellpath)+1);
-	//Personal
-   	strcpy(shellpath, InternalGetWindowsDirectoryA());
-   	strcat(shellpath, "\\My Documents");
-   	CreateDirectoryA(shellpath, NULL);
-   	RegSetValueExA(hkey,"Personal",0,REG_SZ, (LPBYTE)shellpath, strlen(shellpath)+1);
-	//PrintHood
-   	strcpy(shellpath, InternalGetWindowsDirectoryA());
-   	strcat(shellpath, "\\PrintHood");
-   	CreateDirectoryA(shellpath, NULL);
-   	RegSetValueExA(hkey,"PrintHood",0,REG_SZ, (LPBYTE)shellpath, strlen(shellpath)+1);
-	//Recent
-   	strcpy(shellpath, InternalGetWindowsDirectoryA());
-   	strcat(shellpath, "\\Recent");
-   	CreateDirectoryA(shellpath, NULL);
-   	RegSetValueExA(hkey,"Recent",0,REG_SZ, (LPBYTE)shellpath, strlen(shellpath)+1);
-	//SendTo
-   	strcpy(shellpath, InternalGetWindowsDirectoryA());
-   	strcat(shellpath, "\\SendTo");
-   	CreateDirectoryA(shellpath, NULL);
-   	RegSetValueExA(hkey,"SendTo",0,REG_SZ, (LPBYTE)shellpath, strlen(shellpath)+1);
-	//Start Menu
-   	strcpy(shellpath, InternalGetWindowsDirectoryA());
-   	strcat(shellpath, "\\Start Menu");
-   	CreateDirectoryA(shellpath, NULL);
-   	RegSetValueExA(hkey,"Start Menu",0,REG_SZ, (LPBYTE)shellpath, strlen(shellpath)+1);
-	//Programs
-   	strcpy(shellpath, InternalGetWindowsDirectoryA());
-   	strcat(shellpath, "\\Start Menu\\Programs");
-   	CreateDirectoryA(shellpath, NULL);
-   	RegSetValueExA(hkey,"Programs",0,REG_SZ, (LPBYTE)shellpath, strlen(shellpath)+1);
-	//Startup
-	strcat(shellpath, "\\Startup");
-   	CreateDirectoryA(shellpath, NULL);
-   	RegSetValueExA(hkey,"Startup",0,REG_SZ, (LPBYTE)shellpath, strlen(shellpath)+1);
-	//ShellNew
-   	strcpy(shellpath, InternalGetWindowsDirectoryA());
-   	strcat(shellpath, "\\ShellNew");
-   	CreateDirectoryA(shellpath, NULL);
-   	RegSetValueExA(hkey,"Templates",0,REG_SZ, (LPBYTE)shellpath, strlen(shellpath)+1);
+    //AppData
+    strcpy(shellpath, InternalGetWindowsDirectoryA());
+    strcat(shellpath, "\\Application Data");
+    CreateDirectoryA(shellpath, NULL);
+    RegSetValueExA(hkey,"AppData",0,REG_SZ, (LPBYTE)shellpath, strlen(shellpath)+1);
+    //Cache
+    strcpy(shellpath, InternalGetWindowsDirectoryA());
+    strcat(shellpath, "\\Temporary Internet Files");
+    CreateDirectoryA(shellpath, NULL);
+    RegSetValueExA(hkey,"Cache",0,REG_SZ, (LPBYTE)shellpath, strlen(shellpath)+1);
+    //Cookies
+    strcpy(shellpath, InternalGetWindowsDirectoryA());
+    strcat(shellpath, "\\Cookies");
+    CreateDirectoryA(shellpath, NULL);
+    RegSetValueExA(hkey,"Cookies",0,REG_SZ, (LPBYTE)shellpath, strlen(shellpath)+1);
+    //Desktop
+    strcpy(shellpath, InternalGetWindowsDirectoryA());
+    strcat(shellpath, "\\Desktop");
+    CreateDirectoryA(shellpath, NULL);
+    RegSetValueExA(hkey,"Desktop",0,REG_SZ, (LPBYTE)shellpath, strlen(shellpath)+1);
+    //Favorites
+    strcpy(shellpath, InternalGetWindowsDirectoryA());
+    strcat(shellpath, "\\Favorites");
+    CreateDirectoryA(shellpath, NULL);
+    RegSetValueExA(hkey,"Favorites",0,REG_SZ, (LPBYTE)shellpath, strlen(shellpath)+1);
+    //Fonts
+    strcpy(shellpath, InternalGetWindowsDirectoryA());
+    strcat(shellpath, "\\Fonts");
+    CreateDirectoryA(shellpath, NULL);
+    RegSetValueExA(hkey,"Fonts",0,REG_SZ, (LPBYTE)shellpath, strlen(shellpath)+1);
+    //History
+    strcpy(shellpath, InternalGetWindowsDirectoryA());
+    strcat(shellpath, "\\History");
+    CreateDirectoryA(shellpath, NULL);
+    RegSetValueExA(hkey,"History",0,REG_SZ, (LPBYTE)shellpath, strlen(shellpath)+1);
+    //NetHood
+    strcpy(shellpath, InternalGetWindowsDirectoryA());
+    strcat(shellpath, "\\NetHood");
+    CreateDirectoryA(shellpath, NULL);
+    RegSetValueExA(hkey,"NetHood",0,REG_SZ, (LPBYTE)shellpath, strlen(shellpath)+1);
+    //Personal
+    strcpy(shellpath, InternalGetWindowsDirectoryA());
+    strcat(shellpath, "\\My Documents");
+    CreateDirectoryA(shellpath, NULL);
+    RegSetValueExA(hkey,"Personal",0,REG_SZ, (LPBYTE)shellpath, strlen(shellpath)+1);
+    //PrintHood
+    strcpy(shellpath, InternalGetWindowsDirectoryA());
+    strcat(shellpath, "\\PrintHood");
+    CreateDirectoryA(shellpath, NULL);
+    RegSetValueExA(hkey,"PrintHood",0,REG_SZ, (LPBYTE)shellpath, strlen(shellpath)+1);
+    //Recent
+    strcpy(shellpath, InternalGetWindowsDirectoryA());
+    strcat(shellpath, "\\Recent");
+    CreateDirectoryA(shellpath, NULL);
+    RegSetValueExA(hkey,"Recent",0,REG_SZ, (LPBYTE)shellpath, strlen(shellpath)+1);
+    //SendTo
+    strcpy(shellpath, InternalGetWindowsDirectoryA());
+    strcat(shellpath, "\\SendTo");
+    CreateDirectoryA(shellpath, NULL);
+    RegSetValueExA(hkey,"SendTo",0,REG_SZ, (LPBYTE)shellpath, strlen(shellpath)+1);
+    //Start Menu
+    strcpy(shellpath, InternalGetWindowsDirectoryA());
+    strcat(shellpath, "\\Start Menu");
+    CreateDirectoryA(shellpath, NULL);
+    RegSetValueExA(hkey,"Start Menu",0,REG_SZ, (LPBYTE)shellpath, strlen(shellpath)+1);
+    //Programs
+    strcpy(shellpath, InternalGetWindowsDirectoryA());
+    strcat(shellpath, "\\Start Menu\\Programs");
+    CreateDirectoryA(shellpath, NULL);
+    RegSetValueExA(hkey,"Programs",0,REG_SZ, (LPBYTE)shellpath, strlen(shellpath)+1);
+    //Startup
+    strcat(shellpath, "\\Startup");
+    CreateDirectoryA(shellpath, NULL);
+    RegSetValueExA(hkey,"Startup",0,REG_SZ, (LPBYTE)shellpath, strlen(shellpath)+1);
+    //ShellNew
+    strcpy(shellpath, InternalGetWindowsDirectoryA());
+    strcat(shellpath, "\\ShellNew");
+    CreateDirectoryA(shellpath, NULL);
+    RegSetValueExA(hkey,"Templates",0,REG_SZ, (LPBYTE)shellpath, strlen(shellpath)+1);
 //   }
    RegCloseKey(hkey);
 
@@ -298,12 +298,12 @@ BOOL InitSystemAndRegistry()
    //@="shell32.dll"
    //ThreadingModel="Apartment"
    if(RegCreateKeyA(HKEY_LOCAL_MACHINE,"SOFTWARE\\Classes\\CLSID\\{00021400-0000-0000-C000-000000000046}",&hkey)!=ERROR_SUCCESS) {
-   	goto initreg_error;
+    goto initreg_error;
    }
    RegSetValueExA(hkey, "", 0, REG_SZ, (LPBYTE)CLASS_DESKTOP, sizeof(CLASS_DESKTOP));
    RegCloseKey(hkey);
    if(RegCreateKeyA(HKEY_LOCAL_MACHINE,"SOFTWARE\\Classes\\CLSID\\{00021400-0000-0000-C000-000000000046}\\InProcServer32",&hkey)!=ERROR_SUCCESS) {
-   	goto initreg_error;
+    goto initreg_error;
    }
    RegSetValueExA(hkey, "", 0, REG_SZ, (LPBYTE)CLASS_SHELL32DLL, sizeof(CLASS_SHELL32DLL));
    RegSetValueExA(hkey, COM_THREADMODEL, 0, REG_SZ, (LPBYTE)COM_THREAD_APARTMENT, sizeof(COM_THREAD_APARTMENT));
@@ -316,18 +316,18 @@ BOOL InitSystemAndRegistry()
    //[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\CLSID\{00021401-0000-0000-C000-000000000046}\shellex\MayChangeDefaultMenu]
    //@=""
    if(RegCreateKeyA(HKEY_LOCAL_MACHINE,"SOFTWARE\\Classes\\CLSID\\{00021401-0000-0000-C000-000000000046}",&hkey)!=ERROR_SUCCESS) {
-   	goto initreg_error;
+    goto initreg_error;
    }
    RegSetValueExA(hkey, "", 0, REG_SZ, (LPBYTE)CLASS_SHORTCUT, sizeof(CLASS_SHORTCUT));
    RegCloseKey(hkey);
    if(RegCreateKeyA(HKEY_LOCAL_MACHINE,"SOFTWARE\\Classes\\CLSID\\{00021401-0000-0000-C000-000000000046}\\InProcServer32",&hkey)!=ERROR_SUCCESS) {
-   	goto initreg_error;
+    goto initreg_error;
    }
    RegSetValueExA(hkey, "", 0, REG_SZ, (LPBYTE)CLASS_SHELL32DLL, sizeof(CLASS_SHELL32DLL));
    RegSetValueExA(hkey, COM_THREADMODEL, 0, REG_SZ, (LPBYTE)COM_THREAD_APARTMENT, sizeof(COM_THREAD_APARTMENT));
    RegCloseKey(hkey);
    if(RegCreateKeyA(HKEY_LOCAL_MACHINE,"SOFTWARE\\Classes\\CLSID\\{00021401-0000-0000-C000-000000000046}\\shellex\\MayChangeDefaultMenu",&hkey)!=ERROR_SUCCESS) {
-   	goto initreg_error;
+    goto initreg_error;
    }
    RegSetValueExA(hkey, "", 0, REG_SZ, (LPBYTE)"", 0);
    RegCloseKey(hkey);
@@ -338,24 +338,24 @@ BOOL InitSystemAndRegistry()
    //HKEY_CLASSES_ROOT\CLSID\{D7B70EE0-4340-11CF-B063-0020AFC2CD35} = DirectDraw Object
    //HKEY_CLASSES_ROOT\CLSID\{D7B70EE0-4340-11CF-B063-0020AFC2CD35}\InprocServer32 = ddraw.dll
    if(RegCreateKeyA(HKEY_CLASSES_ROOT,"DirectDraw",&hkey)!=ERROR_SUCCESS) {
-   	goto initreg_error;
+    goto initreg_error;
    }
    RegSetValueExA(hkey, "", 0, REG_SZ, (LPBYTE)DDRAW_DEFAULT, sizeof(DDRAW_DEFAULT));
    if(RegCreateKeyA(hkey,COM_CLASS_ID,&hkey1)!=ERROR_SUCCESS) {
-   	RegCloseKey(hkey);
-   	goto initreg_error;
+    RegCloseKey(hkey);
+    goto initreg_error;
    }
    RegSetValueExA(hkey1,"",0,REG_SZ, (LPBYTE)DDRAW_CLASSID, sizeof(DDRAW_CLASSID));
    RegCloseKey(hkey1);
    RegCloseKey(hkey);
 
    if(RegCreateKeyA(HKEY_CLASSES_ROOT, COM_CLASS_ID"\\"DDRAW_CLASSID ,&hkey)!=ERROR_SUCCESS) {
-   	goto initreg_error;
+    goto initreg_error;
    }
    RegSetValueExA(hkey,"",0,REG_SZ, (LPBYTE)DDRAW_DEFAULT, sizeof(DDRAW_DEFAULT));
    if(RegCreateKeyA(hkey,COM_INPROCSERVER, &hkey1)!=ERROR_SUCCESS) {
-   	RegCloseKey(hkey);
-   	goto initreg_error;
+    RegCloseKey(hkey);
+    goto initreg_error;
    }
    RegSetValueExA(hkey1,"",0,REG_SZ, (LPBYTE)DDRAW_DLL, sizeof(DDRAW_DLL));
    RegSetValueExA(hkey1, COM_THREADMODEL, 0,REG_SZ, (LPBYTE)THREAD_BOTH, sizeof(THREAD_BOTH));
@@ -367,24 +367,24 @@ BOOL InitSystemAndRegistry()
    //HKEY_CLASSES_ROOT\CLSID\{593817A0-7DB3-11CF-A2DE-00AA00B93356} = DirectDraw Clipper Object
    //HKEY_CLASSES_ROOT\CLSID\{593817A0-7DB3-11CF-A2DE-00AA00B93356}\InprocServer32 = ddraw.dll
    if(RegCreateKeyA(HKEY_CLASSES_ROOT,"DirectDrawClipper",&hkey)!=ERROR_SUCCESS) {
-   	goto initreg_error;
+    goto initreg_error;
    }
    RegSetValueExA(hkey,"",0,REG_SZ, (LPBYTE)DDRAW_CLIPPER_DEFAULT, sizeof(DDRAW_CLIPPER_DEFAULT));
    if(RegCreateKeyA(hkey,COM_CLASS_ID,&hkey1)!=ERROR_SUCCESS) {
-   	RegCloseKey(hkey);
-   	goto initreg_error;
+    RegCloseKey(hkey);
+    goto initreg_error;
    }
    RegSetValueExA(hkey1,"",0,REG_SZ, (LPBYTE)DDRAW_CLIPPER_CLASSID, sizeof(DDRAW_CLIPPER_CLASSID));
    RegCloseKey(hkey1);
    RegCloseKey(hkey);
 
    if(RegCreateKeyA(HKEY_CLASSES_ROOT, COM_CLASS_ID"\\"DDRAW_CLIPPER_CLASSID,&hkey)!=ERROR_SUCCESS) {
-   	goto initreg_error;
+    goto initreg_error;
    }
    RegSetValueExA(hkey,"",0,REG_SZ, (LPBYTE)DDRAW_CLIPPER_DEFAULT, sizeof(DDRAW_CLIPPER_DEFAULT));
    if(RegCreateKeyA(hkey,COM_INPROCSERVER, &hkey1)!=ERROR_SUCCESS) {
-   	RegCloseKey(hkey);
-   	goto initreg_error;
+    RegCloseKey(hkey);
+    goto initreg_error;
    }
    RegSetValueExA(hkey1,"",0,REG_SZ, (LPBYTE)DDRAW_DLL, sizeof(DDRAW_DLL));
    RegSetValueExA(hkey1, COM_THREADMODEL, 0,REG_SZ, (LPBYTE)THREAD_BOTH, sizeof(THREAD_BOTH));
@@ -396,24 +396,24 @@ BOOL InitSystemAndRegistry()
    //HKEY_CLASSES_ROOT\CLSID\{47D4D946-62E8-11cf-93BC-444553540000} = DirectSound Object
    //HKEY_CLASSES_ROOT\CLSID\{47D4D946-62E8-11cf-93BC-444553540000}\InprocServer32 = dsound.dll
    if(RegCreateKeyA(HKEY_CLASSES_ROOT,"DirectSound",&hkey)!=ERROR_SUCCESS) {
-   	goto initreg_error;
+    goto initreg_error;
    }
    RegSetValueExA(hkey,"",0,REG_SZ, (LPBYTE)DSOUND_DEFAULT, sizeof(DSOUND_DEFAULT));
    if(RegCreateKeyA(hkey,COM_CLASS_ID,&hkey1)!=ERROR_SUCCESS) {
-   	RegCloseKey(hkey);
-   	goto initreg_error;
+    RegCloseKey(hkey);
+    goto initreg_error;
    }
    RegSetValueExA(hkey1,"",0,REG_SZ, (LPBYTE)DSOUND_CLASSID, sizeof(DSOUND_CLASSID));
    RegCloseKey(hkey1);
    RegCloseKey(hkey);
 
    if(RegCreateKeyA(HKEY_CLASSES_ROOT, COM_CLASS_ID"\\"DSOUND_CLASSID ,&hkey)!=ERROR_SUCCESS) {
-   	goto initreg_error;
+    goto initreg_error;
    }
    RegSetValueExA(hkey,"",0,REG_SZ, (LPBYTE)DSOUND_DEFAULT, sizeof(DSOUND_DEFAULT));
    if(RegCreateKeyA(hkey,COM_INPROCSERVER, &hkey1)!=ERROR_SUCCESS) {
-   	RegCloseKey(hkey);
-   	goto initreg_error;
+    RegCloseKey(hkey);
+    goto initreg_error;
    }
    RegSetValueExA(hkey1,"",0,REG_SZ, (LPBYTE)DSOUND_DLL, sizeof(DSOUND_DLL));
    RegSetValueExA(hkey1, COM_THREADMODEL, 0,REG_SZ, (LPBYTE)THREAD_BOTH, sizeof(THREAD_BOTH));
@@ -422,12 +422,12 @@ BOOL InitSystemAndRegistry()
 
    //DirectPlay
    if(RegCreateKeyA(HKEY_LOCAL_MACHINE, "Software\\CLASSES\\CLSID\\"DPLAYX_CLASSID ,&hkey)!=ERROR_SUCCESS) {
-   	goto initreg_error;
+    goto initreg_error;
    }
    RegSetValueExA(hkey,"",0,REG_SZ, (LPBYTE)DPLAYX_DEFAULT, sizeof(DPLAYX_DEFAULT));
    if(RegCreateKeyA(hkey,COM_INPROCSERVER, &hkey1)!=ERROR_SUCCESS) {
-   	RegCloseKey(hkey);
-   	goto initreg_error;
+    RegCloseKey(hkey);
+    goto initreg_error;
    }
    RegSetValueExA(hkey1,"",0,REG_SZ, (LPBYTE)DPLAYX_DLL, sizeof(DPLAYX_DLL));
    RegSetValueExA(hkey1, COM_THREADMODEL, 0,REG_SZ, (LPBYTE)THREAD_BOTH, sizeof(THREAD_BOTH));
@@ -436,12 +436,12 @@ BOOL InitSystemAndRegistry()
 
    //DirectPlay Lobby
    if(RegCreateKeyA(HKEY_LOCAL_MACHINE, "Software\\CLASSES\\CLSID\\"DPLAYX_LOBBY_CLASSID ,&hkey)!=ERROR_SUCCESS) {
-   	goto initreg_error;
+    goto initreg_error;
    }
    RegSetValueExA(hkey,"",0,REG_SZ, (LPBYTE)DPLAYX_LOBBY_DEFAULT, sizeof(DPLAYX_LOBBY_DEFAULT));
    if(RegCreateKeyA(hkey,COM_INPROCSERVER, &hkey1)!=ERROR_SUCCESS) {
-   	RegCloseKey(hkey);
-   	goto initreg_error;
+    RegCloseKey(hkey);
+    goto initreg_error;
    }
    RegSetValueExA(hkey1,"",0,REG_SZ, (LPBYTE)DPLAYX_LOBBY_DLL, sizeof(DPLAYX_LOBBY_DLL));
    RegSetValueExA(hkey1, COM_THREADMODEL, 0,REG_SZ, (LPBYTE)THREAD_BOTH, sizeof(THREAD_BOTH));
@@ -454,11 +454,11 @@ BOOL InitSystemAndRegistry()
    //# This is intended for a centrally managed (server) directory where system files and e.g. fonts can reside. Most installs have this set to C:\WINDOWS, though.
    //"SharedDir"="C:\WINDOWS"
    if(RegCreateKeyA(HKEY_LOCAL_MACHINE,"Software\\Microsoft\\Windows\\CurrentVersion",&hkey)!=ERROR_SUCCESS) {
-   	goto initreg_error;
+    goto initreg_error;
    }
    //Create x:\Program Files directory
    strcpy(shellpath, InternalGetWindowsDirectoryA());
-   shellpath[2] = 0;	//get drive
+   shellpath[2] = 0;    //get drive
    strcat(shellpath, "\\Program Files");
    CreateDirectoryA(shellpath, NULL);
    RegSetValueExA(hkey, DIR_PROGRAM, 0,REG_SZ, (LPBYTE)shellpath, strlen(shellpath)+1);
@@ -478,7 +478,7 @@ BOOL InitSystemAndRegistry()
    //"\\Device\\Video1"="\\REGISTRY\\Machine\\System\\ControlSet001\\Services\\VgaSave\\Device0"
    //"VgaCompatible"="\\Device\\Video1"
    if(RegCreateKeyA(HKEY_LOCAL_MACHINE,"HARDWARE\\DEVICEMAP\\VIDEO",&hkey)!=ERROR_SUCCESS) {
-   	goto initreg_error;
+    goto initreg_error;
    }
    RegSetValueExA(hkey,"\\Device\\Video0",0,REG_SZ, (LPBYTE)HARDWARE_VIDEO_GRADD, sizeof(HARDWARE_VIDEO_GRADD));
    RegSetValueExA(hkey,"\\Device\\Video1",0,REG_SZ, (LPBYTE)HARDWARE_VIDEO_VGA, sizeof(HARDWARE_VIDEO_VGA));
@@ -486,28 +486,28 @@ BOOL InitSystemAndRegistry()
    RegCloseKey(hkey);
 
    if(RegCreateKeyA(HKEY_LOCAL_MACHINE,"SYSTEM\\CurrentControlSet\\Services\\Gradd\\Device0",&hkey)!=ERROR_SUCCESS) {
-   	goto initreg_error;
+    goto initreg_error;
    }
    RegSetValueExA(hkey,"Device Description", 0, REG_SZ, (LPBYTE)HARDWARE_VIDEO_GRADD_DESCRIPTION, sizeof(HARDWARE_VIDEO_GRADD_DESCRIPTION));
    RegCloseKey(hkey);
 
    if(RegCreateKeyA(HKEY_LOCAL_MACHINE,"SYSTEM\\CurrentControlSet\\Services\\VgaSave\\Device0",&hkey)!=ERROR_SUCCESS) {
-   	goto initreg_error;
+    goto initreg_error;
    }
    RegSetValueExA(hkey,"Device Description", 0, REG_SZ, (LPBYTE)HARDWARE_VIDEO_VGA_DESCRIPTION, sizeof(HARDWARE_VIDEO_VGA_DESCRIPTION));
    RegCloseKey(hkey);
 
    //Software\Microsoft\Multimedia\Sound Mapper
    if(RegCreateKeyA(HKEY_CURRENT_USER,"Software\\Microsoft\\Multimedia\\Sound Mapper",&hkey)!=ERROR_SUCCESS) {
-   	goto initreg_error;
+    goto initreg_error;
    }
    RegSetValueExA(hkey,"Playback", 0, REG_SZ, (LPBYTE)ODIN_WINMM_PLAYBACK, sizeof(ODIN_WINMM_PLAYBACK));
    RegSetValueExA(hkey,"Record", 0, REG_SZ, (LPBYTE)ODIN_WINMM_RECORD, sizeof(ODIN_WINMM_RECORD));
    RegCloseKey(hkey);
 
-   //Software\Microsoft\DirectX  
+   //Software\Microsoft\DirectX
    if(RegCreateKeyA(HKEY_LOCAL_MACHINE,"Software\\Microsoft\\DirectX",&hkey)!=ERROR_SUCCESS) {
-   	goto initreg_error;
+    goto initreg_error;
    }
    RegSetValueExA(hkey,"",0,REG_SZ, (LPBYTE)"", 0);
    RegSetValueExA(hkey, "RC", 0,REG_SZ, (LPBYTE)DIRECTX_RC, sizeof(DIRECTX_RC));
@@ -517,26 +517,26 @@ BOOL InitSystemAndRegistry()
    RegCloseKey(hkey);
 
    if(RegCreateKeyA(HKEY_LOCAL_MACHINE,"Software\\Microsoft\\DirectDraw",&hkey)!=ERROR_SUCCESS) {
-   	goto initreg_error;
+    goto initreg_error;
    }
    //todo
    RegCloseKey(hkey);
 
    if(RegCreateKeyA(HKEY_LOCAL_MACHINE,"Software\\Microsoft\\Direct3D",&hkey)!=ERROR_SUCCESS) {
-   	goto initreg_error;
+    goto initreg_error;
    }
    //todo
    RegCloseKey(hkey);
 
    if(RegCreateKeyA(HKEY_LOCAL_MACHINE,"Software\\Microsoft\\DirectPlay",&hkey)!=ERROR_SUCCESS) {
-   	goto initreg_error;
+    goto initreg_error;
    }
    //todo
    RegCloseKey(hkey);
 
 #if 0
    if(RegCreateKeyA(HKEY_LOCAL_MACHINE,"Software\\Microsoft\\DirectMusic",&hkey)!=ERROR_SUCCESS) {
-   	goto initreg_error;
+    goto initreg_error;
    }
    //todo
    RegCloseKey(hkey);
@@ -550,7 +550,7 @@ BOOL InitSystemAndRegistry()
 // "DependOnGroup"=hex(7):53,43,53,49,20,43,44,52,4f,4d,20,43,6c,61,73,73,00,00
 
    if(RegCreateKeyA(HKEY_LOCAL_MACHINE,"SYSTEM\\CurrentControlSet\\Services\\Cdfs",&hkey)!=ERROR_SUCCESS) {
-   	goto initreg_error;
+    goto initreg_error;
    }
    val = 0x2;
    RegSetValueExA(hkey, KEY_DEVICE_TYPE,0,REG_DWORD, (LPBYTE)&val, sizeof(DWORD));
@@ -579,7 +579,7 @@ BOOL InitSystemAndRegistry()
 // "Autorun"=dword:00000001
 
    if(RegCreateKeyA(HKEY_LOCAL_MACHINE,"SYSTEM\\CurrentControlSet\\Services\\Cdrom",&hkey)!=ERROR_SUCCESS) {
-   	goto initreg_error;
+    goto initreg_error;
    }
    val = 0x1;
    RegSetValueExA(hkey, KEY_DEVICE_TYPE,0,REG_DWORD, (LPBYTE)&val, sizeof(DWORD));
@@ -607,7 +607,7 @@ BOOL InitSystemAndRegistry()
    //"NtfsDisable8dot3NameCreation"=dword:00000000
    //"Win95TruncatedExtensions"=dword:00000001
    if(RegCreateKeyA(HKEY_LOCAL_MACHINE,"SYSTEM\\CurrentControlSet\\Control\\FileSystem",&hkey)!=ERROR_SUCCESS) {
-   	goto initreg_error;
+    goto initreg_error;
    }
    val = 0x0;
    RegSetValueExA(hkey, "Win31FileSystem",0,REG_DWORD, (LPBYTE)&val, sizeof(DWORD));
@@ -653,38 +653,74 @@ void InitEnvironment(int nrcpus)
  char *windir;
  DWORD signature;
 
-   SetEnvironmentVariableA("CPU", "i386");
-   SetEnvironmentVariableA("PROCESSOR_ARCHITECTURE", "x86");
-   if(SupportsCPUID()) {
-   	GetCPUVendorString(buffer1);
-        buffer1[12] = 0;        
- 	signature = GetCPUSignature();
-	sprintf(buffer, "x86 Family %x Model %x Stepping %x, %s", (signature >> 8)&0xf, signature & 0xf, (signature >> 4)&0xf, buffer1);
-	SetEnvironmentVariableA("PROCESSOR_IDENTIFIER", buffer);
-	sprintf(buffer, "%x", (signature >> 8)&0xf);
-	SetEnvironmentVariableA("PROCESSOR_LEVEL", buffer);
-	sprintf(buffer, "%02x%02x", (signature >> 4)&0xf, signature & 0xf);
-	SetEnvironmentVariableA("PROCESSOR_REVISION", buffer);
-   }
-   sprintf(buffer, "%d", nrcpus);
-   SetEnvironmentVariableA("NUMBER_OF_PROCESSORS", buffer);
-   SetEnvironmentVariableA("OS", "Windows_NT");
-   SetEnvironmentVariableA("PATHEXT", ".COM;.EXE;.BAT;.CMD");
-   windir = InternalGetWindowsDirectoryA();
-   SetEnvironmentVariableA("windir", windir);
-   SetEnvironmentVariableA("SystemRoot", windir);
-   buffer[0] = windir[0];
-   buffer[1] = windir[1];
-   buffer[2] = 0;
-   SetEnvironmentVariableA("SystemDrive", buffer);
-   SetEnvironmentVariableA("HOMEDRIVE", buffer);
-   SetEnvironmentVariableA("HOMEPATH", "\\");
+    SetEnvironmentVariableA("CPU", "i386");
+    SetEnvironmentVariableA("PROCESSOR_ARCHITECTURE", "x86");
+    if(SupportsCPUID()) {
+        GetCPUVendorString(buffer1);
+        buffer1[12] = 0;
+        signature = GetCPUSignature();
+        sprintf(buffer, "x86 Family %x Model %x Stepping %x, %s", (signature >> 8)&0xf, signature & 0xf, (signature >> 4)&0xf, buffer1);
+        SetEnvironmentVariableA("PROCESSOR_IDENTIFIER", buffer);
+        sprintf(buffer, "%x", (signature >> 8)&0xf);
+        SetEnvironmentVariableA("PROCESSOR_LEVEL", buffer);
+        sprintf(buffer, "%02x%02x", (signature >> 4)&0xf, signature & 0xf);
+        SetEnvironmentVariableA("PROCESSOR_REVISION", buffer);
+    }
+    sprintf(buffer, "%d", nrcpus);
+    SetEnvironmentVariableA("NUMBER_OF_PROCESSORS", buffer);
+    SetEnvironmentVariableA("OS", "Windows_NT");
+    SetEnvironmentVariableA("PATHEXT", ".COM;.EXE;.BAT;.CMD");
+    windir = InternalGetWindowsDirectoryA();
+    SetEnvironmentVariableA("windir", windir);
+    SetEnvironmentVariableA("SystemRoot", windir);
+    buffer[0] = windir[0];
+    buffer[1] = windir[1];
+    buffer[2] = 0;
+    SetEnvironmentVariableA("SystemDrive", buffer);
+    SetEnvironmentVariableA("HOMEDRIVE", buffer);
+    SetEnvironmentVariableA("HOMEPATH", "\\");
 
-//TODO:
-//COMPUTERNAME=NTBAK
-//ComSpec=E:\WINNT\system32\cmd.exe
-//LOGONSERVER=\\NTBAK
-//USERDOMAIN=NTBAK
-//USERNAME=Sander
-//USERPROFILE=E:\WINNT\Profiles\Sander
+    //TODO:
+    //COMPUTERNAME=NTBAK
+    //ComSpec=E:\WINNT\system32\cmd.exe
+    //LOGONSERVER=\\NTBAK
+    //USERDOMAIN=NTBAK
+    //USERNAME=Sander
+    //USERPROFILE=E:\WINNT\Profiles\Sander
 }
+//******************************************************************************
+//Create/change keys that may change (i.e. odin.ini keys that affect windows version)
+//******************************************************************************
+void InitDynamicRegistry()
+{
+ OSVERSIONINFOA versioninfo;
+ HKEY           hkey;
+ char           buf[16] = "";
+
+    versioninfo.dwOSVersionInfoSize = sizeof(OSVERSIONINFOA);
+    GetVersionExA(&versioninfo);
+
+    //Set version key:
+    // [HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\ProductOptions]
+    // "ProductType"="WinNT"
+    if(RegCreateKeyA(HKEY_LOCAL_MACHINE,"SYSTEM\\CurrentControlSet\\Control\\ProductOptions",&hkey)!=ERROR_SUCCESS) {
+      	dprintf(("InitRegistry: Unable to register system information (2)"));
+	    return;
+    }
+    switch(versioninfo.dwPlatformId) {
+    case VER_PLATFORM_WIN32_WINDOWS:
+        strcpy(buf, "Win98");    //TODO: Correct???????????
+        break;
+    case VER_PLATFORM_WIN32_NT:
+        strcpy(buf, "WinNT");	//TODO: Also correct for Windows 2000???
+        break;
+    default:
+        DebugInt3();
+        break;
+    }
+    RegSetValueExA(hkey,"ProductType",0,REG_SZ, (LPBYTE)buf, strlen(buf)+1);
+    RegCloseKey(hkey);
+}
+//******************************************************************************
+//******************************************************************************
+
