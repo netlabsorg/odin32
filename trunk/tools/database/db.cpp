@@ -1,4 +1,4 @@
-/* $Id: db.cpp,v 1.24 2001-09-05 13:59:03 bird Exp $ *
+/* $Id: db.cpp,v 1.25 2001-09-06 03:07:32 bird Exp $ *
  *
  * DB - contains all database routines.
  *
@@ -1171,38 +1171,47 @@ BOOL            _System dbRemoveDesignNotes(signed long lFile)
  * @param       lFile           File refcode.
  * @param       pszTitle        Design note title.
  * @param       pszText         Design note text.
+ * @param       lLevel          Level of the note section. 0 is the design note it self.
  * @param       lSeqNbr         Sequence number (in dll). If 0 the use next available number.
- * @param       lSeqNbrFile     Sequence number in file.
+ * @param       lSeqNbrNote     Sequence number in note.
  * @param       lLine           Line number (1 - based!).
+ * @param       fSubSection     TRUE if subsection FALSE if design note.
+ *                              if TRUE *plRefCode will hold the reference id of the note.
+ *                              if FALSE *plRefCode will receive the reference id of the note being created.
+ * @param       plRefCode       Pointer to reference id of the design note. see fSubSection for more info.
  */
 BOOL            _System dbAddDesignNote(signed long lDll,
                                         signed long lFile,
                                         const char *pszTitle,
                                         const char *pszText,
+                                        signed long lLevel,
                                         signed long lSeqNbr,
-                                        signed long lSeqNbrFile,
-                                        signed long lLine)
+                                        signed long lSeqNbrNote,
+                                        signed long lLine,
+                                        BOOL        fSubSection,
+                                        signed long *plRefCode)
 {
+    int         rc;
     char        szQuery[0x10200];
     MYSQL_RES * pres;
 
 
     assert(lDll >= 0 && lFile >= 0);
-    assert(lSeqNbrFile >= 0);
+    assert(lSeqNbrNote >= 0);
 
     /*
      * If no lSqlNbr the make one.
      */
-    if (lSeqNbr == 0)
+    if (lSeqNbr == 0 && !fSubSection)
     {
-        sprintf(&szQuery[0], "SELECT MAX(seqnbr) + 1 FROM designnote WHERE dll = %ld", lDll);
+        sprintf(&szQuery[0], "SELECT MAX(seqnbr) + 1 FROM designnote WHERE dll = %ld AND level = 0", lDll);
         if (mysql_query(pmysql, &szQuery[0]) >= 0)
         {
             pres = mysql_store_result(pmysql);
             if (pres != NULL)
             {
                 MYSQL_ROW parow = mysql_fetch_row(pres);
-                if (parow != NULL)
+                if (parow != NULL && parow[0])
                     lSeqNbr = getvalue(0, parow);
                 else
                     lSeqNbr = 1;
@@ -1216,18 +1225,30 @@ BOOL            _System dbAddDesignNote(signed long lDll,
     }
 
     /*
-     * Create update query.
+     * Create insert query.
      */
-    sprintf(&szQuery[0], "INSERT INTO designnote(dll, file, seqnbrfile, seqnbr, line, title, note) "
-                         "VALUES (%ld, %ld, %ld, %ld, %ld, ",
-            lDll, lFile, lSeqNbrFile, lSeqNbr, lLine);
+    if (!fSubSection)
+        sprintf(&szQuery[0], "INSERT INTO designnote(dll, file, level, seqnbrnote, seqnbr, line, name, note) "
+                             "VALUES (%ld, %ld, %ld, %ld, %ld, %ld, ",
+                lDll, lFile, lLevel, lSeqNbrNote, lSeqNbr, lLine);
+    else
+        sprintf(&szQuery[0], "INSERT INTO designnote(refcode, dll, file, level, seqnbrnote, seqnbr, line, name, note) "
+                             "VALUES (%ld, %ld, %ld, %ld, %ld, %ld, %ld, ",
+                *plRefCode, lDll, lFile, lLevel, lSeqNbrNote, lSeqNbr, lLine);
+
     if (pszTitle != NULL && *pszTitle != '\0')
         sqlstrcat(&szQuery[0], NULL, pszTitle);
     else
         strcat(&szQuery[0], "NULL");
     sqlstrcat(&szQuery[0], ", ", pszText == NULL ? "" : pszText, ")");
 
-    return mysql_query(pmysql, &szQuery[0]) >= 0;
+    if (mysql_query(pmysql, &szQuery[0]) >= 0)
+    {
+        if (!fSubSection)
+            *plRefCode = mysql_insert_id(pmysql);
+        return TRUE;
+    }
+    return FALSE;
 }
 
 

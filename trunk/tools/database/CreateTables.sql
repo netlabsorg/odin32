@@ -1,4 +1,4 @@
--- $Id: CreateTables.sql,v 1.17 2000-08-02 01:22:34 bird Exp $
+-- $Id: CreateTables.sql,v 1.18 2001-09-06 03:07:31 bird Exp $
 --
 -- Create all tables.
 --
@@ -102,19 +102,28 @@ CREATE TABLE file (
 
 
 --
--- This table holds design notes (per dll).
+-- This table holds design notes (per module).
+--
+-- seqnbrnote is a unique number used to order the
+--            sections within a design note.
+-- level      is the nesting level of the section.
+--            0 is the top section in the note.
 --
 CREATE TABLE designnote (
-    refcode     INTEGER NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    refcode     INTEGER NOT NULL AUTO_INCREMENT,
     dll         TINYINT NOT NULL,
     file        INTEGER NOT NULL,
-    seqnbrfile  SMALLINT NOT NULL,
-    seqnbr      INTEGER NOT NULL,
     line        INTEGER  NOT NULL DEFAULT -1,
-    title       TEXT,
+    seqnbrnote  SMALLINT NOT NULL,
+    level       TINYINT NOT NULL,
+    seqnbr      INTEGER NOT NULL,
+    name        TEXT,
     note        TEXT    NOT NULL,
-    UNIQUE      u1(refcode),
-    INDEX       u2(file, seqnbrfile, seqnbr, dll)
+    PRIMARY KEY(refcode, seqnbrnote),
+    UNIQUE      u1(refcode, seqnbrnote),
+    UNIQUE      u2(refcode, seqnbrnote, level),
+    UNIQUE      u3(dll, seqnbr, level, seqnbrnote, refcode),
+    INDEX       i1(file, refcode)
 );
 
 

@@ -1,4 +1,4 @@
-/* $Id: db.h,v 1.13 2000-08-02 02:18:05 bird Exp $ */
+/* $Id: db.h,v 1.14 2001-09-06 03:07:32 bird Exp $ */
 /*
  * DB - contains all database routines
  *
@@ -139,9 +139,12 @@ extern "C" {
                                              signed long lFile,
                                              const char *pszTitle,
                                              const char *pszText,
+                                             signed long lLevel,
                                              signed long lSeqNbr,
-                                             signed long lSeqNbrFile,
-                                             signed long lLine);
+                                             signed long lSeqNbrNote,
+                                             signed long lLine,
+                                             BOOL        fSubSection,
+                                             signed long *plRefCode);
     unsigned long    _System dbCreateHistory(char *pszError);
     unsigned long    _System dbCheckIntegrity(char *pszError);
 
