@@ -1,4 +1,4 @@
-/* $Id: win32wnd.cpp,v 1.20 1999-07-24 14:01:45 sandervl Exp $ */
+/* $Id: win32wnd.cpp,v 1.21 1999-07-25 09:19:22 sandervl Exp $ */
 /*
  * Win32 Window Code for OS/2
  *
@@ -353,7 +353,7 @@ BOOL Win32Window::CreateWindowExA(CREATESTRUCTA *cs, ATOM classAtom)
   OS2Hwnd = OSLibWinCreateWindow((getParent()) ? getParent()->getOS2WindowHandle() : 0,
                                  dwOSWinStyle, dwOSFrameStyle, (char *)cs->lpszName,
                                  (owner) ? owner->getOS2WindowHandle() : 0,
-                 (hwndLinkAfter == HWND_BOTTOM) ? TRUE : FALSE,
+                                 (hwndLinkAfter == HWND_BOTTOM) ? TRUE : FALSE,
                                  &OS2HwndFrame);
 
   if(OS2Hwnd == 0) {
@@ -396,7 +396,7 @@ BOOL Win32Window::CreateWindowExA(CREATESTRUCTA *cs, ATOM classAtom)
 
   //Set icon from class
   if(windowClass->getIcon())
-    SetIcon(windowClass->getIcon());
+        SetIcon(windowClass->getIcon());
 
   /* Send the WM_CREATE message
    * Perhaps we shouldn't allow width/height changes as well.
@@ -407,8 +407,7 @@ BOOL Win32Window::CreateWindowExA(CREATESTRUCTA *cs, ATOM classAtom)
   if(SendInternalMessage(WM_NCCREATE, 0, (LPARAM)cs) )
   {
         SendNCCalcSize(FALSE, &rectWindow, NULL, NULL, 0, &rectClient );
-        OffsetRect(&rectWindow, maxPos.x - rectWindow.left,
-                                          maxPos.y - rectWindow.top);
+        OffsetRect(&rectWindow, maxPos.x - rectWindow.left, maxPos.y - rectWindow.top);
         dprintf(("Sending WM_CREATE"));
         if( (SendInternalMessage(WM_CREATE, 0, (LPARAM)cs )) != -1 )
         {
@@ -425,8 +424,8 @@ BOOL Win32Window::CreateWindowExA(CREATESTRUCTA *cs, ATOM classAtom)
             if (!(dwStyle & WS_CHILD) && !owner)
                 HOOK_CallHooks16( WH_SHELL, HSHELL_WINDOWCREATED, hwnd, 0 );
 #endif
-    SetLastError(0);
-        return TRUE;
+            SetLastError(0);
+            return TRUE;
         }
   }
   return FALSE;
@@ -723,34 +722,58 @@ ULONG Win32Window::MsgSize(ULONG width, ULONG height, BOOL fMinimize, BOOL fMaxi
 {
  WORD fwSizeType = 0;
 
-  if(fMinimize) {
-        fwSizeType = SIZE_MINIMIZED;
-  }
-  else
-  if(fMaximize) {
-        fwSizeType = SIZE_MAXIMIZED;
-  }
-  else  fwSizeType = SIZE_RESTORED;
+    if(fMinimize) {
+            fwSizeType = SIZE_MINIMIZED;
+    }
+    else
+    if(fMaximize) {
+            fwSizeType = SIZE_MAXIMIZED;
+    }
+    else    fwSizeType = SIZE_RESTORED;
 
-  return SendInternalMessageA(WM_SIZE, fwSizeType, MAKELONG((USHORT)width, (USHORT)height));
+    return SendInternalMessageA(WM_SIZE, fwSizeType, MAKELONG((USHORT)width, (USHORT)height));
 }
 //******************************************************************************
 //******************************************************************************
 ULONG Win32Window::MsgActivate(BOOL fActivate, HWND hwnd)
 {
-  return SendInternalMessageA(WM_ACTIVATE, (fActivate) ? WA_ACTIVE : WA_INACTIVE, hwnd);
+    return SendInternalMessageA(WM_ACTIVATE, (fActivate) ? WA_ACTIVE : WA_INACTIVE, hwnd);
+}
+//******************************************************************************
+//******************************************************************************
+ULONG Win32Window::MsgSysCommand(ULONG win32sc, ULONG x, ULONG y)
+{
+    return SendInternalMessageA(WM_SYSCOMMAND, win32sc, MAKELONG((USHORT)x, (USHORT)y));
+}
+//******************************************************************************
+//TODO: virtual key translation & extended keyboard bit
+//******************************************************************************
+ULONG Win32Window::MsgChar(ULONG cmd, ULONG repeatcnt, ULONG scancode, ULONG vkey, ULONG keyflags)
+{
+ ULONG lParam = 0;
+
+    lParam  = repeatcnt;
+    lParam |= (scancode << 16);
+    if(keyflags & KEY_ALTDOWN)
+        lParam |= (1<<29);
+    if(keyflags & KEY_PREVDOWN)
+        lParam |= (1<<30);
+    if(keyflags & KEY_UP)
+        lParam |= (1<<31);
+    dprintf(("WM_CHAR: %x %x %08x", OS2Hwnd, cmd, lParam));
+    return SendInternalMessageA(WM_CHAR, cmd, lParam);
 }
 //******************************************************************************
 //******************************************************************************
 ULONG Win32Window::MsgSetFocus(HWND hwnd)
 {
-  return SendInternalMessageA(WM_SETFOCUS, hwnd, 0);
+    return SendInternalMessageA(WM_SETFOCUS, hwnd, 0);
 }
 //******************************************************************************
 //******************************************************************************
 ULONG Win32Window::MsgKillFocus(HWND hwnd)
 {
-  return SendInternalMessageA(WM_KILLFOCUS, hwnd, 0);
+    return SendInternalMessageA(WM_KILLFOCUS, hwnd, 0);
 }
 //******************************************************************************
 //******************************************************************************
@@ -759,8 +782,8 @@ ULONG Win32Window::MsgButton(ULONG msg, ULONG x, ULONG y)
  ULONG win32msg;
  ULONG win32ncmsg;
 
-  dprintf(("MsgButton to (%d,%d)", x, y));
-  switch(msg) {
+    dprintf(("MsgButton to (%d,%d)", x, y));
+    switch(msg) {
         case BUTTON_LEFTDOWN:
                 win32msg = WM_LBUTTONDOWN;
                 win32ncmsg = WM_NCLBUTTONDOWN;
@@ -800,9 +823,9 @@ ULONG Win32Window::MsgButton(ULONG msg, ULONG x, ULONG y)
         default:
                 dprintf(("Win32Window::Button: invalid msg!!!!"));
                 return 1;
-  }
-  SendInternalMessageA(win32ncmsg, lastHitTestVal, MAKELONG(x, y)); //TODO:
-  return SendInternalMessageA(win32msg, 0, MAKELONG(x, y));
+    }
+    SendInternalMessageA(win32ncmsg, lastHitTestVal, MAKELONG(x, y)); //TODO:
+    return SendInternalMessageA(win32msg, 0, MAKELONG(x, y));
 }
 //******************************************************************************
 //******************************************************************************

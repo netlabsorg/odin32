@@ -1,4 +1,4 @@
-/* $Id: window.cpp,v 1.9 1999-07-24 14:01:45 sandervl Exp $ */
+/* $Id: window.cpp,v 1.10 1999-07-25 09:19:22 sandervl Exp $ */
 /*
  * Win32 window apis for OS/2
  *
@@ -298,15 +298,6 @@ HWND WIN32API GetWindow(HWND hwnd, UINT uCmd)
 }
 //******************************************************************************
 //******************************************************************************
-HDC WIN32API GetWindowDC(HWND arg1)
-{
-#ifdef DEBUG
-    WriteLog("USER32:  GetWindowDC\n");
-#endif
-    return O32_GetWindowDC(arg1);
-}
-//******************************************************************************
-//******************************************************************************
 BOOL WIN32API EnableWindow( HWND hwnd, BOOL fEnable)
 {
   Win32Window *window;
@@ -373,6 +364,15 @@ BOOL WIN32API SetWindowPlacement( HWND arg1, const WINDOWPLACEMENT *  arg2)
 {
     dprintf(("USER32:  SetWindowPlacement\n"));
     return O32_SetWindowPlacement(arg1, arg2);
+}
+//******************************************************************************
+//******************************************************************************
+BOOL WIN32API GetWindowPlacement( HWND arg1, LPWINDOWPLACEMENT arg2)
+{
+#ifdef DEBUG
+    WriteLog("USER32:  GetWindowPlacement\n");
+#endif
+    return O32_GetWindowPlacement(arg1, arg2);
 }
 //******************************************************************************
 //******************************************************************************
@@ -454,7 +454,7 @@ UINT WIN32API GetInternalWindowPos(HWND    hwnd,
              rectWnd,
              ptIcon));
 
-    if (O32_GetWindowPlacement( hwnd, &wndpl ))
+    if (GetWindowPlacement( hwnd, &wndpl ))
     {
         if (rectWnd) *rectWnd = wndpl.rcNormalPosition;
         if (ptIcon)  *ptIcon = wndpl.ptMinPosition;
@@ -536,6 +536,31 @@ int WIN32API GetWindowTextA( HWND hwnd, LPSTR lpsz, int cch)
     }
     dprintf(("GetWindowTextA %x", hwnd));
     return window->GetWindowTextA(lpsz, cch);
+}
+//******************************************************************************
+//******************************************************************************
+int WIN32API GetWindowTextLengthW( HWND hwnd)
+{
+    dprintf(("USER32:  GetWindowTextLengthW\n"));
+    return GetWindowTextLengthA(hwnd);
+}
+//******************************************************************************
+//******************************************************************************
+int WIN32API GetWindowTextW(HWND hwnd, LPWSTR lpsz, int cch)
+{
+ char title[128];
+ int  rc;
+
+   rc = O32_GetWindowText(hwnd, title, sizeof(title));
+#ifdef DEBUG
+   WriteLog("USER32:  GetWindowTextW returned %s\n", title);
+#endif
+   if(rc > cch) {
+    title[cch-1] = 0;
+    rc = cch;
+   }
+   AsciiToUnicode(title, lpsz);
+   return(rc);
 }
 //******************************************************************************
 //******************************************************************************
