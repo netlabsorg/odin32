@@ -1,4 +1,4 @@
-/* $Id: directory.cpp,v 1.17 2000-03-04 19:52:35 sandervl Exp $ */
+/* $Id: directory.cpp,v 1.18 2000-04-07 19:43:46 sandervl Exp $ */
 
 /*
  * Win32 Directory functions for OS/2
@@ -219,7 +219,7 @@ ODINFUNCTION2(BOOL,CreateDirectoryW,LPCWSTR,             arg1,
  * Parameters:
  * Variables :
  * Result    :
- * Remark    :
+ * Remark    : Should return length of system dir even if lpBuffer == NULL
  * Status    :
  *
  * Author    : Patrick Haller [Wed, 1999/09/28 20:44]
@@ -229,33 +229,39 @@ ODINFUNCTION2(UINT,GetSystemDirectoryA,LPSTR,lpBuffer,
                                        UINT,uSize)
 {
   LPSTR lpstrEnv = getenv("WIN32.DIR.SYSTEM");          /* query environment */
+  CHAR  buf[255];
 
   if (lpstrEnv != NULL)
   {
-    lstrcpynA(lpBuffer,                   /* copy environment variable to buffer */
-              lpstrEnv,
-              uSize);
-    return (lstrlenA(lpBuffer));                /* return number of copies bytes */
+	if(lpBuffer)
+    		lstrcpynA(lpBuffer, lpstrEnv, uSize);
+
+    	return (lstrlenA(lpstrEnv));                /* return number of copies bytes */
   } 
   else
   {
     int len;
 
-    len = ODIN_PROFILE_GetOdinIniString(ODINDIRECTORIES,"SYSTEM","",lpBuffer,uSize);
+    len = ODIN_PROFILE_GetOdinIniString(ODINDIRECTORIES,"SYSTEM","",buf,sizeof(buf));
     if (len > 2) {
-	if(lpBuffer[len-1] == '\\') {
-		lpBuffer[len-1] = 0; 
+	if(buf[len-1] == '\\') {
+		buf[len-1] = 0; 
 		len--;
 	}
+	if(lpBuffer)
+		lstrcpynA(lpBuffer, buf, uSize);
+
 	return len;
     }
     else {//SvL: Use path of kernel32.dll instead of calling Open32 api (which returns \OS2\SYSTEM)
-	lstrcpynA(lpBuffer, kernel32Path, uSize);
-	len = lstrlenA(lpBuffer);;
-	if(lpBuffer[len-1] == '\\') {
-		lpBuffer[len-1] = 0; 
+	lstrcpynA(buf, kernel32Path, sizeof(buf)-1);
+	len = lstrlenA(buf);;
+	if(buf[len-1] == '\\') {
+		buf[len-1] = 0; 
 		len--;
 	}
+	if(lpBuffer)
+		lstrcpynA(lpBuffer, buf, uSize);
 	return len;
     }
   }
@@ -268,7 +274,7 @@ ODINFUNCTION2(UINT,GetSystemDirectoryA,LPSTR,lpBuffer,
  * Parameters:
  * Variables :
  * Result    :
- * Remark    :
+ * Remark    : Should return length of system dir even if lpBuffer == NULL
  * Status    :
  *
  * Author    : Patrick Haller [Wed, 1999/09/28 20:44]
@@ -277,12 +283,18 @@ ODINFUNCTION2(UINT,GetSystemDirectoryA,LPSTR,lpBuffer,
 ODINFUNCTION2(UINT,GetSystemDirectoryW,LPWSTR,lpBuffer,
                                        UINT,  uSize)
 {
-  char *asciibuffer = (char *)malloc(uSize+1);
+  char *asciibuffer = NULL;
   UINT  rc;
 
+  if(lpBuffer)
+  	asciibuffer = (char *)malloc(uSize+1);
+
   rc = GetSystemDirectoryA(asciibuffer, uSize);
-  if(rc) AsciiToUnicode(asciibuffer, lpBuffer);
-  free(asciibuffer);
+  if(rc && asciibuffer)
+    	AsciiToUnicode(asciibuffer, lpBuffer);
+
+  if(asciibuffer)
+	free(asciibuffer);
   return(rc);
 }
 
@@ -293,7 +305,7 @@ ODINFUNCTION2(UINT,GetSystemDirectoryW,LPWSTR,lpBuffer,
  * Parameters:
  * Variables :
  * Result    :
- * Remark    :
+ * Remark    : Should return length of system dir even if lpBuffer == NULL
  * Status    :
  *
  * Author    : Patrick Haller [Wed, 1999/09/28 20:44]
@@ -303,39 +315,43 @@ ODINFUNCTION2(UINT,GetWindowsDirectoryA,LPSTR,lpBuffer,
                                         UINT,uSize)
 {
   LPSTR lpstrEnv = getenv("WIN32.DIR.WINDOWS");         /* query environment */
+  CHAR  buf[255];
 
   if (lpstrEnv != NULL)
   {
-    lstrcpynA(lpBuffer,                   /* copy environment variable to buffer */
-              lpstrEnv,
-              uSize);
-    return (lstrlenA(lpBuffer));                /* return number of copies bytes */
+	if(lpBuffer)
+    		lstrcpynA(lpBuffer, lpstrEnv, uSize);
+
+    	return (lstrlenA(lpstrEnv));                /* return number of copies bytes */
   } 
   else
   {
     int len;
 
-    len = ODIN_PROFILE_GetOdinIniString(ODINDIRECTORIES,"WINDOWS","",lpBuffer,uSize);
+    len = ODIN_PROFILE_GetOdinIniString(ODINDIRECTORIES,"WINDOWS","",buf,sizeof(buf));
     if (len > 2) {
-	if(lpBuffer[len-1] == '\\') {
-		lpBuffer[len-1] = 0; 
+	if(buf[len-1] == '\\') {
+		buf[len-1] = 0; 
 		len--;
 	}
+	if(lpBuffer)
+		lstrcpynA(lpBuffer, buf, uSize);
+
 	return len;
     }
     else {//SvL: Use path of kernel32.dll instead of calling Open32 api (which returns \OS2\SYSTEM)
-     CHAR buf[255];
 
 	lstrcpynA(buf, kernel32Path, sizeof(buf)-1);
 	strcat(buf, "WIN");
 	O32_CreateDirectory(buf, NULL);
 
-	lstrcpynA(lpBuffer, buf, uSize);
-	len = lstrlenA(lpBuffer);;
-	if(lpBuffer[len-1] == '\\') {
-		lpBuffer[len-1] = 0; 
+	len = lstrlenA(buf);;
+	if(buf[len-1] == '\\') {
+		buf[len-1] = 0; 
 		len--;
 	}
+	if(lpBuffer)
+		lstrcpynA(lpBuffer, buf, uSize);
 	return len;
     }
   }
@@ -348,7 +364,7 @@ ODINFUNCTION2(UINT,GetWindowsDirectoryA,LPSTR,lpBuffer,
  * Parameters:
  * Variables :
  * Result    :
- * Remark    :
+ * Remark    : Should return length of system dir even if lpBuffer == NULL
  * Status    :
  *
  * Author    : Patrick Haller [Wed, 1999/09/28 20:44]
@@ -357,13 +373,18 @@ ODINFUNCTION2(UINT,GetWindowsDirectoryA,LPSTR,lpBuffer,
 ODINFUNCTION2(UINT,GetWindowsDirectoryW,LPWSTR,lpBuffer,
                                         UINT,  uSize)
 {
-  char *asciibuffer = (char *)malloc(uSize+1);
+  char *asciibuffer = NULL;
   UINT  rc;
 
+  if(lpBuffer)
+  	asciibuffer = (char *)malloc(uSize+1);
+
   rc = GetWindowsDirectoryA(asciibuffer, uSize);
-  if(rc)
-    AsciiToUnicode(asciibuffer, lpBuffer);
-  free(asciibuffer);
+  if(rc && asciibuffer)
+    	AsciiToUnicode(asciibuffer, lpBuffer);
+
+  if(asciibuffer)
+	free(asciibuffer);
   return(rc);
 }
 
@@ -389,6 +410,9 @@ ODINFUNCTION1(BOOL,RemoveDirectoryA,LPCSTR,arg1)
   strcpy(tmp, arg1);
   if(tmp[len -1] == '\\')
     tmp[len -1] = 0;
+
+  dprintf(("RemoveDirectory %S", arg1));
+
   return O32_RemoveDirectory(tmp);
 }
 
