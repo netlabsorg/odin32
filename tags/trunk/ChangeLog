@@ -1,4 +1,8 @@
- /* $Id: ChangeLog,v 1.474 1999-11-26 00:04:02 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.475 1999-11-26 17:04:25 cbratschi Exp $ */
+
+ 99-11-26: Christoph Bratschi <cbratschi@datacomm.ch>
+	- USER32: fixed rect mapping -> edit scroll redraw bug fixed
+		  WM_ERASEBKGND: brush or system color
 
  99-11-25: Sander van Leeuwen <sandervl@xs4all.nl>
 	- KERNEL32: Removed hardcoded dependency on ADVAPI32 (cpu.cpp); fixes
