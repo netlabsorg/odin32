@@ -1,8 +1,10 @@
-/* $Id: changelog,v 1.2358 2002-11-18 13:54:34 sandervl Exp $ */
+/* $Id: changelog,v 1.2359 2002-11-18 15:45:18 sandervl Exp $ */
 
  2002-11-18: Sander van Leeuwen <sandervl@innotek   >
     - KERNEL32: o Added support for renaming of exported functions.
                   (to resolve duplicate name exports in custom build dlls)
+    - GDI32:    o DeleteObject can delete DC handles (thanks to Dietrich Teickner
+                  for spotting this bug)
 
  2002-11-13: Sander van Leeuwen <sandervl@innotek   >
     - SETUPAPI, RICHED32: 
