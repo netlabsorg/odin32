@@ -1,4 +1,4 @@
-/* $Id: virtual.cpp,v 1.33 2000-09-05 20:35:40 sandervl Exp $ */
+/* $Id: virtual.cpp,v 1.34 2000-09-18 19:26:16 sandervl Exp $ */
 
 /*
  * Win32 virtual memory functions
@@ -272,6 +272,8 @@ ODINFUNCTION4(LPVOID, VirtualAlloc, LPVOID, lpvAddress,
   ULONG flag = 0, base;
   DWORD rc;
 
+  SetLastError(ERROR_SUCCESS);
+
   if (cbSize > 0x7fc00000)  /* 2Gb - 4Mb */
   {
    	dprintf(("VirtualAlloc: size too large"));
@@ -420,6 +422,8 @@ ODINFUNCTION3(BOOL, VirtualFree, LPVOID, lpvAddress,
 {
   DWORD rc;
 
+  SetLastError(ERROR_SUCCESS);
+
   // verify parameters
   if ( (FreeType & MEM_RELEASE) && (cbSize   != 0) )
   {
@@ -485,8 +489,13 @@ ODINFUNCTION4(BOOL, VirtualProtect, LPVOID, lpvAddress,
   ULONG  pageFlags = 0;
   int npages;
 
-  if(pfdwOldProtect == NULL)
+  if(pfdwOldProtect == NULL) {
+        dprintf(("WARNING: pfdwOldProtect == NULL"));
+  	SetLastError(ERROR_INVALID_PARAMETER);
         return(FALSE);
+  }
+
+  SetLastError(ERROR_SUCCESS);
 
   rc = OSLibDosQueryMem(lpvAddress, &cb, &pageFlags);
   if(rc) {
@@ -560,12 +569,14 @@ ODINFUNCTION3(DWORD, VirtualQuery, LPCVOID, lpvAddress,
   DWORD  rc;
   LPVOID lpBase;
 
+  SetLastError(ERROR_SUCCESS);
+
   if(pmbiBuffer == NULL || cbLength != sizeof(MEMORY_BASIC_INFORMATION)) // check parameters
   {
+	dprintf(("WARNING: invalid parameter"));
 	SetLastError(ERROR_INVALID_PARAMETER);
     	return 0;                             // nothing to return
   }
-  SetLastError(ERROR_SUCCESS);
 
   // determine exact page range
   lpBase = (LPVOID)((ULONG)lpvAddress & 0xFFFFF000);
@@ -646,6 +657,7 @@ ODINFUNCTION2(BOOL, VirtualLock, LPVOID, lpAddress,
                                  DWORD,  dwSize)
 {
   dprintf(("VirtualLock at %d; %d bytes - stub (TRUE)\n", (int)lpAddress, dwSize));
+  SetLastError(ERROR_SUCCESS);
   return TRUE;
 }
 
@@ -654,6 +666,7 @@ ODINFUNCTION2(BOOL, VirtualUnlock, LPVOID, lpAddress,
                                    DWORD,  dwSize)
 {
   dprintf(("VirtualUnlock at %d; %d bytes - stub (TRUE)\n", (int)lpAddress, dwSize));
+  SetLastError(ERROR_SUCCESS);
   return TRUE;
 }
 
