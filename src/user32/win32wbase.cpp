@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.337 2002-08-27 09:30:50 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.338 2002-09-06 12:31:41 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -714,9 +714,6 @@ BOOL Win32BaseWindow::MsgCreate(HWND hwndOS2)
     }
   }
 #endif
-
-    fakeWinBase.hwndThis     = OS2Hwnd;
-    fakeWinBase.pWindowClass = windowClass;
 
     //Set icon from window or class
     if (hIcon)

@@ -1,4 +1,4 @@
-/* $Id: win32wbase.h,v 1.144 2002-08-23 15:06:01 sandervl Exp $ */
+/* $Id: win32wbase.h,v 1.145 2002-09-06 12:31:42 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -16,7 +16,6 @@
 #ifdef __cplusplus
 
 #include <win32class.h>
-#include "open32wbase.h"
 #include <gen_object.h>
 #include <win32wndchild.h>
 #include <winuser32.h>
@@ -518,10 +517,6 @@ friend BOOL  OS2ToWinMsgTranslate(void *pThdb, QMSG *os2Msg, MSG *winMsg, BOOL i
 #endif
 
 public:
-         void SetFakeOpen32()    { WinSetDAXData (OS2Hwnd, &fakeWinBase); }
-         void RemoveFakeOpen32() { WinSetDAXData (OS2Hwnd, NULL); }
-
-         fakeOpen32WinBaseClass fakeWinBase;
 
          VOID  AdjustMaximizedRect(LPRECT rect);
          VOID  AdjustTrackInfo(PPOINT minTrackSize,PPOINT maxTrackSize);
