@@ -1,4 +1,11 @@
-/* $Id: changelog,v 1.2403 2002-12-29 17:16:55 sandervl Exp $ */
+/* $Id: changelog,v 1.2404 2002-12-30 14:04:52 sandervl Exp $ */
+
+ 2002-12-30: Sander van Leeuwen <sandervl@innotek   >
+    - GDI32:    o Support reversed bitmap data in SetDIBits
+    - DDRAW:    o Fixed pitch for offscreen surfaces so it doesn't conflict
+                  with GetDIBits/SetDIBits alignment (aligned at dword boundary)
+                o Use GetDIBits & SetDIBits with negative height. Origin must
+                  be top left.
 
  2002-12-29: Sander van Leeuwen <sandervl@innotek   >
     - DDRAW:    o Cleanup
