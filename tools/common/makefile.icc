@@ -1,4 +1,4 @@
-# $Id: makefile.icc,v 1.10 2000-05-23 18:23:04 bird Exp $
+# $Id: makefile.icc,v 1.11 2000-10-02 04:01:40 bird Exp $
 
 #
 # PD-Win32 API
@@ -51,12 +51,20 @@ all:    $(OBJDIR) \
         commonicc.lib
 
 
+# CommonICC
 commonicc.lib: $(OBJDIR)\commonicc.lib
     $(CP) $** $@
 
 $(OBJDIR)\commonicc.lib: $(OBJS)
     $(RM) $@
     $(ILIB) /nobackup $@ $(OBJS: = +), NUL;
+
+# kDump
+kDump.exe: $(OBJDIR)\kDump.exe
+    $(CP) $** $@
+
+$(OBJDIR)\kDump.exe: commonicc.lib $(OBJDIR)\kDump.obj
+    $(LD) $(LDFLAGS) -Fe$@ $** $(RTLLIB) OS2386.LIB
 
 
 # Dependent rule. Forward to main makefile.
