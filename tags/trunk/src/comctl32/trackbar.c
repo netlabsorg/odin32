@@ -1,4 +1,4 @@
-/* $Id: trackbar.c,v 1.18 1999-09-15 16:31:48 cbratschi Exp $ */
+/* $Id: trackbar.c,v 1.19 1999-10-01 15:53:32 cbratschi Exp $ */
 /*
  * Trackbar control
  *
@@ -12,6 +12,7 @@
  * Version: 5.00
  *
  * Note: TBM_SETTHUMBLENGTH implemented, COMCTL32 5.00 ignores it
+ *       Microsoft(TM) should fix this bug :)
  */
 
 #include "winbase.h"
@@ -2216,11 +2217,13 @@ static LRESULT
 TRACKBAR_Enable(HWND hwnd,WPARAM wParam,LPARAM lParam)
 {
   TRACKBAR_INFO *infoPtr = TRACKBAR_GetInfoPtr(hwnd);
+  BOOL oldFocus = infoPtr->bFocus;
 
   if (wParam) infoPtr->bFocus = (GetFocus() == hwnd);
   else infoPtr->bFocus = FALSE;
 
-  TRACKBAR_Refresh(hwnd);
+  if (oldFocus != infoPtr->bFocus) TRACKBAR_Refresh(hwnd);
+  else TRACKBAR_UpdateThumbPosition(hwnd,infoPtr->nPos,TRUE);
 
   return 0;
 }

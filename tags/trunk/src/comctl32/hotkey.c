@@ -1,4 +1,4 @@
-/* $Id: hotkey.c,v 1.11 1999-09-25 15:24:12 cbratschi Exp $ */
+/* $Id: hotkey.c,v 1.12 1999-10-01 15:53:32 cbratschi Exp $ */
 /*
  * Hotkey control
  *
@@ -6,7 +6,7 @@
  * Copyright 1999 Achim Hasenmueller
  * Copyright 1999 Christoph Bratschi
  *
- * Status: Development in progress
+ * Status: Complete (perhaps some bugs)
  * Version: 5.00
  */
 
@@ -18,24 +18,295 @@
 #define HOTKEY_GetInfoPtr(hwnd) ((HOTKEY_INFO*)GetWindowLongA(hwnd,0))
 
 static VOID
-HOTKEY_Refresh(HWND hwnd)
+HOTKEY_Refresh(HWND hwnd,BOOL notify)
 {
   InvalidateRect(hwnd,NULL,FALSE);
+
+  if (notify) SendMessageA(GetParent(hwnd),WM_COMMAND,MAKEWPARAM(GetWindowLongA(hwnd,GWL_ID),EN_CHANGE),hwnd);
 }
 
+static char*
+HOTKEY_ExtKey2Name(BYTE bVKHotKey)
+{
+  switch(bVKHotKey)
+  {
+    case VK_RETURN:
+      return "RETURN";
+
+    case VK_PRIOR:
+      return "PRIOR";
+
+    case VK_NEXT:
+      return "NEXT";
+
+    case VK_END:
+      return "END";
+
+    case VK_HOME:
+      return "HOME";
+
+    case VK_LEFT:
+      return "LEFT";
+
+    case VK_UP:
+      return "UP";
+
+    case VK_RIGHT:
+      return "RIGHT";
+
+    case VK_DOWN:
+      return "DOWN";
+
+    case VK_HELP:
+      return "HELP";
+
+    case VK_0:
+      return "0";
+
+    case VK_1:
+      return "1";
+
+    case VK_2:
+      return "2";
+
+    case VK_3:
+      return "3";
+
+    case VK_4:
+      return "4";
+
+    case VK_5:
+      return "5";
+
+    case VK_6:
+      return "6";
+
+    case VK_7:
+      return "7";
+
+    case VK_8:
+      return "8";
+
+    case VK_9:
+      return "9";
+
+    case VK_A:
+      return "A";
+
+    case VK_B:
+      return "B";
+
+    case VK_C:
+      return "C";
+
+    case VK_D:
+      return "D";
+
+    case VK_E:
+      return "E";
+
+    case VK_F:
+      return "F";
+
+    case VK_G:
+      return "G";
+
+    case VK_H:
+      return "H";
+
+    case VK_I:
+      return "I";
+
+    case VK_J:
+      return "J";
+
+    case VK_K:
+      return "K";
+
+    case VK_L:
+      return "L";
+
+    case VK_M:
+      return "M";
+
+    case VK_N:
+      return "N";
+
+    case VK_O:
+      return "O";
+
+    case VK_P:
+      return "P";
+
+    case VK_Q:
+      return "Q";
+
+    case VK_R:
+      return "R";
+
+    case VK_S:
+      return "S";
+
+    case VK_T:
+      return "T";
+
+    case VK_U:
+      return "U";
+
+    case VK_V:
+      return "V";
+
+    case VK_W:
+      return "W";
+
+    case VK_X:
+      return "Y";
+
+    case VK_Y:
+      return "X";
+
+    case VK_Z:
+      return "Z";
+
+    case VK_NUMPAD0:
+      return "NUMPAD0";
+
+    case VK_NUMPAD1:
+      return "NUMPAD1";
+
+    case VK_NUMPAD2:
+      return "NUMPAD2";
+
+    case VK_NUMPAD3:
+      return "NUMPAD3";
+
+    case VK_NUMPAD4:
+      return "NUMPAD4";
+
+    case VK_NUMPAD5:
+      return "NUMPAD5";
+
+    case VK_NUMPAD6:
+      return "NUMPAD6";
+
+    case VK_NUMPAD7:
+      return "NUMPAD7";
+
+    case VK_NUMPAD8:
+      return "NUMPAD8";
+
+    case VK_NUMPAD9:
+      return "NUMPAD9";
+
+    case VK_MULTIPLY:
+      return "MULTIPLY";
+
+    case VK_ADD:
+      return "ADD";
+
+    case VK_SEPARATOR:
+      return "SEPARATOR";
+
+    case VK_SUBTRACT:
+      return "SUBTRACT";
+
+    case VK_DECIMAL:
+      return "DECIMAL";
+
+    case VK_DIVIDE:
+      return "DIVIDE";
+
+    case VK_F1:
+      return "F1";
+
+    case VK_F2:
+      return "F2";
+
+    case VK_F3:
+      return "F3";
+
+    case VK_F4:
+      return "F4";
+
+    case VK_F5:
+      return "F5";
+
+    case VK_F6:
+      return "F6";
+
+    case VK_F7:
+      return "F7";
+
+    case VK_F8:
+      return "F8";
+
+    case VK_F9:
+      return "F9";
+
+    case VK_F10:
+      return "F10";
+
+    case VK_F11:
+      return "F11";
+
+    case VK_F12:
+      return "F12";
+
+    case VK_F13:
+      return "F13";
+
+    case VK_F14:
+      return "F14";
+
+    case VK_F15:
+      return "F15";
+
+    case VK_F16:
+      return "F16";
+
+    case VK_F17:
+      return "F17";
+
+    case VK_F18:
+      return "F18";
+
+    case VK_F19:
+      return "F19";
+
+    case VK_F20:
+      return "F20";
+
+    case VK_F21:
+      return "F21";
+
+    case VK_F22:
+      return "F22";
+
+    case VK_F23:
+      return "F23";
+
+    case VK_F24:
+      return "F24";
+
+    default:
+      return NULL;
+  }
+}
 
 static BYTE
 HOTKEY_Check(HOTKEY_INFO *infoPtr,BYTE bfMods)
 {
-  if ((infoPtr->fwCombInv & HKCOMB_A && bfMods == HOTKEYF_ALT) ||
-      (infoPtr->fwCombInv & HKCOMB_C && bfMods == HOTKEYF_CONTROL) ||
-      (infoPtr->fwCombInv & HKCOMB_CA && bfMods == HOTKEYF_CONTROL | HOTKEYF_ALT) ||
-      (infoPtr->fwCombInv & HKCOMB_NONE && bfMods == 0) ||
-      (infoPtr->fwCombInv & HKCOMB_S && bfMods == HOTKEYF_SHIFT) ||
-      (infoPtr->fwCombInv & HKCOMB_SA && bfMods == HOTKEYF_SHIFT | HOTKEYF_ALT) ||
-      (infoPtr->fwCombInv & HKCOMB_SC && bfMods == HOTKEYF_SHIFT | HOTKEYF_CONTROL) ||
-      (infoPtr->fwCombInv & HKCOMB_SCA && bfMods == HOTKEYF_SHIFT | HOTKEYF_CONTROL | HOTKEYF_ALT))
-    return infoPtr->fwModInv;
+  BYTE mods = bfMods & ~HOTKEYF_EXT;
+
+  if ((infoPtr->fwCombInv & HKCOMB_A && mods == HOTKEYF_ALT) ||
+      (infoPtr->fwCombInv & HKCOMB_C && mods == HOTKEYF_CONTROL) ||
+      (infoPtr->fwCombInv & HKCOMB_CA && mods == HOTKEYF_CONTROL | HOTKEYF_ALT) ||
+      (infoPtr->fwCombInv & HKCOMB_NONE && mods == 0) ||
+      (infoPtr->fwCombInv & HKCOMB_S && mods == HOTKEYF_SHIFT) ||
+      (infoPtr->fwCombInv & HKCOMB_SA && mods == HOTKEYF_SHIFT | HOTKEYF_ALT) ||
+      (infoPtr->fwCombInv & HKCOMB_SC && mods == HOTKEYF_SHIFT | HOTKEYF_CONTROL) ||
+      (infoPtr->fwCombInv & HKCOMB_SCA && mods == HOTKEYF_SHIFT | HOTKEYF_CONTROL | HOTKEYF_ALT))
+    return infoPtr->fwModInv | bfMods;
   else
     return bfMods;
 }
@@ -49,7 +320,7 @@ HOTKEY_SetHotKey(HWND hwnd,WPARAM wParam,LPARAM lParam)
   infoPtr->bVKHotKey = wParam & 0xFF;
   infoPtr->bfMods = HOTKEY_Check(infoPtr,(wParam & 0xFF00)>>8);
 
-  HOTKEY_Refresh(hwnd);
+  HOTKEY_Refresh(hwnd,TRUE);
 
   return 0;
 }
@@ -74,7 +345,7 @@ HOTKEY_SetRules(HWND hwnd,WPARAM wParam,LPARAM lParam)
   infoPtr->fwModInv = lParam;
 
   infoPtr->bfMods = HOTKEY_Check(infoPtr,infoPtr->bfMods);
-  if (infoPtr->bfMods != oldMods) HOTKEY_Refresh(hwnd);
+  if (infoPtr->bfMods != oldMods) HOTKEY_Refresh(hwnd,TRUE);
 
   return 0;
 }
@@ -88,9 +359,11 @@ HOTKEY_Char(HWND hwnd,WPARAM wParam,LPARAM lParam,BOOL sysKey)
   if (wParam != infoPtr->bVKHotKey)
   {
     infoPtr->bVKHotKey = wParam & 0xFF;
+    infoPtr->bfMods &= ~HOTKEYF_EXT;
     infoPtr->bfMods = HOTKEY_Check(infoPtr,infoPtr->bfMods);
-    HOTKEY_Refresh(hwnd);
+    HOTKEY_Refresh(hwnd,TRUE);
   }
+  infoPtr->bfModsDown = 0;
 
   return 0;
 }
@@ -198,7 +471,17 @@ HOTKEY_KeyDown (HWND hwnd, WPARAM wParam, LPARAM lParam,BOOL sysKey)
          break;
 
     default:
-         //CB:
+         if (newKey != wParam && HOTKEY_ExtKey2Name(wParam))
+         {
+           infoPtr ->bVKHotKey = wParam & 0xFF;
+           newMods |= HOTKEYF_EXT;
+
+           infoPtr->bfMods = HOTKEY_Check(infoPtr,newMods);
+           HOTKEY_Refresh(hwnd,TRUE);
+           infoPtr->bfModsDown = 0;
+
+           return 0;
+         }
          break;
     }
 
@@ -207,7 +490,7 @@ HOTKEY_KeyDown (HWND hwnd, WPARAM wParam, LPARAM lParam,BOOL sysKey)
     {
       infoPtr->bVKHotKey = newKey;
       infoPtr->bfMods = newMods;
-      HOTKEY_Refresh(hwnd);
+      HOTKEY_Refresh(hwnd,TRUE);
     }
 
     return 0;
@@ -217,8 +500,10 @@ HOTKEY_KeyDown (HWND hwnd, WPARAM wParam, LPARAM lParam,BOOL sysKey)
 static LRESULT
 HOTKEY_KeyUp (HWND hwnd, WPARAM wParam, LPARAM lParam,BOOL sysKey)
 {
-  HOTKEY_INFO *infoPtr = HOTKEY_GetInfoPtr (hwnd);
+  HOTKEY_INFO *infoPtr = HOTKEY_GetInfoPtr(hwnd);
   INT newMods = infoPtr->bfModsDown;
+
+  if (!infoPtr->bfModsDown) return 0;
 
   if (sysKey)
   {
@@ -253,7 +538,7 @@ HOTKEY_KeyUp (HWND hwnd, WPARAM wParam, LPARAM lParam,BOOL sysKey)
     if (infoPtr->bfMods != newMods)
     {
       infoPtr->bfMods = newMods;
-      HOTKEY_Refresh(hwnd);
+      HOTKEY_Refresh(hwnd,TRUE);
     }
 
     return 0;
@@ -318,12 +603,24 @@ HOTKEY_Draw(HWND hwnd,HDC hdc)
 
   if (infoPtr->bVKHotKey)
   {
-    char char2[2];
+    if (infoPtr->bfMods & HOTKEYF_EXT)
+    {
+      char* name = HOTKEY_ExtKey2Name(infoPtr->bVKHotKey);
 
-    if (text[0]) strcat(text,"+");
-    char2[0] = (char)infoPtr->bVKHotKey;
-    char2[1] = 0;
-    strcat(text,char2);
+      if (name)
+      {
+        if (text[0]) strcat(text,"+");
+        strcat(text,name);
+      }
+    } else
+    {
+      char char2[2];
+
+      if (text[0]) strcat(text,"+");
+      char2[0] = (char)infoPtr->bVKHotKey;
+      char2[1] = 0;
+      strcat(text,char2);
+    }
   } else if (infoPtr->bfModsDown) strcat(text,"+");
   if(infoPtr->hFont) oldFont = SelectObject(hdc,infoPtr->hFont);
   SetBkMode(hdc,TRANSPARENT);
@@ -390,7 +687,7 @@ HOTKEY_SetFont (HWND hwnd, WPARAM wParam, LPARAM lParam)
         SelectObject (hdc, hOldFont);
     ReleaseDC (hwnd, hdc);
 
-    if (LOWORD(lParam)) HOTKEY_Refresh(hwnd);
+    if (LOWORD(lParam)) HOTKEY_Refresh(hwnd,FALSE);
 
     return 0;
 }
