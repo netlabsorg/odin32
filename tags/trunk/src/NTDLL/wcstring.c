@@ -284,10 +284,20 @@ INT __cdecl NTDLL_mbstowcs( LPWSTR dst, LPCSTR src, INT n )
  */
 INT __cdecl NTDLL_wcstol(LPWSTR s,LPWSTR *end,INT base)
 {
+    INT ret;
+#ifdef __WIN32OS2__
+    LPSTR endA;
+    LPSTR sA;
+    STACK_strdupWtoA(s, sA)
+#else
     LPSTR sA = HEAP_strdupWtoA(GetProcessHeap(),0,s),endA;
-    INT	ret = strtol(sA,&endA,base);
+#endif
+  
+    strtol(sA,&endA,base);
 
+#ifndef __WIN32OS2__
     HeapFree(GetProcessHeap(),0,sA);
+#endif
     if (end) *end = s+(endA-sA); /* pointer magic checked. */
     return ret;
 }
