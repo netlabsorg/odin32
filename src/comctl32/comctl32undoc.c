@@ -12,8 +12,87 @@
 
 #include "comctl32.h"
 #include <memory.h>
+#include <string.h>
+#include <stdlib.h>
+#include <ctype.h>
 
 extern HANDLE COMCTL32_hHeap; /* handle to the private heap */
+
+/**************************************************************************
+ * DPA_Merge [COMCTL32.11]
+ *
+ * PARAMS
+ *     hdpa1    [I] handle to a dynamic pointer array
+ *     hdpa2    [I] handle to a dynamic pointer array
+ *     dwFlags  [I] flags
+ *     pfnSort  [I] pointer to sort function
+ *     dwParam5 [I]
+ *     lParam   [I] application specific value
+ *
+ * NOTES
+ *     No more information available yet!
+ */
+
+BOOL WINAPI
+DPA_Merge (const HDPA hdpa1, const HDPA hdpa2, DWORD dwFlags,
+	   PFNDPACOMPARE pfnCompare, LPVOID pfnParam5, LPARAM lParam)
+{
+    /* LPVOID *pWork1, *pWork2; */
+    INT  nCount1, nCount2;
+
+//    TRACE (commctrl, "(%p %p %08lx %p %p %08lx): stub!\n",
+//	   hdpa1, hdpa2, dwFlags, pfnCompare, pfnParam5, lParam);
+
+    if (IsBadWritePtr (hdpa1, sizeof(DPA)))
+	return FALSE;
+
+    if (IsBadWritePtr (hdpa2, sizeof(DPA)))
+	return FALSE;
+
+    if (IsBadCodePtr ((FARPROC)pfnCompare))
+	return FALSE;
+
+    if (IsBadCodePtr ((FARPROC)pfnParam5))
+	return FALSE;
+
+    if (dwFlags & DPAM_SORT) {
+//	TRACE (commctrl, "sorting dpa's!\n");
+	DPA_Sort (hdpa1, pfnCompare, lParam);
+	DPA_Sort (hdpa2, pfnCompare, lParam);
+    }
+
+    if (hdpa2->nItemCount <= 0)
+	return TRUE;
+
+    nCount1 = hdpa1->nItemCount - 1;
+
+    nCount2 = hdpa2->nItemCount - 1;
+
+//    FIXME (commctrl, "nCount1=%d nCount2=%d\n", nCount1, nCount2);
+//    FIXME (commctrl, "semi stub!\n");
+#if 0
+
+    do {
+
+
+	if (nResult == 0) {
+
+	}
+	else if (nResult > 0) {
+
+	}
+	else {
+
+	}
+
+    }
+    while (nCount2 >= 0);
+
+#endif
+
+
+    return TRUE;
+}
 
 
 /**************************************************************************
@@ -110,6 +189,132 @@ DWORD WINAPI COMCTL32_GetSize (LPVOID lpMem)
 
     return HeapSize (COMCTL32_hHeap, 0, lpMem);
 }
+
+
+/**************************************************************************
+ * The MRU-API is a set of functions to manipulate MRU(Most Recently Used)
+ * lists.
+ *
+ *
+ */
+
+typedef struct tagMRUINFO
+{
+    DWORD  dwParam1;
+    DWORD  dwParam2;
+    DWORD  dwParam3;
+    HKEY   hkeyMain;
+    LPCSTR lpszSubKey;
+    DWORD  dwParam6;
+} MRUINFO, *LPMRUINFO;
+
+ 
+typedef struct tagMRU
+{
+    DWORD  dwParam1;  /* some kind of flag */
+    DWORD  dwParam2;
+    DWORD  dwParam3;
+    HKEY   hkeyMRU;
+    LPCSTR lpszSubKey;
+    DWORD  dwParam6;
+} MRU, *HMRU;
+
+LPVOID WINAPI
+CreateMRUListLazyA (LPMRUINFO lpmi, DWORD dwParam2,
+		    DWORD dwParam3, DWORD dwParam4);
+
+
+/**************************************************************************
+ * CreateMRUListA [COMCTL32.151]
+ *
+ * PARAMS
+ *     dwParam
+ *
+ * RETURNS
+ */
+
+LPVOID WINAPI
+CreateMRUListA (LPMRUINFO lpmi)
+{
+     return CreateMRUListLazyA (lpmi, 0, 0, 0);
+}
+
+
+DWORD WINAPI
+FreeMRUListA (HMRU hmru)
+{
+//    FIXME (commctrl, "(%p) empty stub!\n", hmru);
+
+#if 0
+    if (!(hmru->dwParam1 & 1001)) {
+	RegSetValueExA (hmru->hKeyMRU, "MRUList", 0, REG_SZ,
+			  hmru->lpszMRUString,
+			  lstrlenA (hmru->lpszMRUString));
+    }
+
+
+    RegClosKey (hmru->hkeyMRU
+    COMCTL32_Free32 (hmru->lpszMRUString);
+#endif
+
+    return COMCTL32_Free (hmru);
+}
+
+
+
+DWORD WINAPI
+AddMRUData (DWORD dwParam1, DWORD dwParam2, DWORD dwParam3)
+{
+
+//    FIXME (commctrl, "(%lx %lx %lx) empty stub!\n",
+//	   dwParam1, dwParam2, dwParam3);
+
+    return 0;
+}
+
+
+DWORD WINAPI
+FindMRUData (DWORD dwParam1, DWORD dwParam2, DWORD dwParam3, DWORD dwParam4)
+{
+
+//    FIXME (commctrl, "(%lx %lx %lx %lx) empty stub!\n",
+//	   dwParam1, dwParam2, dwParam3, dwParam4);
+
+    return TRUE;
+}
+
+
+LPVOID WINAPI
+CreateMRUListLazyA (LPMRUINFO lpmi, DWORD dwParam2, DWORD dwParam3, DWORD dwParam4)
+{
+    /* DWORD  dwLocal1;   *
+     * HKEY   hkeyResult; *
+     * DWORD  dwLocal3;   *
+     * LPVOID lMRU;       *
+     * DWORD  dwLocal5;   *
+     * DWORD  dwLocal6;   *
+     * DWORD  dwLocal7;   *
+     * DWORD  dwDisposition; */
+
+    /* internal variables */
+    LPVOID ptr;
+
+//    FIXME (commctrl, "(%p) empty stub!\n", lpmi);
+
+    if (lpmi) {
+//	FIXME (commctrl, "(%lx %lx %lx %lx \"%s\" %lx)\n",
+//	       lpmi->dwParam1, lpmi->dwParam2, lpmi->dwParam3,
+//	       (DWORD)lpmi->hkeyMain, lpmi->lpszSubKey, lpmi->dwParam6);
+    }
+
+    /* dummy pointer creation */
+    ptr = COMCTL32_Alloc (32);
+
+//    FIXME (commctrl, "-- ret = %p\n", ptr);
+
+    return ptr;
+}
+
 
 
 /**************************************************************************
@@ -1239,5 +1444,315 @@ DPA_CreateEx (INT nGrow, HANDLE hHeap)
 //    TRACE (commctrl, "-- %p\n", hdpa);
 
     return hdpa;
+}
+
+/**************************************************************************
+ * Notification functions
+ */
+
+typedef struct tagNOTIFYDATA
+{
+    HWND hwndFrom;
+    HWND hwndTo;
+    DWORD  dwParam3;
+    DWORD  dwParam4;
+    DWORD  dwParam5;
+    DWORD  dwParam6;
+} NOTIFYDATA, *LPNOTIFYDATA;
+
+
+/**************************************************************************
+ * DoNotify [Internal]
+ */
+
+static LRESULT
+DoNotify (LPNOTIFYDATA lpNotify, UINT uCode, LPNMHDR lpHdr)
+{
+    NMHDR nmhdr;
+    LPNMHDR lpNmh = NULL;
+    UINT idFrom = 0;
+
+//    TRACE (commctrl, "(0x%04x 0x%04x %d %p 0x%08lx)\n",
+//	   lpNotify->hwndFrom, lpNotify->hwndTo, uCode, lpHdr,
+//	   lpNotify->dwParam5);
+
+    if (!lpNotify->hwndTo)
+	return 0;
+
+    if (lpNotify->hwndFrom == -1) {
+	lpNmh = lpHdr;
+	idFrom = lpHdr->idFrom;
+    }
+    else {
+	if (lpNotify->hwndFrom) {
+	    HWND hwndParent = GetParent (lpNotify->hwndFrom);
+	    if (hwndParent) {
+		hwndParent = GetWindow (lpNotify->hwndFrom, GW_OWNER);
+		if (hwndParent)
+		    idFrom = GetDlgCtrlID (lpNotify->hwndFrom);
+	    }
+	}
+
+	lpNmh = (lpHdr) ? lpHdr : &nmhdr;
+
+	lpNmh->hwndFrom = lpNotify->hwndFrom;
+	lpNmh->idFrom = idFrom;
+	lpNmh->code = uCode;
+    }
+
+    return SendMessageA (lpNotify->hwndTo, WM_NOTIFY, idFrom, (LPARAM)lpNmh);
+}
+
+
+/**************************************************************************
+ * SendNotify [COMCTL32.341]
+ *
+ * PARAMS
+ *     hwndFrom [I]
+ *     hwndTo   [I]
+ *     uCode    [I]
+ *     lpHdr    [I]
+ *
+ * RETURNS
+ *     Success: return value from notification
+ *     Failure: 0
+ */
+
+LRESULT WINAPI
+COMCTL32_SendNotify (HWND hwndFrom, HWND hwndTo,
+		     UINT uCode, LPNMHDR lpHdr)
+{
+    NOTIFYDATA notify;
+
+//    TRACE (commctrl, "(0x%04x 0x%04x %d %p)\n",
+//	   hwndFrom, hwndTo, uCode, lpHdr);
+
+    notify.hwndFrom = hwndFrom;
+    notify.hwndTo   = hwndTo;
+    notify.dwParam5 = 0;
+    notify.dwParam6 = 0;
+
+    return DoNotify (&notify, uCode, lpHdr);
+}
+
+
+/**************************************************************************
+ * SendNotifyEx [COMCTL32.342]
+ *
+ * PARAMS
+ *     hwndFrom [I]
+ *     hwndTo   [I]
+ *     uCode    [I]
+ *     lpHdr    [I]
+ *     dwParam5 [I]
+ *
+ * RETURNS
+ *     Success: return value from notification
+ *     Failure: 0
+ */
+
+LRESULT WINAPI
+COMCTL32_SendNotifyEx (HWND hwndTo, HWND hwndFrom, UINT uCode,
+		       LPNMHDR lpHdr, DWORD dwParam5)
+{
+    NOTIFYDATA notify;
+    HWND hwndNotify;
+
+//    TRACE (commctrl, "(0x%04x 0x%04x %d %p 0x%08lx)\n",
+//	   hwndFrom, hwndTo, uCode, lpHdr, dwParam5);
+
+    hwndNotify = hwndTo;
+    if (!hwndTo) {
+	if (IsWindow (hwndFrom)) {
+	    hwndNotify = GetParent (hwndFrom);
+	    if (!hwndNotify)
+		return 0;
+	}
+    }
+
+    notify.hwndFrom = hwndFrom;
+    notify.hwndTo   = hwndNotify;
+    notify.dwParam5 = dwParam5;
+    notify.dwParam6 = 0;
+
+    return DoNotify (&notify, uCode, lpHdr);
+}
+
+
+/**************************************************************************
+ * StrChrA [COMCTL32.350]
+ *
+ */
+
+LPSTR WINAPI
+COMCTL32_StrChrA (LPCSTR lpString, CHAR cChar)
+{
+    return strchr (lpString, cChar);
+}
+
+
+/**************************************************************************
+ * StrStrIA [COMCTL32.355]
+ */
+
+LPSTR WINAPI
+COMCTL32_StrStrIA (LPCSTR lpStr1, LPCSTR lpStr2)
+{
+    INT len1, len2, i;
+    CHAR  first;
+
+    if (*lpStr2 == 0)
+	return ((LPSTR)lpStr1);
+    len1 = 0;
+    while (lpStr1[len1] != 0) ++len1;
+    len2 = 0;
+    while (lpStr2[len2] != 0) ++len2;
+    if (len2 == 0)
+	return ((LPSTR)(lpStr1 + len1));
+    first = tolower (*lpStr2);
+    while (len1 >= len2) {
+	if (tolower(*lpStr1) == first) {
+	    for (i = 1; i < len2; ++i)
+		if (tolower (lpStr1[i]) != tolower(lpStr2[i]))
+		    break;
+	    if (i >= len2)
+		return ((LPSTR)lpStr1);
+        }
+	++lpStr1; --len1;
+    }
+    return (NULL);
+}
+
+
+/**************************************************************************
+ * StrToIntA [COMCTL32.357] Converts a string to a signed integer.
+ */
+
+INT WINAPI
+COMCTL32_StrToIntA (LPSTR lpString)
+{
+    return atoi(lpString);
+}
+
+/**************************************************************************
+ * DPA_EnumCallback [COMCTL32.385]
+ *
+ * Enumerates all items in a dynamic pointer array.
+ *
+ * PARAMS
+ *     hdpa     [I] handle to the dynamic pointer array
+ *     enumProc [I]
+ *     lParam   [I] 
+ *
+ * RETURNS
+ *     none
+ */
+
+VOID WINAPI
+DPA_EnumCallback (const HDPA hdpa, DPAENUMPROC enumProc, LPARAM lParam)
+{
+    INT i;
+
+//    TRACE (commctrl, "(%p %p %08lx)\n", hdpa, enumProc, lParam);
+
+    if (!hdpa)
+	return;
+    if (hdpa->nItemCount <= 0)
+	return;
+
+    for (i = 0; i < hdpa->nItemCount; i++) {
+	if ((enumProc)(hdpa->ptrs[i], lParam) == 0)
+	    return;
+    }
+
+    return;
+}
+
+
+/**************************************************************************
+ * DPA_DestroyCallback [COMCTL32.386]
+ *
+ * Enumerates all items in a dynamic pointer array and destroys it.
+ *
+ * PARAMS
+ *     hdpa     [I] handle to the dynamic pointer array
+ *     enumProc [I]
+ *     lParam   [I]
+ *
+ * RETURNS
+ *     Success: TRUE
+ *     Failure: FALSE
+ */
+
+BOOL WINAPI
+DPA_DestroyCallback (const HDPA hdpa, DPAENUMPROC enumProc, LPARAM lParam)
+{
+//    TRACE (commctrl, "(%p %p %08lx)\n", hdpa, enumProc, lParam);
+
+    DPA_EnumCallback (hdpa, enumProc, lParam);
+
+    return DPA_Destroy (hdpa);
+}
+
+
+/**************************************************************************
+ * DSA_EnumCallback [COMCTL32.387]
+ *
+ * Enumerates all items in a dynamic storage array.
+ *
+ * PARAMS
+ *     hdsa     [I] handle to the dynamic storage array
+ *     enumProc [I]
+ *     lParam   [I]
+ *
+ * RETURNS
+ *     none
+ */
+
+VOID WINAPI
+DSA_EnumCallback (const HDSA hdsa, DSAENUMPROC enumProc, LPARAM lParam)
+{
+    INT i;
+
+//    TRACE (commctrl, "(%p %p %08lx)\n", hdsa, enumProc, lParam);
+
+    if (!hdsa)
+	return;
+    if (hdsa->nItemCount <= 0)
+	return;
+
+    for (i = 0; i < hdsa->nItemCount; i++) {
+	LPVOID lpItem = DSA_GetItemPtr (hdsa, i);
+	if ((enumProc)(lpItem, lParam) == 0)
+	    return;
+    }
+
+    return;
+}
+
+
+/**************************************************************************
+ * DSA_DestroyCallback [COMCTL32.388]
+ *
+ * Enumerates all items in a dynamic storage array and destroys it.
+ *
+ * PARAMS
+ *     hdsa     [I] handle to the dynamic storage array
+ *     enumProc [I]
+ *     lParam   [I]
+ *
+ * RETURNS
+ *     Success: TRUE
+ *     Failure: FALSE
+ */
+
+BOOL WINAPI
+DSA_DestroyCallback (const HDSA hdsa, DSAENUMPROC enumProc, LPARAM lParam)
+{
+//    TRACE (commctrl, "(%p %p %08lx)\n", hdsa, enumProc, lParam);
+
+    DSA_EnumCallback (hdsa, enumProc, lParam);
+
+    return DSA_Destroy (hdsa);
 }
 

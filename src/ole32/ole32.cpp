@@ -23,7 +23,7 @@
 
 // ><DJR 17.05.99 Prevent CALLCONV becoming _System
 #include <winbase.h>
-#include <uconv.h>
+#include <uniconv.h>
 #undef CALLCONV
 
 #include <os2win.h>

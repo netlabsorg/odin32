@@ -1,4 +1,4 @@
-/* $Id: unicode.h,v 1.2 1999-05-27 15:17:59 phaller Exp $ */
+/* $Id: unicode.h,v 1.3 1999-06-08 09:44:27 achimha Exp $ */
 
 /*
  *
@@ -8,7 +8,7 @@
 #ifndef __UNICODE_H__
 #define __UNICODE_H__
 
-#include <uconv.h>
+#include <uniconv.h>
 
 #ifdef __cplusplus
  extern "C" {
