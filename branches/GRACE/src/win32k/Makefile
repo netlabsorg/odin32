@@ -1,5 +1,5 @@
 ################################################################################
-# $Id: Makefile,v 1.43.4.2 2000-08-13 09:23:54 bird Exp $
+# $Id: Makefile,v 1.43.4.3 2000-08-14 08:57:02 bird Exp $
 #
 # Win32k makefile.
 #
@@ -658,6 +658,8 @@ dep:
     $(PDWIN32_TOOLS)\fastdep -o$$(WIN32KOBJ) $(CINCLUDES) misc\*.c* ldr\*.c* \
         dev32\*.c* pe2lx\*.c* k32\*.c* lib\*.c elf2lx\*.c* test\*.c* \
         $(WIN32KINCLUDE)\*.h
+    $(PDWIN32_TOOLS)\fastdep -a+ -objobj_tst -o$$(WIN32KOBJ) $(CINCLUDES) misc\*.c* ldr\*.c* \
+        dev32\*.c* pe2lx\*.c* k32\*.c* lib\*.c elf2lx\*.c* test\*.c*
     $(PDWIN32_TOOLS)\fastdep -a+ -o$$(WIN32KOBJ) $(CINCLUDES16) dev16\*.c*
     $(PDWIN32_TOOLS)\fastdep -a+ -o$$(WIN32KOBJ) -I$(WIN32KINCLUDE) \
         -I$(DDKPATH)\inc dev32\*.asm ldr\*.asm misc\*.asm test\*.asm include\*.inc

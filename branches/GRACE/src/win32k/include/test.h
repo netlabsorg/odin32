@@ -1,4 +1,4 @@
-/* $Id: test.h,v 1.1 2000-07-16 22:17:13 bird Exp $
+/* $Id: test.h,v 1.1.4.1 2000-08-14 08:57:07 bird Exp $
  *
  * Definitions and declarations for test moduls.
  *
@@ -112,14 +112,17 @@ extern USHORT   fakeptda_environ;
 #endif /* INCL_NO_FAKE */
 
 #ifdef INCL_16
-extern USHORT  usFakeVerMajor;          /* define in probkrnl.c */
-extern USHORT  usFakeVerMinor;          /* define in probkrnl.c */
+extern USHORT   usFakeVerMajor;         /* define in probkrnl.c */
+extern USHORT   usFakeVerMinor;         /* define in probkrnl.c */
 #else
-extern USHORT  _usFakeVerMajor;
-extern USHORT  _usFakeVerMinor;
+extern USHORT   _usFakeVerMajor;
+extern USHORT   _usFakeVerMinor;
 #endif
 
-extern const char *pszInternalRevision; /* defined in win32ktst.c */
+#ifdef _OS2Krnl_h_
+extern int      cObjectsFake;           /* defined in win32ktst.c */
+extern OTE      aKrnlOTE[24];           /* defined in win32ktst.c */
+#endif
 
 #ifdef __cplusplus
 }

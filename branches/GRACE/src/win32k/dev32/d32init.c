@@ -1,4 +1,4 @@
-/* $Id: d32init.c,v 1.19.4.1 2000-07-16 22:42:03 bird Exp $
+/* $Id: d32init.c,v 1.19.4.2 2000-08-14 08:57:04 bird Exp $
  *
  * d32init.c - 32-bits init routines.
  *
@@ -43,6 +43,7 @@
 #include "ldr.h"
 #include "ldrCalls.h"
 #include "macros.h"
+#include "errors.h"
 
 #ifdef R3TST
     #include "test.h"
@@ -470,14 +471,8 @@ USHORT _loadds _Far32 _Pascal GetKernelInfo32(PKRNLINFO pKrnlInfo)
                     pKrnlInfo->ulBuild = 0;
                     for (i = 0; i < 2 && pKrnlInfo->ulBuild == 0; i++)
                     {
-                        #ifndef R3TST
                         const char *psz = (const char*)pKrnlOTE[i].ote_base;
                         const char *pszEnd = psz + pKrnlOTE[i].ote_size - 50; /* Last possible search position. */
-                        #else
-                        extern const char *pszInternalRevision; /* defined in win32ktst.c */
-                        const char *psz =  pszInternalRevision;
-                        const char *pszEnd = psz + 3;
-                        #endif
 
                         while (psz < pszEnd)
                         {
@@ -523,7 +518,6 @@ USHORT _loadds _Far32 _Pascal GetKernelInfo32(PKRNLINFO pKrnlInfo)
 
 
                                 /* Check if its a debug kernel (look for DEBUG at start of object 3-5) */
-                            #ifndef R3TST
                                 j = 3;
                                 while (j < 5)
                                 {
@@ -540,9 +534,6 @@ USHORT _loadds _Far32 _Pascal GetKernelInfo32(PKRNLINFO pKrnlInfo)
                                     }
                                     j++;
                                 }
-                            #else
-                                NOREF(j);
-                            #endif
 
                                 /* Display info */
                                 kprintf(("GetKernelInfo32: info summary: Build %d, fKernel=%d\n",
@@ -597,11 +588,11 @@ int ModR_M_32bit(char bModRM)
     if ((bModRM & 0xc0) == 0x80  /* ex. mov ax,[ebp+11145543h] */
         || ((bModRM & 0xc0) == 0 && (bModRM & 0x07) == 5)) /* ex. mov ebp,[0ff231234h] */
     {   /* 32-bit displacement */
-        return 5;
+        return 5 + ((bModRM & 0x7) == 0x4); // + SIB
     }
     else if ((bModRM & 0xc0) == 0x40) /* ex. mov ecx,[esi]+4fh */
     {   /* 8-bit displacement */
-        return 2;
+        return 2 + ((bModRM & 0x7) == 0x4); // + SIB
     }
     /* no displacement (only /r byte) */
     return 1;
@@ -669,12 +660,24 @@ int interpretFunctionProlog32(char *pach, BOOL fOverload)
      *     mov eax, imm32
      *     push ebp
      *  or
+     *     mov ecx, r/m32
+     *  or
+     *     jmp dword
+     *  or
+     *     sub esp, imm8
+     *  or
      *     mov eax, msoff32
      *
      */
-    if ((pach[0] == 0x55 && (pach[1] == 0x8b || pach[1] == 0xa1)) /* two first prologs */
+    if ((pach[0] == 0x55 && (pach[1] == 0x8b || pach[1] == 0xa1)) /* the two first prologs */
         ||
-        (pach[0] == 0xB8 && (pach[5] == 0xEB || pach[5] == 0x55 ) && !fOverload) /* two next prologs */
+        (pach[0] == 0xB8 && (pach[5] == 0xEB || pach[5] == 0x55) && !fOverload) /* the two next prologs */
+        ||
+        (pach[0] == 0x8B && !fOverload) /* the next prolog */
+        ||
+        (pach[0] == 0xFF && !fOverload) /* the next prolog */
+        ||
+        (pach[0] == 0x83 && !fOverload) /* the next prolog */
         ||
         (pach[0] == 0xa1 && !fOverload) /* last prolog */
         )
@@ -761,8 +764,6 @@ int interpretFunctionProlog32(char *pach, BOOL fOverload)
                 case 0x2b:              /* sub r32, r/m32 */
                 case 0x8b:              /* mov /r */
                 case 0x8d:              /* lea /r */
-                    if ((pach[1] & 0x7) == 4 && (pach[1] & 0xc0) != 0xc0) /* invalid instruction!?! */
-                        return -1;
                     cb += cb2 = ModR_M_32bit(pach[1]);
                     pach += cb2;
                     break;
@@ -800,6 +801,14 @@ int interpretFunctionProlog32(char *pach, BOOL fOverload)
                     }
                     break;
 
+                /*
+                 * jmp /digit
+                 */
+                case 0xff:
+                    cb += cb2 = 4 + ModR_M_32bit(pach[1]); /* 4 is the size of the imm32 */
+                    pach += cb2;
+                    break;
+
                 default:
                     kprintf(("interpretFunctionProlog32: unknown instruction 0x%x 0x%x 0x%x\n", pach[0], pach[1], pach[2]));
                     return 0;
@@ -810,7 +819,8 @@ int interpretFunctionProlog32(char *pach, BOOL fOverload)
     }
     else
     {
-        kprintf(("interpretFunctionProlog32: unknown prolog start. 0x%x 0x%x 0x%x\n", pach[0], pach[1], pach[2]));
+        kprintf(("interpretFunctionProlog32: unknown prolog start. 0x%x 0x%x 0x%x 0x%x 0x%x\n",
+                 pach[0], pach[1], pach[2], pach[3], pach[4]));
         cb = 0;
     }
     return cb;
@@ -946,7 +956,7 @@ int interpretFunctionProlog16(char *pach, BOOL fOverload)
                     }
                     else
                     {
-                        kprintf(("interpretFunctionProlog32: unknown instruction (-3) 0x%x 0x%x 0x%x\n", pach[0], pach[1], pach[2]));
+                        kprintf(("interpretFunctionProlog16: unknown instruction (-3) 0x%x 0x%x 0x%x\n", pach[0], pach[1], pach[2]));
                         return -3;
                     }
                     break;
@@ -985,10 +995,6 @@ USHORT _loadds _Far32 _Pascal VerifyImportTab32(void)
     /* VerifyImporTab32 is called before the initroutine! */
     pulTKSSBase32 = (PULONG)_TKSSBase16;
 
-#ifdef R3TST
-    R3TstFixImportTab();
-#endif
-
     /* Check that pKrnlOTE is set */
     usRc = GetKernelInfo32(NULL);
     if (usRc != NO_ERROR)
@@ -1013,7 +1019,6 @@ USHORT _loadds _Far32 _Pascal VerifyImportTab32(void)
             return STATUS_DONE | STERR | ERROR_D32_PROC_NOT_FOUND;
         }
 
-    #ifndef R3TST
         /* Verify read/writeable. */
         if (_aImportTab[i].iObject >= pKrnlSMTE->smte_objcnt                                /* object index valid? */
             || _aImportTab[i].ulAddress < pKrnlOTE[_aImportTab[i].iObject].ote_base         /* address valid? */
@@ -1031,14 +1036,14 @@ USHORT _loadds _Far32 _Pascal VerifyImportTab32(void)
         }
 
 
-
+        #ifndef R3TST
         if (_aImportTab[i].ulAddress < 0xffe00000UL)
         {
             kprintf(("VerifyImportTab32: procedure no.%d has an invalid address, %#08x!\n",
                      i, _aImportTab[i].ulAddress));
             return STATUS_DONE | STERR | ERROR_D32_INVALID_ADDRESS;
         }
-    #endif
+        #endif
 
         switch (_aImportTab[i].fType & ~EPT_BIT_MASK)
         {
@@ -1065,7 +1070,7 @@ USHORT _loadds _Far32 _Pascal VerifyImportTab32(void)
                  */
                 if (cb <= 0 || cb + cbmin >= MAXSIZE_PROLOG)
                 {   /* failed, too small or too large. */
-                    kprintf(("VerifyImportTab32: verify failed for procedure no.%d (cd=%d)\n", i, cb));
+                    kprintf(("VerifyImportTab32: verify failed for procedure no.%d (cb=%d)\n", i, cb));
                     return STATUS_DONE | STERR | ERROR_D32_TOO_INVALID_PROLOG;
                 }
                 break;
@@ -1199,7 +1204,7 @@ int importTabInit(void)
                 }
                 else
                 {   /* !fatal! - this could never happen really... */
-                    kprintf(("ImportTabInit: FATAL verify failed for procedure no.%d when rehooking it!\n",i));
+                    kprintf(("ImportTabInit: FATAL verify failed for procedure no.%d when rehooking it!\n", i));
                     Int3(); /* ipe - later! */
                     return ERROR_D32_VERIFY_FAILED;
                 }
@@ -1244,7 +1249,7 @@ int importTabInit(void)
                 }
                 else
                 {   /* !fatal! - this could never happen really... */
-                    kprintf(("ImportTabInit: FATAL verify failed for procedure no.%d when rehooking it!\n",i));
+                    kprintf(("ImportTabInit: FATAL verify failed for procedure no.%d when rehooking it!\n", i));
                     Int3(); /* ipe - later! */
                     return ERROR_D32_VERIFY_FAILED;
                 }
@@ -1272,7 +1277,7 @@ int importTabInit(void)
                 }
                 else
                 {   /* !fatal! - this should never really happen... */
-                    kprintf(("ImportTabInit: FATAL verify failed for procedure no.%d when importing it!\n",i));
+                    kprintf(("ImportTabInit: FATAL verify failed for procedure no.%d when importing it!\n", i));
                     Int3(); /* ipe - later! */
                     return ERROR_D32_VERIFY_FAILED;
                 }
@@ -1300,7 +1305,7 @@ int importTabInit(void)
                 }
                 else
                 {   /* !fatal! - this should never really happen... */
-                    kprintf(("ImportTabInit: FATAL verify failed for procedure no.%d when importing it!\n",i));
+                    kprintf(("ImportTabInit: FATAL verify failed for procedure no.%d when importing it!\n", i));
                     Int3(); /* ipe - later! */
                     return ERROR_D32_VERIFY_FAILED;
                 }
@@ -1349,149 +1354,10 @@ PMTE GetOS2KrnlMTETst(void)
 {
     static MTE    KrnlMTE;
     static SMTE   KrnlSMTE;
-    static OTE    aKrnlOTE[17];
-
-    extern int  cObjectsFake; /* defined in win32ktst.c */
 
     KrnlMTE.mte_swapmte = &KrnlSMTE;
     KrnlSMTE.smte_objtab = &aKrnlOTE[0];
     KrnlSMTE.smte_objcnt = cObjectsFake;
-
-    aKrnlOTE[0].ote_size     = 0x00000FB4;
-    aKrnlOTE[0].ote_base     = 0xffe10000;
-    aKrnlOTE[0].ote_flags    = 0x80001063;
-    aKrnlOTE[0].ote_pagemap  = 1;
-    aKrnlOTE[0].ote_mapsize  = 1;
-    aKrnlOTE[0].ote_sel      = 0;
-    aKrnlOTE[0].ote_hob      = 0;
-
-    aKrnlOTE[1].ote_size     = 0x0000A7CD;
-    aKrnlOTE[1].ote_base     = 0xffe20000;
-    aKrnlOTE[1].ote_flags    = 0x80001063;
-    aKrnlOTE[1].ote_pagemap  = 0x00000002;
-    aKrnlOTE[1].ote_mapsize  = 0x0000000B;
-    aKrnlOTE[1].ote_sel      = 0x0;
-    aKrnlOTE[1].ote_hob      = 0x0;
-
-    aKrnlOTE[2].ote_size     = 0x000084C9;
-    aKrnlOTE[2].ote_base     = 0xffe30000;
-    aKrnlOTE[2].ote_flags    = 0x80001045;
-    aKrnlOTE[2].ote_pagemap  = 0x0000000D;
-    aKrnlOTE[2].ote_mapsize  = 0x00000009;
-    aKrnlOTE[2].ote_sel      = 0x0;
-    aKrnlOTE[2].ote_hob      = 0x0;
-
-    aKrnlOTE[3].ote_size     = 0x00010000;
-    aKrnlOTE[3].ote_base     = 0xffe40000;
-    aKrnlOTE[3].ote_flags    = 0x800090A3;
-    aKrnlOTE[3].ote_pagemap  = 0x00000016;
-    aKrnlOTE[3].ote_mapsize  = 0x00000010;
-    aKrnlOTE[3].ote_sel      = 0x0;
-    aKrnlOTE[3].ote_hob      = 0x0;
-
-    aKrnlOTE[4].ote_size     = 0x00002A80;
-    aKrnlOTE[4].ote_base     = 0xffe50000;
-    aKrnlOTE[4].ote_flags    = 0x80009023;
-    aKrnlOTE[4].ote_pagemap  = 0x00000026;
-    aKrnlOTE[4].ote_mapsize  = 0x00000003;
-    aKrnlOTE[4].ote_sel      = 0x0;
-    aKrnlOTE[4].ote_hob      = 0x0;
-
-    aKrnlOTE[5].ote_size     = 0x00005734;
-    aKrnlOTE[5].ote_base     = 0xffe60000;
-    aKrnlOTE[5].ote_flags    = 0x80001023;
-    aKrnlOTE[5].ote_pagemap  = 0x00000029;
-    aKrnlOTE[5].ote_mapsize  = 0x00000003;
-    aKrnlOTE[5].ote_sel      = 0x0;
-    aKrnlOTE[5].ote_hob      = 0x0;
-
-    aKrnlOTE[6].ote_size     = 0x00002833;
-    aKrnlOTE[6].ote_base     = 0xffe70000;
-    aKrnlOTE[6].ote_flags    = 0x80001015;
-    aKrnlOTE[6].ote_pagemap  = 0x0000002C;
-    aKrnlOTE[6].ote_mapsize  = 0x00000003;
-    aKrnlOTE[6].ote_sel      = 0x0;
-    aKrnlOTE[6].ote_hob      = 0x0;
-
-    aKrnlOTE[7].ote_size     = 0x000001B0;
-    aKrnlOTE[7].ote_base     = 0xffe80000;
-    aKrnlOTE[7].ote_flags    = 0x80002213;
-    aKrnlOTE[7].ote_pagemap  = 0x0000002F;
-    aKrnlOTE[7].ote_mapsize  = 0x00000001;
-    aKrnlOTE[7].ote_sel      = 0x0;
-    aKrnlOTE[7].ote_hob      = 0x0;
-
-    aKrnlOTE[8].ote_size     = 0x000027CC;
-    aKrnlOTE[8].ote_base     = 0xffe90000;
-    aKrnlOTE[8].ote_flags    = 0x80002013;
-    aKrnlOTE[8].ote_pagemap  = 0x00000030;
-    aKrnlOTE[8].ote_mapsize  = 0x00000003;
-    aKrnlOTE[8].ote_sel      = 0x0;
-    aKrnlOTE[8].ote_hob      = 0x0;
-
-    aKrnlOTE[9].ote_size     = 0x0000FDA8;
-    aKrnlOTE[9].ote_base     = 0xffeA0000;
-    aKrnlOTE[9].ote_flags    = 0x80002033;
-    aKrnlOTE[9].ote_pagemap  = 0x00000033;
-    aKrnlOTE[9].ote_mapsize  = 0x0000000D;
-    aKrnlOTE[9].ote_sel      = 0x0;
-    aKrnlOTE[9].ote_hob      = 0x0;
-
-    aKrnlOTE[10].ote_size     = 0x0000ECD6;
-    aKrnlOTE[10].ote_base     = 0xffeB0000;
-    aKrnlOTE[10].ote_flags    = 0x80001015;
-    aKrnlOTE[10].ote_pagemap  = 0x00000040;
-    aKrnlOTE[10].ote_mapsize  = 0x0000000F;
-    aKrnlOTE[10].ote_sel      = 0x0;
-    aKrnlOTE[10].ote_hob      = 0x0;
-
-    aKrnlOTE[11].ote_size     = 0x0000EAF4;
-    aKrnlOTE[11].ote_base     = 0xffeC0000;
-    aKrnlOTE[11].ote_flags    = 0x80001015;
-    aKrnlOTE[11].ote_pagemap  = 0x0000004F;
-    aKrnlOTE[11].ote_mapsize  = 0x0000000F;
-    aKrnlOTE[11].ote_sel      = 0x0;
-    aKrnlOTE[11].ote_hob      = 0x0;
-
-    aKrnlOTE[12].ote_size     = 0x0000D900;
-    aKrnlOTE[12].ote_base     = 0xffeD0000;
-    aKrnlOTE[12].ote_flags    = 0x80001015;
-    aKrnlOTE[12].ote_pagemap  = 0x0000005E;
-    aKrnlOTE[12].ote_mapsize  = 0x0000000E;
-    aKrnlOTE[12].ote_sel      = 0x0;
-    aKrnlOTE[12].ote_hob      = 0x0;
-
-    aKrnlOTE[13].ote_size     = 0x0000D6DC;
-    aKrnlOTE[13].ote_base     = 0xffeE0000;
-    aKrnlOTE[13].ote_flags    = 0x80001015;
-    aKrnlOTE[13].ote_pagemap  = 0x0000006C;
-    aKrnlOTE[13].ote_mapsize  = 0x0000000E;
-    aKrnlOTE[13].ote_sel      = 0x0;
-    aKrnlOTE[13].ote_hob      = 0x0;
-
-    aKrnlOTE[14].ote_size     = 0x000B684B;
-    aKrnlOTE[14].ote_base     = 0xffeF0000;
-    aKrnlOTE[14].ote_flags    = 0x80002015;
-    aKrnlOTE[14].ote_pagemap  = 0x0000007A;
-    aKrnlOTE[14].ote_mapsize  = 0x000000B7;
-    aKrnlOTE[14].ote_sel      = 0x0;
-    aKrnlOTE[14].ote_hob      = 0x0;
-
-    aKrnlOTE[15].ote_size     = 0x000B684B;
-    aKrnlOTE[15].ote_base     = 0xffeF0000;
-    aKrnlOTE[15].ote_flags    = 0x80002015;
-    aKrnlOTE[15].ote_pagemap  = 0x0000007A;
-    aKrnlOTE[15].ote_mapsize  = 0x000000B7;
-    aKrnlOTE[15].ote_sel      = 0x0;
-    aKrnlOTE[15].ote_hob      = 0x0;
-
-    aKrnlOTE[16].ote_size     = 0x000B684B;
-    aKrnlOTE[16].ote_base     = 0xffeF0000;
-    aKrnlOTE[16].ote_flags    = 0x80002015;
-    aKrnlOTE[16].ote_pagemap  = 0x0000007A;
-    aKrnlOTE[16].ote_mapsize  = 0x000000B7;
-    aKrnlOTE[16].ote_sel      = 0x0;
-    aKrnlOTE[16].ote_hob      = 0x0;
 
     return &KrnlMTE;
 }

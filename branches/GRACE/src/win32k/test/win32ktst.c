@@ -1,4 +1,4 @@
-/* $Id: win32ktst.c,v 1.1.4.1 2000-08-11 02:22:35 bird Exp $
+/* $Id: win32ktst.c,v 1.1.4.2 2000-08-14 08:57:07 bird Exp $
  *
  * Win32k test module.
  *
@@ -25,10 +25,14 @@
 #define FlatToSel(flataddr) \
     (PVOID)( ( (((unsigned)(flataddr) << 3) & 0xfff80000) | (SEL_LDT_RPL3 << 16) ) | ((unsigned)(flataddr) & 0xffff) )
 
+#define DWORD   ULONG
+#define WORD    USHORT
+
 /*******************************************************************************
 *   Internal Functions                                                         *
 *******************************************************************************/
 #include <os2.h>
+#include <exe386.h>
 
 #include "malloc.h"
 
@@ -132,21 +136,88 @@
  *      7) Testing finished - thunk stack back to 32-bit.
  */
 
-
 /*******************************************************************************
-*   Internal Functions                                                         *
+*   Structures and Typedefs                                                    *
 *******************************************************************************/
-void    syntax(void);
-void    workersinit(void);
-void    initRPInit(RP32INIT *pRpInit, char *pszInitArgs);
-int     tests(int iTest, int argc, char **argv);
-int     TestCase1(void);
-int     TestCase2(void);
-int     TestCase3(void);
-int     TestCase4(void);
-int     TestCase5(void);
-int     CompareOptions(struct options *pOpt);
-int     TestCaseExeLoad1(void);
+#ifndef QS_MTE
+   /* From OS/2 Toolkit v4.5 (BSEDOS.H) */
+
+   /* Global Record structure
+    * Holds all global system information. Placed first in user buffer
+    */
+   typedef struct qsGrec_s {  /* qsGrec */
+           ULONG         cThrds;
+           ULONG         c32SSem;
+           ULONG         cMFTNodes;
+   }qsGrec_t;
+
+   /*
+    *      System wide MTE information
+    *      ________________________________
+    *      |       pNextRec                |----|
+    *      |-------------------------------|    |
+    *      |       hmte                    |    |
+    *      |-------------------------------|    |
+    *      |       ctImpMod                |    |
+    *      |-------------------------------|    |
+    *      |       ctObj                   |    |
+    *      |-------------------------------|    |
+    *      |       pObjInfo                |----|----------|
+    *      |-------------------------------|    |          |
+    *      |       pName                   |----|----|     |
+    *      |-------------------------------|    |    |     |
+    *      |       imported module handles |    |    |     |
+    *      |          .                    |    |    |     |
+    *      |          .                    |    |    |     |
+    *      |          .                    |    |    |     |
+    *      |-------------------------------| <--|----|     |
+    *      |       "pathname"              |    |          |
+    *      |-------------------------------| <--|----------|
+    *      |       Object records          |    |
+    *      |       (if requested)          |    |
+    *      |_______________________________|    |
+    *                                      <-----
+    *      NOTE that if the level bit is set to QS_MTE, the base Lib record will be followed
+    *      by a series of object records (qsLObj_t); one for each object of the
+    *      module.
+    */
+
+   typedef struct qsLObjrec_s {  /* qsLOrec */
+           ULONG         oaddr;  /* object address */
+           ULONG         osize;  /* object size */
+           ULONG         oflags; /* object flags */
+   } qsLObjrec_t;
+
+   typedef struct qsLrec_s {     /* qsLrec */
+           void  FAR        *pNextRec;      /* pointer to next record in buffer */
+           USHORT           hmte;           /* handle for this mte */
+           USHORT           fFlat;          /* true if 32 bit module */
+           ULONG            ctImpMod;       /* # of imported modules in table */
+           ULONG            ctObj;          /* # of objects in module (mte_objcnt)*/
+           qsLObjrec_t FAR  *pObjInfo;      /* pointer to per object info if any */
+           UCHAR     FAR    *pName;         /* -> name string following struc */
+   } qsLrec_t;
+
+
+
+   /* Pointer Record Structure
+    *      This structure is the first in the user buffer.
+    *      It contains pointers to heads of record types that are loaded
+    *      into the buffer.
+    */
+
+   typedef struct qsPtrRec_s {   /* qsPRec */
+           qsGrec_t        *pGlobalRec;
+           void            *pProcRec;      /* ptr to head of process records */
+           void            *p16SemRec;     /* ptr to head of 16 bit sem recds */
+           void            *p32SemRec;     /* ptr to head of 32 bit sem recds */
+           void            *pMemRec;       /* ptr to head of shared mem recs */
+           qsLrec_t        *pLibRec;       /* ptr to head of mte records */
+           void            *pShrMemRec;    /* ptr to head of shared mem records */
+           void            *pFSRec;        /* ptr to head of file sys records */
+   } qsPtrRec_t;
+
+#endif
 
 
 /*******************************************************************************
@@ -155,7 +226,36 @@ int     TestCaseExeLoad1(void);
 extern BOOL     fInited;                /* malloc.c */
 const char *    pszInternalRevision = "\r\nInternal revision 14.040_W4";
 int             cObjectsFake = 14;
+OTE             aKrnlOTE[24];
 
+
+/*******************************************************************************
+*   External Functions                                                         *
+*******************************************************************************/
+#ifndef QS_MTE
+   /* from OS/2 Toolkit v4.5 */
+
+   APIRET APIENTRY DosQuerySysState(ULONG EntityList, ULONG EntityLevel, PID pid,
+                                    TID tid, PVOID pDataBuf, ULONG cbBuf);
+    #define QS_MTE         0x0004
+#endif
+
+/*******************************************************************************
+*   Internal Functions                                                         *
+*******************************************************************************/
+void    syntax(void);
+int     kernelInit(int iTest, int argc, char **argv);
+void    workersinit(void);
+void    initRPInit(RP32INIT *pRpInit, char *pszInitArgs);
+int     tests(int iTest, int argc, char **argv);
+int     TestCase1(int argc, char **argv);
+int     TestCase2(void);
+int     TestCase3(void);
+int     TestCase4(void);
+int     TestCase5(void);
+int     TestCase6(void);
+int     CompareOptions(struct options *pOpt);
+int     TestCaseExeLoad2(void);
 
 
 /**
@@ -187,6 +287,11 @@ int main(int argc, char **argv)
      */
     workersinit();
 
+    /*
+     * Init Kernel
+     */
+    if (!kernelInit(iTest, argc, argv))
+        return -2;
 
     /*
      * Thunk Stack to 16-bits.
@@ -226,6 +331,206 @@ void    syntax(void)
            );
 }
 
+
+/**
+ * test case 1: Load the specified kernel
+ * other cases: Load running kernel.
+ * @returns Success indicator. (true/false)
+ * @param   iTest   Testcase number.
+ * @param   argc    main argc
+ * @param   argv    main argv
+ * @status  completely implemented.
+ * @author  knut st. osmundsen (knut.stange.osmundsen@pmsc.no)
+ */
+int     kernelInit(int iTest, int argc, char **argv)
+{
+    static char     achBuffer[1024*256];
+    char            szError[256];
+    HMODULE         hmod = NULLHANDLE;
+    int             rc;
+    char            szName[CCHMAXPATH];
+    char *          pszSrcName;
+    char *          pszTmp;
+    ULONG           ulAction;
+    HFILE           hFile;
+    struct e32_exe* pe32 = (struct e32_exe*)(void*)&achBuffer[0];
+    qsPtrRec_t *    pPtrRec = (qsPtrRec_t*)(void*)&achBuffer[0];
+    qsLrec_t *      pLrec;
+    int             i;
+    FILESTATUS3     fsts3;
+
+    /*
+     * If not testcase 1, use the running kernel.
+     */
+    if (iTest != 1)
+    {
+        ULONG   ulBootDrv = 3;
+        pszSrcName = "c:\\os2krnl";
+        DosQuerySysInfo(QSV_BOOT_DRIVE, QSV_BOOT_DRIVE, SSToDS(&ulBootDrv), sizeof(ulBootDrv));
+        pszSrcName[0] = (char)(ulBootDrv + 'a' - 1);
+    }
+    else
+    {
+        if (argc < 3)
+        {
+            printf("Missing parameter!\n");
+            return FALSE;
+        }
+        pszSrcName = argv[2];
+    }
+
+    /*
+     * Make a temporary copy of the kernel.
+     */
+    if (DosScanEnv("TMP", &pszTmp) != NO_ERROR || pszTmp == NULL)
+    {
+        printf("Environment variable TMP is not set.\n");
+        return FALSE;
+    }
+    strcpy(szName, pszTmp);
+    if (szName[strlen(pszTmp) - 1] != '\\' && szName[strlen(pszTmp) - 1] != '/')
+        strcat(szName, "\\");
+    strcat(szName, "os2krnl");
+    rc = DosCopy(pszSrcName, szName, DCPY_EXISTING);
+    if (rc != NO_ERROR)
+    {
+        printf("Failed to copy %s to %s.\n", pszSrcName, szName);
+        return FALSE;
+    }
+    if (DosQueryPathInfo(szName, FIL_STANDARD, &fsts3, sizeof(fsts3)) != NO_ERROR
+        ||  !(fsts3.attrFile = FILE_ARCHIVED)
+        ||  DosSetPathInfo(szName, FIL_STANDARD, &fsts3, sizeof(fsts3), 0) != NO_ERROR
+        )
+    {
+        printf("Failed to set attributes for %s.\n", szName);
+        return FALSE;
+    }
+
+    /*
+     * Patch the kernel.
+     *      Remove the entrypoint.
+     */
+    ulAction = 0;
+    rc = DosOpen(szName, &hFile, &ulAction, 0, FILE_NORMAL,
+                 OPEN_ACTION_FAIL_IF_NEW | OPEN_ACTION_OPEN_IF_EXISTS,
+                 OPEN_SHARE_DENYNONE | OPEN_ACCESS_READWRITE,
+                 NULL);
+    if (rc != NO_ERROR)
+    {
+        printf("Failed to open temporary kernel file. rc = %d\n", rc);
+        return FALSE;
+    }
+    rc = DosRead(hFile, &achBuffer[0], 0x200, &ulAction);
+    if (rc != NO_ERROR)
+    {
+        DosClose(hFile);
+        printf("Failed to read LX header from temporary kernel file.\n");
+        return FALSE;
+    }
+    pe32 = (struct e32_exe*)(void*)&achBuffer[*(unsigned long*)(void*)&achBuffer[0x3c]];
+    if (*(PUSHORT)pe32->e32_magic != E32MAGIC)
+    {
+        DosClose(hFile);
+        printf("Failed to read LX header from temporary kernel file (2).\n");
+        return FALSE;
+    }
+    pe32->e32_eip = 0;
+    pe32->e32_startobj = 0;
+    pe32->e32_mflags &= ~(E32LIBTERM | E32LIBINIT);
+    if ((rc = DosSetFilePtr(hFile, *(unsigned long*)(void*)&achBuffer[0x3c], FILE_BEGIN, &ulAction)) != NO_ERROR
+        || (rc = DosWrite(hFile, pe32, sizeof(struct e32_exe), &ulAction)) != NO_ERROR)
+    {
+        DosClose(hFile);
+        printf("Failed to write patched LX header to temporary kernel file.\n");
+        return FALSE;
+    }
+    DosClose(hFile);
+
+    /*
+     * Load the module.
+     */
+    rc = DosLoadModule(szError, sizeof(szError), szName, SSToDS(&hmod));
+    if (rc != NO_ERROR && (rc != ERROR_INVALID_PARAMETER && hmod == NULLHANDLE))
+    {
+        printf("Failed to load OS/2 kernel image %s.");
+        return FALSE;
+    }
+
+    /*
+     * Get object information.
+     */
+    rc = DosQuerySysState(QS_MTE, QS_MTE, 0L, 0L, pPtrRec, sizeof(achBuffer));
+    if (rc != NO_ERROR)
+    {
+        printf("DosQuerySysState failed with rc=%d.\n", rc);
+        return FALSE;
+    }
+
+    pLrec = pPtrRec->pLibRec;
+    while (pLrec != NULL)
+    {
+        /*
+         * Bug detected in OS/2 FP13. Probably a problem which occurs
+         * in _LDRSysMteInfo when qsCheckCache is calle before writing
+         * object info. The result is that the cache flushed and the
+         * attempt of updating the qsLrec_t next and object pointer is
+         * not done. This used to work earlier and on Aurora AFAIK.
+         *
+         * The fix for this problem is to check if the pObjInfo is NULL
+         * while the number of objects isn't 0 and correct this. pNextRec
+         * will also be NULL at this time. This will be have to corrected
+         * before we exit the loop or moves to the next record.
+         * There is also a nasty alignment of the object info... Hope
+         * I got it right. (This aligment seems new to FP13.)
+         */
+        if (pLrec->pObjInfo == NULL /*&& pLrec->pNextRec == NULL*/ && pLrec->ctObj > 0)
+            {
+            pLrec->pObjInfo = (qsLObjrec_t*)(void*)(
+                (char*)(void*)pLrec
+                + ((sizeof(qsLrec_t)                            /* size of the lib record */
+                   + pLrec->ctImpMod * sizeof(short)            /* size of the array of imported modules */
+                   + strlen((char*)(void*)pLrec->pName) + 1     /* size of the filename */
+                   + 3) & ~3));                                 /* the size is align on 4 bytes boundrary */
+            pLrec->pNextRec = (qsLrec_t*)(void*)((char*)(void*)pLrec->pObjInfo
+                                                 + sizeof(qsLObjrec_t) * pLrec->ctObj);
+            }
+        if (pLrec->hmte == hmod)
+            break;
+
+        /*
+         * Next record
+         */
+        pLrec = (qsLrec_t*)pLrec->pNextRec;
+    }
+
+    if (pLrec == NULL)
+    {
+        printf("DosQuerySysState(os2krnl): not found\n");
+        return FALSE;
+    }
+    if (pLrec->pObjInfo == NULL)
+    {
+        printf("DosQuerySysState(os2krnl): no object info\n");
+        return FALSE;
+    }
+
+    /*
+     * Fill the aKrnlOTE array.
+     */
+    for (i = 0; i < pLrec->ctObj; i++)
+    {
+        aKrnlOTE[i].ote_size    = pLrec->pObjInfo[i].osize;
+        aKrnlOTE[i].ote_base    = pLrec->pObjInfo[i].oaddr;
+        aKrnlOTE[i].ote_flags   = pLrec->pObjInfo[i].oflags;
+        aKrnlOTE[i].ote_pagemap = i > 0 ? aKrnlOTE[i-1].ote_pagemap + aKrnlOTE[i-1].ote_mapsize : 0;
+        aKrnlOTE[i].ote_mapsize = (pLrec->pObjInfo[i].osize + 0x0FFF) / 0x1000;
+        aKrnlOTE[i].ote_sel     = (USHORT)FlatToSel(pLrec->pObjInfo[i].oaddr);
+        aKrnlOTE[i].ote_hob     = 0;
+    }
+    cObjectsFake = pLrec->ctObj;
+
+    return TRUE;
+}
 
 /**
  * Initiate workers (imported kernel functions / vars)
@@ -274,11 +579,8 @@ int tests(int iTest, int argc, char **argv)
     printf("-------------------------------- Testcase %d:\n", iTest);
     switch (iTest)
     {
-        case 1:     rc = TestCase1();   break;
+        case 1:     rc = TestCase1(argc, argv);   break;
         case 2:     rc = TestCase2();   break;
-        case 3:     rc = TestCase3();   break;
-        case 4:     rc = TestCase4();   break;
-        case 5:     rc = TestCase5();   break;
 
         default:
             printf("testcase no. %d is not found\n", iTest);
@@ -295,7 +597,9 @@ int tests(int iTest, int argc, char **argv)
 
 /**
  * Test case 1.
- * Checks that default initiation works fine for Aurora SMP kernels.
+ * Checks that default initiation works fine for a given kernel.
+ *
+ * Syntax:  win32ktst.exe 1 <os2krnl> <majorver> <minorver> <build> <kerneltype: S|U|4> [os2krnl.sym]
  *
  * @sketch  Create init packet with no arguments.
  *          Initiate elf$
@@ -306,41 +610,48 @@ int tests(int iTest, int argc, char **argv)
  * @status  completely implemented.
  * @author  knut st. osmundsen (knut.stange.osmundsen@pmsc.no)
  */
-int TestCase1(void)
+int TestCase1(int argc, char **argv)
 {
+    static char szInitArgs[CCHMAXPATH + 10];
     int         rc = 1;
     RP32INIT    rpinit;
 
+    /* verify argument count */
+    if (argc < 7 || argc > 8)
+    {
+        printf("Invalid parameter count for testcase 1.\n");
+        return ERROR_INVALID_PARAMETER;
+    }
+
     /* init fake variabels */
-    pszInternalRevision ="\r\nInternal revision 14.040_SMP";
-    cObjectsFake = 15;
-    _usFakeVerMajor = 20;
-    _usFakeVerMinor = 45;
+    _usFakeVerMajor = (USHORT)atoi(argv[3]);
+    _usFakeVerMinor = (USHORT)atoi(argv[4]);
+
+    /* make init string */
+    strcpy(szInitArgs, "-w3");
+    if (argc >= 8)
+        strcat(strcat(szInitArgs, " -S:"), argv[7]);
 
     /* $elf */
-    initRPInit(SSToDS(&rpinit), "-w3");
+    initRPInit(SSToDS(&rpinit), szInitArgs);
     rc = InitElf(&rpinit);              /* no SSToDS! */
     printf("InitElf returned status=0x%04x\n", rpinit.rph.Status);
     if ((rpinit.rph.Status & (STDON | STERR)) == STDON)
     {
         /* $win32k */
-        initRPInit(SSToDS(&rpinit), "-w3");
+        initRPInit(SSToDS(&rpinit), szInitArgs);
         rc = InitWin32k(&rpinit);       /* no SSToDS! */
         printf("InitWin32k returned status=0x%04x\n", rpinit.rph.Status);
         if ((rpinit.rph.Status & (STDON | STERR)) == STDON)
         {
             struct options opt = DEFAULT_OPTION_ASSIGMENTS;
-            opt.fKernel = KF_SMP;
-            opt.ulBuild = 14040;
-            opt.usVerMajor = 20;
-            opt.usVerMinor = 45;
             opt.ulInfoLevel = 3;
+            opt.fKernel = argv[6][0] == 'S' ? KF_SMP : (argv[6][0] == '4' ? KF_W4 : KF_UNI);
+            opt.ulBuild = atoi(argv[5]);
+            opt.usVerMajor = (USHORT)atoi(argv[3]);
+            opt.usVerMinor = (USHORT)atoi(argv[4]);
 
             rc = CompareOptions(SSToDS(&opt));
-            if (rc == NO_ERROR)
-            {
-                rc = TestCaseExeLoad1();
-            }
         }
         else
             printf("!failed!\n");
@@ -351,10 +662,9 @@ int TestCase1(void)
     return rc;
 }
 
-
 /**
  * Test case 2.
- * Checks that default initiation works fine for Aurora UNI kernels.
+ * Checks that all parameters are read correctly (1).
  *
  * @sketch  Create init packet with no arguments.
  *          Initiate elf$
@@ -369,175 +679,7 @@ int TestCase2(void)
 {
     int         rc = 1;
     RP32INIT    rpinit;
-
-    /* init fake variabels */
-    pszInternalRevision ="\r\nInternal revision 14.040_UNI";
-    cObjectsFake = 14;
-    _usFakeVerMajor = 20;
-    _usFakeVerMinor = 45;
-
-    /* $elf */
-    initRPInit(SSToDS(&rpinit), "");
-    rc = InitElf(&rpinit);              /* no SSToDS! */
-    printf("InitElf returned status=0x%04x\n", rpinit.rph.Status);
-    if ((rpinit.rph.Status & (STDON | STERR)) == STDON)
-    {
-        /* $win32k */
-        initRPInit(SSToDS(&rpinit), "");
-        rc = InitWin32k(&rpinit);       /* no SSToDS! */
-        printf("InitWin32k returned status=0x%04x\n", rpinit.rph.Status);
-        if ((rpinit.rph.Status & (STDON | STERR)) == STDON)
-        {
-            struct options opt = DEFAULT_OPTION_ASSIGMENTS;
-            opt.fKernel = KF_UNI;
-            opt.ulBuild = 14040;
-            opt.usVerMajor = 20;
-            opt.usVerMinor = 45;
-
-            rc = CompareOptions(SSToDS(&opt));
-        }
-        else
-            printf("!failed!\n");
-    }
-    else
-        printf("!failed!\n");
-
-    return rc;
-}
-
-
-/**
- * Test case 3.
- * Checks that default initiation works fine for Warp FP13 kernel.
- *
- * @sketch  Create init packet with no arguments.
- *          Initiate elf$
- *          Create init packet with no arguments.
- *          Initiate win32k$
- * @returns 0 on success.
- *          1 on failure.
- * @status  completely implemented.
- * @author  knut st. osmundsen (knut.stange.osmundsen@pmsc.no)
- */
-int TestCase3(void)
-{
-    int         rc = 1;
-    RP32INIT    rpinit;
-
-    /* init fake variabels */
-    pszInternalRevision ="\r\nInternal revision 14.040_W4";
-    cObjectsFake = 14;
-    _usFakeVerMajor = 20;
-    _usFakeVerMinor = 45;
-
-    /* $elf */
-    initRPInit(SSToDS(&rpinit), "");
-    rc = InitElf(&rpinit);              /* no SSToDS! */
-    printf("InitElf returned status=0x%04x\n", rpinit.rph.Status);
-    if ((rpinit.rph.Status & (STDON | STERR)) == STDON)
-    {
-        /* $win32k */
-        initRPInit(SSToDS(&rpinit), "");
-        rc = InitWin32k(&rpinit);       /* no SSToDS! */
-        printf("InitWin32k returned status=0x%04x\n", rpinit.rph.Status);
-        if ((rpinit.rph.Status & (STDON | STERR)) == STDON)
-        {
-            struct options opt = DEFAULT_OPTION_ASSIGMENTS;
-            opt.fKernel = KF_UNI | KF_W4;
-            opt.ulBuild = 14040;
-            opt.usVerMajor = 20;
-            opt.usVerMinor = 45;
-
-            rc = CompareOptions(SSToDS(&opt));
-        }
-        else
-            printf("!failed!\n");
-    }
-    else
-        printf("!failed!\n");
-
-    return rc;
-}
-
-
-/**
- * Test case 4.
- * Checks that default initiation works fine for Aurora SMP kernels.
- *
- * @sketch  Create init packet with no arguments.
- *          Initiate elf$
- *          Create init packet with no arguments.
- *          Initiate win32k$
- * @returns 0 on success.
- *          1 on failure.
- * @status  completely implemented.
- * @author  knut st. osmundsen (knut.stange.osmundsen@pmsc.no)
- */
-int TestCase4(void)
-{
-    int         rc = 1;
-    RP32INIT    rpinit;
-
-    /* init fake variabels */
-    pszInternalRevision ="\r\nInternal revision 9.036";
-    cObjectsFake = 14;
-    _usFakeVerMajor = 20;
-    _usFakeVerMinor = 40;
-
-    /* $elf */
-    initRPInit(SSToDS(&rpinit), "");
-    rc = InitElf(&rpinit);              /* no SSToDS! */
-    printf("InitElf returned status=0x%04x\n", rpinit.rph.Status);
-    if ((rpinit.rph.Status & (STDON | STERR)) == STDON)
-    {
-        /* $win32k */
-        initRPInit(SSToDS(&rpinit), "");
-        rc = InitWin32k(&rpinit);       /* no SSToDS! */
-        printf("InitWin32k returned status=0x%04x\n", rpinit.rph.Status);
-        if ((rpinit.rph.Status & (STDON | STERR)) == STDON)
-        {
-            struct options opt = DEFAULT_OPTION_ASSIGMENTS;
-            opt.fKernel     = KF_UNI;
-            opt.ulBuild     = 9036;
-            opt.usVerMajor  = 20;
-            opt.usVerMinor  = 40;
-
-            rc = CompareOptions(SSToDS(&opt));
-        }
-        else
-            printf("!failed!\n");
-    }
-    else
-        printf("!failed!\n");
-
-    return rc;
-}
-
-
-/**
- * Test case 5.
- * Checks that all parameters are read correctly (1) (Warp FP13 kernel).
- *
- * @sketch  Create init packet with no arguments.
- *          Initiate elf$
- *          Create init packet with no arguments.
- *          Initiate win32k$
- * @returns 0 on success.
- *          1 on failure.
- * @status  completely implemented.
- * @author  knut st. osmundsen (knut.stange.osmundsen@pmsc.no)
- */
-int TestCase5(void)
-{
-    int         rc = 1;
-    RP32INIT    rpinit;
     char *      pszInitArgs = "-C1 -L:N -Verbose -Quiet -Elf:Yes -Pe:Mixed -Script:No -W4 -Heap:512000 -ResHeap:0256000 -HeapMax:4096000 -ResHeapMax:0x100000";
-
-    /* init fake variabels */
-    pszInternalRevision ="\r\nInternal revision 14.040_W4";
-    cObjectsFake = 14;
-    _usFakeVerMajor = 20;
-    _usFakeVerMinor = 45;
 
     /* $elf */
     initRPInit(SSToDS(&rpinit), pszInitArgs);
@@ -552,10 +694,6 @@ int TestCase5(void)
         if ((rpinit.rph.Status & (STDON | STERR)) == STDON)
         {
             struct options opt = DEFAULT_OPTION_ASSIGMENTS;
-            opt.fKernel         = KF_UNI | KF_W4;
-            opt.ulBuild         = 14040;
-            opt.usVerMajor      = 20;
-            opt.usVerMinor      = 45;
             opt.cbSwpHeapInit   = 512000;
             opt.cbSwpHeapMax    = 4096000;
             opt.cbResHeapInit   = 0256000;
@@ -599,14 +737,17 @@ int CompareOptions(struct options *pOpt)
         printf("usCom = %d - should be %d\n", options.usCom, pOpt->usCom, rc++);
     if (options.fLogging != pOpt->fLogging)
         printf("fLogging = %d - should be %d\n", options.fLogging, pOpt->fLogging, rc++);
-    if (options.fKernel != pOpt->fKernel)
-        printf("fKernel = %d - should be %d\n", options.fKernel, pOpt->fKernel, rc++);
-    if (options.ulBuild != pOpt->ulBuild)
-        printf("ulBuild = %d - should be %d\n", options.ulBuild, pOpt->ulBuild, rc++);
-    if (options.usVerMajor != pOpt->usVerMajor)
-        printf("usVerMajor = %d - should be %d\n", options.usVerMajor, pOpt->usVerMajor, rc++);
-    if (options.usVerMinor != pOpt->usVerMinor)
-        printf("usVerMinor = %d - should be %d\n", options.usVerMinor, pOpt->usVerMinor, rc++);
+    if (options.ulBuild != ~0UL)
+    {
+        if (options.fKernel != pOpt->fKernel)
+            printf("fKernel = %d - should be %d\n", options.fKernel, pOpt->fKernel, rc++);
+        if (options.ulBuild != pOpt->ulBuild)
+            printf("ulBuild = %d - should be %d\n", options.ulBuild, pOpt->ulBuild, rc++);
+        if (options.usVerMajor != pOpt->usVerMajor)
+            printf("usVerMajor = %d - should be %d\n", options.usVerMajor, pOpt->usVerMajor, rc++);
+        if (options.usVerMinor != pOpt->usVerMinor)
+            printf("usVerMinor = %d - should be %d\n", options.usVerMinor, pOpt->usVerMinor, rc++);
+    }
     if (options.fPE != pOpt->fPE)
         printf("fPE = %d - should be %d\n", options.fPE, pOpt->fPE, rc++);
     if (options.ulInfoLevel != pOpt->ulInfoLevel)
@@ -648,7 +789,7 @@ int CompareOptions(struct options *pOpt)
  * @author    knut st. osmundsen (knut.stange.osmundsen@pmsc.no)
  * @remark
  */
-int TestCaseExeLoad1(void)
+int TestCaseExeLoad2(void)
 {
     APIRET rc;
     int    cch;
