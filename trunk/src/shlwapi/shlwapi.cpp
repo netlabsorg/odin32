@@ -1,4 +1,4 @@
-/* $Id: shlwapi.cpp,v 1.8 2000-06-12 08:09:40 phaller Exp $ */
+/* $Id: shlwapi.cpp,v 1.9 2000-10-02 13:37:10 sandervl Exp $ */
 
 /*
  * Win32 URL-handling APIs for OS/2
@@ -56,12 +56,16 @@ ODINDEBUGCHANNEL(SHLWAPI)
  * This enables procedures to automatically take care or
  * required unicode conversion or not.
  */
-static BOOL flagOsIsUnicode = FALSE;
 
-
-BOOL VERSION_OsIsUnicode(VOID)
+BOOL VERSION_OsIsUnicode(void)
 {
-  return flagOsIsUnicode;
+ static version = 0;
+
+  if(version == 0) {
+    	version = GetVersion();
+  }
+  /* if high-bit of version is 0, we are emulating NT */
+  return !(version & 0x80000000);
 }
 
 
