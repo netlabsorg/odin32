@@ -1,4 +1,16 @@
- /* $Id: changelog,v 1.260 1999-10-01 10:14:30 sandervl Exp $ */
+ /* $Id: changelog,v 1.261 1999-10-01 16:01:41 sandervl Exp $ */
+
+ 99-10-01: Sander van Leeuwen <sandervl@xs4all.nl>
+	- DDRAW: ifdef'ed out code that causes crash (OS2Surface destructor)
+	         Free original translation buffer, not the one aligned to qword
+                 boundary.
+	- USER32: Create frame window for windows with desktop as parent (i.e. WS_POPUP)
+                  This makes sure WM_ACTIVATE messages are sent.
+                  Scrollbar changes.
+	          Call DestroyWindow when DefWndProc receives WM_CLOSE msg.
+	- KERNEL32: Allocate memory from heap when HeapReAlloc is called with
+                    a NULL memory pointer (WINE listbox control depends on this)
+	- AVIFIL32: Compilation fix
 
  99-10-01: Edgar Buerkle <Edgar.Buerkle@gmx.net>
 	- KERNEL32: Skip spaces in command line string
@@ -8,6 +20,7 @@
 
  99-10-01: Jens Wiessner <wiessnej@rfi.de>
 	- CRTDLL: Implemented functions + added stubs
+	- MSVCRT: More stubs + crtdll forwarders
 
  99-09-29: Daniela Engert <dani@ngrt.de>
 	- USER32: improved timer handling for caret blinking.
