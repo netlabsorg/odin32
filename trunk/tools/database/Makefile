@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.19 2001-09-07 10:31:43 bird Exp $
+# $Id: Makefile,v 1.20 2001-09-30 00:25:30 bird Exp $
 
 #
 # Odin32 Api Database Utilities.
@@ -22,9 +22,7 @@ _all: all
 # All the common rules like all, lib, clean and dep.
 #
 $(COMMONRULES):
-    $(MAKE_CMD) -f APIImport.mak $@
-    $(MAKE_CMD) -f StateUpd.mak $@
-
+    @$(DOMAKES) "APIImport.mak StateUpd.mak" $(MAKE_CMD) $@
 
 
 #
