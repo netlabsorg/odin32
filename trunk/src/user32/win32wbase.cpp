@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.295 2001-10-24 15:41:54 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.296 2001-10-25 10:40:45 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -1000,17 +1000,7 @@ ULONG Win32BaseWindow::MsgActivate(BOOL fActivate, BOOL fMinimized, HWND hwnd, H
         return 0;
     }
 
-    rc = SendInternalMessageA(WM_ACTIVATE, MAKELONG((fActivate) ? WA_ACTIVE : WA_INACTIVE, fMinimized), hwnd);
-
-    if(hwndOS2Win) {
-        threadidhwnd = O32_GetWindowThreadProcessId(hwndOS2Win, &procidhwnd);
-    }
-
-    if(fActivate) {
-         SendInternalMessageA(WM_ACTIVATEAPP, 1, dwThreadId);    //activate; specify window thread id
-    }
-    else SendInternalMessageA(WM_ACTIVATEAPP, 0, threadidhwnd);  //deactivate; specify thread id of other process
-    return rc;
+    return SendInternalMessageA(WM_ACTIVATE, MAKELONG((fActivate) ? WA_ACTIVE : WA_INACTIVE, fMinimized), hwnd);
 }
 //******************************************************************************
 //******************************************************************************
