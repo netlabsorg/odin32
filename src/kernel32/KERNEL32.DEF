@@ -1,4 +1,4 @@
-; $Id: KERNEL32.DEF,v 1.102 2001-04-03 20:56:07 sandervl Exp $
+; $Id: KERNEL32.DEF,v 1.103 2001-04-04 09:00:57 sandervl Exp $
 
 ;Basis is Windows95 KERNEL32
 LIBRARY KERNEL32 INITINSTANCE TERMINSTANCE
@@ -1043,15 +1043,6 @@ EXPORTS
    leave__6VMutexFPUl                                             @1205 NONAME
    __ct__6VMutexFiPUl                                             @1206 NONAME
    __dt__6VMutexFv                                                @1207 NONAME
-
-;Unicode
-   UnicodeToAsciiString  = _UnicodeToAsciiString@4                 @1210 NONAME
-   UnicodeToAscii        = _UnicodeToAscii@8                       @1211 NONAME
-   FreeAsciiString       = _FreeAsciiString@4                      @1212 NONAME
-   AsciiToUnicode        = _AsciiToUnicode@8                       @1213 NONAME
-   UnicodeToAsciiN       = _UnicodeToAsciiN@12                     @1215 NONAME
-   AsciiToUnicodeN       = _AsciiToUnicodeN@12                     @1216 NONAME
-   UnicodeToAsciiStringN = _UnicodeToAsciiStringN@8                @1217 NONAME
 
 ;Get version resource
    GetVersionStruct     = GetVersionStruct                        @1221 NONAME

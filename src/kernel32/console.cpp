@@ -1,4 +1,4 @@
-/* $Id: console.cpp,v 1.26 2001-03-13 18:45:33 sandervl Exp $ */
+/* $Id: console.cpp,v 1.27 2001-04-04 09:00:57 sandervl Exp $ */
 
 /*
  * Win32 Console API Translation for OS/2
@@ -3759,7 +3759,7 @@ BOOL WIN32API SetConsoleTitleW(LPWSTR lpszTitle)
     free (ConsoleGlobals.pszWindowTitle);                     /* then free it */
 
   /* create an ascii copy of the lpszTitle */
-  int iLength = UniStrlen(lpszTitle);
+  int iLength = lstrlenW(lpszTitle);
 
   ConsoleGlobals.pszWindowTitle = (PSZ)malloc(iLength+1);
   ConsoleGlobals.pszWindowTitle[iLength] = 0;
