@@ -110,7 +110,10 @@ static LRESULT WINAPI RICHED32_WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam,
             newstyle &= ~WS_VSCROLL;
             newstyle &= ~ES_AUTOHSCROLL;
             newstyle &= ~ES_AUTOVSCROLL;
-                                  
+
+#ifdef __WIN32OS2__
+	    style |= WS_CHILD;                                  
+#endif
             hwndEdit = CreateWindowA ("edit", ((LPCREATESTRUCTA) lParam)->lpszName,
                                    style, 0, 0, 0, 0,
                                    hwnd, (HMENU) ID_EDIT,
