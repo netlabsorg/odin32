@@ -1,4 +1,8 @@
-/* $Id: changelog,v 1.2266 2002-08-15 15:44:01 sandervl Exp $ */
+/* $Id: changelog,v 1.2267 2002-08-16 09:55:57 sandervl Exp $ */
+
+ 2002-08-16: Platon Fomichev <platon@innotek   >
+    - KERNEL32: o Fully implemented GetShortPathNameA/W & GetLongPathNameA/W
+                  (based on Rewind code)
 
  2002-08-15: Yuri Dario <mc6530@mclink   >
     - USER32:   o SPI_GETNONCLIENTMETRICS size check extended
