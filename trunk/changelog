@@ -1,4 +1,7 @@
- /* $Id: changelog,v 1.222 1999-09-22 09:45:41 sandervl Exp $ */
+ /* $Id: changelog,v 1.223 1999-09-22 11:27:09 sandervl Exp $ */
+
+ 99-09-22: David Raison <djr@lemur.co.uk>
+	- KERNEL32: Return "Service Pack 3" as CSD string in GetVersionExA/W
 
  99-09-22: Yuri Dario <mc6530@mclink.it>
 	- MISC: Fixed WINELIB macro's in wingdi.h, added fixes to headers
