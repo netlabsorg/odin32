@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.10 1999-12-01 00:11:21 sandervl Exp $
+# $Id: makefile,v 1.11 1999-12-01 18:41:46 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -42,7 +42,7 @@ initterm.obj: initterm.cpp
 odincrt.obj: odincrt.asm
 
 clean:
-        $(RM) *.obj *.lib *.dll *~ *.map *.pch
+        $(RM) *.obj *.lib *.dll *.map *.pch
         $(RM) $(PDWIN32_BIN)\$(TARGET).dll
         $(RM) $(PDWIN32_LIB)\$(TARGET).lib
 
