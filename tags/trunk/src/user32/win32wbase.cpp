@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.308 2001-12-30 16:51:37 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.309 2002-01-07 11:18:10 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -2676,6 +2676,11 @@ BOOL Win32BaseWindow::SetWindowPos(HWND hwndInsertAfter, int x, int y, int cx, i
     {
         NotifyFrameChanged(&wpos, &oldClientRect);
     }
+    if(!(getStyle() & (WS_MAXIMIZE|WS_MINIMIZE))) {
+        //Restore position always changes when the window position is changed
+        dprintf(("Save new restore position (%d,%d)(%d,%d)", rectWindow.left, rectWindow.top, rectWindow.right, rectWindow.bottom));
+        windowpos.rcNormalPosition = rectWindow;
+    }
     return (rc);
 }
 //******************************************************************************
@@ -2797,7 +2802,7 @@ BOOL Win32BaseWindow::SetWindowPlacement(WINDOWPLACEMENT *wndpl)
    {
         /* SDK: ...valid only the next time... */
         if(wndpl->flags & WPF_RESTORETOMAXIMIZED)
-        setFlags(getFlags() | WIN_RESTORE_MAX);
+            setFlags(getFlags() | WIN_RESTORE_MAX);
    }
    return TRUE;
 }
