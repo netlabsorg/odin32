@@ -1,4 +1,4 @@
-/* $Id: winimagelx.cpp,v 1.3 1999-10-04 20:52:33 sandervl Exp $ */
+/* $Id: winimagelx.cpp,v 1.4 1999-11-26 00:05:19 sandervl Exp $ */
 
 /*
  * Win32 LX Image base class
@@ -64,6 +64,49 @@ Win32LxImage::Win32LxImage(HINSTANCE hInstance, PVOID pResData)
 //******************************************************************************
 Win32LxImage::~Win32LxImage()
 {
+}
+//******************************************************************************
+//******************************************************************************
+ULONG Win32LxImage::getApi(char *name)
+{
+  APIRET      rc;
+  ULONG       apiaddr;
+
+  rc = DosQueryProcAddr(hinstance, 0, name, (PFN *)&apiaddr);
+  if(rc)  
+  {
+	if(rc == ERROR_INVALID_HANDLE) 
+        {//handle invalid for some silly reason, so load module again (initterm entrypoint not called twice)
+		char szErrName[CCHMAXPATH];
+
+		rc = DosLoadModule(szErrName, sizeof(szErrName), szFileName, &hinstance);
+		if(!rc)
+			rc = DosQueryProcAddr(hinstance, 0, name, (PFN *)&apiaddr);
+	}
+	if(rc) 	return(0);
+  }
+  return(apiaddr);
+}
+//******************************************************************************
+//******************************************************************************
+ULONG Win32LxImage::getApi(int ordinal)
+{
+ APIRET      rc;
+ ULONG       apiaddr;
+
+  rc = DosQueryProcAddr(hinstance, ordinal, NULL, (PFN *)&apiaddr);
+  if(rc) {
+	if(rc == ERROR_INVALID_HANDLE) 
+        {//handle invalid for some silly reason, so load module again (initterm entrypoint not called twice)
+		char szErrName[CCHMAXPATH];
+
+		rc = DosLoadModule(szErrName, sizeof(szErrName), szFileName, &hinstance);
+		if(!rc)
+			rc = DosQueryProcAddr(hinstance, ordinal, NULL, (PFN *)&apiaddr);
+	}
+	if(rc) 	return(0);
+  }
+  return(apiaddr);
 }
 //******************************************************************************
 //******************************************************************************

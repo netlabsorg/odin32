@@ -1,4 +1,4 @@
-/* $Id: wprocess.cpp,v 1.50 1999-11-22 20:35:52 sandervl Exp $ */
+/* $Id: wprocess.cpp,v 1.51 1999-11-26 00:05:20 sandervl Exp $ */
 
 /*
  * Win32 process functions
@@ -683,11 +683,15 @@ HINSTANCE WIN32API WinExec(LPCSTR lpCmdLine, UINT nCmdShow)
 //******************************************************************************
 FARPROC WIN32API GetProcAddress(HMODULE hModule, LPCSTR lpszProc)
 {
- Win32DllBase *winmod;
+ Win32ImageBase *winmod;
  FARPROC   proc;
  ULONG     ulAPIOrdinal;
 
-  winmod = Win32DllBase::findModule((HINSTANCE)hModule);
+  if(hModule == 0 || hModule == -1 || (WinExe && hModule == WinExe->getInstanceHandle())) {
+	winmod = WinExe;
+  }
+  else  winmod = (Win32ImageBase *)Win32DllBase::findModule((HINSTANCE)hModule);
+
   if(winmod) {
     	ulAPIOrdinal = (ULONG)lpszProc;
     	if (ulAPIOrdinal <= 0x0000FFFF) {
