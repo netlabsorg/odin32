@@ -1,10 +1,12 @@
-/* $Id: changelog,v 1.2409 2003-01-01 16:32:25 sandervl Exp $ */
+/* $Id: changelog,v 1.2410 2003-01-01 18:15:22 sandervl Exp $ */
 
  2003-01-01: Sander van Leeuwen <sandervl@innotek   >
     - USER32:   o Fixes for windows with an iconless class and WS_EX_DLGMODALFRAME
                   style. (they shouldn't have a system menu)
                   (either right after creation or when the app add this extended
                    style later on)
+                o Remove minimize or maximize controls when the app requests it
+                  (OS/2 GUI mode)
     - GDI32:    o Cleaned up SetDIBitsToDevice
 
  2002-12-31: Sander van Leeuwen <sandervl@innotek   >
