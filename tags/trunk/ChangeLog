@@ -1,4 +1,8 @@
- /* $Id: ChangeLog,v 1.415 1999-11-05 12:57:36 phaller Exp $ */
+ /* $Id: ChangeLog,v 1.416 1999-11-05 13:07:58 achimha Exp $ */
+
+ 99-11-05: Achim Hasenmueller <achimha@innotek.de>
+        - COMCTL32: Source code cleanup, remove warnings, corrected typecasts
+                    Added logging, warnings for stub functions
 
  99-11-05: Patrick Haller <phaller@gmx.net>
 	- COMCTL32:	Fix: TREEVIEW_Edit_Subclass is called with freed infoPtr
