@@ -1,4 +1,4 @@
-/* $Id: HandleManager.cpp,v 1.65 2001-06-19 10:50:23 sandervl Exp $ */
+/* $Id: HandleManager.cpp,v 1.66 2001-06-22 19:40:27 sandervl Exp $ */
 
 /*
  * Win32 Unified Handle Manager for OS/2
@@ -1912,8 +1912,8 @@ DWORD HMWaitForSingleObject(HANDLE hObject,
 //          teb->o.odin.fIgnoreMsgs = TRUE;
 
           while(TRUE) {
-              dwResult = O32_MsgWaitForMultipleObjects(1, &hObject, FALSE, 
-                                                       INFINITE, QS_ALLINPUT);
+              dwResult = HMMsgWaitForMultipleObjects(1, &hObject, FALSE, 
+                                                     INFINITE, QS_ALLINPUT);
               if(dwResult == WAIT_OBJECT_0 + 1) {
                   MSG msg ;
    
@@ -1947,8 +1947,6 @@ DWORD HMWaitForSingleObject(HANDLE hObject,
        }
   }
 
-  // @@@PH Problem: wrong class (base class) is called instead of
-  //                open32 class ?! Why ?!
   pHMHandle = &TabWin32Handles[iIndex];               /* call device handler */
   dwResult = pHMHandle->pDeviceHandler->WaitForSingleObject(&pHMHandle->hmHandleData,
                                                             dwTimeout);
@@ -2876,6 +2874,30 @@ DWORD HMWaitForMultipleObjects (DWORD   cObjects,
                                 BOOL    fWaitAll,
                                 DWORD   dwTimeout)
 {
+#ifdef USE_OS2SEMAPHORES
+  int       iIndex;                           /* index into the handle table */
+  DWORD     dwResult;                /* result from the device handler's API */
+  PHMHANDLE pHMHandle;       /* pointer to the handle structure in the table */
+
+  if(cObjects == 1) {
+      return HMWaitForSingleObject(*lphObjects, dwTimeout);
+  }
+                                                          /* validate handle */
+  iIndex = _HMHandleQuery(*lphObjects);                   /* get the index */
+  if (-1 == iIndex)                                       /* error ? */
+  {//oh, oh. possible problem here
+   //TODO: rewrite handling of other handles; don't forward to open32
+      dprintf(("WANRING: HMWaitForMultipleObjects: unknown handle passed on to Open32 -> will not work if other handles are semaphores"));
+      return O32_WaitForMultipleObjects(cObjects, lphObjects, fWaitAll, dwTimeout);
+  }
+
+  pHMHandle = &TabWin32Handles[iIndex];               /* call device handler */
+  dwResult = pHMHandle->pDeviceHandler->WaitForMultipleObjects(&pHMHandle->hmHandleData,
+                                                               cObjects, lphObjects, fWaitAll,
+                                                               dwTimeout);
+
+  return (dwResult);                                  /* deliver return code */
+#else
   ULONG   ulIndex;
   PHANDLE pArrayOfHandles;
   PHANDLE pLoop1 = lphObjects;
@@ -2932,6 +2954,7 @@ DWORD HMWaitForMultipleObjects (DWORD   cObjects,
                                   dwTimeout);
 
   return (rc);                            // OK, done
+#endif
 }
 
 
@@ -2972,12 +2995,33 @@ DWORD HMWaitForMultipleObjectsEx (DWORD   cObjects,
  * Author    : Patrick Haller [Wed, 1999/06/17 20:44]
  *****************************************************************************/
 
-DWORD  HMMsgWaitForMultipleObjects  (DWORD      nCount,
-                                     LPHANDLE       pHandles,
+DWORD  HMMsgWaitForMultipleObjects  (DWORD      cObjects, 
+                                     LPHANDLE   lphObjects,
                                      BOOL       fWaitAll,
-                                     DWORD      dwMilliseconds,
+                                     DWORD      dwTimeout,
                                      DWORD      dwWakeMask)
 {
+#ifdef USE_OS2SEMAPHORES
+  int       iIndex;                           /* index into the handle table */
+  DWORD     dwResult;                /* result from the device handler's API */
+  PHMHANDLE pHMHandle;       /* pointer to the handle structure in the table */
+
+                                                          /* validate handle */
+  iIndex = _HMHandleQuery(*lphObjects);                   /* get the index */
+  if (-1 == iIndex)                                       /* error ? */
+  {//oh, oh. possible problem here
+   //TODO: rewrite handling of other handles; don't forward to open32
+      dprintf(("WANRING: HMWaitForMultipleObjects: unknown handle passed on to Open32 -> will not work if other handles are semaphores"));
+      return O32_MsgWaitForMultipleObjects(cObjects, lphObjects, fWaitAll, dwTimeout, dwWakeMask);
+  }
+
+  pHMHandle = &TabWin32Handles[iIndex];               /* call device handler */
+  dwResult = pHMHandle->pDeviceHandler->MsgWaitForMultipleObjects(&pHMHandle->hmHandleData,
+                                                                  cObjects, lphObjects, fWaitAll,
+                                                                  dwTimeout, dwWakeMask);
+
+  return (dwResult);                                  /* deliver return code */
+#else
   ULONG   ulIndex;
   PHANDLE pArrayOfHandles;
   PHANDLE pLoop1 = pHandles;
@@ -3029,6 +3073,7 @@ DWORD  HMMsgWaitForMultipleObjects  (DWORD      nCount,
                                      dwWakeMask);
 
   return (rc);                            // OK, done
+#endif
 }
 /*****************************************************************************
  * Name      : HMDeviceIoControl
