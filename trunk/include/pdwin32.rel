@@ -1,4 +1,4 @@
-# $Id: pdwin32.rel,v 1.6 1999-11-30 19:39:12 sandervl Exp $
+# $Id: pdwin32.rel,v 1.7 2000-03-04 19:04:14 bird Exp $
 #
 # PD-Win32 Project
 #
@@ -8,6 +8,7 @@
 #       Create: cdmckill@novice.uwaterloo.ca
 #               January 4th, 1998
 #
+# Remark! This is not used any longer.
 #
 
 

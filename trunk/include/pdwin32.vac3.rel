@@ -1,4 +1,4 @@
-# $Id: pdwin32.vac3.rel,v 1.16 2000-02-26 13:28:15 bird Exp $
+# $Id: pdwin32.vac3.rel,v 1.17 2000-03-04 19:04:14 bird Exp $
 # ODIN / win32os2 Project
 #
 # RELEASE makefile for the VAC3 compiler environment
@@ -6,8 +6,7 @@
 # phaller@gmx.net, 1999/05/27
 #
 
-
-SOMLIB   =
+SOMLIB   = somtk.lib
 RTLLIB   = cppom30.lib
 RTLLIB_O = cppom30o.lib
 
@@ -18,6 +17,7 @@ CC     = icc
 AS     = alp
 CXX    = icc
 LD     = icc
+LD2    = ilink
 IMPLIB = implib
 ILIB   = ilib
 RC     = $(PDWIN32_TOOLS)\wrc
@@ -31,8 +31,11 @@ CXXFLAGS_ODINCRT = -Q -Si -G5 -O+ -Oi+ -Ge- -Ss+ -W3 -Gm+ /Gn- -I$(PDWIN32_INCLU
 CFLAGS_WIN32APP  = -Q -Si -G5 -O+ -Oi+ -Ge- -Ss+ -W3 -Gm+ /Gn+ -I$(PDWIN32_INCLUDE)\Win -I. -D__WIN32OS2__ -D__i386__
 CXXFLAGS_WIN32APP= -Q -Si -G5 -O+ -Oi+ -Ge- -Ss+ -W3 -Gm+ /Gn+ -I$(PDWIN32_INCLUDE)\Win -I. -D__WIN32OS2__ -D__i386__
 ASFLAGS          = -Sc -Sv:ALP
-LDFLAGS          = -Q -Si -G5 -O+ -Ge- -Ss+ -W3 -Gm+ /B"/noe /NOD /packcode /packdata /exepack"
-LDFLAGS_ODINCRT  = -Q -Si -G5 -O+ -Ge- -Ss+ -W3 -Gm+ /B"/noe /packcode /packdata /exepack"
+LDFLAGS          = -Q -Si -G5 -O+ -Ge- -Ss+ -W3 -Gm+ /B"/noe /map /packcode /packdata /exepack:2 /nod"
+LDFLAGS_ODINCRT  = -Q -Si -G5 -O+ -Ge- -Ss+ -W3 -Gm+ /B"/noe /map /packcode /packdata /exepack:2"
+LD2FLAGS         = /nologo /noe /map /packcode /packdata /exepack:2 /nod /nodebug
+LD2FLAGS_ODINCRT = /nologo /noe /map /packcode /packdata /exepack:2 /nodebug
 IMPLIBFLAGS      = /nologo
 ILIBFLAGS        = /quiet /nologo
 RCFLAGS          = -s -I. -I$(CPPMAIN)\include -I$(PDWIN32_INCLUDE) -I$(PDWIN32_INCLUDE)\win
+
