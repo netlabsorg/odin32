@@ -1,4 +1,12 @@
- /* $Id: ChangeLog,v 1.869 2000-04-07 02:56:01 bird Exp $ */
+ /* $Id: ChangeLog,v 1.870 2000-04-07 10:05:30 sandervl Exp $ */
+
+ 2000-04-07: Sander van Leeuwen <sandervl@xs4all.nl>
+	- WINMM:  Don't restart when already playing
+        - USER32: Print mark in debug log with WriteLog (#ifdef DEBUG), not dprintf
+
+ 2000-04-07: David Raison <djr@lemur.co.uk>
+	- USER32: Set lfSmCaptionFont structure in NONCLIENTMETRICSA
+                  (SystemParametersInfoA/SPI_GETNONCLIENTMETRICS)
 
  2000-04-07: Knut St. Osmundsen <knut.stange.osmundsen@pmsc.no>
         - TOOLS\DBGINFO: Sym2Hll is now able to convert .SYM files into HLL
