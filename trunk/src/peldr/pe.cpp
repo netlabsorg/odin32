@@ -1,4 +1,4 @@
-/* $Id: pe.cpp,v 1.34 2002-07-23 13:26:10 sandervl Exp $ */
+/* $Id: pe.cpp,v 1.35 2002-12-20 11:38:55 sandervl Exp $ */
 
 /*
  * PELDR main exe loader code
@@ -31,19 +31,24 @@
 #include <misc.h>
 #include <wprocess.h>
 #include <win\peexe.h>
+#include <odinpe.h>
 #include "pe.h"
 
 char INFO_BANNER[]      = "Usage: PE winexe commandline";
 char szErrorTitle[]     = "Odin";
-char szLoadErrorMsg[]   = "Can't load executable";
+char szLoadErrorMsg[]   = "Can't load executable %s";
 char szFileNotFound[]   = "File not found.";
 char szFileErrorMsg[]   = "File IO error";
 char szPEErrorMsg[]     = "Not a valid win32 exe. (perhaps 16 bits windows)";
-char szCPUErrorMsg[]    = "Executable doesn't run on x86 machines";
-char szExeErrorMsg[]    = "File isn't an executable";
-char szInteralErrorMsg[]= "Internal Error";
+char szCPUErrorMsg[]    = "%s doesn't run on x86 machines";
+char szExeErrorMsg[]    = "%s isn't an executable";
+char szInteralErrorMsg[]= "Internal Error while loading %s";
 char szNoKernel32Msg[]  = "Can't load/find kernel32.dll (rc=%d, module %s)";
 char szDosInfoBlocks[]  = "DosInfoBlocks failed!";
+char szErrorExports[]   = "Unable to process exports of %s";
+char szErrorMemory[]    = "Memory allocation failure while loading %s";
+char szErrorImports[]   = "Failure to load \"%s\" due to bad or missing %s";
+
 char szErrDosStartSession[] = "Failed to start win16 session (rc=%d)";
 
 char fullpath[CCHMAXPATH];
@@ -68,8 +73,6 @@ WINMESSAGEBOXPROC      MyWinMessageBox      = 0;
 KRNL32EXCEPTPROC       Krnl32SetExceptionHandler = 0;
 KRNL32EXCEPTPROC       Krnl32UnsetExceptionHandler = 0;
 
-//should be the same as in ..\kernel32\winexepeldr.h
-typedef BOOL (* WIN32API WIN32CTOR)(char *, char *, char *, ULONG, ULONG, BOOL, BOOL);
 
 WIN32CTOR   CreateWin32Exe       = 0;
 ULONG       reservedMemory       = 0;
@@ -257,14 +260,45 @@ tryagain:
 	MyWinMessageBox(HWND_DESKTOP, NULL, fullpath, szErrorTitle, 0, MB_OK | MB_ERROR | MB_MOVEABLE);
         goto fail;
   }
-  rc = DosQueryProcAddr(hmodKernel32, 0, "_CreateWin32PeLdrExe@28", (PFN *)&CreateWin32Exe);
+  rc = DosQueryProcAddr(hmodKernel32, 0, "_CreateWin32PeLdrExe@36", (PFN *)&CreateWin32Exe);
 
 #ifdef COMMAND_LINE_VERSION
   fVioConsole = TRUE;
 #else
   fVioConsole = FALSE;
 #endif
-  if(CreateWin32Exe(exeName, win32cmdline, peoptions, reservedMemory, 0, fConsoleApp, fVioConsole) == FALSE) {
+  rc = CreateWin32Exe(exeName, win32cmdline, peoptions, reservedMemory, 0, 
+                      fConsoleApp, fVioConsole, errorMod, sizeof(errorMod));
+  if(rc != LDRERROR_SUCCESS)
+  {
+        char szErrorMsg[512];
+
+        switch(rc) {
+        case LDRERROR_INVALID_MODULE:
+            sprintf(szErrorMsg, szLoadErrorMsg, exeName);
+            break;
+        case LDRERROR_INVALID_CPU:
+            sprintf(pszErrorMsg, szCPUErrorMsg, exeName);
+            break;
+        case LDRERROR_FILE_SYSTEM:            
+            sprintf(szErrorMsg, szExeErrorMsg, exeName);
+            break;
+        case LDRERROR_MEMORY:
+            sprintf(szErrorMsg, szErrorMemory, exeName);
+            break;
+        case LDRERROR_EXPORTS:
+            sprintf(szErrorMsg, szErrorExports, exeName);
+            break;
+        case LDRERROR_IMPORTS:
+            sprintf(szErrorMsg, szErrorImports, exeName, errorMod);
+            break;
+        case LDRERROR_INVALID_SECTION:
+        default:
+            sprintf(szErrorMsg, szInteralErrorMsg, exeName);
+            break;
+        }
+
+        WinMessageBox(HWND_DESKTOP, HWND_DESKTOP, szErrorMsg, szErrorTitle, 0, MB_OK | MB_ERROR | MB_MOVEABLE);
         goto fail;
   }
 
