@@ -1,4 +1,4 @@
-/* $Id: win32wndhandle.cpp,v 1.7 2000-03-23 19:24:26 sandervl Exp $ */
+/* $Id: win32wndhandle.cpp,v 1.8 2001-01-02 18:14:59 sandervl Exp $ */
 /*
  * Win32 Handle Management Code for OS/2
  *
@@ -33,7 +33,7 @@ HMTX hGlobalTableMutex = 0;
 #pragma data_seg(_GLOBALDATA)
 ULONG  WindowHandleTable[MAX_WINDOW_HANDLES] = {0};
 VMutex tableMutex(VMUTEX_SHARED, &hGlobalTableMutex);
-ULONG  lowestFreeIndex = 0;
+ULONG  lastIndex = 0;
 #pragma data_seg()
 
 //******************************************************************************
@@ -41,26 +41,28 @@ ULONG  lowestFreeIndex = 0;
 BOOL HwAllocateWindowHandle(HWND *hwnd, DWORD dwUserData)
 {
   tableMutex.enter(VMUTEX_WAIT_FOREVER, &hGlobalTableMutex);
-  if(lowestFreeIndex == -1) {
-	//oops, out of handles
-	dprintf(("USER32: HwAllocateWindowHandle OUT OF WINDOW HANDLES!!"));
-	tableMutex.leave(&hGlobalTableMutex);
-	DebugInt3();
-	return FALSE;
-  }
-  *hwnd           = lowestFreeIndex;
-  *hwnd          |= WNDHANDLE_MAGIC_HIGHWORD;
-  WindowHandleTable[lowestFreeIndex] = dwUserData;
-
-  lowestFreeIndex = -1;
 
   //find next free handle
-  for(int i=0;i<MAX_WINDOW_HANDLES;i++) {
+  if(lastIndex >= MAX_WINDOW_HANDLES-1) {
+        lastIndex = 0;
+  }
+  for(int i=lastIndex;i<MAX_WINDOW_HANDLES;i++) {
 	if(WindowHandleTable[i] == 0) {
-		lowestFreeIndex = i;
+		lastIndex = i;
 		break;
 	}
   }
+  if(i == MAX_WINDOW_HANDLES) {
+	//oops, out of handles
+	tableMutex.leave(&hGlobalTableMutex);
+	dprintf(("ERROR: USER32: HwAllocateWindowHandle OUT OF WINDOW HANDLES!!"));
+	DebugInt3();
+	return FALSE;
+  }
+  *hwnd  = lastIndex;
+  *hwnd |= WNDHANDLE_MAGIC_HIGHWORD;
+  WindowHandleTable[lastIndex] = dwUserData;
+
   tableMutex.leave(&hGlobalTableMutex);
   return TRUE;
 }
@@ -72,9 +74,6 @@ void HwFreeWindowHandle(HWND hwnd)
   if(hwnd < MAX_WINDOW_HANDLES) {
 	tableMutex.enter(VMUTEX_WAIT_FOREVER, &hGlobalTableMutex);
 	WindowHandleTable[hwnd] = 0;
-	if(lowestFreeIndex == -1 || hwnd < lowestFreeIndex) 
-		lowestFreeIndex = hwnd;
-
 	tableMutex.leave(&hGlobalTableMutex);
   }
 }
