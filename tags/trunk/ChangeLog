@@ -1,8 +1,10 @@
- /* $Id: ChangeLog,v 1.858 2000-04-02 10:13:38 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.859 2000-04-02 12:23:57 sandervl Exp $ */
 
  2000-04-02: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32: dc.cpp cleanup
-	- GDI32:  Dib section sync bugfix
+	- GDI32:  Dib section sync bugfix (todo: rgb 565 to 555 conversion if bpp == 16)
+                  Set y inversion to 0 if dib section isn't flipped
+                  (fixes upside down flash videos in RealPlayer 7)
 
  2000-04-01: Sander van Leeuwen <sandervl@xs4all.nl>
 	- GDI32: Fixed dibsection bitblits. (wrong updates of realplayer 7
