@@ -1,4 +1,8 @@
-/* $Id: ChangeLog,v 1.2561 2003-04-25 11:13:31 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.2562 2003-04-25 12:19:01 sandervl Exp $ */
+
+ 2003-04-25: Sander van Leeuwen <sandervl@innotek   >
+    - NTDLL:    o Initialize kernel32 first (circular dependency between 
+                  kernel32 & ntdll)
 
  2003-04-25: knut st. osmundsen <bird-odin-spam@anduin   >
     - USER32:   o Fake window subclass FS bugfix.
