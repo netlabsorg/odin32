@@ -1,4 +1,4 @@
-/* $Id: rtl.cpp,v 1.5 1999-08-18 22:08:34 phaller Exp $ */
+/* $Id: rtl.cpp,v 1.6 1999-08-19 02:12:17 phaller Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -17,6 +17,7 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include <odinwrap.h>
 
 #include "ntdll.h"
 
@@ -25,6 +26,7 @@
 #include "winreg.h"
 
 
+ODINDEBUGCHANNEL(NTDLL-RTL)
 
 /*
  * resource functions
@@ -323,6 +325,22 @@ BOOLEAN WINAPI RtlDestroyHeap(HANDLE Heap)
 
   return HeapDestroy(Heap);
 }
+
+
+
+/******************************************************************************
+ *  RtlSizeHeap                             [NTDLL]
+ */
+
+ODINFUNCTION3(DWORD,RtlSizeHeap,HANDLE,hHeap,
+                                DWORD, dwFlags,
+                                PVOID, pAddress)
+{
+  return HeapSize(hHeap,
+                  dwFlags,
+                  pAddress);
+}
+
 
 
 /*
