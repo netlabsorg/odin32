@@ -1,9 +1,11 @@
-Odin Bug Report Tool Version 0.2.1
+Odin Bug Report Tool Version 0.3.0
+==================================
 
 0. DISCLAIMER
 
-OdinBug is free software. It is not guaranteed to fulfill any 
-particular purpose. Use it at your own risk. 
+OdinBug is free, but copyrighted software. It is not guaranteed 
+to fulfill any particular purpose. Use it at your own risk. It may 
+be included with every application that comes with Odin files 
 
 1. INTRODUCTION
 
@@ -24,9 +26,9 @@ This program presents a form to fill in the information needed by
 Team Odin and generates a report that follows the standards presented 
 in ReportingBugs.TXT which is part of every Odin build.
 
-Some of the information is gathered from CONFIG.SYS and SYSLEVEL files
-and also from the odin32_?.log files. And some information has to be 
-filled in manually (only the minor part).
+Some of the information is gathered from CONFIG.SYS, SYSLEVEL files, 
+the WarpIN database, from ODIN.INI and also from the odin32_?.log files. 
+And some information has to be filled in manually (only the minor part).
 
 It also scans the odin_?.log file to find the exception information and
 the stack dump in case an application traps. The aware that these logfiles
@@ -37,9 +39,15 @@ complete.
 
 As OdinBug.EXE is written in VX-REXX it needs the VROBJ.DLL runtime.
 
-VROBJ.DLL can be found in the directory x:\IMAGES (x=CD-ROM drive) of your 
-original Warp 4 CD-ROM and have to copy it into d:\OS2\DLL (d=bootdrive), 
-or somewhere else in your LIBPATH.
+VROBJ.DLL can be found in the directory x:\IMAGES (x=CD-ROM drive) of 
+your original Warp 4 CD-ROM and has to be copied into into d:\OS2\DLL
+(d=bootdrive), or somewhere else in your LIBPATH.
+
+There is also a VROBJ.WPI package at the following location:
+
+    http://groups.yahoo.com/group/odinusers/files/vrobj.wpi
+
+This package can be installed the usual way using WarpIN.
 
 Put OdinBug.EXE in a directory in your path. 
 
@@ -47,27 +55,26 @@ Put OdinBug.CFG into the same directory within your path. If you are not
 familiar with REXX code, you can also delete OdinBug.CFG, the program 
 itself has reasonable default values.
 
-Call it after you experienced a trap in a Win32 program and 
-after you have created a log file.
+Call it after you experienced a trap in a Win32 program and after you 
+have created a log file.
 
 Every field can be changed manually, but using the "Search"-buttons should
 be the preferred method.
 
-When everything is complete press "Create report" button. The program checks
-for empty fields, and if everything is filled out creates a report.
+When everything is complete press "Create report" button. The program 
+checks for empty fields, and if everything is filled out creates a report.
 
-Pressing "EMail report" starts Netscape Messenger (or any other email program;
-see OdinBug.CFG) with the appropriate email address and copies the newly 
-created report into the clipboard, so it can be pasted into the email.
+Pressing "EMail report" starts Netscape Messenger (or any other email 
+program; see OdinBug.CFG) with the appropriate email address and copies 
+the newly created report into the clipboard, so it can be pasted into 
+the email.
 
 4. BUG REPORTS AND FEATURE REQUEST FOR THIS PROGRAM
 
-Just email me and tell me what you think or what you want! I will try to
-realize it.
+Just email me and tell me what you think or what you want! 
+I will try to realize it.
 
 5. AUTHOR:
 
 Herwig Bauernfeind, 10.08.2001
 EMail: herwig.bauernfeind@aon.at
-
-
