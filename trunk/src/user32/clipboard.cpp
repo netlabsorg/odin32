@@ -1,4 +1,4 @@
-/* $Id: clipboard.cpp,v 1.10 2001-04-04 09:01:24 sandervl Exp $ */
+/* $Id: clipboard.cpp,v 1.11 2001-04-27 17:36:36 sandervl Exp $ */
 
 /*
  * Win32 Clipboard API functions for OS/2
@@ -151,7 +151,7 @@ HWND WIN32API GetOpenClipboardWindow(void)
 }
 //******************************************************************************
 //******************************************************************************
-int WIN32API GetPriorityClipboardFormat( PUINT arg1, int  arg2)
+int WIN32API GetPriorityClipboardFormat( PUINT arg1, int arg2)
 {
     dprintf(("USER32:  GetPriorityClipboardFormat\n"));
     return O32_GetPriorityClipboardFormat(arg1, arg2);
@@ -160,7 +160,7 @@ int WIN32API GetPriorityClipboardFormat( PUINT arg1, int  arg2)
 //******************************************************************************
 BOOL WIN32API IsClipboardFormatAvailable( UINT arg1)
 {
-    dprintf(("USER32:  IsClipboardFormatAvailable\n"));
+    dprintf(("USER32: IsClipboardFormatAvailable %x", arg1));
     return O32_IsClipboardFormatAvailable(arg1);
 }
 //******************************************************************************
@@ -177,7 +177,7 @@ BOOL WIN32API OpenClipboard( HWND hwnd)
             return 0;
         }
     }
-    dprintf(("USER32:  OpenClipboard\n"));
+    dprintf(("USER32: OpenClipboard %x", hwnd));
     return O32_OpenClipboard(hwnd ? window->getOS2WindowHandle() : NULL);
 }
 //******************************************************************************

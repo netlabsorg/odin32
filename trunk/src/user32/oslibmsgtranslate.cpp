@@ -1,4 +1,4 @@
-/* $Id: oslibmsgtranslate.cpp,v 1.47 2001-04-25 20:53:38 sandervl Exp $ */
+/* $Id: oslibmsgtranslate.cpp,v 1.48 2001-04-27 17:36:37 sandervl Exp $ */
 /*
  * Window message translation functions for OS/2
  *
@@ -386,6 +386,7 @@ BOOL OS2ToWinMsgTranslate(void *pTeb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode,
     {
         //WM_NC*BUTTON* is posted when the cursor is in a non-client area of the window
 
+        dprintf(("button (%d,%d)", winMsg->pt.x, winMsg->pt.y));
 #ifdef ODIN_HITTEST
         HWND hwnd;
 
@@ -474,6 +475,7 @@ BOOL OS2ToWinMsgTranslate(void *pTeb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode,
 #ifdef ODIN_HITTEST
         HWND hwnd;
 
+        dprintf2(("WM_NCMOUSEMOVE (%d,%d)", winMsg->pt.x, winMsg->pt.y));
         DisableLogging();
         if(GetCapture() != winMsg->hwnd) 
         {
@@ -531,9 +533,11 @@ BOOL OS2ToWinMsgTranslate(void *pTeb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode,
         }
         if(fWasDisabled) {
                 if(win32wnd) {
-                        winMsg->hwnd = win32wnd->getWindowHandle();
+                    winMsg->hwnd = win32wnd->getWindowHandle();
                 }
-                else    goto dummymessage; //don't send mouse messages to disabled windows
+                else {
+                    goto dummymessage; //don't send mouse messages to disabled windows
+                }
         }
         //OS/2 Window coordinates -> Win32 Window coordinates
         break;
@@ -813,6 +817,7 @@ VirtualKeyFound:
     case WM_SEMANTICEVENT:
     default:
 dummymessage:
+        dprintf2(("dummy message %x %x %x %x", os2Msg->hwnd, os2Msg->msg, os2Msg->mp1, os2Msg->mp2));
         winMsg->message = 0;
         winMsg->wParam  = 0;
         winMsg->lParam  = 0;

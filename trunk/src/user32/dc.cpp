@@ -1,4 +1,4 @@
-/* $Id: dc.cpp,v 1.96 2001-03-27 20:47:22 sandervl Exp $ */
+/* $Id: dc.cpp,v 1.97 2001-04-27 17:36:36 sandervl Exp $ */
 
 /*
  * DC functions for USER32
@@ -424,9 +424,9 @@ void selectClientArea(Win32BaseWindow *window, pDCData pHps)
    RECT  rectWindow;
    RECTL rectWindowOS2;
 
-   if(pClient->left == 0 && pClient->top == 0 &&
+   if(!window->isOwnDCDirty() && (pClient->left == 0 && pClient->top == 0 &&
       window->getClientHeight() == window->getWindowHeight() &&
-      window->getClientWidth()  == window->getWindowWidth())
+      window->getClientWidth()  == window->getWindowWidth()))
    {
         //client rectangle = frame rectangle -> no change necessary
         return;
@@ -436,6 +436,10 @@ void selectClientArea(Win32BaseWindow *window, pDCData pHps)
    hwnd = window->getOS2WindowHandle();
 
    mapWin32ToOS2Rect(window->getWindowHeight(), window->getClientRectPtr(), (PRECTLOS2)&rcl);
+
+   GetWindowRect(window->getWindowHandle(), &rectWindow);
+   mapWin32ToOS2Rect(GetScreenHeight(), &rectWindow, (PRECTLOS2)&rectWindowOS2);
+   dprintf2(("frame (%d,%d)(%d,%d) hps height %d", rectWindowOS2.xLeft, rectWindowOS2.yBottom, rectWindowOS2.xRight, rectWindowOS2.yTop, pHps->height));
 
    //convert to screen coordinates
    GreGetDCOrigin(pHps->hps, (PPOINTL)&rcltemp);
@@ -509,10 +513,23 @@ void selectClientArea(Win32BaseWindow *window, pDCData pHps)
               NULL,
               SETUPDC_ORIGIN | SETUPDC_VISRGN | SETUPDC_RECALCCLIP);
 
-   pHps->isClientArea = TRUE;
-
    // Destroy the region now we have finished with it.
    GreDestroyRegion(pHps->hps, hrgnRect);
+
+   pHps->isClientArea = TRUE;
+
+   if(pClient->left == 0 && pClient->top == 0 &&
+      window->getClientHeight() == window->getWindowHeight() &&
+      window->getClientWidth()  == window->getWindowWidth())
+   {
+       //client = frame, so no changes are necessary when switching between the two
+       pHps->isClient = FALSE;
+       pHps->isClientArea = FALSE;
+   }
+   if(window->isOwnDCDirty()) {
+       window->validateOwnDC();
+       setPageXForm(window, pHps);
+   }
 
 //testestest
 #if 0
@@ -620,6 +637,19 @@ VOID WIN32API selectClientArea(pDCData pHps)
    wnd = Win32BaseWindow::GetWindowFromOS2Handle(pHps->hwnd);
    if(wnd) {
       selectClientArea(wnd, pHps);
+   }
+}
+//******************************************************************************
+//******************************************************************************
+VOID WIN32API checkOrigin(pDCData pHps)
+{
+ Win32BaseWindow *wnd;
+
+   wnd = Win32BaseWindow::GetWindowFromOS2Handle(pHps->hwnd);
+   if(wnd) {
+      dprintfOrigin(pHps->hps);
+      if(pHps->isClient)
+          selectClientArea(wnd, pHps);
    }
 }
 //******************************************************************************
@@ -1304,7 +1334,7 @@ BOOL WIN32API RedrawWindow(HWND hwnd, const RECT* pRect, HRGN hrgn, DWORD redraw
          LONG temp = pr->yTop;
          pr->yTop = height - pr->yBottom;
          pr->yBottom = height - temp;
-         dprintf2(("Invalid region (%d,%d) (%d,%d)", pr->xLeft, pr->yBottom, pr->xRight, pr->yTop));
+         dprintf2(("RedrawWindow: region (%d,%d) (%d,%d)", pr->xLeft, pr->yBottom, pr->xRight, pr->yTop));
       }
 
       hpsTemp = WinGetScreenPS (HWND_DESKTOP);

@@ -1,4 +1,4 @@
-/* $Id: HOOK.CPP,v 1.17 2000-12-06 15:39:42 phaller Exp $ */
+/* $Id: HOOK.CPP,v 1.18 2001-04-27 17:36:36 sandervl Exp $ */
 
 /*
  * Windows hook functions
@@ -685,15 +685,13 @@ ODINFUNCTION1(BOOL, UnhookWindowsHookEx,
  *
  * There aren't ANSI and UNICODE versions of this.
  */
-ODINFUNCTION4(LRESULT, CallNextHookEx, 
-              HHOOK, hhook, 
-              INT, code, 
-              WPARAM, wParam,
-              LPARAM, lParam )
+LRESULT WINAPI CallNextHookEx(HHOOK hhook, INT code, WPARAM wParam, LPARAM lParam)
 {
     HANDLE next;
     INT fromtype;       /* figure out Ansi/Unicode */
     HOOKDATA *oldhook;
+
+    dprintf2(("CallNextHookEx %x %d %x %x", hhook, code, wParam, lParam));
 
     if (CHECK_MAGIC(hhook) == FALSE) {
 	dprintf(("ERROR: CallNextHookEx invalid hook %x", hhook));

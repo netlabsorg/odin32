@@ -1,4 +1,4 @@
-/* $Id: windowmsg.cpp,v 1.23 2001-03-25 08:50:42 sandervl Exp $ */
+/* $Id: windowmsg.cpp,v 1.24 2001-04-27 17:36:39 sandervl Exp $ */
 /*
  * Win32 window message APIs for OS/2
  *
@@ -23,6 +23,7 @@
 #include "oslibutil.h"
 #include "oslibwin.h"
 #include "oslibmsg.h"
+#include "hook.h"
 
 #define DBG_LOCALLOG	DBG_windowmsg
 #include "dbglocal.h"
@@ -38,12 +39,14 @@ VOID WIN32API PostQuitMessage( int nExitCode)
 //******************************************************************************
 LONG WIN32API DispatchMessageA(const MSG * msg)
 {
+  dprintf2(("DispatchMessageA %x %x %x %x %x", msg->hwnd, msg->message, msg->wParam, msg->lParam, msg->time));
   return OSLibWinDispatchMsg((MSG *)msg);
 }
 //******************************************************************************
 //******************************************************************************
 LONG WIN32API DispatchMessageW( const MSG * msg)
 {
+  dprintf2(("DispatchMessageW %x %x %x %x %x", msg->hwnd, msg->message, msg->wParam, msg->lParam, msg->time));
   return OSLibWinDispatchMsg((MSG *)msg, TRUE);
 }
 //******************************************************************************
@@ -56,13 +59,23 @@ BOOL WIN32API TranslateMessage( const MSG * msg)
 //******************************************************************************
 BOOL WIN32API GetMessageA( LPMSG pMsg, HWND hwnd, UINT uMsgFilterMin, UINT uMsgFilterMax)
 {
-    return OSLibWinGetMsg(pMsg, hwnd, uMsgFilterMin, uMsgFilterMax);
+  BOOL ret;
+
+    dprintf2(("GetMessageA %x %d-%d %d", hwnd, uMsgFilterMin, uMsgFilterMax));
+    ret = OSLibWinGetMsg(pMsg, hwnd, uMsgFilterMin, uMsgFilterMax);
+    HOOK_CallHooksA(WH_GETMESSAGE, HC_ACTION, PM_REMOVE, (LPARAM)pMsg);
+    return ret;
 }
 //******************************************************************************
 //******************************************************************************
 BOOL WIN32API GetMessageW( LPMSG pMsg, HWND hwnd, UINT uMsgFilterMin, UINT uMsgFilterMax)
 {
-    return OSLibWinGetMsg(pMsg, hwnd, uMsgFilterMin, uMsgFilterMax, TRUE);
+  BOOL ret;
+
+    dprintf2(("GetMessageW %x %d-%d %d", hwnd, uMsgFilterMin, uMsgFilterMax));
+    ret = OSLibWinGetMsg(pMsg, hwnd, uMsgFilterMin, uMsgFilterMax, TRUE);
+    HOOK_CallHooksW(WH_GETMESSAGE, HC_ACTION, PM_REMOVE, (LPARAM)pMsg);
+    return ret;
 }
 //******************************************************************************
 //******************************************************************************
@@ -70,10 +83,13 @@ BOOL WIN32API PeekMessageA(LPMSG msg, HWND hwndOwner, UINT uMsgFilterMin,
                            UINT uMsgFilterMax, UINT fuRemoveMsg)
 {
  BOOL fFoundMsg;
-
+ 
+    dprintf2(("PeekMessagA %x %d-%d %d", hwndOwner, uMsgFilterMin, uMsgFilterMax, fuRemoveMsg));
     fFoundMsg = OSLibWinPeekMsg(msg, hwndOwner, uMsgFilterMin, uMsgFilterMax,
                                 fuRemoveMsg, FALSE);
     if(fFoundMsg) {
+        dprintf2(("PeekMessagA %x %d-%d %d found message %x %d %x %x", hwndOwner, uMsgFilterMin, uMsgFilterMax, fuRemoveMsg, msg->hwnd, msg->message, msg->wParam, msg->lParam));
+        HOOK_CallHooksA(WH_GETMESSAGE, HC_ACTION, fuRemoveMsg & PM_REMOVE, (LPARAM)msg );
         if (msg->message == WM_QUIT && (fuRemoveMsg & PM_REMOVE)) {
             //TODO: Post WM_QUERYENDSESSION message when WM_QUIT received and system is shutting down
         }
@@ -87,9 +103,12 @@ BOOL WIN32API PeekMessageW(LPMSG msg, HWND hwndOwner, UINT uMsgFilterMin,
 {
  BOOL fFoundMsg;
 
+    dprintf2(("PeekMessagW %x %d-%d %d", hwndOwner, uMsgFilterMin, uMsgFilterMax, fuRemoveMsg));
     fFoundMsg = OSLibWinPeekMsg(msg, hwndOwner, uMsgFilterMin, uMsgFilterMax,
                                 fuRemoveMsg, FALSE);
     if(fFoundMsg) {
+        dprintf2(("PeekMessagW %x %d-%d %d found message %x %d %x %x", hwndOwner, uMsgFilterMin, uMsgFilterMax, fuRemoveMsg, msg->hwnd, msg->message, msg->wParam, msg->lParam));
+        HOOK_CallHooksW(WH_GETMESSAGE, HC_ACTION, fuRemoveMsg & PM_REMOVE, (LPARAM)msg );
         if (msg->message == WM_QUIT && (fuRemoveMsg & (PM_REMOVE))) {
             //TODO: Post WM_QUERYENDSESSION message when WM_QUIT received and system is shutting down
         }
@@ -108,8 +127,11 @@ LONG WIN32API GetMessageExtraInfo()
 //******************************************************************************
 DWORD WIN32API GetMessagePos(void)
 {
-    dprintf(("USER32: GetMessagePos"));
-    return OSLibWinGetMessagePos();
+ DWORD pos;
+
+    pos = OSLibWinGetMessagePos();
+    dprintf(("USER32: GetMessagePos -> (%d,%d)", HIWORD(pos), LOWORD(pos)));
+    return pos;
 }
 //******************************************************************************
 //******************************************************************************
@@ -993,10 +1015,11 @@ DWORD WIN32API GetQueueStatus( UINT flags)
 {
  DWORD queueStatus;
 
-    dprintf(("USER32:  GetQueueStatus"));
     queueStatus = OSLibWinQueryQueueStatus();
-
     queueStatus = MAKELONG(queueStatus, queueStatus);
+
+    dprintf(("USER32: GetQueueStatus %x returned %x", flags, queueStatus & MAKELONG(flags, flags)));
+
     return queueStatus & MAKELONG(flags, flags);
 }
 /*****************************************************************************
@@ -1031,6 +1054,7 @@ DWORD MsgWaitForMultipleObjects(DWORD nCount, LPHANDLE pHandles, BOOL fWaitAll,
                                 DWORD dwMilliseconds, DWORD dwWakeMask)
 {
  DWORD curtime, endtime;
+ MSG msg;
 
   dprintf(("MsgWaitForMultipleObjects %x %x %d %d %x", nCount, pHandles, fWaitAll, dwMilliseconds, dwWakeMask));
   // @@@PH this is a temporary bugfix for WINFILE.EXE
@@ -1050,10 +1074,22 @@ DWORD MsgWaitForMultipleObjects(DWORD nCount, LPHANDLE pHandles, BOOL fWaitAll,
         while(curtime < endtime || dwMilliseconds == INFINITE) {
                 if(OSLibWinWaitMessage() == FALSE) {
                         dprintf(("OSLibWinWaitMessage returned FALSE!"));
-                        return -1;
+                        return WAIT_ABANDONED;
                 }
                 if(GetQueueStatus(dwWakeMask) != 0) {
                         return WAIT_OBJECT_0;
+                }
+                //TODO: Ignoring all messages could be dangerous. But processing them,
+                //while the app doesn't expect any, isn't safe either.
+                if(PeekMessageA(&msg, NULL, 0, 0, PM_REMOVE)) 
+                {
+                    if (msg.message == WM_QUIT) {
+                         dprintf(("ERROR: MsgWaitForMultipleObjects call abandoned because WM_QUIT msg was received!!"));
+                         return WAIT_ABANDONED;
+                    }
+   
+                    /* otherwise dispatch it */
+                    DispatchMessageA(&msg);
                 }
                 curtime = GetCurrentTime();
         }

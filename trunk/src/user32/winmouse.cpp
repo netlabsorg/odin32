@@ -1,4 +1,4 @@
-/* $Id: winmouse.cpp,v 1.13 2001-04-15 09:47:21 sandervl Exp $ */
+/* $Id: winmouse.cpp,v 1.14 2001-04-27 17:36:39 sandervl Exp $ */
 /*
  * Mouse handler for DINPUT
  *
@@ -153,6 +153,70 @@ BOOL WIN32API ReleaseCapture(void)
     	SendMessageA(hwndPrev, WM_CAPTURECHANGED, 0L, 0L);
     }
     return ret;
+}
+//******************************************************************************
+//******************************************************************************
+UINT WIN32API GetDoubleClickTime(void)
+{
+    dprintf(("USER32: GetDoubleClickTime"));
+    return O32_GetDoubleClickTime();
+}
+//******************************************************************************
+//******************************************************************************
+BOOL WIN32API SetDoubleClickTime( UINT uInterval)
+{
+    dprintf(("USER32: SetDoubleClickTime %d", uInterval));
+    return O32_SetDoubleClickTime(uInterval);
+}
+//******************************************************************************
+//******************************************************************************
+BOOL WIN32API SwapMouseButton( BOOL fSwap)
+{
+    dprintf(("USER32: SwapMouseButton %d", fSwap));
+    return O32_SwapMouseButton(fSwap);
+}
+/*****************************************************************************
+ * Name      : VOID WIN32API mouse_event
+ * Purpose   : The mouse_event function synthesizes mouse motion and button clicks.
+ * Parameters: DWORD dwFlags     flags specifying various motion/click variants
+ *             DWORD dx          horizontal mouse position or position change
+ *             DWORD dy          vertical mouse position or position change
+ *             DWORD cButtons    unused, reserved for future use, set to zero
+ *             DWORD dwExtraInfo 32 bits of application-defined information
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Thu, 1998/02/26 11:55]
+ *****************************************************************************/
+VOID WIN32API mouse_event(DWORD dwFlags, DWORD dx, DWORD dy, DWORD cButtons,
+                          DWORD dwExtraInfo)
+{
+  dprintf(("USER32:mouse_event (%08xh,%u,%u,%u,%08x) not implemented",
+          dwFlags, dx, dy, cButtons, dwExtraInfo));
+}
+/*****************************************************************************
+ * Name      : BOOL WIN32API DragDetect
+ * Purpose   : The DragDetect function captures the mouse and tracks its movement
+ * Parameters: HWND  hwnd
+ *             POINT pt
+ * Variables :
+ * Result    : If the user moved the mouse outside of the drag rectangle while
+ *               holding the left button down, the return value is TRUE.
+ *             If the user did not move the mouse outside of the drag rectangle
+ *               while holding the left button down, the return value is FALSE.
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Thu, 1998/02/26 11:55]
+ *****************************************************************************/
+BOOL WIN32API DragDetect(HWND  hwnd,
+                            POINT pt)
+{
+  dprintf(("USER32:DragDetect(%08xh,...) not implemented", hwnd));
+
+  return (FALSE);
 }
 //******************************************************************************
 //******************************************************************************

@@ -1,4 +1,4 @@
-/* $Id: user32.cpp,v 1.96 2001-04-15 14:29:48 sandervl Exp $ */
+/* $Id: user32.cpp,v 1.97 2001-04-27 17:36:38 sandervl Exp $ */
 
 /*
  * Win32 misc user32 API functions for OS/2
@@ -325,79 +325,6 @@ BOOL WIN32API UnionRect( PRECT lprcDst, const RECT *lprcSrc1, const RECT *lprcSr
 }
 
 /* Mouse Input Functions */
-
-/*****************************************************************************
- * Name      : BOOL WIN32API DragDetect
- * Purpose   : The DragDetect function captures the mouse and tracks its movement
- * Parameters: HWND  hwnd
- *             POINT pt
- * Variables :
- * Result    : If the user moved the mouse outside of the drag rectangle while
- *               holding the left button down, the return value is TRUE.
- *             If the user did not move the mouse outside of the drag rectangle
- *               while holding the left button down, the return value is FALSE.
- * Remark    :
- * Status    : UNTESTED STUB
- *
- * Author    : Patrick Haller [Thu, 1998/02/26 11:55]
- *****************************************************************************/
-BOOL WIN32API DragDetect(HWND  hwnd,
-                            POINT pt)
-{
-  dprintf(("USER32:DragDetect(%08xh,...) not implemented.\n",
-         hwnd));
-
-  return (FALSE);
-}
-//******************************************************************************
-//******************************************************************************
-UINT WIN32API GetDoubleClickTime(void)
-{
-    dprintf(("USER32:  GetDoubleClickTime\n"));
-    return O32_GetDoubleClickTime();
-}
-/*****************************************************************************
- * Name      : VOID WIN32API mouse_event
- * Purpose   : The mouse_event function synthesizes mouse motion and button clicks.
- * Parameters: DWORD dwFlags     flags specifying various motion/click variants
- *             DWORD dx          horizontal mouse position or position change
- *             DWORD dy          vertical mouse position or position change
- *             DWORD cButtons    unused, reserved for future use, set to zero
- *             DWORD dwExtraInfo 32 bits of application-defined information
- * Variables :
- * Result    :
- * Remark    :
- * Status    : UNTESTED STUB
- *
- * Author    : Patrick Haller [Thu, 1998/02/26 11:55]
- *****************************************************************************/
-VOID WIN32API mouse_event(DWORD dwFlags,
-                             DWORD dx,
-                             DWORD dy,
-                             DWORD cButtons,
-                             DWORD dwExtraInfo)
-{
-  dprintf(("USER32:mouse_event (%08xh,%u,%u,%u,%08x) not implemented.\n",
-          dwFlags,
-          dx,
-          dy,
-          cButtons,
-          dwExtraInfo));
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API SetDoubleClickTime( UINT uInterval)
-{
-    dprintf(("USER32:  SetDoubleClickTime\n"));
-    return O32_SetDoubleClickTime(uInterval);
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API SwapMouseButton( BOOL fSwap)
-{
-    dprintf(("USER32:  SwapMouseButton\n"));
-    return O32_SwapMouseButton(fSwap);
-}
 
 /* Error Functions */
 

@@ -1,4 +1,4 @@
-/* $Id: oslibmsg.cpp,v 1.36 2001-02-15 00:33:01 sandervl Exp $ */
+/* $Id: oslibmsg.cpp,v 1.37 2001-04-27 17:36:37 sandervl Exp $ */
 /*
  * Window message translation functions for OS/2
  *
@@ -66,6 +66,18 @@ MSGTRANSTAB MsgTransTab[] = {
 
    WM_HITTEST,       WINWM_NCHITTEST,
 
+   //todo: not always right if mouse msg turns out to be for the client window
+   WM_MOUSEMOVE,     WINWM_NCMOUSEMOVE,
+   WM_BUTTON1DOWN,   WINWM_NCLBUTTONDOWN,
+   WM_BUTTON1UP,     WINWM_NCLBUTTONUP,
+   WM_BUTTON1DBLCLK, WINWM_NCLBUTTONDBLCLK,
+   WM_BUTTON2DOWN,   WINWM_NCRBUTTONDOWN,
+   WM_BUTTON2UP,     WINWM_NCRBUTTONUP,
+   WM_BUTTON2DBLCLK, WINWM_NCRBUTTONDBLCLK,
+   WM_BUTTON3DOWN,   WINWM_NCMBUTTONDOWN,
+   WM_BUTTON3UP,     WINWM_NCMBUTTONUP,
+   WM_BUTTON3DBLCLK, WINWM_NCMBUTTONDBLCLK,
+
    //TODO: Needs better translation!
    WM_CHAR,          WINWM_KEYDOWN,
    WM_CHAR,          WINWM_KEYUP,
@@ -81,6 +93,7 @@ MSGTRANSTAB MsgTransTab[] = {
    WM_TIMER,         WINWM_TIMER,
 
    //
+   //todo: not always right if mouse msg turns out to be for the nonclient window
    WM_MOUSEMOVE,     WINWM_MOUSEMOVE,
    WM_BUTTON1DOWN,   WINWM_LBUTTONDOWN,
    WM_BUTTON1UP,     WINWM_LBUTTONUP,
@@ -340,7 +353,16 @@ continuepeekmsg:
     return FALSE;
   }
 
-  OS2ToWinMsgTranslate((PVOID)teb, &os2msg, pMsg, isUnicode, (fRemove & PM_REMOVE_W) ? MSG_REMOVE : MSG_NOREMOVE);
+  if(OS2ToWinMsgTranslate((PVOID)teb, &os2msg, pMsg, isUnicode, (fRemove & PM_REMOVE_W) ? MSG_REMOVE : MSG_NOREMOVE) == FALSE) 
+  {
+     //unused PM message; dispatch immediately and grab next one
+     dprintf2(("OSLibWinPeekMsg: Untranslated message; dispatched immediately"));
+     rc = WinPeekMsg(teb->o.odin.hab, &os2msg, hwndOS2, TranslateWinMsg(uMsgFilterMin, TRUE),
+                     TranslateWinMsg(uMsgFilterMax, FALSE), PM_REMOVE);
+     WinDispatchMsg(teb->o.odin.hab, &os2msg);
+     return OSLibWinPeekMsg(pMsg, hwnd, uMsgFilterMin, uMsgFilterMax,
+                            fRemove, isUnicode);
+  }
   //TODO: This is not safe! There's no guarantee this message will be dispatched and it might overwrite a previous message
   if(fRemove & PM_REMOVE_W) {
   	memcpy(&teb->o.odin.os2msg, &os2msg, sizeof(QMSG));

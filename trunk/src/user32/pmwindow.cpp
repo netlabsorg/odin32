@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.122 2001-04-01 19:38:51 sandervl Exp $ */
+/* $Id: pmwindow.cpp,v 1.123 2001-04-27 17:36:37 sandervl Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -459,6 +459,10 @@ MRESULT ProcessPMMessage(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2, Win32Base
             //Note: Also updates the new window rectangle
             win32wnd->MsgFormatFrame(&wp);
 
+            if(win32wnd->isOwnDC()) {
+                dprintf(("Mark owndc of %x as dirty", win32wnd->getWindowHandle()));
+                win32wnd->invalidateOwnDC(); //mark DC as dirty. origin & visible region must be reinitialized
+            }
             if(win32wnd->CanReceiveSizeMsgs())
                 win32wnd->MsgPosChanged((LPARAM)&wp);
 
@@ -1159,14 +1163,20 @@ PosChangedEnd:
     default:
         dprintf2(("OS2: RunDefWndProc hwnd %x msg %x mp1 %x mp2 %x", hwnd, msg, mp1, mp2));
         RestoreOS2TIB();
-        return WinDefWindowProc( hwnd, msg, mp1, mp2 );
+        if(isFrame) {
+             return pfnFrameWndProc(hwnd, msg, mp1, mp2);
+        }
+        else return WinDefWindowProc( hwnd, msg, mp1, mp2 );
   }
   return (MRESULT)rc;
 
 RunDefWndProc:
 //  dprintf(("OS2: RunDefWndProc msg %x for %x", msg, hwnd));
   RestoreOS2TIB();
-  return WinDefWindowProc( hwnd, msg, mp1, mp2 );
+  if(isFrame) {
+       return pfnFrameWndProc(hwnd, msg, mp1, mp2);
+  }
+  else return WinDefWindowProc( hwnd, msg, mp1, mp2 );
 } /* End of Win32WindowProc */
 //******************************************************************************
 //******************************************************************************

@@ -1,4 +1,4 @@
-/* $Id: win32wbase.h,v 1.114 2001-04-25 20:53:39 sandervl Exp $ */
+/* $Id: win32wbase.h,v 1.115 2001-04-27 17:36:39 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -378,6 +378,7 @@ protected:
         unsigned fCreateSetWindowPos:1;  //FALSE -> SetWindowPos in Win32BaseWindow::MsgCreate not yet called
         unsigned isUnicode:1;
         unsigned fMinMaxChange:1;        //set when switching between min/max/restored state
+        unsigned fOwnDCDirty:1;          //set when selectClientArea must reset the origin + visible region
 
         HRGN    hWindowRegion;
         HRGN    hClipRegion;
@@ -467,6 +468,10 @@ public:
 #else
          BOOL   isOwnDC() { return (windowClass && windowClass->getStyle() & CS_OWNDC_W); }
 #endif
+         void   invalidateOwnDC() { fOwnDCDirty = TRUE; };
+         void   validateOwnDC()   { fOwnDCDirty = FALSE; };
+         BOOL   isOwnDCDirty()    { return fOwnDCDirty; };
+
          HDC    getOwnDC() { return ownDC; }
          void   setOwnDC(HDC hdc) { ownDC = hdc; }
 protected:
