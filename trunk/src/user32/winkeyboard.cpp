@@ -1,4 +1,4 @@
-/* $Id: winkeyboard.cpp,v 1.24 2001-10-26 12:46:17 phaller Exp $ */
+/* $Id: winkeyboard.cpp,v 1.25 2001-10-26 15:54:04 phaller Exp $ */
 /*
  * Win32 <-> PM key translation
  *
@@ -332,7 +332,7 @@ WINVKEYTOPMSCAN abWinVKeyToPMScan[256] =
 /* 0x0A                   */ , 0x00                   , NULL
 /* 0x0B                   */ , 0x00                   , NULL
 /* 0x0C VK_CLEAR          */ , PMSCAN_PAD5            , "Num 5"
-/* 0x0D VK_RETURN         */ , PMSCAN_ENTER           , "Enter"
+/* 0x0D VK_RETURN         */ , PMSCAN_ENTER           , "Enter" // @@@PH BUG: identical to "Num Enter" !
 /* 0x0E                   */ , 0x00                   , NULL
 /* 0x0F                   */ , 0x00                   , NULL
 /* 0x10 VK_SHIFT          */ , PMSCAN_SHIFTLEFT       , "Left Shift"

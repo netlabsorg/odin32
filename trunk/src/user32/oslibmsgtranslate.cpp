@@ -1,4 +1,4 @@
-/* $Id: oslibmsgtranslate.cpp,v 1.72 2001-10-26 12:46:16 phaller Exp $ */
+/* $Id: oslibmsgtranslate.cpp,v 1.73 2001-10-26 15:53:22 phaller Exp $ */
 /*
  * Window message translation functions for OS/2
  *
@@ -551,15 +551,19 @@ BOOL OS2ToWinMsgTranslate(void *pTeb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode,
       
     case WM_CHAR:
     {
-        ULONG repeatCount=0, virtualKey=0, keyFlags=0, scanCode=0;
-        ULONG flags = SHORT1FROMMP(os2Msg->mp1);
-        BOOL keyWasPressed, isExtended = FALSE;
-        char c;
+      ULONG  repeatCount=0;
+      ULONG  virtualKey=0;
+      ULONG  keyFlags=0;
+      USHORT scanCode=0;
+      ULONG  flags = SHORT1FROMMP(os2Msg->mp1);
+      BOOL   keyWasPressed, isExtended = FALSE;
+      char   c;
+      USHORT usPMScanCode = CHAR4FROMMP(os2Msg->mp1);
 
-        teb->o.odin.fTranslated = FALSE;
-        repeatCount = CHAR3FROMMP(os2Msg->mp1);
-        scanCode = CHAR4FROMMP(os2Msg->mp1);
-        keyWasPressed = ((SHORT1FROMMP (os2Msg->mp1) & KC_PREVDOWN) == KC_PREVDOWN);
+      teb->o.odin.fTranslated = FALSE;
+      repeatCount = CHAR3FROMMP(os2Msg->mp1);
+      scanCode = CHAR4FROMMP(os2Msg->mp1);
+      keyWasPressed = ((SHORT1FROMMP (os2Msg->mp1) & KC_PREVDOWN) == KC_PREVDOWN);
 
         dprintf(("PM: WM_CHAR: %x %x rep=%d scancode=%x", SHORT1FROMMP(os2Msg->mp2), SHORT2FROMMP(os2Msg->mp2), repeatCount, scanCode));
         dprintf(("PM: WM_CHAR: hwnd %x flags %x mp1 %x, mp2 %x, time=%08xh", win32wnd->getWindowHandle(), flags, os2Msg->mp1, os2Msg->mp2, os2Msg->time));
@@ -607,16 +611,16 @@ VirtualKeyFound:
         // Adjust PM scancodes for Win* keys
         if (scanCode >= 0x70)
           scanCode -= 0x10;
+        // winMsg->wParam  = pmscan2winkey[scanCode][0];
+        // wWinScan  = pmscan2winkey[scanCode][1];
       
-      // winMsg->wParam  = pmscan2winkey[scanCode][0];
-      // wWinScan  = pmscan2winkey[scanCode][1];
       {
         BOOL  fWinExtended;
         BYTE  bWinVKey;
         WORD  wWinScan;
 
         // Note: Numlock-state currently ignored, see below
-        KeyTranslatePMScanToWinVKey(scanCode,
+        KeyTranslatePMScanToWinVKey(usPMScanCode,
                                     FALSE, 
                                     &bWinVKey,
                                     &wWinScan,
@@ -641,7 +645,7 @@ VirtualKeyFound:
         #define WIN_KEY_ALTHELD    0x20000000
         #define WIN_KEY_PREVSTATE  0x40000000
 
-        if (scanCode == PMSCAN_ALTRIGHT)
+        if (usPMScanCode == PMSCAN_ALTRIGHT)
         {
           // Turn message into CTRL-event
           // The original PM message is still saved inside
