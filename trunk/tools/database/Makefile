@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.13 2000-07-18 17:56:51 bird Exp $
+# $Id: Makefile,v 1.14 2000-09-28 03:06:27 bird Exp $
 
 #
 # Common makefile for database utils. ICC edition
@@ -116,9 +116,6 @@ dep:
     @nmake /nologo dep
     cd ..
 
-!ifndef NODEP
-!include .depend
-!endif
 
 
 #
@@ -129,6 +126,23 @@ clean:
    cd gd
    $(MAKE) /nologo clean
    cd ..
+
+
+
+#
+# Include the .depend file.
+#   If the depend file don't exists we'll complain about it.
+#
+!ifndef NODEP
+!   if [$(EXISTS) .depend] == 0
+!       include .depend
+!   else
+!       if [$(ECHO) .depend doesn't exist]
+!       endif
+!   endif
+!endif
+
+
 
 force:
     @$(ECHO) ...

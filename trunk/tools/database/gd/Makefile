@@ -29,13 +29,22 @@ force:
 dep:
     $(DEPEND) *.c *.cpp *.h *.asm *.inc -Objo *.c *.cpp -objgobj *.c *.cpp
 
-!ifndef NODEP
-!include .depend
-!endif
-
-
 clean:
    @nmake /nologo -f makefile.icc clean
    @nmake /nologo OMF=0 -f makefile.gcc clean
    @nmake /nologo OMF=1 -f makefile.gcc clean
+
+
+#
+# Include the .depend file.
+#   If the depend file don't exists we'll complain about it.
+#
+!ifndef NODEP
+!   if [$(EXISTS) .depend] == 0
+!       include .depend
+!   else
+!       if [$(ECHO) .depend doesn't exist]
+!       endif
+!   endif
+!endif
 

@@ -40,10 +40,19 @@ webgif.exe: webgif.obj gdicc.lib gd.h
 dep:
     @nmake /nologo -f makefile NODEP=1 dep
 
-!ifndef NODEP
-!include .depend
-!endif
-
 clean:
     @$(RM) *.obj *.exe *.map gdicc.lib cset*.pch
+
+#
+# Include the .depend file.
+#   If the depend file don't exists we'll complain about it.
+#
+!ifndef NODEP
+!   if [$(EXISTS) .depend] == 0
+!       include .depend
+!   else
+!       if [$(ECHO) .depend doesn't exist]
+!       endif
+!   endif
+!endif
 
