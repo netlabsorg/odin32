@@ -1,7 +1,7 @@
-; $Id: dciman32.def,v 1.1 2000-10-23 11:24:38 sandervl Exp $
+; $Id: dciman32.def,v 1.2 2000-12-16 22:53:20 bird Exp $
 
-;Created by BLAST for IBM's compiler
 LIBRARY DCIMAN32 INITINSTANCE
+DESCRIPTION 'Odin32 System DLL - DciMan32'
 DATA MULTIPLE NONSHARED
 
 EXPORTS

@@ -1,724 +1,725 @@
-; $Id: msvcrt20.def,v 1.8 2000-06-21 17:33:37 phaller Exp $
+; $Id: msvcrt20.def,v 1.9 2000-12-16 22:53:23 bird Exp $
 
 ;
 ; Based on Windows 98 : MSVCRT20.DLL (v2.11.000)
 ;
 LIBRARY MSVCRT20 INITINSTANCE TERMINSTANCE
+DESCRIPTION 'Odin32 System DLL - MSVCrt20'
 DATA MULTIPLE NONSHARED
 
 
 EXPORTS
-    ??2@YAPAXI@Z		= _MSVCRT_new			@79
-    ??3@YAXPAX@Z		= _MSVCRT_delete		@80
-    ?_query_new_handler@@YAP6AHI@ZXZ = _MSVCRT_EXP35		@226
-    ?_query_new_mode@@YAHXZ	= _MSVCRT_EXP36			@227
-    ?_set_new_handler@@YAP6AHI@ZP6AHI@Z@Z = _MSVCRT_set_new_handler	@228
-    ?_set_new_mode@@YAHH@Z	= _MSVCRT_EXP38			@229
-    ?_set_se_translator@@YAP6AXIPAU_EXCEPTION_POINTERS@@@ZP6AXI0@Z@Z = _MSVCRT_EXP39	@230
-    ?set_terminate@@YAP6AXXZP6AXXZ@Z = _MSVCRT_EXP44		@365
-    ?set_unexpected@@YAP6AXXZP6AXXZ@Z = _MSVCRT_EXP45		@366
-    ?terminate@@YAXXZ		= _MSVCRT_EXP46			@409
-    ?unexpected@@YAXXZ		= _MSVCRT_EXP47			@418
-    $I10_OUTPUT			= _MSVCRT_EXP49			@438
-    _CIacos			= _CRTDLL__CIacos		@439
-    _CIasin			= _CRTDLL__CIasin		@440
-    _CIatan			= _CRTDLL__CIatan		@441
-    _CIatan2			= _CRTDLL__CIatan2		@442
-    _CIcos			= _CRTDLL__CIcos		@443
-    _CIcosh			= _CRTDLL__CIcosh		@444
-    _CIexp			= _CRTDLL__CIexp		@445 
-    _CIfmod			= _CRTDLL__CIfmod		@446
-    _CIlog			= _CRTDLL__CIlog		@447
-    _CIlog10			= _CRTDLL__CIlog10		@448
-    _CIpow			= _CRTDLL__CIpow		@449
-    _CIsin			= _CRTDLL__CIsin		@450
-    _CIsinh			= _CRTDLL__CIsinh		@451
-    _CIsqrt			= _CRTDLL__CIsqrt		@452
-    _CItan			= _CRTDLL__CItan 		@453
-    _CItanh			= _CRTDLL__CItanh		@454
-    _CxxThrowException		= _MSVCRT__CxxThrowException	@455
-    _HUGE			= MSVCRT__HUGE   		@456
-    _XcptFilter			= _CRTDLL__XcptFilter		@457
-    __CxxFrameHandler		= _MSVCRT___CxxFrameHandler	@458
-    __CxxLongjmpUnwind		= _MSVCRT___CxxLongjmpUnwind    @459
-;   __STRINGTOLD						@460
-    __argc			= MSVCRT___argc    		@461
-    __argv			= MSVCRT___argv    		@462
-    __dllonexit			= _CRTDLL___dllonexit		@463
-    __doserrno			= _CRTDLL___doserrno		@464
-    __fpecode			= _CRTDLL___fpecode		@465
-    __getmainargs		= _MSVCRT___GetMainArgs		@466
-    __initenv			= _MSVCRT___initenv		@467
-    __isascii			= _CRTDLL___isascii		@468
-    __iscsym			= _CRTDLL___iscsym		@469
-    __iscsymf			= _CRTDLL___iscsymf		@470
-;   __lconv_init						@471
-    __mb_cur_max		= MSVCRT___mb_cur_max		@472
-    __p___argc			= _MSVCRT___p___argc		@473
-    __p___argv			= _MSVCRT___p___argv		@474
-    __p___initenv		= _MSVCRT___p__initenv		@475
-    __p___mb_cur_max		= _MSVCRT___p___mb_cur_max	@476
-;   __p___wargv							@477
-;   __p___winitenv						@478
-    __p__acmdln			= _MSVCRT___p__acmdln		@479
-;   __p__amblksiz						@480
-    __p__commode		= _MSVCRT___p__commode		@481
-    __p__daylight		= _MSVCRT___p__daylight		@482
-    __p__environ		= _MSVCRT___p__environ		@483
-    __p__fmode			= _MSVCRT___p__fmode		@484
-    __p__iob			= _MSVCRT___p__iob		@485
-;   __p__mbctype						@486
-    __p__osver			= _MSVCRT___p__osver		@487
-    __p__pctype			= _MSVCRT___p__pctype		@488
-    __p__pgmptr			= _MSVCRT___p__pgmptr		@489
-    __p__pwctype		= _MSVCRT___p__pwctype		@490
-    __p__timezone		= _MSVCRT___p__timezone		@491
-    __p__tzname			= _MSVCRT___p__tzname		@492
-;   __p__wcmdln							@493
-;   __p__wenviron						@494
-    __p__winmajor		= _MSVCRT___p__winmajor		@495
-    __p__winminor		= _MSVCRT___p__winminor		@496
-    __p__winver			= _MSVCRT___p__winver		@497
-;   __p__wpgmptr						@498
-;   __pxcptinfoptrs						@499
+    ??2@YAPAXI@Z        = _MSVCRT_new           @79
+    ??3@YAXPAX@Z        = _MSVCRT_delete        @80
+    ?_query_new_handler@@YAP6AHI@ZXZ = _MSVCRT_EXP35        @226
+    ?_query_new_mode@@YAHXZ = _MSVCRT_EXP36         @227
+    ?_set_new_handler@@YAP6AHI@ZP6AHI@Z@Z = _MSVCRT_set_new_handler @228
+    ?_set_new_mode@@YAHH@Z  = _MSVCRT_EXP38         @229
+    ?_set_se_translator@@YAP6AXIPAU_EXCEPTION_POINTERS@@@ZP6AXI0@Z@Z = _MSVCRT_EXP39    @230
+    ?set_terminate@@YAP6AXXZP6AXXZ@Z = _MSVCRT_EXP44        @365
+    ?set_unexpected@@YAP6AXXZP6AXXZ@Z = _MSVCRT_EXP45       @366
+    ?terminate@@YAXXZ       = _MSVCRT_EXP46         @409
+    ?unexpected@@YAXXZ      = _MSVCRT_EXP47         @418
+    $I10_OUTPUT         = _MSVCRT_EXP49         @438
+    _CIacos         = _CRTDLL__CIacos       @439
+    _CIasin         = _CRTDLL__CIasin       @440
+    _CIatan         = _CRTDLL__CIatan       @441
+    _CIatan2            = _CRTDLL__CIatan2      @442
+    _CIcos          = _CRTDLL__CIcos        @443
+    _CIcosh         = _CRTDLL__CIcosh       @444
+    _CIexp          = _CRTDLL__CIexp        @445
+    _CIfmod         = _CRTDLL__CIfmod       @446
+    _CIlog          = _CRTDLL__CIlog        @447
+    _CIlog10            = _CRTDLL__CIlog10      @448
+    _CIpow          = _CRTDLL__CIpow        @449
+    _CIsin          = _CRTDLL__CIsin        @450
+    _CIsinh         = _CRTDLL__CIsinh       @451
+    _CIsqrt         = _CRTDLL__CIsqrt       @452
+    _CItan          = _CRTDLL__CItan        @453
+    _CItanh         = _CRTDLL__CItanh       @454
+    _CxxThrowException      = _MSVCRT__CxxThrowException    @455
+    _HUGE           = MSVCRT__HUGE          @456
+    _XcptFilter         = _CRTDLL__XcptFilter       @457
+    __CxxFrameHandler       = _MSVCRT___CxxFrameHandler @458
+    __CxxLongjmpUnwind      = _MSVCRT___CxxLongjmpUnwind    @459
+;   __STRINGTOLD                        @460
+    __argc          = MSVCRT___argc         @461
+    __argv          = MSVCRT___argv         @462
+    __dllonexit         = _CRTDLL___dllonexit       @463
+    __doserrno          = _CRTDLL___doserrno        @464
+    __fpecode           = _CRTDLL___fpecode     @465
+    __getmainargs       = _MSVCRT___GetMainArgs     @466
+    __initenv           = _MSVCRT___initenv     @467
+    __isascii           = _CRTDLL___isascii     @468
+    __iscsym            = _CRTDLL___iscsym      @469
+    __iscsymf           = _CRTDLL___iscsymf     @470
+;   __lconv_init                        @471
+    __mb_cur_max        = MSVCRT___mb_cur_max       @472
+    __p___argc          = _MSVCRT___p___argc        @473
+    __p___argv          = _MSVCRT___p___argv        @474
+    __p___initenv       = _MSVCRT___p__initenv      @475
+    __p___mb_cur_max        = _MSVCRT___p___mb_cur_max  @476
+;   __p___wargv                         @477
+;   __p___winitenv                      @478
+    __p__acmdln         = _MSVCRT___p__acmdln       @479
+;   __p__amblksiz                       @480
+    __p__commode        = _MSVCRT___p__commode      @481
+    __p__daylight       = _MSVCRT___p__daylight     @482
+    __p__environ        = _MSVCRT___p__environ      @483
+    __p__fmode          = _MSVCRT___p__fmode        @484
+    __p__iob            = _MSVCRT___p__iob      @485
+;   __p__mbctype                        @486
+    __p__osver          = _MSVCRT___p__osver        @487
+    __p__pctype         = _MSVCRT___p__pctype       @488
+    __p__pgmptr         = _MSVCRT___p__pgmptr       @489
+    __p__pwctype        = _MSVCRT___p__pwctype      @490
+    __p__timezone       = _MSVCRT___p__timezone     @491
+    __p__tzname         = _MSVCRT___p__tzname       @492
+;   __p__wcmdln                         @493
+;   __p__wenviron                       @494
+    __p__winmajor       = _MSVCRT___p__winmajor     @495
+    __p__winminor       = _MSVCRT___p__winminor     @496
+    __p__winver         = _MSVCRT___p__winver       @497
+;   __p__wpgmptr                        @498
+;   __pxcptinfoptrs                     @499
 
 
-    __threadhandle		= _CRTDLL___threadhandle	@500
-    __threadid			= _CRTDLL___threadid		@501
-;   __toascii			= _CRTDLL___toascii		@502
-    __wargv							@503
-;   __wgetmainargs						@504
-;   __winitenv							@505
-    _abnormal_termination	= _CRTDLL__abnormal_termination	@506
-    _access			= _CRTDLL__access		@507
-    _acmdln			= MSVCRT__acmdln		@508
-;   _adj_fdiv_m16i						@509
-;   _adj_fdiv_m32						@510
-;   _adj_fdiv_m32i						@511
-;   _adj_fdiv_m64						@512
-;   _adj_fdiv_r							@513
-;   _adj_fdivr_m16i						@514
-;   _adj_fdivr_m32						@515
-;   _adj_fdivr_m32i						@516
-;   _adj_fdivr_m64						@517
-;   _adj_fpatan							@518
-;   _adj_fprem							@519
-;   _adj_fprem1							@520
-;   _adj_fptan							@521
-    _adjust_fdiv		= _MSVCRT__adjust_fdiv		@522
-    _aexit_rtn			= _MSVCRT__aexit_rtn		@523
-    _amsg_exit     		= _CRTDLL__amsg_exit		@524
-    _assert			= _CRTDLL__assert		@525
-;   _atodbl							@526
-;   _atoldbl							@527
-    _beep			= _CRTDLL__beep			@528
-    _beginthread		= _CRTDLL__beginthread		@529
-    _beginthreadex		= _MSVCRT__beginthreadex	@530
-    _c_exit			= _CRTDLL__c_exit		@531
-    _cabs			= _CRTDLL__cabs			@532
-    _cexit			= _CRTDLL__cexit		@533
-    _cgets			= _CRTDLL__cgets		@534
-    _chdir			= _CRTDLL__chdir		@535
-    _chdrive			= _CRTDLL__chdrive		@536
-    _chgsign			= _CRTDLL__chgsign		@537
-    _chmod			= _CRTDLL__chmod		@538
-    _chsize			= _CRTDLL__chsize		@539
-    _clearfp			= _CRTDLL__clearfp		@540
-    _close			= _CRTDLL__close		@541
-    _commit			= _CRTDLL__commit		@542
-    _commode			= MSVCRT__commode		@543
-    _control87			= _CRTDLL__control87		@544
-    _controlfp			= _CRTDLL__controlfp		@545
-    _copysign			= _CRTDLL__copysign		@546
-    _cprintf			= _CRTDLL__cprintf		@547
-    _cputs			= _CRTDLL__cputs 		@548
-    _creat		 	= _CRTDLL__creat		@549
-    _cscanf			= _CRTDLL__cscanf		@550
-    _ctype			= CRTDLL_ctype			@551
-    _cwait			= _CRTDLL__cwait		@552
-    _daylight    		= MSVCRT__daylight    		@553
-    _dup			= _CRTDLL__dup			@554
-    _dup2			= _CRTDLL__dup2			@555
-    _ecvt			= _CRTDLL__ecvt			@556
-    _endthread			= _CRTDLL__endthread		@557
-    _endthreadex		= _MSVCRT__endthreadex		@558
-    _environ			= MSVCRT__environ    		@559
-    _eof			= _CRTDLL__eof			@560
-    _errno			= _CRTDLL__errno		@561
-    _except_handler2		= _CRTDLL__except_handler2	@562
-    _except_handler3		= _MSVCRT__except_handler3	@563
-    _execl			= _CRTDLL__execl		@564
-    _execle			= _CRTDLL__execle		@565
-    _execlp			= _CRTDLL__execlp		@566
-    _execlpe			= _CRTDLL__execlpe		@567
-    _execv			= _CRTDLL__execv		@568
-    _execve			= _CRTDLL__execve		@569
-    _execvp			= _CRTDLL__execvp		@570
-    _execvpe			= _CRTDLL__execvpe		@571
-    _exit			= _CRTDLL__exit			@572
-    _expand			= _CRTDLL__expand		@573
-    _fcloseall			= _CRTDLL__fcloseall		@574
-    _fcvt			= _CRTDLL__fcvt			@575
-    _fdopen			= _CRTDLL__fdopen		@576
-    _fgetchar			= _CRTDLL__fgetchar		@577
-    _fgetwchar			= _CRTDLL__fgetwchar		@578
-    _filbuf			= _CRTDLL__filbuf		@579
-    _fileinfo			= MSVCRT__fileinfo		@580
-    _filelength			= _CRTDLL__filelength		@581
-    _fileno			= _CRTDLL__fileno		@582
-    _findclose			= _CRTDLL__findclose		@583
-    _findfirst			= _CRTDLL__findfirst		@584
-    _findnext			= _CRTDLL__findnext		@585
-    _finite			= _CRTDLL__finite		@586
-    _flsbuf			= _CRTDLL__flsbuf		@587
-    _flushall			= _CRTDLL__flushall		@588
-    _fmode			= MSVCRT__fmode			@589
-    _fpclass			= _CRTDLL__fpclass		@590
-    _fpieee_flt			= _CRTDLL__fpieee_flt		@591
-    _fpreset			= _CRTDLL__fpreset		@592
-    _fputchar			= _CRTDLL__fputchar		@593
-    _fputwchar			= _CRTDLL__fputwchar		@594
-    _fsopen			= _CRTDLL__fsopen		@595
-    _fstat			= _CRTDLL__fstat		@596
-    _ftime			= _CRTDLL__ftime		@597
-    _ftol			= _CRTDLL__ftol			@598
-    _fullpath			= _CRTDLL__fullpath		@599
+    __threadhandle      = _CRTDLL___threadhandle    @500
+    __threadid          = _CRTDLL___threadid        @501
+;   __toascii           = _CRTDLL___toascii     @502
+    __wargv                         @503
+;   __wgetmainargs                      @504
+;   __winitenv                          @505
+    _abnormal_termination   = _CRTDLL__abnormal_termination @506
+    _access         = _CRTDLL__access       @507
+    _acmdln         = MSVCRT__acmdln        @508
+;   _adj_fdiv_m16i                      @509
+;   _adj_fdiv_m32                       @510
+;   _adj_fdiv_m32i                      @511
+;   _adj_fdiv_m64                       @512
+;   _adj_fdiv_r                         @513
+;   _adj_fdivr_m16i                     @514
+;   _adj_fdivr_m32                      @515
+;   _adj_fdivr_m32i                     @516
+;   _adj_fdivr_m64                      @517
+;   _adj_fpatan                         @518
+;   _adj_fprem                          @519
+;   _adj_fprem1                         @520
+;   _adj_fptan                          @521
+    _adjust_fdiv        = _MSVCRT__adjust_fdiv      @522
+    _aexit_rtn          = _MSVCRT__aexit_rtn        @523
+    _amsg_exit          = _CRTDLL__amsg_exit        @524
+    _assert         = _CRTDLL__assert       @525
+;   _atodbl                         @526
+;   _atoldbl                            @527
+    _beep           = _CRTDLL__beep         @528
+    _beginthread        = _CRTDLL__beginthread      @529
+    _beginthreadex      = _MSVCRT__beginthreadex    @530
+    _c_exit         = _CRTDLL__c_exit       @531
+    _cabs           = _CRTDLL__cabs         @532
+    _cexit          = _CRTDLL__cexit        @533
+    _cgets          = _CRTDLL__cgets        @534
+    _chdir          = _CRTDLL__chdir        @535
+    _chdrive            = _CRTDLL__chdrive      @536
+    _chgsign            = _CRTDLL__chgsign      @537
+    _chmod          = _CRTDLL__chmod        @538
+    _chsize         = _CRTDLL__chsize       @539
+    _clearfp            = _CRTDLL__clearfp      @540
+    _close          = _CRTDLL__close        @541
+    _commit         = _CRTDLL__commit       @542
+    _commode            = MSVCRT__commode       @543
+    _control87          = _CRTDLL__control87        @544
+    _controlfp          = _CRTDLL__controlfp        @545
+    _copysign           = _CRTDLL__copysign     @546
+    _cprintf            = _CRTDLL__cprintf      @547
+    _cputs          = _CRTDLL__cputs        @548
+    _creat          = _CRTDLL__creat        @549
+    _cscanf         = _CRTDLL__cscanf       @550
+    _ctype          = CRTDLL_ctype          @551
+    _cwait          = _CRTDLL__cwait        @552
+    _daylight           = MSVCRT__daylight          @553
+    _dup            = _CRTDLL__dup          @554
+    _dup2           = _CRTDLL__dup2         @555
+    _ecvt           = _CRTDLL__ecvt         @556
+    _endthread          = _CRTDLL__endthread        @557
+    _endthreadex        = _MSVCRT__endthreadex      @558
+    _environ            = MSVCRT__environ           @559
+    _eof            = _CRTDLL__eof          @560
+    _errno          = _CRTDLL__errno        @561
+    _except_handler2        = _CRTDLL__except_handler2  @562
+    _except_handler3        = _MSVCRT__except_handler3  @563
+    _execl          = _CRTDLL__execl        @564
+    _execle         = _CRTDLL__execle       @565
+    _execlp         = _CRTDLL__execlp       @566
+    _execlpe            = _CRTDLL__execlpe      @567
+    _execv          = _CRTDLL__execv        @568
+    _execve         = _CRTDLL__execve       @569
+    _execvp         = _CRTDLL__execvp       @570
+    _execvpe            = _CRTDLL__execvpe      @571
+    _exit           = _CRTDLL__exit         @572
+    _expand         = _CRTDLL__expand       @573
+    _fcloseall          = _CRTDLL__fcloseall        @574
+    _fcvt           = _CRTDLL__fcvt         @575
+    _fdopen         = _CRTDLL__fdopen       @576
+    _fgetchar           = _CRTDLL__fgetchar     @577
+    _fgetwchar          = _CRTDLL__fgetwchar        @578
+    _filbuf         = _CRTDLL__filbuf       @579
+    _fileinfo           = MSVCRT__fileinfo      @580
+    _filelength         = _CRTDLL__filelength       @581
+    _fileno         = _CRTDLL__fileno       @582
+    _findclose          = _CRTDLL__findclose        @583
+    _findfirst          = _CRTDLL__findfirst        @584
+    _findnext           = _CRTDLL__findnext     @585
+    _finite         = _CRTDLL__finite       @586
+    _flsbuf         = _CRTDLL__flsbuf       @587
+    _flushall           = _CRTDLL__flushall     @588
+    _fmode          = MSVCRT__fmode         @589
+    _fpclass            = _CRTDLL__fpclass      @590
+    _fpieee_flt         = _CRTDLL__fpieee_flt       @591
+    _fpreset            = _CRTDLL__fpreset      @592
+    _fputchar           = _CRTDLL__fputchar     @593
+    _fputwchar          = _CRTDLL__fputwchar        @594
+    _fsopen         = _CRTDLL__fsopen       @595
+    _fstat          = _CRTDLL__fstat        @596
+    _ftime          = _CRTDLL__ftime        @597
+    _ftol           = _CRTDLL__ftol         @598
+    _fullpath           = _CRTDLL__fullpath     @599
 
 
-    _futime			= _CRTDLL__futime		@600
-    _gcvt			= _CRTDLL__gcvt			@601
-    _get_osfhandle		= _CRTDLL__get_osfhandle	@602
-    _getch			= _CRTDLL__getch		@603
-    _getche			= _CRTDLL__getche		@604
-    _getcwd			= _CRTDLL__getcwd		@605
-    _getdcwd			= _CRTDLL__getdcwd		@606
-    _getdiskfree		= _CRTDLL__getdiskfree		@607
-;   _getdllprocaddr						@608
-    _getdrive			= _CRTDLL__getdrive		@609
-    _getdrives			= _CRTDLL__getdrives		@610
-    _getmbcp			= _MSVCRT__getmbcp		@611
-    _getpid			= _CRTDLL__getpid		@612
-    _getsystime			= _CRTDLL__getsystime		@613
-    _getw			= _CRTDLL__getw			@614
-    _getws			= _MSVCRT__getws		@615
-    _global_unwind2		= _CRTDLL__global_unwind2	@616
-    _heapadd			= _MSVCRT__heapadd		@617
-    _heapchk			= _CRTDLL__heapchk		@618
-    _heapmin			= _CRTDLL__heapmin		@619
-    _heapset			= _CRTDLL__heapset		@620
-;    _heapused							@621
-    _heapwalk			= _CRTDLL__heapwalk		@622
-    _hypot			= _CRTDLL__hypot		@623
-    _initterm			= _CRTDLL__initterm		@624
-    _iob			= CRTDLL_iob			@625
-    _isatty			= _CRTDLL__isatty		@626
-    _isctype			= _CRTDLL__isctype		@627
-    _ismbbalnum			= _CRTDLL__ismbbalnum		@628
-    _ismbbalpha			= _CRTDLL__ismbbalpha		@629
-    _ismbbgraph			= _CRTDLL__ismbbgraph		@630
-    _ismbbkalnum		= _CRTDLL__ismbbkalnum		@631
-    _ismbbkana			= _CRTDLL__ismbbkana		@632
-    _ismbbkprint		= _MSVCRT__ismbbkprint		@633
-    _ismbbkpunct		= _CRTDLL__ismbbkpunct		@634
-    _ismbblead			= _CRTDLL__ismbblead		@635
-    _ismbbprint			= _CRTDLL__ismbbprint		@636
-    _ismbbpunct			= _CRTDLL__ismbbpunct		@637
-    _ismbbtrail			= _CRTDLL__ismbbtrail		@638
-    _ismbcalnum			= _MSVCRT__ismbcalnum		@639
-    _ismbcalpha			= _CRTDLL__ismbcalpha		@640
-    _ismbcdigit			= _CRTDLL__ismbcdigit		@641
-    _ismbcgraph			= _MSVCRT__ismbcgraph		@642
-    _ismbchira			= _CRTDLL__ismbchira		@643
-    _ismbckata			= _CRTDLL__ismbckata		@644
-    _ismbcl0			= _CRTDLL__ismbcl0		@645
-    _ismbcl1			= _CRTDLL__ismbcl1		@646
-    _ismbcl2			= _CRTDLL__ismbcl2		@647
-    _ismbclegal			= _CRTDLL__ismbclegal		@648
-    _ismbclower			= _CRTDLL__ismbclower		@649
-    _ismbcprint			= _CRTDLL__ismbcprint		@650
-    _ismbcpunct			= _MSVCRT__ismbcpunct		@651
-    _ismbcspace			= _CRTDLL__ismbcspace		@652
-    _ismbcsymbol		= _CRTDLL__ismbcsymbol		@653
-    _ismbcupper			= _CRTDLL__ismbcupper		@654
-    _ismbslead			= _CRTDLL__ismbslead		@655
-    _ismbstrail			= _CRTDLL__ismbstrail		@656
-    _isnan			= _CRTDLL__isnan		@657
-    _itoa			= _CRTDLL__itoa			@658
-    _itow			= _MSVCRT__itow			@659
-    _j0				= _CRTDLL__j0			@660
-    _j1				= _CRTDLL__j1			@661
-    _jn				= _CRTDLL__jn			@662
-    _kbhit			= _CRTDLL__kbhit		@663
-    _lfind			= _CRTDLL__lfind		@664
-    _loaddll			= _CRTDLL__loaddll		@665
-    _local_unwind2		= _CRTDLL__local_unwind2	@666
-    _locking			= _CRTDLL__locking		@667
-    _logb			= _CRTDLL__logb			@668
-    _longjmpex			= _CRTDLL_longjmp		@669 ; Not correct
-    _lrotl			= _CRTDLL__lrotl		@670
-    _lrotr			= _CRTDLL__lrotr		@671
-    _lsearch			= _CRTDLL__lsearch		@672
-    _lseek			= _CRTDLL__lseek		@673
-    _ltoa			= _CRTDLL__ltoa			@674
-    _ltow			= _MSVCRT__ltow			@675
-    _makepath			= _CRTDLL__makepath		@676
-    _matherr			= _MSVCRT__matherr		@677
-    _mbbtombc			= _CRTDLL__mbbtombc		@678
-    _mbbtype			= _CRTDLL__mbbtype		@679
-    _mbccpy			= _CRTDLL__mbccpy		@680
-    _mbcjistojms		= _CRTDLL__mbcjistojms		@681
-    _mbcjmstojis		= _CRTDLL__mbcjmstojis		@682
-    _mbclen			= _CRTDLL__mbclen		@683
-    _mbctohira			= _CRTDLL__mbctohira		@684
-    _mbctokata			= _CRTDLL__mbctokata		@685
-    _mbctolower			= _CRTDLL__mbctolower		@686
-    _mbctombb			= _CRTDLL__mbctombb		@687
-    _mbctoupper			= _CRTDLL__mbctoupper		@688
-    _mbctype			= CRTDLL_mbctype		@689
-    _mbsbtype			= _CRTDLL__mbsbtype		@690
-    _mbscat			= _CRTDLL__mbscat		@691
-    _mbschr			= _CRTDLL__mbschr		@692
-    _mbscmp			= _CRTDLL__mbscmp		@693
-    _mbscoll			= _CRTDLL__mbscmp 		@694
-    _mbscpy			= _CRTDLL__mbscpy		@695
-    _mbscspn			= _CRTDLL__mbscspn		@696
-    _mbsdec			= _CRTDLL__mbsdec		@697
-    _mbsdup			= _CRTDLL__mbsdup		@698
-    _mbsicmp			= _CRTDLL__mbsicmp		@699
+    _futime         = _CRTDLL__futime       @600
+    _gcvt           = _CRTDLL__gcvt         @601
+    _get_osfhandle      = _CRTDLL__get_osfhandle    @602
+    _getch          = _CRTDLL__getch        @603
+    _getche         = _CRTDLL__getche       @604
+    _getcwd         = _CRTDLL__getcwd       @605
+    _getdcwd            = _CRTDLL__getdcwd      @606
+    _getdiskfree        = _CRTDLL__getdiskfree      @607
+;   _getdllprocaddr                     @608
+    _getdrive           = _CRTDLL__getdrive     @609
+    _getdrives          = _CRTDLL__getdrives        @610
+    _getmbcp            = _MSVCRT__getmbcp      @611
+    _getpid         = _CRTDLL__getpid       @612
+    _getsystime         = _CRTDLL__getsystime       @613
+    _getw           = _CRTDLL__getw         @614
+    _getws          = _MSVCRT__getws        @615
+    _global_unwind2     = _CRTDLL__global_unwind2   @616
+    _heapadd            = _MSVCRT__heapadd      @617
+    _heapchk            = _CRTDLL__heapchk      @618
+    _heapmin            = _CRTDLL__heapmin      @619
+    _heapset            = _CRTDLL__heapset      @620
+;    _heapused                          @621
+    _heapwalk           = _CRTDLL__heapwalk     @622
+    _hypot          = _CRTDLL__hypot        @623
+    _initterm           = _CRTDLL__initterm     @624
+    _iob            = CRTDLL_iob            @625
+    _isatty         = _CRTDLL__isatty       @626
+    _isctype            = _CRTDLL__isctype      @627
+    _ismbbalnum         = _CRTDLL__ismbbalnum       @628
+    _ismbbalpha         = _CRTDLL__ismbbalpha       @629
+    _ismbbgraph         = _CRTDLL__ismbbgraph       @630
+    _ismbbkalnum        = _CRTDLL__ismbbkalnum      @631
+    _ismbbkana          = _CRTDLL__ismbbkana        @632
+    _ismbbkprint        = _MSVCRT__ismbbkprint      @633
+    _ismbbkpunct        = _CRTDLL__ismbbkpunct      @634
+    _ismbblead          = _CRTDLL__ismbblead        @635
+    _ismbbprint         = _CRTDLL__ismbbprint       @636
+    _ismbbpunct         = _CRTDLL__ismbbpunct       @637
+    _ismbbtrail         = _CRTDLL__ismbbtrail       @638
+    _ismbcalnum         = _MSVCRT__ismbcalnum       @639
+    _ismbcalpha         = _CRTDLL__ismbcalpha       @640
+    _ismbcdigit         = _CRTDLL__ismbcdigit       @641
+    _ismbcgraph         = _MSVCRT__ismbcgraph       @642
+    _ismbchira          = _CRTDLL__ismbchira        @643
+    _ismbckata          = _CRTDLL__ismbckata        @644
+    _ismbcl0            = _CRTDLL__ismbcl0      @645
+    _ismbcl1            = _CRTDLL__ismbcl1      @646
+    _ismbcl2            = _CRTDLL__ismbcl2      @647
+    _ismbclegal         = _CRTDLL__ismbclegal       @648
+    _ismbclower         = _CRTDLL__ismbclower       @649
+    _ismbcprint         = _CRTDLL__ismbcprint       @650
+    _ismbcpunct         = _MSVCRT__ismbcpunct       @651
+    _ismbcspace         = _CRTDLL__ismbcspace       @652
+    _ismbcsymbol        = _CRTDLL__ismbcsymbol      @653
+    _ismbcupper         = _CRTDLL__ismbcupper       @654
+    _ismbslead          = _CRTDLL__ismbslead        @655
+    _ismbstrail         = _CRTDLL__ismbstrail       @656
+    _isnan          = _CRTDLL__isnan        @657
+    _itoa           = _CRTDLL__itoa         @658
+    _itow           = _MSVCRT__itow         @659
+    _j0             = _CRTDLL__j0           @660
+    _j1             = _CRTDLL__j1           @661
+    _jn             = _CRTDLL__jn           @662
+    _kbhit          = _CRTDLL__kbhit        @663
+    _lfind          = _CRTDLL__lfind        @664
+    _loaddll            = _CRTDLL__loaddll      @665
+    _local_unwind2      = _CRTDLL__local_unwind2    @666
+    _locking            = _CRTDLL__locking      @667
+    _logb           = _CRTDLL__logb         @668
+    _longjmpex          = _CRTDLL_longjmp       @669 ; Not correct
+    _lrotl          = _CRTDLL__lrotl        @670
+    _lrotr          = _CRTDLL__lrotr        @671
+    _lsearch            = _CRTDLL__lsearch      @672
+    _lseek          = _CRTDLL__lseek        @673
+    _ltoa           = _CRTDLL__ltoa         @674
+    _ltow           = _MSVCRT__ltow         @675
+    _makepath           = _CRTDLL__makepath     @676
+    _matherr            = _MSVCRT__matherr      @677
+    _mbbtombc           = _CRTDLL__mbbtombc     @678
+    _mbbtype            = _CRTDLL__mbbtype      @679
+    _mbccpy         = _CRTDLL__mbccpy       @680
+    _mbcjistojms        = _CRTDLL__mbcjistojms      @681
+    _mbcjmstojis        = _CRTDLL__mbcjmstojis      @682
+    _mbclen         = _CRTDLL__mbclen       @683
+    _mbctohira          = _CRTDLL__mbctohira        @684
+    _mbctokata          = _CRTDLL__mbctokata        @685
+    _mbctolower         = _CRTDLL__mbctolower       @686
+    _mbctombb           = _CRTDLL__mbctombb     @687
+    _mbctoupper         = _CRTDLL__mbctoupper       @688
+    _mbctype            = CRTDLL_mbctype        @689
+    _mbsbtype           = _CRTDLL__mbsbtype     @690
+    _mbscat         = _CRTDLL__mbscat       @691
+    _mbschr         = _CRTDLL__mbschr       @692
+    _mbscmp         = _CRTDLL__mbscmp       @693
+    _mbscoll            = _CRTDLL__mbscmp       @694
+    _mbscpy         = _CRTDLL__mbscpy       @695
+    _mbscspn            = _CRTDLL__mbscspn      @696
+    _mbsdec         = _CRTDLL__mbsdec       @697
+    _mbsdup         = _CRTDLL__mbsdup       @698
+    _mbsicmp            = _CRTDLL__mbsicmp      @699
 
 
-    _mbsicoll			= _CRTDLL__mbsicmp		@700
-    _mbsinc			= _CRTDLL__mbsinc		@701
-    _mbslen			= _CRTDLL__mbslen		@702
-    _mbslwr			= _CRTDLL__mbslwr		@703
-    _mbsnbcat			= _CRTDLL__mbsnbcat		@704
-    _mbsnbcmp			= _CRTDLL__mbsnbcmp		@705
-    _mbsnbcnt			= _CRTDLL__mbsnbcnt		@706
-    _mbsnbcoll			= _CRTDLL__mbsncmp		@707
-    _mbsnbcpy			= _CRTDLL__mbsnbcpy		@708
-    _mbsnbicmp			= _CRTDLL__mbsnbicmp		@709
-    _mbsnbicoll			= _CRTDLL__mbsnbicmp		@710
-    _mbsnbset			= _CRTDLL__mbsnbset		@711
-    _mbsncat			= _CRTDLL__mbsncat		@712
-    _mbsnccnt			= _CRTDLL__mbsnccnt		@713
-    _mbsncmp			= _CRTDLL__mbsncmp		@714
-    _mbsncoll			= _CRTDLL__mbsncmp		@715 
-    _mbsncpy			= _CRTDLL__mbsncpy		@716
-    _mbsnextc			= _CRTDLL__mbsnextc		@717
-    _mbsnicmp			= _CRTDLL__mbsnicmp		@718
-    _mbsnicoll			= _CRTDLL__mbsnicmp		@719
-    _mbsninc			= _CRTDLL__mbsninc		@720
-    _mbsnset			= _CRTDLL__mbsnset		@721
-    _mbspbrk			= _CRTDLL__mbspbrk		@722
-    _mbsrchr			= _CRTDLL__mbsrchr		@723
-    _mbsrev			= _CRTDLL__mbsrev		@724
-    _mbsset			= _CRTDLL__mbsset		@725
-    _mbsspn			= _CRTDLL__mbsspn		@726
-    _mbsspnp			= _CRTDLL__mbsspnp		@727
-    _mbsstr			= _CRTDLL__mbsstr		@728
-    _mbstok			= _CRTDLL__mbstok		@729
-    _mbstrlen			= _CRTDLL__mbstrlen		@730
-    _mbsupr			= _CRTDLL__mbsupr		@731
-    _memccpy			= _CRTDLL__memccpy		@732
-    _memicmp			= _CRTDLL__memicmp		@733
-    _mkdir			= _CRTDLL__mkdir		@734
-    _mktemp			= _CRTDLL__mktemp		@735
-    _msize			= _CRTDLL__msize		@736
-;    _mtlock							@737
-;    _mtunlock							@738
-    _nextafter			= _CRTDLL__nextafter		@739
-    _onexit			= _CRTDLL__onexit		@740
-    _open			= _CRTDLL__open			@741
-    _open_osfhandle		= _CRTDLL__open_osfhandle	@742
-    _osver			= MSVCRT__osver			@743
-    _pclose			= _CRTDLL__pclose		@744
-    _pctype			= MSVCRT__pctype    		@745
-    _pgmptr			= MSVCRT__pgmptr		@746
-    _pipe			= _CRTDLL__pipe			@747
-    _popen			= _CRTDLL__popen		@748
-    _purecall			= _CRTDLL__purecall		@749
-    _putch			= _CRTDLL__putch		@750
-    _putenv			= _CRTDLL__putenv		@751
-    _putw			= _CRTDLL__putw			@752
-    _putws			= _MSVCRT__putws		@753
-    _pwctype			= MSVCRT__pwctype    		@754
-    _read			= _CRTDLL__read			@755
-    _rmdir			= _CRTDLL__rmdir		@756
-    _rmtmp			= _CRTDLL__rmtmp		@757
-    _rotl			= _CRTDLL__rotl			@758
-    _rotr			= _CRTDLL__rotr			@759
-;   _safe_fdiv							@760
-;   _safe_fdivr							@761
-;   _safe_fprem							@762
-;   _safe_fprem1						@763
-    _scalb			= _CRTDLL__scalb		@764
-    _searchenv			= _CRTDLL__searchenv		@765
-;   _seh_longjmp_unwind						@766
-    _seterrormode		= _CRTDLL__seterrormode		@767
-    _setjmp			= _CRTDLL__setjmp		@768
-    _setjmp3			= _CRTDLL__setjmp		@769 ; Not correct
-    _setmbcp			= _MSVCRT__setmbcp		@770
-    _setmode							@771
-    _setsystime			= _CRTDLL__setsystime		@772
-    _sleep			= _CRTDLL__sleep		@773
-    _snprintf			= _CRTDLL__snprintf		@774
-    _snwprintf			= _CRTDLL__snwprintf		@775
-    _sopen			= _CRTDLL__sopen		@776
-    _spawnl			= _CRTDLL__spawnl		@777
-    _spawnle			= _CRTDLL__spawnle		@778
-    _spawnlp			= _CRTDLL__spawnlp		@779
-    _spawnlpe			= _CRTDLL__spawnlpe		@780
-    _spawnv			= _CRTDLL__spawnv		@781
-    _spawnve			= _CRTDLL__spawnve		@782
-    _spawnvp			= _CRTDLL__spawnvp		@783
-    _spawnvpe			= _CRTDLL__spawnvpe		@784
-    _splitpath			= _CRTDLL__splitpath		@785
-    _stat			= _CRTDLL__stat			@786
-    _statusfp			= _CRTDLL__statusfp		@787
-    _strcmpi			= _CRTDLL__strcmpi		@788
-    _strdate			= _CRTDLL__strdate		@789
-    _strdup			= _CRTDLL__strdup		@790
-    _strerror			= _CRTDLL__strerror		@791
-    _stricmp			= _CRTDLL__stricmp		@792
-    _stricoll			= _CRTDLL__stricoll		@793
-    _strlwr			= _CRTDLL__strlwr		@794
-    _strncoll			= _MSVCRT__strncoll		@795
-    _strnicmp			= _CRTDLL__strnicmp		@796
-    _strnicoll			= _MSVCRT__strnicoll		@797
-    _strnset			= _CRTDLL__strnset		@798
-    _strrev			= _CRTDLL__strrev		@799
+    _mbsicoll           = _CRTDLL__mbsicmp      @700
+    _mbsinc         = _CRTDLL__mbsinc       @701
+    _mbslen         = _CRTDLL__mbslen       @702
+    _mbslwr         = _CRTDLL__mbslwr       @703
+    _mbsnbcat           = _CRTDLL__mbsnbcat     @704
+    _mbsnbcmp           = _CRTDLL__mbsnbcmp     @705
+    _mbsnbcnt           = _CRTDLL__mbsnbcnt     @706
+    _mbsnbcoll          = _CRTDLL__mbsncmp      @707
+    _mbsnbcpy           = _CRTDLL__mbsnbcpy     @708
+    _mbsnbicmp          = _CRTDLL__mbsnbicmp        @709
+    _mbsnbicoll         = _CRTDLL__mbsnbicmp        @710
+    _mbsnbset           = _CRTDLL__mbsnbset     @711
+    _mbsncat            = _CRTDLL__mbsncat      @712
+    _mbsnccnt           = _CRTDLL__mbsnccnt     @713
+    _mbsncmp            = _CRTDLL__mbsncmp      @714
+    _mbsncoll           = _CRTDLL__mbsncmp      @715
+    _mbsncpy            = _CRTDLL__mbsncpy      @716
+    _mbsnextc           = _CRTDLL__mbsnextc     @717
+    _mbsnicmp           = _CRTDLL__mbsnicmp     @718
+    _mbsnicoll          = _CRTDLL__mbsnicmp     @719
+    _mbsninc            = _CRTDLL__mbsninc      @720
+    _mbsnset            = _CRTDLL__mbsnset      @721
+    _mbspbrk            = _CRTDLL__mbspbrk      @722
+    _mbsrchr            = _CRTDLL__mbsrchr      @723
+    _mbsrev         = _CRTDLL__mbsrev       @724
+    _mbsset         = _CRTDLL__mbsset       @725
+    _mbsspn         = _CRTDLL__mbsspn       @726
+    _mbsspnp            = _CRTDLL__mbsspnp      @727
+    _mbsstr         = _CRTDLL__mbsstr       @728
+    _mbstok         = _CRTDLL__mbstok       @729
+    _mbstrlen           = _CRTDLL__mbstrlen     @730
+    _mbsupr         = _CRTDLL__mbsupr       @731
+    _memccpy            = _CRTDLL__memccpy      @732
+    _memicmp            = _CRTDLL__memicmp      @733
+    _mkdir          = _CRTDLL__mkdir        @734
+    _mktemp         = _CRTDLL__mktemp       @735
+    _msize          = _CRTDLL__msize        @736
+;    _mtlock                            @737
+;    _mtunlock                          @738
+    _nextafter          = _CRTDLL__nextafter        @739
+    _onexit         = _CRTDLL__onexit       @740
+    _open           = _CRTDLL__open         @741
+    _open_osfhandle     = _CRTDLL__open_osfhandle   @742
+    _osver          = MSVCRT__osver         @743
+    _pclose         = _CRTDLL__pclose       @744
+    _pctype         = MSVCRT__pctype            @745
+    _pgmptr         = MSVCRT__pgmptr        @746
+    _pipe           = _CRTDLL__pipe         @747
+    _popen          = _CRTDLL__popen        @748
+    _purecall           = _CRTDLL__purecall     @749
+    _putch          = _CRTDLL__putch        @750
+    _putenv         = _CRTDLL__putenv       @751
+    _putw           = _CRTDLL__putw         @752
+    _putws          = _MSVCRT__putws        @753
+    _pwctype            = MSVCRT__pwctype           @754
+    _read           = _CRTDLL__read         @755
+    _rmdir          = _CRTDLL__rmdir        @756
+    _rmtmp          = _CRTDLL__rmtmp        @757
+    _rotl           = _CRTDLL__rotl         @758
+    _rotr           = _CRTDLL__rotr         @759
+;   _safe_fdiv                          @760
+;   _safe_fdivr                         @761
+;   _safe_fprem                         @762
+;   _safe_fprem1                        @763
+    _scalb          = _CRTDLL__scalb        @764
+    _searchenv          = _CRTDLL__searchenv        @765
+;   _seh_longjmp_unwind                     @766
+    _seterrormode       = _CRTDLL__seterrormode     @767
+    _setjmp         = _CRTDLL__setjmp       @768
+    _setjmp3            = _CRTDLL__setjmp       @769 ; Not correct
+    _setmbcp            = _MSVCRT__setmbcp      @770
+    _setmode                            @771
+    _setsystime         = _CRTDLL__setsystime       @772
+    _sleep          = _CRTDLL__sleep        @773
+    _snprintf           = _CRTDLL__snprintf     @774
+    _snwprintf          = _CRTDLL__snwprintf        @775
+    _sopen          = _CRTDLL__sopen        @776
+    _spawnl         = _CRTDLL__spawnl       @777
+    _spawnle            = _CRTDLL__spawnle      @778
+    _spawnlp            = _CRTDLL__spawnlp      @779
+    _spawnlpe           = _CRTDLL__spawnlpe     @780
+    _spawnv         = _CRTDLL__spawnv       @781
+    _spawnve            = _CRTDLL__spawnve      @782
+    _spawnvp            = _CRTDLL__spawnvp      @783
+    _spawnvpe           = _CRTDLL__spawnvpe     @784
+    _splitpath          = _CRTDLL__splitpath        @785
+    _stat           = _CRTDLL__stat         @786
+    _statusfp           = _CRTDLL__statusfp     @787
+    _strcmpi            = _CRTDLL__strcmpi      @788
+    _strdate            = _CRTDLL__strdate      @789
+    _strdup         = _CRTDLL__strdup       @790
+    _strerror           = _CRTDLL__strerror     @791
+    _stricmp            = _CRTDLL__stricmp      @792
+    _stricoll           = _CRTDLL__stricoll     @793
+    _strlwr         = _CRTDLL__strlwr       @794
+    _strncoll           = _MSVCRT__strncoll     @795
+    _strnicmp           = _CRTDLL__strnicmp     @796
+    _strnicoll          = _MSVCRT__strnicoll        @797
+    _strnset            = _CRTDLL__strnset      @798
+    _strrev         = _CRTDLL__strrev       @799
 
 
-    _strset			= _CRTDLL__strset		@800
-    _strtime			= _CRTDLL__strtime		@801
-    _strupr			= _CRTDLL__strupr		@802
-    _swab			= _CRTDLL__swab			@803
-    _sys_errlist		= CRTDLL_sys_errlist		@804
-    _sys_nerr			= MSVCRT__sys_nerr		@805
-;   _tccpy							@806
-;   _tclen							@807
-;   _tcschr							@808
-;   _tcsclen							@809
-;   _tcscmp							@810
-;   _tcscspn							@811
-;   _tcsdec							@812
-;   _tcsicmp							@813
-;   _tcsinc							@814
-;   _tcslwr							@815
-;   _tcsnbcnt							@816
-;   _tcsncat							@817
-;   _tcsnccat							@818
-;   _tcsnccmp							@819
-;   _tcsnccnt							@820
-;   _tcsnccpy							@821
-;   _tcsncicmp							@822
-;   _tcsncmp							@823
-;   _tcsncpy							@824
-;   _tcsncset							@825
-;   _tcsnextc							@826
-;   _tcsnicmp							@827
-;   _tcsninc							@828
-;   _tcsnset							@829
-;   _tcspbrk							@830
-;   _tcsrchr							@831
-;   _tcsrev							@832
-;   _tcsset							@833
-;   _tcsspn							@834
-;   _tcsspnp							@835
-;   _tcsstr							@836
-;   _tcstok							@837
-;   _tcsupr							@838
-    _tell			= _CRTDLL__tell			@839
-    _tempnam			= _CRTDLL__tempnam		@840
-    _timezone			= MSVCRT__timezone		@841
-    _tolower			= _CRTDLL__tolower		@842
-    _toupper			= _CRTDLL__toupper		@843
-    _tzname			= CRTDLL_tzname    		@844
-    _tzset			= _CRTDLL__tzset		@845
-    _ultoa			= _CRTDLL__ultoa		@846
-    _ultow			= _MSVCRT__ultow		@847
-    _umask			= _MSVCRT__umask		@848
-    _ungetch			= _CRTDLL__ungetch		@849
-    _unlink			= _CRTDLL__unlink		@850
-    _unloaddll			= _CRTDLL__unloaddll		@851
-    _utime			= _CRTDLL__utime		@852
-    _vsnprintf			= _CRTDLL__vsnprintf		@853
-    _vsnwprintf			= _CRTDLL__vsnwprintf		@854
-    _waccess			= _MSVCRT__waccess		@855
-    _wasctime			= _MSVCRT__wasctime 		@856
-    _wchdir			= _MSVCRT__wchdir		@857
-    _wchmod			= _MSVCRT__wchmod		@858
-;   _wcmdln							@859	
-    _wcreat			= _MSVCRT__wcreat		@860
-    _wcsdup			= _CRTDLL__wcsdup		@861
-    _wcsicmp			= _CRTDLL__wcsicmp		@862
-    _wcsicoll			= _CRTDLL__wcsicoll		@863
-    _wcslwr			= _CRTDLL__wcslwr		@864
-    _wcsncoll			= _MSVCRT__wcsncoll		@865
-    _wcsnicmp			= _CRTDLL__wcsnicmp		@866
-    _wcsnicoll			= _MSVCRT__wcsnicoll		@867
-    _wcsnset			= _CRTDLL__wcsnset		@868
-    _wcsrev			= _CRTDLL__wcsrev		@869
-    _wcsset			= _CRTDLL__wcsset		@870
-    _wcsupr			= _CRTDLL__wcsupr		@871
-    _wctime			= _MSVCRT__wctime		@872
-    _wenviron							@873
-    _wexecl			= _MSVCRT__wexecl		@874
-    _wexecle			= _MSVCRT__wexecle		@875
-    _wexeclp			= _MSVCRT__wexeclp		@876
-    _wexeclpe			= _MSVCRT__wexeclpe		@877
-    _wexecv			= _MSVCRT__wexecv		@878
-    _wexecve			= _MSVCRT__wexecve		@879
-    _wexecvp			= _MSVCRT__wexecvp		@880
-    _wexecvpe			= _MSVCRT__wexecvpe		@881
-    _wfdopen			= _MSVCRT__wfdopen		@882
-    _wfindfirst			= _MSVCRT__wfindfirst		@883
-    _wfindnext			= _MSVCRT__wfindnext		@884
-    _wfopen			= _MSVCRT__wfopen		@885
-    _wfreopen			= _MSVCRT__wfreopen		@886
-    _wfsopen			= _MSVCRT__wfsopen		@887
-    _wfullpath			= _MSVCRT__wfullpath		@888
-    _wgetcwd			= _MSVCRT__wgetcwd		@889
-    _wgetdcwd			= _MSVCRT__wgetdcwd		@890
-    _wgetenv			= _MSVCRT__wgetenv		@891
-    _winmajor			= MSVCRT__winmajor		@892
-    _winminor			= MSVCRT__winminor		@893
-    _winver			= MSVCRT__winver		@894
-    _wmakepath			= _MSVCRT__wmakepath		@895
-    _wmkdir			= _MSVCRT__wmkdir		@896
-    _wmktemp			= _MSVCRT__wmktemp		@897
-    _wopen			= _MSVCRT__wopen		@898
-    _wperror			= _MSVCRT__wperror		@899
+    _strset         = _CRTDLL__strset       @800
+    _strtime            = _CRTDLL__strtime      @801
+    _strupr         = _CRTDLL__strupr       @802
+    _swab           = _CRTDLL__swab         @803
+    _sys_errlist        = CRTDLL_sys_errlist        @804
+    _sys_nerr           = MSVCRT__sys_nerr      @805
+;   _tccpy                          @806
+;   _tclen                          @807
+;   _tcschr                         @808
+;   _tcsclen                            @809
+;   _tcscmp                         @810
+;   _tcscspn                            @811
+;   _tcsdec                         @812
+;   _tcsicmp                            @813
+;   _tcsinc                         @814
+;   _tcslwr                         @815
+;   _tcsnbcnt                           @816
+;   _tcsncat                            @817
+;   _tcsnccat                           @818
+;   _tcsnccmp                           @819
+;   _tcsnccnt                           @820
+;   _tcsnccpy                           @821
+;   _tcsncicmp                          @822
+;   _tcsncmp                            @823
+;   _tcsncpy                            @824
+;   _tcsncset                           @825
+;   _tcsnextc                           @826
+;   _tcsnicmp                           @827
+;   _tcsninc                            @828
+;   _tcsnset                            @829
+;   _tcspbrk                            @830
+;   _tcsrchr                            @831
+;   _tcsrev                         @832
+;   _tcsset                         @833
+;   _tcsspn                         @834
+;   _tcsspnp                            @835
+;   _tcsstr                         @836
+;   _tcstok                         @837
+;   _tcsupr                         @838
+    _tell           = _CRTDLL__tell         @839
+    _tempnam            = _CRTDLL__tempnam      @840
+    _timezone           = MSVCRT__timezone      @841
+    _tolower            = _CRTDLL__tolower      @842
+    _toupper            = _CRTDLL__toupper      @843
+    _tzname         = CRTDLL_tzname         @844
+    _tzset          = _CRTDLL__tzset        @845
+    _ultoa          = _CRTDLL__ultoa        @846
+    _ultow          = _MSVCRT__ultow        @847
+    _umask          = _MSVCRT__umask        @848
+    _ungetch            = _CRTDLL__ungetch      @849
+    _unlink         = _CRTDLL__unlink       @850
+    _unloaddll          = _CRTDLL__unloaddll        @851
+    _utime          = _CRTDLL__utime        @852
+    _vsnprintf          = _CRTDLL__vsnprintf        @853
+    _vsnwprintf         = _CRTDLL__vsnwprintf       @854
+    _waccess            = _MSVCRT__waccess      @855
+    _wasctime           = _MSVCRT__wasctime         @856
+    _wchdir         = _MSVCRT__wchdir       @857
+    _wchmod         = _MSVCRT__wchmod       @858
+;   _wcmdln                         @859
+    _wcreat         = _MSVCRT__wcreat       @860
+    _wcsdup         = _CRTDLL__wcsdup       @861
+    _wcsicmp            = _CRTDLL__wcsicmp      @862
+    _wcsicoll           = _CRTDLL__wcsicoll     @863
+    _wcslwr         = _CRTDLL__wcslwr       @864
+    _wcsncoll           = _MSVCRT__wcsncoll     @865
+    _wcsnicmp           = _CRTDLL__wcsnicmp     @866
+    _wcsnicoll          = _MSVCRT__wcsnicoll        @867
+    _wcsnset            = _CRTDLL__wcsnset      @868
+    _wcsrev         = _CRTDLL__wcsrev       @869
+    _wcsset         = _CRTDLL__wcsset       @870
+    _wcsupr         = _CRTDLL__wcsupr       @871
+    _wctime         = _MSVCRT__wctime       @872
+    _wenviron                           @873
+    _wexecl         = _MSVCRT__wexecl       @874
+    _wexecle            = _MSVCRT__wexecle      @875
+    _wexeclp            = _MSVCRT__wexeclp      @876
+    _wexeclpe           = _MSVCRT__wexeclpe     @877
+    _wexecv         = _MSVCRT__wexecv       @878
+    _wexecve            = _MSVCRT__wexecve      @879
+    _wexecvp            = _MSVCRT__wexecvp      @880
+    _wexecvpe           = _MSVCRT__wexecvpe     @881
+    _wfdopen            = _MSVCRT__wfdopen      @882
+    _wfindfirst         = _MSVCRT__wfindfirst       @883
+    _wfindnext          = _MSVCRT__wfindnext        @884
+    _wfopen         = _MSVCRT__wfopen       @885
+    _wfreopen           = _MSVCRT__wfreopen     @886
+    _wfsopen            = _MSVCRT__wfsopen      @887
+    _wfullpath          = _MSVCRT__wfullpath        @888
+    _wgetcwd            = _MSVCRT__wgetcwd      @889
+    _wgetdcwd           = _MSVCRT__wgetdcwd     @890
+    _wgetenv            = _MSVCRT__wgetenv      @891
+    _winmajor           = MSVCRT__winmajor      @892
+    _winminor           = MSVCRT__winminor      @893
+    _winver         = MSVCRT__winver        @894
+    _wmakepath          = _MSVCRT__wmakepath        @895
+    _wmkdir         = _MSVCRT__wmkdir       @896
+    _wmktemp            = _MSVCRT__wmktemp      @897
+    _wopen          = _MSVCRT__wopen        @898
+    _wperror            = _MSVCRT__wperror      @899
 
 
-    _wpgmptr							@900
-    _wpopen			= _MSVCRT__wpopen		@901
-    _wputenv			= _MSVCRT__wputenv		@902
-    _wremove			= _MSVCRT__wremove		@903
-    _wrename			= _MSVCRT__wrename		@904
-    _write			= _CRTDLL__write		@905
-    _wrmdir			= _MSVCRT__wrmdir		@906
-    _wsearchenv			= _MSVCRT__wsearchenv		@907
-    _wsetlocale			= _MSVCRT__wsetlocale		@908
-    _wsopen			= _MSVCRT__wsopen		@909
-    _wspawnl			= _MSVCRT__wspawnl		@910
-    _wspawnle			= _MSVCRT__wspawnle		@911
-    _wspawnlp			= _MSVCRT__wspawnlp		@912
-    _wspawnlpe			= _MSVCRT__wspawnlpe		@913
-    _wspawnv			= _MSVCRT__wspawnv		@914
-    _wspawnve			= _MSVCRT__wspawnve		@915
-    _wspawnvp			= _MSVCRT__wspawnvp		@916
-    _wspawnvpe			= _MSVCRT__wspawnvpe		@917
-    _wsplitpath			= _MSVCRT__wsplitpath		@918
-    _wstat			= _MSVCRT__wstat		@919
-    _wstrdate			= _MSVCRT__wstrdate		@920
-    _wstrtime			= _MSVCRT__wstrtime		@921
-    _wsystem			= _MSVCRT__wsystem		@922
-    _wtempnam			= _MSVCRT__wtempnam		@923
-    _wtmpnam			= _MSVCRT__wtmpnam		@924
-    _wtoi			= _CRTDLL__wtoi			@925
-    _wtol			= _CRTDLL__wtol			@926
-    _wunlink			= _MSVCRT__wunlink 		@927
-    _wutime			= _MSVCRT__wutime		@928
-    _y0				= _CRTDLL__y0			@929
-    _y1				= _CRTDLL__y1			@930
-    _yn				= _CRTDLL__yn			@931
-    abort			= _CRTDLL_abort			@932
-    abs				= _CRTDLL_abs			@933
-    acos			= _CRTDLL_acos	 		@934
-    asctime			= _CRTDLL_asctime		@935
-    asin			= _CRTDLL_asin			@936
-    atan			= _CRTDLL_atan			@937
-    atan2			= _CRTDLL_atan2			@938
-    atexit			= _CRTDLL_atexit		@939
-    atof			= _CRTDLL_atof			@940
-    atoi			= _CRTDLL_atoi			@941
-    atol			= _CRTDLL_atol			@942
-    bsearch			= _CRTDLL_bsearch		@943
-    calloc			= _CRTDLL_calloc		@944
-    ceil			= _CRTDLL_ceil			@945
-    clearerr			= _CRTDLL_clearerr		@946
-    clock			= _CRTDLL_clock			@947
-    cos				= _CRTDLL_cos			@948
-    cosh			= _CRTDLL_cosh			@949
-    ctime			= _CRTDLL_ctime			@950
-    difftime			= _CRTDLL_difftime		@951
-    div				= _CRTDLL_div			@952
-    exit			= _CRTDLL_exit			@953
-    exp				= _CRTDLL_exp			@954
-    fabs			= _CRTDLL_fabs			@955
-    fclose			= _CRTDLL_fclose		@956
-    feof			= _CRTDLL_feof			@957
-    ferror			= _CRTDLL_ferror		@958
-    fflush			= _CRTDLL_fflush		@959
-    fgetc			= _CRTDLL_fgetc			@960
-    fgetpos			= _CRTDLL_fgetpos		@961
-    fgets			= _CRTDLL_fgets			@962
-    fgetwc			= _CRTDLL_fgetwc		@963
-    fgetws			= _MSVCRT_fgetws		@964
-    floor			= _CRTDLL_floor			@965
-    fmod			= _CRTDLL_fmod			@966
-    fopen			= _CRTDLL_fopen			@967
-    fprintf		        = _CRTDLL_fprintf		@968
-    fputc			= _CRTDLL_fputc			@969
-    fputs			= _CRTDLL_fputs			@970
-    fputwc			= _CRTDLL_fputwc		@971
-    fputws			= _MSVCRT_fputws		@972
-    fread			= _CRTDLL_fread			@973
-    free		        = _CRTDLL_free			@974
-    freopen			= _CRTDLL_freopen		@975
-    frexp			= _CRTDLL_frexp			@976
-    fscanf			= _CRTDLL_fscanf		@977
-    fseek			= _CRTDLL_fseek			@978
-    fsetpos			= _CRTDLL_fsetpos		@979
-    ftell			= _CRTDLL_ftell			@980
-    fwprintf			= _CRTDLL_fwprintf		@981
-    fwrite		        = _CRTDLL_fwrite		@982
-    fwscanf			= _CRTDLL_fwscanf		@983
-    getc			= _CRTDLL_getc			@984
-    getchar			= _CRTDLL_getchar		@985
-    getenv			= _CRTDLL_getenv		@986
-    gets			= _CRTDLL_gets			@987
-    getwc			= _MSVCRT_getwc			@988
-    getwchar			= _MSVCRT_getwchar		@989
-    gmtime			= _CRTDLL_gmtime		@990
-    is_wctype			= _CRTDLL_is_wctype		@991
-    isalnum			= _CRTDLL_isalnum		@992
-    isalpha			= _CRTDLL_isalpha		@993
-    iscntrl			= _CRTDLL_iscntrl		@994
-    isdigit			= _CRTDLL_isdigit		@995
-    isgraph			= _CRTDLL_isgraph		@996
-    isleadbyte			= _CRTDLL_isleadbyte		@997
-    islower			= _CRTDLL_islower		@998
-    isprint			= _CRTDLL_isprint		@999
+    _wpgmptr                            @900
+    _wpopen         = _MSVCRT__wpopen       @901
+    _wputenv            = _MSVCRT__wputenv      @902
+    _wremove            = _MSVCRT__wremove      @903
+    _wrename            = _MSVCRT__wrename      @904
+    _write          = _CRTDLL__write        @905
+    _wrmdir         = _MSVCRT__wrmdir       @906
+    _wsearchenv         = _MSVCRT__wsearchenv       @907
+    _wsetlocale         = _MSVCRT__wsetlocale       @908
+    _wsopen         = _MSVCRT__wsopen       @909
+    _wspawnl            = _MSVCRT__wspawnl      @910
+    _wspawnle           = _MSVCRT__wspawnle     @911
+    _wspawnlp           = _MSVCRT__wspawnlp     @912
+    _wspawnlpe          = _MSVCRT__wspawnlpe        @913
+    _wspawnv            = _MSVCRT__wspawnv      @914
+    _wspawnve           = _MSVCRT__wspawnve     @915
+    _wspawnvp           = _MSVCRT__wspawnvp     @916
+    _wspawnvpe          = _MSVCRT__wspawnvpe        @917
+    _wsplitpath         = _MSVCRT__wsplitpath       @918
+    _wstat          = _MSVCRT__wstat        @919
+    _wstrdate           = _MSVCRT__wstrdate     @920
+    _wstrtime           = _MSVCRT__wstrtime     @921
+    _wsystem            = _MSVCRT__wsystem      @922
+    _wtempnam           = _MSVCRT__wtempnam     @923
+    _wtmpnam            = _MSVCRT__wtmpnam      @924
+    _wtoi           = _CRTDLL__wtoi         @925
+    _wtol           = _CRTDLL__wtol         @926
+    _wunlink            = _MSVCRT__wunlink      @927
+    _wutime         = _MSVCRT__wutime       @928
+    _y0             = _CRTDLL__y0           @929
+    _y1             = _CRTDLL__y1           @930
+    _yn             = _CRTDLL__yn           @931
+    abort           = _CRTDLL_abort         @932
+    abs             = _CRTDLL_abs           @933
+    acos            = _CRTDLL_acos          @934
+    asctime         = _CRTDLL_asctime       @935
+    asin            = _CRTDLL_asin          @936
+    atan            = _CRTDLL_atan          @937
+    atan2           = _CRTDLL_atan2         @938
+    atexit          = _CRTDLL_atexit        @939
+    atof            = _CRTDLL_atof          @940
+    atoi            = _CRTDLL_atoi          @941
+    atol            = _CRTDLL_atol          @942
+    bsearch         = _CRTDLL_bsearch       @943
+    calloc          = _CRTDLL_calloc        @944
+    ceil            = _CRTDLL_ceil          @945
+    clearerr            = _CRTDLL_clearerr      @946
+    clock           = _CRTDLL_clock         @947
+    cos             = _CRTDLL_cos           @948
+    cosh            = _CRTDLL_cosh          @949
+    ctime           = _CRTDLL_ctime         @950
+    difftime            = _CRTDLL_difftime      @951
+    div             = _CRTDLL_div           @952
+    exit            = _CRTDLL_exit          @953
+    exp             = _CRTDLL_exp           @954
+    fabs            = _CRTDLL_fabs          @955
+    fclose          = _CRTDLL_fclose        @956
+    feof            = _CRTDLL_feof          @957
+    ferror          = _CRTDLL_ferror        @958
+    fflush          = _CRTDLL_fflush        @959
+    fgetc           = _CRTDLL_fgetc         @960
+    fgetpos         = _CRTDLL_fgetpos       @961
+    fgets           = _CRTDLL_fgets         @962
+    fgetwc          = _CRTDLL_fgetwc        @963
+    fgetws          = _MSVCRT_fgetws        @964
+    floor           = _CRTDLL_floor         @965
+    fmod            = _CRTDLL_fmod          @966
+    fopen           = _CRTDLL_fopen         @967
+    fprintf             = _CRTDLL_fprintf       @968
+    fputc           = _CRTDLL_fputc         @969
+    fputs           = _CRTDLL_fputs         @970
+    fputwc          = _CRTDLL_fputwc        @971
+    fputws          = _MSVCRT_fputws        @972
+    fread           = _CRTDLL_fread         @973
+    free                = _CRTDLL_free          @974
+    freopen         = _CRTDLL_freopen       @975
+    frexp           = _CRTDLL_frexp         @976
+    fscanf          = _CRTDLL_fscanf        @977
+    fseek           = _CRTDLL_fseek         @978
+    fsetpos         = _CRTDLL_fsetpos       @979
+    ftell           = _CRTDLL_ftell         @980
+    fwprintf            = _CRTDLL_fwprintf      @981
+    fwrite              = _CRTDLL_fwrite        @982
+    fwscanf         = _CRTDLL_fwscanf       @983
+    getc            = _CRTDLL_getc          @984
+    getchar         = _CRTDLL_getchar       @985
+    getenv          = _CRTDLL_getenv        @986
+    gets            = _CRTDLL_gets          @987
+    getwc           = _MSVCRT_getwc         @988
+    getwchar            = _MSVCRT_getwchar      @989
+    gmtime          = _CRTDLL_gmtime        @990
+    is_wctype           = _CRTDLL_is_wctype     @991
+    isalnum         = _CRTDLL_isalnum       @992
+    isalpha         = _CRTDLL_isalpha       @993
+    iscntrl         = _CRTDLL_iscntrl       @994
+    isdigit         = _CRTDLL_isdigit       @995
+    isgraph         = _CRTDLL_isgraph       @996
+    isleadbyte          = _CRTDLL_isleadbyte        @997
+    islower         = _CRTDLL_islower       @998
+    isprint         = _CRTDLL_isprint       @999
 
 
-    ispunct			= _CRTDLL_ispunct		@1000
-    isspace			= _CRTDLL_isspace		@1001
-    isupper			= _CRTDLL_isupper		@1002
-    iswalnum			= _CRTDLL_iswalnum		@1003
-    iswalpha			= _CRTDLL_iswalpha		@1004
-    iswascii			= _CRTDLL_iswascii		@1005
-    iswcntrl			= _CRTDLL_iswcntrl		@1006
-    iswctype			= _CRTDLL_iswctype		@1007
-    iswdigit			= _CRTDLL_iswdigit		@1008
-    iswgraph			= _CRTDLL_iswgraph		@1009
-    iswlower			= _CRTDLL_iswlower		@1010
-    iswprint			= _CRTDLL_iswprint		@1011
-    iswpunct			= _CRTDLL_iswpunct		@1012
-    iswspace			= _CRTDLL_iswspace		@1013
-    iswupper			= _CRTDLL_iswupper		@1014
-    iswxdigit			= _CRTDLL_iswxdigit		@1015
-    isxdigit			= _CRTDLL_isxdigit		@1016
-    labs			= _CRTDLL_labs			@1017
-    ldexp			= _CRTDLL_ldexp			@1018
-    ldiv			= _CRTDLL_ldiv			@1019
-    localeconv			= _CRTDLL_localeconv		@1020
-    localtime			= _CRTDLL_localtime		@1021
-    log				= _CRTDLL_log			@1022
-    log10			= _CRTDLL_log10			@1023
-    longjmp		        = _CRTDLL_longjmp		@1024
-    malloc		        = _CRTDLL_malloc		@1025
-    mblen			= _CRTDLL_mblen			@1026
-    mbstowcs			= _CRTDLL_mbstowcs		@1027
-    mbtowc			= _CRTDLL_mbtowc		@1028
-    memchr			= _CRTDLL_memchr		@1029
-    memcmp		        = _CRTDLL_memcmp		@1030
-    memcpy		        = _CRTDLL_memcpy		@1031
-    memmove			= _CRTDLL_memmove		@1032
-    memset		        = _CRTDLL_memset		@1033
-    mktime			= _CRTDLL_mktime		@1034
-    modf			= _CRTDLL_modf			@1035
-    perror			= _CRTDLL_perror		@1036
-    pow				= _CRTDLL_pow			@1037
-    printf			= _CRTDLL_printf		@1038
-    putc			= _CRTDLL_putc			@1039
-    putchar			= _CRTDLL_putchar		@1040
-    puts			= _CRTDLL_puts			@1041
-    putwc			= _MSVCRT_putwc			@1042
-    putwchar			= _MSVCRT_putwchar		@1043
-    qsort			= _CRTDLL_qsort			@1044
-    raise			= _CRTDLL_raise			@1045
-    rand		        = _CRTDLL_rand	  		@1046
-    realloc			= _CRTDLL_realloc		@1047
-    remove		        = _CRTDLL_remove		@1048
-    rename			= _CRTDLL_rename		@1049
-    rewind			= _CRTDLL_rewind		@1050
-    scanf			= _CRTDLL_scanf			@1051
-    setbuf			= _CRTDLL_setbuf		@1052
-    setlocale			= _CRTDLL_setlocale		@1053
-    setvbuf			= _CRTDLL_setvbuf		@1054
-    signal			= _CRTDLL_signal		@1055
-    sin				= _CRTDLL_sin			@1056
-    sinh			= _CRTDLL_sinh			@1057
-    sprintf			= _CRTDLL_sprintf		@1058
-    sqrt			= _CRTDLL_sqrt			@1059
-    srand 			= _CRTDLL_srand	 		@1060
-    sscanf			= _CRTDLL_sscanf		@1061
-    strcat			= _CRTDLL_strcat		@1062
-    strchr			= _CRTDLL_strchr		@1063
-    strcmp			= _CRTDLL_strcmp		@1064
-    strcoll			= _CRTDLL_strcoll		@1065
-    strcpy			= _CRTDLL_strcpy		@1066
-    strcspn			= _CRTDLL_strcspn		@1067
-    strerror			= _CRTDLL_strerror		@1068
-    strftime			= _CRTDLL_strftime		@1069
-    strlen			= _CRTDLL_strlen		@1070
-    strncat			= _CRTDLL_strncat		@1071
-    strncmp			= _CRTDLL_strncmp		@1072
-    strncpy			= _CRTDLL_strncpy		@1073
-    strpbrk			= _CRTDLL_strpbrk		@1074
-    strrchr			= _CRTDLL_strrchr		@1075
-    strspn			= _CRTDLL_strspn		@1076
-    strstr			= _CRTDLL_strstr		@1077
-    strtod			= _CRTDLL_strtod		@1078
-    strtok			= _CRTDLL_strtok		@1079
-    strtol			= _CRTDLL_strtol		@1080
-    strtoul			= _CRTDLL_strtoul		@1081
-    strxfrm			= _CRTDLL_strxfrm		@1082
-    swprintf			= _CRTDLL_swprintf		@1083
-    swscanf			= _CRTDLL_swscanf		@1084
-    system			= _CRTDLL_system		@1085
-    tan				= _CRTDLL_tan			@1086
-    tanh			= _CRTDLL_tanh			@1087
-    time			= _CRTDLL_time			@1088
-    tmpfile			= _CRTDLL_tmpfile		@1089
-    tmpnam			= _CRTDLL_tmpnam		@1090
-    tolower			= _CRTDLL_tolower		@1091
-    toupper			= _CRTDLL_toupper		@1092
-    towlower			= _CRTDLL_towlower		@1093
-    towupper			= _CRTDLL_towupper		@1094
-    ungetc  		        = _CRTDLL_ungetc  		@1095
-    ungetwc  		        = _CRTDLL_ungetwc  		@1096
-    vfprintf		        = _CRTDLL_vfprintf		@1097
-    vfwprintf		        = _CRTDLL_vfwprintf		@1098
-    vprintf		        = _CRTDLL_vprintf		@1099
+    ispunct         = _CRTDLL_ispunct       @1000
+    isspace         = _CRTDLL_isspace       @1001
+    isupper         = _CRTDLL_isupper       @1002
+    iswalnum            = _CRTDLL_iswalnum      @1003
+    iswalpha            = _CRTDLL_iswalpha      @1004
+    iswascii            = _CRTDLL_iswascii      @1005
+    iswcntrl            = _CRTDLL_iswcntrl      @1006
+    iswctype            = _CRTDLL_iswctype      @1007
+    iswdigit            = _CRTDLL_iswdigit      @1008
+    iswgraph            = _CRTDLL_iswgraph      @1009
+    iswlower            = _CRTDLL_iswlower      @1010
+    iswprint            = _CRTDLL_iswprint      @1011
+    iswpunct            = _CRTDLL_iswpunct      @1012
+    iswspace            = _CRTDLL_iswspace      @1013
+    iswupper            = _CRTDLL_iswupper      @1014
+    iswxdigit           = _CRTDLL_iswxdigit     @1015
+    isxdigit            = _CRTDLL_isxdigit      @1016
+    labs            = _CRTDLL_labs          @1017
+    ldexp           = _CRTDLL_ldexp         @1018
+    ldiv            = _CRTDLL_ldiv          @1019
+    localeconv          = _CRTDLL_localeconv        @1020
+    localtime           = _CRTDLL_localtime     @1021
+    log             = _CRTDLL_log           @1022
+    log10           = _CRTDLL_log10         @1023
+    longjmp             = _CRTDLL_longjmp       @1024
+    malloc              = _CRTDLL_malloc        @1025
+    mblen           = _CRTDLL_mblen         @1026
+    mbstowcs            = _CRTDLL_mbstowcs      @1027
+    mbtowc          = _CRTDLL_mbtowc        @1028
+    memchr          = _CRTDLL_memchr        @1029
+    memcmp              = _CRTDLL_memcmp        @1030
+    memcpy              = _CRTDLL_memcpy        @1031
+    memmove         = _CRTDLL_memmove       @1032
+    memset              = _CRTDLL_memset        @1033
+    mktime          = _CRTDLL_mktime        @1034
+    modf            = _CRTDLL_modf          @1035
+    perror          = _CRTDLL_perror        @1036
+    pow             = _CRTDLL_pow           @1037
+    printf          = _CRTDLL_printf        @1038
+    putc            = _CRTDLL_putc          @1039
+    putchar         = _CRTDLL_putchar       @1040
+    puts            = _CRTDLL_puts          @1041
+    putwc           = _MSVCRT_putwc         @1042
+    putwchar            = _MSVCRT_putwchar      @1043
+    qsort           = _CRTDLL_qsort         @1044
+    raise           = _CRTDLL_raise         @1045
+    rand                = _CRTDLL_rand          @1046
+    realloc         = _CRTDLL_realloc       @1047
+    remove              = _CRTDLL_remove        @1048
+    rename          = _CRTDLL_rename        @1049
+    rewind          = _CRTDLL_rewind        @1050
+    scanf           = _CRTDLL_scanf         @1051
+    setbuf          = _CRTDLL_setbuf        @1052
+    setlocale           = _CRTDLL_setlocale     @1053
+    setvbuf         = _CRTDLL_setvbuf       @1054
+    signal          = _CRTDLL_signal        @1055
+    sin             = _CRTDLL_sin           @1056
+    sinh            = _CRTDLL_sinh          @1057
+    sprintf         = _CRTDLL_sprintf       @1058
+    sqrt            = _CRTDLL_sqrt          @1059
+    srand           = _CRTDLL_srand         @1060
+    sscanf          = _CRTDLL_sscanf        @1061
+    strcat          = _CRTDLL_strcat        @1062
+    strchr          = _CRTDLL_strchr        @1063
+    strcmp          = _CRTDLL_strcmp        @1064
+    strcoll         = _CRTDLL_strcoll       @1065
+    strcpy          = _CRTDLL_strcpy        @1066
+    strcspn         = _CRTDLL_strcspn       @1067
+    strerror            = _CRTDLL_strerror      @1068
+    strftime            = _CRTDLL_strftime      @1069
+    strlen          = _CRTDLL_strlen        @1070
+    strncat         = _CRTDLL_strncat       @1071
+    strncmp         = _CRTDLL_strncmp       @1072
+    strncpy         = _CRTDLL_strncpy       @1073
+    strpbrk         = _CRTDLL_strpbrk       @1074
+    strrchr         = _CRTDLL_strrchr       @1075
+    strspn          = _CRTDLL_strspn        @1076
+    strstr          = _CRTDLL_strstr        @1077
+    strtod          = _CRTDLL_strtod        @1078
+    strtok          = _CRTDLL_strtok        @1079
+    strtol          = _CRTDLL_strtol        @1080
+    strtoul         = _CRTDLL_strtoul       @1081
+    strxfrm         = _CRTDLL_strxfrm       @1082
+    swprintf            = _CRTDLL_swprintf      @1083
+    swscanf         = _CRTDLL_swscanf       @1084
+    system          = _CRTDLL_system        @1085
+    tan             = _CRTDLL_tan           @1086
+    tanh            = _CRTDLL_tanh          @1087
+    time            = _CRTDLL_time          @1088
+    tmpfile         = _CRTDLL_tmpfile       @1089
+    tmpnam          = _CRTDLL_tmpnam        @1090
+    tolower         = _CRTDLL_tolower       @1091
+    toupper         = _CRTDLL_toupper       @1092
+    towlower            = _CRTDLL_towlower      @1093
+    towupper            = _CRTDLL_towupper      @1094
+    ungetc                  = _CRTDLL_ungetc        @1095
+    ungetwc                 = _CRTDLL_ungetwc       @1096
+    vfprintf                = _CRTDLL_vfprintf      @1097
+    vfwprintf               = _CRTDLL_vfwprintf     @1098
+    vprintf             = _CRTDLL_vprintf       @1099
 
 
-    vsprintf			= _CRTDLL_vsprintf		@1100
-    vswprintf			= _CRTDLL_vswprintf		@1101
-    vwprintf		        = _CRTDLL_vwprintf		@1102
-    wcscat			= _CRTDLL_wcscat		@1103
-    wcschr			= _CRTDLL_wcschr		@1104
-    wcscmp			= _CRTDLL_wcscmp		@1105
-    wcscoll			= _CRTDLL_wcscoll		@1106
-    wcscpy			= _CRTDLL_wcscpy		@1107
-    wcscspn			= _CRTDLL_wcscspn		@1108
-    wcsftime			= _CRTDLL_wcsftime		@1109
-    wcslen			= _CRTDLL_wcslen		@1110
-    wcsncat			= _CRTDLL_wcsncat		@1111
-    wcsncmp			= _CRTDLL_wcsncmp		@1112
-    wcsncpy			= _CRTDLL_wcsncpy		@1113
-    wcspbrk			= _CRTDLL_wcspbrk		@1114
-    wcsrchr			= _CRTDLL_wcsrchr		@1115
-    wcsspn			= _CRTDLL_wcsspn		@1116
-    wcsstr			= _CRTDLL_wcsstr		@1117
-    wcstod			= _CRTDLL_wcstod		@1118
-    wcstok			= _CRTDLL_wcstok                @1119
-    wcstol			= _CRTDLL_wcstol 		@1120
-    wcstombs			= _CRTDLL_wcstombs		@1121 
-    wcstoul			= _CRTDLL_wcstoul		@1122
-    wcsxfrm			= _CRTDLL_wcsxfrm		@1123
-    wctomb			= _CRTDLL_wctomb		@1124
-    wprintf			= _CRTDLL_wprintf		@1125
-    wscanf			= _CRTDLL_wscanf		@1126
+    vsprintf            = _CRTDLL_vsprintf      @1100
+    vswprintf           = _CRTDLL_vswprintf     @1101
+    vwprintf                = _CRTDLL_vwprintf      @1102
+    wcscat          = _CRTDLL_wcscat        @1103
+    wcschr          = _CRTDLL_wcschr        @1104
+    wcscmp          = _CRTDLL_wcscmp        @1105
+    wcscoll         = _CRTDLL_wcscoll       @1106
+    wcscpy          = _CRTDLL_wcscpy        @1107
+    wcscspn         = _CRTDLL_wcscspn       @1108
+    wcsftime            = _CRTDLL_wcsftime      @1109
+    wcslen          = _CRTDLL_wcslen        @1110
+    wcsncat         = _CRTDLL_wcsncat       @1111
+    wcsncmp         = _CRTDLL_wcsncmp       @1112
+    wcsncpy         = _CRTDLL_wcsncpy       @1113
+    wcspbrk         = _CRTDLL_wcspbrk       @1114
+    wcsrchr         = _CRTDLL_wcsrchr       @1115
+    wcsspn          = _CRTDLL_wcsspn        @1116
+    wcsstr          = _CRTDLL_wcsstr        @1117
+    wcstod          = _CRTDLL_wcstod        @1118
+    wcstok          = _CRTDLL_wcstok                @1119
+    wcstol          = _CRTDLL_wcstol        @1120
+    wcstombs            = _CRTDLL_wcstombs      @1121
+    wcstoul         = _CRTDLL_wcstoul       @1122
+    wcsxfrm         = _CRTDLL_wcsxfrm       @1123
+    wctomb          = _CRTDLL_wctomb        @1124
+    wprintf         = _CRTDLL_wprintf       @1125
+    wscanf          = _CRTDLL_wscanf        @1126

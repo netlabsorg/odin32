@@ -1,5 +1,6 @@
-;$Id: opengl32.def,v 1.3 2000-03-02 13:26:54 sandervl Exp $
+;$Id: opengl32.def,v 1.4 2000-12-16 22:53:41 bird Exp $
 LIBRARY OPENGL32 INITINSTANCE
+DESCRIPTION 'Odin32 System DLL - OpenGL32'
 
 DATA MULTIPLE NONSHARED
 

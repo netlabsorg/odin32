@@ -1,9 +1,8 @@
-; $Id: mciwave.def,v 1.1 2000-01-03 10:29:04 sandervl Exp $
-
-;Created by BLAST for IBM's compiler
+; $Id: mciwave.def,v 1.2 2000-12-16 22:53:48 bird Exp $
 LIBRARY MCIWAVE INITINSTANCE
+DESCRIPTION 'Odin32 System DLL - MciWave'
+
 DATA MULTIPLE NONSHARED
 
-
 EXPORTS
-    DriverProc		= _MCIWAVE_DriverProc@20		@1
+    DriverProc      = _MCIWAVE_DriverProc@20        @1

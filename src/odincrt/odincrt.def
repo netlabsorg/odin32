@@ -1,7 +1,7 @@
-; $Id: odincrt.def,v 1.21 2000-03-18 15:14:02 sandervl Exp $
+; $Id: odincrt.def,v 1.22 2000-12-16 22:53:28 bird Exp $
 ; Odin VAC++ 3.08 shared multithreaded runtime
 LIBRARY ODINCRT INITINSTANCE TERMINSTANCE
-PROTMODE
+DESCRIPTION 'Odin32 System DLL - VAC++ 3.08 Release OdinCRT'
 DATA MULTIPLE NONSHARED READWRITE LOADONCALL
 CODE LOADONCALL
 SEGMENTS
@@ -17,14 +17,14 @@ EXPORTS
 ; -----------------
 ; memory management
 ; -----------------
-       calloc = os2calloc                      		@346
-       realloc = os2realloc                    		@583
-       malloc = os2malloc                   		@351
-       free = os2free                         		@219
-       _debug_calloc = os2_debug_calloc              	@117
-       _debug_realloc = os2_debug_realloc       	@182
-       _debug_malloc = os2_debug_malloc			@119
-       _debug_free = os2_debug_free    			@59
+       calloc = os2calloc                           @346
+       realloc = os2realloc                         @583
+       malloc = os2malloc                           @351
+       free = os2free                               @219
+       _debug_calloc = os2_debug_calloc                 @117
+       _debug_realloc = os2_debug_realloc           @182
+       _debug_malloc = os2_debug_malloc         @119
+       _debug_free = os2_debug_free             @59
        _umalloc = os2_umalloc                           @749
        _debug_umalloc =os2_debug_umalloc                @185
        _ucalloc = os2_ucalloc                           @704
@@ -58,8 +58,8 @@ EXPORTS
 
 ;;TODO!
     fprintf                                           @647
-  
-     strdup                  			       	@472
+
+     strdup                                     @472
     ;strncpy doesn't stop at 0 terminator!
     strncpy = __strncpy                                 @751
     __strncpy                                           @919
