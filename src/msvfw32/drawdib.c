@@ -47,6 +47,15 @@ typedef struct {
 #undef FIXME
 #undef TRACE
 #ifdef DEBUG
+// PH 2001-11-30
+// this macro definition causes the control leave the scope of a
+// non-curly-braced preceeding if statement. Therefore,
+//   if (p!=NULL) 
+//      TRACE("p->a=%d", p->a)
+// crashes.
+//
+// !!! ENSURE TRACES AND FIXMES WITH PRECEEDING IF STATEMENT 
+// !!! ARE PUT INTO CURLY BRACES
 #define TRACE WriteLog("MSVFW32: %s", __FUNCTION__); WriteLog
 #define FIXME WriteLog("FIXME MSVFW32: %s", __FUNCTION__); WriteLog
 #else
@@ -175,9 +184,11 @@ BOOL VFWAPI DrawDibBegin(HDRAWDIB hdd,
 		  lpbi->biXPelsPerMeter, lpbi->biYPelsPerMeter, lpbi->biClrUsed, 
 		  lpbi->biClrImportant);
 
-	if (wFlags & ~(DDF_BUFFER))
+        if (wFlags & ~(DDF_BUFFER))
+        {
 		FIXME("wFlags == 0x%08x not handled\n", wFlags & ~(DDF_BUFFER));
-
+        }
+                                                   
 	whdd = (WINE_HDD*)GlobalLock16(hdd);
 	if (!whdd) return FALSE;
 
@@ -296,7 +307,9 @@ BOOL VFWAPI DrawDibDraw(HDRAWDIB hdd, HDC hdc,
 
 	if (wFlags & ~(DDF_SAME_HDC | DDF_SAME_DRAW | DDF_NOTKEYFRAME | 
 				   DDF_UPDATE | DDF_DONTDRAW))
-		FIXME("wFlags == 0x%08lx not handled\n",(DWORD)wFlags);
+        {
+          FIXME("wFlags == 0x%08lx not handled\n",(DWORD)wFlags);
+        }
 
 	if (!lpBits) {
 		/* Undocumented? */

@@ -40,6 +40,15 @@ DEFAULT_DEBUG_CHANNEL(commctrl);
 #undef FIXME
 //#undef TRACE
 #ifdef DEBUG
+// PH 2001-11-30
+// this macro definition causes the control leave the scope of a
+// non-curly-braced preceeding if statement. Therefore,
+//   if (p!=NULL) 
+//      TRACE("p->a=%d", p->a)
+// crashes.
+//
+// !!! ENSURE TRACES AND FIXMES WITH PRECEEDING IF STATEMENT 
+// !!! ARE PUT INTO CURLY BRACES
 #define FIXME WriteLog("FIXME COMCTL32: %s", __FUNCTION__); WriteLog
 #else
 #define FIXME 1 ? (void)0 : (void)((int (*)(char *, ...)) NULL)
@@ -1348,10 +1357,14 @@ DSA_InsertItem (const HDSA hdsa, INT nIndex, LPVOID pSrc)
 
     for (i = 0; i < hdsa->nItemSize; i += 4) {
 	p = *(DWORD**)((char *) pSrc + i);
-	if (IsBadStringPtrA ((char*)p, 256))
-	    TRACE("-- %d=%p\n", i, (DWORD*)p);
-	else
-	    TRACE("-- %d=%p [%s]\n", i, p, debugstr_a((char*)p));
+        if (IsBadStringPtrA ((char*)p, 256))
+        {
+          TRACE("-- %d=%p\n", i, (DWORD*)p);
+        }
+        else
+        {
+          TRACE("-- %d=%p [%s]\n", i, p, debugstr_a((char*)p));
+        }
     }
    
     /* when nIndex >= nItemCount then append */

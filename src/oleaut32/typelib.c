@@ -3910,7 +3910,9 @@ static HRESULT WINAPI ITypeInfo_fnGetIDsOfNames( ITypeInfo2 *iface,
         }
         WARN("Could not search inherited interface!\n");
     } else
-        WARN("no names found\n");
+    {
+      WARN("no names found\n");
+    }
     return DISP_E_UNKNOWNNAME;
 }
 

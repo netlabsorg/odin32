@@ -20,6 +20,15 @@
 #undef FIXME
 #undef TRACE
 #ifdef DEBUG
+// PH 2001-11-30
+// this macro definition causes the control leave the scope of a
+// non-curly-braced preceeding if statement. Therefore,
+//   if (p!=NULL) 
+//      TRACE("p->a=%d", p->a)
+// crashes.
+//
+// !!! ENSURE TRACES AND FIXMES WITH PRECEEDING IF STATEMENT 
+// !!! ARE PUT INTO CURLY BRACES
 #define TRACE WriteLog("OLE32: %s", __FUNCTION__); WriteLog
 #define FIXME WriteLog("FIXME OLE32: %s", __FUNCTION__); WriteLog
 #else
