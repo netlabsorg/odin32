@@ -1,0 +1,64 @@
+# $Id: pdwin32.wat.tools,v 1.1 2000-08-23 18:05:55 sandervl Exp $
+# ODIN / win32os2 Project
+#
+# makefile for the build system tools and standard rules
+# Note: this has to be included after the compiler environment
+#
+
+
+#
+# System Utilites
+#
+RM          = rm -f
+CP          = copy
+MKDIR       = mkdir
+ECHO        = echo
+MAPSYM      = mapsym
+EXISTS      = $(PDWIN32_TOOLS)\Exists.cmd
+DOWITHDIRS  = $(PDWIN32_TOOLS)\dowithdirs.cmd
+IMPDEF      = $(PDWIN32_TOOLS)\impdef.exe
+DEPEND      = $(PDWIN32_TOOLS)\fastdep.exe -o$$(OBJDIR) -cy+
+
+MAKE_CMDLINE= wmake /ms
+!ifdef DEBUG
+MAKE_CMDLINE= $(MAKE_CMDLINE) DEBUG=1
+!endif
+!ifdef NODEBUGINFO
+MAKE_CMDLINE= $(MAKE_CMDLINE) NODEBUGINFO=1
+!endif
+!ifdef NODEP
+MAKE_CMDLINE= $(MAKE_CMDLINE) NODEP=1
+!endif
+
+MAKE_CMD    = $(MAKE_CMDLINE) -f makefile.os2
+
+#
+# Targets
+#
+.ERASE
+.SUFFIXES:
+.SUFFIXES: .lst .res .obj .cpp .c .rc .asm .orc
+
+.obj: $(OBJDIR)
+.res: $(OBJDIR)
+
+.c.obj: .AUTODEPEND
+    $(CC) $(CFLAGS) -fo$(OBJDIR)\$^&.obj $^&.c
+
+.cpp.obj: .AUTODEPEND
+    $(CXX) $(CXXFLAGS) -fo$(OBJDIR)\$^&.obj $^&.cpp
+
+.asm.obj:
+    $(AS) $(ASFLAGS) -Fdo:$(OBJDIR) $^&.asm
+
+.orc.asm:
+    $(RC) $(RCFLAGS) -o $(OBJDIR)\$^&.asm $^.
+
+.orc.obj:
+    $(RC) $(RCFLAGS) -o $(OBJDIR)\$^&.asm &.orc
+    $(AS) $(ASFLAGS) -Fdo:$(OBJDIR) $(OBJDIR)\$^&.asm
+
+.rc.res:
+    $(OS2RC) $(OS2RCFLAGS) $^&.rc
+
+
