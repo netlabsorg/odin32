@@ -1,4 +1,4 @@
-/* $Id: user32.cpp,v 1.13 1999-06-22 20:00:04 achimha Exp $ */
+/* $Id: user32.cpp,v 1.14 1999-06-23 16:36:56 achimha Exp $ */
 
 /*
  * Win32 misc user32 API functions for OS/2
@@ -3483,15 +3483,6 @@ BOOL WIN32API SetKeyboardState(PBYTE lpKeyState)
 {
 #ifdef DEBUG
   WriteLog("USER32:  SetKeyboardState, not implemented\n");
-#endif
-  return(TRUE);
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API DrawFrameControl(HDC hdc, LPRECT lprc, UINT uType, UINT uState)
-{
-#ifdef DEBUG
-  WriteLog("USER32:  DrawFrameControl, not implemented\n");
 #endif
   return(TRUE);
 }
