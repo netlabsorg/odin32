@@ -1,4 +1,4 @@
-/* $Id: menu.cpp,v 1.23 2000-05-22 19:03:45 sandervl Exp $*/
+/* $Id: menu.cpp,v 1.24 2000-10-22 16:18:59 sandervl Exp $*/
 /*
  * Menu functions
  *
@@ -98,7 +98,7 @@ typedef struct
 } MTRACKER;
 
 #define MENU_MAGIC   0x554d  /* 'MU' */
-#define IS_A_MENU(pmenu) ((pmenu) && (pmenu)->wMagic == MENU_MAGIC)
+#define IS_A_MENU(pmenu) ((pmenu) && !IsWindow((HWND)pmenu) && (pmenu)->wMagic == MENU_MAGIC)
 
 #define ITEM_PREV               -1
 #define ITEM_NEXT                1
