@@ -1,4 +1,4 @@
-/* $Id: wprocess.cpp,v 1.96 2000-09-16 00:09:59 bird Exp $ */
+/* $Id: wprocess.cpp,v 1.97 2000-10-01 12:05:57 sandervl Exp $ */
 
 /*
  * Win32 process functions
@@ -1084,75 +1084,15 @@ ULONG InitCommandLine(const char *pszPeExe)
      *        the two methods are nearly identical.
      *
      */
-    if (pszPeExe)
+    if(pszPeExe)
     {
-        PSZ     pszArg2;                /* Pointer to into pib_pchcmd to the second argument. */
-
-        /** @sketch Method (1):
-         * First we'll have to determin the size of the commandline.
-         *
-         * If the commandline string don't have any arguments we'll fail.
-         * Skip argument pointer to the second argument (ie. argv[2]).
-         */
-        if (pib_pchcmd == NULL                                  /* CPREF states that if may be NULL. */
-            || pib_pchcmd[cch = strlen(pib_pchcmd) + 1] == '\0' /* No arguments */
-            )
-        {
-            dprintf(("KERNEL32: InitCommandLine(%p): No arguments!\n", pszPeExe));
-            return ERROR_BAD_ARGUMENTS;
-        }
-
-        psz2 = pib_pchcmd + cch;        /* skip exe name (PE.EXE) */
-        while (*psz2 == ' ')
-            psz2++;
-        fQuotes = *psz2 == '"';
-        if (fQuotes)
-        {
-            psz2++;
-            psz = strchr(psz2, '"');
-        }
-        else
-            psz = strchr(psz2, ' ');
-        if (psz != NULL)
-        {
-            psz2 += psz - psz2 + 1;     /* + 1: space or quote. */
-            while (*psz2 == ' ')        /* skip blanks after argv[1]. */
-                psz2++;
-            pszArg2 = psz2;
-        }
-        else
-            pszArg2 = psz2 += strlen(psz2) + 1; /* no arguments, skip to next string. */
-
-        /** @sketch
-         * Use passed in executable name.
-         * Check if the exe filename needs to be put in quotes.
-         * Determin the length of the executable name including quotes and '\0'-terminator.
-         * Count the length of the arguments. (We here count's all argument strings.)
-         */
-        #ifdef DEBUG
-        if (pszPeExe[0] == '\0')
-        {
-            dprintf(("KERNEL32: InitCommandLine(%p): pszPeExe was empty string\n", pszPeExe));
-            return ERROR_BAD_ARGUMENTS;
-        }
-        #endif
-
-        fQuotes = strchr(pszPeExe, ' ') != NULL;
-        cch = strlen(pszPeExe) + fQuotes*2 + 1;
-
-        while (*psz2 != '\0')
-        {
-            register int cchTmp = strlen(psz2) + 1; /* + 1 is for terminator (psz2) and space (cch). */
-            psz2 += cchTmp;
-            cch += cchTmp;
-        }
-
         /** @sketch
          * Allocate memory for the commandline.
          * Build commandline:
          *  Copy exe filename.
          *  Add arguments.
          */
+        cch = strlen(pszPeExe)+1;
         pszCmdLineA = psz = (PSZ)malloc(cch);
         if (psz == NULL)
         {
@@ -1160,25 +1100,6 @@ ULONG InitCommandLine(const char *pszPeExe)
             return ERROR_NOT_ENOUGH_MEMORY;
         }
 
-        if (fQuotes)
-            *psz++ = '"';
-        strcpy(psz, pszPeExe);
-        psz += strlen(psz);
-        if (fQuotes)
-        {
-            *psz++ = '"';
-            *psz = '\0';
-        }
-
-        psz2 = pszArg2;
-        while (*psz2 != '\0')
-        {
-            register int cchTmp = strlen(psz2) + 1; /* + 1 is for terminator (psz). */
-            *psz++ = ' ';           /* add space */
-            memcpy(psz, psz2, cchTmp);
-            psz2 += cchTmp;
-            psz += cchTmp - 1;
-        }
         rc = NO_ERROR;
     }
     else
