@@ -1,4 +1,4 @@
-/* $Id: win32dlg.cpp,v 1.78 2002-07-08 11:43:44 sandervl Exp $ */
+/* $Id: win32dlg.cpp,v 1.79 2002-12-18 12:28:06 sandervl Exp $ */
 /*
  * Win32 Dialog Code for OS/2
  *
@@ -706,6 +706,13 @@ BOOL Win32Dialog::createControls(LPCSTR dlgtemplate, HINSTANCE hInst)
     while (items--)
     {
         dlgtemplate = (LPCSTR)getControl( (WORD *)dlgtemplate, &info, dlgInfo.dialogEx );
+
+        /* Is this it? */
+        if (info.style & WS_BORDER)
+        {
+            info.style &= ~WS_BORDER;
+            info.exStyle |= WS_EX_CLIENTEDGE;
+        }
 
         dprintf(("Create CONTROL %d", info.id));
 

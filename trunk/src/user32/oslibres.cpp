@@ -1,4 +1,4 @@
-/* $Id: oslibres.cpp,v 1.32 2002-12-13 16:46:12 sandervl Exp $ */
+/* $Id: oslibres.cpp,v 1.33 2002-12-18 12:28:05 sandervl Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -798,8 +798,6 @@ BOOL WIN32API OSLibWinCreateObject(LPSTR pszPath, LPSTR pszArgs,
        hObject = WinCreateObject("WPProgram", pszName, pszSetupString,
                                  temp, CO_REPLACEIFEXISTS);
    }
-// If SysCreateObject("WPProgram", "WarpMix", "<ICHAUDIO>",,
-//                    "PROGTYPE=PM;OBJECTID=<WARPMIX>;ICONFILE=WARPMIX.ICO;EXENAME="||bootDrive||"\MMOS2\WARPMIX.EXE")
 
    free(pszSetupString);
    if(!hObject) {

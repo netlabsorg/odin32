@@ -1,4 +1,4 @@
-/* $Id: wndmsg.cpp,v 1.18 2002-06-03 13:37:19 sandervl Exp $ */
+/* $Id: wndmsg.cpp,v 1.19 2002-12-18 12:28:08 sandervl Exp $ */
 /*
  * Win32 window message text function for OS/2
  *
@@ -14,6 +14,7 @@
 #include <string.h>
 #include <win\winmfcmsg.h>
 #include <spy.h>
+#include "wndmsg.h"
 
 #define DBG_LOCALLOG	DBG_wndmsg
 #include "dbglocal.h"

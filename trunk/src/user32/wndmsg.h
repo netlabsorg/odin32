@@ -1,4 +1,4 @@
-/* $Id: wndmsg.h,v 1.6 2000-01-18 20:08:18 sandervl Exp $ */
+/* $Id: wndmsg.h,v 1.7 2002-12-18 12:28:08 sandervl Exp $ */
 /*
  * Win32 window message text function for OS/2
  *
@@ -11,11 +11,20 @@
 #ifndef __WNDMSG_H__
 #define __WNDMSG_H__
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #ifdef DEBUG
 char *GetMsgText(int Msg);
+
 void DebugPrintMessage(HWND hwnd, UINT Msg, WPARAM wParam, LPARAM lParam, BOOL fUnicode, BOOL fInternalMsg);
 #else
 #define DebugPrintMessage(a, b, c, d, e, f)
+#endif
+
+#ifdef __cplusplus
+}
 #endif
 
 #endif
