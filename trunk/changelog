@@ -1,4 +1,4 @@
-/* $Id: changelog,v 1.1784 2001-10-24 10:56:22 achimha Exp $ */
+/* $Id: changelog,v 1.1785 2001-10-24 11:20:40 sandervl Exp $ */
 
  2001-10-24: Achim Hasenmueller <achimha@innotek.de>
     - PMKBDHK:  o link statically with C runtime
@@ -9,6 +9,10 @@
                 o IsWindowVisible: check for WS_CHILD style before checking
                   parents
                   (CVP: fixes moving of dialog with invisible owner)
+                o Frame tracking: activate and bring window to top when
+                  control key is not pressed (OS/2 look)
+                  (fixes activation by clicking on title bar and you can now
+                   track frame without activating it)
 
  2001-10-23: Sander van Leeuwen <sandervl@xs4all.nl>
     - COMCTL32: o ListView: WM_KEYDOWN -> if WM_NOTIFY returns TRUE, then
