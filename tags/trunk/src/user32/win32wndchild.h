@@ -1,4 +1,4 @@
-/* $Id: win32wndchild.h,v 1.1 1999-09-15 23:19:02 sandervl Exp $ */
+/* $Id: win32wndchild.h,v 1.2 1999-09-22 08:58:36 sandervl Exp $ */
 /*
  * Win32 Child/Parent window class for OS/2
  *
@@ -22,6 +22,9 @@ public:
  	 ChildWindow();
 virtual ~ChildWindow();
 
+ChildWindow   *getFirstChild()                  { return children; };
+ChildWindow   *getNextChild()   		{ return nextchild; };
+
 protected:
 
  ChildWindow *GetParent()			{ return parent; };
@@ -36,8 +39,6 @@ protected:
 	BOOL   AddChild(ChildWindow *child);
 	BOOL   RemoveChild(ChildWindow *child);
 
-ChildWindow   *getFirstChild()                  { return children; };
-ChildWindow   *getNextChild()   		{ return nextchild; };
         void   setNextChild(ChildWindow *child)	{ nextchild = child; };
 
 	BOOL   DestroyChildren();

@@ -1,4 +1,4 @@
-/* $Id: win32dlg.cpp,v 1.2 1999-09-19 18:33:31 sandervl Exp $ */
+/* $Id: win32dlg.cpp,v 1.3 1999-09-22 08:58:35 sandervl Exp $ */
 /*
  * Win32 Dialog Code for OS/2
  *
@@ -917,17 +917,85 @@ BOOL Win32Dialog::setDefButton(HWND hwndNew )
     return TRUE;
 }
 //******************************************************************************
-//TODO:
+// GetNextDlgTabItem32   (USER32.276)
 //******************************************************************************
 HWND Win32Dialog::getNextDlgTabItem(HWND hwndCtrl, BOOL fPrevious)
 {
-    return 0;
+ Win32BaseWindow *child, *nextchild, *lastchild;
+ HWND retvalue;
+
+    if (hwndCtrl)
+    {
+        child = GetWindowFromHandle(hwndCtrl);
+        if (!child)
+        {
+            retvalue = 0;
+            goto END;
+        }
+        /* Make sure hwndCtrl is a top-level child */
+        while ((child->getStyle() & WS_CHILD) && (child->getParent() != this))
+        {
+            child = child->getParent();
+            if(child == NULL) break;
+        }
+
+        if (!child || child->getParent() != this)
+        {
+            retvalue = 0;
+            goto END;
+        }
+    }
+    else
+    {
+        /* No ctrl specified -> start from the beginning */
+        child = (Win32BaseWindow *)getFirstChild();
+        if (!child)
+        {
+            retvalue = 0;
+            goto END;
+        }
+
+        if (!fPrevious)
+        {
+            while (child->getNextChild())
+            {
+                child = (Win32BaseWindow *)child->getNextChild();
+            }
+        }
+    }
+
+    lastchild = child;
+    nextchild = (Win32BaseWindow *)child->getNextChild();
+    while (TRUE)
+    {
+        if (!nextchild) nextchild = (Win32BaseWindow *)getFirstChild();
+
+        if (child == nextchild) break;
+
+	    if ((nextchild->getStyle() & WS_TABSTOP) && (nextchild->getStyle() & WS_VISIBLE) &&
+            !(nextchild->getStyle() & WS_DISABLED))
+	    {
+	        lastchild = nextchild;
+	        if (!fPrevious) break;
+	    }
+	    nextchild = (Win32BaseWindow *)nextchild->getNextChild();
+    }
+    retvalue = lastchild->getWindowHandle();
+
+END:
+    return retvalue;
 }
 //******************************************************************************
-//TODO
 //******************************************************************************
 Win32BaseWindow *Win32Dialog::getDlgItem(int id)
 {
+    for (Win32BaseWindow *child = (Win32BaseWindow *)getFirstChild(); child; child = (Win32BaseWindow *)child->getNextChild())
+    {
+        if (child->getWindowId() == id)
+        {
+            return child;
+        }
+    }
     return 0;
 }
 //******************************************************************************
