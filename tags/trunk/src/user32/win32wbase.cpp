@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.275 2001-07-05 10:45:25 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.276 2001-07-13 14:31:15 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -408,9 +408,6 @@ BOOL Win32BaseWindow::CreateWindowExA(CREATESTRUCTA *cs, ATOM classAtom)
         }
     }
     if (fXDefault && !fCXDefault) fXDefault = FALSE; //CB: only x positioning doesn't work (calc.exe,cdrlabel.exe)
-
-    if (cs->x < 0) cs->x = 0;
-    if (cs->y < 0) cs->y = 0;
 
     //Allocate window words
     nrUserWindowBytes = windowClass->getExtraWndBytes();
