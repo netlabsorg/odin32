@@ -1,4 +1,10 @@
- /* $Id: changelog,v 1.1133 2000-09-19 19:04:11 sandervl Exp $ */
+ /* $Id: changelog,v 1.1134 2000-09-20 21:38:20 hugh Exp $ */
+
+ 2000-09-20: Markus Montkowski <mmontkowski@gmx.de>
+    - KERNEL32: Implemented COM-port APIs
+                Enhanced handlemanager to support device and handle data (for COM ports)
+                Added IOCTL to oslibdos
+    - INCLUDE\handlemanager.h os2win.h win32type.h: added COM definitions
 
  2000-09-19: Michal Necasek <mike@mendelu.cz>
     - INCLUDE\makefiles: disable C++ exception handling code generation (FS:0 changes)
