@@ -1,4 +1,4 @@
- /* $Id: ChangeLog,v 1.1167 2000-10-03 19:23:14 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.1168 2000-10-03 20:17:49 sandervl Exp $ */
 
  2000-10-03: Sander van Leeuwen <sandervl@xs4all.nl>
     - Include\uniconv.h
@@ -13,6 +13,8 @@
                 [HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\Cdrom]
                 Fix for failure during DLL_PROCESS_ATTACH for LX system
                 dlls (pe loader). Didn't fail properly before.
+                Check if executable exists in CreateProcessA; fixes VMWare
+                installation
     - USER32:   Fix for EDIT_WM_Char (couldn't type in numbers anymore)
                 EnumDisplaySettingsA accepts negative indices
     - ADVAPI32: Cleanup
