@@ -1,4 +1,4 @@
-/* $Id: menu.cpp,v 1.10 2000-01-18 20:10:38 sandervl Exp $*/
+/* $Id: menu.cpp,v 1.11 2000-01-19 01:40:56 sandervl Exp $*/
 /*
  * Menu functions
  *
@@ -1142,7 +1142,7 @@ static void MENU_DrawMenuItem( HWND hwnd, HMENU hmenu, HWND hwndOwner, HDC hdc, 
             SelectObject( hdcMem, bm );
             BitBlt( hdc, rect.left, (y - check_bitmap_height) / 2,
                       check_bitmap_width, check_bitmap_height,
-                      hdcMem, 0, 0, SRCCOPY );
+                      hdcMem, 0, 0, (lpitem->fState & MF_HILITE) ? MERGEPAINT : SRCAND );
             DeleteDC( hdcMem );
         }
         else if (lpitem->hUnCheckBit)
@@ -1152,7 +1152,7 @@ static void MENU_DrawMenuItem( HWND hwnd, HMENU hmenu, HWND hwndOwner, HDC hdc, 
             SelectObject( hdcMem, lpitem->hUnCheckBit );
             BitBlt( hdc, rect.left, (y - check_bitmap_height) / 2,
                       check_bitmap_width, check_bitmap_height,
-                      hdcMem, 0, 0, SRCCOPY );
+                      hdcMem, 0, 0, (lpitem->fState & MF_HILITE) ? MERGEPAINT : SRCAND );
             DeleteDC( hdcMem );
         }
 
@@ -1165,7 +1165,7 @@ static void MENU_DrawMenuItem( HWND hwnd, HMENU hmenu, HWND hwndOwner, HDC hdc, 
             BitBlt( hdc, rect.right - arrow_bitmap_width - 1,
                       (y - arrow_bitmap_height) / 2,
                       arrow_bitmap_width, arrow_bitmap_height,
-                      hdcMem, 0, 0, SRCCOPY );
+                      hdcMem, 0, 0, (lpitem->fState & MF_HILITE) ? MERGEPAINT : SRCAND );
             DeleteDC( hdcMem );
         }
 
