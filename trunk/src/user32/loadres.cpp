@@ -1,4 +1,4 @@
-/* $Id: loadres.cpp,v 1.40 2002-11-27 13:56:26 sandervl Exp $ */
+/* $Id: loadres.cpp,v 1.41 2003-02-13 13:10:49 sandervl Exp $ */
 
 /*
  * Win32 resource API functions for OS/2
@@ -167,7 +167,6 @@ HANDLE LoadBitmapW(HINSTANCE hinst, LPCWSTR lpszName, int cxDesired, int cyDesir
 
     //if in OS/2 mode, then we must replace the standard button bitmaps
     //(min, max, restore, close)
-#ifdef NEW_WGSS
     if(fOS2Look && (hinst == hInstanceUser32 || !hinst)) {
         switch((ULONG)lpszName) {
         case OBM_CLOSE:
@@ -188,7 +187,6 @@ HANDLE LoadBitmapW(HINSTANCE hinst, LPCWSTR lpszName, int cxDesired, int cyDesir
             return CopyImage(hBmpMaxButtonDown, IMAGE_BITMAP, 0, 0, 0);
         }
     }
-#endif
     if (!(fuLoad & LR_LOADFROMFILE))
     {
         handle = 0;
