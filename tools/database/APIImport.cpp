@@ -1,4 +1,4 @@
-/* $Id: APIImport.cpp,v 1.12 2001-09-07 10:31:42 bird Exp $ */
+/* $Id: APIImport.cpp,v 1.13 2002-02-24 02:58:26 bird Exp $ */
 /*
  *
  * APIImport - imports a DLL or Dll-.def with functions into the Odin32 database.
@@ -11,16 +11,18 @@
 /*******************************************************************************
 *   Header Files                                                               *
 *******************************************************************************/
-#include <os2.h>
 #include <stdio.h>
 #include <string.h>
 
-#include "APIImport.h"
+#include "kTypes.h"
+#include "kError.h"
 #include "kFile.h"
-#include "kInterfaces.h"
+#include "kFileInterfaces.h"
 #include "kFileFormatBase.h"
 #include "kFilePE.h"
 #include "kFileDef.h"
+
+#include "APIImport.h"
 #include "db.h"
 
 
@@ -49,7 +51,7 @@ static void demangle(char *pszDemangled, const char *pszMangledName);
 int main(int argc, char **argv)
 {
     int     argi;
-    BOOL    fFatal = FALSE;
+    KBOOL   fFatal = FALSE;
     long    lRc = 0;
     OPTIONS options = {0};
     char   *pszHost     = "localhost";
@@ -269,7 +271,7 @@ static long processFile(const char *pszFilename, const POPTIONS pOptions, long &
             catch (int i)
             {
                 i = i;
-                kFileDef *pFile = new kFileDef(pInFile);
+                kFileDef *pFile = new kFileDef(new kFile(pszFilename));
                 pExportFile = pFile;
                 pModuleFile = pFile;
                 pFileBase = pFile;
@@ -287,8 +289,8 @@ static long processFile(const char *pszFilename, const POPTIONS pOptions, long &
                 /* find or insert module name */
                 if ((lDll = dbCheckInsertDll(pszModuleName, DLL_ODIN32_API)) >= 0)
                 {
-                    BOOL    fClearUpdateOk = FALSE;
-                    BOOL    fOk;
+                    KBOOL   fClearUpdateOk = FALSE;
+                    KBOOL   fOk;
                     kExportEntry export;
 
                     /* Clear the update flag for all functions in this DLL. */
