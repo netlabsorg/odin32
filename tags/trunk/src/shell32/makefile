@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.16 1999-11-02 19:08:17 sandervl Exp $
+# $Id: makefile,v 1.17 1999-11-02 19:17:15 phaller Exp $
 
 #
 # PD-Win32 API
@@ -31,7 +31,7 @@ OBJS =  initterm.obj \
         shellguid.obj shelllink.obj shlmenu.obj shellole.obj \
         shellord.obj shellpath.obj shv_bg_cmenu.obj \
         shlfolder.obj shlview.obj shell.obj unknown.obj misc.obj \
-        she.obj sh.obj resource.obj
+        she.obj sh.obj resource.obj shpolicy.obj
 
 all: $(TARGET).dll $(TARGET).lib
 
@@ -53,7 +53,7 @@ $(TARGET).lib: $(TARGET)exp.def
 $(TARGET)exp.def: $(TARGET).def
         $(IMPDEF) $** $@
 
-resource.asm: shres.rc 
+resource.asm: shres.rc
     $(RC) $(RCFLAGS) -o resource.asm shres.rc
 
 resource.obj: resource.asm
@@ -85,6 +85,7 @@ unknown.obj:      unknown.cpp
 misc.obj:         misc.cpp
 she.obj:          she.cpp
 sh.obj:           sh.cpp
+shpolicy.obj:     shpolicy.cpp shpolicy.h
 
 clean:
         $(RM) *.obj *.lib *.dll *.map *.pch

@@ -1,4 +1,4 @@
-/* $Id: unknown.cpp,v 1.7 1999-10-09 11:13:25 sandervl Exp $ */
+/* $Id: unknown.cpp,v 1.8 1999-11-02 19:17:16 phaller Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -271,3 +271,16 @@ ODINFUNCTION2(DWORD, SheShortenPathA,
   return (0);
 }
 
+
+/*************************************************************************
+ * SHRegQueryValueA				[NT4.0:SHELL32.?]
+ *
+ */
+ODINFUNCTION4(HRESULT,SHRegQueryValueA,HKEY,   hkey,
+                                       LPSTR,  lpszSubKey,
+                                       LPSTR,  lpszData,
+                                       LPDWORD,lpcbData )
+{	dprintf(("SHELL32:UNKNOWN:SHRegQueryValueA(0x%04x %s %p %p semi-stub\n",
+		hkey, lpszSubKey, lpszData, lpcbData));
+	return RegQueryValueA( hkey, lpszSubKey, lpszData, (LPLONG)lpcbData );
+}
