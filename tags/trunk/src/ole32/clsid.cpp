@@ -1,4 +1,4 @@
-/* $Id: clsid.cpp,v 1.8 1999-09-24 21:49:42 davidr Exp $ */
+/* $Id: clsid.cpp,v 1.9 1999-11-23 20:37:42 davidr Exp $ */
 /*
  *
  * Project Odin Software License can be found in LICENSE.TXT
@@ -284,12 +284,12 @@ int WIN32API StringFromGUID2(REFGUID rguid, LPOLESTR lpsz, int cbMax)
 
     strLen = strlen(tmp);
 
-    if(cbMax < (strLen * 2 + 1))
+    if ( (strLen / 2) + 1  > cbMax )
 	return 0;
 
     AsciiToUnicode(tmp, lpsz);
 
-    return(strLen * 2 + 1);  // including 0 terminator
+    return (strLen / 2) + 1;  // including 0 terminator
 }
 
 // ----------------------------------------------------------------------
