@@ -1,4 +1,4 @@
-/* $Id: HandleManager.h,v 1.15 2000-01-02 22:52:48 sandervl Exp $ */
+/* $Id: HandleManager.h,v 1.16 2000-01-05 19:35:52 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -336,8 +336,7 @@ BOOL HMDuplicateHandle(HANDLE  srcprocess,
 
 DWORD HMOpenThreadToken(HANDLE  ThreadHandle,
                         DWORD   DesiredAccess,
-                        BOOL    OpenAsSelf,
-                        DWORD   dwUserData,
+                        DWORD   OpenAsSelf,
                         HANDLE *TokenHandle);
 
 DWORD HMOpenProcessToken(HANDLE  ProcessHandle,
