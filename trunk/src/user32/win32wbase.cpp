@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.18 1999-09-28 13:27:52 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.19 1999-09-29 08:27:15 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -121,6 +121,10 @@ void Win32BaseWindow::Init()
   EraseBkgndFlag     = TRUE;
   PSEraseFlag        = FALSE;
   SupressEraseFlag   = FALSE;
+
+  horzScrollInfo     = NULL;
+  vertScrollInfo     = NULL;
+
 }
 //******************************************************************************
 //todo get rid of resources (menu, accel, icon etc)
@@ -145,6 +149,14 @@ Win32BaseWindow::~Win32BaseWindow()
   if(windowNameW) {
         free(windowNameW);
         windowNameW = NULL;
+  }
+  if(vertScrollInfo) {
+        free(vertScrollInfo);
+        vertScrollInfo = NULL;
+  }
+  if(horzScrollInfo) {
+        free(horzScrollInfo);
+        horzScrollInfo = NULL;
   }
 }
 //******************************************************************************
@@ -360,6 +372,22 @@ BOOL Win32BaseWindow::CreateWindowExA(CREATESTRUCTA *cs, ATOM classAtom)
   else wndPtr->dce = NULL;
 #endif
 
+  if (cs->style & WS_HSCROLL)
+  {
+        horzScrollInfo = (SCROLLBAR_INFO*)malloc(sizeof(SCROLLBAR_INFO));
+        horzScrollInfo->MinVal = horzScrollInfo->CurVal = horzScrollInfo->Page = 0;
+        horzScrollInfo->MaxVal = 100;
+        horzScrollInfo->flags  = ESB_ENABLE_BOTH;
+  }
+
+  if (cs->style & WS_VSCROLL)
+  {
+        vertScrollInfo = (SCROLLBAR_INFO*)malloc(sizeof(SCROLLBAR_INFO));
+        vertScrollInfo->MinVal = vertScrollInfo->CurVal = vertScrollInfo->Page = 0;
+        vertScrollInfo->MaxVal = 100;
+        vertScrollInfo->flags  = ESB_ENABLE_BOTH;
+  }
+
   /* Send the WM_GETMINMAXINFO message and fix the size if needed */
   if ((cs->style & WS_THICKFRAME) || !(cs->style & (WS_POPUP | WS_CHILD)))
   {
@@ -426,6 +454,12 @@ BOOL Win32BaseWindow::CreateWindowExA(CREATESTRUCTA *cs, ATOM classAtom)
   if(OSLibWinSetWindowULong(OS2Hwnd, OFFSET_WIN32PM_SHAREDMEM, HeapGetSharedMemBase()) == FALSE) {
         dprintf(("WM_CREATE: WinSetWindowULong2 %X failed!!", OS2Hwnd));
         return FALSE;
+  }
+  if(cs->style & WS_HSCROLL) {
+        OSLibWinChangeScrollStyle(OS2HwndFrame, OSLIB_HSCROLL, 0);
+  }
+  if(cs->style & WS_VSCROLL) {
+        OSLibWinChangeScrollStyle(OS2HwndFrame, OSLIB_VSCROLL, 0);
   }
 #if 0
   if(OS2Hwnd != OS2HwndFrame) {
@@ -1210,6 +1244,148 @@ char *Win32BaseWindow::MsgGetText()
     return windowNameA;
 }
 //******************************************************************************
+//TODO: Not complete (flags)
+//******************************************************************************
+SCROLLBAR_INFO *Win32BaseWindow::getScrollInfo(int nBar)
+{
+    switch(nBar) {
+    case SB_HORZ:
+        if(horzScrollInfo) {
+            horzScrollInfo->CurVal = OSLibWinGetScrollPos(OS2HwndFrame, OSLIB_HSCROLL);
+            return horzScrollInfo;
+        }
+        break;
+    case SB_VERT:
+        if(vertScrollInfo) {
+            vertScrollInfo->CurVal = OSLibWinGetScrollPos(OS2HwndFrame, OSLIB_VSCROLL);
+            return vertScrollInfo;
+        }
+        break;
+    }
+    return NULL;
+}
+//******************************************************************************
+//TODO: Not complete
+//******************************************************************************
+LONG Win32BaseWindow::setScrollInfo(int nBar, SCROLLINFO *info, int fRedraw)
+{
+  SCROLLBAR_INFO *infoPtr;
+  ULONG           scrollType;
+  int             new_flags;
+
+    switch(nBar) {
+    case SB_HORZ:
+        if(!horzScrollInfo) {
+            return 0;
+        }
+        infoPtr = horzScrollInfo;
+        scrollType = OSLIB_HSCROLL;
+        break;
+    case SB_VERT:
+        if(!vertScrollInfo) {
+            return 0;
+        }
+        infoPtr = vertScrollInfo;
+        scrollType = OSLIB_VSCROLL;
+        break;
+    default:
+        return 0;
+    }
+
+    if (info->fMask & ~(SIF_ALL | SIF_DISABLENOSCROLL)) return 0;
+    if ((info->cbSize != sizeof(*info)) &&
+        (info->cbSize != sizeof(*info)-sizeof(info->nTrackPos))) return 0;
+
+    /* Set the page size */
+    if (info->fMask & SIF_PAGE)
+    {
+        if( infoPtr->Page != info->nPage )
+        {
+            infoPtr->Page = info->nPage;
+            OSLibWinSetScrollPageSize(OS2HwndFrame, scrollType, info->nPage, infoPtr->MaxVal, fRedraw);
+        }
+    }
+
+    /* Set the scroll pos */
+    if (info->fMask & SIF_POS)
+    {
+        if( infoPtr->CurVal != info->nPos )
+        {
+            infoPtr->CurVal = info->nPos;
+            OSLibWinSetScrollPos(OS2HwndFrame, scrollType, info->nPos, fRedraw);
+        }
+    }
+
+    /* Set the scroll range */
+    if (info->fMask & SIF_RANGE)
+    {
+        /* Invalid range -> range is set to (0,0) */
+        if ((info->nMin > info->nMax) ||
+            ((UINT)(info->nMax - info->nMin) >= 0x80000000))
+        {
+            infoPtr->MinVal = 0;
+            infoPtr->MaxVal = 0;
+        }
+        else
+        {
+            if( infoPtr->MinVal != info->nMin ||
+                infoPtr->MaxVal != info->nMax )
+            {
+                infoPtr->MinVal = info->nMin;
+                infoPtr->MaxVal = info->nMax;
+
+                OSLibWinSetScrollRange(OS2HwndFrame, scrollType, info->nMin, info->nMax, fRedraw);
+            }
+        }
+    }
+
+    /* Make sure the page size is valid */
+    if (infoPtr->Page < 0) infoPtr->Page = 0;
+    else if (infoPtr->Page > infoPtr->MaxVal - infoPtr->MinVal + 1 )
+        infoPtr->Page = infoPtr->MaxVal - infoPtr->MinVal + 1;
+
+    /* Make sure the pos is inside the range */
+    if (infoPtr->CurVal < infoPtr->MinVal)
+        infoPtr->CurVal = infoPtr->MinVal;
+    else if (infoPtr->CurVal > infoPtr->MaxVal - MAX( infoPtr->Page-1, 0 ))
+        infoPtr->CurVal = infoPtr->MaxVal - MAX( infoPtr->Page-1, 0 );
+
+    /* Check if the scrollbar should be hidden or disabled */
+    if (info->fMask & (SIF_RANGE | SIF_PAGE | SIF_DISABLENOSCROLL))
+    {
+        new_flags = infoPtr->flags;
+        if (infoPtr->MinVal >= infoPtr->MaxVal - MAX( infoPtr->Page-1, 0 ))
+        {
+            /* Hide or disable scroll-bar */
+            if (info->fMask & SIF_DISABLENOSCROLL)
+            {
+                new_flags = ESB_DISABLE_BOTH;
+                //TODO:
+            }
+            else if (nBar != SB_CTL)
+            {
+                //TODO
+                goto done;
+            }
+        }
+        else  /* Show and enable scroll-bar */
+        {
+            //TODO
+            new_flags = 0;
+        }
+
+        if (infoPtr->flags != new_flags) /* check arrow flags */
+        {
+            infoPtr->flags = new_flags;
+        }
+    }
+
+done:
+    /* Return current position */
+
+    return infoPtr->CurVal;
+}
+//******************************************************************************
 //******************************************************************************
 LRESULT Win32BaseWindow::DefWindowProcA(UINT Msg, WPARAM wParam, LPARAM lParam)
 {
@@ -1349,17 +1525,17 @@ LRESULT Win32BaseWindow::DefWindowProcA(UINT Msg, WPARAM wParam, LPARAM lParam)
 
 #if 0
     case WM_SYSKEYDOWN:
-	    if(HIWORD(lParam) & KEYDATA_ALT)
-	    {
-    	    if(wParam == VK_F4)	/* try to close the window */
-    	    {
-    		    HWND hWnd = WIN_GetTopParent( wndPtr->hwndSelf );
-    		    wndPtr = WIN_FindWndPtr( hWnd );
-    		    if( wndPtr && !(getClass()->getStyle() & CS_NOCLOSE) )
-        		    PostMessage(WM_SYSCOMMAND, SC_CLOSE, 0);
-    	    }
-    	}
-    	return 0;
+        if(HIWORD(lParam) & KEYDATA_ALT)
+        {
+            if(wParam == VK_F4) /* try to close the window */
+            {
+                HWND hWnd = WIN_GetTopParent( wndPtr->hwndSelf );
+                wndPtr = WIN_FindWndPtr( hWnd );
+                if( wndPtr && !(getClass()->getStyle() & CS_NOCLOSE) )
+                    PostMessage(WM_SYSCOMMAND, SC_CLOSE, 0);
+            }
+        }
+        return 0;
 #endif
 
     default:

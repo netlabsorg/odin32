@@ -1,4 +1,4 @@
-/* $Id: scroll.cpp,v 1.3 1999-09-26 15:25:55 sandervl Exp $ */
+/* $Id: scroll.cpp,v 1.4 1999-09-29 08:27:15 sandervl Exp $ */
 /*
  * Scrollbar control
  *
@@ -166,7 +166,20 @@ static SCROLLBAR_INFO *SCROLL_GetPtrScrollInfo( HWND hwnd, INT nBar )
  */
 static SCROLLBAR_INFO *SCROLL_GetScrollInfo( HWND hwnd, INT nBar )
 {
-   return SCROLL_GetPtrScrollInfo( hwnd, nBar );
+ Win32BaseWindow *window;
+
+    window = Win32BaseWindow::GetWindowFromHandle(hwnd);
+    if(!window && nBar != SB_CTL) {
+        dprintf(("SCROLL_GetScrollInfo window %x not found!", hwnd));
+        SetLastError(ERROR_INVALID_WINDOW_HANDLE);
+        return NULL;
+    }
+
+    if (window) {
+            return window->getScrollInfo(nBar);
+    }
+
+    return SCROLL_GetPtrScrollInfo( hwnd, nBar );
 }
 
 
@@ -1124,15 +1137,19 @@ INT WINAPI SetScrollInfo(
 {
   Win32BaseWindow *window;
   INT action;
-  INT retVal = SCROLL_SetScrollInfo( hwnd, nBar, info, &action );
+  INT retVal;
 
     window = Win32BaseWindow::GetWindowFromHandle(hwnd);
-    if(!window) {
+    if(!window && nBar != SB_CTL) {
         dprintf(("SetScrollInfo window not found!"));
         SetLastError(ERROR_INVALID_WINDOW_HANDLE);
         return FALSE;
     }
+    if(window) {
+        return window->setScrollInfo(nBar, (SCROLLINFO *)info, bRedraw);
+    }
 
+    retVal = SCROLL_SetScrollInfo( hwnd, nBar, info, &action );
     if( action & SA_SSI_HIDE )
         SCROLL_ShowScrollBar( hwnd, nBar, FALSE, FALSE );
     else
@@ -1169,7 +1186,6 @@ INT SCROLL_SetScrollInfo( HWND hwnd, INT nBar,
         (info->cbSize != sizeof(*info)-sizeof(info->nTrackPos))) return 0;
 
     /* Set the page size */
-
     if (info->fMask & SIF_PAGE)
     {
         //dsprintf(scroll, " page=%d", info->nPage );
@@ -1181,7 +1197,6 @@ INT SCROLL_SetScrollInfo( HWND hwnd, INT nBar,
     }
 
     /* Set the scroll pos */
-
     if (info->fMask & SIF_POS)
     {
         //dsprintf(scroll, " pos=%d", info->nPos );
@@ -1193,7 +1208,6 @@ INT SCROLL_SetScrollInfo( HWND hwnd, INT nBar,
     }
 
     /* Set the scroll range */
-
     if (info->fMask & SIF_RANGE)
     {
         //dsprintf(scroll, " min=%d max=%d", info->nMin, info->nMax );
@@ -1238,7 +1252,6 @@ INT SCROLL_SetScrollInfo( HWND hwnd, INT nBar,
     //             infoPtr->MinVal, infoPtr->MaxVal );
 
     /* Check if the scrollbar should be hidden or disabled */
-
     if (info->fMask & (SIF_RANGE | SIF_PAGE | SIF_DISABLENOSCROLL))
     {
         new_flags = infoPtr->flags;
@@ -1287,15 +1300,8 @@ BOOL WINAPI GetScrollInfo(
                 INT nBar /* [I] One of SB_HORZ, SB_VERT, or SB_CTL */,
                 LPSCROLLINFO info /* [IO] (info.fMask [I] specifies which values are to retrieve) */)
 {
-  Win32BaseWindow *window;
   SCROLLBAR_INFO *infoPtr;
 
-    window = Win32BaseWindow::GetWindowFromHandle(hwnd);
-    if(!window) {
-        dprintf(("GetScrollInfo window not found!"));
-        SetLastError(ERROR_INVALID_WINDOW_HANDLE);
-        return FALSE;
-    }
     if (!(infoPtr = SCROLL_GetScrollInfo( hwnd, nBar ))) return FALSE;
     if (info->fMask & ~(SIF_ALL | SIF_DISABLENOSCROLL)) return FALSE;
     if ((info->cbSize != sizeof(*info)) &&
@@ -1329,19 +1335,11 @@ INT WINAPI SetScrollPos(
                 INT nPos /* [I] New value */,
                 BOOL bRedraw /* [I] Should scrollbar be redrawn afterwards ? */ )
 {
-  Win32BaseWindow *window;
   SCROLLINFO info;
   SCROLLBAR_INFO *infoPtr;
   INT oldPos;
 
     dprintf(("SetScrollPos %x %d %d %d", hwnd, nBar, nPos, bRedraw));
-    window = Win32BaseWindow::GetWindowFromHandle(hwnd);
-    if(!window) {
-        dprintf(("SetScrollPos window not found!"));
-        SetLastError(ERROR_INVALID_WINDOW_HANDLE);
-        return FALSE;
-    }
-
     if (!(infoPtr = SCROLL_GetScrollInfo( hwnd, nBar ))) return 0;
     oldPos      = infoPtr->CurVal;
     info.cbSize = sizeof(info);
@@ -1365,19 +1363,13 @@ INT WINAPI GetScrollPos(
                 HWND hwnd, /* [I] Handle of window */
                 INT nBar /* [I] One of SB_HORZ, SB_VERT, or SB_CTL */)
 {
-  Win32BaseWindow *window;
   SCROLLBAR_INFO *infoPtr;
 
     dprintf(("GetScrollPos %x %d", hwnd, nBar));
 
-    window = Win32BaseWindow::GetWindowFromHandle(hwnd);
-    if(!window) {
-        dprintf(("GetScrollPos window not found!"));
-        SetLastError(ERROR_INVALID_WINDOW_HANDLE);
-        return 0;
-    }
+    infoPtr = SCROLL_GetScrollInfo( hwnd, nBar );
+    if (!infoPtr) return 0;
 
-    if (!(infoPtr = SCROLL_GetScrollInfo( hwnd, nBar ))) return 0;
     return infoPtr->CurVal;
 }
 /*************************************************************************
@@ -1392,16 +1384,9 @@ BOOL WINAPI SetScrollRange(
                 INT MaxVal,  /* [I] New maximum value */
                 BOOL bRedraw /* [I] Should scrollbar be redrawn afterwards ? */)
 {
-  Win32BaseWindow *window;
   SCROLLINFO info;
 
-    window = Win32BaseWindow::GetWindowFromHandle(hwnd);
-    if(!window) {
-        dprintf(("SetScrollRange window not found!"));
-        SetLastError(ERROR_INVALID_WINDOW_HANDLE);
-        return FALSE;
-    }
-
+    dprintf(("SetScrollRange %x %x %d %d %d", hwnd, nBar, MinVal, MaxVal, bRedraw));
     info.cbSize = sizeof(info);
     info.nMin   = MinVal;
     info.nMax   = MaxVal;
@@ -1454,17 +1439,10 @@ BOOL WINAPI GetScrollRange(
                 LPINT lpMin, /* [O] Where to store minimum value */
                 LPINT lpMax  /* [O] Where to store maximum value */)
 {
-  Win32BaseWindow *window;
   SCROLLBAR_INFO *infoPtr;
 
-    window = Win32BaseWindow::GetWindowFromHandle(hwnd);
-    if(!window) {
-        dprintf(("GetScrollRange window not found!"));
-        SetLastError(ERROR_INVALID_WINDOW_HANDLE);
-        return FALSE;
-    }
-
-    if (!(infoPtr = SCROLL_GetScrollInfo( hwnd, nBar )))
+    infoPtr = SCROLL_GetScrollInfo( hwnd, nBar );
+    if (!infoPtr)
     {
         if (lpMin) lpMin = 0;
         if (lpMax) lpMax = 0;
@@ -1565,7 +1543,7 @@ BOOL WINAPI ShowScrollBar(
     dprintf(("ShowScrollBar %04x %d %d\n", hwnd, nBar, fShow));
 
     window = Win32BaseWindow::GetWindowFromHandle(hwnd);
-    if(!window) {
+    if(!window && nBar != SB_CTL) {
         dprintf(("ShowScrollBar window not found!"));
         SetLastError(ERROR_INVALID_WINDOW_HANDLE);
         return 0;
@@ -1599,7 +1577,7 @@ BOOL WINAPI EnableScrollBar( HWND hwnd, INT nBar, UINT flags)
     dprintf(("EnableScrollBar %04x %d %d\n", hwnd, nBar, flags));
 
     window = Win32BaseWindow::GetWindowFromHandle(hwnd);
-    if(!window) {
+    if(!window && nBar != SB_CTL) {
         dprintf(("EnableScrollBar window not found!"));
         SetLastError(ERROR_INVALID_WINDOW_HANDLE);
         return 0;
