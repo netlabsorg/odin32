@@ -1,8 +1,11 @@
-/* $Id: ChangeLog,v 1.2487 2003-02-17 11:32:06 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.2488 2003-02-17 13:41:45 sandervl Exp $ */
 
  2003-02-17: Sander van Leeuwen <sandervl@innotek   >
     - KERNEL32: o FindFirstFile: return ERROR_FILE_NOT_FOUND if DosFindFirst
                   returns ERROR_PATH_NOT_FOUND
+    - USER32:   o Single Alt down + up always generates WM_SYSKEYUP; reset
+                  iMenuSysKey on WM_KEYUP, so the system menu isn't accidentally 
+                  activated.
 
  2003-02-16: Sander van Leeuwen <sandervl@innotek   >
     - USER32:   o ToAscii: fixed wrong checks for VK_SHIFT/CONTROL/MENU
