@@ -1,4 +1,7 @@
-/* $Id: changelog,v 1.1962 2002-02-08 00:46:32 bird Exp $ */
+/* $Id: changelog,v 1.1963 2002-02-08 09:56:37 sandervl Exp $ */
+
+ 2002-02-08: Platon Fomichev
+    - USER32:   o Fixes for handling Shift-Enter & Alt-Enter
 
  2002-02-08: knut st. osmundsen <bird@anduin.net>
     - WRC:      o Added codepage.c from kernel32 as a hotfix to the
@@ -9,6 +12,9 @@
     - KERNEL32: o Thread change: determine if thread callback is inside
                   a PE dll. If it is, then force switch to win32 TIB.
                   (necessary for Opera when loading win32 plugins)
+                o Use NLS resources from Wine (no longer rely on OS/2 unicode
+                  dll)
+                o ole2nls update; now use GetLocaleInfoA/W from Wine
 
  2002-02-06: Sander van Leeuwen <sandervl@xs4all.nl>
     - WSOCK32:  o minor recv update for error handling
