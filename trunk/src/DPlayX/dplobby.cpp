@@ -1,4 +1,4 @@
-// $Id: dplobby.cpp,v 1.3 2000-10-06 19:49:05 hugh Exp $
+// $Id: dplobby.cpp,v 1.4 2001-03-13 23:13:27 hugh Exp $
 /* Direct Play Lobby 2 & 3 Implementation
  *
  * Copyright 1998,1999,2000 - Peter Hunnisett
@@ -15,6 +15,7 @@
 #include "winerror.h"
 #include "winnt.h"
 #include "winreg.h"
+#include "winnls.h"
 #include "heap.h"
 #include "heapstring.h"
 #include "debugtools.h"
@@ -25,7 +26,7 @@
 #include "dplayx_messages.h"
 #include "dplayx_queue.h"
 
-DEFAULT_DEBUG_CHANNEL(dplay)
+DEFAULT_DEBUG_CHANNEL(dplay);
 
 #undef  debugstr_guid
 #define debugstr_guid(a) a
@@ -362,7 +363,7 @@ static HRESULT WINAPI DPL_QueryInterface
   }
 
   CopyMemory( *ppvObj, iface, sizeof( IDirectPlayLobbyWImpl )  );
-  (*(IDirectPlayLobbyWImpl**)ppvObj)->ulInterfaceRef = 0;
+  (*(IDirectPlayLobbyAImpl**)ppvObj)->ulInterfaceRef = 0;
 
   if( IsEqualGUID( &IID_IDirectPlayLobby, riid ) )
   {
@@ -766,7 +767,7 @@ static HRESULT WINAPI IDirectPlayLobbyAImpl_EnumAddressTypes
       DWORD    returnTypeGUID, sizeOfReturnBuffer = 50;
       char     atSubKey[51];
       char     returnBuffer[51];
-      LPWSTR   lpWGUIDString;
+      WCHAR    buff[51];
       DWORD    dwAtIndex;
       LPSTR    atKey = "Address Types";
       LPSTR    guidDataSubKey   = "Guid";
@@ -792,9 +793,8 @@ static HRESULT WINAPI IDirectPlayLobbyAImpl_EnumAddressTypes
       }
 
       /* FIXME: Check return types to ensure we're interpreting data right */
-      lpWGUIDString = HEAP_strdupAtoW( GetProcessHeap(), 0, returnBuffer );
-      CLSIDFromString( (LPCOLESTR)lpWGUIDString, &serviceProviderGUID );
-      HeapFree( GetProcessHeap(), 0, lpWGUIDString );
+      MultiByteToWideChar( CP_ACP, 0, returnBuffer, -1, buff, sizeof(buff)/sizeof(WCHAR) );
+      CLSIDFromString( (LPCOLESTR)buff, &serviceProviderGUID );
       /* FIXME: Have I got a memory leak on the serviceProviderGUID? */
 
       /* Determine if this is the Service Provider that the user asked for */
@@ -820,9 +820,8 @@ static HRESULT WINAPI IDirectPlayLobbyAImpl_EnumAddressTypes
         TRACE( "Found Address Type GUID %s\n", atSubKey );
 
         /* FIXME: Check return types to ensure we're interpreting data right */
-        lpWGUIDString = HEAP_strdupAtoW( GetProcessHeap(), 0, atSubKey );
-        CLSIDFromString( (LPCOLESTR)lpWGUIDString, &serviceProviderGUID );
-        HeapFree( GetProcessHeap(), 0, lpWGUIDString );
+        MultiByteToWideChar( CP_ACP, 0, atSubKey, -1, buff, sizeof(buff)/sizeof(WCHAR) );
+        CLSIDFromString( (LPCOLESTR)buff, &serviceProviderGUID );
         /* FIXME: Have I got a memory leak on the serviceProviderGUID? */
 
         /* The enumeration will return FALSE if we are not to continue */
@@ -917,7 +916,7 @@ static HRESULT WINAPI IDirectPlayLobbyAImpl_EnumLocalApplications
     GUID       serviceProviderGUID;
     DWORD      returnTypeGUID, sizeOfReturnBuffer = 50;
     char       returnBuffer[51];
-    LPWSTR     lpWGUIDString;
+    WCHAR      buff[51];
     DPLAPPINFO dplAppInfo;
 
     TRACE(" this time through: %s\n", subKeyName );
@@ -939,14 +938,13 @@ static HRESULT WINAPI IDirectPlayLobbyAImpl_EnumLocalApplications
     }
 
     /* FIXME: Check return types to ensure we're interpreting data right */
-    lpWGUIDString = HEAP_strdupAtoW( GetProcessHeap(), 0, returnBuffer );
-    CLSIDFromString( (LPCOLESTR)lpWGUIDString, &serviceProviderGUID );
-    HeapFree( GetProcessHeap(), 0, lpWGUIDString );
+    MultiByteToWideChar( CP_ACP, 0, returnBuffer, -1, buff, sizeof(buff)/sizeof(WCHAR) );
+    CLSIDFromString( (LPCOLESTR)buff, &serviceProviderGUID );
     /* FIXME: Have I got a memory leak on the serviceProviderGUID? */
 
     dplAppInfo.dwSize               = sizeof( dplAppInfo );
     dplAppInfo.guidApplication      = serviceProviderGUID;
-    dplAppInfo.appName.lpszAppNameA = subKeyName;
+    dplAppInfo.u.lpszAppNameA = subKeyName;
 
     EnterCriticalSection( &This->unk->DPL_lock );
 
@@ -1095,7 +1093,8 @@ static BOOL CALLBACK RunApplicationA_EnumLocalApplications
     }
     else
     {
-      lpData->lpszCommandLine = HEAP_strdupA( GetProcessHeap(), HEAP_ZERO_MEMORY, returnBuffer );
+        if ((lpData->lpszCommandLine = (LPSTR)HeapAlloc( GetProcessHeap(), 0, strlen(returnBuffer)+1 )))
+            strcpy( lpData->lpszCommandLine, returnBuffer );
     }
 
     sizeOfReturnBuffer = 200;
@@ -1108,7 +1107,8 @@ static BOOL CALLBACK RunApplicationA_EnumLocalApplications
     }
     else
     {
-      lpData->lpszCurrentDirectory = HEAP_strdupA( GetProcessHeap(), HEAP_ZERO_MEMORY, returnBuffer );
+        if ((lpData->lpszCurrentDirectory = (LPSTR)HeapAlloc( GetProcessHeap(), 0, strlen(returnBuffer)+1 )))
+            strcpy( lpData->lpszCurrentDirectory, returnBuffer );
     }
 
     sizeOfReturnBuffer = 200;
@@ -1121,7 +1121,8 @@ static BOOL CALLBACK RunApplicationA_EnumLocalApplications
     }
     else
     {
-      lpData->lpszFileName = HEAP_strdupA( GetProcessHeap(), HEAP_ZERO_MEMORY, returnBuffer );
+        if ((lpData->lpszFileName = (LPSTR)HeapAlloc( GetProcessHeap(), 0, strlen(returnBuffer)+1 )))
+            strcpy( lpData->lpszFileName, returnBuffer );
     }
 
     sizeOfReturnBuffer = 200;
@@ -1134,7 +1135,8 @@ static BOOL CALLBACK RunApplicationA_EnumLocalApplications
     }
     else
     {
-      lpData->lpszPath = HEAP_strdupA( GetProcessHeap(), HEAP_ZERO_MEMORY, returnBuffer );
+        if ((lpData->lpszPath = (LPSTR)HeapAlloc( GetProcessHeap(), 0, strlen(returnBuffer)+1 )))
+            strcpy( lpData->lpszPath, returnBuffer );
     }
 
     return FALSE; /* No need to keep going as we found what we wanted */
@@ -1148,7 +1150,7 @@ BOOL DPL_CreateAndSetLobbyHandles( DWORD dwDestProcessId, HANDLE hDestProcess,
                                    LPHANDLE lphRead )
 {
   /* These are the handles for the created process */
-  HANDLE hAppStart, hAppDeath, hAppRead, hTemp;;
+  HANDLE hAppStart, hAppDeath, hAppRead, hTemp;
   SECURITY_ATTRIBUTES s_attrib;
 
   s_attrib.nLength              = sizeof( s_attrib );
@@ -1244,13 +1246,14 @@ static HRESULT WINAPI IDirectPlayLobbyAImpl_RunApplication
   strcat( temp, enumData.lpszFileName );
   HeapFree( GetProcessHeap(), 0, enumData.lpszPath );
   HeapFree( GetProcessHeap(), 0, enumData.lpszFileName );
-  appName = HEAP_strdupA( GetProcessHeap(), HEAP_ZERO_MEMORY, temp );
+  if ((appName = (LPSTR)HeapAlloc( GetProcessHeap(), 0, strlen(temp)+1 ))) strcpy( appName, temp );
 
   /* Now the command line */
   strcat( temp, " " );
   strcat( temp, enumData.lpszCommandLine );
   HeapFree( GetProcessHeap(), 0, enumData.lpszCommandLine );
-  enumData.lpszCommandLine = HEAP_strdupA( GetProcessHeap(), HEAP_ZERO_MEMORY, temp );
+  if ((enumData.lpszCommandLine = (LPSTR)HeapAlloc( GetProcessHeap(), 0, strlen(temp)+1 )))
+      strcpy( enumData.lpszCommandLine, temp );
 
   ZeroMemory( &startupInfo, sizeof( startupInfo ) );
   startupInfo.cb = sizeof( startupInfo );

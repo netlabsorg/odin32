@@ -1,4 +1,4 @@
-// $Id: name_server.cpp,v 1.3 2000-10-06 19:49:06 hugh Exp $
+// $Id: name_server.cpp,v 1.4 2001-03-13 23:13:27 hugh Exp $
 /* DPLAYX.DLL name server implementation
  *
  * Copyright 2000 - Peter Hunnisett
@@ -17,6 +17,8 @@
 
 #include "winbase.h"
 #include "winuser.h"
+#include "winnls.h"
+#include "wine/unicode.h"
 #include "debugtools.h"
 #include "heap.h"
 #include "heapstring.h"
@@ -81,6 +83,7 @@ void NS_SetRemoteComputerAsNameServer( LPVOID                    lpNSAddrHdr,
                                        LPDPMSG_ENUMSESSIONSREPLY lpMsg,
                                        LPVOID                    lpNSInfo )
 {
+  DWORD len;
   lpNSCache     lpCache = (lpNSCache)lpNSInfo;
   lpNSCacheData lpCacheNode;
 
@@ -127,11 +130,12 @@ void NS_SetRemoteComputerAsNameServer( LPVOID                    lpNSAddrHdr,
   }
 
   CopyMemory( lpCacheNode->data, &lpMsg->sd, sizeof( *lpCacheNode->data ) );
-  lpCacheNode->data->sess.lpszSessionNameA = HEAP_strdupWtoA( GetProcessHeap(),
-                                                              HEAP_ZERO_MEMORY,
-                                                              (LPWSTR)(lpMsg+1) );
+  len = WideCharToMultiByte( CP_ACP, 0, (LPWSTR)(lpMsg+1), -1, NULL, 0, NULL, NULL );
+  if ((lpCacheNode->data->u1.lpszSessionNameA = (LPSTR)HeapAlloc( GetProcessHeap(), 0, len )))
+      WideCharToMultiByte( CP_ACP, 0, (LPWSTR)(lpMsg+1), -1,
+                           lpCacheNode->data->u1.lpszSessionNameA, len, NULL, NULL );
 
-  lpCacheNode->dwTime = GetTickCount();
+  lpCacheNode->dwTime = timeGetTime();
 
   DPQ_INSERT(lpCache->first, lpCacheNode, next );
 
@@ -198,6 +202,7 @@ HRESULT NS_SendSessionRequestBroadcast( LPCGUID lpcGuid,
   return (lpSpData->lpCB->EnumSessions)( &data );
 }
 
+/* Delete a name server node which has been allocated on the heap */
 DPQ_DECL_DELETECB( cbDeleteNSNodeFromHeap, lpNSCacheData )
 {
   /* NOTE: This proc doesn't deal with the walking pointer */
@@ -207,8 +212,6 @@ DPQ_DECL_DELETECB( cbDeleteNSNodeFromHeap, lpNSCacheData )
   HeapFree( GetProcessHeap(), 0, elem->lpNSAddrHdr );
   HeapFree( GetProcessHeap(), 0, elem );
 }
-
-
 
 /* Render all data in a session cache invalid */
 void NS_InvalidateSessionCache( LPVOID lpNSInfo )
@@ -256,7 +259,6 @@ void NS_DeleteSessionCache( LPVOID lpNSInfo )
 /* Reinitialize the present pointer for this cache */
 void NS_ResetSessionEnumeration( LPVOID lpNSInfo )
 {
-
   ((lpNSCache)lpNSInfo)->present = ((lpNSCache)lpNSInfo)->first.lpQHFirst;
 }
 
@@ -284,6 +286,7 @@ LPDPSESSIONDESC2 NS_WalkSessions( LPVOID lpNSInfo )
 /* This method should check to see if there are any sessions which are
  * older than the criteria. If so, just delete that information.
  */
+/* FIXME: This needs to be called by some periodic timer */
 void NS_PruneSessionCache( LPVOID lpNSInfo )
 {
   lpNSCache     lpCache = (lpNSCache)lpNSInfo;
@@ -336,9 +339,7 @@ void NS_PruneSessionCache( LPVOID lpNSInfo )
 
 }
 
-
-
-/* Message stuff */
+/* NAME SERVER Message stuff */
 void NS_ReplyToEnumSessionsRequest( LPVOID lpMsg,
                                     LPDPSP_REPLYDATA lpReplyData,
                                     IDirectPlay2Impl* lpDP )
@@ -346,14 +347,17 @@ void NS_ReplyToEnumSessionsRequest( LPVOID lpMsg,
   LPDPMSG_ENUMSESSIONSREPLY rmsg;
   DWORD dwVariableSize;
   DWORD dwVariableLen;
-  LPWSTR string;
   /* LPDPMSG_ENUMSESSIONSREQUEST msg = (LPDPMSG_ENUMSESSIONSREQUEST)lpMsg; */
   BOOL bAnsi = TRUE; /* FIXME: This needs to be in the DPLAY interface */
 
   FIXME( ": few fixed + need to check request for response\n" );
 
-  dwVariableLen = bAnsi ? lstrlenA( lpDP->dp2->lpSessionDesc->sess.lpszSessionNameA ) + 1
-                         : lstrlenW( lpDP->dp2->lpSessionDesc->sess.lpszSessionName ) + 1;
+  if (bAnsi)
+      dwVariableLen = MultiByteToWideChar( CP_ACP, 0,
+                                           lpDP->dp2->lpSessionDesc->u1.lpszSessionNameA,
+                                           -1, NULL, 0 );
+  else
+      dwVariableLen = strlenW( lpDP->dp2->lpSessionDesc->u1.lpszSessionName ) + 1;
 
   dwVariableSize = dwVariableLen * sizeof( WCHAR );
 
@@ -373,17 +377,8 @@ void NS_ReplyToEnumSessionsRequest( LPVOID lpMsg,
               sizeof( lpDP->dp2->lpSessionDesc->dwSize ) );
   rmsg->dwUnknown = 0x0000005c;
   if( bAnsi )
-  {
-    string = HEAP_strdupAtoW( GetProcessHeap(), 0,
-                              lpDP->dp2->lpSessionDesc->sess.lpszSessionNameA );
-    /* FIXME: Memory leak */
-  }
+      MultiByteToWideChar( CP_ACP, 0, lpDP->dp2->lpSessionDesc->u1.lpszSessionNameA, -1,
+                           (LPWSTR)(rmsg+1), dwVariableLen );
   else
-  {
-    string = lpDP->dp2->lpSessionDesc->sess.lpszSessionName;
-  }
-
-  lstrcpyW( (LPWSTR)(rmsg+1), string );
-
+      strcpyW( (LPWSTR)(rmsg+1), lpDP->dp2->lpSessionDesc->u1.lpszSessionName );
 }
-

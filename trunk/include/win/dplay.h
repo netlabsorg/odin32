@@ -1,10 +1,6 @@
-// $Id: dplay.h,v 1.6 2000-10-02 17:37:41 sandervl Exp $
+// $Id: dplay.h,v 1.7 2001-03-13 23:13:26 hugh Exp $
 #ifndef __WINE_DPLAY_H
 #define __WINE_DPLAY_H
-
-/* FIXME: GCC doesn't yet support annon structures so some of the structures defined here don't match the sdk exactly.
- * I've tried to come up with suitably terse names, but this file won't cut it for inclusion into a WineLib app.
- */
 
 #include "wine/obj_base.h"
 
@@ -181,13 +177,13 @@ typedef struct tagDPNAME
     {
         LPWSTR  lpszShortName;
         LPSTR   lpszShortNameA;
-    }psn;
+    } DUMMYUNIONNAME1;
 
     union /*playerLongName */       /* Player's formal/real name */
     {
         LPWSTR  lpszLongName;
         LPSTR   lpszLongNameA;
-    }pln;
+    } DUMMYUNIONNAME2;
 
 } DPNAME, *LPDPNAME;
 
@@ -231,13 +227,13 @@ typedef struct tagDPSESSIONDESC2
     {
         LPWSTR  lpszSessionName;
         LPSTR   lpszSessionNameA;
-    }sess;
+    } DUMMYUNIONNAME1;
 
     union  /* Optional password */
     {
         LPWSTR  lpszPassword;
         LPSTR   lpszPasswordA;
-    }pass;
+    } DUMMYUNIONNAME2;
 
     DWORD   dwReserved1;
     DWORD   dwReserved2;
@@ -288,7 +284,7 @@ typedef struct tagDPCHAT
     {                          /* Message string */
         LPWSTR  lpszMessage;   /* Unicode */
         LPSTR   lpszMessageA;  /* ANSI */
-    }msgstr;
+    } DUMMYUNIONNAME;
 } DPCHAT, *LPDPCHAT;
 
 typedef struct
@@ -306,12 +302,12 @@ typedef struct tagDPSECURITYDESC
     {                               /* SSPI provider name */
         LPWSTR  lpszSSPIProvider;   /* Unicode */
         LPSTR   lpszSSPIProviderA;  /* ANSI */
-    }sspi;
+    } DUMMYUNIONNAME1;
     union
     {                               /* CAPI provider name */
         LPWSTR lpszCAPIProvider;    /* Unicode */
         LPSTR  lpszCAPIProviderA;   /* ANSI */
-    }capi;
+    } DUMMYUNIONNAME2;
     DWORD dwCAPIProviderType;       /* Crypto Service Provider type */
     DWORD dwEncryptionAlgorithm;    /* Encryption Algorithm type */
 } DPSECURITYDESC, *LPDPSECURITYDESC;
@@ -326,17 +322,17 @@ typedef struct tagDPCREDENTIALS
     {                           /* User name of the account */
         LPWSTR  lpszUsername;   /* Unicode */
         LPSTR   lpszUsernameA;  /* ANSI */
-    }name;
+    } DUMMYUNIONNAME1;
     union
     {                           /* Password of the account */
         LPWSTR  lpszPassword;   /* Unicode */
         LPSTR   lpszPasswordA;  /* ANSI */
-    }pass;
+    } DUMMYUNIONNAME2;
     union
     {                           /* Domain name of the account */
         LPWSTR  lpszDomain;     /* Unicode */
         LPSTR   lpszDomainA;    /* ANSI */
-    }domain;
+    } DUMMYUNIONNAME3;
 } DPCREDENTIALS, *LPDPCREDENTIALS;
 
 typedef const DPCREDENTIALS *LPCDPCREDENTIALS;
@@ -357,7 +353,10 @@ typedef BOOL (* CALLBACK LPDPENUMDPCALLBACKA)(
     DWORD       dwMinorVersion, /* Minor # of driver spec in lpguidSP */
     LPVOID      lpContext);     /* User given */
 
-typedef const GUID   *LPCGUID;
+#ifndef __LPCGUID_DEFINED__
+#define __LPCGUID_DEFINED__
+typedef const GUID *LPCGUID;
+#endif
 
 typedef const DPNAME *LPCDPNAME;
 
