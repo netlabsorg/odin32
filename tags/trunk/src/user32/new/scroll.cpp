@@ -1,4 +1,4 @@
-/* $Id: scroll.cpp,v 1.11 2000-01-13 20:11:37 sandervl Exp $ */
+/* $Id: scroll.cpp,v 1.12 2000-01-16 18:17:11 cbratschi Exp $ */
 /*
  * Scrollbar control
  *
@@ -72,12 +72,9 @@ static BOOL SCROLL_trackVertical;
  /* Is the moving thumb being displayed? */
 static BOOL SCROLL_MovingThumb = FALSE;
 
-// Get the infoPtr: works only with scrollbar handles
-
 static SCROLLBAR_INFO *SCROLL_GetInfoPtr( HWND hwnd, INT nBar )
 {
     Win32BaseWindow *win32wnd;
-    HWND hwndFrame;
 
     switch(nBar)
     {
