@@ -1,4 +1,4 @@
-# $Id: setup.os2debmscv6.mk,v 1.10 2002-08-24 04:59:46 bird Exp $
+# $Id: setup.os2debmscv6.mk,v 1.11 2002-08-24 22:33:11 bird Exp $
 
 # ---OS2, DEBUG, MSCV6-------------------------
 ENV_NAME="OS/2, Debug, Microsoft C v6.0a 32-bit"
@@ -28,7 +28,6 @@ LINK=ilink.exe
 IMPLIB=implib.exe
 RC=rc.exe
 RL=rc.exe
-EXEPACK=lxlite.exe
 
 
 #

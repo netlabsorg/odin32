@@ -1,4 +1,4 @@
-# $Id: setup.os2relemx.mk,v 1.5 2002-08-24 04:59:48 bird Exp $
+# $Id: setup.os2relemx.mk,v 1.6 2002-08-24 22:33:12 bird Exp $
 
 # ---OS2, DEBUG, EMX----------------------------
 ENV_NAME="OS/2, Debug, EMX/GCC Compiler"
@@ -37,7 +37,6 @@ LINK=ilink.exe
 IMPLIB=implib.exe
 RC=rc.exe
 RL=rc.exe
-EXEPACK=lxlite.exe
 
 
 #
@@ -102,7 +101,7 @@ CC_FLAGS_IFS=$(CXX_FLAGS_IFS)
 
 IMPLIB_FLAGS=/NOI /Nologo
 
-LINK_FLAGS=/nofree /nologo /map /linenumbers /NOIgnorecase /noe /nod /packcode /packdata /exepack:2 /nodebug
+LINK_FLAGS=/nofree /nologo /map /linenumbers /NOIgnorecase /noe /nod /packcode /packdata /exepack:2
 LINK_FLAGS_EXE=$(LINK_FLAGS) /EXECutable /BASE:0x10000 /STACK:$(TARGET_STACKSIZE)
 LINK_FLAGS_DLL=$(LINK_FLAGS) /DLL
 LINK_FLAGS_SYS=$(LINK_FLAGS) /PDD /Align:16

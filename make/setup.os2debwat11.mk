@@ -1,4 +1,4 @@
-# $Id: setup.os2debwat11.mk,v 1.11 2002-08-24 04:59:47 bird Exp $
+# $Id: setup.os2debwat11.mk,v 1.12 2002-08-24 22:33:12 bird Exp $
 
 # ---OS2, DEBUG, WAT11-------------------------
 ENV_NAME="OS/2, Debug, Watcom C/C++ v11.0c"
@@ -29,7 +29,6 @@ LINK=wlink.exe
 IMPLIB=implib.exe
 RC=rc.exe
 RL=rc.exe
-EXEPACK=lxlite.exe
 
 
 #
