@@ -1,4 +1,4 @@
-/* $Id: nt.cpp,v 1.7 2000-05-26 18:51:55 sandervl Exp $ */
+/* $Id: nt.cpp,v 1.8 2000-07-07 19:06:18 sandervl Exp $ */
 
 
 /*
@@ -356,12 +356,25 @@ NTSTATUS WINAPI NtQueryInformationToken(HANDLE  Token,
 	memcpy(TokenInformation, (LPVOID)pSecInfo->pTokenGroups, sizeof(TOKEN_GROUPS));
 	break;
     case TokenUser:                     /* 1 */
-      	*ReturnLength = sizeof (TOKEN_USER);
-	if(TokenInformationLength < sizeof (TOKEN_USER)) {
+    {
+        int len = sizeof (TOKEN_USER) + sizeof(SID);
+        *ReturnLength = len;
+        if(len <= TokenInformationLength) {
+	  	if(TokenInformation)
+		{
+		    TOKEN_USER *tuser = (TOKEN_USER *)TokenInformation;
+		    PSID sid = (PSID) &((LPBYTE)TokenInformation)[sizeof(TOKEN_USER)];
+		    SID_IDENTIFIER_AUTHORITY localSidAuthority = {SECURITY_NT_AUTHORITY};
+		    RtlInitializeSid(sid, &localSidAuthority, 1);
+		    *(RtlSubAuthoritySid(sid, 0)) = SECURITY_INTERACTIVE_RID;
+		    tuser->User.Sid = sid;
+		}
+        }
+	else {
 		return STATUS_BUFFER_TOO_SMALL;
-	}
-	memset(TokenInformation, 0, sizeof(TOKEN_USER));
+	}	
 	break;
+    }
     case TokenPrivileges:
       	*ReturnLength = sizeof (TOKEN_PRIVILEGES);
 	if(TokenInformationLength < sizeof (TOKEN_PRIVILEGES)) {
