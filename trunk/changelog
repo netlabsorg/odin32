@@ -1,4 +1,10 @@
-/* $Id: changelog,v 1.1395 2001-05-03 18:20:09 sandervl Exp $ */
+/* $Id: changelog,v 1.1396 2001-05-04 17:00:54 sandervl Exp $ */
+
+ 2001-05-04: Dietrich Teickner <Dietrich_Teickner@t-online.de>
+    - SHELL32:  o Update for SHFileOperationA (FO_MOVE)
+
+ 2001-05-04: Sander van Leeuwen <sandervl@xs4all.nl>
+    - USER32:   o FrameTrackFrame bugfix for moving child windows
 
  2000-05-03: Yuri Dario <mc6530@mclink.it>
     - USER32:   o SendNCCalcSize call bugfix (client rectangle parameter)
