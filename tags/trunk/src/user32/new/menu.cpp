@@ -1,4 +1,4 @@
-/* $Id: menu.cpp,v 1.9 2000-01-13 20:11:36 sandervl Exp $*/
+/* $Id: menu.cpp,v 1.10 2000-01-15 14:18:16 cbratschi Exp $*/
 /*
  * Menu functions
  *
@@ -1028,17 +1028,7 @@ static void MENU_DrawMenuItem( HWND hwnd, HMENU hmenu, HWND hwndOwner, HDC hdc, 
 
     //debug_print_menuitem("MENU_DrawMenuItem: ", lpitem, "");
 
-    if (lpitem->fType & MF_SYSMENU)
-    {
-        if( !IsIconic(hwnd) )
-        {
-          Win32BaseWindow *win32wnd = Win32BaseWindow::GetWindowFromHandle(hwnd);
-
-          if (win32wnd) win32wnd->DrawSysButton(hdc,lpitem->fState & (MF_HILITE | MF_MOUSESELECT));
-        }
-
-        return;
-    }
+    if (lpitem->fType & MF_SYSMENU) return;
 
     if (lpitem->fType & MF_OWNERDRAW)
     {
@@ -1073,9 +1063,6 @@ static void MENU_DrawMenuItem( HWND hwnd, HMENU hmenu, HWND hwndOwner, HDC hdc, 
     rect = lpitem->rect;
 
     if ((lpitem->fState & MF_HILITE) && !(IS_BITMAP_ITEM(lpitem->fType)))
-        if (menuBar)
-            DrawEdge(hdc, &rect, BDR_SUNKENOUTER, BF_RECT);
-        else
             FillRect( hdc, &rect, GetSysColorBrush(COLOR_HIGHLIGHT) );
     else {
         //SvL: TODO: Bug in GDI32; draws black rectangle instead of menu color
@@ -1384,24 +1371,46 @@ UINT MENU_DrawMenuBar( HDC hDC, LPRECT lprect, HWND hwnd,
         goto END;
     }
 
-    FillRect(hDC, lprect, GetSysColorBrush(COLOR_MENU) );
+    HDC memDC;
+    HBITMAP memBmp,oldBmp;
+    RECT r;
+    HFONT oldMemFont;
 
-    SelectObject( hDC, GetSysColorPen(COLOR_3DFACE));
-    MoveToEx( hDC, lprect->left, lprect->bottom,NULL);
-    LineTo( hDC, lprect->right, lprect->bottom );
+    memDC = CreateCompatibleDC(hDC);
+    r = *lprect;
+    r.right -= r.left;
+    r.bottom -= r.top;
+    r.left = r.top = 0;
+    memBmp = CreateCompatibleBitmap(hDC,r.right,r.bottom+1);
+    oldBmp = SelectObject(memDC,memBmp);
+    oldMemFont = SelectObject(memDC,hMenuFont);
+
+    FillRect(memDC,&r,GetSysColorBrush(COLOR_MENU));
+
+    SelectObject(memDC,GetSysColorPen(COLOR_3DFACE));
+    MoveToEx(memDC,r.left,r.bottom,NULL);
+    LineTo(memDC,r.right,r.bottom);
 
     if (lppop->nItems == 0)
     {
-        retvalue = GetSystemMetrics(SM_CYMENU);
-        goto END;
+      retvalue = GetSystemMetrics(SM_CYMENU);
+    } else
+    {
+      for (i = 0; i < lppop->nItems; i++)
+      {
+        OffsetRect(&lppop->items[i].rect,-lprect->left,-lprect->top);
+        MENU_DrawMenuItem( hwnd,getMenu(hwnd), GetWindow(hwnd,GW_OWNER),
+                         memDC, &lppop->items[i], lppop->Height, TRUE, ODA_DRAWENTIRE );
+        OffsetRect(&lppop->items[i].rect,lprect->left,lprect->top);
+      }
+      retvalue = lppop->Height;
     }
 
-    for (i = 0; i < lppop->nItems; i++)
-    {
-        MENU_DrawMenuItem( hwnd,getMenu(hwnd), GetWindow(hwnd,GW_OWNER),
-                         hDC, &lppop->items[i], lppop->Height, TRUE, ODA_DRAWENTIRE );
-    }
-    retvalue = lppop->Height;
+    BitBlt(hDC,lprect->left,lprect->top,lprect->right-lprect->left,lprect->bottom-lprect->top+1,memDC,0,0,SRCCOPY);
+    SelectObject(memDC,oldBmp);
+    if (oldMemFont) SelectObject(memDC,oldMemFont);
+    DeleteObject(memBmp);
+    DeleteDC(memDC);
 
 END:
     if (hfontOld)
@@ -2102,7 +2111,7 @@ static HMENU MENU_ShowSubPopup( HWND hwndOwner, HMENU hmenu,
  *
  * Walks menu chain trying to find a menu pt maps to.
  */
-static HMENU MENU_PtMenu( HMENU hMenu, POINT pt )
+static HMENU MENU_PtMenu(HMENU hMenu,POINT pt,BOOL inMenuBar)
 {
    POPUPMENU *menu = (POPUPMENU*)hMenu;
    register UINT ht = menu->FocusedItem;
@@ -2111,7 +2120,7 @@ static HMENU MENU_PtMenu( HMENU hMenu, POINT pt )
     ht = (ht != NO_SELECTED_ITEM &&
           (menu->items[ht].fType & MF_POPUP) &&
           (menu->items[ht].fState & MF_MOUSESELECT))
-        ? (UINT) MENU_PtMenu(menu->items[ht].hSubMenu, pt) : 0;
+        ? (UINT) MENU_PtMenu(menu->items[ht].hSubMenu,pt,inMenuBar) : 0;
 
    if( !ht )    /* check the current window (avoiding WM_HITTEST) */
    {
@@ -2125,8 +2134,8 @@ static HMENU MENU_PtMenu( HMENU hMenu, POINT pt )
                    ht != (UINT)HTERROR) ? (UINT)hMenu : 0;
         else
         {
-            ht = ( ht == HTSYSMENU ) ? (UINT)(getSysMenu(menu->hWnd))
-                 : ( ht == HTMENU ) ? (UINT)(getMenu(menu->hWnd)) : 0;
+            ht = ((ht == HTSYSMENU) && !inMenuBar) ? (UINT)(getSysMenu(menu->hWnd))
+                 : ((ht == HTMENU) && inMenuBar) ? (UINT)(getMenu(menu->hWnd)) : 0;
         }
    }
    return (HMENU)ht;
@@ -2401,9 +2410,9 @@ static LRESULT MENU_DoNextMenu( MTRACKER* pmt, UINT vk )
 
         if( hNewWnd != pmt->hOwnerWnd )
         {
-            ReleaseCapture(); 
+            ReleaseCapture();
             pmt->hOwnerWnd = hNewWnd;
-	    SetCapture(pmt->hOwnerWnd); //SvL: Don't know if this is good enough
+            SetCapture(pmt->hOwnerWnd); //SvL: Don't know if this is good enough
             //EVENT_Capture( pmt->hOwnerWnd, HTMENU ); //CB: todo
         }
 
@@ -2567,8 +2576,7 @@ static void MENU_KeyRight( MTRACKER* pmt, UINT wFlags )
  *
  * Menu tracking code.
  */
-static INT MENU_TrackMenu( HMENU hmenu, UINT wFlags, INT x, INT y,
-                              HWND hwnd, const RECT *lprect )
+static INT MENU_TrackMenu(HMENU hmenu,UINT wFlags,INT x,INT y,HWND hwnd,BOOL inMenuBar,const RECT *lprect)
 {
     MSG msg;
     POPUPMENU *menu;
@@ -2605,7 +2613,7 @@ static INT MENU_TrackMenu( HMENU hmenu, UINT wFlags, INT x, INT y,
         /* we have to keep the message in the queue until it's
          * clear that menu loop is not over yet. */
 //        if (!GetMessageA(&msg,msg.hwnd,0,0)) break;
-	//SvL: Getting messages for only the menu delays background paints (i.e. VPBuddy logo)
+        //SvL: Getting messages for only the menu delays background paints (i.e. VPBuddy logo)
         if (!GetMessageA(&msg,0,0,0)) break;
         TranslateMessage( &msg );
         mt.pt = msg.pt;
@@ -2618,7 +2626,8 @@ static INT MENU_TrackMenu( HMENU hmenu, UINT wFlags, INT x, INT y,
         {
             /* Find a menu for this mouse event */
             POINT pt = msg.pt;
-            hmenu = MENU_PtMenu( mt.hTopMenu, pt );
+
+            hmenu = MENU_PtMenu(mt.hTopMenu,pt,inMenuBar);
 
             switch(msg.message)
             {
@@ -2827,7 +2836,7 @@ static BOOL MENU_ExitTracking(HWND hWnd)
  */
 void MENU_TrackMouseMenuBar( HWND hWnd, INT ht, POINT pt )
 {
-    HMENU hMenu = (ht == HTSYSMENU) ? getSysMenu(hWnd):getMenu(hWnd);
+    HMENU hMenu = (ht == 0) ? getMenu(hWnd):getSysMenu(hWnd);
     UINT wFlags = TPM_ENTERIDLEEX | TPM_BUTTONDOWN | TPM_LEFTALIGN | TPM_LEFTBUTTON;
 
     //TRACE("pwnd=%p ht=0x%04x (%ld,%ld)\n", wndPtr, ht, pt.x, pt.y);
@@ -2835,7 +2844,7 @@ void MENU_TrackMouseMenuBar( HWND hWnd, INT ht, POINT pt )
     if (IsMenu(hMenu))
     {
         MENU_InitTracking( hWnd, hMenu, FALSE, wFlags );
-        MENU_TrackMenu( hMenu, wFlags, pt.x, pt.y, hWnd, NULL );
+        MENU_TrackMenu( hMenu, wFlags, pt.x, pt.y, hWnd,ht == 0, NULL );
         MENU_ExitTracking(hWnd);
     }
 }
@@ -2894,7 +2903,7 @@ void MENU_TrackKbdMenuBar( HWND hWnd, UINT wParam, INT vkey)
             else if( vkey )
                 PostMessageA( hWnd, WM_KEYDOWN, VK_DOWN, 0L );
 
-            MENU_TrackMenu( hTrackMenu, wFlags, 0, 0, hWnd, NULL );
+            MENU_TrackMenu( hTrackMenu, wFlags, 0, 0, hWnd,TRUE, NULL );
         }
 
         MENU_ExitTracking (hWnd);
@@ -2923,7 +2932,7 @@ BOOL WINAPI TrackPopupMenu( HMENU hMenu, UINT wFlags, INT x, INT y,
         SendMessageA( hWnd, WM_INITMENUPOPUP, hMenu, 0);
 
     if (MENU_ShowPopup( hWnd, hMenu, 0, x, y, 0, 0 ))
-        ret = MENU_TrackMenu( hMenu, wFlags | TPM_POPUPMENU, 0, 0, hWnd, lpRect );
+        ret = MENU_TrackMenu( hMenu, wFlags | TPM_POPUPMENU, 0, 0, hWnd,FALSE, lpRect );
     MENU_ExitTracking(hWnd);
 
     if( (!(wFlags & TPM_RETURNCMD)) && (ret != FALSE) )
@@ -3310,12 +3319,12 @@ BOOL WINAPI InsertMenuA( HMENU hMenu, UINT pos, UINT flags,
     MENUITEM *item;
 
     if (IS_STRING_ITEM(flags) && str)
-    	dprintf(("USER32: InsertMenuA %x %d %x %d %s", hMenu, pos, flags, id, str));
+        dprintf(("USER32: InsertMenuA %x %d %x %d %s", hMenu, pos, flags, id, str));
     //    TRACE("hMenu %04x, pos %d, flags %08x, "
     //                  "id %04x, str '%s'\n",
     //                  hMenu, pos, flags, id, str );
     else // TRACE("hMenu %04x, pos %d, flags %08x, "
-    	dprintf(("USER32: InsertMenuA %x %d %x %d %x", hMenu, pos, flags, id, str));
+        dprintf(("USER32: InsertMenuA %x %d %x %d %x", hMenu, pos, flags, id, str));
     //                   "id %04x, str %08lx (not a string)\n",
     //                   hMenu, pos, flags, id, (DWORD)str );
 
@@ -3444,14 +3453,14 @@ BOOL WINAPI ModifyMenuA( HMENU hMenu, UINT pos, UINT flags,
 
     if (IS_STRING_ITEM(flags))
     {
-    	dprintf(("USER32: ModifyMenuA, %x %d %x %d %s", hMenu, pos, flags, id, str));
+        dprintf(("USER32: ModifyMenuA, %x %d %x %d %s", hMenu, pos, flags, id, str));
         //TRACE("%04x %d %04x %04x '%s'\n",
         //              hMenu, pos, flags, id, str ? str : "#NULL#" );
         if (!str) return FALSE;
     }
     else
     {
-    	dprintf(("USER32: ModifyMenuA, %x %d %x %d %x", hMenu, pos, flags, id, str));
+        dprintf(("USER32: ModifyMenuA, %x %d %x %d %x", hMenu, pos, flags, id, str));
         //TRACE("%04x %d %04x %04x %08lx\n",
         //              hMenu, pos, flags, id, (DWORD)str );
     }

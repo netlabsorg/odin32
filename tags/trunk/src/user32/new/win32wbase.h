@@ -1,4 +1,4 @@
-/* $Id: win32wbase.h,v 1.29 2000-01-14 17:48:33 cbratschi Exp $ */
+/* $Id: win32wbase.h,v 1.30 2000-01-15 14:18:18 cbratschi Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -384,6 +384,7 @@ private:
         VOID  TrackScrollBar(WPARAM wParam,POINT pt);
         LONG  HandleNCLButtonDown(WPARAM wParam,LPARAM lParam);
         LONG  HandleNCLButtonDblClk(WPARAM wParam,LPARAM lParam);
+        LONG  HandleNCRButtonUp(WPARAM wParam,LPARAM lParam);
         BOOL  WindowNeedsWMBorder();
         VOID  AdjustRectOuter(LPRECT rect,BOOL menu);
         VOID  AdjustRectInner(LPRECT rect);
@@ -392,13 +393,13 @@ private:
         VOID  DrawFrame(HDC hdc,RECT *rect,BOOL dlgFrame,BOOL active);
 public:
         LONG  HandleNCHitTest(POINT pt);
-        BOOL  DrawSysButton(HDC hdc,BOOL down);
         BOOL  GetSysPopupPos(RECT* rect);
 private:
+        BOOL  DrawSysButton(HDC hdc,RECT *rect);
         BOOL  DrawGrayButton(HDC hdc,int x,int y);
-        VOID  DrawCloseButton(HDC hdc,BOOL down,BOOL bGrayed);
-        VOID  DrawMaxButton(HDC hdc,BOOL down,BOOL bGrayed);
-        VOID  DrawMinButton(HDC hdc,BOOL down,BOOL bGrayed);
+        VOID  DrawCloseButton(HDC hdc,RECT *rect,BOOL down,BOOL bGrayed);
+        VOID  DrawMaxButton(HDC hdc,RECT *rect,BOOL down,BOOL bGrayed);
+        VOID  DrawMinButton(HDC hdc,RECT *rect,BOOL down,BOOL bGrayed);
         VOID  DrawCaption(HDC hdc,RECT *rect,BOOL active,BOOL redrawText);
         VOID  UpdateCaptionText();
         VOID  DoNCPaint(HRGN clip,BOOL suppress_menupaint);
