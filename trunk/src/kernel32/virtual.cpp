@@ -1,4 +1,4 @@
-/* $Id: virtual.cpp,v 1.17 1999-10-14 17:15:50 phaller Exp $ */
+/* $Id: virtual.cpp,v 1.18 1999-10-14 20:55:39 phaller Exp $ */
 
 /*
  * Win32 virtual memory functions
@@ -567,13 +567,13 @@ ODINFUNCTION3(DWORD, VirtualQuery, LPCVOID, lpvAddress,
     pmbiBuffer->AllocationBase = lpBase;
   else
   {
-    while(lpvAddress > 0)
+    while(lpBase > 0)
     {
       rc = OSLibDosQueryMem(lpBase, &cbRangeSize, &dAttr);
       if(rc)
       {
          dprintf(("VirtualQuery - OSLibDosQueryMem %x %x returned %d\n",
-                  lpvAddress,
+                  lpBase,
                   cbLength,
                   rc));
          break;
@@ -583,7 +583,7 @@ ODINFUNCTION3(DWORD, VirtualQuery, LPCVOID, lpvAddress,
          pmbiBuffer->AllocationBase = lpBase;
          break;
       }
-      lpvAddress = (LPVOID)((ULONG)lpBase - PAGE_SIZE);
+      lpBase = (LPVOID) ((LPBYTE)lpBase - PAGE_SIZE);
    }
   }
   return sizeof(MEMORY_BASIC_INFORMATION);
