@@ -1,4 +1,4 @@
-/* $Id: win32wbase.h,v 1.113 2001-04-12 14:04:33 sandervl Exp $ */
+/* $Id: win32wbase.h,v 1.114 2001-04-25 20:53:39 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -159,6 +159,7 @@ virtual  WORD   GetWindowWord(int index);
          void   setInstance(ULONG newinstance)  { hInstance = newinstance; };
          HWND   getWindowHandle()               { return Win32Hwnd; };
          HWND   getOS2WindowHandle()            { return OS2Hwnd; };
+
  Win32WndClass *getWindowClass()                { return windowClass; };
 
          LONG   getLastHitTestVal()             { return lastHitTestVal; }
@@ -253,8 +254,6 @@ Win32BaseWindow *GetTopParent();
          BOOL   CanReceiveSizeMsgs()          { return !fNoSizeMsg; };
          BOOL   IsWindowCreated()             { return fCreated; }
          BOOL   IsWindowDestroyed()           { return fIsDestroyed; };
-         BOOL   IsWindowEnabled();
-         BOOL   IsWindowVisible();
          BOOL   IsWindowIconic();
          //Window procedure type
          BOOL   IsWindowUnicode();
