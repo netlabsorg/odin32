@@ -1,4 +1,4 @@
-/* $Id: dibsect.cpp,v 1.52 2001-05-29 09:45:21 sandervl Exp $ */
+/* $Id: dibsect.cpp,v 1.53 2001-06-03 14:52:47 sandervl Exp $ */
 
 /*
  * GDI32 DIB sections
@@ -745,7 +745,6 @@ void DIBSection::sync(HDC hdc, DWORD nYdest, DWORD nDestHeight, BOOL orgYInversi
   }
   memcpy(pOS2bmp, tmphdr, os2bmphdrsize);
 
-#if 0
   if(dibinfo.dsBitfields[1] == 0x3E0) {//RGB 555?
     dprintf(("DIBSection::sync: convert RGB 565 to RGB 555"));
 
@@ -756,7 +755,7 @@ void DIBSection::sync(HDC hdc, DWORD nYdest, DWORD nDestHeight, BOOL orgYInversi
     }
     else    RGB565to555((WORD *)destBuf, (WORD *)destBuf, (nDestHeight*dibinfo.dsBm.bmWidthBytes)/sizeof(WORD));
   }
-#endif
+
   free(tmphdr);
   if(rc != nDestHeight) {
     DebugInt3();

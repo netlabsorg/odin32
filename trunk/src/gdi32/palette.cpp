@@ -1,4 +1,4 @@
-/* $Id: palette.cpp,v 1.9 2001-05-29 09:45:21 sandervl Exp $ */
+/* $Id: palette.cpp,v 1.10 2001-06-03 14:52:47 sandervl Exp $ */
 
 /*
  * GDI32 palette apis
@@ -57,6 +57,14 @@ UINT WIN32API RealizePalette( HDC hdc)
 
     rc = O32_RealizePalette(hdc);
     dprintf(("GDI32: RealizePalette %x returned %d", hdc, rc));
+    if(rc && DIBSection::getSection() != NULL)
+    {
+        DIBSection *dsect = DIBSection::findHDC(hdc);
+        if(dsect)
+        {
+            dsect->sync(hdc, 0, dsect->GetHeight());
+        }
+    }
     return rc;
 }
 //******************************************************************************
@@ -84,17 +92,6 @@ HPALETTE WIN32API SelectPalette(HDC hdc, HPALETTE hPalette, BOOL bForceBackgroun
 
   dprintf(("GDI32: SelectPalette (0x%08X, 0x%08X, 0x%08X)", hdc, hPalette, bForceBackground));
   hPal = O32_SelectPalette(hdc, hPalette, bForceBackground);
-
-  //hack for beyond compare buttons (+ other apps)
-  //seems to select old palette into dc before unselecting dib section
-  if(bForceBackground != -1 && DIBSection::getSection() != NULL)
-  {
-    DIBSection *dsect = DIBSection::findHDC(hdc);
-    if(dsect)
-    {
-        dsect->sync(hdc, 0, dsect->GetHeight());
-    }
-  }
   return hPal;
 }
 //******************************************************************************

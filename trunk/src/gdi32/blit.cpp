@@ -1,4 +1,4 @@
-/* $Id: blit.cpp,v 1.30 2001-06-02 07:24:38 sandervl Exp $ */
+/* $Id: blit.cpp,v 1.31 2001-06-03 14:52:46 sandervl Exp $ */
 
 /*
  * GDI32 blit code
@@ -22,7 +22,7 @@
 #include "dbglocal.h"
 
 static ULONG QueryPaletteSize(BITMAPINFOHEADER *pBHdr);
-static ULONG CalcBitmapSize(ULONG cBits, LONG cx, LONG cy);
+ULONG CalcBitmapSize(ULONG cBits, LONG cx, LONG cy);
 
 //******************************************************************************
 //******************************************************************************
@@ -451,7 +451,6 @@ static INT StretchDIBits_(HDC hdc, INT xDst, INT yDst, INT widthDst,
         bitfields[2] = 0;
         break;
     }
-
     if(bitfields[1] == 0x3E0) 
     {//RGB 555?
         dprintf(("RGB 555->565 conversion required %x %x %x", bitfields[0], bitfields[1], bitfields[2]));
@@ -581,7 +580,7 @@ static ULONG QueryPaletteSize(BITMAPINFOHEADER *pBHdr)
 }
 //******************************************************************************
 //******************************************************************************
-static ULONG CalcBitmapSize(ULONG cBits, LONG cx, LONG cy)
+ULONG CalcBitmapSize(ULONG cBits, LONG cx, LONG cy)
 {
         ULONG alignment;
         ULONG factor;
