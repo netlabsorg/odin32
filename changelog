@@ -1,4 +1,13 @@
- /* $Id: changelog,v 1.259 1999-09-29 09:31:17 dengert Exp $ */
+ /* $Id: changelog,v 1.260 1999-10-01 10:14:30 sandervl Exp $ */
+
+ 99-10-01: Edgar Buerkle <Edgar.Buerkle@gmx.net>
+	- KERNEL32: Skip spaces in command line string
+	- USER32: Fix for MessageBoxA (window handle conversion)
+	          Fixes for combobox (handles null pointers)
+	- GDI32: Added OSLibSetDIBitsToDevice
+
+ 99-10-01: Jens Wiessner <wiessnej@rfi.de>
+	- CRTDLL: Implemented functions + added stubs
 
  99-09-29: Daniela Engert <dani@ngrt.de>
 	- USER32: improved timer handling for caret blinking.
