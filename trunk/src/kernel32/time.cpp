@@ -1,4 +1,4 @@
-/* $Id: time.cpp,v 1.12 2000-09-08 00:33:16 phaller Exp $ */
+/* $Id: time.cpp,v 1.13 2000-10-01 21:21:09 phaller Exp $ */
 
 /*
  * Win32 time/date API functions
@@ -121,10 +121,11 @@ BOOL WIN32API LocalFileTimeToFileTime(const FILETIME * arg1, LPFILETIME arg2)
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API FileTimeToSystemTime(const FILETIME * arg1, LPSYSTEMTIME  arg2)
+ODINFUNCTION2(BOOL, FileTimeToSystemTime,
+              const FILETIME *, arg1, 
+              LPSYSTEMTIME, arg2)
 {
-    dprintf(("KERNEL32:  FileTimeToSystemTime"));
-    return O32_FileTimeToSystemTime(arg1, arg2);
+  return O32_FileTimeToSystemTime(arg1, arg2);
 }
 //******************************************************************************
 //******************************************************************************

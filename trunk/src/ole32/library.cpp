@@ -1,4 +1,4 @@
-/* $Id: library.cpp,v 1.3 2000-09-17 10:31:05 davidr Exp $ */
+/* $Id: library.cpp,v 1.4 2000-10-01 21:22:08 phaller Exp $ */
 /* 
  * 
  * Project Odin Software License can be found in LICENSE.TXT
@@ -18,10 +18,27 @@
  *   Copyright 1999  Sylvain St-Germain
  */
 
+/*****************************************************************************
+ * Includes                                                                  *
+ *****************************************************************************/
+
+#include <odin.h>
+#include <odinwrap.h>
+#include <os2sel.h>
+
+
 #include "ole32.h"
 
 #include "oString.h"
 #include "moniker.h"	// RunningObjectTableImpl_***
+
+
+/*****************************************************************************
+ * Defines                                                                   *
+ *****************************************************************************/
+
+ODINDEBUGCHANNEL(OLE32-LIBRARY)
+
 
 // ======================================================================
 // Local Data
@@ -48,7 +65,10 @@ static OpenDll * openDllList = NULL;	/* linked list of open dlls */
 // ----------------------------------------------------------------------
 // CoLoadLibrary
 // ----------------------------------------------------------------------
-HINSTANCE WIN32API CoLoadLibrary(LPSTR lpszLibName, BOOL bAutoFree)
+//HINSTANCE WIN32API CoLoadLibrary(LPSTR lpszLibName, BOOL bAutoFree)
+ODINFUNCTION2(HINSTANCE, CoLoadLibrary,
+              LPSTR, lpszLibName,
+              BOOL, bAutoFree)
 {
     HINSTANCE 	hLibrary;
     OpenDll *	ptr;

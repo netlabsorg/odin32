@@ -1,16 +1,22 @@
-/* $Id: ToDO.txt,v 1.8 2000-08-01 23:17:55 sandervl Exp $ */
+/* $Id: ToDO.txt,v 1.9 2000-10-01 21:25:49 phaller Exp $ */
 
 To Do list for ODIN:
 
 
 Assigned Status Topic -------------------------------------------------------
 
+PH              Implement WaitForSingleObject() for process handles
+
 PD       DONE   Handle named pipes via HandleManager
 
-AH              Do COM (serial port) support for ODIN (requires
+MM       DONE   Do COM (serial port) support for ODIN (requires
                 pseudo-device in HM)
 
-PH              Sync SHELL32 with WINE
+PH       DONE   Sync SHELL32 with WINE
+
+SvL             Add HKLM\\SOFTWARE\Microsoft\WINDOWS\CurrentVersion
+                Key CommonFilesDir="?:\Program Files\Common Files" for
+                TogetherJ installation to the ODIN installer.
 
 PH              Sync NTDLL with WINE
 
