@@ -1,5 +1,5 @@
 ##############################################################################
-# $Id: makefile,v 1.11 2000-01-27 23:45:59 bird Exp $
+# $Id: makefile,v 1.12 2000-01-29 11:01:55 sandervl Exp $
 #
 # PD-Win32 API
 #
@@ -131,4 +131,4 @@ clean:
     @$(ECHO) #do nmake depend > .depend
 
 
-!include .depend
+#!include .depend
