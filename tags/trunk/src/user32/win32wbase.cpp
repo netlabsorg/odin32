@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.63 1999-10-28 12:00:34 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.64 1999-10-28 15:20:25 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -2562,7 +2562,7 @@ LONG Win32BaseWindow::SetWindowLongA(int index, ULONG value)
                 SendMessageA(WM_STYLECHANGING,GWL_STYLE,(LPARAM)&ss);
                 setStyle(ss.styleNew);
                 if(!IsWindowDestroyed())
-                    OSLibSetWindowStyle(OS2HwndFrame, dwStyle);
+                    OSLibSetWindowStyle(OS2HwndFrame, ss.styleNew);
                 SendMessageA(WM_STYLECHANGED,GWL_STYLE,(LPARAM)&ss);
                 return ss.styleOld;
         }
