@@ -1,4 +1,4 @@
-/* $Id: k32QuerySystemMemInfo.cpp,v 1.1 2001-02-11 15:22:18 bird Exp $
+/* $Id: k32QuerySystemMemInfo.cpp,v 1.2 2001-03-07 21:55:30 bird Exp $
  *
  * k32QuerySystemMemInfo - Collects more or less useful information on the
  *                         memory state of the system.
@@ -150,7 +150,7 @@ APIRET k32QuerySystemMemInfo(PK32SYSTEMMEMINFO pMemInfo)
         MemInfo.ulVMArenaSharedMax      = pahvmShr->ah_laddrMax;
         MemInfo.ulVMArenaSystemMin      = pahvmSys->ah_laddrMin;
         MemInfo.ulVMArenaSystemMax      = pahvmSys->ah_laddrMax;
-        if (pahvmhShr)
+        if (pahvmhShr && VirtualAddressLimit > 0x20000000) /* Not valid if less or equal to 512MB user memory */
         {
             MemInfo.ulVMArenaHighSharedMin  = pahvmhShr->ah_laddrMin;
             MemInfo.ulVMArenaHighSharedMax  = pahvmhShr->ah_laddrMax;
