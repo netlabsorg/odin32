@@ -1,4 +1,4 @@
-/* $Id: shell32.cpp,v 1.1 1999-05-24 20:19:57 ktk Exp $ */
+/* $Id: shell32.cpp,v 1.2 1999-06-01 08:05:42 phaller Exp $ */
 
 /*
  * Win32 SHELL32 for OS/2
@@ -1142,60 +1142,6 @@ DWORD WIN32API SHELL32_79(LPCSTR dir,
 
 
 /*************************************************************************
- *           SHELL32_183            [SHELL32.183]
- * Format and output errormessage.
- */
-//void __cdecl SHELL32_183(HMODULE hmod,
-// CDECL ? really ?
-void WIN32API SHELL32_183(HMODULE hmod,
-                             HWND    hwnd,
-                             DWORD   id,
-                             DWORD   x,
-                             DWORD   type,
-                             LPVOID  arglist)
-{
-  char   buf[100],
-         buf2[100],
-         *buf3;
-  LPVOID args = &arglist;
-
-  dprintf(("SHELL32: .183 (%08xh, %08xh, %08xh, %08xh, %08xh, %08xh) not implemented.\n",
-           hmod,
-           hwnd,
-           id,
-           x,
-           type,
-           arglist));
-
-  if (!LoadStringA(hmod,
-                     x,
-                     buf,
-                     100))
-    strcpy(buf,
-           "Desktop");
-
-  LoadStringA(hmod,
-                id,
-                buf2,
-                100);
-
-  /* FIXME: the varargs handling doesn't. */
-  FormatMessageA(0x500,
-                   buf2,
-                   0,
-                   0,
-                   (LPSTR)&buf3,
-                   256,
-                   (LPDWORD)&args);
-
-  MessageBoxA(hwnd,
-                buf3,
-                buf,
-                id|0x10000);
-}
-
-
-/*************************************************************************
  *           SHELL32_100            [SHELL32.100]
  * walks through policy table, queries <app> key, <type> value, returns
  * queried (DWORD) value.
@@ -1662,6 +1608,135 @@ BOOL WIN32API ShellExecuteExW(LPSHELLEXECUTEINFOW lpExecInfo)
   return (0);
 }
 
+
+/*****************************************************************************
+ * Name      : DWORD ShellMessageBoxW
+ * Purpose   : display a messagebox, retrieve message text from resources
+ * Parameters: HMODULE hmod
+ *             HWND    hwnd
+ *             DWORD   idText
+ *             DWORD   idTitle
+ *             DWORD   uType
+ *             LPCVOID arglist
+ * Variables :
+ * Result    :
+ * Remark    : SHELL32.182
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Tue, 1999/06/01 09:00]
+ *****************************************************************************/
+
+DWORD WIN32API ShellMessageBoxW(HMODULE hmod,
+                                HWND    hwnd,
+                                DWORD   idText,
+                                DWORD   idTitle,
+                                DWORD   uType,
+                                LPCVOID arglist) 
+{	
+  WCHAR	 szText[100],
+         szTitle[100],
+         szTemp[256];
+  LPWSTR pszText = &szText[0], 
+         pszTitle = &szTitle[0];
+  LPVOID args = &arglist;
+
+  dprintf(("SHELL32: ShellMessageBoxW(%08lx,%08lx,%08lx,%08lx,%08lx,%p)\n",
+           hmod,
+           hwnd,
+           idText,
+           idTitle,
+           uType,
+           arglist));
+
+  if (!HIWORD (idTitle))
+    LoadStringW(hmod,
+                idTitle,
+                pszTitle,
+                100);
+  else
+    pszTitle = (LPWSTR)idTitle;
+
+  if (! HIWORD (idText))
+    LoadStringW(hmod,idText,pszText,100);
+  else
+    pszText = (LPWSTR)idText;
+
+  FormatMessageW(FORMAT_MESSAGE_FROM_STRING | FORMAT_MESSAGE_ARGUMENT_ARRAY,
+                 szText,
+                 0,
+                 0,
+                 szTemp,
+                 256,
+                 (LPDWORD)args);
+
+  return MessageBoxW(hwnd,
+                     szTemp,
+                     szTitle,
+                     uType);
+}
+
+/*****************************************************************************
+ * Name      : DWORD ShellMessageBoxA
+ * Purpose   : display a messagebox, retrieve message text from resources
+ * Parameters: HMODULE hmod
+ *             HWND    hwnd
+ *             DWORD   idText
+ *             DWORD   idTitle
+ *             DWORD   uType
+ *             LPCVOID arglist
+ * Variables :
+ * Result    :
+ * Remark    : SHELL32.183
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Tue, 1999/06/01 09:00]
+ *****************************************************************************/
+
+DWORD WIN32API ShellMessageBoxA(HMODULE hmod,
+                                HWND    hwnd,
+                                DWORD   idText,
+                                DWORD   idTitle,
+                                DWORD   uType,
+                                LPCVOID arglist) 
+{
+  char   szText[100],
+         szTitle[100],
+         szTemp[256];
+  LPSTR  pszText = &szText[0], 
+         pszTitle = &szTitle[0];
+  LPVOID args = &arglist;
+
+  dprintf(("SHELL32: ShellMessageBoxA (%08lx,%08lx,%08lx,%08lx,%08lx,%p)\n", 
+           hmod,
+           hwnd,
+           idText,
+           idTitle,
+           uType,
+           arglist));
+
+  if (!HIWORD (idTitle))
+    LoadStringA(hmod,idTitle,pszTitle,100);
+  else
+    pszTitle = (LPSTR)idTitle;
+
+  if (! HIWORD (idText))
+    LoadStringA(hmod,idText,pszText,100);
+  else
+    pszText = (LPSTR)idText;
+
+  FormatMessageA(FORMAT_MESSAGE_FROM_STRING | FORMAT_MESSAGE_ARGUMENT_ARRAY,
+                 pszText,
+                 0,
+                 0,
+                 szTemp,
+                 256,
+                 (LPDWORD)args);
+
+  return MessageBoxA(hwnd,
+                     szTemp,
+                     pszTitle,
+                     uType);
+}
 
 
 
