@@ -1,4 +1,4 @@
-/* $Id: disk.cpp,v 1.39 2002-09-27 14:35:56 sandervl Exp $ */
+/* $Id: disk.cpp,v 1.40 2004-03-24 09:23:47 sandervl Exp $ */
 
 /*
  * Win32 Disk API functions for OS/2
@@ -373,13 +373,14 @@ proceed:
             }
             else 
             {//pretend everything else is FAT16 (HPFS and FAT have the same file size limit)
-                strcpy(lpFileSystemNameBuffer, "FAT16");
+                // @@VP:20040323 - nFileSystemNameSize may be 0!!!
+                strncpy(lpFileSystemNameBuffer, "FAT16", nFileSystemNameSize);
             }
             if(fForce2GBFileSize) {
                 if(strcmp(lpFileSystemNameBuffer, "CDFS") &&
                    strcmp(lpFileSystemNameBuffer, "UDF")) 
                 {//everything is FAT -> 2 GB file size limit
-                    strcpy(lpFileSystemNameBuffer, "FAT16");
+                    strncpy(lpFileSystemNameBuffer, "FAT16", nFileSystemNameSize);
                 }
             }
             dprintf2(("Final file system name: %s", lpFileSystemNameBuffer));
@@ -477,17 +478,19 @@ UINT WIN32API GetLogicalDriveStringsA(UINT cchBuffer, LPSTR lpszBuffer)
 }
 //******************************************************************************
 //******************************************************************************
-UINT WIN32API GetLogicalDriveStringsW(UINT nBufferLength, LPWSTR lpBuffer)
+UINT WIN32API GetLogicalDriveStringsW(UINT nBufferLength, LPWSTR lpBufferW)
 {
-    char *asciibuffer = (char *)malloc(nBufferLength+1);
-    DWORD rc;
+   LPSTR  lpBufferA = (LPSTR)HeapAlloc( GetProcessHeap(), 0, sizeof(CHAR) * (nBufferLength + 1) );
+   DWORD   dwResult = GetLogicalDriveStringsA( nBufferLength, lpBufferA );
 
-    dprintf(("KERNEL32:  OS2GetLogicalDriveStringsW\n"));
+   dprintf(("KERNEL32: GetLogicalDriveStringsW %d %x", nBufferLength, lpBufferA));
 
-    rc = O32_GetLogicalDriveStrings(nBufferLength, asciibuffer);
-    if(rc)      AsciiToUnicode(asciibuffer, lpBuffer);
-    free(asciibuffer);
-    return(rc);
+   if ( dwResult && dwResult <= nBufferLength )
+	MultiByteToWideChar( CP_ACP, 0, lpBufferA, dwResult + 1, lpBufferW, nBufferLength );
+
+   HeapFree( GetProcessHeap(), 0, lpBufferA );
+
+   return dwResult;
 }
 //******************************************************************************
 typedef struct {
