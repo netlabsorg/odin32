@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.245 2001-03-25 08:50:42 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.246 2001-03-29 17:39:19 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -3479,7 +3479,7 @@ ULONG Win32BaseWindow::GetWindowLongA(int index, BOOL fUnicode)
         SetLastError(ERROR_INVALID_INDEX);  //verified in NT4, SP6
         return 0;
     }
-    dprintf2(("GetWindowLong%c %x %d %x", getWindowHandle(), (fUnicode) ? 'W' : 'A', index, value));
+    dprintf2(("GetWindowLong%c %x %d %x", (fUnicode) ? 'W' : 'A', getWindowHandle(), index, value));
     //Note: NT4, SP6 does not set the last error to 0
     SetLastError(ERROR_SUCCESS);
     return value;
