@@ -1,4 +1,4 @@
-/* $Id: HOOK.CPP,v 1.37 2002-04-07 14:36:59 sandervl Exp $ */
+/* $Id: HOOK.CPP,v 1.38 2002-05-23 07:13:00 sandervl Exp $ */
 
 /*
  * Windows hook functions
@@ -834,7 +834,7 @@ BOOL ProcessKbdHookLL(LPMSG msg, BOOL flagRemove, BOOL flagInjected )
   // check if alt is currently pressed
   // Note: ALT seems to stick sometimes
   // Note: ALTGR can't be queried
-  BOOL fAltDown = GetAsyncKeyState(VK_LMENU);
+  BOOL fAltDown = GetAsyncKeyState(VK_LMENU) | GetAsyncKeyState(VK_RMENU);
   
   // this bit indicates if ALT was held
   // fAltDown = msg->lParam & 0x20000000;

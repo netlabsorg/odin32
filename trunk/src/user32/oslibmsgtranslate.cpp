@@ -1,4 +1,4 @@
-/* $Id: oslibmsgtranslate.cpp,v 1.86 2002-05-07 16:15:30 sandervl Exp $ */
+/* $Id: oslibmsgtranslate.cpp,v 1.87 2002-05-23 07:13:00 sandervl Exp $ */
 /*
  * Window message translation functions for OS/2
  *
@@ -627,6 +627,8 @@ BOOL OS2ToWinMsgTranslate(void *pTeb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode,
         if (fWinExtended)
             winMsg->lParam = winMsg->lParam | WIN_KEY_EXTENDED;
 
+        //@PF PM does not add KC_ALT to right alt but win32 does it
+        if (WinGetKeyState(HWND_DESKTOP, VK_ALTGRAF) & 0x8000) flags |= KC_ALT;
 #if 0
 //TODO
         // Adjust VKEY value for pad digits if NumLock is on
@@ -636,7 +638,7 @@ BOOL OS2ToWinMsgTranslate(void *pTeb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode,
 #endif
 
 #ifdef ALTGR_HACK
-     
+    
         if (usPMScanCode == PMSCAN_ALTRIGHT)
         {
           // Turn message into CTRL-event
@@ -693,7 +695,7 @@ BOOL OS2ToWinMsgTranslate(void *pTeb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode,
           {
             // check for a lonesome ALT key ...
             if ( (flags & KC_LONEKEY) &&
-                (winMsg->wParam == VK_LMENU_W) )
+                ((winMsg->wParam == VK_LMENU_W) || (winMsg->wParam == VK_RMENU_W)) )
             {
               winMsg->message = WINWM_SYSKEYUP;
               // held ALT-key when current key is released
@@ -761,7 +763,8 @@ BOOL OS2ToWinMsgTranslate(void *pTeb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode,
              //@@PF Note that without pmkbdhook there will not be correct message for Alt-Enter
               winMsg->message = WINWM_SYSKEYUP;
               winMsg->lParam |= WIN_KEY_PREVSTATE;            
-	      winMsg->lParam |= WIN_KEY_ALTHELD;            
+              // No ALTHELD for Alt itself ;)
+              winMsg->lParam |= WIN_KEY_ALTHELD;            
 	      winMsg->lParam |= 1 << 31;                              // bit 31, transition state, always 1 for WM_KEYUP 
           }
           else 
@@ -1016,7 +1019,7 @@ BOOL OSLibWinTranslateMessage(MSG *msg)
 
 
       extramsg.lParam = msg->lParam & 0x00FFFFFF;
-      if(fl & KC_ALT)
+      if ((fl & KC_ALT) || (msg->lParam & WIN_KEY_ALTHELD))
         extramsg.lParam |= WIN_KEY_ALTHELD;
       if(fl & KC_PREVDOWN)
         extramsg.lParam |= WIN_KEY_PREVSTATE;
