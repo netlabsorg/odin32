@@ -1,4 +1,4 @@
-/* $Id: win32wbase.h,v 1.97 2000-06-07 14:51:31 sandervl Exp $ */
+/* $Id: win32wbase.h,v 1.98 2000-06-07 21:45:52 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -155,11 +155,12 @@ virtual  WORD   GetWindowWord(int index);
          BOOL   isFrameWindow();
 virtual  BOOL   isMDIClient();
 virtual  BOOL   isMDIChild();
+virtual  BOOL   isDesktopWindow();
 
          BOOL   fHasParentDC()                  { return fParentDC; };
 
 Win32BaseWindow *getParent();
-         void   setParent(Win32BaseWindow *pwindow) { ChildWindow::SetParent((ChildWindow *)pwindow); };
+         void   setParent(Win32BaseWindow *pwindow) { setParentOfChild((ChildWindow *)pwindow); };
        WNDPROC  getWindowProc()                 { return win32wndproc; };
          void   setWindowProc(WNDPROC newproc)  { win32wndproc = newproc; };
         DWORD   getWindowId()                   { return dwIDMenu; };

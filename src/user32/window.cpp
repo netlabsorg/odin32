@@ -1,4 +1,4 @@
-/* $Id: window.cpp,v 1.68 2000-06-07 14:51:33 sandervl Exp $ */
+/* $Id: window.cpp,v 1.69 2000-06-07 21:45:52 sandervl Exp $ */
 /*
  * Win32 window apis for OS/2
  *
@@ -317,6 +317,10 @@ BOOL WIN32API DestroyWindow(HWND hwnd)
         SetLastError(ERROR_INVALID_WINDOW_HANDLE);
         return 0;
     }
+    if(window->isDesktopWindow()) {
+	dprintf(("WARNING: Trying to destroy desktop window!"));
+	return FALSE;
+    }
     return window->DestroyWindow();
 }
 //******************************************************************************
@@ -352,13 +356,24 @@ HWND WIN32API GetParent( HWND hwnd)
 //******************************************************************************
 HWND WIN32API SetParent( HWND hwndChild, HWND hwndNewParent)
 {
-  Win32BaseWindow *window;
+  Win32BaseWindow *window, *parent;
 
     window = Win32BaseWindow::GetWindowFromHandle(hwndChild);
     if(!window) {
         dprintf(("SetParent, window %x not found", hwndChild));
         SetLastError(ERROR_INVALID_WINDOW_HANDLE);
         return 0;
+    }
+    if(hwndNewParent == HWND_DESKTOP) {
+	hwndNewParent = GetDesktopWindow();
+    } 
+    else {
+    	parent = Win32BaseWindow::GetWindowFromHandle(hwndNewParent);
+    	if(!window) {
+        	dprintf(("SetParent, parent %x not found", hwndNewParent));
+	        SetLastError(ERROR_INVALID_WINDOW_HANDLE);
+	        return 0;
+	}
     }
     dprintf(("SetParent %x %x", hwndChild, hwndNewParent));
     return window->SetParent(hwndNewParent);
