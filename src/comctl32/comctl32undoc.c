@@ -1,4 +1,4 @@
-/* $Id: comctl32undoc.c,v 1.14 1999-11-05 13:01:32 achimha Exp $ */
+/* $Id: comctl32undoc.c,v 1.15 1999-11-14 13:09:59 achimha Exp $ */
 /*
  * Undocumented functions from COMCTL32.DLL
  *
@@ -1830,9 +1830,7 @@ INT WINAPI COMCTL32_StrCSpnA( LPCSTR lpStr, LPCSTR lpSet) {
  *
  */
 LPWSTR WINAPI COMCTL32_StrChrW( LPCWSTR lpStart, WORD wMatch) {
-  dprintf(("COMCTL32: StrChrW - unimplemented stub\n"));
-//  return CRTDLL_wcschr(lpStart, wMatch);
-  return 0;
+  return (unsigned short*)wcschr(lpStart, wMatch);
 }
 
 /**************************************************************************
@@ -1844,13 +1842,24 @@ INT WINAPI COMCTL32_StrCmpNA( LPCSTR lpStr1, LPCSTR lpStr2, int nChar) {
 }
 
 /**************************************************************************
+ * StrCmpNIA [COMCTL32.353]
+ *
+ */
+INT WINAPI COMCTL32_StrCmpNIA( LPCSTR lpStr1, LPCSTR lpStr2, int nChar) {
+  //AH: Inline helper function from WINE
+    int res;
+    if (!nChar) return 0;
+    while ((--nChar > 0) && *lpStr1)
+      if ((res = toupper(*lpStr1++) - toupper(*lpStr2++))) return res;
+    return toupper(*lpStr1) - toupper(*lpStr2);
+}
+
+/**************************************************************************
  * StrCmpNW [COMCTL32.360]
  *
  */
 INT WINAPI COMCTL32_StrCmpNW( LPCWSTR lpStr1, LPCWSTR lpStr2, int nChar) {
-  dprintf(("COMCTL32: StrCmpNW - unimplemented stub\n"));
-//  return lstrncmpW(lpStr1, lpStr2, nChar);
-  return 0;
+  return wcsncmp(lpStr1, lpStr2, nChar);
 }
 
 /**************************************************************************
@@ -1863,25 +1872,64 @@ INT WINAPI COMCTL32_StrCmpNIW( LPCWSTR lpStr1, LPCWSTR lpStr2, int nChar) {
   return 0;
 }
 
+/***********************************************************************
+ *           ChrCmpA   
+ * This fuction returns FALSE if both words match, TRUE otherwise...
+ */
+static BOOL ChrCmpA( WORD word1, WORD word2) {
+  if (LOBYTE(word1) == LOBYTE(word2)) {
+    if (IsDBCSLeadByte(LOBYTE(word1))) {
+      return (word1 != word2);
+    }
+    return FALSE;
+  }
+  return TRUE;
+}
+
 /**************************************************************************
  * StrRChrA [COMCTL32.351]
  *
  */
 LPSTR WINAPI COMCTL32_StrRChrA( LPCSTR lpStart, LPCSTR lpEnd, WORD wMatch) {
-  dprintf(("COMCTL32: lstrrchr - unimplemented stub\n"));
-//  return lstrrchr(lpStart, lpEnd, wMatch);
+  LPCSTR lpGotIt = NULL;
+
+  if (!lpEnd) lpEnd = lpStart + strlen(lpStart);
+
+  for(; lpStart < lpEnd; lpStart = CharNextA(lpStart)) 
+    if (!ChrCmpA( GET_WORD(lpStart), wMatch)) 
+      lpGotIt = lpStart;
+    
+  return ((LPSTR)lpGotIt);
+
   return 0;
+}
+
+/***********************************************************************
+ *           ChrCmpW   
+ * This fuction returns FALSE if both words match, TRUE otherwise...
+ */
+static BOOL ChrCmpW( WORD word1, WORD word2) {
+  return (word1 != word2);
 }
 
 /**************************************************************************
  * StrRChrW [COMCTL32.359]
  *
  */
-LPWSTR WINAPI COMCTL32_StrRChrW( LPCWSTR lpStart, LPCWSTR lpEnd, WORD wMatch) {
-  dprintf(("COMCTL32: StrRChrW - unimplemented stub\n"));
-//  return lstrrchrw(lpStart, lpEnd, wMatch);
-  return 0;
+LPWSTR WINAPI COMCTL32_StrRChrW( LPCWSTR lpStart, LPCWSTR lpEnd, WORD wMatch)
+{
+  //AH: Inline Wine helper function
+  LPCWSTR lpGotIt = NULL;
+
+  if (!lpEnd) lpEnd = lpStart + lstrlenW(lpStart);
+
+  for(; lpStart < lpEnd; lpStart = CharNextW(lpStart)) 
+    if (!ChrCmpW( GET_WORD(lpStart), wMatch)) 
+      lpGotIt = lpStart;
+    
+  return (LPWSTR)lpGotIt;
 }
+
 
 /**************************************************************************
  * StrStrA [COMCTL32.354]
@@ -1896,9 +1944,7 @@ LPSTR WINAPI COMCTL32_StrStrA( LPCSTR lpFirst, LPCSTR lpSrch) {
  *
  */
 LPWSTR WINAPI COMCTL32_StrStrW( LPCWSTR lpFirst, LPCWSTR lpSrch) {
-  dprintf(("COMCTL32: StrStrW - unimplemented stub\n"));
-//  return strstrw(lpFirst, lpSrch);
-  return 0;
+  return (unsigned short*)wcsstr(lpFirst, lpSrch);
 }
 
 /**************************************************************************
@@ -1908,19 +1954,16 @@ LPWSTR WINAPI COMCTL32_StrStrW( LPCWSTR lpFirst, LPCWSTR lpSrch) {
 INT WINAPI COMCTL32_StrSpnW( LPWSTR lpStr, LPWSTR lpSet) {
   LPWSTR lpLoop = lpStr;
 
-  dprintf(("COMCTL32: StrSpnW - unimplemented stub\n"));
-  return 0;
-
   /* validate ptr */
   if ((lpStr == 0) || (lpSet == 0)) return 0;
 
 /* while(*lpLoop) { if lpLoop++; } */
 
-//  for(; (*lpLoop != 0); lpLoop++)
-//    if( CRTDLL_wcschr(lpSet, *(WORD*)lpLoop))
-//      return (INT)(lpLoop-lpStr);
+  for(; (*lpLoop != 0); lpLoop++)
+    if (wcschr(lpSet, *(WORD*)lpLoop))
+      return (INT)(lpLoop-lpStr);
 
-//  return (INT)(lpLoop-lpStr);
+  return (INT)(lpLoop-lpStr);
 }
 
 /**************************************************************************
