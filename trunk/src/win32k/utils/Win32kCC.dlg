@@ -1,71 +1,73 @@
 #ifndef OS2_INCLUDED
    #include <os2.h>
 #endif
-DLGINCLUDE 1 "G:\odin32\tree\src\win32k\utils\test\Dialog.h"
+DLGINCLUDE 1 "G:\odin32\tree\src\win32k\utils\Dialog.h"
 
 DLGTEMPLATE DL_WIN32KCC LOADONCALL MOVEABLE DISCARDABLE
 BEGIN
-    DIALOG  "Win32k Control Center", DL_WIN32KCC, 146, 12, 274, 334, 
-            WS_VISIBLE, FCF_SYSMENU | FCF_TITLEBAR
+    DIALOG  "Win32k Control Center", DL_WIN32KCC, 47, 13, 274, 344,
+            WS_VISIBLE, FCF_SYSMENU | FCF_TITLEBAR | FCF_TASKLIST
     BEGIN
-        GROUPBOX        "", GR_W32K, 6, 286, 262, 46
-        LTEXT           "Symbol file", TX_W32K_SYMBOLFILE, 14, 298, 84, 8
-        LTEXT           "Kernel Build", TX_W32K_KERNELBUILD, 14, 290, 84, 8
-        LTEXT           "c:\\os2\\pdpsi\\pmdf\\warp4\\os2krnl.sym", 
-                        TX_W32K_SYMBOLFILE_VAL, 100, 298, 165, 8
-        LTEXT           "Win32k version", TX_W32K_VERSION, 14, 314, 84, 8
-        LTEXT           "0.5", TX_W32K_VERSION_VAL, 100, 314, 165, 8
-        LTEXT           "Build time/date", TX_W32K_BUILD_DATETIME, 14, 306, 
+        GROUPBOX        "", GR_W32K, 6, 298, 262, 46
+        LTEXT           "Symbol file", TX_W32K_SYMBOLFILE, 14, 310, 84, 8
+        LTEXT           "Kernel Build", TX_W32K_KERNELBUILD, 14, 302, 84, 8
+        LTEXT           "c:\\os2\\pdpsi\\pmdf\\warp4\\os2krnl.sym",
+                        TX_W32K_SYMBOLFILE_VAL, 100, 310, 165, 8
+        LTEXT           "Win32k version", TX_W32K_VERSION, 14, 326, 84, 8
+        LTEXT           "0.5", TX_W32K_VERSION_VAL, 100, 326, 165, 8
+        LTEXT           "Build time/date", TX_W32K_BUILD_DATETIME, 14, 318,
                         84, 8
-        LTEXT           "04:30:12 Sep 01 2000", TX_W32K_BUILD_DATETIME_VAL, 
-                        100, 306, 165, 8
-        LTEXT           "9.036", TX_W32K_KERNELBUILD_VAL, 100, 290, 165, 8
-        GROUPBOX        "Logging", GR_LOGGING, 6, 258, 262, 24
-        AUTOCHECKBOX    "Enabled", CB_LOGGING_ENABLED, 14, 262, 50, 10
-        AUTORADIOBUTTON "COM1", RB_LOGGING_COM1, 76, 262, 36, 10, WS_TABSTOP
-        AUTORADIOBUTTON "COM2", RB_LOGGING_COM2, 123, 262, 36, 10, 
+        LTEXT           "04:30:12 Sep 01 2000", TX_W32K_BUILD_DATETIME_VAL,
+                        100, 318, 165, 8
+        LTEXT           "9.036", TX_W32K_KERNELBUILD_VAL, 100, 302, 165, 8
+        GROUPBOX        "Logging", GR_LOGGING, 6, 270, 262, 24
+        AUTOCHECKBOX    "Enabled", CB_LOGGING_ENABLED, 14, 274, 50, 10
+        AUTORADIOBUTTON "COM1", RB_LOGGING_COM1, 76, 274, 36, 10, WS_TABSTOP
+        AUTORADIOBUTTON "COM2", RB_LOGGING_COM2, 123, 274, 36, 10,
                         WS_TABSTOP
-        AUTORADIOBUTTON "COM3", RB_LOGGING_COM3, 167, 262, 36, 10, 
+        AUTORADIOBUTTON "COM3", RB_LOGGING_COM3, 167, 274, 36, 10,
                         WS_TABSTOP
-        AUTORADIOBUTTON "COM4", RB_LOGGING_COM4, 213, 262, 36, 10, 
+        AUTORADIOBUTTON "COM4", RB_LOGGING_COM4, 213, 274, 36, 10,
                         WS_TABSTOP
-        GROUPBOX        "Loaders", GR_LOADERS, 6, 143, 262, 111
-        AUTOCHECKBOX    "Disable all loaders", CB_LDR_DISABLE_ALL, 14, 234, 
+        GROUPBOX        "Loaders", GR_LOADERS, 6, 155, 262, 111
+        AUTOCHECKBOX    "Disable all loaders", CB_LDR_DISABLE_ALL, 14, 246,
                         112, 10
-        GROUPBOX        "~PE Loader", GR_LDR_PE, 14, 171, 118, 63, 
+        GROUPBOX        "~PE Loader", GR_LDR_PE, 14, 183, 118, 63,
                         DT_MNEMONIC
-        AUTORADIOBUTTON "Pure", RB_LDR_PE_PURE, 22, 215, 44, 9, WS_TABSTOP
-        AUTORADIOBUTTON "Mixed", RB_LDR_PE_MIXED, 22, 206, 44, 9, WS_TABSTOP
-        AUTORADIOBUTTON "PE.EXE", RB_LDR_PE_PE, 78, 215, 44, 9, WS_TABSTOP
-        AUTORADIOBUTTON "Disabled", RB_LDR_PE_NOT, 78, 206, 51, 9, 
+        AUTORADIOBUTTON "Pure", RB_LDR_PE_PURE, 22, 227, 44, 9, WS_TABSTOP
+        AUTORADIOBUTTON "Mixed", RB_LDR_PE_MIXED, 22, 218, 44, 9, WS_TABSTOP
+        AUTORADIOBUTTON "PE.EXE", RB_LDR_PE_PE, 78, 227, 44, 9, WS_TABSTOP
+        AUTORADIOBUTTON "Disabled", RB_LDR_PE_NOT, 78, 218, 51, 9,
                         WS_TABSTOP
-        CONTROL         "All-In-One-Object Fix", CK_LDR_PE_ONEOBJECT, 22, 
-                        196, 102, 10, WC_BUTTON, BS_AUTO3STATE | BS_AUTOSIZE | 
+        CONTROL         "All-In-One-Object Fix", CK_LDR_PE_ONEOBJECT, 22,
+                        208, 102, 10, WC_BUTTON, BS_AUTO3STATE | BS_AUTOSIZE |
                         WS_TABSTOP | WS_VISIBLE
-        SPINBUTTON      SB_LDR_PE_INFOLEVEL, 96, 185, 28, 12, 
+        SPINBUTTON      SB_LDR_PE_INFOLEVEL, 96, 197, 28, 12,
                         SPBS_NUMERICONLY | SPBS_MASTER | WS_GROUP
-        LTEXT           "Infolevel:", TX_LDR_PE_INFOLEVEL, 22, 185, 48, 8
-        GROUPBOX        "~ELF Loader", GR_LDR_ELF, 142, 190, 118, 44, 
+        LTEXT           "Infolevel:", TX_LDR_PE_INFOLEVEL, 22, 197, 48, 8
+        GROUPBOX        "~ELF Loader", GR_LDR_ELF, 142, 202, 118, 44,
                         DT_MNEMONIC | WS_DISABLED
-        AUTOCHECKBOX    "Enabled", CB_LDR_ELF_ENABLED, 150, 214, 55, 10, 
+        AUTOCHECKBOX    "Enabled", CB_LDR_ELF_ENABLED, 150, 226, 55, 10,
                         WS_DISABLED
-        LTEXT           "Infolevel:", TX_LDR_ELF_INFOLEVEL, 150, 204, 48, 8, 
+        LTEXT           "Infolevel:", TX_LDR_ELF_INFOLEVEL, 150, 216, 48, 8,
                         WS_DISABLED
-        SPINBUTTON      SB_LDR_ELF_INFOLEVEL, 224, 204, 28, 12, 
-                        SPBS_NUMERICONLY | SPBS_MASTER | WS_GROUP | 
+        SPINBUTTON      SB_LDR_ELF_INFOLEVEL, 224, 216, 28, 12,
+                        SPBS_NUMERICONLY | SPBS_MASTER | WS_GROUP |
                         WS_DISABLED
-        AUTOCHECKBOX    "UNIX Shell Scripts", CB_LDR_SHELL_SCRIPTS, 14, 157, 
+        AUTOCHECKBOX    "UNIX Shell Scripts", CB_LDR_SHELL_SCRIPTS, 14, 169,
                         118, 10
-        AUTOCHECKBOX    "JAVA", CB_LDR_JAVA, 142, 157, 118, 10
-        AUTOCHECKBOX    "(Pure) REXX Scripts (.RX/.REX)", CB_LDR_REXX, 14, 
-                        147, 160, 10
-        GROUPBOX        "OS/2 Loader Fixes", GR_LDRFIX, 6, 115, 262, 24
-        AUTOCHECKBOX    "Long DLL names and non .DLL extention fixes (expr.)", 
-                        CB_LDRFIX_DLLFIXES, 14, 119, 252, 10
+        AUTOCHECKBOX    "JAVA", CB_LDR_JAVA, 142, 169, 118, 10
+        AUTOCHECKBOX    "(Pure) REXX Scripts (.RX/.REX)", CB_LDR_REXX, 14,
+                        159, 160, 10
+        GROUPBOX        "OS/2 Loader Fixes", GR_LDRFIX, 6, 115, 262, 34
+        AUTOCHECKBOX    "Long DLL names and non .DLL extention fixes",
+                        CB_LDRFIX_DLLFIXES, 14, 129, 252, 10
+        AUTOCHECKBOX    "Force Preload of Executable Modules (ICAT/R3 debug)",
+                        CB_LDRFIX_FORCEPRELOAD, 14, 119, 252, 10
         GROUPBOX        "Heaps", GR_HEAPS, 6, 26, 262, 85
         GROUPBOX        "Resident Heap", GR_HEAP_RES, 14, 30, 118, 73
         LTEXT           "Max (KB):", TX_HEAP_RES_MAX, 22, 84, 53, 8
-        SPINBUTTON      SB_HEAP_RES_MAX, 82, 84, 42, 8, SPBS_NUMERICONLY | 
+        SPINBUTTON      SB_HEAP_RES_MAX, 82, 84, 42, 8, SPBS_NUMERICONLY |
                         SPBS_MASTER | SPBS_FASTSPIN | WS_GROUP
         LTEXT           "Initial (KB)", TX_HEAP_RES_INIT, 22, 74, 50, 8
         RTEXT           "257", TX_HEAP_RES_INIT_VAL, 78, 74, 46, 8
@@ -73,7 +75,7 @@ BEGIN
         RTEXT           "257", TX_HEAP_RES_USED_VAL, 78, 58, 46, 8
         GROUPBOX        "Swappable Heap", GR_HEAP_SWP, 142, 30, 118, 73
         LTEXT           "Max (KB):", TX_HEAP_SWP_MAX, 150, 84, 53, 8
-        SPINBUTTON      SB_HEAP_SWP_MAX, 210, 84, 42, 8, SPBS_NUMERICONLY | 
+        SPINBUTTON      SB_HEAP_SWP_MAX, 210, 84, 42, 8, SPBS_NUMERICONLY |
                         SPBS_MASTER | SPBS_FASTSPIN | WS_GROUP
         LTEXT           "Initial (KB)", TX_HEAP_SWP_INIT, 150, 74, 50, 8
         RTEXT           "257", TX_HEAP_SWP_INIT_VAL, 206, 74, 46, 8
@@ -83,31 +85,31 @@ BEGIN
         RTEXT           "257", TX_HEAP_RES_FREE_VAL, 78, 50, 46, 8
         LTEXT           "Current (KB)", TX_HEAP_RES_SIZE, 22, 66, 56, 8
         RTEXT           "257", TX_HEAP_RES_SIZE_VAL, 78, 66, 46, 8
-        LTEXT           "Used Blocks", TX_HEAP_RES_USED_BLOCKS, 22, 42, 53, 
+        LTEXT           "Used Blocks", TX_HEAP_RES_USED_BLOCKS, 22, 42, 53,
                         8
         RTEXT           "10", TX_HEAP_RES_USED_BLOCKS_VAL, 78, 42, 46, 8
-        LTEXT           "Free Blocks", TX_HEAP_RES_FREE_BLOCKS, 22, 34, 53, 
+        LTEXT           "Free Blocks", TX_HEAP_RES_FREE_BLOCKS, 22, 34, 53,
                         8
         RTEXT           "10", TX_HEAP_RES_FREE_BLOCKS_VAL, 78, 34, 46, 8
         LTEXT           "Free (KB)", TX_HEAP_SWP_FREE, 150, 50, 50, 8
         RTEXT           "257", TX_HEAP_SWP_FREE_VAL, 206, 50, 46, 8
         LTEXT           "Current (KB)", TX_HEAP_SWP_SIZE, 150, 66, 56, 8
         RTEXT           "257", TX_HEAP_SWP_SIZE_VAL, 206, 66, 46, 8
-        LTEXT           "Used Blocks", TX_HEAP_SWP_USED_BLOCKS, 150, 42, 53, 
+        LTEXT           "Used Blocks", TX_HEAP_SWP_USED_BLOCKS, 150, 42, 53,
                         8
         RTEXT           "11", TX_HEAP_SWP_USED_BLOCKS_VAL, 206, 42, 46, 8
-        LTEXT           "Free Blocks", TX_HEAP_SWP_FREE_BLOCKS, 150, 34, 53, 
+        LTEXT           "Free Blocks", TX_HEAP_SWP_FREE_BLOCKS, 150, 34, 53,
                         8
         RTEXT           "11", TX_HEAP_SWP_FREE_BLOCKS_VAL, 206, 34, 46, 8
-        LTEXT           "Modules", TX_LDR_PE_MODULES, 22, 175, 48, 8
-        RTEXT           "3", TX_LDR_PE_MODULES_VAL, 77, 175, 47, 8
-        LTEXT           "Modules", TX_LDR_ELF_MODULES, 150, 194, 48, 8, 
+        LTEXT           "Modules", TX_LDR_PE_MODULES, 22, 187, 48, 8
+        RTEXT           "3", TX_LDR_PE_MODULES_VAL, 77, 187, 47, 8
+        LTEXT           "Modules", TX_LDR_ELF_MODULES, 150, 206, 48, 8,
                         WS_DISABLED
-        RTEXT           "3", TX_LDR_ELF_MODULES_VAL, 205, 194, 47, 8, 
+        RTEXT           "3", TX_LDR_ELF_MODULES_VAL, 205, 206, 47, 8,
                         WS_DISABLED
         DEFPUSHBUTTON   "~Refresh", PB_REFRESH, 6, 5, 40, 14
         PUSHBUTTON      "~Apply", PB_APPLY, 49, 5, 40, 14
-        PUSHBUTTON      "Update Config.sys", PB_UPD_CONFIGSYS, 92, 5, 100, 
+        PUSHBUTTON      "Update Config.sys", PB_UPD_CONFIGSYS, 92, 5, 100,
                         14
         PUSHBUTTON      "~Close", DID_OK, 195, 5, 40, 14
     END

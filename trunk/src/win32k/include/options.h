@@ -1,4 +1,4 @@
-/* $Id: options.h,v 1.20 2001-02-11 15:04:26 bird Exp $
+/* $Id: options.h,v 1.21 2001-02-11 23:44:38 bird Exp $
  *
  * Options.
  *
@@ -78,6 +78,7 @@
             FALSE,                  /* fNoLoader     */     \
             TRUE,                   /* fDllFixes     */     \
             TRUE,                   /* fExeFixes     */     \
+            FALSE,                  /* fForcePreload */     \
             FALSE,                  /* fApiEnh       */     \
             CB_SWP_INIT,            /* cbSwpHeapInit */     \
             CB_SWP_MAX,             /* cbSwpHeapMax  */     \
@@ -113,6 +114,9 @@
 
 #define isExeFixesEnabled()         (options.fExeFixes)
 #define isExeFixesDisabled()        (!options.fExeFixes)
+
+#define isForcePreloadEnabled()     (options.fForcePreload)
+#define isForcePreloadDisabled()    (!options.fForcePreload)
 
 #define isApiEnhEnabled()           (options.fApiEnh)
 #define isApiEnhDisabled()          (!options.fApiEnh)
@@ -162,6 +166,7 @@ struct options
     /** @cat Options affecting the behaviour changes in the OS/2 loader */
     ULONG       fDllFixes;              /* Enables the long DLL name and non .DLL extention fixes. */
     ULONG       fExeFixes;              /* Enables EXE files to export entry points. */
+    ULONG       fForcePreload;          /* Forces the loader to preload executable images. Handy for ICAT Ring-3 debugging. */
     ULONG       fApiEnh;                /* Enables the API enhancements */
 
     /** @cat Options affecting the heap. */

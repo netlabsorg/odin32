@@ -1,4 +1,4 @@
-/* $Id: d32init.c,v 1.34 2001-02-11 15:57:14 bird Exp $
+/* $Id: d32init.c,v 1.35 2001-02-11 23:44:38 bird Exp $
  *
  * d32init.c - 32-bits init routines.
  *
@@ -186,6 +186,17 @@ USHORT _loadds _Far32 _Pascal R0Init32(RP32INIT *pRpInit)
                                           && (   pszTmp2[1] == 'N' || pszTmp2[1] == 'n'
                                               || pszTmp2[1] == 'D' || pszTmp2[1] == 'd'));
                 }
+                break;
+
+            case 'f':
+            case 'F': /* -F[..]<:|=| >[<Y..|E..| > | <N..|D..>]  - force preload */
+                pszTmp2 = strpbrk(pszTmp, ":=/- ");
+                if (pszTmp2 == NULL
+                    || (pszTmp2[1] == 'Y' || pszTmp2[1] == 'y' || pszTmp2[1] == 'E' || pszTmp2[1] == 'e')
+                    )
+                    options.fForcePreload = TRUE;
+                else
+                    options.fForcePreload = FALSE;
                 break;
 
             case 'h':
