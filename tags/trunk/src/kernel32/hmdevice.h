@@ -1,4 +1,4 @@
-/* $Id: hmdevice.h,v 1.32 2001-12-05 14:16:00 sandervl Exp $ */
+/* $Id: hmdevice.h,v 1.33 2003-01-10 12:57:13 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -54,6 +54,7 @@ typedef struct _HMHANDLEDATA
 
   DWORD           dwUserData;
   DWORD           dwInternalType;
+  DWORD           dwHandleInformation;               /* Set by SetHandleInformation */
 
   LPVOID          lpHandlerData;    /* for private use of the device handler */
   LPVOID          lpDeviceData;
@@ -113,6 +114,10 @@ public:
 
   /* this is a handler method for calls to CloseHandle() */
   virtual BOOL   CloseHandle(PHMHANDLEDATA pHMHandleData);
+
+  virtual BOOL   SetHandleInformation(PHMHANDLEDATA pHMHandleData,
+                                      DWORD  dwMask,
+                                      DWORD  dwFlags);
 
   /* this is a handler method for calls to ReadFile/Ex */
   virtual BOOL   ReadFile   (PHMHANDLEDATA pHMHandleData,

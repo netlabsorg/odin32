@@ -1,4 +1,4 @@
-/* $Id: hmdevice.cpp,v 1.32 2002-05-10 14:55:11 sandervl Exp $ */
+/* $Id: hmdevice.cpp,v 1.33 2003-01-10 12:57:12 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -199,6 +199,32 @@ DWORD HMDeviceHandler::CreateFile (LPCSTR        lpFileName,
 BOOL HMDeviceHandler::CloseHandle(PHMHANDLEDATA pHMHandleData)
 {
   dprintf(("KERNEL32:HandleManager::CloseHandle %s(%08x) - stub?\n",
+           lpHMDeviceName,
+           pHMHandleData));
+
+  SetLastError(ERROR_INVALID_FUNCTION);
+  return FALSE;
+}
+
+/*****************************************************************************
+ * Name      : BOOL HMSetHandleInformation
+ * Purpose   : The SetHandleInformation function sets certain properties of an
+ *             object handle. The information is specified as a set of bit flags.
+ * Parameters: HANDLE hObject  handle to an object
+ *             DWORD  dwMask   specifies flags to change
+ *             DWORD  dwFlags  specifies new values for flags
+ * Variables :
+ * Result    : TRUE / FALSE
+ * Remark    :
+ * Status    : 
+ *
+ * Author    : SvL
+ *****************************************************************************/
+BOOL HMDeviceHandler::SetHandleInformation(PHMHANDLEDATA pHMHandleData,
+                                           DWORD  dwMask,
+                                           DWORD  dwFlags)
+{
+  dprintf(("KERNEL32:HandleManager::SetHandleInformation %s(%08x) - stub?\n",
            lpHMDeviceName,
            pHMHandleData));
 
