@@ -1,4 +1,4 @@
-/* $Id: odininst.cpp,v 1.13 2003-01-07 20:01:47 sandervl Exp $ */
+/* $Id: odininst.cpp,v 1.14 2003-07-16 10:51:10 sandervl Exp $ */
 /*
  * Odin WarpIn installation app
  *
@@ -33,6 +33,7 @@
  *
  */
 #include <os2win.h>
+#include <io.h>
 #include <string.h>
 #include <stdio.h>
 #include <heapstring.h>
@@ -591,17 +592,22 @@ BOOL InitSystemAndRegistry()
    if(RegCreateKey(HKEY_LOCAL_MACHINE,"Software\\Microsoft\\Windows\\CurrentVersion",&hkey)!=ERROR_SUCCESS) {
     goto initreg_error;
    }
-   //Create x:\Program Files directory
-   strcpy(shellpath, InternalGetWindowsDirectory());
-   shellpath[2] = 0;    //get drive
-   strcat(shellpath, "\\Program Files");
-   CreateDirectory(shellpath, NULL);
-   RegSetValueEx(hkey, DIR_PROGRAM, 0,REG_SZ, (LPBYTE)shellpath, strlen(shellpath)+1);
+   //Check if DIR_PROGRAM already created
+   val = sizeof(shellpath);
+   if (RegQueryValueEx(hkey, DIR_PROGRAM, 0, NULL, (LPBYTE)shellpath, &val) != ERROR_SUCCESS 
+       || GetFileAttributes( shellpath) == -1) {
+      //Create x:\Program Files directory
+      strcpy(shellpath, InternalGetWindowsDirectory());
+      shellpath[2] = 0;    //get drive
+      strcat(shellpath, "\\Program Files");
+      CreateDirectory(shellpath, NULL);
+      RegSetValueEx(hkey, DIR_PROGRAM, 0,REG_SZ, (LPBYTE)shellpath, strlen(shellpath)+1);
 
-   //Create x:\Program Files\Common Files directory
-   strcat(shellpath, "\\Common Files");
-   CreateDirectory(shellpath, NULL);
-   RegSetValueEx(hkey, DIR_PROGRAM_COMMON, 0,REG_SZ, (LPBYTE)shellpath, strlen(shellpath)+1);
+      //Create x:\Program Files\Common Files directory
+      strcat(shellpath, "\\Common Files");
+      CreateDirectory(shellpath, NULL);
+      RegSetValueEx(hkey, DIR_PROGRAM_COMMON, 0,REG_SZ, (LPBYTE)shellpath, strlen(shellpath)+1);
+   }
 
    strcpy(shellpath, InternalGetWindowsDirectory());
    RegSetValueEx(hkey, DIR_SHARED, 0,REG_SZ, (LPBYTE)shellpath, strlen(shellpath)+1);
