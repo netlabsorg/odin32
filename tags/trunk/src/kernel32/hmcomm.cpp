@@ -1,4 +1,4 @@
-/* $Id: hmcomm.cpp,v 1.33 2001-12-10 12:55:12 sandervl Exp $ */
+/* $Id: hmcomm.cpp,v 1.34 2001-12-10 14:04:24 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -240,7 +240,7 @@ DWORD HMDeviceCommClass::CreateFile(LPCSTR lpFileName,
             if(handler[comnr] == NULL) 
             {
                 try {
-                    handler[comnr] = new OverlappedIOHandler(CommReadIOHandler, CommWriteIOHandler, CommPollIOHandler);
+                    handler[comnr] = new OverlappedIOHandler(CommReadIOHandler, CommWriteIOHandler, CommPollIOHandler, ASYNC_TYPE_FULLDUPLEX);
                 }
                 catch(...)
                 {

@@ -1,4 +1,4 @@
-/* $Id: overlappedio.h,v 1.8 2001-12-10 12:55:13 sandervl Exp $ */
+/* $Id: overlappedio.h,v 1.9 2001-12-10 14:04:25 sandervl Exp $ */
 
 /*
  * Win32 overlapped IO class
@@ -17,6 +17,9 @@
 #define ASYNC_INDEX_WRITE       1
 #define ASYNC_INDEX_POLL        2
 #define ASYNC_INDEX_BUSY        3
+
+#define ASYNC_TYPE_HALFDUPLEX   0
+#define ASYNC_TYPE_FULLDUPLEX   1
 
 #define ASYNCIO_READ        1
 #define ASYNCIO_WRITE       2
@@ -69,7 +72,7 @@ public:
      OverlappedIOHandler(LPOVERLAPPED_HANDLER lpReadHandler,
                          LPOVERLAPPED_HANDLER lpWriteHandler,
                          LPOVERLAPPED_HANDLER lpPollHandler = NULL,
-                         BOOL fFullDuplex = FALSE);
+                         BOOL fFullDuplex = ASYNC_TYPE_HALFDUPLEX);
     ~OverlappedIOHandler();
 
      BOOL   WriteFile(HANDLE        hHandle,
