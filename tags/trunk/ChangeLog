@@ -1,4 +1,9 @@
- /* $Id: ChangeLog,v 1.1029 2000-07-12 18:20:12 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.1030 2000-07-15 08:08:30 sandervl Exp $ */
+
+ 2000-07-15: Sander van Leeuwen <sandervl@xs4all.nl>
+    - USER32:   XWing vs Tie Fighter fix broke RealPlayer 7 setup (missing buttons)
+                -> rewrote RDW_INVALIDATE code in RedrawWindow to work for
+                both applications
 
  2000-07-12: Przemyslaw Dobrowolski <dobrawka@asua.org.pl>
     - KERNEL32: Implemented handlemanager support for named and unnamed pipes
