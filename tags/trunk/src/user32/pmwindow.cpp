@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.184 2002-08-05 16:31:26 sandervl Exp $ */
+/* $Id: pmwindow.cpp,v 1.185 2002-08-13 20:17:23 sandervl Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -96,6 +96,11 @@ void FrameReplaceMenuItem(HWND hwndMenu, ULONG nIndex, ULONG idOld, ULONG   idNe
 void FrameSetFocus(HWND hwnd);
 
 VOID APIENTRY DspInitSystemDriverName(PSZ pszDriverName, ULONG lenDriverName);
+
+#ifdef DEBUG
+static char *DbgGetStringSWPFlags(ULONG flags);
+static char *DbgPrintQFCFlags(ULONG flags);
+#endif
 
 //******************************************************************************
 // Initialize PM; create hab, message queue and register special Win32 window classes
@@ -1161,7 +1166,7 @@ MRESULT EXPENTRY Win32FrameWindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM m
       ULONG     ret = 0;
       HWND      hParent = NULLHANDLE, hwndAfter;
 
-        dprintf(("PMFRAME:WM_ADJUSTWINDOWPOS %x %x %x (%d,%d) (%d,%d)", win32wnd->getWindowHandle(), pswp->hwnd, pswp->fl, pswp->x, pswp->y, pswp->cx, pswp->cy));
+        dprintf(("PMFRAME:WM_ADJUSTWINDOWPOS %x %x %x (%s) (%d,%d) (%d,%d)", win32wnd->getWindowHandle(), pswp->hwnd, pswp->fl, DbgGetStringSWPFlags(pswp->fl), pswp->x, pswp->y, pswp->cx, pswp->cy));
 
         ulFlags = pswp->fl;
 
@@ -1280,7 +1285,7 @@ MRESULT EXPENTRY Win32FrameWindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM m
             ULONG flags = pswp->fl;      //make a backup copy; OSLibMapWINDOWPOStoSWP will modify it
 
             dprintf(("PMFRAME:WM_ADJUSTWINDOWPOS, app changed windowpos struct"));
-            dprintf(("%x (%d,%d), (%d,%d)", pswp->fl, pswp->x, pswp->y, pswp->cx, pswp->cy));
+            dprintf(("%x (%s) (%d,%d), (%d,%d)", pswp->fl, DbgGetStringSWPFlags(pswp->fl), pswp->x, pswp->y, pswp->cx, pswp->cy));
 
             if(win32wnd->getParent()) {
                   OSLibMapWINDOWPOStoSWP(&wp, pswp, &swpOld, win32wnd->getParent()->getClientHeight(),
@@ -1364,7 +1369,7 @@ adjustend:
       HWND      hParent = NULLHANDLE;
       RECTL     rect;
 
-        dprintf(("PMFRAME:WM_WINDOWPOSCHANGED (%x) %x %x (%d,%d) (%d,%d)", mp2, win32wnd->getWindowHandle(), pswp->fl, pswp->x, pswp->y, pswp->cx, pswp->cy));
+        dprintf(("PMFRAME:WM_WINDOWPOSCHANGED (%x) %x %x (%s) (%d,%d) (%d,%d)", mp2, win32wnd->getWindowHandle(), pswp->fl, DbgGetStringSWPFlags(pswp->fl), pswp->x, pswp->y, pswp->cx, pswp->cy));
         if(win32wnd->IsParentChanging()) {
             goto PosChangedEnd;
         }
@@ -1643,7 +1648,7 @@ PosChangedEnd:
 
 #ifdef DEBUG
     case WM_QUERYFOCUSCHAIN:
-        dprintf2(("PMFRAME:WM_QUERYFOCUSCHAIN %x fsCmd %x parent %x", win32wnd->getWindowHandle(), SHORT1FROMMP(mp1), (mp2) ? OS2ToWin32Handle((DWORD)mp2) : 0));
+        dprintf2(("PMFRAME:WM_QUERYFOCUSCHAIN %x fsCmd %x (%s) parent %x", win32wnd->getWindowHandle(), SHORT1FROMMP(mp1), DbgPrintQFCFlags(SHORT1FROMMP(mp1)), (mp2) ? OS2ToWin32Handle((DWORD)mp2) : 0));
 
         RestoreOS2TIB();
         rc = pfnFrameWndProc(hwnd, msg, mp1, mp2);
@@ -1794,7 +1799,7 @@ PosChangedEnd:
     {
         PSWP pswp   = (PSWP)mp1;
 
-        dprintf(("PMFRAME:WM_ADJUSTFRAMEPOS %x %x %x (%d,%d) (%d,%d)", win32wnd->getWindowHandle(), pswp->hwnd, pswp->fl, pswp->x, pswp->y, pswp->cx, pswp->cy));
+        dprintf(("PMFRAME:WM_ADJUSTFRAMEPOS %x %x %x (%s) (%d,%d) (%d,%d)", win32wnd->getWindowHandle(), pswp->hwnd, pswp->fl, DbgGetStringSWPFlags(pswp->fl), pswp->x, pswp->y, pswp->cx, pswp->cy));
         goto RunDefFrameWndProc;
     }
 
@@ -1802,7 +1807,7 @@ PosChangedEnd:
     {
         PSWP pswp   = (PSWP)mp1;
 
-        dprintf(("PMFRAME:WM_OWNERPOSCHANGE %x %x %x (%d,%d) (%d,%d)", win32wnd->getWindowHandle(), pswp->hwnd, pswp->fl, pswp->x, pswp->y, pswp->cx, pswp->cy));
+        dprintf(("PMFRAME:WM_OWNERPOSCHANGE %x %x %x (%s) (%d,%d) (%d,%d)", win32wnd->getWindowHandle(), pswp->hwnd, pswp->fl, DbgGetStringSWPFlags(pswp->fl), pswp->x, pswp->y, pswp->cx, pswp->cy));
         goto RunDefFrameWndProc;
     }
 #endif
@@ -2194,4 +2199,91 @@ failure:
 }
 //******************************************************************************
 //******************************************************************************
+#ifdef DEBUG
+static char *DbgGetStringSWPFlags(ULONG flags)
+{
+    static char szSWPFlags[512];
+  
+    szSWPFlags[0] = 0;
 
+    if(flags & SWP_SIZE) {
+        strcat(szSWPFlags, "SWP_SIZE ");
+    }
+    if(flags & SWP_MOVE) {
+        strcat(szSWPFlags, "SWP_MOVE ");
+    }
+    if(flags & SWP_ZORDER) {
+        strcat(szSWPFlags, "SWP_ZORDER ");
+    }
+    if(flags & SWP_SHOW) {
+        strcat(szSWPFlags, "SWP_SHOW ");
+    }
+    if(flags & SWP_HIDE) {
+        strcat(szSWPFlags, "SWP_HIDE ");
+    }
+    if(flags & SWP_NOREDRAW) {
+        strcat(szSWPFlags, "SWP_NOREDRAW ");
+    }
+    if(flags & SWP_NOADJUST) {
+        strcat(szSWPFlags, "SWP_NOADJUST ");
+    }
+    if(flags & SWP_ACTIVATE) {
+        strcat(szSWPFlags, "SWP_ACTIVATE ");
+    }                                    
+    if(flags & SWP_DEACTIVATE) {
+        strcat(szSWPFlags, "SWP_DEACTIVATE ");
+    }
+    if(flags & SWP_EXTSTATECHANGE) {
+        strcat(szSWPFlags, "SWP_EXTSTATECHANGE ");
+    }
+    if(flags & SWP_MINIMIZE) {
+        strcat(szSWPFlags, "SWP_MINIMIZE ");
+    }
+    if(flags & SWP_MAXIMIZE) {
+        strcat(szSWPFlags, "SWP_MAXIMIZE ");
+    }
+    if(flags & SWP_RESTORE) {
+        strcat(szSWPFlags, "SWP_RESTORE ");
+    }
+    if(flags & SWP_FOCUSACTIVATE) {
+        strcat(szSWPFlags, "SWP_FOCUSACTIVATE ");
+    }
+    if(flags & SWP_FOCUSDEACTIVATE) {
+        strcat(szSWPFlags, "SWP_FOCUSDEACTIVATE ");
+    }
+    if(flags & SWP_NOAUTOCLOSE) {
+        strcat(szSWPFlags, "SWP_NOAUTOCLOSE ");
+    }
+    return szSWPFlags;
+}
+static char *DbgPrintQFCFlags(ULONG flags)
+{
+    static char szQFCFlags[64];
+
+    szQFCFlags[0] = 0;
+
+    if(flags & QFC_NEXTINCHAIN) {
+        strcat(szQFCFlags, "QFC_NEXTINCHAIN");
+    }
+    else
+    if(flags & QFC_ACTIVE) {
+        strcat(szQFCFlags, "QFC_ACTIVE");
+    }
+    else
+    if(flags & QFC_FRAME) {
+        strcat(szQFCFlags, "QFC_FRAME");
+    }
+    else
+    if(flags & QFC_SELECTACTIVE) {
+        strcat(szQFCFlags, "QFC_SELECTACTIVE");
+    }
+    else
+    if(flags & QFC_PARTOFCHAIN) {
+        strcat(szQFCFlags, "QFC_PARTOFCHAIN");
+    }
+
+    return szQFCFlags;
+}
+#endif
+//******************************************************************************
+//******************************************************************************
