@@ -1,5 +1,5 @@
 ##############################################################################
-# $Id: makefile,v 1.20 2000-03-08 09:22:21 bird Exp $
+# $Id: makefile,v 1.20.4.1 2000-09-02 20:49:25 bird Exp $
 #
 # PD-Win32 API
 #
@@ -19,19 +19,18 @@ EXETARGET=1
 ##############################################################################
 OBJEXT          = pe_obj
 
-
 ##############################################################################
 # Tools and Flags Addjustments
 ##############################################################################
+OBJDIR     = $(WIN32KOBJ)
 CINCLUDES  = -I$(WIN32KINCLUDE)
 
 CFLAGS     = $(CINCLUDES) $(CFLAGS) -DRING3 -DPE2LX \
-             -Ge+ -Wall+ppt-ppc-inl-cnv-gnr-vft-gen-uni-ext- -Gm- -Gn- -Ti+ -Rn
+             -Ge+ -Gm- -Gn- -Ti+ -Rn -Wall+ppt-ppc-inl-cnv-gnr-vft-gen-uni-ext-
 CXXFLAGS   = $(CINCLUDES) $(CXXFLAGS) -DRING3 -DPE2LX \
-             -Ge+ -Wall+ppt-ppc-inl-cnv-gnr-vft- -Gm- -Gn- -Ti+ -Gx -Rn
+             -Ge+ -Gm- -Gn- -Ti+ -Rn -Gx -Wall+ppt-ppc-inl-cnv-gnr-vft-
 
-LD         = ilink
-LDFLAGS    = /nologo /NOI /A:16 /NOE /packcode /packdata /pmtype:vio /Stack:4096 \
+LD2FLAGS   = /nologo /NOI /A:16 /NOE /NOD /packcode /packdata /pmtype:vio /Stack:4096 \
 !ifdef DEBUG
 !ifndef NODEBUGINFO
     /debug /dbgpack
@@ -84,27 +83,42 @@ LDFLAGS    = /nologo /NOI /A:16 /NOE /packcode /packdata /pmtype:vio /Stack:4096
 ##############################################################################
 # Main targets.
 ##############################################################################
-TARGET   = pe2lx
+TARGET = pe2lx
 
-OBJS     =  $(OBJDIR)\pe2lx.$(OBJEXT)         \
-            $(OBJDIR)\pe2lxmain.$(OBJEXT)     \
-            $(OBJDIR)\modulebase.$(OBJEXT)    \
-            $(OBJDIR)\malloc.$(OBJEXT)        \
-            $(OBJDIR)\smalloc_avl.$(OBJEXT)   \
-            $(OBJDIR)\avl.$(OBJEXT)           \
-            $(OBJDIR)\rmalloc_avl.$(OBJEXT)   \
-            $(OBJDIR)\new.$(OBJEXT)           \
-            $(OBJDIR)\stricmp.$(OBJEXT)       \
-            $(OBJDIR)\vprintf.$(OBJEXT)
+OBJS =\
+$(OBJDIR)\pe2lx.$(OBJEXT)\
+$(OBJDIR)\pe2lxmain.$(OBJEXT)\
+$(OBJDIR)\modulebase.$(OBJEXT)\
+$(OBJDIR)\malloc.$(OBJEXT)\
+$(OBJDIR)\smalloc_avl.$(OBJEXT)\
+$(OBJDIR)\avl.$(OBJEXT)\
+$(OBJDIR)\rmalloc_avl.$(OBJEXT)\
+$(OBJDIR)\new.$(OBJEXT)\
+$(OBJDIR)\stricmp.$(OBJEXT)\
+$(OBJDIR)\vprintf.$(OBJEXT)
+
+LIBS =\
+!if "$(CCENV)" == "VAC36"
+    $(VACPATH)\lib\cpprni36.lib \
+!else
+    $(VACPATH)\lib\cppon30.lib  \
+!endif
 
 
+all:    $(WIN32KBIN)\$(TARGET).exe
 
-all:      $(OBJDIR) $(OBJDIR)\$(TARGET).exe
 
-
-$(OBJDIR)\$(TARGET).exe: $(OBJS)
+$(WIN32KBIN)\$(TARGET).exe: $(OBJS) makefile
     @echo linking $@
-    $(LD) $(LDFLAGS) /OUT:$@ /MAP:$*.map $**
+    $(LD2) @<<$(OBJDIR)\$(@B).lnk
+$(LD2FLAGS)
+/OUT:$@
+/MAP:$*.map
+$(OBJS: =^
+)
+$(LIBS)
+os2386.lib
+<<KEEP
     $(CP) $@ $(PDWIN32_BIN)
 
 
@@ -112,7 +126,8 @@ $(OBJDIR)\$(TARGET).exe: $(OBJS)
 # Dependencies.
 ##############################################################################
 dep:
-    $(DEPEND) -obj$(OBJEXT) -o$$(OBJDIR) $(CINCLUDES) ..\misc\*.c* ..\include\*.h
+    $(DEPEND) -obj$(OBJEXT) -o$$(OBJDIR) $(CINCLUDES) \
+        *.c* ..\misc\*.c* ..\include\*.h
 
 
 ##############################################################################

@@ -1,4 +1,4 @@
-/* $Id: myldrClose.cpp,v 1.5.4.2 2000-08-21 22:59:39 bird Exp $
+/* $Id: myldrClose.cpp,v 1.5.4.3 2000-09-02 20:49:18 bird Exp $
  *
  * myldrClose - ldrClose
  *
@@ -22,6 +22,7 @@
 #include <memory.h>
 #include <stdlib.h>
 
+#include "devSegDf.h"                   /* Win32k segment definitions. */
 #include "log.h"
 #include "avl.h"
 #include <peexe.h>

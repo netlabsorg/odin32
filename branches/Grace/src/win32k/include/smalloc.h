@@ -1,4 +1,4 @@
-/* $Id: smalloc.h,v 1.1 2000-01-24 01:44:08 bird Exp $
+/* $Id: smalloc.h,v 1.1.4.1 2000-09-02 20:49:16 bird Exp $
  *
  * Swappable Heap.
  *
@@ -20,6 +20,8 @@ extern "C" {
 #endif
 /* XLATON */
 
+struct HeapState_s;
+
 /*******************************************************************************
 *   Exported Functions and Variables                                           *
 *******************************************************************************/
@@ -32,10 +34,14 @@ unsigned    _swp_msize(void *);
 int         _swp_validptr(void *);
 int         _swp_validptr2(void *, unsigned);
 unsigned    _swp_memfree(void);
+unsigned    _swp_memused(void);
+int         _swp_state(struct HeapState_s *);
 int         _swp_heap_check(void);
 void        _swp_heapmin(void);
 void        _swp_dump_subheaps(void);
 void        _swp_dump_allocated(unsigned);
+
+extern unsigned cbSwpHeapMax;   /* Maximum amount of memory used by the heap. */
 
 /* XLATOFF */
 #ifdef __cplusplus

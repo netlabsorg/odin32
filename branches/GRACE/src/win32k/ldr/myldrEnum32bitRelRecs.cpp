@@ -1,4 +1,4 @@
-/* $Id: myldrEnum32bitRelRecs.cpp,v 1.2.4.1 2000-07-16 22:43:36 bird Exp $
+/* $Id: myldrEnum32bitRelRecs.cpp,v 1.2.4.2 2000-09-02 20:49:19 bird Exp $
  *
  * myldrEnum32bitRelRecs - ldrEnum32bitRelRecs
  *
@@ -23,6 +23,7 @@
 #include <memory.h>
 #include <stdlib.h>
 
+#include "devSegDf.h"                   /* Win32k segment definitions. */
 #include "avl.h"
 #include "log.h"
 #include <peexe.h>

@@ -1,4 +1,4 @@
-/* $Id: win32ktst.c,v 1.1.4.7 2000-08-30 04:11:33 bird Exp $
+/* $Id: win32ktst.c,v 1.1.4.8 2000-09-02 20:49:29 bird Exp $
  *
  * Win32k test module.
  *
@@ -33,6 +33,8 @@
 *******************************************************************************/
 #include <os2.h>
 #include <exe386.h>
+
+#include "devSegDf.h"                   /* Win32k segment definitions. */
 
 #include "malloc.h"
 
@@ -735,7 +737,7 @@ int TestCase3(void)
 {
     int         rc = 1;
     RP32INIT    rpinit;
-    char *      pszInitArgs = "-C1 -L:N -Verbose -Quiet -Elf:Yes -Pe:PE -Script:Yes -W4 -Heap:512000 -ResHeap:0256000 -HeapMax:4096000 -ResHeapMax:0x100000";
+    char *      pszInitArgs = "-C1 -L:N -Verbose -Quiet -Elf:Yes -Pe:PE -Script:Yes -Rexx:NES -Java:NYes -W4 -Heap:512000 -ResHeap:0256000 -HeapMax:4096000 -ResHeapMax:0x100000";
 
     /* $elf */
     initRPInit(SSToDS(&rpinit), pszInitArgs);
@@ -756,6 +758,8 @@ int TestCase3(void)
             opt.cbResHeapMax    = 0x100000;
             opt.fElf            = TRUE;
             opt.fUNIXScript     = TRUE;
+            opt.fJava           = FALSE;
+            opt.fREXXScript     = FALSE;
             opt.fPE             = FLAGS_PE_PE;
             opt.fQuiet          = TRUE;
             opt.fLogging        = FALSE;

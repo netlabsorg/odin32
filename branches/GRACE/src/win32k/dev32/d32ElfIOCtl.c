@@ -1,4 +1,4 @@
-/* $Id: d32ElfIOCtl.c,v 1.1 2000-02-15 23:39:18 bird Exp $
+/* $Id: d32ElfIOCtl.c,v 1.1.4.1 2000-09-02 20:49:11 bird Exp $
  *
  * Elf driver IOCtl handler function.
  *
@@ -19,6 +19,7 @@
 *******************************************************************************/
 #include <os2.h>
 
+#include "devSegDf.h"
 #include "dev1632.h"
 #include "dev32.h"
 

@@ -1,4 +1,4 @@
-; $Id: devlast.asm,v 1.5 2000-02-25 18:15:03 bird Exp $
+; $Id: devlast.asm,v 1.5.4.1 2000-09-02 20:49:13 bird Exp $
 ;
 ; DevLast - the object file termintating the resident part of the objects.
 ; Code after the ???END labes and object files and which are linked in
@@ -20,17 +20,21 @@
 ;
 ; Exported symbols
 ;
-    public CODE16END
     public DATA16END
     public DATA16_BSSEND
     public DATA16_CONSTEND
+    public DATA16_INITEND
+    public DATA16_INIT_BSSEND
+    public DATA16_INIT_CONSTEND
     public CODE16END
+    public CODE16_INITEND
     public CODE32END
     public DATA32END
     public BSS32END
     public CONST32_ROEND
     public _VFTEND
     public EH_DATAEND
+
     public _CallR0Init32
     public _CallVerifyImportTab32
 
@@ -51,13 +55,26 @@ DATA16_CONST segment
 DATA16_CONSTEND db ?
 DATA16_CONST ends
 
+DATA16_INIT segment
+DATA16_INITEND db ?
+DATA16_INIT ends
+
+DATA16_INIT_BSS segment
+DATA16_INIT_BSSEND db ?
+DATA16_INIT_BSS ends
+
+DATA16_INIT_CONST segment
+DATA16_INIT_CONSTEND db ?
+DATA16_INIT_CONST ends
+
+CODE16 segment
+CODE16END db ?
+CODE16 ends
 
 extrn R0INIT32:FAR
 extrn VERIFYIMPORTTAB32:FAR
 
-CODE16 segment
-CODE16END db ?
-
+CODE16_INIT segment
 ;;
 ; Thunk procedure for R0Init32.
 ; @cproto    USHORT NEAR CallR0Init32(LIN pRpInit);
@@ -66,13 +83,13 @@ CODE16END db ?
 ; @status    completely implemented.
 ; @author    knut st. osmundsen
 _CallR0Init32 PROC NEAR
-    ASSUME CS:CODE16
+    ASSUME CS:CODE16_INIT
     push    ds
     push    word ptr [esp+6]            ; push high word.
     push    word ptr [esp+6]            ; push low word.
     call    far ptr FLAT:R0INIT32
     pop     ds
-    retn
+    ret
 _CallR0Init32 ENDP
 
 
@@ -83,14 +100,15 @@ _CallR0Init32 ENDP
 ; @status    completely implemented.
 ; @author    knut st. osmundsen
 _CallVerifyImportTab32 PROC NEAR
-    ASSUME CS:CODE16
+    ASSUME CS:CODE16_INIT
     push    ds
     call    far ptr FLAT:VERIFYIMPORTTAB32
     pop     ds
-    retn
+    ret
 _CallVerifyImportTab32 ENDP
 
-CODE16 ends
+CODE16_INITEND LABEL BYTE
+CODE16_INIT ends
 
 
 CODE32 segment
@@ -116,6 +134,7 @@ _VFT ends
 EH_DATA segment
 EH_DATAEND LABEL BYTE
 EH_DATA ends
+
 
 END
 

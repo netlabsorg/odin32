@@ -1,4 +1,4 @@
-/* $Id: d32init.c,v 1.19.4.12 2000-08-30 04:11:28 bird Exp $
+/* $Id: d32init.c,v 1.19.4.13 2000-09-02 20:49:11 bird Exp $
  *
  * d32init.c - 32-bits init routines.
  *
@@ -31,6 +31,7 @@
 
 #include <string.h>
 
+#include "devSegDf.h"
 #include "OS2Krnl.h"
 #include "options.h"
 #include "dev1632.h"
@@ -165,6 +166,16 @@ USHORT _loadds _Far32 _Pascal R0Init32(RP32INIT *pRpInit)
                 }
                 break;
 
+            case 'j':
+            case 'J': /* -Java:<Yes|No> */
+                pszTmp2 = strpbrk(pszTmp, ":=/- ");
+                options.fJava =
+                    pszTmp2 != NULL
+                    && (int)(pszTmp2-pszTmp) < cch-1
+                    && (*pszTmp2 == ':' || *pszTmp2 == '=')
+                    && (pszTmp2[1] == 'Y' || pszTmp2[1] == 'y');
+                break;
+
             case 'l':
             case 'L': /* -L[..]<:|=| >[<Y..|E..| > | <N..|D..>] */
                 pszTmp2 = strpbrk(pszTmp, ":=/- ");
@@ -208,17 +219,29 @@ USHORT _loadds _Far32 _Pascal R0Init32(RP32INIT *pRpInit)
                 break;
 
             case 'r':
-            case 'R': /* ResHeap options */
+            case 'R': /* ResHeap options or REXX option */
                 pszTmp2 = strpbrk(pszTmp, ":=/- ");
-                if (pszTmp2 != NULL && (*pszTmp2 == ':' || *pszTmp2 == '='))
-                {
-                    ul = readnum(pszTmp2 + 1);
-                    if (ul > 0x1000UL && ul < 0x700000UL) /* 4KB < ul < 7MB */
+                if (   (pszTmp[1] == 'E' || pszTmp[1] == 'e')
+                    && (pszTmp[2] == 'X' || pszTmp[2] == 'x'))
+                {   /* REXX */
+                    options.fREXXScript =
+                        pszTmp2 != NULL
+                        && (int)(pszTmp2-pszTmp) < cch-1
+                        && (*pszTmp2 == ':' || *pszTmp2 == '=')
+                        && (pszTmp2[1] == 'Y' || pszTmp2[1] == 'y');
+                }
+                else
+                {   /* ResHeap options */
+                    if (pszTmp2 != NULL && (*pszTmp2 == ':' || *pszTmp2 == '='))
                     {
-                        if (strnicmp(pszTmp, "resheapm", 8) == 0)
-                            options.cbResHeapMax = ul;
-                        else
-                            options.cbResHeapInit = ul;
+                        ul = readnum(pszTmp2 + 1);
+                        if (ul > 0x1000UL && ul < 0x700000UL) /* 4KB < ul < 7MB */
+                        {
+                            if (strnicmp(pszTmp, "resheapm", 8) == 0)
+                                options.cbResHeapMax = ul;
+                            else
+                                options.cbResHeapInit = ul;
+                        }
                     }
                 }
                 break;
@@ -1048,13 +1071,13 @@ USHORT _loadds _Far32 _Pascal VerifyImportTab32(void)
          * Debug info
          */
         kprintf2(("VerifyImportTab32: procedure no.%d is being checked: %s addr=0x%08x iObj=%d offObj=%d\n",
-                  i, &_aImportTab[i].achName[0], _aImportTab[i].ulAddress,
-                  _aImportTab[i].iObject, _aImportTab[i].offObject));
+                  i, &aImportTab[i].achName[0], aImportTab[i].ulAddress,
+                  aImportTab[i].iObject, aImportTab[i].offObject));
 
         /* Verify that it is found */
-        if (!_aImportTab[i].fFound)
+        if (!aImportTab[i].fFound)
         {
-            if (_aImportTab[i].fType & EPT_NOT_REQ)
+            if (aImportTab[i].fType & EPT_NOT_REQ)
                 continue;
             else
             {
@@ -1064,48 +1087,48 @@ USHORT _loadds _Far32 _Pascal VerifyImportTab32(void)
         }
 
         /* Verify read/writeable. */
-        if (_aImportTab[i].iObject >= pKrnlSMTE->smte_objcnt                                /* object index valid? */
-            || _aImportTab[i].ulAddress < pKrnlOTE[_aImportTab[i].iObject].ote_base         /* address valid? */
-            || _aImportTab[i].ulAddress + 16 > (pKrnlOTE[_aImportTab[i].iObject].ote_base +
-                                                pKrnlOTE[_aImportTab[i].iObject].ote_size)  /* address valid? */
-            || _aImportTab[i].ulAddress - _aImportTab[i].offObject
-               != pKrnlOTE[_aImportTab[i].iObject].ote_base                                 /* offObject ok?  */
+        if (aImportTab[i].iObject >= pKrnlSMTE->smte_objcnt                                /* object index valid? */
+            || aImportTab[i].ulAddress < pKrnlOTE[aImportTab[i].iObject].ote_base          /* address valid? */
+            || aImportTab[i].ulAddress + 16 > (pKrnlOTE[aImportTab[i].iObject].ote_base +
+                                                pKrnlOTE[aImportTab[i].iObject].ote_size)  /* address valid? */
+            || aImportTab[i].ulAddress - aImportTab[i].offObject
+               != pKrnlOTE[aImportTab[i].iObject].ote_base                                 /* offObject ok?  */
             )
         {
             kprintf(("VerifyImportTab32: procedure no.%d has an invalid address or object number.!\n"
                      "                   %s  addr=0x%08x iObj=%d offObj=%d\n",
-                     i, &_aImportTab[i].achName[0], _aImportTab[i].ulAddress,
-                     _aImportTab[i].iObject, _aImportTab[i].offObject));
+                     i, &aImportTab[i].achName[0], aImportTab[i].ulAddress,
+                     aImportTab[i].iObject, aImportTab[i].offObject));
             return STATUS_DONE | STERR | ERROR_D32_INVALID_OBJ_OR_ADDR;
         }
 
 
         #ifndef R3TST
-        if (_aImportTab[i].ulAddress < 0xff400000UL)
+        if (aImportTab[i].ulAddress < 0xff400000UL)
         {
             kprintf(("VerifyImportTab32: procedure no.%d has an invalid address, %#08x!\n",
-                     i, _aImportTab[i].ulAddress));
+                     i, aImportTab[i].ulAddress));
             return STATUS_DONE | STERR | ERROR_D32_INVALID_ADDRESS;
         }
         #endif
 
-        switch (_aImportTab[i].fType & ~(EPT_BIT_MASK | EPT_NOT_REQ))
+        switch (aImportTab[i].fType & ~(EPT_BIT_MASK | EPT_NOT_REQ))
         {
             case EPT_PROC:
             case EPT_PROCIMPORT:
                 /*
                  * Verify known function prolog.
                  */
-                if (EPT32BitEntry(_aImportTab[i]))
+                if (EPT32BitEntry(aImportTab[i]))
                 {
-                    cb = interpretFunctionProlog32((char*)_aImportTab[i].ulAddress,
-                                                   _aImportTab[i].fType == EPT_PROC32);
+                    cb = interpretFunctionProlog32((char*)aImportTab[i].ulAddress,
+                                                   aImportTab[i].fType == EPT_PROC32);
                     cbmin = 5; /* Size of the jump instruction */
                 }
                 else
                 {
-                    cb = interpretFunctionProlog16((char*)_aImportTab[i].ulAddress,
-                                                   _aImportTab[i].fType == EPT_PROC16);
+                    cb = interpretFunctionProlog16((char*)aImportTab[i].ulAddress,
+                                                   aImportTab[i].fType == EPT_PROC16);
                     cbmin = 7; /* Size of the far jump instruction */
                 }
 
@@ -1203,23 +1226,23 @@ int importTabInit(void)
     for (i = 0; i < NBR_OF_KRNLIMPORTS; i++)
     {
         /* EPT_VARIMPORTs are skipped */
-        if ((_aImportTab[i].fType & ~EPT_BIT_MASK) == EPT_VARIMPORT)
+        if ((aImportTab[i].fType & ~EPT_BIT_MASK) == EPT_VARIMPORT)
             continue;
         /* EPT_NOT_REQ which is not found are set pointing to the nop function provided. */
-        if (!_aImportTab[i].fFound && (_aImportTab[i].fType & EPT_NOT_REQ))
+        if (!aImportTab[i].fFound && (aImportTab[i].fType & EPT_NOT_REQ))
         {
-            _aImportTab[i].ulAddress = auFuncs[i];
+            aImportTab[i].ulAddress = auFuncs[i];
             continue;
         }
 
-        if (EPT32BitEntry(_aImportTab[i]))
+        if (EPT32BitEntry(aImportTab[i]))
         {
-            cb = interpretFunctionProlog32((char*)_aImportTab[i].ulAddress, _aImportTab[i].fType == EPT_PROC32);
+            cb = interpretFunctionProlog32((char*)aImportTab[i].ulAddress, aImportTab[i].fType == EPT_PROC32);
             cbmin = 5; /* Size of the jump instruction */
         }
         else
         {
-            cb = interpretFunctionProlog16((char*)_aImportTab[i].ulAddress, _aImportTab[i].fType == EPT_PROC16);
+            cb = interpretFunctionProlog16((char*)aImportTab[i].ulAddress, aImportTab[i].fType == EPT_PROC16);
             cbmin = 7; /* Size of the far jump instruction */
         }
         if (cb <= 0 || cb + cbmin >= MAXSIZE_PROLOG)
@@ -1234,7 +1257,7 @@ int importTabInit(void)
      */
     for (i = 0; i < NBR_OF_KRNLIMPORTS; i++)
     {
-        switch (_aImportTab[i].fType & ~EPT_NOT_REQ)
+        switch (aImportTab[i].fType & ~EPT_NOT_REQ)
         {
             /*
              * 32-bit procedure overload.
@@ -1244,14 +1267,14 @@ int importTabInit(void)
              */
             case EPT_PROC32:
             {
-                cb = interpretFunctionProlog32((char*)_aImportTab[i].ulAddress, TRUE);
-                _aImportTab[i].cbProlog = (char)cb;
+                cb = interpretFunctionProlog32((char*)aImportTab[i].ulAddress, TRUE);
+                aImportTab[i].cbProlog = (char)cb;
                 if (cb >= 5 && cb + 5 < MAXSIZE_PROLOG) /* 5(1st): size of jump instruction in the function prolog which jumps to my overloading function */
                 {                                       /* 5(2nd): size of jump instruction which jumps back to the original function after executing the prolog copied to the callTab entry for this function. */
                     /*
                      * Copy function prolog which will be overwritten by the jmp to calltabl.
                      */
-                    memcpy(callTab[i], (void*)_aImportTab[i].ulAddress, (size_t)cb);
+                    memcpy(callTab[i], (void*)aImportTab[i].ulAddress, (size_t)cb);
 
                     /*
                      * Make jump instruction which jumps from calltab to original function.
@@ -1259,13 +1282,13 @@ int importTabInit(void)
                      * Note: the displacement is relative to the next instruction
                      */
                     callTab[i][cb] = 0xE9; /* jmp */
-                    *(unsigned long*)(void*)&callTab[i][cb+1] = _aImportTab[i].ulAddress + cb - (unsigned long)&callTab[i][cb+5];
+                    *(unsigned long*)(void*)&callTab[i][cb+1] = aImportTab[i].ulAddress + cb - (unsigned long)&callTab[i][cb+5];
 
                     /*
                      * Jump from original function to my function - an cli(?) could be needed here
                      */
-                    *(char*)_aImportTab[i].ulAddress = 0xE9; /* jmp */
-                    *(unsigned long*)(_aImportTab[i].ulAddress + 1) = auFuncs[i] - (_aImportTab[i].ulAddress + 5);
+                    *(char*)aImportTab[i].ulAddress = 0xE9; /* jmp */
+                    *(unsigned long*)(aImportTab[i].ulAddress + 1) = auFuncs[i] - (aImportTab[i].ulAddress + 5);
                 }
                 else
                 {   /* !fatal! - this could never happen really... */
@@ -1286,31 +1309,31 @@ int importTabInit(void)
                 kprintf(("ImportTabInit: Overloading 16-bit procedures are not supported yet!!! Calltable in 32-bit segment!\n", i));
                 Int3();
 
-                cb = interpretFunctionProlog16((char*)_aImportTab[i].ulAddress, TRUE);
-                _aImportTab[i].cbProlog = (char)cb;
+                cb = interpretFunctionProlog16((char*)aImportTab[i].ulAddress, TRUE);
+                aImportTab[i].cbProlog = (char)cb;
                 if (cb >= 8 && cb + 7 < MAXSIZE_PROLOG) /* 8: size of a 16:32 jump which jumps to my overloading function (prefixed with 66h in a 16-bit segment) */
                 {                                       /* 7: size of a 16:32 jump which is added to the call tab */
                     /*
                      * Copy function prolog which is to be overwritten.
                      */
-                    memcpy(callTab[i], (void*)_aImportTab[i].ulAddress, (size_t)cb);
+                    memcpy(callTab[i], (void*)aImportTab[i].ulAddress, (size_t)cb);
 
                     /*
                      * Create far jump from calltab to original function.
                      * 0xEA <four byte target address> <two byte target selector>
                      */
                     callTab[i][cb] = 0xEA; /* jmp far ptr */
-                    *(unsigned long*)(void*)&callTab[i][cb+1] = _aImportTab[i].offObject;
-                    *(unsigned short*)(void*)&callTab[i][cb+5] = _aImportTab[i].usSel;
+                    *(unsigned long*)(void*)&callTab[i][cb+1] = aImportTab[i].offObject;
+                    *(unsigned short*)(void*)&callTab[i][cb+5] = aImportTab[i].usSel;
 
                     /*
                      * jump from original function to my function - an cli(?) could be needed here
                      * 0x66 0xEA <four byte target address> <two byte target selector>
                      */
-                    *(char*)(_aImportTab[i].ulAddress    ) = 0x66;    /* operandsize prefix */
-                    *(char*)(_aImportTab[i].ulAddress + 1) = 0xEA;    /* jmp far ptr */
-                    *(unsigned long*)(_aImportTab[i].ulAddress + 2) = auFuncs[i];   /* FIXME? */
-                    *(unsigned short*)(_aImportTab[i].ulAddress + 6) = _R0FlatCS16; /* FIXME */
+                    *(char*)(aImportTab[i].ulAddress    ) = 0x66;    /* operandsize prefix */
+                    *(char*)(aImportTab[i].ulAddress + 1) = 0xEA;    /* jmp far ptr */
+                    *(unsigned long*)(aImportTab[i].ulAddress + 2) = auFuncs[i];   /* FIXME? */
+                    *(unsigned short*)(aImportTab[i].ulAddress + 6) = _R0FlatCS16; /* FIXME */
                 }
                 else
                 {   /* !fatal! - this could never happen really... */
@@ -1328,8 +1351,8 @@ int importTabInit(void)
              */
             case EPT_PROCIMPORT32:
             {
-                cb = interpretFunctionProlog32((char*)_aImportTab[i].ulAddress, FALSE);
-                _aImportTab[i].cbProlog = (char)cb;
+                cb = interpretFunctionProlog32((char*)aImportTab[i].ulAddress, FALSE);
+                aImportTab[i].cbProlog = (char)cb;
                 if (cb > 0) /* Since no prolog part is copied to the function table, it's ok as long as the prolog has been recognzied. */
                 {
                     /*
@@ -1338,7 +1361,7 @@ int importTabInit(void)
                      * Note: the displacement is relative to the next instruction
                      */
                     callTab[i][0] = 0xE9; /* jmp */
-                    *(unsigned*)(void*)&callTab[i][1] = _aImportTab[i].ulAddress - (unsigned)&callTab[i][5];
+                    *(unsigned*)(void*)&callTab[i][1] = aImportTab[i].ulAddress - (unsigned)&callTab[i][5];
                 }
                 else
                 {   /* !fatal! - this should never really happen... */
@@ -1356,8 +1379,8 @@ int importTabInit(void)
              */
             case EPT_PROCIMPORT16:
             {
-                cb = interpretFunctionProlog16((char*)_aImportTab[i].ulAddress, FALSE);
-                _aImportTab[i].cbProlog = (char)cb;
+                cb = interpretFunctionProlog16((char*)aImportTab[i].ulAddress, FALSE);
+                aImportTab[i].cbProlog = (char)cb;
                 if (cb > 0) /* Since no prolog part is copied to the function table, it's ok as long as the prolog has been recognzied. */
                 {
                     /*
@@ -1365,8 +1388,8 @@ int importTabInit(void)
                      * 0xEA <four byte target address> <two byte target selector>
                      */
                     callTab[i][0] = 0xEA; /* jmp far ptr */
-                    *(unsigned long*)(void*)&callTab[i][1] = _aImportTab[i].offObject;
-                    *(unsigned short*)(void*)&callTab[i][5] = _aImportTab[i].usSel;
+                    *(unsigned long*)(void*)&callTab[i][1] = aImportTab[i].offObject;
+                    *(unsigned short*)(void*)&callTab[i][5] = aImportTab[i].usSel;
                 }
                 else
                 {   /* !fatal! - this should never really happen... */
@@ -1388,12 +1411,12 @@ int importTabInit(void)
              */
             case EPT_VARIMPORT32:
             case EPT_VARIMPORT16:
-                _aImportTab[i].cbProlog = (char)0;
-                *(unsigned long*)(void*)&callTab[i][0] = _aImportTab[i].ulAddress;
-                *(unsigned long*)(void*)&callTab[i][4] = _aImportTab[i].offObject;
-                *(unsigned short*)(void*)&callTab[i][8] = _aImportTab[i].usSel;
-                *(unsigned short*)(void*)&callTab[i][0xa] = (unsigned short)_aImportTab[i].offObject;
-                *(unsigned short*)(void*)&callTab[i][0xc] = _aImportTab[i].usSel;
+                aImportTab[i].cbProlog = (char)0;
+                *(unsigned long*)(void*)&callTab[i][0] = aImportTab[i].ulAddress;
+                *(unsigned long*)(void*)&callTab[i][4] = aImportTab[i].offObject;
+                *(unsigned short*)(void*)&callTab[i][8] = aImportTab[i].usSel;
+                *(unsigned short*)(void*)&callTab[i][0xa] = (unsigned short)aImportTab[i].offObject;
+                *(unsigned short*)(void*)&callTab[i][0xc] = aImportTab[i].usSel;
                 break;
 
             default:
@@ -1428,12 +1451,12 @@ PMTE GetOS2KrnlMTETst(void)
 
 /**
  * -Ring-3 testing-
- * Changes the entries in _aImportTab to point to their fake equivalents.
+ * Changes the entries in aImportTab to point to their fake equivalents.
  * @returns void
  * @param   void
  * @status  completely implemented.
  * @author  knut st. osmundsen (knut.stange.osmundsen@pmsc.no)
- * @remark  Called before the _aImportTab array is used/verified.
+ * @remark  Called before the aImportTab array is used/verified.
  */
 VOID R3TstFixImportTab(VOID)
 {
@@ -1491,7 +1514,7 @@ VOID R3TstFixImportTab(VOID)
 
     for (i = 0; i < NBR_OF_KRNLIMPORTS; i++)
     {
-        switch (_aImportTab[i].fType)
+        switch (aImportTab[i].fType)
         {
             case EPT_PROC32:
                 if (aTstFakers[i].fObj != 1)
@@ -1512,24 +1535,24 @@ VOID R3TstFixImportTab(VOID)
                 break;
         } /* switch - type */
 
-        _aImportTab[i].ulAddress = aTstFakers[i].uAddress;
+        aImportTab[i].ulAddress = aTstFakers[i].uAddress;
         switch (aTstFakers[i].fObj)
         {
             case 1:
-                _aImportTab[i].usSel = GetSelectorCODE32();
-                _aImportTab[i].offObject = aTstFakers[i].uAddress - (unsigned)&CODE32START;
+                aImportTab[i].usSel = GetSelectorCODE32();
+                aImportTab[i].offObject = aTstFakers[i].uAddress - (unsigned)&CODE32START;
                 break;
             case 2:
-                _aImportTab[i].usSel = GetSelectorCODE16();
-                _aImportTab[i].offObject = aTstFakers[i].uAddress - (unsigned)&CODE16START;
+                aImportTab[i].usSel = GetSelectorCODE16();
+                aImportTab[i].offObject = aTstFakers[i].uAddress - (unsigned)&CODE16START;
                 break;
             case 3:
-                _aImportTab[i].usSel = GetSelectorDATA32();
-                _aImportTab[i].offObject = aTstFakers[i].uAddress - (unsigned)&DATA32START;
+                aImportTab[i].usSel = GetSelectorDATA32();
+                aImportTab[i].offObject = aTstFakers[i].uAddress - (unsigned)&DATA32START;
                 break;
             case 4:
-                _aImportTab[i].usSel = GetSelectorDATA16();
-                _aImportTab[i].offObject = aTstFakers[i].uAddress - (unsigned)&DATA16START;
+                aImportTab[i].usSel = GetSelectorDATA16();
+                aImportTab[i].offObject = aTstFakers[i].uAddress - (unsigned)&DATA16START;
                 break;
             default:
                 kprintf(("R3TstFixImportTab: invalid segment config for entry %i.\n", i));

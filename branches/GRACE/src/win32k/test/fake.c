@@ -1,4 +1,4 @@
-/* $Id: fake.c,v 1.1.4.5 2000-08-30 04:11:32 bird Exp $
+/* $Id: fake.c,v 1.1.4.6 2000-09-02 20:49:28 bird Exp $
  *
  * Fake stubs for the ldr and kernel functions we imports or overloads.
  *
@@ -27,6 +27,8 @@
 #include <exe386.h>                     /* OS/2 LX structs and definitions. */
 
 #include <string.h>
+
+#include "devSegDf.h"                   /* Win32k segment definitions. */
 
 #include "log.h"
 #include "OS2Krnl.h"

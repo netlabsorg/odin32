@@ -1,4 +1,4 @@
-/* $Id: avl.c,v 1.4 2000-03-19 16:00:11 bird Exp $
+/* $Id: avl.c,v 1.4.4.1 2000-09-02 20:49:21 bird Exp $
  *
  * AVL-Tree (lookalike) implementation.
  *
@@ -23,6 +23,7 @@
 *   Internal Functions                                                         *
 *******************************************************************************/
 #include <os2.h>
+#include "devSegDf.h"                   /* Win32k segment definitions. */
 #include "avl.h"
 #if defined(RING0) || defined(RING3)
     #include "dev32.h"

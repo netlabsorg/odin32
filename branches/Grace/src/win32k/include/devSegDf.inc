@@ -1,4 +1,4 @@
-; $Id: devSegDf.inc,v 1.5.4.2 2000-08-13 09:23:59 bird Exp $
+; $Id: devSegDf.inc,v 1.5.4.3 2000-09-02 20:49:15 bird Exp $
 ;
 ; Segment definitions for win32k.sys.
 ;
@@ -17,11 +17,33 @@ DATA16_BSS ends
 DATA16_CONST segment word public 'FAR_DATA' use16
 DATA16_CONST ends
 
-DATA16_GROUP    group DATA16, DATA16_CONST, DATA16_BSS
+DATA16_GLOBAL segment word public 'FAR_DATA' use16
+DATA16_GLOBAL ends
+
+;DATA16_GROUP    group DATA16, DATA16_CONST, DATA16_BSS, DATA16_GLOBAL
+
+
+DATA16_INIT segment word public 'FAR_DATA' use16
+DATA16_INIT ends
+
+DATA16_INIT_CONST segment word public 'FAR_DATA' use16
+DATA16_INIT_CONST ends
+
+DATA16_INIT_BSS segment word public 'FAR_DATA' use16
+DATA16_INIT_BSS ends
+
+;DATA16_INIT_GROUP   group DATA16_INIT, DATA16_INIT_CONST, DATA16_INIT_BSS
+;
+;A bad trick to make all the 16-bit data segments one
+;
+DATA16_GROUP    group DATA16, DATA16_CONST, DATA16_BSS, DATA16_GLOBAL, DATA16_INIT, DATA16_INIT_CONST, DATA16_INIT_BSS
 
 
 CODE16 segment word public 'CODE' use16
 CODE16 ends
+
+CODE16_INIT segment word public 'CODE' use16
+CODE16_INIT ends
 
 CODE16_IOSEG segment word public 'CODE' use16
 CODE16_IOSEG ends

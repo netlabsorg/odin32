@@ -1,4 +1,4 @@
-/* $Id: rmalloc.h,v 1.2 2000-01-24 01:44:08 bird Exp $
+/* $Id: rmalloc.h,v 1.2.4.1 2000-09-02 20:49:15 bird Exp $
  *
  * Resident Heap.
  *
@@ -19,6 +19,18 @@
 extern "C" {
 #endif
 /* XLATON */
+/*******************************************************************************
+*   Structures and Typedefs                                                    *
+*******************************************************************************/
+typedef struct HeapState_s  /* note: this is used by both swappable and resident heaps */
+{
+    ULONG       cbHeapSize;          /* Amount of memory used by the heap free and used++. */
+    ULONG       cbHeapFree;          /* Amount of used space. */
+    ULONG       cbHeapUsed;          /* Amount of free space reserved. */
+    ULONG       cBlocksUsed;         /* Count of used blocks. */
+    ULONG       cBlocksFree;         /* Count of free blocks. */
+} HEAPSTATE, *PHEAPSTATE;
+
 
 /*******************************************************************************
 *   Exported Functions and Variables                                           *
@@ -32,10 +44,15 @@ unsigned    _res_msize(void *);
 int         _res_validptr(void *);
 int         _res_validptr2(void *, unsigned);
 unsigned    _res_memfree(void);
+unsigned    _res_memused(void);
+int         _res_state(PHEAPSTATE);
 int         _res_heap_check(void);
 void        _res_heapmin(void);
 void        _res_dump_subheaps(void);
 void        _res_dump_allocated(unsigned);
+
+extern unsigned cbResHeapMax;           /* Maximum amount of memory used by the heap. */
+
 
 /* XLATOFF */
 #ifdef __cplusplus

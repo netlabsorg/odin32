@@ -1,4 +1,4 @@
-/* $Id: ldr.cpp,v 1.7.4.4 2000-08-25 04:47:24 bird Exp $
+/* $Id: ldr.cpp,v 1.7.4.5 2000-09-02 20:49:17 bird Exp $
  *
  * ldr.cpp - Loader helpers.
  *
@@ -21,6 +21,7 @@
 *******************************************************************************/
 #include <os2.h>
 
+#include "devSegDf.h"
 #include "malloc.h"
 #include "new.h"
 #include <memory.h>

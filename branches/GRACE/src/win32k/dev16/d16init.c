@@ -1,4 +1,4 @@
-/* $Id: d16init.c,v 1.6.4.4 2000-08-30 04:11:26 bird Exp $
+/* $Id: d16init.c,v 1.6.4.5 2000-09-02 20:49:09 bird Exp $
  *
  * d16init - init routines for both drivers.
  *
@@ -35,12 +35,19 @@
 #include <string.h>
 #include <memory.h>
 
+#include "devSegDf.h"
+#undef  DATA16_INIT
+#define DATA16_INIT
+#undef  CODE16_INIT
+#define CODE16_INIT
 #include "probkrnl.h"
 #include "dev1632.h"
 #include "dev16.h"
 #include "vprntf16.h"
 #include "log.h"
 #include "options.h"
+
+
 
 /**
  * init function - device 0.
@@ -65,8 +72,8 @@ USHORT NEAR dev0Init(PRPINITIN pRpIn, PRPINITOUT pRpOut)
         printf16("win32k - elf$: initGetDosTableData failed with rc=%d\n", rc);
 
     pRpOut->BPBArray = NULL;
-    pRpOut->CodeEnd  = (USHORT)&CODE16END;
-    pRpOut->DataEnd  = (USHORT)&DATA16END;
+    pRpOut->CodeEnd = (USHORT)&CODE16_INITSTART;
+    pRpOut->DataEnd = (USHORT)&DATA16_INITSTART;
     pRpOut->Unit     = 0;
     pRpOut->rph.Status = STATUS_DONE;
     return STATUS_DONE;
@@ -133,8 +140,8 @@ USHORT NEAR dev1Init(PRPINITIN pRpIn, PRPINITOUT pRpOut)
     /*
      * Fill return data.
      */
-    pRpOut->CodeEnd = (USHORT)&CODE16END;
-    pRpOut->DataEnd = (USHORT)&DATA16END;
+    pRpOut->CodeEnd = (USHORT)&CODE16_INITSTART;
+    pRpOut->DataEnd = (USHORT)&DATA16_INITSTART;
     pRpOut->BPBArray= NULL;
     pRpOut->Unit    = 0;
 
@@ -162,7 +169,7 @@ USHORT NEAR dev1Init(PRPINITIN pRpIn, PRPINITOUT pRpOut)
  * @returns   Status word.
  * @param     pRp  Generic IO Control request packet.
  */
-USHORT NEAR R0Init16(PRP_GENIOCTL pRp)
+USHORT NEAR  R0Init16(PRP_GENIOCTL pRp)
 {
     USHORT usRc = STATUS_DONE;
     APIRET rc;
@@ -243,7 +250,7 @@ USHORT NEAR R0Init16(PRP_GENIOCTL pRp)
  *            IMPORTANT! This function must _not_ be called after the initiation of the second device driver!!!
  *                       (Since this is init code not present after init...)
  */
-USHORT NEAR initGetDosTableData(void)
+USHORT NEAR  initGetDosTableData(void)
 {
     APIRET     rc;
     PDOSTABLE  pDT;

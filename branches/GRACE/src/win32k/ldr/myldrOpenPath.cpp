@@ -1,4 +1,4 @@
-/* $Id: myldrOpenPath.cpp,v 1.1.2.3 2000-08-25 04:47:25 bird Exp $
+/* $Id: myldrOpenPath.cpp,v 1.1.2.4 2000-09-02 20:49:20 bird Exp $
  *
  * myldrOpenPath - ldrOpenPath used to open executables we'll override
  * this to altern the search path for DLLs.
@@ -25,6 +25,7 @@
 #include <memory.h>
 #include <stdlib.h>
 
+#include "devSegDf.h"                   /* Win32k segment definitions. */
 #include "log.h"
 #include "dev32.h"
 #include "dev32hlp.h"

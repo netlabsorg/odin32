@@ -1,4 +1,4 @@
-/* $Id: malloc.c,v 1.6.4.1 2000-07-16 22:43:40 bird Exp $
+/* $Id: malloc.c,v 1.6.4.2 2000-09-02 20:49:22 bird Exp $
  *
  * Common Heap - this forwards to the swappable heap!
  *
@@ -19,6 +19,7 @@
 *  Headerfiles
 ******************************************************************************/
 #include <os2.h>
+#include "devSegDf.h"                   /* Win32k segment definitions. */
 #include "smalloc.h"
 #include "rmalloc.h"
 #include "options.h"

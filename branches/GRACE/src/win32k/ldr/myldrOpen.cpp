@@ -1,4 +1,4 @@
-/* $Id: myldrOpen.cpp,v 1.10.4.11 2000-08-30 04:11:31 bird Exp $
+/* $Id: myldrOpen.cpp,v 1.10.4.12 2000-09-02 20:49:19 bird Exp $
  *
  * myldrOpen - ldrOpen.
  *
@@ -25,6 +25,7 @@
 *******************************************************************************/
 #include <os2.h>
 
+#include "devSegDf.h"                   /* Win32k segment definitions. */
 #include "rmalloc.h"
 #include "malloc.h"
 #include <memory.h>

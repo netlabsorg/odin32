@@ -1,4 +1,4 @@
-/* $Id: vprntf16.h,v 1.1 2000-02-25 18:15:06 bird Exp $
+/* $Id: vprntf16.h,v 1.1.4.1 2000-09-02 20:49:16 bird Exp $
  *
  * printf/vprintf header file - 16bit.
  *
@@ -29,8 +29,10 @@ typedef char _far *va_list;
 /*
  * Function prototypes
  */
-int printf16(const char *pszFormat, ...);
-int vprintf16(const char *pszFormat, va_list args);
+int FAR printf16(const char *pszFormat, ...);
+int FAR vprintf16(const char *pszFormat, va_list args);
+
+/*#pragma alloc_text(CODE16, printf16, vprintf16)*/
 
 
 #ifdef __cplusplus

@@ -1,4 +1,4 @@
-/* $Id: configure.cmd,v 1.10.4.1 2000-09-01 15:40:14 bird Exp $
+/* $Id: configure.cmd,v 1.10.4.2 2000-09-02 20:49:06 bird Exp $
  *
  * Configuration script.
  * Generates makefile.inc and an empty .depend file.
@@ -107,17 +107,17 @@
         /*
          * Create output directories.
          */
-        'mkdir bin > nul 2> nul'
-        'mkdir bin\release > nul 2> nul'
-        'mkdir bin\debug > nul 2> nul'
+        'mkdir Bin > nul 2> nul'
+        'mkdir Bin\Release > nul 2> nul'
+        'mkdir Bin\Debug > nul 2> nul'
 
-        'mkdir list > nul 2> nul'
-        'mkdir list\release > nul 2> nul'
-        'mkdir list\debug > nul 2> nul'
+        'mkdir List > nul 2> nul'
+        'mkdir List\Release > nul 2> nul'
+        'mkdir List\Debug > nul 2> nul'
 
-        'mkdir object > nul 2> nul'
-        'mkdir object\debug > nul 2> nul'
-        'mkdir object\release > nul 2> nul'
+        'mkdir Object > nul 2> nul'
+        'mkdir Object\Debug > nul 2> nul'
+        'mkdir Object\Release > nul 2> nul'
 
         /*
          * Display output.

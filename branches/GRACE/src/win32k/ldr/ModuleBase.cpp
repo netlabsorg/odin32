@@ -1,4 +1,4 @@
-/* $Id: ModuleBase.cpp,v 1.3.4.2 2000-08-25 04:47:23 bird Exp $
+/* $Id: ModuleBase.cpp,v 1.3.4.3 2000-09-02 20:49:17 bird Exp $
  *
  * ModuleBase - Implementetation.
  *
@@ -24,7 +24,8 @@
 *******************************************************************************/
 #include <os2.h>                        /* OS/2 header file. */
 
-#include "malloc.h"                     /* win32k malloc. Not C library! */
+#include "devSegDf.h"                   /* Win32k segment definitions. */
+#include "malloc.h"                     /* Win32k malloc. Not C library! */
 
 #include <string.h>                     /* C library string.h. */
 #include <stdarg.h>                     /* C library stdarg.h. */

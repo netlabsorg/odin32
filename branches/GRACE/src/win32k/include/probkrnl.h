@@ -1,4 +1,4 @@
-/* $Id: probkrnl.h,v 1.13.4.9 2000-08-30 04:11:30 bird Exp $
+/* $Id: probkrnl.h,v 1.13.4.10 2000-09-02 20:49:15 bird Exp $
  *
  * Include file for ProbKrnl.
  *
@@ -96,12 +96,23 @@ typedef struct
 *   Global Variables                                                           *
 *   NOTE! These are only available at init time!                               *
 *******************************************************************************/
-extern IMPORTKRNLSYM _aImportTab[NBR_OF_KRNLIMPORTS]; /* 'aImportTab' in PrbKrnl.c */
-extern KRNLDBENTRY   aKrnlSymDB[];      /* defined in symdb.c (for 16-bit usage) */
-extern KRNLDBENTRY   _aKrnlSymDB[];     /* defined in symdb.c (for 32-bit usage) */
+extern IMPORTKRNLSYM DATA16_GLOBAL  aImportTab[NBR_OF_KRNLIMPORTS]; /* Defined in ProbKrnl.c */
+extern char          DATA16_GLOBAL  szUsrSym[50];                   /* Defined in ProbKrnl.c */
+extern KRNLDBENTRY   DATA16_INIT    aKrnlSymDB[];                   /* Defined in symdb.c (for 16-bit usage) */
+
+#if defined(__IBMC__) || defined(__IBMCPP__)
+    #pragma map( aImportTab , "_aImportTab" )
+    #pragma map( szUsrSym   , "_szUsrSym"   )
+    #pragma map( aKrnlSymDB , "_aKrnlSymDB" )
+#endif
 
 #if defined(INCL_16) && defined(MAX_DISKDD_CMD) /* 16-bit only */
 int ProbeKernel(PRPINITIN pReqPack);
+
+#if 0 /*ndef CODE16_INIT*/
+#pragma alloc_text(CODE16_INIT, ProbeKernel)
+#endif
+
 #endif
 
 #endif
