@@ -1,4 +1,4 @@
-/* $Id: directory.cpp,v 1.23 2000-06-01 11:28:44 sandervl Exp $ */
+/* $Id: directory.cpp,v 1.24 2000-06-12 13:03:00 phaller Exp $ */
 
 /*
  * Win32 Directory functions for OS/2
@@ -13,7 +13,8 @@
  *
  * Copyright 1995 Alexandre Julliard
  *
- * TODO: System/window directories should be created by install program!
+ * TODO: 
+ *  - System/window directories should be created by install program!
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *
@@ -148,25 +149,33 @@ ODINFUNCTION2(UINT, GetCurrentDirectoryW, UINT,   nBufferLength,
  *****************************************************************************/
 
 
-ODINFUNCTION1(BOOL,SetCurrentDirectoryA,LPCSTR,lpPathName)
+ODINFUNCTION1(BOOL,   SetCurrentDirectoryA,
+              LPCSTR, lpstrDirectory)
 {
-  if(HIWORD(lpPathName) == 0) {
-	SetLastError(ERROR_INVALID_PARAMETER);
-	return FALSE;
+  char szBuffer[260]; // MAXPATHLEN
+  
+  if(HIWORD(lpstrDirectory) == 0)
+  {
+    SetLastError(ERROR_INVALID_PARAMETER);
+    return FALSE;
   }
-  int len = strlen(lpPathName);
-  char *tmp=(char *)alloca(len + 1);
-
-  strcpy(tmp, lpPathName);
-  if(tmp[len - 1] == '/') {
-	tmp[len-1] = '\\';
+  
+  // cut off trailing backslashes
+  // not if a process wants to change to the root directory
+  int len = lstrlenA(lpstrDirectory);
+  if ( ( (lpstrDirectory[len - 1] == '\\') ||
+         (lpstrDirectory[len - 1] == '/') ) &&
+       (len != 1) )
+  {
+    lstrcpynA(szBuffer,
+              lpstrDirectory,
+              len - 1);
+    szBuffer[len - 1] = 0;
+    lpstrDirectory = szBuffer;
   }
-  //SvL: Don't remove trailing backslash if it wants to chdir to root dir
-  if((tmp[len - 1] == '\\')  && len != 1)
-    tmp[len -1] = 0;
 
-  dprintf(("SetCurrentDirectoryA %s", tmp));
-  return O32_SetCurrentDirectory((LPSTR)tmp);
+  dprintf(("SetCurrentDirectoryA %s", lpstrDirectory));
+  return O32_SetCurrentDirectory((LPSTR)lpstrDirectory);
 }
 
 
@@ -206,16 +215,28 @@ ODINFUNCTION1(BOOL,SetCurrentDirectoryW,LPCWSTR,lpPathName)
  * Author    : Patrick Haller [Wed, 1999/09/28 20:44]
  *****************************************************************************/
 
-ODINFUNCTION2(BOOL,CreateDirectoryA,LPCSTR, arg1,PSECURITY_ATTRIBUTES,arg2)
+ODINFUNCTION2(BOOL,                CreateDirectoryA,
+              LPCSTR,              lpstrDirectory,
+              PSECURITY_ATTRIBUTES,arg2)
 {
-  int len = strlen(arg1);
-  char *tmp=(char *)alloca(len + 1);
-
-  strcpy(tmp, arg1);
-  if(tmp[len -1] == '\\')
-    tmp[len -1] = 0;
-  dprintf(("CreateDirectoryA %s", tmp));
-  return O32_CreateDirectory(tmp, arg2);
+  char szBuffer[260]; // MAXPATHLEN
+  int len = strlen(lpstrDirectory);
+  
+  // cut off trailing backslashes
+  if (lpstrDirectory[len - 1] == '\\')
+  {
+    lstrcpynA(szBuffer,
+              lpstrDirectory,
+              len - 1);
+    szBuffer[len - 1] = 0;
+    lpstrDirectory = szBuffer;
+  }
+  
+  dprintf(("CreateDirectoryA %s", 
+            lpstrDirectory));
+  
+  return(O32_CreateDirectory(szBuffer,
+                             arg2));
 }
 
 /*****************************************************************************
@@ -288,16 +309,18 @@ ODINFUNCTION2(UINT,GetSystemDirectoryW,LPWSTR,lpBuffer,
   UINT  rc;
 
   if(lpBuffer)
-  	asciibuffer = (char *)alloca(uSize+1);
+    asciibuffer = (char *)alloca(uSize+1);
 
-  if(lpBuffer && asciibuffer == NULL) {
-	DebugInt3();
+  if(lpBuffer && asciibuffer == NULL) 
+  {
+    DebugInt3();
   }
 
   rc = GetSystemDirectoryA(asciibuffer, uSize);
   if(rc && asciibuffer)
-    	AsciiToUnicode(asciibuffer, lpBuffer);
-
+    AsciiToUnicode(asciibuffer, lpBuffer);
+  
+  free(asciibuffer);
   return(rc);
 }
 
@@ -347,16 +370,18 @@ ODINFUNCTION2(UINT,GetWindowsDirectoryW,LPWSTR,lpBuffer,
   UINT  rc;
 
   if(lpBuffer)
-  	asciibuffer = (char *)alloca(uSize+1);
+    asciibuffer = (char *)alloca(uSize+1);
 
-  if(lpBuffer && asciibuffer == NULL) {
-	DebugInt3();
+  if(lpBuffer && asciibuffer == NULL) 
+  {
+    DebugInt3();
   }
 
   rc = GetWindowsDirectoryA(asciibuffer, uSize);
   if(rc && asciibuffer)
-    	AsciiToUnicode(asciibuffer, lpBuffer);
-
+    AsciiToUnicode(asciibuffer, lpBuffer);
+  
+  free(asciibuffer);
   return(rc);
 }
 
@@ -374,18 +399,26 @@ ODINFUNCTION2(UINT,GetWindowsDirectoryW,LPWSTR,lpBuffer,
  *****************************************************************************/
 
 
-ODINFUNCTION1(BOOL,RemoveDirectoryA,LPCSTR,arg1)
+ODINFUNCTION1(BOOL,   RemoveDirectoryA,
+              LPCSTR, lpstrDirectory)
 {
-  int len = strlen(arg1);
-  char *tmp=(char *)alloca(len + 1);
+  char szBuffer[260]; // MAXPATHLEN
+  int len = strlen(lpstrDirectory);
+  
+  // cut off trailing backslashes
+  if (lpstrDirectory[len - 1] == '\\')
+  {
+    lstrcpynA(szBuffer,
+              lpstrDirectory,
+              len - 1);
+    szBuffer[len - 1] = 0;
+    lpstrDirectory = szBuffer;
+  }
+  
+  dprintf(("RemoveDirectory %s", 
+          lpstrDirectory));
 
-  strcpy(tmp, arg1);
-  if(tmp[len -1] == '\\')
-    tmp[len -1] = 0;
-
-  dprintf(("RemoveDirectory %s", arg1));
-
-  return O32_RemoveDirectory(tmp);
+  return O32_RemoveDirectory(lpstrDirectory);
 }
 
 
