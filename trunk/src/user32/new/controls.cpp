@@ -1,3 +1,4 @@
+/* $Id: controls.cpp,v 1.6 1999-07-23 16:46:29 cbratschi Exp $ */
 /* File: controls.cpp -- Win32 common controls
  *
  * Copyright (c) 1999 Christoph Bratschi

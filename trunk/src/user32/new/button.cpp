@@ -1,3 +1,4 @@
+/* $Id: button.cpp,v 1.7 1999-07-23 16:46:29 cbratschi Exp $ */
 /* File: button.c -- Button type widgets
  *
  * Copyright (c) 1999 Christoph Bratschi (ported from WINE)
