@@ -1,4 +1,4 @@
-# $Id: process.mak,v 1.27 2002-09-01 15:35:10 bird Exp $
+# $Id: process.mak,v 1.28 2002-09-12 02:55:54 bird Exp $
 
 #
 # Unix-like tools for OS/2
@@ -248,7 +248,11 @@ TARGET_ILIB = $(PATH_LIB)\$(TARGET_NAME).$(EXT_ILIB)
 
 # Default public base directory. (publish)
 !ifndef TARGET_PUB_BASE
+! if "$(TARGET_MODE)" == "LIB" || "$(TARGET_MODE)" == "SYSLIB" || "$(TARGET_MODE)" == "IFSLIB"
+TARGET_PUB_BASE = $(PATH_LIB)
+! else
 TARGET_PUB_BASE = $(PATH_PUB)
+!endif
 !endif
 
 # Default public base directory for unstripped release version.
@@ -272,7 +276,7 @@ TARGET_PUB_SUB  = $(PATH_SUB_BIN)
 TARGET_PUB_SUB  = $(PATH_SUB_DLL)
 !  endif
 !  if "$(TARGET_MODE)" == "LIB" || "$(TARGET_MODE)" == "SYSLIB" || "$(TARGET_MODE)" == "IFSLIB"
-TARGET_PUB_SUB  = $(PATH_SUB_LIB)
+TARGET_PUB_SUB  = .
 !  endif
 !  if "$(TARGET_MODE)" == "SYS" || "$(TARGET_MODE)" == "IFS"
 TARGET_PUB_SUB  = $(PATH_SUB_SYS)
