@@ -1,4 +1,4 @@
-/* $Id: dc.cpp,v 1.81 2000-12-29 18:39:58 sandervl Exp $ */
+/* $Id: dc.cpp,v 1.82 2001-01-20 16:57:00 sandervl Exp $ */
 
 /*
  * DC functions for USER32
@@ -33,6 +33,7 @@
 #include "oslibwin.h"
 #include "oslibmsg.h"
 #include <dcdata.h>
+#include <codepage.h>
 
 #define INCLUDED_BY_DC
 #include "dc.h"
@@ -946,6 +947,8 @@ HDC WIN32API GetDCEx (HWND hwnd, HRGN hrgn, ULONG flags)
                          WinOpenWindowDC (hWindow),
                          &sizel, PU_PELS | GPIT_MICRO | GPIA_ASSOC );
       psType = MICRO;
+      // default cp is OS/2 one: set to windows default (ODIN.INI)
+      GpiSetCp(hps, GetDisplayCodepage());
    }
    else
    {
@@ -981,6 +984,9 @@ HDC WIN32API GetDCEx (HWND hwnd, HRGN hrgn, ULONG flags)
 		hps = WinGetClipPS(hWindow, clipwnd, clipstyle);
 	}
 	else	hps = WinGetPS (hWindow);
+
+        // default cp is OS/2 one: set to windows default (ODIN.INI)
+        GpiSetCp(hps, GetDisplayCodepage());
       }
       psType = MICRO_CACHED;
    }
