@@ -1,8 +1,12 @@
- /* $Id: ChangeLog,v 1.72 1999-08-05 17:18:08 phaller Exp $ */
+ /* $Id: ChangeLog,v 1.73 1999-08-05 19:51:50 phaller Exp $ */
 
  99-08-05: Patrick Haller <phaller@gmx.net>
 	- KERNEL32:  interactive control over UnhandledExceptionFilter
+        - KERNEL32:  FormatMessageAW fixed. Do not mix ODIN's heap functions with VAC heap functions
+	- KERNEL32:  added WINE-style string functions in Heapstring.cpp
 	- SHELL3232: RestartDialog @59 stub added. IE2 can load now with NT4's URL.DLL.
+
+
 
  99-08-05: Sander van Leeuwen <sandervl@xs4all.nl>
 	- KERNEL32: Bitmap conversion bugfix; always recalculate bitmap size
