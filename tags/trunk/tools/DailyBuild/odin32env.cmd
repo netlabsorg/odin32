@@ -1,4 +1,4 @@
-/* $Id: odin32env.cmd,v 1.19 2001-06-02 19:15:23 bird Exp $
+/* $Id: odin32env.cmd,v 1.20 2001-06-27 08:56:28 bird Exp $
  *
  * Sets the build environment.
  *
@@ -497,7 +497,7 @@ Watcom: procedure
     /*
      * Watcom C/C++ 11.0 Main directory.
      */
-    sWatcom = 'e:\apps\Watcom';
+    sWatcom = 'd:\knut\apps\Watcom';
 
     call EnvVar_Set      fRM, 'CCENV',      'WAT'
     call EnvVar_Set      fRM, 'watcom', sWatcom;
