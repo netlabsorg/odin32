@@ -1,4 +1,11 @@
- /* $Id: changelog,v 1.497 1999-12-02 15:23:34 achimha Exp $ */
+ /* $Id: changelog,v 1.498 1999-12-02 17:51:58 hugh Exp $ */
+
+ 99-12-02  Markus Montkowski <mmontkowski@gmx.de>
+       - GDI32:  Implemented:
+                 CombineTransform, CreateDIBPatternBrush, CreateDCW, 
+                 CreateEnhMetaFileW, CreateICW
+                 Fixed memory leak in GetTextFaceW (didn't free ASCII buffer)
+                 Enhanced StretchBlt to support DIBSections
 
  99-12-02: Achim Hasenmueller <achimha@innotek.de>
        - WSOCK32\NEW: Not really working :(
