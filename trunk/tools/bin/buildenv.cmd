@@ -1,4 +1,4 @@
-/* $Id: buildenv.cmd,v 1.51 2003-09-14 18:50:59 bird Exp $
+/* $Id: buildenv.cmd,v 1.52 2004-03-09 15:24:00 bird Exp $
  *
  * This is the master tools environment script. It contains environment
  * configurations for many development tools. Each tool can be installed
@@ -26,7 +26,7 @@
     /*
      * Version
      */
-    sVersion = '1.1.0 [2003-09-14]';
+    sVersion = '1.1.1 [2004-03-08]';
 
     /*
      * Create argument array with lowercase arguments.
@@ -2138,9 +2138,9 @@ GCC322plus: procedure expose aCfg. aPath.
 
     sGCCBack    = translate(sGCC, '\', '/');
     sGCCForw    = translate(sGCC, '/', '\');
-    call EnvSet      fRM, 'PATH_EMXPGCC',   sGCCBack;
-    call EnvSet      fRM, 'CCENV',          'EMX'
-    call EnvSet      fRM, 'BUILD_ENV',      'EMX'
+    call EnvSet      fRM, 'PATH_IGCC',       sGCCBack;
+    call EnvSet      fRM, 'CCENV',          'IGCC'
+    call EnvSet      fRM, 'BUILD_ENV',      'IGCC'
     call EnvSet      fRM, 'BUILD_PLATFORM', 'OS2'
 
     call EnvAddFront fRM, 'BEGINLIBPATH',       sGCCBack'\'sTrgt'\lib;'sGCCBack'\lib;'
@@ -2173,11 +2173,12 @@ GCC322plus: procedure expose aCfg. aPath.
         |   \CfgVerifyFile(sGCCBack'\bin\as.exe', fQuiet),
         |   \CfgVerifyFile(sGCCBack'\bin\readelf.exe', fQuiet),
         |   \CfgVerifyFile(sGCCBack'\bin\emxomf.exe', fQuiet),
-        |   \CfgVerifyFile(sGCCBack'\lib\opcode2B.dll', fQuiet),
+        |   \CfgVerifyFile(sGCCBack'\bin\ilink.exe', fQuiet),
+        |   \CfgVerifyFile(sGCCBack'\lib\bfd2E.dll', fQuiet),
         |   \CfgVerifyFile(sGCCBack'\lib\gcc'sVerShrt'.dll', fQuiet),
         |   \CfgVerifyFile(sGCCBack'\lib\libiberty.a', fQuiet),
         |   \CfgVerifyFile(sGCCBack'\lib\libiberty.lib', fQuiet),
-        |   \CfgVerifyFile(sGCCBack'\lib\opcode2B.dll', fQuiet),
+        |   \CfgVerifyFile(sGCCBack'\lib\opcode2E.dll', fQuiet),
         |   \CfgVerifyFile(sGCCBack'\lib\libopcodes.a', fQuiet),
         |   \CfgVerifyFile(sGCCBack'\lib\libopcodes.lib', fQuiet),
         |   \CfgVerifyFile(sGCCBack'\include\unikbd.h', fQuiet),
@@ -2199,9 +2200,12 @@ GCC322plus: procedure expose aCfg. aPath.
         rc = CheckCmdOutput('g++ --version', 0, fQuiet, sVer);
     if (rc = 0) then
     do
-        sVerAS = '2.11.2';
+        sVerAS = '2.14';
         rc = CheckCmdOutput('as --version', 0, fQuiet, 'GNU assembler 'sVerAS);
     end
+    if (rc = 0) then
+        rc = CheckCmdOutput('ilink /?', 0, fQuiet, 'IBM(R) Linker for OS/2(R), Version 5.0');
+
 return rc;
 
 
