@@ -1,4 +1,4 @@
-/* $Id: heapstring.cpp,v 1.30 2000-07-10 18:38:51 sandervl Exp $ */
+/* $Id: heapstring.cpp,v 1.31 2000-08-10 02:19:57 phaller Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -523,9 +523,16 @@ int WIN32API lstrcpynCtoA(LPSTR  astring,
                          &in_buf, &uni_chars_left,
                          (void**)&out_buf, &out_bytes_left,
                          &num_subs);
-
+    
+    /* @@@PH 2000/08/10
+     * this causes the last character in the converted
+     * target string to be chopped off. I.e. causes CMD.EXE
+     * to loose the CRLF functionality.
+     */
+     /*
     unilen -= 1+out_bytes_left; //end + left bytes
     astring[unilen] = 0; //terminate
+    */
 
     return unilen; //length of string (excluding terminator)
   }
@@ -620,10 +627,18 @@ int lstrcpynAtoC(LPWSTR unicode,
                         (void**)&in_buf, &in_bytes_left,
                         &out_buf,        &uni_chars_left,
                         &num_subs );
-
+    
+    /* @@@PH 2000/08/10
+     * this causes the last character in the converted
+     * target string to be chopped off. I.e. causes CMD.EXE
+     * to enter command correctly.
+     */
+    /*
     asciilen -= 1+uni_chars_left; //end + left bytes
 
     unicode[asciilen] = 0; // always terminate string
+    */
+      
     return asciilen; //length of string (excluding terminator)
   }
   else

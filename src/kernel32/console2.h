@@ -1,4 +1,4 @@
-/* $Id: console2.h,v 1.8 2000-07-06 21:18:41 sandervl Exp $ */
+/* $Id: console2.h,v 1.9 2000-08-10 02:19:56 phaller Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -619,7 +619,7 @@ BOOL   WIN32API SetConsoleTextAttribute       (HANDLE        hConsoleOutput,
 
 BOOL   WIN32API SetConsoleTitleA              (LPTSTR        lpszTitle);
 
-BOOL   WIN32API SetConsoleTitleW              (LPTSTR        lpszTitle);
+BOOL   WIN32API SetConsoleTitleW              (LPWSTR        lpszTitle);
 
 BOOL   WIN32API SetConsoleWindowInfo          (HANDLE        hConsoleOutput,
                                                   BOOL          fAbsolute,
