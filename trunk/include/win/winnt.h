@@ -1083,7 +1083,8 @@ static inline struct _TEB * WINE_UNUSED __get_teb(void)
 #define NtCurrentTeb() __get_teb()
 
 #else /* __WINE__ */
-extern struct _TEB * WINAPI NtCurrentTeb(void);
+#define NtCurrentTeb GetThreadTEB
+struct _TEB  *WINAPI GetThreadTEB();
 #endif
 #endif //__WIN32OS2__
 
