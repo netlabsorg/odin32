@@ -1,4 +1,4 @@
-/* $Id: window.cpp,v 1.17 1999-08-28 14:09:30 sandervl Exp $ */
+/* $Id: window.cpp,v 1.18 1999-08-29 20:05:08 sandervl Exp $ */
 /*
  * Win32 window apis for OS/2
  *
@@ -81,44 +81,6 @@ HWND WIN32API CreateWindowExA(DWORD exStyle, LPCSTR className,
 }
 //******************************************************************************
 //******************************************************************************
-HWND WIN32API CreateMDIWindowA(LPCSTR arg1, LPCSTR arg2, DWORD arg3,
-                               int arg4, int arg5, int arg6, int arg7,
-                               HWND arg8, HINSTANCE arg9, LPARAM  arg10)
-{
- HWND hwnd;
-
-    dprintf(("USER32:  CreateMDIWindowA\n"));
-
-    hwnd = O32_CreateMDIWindow((LPSTR)arg1, (LPSTR)arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10);
-
-    dprintf(("USER32:  CreateMDIWindowA returned %X\n", hwnd));
-    return hwnd;
-}
-//******************************************************************************
-//******************************************************************************
-HWND WIN32API CreateMDIWindowW(LPCWSTR arg1, LPCWSTR arg2, DWORD arg3, int arg4,
-                               int arg5, int arg6, int arg7, HWND arg8, HINSTANCE arg9,
-                               LPARAM arg10)
-{
- HWND hwnd;
- char *astring1 = NULL, *astring2 = NULL;
-
-    if((int)arg1 >> 16 != 0) {
-        astring1 = UnicodeToAsciiString((LPWSTR)arg1);
-    }
-    else    astring1 = (char *)arg2;
-
-    astring2 = UnicodeToAsciiString((LPWSTR)arg2);
-
-    hwnd = O32_CreateMDIWindow(astring1, astring2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10);
-
-    if(astring1)    FreeAsciiString(astring1);
-    FreeAsciiString(astring2);
-    dprintf(("USER32:  CreateMDIWindowW hwnd = %X\n", hwnd));
-    return(hwnd);
-}
-//******************************************************************************
-//******************************************************************************
 HWND WIN32API CreateWindowExW(DWORD exStyle, LPCWSTR className,
                               LPCWSTR windowName, DWORD style, INT x,
                               INT y, INT width, INT height,
@@ -170,6 +132,66 @@ HWND WIN32API CreateWindowExW(DWORD exStyle, LPCWSTR className,
         return 0;
     }
     return window->getWindowHandle();
+}
+//******************************************************************************
+//******************************************************************************
+HWND WIN32API CreateMDIWindowA(LPCSTR lpszClassName, LPCSTR lpszWindowName, 
+                               DWORD dwStyle, int x, int y, int nWidth, 
+                               int nHeight, HWND hwndParent,
+                               HINSTANCE hInstance, LPARAM lParam )
+{
+ HWND hwnd;
+ MDICREATESTRUCTA cs;
+ Win32Window *window;
+
+    window = Win32Window::GetWindowFromHandle(hwndParent);
+    if(!window) {
+        dprintf(("CreateMDIWindowA, window %x not found", hwndParent));
+        return 0;
+    }
+
+    dprintf(("USER32:  CreateMDIWindowA\n"));
+    cs.szClass        = lpszClassName;
+    cs.szTitle        = lpszWindowName;
+    cs.hOwner         = hInstance;
+    cs.x              = x;
+    cs.y              = y;
+    cs.cx             = nHeight;
+    cs.cy             = nWidth;
+    cs.style          = dwStyle;
+    cs.lParam         = lParam;
+
+    return window->SendMessageA(WM_MDICREATE, 0, (LPARAM)&cs);
+}
+//******************************************************************************
+//******************************************************************************
+HWND WIN32API CreateMDIWindowW(LPCWSTR lpszClassName, LPCWSTR lpszWindowName, 
+                               DWORD dwStyle, int x, int y, int nWidth, 
+                               int nHeight, HWND hwndParent,
+                               HINSTANCE hInstance, LPARAM lParam )
+{
+ HWND hwnd;
+ MDICREATESTRUCTW cs;
+ Win32Window *window;
+
+    window = Win32Window::GetWindowFromHandle(hwndParent);
+    if(!window) {
+        dprintf(("CreateMDIWindowW, window %x not found", hwndParent));
+        return 0;
+    }
+
+    dprintf(("USER32:  CreateMDIWindowW\n"));
+    cs.szClass        = lpszClassName;
+    cs.szTitle        = lpszWindowName;
+    cs.hOwner         = hInstance;
+    cs.x              = x;
+    cs.y              = y;
+    cs.cx             = nHeight;
+    cs.cy             = nWidth;
+    cs.style          = dwStyle;
+    cs.lParam         = lParam;
+
+    return window->SendMessageW(WM_MDICREATE, 0, (LPARAM)&cs);
 }
 //******************************************************************************
 //******************************************************************************
