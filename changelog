@@ -1,4 +1,4 @@
- /* $Id: changelog,v 1.1059 2000-08-11 10:54:35 sandervl Exp $ */
+ /* $Id: changelog,v 1.1060 2000-08-11 18:43:29 sandervl Exp $ */
 
  2000-08-11: Sander van Leeuwen <sandervl@xs4all.nl>
     - KERNEL32: Lock/Unlock
@@ -7,6 +7,12 @@
                 (TODO: should check the partition type instead)
                 Build fake dll header for system dlls and use it's address
                 as instance handle.
+                VIRTUAL_MapFileA/W: open file in share read/write mode
+                Fixed  HMDuplicateHandle (check for DUPLICATE_ACCESS_READWRITE)
+                LoadLibraryExA: if dll name = executable name of current process
+                -> return handle of exe
+                (GrandPrix 3 installer does this; verified in NT)
+                FreeLibrary: if handle = exe handle of current process -> ignore
     - SRC\*\initterm.cpp
                 Changed RegisterLxDll call for fake headers.
     - INCLUDE\misc.h:
