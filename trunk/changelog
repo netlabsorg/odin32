@@ -1,4 +1,7 @@
- /* $Id: changelog,v 1.208 1999-09-17 18:49:52 dengert Exp $ */
+ /* $Id: changelog,v 1.209 1999-09-18 10:35:01 sandervl Exp $ */
+
+ 99-09-18: Jens Wiessner <wiessnej@rfi.de>
+	- CRTDLL: Added stubs
 
  99-09-17: Daniela Engert <dani@ngrt.de>
 	- USER32:   Fix: window focus management.
