@@ -1,4 +1,7 @@
-/* $Id: ChangeLog,v 1.2612 2003-07-31 16:07:28 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.2613 2003-08-01 10:07:19 sandervl Exp $ */
+
+ 2003-08-01: Sander van Leeuwen <sandervl@innotek   >
+    - USER32:   o Fixed SPI_GETWHEELSCROLLLINES
 
  2003-07-31: KO Myung-Hun <komh@chollian    >
     - USER32:   o fixed GetMenuStringA() to truncate DBCS string correctly.
