@@ -2656,8 +2656,17 @@ static BOOL LISTVIEW_SetItem(HWND hwnd, LPLVITEMA lpLVItem)
                  * this function is being called as a result of a
                  * SetItemFocus call.
                  */
+#ifdef __WIN32OS2__
+                //SvL: Allow focus change the first time (nFocusedItem set to -2
+                //     in WM_CREATE
+                if (infoPtr->nFocusedItem >= 0 || infoPtr->nFocusedItem == -2) {
+                   if(infoPtr->nFocusedItem == -2) infoPtr->nFocusedItem = -1;
+                   LISTVIEW_SetItemFocus(hwnd, lpLVItem->iItem);
+                }
+#else
                 if (infoPtr->nFocusedItem >= 0)
                   LISTVIEW_SetItemFocus(hwnd, lpLVItem->iItem);
+#endif
               }
             }
 
@@ -7876,7 +7885,11 @@ static LRESULT LISTVIEW_Create(HWND hwnd, WPARAM wParam, LPARAM lParam)
 
   /* set default values */
   infoPtr->uCallbackMask = 0;
+#ifdef __WIN32OS2__
+  infoPtr->nFocusedItem = -2;
+#else
   infoPtr->nFocusedItem = -1;
+#endif
   infoPtr->nSelectionMark = -1;
   infoPtr->nHotItem = -1;
   infoPtr->iconSpacing.cx = GetSystemMetrics(SM_CXICONSPACING);
@@ -8300,7 +8313,14 @@ static LRESULT LISTVIEW_KeyDown(HWND hwnd, INT nVirtualKey, LONG lKeyData)
   nmKeyDown.hdr.code = LVN_KEYDOWN;
   nmKeyDown.wVKey = nVirtualKey;
   nmKeyDown.flags = 0;
+#ifdef __WIN32OS2__
+  if(SendMessageA(hwndParent, WM_NOTIFY, (WPARAM)nCtrlId, (LPARAM)&nmKeyDown) == TRUE) 
+  {//application processed this key press
+      return 0;
+  }
+#else
   SendMessageA(hwndParent, WM_NOTIFY, (WPARAM)nCtrlId, (LPARAM)&nmKeyDown);
+#endif
 
   /* initialize */
   nmh.hwndFrom = hwnd;
@@ -8607,6 +8627,11 @@ static LRESULT LISTVIEW_LButtonDown(HWND hwnd, WORD wKey, WORD wPosX,
     /* remove all selections */
     LISTVIEW_RemoveAllSelections(hwnd);
   }
+
+#ifdef __WIN32OS2__
+  //SvL: Send WM_COMMAND as well. (also done by NT's comctl32)
+  SendMessageA(GetParent(hwnd), WM_COMMAND, (1<<16) | nCtrlId, hwnd);
+#endif
 
   /* redraw if we could have possibly selected something */
   if(!GETITEMCOUNT(infoPtr)) InvalidateRect(hwnd, NULL, TRUE);
