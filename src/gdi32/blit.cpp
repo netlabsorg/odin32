@@ -1,4 +1,4 @@
-/* $Id: blit.cpp,v 1.22 2001-01-18 18:13:17 sandervl Exp $ */
+/* $Id: blit.cpp,v 1.23 2001-01-18 21:09:34 sandervl Exp $ */
 
 /*
  * GDI32 blit code
@@ -171,8 +171,12 @@ INT WIN32API SetDIBitsToDevice(HDC hdc, INT xDest, INT yDest, DWORD cx,
         }
     }
 
+    if(startscan != 0 || lines != info->bmiHeader.biHeight) {
+	dprintf(("WARNING: SetDIBitsToDevice startscan != 0 || lines != info->bmiHeader.biHeight"));
+    }
+
     result = O32_StretchDIBits(hdc, xDest, yDest, cx, cy, xSrc, ySrc,
-                             info->bmiHeader.biWidth, info->bmiHeader.biHeight, (void *)bits,
+                             cx, cy, (void *)bits,
                              (PBITMAPINFO)info, coloruse, SRCCOPY);
 
     //Open32 always returns height of bitmap (regardless of how many scanlines were copied)
