@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.18 2001-11-09 07:37:33 bird Exp $
+# $Id: Makefile,v 1.19 2001-11-15 04:18:49 bird Exp $
 
 #
 # kKrnlLib.sys makefile.
@@ -64,6 +64,8 @@ OBJS  =\
     $(WIN32KOBJ)\kAVLULM.obj \
     $(WIN32KOBJ)\kLog.obj \
     $(WIN32KOBJ)\kLoga.obj \
+    $(WIN32KOBJ)\kLogAVLUL.obj \
+    $(WIN32KOBJ)\kLogAVLStr.obj \
     $(WIN32KOBJ)\malloc.obj \
     $(WIN32KOBJ)\smalloc.obj \
     $(WIN32KOBJ)\rmalloc.obj \
@@ -189,6 +191,8 @@ TSTOBJS =\
     $(WIN32KOBJ)\kAVLULM.obj \
     $(WIN32KOBJ)\kLog.obj \
     $(WIN32KOBJ)\kLoga.obj \
+    $(WIN32KOBJ)\kLogAVLUL.obj \
+    $(WIN32KOBJ)\kLogAVLStr.obj \
     $(WIN32KOBJ)\malloc.obj_tst. \
     $(WIN32KOBJ)\smalloc.obj \
     $(WIN32KOBJ)\rmalloc.obj \
