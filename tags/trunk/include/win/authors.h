@@ -1,3 +1,4 @@
+/* $Id: authors.h,v 1.4 1999-11-28 12:34:29 sandervl Exp $ */
 #ifndef __WINE_AUTHORS_H
 #define __WINE_AUTHORS_H
 
