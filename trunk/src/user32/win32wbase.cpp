@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.221 2000-11-05 18:49:07 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.222 2000-11-17 09:56:54 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -2360,6 +2360,7 @@ BOOL Win32BaseWindow::SetWindowPos(HWND hwndInsertAfter, int x, int y, int cx, i
 
     if((fuFlags & SWP_FRAMECHANGED) && (fuFlags & (SWP_NOMOVE | SWP_NOSIZE) == (SWP_NOMOVE | SWP_NOSIZE)))
     {
+        MsgFormatFrame(NULL);
         UnionRect(&oldClientRect, &oldClientRect, &rectClient);
         OffsetRect(&oldClientRect, -rectClient.left, -rectClient.top);
         InvalidateRect(getWindowHandle(), &oldClientRect, TRUE);
