@@ -1,4 +1,4 @@
-/* $Id: winexedummy.cpp,v 1.3 2002-07-18 12:01:33 achimha Exp $ */
+/* $Id: winexedummy.cpp,v 1.4 2003-04-02 11:03:32 sandervl Exp $ */
 
 /*
  * Win32 Dummy Exe class
@@ -137,7 +137,7 @@ LPVOID Win32DummyExe::buildHeader(DWORD MajorImageVersion, DWORD MinorImageVersi
     poh->MinorImageVersion           = MinorImageVersion;
     poh->MajorSubsystemVersion       = ODINNT_MAJOR_VERSION;
     poh->MinorSubsystemVersion       = ODINNT_MINOR_VERSION;
-    poh->Reserved1                   = 0;
+    poh->Win32VersionValue           = 0;
     poh->SizeOfImage                 = 0;
     poh->SizeOfHeaders               = 1024;
     poh->CheckSum                    = 0;

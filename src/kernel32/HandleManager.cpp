@@ -1,4 +1,4 @@
-/* $Id: HandleManager.cpp,v 1.96 2003-03-26 16:02:33 sandervl Exp $ */
+/* $Id: HandleManager.cpp,v 1.97 2003-04-02 11:03:30 sandervl Exp $ */
 
 /*
  * Win32 Unified Handle Manager for OS/2
@@ -980,7 +980,7 @@ BOOL HMDuplicateHandle(HANDLE  srcprocess,
  * Author    : Patrick Haller [Wed, 1998/02/11 20:44]
  *****************************************************************************/
 
-HFILE HMCreateFile(LPCSTR lpFileName,
+HANDLE HMCreateFile(LPCSTR lpFileName,
                    DWORD  dwDesiredAccess,
                    DWORD  dwShareMode,
                    LPSECURITY_ATTRIBUTES lpSecurityAttributes,
@@ -1903,7 +1903,7 @@ BOOL HMLockFileEx(HANDLE        hFile,
  * Author    : Patrick Haller [Wed, 1999/06/17 20:44]
  *****************************************************************************/
 
-BOOL HMUnlockFile (HFILE         hFile,
+BOOL HMUnlockFile (HANDLE        hFile,
                    DWORD         arg2,
                    DWORD         arg3,
                    DWORD         arg4,

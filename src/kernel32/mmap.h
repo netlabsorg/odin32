@@ -1,4 +1,4 @@
-/* $Id: mmap.h,v 1.27 2003-03-27 14:13:11 sandervl Exp $ */
+/* $Id: mmap.h,v 1.28 2003-04-02 11:03:32 sandervl Exp $ */
 
 /*
  * Memory mapped class
@@ -53,7 +53,7 @@ class Win32PeLdrImage;
 class Win32MemMap
 {
 public:
-   Win32MemMap(HFILE hfile, ULONG size, ULONG fdwProtect, LPSTR lpszName);
+   Win32MemMap(HANDLE hfile, ULONG size, ULONG fdwProtect, LPSTR lpszName);
    //Use by PE loader image class only:
    Win32MemMap(Win32PeLdrImage *pImage, ULONG lpImageMem, ULONG size);
 virtual ~Win32MemMap();
@@ -66,7 +66,7 @@ virtual BOOL   unmapViewOfFile(LPVOID addr);
         BOOL   updateViewPages(ULONG offset, ULONG size, PAGEVIEW flags);
         BOOL   allocateMap();
 
-   HFILE  getFileHandle()                { return hMemFile; };
+   HANDLE getFileHandle()                { return hMemFile; };
    LPSTR  getMemName()                   { return lpszMapName; };
    DWORD  getMapSize()                   { return mSize; };
    DWORD  getProtFlags()                 { return mProtFlags; };
@@ -121,8 +121,8 @@ static void deleteAll();
 #endif
 
 protected:
-   HFILE  hMemFile;
-   HFILE  hOrgMemFile;
+   HANDLE hMemFile;
+   HANDLE hOrgMemFile;
    ULONG  mSize;
    ULONG  mProtFlags;
    ULONG  mProcessId;
@@ -153,7 +153,7 @@ private:
 class Win32MemMapDup : public Win32MemMap
 {
 public:
-            Win32MemMapDup(Win32MemMap *parent, HFILE hFile, ULONG size, ULONG fdwProtect, LPSTR lpszName);
+            Win32MemMapDup(Win32MemMap *parent, HANDLE hFile, ULONG size, ULONG fdwProtect, LPSTR lpszName);
    virtual ~Win32MemMapDup();
 
 virtual BOOL   Init(DWORD aMSize=0);

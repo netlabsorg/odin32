@@ -1,4 +1,4 @@
-/* $Id: mmap.cpp,v 1.64 2003-03-27 14:13:10 sandervl Exp $ */
+/* $Id: mmap.cpp,v 1.65 2003-04-02 11:03:31 sandervl Exp $ */
 
 /*
  * Win32 Memory mapped file & view classes
@@ -72,7 +72,7 @@ void InitializeMemMaps()
 }
 //******************************************************************************
 //******************************************************************************
-Win32MemMap::Win32MemMap(HFILE hfile, ULONG size, ULONG fdwProtect, LPSTR lpszName)
+Win32MemMap::Win32MemMap(HANDLE hfile, ULONG size, ULONG fdwProtect, LPSTR lpszName)
                : nrMappings(0), pMapping(NULL), mMapAccess(0), referenced(0), 
                  image(0), pWriteBitmap(NULL)
 {
@@ -308,6 +308,11 @@ BOOL Win32MemMap::commitPage(ULONG ulFaultAddr, ULONG offset, BOOL fWriteAccess,
       return image->commitPage(pageAddr, fWriteAccess);
   }
 
+  if(fWriteAccess && (mProtFlags & PAGE_WRITECOPY)) 
+  {//this is a COW map, call commitGuardPage to handle write faults
+      return commitGuardPage(ulFaultAddr, offset, fWriteAccess);
+  }
+
   dprintf(("Win32MemMap::commitPage %x (faultaddr %x)", pageAddr, lpPageFaultAddr));
 
   //align at page boundary
@@ -406,6 +411,10 @@ BOOL Win32MemMap::commitPage(ULONG ulFaultAddr, ULONG offset, BOOL fWriteAccess,
 
                 dprintf(("Mark %d page(s) starting at %x as dirty", nrPages, pageAddr));
                 markDirtyPages(startPage, nrPages);
+
+                //Write access means that the next time the corresponding COW page 
+                //is touched, we need to reload it. So set the GUARD flags.
+                updateViewPages(offset, memInfo.RegionSize, PAGEVIEW_GUARD);
             }
         }
         else 
@@ -428,6 +437,10 @@ BOOL Win32MemMap::commitPage(ULONG ulFaultAddr, ULONG offset, BOOL fWriteAccess,
             }
             //Now change all the aliased pages according to their view protection flags
             updateViewPages(offset, memInfo.RegionSize, PAGEVIEW_VIEW);
+
+            //Write access means that the next time the corresponding COW page 
+            //is touched, we need to reload it. So set the GUARD flags.
+            updateViewPages(offset, memInfo.RegionSize, PAGEVIEW_GUARD);
         }
         faultsize -= memInfo.RegionSize;
         pageAddr  += memInfo.RegionSize;
@@ -442,7 +455,7 @@ fail:
 //******************************************************************************
 // Win32MemMap::commitGuardPage
 //
-// Handle a guard page exception
+// Handle a guard page exception for a copy-on-write view (one page only)
 //
 // Parameters:
 //
@@ -468,6 +481,52 @@ BOOL Win32MemMap::commitGuardPage(ULONG ulFaultAddr, ULONG ulOffset, BOOL fWrite
    //align at page boundary
    ulOffset &= ~0xFFF;
 
+   //commit a single page in the original mapping (pretend read access)
+   ret = commitPage(ulFaultAddr, ulOffset, FALSE, 1);
+   if(ret == FALSE) {
+       DebugInt3();
+       goto fail;
+   }
+   //clear PAGE_GUARD flag, since this page must now be made accessible
+   dwNewProt = mProtFlags & (PAGE_READONLY | PAGE_READWRITE | PAGE_WRITECOPY);
+   if(dwNewProt & PAGE_WRITECOPY) {
+       dwNewProt |= PAGE_GUARD;
+   }
+   dwNewProt &= ~PAGE_GUARD;
+   if(VirtualProtect((LPVOID)pageAddr, PAGE_SIZE, dwNewProt, &dwOldProt) == FALSE) {
+       dprintf(("Win32MemMap::commitGuardPage: VirtualProtect %x 0x1000 %x failed!!", pageAddr, dwNewProt));
+       goto fail;
+   }
+   //copy the data from the original mapping to the COW page
+   memcpy((LPVOID)pageAddr, (char *)pMapping+ulOffset, PAGE_SIZE);
+
+   if(fWriteAccess) 
+   {//copy on write; mark pages as private
+        DWORD startpage = (ulOffset) >> PAGE_SHIFT;
+
+        dprintf(("Win32MemMap::commitGuardPage: write access -> mark page as private"));
+
+        Win32MemMapView *view = Win32MemMapView::findView(ulFaultAddr);
+        if(view) 
+        {
+            view->markCOWPages(startpage, 1);
+        }
+        else DebugInt3(); //oh, oh
+   }
+   else 
+   {//read access; must set the map + all views to READONLY to track write access
+
+       dprintf(("Win32MemMap::commitGuardPage: read access -> set page as READONLY in map + all views"));
+
+       //first the memory map page
+       if(VirtualProtect((LPVOID)pageAddr, PAGE_SIZE, PAGE_READONLY, &dwOldProt) == FALSE) {
+           dprintf(("Win32MemMap::commitGuardPage: VirtualProtect %x 0x1000 %x failed!!", pageAddr, dwNewProt));
+           goto fail;
+       }
+       //now for any views that exist
+       updateViewPages(ulOffset, PAGE_SIZE, PAGEVIEW_READONLY);
+   }
+
    return TRUE;
 fail:
    return FALSE;
@@ -484,6 +543,7 @@ fail:
 //   PAGEVIEW flags             - page flags
 //       PAGEVIEW_READONLY      -> set page flags to readonly
 //       PAGEVIEW_VIEW          -> set page flags to view default
+//       PAGEVIEW_GUARD         -> set page flags of COW view to GUARD
 //
 // Returns:
 //   TRUE                       - success
@@ -534,7 +594,9 @@ BOOL Win32MemMap::invalidatePages(ULONG offset, ULONG size)
     if(ret == FALSE) {
         dprintf(("ERROR: Win32MemMap::invalidatePages: VirtualFree failed!!"));
     }
-    return TRUE;
+    //invalidate all shared COW pages too by setting the GUARD flag 
+    //(which forces a resync the next time the app touches them)
+    return updateViewPages(offset, size, PAGEVIEW_GUARD);
 }
 //******************************************************************************
 // Win32MemMap::allocateMap
