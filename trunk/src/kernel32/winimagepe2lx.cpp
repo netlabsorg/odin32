@@ -1,4 +1,4 @@
-/* $Id: winimagepe2lx.cpp,v 1.16 2000-10-02 04:00:35 bird Exp $ */
+/* $Id: winimagepe2lx.cpp,v 1.17 2000-10-02 13:35:23 bird Exp $ */
 
 /*
  * Win32 PE2LX Image base class
@@ -323,50 +323,63 @@ BOOL Win32Pe2LxImage::init()
         if (pTLSDir != NULL && iSection != -1)
         {
             PVOID pv;
-            ULONG ulBorlandRVAFix = 0UL;
 
             /*
-             * Borland seems to have problems getting things right...
-             *      Uses real pointers with baserelocations.
-             * Needs to subtract image loadaddress to make the TLSDir them RVAs.
+             * According to the docs StartAddressOfRawData and EndAddressOfRawData is
+             * real pointers with a baserelocs.
              *
-             * We'll check if the StartAddressOfRawData pointer is an RVA or an real address by
-             * check if it is within the TLS section or not.
-             * ASSUMES: StartAddressOfRawData is in the same section as the TLS Directory.
+             * The docs says nothing about the two AddressOf pointers. So, we'll assume that
+             * these also are real pointers. But, we'll try compensate if they should not have
+             * base realocations.
              */
-            if (paSections[iSection].ulRVA > pTLSDir->StartAddressOfRawData ||
-                paSections[iSection].ulRVA + paSections[iSection].cbVirtual <= pTLSDir->StartAddressOfRawData)
-                { /* StartAddressOfRawData was not an RVA within the same section as the TLS directory */
-                ulBorlandRVAFix = paSections[iSection].ulAddress - paSections[iSection].ulRVA;
-                }
-            pv = getPointerFromRVA(pTLSDir->StartAddressOfRawData - ulBorlandRVAFix);
-            if (pv == NULL || pTLSDir->StartAddressOfRawData == 0UL)
+            if (validateRealPointer((PVOID)pTLSDir->StartAddressOfRawData)
+                &&
+                validateRealPointer((PVOID)pTLSDir->EndAddressOfRawData)
+                )
             {
-                eprintf(("Win32Pe2LxImage::init: invalid RVA to TLS StartAddressOfRawData - %#8x.\n",
-                         pTLSDir->StartAddressOfRawData));
-                return FALSE;
-            }
-            setTLSAddress(pv);
-            setTLSInitSize(pTLSDir->EndAddressOfRawData - pTLSDir->StartAddressOfRawData);
-            setTLSTotalSize(pTLSDir->EndAddressOfRawData - pTLSDir->StartAddressOfRawData + pTLSDir->SizeOfZeroFill);
-            pv = getPointerFromRVA((ULONG)pTLSDir->AddressOfIndex - ulBorlandRVAFix);
-            if (pv == NULL)
-            {
-                eprintf(("Win32Pe2LxImage::init: invalid RVA to TLS AddressOffIndex - %#8x.\n",
-                         pTLSDir->AddressOfIndex));
-                return FALSE;
-            }
-            setTLSIndexAddr((LPDWORD)pv);
-            if (pTLSDir->AddressOfCallBacks != 0)
-            {
-                pv = getPointerFromRVA((ULONG)pTLSDir->AddressOfCallBacks - ulBorlandRVAFix);
-                if (pv == NULL)
+                setTLSAddress((PVOID)pTLSDir->StartAddressOfRawData);
+                setTLSInitSize(pTLSDir->EndAddressOfRawData - pTLSDir->StartAddressOfRawData);
+                setTLSTotalSize(pTLSDir->EndAddressOfRawData - pTLSDir->StartAddressOfRawData + pTLSDir->SizeOfZeroFill);
+
+                if (pTLSDir->AddressOfIndex)
                 {
-                    eprintf(("Win32Pe2LxImage::init: invalid RVA to TLS AddressOffIndex - %#8x.\n",
-                             pTLSDir->AddressOfIndex));
-                    return FALSE;
+                    if (validateRealPointer(pTLSDir->AddressOfIndex))
+                        /* assume baserelocations for thepointer; use it without any change. */
+                        setTLSIndexAddr((LPDWORD)(void*)pTLSDir->AddressOfIndex);
+                    else
+                    {   /* assume no baserelocs for these pointers? Complain and debugint3 */
+                        eprintf(("Win32Pe2LxImage::init: TLS - AddressOfIndex(%#8x) is not a pointer with basereloc.\n",
+                                 pTLSDir->AddressOfIndex));
+                        pv = getPointerFromPointer(pTLSDir->AddressOfIndex);
+                        if (pv == NULL)
+                        {
+                            eprintf(("Win32Pe2LxImage::init: invalid RVA to TLS AddressOfIndex - %#8x.\n",
+                                     pTLSDir->AddressOfIndex));
+                            return FALSE;
+                        }
+                        setTLSIndexAddr((LPDWORD)pv);
+                    }
                 }
-                setTLSCallBackAddr((PIMAGE_TLS_CALLBACK*)pv);
+
+                if (pTLSDir->AddressOfCallBacks)
+                {
+                    if (validateRealPointer(pTLSDir->AddressOfCallBacks))
+                        /* assume baserelocations for thepointer; use it without any change. */
+                        setTLSCallBackAddr(pTLSDir->AddressOfCallBacks);
+                    else
+                    {   /* assume no baserelocs for these pointers? Complain and debugint3 */
+                        eprintf(("Win32Pe2LxImage::init: Warning: TLS - AddressOfCallBacks(%#8x) is not a pointer with basereloc.\n",
+                                 pTLSDir->AddressOfCallBacks));
+                        pv = getPointerFromPointer(pTLSDir->AddressOfCallBacks);
+                        if (pv == NULL)
+                        {
+                            eprintf(("Win32Pe2LxImage::init: invalid pointer to TLS AddressOfCallBacks - %#8x.\n",
+                                     pTLSDir->AddressOfIndex));
+                            return FALSE;
+                        }
+                        setTLSCallBackAddr((PIMAGE_TLS_CALLBACK*)pv);
+                    }
+                }
             }
         }
         else
@@ -699,9 +712,13 @@ VOID  Win32Pe2LxImage::cleanup()
 PVOID  Win32Pe2LxImage::getPointerFromRVA(ULONG ulRVA)
 {
     int i;
+
     #ifdef DEBUG
-        if (paSections == NULL)
-            return NULL;
+    if (paSections == NULL)
+    {
+        eprintf(("Win32Pe2LxImage::getPointerFromRVA: paSections is NULL!\n"));
+        return NULL;
+    }
     #endif
 
     if (ulRVA == 0UL)
@@ -709,13 +726,29 @@ PVOID  Win32Pe2LxImage::getPointerFromRVA(ULONG ulRVA)
 
     i = 0;
     while (i < cSections &&
-           !(paSections[i].ulRVA <= ulRVA && paSections[i].ulRVA + paSections[i].cbVirtual > ulRVA)) /* ALIGN on page too? */
+           (paSections[i].ulRVA > ulRVA || paSections[i].ulRVA + paSections[i].cbVirtual <= ulRVA)) /* ALIGN on page too? */
         i++;
 
     if (i >= cSections)
         return NULL;
 
     return (PVOID)(ulRVA - paSections[i].ulRVA + paSections[i].ulAddress);
+}
+
+
+/**
+ * Converts a pointer with not basereloc to a pointer.
+ * @returns Pointer with baserelocation applied.
+ * @param   pv  Pointer without baserelocation.
+ * @status  completely implemented.
+ * @author  knut st. osmundsen (knut.stange.osmundsen@mynd.no)
+ */
+PVOID  Win32Pe2LxImage::getPointerFromPointer(PVOID pv)
+{
+    if (pv == NULL)
+        return NULL;
+
+    return getPointerFromRVA((ULONG)pv - pNtHdrs->OptionalHeader.ImageBase);
 }
 
 
@@ -738,9 +771,13 @@ PVOID  Win32Pe2LxImage::getPointerFromRVA(ULONG ulRVA)
 LONG Win32Pe2LxImage::getSectionIndexFromRVA(ULONG ulRVA)
 {
     LONG i;
+
     #ifdef DEBUG
-        if (paSections == NULL)
-            return -1;
+    if (paSections == NULL)
+    {
+        eprintf(("Win32Pe2LxImage::getSectionIndexFromRVA: paSections is NULL!\n"));
+        return NULL;
+    }
     #endif
 
     if (ulRVA == 0UL)
@@ -748,10 +785,46 @@ LONG Win32Pe2LxImage::getSectionIndexFromRVA(ULONG ulRVA)
 
     i = 0;
     while (i < cSections &&
-           !(paSections[i].ulRVA <= ulRVA && paSections[i].ulRVA + paSections[i].cbVirtual > ulRVA)) /* ALIGN on page too? */
+           (paSections[i].ulRVA > ulRVA && paSections[i].ulRVA + paSections[i].cbVirtual <= ulRVA)) /* ALIGN on page too? */
         i++;
 
     return i < cSections ? i : -1;
+}
+
+
+/**
+ * Validates that a given pointer is pointing to valid memory within
+ * the loaded executable image.
+ * @returns TRUE if the pointer is valid.
+ *          FALSE if the pointer is invalid.
+ * @param   pv  Pointer to validate.
+ * @sketch
+ * @status  completely implemented.
+ * @author  knut st. osmundsen (knut.stange.osmundsen@mynd.no)
+ */
+BOOL Win32Pe2LxImage::validateRealPointer(PVOID pv)
+{
+    int i;
+
+    #ifdef DEBUG
+    if (paSections == NULL)
+    {
+        eprintf(("Win32Pe2LxImage::validateRealPointer: paSections is NULL!\n"));
+        return NULL;
+    }
+    #endif
+
+    if (pv == NULL)
+        return FALSE;
+
+    i = 0;
+    while (i < cSections &&
+           (paSections[i].ulAddress < (ULONG)pv ||
+            paSections[i].ulAddress + paSections[i].cbVirtual <= (ULONG)pv) /* Align on page too? */
+           )
+        i++;
+
+    return i < cSections;
 }
 
 
