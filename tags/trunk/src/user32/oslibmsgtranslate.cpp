@@ -1,4 +1,4 @@
-/* $Id: oslibmsgtranslate.cpp,v 1.46 2001-04-02 09:52:01 sandervl Exp $ */
+/* $Id: oslibmsgtranslate.cpp,v 1.47 2001-04-25 20:53:38 sandervl Exp $ */
 /*
  * Window message translation functions for OS/2
  *
@@ -365,7 +365,7 @@ BOOL OS2ToWinMsgTranslate(void *pTeb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode,
       winMsg->message = WINWM_NCHITTEST;
       winMsg->wParam  = 0;
       winMsg->lParam  = MAKELONG(winMsg->pt.x,winMsg->pt.y);
-      if(!win32wnd->IsWindowEnabled()) {
+      if(!IsWindowEnabled(win32wnd->getWindowHandle())) {
                 if(win32wnd->getParent()) {
                         winMsg->hwnd = win32wnd->getParent()->getWindowHandle();
                 }
@@ -406,7 +406,7 @@ BOOL OS2ToWinMsgTranslate(void *pTeb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode,
 #endif
 
         //if a window is disabled, it's parent receives the mouse messages
-        if(!win32wnd->IsWindowEnabled()) {
+        if(!IsWindowEnabled(win32wnd->getWindowHandle())) {
             if(win32wnd->getParent()) {
                 win32wnd = win32wnd->getParent();
             }
@@ -491,7 +491,7 @@ BOOL OS2ToWinMsgTranslate(void *pTeb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode,
 #endif
 
         //if a window is disabled, it's parent receives the mouse messages
-        if(!win32wnd->IsWindowEnabled()) {
+        if(!IsWindowEnabled(win32wnd->getWindowHandle())) {
             if(win32wnd->getParent()) {
                 win32wnd = win32wnd->getParent();
             }

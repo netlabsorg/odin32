@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.251 2001-04-15 17:05:29 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.252 2001-04-25 20:53:38 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -1348,7 +1348,7 @@ LRESULT Win32BaseWindow::DefWndPrint(HDC hdc,ULONG uFlags)
    * Visibility flag.
    */
   if ( (uFlags & PRF_CHECKVISIBLE) &&
-       !IsWindowVisible() )
+       !IsWindowVisible(getWindowHandle()) )
       return 0;
 
   /*
@@ -2481,7 +2481,7 @@ BOOL Win32BaseWindow::SetWindowPos(HWND hwndInsertAfter, int x, int y, int cx, i
     }
     swp.hwnd = OS2Hwnd;
 
-    if(fuFlags & SWP_SHOWWINDOW && !IsWindowVisible()) {
+    if(fuFlags & SWP_SHOWWINDOW && !IsWindowVisible(getWindowHandle())) {
         setStyle(getStyle() | WS_VISIBLE);
         if(hTaskList) {
             dprintf(("Adding window %x to tasklist", getWindowHandle()));
@@ -2489,7 +2489,7 @@ BOOL Win32BaseWindow::SetWindowPos(HWND hwndInsertAfter, int x, int y, int cx, i
         }
     }
     else
-    if((fuFlags & SWP_HIDEWINDOW) && IsWindowVisible()) {
+    if((fuFlags & SWP_HIDEWINDOW) && IsWindowVisible(getWindowHandle())) {
         setStyle(getStyle() & ~WS_VISIBLE);
         if(hTaskList && !(getStyle() & WS_MINIMIZE)) {
             dprintf(("Removing window %x from tasklist", getWindowHandle()));
@@ -2696,7 +2696,7 @@ BOOL Win32BaseWindow::DestroyWindow()
 ////        else DebugInt3();
     }
     /* Hide the window */
-    if(IsWindowVisible())
+    if(IsWindowVisible(getWindowHandle()))
     {
         SetWindowPos(0, 0, 0, 0, 0, SWP_HIDEWINDOW |
                      SWP_NOACTIVATE|SWP_NOZORDER|SWP_NOMOVE|SWP_NOSIZE);
@@ -3252,23 +3252,6 @@ HWND Win32BaseWindow::GetActiveWindow()
   hwndActive = OSLibWinQueryActiveWindow();
 
   return OS2ToWin32Handle(hwndActive);
-}
-//******************************************************************************
-//******************************************************************************
-BOOL Win32BaseWindow::IsWindowEnabled()
-{
-    return OSLibWinIsWindowEnabled(OS2Hwnd);
-}
-//******************************************************************************
-//******************************************************************************
-BOOL Win32BaseWindow::IsWindowVisible()
-{
-    //TODO: Do we have to check the state of the parent window? (as Wine does)
-#if 1
-    return (dwStyle & WS_VISIBLE) == WS_VISIBLE;
-#else
-    return OSLibWinIsWindowVisible(OS2Hwnd);
-#endif
 }
 //******************************************************************************
 //******************************************************************************

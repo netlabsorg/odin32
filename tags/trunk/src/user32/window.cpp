@@ -1,4 +1,4 @@
-/* $Id: window.cpp,v 1.93 2001-04-12 14:04:33 sandervl Exp $ */
+/* $Id: window.cpp,v 1.94 2001-04-25 20:53:39 sandervl Exp $ */
 /*
  * Win32 window apis for OS/2
  *
@@ -652,6 +652,7 @@ BOOL WIN32API IsWindow( HWND hwnd)
 BOOL WIN32API IsWindowEnabled( HWND hwnd)
 {
   Win32BaseWindow *window;
+  DWORD            dwStyle;
 
     window = Win32BaseWindow::GetWindowFromHandle(hwnd);
     if(!window) {
@@ -660,31 +661,58 @@ BOOL WIN32API IsWindowEnabled( HWND hwnd)
         return 0;
     }
     dprintf(("IsWindowEnabled %x", hwnd));
-    return window->IsWindowEnabled();
+    dwStyle = GetWindowLongA(hwnd, GWL_STYLE);
+    if(dwStyle & WS_DISABLED) {
+        return FALSE;
+    }
+    return TRUE;
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API IsWindowVisible( HWND hwnd)
+BOOL WIN32API IsWindowVisible(HWND hwnd)
 {
   Win32BaseWindow *window;
-  BOOL rc;
+  BOOL             ret;
+  HWND             hwndParent;
+  DWORD            dwStyle;
 
-    if (hwnd)
-      window = Win32BaseWindow::GetWindowFromHandle(hwnd);
-    else
-      window = windowDesktop;
+    if(!hwnd) {//TODO: verify in NT!
+        dprintf(("IsWindowVisible DESKTOP returned TRUE"));
+        return TRUE;    //desktop is always visible
+    }
+    window = Win32BaseWindow::GetWindowFromHandle(hwnd);
+
     if(!window) {
         dprintf(("IsWindowVisible, window %x not found", hwnd));
         SetLastError(ERROR_INVALID_WINDOW_HANDLE);
         return 0;
     }
-    rc = window->IsWindowVisible();
-    dprintf(("IsWindowVisible %x returned %d", hwnd, rc));
-    return rc;
+    //check visibility of this window
+    dwStyle = GetWindowLongA(hwnd, GWL_STYLE);
+    if(!(dwStyle & WS_VISIBLE)) {
+        ret = FALSE;
+        goto end;
+    }
+    ret = TRUE;
+
+    //check visibility of parents
+    hwndParent = GetParent(hwnd);
+    while(hwndParent) {
+        dwStyle = GetWindowLongA(hwndParent, GWL_STYLE);
+        if(!(dwStyle & WS_VISIBLE)) {
+            dprintf(("IsWindowVisible %x returned FALSE (parent %x invisible)", hwnd, hwndParent));
+            return FALSE;
+        }
+        hwndParent = GetParent(hwndParent);
+    }
+
+end:
+    dprintf(("IsWindowVisible %x returned %d", hwnd, ret));
+    return ret;
 }
 //******************************************************************************
 //******************************************************************************
-HWND WIN32API SetFocus (HWND hwnd)
+HWND WIN32API SetFocus(HWND hwnd)
 {
  HWND lastFocus, lastFocus_W, hwnd_O;
  BOOL activate;
