@@ -1,4 +1,4 @@
-/* $Id: file.cpp,v 1.2 1999-06-10 17:06:45 phaller Exp $ */
+/* $Id: file.cpp,v 1.3 2000-02-03 21:46:42 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -12,21 +12,6 @@
 #include <string.h>
 
 #include "ntdll.h"
-
-
-//******************************************************************************
-//NtClose has to call CloseHandle since the Handlemanager has to be
-//called.
-//******************************************************************************
-NTSTATUS WIN32API NtClose(HANDLE hHandle)
-{
-  dprintf(("NTDLL: NtClose(%08x) not properly implemented.\n",
-           hHandle));
-
-  /* @@@PH 98/05/05 function from NTDLL */
-  return (CloseHandle(hHandle));
-}
-
 
 
 /**************************************************************************
