@@ -19,5 +19,7 @@ ULONG GetWindowsCodepage();
 UconvObject GetDisplayUconvObject();
 UconvObject GetWindowsUconvObject();
 
+void CODEPAGE_Init(void);
+
 #endif  /*__CODEPAGE_H*/
 
