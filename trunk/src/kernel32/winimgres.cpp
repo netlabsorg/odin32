@@ -1,4 +1,4 @@
-/* $Id: winimgres.cpp,v 1.27 1999-11-29 00:04:07 bird Exp $ */
+/* $Id: winimgres.cpp,v 1.28 1999-11-29 20:43:02 sandervl Exp $ */
 
 /*
  * Win32 PE Image class (resource methods)
@@ -269,7 +269,7 @@ HRSRC Win32ImageBase::findResourceA(LPCSTR lpszName, LPSTR lpszType, ULONG lang)
     //ulRVAResourceSection contains the relative virtual address (relative to the start of the image)
     //for the resource section (images loaded by the pe.exe and pe2lx/win32k)
     //For LX images, this is 0 as OffsetToData contains a relative offset
-    char *resdata = (char *)((char *)pResDir + pData->OffsetToData - ulRVAResourceSection);
+    char *resdata = (char *)((char *)pResDir + (pData->OffsetToData - ulRVAResourceSection));
     res = new Win32Resource(this, id, type, pData->Size, resdata);
 
     return (HRSRC) res;
@@ -298,16 +298,6 @@ HRSRC Win32ImageBase::findResourceW(LPWSTR lpszName, LPWSTR lpszType, ULONG lang
 
     return(hres);
 }
-//******************************************************************************
-//TODO:
-//******************************************************************************
-#if 0
-ULONG Win32Pe2LxImage::getResourceSizeA(LPCSTR lpszName, LPSTR lpszType, ULONG lang)
-{
-    DebugInt3();
-    return 0;
-}
-#endif
 //******************************************************************************
 //******************************************************************************
 ULONG Win32ImageBase::getResourceSizeA(LPCSTR lpszName, LPSTR lpszType, ULONG lang)
@@ -355,6 +345,7 @@ BOOL Win32Pe2LxImage::getVersionStruct(char *verstruct, ULONG bufLength)
 {
     if(getVersionId() == -1) {
         dprintf(("GetVersionStruct: %s has no version resource!\n", szModule));
+        SetLastError(ERROR_RESOURCE_DATA_NOT_FOUND);
         return(FALSE);
     }
     return OSLibGetResource(hinstance, getVersionId(), verstruct, bufLength);
@@ -379,6 +370,7 @@ BOOL Win32ImageBase::getVersionStruct(char *verstruct, ULONG bufLength)
     pData = getPEResourceEntry(ID_GETFIRST, NTRT_VERSION);
     if(pData == NULL) {
         dprintf(("Win32PeLdrImage::getVersionStruct: couldn't find version resource!"));
+        SetLastError(ERROR_RESOURCE_DATA_NOT_FOUND);
         return 0;
     }
     char *resdata = (char *)((char *)pResDir + pData->OffsetToData - ulRVAResourceSection);
@@ -431,7 +423,7 @@ BOOL Win32ImageBase::enumResourceNamesA(HMODULE hmod,
 
     if (pResDir == NULL)
     {
-        /* SetLastError(?);? */
+        SetLastError(ERROR_RESOURCE_DATA_NOT_FOUND);
         return FALSE;
     }
 
@@ -701,4 +693,114 @@ PIMAGE_RESOURCE_DIRECTORY Win32ImageBase::getResSubDirA(PIMAGE_RESOURCE_DIRECTOR
 
     return pResDirRet;
 }
+//******************************************************************************
+//******************************************************************************
+BOOL Win32ImageBase::enumResourceTypesA(HMODULE hmod, ENUMRESTYPEPROCA lpEnumFunc, 
+                                        LONG lParam)
+{
+ PIMAGE_RESOURCE_DIRECTORY       prdType;
+ PIMAGE_RESOURCE_DIRECTORY_ENTRY prde;
+ PIMAGE_RESOURCE_DIR_STRING_U    pstring;
+ ULONG  i, nameOffset;
+ BOOL   fRet;
 
+    if (pResDir == NULL)
+    {
+        SetLastError(ERROR_RESOURCE_DATA_NOT_FOUND);
+        return FALSE;
+    }
+
+    if ((unsigned)lpEnumFunc < 0x10000 || (unsigned)lpEnumFunc >= 0xc0000000)
+    {
+        SetLastError(ERROR_NOACCESS);
+        return FALSE;
+    }
+
+    //reminder:
+    //1st level -> types
+    //2nd level -> names
+    //3rd level -> language
+
+    /* set pointer to first resource type entry */
+    prde = (PIMAGE_RESOURCE_DIRECTORY_ENTRY)((ULONG)pResDir + sizeof(IMAGE_RESOURCE_DIRECTORY));
+
+    for (i=0; i<pResDir->NumberOfNamedEntries+pResDir->NumberOfIdEntries && fRet; i++) 
+    {
+      	/* locate directory or each resource type */
+    	prdType = (PIMAGE_RESOURCE_DIRECTORY)((int)pResDir + (int)prde->u2.OffsetToData);
+
+        if (prde->u1.s.NameIsString)
+    	{//name or id entry?
+	        //SvL: 30-10-'97, high bit is set, so clear to get real offset
+	        nameOffset = prde->u1.Name & ~0x80000000;
+	
+	        pstring = (PIMAGE_RESOURCE_DIR_STRING_U)((ULONG)pResDir + nameOffset);
+	        char *typename = (char *)malloc(pstring->Length+1);
+	        lstrcpynWtoA(typename, pstring->NameString, pstring->Length+1);
+	        typename[pstring->Length] = 0;
+
+		fRet = lpEnumFunc(hmod, typename, lParam);
+        	free(typename);
+    	}
+    	else {
+		fRet = lpEnumFunc(hmod, (LPSTR)prde->u1.Id, lParam);
+	}
+
+        /* increment to next entry */
+        prde++;
+    }
+    return fRet > 0 ? TRUE : FALSE;
+}
+//******************************************************************************
+//******************************************************************************
+BOOL Win32ImageBase::enumResourceTypesW(HMODULE hmod, ENUMRESTYPEPROCW lpEnumFunc, 
+                                        LONG lParam)
+{
+ PIMAGE_RESOURCE_DIRECTORY       prdType;
+ PIMAGE_RESOURCE_DIRECTORY_ENTRY prde;
+ PIMAGE_RESOURCE_DIR_STRING_U    pstring;
+ ULONG  i, nameOffset;
+ BOOL   fRet;
+
+    if (pResDir == NULL)
+    {
+        SetLastError(ERROR_RESOURCE_DATA_NOT_FOUND);
+        return FALSE;
+    }
+
+    if ((unsigned)lpEnumFunc < 0x10000 || (unsigned)lpEnumFunc >= 0xc0000000)
+    {
+        SetLastError(ERROR_NOACCESS);
+        return FALSE;
+    }
+
+    //reminder:
+    //1st level -> types
+    //2nd level -> names
+    //3rd level -> language
+
+    /* set pointer to first resource type entry */
+    prde = (PIMAGE_RESOURCE_DIRECTORY_ENTRY)((ULONG)pResDir + sizeof(IMAGE_RESOURCE_DIRECTORY));
+
+    for (i=0; i<pResDir->NumberOfNamedEntries+pResDir->NumberOfIdEntries && fRet; i++) 
+    {
+      	/* locate directory or each resource type */
+    	prdType = (PIMAGE_RESOURCE_DIRECTORY)((int)pResDir + (int)prde->u2.OffsetToData);
+
+        if (prde->u1.s.NameIsString)
+    	{//name or id entry?
+	        //SvL: 30-10-'97, high bit is set, so clear to get real offset
+	        nameOffset = prde->u1.Name & ~0x80000000;
+	
+	        pstring = (PIMAGE_RESOURCE_DIR_STRING_U)((ULONG)pResDir + nameOffset);
+		fRet = lpEnumFunc(hmod, pstring->NameString, lParam);
+    	}
+    	else 	fRet = lpEnumFunc(hmod, (LPWSTR)prde->u1.Id, lParam);
+
+        /* increment to next entry */
+        prde++;
+    }
+    return fRet > 0 ? TRUE : FALSE;
+}
+//******************************************************************************
+//******************************************************************************
