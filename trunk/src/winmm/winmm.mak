@@ -1,4 +1,4 @@
-# $Id: winmm.mak,v 1.2 2001-02-27 21:14:00 sandervl Exp $
+# $Id: winmm.mak,v 1.3 2001-03-23 16:23:47 sandervl Exp $
 
 #
 # Odin32 API
@@ -25,10 +25,13 @@ MAKEFILE = winmm.mak
 OBJS = \
 $(OBJDIR)\os2timer.obj \
 $(OBJDIR)\waveout.obj \
-$(OBJDIR)\dwaveout.obj \
-$(OBJDIR)\time.obj \
+$(OBJDIR)\waveoutdart.obj \
+$(OBJDIR)\waveoutbase.obj \
+$(OBJDIR)\waveinoutbase.obj \
+$(OBJDIR)\waveoutdaud.obj \
+$(OBJDIR)\waveindart.obj \
 $(OBJDIR)\wavein.obj \
-$(OBJDIR)\dwavein.obj \
+$(OBJDIR)\time.obj \
 $(OBJDIR)\auxiliary.obj \
 $(OBJDIR)\auxos2.obj \
 $(OBJDIR)\mixer.obj \

@@ -1,4 +1,4 @@
-/* $Id: winmmtype.h,v 1.3 1999-06-10 16:24:35 phaller Exp $ */
+/* $Id: winmmtype.h,v 1.4 2001-03-23 16:23:47 sandervl Exp $ */
 
 /*
  *
@@ -86,5 +86,13 @@ typedef void (* CALLBACK LPDRVCALLBACK)(HDRVR hdrvr, UINT uMsg, DWORD dwUser, DW
 #define WIM_OPEN        MM_WIM_OPEN
 #define WIM_CLOSE       MM_WIM_CLOSE
 #define WIM_DATA        MM_WIM_DATA
+
+#define CALLBACK_TYPEMASK   	0x00070000l    	/* callback type mask */
+#define CALLBACK_NULL       	0x00000000l    	/* no callback */
+#define CALLBACK_WINDOW     	0x00010000l    	/* dwCallback is a HWND */
+#define CALLBACK_TASK       	0x00020000l    	/* dwCallback is a HTASK */
+#define CALLBACK_THREAD		(CALLBACK_TASK)	/* dwCallback is a thread ID */
+#define CALLBACK_FUNCTION   	0x00030000l    	/* dwCallback is a FARPROC */
+#define CALLBACK_EVENT		0x00050000l	/* dwCallback is an EVENT Handler */
 
 #endif
