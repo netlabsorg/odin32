@@ -1,4 +1,4 @@
-/* $Id: OS2KLDR.h,v 1.2 2001-09-26 03:52:35 bird Exp $
+/* $Id: OS2KLDR.h,v 1.3 2001-09-27 03:04:12 bird Exp $
  *
  * OS/2 kernel Loader Stuff.
  *
@@ -224,6 +224,32 @@ typedef struct MTE
 /*******************************************************************************
 *   Global Variables                                                           *
 *******************************************************************************/
+#ifndef KKRNLLIB
+    #if defined(__IBMC__) || defined(__IBMCPP__)
+        #pragma map(LdrLibPath, "_LdrLibPath")
+        #pragma map(mte_h     , "_mte_h")
+        #pragma map(program_h , "_program_h")
+        #pragma map(program_l , "_program_l")
+        #pragma map(global_h  , "_global_h")
+        #pragma map(global_l  , "_global_l")
+        #pragma map(specific_h, "_specific_h")
+        #pragma map(specific_l, "_specific_l")
+        #pragma map(LdrSem,     "_LdrSem")
+        #pragma map(ldrpFileNameBuf, "_ldrpFileNameBuf")
+    #else
+        #pragma LdrLibPath       _LdrLibPath
+        #pragma mte_h            _mte_h
+        #pragma program_h        _program_h
+        #pragma program_l        _program_l
+        #pragma global_h         _global_h
+        #pragma global_l         _global_l
+        #pragma specific_h       _specific_h
+        #pragma specific_l       _specific_l
+        #pragma LdrSem           _LdrSem
+        #pragma ldrpFileNameBuf  _ldrpFileNameBuf
+    #endif
+#endif
+
 #ifdef KKRNLLIB
 extern PSZ*    pLdrLibPath;             /* Pointer to the libpath pointer. */
 extern PPMTE   pmte_h;
@@ -243,6 +269,30 @@ extern PMTE    global_l;
 extern PMTE    specific_h;
 extern PMTE    specific_l;
 #endif
+
+/*
+ * Pointer to the loader semaphore.
+ */
+#ifdef _OS2KSEM_h_
+#ifdef KKRNLLIB
+extern PKSEMMTX    pLdrSem;
+#else
+extern KSEMMTX     LdrSem;
+#endif
+#endif
+
+/**
+ * Pointer to the loader filename buffer.
+ * Upon return from ldrOpen (and ldrOpenPath which calls ldrOpen) this is
+ * set to the fully qualified filename of the file last opened (successfully).
+ */
+#ifdef KKRNLLIB
+extern PSZ *    pldrpFileNameBuf;
+#define ldrpFileNameBuf (*pldrpFileNameBuf)
+#else
+extern PSZ      ldrpFileNameBuf;
+#endif
+
 
 /*******************************************************************************
 *   Function Prototypes                                                        *
@@ -469,7 +519,7 @@ extern ULONG LDRCALL OrgldrFindModule(PCHAR pachFilename, USHORT cchFilename, US
  *                  The usage count is returned.
  * @sketch
  */
-#ifdef _ptda_h_
+#ifdef _OS2KPTDA_h_
 ULONG LDRCALL ldrWasLoadModuled(        /* retd 0x0c */
     HMTE        hmte,                   /* ebp + 0x08 */
     PPTDA       pptda,                  /* ebp + 0x0c */
@@ -526,18 +576,6 @@ extern ULONG LDRCALL OrgLDRClearSem(void);
 #define LDRRequestSem()   KSEMRequestMutex(pLdrSem, (ULONG)-1)
 #else
 #define LDRRequestSem()   KSEMRequestMutex(&LdrSem, (ULONG)-1)
-#endif
-
-
-/*
- * Pointer to the loader semaphore.
- */
-#ifdef _OS2KSEM_h_
-#ifdef KKRNLLIB
-extern PKSEMMTX    pLdrSem;
-#else
-extern KSEMMTX     LdrSem;
-#endif
 #endif
 
 
@@ -655,20 +693,9 @@ extern ULONG LDRCALL    OrgldrGetOrdNum(PMTE pMTE, PSZ pszExportName, PUSHORT pu
  * Frees a task.
  * @param   pPTDA   Pointer to per task data area of the task to be freed.
  */
+#ifdef _OS2KPTDA_h_
 extern void LDRCALL     LDRFreeTask(PPTDA pPTDA);
 extern void LDRCALL     OrgLDRFreeTask(PPTDA pPTDA);
-
-
-/**
- * Pointer to the loader filename buffer.
- * Upon return from ldrOpen (and ldrOpenPath which calls ldrOpen) this is
- * set to the fully qualified filename of the file last opened (successfully).
- */
-#ifdef KKRNLLIB
-extern PSZ *    pldrpFileNameBuf;
-#define ldrpFileNameBuf (*pldrpFileNameBuf)
-#else
-extern PSZ      ldrpFileNameBuf;
 #endif
 
 

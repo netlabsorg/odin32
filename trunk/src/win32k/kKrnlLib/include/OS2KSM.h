@@ -1,4 +1,4 @@
-/* $Id: OS2KSM.h,v 1.2 2001-09-26 03:52:36 bird Exp $
+/* $Id: OS2KSM.h,v 1.3 2001-09-27 03:04:12 bird Exp $
  *
  * OS/2 kernel swapper manager stuff.
  *
@@ -10,6 +10,32 @@
 #ifndef _OS2KSM_H_
 #define _OS2KSM_H_
 
+/*******************************************************************************
+*   Global Variables                                                           *
+*******************************************************************************/
+#ifndef KKRNLLIB
+    #if defined(__IBMC__) || defined(__IBMCPP__)
+        #pragma map(SMswapping   , "_SMswapping")
+        #pragma map(smFileSize   , "_smFileSize")
+        #pragma map(smcBrokenDF  , "_smcBrokenDF")
+        #pragma map(SMcDFInuse   , "_SMcDFInuse")
+        #pragma map(SMMinFree    , "_SMMinFree")
+        #pragma map(SMCFGMinFree , "_SMCFGMinFree")
+        #pragma map(SMCFGSwapSize, "_SMCFGSwapSize")
+        #pragma map(smcGrowFails , "_smcGrowFails")
+        #pragma map(SMcInMemFile , "_SMcInMemFile")
+    #else
+        #pragma SMswapping        _SMswapping
+        #pragma smFileSize        _smFileSize
+        #pragma smcBrokenDF       _smcBrokenDF
+        #pragma SMcDFInuse        _SMcDFInuse
+        #pragma SMMinFree         _SMMinFree
+        #pragma SMCFGMinFree      _SMCFGMinFree
+        #pragma SMCFGSwapSize     _SMCFGSwapSize
+        #pragma smcGrowFails      _smcGrowFails
+        #pragma SMcInMemFile      _SMcInMemFile
+    #endif
+#endif
 
 /**
  * Swapping enabled flag.

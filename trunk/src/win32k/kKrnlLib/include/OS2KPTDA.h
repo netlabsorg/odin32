@@ -1,14 +1,14 @@
-/* $Id: OS2KPTDA.h,v 1.2 2001-09-26 03:52:36 bird Exp $
+/* $Id: OS2KPTDA.h,v 1.3 2001-09-27 03:04:12 bird Exp $
  *
  * PTDA access functions.
  *
- * Copyright (c) 2000-2001 knut st. osmundsen (knut.stange.osmundsen@mynd.no)
+ * Copyright (c) 2000-2001 knut st. osmundsen (kosmunds@csc.com)
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *
  */
-#ifndef _ptda_h_
-#define _ptda_h_
+#ifndef _OS2KPTDA_h_
+#define _OS2KPTDA_h_
 
 #ifdef __cplusplus
 extern "C" {
@@ -26,6 +26,16 @@ typedef struct _PTDA
 } PTDA, *PPTDA, **PPPTDA;
 
 
+/*******************************************************************************
+*   Global Variables                                                           *
+*******************************************************************************/
+#ifndef KKRNLLIB
+    #if defined(__IBMC__) || defined(__IBMCPP__)
+        #pragma map(pPTDACur, "_pPTDACur")
+    #else
+        #pragma pPTDACur       _pPTDACur
+    #endif
+#endif
 #ifdef KKRNLLIB
 extern  PPPTDA      ppPTDACur;          /* Please access this only thru the ptdaGetCur() function. */
 #else
