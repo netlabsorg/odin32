@@ -1,4 +1,4 @@
-/* $Id: mouse.h,v 1.1 1999-05-24 20:19:14 ktk Exp $ */
+/* $Id: mouse.h,v 1.2 2000-05-09 19:04:43 sandervl Exp $ */
 
 /*
  * MOUSE driver interface
@@ -28,7 +28,7 @@ typedef struct _MOUSEINFO
 } MOUSEINFO, *LPMOUSEINFO;
 #include "poppack.h"
 
-typedef VOID (CALLBACK *LPMOUSE_EVENT_PROC)(DWORD,DWORD,DWORD,DWORD,DWORD);
+typedef BOOL (CALLBACK *LPMOUSE_EVENT_PROC)(DWORD,DWORD,DWORD,DWORD,DWORD);
 
 WORD WINAPI MOUSE_Inquire(LPMOUSEINFO lpMouseInfo);
 VOID WINAPI MOUSE_Enable(LPMOUSE_EVENT_PROC lpMouseEventProc);
