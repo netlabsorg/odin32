@@ -1,4 +1,4 @@
-/* $Id: heapstring.cpp,v 1.32 2000-09-03 18:04:56 phaller Exp $ */
+/* $Id: heapstring.cpp,v 1.33 2000-10-02 13:05:37 phaller Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -806,6 +806,24 @@ LPVOID WIN32API HEAP_malloc(DWORD size )
              size));
   }
   return p;
+}
+
+
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    :
+ *
+ * Author    : Patrick Haller [Thu, 1999/08/05 20:46]
+ *****************************************************************************/
+
+DWORD WIN32API HEAP_size(LPVOID lpMem)
+{
+  return HeapSize( GetProcessHeap(), 0, lpMem );
 }
 
 

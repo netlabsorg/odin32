@@ -1,4 +1,4 @@
-; $Id: kernel32.def,v 1.86 2000-09-15 13:24:29 sandervl Exp $
+; $Id: kernel32.def,v 1.87 2000-10-02 13:05:36 phaller Exp $
 
 ;Created by BLAST for IBM's compiler
 ;Basis is Windows95 KERNEL32
@@ -1092,6 +1092,7 @@ EXPORTS
     HEAP_xrealloc              = _HEAP_xrealloc@16                @1241
     HEAP_malloc                = _HEAP_malloc@4                   @1242
     HEAP_realloc               = _HEAP_realloc@8                  @1243
+    HEAP_size                  = _HEAP_size@4                     @1292
     HEAP_free                  = _HEAP_free@4                     @1244
     HEAP_strdupWtoA            = _HEAP_strdupWtoA@12              @1245
     HEAP_strdupAtoW            = _HEAP_strdupAtoW@12              @1246
