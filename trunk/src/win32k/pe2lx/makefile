@@ -1,5 +1,5 @@
 ##############################################################################
-# $Id: makefile,v 1.10 2000-01-24 18:19:01 bird Exp $
+# $Id: makefile,v 1.11 2000-01-27 23:45:59 bird Exp $
 #
 # PD-Win32 API
 #
@@ -121,13 +121,14 @@ $(TARGET).exe: $(OBJS)
     cd pe2lx
 
 depend:
-    ..\fastdep.exe -o..\Object $(CINCLUDES) ..\misc\*.c* ..\include\*.h
+    ..\fastdep.exe -obj$(OBJEXT) -o..\Object $(CINCLUDES) ..\misc\*.c* ..\include\*.h
 
 ##############################################################################
 # Cleanup
 ##############################################################################
 clean:
-    @-$(RM) $(OBJS) $(TARGET).exe $(PE2LXLIST)\$(TARGET).map *.pch
+    @$(RM) $(OBJS) $(TARGET).exe $(PE2LXLIST)\$(TARGET).map *.pch
+    @$(ECHO) #do nmake depend > .depend
 
 
-# !include .depend FIXME
+!include .depend
