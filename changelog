@@ -1,4 +1,8 @@
-/* $Id: changelog,v 1.2404 2002-12-30 14:04:52 sandervl Exp $ */
+/* $Id: changelog,v 1.2405 2002-12-30 15:48:45 sandervl Exp $ */
+
+ 2002-12-30: Yuri Dario <mc6530@mclink   >
+    - USER32:   o Fixed regression in Set/GetClassLong. (default must be ascii;
+                  not unicode)
 
  2002-12-30: Sander van Leeuwen <sandervl@innotek   >
     - GDI32:    o Support reversed bitmap data in SetDIBits
