@@ -1,4 +1,4 @@
-/* $Id: os2timer.cpp,v 1.9 1999-08-31 15:39:20 phaller Exp $ */
+/* $Id: os2timer.cpp,v 1.10 1999-08-31 15:47:48 phaller Exp $ */
 
 /*
  * OS/2 Timer class
@@ -219,7 +219,8 @@ OS2Timer::OS2Timer() : TimerSem(0), TimerHandle(0), TimerThreadID(0),
     timers = this;
 
   TimerThreadID = _beginthread(TimerHlpHandler, NULL, 0x4000, (void *)this);
-  //@@@PH: why the wait? DosSleep(100);
+  //@@@PH: logic sux ... waits for creation of semaphores
+  DosSleep(100);
 }
 /******************************************************************************/
 /******************************************************************************/
@@ -324,11 +325,11 @@ void OS2Timer::TimerHandler()
                        0L);                 /* Assume current thread  */
 
   rc = DosCreateEventSem(NULL, &TimerSem, DC_SEM_SHARED, 0);
-
   if(rc != 0)
+  {
+    dprintf(("WINMM: OS2Timer: DosCreateEventSem failed rc=#%08xh\n", rc));
       _endthread();
-
-  dprintf(("WINMM: OS2Timer:Semaphore created\n"));
+  }
 
   TimerStatus = Stopped;
 
