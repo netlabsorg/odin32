@@ -1,4 +1,8 @@
-/* $Id: changelog,v 1.2194 2002-06-27 11:59:55 sandervl Exp $ */
+/* $Id: changelog,v 1.2195 2002-06-28 12:35:40 sandervl Exp $ */
+
+ 2002-06-28: Sander van Leeuwen <sandervl@innotek.de>
+    - USER32:   o Removed focus fix from 2001-11-20; controls of child
+                  dialogs can receive input focus (CVP wizard dialogs)
 
  2002-06-27: Platon Fomichev <platon@innotek.de>
     - SHELL32:  o Enable OK button before sending BFFM_SELCHANGED (apparently
