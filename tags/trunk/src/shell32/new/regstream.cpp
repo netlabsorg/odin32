@@ -16,6 +16,7 @@
 
 #include "shell32_main.h"
 
+#include <heapstring.h>
 #include <misc.h>
 
 DEFAULT_DEBUG_CHANNEL(shell)
@@ -31,43 +32,8 @@ typedef struct
 	DWORD		dwPos;
 } ISHRegStream;
 
-static struct ICOM_VTABLE(IStream) rstvt;
+//static struct ICOM_VTABLE(IStream) rstvt;
 
-/**************************************************************************
-*   IStream_Constructor()
-*/
-IStream *IStream_Constructor(HKEY hKey, LPCSTR pszSubKey, LPCSTR pszValue, DWORD grfMode)
-{	ISHRegStream*	rstr;
-	DWORD		dwType;
-	
-	rstr = (ISHRegStream*)HeapAlloc(GetProcessHeap(),HEAP_ZERO_MEMORY,sizeof(ISHRegStream));
-	rstr->lpvtbl=&rstvt;
-	rstr->ref = 1;
-
-	if ( ERROR_SUCCESS == RegOpenKeyExA (hKey, pszSubKey, 0, KEY_READ, &(rstr->hKey)))
-	{ if ( ERROR_SUCCESS == RegQueryValueExA(rstr->hKey, (LPSTR)pszValue,0,0,0,&(rstr->dwLength)))
-	  {
-	    /* read the binary data into the buffer */
-	    rstr->pbBuffer = HeapAlloc(GetProcessHeap(),0,rstr->dwLength);
-	    if (rstr->pbBuffer)
-	    { if ( ERROR_SUCCESS == RegQueryValueExA(rstr->hKey, (LPSTR)pszValue,0,&dwType,rstr->pbBuffer,&(rstr->dwLength)))
-	      { if (dwType == REG_BINARY )
-	        { rstr->pszSubKey = HEAP_strdupA (GetProcessHeap(),0, pszSubKey);
-	          rstr->pszValue = HEAP_strdupA (GetProcessHeap(),0, pszValue);		
-	          TRACE("(%p)->0x%08x,%s,%s,0x%08lx\n", rstr, hKey, pszSubKey, pszValue, grfMode);
-	          shell32_ObjCount++;
-	          return (IStream*)rstr;
-	        }
-	      }
-	      HeapFree (GetProcessHeap(),0,rstr->pbBuffer);
-	    }
-	  }
-	  RegCloseKey(rstr->hKey);
-
-	}
-	HeapFree (GetProcessHeap(),0,rstr);
-	return NULL;
-}
 
 /**************************************************************************
 *  IStream_fnQueryInterface
@@ -272,6 +238,43 @@ static struct ICOM_VTABLE(IStream) rstvt =
 	IStream_fnClone
 	
 };
+
+/**************************************************************************
+*   IStream_Constructor()
+*/
+IStream *IStream_Constructor(HKEY hKey, LPCSTR pszSubKey, LPCSTR pszValue, DWORD grfMode)
+{	ISHRegStream*	rstr;
+	DWORD		dwType;
+	
+	rstr = (ISHRegStream*)HeapAlloc(GetProcessHeap(),HEAP_ZERO_MEMORY,sizeof(ISHRegStream));
+	rstr->lpvtbl=&rstvt;
+	rstr->ref = 1;
+
+	if ( ERROR_SUCCESS == RegOpenKeyExA (hKey, pszSubKey, 0, KEY_READ, &(rstr->hKey)))
+	{ if ( ERROR_SUCCESS == RegQueryValueExA(rstr->hKey, (LPSTR)pszValue,0,0,0,&(rstr->dwLength)))
+	  {
+	    /* read the binary data into the buffer */
+	    rstr->pbBuffer = (BYTE*)HeapAlloc(GetProcessHeap(),0,rstr->dwLength);
+	    if (rstr->pbBuffer)
+	    { if ( ERROR_SUCCESS == RegQueryValueExA(rstr->hKey, (LPSTR)pszValue,0,&dwType,rstr->pbBuffer,&(rstr->dwLength)))
+	      { if (dwType == REG_BINARY )
+	        { rstr->pszSubKey = HEAP_strdupA (GetProcessHeap(),0, pszSubKey);
+	          rstr->pszValue = HEAP_strdupA (GetProcessHeap(),0, pszValue);		
+	          TRACE("(%p)->0x%08x,%s,%s,0x%08lx\n", rstr, hKey, pszSubKey, pszValue, grfMode);
+	          shell32_ObjCount++;
+	          return (IStream*)rstr;
+	        }
+	      }
+	      HeapFree (GetProcessHeap(),0,rstr->pbBuffer);
+	    }
+	  }
+	  RegCloseKey(rstr->hKey);
+
+	}
+	HeapFree (GetProcessHeap(),0,rstr);
+	return NULL;
+}
+
 
 /*************************************************************************
  * OpenRegStream				[SHELL32.85]

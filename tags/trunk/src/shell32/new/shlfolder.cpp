@@ -28,6 +28,7 @@
 #include "wine/undocshell.h"
 #include "shell32_main.h"
 
+#include <heapstring.h>
 #include <misc.h>
 
 DEFAULT_DEBUG_CHANNEL(shell)
@@ -208,16 +209,15 @@ typedef struct
 	BOOL		fAcceptFmt;			/* flag for pending Drop */
 } IGenericSFImpl;
 
-static struct ICOM_VTABLE(IShellFolder) sfvt;
-static struct ICOM_VTABLE(IPersistFolder) psfvt;
-static struct ICOM_VTABLE(IDropTarget) dtvt;
+//static struct ICOM_VTABLE(IShellFolder) sfvt;
+//static struct ICOM_VTABLE(IPersistFolder) psfvt;
+//static struct ICOM_VTABLE(IDropTarget) dtvt;
 
 static IShellFolder * ISF_MyComputer_Constructor(void);
 
 #define _IPersistFolder_Offset ((int)(&(((IGenericSFImpl*)0)->lpvtblPersistFolder)))
 #define _ICOM_THIS_From_IPersistFolder(class, name) class* This = (class*)(((char*)name)-_IPersistFolder_Offset);
 	
-static struct ICOM_VTABLE(IDropTarget) dtvt;
 #define _IDropTarget_Offset ((int)(&(((IGenericSFImpl*)0)->lpvtblDropTarget)))
 #define _ICOM_THIS_From_IDropTarget(class, name) class* This = (class*)(((char*)name)-_IDropTarget_Offset);
 
@@ -277,7 +277,7 @@ static IShellFolder * IShellFolder_Constructor(
 	    }
 
 	    dwSize += _ILSimpleGetText(pidl,NULL,0);		/* add the size of our name*/
-	    sf->sMyPath = SHAlloc(dwSize + 2);			/* '\0' and backslash */
+	    sf->sMyPath = (char*)SHAlloc(dwSize + 2);			/* '\0' and backslash */
 
 	    if(!sf->sMyPath) return NULL;
 	    *(sf->sMyPath)=0x00;
@@ -561,7 +561,7 @@ static HRESULT WINAPI IShellFolder_fnBindToObject( IShellFolder * iface, LPCITEM
 	}
 	else
 	{
-	  IShellFolder_BindToObject(pShellFolder, ILGetNext(pidl), NULL, &IID_IShellFolder, (LPVOID)&pSubFolder);
+	  IShellFolder_BindToObject(pShellFolder, ILGetNext(pidl), NULL, &IID_IShellFolder, (LPVOID*)&pSubFolder);
 	  IShellFolder_Release(pShellFolder);
 	  *ppvOut = pSubFolder;
 	}
@@ -663,7 +663,7 @@ static HRESULT WINAPI  IShellFolder_fnCompareIDs(
 	  {
 	    _ILSimpleGetText(pidl1, szTemp1, MAX_PATH);
 	    _ILSimpleGetText(pidl2, szTemp2, MAX_PATH);
-	    nReturn = strcasecmp(szTemp1, szTemp2);
+	    nReturn = strcmp(szTemp1, szTemp2);
 	
 	    if (nReturn == 0)				/* first pidl different ? */
 	    {
@@ -1177,7 +1177,7 @@ static HRESULT WINAPI ISF_Desktop_fnBindToObject( IShellFolder * iface, LPCITEMI
 	}
 	else				/* go deeper */
 	{
-	  IShellFolder_BindToObject(pShellFolder, ILGetNext(pidl), NULL, riid, (LPVOID)&pSubFolder);
+	  IShellFolder_BindToObject(pShellFolder, ILGetNext(pidl), NULL, riid, (LPVOID*)&pSubFolder);
 	  IShellFolder_Release(pShellFolder);
 	  *ppvOut = pSubFolder;
 	}
@@ -1489,7 +1489,7 @@ static HRESULT WINAPI ISF_MyComputer_fnBindToObject( IShellFolder * iface, LPCIT
 	}
 	else				/* go deeper */
 	{
-	  IShellFolder_BindToObject(pShellFolder, ILGetNext(pidl), NULL, &IID_IShellFolder, (LPVOID)&pSubFolder);
+	  IShellFolder_BindToObject(pShellFolder, ILGetNext(pidl), NULL, &IID_IShellFolder, (LPVOID*)&pSubFolder);
 	  IShellFolder_Release(pShellFolder);
 	  *ppvOut = pSubFolder;
 	}

@@ -141,6 +141,7 @@ BOOL pcheck (LPCITEMIDLIST pidl)
 	return ret;
 }
 
+
 /*************************************************************************
  * ILGetDisplayName			[SHELL32.15]
  */
@@ -292,7 +293,7 @@ HRESULT WINAPI SHILCreateFromPathA (LPCSTR path, LPITEMIDLIST * ppidl, DWORD * a
 	
 	TRACE_(shell)("%s %p 0x%08lx\n",path,ppidl,attributes?*attributes:0);
 
-	LocalToWideChar(lpszDisplayName, path, MAX_PATH);
+	LocalToWideChar(lpszDisplayName, (LPSTR)path, MAX_PATH);
 
 	if (SUCCEEDED (SHGetDesktopFolder(&sf)))
 	{

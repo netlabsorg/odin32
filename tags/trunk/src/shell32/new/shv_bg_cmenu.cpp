@@ -34,23 +34,7 @@ typedef struct
 } BgCmImpl;
 
 
-static struct ICOM_VTABLE(IContextMenu) cmvt;
-
-/**************************************************************************
-*   ISVBgCm_Constructor()
-*/
-IContextMenu *ISvBgCm_Constructor(void)
-{
-	BgCmImpl* cm;
-
-	cm = (BgCmImpl*)HeapAlloc(GetProcessHeap(),HEAP_ZERO_MEMORY,sizeof(BgCmImpl));
-	cm->lpvtbl=&cmvt;
-	cm->ref = 1;
-
-	TRACE("(%p)->()\n",cm);
-	shell32_ObjCount++;
-	return (IContextMenu*)cm;
-}
+//static struct ICOM_VTABLE(IContextMenu) cmvt;
 
 /**************************************************************************
 *  ISVBgCm_fnQueryInterface
@@ -283,4 +267,21 @@ static struct ICOM_VTABLE(IContextMenu) cmvt =
 	ISVBgCm_fnHandleMenuMsg,
 	(void *) 0xdeadbabe	/* just paranoia (IContextMenu3) */
 };
+
+/**************************************************************************
+*   ISVBgCm_Constructor()
+*/
+IContextMenu *ISvBgCm_Constructor(void)
+{
+	BgCmImpl* cm;
+
+	cm = (BgCmImpl*)HeapAlloc(GetProcessHeap(),HEAP_ZERO_MEMORY,sizeof(BgCmImpl));
+	cm->lpvtbl=&cmvt;
+	cm->ref = 1;
+
+	TRACE("(%p)->()\n",cm);
+	shell32_ObjCount++;
+	return (IContextMenu*)cm;
+}
+
 

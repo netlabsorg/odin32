@@ -20,6 +20,7 @@
 
 #include "pidl.h"
 
+#include <heapstring.h>
 #include <misc.h>
 
 BOOL WINAPI FileMenu_DeleteAllItems (HMENU hMenu);
@@ -159,7 +160,7 @@ static int FM_InitMenuPopup(HMENU hmenu, LPITEMIDLIST pAlternatePidl)
 		if (SUCCEEDED (IShellFolder_GetAttributesOf(lpsf, 1, &pidlTemp, &ulItemAttr)))
 		{
 		  ILGetDisplayName( pidlTemp, sTemp);
-		  if (! (PidlToSicIndex(lpsf, pidlTemp, FALSE, &iIcon)))
+		  if (! (PidlToSicIndex(lpsf, pidlTemp, FALSE, (UINT*)&iIcon)))
 		    iIcon = FM_BLANK_ICON;
 		  if ( SFGAO_FOLDER & ulItemAttr)
 		  {
@@ -339,9 +340,9 @@ BOOL WINAPI FileMenu_AppendItemAW(
 	LPSTR lpszText=NULL;
 
 	if (VERSION_OsIsUnicode() && (lpText!=FM_SEPARATOR))
-	  lpszText = HEAP_strdupWtoA ( GetProcessHeap(),0, lpText);
+	  lpszText = (LPSTR)HEAP_strdupWtoA ( GetProcessHeap(),0, (LPCWSTR)lpText);
 
-	ret = FileMenu_AppendItemA(hMenu, (lpszText) ? lpszText : lpText, uID, icon, hMenuPopup, nItemHeight);
+	ret = FileMenu_AppendItemA(hMenu, (lpszText) ? lpszText : (LPCSTR)lpText, uID, icon, hMenuPopup, nItemHeight);
 
 	if (lpszText)
 	  HeapFree( GetProcessHeap(), 0, lpszText );
