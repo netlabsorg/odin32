@@ -1,4 +1,8 @@
-/* $Id: changelog,v 1.2154 2002-06-11 16:42:17 sandervl Exp $ */
+/* $Id: changelog,v 1.2155 2002-06-12 14:27:47 sandervl Exp $ */
+
+ 2002-06-12: Sander van Leeuwen <sandervl@innotek.de>
+    - KERNEL32: o If bytes present in COM device buffer, read them directly; 
+                  even for overlapped IO calls.
 
  2002-06-11: Platon Fomichev <platon@innotek.de>
     - SHELL32:  o Ignore name changes for 'My Computer' and other non-file
