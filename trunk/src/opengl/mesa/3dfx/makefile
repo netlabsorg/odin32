@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.7 2000-03-07 11:11:10 bird Exp $
+# $Id: makefile,v 1.8 2000-03-11 17:30:54 bird Exp $
 #
 # Odin32 API
 #
@@ -138,7 +138,7 @@ lib: $(TARGET).lib $(PDWIN32_LIB)\$(TARGET).lib
 
 # Dll rule - builds the target dll.
 $(OBJDIR)\$(TARGET).dll: $(OBJS) $(TARGET).def $(OBJDIR)\$(TARGET).lrf
-    $(LD2) $(LD2FLAGS) @$(OBJDIR)\$(TARGET).lrf
+    -4 $(LD2) $(LD2FLAGS) @$(OBJDIR)\$(TARGET).lrf
 
 
 # Linker file - creates the parameter file passed on to the linker.
