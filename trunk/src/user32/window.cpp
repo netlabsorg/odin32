@@ -1,4 +1,4 @@
-/* $Id: window.cpp,v 1.78 2000-10-08 18:45:36 sandervl Exp $ */
+/* $Id: window.cpp,v 1.79 2000-10-08 20:05:29 sandervl Exp $ */
 /*
  * Win32 window apis for OS/2
  *
@@ -947,14 +947,20 @@ BOOL WIN32API AdjustWindowRectEx( PRECT rect, DWORD style, BOOL menu, DWORD exSt
       rect->top -= GetSystemMetrics(SM_CYMENU);
 
     //Adjust rect inner (Win32BaseWindow::AdjustRectInner)
-    if (exStyle & WS_EX_CLIENTEDGE)
-      InflateRect (rect, GetSystemMetrics(SM_CXEDGE), GetSystemMetrics(SM_CYEDGE));
+    if(!(style & WS_ICONIC)) {
+	if (exStyle & WS_EX_CLIENTEDGE)
+      		InflateRect (rect, GetSystemMetrics(SM_CXEDGE), GetSystemMetrics(SM_CYEDGE));
 
-    if (exStyle & WS_EX_STATICEDGE)
-      InflateRect (rect, GetSystemMetrics(SM_CXBORDER), GetSystemMetrics(SM_CYBORDER));
+	if (exStyle & WS_EX_STATICEDGE)
+      		InflateRect (rect, GetSystemMetrics(SM_CXBORDER), GetSystemMetrics(SM_CYBORDER));
 
-    if (style & WS_VSCROLL) rect->right  += GetSystemMetrics(SM_CXVSCROLL);
-    if (style & WS_HSCROLL) rect->bottom += GetSystemMetrics(SM_CYHSCROLL);
+	//SvL: scrollbars aren't checked *UNLESS* the style includes a border (any border)
+        //     --> VERIFIED IN NT4, SP6 (fixes MFC apps with scrollbars + bar controls)
+	if(style & (WS_THICKFRAME|WS_BORDER|WS_DLGFRAME)) {
+    		if (style & WS_VSCROLL) rect->right  += GetSystemMetrics(SM_CXVSCROLL);
+    		if (style & WS_HSCROLL) rect->bottom += GetSystemMetrics(SM_CYHSCROLL);
+	}
+    }
 
     dprintf(("AdjustWindowRectEx returned (%d,%d)(%d,%d)\n", rect->left, rect->top, rect->right, rect->bottom));
 
