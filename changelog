@@ -1,9 +1,11 @@
-/* $Id: changelog,v 1.1812 2001-10-30 00:45:51 sandervl Exp $ */
+/* $Id: changelog,v 1.1813 2001-10-30 18:47:15 sandervl Exp $ */
 
  2001-10-30: Sander van Leeuwen <sandervl@xs4all.nl>
     - KERNEL32: o IOCTL_CDROM_READ_TOC bugfix
                 o Handle opening of drive without disk and getting handle
                   when disk is inserted
+                o Use DosOpenL (if available) to open files, or else the
+                  large file apis won't work properly.
 
  2001-10-29: Sander van Leeuwen <sandervl@xs4all.nl>
     - KERNEL32: o Always IOCTL_DISK/DSK_GETLOCKSTATUS for IOCTL_STORAGE_CHECK_VERIFY
