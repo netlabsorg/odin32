@@ -1,4 +1,4 @@
-/* $Id: static.h,v 1.4 2003-10-06 10:00:33 sandervl Exp $ */
+/* $Id: static.h,v 1.5 2003-11-14 13:43:08 sandervl Exp $ */
 
 /*
  * Static-class extra info

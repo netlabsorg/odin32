@@ -1,4 +1,4 @@
-/* $Id: scroll.h,v 1.8 2003-10-06 10:00:33 sandervl Exp $ */
+/* $Id: scroll.h,v 1.9 2003-11-14 13:43:08 sandervl Exp $ */
 
 /*
  * Scroll-bar class extra info
