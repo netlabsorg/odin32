@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.36 1999-08-30 11:59:53 sandervl Exp $
+# $Id: makefile,v 1.37 1999-08-30 14:21:25 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -29,7 +29,7 @@ OBJS =  user32.obj dialog.obj loadres.obj \
         msgbox.obj window.obj windowmsg.obj windowclass.obj win32wbase.obj \
         windowword.obj gen_object.obj oslibwin.obj win32wndchild.obj \
         controls.obj button.obj static.obj scroll.obj listbox.obj \
-        combo.obj edit.obj clipboard.obj winicon.obj \
+        combo.obj edit.obj clipboard.obj winicon.obj win32wmdiclient.obj \
         oslibutil.obj oslibmsg.obj dib.obj oslibdos.obj \
         winprop.obj wingdi.obj oslibgdi.obj winaccel.obj winscrollbar.obj \
         nativerc.obj oslibres.obj dummy.obj \
@@ -75,7 +75,7 @@ wndmsg.obj: wndmsg.cpp wndmsg.h
 
 spy.obj: spy.cpp $(PDWIN32_INCLUDE)\spy.h
 
-controls.obj: controls.cpp $(PDWIN32_INCLUDE)\win\controls.h
+controls.obj: controls.cpp $(PDWIN32_INCLUDE)\win\controls.h win32wmdiclient.h
 button.obj: button.cpp $(PDWIN32_INCLUDE)\win\button.h
 static.obj: static.cpp $(PDWIN32_INCLUDE)\win\static.h
 scroll.obj: scroll.cpp $(PDWIN32_INCLUDE)\win\scroll.h
@@ -105,6 +105,7 @@ win32wbase.obj:   win32wbase.cpp win32class.h win32wbase.h win32dlg.h gen_object
 win32wnd.obj:   win32wnd.cpp win32class.h win32wbase.h win32wnd.h win32dlg.h gen_object.h heapshared.h oslibwin.h win32wndchild.h  $(PDWIN32_INCLUDE)\winres.h oslibres.h win32wndhandle.h oslibdos.h
 win32dlg.obj:   win32dlg.cpp win32class.h win32wbase.h win32dlg.h gen_object.h heapshared.h oslibwin.h win32wndchild.h
 win32wndchild.obj: win32wndchild.cpp win32wndchild.h
+win32wmdiclient.obj: win32wmdiclient.cpp win32wmdiclient.h
 gen_object.obj: gen_object.cpp gen_object.h heapshared.h
 oslibwin.obj:   oslibwin.cpp oslibwin.h oslibutil.h oslibgdi.h $(PDWIN32_INCLUDE)\winconst.h
 oslibutil.obj:  oslibutil.cpp oslibutil.h $(PDWIN32_INCLUDE)\wprocess.h oslibmsg.h
