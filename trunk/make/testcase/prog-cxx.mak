@@ -1,4 +1,4 @@
-# $Id: prog-cxx.mak,v 1.2 2002-08-20 21:14:30 bird Exp $
+# $Id: prog-cxx.mak,v 1.3 2002-08-28 03:40:04 bird Exp $
 
 # Testcase for makeing simple C++ programs.
 
@@ -7,6 +7,7 @@ PATH_ROOT=..\..
 !include $(PATH_ROOT)\make\setup.mak
 
 # target config.
+TARGET_MODE = EXE
 TARGET_NAME = prog-cxx
 MAKEFILE    = prog-cxx.mak
 TARGET_LIBS = $(LIB_C_OBJ) $(LIB_OS)    # use the static library!
