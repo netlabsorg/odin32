@@ -101,6 +101,9 @@ typedef struct
     INT      nButtonDown;
     INT      nOldHit;
     INT      nHotItem;        /* index of the "hot" item */
+#ifdef __WIN32OS2__
+    HFONT    hDefaultFont;
+#endif
     HFONT    hFont;           /* text font */
     HIMAGELIST himlInt;         /* image list created internally */
     HIMAGELIST himlDef;         /* default image list */
@@ -4041,7 +4044,11 @@ TOOLBAR_Create (HWND hwnd, WPARAM wParam, LPARAM lParam)
     infoPtr->hwndSelf = hwnd;
 
     SystemParametersInfoA (SPI_GETICONTITLELOGFONT, 0, &logFont, 0);
+#ifdef __WIN32OS2__
+    infoPtr->hFont = infoPtr->hDefaultFont = CreateFontIndirectA (&logFont);
+#else
     infoPtr->hFont = CreateFontIndirectA (&logFont);
+#endif
 
     if (dwStyle & TBSTYLE_TOOLTIPS) {
 	/* Create tooltip control */
@@ -4098,8 +4105,14 @@ TOOLBAR_Destroy (HWND hwnd, WPARAM wParam, LPARAM lParam)
 	ImageList_Destroy (infoPtr->himlInt);
 
     /* delete default font */
+#ifdef __WIN32OS2__
+    //NEVER delete the font object received by WM_SETFONT!
+    if (infoPtr->hDefaultFont)
+        DeleteObject (infoPtr->hDefaultFont);
+#else
     if (infoPtr->hFont)
 	DeleteObject (infoPtr->hFont);
+#endif
 
     /* free toolbar info data */
     COMCTL32_Free (infoPtr);
