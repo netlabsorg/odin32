@@ -1,4 +1,4 @@
-/* $Id: win32wnd.cpp,v 1.3 1999-12-16 00:11:48 sandervl Exp $ */
+/* $Id: win32wnd.cpp,v 1.4 1999-12-18 16:31:52 cbratschi Exp $ */
 /*
  * Win32 Window Class for OS/2
  *
@@ -32,6 +32,8 @@
 #include <winres.h>
 #include "syscolor.h"
 #include "win32wndhandle.h"
+#include "mdi.h"
+#include "win32wmdiclient.h"
 
 
 //******************************************************************************
@@ -49,12 +51,13 @@ Win32Window::~Win32Window()
 //******************************************************************************
 LRESULT Win32Window::DefFrameProcA(HWND hwndMDIClient, UINT Msg, WPARAM wParam, LPARAM lParam)
 {
- Win32Window *window = NULL;
+ Win32MDIClientWindow *window = NULL;
+ Win32MDIChildWindow *child;
 
     if(hwndMDIClient)
-        window = (Win32Window *)GetWindowFromHandle(hwndMDIClient);
+        window = (Win32MDIClientWindow*)GetWindowFromHandle(hwndMDIClient);
 
-    if(window)
+    if (window && window->isMDIClient())
     {
         switch(Msg)
         {
@@ -63,16 +66,16 @@ LRESULT Win32Window::DefFrameProcA(HWND hwndMDIClient, UINT Msg, WPARAM wParam, 
             break;
 
 #if 0
+        case WM_SETTEXT:
+            //CB: infinite loop
+            //window->updateFrameText(MDI_REPAINTFRAME,(LPCSTR)lParam);
+            return 0;
+#endif
+
         case WM_COMMAND:
-            ci = (MDICLIENTINFO*)wndPtr->wExtra;
-
             /* check for possible syscommands for maximized MDI child */
-            WIN_ReleaseWndPtr(wndPtr);
-
-            if( ci && (
-                wParam <  ci->idFirstChild ||
-                wParam >= ci->idFirstChild + ci->nActiveChildren
-            )){
+            if(wParam <  window->getFirstChildId() || wParam >= window->getFirstChildId()+window->getNrOfChildren())
+            {
                 if( (wParam - 0xF000) & 0xF00F ) break;
                 switch( wParam )
                 {
@@ -84,23 +87,18 @@ LRESULT Win32Window::DefFrameProcA(HWND hwndMDIClient, UINT Msg, WPARAM wParam, 
                 case SC_PREVWINDOW:
                 case SC_CLOSE:
                 case SC_RESTORE:
-                    if( ci->hwndChildMaximized )
-                    return SendMessage16( ci->hwndChildMaximized, WM_SYSCOMMAND,
-                           wParam, lParam);
+                    child = window->getMaximizedChild();
+                    if (child)
+                    return ::SendMessageA(child->getWindowHandle(),WM_SYSCOMMAND,wParam,lParam);
                 }
             }
             else
             {
-                wndPtr = WIN_FindWndPtr(hwndMDIClient);
-                childHwnd = MDI_GetChildByID(wndPtr,wParam );
-                WIN_ReleaseWndPtr(wndPtr);
-
-                if( childHwnd )
-                    SendMessage16(hwndMDIClient, WM_MDIACTIVATE,
-                                      (WPARAM16)childHwnd , 0L);
+                child = window->getChildByID(wParam);
+                if (child)
+                    ::SendMessageA(window->getWindowHandle(),WM_MDIACTIVATE,(WPARAM)child->getWindowHandle(),0L);
             }
             break;
-#endif
 
         case WM_SETFOCUS:
             SetFocus(hwndMDIClient);

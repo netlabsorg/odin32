@@ -1,4 +1,4 @@
-/* $Id: win32wmdichild.cpp,v 1.14 1999-12-17 17:49:54 cbratschi Exp $ */
+/* $Id: win32wmdichild.cpp,v 1.15 1999-12-18 16:31:51 cbratschi Exp $ */
 /*
  * Win32 MDI Child Window Class for OS/2
  *
@@ -434,8 +434,9 @@ BOOL Win32MDIChildWindow::menuModifyItem()
 {
     Win32MDIClientWindow *client = (Win32MDIClientWindow *)getParent();
     char   buffer[128];
-    UINT   n          = sprintf(buffer, "%d ", getWindowId() - client->getFirstChildId() + 1);
-    BOOL   bRet     = 0;
+    UINT   id   = getWindowId()-client->getFirstChildId()+1;
+    UINT   n    = sprintf(buffer,(id > 9) ? "%d":"&%d ",id);
+    BOOL   bRet = 0;
 
     if( !client->getMDIMenu() )
     {

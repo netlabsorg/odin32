@@ -1,4 +1,4 @@
-/* $Id: win32wmdiclient.cpp,v 1.15 1999-12-17 17:18:04 cbratschi Exp $ */
+/* $Id: win32wmdiclient.cpp,v 1.16 1999-12-18 16:31:51 cbratschi Exp $ */
 /*
  * Win32 MDI Client Window Class for OS/2
  *
@@ -436,7 +436,7 @@ LRESULT Win32MDIClientWindow::destroyChild(Win32MDIChildWindow *child, BOOL flag
 
         if( child == getActiveChild() )
         {
-            ShowWindow(SW_HIDE);
+            ::ShowWindow(child->getWindowHandle(),SW_HIDE);
             if( child == getMaximizedChild() )
             {
                 restoreFrameMenu(child);
@@ -454,7 +454,7 @@ LRESULT Win32MDIClientWindow::destroyChild(Win32MDIChildWindow *child, BOOL flag
 
     if (flagDestroy)
     {
-//        MDI_PostUpdate(GetParent(child), ci, SB_BOTH+1);
+        postUpdate(SB_BOTH+1);
         ::DestroyWindow(child->getWindowHandle());
     }
 
@@ -686,7 +686,7 @@ void Win32MDIClientWindow::releaseWindowArray(Win32BaseWindow **wndArray)
 }
 
 /**********************************************************************
- *			MDI_CalcDefaultChildPos
+ *                      MDI_CalcDefaultChildPos
  *
  *  It seems that the default height is about 2/3 of the client rect
  */
@@ -695,10 +695,10 @@ void Win32MDIClientWindow::calcDefaultChildPos(WORD n,LPPOINT lpPos,INT delta)
     INT  nstagger;
     RECT rect = *this->getClientRect();
     INT  spacing = GetSystemMetrics(SM_CYCAPTION) +
-		     GetSystemMetrics(SM_CYFRAME) - 1;
+                     GetSystemMetrics(SM_CYFRAME) - 1;
 
     if( rect.bottom - rect.top - delta >= spacing )
-	rect.bottom -= delta;
+        rect.bottom -= delta;
 
     nstagger = (rect.bottom - rect.top)/(3 * spacing);
     lpPos[1].x = (rect.right - rect.left - nstagger * spacing);
@@ -1105,6 +1105,115 @@ void WINAPI ScrollChildren(HWND hWnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
   else
     ScrollWindowEx(hWnd ,curPos - newPos, 0, NULL, NULL, 0, NULL,
                    SW_INVALIDATE | SW_ERASE | SW_SCROLLCHILDREN );
+}
+
+/*****************************************************************************
+ * Name      : WORD WIN32API CascadeWindows
+ * Purpose   : The CascadeWindows function cascades the specified windows or
+ *             the child windows of the specified parent window.
+ * Parameters: HWND hwndParent         handle of parent window
+ *             UINT wHow               types of windows not to arrange
+ *             CONST RECT * lpRect     rectangle to arrange windows in
+ *             UINT cKids              number of windows to arrange
+ *             const HWND FAR * lpKids array of window handles
+ * Variables :
+ * Result    : If the function succeeds, the return value is the number of windows arranged.
+ *             If the function fails, the return value is zero.
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Thu, 1998/02/26 11:55]
+ *****************************************************************************/
+WORD WIN32API CascadeWindows(HWND       hwndParent,
+                             UINT       wHow,
+                             CONST LPRECT lpRect,
+                             UINT       cKids,
+                             const HWND *lpKids)
+{
+  dprintf(("USER32:CascadeWindows(%08xh,%u,%08xh,%u,%08x) not implemented.\n",
+         hwndParent,
+         wHow,
+         lpRect,
+         cKids,
+         lpKids));
+
+  return (0);
+}
+
+/*****************************************************************************
+ * Name      : BOOL WIN32API CascadeChildWindows
+ * Purpose   : Unknown
+ * Parameters: Unknown
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED UNKNOWN STUB
+ *
+ * Author    : Patrick Haller [Wed, 1998/06/16 11:55]
+ *****************************************************************************/
+BOOL WIN32API CascadeChildWindows(DWORD x1,
+                                     DWORD x2)
+{
+  dprintf(("USER32: CascadeChildWindows(%08xh,%08xh) not implemented.\n",
+           x1,
+           x2));
+
+  return (FALSE); /* default */
+}
+
+/*****************************************************************************
+ * Name      : WORD WIN32API TileWindows
+ * Purpose   : The TileWindows function tiles the specified windows, or the child
+ *             windows of the specified parent window.
+ * Parameters: HWND       hwndParent     handle of parent window
+ *             WORD       wFlags         types of windows not to arrange
+ *             LPCRECT    lpRect         rectangle to arrange windows in
+ *             WORD       cChildrenb     number of windows to arrange
+ *             const HWND *ahwndChildren array of window handles
+ * Variables :
+ * Result    : If the function succeeds, the return value is the number of
+ *               windows arranged.
+ *             If the function fails, the return value is zero.
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Thu, 1998/02/26 11:55]
+ *****************************************************************************/
+WORD WIN32API TileWindows(HWND       hwndParent,
+                          UINT       wFlags,
+                          const LPRECT lpRect,
+                          UINT       cChildrenb,
+                          const HWND *ahwndChildren)
+{
+  dprintf(("USER32:TileWindows (%08xh,%08xh,%08xh,%08xh,%08x) not implemented.\n",
+           hwndParent,
+           wFlags,
+           lpRect,
+           cChildrenb,
+           ahwndChildren));
+
+   return (0);
+}
+
+/*****************************************************************************
+ * Name      : BOOL WIN32API TileChildWindows
+ * Purpose   : Unknown
+ * Parameters: Unknown
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED UNKNOWN STUB
+ *
+ * Author    : Patrick Haller [Wed, 1998/06/16 11:55]
+ *****************************************************************************/
+BOOL WIN32API TileChildWindows(DWORD x1,
+                                  DWORD x2)
+{
+  dprintf(("USER32: TileChildWindows(%08xh,%08xh) not implemented.\n",
+           x1,
+           x2));
+
+  return (FALSE); /* default */
 }
 
 /* -------- Miscellaneous service functions ----------
