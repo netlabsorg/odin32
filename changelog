@@ -1,8 +1,10 @@
-/* $Id: changelog,v 1.2108 2002-05-29 11:46:55 sandervl Exp $ */
+/* $Id: changelog,v 1.2109 2002-05-29 15:12:44 sandervl Exp $ */
 
  2002-05-29: Sander van Leeuwen <sandervl@innotek.de>
     - USER32:   o Fix for ToAscii(Ex) & GetKeyboardState (WinTranslateChar2 call)
                   (fixes AbiWord keyboard input)
+    - WINMM:    o mixerGetLineControlsA (MIXER_GETLINECONTROLSF_ALL) fixes
+                o mixerGetLineInfoW fix
 
  2002-05-29: Platon Fomichev <platon@innotek.de>
     - USER32:   o GetAsyncKeyState fix for VK_MENU
