@@ -1,4 +1,4 @@
-/* $Id: kHll.h,v 1.5 2000-03-31 15:47:38 bird Exp $
+/* $Id: kHll.h,v 1.6 2000-04-05 18:45:21 bird Exp $
  *
  * kHll - Declarations of the class kHll.
  *        That class is used to create HLL debuginfo.
@@ -64,12 +64,41 @@ public:
 };
 
 
+
+/**
+ * HLL Source entry.
+ * @shortdesc
+ * @dstruct
+ * @version
+ * @verdesc
+ * @author      knut st. osmundsen (knut.stange.osmundsen@pmsc.no)
+ * @approval
+ */
 class kHllSrcEntry
 {
 private:
+    int                 cFilenames;
+    char *              pchFilenames;
+
+    int                 cLines;
+    HLLLINENUMBERENTRY  paLines;
 
 public:
 
+    ~kHllSrcEntry();
+
+    BOOL            addLineInfo(
+                        int                 iFile,
+                        int                 iLine,
+                        unsigned short int  iObject,
+                        unsigned long int   off
+                        );
+    int             addFile(
+                        const char *        pszFilename,
+
+                        );
+
+    int             write(FILE *phFile);
 };
 
 
