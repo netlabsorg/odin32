@@ -1,4 +1,8 @@
-/* $Id: changelog,v 1.1289 2001-02-25 16:05:05 sandervl Exp $ */
+/* $Id: changelog,v 1.1290 2001-02-26 20:14:01 sandervl Exp $ */
+
+ 2001-02-26: Sander van Leeuwen <sandervl@xs4all.nl>
+    - WINMM:    o Fixed FS corruption in RTMidi class (wrappers for RTMIDI
+                  functions)
 
  2001-02-25: Sander van Leeuwen <sandervl@xs4all.nl>
     - KERNEL32: o Check executable too when searching for imported modules
