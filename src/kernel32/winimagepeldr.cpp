@@ -1,4 +1,4 @@
-/* $Id: winimagepeldr.cpp,v 1.19 1999-11-29 00:04:06 bird Exp $ */
+/* $Id: winimagepeldr.cpp,v 1.20 1999-11-30 15:06:55 sandervl Exp $ */
 
 /*
  * Win32 PE loader Image base class
@@ -547,7 +547,7 @@ BOOL Win32PeLdrImage::commitPage(ULONG virtAddress, BOOL fWriteAccess, int fPage
   	protflags   = section->pageflags;
   	offset      = virtAddress - section->realvirtaddr;
   	sectionsize = section->virtualsize - offset;
-  	if(offset > section->rawsize) {
+  	if(offset > section->rawsize || section->type == SECTION_UNINITDATA) {
 		//unintialized data (set to 0)
 		size = 0;
 		fileoffset = -1;
@@ -982,6 +982,7 @@ void Win32PeLdrImage::AddOff32Fixup(ULONG fixupaddr)
 
   fixup   = (ULONG *)(fixupaddr + realBaseAddress);
   orgaddr = *fixup;
+//  dprintf(("AddOff32Fixup 0x%x org 0x%x -> new 0x%x", fixup, orgaddr, realBaseAddress + (*fixup - oh.ImageBase)));
   *fixup  = realBaseAddress + (*fixup - oh.ImageBase);
 }
 //******************************************************************************
@@ -995,9 +996,11 @@ void Win32PeLdrImage::AddOff16Fixup(ULONG fixupaddr, BOOL fHighFixup)
   orgaddr = *fixup;
   if(fHighFixup) {
   	*fixup  += (USHORT)((realBaseAddress - oh.ImageBase) >> 16);
+//        dprintf(("AddOff16FixupH 0x%x org 0x%x -> new 0x%x", fixup, orgaddr, *fixup));
   }
   else {
   	*fixup  += (USHORT)((realBaseAddress - oh.ImageBase) & 0xFFFF);
+//        dprintf(("AddOff16FixupL 0x%x org 0x%x -> new 0x%x", fixup, orgaddr, *fixup));
   }
 }
 //******************************************************************************
