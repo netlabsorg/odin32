@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.19 1999-10-07 18:24:53 achimha Exp $ */
+/* $Id: pmwindow.cpp,v 1.20 1999-10-07 19:38:27 sandervl Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -270,6 +270,7 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
       ULONG     parentHeight = 0;
       HWND      hParent = NULLHANDLE, hFrame = NULLHANDLE;
       LONG      yDelta = pswp->cy - pswpo->cy;
+      LONG      xDelta = pswp->cx - pswpo->cx;
       ULONG     classStyle;
 
         dprintf(("OS2: WM_WINDOWPOSCHANGED %x %x (%d,%d) (%d,%d)", hwnd, pswp->fl, pswp->x, pswp->y, pswp->cx, pswp->cy));
@@ -295,7 +296,7 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
         }
         classStyle = win32wnd->getClass()->getStyle();
 
-        if ((yDelta != 0) || (pswp->cx != pswpo->cx)) 
+        if (yDelta != 0 || xDelta != 0)
         {
             HENUM henum = WinBeginEnumWindows(pswp->hwnd);
             SWP swp[10];
@@ -305,23 +306,31 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
             while ((hwnd = WinGetNextWindow(henum)) != NULLHANDLE)
             {
 #if 0
-               if (mdiClient )
-               {
+                if (mdiClient )
+                {
                   continue;
-               }
+                }
 #endif
-               WinQueryWindowPos(hwnd, &(swp[i]));
-               swp[i].y += yDelta;
+                WinQueryWindowPos(hwnd, &(swp[i]));
 
-               if (i == 9)
-               {
-                  WinSetMultWindowPos(GetThreadHAB(), swp, 10);
-                  i = 0;
-               }
-               else
-               {
-                  i++;
-               }
+#ifdef DEBUG
+                Win32BaseWindow *window = Win32BaseWindow::GetWindowFromOS2Handle(hwnd);
+                dprintf(("ENUMERATE %x delta %d (%d,%d) (%d,%d)", (window) ? window->getWindowHandle() : hwnd,
+                         yDelta, swp[i].x, swp[i].y, swp[i].cx, swp[i].cy));
+#endif
+
+                swp[i].cy += yDelta;
+                swp[i].fl  = SWP_SIZE;
+
+                if (i == 9)
+                {
+                    WinSetMultWindowPos(GetThreadHAB(), swp, 10);
+                    i = 0;
+                }
+                else
+                {
+                    i++;
+                }
             }
 
             WinEndEnumWindows(henum);
@@ -332,9 +341,17 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
         if (yDelta != 0)
         {
             POINT pt;
+#if 1
+            if(GetCaretPos (&pt) == TRUE)
+            {
+                pt.y -= yDelta;
+                SetCaretPos (pt.x, pt.y);
+            }
+#else
             GetCaretPos (&pt);
             pt.y -= yDelta;
             SetCaretPos (pt.x, pt.y);
+#endif
         }
         win32wnd->MsgPosChanged((LPARAM)&wp);
 
@@ -371,6 +388,8 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
         swp.hwndInsertBehind = NULLHANDLE;
 
         OSLibMapSWPtoWINDOWPOS(&swp, &wp, &swpo, NULLHANDLE, hFrame);
+
+        dprintf(("OS2: WM_MOVE %x %x (%d,%d) (%d,%d)", hwnd, swp.fl, swp.x, swp.y, swp.cx, swp.cy));
 
         wp.flags &= ~SWP_NOMOVE_W;
         wp.hwnd = win32wnd->getWindowHandle();
@@ -775,7 +794,7 @@ VirtualKeyFound:
      ULONG textlen;
      PSZ   wintext;
 
-        if(wndpars->fsStatus & (WPM_CCHTEXT | WPM_TEXT)) 
+        if(wndpars->fsStatus & (WPM_CCHTEXT | WPM_TEXT))
         {
             if(wndpars->fsStatus & WPM_CCHTEXT)
                 wndpars->cchText = win32wnd->MsgGetTextLength();
