@@ -1,4 +1,4 @@
-/* $Id: ftp.c,v 1.3 2000-12-27 23:06:17 sandervl Exp $
+/* $Id: ftp.c,v 1.4 2000-12-27 23:15:05 sandervl Exp $
  *
  * WININET - Ftp implementation
  *
@@ -29,8 +29,6 @@
 #endif
 
 #include "internet.h"
-
-#define ERROR_INTERNET_TIMEOUT ERROR_INTERNET_TIME
 
 DEFAULT_DEBUG_CHANNEL(wininet)
 

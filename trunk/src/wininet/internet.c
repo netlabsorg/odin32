@@ -1,4 +1,4 @@
-/* $Id: internet.c,v 1.3 2000-12-27 23:06:17 sandervl Exp $
+/* $Id: internet.c,v 1.4 2000-12-27 23:15:05 sandervl Exp $
  *
  * Wininet
  *
@@ -22,8 +22,6 @@
 #include <string.h>
 #include <ctype.h>
 #define strncasecmp strnicmp
-#define ERROR_INTERNET_TIMEOUT ERROR_INTERNET_TIME
-#define ERROR_INTERNET_ASYNC_THREAD_FAILED (INTERNET_ERROR_BASE + 47)
 #define TLS_OUT_OF_INDEXES -1
 #else
 #include <sys/types.h>

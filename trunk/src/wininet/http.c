@@ -20,20 +20,6 @@
 #include <stdlib.h>
 #include <string.h>
 #define strcasecmp stricmp
-#define HTTP_QUERY_ETAG 54
-typedef struct _INTERNET_BUFFERSA
-{
-    DWORD dwStructSize;
-    struct _INTERNET_BUFFERSA * Next;
-    LPCSTR   lpcszHeader;
-    DWORD dwHeadersLength;
-    DWORD dwHeadersTotal;
-    LPVOID lpvBuffer;
-    DWORD dwBufferLength;
-    DWORD dwBufferTotal;
-    DWORD dwOffsetLow;
-    DWORD dwOffsetHigh;
-} INTERNET_BUFFERSA,* LPINTERNET_BUFFERSA;
 #else
 #include <sys/types.h>
 #ifdef HAVE_SYS_SOCKET_H
