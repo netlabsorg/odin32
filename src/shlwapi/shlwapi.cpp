@@ -1,4 +1,4 @@
-/* $Id: shlwapi.cpp,v 1.2 1999-12-28 23:17:04 sandervl Exp $ */
+/* $Id: shlwapi.cpp,v 1.3 1999-12-30 00:24:29 phaller Exp $ */
 
 /*
  * Win32 URL-handling APIs for OS/2
@@ -103,5 +103,61 @@ ODINFUNCTION8(LONG,SHRegGetUSValueW,LPCWSTR, pSubKey,
     dprintf(("(%p),stub!\n", pSubKey));
 
 	return ERROR_SUCCESS;  /* return success */
+}
+
+
+/*****************************************************************************
+ * Name      : DWORD SHRegGetBoolUSValueA
+ * Purpose   : unknown
+ * Parameters: unknown
+ * Variables :
+ * Result    : unknown
+ * Remark    : SHLWAPI.SHRegGetBoolUSValueA
+ * Status    : UNTESTED
+ *
+ * Author    : Patrick Haller [Wed, 1999/12/29 23:02]
+ *****************************************************************************/
+
+ODINFUNCTION5(LONG,    SHRegGetBoolUSValueA,
+              LPCSTR,  pSubKey,
+              DWORD,   arg2,
+              DWORD,   arg3,
+              DWORD,   arg4,
+              DWORD,   arg5)
+{
+  char  szBuffer[264];
+  int   iLength;
+  
+  dprintf(("(%p),stub!\n", pSubKey));
+
+  return ERROR_SUCCESS;  /* return success */
+}
+
+
+/*****************************************************************************
+ * Name      : DWORD SHRegGetBoolUSValueW
+ * Purpose   : unknown
+ * Parameters: unknown
+ * Variables :
+ * Result    : unknown
+ * Remark    : SHLWAPI.SHRegGetBoolUSValueW
+ * Status    : UNTESTED
+ *
+ * Author    : Patrick Haller [Wed, 1999/12/29 23:02]
+ *****************************************************************************/
+
+ODINFUNCTION5(LONG,    SHRegGetBoolUSValueW,
+              LPCWSTR, pSubKey,
+              DWORD,   arg2,
+              DWORD,   arg3,
+              DWORD,   arg4,
+              DWORD,   arg5)
+{
+  char  szBuffer[264];
+  int   iLength;
+  
+  dprintf(("(%p),stub!\n", pSubKey));
+
+  return ERROR_SUCCESS;  /* return success */
 }
 

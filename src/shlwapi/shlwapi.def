@@ -1,4 +1,4 @@
-; $Id: shlwapi.def,v 1.5 1999-12-28 23:28:12 sandervl Exp $
+; $Id: shlwapi.def,v 1.6 1999-12-30 00:24:30 phaller Exp $
 
 LIBRARY SHLWAPI INITINSTANCE TERMINSTANCE
 DATA MULTIPLE NONSHARED
@@ -467,10 +467,15 @@ EXPORTS
     SHGetValueA          = _SHGetValueA@24                      @281
     SHGetValueW          = _SHGetValueW@24                      @282
 
+    SHRegGetBoolUSValueA = _SHRegGetBoolUSValueA@20             @301
+    SHRegGetBoolUSValueW = _SHRegGetBoolUSValueW@20             @302
     SHRegGetUSValueA     = _SHRegGetUSValueA@32                 @303
     SHRegGetUSValueW     = _SHRegGetUSValueW@32                 @304
     StrChrA              = _StrChrA@8                           @322
+    StrChrIA             = _StrChrIA@8                          @323
+    StrChrIW             = _StrChrIW@8                          @324
     StrChrW              = _StrChrW@8                           @325
+
     StrCmpNIA            = _StrCmpNIA@12                        @328
     StrCmpNIW            = _StrCmpNIW@12                        @329
 
@@ -478,6 +483,9 @@ EXPORTS
     StrFormatByteSizeW   = _StrFormatByteSizeW@12               @337
     StrRChrA             = _StrRChrA@12                         @346
     StrRChrW             = _StrRChrW@12                         @349
+
+    StrStrIA             = _StrStrIA@8                          @355
+    StrStrIW             = _StrStrIW@8                          @356
 
     StrRetToBufA         = _StrRetToBufA@16                     @400
     StrRetToBufW         = _StrRetToBufW@16                     @401
