@@ -1,4 +1,4 @@
- /* $Id: ChangeLog,v 1.808 2000-03-14 18:26:32 cbratschi Exp $ */
+ /* $Id: ChangeLog,v 1.809 2000-03-14 20:03:36 sandervl Exp $ */
 
  2000-03-14: Christoph Bratschi <cbratschi@datacomm.ch>
 	- USER32: implemented much faster LB_SETCOUNT
@@ -12,6 +12,11 @@
                                   flag is set (by combo_handletext)
                   -> fixes infinite loops in RealPlayer 7 (type name of file
                      previously used in edit box; last letter entered -> crash)
+	          AdjustWindowRectEx bugfix (reported by Robert Lalla)
+                  Don't clear WS_POPUP flag. (HAS_THINFRAME depends on it)
+                  -> fixes wrong resolution changes in Quake 2
+                  Don't clear WS_CHILD flag either. (HAS_THICKFRAME depends on it)
+
         - WSOCK32: Changed workaround for setsockopt bug (SO_SNDBUF/SO_RCVBUF (OS/2's
                    winsock returns WSAEINVAL if size > 64k))
                    Only change size if setsockopt returns WSAINVAL (32 bits stack
