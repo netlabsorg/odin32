@@ -1,4 +1,4 @@
-# $Id: process.forwarder.mak,v 1.5 2002-08-19 15:00:25 bird Exp $
+# $Id: process.forwarder.mak,v 1.6 2002-08-20 04:05:40 bird Exp $
 
 #
 # Generic makefile system.
@@ -178,45 +178,14 @@ all: build
 
 
 # -----------------------------------------------------------------------------
-# The build rule - Build the target.
+# Generic forwarder
 # -----------------------------------------------------------------------------
-build:
-    \
-!ifndef BUILD_VERBOSE
-    @ \
+build rebuild clean dep lib executables miscellaneous \
+!if "$(TARGET_MODE)" == "DEPEND"
+$(TARGET) \
 !endif
-    $(TOOL_BUILDENV) $(BUILD_ENVS_CHANGE) * $(TOOL_MAKE) -f $(MAKEFILE) $@
-
-
-
-# -----------------------------------------------------------------------------
-# The lib rule - Make Public libraries.
-# -----------------------------------------------------------------------------
-lib:
-    \
-!ifndef BUILD_VERBOSE
-    @ \
-!endif
-    $(TOOL_BUILDENV) $(BUILD_ENVS_CHANGE) * $(TOOL_MAKE) -f $(MAKEFILE) $@
-
-
-
-# -----------------------------------------------------------------------------
-# The install rule - Copies target to main binary directory.
-# -----------------------------------------------------------------------------
-install:
-    \
-!ifndef BUILD_VERBOSE
-    @ \
-!endif
-    $(TOOL_BUILDENV) $(BUILD_ENVS_CHANGE) * $(TOOL_MAKE) -f $(MAKEFILE) $@
-
-
-
-# -----------------------------------------------------------------------------
-# The testcase rule - Execute testcases when present.
-# -----------------------------------------------------------------------------
-testcase:
+$(TARGET_ILIB) \
+install testcase nothing target:
     \
 !ifndef BUILD_VERBOSE
     @ \
@@ -238,96 +207,11 @@ shell:
 
 
 # -----------------------------------------------------------------------------
-# The dep rule - Make dependencies.
-# -----------------------------------------------------------------------------
-dep:
-    \
-!ifndef BUILD_VERBOSE
-    @ \
-!endif
-    $(TOOL_BUILDENV) $(BUILD_ENVS_CHANGE) * $(TOOL_MAKE) -f $(MAKEFILE) $@
-
-
-
-# -----------------------------------------------------------------------------
-# The clean rule - Clean up output files.
-#   The current setup doesn't clean the installed ones.
-# -----------------------------------------------------------------------------
-clean:
-    \
-!ifndef BUILD_VERBOSE
-    @ \
-!endif
-    $(TOOL_BUILDENV) $(BUILD_ENVS_CHANGE) * $(TOOL_MAKE) -f $(MAKEFILE) $@
-
-
-
-# -----------------------------------------------------------------------------
-# The nothing rule - Rule for testing the makefile structure.
-# -----------------------------------------------------------------------------
-nothing:
-    \
-!ifndef BUILD_VERBOSE
-    @ \
-!endif
-    $(TOOL_BUILDENV) $(BUILD_ENVS_CHANGE) * $(TOOL_MAKE) -f $(MAKEFILE) $@
-
-
-
-# -----------------------------------------------------------------------------
-# The $(TARGET) rule - For EXE, DLL, SYS and IFS targets
-# -----------------------------------------------------------------------------
-!if "$(TARGET_MODE)" == "EXE" || "$(TARGET_MODE)" == "DLL" || "$(TARGET_MODE)" == "SYS" || "$(TARGET_MODE)" == "IFS" || "$(TARGET_MODE)" == "VDD"
-$(TARGET):
-    \
-!ifndef BUILD_VERBOSE
-    @ \
-!endif
-    $(TOOL_BUILDENV) $(BUILD_ENVS_CHANGE) * $(TOOL_MAKE) -f $(MAKEFILE) $@
-!endif
-
-
-
-# -----------------------------------------------------------------------------
-# The $(TARGET) rule - For LIB, SYSLIB, and IFSLIB targets.
-# -----------------------------------------------------------------------------
-!if "$(TARGET_MODE)" == "LIB" || "$(TARGET_MODE)" == "SYSLIB" || "$(TARGET_MODE)" == "IFSLIB"
-$(TARGET):
-    \
-!ifndef BUILD_VERBOSE
-    @ \
-!endif
-    $(TOOL_BUILDENV) $(BUILD_ENVS_CHANGE) * $(TOOL_MAKE) -f $(MAKEFILE) $@
-!endif
-
-
-
-# -----------------------------------------------------------------------------
 # The $(TARGET) rule - For EMPTY & DEPEND targets.
 # -----------------------------------------------------------------------------
-# this doesn't work as we don't have a target name. Hence not needed.
-#!if "$(TARGET_MODE)" == "EMPTY"
-#$(TARGET):
-#    @$(ECHO) .
-#!endif
 !if "$(TARGET_MODE)" == "DEPEND"
 $(TARGET):
     @$(ECHO) .
-!endif
-
-
-
-# -----------------------------------------------------------------------------
-# The $(TARGET_ILIB) rule - Make import library.
-# -----------------------------------------------------------------------------
-!ifdef TARGET_ILIB
-$(TARGET_ILIB):
-    \
-!ifndef BUILD_VERBOSE
-    @ \
-!endif
-    $(TOOL_BUILDENV) $(BUILD_ENVS_CHANGE) * $(TOOL_MAKE) -f $(MAKEFILE) $@
-
 !endif
 
 
@@ -342,5 +226,4 @@ $(TARGET_ILIB):
 !else
     @$(ECHO) . (force) .
 !endif
-
 
