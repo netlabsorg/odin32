@@ -1,4 +1,4 @@
-/* $Id: dbglog.cpp,v 1.4 2002-10-10 16:28:40 sandervl Exp $ */
+/* $Id: dbglog.cpp,v 1.5 2003-01-22 17:06:18 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -693,23 +693,6 @@ void ClosePrivateLogFiles()
 #endif
         ClosePrivateLogFilePE();
     }
-}
-//******************************************************************************
-//******************************************************************************
-int SYSTEM WriteLogError(char *tekst, ...)
-{
-  USHORT  sel = RestoreOS2FS();
-  va_list argptr;
-
-  va_start(argptr, tekst);
-  printf("ERROR: ");
-  vprintf(tekst, argptr);
-  va_end(argptr);
-  if(tekst[strlen(tekst)-1] != '\n')
-    printf("\n");
-
-  SetFS(sel);
-  return 1;
 }
 //******************************************************************************
 //******************************************************************************
