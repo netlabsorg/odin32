@@ -1,4 +1,7 @@
- /* $Id: ChangeLog,v 1.42 1999-07-05 13:49:22 phaller Exp $ */
+ /* $Id: ChangeLog,v 1.43 1999-07-06 08:49:28 sandervl Exp $ */
+ 99-07-06: Edgar Buerkle <100566.557@compuserve.com>
+	- PE2LX: Finished support for codepages
+
  99-07-05: Patrick Haller <phaller@gmx.net>
         - SHELL32: SheSetCurDrive stub, ...
 
