@@ -1,4 +1,4 @@
-/* $Id: obj_shellbrowser.h,v 1.6 2000-08-18 02:04:19 phaller Exp $ */
+/* $Id: obj_shellbrowser.h,v 1.7 2000-11-06 19:50:04 sandervl Exp $ */
 /************************************************************
  *    IShellBrowser
  */
@@ -22,6 +22,8 @@ extern "C" {
 */
 
 #define SID_SShellBrowser IID_IShellBrowser
+
+DEFINE_GUID(SID_STopLevelBrowser, 0x4C96BE40L, 0x915C, 0x11CF, 0x99, 0xD3, 0x00, 0xAA, 0x00, 0x4A, 0xE8, 0x37);
 
 /* targets for GetWindow/SendControlMsg */
 #define FCW_STATUS		0x0001
