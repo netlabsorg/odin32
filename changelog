@@ -1,8 +1,9 @@
-/* $Id: changelog,v 1.1322 2001-03-25 22:35:12 sandervl Exp $ */
+/* $Id: changelog,v 1.1323 2001-03-25 22:41:29 sandervl Exp $ */
 
  2001-03-25: Michal Necasek <michalnec@volny.cz>
     - KERNEL32: o Turn off all optimizations for exceptions.cpp in release build (!)
-    - DINPUT:   o Fixed keyboard handling. Now arrow keys should work right
+    - DINPUT/USER32:
+                o Fixed keyboard handling. Now arrow keys should work right
                   on both numpad and the separate arrow block among other things.
 
  2001-03-25: Sander van Leeuwen <sandervl@xs4all.nl>
