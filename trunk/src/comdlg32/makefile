@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.3 1999-06-10 17:07:29 phaller Exp $
+# $Id: makefile,v 1.4 1999-06-27 21:58:19 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -36,7 +36,7 @@ $(TARGET).lib: $(TARGET)exp.def
 	$(IMPLIB) $(IMPLIBFLAGS) $@ $(TARGET)exp.def
 	$(CP) $@ $(PDWIN32_LIB)
 
-comdlg32.obj: comdlg32.cpp
+comdlg32.obj: comdlg32.cpp $(PDWIN32_INCLUDE)\wndproc.h
 initterm.obj: initterm.cpp
 
 clean:
