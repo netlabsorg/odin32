@@ -1,4 +1,4 @@
-/* $Id: resource.cpp,v 1.10 1999-11-29 00:04:05 bird Exp $ */
+/* $Id: resource.cpp,v 1.11 1999-11-29 20:43:01 sandervl Exp $ */
 
 /*
  * Misc resource procedures
@@ -162,3 +162,142 @@ BOOL WIN32API EnumResourceNamesW(HMODULE          hModule,
     return pModule->enumResourceNamesW(hModule, lpszType, lpEnumFunc, lParam);
 }
 
+/*****************************************************************************
+ * Name      : BOOL WIN32API EnumResourceLanguagesA
+ * Purpose   : The EnumResourceLanguagesA function searches a module for each
+ *             resource of the specified type and name and passes the language
+ *             of each resource it locates to a defined callback function
+ * Parameters: HMODULE hModule                  resource-module handle
+ *             LPCTSTR lpType                   pointer to resource type
+ *             LPCTSTR lpName,                  pointer to resource name
+ *             ENUMRESLANGPROC lpEnumFunc       pointer to callback function
+ *             LONG lParam                  application-defined parameter
+ * Variables :
+ * Result    : If the function succeeds, the return value is nonzero.
+ *             If the function fails, the return value is zero.
+ * Remark    : The EnumResourceLanguages function continues to enumerate
+ *             resource languages until the callback function returns FALSE
+ *             or all resource languages have been enumerated.
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Markus Montkowski [Tha, 1998/05/21 17:46]
+ *****************************************************************************/
+
+BOOL WIN32API EnumResourceLanguagesA(HMODULE hModule, LPCSTR lpType,
+                                     LPCSTR lpName,
+                                     ENUMRESLANGPROCA lpEnumFunc,
+                                     LONG lParam)
+{
+
+  dprintf(("KERNEL32:EnumResourceLanguagesA(%08x,%08x,%08x,%08x,%08x)\n not implemented",
+           hModule, lpType, lpName, lpEnumFunc, lParam
+          ));
+
+  return (FALSE);
+}
+
+/*****************************************************************************
+ * Name      : BOOL WIN32API EnumResourceLanguagesW
+ * Purpose   : The EnumResourceLanguagesW function searches a module for each
+ *             resource of the specified type and name and passes the language
+ *             of each resource it locates to a defined callback function
+ * Parameters: HMODULE hModule                  resource-module handle
+ *             LPCTSTR lpType                   pointer to resource type
+ *             LPCTSTR lpName,                  pointer to resource name
+ *             ENUMRESLANGPROC lpEnumFunc       pointer to callback function
+ *             LONG lParam                  application-defined parameter
+ * Variables :
+ * Result    : If the function succeeds, the return value is nonzero.
+ *             If the function fails, the return value is zero.
+ * Remark    : The EnumResourceLanguages function continues to enumerate
+ *             resource languages until the callback function returns FALSE
+ *             or all resource languages have been enumerated.
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Markus Montkowski [Tha, 1998/05/21 17:46]
+ *****************************************************************************/
+
+BOOL WIN32API EnumResourceLanguagesW(HMODULE hModule, LPCWSTR lpType,
+                                     LPCWSTR lpName,
+                                     ENUMRESLANGPROCW lpEnumFunc,
+                                     LONG lParam)
+{
+
+  dprintf(("KERNEL32:EnumResourceLanguagesW(%08x,%08x,%08x,%08x,%08x)\n not implemented",
+           hModule, lpType, lpName, lpEnumFunc, lParam
+          ));
+
+  return (FALSE);
+}
+
+
+
+/*****************************************************************************
+ * Name      : BOOL WIN32API EnumResourceTypesA
+ * Purpose   : The EnumResourceTypesA function searches a module for resources
+ *             and passes each resource type it finds to an application-defined
+ *             callback function
+ * Parameters: HMODULE hModule,                    resource-module handle
+ *             ENUMRESTYPEPROC lpEnumFunc          pointer to callback function
+ *             LONG lParam                         application-defined parameter
+ * Variables :
+ * Result    : If the function succeeds, the return value is nonzero.
+ * If the function fails, the return value is zero
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Markus Montkowski [Tha, 1998/05/21 17:46]
+ *****************************************************************************/
+
+BOOL WIN32API EnumResourceTypesA(HMODULE hModule,
+                                 ENUMRESTYPEPROCA lpEnumFunc, LONG lParam)
+{
+    Win32ImageBase *pModule;
+
+    dprintf(("KERNEL32:EnumResourceTypesA(%08x,%08x,%08x)\n",
+              hModule, lpEnumFunc, lParam));
+
+    pModule = Win32ImageBase::findModule(hModule);
+    if (pModule == NULL)
+    {
+        SetLastError(ERROR_RESOURCE_DATA_NOT_FOUND);
+        return FALSE;
+    }
+
+    return pModule->enumResourceTypesA(hModule, lpEnumFunc, lParam);
+}
+
+/*****************************************************************************
+ * Name      : BOOL WIN32API EnumResourceTypesW
+ * Purpose   : The EnumResourceTypesW function searches a module for resources
+ *             and passes each resource type it finds to an application-defined
+ *             callback function
+ * Parameters: HMODULE hModule,                    resource-module handle
+ *             ENUMRESTYPEPROC lpEnumFunc          pointer to callback function
+ *             LONG lParam                         application-defined parameter
+ * Variables :
+ * Result    : If the function succeeds, the return value is nonzero.
+ * If the function fails, the return value is zero
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Markus Montkowski [Tha, 1998/05/21 17:46]
+ *****************************************************************************/
+
+BOOL WIN32API EnumResourceTypesW(HMODULE hModule,
+                                 ENUMRESTYPEPROCW lpEnumFunc, LONG lParam)
+{
+    Win32ImageBase *pModule;
+
+    dprintf(("KERNEL32:EnumResourceTypesW(%08x,%08x,%08x)\n",
+              hModule, lpEnumFunc, lParam));
+
+    pModule = Win32ImageBase::findModule(hModule);
+    if (pModule == NULL)
+    {
+        SetLastError(ERROR_RESOURCE_DATA_NOT_FOUND);
+        return FALSE;
+    }
+
+    return pModule->enumResourceTypesW(hModule, lpEnumFunc, lParam);
+}
