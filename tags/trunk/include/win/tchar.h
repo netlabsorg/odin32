@@ -1,4 +1,4 @@
-/* $Id: tchar.h,v 1.2 1999-09-18 15:55:45 sandervl Exp $ */
+/* $Id: tchar.h,v 1.3 1999-11-02 19:06:43 sandervl Exp $ */
 
 #ifndef __WINE_TCHAR_H
 #define __WINE_TCHAR_H
@@ -254,8 +254,6 @@ char *_strupr(char *string);
 #define _TEXT(x) __T(x)
 #define __T(x) x
 
-#endif //__WIN32OS2__
-
 typedef CHAR  _TCHARA;
 typedef WCHAR _TCHARW;
 DECL_WINELIB_TYPE_AW (_TCHAR)
@@ -274,5 +272,7 @@ DECL_WINELIB_TYPE_AW (PTSTR)
 #ifdef __cplusplus
 } /* extern "C" */
 #endif
+
+#endif //__WIN32OS2__
 				 
 #endif /* __WINE_TCHAR_H */

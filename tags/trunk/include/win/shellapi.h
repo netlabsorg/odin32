@@ -1,4 +1,4 @@
-/* $Id: shellapi.h,v 1.6 1999-09-22 09:46:19 sandervl Exp $ */
+/* $Id: shellapi.h,v 1.7 1999-11-02 19:06:42 sandervl Exp $ */
 
 #ifndef _WINE_SHELLAPI_H
 #define _WINE_SHELLAPI_H
@@ -186,8 +186,8 @@ typedef struct _SHFILEOPSTRUCTW
   LPCWSTR         lpszProgressTitle;
 } SHFILEOPSTRUCTW, *LPSHFILEOPSTRUCTW;
 
-DWORD	WIN32API SHFileOperationA (LPSHFILEOPSTRUCTA lpFileOp);
-DWORD	WIN32API SHFileOperationW (LPSHFILEOPSTRUCTW lpFileOp);
+DWORD	WINAPI SHFileOperationA (LPSHFILEOPSTRUCTA lpFileOp);
+DWORD	WINAPI SHFileOperationW (LPSHFILEOPSTRUCTW lpFileOp);
 
 
 

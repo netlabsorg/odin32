@@ -1,5 +1,4 @@
-/* $Id: shlobj.h,v 1.3 1999-10-04 09:55:50 sandervl Exp $ */
-
+/* $Id: shlobj.h,v 1.4 1999-11-02 19:06:43 sandervl Exp $ */
 #ifndef __WINE_SHLOBJ_H
 #define __WINE_SHLOBJ_H
 
@@ -24,6 +23,10 @@
 #include "commctrl.h"
 #include "prsht.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif /* defined(__cplusplus) */
+
 /*****************************************************************************
  * Predeclare interfaces
  */
@@ -43,7 +46,7 @@ extern UINT cfShellIDList;
 typedef struct
 {	UINT cidl;
 	UINT aoffset[1];
-} CIDA, *LPCIDA;
+} CIDA, *LPCIDA,*LPIDA;
 
 #define CFSTR_SHELLIDLISTOFFSET "Shell Object Offsets"    /* CF_OBJECTPOSITIONS */
 #define CFSTR_NETRESOURCES      "Net Resource"            /* CF_NETRESOURCE */
@@ -134,12 +137,7 @@ ICOM_DEFINE(IShellIcon, IUnknown)
 #define SEE_MASK_ASYNCOK          0x00100000
 #define SEE_MASK_HMONITOR         0x00200000
 
-/*************************************
- * code that is shared with shlobj.h *
- *************************************/
-
 #ifndef _WINE_SHELLAPI_H
-
 typedef struct _SHELLEXECUTEINFOA
 {       DWORD cbSize;
         ULONG fMask;
@@ -155,7 +153,7 @@ typedef struct _SHELLEXECUTEINFOA
         LPCSTR   lpClass;
         HKEY hkeyClass;
         DWORD dwHotKey;
-        union
+        union 
         { HANDLE hIcon;
           HANDLE hMonitor;
         } u;
@@ -183,12 +181,10 @@ typedef struct _SHELLEXECUTEINFOW
         } u;
         HANDLE hProcess;
 } SHELLEXECUTEINFOW, *LPSHELLEXECUTEINFOW;
+#endif
 
 #define SHELLEXECUTEINFO   WINELIB_NAME_AW(SHELLEXECUTEINFO)
 #define LPSHELLEXECUTEINFO WINELIB_NAME_AW(LPSHELLEXECUTEINFO)
-
-#endif /* __WINE_SHELLAPI_H */
-
 
 BOOL WINAPI ShellExecuteExA(LPSHELLEXECUTEINFOA lpExecInfo);
 BOOL WINAPI ShellExecuteExW(LPSHELLEXECUTEINFOW lpExecInfo);
@@ -225,7 +221,7 @@ typedef struct tagBROWSEINFOW {
     BFFCALLBACK   lpfn;
     LPARAM        lParam;
 	INT         iImage;
-} BROWSEINFOW, *PBROWSEINFOW, *LPBROWSEINFOW;
+} BROWSEINFOW, *PBROWSEINFOW, *LPBROWSEINFOW; 
 
 #define BROWSEINFO   WINELIB_NAME_AW(BROWSEINFO)
 #define PBROWSEINFO  WINELIB_NAME_AW(PBROWSEINFO)
@@ -238,7 +234,7 @@ typedef struct tagBROWSEINFOW {
 #define BIF_RETURNFSANCESTORS  0x0008
 #define BIF_EDITBOX            0x0010
 #define BIF_VALIDATE           0x0020
-
+ 
 #define BIF_BROWSEFORCOMPUTER  0x1000
 #define BIF_BROWSEFORPRINTER   0x2000
 #define BIF_BROWSEINCLUDEFILES 0x4000
@@ -254,8 +250,6 @@ typedef struct tagBROWSEINFOW {
 #define BFFM_ENABLEOK           (WM_USER+101)
 #define BFFM_SETSELECTIONA      (WM_USER+102)
 #define BFFM_SETSELECTIONW      (WM_USER+103)
-#define BFFM_SETSELECTION       WINELIB_NAME_AW(BFFM_SETSELECTION)
-
 #define BFFM_SETSTATUSTEXTW     (WM_USER+104)
 
 /*
@@ -270,8 +264,8 @@ typedef struct tagBROWSEINFOW {
 #define BFFM_SETSTATUSTEXT  BFFM_SETSTATUSTEXTA
 #define BFFM_SETSELECTION   BFFM_SETSELECTIONA
 
-#define BFFM_VALIDATEFAILED BFFM_VALIDATEFAILEDA
-#endif
+#define BFFM_VALIDATEFAILED BFFM_VALIDATEFAILEDA 
+#endif 
 */
 
 LPITEMIDLIST WINAPI SHBrowseForFolderA(LPBROWSEINFOA lpbi);
@@ -303,14 +297,20 @@ LPITEMIDLIST WINAPI SHBrowseForFolderA(LPBROWSEINFOA lpbi);
 #define SHDID_NET_RESTOFNET         16
 #define SHDID_NET_OTHER             17
 
-typedef struct _SHDESCRIPTIONID
+typedef struct _SHDESCRIPTIONID 
 {   DWORD   dwDescriptionId;
     CLSID   clsid;
 } SHDESCRIPTIONID, *LPSHDESCRIPTIONID;
 
 HRESULT WINAPI SHGetDataFromIDListA(LPSHELLFOLDER psf, LPCITEMIDLIST pidl, int nFormat, LPVOID pv, int cb);
 HRESULT WINAPI SHGetDataFromIDListW(LPSHELLFOLDER psf, LPCITEMIDLIST pidl, int nFormat, LPVOID pv, int cb);
-BOOL    WINAPI SHGetSpecialFolderPathA (HWND hwndOwner,LPSTR szPath,DWORD csidl,BOOL bCreate);
+#define  SHGetDataFromIDList WINELIB_NAME_AW(SHGetDataFromIDList)
+
+BOOL WINAPI SHGetSpecialFolderPathA (HWND hwndOwner,LPSTR szPath,DWORD csidl,BOOL bCreate);
+BOOL WINAPI SHGetSpecialFolderPathW (HWND hwndOwner,LPWSTR szPath,DWORD csidl,BOOL bCreate);
+#define  SHGetSpecialFolderPath WINELIB_NAME_AW(SHGetSpecialFolderPath)
+
+HRESULT WINAPI SHGetSpecialFolderLocation(HWND hwndOwner, INT nFolder, LPITEMIDLIST * ppidl);
 
 /****************************************************************************
 * shlview structures
@@ -322,7 +322,7 @@ BOOL    WINAPI SHGetSpecialFolderPathA (HWND hwndOwner,LPSTR szPath,DWORD csidl,
 *  we got using SHCreateShellViewEx()), to notify us of the various things that
 *  are happening to the shellview (and ask for things too).
 *
-*  You don't have to support anything here - anything you don't want to
+*  You don't have to support anything here - anything you don't want to 
 *  handle, the shell will do itself if you just return E_NOTIMPL. This parameters
 *  that the shell passes to this function are entirely undocumented.
 *
@@ -413,5 +413,9 @@ void WINAPI SHGetSettings(LPSHELLFLAGSTATE lpsfs, DWORD dwMask, DWORD dwx);
 #define SSF_HIDEICONS			0x4000
 
 /**********************************************************************/
+
+#ifdef __cplusplus
+} /* extern "C" */
+#endif /* defined(__cplusplus) */
 
 #endif /* __WINE_SHLOBJ_H */
