@@ -1,0 +1,1028 @@
+address 0x7be4b CheckEscapesA@3
+address 0x7bda1 CheckEscapesW@6
+address 0x7c0c1 CommandLineToArgvW@7
+address 0x2fa2d Control_FillCache_RunDLL@8
+address 0x2fa2d Control_FillCache_RunDLLA@12
+address 0x2fb09 Control_FillCache_RunDLLW@14
+address 0x2f906 Control_RunDLL@22
+address 0x2f906 Control_RunDLLA@41
+address 0x21342 Control_RunDLLW@42
+address 0x97c8 DllGetClassObject@44
+address 0x7c15e DoEnvironmentSubstA@53
+address 0x7c1ca DoEnvironmentSubstW@54
+address 0xa27b DragAcceptFiles@80
+address 0x718ea DragFinish@81
+address 0x718ce DragQueryFile@82
+address 0x718ce DragQueryFileA@101
+address 0x1c909 DragQueryFileAorW@133
+address 0x14813 DragQueryFileW@135
+address 0x71878 DragQueryPoint@138
+address 0x40928 DuplicateIcon@148
+address 0x41527 ExtractAssociatedIconA@150
+address 0x41455 ExtractAssociatedIconExA@186
+address 0x412f1 ExtractAssociatedIconExW@187
+address 0x40897 ExtractAssociatedIconW@188
+address 0xc5eb ExtractIconA@189
+address 0x4090b ExtractIconEx@190
+address 0x4090b ExtractIconExA@191
+address 0x408ee ExtractIconExW@192
+address 0x4127a ExtractIconResInfoA@193
+address 0x40e58 ExtractIconResInfoW@194
+address 0xc599 ExtractIconW@216
+address 0x40cb6 ExtractVersionResource16W@217
+address 0x79418 FindExeDlgProc@218
+address 0x75a48 FindExecutableA@219
+address 0x758c1 FindExecutableW@220
+address 0x40b31 FreeIconList@221
+address 0x40cb1 InternalExtractIconListA@222
+address 0x40b8d InternalExtractIconListW@223
+address 0x490ba OpenAs_RunDLL@224
+address 0x490ba OpenAs_RunDLLA@225
+address 0x49115 OpenAs_RunDLLW@226
+address 0x6fe17 PrintersGetCommand_RunDLL@227
+address 0x6fe17 PrintersGetCommand_RunDLLA@228
+address 0x6fe79 PrintersGetCommand_RunDLLW@229
+address 0x7480e RealShellExecuteA@230
+address 0x746b2 RealShellExecuteExA@231
+address 0x74760 RealShellExecuteExW@232
+address 0x7483a RealShellExecuteW@233
+address 0x7d2d6 RegenerateUserEnvironment@234
+address 0x7f7e SHAddToRecentDocs@235
+address 0xc4bf SHAppBarMessage@236
+address 0x5c722 SHBrowseForFolder@237
+address 0x5c722 SHBrowseForFolderA@238
+address 0x5c671 SHBrowseForFolderW@239
+address 0x8ba1 SHChangeNotify@240
+address 0x2ea27 SHFileOperation@241
+address 0x2ea27 SHFileOperationA@242
+address 0x2e769 SHFileOperationW@243
+address 0x7e301 SHFormatDrive@244
+address 0x2b1f5 SHFreeNameMappings@245
+address 0x4dfbc SHGetDataFromIDListA@246
+address 0x4e196 SHGetDataFromIDListW@247
+address 0x8e89 SHGetDesktopFolder@248
+address 0x1af8 SHGetFileInfo@252
+address 0x1af8 SHGetFileInfoA@253
+address 0x1707 SHGetFileInfoW@254
+address 0x797e9 SHGetInstanceExplorer@255
+address 0x98e0 SHGetMalloc@256
+address 0x4aaaf SHGetNewLinkInfo@257
+address 0x8e9c SHGetPathFromIDList@258
+address 0x8e9c SHGetPathFromIDListA@259
+address 0x3260 SHGetPathFromIDListW@260
+address 0x8e54 SHGetSpecialFolderLocation@261
+address 0x521a3 SHHelpShortcuts_RunDLL@262
+address 0x521a3 SHHelpShortcuts_RunDLLA@263
+address 0x52205 SHHelpShortcuts_RunDLLW@264
+address 0x79788 SHLoadInProc@265
+address 0x271f1 SHUpdateRecycleBinIcon@266
+address 0x7ef82 SheChangeDirA@267
+address 0x7f267 SheChangeDirExA@268
+address 0x7efc1 SheChangeDirExW@269
+address 0x7edc7 SheChangeDirW@270
+address 0x7f793 SheConvertPathW@271
+address 0x7f304 SheFullPathA@272
+address 0x7f3da SheFullPathW@273
+address 0x7f2a6 SheGetCurDrive@274
+address 0x7ed77 SheGetDirA@275
+address 0x7f4a9 SheGetDirExW@276
+address 0x7ecea SheGetDirW@277
+address 0x7ec6b SheGetPathOffsetW@278
+address 0x7f5a4 SheRemoveQuotesA@279
+address 0x7f56c SheRemoveQuotesW@280
+address 0x7f2c7 SheSetCurDrive@281
+address 0x7f5d1 SheShortenPathA@282
+address 0x7f62c SheShortenPathW@283
+address 0x21718 ShellAboutA@284
+address 0x216dc ShellAboutW@285
+address 0x748c6 ShellExecuteA@286
+address 0x74f2b ShellExecuteEx@287
+address 0x74f2b ShellExecuteExA@288
+address 0x20235 ShellExecuteExW@289
+address 0x74866 ShellExecuteW@290
+address 0x27e58 ShellHookProc@291
+address 0x79719 Shell_NotifyIcon@292
+address 0x79719 Shell_NotifyIconA@293
+address 0x79696 Shell_NotifyIconW@294
+address 0x7fee9 StrChrA@295
+address 0x7f93c StrChrIA@296
+address 0x7f90d StrChrIW@297
+address 0x1d0b2 StrChrW@298
+address 0x7ff3f StrCmpNA@299
+address 0x7ff54 StrCmpNIA@300
+address 0x1e372 StrCmpNIW@301
+address 0x7ff2a StrCmpNW@302
+address 0x7fa31 StrCpyNA@303
+address 0x7f9f7 StrCpyNW@304
+address 0x7fae2 StrNCmpA@305
+address 0x7fbb1 StrNCmpIA@306
+address 0x7fb51 StrNCmpIW@307
+address 0x7fa65 StrNCmpW@308
+address 0x7fc67 StrNCpyA@309
+address 0x7fc20 StrNCpyW@310
+address 0x7ff12 StrRChrA@311
+address 0x7f9b0 StrRChrIA@312
+address 0x7f96e StrRChrIW@313
+address 0x7fefd StrRChrW@314
+address 0x7fd96 StrRStrA@315
+address 0x7fe6c StrRStrIA@316
+address 0x7fded StrRStrIW@317
+address 0x7fd3b StrRStrW@318
+address 0x7ff7a StrStrA@319
+address 0x7fcf0 StrStrIA@320
+address 0x7fcb0 StrStrIW@321
+address 0x7ff69 StrStrW@322
+address 0x802e2 WOWShellExecute@323
+ord 2 at 0x167ff
+ord 3 at 0x7be4b
+ord 4 at 0xbc92
+ord 5 at 0x49eb2
+ord 6 at 0x7bda1
+ord 7 at 0x7c0c1
+ord 8 at 0x2fa2d
+ord 9 at 0x6a457
+ord 10 at 0x6a9b3
+ord 11 at 0x6ac50
+ord 12 at 0x2fa2d
+ord 13 at 0x6af9c
+ord 14 at 0x2fb09
+ord 15 at 0x52f24
+ord 16 at 0x1619
+ord 17 at 0x52eca
+ord 18 at 0x1d8e
+ord 19 at 0x52eed
+ord 20 at 0x95b4
+ord 21 at 0x4f5f
+ord 22 at 0x2f906
+ord 23 at 0x5121
+ord 24 at 0x77ff
+ord 25 at 0x144c
+ord 26 at 0x1426e
+ord 27 at 0x6dd9
+ord 28 at 0x6357
+ord 29 at 0x2b72
+ord 30 at 0x45f6
+ord 31 at 0x1413
+ord 32 at 0x300a
+ord 33 at 0x9342
+ord 34 at 0x4080
+ord 35 at 0x3ee6
+ord 36 at 0xb86d
+ord 37 at 0x3044
+ord 38 at 0x64223
+ord 39 at 0x14f0
+ord 40 at 0x126f
+ord 41 at 0x2f906
+ord 42 at 0x21342
+ord 43 at 0x17432
+ord 44 at 0x97c8
+ord 45 at 0x461a
+ord 46 at 0x64b0e
+ord 47 at 0x64a6f
+ord 48 at 0x6447b
+ord 49 at 0x642c3
+ord 50 at 0x641c3
+ord 51 at 0xb7c8
+ord 52 at 0x1f8c6
+ord 53 at 0x7c15e
+ord 54 at 0x7c1ca
+ord 55 at 0x64ac4
+ord 56 at 0x1f88b
+ord 57 at 0x209f
+ord 58 at 0x78826
+ord 59 at 0x724e6
+ord 60 at 0x72be6
+ord 61 at 0x73af1
+ord 62 at 0x65574
+ord 63 at 0x72e42
+ord 64 at 0x6d7b
+ord 65 at 0x20ffc
+ord 66 at 0x507da
+ord 67 at 0x15295
+ord 68 at 0x28dc
+ord 69 at 0x60efc
+ord 70 at 0xa980
+ord 71 at 0x17272
+ord 72 at 0x40be
+ord 73 at 0x33819
+ord 74 at 0x27b0c
+ord 75 at 0x7ed3
+ord 76 at 0x71708
+ord 77 at 0x4913
+ord 78 at 0x376d
+ord 79 at 0x6319
+ord 80 at 0xa27b
+ord 81 at 0x718ea
+ord 82 at 0x718ce
+ord 83 at 0x52703
+ord 84 at 0x21c9d
+ord 85 at 0x20a3b
+ord 86 at 0x1edc1
+ord 87 at 0x62967
+ord 88 at 0x62705
+ord 89 at 0x62e6
+ord 90 at 0x39601
+ord 91 at 0x39659
+ord 92 at 0x64a8c
+ord 93 at 0x639d6
+ord 94 at 0x63a00
+ord 95 at 0x77d92
+ord 96 at 0x2da0
+ord 97 at 0x75cdf
+ord 98 at 0x77e13
+ord 99 at 0x1ceb6
+ord 100 at 0x9909
+ord 101 at 0x718ce
+ord 102 at 0x210b
+ord 103 at 0x75df0
+ord 104 at 0xbd77
+ord 105 at 0x49232
+ord 106 at 0x49794
+ord 107 at 0x4982a
+ord 108 at 0x49928
+ord 109 at 0x162fa
+ord 110 at 0x15001
+ord 111 at 0x491ff
+ord 112 at 0x4976d
+ord 113 at 0x491d7
+ord 114 at 0x1582f
+ord 115 at 0x14b69
+ord 116 at 0x499fc
+ord 117 at 0x15f42
+ord 118 at 0x491bc
+ord 119 at 0x63f3
+ord 120 at 0x4981f
+ord 121 at 0x627a7
+ord 122 at 0x7b70e
+ord 123 at 0x21cdc
+ord 124 at 0x15613
+ord 125 at 0x15d64
+ord 126 at 0x5d7c3
+ord 127 at 0x78ce7
+ord 128 at 0x97c8
+ord 129 at 0x33cb4
+ord 130 at 0x3f8e0
+ord 131 at 0x3f822
+ord 132 at 0x3f957
+ord 133 at 0x1c909
+ord 134 at 0x3f916
+ord 135 at 0x14813
+ord 136 at 0x3f5b9
+ord 137 at 0x3f45e
+ord 138 at 0x71878
+ord 139 at 0x506f0
+ord 140 at 0x49a79
+ord 141 at 0x49b81
+ord 142 at 0x49c3e
+ord 143 at 0x49cbd
+ord 144 at 0x14c9f
+ord 145 at 0xb88c
+ord 146 at 0x1e72c
+ord 147 at 0x60de
+ord 148 at 0x40928
+ord 149 at 0x148c3
+ord 150 at 0x41527
+ord 151 at 0x17a88
+ord 152 at 0x149d
+ord 153 at 0x52e90
+ord 154 at 0x2d23
+ord 155 at 0x10eb
+ord 156 at 0xa158
+ord 157 at 0x63a2
+ord 158 at 0x640c7
+ord 159 at 0x6fb4
+ord 160 at 0x6137c
+ord 161 at 0x2f82e
+ord 162 at 0x2bf8
+ord 163 at 0x7940
+ord 164 at 0xa3f7
+ord 165 at 0x2be70
+ord 166 at 0x7b709
+ord 167 at 0x71654
+ord 168 at 0x71510
+ord 169 at 0x7161f
+ord 170 at 0x716a7
+ord 171 at 0x6f16
+ord 172 at 0x4ac73
+ord 173 at 0x74502
+ord 174 at 0x1e93c
+ord 175 at 0x63bf3
+ord 176 at 0x797dd
+ord 177 at 0x3f795
+ord 178 at 0x5221e
+ord 179 at 0x4aaaf
+ord 180 at 0x7821
+ord 181 at 0x116f
+ord 182 at 0x5a03c
+ord 183 at 0x5a111
+ord 184 at 0x7a32f
+ord 185 at 0x273b4
+ord 186 at 0x41455
+ord 187 at 0x412f1
+ord 188 at 0x40897
+ord 189 at 0xc5eb
+ord 190 at 0x4090b
+ord 191 at 0x4090b
+ord 192 at 0x408ee
+ord 193 at 0x4127a
+ord 194 at 0x40e58
+ord 195 at 0x10fc
+ord 196 at 0x1503
+ord 197 at 0x7b711
+ord 198 at 0x76f05
+ord 199 at 0x4dd4a
+ord 200 at 0x59eeb
+ord 201 at 0x59f4d
+ord 202 at 0x59f09
+ord 203 at 0x78479
+ord 204 at 0x785e1
+ord 205 at 0x709d9
+ord 206 at 0x76b0f
+ord 207 at 0x76bce
+ord 208 at 0xb4bc
+ord 209 at 0x78661
+ord 210 at 0x78801
+ord 211 at 0x6d8b5
+ord 212 at 0x7135f
+ord 213 at 0x6d78e
+ord 214 at 0x6d852
+ord 215 at 0x614a2
+ord 216 at 0xc599
+ord 217 at 0x40cb6
+ord 218 at 0x79418
+ord 219 at 0x75a48
+ord 220 at 0x758c1
+ord 221 at 0x40b31
+ord 222 at 0x40cb1
+ord 223 at 0x40b8d
+ord 224 at 0x490ba
+ord 225 at 0x490ba
+ord 226 at 0x49115
+ord 227 at 0x6fe17
+ord 228 at 0x6fe17
+ord 229 at 0x6fe79
+ord 230 at 0x7480e
+ord 231 at 0x746b2
+ord 232 at 0x74760
+ord 233 at 0x7483a
+ord 234 at 0x7d2d6
+ord 235 at 0x7f7e
+ord 236 at 0xc4bf
+ord 237 at 0x5c722
+ord 238 at 0x5c722
+ord 239 at 0x5c671
+ord 240 at 0x8ba1
+ord 241 at 0x2ea27
+ord 242 at 0x2ea27
+ord 243 at 0x2e769
+ord 244 at 0x7e301
+ord 245 at 0x2b1f5
+ord 246 at 0x4dfbc
+ord 247 at 0x4e196
+ord 248 at 0x8e89
+ord 249 at 0x9383
+ord 250 at 0x2be2
+ord 251 at 0x17be5
+ord 252 at 0x1af8
+ord 253 at 0x1af8
+ord 254 at 0x1707
+ord 255 at 0x797e9
+ord 256 at 0x98e0
+ord 257 at 0x4aaaf
+ord 258 at 0x8e9c
+ord 259 at 0x8e9c
+ord 260 at 0x3260
+ord 261 at 0x8e54
+ord 262 at 0x521a3
+ord 263 at 0x521a3
+ord 264 at 0x52205
+ord 265 at 0x79788
+ord 266 at 0x271f1
+ord 267 at 0x7ef82
+ord 268 at 0x7f267
+ord 269 at 0x7efc1
+ord 270 at 0x7edc7
+ord 271 at 0x7f793
+ord 272 at 0x7f304
+ord 273 at 0x7f3da
+ord 274 at 0x7f2a6
+ord 275 at 0x7ed77
+ord 276 at 0x7f4a9
+ord 277 at 0x7ecea
+ord 278 at 0x7ec6b
+ord 279 at 0x7f5a4
+ord 280 at 0x7f56c
+ord 281 at 0x7f2c7
+ord 282 at 0x7f5d1
+ord 283 at 0x7f62c
+ord 284 at 0x21718
+ord 285 at 0x216dc
+ord 286 at 0x748c6
+ord 287 at 0x74f2b
+ord 288 at 0x74f2b
+ord 289 at 0x20235
+ord 290 at 0x74866
+ord 291 at 0x27e58
+ord 292 at 0x79719
+ord 293 at 0x79719
+ord 294 at 0x79696
+ord 295 at 0x7fee9
+ord 296 at 0x7f93c
+ord 297 at 0x7f90d
+ord 298 at 0x1d0b2
+ord 299 at 0x7ff3f
+ord 300 at 0x7ff54
+ord 301 at 0x1e372
+ord 302 at 0x7ff2a
+ord 303 at 0x7fa31
+ord 304 at 0x7f9f7
+ord 305 at 0x7fae2
+ord 306 at 0x7fbb1
+ord 307 at 0x7fb51
+ord 308 at 0x7fa65
+ord 309 at 0x7fc67
+ord 310 at 0x7fc20
+ord 311 at 0x7ff12
+ord 312 at 0x7f9b0
+ord 313 at 0x7f96e
+ord 314 at 0x7fefd
+ord 315 at 0x7fd96
+ord 316 at 0x7fe6c
+ord 317 at 0x7fded
+ord 318 at 0x7fd3b
+ord 319 at 0x7ff7a
+ord 320 at 0x7fcf0
+ord 321 at 0x7fcb0
+ord 322 at 0x7ff69
+ord 323 at 0x802e2
+ord 505 at 0x151f
+ord 506 at 0x789d7
+ord 507 at 0x4057
+ord 508 at 0x78b6c
+ord 509 at 0x789fe
+ord 510 at 0x4658
+ord 511 at 0x3f41
+ord 512 at 0x78c17
+ord 520 at 0x864e
+ord 521 at 0x8564
+ord 522 at 0x820f
+ord 523 at 0x8d1a
+ord 524 at 0x4223
+ord 525 at 0x46de
+ord 640 at 0x49e83
+ord 641 at 0x49ea6
+ord 643 at 0x83ae
+ord 644 at 0x8252
+ord 645 at 0x843f
+ord 646 at 0xbd32
+ord 647 at 0x7b84
+ord 648 at 0x75c1c
+ord 650 at 0x64d1d
+ord 651 at 0xa7a8
+ord 652 at 0x27dd1
+ord 653 at 0x1d5de
+ord 660 at 0xaa3f
+ord 680 at 0x18eb0
+ord 1217 at 0x62e6
+
+
+Module KERNEL32.dll
+0x77cc108c Imported function TlsAlloc
+0x77cc1090 Imported function GetDriveTypeW
+0x77cc1094 Imported function RaiseException
+0x77cc1098 Imported function lstrcpynA
+0x77cc109c Imported function ReleaseMutex
+0x77cc10a0 Imported function ExpandEnvironmentStringsW
+0x77cc10a4 Imported function ExitThread
+0x77cc10a8 Imported function GetBinaryTypeW
+0x77cc10ac Imported function CompareFileTime
+0x77cc10b0 Imported function FormatMessageA
+0x77cc10b4 Imported function lstrcmpA
+0x77cc10b8 Imported function LocalFree
+0x77cc10bc Imported function GetCompressedFileSizeW
+0x77cc10c0 Imported function MoveFileW
+0x77cc10c4 Imported function CreateDirectoryW
+0x77cc10c8 Imported function RemoveDirectoryW
+0x77cc10cc Imported function GetEnvironmentVariableW
+0x77cc10d0 Imported function EnumResourceNamesW
+0x77cc10d4 Imported function lstrcatA
+0x77cc10d8 Imported function MulDiv
+0x77cc10dc Imported function GetProfileIntW
+0x77cc10e0 Imported function GetFullPathNameW
+0x77cc10e4 Imported function WriteFile
+0x77cc10e8 Imported function CreateSemaphoreW
+0x77cc10ec Imported function ReleaseSemaphore
+0x77cc10f0 Imported function GetProfileStringW
+0x77cc10f4 Imported function GetComputerNameW
+0x77cc10f8 Imported function WriteProfileStringW
+0x77cc10fc Imported function GetEnvironmentStringsW
+0x77cc1100 Imported function CreateProcessW
+0x77cc1104 Imported function GetExitCodeThread
+0x77cc1108 Imported function GetFileAttributesExW
+0x77cc110c Imported function GetNumberFormatW
+0x77cc1110 Imported function ExpandEnvironmentStringsA
+0x77cc1114 Imported function DuplicateHandle
+0x77cc1118 Imported function GetCurrentProcess
+0x77cc111c Imported function UnmapViewOfFile
+0x77cc1120 Imported function MapViewOfFile
+0x77cc1124 Imported function CreateFileMappingW
+0x77cc1128 Imported function _hread
+0x77cc112c Imported function GetFileSize
+0x77cc1130 Imported function TlsFree
+0x77cc1134 Imported function SetEnvironmentVariableW
+0x77cc1138 Imported function GetFullPathNameA
+0x77cc113c Imported function _hwrite
+0x77cc1140 Imported function CopyFileW
+0x77cc1144 Imported function DosDateTimeToFileTime
+0x77cc1148 Imported function WaitForMultipleObjects
+0x77cc114c Imported function OpenEventW
+0x77cc1150 Imported function FindCloseChangeNotification
+0x77cc1154 Imported function FindFirstChangeNotificationW
+0x77cc1158 Imported function FindNextChangeNotification
+0x77cc115c Imported function TerminateThread
+0x77cc1160 Imported function FindResourceW
+0x77cc1164 Imported function LoadResource
+0x77cc1168 Imported function LockResource
+0x77cc116c Imported function FreeResource
+0x77cc1170 Imported function SearchPathW
+0x77cc1174 Imported function GlobalSize
+0x77cc1178 Imported function ReadFile
+0x77cc117c Imported function SetFilePointer
+0x77cc1180 Imported function SetVolumeLabelW
+0x77cc1184 Imported function GetUserDefaultLCID
+0x77cc1188 Imported function GetLocaleInfoW
+0x77cc118c Imported function DeviceIoControl
+0x77cc1190 Imported function GetDiskFreeSpaceA
+0x77cc1194 Imported function GetLogicalDrives
+0x77cc1198 Imported function EnterCriticalSection
+0x77cc119c Imported function TlsGetValue
+0x77cc11a0 Imported function GetProcessHeap
+0x77cc11a4 Imported function DeleteCriticalSection
+0x77cc11a8 Imported function CompareStringW
+0x77cc11ac Imported function FormatMessageW
+0x77cc11b0 Imported function FileTimeToDosDateTime
+0x77cc11b4 Imported function GetFileTime
+0x77cc11b8 Imported function SetEvent
+0x77cc11bc Imported function CreateEventW
+0x77cc11c0 Imported function ResetEvent
+0x77cc11c4 Imported function WaitForSingleObject
+0x77cc11c8 Imported function GlobalUnlock
+0x77cc11cc Imported function GlobalAlloc
+0x77cc11d0 Imported function GlobalFree
+0x77cc11d4 Imported function GlobalLock
+0x77cc11d8 Imported function InterlockedDecrement
+0x77cc11dc Imported function InterlockedIncrement
+0x77cc11e0 Imported function GlobalDeleteAtom
+0x77cc11e4 Imported function GlobalAddAtomW
+0x77cc11e8 Imported function SetCurrentDirectoryW
+0x77cc11ec Imported function GetTempFileNameW
+0x77cc11f0 Imported function GetCurrentDirectoryW
+0x77cc11f4 Imported function DeleteFileW
+0x77cc11f8 Imported function CopyFileExW
+0x77cc11fc Imported function SetFileTime
+0x77cc1200 Imported function FileTimeToLocalFileTime
+0x77cc1204 Imported function GetModuleHandleW
+0x77cc1208 Imported function GetPrivateProfileIntW
+0x77cc120c Imported function GetTimeFormatW
+0x77cc1210 Imported function FileTimeToSystemTime
+0x77cc1214 Imported function GetDateFormatW
+0x77cc1218 Imported function OpenProcess
+0x77cc121c Imported function GetSystemDirectoryW
+0x77cc1220 Imported function GetPrivateProfileStringW
+0x77cc1224 Imported function UnhandledExceptionFilter
+0x77cc1228 Imported function GetModuleFileNameW
+0x77cc122c Imported function SetErrorMode
+0x77cc1230 Imported function WritePrivateProfileStringW
+0x77cc1234 Imported function lstrcpyA
+0x77cc1238 Imported function lstrcatW
+0x77cc123c Imported function SystemTimeToFileTime
+0x77cc1240 Imported function GetShortPathNameW
+0x77cc1244 Imported function GetSystemTime
+0x77cc1248 Imported function lstrcmpW
+0x77cc124c Imported function CreateFileW
+0x77cc1250 Imported function Sleep
+0x77cc1254 Imported function _llseek
+0x77cc1258 Imported function _lread
+0x77cc125c Imported function _lclose
+0x77cc1260 Imported function CreateThread
+0x77cc1264 Imported function _lwrite
+0x77cc1268 Imported function GetCurrentProcessId
+0x77cc126c Imported function CloseHandle
+0x77cc1270 Imported function SetThreadPriority
+0x77cc1274 Imported function ResumeThread
+0x77cc1278 Imported function GetFileAttributesA
+0x77cc127c Imported function GetShortPathNameA
+0x77cc1280 Imported function FindNextFileW
+0x77cc1284 Imported function MultiByteToWideChar
+0x77cc1288 Imported function HeapAlloc
+0x77cc128c Imported function HeapFree
+0x77cc1290 Imported function HeapReAlloc
+0x77cc1294 Imported function GetVersionExW
+0x77cc1298 Imported function lstrlenA
+0x77cc129c Imported function lstrlenW
+0x77cc12a0 Imported function lstrcpyW
+0x77cc12a4 Imported function GlobalMemoryStatus
+0x77cc12a8 Imported function lstrcmpiW
+0x77cc12ac Imported function IsBadCodePtr
+0x77cc12b0 Imported function lstrcpynW
+0x77cc12b4 Imported function FreeLibrary
+0x77cc12b8 Imported function GetTickCount
+0x77cc12bc Imported function IsBadReadPtr
+0x77cc12c0 Imported function HeapSize
+0x77cc12c4 Imported function WideCharToMultiByte
+0x77cc12c8 Imported function GetCurrentThreadId
+0x77cc12cc Imported function SetLastError
+0x77cc12d0 Imported function GetProcAddress
+0x77cc12d4 Imported function GetLastError
+0x77cc12d8 Imported function GetWindowsDirectoryW
+0x77cc12dc Imported function GetDiskFreeSpaceW
+0x77cc12e0 Imported function LoadLibraryExW
+0x77cc12e4 Imported function LoadLibraryW
+0x77cc12e8 Imported function FindClose
+0x77cc12ec Imported function lstrcmpiA
+0x77cc12f0 Imported function GetFileAttributesW
+0x77cc12f4 Imported function GetVolumeInformationW
+0x77cc12f8 Imported function FindFirstFileW
+0x77cc12fc Imported function SetFileAttributesW
+0x77cc1300 Imported function LeaveCriticalSection
+0x77cc1304 Imported function InitializeCriticalSection
+0x77cc1308 Imported function TlsSetValue
+
+Module GDI32.dll
+0x77cc1310 Imported function CreatePatternBrush
+0x77cc1314 Imported function EnumFontFamiliesA
+0x77cc1318 Imported function CreateICW
+0x77cc131c Imported function CreateFontA
+0x77cc1320 Imported function GetTextFaceW
+0x77cc1324 Imported function SetFontEnumeration
+0x77cc1328 Imported function AddFontResourceW
+0x77cc132c Imported function EnumFontFamiliesW
+0x77cc1330 Imported function GetTextExtentPoint32W
+0x77cc1334 Imported function CreateDCW
+0x77cc1338 Imported function GetNearestColor
+0x77cc133c Imported function GetClipBox
+0x77cc1340 Imported function GetTextMetricsW
+0x77cc1344 Imported function IntersectClipRect
+0x77cc1348 Imported function GetBkColor
+0x77cc134c Imported function SaveDC
+0x77cc1350 Imported function SetTextColor
+0x77cc1354 Imported function ExtTextOutW
+0x77cc1358 Imported function RestoreDC
+0x77cc135c Imported function CreateFontIndirectW
+0x77cc1360 Imported function CreateEllipticRgnIndirect
+0x77cc1364 Imported function GetStockObject
+0x77cc1368 Imported function CreateRectRgn
+0x77cc136c Imported function CombineRgn
+0x77cc1370 Imported function OffsetRgn
+0x77cc1374 Imported function CreatePen
+0x77cc1378 Imported function Ellipse
+0x77cc137c Imported function FillRgn
+0x77cc1380 Imported function Arc
+0x77cc1384 Imported function MoveToEx
+0x77cc1388 Imported function Pie
+0x77cc138c Imported function CreateBitmap
+0x77cc1390 Imported function GetObjectW
+0x77cc1394 Imported function LineTo
+0x77cc1398 Imported function CreateCompatibleBitmap
+0x77cc139c Imported function CreateSolidBrush
+0x77cc13a0 Imported function GetBitmapBits
+0x77cc13a4 Imported function GetDeviceCaps
+0x77cc13a8 Imported function SetBkColor
+0x77cc13ac Imported function PatBlt
+0x77cc13b0 Imported function GetTextExtentPointW
+0x77cc13b4 Imported function CreateCompatibleDC
+0x77cc13b8 Imported function RectVisible
+0x77cc13bc Imported function SelectObject
+0x77cc13c0 Imported function DeleteObject
+0x77cc13c4 Imported function BitBlt
+0x77cc13c8 Imported function DeleteDC
+
+Module USER32.dll
+0x77cc13d0 Imported function PrivateExtractIconExA
+0x77cc13d4 Imported function PrivateExtractIconExW
+0x77cc13d8 Imported function ShowCursor
+0x77cc13dc Imported function PrivateExtractIconsW
+0x77cc13e0 Imported function GetMenuItemCount
+0x77cc13e4 Imported function LoadMenuW
+0x77cc13e8 Imported function DrawIconEx
+0x77cc13ec Imported function GetIconInfo
+0x77cc13f0 Imported function GetDesktopWindow
+0x77cc13f4 Imported function DestroyCursor
+0x77cc13f8 Imported function LockWindowUpdate
+0x77cc13fc Imported function GetDCEx
+0x77cc1400 Imported function OffsetRect
+0x77cc1404 Imported function DrawFocusRect
+0x77cc1408 Imported function IsWindowEnabled
+0x77cc140c Imported function BeginDeferWindowPos
+0x77cc1410 Imported function DeferWindowPos
+0x77cc1414 Imported function EndDeferWindowPos
+0x77cc1418 Imported function FindWindowW
+0x77cc141c Imported function GetWindowThreadProcessId
+0x77cc1420 Imported function IsIconic
+0x77cc1424 Imported function AdjustWindowRectEx
+0x77cc1428 Imported function GetNextDlgTabItem
+0x77cc142c Imported function SetWindowsHookExW
+0x77cc1430 Imported function UnhookWindowsHookEx
+0x77cc1434 Imported function GetDlgCtrlID
+0x77cc1438 Imported function GetMenuItemID
+0x77cc143c Imported function wvsprintfW
+0x77cc1440 Imported function GetMenu
+0x77cc1444 Imported function SetMenu
+0x77cc1448 Imported function GetDlgItemInt
+0x77cc144c Imported function SetDlgItemInt
+0x77cc1450 Imported function IsChild
+0x77cc1454 Imported function IsWindowVisible
+0x77cc1458 Imported function LoadIconW
+0x77cc145c Imported function GetDoubleClickTime
+0x77cc1460 Imported function GetScrollInfo
+0x77cc1464 Imported function PtInRect
+0x77cc1468 Imported function ScreenToClient
+0x77cc146c Imported function DrawFrameControl
+0x77cc1470 Imported function ChildWindowFromPoint
+0x77cc1474 Imported function LookupIconIdFromDirectory
+0x77cc1478 Imported function CheckMenuRadioItem
+0x77cc147c Imported function CheckMenuItem
+0x77cc1480 Imported function TranslateAcceleratorW
+0x77cc1484 Imported function CreateMenu
+0x77cc1488 Imported function PostThreadMessageW
+0x77cc148c Imported function GetClassInfoW
+0x77cc1490 Imported function RegisterClassW
+0x77cc1494 Imported function KillTimer
+0x77cc1498 Imported function GetSysColorBrush
+0x77cc149c Imported function DefWindowProcW
+0x77cc14a0 Imported function InvalidateRect
+0x77cc14a4 Imported function DrawEdge
+0x77cc14a8 Imported function GetCursorPos
+0x77cc14ac Imported function ChangeClipboardChain
+0x77cc14b0 Imported function SetClipboardViewer
+0x77cc14b4 Imported function SetTimer
+0x77cc14b8 Imported function MsgWaitForMultipleObjects
+0x77cc14bc Imported function SystemParametersInfoW
+0x77cc14c0 Imported function InflateRect
+0x77cc14c4 Imported function GetWindowPlacement
+0x77cc14c8 Imported function GetForegroundWindow
+0x77cc14cc Imported function ClientToScreen
+0x77cc14d0 Imported function TrackPopupMenu
+0x77cc14d4 Imported function GetClientRect
+0x77cc14d8 Imported function RedrawWindow
+0x77cc14dc Imported function MoveWindow
+0x77cc14e0 Imported function LoadAcceleratorsW
+0x77cc14e4 Imported function CreateWindowExW
+0x77cc14e8 Imported function RegisterWindowMessageW
+0x77cc14ec Imported function GetDC
+0x77cc14f0 Imported function ReleaseDC
+0x77cc14f4 Imported function GetSysColor
+0x77cc14f8 Imported function CreatePopupMenu
+0x77cc14fc Imported function MessageBeep
+0x77cc1500 Imported function InsertMenuW
+0x77cc1504 Imported function GetMenuDefaultItem
+0x77cc1508 Imported function AppendMenuW
+0x77cc150c Imported function SetMenuItemInfoW
+0x77cc1510 Imported function DeleteMenu
+0x77cc1514 Imported function ModifyMenuW
+0x77cc1518 Imported function CountClipboardFormats
+0x77cc151c Imported function GetShellWindow
+0x77cc1520 Imported function MessageBoxW
+0x77cc1524 Imported function CharLowerW
+0x77cc1528 Imported function CharUpperW
+0x77cc152c Imported function FillRect
+0x77cc1530 Imported function IsMenu
+0x77cc1534 Imported function DrawStateW
+0x77cc1538 Imported function SendNotifyMessageW
+0x77cc153c Imported function UnregisterClassW
+0x77cc1540 Imported function CharToOemA
+0x77cc1544 Imported function CharLowerA
+0x77cc1548 Imported function SetTaskmanWindow
+0x77cc154c Imported function RegisterClipboardFormatW
+0x77cc1550 Imported function CharUpperBuffA
+0x77cc1554 Imported function IsCharUpperW
+0x77cc1558 Imported function IsCharAlphaNumericW
+0x77cc155c Imported function IsCharLowerW
+0x77cc1560 Imported function CharToOemBuffA
+0x77cc1564 Imported function IsCharAlphaW
+0x77cc1568 Imported function DrawTextW
+0x77cc156c Imported function CharUpperA
+0x77cc1570 Imported function FrameRect
+0x77cc1574 Imported function MessageBoxExW
+0x77cc1578 Imported function LoadBitmapW
+0x77cc157c Imported function TabbedTextOutW
+0x77cc1580 Imported function MessageBoxA
+0x77cc1584 Imported function AdjustWindowRect
+0x77cc1588 Imported function SetRect
+0x77cc158c Imported function ReleaseCapture
+0x77cc1590 Imported function GetWindowTextA
+0x77cc1594 Imported function SetDlgItemTextA
+0x77cc1598 Imported function GetCapture
+0x77cc159c Imported function WindowFromPoint
+0x77cc15a0 Imported function GetMessagePos
+0x77cc15a4 Imported function CloseClipboard
+0x77cc15a8 Imported function SetCapture
+0x77cc15ac Imported function GetCursor
+0x77cc15b0 Imported function OpenClipboard
+0x77cc15b4 Imported function SetClipboardData
+0x77cc15b8 Imported function EmptyClipboard
+0x77cc15bc Imported function DrawIcon
+0x77cc15c0 Imported function GetClipboardData
+0x77cc15c4 Imported function CharNextA
+0x77cc15c8 Imported function GrayStringW
+0x77cc15cc Imported function OemToCharA
+0x77cc15d0 Imported function CopyRect
+0x77cc15d4 Imported function MapVirtualKeyW
+0x77cc15d8 Imported function GetDlgItemTextA
+0x77cc15dc Imported function EnumChildWindows
+0x77cc15e0 Imported function MessageBoxIndirectW
+0x77cc15e4 Imported function ExitWindowsEx
+0x77cc15e8 Imported function SetClassLongW
+0x77cc15ec Imported function AttachThreadInput
+0x77cc15f0 Imported function SetActiveWindow
+0x77cc15f4 Imported function BringWindowToTop
+0x77cc15f8 Imported function WaitForInputIdle
+0x77cc15fc Imported function FreeDDElParam
+0x77cc1600 Imported function UnpackDDElParam
+0x77cc1604 Imported function PackDDElParam
+0x77cc1608 Imported function IsWindowUnicode
+0x77cc160c Imported function SendMessageTimeoutW
+0x77cc1610 Imported function InsertMenuItemW
+0x77cc1614 Imported function IntersectRect
+0x77cc1618 Imported function EqualRect
+0x77cc161c Imported function IsZoomed
+0x77cc1620 Imported function CharNextW
+0x77cc1624 Imported function GetMenuItemInfoW
+0x77cc1628 Imported function IsWindow
+0x77cc162c Imported function GetSubMenu
+0x77cc1630 Imported function RemoveMenu
+0x77cc1634 Imported function RemovePropW
+0x77cc1638 Imported function SetForegroundWindow
+0x77cc163c Imported function SetPropW
+0x77cc1640 Imported function GetClassNameW
+0x77cc1644 Imported function CopyIcon
+0x77cc1648 Imported function EnumWindows
+0x77cc164c Imported function PostMessageW
+0x77cc1650 Imported function GetPropW
+0x77cc1654 Imported function CharUpperBuffW
+0x77cc1658 Imported function MapWindowPoints
+0x77cc165c Imported function GetKeyState
+0x77cc1660 Imported function GetWindowRect
+0x77cc1664 Imported function IsDialogMessageW
+0x77cc1668 Imported function SetWindowPos
+0x77cc166c Imported function UpdateWindow
+0x77cc1670 Imported function PeekMessageW
+0x77cc1674 Imported function TranslateMessage
+0x77cc1678 Imported function DispatchMessageW
+0x77cc167c Imported function RegisterShellHookWindow
+0x77cc1680 Imported function SetFocus
+0x77cc1684 Imported function SetMenuDefaultItem
+0x77cc1688 Imported function SetProgmanWindow
+0x77cc168c Imported function GetTaskmanWindow
+0x77cc1690 Imported function DeregisterShellHookWindow
+0x77cc1694 Imported function CreateIconIndirect
+0x77cc1698 Imported function CopyImage
+0x77cc169c Imported function SendMessageCallbackW
+0x77cc16a0 Imported function DestroyMenu
+0x77cc16a4 Imported function EnableMenuItem
+0x77cc16a8 Imported function LoadStringA
+0x77cc16ac Imported function GetAsyncKeyState
+0x77cc16b0 Imported function DestroyWindow
+0x77cc16b4 Imported function GetLastActivePopup
+0x77cc16b8 Imported function SwitchToThisWindow
+0x77cc16bc Imported function DestroyIcon
+0x77cc16c0 Imported function WinHelpW
+0x77cc16c4 Imported function SetWindowLongW
+0x77cc16c8 Imported function CheckRadioButton
+0x77cc16cc Imported function CheckDlgButton
+0x77cc16d0 Imported function GetWindow
+0x77cc16d4 Imported function GetParent
+0x77cc16d8 Imported function SendMessageW
+0x77cc16dc Imported function IsDlgButtonChecked
+0x77cc16e0 Imported function EnableWindow
+0x77cc16e4 Imported function LoadCursorW
+0x77cc16e8 Imported function SetCursor
+0x77cc16ec Imported function BeginPaint
+0x77cc16f0 Imported function LoadImageW
+0x77cc16f4 Imported function EndPaint
+0x77cc16f8 Imported function EndDialog
+0x77cc16fc Imported function GetWindowTextW
+0x77cc1700 Imported function SetWindowTextW
+0x77cc1704 Imported function GetDlgItemTextW
+0x77cc1708 Imported function SetDlgItemTextW
+0x77cc170c Imported function SendDlgItemMessageW
+0x77cc1710 Imported function GetDlgItem
+0x77cc1714 Imported function ShowWindow
+0x77cc1718 Imported function GetSystemMetrics
+0x77cc171c Imported function LoadStringW
+0x77cc1720 Imported function wsprintfW
+0x77cc1724 Imported function DialogBoxParamW
+0x77cc1728 Imported function CreateDialogParamW
+0x77cc172c Imported function GetWindowLongW
+0x77cc1730 Imported function GetProgmanWindow
+0x77cc1734 Imported function GetScrollPos
+0x77cc1738 Imported function GetMenuState
+0x77cc173c Imported function GetActiveWindow
+0x77cc1740 Imported function TrackPopupMenuEx
+0x77cc1744 Imported function GetFocus
+
+Module ADVAPI32.dll
+0x77cc174c Imported function RegCloseKey
+0x77cc1750 Imported function RegCreateKeyW
+0x77cc1754 Imported function RegEnumKeyW
+0x77cc1758 Imported function RegSetValueExW
+0x77cc175c Imported function RegDeleteKeyW
+0x77cc1760 Imported function RegQueryInfoKeyW
+0x77cc1764 Imported function RegDeleteValueW
+0x77cc1768 Imported function RegSetValueW
+0x77cc176c Imported function RegQueryValueExA
+0x77cc1770 Imported function RegEnumKeyExW
+0x77cc1774 Imported function RegCreateKeyExW
+0x77cc1778 Imported function RegEnumValueW
+0x77cc177c Imported function RegOpenKeyExA
+0x77cc1780 Imported function RegOpenKeyExW
+0x77cc1784 Imported function RegQueryValueExW
+0x77cc1788 Imported function AdjustTokenPrivileges
+0x77cc178c Imported function OpenProcessToken
+0x77cc1790 Imported function FreeSid
+0x77cc1794 Imported function GetTokenInformation
+0x77cc1798 Imported function GetSecurityDescriptorLength
+0x77cc179c Imported function SetSecurityDescriptorDacl
+0x77cc17a0 Imported function MakeSelfRelativeSD
+0x77cc17a4 Imported function GetAce
+0x77cc17a8 Imported function AddAccessAllowedAce
+0x77cc17ac Imported function InitializeSecurityDescriptor
+0x77cc17b0 Imported function GetLengthSid
+0x77cc17b4 Imported function AllocateAndInitializeSid
+0x77cc17b8 Imported function InitializeAcl
+0x77cc17bc Imported function LookupPrivilegeValueW
+0x77cc17c0 Imported function LookupAccountSidW
+
+Module COMCTL32.dll
+0x77cc17c8 Imported function COMCTL32.dll@164
+0x77cc17cc Imported function ImageList_SetOverlayImage
+0x77cc17d0 Imported function ImageList_Add
+0x77cc17d4 Imported function ImageList_DragEnter
+0x77cc17d8 Imported function ImageList_BeginDrag
+0x77cc17dc Imported function ImageList_SetDragCursorImage
+0x77cc17e0 Imported function ImageList_GetDragImage
+0x77cc17e4 Imported function ImageList_Remove
+0x77cc17e8 Imported function ImageList_SetBkColor
+0x77cc17ec Imported function ImageList_SetIconSize
+0x77cc17f0 Imported function ImageList_ReplaceIcon
+0x77cc17f4 Imported function ImageList_DrawEx
+0x77cc17f8 Imported function ImageList_Draw
+0x77cc17fc Imported function ImageList_Read
+0x77cc1800 Imported function ImageList_Write
+0x77cc1804 Imported function ImageList_GetIconSize
+0x77cc1808 Imported function COMCTL32.dll@16a
+0x77cc180c Imported function COMCTL32.dll@145
+0x77cc1810 Imported function COMCTL32.dll@168
+0x77cc1814 Imported function COMCTL32.dll@161
+0x77cc1818 Imported function COMCTL32.dll@14f
+0x77cc181c Imported function DestroyPropertySheetPage
+0x77cc1820 Imported function COMCTL32.dll@a7
+0x77cc1824 Imported function COMCTL32.dll@160
+0x77cc1828 Imported function COMCTL32.dll@8
+0x77cc182c Imported function COMCTL32.dll@16e
+0x77cc1830 Imported function COMCTL32.dll@a9
+0x77cc1834 Imported function COMCTL32.dll@169
+0x77cc1838 Imported function COMCTL32.dll@15e
+0x77cc183c Imported function COMCTL32.dll@16b
+0x77cc1840 Imported function COMCTL32.dll@163
+0x77cc1844 Imported function COMCTL32.dll@15f
+0x77cc1848 Imported function COMCTL32.dll@162
+0x77cc184c Imported function ImageList_DragLeave
+0x77cc1850 Imported function ImageList_DragMove
+0x77cc1854 Imported function ImageList_DragShowNolock
+0x77cc1858 Imported function ImageList_EndDrag
+0x77cc185c Imported function COMCTL32.dll@146
+0x77cc1860 Imported function ImageList_Destroy
+0x77cc1864 Imported function COMCTL32.dll@144
+0x77cc1868 Imported function COMCTL32.dll@140
+0x77cc186c Imported function COMCTL32.dll@143
+0x77cc1870 Imported function COMCTL32.dll@166
+0x77cc1874 Imported function COMCTL32.dll@ec
+0x77cc1878 Imported function COMCTL32.dll@141
+0x77cc187c Imported function COMCTL32.dll@167
+0x77cc1880 Imported function COMCTL32.dll@149
+0x77cc1884 Imported function COMCTL32.dll@16d
+0x77cc1888 Imported function CreatePropertySheetPageW
+0x77cc188c Imported function COMCTL32.dll@152
+0x77cc1890 Imported function PropertySheetW
+0x77cc1894 Imported function COMCTL32.dll@14e
+0x77cc1898 Imported function COMCTL32.dll@148
+0x77cc189c Imported function ImageList_Create
+0x77cc18a0 Imported function COMCTL32.dll@14c
+0x77cc18a4 Imported function COMCTL32.dll@150
+0x77cc18a8 Imported function COMCTL32.dll@179
+0x77cc18ac Imported function COMCTL32.dll@147
+0x77cc18b0 Imported function COMCTL32.dll@14b
+0x77cc18b4 Imported function COMCTL32.dll@151
+0x77cc18b8 Imported function COMCTL32.dll@142
+0x77cc18bc Imported function ImageList_GetIcon
+0x77cc18c0 Imported function COMCTL32.dll@16c
+0x77cc18c4 Imported function COMCTL32.dll@155
+0x77cc18c8 Imported function COMCTL32.dll@a3
+0x77cc18cc Imported function COMCTL32.dll@98
+0x77cc18d0 Imported function COMCTL32.dll@191
+0x77cc18d4 Imported function COMCTL32.dll@190
+0x77cc18d8 Imported function COMCTL32.dll@193
+0x77cc18dc Imported function COMCTL32.dll@14a
+0x77cc18e0 Imported function COMCTL32.dll@153
+0x77cc18e4 Imported function COMCTL32.dll@154
