@@ -1,4 +1,4 @@
-/* $Id: pmframe.cpp,v 1.2 1999-10-08 16:19:34 cbratschi Exp $ */
+/* $Id: pmframe.cpp,v 1.3 1999-10-09 09:45:27 sandervl Exp $ */
 /*
  * Win32 Frame Managment Code for OS/2
  *
@@ -31,7 +31,7 @@ MRESULT EXPENTRY Win32FrameProc(HWND hwnd,ULONG msg,MPARAM mp1,MPARAM mp2)
 
   SetWin32TIB();
 
-  win32wnd = Win32BaseWindow::GetWindowFromFrameHandle(hwnd);
+  win32wnd = Win32BaseWindow::GetWindowFromOS2FrameHandle(hwnd);
 
   if(win32wnd == NULL || !win32wnd->getOldFrameProc())
   {

@@ -1,4 +1,4 @@
-/* $Id: win32wbase.h,v 1.15 1999-10-08 16:13:09 cbratschi Exp $ */
+/* $Id: win32wbase.h,v 1.16 1999-10-09 09:45:28 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -198,7 +198,7 @@ Win32BaseWindow *getTopParent();
 
 static Win32BaseWindow *GetWindowFromHandle(HWND hwnd);
 static Win32BaseWindow *GetWindowFromOS2Handle(HWND hwnd);
-static Win32BaseWindow *GetWindowFromFrameHandle(HWND hwnd);
+static Win32BaseWindow *GetWindowFromOS2FrameHandle(HWND hwnd);
 
        PVOID getOldFrameProc() { return pOldFrameProc; };
        VOID  setOldFrameProc(PVOID aOldFrameProc) { pOldFrameProc = aOldFrameProc; };

@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.31 1999-10-08 18:39:35 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.32 1999-10-09 09:45:27 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -910,8 +910,10 @@ ULONG Win32BaseWindow::MsgCommand(ULONG cmd, ULONG Id, HWND hwnd)
     case CMD_CONTROL:
         return 0; //todo
     case CMD_ACCELERATOR:
-        dprintf(("accelerator command"));
-        return 0; //todo
+      	// this fit not really windows behavior.
+      	// maybe TranslateAccelerator() is better
+      	dprintf(("accelerator command"));
+      	return SendInternalMessageA(WM_COMMAND, MAKELONG(Id, 0), 0);
   }
   return 0;
 }
@@ -2549,7 +2551,7 @@ Win32BaseWindow *Win32BaseWindow::GetWindowFromOS2Handle(HWND hwnd)
 }
 //******************************************************************************
 //******************************************************************************
-Win32BaseWindow *Win32BaseWindow::GetWindowFromFrameHandle(HWND hwnd)
+Win32BaseWindow *Win32BaseWindow::GetWindowFromOS2FrameHandle(HWND hwnd)
 {
  Win32BaseWindow *win32wnd;
  DWORD        magic;
