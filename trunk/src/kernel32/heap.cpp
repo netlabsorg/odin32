@@ -1,4 +1,4 @@
-/* $Id: heap.cpp,v 1.35 2001-10-10 22:25:34 phaller Exp $ */
+/* $Id: heap.cpp,v 1.36 2001-10-12 03:48:06 phaller Exp $ */
 
 /*
  * Win32 heap API functions for OS/2
@@ -225,10 +225,10 @@ typedef struct __GLOBAL32_INTERN
  *	Handle: Success
  *	NULL: Failure
  */
-HGLOBAL WINAPI GlobalAlloc(
-                 UINT flags, /* [in] Object allocation attributes */
-                 DWORD size    /* [in] Number of bytes to allocate */
-) {
+ODINFUNCTION2(HGLOBAL, GlobalAlloc,
+              UINT, flags,
+              DWORD, size)
+{
    PGLOBAL32_INTERN     pintern;
    DWORD		hpflags;
    LPVOID               palloc;
@@ -279,9 +279,9 @@ HGLOBAL WINAPI GlobalAlloc(
  *	Pointer to first byte of block
  *	NULL: Failure
  */
-LPVOID WINAPI GlobalLock(
-              HGLOBAL hmem /* [in] Handle of global memory object */
-) {
+ODINFUNCTION1(LPVOID, GlobalLock,
+              HGLOBAL, hmem)
+{
    PGLOBAL32_INTERN pintern;
    LPVOID           palloc;
 
@@ -327,13 +327,11 @@ LPVOID WINAPI GlobalLock(
  *	TRUE: Object is still locked
  *	FALSE: Object is unlocked
  */
-BOOL WINAPI GlobalUnlock(
-              HGLOBAL hmem /* [in] Handle of global memory object */
-) {
+ODINFUNCTION1(BOOL, GlobalUnlock,
+              HGLOBAL, hmem)
+{
    PGLOBAL32_INTERN       pintern;
    BOOL                 locked;
-
-   dprintf(("KERNEL32: GlobalUnlock %x", hmem));
 
    if(hmem == NULL || ISPOINTER(hmem))
       return FALSE;
@@ -376,14 +374,12 @@ BOOL WINAPI GlobalUnlock(
  *	Handle: Success
  *	NULL: Failure
  */
-HGLOBAL WINAPI GlobalHandle(
-                 LPCVOID pmem /* [in] Pointer to global memory block */
-) {
+ODINFUNCTION1(HGLOBAL, GlobalHandle,
+              LPCVOID, pmem)
+{
     HGLOBAL handle;
     PGLOBAL32_INTERN  maybe_intern;
     LPCVOID test;
-
-    dprintf(("KERNEL32: GlobalHandle %x", pmem));
 
     if (!pmem)
     {
@@ -469,11 +465,11 @@ HGLOBAL WINAPI GlobalHandle(
  *	Handle: Success
  *	NULL: Failure
  */
-HGLOBAL WINAPI GlobalReAlloc(
-                 HGLOBAL hmem, /* [in] Handle of global memory object */
-                 DWORD size,     /* [in] New size of block */
-                 UINT flags    /* [in] How to reallocate object */
-) {
+ODINFUNCTION3(HGLOBAL, GlobalReAlloc,
+                 HGLOBAL, hmem,
+                 DWORD, size,
+                 UINT, flags)
+{
    LPVOID               palloc;
    HGLOBAL            hnew;
    PGLOBAL32_INTERN     pintern;
@@ -579,13 +575,11 @@ HGLOBAL WINAPI GlobalReAlloc(
  *	NULL: Success
  *	Handle: Failure
  */
-HGLOBAL WINAPI GlobalFree(
-                 HGLOBAL hmem /* [in] Handle of global memory object */
-) {
+ODINFUNCTION1(HGLOBAL, GlobalFree,
+              HGLOBAL, hmem)
+{
    PGLOBAL32_INTERN pintern;
    HGLOBAL        hreturned = 0;
-
-   dprintf(("KERNEL32: GlobalFree %x", hmem));
 
    /* verify lpMem address */
    if (hmem >= (HGLOBAL)ulMaxAddr || hmem < (HGLOBAL)0x10000)
@@ -630,13 +624,11 @@ HGLOBAL WINAPI GlobalFree(
  *	Size in bytes of the global memory object
  *	0: Failure
  */
-DWORD WINAPI GlobalSize(
-             HGLOBAL hmem /* [in] Handle of global memory object */
-) {
+ODINFUNCTION1(DWORD, GlobalSize,
+              HGLOBAL, hmem)
+{
    DWORD                retval;
    PGLOBAL32_INTERN     pintern;
-
-   dprintf(("KERNEL32: GlobalSize %x", hmem));
 
    if(ISPOINTER(hmem)) 
    {
@@ -673,7 +665,8 @@ DWORD WINAPI GlobalSize(
 /***********************************************************************
  *           GlobalWire   (KERNEL32.@)
  */
-LPVOID WINAPI GlobalWire(HGLOBAL hmem)
+ODINFUNCTION1(LPVOID, GlobalWire,
+              HGLOBAL, hmem)
 {
    return GlobalLock( hmem );
 }
@@ -682,7 +675,8 @@ LPVOID WINAPI GlobalWire(HGLOBAL hmem)
 /***********************************************************************
  *           GlobalUnWire   (KERNEL32.@)
  */
-BOOL WINAPI GlobalUnWire(HGLOBAL hmem)
+ODINFUNCTION1(BOOL, GlobalUnWire,
+              HGLOBAL, hmem)
 {
    return GlobalUnlock( hmem);
 }
@@ -691,7 +685,8 @@ BOOL WINAPI GlobalUnWire(HGLOBAL hmem)
 /***********************************************************************
  *           GlobalFix   (KERNEL32.@)
  */
-VOID WINAPI GlobalFix(HGLOBAL hmem)
+ODINPROCEDURE1(GlobalFix,
+               HGLOBAL, hmem)
 {
     GlobalLock( hmem );
 }
@@ -700,7 +695,8 @@ VOID WINAPI GlobalFix(HGLOBAL hmem)
 /***********************************************************************
  *           GlobalUnfix   (KERNEL32.@)
  */
-VOID WINAPI GlobalUnfix(HGLOBAL hmem)
+ODINPROCEDURE1(GlobalUnfix,
+               HGLOBAL, hmem)
 {
    GlobalUnlock( hmem);
 }
@@ -717,14 +713,12 @@ VOID WINAPI GlobalUnfix(HGLOBAL hmem)
  *	Value specifying allocation flags and lock count
  *	GMEM_INVALID_HANDLE: Failure
  */
-UINT WINAPI GlobalFlags(
-              HGLOBAL hmem /* [in] Handle to global memory object */
-) {
+ODINFUNCTION1(UINT, GlobalFlags,
+              HGLOBAL, hmem)
+{
    DWORD                retval;
    PGLOBAL32_INTERN     pintern;
 
-   dprintf(("KERNEL32: GlobalFlags %x", hmem));
-   
    if(ISPOINTER(hmem))
    {
       retval=0;
@@ -753,10 +747,9 @@ UINT WINAPI GlobalFlags(
 /***********************************************************************
  *           GlobalCompact   (KERNEL32.@)
  */
-DWORD WINAPI GlobalCompact( DWORD minfree )
+ODINFUNCTION1(DWORD, GlobalCompact,
+              DWORD, minfree )
 {
-    dprintf(("KERNEL32:  GlobalCompact %d OBSOLETE", minfree));
-
     return 0;  /* GlobalCompact does nothing in Win32 */
 }
 #else
@@ -765,7 +758,9 @@ DWORD WINAPI GlobalCompact( DWORD minfree )
 static ULONG totalGlobalAlloc = 0;
 #endif
 //******************************************************************************
-HGLOBAL WIN32API GlobalAlloc(UINT fuFlags, DWORD dwBytes)
+ODINFUNCTION2(HGLOBAL, GlobalAlloc,
+              UINT, fuFlags, 
+              DWORD, dwBytes)
 {
  HGLOBAL ret;
 
@@ -773,12 +768,12 @@ HGLOBAL WIN32API GlobalAlloc(UINT fuFlags, DWORD dwBytes)
 #ifdef DEBUG
     totalGlobalAlloc += dwBytes;
 #endif
-    dprintf(("KERNEL32: GlobalAlloc %x %d returned %x (total %x)", fuFlags, dwBytes, ret, totalGlobalAlloc));
     return ret;
 }
 //******************************************************************************
 //******************************************************************************
-HGLOBAL WIN32API GlobalFree( HGLOBAL arg1)
+ODINFUNCTION1(HGLOBAL, GlobalFree,
+              HGLOBAL, arg1)
 {
  HGLOBAL ret;
 
@@ -786,65 +781,57 @@ HGLOBAL WIN32API GlobalFree( HGLOBAL arg1)
     totalGlobalAlloc -= O32_GlobalSize(arg1);
 #endif
     ret = O32_GlobalFree(arg1);
-    dprintf(("KERNEL32: GlobalFree %x returned %x (lasterr=%x) total %x", arg1, ret, GetLastError(), totalGlobalAlloc));
     return ret;
 }
 //******************************************************************************
 //******************************************************************************
-HGLOBAL WIN32API GlobalHandle( LPCVOID lpMem)
+ODINFUNCTION1(HGLOBAL, GlobalHandle,
+              LPCVOID, lpMem)
 {
-    dprintf(("KERNEL32: GlobalHandle %x", lpMem));
-
     return O32_GlobalHandle((LPVOID)lpMem);
 }
 //******************************************************************************
 //******************************************************************************
-UINT WIN32API GlobalFlags(HGLOBAL hMem)
+ODINFUNCTION1(UINT, GlobalFlags,
+              HGLOBAL, hMem)
 {
-    dprintf(("KERNEL32: GlobalFlags %x", hMem));
-
     return O32_GlobalFlags(hMem);
 }
 //******************************************************************************
 //******************************************************************************
-DWORD WIN32API GlobalCompact(DWORD dwMinFree)
+ODINFUNCTION1(DWORD, GlobalCompact,
+              DWORD, dwMinFree)
 {
-  dprintf(("KERNEL32:  GlobalCompact, OBSOLETE - stub\n"));
-
   return(0);
 }
 //******************************************************************************
 //******************************************************************************
-PVOID WIN32API GlobalLock(HGLOBAL hMem)
+ODINFUNCTION1(PVOID, GlobalLock,
+              HGLOBAL, hMem)
 {
- PVOID ret;
-
-    ret = O32_GlobalLock(hMem);
-    dprintf(("KERNEL32: GlobalLock %x returned %x", hMem, ret));
-    return ret;
+  return O32_GlobalLock(hMem);
 }
 //******************************************************************************
 //******************************************************************************
-HGLOBAL WIN32API GlobalReAlloc(HGLOBAL arg1, DWORD arg2, UINT  arg3)
+ODINFUNCTION3(HGLOBAL, GlobalReAlloc,
+              HGLOBAL, arg1,
+              DWORD, arg2,
+              UINT,  arg3)
 {
-    dprintf(("KERNEL32: GlobalReAlloc %x %x %d", arg1, arg2, arg3));
-
     return O32_GlobalReAlloc(arg1, arg2, arg3);
 }
 //******************************************************************************
 //******************************************************************************
-DWORD WIN32API GlobalSize(HGLOBAL arg1)
+ODINFUNCTION1(DWORD, GlobalSize,
+              HGLOBAL, arg1)
 {
-    dprintf(("KERNEL32:  GlobalSize\n"));
-
     return O32_GlobalSize(arg1);
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API GlobalUnlock(HGLOBAL arg1)
+ODINFUNCTION1(BOOL, GlobalUnlock,
+              HGLOBAL, arg1)
 {
-    dprintf(("KERNEL32:  GlobalUnlock\n"));
-
     return O32_GlobalUnlock(arg1);
 }
 /***********************************************************************
@@ -855,7 +842,8 @@ BOOL WIN32API GlobalUnlock(HGLOBAL arg1)
  * memory object should use the GlobalLock and GlobalUnlock functions. 
  *
  */
-LPVOID WIN32API GlobalWire(HGLOBAL hmem)
+ODINFUNCTION1(LPVOID, GlobalWire,
+              HGLOBAL, hmem)
 {
    return GlobalLock( hmem );
 }
@@ -867,36 +855,40 @@ LPVOID WIN32API GlobalWire(HGLOBAL hmem)
  * memory object should use the GlobalLock and GlobalUnlock functions. 
  *
  */
-BOOL WIN32API GlobalUnWire(HGLOBAL hmem)
+ODINFUNCTION1(BOOL, GlobalUnWire,
+              HGLOBAL, hmem)
 {
    return GlobalUnlock( hmem);
 }
 //******************************************************************************
 //******************************************************************************
-HGLOBAL WIN32API GlobalDiscard(HGLOBAL hGlobal)
+ODINFUNCTION1(HGLOBAL, GlobalDiscard,
+              HGLOBAL, hGlobal)
 {
-    dprintf(("KERNEL32: GlobalDiscard %x", hGlobal));
-
     return O32_GlobalDiscard(hGlobal);
 }
 /***********************************************************************
  *           GlobalFix   (KERNEL32.@)
  */
-VOID WINAPI GlobalFix(HGLOBAL hmem)
+ODINPROCEDURE1(GlobalFix,
+               HGLOBAL, hmem)
 {
     GlobalLock( hmem );
 }
 /***********************************************************************
  *           GlobalUnfix   (KERNEL32.@)
  */
-VOID WINAPI GlobalUnfix(HGLOBAL hmem)
+ODINPROCEDURE1(GlobalUnfix,
+               HGLOBAL, hmem)
 {
    GlobalUnlock( hmem);
 }
 #endif
 //******************************************************************************
 //******************************************************************************
-HLOCAL WIN32API LocalAlloc(UINT fuFlags, DWORD cbBytes)
+ODINFUNCTION2(HLOCAL, LocalAlloc,
+              UINT, fuFlags, 
+              DWORD, cbBytes)
 {
     HLOCAL hLocal;
 
@@ -915,10 +907,10 @@ HLOCAL WIN32API LocalAlloc(UINT fuFlags, DWORD cbBytes)
 }
 //******************************************************************************
 //******************************************************************************
-UINT WIN32API LocalFlags(HLOCAL hMem)
+ODINFUNCTION1(UINT, LocalFlags,
+              HLOCAL, hMem)
 {
     UINT ret, retG;
-    dprintf(("KERNEL32: LocalFlags %X\n", hMem));
 
     retG = GlobalFlags(hMem);
 
@@ -936,38 +928,36 @@ UINT WIN32API LocalFlags(HLOCAL hMem)
 }
 //******************************************************************************
 //******************************************************************************
-HLOCAL WIN32API LocalFree(HLOCAL hMem)
+ODINFUNCTION1(HLOCAL, LocalFree,
+              HLOCAL, hMem)
 {
-  dprintf(("KERNEL32: LocalFree %X", hMem));
-
   return GlobalFree(hMem);
 }
 //******************************************************************************
 //******************************************************************************
-HLOCAL WIN32API LocalHandle(PCVOID lpMem)
+ODINFUNCTION1(HLOCAL, LocalHandle,
+              PCVOID, lpMem)
 {
-    dprintf(("KERNEL32: LocalHandle %x", lpMem));
-
     return GlobalHandle(lpMem);
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API LocalUnlock(HLOCAL hMem)
+ODINFUNCTION1(BOOL, LocalUnlock,
+              HLOCAL, hMem)
 {
-    dprintf(("KERNEL32: LocalUnlock %X", hMem));
-
     return GlobalUnlock(hMem);
 }
 //******************************************************************************
 //TODO: cbBytes==0 && fuFlags & LMEM_MOVEABLE not handled!!
 //******************************************************************************
-HLOCAL WIN32API LocalReAlloc(HLOCAL hMem, DWORD cbBytes, UINT fuFlags)
+ODINFUNCTION3(HLOCAL, LocalReAlloc,
+              HLOCAL, hMem,
+              DWORD, cbBytes,
+              UINT, fuFlags)
 {
   HLOCAL hLocalNew, hLocalOld;
   LPVOID lpMem, lpMemOld;
   DWORD  cbOldSize;
-
-    dprintf(("KERNEL32: LocalReAlloc %X %d %X\n", hMem, cbBytes, fuFlags));
 
     // Check flags
     if(fuFlags & (~(LMEM_MOVEABLE | LMEM_DISCARDABLE | LMEM_NOCOMPACT |
@@ -987,36 +977,33 @@ HLOCAL WIN32API LocalReAlloc(HLOCAL hMem, DWORD cbBytes, UINT fuFlags)
 }
 //******************************************************************************
 //******************************************************************************
-UINT WIN32API LocalSize(HLOCAL hMem)
+ODINFUNCTION1(UINT, LocalSize,
+              HLOCAL, hMem)
 {
-    dprintf(("KERNEL32: LocalSize %X", hMem));
-
     return GlobalSize(hMem);
 }
 //******************************************************************************
 //******************************************************************************
-PVOID WIN32API LocalLock(HLOCAL hMem)
+ODINFUNCTION1(PVOID, LocalLock,
+              HLOCAL, hMem)
 {
-    dprintf(("KERNEL32:  LocalLock %X\n", hMem));
-
     return GlobalLock(hMem);
 }
 //******************************************************************************
 //* this function is here for completeness, some stupid software requires it.
 //******************************************************************************
-UINT WIN32API LocalShrink(HLOCAL hMem, UINT cbNewSize)
+ODINFUNCTION2(UINT, LocalShrink,
+              HLOCAL, hMem,
+              UINT, cbNewSize)
 {
-    dprintf(("KERNEL32:  LocalShrink %X, %08xh - OBSOLETE", hMem, cbNewSize));
-
     return cbNewSize;
 }
 //******************************************************************************
 //* this function is here for completeness, mIRC/32 requires it.
 //******************************************************************************
-UINT WIN32API LocalCompact(UINT cbNewSize)
+ODINFUNCTION1(UINT, LocalCompact,
+              UINT, cbNewSize)
 {
-    dprintf(("KERNEL32:  LocalCompact %08xh - OBSOLETE", cbNewSize));
-
     return cbNewSize;
 }
 //******************************************************************************

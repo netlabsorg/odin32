@@ -1,4 +1,4 @@
-/* $Id: os2heap.cpp,v 1.26 2001-10-09 20:25:20 sandervl Exp $ */
+/* $Id: os2heap.cpp,v 1.27 2001-10-12 03:48:06 phaller Exp $ */
 
 /*
  * Heap class for OS/2
@@ -44,12 +44,21 @@ VMutex heaplistmutex;   //protects linked lists of heaps
 void * _LNK_CONV getmoreHeapMem(Heap_t pHeap, size_t *size, int *clean);
 void   _LNK_CONV releaseHeapMem(Heap_t pHeap, void *block, size_t size);
 
+
+//******************************************************************************
+// Fast Heap Handle Management
+//******************************************************************************
+
+static HANDLE   fhhm_lastHandle = 0;
+static OS2Heap* fhhm_lastHeap   = NULL;
+
+
 //******************************************************************************
 //******************************************************************************
 OS2Heap::OS2Heap(DWORD flOptions, DWORD dwInitialSize, DWORD dwMaximumSize)
 {
- OS2Heap *curheap = OS2Heap::heap;
-
+  OS2Heap *curheap = OS2Heap::heap;
+  
   totalAlloc   = 0;
   fInitialized = 0;
   nrHeaps      = 0;
@@ -97,7 +106,12 @@ OS2Heap::~OS2Heap()
 {
  OS2Heap *curheap = OS2Heap::heap;
  int i;
-
+  
+  // invalidate handle cache
+  fhhm_lastHandle = 0;
+  fhhm_lastHeap   = NULL;
+  
+  
   dprintf(("dtr OS2Heap, hPrimaryHeap = %X\n", hPrimaryHeap));
 
   heaplistmutex.enter();
@@ -290,20 +304,35 @@ BOOL OS2Heap::Walk(void *lpEntry)
 //******************************************************************************
 OS2Heap *OS2Heap::find(HANDLE hHeap)
 {
+  // check against cache first
+  if (fhhm_lastHeap)
+    if (hHeap == fhhm_lastHandle)
+      return fhhm_lastHeap;
+  
   OS2Heap *curheap = OS2Heap::heap;
-
+  
   //@@@PH NT programs seem to assume heap 0 is always valid?!
   if (hHeap == 0)
-     if (curheap != NULL)
-       return curheap;
+    if (curheap != NULL)
+    {
+      fhhm_lastHandle = hHeap;
+      fhhm_lastHeap   = curheap;
+      return curheap;
+    }
 
-  while(curheap != NULL) {
-        if(curheap->hPrimaryHeap == hHeap) {
-                return(curheap);
-        }
-        curheap = curheap->next;
+  while(curheap != NULL) 
+  {
+    if(curheap->hPrimaryHeap == hHeap) 
+    {
+      fhhm_lastHandle = hHeap;
+      fhhm_lastHeap   = curheap;
+      return(curheap);
+    }
+    curheap = curheap->next;
   }
   dprintf(("Heap %X not found!\n", hHeap));
+  fhhm_lastHandle = hHeap;
+  fhhm_lastHeap   = NULL;
   return(NULL);
 }
 //******************************************************************************
