@@ -1200,6 +1200,7 @@ static HRESULT WINAPI OLEClipbrd_IDataObject_GetData(
   HANDLE      hData = 0;
   BOOL bClipboardOpen = FALSE;
   HRESULT hr = S_OK;
+  LPVOID src;
 
   /*
    * Declare "This" pointer 
@@ -1240,17 +1241,16 @@ static HRESULT WINAPI OLEClipbrd_IDataObject_GetData(
   hData = GetClipboardData(pformatetcIn->cfFormat);
 
 #ifdef __WIN32OS2__
-{
-  //must make a copy of global handle returned by GetClipboardData; it
-  //is not valid after we call CloseClipboard
-  //Application is responsible for freeing the memory (Forte Agent does this)
-  LPVOID src;
-  LPVOID dest;
-  ULONG  size;
-  HANDLE hDest;
-
+  /* Must make a copy of global handle returned by GetClipboardData; it
+   * is not valid after we call CloseClipboard
+   * Application is responsible for freeing the memory (Forte Agent does this)
+   */
   src = GlobalLock(hData);
   if(src) {
+      LPVOID dest;
+      ULONG  size;
+      HANDLE hDest;
+
       size = GlobalSize(hData);
       hDest = GlobalAlloc(GHND, size);
       dest  = GlobalLock(hDest);
@@ -1259,7 +1259,6 @@ static HRESULT WINAPI OLEClipbrd_IDataObject_GetData(
       GlobalUnlock(hData);
       hData = hDest;
   }
-}
 #endif
 
   /* 

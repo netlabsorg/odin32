@@ -1,4 +1,4 @@
-# $Id: ole32.mak,v 1.15 2001-11-19 12:33:09 sandervl Exp $
+# $Id: ole32.mak,v 1.16 2002-02-15 13:57:40 sandervl Exp $
 
 #
 # Odin32 API
@@ -13,6 +13,10 @@
 WRC_PREFIX_RESOURCE=1
 MAKEFILE = ole32.mak
 
+!if "$(DEBUG)" == "1"
+DEFFILE    = ole32dbg.def
+ORGDEFFILE = ole32.def
+!endif
 
 #
 # Compiler, tools, and interference rules.
@@ -60,6 +64,9 @@ $(OBJDIR)\stg_stream.obj \
 $(OBJDIR)\storage32.obj \
 $(OBJDIR)\stubs.obj \
 $(OBJDIR)\ifs.obj \
+!if "$(DEBUG)" == "1"
+$(OBJDIR)\dbgwrap.obj \
+!endif
 $(OBJDIR)\ole32rsrc.obj
 
 
