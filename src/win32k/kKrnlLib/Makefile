@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.31 2002-08-20 05:05:37 bird Exp $
+# $Id: Makefile,v 1.32 2002-08-20 05:49:14 bird Exp $
 
 #
 # kKrnlLib main file.
@@ -22,7 +22,7 @@ PATH_ROOT = ..\..\..
 TARGET_MODE = EMPTY
 BUILD_OWN_TESTCASE_RULE = 1
 !ifdef WITH_KLIB
-SUBDIRS     = kLib\src tools include src
+SUBDIRS     = kLib\src tools
 !endif
 PREMAKEFILES=\
 !ifdef WITH_KLIB
