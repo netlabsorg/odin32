@@ -35,6 +35,7 @@ EXPORTS
     _DoEnvironmentSubstA@8                    @44
     _PathFileExists@4                         @45
     _PathMatchSpec@8                          @46
+    _PathMatchSpecW@8                         @346
     _PathSetDlgItemPath@12                    @48
     _PathQualify@4                            @49
     _PathResolve@12                           @51
@@ -71,6 +72,8 @@ EXPORTS
     _SHCloneSpecialIDList@12                  @89
     _SHLogILFromFSIL@4                        @95
     _StrRetToStrN@16                          @96
+    _StrRetToStrNA@16                         @396
+    _StrRetToStrNW@16                         @397
     _SHWaitForFileToOpen@12                   @97
     _SHGetRealIDL@12                          @98
     _SetAppStartingCursor@8                   @99
