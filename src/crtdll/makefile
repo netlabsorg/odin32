@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.3 1999-11-03 23:28:04 sandervl Exp $
+# $Id: makefile,v 1.4 1999-12-20 11:09:41 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -15,13 +15,13 @@ PDWIN32_TOOLS = ..\..\tools\bin
 !include $(PDWIN32_INCLUDE)/pdwin32.mk
 
 
-CFLAGS = $(CFLAGS) -I$(PDWIN32_INCLUDE)
+CFLAGS = $(CFLAGS) -I$(PDWIN32_INCLUDE) 
 CXXFLAGS = $(CXXFLAGS) -I$(PDWIN32_INCLUDE)
 
 
 TARGET = crtdll
 
-OBJS =  crtdll.obj initterm.obj
+OBJS =  crtdll.obj bsearch.obj initterm.obj
 
 all: $(TARGET).dll $(TARGET).lib
 
@@ -40,9 +40,10 @@ $(TARGET).lib: $(TARGET).def
 
 initterm.obj: initterm.cpp
 crtdll.obj: crtdll.cpp
+bsearch.obj: bsearch.c
 
 clean:
-	$(RM) *.obj *.lib *.dll *~ *.map *.pch
+	$(RM) *.obj *.lib *.dll *.map *.pch
 	$(RM) $(PDWIN32_BIN)\$(TARGET).dll
 	$(RM) $(PDWIN32_LIB)\$(TARGET).lib
 
