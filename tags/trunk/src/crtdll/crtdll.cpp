@@ -1,4 +1,4 @@
-/* $Id: crtdll.cpp,v 1.27 2000-11-21 23:48:49 phaller Exp $ */
+/* $Id: crtdll.cpp,v 1.28 2000-11-22 00:49:54 phaller Exp $ */
 
 /*
  * The C RunTime DLL
@@ -67,6 +67,14 @@ ODINDEBUGCHANNEL(CRTDLL)
 
 
 #define dprintf2 dprintf
+
+
+//
+// Definitions for internal functions
+//
+void 		qsort1 (char*, char*, size_t,
+                    int (* CDECL)(const void*, const void*));
+
 
 
 /*********************************************************************
@@ -830,6 +838,15 @@ char * CDECL CRTDLL__mktemp( char *string )
 void CDECL CRTDLL__purecall(void)
 {
   dprintf2(("CRTDLL: _purecall\n"));
+}
+
+/*********************************************************************
+ *                  _putch     (CRTDLL.250)
+ */
+INT CDECL CRTDLL__putch( int i )
+{
+  dprintf2(("CRTDLL: _putch\n"));
+  return (_putch(i));
 }
 
 
