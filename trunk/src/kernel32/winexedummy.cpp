@@ -1,4 +1,4 @@
-/* $Id: winexedummy.cpp,v 1.2 2002-07-15 14:28:53 sandervl Exp $ */
+/* $Id: winexedummy.cpp,v 1.3 2002-07-18 12:01:33 achimha Exp $ */
 
 /*
  * Win32 Dummy Exe class
@@ -98,11 +98,12 @@ LPVOID Win32DummyExe::buildHeader(DWORD MajorImageVersion, DWORD MinorImageVersi
     PIMAGE_FILE_HEADER     pfh;
     DWORD *ntsig;
 
+    // AH TODO: we are wasting 60kb address space here (unless using high memory)!!!
     rc = DosAllocMem(&header, 4096, PAG_READ | PAG_WRITE | PAG_COMMIT | flAllocMem);
     if(rc) {
-	    dprintf(("ERROR: buildHeader DosAllocMem failed!! (rc=%x)", rc));
+        dprintf(("ERROR: buildHeader DosAllocMem failed!! (rc=%x)", rc));
         DebugInt3();
-	    return NULL;
+        return NULL;
     }
     memcpy(header, dosHeader, sizeof(dosHeader));
     ntsig  = (DWORD *)((LPBYTE)header + sizeof(dosHeader));
