@@ -1,4 +1,4 @@
-/* $Id: HandleManager.cpp,v 1.69 2001-06-23 19:43:49 sandervl Exp $ */
+/* $Id: HandleManager.cpp,v 1.70 2001-08-25 10:38:50 sandervl Exp $ */
 
 /*
  * Win32 Unified Handle Manager for OS/2
@@ -2237,6 +2237,7 @@ HANDLE HMCreateEvent(LPSECURITY_ATTRIBUTES lpsa,
       HANDLE handle = HMOpenEvent(EVENT_ALL_ACCESS, FALSE, lpName);
       if(handle) {
           dprintf(("CreateEvent: return handle of existing event semaphore %x", handle));
+          SetLastError(ERROR_ALREADY_EXISTS);
           return handle;
       }
   }
@@ -2313,6 +2314,7 @@ HANDLE HMCreateMutex(LPSECURITY_ATTRIBUTES lpsa,
       HANDLE handle = HMOpenMutex(MUTEX_ALL_ACCESS, FALSE, lpName);
       if(handle) {
           dprintf(("CreateMutex: return handle of existing mutex semaphore %x", handle));
+          SetLastError(ERROR_ALREADY_EXISTS);
           return handle;
       }
   }
@@ -2524,6 +2526,7 @@ HANDLE HMCreateSemaphore(LPSECURITY_ATTRIBUTES lpsa,
       HANDLE handle = HMOpenSemaphore(SEMAPHORE_ALL_ACCESS, FALSE, lpName);
       if(handle) {
           dprintf(("CreateSemaphore: return handle of existing semaphore %x", handle));
+          SetLastError(ERROR_ALREADY_EXISTS);
           return handle;
       }
   }
@@ -3025,6 +3028,11 @@ DWORD  HMMsgWaitForMultipleObjects  (DWORD      cObjects,
   DWORD     dwResult;                /* result from the device handler's API */
   PHMHANDLE pHMHandle;       /* pointer to the handle structure in the table */
 
+
+  if(dwWakeMask == 0) {
+      dprintf(("WARNING: wakemask == 0 -> calling WaitForMultipleObjects"));
+      return HMWaitForMultipleObjects(cObjects, lphObjects, fWaitAll, dwTimeout);
+  }
                                                           /* validate handle */
   iIndex = _HMHandleQuery(*lphObjects);                   /* get the index */
   if (-1 == iIndex)                                       /* error ? */
