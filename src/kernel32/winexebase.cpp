@@ -1,4 +1,4 @@
-/* $Id: winexebase.cpp,v 1.12 2000-10-06 11:04:01 sandervl Exp $ */
+/* $Id: winexebase.cpp,v 1.13 2001-02-11 10:34:45 sandervl Exp $ */
 
 /*
  * Win32 exe base class
@@ -26,6 +26,7 @@
 #include <windllbase.h>
 #include <wprocess.h>
 #include <pefile.h>
+#include <cpuhlp.h>
 #include "exceptions.h"
 #include "exceptutil.h"
 #include "cio.h"
@@ -113,14 +114,8 @@ ULONG Win32ExeBase::start()
   tlsAttachThread();	//setup TLS (main thread)
 
   //Set default FPU control word (no exceptions); same as in NT
-  _control87(0x27F, 0xFFF);
-#if 0
-  ULONG Size = 16, Attr;
-  rc = DosQueryMem((PVOID) (entryPoint), &Size, &Attr);
-  dprintf(("Start exe; Attr = %x, rc = %d", Attr, rc));
-#else
+  CONTROL87(0x27F, 0xFFF);
   dprintf(("Start exe"));
-#endif
   rc = ((WIN32EXEENTRY)entryPoint)(NULL);
   RestoreOS2TIB();
 

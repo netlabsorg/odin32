@@ -1,4 +1,4 @@
-/* $Id: crt_wc.cpp,v 1.3 2000-11-21 23:48:49 phaller Exp $ */
+/* $Id: crt_wc.cpp,v 1.4 2001-02-11 10:33:13 sandervl Exp $ */
 
 /*
  * The C RunTime DLL
@@ -19,6 +19,7 @@
 
 #include <odin.h>
 #include <os2win.h>
+#include <stdio.h>
 #include <wchar.h>
 #include <wctype.h>
 #include <heapstring.h>

@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.21 2000-12-16 23:33:37 bird Exp $
+# $Id: makefile,v 1.22 2001-02-11 10:32:51 sandervl Exp $
 
 #
 # Odin32 API
@@ -68,7 +68,9 @@ LIBS = \
 !ifdef WAT
 $(RTLLIB_O)
 !endif
-
+!ifdef VAC36
+$(SOMLIB)
+!endif
 
 #
 # Target name - name of the dll without extention and path.
