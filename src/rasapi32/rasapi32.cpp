@@ -1,4 +1,4 @@
-/* $Id: rasapi32.cpp,v 1.4 1999-11-12 11:38:45 sandervl Exp $ */
+/* $Id: rasapi32.cpp,v 1.5 2000-02-21 10:33:34 sandervl Exp $ */
 /*
  * RASAPI32
  * 
@@ -411,37 +411,37 @@ DWORD WINAPI RnaCloseMac(HANDLE hConn)
 /**************************************************************************
  *                 RnaComplete			[RASAPI32.582]
  */
-/* DWORD APIENTRY RnaComplete(HANDLE hConn, LPCOMPLETE_INFO lpci, LPPROJECTION_INFO lppi, DWORD cEntries)
+DWORD APIENTRY RnaComplete(HANDLE hConn, LPCOMPLETE_INFO lpci, LPPROJECTION_INFO lppi, DWORD cEntries)
 {
 #ifdef DEBUG
   dprintf(("RASAPI32: RnaComplete not implemented\n"));
 #endif
 	return 0;
-} */
+}
 
 
 /**************************************************************************
  *                 RnaGetDevicePort		[RASAPI32.583]
  */
-/* DWORD WINAPI RnaGetDevicePort(HANDLE hConn, LPDEVICE_PORT_INFO lpdpi)
+DWORD WINAPI RnaGetDevicePort(HANDLE hConn, LPDEVICE_PORT_INFO lpdpi)
 {
 #ifdef DEBUG
   dprintf(("RASAPI32: RnaGetDevicePort not implemented\n"));
 #endif
 	return 0;
-} */
+}
 
 
 /**************************************************************************
  *                 RnaGetUserProfile		[RASAPI32.585]
  */
-/* DWORD WINAPI RnaGetUserProfile(HANDLE hConn, LPUSER_PROFILE lpUserProfile)
+DWORD WINAPI RnaGetUserProfile(HANDLE hConn, LPUSER_PROFILE lpUserProfile)
 {
 #ifdef DEBUG
   dprintf(("RASAPI32: RnaGetUserProfile not implemented\n"));
 #endif
 	return 0;
-} */
+}
 
 
 /**************************************************************************
@@ -459,13 +459,13 @@ DWORD WINAPI RnaCloseMac(HANDLE hConn)
 /**************************************************************************
  *                 RnaSessInitialize		[RASAPI32.587]
  */
-/* DWORD APIENTRY RnaSessInitialize(LPSTR lpszType, LPRNA_FUNCS lpRnaFuncs)
+DWORD APIENTRY RnaSessInitialize(LPSTR lpszType, LPRNA_FUNCS lpRnaFuncs)
 {
 #ifdef DEBUG
   dprintf(("RASAPI32: RnaSessInitialize not implemented\n"));
 #endif
 	return 0;
-} */
+}
 
 
 /**************************************************************************

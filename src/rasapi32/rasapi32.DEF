@@ -1,4 +1,4 @@
-; $Id: rasapi32.DEF,v 1.3 1999-12-28 10:31:02 sandervl Exp $
+; $Id: rasapi32.DEF,v 1.4 2000-02-21 10:33:34 sandervl Exp $
 
 ;
 ; Based on NT 4.0 SP6: RASAPI32.DLL 
@@ -89,12 +89,12 @@ EXPORTS
    RasSetEntryDialParamsA	= _RasSetEntryDialParamsA@12	@579
    RasSetEntryDialParamsW	= _RasSetEntryDialParamsW@12	@580
    RnaCloseMac			= _RnaCloseMac@4		@581
-;   RnaComplete			= _RnaComplete			@582
-;   RnaGetDevicePort		= _RnaGetDevicePort		@583
+   RnaComplete			= _RnaComplete@16		@582
+   RnaGetDevicePort		= _RnaGetDevicePort@8		@583
    ;RnaGetOverlaidSMM						@584
-;   RnaGetUserProfile		= _RnaGetUserProfile		@585
+   RnaGetUserProfile		= _RnaGetUserProfile@8		@585
 ;   RnaOpenMac			= _RnaOpenMac			@586
-;   RnaSessInitialize		= _RnaSessInitialize		@587
+   RnaSessInitialize		= _RnaSessInitialize@8		@587
    RnaStartCallback		= _RnaStartCallback@8		@588
    RnaTerminate			= _RnaTerminate@8		@589
    RnaUICallbackDialog		= _RnaUICallbackDialog@28	@590
