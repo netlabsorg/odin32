@@ -1,9 +1,9 @@
-/* $Id: libWin32kSetEnvironment.c,v 1.1 2001-07-08 02:51:24 bird Exp $
+/* $Id: libWin32kSetEnvironment.c,v 1.1.2.1 2002-04-01 13:04:58 bird Exp $
  *
  * libWin32kSetEnvironment - Set the Odin32 environment block pointer for the
  *                           current process.
  *
- * Copyright (c) 2001 knut st. osmundsen (kosmunds@csc.no)
+ * Copyright (c) 2001-2002 knut st. osmundsen (bird@anduin.net)
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *
@@ -35,7 +35,7 @@
  *                                  to get the size of the memory block.
  * @param       pid                 Process id.
  * @status      completely implelemented.
- * @author      knut st. osmundsen (kosmunds@csc.no)
+ * @author      knut st. osmundsen (bird@anduin.net)
  */
 APIRET APIENTRY  libWin32kSetEnvironment(PSZ pszzEnvironment, ULONG cchEnvironment, PID pid)
 {

@@ -1,8 +1,8 @@
-/* $Id: libW32kProcessReadWrite.c,v 1.2 2001-02-21 07:47:58 bird Exp $
+/* $Id: libW32kProcessReadWrite.c,v 1.2.2.1 2002-04-01 13:04:57 bird Exp $
  *
  * libW32kProcessReadWrite  -  Read or write to another process.
  *
- * Copyright (c) 2000-2001 knut st. osmundsen (knut.stange.osmundsen@mynd.no)
+ * Copyright (c) 2000-2002 knut st. osmundsen (bird@anduin.net)
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *
@@ -35,7 +35,7 @@
  * @param       fRead       TRUE:   pvSource is within pid while pvTarget is ours.
  *                          FALSE:  pvTarget is within pid while pvSource is ours.
  * @status      completely implelemented.
- * @author      knut st. osmundsen (knut.stange.osmundsen@mynd.no)
+ * @author      knut st. osmundsen (bird@anduin.net)
  */
 APIRET APIENTRY W32kProcessReadWrite(PID pid, ULONG cb, PVOID pvSource, PVOID pvTarget, BOOL fRead)
 {

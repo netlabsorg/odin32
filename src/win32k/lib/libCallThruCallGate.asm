@@ -1,8 +1,8 @@
-; $Id: libCallThruCallGate.asm,v 1.1 2001-02-21 07:47:57 bird Exp $
+; $Id: libCallThruCallGate.asm,v 1.1.2.1 2002-04-01 13:04:54 bird Exp $
 ;
 ; Calls Win32k thru the call gate.
 ;
-; Copyright (c) 2001 knut st. osmundsen (knut.stange.osmundsen@pmsc.no)
+; Copyright (c) 2001-2002 knut st. osmundsen (bird@anduin.net)
 ;
 ; Project Odin Software License can be found in LICENSE.TXT
 ;
@@ -28,7 +28,7 @@ CODE32 segment
 ;
 ; @cproto    APIRET APIENTRY libWin32kCallThruCallGate(ULONG ulFunction, PVOID pvParam);
 ; @returns   CS value.
-; @author    knut st. osmundsen (knut.stange.osmundsen@pmsc.no)
+; @author    knut st. osmundsen (bird@anduin.net)
 libCallThruCallGate proc near
     ASSUME  ds:FLAT, ss:FLAT
     push    dword ptr [esp+08h]

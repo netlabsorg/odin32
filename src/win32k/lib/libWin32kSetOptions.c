@@ -1,8 +1,8 @@
-/* $Id: libWin32kSetOptions.c,v 1.4 2001-02-21 07:47:59 bird Exp $
+/* $Id: libWin32kSetOptions.c,v 1.4.2.1 2002-04-01 13:04:59 bird Exp $
  *
  * libWin32kSetOptions - Sets the changable options of win32k.sys the options.
  *
- * Copyright (c) 2000-2001 knut st. osmundsen (knut.stange.osmundsen@mynd.no)
+ * Copyright (c) 2000-2002 knut st. osmundsen (bird@anduin.net)
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *
@@ -33,7 +33,7 @@
  * @param       pStatus     Pointer to a status struct. (NULL is allowed)
  *                          (cb have to be set to the size of the structure.)
  * @status      completely implelemented.
- * @author      knut st. osmundsen (knut.stange.osmundsen@mynd.no)
+ * @author      knut st. osmundsen (bird@anduin.net)
  * @remark
  */
 APIRET APIENTRY  libWin32kSetOptions(PK32OPTIONS pOptions)

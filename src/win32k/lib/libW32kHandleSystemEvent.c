@@ -1,9 +1,9 @@
-/* $Id: libW32kHandleSystemEvent.c,v 1.2 2001-02-21 07:47:58 bird Exp $
+/* $Id: libW32kHandleSystemEvent.c,v 1.2.2.1 2002-04-01 13:04:56 bird Exp $
  *
  * libW32kHandleSystemEvent - Override system events like Ctrl-Alt-Delete
  *          and Ctrl-Alt-2xNumLock.
  *
- * Copyright (c) 2000-2001 knut st. osmundsen (knut.stange.osmundsen@mynd.no)
+ * Copyright (c) 2000-2002 knut st. osmundsen (bird@anduin.net)
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *
@@ -44,7 +44,7 @@
  *                      TRUE:  Take control of the event.<br>
  *                      FALSE: Give control back to the OS of this event. (hev must match the current handle!)
  * @status  partially implemented.
- * @author  knut st. osmundsen (knut.stange.osmundsen@mynd.no)
+ * @author  knut st. osmundsen (bird@anduin.net)
  * @remark  Not all events are implemented yet.
  */
 APIRET APIENTRY  W32kHandleSystemEvent(ULONG ulEvent, HEV hev, BOOL fHandle)

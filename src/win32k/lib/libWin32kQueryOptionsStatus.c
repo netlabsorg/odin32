@@ -1,9 +1,9 @@
-/* $Id: libWin32kQueryOptionsStatus.c,v 1.3 2001-02-21 07:47:59 bird Exp $
+/* $Id: libWin32kQueryOptionsStatus.c,v 1.3.2.1 2002-04-01 13:04:58 bird Exp $
  *
  * libWin32kQueryOptionsStatus - Queries the options and/or the status of
  *                               Win32k.sys driver.
  *
- * Copyright (c) 2000-2001 knut st. osmundsen (knut.stange.osmundsen@mynd.no)
+ * Copyright (c) 2000-2002 knut st. osmundsen (bird@anduin.net)
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *
@@ -34,7 +34,7 @@
  * @param       pStatus     Pointer to a status struct. (NULL is allowed)
  *                          (cb have to be set to the size of the structure.)
  * @status      completely implelemented.
- * @author      knut st. osmundsen (knut.stange.osmundsen@mynd.no)
+ * @author      knut st. osmundsen (bird@anduin.net)
  * @remark
  */
 APIRET APIENTRY  libWin32kQueryOptionsStatus(PK32OPTIONS pOptions, PK32STATUS pStatus)

@@ -1,8 +1,8 @@
-; $Id: libGetCS.asm,v 1.1 2000-02-26 20:19:26 bird Exp $
+; $Id: libGetCS.asm,v 1.1.6.1 2002-04-01 13:04:55 bird Exp $
 ;
 ; Gets the CS.
 ;
-; Copyright (c) 2000 knut st. osmundsen (knut.stange.osmundsen@pmsc.no)
+; Copyright (c) 2000-2002 knut st. osmundsen (bird@anduin.net)
 ;
 ; Project Odin Software License can be found in LICENSE.TXT
 ;
@@ -20,7 +20,7 @@ CODE32 segment
 ; Gets the value of the CS register.
 ; @cproto    USHORT APIENTRY  libHelperGetCS(void)
 ; @returns   CS value.
-; @author    knut st. osmundsen (knut.stange.osmundsen@pmsc.no)
+; @author    knut st. osmundsen (bird@anduin.net)
 libHelperGetCS proc near
     xor eax,eax
     mov ax,cs

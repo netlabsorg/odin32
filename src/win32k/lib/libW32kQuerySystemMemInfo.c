@@ -1,9 +1,9 @@
-/* $Id: libW32kQuerySystemMemInfo.c,v 1.2 2001-02-21 07:47:59 bird Exp $
+/* $Id: libW32kQuerySystemMemInfo.c,v 1.2.2.1 2002-04-01 13:04:57 bird Exp $
  *
  * libW32kQuerySystemMemInfo - Collects more or less useful information on the
  *                             memory state of the system.
  *
- * Copyright (c) 2001 knut st. osmundsen (knut.stange.osmundsen@mynd.no)
+ * Copyright (c) 2001-2002 knut st. osmundsen (bird@anduin.net)
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *
@@ -34,7 +34,7 @@
  *                          entry. The rest of the structure is output data
  *                          and hence will only be valid on successful return.
  * @status      completely implelemented.
- * @author      knut st. osmundsen (knut.stange.osmundsen@mynd.no)
+ * @author      knut st. osmundsen (bird@anduin.net)
  * @remark      This function must be backward compatitible if changed.
  */
 APIRET APIENTRY  W32kQuerySystemMemInfo(PK32SYSTEMMEMINFO pMemInfo)

@@ -1,8 +1,8 @@
-/* $Id: libDosKillProcessEx.c,v 1.1 2001-07-09 23:48:52 bird Exp $
+/* $Id: libDosKillProcessEx.c,v 1.1.2.1 2002-04-01 13:04:55 bird Exp $
  *
  * DosKillProcessEx - Extened Edition of DosKillProcess.
  *
- * Copyright (c) 2001 knut st. osmundsen (knut.stange.osmundsen@mynd.no)
+ * Copyright (c) 2001-2002 knut st. osmundsen (bird@anduin.net)
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *
@@ -35,7 +35,7 @@
  *          other error code..
  * @param   flAction    Action and flags defined in os2 headers and win32k.h
  * @param   pid         Pid to kill or top of process tree to kill.
- * @author  knut st. osmundsen (knut.stange.osmundsen@mynd.no)
+ * @author  knut st. osmundsen (bird@anduin.net)
  */
 APIRET APIENTRY  DosKillProcessEx(ULONG flAction, PID pid)
 {
