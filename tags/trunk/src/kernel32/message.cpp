@@ -1,4 +1,4 @@
-/* $Id: message.cpp,v 1.7 1999-10-10 09:00:58 sandervl Exp $ */
+/* $Id: message.cpp,v 1.8 1999-11-21 13:59:36 achimha Exp $ */
 
 /*
  * Win32 message API functions for OS/2
@@ -6,6 +6,7 @@
  * Copyright 1998 Sander van Leeuwen (ported WINE code)
  *
  * Original WINE code (loader\resource.c)
+ * WINE level: 991031
  *
  * Resources
  *
@@ -24,6 +25,22 @@
 #include "heap.h"
 #include "heapstring.h"
 
+typedef VOID (*WVSPRINTFAPROC)(LPSTR,LPCSTR,va_list);
+WVSPRINTFAPROC wvsprintfAProc = NULL;
+
+BOOL LoadwvsprintfA(VOID)
+{
+  //CB: load wvsprintfA dynamic to avoid problems with crosslinked DLL's
+  if (!wvsprintfAProc)
+  {
+    HMODULE hUser32 = LoadLibraryA("USER32.DLL");
+
+    wvsprintfAProc = (WVSPRINTFAPROC)GetProcAddress(hUser32,"wvsprintfA");
+    FreeLibrary(hUser32);
+  }
+
+  return wvsprintfAProc != NULL;
+}
 
 //******************************************************************************
 //******************************************************************************
@@ -46,7 +63,7 @@ int LoadMessageA(HINSTANCE instance, UINT id, WORD lang,
     } *stre;
 
     /*FIXME: I am not sure about the '1' ... But I've only seen those entries*/
-    hrsrc = FindResourceA(instance,(LPCSTR)1,(LPCSTR)RT_MESSAGELISTA);
+    hrsrc = FindResourceW(instance,(LPWSTR)1,RT_MESSAGELISTW);
     if (!hrsrc) return 0;
     hmem = LoadResource(instance, hrsrc);
     if (!hmem) return 0;
@@ -125,7 +142,7 @@ DWORD WIN32API FormatMessageA(DWORD   dwFlags,
    LPSTR from,
          f;
    DWORD width = dwFlags & FORMAT_MESSAGE_MAX_WIDTH_MASK;
-   DWORD nolinefeed = 0;
+   BOOL  eos = FALSE;
 
    dprintf(("KERNEL32: FormatMessageA(%08xh,%08xh,%08xh,%08xh,%08xh,%08xh,%08xh)\n",
             dwFlags,
@@ -178,7 +195,7 @@ DWORD WIN32API FormatMessageA(DWORD   dwFlags,
    {
      f=from;
 
-     while (*f && !nolinefeed)
+     while (*f && !eos)
      {
        if (*f=='%')
        {
@@ -249,13 +266,13 @@ DWORD WIN32API FormatMessageA(DWORD   dwFlags,
                else
                  argliststart=(*(DWORD**)args)+insertnr-1;
 
-               if (fmtstr[strlen(fmtstr)-1]=='s')
+               if (fmtstr[strlen(fmtstr)-1]=='s' && argliststart[0])
                  sprintfbuf = (char*)HeapAlloc(GetProcessHeap(),0,strlen((LPSTR)argliststart[0])+1);
                else
                  sprintfbuf = (char*)HeapAlloc(GetProcessHeap(),0,100);
 
                /* CMF - This makes a BIG assumption about va_list */
-               O32_wvsprintf(sprintfbuf, fmtstr, (va_list) argliststart);
+               if (LoadwvsprintfA()) wvsprintfAProc(sprintfbuf,fmtstr,(va_list)argliststart);
                x=sprintfbuf;
                while (*x)
                {
@@ -279,33 +296,34 @@ DWORD WIN32API FormatMessageA(DWORD   dwFlags,
              break;
 
            case 'n':
-             /* FIXME: perhaps add \r too? */
+             ADD_TO_T('\r');
              ADD_TO_T('\n');
              f++;
              break;
 
            case '0':
-             nolinefeed=1;
+             eos = TRUE;
              f++;
              break;
 
            default:ADD_TO_T(*f++)
              break;
          }
-       }
-       else
-       {
-         ADD_TO_T(*f++)
+       } else
+       { /* '\n' or '\r' gets mapped to "\r\n" */
+         if(*f == '\n' || *f == '\r')
+         {
+           ADD_TO_T('\r');
+           ADD_TO_T('\n');
+           if(*f++ == '\r' && *f == '\n')
+             f++;
+         } else
+         {
+           ADD_TO_T(*f++);
+         }
        }
      }
      *t='\0';
-  }
-
-  if (!nolinefeed)
-  {
-    /* add linefeed */
-    if(t==target || t[-1]!='\n')
-      ADD_TO_T('\n'); /* FIXME: perhaps add \r too? */
   }
 
   talloced = strlen(target)+1;
@@ -352,7 +370,7 @@ DWORD WINAPI FormatMessageW(DWORD   dwFlags,
    DWORD talloced;
    LPSTR from,f;
    DWORD width = dwFlags & FORMAT_MESSAGE_MAX_WIDTH_MASK;
-   DWORD nolinefeed = 0;
+   BOOL  eos = FALSE;
 
    dprintf(("KERNEL32: FormatMessageW(%08xh,%08xh,%08xh,%08xh,%08xh,%08xh,%08xh)\n",
             dwFlags,
@@ -404,7 +422,7 @@ DWORD WINAPI FormatMessageW(DWORD   dwFlags,
 
    if (from) {
       f=from;
-      while (*f && !nolinefeed) {
+      while (*f && !eos) {
          if (*f=='%') {
             int   insertnr;
             char  *fmtstr,*sprintfbuf,*x;
@@ -455,7 +473,7 @@ DWORD WINAPI FormatMessageW(DWORD   dwFlags,
                else
                   argliststart=(*(DWORD**)args)+insertnr-1;
 
-               if (fmtstr[strlen(fmtstr)-1]=='s') {
+               if (fmtstr[strlen(fmtstr)-1]=='s' && argliststart[0]) {
                   DWORD                  xarr[3];
 
                   xarr[0]=(DWORD)HEAP_strdupWtoA(GetProcessHeap(),0,(LPWSTR)(*(argliststart+0)));
@@ -470,7 +488,7 @@ DWORD WINAPI FormatMessageW(DWORD   dwFlags,
                   sprintfbuf=(char*)HeapAlloc(GetProcessHeap(),0,100);
 
                   /* CMF - This makes a BIG assumption about va_list */
-                  O32_wvsprintf(sprintfbuf, fmtstr, (va_list) argliststart);
+                  if (LoadwvsprintfA()) wvsprintfAProc(sprintfbuf,fmtstr,(va_list)argliststart);
                }
                x=sprintfbuf;
                while (*x) {
@@ -480,28 +498,33 @@ DWORD WINAPI FormatMessageW(DWORD   dwFlags,
                HeapFree(GetProcessHeap(),0,fmtstr);
                break;
             case 'n':
-               /* FIXME: perhaps add \r too? */
+               ADD_TO_T('\r');
                ADD_TO_T('\n');
                f++;
                break;
             case '0':
-               nolinefeed=1;
+               eos = TRUE;
                f++;
                break;
             default:ADD_TO_T(*f++)
                break;
 
-            }
-         } else {
-            ADD_TO_T(*f++)
-         }
+          }
+        } else
+        { /* '\n' or '\r' gets mapped to "\r\n" */
+          if(*f == '\n' || *f == '\r')
+          {
+            ADD_TO_T('\r');
+            ADD_TO_T('\n');
+            if(*f++ == '\r' && *f == '\n')
+              f++;
+          } else
+          {
+            ADD_TO_T(*f++);
+          }
+        }
       }
       *t='\0';
-   }
-   if (!nolinefeed) {
-       /* add linefeed */
-       if(t==target || t[-1]!='\n')
-      ADD_TO_T('\n'); /* FIXME: perhaps add \r too? */
    }
    talloced = strlen(target)+1;
    if (nSize && talloced<nSize)
@@ -519,4 +542,5 @@ DWORD WINAPI FormatMessageW(DWORD   dwFlags,
          lstrlenW(lpBuffer);
 }
 #undef ADD_TO_T
+
 
