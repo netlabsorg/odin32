@@ -1,4 +1,8 @@
-/* $Id: changelog,v 1.2113 2002-05-29 18:49:27 sandervl Exp $ */
+/* $Id: changelog,v 1.2114 2002-05-30 14:22:59 sandervl Exp $ */
+
+ 2002-05-30: Platon Fomichev <platon@innotek.de>
+    - COMCTL32: o Correct scrollbar range for listview control (during WM_VSCROLL)
+                  (seems to be done in windows)
 
  2002-05-29: Sander van Leeuwen <sandervl@innotek.de>
     - USER32:   o Fix for ToAscii(Ex) & GetKeyboardState (WinTranslateChar2 call)
