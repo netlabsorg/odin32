@@ -1,4 +1,4 @@
-/* $Id: wintls.cpp,v 1.1 1999-07-07 08:11:58 sandervl Exp $ */
+/* $Id: wintls.cpp,v 1.2 1999-07-07 08:42:49 sandervl Exp $ */
 /*
  * Win32 TLS API functions
  *
@@ -115,8 +115,7 @@ void Win32Image::tlsDetachThread()	//destroy TLS structures
    }
    winteb = (TEB *)TIBFlatPtr;
    VirtualFree(winteb->tls_ptr[tlsIndex], tlsTotalSize, MEM_RELEASE);
-
-   TlsFree(tlsIndex);
+   winteb->tls_ptr[tlsIndex] = 0;
 }
 //******************************************************************************
 //******************************************************************************
