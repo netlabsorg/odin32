@@ -1,4 +1,4 @@
-/* $Id: probkrnl.c,v 1.27 2000-10-01 02:58:15 bird Exp $
+/* $Id: probkrnl.c,v 1.28 2000-10-27 10:59:13 bird Exp $
  *
  * Description:   Autoprobes the os2krnl file and os2krnl[*].sym files.
  *                Another Hack!
@@ -85,9 +85,13 @@
  * aImportTab defines the imported and overloaded OS/2 kernel functions.
  * IMPORTANT: aImportTab has three sibling arrays, two in dev32\d32init.c (aulProc
  *            and aTstFakers), and the calltab.asm, which must match entry by entry.
+ *  - obsolete warning -
  *            When adding/removing/shuffling items in aImportTab, aulProc and
  *            calltab.asm has to be updated immediately!
  *            Use the mkcalltab.exe to generate calltab.asm and aTstFakers.
+ *  - obsolete warning -
+ *            We'll now generate both of these files from this table.
+ *
  */
 IMPORTKRNLSYM DATA16_GLOBAL aImportTab[NBR_OF_KRNLIMPORTS] =
 {/* iFound     cchName                          offObject   usSel     fType    */
@@ -631,6 +635,7 @@ int LookupKrnlEntry(unsigned short usBuild, unsigned short fKernel, unsigned cha
             register PKRNLDBENTRY pEntry = &aKrnlSymDB[i];
 
             dprintf(("LookUpKrnlEntry - found entry for this kernel!\n"));
+            kstrcpy(szSymbolFile, "Win32k Symbol Database");
 
             /*
              * Copy symbol data from the DB to aImportTab.
@@ -652,9 +657,7 @@ int LookupKrnlEntry(unsigned short usBuild, unsigned short fKernel, unsigned cha
             rc = VerifyPrologs();
 
             /* set sym name on success or complain on error */
-            if (rc == 0)
-                kstrcpy(szSymbolFile, "Win32k Symbol Database");
-            else
+            if (rc != 0)
             {
                 printf16("Warning: The Win32k Symbol Database entry found.\n"
                          "         But, VerifyPrologs() returned rc=0x%x and iProc=%d\n", rc, iProc);
@@ -1257,10 +1260,11 @@ int ProbeKernel(PRPINITIN pReqPack)
                     if (rc2 >= ERROR_PROB_SYM_D32_FIRST)
                         rc = rc2;
                 }
-                if (rc == NO_ERROR)
+                if (rc2 == NO_ERROR)
+                {
                     kstrcpy(szSymbolFile, apszSym[i]);
-                else if (rc == 1 || rc2 == NO_ERROR)
-                    rc = rc2;
+                    rc = NO_ERROR;
+                }
                 #endif
             }
         }
