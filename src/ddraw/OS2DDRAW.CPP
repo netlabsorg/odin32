@@ -1,4 +1,4 @@
-/* $Id: OS2DDRAW.CPP,v 1.36 2002-08-12 15:06:21 sandervl Exp $ */
+/* $Id: OS2DDRAW.CPP,v 1.37 2002-08-28 08:20:04 sandervl Exp $ */
 
 /*
  * DX Draw base class implementation
@@ -45,8 +45,9 @@
 #define KEY_DIRECT2DRAW "\\Software\\Win32OS2\\Direct2\\Draw"
 
 
-BOOL bUseFSDD = FALSE;
-BOOL fNoFSDD = FALSE;
+BOOL bUseFSDD          = FALSE;
+BOOL fNoFSDD           = FALSE;
+BOOL fHideCursorOnLock = FALSE;
 
 FOURCC SupportedFourCCs[]   = {FOURCC_SCRN,FOURCC_LUT8,FOURCC_R565,FOURCC_RGB3,FOURCC_RGB4};
 
@@ -67,6 +68,15 @@ void WIN32API SetCustomFullScreenMode(DWORD dwWidth, DWORD dwHeight, DWORD dwBPP
     ModesDive[0].iBits  = dwBPP;
     ModesDive[0].iRatio = 0;
     fNoFSDD = TRUE;
+}
+//******************************************************************************
+//Force DirectSurface Lock & Unlock methods to hide & show the mouse cursor
+//******************************************************************************
+BOOL WIN32API SetCustomHideCursorOnLock(BOOL state)
+{
+    BOOL preState = fHideCursorOnLock;
+    fHideCursorOnLock = state;
+    return preState;
 }
 //******************************************************************************
 //******************************************************************************
