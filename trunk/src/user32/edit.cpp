@@ -1,4 +1,4 @@
-/* $Id: edit.cpp,v 1.44 2001-07-09 18:39:28 sandervl Exp $ */
+/* $Id: edit.cpp,v 1.45 2002-07-01 14:07:22 sandervl Exp $ */
 /*
  *      Edit control
  *
@@ -2985,7 +2985,6 @@ static void EDIT_WM_Char(HWND hwnd, EDITSTATE *es, CHAR c, DWORD key_data)
             /* If the edit doesn't want the return and it's not a multiline edit, do nothing */
             if(!(es->style & ES_MULTILINE) && !(es->style & ES_WANTRETURN))
             {
-              MessageBeep(MB_ICONEXCLAMATION);
               break;
             }
         case '\n':
