@@ -1,4 +1,4 @@
-/* $Id: wingdi.h,v 1.7 1999-10-04 09:55:51 sandervl Exp $ */
+/* $Id: wingdi.h,v 1.8 1999-11-11 13:15:21 sandervl Exp $ */
 
 #ifndef __WINE_WINGDI_H
 #define __WINE_WINGDI_H
@@ -1008,7 +1008,6 @@ typedef struct
 
 DECL_WINELIB_TYPE_AW(NEWTEXTMETRICEX)
 DECL_WINELIB_TYPE_AW(LPNEWTEXTMETRICEX)
-
 
 typedef INT (* CALLBACK FONTENUMPROCA)(LPENUMLOGFONTA,LPNEWTEXTMETRICA,
                                           UINT,LPARAM);
@@ -2693,7 +2692,7 @@ HENHMETAFILE WINAPI SetEnhMetaFileBits(UINT,const BYTE *);
 INT       WINAPI SetGraphicsMode(HDC,INT);
 HMETAFILE WINAPI SetMetaFileBitsEx(UINT,const BYTE*);
 BOOL      WINAPI SetWorldTransform(HDC,const XFORM*);
-UINT      WINAPI TranslateCharsetInfo(LPDWORD,LPCHARSETINFO,DWORD);
+BOOL      WINAPI TranslateCharsetInfo(LPDWORD,LPCHARSETINFO,DWORD);
 
 /* Declarations for functions that change between Win16 and Win32 */
 
