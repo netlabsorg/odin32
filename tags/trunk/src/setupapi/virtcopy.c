@@ -467,7 +467,8 @@ RETERR16 VCP_CopyFiles(void)
 	/* FIXME: need to do the file copy in small chunks for notifications */
 	TRACE("copying '%s' to '%s'\n", fn_src, fn_dst);
         /* perform the file copy */
-        if (!(CopyFileA(fn_src, fn_dst, TRUE)))
+        if (!(CopyFileA(fn_src, fn_dst,
+	       (lpvn->fl & VNLP_COPYIFEXISTS) ? FALSE : TRUE )))
         {
             ERR("error copying, src: %s -> dst: %s\n", fn_src, fn_dst);
 	    res = ERR_VCP_IOFAIL;
@@ -578,9 +579,9 @@ static HWND hDlgCopy = 0;
 static HKEY hKeyFiles = 0, hKeyRename = 0, hKeyConflict = 0;
 static char BackupDir[12];
 
-static BOOL CALLBACK VCP_UI_FileCopyDlgProc(HWND hWndDlg, UINT iMsg, WPARAM wParam, LPARAM lParam)
+static INT_PTR CALLBACK VCP_UI_FileCopyDlgProc(HWND hWndDlg, UINT iMsg, WPARAM wParam, LPARAM lParam)
 {
-    BOOL retval = FALSE;
+    INT_PTR retval = FALSE;
 
     if (iMsg == WM_INITDIALOG)
     {
@@ -593,7 +594,8 @@ static BOOL CALLBACK VCP_UI_FileCopyDlgProc(HWND hWndDlg, UINT iMsg, WPARAM wPar
 
 BOOL VCP_UI_GetDialogTemplate(LPCVOID *template32)
 {
-    HANDLE hResInfo, hDlgTmpl32;
+    HRSRC hResInfo;
+    HGLOBAL hDlgTmpl32;
 
     if (!(hResInfo = FindResourceA(SETUPAPI_hInstance, MAKEINTRESOURCEA(COPYFILEDLGORD), RT_DIALOGA)))
 	return FALSE;

@@ -20,7 +20,7 @@
 
 #include "windef.h"
 #include "winbase.h"
-#include "ntddk.h"
+#include "winternl.h"
 #include "winerror.h"
 #include "setupapi.h"
 #include "wine/unicode.h"
@@ -959,7 +959,7 @@ BOOL WINAPI SetupCommitFileQueueW( HWND owner, HSPFILEQ handle, PSP_FILE_CALLBAC
     if (!queue->copy_queue.count && !queue->delete_queue.count && !queue->rename_queue.count)
         return TRUE;  /* nothing to do */
 
-    if (!handler( context, SPFILENOTIFY_STARTQUEUE, owner, 0 )) return FALSE;
+    if (!handler( context, SPFILENOTIFY_STARTQUEUE, (UINT)owner, 0 )) return FALSE;
 
     /* perform deletes */
 
