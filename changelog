@@ -1,8 +1,9 @@
-/* $Id: changelog,v 1.2090 2002-05-22 12:57:59 sandervl Exp $ */
+/* $Id: changelog,v 1.2091 2002-05-22 15:48:25 sandervl Exp $ */
 
  2002-05-22: Sander van Leeuwen <sandervl@xs4all.nl>
     - KERNEL32: o CreateThread bugfix (returned thread id incorrect)
                   (fixes RealPlayer (PostThreadMessage))
+    - WINMM:    o Added debug wrappers
 
  2002-05-21: Sander van Leeuwen <sandervl@xs4all.nl>
     - KERNEL32: o Round stack top & bottom (TIB) to page boundary
