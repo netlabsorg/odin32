@@ -1,4 +1,4 @@
-/* $Id: win32wbase.h,v 1.51 1999-12-07 20:43:40 sandervl Exp $ */
+/* $Id: win32wbase.h,v 1.52 1999-12-09 00:53:38 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -100,8 +100,8 @@ virtual  ULONG  MsgActivate(BOOL fActivate, BOOL fMinimized, HWND hwnd);
 
          VOID   updateWindowStyle(DWORD oldExStyle,DWORD oldStyle);
 
-virtual  LONG   SetWindowLongA(int index, ULONG value);
-virtual  ULONG  GetWindowLongA(int index);
+virtual  LONG   SetWindowLongA(int index, ULONG value, BOOL fUnicode = FALSE);
+virtual  ULONG  GetWindowLongA(int index, BOOL fUnicode = FALSE);
 virtual  WORD   SetWindowWord(int index, WORD value);
 virtual  WORD   GetWindowWord(int index);
 
@@ -184,7 +184,11 @@ Win32BaseWindow *GetTopParent();
          BOOL   IsWindowDestroyed()           { return fIsDestroyed; };
          BOOL   IsWindowEnabled();
          BOOL   IsWindowVisible();
-         BOOL   IsUnicode()  { return isUnicode; };
+	 //Created with CreateWindowExA or ExW
+         BOOL   IsUnicode() 			{ return isUnicode; };
+	 //Window procedure type
+         BOOL   IsWindowUnicode();	
+
          BOOL   GetWindowRect(PRECT pRect);
          int    GetWindowTextLength();
          int    GetWindowTextA(LPSTR lpsz, int cch);
@@ -215,7 +219,7 @@ static BOOL     PostThreadMessageW(ULONG threadid, UINT msg, WPARAM wParam, LPAR
 static LRESULT  BroadcastMessageA(int type, UINT msg, WPARAM wParam, LPARAM lParam);
 static LRESULT  BroadcastMessageW(int type, UINT msg, WPARAM wParam, LPARAM lParam);
 
-       LRESULT  DefWindowProcA(UINT Msg, WPARAM wParam, LPARAM lParam, BOOL fReentered = FALSE);
+       LRESULT  DefWindowProcA(UINT Msg, WPARAM wParam, LPARAM lParam);
        LRESULT  DefWindowProcW(UINT msg, WPARAM wParam, LPARAM lParam);
 
        LRESULT  DefWndControlColor(UINT ctlType, HDC hdc);

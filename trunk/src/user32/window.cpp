@@ -1,4 +1,4 @@
-/* $Id: window.cpp,v 1.40 1999-12-05 00:31:49 sandervl Exp $ */
+/* $Id: window.cpp,v 1.41 1999-12-09 00:53:38 sandervl Exp $ */
 /*
  * Win32 window apis for OS/2
  *
@@ -955,7 +955,7 @@ BOOL WIN32API MoveWindow( HWND hwnd, INT x, INT y, INT cx, INT cy,
     int flags = SWP_NOZORDER | SWP_NOACTIVATE;
 
     if (!repaint) flags |= SWP_NOREDRAW;
-    dprintf(("MoveWindow: %04x %d,%d %dx%d %d\n", hwnd, x, y, cx, cy, repaint ));
+    dprintf(("MoveWindow: %x %d,%d %dx%d %d\n", hwnd, x, y, cx, cy, repaint ));
 
     return SetWindowPos( hwnd, 0, x, y, cx, cy, flags );
 }
@@ -1276,7 +1276,7 @@ BOOL WIN32API IsWindowUnicode(HWND hwnd)
         SetLastError(ERROR_INVALID_WINDOW_HANDLE);
         return 0;
     }
-    return window->IsUnicode();
+    return window->IsWindowUnicode();
 }
 /*****************************************************************************
  * Name      : WORD WIN32API CascadeWindows
