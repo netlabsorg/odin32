@@ -1,4 +1,4 @@
-/* $Id: mmap.cpp,v 1.15 1999-08-26 15:05:14 sandervl Exp $ */
+/* $Id: mmap.cpp,v 1.16 1999-08-26 17:56:25 sandervl Exp $ */
 
 /*
  * Win32 Memory mapped file class
@@ -189,12 +189,9 @@ BOOL Win32MemMap::commitPage(LPVOID lpPageFaultAddr, ULONG nrpages, BOOL fWriteA
 			goto fail;
 		}
 		if(mProtFlags & PAGE_READONLY) {
-//DosSetMem returns flags with EXECUTE bit set, even though the initial allocation is without this bit set!
-//Also returns access denied when trying to set it back to READONLY
-  			VirtualProtect((LPVOID)pageAddr, nrpages*PAGE_SIZE, newProt, &oldProt);
-//  			if(VirtualProtect((LPVOID)pageAddr, nrpages*PAGE_SIZE, newProt, &oldProt) == FALSE) {
-//				goto fail;
-//			}
+  			if(VirtualProtect((LPVOID)pageAddr, nrpages*PAGE_SIZE, newProt, &oldProt) == FALSE) {
+				goto fail;
+			}
 		}
 	}
   }
@@ -255,7 +252,12 @@ LPVOID Win32MemMap::mapViewOfFile(ULONG size, ULONG offset, ULONG fdwAccess)
 #endif
 
   if(fMapped == FALSE) {//if not mapped, reserve/commit entire view
-  	pMapping = VirtualAlloc(0, mSize, fAlloc, memFlags);
+	//SvL: Always read/write access or else ReadFile will crash once we
+ 	//     start decommitting pages. 
+	//     This is most likely an OS/2 bug and doesn't happen in Aurora
+        //     when allocating memory with the PAG_ANY bit set. (without this
+        //     flag it will also crash)
+  	pMapping = VirtualAlloc(0, mSize, fAlloc, PAGE_READWRITE);
   	if(pMapping == NULL) {
 		dprintf(("Win32MemMap::mapFileView: VirtualAlloc %x %x %x failed!", mSize, fAlloc, memFlags));
 		goto fail;
