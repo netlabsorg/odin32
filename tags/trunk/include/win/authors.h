@@ -1,4 +1,4 @@
-/* $Id: authors.h,v 1.6 1999-12-30 09:29:10 sandervl Exp $ */
+/* $Id: authors.h,v 1.7 2000-01-22 10:30:30 sandervl Exp $ */
 #ifndef __WINE_AUTHORS_H
 #define __WINE_AUTHORS_H
 
@@ -19,6 +19,7 @@ static const char * const SHELL_People[] =
     "Chris McKillop",
     "Nenad Milenkovic",
     "Markus Montkowski",
+    "Michal Necasek",
     "Knut Stange Osmundsen",
     "Vitali E. Pelenyov",
     "Rene Pronk",

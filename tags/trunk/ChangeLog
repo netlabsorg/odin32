@@ -1,4 +1,7 @@
- /* $Id: ChangeLog,v 1.664 2000-01-21 22:34:42 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.665 2000-01-22 10:29:52 sandervl Exp $ */
+
+ 2000-01-22: Michal Necasek <mike@mendelu.cz>
+	- DINPUT: Fixes + basic functionality is complete; enough for many games
 
  2000-01-21: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32: Put back old WM_MOVE, MsgFormatChanged & OSLibSWPToWINDOWPOSFrame
