@@ -1,4 +1,4 @@
-/* $Id: hmfile.cpp,v 1.27 2001-05-15 17:01:15 sandervl Exp $ */
+/* $Id: hmfile.cpp,v 1.28 2001-05-24 08:19:18 sandervl Exp $ */
 
 /*
  * File IO win32 apis
@@ -159,73 +159,69 @@ DWORD HMDeviceFileClass::OpenFile (LPCSTR        lpszFileName,
                                    OFSTRUCT      *pOFStruct,
                                    UINT          fuMode)
 {
-  HFILE hFile;
-  FILETIME filetime;
-  WORD filedatetime[2];
-  char filepath[260];
-  LPSTR lpFileName = (LPSTR)lpszFileName;
+    HFILE hFile;
+    FILETIME filetime;
+    WORD filedatetime[2];
+    char filepath[260];
+    LPSTR lpFileName = (LPSTR)lpszFileName;
 
-  SetLastError(ERROR_SUCCESS);
+    SetLastError(ERROR_SUCCESS);
 
-  dprintf(("KERNEL32: HMDeviceFileClass::OpenFile %s(%s,%08x,%08x,%08x)",
-           lpHMDeviceName,
-           lpFileName,
-           pHMHandleData,
-           pOFStruct,
-           fuMode));
+    //Re-open using name in OFSTRUCT
+    if(fuMode & OF_REOPEN)
+         lpFileName = (LPSTR)pOFStruct->szPathName;
+    else memset(pOFStruct, 0, sizeof(OFSTRUCT));
 
-  //Re-open using name in OFSTRUCT
-  if(fuMode & OF_REOPEN)
-        lpFileName = (LPSTR)pOFStruct->szPathName;
-  else  memset(pOFStruct, 0, sizeof(OFSTRUCT));
+    dprintf(("KERNEL32: HMDeviceFileClass::OpenFile %s(%s,%08x,%08x,%08x)", lpHMDeviceName,
+             lpFileName, pHMHandleData, pOFStruct, fuMode));
 
-  if(lpFileName == NULL) {
-      dprintf(("Invalid name (NULL)!"));
-      SetLastError(ERROR_INVALID_NAME);
-      return HFILE_ERROR;
-  }
-
-  if(strcmp(lpFileName,       // "support" for local unc names
-             "\\\\.\\") == 0)
-  {
-        lpFileName+=4;
-  }
-  else
-  if(!strchr(lpFileName, ':') && !strchr(lpFileName, '\\'))
-  {
-    //filename only; search for file in following order
-    //1: dir from which the app loaded
-    //2: current dir
-    //3: windows system dir
-    //4: windows dir
-    //5: dirs in path path environment variable
-    //SearchPath does exactly that
-    LPSTR filenameinpath;
-
-    if(SearchPathA(NULL, lpFileName, NULL, sizeof(filepath), filepath, &filenameinpath) == 0
-           && !(fuMode & OF_CREATE) )
-        {
-        pOFStruct->nErrCode = ERROR_FILE_NOT_FOUND;
-        SetLastError(ERROR_FILE_NOT_FOUND);
+    if(lpFileName == NULL) {
+        dprintf(("Invalid name (NULL)!"));
+        SetLastError(ERROR_INVALID_NAME);
         return HFILE_ERROR;
     }
-    lpFileName = filepath;
-  }
-  else {
-    ParsePath(lpFileName, filepath, sizeof(filepath));
-    lpFileName = filepath;
-  }
 
-  // filling OFSTRUCT
-  pOFStruct->cBytes = sizeof(OFSTRUCT);
-  pOFStruct->nErrCode = 0;
-  strncpy((char *)pOFStruct->szPathName, lpFileName, OFS_MAXPATHNAME);
-  pOFStruct->szPathName[OFS_MAXPATHNAME-1] = 0;
+    if(strcmp(lpFileName,       // "support" for local unc names
+             "\\\\.\\") == 0)
+    {
+        lpFileName+=4;
+    }
+    else
+    if(!strchr(lpFileName, ':') && !strchr(lpFileName, '\\'))
+    {
+        //filename only; search for file in following order
+        //1: dir from which the app loaded
+        //2: current dir
+        //3: windows system dir
+        //4: windows dir
+        //5: dirs in path path environment variable
+        //SearchPath does exactly that
+        LPSTR filenameinpath;
 
-  hFile = OSLibDosOpenFile((LPSTR)lpFileName, fuMode);
+        if(SearchPathA(NULL, lpFileName, NULL, sizeof(filepath), filepath, &filenameinpath) == 0
+           && !(fuMode & OF_CREATE) )
+        {
+            pOFStruct->nErrCode = ERROR_FILE_NOT_FOUND;
+            SetLastError(ERROR_FILE_NOT_FOUND);
+            return HFILE_ERROR;
+        }
+        lpFileName = filepath;
+    }
+    else {
+        ParsePath(lpFileName, filepath, sizeof(filepath));
+        lpFileName = filepath;
+    }
 
-  if(hFile != INVALID_HANDLE_ERROR)
-  {
+    // filling OFSTRUCT
+    pOFStruct->cBytes = sizeof(OFSTRUCT);
+    pOFStruct->nErrCode = 0;
+    strncpy((char *)pOFStruct->szPathName, lpFileName, OFS_MAXPATHNAME);
+    pOFStruct->szPathName[OFS_MAXPATHNAME-1] = 0;
+
+    hFile = OSLibDosOpenFile((LPSTR)lpFileName, fuMode);
+
+    if(hFile != INVALID_HANDLE_ERROR)
+    {
         //Needed for GetFileTime
         pHMHandleData->hHMHandle = hFile;
         GetFileTime(pHMHandleData,
@@ -238,68 +234,68 @@ DWORD HMDeviceFileClass::OpenFile (LPCSTR        lpszFileName,
                               &filedatetime[1] );
         memcpy(pOFStruct->reserved, filedatetime, sizeof(pOFStruct->reserved));
 
-    if(fuMode & OF_DELETE)
-    {
+        if(fuMode & OF_DELETE)
+        {
             OSLibDosClose(hFile);
             OSLibDosDelete((LPSTR)lpFileName);
-    }
-    else
-    if(fuMode & OF_EXIST)
-    {
-        OSLibDosClose(hFile);
-        hFile = HFILE_ERROR;
-    }
-    if(fuMode & OF_PARSE)
-    {
-      CHAR drive[4];
+        }
+        else
+        if(fuMode & OF_EXIST)
+        {
+            OSLibDosClose(hFile);
+            hFile = HFILE_ERROR;
+        }
+        if(fuMode & OF_PARSE)
+        {
+            CHAR drive[4];
 
-        drive[0] = pOFStruct->szPathName[0];
-        drive[1] = pOFStruct->szPathName[1];
-        drive[2] = pOFStruct->szPathName[2];
-        drive[3] = 0;
+            drive[0] = pOFStruct->szPathName[0];
+            drive[1] = pOFStruct->szPathName[1];
+            drive[2] = pOFStruct->szPathName[2];
+            drive[3] = 0;
 
-        pOFStruct->fFixedDisk = (GetDriveTypeA(drive) != DRIVE_REMOVABLE);
+            pOFStruct->fFixedDisk = (GetDriveTypeA(drive) != DRIVE_REMOVABLE);
 
-        OSLibDosClose(hFile);
-        hFile = HFILE_ERROR;
-    }
+            OSLibDosClose(hFile);
+            hFile = HFILE_ERROR;
+        }
 
         if((fuMode & OF_VERIFY))
         {
             if(memcmp(pOFStruct->reserved, filedatetime, sizeof(pOFStruct->reserved)))
             {
-                    OSLibDosClose(hFile);
-                    SetLastError(ERROR_FILE_NOT_FOUND);
+                OSLibDosClose(hFile);
+                SetLastError(ERROR_FILE_NOT_FOUND);
             }
-        hFile = HFILE_ERROR;
+            hFile = HFILE_ERROR;
         }
 
         pOFStruct->nErrCode = GetLastError();
         pHMHandleData->hHMHandle = hFile;
 
         if(hFile != HFILE_ERROR) {
-        pHMHandleData->dwUserData = (DWORD) new HMFileInfo((LPSTR)lpFileName, NULL);
-    }
+            pHMHandleData->dwUserData = (DWORD) new HMFileInfo((LPSTR)lpFileName, NULL);
+        }
         return (NO_ERROR);
-  }
-  else {
+    }
+    else {
         DWORD rc = GetLastError();
 
         if(fuMode & OF_EXIST)
         {
             if(rc == ERROR_OPEN_FAILED) {
-            SetLastError(ERROR_FILE_NOT_FOUND);
+                SetLastError(ERROR_FILE_NOT_FOUND);
+            }
         }
+        //todo: OF_PROMPT handling (pop up message box)
     }
-    //todo: OF_PROMPT handling (pop up message box)
-  }
-  // error branch
-  pOFStruct->nErrCode = GetLastError();
-  dprintf(("KERNEL32: HMDeviceFileClass::OpenFile Error %08xh\n",
-            pOFStruct->nErrCode));
+    // error branch
+    pOFStruct->nErrCode = GetLastError();
+    dprintf(("KERNEL32: HMDeviceFileClass::OpenFile Error %08xh\n",
+             pOFStruct->nErrCode));
 
-  // return != NO_ERROR => error code
-  return(hFile);
+    // return != NO_ERROR => error code
+    return(hFile);
 }
 
 /*****************************************************************************
