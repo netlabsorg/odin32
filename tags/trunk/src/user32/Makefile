@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.78 2000-12-07 15:51:24 sandervl Exp $
+# $Id: Makefile,v 1.79 2000-12-07 21:13:14 bird Exp $
 
 #
 # Odin32 API
@@ -14,10 +14,13 @@
 
 
 #
-# Overrides
+# Overrides.
 #
-CFLAGS   = $(CFLAGS) -DINVERT -DUSING_OPEN32
-CXXFLAGS = $(CXXFLAGS) -DINVERT -DUSING_OPEN32
+!ifndef WAT
+CDEFINES = $(CDEFINES) -DINVERT -DUSING_OPEN32
+!else
+CDEFINES += -DINVERT -DUSING_OPEN32
+!endif
 
 
 #
