@@ -1,4 +1,4 @@
-/* $Id: KERNEL32.CPP,v 1.72 2002-02-15 20:15:54 sandervl Exp $ */
+/* $Id: KERNEL32.CPP,v 1.73 2003-01-10 12:57:12 sandervl Exp $ */
 
 /*
  * Win32 compatibility file functions for OS/2
@@ -52,6 +52,47 @@ ODINDEBUGCHANNEL(KERNEL32-KERNEL32)
 
 
 
+/*****************************************************************************
+ * Name      : DWORD GetHandleInformation
+ * Purpose   : The GetHandleInformation function obtains information about certain
+ *             properties of an object handle. The information is obtained as a set of bit flags.
+ * Parameters: HANDLE  hObject
+ *             LPDWORD lpdwFlags
+ * Variables :
+ * Result    : TRUE / FALSE
+ * Remark    :
+ * Status    : 
+ *
+ * Author    : SvL
+ *****************************************************************************/
+
+BOOL WIN32API GetHandleInformation(HANDLE  hObject,
+                                   LPDWORD lpdwFlags)
+{
+   return HMGetHandleInformation(hObject, lpdwFlags);
+}
+
+/*****************************************************************************
+ * Name      : BOOL SetHandleInformation
+ * Purpose   : The SetHandleInformation function sets certain properties of an
+ *             object handle. The information is specified as a set of bit flags.
+ * Parameters: HANDLE hObject  handle to an object
+ *             DWORD  dwMask   specifies flags to change
+ *             DWORD  dwFlags  specifies new values for flags
+ * Variables :
+ * Result    : TRUE / FALSE
+ * Remark    :
+ * Status    : 
+ *
+ * Author    : SvL
+ *****************************************************************************/
+
+BOOL WIN32API SetHandleInformation(HANDLE hObject,
+                                   DWORD  dwMask,
+                                   DWORD  dwFlags)
+{
+   return HMSetHandleInformation(hObject, dwMask, dwFlags);
+}
 /*****************************************************************************
  * Name      : BOOL WIN32API CloseHandle
  * Purpose   : forward call to Open32

@@ -1,4 +1,4 @@
-/* $Id: oslibdos.cpp,v 1.110 2002-12-19 12:55:27 sandervl Exp $ */
+/* $Id: oslibdos.cpp,v 1.111 2003-01-10 12:57:13 sandervl Exp $ */
 /*
  * Wrappers for OS/2 Dos* API
  *
@@ -429,7 +429,7 @@ DWORD OSLibDosOpen(char *lpszFileName, DWORD flags)
  APIRET rc;
  HFILE  hFile;
  ULONG  ulAction;
- DWORD  os2flags = OPEN_FLAGS_NOINHERIT;
+ DWORD  os2flags = OPEN_FLAGS_NOINHERIT; //default is not inherited by child processes
  char lOemFileName[260];
 
   CharToOemA(lpszFileName, lOemFileName);
@@ -842,7 +842,7 @@ DWORD OSLibDosCreateFile(CHAR *lpszFile,
    LONGLONG fileSize = {0};
    ULONG   fileAttr = FILE_NORMAL;
    ULONG   openFlag = 0;
-   ULONG   openMode = 0;
+   ULONG   openMode = OPEN_FLAGS_NOINHERIT; //default is not inherited by child processes
    APIRET  rc = ERROR_NOT_ENOUGH_MEMORY;;
 
    //TODO: lpSecurityAttributes (inheritance)
@@ -1019,7 +1019,7 @@ DWORD OSLibDosOpenFile(CHAR *lpszFile, UINT fuMode)
    LONGLONG fileSize = {0};
    ULONG   fileAttr = FILE_NORMAL;
    ULONG   openFlag = 0;
-   ULONG   openMode = 0;
+   ULONG   openMode = OPEN_FLAGS_NOINHERIT; //default is not inherited by child processes
    APIRET  rc = ERROR_NOT_ENOUGH_MEMORY;
    HFILE   hFile;
 
@@ -1470,6 +1470,28 @@ DWORD OSLibDosDupHandle(DWORD hFile, DWORD *hNew)
    return DosDupHandle(hFile, hNew);
 }
 //******************************************************************************
+//******************************************************************************
+DWORD OSLibDosSetFHState(DWORD hFile, DWORD dwFlags)
+{
+   DWORD  ulMode;
+   APIRET rc;
+   
+   rc = DosQueryFHState(hFile, &ulMode);
+   if(rc != NO_ERROR) return error2WinError(rc);
+
+   //turn off non-participating bits
+   ulMode &= 0x7F88;
+
+   if(dwFlags & HANDLE_FLAG_INHERIT_W) {
+       ulMode &= ~OPEN_FLAGS_NOINHERIT;
+   }
+   else 
+       ulMode |= OPEN_FLAGS_NOINHERIT;
+
+   rc = DosSetFHState(hFile, ulMode);
+   return error2WinError(rc);
+}
+//******************************************************************************
 //Returns time spent in kernel & user mode in milliseconds
 //******************************************************************************
 BOOL OSLibDosQueryProcTimes(DWORD procid, ULONG *kerneltime, ULONG *usertime)
@@ -1514,7 +1536,7 @@ DWORD OSLibDosCreateNamedPipe(LPCTSTR lpName,
                                DWORD   nInBufferSize,
                                DWORD   nDefaultTimeOut,
                                LPSECURITY_ATTRIBUTES lpSecurityAttributes)
-{  DWORD dwOS2Mode     = 0;
+{  DWORD dwOS2Mode     = NP_NOINHERIT; //default is not inherited by child processes
    DWORD dwOS2PipeMode = 0;
    LPSTR lpOS2Name;
    DWORD hPipe;
@@ -1573,7 +1595,7 @@ DWORD OSLibDosCreateNamedPipe(LPCTSTR lpName,
   //create the named pipe
   rc = DosOpen(lpOS2Name, &hPipe, &ulAction, 0, FILE_NORMAL, FILE_OPEN,
                ((dwOpenMode & PIPE_ACCESS_INBOUND_W) ? OPEN_ACCESS_READWRITE : OPEN_ACCESS_READONLY) |
-               OPEN_SHARE_DENYNONE, NULL);
+               OPEN_SHARE_DENYNONE | OPEN_FLAGS_NOINHERIT, NULL);
 
   if(rc == NO_ERROR) {
 #if 0
@@ -1645,7 +1667,7 @@ DWORD OSLibDosOpenPipe(LPCTSTR lpName,
   ULONG hPipe;
   ULONG rc, ulAction;
   ULONG openFlag = 0;
-  ULONG openMode = 0;
+  ULONG openMode = OPEN_FLAGS_NOINHERIT; //default is not inherited by child processes
 
 
    switch(fuCreate)
@@ -2608,7 +2630,7 @@ ULONG OSLibGetDriveType(ULONG ulDrive)
 
         if (DosOpen("\\DEV\\CD-ROM2$", &hCDRom2, &ulAction, 0,
                     FILE_NORMAL, OPEN_ACTION_OPEN_IF_EXISTS,
-                    OPEN_SHARE_DENYNONE | OPEN_ACCESS_READONLY, NULL)
+                    OPEN_SHARE_DENYNONE | OPEN_ACCESS_READONLY | OPEN_FLAGS_NOINHERIT, NULL)
             == NO_ERROR)
         {
             cbData = sizeof(cdDrvLtr);
@@ -2863,7 +2885,7 @@ DWORD SYSTEM OSLibDosDevIOCtl( DWORD hFile, DWORD dwCat, DWORD dwFunc,
 
         if (DosOpen("\\DEV\\CD-ROM2$", &hCDRom2, &ulAction, 0,
                     FILE_NORMAL, OPEN_ACTION_OPEN_IF_EXISTS,
-                    OPEN_SHARE_DENYNONE | OPEN_ACCESS_READONLY, NULL)
+                    OPEN_SHARE_DENYNONE | OPEN_ACCESS_READONLY | OPEN_FLAGS_NOINHERIT, NULL)
             == NO_ERROR)
         {
             ULONG cbData = sizeof(cdDrvLtr);
