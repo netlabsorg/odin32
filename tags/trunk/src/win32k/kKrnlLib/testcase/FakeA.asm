@@ -1,4 +1,4 @@
-; $Id: FakeA.asm,v 1.1 2001-09-17 01:41:13 bird Exp $
+; $Id: FakeA.asm,v 1.2 2001-11-15 04:20:12 bird Exp $
 ;
 ; Fake assembly imports.
 ;
@@ -46,6 +46,7 @@
     public fakeRASRST
     public fakedh_SendEvent
     public fakeh_POST_SIGNAL
+    public _exeentry                    ; VAC stuff
 
 
 ;
@@ -57,9 +58,28 @@
     extrn _fakeldrOpenPath_old@16:PROC  ; fake.c
     extrn _fakeldrOpenPath_new@20:PROC  ; fake.c
     extrn _options:kKLOptions           ; d16globl.c
+    extrn _exestart:FAR                 ; VAC stuff
+
+;
+; Stack segment
+;
+STACK32 segment para stack 'STACK' use32
+    db 1000h dup(?)
+STACK32 ends
+MYSTACKGROUP group STACK32              ; separates the stack from the other data segments.
 
 
-DATA16 SEGMENT
+;
+; Prevent exeentry.obj from being linked in.
+; That way we can make our own stack.
+;
+DATA32 segment
+    _exeentry dd 0
+DATA32 ends
+
+
+
+DATA16 segment
 ; Fake data in 16-bit segment.
 fakepTCBCur         dd      offset FLAT:fakeTCB
 fakepPTDACur        dd      offset FLAT:fakeptda_start
@@ -299,11 +319,11 @@ fakeh_POST_SIGNAL proc near
 fakeh_POST_SIGNAL endp
 
 
-CODE16 ENDS
+CODE16 ends
 
 
 
-CODE32 SEGMENT
+CODE32 segment
 ;;
 ; Faker of which simply clears the loader semaphore.
 ; @cproto    none! (void _Optlink   faketkStartProcess(void))
@@ -612,6 +632,6 @@ fakeKMExitKmodeSEF8 proc near
     ret
 fakeKMExitKmodeSEF8 endp
 
-CODE32 ENDS
+CODE32 ends
 
-END
+end _exestart
