@@ -1,4 +1,5 @@
-/*
+/* $Id: yield.c,v 1.2 1999-10-14 01:20:34 bird Exp $
+ *
  * Yield - conversion may take some time. So it is necessary to
  *         check it's time to yield the processor to other processes.
  *
