@@ -1,4 +1,9 @@
-/* $Id: changelog,v 1.1529 2001-06-19 10:49:34 sandervl Exp $ */
+/* $Id: changelog,v 1.1530 2001-06-20 17:11:11 sandervl Exp $ */
+
+ 2001-06-20: Sander van Leeuwen <sandervl@xs4all.nl>
+    - include\win\winioctl.h:
+                o Added CDROM ioctls
+    - KERNEL32: o Dummy CDROM ioctl support
 
  2001-06-19: Sander van Leeuwen <sandervl@xs4all.nl>
     - KERNEL32: o Started with event, mutex & semaphore rewrite
