@@ -1,4 +1,4 @@
-/* $Id: treeview.cpp,v 1.14 2000-05-22 17:25:13 cbratschi Exp $ */
+/* $Id: treeview.cpp,v 1.15 2000-06-22 19:02:04 cbratschi Exp $ */
 /* Treeview control
  *
  * Copyright 1998 Eric Kohl <ekohl@abo.rhein-zeitung.de>
@@ -4001,7 +4001,7 @@ TREEVIEW_Create (HWND hwnd, WPARAM wParam, LPARAM lParam)
 
   /* set default settings */
   infoPtr->hwnd = hwnd;
-  infoPtr->dwStyle = GetWindowLongA(hwnd, GWL_STYLE);
+  infoPtr->dwStyle = lpcs->style;
   infoPtr->uInternalStatus = TV_CALCALL;
   infoPtr->Timer = 0;
   infoPtr->uNumItems = 0;

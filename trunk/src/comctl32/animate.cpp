@@ -1,4 +1,4 @@
-/* $Id: animate.cpp,v 1.3 2000-05-22 17:25:06 cbratschi Exp $ */
+/* $Id: animate.cpp,v 1.4 2000-06-22 19:02:03 cbratschi Exp $ */
 /*
  * Animation control
  *
@@ -255,7 +255,7 @@ static LRESULT ANIMATE_DrawFrame(ANIMATE_INFO* infoPtr)
     return TRUE;
 }
 
-static DWORD ANIMATE_ThreadFunc(LPDWORD lpdwParam)
+static DWORD CALLBACK ANIMATE_ThreadFunc(LPDWORD lpdwParam)
 {
     HWND hwnd = (HWND)lpdwParam;
     ANIMATE_INFO* infoPtr = ANIMATE_GetInfoPtr(hwnd);
