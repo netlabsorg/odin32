@@ -1,9 +1,10 @@
-/* $Id: changelog,v 1.2324 2002-09-27 13:57:30 sandervl Exp $ */
+/* $Id: changelog,v 1.2325 2002-09-27 14:33:34 sandervl Exp $ */
 
  2002-09-27: Sander van Leeuwen <sandervl@innotek   >
     - KERNEL32: o GetFileSize must fail for drives
                 o Disable physical disk & volume access by default; 
                   call EnablePhysicalDiskAccess to enable it (custom build)
+                o FindFirst/NextVolumeA fixes for ignoring LVM volumes
 
  2002-09-26: Sander van Leeuwen <sandervl@innotek   >
     - KERNEL32: o OS/2 Physical partition names have base 1 (0 for win32)
