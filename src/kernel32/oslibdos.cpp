@@ -1,3 +1,4 @@
+/* $Id: oslibdos.cpp,v 1.14 2000-01-02 22:51:39 sandervl Exp $ */
 /*
  * Wrappers for OS/2 Dos* API
  *
