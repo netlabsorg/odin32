@@ -1,4 +1,4 @@
-/* $Id: shell32_main.cpp,v 1.6 1999-12-01 10:48:58 sandervl Exp $ */
+/* $Id: shell32_main.cpp,v 1.7 2000-01-09 19:23:09 phaller Exp $ */
 
 /*
  * Win32 SHELL32 for OS/2
@@ -713,7 +713,7 @@ ODINFUNCTION4(INT,ShellAboutA, HWND,   hWnd,
     info.szApp        = szApp;
     info.szOtherStuff = szOtherStuff;
     info.hIcon        = hIcon;
-    if (!hIcon) info.hIcon = LoadIconA( 0, (LPCSTR)OIC_WINEICON );
+    if (!hIcon) info.hIcon = LoadIconA( 0, (LPCSTR)OIC_ODINICON );
     return DialogBoxIndirectParamA( GetWindowLongA( hWnd, GWL_HINSTANCE ),
                                     (DLGTEMPLATE*)dlgTemplate , hWnd, AboutDlgProc, (LPARAM)&info );
 }
@@ -739,7 +739,7 @@ ODINFUNCTION4(INT,ShellAboutW, HWND,    hWnd,
     info.szApp        = HEAP_strdupWtoA( GetProcessHeap(), 0, szApp );
     info.szOtherStuff = HEAP_strdupWtoA( GetProcessHeap(), 0, szOtherStuff );
     info.hIcon        = hIcon;
-    if (!hIcon) info.hIcon = LoadIconA( 0, (LPCSTR)OIC_WINEICON );
+    if (!hIcon) info.hIcon = LoadIconA( 0, (LPCSTR)OIC_ODINICON );
     ret = DialogBoxIndirectParamA( GetWindowLongA( hWnd, GWL_HINSTANCE ),
                                    (DLGTEMPLATE*)dlgTemplate, hWnd, AboutDlgProc, (LPARAM)&info );
     HeapFree( GetProcessHeap(), 0, (LPSTR)info.szApp );
