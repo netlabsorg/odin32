@@ -1,4 +1,8 @@
-/* $Id: changelog,v 1.2259 2002-08-12 15:04:51 sandervl Exp $ */
+/* $Id: changelog,v 1.2260 2002-08-13 10:04:08 sandervl Exp $ */
+
+ 2002-08-13: Yuri Dario <mc6530@mclink   >
+    - USER32:   o Resync WM_RBUTTONUP & WM_CONTEXTMENU default window handlers
+                  (Rewind)
 
  2002-08-12: Sander van Leeuwen <sandervl@innotek   >
     - DDRAW:    o SetCustomFullScreenMode added to force DirectDraw to
