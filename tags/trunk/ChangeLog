@@ -1,4 +1,10 @@
- /* $Id: ChangeLog,v 1.1061 2000-08-11 18:52:49 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.1062 2000-08-12 07:32:48 sandervl Exp $ */
+
+ 2000-08-12: Sander van Leeuwen <sandervl@xs4all.nl>
+    - KERNEL32: Do not set OPEN_ACCESS_READWRITE flag in OSLibDosCreateFile
+                (if OPEN_ACTION_CREATE_IF_NEW & readonly access)
+                This was causing access denied errors (using FILE_SHARE_WRITE
+                on a file on a readonly volume was not causing this; that's allowed)
 
  2000-08-11: Sander van Leeuwen <sandervl@xs4all.nl>
     - KERNEL32: Lock/Unlock
@@ -9,8 +15,6 @@
                 as instance handle.
                 VIRTUAL_MapFileA/W: open file in share read/write mode
                 Fixed  HMDuplicateHandle (check for DUPLICATE_ACCESS_READWRITE)
-                Fixed SHARE_WORKAROUND in CreateFile. FILE_SHARE_WRITE is not
-                allowed on a read-only volume.
                 LoadLibraryExA: if dll name = executable name of current process
                 -> return handle of exe
                 (GrandPrix 3 installer does this; verified in NT)
