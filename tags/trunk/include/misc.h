@@ -1,4 +1,4 @@
-/* $Id: misc.h,v 1.9 1999-11-05 13:03:41 achimha Exp $ */
+/* $Id: misc.h,v 1.10 1999-11-09 19:21:36 sandervl Exp $ */
 
 /*
  * Miscellaneous definitions
@@ -34,6 +34,13 @@
   #define eprintf(a)      WriteLog a ; WriteLogError a
   #define dassert(a, b)   if(!(a)) WriteLogError b
   #define dbgCheckObj(a)	a->checkObject()
+
+#ifdef DEBUG_ENABLELOG_LEVEL2
+  #define dprintf2(a)     WriteLog a
+#else
+  #define dprintf2(a)
+#endif
+
 #else
   #define dprintf(a)
   #define eprintf(a)
