@@ -1,4 +1,4 @@
-/* $Id: hmopen32.h,v 1.1 1999-06-17 18:21:43 phaller Exp $ */
+/* $Id: hmopen32.h,v 1.2 1999-07-06 15:48:47 phaller Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -125,6 +125,24 @@ public:
                              DWORD         nNumberOfBytesToLockLow,
                              DWORD         nNumberOfBytesToLockHigh,
                              LPOVERLAPPED  lpOverlapped);
+
+                /* this is a handler method for calls to WaitForSingleObject */
+  virtual DWORD WaitForSingleObject  (PHMHANDLEDATA pHMHandleData,
+                                      DWORD  dwTimeout);
+
+              /* this is a handler method for calls to WaitForSingleObjectEx */
+  virtual DWORD WaitForSingleObjectEx(PHMHANDLEDATA pHMHandleData,
+                                      DWORD  dwTimeout,
+                                      BOOL   fAlertable);
+
+                   /* this is a handler method for calls to FlushFileBuffers */
+  virtual BOOL FlushFileBuffers(PHMHANDLEDATA pHMHandleData);
+
+                /* this is a handler method for calls to GetOverlappedResult */
+  virtual BOOL GetOverlappedResult(PHMHANDLEDATA pHMHandleData,
+                                   LPOVERLAPPED  arg2,
+                                   LPDWORD       arg3,
+                                   BOOL          arg4);
 };
 
 

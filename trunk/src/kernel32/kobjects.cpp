@@ -1,4 +1,4 @@
-/* $Id: kobjects.cpp,v 1.1 1999-06-17 21:52:01 phaller Exp $ */
+/* $Id: kobjects.cpp,v 1.2 1999-07-06 15:48:48 phaller Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -14,33 +14,29 @@
  * Includes                                                                  *
  *****************************************************************************/
 #include <os2win.h>
-//#include <winnt.h>
-//#include <winnls.h>
-//#include <stdlib.h>
-//#include <string.h>
 #include "misc.h"
 #include "handlemanager.h"
 
 
 
 // REMARK: THIS IS IN PREPARATION FOR HANDLEMANAGER SUPPORT (PH) !!
-#define HMCreateEvent              O32_CreateEvent
-#define HMCreateMutex              O32_CreateMutex
-#define HMCreateSemaphore          O32_CreateSemaphore
-#define HMSetEvent                 O32_SetEvent
-#define HMReleaseMutex             O32_ReleaseMutex
-#define HMWaitForSingleObject      O32_WaitForSingleObject
-#define HMWaitForSingleObjectEx    O32_WaitForSingleObjectEx
-#define HMGetOverlappedResult      O32_GetOverlappedResult
-#define HMOpenEvent                O32_OpenEvent
-#define HMOpenMutex                O32_OpenMutex
-#define HMOpenSemaphore            O32_OpenSemaphore
-#define HMPulseEvent               O32_PulseEvent
-#define HMReleaseSemaphore         O32_ReleaseSemaphore
-#define HMResetEvent               O32_ResetEvent
-#define HMWaitForMultipleObjects   O32_WaitForMultipleObjects
-#define HMWaitForMultipleObjectsEx O32_WaitForMultipleObjectsEx
-#define HMFlushFileBuffers         O32_FlushFileBuffers
+//#define HMCreateEvent              O32_CreateEvent
+//#define HMCreateMutex              O32_CreateMutex
+//#define HMCreateSemaphore          O32_CreateSemaphore
+//#define HMSetEvent                 O32_SetEvent
+//#define HMReleaseMutex             O32_ReleaseMutex
+//#define HMWaitForSingleObject      O32_WaitForSingleObject
+//#define HMWaitForSingleObjectEx    O32_WaitForSingleObjectEx
+//#define HMGetOverlappedResult      O32_GetOverlappedResult
+//#define HMOpenEvent                O32_OpenEvent
+//#define HMOpenMutex                O32_OpenMutex
+//#define HMOpenSemaphore            O32_OpenSemaphore
+//#define HMPulseEvent               O32_PulseEvent
+//#define HMReleaseSemaphore         O32_ReleaseSemaphore
+//#define HMResetEvent               O32_ResetEvent
+//#define HMWaitForMultipleObjects   O32_WaitForMultipleObjects
+//#define HMWaitForMultipleObjectsEx O32_WaitForMultipleObjectsEx
+//#define HMFlushFileBuffers         O32_FlushFileBuffers
 #define HMSetHandleCount           O32_SetHandleCount
 #define HMGetHandleCount           O32_GetHandleCount
 #define HMDuplicateHandle          O32_DuplicateHandle
@@ -280,8 +276,9 @@ DWORD WIN32API WaitForSingleObjectEx(HANDLE hObject,
            dwTimeout,
            fAlertable));
 
-  return(HMWaitForSingleObject(hObject,
-                               dwTimeout));
+  return(HMWaitForSingleObjectEx(hObject,
+                                 dwTimeout,
+                                 fAlertable));
 }
 
 
@@ -742,7 +739,7 @@ DWORD WIN32API WaitForMultipleObjects(DWORD        arg1,
            arg4));
 
   return HMWaitForMultipleObjects(arg1,
-                                  arg2,
+                                  (PHANDLE)arg2,
                                   arg3,
                                   arg4);
 }
@@ -783,10 +780,11 @@ DWORD WIN32API WaitForMultipleObjectsEx(DWORD        cObjects,
            dwTimeout,
            fAlertable));
 
-  return(HMWaitForMultipleObjects(cObjects,
-                                  lphObjects,
-                                  fWaitAll,
-                                  dwTimeout));
+  return(HMWaitForMultipleObjectsEx(cObjects,
+                                    (PHANDLE)lphObjects,
+                                    fWaitAll,
+                                    dwTimeout,
+                                    fAlertable));
 }
 
 
