@@ -1,4 +1,4 @@
-/* $Id: macros.h,v 1.2 2000-05-03 10:46:07 bird Exp $
+/* $Id: macros.h,v 1.2.4.1 2000-07-16 22:43:31 bird Exp $
  *
  * Common macros for Win32k/Elf.
  *
@@ -23,6 +23,10 @@
  */
 #define ALIGN(a, alignment) (((a) + (alignment - 1UL)) & ~(alignment - 1UL))
 
+/*
+ * Not referenced parameter warning fix.
+ */
+#define NOREF(a) (a=a)
 
 /*
  * Makes an unsigned long from 4 (unsigned or signed) chars.

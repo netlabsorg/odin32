@@ -1,4 +1,4 @@
-; $Id: d32hlp.asm,v 1.3 1999-10-31 23:57:02 bird Exp $
+; $Id: d32hlp.asm,v 1.3.4.1 2000-07-16 22:43:25 bird Exp $
 ;
 ; d32hlp - 32-bit Device Driver Helper Function.
 ;
@@ -33,7 +33,7 @@
 ;
 ; extrns
 ;
-extrn _Device_Help:dword
+    extrn _Device_Help:dword
 
 ;CODE32 segment
 CODE32 segment dword public 'CODE' use32
@@ -41,6 +41,7 @@ CODE32 segment dword public 'CODE' use32
     .386p
 
 ;PVOID  D32HLPCALL D32Hlp_VirtToLin(ULONG  ulPtr16); /* eax */
+; Sideeffect: edx holds the error code on error.
 D32Hlp_VirtToLin proc near
     push    esi
 
@@ -50,6 +51,7 @@ D32Hlp_VirtToLin proc near
     jmp     far ptr CODE16:Thunk16_VirtToLin
 Thunk32_VirtToLin::
     jnc     Finished
+    mov     edx, eax
     xor     eax, eax
 
 Finished:
@@ -60,6 +62,7 @@ D32Hlp_VirtToLin endp
 
 ;PVOID  D32HLPCALL D32Hlp_VirtToLin2(USHORT usSelector, /*  ax */
 ;                                    ULONG  ulOffset);  /* edx */
+; Sideeffect: edx holds the error code on error.
 D32Hlp_VirtToLin2 proc near
     push    esi
 
@@ -68,6 +71,7 @@ D32Hlp_VirtToLin2 proc near
     jmp     far ptr CODE16:Thunk16_VirtToLin2
 Thunk32_VirtToLin2::
     jnc     Finished
+    mov     edx, eax
     xor     eax, eax
 
 Finished:
