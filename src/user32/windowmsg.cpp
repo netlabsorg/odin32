@@ -1,4 +1,4 @@
-/* $Id: windowmsg.cpp,v 1.44 2003-07-31 15:56:47 sandervl Exp $ */
+/* $Id: windowmsg.cpp,v 1.45 2003-08-04 13:38:39 sandervl Exp $ */
 /*
  * Win32 window message APIs for OS/2
  *
@@ -689,7 +689,11 @@ INT WINPROC_MapMsg32WTo32A( HWND hwnd, UINT msg, WPARAM *pwparam, LPARAM *plpara
 /* Multiline edit */
     case EM_GETLINE:
         { WORD len = (WORD)*plparam;
+#ifdef __WIN32OS2__
+          LPARAM *ptr = (LPARAM *) HEAP_xalloc( GetProcessHeap(), 0, sizeof(LPARAM) + sizeof (WORD) + len*sizeof(WCHAR) );
+#else
           LPARAM *ptr = (LPARAM *) HEAP_xalloc( GetProcessHeap(), 0, sizeof(LPARAM) + sizeof (WORD) + len*sizeof(CHAR) );
+#endif
           if (!ptr) return -1;
           *ptr++ = *plparam;  /* Store previous lParam */
 #ifdef __WIN32OS2__
@@ -833,11 +837,8 @@ void WINPROC_UnmapMsg32WTo32A( HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam
 /* Multiline edit */
     case EM_GETLINE:
         { LPARAM * ptr = (LPARAM *)lParam - 1;  /* get the old lparam */
-#ifdef __WIN32OS2__
-          WORD len = *(WORD *)ptr/sizeof(WCHAR);
-#else
           WORD len = *(WORD *)ptr;
-#endif
+
           lstrcpynAtoW( (LPWSTR) *ptr, (LPSTR)lParam, len );
           HeapFree( GetProcessHeap(), 0, ptr );
         }
