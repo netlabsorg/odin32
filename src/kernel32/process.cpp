@@ -1,4 +1,4 @@
-/* $Id: process.cpp,v 1.9 2001-11-10 12:47:47 sandervl Exp $ */
+/* $Id: process.cpp,v 1.10 2002-01-08 22:34:11 sandervl Exp $ */
 
 /*
  * Win32 process functions for OS/2
@@ -123,6 +123,7 @@ DWORD WIN32API GetProcessVersion(DWORD Processid)
  */
 BOOL WINAPI SetProcessAffinityMask( HANDLE hProcess, DWORD affmask )
 {
+    dprintf(("SetProcessAffinityMask %x %x", hProcess, affmask));
     ProcessAffinityMask = affmask;
     //TODO: should update all threads, but that doesn't seem possible in OS/2
     SetThreadAffinityMask(GetCurrentThread(), ProcessAffinityMask);
@@ -134,6 +135,8 @@ BOOL WIN32API GetProcessAffinityMask(HANDLE  hProcess,
                                      LPDWORD lpProcessAffinityMask,
                                      LPDWORD lpSystemAffinityMask)
 {
+    dprintf(("GetProcessAffinityMask %x %x %x", hProcess, lpProcessAffinityMask, lpSystemAffinityMask));
+
     /* It is definitely important for a process to know on what processor
        it is running :-) */
     if(lpProcessAffinityMask)

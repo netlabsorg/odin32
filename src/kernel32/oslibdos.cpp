@@ -1,4 +1,4 @@
-/* $Id: oslibdos.cpp,v 1.92 2002-01-04 14:11:23 sandervl Exp $ */
+/* $Id: oslibdos.cpp,v 1.93 2002-01-08 22:34:10 sandervl Exp $ */
 /*
  * Wrappers for OS/2 Dos* API
  *
@@ -3027,9 +3027,21 @@ BOOL OSLibDosSetThreadAffinity(DWORD dwThreadAffinityMask)
 {
   static PROC_DosSetThreadAffinity pfnDosSetThreadAffinity = NULL;
   static BOOL fInit = FALSE;
-  MPAFFINITY mask;
+  MPAFFINITY  mask;
+  APIRET      rc;
 
-    if(fInit == FALSE && pfnDosSetThreadAffinity == NULL) {
+    if(fInit == FALSE && pfnDosSetThreadAffinity == NULL) 
+    {
+        ULONG nrCPUs;
+
+        rc = DosQuerySysInfo(QSV_NUMPROCESSORS, QSV_NUMPROCESSORS, &nrCPUs, sizeof(nrCPUs));
+        if (rc != 0 || nrCPUs == 1) 
+        {//not supported
+            fInit = TRUE;
+            SetLastError(ERROR_SUCCESS_W);
+            return TRUE;
+        }
+
         HMODULE hDoscalls;
         if(DosQueryModuleHandle("DOSCALLS", &hDoscalls) == NO_ERROR) {
             DosQueryProcAddr(hDoscalls, 564, NULL, (PFN *)&pfnDosSetThreadAffinity);
@@ -3040,7 +3052,6 @@ BOOL OSLibDosSetThreadAffinity(DWORD dwThreadAffinityMask)
         SetLastError(ERROR_SUCCESS_W);
         return TRUE;
     }
-    APIRET rc;
     USHORT sel = RestoreOS2FS();
 
     mask.mask[0] = dwThreadAffinityMask;
@@ -3058,9 +3069,22 @@ BOOL OSLibDosQueryAffinity(DWORD fMaskType, DWORD *pdwThreadAffinityMask)
 {
   static PROC_DosQueryThreadAffinity pfnDosQueryThreadAffinity = NULL;
   static BOOL fInit = FALSE;
-  MPAFFINITY mask;
+  MPAFFINITY  mask;
+  APIRET      rc;
 
-    if(fInit == FALSE && pfnDosQueryThreadAffinity == NULL) {
+    if(fInit == FALSE && pfnDosQueryThreadAffinity == NULL) 
+    {
+        ULONG nrCPUs;
+
+        rc = DosQuerySysInfo(QSV_NUMPROCESSORS, QSV_NUMPROCESSORS, &nrCPUs, sizeof(nrCPUs));
+        if (rc != 0 || nrCPUs == 1) 
+        {//not supported
+            fInit = TRUE;
+            *pdwThreadAffinityMask = 1;
+            SetLastError(ERROR_SUCCESS_W);
+            return TRUE;
+        }
+
         HMODULE hDoscalls;
         if(DosQueryModuleHandle("DOSCALLS", &hDoscalls) == NO_ERROR) {
             DosQueryProcAddr(hDoscalls, 563, NULL, (PFN *)&pfnDosQueryThreadAffinity);
@@ -3075,15 +3099,15 @@ BOOL OSLibDosQueryAffinity(DWORD fMaskType, DWORD *pdwThreadAffinityMask)
 
     ULONG scope = (fMaskType == MASK_SYSTEM) ? AFNTY_SYSTEM : AFNTY_THREAD;
 
-    APIRET rc;
     USHORT sel = RestoreOS2FS();
 
     rc = pfnDosQueryThreadAffinity(scope, &mask);
     SetFS(sel);
 
     if(rc == NO_ERROR) {
-        *pdwThreadAffinityMask = mask.mask[0];
+         *pdwThreadAffinityMask = mask.mask[0];
     }
+
     SetLastError(error2WinError(rc,ERROR_INVALID_PARAMETER));
     return (rc == NO_ERROR);
 }
