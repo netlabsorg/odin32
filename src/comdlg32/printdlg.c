@@ -134,42 +134,6 @@ static struct pd_flags psd_flags[] = {
 #define MAX_COPIES 9999
 
 
-#ifdef __WIN32OS2__
-/***********************************************************************
- *   PrnNameToQueue
- *
- * Odin helper function that gets Queue Name from Printer Name
- *
- * Returns TRUE on success else FALSE
- */
-
-BOOL PrnNameToQueue(char* PrnName, char* QueueName) 
-{
- BOOL rc = FALSE;
-
-  if (PrnName && QueueName)
-  {
-    LPPRINTER_INFO_2A pi;
-    DWORD needed, num;
-    INT i;
-
-    EnumPrintersA(PRINTER_ENUM_LOCAL, NULL, 2, NULL, 0, &needed, &num);
-    pi = HeapAlloc(GetProcessHeap(), 0, needed);
-    EnumPrintersA(PRINTER_ENUM_LOCAL, NULL, 2, (LPBYTE)pi, needed, &needed,
-		  &num);
-
-    for(i = 0; i < num; i++)
-       if (!strcmp(pi[i].pComment, PrnName)) 
-       {
-         strcpy(QueueName, pi[i].pPrinterName);
-         rc = TRUE; 
-       }
-    HeapFree(GetProcessHeap(), 0, pi);
-  }
-  return rc;
-}
-#endif
-
 /***********************************************************************
  *    PRINTDLG_GetDefaultPrinterName
  *
@@ -254,53 +218,27 @@ static INT PRINTDLG_SetUpPrinterListComboA(HWND hDlg, UINT id, LPCSTR name)
     DWORD needed, num;
     INT i;
     LPPRINTER_INFO_2A pi;
-#ifdef __WIN32OS2__
-    char substName[260];
-#endif
 
     EnumPrintersA(PRINTER_ENUM_LOCAL, NULL, 2, NULL, 0, &needed, &num);
     pi = HeapAlloc(GetProcessHeap(), 0, needed);
     EnumPrintersA(PRINTER_ENUM_LOCAL, NULL, 2, (LPBYTE)pi, needed, &needed,
 		  &num);
 
-#ifndef __WIN32OS2__
     for(i = 0; i < num; i++) {
         SendDlgItemMessageA(hDlg, id, CB_ADDSTRING, 0,
 			    (LPARAM)pi[i].pPrinterName );
     }
     HeapFree(GetProcessHeap(), 0, pi);
-#else
-    substName[0] = 0;
-
-    for(i = 0; i < num; i++)
-    {
-        SendDlgItemMessageA(hDlg, id, CB_ADDSTRING, 0,
-			    (LPARAM)pi[i].pComment );
-        if (!name || !strcmp(pi[i].pPrinterName, name))
-           strcpy(substName, pi[i].pComment);
-    }
-#endif
 
     if(!name ||
        (i = SendDlgItemMessageA(hDlg, id, CB_FINDSTRINGEXACT, -1,
-#ifndef __WIN32OS2__
 				(LPARAM)name)) == CB_ERR) {
-#else
-				(LPARAM)substName)) == CB_ERR) {
-#endif
         char buf[260];
         FIXME("Can't find '%s' in printer list so trying to find default\n",
 	      name);
 	if(!PRINTDLG_GetDefaultPrinterNameA(buf, sizeof(buf)))
 	    return num;
-#ifndef __WIN32OS2__
 	i = SendDlgItemMessageA(hDlg, id, CB_FINDSTRINGEXACT, -1, (LPARAM)buf);
-#else
-        for(i = 0; i < num; i++)
-           if (!strcmp(pi[i].pComment, buf))
-              break;
-        HeapFree(GetProcessHeap(), 0, pi);
-#endif
 
 	if(i == CB_ERR)
 	    FIXME("Can't find default printer in printer list\n");
@@ -1192,11 +1130,17 @@ static BOOL PRINTDLG_ChangePrinterA(HWND hDlg, char *name,
 	}
 
 	if (lppd->Flags & PD_USEDEVMODECOPIESANDCOLLATE) {
+#ifdef __WIN32OS2__
+            EnableWindow(GetDlgItem(hDlg, chx2), FALSE);
+            EnableWindow(GetDlgItem(hDlg, ico3), FALSE);
+            ShowWindow(GetDlgItem(hDlg, chx2), SW_HIDE);
+#else
 	  /* if printer doesn't support it: no Collate */
 	    if (!(lpdm->dmFields & DM_COLLATE)) {
 	        EnableWindow(GetDlgItem(hDlg, chx2), FALSE);
 		EnableWindow(GetDlgItem(hDlg, ico3), FALSE);
 	    }
+#endif
 	}
 
 	/* nCopies */
@@ -1355,11 +1299,17 @@ static BOOL PRINTDLG_ChangePrinterW(HWND hDlg, WCHAR *name,
 	}
 
 	if (lppd->Flags & PD_USEDEVMODECOPIESANDCOLLATE) {
+#ifdef __WIN32OS2__
+            EnableWindow(GetDlgItem(hDlg, chx2), FALSE);
+            EnableWindow(GetDlgItem(hDlg, ico3), FALSE);
+            ShowWindow(GetDlgItem(hDlg, chx2), SW_HIDE);
+#else
 	  /* if printer doesn't support it: no Collate */
 	    if (!(lpdm->dmFields & DM_COLLATE)) {
 	        EnableWindow(GetDlgItem(hDlg, chx2), FALSE);
 		EnableWindow(GetDlgItem(hDlg, ico3), FALSE);
 	    }
+#endif
 	}
 
 	/* nCopies */
@@ -1506,18 +1456,12 @@ static LRESULT PRINTDLG_WMInitDialog(HWND hDlg, WPARAM wParam,
 	/* Now find selected printer and update rest of dlg */
 	name = HeapAlloc(GetProcessHeap(),0,256);
 	if (GetDlgItemTextA(hDlg, comboID, name, 255))
-#ifdef __WIN32OS2__
-            PrnNameToQueue(name, name);
-#endif
 	    PRINTDLG_ChangePrinterA(hDlg, name, PrintStructures);
 	HeapFree(GetProcessHeap(),0,name);
     } else {
 	/* else use default printer */
 	char name[200];
 	BOOL ret = PRINTDLG_GetDefaultPrinterNameA(name, sizeof(name));
-#ifdef __WIN32OS2__
-        PrnNameToQueue(name, name);
-#endif
 	if (ret)
 	    PRINTDLG_ChangePrinterA(hDlg, name, PrintStructures);
 	else
@@ -1807,6 +1751,7 @@ static LRESULT PRINTDLG_WMCommandA(HWND hDlg, WPARAM wParam,
         break;
 
     case edt3:
+#ifndef __WIN32OS2__
         if(HIWORD(wParam) == EN_CHANGE) {
 	    INT copies = GetDlgItemInt(hDlg, edt3, NULL, FALSE);
 	    if(copies <= 1)
@@ -1814,6 +1759,7 @@ static LRESULT PRINTDLG_WMCommandA(HWND hDlg, WPARAM wParam,
 	    else
 	        EnableWindow(GetDlgItem(hDlg, chx2), TRUE);
 	}
+#endif
 	break;
 
 #ifndef __WIN32OS2__
@@ -1841,9 +1787,6 @@ static LRESULT PRINTDLG_WMCommandA(HWND hDlg, WPARAM wParam,
          char   PrinterName[256];
 
          GetDlgItemTextA(hDlg, PrinterComboID, PrinterName, 255);
-#ifdef __WIN32OS2__
-         PrnNameToQueue(PrinterName, PrinterName);
-#endif
          if (!OpenPrinterA(PrinterName, &hPrinter, NULL)) {
 	     FIXME(" Call to OpenPrinter did not succeed!\n");
 	     break;
@@ -1890,9 +1833,6 @@ static LRESULT PRINTDLG_WMCommandA(HWND hDlg, WPARAM wParam,
          if (HIWORD(wParam)==CBN_SELCHANGE) {
 	     char   PrinterName[256];
 	     GetDlgItemTextA(hDlg, LOWORD(wParam), PrinterName, 255);
-#ifdef __WIN32OS2__
-             PrnNameToQueue(PrinterName, PrinterName);
-#endif
 	     PRINTDLG_ChangePrinterA(hDlg, PrinterName, PrintStructures);
 	 }
 	 break;
@@ -1997,6 +1937,7 @@ static LRESULT PRINTDLG_WMCommandW(HWND hDlg, WPARAM wParam,
         break;
 
     case edt3:
+#ifndef __WIN32OS2__
         if(HIWORD(wParam) == EN_CHANGE) {
 	    INT copies = GetDlgItemInt(hDlg, edt3, NULL, FALSE);
 	    if(copies <= 1)
@@ -2004,6 +1945,7 @@ static LRESULT PRINTDLG_WMCommandW(HWND hDlg, WPARAM wParam,
 	    else
 	        EnableWindow(GetDlgItem(hDlg, chx2), TRUE);
 	}
+#endif
 	break;
 
      case psh1:                       /* Print Setup */
@@ -2136,10 +2078,16 @@ BOOL WINAPI PrintDlgProcA(HWND hDlg, UINT uMsg, WPARAM wParam,
 	SetPropA(hDlg,"__WINE_PRINTDLGDATA",lParam);
 	res = PRINTDLG_WMInitDialog(hDlg, wParam, PrintStructures);
 
-	if(PrintStructures->dlg.lpPrintDlg->Flags & PD_ENABLEPRINTHOOK)
+	if(PrintStructures->dlg.lpPrintDlg->Flags & PD_ENABLEPRINTHOOK) {
 	    res = PrintStructures->dlg.lpPrintDlg->lpfnPrintHook(
 		hDlg, uMsg, wParam, (LPARAM)PrintStructures->dlg.lpPrintDlg
 	    );
+#ifdef __WIN32OS2__
+            EnableWindow(GetDlgItem(hDlg, chx2), FALSE);
+            EnableWindow(GetDlgItem(hDlg, ico3), FALSE);
+            ShowWindow(GetDlgItem(hDlg, chx2), SW_HIDE);
+#endif
+        }
 	return res;
     }
 
@@ -2181,9 +2129,16 @@ BOOL WINAPI PrintDlgProcW(HWND hDlg, UINT uMsg, WPARAM wParam,
 	res = PRINTDLG_WMInitDialogW(hDlg, wParam, PrintStructures);
 
 	if(PrintStructures->dlg.lpPrintDlg->Flags & PD_ENABLEPRINTHOOK)
+        {
 	    res = PrintStructures->dlg.lpPrintDlg->lpfnPrintHook(
 		hDlg, uMsg, wParam, (LPARAM)PrintStructures->dlg.lpPrintDlg
 	    );
+#ifdef __WIN32OS2__
+            EnableWindow(GetDlgItem(hDlg, chx2), FALSE);
+            EnableWindow(GetDlgItem(hDlg, ico3), FALSE);
+            ShowWindow(GetDlgItem(hDlg, chx2), SW_HIDE);
+#endif
+        }
 	return res;
     }
 
