@@ -1,4 +1,4 @@
-/* $Id: window.cpp,v 1.21 1999-08-31 17:14:52 sandervl Exp $ */
+/* $Id: window.cpp,v 1.22 1999-09-04 19:42:30 sandervl Exp $ */
 /*
  * Win32 window apis for OS/2
  *
@@ -557,21 +557,23 @@ int WIN32API GetWindowTextLengthA( HWND hwnd)
         return 0;
     }
     dprintf(("GetWindowTextLength %x", hwnd));
-    return window->GetWindowTextLengthA();
+    return window->GetWindowTextLength();
 }
 //******************************************************************************
 //******************************************************************************
 int WIN32API GetWindowTextA( HWND hwnd, LPSTR lpsz, int cch)
 {
    Win32BaseWindow *window;
+   int rc;
 
     window = Win32BaseWindow::GetWindowFromHandle(hwnd);
     if(!window) {
         dprintf(("GetWindowTextA, window %x not found", hwnd));
         return 0;
     }
-    dprintf(("GetWindowTextA %x", hwnd));
-    return window->GetWindowTextA(lpsz, cch);
+    rc = window->GetWindowText(lpsz, cch);
+    dprintf(("GetWindowTextA %x %s", hwnd, lpsz));
+    return rc;
 }
 //******************************************************************************
 //******************************************************************************
@@ -584,19 +586,15 @@ int WIN32API GetWindowTextLengthW( HWND hwnd)
 //******************************************************************************
 int WIN32API GetWindowTextW(HWND hwnd, LPWSTR lpsz, int cch)
 {
- char title[128];
- int  rc;
+   Win32BaseWindow *window;
 
-   rc = O32_GetWindowText(hwnd, title, sizeof(title));
-#ifdef DEBUG
-   WriteLog("USER32:  GetWindowTextW returned %s\n", title);
-#endif
-   if(rc > cch) {
-    title[cch-1] = 0;
-    rc = cch;
-   }
-   AsciiToUnicode(title, lpsz);
-   return(rc);
+    window = Win32BaseWindow::GetWindowFromHandle(hwnd);
+    if(!window) {
+        dprintf(("GetWindowTextW, window %x not found", hwnd));
+        return 0;
+    }
+    dprintf(("GetWindowTextW %x", hwnd));
+    return window->GetWindowText((LPSTR)lpsz, cch);
 }
 //******************************************************************************
 //******************************************************************************
@@ -614,15 +612,17 @@ BOOL WIN32API SetWindowTextA(HWND hwnd, LPCSTR lpsz)
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API SetWindowTextW( HWND arg1, LPCWSTR arg2)
+BOOL WIN32API SetWindowTextW( HWND hwnd, LPCWSTR lpsz)
 {
- char *astring = UnicodeToAsciiString((LPWSTR)arg2);
- BOOL  rc;
+   Win32BaseWindow *window;
 
-   rc = SetWindowTextA(arg1, (LPCSTR)astring);
-   dprintf(("USER32:  SetWindowTextW %X %s returned %d\n", arg1, astring, rc));
-   FreeAsciiString(astring);
-   return(rc);
+    window = Win32BaseWindow::GetWindowFromHandle(hwnd);
+    if(!window) {
+        dprintf(("SetWindowTextA, window %x not found", hwnd));
+        return 0;
+    }
+    dprintf(("SetWindowTextW %x", hwnd));
+    return window->SetWindowText((LPSTR)lpsz);
 }
 /*******************************************************************
  *      InternalGetWindowText    (USER32.326)

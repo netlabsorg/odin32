@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.6 1999-09-04 17:56:41 dengert Exp $ */
+/* $Id: win32wbase.cpp,v 1.7 1999-09-04 19:42:29 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -74,6 +74,7 @@ void Win32BaseWindow::Init()
   isUnicode        = FALSE;
   fCreated         = FALSE;
   fFirstShow       = TRUE;
+  fIsDialog        = FALSE;
 
   windowNameA      = NULL;
   windowNameW      = NULL;
