@@ -1,4 +1,4 @@
-/* $Id: console.cpp,v 1.12 1999-08-26 12:55:35 sandervl Exp $ */
+/* $Id: console.cpp,v 1.13 1999-08-31 22:44:33 phaller Exp $ */
 
 /*
  * Win32 Console API Translation for OS/2
@@ -442,6 +442,11 @@ APIRET iConsoleDevicesRegister(void)
 
   ConsoleGlobals.hConsoleBufferDefault = INVALID_HANDLE_VALUE;
   ConsoleGlobals.hConsoleBuffer        = INVALID_HANDLE_VALUE;
+
+
+  // defaults are effective, try to read and apply stored properties
+  if (ConsolePropertyLoad(&ConsoleGlobals.Options) == NO_ERROR)
+    ConsolePropertyApply(&ConsoleGlobals.Options);
 
 
   /***************************************************************************
@@ -1099,6 +1104,20 @@ MRESULT EXPENTRY iConsoleWindowProc(HWND   hwnd,
                                ConsoleGlobals.hmodResource,
                                DLG_CONSOLE_PROPERTIES,
                                (PVOID)&ConsoleGlobals.Options);
+          switch (ulResult)
+          {
+            case ID_BTN_SAVE:
+              ConsolePropertySave(&ConsoleGlobals.Options);
+              ConsolePropertyApply(&ConsoleGlobals.Options);
+              break;
+
+            case ID_BTN_APPLY:
+              ConsolePropertyApply(&ConsoleGlobals.Options);
+              break;
+
+            default:           break;
+          }
+
           return (MPARAM) FALSE;
         }
       }
