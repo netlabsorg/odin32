@@ -1,4 +1,4 @@
-/* $Id: mixeros2.cpp,v 1.1 2002-05-22 20:19:11 sandervl Exp $ */
+/* $Id: mixeros2.cpp,v 1.2 2002-05-23 13:50:15 sandervl Exp $ */
 
 /*
  * OS/2 Mixer multimedia
@@ -72,47 +72,50 @@ static DWORD OSLibMixGetIndex(DWORD dwControl)
     DWORD idx;
 
     switch(dwControl) {
-    case MIXER_CTRL_MONOIN:
+    case MIX_CTRL_VOL_IN_L_MONO:
+    case MIX_CTRL_MUTE_IN_L_MONO:
         idx = MONOINSET;
         break;
-    case MIXER_CTRL_PHONE:
+    case MIX_CTRL_VOL_IN_L_PHONE:
+    case MIX_CTRL_MUTE_IN_L_PHONE:
         idx = PHONESET;
         break;
-    case MIXER_CTRL_MIC:
+    case MIX_CTRL_VOL_IN_L_MIC:
+    case MIX_CTRL_MUTE_IN_L_MIC:
         idx = MICSET;
         break;
-    case MIXER_CTRL_LINE:
+    case MIX_CTRL_VOL_IN_L_LINE:
+    case MIX_CTRL_MUTE_IN_L_LINE:
         idx = LINESET;
         break;
-    case MIXER_CTRL_CD:
+    case MIX_CTRL_VOL_IN_L_CD:
+    case MIX_CTRL_MUTE_IN_L_CD:
         idx = CDSET;
         break;
-    case MIXER_CTRL_VIDEO:
+    case MIX_CTRL_VOL_IN_L_VIDEO:
+    case MIX_CTRL_MUTE_IN_L_VIDEO:
         idx = VIDEOSET;
         break;
-    case MIXER_CTRL_AUX:
+    case MIX_CTRL_VOL_IN_L_AUX:
+    case MIX_CTRL_MUTE_IN_L_AUX:
         idx = AUXSET;
         break;
-    case MIXER_CTRL_BASS:
+    case MIX_CTRL_OUT_L_BASS:
+    case MIX_CTRL_OUT_L_TREBLE:
         idx = BASSTREBLESET;
         break;
-    case MIXER_CTRL_TREBLE:
-        idx = BASSTREBLESET;
-        break;
-    case MIXER_CTRL_3D:
+    case MIX_CTRL_OUT_L_3DCENTER:
+    case MIX_CTRL_OUT_L_3DDEPTH:
         idx = THREEDSET;
         break;
-    case MIXER_CTRL_STREAMVOL:
+    case MIX_CTRL_VOL_IN_L_PCM:
+    case MIX_CTRL_MUTE_IN_L_PCM:
         idx = STREAMVOLSET;
         break;
-    case MIXER_CTRL_RECORDSRC:
+    case MIX_CTRL_MUX_IN_W_SRC:
         idx = RECORDSRCSET;
         break;
-    case MIXER_CTRL_RECORDGAIN:
-        idx = RECORDGAINSET;
-        break;
     default:
-        DebugInt3();
         return -1;
     }
     return idx & 0xF;
@@ -187,52 +190,68 @@ BOOL OSLibMixGetVolume(DWORD dwControl, BOOL *pfMute, DWORD *pdwVolLeft, DWORD *
 }
 /******************************************************************************/
 /******************************************************************************/
-BOOL OSLibMixSetRecSource(DWORD dwRecSrc)
+BOOL OSLibMixIsRecSourcePresent(DWORD dwRecSrc)
+{
+    DWORD dwOldRecSrc, dwVolL, dwVolR;
+
+    if(OSLibMixGetRecSource(&dwOldRecSrc, &dwVolL, &dwVolR) == FALSE) {
+        return FALSE;
+    }
+    if(OSLibMixSetRecSource(dwRecSrc, dwVolL, dwVolR) == FALSE) {
+        return FALSE;
+    }
+    OSLibMixSetRecSource(dwOldRecSrc, dwVolL, dwVolR);
+    return TRUE;
+}
+/******************************************************************************/
+/******************************************************************************/
+BOOL OSLibMixSetRecSource(DWORD dwRecSrc, DWORD dwVolL, DWORD dwVolR)
 {
     DWORD idx;
     MIXSTRUCT mixstruct;
 
     switch(dwRecSrc) {
-    case MIXER_RECSRC_MIC:
+    case MIX_CTRL_VOL_IN_W_MIC:
         idx = I90SRC_MIC;
         break;
-    case MIXER_RECSRC_CD:
+    case MIX_CTRL_VOL_IN_W_CD:
         idx = I90SRC_CD;
         break;
-    case MIXER_RECSRC_VIDEO:
+    case MIX_CTRL_VOL_IN_W_VIDEO:
         idx = I90SRC_VIDEO;
         break;
-    case MIXER_RECSRC_AUX:
+    case MIX_CTRL_VOL_IN_W_AUX:
         idx = I90SRC_AUX;
         break;
-    case MIXER_RECSRC_LINE:
+    case MIX_CTRL_VOL_IN_W_LINE:
         idx = I90SRC_LINE;
         break;
-    case MIXER_RECSRC_RES5:
-        idx = I90SRC_RES5;
-        break;
-    case MIXER_RECSRC_RES6:
-        idx = I90SRC_RES6;
-        break;
-    case MIXER_RECSRC_PHONE:
+    case MIX_CTRL_VOL_IN_W_PHONE:
         idx = I90SRC_PHONE;
         break;
     default:
-        DebugInt3();
         return FALSE;
     }
     mixstruct.Mute    = 0;
     mixstruct.VolumeL = idx;
 
-    if(mixerapiIOCTL90(hPDDMix, RECORDSRCSET, &mixstruct, sizeof(mixstruct)) == TRUE) {
-        return TRUE;
+    if(mixerapiIOCTL90(hPDDMix, RECORDSRCSET, &mixstruct, sizeof(mixstruct)) == FALSE) {
+        dprintf(("OSLibMixSetRecSource: mixerapiIOCTL90 RECORDSRCSET failed!!"));
+        return FALSE;
     }
-    dprintf(("OSLibMixSetRecSource: mixerapiIOCTL90 RECORDSRCSET failed!!"));
-    return FALSE;
+
+    mixstruct.Mute    = 0;
+    mixstruct.VolumeL = dwVolL;
+    mixstruct.VolumeR = dwVolR;
+    if(mixerapiIOCTL90(hPDDMix, RECORDGAINSET, &mixstruct, sizeof(mixstruct)) == FALSE) {
+        dprintf(("OSLibMixSetRecSource: mixerapiIOCTL90 RECORDGAINSET failed!!"));
+        return FALSE;
+    }
+    return TRUE;
 }
 /******************************************************************************/
 /******************************************************************************/
-BOOL OSLibMixGetRecSource(DWORD *pdwRecSrc)
+BOOL OSLibMixGetRecSource(DWORD *pdwRecSrc, DWORD *pdwVolL, DWORD *pdwVolR)
 {
     DWORD idx;
     MIXSTRUCT mixstruct;
@@ -243,28 +262,22 @@ BOOL OSLibMixGetRecSource(DWORD *pdwRecSrc)
     }
     switch(mixstruct.VolumeL) {
     case I90SRC_MIC:
-        idx = MIXER_RECSRC_MIC;
+        idx = MIX_CTRL_VOL_IN_W_MIC;
         break;
     case I90SRC_CD:
-        idx = MIXER_RECSRC_CD;
+        idx = MIX_CTRL_VOL_IN_W_CD;
         break;
     case I90SRC_VIDEO:
-        idx = MIXER_RECSRC_VIDEO;
+        idx = MIX_CTRL_VOL_IN_W_VIDEO;
         break;
     case I90SRC_AUX:
-        idx = MIXER_RECSRC_AUX;
+        idx = MIX_CTRL_VOL_IN_W_AUX;
         break;
     case I90SRC_LINE:
-        idx = MIXER_RECSRC_LINE;
-        break;
-    case I90SRC_RES5:
-        idx = MIXER_RECSRC_RES5;
-        break;
-    case I90SRC_RES6:
-        idx = MIXER_RECSRC_RES6;
+        idx = MIX_CTRL_VOL_IN_W_LINE;
         break;
     case I90SRC_PHONE:
-        idx = MIXER_RECSRC_PHONE;
+        idx = MIX_CTRL_VOL_IN_W_PHONE;
         break;
     default:
         DebugInt3();
@@ -272,6 +285,16 @@ BOOL OSLibMixGetRecSource(DWORD *pdwRecSrc)
     }
     if(pdwRecSrc) {
         *pdwRecSrc = idx;
+    }
+    if(mixerapiIOCTL90(hPDDMix, RECORDGAINQUERY, &mixstruct, sizeof(mixstruct)) == FALSE) {
+        dprintf(("OSLibMixSetRecSource: mixerapiIOCTL90 RECORDGAINQUERY failed!!"));
+        return FALSE;
+    }
+    if(pdwVolL) {
+        *pdwVolL = mixstruct.VolumeL;
+    }
+    if(pdwVolR) {
+        *pdwVolR = mixstruct.VolumeR;
     }
     return TRUE;
 }
