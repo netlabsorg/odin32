@@ -1,4 +1,4 @@
-/* $Id: d16strat.c,v 1.9 2000-09-02 21:07:56 bird Exp $
+/* $Id: d16strat.c,v 1.10 2000-09-04 16:40:48 bird Exp $
  *
  * d16strat.c - 16-bit strategy routine, device headers, device_helper (ptr)
  *              and 16-bit IOClts.
@@ -173,7 +173,10 @@ USHORT NEAR dev0GenIOCtl(PRP_GENIOCTL pRp)
                 {
                     if (TKSSBase16 == 0)
                         initGetDosTableData();
-                    return CallVerifyImportTab32();
+                    rc = CallVerifyImportTab32();
+                    if (pRp->DataPacket)
+                        ((PD16VERIFYIMPORTTABDATA)pRp->DataPacket)->usRc = rc;
+                    return STATUS_DONE;
                 }
                 break;
         }

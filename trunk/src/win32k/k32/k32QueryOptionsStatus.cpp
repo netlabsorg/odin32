@@ -1,4 +1,4 @@
-/* $Id: k32QueryOptionsStatus.cpp,v 1.2 2000-09-02 21:08:06 bird Exp $
+/* $Id: k32QueryOptionsStatus.cpp,v 1.3 2000-09-04 16:40:50 bird Exp $
  *
  * k32QueryOptionsStatus  - Queries the options and/or the status of
  *                          Win32k.sys driver.
@@ -151,7 +151,7 @@ APIRET k32QueryOptionsStatus(PK32OPTIONS pOptions, PK32STATUS pStatus)
         HEAPSTATE HeapState;
 
         /* initate the temporary structure */
-        memset(&TmpStatus, 0, sizeof(K32STATUS));
+        memset(SSToDS(&TmpStatus), 0, sizeof(K32STATUS));
         TmpStatus.cb = sizeof(K32STATUS);
 
         /* options */
@@ -184,10 +184,10 @@ APIRET k32QueryOptionsStatus(PK32OPTIONS pOptions, PK32STATUS pStatus)
         }
 
         /* Win32k Build and version; and symfile name or SymDB. */
-        strcpy(TmpStatus.szBuildDate, szBuildDate);                 /* Date of the win32k build. */
-        strcpy(TmpStatus.szBuildTime, szBuildTime);                 /* Time of the win32k build. */
+        strcpy((char*)SSToDS(TmpStatus.szBuildDate), szBuildDate);  /* Date of the win32k build. */
+        strcpy((char*)SSToDS(TmpStatus.szBuildTime), szBuildTime);  /* Time of the win32k build. */
         TmpStatus.ulVersion         = PE2LX_VERSION;                /* Win32k version */
-        strcpy(TmpStatus.szSymFile, szUsrSym);  /* The name of the symbol file or sym database. */
+        strcpy((char*)SSToDS(TmpStatus.szSymFile), szSymbolFile);   /* The name of the symbol file or sym database. */
 
         /* Module counts */
         TmpStatus.cPe2LxModules     = Pe2Lx::getLoadedModuleCount();/* Number of Pe2Lx modules currently loaded. */

@@ -1,4 +1,4 @@
-/* $Id: dev16.h,v 1.9 2000-09-02 21:08:00 bird Exp $
+/* $Id: dev16.h,v 1.10 2000-09-04 16:40:50 bird Exp $
  * dev16 - 16-bit specific. Should not be used in 32-bit C/C++.
  *
  * Copyright (c) 1999 knut st. osmundsen
@@ -27,7 +27,7 @@ typedef ULONG       DDHDR;
 #define D16_IOCTL_RING0INIT         0x40
 typedef struct _D16R0INITDATA
 {
-    USHORT Status;
+    USHORT usRcInit32;
 } D16R0INITDATA;
 typedef D16R0INITDATA FAR *PD16R0INITDATA;
 
@@ -48,6 +48,11 @@ typedef D16R0INITPARAM FAR *PD16R0INITPARAM;
  * Verify aImportTab. No params. No data (aImportTab is used).
  */
 #define D16_IOCTL_VERIFYIMPORTTAB   0x42
+typedef struct _D16VERIFYIMPORTTABDATA
+{
+    USHORT usRc;
+} D16VERIFYIMPORTTABDATA;
+typedef D16VERIFYIMPORTTABDATA FAR *PD16VERIFYIMPORTTABDATA;
 
 
 /**

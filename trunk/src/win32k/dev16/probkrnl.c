@@ -1,4 +1,4 @@
-/* $Id: probkrnl.c,v 1.21 2000-09-02 21:07:56 bird Exp $
+/* $Id: probkrnl.c,v 1.22 2000-09-04 16:40:48 bird Exp $
  *
  * Description:   Autoprobes the os2krnl file and os2krnl[*].sym files.
  *                Another Hack!
@@ -136,7 +136,16 @@ IMPORTKRNLSYM DATA16_GLOBAL aImportTab[NBR_OF_KRNLIMPORTS] =
 
 };
 
-char DATA16_GLOBAL  szUsrSym[50] = {0};
+/**
+ * szSymbolFile holds the name of the symbol file used.
+ *
+ */
+char DATA16_GLOBAL  szSymbolFile[60] = {0};
+
+/**
+ * iProc holds the number of the procedure which failed during verify.
+ */
+int  DATA16_GLOBAL  iProc = -1;         /* The procedure number which failed Verify. */
 
 
 
@@ -203,7 +212,7 @@ static struct
     {ERROR_PROB_KRNL_OTE_SIZE_MIS,      "Krnl: Size of a OTE didn't match the running kernel."},
 
     /*
-     * ProbeSymFile error messages
+     * ProbeSymFile error messages + some extra ones.
      */
     {ERROR_PROB_SYM_FILE_NOT_FOUND,     "Sym: Symbol file was not found."},
     {ERROR_PROB_SYM_READERROR,          "Sym: Read failed."},
@@ -211,12 +220,22 @@ static struct
     {ERROR_PROB_SYM_SEGS_NE_OBJS,       "Sym: Number of segments don't match the object count of the kernel."},
     {ERROR_PROB_SYM_SEG_DEF_SEEK,       "Sym: Failed to seek to a segment definition."},
     {ERROR_PROB_SYM_SEG_DEF_READ,       "Sym: Failed to read a segment definition."},
-    {ERROR_PROB_SYM_IMPORTS_NOTFOUND,   "Sym: All the imports wasn't found."},
+    {ERROR_PROB_SYM_IMPORTS_NOTFOUND,   "Sym: Some of the imports wasn't found."},
     {ERROR_PROB_SYM_V_PROC_NOT_FND,     "Sym: Verify failed: Procedure not found."},
     {ERROR_PROB_SYM_V_OBJ_OR_ADDR,      "Sym: Verify failed: Invalid object or address."},
     {ERROR_PROB_SYM_V_ADDRESS,          "Sym: Verify failed: Invalid address."},
     {ERROR_PROB_SYM_V_PROLOG,           "Sym: Verify failed: Invalid prolog."},
     {ERROR_PROB_SYM_V_NOT_IMPL,         "Sym: Verify failed: Not implemented."},
+    {ERROR_PROB_SYM_V_GETOS2KRNL,       "GetOs2Krnl: failed."},
+    {ERROR_PROB_SYM_V_NO_SWAPMTE,       "GetOs2Krnl: No Swap MTE."},
+    {ERROR_PROB_SYM_V_OBJECTS,          "GetOs2Krnl: Too many objects."},
+    {ERROR_PROB_SYM_V_OBJECT_TABLE,     "GetOs2Krnl: No object table."},
+    {ERROR_PROB_SYM_V_BUILD_INFO,       "GetOs2Krnl: Build info not found."},
+    {ERROR_PROB_SYM_V_INVALID_BUILD,    "GetOs2Krnl: Unsupported build."},
+    {ERROR_PROB_SYM_V_VERIFY,           "importTabInit: Import failed."},
+    {ERROR_PROB_SYM_V_IPE,              "importTabInit: Internal-Processing-Error."},
+    {ERROR_PROB_SYM_V_HEAPINIT,         "R0Init32: HeapInit Failed."},
+    {ERROR_PROB_SYM_V_D32_LDR_INIT,     "R0Init32: ldrInit Failed."},
 
     {ERROR_PROB_SYMDB_KRNL_NOT_FOUND,   "SymDB: Kernel was not found."}
 };
@@ -252,8 +271,6 @@ static int      kstrlen(const char *psz);
 static char *   kstrcpy(char * pszTarget, const char * pszSource);
 static int      kargncpy(char *pszTarget, const char *pszArg, unsigned cchMaxlen);
 
-static const char * GetErrorMsg(short sErr);
-
 /* Workers */
 static int      LookupKrnlEntry(unsigned short usBuild, unsigned short fKernel, unsigned char cObjects);
 static int      VerifyPrologs(void);
@@ -261,7 +278,7 @@ static int      ProbeSymFile(const char *pszFilename);
 static int      GetKernelInfo(void);
 
 /* Ouput */
-static void     ShowResult(int rc, int iSym);
+static void     ShowResult(int rc);
 
 /* Others used while debugging in R3. */
 static int      VerifyKernelVer(void);
@@ -569,7 +586,7 @@ static int kargncpy(char * pszTarget, const char * pszArg, unsigned cchMaxlen)
  * @status  completely implemented.
  * @author    knut st. osmundsen (knut.stange.osmundsen@pmsc.no)
  */
-static const char * GetErrorMsg(short sErr)
+const char * GetErrorMsg(short sErr)
 {
     int i;
     for (i = 0; i < sizeof(aErrorMsgs) / sizeof(aErrorMsgs[0]); i++)
@@ -638,9 +655,16 @@ static int LookupKrnlEntry(unsigned short usBuild, unsigned short fKernel, unsig
             /* Verify prologs*/
             rc = VerifyPrologs();
 
-            /* set sym name */
+            /* set sym name on success or complain on error */
             if (rc == 0)
-                kstrcpy(szUsrSym, "Win32k Symbol Database");
+                kstrcpy(szSymbolFile, "Win32k Symbol Database");
+            else
+            {
+                printf16("Warning: The Win32k Symbol Database entry found.\n"
+                         "         But, VerifyPrologs() returned rc=0x%x and iProc=%d\n", rc, iProc);
+                DosSleep(3000);
+            }
+
             return rc;
         }
     }
@@ -654,7 +678,9 @@ static int LookupKrnlEntry(unsigned short usBuild, unsigned short fKernel, unsig
 /**
  * Verifies the that the addresses in aImportTab are valid.
  * This is done at Ring-0 of course.
- * @returns   0 if ok, not 0 if not ok.
+ * @returns     NO_ERROR (ie. 0) on success. iProc = -1
+ *              The appropriate OS/2 or Win32k return code on success. iProc
+ *              is set to the failing procedure (if appliable).
  */
 static int VerifyPrologs(void)
 {
@@ -663,25 +689,41 @@ static int VerifyPrologs(void)
     HFILE           hDev0 = 0;
     USHORT          usAction = 0;
 
+    /* Set the failing procedure number to -1. */
+    iProc = -1;
+
+    /* Open the elf device driver. */
     rc = DosOpen("\\dev\\elf$", &hDev0, &usAction, 0UL, FILE_NORMAL,
                  OPEN_ACTION_FAIL_IF_NEW | OPEN_ACTION_OPEN_IF_EXISTS,
                  OPEN_SHARE_DENYNONE | OPEN_ACCESS_READONLY,
                  0UL);
     if (rc == NO_ERROR)
     {
-        rc = DosDevIOCtl("", "", D16_IOCTL_VERIFYIMPORTTAB, D16_IOCTL_CAT, hDev0);
+        D16VERIFYIMPORTTABDATA Data = {0};
+
+        /* Issue the VerifyImportTab IOCtl call. */
+        rc = DosDevIOCtl(&Data, "", D16_IOCTL_VERIFYIMPORTTAB, D16_IOCTL_CAT, hDev0);
         DosClose(hDev0);
-        if (rc != NO_ERROR)
+        if (rc == NO_ERROR)
         {
-            register APIRET rc2 = rc & STECODE;
-            if (rc2 >= ERROR_D32_VERIFYIMPORTTAB_FIRST && rc2 <= ERROR_D32_VERIFYIMPORTTAB_LAST)
-                rc = rc2 + ERROR_PROB_SYM_VERIFY_FIRST - ERROR_D32_VERIFYIMPORTTAB_FIRST;
+            if (Data.usRc != NO_ERROR)
+            {
+                /* set the appropriate return values. */
+                rc = (Data.usRc & ERROR_D32_ERROR_MASK) + ERROR_PROB_SYM_D32_FIRST;
+                if (Data.usRc & ERROR_D32_PROC_FLAG)
+                    iProc = (Data.usRc & ERROR_D32_PROC_MASK) >> ERROR_D32_PROC_SHIFT;
+            }/* else success */
+        }
+        else
+        {
+            dprintf(("DosDevIOCtl failed with rc=%d\n", rc));
+            DosSleep(3000);
         }
     }
     else
     {
         dprintf(("DosOpen Failed with rc=%d\n", rc));
-        DosSleep(2000);
+        DosSleep(3000);
     }
 
     return rc;
@@ -1041,10 +1083,9 @@ static int   GetKernelInfo(void)
 /**
  * Shows result of kernelprobing if not quiet or on error.
  * @param   rc      Return code.
- * @param   iSym    index of .sym-file into static struct.
  */
 #ifndef EXTRACT
-static void ShowResult(int rc, int iSym)
+static void ShowResult(int rc)
 {
     int i;
 
@@ -1074,9 +1115,8 @@ static void ShowResult(int rc, int iSym)
         /*
          * symbol-file
          */
-        if (rc == NO_ERROR || (rc > ERROR_PROB_SYM_LAST && (szUsrSym[0] != '\0' || apszSym[iSym] != NULL)))
-            printf16("    Found symbolfile: %s\n",
-                     szUsrSym[0] == '\0' ? apszSym[iSym] : szUsrSym);
+        if (rc == NO_ERROR || (rc > ERROR_PROB_SYM_LAST && szSymbolFile[0] != '\0'))
+            printf16("    Found symbolfile: %s\n", (NPSZ)szSymbolFile);
         else if (rc >= ERROR_PROB_SYM_FIRST)
             printf16("    Failed to find symbolfile!\n");
         else
@@ -1085,7 +1125,7 @@ static void ShowResult(int rc, int iSym)
         /*
          * function listing
          */
-        if (options.fLogging || rc != NO_ERROR)
+        if (options.fLogging)/* || rc != NO_ERROR)*/
         {
             for (i = 0; i < NBR_OF_KRNLIMPORTS; i++)
             {
@@ -1104,7 +1144,7 @@ static void ShowResult(int rc, int iSym)
         if (rc != NO_ERROR)
         {
             const char *psz = GetErrorMsg(rc);
-            printf16("ProbeKernel failed with rc=%d.\n", rc);
+            printf16("ProbeKernel failed with rc=%d. iProc=%x\n", rc, iProc);
             if (psz) printf16("%s\n", psz);
         }
     }
@@ -1166,7 +1206,7 @@ int ProbeKernel(PRPINITIN pReqPack)
                         if (   pReqPack->InitArgs[i] != 'c' && pReqPack->InitArgs[i] != 'C'
                             && pReqPack->InitArgs[i] != 'm' && pReqPack->InitArgs[i] != 'M'
                             ) /* -script and -smp is ignored */
-                            i += kargncpy(szUsrSym, &pReqPack->InitArgs[i], sizeof(szUsrSym));
+                            i += kargncpy(szSymbolFile, &pReqPack->InitArgs[i], sizeof(szSymbolFile));
                         break;
 
                     case 'v':
@@ -1221,13 +1261,15 @@ int ProbeKernel(PRPINITIN pReqPack)
     if (!rc)
     {
         rc = 1;
-        if (szUsrSym[0] != '\0')
+        if (szSymbolFile[0] != '\0')
         {
-            rc = ProbeSymFile(szUsrSym);
+            rc = ProbeSymFile(szSymbolFile);
             if (rc)
             {
-                printf16("Warning: Invalid symbol file specified. Tries defaults.\n");
-                szUsrSym[0] = '\0';
+                printf16("Warning: Invalid symbol file specified. rc=%x iProc=%d\n"
+                         "         Tries defaults.\n", rc, iProc);
+                szSymbolFile[0] = '\0';
+                DosSleep(3000);
             }
         }
         if (rc != NO_ERROR) /* if user sym failed or don't exists. */
@@ -1254,23 +1296,21 @@ int ProbeKernel(PRPINITIN pReqPack)
                        )
                 {
                     i++;
-                    if (rc2 >= ERROR_PROB_SYM_VERIFY_FIRST)
+                    if (rc2 >= ERROR_PROB_SYM_D32_FIRST)
                         rc = rc2;
                 }
-                if (rc == 1 || rc2 == NO_ERROR)
+                if (rc == NO_ERROR)
+                    kstrcpy(szSymbolFile, apszSym[i]);
+                else if (rc == 1 || rc2 == NO_ERROR)
                     rc = rc2;
                 #endif
             }
         }
     }
 
-    /* show the result and set return-value */
-    dprintf(("rc=%d; i=%d\n", rc, i));
-    ShowResult(rc, i);
-
-    /* Copy the symbol file name to szUsrSym. */
-    if (szUsrSym[0] == '\0' && apszSym[i] != NULL)
-        kstrcpy(szUsrSym, apszSym[i]);
+    /* Show the result and set return-value */
+    dprintf(("rc=%d(0x%x); i=%d; iProc=%d\n", rc, rc, i, iProc));
+    ShowResult(rc);
 
     return rc;
 }
@@ -1713,7 +1753,7 @@ int main(int argc, char **argv)
         FILEFINDBUF ffb;
         int         i;
 
-        printf16("/* $Id: probkrnl.c,v 1.21 2000-09-02 21:07:56 bird Exp $\n"
+        printf16("/* $Id: probkrnl.c,v 1.22 2000-09-04 16:40:48 bird Exp $\n"
                  "*\n"
                  "* Autogenerated kernel symbol database.\n"
                  "*\n"
