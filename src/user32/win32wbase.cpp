@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.66 1999-10-28 23:51:05 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.67 1999-10-29 16:06:56 cbratschi Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -595,17 +595,11 @@ BOOL Win32BaseWindow::MsgCreate(HWND hwndFrame, HWND hwndClient)
   OSLibWinSetOwner(OS2Hwnd, OS2HwndFrame);
 
   if (dwStyle & WS_HSCROLL)
-  {
-        hwndHorzScroll = OSLibWinQueryScrollBarHandle(OS2HwndFrame, OSLIB_HSCROLL);
-//        OSLibWinShowScrollBar(OS2HwndFrame, hwndHorzScroll, OSLIB_HSCROLL, FALSE, TRUE);
-  }
+    hwndHorzScroll = OSLibWinQueryScrollBarHandle(OS2HwndFrame, OSLIB_HSCROLL);
 
-  if (dwStyle & WS_VSCROLL) {
-        hwndVertScroll = OSLibWinQueryScrollBarHandle(OS2HwndFrame, OSLIB_VSCROLL);
-//        OSLibWinShowScrollBar(OS2HwndFrame, hwndVertScroll, OSLIB_VSCROLL, FALSE, TRUE);
-  }
+  if (dwStyle & WS_VSCROLL)
+    hwndVertScroll = OSLibWinQueryScrollBarHandle(OS2HwndFrame, OSLIB_VSCROLL);
 
-  //CB: switch off -> OS/2 scrollbars
   subclassScrollBars(dwStyle & WS_HSCROLL,dwStyle & WS_VSCROLL);
 
   fakeWinBase.hwndThis     = OS2Hwnd;
@@ -731,8 +725,8 @@ ULONG Win32BaseWindow::MsgDestroy()
     }
     SendInternalMessageA(WM_DESTROY, 0, 0);
 
-    if (hwndHorzScroll && OSLibWinQueryWindow(hwndHorzScroll,QWOS_PARENT) == OSLIB_HWND_OBJECT) OSLibWinDestroyWindow(hwndHorzScroll);
-    if (hwndVertScroll && OSLibWinQueryWindow(hwndVertScroll,QWOS_PARENT) == OSLIB_HWND_OBJECT) OSLibWinDestroyWindow(hwndVertScroll);
+    if (hwndHorzScroll && OSLibWinQueryWindow(hwndHorzScroll,QWOS_PARENT) == OSLibWinQueryObjectWindow()) OSLibWinDestroyWindow(hwndHorzScroll);
+    if (hwndVertScroll && OSLibWinQueryWindow(hwndVertScroll,QWOS_PARENT) == OSLibWinQueryObjectWindow()) OSLibWinDestroyWindow(hwndVertScroll);
 
     if(getFirstChild() == NULL) {
         delete this;
@@ -1247,25 +1241,19 @@ BOOL Win32BaseWindow::isFrameWindow()
     return FALSE;
 }
 //******************************************************************************
-//TODO: Not complete (flags)
 //******************************************************************************
 SCROLLBAR_INFO *Win32BaseWindow::getScrollInfo(int nBar)
 {
-    switch(nBar) {
+  switch(nBar)
+  {
     case SB_HORZ:
-        if(horzScrollInfo) {
-            //CB:horzScrollInfo->CurVal = OSLibWinGetScrollPos(OS2HwndFrame, hwndHorzScroll);
-            return horzScrollInfo;
-        }
-        break;
+      return horzScrollInfo;
+
     case SB_VERT:
-        if(vertScrollInfo) {
-            //CB:vertScrollInfo->CurVal = OSLibWinGetScrollPos(OS2HwndFrame, hwndVertScroll);
-            return vertScrollInfo;
-        }
-        break;
-    }
-    return NULL;
+      return vertScrollInfo;
+  }
+
+  return NULL;
 }
 /***********************************************************************/
 /***********************************************************************/

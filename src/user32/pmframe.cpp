@@ -1,4 +1,4 @@
-/* $Id: pmframe.cpp,v 1.12 1999-10-28 12:00:34 sandervl Exp $ */
+/* $Id: pmframe.cpp,v 1.13 1999-10-29 16:06:55 cbratschi Exp $ */
 /*
  * Win32 Frame Managment Code for OS/2
  *
@@ -66,6 +66,7 @@ VOID DrawFrame(HPS hps,RECTL *rect,Win32BaseWindow *win32wnd)
   DWORD dwExStyle = win32wnd->getExStyle();
   DWORD dwStyle = win32wnd->getStyle();
 
+  //CB: todo: switch to RGB mode and use win colors
   clrWhite = CLR_WHITE;
   clrBlack = CLR_BLACK;
   clrLight = CLR_PALEGRAY;
@@ -143,6 +144,7 @@ VOID DrawSizeBox(HPS hps,RECTL rect)
   LONG clrDark = CLR_DARKGRAY,clrWhite = CLR_WHITE;
   INT x;
 
+  //CB: todo: switch to RGB mode and use win colors
   WinFillRect(hps,&rect,SYSCLR_DIALOGBACKGROUND);
   p1.x = rect.xRight-2;
   p1.y = rect.yBottom;
@@ -197,6 +199,14 @@ void DrawActivate(Win32BaseWindow *win32wnd, HWND hwnd)
         DrawFrame(hps,&rect,win32wnd);
         WinReleasePS(hps);
     }
+}
+//******************************************************************************
+//******************************************************************************
+void FrameTrackFrame(Win32BaseWindow *win32wnd,BOOL lefttop)
+{
+  INT flags = lefttop ? (TF_LEFT | TF_TOP):(TF_RIGHT | TF_BOTTOM);
+
+  WinSendMsg(win32wnd->getOS2FrameWindowHandle(),WM_TRACKFRAME,(MPARAM)flags,(MPARAM)0);
 }
 //******************************************************************************
 //Win32 frame message handler
