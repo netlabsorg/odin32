@@ -1,4 +1,4 @@
-/* $Id: win32_menu.c,v 1.2 2000-02-09 08:46:22 jeroen Exp $ */
+/* $Id: win32_menu.c,v 1.3 2000-03-05 10:19:39 jeroen Exp $ */
 /* Copyright (c) Mark J. Kilgard, 1994, 1997, 1998. */
 /* Copyright (c) Nate Robins, 1997. */
 
@@ -18,7 +18,7 @@
 
 #include "glutint.h"
 
-void (* APIENTRY __glutMenuStatusFunc) (int, int, int);
+void (* CDECL __glutMenuStatusFunc) (int, int, int);
 extern GLUTmenu *__glutMappedMenu;
 extern GLUTwindow *__glutMenuWindow;
 GLUTmenuItem *__glutItemSelected;

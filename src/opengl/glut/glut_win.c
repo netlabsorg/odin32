@@ -1,4 +1,4 @@
-/* $Id: glut_win.c,v 1.4 2000-03-04 19:33:43 jeroen Exp $ */
+/* $Id: glut_win.c,v 1.5 2000-03-05 10:19:38 jeroen Exp $ */
 /* Copyright (c) Mark J. Kilgard, 1994, 1997.  */
 
 /* This program is freely distributable without licensing fees
@@ -402,7 +402,7 @@ __glutDetermineVisual(
   return vis;
 }
 
-void GLAPIENTRY
+void CDECL
 __glutDefaultDisplay(void)
 {
   /* XXX Remove the warning after GLUT 3.0. */
@@ -412,7 +412,7 @@ __glutDefaultDisplay(void)
     __glutCurrentWindow->num + 1);
 }
 
-void GLAPIENTRY
+void CDECL
 __glutDefaultReshape(int width, int height)
 {
   GLUToverlay *overlay;
@@ -1006,9 +1006,9 @@ static void GLAPIENTRY
 visibilityHelper(int status)
 {
   if (status == GLUT_HIDDEN || status == GLUT_FULLY_COVERED)
-    __glutCurrentWindow->visibility(GLUT_NOT_VISIBLE);
+    ((GLUTvisibilityCB)(__glutCurrentWindow->visibility))(GLUT_NOT_VISIBLE);
   else
-    __glutCurrentWindow->visibility(GLUT_VISIBLE);
+    ((GLUTvisibilityCB)(__glutCurrentWindow->visibility))(GLUT_VISIBLE);
 }
 
 void GLAPIENTRY

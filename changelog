@@ -1,4 +1,8 @@
- /* $Id: changelog,v 1.784 2000-03-04 23:56:34 bird Exp $ */
+ /* $Id: changelog,v 1.785 2000-03-05 10:21:10 jeroen Exp $ */
+
+ 2000-03-05: Jeroen van den Horn <J.vandenHorn@fibre.a2000.nl>
+        - GLUT32: Really fixed optimized build now. Was not a VACPP bug but
+                  error in calling convention prototype in glutint.h
 
  2000-03-04: Jeroen van den Horn <J.vandenHorn@fibre.a2000.nl>
         - GLUT32: Added logic to escape from optimizer bug in VACPP
@@ -18,7 +22,7 @@
                  compiler and linker flags, this is allready done!
 
  2000-03-04: Sander van Leeuwen <sandervl@xs4all.nl>
-	- INCLUDE\pdwin32.tools, pdwin.vac*
+        - INCLUDE\pdwin32.tools, pdwin.vac*
                    Added new build rules (conditional at this time)
                    For each dll a subdir bin\release & bin\debug is created
                    in which the object files of the release & build version
