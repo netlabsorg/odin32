@@ -1,11 +1,14 @@
-; $Id: gdi32.DEF,v 1.4 1999-12-09 16:49:44 cbratschi Exp $
+; $Id: gdi32.DEF,v 1.5 1999-12-16 16:52:31 cbratschi Exp $
 
 ;Created by BLAST for IBM's compiler
 LIBRARY GDI32 INITINSTANCE
 DATA MULTIPLE NONSHARED
 
 IMPORTS
-    __GpiQueryDCData@4         = PMGPI.665
+    _GpiQueryTabbedTextExtent  = PMGPI.658
+    _GpiTabbedCharStringAt     = PMGPI.659
+    _GpiQueryDCData            = PMGPI.665
+    _PaxStrokeAndFillPath      = PMGPI.712
     _GpiEnableYInversion       = PMGPI.723
 
 EXPORTS
@@ -341,9 +344,9 @@ EXPORTS
 ;    pfnSelectPalette           = _pfnSelectPalette@??        @434
 
 ;USER32 functions
-    InternalDrawTextExA          = _InternalDrawTextExA@24          @1000
-    InternalDrawTextExW          = _InternalDrawTextExW@24          @1001
-    InternalTabbedTextOutA       = _InternalTabbedTextOutA@32       @1002
-    InternalTabbedTextOutW       = _InternalTabbedTextOutW@32       @1003
-    InternalGetTabbedTextExtentA = _InternalGetTabbedTextExtentA@20 @1004
-    InternalGetTabbedTextExtentW = _InternalGetTabbedTextExtentW@20 @1005
+    InternalDrawTextExA          @1000
+    InternalDrawTextExW          @1001
+    InternalTabbedTextOutA       @1002
+    InternalTabbedTextOutW       @1003
+    InternalGetTabbedTextExtentA @1004
+    InternalGetTabbedTextExtentW @1005
