@@ -1,4 +1,4 @@
-/* $Id: kFile.h,v 1.6 2000-10-03 05:42:38 bird Exp $
+/* $Id: kFile.h,v 1.7 2000-10-05 07:27:57 bird Exp $
  *
  * kFile - Simple (for the time being) file class.
  *
@@ -37,6 +37,15 @@ protected:
     unsigned long   offReal;            /* Real file position. */
 
     /** @cat Buffering datamembers */
+    char *          pachBuffer;         /* Pointer to the buffer. NULL if not buffering. */
+    unsigned long   cbBuffer;           /* Count of allocated bytes. */
+    unsigned long   offBuffer;          /* Virtual file offset where the buffer starts. */
+    unsigned long   cbBufferValid;      /* Count of valid bytes in the buffer. */
+    BOOL            fBufferDirty;       /* Dirty flag. Set when the buffer needs to be committed. */
+
+    /** @cat internal buffer methods */
+    BOOL            bufferRead(ULONG offFile) throw (int);
+    BOOL            bufferCommit(void) throw (int);
 
     /** @cat internal methods for maintaing internal structures. */
     BOOL            refreshFileStatus() throw(int);

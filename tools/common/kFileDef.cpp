@@ -113,7 +113,14 @@ kFileDef::kFileDef(kFile *pFile) throw(int)
 
     if (pFile->start())
     {
-        this->read(pFile);
+        try
+        {
+            this->read(pFile);
+        }
+        catch (int err)
+        {
+            throw (err);
+        }
     }
     else
         throw (0x001);
