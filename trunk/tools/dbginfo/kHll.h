@@ -1,4 +1,4 @@
-/* $Id: kHll.h,v 1.8 2000-05-27 02:15:42 bird Exp $
+/* $Id: kHll.h,v 1.9 2000-05-29 19:46:29 bird Exp $
  *
  * kHll - Declarations of the class kHll.
  *        That class is used to create HLL debuginfo.
@@ -45,6 +45,15 @@ public:
      */
     virtual void    dump(FILE *ph, int cchIndent) = 0;
     static  void    dumpList(FILE *ph, int cchIndent, kHllBaseEntry *pEntry);
+
+    /**
+     * Create IDC (IDA Pro) calls which adds info contained in the entry
+     * to the ida pro database.
+     * !!!NOTE!!! THIS IS ONLY TO BE USED FOR YOUR OWN PROGRAMS!!!
+     * @param       pFile   Output file.
+     */
+    virtual void    ida(kFile *pFile) throw(int) = 0;
+    static void     idaList(kFile *pFile, kHllBaseEntry *pEntry) throw(int);
 };
 
 
@@ -70,6 +79,7 @@ public:
 
     int             write(FILE *phFile);
     void            dump(FILE *ph, int cchIndent);
+    void            ida(kFile *pFile) throw(int);
 };
 
 
@@ -99,6 +109,7 @@ public:
 
     int             write(FILE *phFile);
     void            dump(FILE *ph, int cchIndent);
+    void            ida(kFile *pFile) throw(int);
 
     int             getSeg()    { return FirstEntry.hll04.iSeg; }
 };
@@ -137,6 +148,7 @@ public:
                         );
     int             write(FILE *phFile);
     void            dump(FILE *ph, int cchIndent);
+    void            ida(kFile *pFile) throw(int);
 };
 
 
@@ -231,6 +243,7 @@ public:
      * Debug dump function.
      */
     void            dump(FILE *ph);
+    void            ida(kFile *pFile) throw(int);
 };
 
 
@@ -304,6 +317,7 @@ public:
      * Debug dump function.
      */
     void                dump();
+    void                ida(kFile *pFile) throw(int);
 };
 
 
