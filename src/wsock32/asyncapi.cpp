@@ -1,4 +1,4 @@
-/* $Id: asyncapi.cpp,v 1.14 2001-07-07 18:49:13 achimha Exp $ */
+/* $Id: asyncapi.cpp,v 1.15 2001-07-08 15:44:27 achimha Exp $ */
 
 /*
  *
@@ -670,19 +670,9 @@ int WSAAsyncSelectWorker(SOCKET s, int mode, int notifyHandle, int notifyData, l
         WSASetLastError(WSAEINVAL);           	// invalid parameter
 	return SOCKET_ERROR;
    }
-#if 0
-// AH: null sempahore is ok when clearing request
-   else
-   if ((mode == WSA_SELECT_HEVENT) && !(WSAEVENT)notifyHandle)
-   {
-        dprintf(("invalid event semaphore handle"));
-        WSASetLastError(WSAEINVAL);           	// invalid parameter
-	return SOCKET_ERROR;
-   }
-#endif
 
-   //Set socket to non-blocking mode
-   ret = ioctl(s, FIONBIO, (char *) &nonblock, sizeof(nonblock));
+   // Set socket to non-blocking mode
+   ret = ioctl(s, FIONBIO, (char *)&nonblock, sizeof(nonblock));
    if(ret == SOCKET_ERROR) {
         dprintf(("setting socket to non blocking mode failed"));
  	WSASetLastError(wsaErrno());

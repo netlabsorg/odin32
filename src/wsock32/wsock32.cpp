@@ -1,4 +1,4 @@
-/* $Id: wsock32.cpp,v 1.36 2001-07-07 10:44:10 achimha Exp $ */
+/* $Id: wsock32.cpp,v 1.37 2001-07-08 15:44:27 achimha Exp $ */
 
 /*
  *
@@ -150,12 +150,53 @@ void WINSOCK_DeleteIData(void)
 //******************************************************************************
 void WIN32API WSASetLastError(int iError)
 {
-  // according to the docs, WSASetLastError() is just a call-through
-  // to SetLastError()
-  if(iError) {
-	dprintf(("WSASetLastError 0x%x", iError));
-  }
-  SetLastError(iError);
+#ifdef DEBUG
+    char msg[20];
+#endif
+    // according to the docs, WSASetLastError() is just a call-through
+    // to SetLastError()
+    SetLastError(iError);
+#ifdef DEBUG
+    switch (iError)
+    {
+        case NO_ERROR:
+            strcpy(msg, "no error");
+            break;
+        case WSAEINTR:
+            strcpy(msg, "WSAEINTR");
+            break;
+        case WSAEBADF:
+            strcpy(msg, "WSAEBADF");
+            break;
+        case WSAEACCES:
+            strcpy(msg, "WSAEACCES");
+            break;
+        case WSAEFAULT:
+            strcpy(msg, "WSAEFAULT");
+            break;
+        case WSAEINVAL:
+            strcpy(msg, "WSAEINVAL");
+            break;
+        case WSAEMFILE:
+            strcpy(msg, "WSAEMFILE");
+            break;
+        case WSAEWOULDBLOCK:
+            strcpy(msg, "WSAEWOULDBLOCK");
+            break;
+        case WSAEINPROGRESS:
+            strcpy(msg, "WSAEINPROGRESS");
+            break;
+        case WSAEALREADY:
+            strcpy(msg, "WSAEALREADY");
+            break;
+        default:
+            strcpy(msg, "unknown");
+    }
+    if (iError != 0)
+    {
+        dprintf(("WSASetLastError 0x%x - %s", iError, msg));
+    }
+#endif
 }
 //******************************************************************************
 //******************************************************************************
@@ -883,11 +924,14 @@ ODINFUNCTION5(int,OS2setsockopt,
    memcpy(safeoptval, optval, optlen);
    optval = safeoptval;
 
-   if (level == SOL_SOCKET) {
-	switch(optname) {
+   if (level == SOL_SOCKET)
+   {
+	switch(optname)
+        {
 	case SO_DONTLINGER:
 	case SO_LINGER:
-            	if(optlen < (int)sizeof(ws_linger)) {
+            	if(optlen < (int)sizeof(ws_linger))
+                {
                         dprintf(("SOL_SOCKET, SO_LINGER, optlen too small"));
                		WSASetLastError(WSAEFAULT);
                		return SOCKET_ERROR;
@@ -900,7 +944,8 @@ ODINFUNCTION5(int,OS2setsockopt,
 		break;
 	case SO_SNDBUF:
 	case SO_RCVBUF:
-            	if(optlen < (int)sizeof(int)) {
+            	if(optlen < (int)sizeof(int))
+                {
                         dprintf(("SOL_SOCKET, SO_RCVBUF, optlen too small"));
                		WSASetLastError(WSAEFAULT);
                		return SOCKET_ERROR;
@@ -933,13 +978,14 @@ tryagain:
                 ret = setsockopt(s, level, optname, (char *)optval, optlen);
 		break;
 	default:
-		dprintf(("setsockopt: unknown option %x", optname));
+		dprintf(("setsockopt: SOL_SOCKET, unknown option %x", optname));
             	WSASetLastError(WSAENOPROTOOPT);
             	return SOCKET_ERROR;
         }
    }
    else
-   if(level == IPPROTO_TCP) {
+   if(level == IPPROTO_TCP)
+   {
        	if(optname == TCP_NODELAY) {
             	if(optlen < (int)sizeof(int)) {
                         dprintf(("IPPROTO_TCP, TCP_NODELAY, optlen too small"));
@@ -949,10 +995,34 @@ tryagain:
                	ret = setsockopt(s, level, optname, (char *)optval, optlen);
         }
 	else {
-		dprintf(("setsockopt: unknown option %x", optname));
+		dprintf(("setsockopt: IPPROTO_TCP, unknown option %x", optname));
        		WSASetLastError(WSAENOPROTOOPT);
       		return SOCKET_ERROR;
         }
+   }
+   else
+   if (level == IPPROTO_IP)
+   {
+       switch (optname)
+       {
+           case IP_MULTICAST_IF:
+           {
+               if (optlen < sizeof(in_addr))
+               {
+                   dprintf(("IPPROTO_IP, IP_MULTICAST_IP, optlen too small"));
+                   WSASetLastError(WSAEFAULT);
+                   return SOCKET_ERROR;
+               }
+               //TODO convert common interface names!
+               ret = setsockopt(s, level, optname, (char *)optval, optlen);
+               break;
+           }
+
+           default:
+		dprintf(("setsockopt: IPPROTO_IP, unknown option %x", optname));
+       		WSASetLastError(WSAENOPROTOOPT);
+      		return SOCKET_ERROR;
+       }
    }
    else {
         dprintf(("unknown level code!"));
