@@ -1,4 +1,4 @@
-/* $Id: changelog,v 1.1249 2001-02-11 15:36:50 bird Exp $ */
+/* $Id: changelog,v 1.1250 2001-02-11 17:24:53 sandervl Exp $ */
 
  2001-02-11: knut st. osmundsen <knut.stange.osmundsen@mynd.no>
     - Win32k:   o Added symbols for the 14062D kernels.
@@ -9,6 +9,9 @@
     - WINMM, GLU, CRTDLL, KERNEL32:
                 o Compile fixes for VAC 3.6.5
     - RASAPI32: o Can't use LXLITE as it crashes on this binary
+    - KERNEL32: o Check for valid pointer in LocalLock and return NULL if invalid
+                  (some apps use LocalLock to get access to GDI objects; doesn't 
+                   work in Odin)
 
  2001-02-10: Sander van Leeuwen <sandervl@xs4all.nl>
     - USER32:   o Check if window has been destroyed before accessing
