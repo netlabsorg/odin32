@@ -3323,7 +3323,7 @@ HWND      WINAPI CreateMDIWindowA(LPCSTR,LPCSTR,DWORD,INT,INT,
 HWND      WINAPI CreateMDIWindowW(LPCWSTR,LPCWSTR,DWORD,INT,INT,
                                 INT,INT,HWND,HINSTANCE,LPARAM);
 #define     CreateMDIWindow WINELIB_NAME_AW(CreateMDIWindow)
-void        WINAPI CalcChildScroll(HWND,WORD);
+void        WINAPI CalcChildScroll(HWND,INT);
 LRESULT     WINAPI DefDlgProcA(HWND,UINT,WPARAM,LPARAM);
 LRESULT     WINAPI DefDlgProcW(HWND,UINT,WPARAM,LPARAM);
 #define     DefDlgProc WINELIB_NAME_AW(DefDlgProc)
