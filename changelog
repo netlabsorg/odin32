@@ -1,4 +1,4 @@
-/* $Id: changelog,v 1.1959 2002-02-06 17:24:48 sandervl Exp $ */
+/* $Id: changelog,v 1.1960 2002-02-06 20:13:38 sandervl Exp $ */
 
  2002-02-06: Sander van Leeuwen <sandervl@xs4all.nl>
     - WSOCK32:  o minor recv update for error handling
@@ -8,7 +8,8 @@
                   entrypoints (necessary for Odin32 applications that use
                   PE dlls (like Opera))
     - COMCTL32: o Wine updates (smoothscroll, ipaddress, rebar, toolbar, tab,
-                  comboex, imagelist)
+                  comboex, imagelist) (20020122)
+    - SHLWAPI:  o Wine resync (20020122)
 
  2002-02-05: Sander van Leeuwen <sandervl@xs4all.nl>
     - USER32:   o Ported SendMessageCallbackA/W, SendMessageTimeoutA/W,
