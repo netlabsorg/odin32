@@ -1,4 +1,4 @@
-/* $Id: probkrnl.h,v 1.13.4.8 2000-08-28 22:44:23 bird Exp $
+/* $Id: probkrnl.h,v 1.13.4.9 2000-08-30 04:11:30 bird Exp $
  *
  * Include file for ProbKrnl.
  *
@@ -15,7 +15,7 @@
 /*******************************************************************************
 *   Defined Constants And Macros                                               *
 *******************************************************************************/
-#define NBR_OF_KRNLIMPORTS      41      /* When this is changed make sure to   */
+#define NBR_OF_KRNLIMPORTS      42      /* When this is changed make sure to   */
                                         /* update the arrays in d32init.c and  */
                                         /* probkrnl.c, make test faker in      */
                                         /* test.h and the appropriate fake.c   */
@@ -25,7 +25,8 @@
 /* Entry-Point Type flag */
 #define EPT_PROC                0x00    /* procedure - overload procedure*/
 #define EPT_PROCIMPORT          0x01    /* procedure 32bit - import only */
-#define EPT_VARIMPORT           0x02    /* variable/non-procedure 32bit - not implemented yet */
+#define EPT_VARIMPORT           0x02    /* variable/non-procedure 32bit */
+#define EPT_NOT_REQ             0x04    /* Not required flag. */
 #define EPT_32BIT               0x00    /* 32 bit entry-point  */
 #define EPT_16BIT               0x80    /* 16 bit entry-point */
 #define EPT_BIT_MASK            0x80    /* Mask bit entry-point */
@@ -35,6 +36,7 @@
 /* 32bit types */
 #define EPT_PROC32              (EPT_PROC | EPT_32BIT)
 #define EPT_PROCIMPORT32        (EPT_PROCIMPORT | EPT_32BIT)
+#define EPT_PROCIMPORTNR32      (EPT_PROCIMPORT | EPT_32BIT | EPT_NOT_REQ)
 #define EPT_VARIMPORT32         (EPT_VARIMPORT | EPT_32BIT)
 
 /* 16bit types */

@@ -1,4 +1,4 @@
-/* $Id: test.h,v 1.1.4.7 2000-08-28 22:44:23 bird Exp $
+/* $Id: test.h,v 1.1.4.8 2000-08-30 04:11:31 bird Exp $
  *
  * Definitions and declarations for test moduls.
  *
@@ -107,6 +107,7 @@ ULONG KRNLCALL  fakeTKFuBuff(PVOID pv, PVOID pvUsr, ULONG cb, ULONG fl);
 ULONG KRNLCALL  fakeTKSuBuff(PVOID pvUsr, PVOID pv, ULONG cb, ULONG fl);
 ULONG KRNLCALL  fakeTKFuBufLen(PLONG pcch, PVOID pvUsr, ULONG cchMax, ULONG fl, BOOL fDblNULL);
 PMTE LDRCALL    fakeldrValidateMteHandle(HMTE hMTE);
+PSZ  SECCALL    fakeSecPathFromSFN(SFN hFile);
 void _Optlink   fakeg_tkExecPgm(void);    /* Not callable! (fakea.asm) */
 void _Optlink   fake_tkStartProcess(void);/* Not callable! (fakea.asm) */
 void _Optlink   fakef_FuStrLenZ(void);    /* Not callable! (fakea.asm) */
@@ -118,6 +119,7 @@ extern char     fakeptda_start;
 extern USHORT   fakeptda_environ;
 extern KSEMMTX  fakeptda_ptdasem;
 extern HMTE     fakeptda_module;
+extern PSZ      fakeptda_pBeginLIBPATH;
 extern PSZ      fakeldrpFileNameBuf;
 
 #endif /* INCL_NO_FAKE */

@@ -1,4 +1,4 @@
-/* $Id: d32init.c,v 1.19.4.11 2000-08-28 22:44:21 bird Exp $
+/* $Id: d32init.c,v 1.19.4.12 2000-08-30 04:11:28 bird Exp $
  *
  * d32init.c - 32-bits init routines.
  *
@@ -75,6 +75,7 @@ int             importTabInit(void);
 PMTE            GetOS2KrnlMTETst(void);
 void            R3TstFixImportTab(void);
 #endif
+PSZ SECCALL     nopSecPathFromSFN(SFN hFile);
 
 
 
@@ -1053,8 +1054,13 @@ USHORT _loadds _Far32 _Pascal VerifyImportTab32(void)
         /* Verify that it is found */
         if (!_aImportTab[i].fFound)
         {
-            kprintf(("VerifyImportTab32: procedure no.%d was not fFound!\n", i));
-            return STATUS_DONE | STERR | ERROR_D32_PROC_NOT_FOUND;
+            if (_aImportTab[i].fType & EPT_NOT_REQ)
+                continue;
+            else
+            {
+                kprintf(("VerifyImportTab32: procedure no.%d was not fFound!\n", i));
+                return STATUS_DONE | STERR | ERROR_D32_PROC_NOT_FOUND;
+            }
         }
 
         /* Verify read/writeable. */
@@ -1075,7 +1081,7 @@ USHORT _loadds _Far32 _Pascal VerifyImportTab32(void)
 
 
         #ifndef R3TST
-        if (_aImportTab[i].ulAddress < 0xffc00000UL)
+        if (_aImportTab[i].ulAddress < 0xff400000UL)
         {
             kprintf(("VerifyImportTab32: procedure no.%d has an invalid address, %#08x!\n",
                      i, _aImportTab[i].ulAddress));
@@ -1083,7 +1089,7 @@ USHORT _loadds _Far32 _Pascal VerifyImportTab32(void)
         }
         #endif
 
-        switch (_aImportTab[i].fType & ~EPT_BIT_MASK)
+        switch (_aImportTab[i].fType & ~(EPT_BIT_MASK | EPT_NOT_REQ))
         {
             case EPT_PROC:
             case EPT_PROCIMPORT:
@@ -1134,7 +1140,10 @@ USHORT _loadds _Far32 _Pascal VerifyImportTab32(void)
  */
 int importTabInit(void)
 {
-    /* This table must be updated with the overloading functions. */
+    /* This table must be updated with the overloading functions.
+     * It should also hold NOP functions for functions which are of the
+     * not required type.
+     */
     static unsigned auFuncs[NBR_OF_KRNLIMPORTS] =
     {
         (unsigned)myldrRead,            /* 0 */
@@ -1177,7 +1186,8 @@ int importTabInit(void)
         0,                              /* 37 */
         0,                              /* 38 */
         0,                              /* 39 */
-        0                               /* 40 */
+        0,                              /* 40 */
+        (unsigned)nopSecPathFromSFN,    /* 41 */
     };
     int i;
     int cb;
@@ -1195,6 +1205,12 @@ int importTabInit(void)
         /* EPT_VARIMPORTs are skipped */
         if ((_aImportTab[i].fType & ~EPT_BIT_MASK) == EPT_VARIMPORT)
             continue;
+        /* EPT_NOT_REQ which is not found are set pointing to the nop function provided. */
+        if (!_aImportTab[i].fFound && (_aImportTab[i].fType & EPT_NOT_REQ))
+        {
+            _aImportTab[i].ulAddress = auFuncs[i];
+            continue;
+        }
 
         if (EPT32BitEntry(_aImportTab[i]))
         {
@@ -1218,7 +1234,7 @@ int importTabInit(void)
      */
     for (i = 0; i < NBR_OF_KRNLIMPORTS; i++)
     {
-        switch (_aImportTab[i].fType)
+        switch (_aImportTab[i].fType & ~EPT_NOT_REQ)
         {
             /*
              * 32-bit procedure overload.
@@ -1468,7 +1484,8 @@ VOID R3TstFixImportTab(VOID)
         {(unsigned)&fakeptda_ptdasem,       4},
         {(unsigned)&fakeptda_module,        4},
         {(unsigned)&fakeptda_pBeginLIBPATH, 4},
-        {(unsigned)&fakeldrpFileNameBuf,    3}
+        {(unsigned)&fakeldrpFileNameBuf,    3},
+        {(unsigned)&fakeSecPathFromSFN,     3}
     };
     int i;
 
@@ -1521,3 +1538,11 @@ VOID R3TstFixImportTab(VOID)
 }
 #endif
 
+/**
+ * Dummy nop function if SecPathFromSFN isn't found.
+ */
+PSZ SECCALL nopSecPathFromSFN(SFN hFile)
+{
+    NOREF(hFile);
+    return NULL;
+}

@@ -1,4 +1,4 @@
-/* $Id: fake.c,v 1.1.4.4 2000-08-24 01:36:29 bird Exp $
+/* $Id: fake.c,v 1.1.4.5 2000-08-30 04:11:32 bird Exp $
  *
  * Fake stubs for the ldr and kernel functions we imports or overloads.
  *
@@ -142,6 +142,11 @@ void  workersinit(void)
      * Loader semaphore
      */
     fakeKSEMInit((PKSEM)(void*)&fakeLDRSem, KSEM_MUTEX, KSEM_DEFAULT);
+
+    /*
+     * Intra process semaphore.
+     */
+    fakeKSEMInit((PKSEM)(void*)&fakeptda_ptdasem, KSEM_MUTEX, KSEM_DEFAULT);
 
     /*
      * LIBPaths
@@ -1769,4 +1774,25 @@ ULONG LDRCALL   fakeldrFindModule(PCHAR pachFilename, USHORT cchFilename, USHORT
     return rc;
 }
 
+
+/**
+ * Gets the path (name with fully qualified path) from a SFN.
+ * @returns     Pointer to the path of hFile.
+ * @param       hFile   SFN filehandle.
+ */
+PSZ SECCALL fakeSecPathFromSFN(SFN hFile)
+{
+    APIRET  rc;
+    BOOL    f32Stack = ((int)&hFile > 0x10000);
+
+    if (!f32Stack) ThunkStack16To32();
+
+    rc = ERROR_NOT_SUPPORTED;
+
+    if (!f32Stack) ThunkStack32To16();
+
+    printf("fakeSecPathFromSFN:                    - not implemented - hFile = 0x%04x, rc = %d\n", hFile, rc);
+
+    return rc;
+}
 

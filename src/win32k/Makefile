@@ -1,5 +1,5 @@
 ################################################################################
-# $Id: Makefile,v 1.43.4.7 2000-08-29 19:46:59 bird Exp $
+# $Id: Makefile,v 1.43.4.8 2000-08-30 04:11:22 bird Exp $
 #
 # Win32k makefile.
 #
@@ -519,6 +519,7 @@ $(WIN32KBIN)\$(NAME)tst.exe: \
 /MAP:$(WIN32KBIN)\$(@B).map
 $(TSTOBJS:  =^
 )
+/IG
 $(TSTLIBS:  =^
 )
 $(WIN32KOBJ)\last.lib
