@@ -1,7 +1,12 @@
-/* $Id: ChangeLog,v 1.1621 2001-07-29 23:30:00 bird Exp $ */
+/* $Id: ChangeLog,v 1.1622 2001-07-30 02:02:57 bird Exp $ */
 
  2001-07-29: knut st. osmundsen <kosmunds@csc.com>
-    - Makefiles: o Force fastdep to scan all files if -a is specified to nmake.
+    - Makefiles:
+                o Force fastdep to scan all files if -a is specified to nmake.
+    - Win32k/test:
+                o Wrote stupid test app to profile child process execution
+                  on different OSes.
+                  Current results are found in source (PrfTstProcess.c).
 
  2001-07-29: Sander van Leeuwen <sandervl@xs4all.nl>
     - COMCTL32/COMDLG32/GDI32/KERNEL32/MSVFW32/USER32/SHELL32/WSOCK32/WINMM
