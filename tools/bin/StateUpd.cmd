@@ -1,4 +1,4 @@
-/* $Id: StateUpd.cmd,v 1.2 2000-03-14 16:29:35 bird Exp $
+/* $Id: StateUpd.cmd,v 1.3 2000-08-02 20:19:35 bird Exp $
  *
  * Helper script which invokes StateUpd.cmd.
  * This was created to hold special rules for dirs like OpenGl.
@@ -25,11 +25,17 @@
         call directory('mesa');
 
         /* execute update  */
-        sStateUpd || ' -dll:opengl32 ' || sAllArgs;
+        sStateUpd || ' -dll:opengl32 -s ' || sAllArgs;
         lRc = rc;
 
         /* restore dir */
         call directory sOldDir;
+    end
+    else if (translate(sDllName) = 'WNETAP32') then
+    do
+        /* execute update  */
+        sStateUpd || ' -dll:netapi32 ' || sAllArgs;
+        lRc = rc;
     end
     else
     do
