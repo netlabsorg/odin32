@@ -1,4 +1,6 @@
- /* $Id: ChangeLog,v 1.397 1999-11-02 21:14:52 phaller Exp $ */
+ /* $Id: ChangeLog,v 1.398 1999-11-02 21:20:40 hugh Exp $ */
+ 99-11-02  Markus Montkowski <mmontkowski@gmx.de>
+	- DDRAW: Changed interface handling of Surfaces=> Quake 2 runs again!
 
  99-11-02: Patrick Haller <phaller@gmx.net>
 	- SHELL32:	Up to current WINE level
