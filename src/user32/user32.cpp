@@ -1,4 +1,4 @@
-/* $Id: user32.cpp,v 1.40 1999-10-13 14:24:25 sandervl Exp $ */
+/* $Id: user32.cpp,v 1.41 1999-10-13 16:02:42 phaller Exp $ */
 
 /*
  * Win32 misc user32 API functions for OS/2
@@ -21,6 +21,10 @@
 
 //Attention: many functions belong to other subsystems, move them to their
 //           right place!
+
+#include <odin.h>
+#include <odinwrap.h>
+#include <os2sel.h>
 
 #include <os2win.h>
 #include "misc.h"
@@ -72,6 +76,9 @@
 // WIN32API WinOldAppHackoMatic
 // WIN32API WNDPROC_CALLBACK
 // WIN32API YieldTask
+
+ODINDEBUGCHANNEL(USER32-USER32)
+
 
 /* Coordinate Transformation */
 
@@ -1795,13 +1802,22 @@ WORD WIN32API VkKeyScanExA(CHAR uChar,
 }
 
 /* Synchronization Functions */
-
-DWORD WIN32API MsgWaitForMultipleObjects( DWORD nCount, LPHANDLE pHandles, BOOL fWaitAll, DWORD dwMilliseconds, DWORD  dwWakeMask)
+ODINFUNCTION5(DWORD,MsgWaitForMultipleObjects,DWORD,    nCount,
+                                              LPHANDLE, pHandles,
+                                              BOOL,     fWaitAll,
+                                              DWORD,    dwMilliseconds,
+                                              DWORD,    dwWakeMask)
 {
-#ifdef DEBUG
-    WriteLog("USER32:  MsgWaitForMultipleObjects\n");
-#endif
-    return O32_MsgWaitForMultipleObjects(nCount,pHandles,fWaitAll,dwMilliseconds,dwWakeMask);
+  // @@@PH that's a really difficult function to implement
+
+  // @@@PH this is a temporary bugfix for WINFILE.EXE
+  if (nCount == 0)
+  {
+    // only listens to incoming thread messages.
+    return (WAIT_OBJECT_0);
+  }
+
+  return O32_MsgWaitForMultipleObjects(nCount,pHandles,fWaitAll,dwMilliseconds,dwWakeMask);
 }
 
 /* Button Functions */

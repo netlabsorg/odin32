@@ -1,4 +1,4 @@
- /* $Id: changelog,v 1.313 1999-10-13 14:29:11 sandervl Exp $ */
+ /* $Id: changelog,v 1.314 1999-10-13 16:05:25 phaller Exp $ */
 
  99-10-13: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32: Fixed shrinking listbox in shell about dialog.
@@ -15,6 +15,8 @@
  99-10-13: Patrick Haller <phaller@gmx.net>
 	- KERNEL32: Fix: XCPT_GUARD_PAGE_VIOLATION are now supported.
 			 (helps PROGMAN.EXE)
+	- USER32:   Fix: parameter checking in RedrawWindow
+		    Fix: temp fix for MsgWaitForMultipleObjects
 
  99-10-12: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32: DrawMenuBar & DrawCaptionTempA bugfix (window handle translation)

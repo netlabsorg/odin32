@@ -1,4 +1,4 @@
-/* $Id: dc.cpp,v 1.11 1999-09-28 18:14:57 dengert Exp $ */
+/* $Id: dc.cpp,v 1.12 1999-10-13 16:02:41 phaller Exp $ */
 
 /*
  * DC functions for USER32
@@ -7,13 +7,20 @@
  *
  */
 
+/*****************************************************************************
+ * Includes                                                                  *
+ *****************************************************************************/
+
+#include <odin.h>
+#include <odinwrap.h>
+#include <os2sel.h>
+
 #define INCL_WIN
 #define INCL_GPI
 #define INCL_GREALL
 #define INCL_DEV
 #include <os2.h>
 #include <pmddi.h>
-#include <os2sel.h>
 #include <stdlib.h>
 #include "win32type.h"
 #include <winconst.h>
@@ -24,6 +31,10 @@
 #include <limits.h>
 #include "oslibwin.h"
 #include "dcdata.h"
+
+
+ODINDEBUGCHANNEL(USER32-DC)
+
 
 #undef SEVERITY_ERROR
 #include <winerror.h>
@@ -1016,7 +1027,10 @@ dprintf (("User32: UpdateWindow hwnd %x -> wnd %x", hwnd, wnd));
 // RDW_ERASENOW
 // RDW_UPDATENOW
 
-BOOL WIN32API RedrawWindow (HWND hwnd, const RECT *pRect, HRGN hrgn, DWORD redraw)
+ODINFUNCTION4(BOOL,RedrawWindow,HWND,        hwnd,
+                                const RECT*, pRect,
+                                HRGN,        hrgn,
+                                DWORD,       redraw)
 {
    Win32BaseWindow *wnd;
 
@@ -1026,12 +1040,23 @@ BOOL WIN32API RedrawWindow (HWND hwnd, const RECT *pRect, HRGN hrgn, DWORD redra
       return FALSE;
    }
 
-   USHORT sel = RestoreOS2FS();
- dprintf(("USER32: RedrawWindow %X, %X %X %X", hwnd, pRect, hrgn, redraw));
+//@@@PH   USHORT sel = RestoreOS2FS();
+//@@@PH dprintf(("USER32: RedrawWindow %X, %X %X %X", hwnd, pRect, hrgn, redraw));
 
-   if (hwnd == NULLHANDLE) {
+   if (hwnd == NULLHANDLE)
+   {
       hwnd = HWND_DESKTOP;
       wnd  = Win32BaseWindow::GetWindowFromOS2Handle(OSLIB_HWND_DESKTOP);
+
+      if (!wnd)
+      {
+         dprintf(("USER32:dc: RedrawWindow can't find desktop window %08xh\n",
+                  hwnd));
+         _O32_SetLastError (ERROR_INVALID_PARAMETER);
+//@@@PH         SetFS(sel);
+         return FALSE;
+      }
+
    }
    else
    {
@@ -1039,8 +1064,10 @@ BOOL WIN32API RedrawWindow (HWND hwnd, const RECT *pRect, HRGN hrgn, DWORD redra
 
       if (!wnd)
       {
+         dprintf(("USER32:dc: RedrawWindow can't find window %08xh\n",
+                  hwnd));
          _O32_SetLastError (ERROR_INVALID_PARAMETER);
-         SetFS(sel);
+//@@@PH         SetFS(sel);
          return FALSE;
       }
       hwnd = wnd->getOS2WindowHandle();
@@ -1178,7 +1205,7 @@ error:
    if (!success)
       _O32_SetLastError (ERROR_INVALID_PARAMETER);
 
-   SetFS(sel);
+//@@@PH   SetFS(sel);
    return (success);
 }
 
