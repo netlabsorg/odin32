@@ -1,4 +1,4 @@
-/* $Id: time.cpp,v 1.13 2001-09-16 19:27:25 phaller Exp $ */
+/* $Id: time.cpp,v 1.14 2001-10-03 13:47:59 sandervl Exp $ */
 
 /*
  * Timer MM apis
@@ -17,6 +17,7 @@
 #include <os2win.h>
 #include <odinwrap.h>
 #include <misc.h>
+#include <handlemanager.h>
 
 #include "os2timer.h"
 #include "time.h"
@@ -137,11 +138,16 @@ ODINFUNCTION1(MMRESULT, timeEndPeriod,
 ODINFUNCTION1(MMRESULT, timeKillEvent,
               UINT,     IDEvent)
 {
-  dprintf(("WINMM:timeKillEvent\n"));
+  OS2Timer *os2timer = NULL;
 
+  if(HMHandleTranslateToOS2(IDEvent, (PULONG)&os2timer) != NO_ERROR) {
+      dprintf(("invalid timer id"));
+      return TIMERR_NOERROR; //TODO: should we return an error here??
+  }
+  HMHandleFree(IDEvent);
   // return OS2Timer::killEvent(UINT IDEvent)
 
-  delete((OS2Timer *)IDEvent);
+  delete os2timer;
   return TIMERR_NOERROR;
 }
 
@@ -166,6 +172,7 @@ ODINFUNCTION5(MMRESULT,       timeSetEvent,
               UINT,           fuEvent)
 {
   OS2Timer *timer;
+  ULONG     timerID = 0;
 
 // @@@PH 1999/10/26 hack for RA95
   if (wDelay      < OS2TIMER_RESOLUTION_MINIMUM)
@@ -199,13 +206,20 @@ ODINFUNCTION5(MMRESULT,       timeSetEvent,
   if(timer == NULL)
       return(0);
 
+  if(HMHandleAllocate(&timerID, (ULONG)timer) != NO_ERROR) {
+      dprintf(("HMHandleAllocate failed!!"));
+      delete timer;
+      return 0;
+  }
+
+  timer->setTimerID(timerID);
   if(timer->StartTimer(wDelay, wResolution, lptc, dwUser, fuEvent) == FALSE)
   {
     dprintf(("WINMM:timeSetEvent: couldn't start timer!\n"));
     delete(timer);
     return(0);
   }
-  return(MMRESULT)timer;
+  return(MMRESULT)timerID;
 }
 
 ULONG OPEN32API WinGetCurrentTime(ULONG hab);
