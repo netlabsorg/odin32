@@ -1,4 +1,13 @@
-/* $Id: ChangeLog,v 1.2580 2003-05-15 15:45:07 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.2581 2003-05-16 09:25:41 sandervl Exp $ */
+
+ 2003-05-16: Sander van Leeuwen <sandervl@innotek   >
+    - USER32:   o Use our fast critical sections instead of OS/2 mutex semaphores 
+                  in the timer code.
+
+ 2003-05-16: Platon Fomichev <stauff@innotek   >
+    - USER32:   o Eat first WM_MOUSEMOVE while menu tracking like windows does
+                  to prevent 'auto-clicking' on popup menus that appear in the
+                  area of first mouse-click
 
  2003-05-15: Sander van Leeuwen <sandervl@innotek   >
     - USER32:   o Window creation: updated the coordinate fix code with the latest Rewind version
