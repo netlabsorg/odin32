@@ -1,4 +1,4 @@
-/* $Id: HandleManager.cpp,v 1.52 2000-10-05 13:48:08 sandervl Exp $ */
+/* $Id: HandleManager.cpp,v 1.53 2000-10-16 17:56:08 sandervl Exp $ */
 
 /*
  * Win32 Unified Handle Manager for OS/2
@@ -12,7 +12,7 @@
  */
 
 //#undef DEBUG_LOCAL
-#define DEBUG_LOCAL
+//#define DEBUG_LOCAL
 
 
 /*****************************************************************************
