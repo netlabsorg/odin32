@@ -1,5 +1,5 @@
 ################################################################################
-# $Id: Makefile,v 1.49 2000-09-12 21:40:15 bird Exp $
+# $Id: Makefile,v 1.50 2000-09-21 12:05:56 bird Exp $
 #
 # Win32k makefile.
 #
@@ -110,7 +110,7 @@ CINCLUDES  = -I$(WIN32KINCLUDE) \
              -I$(PDWIN32_INCLUDE) \
              -I$(PDWIN32_INCLUDE)\win
 
-CINCLUDES16= -I$(WIN32KINCLUDE) -I. -I$(DDKPATH)\h -I$(MSCPATH)\include -I$(PDWIN32_INCLUDE)
+CINCLUDES16= -I$(WIN32KINCLUDE) -I. -I$(DDKPATH)\h -I$(MSCPATH)\include -I$(PDWIN32_INCLUDE) -I$(TOOLKIT)\h
 
 
 AINCLUDES  = -Fdi:$(WIN32KINCLUDE) \
