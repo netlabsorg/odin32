@@ -1,4 +1,4 @@
-/* $Id: treeview.c,v 1.11 1999-10-24 22:49:50 sandervl Exp $ */
+/* $Id: treeview.c,v 1.12 1999-10-25 19:37:21 phaller Exp $ */
 /* Treeview control
  *
  * Copyright 1998 Eric Kohl <ekohl@abo.rhein-zeitung.de>
@@ -3597,7 +3597,8 @@ TREEVIEW_WindowProc (HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
                 return TREEVIEW_CreateDragImage (hwnd, wParam, lParam);
 
         case TVM_SORTCHILDREN:
-                return TREEVIEW_SortChildrenCB(hwnd, wParam, lParam);
+                //@@@PH 1999/10/25 TREEVIEW_SortChildrenCB is wrong
+                return TREEVIEW_SortChildren(hwnd, wParam, lParam);
 
         case TVM_ENSUREVISIBLE:
 //                      FIXME (treeview, "Unimplemented msg TVM_ENSUREVISIBLE\n");
