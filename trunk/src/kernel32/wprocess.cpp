@@ -1,4 +1,4 @@
-/* $Id: wprocess.cpp,v 1.176 2003-01-20 10:46:28 sandervl Exp $ */
+/* $Id: wprocess.cpp,v 1.177 2003-01-30 14:00:47 sandervl Exp $ */
 
 /*
  * Win32 process functions
@@ -1856,58 +1856,6 @@ BOOL WINAPI CreateProcessA( LPCSTR lpApplicationName, LPSTR lpCommandLine,
         lpStartupInfo = &startinfo;
     }
 
-    // open32 does not support DEBUG_ONLY_THIS_PROCESS
-    if(dwCreationFlags & DEBUG_ONLY_THIS_PROCESS)
-      dwCreationFlags |= DEBUG_PROCESS;
-
-    if(O32_CreateProcess(lpApplicationName, lpCommandLine, lpProcessAttributes,
-                         lpThreadAttributes, bInheritHandles, dwCreationFlags,
-                         lpEnvironment, lpCurrentDirectory, lpStartupInfo,
-                         lpProcessInfo) == TRUE)
-    {
-      if (dwCreationFlags & DEBUG_PROCESS && pThreadDB != NULL)
-      {
-        if(pThreadDB->o.odin.pidDebuggee != 0)
-        {
-          // TODO: handle this
-          dprintf(("KERNEL32: CreateProcess ERROR: This thread is already a debugger\n"));
-        }
-        else
-        {
-          pThreadDB->o.odin.pidDebuggee = lpProcessInfo->dwProcessId;
-          OSLibStartDebugger((ULONG*)&pThreadDB->o.odin.pidDebuggee);
-        }
-      }
-      else pThreadDB->o.odin.pidDebuggee = 0;
-
-      if(lpProcessInfo)
-      {
-          lpProcessInfo->dwThreadId = MAKE_THREADID(lpProcessInfo->dwProcessId, lpProcessInfo->dwThreadId);
-      }
-
-      return(TRUE);
-    }
-
-    // PH 2001-05-07
-    // verify why O32_CreateProcess actually failed.
-    // If GetLastError() == 191 (ERROR_INVALID_EXE_SIGNATURE)
-    // we can continue to call "PE.EXE".
-    // Note: Open32 does not translate ERROR_INVALID_EXE_SIGNATURE,
-    // it is also valid in Win32.
-    DWORD dwError = GetLastError();
-    if (ERROR_INVALID_EXE_SIGNATURE != dwError && ERROR_FILE_NOT_FOUND != dwError && ERROR_ACCESS_DENIED != dwError)
-    {
-        dprintf(("CreateProcess: O32_CreateProcess failed with rc=%d, not PE-executable !",
-                dwError));
-
-        // the current value of GetLastError() is still valid.
-
-        return FALSE;
-    }
-
-    // else ...
-
-    //probably a win32 exe, so run it in the pe loader
     if(lpApplicationName) {
         if(lpCommandLine) {
             //skip exe name in lpCommandLine
@@ -1920,8 +1868,8 @@ BOOL WINAPI CreateProcessA( LPCSTR lpApplicationName, LPSTR lpCommandLine,
             }
             cmdline = (char *)malloc(strlen(lpApplicationName)+strlen(lpCommandLine) + 16);
             sprintf(cmdline, "%s %s", lpApplicationName, lpCommandLine);
-         }
-         else {
+        }
+        else {
             cmdline = (char *)malloc(strlen(lpApplicationName) + 16);
             sprintf(cmdline, "%s", lpApplicationName);
         }
@@ -1935,7 +1883,7 @@ BOOL WINAPI CreateProcessA( LPCSTR lpApplicationName, LPSTR lpCommandLine,
     char buffer[MAX_PATH];
     DWORD fileAttr;
     char *exename = buffer;
-    strncpy(buffer, cmdline, sizeof(szAppName));
+    strncpy(buffer, cmdline, sizeof(buffer));
     buffer[MAX_PATH-1] = 0;
     if(*exename == '"') {
         exename++;
@@ -1984,10 +1932,71 @@ BOOL WINAPI CreateProcessA( LPCSTR lpApplicationName, LPSTR lpCommandLine,
     fileAttr = GetFileAttributesA(szAppName);
     if(fileAttr == -1 || (fileAttr & FILE_ATTRIBUTE_DIRECTORY)) {
         dprintf(("CreateProcess: can't find executable!"));
+
+        if(cmdline)
+            free(cmdline);
+
         SetLastError(ERROR_FILE_NOT_FOUND);
         return FALSE;
     }
 
+    // open32 does not support DEBUG_ONLY_THIS_PROCESS
+    if(dwCreationFlags & DEBUG_ONLY_THIS_PROCESS)
+      dwCreationFlags |= DEBUG_PROCESS;
+
+    if(O32_CreateProcess(szAppName, lpCommandLine, lpProcessAttributes,
+                         lpThreadAttributes, bInheritHandles, dwCreationFlags,
+                         lpEnvironment, lpCurrentDirectory, lpStartupInfo,
+                         lpProcessInfo) == TRUE)
+    {
+      if (dwCreationFlags & DEBUG_PROCESS && pThreadDB != NULL)
+      {
+        if(pThreadDB->o.odin.pidDebuggee != 0)
+        {
+          // TODO: handle this
+          dprintf(("KERNEL32: CreateProcess ERROR: This thread is already a debugger\n"));
+        }
+        else
+        {
+          pThreadDB->o.odin.pidDebuggee = lpProcessInfo->dwProcessId;
+          OSLibStartDebugger((ULONG*)&pThreadDB->o.odin.pidDebuggee);
+        }
+      }
+      else pThreadDB->o.odin.pidDebuggee = 0;
+
+      if(lpProcessInfo)
+      {
+          lpProcessInfo->dwThreadId = MAKE_THREADID(lpProcessInfo->dwProcessId, lpProcessInfo->dwThreadId);
+      }
+
+      if(cmdline)
+          free(cmdline);
+      return(TRUE);
+    }
+
+    // PH 2001-05-07
+    // verify why O32_CreateProcess actually failed.
+    // If GetLastError() == 191 (ERROR_INVALID_EXE_SIGNATURE)
+    // we can continue to call "PE.EXE".
+    // Note: Open32 does not translate ERROR_INVALID_EXE_SIGNATURE,
+    // it is also valid in Win32.
+    DWORD dwError = GetLastError();
+    if (ERROR_INVALID_EXE_SIGNATURE != dwError && ERROR_FILE_NOT_FOUND != dwError && ERROR_ACCESS_DENIED != dwError)
+    {
+        dprintf(("CreateProcess: O32_CreateProcess failed with rc=%d, not PE-executable !",
+                dwError));
+
+        // the current value of GetLastError() is still valid.
+
+        if(cmdline)
+            free(cmdline);
+
+        return FALSE;
+    }
+
+    // else ...
+
+    //probably a win32 exe, so run it in the pe loader
     dprintf(("KERNEL32: CreateProcess %s %s", szAppName, lpCommandLine));
 
     DWORD Characteristics, SubSystem, fNEExe;
