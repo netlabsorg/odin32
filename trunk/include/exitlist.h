@@ -1,4 +1,4 @@
-// $Id: exitlist.h,v 1.5 2003-04-02 11:02:33 sandervl Exp $
+// $Id: exitlist.h,v 1.6 2003-12-30 14:35:51 sandervl Exp $
 /*
  * Win32 dll exit list invocation orders
  *
@@ -37,17 +37,19 @@
 #define EXITLIST_NONCRITDLL		0x00009000
 
 //Order of USER32 & GDI32
-#define EXITLIST_USER32			0x00009D00
-#define EXITLIST_GDI32			0x00009D01
+#define EXITLIST_USER32			0x00009A00
+#define EXITLIST_GDI32			0x00009B00
 
 //Order of Kernel32
-#define EXITLIST_KERNEL32		0x00009E00
+#define EXITLIST_KERNEL32		0x00009C00
 
 //Order of WGSS50
-#define EXITLIST_WGSS50			0x00009E01
+#define EXITLIST_WGSS50			0x00009D00
 
 //Order of odincrt.dll (should always be invoked last!)
-#define EXITLIST_ODINCRT		0x00009F00
-#define EXITLIST_ODINPROF       	0x00009F01
+#define EXITLIST_ODINCRT		0x00009E00
+#define EXITLIST_ODINPROF       	0x00009E00
+
+#define EXITLIST_FT2LIB                 0x00009F00
 
 #endif //__EXITLIST_H__
