@@ -1,4 +1,4 @@
-/* $Id: cdlg32.cpp,v 1.2 1999-11-02 20:37:42 sandervl Exp $ */
+/* $Id: cdlg32.cpp,v 1.3 1999-11-03 19:34:40 sandervl Exp $ */
 /*
  *  Common Dialog Boxes interface (32 bit)
  *  Find/Replace
@@ -29,6 +29,7 @@ static int	COMDLG32_Attach = 0;
 
 HINSTANCE	COMCTL32_hInstance = 0;
 HINSTANCE	SHELL32_hInstance = 0;
+HINSTANCE       SHLWAPI_hInstance = 0;
 
 /* DPA */
 HDPA	(WINAPI* COMDLG32_DPA_Create) (INT);  
@@ -104,8 +105,9 @@ BOOL WINAPI COMDLG32_DllEntryPoint(HINSTANCE hInstance, DWORD Reason, LPVOID Res
 
 		COMCTL32_hInstance = LoadLibraryA("COMCTL32.DLL");	
 		SHELL32_hInstance = LoadLibraryA("SHELL32.DLL");
+		SHLWAPI_hInstance = LoadLibraryA("SHLWAPI.DLL");
 		
-		if (!COMCTL32_hInstance || !SHELL32_hInstance)
+		if (!COMCTL32_hInstance || !SHELL32_hInstance || !SHLWAPI_hInstance)
 		{
 			ERR("loading of comctl32 or shell32 or shlwapi failed\n");
 			return FALSE;
@@ -148,11 +150,11 @@ BOOL WINAPI COMDLG32_DllEntryPoint(HINSTANCE hInstance, DWORD Reason, LPVOID Res
 		so it won't break the use of any combination of native and buildin dll's (jsch) */
 
 		/* PATH */
-		*(VOID **)&COMDLG32_PathMatchSpecW = (void*)GetProcAddress(SHELL32_hInstance,"PathMatchSpecW");
-		*(VOID **)&COMDLG32_PathIsRootA = (void*)GetProcAddress(SHELL32_hInstance,"PathIsRootA");
-		*(VOID **)&COMDLG32_PathRemoveFileSpecA = (void*)GetProcAddress(SHELL32_hInstance,"PathRemoveFileSpecA");
-		*(VOID **)&COMDLG32_PathFindFilenameA = (void*)GetProcAddress(SHELL32_hInstance,"PathFindFileNameA");
-		*(VOID **)&COMDLG32_PathAddBackslashA = (void*)GetProcAddress(SHELL32_hInstance,"PathAddBackslashA");
+		*(VOID **)&COMDLG32_PathMatchSpecW = (void*)GetProcAddress(SHLWAPI_hInstance,"PathMatchSpecW");
+		*(VOID **)&COMDLG32_PathIsRootA = (void*)GetProcAddress(SHLWAPI_hInstance,"PathIsRootA");
+		*(VOID **)&COMDLG32_PathRemoveFileSpecA = (void*)GetProcAddress(SHLWAPI_hInstance,"PathRemoveFileSpecA");
+		*(VOID **)&COMDLG32_PathFindFilenameA = (void*)GetProcAddress(SHLWAPI_hInstance,"PathFindFileNameA");
+		*(VOID **)&COMDLG32_PathAddBackslashA = (void*)GetProcAddress(SHLWAPI_hInstance,"PathAddBackslashA");
 		break;
 
 	case DLL_PROCESS_DETACH:
@@ -164,6 +166,7 @@ BOOL WINAPI COMDLG32_DllEntryPoint(HINSTANCE hInstance, DWORD Reason, LPVOID Res
 		}
 		FreeLibrary(COMCTL32_hInstance);
 		FreeLibrary(SHELL32_hInstance);
+		FreeLibrary(SHLWAPI_hInstance);
 		break;
 	}
 	return TRUE;
