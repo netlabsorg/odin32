@@ -1,4 +1,4 @@
-/* $Id: dwaveout.cpp,v 1.25 2000-06-03 12:49:55 sandervl Exp $ */
+/* $Id: dwaveout.cpp,v 1.26 2000-06-03 16:40:52 sandervl Exp $ */
 
 /*
  * Wave playback class
@@ -487,6 +487,7 @@ MMRESULT DartWaveOut::reset()
   wmutex->enter(VMUTEX_WAIT_FOREVER);
   while(wavehdr) {
     	wavehdr->dwFlags |= WHDR_DONE;
+    	wavehdr->dwFlags &= ~WHDR_INQUEUE;
     	wmutex->leave();
     	if(mthdCallback) {
         	callback((ULONG)this, WOM_DONE, dwInstance, (ULONG)wavehdr, 0);
