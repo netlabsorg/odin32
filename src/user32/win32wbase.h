@@ -1,4 +1,4 @@
-/* $Id: win32wbase.h,v 1.129 2001-10-03 22:34:32 sandervl Exp $ */
+/* $Id: win32wbase.h,v 1.130 2001-10-09 05:18:04 phaller Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -178,6 +178,9 @@ virtual  WORD   GetWindowWord(int index);
          HWND   getWindowHandle()               { return Win32Hwnd; };
          HWND   getOS2WindowHandle()            { return OS2Hwnd; };
          HWND   getOS2FrameWindowHandle()       { return OS2HwndFrame; };
+         HWND   getLastActive()                 { return hwndLastActive; };
+         void   setLastActive(HWND _hwndLastActive)
+                                                { hwndLastActive = _hwndLastActive; };
 
  Win32WndClass *getWindowClass()                { return windowClass; };
 
@@ -393,7 +396,8 @@ protected:
 /////   Win32BaseWindow *parent;                    //GWL_HWNDPARENT
         ULONG   dwIDMenu;               //GWL_ID
         ULONG   userData;               //GWL_USERDATA
-
+        HWND    hwndLastActive;         // last active popup handle
+  
         ULONG   cbExtra;
         PVOID   pExtra;
 
