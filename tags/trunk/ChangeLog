@@ -1,4 +1,16 @@
-/* $Id: ChangeLog,v 1.1318 2001-03-24 15:43:20 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.1319 2001-03-25 08:51:22 sandervl Exp $ */
+
+ 2001-03-25: Sander van Leeuwen <sandervl@xs4all.nl>
+    - USER32:   o If a static window has children, then we can't return HTTRANSPARENT
+                  for WM_NCHITTEST. For some reason PM then sends all mouse messages 
+                  to the parent of the static window; even if they are intended 
+                  for the children of the static window.
+                  TODO: This could break some win32 apps (parent not receiving mouse
+                        message for static window (non-child) area)
+                        Rewrite NCHITTEST handling. (don't use PM)
+                  (fixes Roger Wilco config window input)
+                o Call GlobalAddAtomA/W in RegisterWindowMessageA/W
+                  (don't use Open32)
 
  2001-03-24: Sander van Leeuwen <sandervl@xs4all.nl>
     - WINMM:    o mmsystemGetVersion returned wrong version. Should be 0x030A.
