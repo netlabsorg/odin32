@@ -36,6 +36,7 @@
 *.err -k 'b'
 *.map -k 'b'
 *.sym -k 'b'
+*.vry -k 'b'
 
 # icon and mouse pointer formats
 *.ico -k 'b'
