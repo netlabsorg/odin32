@@ -1,4 +1,8 @@
-/* $Id: changelog,v 1.1630 2001-08-03 17:44:12 sandervl Exp $ */
+/* $Id: changelog,v 1.1631 2001-08-04 14:20:16 sandervl Exp $ */
+
+ 2001-08-04: Sander van Leeuwen <sandervl@xs4all.nl>
+    - CUSTOMBUILD: 
+                o Add registration of gdi32 & advapi32
 
  2001-08-03: Sander van Leeuwen <sandervl@xs4all.nl>
     - KERNEL32: o Temporarily disabled new name lookup (resources) until
