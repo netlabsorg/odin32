@@ -1,4 +1,7 @@
-/* $Id: ChangeLog,v 1.1524 2001-06-16 20:22:14 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.1525 2001-06-17 13:58:59 sandervl Exp $ */
+
+ 2001-06-17: Sander van Leeuwen <sandervl@xs4all.nl>
+    - KERNEL32: o Implemented IOCTL_SCSI_PASS_THROUGH_DIRECT storage ioctl
 
  2001-06-16: Sander van Leeuwen <sandervl@xs4all.nl>
     - DDRAW:    o Save & Restore FS when calling io_init2
