@@ -1,7 +1,9 @@
-/* $Id: ChangeLog,v 1.2685 2004-02-23 12:03:24 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.2686 2004-02-23 12:40:52 sandervl Exp $ */
 
  2004-02-23: Sander van Leeuwen <sandervl@innotek   >
     - USER32:   o Backed out RedrawWindow change
+                o Edit: wrong ScrollWindowEx call; must include SW_ERASE
+                o ScrollWindowEx: set background erase flag for SW_ERASE
 
  2004-02-20: Sander van Leeuwen <sandervl@innotek   >
     - KERNEL32: o Default CPU is set to Pentium if the one in the system isn't recognized
