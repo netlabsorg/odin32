@@ -1,4 +1,4 @@
-/* $Id: shlstub.cpp,v 1.1 2000-05-19 12:10:04 sandervl Exp $ */
+/* $Id: shlstub.cpp,v 1.2 2001-08-30 19:19:58 phaller Exp $ */
 
 /*
  * Win32 stub shlwapi APIs for OS/2
@@ -38,3 +38,45 @@ ODINDEBUGCHANNEL(SHLWAPI-SHLSTUB)
 #include "shlwapi.h"
 
 
+/*****************************************************************************
+ * Name      : StrFromTimeIntervalA
+ * Purpose   : 
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    : 
+ * Status    : UNTESTED
+ *
+ * Author    :
+ *****************************************************************************/
+
+ODINFUNCTION2(LPSTR,    StrFromTimeIntervalA,
+              LPVOID, lp1,
+              LPVOID, lp2)
+{
+  dprintf(("not yet implemented"));
+  
+  return NULL;
+}
+
+
+/*****************************************************************************
+ * Name      : StrFromTimeIntervalW
+ * Purpose   : 
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    : 
+ * Status    : UNTESTED
+ *
+ * Author    :
+ *****************************************************************************/
+
+ODINFUNCTION2(LPWSTR,    StrFromTimeIntervalW,
+              LPVOID, lp1,
+              LPVOID, lp2)
+{
+  dprintf(("not yet implemented"));
+  
+  return NULL;
+}

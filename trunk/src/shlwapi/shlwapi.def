@@ -1,4 +1,4 @@
-; $Id: shlwapi.def,v 1.24 2001-05-19 13:17:33 sandervl Exp $
+; $Id: shlwapi.def,v 1.25 2001-08-30 19:19:58 phaller Exp $
 
 ; updated export ordinals to NT4 SP6 version of SHLWAPI.DLL
 ; Note: W95/W98 has DIFFERENT export ordinals
@@ -166,7 +166,7 @@ EXPORTS
 
                              _SHLWAPI_156@8                       @156 NONAME
                              _SHLWAPI_158@8                       @158 NONAME
-                             _CompareStringW@24                   @159 NONAME
+; @@@PH dupe                 _CompareStringW@24                   @159 NONAME
                              _SHLWAPI_160@8                       @160 NONAME
                              _SHLWAPI_162@8                       @162 NONAME
                              _SHLWAPI_165@16                      @165 NONAME
@@ -201,7 +201,7 @@ EXPORTS
                              _WritePrivateProfileStringW@16       @298 NONAME
 
                              _DrawTextExW@24                      @301 NONAME
-                             _GetMenuItemInfoW@16                 @302 NONAME ; FIXME CreateFontW
+; @@@PH dupe                 _GetMenuItemInfoW@16                 @302 NONAME ; FIXME CreateFontW
                              _InsertMenuItemW@16                  @303 NONAME
                              _CreateMetaFileW@4                   @304 NONAME
                              _CreateMutexW@12                     @305 NONAME
@@ -408,12 +408,12 @@ EXPORTS
   ; SHCreateStreamOnFileW  = _SHCreateStreamOnFileW@?             @564
   ; SHCreateStreamWrapper  = _SHCreateStreamWrapper@?             @565
 
-  ; SHDeleteEmptyKeyA      = _SHDeleteEmptyKeyA@?                 @567
-  ; SHDeleteEmptyKeyW      = _SHDeleteEmptyKeyW@?                 @568
+    SHDeleteEmptyKeyA      = _SHDeleteEmptyKeyA@8                 @567
+    SHDeleteEmptyKeyW      = _SHDeleteEmptyKeyW@8                 @568
     SHDeleteKeyA           = _SHDeleteKeyA@8                      @569
     SHDeleteKeyW           = _SHDeleteKeyW@8                      @570
-  ; SHDeleteOrphanKeyA     = _SHDeleteOrphanKeyA@?                @571
-  ; SHDeleteOrphanKeyW     = _SHDeleteOrphanKeyW@?                @572
+    SHDeleteOrphanKeyA     = _SHDeleteOrphanKeyA@8                @571
+    SHDeleteOrphanKeyW     = _SHDeleteOrphanKeyW@8                @572
     SHDeleteValueA         = _SHDeleteValueA@12                   @573
     SHDeleteValueW         = _SHDeleteValueW@12                   @574
   ; SHEnumKeyExA           = _SHEnumKeyExA@?                      @575
@@ -434,18 +434,18 @@ EXPORTS
   ; SHQueryInfoKeyW        = _SHQueryInfoKeyW@?                   @590
     SHQueryValueExA        = _SHQueryValueExA@24                  @591
     SHQueryValueExW        = _SHQueryValueExW@24                  @592
-  ; SHRegCloseUSKey        = _SHRegCloseUSKey@?                   @593
+    SHRegCloseUSKey        = _SHRegCloseUSKey@4                   @593
     SHRegCreateUSKeyA      = _SHRegCreateUSKeyA@20                @594
     SHRegCreateUSKeyW      = _SHRegCreateUSKeyW@20                @595
-  ; SHRegDeleteEmptyUSKeyA = _SHRegDeleteEmptyUSKeyA@?            @596
-  ; SHRegDeleteEmptyUSKeyW = _SHRegDeleteEmptyUSKeyW@?            @597
-  ; SHRegDeleteUSKeyA      = _SHRegDeleteUSKeyA@?                 @598
-  ; SHRegDeleteUSKeyW      = _SHRegDeleteUSKeyW@?                 @599
+    SHRegDeleteEmptyUSKeyA = _SHRegDeleteEmptyUSKeyA@12           @596
+    SHRegDeleteEmptyUSKeyW = _SHRegDeleteEmptyUSKeyW@12           @597
+    SHRegDeleteUSKeyA      = _SHRegDeleteUSKeyA@12                @598
+    SHRegDeleteUSKeyW      = _SHRegDeleteUSKeyW@12                @599
   ; SHRegDuplicateHKey     = _SHRegDuplicateHKey@?                @600
-  ; SHRegEnumUSKeyA        = _SHRegEnumUSKeyA@?                   @601
-  ; SHRegEnumUSKeyW        = _SHRegEnumUSKeyW@?                   @602
-  ; SHRegEnumUSValueA      = _SHRegEnumUSValueA@?                 @603
-  ; SHRegEnumUSValueA      = _SHRegEnumUSValueW@?                 @604
+    SHRegEnumUSKeyA        = _SHRegEnumUSKeyA@20                  @601
+    SHRegEnumUSKeyW        = _SHRegEnumUSKeyW@20                  @602
+    SHRegEnumUSValueA      = _SHRegEnumUSValueA@32                @603
+    SHRegEnumUSValueW      = _SHRegEnumUSValueW@32                @604
     SHRegGetBoolUSValueA   = _SHRegGetBoolUSValueA@16             @605
     SHRegGetBoolUSValueW   = _SHRegGetBoolUSValueW@16             @606
     SHRegGetUSValueA       = _SHRegGetUSValueA@32                 @607
@@ -458,8 +458,8 @@ EXPORTS
     SHRegQueryUSValueW     = _SHRegQueryUSValueW@32               @614
     SHRegSetUSValueA       = _SHRegSetUSValueA@24                 @615
     SHRegSetUSValueW       = _SHRegSetUSValueW@24                 @616
-;   SHRegWriteUSValueA     = _SHRegWriteUSValueA@?                @617
-;   SHRegWriteUSValueW     = _SHRegWriteUSValueW@?                @618
+    SHRegWriteUSValueA     = _SHRegWriteUSValueA@24               @617
+    SHRegWriteUSValueW     = _SHRegWriteUSValueW@24               @618
 ;   SHSetSetThreadRef      = _SHSetThreadRef@?                    @619
     SHSetValueA            = _SHSetValueA@24                      @620
     SHSetValueW            = _SHSetValueW@24                      @621
@@ -494,26 +494,26 @@ EXPORTS
     StrFormatByteSizeW     = _StrFormatByteSizeW@12               @648
 ;   StrFormatKBSizeA       = _StrFormatKBSizeA@16                 @649
 ;   StrFormatKBSizeW       = _StrFormatKBSizeW@16                 @650
-  ; StrFromTimeIntervalA   = _StrFromTimeIntervalA@?              @651
-  ; StrFromTimeIntervalW   = _StrFromTimeIntervalW@?              @652
+    StrFromTimeIntervalA   = _StrFromTimeIntervalA@8              @651
+    StrFromTimeIntervalW   = _StrFromTimeIntervalW@8              @652
   ; IntlStrEqWorkerA       = _StrIsIntlEqualA@16                  @653
   ; StrIsIntlEqualW        = _StrIsIntlEqualW@?                   @654
     StrNCatA               = _StrNCatA@12                         @655
     StrNCatW               = _StrNCatW@12                         @656
-  ; StrPBrkA               = _StrPBrkA@?                          @657
-  ; StrPBrkW               = _StrPBrkW@?                          @658
+    StrPBrkA               = _StrPBrkA@8                          @657
+    StrPBrkW               = _StrPBrkW@8                          @658
     StrRChrA               = _StrRChrA@12                         @659
   ; StrRChrIA              = _StrRChrIA@12                        @660
   ; StrRChrIW              = _StrRChrIW@12                        @661
     StrRChrW               = _StrRChrW@12                         @662
-  ; StrRStrIA              = _StrRStrIA@?                         @663
-  ; StrRStrIW              = _StrRStrIW@?                         @664
+    StrRStrIA              = _StrRStrIA@8                         @663
+    StrRStrIW              = _StrRStrIW@8                         @664
     StrRetToBufA           = _StrRetToBufA@16                     @665
     StrRetToBufW           = _StrRetToBufW@16                     @666
 ;   StrRetToStrA           = _StrRetToStrA@12                     @667
 ;   StrRetToStrW           = _StrRetToStrW@12                     @668
-  ; StrSpnA                = _StrSpnA@?                           @669
-  ; StrSpnW                = _StrSpnW@?                           @670
+    StrSpnA                = _StrSpnA@8                           @669
+    StrSpnW                = _StrSpnW@8                           @670
     StrStrA                = _StrStrA@8                           @671
     StrStrIA               = _StrStrIA@8                          @672
     StrStrIW               = _StrStrIW@8                          @673
@@ -522,7 +522,7 @@ EXPORTS
     StrToIntExA            = _StrToIntExA@12                      @676
     StrToIntExW            = _StrToIntExW@12                      @677
     StrToIntW              = _StrToIntW@4                         @678
-  ; StrTrimA               = _StrTrimA@?                          @679
+    StrTrimA               = _StrTrimA@8                          @679
   ; StrTrimW               = _StrTrimW@?                          @680
     UrlApplySchemeA        = _UrlApplySchemeA@16                  @681
     UrlApplySchemeW        = _UrlApplySchemeW@16                  @682
@@ -557,3 +557,5 @@ EXPORTS
 
     SHRegGetPathA          = _SHRegGetPathA@20                    @802
     SHRegGetPathW          = _SHRegGetPathW@20                    @803
+    SHRegDeleteUSValueA    = _SHRegDeleteUSValueA@12
+    SHRegDeleteUSValueW    = _SHRegDeleteUSValueW@12

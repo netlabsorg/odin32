@@ -14,6 +14,9 @@
 #include "wine/unicode.h"
 
 #ifdef __WIN32OS2__
+
+#include "shlwapi_odin.h"
+
 #undef FIXME
 #ifdef DEBUG
 #define FIXME WriteLog("FIXME %s", __FUNCTION__); WriteLog
@@ -71,10 +74,10 @@ LONG WINAPI SHRegGetUSValueW(
  * Openss a user-specific registry key
  */
 LONG WINAPI SHRegOpenUSKeyA(
-        LPCSTR Path,
-        REGSAM AccessType,
-        HKEY hRelativeUSKey,
-        HKEY hNewUSKey,
+        LPCSTR lpszPath,
+        DWORD  dwAccessType,
+        HUSKEY hRelativeUSKey,
+        PHUSKEY phNewUSKey,
         BOOL fIgnoreHKCU)
 {
 	FIXME("stub!\n");
@@ -87,10 +90,10 @@ LONG WINAPI SHRegOpenUSKeyA(
  * Openss a user-specific registry key
  */
 LONG WINAPI SHRegOpenUSKeyW(
-        LPCSTR Path,
-        REGSAM AccessType,
-        HKEY hRelativeUSKey,
-        HKEY hNewUSKey,
+        LPCSTR lpszPath,
+        DWORD  dwAccessType,
+        HUSKEY hRelativeUSKey,
+        HUSKEY hNewUSKey,
         BOOL fIgnoreHKCU)
 {
 	FIXME("stub!\n");
@@ -129,13 +132,13 @@ BOOL WINAPI SHRegGetBoolUSValueW(
  *      SHRegQueryUSValueA	[SHLWAPI]
  */
 LONG WINAPI SHRegQueryUSValueA(
-	HKEY hUSKey,             /* [in] FIXME: HUSKEY */
+	HUSKEY hUSKey,             /* [in] FIXME: HUSKEY */
 	LPCSTR pszValue,
 	LPDWORD pdwType,
-	void *pvData,
+	LPVOID pvData,
 	LPDWORD pcbData,
 	BOOL fIgnoreHKCU,
-	void *pvDefaultData,
+	LPVOID pvDefaultData,
 	DWORD dwDefaultDataSize)
 {
 	FIXME("%s stub\n",pszValue);
@@ -146,7 +149,7 @@ LONG WINAPI SHRegQueryUSValueA(
  *      SHRegQueryUSValueA	[SHLWAPI]
  */
 LONG WINAPI SHRegQueryUSValueW(
-	HKEY hUSKey,             /* [in] FIXME: HUSKEY */
+	HUSKEY hUSKey,             /* [in] FIXME: HUSKEY */
 	LPCSTR pszValue,
 	LPDWORD pdwType,
 	void *pvData,

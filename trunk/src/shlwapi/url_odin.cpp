@@ -1,4 +1,4 @@
-/* $Id: url_odin.cpp,v 1.1 2001-04-28 13:32:38 sandervl Exp $ */
+/* $Id: url_odin.cpp,v 1.2 2001-08-30 19:19:59 phaller Exp $ */
 
 /*
  * Win32 Lightweight SHELL32 API for OS/2
@@ -158,29 +158,6 @@ ODINFUNCTION4(HRESULT, UrlApplySchemeA,
 
   return S_OK;
 }
-
-
-/**
- * @status      partially
- */
-ODINFUNCTION4(HRESULT, UrlApplySchemeW,
-              LPCWSTR, pszIn,
-              LPWSTR,  pszOut,
-              LPDWORD, pcchOut,
-              DWORD,   dwFlags)
-{
-  dprintf(("not implemented."));
-
-  wcsncpy((wchar_t*)pszOut,
-          (wchar_t*)pszIn,
-          *pcchOut);
-  *pcchOut = 0;
-
-  return S_OK;
-}
-
-
-
 
 
 /*****************************************************************************
