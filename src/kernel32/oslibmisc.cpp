@@ -1,4 +1,4 @@
-/* $Id: oslibmisc.cpp,v 1.3 1999-10-09 13:33:24 sandervl Exp $ */
+/* $Id: oslibmisc.cpp,v 1.4 1999-10-28 18:23:34 sandervl Exp $ */
 
 /*
  * Misc OS/2 util. procedures
@@ -282,11 +282,11 @@ char *OSLibStripPath(char *path)
   
   pszFilename = strrchr(path, '\\');                 /* find rightmost slash */
   if (pszFilename != NULL)
-    return (pszFilename++);              /* return pointer to next character */
+    return (++pszFilename);              /* return pointer to next character */
   
   pszFilename = strrchr(path, '/');                  /* find rightmost slash */
   if (pszFilename != NULL)
-    return (pszFilename++);              /* return pointer to next character */
+    return (++pszFilename);              /* return pointer to next character */
   
   return (path);                                     /* default return value */
 }
