@@ -28,12 +28,12 @@ HFILE WIN32API CreateFileA(LPCSTR  lpszName,
                            HANDLE hTemplateFile)
 {
   HANDLE rc;
-  int    slen = 0;
+  HANDLE hFile;
 
   if(lpszName == NULL)
     return(NULL);
 
-  dprintf(("KERNEL32:  CreateFile %s\n", lpszName));
+  dprintf(("KERNEL32: CreateFile %s\n", lpszName));
 
   if(strncmp(lpszName,
              "\\\\.\\",
@@ -44,12 +44,14 @@ HFILE WIN32API CreateFileA(LPCSTR  lpszName,
                          fdwShareMode));
   }
 
-  dprintf(("KERNEL32:  CreateFile %s %X %X %X %X \n",
+  dprintf(("KERNEL32: CreateFileA(%s,%08xh,%08xh,%08xh,%08xh,%08xh,%08xh)\n",
            lpszName,
            fdwAccess,
            fdwShareMode,
+           lpsa,
            fdwCreate,
-           fdwAttrsAndFlags));
+           fdwAttrsAndFlags,
+           hTemplateFile));
 
   rc = O32_CreateFile(lpszName,
                   fdwAccess,
@@ -69,9 +71,12 @@ HFILE WIN32API CreateFileA(LPCSTR  lpszName,
                       fdwAttrsAndFlags,
                       hTemplateFile);
 
-  //@@@PH translate handle
+  /* @@@PH experimental Handlemanager support */
+  if (HMHandleAllocate(&hFile,
+                       rc) == NO_ERROR)
+    rc = hFile;
 
-  dprintf(("KERNEL32:  CreateFile returned %d\n",
+  dprintf(("KERNEL32:  CreateFile returned %08xh\n",
            rc));
 
   return(rc);
@@ -111,7 +116,7 @@ HANDLE WIN32API FindFirstFileW(LPCWSTR arg1, WIN32_FIND_DATAW *  arg2)
  char  *astring;
 
     dprintf(("KERNEL32: FindFirstFileW: not implemented!!"));
-    dprintf(("KERNEL32:  FindFirstFileW\n"));
+
     astring = UnicodeToAsciiString((LPWSTR)arg1);
 //    rc = O32_FindFirstFile(astring, arg2);
     rc = 0;
@@ -145,18 +150,31 @@ BOOL WIN32API FindClose(HANDLE arg1)
 //******************************************************************************
 DWORD WIN32API GetFileType(HANDLE file)
 {
- DWORD rc;
+  DWORD rc;
+  HFILE hFile;
 
   /* @@@PH 1998/02/12 Handle Manager support */
   if (IS_HM_HANDLE(file))
     return (HMGetFileType(file));
 
-  dprintf(("KERNEL32:  GetFileType %d\n", file));
+  /* @@@PH experimental Handlemanager support */
+  if (HMHandleTranslateToOS2(file,
+                       &hFile) == NO_ERROR)
+    file = hFile;
+
+  dprintf(("KERNEL32:  GetFileType %08xh\n",
+           file));
+
   rc = O32_GetFileType(file);
-  if(rc == 0) {//bugfix
-        rc = 1;
+  if(rc == 0)
+  {
+    //bugfix
+    rc = 1;
   }
-  dprintf(("KERNEL32:  GetFileType returned %d\n", rc));
+
+  dprintf(("KERNEL32:  GetFileType returned %08xh\n",
+           rc));
+
   return(rc);
 }
 //******************************************************************************
@@ -164,33 +182,74 @@ DWORD WIN32API GetFileType(HANDLE file)
 DWORD WIN32API GetFileInformationByHandle(HANDLE                      arg1,
                                           BY_HANDLE_FILE_INFORMATION *arg2)
 {
- DWORD rc;
+  DWORD rc;
+  HFILE hFile;
 
+   /* @@@PH experimental Handlemanager support */
+  if (HMHandleTranslateToOS2(arg1,
+                       &hFile) == NO_ERROR)
+    arg1 = hFile;
+
+
+  rc = O32_GetFileInformationByHandle(arg1,
+                                      arg2);
+
+  dprintf(("KERNEL32:  GetFileInformationByHandle (%08xh) returned %08xh\n",
+           arg1,
+           rc));
+
+  /* @@@PH irrelevant
+  if(rc == 0)
+  {
+    //might be converted _lopen handle, so go get it
+    //      arg1 = ConvertHandle(arg1);
     rc = O32_GetFileInformationByHandle(arg1, arg2);
     dprintf(("KERNEL32:  GetFileInformationByHandle (%X) returned %d\n", arg1, rc));
+  }
+  */
 
-    if(rc == 0) {//might be converted _lopen handle, so go get it
-        //      arg1 = ConvertHandle(arg1);
-        //@@@PH translate handle
-        rc = O32_GetFileInformationByHandle(arg1, arg2);
-        dprintf(("KERNEL32:  GetFileInformationByHandle (%X) returned %d\n", arg1, rc));
-    }
-
-    return(rc);
+  return(rc);
 }
 //******************************************************************************
 //******************************************************************************
 BOOL WIN32API SetEndOfFile( HANDLE arg1)
 {
-    dprintf(("KERNEL32:  SetEndOfFile\n"));
-    return O32_SetEndOfFile(arg1);
+  HFILE hFile;
+
+  /* @@@PH experimental Handlemanager support */
+  if (HMHandleTranslateToOS2(arg1,
+                       &hFile) == NO_ERROR)
+    arg1 = hFile;
+
+  dprintf(("KERNEL32: SetEndOfFile(%08xh)\n",
+           arg1));
+
+  return O32_SetEndOfFile(arg1);
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API SetFileTime( HANDLE arg1, const FILETIME * arg2, const FILETIME * arg3, const FILETIME *  arg4)
+BOOL WIN32API SetFileTime(HANDLE          arg1,
+                          const FILETIME *arg2,
+                          const FILETIME *arg3,
+                          const FILETIME *arg4)
 {
-    dprintf(("KERNEL32:  SetFileTime\n"));
-    return O32_SetFileTime(arg1, arg2, arg3, arg4);
+  HFILE hFile;
+
+  /* @@@PH experimental Handlemanager support */
+  if (HMHandleTranslateToOS2(arg1,
+                       &hFile) == NO_ERROR)
+    arg1 = hFile;
+
+  dprintf(("KERNEL32: SetFileTime(%08xh,%08xh,%08xh,%08xh)\n",
+           arg1,
+           arg2,
+           arg3,
+           arg4));
+
+  return O32_SetFileTime(arg1,
+                         arg2,
+                         arg3,
+                         arg4);
 }
 //******************************************************************************
 //******************************************************************************
@@ -226,8 +285,19 @@ BOOL WIN32API CopyFileW(LPCWSTR arg1, LPCWSTR arg2, BOOL  arg3)
 //******************************************************************************
 DWORD WIN32API GetFileSize( HANDLE arg1, PDWORD  arg2)
 {
-    dprintf(("KERNEL32:  GetFileSize\n"));
-    return O32_GetFileSize(arg1, arg2);
+  HFILE hFile;
+
+  /* @@@PH experimental Handlemanager support */
+  if (HMHandleTranslateToOS2(arg1,
+                       &hFile) == NO_ERROR)
+    arg1 = hFile;
+
+  dprintf(("KERNEL32: GetFileSize (%08xh, %08xh)\n",
+           arg1,
+           arg2));
+
+  return O32_GetFileSize(arg1,
+                         arg2);
 }
 //******************************************************************************
 //******************************************************************************
@@ -297,16 +367,37 @@ UINT WIN32API GetTempPathW(UINT nBufferLength, LPWSTR lpBuffer)
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API ReadFile( HANDLE arg1, PVOID arg2, DWORD arg3, PDWORD arg4, LPOVERLAPPED  arg5)
+BOOL WIN32API ReadFile(HANDLE arg1,
+                       PVOID  arg2,
+                       DWORD  arg3,
+                       PDWORD arg4,
+                       LPOVERLAPPED  arg5)
 {
- BOOL rc;
+  BOOL rc;
+  HFILE hFile;
 
   /* @@@PH 1998/02/12 Handle Manager support */
   if (IS_HM_HANDLE(arg1))
     return (HMReadFile(arg1, arg2, arg3, arg4, arg5));
 
-  rc = O32_ReadFile(arg1, arg2, arg3, arg4, arg5);
-  dprintf(("KERNEL32:  ReadFile %X %d bytes returned %d\n", arg1, arg3, rc));
+  /* @@@PH 1999/06/09 Handle Manager support */
+
+  /* @@@PH experimental Handlemanager support */
+  if (HMHandleTranslateToOS2(arg1,
+                       &hFile) == NO_ERROR)
+    arg1 = hFile;
+
+  rc = O32_ReadFile(arg1,
+                    arg2,
+                    arg3,
+                    arg4,
+                    arg5);
+
+  dprintf(("KERNEL32:  ReadFile %X %d bytes returned %d\n",
+           arg1,
+           arg3,
+           rc));
+
   return(rc);
 }
 //******************************************************************************
@@ -316,15 +407,19 @@ DWORD WIN32API SetFilePointer(HANDLE hFile,
                               PLONG  lpDistanceToMoveHigh,
                               DWORD  dwMoveMethod)
 {
-////  dprintf(("KERNEL32:  SetFilePointer\n"));
+  HANDLE hFile2;
 
-  //@@@PH translate handle
+//  dprintf(("KERNEL32:  SetFilePointer\n"));
 
+  /* @@@PH experimental Handlemanager support */
+  if (HMHandleTranslateToOS2(hFile,
+                       &hFile2) == NO_ERROR)
+    hFile = hFile2;
 
   return(O32_SetFilePointer(hFile,
-                        lDistanceToMove,
-                        lpDistanceToMoveHigh,
-                        dwMoveMethod));
+                            lDistanceToMove,
+                            lpDistanceToMoveHigh,
+                            dwMoveMethod));
 }
 //******************************************************************************
 //******************************************************************************
@@ -334,7 +429,8 @@ BOOL WIN32API WriteFile(HANDLE  hFile,
                            LPDWORD nrbyteswritten,
                            LPOVERLAPPED lpOverlapped)
 {
-  BOOL rc;
+  BOOL   rc;
+  HANDLE hFile2;
 
   //@@@PH translate handle
   //KSO Aug 31 1998: when writing 0 bytes to a file win32 sets eof here.
@@ -351,6 +447,12 @@ BOOL WIN32API WriteFile(HANDLE  hFile,
                         nrbytes,
                         nrbyteswritten,
                         lpOverlapped));
+
+  /* @@@PH experimental Handlemanager support */
+  if (HMHandleTranslateToOS2(hFile,
+                       &hFile2) == NO_ERROR)
+    hFile = hFile2;
+
 
   rc = O32_WriteFile(hFile, buffer, nrbytes, nrbyteswritten, (LPOVERLAPPED)lpOverlapped);
   if(rc == 0 && GetLastError() == 436) { //ERROR_VIO_INVALID_HANDLE (OS/2)
@@ -475,10 +577,31 @@ DWORD WIN32API GetFullPathNameW(LPCWSTR lpFileName, DWORD nBufferLength,
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API LockFile( HANDLE arg1, DWORD arg2, DWORD arg3, DWORD arg4, DWORD  arg5)
+BOOL WIN32API LockFile(HANDLE arg1,
+                       DWORD  arg2,
+                       DWORD  arg3,
+                       DWORD  arg4,
+                       DWORD  arg5)
 {
-    dprintf(("KERNEL32:  LockFile\n"));
-    return O32_LockFile(arg1, arg2, arg3, arg4, arg5);
+  HFILE hFile;
+
+  /* @@@PH experimental Handlemanager support */
+  if (HMHandleTranslateToOS2(arg1,
+                       &hFile) == NO_ERROR)
+    arg1 = hFile;
+
+  dprintf(("KERNEL32: LockFile (%08xh,%08xh,%08xh,%08xh,%08xh)\n",
+           arg1,
+           arg2,
+           arg3,
+           arg4,
+           arg5));
+
+  return O32_LockFile(arg1,
+                      arg2,
+                      arg3,
+                      arg4,
+                      arg5);
 }
 
 
@@ -500,12 +623,19 @@ BOOL WIN32API LockFile( HANDLE arg1, DWORD arg2, DWORD arg3, DWORD arg4, DWORD  
  *****************************************************************************/
 
 BOOL WIN32API LockFileEx(HANDLE       hFile,
-                            DWORD        dwFlags,
-                            DWORD        dwReserved,
-                            DWORD        nNumberOfBytesToLockLow,
-                            DWORD        nNumberOfBytesToLockHigh,
-                            LPOVERLAPPED LPOVERLAPPED)
+                         DWORD        dwFlags,
+                         DWORD        dwReserved,
+                         DWORD        nNumberOfBytesToLockLow,
+                         DWORD        nNumberOfBytesToLockHigh,
+                         LPOVERLAPPED LPOVERLAPPED)
 {
+  HFILE hFile2;
+
+  /* @@@PH experimental Handlemanager support */
+  if (HMHandleTranslateToOS2(hFile,
+                       &hFile2) == NO_ERROR)
+    hFile = hFile2;
+
   dprintf(("Kernel32: LockFileEx(%08xh,%08xh,%08xh,%08xh,%08xh,%08xh)\n",
            hFile,
            dwFlags,
@@ -592,23 +722,44 @@ HFILE WIN32API OpenFile(LPCSTR    arg1,
   hFile = O32_OpenFile(arg1,                                      /* call open32 */
                    arg2,
                    arg3);
+
+  /* @@@PH 1999/06/09 HandleManager support temporarily disabled */
   if (hFile != 0)                                /* check if handle is valid */
   {
     if (HMHandleAllocate(&ulWindowsHandle,    /* allocate translation handle */
                          hFile) == NO_ERROR)
       return (ulWindowsHandle);
-    else
-      return (0);
   }
-  else
-    return (0);
+
+  return (hFile);
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API UnlockFile( HANDLE arg1, DWORD arg2, DWORD arg3, DWORD arg4, DWORD  arg5)
+BOOL WIN32API UnlockFile(HANDLE arg1,
+                         DWORD  arg2,
+                         DWORD  arg3,
+                         DWORD  arg4,
+                         DWORD  arg5)
 {
-    dprintf(("KERNEL32:  UnlockFile\n"));
-    return O32_UnlockFile(arg1, arg2, arg3, arg4, arg5);
+  HFILE hFile2;
+
+  /* @@@PH experimental Handlemanager support */
+  if (HMHandleTranslateToOS2(arg1,
+                       &hFile2) == NO_ERROR)
+    arg1 = hFile2;
+
+  dprintf(("KERNEL32: UnlockFile(%08xh,%08xh,%08xh,%08xh,%08xh)\n",
+           arg1,
+           arg2,
+           arg3,
+           arg4,
+           arg5));
+
+  return O32_UnlockFile(arg1,
+                        arg2,
+                        arg3,
+                        arg4,
+                        arg5);
 }
 
 
@@ -629,11 +780,18 @@ BOOL WIN32API UnlockFile( HANDLE arg1, DWORD arg2, DWORD arg3, DWORD arg4, DWORD
  *****************************************************************************/
 
 BOOL WIN32API UnlockFileEx(HANDLE       hFile,
-                              DWORD        dwReserved,
-                              DWORD        nNumberOfBytesToLockLow,
-                              DWORD        nNumberOfBytesToLockHigh,
-                              LPOVERLAPPED LPOVERLAPPED)
+                           DWORD        dwReserved,
+                           DWORD        nNumberOfBytesToLockLow,
+                           DWORD        nNumberOfBytesToLockHigh,
+                           LPOVERLAPPED LPOVERLAPPED)
 {
+  HFILE hFile2;
+
+  /* @@@PH experimental Handlemanager support */
+  if (HMHandleTranslateToOS2(hFile,
+                       &hFile2) == NO_ERROR)
+    hFile = hFile2;
+
   dprintf(("Kernel32: UnlockFileEx(%08xh,%08xh,%08xh,%08xh,%08xh,%08xh)\n",
            hFile,
            dwReserved,
@@ -691,7 +849,9 @@ HANDLE WIN32API FindFirstChangeNotificationA(LPCSTR lpPathName, BOOL bWatchSubtr
 //******************************************************************************
 BOOL WIN32API FindNextChangeNotification(HANDLE hChange)
 {
-  dprintf(("KERNEL32:  FindNextChangeNotification, Not implemented\n"));
+  dprintf(("KERNEL32: FindNextChangeNotification (%08xh), Not implemented\n",
+           hChange));
+
   return(0);
 }
 //******************************************************************************
@@ -717,7 +877,7 @@ VOID WIN32API SetFileApisToANSI( VOID ) /*PLF Tue  98-02-10 00:52:22*/
  *****************************************************************************/
 
 DWORD WIN32API GetCompressedFileSizeA(LPCTSTR  lpFileName,
-                                         LPDWORD  lpFileSizeHigh)
+                                      LPDWORD  lpFileSizeHigh)
 {
   dprintf(("KERNEL32: GetCompressedFileSizeA (%s, %08xh) not implemented.\n",
            lpFileName,
