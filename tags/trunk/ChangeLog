@@ -1,8 +1,9 @@
- /* $Id: ChangeLog,v 1.518 1999-12-07 12:30:18 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.519 1999-12-07 18:20:34 sandervl Exp $ */
 
  99-12-07: Sander van Leeuwen <sandervl@xs4all.nl>
 	- KERNEL32: Fixed string resource load bug (last character of string resource set to 0)
 	- KERNEL32: Always commit memory for page memory maps
+	- KERNEL32: Fixed bug in InterlockedExchange (parameters reversed)
 	- USER32: Do not call selectClientArea during BeginPaint -> creates
                   painting problems for i.e. memory SDK sample & AbiWord
                   Disabled CS_OWNDC support for now -> otherwise certain
