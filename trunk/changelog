@@ -1,10 +1,11 @@
- /* $Id: changelog,v 1.917 2000-04-30 16:30:24 sandervl Exp $ */
+ /* $Id: changelog,v 1.918 2000-04-30 17:05:13 sandervl Exp $ */
 
  2000-04-30: Sander van Leeuwen <sandervl@xs4all.nl>
 	- KERNEL32: LocalFlags fix (low byte = lock count, hight byte (of low word) = memory flags)
                     LocalGetFlags, LocalLock & LocalUnlock now check if the
                     pointer is larger than 3 GB. Some apps calls these functions
                     with GDI object handles.
+	- OLEAUT32: Don't create logfiles in release build
 
  2000-04-29: Yuri Dario <mc6530@mclink.it>
 	- USER32:   Bugfix for owner of windows (set to owner instead of parent now)
