@@ -1,4 +1,4 @@
-; $Id: USER32.DEF,v 1.54 2001-04-27 17:36:36 sandervl Exp $
+; $Id: USER32.DEF,v 1.55 2001-05-19 11:16:01 sandervl Exp $
 
 LIBRARY USER32 INITINSTANCE TERMINSTANCE
 DESCRIPTION 'Odin32 System Dll - User32'
@@ -613,6 +613,10 @@ EXPORTS
     wsprintfW                  = _wsprintfW                   @578
     wvsprintfA                 = _wvsprintfA@12              @579
     wvsprintfW                 = _wvsprintfW@12              @580
+
+    TrackMouseEvent            = _TrackMouseEvent@4          @600 ;ordinal??
+    SendInput                  = _SendInput@12               @601 ;ordinal??
+    GetGUIThreadInfo           = _GetGUIThreadInfo@8         @602
 
     ChangeDisplaySettingsExA   = _ChangeDisplaySettingsExA@20 @604
     ChangeDisplaySettingsExW   = _ChangeDisplaySettingsExW@20 @605
