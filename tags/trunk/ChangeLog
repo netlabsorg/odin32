@@ -1,11 +1,59 @@
- /* $Id: ChangeLog,v 1.915 2000-04-27 22:12:42 davidr Exp $ */
+ /* $Id: ChangeLog,v 1.916 2000-04-29 18:21:59 sandervl Exp $ */
+
+ 2000-04-29: Yuri Dario <mc6530@mclink.it>
+	- USER32:   Bugfix for owner of windows (set to owner instead of parent now)
+
+ 2000-04-29: Sander van Leeuwen <sandervl@xs4all.nl>
+	- USER32/KERNEL32: Added selectable logging for level 2 dprintfs.
+
+	- USER32:   Commented out default x & y position code
+                    (FCF_SHELLPOSITION no longer works)
+                    -> fixes menu & toolbars in MS Word 97
+
+	- KERNEL32: Added windows directory override again
+                    (NOTE: for developers *ONLY*; DO NOT USE IT)
+                    [DEVDIRECTORIES]
+                    WINDOWS=drive:\path
+                    Default System directory is kernel32 path
+                    (with new install program: x:\odin\system32)
+                    Default Windows directory is parent of System Directory
+                    (with new install program: x:\odin)
+		    NOTE: This assumption could break current installs
+                          Will be fixed in upcoming WarpIn installation distributions
+
+                    Changed InitSystemAndRegistry:
+  		    InitSystemAndRegistry creates:
+			- WINDOWSDIR\SYSTEM
+		        - WINDOWSDIR\AppData
+		        - WINDOWSDIR\Cache
+		        - WINDOWSDIR\Cookies
+		 	- WINDOWSDIR\Desktop
+		 	- WINDOWSDIR\Favorites
+		 	- WINDOWSDIR\Fonts
+		        - WINDOWSDIR\History
+		 	- WINDOWSDIR\NetHood
+		 	- WINDOWSDIR\My Documents
+		 	- WINDOWSDIR\PrintHood
+		 	- WINDOWSDIR\Recent
+		 	- WINDOWSDIR\SendTo
+		 	- WINDOWSDIR\Start Menu
+		 	- WINDOWSDIR\Start Menu\Programs
+		 	- WINDOWSDIR\Start Menu\Programs\Startup
+		 	- WINDOWSDIR\ShellNew
+		 	- and a minimal system registry
+
+	- TOOLS\INSTALL: WarpIn install script + small install program
+                         that calls kernel32 export (InitSystemAndRegistry)
+
+	- TOOLS\WRC:     Forgot to add change in preproc.c (ifdef)
+                         (shouldn't really matter though)
 
  2000-04-27: David Raison <djr@lemur.co.uk>
         - OLE32/NEW: Work-in-progress on adding apartment handling.
 	  Added here for backup until ready for release.
 
  2000-04-27: knut st. osmundsen <knut.stange.osmundsen@mynd.no>
-    - tools/DailyBuild: Checked in the scripts used for the daily build.
+        - tools/DailyBuild: Checked in the scripts used for the daily build.
 
  2000-04-27: Achim Hasenmueller <achimha@innotek.de>
 	- put back new wrc.exe, provide workarounds in
