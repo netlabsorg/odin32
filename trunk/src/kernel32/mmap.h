@@ -1,9 +1,9 @@
-/* $Id: mmap.h,v 1.26 2003-03-06 10:44:34 sandervl Exp $ */
+/* $Id: mmap.h,v 1.27 2003-03-27 14:13:11 sandervl Exp $ */
 
 /*
  * Memory mapped class
  *
- * Copyright 1999 Sander van Leeuwen (sandervl@xs4all.nl)
+ * Copyright 1999-2003 Sander van Leeuwen (sandervl@xs4all.nl)
  *
  *
  * Project Odin Software License can be found in LICENSE.TXT
@@ -14,6 +14,8 @@
 
 #include <vmutex.h>
 #include "heapshared.h"
+#include "asmutil.h"
+
 
 #ifndef PAGE_SIZE
 #define PAGE_SIZE       4096
@@ -24,7 +26,7 @@
 
 #define MEMMAP_CRITSECTION_NAME	"\\SEM32\\ODIN_MMAP.SEM"
 
-//commit 4 pages at once when the app accesses it
+//commit 16 pages at once when the app accesses it
 #define NRPAGES_TOCOMMIT        16
 
 #define MEMMAP_ACCESS_INVALID           0
@@ -35,10 +37,18 @@
 
 #define MMAP_FLUSHVIEW_ALL		0xFFFFFFFF
 
+typedef enum
+{
+    PAGEVIEW_READONLY,
+    PAGEVIEW_VIEW,
+    PAGEVIEW_GUARD
+} PAGEVIEW;
+
 class Win32MemMapView;
 class Win32PeLdrImage;
 
 //******************************************************************************
+//Memory mapping class
 //******************************************************************************
 class Win32MemMap
 {
@@ -46,17 +56,21 @@ public:
    Win32MemMap(HFILE hfile, ULONG size, ULONG fdwProtect, LPSTR lpszName);
    //Use by PE loader image class only:
    Win32MemMap(Win32PeLdrImage *pImage, ULONG lpImageMem, ULONG size);
-  ~Win32MemMap();
+virtual ~Win32MemMap();
 
 virtual BOOL   Init(DWORD aMSize=0);
 virtual BOOL   flushView(ULONG viewaddr, ULONG offset, ULONG cbFlush);
 virtual LPVOID mapViewOfFile(ULONG size, ULONG offset, ULONG fdwAccess);
 virtual BOOL   unmapViewOfFile(LPVOID addr);
 
+        BOOL   updateViewPages(ULONG offset, ULONG size, PAGEVIEW flags);
+        BOOL   allocateMap();
+
    HFILE  getFileHandle()                { return hMemFile; };
    LPSTR  getMemName()                   { return lpszMapName; };
+   DWORD  getMapSize()                   { return mSize; };
    DWORD  getProtFlags()                 { return mProtFlags; };
-   BOOL   setProtFlags(DWORD dwNewProtect);
+   void   setProtFlags(DWORD dwNewFlags) { mProtFlags = dwNewFlags; };
    LPVOID getMappingAddr()               { return pMapping; };
    DWORD  getProcessId()                 { return mProcessId;};
 Win32PeLdrImage *getImage()              { return image; };
@@ -64,7 +78,15 @@ Win32PeLdrImage *getImage()              { return image; };
    BOOL   isImageMap()                   { return image != NULL; };
 
    void   AddRef()                       { ++referenced; };
-   void   Release();
+   int    Release();
+
+   void   AddView()                      { ++nrMappings; };
+   void   RemoveView()                   { --nrMappings; };
+
+
+   void   markDirtyPages(int startpage, int nrpages);
+   void   clearDirtyPages(int startpage, int nrpages);
+   BOOL   isDirtyPage(int pagenr)        { return test_bit(pagenr, pWriteBitmap) != 0; };
 
 virtual BOOL   invalidatePages(ULONG offset, ULONG size);
 virtual BOOL   commitPage(ULONG ulFaultAddr, ULONG offset, BOOL fWriteAccess, int nrpages = NRPAGES_TOCOMMIT);
@@ -108,6 +130,8 @@ protected:
    LPSTR  lpszMapName;
    void  *pMapping;
 
+   char  *pWriteBitmap;
+
    ULONG  nrMappings;
 
    ULONG  referenced;
@@ -116,9 +140,35 @@ protected:
 
    Win32PeLdrImage *image;
 
+   Win32MemMapView *views;
+
 private:
    static Win32MemMap *memmaps;
           Win32MemMap *next;
+};
+//******************************************************************************
+//Duplicate memory mapping class (duplicate map with different protection flags
+//associated with an existing memory map)
+//******************************************************************************
+class Win32MemMapDup : public Win32MemMap
+{
+public:
+            Win32MemMapDup(Win32MemMap *parent, HFILE hFile, ULONG size, ULONG fdwProtect, LPSTR lpszName);
+   virtual ~Win32MemMapDup();
+
+virtual BOOL   Init(DWORD aMSize=0);
+virtual BOOL   flushView(ULONG viewaddr, ULONG offset, ULONG cbFlush);
+virtual LPVOID mapViewOfFile(ULONG size, ULONG offset, ULONG fdwAccess);
+virtual BOOL   unmapViewOfFile(LPVOID addr);
+
+virtual BOOL   invalidatePages(ULONG offset, ULONG size);
+virtual BOOL   commitGuardPage(ULONG ulFaultAddr, ULONG offset, BOOL fWriteAccess);
+virtual BOOL   commitPage(ULONG ulFaultAddr, ULONG offset, BOOL fWriteAccess, int nrpages = NRPAGES_TOCOMMIT);
+
+protected:
+            Win32MemMap *parent;
+
+private:
 };
 //******************************************************************************
 //Memory mapped file View Class
@@ -126,8 +176,10 @@ private:
 class Win32MemMapView
 {
 public:
-   Win32MemMapView(Win32MemMap *map, ULONG offset, ULONG size, ULONG fdwAccess);
+   Win32MemMapView(Win32MemMap *parent, ULONG offset, ULONG size, ULONG fdwAccess, Win32MemMap *owner = NULL);
   ~Win32MemMapView();
+
+   BOOL   changePageFlags(ULONG offset, ULONG size, PAGEVIEW flags);
 
    DWORD  getAccessFlags()               { return mfAccess; };
    DWORD  getSize()                      { return mSize;    };
@@ -137,11 +189,17 @@ public:
    BOOL   everythingOk()                 { return errorState == 0; };
 
 Win32MemMap *getParentMap()              { return mParentMap;};
+Win32MemMap *getOwnerMap()               { return mOwnerMap; };
+
    DWORD  getProcessId()                 { return mProcessId;};
+
+   void   markCOWPages(int startpage, int nrpages);
+   BOOL   isCOWPage(int pagenr)          { return (pCOWBitmap) ? (test_bit(pagenr, pCOWBitmap) != 0) : FALSE; };
 
 static void             deleteViews(Win32MemMap *map);
 static Win32MemMap     *findMapByView(ULONG address, ULONG *offset = NULL,
                                       ULONG accessType = MEMMAP_ACCESS_READ);
+static int              findViews(Win32MemMap *map, int nrViews, Win32MemMapView *viewarray[]);
 static Win32MemMapView *findView(ULONG address);
 
 #ifdef __DEBUG_ALLOC__
@@ -170,7 +228,12 @@ protected:
    ULONG  mfAccess, mOffset;
    void  *pMapView, *pShareViewAddr;
 
+   char  *pCOWBitmap;
+
+   //parent map object; memory map that contains the original memory map
    Win32MemMap *mParentMap;
+   //owner map object (can be NULL); duplicate memory map that created this view
+   Win32MemMap *mOwnerMap;
 
 private:
    static Win32MemMapView *mapviews;
@@ -180,6 +243,10 @@ private:
 };
 //******************************************************************************
 //******************************************************************************
+
+#pragma data_seg(_GLOBALDATA)
+extern CRITICAL_SECTION_OS2 globalmapcritsect;
+#pragma data_seg()
 
 void InitializeMemMaps();
 

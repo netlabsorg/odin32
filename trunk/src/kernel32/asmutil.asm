@@ -1,4 +1,4 @@
-; $Id: asmutil.asm,v 1.2 2002-05-15 10:57:44 sandervl Exp $
+; $Id: asmutil.asm,v 1.3 2003-03-27 14:13:10 sandervl Exp $
 
 ;/*
 ; * Project Odin Software License can be found in LICENSE.TXT
@@ -18,6 +18,8 @@ BSS32	segment dword use32 public 'BSS'
 BSS32	ends
 DGROUP	group BSS32, DATA32
 	assume	cs:FLAT, ds:FLAT, ss:FLAT, es:FLAT
+
+extrn   Dos32TIB:abs
 
 CODE32          SEGMENT DWORD PUBLIC USE32 'CODE'
 
@@ -98,7 +100,7 @@ getESP  endp
 
         PUBLIC RestoreOS2FS
 RestoreOS2FS proc near
-        push    150bh
+        push    Dos32TIB
         mov     ax, fs
         pop     fs
         ret
@@ -187,6 +189,54 @@ _Add64	proc
 
 _Add64	endp
 
+
+	align 4h
+
+	public _set_bit
+;void CDECL set_bit(int bitnr, void *addr);
+_set_bit proc near
+    push esi
+
+    mov  esi, [esp+12]
+    mov  eax, [esp+8]
+
+    bts  dword ptr [esi], eax
+
+    pop  esi
+    ret
+_set_bit endp
+
+	align 4h
+
+	public _test_bit
+;int CDECL test_bit(int bitnr, void *addr);
+_test_bit proc near
+    push esi
+
+    mov  esi, [esp+12]
+    mov  eax, [esp+8]
+
+    bt   dword ptr [esi], eax
+    setc al
+    movzx eax, al
+
+    pop  esi
+    ret
+_test_bit endp
+
+	public _clear_bit
+;void CDECL clear_bit(int bitnr, void *addr);
+_clear_bit proc near
+    push esi
+
+    mov  esi, [esp+12]
+    mov  eax, [esp+8]
+
+    btr  dword ptr [esi], eax
+
+    pop  esi
+    ret
+_clear_bit endp
 
 CODE32          ENDS
 
