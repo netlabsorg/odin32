@@ -1,8 +1,8 @@
-/* $Id: readpix.c,v 1.2 2000-03-01 18:49:35 jeroen Exp $ */
+/* $Id: readpix.c,v 1.3 2000-05-23 20:40:52 jeroen Exp $ */
 
 /*
  * Mesa 3-D graphics library
- * Version:  3.1
+ * Version:  3.3
  *
  * Copyright (C) 1999  Brian Paul   All Rights Reserved.
  *
@@ -25,19 +25,10 @@
  */
 
 
-
-
-
 #ifdef PC_HEADER
 #include "all.h"
 #else
-#ifndef XFree86Server
-#include <math.h>
-#include <stdlib.h>
-#include <string.h>
-#else
-#include "GL/xf86glx.h"
-#endif
+#include "glheader.h"
 #include "alphabuf.h"
 #include "types.h"
 #include "context.h"
@@ -49,6 +40,7 @@
 #include "readpix.h"
 #include "span.h"
 #include "stencil.h"
+#include "mem.h"
 #endif
 
 
@@ -60,7 +52,7 @@
 static void read_index_pixels( GLcontext *ctx,
                                GLint x, GLint y,
                                GLsizei width, GLsizei height,
-			       GLenum type, GLvoid *pixels,
+                               GLenum type, GLvoid *pixels,
                                const struct gl_pixelstore_attrib *packing )
 {
    GLint i, j, readWidth;
@@ -71,7 +63,8 @@ static void read_index_pixels( GLcontext *ctx,
       return;
    }
 
-   (void) (*ctx->Driver.SetBuffer)( ctx, ctx->Pixel.DriverReadBuffer );
+   ASSERT(ctx->Driver.SetReadBuffer);
+   (*ctx->Driver.SetReadBuffer)(ctx, ctx->ReadBuffer, ctx->Pixel.DriverReadBuffer);
 
    readWidth = (width > MAX_WIDTH) ? MAX_WIDTH : width;
 
@@ -90,96 +83,96 @@ static void read_index_pixels( GLcontext *ctx,
          gl_map_ci(ctx, readWidth, index);
       }
 
-      dest = gl_pixel_addr_in_image(packing, pixels,
+      dest = _mesa_image_address(packing, pixels,
                          width, height, GL_COLOR_INDEX, type, 0, j, 0);
 
       switch (type) {
-	 case GL_UNSIGNED_BYTE:
-	    {
+         case GL_UNSIGNED_BYTE:
+            {
                GLubyte *dst = (GLubyte *) dest;
-	       for (i=0;i<readWidth;i++) {
-		  *dst++ = (GLubyte) index[i];
-	       }
-	    }
-	    break;
-	 case GL_BYTE:
-	    {
+               for (i=0;i<readWidth;i++) {
+                  *dst++ = (GLubyte) index[i];
+               }
+            }
+            break;
+         case GL_BYTE:
+            {
                GLbyte *dst = (GLbyte *) dest;
-	       for (i=0;i<readWidth;i++) {
-		  dst[i] = (GLbyte) index[i];
-	       }
-	    }
-	    break;
-	 case GL_UNSIGNED_SHORT:
-	    {
+               for (i=0;i<readWidth;i++) {
+                  dst[i] = (GLbyte) index[i];
+               }
+            }
+            break;
+         case GL_UNSIGNED_SHORT:
+            {
                GLushort *dst = (GLushort *) dest;
-	       for (i=0;i<readWidth;i++) {
-		  dst[i] = (GLushort) index[i];
-	       }
-	       if (packing->SwapBytes) {
-		  gl_swap2( (GLushort *) dst, readWidth );
-	       }
-	    }
-	    break;
-	 case GL_SHORT:
-	    {
+               for (i=0;i<readWidth;i++) {
+                  dst[i] = (GLushort) index[i];
+               }
+               if (packing->SwapBytes) {
+                  _mesa_swap2( (GLushort *) dst, readWidth );
+               }
+            }
+            break;
+         case GL_SHORT:
+            {
                GLshort *dst = (GLshort *) dest;
-	       for (i=0;i<readWidth;i++) {
-		  dst[i] = (GLshort) index[i];
-	       }
-	       if (packing->SwapBytes) {
-		  gl_swap2( (GLushort *) dst, readWidth );
-	       }
-	    }
-	    break;
-	 case GL_UNSIGNED_INT:
-	    {
+               for (i=0;i<readWidth;i++) {
+                  dst[i] = (GLshort) index[i];
+               }
+               if (packing->SwapBytes) {
+                  _mesa_swap2( (GLushort *) dst, readWidth );
+               }
+            }
+            break;
+         case GL_UNSIGNED_INT:
+            {
                GLuint *dst = (GLuint *) dest;
-	       for (i=0;i<readWidth;i++) {
-		  dst[i] = (GLuint) index[i];
-	       }
-	       if (packing->SwapBytes) {
-		  gl_swap4( (GLuint *) dst, readWidth );
-	       }
-	    }
-	    break;
-	 case GL_INT:
-	    {
+               for (i=0;i<readWidth;i++) {
+                  dst[i] = (GLuint) index[i];
+               }
+               if (packing->SwapBytes) {
+                  _mesa_swap4( (GLuint *) dst, readWidth );
+               }
+            }
+            break;
+         case GL_INT:
+            {
                GLint *dst = (GLint *) dest;
-	       for (i=0;i<readWidth;i++) {
-		  dst[i] = (GLint) index[i];
-	       }
-	       if (packing->SwapBytes) {
-		  gl_swap4( (GLuint *) dst, readWidth );
-	       }
-	    }
-	    break;
-	 case GL_FLOAT:
-	    {
+               for (i=0;i<readWidth;i++) {
+                  dst[i] = (GLint) index[i];
+               }
+               if (packing->SwapBytes) {
+                  _mesa_swap4( (GLuint *) dst, readWidth );
+               }
+            }
+            break;
+         case GL_FLOAT:
+            {
                GLfloat *dst = (GLfloat *) dest;
-	       for (i=0;i<readWidth;i++) {
-		  dst[i] = (GLfloat) index[i];
-	       }
-	       if (packing->SwapBytes) {
-		  gl_swap4( (GLuint *) dst, readWidth );
-	       }
-	    }
-	    break;
+               for (i=0;i<readWidth;i++) {
+                  dst[i] = (GLfloat) index[i];
+               }
+               if (packing->SwapBytes) {
+                  _mesa_swap4( (GLuint *) dst, readWidth );
+               }
+            }
+            break;
          default:
             gl_error( ctx, GL_INVALID_ENUM, "glReadPixels(type)" );
             j = height + 1; /* exit loop */
       }
    }
 
-   (void) (*ctx->Driver.SetBuffer)( ctx, ctx->Color.DriverDrawBuffer );
+   (*ctx->Driver.SetReadBuffer)(ctx, ctx->DrawBuffer, ctx->Color.DriverDrawBuffer);
 }
 
 
 
 static void read_depth_pixels( GLcontext *ctx,
                                GLint x, GLint y,
-			       GLsizei width, GLsizei height,
-			       GLenum type, GLvoid *pixels,
+                               GLsizei width, GLsizei height,
+                               GLenum type, GLvoid *pixels,
                                const struct gl_pixelstore_attrib *packing )
 {
    GLint i, j, readWidth;
@@ -211,28 +204,22 @@ static void read_depth_pixels( GLcontext *ctx,
        && !bias_or_scale && !packing->SwapBytes) {
       /* Special case: directly read 16-bit unsigned depth values. */
       for (j=0;j<height;j++,y++) {
-         GLushort *dst = (GLushort*) gl_pixel_addr_in_image( packing, pixels,
+         GLdepth depth[MAX_WIDTH];
+         GLushort *dst = (GLushort*) _mesa_image_address( packing, pixels,
                          width, height, GL_DEPTH_COMPONENT, type, 0, j, 0 );
-         (*ctx->Driver.ReadDepthSpanInt)( ctx, width, x, y, (GLdepth*) dst);
+         GLint i;
+         (*ctx->Driver.ReadDepthSpan)( ctx, width, x, y, depth);
+         for (i = 0; i < width; i++)
+            dst[i] = depth[i];
       }
    }
-   else if (type==GL_UNSIGNED_INT && sizeof(GLdepth)==sizeof(GLuint)
+   else if (type==GL_UNSIGNED_INT && ctx->Visual->DepthBits == 32
             && !bias_or_scale && !packing->SwapBytes) {
       /* Special case: directly read 32-bit unsigned depth values. */
-      /* Compute shift value to scale depth values up to 32-bit uints. */
-      GLuint shift = 0;
-      GLuint max = MAX_DEPTH;
-      while ((max&0x80000000)==0) {
-         max = max << 1;
-         shift++;
-      }
       for (j=0;j<height;j++,y++) {
-         GLuint *dst = (GLuint *) gl_pixel_addr_in_image( packing, pixels,
+         GLdepth *dst = (GLdepth *) _mesa_image_address( packing, pixels,
                          width, height, GL_DEPTH_COMPONENT, type, 0, j, 0 );
-         (*ctx->Driver.ReadDepthSpanInt)( ctx, width, x, y, (GLdepth*) dst);
-         for (i=0;i<width;i++) {
-            dst[i] = dst[i] << shift;
-         }
+         (*ctx->Driver.ReadDepthSpan)( ctx, width, x, y, dst);
       }
    }
    else {
@@ -241,7 +228,7 @@ static void read_depth_pixels( GLcontext *ctx,
          GLfloat depth[MAX_WIDTH];
          GLvoid *dest;
 
-         (*ctx->Driver.ReadDepthSpanFloat)( ctx, readWidth, x, y, depth );
+         _mesa_read_depth_span_float(ctx, readWidth, x, y, depth);
 
          if (bias_or_scale) {
             for (i=0;i<readWidth;i++) {
@@ -251,7 +238,7 @@ static void read_depth_pixels( GLcontext *ctx,
             }
          }
 
-         dest = gl_pixel_addr_in_image(packing, pixels,
+         dest = _mesa_image_address(packing, pixels,
                          width, height, GL_DEPTH_COMPONENT, type, 0, j, 0);
 
          switch (type) {
@@ -278,7 +265,7 @@ static void read_depth_pixels( GLcontext *ctx,
                      dst[i] = FLOAT_TO_USHORT( depth[i] );
                   }
                   if (packing->SwapBytes) {
-                     gl_swap2( (GLushort *) dst, readWidth );
+                     _mesa_swap2( (GLushort *) dst, readWidth );
                   }
                }
                break;
@@ -289,7 +276,7 @@ static void read_depth_pixels( GLcontext *ctx,
                      dst[i] = FLOAT_TO_SHORT( depth[i] );
                   }
                   if (packing->SwapBytes) {
-                     gl_swap2( (GLushort *) dst, readWidth );
+                     _mesa_swap2( (GLushort *) dst, readWidth );
                   }
                }
                break;
@@ -300,7 +287,7 @@ static void read_depth_pixels( GLcontext *ctx,
                      dst[i] = FLOAT_TO_UINT( depth[i] );
                   }
                   if (packing->SwapBytes) {
-                     gl_swap4( (GLuint *) dst, readWidth );
+                     _mesa_swap4( (GLuint *) dst, readWidth );
                   }
                }
                break;
@@ -311,7 +298,7 @@ static void read_depth_pixels( GLcontext *ctx,
                      dst[i] = FLOAT_TO_INT( depth[i] );
                   }
                   if (packing->SwapBytes) {
-                     gl_swap4( (GLuint *) dst, readWidth );
+                     _mesa_swap4( (GLuint *) dst, readWidth );
                   }
                }
                break;
@@ -322,7 +309,7 @@ static void read_depth_pixels( GLcontext *ctx,
                      dst[i] = depth[i];
                   }
                   if (packing->SwapBytes) {
-                     gl_swap4( (GLuint *) dst, readWidth );
+                     _mesa_swap4( (GLuint *) dst, readWidth );
                   }
                }
                break;
@@ -338,8 +325,8 @@ static void read_depth_pixels( GLcontext *ctx,
 
 static void read_stencil_pixels( GLcontext *ctx,
                                  GLint x, GLint y,
-				 GLsizei width, GLsizei height,
-				 GLenum type, GLvoid *pixels,
+                                 GLsizei width, GLsizei height,
+                                 GLenum type, GLvoid *pixels,
                                  const struct gl_pixelstore_attrib *packing )
 {
    GLboolean shift_or_offset;
@@ -382,87 +369,87 @@ static void read_stencil_pixels( GLcontext *ctx,
          gl_map_stencil( ctx, readWidth, stencil );
       }
 
-      dest = gl_pixel_addr_in_image( packing, pixels,
+      dest = _mesa_image_address( packing, pixels,
                           width, height, GL_STENCIL_INDEX, type, 0, j, 0 );
 
       switch (type) {
-	 case GL_UNSIGNED_BYTE:
+         case GL_UNSIGNED_BYTE:
             if (sizeof(GLstencil) == 8) {
                MEMCPY( dest, stencil, readWidth );
             }
             else {
                GLubyte *dst = (GLubyte *) dest;
-	       for (i=0;i<readWidth;i++) {
-		  dst[i] = (GLubyte) stencil[i];
-	       }
+               for (i=0;i<readWidth;i++) {
+                  dst[i] = (GLubyte) stencil[i];
+               }
             }
-	    break;
-	 case GL_BYTE:
+            break;
+         case GL_BYTE:
             if (sizeof(GLstencil) == 8) {
                MEMCPY( dest, stencil, readWidth );
             }
             else {
                GLbyte *dst = (GLbyte *) dest;
-	       for (i=0;i<readWidth;i++) {
-		  dst[i] = (GLbyte) stencil[i];
-	       }
+               for (i=0;i<readWidth;i++) {
+                  dst[i] = (GLbyte) stencil[i];
+               }
             }
-	    break;
-	 case GL_UNSIGNED_SHORT:
-	    {
+            break;
+         case GL_UNSIGNED_SHORT:
+            {
                GLushort *dst = (GLushort *) dest;
-	       for (i=0;i<readWidth;i++) {
-		  dst[i] = (GLushort) stencil[i];
-	       }
-	       if (packing->SwapBytes) {
-		  gl_swap2( (GLushort *) dst, readWidth );
-	       }
-	    }
-	    break;
-	 case GL_SHORT:
-	    {
+               for (i=0;i<readWidth;i++) {
+                  dst[i] = (GLushort) stencil[i];
+               }
+               if (packing->SwapBytes) {
+                  _mesa_swap2( (GLushort *) dst, readWidth );
+               }
+            }
+            break;
+         case GL_SHORT:
+            {
                GLshort *dst = (GLshort *) dest;
-	       for (i=0;i<readWidth;i++) {
-		  dst[i] = (GLshort) stencil[i];
-	       }
-	       if (packing->SwapBytes) {
-		  gl_swap2( (GLushort *) dst, readWidth );
-	       }
-	    }
-	    break;
-	 case GL_UNSIGNED_INT:
-	    {
+               for (i=0;i<readWidth;i++) {
+                  dst[i] = (GLshort) stencil[i];
+               }
+               if (packing->SwapBytes) {
+                  _mesa_swap2( (GLushort *) dst, readWidth );
+               }
+            }
+            break;
+         case GL_UNSIGNED_INT:
+            {
                GLuint *dst = (GLuint *) dest;
-	       for (i=0;i<readWidth;i++) {
-		  dst[i] = (GLuint) stencil[i];
-	       }
-	       if (packing->SwapBytes) {
-		  gl_swap4( (GLuint *) dst, readWidth );
-	       }
-	    }
-	    break;
-	 case GL_INT:
-	    {
+               for (i=0;i<readWidth;i++) {
+                  dst[i] = (GLuint) stencil[i];
+               }
+               if (packing->SwapBytes) {
+                  _mesa_swap4( (GLuint *) dst, readWidth );
+               }
+            }
+            break;
+         case GL_INT:
+            {
                GLint *dst = (GLint *) dest;
-	       for (i=0;i<readWidth;i++) {
-		  *dst++ = (GLint) stencil[i];
-	       }
-	       if (packing->SwapBytes) {
-		  gl_swap4( (GLuint *) dst, readWidth );
-	       }
-	    }
-	    break;
-	 case GL_FLOAT:
-	    {
+               for (i=0;i<readWidth;i++) {
+                  *dst++ = (GLint) stencil[i];
+               }
+               if (packing->SwapBytes) {
+                  _mesa_swap4( (GLuint *) dst, readWidth );
+               }
+            }
+            break;
+         case GL_FLOAT:
+            {
                GLfloat *dst = (GLfloat *) dest;
-	       for (i=0;i<readWidth;i++) {
-		  dst[i] = (GLfloat) stencil[i];
-	       }
-	       if (packing->SwapBytes) {
-		  gl_swap4( (GLuint *) dst, readWidth );
-	       }
-	    }
-	    break;
+               for (i=0;i<readWidth;i++) {
+                  dst[i] = (GLfloat) stencil[i];
+               }
+               if (packing->SwapBytes) {
+                  _mesa_swap4( (GLuint *) dst, readWidth );
+               }
+            }
+            break;
          case GL_BITMAP:
             if (packing->LsbFirst) {
                GLubyte *dst = (GLubyte*) dest;
@@ -537,24 +524,24 @@ read_fast_rgba_pixels( GLcontext *ctx,
          rowLength = width;
 
       /* horizontal clipping */
-      if (srcX < ctx->Buffer->Xmin) {
-         skipPixels += (ctx->Buffer->Xmin - srcX);
-         readWidth  -= (ctx->Buffer->Xmin - srcX);
-         srcX = ctx->Buffer->Xmin;
+      if (srcX < ctx->ReadBuffer->Xmin) {
+         skipPixels += (ctx->ReadBuffer->Xmin - srcX);
+         readWidth  -= (ctx->ReadBuffer->Xmin - srcX);
+         srcX = ctx->ReadBuffer->Xmin;
       }
-      if (srcX + readWidth > ctx->Buffer->Xmax)
-         readWidth -= (srcX + readWidth - ctx->Buffer->Xmax - 1);
+      if (srcX + readWidth > ctx->ReadBuffer->Xmax)
+         readWidth -= (srcX + readWidth - ctx->ReadBuffer->Xmax - 1);
       if (readWidth <= 0)
          return GL_TRUE;
 
       /* vertical clipping */
-      if (srcY < ctx->Buffer->Ymin) {
-         skipRows   += (ctx->Buffer->Ymin - srcY);
-         readHeight -= (ctx->Buffer->Ymin - srcY);
-         srcY = ctx->Buffer->Ymin;
+      if (srcY < ctx->ReadBuffer->Ymin) {
+         skipRows   += (ctx->ReadBuffer->Ymin - srcY);
+         readHeight -= (ctx->ReadBuffer->Ymin - srcY);
+         srcY = ctx->ReadBuffer->Ymin;
       }
-      if (srcY + readHeight > ctx->Buffer->Ymax)
-         readHeight -= (srcY + readHeight - ctx->Buffer->Ymax - 1);
+      if (srcY + readHeight > ctx->ReadBuffer->Ymax)
+         readHeight -= (srcY + readHeight - ctx->ReadBuffer->Ymax - 1);
       if (readHeight <= 0)
          return GL_TRUE;
 
@@ -601,13 +588,13 @@ static void read_rgba_pixels( GLcontext *ctx,
 {
    GLint readWidth;
 
-   (void) (*ctx->Driver.SetBuffer)( ctx, ctx->Pixel.DriverReadBuffer );
+   (*ctx->Driver.SetReadBuffer)(ctx, ctx->ReadBuffer, ctx->Pixel.DriverReadBuffer);
 
    /* Try optimized path first */
    if (read_fast_rgba_pixels( ctx, x, y, width, height,
                               format, type, pixels, packing )) {
 
-      (void) (*ctx->Driver.SetBuffer)( ctx, ctx->Color.DriverDrawBuffer );
+      (*ctx->Driver.SetReadBuffer)(ctx, ctx->DrawBuffer, ctx->Color.DriverDrawBuffer);
       return; /* done! */
    }
 
@@ -641,7 +628,7 @@ static void read_rgba_pixels( GLcontext *ctx,
          return;
    }
 
-   if (!gl_is_legal_format_and_type(format, type)) {
+   if (!_mesa_is_legal_format_and_type(format, type)) {
       gl_error(ctx, GL_INVALID_OPERATION, "glReadPixels(format or type)");
       return;
    }
@@ -652,47 +639,48 @@ static void read_rgba_pixels( GLcontext *ctx,
          GLubyte rgba[MAX_WIDTH][4];
          GLvoid *dest;
 
-         gl_read_rgba_span( ctx, readWidth, x, y, rgba );
+         gl_read_rgba_span( ctx, ctx->ReadBuffer, readWidth, x, y, rgba );
 
-         dest = gl_pixel_addr_in_image( packing, pixels, width, height,
+         dest = _mesa_image_address( packing, pixels, width, height,
                                         format, type, 0, j, 0);
 
-         gl_pack_rgba_span( ctx, readWidth, (const GLubyte (*)[4]) rgba,
-                            format, type, dest, packing, GL_TRUE );
+         _mesa_pack_rgba_span( ctx, readWidth, (const GLubyte (*)[4]) rgba,
+                               format, type, dest, packing, GL_TRUE );
       }
    }
    else {
       GLint j;
       for (j=0;j<height;j++,y++) {
          GLubyte rgba[MAX_WIDTH][4];
-	 GLuint index[MAX_WIDTH];
+         GLuint index[MAX_WIDTH];
          GLvoid *dest;
 
-	 (*ctx->Driver.ReadCI32Span)( ctx, readWidth, x, y, index );
+         (*ctx->Driver.ReadCI32Span)( ctx, readWidth, x, y, index );
 
-	 if (ctx->Pixel.IndexShift!=0 || ctx->Pixel.IndexOffset!=0) {
+         if (ctx->Pixel.IndexShift!=0 || ctx->Pixel.IndexOffset!=0) {
             gl_map_ci( ctx, readWidth, index );
-	 }
+         }
 
          gl_map_ci_to_rgba(ctx, readWidth, index, rgba );
 
-         dest = gl_pixel_addr_in_image( packing, pixels, width, height,
+         dest = _mesa_image_address( packing, pixels, width, height,
                                         format, type, 0, j, 0);
 
-         gl_pack_rgba_span( ctx, readWidth, (const GLubyte (*)[4]) rgba,
-                            format, type, dest, packing, GL_TRUE );
+         _mesa_pack_rgba_span( ctx, readWidth, (const GLubyte (*)[4]) rgba,
+                               format, type, dest, packing, GL_TRUE );
       }
    }
 
-   (void) (*ctx->Driver.SetBuffer)( ctx, ctx->Color.DriverDrawBuffer );
+   (*ctx->Driver.SetReadBuffer)( ctx, ctx->DrawBuffer, ctx->Color.DriverDrawBuffer );
 }
 
 
 
-void gl_ReadPixels( GLcontext *ctx,
-                    GLint x, GLint y, GLsizei width, GLsizei height,
-		    GLenum format, GLenum type, GLvoid *pixels )
+void
+_mesa_ReadPixels( GLint x, GLint y, GLsizei width, GLsizei height,
+                  GLenum format, GLenum type, GLvoid *pixels )
 {
+   GET_CURRENT_CONTEXT(ctx);
    ASSERT_OUTSIDE_BEGIN_END_AND_FLUSH(ctx, "glReadPixels");
 
    if (!pixels) {
@@ -700,16 +688,21 @@ void gl_ReadPixels( GLcontext *ctx,
       return;
    }
 
+   if (ctx->Driver.ReadPixels &&
+       (*ctx->Driver.ReadPixels)(ctx, x, y, width, height,
+                                 format, type, &ctx->Pack, pixels))
+      return;
+
    switch (format) {
       case GL_COLOR_INDEX:
-         read_index_pixels( ctx, x, y, width, height, type, pixels, &ctx->Pack );
-	 break;
+         read_index_pixels(ctx, x, y, width, height, type, pixels, &ctx->Pack );
+         break;
       case GL_STENCIL_INDEX:
-	 read_stencil_pixels( ctx, x, y, width, height, type, pixels, &ctx->Pack );
+         read_stencil_pixels(ctx, x, y, width, height, type, pixels, &ctx->Pack );
          break;
       case GL_DEPTH_COMPONENT:
-	 read_depth_pixels( ctx, x, y, width, height, type, pixels, &ctx->Pack );
-	 break;
+         read_depth_pixels(ctx, x, y, width, height, type, pixels, &ctx->Pack );
+         break;
       case GL_RED:
       case GL_GREEN:
       case GL_BLUE:
@@ -721,9 +714,10 @@ void gl_ReadPixels( GLcontext *ctx,
       case GL_BGR:
       case GL_BGRA:
       case GL_ABGR_EXT:
-         read_rgba_pixels( ctx, x, y, width, height, format, type, pixels, &ctx->Pack );
-	 break;
+         read_rgba_pixels(ctx, x, y, width, height,
+                          format, type, pixels, &ctx->Pack );
+         break;
       default:
-	 gl_error( ctx, GL_INVALID_ENUM, "glReadPixels(format)" );
+         gl_error( ctx, GL_INVALID_ENUM, "glReadPixels(format)" );
    }
 }

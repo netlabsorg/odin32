@@ -1,8 +1,8 @@
-/* $Id: alpha.c,v 1.2 2000-03-01 18:49:22 jeroen Exp $ */
+/* $Id: alpha.c,v 1.3 2000-05-23 20:40:20 jeroen Exp $ */
 
 /*
  * Mesa 3-D graphics library
- * Version:  3.1
+ * Version:  3.3
  *
  * Copyright (C) 1999  Brian Paul   All Rights Reserved.
  *
@@ -30,10 +30,7 @@
 #ifdef PC_HEADER
 #include "all.h"
 #else
-#ifndef XFree86Server
-#else
-#include "GL/xf86glx.h"
-#endif
+#include "glheader.h"
 #include "alpha.h"
 #include "types.h"
 #include "context.h"
@@ -43,8 +40,10 @@
 
 
 
-void gl_AlphaFunc( GLcontext* ctx, GLenum func, GLclampf ref )
+void
+_mesa_AlphaFunc( GLenum func, GLclampf ref )
 {
+   GET_CURRENT_CONTEXT(ctx);
    ASSERT_OUTSIDE_BEGIN_END_AND_FLUSH(ctx, "glAlphaFunc");
 
    switch (func) {
@@ -84,8 +83,9 @@ void gl_AlphaFunc( GLcontext* ctx, GLenum func, GLclampf ref )
  * Return:  0 = all pixels in the span failed the alpha test.
  *          1 = one or more pixels passed the alpha test.
  */
-GLint gl_alpha_test( const GLcontext* ctx,
-                     GLuint n, CONST GLubyte rgba[][4], GLubyte mask[] )
+GLint
+_mesa_alpha_test( const GLcontext* ctx,
+                  GLuint n, CONST GLubyte rgba[][4], GLubyte mask[] )
 {
    GLuint i;
    GLubyte ref = ctx->Color.AlphaRef;

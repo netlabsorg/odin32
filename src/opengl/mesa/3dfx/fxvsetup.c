@@ -2,7 +2,7 @@
 
 /*
  * Mesa 3-D graphics library
- * Version:  3.1
+ * Version:  3.3
  *
  * Copyright (C) 1999  Brian Paul   All Rights Reserved.
  *
@@ -60,20 +60,20 @@
 void fxPrintSetupFlags( const char *msg, GLuint flags )
 {
    fprintf(stderr, "%s: %d %s%s%s%s%s%s\n",
-	  msg,
-	  flags,
-	  (flags & SETUP_XY) ? " xy," : "", 
-	  (flags & SETUP_Z)  ? " z," : "",
-	  (flags & SETUP_W)  ? " w," : "",
-	  (flags & SETUP_RGBA) ? " rgba," : "",
-	  (flags & SETUP_TMU0)  ? " tmu0," : "",
-	  (flags & SETUP_TMU1)  ? " tmu1," : "");
+          msg,
+          flags,
+          (flags & SETUP_XY) ? " xy," : "",
+          (flags & SETUP_Z)  ? " z," : "",
+          (flags & SETUP_W)  ? " w," : "",
+          (flags & SETUP_RGBA) ? " rgba," : "",
+          (flags & SETUP_TMU0)  ? " tmu0," : "",
+          (flags & SETUP_TMU1)  ? " tmu1," : "");
 }
 
 static void project_texcoords( struct vertex_buffer *VB,
-			       GLuint tmu_nr, GLuint tc_nr,
-			       GLuint start, GLuint count )
-{			       
+                               GLuint tmu_nr, GLuint tc_nr,
+                               GLuint start, GLuint count )
+{
    fxVertex *v = FX_DRIVER_DATA(VB)->verts + start;
    GrTmuVertex *tmu = &(((GrVertex *)v->f)->tmuvtx[tmu_nr]);
    GLvector4f *vec = VB->TexCoordPtr[tc_nr];
@@ -85,14 +85,14 @@ static void project_texcoords( struct vertex_buffer *VB,
    for (i = start ; i < count ; i++, STRIDE_F(data, stride), v++) {
       tmu->oow = v->f[OOWCOORD] * data[3];
       tmu = (GrTmuVertex *)((char *)tmu + sizeof(fxVertex));
-   }      
+   }
 }
 
 
 static void copy_w( struct vertex_buffer *VB,
-		    GLuint tmu_nr, 
-		    GLuint start, GLuint count )
-{			       
+                    GLuint tmu_nr,
+                    GLuint start, GLuint count )
+{
    fxVertex *v = FX_DRIVER_DATA(VB)->verts + start;
    GrTmuVertex *tmu = &(((GrVertex *)v->f)->tmuvtx[tmu_nr]);
    GLuint i;
@@ -100,7 +100,7 @@ static void copy_w( struct vertex_buffer *VB,
    for (i = start ; i < count ; i++, v++) {
       tmu->oow = v->f[OOWCOORD];
       tmu = (GrTmuVertex *)((char *)tmu + sizeof(fxVertex));
-   }      
+   }
 }
 
 
@@ -302,39 +302,33 @@ tfxSetupFunc fxDDChooseSetupFunction(GLcontext *ctx)
    if (ctx->Fog.Enabled && ctx->FogMode==FOG_FRAGMENT)
       setupindex |= SETUP_RGBA|SETUP_W;
 
-   if ((ctx->Texture.ReallyEnabled & (TEXTURE0_2D|TEXTURE0_3D)) == TEXTURE0_2D) 
+   if ((ctx->Texture.ReallyEnabled & (TEXTURE0_2D|TEXTURE0_3D)) == TEXTURE0_2D)
    {
-      if (ctx->Texture.Unit[0].EnvMode == GL_REPLACE) 
-	 setupindex &= ~SETUP_RGBA;
+      if (ctx->Texture.Unit[0].EnvMode == GL_REPLACE)
+         setupindex &= ~SETUP_RGBA;
 
       setupindex |= SETUP_TMU0|SETUP_W;
    }
 
    if ((ctx->Texture.ReallyEnabled & (TEXTURE1_2D|TEXTURE1_3D)) == TEXTURE1_2D)
    {
-      if (setupindex & SETUP_TMU0) {
-	 struct gl_texture_object *tObj=ctx->Texture.Unit[0].CurrentD[2];
-	 tfxTexInfo *ti=fxTMGetTexInfo(tObj);
+     setupindex |= SETUP_TMU1|SETUP_W;
+     if (setupindex & SETUP_TMU0) { /* both TMUs in use */
+       struct gl_texture_object *tObj=ctx->Texture.Unit[0].CurrentD[2];
+       tfxTexInfo *ti=fxTMGetTexInfo(tObj);
 
-	 setupindex |= SETUP_TMU1|SETUP_W;
-
-	 if(ti->whichTMU!=FX_TMU0) {
-	    fxMesa->tmu_source[0] = 1; fxMesa->tex_dest[1] = SETUP_TMU0;
-	    fxMesa->tmu_source[1] = 0; fxMesa->tex_dest[0] = SETUP_TMU1;
-	 }
-      } else {
-	 setupindex |= SETUP_TMU0|SETUP_W;
-	 fxMesa->tmu_source[0] = 1; fxMesa->tex_dest[1] = SETUP_TMU0;
-	 /* not used: */
-	 fxMesa->tmu_source[1] = 0; fxMesa->tex_dest[0] = SETUP_TMU1; 
-      }
+       if (ti->whichTMU!=FX_TMU0) { /* TMU0 and TMU1 are swapped */
+         fxMesa->tmu_source[0] = 1; fxMesa->tex_dest[1] = SETUP_TMU0;
+         fxMesa->tmu_source[1] = 0; fxMesa->tex_dest[0] = SETUP_TMU1;
+       }
+     }
    }
 
    if (ctx->Color.BlendEnabled)
       setupindex |= SETUP_RGBA;
 
    if (MESA_VERBOSE & (VERBOSE_DRIVER|VERBOSE_PIPELINE|VERBOSE_STATE))
-      fxPrintSetupFlags("fxmesa: vertex setup function", setupindex); 
+      fxPrintSetupFlags("fxmesa: vertex setup function", setupindex);
 
    fxMesa->setupindex = setupindex;
    fxMesa->view_clip_tri = fxTriViewClipTab[setupindex&0x7];
@@ -352,10 +346,10 @@ void fxDDDoRasterSetup( struct vertex_buffer *VB )
       fxMesa->setupdone = 0;
       return;
    }
-      
-   if (VB->Type == VB_CVA_PRECALC) 
+
+   if (VB->Type == VB_CVA_PRECALC)
       fxDDPartialRasterSetup( VB );
-   else 
+   else
       ctx->Driver.RasterSetup( VB, VB->CopyStart, VB->Count );
 }
 
@@ -365,7 +359,7 @@ void fxDDDoRasterSetup( struct vertex_buffer *VB )
  * happen here.  Therefore - need to know that this will be fired when
  * we get a forbidden input in the elt pipeline - and therefore need to check
  * whether we have one *now*.  Similarly need to know if state changes cause
- * size4 texcoords to be introduced.  
+ * size4 texcoords to be introduced.
  */
 void fxDDCheckPartialRasterSetup( GLcontext *ctx, struct gl_pipeline_stage *d )
 {
@@ -374,25 +368,25 @@ void fxDDCheckPartialRasterSetup( GLcontext *ctx, struct gl_pipeline_stage *d )
 
    d->type = 0;
    d->pre_forbidden_inputs = 0;
-   fxMesa->setupdone = 0;	/* cleared if we return */
+   fxMesa->setupdone = 0;       /* cleared if we return */
 
-   /* Indirect triangles must be rendered via the immediate pipeline.  
-    * If all rasterization is software, no need to set up.  
+   /* Indirect triangles must be rendered via the immediate pipeline.
+    * If all rasterization is software, no need to set up.
     */
    if ((ctx->Array.Summary & VERT_OBJ_ANY) == 0)
       return;
-   
+
    if ((ctx->IndirectTriangles & DD_SW_SETUP) ||
-       (ctx->IndirectTriangles & DD_SW_RASTERIZE) == DD_SW_RASTERIZE) 
+       (ctx->IndirectTriangles & DD_SW_RASTERIZE) == DD_SW_RASTERIZE)
       return;
 
    if ((ctx->Texture.ReallyEnabled & 0xf) &&
        !(ctx->Array.Flags & VERT_TEX0_ANY))
    {
       if (ctx->TextureMatrix[0].type == MATRIX_GENERAL ||
-	  ctx->TextureMatrix[0].type == MATRIX_PERSPECTIVE ||
-	  (ctx->Texture.Unit[1].TexGenEnabled & Q_BIT))
-	 return;
+          ctx->TextureMatrix[0].type == MATRIX_PERSPECTIVE ||
+          (ctx->Texture.Unit[1].TexGenEnabled & Q_BIT))
+         return;
 
       d->pre_forbidden_inputs |= VERT_TEX0_4;
    }
@@ -401,14 +395,14 @@ void fxDDCheckPartialRasterSetup( GLcontext *ctx, struct gl_pipeline_stage *d )
        !(ctx->Array.Flags & VERT_TEX1_ANY))
    {
       if (ctx->TextureMatrix[1].type == MATRIX_GENERAL ||
-	  ctx->TextureMatrix[1].type == MATRIX_PERSPECTIVE ||
-	  (ctx->Texture.Unit[1].TexGenEnabled & Q_BIT))
-	 return;
+          ctx->TextureMatrix[1].type == MATRIX_PERSPECTIVE ||
+          (ctx->Texture.Unit[1].TexGenEnabled & Q_BIT))
+         return;
 
       d->pre_forbidden_inputs |= VERT_TEX1_4;
    }
 
-   
+
    fxMesa->setupdone = tmp;
    d->inputs = 0;
    d->outputs = VERT_SETUP_PART;
@@ -443,18 +437,18 @@ void fxDDPartialRasterSetup( struct vertex_buffer *VB )
 
    if ((newout & VERT_WIN) == 0)
       ind &= ~(fxMesa->setupdone & SETUP_W);
-      
+
    fxMesa->setupdone &= ~ind;
    ind &= fxMesa->setupindex;
    fxMesa->setupdone |= ind;
 
    if (MESA_VERBOSE & (VERBOSE_DRIVER|VERBOSE_PIPELINE)) {
       gl_print_vert_flags("new outputs", VB->pipeline->new_outputs);
-      fxPrintSetupFlags("fxmesa: partial setup function", ind); 
+      fxPrintSetupFlags("fxmesa: partial setup function", ind);
    }
 
-   if (ind) 
-      setupfuncs[ind]( VB, VB->Start, VB->Count );   
+   if (ind)
+      setupfuncs[ind]( VB, VB->Start, VB->Count );
 }
 
 /* Almost certainly never called.
@@ -471,24 +465,24 @@ void fxDDResizeVB( struct vertex_buffer *VB, GLuint size )
 
    FREE( fvb->vert_store );
    fvb->vert_store = MALLOC( sizeof(fxVertex) * fvb->size + 31);
-   if (!fvb->vert_store || !VB->ClipMask) 
+   if (!fvb->vert_store || !VB->ClipMask)
    {
      fprintf(stderr,"fx Driver: out of memory !\n");
      fxCloseHardware();
-     exit(-1);
+     EXIT(-1);
    }
    fvb->verts = (fxVertex *)(((unsigned long)fvb->vert_store + 31) & ~31);
 
    gl_vector1ui_free( &fvb->clipped_elements );
    gl_vector1ui_alloc( &fvb->clipped_elements, VEC_WRITABLE, fvb->size, 32 );
-   
+
    if (!fvb->clipped_elements.start) goto memerror;
-   
+
    return;
-memerror: 
+memerror:
    fprintf(stderr,"fx Driver: out of memory !\n");
    fxCloseHardware();
-   exit(-1);
+   EXIT(-1);
 }
 
 
@@ -506,58 +500,58 @@ void fxDDRegisterVB( struct vertex_buffer *VB )
       fvb->size = VB->Size * 5;
       fvb->vert_store = MALLOC( sizeof(fxVertex) * fvb->size + 31);
       if (!fvb->vert_store) goto memerror;
-#if defined(FX_GLIDE3) 
+#if defined(FX_GLIDE3)
       fvb->triangle_b = MALLOC( sizeof(GrVertex*) *4* fvb->size+ 31);
       if (!fvb->triangle_b)  goto memerror;
       fvb->strips_b = MALLOC( sizeof(GrVertex*) *4* fvb->size+ 31);
-      if (!fvb->strips_b )  goto memerror;          
-#endif     
+      if (!fvb->strips_b )  goto memerror;
+#endif
       fvb->verts = (fxVertex *)(((unsigned long)fvb->vert_store + 31) & ~31);
       gl_vector1ui_alloc( &fvb->clipped_elements, VEC_WRITABLE, fvb->size, 32 );
       if (!fvb->clipped_elements.start) goto memerror;
 
       FREE( VB->ClipMask );
       VB->ClipMask = (GLubyte *)MALLOC(sizeof(GLubyte) * fvb->size);
-	  if (!VB->ClipMask) goto memerror;
+          if (!VB->ClipMask) goto memerror;
 
    } else {
       fvb->vert_store = MALLOC( sizeof(fxVertex) * (VB->Size + 12) + 31);
       if (!fvb->vert_store) goto memerror;
-#if defined(FX_GLIDE3) 
+#if defined(FX_GLIDE3)
       fvb->triangle_b = MALLOC( sizeof(GrVertex*) *4* fvb->size+ 31);
       if (!fvb->triangle_b)  goto memerror;
       fvb->strips_b = MALLOC( sizeof(GrVertex*) *4* fvb->size+ 31);
-      if (!fvb->strips_b )  goto memerror;     
-#endif       
+      if (!fvb->strips_b )  goto memerror;
+#endif
       fvb->verts = (fxVertex *)(((unsigned long)fvb->vert_store + 31) & ~31);
       fvb->size = VB->Size + 12;
    }
 
-   
+
    VB->driver_data = fvb;
    return;
 memerror:
    fprintf(stderr,"fx Driver: out of memory !\n");
    fxCloseHardware();
-   exit(-1);   
+   EXIT(-1);
 }
 
 void fxDDUnregisterVB( struct vertex_buffer *VB )
 {
    struct tfxMesaVertexBuffer *fvb = FX_DRIVER_DATA(VB);
-   
+
    if (fvb) {
       if (fvb->vert_store) FREE(fvb->vert_store);
       gl_vector1ui_free( &fvb->clipped_elements );
       FREE(fvb);
 #if defined(FX_GLIDE3)
       if (fvb->strips_b)
-      	FREE(fvb->strips_b);
+        FREE(fvb->strips_b);
       if (fvb->triangle_b)
-      	FREE(fvb->triangle_b);
+        FREE(fvb->triangle_b);
 #endif
       VB->driver_data = 0;
-   }      
+   }
 }
 
 

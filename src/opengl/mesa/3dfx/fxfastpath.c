@@ -2,7 +2,7 @@
 
 /*
  * Mesa 3-D graphics library
- * Version:  3.1
+ * Version:  3.3
  *
  * Copyright (C) 1999  Brian Paul   All Rights Reserved.
  *
@@ -55,7 +55,7 @@
 #include "mmath.h"
 #include "fxdrv.h"
 #include "vertices.h"
-//#include "X86/common_x86asm.h"
+#include "common_x86asm.h"
 
 
 #if 0 && defined(__i386__)
@@ -69,159 +69,159 @@
 #define LINTERP( T, A, B )   ( (A) + (T) * ( (B) - (A) ) )
 
 
-#define CLIP(sgn,v,PLANE)					\
-if (mask & PLANE) {						\
-   GLuint *indata = inlist[in];					\
-   GLuint *outdata = inlist[in ^= 1];				\
-   GLuint nr = n;						\
-   GLfloat *J = verts[indata[nr-1]].f;				\
-   GLfloat dpJ = (sgn J[v]) + J[CLIP_WCOORD];			\
-								\
-   inlist[0] = vlist1;						\
-   for (i = n = 0 ; i < nr ; i++) {				\
-      GLuint elt_i = indata[i];					\
-      GLfloat *I = verts[elt_i].f;				\
-      GLfloat dpI = (sgn I[v]) + I[CLIP_WCOORD];		\
-								\
-      if (DIFFERENT_SIGNS(dpI, dpJ)) {				\
-	 GLfloat *O = verts[next_vert].f;			\
-         GLfloat t = dpI / (dpI - dpJ);				\
-	 GLuint j;						\
-								\
-	 clipmask[next_vert] = 0;				\
-	 outdata[n++] = next_vert++;				\
-								\
-         for (j = 0 ; j < SIZE ; j += 2) {			\
-	    O[j]   = LINTERP(t, I[j],   J[j]);			\
-	    O[j+1] = LINTERP(t, I[j+1], J[j+1]);	       	\
-	 }							\
-      }								\
-								\
-      clipmask[elt_i] |= PLANE;		/* don't set up */	\
-								\
-      if (!NEGATIVE(dpI)) {					\
-	 outdata[n++] = elt_i;					\
-	 clipmask[elt_i] &= ~PLANE;	/* set up after all */	\
-      }								\
-								\
-      J = I;							\
-      dpJ = dpI;						\
-   }								\
-								\
-   if (n < 3) return;						\
+#define CLIP(sgn,v,PLANE)                                       \
+if (mask & PLANE) {                                             \
+   GLuint *indata = inlist[in];                                 \
+   GLuint *outdata = inlist[in ^= 1];                           \
+   GLuint nr = n;                                               \
+   GLfloat *J = verts[indata[nr-1]].f;                          \
+   GLfloat dpJ = (sgn J[v]) + J[CLIP_WCOORD];                   \
+                                                                \
+   inlist[0] = vlist1;                                          \
+   for (i = n = 0 ; i < nr ; i++) {                             \
+      GLuint elt_i = indata[i];                                 \
+      GLfloat *I = verts[elt_i].f;                              \
+      GLfloat dpI = (sgn I[v]) + I[CLIP_WCOORD];                \
+                                                                \
+      if (DIFFERENT_SIGNS(dpI, dpJ)) {                          \
+         GLfloat *O = verts[next_vert].f;                       \
+         GLfloat t = dpI / (dpI - dpJ);                         \
+         GLuint j;                                              \
+                                                                \
+         clipmask[next_vert] = 0;                               \
+         outdata[n++] = next_vert++;                            \
+                                                                \
+         for (j = 0 ; j < SIZE ; j += 2) {                      \
+            O[j]   = LINTERP(t, I[j],   J[j]);                  \
+            O[j+1] = LINTERP(t, I[j+1], J[j+1]);                \
+         }                                                      \
+      }                                                         \
+                                                                \
+      clipmask[elt_i] |= PLANE;         /* don't set up */      \
+                                                                \
+      if (!NEGATIVE(dpI)) {                                     \
+         outdata[n++] = elt_i;                                  \
+         clipmask[elt_i] &= ~PLANE;     /* set up after all */  \
+      }                                                         \
+                                                                \
+      J = I;                                                    \
+      dpJ = dpI;                                                \
+   }                                                            \
+                                                                \
+   if (n < 3) return;                                           \
 }
 
-#define LINE_CLIP(x,y,z,w,PLANE)				\
-if (mask & PLANE) {						\
-   GLfloat dpI = DOT4V(I,x,y,z,w);				\
-   GLfloat dpJ = DOT4V(J,x,y,z,w);				\
-								\
-   if (DIFFERENT_SIGNS(dpI, dpJ)) {				\
-      GLfloat *O = verts[next_vert].f;				\
-      GLfloat t = dpI / (dpI - dpJ);				\
-      GLuint j;							\
-								\
-      for (j = 0 ; j < SIZE ; j += 2) {				\
-         O[j]   = LINTERP(t, I[j],   J[j]);			\
-	 O[j+1] = LINTERP(t, I[j+1], J[j+1]);	       		\
-      }								\
-								\
-      clipmask[next_vert] = 0;					\
-								\
-      if (NEGATIVE(dpI)) {					\
-  	 clipmask[elts[0]] |= PLANE;				\
-	 I = O; elts[0] = next_vert++;				\
-      } else {							\
-  	 clipmask[elts[1]] |= PLANE;				\
-	 J = O;	elts[1] = next_vert++;				\
-      }								\
-   }								\
-   else if (NEGATIVE(dpI))					\
-      return;							\
+#define LINE_CLIP(x,y,z,w,PLANE)                                \
+if (mask & PLANE) {                                             \
+   GLfloat dpI = DOT4V(I,x,y,z,w);                              \
+   GLfloat dpJ = DOT4V(J,x,y,z,w);                              \
+                                                                \
+   if (DIFFERENT_SIGNS(dpI, dpJ)) {                             \
+      GLfloat *O = verts[next_vert].f;                          \
+      GLfloat t = dpI / (dpI - dpJ);                            \
+      GLuint j;                                                 \
+                                                                \
+      for (j = 0 ; j < SIZE ; j += 2) {                         \
+         O[j]   = LINTERP(t, I[j],   J[j]);                     \
+         O[j+1] = LINTERP(t, I[j+1], J[j+1]);                   \
+      }                                                         \
+                                                                \
+      clipmask[next_vert] = 0;                                  \
+                                                                \
+      if (NEGATIVE(dpI)) {                                      \
+         clipmask[elts[0]] |= PLANE;                            \
+         I = O; elts[0] = next_vert++;                          \
+      } else {                                                  \
+         clipmask[elts[1]] |= PLANE;                            \
+         J = O; elts[1] = next_vert++;                          \
+      }                                                         \
+   }                                                            \
+   else if (NEGATIVE(dpI))                                      \
+      return;                                                   \
 }
 
 
-#define CLIP_POINT( e )				\
-   if (mask[e])					\
-      *out++ = e 
+#define CLIP_POINT( e )                         \
+   if (mask[e])                                 \
+      *out++ = e
 
-#define CLIP_LINE( e1, e0 )						\
-do {									\
-   GLubyte ormask = mask[e0] | mask[e1];				\
-   out[0] = e1;								\
-   out[1] = e0;								\
-   out+=2;								\
-   if (ormask) {							\
-      out-=2;								\
-      if (!(mask[e0] & mask[e1])) {					\
-	 TAG(fx_line_clip)( &out, verts, mask, &next_vert, ormask);	\
-      }									\
-   }									\
+#define CLIP_LINE( e1, e0 )                                             \
+do {                                                                    \
+   GLubyte ormask = mask[e0] | mask[e1];                                \
+   out[0] = e1;                                                         \
+   out[1] = e0;                                                         \
+   out+=2;                                                              \
+   if (ormask) {                                                        \
+      out-=2;                                                           \
+      if (!(mask[e0] & mask[e1])) {                                     \
+         TAG(fx_line_clip)( &out, verts, mask, &next_vert, ormask);     \
+      }                                                                 \
+   }                                                                    \
 } while (0)
 
-#define CLIP_TRIANGLE( e2, e1, e0 )					\
-do {									\
-   GLubyte ormask;							\
-   out[0] = e2;								\
-   out[1] = e1;								\
-   out[2] = e0;								\
-   out += 3;								\
-   ormask = mask[e2] | mask[e1] | mask[e0];				\
-   if (ormask) {							\
-      out -= 3;								\
-      if ( !(mask[e2] & mask[e1] & mask[e0])) {				\
-	 TAG(fx_tri_clip)( &out, verts, mask, &next_vert, ormask );	\
-      }									\
-   }									\
+#define CLIP_TRIANGLE( e2, e1, e0 )                                     \
+do {                                                                    \
+   GLubyte ormask;                                                      \
+   out[0] = e2;                                                         \
+   out[1] = e1;                                                         \
+   out[2] = e0;                                                         \
+   out += 3;                                                            \
+   ormask = mask[e2] | mask[e1] | mask[e0];                             \
+   if (ormask) {                                                        \
+      out -= 3;                                                         \
+      if ( !(mask[e2] & mask[e1] & mask[e0])) {                         \
+         TAG(fx_tri_clip)( &out, verts, mask, &next_vert, ormask );     \
+      }                                                                 \
+   }                                                                    \
 } while (0)
 
 #if defined(FX_V2) || defined(DRIVERTS)
 
-#define VARS_XYZ				\
-  GLfloat vsx = mat[MAT_SX];			\
-  GLfloat vsy = mat[MAT_SY];			\
-  GLfloat vsz = mat[MAT_SZ];			\
-  GLfloat vtx = mat[MAT_TX];			\
-  GLfloat vty = mat[MAT_TY];			\
+#define VARS_XYZ                                \
+  GLfloat vsx = mat[MAT_SX];                    \
+  GLfloat vsy = mat[MAT_SY];                    \
+  GLfloat vsz = mat[MAT_SZ];                    \
+  GLfloat vtx = mat[MAT_TX];                    \
+  GLfloat vty = mat[MAT_TY];                    \
   GLfloat vtz = mat[MAT_TZ];
 
-#define DO_SETUP_XYZ				\
-  f[XCOORD] = f[0] * oow * vsx + vtx;		\
-  f[YCOORD] = f[1] * oow * vsy + vty;		\
+#define DO_SETUP_XYZ                            \
+  f[XCOORD] = f[0] * oow * vsx + vtx;           \
+  f[YCOORD] = f[1] * oow * vsy + vty;           \
   f[ZCOORD] = f[2] * oow * vsz + vtz;
 
 #else
 #if defined(HAVE_FAST_MATH)
 
-#define VARS_XYZ				\
-  GLfloat vsx = mat[MAT_SX];			\
-  GLfloat vsy = mat[MAT_SY];			\
-  GLfloat vsz = mat[MAT_SZ];			\
-  const GLfloat snapper = (3L << 18);		\
-  GLfloat vtx = mat[MAT_TX] + snapper;		\
-  GLfloat vty = mat[MAT_TY] + snapper;		\
+#define VARS_XYZ                                \
+  GLfloat vsx = mat[MAT_SX];                    \
+  GLfloat vsy = mat[MAT_SY];                    \
+  GLfloat vsz = mat[MAT_SZ];                    \
+  const GLfloat snapper = (3L << 18);           \
+  GLfloat vtx = mat[MAT_TX] + snapper;          \
+  GLfloat vty = mat[MAT_TY] + snapper;          \
   GLfloat vtz = mat[MAT_TZ];
 
-#define DO_SETUP_XYZ				\
-  f[XCOORD] = f[0] * oow * vsx + vtx;		\
-  f[XCOORD] -= snapper;				\
-  f[YCOORD] = f[1] * oow * vsy + vty;		\
-  f[YCOORD] -= snapper;				\
+#define DO_SETUP_XYZ                            \
+  f[XCOORD] = f[0] * oow * vsx + vtx;           \
+  f[XCOORD] -= snapper;                         \
+  f[YCOORD] = f[1] * oow * vsy + vty;           \
+  f[YCOORD] -= snapper;                         \
   f[ZCOORD] = f[2] * oow * vsz + vtz;
 
 #else
 
-#define VARS_XYZ				\
-  GLfloat vsx = mat[MAT_SX] * 16.0f;		\
-  GLfloat vsy = mat[MAT_SY] * 16.0f;		\
-  GLfloat vsz = mat[MAT_SZ];			\
-  GLfloat vtx = mat[MAT_TX] * 16.0f;		\
-  GLfloat vty = mat[MAT_TY] * 16.0f;		\
+#define VARS_XYZ                                \
+  GLfloat vsx = mat[MAT_SX] * 16.0f;            \
+  GLfloat vsy = mat[MAT_SY] * 16.0f;            \
+  GLfloat vsz = mat[MAT_SZ];                    \
+  GLfloat vtx = mat[MAT_TX] * 16.0f;            \
+  GLfloat vty = mat[MAT_TY] * 16.0f;            \
   GLfloat vtz = mat[MAT_TZ];
 
-#define DO_SETUP_XYZ					\
-  f[XCOORD] = ((int)(f[0]*oow*vsx+vtx)) * (1.0f/16.0f);	\
-  f[YCOORD] = ((int)(f[1]*oow*vsy+vty)) * (1.0f/16.0f);	\
+#define DO_SETUP_XYZ                                    \
+  f[XCOORD] = ((int)(f[0]*oow*vsx+vtx)) * (1.0f/16.0f); \
+  f[YCOORD] = ((int)(f[1]*oow*vsy+vty)) * (1.0f/16.0f); \
   f[ZCOORD] = f[2]*oow*vsz + vtz;
 
 
@@ -230,25 +230,25 @@ do {									\
 
 
 
-struct fx_fast_tab 
+struct fx_fast_tab
 {
    void (*build_vertices)( struct vertex_buffer *VB, GLuint do_clip );
 
-   void (*clip[GL_POLYGON+1])( struct vertex_buffer *VB, 
-			       GLuint start,
-			       GLuint count,
-			       GLuint parity );
+   void (*clip[GL_POLYGON+1])( struct vertex_buffer *VB,
+                               GLuint start,
+                               GLuint count,
+                               GLuint parity );
 
    void (*project_clipped_vertices)( GLfloat *first,
-				     GLfloat *last,
-				     const GLfloat *mat,
-				     GLuint stride,
-				     const GLubyte *mask );
+                                     GLfloat *last,
+                                     const GLfloat *mat,
+                                     GLuint stride,
+                                     const GLubyte *mask );
 
    void (*project_vertices)( GLfloat *first,
-			     GLfloat *last,
-			     const GLfloat *mat,
-			     GLuint stride );
+                             GLfloat *last,
+                             const GLfloat *mat,
+                             GLuint stride );
 };
 
 /* Pack either rgba or texture into the remaining half of a 32 byte vertex.
@@ -257,7 +257,7 @@ struct fx_fast_tab
 #define CLIP_G  CLIP_GCOORD
 #define CLIP_B  CLIP_BCOORD
 #define CLIP_A  CLIP_ACOORD
-#define CLIP_S0 4		
+#define CLIP_S0 4
 #define CLIP_T0 5
 #define CLIP_S1 6
 #define CLIP_T1 7
@@ -336,7 +336,7 @@ void fxDDFastPathInit()
    fx_init_fastpath_RGBA_TMU1( &fxFastTab[SETUP_RGBA|SETUP_TMU1] );
    fx_init_fastpath_TMU0_TMU1( &fxFastTab[SETUP_TMU0|SETUP_TMU1] );
    fx_init_fastpath_RGBA_TMU0_TMU1( &fxFastTab[SETUP_RGBA|SETUP_TMU0|
-					       SETUP_TMU1] );
+                                               SETUP_TMU1] );
 }
 
 
@@ -356,7 +356,7 @@ void fxDDFastPath( struct vertex_buffer *VB )
    fxVertex *first;
    GLfloat *mat = ctx->Viewport.WindowMap.m;
 
-   gl_prepare_arrays_cva( VB );	                /* still need this */
+   gl_prepare_arrays_cva( VB );                 /* still need this */
 
    if (VB->EltPtr->count * 12 > fxVB->size) {
       fxDDResizeVB( VB, VB->EltPtr->count * 12 );
@@ -376,26 +376,26 @@ void fxDDFastPath( struct vertex_buffer *VB )
 
    if (VB->ClipOrMask) {
       if (!VB->ClipAndMask) {
-	 GLubyte tmp = VB->ClipOrMask;
+         GLubyte tmp = VB->ClipOrMask;
 
-	 tab->clip[prim]( VB, 0, VB->EltPtr->count, 0 );   /* clip */
+         tab->clip[prim]( VB, 0, VB->EltPtr->count, 0 );   /* clip */
 
-	 tab->project_clipped_vertices( fxVB->verts->f, 
-					fxVB->last_vert->f, 
-					mat, 16 * 4, 
-					VB->ClipMask );
-	 
-	 ctx->CVA.elt_mode = gl_reduce_prim[prim];
-	 VB->EltPtr = &(FX_DRIVER_DATA(VB)->clipped_elements);
+         tab->project_clipped_vertices( fxVB->verts->f,
+                                        fxVB->last_vert->f,
+                                        mat, 16 * 4,
+                                        VB->ClipMask );
 
-	 VB->ClipOrMask = 0;
-	 fxDDRenderElementsDirect( VB );        /* render using new list */
-	 VB->ClipOrMask = tmp;
+         ctx->CVA.elt_mode = gl_reduce_prim[prim];
+         VB->EltPtr = &(FX_DRIVER_DATA(VB)->clipped_elements);
+
+         VB->ClipOrMask = 0;
+         fxDDRenderElementsDirect( VB );        /* render using new list */
+         VB->ClipOrMask = tmp;
       }
    } else {
-      tab->project_vertices(  fxVB->verts->f, 
-			      fxVB->last_vert->f, 
-			      mat, 16 * 4 );  
+      tab->project_vertices(  fxVB->verts->f,
+                              fxVB->last_vert->f,
+                              mat, 16 * 4 );
 
       fxDDRenderElementsDirect( VB );           /* render using orig list */
    }
@@ -405,7 +405,7 @@ void fxDDFastPath( struct vertex_buffer *VB )
    mat[MAT_TY]=ty;
 #endif
 
-   /* This indicates that there is no cached data to reuse.  
+   /* This indicates that there is no cached data to reuse.
     */
    VB->pipeline->data_valid = 0;
    VB->pipeline->pipeline_valid = 0;

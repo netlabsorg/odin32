@@ -1,8 +1,8 @@
-/* $Id: texture.c,v 1.2 2000-03-01 18:49:37 jeroen Exp $ */
+/* $Id: texture.c,v 1.3 2000-05-23 20:40:57 jeroen Exp $ */
 
 /*
  * Mesa 3-D graphics library
- * Version:  3.1
+ * Version:  3.3
  *
  * Copyright (C) 1999  Brian Paul   All Rights Reserved.
  *
@@ -28,13 +28,7 @@
 #ifdef PC_HEADER
 #include "all.h"
 #else
-#ifndef XFree86Server
-#include <math.h>
-#include <stdlib.h>
-#include <stdio.h>
-#else
-#include "GL/xf86glx.h"
-#endif
+#include "glheader.h"
 #include "types.h"
 #include "context.h"
 #include "macros.h"
@@ -140,6 +134,107 @@ void gl_init_texture( void )
    init_texgen_compacted_masked();
 }
 
+
+/*
+ * After state changes to texturing we call this function to update
+ * intermediate and derived state.
+ * Called by gl_update_state().
+ */
+void gl_update_texture_unit( GLcontext *ctx, struct gl_texture_unit *texUnit )
+{
+   (void) ctx;
+
+   if ((texUnit->Enabled & TEXTURE0_3D) && texUnit->CurrentD[3]->Complete) {
+      texUnit->ReallyEnabled = TEXTURE0_3D;
+      texUnit->Current = texUnit->CurrentD[3];
+      texUnit->CurrentDimension = 3;
+      goto utex_cont;
+   }
+   if ((texUnit->Enabled & TEXTURE0_2D) && texUnit->CurrentD[2]->Complete) {
+      texUnit->ReallyEnabled = TEXTURE0_2D;
+      texUnit->Current = texUnit->CurrentD[2];
+      texUnit->CurrentDimension = 2;
+      goto utex_cont;
+   }
+   if ((texUnit->Enabled & TEXTURE0_1D) && texUnit->CurrentD[1]->Complete) {
+      texUnit->ReallyEnabled = TEXTURE0_1D;
+      texUnit->Current = texUnit->CurrentD[1];
+      texUnit->CurrentDimension = 1;
+      goto utex_cont;
+   }
+   {
+/*    if (MESA_VERBOSE & VERBOSE_TEXTURE) {
+         switch (texUnit->Enabled) {
+         case TEXTURE0_3D:
+            fprintf(stderr, "Using incomplete 3d texture %u\n",
+                    texUnit->CurrentD[3]->Name);
+            break;
+         case TEXTURE0_2D:
+            fprintf(stderr, "Using incomplete 2d texture %u\n",
+                    texUnit->CurrentD[2]->Name);
+            break;
+         case TEXTURE0_1D:
+            fprintf(stderr, "Using incomplete 1d texture %u\n",
+                    texUnit->CurrentD[1]->Name);
+            break;
+         default:
+            fprintf(stderr, "Bad value for texUnit->Enabled %x\n",
+                    texUnit->Enabled);
+            break;
+         }
+      }      */
+
+      texUnit->ReallyEnabled = 0;
+      texUnit->Current = NULL;
+      texUnit->CurrentDimension = 0;
+      return;
+   }
+
+utex_cont:
+
+   texUnit->GenFlags = 0;
+
+   if (texUnit->TexGenEnabled) {
+      GLuint sz = 0;
+
+      if (texUnit->TexGenEnabled & S_BIT) {
+         sz = 1;
+         texUnit->GenFlags |= texUnit->GenBitS;
+      }
+      if (texUnit->TexGenEnabled & T_BIT) {
+         sz = 2;
+         texUnit->GenFlags |= texUnit->GenBitT;
+      }
+      if (texUnit->TexGenEnabled & Q_BIT) {
+         sz = 3;
+         texUnit->GenFlags |= texUnit->GenBitQ;
+      }
+      if (texUnit->TexGenEnabled & R_BIT) {
+         sz = 4;
+         texUnit->GenFlags |= texUnit->GenBitR;
+      }
+
+      texUnit->TexgenSize = sz;
+      texUnit->Holes = (GLubyte) (all_bits[sz] & ~texUnit->TexGenEnabled);
+      texUnit->func = texgen_generic_tab;
+
+      if (texUnit->TexGenEnabled == (S_BIT|T_BIT|R_BIT)) {
+         if (texUnit->GenFlags == TEXGEN_REFLECTION_MAP_NV) {
+            texUnit->func = texgen_reflection_map_nv_tab;
+         }
+         else if (texUnit->GenFlags == TEXGEN_NORMAL_MAP_NV) {
+            texUnit->func = texgen_normal_map_nv_tab;
+         }
+      }
+      else if (texUnit->TexGenEnabled == (S_BIT|T_BIT) &&
+               texUnit->GenFlags == TEXGEN_SPHERE_MAP) {
+         texUnit->func = texgen_sphere_map_tab;
+      }
+   }
+}
+
+
+
 /*
  * Paletted texture sampling.
  * Input:  tObj - the texture object
@@ -149,20 +244,23 @@ void gl_init_texture( void )
 static void palette_sample(const struct gl_texture_object *tObj,
                            GLubyte index, GLubyte rgba[4] )
 {
-   GLcontext *ctx = gl_get_current_context();  /* THIS IS A HACK */
+   GLcontext *ctx = gl_get_current_context();             /* THIS IS A HACK*/
    GLint i = index;
    const GLubyte *palette;
+   GLenum format;
 
    if (ctx->Texture.SharedPalette) {
-      palette = ctx->Texture.Palette;
+      palette = ctx->Texture.Palette.Table;
+      format = ctx->Texture.Palette.Format;
    }
    else {
-      palette = tObj->Palette;
+      palette = tObj->Palette.Table;
+      format = tObj->Palette.Format;
    }
 
-   switch (tObj->PaletteFormat) {
+   switch (format) {
       case GL_ALPHA:
-         rgba[ACOMP] = tObj->Palette[index];
+         rgba[ACOMP] = palette[index];
          return;
       case GL_LUMINANCE:
       case GL_INTENSITY:
@@ -313,8 +411,8 @@ static void get_1d_texel( const struct gl_texture_object *tObj,
 
 #ifdef DEBUG
    GLint width = img->Width;
-   assert(i >= 0);
-   assert(i < width);
+   ASSERT(i >= 0);
+   ASSERT(i < width);
 #endif
 
    switch (img->Format) {
@@ -447,19 +545,13 @@ static void sample_1d_linear( const struct gl_texture_object *tObj,
       GLubyte t0[4], t1[4];  /* texels */
 
       if (useBorderColor & I0BIT) {
-         t0[RCOMP] = tObj->BorderColor[0];
-         t0[GCOMP] = tObj->BorderColor[1];
-         t0[BCOMP] = tObj->BorderColor[2];
-         t0[ACOMP] = tObj->BorderColor[3];
+         COPY_4UBV(t0, tObj->BorderColor);
       }
       else {
          get_1d_texel( tObj, img, i0, t0 );
       }
       if (useBorderColor & I1BIT) {
-         t1[RCOMP] = tObj->BorderColor[0];
-         t1[GCOMP] = tObj->BorderColor[1];
-         t1[BCOMP] = tObj->BorderColor[2];
-         t1[ACOMP] = tObj->BorderColor[3];
+         COPY_4UBV(t1, tObj->BorderColor);
       }
       else {
          get_1d_texel( tObj, img, i1, t1 );
@@ -681,10 +773,10 @@ static void get_2d_texel( const struct gl_texture_object *tObj,
 
 #ifdef DEBUG
    const GLint height = img->Height;  /* includes border */
-   assert(i >= 0);
-   assert(i < width);
-   assert(j >= 0);
-   assert(j < height);
+   ASSERT(i >= 0);
+   ASSERT(i < width);
+   ASSERT(j >= 0);
+   ASSERT(j < height);
 #endif
 
    switch (img->Format) {
@@ -832,37 +924,25 @@ static void sample_2d_linear( const struct gl_texture_object *tObj,
       GLubyte t11[4];
 
       if (useBorderColor & (I0BIT | J0BIT)) {
-         t00[RCOMP] = tObj->BorderColor[0];
-         t00[GCOMP] = tObj->BorderColor[1];
-         t00[BCOMP] = tObj->BorderColor[2];
-         t00[ACOMP] = tObj->BorderColor[3];
+         COPY_4UBV(t00, tObj->BorderColor);
       }
       else {
          get_2d_texel( tObj, img, i0, j0, t00 );
       }
       if (useBorderColor & (I1BIT | J0BIT)) {
-         t10[RCOMP] = tObj->BorderColor[0];
-         t10[GCOMP] = tObj->BorderColor[1];
-         t10[BCOMP] = tObj->BorderColor[2];
-         t10[ACOMP] = tObj->BorderColor[3];
+         COPY_4UBV(t10, tObj->BorderColor);
       }
       else {
          get_2d_texel( tObj, img, i1, j0, t10 );
       }
       if (useBorderColor & (I0BIT | J1BIT)) {
-         t01[RCOMP] = tObj->BorderColor[0];
-         t01[GCOMP] = tObj->BorderColor[1];
-         t01[BCOMP] = tObj->BorderColor[2];
-         t01[ACOMP] = tObj->BorderColor[3];
+         COPY_4UBV(t01, tObj->BorderColor);
       }
       else {
          get_2d_texel( tObj, img, i0, j1, t01 );
       }
       if (useBorderColor & (I1BIT | J1BIT)) {
-         t11[RCOMP] = tObj->BorderColor[0];
-         t11[GCOMP] = tObj->BorderColor[1];
-         t11[BCOMP] = tObj->BorderColor[2];
-         t11[ACOMP] = tObj->BorderColor[3];
+         COPY_4UBV(t11, tObj->BorderColor);
       }
       else {
          get_2d_texel( tObj, img, i1, j1, t11 );
@@ -1165,12 +1245,12 @@ static void get_3d_texel( const struct gl_texture_object *tObj,
 
 #ifdef DEBUG
    const GLint depth = img->Depth;    /* includes border */
-   assert(i >= 0);
-   assert(i < width);
-   assert(j >= 0);
-   assert(j < height);
-   assert(k >= 0);
-   assert(k < depth);
+   ASSERT(i >= 0);
+   ASSERT(i < width);
+   ASSERT(j >= 0);
+   ASSERT(j < height);
+   ASSERT(k >= 0);
+   ASSERT(k < depth);
 #endif
 
    switch (img->Format) {
@@ -1327,74 +1407,50 @@ static void sample_3d_linear( const struct gl_texture_object *tObj,
       GLubyte t100[4], t110[4], t101[4], t111[4];
 
       if (useBorderColor & (I0BIT | J0BIT | K0BIT)) {
-         t000[RCOMP] = tObj->BorderColor[0];
-         t000[GCOMP] = tObj->BorderColor[1];
-         t000[BCOMP] = tObj->BorderColor[2];
-         t000[ACOMP] = tObj->BorderColor[3];
+         COPY_4UBV(t000, tObj->BorderColor);
       }
       else {
          get_3d_texel( tObj, img, i0, j0, k0, t000 );
       }
       if (useBorderColor & (I1BIT | J0BIT | K0BIT)) {
-         t100[RCOMP] = tObj->BorderColor[0];
-         t100[GCOMP] = tObj->BorderColor[1];
-         t100[BCOMP] = tObj->BorderColor[2];
-         t100[ACOMP] = tObj->BorderColor[3];
+         COPY_4UBV(t100, tObj->BorderColor);
       }
       else {
          get_3d_texel( tObj, img, i1, j0, k0, t100 );
       }
       if (useBorderColor & (I0BIT | J1BIT | K0BIT)) {
-         t010[RCOMP] = tObj->BorderColor[0];
-         t010[GCOMP] = tObj->BorderColor[1];
-         t010[BCOMP] = tObj->BorderColor[2];
-         t010[ACOMP] = tObj->BorderColor[3];
+         COPY_4UBV(t010, tObj->BorderColor);
       }
       else {
          get_3d_texel( tObj, img, i0, j1, k0, t010 );
       }
       if (useBorderColor & (I1BIT | J1BIT | K0BIT)) {
-         t110[RCOMP] = tObj->BorderColor[0];
-         t110[GCOMP] = tObj->BorderColor[1];
-         t110[BCOMP] = tObj->BorderColor[2];
-         t110[ACOMP] = tObj->BorderColor[3];
+         COPY_4UBV(t110, tObj->BorderColor);
       }
       else {
          get_3d_texel( tObj, img, i1, j1, k0, t110 );
       }
 
       if (useBorderColor & (I0BIT | J0BIT | K1BIT)) {
-         t001[RCOMP] = tObj->BorderColor[0];
-         t001[GCOMP] = tObj->BorderColor[1];
-         t001[BCOMP] = tObj->BorderColor[2];
-         t001[ACOMP] = tObj->BorderColor[3];
+         COPY_4UBV(t001, tObj->BorderColor);
       }
       else {
          get_3d_texel( tObj, img, i0, j0, k1, t001 );
       }
       if (useBorderColor & (I1BIT | J0BIT | K1BIT)) {
-         t101[RCOMP] = tObj->BorderColor[0];
-         t101[GCOMP] = tObj->BorderColor[1];
-         t101[BCOMP] = tObj->BorderColor[2];
-         t101[ACOMP] = tObj->BorderColor[3];
+         COPY_4UBV(t101, tObj->BorderColor);
       }
       else {
          get_3d_texel( tObj, img, i1, j0, k1, t101 );
       }
       if (useBorderColor & (I0BIT | J1BIT | K1BIT)) {
-         t011[RCOMP] = tObj->BorderColor[0];
-         t011[GCOMP] = tObj->BorderColor[1];
-         t011[BCOMP] = tObj->BorderColor[2];
-         t011[ACOMP] = tObj->BorderColor[3];
+         COPY_4UBV(t011, tObj->BorderColor);
       }
       else {
          get_3d_texel( tObj, img, i0, j1, k1, t011 );
       }
       if (useBorderColor & (I1BIT | J1BIT | K1BIT)) {
-         t111[RCOMP] = tObj->BorderColor[0];
-         t111[GCOMP] = tObj->BorderColor[1];
-         t111[BCOMP] = tObj->BorderColor[2];
-         t111[ACOMP] = tObj->BorderColor[3];
+         COPY_4UBV(t111, tObj->BorderColor);
       }
       else {
          get_3d_texel( tObj, img, i1, j1, k1, t111 );
@@ -1694,8 +1750,6 @@ void gl_set_texture_sampler( struct gl_texture_object *t )
  * InOut:  rgba - incoming fragment colors modified by texel colors
  *                according to the texture environment mode.
  */
-
-
 static void apply_texture( const GLcontext *ctx,
                            const struct gl_texture_unit *texUnit,
                            GLuint n,
@@ -1705,18 +1759,17 @@ static void apply_texture( const GLcontext *ctx,
    GLint Rc, Gc, Bc, Ac;
    GLenum format;
 
-/*
- * Use (A*(B+1)) >> 8 as a fast approximation of (A*B)/255 for A
- * and B in [0,255]
- */
-
-#define PROD(A,B) ( (GLubyte) (((GLint)(A) * ((GLint)(B)+1)) >> 8) )
-
    ASSERT(texUnit);
    ASSERT(texUnit->Current);
    ASSERT(texUnit->Current->Image[0]);
 
    format = texUnit->Current->Image[0]->Format;
+
+/*
+ * Use (A*(B+1)) >> 8 as a fast approximation of (A*B)/255 for A
+ * and B in [0,255]
+ */
+#define PROD(A,B)   ( (GLubyte) (((GLint)(A) * ((GLint)(B)+1)) >> 8) )
 
    if (format==GL_COLOR_INDEX) {
       format = GL_RGBA;  /* XXXX a hack! */
@@ -1778,7 +1831,7 @@ static void apply_texture( const GLcontext *ctx,
                }
                break;
             default:
-               gl_problem(ctx, "Bad format in apply_texture");
+               gl_problem(ctx, "Bad format (GL_REPLACE) in apply_texture");
                return;
          }
          break;
@@ -1844,7 +1897,7 @@ static void apply_texture( const GLcontext *ctx,
                }
                break;
             default:
-               gl_problem(ctx, "Bad format (2) in apply_texture");
+               gl_problem(ctx, "Bad format (GL_MODULATE) in apply_texture");
                return;
          }
          break;
@@ -1877,7 +1930,7 @@ static void apply_texture( const GLcontext *ctx,
                }
                break;
             default:
-               gl_problem(ctx, "Bad format (3) in apply_texture");
+               gl_problem(ctx, "Bad format (GL_DECAL) in apply_texture");
                return;
          }
          break;
@@ -1947,7 +2000,82 @@ static void apply_texture( const GLcontext *ctx,
                }
                break;
             default:
-               gl_problem(ctx, "Bad format (4) in apply_texture");
+               gl_problem(ctx, "Bad format (GL_BLEND) in apply_texture");
+               return;
+         }
+         break;
+
+      case GL_ADD:  /* GL_EXT_texture_add_env */
+         switch (format) {
+            case GL_ALPHA:
+               for (i=0;i<n;i++) {
+                  /* Rv = Rf */
+                  /* Gv = Gf */
+                  /* Bv = Bf */
+                  rgba[i][ACOMP] = PROD(rgba[i][ACOMP], texel[i][ACOMP]);
+               }
+               break;
+            case GL_LUMINANCE:
+               for (i=0;i<n;i++) {
+                  GLuint Lt = texel[i][RCOMP];
+                  GLuint r = rgba[i][RCOMP] + Lt;
+                  GLuint g = rgba[i][GCOMP] + Lt;
+                  GLuint b = rgba[i][BCOMP] + Lt;
+                  rgba[i][RCOMP] = r < 256 ? (GLubyte) r : 255;
+                  rgba[i][GCOMP] = g < 256 ? (GLubyte) g : 255;
+                  rgba[i][BCOMP] = b < 256 ? (GLubyte) b : 255;
+                  /* Av = Af */
+               }
+               break;
+            case GL_LUMINANCE_ALPHA:
+               for (i=0;i<n;i++) {
+                  GLuint Lt = texel[i][RCOMP];
+                  GLuint r = rgba[i][RCOMP] + Lt;
+                  GLuint g = rgba[i][GCOMP] + Lt;
+                  GLuint b = rgba[i][BCOMP] + Lt;
+                  rgba[i][RCOMP] = r < 256 ? (GLubyte) r : 255;
+                  rgba[i][GCOMP] = g < 256 ? (GLubyte) g : 255;
+                  rgba[i][BCOMP] = b < 256 ? (GLubyte) b : 255;
+                  rgba[i][ACOMP] = PROD(rgba[i][ACOMP], texel[i][ACOMP]);
+               }
+               break;
+            case GL_INTENSITY:
+               for (i=0;i<n;i++) {
+                  GLubyte It = texel[i][RCOMP];
+                  GLuint r = rgba[i][RCOMP] + It;
+                  GLuint g = rgba[i][GCOMP] + It;
+                  GLuint b = rgba[i][BCOMP] + It;
+                  GLuint a = rgba[i][ACOMP] + It;
+                  rgba[i][RCOMP] = r < 256 ? (GLubyte) r : 255;
+                  rgba[i][GCOMP] = g < 256 ? (GLubyte) g : 255;
+                  rgba[i][BCOMP] = b < 256 ? (GLubyte) b : 255;
+                  rgba[i][ACOMP] = a < 256 ? (GLubyte) a : 255;
+               }
+               break;
+            case GL_RGB:
+               for (i=0;i<n;i++) {
+                  GLuint r = rgba[i][RCOMP] + texel[i][RCOMP];
+                  GLuint g = rgba[i][GCOMP] + texel[i][GCOMP];
+                  GLuint b = rgba[i][BCOMP] + texel[i][BCOMP];
+                  rgba[i][RCOMP] = r < 256 ? (GLubyte) r : 255;
+                  rgba[i][GCOMP] = g < 256 ? (GLubyte) g : 255;
+                  rgba[i][BCOMP] = b < 256 ? (GLubyte) b : 255;
+                  /* Av = Af */
+               }
+               break;
+            case GL_RGBA:
+               for (i=0;i<n;i++) {
+                  GLuint r = rgba[i][RCOMP] + texel[i][RCOMP];
+                  GLuint g = rgba[i][GCOMP] + texel[i][GCOMP];
+                  GLuint b = rgba[i][BCOMP] + texel[i][BCOMP];
+                  rgba[i][RCOMP] = r < 256 ? (GLubyte) r : 255;
+                  rgba[i][GCOMP] = g < 256 ? (GLubyte) g : 255;
+                  rgba[i][BCOMP] = b < 256 ? (GLubyte) b : 255;
+                  rgba[i][ACOMP] = PROD(rgba[i][ACOMP], texel[i][ACOMP]);
+               }
+               break;
+            default:
+               gl_problem(ctx, "Bad format (GL_ADD) in apply_texture");
                return;
          }
          break;
@@ -1973,8 +2101,15 @@ void gl_texture_pixels( GLcontext *ctx, GLuint texUnit, GLuint n,
    if (ctx->Texture.Enabled & mask) {
       const struct gl_texture_unit *textureUnit = &ctx->Texture.Unit[texUnit];
       if (textureUnit->Current && textureUnit->Current->SampleFunc) {
-
          GLubyte texel[PB_SIZE][4];
+
+         if (textureUnit->LodBias != 0.0F) {
+            /* apply LOD bias, but don't clamp yet */
+            GLuint i;
+            for (i=0;i<n;i++) {
+               lambda[i] += textureUnit->LodBias;
+            }
+         }
 
          if (textureUnit->Current->MinLod != -1000.0
              || textureUnit->Current->MaxLod != 1000.0) {
@@ -1994,99 +2129,6 @@ void gl_texture_pixels( GLcontext *ctx, GLuint texUnit, GLuint n,
 
          apply_texture( ctx, textureUnit, n,
                         rgba, (const GLubyte (*)[4])texel );
-      }
-   }
-}
-
-/*
- * After state changes to texturing we call this function to update
- * intermediate and derived state.
- * Called by gl_update_state().
- */
-void gl_update_texture_unit( GLcontext *ctx, struct gl_texture_unit *texUnit )
-{
-   (void) ctx;
-
-   if ((texUnit->Enabled & TEXTURE0_3D) && texUnit->CurrentD[3]->Complete) {
-      texUnit->ReallyEnabled = TEXTURE0_3D;
-      texUnit->Current = texUnit->CurrentD[3];
-      texUnit->CurrentDimension = 3;
-   }
-   else if ((texUnit->Enabled & TEXTURE0_2D) && texUnit->CurrentD[2]->Complete) {
-      texUnit->ReallyEnabled = TEXTURE0_2D;
-      texUnit->Current = texUnit->CurrentD[2];
-      texUnit->CurrentDimension = 2;
-   }
-   else if ((texUnit->Enabled & TEXTURE0_1D) && texUnit->CurrentD[1]->Complete) {
-      texUnit->ReallyEnabled = TEXTURE0_1D;
-      texUnit->Current = texUnit->CurrentD[1];
-      texUnit->CurrentDimension = 1;
-   }
-   else {
-  /*  if (MESA_VERBOSE & VERBOSE_TEXTURE) {
-         switch (texUnit->Enabled) {
-         case TEXTURE0_3D:
-            fprintf(stderr, "Using incomplete 3d texture %u\n",
-                    texUnit->CurrentD[3]->Name);
-            break;
-         case TEXTURE0_2D:
-            fprintf(stderr, "Using incomplete 2d texture %u\n",
-                    texUnit->CurrentD[2]->Name);
-            break;
-         case TEXTURE0_1D:
-            fprintf(stderr, "Using incomplete 1d texture %u\n",
-                    texUnit->CurrentD[1]->Name);
-            break;
-         default:
-            fprintf(stderr, "Bad value for texUnit->Enabled %x\n",
-                    texUnit->Enabled);
-            break;
-         }
-      }*/
-
-      texUnit->ReallyEnabled = 0;
-      texUnit->Current = NULL;
-      texUnit->CurrentDimension = 0;
-      return;
-   }
-
-   texUnit->GenFlags = 0;
-
-   if (texUnit->TexGenEnabled) {
-      GLuint sz = 0;
-
-      if (texUnit->TexGenEnabled & S_BIT) {
-         sz = 1;
-         texUnit->GenFlags |= texUnit->GenBitS;
-      }
-      if (texUnit->TexGenEnabled & T_BIT) {
-         sz = 2;
-         texUnit->GenFlags |= texUnit->GenBitT;
-      }
-      if (texUnit->TexGenEnabled & Q_BIT) {
-         sz = 3;
-         texUnit->GenFlags |= texUnit->GenBitQ;
-      }
-      if (texUnit->TexGenEnabled & R_BIT) {
-         sz = 4;
-         texUnit->GenFlags |= texUnit->GenBitR;
-      }
-
-      texUnit->TexgenSize = sz;
-      texUnit->Holes = (GLubyte) (all_bits[sz] & ~texUnit->TexGenEnabled);
-      texUnit->func = texgen_generic_tab;
-
-      if (texUnit->TexGenEnabled == (S_BIT|T_BIT|R_BIT)) {
-         if (texUnit->GenFlags == TEXGEN_REFLECTION_MAP_NV) {
-            texUnit->func = texgen_reflection_map_nv_tab;
-         }
-         else if (texUnit->GenFlags == TEXGEN_NORMAL_MAP_NV) {
-            texUnit->func = texgen_normal_map_nv_tab;
-         }
-      }
-      else if (texUnit->TexGenEnabled == (S_BIT|T_BIT) &&
-               texUnit->GenFlags == TEXGEN_SPHERE_MAP) {
-         texUnit->func = texgen_sphere_map_tab;
       }
    }
 }

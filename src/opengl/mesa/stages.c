@@ -1,8 +1,8 @@
-/* $Id: stages.c,v 1.2 2000-03-01 18:49:35 jeroen Exp $ */
+/* $Id: stages.c,v 1.3 2000-05-23 20:40:53 jeroen Exp $ */
 
 /*
  * Mesa 3-D graphics library
- * Version:  3.1
+ * Version:  3.3
  *
  * Copyright (C) 1999  Brian Paul   All Rights Reserved.
  *
@@ -25,14 +25,10 @@
  */
 
 
-#ifdef HAVE_CONFIG_H
-#include "conf.h"
-#endif
-#ifndef XFree86Server
-#include <stdio.h>
+#ifdef PC_HEADER
+#include "all.h"
 #else
-#include "GL/xf86glx.h"
-#endif
+#include "glheader.h"
 #include "bbox.h"
 #include "clip.h"
 #include "types.h"
@@ -50,6 +46,7 @@
 #include "vbrender.h"
 #include "vbxform.h"
 #include "xform.h"
+#endif
 
 
 static GLmatrix gl_identity_mat;
@@ -85,8 +82,8 @@ void gl_update_materials( struct vertex_buffer *VB )
       /* This code never reached in cva.
        */
       for ( i = VB->Start ; i <= count ; i++ )
-	 if ( flag[i] & VERT_MATERIAL )
-	    gl_update_material( ctx, new_material[i], new_material_mask[i] );
+         if ( flag[i] & VERT_MATERIAL )
+            gl_update_material( ctx, new_material[i], new_material_mask[i] );
    }
 
    if ((orflag & VERT_RGBA) && ctx->Light.ColorMaterialEnabled)
@@ -111,7 +108,7 @@ void gl_clean_color( struct vertex_buffer *VB )
    }
 
    gl_trans_4ub_tab[4][TYPE_IDX(GL_UNSIGNED_BYTE)]( col->data, client_data,
-						    VB->Start, VB->Count );
+                                                    VB->Start, VB->Count );
 
    col->flags = VEC_WRITABLE|VEC_GOOD_STRIDE;
    col->stride = 4 * sizeof(GLubyte);
@@ -134,7 +131,7 @@ static void clean_index( struct vertex_buffer *VB )
    }
 
    gl_trans_1ui_tab[TYPE_IDX(GL_UNSIGNED_INT)]( index->data, client_data,
-						VB->Start, VB->Count );
+                                                VB->Start, VB->Count );
 
    index->flags = VEC_WRITABLE|VEC_GOOD_STRIDE;
    index->stride = sizeof(GLuint);
@@ -158,7 +155,7 @@ static void clean_edgeflag( struct vertex_buffer *VB )
    }
 
    gl_trans_1ub_tab[TYPE_IDX(GL_UNSIGNED_BYTE)]( edge->data, client_data,
-						 VB->Start, VB->Count );
+                                                 VB->Start, VB->Count );
 
    edge->flags = VEC_WRITABLE|VEC_GOOD_STRIDE;
    edge->stride = sizeof(GLubyte);
@@ -183,7 +180,7 @@ static void clean_texcoord( struct vertex_buffer *VB, GLuint i )
    }
 
    gl_trans_4f_tab[tc->size][TYPE_IDX(GL_FLOAT)]( tc->data, client_data,
-						  VB->Start, VB->Count );
+                                                  VB->Start, VB->Count );
 
    tc->flags = VEC_WRITABLE|VEC_GOOD_STRIDE;
    tc->stride = 4 * sizeof(GLfloat);
@@ -205,8 +202,8 @@ static void clean_clip( struct vertex_buffer *VB )
 
 
 void gl_import_client_data( struct vertex_buffer *VB,
-			    GLuint required,
-			    GLuint vec_flags )
+                            GLuint required,
+                            GLuint vec_flags )
 {
    if ((required & VERT_RGBA) && !(VB->ColorPtr->flags & vec_flags))
       gl_clean_color(VB);
@@ -236,8 +233,8 @@ void gl_import_client_data( struct vertex_buffer *VB,
 static void gl_calculate_model_project_win_matrix( GLcontext *ctx )
 {
     gl_matrix_mul( &ctx->ModelProjectWinMatrix,
-		   &ctx->Viewport.WindowMap,
-		   &ctx->ModelProjectMatrix );
+                   &ctx->Viewport.WindowMap,
+                   &ctx->ModelProjectMatrix );
 
    gl_matrix_analyze( &ctx->ModelProjectWinMatrix );
    ctx->ModelProjectWinMatrixUptodate = GL_TRUE;
@@ -263,23 +260,23 @@ static void bound_cull_vb( struct vertex_buffer *VB )
       GLmatrix *mat = &ctx->ModelProjectMatrix;
 
       for (dst = start ; dst < VB->Start ; dst++) {
-	 GLfloat *src = VEC_ELT(VB->ObjPtr, GLfloat, copy[dst]);
-	 GLfloat *clip = VB->Clip.data[copy[dst]];
-	 gl_transform_point_sz( clip, mat->m, src, VB->ObjPtr->size );
-	 {
-	    const GLfloat cw = clip[3];
-	    const GLfloat cx = clip[0];
-	    const GLfloat cy = clip[1];
-	    const GLfloat cz = clip[2];
-	    GLuint mask = 0;
-	    if (cx >  cw) mask |= CLIP_RIGHT_BIT;
-	    if (cx < -cw) mask |= CLIP_LEFT_BIT;
-	    if (cy >  cw) mask |= CLIP_TOP_BIT;
-	    if (cy < -cw) mask |= CLIP_BOTTOM_BIT;
-	    if (cz >  cw) mask |= CLIP_FAR_BIT;
-	    if (cz < -cw) mask |= CLIP_NEAR_BIT;
-	    VB->ClipMask[copy[dst]] = mask;
-	 }
+         GLfloat *src = VEC_ELT(VB->ObjPtr, GLfloat, copy[dst]);
+         GLfloat *clip = VB->Clip.data[copy[dst]];
+         gl_transform_point_sz( clip, mat->m, src, VB->ObjPtr->size );
+         {
+            const GLfloat cw = clip[3];
+            const GLfloat cx = clip[0];
+            const GLfloat cy = clip[1];
+            const GLfloat cz = clip[2];
+            GLuint mask = 0;
+            if (cx >  cw) mask |= CLIP_RIGHT_BIT;
+            if (cx < -cw) mask |= CLIP_LEFT_BIT;
+            if (cy >  cw) mask |= CLIP_TOP_BIT;
+            if (cy < -cw) mask |= CLIP_BOTTOM_BIT;
+            if (cz >  cw) mask |= CLIP_FAR_BIT;
+            if (cz < -cw) mask |= CLIP_NEAR_BIT;
+            VB->ClipMask[copy[dst]] = mask;
+         }
       }
    }
 }
@@ -313,7 +310,7 @@ static void do_vertex_pipeline( struct vertex_buffer *VB )
 
    if (proj_mat->type != MATRIX_IDENTITY ||
        ((ctx->IndirectTriangles & DD_ANY_CULL) &&
-	VB->Unprojected->stride != 4*sizeof(GLfloat)))
+        VB->Unprojected->stride != 4*sizeof(GLfloat)))
    {
       VB->ClipPtr = TransformRaw(proj_dest, proj_mat, VB->Unprojected );
    }
@@ -345,11 +342,11 @@ static void do_vertex_pipeline( struct vertex_buffer *VB )
       gl_user_cliptest( VB );
       if (VB->Culled) {
 
-	 if (MESA_VERBOSE&VERBOSE_CULL)
-	    fprintf(stderr, "Culled in userclip\n");
+         if (MESA_VERBOSE&VERBOSE_CULL)
+            fprintf(stderr, "Culled in userclip\n");
 
-	 gl_update_materials(VB);
-	 return;
+         gl_update_materials(VB);
+         return;
       }
    }
 
@@ -359,25 +356,25 @@ static void do_vertex_pipeline( struct vertex_buffer *VB )
    if (VB->IM) {
       if (ctx->IndirectTriangles & DD_ANY_CULL)
       {
-	 GLuint cullcount = gl_cull_vb( VB );
-	
-	 if (MESA_VERBOSE&VERBOSE_CULL)
-	    fprintf(stderr, "culled %u of %u vertices\n", cullcount, VB->Count);
+         GLuint cullcount = gl_cull_vb( VB );
 
-	 if (cullcount == VB->Count) {
-	    VB->Culled = 1;
-	    gl_update_materials(VB);
-	    return;
-	 }
-	 if (cullcount || (ctx->IndirectTriangles & DD_LIGHTING_CULL))
-	    VB->CullMode |= CULL_MASK_ACTIVE;
+         if (MESA_VERBOSE&VERBOSE_CULL)
+            fprintf(stderr, "culled %u of %u vertices\n", cullcount, VB->Count);
+
+         if (cullcount == VB->Count) {
+            VB->Culled = 1;
+            gl_update_materials(VB);
+            return;
+         }
+         if (cullcount || (ctx->IndirectTriangles & DD_LIGHTING_CULL))
+            VB->CullMode |= CULL_MASK_ACTIVE;
       }
       else
       {
-	 if (MESA_VERBOSE&VERBOSE_CULL)
-	    fprintf(stderr, "culling not active\n");
+         if (MESA_VERBOSE&VERBOSE_CULL)
+            fprintf(stderr, "culling not active\n");
 
-	 gl_dont_cull_vb( VB );
+         gl_dont_cull_vb( VB );
       }
    }
 
@@ -391,17 +388,17 @@ static void do_vertex_pipeline( struct vertex_buffer *VB )
                         - (copycount*VB->Projected->stride) );
          VB->Projected->count += copycount;
 
-	 VB->Win.start = (GLfloat *)VB->Win.data[VB->CopyStart];
+         VB->Win.start = (GLfloat *)VB->Win.data[VB->CopyStart];
       }
 
       (void) Transform( &VB->Win,
-			&ctx->Viewport.WindowMap,
-			VB->Projected,
-			VB->ClipMask + VB->CopyStart,
-			VB->CullFlag[1]);
+                        &ctx->Viewport.WindowMap,
+                        VB->Projected,
+                        VB->ClipMask + VB->CopyStart,
+                        VB->CullFlag[1]);
 
       if (VB->Win.size == 2) {
-	 gl_vector4f_clean_elem(&VB->Win, VB->Count, 2);
+         gl_vector4f_clean_elem(&VB->Win, VB->Count, 2);
       }
    }
 }
@@ -423,15 +420,17 @@ static void do_normal_transform( struct vertex_buffer *VB )
       gl_make_normal_cullmask( VB );
    }
 
-   (ctx->NormalTransform[tmp])(&ctx->ModelView,
-			       ctx->vb_rescale_factor,
-			       VB->NormalPtr,
-			       (VB->NormalLengthPtr ?
-				VB->NormalLengthPtr + VB->Start : 0),
-			       VB->NormCullStart,
-			       VB->store.Normal);
+   if (ctx->NormalTransform) {
+      (ctx->NormalTransform[tmp])(&ctx->ModelView,
+                                  ctx->vb_rescale_factor,
+                                  VB->NormalPtr,
+                                  (VB->NormalLengthPtr ?
+                                   VB->NormalLengthPtr + VB->Start : 0),
+                                  VB->NormCullStart,
+                                  VB->store.Normal);
 
-   VB->NormalPtr = VB->store.Normal;
+      VB->NormalPtr = VB->store.Normal;
+   }
 }
 
 
@@ -463,10 +462,10 @@ static void do_texture_0( struct vertex_buffer *VB )
 
    if (ctx->Enabled & ENABLE_TEXMAT0)
       VB->TexCoordPtr[0] = Transform( VB->store.TexCoord[0],
-				      &ctx->TextureMatrix[0],
-				      VB->TexCoordPtr[0],
-				      VB->ClipMask + VB->Start,
-				      VB->CullFlag[0]);
+                                      &ctx->TextureMatrix[0],
+                                      VB->TexCoordPtr[0],
+                                      VB->ClipMask + VB->Start,
+                                      VB->CullFlag[0]);
 }
 
 
@@ -479,10 +478,10 @@ static void do_texture_1( struct vertex_buffer *VB )
 
    if (ctx->Enabled & ENABLE_TEXMAT1)
       VB->TexCoordPtr[1] = Transform( VB->store.TexCoord[1],
-				      &ctx->TextureMatrix[1],
-				      VB->TexCoordPtr[1],
-				      VB->ClipMask + VB->Start,
-				      VB->CullFlag[0]);
+                                      &ctx->TextureMatrix[1],
+                                      VB->TexCoordPtr[1],
+                                      VB->ClipMask + VB->Start,
+                                      VB->CullFlag[0]);
 }
 
 
@@ -520,9 +519,9 @@ static void check_fog( GLcontext *ctx, struct gl_pipeline_stage *d )
       GLuint flags;
 
       if (ctx->Visual->RGBAflag)
-	 flags = VERT_EYE|VERT_RGBA;
+         flags = VERT_EYE|VERT_RGBA;
       else
-	 flags = VERT_EYE|VERT_INDEX;
+         flags = VERT_EYE|VERT_INDEX;
 
       d->type = PIPE_IMMEDIATE|PIPE_PRECALC;
       d->inputs = flags;
@@ -540,10 +539,10 @@ static void check_lighting( GLcontext *ctx, struct gl_pipeline_stage *d )
       GLuint flags = VERT_NORM|VERT_MATERIAL;
 
       if (ctx->Light.NeedVertices) {
-	 if (ctx->NeedEyeCoords)
-	    flags |= VERT_EYE;
-	 else
-	    flags |= VERT_OBJ_ANY;
+         if (ctx->NeedEyeCoords)
+            flags |= VERT_EYE;
+         else
+            flags |= VERT_OBJ_ANY;
       }
 
       if (ctx->Light.ColorMaterialEnabled) flags |= VERT_RGBA;
@@ -555,7 +554,7 @@ static void check_lighting( GLcontext *ctx, struct gl_pipeline_stage *d )
 }
 
 static void check_update_materials( GLcontext *ctx,
-				    struct gl_pipeline_stage *d )
+                                    struct gl_pipeline_stage *d )
 {
    d->type = 0;
 
@@ -570,12 +569,12 @@ static void check_update_materials( GLcontext *ctx,
 
 
 static void check_normal_transform( GLcontext *ctx,
-				    struct gl_pipeline_stage *d )
+                                    struct gl_pipeline_stage *d )
 {
    d->type = 0;
 
    if ( ctx->NormalTransform &&
-	(ctx->Enabled & (ENABLE_LIGHT|ENABLE_TEXGEN0|ENABLE_TEXGEN1)) )
+        (ctx->Enabled & (ENABLE_LIGHT|ENABLE_TEXGEN0|ENABLE_TEXGEN1)) )
    {
       d->type = PIPE_IMMEDIATE|PIPE_PRECALC;
       d->inputs = VERT_NORM;
@@ -586,7 +585,7 @@ static void check_normal_transform( GLcontext *ctx,
 
 
 static void check_texture( GLcontext *ctx, GLuint i,
-			   struct gl_pipeline_stage *d )
+                           struct gl_pipeline_stage *d )
 {
    struct gl_texture_unit *texUnit = &ctx->Texture.Unit[i];
 
@@ -600,17 +599,17 @@ static void check_texture( GLcontext *ctx, GLuint i,
       /* safe, but potentially inefficient
        */
       if (texUnit->GenFlags & TEXGEN_NEED_VERTICES) {
-	 if (0)
-	    flags |= VERT_OBJ_ANY;
-	 if (1)
-	    flags |= VERT_EYE;
+         if (0)
+            flags |= VERT_OBJ_ANY;
+         if (1)
+            flags |= VERT_EYE;
       }
 
       if (texUnit->GenFlags & TEXGEN_NEED_NORMALS)
-	 flags |= VERT_NORM;
+         flags |= VERT_NORM;
 
       if (texUnit->Enabled & ~texUnit->TexGenEnabled)
-	 flags |= texflag;
+         flags |= texflag;
 
       d->type = PIPE_IMMEDIATE|PIPE_PRECALC;
       d->inputs = flags;
@@ -644,7 +643,7 @@ static void check_full_setup( GLcontext *ctx, struct gl_pipeline_stage *d )
 }
 
 static void check_indirect_render( GLcontext *ctx,
-				   struct gl_pipeline_stage *d )
+                                   struct gl_pipeline_stage *d )
 {
    d->type = 0;
 
@@ -676,9 +675,9 @@ CONST struct gl_pipeline_stage gl_default_pipeline[] = {
      0,
      PIPE_IMMEDIATE,
      0,
-     0,				/* state change (recheck) */
-     0,				/* cva state change (recalc) */
-     0, 0,			/* cva forbidden */
+     0,                         /* state change (recheck) */
+     0,                         /* cva state change (recalc) */
+     0, 0,                      /* cva forbidden */
      0, VERT_PRECALC_DATA | VERT_ELT, 0,
      check_noop,
      do_cva_merge },
@@ -688,7 +687,7 @@ CONST struct gl_pipeline_stage gl_default_pipeline[] = {
      PIPE_PRECALC,
      0,
      0,
-     NEW_CLIENT_STATE,		/* cva state change (recalc) */
+     NEW_CLIENT_STATE,          /* cva state change (recalc) */
      0, 0,
      PIPE_PRECALC, 0, 0,
      check_noop,
@@ -709,8 +708,8 @@ CONST struct gl_pipeline_stage gl_default_pipeline[] = {
      PIPE_OP_NORM_XFORM,
      PIPE_PRECALC|PIPE_IMMEDIATE,
      0,
-     NEW_LIGHTING|NEW_FOG|NEW_TEXTURING|NEW_NORMAL_TRANSFORM,	/* state change (recheck) */
-     NEW_NORMAL_TRANSFORM,	/* cva state change (recalc) */
+     NEW_LIGHTING|NEW_FOG|NEW_TEXTURING|NEW_NORMAL_TRANSFORM,   /* state change (recheck) */
+     NEW_NORMAL_TRANSFORM,      /* cva state change (recalc) */
      0, 0,
      DYN_STATE,
      check_normal_transform,
@@ -720,9 +719,9 @@ CONST struct gl_pipeline_stage gl_default_pipeline[] = {
      PIPE_OP_LIGHT,
      PIPE_PRECALC|PIPE_IMMEDIATE,
      0,
-     NEW_LIGHTING,		 /* recheck */
+     NEW_LIGHTING,               /* recheck */
      NEW_LIGHTING|NEW_MODELVIEW, /* recalc */
-     0, VERT_MATERIAL,  	 /* I hate glMaterial() */
+     0, VERT_MATERIAL,           /* I hate glMaterial() */
      DYN_STATE,
      check_lighting,
      do_lighting },
@@ -731,7 +730,7 @@ CONST struct gl_pipeline_stage gl_default_pipeline[] = {
      0,
      PIPE_IMMEDIATE,
      0,
-     NEW_LIGHTING,		/* recheck */
+     NEW_LIGHTING,              /* recheck */
      0,
      0, 0,
      DYN_STATE,
@@ -747,7 +746,7 @@ CONST struct gl_pipeline_stage gl_default_pipeline[] = {
      0, 0,
      DYN_STATE,
      check_fog,
-     gl_fog_vertices },
+     _mesa_fog_vertices },
 
    { "texture gen/transform 0",
      PIPE_OP_TEX0,
@@ -772,7 +771,7 @@ CONST struct gl_pipeline_stage gl_default_pipeline[] = {
      do_texture_1 },
 
 
-   { "cva indirect render",	/* prior to setup -> require precalc'd setup */
+   { "cva indirect render",     /* prior to setup -> require precalc'd setup */
      PIPE_OP_RENDER,
      PIPE_IMMEDIATE,
      0,
@@ -784,7 +783,7 @@ CONST struct gl_pipeline_stage gl_default_pipeline[] = {
      gl_render_vb_indirect },
 
 
-   { "full raster setup",	/* prepare for indirect and normal render */
+   { "full raster setup",       /* prepare for indirect and normal render */
      PIPE_OP_RAST_SETUP_0|PIPE_OP_RAST_SETUP_1,
      PIPE_PRECALC|PIPE_IMMEDIATE,
      0,
@@ -795,7 +794,7 @@ CONST struct gl_pipeline_stage gl_default_pipeline[] = {
      check_full_setup,
      do_full_setup },
 
-   { "partial raster setup",	/* prepare for merge_and_render */
+   { "partial raster setup",    /* prepare for merge_and_render */
      PIPE_OP_RAST_SETUP_0,
      0,
      0,
@@ -810,9 +809,9 @@ CONST struct gl_pipeline_stage gl_default_pipeline[] = {
      PIPE_OP_RAST_SETUP_1|PIPE_OP_RENDER, /* rsetup1 if processing in elt? */
      0,
      0,
-     0,				/* state change (recheck)  */
-     0,				/* cva state change */
-     0,	0,			/* cva forbidden */
+     0,                         /* state change (recheck)  */
+     0,                         /* cva state change */
+     0, 0,                      /* cva forbidden */
      DYN_STATE,
      check_noop,
      do_noop },
@@ -828,11 +827,11 @@ CONST struct gl_pipeline_stage gl_default_pipeline[] = {
      check_noop,
      gl_render_vb },
 
-   { "render elements",		/* essentially the same as indirect render */
+   { "render elements",         /* essentially the same as indirect render */
      PIPE_OP_RENDER,
      PIPE_PRECALC,
      0,
-     0,				/* render always triggered by data updates */
+     0,                         /* render always triggered by data updates */
      0,
      0, 0,
      0, VERT_SETUP_FULL|VERT_ELT, 0,

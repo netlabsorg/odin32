@@ -1,8 +1,8 @@
-/* $Id: vertices.c,v 1.2 2000-03-01 18:49:39 jeroen Exp $ */
+/* $Id: vertices.c,v 1.3 2000-05-23 20:41:04 jeroen Exp $ */
 
 /*
  * Mesa 3-D graphics library
- * Version:  3.1
+ * Version:  3.3
  *
  * Copyright (C) 1999  Brian Paul   All Rights Reserved.
  *
@@ -24,11 +24,7 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#ifndef XFree86Server
-#include <stdio.h>
-#else
-#include "GL/xf86glx.h"
-#endif
+#include "glheader.h"
 #include "types.h"
 #include "vertices.h"
 
@@ -67,7 +63,7 @@
 #endif
 
 
-static void __cdecl transform_v16(GLfloat *f,
+static void _PROJAPI transform_v16(GLfloat *f,
                           const GLfloat *m,
                           const GLfloat *obj,
                           GLuint obj_stride,
@@ -88,10 +84,10 @@ static void __cdecl transform_v16(GLfloat *f,
 /* Project all vertices upto but not including last.  Guarenteed to be
  * at least one such vertex.
  */
-static void project_verts(GLfloat *first,
-			  GLfloat *last,
-			  const GLfloat *m,
-			  GLuint stride )
+static void _PROJAPI project_verts(GLfloat *first,
+                          GLfloat *last,
+                          const GLfloat *m,
+                          GLuint stride )
 {
    const GLfloat sx = m[0], sy = m[5], sz = m[10];
    const GLfloat tx = m[12], ty = m[13], tz = m[14];
@@ -107,11 +103,11 @@ static void project_verts(GLfloat *first,
    }
 }
 
-static void project_clipped_verts(GLfloat *first,
-				  GLfloat *last,
-				  const GLfloat *m,
-				  GLuint stride,
-				  const GLubyte *clipmask )
+static void _PROJAPI project_clipped_verts(GLfloat *first,
+                                  GLfloat *last,
+                                  const GLfloat *m,
+                                  GLuint stride,
+                                  const GLubyte *clipmask )
 {
    const GLfloat sx = m[0], sy = m[5], sz = m[10];
    const GLfloat tx = m[12], ty = m[13], tz = m[14];
@@ -120,7 +116,7 @@ static void project_clipped_verts(GLfloat *first,
    for ( f = first ; f != last ; STRIDE_F(f,stride), clipmask++)
    {
       if (!*clipmask) {
-	 const GLfloat oow = 1.0F / f[3];
+         const GLfloat oow = 1.0F / f[3];
          f[0] = sx * f[0] * oow + tx;
          f[1] = sy * f[1] * oow + ty;
          f[2] = sz * f[2] * oow + tz;
@@ -132,7 +128,7 @@ static void project_clipped_verts(GLfloat *first,
 
 
 
-static void __cdecl cliptest_v16( GLfloat *first,
+static void _PROJAPI cliptest_v16( GLfloat *first,
                           GLfloat *last,
                           GLubyte *p_clipOr,
                           GLubyte *p_clipAnd,
@@ -191,12 +187,3 @@ gl_project_func gl_project_v16 = project_verts;
 void gl_init_vertices()
 {
 }
-
-
-
-
-
-
-
-
-

@@ -1,8 +1,8 @@
-/* $Id: clip.c,v 1.2 2000-03-01 18:49:24 jeroen Exp $ */
+/* $Id: clip.c,v 1.3 2000-05-23 20:40:25 jeroen Exp $ */
 
 /*
  * Mesa 3-D graphics library
- * Version:  3.1
+ * Version:  3.3
  *
  * Copyright (C) 1999  Brian Paul   All Rights Reserved.
  *
@@ -31,13 +31,7 @@
 #ifdef PC_HEADER
 #include "all.h"
 #else
-#ifndef XFree86Server
-#include <string.h>
-#include <stdlib.h>
-#include <stdio.h>
-#else
-#include "GL/xf86glx.h"
-#endif
+#include "glheader.h"
 #include "clip.h"
 #include "types.h"
 #include "context.h"
@@ -65,14 +59,14 @@
 
 
 
-#define INTERP_SZ( t, vec, to, a, b, sz )			\
-do {								\
-   switch (sz) {						\
-   case 4: vec[to][3] = LINTERP( t, vec[a][3], vec[b][3] );	\
-   case 3: vec[to][2] = LINTERP( t, vec[a][2], vec[b][2] );	\
-   case 2: vec[to][1] = LINTERP( t, vec[a][1], vec[b][1] );	\
-   case 1: vec[to][0] = LINTERP( t, vec[a][0], vec[b][0] );	\
-   }								\
+#define INTERP_SZ( t, vec, to, a, b, sz )                       \
+do {                                                            \
+   switch (sz) {                                                \
+   case 4: vec[to][3] = LINTERP( t, vec[a][3], vec[b][3] );     \
+   case 3: vec[to][2] = LINTERP( t, vec[a][2], vec[b][2] );     \
+   case 2: vec[to][1] = LINTERP( t, vec[a][1], vec[b][1] );     \
+   case 1: vec[to][0] = LINTERP( t, vec[a][0], vec[b][0] );     \
+   }                                                            \
 } while(0)
 
 
@@ -175,9 +169,17 @@ static clip_interp_func clip_interp_tab[0x80];
 
 
 
-void gl_ClipPlane( GLcontext* ctx, GLenum plane, const GLfloat *equation )
+void
+_mesa_ClipPlane( GLenum plane, const GLdouble *eq )
 {
+   GET_CURRENT_CONTEXT(ctx);
    GLint p;
+   GLfloat equation[4];
+
+   equation[0] = eq[0];
+   equation[1] = eq[1];
+   equation[2] = eq[2];
+   equation[3] = eq[3];
 
    ASSERT_OUTSIDE_BEGIN_END_AND_FLUSH(ctx, "glClipPlane");
 
@@ -199,18 +201,18 @@ void gl_ClipPlane( GLcontext* ctx, GLenum plane, const GLfloat *equation )
       gl_matrix_analyze( &ctx->ModelView );
    }
    gl_transform_vector( ctx->Transform.EyeUserPlane[p], equation,
-		        ctx->ModelView.inv );
+                        ctx->ModelView.inv );
 
 
    if (ctx->Transform.ClipEnabled[p]) {
       ctx->NewState |= NEW_USER_CLIP;
 
       if (ctx->ProjectionMatrix.flags & MAT_DIRTY_ALL_OVER) {
-	 gl_matrix_analyze( &ctx->ProjectionMatrix );
+         gl_matrix_analyze( &ctx->ProjectionMatrix );
       }
       gl_transform_vector( ctx->Transform.ClipUserPlane[p],
-			   ctx->Transform.EyeUserPlane[p],
-			   ctx->ProjectionMatrix.inv );
+                           ctx->Transform.EyeUserPlane[p],
+                           ctx->ProjectionMatrix.inv );
    }
 }
 
@@ -221,15 +223,17 @@ void gl_update_userclip( GLcontext *ctx )
 
    for (p = 0 ; p < MAX_CLIP_PLANES ; p++) {
       if (ctx->Transform.ClipEnabled[p]) {
-	 gl_transform_vector( ctx->Transform.ClipUserPlane[p],
-			      ctx->Transform.EyeUserPlane[p],
-			      ctx->ProjectionMatrix.inv );
+         gl_transform_vector( ctx->Transform.ClipUserPlane[p],
+                              ctx->Transform.EyeUserPlane[p],
+                              ctx->ProjectionMatrix.inv );
       }
    }
 }
 
-void gl_GetClipPlane( GLcontext* ctx, GLenum plane, GLdouble *equation )
+void
+_mesa_GetClipPlane( GLenum plane, GLdouble *equation )
 {
+   GET_CURRENT_CONTEXT(ctx);
    GLint p;
 
    ASSERT_OUTSIDE_BEGIN_END(ctx, "glGetClipPlane");
@@ -285,10 +289,10 @@ GLuint gl_userclip_point( GLcontext* ctx, const GLfloat v[] )
 
    for (p=0;p<MAX_CLIP_PLANES;p++) {
       if (ctx->Transform.ClipEnabled[p]) {
-	 GLfloat dot = v[0] * ctx->Transform.ClipUserPlane[p][0]
-		     + v[1] * ctx->Transform.ClipUserPlane[p][1]
-		     + v[2] * ctx->Transform.ClipUserPlane[p][2]
-		     + v[3] * ctx->Transform.ClipUserPlane[p][3];
+         GLfloat dot = v[0] * ctx->Transform.ClipUserPlane[p][0]
+                     + v[1] * ctx->Transform.ClipUserPlane[p][1]
+                     + v[2] * ctx->Transform.ClipUserPlane[p][2]
+                     + v[3] * ctx->Transform.ClipUserPlane[p][3];
          if (dot < 0.0F) {
             return 0;
          }
@@ -376,24 +380,24 @@ void gl_update_clipmask( GLcontext *ctx )
    {
       if (ctx->Light.ShadeModel==GL_SMOOTH)
       {
-	 mask |= CLIP_RGBA0;
+         mask |= CLIP_RGBA0;
 
-	 if (ctx->TriangleCaps & (DD_TRI_LIGHT_TWOSIDE|DD_SEPERATE_SPECULAR))
-	    mask |= CLIP_RGBA1;
+         if (ctx->TriangleCaps & (DD_TRI_LIGHT_TWOSIDE|DD_SEPERATE_SPECULAR))
+            mask |= CLIP_RGBA1;
       }
 
       if (ctx->Texture.ReallyEnabled & 0xf0)
-	 mask |= CLIP_TEX1|CLIP_TEX0;
+         mask |= CLIP_TEX1|CLIP_TEX0;
 
       if (ctx->Texture.ReallyEnabled & 0xf)
-	 mask |= CLIP_TEX0;
+         mask |= CLIP_TEX0;
    }
    else if (ctx->Light.ShadeModel==GL_SMOOTH)
    {
       mask |= CLIP_INDEX0;
 
       if (ctx->TriangleCaps & DD_TRI_LIGHT_TWOSIDE)
-	 mask |= CLIP_INDEX1;
+         mask |= CLIP_INDEX1;
    }
 
    if (ctx->FogMode == FOG_FRAGMENT && (ctx->TriangleCaps & DD_CLIP_FOG_COORD))
@@ -410,56 +414,56 @@ void gl_update_clipmask( GLcontext *ctx )
 }
 
 
-#define USER_CLIPTEST(NAME, SZ)						\
-static void NAME( struct vertex_buffer *VB )				\
-{									\
-   GLcontext *ctx = VB->ctx;						\
-   GLubyte *clipMask = VB->ClipMask;					\
-   GLubyte *userClipMask = VB->UserClipMask;				\
-   GLuint start = VB->Start;						\
-   GLuint count = VB->Count;						\
-   GLuint p, i;								\
-   GLubyte bit;								\
-									\
-									\
-   for (bit = 1, p = 0; p < MAX_CLIP_PLANES ; p++, bit *=2)		\
-      if (ctx->Transform.ClipEnabled[p]) {				\
-	 GLuint nr = 0;							\
-	 const GLfloat a = ctx->Transform.ClipUserPlane[p][0];		\
-	 const GLfloat b = ctx->Transform.ClipUserPlane[p][1];		\
-	 const GLfloat c = ctx->Transform.ClipUserPlane[p][2];		\
-	 const GLfloat d = ctx->Transform.ClipUserPlane[p][3];		\
-         GLfloat *coord = VB->ClipPtr->start;				\
-         GLuint stride = VB->ClipPtr->stride;				\
-									\
-	 for (i = start ; i < count ; i++, STRIDE_F(coord, stride)) {	\
-	    GLfloat dp = coord[0] * a + coord[1] * b;			\
-	    if (SZ > 2) dp += coord[2] * c;				\
-	    if (SZ > 3) dp += coord[3] * d; else dp += d;		\
-									\
-	    if (dp < 0) {						\
-	       clipMask[i] |= CLIP_USER_BIT;				\
-	       userClipMask[i] |= bit;					\
-	       nr++;							\
-	    }								\
-	 }								\
-									\
-	 if (nr > 0) {							\
-	    VB->ClipOrMask |= CLIP_USER_BIT;				\
-	    VB->CullMode |= CLIP_MASK_ACTIVE;				\
-	    if (nr == count - start) {					\
-	       VB->ClipAndMask |= CLIP_USER_BIT;			\
-	       VB->Culled = 1;						\
-	       return;							\
-	    }								\
-	 }								\
-      }									\
+#define USER_CLIPTEST(NAME, SZ)                                         \
+static void NAME( struct vertex_buffer *VB )                            \
+{                                                                       \
+   GLcontext *ctx = VB->ctx;                                            \
+   GLubyte *clipMask = VB->ClipMask;                                    \
+   GLubyte *userClipMask = VB->UserClipMask;                            \
+   GLuint start = VB->Start;                                            \
+   GLuint count = VB->Count;                                            \
+   GLuint p, i;                                                         \
+   GLubyte bit;                                                         \
+                                                                        \
+                                                                        \
+   for (bit = 1, p = 0; p < MAX_CLIP_PLANES ; p++, bit *=2)             \
+      if (ctx->Transform.ClipEnabled[p]) {                              \
+         GLuint nr = 0;                                                 \
+         const GLfloat a = ctx->Transform.ClipUserPlane[p][0];          \
+         const GLfloat b = ctx->Transform.ClipUserPlane[p][1];          \
+         const GLfloat c = ctx->Transform.ClipUserPlane[p][2];          \
+         const GLfloat d = ctx->Transform.ClipUserPlane[p][3];          \
+         GLfloat *coord = VB->ClipPtr->start;                           \
+         GLuint stride = VB->ClipPtr->stride;                           \
+                                                                        \
+         for (i = start ; i < count ; i++, STRIDE_F(coord, stride)) {   \
+            GLfloat dp = coord[0] * a + coord[1] * b;                   \
+            if (SZ > 2) dp += coord[2] * c;                             \
+            if (SZ > 3) dp += coord[3] * d; else dp += d;               \
+                                                                        \
+            if (dp < 0) {                                               \
+               clipMask[i] |= CLIP_USER_BIT;                            \
+               userClipMask[i] |= bit;                                  \
+               nr++;                                                    \
+            }                                                           \
+         }                                                              \
+                                                                        \
+         if (nr > 0) {                                                  \
+            VB->ClipOrMask |= CLIP_USER_BIT;                            \
+            VB->CullMode |= CLIP_MASK_ACTIVE;                           \
+            if (nr == count - start) {                                  \
+               VB->ClipAndMask |= CLIP_USER_BIT;                        \
+               VB->Culled = 1;                                          \
+               return;                                                  \
+            }                                                           \
+         }                                                              \
+      }                                                                 \
 }
 
 
-USER_CLIPTEST(userclip2, 2)		
-USER_CLIPTEST(userclip3, 3)		
-USER_CLIPTEST(userclip4, 4)		
+USER_CLIPTEST(userclip2, 2)
+USER_CLIPTEST(userclip3, 3)
+USER_CLIPTEST(userclip4, 4)
 
 static void (*(usercliptab[5]))( struct vertex_buffer * ) = {
    0,

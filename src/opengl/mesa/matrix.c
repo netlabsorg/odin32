@@ -1,8 +1,8 @@
-/* $Id: matrix.c,v 1.2 2000-03-01 18:49:31 jeroen Exp $ */
+/* $Id: matrix.c,v 1.3 2000-05-23 20:40:40 jeroen Exp $ */
 
 /*
  * Mesa 3-D graphics library
- * Version:  3.1
+ * Version:  3.3
  *
  * Copyright (C) 1999  Brian Paul   All Rights Reserved.
  *
@@ -43,22 +43,16 @@
 #ifdef PC_HEADER
 #include "all.h"
 #else
-#ifndef XFree86Server
-#include <math.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#else
-#include "GL/xf86glx.h"
-#endif
+#include "glheader.h"
 #include "types.h"
 #include "context.h"
 #include "enums.h"
 #include "macros.h"
 #include "matrix.h"
 #include "mmath.h"
+#include "buffers.h"
+#include "mem.h"
 #endif
-
 
 static const char *types[] = {
    "MATRIX_GENERAL",
@@ -346,14 +340,14 @@ static GLboolean invert_matrix_3d_general( GLmatrix *mat )
 
    /* Do the translation part */
    MAT(out,0,3) = - (MAT(in,0,3) * MAT(out,0,0) +
-		     MAT(in,1,3) * MAT(out,0,1) +
-		     MAT(in,2,3) * MAT(out,0,2) );
+                     MAT(in,1,3) * MAT(out,0,1) +
+                     MAT(in,2,3) * MAT(out,0,2) );
    MAT(out,1,3) = - (MAT(in,0,3) * MAT(out,1,0) +
-		     MAT(in,1,3) * MAT(out,1,1) +
-		     MAT(in,2,3) * MAT(out,1,2) );
+                     MAT(in,1,3) * MAT(out,1,1) +
+                     MAT(in,2,3) * MAT(out,1,2) );
    MAT(out,2,3) = - (MAT(in,0,3) * MAT(out,2,0) +
-		     MAT(in,1,3) * MAT(out,2,1) +
-		     MAT(in,2,3) * MAT(out,2,2) );
+                     MAT(in,1,3) * MAT(out,2,1) +
+                     MAT(in,2,3) * MAT(out,2,2) );
 
    return GL_TRUE;
 }
@@ -372,8 +366,8 @@ static GLboolean invert_matrix_3d( GLmatrix *mat )
    if (mat->flags & MAT_FLAG_UNIFORM_SCALE)
    {
       GLfloat  scale = (MAT(in,0,0) * MAT(in,0,0) +
-			MAT(in,0,1) * MAT(in,0,1) +
-			MAT(in,0,2) * MAT(in,0,2));
+                        MAT(in,0,1) * MAT(in,0,1) +
+                        MAT(in,0,2) * MAT(in,0,2));
 
       if (scale == 0.0)
          return GL_FALSE;
@@ -417,14 +411,14 @@ static GLboolean invert_matrix_3d( GLmatrix *mat )
    {
       /* Do the translation part */
       MAT(out,0,3) = - (MAT(in,0,3) * MAT(out,0,0) +
-			MAT(in,1,3) * MAT(out,0,1) +
-			MAT(in,2,3) * MAT(out,0,2) );
+                        MAT(in,1,3) * MAT(out,0,1) +
+                        MAT(in,2,3) * MAT(out,0,2) );
       MAT(out,1,3) = - (MAT(in,0,3) * MAT(out,1,0) +
-			MAT(in,1,3) * MAT(out,1,1) +
-			MAT(in,2,3) * MAT(out,1,2) );
+                        MAT(in,1,3) * MAT(out,1,1) +
+                        MAT(in,2,3) * MAT(out,1,2) );
       MAT(out,2,3) = - (MAT(in,0,3) * MAT(out,2,0) +
-			MAT(in,1,3) * MAT(out,2,1) +
-			MAT(in,2,3) * MAT(out,2,2) );
+                        MAT(in,1,3) * MAT(out,2,1) +
+                        MAT(in,2,3) * MAT(out,2,2) );
    }
    else
    {
@@ -522,7 +516,7 @@ static inv_mat_func inv_mat_tab[7] = {
    invert_matrix_identity,
    invert_matrix_3d_no_rot,
    invert_matrix_perspective,
-   invert_matrix_3d,		/* lazy! */
+   invert_matrix_3d,            /* lazy! */
    invert_matrix_2d_no_rot,
    invert_matrix_3d
 };
@@ -543,6 +537,50 @@ GLboolean gl_matrix_invert( GLmatrix *mat )
       MEMCPY( mat->inv, Identity, sizeof(Identity) );
       return GL_FALSE;
    }
+}
+
+
+
+void gl_matrix_transposef( GLfloat to[16], const GLfloat from[16] )
+{
+   to[0] = from[0];
+   to[1] = from[4];
+   to[2] = from[8];
+   to[3] = from[12];
+   to[4] = from[1];
+   to[5] = from[5];
+   to[6] = from[9];
+   to[7] = from[13];
+   to[8] = from[2];
+   to[9] = from[6];
+   to[10] = from[10];
+   to[11] = from[14];
+   to[12] = from[3];
+   to[13] = from[7];
+   to[14] = from[11];
+   to[15] = from[15];
+}
+
+
+
+void gl_matrix_transposed( GLdouble to[16], const GLdouble from[16] )
+{
+   to[0] = from[0];
+   to[1] = from[4];
+   to[2] = from[8];
+   to[3] = from[12];
+   to[4] = from[1];
+   to[5] = from[5];
+   to[6] = from[9];
+   to[7] = from[13];
+   to[8] = from[2];
+   to[9] = from[6];
+   to[10] = from[10];
+   to[11] = from[14];
+   to[12] = from[3];
+   to[13] = from[7];
+   to[14] = from[11];
+   to[15] = from[15];
 }
 
 
@@ -668,36 +706,36 @@ void gl_rotation_matrix( GLfloat angle, GLfloat x, GLfloat y, GLfloat z,
 #define MASK_NO_2D_SCALE ( ONE(0)  | ONE(5))
 
 #define MASK_IDENTITY    ( ONE(0)  | ZERO(4)  | ZERO(8)  | ZERO(12) |\
-			  ZERO(1)  |  ONE(5)  | ZERO(9)  | ZERO(13) |\
-			  ZERO(2)  | ZERO(6)  |  ONE(10) | ZERO(14) |\
-			  ZERO(3)  | ZERO(7)  | ZERO(11) |  ONE(15) )
+                          ZERO(1)  |  ONE(5)  | ZERO(9)  | ZERO(13) |\
+                          ZERO(2)  | ZERO(6)  |  ONE(10) | ZERO(14) |\
+                          ZERO(3)  | ZERO(7)  | ZERO(11) |  ONE(15) )
 
 #define MASK_2D_NO_ROT   (           ZERO(4)  | ZERO(8)  |           \
-			  ZERO(1)  |            ZERO(9)  |           \
-			  ZERO(2)  | ZERO(6)  |  ONE(10) | ZERO(14) |\
-			  ZERO(3)  | ZERO(7)  | ZERO(11) |  ONE(15) )
+                          ZERO(1)  |            ZERO(9)  |           \
+                          ZERO(2)  | ZERO(6)  |  ONE(10) | ZERO(14) |\
+                          ZERO(3)  | ZERO(7)  | ZERO(11) |  ONE(15) )
 
 #define MASK_2D          (                      ZERO(8)  |           \
-			                        ZERO(9)  |           \
-			  ZERO(2)  | ZERO(6)  |  ONE(10) | ZERO(14) |\
-			  ZERO(3)  | ZERO(7)  | ZERO(11) |  ONE(15) )
+                                                ZERO(9)  |           \
+                          ZERO(2)  | ZERO(6)  |  ONE(10) | ZERO(14) |\
+                          ZERO(3)  | ZERO(7)  | ZERO(11) |  ONE(15) )
 
 
 #define MASK_3D_NO_ROT   (           ZERO(4)  | ZERO(8)  |           \
-			  ZERO(1)  |            ZERO(9)  |           \
-			  ZERO(2)  | ZERO(6)  |                      \
-			  ZERO(3)  | ZERO(7)  | ZERO(11) |  ONE(15) )
+                          ZERO(1)  |            ZERO(9)  |           \
+                          ZERO(2)  | ZERO(6)  |                      \
+                          ZERO(3)  | ZERO(7)  | ZERO(11) |  ONE(15) )
 
 #define MASK_3D          (                                           \
-			                                             \
-			                                             \
-			  ZERO(3)  | ZERO(7)  | ZERO(11) |  ONE(15) )
+                                                                     \
+                                                                     \
+                          ZERO(3)  | ZERO(7)  | ZERO(11) |  ONE(15) )
 
 
 #define MASK_PERSPECTIVE (           ZERO(4)  |            ZERO(12) |\
-			  ZERO(1)  |                       ZERO(13) |\
-			  ZERO(2)  | ZERO(6)  |                      \
-			  ZERO(3)  | ZERO(7)  |            ZERO(15) )
+                          ZERO(1)  |                       ZERO(13) |\
+                          ZERO(2)  | ZERO(6)  |                      \
+                          ZERO(3)  | ZERO(7)  |            ZERO(15) )
 
 #define SQ(x) ((x)*(x))
 
@@ -737,7 +775,7 @@ static void analyze_from_scratch( GLmatrix *mat )
       mat->type = MATRIX_2D_NO_ROT;
 
       if ((mask & MASK_NO_2D_SCALE) != MASK_NO_2D_SCALE)
-	 mat->flags = MAT_FLAG_GENERAL_SCALE;
+         mat->flags = MAT_FLAG_GENERAL_SCALE;
    }
    else if ((mask & MASK_2D) == MASK_2D)
    {
@@ -749,14 +787,14 @@ static void analyze_from_scratch( GLmatrix *mat )
 
       /* Check for scale */
       if (SQ(mm-1) > SQ(1e-6) ||
-	  SQ(m4m4-1) > SQ(1e-6))
-	 mat->flags |= MAT_FLAG_GENERAL_SCALE;
+          SQ(m4m4-1) > SQ(1e-6))
+         mat->flags |= MAT_FLAG_GENERAL_SCALE;
 
       /* Check for rotation */
       if (SQ(mm4) > SQ(1e-6))
-	 mat->flags |= MAT_FLAG_GENERAL_3D;
+         mat->flags |= MAT_FLAG_GENERAL_3D;
       else
-	 mat->flags |= MAT_FLAG_ROTATION;
+         mat->flags |= MAT_FLAG_ROTATION;
 
    }
    else if ((mask & MASK_3D_NO_ROT) == MASK_3D_NO_ROT)
@@ -765,11 +803,11 @@ static void analyze_from_scratch( GLmatrix *mat )
 
       /* Check for scale */
       if (SQ(m[0]-m[5]) < SQ(1e-6) &&
-	  SQ(m[0]-m[10]) < SQ(1e-6)) {
-	 if (SQ(m[0]-1.0) > SQ(1e-6))
-	    mat->flags |= MAT_FLAG_UNIFORM_SCALE;
+          SQ(m[0]-m[10]) < SQ(1e-6)) {
+         if (SQ(m[0]-1.0) > SQ(1e-6))
+            mat->flags |= MAT_FLAG_UNIFORM_SCALE;
       } else
-	 mat->flags |= MAT_FLAG_GENERAL_SCALE;
+         mat->flags |= MAT_FLAG_GENERAL_SCALE;
    }
    else if ((mask & MASK_3D) == MASK_3D)
    {
@@ -783,23 +821,23 @@ static void analyze_from_scratch( GLmatrix *mat )
 
       /* Check for scale */
       if (SQ(c1-c2) < SQ(1e-6) && SQ(c1-c3) < SQ(1e-6)) {
-	 if (SQ(c1-1.0) > SQ(1e-6))
-	    mat->flags |= MAT_FLAG_UNIFORM_SCALE;
-	 /* else no scale at all */
+         if (SQ(c1-1.0) > SQ(1e-6))
+            mat->flags |= MAT_FLAG_UNIFORM_SCALE;
+         /* else no scale at all */
       } else
-	 mat->flags |= MAT_FLAG_GENERAL_SCALE;
+         mat->flags |= MAT_FLAG_GENERAL_SCALE;
 
       /* Check for rotation */
       if (SQ(d1) < SQ(1e-6)) {
-	 CROSS3( cp, m, m+4 );
-	 SUB_3V( cp, cp, (m+8) );
-	 if (LEN_SQUARED_3FV(cp) < SQ(1e-6))
-	    mat->flags |= MAT_FLAG_ROTATION;
-	 else
-	    mat->flags |= MAT_FLAG_GENERAL_3D;
+         CROSS3( cp, m, m+4 );
+         SUB_3V( cp, cp, (m+8) );
+         if (LEN_SQUARED_3FV(cp) < SQ(1e-6))
+            mat->flags |= MAT_FLAG_ROTATION;
+         else
+            mat->flags |= MAT_FLAG_GENERAL_3D;
       }
       else
-	 mat->flags |= MAT_FLAG_GENERAL_3D; /* shear, etc */
+         mat->flags |= MAT_FLAG_GENERAL_3D; /* shear, etc */
    }
    else if ((mask & MASK_PERSPECTIVE) == MASK_PERSPECTIVE && m[11]==-1.0F)
    {
@@ -824,14 +862,14 @@ static void analyze_from_flags( GLmatrix *mat )
       mat->type = MATRIX_IDENTITY;
    }
    else if (TEST_MAT_FLAGS(mat, (MAT_FLAG_TRANSLATION |
-				 MAT_FLAG_UNIFORM_SCALE |
-				 MAT_FLAG_GENERAL_SCALE)))
+                                 MAT_FLAG_UNIFORM_SCALE |
+                                 MAT_FLAG_GENERAL_SCALE)))
    {
       if ( m[10]==1.0F && m[14]==0.0F ) {
-	 mat->type = MATRIX_2D_NO_ROT;
+         mat->type = MATRIX_2D_NO_ROT;
       }
       else {
-	 mat->type = MATRIX_3D_NO_ROT;
+         mat->type = MATRIX_3D_NO_ROT;
       }
    }
    else if (TEST_MAT_FLAGS(mat, MAT_FLAGS_3D)) {
@@ -839,11 +877,11 @@ static void analyze_from_flags( GLmatrix *mat )
             &&                             m[ 9]==0.0F
             && m[2]==0.0F && m[6]==0.0F && m[10]==1.0F && m[14]==0.0F)
       {
-	 mat->type = MATRIX_2D;
+         mat->type = MATRIX_2D;
       }
       else
       {
-	 mat->type = MATRIX_3D;
+         mat->type = MATRIX_3D;
       }
    }
    else if (                 m[4]==0.0F                 && m[12]==0.0F
@@ -864,9 +902,9 @@ void gl_matrix_analyze( GLmatrix *mat )
 {
    if (mat->flags & MAT_DIRTY_TYPE) {
       if (mat->flags & MAT_DIRTY_FLAGS)
-	 analyze_from_scratch( mat );
+         analyze_from_scratch( mat );
       else
-	 analyze_from_flags( mat );
+         analyze_from_flags( mat );
    }
 
    if (mat->inv && (mat->flags & MAT_DIRTY_INVERSE)) {
@@ -874,39 +912,40 @@ void gl_matrix_analyze( GLmatrix *mat )
    }
 
    mat->flags &= ~(MAT_DIRTY_FLAGS|
-		   MAT_DIRTY_TYPE|
-		   MAT_DIRTY_INVERSE);
+                   MAT_DIRTY_TYPE|
+                   MAT_DIRTY_INVERSE);
 }
 
 
-#define GET_ACTIVE_MATRIX(ctx, mat, flags, where)			\
-do {									\
+#define GET_ACTIVE_MATRIX(ctx, mat, flags, where)                       \
+do {                                                                    \
    ASSERT_OUTSIDE_BEGIN_END_AND_FLUSH(ctx, where);                      \
    if (MESA_VERBOSE&VERBOSE_API) fprintf(stderr, "%s\n", where);        \
-   switch (ctx->Transform.MatrixMode) {					\
-      case GL_MODELVIEW:						\
-	 mat = &ctx->ModelView;						\
-	 flags |= NEW_MODELVIEW;					\
-	 break;								\
-      case GL_PROJECTION:						\
-	 mat = &ctx->ProjectionMatrix;					\
-	 flags |= NEW_PROJECTION;					\
-	 break;								\
-      case GL_TEXTURE:							\
-	 mat = &ctx->TextureMatrix[ctx->Texture.CurrentTransformUnit];	\
-	 flags |= NEW_TEXTURE_MATRIX;					\
-	 break;								\
-      default:								\
-         gl_problem(ctx, where);					\
-   }									\
+   switch (ctx->Transform.MatrixMode) {                                 \
+      case GL_MODELVIEW:                                                \
+         mat = &ctx->ModelView;                                         \
+         flags |= NEW_MODELVIEW;                                        \
+         break;                                                         \
+      case GL_PROJECTION:                                               \
+         mat = &ctx->ProjectionMatrix;                                  \
+         flags |= NEW_PROJECTION;                                       \
+         break;                                                         \
+      case GL_TEXTURE:                                                  \
+         mat = &ctx->TextureMatrix[ctx->Texture.CurrentTransformUnit];  \
+         flags |= NEW_TEXTURE_MATRIX;                                   \
+         break;                                                         \
+      default:                                                          \
+         gl_problem(ctx, where);                                        \
+   }                                                                    \
 } while (0)
 
 
-void gl_Frustum( GLcontext *ctx,
-                 GLdouble left, GLdouble right,
-	 	 GLdouble bottom, GLdouble top,
-		 GLdouble nearval, GLdouble farval )
+void
+_mesa_Frustum( GLdouble left, GLdouble right,
+               GLdouble bottom, GLdouble top,
+               GLdouble nearval, GLdouble farval )
 {
+   GET_CURRENT_CONTEXT(ctx);
    GLfloat x, y, a, b, c, d;
    GLfloat m[16];
    GLmatrix *mat = 0;
@@ -946,17 +985,18 @@ void gl_Frustum( GLcontext *ctx,
       ctx->NearFarStack[ctx->ProjectionStackDepth][1] = farval;
 
       if (ctx->Driver.NearFar) {
-	 (*ctx->Driver.NearFar)( ctx, nearval, farval );
+         (*ctx->Driver.NearFar)( ctx, nearval, farval );
       }
    }
 }
 
 
-void gl_Ortho( GLcontext *ctx,
-               GLdouble left, GLdouble right,
-               GLdouble bottom, GLdouble top,
-               GLdouble nearval, GLdouble farval )
+void
+_mesa_Ortho( GLdouble left, GLdouble right,
+             GLdouble bottom, GLdouble top,
+             GLdouble nearval, GLdouble farval )
 {
+   GET_CURRENT_CONTEXT(ctx);
    GLfloat x, y, z;
    GLfloat tx, ty, tz;
    GLfloat m[16];
@@ -991,8 +1031,10 @@ void gl_Ortho( GLcontext *ctx,
 }
 
 
-void gl_MatrixMode( GLcontext *ctx, GLenum mode )
+void
+_mesa_MatrixMode( GLenum mode )
 {
+   GET_CURRENT_CONTEXT(ctx);
    ASSERT_OUTSIDE_BEGIN_END_AND_FLUSH(ctx, "glMatrixMode");
    switch (mode) {
       case GL_MODELVIEW:
@@ -1007,30 +1049,32 @@ void gl_MatrixMode( GLcontext *ctx, GLenum mode )
 
 
 
-void gl_PushMatrix( GLcontext *ctx )
+void
+_mesa_PushMatrix( void )
 {
+   GET_CURRENT_CONTEXT(ctx);
    ASSERT_OUTSIDE_BEGIN_END_AND_FLUSH(ctx, "glPushMatrix");
 
    if (MESA_VERBOSE&VERBOSE_API)
       fprintf(stderr, "glPushMatrix %s\n",
-	      gl_lookup_enum_by_nr(ctx->Transform.MatrixMode));
+              gl_lookup_enum_by_nr(ctx->Transform.MatrixMode));
 
    switch (ctx->Transform.MatrixMode) {
       case GL_MODELVIEW:
-         if (ctx->ModelViewStackDepth>=MAX_MODELVIEW_STACK_DEPTH-1) {
+         if (ctx->ModelViewStackDepth >= MAX_MODELVIEW_STACK_DEPTH - 1) {
             gl_error( ctx,  GL_STACK_OVERFLOW, "glPushMatrix");
             return;
          }
          gl_matrix_copy( &ctx->ModelViewStack[ctx->ModelViewStackDepth++],
-			 &ctx->ModelView );
+                         &ctx->ModelView );
          break;
       case GL_PROJECTION:
-         if (ctx->ProjectionStackDepth>=MAX_PROJECTION_STACK_DEPTH) {
+         if (ctx->ProjectionStackDepth >= MAX_PROJECTION_STACK_DEPTH - 1) {
             gl_error( ctx,  GL_STACK_OVERFLOW, "glPushMatrix");
             return;
          }
          gl_matrix_copy( &ctx->ProjectionStack[ctx->ProjectionStackDepth++],
-			 &ctx->ProjectionMatrix );
+                         &ctx->ProjectionMatrix );
 
          /* Save near and far projection values */
          ctx->NearFarStack[ctx->ProjectionStackDepth][0]
@@ -1041,12 +1085,12 @@ void gl_PushMatrix( GLcontext *ctx )
       case GL_TEXTURE:
          {
             GLuint t = ctx->Texture.CurrentTransformUnit;
-            if (ctx->TextureStackDepth[t] >= MAX_TEXTURE_STACK_DEPTH) {
+            if (ctx->TextureStackDepth[t] >= MAX_TEXTURE_STACK_DEPTH - 1) {
                gl_error( ctx,  GL_STACK_OVERFLOW, "glPushMatrix");
                return;
             }
-	    gl_matrix_copy( &ctx->TextureStack[t][ctx->TextureStackDepth[t]++],
-			    &ctx->TextureMatrix[t] );
+            gl_matrix_copy( &ctx->TextureStack[t][ctx->TextureStackDepth[t]++],
+                            &ctx->TextureMatrix[t] );
          }
          break;
       default:
@@ -1056,13 +1100,15 @@ void gl_PushMatrix( GLcontext *ctx )
 
 
 
-void gl_PopMatrix( GLcontext *ctx )
+void
+_mesa_PopMatrix( void )
 {
+   GET_CURRENT_CONTEXT(ctx);
    ASSERT_OUTSIDE_BEGIN_END_AND_FLUSH(ctx, "glPopMatrix");
 
    if (MESA_VERBOSE&VERBOSE_API)
       fprintf(stderr, "glPopMatrix %s\n",
-	      gl_lookup_enum_by_nr(ctx->Transform.MatrixMode));
+              gl_lookup_enum_by_nr(ctx->Transform.MatrixMode));
 
    switch (ctx->Transform.MatrixMode) {
       case GL_MODELVIEW:
@@ -1071,8 +1117,8 @@ void gl_PopMatrix( GLcontext *ctx )
             return;
          }
          gl_matrix_copy( &ctx->ModelView,
-			 &ctx->ModelViewStack[--ctx->ModelViewStackDepth] );
-	 ctx->NewState |= NEW_MODELVIEW;
+                         &ctx->ModelViewStack[--ctx->ModelViewStackDepth] );
+         ctx->NewState |= NEW_MODELVIEW;
          break;
       case GL_PROJECTION:
          if (ctx->ProjectionStackDepth==0) {
@@ -1081,8 +1127,8 @@ void gl_PopMatrix( GLcontext *ctx )
          }
 
          gl_matrix_copy( &ctx->ProjectionMatrix,
-			 &ctx->ProjectionStack[--ctx->ProjectionStackDepth] );
-	 ctx->NewState |= NEW_PROJECTION;
+                         &ctx->ProjectionStack[--ctx->ProjectionStackDepth] );
+         ctx->NewState |= NEW_PROJECTION;
 
          /* Device driver near/far values */
          {
@@ -1100,8 +1146,8 @@ void gl_PopMatrix( GLcontext *ctx )
                gl_error( ctx,  GL_STACK_UNDERFLOW, "glPopMatrix");
                return;
             }
-	    gl_matrix_copy(&ctx->TextureMatrix[t],
-			   &ctx->TextureStack[t][--ctx->TextureStackDepth[t]]);
+            gl_matrix_copy(&ctx->TextureMatrix[t],
+                           &ctx->TextureStack[t][--ctx->TextureStackDepth[t]]);
          }
          break;
       default:
@@ -1111,8 +1157,10 @@ void gl_PopMatrix( GLcontext *ctx )
 
 
 
-void gl_LoadIdentity( GLcontext *ctx )
+void
+_mesa_LoadIdentity( void )
 {
+   GET_CURRENT_CONTEXT(ctx);
    GLmatrix *mat = 0;
    GET_ACTIVE_MATRIX(ctx, mat, ctx->NewState, "glLoadIdentity");
 
@@ -1127,12 +1175,14 @@ void gl_LoadIdentity( GLcontext *ctx )
     * combined matrix later.  The update_matrix in this case is a
     * shortcircuit anyway...
     */
-   mat->flags = MAT_DIRTY_DEPENDENTS;	
+   mat->flags = MAT_DIRTY_DEPENDENTS;
 }
 
 
-void gl_LoadMatrixf( GLcontext *ctx, const GLfloat *m )
+void
+_mesa_LoadMatrixf( const GLfloat *m )
 {
+   GET_CURRENT_CONTEXT(ctx);
    GLmatrix *mat = 0;
    GET_ACTIVE_MATRIX(ctx, mat, ctx->NewState, "glLoadMatrix");
 
@@ -1156,9 +1206,20 @@ void gl_LoadMatrixf( GLcontext *ctx, const GLfloat *m )
       ctx->NearFarStack[ctx->ProjectionStackDepth][1] = f;
 
       if (ctx->Driver.NearFar) {
-	 (*ctx->Driver.NearFar)( ctx, n, f );
+         (*ctx->Driver.NearFar)( ctx, n, f );
       }
    }
+}
+
+
+void
+_mesa_LoadMatrixd( const GLdouble *m )
+{
+   GLfloat f[16];
+   GLint i;
+   for (i = 0; i < 16; i++)
+      f[i] = m[i];
+   _mesa_LoadMatrixf(f);
 }
 
 
@@ -1166,8 +1227,10 @@ void gl_LoadMatrixf( GLcontext *ctx, const GLfloat *m )
 /*
  * Multiply the active matrix by an arbitary matrix.
  */
-void gl_MultMatrixf( GLcontext *ctx, const GLfloat *m )
+void
+_mesa_MultMatrixf( const GLfloat *m )
 {
+   GET_CURRENT_CONTEXT(ctx);
    GLmatrix *mat = 0;
    GET_ACTIVE_MATRIX( ctx,  mat, ctx->NewState, "glMultMatrix" );
    matmul4( mat->m, mat->m, m );
@@ -1178,8 +1241,10 @@ void gl_MultMatrixf( GLcontext *ctx, const GLfloat *m )
 /*
  * Multiply the active matrix by an arbitary matrix.
  */
-void gl_MultMatrixd( GLcontext *ctx, const GLdouble *m )
+void
+_mesa_MultMatrixd( const GLdouble *m )
 {
+   GET_CURRENT_CONTEXT(ctx);
    GLmatrix *mat = 0;
    GET_ACTIVE_MATRIX( ctx,  mat, ctx->NewState, "glMultMatrix" );
    matmul4fd( mat->m, mat->m, m );
@@ -1195,9 +1260,9 @@ void gl_MultMatrixd( GLcontext *ctx, const GLdouble *m )
 void gl_mat_mul_floats( GLmatrix *mat, const GLfloat *m, GLuint flags )
 {
    mat->flags |= (flags |
-		  MAT_DIRTY_TYPE |
-		  MAT_DIRTY_INVERSE |
-		  MAT_DIRTY_DEPENDENTS);
+                  MAT_DIRTY_TYPE |
+                  MAT_DIRTY_INVERSE |
+                  MAT_DIRTY_DEPENDENTS);
 
    if (TEST_MAT_FLAGS(mat, MAT_FLAGS_3D))
       matmul34( mat->m, mat->m, m );
@@ -1212,9 +1277,9 @@ void gl_mat_mul_floats( GLmatrix *mat, const GLfloat *m, GLuint flags )
 void gl_mat_mul_mat( GLmatrix *mat, const GLmatrix *m )
 {
    mat->flags |= (m->flags |
-		  MAT_DIRTY_TYPE |
-		  MAT_DIRTY_INVERSE |
-		  MAT_DIRTY_DEPENDENTS);
+                  MAT_DIRTY_TYPE |
+                  MAT_DIRTY_INVERSE |
+                  MAT_DIRTY_DEPENDENTS);
 
    if (TEST_MAT_FLAGS(mat, MAT_FLAGS_3D))
       matmul34( mat->m, mat->m, m->m );
@@ -1227,9 +1292,10 @@ void gl_mat_mul_mat( GLmatrix *mat, const GLmatrix *m )
 /*
  * Execute a glRotate call
  */
-void gl_Rotatef( GLcontext *ctx,
-                 GLfloat angle, GLfloat x, GLfloat y, GLfloat z )
+void
+_mesa_Rotatef( GLfloat angle, GLfloat x, GLfloat y, GLfloat z )
 {
+   GET_CURRENT_CONTEXT(ctx);
    GLfloat m[16];
    if (angle != 0.0F) {
       GLmatrix *mat = 0;
@@ -1240,11 +1306,20 @@ void gl_Rotatef( GLcontext *ctx,
    }
 }
 
+void
+_mesa_Rotated( GLdouble angle, GLdouble x, GLdouble y, GLdouble z )
+{
+   _mesa_Rotatef(angle, x, y, z);
+}
+
+
 /*
  * Execute a glScale call
  */
-void gl_Scalef( GLcontext *ctx, GLfloat x, GLfloat y, GLfloat z )
+void
+_mesa_Scalef( GLfloat x, GLfloat y, GLfloat z )
 {
+   GET_CURRENT_CONTEXT(ctx);
    GLmatrix *mat = 0;
    GLfloat *m;
    GET_ACTIVE_MATRIX(ctx, mat, ctx->NewState, "glScale");
@@ -1261,15 +1336,25 @@ void gl_Scalef( GLcontext *ctx, GLfloat x, GLfloat y, GLfloat z )
       mat->flags |= MAT_FLAG_GENERAL_SCALE;
 
    mat->flags |= (MAT_DIRTY_TYPE |
-		  MAT_DIRTY_INVERSE |
-		  MAT_DIRTY_DEPENDENTS);
+                  MAT_DIRTY_INVERSE |
+                  MAT_DIRTY_DEPENDENTS);
 }
+
+
+void
+_mesa_Scaled( GLdouble x, GLdouble y, GLdouble z )
+{
+   _mesa_Scalef(x, y, z);
+}
+
 
 /*
  * Execute a glTranslate call
  */
-void gl_Translatef( GLcontext *ctx, GLfloat x, GLfloat y, GLfloat z )
+void
+_mesa_Translatef( GLfloat x, GLfloat y, GLfloat z )
 {
+   GET_CURRENT_CONTEXT(ctx);
    GLmatrix *mat = 0;
    GLfloat *m;
    GET_ACTIVE_MATRIX(ctx, mat, ctx->NewState, "glTranslate");
@@ -1280,18 +1365,78 @@ void gl_Translatef( GLcontext *ctx, GLfloat x, GLfloat y, GLfloat z )
    m[15] = m[3] * x + m[7] * y + m[11] * z + m[15];
 
    mat->flags |= (MAT_FLAG_TRANSLATION |
-		  MAT_DIRTY_TYPE |
-		  MAT_DIRTY_INVERSE |
-		  MAT_DIRTY_DEPENDENTS);
+                  MAT_DIRTY_TYPE |
+                  MAT_DIRTY_INVERSE |
+                  MAT_DIRTY_DEPENDENTS);
 }
+
+
+void
+_mesa_Translated( GLdouble x, GLdouble y, GLdouble z )
+{
+   _mesa_Translatef(x, y, z);
+}
+
+
+
+void
+_mesa_LoadTransposeMatrixfARB( const GLfloat *m )
+{
+   GLfloat tm[16];
+   gl_matrix_transposef(tm, m);
+   _mesa_LoadMatrixf(tm);
+}
+
+
+void
+_mesa_LoadTransposeMatrixdARB( const GLdouble *m )
+{
+   GLdouble tm[16];
+   gl_matrix_transposed(tm, m);
+   _mesa_LoadMatrixd(tm);
+}
+
+
+void
+_mesa_MultTransposeMatrixfARB( const GLfloat *m )
+{
+   GLfloat tm[16];
+   gl_matrix_transposef(tm, m);
+   _mesa_MultMatrixf(tm);
+}
+
+
+void
+_mesa_MultTransposeMatrixdARB( const GLdouble *m )
+{
+   GLdouble tm[16];
+   gl_matrix_transposed(tm, m);
+   _mesa_MultMatrixd(tm);
+}
+
+
+/*
+ * Called via glViewport or display list execution.
+ */
+void
+_mesa_Viewport( GLint x, GLint y, GLsizei width, GLsizei height )
+{
+   GET_CURRENT_CONTEXT(ctx);
+   gl_Viewport(ctx, x, y, width, height);
+}
+
 
 
 /*
  * Define a new viewport and reallocate auxillary buffers if the size of
  * the window (color buffer) has changed.
+ *
+ * XXX This is directly called by device drivers, BUT this function
+ * may be renamed _mesa_Viewport (without ctx arg) in the future so
+ * use of _mesa_Viewport is encouraged.
  */
-void gl_Viewport( GLcontext *ctx,
-                  GLint x, GLint y, GLsizei width, GLsizei height )
+void
+gl_Viewport( GLcontext *ctx, GLint x, GLint y, GLsizei width, GLsizei height )
 {
    ASSERT_OUTSIDE_BEGIN_END_AND_FLUSH(ctx, "glViewport");
 
@@ -1318,8 +1463,8 @@ void gl_Viewport( GLcontext *ctx,
    ctx->Viewport.WindowMap.m[MAT_TX] = ctx->Viewport.WindowMap.m[MAT_SX] + x;
    ctx->Viewport.WindowMap.m[MAT_SY] = (GLfloat) height / 2.0F;
    ctx->Viewport.WindowMap.m[MAT_TY] = ctx->Viewport.WindowMap.m[MAT_SY] + y;
-   ctx->Viewport.WindowMap.m[MAT_SZ] = 0.5 * DEPTH_SCALE;
-   ctx->Viewport.WindowMap.m[MAT_TZ] = 0.5 * DEPTH_SCALE;
+   ctx->Viewport.WindowMap.m[MAT_SZ] = 0.5 * ctx->Visual->DepthMaxF;
+   ctx->Viewport.WindowMap.m[MAT_TZ] = 0.5 * ctx->Visual->DepthMaxF;
 
    ctx->Viewport.WindowMap.flags = MAT_FLAG_GENERAL_SCALE|MAT_FLAG_TRANSLATION;
    ctx->Viewport.WindowMap.type = MATRIX_3D_NO_ROT;
@@ -1330,15 +1475,15 @@ void gl_Viewport( GLcontext *ctx,
    /* Check if window/buffer has been resized and if so, reallocate the
     * ancillary buffers.
     */
-   gl_ResizeBuffersMESA(ctx);
+   _mesa_ResizeBuffersMESA();
 
 
    ctx->RasterMask &= ~WINCLIP_BIT;
 
    if (   ctx->Viewport.X<0
-       || ctx->Viewport.X + ctx->Viewport.Width > ctx->Buffer->Width
+       || ctx->Viewport.X + ctx->Viewport.Width > ctx->DrawBuffer->Width
        || ctx->Viewport.Y<0
-       || ctx->Viewport.Y + ctx->Viewport.Height > ctx->Buffer->Height) {
+       || ctx->Viewport.Y + ctx->Viewport.Height > ctx->DrawBuffer->Height) {
       ctx->RasterMask |= WINCLIP_BIT;
    }
 
@@ -1350,7 +1495,8 @@ void gl_Viewport( GLcontext *ctx,
 
 
 
-void gl_DepthRange( GLcontext *ctx, GLclampd nearval, GLclampd farval )
+void
+_mesa_DepthRange( GLclampd nearval, GLclampd farval )
 {
    /*
     * nearval - specifies mapping of the near clipping plane to window
@@ -1364,7 +1510,7 @@ void gl_DepthRange( GLcontext *ctx, GLclampd nearval, GLclampd farval )
     * this range to window z coords.
     */
    GLfloat n, f;
-
+   GET_CURRENT_CONTEXT(ctx);
    ASSERT_OUTSIDE_BEGIN_END_AND_FLUSH(ctx, "glDepthRange");
 
    if (MESA_VERBOSE&VERBOSE_API)
@@ -1375,8 +1521,8 @@ void gl_DepthRange( GLcontext *ctx, GLclampd nearval, GLclampd farval )
 
    ctx->Viewport.Near = n;
    ctx->Viewport.Far = f;
-   ctx->Viewport.WindowMap.m[MAT_SZ] = DEPTH_SCALE * ((f - n) / 2.0);
-   ctx->Viewport.WindowMap.m[MAT_TZ] = DEPTH_SCALE * ((f - n) / 2.0 + n);
+   ctx->Viewport.WindowMap.m[MAT_SZ] = ctx->Visual->DepthMaxF * ((f - n) / 2.0);
+   ctx->Viewport.WindowMap.m[MAT_TZ] = ctx->Visual->DepthMaxF * ((f - n) / 2.0 + n);
 
    ctx->ModelProjectWinMatrixUptodate = GL_FALSE;
 
@@ -1389,8 +1535,8 @@ void gl_DepthRange( GLcontext *ctx, GLclampd nearval, GLclampd farval )
 void gl_calculate_model_project_matrix( GLcontext *ctx )
 {
    gl_matrix_mul( &ctx->ModelProjectMatrix,
-		  &ctx->ProjectionMatrix,
-		  &ctx->ModelView );
+                  &ctx->ProjectionMatrix,
+                  &ctx->ModelView );
 
    gl_matrix_analyze( &ctx->ModelProjectMatrix );
 }
@@ -1412,13 +1558,14 @@ void gl_matrix_dtr( GLmatrix *m )
    }
 }
 
+#if 0
 void gl_matrix_set_identity( GLmatrix *m )
 {
    MEMCPY( m->m, Identity, sizeof(Identity));
    m->type = MATRIX_IDENTITY;
    m->flags = MAT_DIRTY_DEPENDENTS;
 }
-
+#endif
 
 void gl_matrix_alloc_inv( GLmatrix *m )
 {
@@ -1436,9 +1583,9 @@ void gl_matrix_copy( GLmatrix *to, const GLmatrix *from )
 
    if (to->inv != 0) {
       if (from->inv == 0) {
-	 gl_matrix_invert( to );
+         gl_matrix_invert( to );
       } else {
-	 MEMCPY(to->inv, from->inv, sizeof(GLfloat)*16);
+         MEMCPY(to->inv, from->inv, sizeof(GLfloat)*16);
       }
    }
 }
@@ -1446,10 +1593,10 @@ void gl_matrix_copy( GLmatrix *to, const GLmatrix *from )
 void gl_matrix_mul( GLmatrix *dest, const GLmatrix *a, const GLmatrix *b )
 {
    dest->flags = (a->flags |
-		  b->flags |
-		  MAT_DIRTY_TYPE |
-		  MAT_DIRTY_INVERSE |
-		  MAT_DIRTY_DEPENDENTS);
+                  b->flags |
+                  MAT_DIRTY_TYPE |
+                  MAT_DIRTY_INVERSE |
+                  MAT_DIRTY_DEPENDENTS);
 
    if (TEST_MAT_FLAGS(dest, MAT_FLAGS_3D))
       matmul34( dest->m, a->m, b->m );

@@ -1,8 +1,8 @@
-/* $Id: scissor.c,v 1.2 2000-03-01 18:49:35 jeroen Exp $ */
+/* $Id: scissor.c,v 1.3 2000-05-23 20:40:53 jeroen Exp $ */
 
 /*
  * Mesa 3-D graphics library
- * Version:  3.1
+ * Version:  3.3
  *
  * Copyright (C) 1999  Brian Paul   All Rights Reserved.
  *
@@ -32,11 +32,7 @@
 #ifdef PC_HEADER
 #include "all.h"
 #else
-#ifndef XFree86Server
-#include <stdio.h>
-#else
-#include "GL/xf86glx.h"
-#endif
+#include "glheader.h"
 #include "types.h"
 #include "context.h"
 #include "macros.h"
@@ -44,20 +40,24 @@
 #endif
 
 
-void gl_Scissor( GLcontext *ctx,
-                 GLint x, GLint y, GLsizei width, GLsizei height )
+void
+_mesa_Scissor( GLint x, GLint y, GLsizei width, GLsizei height )
 {
-   if (width<0 || height<0) {
+   GET_CURRENT_CONTEXT(ctx);
+   ASSERT_OUTSIDE_BEGIN_END_AND_FLUSH(ctx, "glScissor");
+
+   if (width < 0 || height < 0) {
       gl_error( ctx, GL_INVALID_VALUE, "glScissor" );
       return;
    }
-   ASSERT_OUTSIDE_BEGIN_END_AND_FLUSH(ctx, "glBegin");
 
    if (MESA_VERBOSE & VERBOSE_API)
       fprintf(stderr, "glScissor %d %d %d %d\n", x, y, width, height);
 
-   if (x!=ctx->Scissor.X || y!=ctx->Scissor.Y ||
-       width!=ctx->Scissor.Width || height!=ctx->Scissor.Height) {
+   if (x != ctx->Scissor.X ||
+       y != ctx->Scissor.Y ||
+       width != ctx->Scissor.Width ||
+       height != ctx->Scissor.Height) {
       ctx->Scissor.X = x;
       ctx->Scissor.Y = y;
       ctx->Scissor.Width = width;
@@ -80,18 +80,20 @@ GLint gl_scissor_span( GLcontext *ctx,
                        GLuint n, GLint x, GLint y, GLubyte mask[] )
 {
    /* first check if whole span is outside the scissor box */
-   if (y<ctx->Buffer->Ymin || y>ctx->Buffer->Ymax
-       || x>ctx->Buffer->Xmax || x+(GLint)n-1<ctx->Buffer->Xmin) {
+   if (y < ctx->DrawBuffer->Ymin
+       || y > ctx->DrawBuffer->Ymax
+       || x > ctx->DrawBuffer->Xmax
+       || x + (GLint) n - 1 < ctx->DrawBuffer->Xmin) {
       return 0;
    }
    else {
+      const GLint xMin = ctx->DrawBuffer->Xmin;
+      const GLint xMax = ctx->DrawBuffer->Xmax;
       GLint i;
-      GLint xMin = ctx->Buffer->Xmin;
-      GLint xMax = ctx->Buffer->Xmax;
-      for (i=0; x+i < xMin; i++) {
+      for (i = 0; x + i < xMin; i++) {
          mask[i] = 0;
       }
-      for (i=(GLint)n-1; x+i > xMax; i--) {
+      for (i = (GLint) n - 1; x + i > xMax; i--) {
          mask[i] = 0;
       }
 
@@ -109,10 +111,10 @@ GLuint gl_scissor_pixels( GLcontext *ctx,
                           GLuint n, const GLint x[], const GLint y[],
                           GLubyte mask[] )
 {
-   GLint xmin = ctx->Buffer->Xmin;
-   GLint xmax = ctx->Buffer->Xmax;
-   GLint ymin = ctx->Buffer->Ymin;
-   GLint ymax = ctx->Buffer->Ymax;
+   const GLint xmin = ctx->DrawBuffer->Xmin;
+   const GLint xmax = ctx->DrawBuffer->Xmax;
+   const GLint ymin = ctx->DrawBuffer->Ymin;
+   const GLint ymax = ctx->DrawBuffer->Ymax;
    GLuint i;
 
    for (i=0;i<n;i++) {

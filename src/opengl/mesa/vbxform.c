@@ -1,4 +1,4 @@
-/* $Id: vbxform.c,v 1.2 2000-03-01 18:49:39 jeroen Exp $ */
+/* $Id: vbxform.c,v 1.3 2000-05-23 20:41:03 jeroen Exp $ */
 
 /*
  * Mesa 3-D graphics library
@@ -29,13 +29,7 @@
 #ifdef PC_HEADER
 #include "all.h"
 #else
-#ifndef XFree86Server
-#include <math.h>
-#include <stdlib.h>
-#include <stdio.h>
-#else
-#include "GL/xf86glx.h"
-#endif
+#include "glheader.h"
 #include "types.h"
 #include "context.h"
 #include "cva.h"
@@ -58,6 +52,8 @@
 #include "vbrender.h"
 #include "vbxform.h"
 #include "xform.h"
+#include "mem.h"
+#include "state.h"
 #endif
 
 
@@ -131,43 +127,43 @@ void gl_reset_vb( struct vertex_buffer *VB )
    if (IM)
    {
       if (VB->Count != IM->Count && 0) {
-	 fprintf(stderr, "Trying to copy vertices in the middle of an IM (%d/%d)!!\n",
-		 VB->Count, IM->Count);
+         fprintf(stderr, "Trying to copy vertices in the middle of an IM (%d/%d)!!\n",
+                 VB->Count, IM->Count);
       }
       else if (VB->pipeline->copy_transformed_data) {
 
-	 for (dst = start ; dst < VB_START ; dst++)
-	 {
-	    GLuint src = VB->Copy[dst];
-	
-	    if (MESA_VERBOSE&VERBOSE_IMMEDIATE)
-	       fprintf(stderr, "copying vertex %u to %u\n", src, dst);
-	
-	    COPY_4FV( VB->Clip.data[dst], VEC_ELT(VB->ClipPtr, GLfloat, src) );
-	    COPY_4FV( VB->Win.data[dst], VB->Win.data[src] );
-	
-	    VB->UserClipMask[dst] = VB->UserClipMask[src];
-	    VB->ClipMask[dst] = (GLubyte) (VB->ClipMask[src] & ~CLIP_CULLED_BIT);
-	    VB->ClipAndMask &= VB->ClipMask[dst];
-	    VB->ClipOrMask  |= VB->ClipMask[dst];
-	    VB->ClipMask[src] = 0;	/* hack for bounds_cull_vb */
+         for (dst = start ; dst < VB_START ; dst++)
+         {
+            GLuint src = VB->Copy[dst];
 
-	    COPY_4UBV( IM->Color[dst], IM->Color[src] );
-	    COPY_4UBV( VB->Spec[0][dst], VB->Spec[0][src] );
-	    COPY_4UBV( VB->Spec[1][dst], VB->Spec[1][src] );
-	    COPY_4UBV( VB->BColor.data[dst], VB->BColor.data[src] );
-	    IM->Index[dst] = IM->Index[src];
-	    VB->BIndex.data[dst] = VB->BIndex.data[src];
+            if (MESA_VERBOSE&VERBOSE_IMMEDIATE)
+               fprintf(stderr, "copying vertex %u to %u\n", src, dst);
 
-	    if (VB->TexCoordPtr[0] == &IM->v.TexCoord[0])
-	       COPY_4FV( IM->TexCoord[0][dst], IM->TexCoord[0][src] );
-	
-	    if (VB->TexCoordPtr[1] == &IM->v.TexCoord[1])
-	       COPY_4FV( IM->TexCoord[1][dst], IM->TexCoord[1][src] );
+            COPY_4FV( VB->Clip.data[dst], VEC_ELT(VB->ClipPtr, GLfloat, src) );
+            COPY_4FV( VB->Win.data[dst], VB->Win.data[src] );
 
-	    IM->Elt[dst] = IM->Elt[src];
-	    VB->SavedOrFlag |= IM->Flag[src];
-	 }
+            VB->UserClipMask[dst] = VB->UserClipMask[src];
+            VB->ClipMask[dst] = (GLubyte) (VB->ClipMask[src] & ~CLIP_CULLED_BIT);
+            VB->ClipAndMask &= VB->ClipMask[dst];
+            VB->ClipOrMask  |= VB->ClipMask[dst];
+            VB->ClipMask[src] = 0;      /* hack for bounds_cull_vb */
+
+            COPY_4UBV( IM->Color[dst], IM->Color[src] );
+            COPY_4UBV( VB->Spec[0][dst], VB->Spec[0][src] );
+            COPY_4UBV( VB->Spec[1][dst], VB->Spec[1][src] );
+            COPY_4UBV( VB->BColor.data[dst], VB->BColor.data[src] );
+            IM->Index[dst] = IM->Index[src];
+            VB->BIndex.data[dst] = VB->BIndex.data[src];
+
+            if (VB->TexCoordPtr[0] == &IM->v.TexCoord[0])
+               COPY_4FV( IM->TexCoord[0][dst], IM->TexCoord[0][src] );
+
+            if (VB->TexCoordPtr[1] == &IM->v.TexCoord[1])
+               COPY_4FV( IM->TexCoord[1][dst], IM->TexCoord[1][src] );
+
+            IM->Elt[dst] = IM->Elt[src];
+            VB->SavedOrFlag |= IM->Flag[src];
+         }
       }
 
       VB->CullDone = 0;
@@ -197,15 +193,15 @@ void gl_reset_vb( struct vertex_buffer *VB )
  * are done in gl_reset_vb.
  */
 void gl_copy_prev_vertices( struct vertex_buffer *VB,
-			    struct immediate *prev,
-			    struct immediate *next )
+                            struct immediate *prev,
+                            struct immediate *next )
 {
    GLuint dst;
    GLuint flags = VB->pipeline->inputs;
 
    if (MESA_VERBOSE&VERBOSE_CULL)
       fprintf(stderr, "copy prev vertices im: prev %d next %d copystart %d\n",
-	      prev->id, next->id, VB->CopyStart);
+              prev->id, next->id, VB->CopyStart);
 
    /* VB_START is correct as vertex copying is only required when an
     * IM wraps, which means that the next VB must start at VB_START.
@@ -215,15 +211,15 @@ void gl_copy_prev_vertices( struct vertex_buffer *VB,
       GLuint src = VB->Copy[dst];
 
       if (MESA_VERBOSE&VERBOSE_CULL)
-	 fprintf(stderr, "copy_prev: copy %d to %d\n", src, dst );
+         fprintf(stderr, "copy_prev: copy %d to %d\n", src, dst );
 
       COPY_4FV( next->Obj[dst], prev->Obj[src] );
 
       if ((flags&VERT_TEX0_ANY) && VB->TexCoordPtr[0] == &prev->v.TexCoord[0])
-	 COPY_4FV( next->TexCoord[0][dst], prev->TexCoord[0][src] );
-	
+         COPY_4FV( next->TexCoord[0][dst], prev->TexCoord[0][src] );
+
       if ((flags&VERT_TEX1_ANY) && VB->TexCoordPtr[1] == &prev->v.TexCoord[1])
-	 COPY_4FV( next->TexCoord[1][dst], prev->TexCoord[1][src] );
+         COPY_4FV( next->TexCoord[1][dst], prev->TexCoord[1][src] );
 
       COPY_4UBV( next->Color[dst], prev->Color[src] );
       next->Index[dst] = prev->Index[src];
@@ -269,10 +265,10 @@ void gl_reset_input( GLcontext *ctx )
 
    if (0)
       fprintf(stderr,
-	   "in reset_input(IM %d), BeginState is %x, setting prim[%d] to %s\n",
-	   IM->id,
-	   VERT_BEGIN_0,
-	   IM->Start, gl_lookup_enum_by_nr(ctx->Current.Primitive));
+           "in reset_input(IM %d), BeginState is %x, setting prim[%d] to %s\n",
+           IM->id,
+           VERT_BEGIN_0,
+           IM->Start, gl_lookup_enum_by_nr(ctx->Current.Primitive));
 
    IM->ArrayAndFlags = ~ctx->Array.Flags;
    IM->ArrayIncr = ctx->Array.Vertex.Enabled;
@@ -289,9 +285,9 @@ fixup_4f( GLfloat data[][4], GLuint flag[], GLuint start, GLuint match )
 
    for (;;) {
       if ((flag[++i] & match) == 0) {
-	 COPY_4FV(data[i], data[i-1]);
-	 flag[i] |= (flag[i-1] & match);
-	 if (flag[i] & VERT_END_VB) break;
+         COPY_4FV(data[i], data[i-1]);
+         flag[i] |= (flag[i-1] & match);
+         if (flag[i] & VERT_END_VB) break;
       }
    }
 }
@@ -307,9 +303,9 @@ fixup_3f( float data[][3], GLuint flag[], GLuint start, GLuint match )
 
    for (;;) {
       if ((flag[++i] & match) == 0) {
-	 COPY_3V(data[i], data[i-1]);
-	 flag[i] |= match;
-	 if (flag[i] & VERT_END_VB) break;
+         COPY_3V(data[i], data[i-1]);
+         flag[i] |= match;
+         if (flag[i] & VERT_END_VB) break;
       }
    }
 }
@@ -322,8 +318,8 @@ fixup_1ui( GLuint *data, GLuint flag[], GLuint start, GLuint match )
 
    for (;;) {
       if ((flag[++i] & match) == 0) {
-	 data[i] = data[i-1];
-	 if (flag[i] & VERT_END_VB) break;
+         data[i] = data[i-1];
+         if (flag[i] & VERT_END_VB) break;
       }
    }
    flag[i] |= match;
@@ -336,8 +332,8 @@ fixup_1ub( GLubyte *data, GLuint flag[], GLuint start, GLuint match )
 
    for (;;) {
       if ((flag[++i] & match) == 0) {
-	 data[i] = data[i-1];
-	 if (flag[i] & VERT_END_VB) break;
+         data[i] = data[i-1];
+         if (flag[i] & VERT_END_VB) break;
       }
    }
    flag[i] |= match;
@@ -351,8 +347,8 @@ fixup_4ub( GLubyte data[][4], GLuint flag[], GLuint start, GLuint match )
 
    for (;;) {
       if ((flag[++i] & match) == 0) {
-	 COPY_4UBV(data[i], data[i-1]);
-	 if (flag[i] & VERT_END_VB) break;
+         COPY_4UBV(data[i], data[i-1]);
+         if (flag[i] & VERT_END_VB) break;
       }
    }
    flag[i] |= match;
@@ -364,18 +360,28 @@ fixup_4ub( GLubyte data[][4], GLuint flag[], GLuint start, GLuint match )
 static void
 find_last_3f( float data[][3], GLuint flag[], GLuint match, GLuint count )
 {
-   GLuint i = count;
+   int i = count;
 
-   for (;;)
+   do {
       if ((flag[--i] & match) != 0) {
-	 COPY_3V(data[count], data[i]);	
-	 return;
+         COPY_3V(data[count], data[i]);
+         return;
       }
+   } while (i >= 0);
+
+   /* To reach this point excercises a bug that seems only to exist on
+    * dec alpha installations.  I want to leave this print statement
+    * enabled on the 3.3 branch so that we are reminded to track down
+    * the problem.
+    */
+   fprintf(stderr,
+           "didn't find VERT_NORM in find_last_3f"
+           "(Dec alpha problem?)\n");
 }
 
 static void
 fixup_first_4v( GLfloat data[][4], GLuint flag[], GLuint match,
-		GLuint start, GLfloat *dflt )
+                GLuint start, GLfloat *dflt )
 {
    GLuint i = start-1;
    match |= VERT_END_VB;
@@ -387,7 +393,7 @@ fixup_first_4v( GLfloat data[][4], GLuint flag[], GLuint match,
 
 static void
 fixup_first_1ui( GLuint data[], GLuint flag[], GLuint match,
-		 GLuint start, GLuint dflt )
+                 GLuint start, GLuint dflt )
 {
    GLuint i = start-1;
    match |= VERT_END_VB;
@@ -399,7 +405,7 @@ fixup_first_1ui( GLuint data[], GLuint flag[], GLuint match,
 
 static void
 fixup_first_1ub( GLubyte data[], GLuint flag[], GLuint match,
-		 GLuint start, GLubyte dflt )
+                 GLuint start, GLubyte dflt )
 {
    GLuint i = start-1;
    match |= VERT_END_VB;
@@ -411,7 +417,7 @@ fixup_first_1ub( GLubyte data[], GLuint flag[], GLuint match,
 
 static void
 fixup_first_4ub( GLubyte data[][4], GLuint flag[], GLuint match,
-		 GLuint start, GLubyte dflt[4] )
+                 GLuint start, GLubyte dflt[4] )
 {
    GLuint i = start-1;
    match |= VERT_END_VB;
@@ -424,10 +430,10 @@ fixup_first_4ub( GLubyte data[][4], GLuint flag[], GLuint match,
 
 
 static GLuint vertex_sizes[16] = { 0,
-				   1,
-				   2, 2,
-				   3, 3, 3, 3,
-				   4, 4, 4, 4, 4, 4, 4, 4 };
+                                   1,
+                                   2, 2,
+                                   3, 3, 3, 3,
+                                   4, 4, 4, 4, 4, 4, 4, 4 };
 
 
 
@@ -449,9 +455,9 @@ static void set_vec_sizes( struct immediate *IM, GLuint orflag )
 
    for (i = 0 ; i < MAX_TEXTURE_UNITS ; i++) {
       if (orflag & VERT_TEX_ANY(i)) {
-	 GLuint szflag = ((orflag>>(VERT_TEX0_SHIFT+i*NR_TEXSIZE_BITS))
-			  & 0xf);
-	 IM->v.TexCoord[i].size = vertex_sizes[szflag];
+         GLuint szflag = ((orflag>>(VERT_TEX0_SHIFT+i*NR_TEXSIZE_BITS))
+                          & 0xf);
+         IM->v.TexCoord[i].size = vertex_sizes[szflag];
       }
    }
 }
@@ -504,7 +510,7 @@ void gl_fixup_input( GLcontext *ctx, struct immediate *IM )
    if (MESA_VERBOSE&VERBOSE_IMMEDIATE)
    {
       fprintf(stderr, "Start: %u Count: %u LastData: %u\n",
-	      IM->Start, IM->Count, IM->LastData);
+              IM->Start, IM->Count, IM->LastData);
       gl_print_vert_flags("Orflag", orflag);
       gl_print_vert_flags("Andflag", andflag);
    }
@@ -540,74 +546,81 @@ void gl_fixup_input( GLcontext *ctx, struct immediate *IM )
    {
 
       if (ctx->ExecuteFlag && (fixup & ~IM->Flag[start])) {
-	 GLuint copy = fixup & ~IM->Flag[start];
+         GLuint copy = fixup & ~IM->Flag[start];
 
-	 if (copy & VERT_NORM) 	
-	    COPY_3V( IM->Normal[start], ctx->Current.Normal );
-	
-	 if (copy & VERT_RGBA)
-	    COPY_4UBV( IM->Color[start], ctx->Current.ByteColor);
+         if (copy & VERT_NORM)
+            COPY_3V( IM->Normal[start], ctx->Current.Normal );
 
-	 if (copy & VERT_INDEX)
-	    IM->Index[start] = ctx->Current.Index;
-	
-	 if (copy & VERT_EDGE)
-	    IM->EdgeFlag[start] = ctx->Current.EdgeFlag;
+         if (copy & VERT_RGBA)
+            COPY_4UBV( IM->Color[start], ctx->Current.ByteColor);
 
-	 if (copy & VERT_TEX0_ANY)
-	    COPY_4FV( IM->TexCoord[0][start], ctx->Current.Texcoord[0] );
-	
-	 if (copy & VERT_TEX1_ANY)
-	    COPY_4FV( IM->TexCoord[1][start], ctx->Current.Texcoord[1] );
+         if (copy & VERT_INDEX)
+            IM->Index[start] = ctx->Current.Index;
+
+         if (copy & VERT_EDGE)
+            IM->EdgeFlag[start] = ctx->Current.EdgeFlag;
+
+         if (copy & VERT_TEX0_ANY)
+            COPY_4FV( IM->TexCoord[0][start], ctx->Current.Texcoord[0] );
+
+         if (copy & VERT_TEX1_ANY)
+            COPY_4FV( IM->TexCoord[1][start], ctx->Current.Texcoord[1] );
       }
 
 
       if (MESA_VERBOSE&VERBOSE_IMMEDIATE)
-	 gl_print_vert_flags("fixup", fixup);
+         gl_print_vert_flags("fixup", fixup);
 
       if (fixup & VERT_TEX0_ANY) {
-	 if (orflag & VERT_TEX0_ANY)
-	    fixup_4f( IM->TexCoord[0], IM->Flag, start, VERT_TEX0_1234 );
-	 else
-	    fixup_first_4v( IM->TexCoord[0], IM->Flag, 0, start,
-			    IM->TexCoord[0][start]);
+         if (orflag & VERT_TEX0_ANY)
+            fixup_4f( IM->TexCoord[0], IM->Flag, start, VERT_TEX0_1234 );
+         else
+            fixup_first_4v( IM->TexCoord[0], IM->Flag, 0, start,
+                            IM->TexCoord[0][start]);
       }
 
       if (fixup & VERT_TEX1_ANY) {
-	 if (orflag & VERT_TEX1_ANY)
-	    fixup_4f( IM->TexCoord[1], IM->Flag, start, VERT_TEX1_1234 );
-	 else
-	    fixup_first_4v( IM->TexCoord[1], IM->Flag, 0, start,
-			    IM->TexCoord[1][start] );
+         if (orflag & VERT_TEX1_ANY)
+            fixup_4f( IM->TexCoord[1], IM->Flag, start, VERT_TEX1_1234 );
+         else
+            fixup_first_4v( IM->TexCoord[1], IM->Flag, 0, start,
+                            IM->TexCoord[1][start] );
       }
 
       if (fixup & VERT_EDGE) {
-	 if (orflag & VERT_EDGE)
-	    fixup_1ub( IM->EdgeFlag, IM->Flag, start, VERT_EDGE );
-	 else
-	    fixup_first_1ub( IM->EdgeFlag, IM->Flag, 0, start,
-			     IM->EdgeFlag[start] );
+         if (orflag & VERT_EDGE)
+            fixup_1ub( IM->EdgeFlag, IM->Flag, start, VERT_EDGE );
+         else
+            fixup_first_1ub( IM->EdgeFlag, IM->Flag, 0, start,
+                             IM->EdgeFlag[start] );
       }
 
       if (fixup & VERT_INDEX) {
-	 if (orflag & VERT_INDEX)
-	    fixup_1ui( IM->Index, IM->Flag, start, VERT_INDEX );
-	 else
-	    fixup_first_1ui( IM->Index, IM->Flag, 0, start, IM->Index[start] );
+         if (orflag & VERT_INDEX)
+            fixup_1ui( IM->Index, IM->Flag, start, VERT_INDEX );
+         else
+            fixup_first_1ui( IM->Index, IM->Flag, 0, start, IM->Index[start] );
       }
 
       if (fixup & VERT_RGBA) {
-	 if (orflag & VERT_RGBA)
-	    fixup_4ub( IM->Color, IM->Flag, start, VERT_RGBA );
-	 else
-	    fixup_first_4ub( IM->Color, IM->Flag, 0, start, IM->Color[start] );
+         if (orflag & VERT_RGBA)
+            fixup_4ub( IM->Color, IM->Flag, start, VERT_RGBA );
+         else
+            fixup_first_4ub( IM->Color, IM->Flag, 0, start, IM->Color[start] );
       }
 
       if (fixup & VERT_NORM) {
-	 if (IM->OrFlag & VERT_EVAL_ANY)
-	    fixup_3f( IM->Normal, IM->Flag, start, VERT_NORM );
-	 else if (!(IM->Flag[IM->LastData] & VERT_NORM))
- 	    find_last_3f( IM->Normal, IM->Flag, VERT_NORM, IM->LastData );
+         /* Only eval cannot use the Flag member to find valid normals:
+          */
+         if (IM->OrFlag & VERT_EVAL_ANY)
+            fixup_3f( IM->Normal, IM->Flag, start, VERT_NORM );
+         else {
+            /* Copy-to-current requires a valid normal in the last slot:
+             */
+            if ((IM->OrFlag & VERT_NORM) &&
+                !(IM->Flag[IM->LastData] & VERT_NORM))
+               find_last_3f( IM->Normal, IM->Flag, VERT_NORM, IM->LastData );
+         }
       }
    }
 
@@ -628,18 +641,18 @@ void gl_fixup_input( GLcontext *ctx, struct immediate *IM )
 
 
 static void calc_normal_lengths( GLfloat *dest,
-				 CONST GLfloat (*data)[3],
-				 const GLuint *flags,
-				 GLuint count )
+                                 CONST GLfloat (*data)[3],
+                                 const GLuint *flags,
+                                 GLuint count )
 {
    GLuint i;
 
    for (i = 0 ; i < count ; i++ )
       if (flags[i] & VERT_NORM) {
-	 GLfloat tmp = (GLfloat) LEN_3FV( data[i] );
-	 dest[i] = 0;
-	 if (tmp > 0)
-	    dest[i] = 1.0F / tmp;
+         GLfloat tmp = (GLfloat) LEN_3FV( data[i] );
+         dest[i] = 0;
+         if (tmp > 0)
+            dest[i] = 1.0F / tmp;
       }
 }
 
@@ -665,12 +678,12 @@ void gl_fixup_cassette( GLcontext *ctx, struct immediate *IM )
       GLuint start = IM->LastCalcedLength;
 
       if (!IM->NormalLengths)
-	 IM->NormalLengths = (GLfloat *)MALLOC(sizeof(GLfloat) * VB_SIZE);
+         IM->NormalLengths = (GLfloat *)MALLOC(sizeof(GLfloat) * VB_SIZE);
 
       calc_normal_lengths( IM->NormalLengths + start,
-			   (const GLfloat (*)[3])(IM->Normal + start),
-			   IM->Flag + start,
-			   IM->Count - start);
+                           (const GLfloat (*)[3])(IM->Normal + start),
+                           IM->Flag + start,
+                           IM->Count - start);
 
       IM->LastCalcedLength = IM->Count;
    }
@@ -680,34 +693,34 @@ void gl_fixup_cassette( GLcontext *ctx, struct immediate *IM )
    if (fixup) {
 
       if (MESA_VERBOSE & VERBOSE_IMMEDIATE) {
-	 fprintf(stderr, "start: %d count: %d\n", start, count);
-	 gl_print_vert_flags("fixup_cassette", fixup);
+         fprintf(stderr, "start: %d count: %d\n", start, count);
+         gl_print_vert_flags("fixup_cassette", fixup);
       }
 
       if (fixup & VERT_TEX0_ANY)
-	 fixup_first_4v( IM->TexCoord[0], IM->Flag, VERT_TEX0_ANY, start,
-			 ctx->Current.Texcoord[0] );
+         fixup_first_4v( IM->TexCoord[0], IM->Flag, VERT_TEX0_ANY, start,
+                         ctx->Current.Texcoord[0] );
 
       if (fixup & VERT_TEX1_ANY)
-	 fixup_first_4v( IM->TexCoord[1], IM->Flag, VERT_TEX1_ANY, start,
-			 ctx->Current.Texcoord[1] );
+         fixup_first_4v( IM->TexCoord[1], IM->Flag, VERT_TEX1_ANY, start,
+                         ctx->Current.Texcoord[1] );
 
       if (fixup & VERT_EDGE)
-	 fixup_first_1ub(IM->EdgeFlag, IM->Flag, VERT_EDGE, start,
-			 ctx->Current.EdgeFlag );
+         fixup_first_1ub(IM->EdgeFlag, IM->Flag, VERT_EDGE, start,
+                         ctx->Current.EdgeFlag );
 
       if (fixup & VERT_INDEX)
-	 fixup_first_1ui(IM->Index, IM->Flag, VERT_INDEX, start,
-			 ctx->Current.Index );
+         fixup_first_1ui(IM->Index, IM->Flag, VERT_INDEX, start,
+                         ctx->Current.Index );
 
       if (fixup & VERT_RGBA)
-	 fixup_first_4ub(IM->Color, IM->Flag, VERT_RGBA, start,
-			 ctx->Current.ByteColor );
+         fixup_first_4ub(IM->Color, IM->Flag, VERT_RGBA, start,
+                         ctx->Current.ByteColor );
 
       if ((fixup & VERT_NORM) && !(IM->Flag[start] & VERT_NORM)) {
-	 COPY_3V(IM->Normal[start], ctx->Current.Normal);
-	 if (ctx->Transform.Normalize)
-	    IM->NormalLengths[start] = 1.0F / (GLfloat) LEN_3FV(ctx->Current.Normal);
+         COPY_3V(IM->Normal[start], ctx->Current.Normal);
+         if (ctx->Transform.Normalize)
+            IM->NormalLengths[start] = 1.0F / (GLfloat) LEN_3FV(ctx->Current.Normal);
       }
    }
 }
@@ -753,7 +766,7 @@ static void fixup_primitives( struct vertex_buffer *VB, struct immediate *IM )
 
    for (in = start ; in <= count ; in = in_nextprim[in])
       if (flags[in] & interesting)
-	 break;
+         break;
 
    out = VB->CopyStart;
 
@@ -777,7 +790,7 @@ static void fixup_primitives( struct vertex_buffer *VB, struct immediate *IM )
       out_prim[in] = in_prim[in];
       out_nextprim[in] = in_nextprim[in];
    }
-	
+
 
    VB->Primitive = out_prim;
    VB->NextPrimitive = out_nextprim;
@@ -802,7 +815,7 @@ static void fixup_primitives( struct vertex_buffer *VB, struct immediate *IM )
 
    if (0)
       fprintf(stderr, "prim: %s count %u last %u incr %u ovf: %u\n",
-	      gl_prim_name[prim], count, last, incr, VB->Ovf);
+              gl_prim_name[prim], count, last, incr, VB->Ovf);
 }
 
 
@@ -926,10 +939,10 @@ void gl_execute_cassette( GLcontext *ctx, struct immediate *IM )
 
    if (MESA_VERBOSE&VERBOSE_IMMEDIATE)
       fprintf(stderr,
-	      "executing cassette, rows %u tc0->size == %u tc1->size == %u\n",
-	      VB->Count,
-	      VB->TexCoordPtr[0]->size,
-	      VB->TexCoordPtr[1]->size);
+              "executing cassette, rows %u tc0->size == %u tc1->size == %u\n",
+              VB->Count,
+              VB->TexCoordPtr[0]->size,
+              VB->TexCoordPtr[1]->size);
 
    if (MESA_VERBOSE&VERBOSE_IMMEDIATE)
       gl_print_cassette( IM );
@@ -950,7 +963,7 @@ void gl_execute_cassette( GLcontext *ctx, struct immediate *IM )
     */
    if (VB->pipeline->replay_copied_vertices) {
       if (!VB->CullDone)
-	 gl_fast_copy_vb( VB );
+         gl_fast_copy_vb( VB );
 
       gl_copy_prev_vertices( VB, VB->prev_buffer, IM );
    }
@@ -971,10 +984,10 @@ void gl_print_cassette_flags( struct immediate *IM, GLuint *flags )
    GLuint state = IM->BeginState;
    GLuint req = ~0;
    static const char *tplate[5] = { "%s ",
-				    "%s: %f ",
-				    "%s: %f %f ",
-				    "%s: %f %f %f ",
-				    "%s: %f %f %f %f " };
+                                    "%s: %f ",
+                                    "%s: %f %f ",
+                                    "%s: %f %f %f ",
+                                    "%s: %f %f %f %f " };
 
    fprintf(stderr, "Cassette id %d, %u rows.\n", IM->id, IM->Count - IM->Start);
 
@@ -985,79 +998,79 @@ void gl_print_cassette_flags( struct immediate *IM, GLuint *flags )
       gl_print_vert_flags("Contains a full complement of", andflag);
 
       fprintf(stderr, "Final begin/end state %s/%s, errors %s/%s\n",
-	     (state & VERT_BEGIN_0) ? "in" : "out",
-	     (state & VERT_BEGIN_1) ? "in" : "out",
-	     (state & VERT_ERROR_0) ? "y" : "n",
-	     (state & VERT_ERROR_1) ? "y" : "n");
+             (state & VERT_BEGIN_0) ? "in" : "out",
+             (state & VERT_BEGIN_1) ? "in" : "out",
+             (state & VERT_ERROR_0) ? "y" : "n",
+             (state & VERT_ERROR_1) ? "y" : "n");
 
       fprintf(stderr, "Obj size: %u, TexCoord0 size: %u, TexCoord1 size: %u\n",
-	     IM->v.Obj.size,
-	     IM->v.TexCoord[0].size,
-	     IM->v.TexCoord[1].size);
+             IM->v.Obj.size,
+             IM->v.TexCoord[0].size,
+             IM->v.TexCoord[1].size);
    }
 
    for (i = IM->Start ; i <= IM->Count ; i++) {
       fprintf(stderr, "%u: ", i);
       if (req & VERT_OBJ_ANY) {
-	 if (flags[i] & VERT_EVAL_C1)
-	    fprintf(stderr, "EvalCoord %f ", IM->Obj[i][0]);
-	 else if (flags[i] & VERT_EVAL_P1)
-	    fprintf(stderr, "EvalPoint %.0f ", IM->Obj[i][0]);
-	 else if (flags[i] & VERT_EVAL_C2)
-	    fprintf(stderr, "EvalCoord %f %f ", IM->Obj[i][0], IM->Obj[i][1]);
-	 else if (flags[i] & VERT_EVAL_P2)
-	    fprintf(stderr, "EvalPoint %.0f %.0f ", IM->Obj[i][0], IM->Obj[i][1]);
-	 else if (i < IM->Count && (flags[i]&VERT_OBJ_234)) {
-	    fprintf(stderr, "(%x) ", flags[i] & VERT_OBJ_234);
-	    fprintf(stderr, tplate[vertex_sizes[(flags[i]&VERT_OBJ_234)<<1]],
-		   "Obj",
-		   IM->Obj[i][0], IM->Obj[i][1], IM->Obj[i][2], IM->Obj[i][3]);
-	 }
+         if (flags[i] & VERT_EVAL_C1)
+            fprintf(stderr, "EvalCoord %f ", IM->Obj[i][0]);
+         else if (flags[i] & VERT_EVAL_P1)
+            fprintf(stderr, "EvalPoint %.0f ", IM->Obj[i][0]);
+         else if (flags[i] & VERT_EVAL_C2)
+            fprintf(stderr, "EvalCoord %f %f ", IM->Obj[i][0], IM->Obj[i][1]);
+         else if (flags[i] & VERT_EVAL_P2)
+            fprintf(stderr, "EvalPoint %.0f %.0f ", IM->Obj[i][0], IM->Obj[i][1]);
+         else if (i < IM->Count && (flags[i]&VERT_OBJ_234)) {
+            fprintf(stderr, "(%x) ", flags[i] & VERT_OBJ_234);
+            fprintf(stderr, tplate[vertex_sizes[(flags[i]&VERT_OBJ_234)<<1]],
+                   "Obj",
+                   IM->Obj[i][0], IM->Obj[i][1], IM->Obj[i][2], IM->Obj[i][3]);
+         }
       }
 
       if (req & flags[i] & VERT_ELT)
-	 fprintf(stderr, " Elt %u\t", IM->Elt[i]);
+         fprintf(stderr, " Elt %u\t", IM->Elt[i]);
 
       if (req & flags[i] & VERT_NORM)
-	 fprintf(stderr, " Norm %f %f %f ",
-		IM->Normal[i][0], IM->Normal[i][1], IM->Normal[i][2]);
+         fprintf(stderr, " Norm %f %f %f ",
+                IM->Normal[i][0], IM->Normal[i][1], IM->Normal[i][2]);
 
       if (req & flags[i] & VERT_TEX0_ANY)
-	 fprintf(stderr, tplate[vertex_sizes[(flags[i]>>VERT_TEX0_SHIFT)&7]],
-		"TC0",
-		IM->TexCoord[0][i][0], IM->TexCoord[0][i][1],
-		IM->TexCoord[0][i][2], IM->TexCoord[0][i][2]);
+         fprintf(stderr, tplate[vertex_sizes[(flags[i]>>VERT_TEX0_SHIFT)&7]],
+                "TC0",
+                IM->TexCoord[0][i][0], IM->TexCoord[0][i][1],
+                IM->TexCoord[0][i][2], IM->TexCoord[0][i][2]);
 
 
       if (req & flags[i] & VERT_TEX1_ANY)
-	 fprintf(stderr, tplate[vertex_sizes[(flags[i]>>(VERT_TEX0_SHIFT+4))&7]],
-		"TC1",
-		IM->TexCoord[1][i][0], IM->TexCoord[1][i][1],
-		IM->TexCoord[1][i][2], IM->TexCoord[1][i][2]);
+         fprintf(stderr, tplate[vertex_sizes[(flags[i]>>(VERT_TEX0_SHIFT+4))&7]],
+                "TC1",
+                IM->TexCoord[1][i][0], IM->TexCoord[1][i][1],
+                IM->TexCoord[1][i][2], IM->TexCoord[1][i][2]);
 
       if (req & flags[i] & VERT_RGBA)
-	 fprintf(stderr, " Rgba %d %d %d %d ",
-		IM->Color[i][0], IM->Color[i][1],
-		IM->Color[i][2], IM->Color[i][3]);
+         fprintf(stderr, " Rgba %d %d %d %d ",
+                IM->Color[i][0], IM->Color[i][1],
+                IM->Color[i][2], IM->Color[i][3]);
 
       if (req & flags[i] & VERT_INDEX)
-	 fprintf(stderr, " Index %u ", IM->Index[i]);
+         fprintf(stderr, " Index %u ", IM->Index[i]);
 
       if (req & flags[i] & VERT_EDGE)
-	 fprintf(stderr, " Edgeflag %d ", IM->EdgeFlag[i]);
+         fprintf(stderr, " Edgeflag %d ", IM->EdgeFlag[i]);
 
       if (req & flags[i] & VERT_MATERIAL)
-	 fprintf(stderr, " Material ");
-	
+         fprintf(stderr, " Material ");
+
 
       /* The order of these two is not easily knowable, but this is
        * the usually correct way to look at them.
        */
       if (req & flags[i] & VERT_END)
-	 fprintf(stderr, " END ");
+         fprintf(stderr, " END ");
 
       if (req & flags[i] & VERT_BEGIN)
-	 fprintf(stderr, " BEGIN(%s) ", gl_prim_name[IM->Primitive[i]]);
+         fprintf(stderr, " BEGIN(%s) ", gl_prim_name[IM->Primitive[i]]);
 
       fprintf(stderr, "\n");
    }

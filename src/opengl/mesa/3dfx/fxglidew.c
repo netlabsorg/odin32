@@ -2,7 +2,7 @@
 
 /*
  * Mesa 3-D graphics library
- * Version:  3.1
+ * Version:  3.3
  *
  * Copyright (C) 1999  Brian Paul   All Rights Reserved.
  *
@@ -42,7 +42,7 @@
  * See fxapi.h for more revision/author details.
  */
 
- 
+
 #ifdef HAVE_CONFIG_H
 #include "conf.h"
 #endif
@@ -55,10 +55,10 @@
 #include <stdlib.h>
 #include <string.h>
 
-static FxI32 FX_grGetInteger_NoLock(FxU32 pname)
+FxI32 FX_grGetInteger_NoLock(FxU32 pname)
 {
 #if !defined(FX_GLIDE3)
-  switch (pname) 
+  switch (pname)
   {
     case FX_FOG_TABLE_ENTRIES:
        return GR_FOG_TABLE_SIZE;
@@ -67,7 +67,10 @@ static FxI32 FX_grGetInteger_NoLock(FxU32 pname)
     case FX_LFB_PIXEL_PIPE:
        return FXFALSE;
     case FX_PENDING_BUFFERSWAPS:
-	return grBufferNumPending();
+        return grBufferNumPending();
+    case FX_TEXTURE_ALIGN:
+        /* This is a guess from reading the glide3 docs */
+        return 8;
     default:
        if (MESA_VERBOSE&VERBOSE_DRIVER) {
           fprintf(stderr,"Wrong parameter in FX_grGetInteger!\n");
@@ -77,13 +80,14 @@ static FxI32 FX_grGetInteger_NoLock(FxU32 pname)
 #else
   FxU32 grname;
   FxI32 result;
-  
+
   switch (pname)
   {
      case FX_FOG_TABLE_ENTRIES:
      case FX_GLIDE_STATE_SIZE:
      case FX_LFB_PIXEL_PIPE:
      case FX_PENDING_BUFFERSWAPS:
+     case FX_TEXTURE_ALIGN:
        grname = pname;
        break;
      default:
@@ -109,9 +113,9 @@ FxI32 FX_grGetInteger(FxU32 pname)
 }
 
 
-FxBool FX_grLfbLock(GrLock_t type, GrBuffer_t buffer, 
-		    GrLfbWriteMode_t writeMode, GrOriginLocation_t origin, 
-		    FxBool pixelPipeline, GrLfbInfo_t *info ) {
+FxBool FX_grLfbLock(GrLock_t type, GrBuffer_t buffer,
+                    GrLfbWriteMode_t writeMode, GrOriginLocation_t origin,
+                    FxBool pixelPipeline, GrLfbInfo_t *info ) {
   FxBool result;
 
   BEGIN_BOARD_LOCK();
@@ -176,7 +180,7 @@ int FX_getFogTableSize(void)
    BEGIN_BOARD_LOCK();
    grGet(GR_FOG_TABLE_ENTRIES,sizeof(int),(void*)&result);
    END_BOARD_LOCK();
-   return result; 
+   return result;
 }
 
 int FX_getGrStateSize(void)
@@ -187,7 +191,7 @@ int FX_getGrStateSize(void)
    END_BOARD_LOCK();
 
    return result;
-   
+
 }
 
 int FX_grSstScreenWidth()
@@ -197,7 +201,7 @@ int FX_grSstScreenWidth()
    BEGIN_BOARD_LOCK();
    grGet(GR_VIEWPORT,sizeof(FxI32)*4,result);
    END_BOARD_LOCK();
-   
+
    return result[2];
 }
 
@@ -208,7 +212,7 @@ int FX_grSstScreenHeight()
    BEGIN_BOARD_LOCK();
    grGet(GR_VIEWPORT,sizeof(FxI32)*4,result);
    END_BOARD_LOCK();
-   
+
    return result[3];
 }
 
@@ -221,12 +225,12 @@ void FX_grGlideGetVersion(char *buf)
 
 void FX_grSstPerfStats(GrSstPerfStats_t *st)
 {
-  /* ToDo */
-  st->pixelsIn = 0;
-  st->chromaFail = 0;
-  st->zFuncFail = 0;
-  st->aFuncFail = 0;
-  st->pixelsOut = 0;
+  int n;
+  grGet(GR_STATS_PIXELS_IN, 4, &n);              st->pixelsIn = n;
+  grGet(GR_STATS_PIXELS_CHROMA_FAIL, 4, &n);     st->chromaFail = n;
+  grGet(GR_STATS_PIXELS_DEPTHFUNC_FAIL, 4, &n);  st->zFuncFail = n;
+  grGet(GR_STATS_PIXELS_AFUNC_FAIL, 4, &n);      st->aFuncFail = n;
+  grGet(GR_STATS_PIXELS_OUT, 4, &n);             st->pixelsOut = n;
 }
 
 void FX_grAADrawLine(GrVertex *a,GrVertex *b)
@@ -244,21 +248,28 @@ void FX_grAADrawPoint(GrVertex *a)
   END_CLIP_LOOP();
 }
 
+void FX_grDrawPolygonVertexList(int n, GrVertex *verts)
+{
+  BEGIN_CLIP_LOOP();
+  grDrawVertexArrayContiguous(GR_POLYGON, n, verts, sizeof(GrVertex));
+  END_CLIP_LOOP();
+}
+
 #if FX_USE_PARGB
 void FX_setupGrVertexLayout(void)
 {
   BEGIN_BOARD_LOCK();
   grReset(GR_VERTEX_PARAMETER);
-   
+
   grCoordinateSpace(GR_WINDOW_COORDS);
   grVertexLayout(GR_PARAM_XY, GR_VERTEX_X_OFFSET << 2, GR_PARAM_ENABLE);
   grVertexLayout(GR_PARAM_PARGB, GR_VERTEX_PARGB_OFFSET << 2, GR_PARAM_ENABLE);
   grVertexLayout(GR_PARAM_Q, GR_VERTEX_OOW_OFFSET << 2, GR_PARAM_ENABLE);
   grVertexLayout(GR_PARAM_Z, GR_VERTEX_OOZ_OFFSET << 2, GR_PARAM_ENABLE);
-  grVertexLayout(GR_PARAM_ST0, GR_VERTEX_SOW_TMU0_OFFSET << 2, GR_PARAM_ENABLE);	
-  grVertexLayout(GR_PARAM_Q0, GR_VERTEX_OOW_TMU0_OFFSET << 2, GR_PARAM_DISABLE); 
-  grVertexLayout(GR_PARAM_ST1, GR_VERTEX_SOW_TMU1_OFFSET << 2, GR_PARAM_DISABLE);	
-  grVertexLayout(GR_PARAM_Q1, GR_VERTEX_OOW_TMU1_OFFSET << 2, GR_PARAM_DISABLE);	
+  grVertexLayout(GR_PARAM_ST0, GR_VERTEX_SOW_TMU0_OFFSET << 2, GR_PARAM_ENABLE);
+  grVertexLayout(GR_PARAM_Q0, GR_VERTEX_OOW_TMU0_OFFSET << 2, GR_PARAM_DISABLE);
+  grVertexLayout(GR_PARAM_ST1, GR_VERTEX_SOW_TMU1_OFFSET << 2, GR_PARAM_DISABLE);
+  grVertexLayout(GR_PARAM_Q1, GR_VERTEX_OOW_TMU1_OFFSET << 2, GR_PARAM_DISABLE);
   END_BOARD_LOCK();
 }
 #else /* FX_USE_PARGB */
@@ -266,16 +277,16 @@ void FX_setupGrVertexLayout(void)
 {
   BEGIN_BOARD_LOCK();
   grReset(GR_VERTEX_PARAMETER);
-   
+
   grCoordinateSpace(GR_WINDOW_COORDS);
   grVertexLayout(GR_PARAM_XY, GR_VERTEX_X_OFFSET << 2, GR_PARAM_ENABLE);
   grVertexLayout(GR_PARAM_RGB, GR_VERTEX_R_OFFSET << 2, GR_PARAM_ENABLE);
   grVertexLayout(GR_PARAM_A, GR_VERTEX_A_OFFSET << 2, GR_PARAM_ENABLE);
   grVertexLayout(GR_PARAM_Q, GR_VERTEX_OOW_OFFSET << 2, GR_PARAM_ENABLE);
-  grVertexLayout(GR_PARAM_Z, GR_VERTEX_OOZ_OFFSET << 2,	GR_PARAM_ENABLE);
-  grVertexLayout(GR_PARAM_ST0, GR_VERTEX_SOW_TMU0_OFFSET << 2, GR_PARAM_ENABLE);	
+  grVertexLayout(GR_PARAM_Z, GR_VERTEX_OOZ_OFFSET << 2, GR_PARAM_ENABLE);
+  grVertexLayout(GR_PARAM_ST0, GR_VERTEX_SOW_TMU0_OFFSET << 2, GR_PARAM_ENABLE);
   grVertexLayout(GR_PARAM_Q0, GR_VERTEX_OOW_TMU0_OFFSET << 2, GR_PARAM_DISABLE);
-  grVertexLayout(GR_PARAM_ST1, GR_VERTEX_SOW_TMU1_OFFSET << 2, GR_PARAM_DISABLE);	
+  grVertexLayout(GR_PARAM_ST1, GR_VERTEX_SOW_TMU1_OFFSET << 2, GR_PARAM_DISABLE);
   grVertexLayout(GR_PARAM_Q1, GR_VERTEX_OOW_TMU1_OFFSET << 2, GR_PARAM_DISABLE);
   END_BOARD_LOCK();
 }
@@ -287,20 +298,20 @@ void FX_grHints_NoLock(GrHint_t hintType, FxU32 hintMask)
   case GR_HINT_STWHINT:
     {
       if (hintMask & GR_STWHINT_W_DIFF_TMU0)
-	grVertexLayout(GR_PARAM_Q0, GR_VERTEX_OOW_TMU0_OFFSET << 2, 	GR_PARAM_ENABLE);
+        grVertexLayout(GR_PARAM_Q0, GR_VERTEX_OOW_TMU0_OFFSET << 2,     GR_PARAM_ENABLE);
       else
-	grVertexLayout(GR_PARAM_Q0,GR_VERTEX_OOW_TMU0_OFFSET << 2, 	GR_PARAM_DISABLE);
-      
+        grVertexLayout(GR_PARAM_Q0,GR_VERTEX_OOW_TMU0_OFFSET << 2,      GR_PARAM_DISABLE);
+
       if (hintMask & GR_STWHINT_ST_DIFF_TMU1)
-	grVertexLayout(GR_PARAM_ST1,GR_VERTEX_SOW_TMU1_OFFSET << 2, GR_PARAM_ENABLE);
+        grVertexLayout(GR_PARAM_ST1,GR_VERTEX_SOW_TMU1_OFFSET << 2, GR_PARAM_ENABLE);
       else
-	grVertexLayout(GR_PARAM_ST1,GR_VERTEX_SOW_TMU1_OFFSET << 2, GR_PARAM_DISABLE);
-        
+        grVertexLayout(GR_PARAM_ST1,GR_VERTEX_SOW_TMU1_OFFSET << 2, GR_PARAM_DISABLE);
+
       if (hintMask & GR_STWHINT_W_DIFF_TMU1)
-	grVertexLayout(GR_PARAM_Q1,GR_VERTEX_OOW_TMU1_OFFSET << 2,	GR_PARAM_ENABLE);
+        grVertexLayout(GR_PARAM_Q1,GR_VERTEX_OOW_TMU1_OFFSET << 2,      GR_PARAM_ENABLE);
       else
-	grVertexLayout(GR_PARAM_Q1,GR_VERTEX_OOW_TMU1_OFFSET << 2,	GR_PARAM_DISABLE);
-      
+        grVertexLayout(GR_PARAM_Q1,GR_VERTEX_OOW_TMU1_OFFSET << 2,      GR_PARAM_DISABLE);
+
     }
   }
 }
@@ -319,17 +330,17 @@ int FX_grSstQueryHardware(GrHwConfiguration *config)
    BEGIN_BOARD_LOCK();
    grGet(GR_NUM_BOARDS,4,(void*)&(config->num_sst));
    if (config->num_sst == 0)
-   	return 0;
+        return 0;
    for (i = 0; i< config->num_sst; i++)
    {
       config->SSTs[i].type = GR_SSTTYPE_VOODOO;
       grSstSelect(i);
       grGet(GR_MEMORY_FB,4,(void*)&(config->SSTs[i].sstBoard.VoodooConfig.fbRam));
       config->SSTs[i].sstBoard.VoodooConfig.fbRam/= 1024*1024;
-      
+
       grGet(GR_NUM_TMU,4,(void*)&(config->SSTs[i].sstBoard.VoodooConfig.nTexelfx));
-   
-      
+
+
       grGet(GR_NUM_FB,4,(void*)&numFB);
       if (numFB > 1)
          config->SSTs[i].sstBoard.VoodooConfig.sliDetect = FXTRUE;
@@ -337,8 +348,8 @@ int FX_grSstQueryHardware(GrHwConfiguration *config)
          config->SSTs[i].sstBoard.VoodooConfig.sliDetect = FXFALSE;
       for (j = 0; j < config->SSTs[i].sstBoard.VoodooConfig.nTexelfx; j++)
       {
-      	 grGet(GR_MEMORY_TMU,4,(void*)&(config->SSTs[i].sstBoard.VoodooConfig.tmuConfig[j].tmuRam));
-      	 config->SSTs[i].sstBoard.VoodooConfig.tmuConfig[j].tmuRam /= 1024*1024;
+         grGet(GR_MEMORY_TMU,4,(void*)&(config->SSTs[i].sstBoard.VoodooConfig.tmuConfig[j].tmuRam));
+         config->SSTs[i].sstBoard.VoodooConfig.tmuConfig[j].tmuRam /= 1024*1024;
       }
    }
    END_BOARD_LOCK();
@@ -365,14 +376,14 @@ int FX_grSstScreenHeight()
    return i;
 }
 
-int FX_grSstQueryHardware(GrHwConfiguration *c)	
+int FX_grSstQueryHardware(GrHwConfiguration *c)
 {
    int i;
    BEGIN_BOARD_LOCK();
    i = grSstQueryHardware(c);
    END_BOARD_LOCK();
    return i;
-} 
+}
 
 FX_GrContext_t FX_grSstWinOpen( FxU32                hWnd,
                                 GrScreenResolution_t screen_resolution,
@@ -391,9 +402,9 @@ FX_GrContext_t FX_grSstWinOpen( FxU32                hWnd,
                      origin_location,
                      nColBuffers,
                      nAuxBuffers );
-   
+
 #if 0
-   fprintf(stderr, 
+   fprintf(stderr,
            "grSstWinOpen( win %d res %d ref %d fmt %d\n"
            "              org %d ncol %d naux %d )\n"
            " ==> %d\n",
@@ -412,7 +423,7 @@ FX_GrContext_t FX_grSstWinOpen( FxU32                hWnd,
 
 
 
-#endif 
+#endif
 #else
 
 /*

@@ -1,8 +1,8 @@
-/* $Id: quads.c,v 1.1 2000-02-29 00:50:09 sandervl Exp $ */
+/* $Id: quads.c,v 1.2 2000-05-23 20:40:51 jeroen Exp $ */
 
 /*
  * Mesa 3-D graphics library
- * Version:  3.1
+ * Version:  3.3
  *
  * Copyright (C) 1999  Brian Paul   All Rights Reserved.
  *
@@ -37,11 +37,7 @@
 #ifdef PC_HEADER
 #include "all.h"
 #else
-#ifndef XFree86Server
-#include <stdio.h>
-#else
-#include "GL/xf86glx.h"
-#endif
+#include "glheader.h"
 #include "types.h"
 #include "quads.h"
 #endif
@@ -88,7 +84,7 @@ void gl_set_quad_function( GLcontext *ctx )
       }
       else if (ctx->Driver.QuadFunc) {
          /* Device driver will draw quads. */
-	 return;
+         return;
       }
       else
          ctx->Driver.QuadFunc = basic_quad;

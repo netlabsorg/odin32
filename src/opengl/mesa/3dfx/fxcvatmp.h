@@ -2,7 +2,7 @@
 
 /*
  * Mesa 3-D graphics library
- * Version:  3.1
+ * Version:  3.3
  *
  * Copyright (C) 1999  Brian Paul   All Rights Reserved.
  *
@@ -44,10 +44,10 @@
 
 
 static void TAG(cva_render_points)( struct vertex_buffer *cvaVB,
-				    struct vertex_buffer *VB,
-				    const struct gl_prim_state *state,
-				    GLuint start,
-				    GLuint count ) 
+                                    struct vertex_buffer *VB,
+                                    const struct gl_prim_state *state,
+                                    GLuint start,
+                                    GLuint count )
 {
    GLcontext *ctx = VB->ctx;
    fxMesaContext fxMesa = (fxMesaContext)ctx->DriverCtx;
@@ -62,30 +62,30 @@ static void TAG(cva_render_points)( struct vertex_buffer *cvaVB,
    if (cvaVB->ClipOrMask) {
       const GLubyte *clip = cvaVB->ClipMask;
       for (i = start ; i < count ; i++ INCR) {
-	 GLuint e = elt[i];
-	 if (!clip[e]) {
-	    GLfloat *v = gWin[e].f; (void) v;
-	    if (!DIRECT) { MERGE_VB; }
-	    MERGE_RAST;
-	    DRAW_POINT;
-	 }
+         GLuint e = elt[i];
+         if (!clip[e]) {
+            GLfloat *v = gWin[e].f; (void) v;
+            if (!DIRECT) { MERGE_VB; }
+            MERGE_RAST;
+            DRAW_POINT;
+         }
       }
    } else {
       for (i = start ; i < count ; i++ INCR) {
-	 GLuint e = elt[i];
-	 GLfloat *v = gWin[e].f; (void) v;
-	 if (!DIRECT) { MERGE_VB; }
-	 MERGE_RAST;
-	 DRAW_POINT;
+         GLuint e = elt[i];
+         GLfloat *v = gWin[e].f; (void) v;
+         if (!DIRECT) { MERGE_VB; }
+         MERGE_RAST;
+         DRAW_POINT;
       }
    }
 }
 
 static void TAG(cva_render_lines)( struct vertex_buffer *cvaVB,
-				   struct vertex_buffer *VB,
-				   const struct gl_prim_state *state,
-				   GLuint start,
-				   GLuint count ) 
+                                   struct vertex_buffer *VB,
+                                   const struct gl_prim_state *state,
+                                   GLuint start,
+                                   GLuint count )
 {
    GLcontext *ctx = VB->ctx;
    fxMesaContext fxMesa = (fxMesaContext)ctx->DriverCtx;
@@ -103,71 +103,71 @@ static void TAG(cva_render_lines)( struct vertex_buffer *cvaVB,
       GLfloat *prev_v = 0;
 
       (void) ctx;
-   
+
       for (i = start ; i < count ; i++ INCR) {
-	 GLuint e = elt[i];
-	 GLfloat *v = gWin[e].f;
+         GLuint e = elt[i];
+         GLfloat *v = gWin[e].f;
 
-	 MERGE_VB;
+         MERGE_VB;
 
-	 if (!clip[e])
-	    MERGE_RAST;
+         if (!clip[e])
+            MERGE_RAST;
 
-	 if (state->draw) {
-	    if (clip[e] | clip[prev]) 
-	       CLIP_LINE;
-	    else
-	       DRAW_LINE;
-	 }
+         if (state->draw) {
+            if (clip[e] | clip[prev])
+               CLIP_LINE;
+            else
+               DRAW_LINE;
+         }
 
-	 prev = e;	 
-	 prev_v = v;
-	 state = state->next;
+         prev = e;
+         prev_v = v;
+         state = state->next;
       }
       if (state->finish_loop) {
-	 GLuint e = elt[start];
-	 GLfloat *v = gWin[e].f; (void) v;
+         GLuint e = elt[start];
+         GLfloat *v = gWin[e].f; (void) v;
 
-	 if (!DIRECT) { MERGE_VB; }
-	 MERGE_RAST;
+         if (!DIRECT) { MERGE_VB; }
+         MERGE_RAST;
 
-	 if (clip[e] | clip[prev]) 
-	    CLIP_LINE;
-	 else
-	    DRAW_LINE;
+         if (clip[e] | clip[prev])
+            CLIP_LINE;
+         else
+            DRAW_LINE;
       }
    } else {
       GLuint prev = 0;
       GLfloat *prev_v = 0;
-      
-      for (i = start ; i < count ; i++ INCR) {
-	 GLuint e = elt[i];
-	 GLfloat *v = gWin[e].f;
 
-	 if (!DIRECT) { MERGE_VB; }
-	 MERGE_RAST;
-	 if (state->draw) DRAW_LINE;
-	 prev = e;
-	 prev_v = v;
-	 state = state->next;
+      for (i = start ; i < count ; i++ INCR) {
+         GLuint e = elt[i];
+         GLfloat *v = gWin[e].f;
+
+         if (!DIRECT) { MERGE_VB; }
+         MERGE_RAST;
+         if (state->draw) DRAW_LINE;
+         prev = e;
+         prev_v = v;
+         state = state->next;
       }
       if (state->finish_loop) {
-	 GLuint e = elt[start];
-	 GLfloat *v = gWin[e].f; (void) v;
+         GLuint e = elt[start];
+         GLfloat *v = gWin[e].f; (void) v;
 
-	 if (!DIRECT) { MERGE_VB; }
-	 MERGE_RAST;
-	 DRAW_LINE;
+         if (!DIRECT) { MERGE_VB; }
+         MERGE_RAST;
+         DRAW_LINE;
       }
-   }      
+   }
 }
 
 
 static void TAG(cva_render_tris)( struct vertex_buffer *cvaVB,
-				  struct vertex_buffer *VB,
-				  const struct gl_prim_state *state,
-				  GLuint start,
-				  GLuint count ) 
+                                  struct vertex_buffer *VB,
+                                  const struct gl_prim_state *state,
+                                  GLuint start,
+                                  GLuint count )
 {
    GLcontext *ctx = VB->ctx;
    fxMesaContext fxMesa = (fxMesaContext)ctx->DriverCtx;
@@ -178,66 +178,66 @@ static void TAG(cva_render_tris)( struct vertex_buffer *cvaVB,
    INIT;
    (void) fxMesa;
 
-   if (cvaVB->ClipOrMask) {      
+   if (cvaVB->ClipOrMask) {
       GLuint vlist[VB_MAX_CLIPPED_VERTS];
       GLuint l[3];
-      const GLubyte *clip = cvaVB->ClipMask; 
-      
+      const GLubyte *clip = cvaVB->ClipMask;
+
       (void) vlist;
 
       for (i = start ; i < count ; i++ INCR) {
-	 GLuint e = l[2] = elt[i];
-	 GLfloat *v = gWin[e].f; (void) v;
+         GLuint e = l[2] = elt[i];
+         GLfloat *v = gWin[e].f; (void) v;
 
-	 MERGE_VB;		/* needed for clip-interp */
+         MERGE_VB;              /* needed for clip-interp */
 
-	 if (!clip[e]) {
-	    MERGE_RAST;
-	 }
+         if (!clip[e]) {
+            MERGE_RAST;
+         }
 
-	 if (state->draw) 
-	    CLIP_OR_DRAW_TRI;
+         if (state->draw)
+            CLIP_OR_DRAW_TRI;
 
 
-	 l[0] = l[state->v0];
-	 l[1] = l[state->v1];
-	 state = state->next;
+         l[0] = l[state->v0];
+         l[1] = l[state->v1];
+         state = state->next;
       }
    } else if (DIRECT) {
       GrVertex *vl[3];
       for (i = start ; i < count ; i++ INCR) {
-	 GLuint e = elt[i];
-	 GLfloat *v = gWin[elt[i]].f;
+         GLuint e = elt[i];
+         GLfloat *v = gWin[elt[i]].f;
 
-	 vl[2] = (GrVertex *)v;
+         vl[2] = (GrVertex *)v;
 
-	 (void) v; 
-	 (void) e;
+         (void) v;
+         (void) e;
 
-	 MERGE_RAST;
+         MERGE_RAST;
 
-	 if (state->draw) 
-	    DRAW_TRI2;
+         if (state->draw)
+            DRAW_TRI2;
 
-	 vl[0] = vl[state->v0];
-	 vl[1] = vl[state->v1];
-	 state = state->next;
+         vl[0] = vl[state->v0];
+         vl[1] = vl[state->v1];
+         state = state->next;
       }
    } else {
       GLuint l[3];
       for (i = start ; i < count ; i++ INCR) {
-	 GLuint e = l[2] = elt[i];
-	 GLfloat *v = gWin[e].f; (void) v;
+         GLuint e = l[2] = elt[i];
+         GLfloat *v = gWin[e].f; (void) v;
 
-	 MERGE_VB;		/* needed for ctx->trianglefunc? */
-	 MERGE_RAST;
-	 
-	 if (state->draw) 
-	    DRAW_TRI;
+         MERGE_VB;              /* needed for ctx->trianglefunc? */
+         MERGE_RAST;
 
-	 l[0] = l[state->v0];
-	 l[1] = l[state->v1];
-	 state = state->next;
+         if (state->draw)
+            DRAW_TRI;
+
+         l[0] = l[state->v0];
+         l[1] = l[state->v1];
+         state = state->next;
       }
    }
 }
