@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.37 1999-10-20 13:46:26 sandervl Exp $ */
+/* $Id: pmwindow.cpp,v 1.38 1999-10-20 22:35:53 sandervl Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -910,15 +910,21 @@ MRESULT EXPENTRY Win32SubclassWindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARA
         WINDOWPOS wp;
         HWND      hParent = NULLHANDLE, hFrame = NULLHANDLE;
 
+        dprintf(("OS2Subclass: WM_WINDOWPOSCHANGED %x %x (%d,%d) (%d,%d)", hwnd, pswp->fl, pswp->x, pswp->y, pswp->cx, pswp->cy));
         if ((pswp->fl & (SWP_SIZE | SWP_MOVE | SWP_ZORDER)) == 0) break;
 
-        if(pswp->fl & (SWP_MOVE | SWP_SIZE))
-          hFrame = WinQueryWindow(hwnd, QW_PARENT);
+        hParent = hFrame = WinQueryWindow(hwnd, QW_PARENT);
 
         OSLibMapSWPtoWINDOWPOS(pswp,&wp, &swpOld,hParent,hFrame);
 
-        win32wnd->setWindowRect(wp.x, wp.y, wp.x+wp.cx, wp.y+wp.cy);
+        win32wnd->setWindowRect(swpOld.x, swpOld.y, swpOld.x + swpOld.cx, swpOld.y + swpOld.cy);
         win32wnd->setClientRect(swpOld.x, swpOld.y, swpOld.x + swpOld.cx, swpOld.y + swpOld.cy);
+        wp.x = swpOld.x;
+        wp.y = swpOld.y;
+        wp.cx = swpOld.cx;
+        wp.cy = swpOld.cy;
+
+        wp.hwnd = win32wnd->getWindowHandle();
 
         win32wnd->MsgPosChanged((LPARAM)&wp);
 

@@ -1,4 +1,4 @@
-/* $Id: user32.cpp,v 1.45 1999-10-20 13:48:07 phaller Exp $ */
+/* $Id: user32.cpp,v 1.46 1999-10-20 22:35:54 sandervl Exp $ */
 
 /*
  * Win32 misc user32 API functions for OS/2
@@ -2259,39 +2259,6 @@ BOOL WIN32API MapDialogRect( HWND hDlg, PRECT  lpRect)
     hDlg = Win32Window::Win32ToOS2Handle(hDlg);
 
     return O32_MapDialogRect(hDlg,lpRect);
-}
-
-/* Coordinate Space and Transformation Functions */
-
-int WIN32API MapWindowPoints( HWND hWndFrom, HWND hWndTo, LPPOINT lpPoints, UINT cPoints)
-{
-#ifdef DEBUG
-    WriteLog("USER32:  MapWindowPoints\n");
-#endif
-    hWndFrom = Win32Window::Win32ToOS2Handle(hWndFrom);
-    hWndTo = Win32Window::Win32ToOS2Handle(hWndTo);
-
-    return O32_MapWindowPoints(hWndFrom,hWndTo,lpPoints,cPoints);
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API ScreenToClient (HWND hwnd, LPPOINT pt)
-{
-    Win32BaseWindow *wnd;
-    PRECT rcl;
-
-    dprintf(("ScreenToClient %x (%d,%d)\n", hwnd, pt->x, pt->y));
-
-    if (!hwnd) return (TRUE);
-    wnd = Win32BaseWindow::GetWindowFromHandle (hwnd);
-    if (!wnd) return (TRUE);
-
-    rcl   = wnd->getClientRect();
-    pt->y = ScreenHeight - pt->y;
-    OSLibWinMapWindowPoints (OSLIB_HWND_DESKTOP, wnd->getOS2WindowHandle(), (OSLIBPOINT *)pt, 1);
-    pt->y = (rcl->bottom - rcl->top) - pt->y;
-    dprintf(("ScreenToClient %x returned (%d,%d)\n", hwnd, pt->x, pt->y));
-    return (TRUE);
 }
 
 /* Icon Functions */
