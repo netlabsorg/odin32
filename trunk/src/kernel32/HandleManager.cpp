@@ -1,4 +1,4 @@
-/* $Id: HandleManager.cpp,v 1.90 2002-08-01 16:02:40 sandervl Exp $ */
+/* $Id: HandleManager.cpp,v 1.91 2002-09-14 13:49:39 sandervl Exp $ */
 
 /*
  * Win32 Unified Handle Manager for OS/2
@@ -1981,10 +1981,30 @@ DWORD HMWaitForSingleObject(HANDLE hObject,
        }
   }
 
+  //If the timeout is less than 20 milliseconds (and not zero), then we are likely to
+  //return too late if the thread priority isn't time critical (time slices
+  //of 32 ms)
+  //To avoid this problem, we temporarily switch to time critical priority.
+  HANDLE hThread          = GetCurrentThread();
+  DWORD  dwThreadPriority = GetThreadPriority(hThread);
+
+  if(dwTimeout && dwTimeout < 20 && dwThreadPriority != THREAD_PRIORITY_TIME_CRITICAL) {
+      dprintf(("Temporarily change priority to THREAD_PRIORITY_TIME_CRITICAL for better timing"));
+      SetThreadPriority(hThread, THREAD_PRIORITY_TIME_CRITICAL);
+      //round to 8 ms units to get more precise timeouts
+      if(dwTimeout > 8)
+          dwTimeout = (dwTimeout/8)*8;
+  }
+  else dwThreadPriority = -1;
+
   pHMHandle = &TabWin32Handles[iIndex];               /* call device handler */
   dwResult = pHMHandle->pDeviceHandler->WaitForSingleObject(&pHMHandle->hmHandleData,
                                                             dwTimeout);
 
+  //Restore thread priority if we previously changed it
+  if(dwThreadPriority != -1) {
+      SetThreadPriority(hThread, dwThreadPriority);
+  }
   return (dwResult);                                  /* deliver return code */
 }
 
@@ -2981,6 +3001,22 @@ DWORD HMWaitForMultipleObjects (DWORD   cObjects,
     }
   }
 
+  //If the timeout is less than 20 milliseconds (and not zero), then we are likely to
+  //return too late if the thread priority isn't time critical (time slices
+  //of 32 ms)
+  //To avoid this problem, we temporarily switch to time critical priority.
+  HANDLE hThread          = GetCurrentThread();
+  DWORD  dwThreadPriority = GetThreadPriority(hThread);
+
+  if(dwTimeout && dwTimeout < 20 && dwThreadPriority != THREAD_PRIORITY_TIME_CRITICAL) {
+      dprintf(("Temporarily change priority to THREAD_PRIORITY_TIME_CRITICAL for better timing"));
+      SetThreadPriority(hThread, THREAD_PRIORITY_TIME_CRITICAL);
+      //round to 8 ms units to get more precise timeouts
+      if(dwTimeout > 8)
+          dwTimeout = (dwTimeout/8)*8;
+  }
+  else dwThreadPriority = -1;
+
   // OK, now forward to Open32.
   // @@@PH: Note this will fail on handles that do NOT belong to Open32
   //        but to i.e. the console subsystem!
@@ -2988,6 +3024,11 @@ DWORD HMWaitForMultipleObjects (DWORD   cObjects,
                                   pArrayOfHandles,
                                   fWaitAll,
                                   dwTimeout);
+
+  //Restore old thread priority if we changed it before
+  if(dwThreadPriority != -1) {
+      SetThreadPriority(hThread, dwThreadPriority);
+  }
 
   return (rc);                            // OK, done
 #endif
@@ -3111,6 +3152,22 @@ DWORD  HMMsgWaitForMultipleObjects  (DWORD      cObjects,
     }
   }
 
+  //If the timeout is less than 20 milliseconds (and not zero), then we are likely to
+  //return too late if the thread priority isn't time critical (time slices
+  //of 32 ms)
+  //To avoid this problem, we temporarily switch to time critical priority.
+  HANDLE hThread          = GetCurrentThread();
+  DWORD  dwThreadPriority = GetThreadPriority(hThread);
+
+  if(dwTimeout && dwTimeout < 20 && dwThreadPriority != THREAD_PRIORITY_TIME_CRITICAL) {
+      dprintf(("Temporarily change priority to THREAD_PRIORITY_TIME_CRITICAL for better timing"));
+      SetThreadPriority(hThread, THREAD_PRIORITY_TIME_CRITICAL);
+      //round to 8 ms units to get more precise timeouts
+      if(dwTimeout > 8)
+          dwTimeout = (dwTimeout/8)*8;
+  }
+  else dwThreadPriority = -1;
+
   // OK, now forward to Open32.
   // @@@PH: Note this will fail on handles that do NOT belong to Open32
   //        but to i.e. the console subsystem!
@@ -3118,6 +3175,11 @@ DWORD  HMMsgWaitForMultipleObjects  (DWORD      cObjects,
                                      pArrayOfHandles,
                                      fWaitAll, dwTimeout,
                                      dwWakeMask);
+
+  //Restore old thread priority if we changed it before
+  if(dwThreadPriority != -1) {
+      SetThreadPriority(hThread, dwThreadPriority);
+  }
 
   dprintf2(("MsgWaitForMultipleObjects returned %d", rc));
   return (rc);                            // OK, done
