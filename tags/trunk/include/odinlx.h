@@ -1,4 +1,4 @@
-/* $Id: odinlx.h,v 1.8 2002-02-03 13:15:40 sandervl Exp $ */
+/* $Id: odinlx.h,v 1.9 2003-01-23 20:21:30 sandervl Exp $ */
 
 /*
  *
@@ -21,10 +21,18 @@
 #define ORDINAL_REGISTERLXEXE		1237
 #define ORDINAL_REGISTERDUMMYEXE	1249
 
+#ifdef __cplusplus
 extern "C" {
+#endif
 
 typedef ULONG (* WIN32API WIN32DLLENTRY)(ULONG hInstance, ULONG reason, LPVOID reserved);
 typedef int (* WIN32API WINMAIN)(HANDLE hInstance, HANDLE hPrevInstance, LPSTR lpCmdLine, int nShowCmd);
+
+#ifdef __cplusplus
+}
+#endif
+
+#ifdef __cplusplus
 
 //******************************************************************************
 //Create LX Dll object and send process attach message
@@ -45,6 +53,15 @@ DWORD WIN32API RegisterLxDll(HINSTANCE hInstance, WIN32DLLENTRY EntryPoint,
                              DWORD MajorImageVersion = ODINNT_MAJOR_VERSION,
                              DWORD MinorImageVersion = ODINNT_MINOR_VERSION,
                              DWORD Subsystem = IMAGE_SUBSYSTEM_WINDOWS_CUI);
+#else
+
+DWORD WIN32API RegisterLxDll(HINSTANCE hInstance, WIN32DLLENTRY EntryPoint,
+                             PVOID pResData,
+                             DWORD MajorImageVersion,
+                             DWORD MinorImageVersion,
+                             DWORD Subsystem) ;
+
+#endif
 
 //******************************************************************************
 //Destroy LX Dll object
@@ -63,5 +80,5 @@ BOOL WIN32API RegisterLxExe(WINMAIN EntryPoint, PVOID pResData);
 //******************************************************************************
 BOOL WIN32API RegisterDummyExe(LPSTR pszExeName);
 
-}
+
 #endif
