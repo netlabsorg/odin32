@@ -1,4 +1,4 @@
-/* $Id: initterm.cpp,v 1.14 1999-10-28 12:00:34 sandervl Exp $ */
+/* $Id: initterm.cpp,v 1.15 1999-11-01 19:11:39 sandervl Exp $ */
 
 /*
  * USER32 DLL entry point
@@ -48,7 +48,6 @@
 /* library DLL is terminated.                                        */
 /*-------------------------------------------------------------------*/
 static void APIENTRY cleanup(ULONG reason);
-static void APIENTRY cleanupQueue(ULONG ulReason);
 
 extern "C" {
 void CDECL _ctordtorInit( void );
@@ -95,11 +94,7 @@ unsigned long SYSTEM _DLL_InitTerm(unsigned long hModule, unsigned long
          /* are required and the runtime is dynamically linked.             */
          /*******************************************************************/
 
-         rc = DosExitList(0x0000F000|EXLST_ADD, cleanup);
-         if(rc)
-                return 0UL;
-
-         rc = DosExitList(0x00008000|EXLST_ADD, cleanupQueue);
+         rc = DosExitList(0x00008000|EXLST_ADD, cleanup);
          if(rc)
                 return 0UL;
 
@@ -134,20 +129,18 @@ unsigned long SYSTEM _DLL_InitTerm(unsigned long hModule, unsigned long
    return 1UL;
 }
 
-static void APIENTRY cleanupQueue(ULONG ulReason)
-{
-   CloseSpyQueue();
-   DosExitList(EXLST_EXIT, cleanupQueue);
-}
-
 static void APIENTRY cleanup(ULONG ulReason)
 {
    dprintf(("user32 exit\n"));
-   SYSCOLOR_Save();
    DestroyDesktopWindow();
+   Win32BaseWindow::DestroyAll();
    UnregisterSystemClasses();
+   Win32WndClass::DestroyAll();
+   SYSCOLOR_Save();
+   CloseSpyQueue();
    _ctordtorTerm();
    dprintf(("user32 exit done\n"));
+
    DosExitList(EXLST_EXIT, cleanup);
-   return ;
 }
+

@@ -1,4 +1,4 @@
-/* $Id: win32class.cpp,v 1.4 1999-10-28 12:00:34 sandervl Exp $ */
+/* $Id: win32class.cpp,v 1.5 1999-11-01 19:11:42 sandervl Exp $ */
 /*
  * Win32 Window Class Managment Code for OS/2
  *
@@ -22,6 +22,8 @@
 #include <misc.h>
 #include <win32class.h>
 #include <win32wnd.h>
+
+static fDestroyAll = FALSE;
 
 //******************************************************************************
 //Win32WndClass methods:
@@ -122,6 +124,10 @@ Win32WndClass::Win32WndClass(WNDCLASSEXA *wndclass, BOOL isUnicode) : GenericObj
 //******************************************************************************
 Win32WndClass::~Win32WndClass()
 {
+  if(classNameA) {
+  	dprintf(("Win32WndClass dtor, destroy class %s\n", classNameA));
+  }
+
   //SvL: Don't delete global classes
   if(classNameA && !(windowStyle & CS_GLOBALCLASS)) {
 	GlobalDeleteAtom(classAtom);
@@ -135,6 +141,13 @@ Win32WndClass::~Win32WndClass()
         assert(menuNameW);
         free(menuNameW);
   }
+}
+//******************************************************************************
+//******************************************************************************
+void Win32WndClass::DestroyAll()
+{
+    fDestroyAll = TRUE;
+    GenericObject::DestroyAll(wndclasses);
 }
 //******************************************************************************
 //******************************************************************************
@@ -448,7 +461,6 @@ void Win32WndClass::UnregisterClassA(HINSTANCE hinst, LPSTR id)
 {
   Win32WndClass *wndclass;
 
-  dprintf(("::UnregisterClass, destroy class %X!!\n", id));
   wndclass = FindClass(hinst, id);
   if(wndclass) {
         delete wndclass;
