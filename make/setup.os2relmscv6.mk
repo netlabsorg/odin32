@@ -1,4 +1,4 @@
-# $Id: setup.os2relmscv6.mk,v 1.2 2002-04-07 22:43:26 bird Exp $
+# $Id: setup.os2relmscv6.mk,v 1.3 2002-04-13 04:40:00 bird Exp $
 
 # ---OS2, RELEASE, MSCV6-------------------------
 ENV_NAME="OS/2, Debug, Microsoft C v6.0a"
@@ -31,7 +31,7 @@ _AR_LNK1= "$(TARGET_OBJS: ="&^
 AR_LNK1= $(_AR_LNK1:""=)
 AR_LNK2= $(@R).lst
 
-CC_FLAGS=-DDEBUG -DOS2 -c -W0 -Asfw $(CC_SEGS) -G2s -Zp -Zl -nologo -Ogeitln -Gs $(CC_DEFINES) $(ALL_DEFINES) $(CC_INCLUDES) $(ALL_INCLUDES) -I$(PATH_INCLUDE)
+CC_FLAGS=-DDEBUG -DOS2 -c -W0 -Asfw $(CC_SEGS) -G2s -Zp -Zl -nologo -Ogeitln -Gs $(CC_DEFINES) $(ALL_DEFINES) $(BUILD_DEFINES) $(CC_INCLUDES) $(ALL_INCLUDES) -I$(PATH_INCLUDES)
 CC_FLAGS_EXE=$(CC_FLAGS)
 CC_FLAGS_DLL=$(CC_FLAGS)
 CC_FLAGS_CRT=$(CC_FLAGS)
@@ -68,7 +68,7 @@ LINK_LNK4=$(TARGET_LIBS: =^
 )
 LINK_LNK5=$(TARGET_DEF)
 
-RC_FLAGS=-r -n -i $(PATH_INCLUDE:;= -i ) $(RC_DEFINES) $(RC_INCLUDES)
+RC_FLAGS=-r -n -i $(PATH_INCLUDES:;= -i ) $(RC_DEFINES) $(RC_INCLUDES)
 RL_FLAGS=-x2 -n
 
 #
