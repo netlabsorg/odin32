@@ -1,4 +1,4 @@
-/* $Id: gdi32.cpp,v 1.40 2000-02-10 18:48:44 cbratschi Exp $ */
+/* $Id: gdi32.cpp,v 1.41 2000-02-14 16:44:45 bird Exp $ */
 
 /*
  * GDI32 apis
@@ -483,7 +483,7 @@ HBRUSH WIN32API CreateHatchBrush( int arg1, COLORREF  arg2)
 }
 //******************************************************************************
 //******************************************************************************
-HDC WIN32API CreateICA(LPCSTR lpszDriver, LPCSTR lpszDevice, LPCSTR lpszOutput, 
+HDC WIN32API CreateICA(LPCSTR lpszDriver, LPCSTR lpszDevice, LPCSTR lpszOutput,
                        const DEVMODEA *lpdvmInit)
 {
  static char *szDisplay = "DISPLAY";
@@ -740,17 +740,17 @@ BOOL WIN32API GetCharABCWidthsW( HDC arg1, UINT arg2, UINT arg3, LPABC arg4)
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API GetCharWidthA( HDC arg1, UINT arg2, UINT arg3, PINT  arg4)
+BOOL WIN32API GetCharWidth32A( HDC arg1, UINT arg2, UINT arg3, PINT  arg4)
 {
-    dprintf(("GDI32: GetCharWidthA"));
+    dprintf(("GDI32: GetCharWidth32A"));
     return O32_GetCharWidth(arg1, arg2, arg3, arg4);
 }
 //******************************************************************************
 //TODO: Cut off Unicode chars?
 //******************************************************************************
-BOOL WIN32API GetCharWidthW(HDC arg1, UINT iFirstChar, UINT iLastChar, PINT  arg4)
+BOOL WIN32API GetCharWidth32W(HDC arg1, UINT iFirstChar, UINT iLastChar, PINT  arg4)
 {
-    dprintf(("GDI32: GetCharWidthW, not properly implemented"));
+    dprintf(("GDI32: GetCharWidth32W, not properly implemented"));
     return O32_GetCharWidth(arg1, iFirstChar, iLastChar, arg4);
 }
 //******************************************************************************
