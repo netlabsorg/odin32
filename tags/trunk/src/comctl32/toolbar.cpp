@@ -1,4 +1,4 @@
-/* $Id: toolbar.cpp,v 1.4 2000-03-21 17:30:44 cbratschi Exp $ */
+/* $Id: toolbar.cpp,v 1.5 2000-04-19 14:47:24 sandervl Exp $ */
 /*
  * Toolbar control
  *
@@ -3470,7 +3470,11 @@ TOOLBAR_Destroy (HWND hwnd, WPARAM wParam, LPARAM lParam)
     {
       INT x;
 
-      for (x = 0;x < infoPtr->nNumButtons;x++) COMCTL32_Free(infoPtr->buttons[x].pszName);
+      //SvL: Check pointers
+      for (x = 0;x < infoPtr->nNumButtons;x++) 
+	if(infoPtr->buttons[x].pszName)
+		COMCTL32_Free(infoPtr->buttons[x].pszName);
+
       COMCTL32_Free(infoPtr->buttons);
     }
 
