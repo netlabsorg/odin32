@@ -1,4 +1,4 @@
-/* $Id: exceptions.cpp,v 1.30 1999-11-22 20:35:49 sandervl Exp $ */
+/* $Id: exceptions.cpp,v 1.31 2000-01-02 22:09:01 sandervl Exp $ */
 
 /*
  * Win32 Device IOCTL API functions for OS/2
@@ -932,6 +932,9 @@ void static dprintfException(PEXCEPTIONREPORTRECORD       pERepRec,
 #define XCPT_CONTINUE_STOP 0x00716668
 #endif
 
+//in misc.cpp
+void CheckLogException();
+
 ULONG APIENTRY OS2ExceptionHandler(PEXCEPTIONREPORTRECORD       pERepRec,
                                    PEXCEPTIONREGISTRATIONRECORD pERegRec,
                                    PCONTEXTRECORD               pCtxRec,
@@ -1020,6 +1023,7 @@ continueFail:
   case XCPT_UNABLE_TO_GROW_STACK:
   case XCPT_IN_PAGE_ERROR:
 CrashAndBurn:
+	CheckLogException();
   	dprintfException(pERepRec, pERegRec, pCtxRec, p);
 	if(fIsOS2Image == FALSE)  //Only for real win32 apps
 	{
