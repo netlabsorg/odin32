@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.11 2000-05-02 11:24:52 bird Exp $
+# $Id: makefile,v 1.12 2000-08-17 05:11:22 bird Exp $
 
 #
 # PD-Win32 API
@@ -63,12 +63,14 @@ nodebuginfosmp:	odin_libraries  needed_tools
     nmake -nologo all DEBUG=1 NODEBUGINFO=1
 
 release:	odin_libraries  needed_tools
+    SET DEBUG=
     cd src
     nmake -nologo all
     cd ..\tools\install
     nmake -nologo all
 
 releasesmp:	odin_libraries  needed_tools
+    SET DEBUG=
     cd src
     start nmake -i -f makefile.smp -nologo all
     nmake -nologo all
