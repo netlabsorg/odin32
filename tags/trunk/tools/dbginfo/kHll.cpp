@@ -1,4 +1,4 @@
-/* $Id: kHll.cpp,v 1.5 2000-03-27 07:26:54 bird Exp $
+/* $Id: kHll.cpp,v 1.6 2000-03-27 10:20:42 bird Exp $
  *
  * kHll - Implementation of the class kHll.
  *        That class is used to create HLL debuginfo.
@@ -39,6 +39,10 @@
 #include "kHll.h"
 
 
+/*******************************************************************************
+*   Internal Functions                                                         *
+*******************************************************************************/
+signed long     fsize(FILE *phFile);
 
 
 
@@ -201,7 +205,7 @@ kHllModuleEntry::kHllModuleEntry(
      */
     cchName = strlen(pszName);
     pModule = (PHLLMODULE)malloc(sizeof(HLLMODULE) + cchName +
-                                 sizeof(HLLSEGINFO) * min((cSegInfo - 1), 3));
+                                 sizeof(HLLSEGINFO) * max((cSegInfo - 1), 3));
     assert(pModule != NULL);
     memset(pModule, 0, sizeof(*pModule));
     pModule->cchName = cchName;
@@ -283,8 +287,8 @@ BOOL            kHllModuleEntry::addSegInfo(
     }
     else
     {
-        PHLLSEGINFO pSegInfo =  (PHLLSEGINFO)(pModule->cSegInfo * sizeof(HLLSEGINFO)
-                                              + pModule->achName[pModule->cchName]);
+        PHLLSEGINFO pSegInfo =  (PHLLSEGINFO)((pModule->cSegInfo - 1) * sizeof(HLLSEGINFO)
+                                              + &pModule->achName[pModule->cchName]);
         pSegInfo->cb = cb;
         pSegInfo->off = off;
         pSegInfo->iObject = iObject;
@@ -373,6 +377,7 @@ const void *    kHllModuleEntry::addPublicSymbol(
 int         kHllModuleEntry::write(FILE *phFile, unsigned long off)
 {
     int             cch;
+    int             cchToWrite;
     int             cchWritten = 0;
 
     /* validate object state */
@@ -382,8 +387,9 @@ int         kHllModuleEntry::write(FILE *phFile, unsigned long off)
      * Write module HLL data.
      */
     offModule = off;
-    cch = fwrite(pModule, 1, offsetof(HLLMODULE, achName) + pModule->cchName, phFile);
-    if (cch != offsetof(HLLMODULE, achName) + pModule->cchName)
+    cchToWrite = offsetof(HLLMODULE, achName) + pModule->cchName + sizeof(HLLSEGINFO) * max(pModule->cSegInfo-1, 0);
+    cch = fwrite(pModule, 1, cchToWrite, phFile);
+    if (cch != cchToWrite)
         return -1;
     cchWritten += cch;
     cbModule = cch;
@@ -788,6 +794,7 @@ APIRET          kHll::writeToLX(
         struct e32_exe      e32;
         int                 cch;
         long                lPosLXHdr;
+        long                cbLXFile;
 
         /*
          * Read exe header
@@ -795,6 +802,7 @@ APIRET          kHll::writeToLX(
         cch = fread(&ehdr, 1, sizeof(ehdr), phFile);
         if (cch == sizeof(ehdr))
         {
+            cbLXFile = fsize(phFile);
             if (ehdr.e_magic == EMAGIC)
                 lPosLXHdr = ehdr.e_lfanew;
             else
@@ -810,17 +818,21 @@ APIRET          kHll::writeToLX(
                          * Found exeheader.
                          * Check if there is any debug info.
                          */
-                        if (e32.e32_debuginfo == 0 && e32.e32_debuginfo == 0)
+                        if ((e32.e32_debuginfo == 0 && e32.e32_debuginfo == 0)
+                            || (cbLXFile == e32.e32_debuglen + e32.e32_debuginfo)
+                            )
                         {
                             long lPosDebug;
 
+                            if (e32.e32_debuginfo != 0 && e32.e32_debuglen != 0)
+                                lPosDebug = e32.e32_debuginfo;
+                            else
+                                lPosDebug = cbLXFile;
+
                             /*
-                             * Go to end of file and write debug info.
+                             * Go to debug info position in the file and write debug info.
                              */
-                            if (fseek(phFile, 0, SEEK_END) == 0
-                                &&
-                                (lPosDebug = ftell(phFile)) != -1
-                                )
+                            if (fseek(phFile, lPosDebug, SEEK_SET) == 0)
                             {
                                 /*
                                  * Write the HLL data to disk.
@@ -885,4 +897,25 @@ APIRET          kHll::writeToLX(
 }
 
 
+/**
+ * Find the size of a file.
+ * @returns   Size of file. -1 on error.
+ * @param     phFile  File handle.
+ */
+signed long fsize(FILE *phFile)
+{
+    int ipos;
+    signed long cb;
+
+    if ((ipos = ftell(phFile)) < 0
+        ||
+        fseek(phFile, 0, SEEK_END) != 0
+        ||
+        (cb = ftell(phFile)) < 0
+        ||
+        fseek(phFile, ipos, SEEK_SET) != 0
+        )
+        cb = -1;
+    return cb;
+}
 
