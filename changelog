@@ -1,4 +1,9 @@
-/* $Id: changelog,v 1.2073 2002-05-14 09:06:22 sandervl Exp $ */
+/* $Id: changelog,v 1.2074 2002-05-14 09:27:27 sandervl Exp $ */
+
+ 2002-05-14: Sander van Leeuwen <sandervl@xs4all.nl>
+    - KERNEL32: o CustForce2GBFileSize function added to force 
+                  GetVolumeInformation to tell the app all partitions are FAT
+                  (2 GB file size limitation)
 
  2002-05-14: Platon Fomichev <platon@innotek.de>
     - USER32:   o Don't send WM_WINDOWPOSCHANGING message when PM sends
