@@ -1,4 +1,4 @@
-/* $Id: cvticon.cpp,v 1.2 1999-08-19 19:50:40 sandervl Exp $ */
+/* $Id: cvticon.cpp,v 1.3 1999-09-04 12:41:46 sandervl Exp $ */
 
 /*
  * PE2LX icons
@@ -26,10 +26,58 @@
 #include <misc.h>
 
 //******************************************************************************
+//******************************************************************************
+ULONG QueryConvertedIconSize(WINBITMAPINFOHEADER *bmpHdr, int size)
+{
+ int bwsize, colorsize, rgbsize, iconsize;
+
+  bwsize   = (bmpHdr->biWidth*(bmpHdr->biHeight/2))/8;
+  colorsize = bmpHdr->biWidth*(bmpHdr->biHeight/2);
+  //SvL: 28-09-'98: only for <= 8
+  if(bmpHdr->biBitCount <= 8)
+        rgbsize = (1<<bmpHdr->biBitCount)*sizeof(RGB2);
+  else  rgbsize = 0;
+
+  switch(bmpHdr->biBitCount) {
+        case 1:
+                colorsize /= 8;
+                break;
+        case 4:
+                colorsize /= 2;
+                break;
+        case 8:
+                break;
+        case 16:
+                colorsize *= 2;
+                break;
+        case 24:
+                colorsize *= 3;
+                break;
+        case 32:
+                colorsize *= 4;
+                break;
+  }
+  if(bmpHdr->biSizeImage == 0 && bmpHdr->biCompression == 0) {
+        bmpHdr->biSizeImage = bwsize + colorsize;
+  }
+
+  //SvL: 28-09-'98: cllngenu.dll has an incorrect size in the header
+  if(bmpHdr->biSizeImage < colorsize) {
+        bmpHdr->biSizeImage = colorsize;
+  }
+  //bitmapfileheader for AndXor mask + 2 RGB structs + bitmapfileheader
+  //for color bitmap + RGB structs for all the colors
+  //SvL, 3-3-98: 2*bwsize
+  iconsize = 2*sizeof(BITMAPFILEHEADER2) + 2*sizeof(RGB2) +
+             rgbsize + 2*bwsize + bmpHdr->biSizeImage;
+
+  return iconsize;
+}
+//******************************************************************************
 //NOTE: offsetBits is the value added to the offBits bitmap structure members
 //      (handy for converting icon groups)
 //******************************************************************************
-void *ConvertIcon(WINBITMAPINFOHEADER *bmpHdr, int size, int offsetBits)
+void *ConvertIcon(WINBITMAPINFOHEADER *bmpHdr, int size, int *os2size, int offsetBits)
 {
  RGBQUAD *rgb;
  RGB2    *os2rgb;
@@ -82,10 +130,13 @@ void *ConvertIcon(WINBITMAPINFOHEADER *bmpHdr, int size, int offsetBits)
   //SvL, 3-3-98: 2*bwsize
   iconsize = 2*sizeof(BITMAPFILEHEADER2) + 2*sizeof(RGB2) +
              rgbsize + 2*bwsize + bmpHdr->biSizeImage;
+#if 0
+  //SvL: Not necessary anymore
   //There are icons without an XOR mask, so check for it
   if(bmpHdr->biSizeImage == colorsize) {
         iconsize += bwsize;
   }
+#endif
   iconhdr  = (BITMAPFILEHEADER2 *)malloc(iconsize);
   memset(iconhdr, 0, iconsize);
   iconhdr->usType        = BFT_COLORICON;
@@ -103,7 +154,7 @@ void *ConvertIcon(WINBITMAPINFOHEADER *bmpHdr, int size, int offsetBits)
   iconhdr->bmp2.ulColorEncoding = BCE_RGB;
   os2rgb                 = (RGB2 *)(iconhdr+1);
   memset(os2rgb, 0, sizeof(RGB2));
-  memset(os2rgb+1, 0xff, sizeof(RGB2)); //not reserved byte
+  memset(os2rgb+1, 0xff, sizeof(RGB)); //not reserved byte!
   iconhdr2               = (BITMAPFILEHEADER2 *)(os2rgb+2);
   iconhdr2->usType       = BFT_COLORICON;
   iconhdr2->cbSize       = sizeof(BITMAPFILEHEADER2);
@@ -142,6 +193,7 @@ void *ConvertIcon(WINBITMAPINFOHEADER *bmpHdr, int size, int offsetBits)
         memcpy((char *)os2rgb+bwsize, (char *)rgb+colorsize, bwsize);
         memcpy((char *)os2rgb+2*bwsize, (char *)rgb, colorsize);
   }
+  *os2size = iconsize;
   return (void *)iconhdr;
 }
 //******************************************************************************

@@ -1,4 +1,4 @@
-/* $Id: winres.h,v 1.8 1999-08-31 17:15:53 sandervl Exp $ */
+/* $Id: winres.h,v 1.9 1999-09-04 12:42:10 sandervl Exp $ */
 
 /*
  * Win32 resource class
@@ -34,7 +34,10 @@ public:
     virtual  PVOID lockResource();	//get original win32 resource
     virtual  PVOID lockOS2Resource();	//get converted OS/2 resource
 
+	     //return size of original win32 resource
              ULONG getSize() 		{ return ressize; };
+	     //return size of converted win32 resource
+	     ULONG getOS2Size();
 
   	     ULONG getOS2Handle()   		{ return OS2ResHandle; };
 	      void setOS2Handle(ULONG handle) 	{ OS2ResHandle = handle; };
