@@ -1,4 +1,4 @@
-/* $Id: crtdll.cpp,v 1.12 1999-11-30 14:16:44 sandervl Exp $ */
+/* $Id: crtdll.cpp,v 1.13 1999-11-30 20:19:52 sandervl Exp $ */
 
 /*
  * The C RunTime DLL
@@ -23,7 +23,6 @@
 #include <heapstring.h>
 #include <ctype.h>
 #include <setjmp.h>
-#include <except.h>
 #include <debugtools.h>
 
 #include <wchar.h>
@@ -48,6 +47,7 @@
 #include <crtdll.h>
 #include "crtinc.h"
 #include "ieee.h"
+#include <ntddk.h>
 
 DEFAULT_DEBUG_CHANNEL(crtdll)
 

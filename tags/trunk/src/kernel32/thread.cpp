@@ -1,4 +1,4 @@
-/* $Id: thread.cpp,v 1.17 1999-11-08 13:43:13 sandervl Exp $ */
+/* $Id: thread.cpp,v 1.18 1999-11-30 20:19:34 sandervl Exp $ */
 
 /*
  * Win32 Thread API functions
@@ -27,7 +27,6 @@
 #include <wprocess.h>
 #include <windllbase.h>
 #include <winexebase.h>
-#include <except.h>
 
 ODINDEBUGCHANNEL(KERNEL32-THREAD)
 

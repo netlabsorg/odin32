@@ -1,4 +1,4 @@
-/* $Id: exception.cpp,v 1.1 1999-08-18 19:35:43 phaller Exp $ */
+/* $Id: exception.cpp,v 1.2 1999-11-30 20:20:31 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -25,8 +25,6 @@
 #include "winuser.h"
 #include "winerror.h"
 #include "winreg.h"
-
-#include <win/except.h>
 
 /*
 #include "winnt.h"
