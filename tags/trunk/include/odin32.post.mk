@@ -1,4 +1,4 @@
-# $Id: odin32.post.mk,v 1.9 2003-02-28 10:28:10 sandervl Exp $
+# $Id: odin32.post.mk,v 1.10 2003-10-26 01:47:50 bird Exp $
 
 #
 # Odin32 API
@@ -27,10 +27,20 @@
 #
 # Altern configuration if we're making the custom build object library.
 #
+!ifndef NO_CUSTOMBUILD
 !if "$(CUSTOMBUILD)" == "1"
+!if "$(EXETARGET)" == ""
+!ifdef LIBS
+!ifdef NOPEHDR
 OBJS = $(OBJS:initterm.obj=dummy.obj)
+!else
+OBJS = $(OBJS:initterm.obj=dummy.obj) \
+$(OBJDIR)\pe_$(ORGTARGET).obj
 !endif
-
+!endif
+!endif
+!endif
+!endif
 
 #
 # Include compiler spesific post rule file.

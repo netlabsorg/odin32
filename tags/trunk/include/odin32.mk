@@ -1,4 +1,4 @@
-# $Id: odin32.mk,v 1.9 2003-02-28 10:28:10 sandervl Exp $
+# $Id: odin32.mk,v 1.10 2003-10-26 01:47:50 bird Exp $
 
 #
 # Odin32 API
@@ -70,6 +70,26 @@ DEBUG   = 1
 !   endif
 !endif
 
+#
+# Altern configuration if we're making the custom build object library.
+#
+CUST =
+!if "$(CUSTOMBUILD)" == "1"
+!   ifndef LIBTARGET
+!       ifndef PUBLICLIB
+CUST        = o
+DIREXT2     = .cust
+LIBTARGET   = 1
+PUBLICLIB   = 1
+WRC_PREFIX_RESOURCE=1
+!       else
+CUSTOMBUILD = 0
+!       endif
+!   else
+CUSTOMBUILD = 0
+!   endif
+!endif
+
 
 #
 # Target directories.
@@ -118,15 +138,15 @@ ODIN32_LIB__= $(ODIN32_LIB_)\Release
 !ifndef OBJDIR
 !   ifdef DEBUG
 !       ifndef PROFILE
-OBJDIR   = .\bin\Debug$(DIREXT)
+OBJDIR   = .\bin\Debug$(DIREXT)$(DIREXT2)
 !       else
-OBJDIR   = .\bin\Profile$(DIREXT)
+OBJDIR   = .\bin\Profile$(DIREXT)$(DIREXT2)
 !       endif
 !   else
 !       ifdef PROFILE
-OBJDIR   = .\bin\Profile$(DIREXT)
+OBJDIR   = .\bin\Profile$(DIREXT)$(DIREXT2)
 !       else
-OBJDIR   = .\bin\Release$(DIREXT)
+OBJDIR   = .\bin\Release$(DIREXT)$(DIREXT2)
 !       endif
 !   endif
 !endif
@@ -143,26 +163,6 @@ ODIN32_POST_INC = $(ODIN32_INCLUDE)/odin32.post.mk
 # (Please don't change order of these rules!)
 #
 COMMONRULES = cleanall clean dep lib all nothing
-
-
-#
-# Altern configuration if we're making the custom build object library.
-#
-CUST =
-!if "$(CUSTOMBUILD)" == "1"
-!   ifndef LIBTARGET
-!       ifndef PUBLICLIB
-CUST        = o
-LIBTARGET   = 1
-PUBLICLIB   = 1
-WRC_PREFIX_RESOURCE=1
-!       else
-CUSTOMBUILD = 0
-!       endif
-!   else
-CUSTOMBUILD = 0
-!   endif
-!endif
 
 
 #

@@ -1,4 +1,4 @@
-# $Id: odin32.post.vac3.mk,v 1.29 2003-02-28 10:28:10 sandervl Exp $
+# $Id: odin32.post.vac3.mk,v 1.30 2003-10-26 01:47:51 bird Exp $
 
 #
 # Odin32 API
@@ -443,6 +443,15 @@ $(OBJDIR)\bldlevel.$(ORGDEFFILE): $(DEFFILE)
         -V"#define=ODIN32_VERSION,$(ODIN32_INCLUDE)\odinbuild.h" \
         -M"#define=ODIN32_BUILD_NR,$(ODIN32_INCLUDE)\odinbuild.h"
 
+
+!ifndef NOPEHDR
+#
+# Common: Make the pe_$(ORGTARGET).obj
+#
+$(OBJDIR)\pe_$(ORGTARGET).obj: $(DEFFILE) $(PEBUILD)
+	$(PEBUILD) $(ORGTARGET) $(DEFFILE) > $(@R).asm
+    $(AS) $(ASFLAGS) -Fdo:$(OBJDIR) $(@R).asm
+!endif
 
 #
 # Common: Create the object directory.

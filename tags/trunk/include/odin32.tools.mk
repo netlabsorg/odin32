@@ -1,4 +1,4 @@
-# $Id: odin32.tools.mk,v 1.10 2001-12-09 15:00:04 bird Exp $
+# $Id: odin32.tools.mk,v 1.11 2003-10-26 01:47:51 bird Exp $
 
 #
 # Odin32 API
@@ -49,6 +49,7 @@ EXECEXCL    = $(ODIN32_TOOLS)\ExecExcl.cmd
 BLDLEVELINF = $(ODIN32_TOOLS)\BldLevelInf.cmd
 LXLITE      = $(ODIN32_TOOLS)\lxlite.exe
 CMDQD       = $(ODIN32_TOOLS)\cmdqd.exe
+PEBUILD		= $(ODIN32_TOOLS)\PEBuild.exe
 DEPEND      = $(ODIN32_TOOLS)\fastdep.exe -o$$(OBJDIR) -cy+ -xdummy.c
 !ifdef MAKEFLAGS
 !if "$(MAKEVER)" != "5.0"
