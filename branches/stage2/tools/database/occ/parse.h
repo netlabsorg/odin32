@@ -1,13 +1,13 @@
 /*
   Copyright (C) 1997-2001 Shigeru Chiba, Tokyo Institute of Technology.
 
-  Permission to use, copy, distribute and modify this software and   
-  its documentation for any purpose is hereby granted without fee,        
-  provided that the above copyright notice appear in all copies and that 
-  both that copyright notice and this permission notice appear in 
+  Permission to use, copy, distribute and modify this software and
+  its documentation for any purpose is hereby granted without fee,
+  provided that the above copyright notice appear in all copies and that
+  both that copyright notice and this permission notice appear in
   supporting documentation.
 
-  Shigeru Chiba makes no representations about the suitability of this 
+  Shigeru Chiba makes no representations about the suitability of this
   software for any purpose.  It is provided "as is" without express or
   implied warranty.
 */
@@ -38,13 +38,16 @@ public:
     void WarningMessage(const char*, Ptree* = nil, Ptree* = nil);
     int NumOfErrors() { return nerrors; }
     uint LineNumber(char* pos, char*& fname, int& fname_len);
+    #ifdef SDS
+    uint LineNumber(char* pos, char*& fname, int& fname_len, int& col_num, int& abs_pos);
+    #endif
 
     bool rProgram(Ptree*&);
 
 protected:
     enum DeclKind { kDeclarator, kArgDeclarator, kCastDeclarator };
-    enum TemplateDeclKind { tdk_unknown, tdk_decl, tdk_instantiation, 
-			    tdk_specialization, num_tdks };
+    enum TemplateDeclKind { tdk_unknown, tdk_decl, tdk_instantiation,
+                            tdk_specialization, num_tdks };
 
     bool SyntaxError();
     void ShowMessageHead(char*);
@@ -83,9 +86,9 @@ protected:
     bool rDeclarators(Ptree*&, Encoding&, bool, bool = FALSE);
     bool rDeclaratorWithInit(Ptree*&, Encoding&, bool, bool);
     bool rDeclarator(Ptree*&, DeclKind, bool, Encoding&, Encoding&, bool,
-		     bool = FALSE);
+                     bool = FALSE);
     bool rDeclarator2(Ptree*&, DeclKind, bool, Encoding&, Encoding&, bool,
-		      bool, Ptree**);
+                      bool, Ptree**);
     bool optPtrOperator(Ptree*&, Encoding&);
     bool rMemberInitializers(Ptree*&);
     bool rMemberInit(Ptree*&);
