@@ -1,4 +1,4 @@
-/* $Id: ADVAPI32.CPP,v 1.7 1999-08-25 11:25:24 sandervl Exp $ */
+/* $Id: ADVAPI32.CPP,v 1.8 1999-10-28 18:24:24 sandervl Exp $ */
 
 /*
  * Win32 advanced API functions for OS/2
@@ -3585,7 +3585,7 @@ SC_HANDLE WIN32API OpenSCManagerA(LPCSTR lpszMachineName,
                                      LPCSTR lpszDatabaseName,
                                      DWORD   fdwDesiredAccess)
 {
-  dprintf(("ADVAPI32: OpenSCManagerA(%s,%s,%s) not implemented.\n",
+  dprintf(("ADVAPI32: OpenSCManagerA(%s,%s,%x) not implemented.\n",
            lpszMachineName,
            lpszDatabaseName,
            fdwDesiredAccess));
@@ -3614,7 +3614,7 @@ SC_HANDLE WIN32API OpenSCManagerW(LPCWSTR lpszMachineName,
                                      LPCWSTR lpszDatabaseName,
                                      DWORD   fdwDesiredAccess)
 {
-  dprintf(("ADVAPI32: OpenSCManagerW(%s,%s,%s) not implemented.\n",
+  dprintf(("ADVAPI32: OpenSCManagerW(%x,%x,%x) not implemented.\n",
            lpszMachineName,
            lpszDatabaseName,
            fdwDesiredAccess));
