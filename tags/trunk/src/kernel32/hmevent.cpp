@@ -1,4 +1,4 @@
-/* $Id: hmevent.cpp,v 1.7 2001-06-22 19:40:28 sandervl Exp $ */
+/* $Id: hmevent.cpp,v 1.8 2001-06-23 16:59:27 sandervl Exp $ */
 
 /*
  * Win32 Event Semaphore implementation
@@ -47,6 +47,7 @@
 
 #include "HandleManager.H"
 #include "HMEvent.h"
+#include "HMSemaphore.h"
 #include "oslibdos.h"
 
 #define DBG_LOCALLOG	DBG_hmevent
@@ -107,6 +108,7 @@ DWORD HMDeviceEventClass::CreateEvent(PHMHANDLEDATA         pHMHandleData,
       strcpy(szSemName, "\\SEM32\\");
       strcat(szSemName, lpszEventName);
       lpszEventName = szSemName;
+      FixSemName((char *)lpszEventName);
   }
   //Manual reset means all threads waiting on the event semaphore will be
   //unblocked and the app must manually reset the event semaphore
@@ -182,6 +184,7 @@ DWORD HMDeviceEventClass::OpenEvent(PHMHANDLEDATA         pHMHandleData,
 
   strcpy(szSemName, "\\SEM32\\");
   strcat(szSemName, lpszEventName);
+  FixSemName(szSemName);
   rc = DosOpenEventSem(szSemName, &hev);
   if(rc) {
       dprintf(("DosOpenEventSem %x failed with rc %d", pHMHandleData->hHMHandle, rc));
@@ -393,17 +396,7 @@ DWORD HMDeviceEventClass::MsgWaitForMultipleObjects(PHMHANDLEDATA pHMHandleData,
                                                     DWORD      dwMilliseconds,
                                                     DWORD      dwWakeMask)
 {
-    dprintf(("KERNEL32: ERROR: HandleManager::DeviceHandler::MsgWaitForMultipleObjects %08x %d %x %d %d %x",
-              pHMHandleData->hHMHandle, nCount, pHandles, fWaitAll, dwMilliseconds, dwWakeMask));
-
-    if(!(pHMHandleData->dwAccess & SYNCHRONIZE_W) )
-    {
-        dprintf(("ERROR: Access denied!!"));
-        SetLastError(ERROR_ACCESS_DENIED_W);
-        return WAIT_FAILED_W;
-    }
-
-    return WAIT_FAILED_W;
+    return HMSemMsgWaitForMultipleObjects(nCount, pHandles, fWaitAll, dwMilliseconds, dwWakeMask);
 }
 #endif
 
@@ -424,17 +417,7 @@ DWORD HMDeviceEventClass::WaitForMultipleObjects(PHMHANDLEDATA pHMHandleData,
                                                  BOOL    fWaitAll,
                                                  DWORD   dwTimeout)
 {
-    dprintf(("KERNEL32: ERROR: HandleManager::DeviceHandler::WaitForMultipleObjects %08x %d %x %d %x",
-              pHMHandleData->hHMHandle, cObjects, lphObjects, fWaitAll, dwTimeout));
-
-    if(!(pHMHandleData->dwAccess & SYNCHRONIZE_W) )
-    {
-        dprintf(("ERROR: Access denied!!"));
-        SetLastError(ERROR_ACCESS_DENIED_W);
-        return WAIT_FAILED_W;
-    }
-
-    return WAIT_FAILED_W;
+    return HMSemWaitForMultipleObjects(cObjects, lphObjects, fWaitAll, dwTimeout);
 }
 #endif
 
@@ -466,7 +449,7 @@ BOOL HMDeviceEventClass::SetEvent(PHMHANDLEDATA pHMHandleData)
   }
 
   rc = DosPostEventSem(pHMHandleData->hHMHandle);
-  if(rc) {
+  if(rc && rc != ERROR_ALREADY_POSTED) {
       dprintf(("DosPostEventSem %x failed with rc %d", pHMHandleData->hHMHandle, rc));
       SetLastError(error2WinError(rc));
       return FALSE;
@@ -511,14 +494,14 @@ BOOL HMDeviceEventClass::PulseEvent(PHMHANDLEDATA pHMHandleData)
   }
 
   rc = DosPostEventSem(pHMHandleData->hHMHandle);
-  if(rc) {
+  if(rc && rc != ERROR_ALREADY_POSTED) {
       dprintf(("DosPostEventSem %x failed with rc %d", pHMHandleData->hHMHandle, rc));
       SetLastError(error2WinError(rc));
       return FALSE;
   }
   if(pHMHandleData->dwFlags == TRUE) {//fManualReset
       rc = DosResetEventSem(pHMHandleData->hHMHandle, &count);
-      if(rc) {
+      if(rc && rc != ERROR_ALREADY_RESET) {
           dprintf(("DosResetEventSem %x failed with rc %d", pHMHandleData->hHMHandle, rc));
           SetLastError(error2WinError(rc));
           return FALSE;
@@ -564,7 +547,7 @@ BOOL HMDeviceEventClass::ResetEvent(PHMHANDLEDATA pHMHandleData)
   }
 
   rc = DosResetEventSem(pHMHandleData->hHMHandle, &count);
-  if(rc) {
+  if(rc && rc != ERROR_ALREADY_RESET) {
       dprintf(("DosResetEventSem %x failed with rc %d", pHMHandleData->hHMHandle, rc));
       SetLastError(error2WinError(rc));
       return FALSE;
