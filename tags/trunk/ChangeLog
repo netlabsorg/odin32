@@ -1,4 +1,11 @@
- /* $Id: ChangeLog,v 1.1114 2000-09-08 04:33:56 phaller Exp $ */
+ /* $Id: ChangeLog,v 1.1115 2000-09-08 15:28:24 bird Exp $ */
+
+ 2000-09-07: knut st. osmundsen <knut.stange.osmundsen@mynd.no>
+    - Win32k:   Added last FP14 kernel to Symbol database.
+                Splitted extract.c from Probkrnl.c. Removed old debug
+                code from Probkrnl.c (Probkrnl.exe) - use win32ktst.exe
+                for Ring-3 testing now.
+                Added filehandle fix for MSC60a compiler.
 
  2000-09-07: Patrick Haller <phaller@gmx.net>
     - KERNEL32: Fixed some FS: bugs in time.cpp, environ.cpp, heap.cpp
@@ -43,7 +50,7 @@
                 otherwise window proc wrapper.
                 Fixes wrong strings in Notes 5.0. (new string problems, but they
                 are caused by something else)
-    - COMCTL32: CreateUpDownControl was not exported correctly 
+    - COMCTL32: CreateUpDownControl was not exported correctly
                 (reported by Reinhold Kopper)
 
  2000-09-04: knut st. osmundsen <knut.stange.osmundsen@mynd.no>
