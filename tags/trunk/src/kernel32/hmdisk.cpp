@@ -1,4 +1,4 @@
-/* $Id: hmdisk.cpp,v 1.39 2002-02-27 15:23:06 sandervl Exp $ */
+/* $Id: hmdisk.cpp,v 1.40 2002-02-28 19:27:48 sandervl Exp $ */
 
 /*
  * Win32 Disk API functions for OS/2
@@ -330,8 +330,8 @@ static BOOL ioctlDISKUnlockEject(PHMHANDLEDATA pHMHandleData,
     *lpBytesReturned = 0;
 
   ret = OSLibDosDevIOCtl(pHMHandleData->hHMHandle,
-                         0x08,       // IOCTL_DISK
-                         0x40,       // DSK_UNLOCKEJECTMEDIA
+                         IOCTL_DISK,
+                         DSK_UNLOCKEJECTMEDIA,
                          &ParameterBlock,
                          sizeof( ParameterBlock ),
                          &dwParameterSize,
@@ -397,6 +397,9 @@ BOOL HMDeviceDiskClass::DeviceIoControl(PHMHANDLEDATA pHMHandleData, DWORD dwIoC
         break;
     case IOCTL_DISK_GET_DRIVE_GEOMETRY:
         msg = "IOCTL_DISK_GET_DRIVE_GEOMETRY";
+        break;
+    case IOCTL_DISK_IS_WRITABLE:
+        msg = "IOCTL_DISK_IS_WRITABLE";
         break;
     case IOCTL_DISK_GET_DRIVE_LAYOUT:
         msg = "IOCTL_DISK_GET_DRIVE_LAYOUT";
@@ -575,6 +578,75 @@ BOOL HMDeviceDiskClass::DeviceIoControl(PHMHANDLEDATA pHMHandleData, DWORD dwIoC
     case IOCTL_DISK_GET_DRIVE_LAYOUT:
         break;
 
+    case IOCTL_DISK_IS_WRITABLE:
+    {
+        APIRET rc;
+	DWORD ret;
+        ULONG  ulBytesRead    = 0;      /* Number of bytes read by DosRead */
+        ULONG  ulWrote        = 0;      /* Number of bytes written by DosWrite */
+        ULONG  ulLocal        = 0;      /* File pointer position after DosSetFilePtr */
+        UCHAR  uchFileData[1] = {'0'};    /* Data to write to file */
+
+        if(!pHMHandleData->hHMHandle) 
+        {
+            pHMHandleData->hHMHandle = OpenDisk(drvInfo);
+            if(!pHMHandleData->hHMHandle) {
+                dprintf(("No disk inserted; aborting"));
+                SetLastError(ERROR_NOT_READY);
+                return FALSE;
+            }
+        }
+        OSLibDosDevIOCtl(pHMHandleData->hHMHandle,IOCTL_DISK,DSK_LOCKDRIVE,0,0,0,0,0,0);
+          
+        ULONG oldmode = SetErrorMode(SEM_FAILCRITICALERRORS);
+
+        /* Read the first byte of the disk */
+        rc = OSLibDosRead(pHMHandleData->hHMHandle,    /* File Handle */
+                          uchFileData,                 /* String to be read */
+                          1L,                          /* Length of string to be read */
+                          &ulBytesRead);               /* Bytes actually read */
+
+        if (rc == 0)
+        {
+            dprintf(("IOCTL_DISK_IS_WRITABLE:OSLibDosRead failed with rc %08xh %x", rc,GetLastError()));
+            SetLastError(ERROR_ACCESS_DENIED);
+            goto writecheckfail;
+        }
+
+        /* Move the file pointer back */
+        rc = OSLibDosSetFilePtr (pHMHandleData->hHMHandle,           /* File Handle */
+                                 -1,OSLIB_SETPTR_FILE_CURRENT);
+        if (rc == -1)
+        {
+            dprintf(("IOCTL_DISK_IS_WRITABLE:OSLibDosSetFilePtr failed with rc %d", rc));
+            SetLastError(ERROR_ACCESS_DENIED);
+            goto writecheckfail;
+        }
+  
+        rc =  OSLibDosWrite(pHMHandleData->hHMHandle,   /* File handle */
+                            (PVOID) uchFileData,        /* String to be written */
+                            1,                          /* Size of string to be written */
+                            &ulWrote);                  /* Bytes actually written */
+
+        dprintf2(("IOCTL_DISK_IS_WRITABLE:OSLibDosWrite returned with rc %x %x", rc,GetLastError()));
+        if (rc == 0)
+        {
+           if (GetLastError() == ERROR_WRITE_PROTECT)
+           {
+               SetLastError(ERROR_WRITE_PROTECT);
+               goto writecheckfail;
+           }
+        }
+        OSLibDosDevIOCtl(pHMHandleData->hHMHandle,IOCTL_DISK,DSK_UNLOCKDRIVE,0,0,0,0,0,0);
+        SetErrorMode(oldmode);
+        SetLastError(ERROR_SUCCESS);
+        return TRUE;
+
+writecheckfail:
+        OSLibDosDevIOCtl(pHMHandleData->hHMHandle,IOCTL_DISK,DSK_UNLOCKDRIVE,0,0,0,0,0,0);
+        SetErrorMode(oldmode);
+        return FALSE;
+    }
     case IOCTL_DISK_GET_DRIVE_GEOMETRY:
     case IOCTL_STORAGE_GET_MEDIA_TYPES:
     case IOCTL_DISK_GET_MEDIA_TYPES:
@@ -599,7 +671,7 @@ BOOL HMDeviceDiskClass::DeviceIoControl(PHMHANDLEDATA pHMHandleData, DWORD dwIoC
                 return FALSE;
             }
         }
-
+        
         //Applications can use this IOCTL to check if the floppy has been changed
         //OSLibDosGetDiskGeometry won't fail when that happens so we read the
         //volume label from the disk and return ERROR_MEDIA_CHANGED if the volume
@@ -974,10 +1046,9 @@ BOOL HMDeviceDiskClass::DeviceIoControl(PHMHANDLEDATA pHMHandleData, DWORD dwIoC
 
         parm.ucCommandInfo = 0;
         parm.usDriveUnit = drvInfo->driveLetter - 'A';
-        //IOCTL_DISK (0x08), DSK_GETLOCKSTATUS (0x66)
 //            rc = OSLibDosDevIOCtl(pHMHandleData->hHMHandle, 0x08, 0x66, &parm, sizeof(parm), &parsize,
         //TODO: this doesn't work for floppies for some reason...
-        rc = OSLibDosDevIOCtl(-1, 0x08, 0x66, &parm, sizeof(parm), &parsize,
+        rc = OSLibDosDevIOCtl(-1, IOCTL_DISK, DSK_GETLOCKSTATUS, &parm, sizeof(parm), &parsize,
                               &status, sizeof(status), &datasize);
         if(rc != NO_ERROR) {
             dprintf(("OSLibDosDevIOCtl failed with rc %d datasize %d", rc, datasize));
@@ -1359,7 +1430,7 @@ BOOL HMDeviceDiskClass::WriteFile(PHMHANDLEDATA pHMHandleData,
   DWORD        offset, byteswritten;
   BOOL         bRC;
 
-  dprintf2(("KERNEL32: HMDeviceDiskClass::WriteFile %s(%08x,%08x,%08x,%08x,%08x) - stub?\n",
+   dprintf2(("KERNEL32: HMDeviceDiskClass::WriteFile %s(%08x,%08x,%08x,%08x,%08x) - stub?\n",
            lpHMDeviceName,
            pHMHandleData,
            lpBuffer,
@@ -1387,7 +1458,7 @@ BOOL HMDeviceDiskClass::WriteFile(PHMHANDLEDATA pHMHandleData,
     return FALSE;
   }
   if(!(pHMHandleData->dwFlags & FILE_FLAG_OVERLAPPED) && lpOverlapped) {
-    dprintf(("Warning: lpOverlapped != NULL & !FILE_FLAG_OVERLAPPED; sync operation"));
+      dprintf(("Warning: lpOverlapped != NULL & !FILE_FLAG_OVERLAPPED; sync operation"));
   }
   if(lpCompletionRoutine) {
       dprintf(("!WARNING!: lpCompletionRoutine not supported -> fall back to sync IO"));
@@ -1428,6 +1499,8 @@ BOOL HMDeviceDiskClass::WriteFile(PHMHANDLEDATA pHMHandleData,
   }
   else  lpRealBuf = (LPVOID)lpBuffer;
 
+  OSLibDosDevIOCtl(pHMHandleData->hHMHandle,IOCTL_DISK,DSK_LOCKDRIVE,0,0,0,0,0,0);
+
   if(pHMHandleData->dwFlags & FILE_FLAG_OVERLAPPED) {
     dprintf(("ERROR: Overlapped IO not yet implememented!!"));
   }
@@ -1438,6 +1511,7 @@ BOOL HMDeviceDiskClass::WriteFile(PHMHANDLEDATA pHMHandleData,
                             lpNumberOfBytesWritten);
 //  }
 
+  OSLibDosDevIOCtl(pHMHandleData->hHMHandle,IOCTL_DISK,DSK_UNLOCKDRIVE,0,0,0,0,0,0);
   dprintf2(("KERNEL32: HMDeviceDiskClass::WriteFile returned %08xh\n",
            bRC));
 
