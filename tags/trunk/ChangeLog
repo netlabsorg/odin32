@@ -1,4 +1,4 @@
-/* $Id: ChangeLog,v 1.1687 2001-09-20 12:56:39 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.1688 2001-09-20 19:05:49 sandervl Exp $ */
 
  2001-09-20: Sander van Leeuwen <sandervl@xs4all.nl>
     - USER32:   o Activate window when it returns 0 for WM_MOUSEACTIVATE
@@ -7,6 +7,7 @@
                   (fixes activation of FreeCell when clicking on the window)
                 o WM_NEXTMENU bugfix (from Wine)
                   (fixes crash during menu navigation in MDI windows)
+    - SHELL32:  o Shell Folder bugfix from Wine added
 
  2000-09-19: Oliver Braun <Oliver.Braun@hamburg.de>
     - USER32:   o PeekMessageW bugfix
