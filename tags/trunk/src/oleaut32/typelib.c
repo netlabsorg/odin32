@@ -845,7 +845,6 @@ static void dump_TypeInfo(ITypeInfoImpl * pty)
     dump_TLBRefType(pty->impltypelist);
 }
 #else
-#ifdef DEBUG
 static char * typekind_desc[] =
 {
 	"TKIND_ENUM",
@@ -858,7 +857,6 @@ static char * typekind_desc[] =
 	"TKIND_UNION",
 	"TKIND_MAX"
 };
-#endif
 #define  dump_TypeInfo(a)
 #define  dump_DispParms(a)
 #define  dump_TLBFuncDescOne(a)
