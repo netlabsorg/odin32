@@ -1,4 +1,4 @@
-/* $Id: wndclass.cpp,v 1.10 1999-06-26 13:45:20 sandervl Exp $ */
+/* $Id: wndclass.cpp,v 1.11 1999-06-26 14:09:58 sandervl Exp $ */
 
 /*
  * Win32 Window Class Managment Code for OS/2
@@ -72,26 +72,6 @@ LRESULT WIN32API ButtonCallback(HWND hwnd, UINT Msg, WPARAM wParam, LPARAM lPara
   PostSpyMessage(hwnd, Msg, wParam, lParam);
   switch(Msg)
   {
-	case WM_MOUSEACTIVATE:
-		//Open32 sends an OS/2 window message for a button click
-		if(HIWORD(lParam) == 0x71)  //WM_BUTTONCLICKFIRST
-		{
-			lParam = (WM_LBUTTONDOWN << 16) | LOWORD(lParam);
-		}
-		dwStyle   = GetWindowLongA(hwnd, GWL_STYLE);
-		dwExStyle = GetWindowLongA(hwnd, GWL_EXSTYLE);
-
-		if(dwStyle & WS_CHILD && !(dwExStyle & WS_EX_NOPARENTNOTIFY) )
-		{
-			HWND hwndParent = GetParent(hwnd);
-
-			Win32WindowProc *parentwnd = Win32WindowProc::FindProc(hwndParent);
-			if(parentwnd) {
-				LRESULT rc = parentwnd->SendMessageA(hwndParent, Msg, wParam, lParam);
-				if(rc) return TRUE;
-			}
-		}
-		break;
 	case WM_LBUTTONDOWN:
 		rc = ButtonHandler(hwnd, Msg, wParam, lParam);
 
@@ -841,6 +821,14 @@ LRESULT EXPENTRY_O32 OS2ToWinCallback(HWND hwnd, UINT Msg, WPARAM wParam, LPARAM
  HWND                  parentHwnd;
  Win32WindowProc      *window;
 
+  if(Msg == WM_MOUSEACTIVATE) 
+  {
+	//Open32 sends an OS/2 window message for a button click
+	if(HIWORD(lParam) == 0x71)  //WM_BUTTONCLICKFIRST
+	{
+		lParam = (WM_LBUTTONDOWN << 16) | LOWORD(lParam);
+	}
+  }
   if(PostSpyMessage(hwnd, Msg, wParam, lParam) == FALSE)
 	dprintf(("OS2ToWinCallback %s for %x %x %x", GetMsgText(Msg), hwnd, wParam, lParam));
 
@@ -882,14 +870,6 @@ LRESULT EXPENTRY_O32 OS2ToWinCallback(HWND hwnd, UINT Msg, WPARAM wParam, LPARAM
 		case WM_CHAR:	//SvL: Correct Open32 key mapping bug
 			//TODO: Not good enough, look at Wine
                         lParam = MapOEMToRealKey(wParam, lParam);
-			break;
-
-		case WM_MOUSEACTIVATE:
-			//Open32 sends an OS/2 window message for a button click
-			if(HIWORD(lParam) == 0x71)  //WM_BUTTONCLICKFIRST
-			{
-				lParam = (WM_LBUTTONDOWN << 16) | LOWORD(lParam);
-			}
 			break;
 
 		case WM_ACTIVATE:
