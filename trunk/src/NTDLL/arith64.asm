@@ -1,4 +1,4 @@
-; $Id: arith64.asm,v 1.2 1999-11-09 09:54:46 phaller Exp $
+; $Id: arith64.asm,v 1.3 1999-12-20 11:47:00 sandervl Exp $
 
 ;/*
 ; * 64-bit integer apis
@@ -665,6 +665,14 @@ _RtlConvertUlongToLargeInteger@4 endp
 
 
 ; ----------------------------------------------------------------------------
+
+PUBLIC 		_POP_FPU
+_POP_FPU proc near
+	mov	eax, [esp+4]
+	fstp	qword ptr [eax]
+	ret
+_POP_FPU endp
+
 CODE32          ENDS
 
                 END
