@@ -1,4 +1,122 @@
- /* $Id: ChangeLog-2002,v 1.3 2002-05-25 08:13:18 sandervl Exp $ */
+ /* $Id: ChangeLog-2002,v 1.4 2002-05-25 08:14:05 sandervl Exp $ */
+
+ 2002-04-30: Sander van Leeuwen <sandervl@innotek.de>
+    - GDI32:    o Font renaming support added to EnumFontFamiliesA/W
+    - USER32:   o Implemented WH_MOUSE_LL hook
+                o Removed DInput hack for keyboard & mouse message translation
+    - DINPUT:   o Resync with last X11 licensed Wine (TODO: LGPL)
+
+ 2002-04-30: knut st. osmundsen <bird@anduin.net>
+    - KERNEL32: o Changes for debug heap (makefile + exception handler)
+
+ 2002-04-30: Platon Fomichev <platon@innotek.de>
+    - KERNEL32: o FileTimeToSystemTime, DosDateTimeToFileTime &
+                  SystemTimeToFileTime bugfixes
+    - USER32:   o Focus fix when minimizing window
+
+ 2002-04-29: Sander van Leeuwen <sandervl@innotek.de>
+    - KERNEL32: o Export RegisterCustomDriver
+
+ 2002-04-29: Patrick Haller <patrick.haller@innotek.de>
+    - OLEAUT32: o Clean up hash object during dll unload
+    - KERNEL32: o Fixed memory leaks in handlename class, Win32ImageBase::isPEImage
+                  and DestroyTIB
+                o fixed unicode conversion for APIs that allow
+                  NULL strings as input parameter (SearchPathW,
+                  Registry APIs) not to set last error to EROROR_INVALID_HANDLE
+                o wprocess.cpp:
+                  - set ODIN32.DEBUG_CHILD=ICSDEBUG.EXE will cause CreateProcess
+                    to start PE-clients inside a new debugger instance
+                  - GetModuleFileName fixes (don't count zero termination)
+                o don't set last error in HeapFree()
+    - COMCTL32: o Draglist control bugfix (crash)
+
+ 2002-04-28: knut st. osmundsen <bird@anduin.net>
+    - Configure.cmd, Odincrt:
+                o Added option --with-klib to configure.cmd to link
+                  odincrt with the electric debug heap of kLib.
+                  Concider this experimental!
+
+ 2002-04-28: Platon Fomichev <platon@innotek.de>
+    - USER32:   o Focus fix when minimizing window
+    - IPHLPAPI: o Bugfix
+
+ 2002-04-24: Platon Fomichev <platon@innotek.de>
+    - USER32:   o Don't activate window when it's minimized (ShowWindow)
+                o Deactivate window & move to bottom of z-order when it's
+                  minimized
+                o Listbox fix; rollup dropdown if mouse button pressed outside
+                  control
+
+ 2002-04-17: Platon Fomichev <platon@innotek.de>
+    - COMDLG32: o If application specifies full path in file dialog structure
+                  (and initial dir string is NULL), then change to the directory.
+
+ 2002-04-17: knut st. osmundsen <bird@anduin.net>
+    - Makefiles:
+                o Use the VAC40 profiler for profiling in PROFILE=1, DEBUG=
+                  mode. See /tools/profilerfix/Readme.1st for details.
+    - ProfilerFix:
+                o Added readme.1st for VAC308, vac365 profiling using the
+                  VAC4 profiler features.
+
+ 2002-04-14: knut st. osmundsen <bird@anduin.net>
+    - KERNEL32: o Cache CDROM drive letters in OSLibGetDriveType.
+                o Added testcases to makescripts in the testcase subdir.
+                  'nmake build testcase' from that dir will build test
+                  program(s) and run testcases.
+
+ 2002-04-13: knut st. osmundsen <bird@anduin.net>
+    - Windefs.h:
+                o _MAX_PATH, _MAX_DIR, _MAX_EXT crashes withc Watcom C.
+    - KERNEL32: o GetDriveType optimizations.
+                  Made it just as strict as WinXP. Hope this won't
+                  blow up any thing. (A little bit worried about a call in
+                  shell32/folders.c and mci_open.)
+                o Corrected a call to GetDirveTypeA in hmdisk.cpp. (paranoia)
+                o Made (stupid) test program which is placed in the testcase
+                  subdir. This is compilable for both OS/2 and NT.
+                o Hot fix for 0 CDROM issue. (To be removed)
+
+    - USER32:   o Corrected a call to GetDriveTypeA. (missing ':')
+
+ 2002-04-11: knut st. osmundsen <bird@anduin.net>
+    - Makefiles:
+                o Output linenumbers to the map file when linking.
+                o Attempt at VAC308 profiling (icsperf.exe).
+                  This is only enabled if you set PROFILE without DEBUG.
+    - ProfileFix:
+                o Hack to prevent the app which is profiled to crash
+                  on Warp 4.5+.
+    - Install:  o Changed it to work with 0.9.18+. Not that this fix
+                  requires a bugfix over the 0.9.18 warping release.
+    - DailyBuild:
+                o Updated scripts so I can run the daily build on my
+                  workstaion at home.
+
+ 2002-04-10: knut st. osmundsen <bird@anduin.net>
+    - UXTHEME:  o Stubbed the DLL as some apps keeps trying to load it.
+    - src/makefile:
+                o Update the CUSTOMBUILD module list.
+
+ 2002-04-07: Sander van Leeuwen <sandervl@innotek.de>
+    - ODINCRT:  o Wrote OS/2 version of CriticalSection apis (including
+                  support for shared critical sections; which is currently
+                  not possible with the Win32 version due to missing
+                  support for global object handles in kernel32)
+    - KERNEL32: o Rewrote VMutex class to use odincrt critical sections
+                o Rewrote global vmutex usage (mmap)
+    - USER32:   o Rewrote global vmutex usage (window handles)
+                o EnumWindows made safer
+                o Fixed bug in desktop window constructor (double window
+                  handle allocation)
+    - WINMM:    o Rewrote vmutex usage (wave in/out classes)
+    - GDI32:    o Rewrote vmutex usage (object handle functions)
+    - INCLUDE:  o Debug wrapper fixes (missing 6th argument)
+
+ 2002-04-06: Sander van Leeuwen <sandervl@innotek.de>
+    - KERNEL32: o Do not test for write capability with CDROM drives
+                  (IOCTL_DISK_IS_WRITABLE)
 
  2002-03-31: knut st. osmundsen <bird@anduin.net>
     - Include:  o Removed blank lines from odinbuild.h and wrapped
