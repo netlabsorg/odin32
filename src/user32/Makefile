@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.13 1999-08-16 16:28:04 sandervl Exp $
+# $Id: Makefile,v 1.14 1999-08-19 12:53:55 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -44,11 +44,11 @@ $(TARGET).lib: $(TARGET)exp.def
 
 
 user32.obj: user32.cpp $(PDWIN32_INCLUDE)\wndproc.h \
-            $(PDWIN32_INCLUDE)\wndclass.h icon.h syscolor.h
+            $(PDWIN32_INCLUDE)\wndclass.h $(PDWIN32_INCLUDE)\winicon.h syscolor.h
 resstring.obj: resstring.cpp resstring.h
 char.obj: char.cpp user32.h
 loadres.obj: loadres.cpp user32.h
-icon.obj: icon.cpp icon.h
+icon.obj: icon.cpp $(PDWIN32_INCLUDE)\winicon.h
 menu.obj: menu.cpp user32.h
 syscolor.obj: syscolor.cpp syscolor.h
 usrcall.obj: usrcall.cpp usrcall.h

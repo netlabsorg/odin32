@@ -1,14 +1,12 @@
-/* $Id: icon.cpp,v 1.4 1999-06-19 10:54:47 sandervl Exp $ */
+/* $Id: icon.cpp,v 1.5 1999-08-19 12:53:55 sandervl Exp $ */
 
-/*
- *
- * Project Odin Software License can be found in LICENSE.TXT
- *
- */
 /*
  * Win32 icon conversion functions for OS/2
  *
  * Copyright 1998 Sander van Leeuwen
+ *
+ *
+ * Project Odin Software License can be found in LICENSE.TXT
  *
  */
 #define INCL_GPIBITMAPS
@@ -24,17 +22,11 @@
 #include <stdlib.h>
 #include <iostream.h>
 #include <string.h>
-#define  _ICON_C_
 
-#define DWORD   ULONG
-#define LPVOID  VOID *
-#define WORD    USHORT 
-#define WCHAR   USHORT
-#define HANDLE  ULONG
-#define LPWSTR  WCHAR *
+#include <win32type.h>
 
-#include "icon.h"
-#include "misc.h"
+#include <winicon.h>
+#include <misc.h>
 
 //******************************************************************************
 //******************************************************************************

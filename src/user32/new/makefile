@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.24 1999-08-16 16:28:04 sandervl Exp $
+# $Id: makefile,v 1.25 1999-08-19 12:53:56 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -54,11 +54,11 @@ $(TARGET).lib: $(TARGET)exp.def
 
 
 user32.obj: user32.cpp $(PDWIN32_INCLUDE)\wndproc.h \
-            icon.h syscolor.h
+            $(PDWIN32_INCLUDE)\winicon.h syscolor.h
 resstring.obj: resstring.cpp resstring.h
 char.obj: char.cpp user32.h
 loadres.obj: loadres.cpp user32.h
-icon.obj: icon.cpp icon.h
+icon.obj: icon.cpp $(PDWIN32_INCLUDE)\winicon.h
 winmenu.obj: winmenu.cpp user32.h $(PDWIN32_INCLUDE)\winres.h
 syscolor.obj: syscolor.cpp syscolor.h
 usrcall.obj: usrcall.cpp usrcall.h
@@ -95,7 +95,7 @@ windowclass.obj: windowclass.cpp win32class.h win32wnd.h win32wndchild.h
 windowword.obj:  windowword.cpp win32class.h win32wnd.h win32dlg.h win32wndchild.h
 winaccel.obj:     winaccel.cpp  $(PDWIN32_INCLUDE)\winres.h
 winscrollbar.obj: winscrollbar.cpp
-winicon.obj:    winicon.cpp
+winicon.obj:    winicon.cpp $(PDWIN32_INCLUDE)\winicon.h
 
 pmwindow.obj:   pmwindow.cpp win32class.h win32wnd.h win32dlg.h pmwindow.h win32wndchild.h $(PDWIN32_INCLUDE)\wprocess.h  oslibgdi.h
 win32class.obj: win32class.cpp win32class.h win32wnd.h win32dlg.h gen_object.h oslibwin.h win32wndchild.h

@@ -1,4 +1,4 @@
-/* $Id: user32.cpp,v 1.20 1999-08-03 21:22:33 sandervl Exp $ */
+/* $Id: user32.cpp,v 1.21 1999-08-19 12:53:55 sandervl Exp $ */
 
 /*
  * Win32 misc user32 API functions for OS/2
@@ -24,13 +24,13 @@
 #include "user32.h"
 #include "wndproc.h"
 #include "wndclass.h"
-#include "icon.h"
 #include "usrcall.h"
 #include "syscolor.h"
 
 #include <wchar.h>
 #include <stdlib.h>
 #include <string.h>
+#include <winicon.h>
 
 //undocumented stuff
 // WIN32API CalcChildScroll
@@ -1396,7 +1396,6 @@ HICON WIN32API CreateIconIndirect(LPICONINFO arg1)
 #endif
     return O32_CreateIconIndirect(arg1);
 }
-//******************************************************************************
 //******************************************************************************
 HWND WIN32API CreateMDIWindowA(LPCSTR arg1, LPCSTR arg2, DWORD arg3,
                                int arg4, int arg5, int arg6, int arg7,

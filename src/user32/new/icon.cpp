@@ -1,4 +1,4 @@
-/* $Id: icon.cpp,v 1.2 1999-07-20 15:46:53 sandervl Exp $ */
+/* $Id: icon.cpp,v 1.3 1999-08-19 12:53:56 sandervl Exp $ */
 
 /*
  * Win32 icon conversion functions for OS/2
@@ -22,17 +22,11 @@
 #include <stdlib.h>
 #include <iostream.h>
 #include <string.h>
-#define  _ICON_C_
 
-#define DWORD   ULONG
-#define LPVOID  VOID *
-#define WORD    USHORT 
-#define WCHAR   USHORT
-#define HANDLE  ULONG
-#define LPWSTR  WCHAR *
+#include <win32type.h>
 
-#include "icon.h"
-#include "misc.h"
+#include <winicon.h>
+#include <misc.h>
 
 //******************************************************************************
 //******************************************************************************
