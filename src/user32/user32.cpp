@@ -1,4 +1,4 @@
-/* $Id: user32.cpp,v 1.130 2003-11-12 14:10:20 sandervl Exp $ */
+/* $Id: user32.cpp,v 1.131 2004-03-12 11:43:57 sandervl Exp $ */
 
 /*
  * Win32 misc user32 API functions for OS/2
@@ -749,8 +749,8 @@ BOOL WIN32API SystemParametersInfoA(UINT uiAction, UINT uiParam, PVOID pvParam, 
 
             SystemParametersInfoA(SPI_GETICONTITLELOGFONT, 0, (LPVOID)&(lpnm->lfCaptionFont),0);
             lpnm->lfCaptionFont.lfWeight = FW_BOLD;
-            lpnm->iCaptionWidth    = 32; //TODO
-            lpnm->iCaptionHeight   = 32; //TODO
+            lpnm->iCaptionWidth    = GetSystemMetrics(SM_CXSIZE);
+            lpnm->iCaptionHeight   = GetSystemMetrics(SM_CYSIZE);
 
             SystemParametersInfoA(SPI_GETICONTITLELOGFONT, 0, (LPVOID)&(lpnm->lfSmCaptionFont),0);
             lpnm->iSmCaptionWidth  = GetSystemMetrics(SM_CXSMSIZE);
