@@ -1,4 +1,4 @@
-/* $Id: winimagepeldr.h,v 1.8 1999-11-30 19:39:14 sandervl Exp $ */
+/* $Id: winimagepeldr.h,v 1.9 1999-12-17 16:55:13 sandervl Exp $ */
 
 /*
  * Win32 PE loader Image base class
@@ -136,10 +136,6 @@ protected:
         Win32MemMap          *memmap;
 private:
 };
-
-#include <iostream.h>
-#include <fstream.h>
-extern ofstream fout;
 
 #endif //__WINIMAGEPELDR_H__
 

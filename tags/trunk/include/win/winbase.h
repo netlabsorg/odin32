@@ -1,4 +1,4 @@
-/* $Id: winbase.h,v 1.7 1999-10-11 20:15:47 sandervl Exp $ */
+/* $Id: winbase.h,v 1.8 1999-12-17 16:55:13 sandervl Exp $ */
 
 #ifndef __WINE_WINBASE_H
 #define __WINE_WINBASE_H
@@ -106,6 +106,16 @@ typedef struct _DEBUG_EVENT {
         RIP_INFO                  RipInfo;
     } u;
 } DEBUG_EVENT, *LPDEBUG_EVENT;
+
+#define EXCEPTION_DEBUG_EVENT       1
+#define CREATE_THREAD_DEBUG_EVENT   2
+#define CREATE_PROCESS_DEBUG_EVENT  3
+#define EXIT_THREAD_DEBUG_EVENT     4
+#define EXIT_PROCESS_DEBUG_EVENT    5
+#define LOAD_DLL_DEBUG_EVENT        6
+#define UNLOAD_DLL_DEBUG_EVENT      7
+#define OUTPUT_DEBUG_STRING_EVENT   8
+#define RIP_EVENT                   9
 
 #define OFS_MAXPATHNAME 128
 typedef struct
