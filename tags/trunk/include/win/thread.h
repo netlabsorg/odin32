@@ -123,6 +123,7 @@ typedef struct _TEB
               ULONG          hooks[WH_NB_HOOKS]; //list of hooks for this thread queue
               ULONG          threadId;       // Thread ID
               ULONG          hThread;        // thread handle
+              ULONG          dwSuspend;      // suspend count (Suspend/ResumeThread)
               ULONG          exceptFrame;    // address of os/2 exception handler frame
               ULONG          newWindow;      // Pointer to window object of window that was just created
               void*          pWsockData;     // Winsock data pointer (NULL if unused)
