@@ -1,4 +1,4 @@
-/* $Id: initterm.cpp,v 1.4 2000-01-25 20:27:58 sandervl Exp $ */
+/* $Id: initterm.cpp,v 1.5 2000-01-26 11:26:36 sandervl Exp $ */
 
 /*
  * PELDR DLL entry point
@@ -136,12 +136,12 @@ void AllocateExeMem(char *filename)
  ULONG  diff, i, baseAddress;
  ULONG  ulSysinfo, flAllocMem;
 
-  tmp = filename;
+  strcpy(szFileName, filename);
+  tmp = szFileName;
   while(*tmp != ' ' && *tmp != 0)
 	tmp++;
   *tmp = 0;
 
-  strcpy(szFileName, filename);
   if(!strchr(szFileName, '.')) {
 	strcat(szFileName,".EXE");
   }
