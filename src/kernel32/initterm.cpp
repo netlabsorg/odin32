@@ -1,4 +1,4 @@
-/* $Id: initterm.cpp,v 1.10 1999-08-17 16:35:09 phaller Exp $ */
+/* $Id: initterm.cpp,v 1.11 1999-08-21 19:47:29 sandervl Exp $ */
 
 /*
  * KERNEL32 DLL entry point
@@ -49,6 +49,8 @@ extern "C" {
 void CDECL _ctordtorInit( void );
 void CDECL _ctordtorTerm( void );
 }
+
+void CloseLogFile(); //misc.cpp
 
 /* Tue 03.03.1998: knut */
 /* flag to optimize DosAllocMem to use all the memory on SMP machines */
@@ -127,6 +129,7 @@ unsigned long SYSTEM _DLL_InitTerm(unsigned long hModule, unsigned long
 static void APIENTRY cleanup(ULONG ulReason)
 {
     dprintf(("kernel32 exit %d\n", ulReason));
+    CloseLogFile();
     WriteOutProfiles();
     _ctordtorTerm();
     DestroyTIB();

@@ -1,4 +1,4 @@
-/* $Id: winimage.cpp,v 1.11 1999-08-18 17:18:01 sandervl Exp $ */
+/* $Id: winimage.cpp,v 1.12 1999-08-21 19:47:30 sandervl Exp $ */
 
 /*
  * Win32 PE Image class
@@ -52,6 +52,8 @@ ofstream fout;
 
 ULONG MissingApi();
 char *hex(ULONG num);
+
+extern ULONG flAllocMem;    /*Tue 03.03.1998: knut */
 
 //******************************************************************************
 //******************************************************************************
@@ -468,7 +470,8 @@ BOOL Win32Image::init(ULONG reservedMem)
   IMAGE_SECTION_HEADER sh;
   if(GetSectionHdrByName (win32file, &sh, ".rsrc")) {
     	//get offset in resource object of directory entry
-    	pResDir = (PIMAGE_RESOURCE_DIRECTORY)ImageDirectoryOffset(win32file, IMAGE_DIRECTORY_ENTRY_RESOURCE);
+//    	pResDir = (PIMAGE_RESOURCE_DIRECTORY)ImageDirectoryOffset(win32file, IMAGE_DIRECTORY_ENTRY_RESOURCE);
+	pResDir = (PIMAGE_RESOURCE_DIRECTORY)(sh.VirtualAddress + realBaseAddress);
   }
 
   //SvL: Use pointer to image header as module handle now. Some apps needs this
@@ -521,7 +524,7 @@ BOOL Win32Image::allocSections(ULONG reservedMem)
     	fout << "No fixups, might not run!" << endl;
     	return allocFixedMem(reservedMem);
   }
-  rc = DosAllocMem((PPVOID)&baseAddress, imageSize, PAG_READ);
+  rc = DosAllocMem((PPVOID)&baseAddress, imageSize, PAG_READ | flAllocMem);
   if(rc) {
     	errorState = rc;
     	return(FALSE);
@@ -582,7 +585,7 @@ BOOL Win32Image::allocFixedMem(ULONG reservedMem)
   }
 
   while(TRUE) {
-    	rc = DosAllocMem((PPVOID)&address, FALLOC_SIZE, PAG_READ);
+    	rc = DosAllocMem((PPVOID)&address, FALLOC_SIZE, PAG_READ | flAllocMem);
     	if(rc) break;
 
     	fout << "DosAllocMem returned " << address << endl;
@@ -594,12 +597,12 @@ BOOL Win32Image::allocFixedMem(ULONG reservedMem)
         	//found the right address
         	DosFreeMem((PVOID)address);
 
-        	diff = address - oh.ImageBase;
+        	diff = oh.ImageBase - address;
         	if(diff) {
-            		rc = DosAllocMem((PPVOID)&address, diff, PAG_READ);
+            		rc = DosAllocMem((PPVOID)&address, diff, PAG_READ | flAllocMem);
             		if(rc) break;
         	}
-        	rc = DosAllocMem((PPVOID)&baseAddress, imageSize, PAG_READ);
+        	rc = DosAllocMem((PPVOID)&baseAddress, imageSize, PAG_READ | flAllocMem);
         	if(rc) break;
 
         	if(diff) DosFreeMem((PVOID)address);
