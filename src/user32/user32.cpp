@@ -1,4 +1,4 @@
-/* $Id: user32.cpp,v 1.18 1999-07-10 15:57:31 sandervl Exp $ */
+/* $Id: user32.cpp,v 1.19 1999-07-11 21:11:57 sandervl Exp $ */
 
 /*
  * Win32 misc user32 API functions for OS/2
@@ -1528,11 +1528,10 @@ HWND WIN32API CreateWindowExW(DWORD     arg1,
                             arg11,
                             arg12);
 
-    if(astring1)
+    if(HIWORD(arg1) != 0)
         FreeAsciiString(astring1);
 
-    if(HIWORD(arg2) != 0)
-    	FreeAsciiString(astring2);
+    FreeAsciiString(astring2);
 
 #ifdef DEBUG
     WriteLog("USER32:  ************CreateWindowExW hwnd = %X (%X)\n", hwnd, GetLastError());
