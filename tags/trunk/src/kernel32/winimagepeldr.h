@@ -1,4 +1,4 @@
-/* $Id: winimagepeldr.h,v 1.3 2000-05-26 18:42:57 sandervl Exp $ */
+/* $Id: winimagepeldr.h,v 1.4 2000-06-27 12:20:46 sandervl Exp $ */
 
 /*
  * Win32 PE loader Image base class
@@ -138,6 +138,7 @@ protected:
 	HFILE                 hFile;
 
         PIMAGE_BASE_RELOCATION pFixups;
+        DWORD                  dwFixupSize;
 
         Win32MemMap          *memmap;
 private:
