@@ -1,4 +1,4 @@
-/* $Id: nt.cpp,v 1.4 1999-12-18 21:45:13 sandervl Exp $ */
+/* $Id: nt.cpp,v 1.5 2000-01-05 19:37:29 sandervl Exp $ */
 
 
 /*
@@ -18,6 +18,7 @@
 #include <handlemanager.h>
 
 #include "ntdll.h"
+#include <ntdllsec.h>
 
 
 /* move to winbase.h */
@@ -287,8 +288,7 @@ NTSTATUS WINAPI NtOpenThreadToken(HANDLE  ThreadHandle,
            OpenAsSelf,
            TokenHandle));
 
-  *TokenHandle = 0;
-  return ERROR_INVALID_HANDLE;
+  return HMOpenThreadToken(ThreadHandle, DesiredAccess, OpenAsSelf, TokenHandle);
 }
 
 
