@@ -1,4 +1,33 @@
- /* $Id: ChangeLog,v 1.929 2000-05-05 18:23:29 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.930 2000-05-09 19:03:47 sandervl Exp $ */
+
+ 2000-05-09: Sander van Leeuwen <sandervl@xs4all.nl>
+	- KERNEL32: Enclose executable name in quotes if it (or it's directory) 
+                    contains spaces
+                    Route rtl error messages to logfile (_set_crt_msg_handle)
+                    Added support for system, user default & neutral language in 
+                    FindResourceExA/W
+                    Fill in correct language id in GetUserDefaultLCID/GetSystemDefaultLCID
+                    GetUserDefaultLangID & GetSystemDefaultLangID; gets country
+                    with DosQueryCtryInfo
+	- WSOCK32:  Return WSAWOULDBLOCK if recv returns 0 and connection is
+                    still available. (experimental change for rp7)
+	- USER32:   MENU_PtMenu: return when menu has no window handle (prevents
+                    Moraff's YourJongg from crashing -> need to check why this
+                    happens)
+                    Bugfix in AdjustWindowRectEx; if style, exstyle and menu 
+                    = 0 -> no changes required to the input rectangle
+                    (verified this in NT 4)
+                    Don't send WM_ACTIVATE, WM_SET/KILLFOCUS & WM_SHOWWINDOW
+                    messages when window is being destroyed.
+	- SHELL32:  Wrong systray classname used when creating systray window
+                    Fixed bugs in SYSTRAY_SetTip/SYSTRAY_ModifyTip; string
+                    copy operations used wrong size -> heap corruption
+	- DINPUT:   Check window handle if app acquired mouse input in
+                    cooperative mode
+	- TOOLS\INSTALL: Fixed wrong glide dll for voodoo 2 install package
+
+ 2000-05-06: Sander van Leeuwen <sandervl@xs4all.nl>
+	- GDI32:    Added stretch blit mode support to dibsection blits
 
  2000-05-05: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32:   Fixed window property functions (ported from Wine)
