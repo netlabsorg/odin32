@@ -1,0 +1,57 @@
+#ifndef OS2_INCLUDED
+   #include <os2.h>
+#endif
+/* Property sheet / Wizard */
+#define IDD_PROPSHEET 1006
+#define IDD_WIZARD    1020
+
+#define IDC_TABCONTROL   12320
+#define IDC_APPLY_BUTTON 12321
+
+/* Toolbar customization dialog */
+#define IDD_TBCUSTOMIZE     200
+
+#define IDC_AVAILBTN_LBOX   201
+#define IDC_RESET_BTN       202
+#define IDC_TOOLBARBTN_LBOX 203
+#define IDC_REMOVE_BTN      204
+#define IDC_HELP_BTN        205
+#define IDC_MOVEUP_BTN      206
+#define IDC_MOVEDN_BTN      207
+
+DLGTEMPLATE IDD_TBCUSTOMIZE LOADONCALL MOVEABLE DISCARDABLE
+BEGIN
+    DIALOG  "Customize Toolbar", IDD_TBCUSTOMIZE, 10, 20, 357, 125, FS_ICON | 
+            FS_ACCELTABLE | WS_VISIBLE, FCF_SYSMENU | FCF_TITLEBAR
+            PRESPARAMS PP_FONTNAMESIZE, "9.WarpSans"
+    BEGIN
+        DEFPUSHBUTTON   "~Close", DID_CANCEL, 308, 105, 44, 14
+        PUSHBUTTON      "R~eset", IDC_RESET_BTN, 308, 88, 44, 14
+        PUSHBUTTON      "~Help", IDC_HELP_BTN, 308, 71, 44, 14
+        PUSHBUTTON      "Move ~Up", IDC_MOVEUP_BTN, 308, 37, 44, 14
+        PUSHBUTTON      "Move ~Down", IDC_MOVEDN_BTN, 308, 20, 44, 14
+        LTEXT           "Available buttons:", -1, 4, 110, 84, 10
+        LISTBOX         IDC_AVAILBTN_LBOX, 4, 8, 120, 100, LS_OWNERDRAW | 
+                        LS_NOADJUSTPOS | LS_HORZSCROLL
+        PUSHBUTTON      "~Add ->", DID_OK, 131, 69, 44, 14
+        PUSHBUTTON      "<- ~Remove", IDC_REMOVE_BTN, 131, 49, 44, 14
+        LTEXT           "Toolbar buttons:", -1, 182, 110, 78, 10
+        LISTBOX         IDC_TOOLBARBTN_LBOX, 182, 8, 120, 100
+    END
+END
+
+DLGTEMPLATE IDD_PROPSHEET LOADONCALL MOVEABLE DISCARDABLE
+BEGIN
+    DIALOG  "Properties for ", IDD_PROPSHEET, 0, 0, 292, 159, FS_ICON | 
+            FS_ACCELTABLE | WS_VISIBLE, FCF_SYSMENU | FCF_TITLEBAR
+            PRESPARAMS PP_FONTNAMESIZE, "9.WarpSans"
+    BEGIN
+        DEFPUSHBUTTON   "~OK", DID_OK, 72, 7, 50, 14
+        PUSHBUTTON      "~Cancel", DID_CANCEL, 127, 7, 50, 14
+        PUSHBUTTON      "~Apply", IDC_APPLY_BUTTON, 181, 7, 50, 14
+        PUSHBUTTON      "~Help", 9, 235, 7, 50, 14
+        CONTROL         "Tab", IDC_TABCONTROL, 7, 27, 278, 125, 
+                        "SysTabControl32", WS_CLIPSIBLINGS
+    END
+END
+
