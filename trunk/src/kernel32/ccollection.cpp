@@ -1,4 +1,4 @@
-/* $Id: ccollection.cpp,v 1.2 2001-05-30 02:44:55 phaller Exp $ */
+/* $Id: ccollection.cpp,v 1.3 2001-05-30 03:28:02 phaller Exp $ */
 
 /*
  * Collection class:
@@ -13,6 +13,26 @@
  */
 
 #include <ccollection.h>
+
+
+
+static inline unsigned long _Optlink hashcode(int iRing, char *pszName)
+{
+    unsigned long h;
+    unsigned char *t = (unsigned char*)pszName;
+
+    for (h = 0;
+         *t;
+         t++)
+    {
+        h = (h << 6);
+        h += *t;
+        h %= iRing;
+    }
+
+    return h;
+}
+
 
 
 CCollection::CCollection(int iInitialSize)
@@ -719,6 +739,12 @@ void  CHashtableLookup::rehash()
     // the given number.
     int iNewSize = nextPrime(iElements);
 
+    setSize(iNewSize);
+}
+
+
+void  CHashtableLookup::setSize(int iNewSize)
+{
     // check if rehashing is necessary at all
     if (iSize == iNewSize)
         return;
@@ -765,6 +791,8 @@ void  CHashtableLookup::rehash()
 
     // swap the tables
     iSize = iNewSize;
+    delete [] parrLists;
+
     parrLists = parrNew;
 }
 
@@ -801,20 +829,3 @@ unsigned long CHashtableLookup::nextPrime(unsigned long x)
    }
 }
 
-
-unsigned long hashcode(int iRing, char *pszName)
-{
-    unsigned long h;
-    unsigned char *t = (unsigned char*)pszName;
-
-    for (h = 0;
-         *t;
-         t++)
-    {
-        h = (h << 6);
-        h += *t;
-        h %= iRing;
-    }
-
-    return h;
-}
