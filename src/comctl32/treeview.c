@@ -1,4 +1,4 @@
-/* $Id: treeview.c,v 1.13 1999-11-02 21:44:04 achimha Exp $ */
+/* $Id: treeview.c,v 1.14 1999-11-05 12:53:06 phaller Exp $ */
 /* Treeview control
  *
  * Copyright 1998 Eric Kohl <ekohl@abo.rhein-zeitung.de>
@@ -49,7 +49,6 @@
 #include "commctrl.h"
 #include "comctl32.h"
 #include "treeview.h"
-
 
 /* ffs should be in <string.h>. */
 
@@ -965,11 +964,11 @@ TREEVIEW_Refresh (HWND hwnd)
 		infoPtr->Timer &= ~TV_REFRESH_TIMER_SET;
     }
 
-    
+
     GetClientRect (hwnd, &rect);
     if ((rect.left-rect.right ==0) || (rect.top-rect.bottom==0)) return;
 
-    infoPtr->cdmode=TREEVIEW_SendCustomDrawNotify 
+    infoPtr->cdmode=TREEVIEW_SendCustomDrawNotify
 						(hwnd, CDDS_PREPAINT, hdc, rect);
 
 	if (infoPtr->cdmode==CDRF_SKIPDEFAULT) {
@@ -986,7 +985,7 @@ TREEVIEW_Refresh (HWND hwnd)
     viewright=infoPtr->cx + rect.right-rect.left;
 
     /* draw background */
-    
+
     hbrBk = CreateSolidBrush (infoPtr->clrBk);
     FillRect(hdc, &rect, hbrBk);
     DeleteObject(hbrBk);
@@ -1016,12 +1015,12 @@ TREEVIEW_Refresh (HWND hwnd)
 
 /* FIXME: remove this in later stage  */
 /*
-		if (wineItem->pszText!=LPSTR_TEXTCALLBACK32A) 
+		if (wineItem->pszText!=LPSTR_TEXTCALLBACK32A)
 		TRACE (treeview, "%d %d [%d %d %d %d] (%s)\n",y,x,
 			wineItem->rect.top, wineItem->rect.bottom,
 			wineItem->rect.left, wineItem->rect.right,
 			wineItem->pszText);
-		else 
+		else
 		TRACE (treeview, "%d [%d %d %d %d] (CALLBACK)\n",
 				wineItem->hItem,
 				wineItem->rect.top, wineItem->rect.bottom,
@@ -1078,19 +1077,19 @@ TREEVIEW_Refresh (HWND hwnd)
  		if (!(infoPtr->uInternalStatus & TV_VSCROLL))
 			ShowScrollBar (hwnd, SB_VERT, TRUE);
 		infoPtr->uInternalStatus |=TV_VSCROLL;
- 		SetScrollRange (hwnd, SB_VERT, 0, 
+ 		SetScrollRange (hwnd, SB_VERT, 0,
 					y - infoPtr->uVisibleHeight, FALSE);
 		SetScrollPos (hwnd, SB_VERT, infoPtr->cy, TRUE);
 	}
     else {
-		if (infoPtr->uInternalStatus & TV_VSCROLL) 
+		if (infoPtr->uInternalStatus & TV_VSCROLL)
 			ShowScrollBar (hwnd, SB_VERT, FALSE);
 		infoPtr->uInternalStatus &= ~TV_VSCROLL;
 	}
 
 
-	if (infoPtr->cdmode & CDRF_NOTIFYPOSTPAINT) 
-    	infoPtr->cdmode=TREEVIEW_SendCustomDrawNotify 
+	if (infoPtr->cdmode & CDRF_NOTIFYPOSTPAINT)
+    	infoPtr->cdmode=TREEVIEW_SendCustomDrawNotify
 								(hwnd, CDDS_POSTPAINT, hdc, rect);
 
     ReleaseDC (hwnd, hdc);
@@ -2019,6 +2018,10 @@ TREEVIEW_GetEditControl (HWND hwnd)
  return infoPtr->hwndEdit;
 }
 
+
+//@@@PH: Note - this SubclassProc is sometimes called with the
+//       wrong window handle. Therefore, infoPtr points to anything
+//       but the expected structure.
 LRESULT CALLBACK
 TREEVIEW_Edit_SubclassProc (HWND hwnd, UINT uMsg, WPARAM wParam,
                                                         LPARAM lParam)
@@ -2042,7 +2045,12 @@ TREEVIEW_Edit_SubclassProc (HWND hwnd, UINT uMsg, WPARAM wParam,
     default:
     {
       TREEVIEW_INFO *infoPtr = TREEVIEW_GetInfoPtr(GetParent(hwnd));
-      return CallWindowProcA( infoPtr->wpEditOrig, hwnd, uMsg, wParam, lParam);
+
+      //@@@PH 1999/11/05 method called with freed infoPtr memory object
+      if (infoPtr != NULL)
+        return CallWindowProcA( infoPtr->wpEditOrig, hwnd, uMsg, wParam, lParam);
+      else
+        break;
     }
   }
 
@@ -2175,11 +2183,11 @@ TREEVIEW_Create (HWND hwnd, WPARAM wParam, LPARAM lParam)
     infoPtr->uIndent = 15;
     infoPtr->himlNormal = NULL;
     infoPtr->himlState = NULL;
-        infoPtr->uItemHeight = -1;
+    infoPtr->uItemHeight = -1;
     GetTextMetricsA (hdc, &tm);
     infoPtr->hFont = GetStockObject (DEFAULT_GUI_FONT);
-        GetObjectA (infoPtr->hFont, sizeof (LOGFONTA), &logFont);
-        logFont.lfWeight=FW_BOLD;
+    GetObjectA (infoPtr->hFont, sizeof (LOGFONTA), &logFont);
+    logFont.lfWeight=FW_BOLD;
     infoPtr->hBoldFont = CreateFontIndirectA (&logFont);
 
     infoPtr->items = NULL;
@@ -2188,6 +2196,9 @@ TREEVIEW_Create (HWND hwnd, WPARAM wParam, LPARAM lParam)
     infoPtr->dropItem=0;
     infoPtr->pCallBackSort=NULL;
     infoPtr->uScrollTime = 300; /* milliseconds */
+
+    // @@@PH 1999/11/05
+    infoPtr->wpEditOrig = NULL; /* no subclass */
 
 /*
     infoPtr->hwndNotify = GetParent32 (hwnd);
@@ -2242,7 +2253,7 @@ TREEVIEW_Create (HWND hwnd, WPARAM wParam, LPARAM lParam)
         infoPtr->wpEditOrig = (WNDPROC)SetWindowLongA (
                                     infoPtr->hwndEdit,
                                     GWL_WNDPROC,
-                                                                (LONG) TREEVIEW_Edit_SubclassProc);
+                                    (LONG) TREEVIEW_Edit_SubclassProc);
 
   ReleaseDC (hwnd, hdc);
   return 0;
@@ -2256,13 +2267,19 @@ TREEVIEW_Destroy (HWND hwnd)
    TREEVIEW_INFO *infoPtr = TREEVIEW_GetInfoPtr(hwnd);
 
 //   TRACE (treeview,"\n");
+
    TREEVIEW_RemoveTree (hwnd);
+
+   //@@@PH 1999/11/05 set infoPtr to NULL
+   SetWindowLongA( hwnd, 0, (DWORD)NULL);
+
    if (infoPtr->Timer & TV_REFRESH_TIMER_SET)
         KillTimer (hwnd, TV_REFRESH_TIMER);
    if (infoPtr->hwndToolTip)
                 DestroyWindow (infoPtr->hwndToolTip);
 
    COMCTL32_Free (infoPtr);
+
    return 0;
 }
 
