@@ -8,3 +8,11 @@ EXPORTS
    UniQueryUconvObject @ 7
    UniSetUconvObject @ 8
    UniMapCpToUcsCp @ 10
+
+   UniCreateUconvObject_ @ 1
+   UniUconvToUcs_ @ 2
+   UniUconvFromUcs_ @ 3
+   UniFreeUconvObject_ @ 4
+   UniQueryUconvObject_ @ 7
+   UniSetUconvObject_ @ 8
+   UniMapCpToUcsCp_ @ 10

@@ -1,4 +1,11 @@
- /* $Id: changelog,v 1.40 1999-07-05 07:59:45 phaller Exp $ */
+ /* $Id: changelog,v 1.41 1999-07-05 12:35:24 sandervl Exp $ */
+ 99-07-05: Sander van Leeuwen <sandervl@xs4all.nl>
+	- LIB\libconv.def: Added name with '_' appended. (or else Watcom won't
+          link pe2lx\misc.cpp properly)
+
+ 99-07-05: Edgar Buerkle <100566.557@compuserve.com>
+	- PE2LX: Preliminary support for codepages
+
  99-07-05: Patrick Haller <phaller@gmx.net>
 	- KERNEL32: HandleManager fixes as suggested by Edgar Buerkle
 
