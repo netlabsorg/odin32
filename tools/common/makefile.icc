@@ -1,4 +1,4 @@
-# $Id: makefile.icc,v 1.9 2000-05-13 17:17:46 bird Exp $
+# $Id: makefile.icc,v 1.10 2000-05-23 18:23:04 bird Exp $
 
 #
 # PD-Win32 API
@@ -42,7 +42,8 @@ OBJS =\
 $(OBJDIR)\kFilePe.obj\
 $(OBJDIR)\kFileDef.obj\
 $(OBJDIR)\kFileLx.obj\
-$(OBJDIR)\kFileFormatBase.obj
+$(OBJDIR)\kFileFormatBase.obj\
+$(OBJDIR)\kFile.obj
 
 
 # All rule.
@@ -55,7 +56,7 @@ commonicc.lib: $(OBJDIR)\commonicc.lib
 
 $(OBJDIR)\commonicc.lib: $(OBJS)
     $(RM) $@
-    $(ILIB) $@ $(OBJS: = +), NUL;
+    $(ILIB) /nobackup $@ $(OBJS: = +), NUL;
 
 
 # Dependent rule. Forward to main makefile.
