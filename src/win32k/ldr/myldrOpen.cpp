@@ -1,4 +1,4 @@
-/* $Id: myldrOpen.cpp,v 1.10.4.7 2000-08-28 11:31:45 bird Exp $
+/* $Id: myldrOpen.cpp,v 1.10.4.8 2000-08-28 22:44:24 bird Exp $
  *
  * myldrOpen - ldrOpen.
  *
@@ -582,7 +582,7 @@ ULONG LDRCALL myldrOpen(PSFN phFile, PSZ pszFilename, PULONG pfl)
             && *u1.pach == '/' && u1.pach[1] == '*'
             && isLdrStateLoadingEXE()
             && (isLdrStateQAppType() || isLdrStateExecPgm())
-            && (stricmp(psz2, ".RX") == 0 || stricmp(psz2, ".REX"))
+            && (stricmp(psz2, ".RX") == 0 || stricmp(psz2, ".REX") == 0)
             )
         {
             if (isREXXScriptDisabled())

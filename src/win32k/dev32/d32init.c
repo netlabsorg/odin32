@@ -1,4 +1,4 @@
-/* $Id: d32init.c,v 1.19.4.10 2000-08-23 04:23:33 bird Exp $
+/* $Id: d32init.c,v 1.19.4.11 2000-08-28 22:44:21 bird Exp $
  *
  * d32init.c - 32-bits init routines.
  *
@@ -1176,7 +1176,8 @@ int importTabInit(void)
         0,                              /* 36 */
         0,                              /* 37 */
         0,                              /* 38 */
-        0                               /* 39 */
+        0,                              /* 39 */
+        0                               /* 40 */
     };
     int i;
     int cb;
@@ -1464,8 +1465,9 @@ VOID R3TstFixImportTab(VOID)
         {(unsigned)&fakepPTDACur,           4},
         {(unsigned)&fakeptda_start,         4},
         {(unsigned)&fakeptda_environ,       4},
+        {(unsigned)&fakeptda_ptdasem,       4},
         {(unsigned)&fakeptda_module,        4},
-        {(unsigned)&fakeptda_module,        4},
+        {(unsigned)&fakeptda_pBeginLIBPATH, 4},
         {(unsigned)&fakeldrpFileNameBuf,    3}
     };
     int i;
