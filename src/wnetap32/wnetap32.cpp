@@ -1,4 +1,4 @@
-/* $Id: wnetap32.cpp,v 1.7 2000-10-02 13:03:01 phaller Exp $ */
+/* $Id: wnetap32.cpp,v 1.8 2000-10-02 13:32:44 phaller Exp $ */
 
 /*
  *
@@ -2824,12 +2824,22 @@ ODINFUNCTION3(NET_API_STATUS, OS2NetWkstaGetInfo,
         PWKSTA_INFO_100 pwki100;
         struct wksta_info_10 *pOS2wki10 = (struct wksta_info_10 *)pOS2Buffer;
         
-        rc = OS2NetApiBufferAllocate(sizeof(pwki100), (LPVOID*)&pwki100);
+        // calculate new size for target buffer
+        int iSizeComputername = (lstrlenA((LPCSTR)pOS2wki10->wki10_computername) + 1) * 2;
+        int iSizeLangroup = (lstrlenA((LPCSTR)pOS2wki10->wki10_langroup) + 1) * 2;
+        int iSize = sizeof(pwki100) + iSizeComputername + iSizeLangroup;
+
+        // pointer to the data area
+        PBYTE pData = (PBYTE)pwki100 + sizeof(pwki100);
+        
+        rc = OS2NetApiBufferAllocate(iSize, (LPVOID*)&pwki100);
         if (!rc)
         {
           pwki100->wki100_platform_id = 0; //@@@PH dummy
-          pwki100->wki100_computername = HEAP_strdupAtoW( GetProcessHeap(), 0, (LPCSTR)pOS2wki10->wki10_computername);
-          pwki100->wki100_langroup = HEAP_strdupAtoW( GetProcessHeap(), 0, (LPCSTR)pOS2wki10->wki10_langroup);
+          pwki100->wki100_computername = lstrcpyAtoW( (LPWSTR)pData, (LPCSTR)pOS2wki10->wki10_computername);
+          pData += iSizeComputername;
+          pwki100->wki100_langroup = lstrcpyAtoW( (LPWSTR)pData, (LPCSTR)pOS2wki10->wki10_langroup);
+          pData += iSizeLangroup;
           pwki100->wki100_ver_major = pOS2wki10->wki10_ver_major;
           pwki100->wki100_ver_minor = pOS2wki10->wki10_ver_minor;
         }
@@ -2845,15 +2855,27 @@ ODINFUNCTION3(NET_API_STATUS, OS2NetWkstaGetInfo,
         PWKSTA_INFO_101 pwki101;
         struct wksta_info_1 *pOS2wki1 = (struct wksta_info_1 *)pOS2Buffer;
         
-        rc = OS2NetApiBufferAllocate(sizeof(pwki101), (LPVOID*)&pwki101);
+        // calculate new size for target buffer
+        int iSizeComputername = (lstrlenA((LPCSTR)pOS2wki1->wki1_computername) + 1) * 2;
+        int iSizeLangroup = (lstrlenA((LPCSTR)pOS2wki1->wki1_langroup) + 1) * 2;
+        int iSizeLanroot  = (lstrlenA((LPCSTR)pOS2wki1->wki1_root) + 1) * 2;
+        int iSize = sizeof(pwki101) + iSizeComputername + iSizeLangroup + iSizeLanroot;
+
+        // pointer to the data area
+        PBYTE pData = (PBYTE)pwki101 + sizeof(pwki101);
+        
+        rc = OS2NetApiBufferAllocate(iSize, (LPVOID*)&pwki101);
         if (!rc)
         {
           pwki101->wki101_platform_id = 0; //@@@PH dummy
-          pwki101->wki101_computername = HEAP_strdupAtoW( GetProcessHeap(), 0, (LPCSTR)pOS2wki1->wki1_computername);
-          pwki101->wki101_langroup = HEAP_strdupAtoW( GetProcessHeap(), 0, (LPCSTR)pOS2wki1->wki1_langroup);
+          pwki101->wki101_computername = lstrcpyAtoW( (LPWSTR)pData, (LPCSTR)pOS2wki1->wki1_computername);
+          pData += iSizeComputername;
+          pwki101->wki101_langroup = lstrcpyAtoW( (LPWSTR)pData, (LPCSTR)pOS2wki1->wki1_langroup);
+          pData += iSizeLangroup;
           pwki101->wki101_ver_major = pOS2wki1->wki1_ver_major;
           pwki101->wki101_ver_minor = pOS2wki1->wki1_ver_minor;
-          pwki101->wki101_lanroot = HEAP_strdupAtoW ( GetProcessHeap(), 0, (LPCSTR)pOS2wki1->wki1_root);
+          pwki101->wki101_lanroot = lstrcpyAtoW( (LPWSTR)pData, (LPCSTR)pOS2wki1->wki1_root);
+          pData += iSizeLanroot;
         }
 
         // the caller is responsible for freeing the memory!
@@ -2867,15 +2889,27 @@ ODINFUNCTION3(NET_API_STATUS, OS2NetWkstaGetInfo,
         PWKSTA_INFO_102 pwki102;
         struct wksta_info_1 *pOS2wki1 = (struct wksta_info_1 *)pOS2Buffer;
         
-        rc = OS2NetApiBufferAllocate(sizeof(pwki102), (LPVOID*)&pwki102);
+        // calculate new size for target buffer
+        int iSizeComputername = (lstrlenA((LPCSTR)pOS2wki1->wki1_computername) + 1) * 2;
+        int iSizeLangroup = (lstrlenA((LPCSTR)pOS2wki1->wki1_langroup) + 1) * 2;
+        int iSizeLanroot  = (lstrlenA((LPCSTR)pOS2wki1->wki1_root) + 1) * 2;
+        int iSize = sizeof(pwki102) + iSizeComputername + iSizeLangroup + iSizeLanroot;
+
+        // pointer to the data area
+        PBYTE pData = (PBYTE)pwki102 + sizeof(pwki102);
+        
+        rc = OS2NetApiBufferAllocate(iSize, (LPVOID*)&pwki102);
         if (!rc)
         {
           pwki102->wki102_platform_id = 0; //@@@PH dummy
-          pwki102->wki102_computername = HEAP_strdupAtoW( GetProcessHeap(), 0, (LPCSTR)pOS2wki1->wki1_computername);
-          pwki102->wki102_langroup = HEAP_strdupAtoW( GetProcessHeap(), 0, (LPCSTR)pOS2wki1->wki1_langroup);
+          pwki102->wki102_computername = lstrcpyAtoW( (LPWSTR)pData, (LPCSTR)pOS2wki1->wki1_computername);
+          pData += iSizeComputername;
+          pwki102->wki102_langroup = lstrcpyAtoW( (LPWSTR)pData, (LPCSTR)pOS2wki1->wki1_langroup);
+          pData += iSizeLangroup;
           pwki102->wki102_ver_major = pOS2wki1->wki1_ver_major;
           pwki102->wki102_ver_minor = pOS2wki1->wki1_ver_minor;
-          pwki102->wki102_lanroot = HEAP_strdupAtoW ( GetProcessHeap(), 0, (LPCSTR)pOS2wki1->wki1_root);
+          pwki102->wki102_lanroot = lstrcpyAtoW( (LPWSTR)pData, (LPCSTR)pOS2wki1->wki1_root);
+          pData += iSizeLanroot;
           pwki102->wki102_logged_on_users = 0; // @@@PH dummy
         }
 
