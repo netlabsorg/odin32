@@ -1,4 +1,4 @@
-/* $Id: OS2KVM.h,v 1.8 2000-12-11 06:53:50 bird Exp $
+/* $Id: OS2KVM.h,v 1.9 2001-02-10 11:11:43 bird Exp $
  *
  * OS/2 kernel VM functions.
  *
@@ -182,6 +182,9 @@ APIRET KRNLCALL VMObjHandleInfo(
     PULONG  pulAddr,
     PUSHORT pushPTDA);
 
+#ifdef _OS2KLDR_H_
 PMTE KRNLCALL VMPseudoHandleMap(
     HMTE    hMTE);
+#endif
+
 #endif

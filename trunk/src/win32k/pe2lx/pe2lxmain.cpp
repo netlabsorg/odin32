@@ -1,4 +1,4 @@
-/* $Id: pe2lxmain.cpp,v 1.6 2001-02-02 08:35:54 bird Exp $
+/* $Id: pe2lxmain.cpp,v 1.7 2001-02-10 11:11:48 bird Exp $
  *
  * Pe2Lx main program. (Ring 3 only!)
  *
@@ -15,6 +15,7 @@
 #define INCL_BASE
 #define INCL_DOSFILEMGR
 #define INCL_DOSERRORS
+#define INCL_OS2KRNL_LDR
 
 #define DATA16_GLOBAL
 #define OUTPUT_COM2     0x2f8
@@ -75,6 +76,9 @@ int main(int argc, char **argv)
     PCSZ   pszOdin32Filename = NULL;
     PCSZ   psz;
     int    argi;
+
+    /* special edition for Dave Evans */
+    options.fPEOneObject = FLAGS_PEOO_DISABLED;
 
     /* read parameters */
     for (argi = 1; argi < argc; argi++)

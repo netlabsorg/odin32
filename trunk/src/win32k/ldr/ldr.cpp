@@ -1,4 +1,4 @@
-/* $Id: ldr.cpp,v 1.9 2000-12-11 06:44:34 bird Exp $
+/* $Id: ldr.cpp,v 1.10 2001-02-10 11:11:45 bird Exp $
  *
  * ldr.cpp - Loader helpers.
  *
@@ -15,6 +15,7 @@
 #define INCL_NOPMAPI
 #define INCL_OS2KRNL_SEM
 #define INCL_OS2KRNL_PTDA
+#define INCL_OS2KRNL_LDR
 
 /*******************************************************************************
 *   Header Files                                                               *
@@ -35,7 +36,6 @@
 #include <exe386.h>
 #include "OS2Krnl.h"
 #include "ldr.h"
-#include "ldrCalls.h"
 #include "ModuleBase.h"
 #include "pe2lx.h"
 #include "options.h"

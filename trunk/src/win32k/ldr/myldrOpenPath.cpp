@@ -1,4 +1,4 @@
-/* $Id: myldrOpenPath.cpp,v 1.4 2000-12-11 06:30:59 bird Exp $
+/* $Id: myldrOpenPath.cpp,v 1.5 2001-02-10 11:11:46 bird Exp $
  *
  * myldrOpenPath - ldrOpenPath used to open executables we'll override
  * this to altern the search path for DLLs.
@@ -16,6 +16,7 @@
 #define INCL_NOPMAPI
 #define INCL_OS2KRNL_TCB
 #define INCL_OS2KRNL_PTDA
+#define INCL_OS2KRNL_LDR
 
 /*******************************************************************************
 *   Header Files                                                               *
@@ -33,7 +34,6 @@
 #include <exe386.h>
 #include "OS2Krnl.h"
 #include "avl.h"
-#include "ldrCalls.h"
 #include "ldr.h"
 #include "ModuleBase.h"
 #include "options.h"

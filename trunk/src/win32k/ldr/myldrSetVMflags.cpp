@@ -1,4 +1,4 @@
-/* $Id: myldrSetVMflags.cpp,v 1.1 2000-09-08 21:34:12 bird Exp $
+/* $Id: myldrSetVMflags.cpp,v 1.2 2001-02-10 11:11:47 bird Exp $
  *
  * myldrSetVMflags - ldrSetVMflags
  *
@@ -15,6 +15,7 @@
 #define INCL_NOPMAPI
 
 #define INCL_OS2KRNL_VM
+#define INCL_OS2KRNL_LDR
 
 /*******************************************************************************
 *   Header Files                                                               *
@@ -31,7 +32,6 @@
 #include <exe386.h>
 #include "OS2Krnl.h"
 #include "ldr.h"
-#include "ldrCalls.h"
 
 
 /**

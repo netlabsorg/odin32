@@ -1,4 +1,4 @@
-/* $Id: k32ProcessReadWrite.cpp,v 1.1 2000-10-01 02:58:18 bird Exp $
+/* $Id: k32ProcessReadWrite.cpp,v 1.2 2001-02-10 11:11:44 bird Exp $
  *
  * k32ProcessReadWrite  -  Read or write to another process.
  *
@@ -19,6 +19,7 @@
 #define INCL_OS2KRNL_PTDA
 #define INCL_OS2KRNL_VM
 #define INCL_OS2KRNL_SEM
+#define INCL_OS2KRNL_LDR
 #define NO_WIN32K_LIB_FUNCTIONS
 
 /*******************************************************************************
@@ -28,7 +29,6 @@
 
 #include "devSegDf.h"                   /* Win32k segment definitions. */
 #include "OS2Krnl.h"
-#include "ldrCalls.h"
 #include "win32k.h"
 #include "k32.h"
 #include "options.h"

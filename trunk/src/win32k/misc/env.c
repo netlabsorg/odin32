@@ -1,4 +1,4 @@
-/* $Id: env.c,v 1.4 2000-12-11 06:53:54 bird Exp $
+/* $Id: env.c,v 1.5 2001-02-10 11:11:47 bird Exp $
  *
  * Environment access functions
  *
@@ -13,7 +13,7 @@
 *******************************************************************************/
 #define INCL_DOSERRORS                  /* Error codes */
 #define INCL_OS2KRNL_VM                 /* OS2KRNL: Virtual Memory Management */
-#define INCL_OS2KRNL_PTDA               /* OS2KNRL: (per)ProcessTaskDataArea */
+#define INCL_OS2KRNL_PTDA               /* OS2KRNL: (per)ProcessTaskDataArea */
 
 /*******************************************************************************
 *   Header Files                                                               *

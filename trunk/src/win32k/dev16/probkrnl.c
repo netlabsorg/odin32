@@ -1,4 +1,4 @@
-/* $Id: probkrnl.c,v 1.30 2000-12-11 06:34:44 bird Exp $
+/* $Id: probkrnl.c,v 1.31 2001-02-10 11:11:42 bird Exp $
  *
  * Description:   Autoprobes the os2krnl file and os2krnl[*].sym files.
  *                Another Hack!
@@ -50,6 +50,7 @@
 #define INCL_BASE
 #define INCL_DOS
 #define INCL_NOPMAPI
+#define INCL_OS2KRNL_LDR
 
 /*******************************************************************************
 *   Header Files                                                               *

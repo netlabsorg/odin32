@@ -1,4 +1,4 @@
-/* $Id: myldrEnum32bitRelRecs.cpp,v 1.4 2000-12-11 06:53:53 bird Exp $
+/* $Id: myldrEnum32bitRelRecs.cpp,v 1.5 2001-02-10 11:11:46 bird Exp $
  *
  * myldrEnum32bitRelRecs - ldrEnum32bitRelRecs
  *
@@ -13,6 +13,7 @@
 *******************************************************************************/
 #define INCL_DOSERRORS
 #define INCL_NOPMAPI
+#define INCL_OS2KRNL_LDR
 
 
 /*******************************************************************************
@@ -30,7 +31,6 @@
 #include <exe386.h>
 #include "OS2Krnl.h"
 #include "ldr.h"
-#include "ldrCalls.h"
 #include "ModuleBase.h"
 
 

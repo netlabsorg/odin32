@@ -1,4 +1,4 @@
-/* $Id: fake.c,v 1.6 2000-12-16 23:03:31 bird Exp $
+/* $Id: fake.c,v 1.7 2001-02-10 11:11:48 bird Exp $
  *
  * Fake stubs for the ldr and kernel functions we imports or overloads.
  *
@@ -33,7 +33,6 @@
 #include "log.h"
 #include "OS2Krnl.h"
 #include "dev32.h"
-#include "ldrcalls.h"
 #include "test.h"
 #include "macros.h"
 

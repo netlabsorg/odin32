@@ -1,4 +1,4 @@
-/* $Id: myldrRead.cpp,v 1.8 2000-12-11 06:53:53 bird Exp $
+/* $Id: myldrRead.cpp,v 1.9 2001-02-10 11:11:47 bird Exp $
  *
  * myldrRead - ldrRead.
  *
@@ -13,6 +13,7 @@
 *******************************************************************************/
 #define INCL_DOSERRORS
 #define INCL_NOPMAPI
+#define INCL_OS2KRNL_LDR
 
 /*******************************************************************************
 *   Header Files                                                               *
@@ -29,7 +30,6 @@
 #include <peexe.h>
 #include <exe386.h>
 #include "OS2Krnl.h"
-#include "ldrCalls.h"
 #include "ldr.h"
 #include "ModuleBase.h"
 #include "pe2lx.h"

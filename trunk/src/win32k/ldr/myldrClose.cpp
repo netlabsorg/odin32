@@ -1,4 +1,4 @@
-/* $Id: myldrClose.cpp,v 1.6 2000-09-02 21:08:07 bird Exp $
+/* $Id: myldrClose.cpp,v 1.7 2001-02-10 11:11:46 bird Exp $
  *
  * myldrClose - ldrClose
  *
@@ -13,6 +13,7 @@
 *******************************************************************************/
 #define INCL_DOSERRORS
 #define INCL_NOPMAPI
+#define INCL_OS2KRNL_LDR
 
 /*******************************************************************************
 *   Header Files                                                               *
@@ -29,7 +30,6 @@
 #include <exe386.h>
 #include "OS2Krnl.h"
 #include "ldr.h"
-#include "ldrCalls.h"
 #include "ModuleBase.h"
 #include "Pe2Lx.h"
 

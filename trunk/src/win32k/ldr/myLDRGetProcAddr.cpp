@@ -1,4 +1,4 @@
-/* $Id: myLDRGetProcAddr.cpp,v 1.1 2000-12-17 22:44:46 bird Exp $
+/* $Id: myLDRGetProcAddr.cpp,v 1.2 2001-02-10 11:11:45 bird Exp $
  *
  * LDRGetProcAddr - Get an entry point to a module.
  *      We override this and allow querying entrypoints from executable too.
@@ -15,6 +15,7 @@
 #define INCL_DOSERRORS
 #define INCL_NOPMAPI
 #define INCL_OS2KRNL_PTDA
+#define INCL_OS2KRNL_LDR
 
 /*******************************************************************************
 *   Header Files                                                               *
@@ -33,7 +34,6 @@
 #include "OS2Krnl.h"
 #include "dev32.h"
 #include "ldr.h"
-#include "ldrCalls.h"
 #include "options.h"
 
 

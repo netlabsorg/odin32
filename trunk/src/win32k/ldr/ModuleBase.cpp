@@ -1,4 +1,4 @@
-/* $Id: ModuleBase.cpp,v 1.6 2000-12-11 06:53:53 bird Exp $
+/* $Id: ModuleBase.cpp,v 1.7 2001-02-10 11:11:44 bird Exp $
  *
  * ModuleBase - Implementetation.
  *
@@ -17,6 +17,7 @@
 #else /*RING3*/
     #define INCL_DOSFILEMGR             /* RING3: DOS File api. */
 #endif
+#define INCL_OS2KRNL_LDR
 
 
 /*******************************************************************************
@@ -33,7 +34,6 @@
 #include "vprintf.h"                    /* win32k printf and vprintf. Not C library! */
 #include "dev32.h"                      /* 32-Bit part of the device driver. (SSToDS) */
 #include "OS2Krnl.h"                    /* kernel structs.  (SFN) */
-#include "ldrCalls.h"                   /* ldrOpenPath and ldrlv_t. */
 #include "modulebase.h"                 /* ModuleBase class definitions, ++. */
 
 
