@@ -1,4 +1,4 @@
-/* $Id: dibsect.cpp,v 1.5 1999-10-21 19:25:06 sandervl Exp $ */
+/* $Id: dibsect.cpp,v 1.6 1999-10-31 21:38:15 achimha Exp $ */
 
 /*
  * GDI32 DIB sections
@@ -11,7 +11,7 @@
  */
 #define  INCL_GPI
 #define  INCL_WIN
-#include <os2wrap.h>	//Odin32 OS/2 api wrappers
+#include <os2wrap.h>  //Odin32 OS/2 api wrappers
 #include <stdlib.h>
 #include <string.h>
 #include "win32type.h"
@@ -26,8 +26,9 @@
 DIBSection::DIBSection(WINBITMAPINFOHEADER *pbmi, DWORD handle, int fFlip)
                 : bmpBits(NULL), pOS2bmp(NULL), next(NULL)
 {
- int bmpsize = pbmi->biWidth, os2bmpsize;
+  int  os2bmpsize;
 
+  bmpsize = pbmi->biWidth;
   /* @@@PH 98/06/07 -- high-color bitmaps don't have palette */
 
 
@@ -60,6 +61,7 @@ DIBSection::DIBSection(WINBITMAPINFOHEADER *pbmi, DWORD handle, int fFlip)
    if(bmpsize & 3) {
         bmpsize = (bmpsize + 3) & ~3;
    }
+
    bmpBits    = (char *)malloc(bmpsize*pbmi->biHeight);
 
    pOS2bmp    = (BITMAPINFO2 *)malloc(os2bmpsize);
@@ -84,21 +86,26 @@ DIBSection::DIBSection(WINBITMAPINFOHEADER *pbmi, DWORD handle, int fFlip)
 
    this->handle = handle;
 
-   if(section == NULL) {
-        section = this;
+   if(section == NULL)
+   {
+     dprintf(("section was NULL\n"));
+     section = this;
    }
    else
    {
      DIBSection *dsect = section;
+     dprintf(("Increment section starting at %08X\n",dsect));
 
      /* @@@PH 98/07/11 fix for dsect->next == NULL */
      while ( (dsect->next != this) &&
              (dsect->next != NULL) )
      {
-                dsect = dsect->next;
+       dprintf(("Increment section to %08X\n",dsect->next));
+       dsect = dsect->next;
      }
      dsect->next = this;
    }
+   dprintf(("Class created"));
 }
 //******************************************************************************
 //******************************************************************************
@@ -284,4 +291,45 @@ void DIBSection::deleteSection(DWORD handle)
 }
 //******************************************************************************
 //******************************************************************************
+int DIBSection::GetDIBSection(int iSize , DIBSECTION *pDIBSection){
+  if( (sizeof(DIBSECTION)==iSize) &&
+      (pDIBSection !=NULL))
+  {
+    // BITMAP struct
+    pDIBSection->dsBm.bmType       = 0;  // TODO: put the correct value here
+    pDIBSection->dsBm.bmWidth      = pOS2bmp->cx;
+    pDIBSection->dsBm.bmHeight     = pOS2bmp->cy;
+    pDIBSection->dsBm.bmWidthBytes = bmpsize;
+    pDIBSection->dsBm.bmPlanes     = pOS2bmp->cPlanes;
+    pDIBSection->dsBm.bmBitsPixel  = pOS2bmp->cBitCount;
+    pDIBSection->dsBm.bmBits       = bmpBits;
+  	// BITMAPINFOHEADER	data
+  	pDIBSection->dsBmih.biSize = sizeof(BITMAPINFOHEADER);
+    pDIBSection->dsBmih.biWidth       = pOS2bmp->cx;
+    pDIBSection->dsBmih.biHeight      = pOS2bmp->cy;
+    pDIBSection->dsBmih.biPlanes      = pOS2bmp->cPlanes;
+    pDIBSection->dsBmih.biBitCount    = pOS2bmp->cBitCount;
+    pDIBSection->dsBmih.biCompression = pOS2bmp->ulCompression;
+    pDIBSection->dsBmih.biSizeImage   = pOS2bmp->cbImage;
+    pDIBSection->dsBmih.biXPelsPerMeter = 0; // TODO: put the correct value here
+    pDIBSection->dsBmih.biYPelsPerMeter = 0;
+    pDIBSection->dsBmih.biClrUsed       = (1<< pOS2bmp->cBitCount);
+    pDIBSection->dsBmih.biClrImportant  = 0;
+
+    pDIBSection->dsBitfields[0] = 0; // TODO: put the correct value here
+    pDIBSection->dsBitfields[1] = 0;
+    pDIBSection->dsBitfields[2] = 0;
+
+  	pDIBSection->dshSection = this->handle;
+  	
+  	pDIBSection->dsOffset = 0; // TODO: put the correct value here
+  	
+  	return 0; //ERROR_SUCCESS
+  }
+  return 87;    //ERROR_INVALID_PARAMETER
+
+}
+//******************************************************************************
+//******************************************************************************
 DIBSection *DIBSection::section = NULL;
+

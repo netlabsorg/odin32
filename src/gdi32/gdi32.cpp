@@ -1,4 +1,4 @@
-/* $Id: gdi32.cpp,v 1.11 1999-10-20 22:36:53 sandervl Exp $ */
+/* $Id: gdi32.cpp,v 1.12 1999-10-31 21:38:17 achimha Exp $ */
 
 /*
  * GDI32 apis
@@ -186,6 +186,16 @@ UINT WIN32API RealizePalette( HDC arg1)
 //******************************************************************************
 int WIN32API GetObjectA( HGDIOBJ arg1, int arg2, void *  arg3)
 {
+
+    if(DIBSection::getSection() != NULL)
+    {
+      DIBSection *dsect = DIBSection::find(arg1);
+      if(dsect)
+      {
+        return dsect->GetDIBSection(arg2, (DIBSECTION*)arg3);
+      }
+    }
+
     dprintf(("GDI32: GetObject %X %X %X\n", arg1, arg2, arg3));
     return O32_GetObject(arg1, arg2, arg3);
 }
@@ -1337,7 +1347,7 @@ int WIN32API GetTextFaceW( HDC arg1, int arg2, LPWSTR  arg3)
 
     dprintf(("GDI32: OS2GetTextFaceW"));
     rc = O32_GetTextFace(arg1, arg2, astring);
-    AsciiToUnicode(astring, arg3);      
+    AsciiToUnicode(astring, arg3);
     return rc;
 }
 //******************************************************************************
@@ -1513,7 +1523,7 @@ HRGN WIN32API PathToRegion( HDC arg1)
 //******************************************************************************
 //******************************************************************************
 BOOL WIN32API Pie(HDC hdc, int nLeftRect, int nTopRect, int nRightRect,
-                  int nBottomRect, int nXRadial1, int nYRadial1, int nXRadial2, 
+                  int nBottomRect, int nXRadial1, int nYRadial1, int nXRadial2,
                   int nYRadial2)
 {
     dprintf(("GDI32: OS2Pie"));
@@ -1739,7 +1749,7 @@ int WIN32API SetDIBits( HDC arg1, HBITMAP arg2, UINT arg3, UINT arg4, const VOID
 }
 //******************************************************************************
 //******************************************************************************
-INT WIN32API SetDIBitsToDevice(HDC hdc, INT xDest, INT yDest, DWORD cx,	DWORD cy, INT xSrc, INT ySrc, UINT startscan, UINT lines, LPCVOID bits, const BITMAPINFO *info, UINT coloruse)
+INT WIN32API SetDIBitsToDevice(HDC hdc, INT xDest, INT yDest, DWORD cx, DWORD cy, INT xSrc, INT ySrc, UINT startscan, UINT lines, LPCVOID bits, const BITMAPINFO *info, UINT coloruse)
 {
     INT result, imgsize, palsize;
     char *ptr;
@@ -2015,7 +2025,10 @@ HBITMAP WIN32API CreateDIBSection(HDC hdc, BITMAPINFO *pbmi, UINT iUsage,
   if (res)
   {
         DIBSection *dsect = new DIBSection((WINBITMAPINFOHEADER *)&pbmi->bmiHeader, (DWORD)res, fFlip);
-        *ppvBits = dsect->GetDIBObject();
+        dprintf(("Constructor returned\n",res));
+        if(ppvBits!=NULL)
+          *ppvBits = dsect->GetDIBObject();
+        dprintf(("GDI32: return %08X\n",res));
         return(res);
   }
 
@@ -3199,5 +3212,6 @@ BOOL WIN32API UpdateICMRegKeyW(DWORD  dwReserved,
 
   return (FALSE);
 }
+
 
 
