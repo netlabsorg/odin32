@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.383 2004-01-11 12:03:18 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.384 2004-01-15 10:28:42 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -250,7 +250,7 @@ Win32BaseWindow::~Win32BaseWindow()
         RELEASE_WNDOBJ(owner);
     }
 
-    // Decrement class window counter 
+    // Decrement class window counter
     // NOTE: Must be done before ReleaseDC call for ownDC!
     if(windowClass) {
         RELEASE_CLASSOBJ(windowClass);
@@ -891,7 +891,7 @@ ULONG Win32BaseWindow::MsgDestroy()
             HwFreeWindowHandle(Win32Hwnd);
             Win32Hwnd = 0;
         }
-        // Decrement class window counter 
+        // Decrement class window counter
         // NOTE: Must be done before ReleaseDC call for ownDC!
         if(windowClass) {
             RELEASE_CLASSOBJ(windowClass);
@@ -2551,12 +2551,12 @@ BOOL Win32BaseWindow::SetWindowPos(HWND hwndInsertAfter, int x, int y, int cx,
         }
     }
 
-    // Hack alert: This makes sure the tooltips windows in OpenOffice don't 
+    // Hack alert: This makes sure the tooltips windows in OpenOffice don't
     //             activate the owner windows too.
     //             First condition takes care of SetWindowPos during window
     //             creation. The 2nd one for calls made by OpenOffice
-    if(((getStyle() & WS_POPUP) && (getExStyle() & WS_EX_TOPMOST)) || (fuFlags & SWP_NOOWNERZORDER)) 
-    { 
+    if(((getStyle() & WS_POPUP) && (getExStyle() & WS_EX_TOPMOST)) || (fuFlags & SWP_NOOWNERZORDER))
+    {
         //SWP_NOOWNERZORDER means only the z-order of this window changes; it
         //should not affect the owner
         //PM doesn't support this feature, so this hack might work
@@ -3195,10 +3195,6 @@ BOOL Win32BaseWindow::EnumThreadWindows(DWORD dwThreadId, WNDENUMPROC lpfn, LPAR
     while(hwnd)
     {
         wnd = GetWindowFromOS2FrameHandle(hwnd);
-        if(wnd == NULL) {
-            hwnd = OSLibWinQueryClientWindow(hwnd);
-            if(hwnd)  wnd = GetWindowFromOS2Handle(hwnd);
-        }
         if(wnd) {
              hwndWin32 = wnd->getWindowHandle();
         }
@@ -3342,11 +3338,6 @@ HWND Win32BaseWindow::FindWindowEx(HWND hwndParent, HWND hwndChildAfter, ATOM at
         while(hwnd)
         {
             wnd = GetWindowFromOS2FrameHandle(hwnd);
-            if(wnd == NULL) {
-                hwnd = OSLibWinQueryClientWindow(hwnd);
-                if(hwnd)  wnd = GetWindowFromOS2Handle(hwnd);
-            }
-
             if(wnd) {
                 //According to Wine, the class doesn't need to be specified
                 if((!atom || wnd->getWindowClass()->getAtom() == atom) &&
