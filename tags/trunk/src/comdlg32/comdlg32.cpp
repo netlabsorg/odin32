@@ -1,4 +1,4 @@
-/* $Id: comdlg32.cpp,v 1.31 2001-07-15 14:35:11 sandervl Exp $ */
+/* $Id: comdlg32.cpp,v 1.32 2001-08-02 14:49:55 sandervl Exp $ */
 
 /*
  * COMDLG32 implementation
@@ -23,6 +23,8 @@
 #include <odinwrap.h>
 #include <winuser32.h>
 #include <unicode.h>
+#include <wingdi32.h>
+#include <codepage.h>
 
 ODINDEBUGCHANNEL(COMDLG32-COMDLG32)
 
@@ -141,6 +143,9 @@ ODINFUNCTION1(BOOL, PrintDlgA,
       }
   }
 #endif
+  if(lppd->hDC) {
+      OSLibGpiSetCp(lppd->hDC, GetDisplayCodepage());
+  }
   return ret;
 }
 
