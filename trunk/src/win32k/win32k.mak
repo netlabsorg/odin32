@@ -1,4 +1,4 @@
-# $Id: win32k.mak,v 1.12 2001-07-10 05:29:22 bird Exp $
+# $Id: win32k.mak,v 1.13 2001-07-31 21:34:08 bird Exp $
 
 #
 # Win32k.sys makefile.
@@ -410,6 +410,7 @@ MKCALLTABOBJS = \
     $(WIN32KOBJ)\vprntf16.obj_c
 
 # Rule to build MkCallTab.exe
+mkcalltab.exe mkcalltab: $(WIN32KBIN)\mkcalltab.exe
 $(WIN32KBIN)\mkcalltab.exe: clfix.exe $(MKCALLTABOBJS)
     $(LD) $(LFLAGS) /pmtype:vio @<<$(WIN32KOBJ)\$(@B).lnk
         /OUT:$@
