@@ -1,4 +1,4 @@
-/* $Id: toolhelp.cpp,v 1.3 2000-10-08 14:01:02 sandervl Exp $ */
+/* $Id: toolhelp.cpp,v 1.4 2002-02-09 12:45:13 sandervl Exp $ */
 
 /*
  * Misc Toolhelp functions
@@ -32,8 +32,7 @@ ODINDEBUGCHANNEL(KERNEL32-TOOLHELP)
  *           CreateToolHelp32Snapshot			(KERNEL32.179)
  */
 
-ODINFUNCTION2(HANDLE,CreateToolhelp32Snapshot,DWORD,dwFlags,
-                                              DWORD,dwProcess)
+HANDLE WIN32API CreateToolhelp32Snapshot(DWORD dwFlags, DWORD dwProcess)
 {
   dprintf(("KERNEL32: CreateToolhelp32Snapshot %x %x not implemented, dwFlags, dwProcess"));
   SetLastError( ERROR_CALL_NOT_IMPLEMENTED );
@@ -46,8 +45,7 @@ ODINFUNCTION2(HANDLE,CreateToolhelp32Snapshot,DWORD,dwFlags,
  *
  * Return info about the first process in a toolhelp32 snapshot
  */
-ODINFUNCTION2(BOOL,Process32First,HANDLE,        hSnapshot,
-                                  LPPROCESSENTRY32,lppe)
+BOOL WIN32API Process32First(HANDLE hSnapshot, LPPROCESSENTRY32 lppe)
 {
   dprintf(("KERNEL32: Process32First %x %x not implemented", hSnapshot, lppe));
   SetLastError( ERROR_CALL_NOT_IMPLEMENTED );
@@ -59,8 +57,7 @@ ODINFUNCTION2(BOOL,Process32First,HANDLE,        hSnapshot,
  *
  * Return info about the "next" process in a toolhelp32 snapshot
  */
-ODINFUNCTION2(BOOL,Process32Next,HANDLE,        hSnapshot,
-                                 LPPROCESSENTRY32,lppe)
+BOOL WIN32API Process32Next(HANDLE hSnapshot, LPPROCESSENTRY32 lppe)
 {
   dprintf(("KERNEL32: Process32Next %x %x not implemented", hSnapshot, lppe));
   SetLastError( ERROR_CALL_NOT_IMPLEMENTED );
@@ -72,8 +69,7 @@ ODINFUNCTION2(BOOL,Process32Next,HANDLE,        hSnapshot,
  *
  * Return info about the "first" module in a toolhelp32 snapshot
  */
-ODINFUNCTION2(BOOL,Module32First,HANDLE,hSnapshot,
-                                 LPMODULEENTRY32,lpme)
+BOOL WIN32API Module32First(HANDLE hSnapshot, LPMODULEENTRY32 lpme)
 {
   dprintf(("KERNEL32: Module32First %x %x not implemented", hSnapshot, lpme));
   SetLastError( ERROR_CALL_NOT_IMPLEMENTED );
@@ -85,8 +81,7 @@ ODINFUNCTION2(BOOL,Module32First,HANDLE,hSnapshot,
  *
  * Return info about the "next" module in a toolhelp32 snapshot
  */
-ODINFUNCTION2(BOOL,Module32Next,HANDLE,hSnapshot,
-                                LPMODULEENTRY32,lpme)
+BOOL WIN32API Module32Next(HANDLE hSnapshot, LPMODULEENTRY32 lpme)
 {
   dprintf(("KERNEL32: Module32Next %x %x not implemented", hSnapshot, lpme));
   SetLastError( ERROR_CALL_NOT_IMPLEMENTED );

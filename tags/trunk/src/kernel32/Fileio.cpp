@@ -1,4 +1,4 @@
-/* $Id: Fileio.cpp,v 1.64 2002-02-03 21:06:40 sandervl Exp $ */
+/* $Id: Fileio.cpp,v 1.65 2002-02-09 12:45:11 sandervl Exp $ */
 
 /*
  * Win32 File IO API functions for OS/2
@@ -187,14 +187,9 @@ void DOSFS_Hash( LPCSTR name, LPSTR buffer, BOOL dir_format,
 #endif
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION7(HFILE,  CreateFileA,
-              LPCSTR, lpszName,
-              DWORD,  fdwAccess,
-              DWORD,  fdwShareMode,
-              LPSECURITY_ATTRIBUTES, lpsa,
-              DWORD,  fdwCreate,
-              DWORD,  fdwAttrsAndFlags,
-              HANDLE, hTemplateFile)
+HFILE WIN32API CreateFileA(LPCSTR lpszName, DWORD fdwAccess, DWORD fdwShareMode,
+                           LPSECURITY_ATTRIBUTES lpsa, DWORD fdwCreate,
+                           DWORD  fdwAttrsAndFlags, HANDLE hTemplateFile)
 {
   dprintf(("CreateFileA %s", lpszName));
   return(HMCreateFile(lpszName,
@@ -208,20 +203,17 @@ ODINFUNCTION7(HFILE,  CreateFileA,
 
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION7(HFILE,   CreateFileW,
-              LPCWSTR, arg1,
-              DWORD,   arg2,
-              DWORD,   arg3,
-              PSECURITY_ATTRIBUTES, arg4,
-              DWORD,   arg5,
-              DWORD,   arg6,
-              HANDLE,  arg7)
+HFILE WIN32API CreateFileW(LPCWSTR lpszName, DWORD fdwAccess, DWORD fdwShareMode,
+                           LPSECURITY_ATTRIBUTES lpsa, DWORD fdwCreate,
+                           DWORD fdwAttrsAndFlags, HANDLE hTemplateFile)
 {
   HANDLE rc;
   char  *astring;
 
-  astring = UnicodeToAsciiString((LPWSTR)arg1);
-  rc = CreateFileA(astring, arg2, arg3, arg4, arg5, arg6, arg7);
+  astring = UnicodeToAsciiString((LPWSTR)lpszName);
+  rc = CreateFileA(astring, fdwAccess, fdwShareMode,
+                   lpsa, fdwCreate, fdwAttrsAndFlags,
+                   hTemplateFile);
   FreeAsciiString(astring);
   return(rc);
 }
@@ -254,12 +246,11 @@ HANDLE WINAPI FindFirstFileA(LPCSTR lpFileName, WIN32_FIND_DATAA *lpFindFileData
  *
  * Author    : SvL
  *****************************************************************************/
-ODINFUNCTION6(HANDLE, FindFirstFileExA,	LPCSTR, lpFileName,
-                                        FINDEX_INFO_LEVELS, fInfoLevelId,
-                                        LPVOID, lpFindFileData,
-                                        FINDEX_SEARCH_OPS, fSearchOp,
-                                        LPVOID, lpSearchFilter,
-                                        DWORD, dwAdditionalFlags)
+HANDLE WIN32API FindFirstFileExA(LPCSTR lpFileName, FINDEX_INFO_LEVELS fInfoLevelId,
+                                 LPVOID lpFindFileData,
+                                 FINDEX_SEARCH_OPS fSearchOp,
+                                 LPVOID lpSearchFilter,
+                                 DWORD dwAdditionalFlags)
 {   
   HANDLE hFind;
   char  *filename;
@@ -342,12 +333,12 @@ HANDLE WINAPI FindFirstFileW(LPCWSTR lpFileName, WIN32_FIND_DATAW *lpFindFileDat
  *
  * Author    : Wine
  *****************************************************************************/
-ODINFUNCTION6(HANDLE, FindFirstFileExW,	LPCWSTR, lpFileName,
-                                        FINDEX_INFO_LEVELS, fInfoLevelId,
-                                        LPVOID, lpFindFileData,
-                                        FINDEX_SEARCH_OPS, fSearchOp,
-                                        LPVOID, lpSearchFilter,
-                                        DWORD, dwAdditionalFlags)
+HANDLE WIN32API FindFirstFileExW(LPCWSTR lpFileName,
+                                 FINDEX_INFO_LEVELS fInfoLevelId,
+                                 LPVOID lpFindFileData,
+                                 FINDEX_SEARCH_OPS fSearchOp,
+                                 LPVOID lpSearchFilter,
+                                 DWORD dwAdditionalFlags)
 {
     HANDLE handle;
     WIN32_FIND_DATAA dataA;
@@ -396,36 +387,29 @@ ODINFUNCTION6(HANDLE, FindFirstFileExW,	LPCWSTR, lpFileName,
 //******************************************************************************
 // internal function for faster access (SHELL32)
 //******************************************************************************
-ODINFUNCTION3(HANDLE, FindFirstFileMultiA,
-              LPCSTR, lpFileName,
-              WIN32_FIND_DATAA *, lpFindFileData,
-              DWORD *,count)
+HANDLE WIN32API FindFirstFileMultiA(LPCSTR lpFileName,
+                                    WIN32_FIND_DATAA * lpFindFileData,
+                                    DWORD * count)
 {
     return (HANDLE)OSLibDosFindFirstMulti(lpFileName,lpFindFileData,count);
 }
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION2(BOOL,   FindNextFileA,
-              HANDLE, hFindFile,
-              WIN32_FIND_DATAA *, lpFindFileData)
+BOOL WIN32API FindNextFileA(HANDLE hFindFile, WIN32_FIND_DATAA * lpFindFileData)
 {
     return OSLibDosFindNext(hFindFile,lpFindFileData);
 }
 //******************************************************************************
 // internal function for faster access (SHELL32)
 //******************************************************************************
-ODINFUNCTION3(BOOL,   FindNextFileMultiA,
-              HANDLE, hFindFile,
-              WIN32_FIND_DATAA *, lpFindFileData,
-              DWORD *,count)
+BOOL WIN32API FindNextFileMultiA(HANDLE hFindFile, WIN32_FIND_DATAA * lpFindFileData,
+              DWORD *count)
 {
   return OSLibDosFindNextMulti(hFindFile,lpFindFileData,count);
 }
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION2(BOOL, FindNextFileW,
-              HANDLE, hFindFile,
-              WIN32_FIND_DATAW *, lpFindFileData)
+BOOL WIN32API FindNextFileW(HANDLE hFindFile, WIN32_FIND_DATAW * lpFindFileData)
 {
   WIN32_FIND_DATAA wfda;
   BOOL             rc;
@@ -453,40 +437,33 @@ ODINFUNCTION2(BOOL, FindNextFileW,
 }
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION1(BOOL, FindClose,
-              HANDLE, hFindFile)
+BOOL WIN32API FindClose(HANDLE hFindFile)
 {
   return OSLibDosFindClose(hFindFile);
 }
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION1(DWORD, GetFileType,
-              HANDLE, hFile)
+DWORD WIN32API GetFileType(HANDLE hFile)
 {
   return(HMGetFileType(hFile));
 }
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION2(DWORD, GetFileInformationByHandle,
-              HANDLE, arg1,
-              BY_HANDLE_FILE_INFORMATION *, arg2)
+DWORD WIN32API GetFileInformationByHandle(HANDLE arg1, BY_HANDLE_FILE_INFORMATION * arg2)
 {
   return(HMGetFileInformationByHandle(arg1,arg2));
 }
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION1(BOOL, SetEndOfFile,
-              HANDLE, arg1)
+BOOL WIN32API SetEndOfFile(HANDLE arg1)
 {
   return HMSetEndOfFile(arg1);
 }
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION4(BOOL, SetFileTime,
-              HANDLE, arg1,
-              const FILETIME *, arg2,
-              const FILETIME *, arg3,
-              const FILETIME *, arg4)
+BOOL WIN32API  SetFileTime(HANDLE arg1, const FILETIME * arg2,
+                           const FILETIME * arg3,
+                           const FILETIME * arg4)
 {
   return HMSetFileTime(arg1,
                        arg2,
@@ -495,9 +472,7 @@ ODINFUNCTION4(BOOL, SetFileTime,
 }
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION2(INT, CompareFileTime,
-              FILETIME *, lpft1,
-              FILETIME *, lpft2)
+INT WIN32API CompareFileTime(FILETIME * lpft1, FILETIME * lpft2)
 {
    if (lpft1 == NULL || lpft2 == NULL) {
        SetLastError(ERROR_INVALID_PARAMETER);
@@ -520,33 +495,26 @@ ODINFUNCTION2(INT, CompareFileTime,
 }
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION4(BOOL, GetFileTime, HANDLE, hFile, LPFILETIME, arg2, LPFILETIME, arg3, LPFILETIME, arg4)
+BOOL WIN32API GetFileTime(HANDLE hFile, LPFILETIME arg2, LPFILETIME arg3, LPFILETIME arg4)
 {
     return HMGetFileTime(hFile, arg2, arg3, arg4);
 }
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION3(BOOL, CopyFileA,
-              LPCSTR, arg1,
-              LPCSTR, arg2,
-              BOOL, arg3)
+BOOL WIN32API CopyFileA(LPCSTR arg1, LPCSTR arg2, BOOL arg3)
 {
   return OSLibDosCopyFile(arg1, arg2, arg3);
 }
 //******************************************************************************
-//SvL: 24-6-'97 - Added
 //******************************************************************************
-ODINFUNCTION3(BOOL, CopyFileW,
-              LPCWSTR, arg1,
-              LPCWSTR, arg2,
-              BOOL, arg3)
+BOOL WIN32API CopyFileW(LPCWSTR arg1, LPCWSTR arg2, BOOL arg3)
 {
   BOOL  rc;
   char *astring1, *astring2;
 
   astring1 = UnicodeToAsciiString((LPWSTR)arg1);
   astring2 = UnicodeToAsciiString((LPWSTR)arg2);
-  rc = CALL_ODINFUNC(CopyFileA)(astring1, astring2, arg3);
+  rc = CopyFileA(astring1, astring2, arg3);
   FreeAsciiString(astring2);
   FreeAsciiString(astring1);
   return(rc);
@@ -575,11 +543,11 @@ ODINFUNCTION3(BOOL, CopyFileW,
  *****************************************************************************/
 
 BOOL WIN32API CopyFileExA( LPCSTR             lpExistingFileName,
-                              LPCSTR             lpNewFileName,
-                              LPPROGRESS_ROUTINE lpProgressRoutine,
-                              LPVOID             lpData,
-                              LPBOOL             pbCancel,
-                              DWORD              dwCopyFlags)
+                           LPCSTR             lpNewFileName,
+                           LPPROGRESS_ROUTINE lpProgressRoutine,
+                           LPVOID             lpData,
+                           LPBOOL             pbCancel,
+                           DWORD              dwCopyFlags)
 {
 
   dprintf(("KERNEL32: CopyFileExA(%08x,%08x,%08x,%08x,%08x,%08x) not properly implemented\n",
@@ -652,24 +620,17 @@ BOOL WIN32API CopyFileExW( LPCWSTR            lpExistingFileName,
 }
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION2(DWORD, GetFileSize,
-              HANDLE, arg1,
-              PDWORD, arg2)
+DWORD WIN32API GetFileSize(HANDLE arg1, PDWORD arg2)
 {
   return HMGetFileSize(arg1,
                        arg2);
 }
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION1(BOOL, DeleteFileA,
-              LPCSTR, lpszFile)
+BOOL WIN32API DeleteFileA(LPCSTR lpszFile)
 {
  BOOL rc;
 
-#if 0
-  dprintf(("DeleteFileA %s", lpszFile));
-  return 1;
-#else
   rc = OSLibDosDelete((LPSTR)lpszFile);
   if(!rc) {
     dprintf(("DeleteFileA %s returned FALSE; last error %x", lpszFile, GetLastError()));
@@ -680,38 +641,29 @@ ODINFUNCTION1(BOOL, DeleteFileA,
   else  dprintf(("DeleteFileA %s", lpszFile));
 
   return rc;
-#endif
 }
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION1(BOOL, DeleteFileW,
-              LPCWSTR, arg1)
+BOOL WIN32API DeleteFileW(LPCWSTR arg1)
 {
   BOOL  rc;
   char *astring;
 
   astring = UnicodeToAsciiString((LPWSTR)arg1);
-  rc = CALL_ODINFUNC(DeleteFileA)(astring);
+  rc = DeleteFileA(astring);
   FreeAsciiString(astring);
   return(rc);
 }
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION4(UINT, GetTempFileNameA,
-              LPCSTR, arg1,
-              LPCSTR, arg2,
-              UINT, arg3,
-              LPSTR, arg4)
+UINT WIN32API GetTempFileNameA(LPCSTR arg1, LPCSTR arg2, UINT arg3, LPSTR arg4)
 {
   return O32_GetTempFileName(arg1, arg2, arg3, arg4);
 }
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION4(UINT, GetTempFileNameW,
-              LPCWSTR, lpPathName,
-              LPCWSTR, lpPrefixString,
-              UINT, uUnique,
-              LPWSTR, lpTempFileName)
+UINT WIN32API GetTempFileNameW(LPCWSTR lpPathName, LPCWSTR lpPrefixString,
+                               UINT uUnique, LPWSTR lpTempFileName)
 {
   char *asciipath, *asciiprefix;
   char *asciitemp = (char *)malloc(MAX_PATH+1);
@@ -728,12 +680,8 @@ ODINFUNCTION4(UINT, GetTempFileNameW,
 }
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION5(BOOL,         ReadFile,
-              HANDLE,       hFile,
-              PVOID,        pBuffer,
-              DWORD,        dwLength,
-              PDWORD,       lpNumberOfBytesRead,
-              LPOVERLAPPED, lpOverlapped)
+BOOL WIN32API ReadFile(HANDLE hFile, PVOID pBuffer, DWORD dwLength,
+                       PDWORD lpNumberOfBytesRead, LPOVERLAPPED lpOverlapped)
 {
   if(lpNumberOfBytesRead) *lpNumberOfBytesRead = 0;
   if(dwLength == 0) {
@@ -749,12 +697,11 @@ ODINFUNCTION5(BOOL,         ReadFile,
 }
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION5(BOOL,         ReadFileEx,
-              HANDLE,       hFile,
-              LPVOID,       lpBuffer,
-              DWORD,        nNumberOfBytesToRead,
-              LPOVERLAPPED, lpOverlapped,
-              LPOVERLAPPED_COMPLETION_ROUTINE,  lpCompletionRoutine)
+BOOL WIN32API ReadFileEx(HANDLE       hFile,
+                         LPVOID       lpBuffer,
+                         DWORD        nNumberOfBytesToRead,
+                         LPOVERLAPPED lpOverlapped,
+                         LPOVERLAPPED_COMPLETION_ROUTINE  lpCompletionRoutine)
 {
   if(nNumberOfBytesToRead == 0) {
       dprintf(("!WARNING!: Nothing to do"));
@@ -779,12 +726,8 @@ ODINFUNCTION5(BOOL,         ReadFileEx,
 }
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION5(BOOL, WriteFile,
-              HANDLE, hFile,
-              LPCVOID, buffer,
-              DWORD, nrbytes,
-              LPDWORD, nrbyteswritten,
-              LPOVERLAPPED, lpOverlapped)
+BOOL WIN32API WriteFile(HANDLE hFile, LPCVOID buffer, DWORD nrbytes,
+                        LPDWORD nrbyteswritten, LPOVERLAPPED lpOverlapped)
 {
   if(nrbyteswritten) *nrbyteswritten = 0;
   if(nrbytes == 0) {
@@ -820,12 +763,11 @@ ODINFUNCTION5(BOOL, WriteFile,
  * Author    : Patrick Haller [Mon, 1998/06/15 08:00]
  *****************************************************************************/
 
-ODINFUNCTION5(BOOL,         WriteFileEx,
-              HANDLE,       hFile,
-              LPCVOID,      lpBuffer,
-              DWORD,        nNumberOfBytesToWrite,
-              LPOVERLAPPED, lpOverlapped,
-              LPOVERLAPPED_COMPLETION_ROUTINE,  lpCompletionRoutine)
+BOOL WIN32API WriteFileEx(HANDLE       hFile,
+                          LPCVOID      lpBuffer,
+                          DWORD        nNumberOfBytesToWrite,
+                          LPOVERLAPPED lpOverlapped,
+                          LPOVERLAPPED_COMPLETION_ROUTINE  lpCompletionRoutine)
 {
   if(nNumberOfBytesToWrite == 0) {
       dprintf(("!WARNING!: Nothing to do"));
@@ -850,11 +792,8 @@ ODINFUNCTION5(BOOL,         WriteFileEx,
 }
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION4(DWORD, SetFilePointer,
-              HANDLE, hFile,
-              LONG, lDistanceToMove,
-              PLONG, lpDistanceToMoveHigh,
-              DWORD, dwMoveMethod)
+DWORD WIN32API SetFilePointer(HANDLE hFile, LONG lDistanceToMove, 
+                              PLONG lpDistanceToMoveHigh, DWORD dwMoveMethod)
 {
   return(HMSetFilePointer(hFile,
                          lDistanceToMove,
@@ -863,8 +802,7 @@ ODINFUNCTION4(DWORD, SetFilePointer,
 }
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION1(DWORD, GetFileAttributesA,
-              LPCSTR, lpszFileName)
+DWORD WIN32API GetFileAttributesA(LPCSTR lpszFileName)
 {
     DWORD rc, error;
 
@@ -907,47 +845,39 @@ ODINFUNCTION1(DWORD, GetFileAttributesA,
 }
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION1(DWORD, GetFileAttributesW,
-              LPCWSTR, arg1)
+DWORD WIN32API GetFileAttributesW(LPCWSTR arg1)
 {
   DWORD rc;
   char *astring;
 
   astring = UnicodeToAsciiString((LPWSTR)arg1);
-  rc = CALL_ODINFUNC(GetFileAttributesA)(astring);
+  rc = GetFileAttributesA(astring);
   FreeAsciiString(astring);
   return(rc);
 }
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION2(BOOL, SetFileAttributesA,
-              LPCSTR, arg1,
-              DWORD, arg2)
+BOOL WIN32API SetFileAttributesA(LPCSTR lpFileName, DWORD dwFileAttributes)
 {
-    dprintf(("KERNEL32:  SetFileAttributes of %s\n", arg1));
-    return O32_SetFileAttributes(arg1, arg2);
+    dprintf(("KERNEL32: SetFileAttributes of %s", lpFileName));
+    return O32_SetFileAttributes(lpFileName, dwFileAttributes);
 }
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION2(BOOL, SetFileAttributesW,
-              LPCWSTR, lpFileName,
-              DWORD, dwFileAttributes)
+BOOL WIN32API SetFileAttributesW(LPCWSTR lpFileName, DWORD dwFileAttributes)
 {
   char *asciifile;
   BOOL  rc;
 
   asciifile = UnicodeToAsciiString((LPWSTR)lpFileName);
-  rc = O32_SetFileAttributes(asciifile, dwFileAttributes);
+  rc = SetFileAttributesA(asciifile, dwFileAttributes);
   FreeAsciiString(asciifile);
   return(rc);
 }
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION4(DWORD, GetFullPathNameA,
-              LPCSTR, arg1,
-              DWORD, arg2,
-              LPSTR, arg3,
-              LPSTR *, arg4)
+DWORD WIN32API GetFullPathNameA(LPCSTR arg1, DWORD arg2, LPSTR  arg3,
+                                LPSTR * arg4)
 {
     char *ptr;
     DWORD rc;
@@ -959,11 +889,8 @@ ODINFUNCTION4(DWORD, GetFullPathNameA,
 }
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION4(DWORD, GetFullPathNameW,
-              LPCWSTR, lpFileName,
-              DWORD, nBufferLength,
-              LPWSTR, lpBuffer,
-              LPWSTR *, lpFilePart)
+DWORD WIN32API GetFullPathNameW(LPCWSTR lpFileName, DWORD nBufferLength,
+                                LPWSTR lpBuffer, LPWSTR *lpFilePart)
 {
  char *astring, *asciibuffer, *asciipart;
  DWORD rc;
@@ -971,10 +898,8 @@ ODINFUNCTION4(DWORD, GetFullPathNameW,
   asciibuffer = (char *)malloc(nBufferLength+1);
   astring     = UnicodeToAsciiString((LPWSTR)lpFileName);
 
-  rc = CALL_ODINFUNC(GetFullPathNameA)(astring,
-                             nBufferLength,
-                             asciibuffer,
-                             &asciipart);
+  rc = GetFullPathNameA(astring, nBufferLength,
+                        asciibuffer, &asciipart);
 
   dprintf(("KERNEL32: GetFullPathNameW %s returns %s\n",
            astring,
@@ -997,12 +922,9 @@ ODINFUNCTION4(DWORD, GetFullPathNameW,
 }
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION5(BOOL, LockFile,
-              HANDLE, arg1,
-              DWORD, arg2,
-              DWORD, arg3,
-              DWORD, arg4,
-              DWORD, arg5)
+BOOL WIN32API LockFile(HANDLE arg1, DWORD arg2,
+                       DWORD arg3, DWORD arg4,
+                       DWORD arg5)
 {
   return HMLockFile(arg1,
                     arg2,
@@ -1029,13 +951,10 @@ ODINFUNCTION5(BOOL, LockFile,
  * Author    : Patrick Haller [Mon, 1998/06/15 08:00]
  *****************************************************************************/
 
-ODINFUNCTION6(BOOL, LockFileEx,
-              HANDLE, hFile,
-              DWORD, dwFlags,
-              DWORD, dwReserved,
-              DWORD, nNumberOfBytesToLockLow,
-              DWORD, nNumberOfBytesToLockHigh,
-              LPOVERLAPPED, lpOverlapped)
+BOOL LockFileEx(HANDLE hFile, DWORD dwFlags, DWORD dwReserved,
+                DWORD nNumberOfBytesToLockLow,
+                DWORD nNumberOfBytesToLockHigh,
+                LPOVERLAPPED lpOverlapped)
 {
   return(HMLockFile(hFile,
                     lpOverlapped->Offset,
@@ -1045,9 +964,7 @@ ODINFUNCTION6(BOOL, LockFileEx,
 }
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION2(BOOL, MoveFileA,
-              LPCSTR, arg1,
-              LPCSTR, arg2)
+BOOL WIN32API MoveFileA(LPCSTR arg1, LPCSTR arg2)
 {
     dprintf(("KERNEL32: MoveFileA %s %s", arg1, arg2));
     return OSLibDosMoveFile(arg1, arg2);
@@ -1070,10 +987,9 @@ ODINFUNCTION2(BOOL, MoveFileA,
  * Author    : Patrick Haller [2001-08-30]
  *****************************************************************************/
 
-ODINFUNCTION3(BOOL, MoveFileExA,
-              LPCSTR, lpszOldFilename,
-              LPCSTR, lpszNewFilename,
-              DWORD, fdwFlags)
+BOOL WIN32API MoveFileExA(LPCSTR lpszOldFilename,
+                          LPCSTR lpszNewFilename,
+                          DWORD fdwFlags)
 {
   dprintf(("KERNEL32:  MoveFileExA %s to %s %x, not complete!\n", 
            lpszOldFilename, 
@@ -1133,9 +1049,7 @@ ODINFUNCTION3(BOOL, MoveFileExA,
 }
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION2(BOOL, MoveFileW,
-              LPCWSTR, lpSrc,
-              LPCWSTR, lpDest)
+BOOL WIN32API MoveFileW(LPCWSTR lpSrc, LPCWSTR lpDest)
 {
   char *asciisrc, *asciidest;
   BOOL  rc;
@@ -1149,10 +1063,7 @@ ODINFUNCTION2(BOOL, MoveFileW,
 }
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION3(BOOL, MoveFileExW,
-              LPCWSTR, lpSrc,
-              LPCWSTR, lpDest,
-              DWORD, fdwFlags)
+BOOL WIN32API MoveFileExW(LPCWSTR lpSrc, LPCWSTR lpDest, DWORD fdwFlags)
 {
   dprintf(("KERNEL32: MoveFileExW %ls to %ls %x", 
            lpSrc, 
@@ -1195,10 +1106,8 @@ ODINFUNCTION3(*, :,
  * Author    : Patrick Haller [Fri, 1998/06/12 02:53]
  *****************************************************************************/
 
-ODINFUNCTION3(HFILE, OpenFile,
-              LPCSTR, lpszFile,
-              OFSTRUCT *, lpOpenBuff,
-              UINT, fuMode)
+HFILE WIN32API OpenFile(LPCSTR lpszFile, OFSTRUCT *lpOpenBuff,
+                        UINT fuMode)
 {
   HFILE hFile;
 
@@ -1215,12 +1124,8 @@ ODINFUNCTION3(HFILE, OpenFile,
 }
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION5(BOOL, UnlockFile,
-              HANDLE, arg1,
-              DWORD, arg2,
-              DWORD, arg3,
-              DWORD, arg4,
-              DWORD, arg5)
+BOOL WIN32API UnlockFile(HANDLE arg1, DWORD arg2, DWORD arg3,
+                         DWORD arg4,  DWORD arg5)
 {
   return HMUnlockFile(arg1,
                       arg2,
@@ -1246,12 +1151,10 @@ ODINFUNCTION5(BOOL, UnlockFile,
  * Author    : Patrick Haller [Mon, 1998/06/15 08:00]
  *****************************************************************************/
 
-ODINFUNCTION5(BOOL, UnlockFileEx,
-              HANDLE, hFile,
-              DWORD, dwReserved,
-              DWORD, nNumberOfBytesToLockLow,
-              DWORD, nNumberOfBytesToLockHigh,
-              LPOVERLAPPED, lpOverlapped)
+BOOL WIN32API UnlockFileEx(HANDLE hFile, DWORD dwReserved,
+                           DWORD nNumberOfBytesToLockLow,
+                           DWORD nNumberOfBytesToLockHigh,
+                           LPOVERLAPPED lpOverlapped)
 {
   return(HMUnlockFileEx(hFile, dwReserved,
                         nNumberOfBytesToLockLow,
@@ -1269,10 +1172,9 @@ ODINFUNCTION5(BOOL, UnlockFileEx,
 //- does NOT clear the last error if successful!
 //- if successful -> return length of string (excluding 0 terminator)
 //******************************************************************************
-ODINFUNCTION3(DWORD, GetShortPathNameA,
-              LPCTSTR, lpszLongPath,
-              LPTSTR, lpszShortPath,
-              DWORD, cchBuffer)
+DWORD WIN32API GetShortPathNameA(LPCTSTR lpszLongPath,
+                                 LPTSTR lpszShortPath,
+                                 DWORD cchBuffer)
 {
  int length;
 
@@ -1285,20 +1187,18 @@ ODINFUNCTION3(DWORD, GetShortPathNameA,
 
   length = lstrlenA(lpszLongPath) + 1;
   if(length > cchBuffer) {
-  if(lpszShortPath) {
+      if(lpszShortPath) {
           *lpszShortPath = 0;
-  }
-        return(length); //return length required (including 0 terminator)
+      }
+      return(length); //return length required (including 0 terminator)
   }
   lstrcpyA(lpszShortPath, lpszLongPath);
   return(length-1);
 }
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION3(DWORD, GetShortPathNameW,
-              LPCWSTR, lpszLongPath,
-              LPWSTR, lpszShortPath,
-              DWORD, cchBuffer)
+DWORD WIN32API GetShortPathNameW(LPCWSTR lpszLongPath, LPWSTR lpszShortPath,
+                                 DWORD cchBuffer)
 {
  int length;
 
@@ -1310,10 +1210,10 @@ ODINFUNCTION3(DWORD, GetShortPathNameW,
 
   length = lstrlenW(lpszLongPath) + 1;
   if(length > cchBuffer) {
-  if(lpszShortPath) {
+      if(lpszShortPath) {
           *lpszShortPath = 0;
-  }
-        return(length); //return length required (including 0 terminator)
+      }
+      return(length); //return length required (including 0 terminator)
   }
   lstrcpyW(lpszShortPath, lpszLongPath);
   return(length-1);
@@ -1378,7 +1278,7 @@ DWORD WINAPI GetLongPathNameW( LPCWSTR lpszShortPath, LPWSTR lpszLongPath,
 }
 //******************************************************************************
 //******************************************************************************
-ODINPROCEDURE0(SetFileApisToANSI)
+void WIN32API SetFileApisToANSI()
 {
     dprintf(("!WARNING! SetFileApisToANSI() stub\n"));
 }
@@ -1398,9 +1298,7 @@ ODINPROCEDURE0(SetFileApisToANSI)
  * Author    : Patrick Haller [Mon, 1998/06/15 08:00]
  *****************************************************************************/
 
-ODINFUNCTION2(DWORD, GetCompressedFileSizeA,
-              LPCTSTR, lpFileName,
-              LPDWORD, lpFileSizeHigh)
+DWORD WIN32API GetCompressedFileSizeA(LPCTSTR lpFileName, LPDWORD lpFileSizeHigh)
 {
   dprintf(("KERNEL32: GetCompressedFileSizeA (%s, %08xh) not implemented.\n",
            lpFileName,
@@ -1426,9 +1324,7 @@ ODINFUNCTION2(DWORD, GetCompressedFileSizeA,
  * Author    : Patrick Haller [Mon, 1998/06/15 08:00]
  *****************************************************************************/
 
-ODINFUNCTION2(DWORD, GetCompressedFileSizeW,
-              LPCWSTR, lpFileName,
-              LPDWORD, lpFileSizeHigh)
+DWORD WIN32API GetCompressedFileSizeW(LPCWSTR lpFileName, LPDWORD lpFileSizeHigh)
 {
   LPCTSTR lpAsciiFileName;                             /* converted filename */
   DWORD   rc;                                             /* function result */
@@ -1460,10 +1356,8 @@ ODINFUNCTION2(DWORD, GetCompressedFileSizeW,
  * Author    : Patrick Haller [Mon, 1998/06/15 08:00]
  *****************************************************************************/
 
-ODINFUNCTION3(BOOL, GetFileAttributesExA,
-              LPCSTR, lpFileName,
-              GET_FILEEX_INFO_LEVELS, fInfoLevelId,
-              LPVOID, lpFileInformation)
+BOOL WIN32API GetFileAttributesExA(LPCSTR lpFileName, GET_FILEEX_INFO_LEVELS fInfoLevelId,
+                                   LPVOID lpFileInformation)
 {
   BOOL rc;
 
@@ -1505,10 +1399,9 @@ ODINFUNCTION3(BOOL, GetFileAttributesExA,
  * Author    : Patrick Haller [Mon, 1998/06/15 08:00]
  *****************************************************************************/
 
-ODINFUNCTION3(BOOL, GetFileAttributesExW,
-              LPCWSTR, lpFileName,
-              GET_FILEEX_INFO_LEVELS, fInfoLevelId,
-              LPVOID, lpFileInformation)
+BOOL WIN32API GetFileAttributesExW(LPCWSTR lpFileName, 
+                                   GET_FILEEX_INFO_LEVELS fInfoLevelId,
+                                   LPVOID lpFileInformation)
 {
   LPSTR nameA = HEAP_strdupWtoA( GetProcessHeap(), 0, lpFileName );
   BOOL res = GetFileAttributesExA( nameA, fInfoLevelId, lpFileInformation);
@@ -1518,18 +1411,16 @@ ODINFUNCTION3(BOOL, GetFileAttributesExW,
 
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION3(HANDLE, FindFirstChangeNotificationA,
-              LPCSTR, lpPathName,
-              BOOL, bWatchSubtree,
-              DWORD, dwNotifyFilter)
+HANDLE WIN32API FindFirstChangeNotificationA(LPCSTR lpPathName,
+                                             BOOL bWatchSubtree,
+                                             DWORD dwNotifyFilter)
 {
   dprintf(("KERNEL32:  FindFirstChangeNotificationA %s, Not implemented (faked)", lpPathName));
   return -1;
 }
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION1(BOOL, FindNextChangeNotification,
-              HANDLE, hChange)
+BOOL WIN32API FindNextChangeNotification(HANDLE hChange)
 {
   dprintf(("KERNEL32: FindNextChangeNotification (%08xh), Not implemented\n",
            hChange));
@@ -1538,7 +1429,7 @@ ODINFUNCTION1(BOOL, FindNextChangeNotification,
 }
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION1(BOOL, FindCloseChangeNotification, HANDLE, hChange)
+BOOL WIN32API FindCloseChangeNotification(HANDLE hChange)
 {
   dprintf(("KERNEL32:  OS2FindNextChangeNotification, Not implemented\n"));
 
@@ -1564,9 +1455,9 @@ ODINFUNCTION1(BOOL, FindCloseChangeNotification, HANDLE, hChange)
  *
  * Author    : Markus Montkowski [Tha, 1998/05/21 20:57]
  *****************************************************************************/
-ODINFUNCTION3(HANDLE, FindFirstChangeNotificationW, LPCWSTR, lpPathName,
-                                                    BOOL, bWatchSubtree,
-                                                    DWORD, dwNotifyFilter)
+HANDLE WIN32API FindFirstChangeNotificationW(LPCWSTR lpPathName,
+                                             BOOL  bWatchSubtree,
+                                             DWORD dwNotifyFilter)
 {
   LPSTR  lpAsciiPath;
   HANDLE hChange;
@@ -1579,10 +1470,10 @@ ODINFUNCTION3(HANDLE, FindFirstChangeNotificationW, LPCWSTR, lpPathName,
 }
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION8(BOOL, DeviceIoControl, HANDLE, hDevice, DWORD, dwIoControlCode,
-              LPVOID, lpInBuffer, DWORD, nInBufferSize,
-              LPVOID, lpOutBuffer, DWORD, nOutBufferSize,
-              LPDWORD, lpBytesReturned, LPOVERLAPPED, lpOverlapped)
+BOOL WIN32API DeviceIoControl(HANDLE hDevice, DWORD dwIoControlCode,
+                              LPVOID lpInBuffer, DWORD nInBufferSize,
+                              LPVOID lpOutBuffer, DWORD nOutBufferSize,
+                              LPDWORD lpBytesReturned, LPOVERLAPPED lpOverlapped)
 {
     return HMDeviceIoControl(hDevice, dwIoControlCode, lpInBuffer, nInBufferSize,
                              lpOutBuffer, nOutBufferSize, lpBytesReturned, lpOverlapped);
@@ -1601,7 +1492,7 @@ ODINFUNCTION8(BOOL, DeviceIoControl, HANDLE, hDevice, DWORD, dwIoControlCode,
  *             If the function fails, the return value is zero.
  *             To get extended error information, call GetLastError.
  * Remark    : If there are any I/O operations in progress for the specified
- *             file handle, and they were issued by the calling thread, the
+ *             file HANDLE and they were issued by the calling thread, the
  *             CancelIO function cancels them.
  *             Note that the I/O operations must have been issued as
  *             overlapped I/O. If they were not, the I/O operations would not
@@ -1611,11 +1502,11 @@ ODINFUNCTION8(BOOL, DeviceIoControl, HANDLE, hDevice, DWORD, dwIoControlCode,
  *             All I/O operations that are canceled will complete with the
  *             error ERROR_OPERATION_ABORTED. All completion notifications
  *             for the I/O operations will occur normally.
- * Status    : UNTESTED STUB
+ * Status    : 
  *
  * Author    : Markus Montkowski [Thu, 1998/05/19 11:46]
  *****************************************************************************/
-ODINFUNCTION1(BOOL, CancelIo, HANDLE, hFile)
+BOOL WIN32API CancelIo(HANDLE hFile)
 {
   return HMCancelIo(hFile);
 }
@@ -1631,11 +1522,10 @@ ODINFUNCTION1(BOOL, CancelIo, HANDLE, hFile)
  * Author    : Patrick Haller [Fri, 1999/06/18 03:44]
  *****************************************************************************/
 
-ODINFUNCTION4(BOOL, GetOverlappedResult,
-              HANDLE, hFile,              /* [in] handle of file to check on */
-              LPOVERLAPPED, lpOverlapped, /* [in/out] pointer to overlapped  */
-              LPDWORD, lpTransferred,     /* [in/out] number of bytes transferred  */
-              BOOL, bWait)                /* [in] wait for the transfer to complete ? */
+BOOL WIN32API  GetOverlappedResult(HANDLE hFile,              /* [in] handle of file to check on */
+                                   LPOVERLAPPED lpOverlapped, /* [in/out] pointer to overlapped  */
+                                   LPDWORD lpTransferred,     /* [in/out] number of bytes transferred  */
+                                   BOOL bWait)                /* [in] wait for the transfer to complete ? */
 {
   //NOTE: According to the SDK docs lpOverlapped->hEvent can be 0. This function
   //      is supposed to wait on the file handle in that case. We don't support

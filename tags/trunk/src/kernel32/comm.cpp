@@ -1,4 +1,4 @@
-/* $Id: comm.cpp,v 1.8 2001-11-28 15:35:15 sandervl Exp $ */
+/* $Id: comm.cpp,v 1.9 2002-02-09 12:45:11 sandervl Exp $ */
 
 /*
  * Comport functions
@@ -476,10 +476,8 @@ BOOL WIN32API CommConfigDialogW( LPCWSTR lpszName, HWND hWnd, LPCOMMCONFIG lpCC 
  * @author    Markus Montkowski
  *****************************************************************************/
 
-ODINFUNCTION3(BOOL,GetDefaultCommConfigA,
-               LPCSTR, lpszName,
-               LPCOMMCONFIG, lpCC,
-               LPDWORD, lpdwSize )
+BOOL WIN32API GetDefaultCommConfigA(LPCSTR lpszName, LPCOMMCONFIG lpCC,
+                                    LPDWORD lpdwSize)
 {
   HFILE hCOM;
   BOOL rc;
@@ -542,10 +540,7 @@ BOOL WIN32API GetDefaultCommConfigW( LPCWSTR lpszName, LPCOMMCONFIG lpCC, LPDWOR
  * @author    Markus Montkowski
  *****************************************************************************/
 
-ODINFUNCTION3(BOOL, SetDefaultCommConfigA,
-               LPCSTR, lpszName,
-               LPCOMMCONFIG, lpCC,
-               DWORD, dwSize )
+BOOL SetDefaultCommConfigA(LPCSTR lpszName, LPCOMMCONFIG lpCC, DWORD dwSize )
 {
   HFILE hCOM;
   BOOL rc;
@@ -617,7 +612,7 @@ BOOL WIN32API SetDefaultCommConfigW( LPCWSTR lpszName, LPCOMMCONFIG lpCC, DWORD 
  * @author    Markus Montkowski
  *****************************************************************************/
 
-ODINFUNCTION1(BOOL, ClearCommBreak, HANDLE, hFile )
+BOOL WIN32API ClearCommBreak(HANDLE hFile )
 {
   return HMCommClearCommBreak(hFile);
 }
@@ -632,10 +627,7 @@ ODINFUNCTION1(BOOL, ClearCommBreak, HANDLE, hFile )
  * @author    Markus Montkowski
  *****************************************************************************/
 
-ODINFUNCTION3(BOOL, SetupComm,
-               HANDLE, hFile,
-               DWORD, dwInQueue,
-               DWORD, dwOutQueue )
+BOOL SetupComm(HANDLE hFile, DWORD dwInQueue, DWORD dwOutQueue )
 {
   return HMCommSetupComm(hFile, dwInQueue, dwOutQueue);
 }
@@ -649,9 +641,7 @@ ODINFUNCTION3(BOOL, SetupComm,
  * @author    Markus Montkowski
  *****************************************************************************/
 
-ODINFUNCTION2 (BOOL, EscapeCommFunction,
-                 HANDLE, hFile,
-                 UINT, dwFunc )
+BOOL WIN32API EscapeCommFunction(HANDLE hFile, UINT dwFunc )
 {
   return HMCommEscapeCommFunction(hFile, dwFunc);
 }

@@ -424,8 +424,8 @@ DEBUGWRAP12(SetHandleInformation);
 DEBUGWRAP8(SetStdHandle);
 DEBUGWRAP8(GetCompressedFileSizeA);
 DEBUGWRAP8(GetCompressedFileSizeW);
-DEBUGWRAP0(SetFileApisToANSI);
-DEBUGWRAP0(SetFileApisToOEM);
+DEBUGWRAP0_NORET(SetFileApisToANSI);
+DEBUGWRAP0_NORET(SetFileApisToOEM);
 DEBUGWRAP8(SetFileAttributesA);
 DEBUGWRAP8(SetFileAttributesW);
 DEBUGWRAP16(SetFilePointer);
@@ -734,7 +734,7 @@ DEBUGWRAP0(GetCommandLineW);
 #define DBG_LOCALLOG	DBG_debug
 
 DEBUGWRAP4(DebugActiveProcess);
-DEBUGWRAP0(DebugBreak);
+DEBUGWRAP0_NORET(DebugBreak);
 DEBUGWRAP4(OutputDebugStringA);
 DEBUGWRAP4(OutputDebugStringW);
 DEBUGWRAP8(WaitForDebugEvent);

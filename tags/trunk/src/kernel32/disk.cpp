@@ -1,4 +1,4 @@
-/* $Id: disk.cpp,v 1.31 2002-01-08 18:20:45 sandervl Exp $ */
+/* $Id: disk.cpp,v 1.32 2002-02-09 12:45:12 sandervl Exp $ */
 
 /*
  * Win32 Disk API functions for OS/2
@@ -54,12 +54,9 @@ BOOL WIN32API SetVolumeLabelW(LPCWSTR lpRootPathName, LPCWSTR lpVolumeName)
 
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION5(BOOL, GetDiskFreeSpaceA,
-              LPCSTR, lpszRootPathName,
-              PDWORD, lpSectorsPerCluster,
-              PDWORD, lpBytesPerSector,
-              PDWORD, lpFreeClusters,
-              PDWORD, lpClusters)
+BOOL WIN32API GetDiskFreeSpaceA(LPCSTR lpszRootPathName, PDWORD lpSectorsPerCluster,
+                                PDWORD lpBytesPerSector, PDWORD lpFreeClusters,
+                                PDWORD lpClusters)
 {
   BOOL rc;
   DWORD dwSectorsPerCluster;    // address of sectors per cluster ter
@@ -104,18 +101,17 @@ ODINFUNCTION5(BOOL, GetDiskFreeSpaceA,
 }
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION5(BOOL, GetDiskFreeSpaceW,
-              LPCWSTR, lpszRootPathName,
-              PDWORD, lpSectorsPerCluster,
-              PDWORD, lpBytesPerSector,
-              PDWORD, lpFreeClusters,
-              PDWORD, lpClusters)
+BOOL WIN32API GetDiskFreeSpaceW(LPCWSTR lpszRootPathName,
+                                PDWORD  lpSectorsPerCluster,
+                                PDWORD  lpBytesPerSector,
+                                PDWORD  lpFreeClusters,
+                                PDWORD  lpClusters)
 {
   BOOL  rc;
   char *astring;
 
   astring = UnicodeToAsciiString((LPWSTR)lpszRootPathName);
-  rc = CALL_ODINFUNC(GetDiskFreeSpaceA)(astring, lpSectorsPerCluster, lpBytesPerSector, lpFreeClusters, lpClusters);
+  rc = GetDiskFreeSpaceA(astring, lpSectorsPerCluster, lpBytesPerSector, lpFreeClusters, lpClusters);
   FreeAsciiString(astring);
   return(rc);
 }
@@ -163,11 +159,10 @@ ODINFUNCTION5(BOOL, GetDiskFreeSpaceW,
  * Author    : Patrick Haller [Fri, 2000/01/08 23:44]
  *****************************************************************************/
 
-ODINFUNCTION4(BOOL,GetDiskFreeSpaceExA,
-              LPCSTR,          lpDirectoryName,
-              PULARGE_INTEGER, lpFreeBytesAvailableToCaller,
-              PULARGE_INTEGER, lpTotalNumberOfBytes,
-              PULARGE_INTEGER, lpTotalNumberOfFreeBytes )
+BOOL WIN32API GetDiskFreeSpaceExA(LPCSTR lpDirectoryName,
+                                  PULARGE_INTEGER lpFreeBytesAvailableToCaller,
+                                  PULARGE_INTEGER lpTotalNumberOfBytes,
+                                  PULARGE_INTEGER lpTotalNumberOfFreeBytes )
 {
     BOOL rc;
     DWORD dwSectorsPerCluster;  // address of sectors per cluster ter
@@ -196,11 +191,10 @@ ODINFUNCTION4(BOOL,GetDiskFreeSpaceExA,
 }
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION4(BOOL,GetDiskFreeSpaceExW,
-              LPCWSTR,         lpDirectoryName,
-              PULARGE_INTEGER, lpFreeBytesAvailableToCaller,
-              PULARGE_INTEGER, lpTotalNumberOfBytes,
-              PULARGE_INTEGER, lpTotalNumberOfFreeBytes )
+BOOL WIN32API GetDiskFreeSpaceExW(LPCWSTR         lpDirectoryName,
+                                  PULARGE_INTEGER lpFreeBytesAvailableToCaller,
+                                  PULARGE_INTEGER lpTotalNumberOfBytes,
+                                  PULARGE_INTEGER lpTotalNumberOfFreeBytes )
 {
  BOOL  rc;
  char *astring;
@@ -256,15 +250,14 @@ UINT WIN32API GetDriveTypeW(LPCWSTR lpszDrive)
 }
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION8(BOOL,    GetVolumeInformationA,
-              LPCSTR,  lpRootPathName,
-              LPSTR,   lpVolumeNameBuffer,
-              DWORD,   nVolumeNameSize,
-              PDWORD,  lpVolumeSerialNumber,
-              PDWORD,  lpMaximumComponentLength,
-              PDWORD,  lpFileSystemFlags,
-              LPSTR,   lpFileSystemNameBuffer,
-              DWORD,   nFileSystemNameSize)
+BOOL WIN32API GetVolumeInformationA(LPCSTR  lpRootPathName,
+                                    LPSTR   lpVolumeNameBuffer,
+                                    DWORD   nVolumeNameSize,
+                                    PDWORD  lpVolumeSerialNumber,
+                                    PDWORD  lpMaximumComponentLength,
+                                    PDWORD  lpFileSystemFlags,
+                                    LPSTR   lpFileSystemNameBuffer,
+                                    DWORD   nFileSystemNameSize)
 {
    CHAR   tmpstring[256];
    CHAR   szOrgFileSystemName[256] = "";
@@ -362,15 +355,14 @@ ODINFUNCTION8(BOOL,    GetVolumeInformationA,
 }
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION8(BOOL,    GetVolumeInformationW,
-              LPCWSTR, lpRootPathName,
-              LPWSTR,  lpVolumeNameBuffer,
-              DWORD,   nVolumeNameSize,
-              PDWORD,  lpVolumeSerialNumber,
-              PDWORD,  lpMaximumComponentLength,
-              PDWORD,  lpFileSystemFlags,
-              LPWSTR,  lpFileSystemNameBuffer,
-              DWORD,   nFileSystemNameSize)
+BOOL WIN32API GetVolumeInformationW(LPCWSTR lpRootPathName,
+                                    LPWSTR  lpVolumeNameBuffer,
+                                    DWORD   nVolumeNameSize,
+                                    PDWORD  lpVolumeSerialNumber,
+                                    PDWORD  lpMaximumComponentLength,
+                                    PDWORD  lpFileSystemFlags,
+                                    LPWSTR  lpFileSystemNameBuffer,
+                                    DWORD   nFileSystemNameSize)
 {
   char *asciiroot,
        *asciivol,
@@ -390,7 +382,7 @@ ODINFUNCTION8(BOOL,    GetVolumeInformationW,
   else
     asciiroot = NULL;
 
-  rc = CALL_ODINFUNC(GetVolumeInformationA)(asciiroot,
+  rc = GetVolumeInformationA(asciiroot,
                              asciivol,
                              nVolumeNameSize,
                              lpVolumeSerialNumber,
