@@ -1,4 +1,4 @@
-/* $Id: shell.h,v 1.2 2000-03-26 16:29:40 cbratschi Exp $ */
+/* $Id: shell.h,v 1.3 2000-05-18 18:06:13 sandervl Exp $ */
 
 /*
  *                              Shell Library definitions
@@ -129,20 +129,24 @@ LPWSTR WINAPI PathCombineW(LPWSTR szDest, LPCWSTR lpszDir, LPCWSTR lpszFile);
 #define  PathCombine WINELIB_NAME_AW(PathCombine)
 LPVOID WINAPI PathCombineAW(LPVOID szDest, LPCVOID lpszDir, LPCVOID lpszFile);
 
-LPCSTR WINAPI PathFindExtensionA(LPCSTR path);
-LPCWSTR WINAPI PathFindExtensionW(LPCWSTR path);
+LPSTR WINAPI PathFindExtensionA(LPCSTR path);
+LPWSTR WINAPI PathFindExtensionW(LPCWSTR path);
 #define  PathFindExtension WINELIB_NAME_AW(PathFindExtension)
-LPCVOID WINAPI PathFindExtensionAW(LPCVOID path);
+LPVOID WINAPI PathFindExtensionAW(LPCVOID path);
 
-LPCSTR WINAPI PathGetExtensionA(LPCSTR path, DWORD y, DWORD x);
-LPCWSTR WINAPI PathGetExtensionW(LPCWSTR path, DWORD y, DWORD x);
+LPSTR WINAPI PathGetExtensionA(LPCSTR path);
+LPWSTR WINAPI PathGetExtensionW(LPCWSTR path);
 #define  PathGetExtension WINELIB_NAME_AW(PathGetExtension)
-LPCVOID WINAPI PathGetExtensionAW(LPCVOID path, DWORD y, DWORD x);
+LPVOID WINAPI PathGetExtensionAW(LPCVOID path);
 
-LPCSTR WINAPI PathFindFilenameA(LPCSTR path);
-LPCWSTR WINAPI PathFindFilenameW(LPCWSTR path);
-#define  PathFindFilename WINELIB_NAME_AW(PathFindFilename)
-LPCVOID WINAPI PathFindFilenameAW(LPCVOID path);
+LPSTR WINAPI PathRemoveBackslashA(LPSTR lpszPath);
+LPWSTR WINAPI PathRemoveBackslashW(LPWSTR lpszPath);
+#define  PathRemoveBackslash WINELIB_NAME_AW(PathRemoveBackslash)
+
+LPSTR WINAPI PathFindFileNameA(LPCSTR path);
+LPWSTR WINAPI PathFindFileNameW(LPCWSTR path);
+#define  PathFindFileName WINELIB_NAME_AW(PathFindFileName)
+LPVOID WINAPI PathFindFileNameAW(LPCVOID path);
 
 BOOL WINAPI PathMatchSpecA(LPCSTR x, LPCSTR y);
 BOOL WINAPI PathMatchSpecW(LPCWSTR x, LPCWSTR y);
