@@ -1,4 +1,4 @@
-/* $Id: loadres.cpp,v 1.15 2000-01-10 23:29:12 sandervl Exp $ */
+/* $Id: loadres.cpp,v 1.16 2000-01-11 10:38:32 sandervl Exp $ */
 
 /*
  * Win32 resource API functions for OS/2
@@ -251,6 +251,7 @@ BOOL IsSystemBitmap(ULONG id)
         case OBM_OLD_RGARROW:
         case OBM_OLD_LFARROW:
         case OBM_CHECK:
+	case OBM_RADIOCHECK:
         case OBM_CHECKBOXES:
         case OBM_BTNCORNERS:
         case OBM_COMBO:
