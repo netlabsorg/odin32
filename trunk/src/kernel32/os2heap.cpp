@@ -1,10 +1,14 @@
-/* $Id: os2heap.cpp,v 1.9 1999-08-25 00:03:50 phaller Exp $ */
+/* $Id: os2heap.cpp,v 1.10 1999-10-01 16:03:10 sandervl Exp $ */
 
 /*
  * Heap class for OS/2
  *
  * Copyright 1998 Sander van Leeuwen
  *
+ *
+ * NOTE: ReAlloc allocates memory using Alloc if memory pointer == NULL
+ *       WINE controls depend on this, even though it apparently 
+ *       doesn't work like this in Windows.
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *
@@ -234,7 +238,11 @@ LPVOID OS2Heap::ReAlloc(DWORD dwFlags, LPVOID lpMem, DWORD dwBytes)
   int    i;
 
   if (dwBytes == 0) return NULL;         // intercept stupid parameters
-  if (lpMem == 0)   return NULL;
+ 
+  //NOTE: Allocate memory using Alloc -> WINE controls depend on this, even
+  //      though it apparently doesn't work in Windows.
+  if (lpMem == 0)   return Alloc(dwFlags, dwBytes);
+//  if (lpMem == 0)   return NULL;
 
   if (Size(0,lpMem) == dwBytes) return lpMem; // if reallocation with same size
                                                 // don't do anything
