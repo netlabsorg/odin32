@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.8 1999-09-25 17:34:36 sandervl Exp $ */
+/* $Id: pmwindow.cpp,v 1.9 1999-09-26 10:09:59 sandervl Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -481,6 +481,20 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
     //**************************************************************************
     case WM_VSCROLL:
     case WM_HSCROLL:
+    {
+     ULONG scrollPos, scrollCode, scrollMsg;
+
+	scrollCode = SHORT2FROMMP(mp2);
+	scrollPos  = SHORT1FROMMP(mp2);
+	scrollMsg  = msg;
+
+	OSLibTranslateScrollCmdAndMsg(&scrollMsg, &scrollCode);
+
+        if(win32wnd->MsgScroll(scrollMsg, scrollCode, scrollPos)) {
+            goto RunDefWndProc;
+        }
+	break;
+    }
 
     case WM_CONTROL:
 
