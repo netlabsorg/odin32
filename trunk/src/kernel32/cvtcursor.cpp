@@ -1,4 +1,4 @@
-/* $Id: cvtcursor.cpp,v 1.10 2000-02-16 14:25:37 sandervl Exp $ */
+/* $Id: cvtcursor.cpp,v 1.11 2001-03-27 16:18:26 sandervl Exp $ */
 
 /*
  * PE2LX cursor conversion code
@@ -36,6 +36,7 @@ ULONG QueryConvertedCursorSize(CursorComponent *curHdr, int size)
 {
  WINBITMAPINFOHEADER *bmpHdr = (WINBITMAPINFOHEADER *)(curHdr+1);
  int bwsize, colorsize, rgbsize, cursorsize;
+ ULONG biSizeImage;
 
   bwsize   = (bmpHdr->biWidth*(bmpHdr->biHeight/2))/8;
   colorsize = bmpHdr->biWidth*(bmpHdr->biHeight/2);
@@ -64,17 +65,19 @@ ULONG QueryConvertedCursorSize(CursorComponent *curHdr, int size)
                 break;
   }
   if(bmpHdr->biSizeImage == 0 && bmpHdr->biCompression == 0) {
-        bmpHdr->biSizeImage = bwsize + colorsize;
+        biSizeImage = bwsize + colorsize;
   }
+  else  biSizeImage = bmpHdr->biSizeImage;
 
   //SvL: 28-09-'98: cllngenu.dll has an incorrect size in the header
-  if(bmpHdr->biSizeImage < colorsize) {
-        bmpHdr->biSizeImage = colorsize;
+  if(biSizeImage < colorsize) {
+        biSizeImage = colorsize;
   }
+
   if(bmpHdr->biBitCount > 1) {
 	//And mask, xor mask (0) + color image
   	cursorsize = 2*sizeof(BITMAPFILEHEADER2) + 2*sizeof(RGB2) +
-             	     rgbsize + 2*bwsize + bmpHdr->biSizeImage;
+             	     rgbsize + 2*bwsize + biSizeImage;
   }
   else {
 	//And + xor mask
@@ -94,6 +97,7 @@ void *ConvertCursor(CursorComponent *curHdr, int size, int *os2size, int offsetB
  WINBITMAPINFOHEADER *bmpHdr = (WINBITMAPINFOHEADER *)(curHdr+1);
  BITMAPFILEHEADER2   *cursorhdr, *cursorhdr2;
  int        i, bwsize, bmpsize, cursorsize, rgbsize, colorsize;
+ ULONG      biSizeImage;
 
   dprintf(("ConvertCursor: Cursor size %d", size));
   bwsize   = (bmpHdr->biWidth*(bmpHdr->biHeight/2))/8;
@@ -123,13 +127,15 @@ void *ConvertCursor(CursorComponent *curHdr, int size, int *os2size, int offsetB
                 break;
   }
   if(bmpHdr->biSizeImage == 0 && bmpHdr->biCompression == 0) {
-        bmpHdr->biSizeImage = bwsize + colorsize;
+        biSizeImage = bwsize + colorsize;
   }
+  else  biSizeImage = bmpHdr->biSizeImage;
 
   //SvL: 28-09-'98: cllngenu.dll has an incorrect size in the header
-  if(bmpHdr->biSizeImage < colorsize) {
-        bmpHdr->biSizeImage = colorsize;
+  if(biSizeImage < colorsize) {
+        biSizeImage = colorsize;
   }
+
   if(bmpHdr->biBitCount == 1) {
 	//And + xor mask 
 	cursorsize = sizeof(BITMAPFILEHEADER2) + 2*sizeof(RGB2) + 2*bwsize;
@@ -137,7 +143,7 @@ void *ConvertCursor(CursorComponent *curHdr, int size, int *os2size, int offsetB
   else {
 	//And mask, xor mask (0) + color image
   	cursorsize = 2*sizeof(BITMAPFILEHEADER2) + 2*sizeof(RGB2) +
-             	     rgbsize + 2*bwsize + bmpHdr->biSizeImage;
+             	     rgbsize + 2*bwsize + biSizeImage;
   }
 
   cursorhdr  = (BITMAPFILEHEADER2 *)malloc(cursorsize);
@@ -169,7 +175,7 @@ void *ConvertCursor(CursorComponent *curHdr, int size, int *os2size, int offsetB
   cursorhdr->bmp2.cBitCount = 1;
   cursorhdr->bmp2.ulCompression   = BCA_UNCOMP;
   cursorhdr->bmp2.ulColorEncoding = BCE_RGB;
-  dprintf2(("Cursor size    : %d", bmpHdr->biSizeImage));
+  dprintf2(("Cursor size    : %d", biSizeImage));
   dprintf2(("Cursor Width   : %d", bmpHdr->biWidth));
   //height for both the XOR and AND bitmap (color & BW)
   dprintf2(("Height         : %d", bmpHdr->biHeight));
