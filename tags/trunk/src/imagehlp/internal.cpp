@@ -1,15 +1,16 @@
-/* $Id: internal.cpp,v 1.1 1999-08-29 14:54:54 sandervl Exp $ */
 /*
  *	IMAGEHLP library
  *
  *	Copyright 1998	Patrik Stridvall
- *	Copyright 1999	Jens Wiessner
  */
 
 #include <os2win.h>
+#include <odinwrap.h>
+#include <imagehlp.h>
+#include <heapstring.h>
 
 /***********************************************************************
- *           InitializeListHead32
+ *		InitializeListHead
  */
 VOID InitializeListHead(PLIST_ENTRY pListHead)
 {
@@ -18,7 +19,7 @@ VOID InitializeListHead(PLIST_ENTRY pListHead)
 }
 
 /***********************************************************************
- *           InsertHeadList32
+ *		InsertHeadList
  */
 VOID InsertHeadList(PLIST_ENTRY pListHead, PLIST_ENTRY pEntry)
 {
@@ -28,7 +29,7 @@ VOID InsertHeadList(PLIST_ENTRY pListHead, PLIST_ENTRY pEntry)
 }
 
 /***********************************************************************
- *           InsertTailList32
+ *		InsertTailList
  */
 VOID InsertTailList(PLIST_ENTRY pListHead, PLIST_ENTRY pEntry)
 {
@@ -38,7 +39,7 @@ VOID InsertTailList(PLIST_ENTRY pListHead, PLIST_ENTRY pEntry)
 }
 
 /***********************************************************************
- *           IsListEmpty32
+ *		IsListEmpty
  */
 BOOLEAN IsListEmpty(PLIST_ENTRY pListHead)
 {
@@ -46,7 +47,7 @@ BOOLEAN IsListEmpty(PLIST_ENTRY pListHead)
 }
 
 /***********************************************************************
- *           PopEntryList32
+ *		PopEntryList
  */
 PSINGLE_LIST_ENTRY PopEntryList(PSINGLE_LIST_ENTRY pListHead)
 {
@@ -55,7 +56,7 @@ PSINGLE_LIST_ENTRY PopEntryList(PSINGLE_LIST_ENTRY pListHead)
 }
 
 /***********************************************************************
- *           PushEntryList32
+ *		PushEntryList
  */
 VOID PushEntryList(
   PSINGLE_LIST_ENTRY pListHead, PSINGLE_LIST_ENTRY pEntry)
@@ -64,7 +65,7 @@ VOID PushEntryList(
 }
 
 /***********************************************************************
- *           RemoveEntryList32
+ *		RemoveEntryList
  */
 VOID RemoveEntryList(PLIST_ENTRY pEntry)
 {
@@ -75,7 +76,7 @@ VOID RemoveEntryList(PLIST_ENTRY pEntry)
 }
 
 /***********************************************************************
- *           RemoveHeadList32
+ *		RemoveHeadList
  */
 PLIST_ENTRY RemoveHeadList(PLIST_ENTRY pListHead)
 {
@@ -95,7 +96,7 @@ PLIST_ENTRY RemoveHeadList(PLIST_ENTRY pListHead)
 }
 
 /***********************************************************************
- *           RemoveTailList32
+ *		RemoveTailList
  */
 PLIST_ENTRY RemoveTailList(PLIST_ENTRY pListHead)
 {
@@ -105,7 +106,3 @@ PLIST_ENTRY RemoveTailList(PLIST_ENTRY pListHead)
   else
     return NULL;
 }
-
-
-
-

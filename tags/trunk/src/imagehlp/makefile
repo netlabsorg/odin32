@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.9 2000-03-06 23:38:39 bird Exp $
+# $Id: makefile,v 1.10 2000-05-29 22:31:30 sandervl Exp $
 
 #
 # Odin32 API
@@ -24,7 +24,12 @@ CLEANEXTRAS = imagehlprsrc.asm
 # Object files. All objects should be prefixed with $(OBJDIR)!
 OBJS = \
 $(OBJDIR)\imagehlp.obj \
+$(OBJDIR)\access.obj \
+$(OBJDIR)\debug.obj \
+$(OBJDIR)\integrity.obj \
 $(OBJDIR)\internal.obj \
+$(OBJDIR)\modify.obj \
+$(OBJDIR)\symbol.obj \
 $(OBJDIR)\initterm.obj \
 $(OBJDIR)\imagehlprsrc.obj
 
