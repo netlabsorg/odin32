@@ -1,4 +1,4 @@
-; $Id: MPR.DEF,v 1.5 1999-12-28 10:31:01 sandervl Exp $
+; $Id: MPR.DEF,v 1.6 2003-09-24 10:16:40 sandervl Exp $
 
 ;
 ; Based on NT 4.0 SP6: MPR.DLL 
@@ -7,8 +7,8 @@ LIBRARY MPR INITINSTANCE
 DATA MULTIPLE NONSHARED
 EXPORTS
 
-  MultinetGetConnectionPerformanceA@1  = _MultinetGetConnectionPerformanceA@8  @1
-  MultinetGetConnectionPerformanceW@2  = _MultinetGetConnectionPerformanceW@8  @2
+  MultinetGetConnectionPerformanceA    = _MultinetGetConnectionPerformanceA@8  @1
+  MultinetGetConnectionPerformanceW    = _MultinetGetConnectionPerformanceW@8  @2
 ; MultinetGetErrorTextA@3              = _MultinetGetErrorTextA@??             @3
 ; MultinetGetErrorTextW@4              = _MultinetGetErrorTextW@??             @4
 ; RestoreConnectionA0@5                = _RestoreConnectionA0@??               @5
