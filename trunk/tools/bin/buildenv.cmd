@@ -1,4 +1,4 @@
-/* $Id: buildenv.cmd,v 1.40 2002-12-18 16:45:19 bird Exp $
+/* $Id: buildenv.cmd,v 1.41 2003-01-20 22:15:58 bird Exp $
  *
  * This is the master tools environment script. It contains environment
  * configurations for many development tools. Each tool can be installed
@@ -26,7 +26,7 @@
     /*
      * Version
      */
-    sVersion = '1.0.12 [2002-12-18]';
+    sVersion = '1.0.14 [2003-01-20]';
 
     /*
      * Create argument array with lowercase arguments.
@@ -838,7 +838,7 @@ PathSetDefault: procedure expose aCfg. aPath. sPathFile
         aPath.i.sPId = 'emxpgcc';                   aPath.i.sPath = 'f:\emxpgcc';                   i = i + 1;
         aPath.i.sPId = 'freetypeemx';               aPath.i.sPath = 'f:\Freetype\v1.3.1-emx\emx';   i = i + 1;
         aPath.i.sPId = 'gcc302';                    aPath.i.sPath = 'f:\gcc302beta';                i = i + 1;
-        aPath.i.sPId = 'gcc303';                    aPath.i.sPath = 'f:\gcc303beta';                i = i + 1;
+        aPath.i.sPId = 'gcc303';                    aPath.i.sPath = 'f:\gcc\v3.0.3beta\emx';        i = i + 1;
         aPath.i.sPId = 'icatgam';                   aPath.i.sPath = 'f:\icatos2';                   i = i + 1;
         aPath.i.sPId = 'icatgam406rc1';             aPath.i.sPath = 'f:\icatos2.4.0.6.rc1';         i = i + 1;
         aPath.i.sPId = 'icatpe';                    aPath.i.sPath = 'f:\icatpe';                    i = i + 1;
@@ -1996,7 +1996,7 @@ GCC30x: procedure expose aCfg. aPath. sPathFile
     call EnvSet      fRM, 'BUILD_PLATFORM', 'OS2'
 
     call EnvAddFront fRM, 'BEGINLIBPATH',       sGCCBack'\dll;'
-    call EnvAddFront fRM, 'PATH',               sGCCBack'\bin;'
+    call EnvAddFront fRM, 'PATH',               sGCCBack'\bin.new;'sGCCBack'\bin;'
     call EnvAddFront fRM, 'DPATH',              sGCCBack'\book;'
     call EnvAddFront fRM, 'BOOKSHELF',          sGCCBack'\book;'
     call EnvAddFront fRM, 'HELP',               sGCCBack'\help;'
@@ -2012,13 +2012,14 @@ GCC30x: procedure expose aCfg. aPath. sPathFile
     /*
      * Verify.
      */
+    ch = right(sToolId, 1);
     if (pos('verify', sOperation) <= 0) then
         return 0;
-    if (    \CfgVerifyFile(sGCCBack'\bin\gcc.exe', fQuiet),
-        |   \CfgVerifyFile(sGCCBack'\bin\g++.exe', fQuiet),
-        |   \CfgVerifyFile(sGCCBack'\bin\as.exe', fQuiet),
-        |   \CfgVerifyFile(sGCCBack'\bin\readelf.exe', fQuiet),
-        |   \CfgVerifyFile(sGCCBack'\bin\emxomf.exe', fQuiet),
+    if (    \CfgVerifyFile(sGCCBack'\bin.new\gcc.exe', fQuiet),
+        |   \CfgVerifyFile(sGCCBack'\bin.new\g++.exe', fQuiet),
+        |   \CfgVerifyFile(sGCCBack'\bin.new\as.exe', fQuiet),
+        |   \CfgVerifyFile(sGCCBack'\bin.new\readelf.exe', fQuiet),
+        |   \CfgVerifyFile(sGCCBack'\bin.new\emxomf.exe', fQuiet),
         |   \CfgVerifyFile(sGCCBack'\dll\bfd211.dll', fQuiet),
         |   \CfgVerifyFile(sGCCBack'\lib\iberty.a', fQuiet),
         |   \CfgVerifyFile(sGCCBack'\lib\iberty.lib', fQuiet),
@@ -2028,6 +2029,8 @@ GCC30x: procedure expose aCfg. aPath. sPathFile
         |   \CfgVerifyFile(sGCCBack'\lib\opcodes.lib', fQuiet),
         |   \CfgVerifyFile(sGCCBack'\lib\opcodes_s.a', fQuiet),
         |   \CfgVerifyFile(sGCCBack'\lib\opcodes_s.lib', fQuiet),
+        |   \CfgVerifyFile(sGCCBack'\lib\gcc-lib\i386-pc-os2_emx\3.0.'ch'\st\gcc_dll.lib', fQuiet),
+        |   \CfgVerifyFile(sGCCBack'\lib\gcc-lib\i386-pc-os2_emx\3.0.'ch'\st\stdcxx.lib', fQuiet),
         ) then
         return 2;
 
