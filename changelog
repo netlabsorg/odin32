@@ -1,7 +1,9 @@
- /* $Id: changelog,v 1.457 1999-11-19 16:23:36 achimha Exp $ */
+ /* $Id: changelog,v 1.458 1999-11-19 17:14:48 achimha Exp $ */
 
  99-11-14: Achim Hasenmueller <achimha@innotek.de>
         - COMCTL32: Merged with WINE 991114
+                    Introduced workaround for blocks after treeview
+                    text items in regedit, remove trailing 0xA char
 
  99-11-18: knut st. osmundsen <knut.stange.osmundsen@pmsc.no>
     - KERNEL32:   Win32Pe2LxImage didn't issue the setFullPath(szFileName)
