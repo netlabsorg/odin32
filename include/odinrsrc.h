@@ -1,4 +1,4 @@
-/* $Id: odinrsrc.h,v 1.1 1999-10-11 20:15:47 sandervl Exp $ */
+/* $Id: odinrsrc.h,v 1.2 2001-04-16 17:02:51 sandervl Exp $ */
 /*
  * ODIN - Version resource constants
  *
