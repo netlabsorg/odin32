@@ -1,4 +1,4 @@
-/* $Id: hmthread.cpp,v 1.7 2001-04-26 13:22:47 sandervl Exp $ */
+/* $Id: hmthread.cpp,v 1.8 2001-06-06 18:59:57 phaller Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -77,6 +77,9 @@ HANDLE HMDeviceThreadClass::CreateThread(PHMHANDLEDATA          pHMHandleData,
                                               (LPVOID)winthread,
                                               fdwCreate,
                                               lpIDThread);
+  
+  dprintf(("CreateThread created %08xh\n", pHMHandleData->hHMHandle));
+  
   return pHMHandleData->hHMHandle;
 }
 //******************************************************************************
@@ -186,6 +189,10 @@ BOOL HMDeviceThreadClass::CloseHandle(PHMHANDLEDATA pHMHandleData)
 DWORD HMDeviceThreadClass::WaitForSingleObject(PHMHANDLEDATA pHMHandleData,
                                                DWORD  dwTimeout)
 {
+  dprintf(("HMThread::WaitForSingleObject (%08xh,%08xh)\n",
+           pHMHandleData->hHMHandle,
+           dwTimeout));
+  
   //This doesn't work very well in Open32 (object's state never signaled)
   if(pHMHandleData->dwUserData == THREAD_TERMINATED) {
 	return WAIT_OBJECT_0;
