@@ -1,4 +1,4 @@
-/* $Id: Fake.c,v 1.4 2001-11-19 03:16:15 bird Exp $
+/* $Id: tstFake.c,v 1.1 2002-03-30 17:05:46 bird Exp $
  *
  * Fake stubs for the ldr and kernel functions we imports or overloads.
  *
@@ -8,7 +8,7 @@
  *
  */
 #ifndef NOFILEID
-static const char szFileId[] = "$Id: Fake.c,v 1.4 2001-11-19 03:16:15 bird Exp $";
+static const char szFileId[] = "$Id: tstFake.c,v 1.1 2002-03-30 17:05:46 bird Exp $";
 #endif
 
 /*******************************************************************************
@@ -49,7 +49,7 @@ static const char szFileId[] = "$Id: Fake.c,v 1.4 2001-11-19 03:16:15 bird Exp $
 #include <OS2Krnl.h>
 #include "dev32.h"
 #include "testcase.h"
-#include "kTypes.h"
+#include "kLib/kTypes.h"
 
 #include "kKLmalloc.h"
 
