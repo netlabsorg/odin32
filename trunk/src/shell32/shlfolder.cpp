@@ -1,11 +1,11 @@
-/* $Id: shlfolder.cpp,v 1.4 1999-11-10 22:13:09 phaller Exp $ */
+/* $Id: shlfolder.cpp,v 1.5 2000-01-08 02:43:27 phaller Exp $ */
 /*
  * Shell Folder stuff
  *
  * Copyright 1997 Marcus Meissner
  * Copyright 1998, 1999                  Juergen Schmied
  *
- * IShellFolder with IDropTarget, IPersistFolder
+ * IShellFolder2 and related interfaces
  *
  */
 
@@ -28,6 +28,7 @@
 #include "wine/obj_shellfolder.h"
 #include "wine/undocshell.h"
 #include "shell32_main.h"
+#include "shresdef.h"
 
 #include <heapstring.h>
 #include <misc.h>
@@ -35,6 +36,15 @@
 DEFAULT_DEBUG_CHANNEL(shell)
 
 #define MEM_DEBUG 1
+
+typedef struct
+{
+  int colnameid;
+  int pcsFlags;
+  int fmt;
+  int cxChar;
+
+} shvheader;
 
 /***************************************************************************
  *  GetNextElement (internal function)
@@ -221,6 +231,16 @@ static IShellFolder * ISF_MyComputer_Constructor(void);
 
 #define _IDropTarget_Offset ((int)(&(((IGenericSFImpl*)0)->lpvtblDropTarget)))
 #define _ICOM_THIS_From_IDropTarget(class, name) class* This = (class*)(((char*)name)-_IDropTarget_Offset);
+
+static shvheader GenericSFHeader [] =
+{
+ { IDS_SHV_COLUMN1, SHCOLSTATE_TYPE_STR | SHCOLSTATE_ONBYDEFAULT, LVCFMT_RIGHT, 15 },
+ { IDS_SHV_COLUMN2, SHCOLSTATE_TYPE_STR | SHCOLSTATE_ONBYDEFAULT, LVCFMT_RIGHT, 10 },
+ { IDS_SHV_COLUMN3, SHCOLSTATE_TYPE_STR | SHCOLSTATE_ONBYDEFAULT, LVCFMT_RIGHT, 10 },
+ { IDS_SHV_COLUMN4, SHCOLSTATE_TYPE_DATE | SHCOLSTATE_ONBYDEFAULT, LVCFMT_RIGHT, 12 },
+ { IDS_SHV_COLUMN5, SHCOLSTATE_TYPE_STR | SHCOLSTATE_ONBYDEFAULT, LVCFMT_RIGHT, 5 }
+};
+#define GENERICSHELLVIEWCOLUMNS 5
 
 /**************************************************************************
 *  registers clipboardformat once
@@ -1014,8 +1034,13 @@ static HRESULT WINAPI IShellFolder_fnGetDefaultColumn(
    ULONG *pDisplay)
 {
    ICOM_THIS(IGenericSFImpl, iface);
+
    TRACE("(%p)\n",This);
-   return E_NOTIMPL;
+
+   if (pSort) *pSort = 0;
+   if (pDisplay) *pDisplay = 0;
+
+   return S_OK;
 }
 static HRESULT WINAPI IShellFolder_fnGetDefaultColumnState(
    IShellFolder2 * iface,
@@ -1023,8 +1048,14 @@ static HRESULT WINAPI IShellFolder_fnGetDefaultColumnState(
    DWORD *pcsFlags)
 {
    ICOM_THIS(IGenericSFImpl, iface);
+
    TRACE("(%p)\n",This);
-   return E_NOTIMPL;
+
+   if (!pcsFlags || iColumn >= GENERICSHELLVIEWCOLUMNS ) return E_INVALIDARG;
+
+   *pcsFlags = GenericSFHeader[iColumn].pcsFlags;
+
+   return S_OK;
 }
 static HRESULT WINAPI IShellFolder_fnGetDetailsEx(
    IShellFolder2 * iface,
@@ -1043,8 +1074,47 @@ static HRESULT WINAPI IShellFolder_fnGetDetailsOf(
    SHELLDETAILS *psd)
 {
    ICOM_THIS(IGenericSFImpl, iface);
-   TRACE("(%p)\n",This);
-   return E_NOTIMPL;
+   HRESULT hr = E_FAIL;
+
+   TRACE("(%p)->(%p %i %p)\n",This, pidl, iColumn, psd);
+
+   if (!psd || iColumn >= GENERICSHELLVIEWCOLUMNS ) return E_INVALIDARG;
+
+   if (!pidl)
+   {
+     /* the header titles */
+     psd->fmt = GenericSFHeader[iColumn].fmt;
+     psd->cxChar = GenericSFHeader[iColumn].cxChar;
+     psd->str.uType = STRRET_CSTRA;
+     LoadStringA(shell32_hInstance, GenericSFHeader[iColumn].colnameid, psd->str.u.cStr, MAX_PATH);
+     return S_OK;
+   }
+   else
+   {
+     /* the data from the pidl */
+     switch(iColumn)
+     {
+       case 0: /* name */
+         hr = IShellFolder_GetDisplayNameOf(iface, pidl, SHGDN_NORMAL | SHGDN_INFOLDER, &psd->str);
+         break;
+       case 1: /* size */
+         _ILGetFileSize (pidl, psd->str.u.cStr, MAX_PATH);
+         break;
+       case 2: /* type */
+         _ILGetFileType(pidl, psd->str.u.cStr, MAX_PATH);
+         break;
+       case 3: /* date */
+         _ILGetFileDate(pidl, psd->str.u.cStr, MAX_PATH);
+         break;
+       case 4: /* attributes */
+         _ILGetAttributeStr(pidl, psd->str.u.cStr, MAX_PATH);
+         break;
+     }
+     hr = S_OK;
+     psd->str.uType = STRRET_CSTRA;
+   }
+
+   return hr;
 }
 static HRESULT WINAPI IShellFolder_fnMapNameToSCID(
    IShellFolder2 * iface,
@@ -1089,6 +1159,16 @@ ICOM_VTABLE(IShellFolder2) sfvt =
 *  [Desktopfolder]                       IShellFolder implementation
 */
 extern struct ICOM_VTABLE(IShellFolder2) sfdvt;
+
+static shvheader DesktopSFHeader [] =
+{
+ { IDS_SHV_COLUMN1, SHCOLSTATE_TYPE_STR | SHCOLSTATE_ONBYDEFAULT, LVCFMT_RIGHT, 15 },
+ { IDS_SHV_COLUMN2, SHCOLSTATE_TYPE_STR | SHCOLSTATE_ONBYDEFAULT, LVCFMT_RIGHT, 10 },
+ { IDS_SHV_COLUMN3, SHCOLSTATE_TYPE_STR | SHCOLSTATE_ONBYDEFAULT, LVCFMT_RIGHT, 10 },
+ { IDS_SHV_COLUMN4, SHCOLSTATE_TYPE_DATE | SHCOLSTATE_ONBYDEFAULT, LVCFMT_RIGHT, 12 },
+ { IDS_SHV_COLUMN5, SHCOLSTATE_TYPE_STR | SHCOLSTATE_ONBYDEFAULT, LVCFMT_RIGHT, 5 }
+};
+#define DESKTOPSHELLVIEWCOLUMNS 5
 
 /**************************************************************************
 *  ISF_Desktop_Constructor
@@ -1418,6 +1498,121 @@ static HRESULT WINAPI ISF_Desktop_fnGetDisplayNameOf(
    return S_OK;
 }
 
+static HRESULT WINAPI ISF_Desktop_fnGetDefaultSearchGUID(
+   IShellFolder2 * iface,
+   GUID *pguid)
+{
+   ICOM_THIS(IGenericSFImpl, iface);
+   FIXME("(%p)\n",This);
+   return E_NOTIMPL;
+}
+static HRESULT WINAPI ISF_Desktop_fnEnumSearches(
+   IShellFolder2 * iface,
+   IEnumExtraSearch **ppenum)
+{
+   ICOM_THIS(IGenericSFImpl, iface);
+   FIXME("(%p)\n",This);
+   return E_NOTIMPL;
+}
+static HRESULT WINAPI ISF_Desktop_fnGetDefaultColumn(
+   IShellFolder2 * iface,
+   DWORD dwRes,
+   ULONG *pSort,
+   ULONG *pDisplay)
+{
+   ICOM_THIS(IGenericSFImpl, iface);
+
+   TRACE("(%p)\n",This);
+
+   if (pSort) *pSort = 0;
+   if (pDisplay) *pDisplay = 0;
+
+   return S_OK;
+}
+static HRESULT WINAPI ISF_Desktop_fnGetDefaultColumnState(
+   IShellFolder2 * iface,
+   UINT iColumn,
+   DWORD *pcsFlags)
+{
+   ICOM_THIS(IGenericSFImpl, iface);
+
+   TRACE("(%p)\n",This);
+
+   if (!pcsFlags || iColumn >= DESKTOPSHELLVIEWCOLUMNS ) return E_INVALIDARG;
+
+   *pcsFlags = DesktopSFHeader[iColumn].pcsFlags;
+
+   return S_OK;
+}
+static HRESULT WINAPI ISF_Desktop_fnGetDetailsEx(
+   IShellFolder2 * iface,
+   LPCITEMIDLIST pidl,
+   const SHCOLUMNID *pscid,
+   VARIANT *pv)
+{
+   ICOM_THIS(IGenericSFImpl, iface);
+   FIXME("(%p)\n",This);
+
+   return E_NOTIMPL;
+}
+static HRESULT WINAPI ISF_Desktop_fnGetDetailsOf(
+   IShellFolder2 * iface,
+   LPCITEMIDLIST pidl,
+   UINT iColumn,
+   SHELLDETAILS *psd)
+{
+   ICOM_THIS(IGenericSFImpl, iface);
+   HRESULT hr = E_FAIL;;
+
+   TRACE("(%p)->(%p %i %p)\n",This, pidl, iColumn, psd);
+
+   if (!psd || iColumn >= DESKTOPSHELLVIEWCOLUMNS ) return E_INVALIDARG;
+
+   if (!pidl)
+   {
+     psd->fmt = DesktopSFHeader[iColumn].fmt;
+     psd->cxChar = DesktopSFHeader[iColumn].cxChar;
+     psd->str.uType = STRRET_CSTRA;
+     LoadStringA(shell32_hInstance, DesktopSFHeader[iColumn].colnameid, psd->str.u.cStr, MAX_PATH);
+     return S_OK;
+   }
+   else
+   {
+     /* the data from the pidl */
+     switch(iColumn)
+     {
+       case 0: /* name */
+         hr = IShellFolder_GetDisplayNameOf(iface, pidl, SHGDN_NORMAL | SHGDN_INFOLDER, &psd->str);
+         break;
+       case 1: /* size */
+         _ILGetFileSize (pidl, psd->str.u.cStr, MAX_PATH);
+         break;
+       case 2: /* type */
+         _ILGetFileType(pidl, psd->str.u.cStr, MAX_PATH);
+         break;
+       case 3: /* date */
+         _ILGetFileDate(pidl, psd->str.u.cStr, MAX_PATH);
+         break;
+       case 4: /* attributes */
+         _ILGetAttributeStr(pidl, psd->str.u.cStr, MAX_PATH);
+         break;
+     }
+     hr = S_OK;
+     psd->str.uType = STRRET_CSTRA;
+   }
+
+   return hr;
+}
+static HRESULT WINAPI ISF_Desktop_fnMapNameToSCID(
+   IShellFolder2 * iface,
+   LPCWSTR pwszName,
+   SHCOLUMNID *pscid)
+{
+   ICOM_THIS(IGenericSFImpl, iface);
+   FIXME("(%p)\n",This);
+   return E_NOTIMPL;
+}
+
 ICOM_VTABLE(IShellFolder2) sfdvt =
 {
    ICOM_MSVTABLE_COMPAT_DummyRTTIVALUE
@@ -1436,13 +1631,13 @@ ICOM_VTABLE(IShellFolder2) sfdvt =
    IShellFolder_fnSetNameOf,
 
    /* ShellFolder2 */
-   IShellFolder_fnGetDefaultSearchGUID,
-   IShellFolder_fnEnumSearches,
-   IShellFolder_fnGetDefaultColumn,
-   IShellFolder_fnGetDefaultColumnState,
-   IShellFolder_fnGetDetailsEx,
-   IShellFolder_fnGetDetailsOf,
-   IShellFolder_fnMapNameToSCID
+   ISF_Desktop_fnGetDefaultSearchGUID,
+   ISF_Desktop_fnEnumSearches,
+   ISF_Desktop_fnGetDefaultColumn,
+   ISF_Desktop_fnGetDefaultColumnState,
+   ISF_Desktop_fnGetDetailsEx,
+   ISF_Desktop_fnGetDetailsOf,
+   ISF_Desktop_fnMapNameToSCID
 };
 
 
@@ -1451,6 +1646,15 @@ ICOM_VTABLE(IShellFolder2) sfdvt =
 */
 
 extern struct ICOM_VTABLE(IShellFolder2) sfmcvt;
+
+static shvheader MyComputerSFHeader [] =
+{
+ { IDS_SHV_COLUMN1, SHCOLSTATE_TYPE_STR | SHCOLSTATE_ONBYDEFAULT, LVCFMT_RIGHT, 15 },
+ { IDS_SHV_COLUMN3, SHCOLSTATE_TYPE_STR | SHCOLSTATE_ONBYDEFAULT, LVCFMT_RIGHT, 10 },
+ { IDS_SHV_COLUMN6, SHCOLSTATE_TYPE_STR | SHCOLSTATE_ONBYDEFAULT, LVCFMT_RIGHT, 10 },
+ { IDS_SHV_COLUMN7, SHCOLSTATE_TYPE_STR | SHCOLSTATE_ONBYDEFAULT, LVCFMT_RIGHT, 10 },
+};
+#define MYCOMPUTERSHELLVIEWCOLUMNS 4
 
 /**************************************************************************
 *  ISF_MyComputer_Constructor
@@ -1761,6 +1965,133 @@ static HRESULT WINAPI ISF_MyComputer_fnGetDisplayNameOf(
    return S_OK;
 }
 
+static HRESULT WINAPI ISF_MyComputer_fnGetDefaultSearchGUID(
+   IShellFolder2 * iface,
+   GUID *pguid)
+{
+   ICOM_THIS(IGenericSFImpl, iface);
+   FIXME("(%p)\n",This);
+   return E_NOTIMPL;
+}
+static HRESULT WINAPI ISF_MyComputer_fnEnumSearches(
+   IShellFolder2 * iface,
+   IEnumExtraSearch **ppenum)
+{
+   ICOM_THIS(IGenericSFImpl, iface);
+   FIXME("(%p)\n",This);
+   return E_NOTIMPL;
+}
+static HRESULT WINAPI ISF_MyComputer_fnGetDefaultColumn(
+   IShellFolder2 * iface,
+   DWORD dwRes,
+   ULONG *pSort,
+   ULONG *pDisplay)
+{
+   ICOM_THIS(IGenericSFImpl, iface);
+
+   TRACE("(%p)\n",This);
+
+   if (pSort) *pSort = 0;
+   if (pDisplay) *pDisplay = 0;
+
+   return S_OK;
+}
+static HRESULT WINAPI ISF_MyComputer_fnGetDefaultColumnState(
+   IShellFolder2 * iface,
+   UINT iColumn,
+   DWORD *pcsFlags)
+{
+   ICOM_THIS(IGenericSFImpl, iface);
+
+   TRACE("(%p)\n",This);
+
+   if (!pcsFlags || iColumn >= MYCOMPUTERSHELLVIEWCOLUMNS ) return E_INVALIDARG;
+
+   *pcsFlags = MyComputerSFHeader[iColumn].pcsFlags;
+
+   return S_OK;
+}
+static HRESULT WINAPI ISF_MyComputer_fnGetDetailsEx(
+   IShellFolder2 * iface,
+   LPCITEMIDLIST pidl,
+   const SHCOLUMNID *pscid,
+   VARIANT *pv)
+{
+   ICOM_THIS(IGenericSFImpl, iface);
+   FIXME("(%p)\n",This);
+
+   return E_NOTIMPL;
+}
+
+/* fixme: drive size >4GB is rolling over */
+static HRESULT WINAPI ISF_MyComputer_fnGetDetailsOf(
+   IShellFolder2 * iface,
+   LPCITEMIDLIST pidl,
+   UINT iColumn,
+   SHELLDETAILS *psd)
+{
+   ICOM_THIS(IGenericSFImpl, iface);
+   HRESULT hr;
+
+   TRACE("(%p)->(%p %i %p)\n",This, pidl, iColumn, psd);
+
+   if (!psd || iColumn >= MYCOMPUTERSHELLVIEWCOLUMNS ) return E_INVALIDARG;
+
+   if (!pidl)
+   {
+     psd->fmt = MyComputerSFHeader[iColumn].fmt;
+     psd->cxChar = MyComputerSFHeader[iColumn].cxChar;
+     psd->str.uType = STRRET_CSTRA;
+     LoadStringA(shell32_hInstance, MyComputerSFHeader[iColumn].colnameid, psd->str.u.cStr, MAX_PATH);
+     return S_OK;
+   }
+   else
+   {
+     char szPath[MAX_PATH];
+     ULARGE_INTEGER ulBytes;
+
+     psd->str.u.cStr[0] = 0x00;
+     psd->str.uType = STRRET_CSTRA;
+     switch(iColumn)
+     {
+       case 0: /* name */
+         hr = IShellFolder_GetDisplayNameOf(iface, pidl, SHGDN_NORMAL | SHGDN_INFOLDER, &psd->str);
+         break;
+       case 1: /* type */
+         _ILGetFileType(pidl, psd->str.u.cStr, MAX_PATH);
+         break;
+       case 2: /* total size */
+         if (_ILIsDrive(pidl))
+         {
+           _ILSimpleGetText(pidl, szPath, MAX_PATH);
+           GetDiskFreeSpaceExA(szPath, NULL, &ulBytes, NULL);
+           StrFormatByteSizeA(ulBytes.s.LowPart, psd->str.u.cStr, MAX_PATH);
+         }
+         break;
+       case 3: /* free size */
+         if (_ILIsDrive(pidl))
+         {
+           _ILSimpleGetText(pidl, szPath, MAX_PATH);
+           GetDiskFreeSpaceExA(szPath, &ulBytes, NULL, NULL);
+           StrFormatByteSizeA(ulBytes.s.LowPart, psd->str.u.cStr, MAX_PATH);
+         }
+         break;
+     }
+     hr = S_OK;
+   }
+
+   return hr;
+}
+static HRESULT WINAPI ISF_MyComputer_fnMapNameToSCID(
+   IShellFolder2 * iface,
+   LPCWSTR pwszName,
+   SHCOLUMNID *pscid)
+{
+   ICOM_THIS(IGenericSFImpl, iface);
+   FIXME("(%p)\n",This);
+   return E_NOTIMPL;
+}
+
 ICOM_VTABLE(IShellFolder2) sfmcvt =
 {
    ICOM_MSVTABLE_COMPAT_DummyRTTIVALUE
@@ -1779,13 +2110,13 @@ ICOM_VTABLE(IShellFolder2) sfmcvt =
    IShellFolder_fnSetNameOf,
 
    /* ShellFolder2 */
-   IShellFolder_fnGetDefaultSearchGUID,
-   IShellFolder_fnEnumSearches,
-   IShellFolder_fnGetDefaultColumn,
-   IShellFolder_fnGetDefaultColumnState,
-   IShellFolder_fnGetDetailsEx,
-   IShellFolder_fnGetDetailsOf,
-   IShellFolder_fnMapNameToSCID
+   ISF_MyComputer_fnGetDefaultSearchGUID,
+   ISF_MyComputer_fnEnumSearches,
+   ISF_MyComputer_fnGetDefaultColumn,
+   ISF_MyComputer_fnGetDefaultColumnState,
+   ISF_MyComputer_fnGetDetailsEx,
+   ISF_MyComputer_fnGetDetailsOf,
+   ISF_MyComputer_fnMapNameToSCID
 };
 
 
