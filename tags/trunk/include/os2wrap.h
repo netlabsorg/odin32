@@ -1,4 +1,4 @@
-/* $Id: os2wrap.h,v 1.5 1999-06-21 18:19:04 phaller Exp $ */
+/* $Id: os2wrap.h,v 1.6 1999-06-26 18:24:22 sandervl Exp $ */
 #ifndef __OS2WRAP_H__
 #define __OS2WRAP_H__
 
@@ -10,7 +10,7 @@
 inline ULONG _DosAllocMem(PPVOID a, ULONG b, ULONG c)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DosAllocMem(a, b, c);
     SetFS(sel);
@@ -24,7 +24,7 @@ inline ULONG _DosAllocMem(PPVOID a, ULONG b, ULONG c)
 inline ULONG _DosAllocSharedMem(PPVOID a, PCSZ b, ULONG c, ULONG d)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DosAllocSharedMem(a, b, c, d);
     SetFS(sel);
@@ -38,7 +38,7 @@ inline ULONG _DosAllocSharedMem(PPVOID a, PCSZ b, ULONG c, ULONG d)
 inline ULONG _DosFreeMem(PVOID a)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DosFreeMem(a);
     SetFS(sel);
@@ -52,7 +52,7 @@ inline ULONG _DosFreeMem(PVOID a)
 inline ULONG _DosGetNamedSharedMem(PPVOID a, PCSZ b, ULONG c)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DosGetNamedSharedMem(a, b, c);
     SetFS(sel);
@@ -66,7 +66,7 @@ inline ULONG _DosGetNamedSharedMem(PPVOID a, PCSZ b, ULONG c)
 inline ULONG _DosGetSharedMem(PVOID a, ULONG b)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DosGetSharedMem(a, b);
     SetFS(sel);
@@ -80,7 +80,7 @@ inline ULONG _DosGetSharedMem(PVOID a, ULONG b)
 inline ULONG _DosGiveSharedMem(PVOID a, PID b, ULONG c)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DosGiveSharedMem(a, b, c);
     SetFS(sel);
@@ -94,7 +94,7 @@ inline ULONG _DosGiveSharedMem(PVOID a, PID b, ULONG c)
 inline ULONG _DosQueryMem(PVOID a, PULONG b, PULONG c)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DosQueryMem(a, b, c);
     SetFS(sel);
@@ -108,7 +108,7 @@ inline ULONG _DosQueryMem(PVOID a, PULONG b, PULONG c)
 inline ULONG _DosSetMem(PVOID a, ULONG b, ULONG c)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DosSetMem(a, b, c);
     SetFS(sel);
@@ -122,7 +122,7 @@ inline ULONG _DosSetMem(PVOID a, ULONG b, ULONG c)
 inline ULONG _DosSubAllocMem(PVOID a, PPVOID b, ULONG c)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DosSubAllocMem(a, b, c);
     SetFS(sel);
@@ -136,7 +136,7 @@ inline ULONG _DosSubAllocMem(PVOID a, PPVOID b, ULONG c)
 inline ULONG _DosSubFreeMem(PVOID a, PVOID b, ULONG c)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DosSubFreeMem(a, b, c);
     SetFS(sel);
@@ -150,7 +150,7 @@ inline ULONG _DosSubFreeMem(PVOID a, PVOID b, ULONG c)
 inline ULONG _DosSubSetMem(PVOID a, ULONG b, ULONG c)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DosSubSetMem(a, b, c);
     SetFS(sel);
@@ -164,7 +164,7 @@ inline ULONG _DosSubSetMem(PVOID a, ULONG b, ULONG c)
 inline ULONG _DosSubUnsetMem(PVOID a)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DosSubUnsetMem(a);
     SetFS(sel);
@@ -180,7 +180,7 @@ inline ULONG _DosSubUnsetMem(PVOID a)
 inline ULONG _DosCancelLockRequest(HFILE a, PFILELOCK b)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DosCancelLockRequest(a, b);
     SetFS(sel);
@@ -194,7 +194,7 @@ inline ULONG _DosCancelLockRequest(HFILE a, PFILELOCK b)
 inline ULONG _DosClose(HFILE a)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DosClose(a);
     SetFS(sel);
@@ -208,7 +208,7 @@ inline ULONG _DosClose(HFILE a)
 inline ULONG _DosCopy(PCSZ a, PCSZ b, ULONG c)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DosCopy(a, b, c);
     SetFS(sel);
@@ -222,7 +222,7 @@ inline ULONG _DosCopy(PCSZ a, PCSZ b, ULONG c)
 inline ULONG _DosCreateDir(PCSZ a, PEAOP2 b)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DosCreateDir(a, b);
     SetFS(sel);
@@ -236,7 +236,7 @@ inline ULONG _DosCreateDir(PCSZ a, PEAOP2 b)
 inline ULONG _DosDelete(PCSZ a)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DosDelete(a);
     SetFS(sel);
@@ -250,7 +250,7 @@ inline ULONG _DosDelete(PCSZ a)
 inline ULONG _DosDeleteDir(PCSZ a)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DosDeleteDir(a);
     SetFS(sel);
@@ -264,7 +264,7 @@ inline ULONG _DosDeleteDir(PCSZ a)
 inline ULONG _DosDupHandle(HFILE a, PHFILE b)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DosDupHandle(a, b);
     SetFS(sel);
@@ -278,7 +278,7 @@ inline ULONG _DosDupHandle(HFILE a, PHFILE b)
 inline ULONG _DosEditName(ULONG a, PCSZ b, PCSZ c, PBYTE d, ULONG e)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DosEditName(a, b, c, d, e);
     SetFS(sel);
@@ -292,7 +292,7 @@ inline ULONG _DosEditName(ULONG a, PCSZ b, PCSZ c, PBYTE d, ULONG e)
 inline ULONG _DosEnumAttribute(ULONG a, PVOID b, ULONG c, PVOID d, ULONG e, PULONG f, ULONG g)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DosEnumAttribute(a, b, c, d, e, f, g);
     SetFS(sel);
@@ -306,7 +306,7 @@ inline ULONG _DosEnumAttribute(ULONG a, PVOID b, ULONG c, PVOID d, ULONG e, PULO
 inline ULONG _DosFindClose(HDIR a)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DosFindClose(a);
     SetFS(sel);
@@ -320,7 +320,7 @@ inline ULONG _DosFindClose(HDIR a)
 inline ULONG _DosFindFirst(PCSZ a, PHDIR b, ULONG c, PVOID d, ULONG e, PULONG f, ULONG g)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DosFindFirst(a, b, c, d, e, f, g);
     SetFS(sel);
@@ -334,7 +334,7 @@ inline ULONG _DosFindFirst(PCSZ a, PHDIR b, ULONG c, PVOID d, ULONG e, PULONG f,
 inline ULONG _DosFindNext(HDIR a, PVOID b, ULONG c, PULONG d)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DosFindNext(a, b, c, d);
     SetFS(sel);
@@ -348,7 +348,7 @@ inline ULONG _DosFindNext(HDIR a, PVOID b, ULONG c, PULONG d)
 inline ULONG _DosForceDelete(PCSZ a)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DosForceDelete(a);
     SetFS(sel);
@@ -362,7 +362,7 @@ inline ULONG _DosForceDelete(PCSZ a)
 inline ULONG _DosFSAttach(PCSZ a, PCSZ b, PVOID c, ULONG d, ULONG e)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DosFSAttach(a, b, c, d, e);
     SetFS(sel);
@@ -376,7 +376,7 @@ inline ULONG _DosFSAttach(PCSZ a, PCSZ b, PVOID c, ULONG d, ULONG e)
 inline ULONG _DosFSCtl(PVOID a, ULONG b, PULONG c, PVOID d, ULONG e, PULONG f, ULONG g, PCSZ h, HFILE i, ULONG j)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DosFSCtl(a, b, c, d, e, f, g, h, i, j);
     SetFS(sel);
@@ -390,7 +390,7 @@ inline ULONG _DosFSCtl(PVOID a, ULONG b, PULONG c, PVOID d, ULONG e, PULONG f, U
 inline ULONG _DosMove(PCSZ a, PCSZ b)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DosMove(a, b);
     SetFS(sel);
@@ -404,7 +404,7 @@ inline ULONG _DosMove(PCSZ a, PCSZ b)
 inline ULONG _DosOpen(PCSZ a, PHFILE b, PULONG c, ULONG d, ULONG e, ULONG f, ULONG g, PEAOP2 h)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DosOpen(a, b, c, d, e, f, g, h);
     SetFS(sel);
@@ -418,7 +418,7 @@ inline ULONG _DosOpen(PCSZ a, PHFILE b, PULONG c, ULONG d, ULONG e, ULONG f, ULO
 inline ULONG _DosProtectClose(HFILE a, FHLOCK b)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DosProtectClose(a, b);
     SetFS(sel);
@@ -432,7 +432,7 @@ inline ULONG _DosProtectClose(HFILE a, FHLOCK b)
 inline ULONG _DosProtectEnumAttribute(ULONG a, PVOID b, ULONG c, PVOID d, ULONG e, PULONG f, ULONG g, FHLOCK h)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DosProtectEnumAttribute(a, b, c, d, e, f, g, h);
     SetFS(sel);
@@ -446,7 +446,7 @@ inline ULONG _DosProtectEnumAttribute(ULONG a, PVOID b, ULONG c, PVOID d, ULONG 
 inline ULONG _DosProtectOpen(PCSZ a, PHFILE b, PULONG c, ULONG d, ULONG e, ULONG f, ULONG g, PEAOP2 h, PFHLOCK i)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DosProtectOpen(a, b, c, d, e, f, g, h, i);
     SetFS(sel);
@@ -460,7 +460,7 @@ inline ULONG _DosProtectOpen(PCSZ a, PHFILE b, PULONG c, ULONG d, ULONG e, ULONG
 inline ULONG _DosProtectQueryFHState(HFILE a, PULONG b, FHLOCK c)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DosProtectQueryFHState(a, b, c);
     SetFS(sel);
@@ -474,7 +474,7 @@ inline ULONG _DosProtectQueryFHState(HFILE a, PULONG b, FHLOCK c)
 inline ULONG _DosProtectQueryFileInfo(HFILE a, ULONG b, PVOID c, ULONG d, FHLOCK e)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DosProtectQueryFileInfo(a, b, c, d, e);
     SetFS(sel);
@@ -488,7 +488,7 @@ inline ULONG _DosProtectQueryFileInfo(HFILE a, ULONG b, PVOID c, ULONG d, FHLOCK
 inline ULONG _DosProtectRead(HFILE a, PVOID b, ULONG c, PULONG d, FHLOCK e)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DosProtectRead(a, b, c, d, e);
     SetFS(sel);
@@ -502,7 +502,7 @@ inline ULONG _DosProtectRead(HFILE a, PVOID b, ULONG c, PULONG d, FHLOCK e)
 inline ULONG _DosProtectSetFHState(HFILE a, ULONG b, FHLOCK c)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DosProtectSetFHState(a, b, c);
     SetFS(sel);
@@ -516,7 +516,7 @@ inline ULONG _DosProtectSetFHState(HFILE a, ULONG b, FHLOCK c)
 inline ULONG _DosProtectSetFileInfo(HFILE a, ULONG b, PVOID c, ULONG d, FHLOCK e)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DosProtectSetFileInfo(a, b, c, d, e);
     SetFS(sel);
@@ -530,7 +530,7 @@ inline ULONG _DosProtectSetFileInfo(HFILE a, ULONG b, PVOID c, ULONG d, FHLOCK e
 inline ULONG _DosProtectSetFileLocks(HFILE a, PFILELOCK b, PFILELOCK c, ULONG d, ULONG e, FHLOCK f)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DosProtectSetFileLocks(a, b, c, d, e, f);
     SetFS(sel);
@@ -544,7 +544,7 @@ inline ULONG _DosProtectSetFileLocks(HFILE a, PFILELOCK b, PFILELOCK c, ULONG d,
 inline ULONG _DosProtectSetFilePtr(HFILE a, LONG b, ULONG c, PULONG d, FHLOCK e)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DosProtectSetFilePtr(a, b, c, d, e);
     SetFS(sel);
@@ -558,7 +558,7 @@ inline ULONG _DosProtectSetFilePtr(HFILE a, LONG b, ULONG c, PULONG d, FHLOCK e)
 inline ULONG _DosProtectSetFileSize(HFILE a, ULONG b, FHLOCK c)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DosProtectSetFileSize(a, b, c);
     SetFS(sel);
@@ -572,7 +572,7 @@ inline ULONG _DosProtectSetFileSize(HFILE a, ULONG b, FHLOCK c)
 inline ULONG _DosProtectWrite(HFILE a, PVOID b, ULONG c, PULONG d, FHLOCK e)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DosProtectWrite(a, b, c, d, e);
     SetFS(sel);
@@ -586,7 +586,7 @@ inline ULONG _DosProtectWrite(HFILE a, PVOID b, ULONG c, PULONG d, FHLOCK e)
 inline ULONG _DosQueryCurrentDir(ULONG a, PBYTE b, PULONG c)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DosQueryCurrentDir(a, b, c);
     SetFS(sel);
@@ -600,7 +600,7 @@ inline ULONG _DosQueryCurrentDir(ULONG a, PBYTE b, PULONG c)
 inline ULONG _DosQueryCurrentDisk(PULONG a, PULONG b)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DosQueryCurrentDisk(a, b);
     SetFS(sel);
@@ -614,7 +614,7 @@ inline ULONG _DosQueryCurrentDisk(PULONG a, PULONG b)
 inline ULONG _DosQueryFHState(HFILE a, PULONG b)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DosQueryFHState(a, b);
     SetFS(sel);
@@ -628,7 +628,7 @@ inline ULONG _DosQueryFHState(HFILE a, PULONG b)
 inline ULONG _DosQueryFileInfo(HFILE a, ULONG b, PVOID c, ULONG d)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DosQueryFileInfo(a, b, c, d);
     SetFS(sel);
@@ -642,7 +642,7 @@ inline ULONG _DosQueryFileInfo(HFILE a, ULONG b, PVOID c, ULONG d)
 inline ULONG _DosQueryFSAttach(PCSZ a, ULONG b, ULONG c, PFSQBUFFER2 d, PULONG e)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DosQueryFSAttach(a, b, c, d, e);
     SetFS(sel);
@@ -656,7 +656,7 @@ inline ULONG _DosQueryFSAttach(PCSZ a, ULONG b, ULONG c, PFSQBUFFER2 d, PULONG e
 inline ULONG _DosQueryFSInfo(ULONG a, ULONG b, PVOID c, ULONG d)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DosQueryFSInfo(a, b, c, d);
     SetFS(sel);
@@ -670,7 +670,7 @@ inline ULONG _DosQueryFSInfo(ULONG a, ULONG b, PVOID c, ULONG d)
 inline ULONG _DosQueryHType(HFILE a, PULONG b, PULONG c)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DosQueryHType(a, b, c);
     SetFS(sel);
@@ -684,7 +684,7 @@ inline ULONG _DosQueryHType(HFILE a, PULONG b, PULONG c)
 inline ULONG _DosQueryPathInfo(PCSZ a, ULONG b, PVOID c, ULONG d)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DosQueryPathInfo(a, b, c, d);
     SetFS(sel);
@@ -698,7 +698,7 @@ inline ULONG _DosQueryPathInfo(PCSZ a, ULONG b, PVOID c, ULONG d)
 inline ULONG _DosQueryVerify(PBOOL32 a)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DosQueryVerify(a);
     SetFS(sel);
@@ -712,7 +712,7 @@ inline ULONG _DosQueryVerify(PBOOL32 a)
 inline ULONG _DosRead(HFILE a, PVOID b, ULONG c, PULONG d)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DosRead(a, b, c, d);
     SetFS(sel);
@@ -726,7 +726,7 @@ inline ULONG _DosRead(HFILE a, PVOID b, ULONG c, PULONG d)
 inline ULONG _DosResetBuffer(HFILE a)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DosResetBuffer(a);
     SetFS(sel);
@@ -740,7 +740,7 @@ inline ULONG _DosResetBuffer(HFILE a)
 inline ULONG _DosSetCurrentDir(PCSZ a)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DosSetCurrentDir(a);
     SetFS(sel);
@@ -754,7 +754,7 @@ inline ULONG _DosSetCurrentDir(PCSZ a)
 inline ULONG _DosSetDefaultDisk(ULONG a)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DosSetDefaultDisk(a);
     SetFS(sel);
@@ -768,7 +768,7 @@ inline ULONG _DosSetDefaultDisk(ULONG a)
 inline ULONG _DosSetFHState(HFILE a, ULONG b)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DosSetFHState(a, b);
     SetFS(sel);
@@ -782,7 +782,7 @@ inline ULONG _DosSetFHState(HFILE a, ULONG b)
 inline ULONG _DosSetFileInfo(HFILE a, ULONG b, PVOID c, ULONG d)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DosSetFileInfo(a, b, c, d);
     SetFS(sel);
@@ -796,7 +796,7 @@ inline ULONG _DosSetFileInfo(HFILE a, ULONG b, PVOID c, ULONG d)
 inline ULONG _DosSetFileLocks(HFILE a, PFILELOCK b, PFILELOCK c, ULONG d, ULONG e)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DosSetFileLocks(a, b, c, d, e);
     SetFS(sel);
@@ -810,7 +810,7 @@ inline ULONG _DosSetFileLocks(HFILE a, PFILELOCK b, PFILELOCK c, ULONG d, ULONG 
 inline ULONG _DosSetFilePtr(HFILE a, LONG b, ULONG c, PULONG d)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DosSetFilePtr(a, b, c, d);
     SetFS(sel);
@@ -824,7 +824,7 @@ inline ULONG _DosSetFilePtr(HFILE a, LONG b, ULONG c, PULONG d)
 inline ULONG _DosSetFileSize(HFILE a, ULONG b)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DosSetFileSize(a, b);
     SetFS(sel);
@@ -838,7 +838,7 @@ inline ULONG _DosSetFileSize(HFILE a, ULONG b)
 inline ULONG _DosSetFSInfo(ULONG a, ULONG b, PVOID c, ULONG d)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DosSetFSInfo(a, b, c, d);
     SetFS(sel);
@@ -852,7 +852,7 @@ inline ULONG _DosSetFSInfo(ULONG a, ULONG b, PVOID c, ULONG d)
 inline ULONG _DosSetMaxFH(ULONG a)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DosSetMaxFH(a);
     SetFS(sel);
@@ -866,7 +866,7 @@ inline ULONG _DosSetMaxFH(ULONG a)
 inline ULONG _DosSetPathInfo(PCSZ a, ULONG b, PVOID c, ULONG d, ULONG e)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DosSetPathInfo(a, b, c, d, e);
     SetFS(sel);
@@ -880,7 +880,7 @@ inline ULONG _DosSetPathInfo(PCSZ a, ULONG b, PVOID c, ULONG d, ULONG e)
 inline ULONG _DosSetRelMaxFH(PLONG a, PULONG b)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DosSetRelMaxFH(a, b);
     SetFS(sel);
@@ -894,7 +894,7 @@ inline ULONG _DosSetRelMaxFH(PLONG a, PULONG b)
 inline ULONG _DosSetVerify(BOOL32 a)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DosSetVerify(a);
     SetFS(sel);
@@ -908,7 +908,7 @@ inline ULONG _DosSetVerify(BOOL32 a)
 inline ULONG _DosShutdown(ULONG a)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DosShutdown(a);
     SetFS(sel);
@@ -922,7 +922,7 @@ inline ULONG _DosShutdown(ULONG a)
 inline ULONG _DosWrite(HFILE a, PVOID b, ULONG c, PULONG d)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DosWrite(a, b, c, d);
     SetFS(sel);
@@ -938,7 +938,7 @@ inline ULONG _DosWrite(HFILE a, PVOID b, ULONG c, PULONG d)
 inline ULONG _DosSearchPath(ULONG a, PCSZ b, PCSZ c, PBYTE d, ULONG e)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DosSearchPath(a, b, c, d, e);
     SetFS(sel);
@@ -954,7 +954,7 @@ inline ULONG _DosSearchPath(ULONG a, PCSZ b, PCSZ c, PBYTE d, ULONG e)
 inline ULONG _DosDevConfig(PVOID a, ULONG b)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DosDevConfig(a, b);
     SetFS(sel);
@@ -968,7 +968,7 @@ inline ULONG _DosDevConfig(PVOID a, ULONG b)
 inline ULONG _DosDevIOCtl(HFILE a, ULONG b, ULONG c, PVOID d, ULONG e, PULONG f, PVOID g, ULONG h, PULONG i)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DosDevIOCtl(a, b, c, d, e, f, g, h, i);
     SetFS(sel);
@@ -982,7 +982,7 @@ inline ULONG _DosDevIOCtl(HFILE a, ULONG b, ULONG c, PVOID d, ULONG e, PULONG f,
 inline ULONG _DosPhysicalDisk(ULONG a, PVOID b, ULONG c, PVOID d, ULONG e)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DosPhysicalDisk(a, b, c, d, e);
     SetFS(sel);
@@ -998,7 +998,7 @@ inline ULONG _DosPhysicalDisk(ULONG a, PVOID b, ULONG c, PVOID d, ULONG e)
 inline ULONG _DosMapCase(ULONG a, PCOUNTRYCODE b, PCHAR c)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DosMapCase(a, b, c);
     SetFS(sel);
@@ -1012,7 +1012,7 @@ inline ULONG _DosMapCase(ULONG a, PCOUNTRYCODE b, PCHAR c)
 inline ULONG _DosQueryCollate(ULONG a, PCOUNTRYCODE b, PCHAR c, PULONG d)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DosQueryCollate(a, b, c, d);
     SetFS(sel);
@@ -1026,7 +1026,7 @@ inline ULONG _DosQueryCollate(ULONG a, PCOUNTRYCODE b, PCHAR c, PULONG d)
 inline ULONG _DosQueryCp(ULONG a, PULONG b, PULONG c)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DosQueryCp(a, b, c);
     SetFS(sel);
@@ -1040,7 +1040,7 @@ inline ULONG _DosQueryCp(ULONG a, PULONG b, PULONG c)
 inline ULONG _DosQueryCtryInfo(ULONG a, PCOUNTRYCODE b, PCOUNTRYINFO c, PULONG d)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DosQueryCtryInfo(a, b, c, d);
     SetFS(sel);
@@ -1054,7 +1054,7 @@ inline ULONG _DosQueryCtryInfo(ULONG a, PCOUNTRYCODE b, PCOUNTRYINFO c, PULONG d
 inline ULONG _DosQueryDBCSEnv(ULONG a, PCOUNTRYCODE b, PCHAR c)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DosQueryDBCSEnv(a, b, c);
     SetFS(sel);
@@ -1068,7 +1068,7 @@ inline ULONG _DosQueryDBCSEnv(ULONG a, PCOUNTRYCODE b, PCHAR c)
 inline ULONG _DosSetProcessCp(ULONG a)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DosSetProcessCp(a);
     SetFS(sel);
@@ -1084,7 +1084,7 @@ inline ULONG _DosSetProcessCp(ULONG a)
 inline ULONG _DosFreeModule(HMODULE a)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DosFreeModule(a);
     SetFS(sel);
@@ -1098,7 +1098,7 @@ inline ULONG _DosFreeModule(HMODULE a)
 inline ULONG _DosLoadModule(PSZ a, ULONG b, PCSZ c, PHMODULE d)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DosLoadModule(a, b, c, d);
     SetFS(sel);
@@ -1112,7 +1112,7 @@ inline ULONG _DosLoadModule(PSZ a, ULONG b, PCSZ c, PHMODULE d)
 inline ULONG _DosQueryModuleHandle(PCSZ a, PHMODULE b)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DosQueryModuleHandle(a, b);
     SetFS(sel);
@@ -1126,7 +1126,7 @@ inline ULONG _DosQueryModuleHandle(PCSZ a, PHMODULE b)
 inline ULONG _DosQueryModuleName(HMODULE a, ULONG b, PCHAR c)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DosQueryModuleName(a, b, c);
     SetFS(sel);
@@ -1140,7 +1140,7 @@ inline ULONG _DosQueryModuleName(HMODULE a, ULONG b, PCHAR c)
 inline ULONG _DosQueryProcAddr(HMODULE a, ULONG b, PCSZ c, PFN *d)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DosQueryProcAddr(a, b, c, d);
     SetFS(sel);
@@ -1154,7 +1154,7 @@ inline ULONG _DosQueryProcAddr(HMODULE a, ULONG b, PCSZ c, PFN *d)
 inline ULONG _DosQueryProcType(HMODULE a, ULONG b, PCSZ c, PULONG d)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DosQueryProcType(a, b, c, d);
     SetFS(sel);
@@ -1170,7 +1170,7 @@ inline ULONG _DosQueryProcType(HMODULE a, ULONG b, PCSZ c, PULONG d)
 inline ULONG _DosFreeResource(PVOID a)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DosFreeResource(a);
     SetFS(sel);
@@ -1184,7 +1184,7 @@ inline ULONG _DosFreeResource(PVOID a)
 inline ULONG _DosGetResource(HMODULE a, ULONG b, ULONG c, PPVOID d)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DosGetResource(a, b, c, d);
     SetFS(sel);
@@ -1198,7 +1198,7 @@ inline ULONG _DosGetResource(HMODULE a, ULONG b, ULONG c, PPVOID d)
 inline ULONG _DosQueryResourceSize(HMODULE a, ULONG b, ULONG c, PULONG d)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DosQueryResourceSize(a, b, c, d);
     SetFS(sel);
@@ -1214,7 +1214,7 @@ inline ULONG _DosQueryResourceSize(HMODULE a, ULONG b, ULONG c, PULONG d)
 inline ULONG _DosBeep(ULONG a, ULONG b)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DosBeep(a, b);
     SetFS(sel);
@@ -1227,7 +1227,7 @@ inline ULONG _DosBeep(ULONG a, ULONG b)
 
 inline VOID _DosExit(ULONG a, ULONG b)
 {
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     DosExit(a, b);
     SetFS(sel);
@@ -1239,7 +1239,7 @@ inline VOID _DosExit(ULONG a, ULONG b)
 inline ULONG _DosAllocThreadLocalMemory(ULONG a, PULONG *b)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DosAllocThreadLocalMemory(a, b);
     SetFS(sel);
@@ -1253,7 +1253,7 @@ inline ULONG _DosAllocThreadLocalMemory(ULONG a, PULONG *b)
 inline ULONG _DosCreateThread(PTID a, PFNTHREAD b, ULONG c, ULONG d, ULONG e)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DosCreateThread(a, b, c, d, e);
     SetFS(sel);
@@ -1267,7 +1267,7 @@ inline ULONG _DosCreateThread(PTID a, PFNTHREAD b, ULONG c, ULONG d, ULONG e)
 inline ULONG _DosEnterCritSec()
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DosEnterCritSec();
     SetFS(sel);
@@ -1281,7 +1281,7 @@ inline ULONG _DosEnterCritSec()
 inline ULONG _DosExecPgm(PCHAR a, LONG b, ULONG c, PCSZ d, PCSZ e, PRESULTCODES f, PCSZ g)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DosExecPgm(a, b, c, d, e, f, g);
     SetFS(sel);
@@ -1295,7 +1295,7 @@ inline ULONG _DosExecPgm(PCHAR a, LONG b, ULONG c, PCSZ d, PCSZ e, PRESULTCODES 
 inline ULONG _DosExitCritSec()
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DosExitCritSec();
     SetFS(sel);
@@ -1309,7 +1309,7 @@ inline ULONG _DosExitCritSec()
 inline ULONG _DosExitList(ULONG a, PFNEXITLIST b)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DosExitList(a, b);
     SetFS(sel);
@@ -1323,7 +1323,7 @@ inline ULONG _DosExitList(ULONG a, PFNEXITLIST b)
 inline ULONG _DosFreeThreadLocalMemory(ULONG *a)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DosFreeThreadLocalMemory(a);
     SetFS(sel);
@@ -1337,7 +1337,7 @@ inline ULONG _DosFreeThreadLocalMemory(ULONG *a)
 inline ULONG _DosGetInfoBlocks(PTIB *a, PPIB *b)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DosGetInfoBlocks(a, b);
     SetFS(sel);
@@ -1351,7 +1351,7 @@ inline ULONG _DosGetInfoBlocks(PTIB *a, PPIB *b)
 inline ULONG _DosKillProcess(ULONG a, PID b)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DosKillProcess(a, b);
     SetFS(sel);
@@ -1365,7 +1365,7 @@ inline ULONG _DosKillProcess(ULONG a, PID b)
 inline ULONG _DosKillThread(TID a)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DosKillThread(a);
     SetFS(sel);
@@ -1379,7 +1379,7 @@ inline ULONG _DosKillThread(TID a)
 inline ULONG _DosResumeThread(TID a)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DosResumeThread(a);
     SetFS(sel);
@@ -1393,7 +1393,7 @@ inline ULONG _DosResumeThread(TID a)
 inline ULONG _DosSetPriority(ULONG a, ULONG b, LONG c, ULONG d)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DosSetPriority(a, b, c, d);
     SetFS(sel);
@@ -1407,7 +1407,7 @@ inline ULONG _DosSetPriority(ULONG a, ULONG b, LONG c, ULONG d)
 inline ULONG _DosSleep(ULONG a)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DosSleep(a);
     SetFS(sel);
@@ -1421,7 +1421,7 @@ inline ULONG _DosSleep(ULONG a)
 inline ULONG _DosSuspendThread(TID a)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DosSuspendThread(a);
     SetFS(sel);
@@ -1435,7 +1435,7 @@ inline ULONG _DosSuspendThread(TID a)
 inline ULONG _DosWaitChild(ULONG a, ULONG b, PRESULTCODES c, PPID d, PID e)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DosWaitChild(a, b, c, d, e);
     SetFS(sel);
@@ -1449,7 +1449,7 @@ inline ULONG _DosWaitChild(ULONG a, ULONG b, PRESULTCODES c, PPID d, PID e)
 inline ULONG _DosWaitThread(PTID a, ULONG b)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DosWaitThread(a, b);
     SetFS(sel);
@@ -1465,7 +1465,7 @@ inline ULONG _DosWaitThread(PTID a, ULONG b)
 inline ULONG _DosQueryAppType(PCSZ a, PULONG b)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DosQueryAppType(a, b);
     SetFS(sel);
@@ -1479,7 +1479,7 @@ inline ULONG _DosQueryAppType(PCSZ a, PULONG b)
 inline ULONG _DosSelectSession(ULONG a)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DosSelectSession(a);
     SetFS(sel);
@@ -1493,7 +1493,7 @@ inline ULONG _DosSelectSession(ULONG a)
 inline ULONG _DosSetSession(ULONG a, PSTATUSDATA b)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DosSetSession(a, b);
     SetFS(sel);
@@ -1507,7 +1507,7 @@ inline ULONG _DosSetSession(ULONG a, PSTATUSDATA b)
 inline ULONG _DosStartSession(PSTARTDATA a, PULONG b, PPID c)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DosStartSession(a, b, c);
     SetFS(sel);
@@ -1521,7 +1521,7 @@ inline ULONG _DosStartSession(PSTARTDATA a, PULONG b, PPID c)
 inline ULONG _DosStopSession(ULONG a, ULONG b)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DosStopSession(a, b);
     SetFS(sel);
@@ -1537,7 +1537,7 @@ inline ULONG _DosStopSession(ULONG a, ULONG b)
 inline ULONG _DosCloseEventSem(HEV a)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DosCloseEventSem(a);
     SetFS(sel);
@@ -1551,7 +1551,7 @@ inline ULONG _DosCloseEventSem(HEV a)
 inline ULONG _DosCreateEventSem(PCSZ a, PHEV b, ULONG c, BOOL32 d)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DosCreateEventSem(a, b, c, d);
     SetFS(sel);
@@ -1565,7 +1565,7 @@ inline ULONG _DosCreateEventSem(PCSZ a, PHEV b, ULONG c, BOOL32 d)
 inline ULONG _DosOpenEventSem(PCSZ a, PHEV b)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DosOpenEventSem(a, b);
     SetFS(sel);
@@ -1579,7 +1579,7 @@ inline ULONG _DosOpenEventSem(PCSZ a, PHEV b)
 inline ULONG _DosPostEventSem(HEV a)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DosPostEventSem(a);
     SetFS(sel);
@@ -1593,7 +1593,7 @@ inline ULONG _DosPostEventSem(HEV a)
 inline ULONG _DosQueryEventSem(HEV a, PULONG b)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DosQueryEventSem(a, b);
     SetFS(sel);
@@ -1607,7 +1607,7 @@ inline ULONG _DosQueryEventSem(HEV a, PULONG b)
 inline ULONG _DosResetEventSem(HEV a, PULONG b)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DosResetEventSem(a, b);
     SetFS(sel);
@@ -1621,7 +1621,7 @@ inline ULONG _DosResetEventSem(HEV a, PULONG b)
 inline ULONG _DosWaitEventSem(HEV a, ULONG b)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DosWaitEventSem(a, b);
     SetFS(sel);
@@ -1635,7 +1635,7 @@ inline ULONG _DosWaitEventSem(HEV a, ULONG b)
 inline ULONG _DosCloseMutexSem(HMTX a)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DosCloseMutexSem(a);
     SetFS(sel);
@@ -1649,7 +1649,7 @@ inline ULONG _DosCloseMutexSem(HMTX a)
 inline ULONG _DosCreateMutexSem(PCSZ a, PHMTX b, ULONG c, BOOL32 d)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DosCreateMutexSem(a, b, c, d);
     SetFS(sel);
@@ -1663,7 +1663,7 @@ inline ULONG _DosCreateMutexSem(PCSZ a, PHMTX b, ULONG c, BOOL32 d)
 inline ULONG _DosOpenMutexSem(PCSZ a, PHMTX b)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DosOpenMutexSem(a, b);
     SetFS(sel);
@@ -1677,7 +1677,7 @@ inline ULONG _DosOpenMutexSem(PCSZ a, PHMTX b)
 inline ULONG _DosQueryMutexSem(HMTX a, PPID b, PTID c, PULONG d)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DosQueryMutexSem(a, b, c, d);
     SetFS(sel);
@@ -1691,7 +1691,7 @@ inline ULONG _DosQueryMutexSem(HMTX a, PPID b, PTID c, PULONG d)
 inline ULONG _DosReleaseMutexSem(HMTX a)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DosReleaseMutexSem(a);
     SetFS(sel);
@@ -1705,7 +1705,7 @@ inline ULONG _DosReleaseMutexSem(HMTX a)
 inline ULONG _DosRequestMutexSem(HMTX a, ULONG b)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DosRequestMutexSem(a, b);
     SetFS(sel);
@@ -1719,7 +1719,7 @@ inline ULONG _DosRequestMutexSem(HMTX a, ULONG b)
 inline ULONG _DosAddMuxWaitSem(HMUX a, PSEMRECORD b)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DosAddMuxWaitSem(a, b);
     SetFS(sel);
@@ -1733,7 +1733,7 @@ inline ULONG _DosAddMuxWaitSem(HMUX a, PSEMRECORD b)
 inline ULONG _DosCloseMuxWaitSem(HMUX a)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DosCloseMuxWaitSem(a);
     SetFS(sel);
@@ -1747,7 +1747,7 @@ inline ULONG _DosCloseMuxWaitSem(HMUX a)
 inline ULONG _DosCreateMuxWaitSem(PCSZ a, PHMUX b, ULONG c, PSEMRECORD d, ULONG e)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DosCreateMuxWaitSem(a, b, c, d, e);
     SetFS(sel);
@@ -1761,7 +1761,7 @@ inline ULONG _DosCreateMuxWaitSem(PCSZ a, PHMUX b, ULONG c, PSEMRECORD d, ULONG 
 inline ULONG _DosDeleteMuxWaitSem(HMUX a, HSEM b)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DosDeleteMuxWaitSem(a, b);
     SetFS(sel);
@@ -1775,7 +1775,7 @@ inline ULONG _DosDeleteMuxWaitSem(HMUX a, HSEM b)
 inline ULONG _DosOpenMuxWaitSem(PCSZ a, PHMUX b)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DosOpenMuxWaitSem(a, b);
     SetFS(sel);
@@ -1789,7 +1789,7 @@ inline ULONG _DosOpenMuxWaitSem(PCSZ a, PHMUX b)
 inline ULONG _DosQueryMuxWaitSem(HMUX a, PULONG b, PSEMRECORD c, PULONG d)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DosQueryMuxWaitSem(a, b, c, d);
     SetFS(sel);
@@ -1803,7 +1803,7 @@ inline ULONG _DosQueryMuxWaitSem(HMUX a, PULONG b, PSEMRECORD c, PULONG d)
 inline ULONG _DosWaitMuxWaitSem(HMUX a, ULONG b, PULONG c)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DosWaitMuxWaitSem(a, b, c);
     SetFS(sel);
@@ -1819,7 +1819,7 @@ inline ULONG _DosWaitMuxWaitSem(HMUX a, ULONG b, PULONG c)
 inline ULONG _DosCallNPipe(PCSZ a, PVOID b, ULONG c, PVOID d, ULONG e, PULONG f, ULONG g)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DosCallNPipe(a, b, c, d, e, f, g);
     SetFS(sel);
@@ -1833,7 +1833,7 @@ inline ULONG _DosCallNPipe(PCSZ a, PVOID b, ULONG c, PVOID d, ULONG e, PULONG f,
 inline ULONG _DosConnectNPipe(HPIPE a)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DosConnectNPipe(a);
     SetFS(sel);
@@ -1847,7 +1847,7 @@ inline ULONG _DosConnectNPipe(HPIPE a)
 inline ULONG _DosCreateNPipe(PCSZ a, PHPIPE b, ULONG c, ULONG d, ULONG e, ULONG f, ULONG g)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DosCreateNPipe(a, b, c, d, e, f, g);
     SetFS(sel);
@@ -1861,7 +1861,7 @@ inline ULONG _DosCreateNPipe(PCSZ a, PHPIPE b, ULONG c, ULONG d, ULONG e, ULONG 
 inline ULONG _DosDisConnectNPipe(HPIPE a)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DosDisConnectNPipe(a);
     SetFS(sel);
@@ -1875,7 +1875,7 @@ inline ULONG _DosDisConnectNPipe(HPIPE a)
 inline ULONG _DosPeekNPipe(HPIPE a, PVOID b, ULONG c, PULONG d, PAVAILDATA e, PULONG f)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DosPeekNPipe(a, b, c, d, e, f);
     SetFS(sel);
@@ -1889,7 +1889,7 @@ inline ULONG _DosPeekNPipe(HPIPE a, PVOID b, ULONG c, PULONG d, PAVAILDATA e, PU
 inline ULONG _DosQueryNPHState(HPIPE a, PULONG b)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DosQueryNPHState(a, b);
     SetFS(sel);
@@ -1903,7 +1903,7 @@ inline ULONG _DosQueryNPHState(HPIPE a, PULONG b)
 inline ULONG _DosQueryNPipeInfo(HPIPE a, ULONG b, PVOID c, ULONG d)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DosQueryNPipeInfo(a, b, c, d);
     SetFS(sel);
@@ -1917,7 +1917,7 @@ inline ULONG _DosQueryNPipeInfo(HPIPE a, ULONG b, PVOID c, ULONG d)
 inline ULONG _DosQueryNPipeSemState(HSEM a, PPIPESEMSTATE b, ULONG c)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DosQueryNPipeSemState(a, b, c);
     SetFS(sel);
@@ -1931,7 +1931,7 @@ inline ULONG _DosQueryNPipeSemState(HSEM a, PPIPESEMSTATE b, ULONG c)
 inline ULONG _DosRawReadNPipe(PCSZ a, ULONG b, PULONG c, PVOID d)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DosRawReadNPipe(a, b, c, d);
     SetFS(sel);
@@ -1945,7 +1945,7 @@ inline ULONG _DosRawReadNPipe(PCSZ a, ULONG b, PULONG c, PVOID d)
 inline ULONG _DosRawWriteNPipe(PCSZ a, ULONG b)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DosRawWriteNPipe(a, b);
     SetFS(sel);
@@ -1959,7 +1959,7 @@ inline ULONG _DosRawWriteNPipe(PCSZ a, ULONG b)
 inline ULONG _DosSetNPHState(HPIPE a, ULONG b)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DosSetNPHState(a, b);
     SetFS(sel);
@@ -1973,7 +1973,7 @@ inline ULONG _DosSetNPHState(HPIPE a, ULONG b)
 inline ULONG _DosSetNPipeSem(HPIPE a, HSEM b, ULONG c)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DosSetNPipeSem(a, b, c);
     SetFS(sel);
@@ -1987,7 +1987,7 @@ inline ULONG _DosSetNPipeSem(HPIPE a, HSEM b, ULONG c)
 inline ULONG _DosTransactNPipe(HPIPE a, PVOID b, ULONG c, PVOID d, ULONG e, PULONG f)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DosTransactNPipe(a, b, c, d, e, f);
     SetFS(sel);
@@ -2001,7 +2001,7 @@ inline ULONG _DosTransactNPipe(HPIPE a, PVOID b, ULONG c, PVOID d, ULONG e, PULO
 inline ULONG _DosWaitNPipe(PCSZ a, ULONG b)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DosWaitNPipe(a, b);
     SetFS(sel);
@@ -2015,7 +2015,7 @@ inline ULONG _DosWaitNPipe(PCSZ a, ULONG b)
 inline ULONG _DosCreatePipe(PHFILE a, PHFILE b, ULONG c)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DosCreatePipe(a, b, c);
     SetFS(sel);
@@ -2031,7 +2031,7 @@ inline ULONG _DosCreatePipe(PHFILE a, PHFILE b, ULONG c)
 inline ULONG _DosCloseQueue(HQUEUE a)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DosCloseQueue(a);
     SetFS(sel);
@@ -2045,7 +2045,7 @@ inline ULONG _DosCloseQueue(HQUEUE a)
 inline ULONG _DosCreateQueue(PHQUEUE a, ULONG b, PCSZ c)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DosCreateQueue(a, b, c);
     SetFS(sel);
@@ -2059,7 +2059,7 @@ inline ULONG _DosCreateQueue(PHQUEUE a, ULONG b, PCSZ c)
 inline ULONG _DosOpenQueue(PPID a, PHQUEUE b, PCSZ c)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DosOpenQueue(a, b, c);
     SetFS(sel);
@@ -2073,7 +2073,7 @@ inline ULONG _DosOpenQueue(PPID a, PHQUEUE b, PCSZ c)
 inline ULONG _DosPeekQueue(HQUEUE a, PREQUESTDATA b, PULONG c, PPVOID d, PULONG e, BOOL32 f, PBYTE g, HEV h)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DosPeekQueue(a, b, c, d, e, f, g, h);
     SetFS(sel);
@@ -2087,7 +2087,7 @@ inline ULONG _DosPeekQueue(HQUEUE a, PREQUESTDATA b, PULONG c, PPVOID d, PULONG 
 inline ULONG _DosPurgeQueue(HQUEUE a)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DosPurgeQueue(a);
     SetFS(sel);
@@ -2101,7 +2101,7 @@ inline ULONG _DosPurgeQueue(HQUEUE a)
 inline ULONG _DosQueryQueue(HQUEUE a, PULONG b)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DosQueryQueue(a, b);
     SetFS(sel);
@@ -2115,7 +2115,7 @@ inline ULONG _DosQueryQueue(HQUEUE a, PULONG b)
 inline ULONG _DosReadQueue(HQUEUE a, PREQUESTDATA b, PULONG c, PPVOID d, ULONG e, BOOL32 f, PBYTE g, HEV h)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DosReadQueue(a, b, c, d, e, f, g, h);
     SetFS(sel);
@@ -2129,7 +2129,7 @@ inline ULONG _DosReadQueue(HQUEUE a, PREQUESTDATA b, PULONG c, PPVOID d, ULONG e
 inline ULONG _DosWriteQueue(HQUEUE a, ULONG b, ULONG c, PVOID d, ULONG e)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DosWriteQueue(a, b, c, d, e);
     SetFS(sel);
@@ -2145,7 +2145,7 @@ inline ULONG _DosWriteQueue(HQUEUE a, ULONG b, ULONG c, PVOID d, ULONG e)
 inline ULONG _DosAcknowledgeSignalException(ULONG a)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DosAcknowledgeSignalException(a);
     SetFS(sel);
@@ -2159,7 +2159,7 @@ inline ULONG _DosAcknowledgeSignalException(ULONG a)
 inline ULONG _DosEnterMustComplete(PULONG a)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DosEnterMustComplete(a);
     SetFS(sel);
@@ -2173,7 +2173,7 @@ inline ULONG _DosEnterMustComplete(PULONG a)
 inline ULONG _DosExitMustComplete(PULONG a)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DosExitMustComplete(a);
     SetFS(sel);
@@ -2187,7 +2187,7 @@ inline ULONG _DosExitMustComplete(PULONG a)
 inline ULONG _DosQueryThreadContext(TID a, ULONG b, PCONTEXTRECORD c)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DosQueryThreadContext(a, b, c);
     SetFS(sel);
@@ -2201,7 +2201,7 @@ inline ULONG _DosQueryThreadContext(TID a, ULONG b, PCONTEXTRECORD c)
 inline ULONG _DosRaiseException(PEXCEPTIONREPORTRECORD a)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DosRaiseException(a);
     SetFS(sel);
@@ -2215,7 +2215,7 @@ inline ULONG _DosRaiseException(PEXCEPTIONREPORTRECORD a)
 inline ULONG _DosSendSignalException(PID a, ULONG b)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DosSendSignalException(a, b);
     SetFS(sel);
@@ -2229,7 +2229,7 @@ inline ULONG _DosSendSignalException(PID a, ULONG b)
 inline ULONG _DosSetExceptionHandler(PEXCEPTIONREGISTRATIONRECORD a)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DosSetExceptionHandler(a);
     SetFS(sel);
@@ -2243,7 +2243,7 @@ inline ULONG _DosSetExceptionHandler(PEXCEPTIONREGISTRATIONRECORD a)
 inline ULONG _DosSetSignalExceptionFocus(BOOL32 a, PULONG b)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DosSetSignalExceptionFocus(a, b);
     SetFS(sel);
@@ -2257,7 +2257,7 @@ inline ULONG _DosSetSignalExceptionFocus(BOOL32 a, PULONG b)
 inline ULONG _DosUnsetExceptionHandler(PEXCEPTIONREGISTRATIONRECORD a)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DosUnsetExceptionHandler(a);
     SetFS(sel);
@@ -2271,7 +2271,7 @@ inline ULONG _DosUnsetExceptionHandler(PEXCEPTIONREGISTRATIONRECORD a)
 inline ULONG _DosUnwindException(PEXCEPTIONREGISTRATIONRECORD a, PVOID b, PEXCEPTIONREPORTRECORD c)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DosUnwindException(a, b, c);
     SetFS(sel);
@@ -2287,7 +2287,7 @@ inline ULONG _DosUnwindException(PEXCEPTIONREGISTRATIONRECORD a, PVOID b, PEXCEP
 inline ULONG _DosQuerySysInfo(ULONG a, ULONG b, PVOID c, ULONG d)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DosQuerySysInfo(a, b, c, d);
     SetFS(sel);
@@ -2301,7 +2301,7 @@ inline ULONG _DosQuerySysInfo(ULONG a, ULONG b, PVOID c, ULONG d)
 inline ULONG _DosScanEnv(PCSZ a, PCSZ *b)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DosScanEnv(a, b);
     SetFS(sel);
@@ -2315,7 +2315,7 @@ inline ULONG _DosScanEnv(PCSZ a, PCSZ *b)
 inline ULONG _DosQueryRASInfo(ULONG a, PPVOID b)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DosQueryRASInfo(a, b);
     SetFS(sel);
@@ -2331,7 +2331,7 @@ inline ULONG _DosQueryRASInfo(ULONG a, PPVOID b)
 inline ULONG _DosGetDateTime(PDATETIME a)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DosGetDateTime(a);
     SetFS(sel);
@@ -2345,7 +2345,7 @@ inline ULONG _DosGetDateTime(PDATETIME a)
 inline ULONG _DosSetDateTime(PDATETIME a)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DosSetDateTime(a);
     SetFS(sel);
@@ -2359,7 +2359,7 @@ inline ULONG _DosSetDateTime(PDATETIME a)
 inline ULONG _DosAsyncTimer(ULONG a, HSEM b, PHTIMER c)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DosAsyncTimer(a, b, c);
     SetFS(sel);
@@ -2373,7 +2373,7 @@ inline ULONG _DosAsyncTimer(ULONG a, HSEM b, PHTIMER c)
 inline ULONG _DosStartTimer(ULONG a, HSEM b, PHTIMER c)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DosStartTimer(a, b, c);
     SetFS(sel);
@@ -2387,7 +2387,7 @@ inline ULONG _DosStartTimer(ULONG a, HSEM b, PHTIMER c)
 inline ULONG _DosStopTimer(HTIMER a)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DosStopTimer(a);
     SetFS(sel);
@@ -2403,7 +2403,7 @@ inline ULONG _DosStopTimer(HTIMER a)
 inline ULONG _DosTmrQueryFreq(PULONG a)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DosTmrQueryFreq(a);
     SetFS(sel);
@@ -2417,7 +2417,7 @@ inline ULONG _DosTmrQueryFreq(PULONG a)
 inline ULONG _DosTmrQueryTime(PQWORD a)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DosTmrQueryTime(a);
     SetFS(sel);
@@ -2433,7 +2433,7 @@ inline ULONG _DosTmrQueryTime(PQWORD a)
 inline ULONG _DosCloseVDD(HVDD a)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DosCloseVDD(a);
     SetFS(sel);
@@ -2447,7 +2447,7 @@ inline ULONG _DosCloseVDD(HVDD a)
 inline ULONG _DosOpenVDD(PCSZ a, PHVDD b)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DosOpenVDD(a, b);
     SetFS(sel);
@@ -2461,7 +2461,7 @@ inline ULONG _DosOpenVDD(PCSZ a, PHVDD b)
 inline ULONG _DosQueryDOSProperty(SGID a, PCSZ b, ULONG c, PSZ d)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DosQueryDOSProperty(a, b, c, d);
     SetFS(sel);
@@ -2475,7 +2475,7 @@ inline ULONG _DosQueryDOSProperty(SGID a, PCSZ b, ULONG c, PSZ d)
 inline ULONG _DosRequestVDD(HVDD a, SGID b, ULONG c, ULONG d, PVOID e, ULONG f, PVOID g)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DosRequestVDD(a, b, c, d, e, f, g);
     SetFS(sel);
@@ -2489,7 +2489,7 @@ inline ULONG _DosRequestVDD(HVDD a, SGID b, ULONG c, ULONG d, PVOID e, ULONG f, 
 inline ULONG _DosSetDOSProperty(SGID a, PCSZ b, ULONG c, PCSZ d)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DosSetDOSProperty(a, b, c, d);
     SetFS(sel);
@@ -2505,7 +2505,7 @@ inline ULONG _DosSetDOSProperty(SGID a, PCSZ b, ULONG c, PCSZ d)
 inline ULONG _DosDebug(uDB_t *a)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DosDebug(a);
     SetFS(sel);
@@ -2521,7 +2521,7 @@ inline ULONG _DosDebug(uDB_t *a)
 inline ULONG _DosGetMessage(PCHAR *a, ULONG b, PCHAR c, ULONG d, ULONG e, PCSZ f, PULONG g)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DosGetMessage(a, b, c, d, e, f, g);
     SetFS(sel);
@@ -2535,7 +2535,7 @@ inline ULONG _DosGetMessage(PCHAR *a, ULONG b, PCHAR c, ULONG d, ULONG e, PCSZ f
 inline ULONG _DosInsertMessage(PCHAR *a, ULONG b, PCSZ c, ULONG d, PCHAR e, ULONG f, PULONG g)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DosInsertMessage(a, b, c, d, e, f, g);
     SetFS(sel);
@@ -2549,7 +2549,7 @@ inline ULONG _DosInsertMessage(PCHAR *a, ULONG b, PCSZ c, ULONG d, PCHAR e, ULON
 inline ULONG _DosPutMessage(HFILE a, ULONG b, PCHAR c)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DosPutMessage(a, b, c);
     SetFS(sel);
@@ -2563,7 +2563,7 @@ inline ULONG _DosPutMessage(HFILE a, ULONG b, PCHAR c)
 inline ULONG _DosQueryMessageCP(PCHAR a, ULONG b, PCSZ c, PULONG d)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DosQueryMessageCP(a, b, c, d);
     SetFS(sel);
@@ -2579,7 +2579,7 @@ inline ULONG _DosQueryMessageCP(PCHAR a, ULONG b, PCSZ c, PULONG d)
 inline ULONG _DosDumpProcess(ULONG a, ULONG b, PID c)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DosDumpProcess(a, b, c);
     SetFS(sel);
@@ -2593,7 +2593,7 @@ inline ULONG _DosDumpProcess(ULONG a, ULONG b, PID c)
 inline ULONG _DosForceSystemDump(ULONG a)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DosForceSystemDump(a);
     SetFS(sel);
@@ -2607,7 +2607,7 @@ inline ULONG _DosForceSystemDump(ULONG a)
 inline ULONG _DosQueryRASInfo(ULONG a, PPVOID b)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DosQueryRASInfo(a, b);
     SetFS(sel);
@@ -2621,7 +2621,7 @@ inline ULONG _DosQueryRASInfo(ULONG a, PPVOID b)
 inline ULONG _DosSuppressPopUps(ULONG a, ULONG b)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DosSuppressPopUps(a, b);
     SetFS(sel);
@@ -2637,7 +2637,7 @@ inline ULONG _DosSuppressPopUps(ULONG a, ULONG b)
 inline ULONG _RexxDeregisterSubcom(PCSZ a, PCSZ b)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = RexxDeregisterSubcom(a, b);
     SetFS(sel);
@@ -2651,7 +2651,7 @@ inline ULONG _RexxDeregisterSubcom(PCSZ a, PCSZ b)
 inline ULONG _RexxQuerySubcom(PCSZ a, PCSZ b, PUSHORT c, PUCHAR d)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = RexxQuerySubcom(a, b, c, d);
     SetFS(sel);
@@ -2665,7 +2665,7 @@ inline ULONG _RexxQuerySubcom(PCSZ a, PCSZ b, PUSHORT c, PUCHAR d)
 inline ULONG _RexxRegisterSubcomDll(PCSZ a, PCSZ b, PCSZ c, PUCHAR d, ULONG e)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = RexxRegisterSubcomDll(a, b, c, d, e);
     SetFS(sel);
@@ -2679,7 +2679,7 @@ inline ULONG _RexxRegisterSubcomDll(PCSZ a, PCSZ b, PCSZ c, PUCHAR d, ULONG e)
 inline ULONG _RexxRegisterSubcomExe(PCSZ a, PFN b, PUCHAR c)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = RexxRegisterSubcomExe(a, b, c);
     SetFS(sel);
@@ -2695,7 +2695,7 @@ inline ULONG _RexxRegisterSubcomExe(PCSZ a, PFN b, PUCHAR c)
 inline ULONG _RexxVariablePool(PSHVBLOCK a)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = RexxVariablePool(a);
     SetFS(sel);
@@ -2711,7 +2711,7 @@ inline ULONG _RexxVariablePool(PSHVBLOCK a)
 inline ULONG _RexxDeregisterFunction(PCSZ a)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = RexxDeregisterFunction(a);
     SetFS(sel);
@@ -2725,7 +2725,7 @@ inline ULONG _RexxDeregisterFunction(PCSZ a)
 inline ULONG _RexxQueryFunction(PCSZ a)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = RexxQueryFunction(a);
     SetFS(sel);
@@ -2739,7 +2739,7 @@ inline ULONG _RexxQueryFunction(PCSZ a)
 inline ULONG _RexxRegisterFunctionDll(PCSZ a, PCSZ b, PCSZ c)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = RexxRegisterFunctionDll(a, b, c);
     SetFS(sel);
@@ -2753,7 +2753,7 @@ inline ULONG _RexxRegisterFunctionDll(PCSZ a, PCSZ b, PCSZ c)
 inline ULONG _RexxRegisterFunctionExe(PCSZ a, RexxFunctionHandler *b)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = RexxRegisterFunctionExe(a, b);
     SetFS(sel);
@@ -2769,7 +2769,7 @@ inline ULONG _RexxRegisterFunctionExe(PCSZ a, RexxFunctionHandler *b)
 inline ULONG _RexxDeregisterExit(PCSZ a, PCSZ b)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = RexxDeregisterExit(a, b);
     SetFS(sel);
@@ -2783,7 +2783,7 @@ inline ULONG _RexxDeregisterExit(PCSZ a, PCSZ b)
 inline ULONG _RexxQueryExit(PCSZ a, PCSZ b, PUSHORT c, PUCHAR d)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = RexxQueryExit(a, b, c, d);
     SetFS(sel);
@@ -2797,7 +2797,7 @@ inline ULONG _RexxQueryExit(PCSZ a, PCSZ b, PUSHORT c, PUCHAR d)
 inline ULONG _RexxRegisterExitDll(PCSZ a, PCSZ b, PCSZ c, PUCHAR d, ULONG e)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = RexxRegisterExitDll(a, b, c, d, e);
     SetFS(sel);
@@ -2811,7 +2811,7 @@ inline ULONG _RexxRegisterExitDll(PCSZ a, PCSZ b, PCSZ c, PUCHAR d, ULONG e)
 inline ULONG _RexxRegisterExitExe(PCSZ a, PFN b, PUCHAR c)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = RexxRegisterExitExe(a, b, c);
     SetFS(sel);
@@ -2827,7 +2827,7 @@ inline ULONG _RexxRegisterExitExe(PCSZ a, PFN b, PUCHAR c)
 inline ULONG _RexxResetTrace(PID a, TID b)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = RexxResetTrace(a, b);
     SetFS(sel);
@@ -2841,7 +2841,7 @@ inline ULONG _RexxResetTrace(PID a, TID b)
 inline ULONG _RexxSetHalt(PID a, TID b)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = RexxSetHalt(a, b);
     SetFS(sel);
@@ -2855,7 +2855,7 @@ inline ULONG _RexxSetHalt(PID a, TID b)
 inline ULONG _RexxSetTrace(PID a, TID b)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = RexxSetTrace(a, b);
     SetFS(sel);
@@ -2871,7 +2871,7 @@ inline ULONG _RexxSetTrace(PID a, TID b)
 inline ULONG _RexxAddMacro(PCSZ a, PCSZ b, ULONG c)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = RexxAddMacro(a, b, c);
     SetFS(sel);
@@ -2885,7 +2885,7 @@ inline ULONG _RexxAddMacro(PCSZ a, PCSZ b, ULONG c)
 inline ULONG _RexxClearMacroSpace()
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = RexxClearMacroSpace();
     SetFS(sel);
@@ -2899,7 +2899,7 @@ inline ULONG _RexxClearMacroSpace()
 inline ULONG _RexxDropMacro(PCSZ a)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = RexxDropMacro(a);
     SetFS(sel);
@@ -2913,7 +2913,7 @@ inline ULONG _RexxDropMacro(PCSZ a)
 inline ULONG _RexxLoadMacroSpace(ULONG a, PCSZ *b, PCSZ c)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = RexxLoadMacroSpace(a, b, c);
     SetFS(sel);
@@ -2927,7 +2927,7 @@ inline ULONG _RexxLoadMacroSpace(ULONG a, PCSZ *b, PCSZ c)
 inline ULONG _RexxQueryMacro(PCSZ a, PUSHORT b)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = RexxQueryMacro(a, b);
     SetFS(sel);
@@ -2941,7 +2941,7 @@ inline ULONG _RexxQueryMacro(PCSZ a, PUSHORT b)
 inline ULONG _RexxReorderMacro(PCSZ a, ULONG b)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = RexxReorderMacro(a, b);
     SetFS(sel);
@@ -2955,7 +2955,7 @@ inline ULONG _RexxReorderMacro(PCSZ a, ULONG b)
 inline ULONG _RexxSaveMacroSpace(ULONG a, PCSZ *b, PCSZ c)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = RexxSaveMacroSpace(a, b, c);
     SetFS(sel);
@@ -2969,7 +2969,7 @@ inline ULONG _RexxSaveMacroSpace(ULONG a, PCSZ *b, PCSZ c)
 inline LONG _RexxStart(LONG a, PRXSTRING b, PCSZ c, PRXSTRING d, PCSZ e, LONG f, PRXSYSEXIT g, PSHORT h, PRXSTRING i)
 {
  LONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = RexxStart(a, b, c, d, e, f, g, h, i);
     SetFS(sel);
@@ -2986,7 +2986,7 @@ inline LONG _RexxStart(LONG a, PRXSTRING b, PCSZ c, PRXSTRING d, PCSZ e, LONG f,
 inline BOOL _WinCancelShutdown(HMQ a, BOOL b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinCancelShutdown(a, b);
     SetFS(sel);
@@ -3000,7 +3000,7 @@ inline BOOL _WinCancelShutdown(HMQ a, BOOL b)
 inline HMQ _WinCreateMsgQueue(HAB a, LONG b)
 {
  HMQ yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinCreateMsgQueue(a, b);
     SetFS(sel);
@@ -3014,7 +3014,7 @@ inline HMQ _WinCreateMsgQueue(HAB a, LONG b)
 inline BOOL _WinDestroyMsgQueue(HMQ a)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinDestroyMsgQueue(a);
     SetFS(sel);
@@ -3028,7 +3028,7 @@ inline BOOL _WinDestroyMsgQueue(HMQ a)
 inline MRESULT _WinDispatchMsg(HAB a, PQMSG b)
 {
  MRESULT yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinDispatchMsg(a, b);
     SetFS(sel);
@@ -3042,7 +3042,7 @@ inline MRESULT _WinDispatchMsg(HAB a, PQMSG b)
 inline BOOL _WinGetMsg(HAB a, PQMSG b, HWND c, ULONG d, ULONG e)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinGetMsg(a, b, c, d, e);
     SetFS(sel);
@@ -3056,7 +3056,7 @@ inline BOOL _WinGetMsg(HAB a, PQMSG b, HWND c, ULONG d, ULONG e)
 inline BOOL _WinLockInput(HMQ a, ULONG b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinLockInput(a, b);
     SetFS(sel);
@@ -3070,7 +3070,7 @@ inline BOOL _WinLockInput(HMQ a, ULONG b)
 inline BOOL _WinPeekMsg(HAB a, PQMSG b, HWND c, ULONG d, ULONG e, ULONG f)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinPeekMsg(a, b, c, d, e, f);
     SetFS(sel);
@@ -3084,7 +3084,7 @@ inline BOOL _WinPeekMsg(HAB a, PQMSG b, HWND c, ULONG d, ULONG e, ULONG f)
 inline BOOL _WinPostMsg(HWND a, ULONG b, MPARAM c, MPARAM d)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinPostMsg(a, b, c, d);
     SetFS(sel);
@@ -3098,7 +3098,7 @@ inline BOOL _WinPostMsg(HWND a, ULONG b, MPARAM c, MPARAM d)
 inline HMQ _WinQueueFromID(HAB a, PID b, TID c)
 {
  HMQ yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinQueueFromID(a, b, c);
     SetFS(sel);
@@ -3112,7 +3112,7 @@ inline HMQ _WinQueueFromID(HAB a, PID b, TID c)
 inline BOOL _WinQueryQueueInfo(HMQ a, PMQINFO b, ULONG c)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinQueryQueueInfo(a, b, c);
     SetFS(sel);
@@ -3126,7 +3126,7 @@ inline BOOL _WinQueryQueueInfo(HMQ a, PMQINFO b, ULONG c)
 inline HMQ _WinQuerySendMsg(HAB a, HMQ b, HMQ c, PQMSG d)
 {
  HMQ yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinQuerySendMsg(a, b, c, d);
     SetFS(sel);
@@ -3140,7 +3140,7 @@ inline HMQ _WinQuerySendMsg(HAB a, HMQ b, HMQ c, PQMSG d)
 inline BOOL _WinRegisterUserDatatype(HAB a, LONG b, LONG c, PLONG d)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinRegisterUserDatatype(a, b, c, d);
     SetFS(sel);
@@ -3154,7 +3154,7 @@ inline BOOL _WinRegisterUserDatatype(HAB a, LONG b, LONG c, PLONG d)
 inline BOOL _WinRegisterUserMsg(HAB a, ULONG b, LONG c, LONG d, LONG e, LONG f, LONG g)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinRegisterUserMsg(a, b, c, d, e, f, g);
     SetFS(sel);
@@ -3168,7 +3168,7 @@ inline BOOL _WinRegisterUserMsg(HAB a, ULONG b, LONG c, LONG d, LONG e, LONG f, 
 inline BOOL _WinReplyMsg(HAB a, HMQ b, HMQ c, MRESULT d)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinReplyMsg(a, b, c, d);
     SetFS(sel);
@@ -3182,7 +3182,7 @@ inline BOOL _WinReplyMsg(HAB a, HMQ b, HMQ c, MRESULT d)
 inline MRESULT _WinSendMsg(HWND a, ULONG b, MPARAM c, MPARAM d)
 {
  MRESULT yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinSendMsg(a, b, c, d);
     SetFS(sel);
@@ -3196,7 +3196,7 @@ inline MRESULT _WinSendMsg(HWND a, ULONG b, MPARAM c, MPARAM d)
 inline BOOL _WinSetMsgMode(HAB a, PCSZ b, LONG c)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinSetMsgMode(a, b, c);
     SetFS(sel);
@@ -3210,7 +3210,7 @@ inline BOOL _WinSetMsgMode(HAB a, PCSZ b, LONG c)
 inline BOOL _WinSetSynchroMode(HAB a, LONG b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinSetSynchroMode(a, b);
     SetFS(sel);
@@ -3224,7 +3224,7 @@ inline BOOL _WinSetSynchroMode(HAB a, LONG b)
 inline BOOL _WinThreadAssocQueue(HAB a, HMQ b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinThreadAssocQueue(a, b);
     SetFS(sel);
@@ -3238,7 +3238,7 @@ inline BOOL _WinThreadAssocQueue(HAB a, HMQ b)
 inline BOOL _WinWakeThread(HMQ a)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinWakeThread(a);
     SetFS(sel);
@@ -3253,7 +3253,7 @@ inline BOOL _WinWakeThread(HMQ a)
 inline HWND _WinCreateWindow(HWND a, PCSZ b, PCSZ c, ULONG d, LONG e, LONG f, LONG g, LONG h, HWND i, HWND j, ULONG k, PVOID l, PVOID m)
 {
  HWND yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinCreateWindow(a, b, c, d, e, f, g, h, i, j, k, l, m);
     SetFS(sel);
@@ -3267,7 +3267,7 @@ inline HWND _WinCreateWindow(HWND a, PCSZ b, PCSZ c, ULONG d, LONG e, LONG f, LO
 inline BOOL _WinDrawBitmap(HPS a, HBITMAP b, PRECTL c, PPOINTL d, LONG e, LONG f, ULONG g)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinDrawBitmap(a, b, c, d, e, f, g);
     SetFS(sel);
@@ -3281,7 +3281,7 @@ inline BOOL _WinDrawBitmap(HPS a, HBITMAP b, PRECTL c, PPOINTL d, LONG e, LONG f
 inline BOOL _WinDrawBorder(HPS a, PRECTL b, LONG c, LONG d, LONG e, LONG f, ULONG g)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinDrawBorder(a, b, c, d, e, f, g);
     SetFS(sel);
@@ -3295,7 +3295,7 @@ inline BOOL _WinDrawBorder(HPS a, PRECTL b, LONG c, LONG d, LONG e, LONG f, ULON
 inline LONG _WinDrawText(HPS a, LONG b, PCH c, PRECTL d, LONG e, LONG f, ULONG g)
 {
  LONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinDrawText(a, b, c, d, e, f, g);
     SetFS(sel);
@@ -3309,7 +3309,7 @@ inline LONG _WinDrawText(HPS a, LONG b, PCH c, PRECTL d, LONG e, LONG f, ULONG g
 inline BOOL _WinEnableWindow(HWND a, BOOL b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinEnableWindow(a, b);
     SetFS(sel);
@@ -3323,7 +3323,7 @@ inline BOOL _WinEnableWindow(HWND a, BOOL b)
 inline BOOL _WinEnableWindowUpdate(HWND a, BOOL b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinEnableWindowUpdate(a, b);
     SetFS(sel);
@@ -3337,7 +3337,7 @@ inline BOOL _WinEnableWindowUpdate(HWND a, BOOL b)
 inline BOOL _WinInvalidateRect(HWND a, PRECTL b, BOOL c)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinInvalidateRect(a, b, c);
     SetFS(sel);
@@ -3351,7 +3351,7 @@ inline BOOL _WinInvalidateRect(HWND a, PRECTL b, BOOL c)
 inline BOOL _WinInvalidateRegion(HWND a, HRGN b, BOOL c)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinInvalidateRegion(a, b, c);
     SetFS(sel);
@@ -3365,7 +3365,7 @@ inline BOOL _WinInvalidateRegion(HWND a, HRGN b, BOOL c)
 inline BOOL _WinInvertRect(HPS a, PRECTL b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinInvertRect(a, b);
     SetFS(sel);
@@ -3379,7 +3379,7 @@ inline BOOL _WinInvertRect(HPS a, PRECTL b)
 inline BOOL _WinIsChild(HWND a, HWND b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinIsChild(a, b);
     SetFS(sel);
@@ -3393,7 +3393,7 @@ inline BOOL _WinIsChild(HWND a, HWND b)
 inline BOOL _WinIsWindow(HAB a, HWND b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinIsWindow(a, b);
     SetFS(sel);
@@ -3407,7 +3407,7 @@ inline BOOL _WinIsWindow(HAB a, HWND b)
 inline BOOL _WinIsWindowEnabled(HWND a)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinIsWindowEnabled(a);
     SetFS(sel);
@@ -3421,7 +3421,7 @@ inline BOOL _WinIsWindowEnabled(HWND a)
 inline BOOL _WinIsWindowVisible(HWND a)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinIsWindowVisible(a);
     SetFS(sel);
@@ -3435,7 +3435,7 @@ inline BOOL _WinIsWindowVisible(HWND a)
 inline LONG _WinLoadMessage(HAB a, HMODULE b, ULONG c, LONG d, PSZ e)
 {
  LONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinLoadMessage(a, b, c, d, e);
     SetFS(sel);
@@ -3449,7 +3449,7 @@ inline LONG _WinLoadMessage(HAB a, HMODULE b, ULONG c, LONG d, PSZ e)
 inline LONG _WinLoadString(HAB a, HMODULE b, ULONG c, LONG d, PSZ e)
 {
  LONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinLoadString(a, b, c, d, e);
     SetFS(sel);
@@ -3463,7 +3463,7 @@ inline LONG _WinLoadString(HAB a, HMODULE b, ULONG c, LONG d, PSZ e)
 inline LONG _WinMultWindowFromIDs(HWND a, PHWND b, ULONG c, ULONG d)
 {
  LONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinMultWindowFromIDs(a, b, c, d);
     SetFS(sel);
@@ -3477,7 +3477,7 @@ inline LONG _WinMultWindowFromIDs(HWND a, PHWND b, ULONG c, ULONG d)
 inline HWND _WinQueryDesktopWindow(HAB a, HDC b)
 {
  HWND yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinQueryDesktopWindow(a, b);
     SetFS(sel);
@@ -3491,7 +3491,7 @@ inline HWND _WinQueryDesktopWindow(HAB a, HDC b)
 inline HWND _WinQueryObjectWindow(HWND a)
 {
  HWND yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinQueryObjectWindow(a);
     SetFS(sel);
@@ -3505,7 +3505,7 @@ inline HWND _WinQueryObjectWindow(HWND a)
 inline HPOINTER _WinQueryPointer(HWND a)
 {
  HPOINTER yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinQueryPointer(a);
     SetFS(sel);
@@ -3519,7 +3519,7 @@ inline HPOINTER _WinQueryPointer(HWND a)
 inline HWND _WinQueryWindow(HWND a, LONG b)
 {
  HWND yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinQueryWindow(a, b);
     SetFS(sel);
@@ -3533,7 +3533,7 @@ inline HWND _WinQueryWindow(HWND a, LONG b)
 inline BOOL _WinQueryWindowPos(HWND a, PSWP b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinQueryWindowPos(a, b);
     SetFS(sel);
@@ -3547,7 +3547,7 @@ inline BOOL _WinQueryWindowPos(HWND a, PSWP b)
 inline BOOL _WinQueryWindowProcess(HWND a, PPID b, PTID c)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinQueryWindowProcess(a, b, c);
     SetFS(sel);
@@ -3561,7 +3561,7 @@ inline BOOL _WinQueryWindowProcess(HWND a, PPID b, PTID c)
 inline LONG _WinQueryWindowText(HWND a, LONG b, PCH c)
 {
  LONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinQueryWindowText(a, b, c);
     SetFS(sel);
@@ -3575,7 +3575,7 @@ inline LONG _WinQueryWindowText(HWND a, LONG b, PCH c)
 inline LONG _WinQueryWindowTextLength(HWND a)
 {
  LONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinQueryWindowTextLength(a);
     SetFS(sel);
@@ -3589,7 +3589,7 @@ inline LONG _WinQueryWindowTextLength(HWND a)
 inline BOOL _WinSetMultWindowPos(HAB a, PSWP b, ULONG c)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinSetMultWindowPos(a, b, c);
     SetFS(sel);
@@ -3603,7 +3603,7 @@ inline BOOL _WinSetMultWindowPos(HAB a, PSWP b, ULONG c)
 inline BOOL _WinSetOwner(HWND a, HWND b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinSetOwner(a, b);
     SetFS(sel);
@@ -3617,7 +3617,7 @@ inline BOOL _WinSetOwner(HWND a, HWND b)
 inline BOOL _WinSetParent(HWND a, HWND b, BOOL c)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinSetParent(a, b, c);
     SetFS(sel);
@@ -3631,7 +3631,7 @@ inline BOOL _WinSetParent(HWND a, HWND b, BOOL c)
 inline BOOL _WinSetWindowPos(HWND a, HWND b, LONG c, LONG d, LONG e, LONG f, ULONG g)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinSetWindowPos(a, b, c, d, e, f, g);
     SetFS(sel);
@@ -3645,7 +3645,7 @@ inline BOOL _WinSetWindowPos(HWND a, HWND b, LONG c, LONG d, LONG e, LONG f, ULO
 inline BOOL _WinSetWindowText(HWND a, PCSZ b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinSetWindowText(a, b);
     SetFS(sel);
@@ -3659,7 +3659,7 @@ inline BOOL _WinSetWindowText(HWND a, PCSZ b)
 inline BOOL _WinUpdateWindow(HWND a)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinUpdateWindow(a);
     SetFS(sel);
@@ -3673,7 +3673,7 @@ inline BOOL _WinUpdateWindow(HWND a)
 inline HWND _WinWindowFromID(HWND a, ULONG b)
 {
  HWND yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinWindowFromID(a, b);
     SetFS(sel);
@@ -3688,7 +3688,7 @@ inline HWND _WinWindowFromID(HWND a, ULONG b)
 inline HWND _WinCreateStdWindow(HWND a, ULONG b, PULONG c, PCSZ d, PCSZ e, ULONG f, HMODULE g, ULONG h, PHWND i)
 {
  HWND yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinCreateStdWindow(a, b, c, d, e, f, g, h, i);
     SetFS(sel);
@@ -3702,7 +3702,7 @@ inline HWND _WinCreateStdWindow(HWND a, ULONG b, PULONG c, PCSZ d, PCSZ e, ULONG
 inline BOOL _WinCalcFrameRect(HWND a, PRECTL b, BOOL c)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinCalcFrameRect(a, b, c);
     SetFS(sel);
@@ -3716,7 +3716,7 @@ inline BOOL _WinCalcFrameRect(HWND a, PRECTL b, BOOL c)
 inline BOOL _WinCreateFrameControls(HWND a, PFRAMECDATA b, PCSZ c)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinCreateFrameControls(a, b, c);
     SetFS(sel);
@@ -3730,7 +3730,7 @@ inline BOOL _WinCreateFrameControls(HWND a, PFRAMECDATA b, PCSZ c)
 inline BOOL _WinFlashWindow(HWND a, BOOL b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinFlashWindow(a, b);
     SetFS(sel);
@@ -3744,7 +3744,7 @@ inline BOOL _WinFlashWindow(HWND a, BOOL b)
 inline BOOL _WinGetMaxPosition(HWND a, PSWP b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinGetMaxPosition(a, b);
     SetFS(sel);
@@ -3758,7 +3758,7 @@ inline BOOL _WinGetMaxPosition(HWND a, PSWP b)
 inline BOOL _WinGetMinPosition(HWND a, PSWP b, PPOINTL c)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinGetMinPosition(a, b, c);
     SetFS(sel);
@@ -3772,7 +3772,7 @@ inline BOOL _WinGetMinPosition(HWND a, PSWP b, PPOINTL c)
 inline BOOL _WinSaveWindowPos(HSAVEWP a, PSWP b, ULONG c)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinSaveWindowPos(a, b, c);
     SetFS(sel);
@@ -3788,7 +3788,7 @@ inline BOOL _WinSaveWindowPos(HSAVEWP a, PSWP b, ULONG c)
 inline HPS _WinBeginPaint(HWND a, HPS b, PRECTL c)
 {
  HPS yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinBeginPaint(a, b, c);
     SetFS(sel);
@@ -3802,7 +3802,7 @@ inline HPS _WinBeginPaint(HWND a, HPS b, PRECTL c)
 inline MRESULT _WinDefWindowProc(HWND a, ULONG b, MPARAM c, MPARAM d)
 {
  MRESULT yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinDefWindowProc(a, b, c, d);
     SetFS(sel);
@@ -3816,7 +3816,7 @@ inline MRESULT _WinDefWindowProc(HWND a, ULONG b, MPARAM c, MPARAM d)
 inline BOOL _WinDestroyWindow(HWND a)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinDestroyWindow(a);
     SetFS(sel);
@@ -3830,7 +3830,7 @@ inline BOOL _WinDestroyWindow(HWND a)
 inline BOOL _WinEndPaint(HPS a)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinEndPaint(a);
     SetFS(sel);
@@ -3844,7 +3844,7 @@ inline BOOL _WinEndPaint(HPS a)
 inline BOOL _WinFillRect(HPS a, PRECTL b, LONG c)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinFillRect(a, b, c);
     SetFS(sel);
@@ -3858,7 +3858,7 @@ inline BOOL _WinFillRect(HPS a, PRECTL b, LONG c)
 inline HPS _WinGetClipPS(HWND a, HWND b, ULONG c)
 {
  HPS yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinGetClipPS(a, b, c);
     SetFS(sel);
@@ -3872,7 +3872,7 @@ inline HPS _WinGetClipPS(HWND a, HWND b, ULONG c)
 inline HPS _WinGetPS(HWND a)
 {
  HPS yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinGetPS(a);
     SetFS(sel);
@@ -3886,7 +3886,7 @@ inline HPS _WinGetPS(HWND a)
 inline HAB _WinInitialize(ULONG a)
 {
  HAB yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinInitialize(a);
     SetFS(sel);
@@ -3900,7 +3900,7 @@ inline HAB _WinInitialize(ULONG a)
 inline BOOL _WinIsWindowShowing(HWND a)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinIsWindowShowing(a);
     SetFS(sel);
@@ -3914,7 +3914,7 @@ inline BOOL _WinIsWindowShowing(HWND a)
 inline HDC _WinOpenWindowDC(HWND a)
 {
  HDC yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinOpenWindowDC(a);
     SetFS(sel);
@@ -3928,7 +3928,7 @@ inline HDC _WinOpenWindowDC(HWND a)
 inline HAB _WinQueryAnchorBlock(HWND a)
 {
  HAB yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinQueryAnchorBlock(a);
     SetFS(sel);
@@ -3942,7 +3942,7 @@ inline HAB _WinQueryAnchorBlock(HWND a)
 inline ULONG _WinQueryVersion(HAB a)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinQueryVersion(a);
     SetFS(sel);
@@ -3956,7 +3956,7 @@ inline ULONG _WinQueryVersion(HAB a)
 inline BOOL _WinQueryWindowRect(HWND a, PRECTL b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinQueryWindowRect(a, b);
     SetFS(sel);
@@ -3970,7 +3970,7 @@ inline BOOL _WinQueryWindowRect(HWND a, PRECTL b)
 inline BOOL _WinRegisterClass(HAB a, PCSZ b, PFNWP c, ULONG d, ULONG e)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinRegisterClass(a, b, c, d, e);
     SetFS(sel);
@@ -3984,7 +3984,7 @@ inline BOOL _WinRegisterClass(HAB a, PCSZ b, PFNWP c, ULONG d, ULONG e)
 inline BOOL _WinReleasePS(HPS a)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinReleasePS(a);
     SetFS(sel);
@@ -3998,7 +3998,7 @@ inline BOOL _WinReleasePS(HPS a)
 inline LONG _WinScrollWindow(HWND a, LONG b, LONG c, PRECTL d, PRECTL e, HRGN f, PRECTL g, ULONG h)
 {
  LONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinScrollWindow(a, b, c, d, e, f, g, h);
     SetFS(sel);
@@ -4012,7 +4012,7 @@ inline LONG _WinScrollWindow(HWND a, LONG b, LONG c, PRECTL d, PRECTL e, HRGN f,
 inline BOOL _WinSetActiveWindow(HWND a, HWND b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinSetActiveWindow(a, b);
     SetFS(sel);
@@ -4026,7 +4026,7 @@ inline BOOL _WinSetActiveWindow(HWND a, HWND b)
 inline BOOL _WinShowWindow(HWND a, BOOL b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinShowWindow(a, b);
     SetFS(sel);
@@ -4040,7 +4040,7 @@ inline BOOL _WinShowWindow(HWND a, BOOL b)
 inline BOOL _WinTerminate(HAB a)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinTerminate(a);
     SetFS(sel);
@@ -4056,7 +4056,7 @@ inline BOOL _WinTerminate(HAB a)
 inline HENUM _WinBeginEnumWindows(HWND a)
 {
  HENUM yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinBeginEnumWindows(a);
     SetFS(sel);
@@ -4070,7 +4070,7 @@ inline HENUM _WinBeginEnumWindows(HWND a)
 inline BOOL _WinEndEnumWindows(HENUM a)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinEndEnumWindows(a);
     SetFS(sel);
@@ -4084,7 +4084,7 @@ inline BOOL _WinEndEnumWindows(HENUM a)
 inline LONG _WinExcludeUpdateRegion(HPS a, HWND b)
 {
  LONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinExcludeUpdateRegion(a, b);
     SetFS(sel);
@@ -4098,7 +4098,7 @@ inline LONG _WinExcludeUpdateRegion(HPS a, HWND b)
 inline HWND _WinGetNextWindow(HENUM a)
 {
  HWND yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinGetNextWindow(a);
     SetFS(sel);
@@ -4112,7 +4112,7 @@ inline HWND _WinGetNextWindow(HENUM a)
 inline HPS _WinGetScreenPS(HWND a)
 {
  HPS yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinGetScreenPS(a);
     SetFS(sel);
@@ -4126,7 +4126,7 @@ inline HPS _WinGetScreenPS(HWND a)
 inline BOOL _WinIsThreadActive(HAB a)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinIsThreadActive(a);
     SetFS(sel);
@@ -4140,7 +4140,7 @@ inline BOOL _WinIsThreadActive(HAB a)
 inline BOOL _WinLockVisRegions(HWND a, BOOL b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinLockVisRegions(a, b);
     SetFS(sel);
@@ -4154,7 +4154,7 @@ inline BOOL _WinLockVisRegions(HWND a, BOOL b)
 inline BOOL _WinLockWindowUpdate(HWND a, HWND b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinLockWindowUpdate(a, b);
     SetFS(sel);
@@ -4168,7 +4168,7 @@ inline BOOL _WinLockWindowUpdate(HWND a, HWND b)
 inline BOOL _WinMapWindowPoints(HWND a, HWND b, PPOINTL c, LONG d)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinMapWindowPoints(a, b, c, d);
     SetFS(sel);
@@ -4182,7 +4182,7 @@ inline BOOL _WinMapWindowPoints(HWND a, HWND b, PPOINTL c, LONG d)
 inline HWND _WinQueryActiveWindow(HWND a)
 {
  HWND yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinQueryActiveWindow(a);
     SetFS(sel);
@@ -4196,7 +4196,7 @@ inline HWND _WinQueryActiveWindow(HWND a)
 inline BOOL _WinQueryClassInfo(HAB a, PCSZ b, PCLASSINFO c)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinQueryClassInfo(a, b, c);
     SetFS(sel);
@@ -4210,7 +4210,7 @@ inline BOOL _WinQueryClassInfo(HAB a, PCSZ b, PCLASSINFO c)
 inline LONG _WinQueryClassName(HWND a, LONG b, PCH c)
 {
  LONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinQueryClassName(a, b, c);
     SetFS(sel);
@@ -4224,7 +4224,7 @@ inline LONG _WinQueryClassName(HWND a, LONG b, PCH c)
 inline BOOL _WinQueryUpdateRect(HWND a, PRECTL b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinQueryUpdateRect(a, b);
     SetFS(sel);
@@ -4238,7 +4238,7 @@ inline BOOL _WinQueryUpdateRect(HWND a, PRECTL b)
 inline LONG _WinQueryUpdateRegion(HWND a, HRGN b)
 {
  LONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinQueryUpdateRegion(a, b);
     SetFS(sel);
@@ -4252,7 +4252,7 @@ inline LONG _WinQueryUpdateRegion(HWND a, HRGN b)
 inline HWND _WinQuerySysModalWindow(HWND a)
 {
  HWND yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinQuerySysModalWindow(a);
     SetFS(sel);
@@ -4266,7 +4266,7 @@ inline HWND _WinQuerySysModalWindow(HWND a)
 inline HDC _WinQueryWindowDC(HWND a)
 {
  HDC yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinQueryWindowDC(a);
     SetFS(sel);
@@ -4280,7 +4280,7 @@ inline HDC _WinQueryWindowDC(HWND a)
 inline PVOID _WinQueryWindowPtr(HWND a, LONG b)
 {
  PVOID yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinQueryWindowPtr(a, b);
     SetFS(sel);
@@ -4294,7 +4294,7 @@ inline PVOID _WinQueryWindowPtr(HWND a, LONG b)
 inline ULONG _WinQueryWindowULong(HWND a, LONG b)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinQueryWindowULong(a, b);
     SetFS(sel);
@@ -4308,7 +4308,7 @@ inline ULONG _WinQueryWindowULong(HWND a, LONG b)
 inline USHORT _WinQueryWindowUShort(HWND a, LONG b)
 {
  USHORT yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinQueryWindowUShort(a, b);
     SetFS(sel);
@@ -4322,7 +4322,7 @@ inline USHORT _WinQueryWindowUShort(HWND a, LONG b)
 inline BOOL _WinSetSysModalWindow(HWND a, HWND b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinSetSysModalWindow(a, b);
     SetFS(sel);
@@ -4336,7 +4336,7 @@ inline BOOL _WinSetSysModalWindow(HWND a, HWND b)
 inline BOOL _WinSetWindowBits(HWND a, LONG b, ULONG c, ULONG d)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinSetWindowBits(a, b, c, d);
     SetFS(sel);
@@ -4350,7 +4350,7 @@ inline BOOL _WinSetWindowBits(HWND a, LONG b, ULONG c, ULONG d)
 inline BOOL _WinSetWindowPtr(HWND a, LONG b, PVOID c)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinSetWindowPtr(a, b, c);
     SetFS(sel);
@@ -4364,7 +4364,7 @@ inline BOOL _WinSetWindowPtr(HWND a, LONG b, PVOID c)
 inline BOOL _WinSetWindowULong(HWND a, LONG b, ULONG c)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinSetWindowULong(a, b, c);
     SetFS(sel);
@@ -4378,7 +4378,7 @@ inline BOOL _WinSetWindowULong(HWND a, LONG b, ULONG c)
 inline BOOL _WinSetWindowUShort(HWND a, LONG b, USHORT c)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinSetWindowUShort(a, b, c);
     SetFS(sel);
@@ -4392,7 +4392,7 @@ inline BOOL _WinSetWindowUShort(HWND a, LONG b, USHORT c)
 inline PFNWP _WinSubclassWindow(HWND a, PFNWP b)
 {
  PFNWP yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinSubclassWindow(a, b);
     SetFS(sel);
@@ -4406,7 +4406,7 @@ inline PFNWP _WinSubclassWindow(HWND a, PFNWP b)
 inline BOOL _WinValidateRect(HWND a, PRECTL b, BOOL c)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinValidateRect(a, b, c);
     SetFS(sel);
@@ -4420,7 +4420,7 @@ inline BOOL _WinValidateRect(HWND a, PRECTL b, BOOL c)
 inline BOOL _WinValidateRegion(HWND a, HRGN b, BOOL c)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinValidateRegion(a, b, c);
     SetFS(sel);
@@ -4434,7 +4434,7 @@ inline BOOL _WinValidateRegion(HWND a, HRGN b, BOOL c)
 inline HWND _WinWindowFromDC(HDC a)
 {
  HWND yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinWindowFromDC(a);
     SetFS(sel);
@@ -4448,7 +4448,7 @@ inline HWND _WinWindowFromDC(HDC a)
 inline HWND _WinWindowFromPoint(HWND a, PPOINTL b, BOOL c)
 {
  HWND yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinWindowFromPoint(a, b, c);
     SetFS(sel);
@@ -4464,7 +4464,7 @@ inline HWND _WinWindowFromPoint(HWND a, PPOINTL b, BOOL c)
 inline ULONG _WinCopyAccelTable(HACCEL a, PACCELTABLE b, ULONG c)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinCopyAccelTable(a, b, c);
     SetFS(sel);
@@ -4478,7 +4478,7 @@ inline ULONG _WinCopyAccelTable(HACCEL a, PACCELTABLE b, ULONG c)
 inline HACCEL _WinCreateAccelTable(HAB a, PACCELTABLE b)
 {
  HACCEL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinCreateAccelTable(a, b);
     SetFS(sel);
@@ -4492,7 +4492,7 @@ inline HACCEL _WinCreateAccelTable(HAB a, PACCELTABLE b)
 inline BOOL _WinDestroyAccelTable(HACCEL a)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinDestroyAccelTable(a);
     SetFS(sel);
@@ -4506,7 +4506,7 @@ inline BOOL _WinDestroyAccelTable(HACCEL a)
 inline HACCEL _WinLoadAccelTable(HAB a, HMODULE b, ULONG c)
 {
  HACCEL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinLoadAccelTable(a, b, c);
     SetFS(sel);
@@ -4520,7 +4520,7 @@ inline HACCEL _WinLoadAccelTable(HAB a, HMODULE b, ULONG c)
 inline HACCEL _WinQueryAccelTable(HAB a, HWND b)
 {
  HACCEL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinQueryAccelTable(a, b);
     SetFS(sel);
@@ -4534,7 +4534,7 @@ inline HACCEL _WinQueryAccelTable(HAB a, HWND b)
 inline BOOL _WinSetAccelTable(HAB a, HACCEL b, HWND c)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinSetAccelTable(a, b, c);
     SetFS(sel);
@@ -4548,7 +4548,7 @@ inline BOOL _WinSetAccelTable(HAB a, HACCEL b, HWND c)
 inline BOOL _WinTranslateAccel(HAB a, HWND b, HACCEL c, PQMSG d)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinTranslateAccel(a, b, c, d);
     SetFS(sel);
@@ -4564,7 +4564,7 @@ inline BOOL _WinTranslateAccel(HAB a, HWND b, HACCEL c, PQMSG d)
 inline ATOM _WinAddAtom(HATOMTBL a, PCSZ b)
 {
  ATOM yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinAddAtom(a, b);
     SetFS(sel);
@@ -4578,7 +4578,7 @@ inline ATOM _WinAddAtom(HATOMTBL a, PCSZ b)
 inline HATOMTBL _WinCreateAtomTable(ULONG a, ULONG b)
 {
  HATOMTBL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinCreateAtomTable(a, b);
     SetFS(sel);
@@ -4592,7 +4592,7 @@ inline HATOMTBL _WinCreateAtomTable(ULONG a, ULONG b)
 inline ATOM _WinDeleteAtom(HATOMTBL a, ATOM b)
 {
  ATOM yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinDeleteAtom(a, b);
     SetFS(sel);
@@ -4606,7 +4606,7 @@ inline ATOM _WinDeleteAtom(HATOMTBL a, ATOM b)
 inline HATOMTBL _WinDestroyAtomTable(HATOMTBL a)
 {
  HATOMTBL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinDestroyAtomTable(a);
     SetFS(sel);
@@ -4620,7 +4620,7 @@ inline HATOMTBL _WinDestroyAtomTable(HATOMTBL a)
 inline ATOM _WinFindAtom(HATOMTBL a, PCSZ b)
 {
  ATOM yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinFindAtom(a, b);
     SetFS(sel);
@@ -4634,7 +4634,7 @@ inline ATOM _WinFindAtom(HATOMTBL a, PCSZ b)
 inline ULONG _WinQueryAtomLength(HATOMTBL a, ATOM b)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinQueryAtomLength(a, b);
     SetFS(sel);
@@ -4648,7 +4648,7 @@ inline ULONG _WinQueryAtomLength(HATOMTBL a, ATOM b)
 inline ULONG _WinQueryAtomName(HATOMTBL a, ATOM b, PSZ c, ULONG d)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinQueryAtomName(a, b, c, d);
     SetFS(sel);
@@ -4662,7 +4662,7 @@ inline ULONG _WinQueryAtomName(HATOMTBL a, ATOM b, PSZ c, ULONG d)
 inline ULONG _WinQueryAtomUsage(HATOMTBL a, ATOM b)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinQueryAtomUsage(a, b);
     SetFS(sel);
@@ -4676,7 +4676,7 @@ inline ULONG _WinQueryAtomUsage(HATOMTBL a, ATOM b)
 inline HATOMTBL _WinQuerySystemAtomTable()
 {
  HATOMTBL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinQuerySystemAtomTable();
     SetFS(sel);
@@ -4692,7 +4692,7 @@ inline HATOMTBL _WinQuerySystemAtomTable()
 inline BOOL _WinCloseClipbrd(HAB a)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinCloseClipbrd(a);
     SetFS(sel);
@@ -4706,7 +4706,7 @@ inline BOOL _WinCloseClipbrd(HAB a)
 inline BOOL _WinEmptyClipbrd(HAB a)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinEmptyClipbrd(a);
     SetFS(sel);
@@ -4720,7 +4720,7 @@ inline BOOL _WinEmptyClipbrd(HAB a)
 inline ULONG _WinEnumClipbrdFmts(HAB a, ULONG b)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinEnumClipbrdFmts(a, b);
     SetFS(sel);
@@ -4734,7 +4734,7 @@ inline ULONG _WinEnumClipbrdFmts(HAB a, ULONG b)
 inline BOOL _WinOpenClipbrd(HAB a)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinOpenClipbrd(a);
     SetFS(sel);
@@ -4748,7 +4748,7 @@ inline BOOL _WinOpenClipbrd(HAB a)
 inline ULONG _WinQueryClipbrdData(HAB a, ULONG b)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinQueryClipbrdData(a, b);
     SetFS(sel);
@@ -4762,7 +4762,7 @@ inline ULONG _WinQueryClipbrdData(HAB a, ULONG b)
 inline BOOL _WinQueryClipbrdFmtInfo(HAB a, ULONG b, PULONG c)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinQueryClipbrdFmtInfo(a, b, c);
     SetFS(sel);
@@ -4776,7 +4776,7 @@ inline BOOL _WinQueryClipbrdFmtInfo(HAB a, ULONG b, PULONG c)
 inline HWND _WinQueryClipbrdOwner(HAB a)
 {
  HWND yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinQueryClipbrdOwner(a);
     SetFS(sel);
@@ -4790,7 +4790,7 @@ inline HWND _WinQueryClipbrdOwner(HAB a)
 inline HWND _WinQueryClipbrdViewer(HAB a)
 {
  HWND yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinQueryClipbrdViewer(a);
     SetFS(sel);
@@ -4804,7 +4804,7 @@ inline HWND _WinQueryClipbrdViewer(HAB a)
 inline BOOL _WinSetClipbrdData(HAB a, ULONG b, ULONG c, ULONG d)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinSetClipbrdData(a, b, c, d);
     SetFS(sel);
@@ -4818,7 +4818,7 @@ inline BOOL _WinSetClipbrdData(HAB a, ULONG b, ULONG c, ULONG d)
 inline BOOL _WinSetClipbrdOwner(HAB a, HWND b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinSetClipbrdOwner(a, b);
     SetFS(sel);
@@ -4832,7 +4832,7 @@ inline BOOL _WinSetClipbrdOwner(HAB a, HWND b)
 inline BOOL _WinSetClipbrdViewer(HAB a, HWND b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinSetClipbrdViewer(a, b);
     SetFS(sel);
@@ -4848,7 +4848,7 @@ inline BOOL _WinSetClipbrdViewer(HAB a, HWND b)
 inline BOOL _WinDdeInitiate(HWND a, PCSZ b, PCSZ c, PCONVCONTEXT d)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinDdeInitiate(a, b, c, d);
     SetFS(sel);
@@ -4862,7 +4862,7 @@ inline BOOL _WinDdeInitiate(HWND a, PCSZ b, PCSZ c, PCONVCONTEXT d)
 inline BOOL _WinDdePostMsg(HWND a, HWND b, ULONG c, PDDESTRUCT d, ULONG e)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinDdePostMsg(a, b, c, d, e);
     SetFS(sel);
@@ -4876,7 +4876,7 @@ inline BOOL _WinDdePostMsg(HWND a, HWND b, ULONG c, PDDESTRUCT d, ULONG e)
 inline MRESULT _WinDdeRespond(HWND a, HWND b, PCSZ c, PCSZ d, PCONVCONTEXT e)
 {
  MRESULT yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinDdeRespond(a, b, c, d, e);
     SetFS(sel);
@@ -4892,7 +4892,7 @@ inline MRESULT _WinDdeRespond(HWND a, HWND b, PCSZ c, PCSZ d, PCONVCONTEXT e)
 inline ULONG _WinCompareStrings(HAB a, ULONG b, ULONG c, PCSZ d, PCSZ e, ULONG f)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinCompareStrings(a, b, c, d, e, f);
     SetFS(sel);
@@ -4906,7 +4906,7 @@ inline ULONG _WinCompareStrings(HAB a, ULONG b, ULONG c, PCSZ d, PCSZ e, ULONG f
 inline UCHAR _WinCpTranslateChar(HAB a, ULONG b, UCHAR c, ULONG d)
 {
  UCHAR yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinCpTranslateChar(a, b, c, d);
     SetFS(sel);
@@ -4920,7 +4920,7 @@ inline UCHAR _WinCpTranslateChar(HAB a, ULONG b, UCHAR c, ULONG d)
 inline BOOL _WinCpTranslateString(HAB a, ULONG b, PCSZ c, ULONG d, ULONG e, PSZ f)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinCpTranslateString(a, b, c, d, e, f);
     SetFS(sel);
@@ -4934,7 +4934,7 @@ inline BOOL _WinCpTranslateString(HAB a, ULONG b, PCSZ c, ULONG d, ULONG e, PSZ 
 inline PCSZ _WinNextChar(HAB a, ULONG b, ULONG c, PCSZ d)
 {
  PCSZ yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinNextChar(a, b, c, d);
     SetFS(sel);
@@ -4948,7 +4948,7 @@ inline PCSZ _WinNextChar(HAB a, ULONG b, ULONG c, PCSZ d)
 inline PCSZ _WinPrevChar(HAB a, ULONG b, ULONG c, PCSZ d, PCSZ e)
 {
  PCSZ yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinPrevChar(a, b, c, d, e);
     SetFS(sel);
@@ -4962,7 +4962,7 @@ inline PCSZ _WinPrevChar(HAB a, ULONG b, ULONG c, PCSZ d, PCSZ e)
 inline ULONG _WinQueryCp(HMQ a)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinQueryCp(a);
     SetFS(sel);
@@ -4976,7 +4976,7 @@ inline ULONG _WinQueryCp(HMQ a)
 inline ULONG _WinQueryCpList(HAB a, ULONG b, PULONG c)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinQueryCpList(a, b, c);
     SetFS(sel);
@@ -4990,7 +4990,7 @@ inline ULONG _WinQueryCpList(HAB a, ULONG b, PULONG c)
 inline BOOL _WinSetCp(HMQ a, ULONG b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinSetCp(a, b);
     SetFS(sel);
@@ -5004,7 +5004,7 @@ inline BOOL _WinSetCp(HMQ a, ULONG b)
 inline ULONG _WinUpper(HAB a, ULONG b, ULONG c, PSZ d)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinUpper(a, b, c, d);
     SetFS(sel);
@@ -5018,7 +5018,7 @@ inline ULONG _WinUpper(HAB a, ULONG b, ULONG c, PSZ d)
 inline ULONG _WinUpperChar(HAB a, ULONG b, ULONG c, ULONG d)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinUpperChar(a, b, c, d);
     SetFS(sel);
@@ -5034,7 +5034,7 @@ inline ULONG _WinUpperChar(HAB a, ULONG b, ULONG c, ULONG d)
 inline BOOL _WinCreateCursor(HWND a, LONG b, LONG c, LONG d, LONG e, ULONG f, PRECTL g)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinCreateCursor(a, b, c, d, e, f, g);
     SetFS(sel);
@@ -5048,7 +5048,7 @@ inline BOOL _WinCreateCursor(HWND a, LONG b, LONG c, LONG d, LONG e, ULONG f, PR
 inline BOOL _WinDestroyCursor(HWND a)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinDestroyCursor(a);
     SetFS(sel);
@@ -5062,7 +5062,7 @@ inline BOOL _WinDestroyCursor(HWND a)
 inline BOOL _WinShowCursor(HWND a, BOOL b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinShowCursor(a, b);
     SetFS(sel);
@@ -5076,7 +5076,7 @@ inline BOOL _WinShowCursor(HWND a, BOOL b)
 inline BOOL _WinQueryCursorInfo(HWND a, PCURSORINFO b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinQueryCursorInfo(a, b);
     SetFS(sel);
@@ -5092,7 +5092,7 @@ inline BOOL _WinQueryCursorInfo(HWND a, PCURSORINFO b)
 inline BOOL _WinQueryDesktopBkgnd(HWND a, PDESKTOP b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinQueryDesktopBkgnd(a, b);
     SetFS(sel);
@@ -5106,7 +5106,7 @@ inline BOOL _WinQueryDesktopBkgnd(HWND a, PDESKTOP b)
 inline HBITMAP _WinSetDesktopBkgnd(HWND a, PDESKTOP b)
 {
  HBITMAP yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinSetDesktopBkgnd(a, b);
     SetFS(sel);
@@ -5122,7 +5122,7 @@ inline HBITMAP _WinSetDesktopBkgnd(HWND a, PDESKTOP b)
 inline BOOL _WinAlarm(HWND a, ULONG b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinAlarm(a, b);
     SetFS(sel);
@@ -5136,7 +5136,7 @@ inline BOOL _WinAlarm(HWND a, ULONG b)
 inline MRESULT _WinDefDlgProc(HWND a, ULONG b, MPARAM c, MPARAM d)
 {
  MRESULT yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinDefDlgProc(a, b, c, d);
     SetFS(sel);
@@ -5150,7 +5150,7 @@ inline MRESULT _WinDefDlgProc(HWND a, ULONG b, MPARAM c, MPARAM d)
 inline BOOL _WinDismissDlg(HWND a, ULONG b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinDismissDlg(a, b);
     SetFS(sel);
@@ -5164,7 +5164,7 @@ inline BOOL _WinDismissDlg(HWND a, ULONG b)
 inline ULONG _WinDlgBox(HWND a, HWND b, PFNWP c, HMODULE d, ULONG e, PVOID f)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinDlgBox(a, b, c, d, e, f);
     SetFS(sel);
@@ -5178,7 +5178,7 @@ inline ULONG _WinDlgBox(HWND a, HWND b, PFNWP c, HMODULE d, ULONG e, PVOID f)
 inline BOOL _WinGetDlgMsg(HWND a, PQMSG b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinGetDlgMsg(a, b);
     SetFS(sel);
@@ -5192,7 +5192,7 @@ inline BOOL _WinGetDlgMsg(HWND a, PQMSG b)
 inline HWND _WinLoadDlg(HWND a, HWND b, PFNWP c, HMODULE d, ULONG e, PVOID f)
 {
  HWND yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinLoadDlg(a, b, c, d, e, f);
     SetFS(sel);
@@ -5206,7 +5206,7 @@ inline HWND _WinLoadDlg(HWND a, HWND b, PFNWP c, HMODULE d, ULONG e, PVOID f)
 inline ULONG _WinMessageBox(HWND a, HWND b, PCSZ c, PCSZ d, ULONG e, ULONG f)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinMessageBox(a, b, c, d, e, f);
     SetFS(sel);
@@ -5220,7 +5220,7 @@ inline ULONG _WinMessageBox(HWND a, HWND b, PCSZ c, PCSZ d, ULONG e, ULONG f)
 inline ULONG _WinMessageBox2(HWND a, HWND b, PSZ c, PSZ d, ULONG e, PMB2INFO f)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinMessageBox2(a, b, c, d, e, f);
     SetFS(sel);
@@ -5234,7 +5234,7 @@ inline ULONG _WinMessageBox2(HWND a, HWND b, PSZ c, PSZ d, ULONG e, PMB2INFO f)
 inline BOOL _WinQueryDlgItemShort(HWND a, ULONG b, PSHORT c, BOOL d)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinQueryDlgItemShort(a, b, c, d);
     SetFS(sel);
@@ -5248,7 +5248,7 @@ inline BOOL _WinQueryDlgItemShort(HWND a, ULONG b, PSHORT c, BOOL d)
 inline ULONG _WinQueryDlgItemText(HWND a, ULONG b, LONG c, PSZ d)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinQueryDlgItemText(a, b, c, d);
     SetFS(sel);
@@ -5262,7 +5262,7 @@ inline ULONG _WinQueryDlgItemText(HWND a, ULONG b, LONG c, PSZ d)
 inline LONG _WinQueryDlgItemTextLength(HWND a, ULONG b)
 {
  LONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinQueryDlgItemTextLength(a, b);
     SetFS(sel);
@@ -5276,7 +5276,7 @@ inline LONG _WinQueryDlgItemTextLength(HWND a, ULONG b)
 inline BOOL _WinSetDlgItemShort(HWND a, ULONG b, USHORT c, BOOL d)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinSetDlgItemShort(a, b, c, d);
     SetFS(sel);
@@ -5290,7 +5290,7 @@ inline BOOL _WinSetDlgItemShort(HWND a, ULONG b, USHORT c, BOOL d)
 inline BOOL _WinSetDlgItemText(HWND a, ULONG b, PCSZ c)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinSetDlgItemText(a, b, c);
     SetFS(sel);
@@ -5304,7 +5304,7 @@ inline BOOL _WinSetDlgItemText(HWND a, ULONG b, PCSZ c)
 inline HWND _WinCreateDlg(HWND a, HWND b, PFNWP c, PDLGTEMPLATE d, PVOID e)
 {
  HWND yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinCreateDlg(a, b, c, d, e);
     SetFS(sel);
@@ -5318,7 +5318,7 @@ inline HWND _WinCreateDlg(HWND a, HWND b, PFNWP c, PDLGTEMPLATE d, PVOID e)
 inline HWND _WinEnumDlgItem(HWND a, HWND b, ULONG c)
 {
  HWND yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinEnumDlgItem(a, b, c);
     SetFS(sel);
@@ -5332,7 +5332,7 @@ inline HWND _WinEnumDlgItem(HWND a, HWND b, ULONG c)
 inline BOOL _WinMapDlgPoints(HWND a, PPOINTL b, ULONG c, BOOL d)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinMapDlgPoints(a, b, c, d);
     SetFS(sel);
@@ -5346,7 +5346,7 @@ inline BOOL _WinMapDlgPoints(HWND a, PPOINTL b, ULONG c, BOOL d)
 inline ULONG _WinProcessDlg(HWND a)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinProcessDlg(a);
     SetFS(sel);
@@ -5360,7 +5360,7 @@ inline ULONG _WinProcessDlg(HWND a)
 inline MRESULT _WinSendDlgItemMsg(HWND a, ULONG b, ULONG c, MPARAM d, MPARAM e)
 {
  MRESULT yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinSendDlgItemMsg(a, b, c, d, e);
     SetFS(sel);
@@ -5374,7 +5374,7 @@ inline MRESULT _WinSendDlgItemMsg(HWND a, ULONG b, ULONG c, MPARAM d, MPARAM e)
 inline LONG _WinSubstituteStrings(HWND a, PCSZ b, LONG c, PSZ d)
 {
  LONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinSubstituteStrings(a, b, c, d);
     SetFS(sel);
@@ -5390,7 +5390,7 @@ inline LONG _WinSubstituteStrings(HWND a, PCSZ b, LONG c, PSZ d)
 inline ERRORID _WinGetLastError(HAB a)
 {
  ERRORID yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinGetLastError(a);
     SetFS(sel);
@@ -5404,7 +5404,7 @@ inline ERRORID _WinGetLastError(HAB a)
 inline BOOL _WinFreeErrorInfo(PERRINFO a)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinFreeErrorInfo(a);
     SetFS(sel);
@@ -5418,7 +5418,7 @@ inline BOOL _WinFreeErrorInfo(PERRINFO a)
 inline PERRINFO _WinGetErrorInfo(HAB a)
 {
  PERRINFO yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinGetErrorInfo(a);
     SetFS(sel);
@@ -5434,7 +5434,7 @@ inline PERRINFO _WinGetErrorInfo(HAB a)
 inline BOOL _WinCallMsgFilter(HAB a, PQMSG b, ULONG c)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinCallMsgFilter(a, b, c);
     SetFS(sel);
@@ -5448,7 +5448,7 @@ inline BOOL _WinCallMsgFilter(HAB a, PQMSG b, ULONG c)
 inline BOOL _WinReleaseHook(HAB a, HMQ b, LONG c, PFN d, HMODULE e)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinReleaseHook(a, b, c, d, e);
     SetFS(sel);
@@ -5462,7 +5462,7 @@ inline BOOL _WinReleaseHook(HAB a, HMQ b, LONG c, PFN d, HMODULE e)
 inline BOOL _WinSetHook(HAB a, HMQ b, LONG c, PFN d, HMODULE e)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinSetHook(a, b, c, d, e);
     SetFS(sel);
@@ -5478,7 +5478,7 @@ inline BOOL _WinSetHook(HAB a, HMQ b, LONG c, PFN d, HMODULE e)
 inline BOOL _WinFocusChange(HWND a, HWND b, ULONG c)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinFocusChange(a, b, c);
     SetFS(sel);
@@ -5492,7 +5492,7 @@ inline BOOL _WinFocusChange(HWND a, HWND b, ULONG c)
 inline BOOL _WinLockupSystem(HAB a)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinLockupSystem(a);
     SetFS(sel);
@@ -5506,7 +5506,7 @@ inline BOOL _WinLockupSystem(HAB a)
 inline BOOL _WinSetFocus(HWND a, HWND b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinSetFocus(a, b);
     SetFS(sel);
@@ -5520,7 +5520,7 @@ inline BOOL _WinSetFocus(HWND a, HWND b)
 inline BOOL _WinUnlockSystem(HAB a, PSZ b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinUnlockSystem(a, b);
     SetFS(sel);
@@ -5534,7 +5534,7 @@ inline BOOL _WinUnlockSystem(HAB a, PSZ b)
 inline BOOL _WinCheckInput(HAB a)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinCheckInput(a);
     SetFS(sel);
@@ -5548,7 +5548,7 @@ inline BOOL _WinCheckInput(HAB a)
 inline BOOL _WinEnablePhysInput(HWND a, BOOL b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinEnablePhysInput(a, b);
     SetFS(sel);
@@ -5562,7 +5562,7 @@ inline BOOL _WinEnablePhysInput(HWND a, BOOL b)
 inline LONG _WinGetKeyState(HWND a, LONG b)
 {
  LONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinGetKeyState(a, b);
     SetFS(sel);
@@ -5576,7 +5576,7 @@ inline LONG _WinGetKeyState(HWND a, LONG b)
 inline LONG _WinGetPhysKeyState(HWND a, LONG b)
 {
  LONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinGetPhysKeyState(a, b);
     SetFS(sel);
@@ -5590,7 +5590,7 @@ inline LONG _WinGetPhysKeyState(HWND a, LONG b)
 inline BOOL _WinIsPhysInputEnabled(HWND a)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinIsPhysInputEnabled(a);
     SetFS(sel);
@@ -5604,7 +5604,7 @@ inline BOOL _WinIsPhysInputEnabled(HWND a)
 inline HWND _WinQueryCapture(HWND a)
 {
  HWND yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinQueryCapture(a);
     SetFS(sel);
@@ -5618,7 +5618,7 @@ inline HWND _WinQueryCapture(HWND a)
 inline HWND _WinQueryFocus(HWND a)
 {
  HWND yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinQueryFocus(a);
     SetFS(sel);
@@ -5632,7 +5632,7 @@ inline HWND _WinQueryFocus(HWND a)
 inline ULONG _WinQueryVisibleRegion(HWND a, HRGN b)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinQueryVisibleRegion(a, b);
     SetFS(sel);
@@ -5646,7 +5646,7 @@ inline ULONG _WinQueryVisibleRegion(HWND a, HRGN b)
 inline BOOL _WinSetCapture(HWND a, HWND b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinSetCapture(a, b);
     SetFS(sel);
@@ -5660,7 +5660,7 @@ inline BOOL _WinSetCapture(HWND a, HWND b)
 inline BOOL _WinSetKeyboardStateTable(HWND a, PBYTE b, BOOL c)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinSetKeyboardStateTable(a, b, c);
     SetFS(sel);
@@ -5674,7 +5674,7 @@ inline BOOL _WinSetKeyboardStateTable(HWND a, PBYTE b, BOOL c)
 inline BOOL _WinSetVisibleRegionNotify(HWND a, BOOL b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinSetVisibleRegionNotify(a, b);
     SetFS(sel);
@@ -5690,7 +5690,7 @@ inline BOOL _WinSetVisibleRegionNotify(HWND a, BOOL b)
 inline BOOL _WinDeleteLibrary(HAB a, HLIB b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinDeleteLibrary(a, b);
     SetFS(sel);
@@ -5704,7 +5704,7 @@ inline BOOL _WinDeleteLibrary(HAB a, HLIB b)
 inline BOOL _WinDeleteProcedure(HAB a, PFNWP b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinDeleteProcedure(a, b);
     SetFS(sel);
@@ -5718,7 +5718,7 @@ inline BOOL _WinDeleteProcedure(HAB a, PFNWP b)
 inline HLIB _WinLoadLibrary(HAB a, PCSZ b)
 {
  HLIB yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinLoadLibrary(a, b);
     SetFS(sel);
@@ -5732,7 +5732,7 @@ inline HLIB _WinLoadLibrary(HAB a, PCSZ b)
 inline PFNWP _WinLoadProcedure(HAB a, HLIB b, PSZ c)
 {
  PFNWP yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinLoadProcedure(a, b, c);
     SetFS(sel);
@@ -5748,7 +5748,7 @@ inline PFNWP _WinLoadProcedure(HAB a, HLIB b, PSZ c)
 inline HWND _WinCreateMenu(HWND a, PVOID b)
 {
  HWND yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinCreateMenu(a, b);
     SetFS(sel);
@@ -5762,7 +5762,7 @@ inline HWND _WinCreateMenu(HWND a, PVOID b)
 inline HWND _WinLoadMenu(HWND a, HMODULE b, ULONG c)
 {
  HWND yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinLoadMenu(a, b, c);
     SetFS(sel);
@@ -5776,7 +5776,7 @@ inline HWND _WinLoadMenu(HWND a, HMODULE b, ULONG c)
 inline BOOL _WinPopupMenu(HWND a, HWND b, HWND c, LONG d, LONG e, LONG f, ULONG g)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinPopupMenu(a, b, c, d, e, f, g);
     SetFS(sel);
@@ -5792,7 +5792,7 @@ inline BOOL _WinPopupMenu(HWND a, HWND b, HWND c, LONG d, LONG e, LONG f, ULONG 
 inline BOOL _WinBroadcastMsg(HWND a, ULONG b, MPARAM c, MPARAM d, ULONG e)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinBroadcastMsg(a, b, c, d, e);
     SetFS(sel);
@@ -5806,7 +5806,7 @@ inline BOOL _WinBroadcastMsg(HWND a, ULONG b, MPARAM c, MPARAM d, ULONG e)
 inline BOOL _WinInSendMsg(HAB a)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinInSendMsg(a);
     SetFS(sel);
@@ -5820,7 +5820,7 @@ inline BOOL _WinInSendMsg(HAB a)
 inline BOOL _WinPostQueueMsg(HMQ a, ULONG b, MPARAM c, MPARAM d)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinPostQueueMsg(a, b, c, d);
     SetFS(sel);
@@ -5834,7 +5834,7 @@ inline BOOL _WinPostQueueMsg(HMQ a, ULONG b, MPARAM c, MPARAM d)
 inline BOOL _WinQueryMsgPos(HAB a, PPOINTL b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinQueryMsgPos(a, b);
     SetFS(sel);
@@ -5848,7 +5848,7 @@ inline BOOL _WinQueryMsgPos(HAB a, PPOINTL b)
 inline ULONG _WinQueryMsgTime(HAB a)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinQueryMsgTime(a);
     SetFS(sel);
@@ -5862,7 +5862,7 @@ inline ULONG _WinQueryMsgTime(HAB a)
 inline ULONG _WinQueryQueueStatus(HWND a)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinQueryQueueStatus(a);
     SetFS(sel);
@@ -5876,7 +5876,7 @@ inline ULONG _WinQueryQueueStatus(HWND a)
 inline ULONG _WinRequestMutexSem(HMTX a, ULONG b)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinRequestMutexSem(a, b);
     SetFS(sel);
@@ -5890,7 +5890,7 @@ inline ULONG _WinRequestMutexSem(HMTX a, ULONG b)
 inline BOOL _WinSetClassMsgInterest(HAB a, PCSZ b, ULONG c, LONG d)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinSetClassMsgInterest(a, b, c, d);
     SetFS(sel);
@@ -5904,7 +5904,7 @@ inline BOOL _WinSetClassMsgInterest(HAB a, PCSZ b, ULONG c, LONG d)
 inline BOOL _WinSetMsgInterest(HWND a, ULONG b, LONG c)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinSetMsgInterest(a, b, c);
     SetFS(sel);
@@ -5918,7 +5918,7 @@ inline BOOL _WinSetMsgInterest(HWND a, ULONG b, LONG c)
 inline ULONG _WinWaitEventSem(HEV a, ULONG b)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinWaitEventSem(a, b);
     SetFS(sel);
@@ -5932,7 +5932,7 @@ inline ULONG _WinWaitEventSem(HEV a, ULONG b)
 inline BOOL _WinWaitMsg(HAB a, ULONG b, ULONG c)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinWaitMsg(a, b, c);
     SetFS(sel);
@@ -5946,7 +5946,7 @@ inline BOOL _WinWaitMsg(HAB a, ULONG b, ULONG c)
 inline ULONG _WinWaitMuxWaitSem(HMUX a, ULONG b, PULONG c)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinWaitMuxWaitSem(a, b, c);
     SetFS(sel);
@@ -5962,7 +5962,7 @@ inline ULONG _WinWaitMuxWaitSem(HMUX a, ULONG b, PULONG c)
 inline LONG _WinRealizePalette(HWND a, HPS b, PULONG c)
 {
  LONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinRealizePalette(a, b, c);
     SetFS(sel);
@@ -5978,7 +5978,7 @@ inline LONG _WinRealizePalette(HWND a, HPS b, PULONG c)
 inline HPOINTER _WinCreatePointer(HWND a, HBITMAP b, BOOL c, LONG d, LONG e)
 {
  HPOINTER yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinCreatePointer(a, b, c, d, e);
     SetFS(sel);
@@ -5992,7 +5992,7 @@ inline HPOINTER _WinCreatePointer(HWND a, HBITMAP b, BOOL c, LONG d, LONG e)
 inline HPOINTER _WinCreatePointerIndirect(HWND a, PPOINTERINFO b)
 {
  HPOINTER yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinCreatePointerIndirect(a, b);
     SetFS(sel);
@@ -6006,7 +6006,7 @@ inline HPOINTER _WinCreatePointerIndirect(HWND a, PPOINTERINFO b)
 inline BOOL _WinDestroyPointer(HPOINTER a)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinDestroyPointer(a);
     SetFS(sel);
@@ -6020,7 +6020,7 @@ inline BOOL _WinDestroyPointer(HPOINTER a)
 inline BOOL _WinDrawPointer(HPS a, LONG b, LONG c, HPOINTER d, ULONG e)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinDrawPointer(a, b, c, d, e);
     SetFS(sel);
@@ -6034,7 +6034,7 @@ inline BOOL _WinDrawPointer(HPS a, LONG b, LONG c, HPOINTER d, ULONG e)
 inline HBITMAP _WinGetSysBitmap(HWND a, ULONG b)
 {
  HBITMAP yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinGetSysBitmap(a, b);
     SetFS(sel);
@@ -6048,7 +6048,7 @@ inline HBITMAP _WinGetSysBitmap(HWND a, ULONG b)
 inline HPOINTER _WinLoadPointer(HWND a, HMODULE b, ULONG c)
 {
  HPOINTER yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinLoadPointer(a, b, c);
     SetFS(sel);
@@ -6062,7 +6062,7 @@ inline HPOINTER _WinLoadPointer(HWND a, HMODULE b, ULONG c)
 inline BOOL _WinLockPointerUpdate(HWND a, HPOINTER b, ULONG c)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinLockPointerUpdate(a, b, c);
     SetFS(sel);
@@ -6076,7 +6076,7 @@ inline BOOL _WinLockPointerUpdate(HWND a, HPOINTER b, ULONG c)
 inline BOOL _WinQueryPointerPos(HWND a, PPOINTL b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinQueryPointerPos(a, b);
     SetFS(sel);
@@ -6090,7 +6090,7 @@ inline BOOL _WinQueryPointerPos(HWND a, PPOINTL b)
 inline BOOL _WinQueryPointerInfo(HPOINTER a, PPOINTERINFO b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinQueryPointerInfo(a, b);
     SetFS(sel);
@@ -6104,7 +6104,7 @@ inline BOOL _WinQueryPointerInfo(HPOINTER a, PPOINTERINFO b)
 inline HPOINTER _WinQuerySysPointer(HWND a, LONG b, BOOL c)
 {
  HPOINTER yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinQuerySysPointer(a, b, c);
     SetFS(sel);
@@ -6118,7 +6118,7 @@ inline HPOINTER _WinQuerySysPointer(HWND a, LONG b, BOOL c)
 inline BOOL _WinQuerySysPointerData(HWND a, ULONG b, PICONINFO c)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinQuerySysPointerData(a, b, c);
     SetFS(sel);
@@ -6132,7 +6132,7 @@ inline BOOL _WinQuerySysPointerData(HWND a, ULONG b, PICONINFO c)
 inline BOOL _WinSetPointer(HWND a, HPOINTER b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinSetPointer(a, b);
     SetFS(sel);
@@ -6146,7 +6146,7 @@ inline BOOL _WinSetPointer(HWND a, HPOINTER b)
 inline BOOL _WinSetPointerOwner(HPOINTER a, PID b, BOOL c)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinSetPointerOwner(a, b, c);
     SetFS(sel);
@@ -6160,7 +6160,7 @@ inline BOOL _WinSetPointerOwner(HPOINTER a, PID b, BOOL c)
 inline BOOL _WinSetPointerPos(HWND a, LONG b, LONG c)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinSetPointerPos(a, b, c);
     SetFS(sel);
@@ -6174,7 +6174,7 @@ inline BOOL _WinSetPointerPos(HWND a, LONG b, LONG c)
 inline BOOL _WinSetSysPointerData(HWND a, ULONG b, PICONINFO c)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinSetSysPointerData(a, b, c);
     SetFS(sel);
@@ -6188,7 +6188,7 @@ inline BOOL _WinSetSysPointerData(HWND a, ULONG b, PICONINFO c)
 inline BOOL _WinShowPointer(HWND a, BOOL b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinShowPointer(a, b);
     SetFS(sel);
@@ -6204,7 +6204,7 @@ inline BOOL _WinShowPointer(HWND a, BOOL b)
 inline BOOL _WinCopyRect(HAB a, PRECTL b, PRECTL c)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinCopyRect(a, b, c);
     SetFS(sel);
@@ -6218,7 +6218,7 @@ inline BOOL _WinCopyRect(HAB a, PRECTL b, PRECTL c)
 inline BOOL _WinEqualRect(HAB a, PRECTL b, PRECTL c)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinEqualRect(a, b, c);
     SetFS(sel);
@@ -6232,7 +6232,7 @@ inline BOOL _WinEqualRect(HAB a, PRECTL b, PRECTL c)
 inline BOOL _WinInflateRect(HAB a, PRECTL b, LONG c, LONG d)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinInflateRect(a, b, c, d);
     SetFS(sel);
@@ -6246,7 +6246,7 @@ inline BOOL _WinInflateRect(HAB a, PRECTL b, LONG c, LONG d)
 inline BOOL _WinIntersectRect(HAB a, PRECTL b, PRECTL c, PRECTL d)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinIntersectRect(a, b, c, d);
     SetFS(sel);
@@ -6260,7 +6260,7 @@ inline BOOL _WinIntersectRect(HAB a, PRECTL b, PRECTL c, PRECTL d)
 inline BOOL _WinIsRectEmpty(HAB a, PRECTL b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinIsRectEmpty(a, b);
     SetFS(sel);
@@ -6274,7 +6274,7 @@ inline BOOL _WinIsRectEmpty(HAB a, PRECTL b)
 inline BOOL _WinMakePoints(HAB a, PPOINTL b, ULONG c)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinMakePoints(a, b, c);
     SetFS(sel);
@@ -6288,7 +6288,7 @@ inline BOOL _WinMakePoints(HAB a, PPOINTL b, ULONG c)
 inline BOOL _WinMakeRect(HAB a, PRECTL b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinMakeRect(a, b);
     SetFS(sel);
@@ -6302,7 +6302,7 @@ inline BOOL _WinMakeRect(HAB a, PRECTL b)
 inline BOOL _WinOffsetRect(HAB a, PRECTL b, LONG c, LONG d)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinOffsetRect(a, b, c, d);
     SetFS(sel);
@@ -6316,7 +6316,7 @@ inline BOOL _WinOffsetRect(HAB a, PRECTL b, LONG c, LONG d)
 inline BOOL _WinPtInRect(HAB a, PRECTL b, PPOINTL c)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinPtInRect(a, b, c);
     SetFS(sel);
@@ -6330,7 +6330,7 @@ inline BOOL _WinPtInRect(HAB a, PRECTL b, PPOINTL c)
 inline BOOL _WinSetRect(HAB a, PRECTL b, LONG c, LONG d, LONG e, LONG f)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinSetRect(a, b, c, d, e, f);
     SetFS(sel);
@@ -6344,7 +6344,7 @@ inline BOOL _WinSetRect(HAB a, PRECTL b, LONG c, LONG d, LONG e, LONG f)
 inline BOOL _WinSetRectEmpty(HAB a, PRECTL b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinSetRectEmpty(a, b);
     SetFS(sel);
@@ -6358,7 +6358,7 @@ inline BOOL _WinSetRectEmpty(HAB a, PRECTL b)
 inline BOOL _WinSubtractRect(HAB a, PRECTL b, PRECTL c, PRECTL d)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinSubtractRect(a, b, c, d);
     SetFS(sel);
@@ -6372,7 +6372,7 @@ inline BOOL _WinSubtractRect(HAB a, PRECTL b, PRECTL c, PRECTL d)
 inline BOOL _WinUnionRect(HAB a, PRECTL b, PRECTL c, PRECTL d)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinUnionRect(a, b, c, d);
     SetFS(sel);
@@ -6388,7 +6388,7 @@ inline BOOL _WinUnionRect(HAB a, PRECTL b, PRECTL c, PRECTL d)
 inline LONG _WinQueryControlColors(HWND a, LONG b, ULONG c, ULONG d, PCTLCOLOR e)
 {
  LONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinQueryControlColors(a, b, c, d, e);
     SetFS(sel);
@@ -6402,7 +6402,7 @@ inline LONG _WinQueryControlColors(HWND a, LONG b, ULONG c, ULONG d, PCTLCOLOR e
 inline ULONG _WinQueryPresParam(HWND a, ULONG b, ULONG c, PULONG d, ULONG e, PVOID f, ULONG g)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinQueryPresParam(a, b, c, d, e, f, g);
     SetFS(sel);
@@ -6416,7 +6416,7 @@ inline ULONG _WinQueryPresParam(HWND a, ULONG b, ULONG c, PULONG d, ULONG e, PVO
 inline LONG _WinQuerySysColor(HWND a, LONG b, LONG c)
 {
  LONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinQuerySysColor(a, b, c);
     SetFS(sel);
@@ -6430,7 +6430,7 @@ inline LONG _WinQuerySysColor(HWND a, LONG b, LONG c)
 inline LONG _WinQuerySysValue(HWND a, LONG b)
 {
  LONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinQuerySysValue(a, b);
     SetFS(sel);
@@ -6444,7 +6444,7 @@ inline LONG _WinQuerySysValue(HWND a, LONG b)
 inline BOOL _WinRemovePresParam(HWND a, ULONG b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinRemovePresParam(a, b);
     SetFS(sel);
@@ -6458,7 +6458,7 @@ inline BOOL _WinRemovePresParam(HWND a, ULONG b)
 inline LONG _WinSetControlColors(HWND a, LONG b, ULONG c, ULONG d, PCTLCOLOR e)
 {
  LONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinSetControlColors(a, b, c, d, e);
     SetFS(sel);
@@ -6472,7 +6472,7 @@ inline LONG _WinSetControlColors(HWND a, LONG b, ULONG c, ULONG d, PCTLCOLOR e)
 inline BOOL _WinSetPresParam(HWND a, ULONG b, ULONG c, PVOID d)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinSetPresParam(a, b, c, d);
     SetFS(sel);
@@ -6486,7 +6486,7 @@ inline BOOL _WinSetPresParam(HWND a, ULONG b, ULONG c, PVOID d)
 inline BOOL _WinSetSysColors(HWND a, ULONG b, ULONG c, LONG d, ULONG e, PLONG f)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinSetSysColors(a, b, c, d, e, f);
     SetFS(sel);
@@ -6500,7 +6500,7 @@ inline BOOL _WinSetSysColors(HWND a, ULONG b, ULONG c, LONG d, ULONG e, PLONG f)
 inline BOOL _WinSetSysValue(HWND a, LONG b, LONG c)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinSetSysValue(a, b, c);
     SetFS(sel);
@@ -6516,7 +6516,7 @@ inline BOOL _WinSetSysValue(HWND a, LONG b, LONG c)
 inline PFN _WinQueryClassThunkProc(PCSZ a)
 {
  PFN yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinQueryClassThunkProc(a);
     SetFS(sel);
@@ -6530,7 +6530,7 @@ inline PFN _WinQueryClassThunkProc(PCSZ a)
 inline LONG _WinQueryWindowModel(HWND a)
 {
  LONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinQueryWindowModel(a);
     SetFS(sel);
@@ -6544,7 +6544,7 @@ inline LONG _WinQueryWindowModel(HWND a)
 inline PFN _WinQueryWindowThunkProc(HWND a)
 {
  PFN yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinQueryWindowThunkProc(a);
     SetFS(sel);
@@ -6558,7 +6558,7 @@ inline PFN _WinQueryWindowThunkProc(HWND a)
 inline BOOL _WinSetClassThunkProc(PCSZ a, PFN b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinSetClassThunkProc(a, b);
     SetFS(sel);
@@ -6572,7 +6572,7 @@ inline BOOL _WinSetClassThunkProc(PCSZ a, PFN b)
 inline BOOL _WinSetWindowThunkProc(HWND a, PFN b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinSetWindowThunkProc(a, b);
     SetFS(sel);
@@ -6588,7 +6588,7 @@ inline BOOL _WinSetWindowThunkProc(HWND a, PFN b)
 inline ULONG _WinGetCurrentTime(HAB a)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinGetCurrentTime(a);
     SetFS(sel);
@@ -6602,7 +6602,7 @@ inline ULONG _WinGetCurrentTime(HAB a)
 inline ULONG _WinStartTimer(HAB a, HWND b, ULONG c, ULONG d)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinStartTimer(a, b, c, d);
     SetFS(sel);
@@ -6616,7 +6616,7 @@ inline ULONG _WinStartTimer(HAB a, HWND b, ULONG c, ULONG d)
 inline BOOL _WinStopTimer(HAB a, HWND b, ULONG c)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinStopTimer(a, b, c);
     SetFS(sel);
@@ -6632,7 +6632,7 @@ inline BOOL _WinStopTimer(HAB a, HWND b, ULONG c)
 inline BOOL _WinShowTrackRect(HWND a, BOOL b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinShowTrackRect(a, b);
     SetFS(sel);
@@ -6646,7 +6646,7 @@ inline BOOL _WinShowTrackRect(HWND a, BOOL b)
 inline BOOL _WinTrackRect(HWND a, HPS b, PTRACKINFO c)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinTrackRect(a, b, c);
     SetFS(sel);
@@ -6663,7 +6663,7 @@ inline BOOL _WinTrackRect(HWND a, HPS b, PTRACKINFO c)
 inline LONG _GpiAnimatePalette(HPAL a, ULONG b, ULONG c, ULONG d, PULONG e)
 {
  LONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiAnimatePalette(a, b, c, d, e);
     SetFS(sel);
@@ -6677,7 +6677,7 @@ inline LONG _GpiAnimatePalette(HPAL a, ULONG b, ULONG c, ULONG d, PULONG e)
 inline BOOL _GpiBeginArea(HPS a, ULONG b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiBeginArea(a, b);
     SetFS(sel);
@@ -6691,7 +6691,7 @@ inline BOOL _GpiBeginArea(HPS a, ULONG b)
 inline BOOL _GpiBeginElement(HPS a, LONG b, PCSZ c)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiBeginElement(a, b, c);
     SetFS(sel);
@@ -6705,7 +6705,7 @@ inline BOOL _GpiBeginElement(HPS a, LONG b, PCSZ c)
 inline BOOL _GpiBeginPath(HPS a, LONG b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiBeginPath(a, b);
     SetFS(sel);
@@ -6719,7 +6719,7 @@ inline BOOL _GpiBeginPath(HPS a, LONG b)
 inline LONG _GpiBox(HPS a, LONG b, PPOINTL c, LONG d, LONG e)
 {
  LONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiBox(a, b, c, d, e);
     SetFS(sel);
@@ -6733,7 +6733,7 @@ inline LONG _GpiBox(HPS a, LONG b, PPOINTL c, LONG d, LONG e)
 inline LONG _GpiCallSegmentMatrix(HPS a, LONG b, LONG c, PMATRIXLF d, LONG e)
 {
  LONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiCallSegmentMatrix(a, b, c, d, e);
     SetFS(sel);
@@ -6747,7 +6747,7 @@ inline LONG _GpiCallSegmentMatrix(HPS a, LONG b, LONG c, PMATRIXLF d, LONG e)
 inline LONG _GpiCharString(HPS a, LONG b, PCH c)
 {
  LONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiCharString(a, b, c);
     SetFS(sel);
@@ -6761,7 +6761,7 @@ inline LONG _GpiCharString(HPS a, LONG b, PCH c)
 inline LONG _GpiCharStringAt(HPS a, PPOINTL b, LONG c, PCH d)
 {
  LONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiCharStringAt(a, b, c, d);
     SetFS(sel);
@@ -6775,7 +6775,7 @@ inline LONG _GpiCharStringAt(HPS a, PPOINTL b, LONG c, PCH d)
 inline LONG _GpiCharStringPos(HPS a, PRECTL b, ULONG c, LONG d, PCH e, PLONG f)
 {
  LONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiCharStringPos(a, b, c, d, e, f);
     SetFS(sel);
@@ -6789,7 +6789,7 @@ inline LONG _GpiCharStringPos(HPS a, PRECTL b, ULONG c, LONG d, PCH e, PLONG f)
 inline LONG _GpiCharStringPosAt(HPS a, PPOINTL b, PRECTL c, ULONG d, LONG e, PCH f, PLONG g)
 {
  LONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiCharStringPosAt(a, b, c, d, e, f, g);
     SetFS(sel);
@@ -6803,7 +6803,7 @@ inline LONG _GpiCharStringPosAt(HPS a, PPOINTL b, PRECTL c, ULONG d, LONG e, PCH
 inline BOOL _GpiCloseFigure(HPS a)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiCloseFigure(a);
     SetFS(sel);
@@ -6817,7 +6817,7 @@ inline BOOL _GpiCloseFigure(HPS a)
 inline LONG _GpiCombineRegion(HPS a, HRGN b, HRGN c, HRGN d, LONG e)
 {
  LONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiCombineRegion(a, b, c, d, e);
     SetFS(sel);
@@ -6831,7 +6831,7 @@ inline LONG _GpiCombineRegion(HPS a, HRGN b, HRGN c, HRGN d, LONG e)
 inline BOOL _GpiComment(HPS a, LONG b, PBYTE c)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiComment(a, b, c);
     SetFS(sel);
@@ -6845,7 +6845,7 @@ inline BOOL _GpiComment(HPS a, LONG b, PBYTE c)
 inline BOOL _GpiConvert(HPS a, LONG b, LONG c, LONG d, PPOINTL e)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiConvert(a, b, c, d, e);
     SetFS(sel);
@@ -6859,7 +6859,7 @@ inline BOOL _GpiConvert(HPS a, LONG b, LONG c, LONG d, PPOINTL e)
 inline BOOL _GpiConvertWithMatrix(HPS a, LONG b, PPOINTL c, LONG d, PMATRIXLF e)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiConvertWithMatrix(a, b, c, d, e);
     SetFS(sel);
@@ -6873,7 +6873,7 @@ inline BOOL _GpiConvertWithMatrix(HPS a, LONG b, PPOINTL c, LONG d, PMATRIXLF e)
 inline HMF _GpiCopyMetaFile(HMF a)
 {
  HMF yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiCopyMetaFile(a);
     SetFS(sel);
@@ -6887,7 +6887,7 @@ inline HMF _GpiCopyMetaFile(HMF a)
 inline BOOL _GpiCreateLogColorTable(HPS a, ULONG b, LONG c, LONG d, LONG e, PLONG f)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiCreateLogColorTable(a, b, c, d, e, f);
     SetFS(sel);
@@ -6901,7 +6901,7 @@ inline BOOL _GpiCreateLogColorTable(HPS a, ULONG b, LONG c, LONG d, LONG e, PLON
 inline LONG _GpiCreateLogFont(HPS a, STR8 *b, LONG c, PFATTRS d)
 {
  LONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiCreateLogFont(a, b, c, d);
     SetFS(sel);
@@ -6915,7 +6915,7 @@ inline LONG _GpiCreateLogFont(HPS a, STR8 *b, LONG c, PFATTRS d)
 inline HPAL _GpiCreatePalette(HAB a, ULONG b, ULONG c, ULONG d, PULONG e)
 {
  HPAL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiCreatePalette(a, b, c, d, e);
     SetFS(sel);
@@ -6929,7 +6929,7 @@ inline HPAL _GpiCreatePalette(HAB a, ULONG b, ULONG c, ULONG d, PULONG e)
 inline HRGN _GpiCreateRegion(HPS a, LONG b, PRECTL c)
 {
  HRGN yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiCreateRegion(a, b, c);
     SetFS(sel);
@@ -6943,7 +6943,7 @@ inline HRGN _GpiCreateRegion(HPS a, LONG b, PRECTL c)
 inline BOOL _GpiDeleteElement(HPS a)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiDeleteElement(a);
     SetFS(sel);
@@ -6957,7 +6957,7 @@ inline BOOL _GpiDeleteElement(HPS a)
 inline BOOL _GpiDeleteElementRange(HPS a, LONG b, LONG c)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiDeleteElementRange(a, b, c);
     SetFS(sel);
@@ -6971,7 +6971,7 @@ inline BOOL _GpiDeleteElementRange(HPS a, LONG b, LONG c)
 inline BOOL _GpiDeleteElementsBetweenLabels(HPS a, LONG b, LONG c)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiDeleteElementsBetweenLabels(a, b, c);
     SetFS(sel);
@@ -6985,7 +6985,7 @@ inline BOOL _GpiDeleteElementsBetweenLabels(HPS a, LONG b, LONG c)
 inline BOOL _GpiDeleteMetaFile(HMF a)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiDeleteMetaFile(a);
     SetFS(sel);
@@ -6999,7 +6999,7 @@ inline BOOL _GpiDeleteMetaFile(HMF a)
 inline BOOL _GpiDeletePalette(HPAL a)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiDeletePalette(a);
     SetFS(sel);
@@ -7013,7 +7013,7 @@ inline BOOL _GpiDeletePalette(HPAL a)
 inline BOOL _GpiDeleteSetId(HPS a, LONG b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiDeleteSetId(a, b);
     SetFS(sel);
@@ -7027,7 +7027,7 @@ inline BOOL _GpiDeleteSetId(HPS a, LONG b)
 inline BOOL _GpiDestroyRegion(HPS a, HRGN b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiDestroyRegion(a, b);
     SetFS(sel);
@@ -7041,7 +7041,7 @@ inline BOOL _GpiDestroyRegion(HPS a, HRGN b)
 inline LONG _GpiElement(HPS a, LONG b, PCSZ c, LONG d, PBYTE e)
 {
  LONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiElement(a, b, c, d, e);
     SetFS(sel);
@@ -7055,7 +7055,7 @@ inline LONG _GpiElement(HPS a, LONG b, PCSZ c, LONG d, PBYTE e)
 inline LONG _GpiEndArea(HPS a)
 {
  LONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiEndArea(a);
     SetFS(sel);
@@ -7069,7 +7069,7 @@ inline LONG _GpiEndArea(HPS a)
 inline BOOL _GpiEndElement(HPS a)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiEndElement(a);
     SetFS(sel);
@@ -7083,7 +7083,7 @@ inline BOOL _GpiEndElement(HPS a)
 inline BOOL _GpiEndPath(HPS a)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiEndPath(a);
     SetFS(sel);
@@ -7097,7 +7097,7 @@ inline BOOL _GpiEndPath(HPS a)
 inline LONG _GpiEqualRegion(HPS a, HRGN b, HRGN c)
 {
  LONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiEqualRegion(a, b, c);
     SetFS(sel);
@@ -7111,7 +7111,7 @@ inline LONG _GpiEqualRegion(HPS a, HRGN b, HRGN c)
 inline LONG _GpiExcludeClipRectangle(HPS a, PRECTL b)
 {
  LONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiExcludeClipRectangle(a, b);
     SetFS(sel);
@@ -7125,7 +7125,7 @@ inline LONG _GpiExcludeClipRectangle(HPS a, PRECTL b)
 inline LONG _GpiFillPath(HPS a, LONG b, LONG c)
 {
  LONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiFillPath(a, b, c);
     SetFS(sel);
@@ -7139,7 +7139,7 @@ inline LONG _GpiFillPath(HPS a, LONG b, LONG c)
 inline LONG _GpiFrameRegion(HPS a, HRGN b, PSIZEL c)
 {
  LONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiFrameRegion(a, b, c);
     SetFS(sel);
@@ -7153,7 +7153,7 @@ inline LONG _GpiFrameRegion(HPS a, HRGN b, PSIZEL c)
 inline LONG _GpiFullArc(HPS a, LONG b, FIXED c)
 {
  LONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiFullArc(a, b, c);
     SetFS(sel);
@@ -7167,7 +7167,7 @@ inline LONG _GpiFullArc(HPS a, LONG b, FIXED c)
 inline LONG _GpiImage(HPS a, LONG b, PSIZEL c, LONG d, PBYTE e)
 {
  LONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiImage(a, b, c, d, e);
     SetFS(sel);
@@ -7181,7 +7181,7 @@ inline LONG _GpiImage(HPS a, LONG b, PSIZEL c, LONG d, PBYTE e)
 inline LONG _GpiIntersectClipRectangle(HPS a, PRECTL b)
 {
  LONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiIntersectClipRectangle(a, b);
     SetFS(sel);
@@ -7195,7 +7195,7 @@ inline LONG _GpiIntersectClipRectangle(HPS a, PRECTL b)
 inline BOOL _GpiLabel(HPS a, LONG b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiLabel(a, b);
     SetFS(sel);
@@ -7209,7 +7209,7 @@ inline BOOL _GpiLabel(HPS a, LONG b)
 inline LONG _GpiLine(HPS a, PPOINTL b)
 {
  LONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiLine(a, b);
     SetFS(sel);
@@ -7223,7 +7223,7 @@ inline LONG _GpiLine(HPS a, PPOINTL b)
 inline BOOL _GpiLoadFonts(HAB a, PCSZ b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiLoadFonts(a, b);
     SetFS(sel);
@@ -7237,7 +7237,7 @@ inline BOOL _GpiLoadFonts(HAB a, PCSZ b)
 inline HMF _GpiLoadMetaFile(HAB a, PCSZ b)
 {
  HMF yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiLoadMetaFile(a, b);
     SetFS(sel);
@@ -7251,7 +7251,7 @@ inline HMF _GpiLoadMetaFile(HAB a, PCSZ b)
 inline BOOL _GpiLoadPublicFonts(HAB a, PCSZ b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiLoadPublicFonts(a, b);
     SetFS(sel);
@@ -7265,7 +7265,7 @@ inline BOOL _GpiLoadPublicFonts(HAB a, PCSZ b)
 inline LONG _GpiMarker(HPS a, PPOINTL b)
 {
  LONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiMarker(a, b);
     SetFS(sel);
@@ -7279,7 +7279,7 @@ inline LONG _GpiMarker(HPS a, PPOINTL b)
 inline BOOL _GpiModifyPath(HPS a, LONG b, LONG c)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiModifyPath(a, b, c);
     SetFS(sel);
@@ -7293,7 +7293,7 @@ inline BOOL _GpiModifyPath(HPS a, LONG b, LONG c)
 inline BOOL _GpiMove(HPS a, PPOINTL b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiMove(a, b);
     SetFS(sel);
@@ -7307,7 +7307,7 @@ inline BOOL _GpiMove(HPS a, PPOINTL b)
 inline LONG _GpiOffsetClipRegion(HPS a, PPOINTL b)
 {
  LONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiOffsetClipRegion(a, b);
     SetFS(sel);
@@ -7321,7 +7321,7 @@ inline LONG _GpiOffsetClipRegion(HPS a, PPOINTL b)
 inline BOOL _GpiOffsetElementPointer(HPS a, LONG b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiOffsetElementPointer(a, b);
     SetFS(sel);
@@ -7335,7 +7335,7 @@ inline BOOL _GpiOffsetElementPointer(HPS a, LONG b)
 inline BOOL _GpiOffsetRegion(HPS a, HRGN b, PPOINTL c)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiOffsetRegion(a, b, c);
     SetFS(sel);
@@ -7349,7 +7349,7 @@ inline BOOL _GpiOffsetRegion(HPS a, HRGN b, PPOINTL c)
 inline LONG _GpiOutlinePath(HPS a, LONG b, LONG c)
 {
  LONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiOutlinePath(a, b, c);
     SetFS(sel);
@@ -7363,7 +7363,7 @@ inline LONG _GpiOutlinePath(HPS a, LONG b, LONG c)
 inline LONG _GpiPaintRegion(HPS a, HRGN b)
 {
  LONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiPaintRegion(a, b);
     SetFS(sel);
@@ -7377,7 +7377,7 @@ inline LONG _GpiPaintRegion(HPS a, HRGN b)
 inline LONG _GpiPartialArc(HPS a, PPOINTL b, FIXED c, FIXED d, FIXED e)
 {
  LONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiPartialArc(a, b, c, d, e);
     SetFS(sel);
@@ -7391,7 +7391,7 @@ inline LONG _GpiPartialArc(HPS a, PPOINTL b, FIXED c, FIXED d, FIXED e)
 inline HRGN _GpiPathToRegion(HPS a, LONG b, LONG c)
 {
  HRGN yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiPathToRegion(a, b, c);
     SetFS(sel);
@@ -7405,7 +7405,7 @@ inline HRGN _GpiPathToRegion(HPS a, LONG b, LONG c)
 inline LONG _GpiPlayMetaFile(HPS a, HMF b, LONG c, PLONG d, PLONG e, LONG f, PSZ g)
 {
  LONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiPlayMetaFile(a, b, c, d, e, f, g);
     SetFS(sel);
@@ -7419,7 +7419,7 @@ inline LONG _GpiPlayMetaFile(HPS a, HMF b, LONG c, PLONG d, PLONG e, LONG f, PSZ
 inline LONG _GpiPointArc(HPS a, PPOINTL b)
 {
  LONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiPointArc(a, b);
     SetFS(sel);
@@ -7433,7 +7433,7 @@ inline LONG _GpiPointArc(HPS a, PPOINTL b)
 inline LONG _GpiPolyFillet(HPS a, LONG b, PPOINTL c)
 {
  LONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiPolyFillet(a, b, c);
     SetFS(sel);
@@ -7447,7 +7447,7 @@ inline LONG _GpiPolyFillet(HPS a, LONG b, PPOINTL c)
 inline LONG _GpiPolyFilletSharp(HPS a, LONG b, PPOINTL c, PFIXED d)
 {
  LONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiPolyFilletSharp(a, b, c, d);
     SetFS(sel);
@@ -7461,7 +7461,7 @@ inline LONG _GpiPolyFilletSharp(HPS a, LONG b, PPOINTL c, PFIXED d)
 inline LONG _GpiPolygons(HPS a, ULONG b, PPOLYGON c, ULONG d, ULONG e)
 {
  LONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiPolygons(a, b, c, d, e);
     SetFS(sel);
@@ -7475,7 +7475,7 @@ inline LONG _GpiPolygons(HPS a, ULONG b, PPOLYGON c, ULONG d, ULONG e)
 inline LONG _GpiPolyLine(HPS a, LONG b, PPOINTL c)
 {
  LONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiPolyLine(a, b, c);
     SetFS(sel);
@@ -7489,7 +7489,7 @@ inline LONG _GpiPolyLine(HPS a, LONG b, PPOINTL c)
 inline LONG _GpiPolyLineDisjoint(HPS a, LONG b, PPOINTL c)
 {
  LONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiPolyLineDisjoint(a, b, c);
     SetFS(sel);
@@ -7503,7 +7503,7 @@ inline LONG _GpiPolyLineDisjoint(HPS a, LONG b, PPOINTL c)
 inline LONG _GpiPolyMarker(HPS a, LONG b, PPOINTL c)
 {
  LONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiPolyMarker(a, b, c);
     SetFS(sel);
@@ -7517,7 +7517,7 @@ inline LONG _GpiPolyMarker(HPS a, LONG b, PPOINTL c)
 inline LONG _GpiPolySpline(HPS a, LONG b, PPOINTL c)
 {
  LONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiPolySpline(a, b, c);
     SetFS(sel);
@@ -7531,7 +7531,7 @@ inline LONG _GpiPolySpline(HPS a, LONG b, PPOINTL c)
 inline BOOL _GpiPop(HPS a, LONG b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiPop(a, b);
     SetFS(sel);
@@ -7545,7 +7545,7 @@ inline BOOL _GpiPop(HPS a, LONG b)
 inline LONG _GpiPtInRegion(HPS a, HRGN b, PPOINTL c)
 {
  LONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiPtInRegion(a, b, c);
     SetFS(sel);
@@ -7559,7 +7559,7 @@ inline LONG _GpiPtInRegion(HPS a, HRGN b, PPOINTL c)
 inline LONG _GpiPtVisible(HPS a, PPOINTL b)
 {
  LONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiPtVisible(a, b);
     SetFS(sel);
@@ -7573,7 +7573,7 @@ inline LONG _GpiPtVisible(HPS a, PPOINTL b)
 inline BOOL _GpiQueryArcParams(HPS a, PARCPARAMS b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiQueryArcParams(a, b);
     SetFS(sel);
@@ -7587,7 +7587,7 @@ inline BOOL _GpiQueryArcParams(HPS a, PARCPARAMS b)
 inline LONG _GpiQueryAttrMode(HPS a)
 {
  LONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiQueryAttrMode(a);
     SetFS(sel);
@@ -7601,7 +7601,7 @@ inline LONG _GpiQueryAttrMode(HPS a)
 inline LONG _GpiQueryAttrs(HPS a, LONG b, ULONG c, PBUNDLE d)
 {
  LONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiQueryAttrs(a, b, c, d);
     SetFS(sel);
@@ -7615,7 +7615,7 @@ inline LONG _GpiQueryAttrs(HPS a, LONG b, ULONG c, PBUNDLE d)
 inline LONG _GpiQueryBackColor(HPS a)
 {
  LONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiQueryBackColor(a);
     SetFS(sel);
@@ -7629,7 +7629,7 @@ inline LONG _GpiQueryBackColor(HPS a)
 inline LONG _GpiQueryBackMix(HPS a)
 {
  LONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiQueryBackMix(a);
     SetFS(sel);
@@ -7643,7 +7643,7 @@ inline LONG _GpiQueryBackMix(HPS a)
 inline BOOL _GpiQueryCharAngle(HPS a, PGRADIENTL b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiQueryCharAngle(a, b);
     SetFS(sel);
@@ -7657,7 +7657,7 @@ inline BOOL _GpiQueryCharAngle(HPS a, PGRADIENTL b)
 inline BOOL _GpiQueryCharBox(HPS a, PSIZEF b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiQueryCharBox(a, b);
     SetFS(sel);
@@ -7671,7 +7671,7 @@ inline BOOL _GpiQueryCharBox(HPS a, PSIZEF b)
 inline BOOL _GpiQueryCharBreakExtra(HPS a, PFIXED b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiQueryCharBreakExtra(a, b);
     SetFS(sel);
@@ -7685,7 +7685,7 @@ inline BOOL _GpiQueryCharBreakExtra(HPS a, PFIXED b)
 inline LONG _GpiQueryCharDirection(HPS a)
 {
  LONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiQueryCharDirection(a);
     SetFS(sel);
@@ -7699,7 +7699,7 @@ inline LONG _GpiQueryCharDirection(HPS a)
 inline BOOL _GpiQueryCharExtra(HPS a, PFIXED b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiQueryCharExtra(a, b);
     SetFS(sel);
@@ -7713,7 +7713,7 @@ inline BOOL _GpiQueryCharExtra(HPS a, PFIXED b)
 inline LONG _GpiQueryCharMode(HPS a)
 {
  LONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiQueryCharMode(a);
     SetFS(sel);
@@ -7727,7 +7727,7 @@ inline LONG _GpiQueryCharMode(HPS a)
 inline LONG _GpiQueryCharSet(HPS a)
 {
  LONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiQueryCharSet(a);
     SetFS(sel);
@@ -7741,7 +7741,7 @@ inline LONG _GpiQueryCharSet(HPS a)
 inline BOOL _GpiQueryCharShear(HPS a, PPOINTL b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiQueryCharShear(a, b);
     SetFS(sel);
@@ -7755,7 +7755,7 @@ inline BOOL _GpiQueryCharShear(HPS a, PPOINTL b)
 inline BOOL _GpiQueryCharStringPos(HPS a, ULONG b, LONG c, PCH d, PLONG e, PPOINTL f)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiQueryCharStringPos(a, b, c, d, e, f);
     SetFS(sel);
@@ -7769,7 +7769,7 @@ inline BOOL _GpiQueryCharStringPos(HPS a, ULONG b, LONG c, PCH d, PLONG e, PPOIN
 inline BOOL _GpiQueryCharStringPosAt(HPS a, PPOINTL b, ULONG c, LONG d, PCH e, PLONG f, PPOINTL g)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiQueryCharStringPosAt(a, b, c, d, e, f, g);
     SetFS(sel);
@@ -7783,7 +7783,7 @@ inline BOOL _GpiQueryCharStringPosAt(HPS a, PPOINTL b, ULONG c, LONG d, PCH e, P
 inline LONG _GpiQueryClipBox(HPS a, PRECTL b)
 {
  LONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiQueryClipBox(a, b);
     SetFS(sel);
@@ -7797,7 +7797,7 @@ inline LONG _GpiQueryClipBox(HPS a, PRECTL b)
 inline HRGN _GpiQueryClipRegion(HPS a)
 {
  HRGN yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiQueryClipRegion(a);
     SetFS(sel);
@@ -7811,7 +7811,7 @@ inline HRGN _GpiQueryClipRegion(HPS a)
 inline LONG _GpiQueryColor(HPS a)
 {
  LONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiQueryColor(a);
     SetFS(sel);
@@ -7825,7 +7825,7 @@ inline LONG _GpiQueryColor(HPS a)
 inline BOOL _GpiQueryColorData(HPS a, LONG b, PLONG c)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiQueryColorData(a, b, c);
     SetFS(sel);
@@ -7839,7 +7839,7 @@ inline BOOL _GpiQueryColorData(HPS a, LONG b, PLONG c)
 inline LONG _GpiQueryColorIndex(HPS a, ULONG b, LONG c)
 {
  LONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiQueryColorIndex(a, b, c);
     SetFS(sel);
@@ -7853,7 +7853,7 @@ inline LONG _GpiQueryColorIndex(HPS a, ULONG b, LONG c)
 inline ULONG _GpiQueryCp(HPS a)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiQueryCp(a);
     SetFS(sel);
@@ -7867,7 +7867,7 @@ inline ULONG _GpiQueryCp(HPS a)
 inline BOOL _GpiQueryCurrentPosition(HPS a, PPOINTL b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiQueryCurrentPosition(a, b);
     SetFS(sel);
@@ -7881,7 +7881,7 @@ inline BOOL _GpiQueryCurrentPosition(HPS a, PPOINTL b)
 inline BOOL _GpiQueryDefArcParams(HPS a, PARCPARAMS b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiQueryDefArcParams(a, b);
     SetFS(sel);
@@ -7895,7 +7895,7 @@ inline BOOL _GpiQueryDefArcParams(HPS a, PARCPARAMS b)
 inline BOOL _GpiQueryDefAttrs(HPS a, LONG b, ULONG c, PBUNDLE d)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiQueryDefAttrs(a, b, c, d);
     SetFS(sel);
@@ -7909,7 +7909,7 @@ inline BOOL _GpiQueryDefAttrs(HPS a, LONG b, ULONG c, PBUNDLE d)
 inline BOOL _GpiQueryDefCharBox(HPS a, PSIZEL b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiQueryDefCharBox(a, b);
     SetFS(sel);
@@ -7923,7 +7923,7 @@ inline BOOL _GpiQueryDefCharBox(HPS a, PSIZEL b)
 inline BOOL _GpiQueryDefTag(HPS a, PLONG b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiQueryDefTag(a, b);
     SetFS(sel);
@@ -7937,7 +7937,7 @@ inline BOOL _GpiQueryDefTag(HPS a, PLONG b)
 inline BOOL _GpiQueryDefViewingLimits(HPS a, PRECTL b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiQueryDefViewingLimits(a, b);
     SetFS(sel);
@@ -7951,7 +7951,7 @@ inline BOOL _GpiQueryDefViewingLimits(HPS a, PRECTL b)
 inline BOOL _GpiQueryDefaultViewMatrix(HPS a, LONG b, PMATRIXLF c)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiQueryDefaultViewMatrix(a, b, c);
     SetFS(sel);
@@ -7965,7 +7965,7 @@ inline BOOL _GpiQueryDefaultViewMatrix(HPS a, LONG b, PMATRIXLF c)
 inline LONG _GpiQueryEditMode(HPS a)
 {
  LONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiQueryEditMode(a);
     SetFS(sel);
@@ -7979,7 +7979,7 @@ inline LONG _GpiQueryEditMode(HPS a)
 inline LONG _GpiQueryElement(HPS a, LONG b, LONG c, PBYTE d)
 {
  LONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiQueryElement(a, b, c, d);
     SetFS(sel);
@@ -7993,7 +7993,7 @@ inline LONG _GpiQueryElement(HPS a, LONG b, LONG c, PBYTE d)
 inline LONG _GpiQueryElementPointer(HPS a)
 {
  LONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiQueryElementPointer(a);
     SetFS(sel);
@@ -8007,7 +8007,7 @@ inline LONG _GpiQueryElementPointer(HPS a)
 inline LONG _GpiQueryElementType(HPS a, PLONG b, LONG c, PSZ d)
 {
  LONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiQueryElementType(a, b, c, d);
     SetFS(sel);
@@ -8021,7 +8021,7 @@ inline LONG _GpiQueryElementType(HPS a, PLONG b, LONG c, PSZ d)
 inline ULONG _GpiQueryFaceString(HPS a, PCSZ b, PFACENAMEDESC c, LONG d, PSZ e)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiQueryFaceString(a, b, c, d, e);
     SetFS(sel);
@@ -8035,7 +8035,7 @@ inline ULONG _GpiQueryFaceString(HPS a, PCSZ b, PFACENAMEDESC c, LONG d, PSZ e)
 inline ULONG _GpiQueryFontAction(HAB a, ULONG b)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiQueryFontAction(a, b);
     SetFS(sel);
@@ -8049,7 +8049,7 @@ inline ULONG _GpiQueryFontAction(HAB a, ULONG b)
 inline LONG _GpiQueryFontFileDescriptions(HAB a, PCSZ b, PLONG c, PFFDESCS d)
 {
  LONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiQueryFontFileDescriptions(a, b, c, d);
     SetFS(sel);
@@ -8063,7 +8063,7 @@ inline LONG _GpiQueryFontFileDescriptions(HAB a, PCSZ b, PLONG c, PFFDESCS d)
 inline BOOL _GpiQueryFontMetrics(HPS a, LONG b, PFONTMETRICS c)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiQueryFontMetrics(a, b, c);
     SetFS(sel);
@@ -8077,7 +8077,7 @@ inline BOOL _GpiQueryFontMetrics(HPS a, LONG b, PFONTMETRICS c)
 inline LONG _GpiQueryFonts(HPS a, ULONG b, PCSZ c, PLONG d, LONG e, PFONTMETRICS f)
 {
  LONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiQueryFonts(a, b, c, d, e, f);
     SetFS(sel);
@@ -8091,7 +8091,7 @@ inline LONG _GpiQueryFonts(HPS a, ULONG b, PCSZ c, PLONG d, LONG e, PFONTMETRICS
 inline LONG _GpiQueryFullFontFileDescs(HAB a, PCSZ b, PLONG c, PVOID d, PLONG e)
 {
  LONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiQueryFullFontFileDescs(a, b, c, d, e);
     SetFS(sel);
@@ -8105,7 +8105,7 @@ inline LONG _GpiQueryFullFontFileDescs(HAB a, PCSZ b, PLONG c, PVOID d, PLONG e)
 inline BOOL _GpiQueryGraphicsField(HPS a, PRECTL b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiQueryGraphicsField(a, b);
     SetFS(sel);
@@ -8119,7 +8119,7 @@ inline BOOL _GpiQueryGraphicsField(HPS a, PRECTL b)
 inline LONG _GpiQueryKerningPairs(HPS a, LONG b, PKERNINGPAIRS c)
 {
  LONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiQueryKerningPairs(a, b, c);
     SetFS(sel);
@@ -8133,7 +8133,7 @@ inline LONG _GpiQueryKerningPairs(HPS a, LONG b, PKERNINGPAIRS c)
 inline LONG _GpiQueryLineEnd(HPS a)
 {
  LONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiQueryLineEnd(a);
     SetFS(sel);
@@ -8147,7 +8147,7 @@ inline LONG _GpiQueryLineEnd(HPS a)
 inline LONG _GpiQueryLineJoin(HPS a)
 {
  LONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiQueryLineJoin(a);
     SetFS(sel);
@@ -8161,7 +8161,7 @@ inline LONG _GpiQueryLineJoin(HPS a)
 inline LONG _GpiQueryLineType(HPS a)
 {
  LONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiQueryLineType(a);
     SetFS(sel);
@@ -8175,7 +8175,7 @@ inline LONG _GpiQueryLineType(HPS a)
 inline FIXED _GpiQueryLineWidth(HPS a)
 {
  FIXED yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiQueryLineWidth(a);
     SetFS(sel);
@@ -8189,7 +8189,7 @@ inline FIXED _GpiQueryLineWidth(HPS a)
 inline LONG _GpiQueryLineWidthGeom(HPS a)
 {
  LONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiQueryLineWidthGeom(a);
     SetFS(sel);
@@ -8203,7 +8203,7 @@ inline LONG _GpiQueryLineWidthGeom(HPS a)
 inline LONG _GpiQueryLogColorTable(HPS a, ULONG b, LONG c, LONG d, PLONG e)
 {
  LONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiQueryLogColorTable(a, b, c, d, e);
     SetFS(sel);
@@ -8217,7 +8217,7 @@ inline LONG _GpiQueryLogColorTable(HPS a, ULONG b, LONG c, LONG d, PLONG e)
 inline BOOL _GpiQueryLogicalFont(HPS a, LONG b, PSTR8 c, PFATTRS d, LONG e)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiQueryLogicalFont(a, b, c, d, e);
     SetFS(sel);
@@ -8231,7 +8231,7 @@ inline BOOL _GpiQueryLogicalFont(HPS a, LONG b, PSTR8 c, PFATTRS d, LONG e)
 inline LONG _GpiQueryMarker(HPS a)
 {
  LONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiQueryMarker(a);
     SetFS(sel);
@@ -8245,7 +8245,7 @@ inline LONG _GpiQueryMarker(HPS a)
 inline BOOL _GpiQueryMarkerBox(HPS a, PSIZEF b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiQueryMarkerBox(a, b);
     SetFS(sel);
@@ -8259,7 +8259,7 @@ inline BOOL _GpiQueryMarkerBox(HPS a, PSIZEF b)
 inline LONG _GpiQueryMarkerSet(HPS a)
 {
  LONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiQueryMarkerSet(a);
     SetFS(sel);
@@ -8273,7 +8273,7 @@ inline LONG _GpiQueryMarkerSet(HPS a)
 inline BOOL _GpiQueryMetaFileBits(HMF a, LONG b, LONG c, PBYTE d)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiQueryMetaFileBits(a, b, c, d);
     SetFS(sel);
@@ -8287,7 +8287,7 @@ inline BOOL _GpiQueryMetaFileBits(HMF a, LONG b, LONG c, PBYTE d)
 inline LONG _GpiQueryMetaFileLength(HMF a)
 {
  LONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiQueryMetaFileLength(a);
     SetFS(sel);
@@ -8301,7 +8301,7 @@ inline LONG _GpiQueryMetaFileLength(HMF a)
 inline LONG _GpiQueryMix(HPS a)
 {
  LONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiQueryMix(a);
     SetFS(sel);
@@ -8315,7 +8315,7 @@ inline LONG _GpiQueryMix(HPS a)
 inline BOOL _GpiQueryModelTransformMatrix(HPS a, LONG b, PMATRIXLF c)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiQueryModelTransformMatrix(a, b, c);
     SetFS(sel);
@@ -8329,7 +8329,7 @@ inline BOOL _GpiQueryModelTransformMatrix(HPS a, LONG b, PMATRIXLF c)
 inline LONG _GpiQueryNearestColor(HPS a, ULONG b, LONG c)
 {
  LONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiQueryNearestColor(a, b, c);
     SetFS(sel);
@@ -8343,7 +8343,7 @@ inline LONG _GpiQueryNearestColor(HPS a, ULONG b, LONG c)
 inline LONG _GpiQueryNumberSetIds(HPS a)
 {
  LONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiQueryNumberSetIds(a);
     SetFS(sel);
@@ -8357,7 +8357,7 @@ inline LONG _GpiQueryNumberSetIds(HPS a)
 inline BOOL _GpiQueryPageViewport(HPS a, PRECTL b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiQueryPageViewport(a, b);
     SetFS(sel);
@@ -8371,7 +8371,7 @@ inline BOOL _GpiQueryPageViewport(HPS a, PRECTL b)
 inline HPAL _GpiQueryPalette(HPS a)
 {
  HPAL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiQueryPalette(a);
     SetFS(sel);
@@ -8385,7 +8385,7 @@ inline HPAL _GpiQueryPalette(HPS a)
 inline LONG _GpiQueryPaletteInfo(HPAL a, HPS b, ULONG c, ULONG d, ULONG e, PULONG f)
 {
  LONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiQueryPaletteInfo(a, b, c, d, e, f);
     SetFS(sel);
@@ -8399,7 +8399,7 @@ inline LONG _GpiQueryPaletteInfo(HPAL a, HPS b, ULONG c, ULONG d, ULONG e, PULON
 inline LONG _GpiQueryPattern(HPS a)
 {
  LONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiQueryPattern(a);
     SetFS(sel);
@@ -8413,7 +8413,7 @@ inline LONG _GpiQueryPattern(HPS a)
 inline BOOL _GpiQueryPatternRefPoint(HPS a, PPOINTL b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiQueryPatternRefPoint(a, b);
     SetFS(sel);
@@ -8427,7 +8427,7 @@ inline BOOL _GpiQueryPatternRefPoint(HPS a, PPOINTL b)
 inline LONG _GpiQueryPatternSet(HPS a)
 {
  LONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiQueryPatternSet(a);
     SetFS(sel);
@@ -8441,7 +8441,7 @@ inline LONG _GpiQueryPatternSet(HPS a)
 inline LONG _GpiQueryRealColors(HPS a, ULONG b, LONG c, LONG d, PLONG e)
 {
  LONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiQueryRealColors(a, b, c, d, e);
     SetFS(sel);
@@ -8455,7 +8455,7 @@ inline LONG _GpiQueryRealColors(HPS a, ULONG b, LONG c, LONG d, PLONG e)
 inline LONG _GpiQueryRegionBox(HPS a, HRGN b, PRECTL c)
 {
  LONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiQueryRegionBox(a, b, c);
     SetFS(sel);
@@ -8469,7 +8469,7 @@ inline LONG _GpiQueryRegionBox(HPS a, HRGN b, PRECTL c)
 inline BOOL _GpiQueryRegionRects(HPS a, HRGN b, PRECTL c, PRGNRECT d, PRECTL e)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiQueryRegionRects(a, b, c, d, e);
     SetFS(sel);
@@ -8483,7 +8483,7 @@ inline BOOL _GpiQueryRegionRects(HPS a, HRGN b, PRECTL c, PRGNRECT d, PRECTL e)
 inline LONG _GpiQueryRGBColor(HPS a, ULONG b, LONG c)
 {
  LONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiQueryRGBColor(a, b, c);
     SetFS(sel);
@@ -8497,7 +8497,7 @@ inline LONG _GpiQueryRGBColor(HPS a, ULONG b, LONG c)
 inline BOOL _GpiQuerySegmentTransformMatrix(HPS a, LONG b, LONG c, PMATRIXLF d)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiQuerySegmentTransformMatrix(a, b, c, d);
     SetFS(sel);
@@ -8511,7 +8511,7 @@ inline BOOL _GpiQuerySegmentTransformMatrix(HPS a, LONG b, LONG c, PMATRIXLF d)
 inline BOOL _GpiQuerySetIds(HPS a, LONG b, PLONG c, PSTR8 d, PLONG e)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiQuerySetIds(a, b, c, d, e);
     SetFS(sel);
@@ -8525,7 +8525,7 @@ inline BOOL _GpiQuerySetIds(HPS a, LONG b, PLONG c, PSTR8 d, PLONG e)
 inline BOOL _GpiQueryTextAlignment(HPS a, PLONG b, PLONG c)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiQueryTextAlignment(a, b, c);
     SetFS(sel);
@@ -8539,7 +8539,7 @@ inline BOOL _GpiQueryTextAlignment(HPS a, PLONG b, PLONG c)
 inline BOOL _GpiQueryTextBox(HPS a, LONG b, PCH c, LONG d, PPOINTL e)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiQueryTextBox(a, b, c, d, e);
     SetFS(sel);
@@ -8553,7 +8553,7 @@ inline BOOL _GpiQueryTextBox(HPS a, LONG b, PCH c, LONG d, PPOINTL e)
 inline BOOL _GpiQueryViewingLimits(HPS a, PRECTL b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiQueryViewingLimits(a, b);
     SetFS(sel);
@@ -8567,7 +8567,7 @@ inline BOOL _GpiQueryViewingLimits(HPS a, PRECTL b)
 inline BOOL _GpiQueryViewingTransformMatrix(HPS a, LONG b, PMATRIXLF c)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiQueryViewingTransformMatrix(a, b, c);
     SetFS(sel);
@@ -8581,7 +8581,7 @@ inline BOOL _GpiQueryViewingTransformMatrix(HPS a, LONG b, PMATRIXLF c)
 inline BOOL _GpiQueryWidthTable(HPS a, LONG b, LONG c, PLONG d)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiQueryWidthTable(a, b, c, d);
     SetFS(sel);
@@ -8595,7 +8595,7 @@ inline BOOL _GpiQueryWidthTable(HPS a, LONG b, LONG c, PLONG d)
 inline LONG _GpiRectInRegion(HPS a, HRGN b, PRECTL c)
 {
  LONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiRectInRegion(a, b, c);
     SetFS(sel);
@@ -8609,7 +8609,7 @@ inline LONG _GpiRectInRegion(HPS a, HRGN b, PRECTL c)
 inline LONG _GpiRectVisible(HPS a, PRECTL b)
 {
  LONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiRectVisible(a, b);
     SetFS(sel);
@@ -8623,7 +8623,7 @@ inline LONG _GpiRectVisible(HPS a, PRECTL b)
 inline BOOL _GpiRotate(HPS a, PMATRIXLF b, LONG c, FIXED d, PPOINTL e)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiRotate(a, b, c, d, e);
     SetFS(sel);
@@ -8637,7 +8637,7 @@ inline BOOL _GpiRotate(HPS a, PMATRIXLF b, LONG c, FIXED d, PPOINTL e)
 inline BOOL _GpiSaveMetaFile(HMF a, PCSZ b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiSaveMetaFile(a, b);
     SetFS(sel);
@@ -8651,7 +8651,7 @@ inline BOOL _GpiSaveMetaFile(HMF a, PCSZ b)
 inline BOOL _GpiScale(HPS a, PMATRIXLF b, LONG c, PFIXED d, PPOINTL e)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiScale(a, b, c, d, e);
     SetFS(sel);
@@ -8665,7 +8665,7 @@ inline BOOL _GpiScale(HPS a, PMATRIXLF b, LONG c, PFIXED d, PPOINTL e)
 inline HPAL _GpiSelectPalette(HPS a, HPAL b)
 {
  HPAL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiSelectPalette(a, b);
     SetFS(sel);
@@ -8679,7 +8679,7 @@ inline HPAL _GpiSelectPalette(HPS a, HPAL b)
 inline BOOL _GpiSetArcParams(HPS a, PARCPARAMS b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiSetArcParams(a, b);
     SetFS(sel);
@@ -8693,7 +8693,7 @@ inline BOOL _GpiSetArcParams(HPS a, PARCPARAMS b)
 inline BOOL _GpiSetAttrMode(HPS a, LONG b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiSetAttrMode(a, b);
     SetFS(sel);
@@ -8707,7 +8707,7 @@ inline BOOL _GpiSetAttrMode(HPS a, LONG b)
 inline BOOL _GpiSetAttrs(HPS a, LONG b, ULONG c, ULONG d, PVOID e)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiSetAttrs(a, b, c, d, e);
     SetFS(sel);
@@ -8721,7 +8721,7 @@ inline BOOL _GpiSetAttrs(HPS a, LONG b, ULONG c, ULONG d, PVOID e)
 inline BOOL _GpiSetBackColor(HPS a, LONG b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiSetBackColor(a, b);
     SetFS(sel);
@@ -8735,7 +8735,7 @@ inline BOOL _GpiSetBackColor(HPS a, LONG b)
 inline BOOL _GpiSetBackMix(HPS a, LONG b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiSetBackMix(a, b);
     SetFS(sel);
@@ -8749,7 +8749,7 @@ inline BOOL _GpiSetBackMix(HPS a, LONG b)
 inline BOOL _GpiSetCharAngle(HPS a, PGRADIENTL b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiSetCharAngle(a, b);
     SetFS(sel);
@@ -8763,7 +8763,7 @@ inline BOOL _GpiSetCharAngle(HPS a, PGRADIENTL b)
 inline BOOL _GpiSetCharBox(HPS a, PSIZEF b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiSetCharBox(a, b);
     SetFS(sel);
@@ -8777,7 +8777,7 @@ inline BOOL _GpiSetCharBox(HPS a, PSIZEF b)
 inline BOOL _GpiSetCharBreakExtra(HPS a, FIXED b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiSetCharBreakExtra(a, b);
     SetFS(sel);
@@ -8791,7 +8791,7 @@ inline BOOL _GpiSetCharBreakExtra(HPS a, FIXED b)
 inline BOOL _GpiSetCharDirection(HPS a, LONG b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiSetCharDirection(a, b);
     SetFS(sel);
@@ -8805,7 +8805,7 @@ inline BOOL _GpiSetCharDirection(HPS a, LONG b)
 inline BOOL _GpiSetCharExtra(HPS a, FIXED b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiSetCharExtra(a, b);
     SetFS(sel);
@@ -8819,7 +8819,7 @@ inline BOOL _GpiSetCharExtra(HPS a, FIXED b)
 inline BOOL _GpiSetCharMode(HPS a, LONG b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiSetCharMode(a, b);
     SetFS(sel);
@@ -8833,7 +8833,7 @@ inline BOOL _GpiSetCharMode(HPS a, LONG b)
 inline BOOL _GpiSetCharSet(HPS a, LONG b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiSetCharSet(a, b);
     SetFS(sel);
@@ -8847,7 +8847,7 @@ inline BOOL _GpiSetCharSet(HPS a, LONG b)
 inline BOOL _GpiSetCharShear(HPS a, PPOINTL b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiSetCharShear(a, b);
     SetFS(sel);
@@ -8861,7 +8861,7 @@ inline BOOL _GpiSetCharShear(HPS a, PPOINTL b)
 inline BOOL _GpiSetClipPath(HPS a, LONG b, LONG c)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiSetClipPath(a, b, c);
     SetFS(sel);
@@ -8875,7 +8875,7 @@ inline BOOL _GpiSetClipPath(HPS a, LONG b, LONG c)
 inline LONG _GpiSetClipRegion(HPS a, HRGN b, PHRGN c)
 {
  LONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiSetClipRegion(a, b, c);
     SetFS(sel);
@@ -8889,7 +8889,7 @@ inline LONG _GpiSetClipRegion(HPS a, HRGN b, PHRGN c)
 inline BOOL _GpiSetColor(HPS a, LONG b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiSetColor(a, b);
     SetFS(sel);
@@ -8903,7 +8903,7 @@ inline BOOL _GpiSetColor(HPS a, LONG b)
 inline BOOL _GpiSetCp(HPS a, ULONG b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiSetCp(a, b);
     SetFS(sel);
@@ -8917,7 +8917,7 @@ inline BOOL _GpiSetCp(HPS a, ULONG b)
 inline BOOL _GpiSetCurrentPosition(HPS a, PPOINTL b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiSetCurrentPosition(a, b);
     SetFS(sel);
@@ -8931,7 +8931,7 @@ inline BOOL _GpiSetCurrentPosition(HPS a, PPOINTL b)
 inline BOOL _GpiSetDefArcParams(HPS a, PARCPARAMS b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiSetDefArcParams(a, b);
     SetFS(sel);
@@ -8945,7 +8945,7 @@ inline BOOL _GpiSetDefArcParams(HPS a, PARCPARAMS b)
 inline BOOL _GpiSetDefAttrs(HPS a, LONG b, ULONG c, PVOID d)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiSetDefAttrs(a, b, c, d);
     SetFS(sel);
@@ -8959,7 +8959,7 @@ inline BOOL _GpiSetDefAttrs(HPS a, LONG b, ULONG c, PVOID d)
 inline BOOL _GpiSetDefaultViewMatrix(HPS a, LONG b, PMATRIXLF c, LONG d)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiSetDefaultViewMatrix(a, b, c, d);
     SetFS(sel);
@@ -8973,7 +8973,7 @@ inline BOOL _GpiSetDefaultViewMatrix(HPS a, LONG b, PMATRIXLF c, LONG d)
 inline BOOL _GpiSetDefTag(HPS a, LONG b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiSetDefTag(a, b);
     SetFS(sel);
@@ -8987,7 +8987,7 @@ inline BOOL _GpiSetDefTag(HPS a, LONG b)
 inline BOOL _GpiSetDefViewingLimits(HPS a, PRECTL b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiSetDefViewingLimits(a, b);
     SetFS(sel);
@@ -9001,7 +9001,7 @@ inline BOOL _GpiSetDefViewingLimits(HPS a, PRECTL b)
 inline BOOL _GpiSetEditMode(HPS a, LONG b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiSetEditMode(a, b);
     SetFS(sel);
@@ -9015,7 +9015,7 @@ inline BOOL _GpiSetEditMode(HPS a, LONG b)
 inline BOOL _GpiSetElementPointer(HPS a, LONG b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiSetElementPointer(a, b);
     SetFS(sel);
@@ -9029,7 +9029,7 @@ inline BOOL _GpiSetElementPointer(HPS a, LONG b)
 inline BOOL _GpiSetElementPointerAtLabel(HPS a, LONG b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiSetElementPointerAtLabel(a, b);
     SetFS(sel);
@@ -9043,7 +9043,7 @@ inline BOOL _GpiSetElementPointerAtLabel(HPS a, LONG b)
 inline BOOL _GpiSetGraphicsField(HPS a, PRECTL b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiSetGraphicsField(a, b);
     SetFS(sel);
@@ -9057,7 +9057,7 @@ inline BOOL _GpiSetGraphicsField(HPS a, PRECTL b)
 inline BOOL _GpiSetLineEnd(HPS a, LONG b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiSetLineEnd(a, b);
     SetFS(sel);
@@ -9071,7 +9071,7 @@ inline BOOL _GpiSetLineEnd(HPS a, LONG b)
 inline BOOL _GpiSetLineJoin(HPS a, LONG b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiSetLineJoin(a, b);
     SetFS(sel);
@@ -9085,7 +9085,7 @@ inline BOOL _GpiSetLineJoin(HPS a, LONG b)
 inline BOOL _GpiSetLineType(HPS a, LONG b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiSetLineType(a, b);
     SetFS(sel);
@@ -9099,7 +9099,7 @@ inline BOOL _GpiSetLineType(HPS a, LONG b)
 inline BOOL _GpiSetLineWidth(HPS a, FIXED b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiSetLineWidth(a, b);
     SetFS(sel);
@@ -9113,7 +9113,7 @@ inline BOOL _GpiSetLineWidth(HPS a, FIXED b)
 inline BOOL _GpiSetLineWidthGeom(HPS a, LONG b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiSetLineWidthGeom(a, b);
     SetFS(sel);
@@ -9127,7 +9127,7 @@ inline BOOL _GpiSetLineWidthGeom(HPS a, LONG b)
 inline BOOL _GpiSetMarker(HPS a, LONG b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiSetMarker(a, b);
     SetFS(sel);
@@ -9141,7 +9141,7 @@ inline BOOL _GpiSetMarker(HPS a, LONG b)
 inline BOOL _GpiSetMarkerBox(HPS a, PSIZEF b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiSetMarkerBox(a, b);
     SetFS(sel);
@@ -9155,7 +9155,7 @@ inline BOOL _GpiSetMarkerBox(HPS a, PSIZEF b)
 inline BOOL _GpiSetMarkerSet(HPS a, LONG b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiSetMarkerSet(a, b);
     SetFS(sel);
@@ -9169,7 +9169,7 @@ inline BOOL _GpiSetMarkerSet(HPS a, LONG b)
 inline BOOL _GpiSetMetaFileBits(HMF a, LONG b, LONG c, PBYTE d)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiSetMetaFileBits(a, b, c, d);
     SetFS(sel);
@@ -9183,7 +9183,7 @@ inline BOOL _GpiSetMetaFileBits(HMF a, LONG b, LONG c, PBYTE d)
 inline BOOL _GpiSetMix(HPS a, LONG b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiSetMix(a, b);
     SetFS(sel);
@@ -9197,7 +9197,7 @@ inline BOOL _GpiSetMix(HPS a, LONG b)
 inline BOOL _GpiSetModelTransformMatrix(HPS a, LONG b, PMATRIXLF c, LONG d)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiSetModelTransformMatrix(a, b, c, d);
     SetFS(sel);
@@ -9211,7 +9211,7 @@ inline BOOL _GpiSetModelTransformMatrix(HPS a, LONG b, PMATRIXLF c, LONG d)
 inline BOOL _GpiSetPageViewport(HPS a, PRECTL b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiSetPageViewport(a, b);
     SetFS(sel);
@@ -9225,7 +9225,7 @@ inline BOOL _GpiSetPageViewport(HPS a, PRECTL b)
 inline BOOL _GpiSetPaletteEntries(HPAL a, ULONG b, ULONG c, ULONG d, ULONG *e)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiSetPaletteEntries(a, b, c, d, e);
     SetFS(sel);
@@ -9239,7 +9239,7 @@ inline BOOL _GpiSetPaletteEntries(HPAL a, ULONG b, ULONG c, ULONG d, ULONG *e)
 inline BOOL _GpiSetPattern(HPS a, LONG b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiSetPattern(a, b);
     SetFS(sel);
@@ -9253,7 +9253,7 @@ inline BOOL _GpiSetPattern(HPS a, LONG b)
 inline BOOL _GpiSetPatternRefPoint(HPS a, PPOINTL b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiSetPatternRefPoint(a, b);
     SetFS(sel);
@@ -9267,7 +9267,7 @@ inline BOOL _GpiSetPatternRefPoint(HPS a, PPOINTL b)
 inline BOOL _GpiSetPatternSet(HPS a, LONG b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiSetPatternSet(a, b);
     SetFS(sel);
@@ -9281,7 +9281,7 @@ inline BOOL _GpiSetPatternSet(HPS a, LONG b)
 inline BOOL _GpiSetRegion(HPS a, HRGN b, LONG c, PRECTL d)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiSetRegion(a, b, c, d);
     SetFS(sel);
@@ -9295,7 +9295,7 @@ inline BOOL _GpiSetRegion(HPS a, HRGN b, LONG c, PRECTL d)
 inline BOOL _GpiSetSegmentTransformMatrix(HPS a, LONG b, LONG c, MATRIXLF *d, LONG e)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiSetSegmentTransformMatrix(a, b, c, d, e);
     SetFS(sel);
@@ -9309,7 +9309,7 @@ inline BOOL _GpiSetSegmentTransformMatrix(HPS a, LONG b, LONG c, MATRIXLF *d, LO
 inline BOOL _GpiSetTextAlignment(HPS a, LONG b, LONG c)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiSetTextAlignment(a, b, c);
     SetFS(sel);
@@ -9323,7 +9323,7 @@ inline BOOL _GpiSetTextAlignment(HPS a, LONG b, LONG c)
 inline BOOL _GpiSetViewingLimits(HPS a, PRECTL b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiSetViewingLimits(a, b);
     SetFS(sel);
@@ -9337,7 +9337,7 @@ inline BOOL _GpiSetViewingLimits(HPS a, PRECTL b)
 inline BOOL _GpiSetViewingTransformMatrix(HPS a, LONG b, MATRIXLF *c, LONG d)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiSetViewingTransformMatrix(a, b, c, d);
     SetFS(sel);
@@ -9351,7 +9351,7 @@ inline BOOL _GpiSetViewingTransformMatrix(HPS a, LONG b, MATRIXLF *c, LONG d)
 inline LONG _GpiStrokePath(HPS a, LONG b, ULONG c)
 {
  LONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiStrokePath(a, b, c);
     SetFS(sel);
@@ -9365,7 +9365,7 @@ inline LONG _GpiStrokePath(HPS a, LONG b, ULONG c)
 inline BOOL _GpiTranslate(HPS a, PMATRIXLF b, LONG c, PPOINTL d)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiTranslate(a, b, c, d);
     SetFS(sel);
@@ -9379,7 +9379,7 @@ inline BOOL _GpiTranslate(HPS a, PMATRIXLF b, LONG c, PPOINTL d)
 inline BOOL _GpiUnloadFonts(HAB a, PCSZ b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiUnloadFonts(a, b);
     SetFS(sel);
@@ -9393,7 +9393,7 @@ inline BOOL _GpiUnloadFonts(HAB a, PCSZ b)
 inline BOOL _GpiUnloadPublicFonts(HAB a, PCSZ b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiUnloadPublicFonts(a, b);
     SetFS(sel);
@@ -9408,7 +9408,7 @@ inline BOOL _GpiUnloadPublicFonts(HAB a, PCSZ b)
 inline LONG _GpiBitBlt(HPS a, HPS b, LONG c, PPOINTL d, LONG e, ULONG f)
 {
  LONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiBitBlt(a, b, c, d, e, f);
     SetFS(sel);
@@ -9422,7 +9422,7 @@ inline LONG _GpiBitBlt(HPS a, HPS b, LONG c, PPOINTL d, LONG e, ULONG f)
 inline BOOL _GpiDeleteBitmap(HBITMAP a)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiDeleteBitmap(a);
     SetFS(sel);
@@ -9436,7 +9436,7 @@ inline BOOL _GpiDeleteBitmap(HBITMAP a)
 inline HBITMAP _GpiLoadBitmap(HPS a, HMODULE b, ULONG c, LONG d, LONG e)
 {
  HBITMAP yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiLoadBitmap(a, b, c, d, e);
     SetFS(sel);
@@ -9450,7 +9450,7 @@ inline HBITMAP _GpiLoadBitmap(HPS a, HMODULE b, ULONG c, LONG d, LONG e)
 inline HBITMAP _GpiSetBitmap(HPS a, HBITMAP b)
 {
  HBITMAP yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiSetBitmap(a, b);
     SetFS(sel);
@@ -9464,7 +9464,7 @@ inline HBITMAP _GpiSetBitmap(HPS a, HBITMAP b)
 inline LONG _GpiWCBitBlt(HPS a, HBITMAP b, LONG c, PPOINTL d, LONG e, ULONG f)
 {
  LONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiWCBitBlt(a, b, c, d, e, f);
     SetFS(sel);
@@ -9478,7 +9478,7 @@ inline LONG _GpiWCBitBlt(HPS a, HBITMAP b, LONG c, PPOINTL d, LONG e, ULONG f)
 inline HBITMAP _GpiCreateBitmap(HPS a, BITMAPINFOHEADER2 *b, ULONG c, PBYTE d, BITMAPINFO2 *e)
 {
  HBITMAP yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiCreateBitmap(a, b, c, d, e);
     SetFS(sel);
@@ -9492,7 +9492,7 @@ inline HBITMAP _GpiCreateBitmap(HPS a, BITMAPINFOHEADER2 *b, ULONG c, PBYTE d, B
 inline LONG _GpiDrawBits(HPS a, PVOID b, BITMAPINFO2 *c, LONG d, PPOINTL e, LONG f, ULONG g)
 {
  LONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiDrawBits(a, b, c, d, e, f, g);
     SetFS(sel);
@@ -9506,7 +9506,7 @@ inline LONG _GpiDrawBits(HPS a, PVOID b, BITMAPINFO2 *c, LONG d, PPOINTL e, LONG
 inline LONG _GpiFloodFill(HPS a, LONG b, LONG c)
 {
  LONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiFloodFill(a, b, c);
     SetFS(sel);
@@ -9520,7 +9520,7 @@ inline LONG _GpiFloodFill(HPS a, LONG b, LONG c)
 inline LONG _GpiQueryBitmapBits(HPS a, LONG b, LONG c, PBYTE d, PBITMAPINFO2 e)
 {
  LONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiQueryBitmapBits(a, b, c, d, e);
     SetFS(sel);
@@ -9534,7 +9534,7 @@ inline LONG _GpiQueryBitmapBits(HPS a, LONG b, LONG c, PBYTE d, PBITMAPINFO2 e)
 inline BOOL _GpiQueryBitmapDimension(HBITMAP a, PSIZEL b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiQueryBitmapDimension(a, b);
     SetFS(sel);
@@ -9548,7 +9548,7 @@ inline BOOL _GpiQueryBitmapDimension(HBITMAP a, PSIZEL b)
 inline HBITMAP _GpiQueryBitmapHandle(HPS a, LONG b)
 {
  HBITMAP yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiQueryBitmapHandle(a, b);
     SetFS(sel);
@@ -9562,7 +9562,7 @@ inline HBITMAP _GpiQueryBitmapHandle(HPS a, LONG b)
 inline BOOL _GpiQueryBitmapInfoHeader(HBITMAP a, PBITMAPINFOHEADER2 b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiQueryBitmapInfoHeader(a, b);
     SetFS(sel);
@@ -9576,7 +9576,7 @@ inline BOOL _GpiQueryBitmapInfoHeader(HBITMAP a, PBITMAPINFOHEADER2 b)
 inline BOOL _GpiQueryBitmapParameters(HBITMAP a, PBITMAPINFOHEADER b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiQueryBitmapParameters(a, b);
     SetFS(sel);
@@ -9590,7 +9590,7 @@ inline BOOL _GpiQueryBitmapParameters(HBITMAP a, PBITMAPINFOHEADER b)
 inline BOOL _GpiQueryDeviceBitmapFormats(HPS a, LONG b, PLONG c)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiQueryDeviceBitmapFormats(a, b, c);
     SetFS(sel);
@@ -9604,7 +9604,7 @@ inline BOOL _GpiQueryDeviceBitmapFormats(HPS a, LONG b, PLONG c)
 inline LONG _GpiSetBitmapBits(HPS a, LONG b, LONG c, PBYTE d, BITMAPINFO2 *e)
 {
  LONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiSetBitmapBits(a, b, c, d, e);
     SetFS(sel);
@@ -9618,7 +9618,7 @@ inline LONG _GpiSetBitmapBits(HPS a, LONG b, LONG c, PBYTE d, BITMAPINFO2 *e)
 inline LONG _GpiQueryPel(HPS a, PPOINTL b)
 {
  LONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiQueryPel(a, b);
     SetFS(sel);
@@ -9632,7 +9632,7 @@ inline LONG _GpiQueryPel(HPS a, PPOINTL b)
 inline BOOL _GpiSetBitmapDimension(HBITMAP a, SIZEL *b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiSetBitmapDimension(a, b);
     SetFS(sel);
@@ -9646,7 +9646,7 @@ inline BOOL _GpiSetBitmapDimension(HBITMAP a, SIZEL *b)
 inline BOOL _GpiSetBitmapId(HPS a, HBITMAP b, LONG c)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiSetBitmapId(a, b, c);
     SetFS(sel);
@@ -9660,7 +9660,7 @@ inline BOOL _GpiSetBitmapId(HPS a, HBITMAP b, LONG c)
 inline LONG _GpiSetPel(HPS a, PPOINTL b)
 {
  LONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiSetPel(a, b);
     SetFS(sel);
@@ -9676,7 +9676,7 @@ inline LONG _GpiSetPel(HPS a, PPOINTL b)
 inline BOOL _GpiAssociate(HPS a, HDC b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiAssociate(a, b);
     SetFS(sel);
@@ -9690,7 +9690,7 @@ inline BOOL _GpiAssociate(HPS a, HDC b)
 inline HPS _GpiCreatePS(HAB a, HDC b, PSIZEL c, ULONG d)
 {
  HPS yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiCreatePS(a, b, c, d);
     SetFS(sel);
@@ -9704,7 +9704,7 @@ inline HPS _GpiCreatePS(HAB a, HDC b, PSIZEL c, ULONG d)
 inline BOOL _GpiDestroyPS(HPS a)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiDestroyPS(a);
     SetFS(sel);
@@ -9718,7 +9718,7 @@ inline BOOL _GpiDestroyPS(HPS a)
 inline BOOL _GpiErase(HPS a)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiErase(a);
     SetFS(sel);
@@ -9732,7 +9732,7 @@ inline BOOL _GpiErase(HPS a)
 inline HDC _GpiQueryDevice(HPS a)
 {
  HDC yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiQueryDevice(a);
     SetFS(sel);
@@ -9746,7 +9746,7 @@ inline HDC _GpiQueryDevice(HPS a)
 inline BOOL _GpiRestorePS(HPS a, LONG b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiRestorePS(a, b);
     SetFS(sel);
@@ -9760,7 +9760,7 @@ inline BOOL _GpiRestorePS(HPS a, LONG b)
 inline LONG _GpiSavePS(HPS a)
 {
  LONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiSavePS(a);
     SetFS(sel);
@@ -9774,7 +9774,7 @@ inline LONG _GpiSavePS(HPS a)
 inline LONG _GpiErrorSegmentData(HPS a, PLONG b, PLONG c)
 {
  LONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiErrorSegmentData(a, b, c);
     SetFS(sel);
@@ -9788,7 +9788,7 @@ inline LONG _GpiErrorSegmentData(HPS a, PLONG b, PLONG c)
 inline LONG _GpiQueryDrawControl(HPS a, LONG b)
 {
  LONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiQueryDrawControl(a, b);
     SetFS(sel);
@@ -9802,7 +9802,7 @@ inline LONG _GpiQueryDrawControl(HPS a, LONG b)
 inline LONG _GpiQueryDrawingMode(HPS a)
 {
  LONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiQueryDrawingMode(a);
     SetFS(sel);
@@ -9816,7 +9816,7 @@ inline LONG _GpiQueryDrawingMode(HPS a)
 inline ULONG _GpiQueryPS(HPS a, PSIZEL b)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiQueryPS(a, b);
     SetFS(sel);
@@ -9830,7 +9830,7 @@ inline ULONG _GpiQueryPS(HPS a, PSIZEL b)
 inline BOOL _GpiResetPS(HPS a, ULONG b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiResetPS(a, b);
     SetFS(sel);
@@ -9844,7 +9844,7 @@ inline BOOL _GpiResetPS(HPS a, ULONG b)
 inline LONG _GpiQueryStopDraw(HPS a)
 {
  LONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiQueryStopDraw(a);
     SetFS(sel);
@@ -9858,7 +9858,7 @@ inline LONG _GpiQueryStopDraw(HPS a)
 inline BOOL _GpiSetDrawControl(HPS a, LONG b, LONG c)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiSetDrawControl(a, b, c);
     SetFS(sel);
@@ -9872,7 +9872,7 @@ inline BOOL _GpiSetDrawControl(HPS a, LONG b, LONG c)
 inline BOOL _GpiSetDrawingMode(HPS a, LONG b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiSetDrawingMode(a, b);
     SetFS(sel);
@@ -9886,7 +9886,7 @@ inline BOOL _GpiSetDrawingMode(HPS a, LONG b)
 inline BOOL _GpiSetPS(HPS a, SIZEL *b, ULONG c)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiSetPS(a, b, c);
     SetFS(sel);
@@ -9900,7 +9900,7 @@ inline BOOL _GpiSetPS(HPS a, SIZEL *b, ULONG c)
 inline BOOL _GpiSetStopDraw(HPS a, LONG b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiSetStopDraw(a, b);
     SetFS(sel);
@@ -9916,7 +9916,7 @@ inline BOOL _GpiSetStopDraw(HPS a, LONG b)
 inline LONG _GpiCorrelateChain(HPS a, LONG b, PPOINTL c, LONG d, LONG e, PLONG f)
 {
  LONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiCorrelateChain(a, b, c, d, e, f);
     SetFS(sel);
@@ -9930,7 +9930,7 @@ inline LONG _GpiCorrelateChain(HPS a, LONG b, PPOINTL c, LONG d, LONG e, PLONG f
 inline LONG _GpiCorrelateFrom(HPS a, LONG b, LONG c, LONG d, PPOINTL e, LONG f, LONG g, PLONG h)
 {
  LONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiCorrelateFrom(a, b, c, d, e, f, g, h);
     SetFS(sel);
@@ -9944,7 +9944,7 @@ inline LONG _GpiCorrelateFrom(HPS a, LONG b, LONG c, LONG d, PPOINTL e, LONG f, 
 inline LONG _GpiCorrelateSegment(HPS a, LONG b, LONG c, PPOINTL d, LONG e, LONG f, PLONG g)
 {
  LONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiCorrelateSegment(a, b, c, d, e, f, g);
     SetFS(sel);
@@ -9958,7 +9958,7 @@ inline LONG _GpiCorrelateSegment(HPS a, LONG b, LONG c, PPOINTL d, LONG e, LONG 
 inline BOOL _GpiQueryBoundaryData(HPS a, PRECTL b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiQueryBoundaryData(a, b);
     SetFS(sel);
@@ -9972,7 +9972,7 @@ inline BOOL _GpiQueryBoundaryData(HPS a, PRECTL b)
 inline BOOL _GpiQueryPickAperturePosition(HPS a, PPOINTL b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiQueryPickAperturePosition(a, b);
     SetFS(sel);
@@ -9986,7 +9986,7 @@ inline BOOL _GpiQueryPickAperturePosition(HPS a, PPOINTL b)
 inline BOOL _GpiQueryPickApertureSize(HPS a, PSIZEL b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiQueryPickApertureSize(a, b);
     SetFS(sel);
@@ -10000,7 +10000,7 @@ inline BOOL _GpiQueryPickApertureSize(HPS a, PSIZEL b)
 inline BOOL _GpiQueryTag(HPS a, PLONG b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiQueryTag(a, b);
     SetFS(sel);
@@ -10014,7 +10014,7 @@ inline BOOL _GpiQueryTag(HPS a, PLONG b)
 inline BOOL _GpiResetBoundaryData(HPS a)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiResetBoundaryData(a);
     SetFS(sel);
@@ -10028,7 +10028,7 @@ inline BOOL _GpiResetBoundaryData(HPS a)
 inline BOOL _GpiSetPickAperturePosition(HPS a, PPOINTL b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiSetPickAperturePosition(a, b);
     SetFS(sel);
@@ -10042,7 +10042,7 @@ inline BOOL _GpiSetPickAperturePosition(HPS a, PPOINTL b)
 inline BOOL _GpiSetPickApertureSize(HPS a, LONG b, SIZEL *c)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiSetPickApertureSize(a, b, c);
     SetFS(sel);
@@ -10056,7 +10056,7 @@ inline BOOL _GpiSetPickApertureSize(HPS a, LONG b, SIZEL *c)
 inline BOOL _GpiSetTag(HPS a, LONG b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiSetTag(a, b);
     SetFS(sel);
@@ -10072,7 +10072,7 @@ inline BOOL _GpiSetTag(HPS a, LONG b)
 inline BOOL _GpiBeginInkPath(HPS a, LONG b, ULONG c)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiBeginInkPath(a, b, c);
     SetFS(sel);
@@ -10086,7 +10086,7 @@ inline BOOL _GpiBeginInkPath(HPS a, LONG b, ULONG c)
 inline BOOL _GpiEndInkPath(HPS a, ULONG b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiEndInkPath(a, b);
     SetFS(sel);
@@ -10100,7 +10100,7 @@ inline BOOL _GpiEndInkPath(HPS a, ULONG b)
 inline LONG _GpiStrokeInkPath(HPS a, LONG b, LONG c, PPOINTL d, ULONG e)
 {
  LONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiStrokeInkPath(a, b, c, d, e);
     SetFS(sel);
@@ -10116,7 +10116,7 @@ inline LONG _GpiStrokeInkPath(HPS a, LONG b, LONG c, PPOINTL d, ULONG e)
 inline BOOL _GpiCloseSegment(HPS a)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiCloseSegment(a);
     SetFS(sel);
@@ -10130,7 +10130,7 @@ inline BOOL _GpiCloseSegment(HPS a)
 inline BOOL _GpiDeleteSegment(HPS a, LONG b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiDeleteSegment(a, b);
     SetFS(sel);
@@ -10144,7 +10144,7 @@ inline BOOL _GpiDeleteSegment(HPS a, LONG b)
 inline BOOL _GpiDeleteSegments(HPS a, LONG b, LONG c)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiDeleteSegments(a, b, c);
     SetFS(sel);
@@ -10158,7 +10158,7 @@ inline BOOL _GpiDeleteSegments(HPS a, LONG b, LONG c)
 inline BOOL _GpiDrawChain(HPS a)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiDrawChain(a);
     SetFS(sel);
@@ -10172,7 +10172,7 @@ inline BOOL _GpiDrawChain(HPS a)
 inline BOOL _GpiDrawDynamics(HPS a)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiDrawDynamics(a);
     SetFS(sel);
@@ -10186,7 +10186,7 @@ inline BOOL _GpiDrawDynamics(HPS a)
 inline BOOL _GpiDrawFrom(HPS a, LONG b, LONG c)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiDrawFrom(a, b, c);
     SetFS(sel);
@@ -10200,7 +10200,7 @@ inline BOOL _GpiDrawFrom(HPS a, LONG b, LONG c)
 inline BOOL _GpiDrawSegment(HPS a, LONG b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiDrawSegment(a, b);
     SetFS(sel);
@@ -10214,7 +10214,7 @@ inline BOOL _GpiDrawSegment(HPS a, LONG b)
 inline LONG _GpiGetData(HPS a, LONG b, PLONG c, LONG d, LONG e, PBYTE f)
 {
  LONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiGetData(a, b, c, d, e, f);
     SetFS(sel);
@@ -10228,7 +10228,7 @@ inline LONG _GpiGetData(HPS a, LONG b, PLONG c, LONG d, LONG e, PBYTE f)
 inline BOOL _GpiOpenSegment(HPS a, LONG b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiOpenSegment(a, b);
     SetFS(sel);
@@ -10242,7 +10242,7 @@ inline BOOL _GpiOpenSegment(HPS a, LONG b)
 inline LONG _GpiPutData(HPS a, LONG b, PLONG c, PBYTE d)
 {
  LONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiPutData(a, b, c, d);
     SetFS(sel);
@@ -10256,7 +10256,7 @@ inline LONG _GpiPutData(HPS a, LONG b, PLONG c, PBYTE d)
 inline LONG _GpiQueryInitialSegmentAttrs(HPS a, LONG b)
 {
  LONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiQueryInitialSegmentAttrs(a, b);
     SetFS(sel);
@@ -10270,7 +10270,7 @@ inline LONG _GpiQueryInitialSegmentAttrs(HPS a, LONG b)
 inline LONG _GpiQuerySegmentAttrs(HPS a, LONG b, LONG c)
 {
  LONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiQuerySegmentAttrs(a, b, c);
     SetFS(sel);
@@ -10284,7 +10284,7 @@ inline LONG _GpiQuerySegmentAttrs(HPS a, LONG b, LONG c)
 inline LONG _GpiQuerySegmentNames(HPS a, LONG b, LONG c, LONG d, PLONG e)
 {
  LONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiQuerySegmentNames(a, b, c, d, e);
     SetFS(sel);
@@ -10298,7 +10298,7 @@ inline LONG _GpiQuerySegmentNames(HPS a, LONG b, LONG c, LONG d, PLONG e)
 inline LONG _GpiQuerySegmentPriority(HPS a, LONG b, LONG c)
 {
  LONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiQuerySegmentPriority(a, b, c);
     SetFS(sel);
@@ -10312,7 +10312,7 @@ inline LONG _GpiQuerySegmentPriority(HPS a, LONG b, LONG c)
 inline BOOL _GpiRemoveDynamics(HPS a, LONG b, LONG c)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiRemoveDynamics(a, b, c);
     SetFS(sel);
@@ -10326,7 +10326,7 @@ inline BOOL _GpiRemoveDynamics(HPS a, LONG b, LONG c)
 inline BOOL _GpiSetInitialSegmentAttrs(HPS a, LONG b, LONG c)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiSetInitialSegmentAttrs(a, b, c);
     SetFS(sel);
@@ -10340,7 +10340,7 @@ inline BOOL _GpiSetInitialSegmentAttrs(HPS a, LONG b, LONG c)
 inline BOOL _GpiSetSegmentAttrs(HPS a, LONG b, LONG c, LONG d)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiSetSegmentAttrs(a, b, c, d);
     SetFS(sel);
@@ -10354,7 +10354,7 @@ inline BOOL _GpiSetSegmentAttrs(HPS a, LONG b, LONG c, LONG d)
 inline BOOL _GpiSetSegmentPriority(HPS a, LONG b, LONG c, LONG d)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = GpiSetSegmentPriority(a, b, c, d);
     SetFS(sel);
@@ -10370,7 +10370,7 @@ inline BOOL _GpiSetSegmentPriority(HPS a, LONG b, LONG c, LONG d)
 inline LONG _DevEscape(HDC a, LONG b, LONG c, PBYTE d, PLONG e, PBYTE f)
 {
  LONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DevEscape(a, b, c, d, e, f);
     SetFS(sel);
@@ -10384,7 +10384,7 @@ inline LONG _DevEscape(HDC a, LONG b, LONG c, PBYTE d, PLONG e, PBYTE f)
 inline LONG _DevPostEscape(PCSZ a, PCSZ b, PCSZ c, PCSZ d, ULONG e, ULONG f, PBYTE g, ULONG h, PBYTE i)
 {
  LONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DevPostEscape(a, b, c, d, e, f, g, h, i);
     SetFS(sel);
@@ -10398,7 +10398,7 @@ inline LONG _DevPostEscape(PCSZ a, PCSZ b, PCSZ c, PCSZ d, ULONG e, ULONG f, PBY
 inline LONG _DevPostDeviceModes(HAB a, PDRIVDATA b, PCSZ c, PCSZ d, PCSZ e, ULONG f)
 {
  LONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DevPostDeviceModes(a, b, c, d, e, f);
     SetFS(sel);
@@ -10412,7 +10412,7 @@ inline LONG _DevPostDeviceModes(HAB a, PDRIVDATA b, PCSZ c, PCSZ d, PCSZ e, ULON
 inline BOOL _DevQueryDeviceNames(HAB a, PCSZ b, PLONG c, PSTR32 d, PSTR64 e, PLONG f, PSTR16 g)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DevQueryDeviceNames(a, b, c, d, e, f, g);
     SetFS(sel);
@@ -10426,7 +10426,7 @@ inline BOOL _DevQueryDeviceNames(HAB a, PCSZ b, PLONG c, PSTR32 d, PSTR64 e, PLO
 inline LONG _DevQueryHardcopyCaps(HDC a, LONG b, LONG c, PHCINFO d)
 {
  LONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DevQueryHardcopyCaps(a, b, c, d);
     SetFS(sel);
@@ -10441,7 +10441,7 @@ inline LONG _DevQueryHardcopyCaps(HDC a, LONG b, LONG c, PHCINFO d)
 inline HMF _DevCloseDC(HDC a)
 {
  HMF yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DevCloseDC(a);
     SetFS(sel);
@@ -10455,7 +10455,7 @@ inline HMF _DevCloseDC(HDC a)
 inline HDC _DevOpenDC(HAB a, LONG b, PCSZ c, LONG d, PDEVOPENDATA e, HDC f)
 {
  HDC yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DevOpenDC(a, b, c, d, e, f);
     SetFS(sel);
@@ -10469,7 +10469,7 @@ inline HDC _DevOpenDC(HAB a, LONG b, PCSZ c, LONG d, PDEVOPENDATA e, HDC f)
 inline BOOL _DevQueryCaps(HDC a, LONG b, LONG c, PLONG d)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DevQueryCaps(a, b, c, d);
     SetFS(sel);
@@ -10485,7 +10485,7 @@ inline BOOL _DevQueryCaps(HDC a, LONG b, LONG c, PLONG d)
 inline HPROGRAM _PrfAddProgram(HINI a, PPROGDETAILS b, HPROGRAM c)
 {
  HPROGRAM yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = PrfAddProgram(a, b, c);
     SetFS(sel);
@@ -10499,7 +10499,7 @@ inline HPROGRAM _PrfAddProgram(HINI a, PPROGDETAILS b, HPROGRAM c)
 inline BOOL _PrfChangeProgram(HINI a, HPROGRAM b, PPROGDETAILS c)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = PrfChangeProgram(a, b, c);
     SetFS(sel);
@@ -10513,7 +10513,7 @@ inline BOOL _PrfChangeProgram(HINI a, HPROGRAM b, PPROGDETAILS c)
 inline HPROGRAM _PrfCreateGroup(HINI a, PCSZ b, UCHAR c)
 {
  HPROGRAM yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = PrfCreateGroup(a, b, c);
     SetFS(sel);
@@ -10527,7 +10527,7 @@ inline HPROGRAM _PrfCreateGroup(HINI a, PCSZ b, UCHAR c)
 inline BOOL _PrfDestroyGroup(HINI a, HPROGRAM b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = PrfDestroyGroup(a, b);
     SetFS(sel);
@@ -10541,7 +10541,7 @@ inline BOOL _PrfDestroyGroup(HINI a, HPROGRAM b)
 inline PROGCATEGORY _PrfQueryProgramCategory(HINI a, PCSZ b)
 {
  PROGCATEGORY yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = PrfQueryProgramCategory(a, b);
     SetFS(sel);
@@ -10555,7 +10555,7 @@ inline PROGCATEGORY _PrfQueryProgramCategory(HINI a, PCSZ b)
 inline ULONG _PrfQueryProgramHandle(HINI a, PCSZ b, PHPROGARRAY c, ULONG d, PULONG e)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = PrfQueryProgramHandle(a, b, c, d, e);
     SetFS(sel);
@@ -10569,7 +10569,7 @@ inline ULONG _PrfQueryProgramHandle(HINI a, PCSZ b, PHPROGARRAY c, ULONG d, PULO
 inline ULONG _PrfQueryProgramTitles(HINI a, HPROGRAM b, PPROGTITLE c, ULONG d, PULONG e)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = PrfQueryProgramTitles(a, b, c, d, e);
     SetFS(sel);
@@ -10583,7 +10583,7 @@ inline ULONG _PrfQueryProgramTitles(HINI a, HPROGRAM b, PPROGTITLE c, ULONG d, P
 inline ULONG _PrfQueryDefinition(HINI a, HPROGRAM b, PPROGDETAILS c, ULONG d)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = PrfQueryDefinition(a, b, c, d);
     SetFS(sel);
@@ -10597,7 +10597,7 @@ inline ULONG _PrfQueryDefinition(HINI a, HPROGRAM b, PPROGDETAILS c, ULONG d)
 inline BOOL _PrfRemoveProgram(HINI a, HPROGRAM b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = PrfRemoveProgram(a, b);
     SetFS(sel);
@@ -10611,7 +10611,7 @@ inline BOOL _PrfRemoveProgram(HINI a, HPROGRAM b)
 inline HAPP _WinStartApp(HWND a, PPROGDETAILS b, PCSZ c, PVOID d, ULONG e)
 {
  HAPP yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinStartApp(a, b, c, d, e);
     SetFS(sel);
@@ -10625,7 +10625,7 @@ inline HAPP _WinStartApp(HWND a, PPROGDETAILS b, PCSZ c, PVOID d, ULONG e)
 inline BOOL _WinTerminateApp(HAPP a)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinTerminateApp(a);
     SetFS(sel);
@@ -10641,7 +10641,7 @@ inline BOOL _WinTerminateApp(HAPP a)
 inline HSWITCH _WinAddSwitchEntry(PSWCNTRL a)
 {
  HSWITCH yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinAddSwitchEntry(a);
     SetFS(sel);
@@ -10655,7 +10655,7 @@ inline HSWITCH _WinAddSwitchEntry(PSWCNTRL a)
 inline ULONG _WinRemoveSwitchEntry(HSWITCH a)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinRemoveSwitchEntry(a);
     SetFS(sel);
@@ -10669,7 +10669,7 @@ inline ULONG _WinRemoveSwitchEntry(HSWITCH a)
 inline ULONG _WinChangeSwitchEntry(HSWITCH a, PSWCNTRL b)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinChangeSwitchEntry(a, b);
     SetFS(sel);
@@ -10683,7 +10683,7 @@ inline ULONG _WinChangeSwitchEntry(HSWITCH a, PSWCNTRL b)
 inline HSWITCH _WinCreateSwitchEntry(HAB a, PSWCNTRL b)
 {
  HSWITCH yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinCreateSwitchEntry(a, b);
     SetFS(sel);
@@ -10697,7 +10697,7 @@ inline HSWITCH _WinCreateSwitchEntry(HAB a, PSWCNTRL b)
 inline ULONG _WinQuerySessionTitle(HAB a, ULONG b, PSZ c, ULONG d)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinQuerySessionTitle(a, b, c, d);
     SetFS(sel);
@@ -10711,7 +10711,7 @@ inline ULONG _WinQuerySessionTitle(HAB a, ULONG b, PSZ c, ULONG d)
 inline ULONG _WinQuerySwitchEntry(HSWITCH a, PSWCNTRL b)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinQuerySwitchEntry(a, b);
     SetFS(sel);
@@ -10725,7 +10725,7 @@ inline ULONG _WinQuerySwitchEntry(HSWITCH a, PSWCNTRL b)
 inline HSWITCH _WinQuerySwitchHandle(HWND a, PID b)
 {
  HSWITCH yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinQuerySwitchHandle(a, b);
     SetFS(sel);
@@ -10739,7 +10739,7 @@ inline HSWITCH _WinQuerySwitchHandle(HWND a, PID b)
 inline ULONG _WinQuerySwitchList(HAB a, PSWBLOCK b, ULONG c)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinQuerySwitchList(a, b, c);
     SetFS(sel);
@@ -10753,7 +10753,7 @@ inline ULONG _WinQuerySwitchList(HAB a, PSWBLOCK b, ULONG c)
 inline ULONG _WinQueryTaskSizePos(HAB a, ULONG b, PSWP c)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinQueryTaskSizePos(a, b, c);
     SetFS(sel);
@@ -10767,7 +10767,7 @@ inline ULONG _WinQueryTaskSizePos(HAB a, ULONG b, PSWP c)
 inline ULONG _WinQueryTaskTitle(ULONG a, PSZ b, ULONG c)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinQueryTaskTitle(a, b, c);
     SetFS(sel);
@@ -10781,7 +10781,7 @@ inline ULONG _WinQueryTaskTitle(ULONG a, PSZ b, ULONG c)
 inline ULONG _WinSwitchToProgram(HSWITCH a)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinSwitchToProgram(a);
     SetFS(sel);
@@ -10797,7 +10797,7 @@ inline ULONG _WinSwitchToProgram(HSWITCH a)
 inline BOOL _PrfCloseProfile(HINI a)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = PrfCloseProfile(a);
     SetFS(sel);
@@ -10811,7 +10811,7 @@ inline BOOL _PrfCloseProfile(HINI a)
 inline HINI _PrfOpenProfile(HAB a, PCSZ b)
 {
  HINI yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = PrfOpenProfile(a, b);
     SetFS(sel);
@@ -10825,7 +10825,7 @@ inline HINI _PrfOpenProfile(HAB a, PCSZ b)
 inline BOOL _PrfQueryProfile(HAB a, PPRFPROFILE b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = PrfQueryProfile(a, b);
     SetFS(sel);
@@ -10839,7 +10839,7 @@ inline BOOL _PrfQueryProfile(HAB a, PPRFPROFILE b)
 inline BOOL _PrfQueryProfileData(HINI a, PCSZ b, PCSZ c, PVOID d, PULONG e)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = PrfQueryProfileData(a, b, c, d, e);
     SetFS(sel);
@@ -10853,7 +10853,7 @@ inline BOOL _PrfQueryProfileData(HINI a, PCSZ b, PCSZ c, PVOID d, PULONG e)
 inline LONG _PrfQueryProfileInt(HINI a, PCSZ b, PCSZ c, LONG d)
 {
  LONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = PrfQueryProfileInt(a, b, c, d);
     SetFS(sel);
@@ -10867,7 +10867,7 @@ inline LONG _PrfQueryProfileInt(HINI a, PCSZ b, PCSZ c, LONG d)
 inline BOOL _PrfQueryProfileSize(HINI a, PCSZ b, PCSZ c, PULONG d)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = PrfQueryProfileSize(a, b, c, d);
     SetFS(sel);
@@ -10881,7 +10881,7 @@ inline BOOL _PrfQueryProfileSize(HINI a, PCSZ b, PCSZ c, PULONG d)
 inline ULONG _PrfQueryProfileString(HINI a, PCSZ b, PCSZ c, PCSZ d, PVOID e, ULONG f)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = PrfQueryProfileString(a, b, c, d, e, f);
     SetFS(sel);
@@ -10895,7 +10895,7 @@ inline ULONG _PrfQueryProfileString(HINI a, PCSZ b, PCSZ c, PCSZ d, PVOID e, ULO
 inline BOOL _PrfReset(HAB a, PPRFPROFILE b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = PrfReset(a, b);
     SetFS(sel);
@@ -10909,7 +10909,7 @@ inline BOOL _PrfReset(HAB a, PPRFPROFILE b)
 inline BOOL _PrfWriteProfileData(HINI a, PCSZ b, PCSZ c, PVOID d, ULONG e)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = PrfWriteProfileData(a, b, c, d, e);
     SetFS(sel);
@@ -10923,7 +10923,7 @@ inline BOOL _PrfWriteProfileData(HINI a, PCSZ b, PCSZ c, PVOID d, ULONG e)
 inline BOOL _PrfWriteProfileString(HINI a, PCSZ b, PCSZ c, PCSZ d)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = PrfWriteProfileString(a, b, c, d);
     SetFS(sel);
@@ -10939,7 +10939,7 @@ inline BOOL _PrfWriteProfileString(HINI a, PCSZ b, PCSZ c, PCSZ d)
 inline MRESULT _WinDefFileDlgProc(HWND a, ULONG b, MPARAM c, MPARAM d)
 {
  MRESULT yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinDefFileDlgProc(a, b, c, d);
     SetFS(sel);
@@ -10953,7 +10953,7 @@ inline MRESULT _WinDefFileDlgProc(HWND a, ULONG b, MPARAM c, MPARAM d)
 inline HWND _WinFileDlg(HWND a, HWND b, PFILEDLG c)
 {
  HWND yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinFileDlg(a, b, c);
     SetFS(sel);
@@ -10967,7 +10967,7 @@ inline HWND _WinFileDlg(HWND a, HWND b, PFILEDLG c)
 inline BOOL _WinFreeFileDlgList(PAPSZ a)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinFreeFileDlgList(a);
     SetFS(sel);
@@ -10983,7 +10983,7 @@ inline BOOL _WinFreeFileDlgList(PAPSZ a)
 inline HWND _WinFontDlg(HWND a, HWND b, PFONTDLG c)
 {
  HWND yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinFontDlg(a, b, c);
     SetFS(sel);
@@ -10997,7 +10997,7 @@ inline HWND _WinFontDlg(HWND a, HWND b, PFONTDLG c)
 inline MRESULT _WinDefFontDlgProc(HWND a, ULONG b, MPARAM c, MPARAM d)
 {
  MRESULT yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinDefFontDlgProc(a, b, c, d);
     SetFS(sel);
@@ -11013,7 +11013,7 @@ inline MRESULT _WinDefFontDlgProc(HWND a, ULONG b, MPARAM c, MPARAM d)
 inline BOOL _DrgAcceptDroppedFiles(HWND a, PCSZ b, PCSZ c, ULONG d, ULONG e)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DrgAcceptDroppedFiles(a, b, c, d, e);
     SetFS(sel);
@@ -11027,7 +11027,7 @@ inline BOOL _DrgAcceptDroppedFiles(HWND a, PCSZ b, PCSZ c, ULONG d, ULONG e)
 inline BOOL _DrgAccessDraginfo(PDRAGINFO a)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DrgAccessDraginfo(a);
     SetFS(sel);
@@ -11041,7 +11041,7 @@ inline BOOL _DrgAccessDraginfo(PDRAGINFO a)
 inline HSTR _DrgAddStrHandle(PCSZ a)
 {
  HSTR yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DrgAddStrHandle(a);
     SetFS(sel);
@@ -11055,7 +11055,7 @@ inline HSTR _DrgAddStrHandle(PCSZ a)
 inline PDRAGINFO _DrgAllocDraginfo(ULONG a)
 {
  PDRAGINFO yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DrgAllocDraginfo(a);
     SetFS(sel);
@@ -11069,7 +11069,7 @@ inline PDRAGINFO _DrgAllocDraginfo(ULONG a)
 inline PDRAGTRANSFER _DrgAllocDragtransfer(ULONG a)
 {
  PDRAGTRANSFER yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DrgAllocDragtransfer(a);
     SetFS(sel);
@@ -11083,7 +11083,7 @@ inline PDRAGTRANSFER _DrgAllocDragtransfer(ULONG a)
 inline BOOL _DrgCancelLazyDrag()
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DrgCancelLazyDrag();
     SetFS(sel);
@@ -11097,7 +11097,7 @@ inline BOOL _DrgCancelLazyDrag()
 inline BOOL _DrgDeleteDraginfoStrHandles(PDRAGINFO a)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DrgDeleteDraginfoStrHandles(a);
     SetFS(sel);
@@ -11111,7 +11111,7 @@ inline BOOL _DrgDeleteDraginfoStrHandles(PDRAGINFO a)
 inline BOOL _DrgDeleteStrHandle(HSTR a)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DrgDeleteStrHandle(a);
     SetFS(sel);
@@ -11125,7 +11125,7 @@ inline BOOL _DrgDeleteStrHandle(HSTR a)
 inline HWND _DrgDrag(HWND a, PDRAGINFO b, PDRAGIMAGE c, ULONG d, LONG e, PVOID f)
 {
  HWND yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DrgDrag(a, b, c, d, e, f);
     SetFS(sel);
@@ -11139,7 +11139,7 @@ inline HWND _DrgDrag(HWND a, PDRAGINFO b, PDRAGIMAGE c, ULONG d, LONG e, PVOID f
 inline BOOL _DrgDragFiles(HWND a, PCSZ *b, PCSZ *c, PCSZ *d, ULONG e, HPOINTER f, ULONG g, BOOL h, ULONG i)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DrgDragFiles(a, b, c, d, e, f, g, h, i);
     SetFS(sel);
@@ -11153,7 +11153,7 @@ inline BOOL _DrgDragFiles(HWND a, PCSZ *b, PCSZ *c, PCSZ *d, ULONG e, HPOINTER f
 inline BOOL _DrgFreeDraginfo(PDRAGINFO a)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DrgFreeDraginfo(a);
     SetFS(sel);
@@ -11167,7 +11167,7 @@ inline BOOL _DrgFreeDraginfo(PDRAGINFO a)
 inline BOOL _DrgFreeDragtransfer(PDRAGTRANSFER a)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DrgFreeDragtransfer(a);
     SetFS(sel);
@@ -11181,7 +11181,7 @@ inline BOOL _DrgFreeDragtransfer(PDRAGTRANSFER a)
 inline HPS _DrgGetPS(HWND a)
 {
  HPS yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DrgGetPS(a);
     SetFS(sel);
@@ -11195,7 +11195,7 @@ inline HPS _DrgGetPS(HWND a)
 inline BOOL _DrgLazyDrag(HWND a, PDRAGINFO b, PDRAGIMAGE c, ULONG d, PVOID e)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DrgLazyDrag(a, b, c, d, e);
     SetFS(sel);
@@ -11209,7 +11209,7 @@ inline BOOL _DrgLazyDrag(HWND a, PDRAGINFO b, PDRAGIMAGE c, ULONG d, PVOID e)
 inline BOOL _DrgLazyDrop(HWND a, ULONG b, PPOINTL c)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DrgLazyDrop(a, b, c);
     SetFS(sel);
@@ -11223,7 +11223,7 @@ inline BOOL _DrgLazyDrop(HWND a, ULONG b, PPOINTL c)
 inline BOOL _DrgPostTransferMsg(HWND a, ULONG b, PDRAGTRANSFER c, ULONG d, ULONG e, BOOL f)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DrgPostTransferMsg(a, b, c, d, e, f);
     SetFS(sel);
@@ -11237,7 +11237,7 @@ inline BOOL _DrgPostTransferMsg(HWND a, ULONG b, PDRAGTRANSFER c, ULONG d, ULONG
 inline BOOL _DrgPushDraginfo(PDRAGINFO a, HWND b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DrgPushDraginfo(a, b);
     SetFS(sel);
@@ -11251,7 +11251,7 @@ inline BOOL _DrgPushDraginfo(PDRAGINFO a, HWND b)
 inline PDRAGINFO _DrgQueryDraginfoPtr(PDRAGINFO a)
 {
  PDRAGINFO yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DrgQueryDraginfoPtr(a);
     SetFS(sel);
@@ -11265,7 +11265,7 @@ inline PDRAGINFO _DrgQueryDraginfoPtr(PDRAGINFO a)
 inline PDRAGINFO _DrgQueryDraginfoPtrFromHwnd(HWND a)
 {
  PDRAGINFO yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DrgQueryDraginfoPtrFromHwnd(a);
     SetFS(sel);
@@ -11279,7 +11279,7 @@ inline PDRAGINFO _DrgQueryDraginfoPtrFromHwnd(HWND a)
 inline PDRAGINFO _DrgQueryDraginfoPtrFromDragitem(PDRAGITEM a)
 {
  PDRAGINFO yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DrgQueryDraginfoPtrFromDragitem(a);
     SetFS(sel);
@@ -11293,7 +11293,7 @@ inline PDRAGINFO _DrgQueryDraginfoPtrFromDragitem(PDRAGITEM a)
 inline BOOL _DrgQueryDragitem(PDRAGINFO a, ULONG b, PDRAGITEM c, ULONG d)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DrgQueryDragitem(a, b, c, d);
     SetFS(sel);
@@ -11307,7 +11307,7 @@ inline BOOL _DrgQueryDragitem(PDRAGINFO a, ULONG b, PDRAGITEM c, ULONG d)
 inline ULONG _DrgQueryDragitemCount(PDRAGINFO a)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DrgQueryDragitemCount(a);
     SetFS(sel);
@@ -11321,7 +11321,7 @@ inline ULONG _DrgQueryDragitemCount(PDRAGINFO a)
 inline PDRAGITEM _DrgQueryDragitemPtr(PDRAGINFO a, ULONG b)
 {
  PDRAGITEM yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DrgQueryDragitemPtr(a, b);
     SetFS(sel);
@@ -11335,7 +11335,7 @@ inline PDRAGITEM _DrgQueryDragitemPtr(PDRAGINFO a, ULONG b)
 inline ULONG _DrgQueryDragStatus()
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DrgQueryDragStatus();
     SetFS(sel);
@@ -11349,7 +11349,7 @@ inline ULONG _DrgQueryDragStatus()
 inline BOOL _DrgQueryNativeRMF(PDRAGITEM a, ULONG b, PCHAR c)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DrgQueryNativeRMF(a, b, c);
     SetFS(sel);
@@ -11363,7 +11363,7 @@ inline BOOL _DrgQueryNativeRMF(PDRAGITEM a, ULONG b, PCHAR c)
 inline ULONG _DrgQueryNativeRMFLen(PDRAGITEM a)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DrgQueryNativeRMFLen(a);
     SetFS(sel);
@@ -11377,7 +11377,7 @@ inline ULONG _DrgQueryNativeRMFLen(PDRAGITEM a)
 inline ULONG _DrgQueryStrName(HSTR a, ULONG b, PSZ c)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DrgQueryStrName(a, b, c);
     SetFS(sel);
@@ -11391,7 +11391,7 @@ inline ULONG _DrgQueryStrName(HSTR a, ULONG b, PSZ c)
 inline ULONG _DrgQueryStrNameLen(HSTR a)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DrgQueryStrNameLen(a);
     SetFS(sel);
@@ -11405,7 +11405,7 @@ inline ULONG _DrgQueryStrNameLen(HSTR a)
 inline BOOL _DrgQueryTrueType(PDRAGITEM a, ULONG b, PSZ c)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DrgQueryTrueType(a, b, c);
     SetFS(sel);
@@ -11419,7 +11419,7 @@ inline BOOL _DrgQueryTrueType(PDRAGITEM a, ULONG b, PSZ c)
 inline ULONG _DrgQueryTrueTypeLen(PDRAGITEM a)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DrgQueryTrueTypeLen(a);
     SetFS(sel);
@@ -11433,7 +11433,7 @@ inline ULONG _DrgQueryTrueTypeLen(PDRAGITEM a)
 inline PDRAGINFO _DrgReallocDraginfo(PDRAGINFO a, ULONG b)
 {
  PDRAGINFO yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DrgReallocDraginfo(a, b);
     SetFS(sel);
@@ -11447,7 +11447,7 @@ inline PDRAGINFO _DrgReallocDraginfo(PDRAGINFO a, ULONG b)
 inline BOOL _DrgReleasePS(HPS a)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DrgReleasePS(a);
     SetFS(sel);
@@ -11461,7 +11461,7 @@ inline BOOL _DrgReleasePS(HPS a)
 inline MRESULT _DrgSendTransferMsg(HWND a, ULONG b, MPARAM c, MPARAM d)
 {
  MRESULT yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DrgSendTransferMsg(a, b, c, d);
     SetFS(sel);
@@ -11475,7 +11475,7 @@ inline MRESULT _DrgSendTransferMsg(HWND a, ULONG b, MPARAM c, MPARAM d)
 inline BOOL _DrgSetDragImage(PDRAGINFO a, PDRAGIMAGE b, ULONG c, PVOID d)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DrgSetDragImage(a, b, c, d);
     SetFS(sel);
@@ -11489,7 +11489,7 @@ inline BOOL _DrgSetDragImage(PDRAGINFO a, PDRAGIMAGE b, ULONG c, PVOID d)
 inline BOOL _DrgSetDragitem(PDRAGINFO a, PDRAGITEM b, ULONG c, ULONG d)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DrgSetDragitem(a, b, c, d);
     SetFS(sel);
@@ -11503,7 +11503,7 @@ inline BOOL _DrgSetDragitem(PDRAGINFO a, PDRAGITEM b, ULONG c, ULONG d)
 inline BOOL _DrgSetDragPointer(PDRAGINFO a, HPOINTER b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DrgSetDragPointer(a, b);
     SetFS(sel);
@@ -11517,7 +11517,7 @@ inline BOOL _DrgSetDragPointer(PDRAGINFO a, HPOINTER b)
 inline BOOL _DrgVerifyNativeRMF(PDRAGITEM a, PCSZ b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DrgVerifyNativeRMF(a, b);
     SetFS(sel);
@@ -11531,7 +11531,7 @@ inline BOOL _DrgVerifyNativeRMF(PDRAGITEM a, PCSZ b)
 inline BOOL _DrgVerifyRMF(PDRAGITEM a, PCSZ b, PCSZ c)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DrgVerifyRMF(a, b, c);
     SetFS(sel);
@@ -11545,7 +11545,7 @@ inline BOOL _DrgVerifyRMF(PDRAGITEM a, PCSZ b, PCSZ c)
 inline BOOL _DrgVerifyTrueType(PDRAGITEM a, PCSZ b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DrgVerifyTrueType(a, b);
     SetFS(sel);
@@ -11559,7 +11559,7 @@ inline BOOL _DrgVerifyTrueType(PDRAGITEM a, PCSZ b)
 inline BOOL _DrgVerifyType(PDRAGITEM a, PCSZ b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DrgVerifyType(a, b);
     SetFS(sel);
@@ -11573,7 +11573,7 @@ inline BOOL _DrgVerifyType(PDRAGITEM a, PCSZ b)
 inline BOOL _DrgVerifyTypeSet(PDRAGITEM a, PCSZ b, ULONG c, PSZ d)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DrgVerifyTypeSet(a, b, c, d);
     SetFS(sel);
@@ -11589,7 +11589,7 @@ inline BOOL _DrgVerifyTypeSet(PDRAGITEM a, PCSZ b, ULONG c, PSZ d)
 inline HOBJECT _WinCopyObject(HOBJECT a, HOBJECT b, ULONG c)
 {
  HOBJECT yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinCopyObject(a, b, c);
     SetFS(sel);
@@ -11603,7 +11603,7 @@ inline HOBJECT _WinCopyObject(HOBJECT a, HOBJECT b, ULONG c)
 inline HOBJECT _WinCreateObject(PCSZ a, PCSZ b, PCSZ c, PCSZ d, ULONG e)
 {
  HOBJECT yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinCreateObject(a, b, c, d, e);
     SetFS(sel);
@@ -11617,7 +11617,7 @@ inline HOBJECT _WinCreateObject(PCSZ a, PCSZ b, PCSZ c, PCSZ d, ULONG e)
 inline HOBJECT _WinCreateShadow(HOBJECT a, HOBJECT b, ULONG c)
 {
  HOBJECT yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinCreateShadow(a, b, c);
     SetFS(sel);
@@ -11631,7 +11631,7 @@ inline HOBJECT _WinCreateShadow(HOBJECT a, HOBJECT b, ULONG c)
 inline BOOL _WinDeregisterObjectClass(PCSZ a)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinDeregisterObjectClass(a);
     SetFS(sel);
@@ -11645,7 +11645,7 @@ inline BOOL _WinDeregisterObjectClass(PCSZ a)
 inline BOOL _WinDestroyObject(HOBJECT a)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinDestroyObject(a);
     SetFS(sel);
@@ -11659,7 +11659,7 @@ inline BOOL _WinDestroyObject(HOBJECT a)
 inline BOOL _WinEnumObjectClasses(POBJCLASS a, PULONG b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinEnumObjectClasses(a, b);
     SetFS(sel);
@@ -11673,7 +11673,7 @@ inline BOOL _WinEnumObjectClasses(POBJCLASS a, PULONG b)
 inline BOOL _WinIsSOMDDReady()
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinIsSOMDDReady();
     SetFS(sel);
@@ -11687,7 +11687,7 @@ inline BOOL _WinIsSOMDDReady()
 inline BOOL _WinIsWPDServerReady()
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinIsWPDServerReady();
     SetFS(sel);
@@ -11701,7 +11701,7 @@ inline BOOL _WinIsWPDServerReady()
 inline HOBJECT _WinMoveObject(HOBJECT a, HOBJECT b, ULONG c)
 {
  HOBJECT yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinMoveObject(a, b, c);
     SetFS(sel);
@@ -11715,7 +11715,7 @@ inline HOBJECT _WinMoveObject(HOBJECT a, HOBJECT b, ULONG c)
 inline BOOL _WinOpenObject(HOBJECT a, ULONG b, BOOL c)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinOpenObject(a, b, c);
     SetFS(sel);
@@ -11729,7 +11729,7 @@ inline BOOL _WinOpenObject(HOBJECT a, ULONG b, BOOL c)
 inline BOOL _WinQueryActiveDesktopPathname(PSZ a, ULONG b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinQueryActiveDesktopPathname(a, b);
     SetFS(sel);
@@ -11743,7 +11743,7 @@ inline BOOL _WinQueryActiveDesktopPathname(PSZ a, ULONG b)
 inline HOBJECT _WinQueryObject(PCSZ a)
 {
  HOBJECT yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinQueryObject(a);
     SetFS(sel);
@@ -11757,7 +11757,7 @@ inline HOBJECT _WinQueryObject(PCSZ a)
 inline BOOL _WinQueryObjectPath(HOBJECT a, PSZ b, ULONG c)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinQueryObjectPath(a, b, c);
     SetFS(sel);
@@ -11771,7 +11771,7 @@ inline BOOL _WinQueryObjectPath(HOBJECT a, PSZ b, ULONG c)
 inline BOOL _WinRegisterObjectClass(PCSZ a, PCSZ b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinRegisterObjectClass(a, b);
     SetFS(sel);
@@ -11785,7 +11785,7 @@ inline BOOL _WinRegisterObjectClass(PCSZ a, PCSZ b)
 inline BOOL _WinReplaceObjectClass(PCSZ a, PCSZ b, BOOL c)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinReplaceObjectClass(a, b, c);
     SetFS(sel);
@@ -11799,7 +11799,7 @@ inline BOOL _WinReplaceObjectClass(PCSZ a, PCSZ b, BOOL c)
 inline ULONG _WinRestartSOMDD(BOOL a)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinRestartSOMDD(a);
     SetFS(sel);
@@ -11813,7 +11813,7 @@ inline ULONG _WinRestartSOMDD(BOOL a)
 inline ULONG _WinRestartWPDServer(BOOL a)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinRestartWPDServer(a);
     SetFS(sel);
@@ -11827,7 +11827,7 @@ inline ULONG _WinRestartWPDServer(BOOL a)
 inline BOOL _WinSaveObject(HOBJECT a, BOOL b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinSaveObject(a, b);
     SetFS(sel);
@@ -11841,7 +11841,7 @@ inline BOOL _WinSaveObject(HOBJECT a, BOOL b)
 inline BOOL _WinSetObjectData(HOBJECT a, PCSZ b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinSetObjectData(a, b);
     SetFS(sel);
@@ -11855,7 +11855,7 @@ inline BOOL _WinSetObjectData(HOBJECT a, PCSZ b)
 inline BOOL _WinFreeFileIcon(HPOINTER a)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinFreeFileIcon(a);
     SetFS(sel);
@@ -11869,7 +11869,7 @@ inline BOOL _WinFreeFileIcon(HPOINTER a)
 inline HPOINTER _WinLoadFileIcon(PCSZ a, BOOL b)
 {
  HPOINTER yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinLoadFileIcon(a, b);
     SetFS(sel);
@@ -11883,7 +11883,7 @@ inline HPOINTER _WinLoadFileIcon(PCSZ a, BOOL b)
 inline BOOL _WinRestoreWindowPos(PCSZ a, PCSZ b, HWND c)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinRestoreWindowPos(a, b, c);
     SetFS(sel);
@@ -11897,7 +11897,7 @@ inline BOOL _WinRestoreWindowPos(PCSZ a, PCSZ b, HWND c)
 inline BOOL _WinSetFileIcon(PCSZ a, PICONINFO b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinSetFileIcon(a, b);
     SetFS(sel);
@@ -11911,7 +11911,7 @@ inline BOOL _WinSetFileIcon(PCSZ a, PICONINFO b)
 inline BOOL _WinShutdownSystem(HAB a, HMQ b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinShutdownSystem(a, b);
     SetFS(sel);
@@ -11925,7 +11925,7 @@ inline BOOL _WinShutdownSystem(HAB a, HMQ b)
 inline BOOL _WinStoreWindowPos(PCSZ a, PCSZ b, HWND c)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinStoreWindowPos(a, b, c);
     SetFS(sel);
@@ -11941,7 +11941,7 @@ inline BOOL _WinStoreWindowPos(PCSZ a, PCSZ b, HWND c)
 inline BOOL _SplStdClose(HDC a)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = SplStdClose(a);
     SetFS(sel);
@@ -11955,7 +11955,7 @@ inline BOOL _SplStdClose(HDC a)
 inline BOOL _SplStdDelete(HSTD a)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = SplStdDelete(a);
     SetFS(sel);
@@ -11969,7 +11969,7 @@ inline BOOL _SplStdDelete(HSTD a)
 inline BOOL _SplStdGetBits(HSTD a, LONG b, LONG c, PCH d)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = SplStdGetBits(a, b, c, d);
     SetFS(sel);
@@ -11983,7 +11983,7 @@ inline BOOL _SplStdGetBits(HSTD a, LONG b, LONG c, PCH d)
 inline BOOL _SplStdOpen(HDC a)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = SplStdOpen(a);
     SetFS(sel);
@@ -11997,7 +11997,7 @@ inline BOOL _SplStdOpen(HDC a)
 inline LONG _SplStdQueryLength(HSTD a)
 {
  LONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = SplStdQueryLength(a);
     SetFS(sel);
@@ -12011,7 +12011,7 @@ inline LONG _SplStdQueryLength(HSTD a)
 inline BOOL _SplStdStart(HDC a)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = SplStdStart(a);
     SetFS(sel);
@@ -12025,7 +12025,7 @@ inline BOOL _SplStdStart(HDC a)
 inline HSTD _SplStdStop(HDC a)
 {
  HSTD yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = SplStdStop(a);
     SetFS(sel);
@@ -12039,7 +12039,7 @@ inline HSTD _SplStdStop(HDC a)
 inline SPLERR _SplControlDevice(PSZ a, PSZ b, ULONG c)
 {
  SPLERR yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = SplControlDevice(a, b, c);
     SetFS(sel);
@@ -12053,7 +12053,7 @@ inline SPLERR _SplControlDevice(PSZ a, PSZ b, ULONG c)
 inline SPLERR _SplCopyJob(PCSZ a, PCSZ b, ULONG c, PCSZ d, PCSZ e, PULONG f)
 {
  SPLERR yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = SplCopyJob(a, b, c, d, e, f);
     SetFS(sel);
@@ -12067,7 +12067,7 @@ inline SPLERR _SplCopyJob(PCSZ a, PCSZ b, ULONG c, PCSZ d, PCSZ e, PULONG f)
 inline SPLERR _SplCreateDevice(PSZ a, ULONG b, PVOID c, ULONG d)
 {
  SPLERR yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = SplCreateDevice(a, b, c, d);
     SetFS(sel);
@@ -12081,7 +12081,7 @@ inline SPLERR _SplCreateDevice(PSZ a, ULONG b, PVOID c, ULONG d)
 inline SPLERR _SplCreatePort(PCSZ a, PCSZ b, PCSZ c, ULONG d, PVOID e, ULONG f)
 {
  SPLERR yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = SplCreatePort(a, b, c, d, e, f);
     SetFS(sel);
@@ -12095,7 +12095,7 @@ inline SPLERR _SplCreatePort(PCSZ a, PCSZ b, PCSZ c, ULONG d, PVOID e, ULONG f)
 inline SPLERR _SplCreateQueue(PSZ a, ULONG b, PVOID c, ULONG d)
 {
  SPLERR yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = SplCreateQueue(a, b, c, d);
     SetFS(sel);
@@ -12109,7 +12109,7 @@ inline SPLERR _SplCreateQueue(PSZ a, ULONG b, PVOID c, ULONG d)
 inline SPLERR _SplDeleteDevice(PSZ a, PSZ b)
 {
  SPLERR yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = SplDeleteDevice(a, b);
     SetFS(sel);
@@ -12123,7 +12123,7 @@ inline SPLERR _SplDeleteDevice(PSZ a, PSZ b)
 inline SPLERR _SplDeleteJob(PSZ a, PSZ b, ULONG c)
 {
  SPLERR yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = SplDeleteJob(a, b, c);
     SetFS(sel);
@@ -12137,7 +12137,7 @@ inline SPLERR _SplDeleteJob(PSZ a, PSZ b, ULONG c)
 inline SPLERR _SplDeletePort(PCSZ a, PCSZ b)
 {
  SPLERR yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = SplDeletePort(a, b);
     SetFS(sel);
@@ -12151,7 +12151,7 @@ inline SPLERR _SplDeletePort(PCSZ a, PCSZ b)
 inline SPLERR _SplDeleteQueue(PSZ a, PSZ b)
 {
  SPLERR yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = SplDeleteQueue(a, b);
     SetFS(sel);
@@ -12165,7 +12165,7 @@ inline SPLERR _SplDeleteQueue(PSZ a, PSZ b)
 inline SPLERR _SplEnumDevice(PSZ a, ULONG b, PVOID c, ULONG d, PULONG e, PULONG f, PULONG g, PVOID h)
 {
  SPLERR yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = SplEnumDevice(a, b, c, d, e, f, g, h);
     SetFS(sel);
@@ -12179,7 +12179,7 @@ inline SPLERR _SplEnumDevice(PSZ a, ULONG b, PVOID c, ULONG d, PULONG e, PULONG 
 inline SPLERR _SplEnumDriver(PSZ a, ULONG b, PVOID c, ULONG d, PULONG e, PULONG f, PULONG g, PVOID h)
 {
  SPLERR yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = SplEnumDriver(a, b, c, d, e, f, g, h);
     SetFS(sel);
@@ -12193,7 +12193,7 @@ inline SPLERR _SplEnumDriver(PSZ a, ULONG b, PVOID c, ULONG d, PULONG e, PULONG 
 inline SPLERR _SplEnumJob(PSZ a, PSZ b, ULONG c, PVOID d, ULONG e, PULONG f, PULONG g, PULONG h, PVOID i)
 {
  SPLERR yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = SplEnumJob(a, b, c, d, e, f, g, h, i);
     SetFS(sel);
@@ -12207,7 +12207,7 @@ inline SPLERR _SplEnumJob(PSZ a, PSZ b, ULONG c, PVOID d, ULONG e, PULONG f, PUL
 inline SPLERR _SplEnumPort(PCSZ a, ULONG b, PVOID c, ULONG d, PULONG e, PULONG f, PULONG g, PVOID h)
 {
  SPLERR yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = SplEnumPort(a, b, c, d, e, f, g, h);
     SetFS(sel);
@@ -12221,7 +12221,7 @@ inline SPLERR _SplEnumPort(PCSZ a, ULONG b, PVOID c, ULONG d, PULONG e, PULONG f
 inline SPLERR _SplEnumPrinter(PSZ a, ULONG b, ULONG c, PVOID d, ULONG e, PULONG f, PULONG g, PULONG h, PVOID i)
 {
  SPLERR yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = SplEnumPrinter(a, b, c, d, e, f, g, h, i);
     SetFS(sel);
@@ -12235,7 +12235,7 @@ inline SPLERR _SplEnumPrinter(PSZ a, ULONG b, ULONG c, PVOID d, ULONG e, PULONG 
 inline SPLERR _SplEnumQueue(PSZ a, ULONG b, PVOID c, ULONG d, PULONG e, PULONG f, PULONG g, PVOID h)
 {
  SPLERR yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = SplEnumQueue(a, b, c, d, e, f, g, h);
     SetFS(sel);
@@ -12249,7 +12249,7 @@ inline SPLERR _SplEnumQueue(PSZ a, ULONG b, PVOID c, ULONG d, PULONG e, PULONG f
 inline SPLERR _SplEnumQueueProcessor(PSZ a, ULONG b, PVOID c, ULONG d, PULONG e, PULONG f, PULONG g, PVOID h)
 {
  SPLERR yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = SplEnumQueueProcessor(a, b, c, d, e, f, g, h);
     SetFS(sel);
@@ -12263,7 +12263,7 @@ inline SPLERR _SplEnumQueueProcessor(PSZ a, ULONG b, PVOID c, ULONG d, PULONG e,
 inline SPLERR _SplHoldJob(PCSZ a, PCSZ b, ULONG c)
 {
  SPLERR yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = SplHoldJob(a, b, c);
     SetFS(sel);
@@ -12277,7 +12277,7 @@ inline SPLERR _SplHoldJob(PCSZ a, PCSZ b, ULONG c)
 inline SPLERR _SplHoldQueue(PSZ a, PSZ b)
 {
  SPLERR yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = SplHoldQueue(a, b);
     SetFS(sel);
@@ -12291,7 +12291,7 @@ inline SPLERR _SplHoldQueue(PSZ a, PSZ b)
 inline SPLERR _SplPurgeQueue(PSZ a, PSZ b)
 {
  SPLERR yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = SplPurgeQueue(a, b);
     SetFS(sel);
@@ -12305,7 +12305,7 @@ inline SPLERR _SplPurgeQueue(PSZ a, PSZ b)
 inline SPLERR _SplQueryDevice(PSZ a, PSZ b, ULONG c, PVOID d, ULONG e, PULONG f)
 {
  SPLERR yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = SplQueryDevice(a, b, c, d, e, f);
     SetFS(sel);
@@ -12319,7 +12319,7 @@ inline SPLERR _SplQueryDevice(PSZ a, PSZ b, ULONG c, PVOID d, ULONG e, PULONG f)
 inline SPLERR _SplQueryDriver(PCSZ a, PCSZ b, PCSZ c, ULONG d, PVOID e, ULONG f, PULONG g)
 {
  SPLERR yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = SplQueryDriver(a, b, c, d, e, f, g);
     SetFS(sel);
@@ -12333,7 +12333,7 @@ inline SPLERR _SplQueryDriver(PCSZ a, PCSZ b, PCSZ c, ULONG d, PVOID e, ULONG f,
 inline SPLERR _SplQueryJob(PSZ a, PSZ b, ULONG c, ULONG d, PVOID e, ULONG f, PULONG g)
 {
  SPLERR yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = SplQueryJob(a, b, c, d, e, f, g);
     SetFS(sel);
@@ -12347,7 +12347,7 @@ inline SPLERR _SplQueryJob(PSZ a, PSZ b, ULONG c, ULONG d, PVOID e, ULONG f, PUL
 inline SPLERR _SplQueryPort(PCSZ a, PCSZ b, ULONG c, PVOID d, ULONG e, PULONG f)
 {
  SPLERR yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = SplQueryPort(a, b, c, d, e, f);
     SetFS(sel);
@@ -12361,7 +12361,7 @@ inline SPLERR _SplQueryPort(PCSZ a, PCSZ b, ULONG c, PVOID d, ULONG e, PULONG f)
 inline SPLERR _SplQueryQueue(PSZ a, PSZ b, ULONG c, PVOID d, ULONG e, PULONG f)
 {
  SPLERR yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = SplQueryQueue(a, b, c, d, e, f);
     SetFS(sel);
@@ -12375,7 +12375,7 @@ inline SPLERR _SplQueryQueue(PSZ a, PSZ b, ULONG c, PVOID d, ULONG e, PULONG f)
 inline SPLERR _SplReleaseJob(PCSZ a, PCSZ b, ULONG c)
 {
  SPLERR yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = SplReleaseJob(a, b, c);
     SetFS(sel);
@@ -12389,7 +12389,7 @@ inline SPLERR _SplReleaseJob(PCSZ a, PCSZ b, ULONG c)
 inline SPLERR _SplReleaseQueue(PSZ a, PSZ b)
 {
  SPLERR yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = SplReleaseQueue(a, b);
     SetFS(sel);
@@ -12403,7 +12403,7 @@ inline SPLERR _SplReleaseQueue(PSZ a, PSZ b)
 inline SPLERR _SplSetDevice(PSZ a, PSZ b, ULONG c, PVOID d, ULONG e, ULONG f)
 {
  SPLERR yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = SplSetDevice(a, b, c, d, e, f);
     SetFS(sel);
@@ -12417,7 +12417,7 @@ inline SPLERR _SplSetDevice(PSZ a, PSZ b, ULONG c, PVOID d, ULONG e, ULONG f)
 inline SPLERR _SplSetDriver(PCSZ a, PCSZ b, PCSZ c, ULONG d, PVOID e, ULONG f, ULONG g)
 {
  SPLERR yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = SplSetDriver(a, b, c, d, e, f, g);
     SetFS(sel);
@@ -12431,7 +12431,7 @@ inline SPLERR _SplSetDriver(PCSZ a, PCSZ b, PCSZ c, ULONG d, PVOID e, ULONG f, U
 inline SPLERR _SplSetJob(PSZ a, PSZ b, ULONG c, ULONG d, PVOID e, ULONG f, ULONG g)
 {
  SPLERR yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = SplSetJob(a, b, c, d, e, f, g);
     SetFS(sel);
@@ -12445,7 +12445,7 @@ inline SPLERR _SplSetJob(PSZ a, PSZ b, ULONG c, ULONG d, PVOID e, ULONG f, ULONG
 inline SPLERR _SplSetPort(PCSZ a, PCSZ b, ULONG c, PVOID d, ULONG e, ULONG f)
 {
  SPLERR yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = SplSetPort(a, b, c, d, e, f);
     SetFS(sel);
@@ -12459,7 +12459,7 @@ inline SPLERR _SplSetPort(PCSZ a, PCSZ b, ULONG c, PVOID d, ULONG e, ULONG f)
 inline SPLERR _SplSetQueue(PSZ a, PSZ b, ULONG c, PVOID d, ULONG e, ULONG f)
 {
  SPLERR yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = SplSetQueue(a, b, c, d, e, f);
     SetFS(sel);
@@ -12473,7 +12473,7 @@ inline SPLERR _SplSetQueue(PSZ a, PSZ b, ULONG c, PVOID d, ULONG e, ULONG f)
 inline ULONG _SplMessageBox(PSZ a, ULONG b, ULONG c, PSZ d, PSZ e, ULONG f, ULONG g)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = SplMessageBox(a, b, c, d, e, f, g);
     SetFS(sel);
@@ -12487,7 +12487,7 @@ inline ULONG _SplMessageBox(PSZ a, ULONG b, ULONG c, PSZ d, PSZ e, ULONG f, ULON
 inline BOOL _SplQmAbort(HSPL a)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = SplQmAbort(a);
     SetFS(sel);
@@ -12501,7 +12501,7 @@ inline BOOL _SplQmAbort(HSPL a)
 inline BOOL _SplQmAbortDoc(HSPL a)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = SplQmAbortDoc(a);
     SetFS(sel);
@@ -12515,7 +12515,7 @@ inline BOOL _SplQmAbortDoc(HSPL a)
 inline BOOL _SplQmClose(HSPL a)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = SplQmClose(a);
     SetFS(sel);
@@ -12529,7 +12529,7 @@ inline BOOL _SplQmClose(HSPL a)
 inline BOOL _SplQmEndDoc(HSPL a)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = SplQmEndDoc(a);
     SetFS(sel);
@@ -12543,7 +12543,7 @@ inline BOOL _SplQmEndDoc(HSPL a)
 inline ULONG _SplQmGetJobID(HSPL a, ULONG b, PVOID c, ULONG d, PULONG e)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = SplQmGetJobID(a, b, c, d, e);
     SetFS(sel);
@@ -12557,7 +12557,7 @@ inline ULONG _SplQmGetJobID(HSPL a, ULONG b, PVOID c, ULONG d, PULONG e)
 inline BOOL _SplQmNewPage(HSPL a, ULONG b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = SplQmNewPage(a, b);
     SetFS(sel);
@@ -12571,7 +12571,7 @@ inline BOOL _SplQmNewPage(HSPL a, ULONG b)
 inline HSPL _SplQmOpen(PSZ a, LONG b, PQMOPENDATA c)
 {
  HSPL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = SplQmOpen(a, b, c);
     SetFS(sel);
@@ -12585,7 +12585,7 @@ inline HSPL _SplQmOpen(PSZ a, LONG b, PQMOPENDATA c)
 inline BOOL _SplQmStartDoc(HSPL a, PSZ b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = SplQmStartDoc(a, b);
     SetFS(sel);
@@ -12599,7 +12599,7 @@ inline BOOL _SplQmStartDoc(HSPL a, PSZ b)
 inline BOOL _SplQmWrite(HSPL a, LONG b, PVOID c)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = SplQmWrite(a, b, c);
     SetFS(sel);
@@ -12615,7 +12615,7 @@ inline BOOL _SplQmWrite(HSPL a, LONG b, PVOID c)
 inline BOOL _WinAssociateHelpInstance(HWND a, HWND b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinAssociateHelpInstance(a, b);
     SetFS(sel);
@@ -12629,7 +12629,7 @@ inline BOOL _WinAssociateHelpInstance(HWND a, HWND b)
 inline HWND _WinCreateHelpInstance(HAB a, PHELPINIT b)
 {
  HWND yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinCreateHelpInstance(a, b);
     SetFS(sel);
@@ -12643,7 +12643,7 @@ inline HWND _WinCreateHelpInstance(HAB a, PHELPINIT b)
 inline BOOL _WinCreateHelpTable(HWND a, PHELPTABLE b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinCreateHelpTable(a, b);
     SetFS(sel);
@@ -12657,7 +12657,7 @@ inline BOOL _WinCreateHelpTable(HWND a, PHELPTABLE b)
 inline BOOL _WinDestroyHelpInstance(HWND a)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinDestroyHelpInstance(a);
     SetFS(sel);
@@ -12671,7 +12671,7 @@ inline BOOL _WinDestroyHelpInstance(HWND a)
 inline BOOL _WinLoadHelpTable(HWND a, ULONG b, HMODULE c)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinLoadHelpTable(a, b, c);
     SetFS(sel);
@@ -12685,7 +12685,7 @@ inline BOOL _WinLoadHelpTable(HWND a, ULONG b, HMODULE c)
 inline HWND _WinQueryHelpInstance(HWND a)
 {
  HWND yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinQueryHelpInstance(a);
     SetFS(sel);
@@ -12701,7 +12701,7 @@ inline HWND _WinQueryHelpInstance(HWND a)
 inline BOOL _DdfBeginList(HDDF a, ULONG b, ULONG c, ULONG d)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DdfBeginList(a, b, c, d);
     SetFS(sel);
@@ -12715,7 +12715,7 @@ inline BOOL _DdfBeginList(HDDF a, ULONG b, ULONG c, ULONG d)
 inline BOOL _DdfBitmap(HDDF a, HBITMAP b, ULONG c)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DdfBitmap(a, b, c);
     SetFS(sel);
@@ -12729,7 +12729,7 @@ inline BOOL _DdfBitmap(HDDF a, HBITMAP b, ULONG c)
 inline BOOL _DdfEndList(HDDF a)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DdfEndList(a);
     SetFS(sel);
@@ -12743,7 +12743,7 @@ inline BOOL _DdfEndList(HDDF a)
 inline BOOL _DdfHyperText(HDDF a, PCSZ b, PCSZ c, ULONG d)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DdfHyperText(a, b, c, d);
     SetFS(sel);
@@ -12757,7 +12757,7 @@ inline BOOL _DdfHyperText(HDDF a, PCSZ b, PCSZ c, ULONG d)
 inline BOOL _DdfInform(HDDF a, PCSZ b, ULONG c)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DdfInform(a, b, c);
     SetFS(sel);
@@ -12771,7 +12771,7 @@ inline BOOL _DdfInform(HDDF a, PCSZ b, ULONG c)
 inline HDDF _DdfInitialize(HWND a, ULONG b, ULONG c)
 {
  HDDF yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DdfInitialize(a, b, c);
     SetFS(sel);
@@ -12785,7 +12785,7 @@ inline HDDF _DdfInitialize(HWND a, ULONG b, ULONG c)
 inline BOOL _DdfListItem(HDDF a, PCSZ b, PCSZ c)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DdfListItem(a, b, c);
     SetFS(sel);
@@ -12799,7 +12799,7 @@ inline BOOL _DdfListItem(HDDF a, PCSZ b, PCSZ c)
 inline BOOL _DdfMetafile(HDDF a, HMF b, PRECTL c)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DdfMetafile(a, b, c);
     SetFS(sel);
@@ -12813,7 +12813,7 @@ inline BOOL _DdfMetafile(HDDF a, HMF b, PRECTL c)
 inline BOOL _DdfPara(HDDF a)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DdfPara(a);
     SetFS(sel);
@@ -12827,7 +12827,7 @@ inline BOOL _DdfPara(HDDF a)
 inline BOOL _DdfSetColor(HDDF a, COLOR b, COLOR c)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DdfSetColor(a, b, c);
     SetFS(sel);
@@ -12841,7 +12841,7 @@ inline BOOL _DdfSetColor(HDDF a, COLOR b, COLOR c)
 inline BOOL _DdfSetFont(HDDF a, PCSZ b, ULONG c, ULONG d)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DdfSetFont(a, b, c, d);
     SetFS(sel);
@@ -12855,7 +12855,7 @@ inline BOOL _DdfSetFont(HDDF a, PCSZ b, ULONG c, ULONG d)
 inline BOOL _DdfSetFontStyle(HDDF a, ULONG b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DdfSetFontStyle(a, b);
     SetFS(sel);
@@ -12869,7 +12869,7 @@ inline BOOL _DdfSetFontStyle(HDDF a, ULONG b)
 inline BOOL _DdfSetFormat(HDDF a, ULONG b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DdfSetFormat(a, b);
     SetFS(sel);
@@ -12883,7 +12883,7 @@ inline BOOL _DdfSetFormat(HDDF a, ULONG b)
 inline BOOL _DdfSetTextAlign(HDDF a, ULONG b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DdfSetTextAlign(a, b);
     SetFS(sel);
@@ -12897,7 +12897,7 @@ inline BOOL _DdfSetTextAlign(HDDF a, ULONG b)
 inline BOOL _DdfText(HDDF a, PCSZ b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DdfText(a, b);
     SetFS(sel);
@@ -12913,7 +12913,7 @@ inline BOOL _DdfText(HDDF a, PCSZ b)
 inline USHORT _VioAssociate(HDC a, HVPS b)
 {
  USHORT yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = VIO16ASSOCIATE(a, b);
     SetFS(sel);
@@ -12927,7 +12927,7 @@ inline USHORT _VioAssociate(HDC a, HVPS b)
 inline USHORT _VioCreateLogFont(PFATTRS a, LONG b, PSTR8 c, HVPS d)
 {
  USHORT yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = VIO16CREATELOGFONT(a, b, c, d);
     SetFS(sel);
@@ -12941,7 +12941,7 @@ inline USHORT _VioCreateLogFont(PFATTRS a, LONG b, PSTR8 c, HVPS d)
 inline USHORT _VioCreatePS(PHVPS a, SHORT b, SHORT c, SHORT d, SHORT e, HVPS f)
 {
  USHORT yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = VIO16CREATEPS(a, b, c, d, e, f);
     SetFS(sel);
@@ -12955,7 +12955,7 @@ inline USHORT _VioCreatePS(PHVPS a, SHORT b, SHORT c, SHORT d, SHORT e, HVPS f)
 inline USHORT _VioDeleteSetId(LONG a, HVPS b)
 {
  USHORT yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = VIO16DELETESETID(a, b);
     SetFS(sel);
@@ -12969,7 +12969,7 @@ inline USHORT _VioDeleteSetId(LONG a, HVPS b)
 inline USHORT _VioDestroyPS(HVPS a)
 {
  USHORT yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = VIO16DESTROYPS(a);
     SetFS(sel);
@@ -12983,7 +12983,7 @@ inline USHORT _VioDestroyPS(HVPS a)
 inline USHORT _VioGetDeviceCellSize(PSHORT a, PSHORT b, HVPS c)
 {
  USHORT yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = VIO16GETDEVICECELLSIZE(a, b, c);
     SetFS(sel);
@@ -12997,7 +12997,7 @@ inline USHORT _VioGetDeviceCellSize(PSHORT a, PSHORT b, HVPS c)
 inline USHORT _VioGetOrg(PSHORT a, PSHORT b, HVPS c)
 {
  USHORT yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = VIO16GETORG(a, b, c);
     SetFS(sel);
@@ -13011,7 +13011,7 @@ inline USHORT _VioGetOrg(PSHORT a, PSHORT b, HVPS c)
 inline USHORT _VioQueryFonts(PLONG a, PFONTMETRICS b, LONG c, PLONG d, PSZ e, ULONG f, HVPS g)
 {
  USHORT yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = VIO16QUERYFONTS(a, b, c, d, e, f, g);
     SetFS(sel);
@@ -13025,7 +13025,7 @@ inline USHORT _VioQueryFonts(PLONG a, PFONTMETRICS b, LONG c, PLONG d, PSZ e, UL
 inline USHORT _VioQuerySetIds(PLONG a, PSTR8 b, PLONG c, LONG d, HVPS e)
 {
  USHORT yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = VIO16QUERYSETIDS(a, b, c, d, e);
     SetFS(sel);
@@ -13039,7 +13039,7 @@ inline USHORT _VioQuerySetIds(PLONG a, PSTR8 b, PLONG c, LONG d, HVPS e)
 inline USHORT _VioSetDeviceCellSize(SHORT a, SHORT b, HVPS c)
 {
  USHORT yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = VIO16SETDEVICECELLSIZE(a, b, c);
     SetFS(sel);
@@ -13053,7 +13053,7 @@ inline USHORT _VioSetDeviceCellSize(SHORT a, SHORT b, HVPS c)
 inline USHORT _VioSetOrg(SHORT a, SHORT b, HVPS c)
 {
  USHORT yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = VIO16SETORG(a, b, c);
     SetFS(sel);
@@ -13067,7 +13067,7 @@ inline USHORT _VioSetOrg(SHORT a, SHORT b, HVPS c)
 inline USHORT _VioShowPS(SHORT a, SHORT b, SHORT c, HVPS d)
 {
  USHORT yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = VIO16SHOWPS(a, b, c, d);
     SetFS(sel);
@@ -13081,7 +13081,7 @@ inline USHORT _VioShowPS(SHORT a, SHORT b, SHORT c, HVPS d)
 inline MRESULT _WinDefAVioWindowProc(HWND a, USHORT b, ULONG c, ULONG d)
 {
  MRESULT yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinDefAVioWindowProc(a, b, c, d);
     SetFS(sel);
@@ -13097,7 +13097,7 @@ inline MRESULT _WinDefAVioWindowProc(HWND a, USHORT b, ULONG c, ULONG d)
 inline USHORT _KbdCharIn(PKBDKEYINFO a, USHORT b, HKBD c)
 {
  USHORT yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = KbdCharIn(a, b, c);
     SetFS(sel);
@@ -13111,7 +13111,7 @@ inline USHORT _KbdCharIn(PKBDKEYINFO a, USHORT b, HKBD c)
 inline USHORT _KbdClose(HKBD a)
 {
  USHORT yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = KbdClose(a);
     SetFS(sel);
@@ -13125,7 +13125,7 @@ inline USHORT _KbdClose(HKBD a)
 inline USHORT _KbdDeRegister()
 {
  USHORT yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = KbdDeRegister();
     SetFS(sel);
@@ -13139,7 +13139,7 @@ inline USHORT _KbdDeRegister()
 inline USHORT _KbdFlushBuffer(HKBD a)
 {
  USHORT yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = KbdFlushBuffer(a);
     SetFS(sel);
@@ -13153,7 +13153,7 @@ inline USHORT _KbdFlushBuffer(HKBD a)
 inline USHORT _KbdFreeFocus(HKBD a)
 {
  USHORT yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = KbdFreeFocus(a);
     SetFS(sel);
@@ -13167,7 +13167,7 @@ inline USHORT _KbdFreeFocus(HKBD a)
 inline USHORT _KbdGetCp(ULONG a, PUSHORT b, HKBD c)
 {
  USHORT yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = KbdGetCp(a, b, c);
     SetFS(sel);
@@ -13181,7 +13181,7 @@ inline USHORT _KbdGetCp(ULONG a, PUSHORT b, HKBD c)
 inline USHORT _KbdGetFocus(USHORT a, HKBD b)
 {
  USHORT yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = KbdGetFocus(a, b);
     SetFS(sel);
@@ -13195,7 +13195,7 @@ inline USHORT _KbdGetFocus(USHORT a, HKBD b)
 inline USHORT _KbdGetHWID(PKBDHWID a, HKBD b)
 {
  USHORT yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = KbdGetHWID(a, b);
     SetFS(sel);
@@ -13209,7 +13209,7 @@ inline USHORT _KbdGetHWID(PKBDHWID a, HKBD b)
 inline USHORT _KbdGetStatus(PKBDINFO a, HKBD b)
 {
  USHORT yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = KbdGetStatus(a, b);
     SetFS(sel);
@@ -13223,7 +13223,7 @@ inline USHORT _KbdGetStatus(PKBDINFO a, HKBD b)
 inline USHORT _KbdOpen(PHKBD a)
 {
  USHORT yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = KbdOpen(a);
     SetFS(sel);
@@ -13237,7 +13237,7 @@ inline USHORT _KbdOpen(PHKBD a)
 inline USHORT _KbdPeek(PKBDKEYINFO a, HKBD b)
 {
  USHORT yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = KbdPeek(a, b);
     SetFS(sel);
@@ -13251,7 +13251,7 @@ inline USHORT _KbdPeek(PKBDKEYINFO a, HKBD b)
 inline USHORT _KbdRegister(PSZ a, PSZ b, ULONG c)
 {
  USHORT yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = KbdRegister(a, b, c);
     SetFS(sel);
@@ -13265,7 +13265,7 @@ inline USHORT _KbdRegister(PSZ a, PSZ b, ULONG c)
 inline USHORT _KbdSetCp(USHORT a, USHORT b, HKBD c)
 {
  USHORT yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = KbdSetCp(a, b, c);
     SetFS(sel);
@@ -13279,7 +13279,7 @@ inline USHORT _KbdSetCp(USHORT a, USHORT b, HKBD c)
 inline USHORT _KbdSetCustXt(PUSHORT a, HKBD b)
 {
  USHORT yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = KbdSetCustXt(a, b);
     SetFS(sel);
@@ -13293,7 +13293,7 @@ inline USHORT _KbdSetCustXt(PUSHORT a, HKBD b)
 inline USHORT _KbdSetFgnd()
 {
  USHORT yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = KbdSetFgnd();
     SetFS(sel);
@@ -13307,7 +13307,7 @@ inline USHORT _KbdSetFgnd()
 inline USHORT _KbdSetHWID(PKBDHWID a, HKBD b)
 {
  USHORT yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = KbdSetHWID(a, b);
     SetFS(sel);
@@ -13321,7 +13321,7 @@ inline USHORT _KbdSetHWID(PKBDHWID a, HKBD b)
 inline USHORT _KbdSetStatus(PKBDINFO a, HKBD b)
 {
  USHORT yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = KbdSetStatus(a, b);
     SetFS(sel);
@@ -13335,7 +13335,7 @@ inline USHORT _KbdSetStatus(PKBDINFO a, HKBD b)
 inline USHORT _KbdStringIn(PCH a, PSTRINGINBUF b, USHORT c, HKBD d)
 {
  USHORT yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = KbdStringIn(a, b, c, d);
     SetFS(sel);
@@ -13349,7 +13349,7 @@ inline USHORT _KbdStringIn(PCH a, PSTRINGINBUF b, USHORT c, HKBD d)
 inline USHORT _KbdSynch(USHORT a)
 {
  USHORT yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = KbdSynch(a);
     SetFS(sel);
@@ -13363,7 +13363,7 @@ inline USHORT _KbdSynch(USHORT a)
 inline USHORT _KbdXlate(PKBDTRANS a, HKBD b)
 {
  USHORT yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = KbdXlate(a, b);
     SetFS(sel);
@@ -13379,7 +13379,7 @@ inline USHORT _KbdXlate(PKBDTRANS a, HKBD b)
 inline USHORT _VioCheckCharType(PUSHORT a, USHORT b, USHORT c, HVIO d)
 {
  USHORT yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = VIO16CHECKCHARTYPE(a, b, c, d);
     SetFS(sel);
@@ -13393,7 +13393,7 @@ inline USHORT _VioCheckCharType(PUSHORT a, USHORT b, USHORT c, HVIO d)
 inline USHORT _VioDeRegister()
 {
  USHORT yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = VIO16DEREGISTER();
     SetFS(sel);
@@ -13407,7 +13407,7 @@ inline USHORT _VioDeRegister()
 inline USHORT _VioEndPopUp(HVIO a)
 {
  USHORT yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = VIO16ENDPOPUP(a);
     SetFS(sel);
@@ -13421,7 +13421,7 @@ inline USHORT _VioEndPopUp(HVIO a)
 inline USHORT _VioGetAnsi(PUSHORT a, HVIO b)
 {
  USHORT yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = VIO16GETANSI(a, b);
     SetFS(sel);
@@ -13435,7 +13435,7 @@ inline USHORT _VioGetAnsi(PUSHORT a, HVIO b)
 inline USHORT _VioGetBuf(PULONG a, PUSHORT b, HVIO c)
 {
  USHORT yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = VIO16GETBUF(a, b, c);
     SetFS(sel);
@@ -13449,7 +13449,7 @@ inline USHORT _VioGetBuf(PULONG a, PUSHORT b, HVIO c)
 inline USHORT _VioGetConfig(USHORT a, PVIOCONFIGINFO b, HVIO c)
 {
  USHORT yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = VIO16GETCONFIG(a, b, c);
     SetFS(sel);
@@ -13463,7 +13463,7 @@ inline USHORT _VioGetConfig(USHORT a, PVIOCONFIGINFO b, HVIO c)
 inline USHORT _VioGetCp(USHORT a, PUSHORT b, HVIO c)
 {
  USHORT yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = VIO16GETCP(a, b, c);
     SetFS(sel);
@@ -13477,7 +13477,7 @@ inline USHORT _VioGetCp(USHORT a, PUSHORT b, HVIO c)
 inline USHORT _VioGetCurPos(PUSHORT a, PUSHORT b, HVIO c)
 {
  USHORT yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = VIO16GETCURPOS(a, b, c);
     SetFS(sel);
@@ -13491,7 +13491,7 @@ inline USHORT _VioGetCurPos(PUSHORT a, PUSHORT b, HVIO c)
 inline USHORT _VioGetCurType(PVIOCURSORINFO a, HVIO b)
 {
  USHORT yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = VIO16GETCURTYPE(a, b);
     SetFS(sel);
@@ -13505,7 +13505,7 @@ inline USHORT _VioGetCurType(PVIOCURSORINFO a, HVIO b)
 inline USHORT _VioGetFont(PVIOFONTINFO a, HVIO b)
 {
  USHORT yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = VIO16GETFONT(a, b);
     SetFS(sel);
@@ -13519,7 +13519,7 @@ inline USHORT _VioGetFont(PVIOFONTINFO a, HVIO b)
 inline USHORT _VioGetMode(PVIOMODEINFO a, HVIO b)
 {
  USHORT yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = VIO16GETMODE(a, b);
     SetFS(sel);
@@ -13533,7 +13533,7 @@ inline USHORT _VioGetMode(PVIOMODEINFO a, HVIO b)
 inline USHORT _VioGetPhysBuf(PVIOPHYSBUF a, USHORT b)
 {
  USHORT yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = VIO16GETPHYSBUF(a, b);
     SetFS(sel);
@@ -13547,7 +13547,7 @@ inline USHORT _VioGetPhysBuf(PVIOPHYSBUF a, USHORT b)
 inline USHORT _VioGetState(PVOID a, HVIO b)
 {
  USHORT yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = VIO16GETSTATE(a, b);
     SetFS(sel);
@@ -13561,7 +13561,7 @@ inline USHORT _VioGetState(PVOID a, HVIO b)
 inline USHORT _VioModeUndo(USHORT a, USHORT b, USHORT c)
 {
  USHORT yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = VIO16MODEUNDO(a, b, c);
     SetFS(sel);
@@ -13575,7 +13575,7 @@ inline USHORT _VioModeUndo(USHORT a, USHORT b, USHORT c)
 inline USHORT _VioModeWait(USHORT a, PUSHORT b, USHORT c)
 {
  USHORT yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = VIO16MODEWAIT(a, b, c);
     SetFS(sel);
@@ -13589,7 +13589,7 @@ inline USHORT _VioModeWait(USHORT a, PUSHORT b, USHORT c)
 inline USHORT _VioPopUp(PUSHORT a, HVIO b)
 {
  USHORT yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = VIO16POPUP(a, b);
     SetFS(sel);
@@ -13603,7 +13603,7 @@ inline USHORT _VioPopUp(PUSHORT a, HVIO b)
 inline USHORT _VioPrtSc(HVIO a)
 {
  USHORT yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = VIO16PRTSC(a);
     SetFS(sel);
@@ -13617,7 +13617,7 @@ inline USHORT _VioPrtSc(HVIO a)
 inline USHORT _VioPrtScToggle(HVIO a)
 {
  USHORT yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = VIO16PRTSCTOGGLE(a);
     SetFS(sel);
@@ -13631,7 +13631,7 @@ inline USHORT _VioPrtScToggle(HVIO a)
 inline USHORT _VioReadCellStr(PCH a, PUSHORT b, USHORT c, USHORT d, HVIO e)
 {
  USHORT yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = VIO16READCELLSTR(a, b, c, d, e);
     SetFS(sel);
@@ -13645,7 +13645,7 @@ inline USHORT _VioReadCellStr(PCH a, PUSHORT b, USHORT c, USHORT d, HVIO e)
 inline USHORT _VioReadCharStr(PCH a, PUSHORT b, USHORT c, USHORT d, HVIO e)
 {
  USHORT yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = VIO16READCHARSTR(a, b, c, d, e);
     SetFS(sel);
@@ -13659,7 +13659,7 @@ inline USHORT _VioReadCharStr(PCH a, PUSHORT b, USHORT c, USHORT d, HVIO e)
 inline USHORT _VioRegister(PSZ a, PSZ b, ULONG c, ULONG d)
 {
  USHORT yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = VIO16REGISTER(a, b, c, d);
     SetFS(sel);
@@ -13673,7 +13673,7 @@ inline USHORT _VioRegister(PSZ a, PSZ b, ULONG c, ULONG d)
 inline USHORT _VioSavRedrawUndo(USHORT a, USHORT b, USHORT c)
 {
  USHORT yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = VIO16SAVREDRAWUNDO(a, b, c);
     SetFS(sel);
@@ -13687,7 +13687,7 @@ inline USHORT _VioSavRedrawUndo(USHORT a, USHORT b, USHORT c)
 inline USHORT _VioSavRedrawWait(USHORT a, PUSHORT b, USHORT c)
 {
  USHORT yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = VIO16SAVREDRAWWAIT(a, b, c);
     SetFS(sel);
@@ -13701,7 +13701,7 @@ inline USHORT _VioSavRedrawWait(USHORT a, PUSHORT b, USHORT c)
 inline USHORT _VioScrLock(USHORT a, PUCHAR b, HVIO c)
 {
  USHORT yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = VIO16SCRLOCK(a, b, c);
     SetFS(sel);
@@ -13715,7 +13715,7 @@ inline USHORT _VioScrLock(USHORT a, PUCHAR b, HVIO c)
 inline USHORT _VioScrollDn(USHORT a, USHORT b, USHORT c, USHORT d, USHORT e, PBYTE f, HVIO g)
 {
  USHORT yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = VIO16SCROLLDN(a, b, c, d, e, f, g);
     SetFS(sel);
@@ -13729,7 +13729,7 @@ inline USHORT _VioScrollDn(USHORT a, USHORT b, USHORT c, USHORT d, USHORT e, PBY
 inline USHORT _VioScrollLf(USHORT a, USHORT b, USHORT c, USHORT d, USHORT e, PBYTE f, HVIO g)
 {
  USHORT yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = VIO16SCROLLLF(a, b, c, d, e, f, g);
     SetFS(sel);
@@ -13743,7 +13743,7 @@ inline USHORT _VioScrollLf(USHORT a, USHORT b, USHORT c, USHORT d, USHORT e, PBY
 inline USHORT _VioScrollRt(USHORT a, USHORT b, USHORT c, USHORT d, USHORT e, PBYTE f, HVIO g)
 {
  USHORT yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = VIO16SCROLLRT(a, b, c, d, e, f, g);
     SetFS(sel);
@@ -13757,7 +13757,7 @@ inline USHORT _VioScrollRt(USHORT a, USHORT b, USHORT c, USHORT d, USHORT e, PBY
 inline USHORT _VioScrollUp(USHORT a, USHORT b, USHORT c, USHORT d, USHORT e, PBYTE f, HVIO g)
 {
  USHORT yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = VIO16SCROLLUP(a, b, c, d, e, f, g);
     SetFS(sel);
@@ -13771,7 +13771,7 @@ inline USHORT _VioScrollUp(USHORT a, USHORT b, USHORT c, USHORT d, USHORT e, PBY
 inline USHORT _VioScrUnLock(HVIO a)
 {
  USHORT yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = VIO16SCRUNLOCK(a);
     SetFS(sel);
@@ -13785,7 +13785,7 @@ inline USHORT _VioScrUnLock(HVIO a)
 inline USHORT _VioSetAnsi(USHORT a, HVIO b)
 {
  USHORT yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = VIO16SETANSI(a, b);
     SetFS(sel);
@@ -13799,7 +13799,7 @@ inline USHORT _VioSetAnsi(USHORT a, HVIO b)
 inline USHORT _VioSetCp(USHORT a, USHORT b, HVIO c)
 {
  USHORT yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = VIO16SETCP(a, b, c);
     SetFS(sel);
@@ -13813,7 +13813,7 @@ inline USHORT _VioSetCp(USHORT a, USHORT b, HVIO c)
 inline USHORT _VioSetCurPos(USHORT a, USHORT b, HVIO c)
 {
  USHORT yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = VIO16SETCURPOS(a, b, c);
     SetFS(sel);
@@ -13827,7 +13827,7 @@ inline USHORT _VioSetCurPos(USHORT a, USHORT b, HVIO c)
 inline USHORT _VioSetCurType(PVIOCURSORINFO a, HVIO b)
 {
  USHORT yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = VIO16SETCURTYPE(a, b);
     SetFS(sel);
@@ -13841,7 +13841,7 @@ inline USHORT _VioSetCurType(PVIOCURSORINFO a, HVIO b)
 inline USHORT _VioSetFont(PVIOFONTINFO a, HVIO b)
 {
  USHORT yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = VIO16SETFONT(a, b);
     SetFS(sel);
@@ -13855,7 +13855,7 @@ inline USHORT _VioSetFont(PVIOFONTINFO a, HVIO b)
 inline USHORT _VioSetMode(PVIOMODEINFO a, HVIO b)
 {
  USHORT yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = VIO16SETMODE(a, b);
     SetFS(sel);
@@ -13869,7 +13869,7 @@ inline USHORT _VioSetMode(PVIOMODEINFO a, HVIO b)
 inline USHORT _VioSetState(PVOID a, HVIO b)
 {
  USHORT yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = VIO16SETSTATE(a, b);
     SetFS(sel);
@@ -13883,7 +13883,7 @@ inline USHORT _VioSetState(PVOID a, HVIO b)
 inline USHORT _VioShowBuf(USHORT a, USHORT b, HVIO c)
 {
  USHORT yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = VIO16SHOWBUF(a, b, c);
     SetFS(sel);
@@ -13897,7 +13897,7 @@ inline USHORT _VioShowBuf(USHORT a, USHORT b, HVIO c)
 inline USHORT _VioWrtCellStr(PCH a, USHORT b, USHORT c, USHORT d, HVIO e)
 {
  USHORT yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = VIO16WRTCELLSTR(a, b, c, d, e);
     SetFS(sel);
@@ -13911,7 +13911,7 @@ inline USHORT _VioWrtCellStr(PCH a, USHORT b, USHORT c, USHORT d, HVIO e)
 inline USHORT _VioWrtCharStr(PCH a, USHORT b, USHORT c, USHORT d, HVIO e)
 {
  USHORT yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = VIO16WRTCHARSTR(a, b, c, d, e);
     SetFS(sel);
@@ -13925,7 +13925,7 @@ inline USHORT _VioWrtCharStr(PCH a, USHORT b, USHORT c, USHORT d, HVIO e)
 inline USHORT _VioWrtCharStrAtt(PCH a, USHORT b, USHORT c, USHORT d, PBYTE e, HVIO f)
 {
  USHORT yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = VIO16WRTCHARSTRATT(a, b, c, d, e, f);
     SetFS(sel);
@@ -13939,7 +13939,7 @@ inline USHORT _VioWrtCharStrAtt(PCH a, USHORT b, USHORT c, USHORT d, PBYTE e, HV
 inline USHORT _VioWrtNAttr(PBYTE a, USHORT b, USHORT c, USHORT d, HVIO e)
 {
  USHORT yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = VIO16WRTNATTR(a, b, c, d, e);
     SetFS(sel);
@@ -13953,7 +13953,7 @@ inline USHORT _VioWrtNAttr(PBYTE a, USHORT b, USHORT c, USHORT d, HVIO e)
 inline USHORT _VioWrtNCell(PBYTE a, USHORT b, USHORT c, USHORT d, HVIO e)
 {
  USHORT yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = VIO16WRTNCELL(a, b, c, d, e);
     SetFS(sel);
@@ -13967,7 +13967,7 @@ inline USHORT _VioWrtNCell(PBYTE a, USHORT b, USHORT c, USHORT d, HVIO e)
 inline USHORT _VioWrtNChar(PCH a, USHORT b, USHORT c, USHORT d, HVIO e)
 {
  USHORT yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = VIO16WRTNCHAR(a, b, c, d, e);
     SetFS(sel);
@@ -13981,7 +13981,7 @@ inline USHORT _VioWrtNChar(PCH a, USHORT b, USHORT c, USHORT d, HVIO e)
 inline USHORT _VioWrtTTY(PCH a, USHORT b, HVIO c)
 {
  USHORT yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = VIO16WRTTTY(a, b, c);
     SetFS(sel);
@@ -13997,7 +13997,7 @@ inline USHORT _VioWrtTTY(PCH a, USHORT b, HVIO c)
 inline USHORT _MouClose(HMOU a)
 {
  USHORT yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = MOU16CLOSE(a);
     SetFS(sel);
@@ -14011,7 +14011,7 @@ inline USHORT _MouClose(HMOU a)
 inline USHORT _MouDeRegister()
 {
  USHORT yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = MOU16DEREGISTER();
     SetFS(sel);
@@ -14025,7 +14025,7 @@ inline USHORT _MouDeRegister()
 inline USHORT _MouDrawPtr(HMOU a)
 {
  USHORT yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = MOU16DRAWPTR(a);
     SetFS(sel);
@@ -14039,7 +14039,7 @@ inline USHORT _MouDrawPtr(HMOU a)
 inline USHORT _MouFlushQue(HMOU a)
 {
  USHORT yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = MOU16FLUSHQUE(a);
     SetFS(sel);
@@ -14053,7 +14053,7 @@ inline USHORT _MouFlushQue(HMOU a)
 inline USHORT _MouGetDevStatus(PUSHORT a, HMOU b)
 {
  USHORT yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = MOU16GETDEVSTATUS(a, b);
     SetFS(sel);
@@ -14067,7 +14067,7 @@ inline USHORT _MouGetDevStatus(PUSHORT a, HMOU b)
 inline USHORT _MouGetEventMask(PUSHORT a, HMOU b)
 {
  USHORT yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = MOU16GETEVENTMASK(a, b);
     SetFS(sel);
@@ -14081,7 +14081,7 @@ inline USHORT _MouGetEventMask(PUSHORT a, HMOU b)
 inline USHORT _MouGetNumButtons(PUSHORT a, HMOU b)
 {
  USHORT yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = MOU16GETNUMBUTTONS(a, b);
     SetFS(sel);
@@ -14095,7 +14095,7 @@ inline USHORT _MouGetNumButtons(PUSHORT a, HMOU b)
 inline USHORT _MouGetNumMickeys(PUSHORT a, HMOU b)
 {
  USHORT yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = MOU16GETNUMMICKEYS(a, b);
     SetFS(sel);
@@ -14109,7 +14109,7 @@ inline USHORT _MouGetNumMickeys(PUSHORT a, HMOU b)
 inline USHORT _MouGetNumQueEl(PMOUQUEINFO a, HMOU b)
 {
  USHORT yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = MOU16GETNUMQUEEL(a, b);
     SetFS(sel);
@@ -14123,7 +14123,7 @@ inline USHORT _MouGetNumQueEl(PMOUQUEINFO a, HMOU b)
 inline USHORT _MouGetPtrPos(PPTRLOC a, HMOU b)
 {
  USHORT yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = MOU16GETPTRPOS(a, b);
     SetFS(sel);
@@ -14137,7 +14137,7 @@ inline USHORT _MouGetPtrPos(PPTRLOC a, HMOU b)
 inline USHORT _MouGetPtrShape(PBYTE a, PPTRSHAPE b, HMOU c)
 {
  USHORT yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = MOU16GETPTRSHAPE(a, b, c);
     SetFS(sel);
@@ -14151,7 +14151,7 @@ inline USHORT _MouGetPtrShape(PBYTE a, PPTRSHAPE b, HMOU c)
 inline USHORT _MouGetScaleFact(PSCALEFACT a, HMOU b)
 {
  USHORT yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = MOU16GETSCALEFACT(a, b);
     SetFS(sel);
@@ -14165,7 +14165,7 @@ inline USHORT _MouGetScaleFact(PSCALEFACT a, HMOU b)
 inline USHORT _MouGetThreshold(PTHRESHOLD a, HMOU b)
 {
  USHORT yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = MOU16GETTHRESHOLD(a, b);
     SetFS(sel);
@@ -14179,7 +14179,7 @@ inline USHORT _MouGetThreshold(PTHRESHOLD a, HMOU b)
 inline USHORT _MouInitReal(PSZ a)
 {
  USHORT yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = MOU16INITREAL(a);
     SetFS(sel);
@@ -14193,7 +14193,7 @@ inline USHORT _MouInitReal(PSZ a)
 inline USHORT _MouOpen(PSZ a, PHMOU b)
 {
  USHORT yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = MOU16OPEN(a, b);
     SetFS(sel);
@@ -14207,7 +14207,7 @@ inline USHORT _MouOpen(PSZ a, PHMOU b)
 inline USHORT _MouReadEventQue(PMOUEVENTINFO a, PUSHORT b, HMOU c)
 {
  USHORT yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = MOU16READEVENTQUE(a, b, c);
     SetFS(sel);
@@ -14221,7 +14221,7 @@ inline USHORT _MouReadEventQue(PMOUEVENTINFO a, PUSHORT b, HMOU c)
 inline USHORT _MouRegister(PSZ a, PSZ b, ULONG c)
 {
  USHORT yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = MOU16REGISTER(a, b, c);
     SetFS(sel);
@@ -14235,7 +14235,7 @@ inline USHORT _MouRegister(PSZ a, PSZ b, ULONG c)
 inline USHORT _MouRemovePtr(PNOPTRRECT a, HMOU b)
 {
  USHORT yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = MOU16REMOVEPTR(a, b);
     SetFS(sel);
@@ -14249,7 +14249,7 @@ inline USHORT _MouRemovePtr(PNOPTRRECT a, HMOU b)
 inline USHORT _MouSetDevStatus(PUSHORT a, HMOU b)
 {
  USHORT yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = MOU16SETDEVSTATUS(a, b);
     SetFS(sel);
@@ -14263,7 +14263,7 @@ inline USHORT _MouSetDevStatus(PUSHORT a, HMOU b)
 inline USHORT _MouSetEventMask(PUSHORT a, HMOU b)
 {
  USHORT yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = MOU16SETEVENTMASK(a, b);
     SetFS(sel);
@@ -14277,7 +14277,7 @@ inline USHORT _MouSetEventMask(PUSHORT a, HMOU b)
 inline USHORT _MouSetPtrPos(PPTRLOC a, HMOU b)
 {
  USHORT yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = MOU16SETPTRPOS(a, b);
     SetFS(sel);
@@ -14291,7 +14291,7 @@ inline USHORT _MouSetPtrPos(PPTRLOC a, HMOU b)
 inline USHORT _MouSetPtrShape(PBYTE a, PPTRSHAPE b, HMOU c)
 {
  USHORT yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = MOU16SETPTRSHAPE(a, b, c);
     SetFS(sel);
@@ -14305,7 +14305,7 @@ inline USHORT _MouSetPtrShape(PBYTE a, PPTRSHAPE b, HMOU c)
 inline USHORT _MouSetScaleFact(PSCALEFACT a, HMOU b)
 {
  USHORT yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = MOU16SETSCALEFACT(a, b);
     SetFS(sel);
@@ -14319,7 +14319,7 @@ inline USHORT _MouSetScaleFact(PSCALEFACT a, HMOU b)
 inline USHORT _MouSetThreshold(PTHRESHOLD a, HMOU b)
 {
  USHORT yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = MOU16SETTHRESHOLD(a, b);
     SetFS(sel);
@@ -14333,7 +14333,7 @@ inline USHORT _MouSetThreshold(PTHRESHOLD a, HMOU b)
 inline USHORT _MouSynch(USHORT a)
 {
  USHORT yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = MOU16SYNCH(a);
     SetFS(sel);

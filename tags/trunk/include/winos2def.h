@@ -1,4 +1,4 @@
-/* $Id: winos2def.h,v 1.5 1999-06-24 08:46:35 sandervl Exp $ */
+/* $Id: winos2def.h,v 1.6 1999-06-26 18:24:23 sandervl Exp $ */
 
 /*
  *
@@ -48,7 +48,7 @@ extern "C" {
 inline BOOL _WinPostMsg(HWND a, ULONG b, MPARAM c, MPARAM d)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = WinPostMsg(a, b, c, d);
     SetFS(sel);
@@ -62,7 +62,7 @@ inline BOOL _WinPostMsg(HWND a, ULONG b, MPARAM c, MPARAM d)
 inline ULONG _DosSleep(ULONG a)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DosSleep(a);
     SetFS(sel);
@@ -109,7 +109,7 @@ extern "C" {
 inline ULONG _DosQueryCtryInfo(ULONG a, PCOUNTRYCODE b, PCOUNTRYINFO c, PULONG d)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = DosQueryCtryInfo(a, b, c, d);
     SetFS(sel);

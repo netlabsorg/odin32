@@ -1,4 +1,4 @@
-/* $Id: wndproc.cpp,v 1.10 1999-06-26 14:09:45 sandervl Exp $ */
+/* $Id: wndproc.cpp,v 1.11 1999-06-26 18:25:08 sandervl Exp $ */
 
 /*
  * Win32 window procedure class for OS/2
@@ -20,6 +20,7 @@
 #include <wndproc.h>
 #include <wndclass.h>
 #include <spy.h>
+#include <wprocess.h>
 #include "dlgconvert.h"
 #include "hooks.h"
 
@@ -288,6 +289,9 @@ LRESULT EXPENTRY_O32 WndCallback(HWND hwnd, UINT Msg, WPARAM wParam, LPARAM lPar
  Win32WindowProc *curwnd;
  LRESULT rc;
 
+  //Restore our FS selector
+  SetWin32TIB();
+
   if(Msg == WM_MOUSEACTIVATE) 
   {
 	//Open32 sends an OS/2 window message for a button click
@@ -301,6 +305,7 @@ LRESULT EXPENTRY_O32 WndCallback(HWND hwnd, UINT Msg, WPARAM wParam, LPARAM lPar
        	dprintf(("Message %s for %X %x %x\n", GetMsgText(Msg), hwnd, wParam, lParam));
 
   if(HkCBT::OS2HkCBTProc(hwnd, Msg, wParam, lParam) == TRUE) {//hook swallowed msg
+	RestoreOS2TIB();
         return(0);
   }
  
@@ -320,14 +325,16 @@ LRESULT EXPENTRY_O32 WndCallback(HWND hwnd, UINT Msg, WPARAM wParam, LPARAM lPar
 		break;
 	case WM_CREATE:  //Open32 isn't sending WM_NCCREATE messages!!
                 if(curwnd->SendMessageA(hwnd, WM_NCCREATE, 0, lParam) == 0) {
-                       dprintf(("WM_NCCREATE returned FALSE\n"));
-                       return(-1); //don't create window
+                       	dprintf(("WM_NCCREATE returned FALSE\n"));
+			RestoreOS2TIB();
+                       	return(-1); //don't create window
                 }
 	
 		NotifyParent(hwnd, WM_CREATE, wParam, lParam);
 //TODO
 #if 0
                 if(curwnd->SendMessageA(hwnd, WM_NCCALCSIZE, 0, lParam) == 0) {
+			RestoreOS2TIB();
                         return(-1); //don't create window
                 }
 #endif
@@ -356,6 +363,7 @@ LRESULT EXPENTRY_O32 WndCallback(HWND hwnd, UINT Msg, WPARAM wParam, LPARAM lPar
                 dprintf(("WM_NCDESTROY received for window/dialog %X\n", curwnd->hwnd));
                 delete curwnd;
         }
+	RestoreOS2TIB();
         return rc;
   }
 
@@ -369,10 +377,13 @@ LRESULT EXPENTRY_O32 WndCallback(HWND hwnd, UINT Msg, WPARAM wParam, LPARAM lPar
         if(wclass) {
                 wnd = new Win32WindowProc(wclass->GetClassCallback(szClass));
                 wnd->SetWindowHandle(hwnd);
-                return(WndCallback(hwnd, Msg, wParam, lParam));
+                rc = WndCallback(hwnd, Msg, wParam, lParam);
+		RestoreOS2TIB();
+		return rc;
         }
   }
   dprintf(("wnd Callback, can't find window %X %d!!!!\n", hwnd, Msg));
+  RestoreOS2TIB();
   return 0;
 }
 //******************************************************************************
