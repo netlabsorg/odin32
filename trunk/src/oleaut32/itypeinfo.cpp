@@ -1,4 +1,4 @@
-/* $Id: itypeinfo.cpp,v 1.2 2000-03-21 08:17:22 davidr Exp $ */
+/* $Id: itypeinfo.cpp,v 1.3 2000-04-05 22:28:47 davidr Exp $ */
 /* 
  * ITypeInfo interface
  * 
@@ -976,7 +976,10 @@ static HRESULT GetAllCustData(oList<TLBCustData *> & list, CUSTDATA *pCustData)
 		    HeapAlloc(GetProcessHeap(), 0, list.Count() * sizeof(CUSTDATAITEM));
 
 	if (!pCustData->prgCustData)
+	{
+	    dprintf(("OLEAUT32: GetAllCustData: E_OUTOFMEMORY"));
 	    return E_OUTOFMEMORY;
+	}
 
 	int		index = 0;
 	oListIter<TLBCustData *>	itrCust(list);

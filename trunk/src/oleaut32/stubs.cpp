@@ -1,4 +1,4 @@
-/* $Id: stubs.cpp,v 1.5 2000-01-05 18:29:54 davidr Exp $ */
+/* $Id: stubs.cpp,v 1.6 2000-04-05 22:28:48 davidr Exp $ */
 /* 
  * Win32 COM/OLE stubs for OS/2
  * 
@@ -9,7 +9,7 @@
  * Project Odin Software License can be found in LICENSE.TXT
  * 
  */
- 
+
 #include "oleaut32.h"
 
 //*****************************************************************************

@@ -1,4 +1,4 @@
-/* $Id: typelib.cpp,v 1.12 2000-03-24 08:34:14 davidr Exp $ */
+/* $Id: typelib.cpp,v 1.13 2000-04-05 22:28:48 davidr Exp $ */
 /* 
  * ITypelib interface
  * 
@@ -259,7 +259,7 @@ HRESULT WINAPI UnRegisterTypeLib(
 // Local functions.
 // ======================================================================
 
-#if defined(DEBUG)
+#if defined(DEBUG2)
 
 // ----------------------------------------------------------------------
 // dprintfLine2
@@ -1099,7 +1099,7 @@ void TypeLibExtract::ParseTypeInfo(ITypeInfoImpl * pTypeInfo, TLBTypeInfoBase * 
 	
     }
 
-#if defined(DEBUG)	    
+#if defined(DEBUG2)	    
     dprintfLine2();
     dprintf((LOG, "TypeInfo        %s", pTypeInfo->szName));
     dprintf((LOG, "  .typeKind:    %08x (%s)", pTypeInfo->TypeAttr.typekind,
@@ -1152,7 +1152,7 @@ void TypeLibExtract::ParseTypeInfo(ITypeInfoImpl * pTypeInfo, TLBTypeInfoBase * 
     // Load Custom data
     ParseCustomData(pBase->oCustData, &pTypeInfo->pCustData);
 
-#if defined(DEBUG)	    
+#if defined(DEBUG2)	    
     dprintfLine();
 #endif
 
@@ -1365,7 +1365,7 @@ void	TypeLibExtract::ParseMembers(ITypeInfoImpl * pTypeInfo, TLBTypeInfoBase * p
 	if (pFuncRec->FKCCIC & 0x80)
 	    ParseCustomData(pCustomOff[0], &pNew->pCustData);
 
-#if defined(DEBUG)
+#if defined(DEBUG2)
 	{
 	dprintfLine();
         char	 buf[1024];
@@ -1415,7 +1415,7 @@ void	TypeLibExtract::ParseMembers(ITypeInfoImpl * pTypeInfo, TLBTypeInfoBase * p
 
 #endif // 0
 	}
-#endif // defined(DEBUG)
+#endif // defined(DEBUG2)
 
         // do the parameters/arguments 
         if (pFuncRec->nrargs)
@@ -1455,7 +1455,7 @@ void	TypeLibExtract::ParseMembers(ITypeInfoImpl * pTypeInfo, TLBTypeInfoBase * p
                 if (pFuncRec->FKCCIC & 0x80)
                     ParseCustomData(pCustomOff[1 + jj], &pNew->pParamDesc[jj].pCustData);
 
-#if defined(DEBUG)
+#if defined(DEBUG2)
 	dprintfLine();
 	dprintf((LOG, "Parameter       \"%s\"\n", pNew->pParamDesc[jj].szName));
 	char	buf[1024];
@@ -1537,7 +1537,7 @@ void	TypeLibExtract::ParseMembers(ITypeInfoImpl * pTypeInfo, TLBTypeInfoBase * p
         else
             V_UNION(&(pNew->vardesc), oInst) = pVarRec->OffsValue;
 
-#if defined(DEBUG)
+#if defined(DEBUG2)
 	{
 	dprintfLine();
         char	 buf[1024];
@@ -1563,7 +1563,7 @@ void	TypeLibExtract::ParseMembers(ITypeInfoImpl * pTypeInfo, TLBTypeInfoBase * p
 
         }
 
-#endif // defined(DEBUG)
+#endif // defined(DEBUG2)
 
 	// Store
 	pTypeInfo->pVariables.AddAtEnd(pNew);
@@ -1730,7 +1730,10 @@ HRESULT TypeLibExtract::MakeITypeLib(ITypeLibImpl * * ppObject)
 
     // Create new typelib object...
     if ((m_pITypeLib = ITypeLibImpl_Constructor()) == 0)
+    {
+	dprintfGlobal(("OLEAUT32: TypeLibExtract::MakeITypeLib: E_OUTOFMEMORY"));
     	return E_OUTOFMEMORY;
+    }
 
     // Parse the typelib into storeage independent format.
     rc = Parse();
@@ -1772,7 +1775,7 @@ HRESULT TypeLibExtract::Parse()
     if (m_pHelpStringOff)
 	ParseString(*m_pHelpStringOff, &m_pITypeLib->szHelpStringDll);
 
-#if defined(DEBUG)
+#if defined(DEBUG2)
 
     dprintfLine2();
     dprintf((LOG, "Library:        \"%s\"", m_pITypeLib->szName));
@@ -1856,7 +1859,7 @@ HRESULT TypeLibExtract::Parse()
 		V_UNION(pNew, hreftype) = MAKELONG(pTd->rec2, pTd->rec3);
 	    }
 
-#if defined(DEBUG)	    
+#if defined(DEBUG2)	    
 	    dprintfLine2();
 	    dprintf((LOG, "TypeDesc:       %i", ii));
 	    char	buf[1024];
@@ -1908,7 +1911,7 @@ HRESULT TypeLibExtract::Parse()
             recLen = (sizeof(TLBImpFile) + size + 3) & 0xfffffffc;
             totLen += recLen;
             pImpFile = (TLBImpFile *)((char *)pImpFile + recLen);
-#if defined(DEBUG)	    
+#if defined(DEBUG2)	    
 	    dprintfLine2();
 	    dprintf((LOG, "ImpLib %i", pNew->offset));
 	    char	guid[128];
