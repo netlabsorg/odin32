@@ -1,4 +1,4 @@
-/* $Id: timer.cpp,v 1.4 1999-09-29 09:31:18 dengert Exp $ */
+/* $Id: timer.cpp,v 1.5 1999-10-22 18:11:47 sandervl Exp $ */
 
 /*
  * timer functions for USER32
@@ -176,12 +176,10 @@ static BOOL TIMER_KillTimer (HWND hwnd, UINT id, BOOL sys)
 UINT WIN32API SetTimer (HWND hwnd, UINT id, UINT timeout, TIMERPROC proc)
 {
     UINT rc;
-    USHORT sel = RestoreOS2FS();
 
     dprintf(("USER32: SetTimer %04x %d %d %08lx", hwnd, id, timeout, (LONG)proc));
 
     rc = TIMER_SetTimer (hwnd, id, timeout, proc, FALSE);
-    SetFS(sel);
     return (rc);
 }
 
@@ -191,12 +189,10 @@ UINT WIN32API SetTimer (HWND hwnd, UINT id, UINT timeout, TIMERPROC proc)
 UINT WIN32API SetSystemTimer (HWND hwnd, UINT id, UINT timeout, TIMERPROC proc)
 {
     UINT rc;
-    USHORT sel = RestoreOS2FS();
 
     dprintf(("USER32: SetSystemTimer %04x %d %d %08lx", hwnd, id, timeout, (LONG)proc));
 
     rc = TIMER_SetTimer (hwnd, id, timeout, proc, TRUE);
-    SetFS(sel);
     return (rc);
 }
 
@@ -206,12 +202,10 @@ UINT WIN32API SetSystemTimer (HWND hwnd, UINT id, UINT timeout, TIMERPROC proc)
 BOOL WIN32API KillTimer (HWND hwnd, UINT id)
 {
     BOOL rc;
-    USHORT sel = RestoreOS2FS();
 
     dprintf(("USER32: KillTimer %04x %d", hwnd, id));
 
     rc = TIMER_KillTimer (hwnd, id, FALSE);
-    SetFS(sel);
     return (rc);
 }
 
@@ -221,12 +215,10 @@ BOOL WIN32API KillTimer (HWND hwnd, UINT id)
 BOOL WIN32API KillSystemTimer (HWND hwnd, UINT id)
 {
     BOOL rc;
-    USHORT sel = RestoreOS2FS();
 
     dprintf(("USER32: KillSystemTimer %04x %d", hwnd, id));
 
     rc = TIMER_KillTimer (hwnd, id, TRUE);
-    SetFS(sel);
     return (rc);
 }
 

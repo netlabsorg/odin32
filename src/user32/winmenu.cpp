@@ -1,4 +1,4 @@
-/* $Id: winmenu.cpp,v 1.7 1999-09-24 12:47:51 sandervl Exp $ */
+/* $Id: winmenu.cpp,v 1.8 1999-10-22 18:11:51 sandervl Exp $ */
 
 /*
  * Win32 menu API functions for OS/2
@@ -295,13 +295,22 @@ ODINFUNCTION7(BOOL, TrackPopupMenu,
               HWND, arg6,
               const RECT *, arg7)
 {
-    dprintf(("USER32:  TrackPopupMenu\n"));
-    if(hMenu == 0)
-    {
-        SetLastError(ERROR_INVALID_PARAMETER);
-        return 0;
-    }
-    return O32_TrackPopupMenu(hMenu, arg2, arg3, arg4, arg5, arg6, arg7);
+  Win32BaseWindow *window;
+
+  window = Win32BaseWindow::GetWindowFromHandle(arg6);
+  if(!window)
+  {
+    dprintf(("TrackPopupMenu, window %x not found", arg6));
+    return 0;
+  }
+  dprintf(("USER32:  TrackPopupMenu\n"));
+  if(hMenu == 0)
+  {
+      SetLastError(ERROR_INVALID_PARAMETER);
+      return 0;
+  }
+  return O32_TrackPopupMenu(hMenu, arg2, arg3, arg4, arg5, window->getOS2WindowHandle(),
+                            arg7);
 }
 //******************************************************************************
 //******************************************************************************
@@ -313,18 +322,26 @@ ODINFUNCTION6(BOOL, TrackPopupMenuEx,
               HWND, hwnd,
               LPTPMPARAMS, lpPM)
 {
- RECT *rect = NULL;
+  RECT *rect = NULL;
+  Win32BaseWindow *window;
 
-    dprintf(("USER32:  TrackPopupMenuEx, not completely implemented\n"));
-    if(lpPM->cbSize != 0)
-        rect = &lpPM->rcExclude;
+  window = Win32BaseWindow::GetWindowFromHandle(hwnd);
+  if(!window)
+  {
+    dprintf(("TrackPopupMenu, window %x not found", hwnd));
+    return 0;
+  }
 
-    if(hMenu == 0)
-    {
-        SetLastError(ERROR_INVALID_PARAMETER);
-        return 0;
-    }
-    return O32_TrackPopupMenu(hMenu, flags, X, Y, 0, hwnd, rect);
+  dprintf(("USER32:  TrackPopupMenuEx, not completely implemented\n"));
+  if(lpPM->cbSize != 0)
+      rect = &lpPM->rcExclude;
+
+  if(hMenu == 0)
+  {
+      SetLastError(ERROR_INVALID_PARAMETER);
+      return 0;
+  }
+  return O32_TrackPopupMenu(hMenu, flags, X, Y, 0, window->getOS2WindowHandle(), rect);
 }
 //******************************************************************************
 //******************************************************************************

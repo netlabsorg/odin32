@@ -1,4 +1,4 @@
-/* $Id: dc.cpp,v 1.16 1999-10-18 11:59:57 sandervl Exp $ */
+/* $Id: dc.cpp,v 1.17 1999-10-22 18:11:43 sandervl Exp $ */
 
 /*
  * DC functions for USER32
@@ -12,19 +12,17 @@
  *****************************************************************************/
 
 #include <odin.h>
-#include <odinwrap.h>
-#include <os2sel.h>
 
 #define INCL_WIN
 #define INCL_GPI
 #define INCL_GREALL
 #define INCL_DEV
-#include <os2.h>
+#include <os2wrap.h>
 #include <pmddi.h>
 #include <stdlib.h>
+
 #include "win32type.h"
 #include <winconst.h>
-#include <wprocess.h>
 #include <misc.h>
 #include <win32wbase.h>
 #include <math.h>
@@ -32,159 +30,11 @@
 #include "oslibwin.h"
 #include "dcdata.h"
 
-ODINDEBUGCHANNEL(USER32-DC)
+#define INCLUDED_BY_DC
+#include "dc.h"
 
 #undef SEVERITY_ERROR
 #include <winerror.h>
-
-#ifndef OPEN32API
-#define OPEN32API _System
-#endif
-
-/*********************/
-typedef struct
-{
-    HDC   hdc;
-    BOOL  fErase;
-    RECT  rcPaint;
-    BOOL  fRestore;
-    BOOL  IncUpdate;
-    BYTE  rgbReserved[32];
-} PAINTSTRUCT_W, *PPAINTSTRUCT_W, *LPPAINTSTRUCT_W;
-
-#define PS_SOLID_W         0x00000000
-#define PS_DASH_W          0x00000001
-#define PS_DOT_W           0x00000002
-#define PS_DASHDOT_W       0x00000003
-#define PS_DASHDOTDOT_W    0x00000004
-#define PS_NULL_W          0x00000005
-#define PS_INSIDEFRAME_W   0x00000006
-#define PS_USERSTYLE_W     0x00000007
-#define PS_ALTERNATE_W     0x00000008
-#define PS_STYLE_MASK_W    0x0000000f
-
-typedef struct
-{
-    UINT   lopnStyle;
-    POINT  lopnWidth;
-    ULONG  lopnColor;
-} LOGPEN_W, *LPLOGPEN_W;
-
-typedef struct tagEXTLOGPEN
-{
-    DWORD elpPenStyle;
-    DWORD elpWidth;
-    DWORD elpBrushStyle;
-    DWORD elpColor;
-    DWORD elpNumEntries;
-    DWORD elpStyleEntry[1];
-} EXTLOGPEN_W, *PEXTLOGPEN_W, *NPEXTLOGPEN_W, *LPEXTLOGPEN_W;
-
-typedef struct
-{
-    UINT   lbStyle;
-    ULONG  lbColor;
-    INT    lbHatch;
-} LOGBRUSH_W, *LPLOGBRUSH_W;
-
-typedef struct _penobject
-{
-   ULONG filler[9];
-   union {
-     struct {
-       PEXTLOGPEN_W      pExtLogPen;
-       LOGBRUSH_W        logbrush;
-       LOGPEN_W          logpen;
-     } ExtPen;
-     struct {
-       LOGPEN_W          logpen;
-     } Pen;
-   };
-} tPenObject, *pPenObject;
-
-/* DC Graphics Mode */
-#define GM_COMPATIBLE_W     1
-#define GM_ADVANCED_W       2
-
-#define DCX_WINDOW_W                    0x00000001L
-#define DCX_CACHE_W                     0x00000002L
-#define DCX_NORESETATTRS_W              0x00000004L
-#define DCX_CLIPCHILDREN_W              0x00000008L
-#define DCX_CLIPSIBLINGS_W              0x00000010L
-#define DCX_PARENTCLIP_W                0x00000020L
-#define DCX_EXCLUDERGN_W                0x00000040L
-#define DCX_INTERSECTRGN_W              0x00000080L
-#define DCX_EXCLUDEUPDATE_W             0x00000100L
-#define DCX_INTERSECTUPDATE_W           0x00000200L
-#define DCX_LOCKWINDOWUPDATE_W          0x00000400L
-#define DCX_VALIDATE_W                  0x00200000L
-
-#define RDW_INVALIDATE_W       0x0001
-#define RDW_INTERNALPAINT_W    0x0002
-#define RDW_ERASE_W            0x0004
-#define RDW_VALIDATE_W         0x0008
-#define RDW_NOINTERNALPAINT_W  0x0010
-#define RDW_NOERASE_W          0x0020
-#define RDW_NOCHILDREN_W       0x0040
-#define RDW_ALLCHILDREN_W      0x0080
-#define RDW_UPDATENOW_W        0x0100
-#define RDW_ERASENOW_W         0x0200
-#define RDW_FRAME_W            0x0400
-#define RDW_NOFRAME_W          0x0800
-
-typedef struct _RGNDATAHEADER_W {
-    DWORD       dwSize;
-    DWORD       iType;
-    DWORD       nCount;
-    DWORD       nRgnSize;
-    RECT        rcBound;
-} RGNDATAHEADER_W, *LPRGNDATAHEADER_W;
-
-typedef struct _RGNDATA_W {
-    RGNDATAHEADER_W     rdh;
-    char                Buffer[1];
-} RGNDATA_W , *PRGNDATA_W , *LPRGNDATA_W ;
-
-
-/* Xform FLAGS */
-#define MWT_IDENTITY_W        1
-#define MWT_LEFTMULTIPLY_W    2
-#define MWT_RIGHTMULTIPLY_W   3
-
-/* Mapping Modes */
-#define MM_TEXT_W             1
-#define MM_LOMETRIC_W         2
-#define MM_HIMETRIC_W         3
-#define MM_LOENGLISH_W        4
-#define MM_HIENGLISH_W        5
-#define MM_TWIPS_W            6
-#define MM_ISOTROPIC_W        7
-#define MM_ANISOTROPIC_W      8
-
-#define RGN_OR_W              2
-
-/* Window scrolling */
-#define SW_SCROLLCHILDREN_W    0x0001
-#define SW_INVALIDATE_W        0x0002
-#define SW_ERASE_W             0x0004
-
-/*********************/
-
-BOOL    APIENTRY GpiEnableYInversion (HPS hps, LONG lHeight);
-LONG    APIENTRY GpiQueryYInversion (HPS hps);
-PVOID   APIENTRY GpiAllocateDCData (HPS GpiH, ULONG size);
-PVOID   APIENTRY GpiQueryDCData (HPS hps);
-HDC     OPEN32API HPSToHDC (HWND hwnd, HPS hps, HDC hdc, PVOID);
-void    OPEN32API DeleteHDC (HDC hdc);
-BOOL    OPEN32API _O32_EndPaint (HWND hwnd, const PAINTSTRUCT_W *lpps);
-int     OPEN32API _O32_GetUpdateRgn (HWND hwnd, HRGN hrgn, BOOL erase);
-ULONG   OPEN32API _O32_GetRegionData (HRGN hrgn, ULONG count, PRGNDATA_W pData);
-BOOL    OPEN32API _O32_DeleteObject (LHANDLE hgdiobj);
-int     OPEN32API _O32_ReleaseDC (HWND hwnd, HDC hdc);
-VOID    OPEN32API _O32_SetLastError( DWORD );
-BOOL    OPEN32API _O32_SetRectRgn (HRGN dest, int left, int top, int right, int bottom);
-int     OPEN32API _O32_CombineRgn (HRGN dest, HRGN src1, HRGN src2, int mode);
-HRGN    OPEN32API _O32_CreateRectRgn (int left, int top, int right, int bottom);
 
 #ifndef DEVESC_SETPS
   #define DEVESC_SETPS  49149L
@@ -268,7 +118,7 @@ int setMapMode(Win32BaseWindow *wnd, pDCData pHps, int mode)
       case MM_ANISOTROPIC_W: flOptions = PU_PELS     ; break;
       case MM_ISOTROPIC_W  : flOptions = PU_LOMETRIC ; break;
       default:
-         _O32_SetLastError (ERROR_INVALID_PARAMETER);
+         O32_SetLastError (ERROR_INVALID_PARAMETER);
          return FALSE;
    }
 
@@ -293,7 +143,7 @@ int setMapMode(Win32BaseWindow *wnd, pDCData pHps, int mode)
 
       if (DevEscape(pHps->hdc ? pHps->hdc : pHps->hps, DEVESC_SETPS, 12, (PBYTE)data, 0, 0) == DEVESC_ERROR)
       {
-         _O32_SetLastError (ERROR_INVALID_PARAMETER);
+         O32_SetLastError (ERROR_INVALID_PARAMETER);
          return 0;
       }
 
@@ -613,7 +463,7 @@ void releaseOwnDC (HDC hps)
          GpiDestroyRegion (pHps->hps, pHps->hrgnHDC);
 
       GpiSetBitmap (pHps->hps, NULL);
-      _O32_DeleteObject (pHps->nullBitmapHandle);
+      O32_DeleteObject (pHps->nullBitmapHandle);
       GpiDestroyPS(pHps->hps);
 
       if (pHps->hdc)
@@ -635,11 +485,10 @@ HDC WIN32API BeginPaint (HWND hWnd, PPAINTSTRUCT_W lpps)
 
    if ( !lpps )
    {
-      _O32_SetLastError (ERROR_INVALID_PARAMETER);
+      O32_SetLastError (ERROR_INVALID_PARAMETER);
       return (HDC)NULLHANDLE;
    }
 
-   USHORT sel = RestoreOS2FS();
    Win32BaseWindow *wnd = Win32BaseWindow::GetWindowFromHandle(hwnd);
 
    if ((hwnd != HWND_DESKTOP) && wnd->isOwnDC())
@@ -648,8 +497,7 @@ HDC WIN32API BeginPaint (HWND hWnd, PPAINTSTRUCT_W lpps)
       pHps = (pDCData)GpiQueryDCData(hPS_ownDC);
       if (!pHps)
       {
-         _O32_SetLastError (ERROR_INVALID_PARAMETER);
-         SetFS(sel);
+         O32_SetLastError (ERROR_INVALID_PARAMETER);
          return (HDC)NULLHANDLE;
       }
    }
@@ -698,8 +546,7 @@ HDC WIN32API BeginPaint (HWND hWnd, PPAINTSTRUCT_W lpps)
 
    WINRECT_FROM_PMRECT(lpps->rcPaint, rect);
 
-   SetFS(sel);
-   _O32_SetLastError(0);
+   O32_SetLastError(0);
    return (HDC)pHps->hps;
 }
 
@@ -710,7 +557,6 @@ dprintf (("USER32: EndPaint(%x)", hwnd));
    if (!pPaint || !pPaint->hdc )
       return TRUE;
 
-   USHORT sel = RestoreOS2FS();
    Win32BaseWindow *wnd = Win32BaseWindow::GetWindowFromHandle(hwnd);
 
    if (!wnd) goto exit;
@@ -726,12 +572,11 @@ dprintf (("USER32: EndPaint(%x)", hwnd));
    }
    else
    {
-       _O32_EndPaint (HWND_DESKTOP, pPaint);
+       O32_EndPaint (HWND_DESKTOP, pPaint);
    }
 
 exit:
-   SetFS(sel);
-   _O32_SetLastError(0);
+   O32_SetLastError(0);
    return TRUE;
 }
 
@@ -739,17 +584,15 @@ BOOL WIN32API GetUpdateRect (HWND hwnd, LPRECT pRect, BOOL erase)
 {
    if (hwnd)
    {
-      _O32_SetLastError (ERROR_INVALID_HANDLE);
+      O32_SetLastError (ERROR_INVALID_HANDLE);
       return FALSE;
    }
 
    RECTL rectl;
-   USHORT sel = RestoreOS2FS();
    Win32BaseWindow *wnd = Win32BaseWindow::GetWindowFromHandle(hwnd);
 
    BOOL updateRegionExists = WinQueryUpdateRect (hwnd, pRect ? &rectl : NULL);
    if (!pRect) {
-      SetFS(sel);
       return (updateRegionExists);
    }
 
@@ -761,8 +604,7 @@ BOOL WIN32API GetUpdateRect (HWND hwnd, LPRECT pRect, BOOL erase)
          pHps = (pDCData)GpiQueryDCData(wnd->getOwnDC());
          if (!pHps)
          {
-            _O32_SetLastError (ERROR_INVALID_HANDLE);
-            SetFS(sel);
+            O32_SetLastError (ERROR_INVALID_HANDLE);
             return FALSE;
          }
          GpiConvert (pHps->hps, CVTC_DEVICE, CVTC_WORLD, 2, (PPOINTL)&rectl);
@@ -786,22 +628,19 @@ BOOL WIN32API GetUpdateRect (HWND hwnd, LPRECT pRect, BOOL erase)
          pRect->left = pRect->top = pRect->right = pRect->bottom = 0;
    }
 
-   SetFS(sel);
    return updateRegionExists;
 }
 
 int WIN32API GetUpdateRgn (HWND hwnd, HRGN hrgn, BOOL erase)
 {
-   USHORT sel = RestoreOS2FS();
    LONG Complexity;
 
-   Complexity = _O32_GetUpdateRgn (hwnd, hrgn, FALSE);
+   Complexity = O32_GetUpdateRgn (hwnd, hrgn, FALSE);
    if (erase && (Complexity > NULLREGION_W)) {
        Win32BaseWindow *wnd = Win32BaseWindow::GetWindowFromHandle(hwnd);
        sendEraseBkgnd (wnd);
    }
 
-   SetFS(sel);
    return Complexity;
 }
 
@@ -813,7 +652,6 @@ int WIN32API GetUpdateRgn (HWND hwnd, HRGN hrgn, BOOL erase)
 
 HDC WIN32API GetDCEx (HWND hwnd, HRGN hrgn, ULONG flags)
 {
-   USHORT sel = RestoreOS2FS();
    Win32BaseWindow *wnd = NULL;
    HWND     hWindow;
    BOOL     success;
@@ -835,10 +673,11 @@ HDC WIN32API GetDCEx (HWND hwnd, HRGN hrgn, ULONG flags)
    else
       hWindow = HWND_DESKTOP;
 
-dprintf (("User32: GetDCEx hwnd %x (%x %x) -> wnd %x", hwnd, hrgn, flags, wnd));
+   dprintf (("User32: GetDCEx hwnd %x (%x %x) -> wnd %x", hwnd, hrgn, flags, wnd));
 
    isWindowOwnDC = (((hWindow == HWND_DESKTOP) ? FALSE : wnd->isOwnDC())
                  && !(flags & DCX_CACHE_W));
+
    if (isWindowOwnDC)
    {
       hps = wnd->getOwnDC();
@@ -856,7 +695,6 @@ dprintf (("User32: GetDCEx hwnd %x (%x %x) -> wnd %x", hwnd, hrgn, flags, wnd));
          setPageXForm (wnd, pHps);
 
          pHps->hdcType = TYPE_1;
-         SetFS(sel);
          return (HDC)hps;
       }
       else
@@ -903,11 +741,11 @@ dprintf (("User32: GetDCEx hwnd %x (%x %x) -> wnd %x", hwnd, hrgn, flags, wnd));
       if (!hrgn)
          goto error;
 
-      BytesNeeded = _O32_GetRegionData (hrgn, 0, NULL);
+      BytesNeeded = O32_GetRegionData (hrgn, 0, NULL);
       RgnData = (PRGNDATA_W)_alloca (BytesNeeded);
       if (RgnData == NULL)
           goto error;
-      _O32_GetRegionData (hrgn, BytesNeeded, RgnData);
+      O32_GetRegionData (hrgn, BytesNeeded, RgnData);
 
       i = RgnData->rdh.nCount;
       pr = (PRECTL)(RgnData->Buffer);
@@ -940,7 +778,6 @@ dprintf (("User32: GetDCEx hwnd %x (%x %x) -> wnd %x", hwnd, hrgn, flags, wnd));
    pHps->hdcType = TYPE_1;
    GpiSetDrawControl (hps, DCTL_DISPLAY, drawingAllowed ? DCTL_ON : DCTL_OFF);
 
-   SetFS(sel);
    return (HDC)pHps->hps;
 
 error:
@@ -959,10 +796,9 @@ error:
       if (pHps->hdc)     DevCloseDC(pHps->hdc);
       if (pHps->hrgnHDC) GpiDestroyRegion(pHps->hps, pHps->hrgnHDC);
 
-      _O32_DeleteObject (pHps->nullBitmapHandle);
+      O32_DeleteObject (pHps->nullBitmapHandle);
    }
-   _O32_SetLastError (ERROR_INVALID_PARAMETER);
-   SetFS(sel);
+   O32_SetLastError (ERROR_INVALID_PARAMETER);
    return NULL;
 }
 
@@ -978,7 +814,6 @@ HDC WIN32API GetWindowDC (HWND hwnd)
 
 int WIN32API ReleaseDC (HWND hwnd, HDC hdc)
 {
-   USHORT sel = RestoreOS2FS();
    BOOL isOwnDC = FALSE;
    int rc;
 
@@ -990,9 +825,8 @@ int WIN32API ReleaseDC (HWND hwnd, HDC hdc)
    if (isOwnDC)
       rc = TRUE;
    else
-      rc = _O32_ReleaseDC (0, hdc);
+      rc = O32_ReleaseDC (0, hdc);
 
-   SetFS(sel);
    dprintf(("ReleaseDC %x %x", hwnd, hdc));
    return (rc);
 }
@@ -1002,7 +836,6 @@ BOOL WIN32API UpdateWindow (HWND hwnd)
    if (!hwnd)
        return FALSE;
 
-   USHORT sel = RestoreOS2FS();
    Win32BaseWindow *wnd = Win32BaseWindow::GetWindowFromHandle (hwnd);
 
    dprintf (("User32: UpdateWindow hwnd %x -> wnd %x", hwnd, wnd));
@@ -1016,7 +849,6 @@ BOOL WIN32API UpdateWindow (HWND hwnd)
    wnd->MsgPaint(0);
 #endif
 
-   SetFS(sel);
    return (TRUE);
 }
 
@@ -1030,21 +862,15 @@ BOOL WIN32API UpdateWindow (HWND hwnd)
 // RDW_ERASENOW
 // RDW_UPDATENOW
 
-ODINFUNCTION4(BOOL,RedrawWindow,HWND,        hwnd,
-                                const RECT*, pRect,
-                                HRGN,        hrgn,
-                                DWORD,       redraw)
+BOOL WIN32API RedrawWindow(HWND hwnd, const RECT* pRect, HRGN hrgn, DWORD redraw)
 {
    Win32BaseWindow *wnd;
 
    if (redraw & (RDW_FRAME_W | RDW_NOFRAME_W))
    {
-      _O32_SetLastError (ERROR_NOT_SUPPORTED);
+      O32_SetLastError (ERROR_NOT_SUPPORTED);
       return FALSE;
    }
-
-//@@@PH   USHORT sel = RestoreOS2FS();
-//@@@PH dprintf(("USER32: RedrawWindow %X, %X %X %X", hwnd, pRect, hrgn, redraw));
 
    if (hwnd == NULLHANDLE)
    {
@@ -1055,8 +881,7 @@ ODINFUNCTION4(BOOL,RedrawWindow,HWND,        hwnd,
       {
          dprintf(("USER32:dc: RedrawWindow can't find desktop window %08xh\n",
                   hwnd));
-         _O32_SetLastError (ERROR_INVALID_PARAMETER);
-//@@@PH         SetFS(sel);
+         O32_SetLastError (ERROR_INVALID_PARAMETER);
          return FALSE;
       }
 
@@ -1069,8 +894,7 @@ ODINFUNCTION4(BOOL,RedrawWindow,HWND,        hwnd,
       {
          dprintf(("USER32:dc: RedrawWindow can't find window %08xh\n",
                   hwnd));
-         _O32_SetLastError (ERROR_INVALID_PARAMETER);
-//@@@PH         SetFS(sel);
+         O32_SetLastError (ERROR_INVALID_PARAMETER);
          return FALSE;
       }
       hwnd = wnd->getOS2WindowHandle();
@@ -1123,11 +947,11 @@ ODINFUNCTION4(BOOL,RedrawWindow,HWND,        hwnd,
       if (!hrgn)
          goto error;
 
-      BytesNeeded = _O32_GetRegionData (hrgn, 0, NULL);
+      BytesNeeded = O32_GetRegionData (hrgn, 0, NULL);
       RgnData = (PRGNDATA_W)_alloca (BytesNeeded);
       if (RgnData == NULL)
           goto error;
-      _O32_GetRegionData (hrgn, BytesNeeded, RgnData);
+      O32_GetRegionData (hrgn, BytesNeeded, RgnData);
 
       pr = (PRECTL)(RgnData->Buffer);
       for (i = RgnData->rdh.nCount; i > 0; i--, pr++) {
@@ -1206,15 +1030,13 @@ error:
       wnd->setSupressErase (TRUE);
 
    if (!success)
-      _O32_SetLastError (ERROR_INVALID_PARAMETER);
+      O32_SetLastError (ERROR_INVALID_PARAMETER);
 
-//@@@PH   SetFS(sel);
    return (success);
 }
 
 BOOL WIN32API InvalidateRect (HWND hwnd, const RECT *pRect, BOOL erase)
 {
-   USHORT sel = RestoreOS2FS();
 //   Win32BaseWindow *wnd = Win32BaseWindow::GetWindowFromHandle (hwnd);
    BOOL result;
 
@@ -1226,13 +1048,11 @@ BOOL WIN32API InvalidateRect (HWND hwnd, const RECT *pRect, BOOL erase)
                           RDW_ALLCHILDREN_W | RDW_INVALIDATE_W |
                           (erase ? RDW_ERASE_W : 0) |
                           (hwnd == NULLHANDLE ? RDW_UPDATENOW_W : 0));
-   SetFS(sel);
    return (result);
 }
 
 BOOL WIN32API InvalidateRgn (HWND hwnd, HRGN hrgn, BOOL erase)
 {
-   USHORT sel = RestoreOS2FS();
 //   Win32BaseWindow *wnd = Win32BaseWindow::GetWindowFromHandle (hwnd);
    BOOL result;
 
@@ -1244,7 +1064,6 @@ BOOL WIN32API InvalidateRgn (HWND hwnd, HRGN hrgn, BOOL erase)
                           RDW_ALLCHILDREN_W | RDW_INVALIDATE_W |
                           (erase ? RDW_ERASE_W : 0) |
                           (hwnd == NULLHANDLE ? RDW_UPDATENOW_W : 0));
-   SetFS(sel);
    return (result);
 }
 
@@ -1269,7 +1088,7 @@ BOOL setPMRgnIntoWinRgn (HRGN hrgnPM, HRGN hrgnWin, LONG height)
          rgnRect.crc = rgnRect.crcReturned;
          rc = GpiQueryRegionRects (hps, hrgnPM, NULL, &rgnRect, Rcls);
 
-         rc = _O32_SetRectRgn (hrgnWin, pRcl->xLeft,
+         rc = O32_SetRectRgn (hrgnWin, pRcl->xLeft,
                                         pRcl->xRight,
                                         height - pRcl->yTop,
                                         height - pRcl->yBottom);
@@ -1278,17 +1097,17 @@ BOOL setPMRgnIntoWinRgn (HRGN hrgnPM, HRGN hrgnWin, LONG height)
          {
             int i;
             HRGN temp;
-            temp = _O32_CreateRectRgn (0, 0, 1, 1);
+            temp = O32_CreateRectRgn (0, 0, 1, 1);
 
             for (i = 1, pRcl++; rc && (i < rgnRect.crcReturned); i++, pRcl++)
             {
-              rc = _O32_SetRectRgn (temp, pRcl->xLeft,
+              rc = O32_SetRectRgn (temp, pRcl->xLeft,
                                           pRcl->xRight,
                                           height - pRcl->yTop,
                                           height - pRcl->yBottom);
-              rc &= _O32_CombineRgn (hrgnWin, hrgnWin, temp, RGN_OR_W);
+              rc &= O32_CombineRgn (hrgnWin, hrgnWin, temp, RGN_OR_W);
             }
-            _O32_DeleteObject (temp);
+            O32_DeleteObject (temp);
          }
          delete[] Rcls;
       }
@@ -1299,7 +1118,7 @@ BOOL setPMRgnIntoWinRgn (HRGN hrgnPM, HRGN hrgnWin, LONG height)
    }
    else
    {
-      rc = _O32_SetRectRgn (hrgnWin, 0, 0, 0, 0);
+      rc = O32_SetRectRgn (hrgnWin, 0, 0, 0, 0);
    }
 
    WinReleasePS (hps);
@@ -1309,14 +1128,12 @@ BOOL setPMRgnIntoWinRgn (HRGN hrgnPM, HRGN hrgnWin, LONG height)
 BOOL WIN32API ScrollDC (HDC hDC, int dx, int dy, const RECT *pScroll,
                         const RECT *pClip, HRGN hrgnUpdate, LPRECT pRectUpdate)
 {
-   USHORT sel = RestoreOS2FS();
    BOOL rc = TRUE;
 
    dprintf (("USER32:  ScrollDC"));
 
    if (!hDC)
    {
-      SetFS(sel);
       return (FALSE);
    }
 
@@ -1326,7 +1143,6 @@ BOOL WIN32API ScrollDC (HDC hDC, int dx, int dy, const RECT *pScroll,
 
    if ((hwnd == NULLHANDLE) || !wnd)
    {
-      SetFS(sel);
       return (FALSE);
    }
 
@@ -1412,7 +1228,6 @@ BOOL WIN32API ScrollDC (HDC hDC, int dx, int dy, const RECT *pScroll,
    LONG lComplexity = WinScrollWindow (hwnd, dx, dy, (pScroll) ? &scrollRect : NULL, (pClip) ? &clipRect : NULL, hrgn, &rectlUpdate, 0);
    if (lComplexity == RGN_ERROR)
    {
-      SetFS(sel);
       return (FALSE);
    }
 
@@ -1430,7 +1245,6 @@ BOOL WIN32API ScrollDC (HDC hDC, int dx, int dy, const RECT *pScroll,
    if (hrgnUpdate)
       rc = setPMRgnIntoWinRgn (hrgn, hrgnUpdate, height);
 
-   SetFS(sel);
    return (rc);
 }
 
@@ -1438,7 +1252,6 @@ BOOL WIN32API ScrollDC (HDC hDC, int dx, int dy, const RECT *pScroll,
 //******************************************************************************
 BOOL WIN32API ScrollWindow(HWND hwnd, int dx, int dy, const RECT *pScroll, const RECT *pClip)
 {
- USHORT sel = RestoreOS2FS();
  Win32BaseWindow *window;
  APIRET  rc;
  RECTL   clientRect;
@@ -1451,7 +1264,6 @@ BOOL WIN32API ScrollWindow(HWND hwnd, int dx, int dy, const RECT *pScroll, const
     window = Win32BaseWindow::GetWindowFromHandle(hwnd);
     if(!window) {
         dprintf(("ScrollWindow, window %x not found", hwnd));
-        SetFS(sel);
         return 0;
     }
     dprintf(("ScrollWindow %x %d %d\n", hwnd, dx, dy));
@@ -1496,7 +1308,6 @@ BOOL WIN32API ScrollWindow(HWND hwnd, int dx, int dy, const RECT *pScroll, const
                          pScrollRect, pClipRect, NULLHANDLE,
                          NULL, scrollFlags);
 
-    SetFS(sel);
     return (rc != RGN_ERROR);
 }
 //******************************************************************************
@@ -1504,7 +1315,6 @@ BOOL WIN32API ScrollWindow(HWND hwnd, int dx, int dy, const RECT *pScroll, const
 INT WIN32API ScrollWindowEx(HWND hwnd, int dx, int dy, const RECT *pScroll, const RECT *pClip,
                             HRGN hrgnUpdate, PRECT pRectUpdate, UINT scrollFlag)
 {
-    USHORT sel = RestoreOS2FS();
     Win32BaseWindow *window;
     APIRET  rc;
     RECTL   scrollRect;
@@ -1515,7 +1325,6 @@ INT WIN32API ScrollWindowEx(HWND hwnd, int dx, int dy, const RECT *pScroll, cons
     window = Win32BaseWindow::GetWindowFromHandle(hwnd);
     if(!window) {
         dprintf(("ScrollWindowEx, window %x not found", hwnd));
-        SetFS(sel);
         return 0;
     }
 
@@ -1538,7 +1347,6 @@ INT WIN32API ScrollWindowEx(HWND hwnd, int dx, int dy, const RECT *pScroll, cons
                                         hrgn, &rectlUpdate, scrollFlags);
     if (lComplexity == RGN_ERROR)
     {
-        SetFS(sel);
         return (0);
     }
 
@@ -1562,7 +1370,6 @@ INT WIN32API ScrollWindowEx(HWND hwnd, int dx, int dy, const RECT *pScroll, cons
        rc = InvalidateRect (hwnd, &winRectUpdate, scrollFlag & SW_ERASE_W);
        if (rc == FALSE)
        {
-          SetFS(sel);
           return (0);
        }
     }
@@ -1583,7 +1390,6 @@ INT WIN32API ScrollWindowEx(HWND hwnd, int dx, int dy, const RECT *pScroll, cons
          break;
     }
 
-    SetFS(sel);
     return (regionType);
 }
 //******************************************************************************

@@ -1,4 +1,4 @@
-/* $Id: open32wbase.h,v 1.1 1999-09-15 23:18:52 sandervl Exp $ */
+/* $Id: open32wbase.h,v 1.2 1999-10-22 18:11:45 sandervl Exp $ */
 /*
  * Open32 Window fake Base Class for OS/2
  *
@@ -13,9 +13,17 @@
 #define __OPEN32WINBASE_H__
 
 extern "C" {
-void _System WinSetDAXData (HWND, PVOID);
 ULONG _System PIEPS (ULONG, ULONG);
+void _System _WinSetDAXData (HWND, PVOID);
 }
+
+inline void _System WinSetDAXData (HWND a, PVOID b)
+{
+ USHORT sel = RestoreOS2FS();
+
+    _WinSetDAXData(a, b);
+    SetFS(sel);
+} 
 
 #define PIEPS(x,y)
 

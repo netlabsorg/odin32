@@ -1,4 +1,4 @@
-/* $Id: caret.cpp,v 1.5 1999-10-07 15:44:15 cbratschi Exp $ */
+/* $Id: caret.cpp,v 1.6 1999-10-22 18:11:42 sandervl Exp $ */
 
 /*
  * Caret functions for USER32
@@ -9,7 +9,7 @@
 
 #define INCL_WIN
 #define INCL_GPI
-#include <os2.h>
+#include <os2wrap.h>
 #include <os2sel.h>
 #include <stdlib.h>
 #include "win32type.h"
@@ -19,6 +19,7 @@
 #include <win32wbase.h>
 #include "oslibwin.h"
 #include "dcdata.h"
+#define INCLUDED_BY_DC
 #include "dc.h"
 #include "caret.h"
 
@@ -39,14 +40,6 @@ static BOOL CaretIsVisible;
 
 #pragma data_seg()
 
-PVOID   APIENTRY  GpiQueryDCData (HPS hps);
-VOID    OPEN32API _O32_SetLastError( DWORD );
-BOOL    OPEN32API _O32_CreateCaret (HWND hwnd, HBITMAP hbm, int width, int height);
-BOOL    APIENTRY  _DestroyCaret (void);
-UINT    APIENTRY  _GetCaretBlinkTime (void);
-BOOL    APIENTRY  _HideCaret (HWND hwnd);
-BOOL    APIENTRY  _SetCaretBlinkTime (UINT mSecs);
-BOOL    APIENTRY  _ShowCaret (HWND hwnd);
 
 BOOL WIN32API CreateCaret (HWND hwnd, HBITMAP hBmp, int width, int height)
 {
@@ -63,7 +56,6 @@ BOOL WIN32API CreateCaret (HWND hwnd, HBITMAP hBmp, int width, int height)
 
        if (!wnd) return (FALSE);
 
-       USHORT sel = RestoreOS2FS();
        wnd->SetFakeOpen32();
 
        rc = _O32_CreateCaret (wnd->getOS2WindowHandle(), hBmp, width, height);
@@ -76,7 +68,6 @@ BOOL WIN32API CreateCaret (HWND hwnd, HBITMAP hBmp, int width, int height)
        }
 
        wnd->RemoveFakeOpen32();
-       SetFS(sel);
        return (rc);
    }
 }
@@ -84,7 +75,6 @@ BOOL WIN32API CreateCaret (HWND hwnd, HBITMAP hBmp, int width, int height)
 BOOL WIN32API DestroyCaret()
 {
    BOOL rc;
-   USHORT sel = RestoreOS2FS();
 
    dprintf(("USER32:  DestroyCaret"));
 
@@ -96,39 +86,32 @@ BOOL WIN32API DestroyCaret()
 
    rc = _DestroyCaret();
 
-   SetFS(sel);
    return (rc);
 }
 
 BOOL WIN32API SetCaretBlinkTime (UINT mSecs)
 {
-   USHORT sel = RestoreOS2FS();
    BOOL rc;
 
    dprintf(("USER32:  SetCaretBlinkTime"));
 
    rc = _SetCaretBlinkTime (mSecs);
 
-   SetFS(sel);
    return (rc);
 }
 
 UINT WIN32API GetCaretBlinkTime()
 {
    UINT rc;
-   USHORT sel = RestoreOS2FS();
 
    dprintf(("USER32:  GetCaretBlinkTime"));
 
    rc = _GetCaretBlinkTime();
-
-   SetFS(sel);
    return (rc);
 }
 
 BOOL WIN32API SetCaretPos (int x, int y)
 {
-   USHORT     sel = RestoreOS2FS();
    LONG       xNew = 0, yNew = 0;
    BOOL       result = TRUE;
    BOOL       rc;
@@ -151,7 +134,6 @@ BOOL WIN32API SetCaretPos (int x, int y)
            if (!pHps)
            {
               _O32_SetLastError (ERROR_INTERNAL_ERROR);
-              SetFS(sel);
               return FALSE;
            }
            GpiConvert (pHps->hps, CVTC_WORLD, CVTC_DEVICE, 1, &caretPos);
@@ -183,13 +165,11 @@ BOOL WIN32API SetCaretPos (int x, int y)
       result = FALSE;
    }
 
-   SetFS(sel);
    return (result);
 }
 
 BOOL WIN32API GetCaretPos (PPOINT pPoint)
 {
-   USHORT sel = RestoreOS2FS();
    CURSORINFO cursorInfo;
 
    dprintf(("USER32:  GetCaretPos"));
@@ -206,7 +186,6 @@ BOOL WIN32API GetCaretPos (PPOINT pPoint)
             hps = wnd->getOwnDC();
          else
          {
-           SetFS(sel);
            return FALSE;
          }
 
@@ -224,19 +203,16 @@ BOOL WIN32API GetCaretPos (PPOINT pPoint)
       pPoint->x = cursorInfo.x;
       pPoint->y = cursorInfo.y;
 
-      SetFS(sel);
       return TRUE;
    }
    else
    {
-      SetFS(sel);
       return FALSE;
    }
 }
 
 BOOL WIN32API ShowCaret (HWND hwnd)
 {
-   USHORT sel = RestoreOS2FS();
    BOOL   rc = FALSE;
 
    dprintf(("USER32:  ShowCaret"));
@@ -244,13 +220,11 @@ BOOL WIN32API ShowCaret (HWND hwnd)
    CaretIsVisible = TRUE;
    rc = _ShowCaret (Win32BaseWindow::Win32ToOS2Handle (hwnd));
 
-   SetFS(sel);
    return (rc);
 }
 
 BOOL WIN32API HideCaret (HWND hwnd)
 {
-   USHORT sel = RestoreOS2FS();
    BOOL rc = FALSE;
 
    dprintf(("USER32:  HideCaret"));
@@ -258,7 +232,6 @@ BOOL WIN32API HideCaret (HWND hwnd)
    CaretIsVisible = FALSE;
    rc = _HideCaret (Win32BaseWindow::Win32ToOS2Handle (hwnd));
 
-   SetFS(sel);
    return (rc);
 }
 
