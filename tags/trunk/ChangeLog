@@ -1,10 +1,13 @@
-/* $Id: ChangeLog,v 1.1337 2001-04-01 12:32:05 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.1338 2001-04-01 14:34:38 sandervl Exp $ */
 
  2001-04-01: Sander van Leeuwen <sandervl@xs4all.nl>   
     - WININET:  o Added missing exports to wininet.def
     - KERNEL32: o Removed yesterday's codepage change.
                   (breaks Opera)
     - WINMM:    o Increased nr of DART buffers used for wave playback
+    - ODININST  o Moved kernel32 init code into odininst
+                o Create [HKEY_USERS\.DEFAULT\Control Panel\International]
+                  registry key with international settings
 
  2001-03-31: Sander van Leeuwen <sandervl@xs4all.nl>   
     - KERNEL32: o Fix for loading executable with sections not starting on
