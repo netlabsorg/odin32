@@ -1,4 +1,4 @@
-/* $Id: asyncthread.h,v 1.13 2002-07-30 15:34:51 achimha Exp $ */
+/* $Id: asyncthread.h,v 1.14 2003-01-06 13:05:40 sandervl Exp $ */
 
 /*
  * Async thread help functions
@@ -92,5 +92,6 @@ BOOL  QueryAsyncEvent(SOCKET s, int *pMode, ULONG *pNofityHandle, ULONG *pNofity
 BOOL  FindAndSetAsyncEvent(SOCKET s, int mode, int notifyHandle, int notifyData, ULONG lEventMask);
 
 void  WSACancelAllAsyncRequests();
+void  WSAWaitForAllAsyncRequests();
 
 #endif  //__ASYNCTHREAD_H__

@@ -1,4 +1,4 @@
-/* $Id: asyncthread.cpp,v 1.15 2002-02-23 16:39:09 sandervl Exp $ */
+/* $Id: asyncthread.cpp,v 1.16 2003-01-06 13:05:40 sandervl Exp $ */
 
 /*
  * Async thread help functions
@@ -120,8 +120,7 @@ void RemoveFromQueue(PASYNCTHREADPARM pThreadParm)
 //******************************************************************************
 void WSACancelAllAsyncRequests()
 {
- PASYNCTHREADPARM pThreadInfo;
- BOOL             found = FALSE;
+   PASYNCTHREADPARM pThreadInfo;
 
    dprintf(("WSACancelAllAsyncRequests"));
    asyncThreadMutex.enter();
@@ -134,8 +133,22 @@ void WSACancelAllAsyncRequests()
 	pThreadInfo = pThreadInfo->next;
    }
    asyncThreadMutex.leave();
-   //TODO: not the right way to wait for the async threads to die
-   DosSleep(250);
+}
+//******************************************************************************
+//******************************************************************************
+void WSAWaitForAllAsyncRequests()
+{
+   int wait = 0;
+
+   dprintf(("WSAWaitForAllAsyncRequests"));
+
+   //We don't want to wait forever until all async request threads have died
+   //(just in case something goes wrong in select())
+   //So wait up to one second for all threads to end.
+   while(threadList && wait < 1000) {
+       DosSleep(20);
+       wait += 20;
+   }
 }
 //******************************************************************************
 //******************************************************************************
