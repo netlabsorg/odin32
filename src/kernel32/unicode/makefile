@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.3 2001-04-17 04:22:06 bird Exp $
+# $Id: makefile,v 1.4 2001-06-26 00:23:17 bird Exp $
 
 #
 # Odin32 API
@@ -19,14 +19,6 @@ PUBLICLIB = 1
 # Compiler, tools, and interference rules.
 #
 !include ../../../makefile.inc
-
-
-#
-# Overrides.
-#
-!if "$(CCENV)" == "VAC3" || "$(CCENV)" == "VAC36"
-CFLAGS = $(CFLAGS) /Tdp
-!endif
 
 
 #
