@@ -1,193 +1,144 @@
- /* $Id: changelog,v 1.1192 2000-10-11 07:22:58 sandervl Exp $ */
+/* $Id: changelog,v 1.1193 2000-12-19 12:30:01 achimha Exp $ */
 
- 2000-10-11: Sander van Leeuwen <sandervl@xs4all.nl>
-    - KERNEL32: TLS callback fix + modify TLS callback pointers for new base address
+ 2000-12-15: Sander van Leeuwen <sandervl@xs4all.nl>
+    - USER32:   o Edit control: Limits removed. EM_SETTEXTLIMIT has no effect in 
+                  NT4, SP6 (EM_GETTEXTLIMIT only returns that value).
+                  Limits are simply ignored, no EN_MAXTEXT notification is ever sent.
+                  (fixes license edit control in Microsoft Visual C++ 4.2 install)
+                o Static control: SS_REALSIZEIMAGE is supposed to prevent 
+                  control resizing, but that doesn't appear to happen in NT 
+                  (although the SDK docs are very clear about this)
+                  Need to figure out why. (not resizing messes up the bitmap 
+                  control in the Microsoft Visual C++ 4.2 install program)
+                  Same thing happens with a very simply test app, so the installer
+                  does nothing special.
+    - WNASPI32: o Fixed bug in access aspi method. (wait check reversed)
+    - MAKEFILES:o Update for overriding stack size of executables
+    - PELDR:    o Fixed makefiles (PEC was built as a PM app -> must be VIO!)
 
- 2000-10-10: Sander van Leeuwen <sandervl@xs4all.nl>
-    - KERNEL32: Print date and time of build during init (log)
-                Create system32\drivers directory during install
-                Implemented LOAD_LIBRARY_AS_DATAFILE & DONT_RESOLVE_DLL_REFERENCES
-                LoadLibraryExA/W features. Removed fake image class; put
-                it in the pe loader class instead.
-                LoadLibraryExA now also works for executables (implies LOAD_LIBRARY_AS_DATAFILE & DONT_RESOLVE_DLL_REFERENCES)
-                Rewrote GetVersionSize/Struct to use LoadLibraryExA.
-    - MSVCRT:   Put WriteLog call in util.asm in IFDEF DEBUG statement
-    - INCLUDE\makefiles
-                Add -D:DEBUG to alp command line for debug build
+ 2000-12-12: Sander van Leeuwen <sandervl@xs4all.nl>
+    - KERNEL32: o GetVolumeInformationA bugfix (lpFileSystemNameBuffer == NULL &
+                  lpFileSystemFlags != NULL)
+                o Wrong calls to VirtualFree in memory map & tls code (size must be zero)
+                o Shared memory address retrieved with DosGetNamedSharedMem not properly freed
 
- 2000-10-10: Michal Necasek <mike@mendelu.cz>
-    - WINMM:    Timers: Don't reset TimerStatus in timer thread; timer may
-                have already been started.
+ 2000-12-12: knut st. osmundsen <knut.stange.osmundsen@mynd.no>
+    - Win32k:   o Fixed problem with newer kernels having a different
+                  prolog to ldrCheckInternalName. (Seems like either new
+                  compiler or better optimization.)
+                o Corrected bad loop condition in configure.cmd causing
+                  a neverending loop during build.
+    - Win32kCC: o Corrected the setting of the -DllFixes parameter.
+    - readme.txt:
+                o Corrected minor flaw: Win32k option "-PE" should be "-Pe".
 
- 2000-10-09: Yuri Dario <mc6530@mclink.it>
-    - USER32:   Corrected background brush for MDI windows
+ 2000-12-10: knut st. osmundsen <knut.stange.osmundsen@mynd.no>
+    - Win32k:   o Fixed minor error in the *printf function.
+                o Added the 14063 kernels (*1129[d].zip).
+                o Removed OS/2 kernel limit for DLL name length.
+                  (Experimental - see readme.txt option -Dllfixes.)
+                o Removed OS/2 kernel restriction for DLL extention.
+                  (Experimental - see readme.txt option -Dllfixes.)
+    - readme.txt:
+                o Updated win32k.sys with new parameter, -Dllfixes.
 
- 2000-10-09: Patrick Haller <phaller@gmx.net>
-    - KERNEL32: Fixed console bug (left offset) reported by Michal
+ 2000-12-09: Patrick Haller <patrick.haller@innotek.de>ú
+    - KERNEL32: o accelerated FindFirst/FindNext calls (oslibdos.cpp)ú
+    - makefile: o added support for "profile" debug buildú
 
- 2000-10-09: Michal Necasek <mike@mendelu.cz>
-    - KERNEL32: IsValidLocale; don't check for kernel32 resources (that aren't there)
-                Always return true for now -> winhlp32 no longer complains about 
-                different languages when loading helpfiles
+ 2000-12-09: Sander van Leeuwen <sandervl@xs4all.nl>
+    - GDI32:    o Temporary fix for bugs introduced by recent handle changes.
 
- 2000-10-09: Sander van Leeuwen <sandervl@xs4all.nl>
-    - USER32:   FrameTrackFrame fix for child windows
-                Ported Wine's ShowOwnedPopups (not tested)
-    - KERNEL32: Check for name value -1 in getResSubDirA/W; previously interpreted
-                as a string pointer resulting in a crash in Quicken.
-                TLS sections must be read/write as they can contain the 
-                TLS index value (i.e. VACPPWIN ilink + ilib)
-                Rewrote GetCurrentDirectoryA due to bugs in Open32's version
-                (returns 0 if bufsize < 3 -> should return required length)
+ 2000-12-07: knut st. osmundsen <knut.stange.osmundsen@mynd.no>
+    - USER32:   o Changed CFLAGS and CXXFLAGS overrides to a CDEFINES override.
+                  (This is the new way to alter the standard C and C++ defines.)
 
- 2000-10-08: Sander van Leeuwen <sandervl@xs4all.nl>
-    - USER32: GetMinMaxInfo fix for windows with both WS_THICKFRAME and
-              WS_BORDER style (differs from Wine; see comment in win32basepos.cpp
-              Win32BaseWindow::GetMinMaxInfo)
-              Fix for CS_OWNDC windows (origin of client window needs to be changed
-              after window size/position changes)
-              Fix for ShowScrollBar (enabling/disabling both scrollbars at once did not work (vert))
-              AdjustWindowRectEx fix:
-                Scrollbars aren't checked *UNLESS* the style includes a border (any border)
-                --> VERIFIED IN NT4, SP6 (fixes MFC apps with scrollbars + bar controls)
-    - KERNEL32: Do not export the toolhelp apis; NT4 doesn't do that. (only win9x)
+ 2000-12-07: Sander van Leeuwen <sandervl@xs4all.nl>
+    - USER32:   o Missing USING_OPEN32 define in makefile. Might be responsible
+                  for a lot of problems that have recently emerged.
 
- 2000-10-07: Markus Montkowski <mmontkowski@gmx.de>
-    - GDI32: Fixed bitblt, it used the size of the source DC
-             when no destwindow was found. this doesn't work
-             for bitblt between dibsections if the dest is larger.
-             so now it checks if the dest DC belongs to a dibsection
-             and uses sets hdcHeight/Width to the size of the dibsection.
-             Added GetWidth() member function for this.
-             Fixes: Civilisation Test of Times
+ 2000-12-06: Sander van Leeuwen <sandervl@xs4all.nl>
+    - USER32:   o Must call selectClientArea after GpiSetClipRegion in BeginPaint
+                  When a window with CS_OWNDC looses focus, for some reason
+                  GpiSetClipRegion resets the window dc origin back to (0,0).
+                  (fixes e.g. Visual C++ 4.2 setup when switching between
+                   setup window & another app)
+    - KERNEL32: o Rewrote GetLogicalDrives
+                o Minor fixes for GetDriveType (return value equals DRIVE_NO_ROOT_DIR
+                  for junk input; does not change last error)
 
- 2000-10-06: Sander van Leeuwen <sandervl@xs4all.nl>
-    - KERNEL32: PE loader: no longer rely on section names, but on image
-                directories instead
-                Init console earlier. (before exe is loaded; some dlls want
-                to send output to the console while they're being loaded)
-                EnumResourceNamesW/EnumResourceTypesW fixes (strings not terminated)
-                CreateProcessA/W fix for setting current directory of new process;
-                Open32 ignores lpCurrentDirectory parameter
-    - PELDR:    Special parameter for setting current directory added (/OPT[CURDIR=x])
-    - USER32:   Ignore class background brush in DefDlgProc for WM_ERASEBKGND
-                (always use GetSysColorBrush(COLOR_BTNFACE))
-                (Wine does this and it fixes the 1st dialog of the Netscape 6 install)
-                OemToCharBuffA fix; put back special characters that got translated
-                to 0xff (fixes Netscape 6 install license edit control)
+ 2000-12-06: Patrick Haller <patrick.haller@innotek.de>
+    - USER32:   o added debug macros to HOOK_ functions
+    - GDI32:    o added debug macros to Font related functions
 
- 2000-10-05: Michal Necasek <mike@mendelu.cz>
-    - KERNEL32: FormatMessageA/W fix; message ids can be larger than 65535
-                (VACPPWIN)
+ 2000-12-05: Sander van Leeuwen <sandervl@xs4all.nl>
+    - USER32:   o 16 bits menu handles are now supported (fixes crash in MultiEdit)
+    - GDI32:    o Changes to local object handle management (for user32 menus)
+    - KERNEL32: o Don't assume resources start at section boundary.
+                  Must use DataDirectory virtual address.
+                  (fixes winrar self-extracting executables)
 
- 2000-10-05: Sander van Leeuwen <sandervl@xs4all.nl>
-    - KERNEL32: Don't print FS warnings for OS/2 Odin applications
-                EnumResourceNamesA fix (zero terminate resource name)
-    - USER32:   GetWindow GW_CHILD & GW_HWNDFIRST fixes
-                EnumDisplaySettingsA; always set refresh rate to 70hz
-                Z-order bugs fixed; GetWindow returns windows in correct order now
-                hack for groupbox (clipsiblings) no longer necessary. Same
-                goes for adding WS_CLIPSIBLINGS style for dialog controls.
-                Re-enabled usage of invalid region instead of invalid rectangle
-                in BeginPaint -> lots of paint problems gone (i.e. winzip)
+ 2000-12-03: chris.wohlgemuth <chris.wohlgemuth@cityweb.de>
+    - KERNEL32: o Fix for TVFS & GetDiskFreeSpaceA (Windows Media Player
+                  install complains about cluster size)
+                  (DRIVESPACE section, key CLUSTERTO32 in odin.ini)
+                o Fix in PROFILE_GetSection for crash in Windows Media Player install
+    - WINMM:    o Ported Wine MCI code
 
- 2000-10-05: Michal Necasek <mike@mendelu.cz>
-    - KERNEL32: Fixes for exception handling (as done by MSVCRT)
-     
- 2000-10-05: knut st. osmundsen <knut.stange.osmundsen@mynd.no>
-    - tools\common: Implemented read and write buffering for class kFile
-                to speed up kDef2Wat and ImpDef.
+ 2000-12-03: knut st. osmundsen <knut.stange.osmundsen@mynd.no>
+    - TOOLS\install:
+                o More installation script fixes.
+    - Win32k:   o Fatal error! I mixed flags for C and C++ compilation during
+                  makefile rewrite. This caused C++ exceptionhandlers to be
+                  generated and registered, leading to Trap 000e during boot.
+                o Confirmed working on the Warp 4 14.060 (at least halfstrict)
+                  kernel (w41106.zip).
 
- 2000-10-04: Sander van Leeuwen <sandervl@xs4all.nl>
-    - KERNEL32: Added forwarder support for PE loader (required for msvcrt40.dll)
+ 2000-12-03: Sander van Leeuwen <sandervl@xs4all.nl>
+    - TOOLS\install:
+                o Installation script fixes.
 
- 2000-10-04: knut st. osmundsen <knut.stange.osmundsen@mynd.no>
-    - tools\ImpDef: Corrected wrong DESCRIPTION statement.
-                Corrected exception when processing src\icmp\icmp.def.
+ 2000-12-03: knut st. osmundsen <knut.stange.osmundsen@mynd.no>
+    - *, makefiles, pdwin32k.*, odin32.*.mk, Configure.cmd:
+                o Made some addjustments to the makefiles. Most important
+                  eliminating nearly all ODIN32_<dir> directory macros.
+                o Changed all "PDWIN32_" to "ODIN32_".
+                o Renamed pdwin32.$(CCENV).* to pdwin32.*.$(CCENV).mk
+                  and pdwin32.* to odin32.*.mk.
+                o Added tiny rexx script, Configure.cmd, which generates
+                  a file with absolute directory macros; makefile.inc.
+                  Makefile.inc also includes /include/odin32.mk.
+                  NB. This script is automatically invoked the first time
+                  you start nmake or wmake on /makefile.
+                o Restructured the win32k.sys makefiles. Now all but
+                  the win32k.sys makefile is using the new makefile style.
+                o The tools makefiles are mostly according to the new style.
+                o Compiler and debug/release specific library directory.
+                  ODIN32_LIB will now point to a compiler specific directory
+                  under /lib. Debug and release files are also separated.
+                o The <>exp.def are now generated in the $(OBJDIR) directory.
+                o .lib-files are also targeted to $(OBJDIR).
+                o More Watcom friendly makefiles. (I didn't say that they are
+                  working with Watcom! I removed VAC dependencies when
+                  possibled or else tried to make wmake fail.)
+                o Moved readmes in the /bin/glide tree to the source
+                  directories under opengl.
+    - tools/install:
+                o Removed odininst.wis - odin.cmd generates this.
+                o Tried to make odin.cmd more readable; uses
+                  the wic.exe option -c <dir> to set current directory.
+                  ARG! Why can't wic.exe return anything but 0? When files
+                  aren't found for example, I have no way of finding it out.
+                o Added package which adds win32k.sys to the config.sys.
+                  Seems like I have to add a file to that packet, so win32k.ddp
+                  works as dummy file. It also seems like there is a but in
+                  WarpIn 0.95 - it inserts the line between the '\r' and the '\n'
+                  chars at the end of the previous line.
 
- 2000-10-03: Sander van Leeuwen <sandervl@xs4all.nl>
-    - Include\uniconv.h
-                FS wrappers for Unicode api
-    - Include\heapstring.h:
-                strcasecmp & strncasecmp are case insensitive (fixes
-                profile apis (and probably some other things too))
-    - KERNEL32: Calculate cpu speed and set HARDWARE\DESCRIPTION\System\CentralProcessor\x\~Mhz key
-                Added GetFileType method to conin/out which return FILE_TYPE_CHAR
-                Create new keys during installation:
-                [HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\Cdfs]
-                [HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\Cdrom]
-                Fix for failure during DLL_PROCESS_ATTACH for LX system
-                dlls (pe loader). Didn't fail properly before.
-                Check if executable exists in CreateProcessA; fixes VMWare
-                installation
-                InitCommandLine fix (forgot to copy cmd line)
-    - USER32:   Fix for EDIT_WM_Char (couldn't type in numbers anymore)
-                EnumDisplaySettingsA accepts negative indices
-    - ADVAPI32: Cleanup
+ 2000-12-02: Sander van Leeuwen <sandervl@xs4all.nl>
+    - KERNEL32: o Added renaming for MCICDA (MCICDA.DLL -> MCICDA.DRV)
 
- 2000-10-03: Michal Necasek <mike@mendelu.cz>
-    - KERNEL32: Fix for HMGetFileType. Must return FILE_TYPE_CHAR for standard
-                handles (in/out/error)
-
- 2000-10-03: knut st. osmundsen <knut.stange.osmundsen@mynd.no>
-    - Watcom makefiles:
-                ú Wrote a converter tool to make wlink input from .def files.
-                  tools/common - kDef2Wat.exe (Need VA C to compiler currently)
-                ú Found a problem with Watcom when trying to link
-                  advapi32.dll; It mangles the __stdcall function when
-                  they aren't prototyped/delcared extern "C". Haven't found
-                  any solution to this, other than prototyping the
-                  APIs within extern "C" { }.
-
- 2000-10-02: Sander van Leeuwen <sandervl@xs4all.nl>
-    - SHLWAPI:  Rewrote VERSION_OsIsUnicode (same as SHELL_OsIsUnicode now)
-    - RICHED32: 'Handle' WM_SETTEXT messages. Wine's richedit dll is very
-                incomplete. It's better to use the native windows version.
-    - KERNEL32: Ported Wine's LoadModule (previously used Open32)
-                Changed version apis
-                You can now tell Odin to pretend to be Windows 98 or
-                Windows NT 4.0 (default = NT40)
-                Odin.ini:
-                [WinVersion]
-                Version=Win98
-    - OLE32:    Added stubs for CoGetInstanceFromFile & CoGetInstanceFromIStorage
-    - KERNEL32, WSOCK32, WINMM, include\odinwrap.h, SHLWAPI, WNASPI32
-                Changes/fixes for new ODINFUNCTION macros
-
- 2000-10-02: Patrick Haller <phaller@gmx.net>
-    - *:        major change in ODINWRAP macros
-                and (all) affected sources
-    - GDI32:    fixed possible error in text.cpp (strrchr)
-    - WNETAP32: started implementation of LAN Manager support :)
-                NetApiBuffer*
-                NetStatisticsGet
-                NetWkstaGetInfo
-    - KERNEL32: added HEAP_size export
-
- 2000-10-02: knut st. osmundsen <knut.stange.osmundsen@mynd.no>
-    - KERNEL32: Fixed Pe2Lx (ie. Win32k) TLS problem. Beyond Compare works.
-    - Common:   Added very limited dump capability to kFilePE. (Used to
-                understand TLS.)
-    - Win32k    Added symbols for kernel 14050 (Warp4) and
-                14054 (Warp4, WS4eB SMP and UNI).
-
- 2000-10-01: Patrick Haller <phaller@gmx.net>
-    - KERNEL32: Optimization of PROFILE calls
-    - GDI32:    Fix for uncompressed/RGB bitmaps (biSizeImage == 0)
-    - WINMM:    Fix for timer logic - timers still quite untested
-
- 2000-10-01: Sander van Leeuwen <sandervl@xs4all.nl>
-    - KERNEL32: Fixed bug introduced by recent command line changes
-                (executables with spaces in name/dir)
-    - GDI32:    Implemented AddFontResourceW
-
- 2000-10-01: knut st. osmundsen <knut.stange.osmundsen@mynd.no>
-    - Win32k:   ú Added IOCtl API for Reading or Writing into another process'
-                  address space. (*ProcessReadWrite)
-                  This is intended used to implemented ReadProcessMemory and
-                  WriteProcessMemory (which is essensial to debuggers I think).
-                  I'll implementet them soon, but it sees that it'll
-                  require more changes in process.c that I first thought.
-                ú Simplified maintaince of kernel imports. (mkcalltab)
-                  Removed unused imports.
+ 2000-12-02: chris.wohlgemuth <chris.wohlgemuth@cityweb.de>
+    - WINMM\MCICDA:
+                o Rewrote it for OS/2
 
