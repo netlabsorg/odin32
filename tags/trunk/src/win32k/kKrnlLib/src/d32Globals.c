@@ -1,4 +1,4 @@
-/* $Id: d32Globals.c,v 1.2 2002-03-31 19:23:41 bird Exp $
+/* $Id: d32Globals.c,v 1.3 2002-04-01 12:48:26 bird Exp $
  *
  * d32globals - global data (32-bit)
  *
@@ -28,4 +28,4 @@
  * based addressed.
  */
 PULONG          pulTKSSBase32 = 0;
-ULONG           kKrnlLibBuild = ODIN32_BUILD_NR;
+ULONG           ulkKrnlLibBuild = ODIN32_BUILD_NR;
