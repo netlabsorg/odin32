@@ -1,4 +1,7 @@
- /* $Id: changelog,v 1.542 1999-12-18 10:14:33 sandervl Exp $ */
+ /* $Id: changelog,v 1.543 1999-12-18 10:25:49 sandervl Exp $ */
+
+ 99-12-18: Sander van Leeuwen <sandervl@xs4all.nl>
+	- MSACM32: Compile fixes (internal.cpp)
 
  99-12-18: Jens Wiessner <wiessnej@rfi.de>
 	- MSACM32: Updated with latest Wine code (991212)
