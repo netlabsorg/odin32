@@ -1,4 +1,4 @@
-/* $Id: exceptions.cpp,v 1.14 1999-08-25 15:46:52 sandervl Exp $ */
+/* $Id: exceptions.cpp,v 1.15 1999-08-25 17:05:57 sandervl Exp $ */
 
 /*
  * Win32 Device IOCTL API functions for OS/2
@@ -896,7 +896,8 @@ ULONG APIENTRY OS2ExceptionHandler(PEXCEPTIONREPORTRECORD       pERepRec,
   case XCPT_ACCESS_VIOLATION:
   {	
    Win32MemMap *map;
-  
+   BOOL fWriteAccess = FALSE;
+
 	if(pERepRec->ExceptionInfo[1] == 0 && pERepRec->ExceptionInfo[1] == XCPT_DATA_UNKNOWN) {
 		goto continueFail;
 	}
@@ -914,6 +915,7 @@ ULONG APIENTRY OS2ExceptionHandler(PEXCEPTIONREPORTRECORD       pERepRec,
 		if(map->hasWriteAccess() == FALSE) {
 			goto continueFail;
 		}
+		fWriteAccess = TRUE;
 		break;
 	case XCPT_EXECUTE_ACCESS:
 		if(map->hasExecuteAccess() == FALSE) {
@@ -925,7 +927,7 @@ ULONG APIENTRY OS2ExceptionHandler(PEXCEPTIONREPORTRECORD       pERepRec,
 	}
 	//Might want to consider mapping more than one page if access is at
         //a high offset in the page
-	if(map->commitPage((LPVOID)pERepRec->ExceptionInfo[1], 1) == TRUE)
+	if(map->commitPage((LPVOID)pERepRec->ExceptionInfo[1], 1, fWriteAccess) == TRUE)
 		return (XCPT_CONTINUE_EXECUTION);
 
 	//no break;
