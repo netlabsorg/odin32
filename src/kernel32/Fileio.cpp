@@ -1,4 +1,4 @@
-/* $Id: Fileio.cpp,v 1.42 2000-10-02 13:38:55 sandervl Exp $ */
+/* $Id: Fileio.cpp,v 1.43 2000-10-02 18:39:32 sandervl Exp $ */
 
 /*
  * Win32 File IO API functions for OS/2
@@ -434,7 +434,7 @@ ODINFUNCTION1(BOOL, DeleteFileW,
   char *astring;
 
   astring = UnicodeToAsciiString((LPWSTR)arg1);
-  rc = ODIN_DeleteFileA(astring);
+  rc = CALL_ODINFUNC(DeleteFileA)(astring);
   FreeAsciiString(astring);
   return(rc);
 }
@@ -634,7 +634,7 @@ ODINFUNCTION1(DWORD, GetFileAttributesW,
   char *astring;
 
   astring = UnicodeToAsciiString((LPWSTR)arg1);
-  rc = ODIN_GetFileAttributesA(astring);
+  rc = CALL_ODINFUNC(GetFileAttributesA)(astring);
   FreeAsciiString(astring);
   return(rc);
 }
@@ -691,7 +691,7 @@ ODINFUNCTION4(DWORD, GetFullPathNameW,
   asciibuffer = (char *)malloc(nBufferLength+1);
   astring     = UnicodeToAsciiString((LPWSTR)lpFileName);
 
-  rc = ODIN_GetFullPathNameA(astring,
+  rc = CALL_ODINFUNC(GetFullPathNameA)(astring,
                              nBufferLength,
                              asciibuffer,
                              &asciipart);

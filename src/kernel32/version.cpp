@@ -1,4 +1,4 @@
-/* $Id: version.cpp,v 1.1 2000-10-02 13:39:18 sandervl Exp $ */
+/* $Id: version.cpp,v 1.2 2000-10-02 18:39:36 sandervl Exp $ */
 
 /*
  * Win32 compatibility file functions for OS/2
@@ -83,9 +83,8 @@ void CheckVersion()
 {
  char szVersion[16];
 
-  if(ODIN_PROFILE_GetOdinIniString(PROFILE_WINVERSION_SECTION, PROFILE_WINVERSION_KEY, 
-                                   "", szVersion, 
-                                   sizeof(szVersion)-1) > 1) 
+  if(PROFILE_GetOdinIniString(PROFILE_WINVERSION_SECTION, PROFILE_WINVERSION_KEY, 
+                              "", szVersion, sizeof(szVersion)-1) > 1) 
   {
 	if(!stricmp(szVersion, PROFILE_WINVERSION_WIN98)) {
 		winversion = WINVERSION_WIN98;

@@ -1,4 +1,4 @@
-/* $Id: critsection.cpp,v 1.6 2000-07-26 18:06:22 sandervl Exp $ */
+/* $Id: critsection.cpp,v 1.7 2000-10-02 18:39:33 sandervl Exp $ */
 /*
  * Win32 critical sections
  * 
@@ -23,12 +23,14 @@
 DECLARE_DEBUG_CHANNEL(relay)
 
 
+#ifdef DEBUG
 HANDLE ODIN_EXTERN(CreateSemaphoreA) (LPSECURITY_ATTRIBUTES arg1, LONG arg2, LONG arg3,
                                       LPCSTR arg4);
 
 DWORD ODIN_EXTERN(WaitForSingleObject)(HANDLE hObject, DWORD timeout);
 
 HANDLE ODIN_EXTERN(ConvertToGlobalHandle)(HANDLE hHandle);
+#endif
 
 /***********************************************************************
  *           InitializeCriticalSection   (KERNEL32.472) (NTDLL.406)
@@ -39,7 +41,7 @@ void WINAPI InitializeCriticalSection( CRITICAL_SECTION *crit )
     crit->LockCount      = -1;
     crit->RecursionCount = 0;
     crit->OwningThread   = 0;
-    crit->LockSemaphore  = ODIN_CreateSemaphoreA( NULL, 0, 1, NULL );
+    crit->LockSemaphore  = CALL_ODINFUNC(CreateSemaphoreA)( NULL, 0, 1, NULL );
     crit->Reserved       = GetCurrentProcessId();
 }
 
@@ -90,11 +92,11 @@ void WINAPI EnterCriticalSection( CRITICAL_SECTION *crit )
         /* Now wait for it */
         for (;;)
         {
-            res = ODIN_WaitForSingleObject( crit->LockSemaphore, 5000L );
+            res = CALL_ODINFUNC(WaitForSingleObject)( crit->LockSemaphore, 5000L );
             if ( res == WAIT_TIMEOUT )
             {
                 dprintf(("Critical section %p wait timed out, retrying (60 sec)\n", crit ));
-                res = ODIN_WaitForSingleObject( crit->LockSemaphore, 60000L );
+                res = CALL_ODINFUNC(WaitForSingleObject)( crit->LockSemaphore, 60000L );
                 if ( res == WAIT_TIMEOUT && TRACE_ON(relay) )
                 {
                     dprintf(("Critical section %p wait timed out, retrying (5 min)\n", crit ));
@@ -174,7 +176,7 @@ void WINAPI LeaveCriticalSection( CRITICAL_SECTION *crit )
 void WINAPI MakeCriticalSectionGlobal( CRITICAL_SECTION *crit )
 {
     dprintf(("MakeCriticalSectionGlobal %x", crit));
-    crit->LockSemaphore = ODIN_ConvertToGlobalHandle( crit->LockSemaphore );
+    crit->LockSemaphore = CALL_ODINFUNC(ConvertToGlobalHandle)( crit->LockSemaphore );
     crit->Reserved      = 0L;
 }
 
