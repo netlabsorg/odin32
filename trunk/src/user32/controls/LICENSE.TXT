@@ -1,0 +1,22 @@
+$Id: LICENSE.TXT,v 1.1 2002-06-02 10:09:27 sandervl Exp $
+This is an additional Odin license agreement.
+It supercedes the main Odin license, but is only valid in 
+the source directory in which it is present.
+
+Copyright (c) 1993-2002 the Wine project authors (see the file AUTHORS
+for a complete list)
+
+Wine is free software; you can redistribute it and/or modify it under
+the terms of the GNU Lesser General Public License as published by the
+Free Software Foundation; either version 2.1 of the License, or (at
+your option) any later version. 
+
+This program is distributed in the hope that it will be useful, but
+WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+Lesser General Public License for more details.
+
+A copy of the GNU Lesser General Public License is included in the
+Wine distribution in the file COPYING.LIB. If you did not receive this
+copy, write to the Free Software Foundation, Inc., 59 Temple Place,
+Suite 330, Boston, MA 02111-1307 USA.
