@@ -1,4 +1,18 @@
-/* $Id: changelog,v 1.1309 2001-03-19 18:56:55 mike Exp $ */
+/* $Id: changelog,v 1.1310 2001-03-19 19:31:35 sandervl Exp $ */
+
+ 2001-03-19: Sander van Leeuwen <sandervl@xs4all.nl>
+    - KERNEL32: o Fail properly when dll can't be found (pe loader)
+    - WINMM:    o Do not pause wave stream after underrun. Stop it instead.
+                  (writing audio buffers to a paused stream crashes MMPM2)
+                  (fixes crash while playing movie in PowerDVD)
+                o Added level 2 logging support.
+                o Recording callback bugfix
+                o Several playback changes & fixes
+                o Do not use TIB selector of thread that issues waveOut/InOpen.
+                  Instead query selector of main thread in DART callback thread.
+                  (fixes crash in WinAmp when pressing stop; thread that opened
+                   the playback stream is terminated before the stream is stopped)
+    - GDI32:    o Check y inversion when resyncing dib section
 
  2001-03-19: Michal Necasek <michalnec@volny.cz>
     - include:  o Few updates/fixes for wmake. Enabled .AUTOEPEND which
