@@ -1,4 +1,7 @@
-/* $Id: changelog,v 1.2445 2003-01-15 10:40:20 sandervl Exp $ */
+/* $Id: changelog,v 1.2446 2003-01-16 12:47:39 sandervl Exp $ */
+
+ 2003-01-16: Sander van Leeuwen <sandervl@innotek   >
+    - KERNEL32: o Fixed heap corruption in CreateProcess (with current dir)
 
  2003-01-15: Platon Fomichev <platon@innotek   >
     - MSVCRT:   o Updates
