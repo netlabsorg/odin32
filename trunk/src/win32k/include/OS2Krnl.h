@@ -1,4 +1,4 @@
-/* $Id: OS2Krnl.h,v 1.12 2001-02-19 05:52:14 bird Exp $
+/* $Id: OS2Krnl.h,v 1.13 2001-07-10 05:23:54 bird Exp $
  *
  * OS/2 kernel structures, typedefs and macros.
  *
@@ -117,12 +117,12 @@ typedef USHORT HPTDA, *PHPTDA;          /* Per-Task Data Area (PTDA) handle */
     #include <OS2KPTDA.h>
 #endif
 
-#ifdef INCL_OS2KRNL_TK
-    #include <OS2KTK.h>
-#endif
-
 #ifdef INCL_OS2KRNL_TCB
     #include <OS2KTCB.h>
+#endif
+
+#ifdef INCL_OS2KRNL_TK
+    #include <OS2KTK.h>
 #endif
 
 #ifdef INCL_OS2KRNL_LDR
