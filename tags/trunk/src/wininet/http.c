@@ -14,6 +14,7 @@
 #include "wininet.h"
 #include "debugtools.h"
 #include "winerror.h"
+#include <shlwapi.h>
 #include "winsock.h"
 
 #ifdef __WIN32OS2__
@@ -222,8 +223,13 @@ HINTERNET HTTP_HttpOpenRequestA(HINTERNET hHttpSession,
     lpwhr->hdr.dwContext = dwContext;
     lpwhr->nSocketFD = INVALID_SOCKET;
 
-    if (NULL != lpszObjectName && strlen(lpszObjectName))
-        lpwhr->lpszPath = strdup(lpszObjectName);
+    if (NULL != lpszObjectName && strlen(lpszObjectName)) {
+        DWORD needed = 0;
+        UrlEscapeA(lpszObjectName, NULL, &needed, URL_ESCAPE_SPACES_ONLY);
+        lpwhr->lpszPath = HeapAlloc(GetProcessHeap(), 0, needed);
+        UrlEscapeA(lpszObjectName, lpwhr->lpszPath, &needed,
+                   URL_ESCAPE_SPACES_ONLY);
+    }
 
     if (NULL != lpszReferrer && strlen(lpszReferrer))
         HTTP_ProcessHeader(lpwhr, HTTP_REFERER, lpszReferrer, HTTP_ADDHDR_FLAG_COALESCE);
@@ -600,6 +606,15 @@ BOOL HTTP_HttpSendRequestA(HINTERNET hHttpRequest, LPCSTR lpszHeaders,
     /* If we don't have a path we set it to root */
     if (NULL == lpwhr->lpszPath)
         lpwhr->lpszPath = strdup("/");
+
+    if(lpwhr->lpszPath[0] != '/') /* not an absolute path ?? --> fix it !! */
+    {
+        char *fixurl = HeapAlloc(GetProcessHeap(), 0, strlen(lpwhr->lpszPath) + 2);
+        *fixurl = '/';
+        strcpy(fixurl + 1, lpwhr->lpszPath);
+        HeapFree( GetProcessHeap(), 0, lpwhr->lpszPath );
+        lpwhr->lpszPath = fixurl;
+    }
 
     /* Calculate length of request string */
     requestStringLen =
