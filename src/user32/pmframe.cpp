@@ -1,4 +1,4 @@
-/* $Id: pmframe.cpp,v 1.5 1999-10-14 18:27:58 sandervl Exp $ */
+/* $Id: pmframe.cpp,v 1.6 1999-10-14 21:37:44 sandervl Exp $ */
 /*
  * Win32 Frame Managment Code for OS/2
  *
@@ -182,7 +182,16 @@ MRESULT EXPENTRY Win32FrameProc(HWND hwnd,ULONG msg,MPARAM mp1,MPARAM mp2)
       Win32BaseWindow *wndchild;
 
       wndchild = Win32BaseWindow::GetWindowFromOS2FrameHandle(pswp->hwnd);
-      if(wndchild && wndchild->isChild()) {
+      if(wndchild && wndchild->isChild()) 
+      {
+#if 0
+       SWP swp = *pswp;
+
+  	MRESULT rc = OldFrameProc(hwnd, msg, mp1, mp2);
+	pswp->x = swp.x;
+	pswp->y = swp.y;
+	pswp->fl = swp.fl;
+#endif
       	dprintf(("PMFRAME: WM_ADJUSTWINDOWPOS %x %x %x (%d,%d) (%d,%d)", hwnd, pswp->hwnd, pswp->fl, pswp->x, pswp->y, pswp->cx, pswp->cy));
       	RestoreOS2TIB();
       	return (MRESULT)0;
@@ -313,7 +322,11 @@ MRESULT EXPENTRY Win32FrameProc(HWND hwnd,ULONG msg,MPARAM mp1,MPARAM mp2)
           RestoreOS2TIB();
           return res;
         } else goto RunDefFrameProc;
-      } else
+      } 
+//SvL: I doubt this is necessary. Just look at winhlp32. First it draws the
+//     the background gray and then white.
+#if 0
+      else
       {
         RECTL rect;
         HPS hps = WinBeginPaint(hwnd,0,&rect);
@@ -325,6 +338,7 @@ MRESULT EXPENTRY Win32FrameProc(HWND hwnd,ULONG msg,MPARAM mp1,MPARAM mp2)
         RestoreOS2TIB();
         return (MRESULT)0;
       }
+#endif
 
     default:
       RestoreOS2TIB();
