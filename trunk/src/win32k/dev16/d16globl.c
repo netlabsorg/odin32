@@ -1,4 +1,4 @@
-/* $Id: d16globl.c,v 1.3 2001-01-20 23:53:27 bird Exp $
+/* $Id: d16globl.c,v 1.4 2001-01-21 07:54:37 bird Exp $
  *
  * d16globals - global data (16-bit)
  *
@@ -38,5 +38,5 @@ struct options
 
 CHAR        szBuildDate[] = {__DATE__};
 CHAR        szBuildTime[] = {__TIME__};
-CHAR        szWin32kIni[CCHMAXPATH] = {"\win32k.ini"};
+CHAR        szWin32kIni[160] = {"\win32k.ini"};
 
