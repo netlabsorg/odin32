@@ -1,4 +1,4 @@
-/* $Id: wprocess.cpp,v 1.148 2002-02-19 12:51:53 sandervl Exp $ */
+/* $Id: wprocess.cpp,v 1.149 2002-02-26 11:11:17 sandervl Exp $ */
 
 /*
  * Win32 process functions
@@ -1865,10 +1865,13 @@ BOOL WINAPI CreateProcessA( LPCSTR lpApplicationName, LPSTR lpCommandLine,
     if(cmdline)
         free(cmdline);
 
-    if(lpProcessInfo)
-      dprintf(("KERNEL32:  CreateProcess returned %d hPro:%x hThr:%x pid:%x tid:%x\n",
-               rc, lpProcessInfo->hProcess, lpProcessInfo->hThread,
-                   lpProcessInfo->dwProcessId,lpProcessInfo->dwThreadId));
+    if(lpProcessInfo) 
+    {
+        lpProcessInfo->dwThreadId = MAKE_THREADID(lpProcessInfo->dwProcessId, lpProcessInfo->dwThreadId);
+        dprintf(("KERNEL32:  CreateProcess returned %d hPro:%x hThr:%x pid:%x tid:%x\n",
+                 rc, lpProcessInfo->hProcess, lpProcessInfo->hThread,
+                 lpProcessInfo->dwProcessId,lpProcessInfo->dwThreadId));
+    }
     else
       dprintf(("KERNEL32:  CreateProcess returned %d\n", rc));
     return(rc);
