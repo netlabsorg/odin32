@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.3 2003-01-23 13:11:14 sandervl Exp $
+# $Id: makefile,v 1.4 2003-02-28 10:32:38 sandervl Exp $
 
 #
 # Odin32 API
@@ -27,6 +27,8 @@ LD2FLAGS    = $(LD2FLAGS_ODINCRT)
 CDEFINES    = $(CDEFINES_ODINCRT)
 IMPLIBFLAGS = $(IMPLIBFLAGS) /NOIgnoreCase
 DEFFILE     = odinprof.def
+OBJ_PROFILE =
+LIB_PROFILE =
 
 
 #

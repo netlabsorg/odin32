@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.2 2002-02-12 07:05:01 bird Exp $
+# $Id: Makefile,v 1.3 2003-02-28 10:31:35 sandervl Exp $
 
 #
 # Odin32 API
@@ -37,9 +37,10 @@ $(ODIN32_LIB)\mysql.lib: mysql.def
 #
 # Make our own libuls import library.
 #
-clean:
+clean cleanall:
     $(RM) $(ODIN32_LIB)\mysql.lib
 
+	
 
 #
 # Dummy rules.

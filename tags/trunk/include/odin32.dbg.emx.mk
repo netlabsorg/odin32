@@ -1,4 +1,4 @@
-# $Id: odin32.dbg.emx.mk,v 1.9 2003-01-15 10:41:11 sandervl Exp $
+# $Id: odin32.dbg.emx.mk,v 1.10 2003-02-28 10:28:09 sandervl Exp $
 
 #
 # Odin32 API
@@ -15,16 +15,29 @@
 #
 SOMLIB   = somtk.lib
 RTLLIB   = \
+#$(EMX)\lib\mt\c.lib \
+#$(EMX)\lib\mt\c_app.lib \
+#$(EMX)\lib\c_alias.lib \
+#$(EMX)\lib\mt\emx.lib \
+#$(EMX)\lib\emx2.lib \
+#$(EMX)\lib\stdcpp.lib \
+#$(EMX)\lib\gcc.lib \
+$(ODIN32_BASE)\src\msvcrt\libs\m.lib \
+$(EMX)\lib\iberty_s.lib \
+$(EMX)\lib\gcc-lib\i386-pc-os2_emx\3.0.3\mt\gcc.lib \
 $(EMX)\lib\mt\c.lib \
-$(EMX)\lib\mt\c_app.lib \
+$(EMX)\lib\mt\c_dllso.lib \
+$(EMX)\lib\mt\sys.lib \
 $(EMX)\lib\c_alias.lib \
 $(EMX)\lib\mt\emx.lib \
 $(EMX)\lib\emx2.lib \
-$(EMX)\lib\stdcpp.lib \
-$(EMX)\lib\gcc.lib \
-$(EMX)\lib\end.lib
+$(EMX)\lib\gcc-lib\i386-pc-os2_emx\3.0.3\mt\stdcxx.lib \
+$(EMX)\lib\gcc-lib\i386-pc-os2_emx\3.0.3\mt\gpp.lib \
+$(EMX)\lib\stdcxx.lib \
+#$(EMX)\lib\stdcpp.lib \
+#$(EMX)\lib\mt\c_app.lib makes trouble for crtdll \
 
-RTLLIB_O = $(EMX)\lib\mt\c_import.lib $(RTLIB)
+RTLLIB_O = $(EMX)\lib\mt\c_import.lib $(RTLLIB)
 RTLLIB_NRE =
 DLLENTRY = $(ODIN32_LIB)\dllentry.obj
 ODINCRT  = odincrtd
@@ -110,20 +123,18 @@ LDTARGETFLAGS    = -Zexe -Zstack 80
 LD2TARGETFLAGS   = /pmtype:pm  /stack:$(STACKSIZE)
 !   endif
 !else
-LDTARGETFLAGS    = -Zdll
+LDTARGETFLAGS    = -Zdll -Zso -Zsys
 LD2TARGETFLAGS   = /DLL
 !endif
 !ifdef NODEBUGINFO
-LDFLAGS          = -Zmt -Zomf -Zmap $(LDTARGETFLAGS) -g
-LDFLAGS_ODINCRT  = -Zmt -Zomf -Zmap $(LDTARGETFLAGS) -g
-LD2FLAGS         = $(LD2TARGETFLAGS) -s -O/EXEPACK:2        -O/NOD
-LD2FLAGS_ODINCRT = $(LD2TARGETFLAGS) -s -O/EXEPACK:2
-LD2FLAGS         = /nologo /noe /map /packcode /packdata /exepack:2 /nodebug /nod $(LD2TARGETFLAGS)
-LD2FLAGS_ODINCRT = /nologo /noe /map /packcode /packdata /exepack:2 /nodebug      $(LD2TARGETFLAGS)
+LDFLAGS          = -Zmt -Zomf -Zmap -Zlinker "/MAP:FULL /Linenumbers /exepack:2 /Nod" $(LDTARGETFLAGS) -s
+LDFLAGS_ODINCRT  = -Zmt -Zomf -Zmap -Zlinker "/MAP:FULL /Linenumbers /exepack:2     " $(LDTARGETFLAGS) -s
+LD2FLAGS         = /nologo /noe /map:full /NoIgnoreCase /Linenumbers /packcode /packdata /exepack:2 /nodebug /nod $(LD2TARGETFLAGS)
+LD2FLAGS_ODINCRT = /nologo /noe /map:full /NoIgnoreCase /Linenumbers /packcode /packdata /exepack:2 /nodebug      $(LD2TARGETFLAGS)
 !else
-LDFLAGS          = -Zomf -Zmap $(LDTARGETFLAGS) -g
-LDFLAGS_ODINCRT  = -Zso -Zsys -Zomf -Zmap $(LDTARGETFLAGS) -g
-LD2FLAGS         = /nologo /noe /map /packcode /packdata /exepack:2 /nod /debug $(LD2TARGETFLAGS)
-LD2FLAGS_ODINCRT = /nologo /noe /map /packcode /packdata /exepack:2      /debug $(LD2TARGETFLAGS)
+LDFLAGS          = -Zmt -Zomf -Zmap -Zlinker "/MAP:FULL /Linenumbers /exepack:2 /Nod" $(LDTARGETFLAGS) -g
+LDFLAGS_ODINCRT  = -Zmt -Zomf -Zmap -Zlinker "/MAP:FULL /Linenumbers /exepack:2     " $(LDTARGETFLAGS) -g
+LD2FLAGS         = /nologo /noe /map:full /NoIgnoreCase /Linenumbers /packcode /packdata /exepack:2 /debug /nod $(LD2TARGETFLAGS)
+LD2FLAGS_ODINCRT = /nologo /noe /map:full /NoIgnoreCase /Linenumbers /packcode /packdata /exepack:2 /debug      $(LD2TARGETFLAGS)
 !endif
 

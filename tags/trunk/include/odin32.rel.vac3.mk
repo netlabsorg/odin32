@@ -1,4 +1,4 @@
-# $Id: odin32.rel.vac3.mk,v 1.13 2003-02-02 14:24:22 sandervl Exp $
+# $Id: odin32.rel.vac3.mk,v 1.14 2003-02-28 10:28:11 sandervl Exp $
 
 #
 # Odin32 API
@@ -39,7 +39,7 @@ STATIC_CRT=1
 #
 # Tool Flags
 #
-ASFLAGS          = -Mb -Sc -Sv:ALP
+ASFLAGS          = -Mb -Sc -Sv:ALP +Od
 IMPLIBFLAGS      = /nologo
 ILIBFLAGS        = /quiet /nologo /noignorecase
 RCFLAGS          = -s -I. -I$(CPPMAIN)\include -D__WIN32OS2__
@@ -67,14 +67,15 @@ CTARGETFLAGS     = -Ge-
 CXXTARGETFLAGS   = -Ge-
 !endif
 CXXEXCEPTIONS    = -Gx-
-CFLAGS           = -c -Q -Si -G5 -O+ -Oi+ -Ss+ -W3 -Gm+ /Gn+ $(PROFILEFLAGS) $(CTARGETFLAGS)
-CXXFLAGS         = -c -Q -Si -G5 -O+ -Oi+ -Ss+ -W3 -Gm+ /Gn+ $(PROFILEFLAGS) $(CXXTARGETFLAGS) /Gx+
-CXXFLAGS_ODINCRT = -c -Q -Si -G5 -O+ -Oi+ -Ss+ -W3 -Gm+ /Gn- $(PROFILEFLAGS) $(CXXTARGETFLAGS) /Gx+
-CFLAGS_WIN32APP  = -c -Q -Si -G5 -O+ -Oi+ -Ss+ -W3 -Gm+ /Gn+ $(PROFILEFLAGS) $(CTARGETFLAGS)
-CXXFLAGS_WIN32APP= -c -Q -Si -G5 -O+ -Oi+ -Ss+ -W3 -Gm+ /Gn+ $(PROFILEFLAGS) $(CXXTARGETFLAGS)
-CINCLUDES        = -I$(ODIN32_INCLUDE)\Win -I. -I$(ODIN32_INCLUDE) 
+CFLAGS           = -c -Q -Si -Ti+ -G5 -O+ -Oi+ -Ss+ -W3 -Gm+ /Gn+ $(PROFILEFLAGS) $(CTARGETFLAGS)
+CXXFLAGS         = -c -Q -Si -Ti+ -G5 -O+ -Oi+ -Ss+ -W3 -Gm+ /Gn+ $(PROFILEFLAGS) $(CXXTARGETFLAGS) /Gx+
+CXXFLAGS_ODINCRT = -c -Q -Si -Ti+ -G5 -O+ -Oi+ -Ss+ -W3 -Gm+ /Gn- $(PROFILEFLAGS) $(CXXTARGETFLAGS) /Gx+
+CFLAGS_WIN32APP  = -c -Q -Si -Ti+ -G5 -O+ -Oi+ -Ss+ -W3 -Gm+ /Gn+ $(PROFILEFLAGS) $(CTARGETFLAGS)
+CXXFLAGS_WIN32APP= -c -Q -Si -Ti+ -G5 -O+ -Oi+ -Ss+ -W3 -Gm+ /Gn+ $(PROFILEFLAGS) $(CXXTARGETFLAGS)
 !ifndef STATIC_CRT
-CINCLUDES        = -I$(ODIN32_INCLUDE)\incl_vac $(CINCLUDES) 
+CINCLUDES        = -I$(ODIN32_INCLUDE)\incl_vac -I$(ODIN32_INCLUDE)\Win -I. -I$(ODIN32_INCLUDE)
+!else
+CINCLUDES        = -I$(ODIN32_INCLUDE)\Win -I. -I$(ODIN32_INCLUDE)
 !endif
 CDEFINES         = -D__WIN32OS2__ -D__WINE__ -D__i386__ -DTCPV40HDRS -DCOMCTL32UNDOC
 CDEFINES_ODINCRT = -D__WIN32OS2__ -D__WINE__ -D__i386__
