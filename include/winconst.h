@@ -1,4 +1,4 @@
-/* $Id: winconst.h,v 1.22 2000-01-20 21:54:41 sandervl Exp $ */
+/* $Id: winconst.h,v 1.23 2000-02-03 12:19:23 sandervl Exp $ */
 
 /*
  * Win32 constants
@@ -994,3 +994,9 @@
 #ifndef HIWORD
 #define HIWORD(l)              ((WORD)((DWORD)(l) >> 16))
 #endif
+
+  /* biCompression */
+#define BI_RGB           0
+#define BI_RLE8          1
+#define BI_RLE4          2
+#define BI_BITFIELDS     3
