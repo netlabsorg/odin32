@@ -1,4 +1,4 @@
-/* $Id: iphlpapi.cpp,v 1.11 2002-10-07 10:25:56 sandervl Exp $ */
+/* $Id: iphlpapi.cpp,v 1.12 2002-10-07 11:02:03 sandervl Exp $ */
 /*
  *	IPHLPAPI library
  *
@@ -398,11 +398,10 @@ ODINFUNCTION2(DWORD,            GetAdaptersInfo,
   {
     // check for sufficient space
     DWORD dwRequired = i_sizeOfIP_ADAPTER_INFO(pip);
-    
-    if (lSpaceLeft - dwRequired >= 0)
-    {
-      lSpaceLeft -= dwRequired;
-      
+
+    lSpaceLeft -= dwRequired;
+    if (lSpaceLeft >= 0)
+    {     
       // @PF revised - this thing works because we currently do not support
       // multi-ip, multi-gateway or multi-DHCP servers lists
       // TODO - add lists support
