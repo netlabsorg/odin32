@@ -1,4 +1,8 @@
-/* $Id: changelog,v 1.2228 2002-07-19 11:03:21 sandervl Exp $ */
+/* $Id: changelog,v 1.2229 2002-07-21 09:16:47 sandervl Exp $ */
+
+ 2002-07-21: Sander van Leeuwen <sandervl@innotek.de> 
+    - KERNEL32: o Use shared memory in high region (> 512MB) if available
+                o Interface changes for shared memory allocation
 
  2002-07-19: Sander van Leeuwen <sandervl@innotek.de> 
     - ODINCRT:  o Dos*CriticalSection fixes
