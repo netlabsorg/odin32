@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.310 2002-01-12 09:55:51 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.311 2002-01-12 14:09:31 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -110,7 +110,7 @@ BOOL INLINE i_HwGetWindowHandleData(HWND hwnd, DWORD *pdwUserData)
 Win32BaseWindow::Win32BaseWindow() 
                      : GenericObject(&windows, &critsect), ChildWindow(&critsect)
 {
-  Init();
+    Init();
 }
 //******************************************************************************
 //******************************************************************************
@@ -142,15 +142,22 @@ Win32BaseWindow::Win32BaseWindow(HWND hwndOS2, ATOM classAtom)
     dwStyle    = WS_VISIBLE;
     dwOldStyle = dwStyle;
     dwExStyle  = 0;
+
+    //We pretend this window has no parent and won't change size
+    //(dangerous assumption!!)
+    OSLibWinQueryWindowClientRect(OS2Hwnd, &rectClient);
+    rectWindow = rectClient;
+
+    fFakeWindow = TRUE;
 }
 //******************************************************************************
 //******************************************************************************
 Win32BaseWindow::Win32BaseWindow(CREATESTRUCTA *lpCreateStructA, ATOM classAtom, BOOL isUnicode)
                      : GenericObject(&windows, &critsect), ChildWindow(&critsect)
 {
-  Init();
-  this->isUnicode = isUnicode;
-  CreateWindowExA(lpCreateStructA, classAtom);
+    Init();
+    this->isUnicode = isUnicode;
+    CreateWindowExA(lpCreateStructA, classAtom);
 }
 //******************************************************************************
 //******************************************************************************
@@ -170,6 +177,7 @@ void Win32BaseWindow::Init()
   fMinMaxChange    = FALSE;
   fVisibleRegionChanged = FALSE;
   fEraseBkgndFlag  = TRUE;
+  fFakeWindow      = FALSE;
 
   state            = STATE_INIT;
   windowNameA      = NULL;
@@ -314,9 +322,6 @@ Win32BaseWindow::~Win32BaseWindow()
     }
     if(owner && !fDestroyAll) {
         RELEASE_WNDOBJ(owner);
-    }
-    if(windowClass) {
-        RELEASE_CLASSOBJ(windowClass);
     }
 }
 //******************************************************************************

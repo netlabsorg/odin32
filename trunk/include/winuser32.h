@@ -41,6 +41,7 @@ HICON WIN32API GetOS2Icon(HICON hIcon);
 //limited functionality)
 //Useful for creating an Odin window with an OS/2 window as parent.
 HWND WIN32API CreateFakeWindowEx(HWND hwndOS2, ATOM classAtom);
+HWND WIN32API DestroyFakeWindow(HWND hwndWin32);
 
 #define WIN32_APPEARANCE	0
 #define OS2_APPEARANCE 		1  //OS/2 look with win32 system menu
