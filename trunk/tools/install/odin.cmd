@@ -1,4 +1,4 @@
-/* $Id: odin.cmd,v 1.25 2001-01-09 18:17:46 sandervl Exp $
+/* $Id: odin.cmd,v 1.26 2001-01-10 18:39:57 bird Exp $
  *
  * Odin32 API WarpIn installation script generator.
  *
@@ -122,8 +122,24 @@ rc = lineout(sInstFile, '     FIXED');
 title = "     TITLE=""Add Win32k.sys to Config.sys""";
 rc = lineout(sInstFile, title);
 rc = lineout(sInstFile, '     CONFIGSYS="DEVICE=$(1)\SYSTEM32\Win32k.sys -pe:pe -Dllfixes:D | UNIQUE(WIN32K.SYS) ADDTOP"');
-rc = lineout(sInstFile, '     >Add Win32k.sys to Config.sys .</PCK>');
+rc = lineout(sInstFile, '     >Add Win32k.sys to Config.sys.</PCK>');
 rc = lineout(sInstFile, '');
+
+/*
+ * For release packages it is optionally to install the debug symbol files.
+ */
+if (pos('DEBUG', translate(filespec('name', sDllDir))) <= 0) then
+do
+    rc = lineout(sInstFile, '<PCK INDEX=4');
+    rc = lineout(sInstFile, '     PACKAGEID="Odin\Odin\Odin .sym files\0\0\5"');
+    rc = lineout(sInstFile, '     TARGET="C:\ODIN\SYSTEM32"');
+    rc = lineout(sInstFile, '     FIXED');
+    title = "     TITLE=""Odin Daily Build .sym Files ("date()")""";
+    rc = lineout(sInstFile, title);
+    rc = lineout(sInstFile, '     >Installation of Odin .sym files.</PCK>');
+    rc = lineout(sInstFile, '');
+end
+
 rc = lineout(sInstFile, '</HEAD>');
 rc = lineout(sInstFile, '<BODY>');
 rc = lineout(sInstFile, '<PAGE INDEX=1 TYPE=TEXT>');
@@ -345,22 +361,36 @@ if (rc <> 0) then return rc;
 /*
  * Packet 2
  */
-say sWICCmd '2 -c'||sBinDir' *.ini 2 -c'||sDllDir '*.dll pe.exe pec.exe odininst.exe regsvr32.exe win32k.sys win32k.ddp Win32kCC.exe kRx.exe';
 /* sWICCmd '2 -c'||sBinDir' odin.ini'; */
+/* if (rc <> 0) then return rc; */
+sWICCmd '2 -c'||sDllDir||' pe.exe *.dll pec.exe odininst.exe regsvr32.exe win32k.sys win32k.ddp Win32kCC.exe kRx.exe';
 if (rc <> 0) then return rc;
-sWICCmd '2 -c'||sDllDir 'pe.exe *.dll ..\wgss50.dll pec.exe odininst.exe regsvr32.exe win32k.sys win32k.ddp Win32kCC.exe kRx.exe';
+sWICCmd '2 -c'||sBinDir||' wgss50.dll';
 if (rc <> 0) then return rc;
+
 if (pos('DEBUG', translate(filespec('name', sDllDir))) > 0) then
 do
     sWICCmd '2 -c'||sDllDir '*.sym';
     if (rc <> 0) then return rc;
 end
 
+
 /*
  * Packet 3 is only win32k.sys config.sys line but it seems like we have to add something.
  */
 sWICCmd '3 -c'||sDllDir '*.ddp';
 if (rc <> 0) then return rc;
+
+
+/*
+ * Packet 4 is the .sym files and only present in release mode.
+ */
+if (pos('DEBUG', translate(filespec('name', sDllDir))) <= 0) then
+do
+    sWICCmd '4 -c'||sDllDir '*.sym';
+    if (rc <> 0) then return rc;
+end
+
 
 return rc;
 
