@@ -1,4 +1,4 @@
-# $Id: winmm.mak,v 1.5 2001-07-29 19:00:53 sandervl Exp $
+# $Id: winmm.mak,v 1.6 2001-07-30 10:19:54 sandervl Exp $
 
 #
 # Odin32 API
@@ -55,7 +55,6 @@ $(OBJDIR)\dbglocal.obj
 # Libraries. One space before the '\'.
 #
 LIBS = \
-$(ODIN32_LIB)/pmwinx.lib \
 mmpm2.lib \
 $(ODIN32_LIB)/kernel32.lib \
 $(ODIN32_LIB)/user32.lib \
