@@ -1,4 +1,4 @@
-/* $Id: oleaut32.h,v 1.3 1999-09-02 16:23:18 sandervl Exp $ */
+/* $Id: oleaut32.h,v 1.4 1999-09-05 22:44:36 davidr Exp $ */
 /*
  * Win32 OLE stubs for OS/2
  *
@@ -37,6 +37,7 @@
 #include <winreg.h>
 
 #include "wine/obj_base.h"
+#include "wine/obj_oleview.h"
 #include "wine/obj_misc.h"
 #include "wine/obj_inplace.h"
 #include "wine/obj_dataobject.h"
