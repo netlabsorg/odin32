@@ -1,6 +1,10 @@
-/* $Id: daudio.h,v 1.1 2001-03-23 16:24:57 sandervl Exp $ */
+/* $Id: daudio.h,v 1.2 2001-03-24 15:42:20 sandervl Exp $ */
 #ifndef __DAUDIO_H__
 #define __DAUDIO_H__
+
+#ifndef FAR
+#define FAR
+#endif
 
 #define DAUDIO_IOCTL_CAT		0x91
 
