@@ -1,4 +1,4 @@
-/* $Id: changelog,v 1.2068 2002-05-08 14:09:09 sandervl Exp $ */
+/* $Id: changelog,v 1.2069 2002-05-08 15:03:25 sandervl Exp $ */
 
  2002-05-08: Sander van Leeuwen <sandervl@xs4all.nl>
     - COMCTL32: o Merged progress, updown, rebar, animate, comboex, flatsb,
@@ -7,6 +7,8 @@
     - ADVAPI32: o AllocateAndInitializeSid bugfix (return value from function
                   in NTDLL)
     - NTDLL:    o RtlAddAccessAllowedAce stub always returns TRUE
+    - KERNEL32: o Stubs for volume & volume mountpoint functions
+                  (win2k and up)
 
  2002-05-08: Platon Fomichev <platon@innotek.de>
     - COMCTL32: o Merged listview control with latest Wine
