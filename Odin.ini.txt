@@ -1,4 +1,4 @@
-/* $Id: Odin.ini.txt,v 1.6 2000-01-11 13:05:43 sandervl Exp $ */
+/* $Id: Odin.ini.txt,v 1.7 2000-01-18 20:23:11 sandervl Exp $ */
 
 Odin initialization file documentation
 
@@ -8,7 +8,7 @@ UseWinColors	Use Windows colors
 		default: 0
 SaveColors	Save/restore colors to/from Odin.ini
 		values: 1/0
-		default: 0
+		default: 1
 
 [DIRECTORIES]
 SYSTEM		Windows system directory
