@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.7 2001-09-30 09:34:43 bird Exp $
+# $Id: makefile,v 1.8 2002-11-13 12:17:18 sandervl Exp $
 
 #
 # Odin32 API
@@ -26,7 +26,7 @@ CDEFINES = $(CDEFINES) -DWIN32 -DSTDARG -DTHINK_C
 OBJS = \
 $(OBJDIR)\reader.obj \
 $(OBJDIR)\charlist.obj \
-$(OBJDIR)\textwriter.obj \
+$(OBJDIR)\text-writer.obj \
 $(OBJDIR)\richedit.obj \
 $(OBJDIR)\initterm.obj \
 $(OBJDIR)\initriched32.obj \
