@@ -3,12 +3,12 @@
  *
  *  Copyright 1998 Eric Kohl
  *            2000 Jason Mawdsley.
+ *            2001 Michael Stefaniuc
+ *            2001 Charles Loep for CodeWeavers
  *
  *  TODO:
  *    - Fix ImageList_DrawIndirect (xBitmap, yBitmap, rgbFg, rgbBk, dwRop).
  *    - Fix ImageList_GetIcon.
- *    - Fix drag functions.
- *    - Fix ImageList_Write.
  *    - Fix ImageList_SetFilter (undocumented).
  *      BTW does anybody know anything about this function???
  *        - It removes 12 Bytes from the stack (3 Parameters).
@@ -23,6 +23,7 @@
  *      limited in functionality too.
  */
 
+#include <stdlib.h>
 #include <string.h>
 #include "winerror.h"
 #include "winbase.h"
@@ -35,24 +36,27 @@
 DEFAULT_DEBUG_CHANNEL(imagelist);
 
 
-#define _MAX(a,b) (((a)>(b))?(a):(b))
-#define _MIN(a,b) (((a)>(b))?(b):(a))
-
 #define MAX_OVERLAYIMAGE 15
 
-
 /* internal image list data used for Drag & Drop operations */
+typedef struct
+{
+    HWND	hwnd;
+    HIMAGELIST	himl;
+    /* position of the drag image relative to the window */
+    INT		x;
+    INT		y;
+    /* offset of the hotspot relative to the origin of the image */
+    INT		dxHotspot;
+    INT		dyHotspot;
+    /* is the drag image visible */
+    BOOL	bShow;
+    /* saved background */
+    HBITMAP	hbmBg;
+} INTERNALDRAG;
 
-static HIMAGELIST himlInternalDrag = NULL;
-static INT      nInternalDragHotspotX = 0;
-static INT      nInternalDragHotspotY = 0;
+static INTERNALDRAG InternalDrag = { 0, 0, 0, 0, 0, 0, FALSE, 0 };
 
-static HWND     hwndInternalDrag = 0;
-static INT      xInternalPos = 0;
-static INT      yInternalPos = 0;
-
-static HDC      hdcBackBuffer = 0;
-static HBITMAP  hbmBackBuffer = 0;
 
 
 /*************************************************************************
@@ -77,7 +81,7 @@ IMAGELIST_InternalExpandBitmaps (HIMAGELIST himl, INT nImageCount, INT cx, INT c
     HBITMAP hbmNewBitmap;
     INT     nNewWidth, nNewCount;
 
-    if ((himl->cCurImage + nImageCount < himl->cMaxImage)
+    if ((himl->cCurImage + nImageCount <= himl->cMaxImage)
         && (himl->cy >= cy))
 	return;
 
@@ -460,9 +464,6 @@ IMAGELIST_InternalDrawOverlay(IMAGELISTDRAWPARAMS *pimldp, INT cx, INT cy)
 }
 
 
-
-
-
 /*************************************************************************
  * ImageList_Add [COMCTL32.40]
  *
@@ -706,45 +707,46 @@ ImageList_BeginDrag (HIMAGELIST himlTrack, INT iTrack,
 	             INT dxHotspot, INT dyHotspot)
 {
     HDC hdcSrc, hdcDst;
+    INT cx, cy;
 
-    FIXME("partially implemented!\n");
+    TRACE("(himlTrack=%p iTrack=%d dx=%d dy=%d)\n", himlTrack, iTrack,
+	  dxHotspot, dyHotspot);
 
     if (himlTrack == NULL)
 	return FALSE;
 
-    if (himlInternalDrag)
+    if (InternalDrag.himl)
         ImageList_EndDrag ();
 
-    himlInternalDrag =
-	ImageList_Create (himlTrack->cx, himlTrack->cy,
-			  himlTrack->flags, 1, 1);
-    if (himlInternalDrag == NULL) {
+    cx = himlTrack->cx;
+    cy = himlTrack->cy;
+
+    InternalDrag.himl = ImageList_Create (cx, cy, himlTrack->flags, 1, 1);
+    if (InternalDrag.himl == NULL) {
         ERR("Error creating drag image list!\n");
         return FALSE;
     }
 
-    nInternalDragHotspotX = dxHotspot;
-    nInternalDragHotspotY = dyHotspot;
+    InternalDrag.dxHotspot = dxHotspot;
+    InternalDrag.dyHotspot = dyHotspot;
 
     hdcSrc = CreateCompatibleDC (0);
     hdcDst = CreateCompatibleDC (0);
 
     /* copy image */
     SelectObject (hdcSrc, himlTrack->hbmImage);
-    SelectObject (hdcDst, himlInternalDrag->hbmImage);
-    StretchBlt (hdcDst, 0, 0, himlInternalDrag->cx, himlInternalDrag->cy, hdcSrc,
-                  iTrack * himlTrack->cx, 0, himlTrack->cx, himlTrack->cy, SRCCOPY);
+    SelectObject (hdcDst, InternalDrag.himl->hbmImage);
+    BitBlt (hdcDst, 0, 0, cx, cy, hdcSrc, iTrack * cx, 0, SRCCOPY);
 
     /* copy mask */
     SelectObject (hdcSrc, himlTrack->hbmMask);
-    SelectObject (hdcDst, himlInternalDrag->hbmMask);
-    StretchBlt (hdcDst, 0, 0, himlInternalDrag->cx, himlInternalDrag->cy, hdcSrc,
-                  iTrack * himlTrack->cx, 0, himlTrack->cx, himlTrack->cy, SRCCOPY);
+    SelectObject (hdcDst, InternalDrag.himl->hbmMask);
+    BitBlt (hdcDst, 0, 0, cx, cy, hdcSrc, iTrack * cx, 0, SRCCOPY);
 
     DeleteDC (hdcSrc);
     DeleteDC (hdcDst);
 
-    himlInternalDrag->cCurImage = 1;
+    InternalDrag.himl->cCurImage = 1;
 
     return TRUE;
 }
@@ -1031,24 +1033,25 @@ ImageList_Destroy (HIMAGELIST himl)
 BOOL WINAPI
 ImageList_DragEnter (HWND hwndLock, INT x, INT y)
 {
-    if (himlInternalDrag == NULL)
+    TRACE("(hwnd=%#x x=%d y=%d)\n", hwndLock, x, y);
+
+    if (InternalDrag.himl == NULL)
 	return FALSE;
 
     if (hwndLock)
-	hwndInternalDrag = hwndLock;
+	InternalDrag.hwnd = hwndLock;
     else
-	hwndInternalDrag = GetDesktopWindow ();
+	InternalDrag.hwnd = GetDesktopWindow ();
 
-    xInternalPos = x;
-    yInternalPos = y;
+    InternalDrag.x = x;
+    InternalDrag.y = y;
 
-    hdcBackBuffer = CreateCompatibleDC (0);
-    hbmBackBuffer = CreateCompatibleBitmap (hdcBackBuffer,
-		himlInternalDrag->cx, himlInternalDrag->cy);
+    /* draw the drag image and save the background */
+    if (!ImageList_DragShowNolock(TRUE)) {
+	return FALSE;
+    }
 
-    ImageList_DragShowNolock (TRUE);
-
-    return FALSE;
+    return TRUE;
 }
 
 
@@ -1069,14 +1072,11 @@ BOOL WINAPI
 ImageList_DragLeave (HWND hwndLock)
 {
     if (hwndLock)
-	hwndInternalDrag = hwndLock;
+	InternalDrag.hwnd = hwndLock;
     else
-	hwndInternalDrag = GetDesktopWindow ();
+	InternalDrag.hwnd = GetDesktopWindow ();
 
     ImageList_DragShowNolock (FALSE);
-
-    DeleteDC (hdcBackBuffer);
-    DeleteObject (hbmBackBuffer);
 
     return TRUE;
 }
@@ -1098,19 +1098,80 @@ ImageList_DragLeave (HWND hwndLock)
  * NOTES
  *     The position of the drag image is relative to the window, not
  *     the client area.
+ *
+ * BUGS
+ *     The drag image should be drawn semitransparent.
  */
 
 BOOL WINAPI
 ImageList_DragMove (INT x, INT y)
 {
-    ImageList_DragShowNolock (FALSE);
+    TRACE("(x=%d y=%d)\n", x, y);
 
-    xInternalPos = x;
-    yInternalPos = y;
+    if (!InternalDrag.himl) {
+	return FALSE;
+    }
 
-    ImageList_DragShowNolock (TRUE);
+    /* draw/update the drag image */
+    if (InternalDrag.bShow) {
+	HDC hdcDrag;
+	HDC hdcOffScreen;
+	HDC hdcBg;
+	HBITMAP hbmOffScreen;
+	INT origNewX, origNewY;
+	INT origOldX, origOldY;
+	INT origRegX, origRegY;
+	INT sizeRegX, sizeRegY;
+	
 
-    return FALSE;
+	/* calculate the update region */
+	origNewX = x - InternalDrag.dxHotspot;
+	origNewY = y - InternalDrag.dyHotspot;
+	origOldX = InternalDrag.x - InternalDrag.dxHotspot;
+	origOldY = InternalDrag.y - InternalDrag.dyHotspot;
+	origRegX = min(origNewX, origOldX);
+	origRegY = min(origNewY, origOldY);
+	sizeRegX = InternalDrag.himl->cx + abs(x - InternalDrag.x);
+	sizeRegY = InternalDrag.himl->cy + abs(y - InternalDrag.y);
+
+	hdcDrag = GetDCEx(InternalDrag.hwnd, 0,
+   			  DCX_WINDOW | DCX_CACHE | DCX_LOCKWINDOWUPDATE);
+    	hdcOffScreen = CreateCompatibleDC(hdcDrag);
+    	hdcBg = CreateCompatibleDC(hdcDrag);
+
+	hbmOffScreen = CreateCompatibleBitmap(hdcDrag, sizeRegX, sizeRegY);
+	SelectObject(hdcOffScreen, hbmOffScreen);
+	SelectObject(hdcBg, InternalDrag.hbmBg);
+
+	/* get the actual background of the update region */
+	BitBlt(hdcOffScreen, 0, 0, sizeRegX, sizeRegY, hdcDrag,
+	       origRegX, origRegY, SRCCOPY);
+	/* erase the old image */
+	BitBlt(hdcOffScreen, origOldX - origRegX, origOldY - origRegY,
+	       InternalDrag.himl->cx, InternalDrag.himl->cy, hdcBg, 0, 0,
+	       SRCCOPY);
+	/* save the background */
+	BitBlt(hdcBg, 0, 0, InternalDrag.himl->cx, InternalDrag.himl->cy,
+	       hdcOffScreen, origNewX - origRegX, origNewY - origRegY, SRCCOPY);
+	/* draw the image */
+	/* FIXME: image should be drawn semitransparent */
+	ImageList_Draw(InternalDrag.himl, 0, hdcOffScreen, origNewX - origRegX,
+		       origNewY - origRegY, ILD_NORMAL);
+	/* draw the update region to the screen */
+	BitBlt(hdcDrag, origRegX, origRegY, sizeRegX, sizeRegY,
+	       hdcOffScreen, 0, 0, SRCCOPY);
+
+	DeleteDC(hdcBg);
+	DeleteDC(hdcOffScreen);
+	DeleteObject(hbmOffScreen);
+	ReleaseDC(InternalDrag.hwnd, hdcDrag);
+    }
+
+    /* update the image position */
+    InternalDrag.x = x;
+    InternalDrag.y = y;
+
+    return TRUE;
 }
 
 
@@ -1126,39 +1187,59 @@ ImageList_DragMove (INT x, INT y)
  *     Success: TRUE
  *     Failure: FALSE
  *
- * FIXME
- *     semi-stub.
+ * BUGS
+ *     The drag image should be drawn semitransparent.
  */
 
 BOOL WINAPI
 ImageList_DragShowNolock (BOOL bShow)
 {
     HDC hdcDrag;
+    HDC hdcBg;
+    INT x, y;
 
-    FIXME("semi-stub!\n");
     TRACE("bShow=0x%X!\n", bShow);
 
-    hdcDrag = GetDCEx (hwndInternalDrag, 0,
+    /* DragImage is already visible/hidden */
+    if ((InternalDrag.bShow && bShow) || (!InternalDrag.bShow && !bShow)) {
+	return FALSE;
+    }
+
+    /* position of the origin of the DragImage */
+    x = InternalDrag.x - InternalDrag.dxHotspot;
+    y = InternalDrag.y - InternalDrag.dyHotspot;
+
+    hdcDrag = GetDCEx (InternalDrag.hwnd, 0,
 			 DCX_WINDOW | DCX_CACHE | DCX_LOCKWINDOWUPDATE);
+    if (!hdcDrag) {
+	return FALSE;
+    }
 
+    hdcBg = CreateCompatibleDC(hdcDrag);
+    if (!InternalDrag.hbmBg) {
+	InternalDrag.hbmBg = CreateCompatibleBitmap(hdcDrag,
+		    InternalDrag.himl->cx, InternalDrag.himl->cy);
+    }
+    SelectObject(hdcBg, InternalDrag.hbmBg);
+    
     if (bShow) {
-	/* show drag image */
-
-	/* save background */
-
-	/* draw drag image */
-
-    }
-    else {
-	/* hide drag image */
-
-	/* restore background */
-
+	/* save the background */
+	BitBlt(hdcBg, 0, 0, InternalDrag.himl->cx, InternalDrag.himl->cy,
+	       hdcDrag, x, y, SRCCOPY);
+	/* show the image */
+	/* FIXME: this should be drawn semitransparent */
+	ImageList_Draw(InternalDrag.himl, 0, hdcDrag, x, y, ILD_NORMAL);
+    } else { 
+	/* hide the image */
+	BitBlt(hdcDrag, x, y, InternalDrag.himl->cx, InternalDrag.himl->cy,
+	       hdcBg, 0, 0, SRCCOPY);
     }
 
-    ReleaseDC (hwndInternalDrag, hdcDrag);
+    InternalDrag.bShow = !InternalDrag.bShow;
 
-    return FALSE;
+    DeleteDC(hdcBg);
+    ReleaseDC (InternalDrag.hwnd, hdcDrag);
+    return TRUE;
 }
 
 
@@ -1392,26 +1473,22 @@ ImageList_Duplicate (HIMAGELIST himlSrc)
  * RETURNS
  *     Success: TRUE
  *     Failure: FALSE
- *
- * BUGS
- *     semi-stub.
  */
 
 BOOL WINAPI
 ImageList_EndDrag (void)
 {
-    FIXME("semi-stub!\n");
-
-    if (himlInternalDrag)
-    {
-
-        ImageList_Destroy (himlInternalDrag);
-        himlInternalDrag = NULL;
-
-        nInternalDragHotspotX = 0;
-        nInternalDragHotspotY = 0;
-
-    }
+    /* cleanup the InternalDrag struct */
+    InternalDrag.hwnd = 0;
+    ImageList_Destroy (InternalDrag.himl);
+    InternalDrag.himl = 0;
+    InternalDrag.x= 0;
+    InternalDrag.y= 0;
+    InternalDrag.dxHotspot = 0;
+    InternalDrag.dyHotspot = 0;
+    InternalDrag.bShow = FALSE;
+    DeleteObject(InternalDrag.hbmBg);
+    InternalDrag.hbmBg = 0;
 
     return TRUE;
 }
@@ -1452,20 +1529,39 @@ ImageList_GetBkColor (HIMAGELIST himl)
  * RETURNS
  *     Success: Handle of the drag image list.
  *     Failure: NULL.
- *
- * BUGS
- *     semi-stub.
  */
 
 HIMAGELIST WINAPI
 ImageList_GetDragImage (POINT *ppt, POINT *pptHotspot)
 {
-    FIXME("semi-stub!\n");
-
-    if (himlInternalDrag)
-        return (himlInternalDrag);
+    if (InternalDrag.himl) {
+	if (ppt) {
+	    ppt->x = InternalDrag.x;
+	    ppt->y = InternalDrag.y;
+	}
+	if (pptHotspot) {
+	    pptHotspot->x = InternalDrag.dxHotspot;
+	    pptHotspot->y = InternalDrag.dyHotspot;
+	}
+        return (InternalDrag.himl);
+    }
 
     return NULL;
+}
+
+
+/*************************************************************************
+ * ImageList_GetFlags [COMCTL32.58]
+ *
+ * BUGS
+ *    Stub.
+ */
+
+DWORD WINAPI
+ImageList_GetFlags(HIMAGELIST himl)
+{
+    FIXME("(%p):empty stub\n", himl);
+    return 0;
 }
 
 
@@ -1837,6 +1933,9 @@ ImageList_Merge (HIMAGELIST himl1, INT i1, HIMAGELIST himl2, INT i2,
     INT      xOff1, yOff1, xOff2, yOff2;
     INT      nX1, nX2;
 
+    TRACE("(himl1=%p i1=%d himl2=%p i2=%d dx=%d dy=%d)\n", himl1, i1, himl2,
+	   i2, dx, dy);
+
     if ((himl1 == NULL) || (himl2 == NULL))
 	return NULL;
 
@@ -1852,33 +1951,33 @@ ImageList_Merge (HIMAGELIST himl1, INT i1, HIMAGELIST himl2, INT i2,
     }
 
     if (dx > 0) {
-        cxDst = _MAX (himl1->cx, dx + himl2->cx);
+        cxDst = max (himl1->cx, dx + himl2->cx);
         xOff1 = 0;
         xOff2 = dx;
     }
     else if (dx < 0) {
-        cxDst = _MAX (himl2->cx, himl1->cx - dx);
+        cxDst = max (himl2->cx, himl1->cx - dx);
         xOff1 = -dx;
         xOff2 = 0;
     }
     else {
-        cxDst = _MAX (himl1->cx, himl2->cx);
+        cxDst = max (himl1->cx, himl2->cx);
         xOff1 = 0;
         xOff2 = 0;
     }
 
     if (dy > 0) {
-        cyDst = _MAX (himl1->cy, dy + himl2->cy);
+        cyDst = max (himl1->cy, dy + himl2->cy);
         yOff1 = 0;
         yOff2 = dy;
     }
     else if (dy < 0) {
-        cyDst = _MAX (himl2->cy, himl1->cy - dy);
+        cyDst = max (himl2->cy, himl1->cy - dy);
         yOff1 = -dy;
         yOff2 = 0;
     }
     else {
-        cyDst = _MAX (himl1->cy, himl2->cy);
+        cyDst = max (himl1->cy, himl2->cy);
         yOff1 = 0;
         yOff2 = 0;
     }
@@ -1921,6 +2020,7 @@ ImageList_Merge (HIMAGELIST himl1, INT i1, HIMAGELIST himl2, INT i2,
 
         DeleteDC (hdcSrcImage);
         DeleteDC (hdcDstImage);
+	himlDst->cCurImage = 1;
     }
    
     return himlDst;
@@ -2379,7 +2479,7 @@ ImageList_ReplaceIcon (HIMAGELIST himl, INT i, HICON hIcon)
     GetObjectA (ii.hbmMask, sizeof(BITMAP), (LPVOID)&bmp);
 
     if (i == -1) {
-        if (himl->cCurImage + 1 >= himl->cMaxImage)
+        if (himl->cCurImage + 1 > himl->cMaxImage)
             IMAGELIST_InternalExpandBitmaps (himl, 1, 0, 0);
 
         nIndex = himl->cCurImage;
@@ -2473,8 +2573,10 @@ ImageList_SetBkColor (HIMAGELIST himl, COLORREF clrBk)
  *     Success: TRUE
  *     Failure: FALSE
  *
- * BUGS
- *     semi-stub.
+ * NOTES
+ *     When this function is called and the drag image is visible, a
+ *     short flickering occurs but this matches the Win9x behavior. It is
+ *     possible to fix the flickering using code like in ImageList_DragMove.
  */
 
 BOOL WINAPI
@@ -2482,25 +2584,55 @@ ImageList_SetDragCursorImage (HIMAGELIST himlDrag, INT iDrag,
 			      INT dxHotspot, INT dyHotspot)
 {
     HIMAGELIST himlTemp;
+    INT dx, dy;
+    BOOL visible;
 
-    FIXME("semi-stub!\n");
-
-    if (himlInternalDrag == NULL)
+    if (InternalDrag.himl == NULL)
 	return FALSE;
 
     TRACE(" dxH=%d dyH=%d nX=%d nY=%d\n",
-	   dxHotspot, dyHotspot, nInternalDragHotspotX, nInternalDragHotspotY);
+	   dxHotspot, dyHotspot, InternalDrag.dxHotspot, InternalDrag.dyHotspot);
 
-    himlTemp = ImageList_Merge (himlInternalDrag, 0, himlDrag, iDrag,
-				dxHotspot, dyHotspot);
+    visible = InternalDrag.bShow;
 
-    ImageList_Destroy (himlInternalDrag);
-    himlInternalDrag = himlTemp;
+    /* Calculate the offset between the origin of the old image and the
+     * origin of the second image.
+     * dxHotspot, dyHotspot is the offset of THE Hotspot (there is only one
+     * hotspot) to the origin of the second image.
+     * See M$DN for details */
+    dx = InternalDrag.dxHotspot - dxHotspot;
+    dy = InternalDrag.dyHotspot - dyHotspot;
+    himlTemp = ImageList_Merge (InternalDrag.himl, 0, himlDrag, iDrag, dx, dy);
 
-    nInternalDragHotspotX = dxHotspot;
-    nInternalDragHotspotY = dyHotspot;
+    if (visible) {
+	/* hide the drag image */
+	ImageList_DragShowNolock(FALSE);
+    }
+    if ((InternalDrag.himl->cx != himlTemp->cx) ||
+	   (InternalDrag.himl->cy != himlTemp->cy)) {
+	/* the size of the drag image changed, invalidate the buffer */
+	DeleteObject(InternalDrag.hbmBg);
+	InternalDrag.hbmBg = 0;
+    }
 
-    return FALSE;
+    ImageList_Destroy (InternalDrag.himl);
+    InternalDrag.himl = himlTemp;
+
+    /* update the InternalDragOffset, if the origin of the
+     * DragImage was changed by ImageList_Merge. */
+    if (dx > InternalDrag.dxHotspot) {
+	InternalDrag.dxHotspot = dx;
+    }
+    if (dy > InternalDrag.dyHotspot) {
+	InternalDrag.dyHotspot = dy;
+    }
+
+    if (visible) {
+	/* show the drag image */
+	ImageList_DragShowNolock(TRUE);
+    }
+
+    return TRUE;
 }
 
 
@@ -2530,6 +2662,21 @@ ImageList_SetFilter (HIMAGELIST himl, INT i, DWORD dwFilter)
 	   himl, i, dwFilter);
 
     return FALSE;
+}
+
+
+/*************************************************************************
+ * ImageList_SetFlags [COMCTL32.79]
+ *
+ * BUGS
+ *    Stub.
+ */
+
+DWORD WINAPI
+ImageList_SetFlags(HIMAGELIST himl, DWORD flags)
+{
+    FIXME("(%p %08lx):empty stub\n", himl, flags);
+    return 0;
 }
 
 
@@ -2611,7 +2758,7 @@ ImageList_SetImageCount (HIMAGELIST himl, INT iImageCount)
 	return TRUE;
 
     nNewCount = iImageCount + himl->cGrow;
-    nCopyCount = _MIN(himl->cCurImage, iImageCount);
+    nCopyCount = min(himl->cCurImage, iImageCount);
 
     hdcImageList = CreateCompatibleDC (0);
     hdcBitmap = CreateCompatibleDC (0);
@@ -2706,6 +2853,105 @@ ImageList_SetOverlayImage (HIMAGELIST himl, INT iImage, INT iOverlay)
 }
 
 
+
+/* helper for ImageList_Write - write bitmap to pstm 
+ * currently everything is written as 24 bit RGB, except masks
+ */
+static BOOL 
+_write_bitmap(HBITMAP hBitmap, LPSTREAM pstm, int cx, int cy)
+{
+    LPBITMAPFILEHEADER bmfh;
+    LPBITMAPINFOHEADER bmih;
+    LPBYTE data, lpBits, lpBitsOrg;
+    BITMAP bm;
+    INT bitCount, sizeImage, offBits, totalSize;
+    INT nwidth, nheight, nsizeImage, icount;
+    HDC xdc;
+    BOOL result = FALSE;
+
+
+    xdc = GetDC(0);
+    GetObjectA(hBitmap, sizeof(BITMAP), (LPVOID)&bm);
+    
+    /* XXX is this always correct? */
+    icount = bm.bmWidth / cx;
+    nwidth = cx << 2;
+    nheight = cy * ((icount+3)>>2);
+
+    bitCount = bm.bmBitsPixel == 1 ? 1 : 24;
+    sizeImage = ((((bm.bmWidth * bitCount)+31) & ~31) >> 3) * bm.bmHeight;
+    nsizeImage = ((((nwidth * bitCount)+31) & ~31) >> 3) * nheight;
+
+    totalSize = sizeof(BITMAPFILEHEADER) + sizeof(BITMAPINFOHEADER);
+    if(bitCount != 24)
+	totalSize += (1 << bitCount) * sizeof(RGBQUAD);
+    offBits = totalSize;
+    totalSize += nsizeImage;
+
+    data = (LPBYTE)LocalAlloc(LMEM_ZEROINIT, totalSize);
+    bmfh = (LPBITMAPFILEHEADER)data;
+    bmih = (LPBITMAPINFOHEADER)(data + sizeof(BITMAPFILEHEADER));
+    lpBits = data + offBits;
+
+    /* setup BITMAPFILEHEADER */
+    bmfh->bfType      = (('M' << 8) | 'B');
+    bmfh->bfSize      = 0;
+    bmfh->bfReserved1 = 0;
+    bmfh->bfReserved2 = 0;
+    bmfh->bfOffBits   = offBits;
+
+    /* setup BITMAPINFOHEADER */
+    bmih->biSize          = sizeof(BITMAPINFOHEADER);
+    bmih->biWidth         = bm.bmWidth;
+    bmih->biHeight        = bm.bmHeight;
+    bmih->biPlanes        = 1;
+    bmih->biBitCount      = bitCount;
+    bmih->biCompression   = BI_RGB;
+    bmih->biSizeImage     = nsizeImage;
+    bmih->biXPelsPerMeter = 0;
+    bmih->biYPelsPerMeter = 0;
+    bmih->biClrUsed       = 0;
+    bmih->biClrImportant  = 0;
+
+    lpBitsOrg = (LPBYTE)LocalAlloc(LMEM_ZEROINIT, nsizeImage);
+    if(!GetDIBits(xdc, hBitmap, 0, bm.bmHeight, lpBitsOrg, 
+		  (BITMAPINFO *)bmih, DIB_RGB_COLORS))
+	goto failed;
+    else {
+	int i;
+	int obpl = (((bm.bmWidth*bitCount+31) & ~31)>>3);
+	int nbpl = (((nwidth*bitCount+31) & ~31)>>3);
+        	
+	for(i = 0; i < nheight; i++) {
+	    int ooff = ((nheight-1-i)%cy) * obpl + ((i/cy) * nbpl);
+	    int noff = (nbpl * (nheight-1-i));
+	    memcpy(lpBits + noff, lpBitsOrg + ooff, nbpl);
+	}
+    }
+    
+    bmih->biWidth  = nwidth;
+    bmih->biHeight = nheight;
+
+    if(bitCount == 1) {
+	//Hack.
+	LPBITMAPINFO inf = (LPBITMAPINFO)bmih;
+	inf->bmiColors[0].rgbRed = inf->bmiColors[0].rgbGreen = inf->bmiColors[0].rgbBlue = 0;
+	inf->bmiColors[1].rgbRed = inf->bmiColors[1].rgbGreen = inf->bmiColors[1].rgbBlue = 0xff;
+    }
+
+    if(!SUCCEEDED(IStream_Write(pstm, data, totalSize, NULL)))
+	goto failed;
+
+    result = TRUE;
+
+    failed:
+    ReleaseDC(0, xdc);
+    LocalFree((HLOCAL)lpBitsOrg);
+
+    return result;
+}
+
+
 /*************************************************************************
  * ImageList_Write [COMCTL32.83]
  *
@@ -2719,22 +2965,45 @@ ImageList_SetOverlayImage (HIMAGELIST himl, INT iImage, INT iOverlay)
  *     Success: TRUE
  *     Failure: FALSE
  *
- * NOTES
- *     This function can not be implemented yet, because
- *     IStream32::Write is not implemented.
- *
  * BUGS
- *     empty stub.
+ *     probably.
  */
 
 BOOL WINAPI
 ImageList_Write (HIMAGELIST himl, LPSTREAM pstm)
 {
+    ILHEAD ilHead;
+    int i;
+
     if (!himl)
 	return FALSE;
 
-    FIXME("empty stub!\n");
+    ilHead.usMagic   = (('L' << 8) | 'I');
+    ilHead.usVersion = 0x101;
+    ilHead.cCurImage = himl->cCurImage;
+    ilHead.cMaxImage = himl->cMaxImage;
+    ilHead.cGrow     = himl->cGrow;
+    ilHead.cx        = himl->cx;
+    ilHead.cy        = himl->cy;
+    ilHead.bkcolor   = himl->clrBk;
+    ilHead.flags     = himl->flags;
+    for(i = 0; i < 4; i++) {
+	ilHead.ovls[i] = himl->nOvlIdx[i];
+    }
 
-    return FALSE;
+    if(!SUCCEEDED(IStream_Write(pstm, &ilHead, sizeof(ILHEAD), NULL)))
+	return FALSE;
+
+    /* write the bitmap */
+    if(!_write_bitmap(himl->hbmImage, pstm, himl->cx, himl->cy))
+	return FALSE;
+
+    /* write the mask if we have one */
+    if(himl->flags & ILC_MASK) {
+	if(!_write_bitmap(himl->hbmMask, pstm, himl->cx, himl->cy))
+	    return FALSE;
+    }
+
+    return TRUE;
 }
 

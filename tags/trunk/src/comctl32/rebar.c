@@ -20,7 +20,7 @@
 
 
 /*
- * Rebar control    rev 8a
+ * Rebar control    rev 8b
  *
  * Copyright 1998, 1999 Eric Kohl
  *
@@ -88,6 +88,11 @@
  * 15. Implement RBBS_CHILDEDGE, and set each bands "offChild" at _Layout
  *     time.
  * 16. Fix REBARSPACE. It should depend on CCS_NODIVIDER.
+ * rev 8b
+ * 17. Fix determination of whether Gripper is needed in _ValidateBand.
+ * 18. Fix _AdjustBand processing of RBBS_FIXEDSIZE.
+ * rev 8c
+ * 19. Fix problem in _Layout when all lengths are 0.
  *
  *
  *    Still to do:
@@ -121,11 +126,6 @@
 #include "commctrl.h"
 /* #include "spy.h" */
 #include "debugtools.h"
-
-#ifdef __WIN32OS2__
-#include <winuser.h>
-#include "ccbase.h"
-#endif
 
 DEFAULT_DEBUG_CHANNEL(rebar);
 
@@ -195,9 +195,6 @@ typedef struct
 
 typedef struct
 {
-#ifdef __WIN32OS2__
-    COMCTL32_HEADER header;
-#endif
     COLORREF   clrBk;       /* background color */
     COLORREF   clrText;     /* text color */
     COLORREF   clrBtnText;  /* system color for BTNTEXT */
@@ -208,9 +205,7 @@ typedef struct
     HWND     hwndSelf;    /* handle of REBAR window itself */
     HWND     hwndToolTip; /* handle to the tool tip control */
     HWND     hwndNotify;  /* notification window (parent) */
-#ifdef __WIN32OS2__
     HFONT    hDefaultFont;
-#endif
     HFONT    hFont;       /* handle to the rebar's font */
     SIZE     imageSize;   /* image size (image list) */
     DWORD    dwStyle;     /* window style */
@@ -576,13 +571,18 @@ REBAR_DrawBand (HDC hdc, REBAR_INFO *infoPtr, REBAR_BAND *lpBand)
 	/* need to handle CDRF_NEWFONT here */
 	INT oldBkMode = SetBkMode (hdc, TRANSPARENT);
 	COLORREF oldcolor = CLR_NONE;
-	oldcolor = SetTextColor (hdc, (lpBand->clrFore != CLR_NONE) ?
-				 lpBand->clrFore : infoPtr->clrBtnText);
+	COLORREF new;
+	if (lpBand->clrFore != CLR_NONE) {
+	    new = (lpBand->clrFore == CLR_DEFAULT) ? infoPtr->clrBtnText :
+		    lpBand->clrFore;
+	    oldcolor = SetTextColor (hdc, new);
+	}
 	DrawTextW (hdc, lpBand->lpText, -1, &lpBand->rcCapText,
 		   DT_CENTER | DT_VCENTER | DT_SINGLELINE);
 	if (oldBkMode != TRANSPARENT)
 	    SetBkMode (hdc, oldBkMode);
-	SetTextColor (hdc, oldcolor);
+	if (lpBand->clrFore != CLR_NONE) 
+	    SetTextColor (hdc, oldcolor);
 	SelectObject (hdc, hOldFont);
     }
 
@@ -715,7 +715,7 @@ REBAR_AdjustBands (REBAR_INFO *infoPtr, UINT rowstart, UINT rowend,
 	    lpBand->rcBand.left = x + xsep;
 
 	/* compute new width */
-	if (lpBand->hwndChild && extra) {
+	if ((lpBand->hwndChild && extra) && !(lpBand->fStyle & RBBS_FIXEDSIZE)) {
 	    /* set to the "current" band size less the header */
 	    fudge = lpBand->ccx;
 	    last_adjusted = i;
@@ -1330,7 +1330,7 @@ REBAR_Layout (REBAR_INFO *infoPtr, LPRECT lpRect, BOOL notify, BOOL resetclient)
     RECT rcClient, rcAdj;
     INT initx, inity, x, y, cx, cxsep, mmcy, mcy, clientcx, clientcy;
     INT adjcx, adjcy, row, rightx, bottomy, origheight;
-    UINT i, j, rowstart, origrows;
+    UINT i, j, rowstart, origrows, cntonrow;
     BOOL dobreak;
 
     if (!(infoPtr->fStatus & BAND_NEEDS_LAYOUT)) {
@@ -1391,6 +1391,7 @@ REBAR_Layout (REBAR_INFO *infoPtr, LPRECT lpRect, BOOL notify, BOOL resetclient)
     mcy = 0;
     rowstart = 0;
     prevBand = NULL;
+    cntonrow = 0;
 
     for (i = 0; i < infoPtr->uNumBands; i++) {
 	lpBand = &infoPtr->bands[i];
@@ -1409,8 +1410,7 @@ REBAR_Layout (REBAR_INFO *infoPtr, LPRECT lpRect, BOOL notify, BOOL resetclient)
 	lpBand->offChild.cy = ((lpBand->fStyle & RBBS_CHILDEDGE) ? 2 : 0);
 
 	/* separator from previous band */
-	cxsep = ( ((infoPtr->dwStyle & CCS_VERT) ? y==inity : x==initx)) ? 
-	    0 : SEP_WIDTH;  
+	cxsep = (cntonrow == 0) ? 0 : SEP_WIDTH;  
 
 	/* Header: includes gripper, text, image */
 	cx = lpBand->cxHeader;   
@@ -1452,6 +1452,7 @@ REBAR_Layout (REBAR_INFO *infoPtr, LPRECT lpRect, BOOL notify, BOOL resetclient)
 	    lpBand->iRow = row;
 	    prevBand = NULL;
 	    rowstart = i;
+	    cntonrow = 0;
 	}
 
 	if (mcy < lpBand->lcy + REBARSPACE(lpBand)) 
@@ -1507,6 +1508,7 @@ REBAR_Layout (REBAR_INFO *infoPtr, LPRECT lpRect, BOOL notify, BOOL resetclient)
 	      lpBand->rcBand.left, lpBand->rcBand.top,
 	      lpBand->rcBand.right, lpBand->rcBand.bottom);
 	prevBand = lpBand;
+	cntonrow++;
 
     } /* for (i = 0; i < infoPtr->uNumBands... */
 
@@ -1729,7 +1731,7 @@ REBAR_Layout (REBAR_INFO *infoPtr, LPRECT lpRect, BOOL notify, BOOL resetclient)
 	    iband = infoPtr->rows[i-1].istartband;
 	    lpBand = &infoPtr->bands[iband];
 	    if(HIDDENBAND(lpBand)) continue;
-	    if (!lpBand->fMask & RBBS_VARIABLEHEIGHT) continue;
+	    if (!(lpBand->fMask & RBBS_VARIABLEHEIGHT)) continue;
 	    if (((INT)lpBand->cyMaxChild < 1) || 
 		((INT)lpBand->cyIntegral < 1)) {
 		if (lpBand->cyMaxChild + lpBand->cyIntegral == 0) continue;
@@ -1863,6 +1865,8 @@ REBAR_ValidateBand (REBAR_INFO *infoPtr, REBAR_BAND *lpBand)
 {
     UINT header=0;
     UINT textheight=0;
+    INT i, nonfixed;
+    REBAR_BAND *tBand;
 
     lpBand->fStatus = 0;
     lpBand->lcx = 0;
@@ -1899,10 +1903,18 @@ REBAR_ValidateBand (REBAR_INFO *infoPtr, REBAR_BAND *lpBand)
     /* Header is where the image, text and gripper exist  */
     /* in the band and preceed the child window.          */
 
+    /* count number of non-FIXEDSIZE and non-Hidden bands */
+    nonfixed = 0;
+    for (i=0; i<infoPtr->uNumBands; i++){
+	tBand = &infoPtr->bands[i];
+	if (!HIDDENBAND(tBand) && !(tBand->fStyle & RBBS_FIXEDSIZE))
+	    nonfixed++;
+    }
+
     /* calculate gripper rectangle */
     if (  (!(lpBand->fStyle & RBBS_NOGRIPPER)) &&
 	  ( (lpBand->fStyle & RBBS_GRIPPERALWAYS) || 
-	    ( !(lpBand->fStyle & RBBS_FIXEDSIZE) && (infoPtr->uNumBands > 1)))
+	    ( !(lpBand->fStyle & RBBS_FIXEDSIZE) && (nonfixed > 1)))
        ) {
 	lpBand->fStatus |= HAS_GRIPPER;
         if (infoPtr->dwStyle & CCS_VERT)
@@ -2075,7 +2087,7 @@ REBAR_InternalEraseBkGnd (REBAR_INFO *infoPtr, WPARAM wParam, LPARAM lParam, REC
     INT i, oldrow;
     HDC hdc = (HDC)wParam;
     RECT rect;
-    COLORREF old, new;
+    COLORREF old = CLR_NONE, new;
 
     oldrow = -1;
     for(i=0; i<infoPtr->uNumBands; i++) {
@@ -2121,25 +2133,28 @@ REBAR_InternalEraseBkGnd (REBAR_INFO *infoPtr, WPARAM wParam, LPARAM lParam, REC
 	}
 
 	/* draw the actual background */
-	if (lpBand->clrBack != CLR_NONE)
-	    new = lpBand->clrBack;
-	else
-	    new = infoPtr->clrBtnFace;
-	rect = lpBand->rcBand;
+	if (lpBand->clrBack != CLR_NONE) {
+	    new = (lpBand->clrBack == CLR_DEFAULT) ? infoPtr->clrBtnFace :
+		    lpBand->clrBack;
 #if GLATESTING
-	/* testing only - make background green to see it */
-	new = RGB(0,128,0);
+	    /* testing only - make background green to see it */
+	    new = RGB(0,128,0);
 #endif
-	old = SetBkColor (hdc, new);
+	    old = SetBkColor (hdc, new);
+	}
+
+	rect = lpBand->rcBand;
 	TRACE("%s background color=0x%06lx, band (%d,%d)-(%d,%d), clip (%d,%d)-(%d,%d)\n",
-	      (lpBand->clrBack == CLR_NONE) ? "std" : "",
-	      new,
+	      (lpBand->clrBack == CLR_NONE) ? "none" : 
+	        ((lpBand->clrBack == CLR_DEFAULT) ? "dft" : ""),
+	      GetBkColor(hdc),
 	      lpBand->rcBand.left,lpBand->rcBand.top,
 	      lpBand->rcBand.right,lpBand->rcBand.bottom,
 	      clip->left, clip->top,
 	      clip->right, clip->bottom);
 	ExtTextOutA (hdc, 0, 0, ETO_OPAQUE, &rect, NULL, 0, 0);
-	SetBkColor (hdc, old);
+	if (lpBand->clrBack != CLR_NONE)
+	    SetBkColor (hdc, old);
     }
     return TRUE;
 }
@@ -2586,7 +2601,7 @@ REBAR_GetBandInfoA (REBAR_INFO *infoPtr, WPARAM wParam, LPARAM lParam)
     if (lprbbi->fMask & RBBIM_COLORS) {
 	lprbbi->clrFore = lpBand->clrFore;
 	lprbbi->clrBack = lpBand->clrBack;
-	if (lprbbi->clrBack == CLR_NONE)
+	if (lprbbi->clrBack == CLR_DEFAULT)
 	    lprbbi->clrBack = infoPtr->clrBtnFace;
     }
 
@@ -2672,7 +2687,7 @@ REBAR_GetBandInfoW (REBAR_INFO *infoPtr, WPARAM wParam, LPARAM lParam)
     if (lprbbi->fMask & RBBIM_COLORS) {
 	lprbbi->clrFore = lpBand->clrFore;
 	lprbbi->clrBack = lpBand->clrBack;
-	if (lprbbi->clrBack == CLR_NONE)
+	if (lprbbi->clrBack == CLR_DEFAULT)
 	    lprbbi->clrBack = infoPtr->clrBtnFace;
     }
 
@@ -2770,7 +2785,7 @@ REBAR_GetBkColor (REBAR_INFO *infoPtr)
 {
     COLORREF clr = infoPtr->clrBk;
 
-    if (clr == CLR_NONE)
+    if (clr == CLR_DEFAULT)
       clr = infoPtr->clrBtnFace;
 
     TRACE("background color 0x%06lx!\n", clr);
@@ -3635,13 +3650,7 @@ REBAR_Destroy (REBAR_INFO *infoPtr, WPARAM wParam, LPARAM lParam)
     DeleteObject (infoPtr->hcurHorz);
     DeleteObject (infoPtr->hcurVert);
     DeleteObject (infoPtr->hcurDrag);
-
-#ifdef __WIN32OS2__
-    //NEVER delete the font object received by WM_SETFONT!
     if(infoPtr->hDefaultFont) DeleteObject (infoPtr->hDefaultFont);
-#else
-    DeleteObject (infoPtr->hFont);
-#endif
     SetWindowLongA (infoPtr->hwndSelf, 0, 0);
 
     /* free rebar info data */
@@ -3808,11 +3817,7 @@ REBAR_NCCreate (HWND hwnd, WPARAM wParam, LPARAM lParam)
     }
 
     /* allocate memory for info structure */
-#ifdef __WIN32OS2__
-    infoPtr = (REBAR_INFO*)initControl(hwnd,sizeof(REBAR_INFO));
-#else
     infoPtr = (REBAR_INFO *)COMCTL32_Alloc (sizeof(REBAR_INFO));
-#endif
     SetWindowLongA (hwnd, 0, (DWORD)infoPtr);
 
     /* initialize info structure - initial values are 0 */
@@ -3855,11 +3860,7 @@ REBAR_NCCreate (HWND hwnd, WPARAM wParam, LPARAM lParam)
     }
     tfont = CreateFontIndirectA (&ncm.lfCaptionFont);
     if (tfont) {
-#ifdef __WIN32OS2__
         infoPtr->hFont = infoPtr->hDefaultFont = tfont;
-#else
-	infoPtr->hFont = tfont;
-#endif
     }
 
 /* native does:
@@ -4412,11 +4413,7 @@ REBAR_WindowProc (HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	    if (uMsg >= WM_USER)
 		ERR("unknown msg %04x wp=%08x lp=%08lx\n",
 		     uMsg, wParam, lParam);
-#ifdef __WIN32OS2__
-            return defComCtl32ProcA (hwnd, uMsg, wParam, lParam);
-#else
 	    return DefWindowProcA (hwnd, uMsg, wParam, lParam);
-#endif
     }
     return 0;
 }

@@ -22,6 +22,7 @@
 #include <string.h>
 #include <stdlib.h> /* atoi */
 #include <ctype.h>
+#include <limits.h>
 
 #include "commctrl.h"
 #include "objbase.h"
@@ -35,6 +36,7 @@
 #include "debugtools.h"
 
 DEFAULT_DEBUG_CHANNEL(commctrl);
+
 
 extern HANDLE COMCTL32_hHeap; /* handle to the private heap */
 
@@ -55,7 +57,7 @@ typedef struct _LOADDATA
 #ifdef __WIN32OS2__
 typedef HRESULT (* CALLBACK DPALOADPROC)(LPLOADDATA,IStream*,LPARAM);
 #else
-typedef HRESULT CALLBACK (*DPALOADPROC)(LPLOADDATA,IStream*,LPARAM);
+typedef HRESULT (CALLBACK *DPALOADPROC)(LPLOADDATA,IStream*,LPARAM);
 #endif
 
 INT __cdecl _wtoi(LPWSTR string);
@@ -98,6 +100,11 @@ DPA_LoadStream (HDPA *phDpa, DPALOADPROC loadProc, IStream *pStream, LPARAM lPar
     position.s.LowPart = 0;
     position.s.HighPart = 0;
 
+    /*
+     * Zero out our streamData
+     */
+    memset(&streamData,0,sizeof(STREAMDATA));
+
     errCode = IStream_Seek (pStream, position, STREAM_SEEK_CUR, &newPosition);
     if (errCode != S_OK)
 	return errCode;
@@ -109,11 +116,15 @@ DPA_LoadStream (HDPA *phDpa, DPALOADPROC loadProc, IStream *pStream, LPARAM lPar
     FIXME ("dwSize=%lu dwData2=%lu dwItems=%lu\n",
 	   streamData.dwSize, streamData.dwData2, streamData.dwItems);
 
-    if (lParam < sizeof(STREAMDATA) ||
+    if ( ulRead < sizeof(STREAMDATA) ||
+    lParam < sizeof(STREAMDATA) ||
 	streamData.dwSize < sizeof(STREAMDATA) ||
 	streamData.dwData2 < 1) {
 	errCode = E_FAIL;
     }
+
+    if (streamData.dwItems > (UINT_MAX / 2 / sizeof(VOID*))) /* 536870911 */
+        return E_OUTOFMEMORY;
 
     /* create the dpa */
     hDpa = DPA_Create (streamData.dwItems);
@@ -260,7 +271,7 @@ DPA_Merge (const HDPA hdpa1, const HDPA hdpa2, DWORD dwFlags,
 	}
 	else if (nResult < 0)
 	{
-	    if (!dwFlags & 8)
+	    if (!(dwFlags & 8))
 	    {
 		PVOID ptr;
 
@@ -273,7 +284,7 @@ DPA_Merge (const HDPA hdpa1, const HDPA hdpa2, DWORD dwFlags,
 	}
 	else
 	{
-	    if (!dwFlags & 4)
+	    if (!(dwFlags & 4))
 	    {
 		PVOID ptr;
 
@@ -413,10 +424,7 @@ COMCTL32_GetSize (LPVOID lpMem)
  * containing the value names (i.e. 'a', 'b', etc.) in the relevant order.
  */
 
-#ifdef __WIN32OS2__
-#include <wine\undoccomctl32.h>
-#else
-typedef struct tagCREATEMRULIST
+typedef struct tagCREATEMRULISTA
 {
     DWORD  cbSize;        /* size of struct */
     DWORD  nMaxItems;     /* max no. of items in list */
@@ -424,7 +432,17 @@ typedef struct tagCREATEMRULIST
     HKEY   hKey;          /* root reg. key under which list is saved */
     LPCSTR lpszSubKey;    /* reg. subkey */
     PROC   lpfnCompare;   /* item compare proc */
-} CREATEMRULIST, *LPCREATEMRULIST;
+} CREATEMRULISTA, *LPCREATEMRULISTA;
+
+typedef struct tagCREATEMRULISTW
+{
+    DWORD   cbSize;        /* size of struct */
+    DWORD   nMaxItems;     /* max no. of items in list */
+    DWORD   dwFlags;       /* see below */
+    HKEY    hKey;          /* root reg. key under which list is saved */
+    LPCWSTR lpszSubKey;    /* reg. subkey */
+    PROC    lpfnCompare;   /* item compare proc */
+} CREATEMRULISTW, *LPCREATEMRULISTW;
 
 /* dwFlags */
 #define MRUF_STRING_LIST  0 /* list will contain strings */
@@ -451,7 +469,8 @@ typedef struct tagWINEMRUITEM
 
 typedef struct tagWINEMRULIST
 {
-    CREATEMRULIST  extview;     /* original create information       */
+    CREATEMRULISTW extview;     /* original create information       */
+    BOOL           isUnicode;   /* is compare fn Unicode */
     DWORD          wineFlags;   /* internal flags                    */
     DWORD          cursize;     /* current size of realMRU           */
     LPSTR          realMRU;     /* pointer to string of index names  */
@@ -462,11 +481,6 @@ typedef struct tagWINEMRULIST
 /* wineFlags */
 #define WMRUF_CHANGED  0x0001   /* MRU list has changed              */
 
-HANDLE WINAPI
-CreateMRUListLazyA (LPCREATEMRULIST lpcml, DWORD dwParam2,
-		    DWORD dwParam3, DWORD dwParam4);
-#endif
-
 /**************************************************************************
  *              MRU_SaveChanged - Localize MRU saving code
  *
@@ -475,35 +489,36 @@ VOID MRU_SaveChanged( LPWINEMRULIST mp )
 {
     INT i, err;
     HKEY newkey;
-    CHAR realname[2];
+    WCHAR realname[2];
     LPWINEMRUITEM witem;
+    WCHAR emptyW[] = {'\0'};
 
     /* or should we do the following instead of RegOpenKeyEx:
      */
 
     /* open the sub key */
-    if ((err = RegOpenKeyExA( mp->extview.hKey, mp->extview.lpszSubKey, 
-			       0, KEY_WRITE, &newkey))) {
+    if ((err = RegOpenKeyExW( mp->extview.hKey, mp->extview.lpszSubKey, 
+			      0, KEY_WRITE, &newkey))) {
 	/* not present - what to do ??? */
 	ERR("Can not open key, error=%d, attempting to create\n",
 	    err);
-	if ((err = RegCreateKeyExA( mp->extview.hKey, mp->extview.lpszSubKey,
+	if ((err = RegCreateKeyExW( mp->extview.hKey, mp->extview.lpszSubKey,
 				    0,
-				    "",
+				    emptyW,
 				    REG_OPTION_NON_VOLATILE,
 				    KEY_READ | KEY_WRITE,
 				    0,
 				    &newkey,
 				    0))) {
 	    ERR("failed to create key /%s/, err=%d\n",
-		mp->extview.lpszSubKey, err);
+		debugstr_w(mp->extview.lpszSubKey), err);
 	    return;
 	}
     }
     if (mp->wineFlags & WMRUF_CHANGED) {
 	mp->wineFlags &= ~WMRUF_CHANGED;
 	err = RegSetValueExA(newkey, "MRUList", 0, REG_SZ, 
-			     mp->realMRU, lstrlenA(mp->realMRU) + 1);
+			     mp->realMRU, strlen(mp->realMRU) + 1);
 	if (err) {
 	    ERR("error saving MRUList, err=%d\n", err);
 	}
@@ -515,33 +530,18 @@ VOID MRU_SaveChanged( LPWINEMRULIST mp )
 	if (witem->itemFlag & WMRUIF_CHANGED) {
 	    witem->itemFlag &= ~WMRUIF_CHANGED;
 	    realname[0] = 'a' + i;
-	    err = RegSetValueExA(newkey, realname, 0, 
+	    err = RegSetValueExW(newkey, realname, 0, 
 				 (mp->extview.dwFlags & MRUF_BINARY_LIST) ? 
 				 REG_BINARY : REG_SZ,
 				 &witem->datastart, witem->size);
 	    if (err) {
-		ERR("error saving /%s/, err=%d\n", realname, err);
+		ERR("error saving /%s/, err=%d\n", debugstr_w(realname), err);
 	    }
 	    TRACE("saving value for name /%s/ size=%ld\n",
-		  realname, witem->size);
+		  debugstr_w(realname), witem->size);
 	}
     }
     RegCloseKey( newkey );
-}
-
-/**************************************************************************
- *              CreateMRUListA [COMCTL32.151]
- *
- * PARAMS
- *     lpcml [I] ptr to CREATEMRULIST structure.
- *
- * RETURNS
- *     Handle to MRU list.
- */
-HANDLE WINAPI
-CreateMRUListA (LPCREATEMRULIST lpcml)
-{
-     return CreateMRUListLazyA (lpcml, 0, 0, 0);
 }
 
 /**************************************************************************
@@ -552,7 +552,7 @@ CreateMRUListA (LPCREATEMRULIST lpcml)
  *
  */
 DWORD WINAPI
-FreeMRUListA (HANDLE hMRUList)
+FreeMRUList (HANDLE hMRUList)
 {
     LPWINEMRULIST mp = (LPWINEMRULIST)hMRUList;
     INT i;
@@ -569,6 +569,7 @@ FreeMRUListA (HANDLE hMRUList)
     }
     COMCTL32_Free(mp->realMRU);
     COMCTL32_Free(mp->array);
+    COMCTL32_Free((LPWSTR)mp->extview.lpszSubKey);
     return COMCTL32_Free(mp);
 }
 
@@ -594,10 +595,18 @@ FindMRUData (HANDLE hList, LPCVOID lpData, DWORD cbData, LPINT lpRegNum)
 {
     LPWINEMRULIST mp = (LPWINEMRULIST)hList;
     INT i, ret;
+    LPSTR dataA = NULL;
 
     if (!mp->extview.lpfnCompare) {
 	ERR("MRU list not properly created. No compare procedure.\n");
 	return -1;
+    }
+
+    if(!(mp->extview.dwFlags & MRUF_BINARY_LIST) && !mp->isUnicode) {
+        DWORD len = WideCharToMultiByte(CP_ACP, 0, lpData, -1,
+					NULL, 0, NULL, NULL);
+	dataA = COMCTL32_Alloc(len);
+	WideCharToMultiByte(CP_ACP, 0, lpData, -1, dataA, len, NULL, NULL);
     }
 
     for(i=0; i<mp->cursize; i++) {
@@ -607,10 +616,27 @@ FindMRUData (HANDLE hList, LPCVOID lpData, DWORD cbData, LPINT lpRegNum)
 		break;
 	}
 	else {
-	    if (!mp->extview.lpfnCompare(lpData, &mp->array[i]->datastart))
-		break;
+	    if(mp->isUnicode) {
+	        if (!mp->extview.lpfnCompare(lpData, &mp->array[i]->datastart))
+		    break;
+	    } else {
+	        DWORD len = WideCharToMultiByte(CP_ACP, 0,
+						(LPWSTR)&mp->array[i]->datastart, -1,
+						NULL, 0, NULL, NULL);
+		LPSTR itemA = COMCTL32_Alloc(len);
+		INT cmp;
+		WideCharToMultiByte(CP_ACP, 0, (LPWSTR)&mp->array[i]->datastart, -1,
+				    itemA, len, NULL, NULL);
+
+	        cmp = mp->extview.lpfnCompare(dataA, itemA);
+		COMCTL32_Free(itemA);
+		if(!cmp)
+		    break;
+	    }
 	}
     }
+    if(dataA)
+        COMCTL32_Free(dataA);
     if (i < mp->cursize)
 	ret = i;
     else
@@ -692,7 +718,7 @@ AddMRUData (HANDLE hList, LPCVOID lpData, DWORD cbData)
 }
 
 /**************************************************************************
- *              AddMRUStringA [COMCTL32.153]
+ *              AddMRUStringW [COMCTL32.401]
  * 
  * Add item to MRU string list.  If item already exists in list them it is
  * simply moved up to the top of the list and not added again.  If list is
@@ -705,6 +731,17 @@ AddMRUData (HANDLE hList, LPCVOID lpData, DWORD cbData)
  * RETURNS
  *     No. corresponding to registry name where value is stored 'a' -> 0 etc.
  *     -1 on error.
+ */
+INT WINAPI
+AddMRUStringW(HANDLE hList, LPCWSTR lpszString)
+{
+    FIXME("(%08x, %s) empty stub!\n", hList, debugstr_w(lpszString));
+
+    return 0;
+}
+
+/**************************************************************************
+ *              AddMRUStringA [COMCTL32.153]
  */
 INT WINAPI
 AddMRUStringA(HANDLE hList, LPCSTR lpszString)
@@ -734,6 +771,16 @@ DelMRUString(HANDLE hList, INT nItemPos)
 }
 
 /**************************************************************************
+ *                  FindMRUStringW [COMCTL32.402]
+ */
+INT WINAPI
+FindMRUStringW (HANDLE hList, LPCWSTR lpszString, LPINT lpRegNum)
+{
+  FIXME("stub\n");
+  return -1;
+}
+
+/**************************************************************************
  *                  FindMRUStringA [COMCTL32.155]
  * 
  * Searches string list for item that matches lpszString.
@@ -751,34 +798,30 @@ DelMRUString(HANDLE hList, INT nItemPos)
 INT WINAPI
 FindMRUStringA (HANDLE hList, LPCSTR lpszString, LPINT lpRegNum)
 {
-    return FindMRUData(hList, (LPVOID)lpszString, lstrlenA(lpszString),
-		       lpRegNum);
+    DWORD len = MultiByteToWideChar(CP_ACP, 0, lpszString, -1, NULL, 0);
+    LPWSTR stringW = COMCTL32_Alloc(len * sizeof(WCHAR));
+    INT ret;
+
+    MultiByteToWideChar(CP_ACP, 0, lpszString, -1, stringW, len);
+    ret = FindMRUData(hList, stringW, len * sizeof(WCHAR), lpRegNum);
+    COMCTL32_Free(stringW);
+    return ret;
 }
 
-/**************************************************************************
- *                  CreateMRUListLazyA [COMCTL32.157]
+/*************************************************************************
+ *                 CreateMRUListLazy_common
  */
-HANDLE WINAPI
-CreateMRUListLazyA (LPCREATEMRULIST lpcml, DWORD dwParam2, DWORD dwParam3, DWORD dwParam4)
+HANDLE CreateMRUListLazy_common(LPWINEMRULIST mp)
 {
-    LPWINEMRULIST mp;
     INT i, err;
     HKEY newkey;
     DWORD datasize, dwdisp;
-    CHAR realname[2];
+    WCHAR realname[2];
     LPWINEMRUITEM witem;
     DWORD type;
+    WCHAR emptyW[] = {'\0'};
 
-    if (lpcml == NULL)
-	return 0;
-
-    if (lpcml->cbSize < sizeof(CREATEMRULIST))
-	return 0;
-
-    mp = (LPWINEMRULIST) COMCTL32_Alloc(sizeof(WINEMRULIST));
-    memcpy(mp, lpcml, sizeof(CREATEMRULIST));
-
-    /* get space to save indexes that will turn into names
+    /* get space to save indices that will turn into names
      * but in order of most to least recently used
      */
     mp->realMRU = (LPSTR) COMCTL32_Alloc(mp->extview.nMaxItems + 2);
@@ -790,9 +833,9 @@ CreateMRUListLazyA (LPCREATEMRULIST lpcml, DWORD dwParam2, DWORD dwParam3, DWORD
 					sizeof(LPVOID));
 
     /* open the sub key */
-     if ((err = RegCreateKeyExA( mp->extview.hKey, mp->extview.lpszSubKey, 
-			       0,
-				"",
+    if ((err = RegCreateKeyExW( mp->extview.hKey, mp->extview.lpszSubKey, 
+			        0,
+				emptyW,
 				REG_OPTION_NON_VOLATILE, 
 				KEY_READ | KEY_WRITE,
                                 0,
@@ -800,9 +843,9 @@ CreateMRUListLazyA (LPCREATEMRULIST lpcml, DWORD dwParam2, DWORD dwParam3, DWORD
 				&dwdisp))) {
 	/* error - what to do ??? */
 	ERR("(%lu %lu %lx %lx \"%s\" %p): Can not open key, error=%d\n",
-	    lpcml->cbSize, lpcml->nMaxItems, lpcml->dwFlags,
-	    (DWORD)lpcml->hKey, lpcml->lpszSubKey, lpcml->lpfnCompare,
-	    err);
+	    mp->extview.cbSize, mp->extview.nMaxItems, mp->extview.dwFlags,
+	    (DWORD)mp->extview.hKey, debugstr_w(mp->extview.lpszSubKey),
+				 mp->extview.lpfnCompare, err);
 	return 0;
     }
 
@@ -825,17 +868,17 @@ CreateMRUListLazyA (LPCREATEMRULIST lpcml, DWORD dwParam2, DWORD dwParam3, DWORD
 	realname[1] = 0;
 	for(i=0; i<mp->cursize; i++) {
 	    realname[0] = 'a' + i;
-	    if(RegQueryValueExA( newkey, realname, 0, &type, 0, &datasize)) {
+	    if(RegQueryValueExW( newkey, realname, 0, &type, 0, &datasize)) {
 		/* not present - what to do ??? */
-		ERR("Key %s not found 1\n", realname);
+		ERR("Key %s not found 1\n", debugstr_w(realname));
 	    }
 	    mp->array[i] = witem = (LPWINEMRUITEM)COMCTL32_Alloc(datasize + 
 								 sizeof(WINEMRUITEM));
 	    witem->size = datasize;
-	    if(RegQueryValueExA( newkey, realname, 0, &type, 
+	    if(RegQueryValueExW( newkey, realname, 0, &type, 
 				 &witem->datastart, &datasize)) {
 		/* not present - what to do ??? */
-		ERR("Key %s not found 2\n", realname);
+		ERR("Key %s not found 2\n", debugstr_w(realname));
 	    }
 	}
 	RegCloseKey( newkey );
@@ -844,16 +887,89 @@ CreateMRUListLazyA (LPCREATEMRULIST lpcml, DWORD dwParam2, DWORD dwParam3, DWORD
 	mp->cursize = 0;
 
     TRACE("(%lu %lu %lx %lx \"%s\" %p): Current Size = %ld\n",
-	  lpcml->cbSize, lpcml->nMaxItems, lpcml->dwFlags,
-	  (DWORD)lpcml->hKey, lpcml->lpszSubKey, lpcml->lpfnCompare,
-	  mp->cursize);
-
+	  mp->extview.cbSize, mp->extview.nMaxItems, mp->extview.dwFlags,
+	  (DWORD)mp->extview.hKey, debugstr_w(mp->extview.lpszSubKey),
+	  mp->extview.lpfnCompare, mp->cursize);
     return (HANDLE)mp;
 }
 
 /**************************************************************************
- *                EnumMRUListA [COMCTL32.154]
- * 
+ *                  CreateMRUListLazyW [COMCTL32.404]
+ */
+HANDLE WINAPI
+CreateMRUListLazyW (LPCREATEMRULISTW lpcml, DWORD dwParam2, DWORD dwParam3, DWORD dwParam4)
+{
+    LPWINEMRULIST mp;
+
+    if (lpcml == NULL)
+	return 0;
+
+    if (lpcml->cbSize < sizeof(CREATEMRULISTW))
+	return 0;
+
+    mp = (LPWINEMRULIST) COMCTL32_Alloc(sizeof(WINEMRULIST));
+    memcpy(&mp->extview, lpcml, sizeof(CREATEMRULISTW));
+    mp->extview.lpszSubKey = COMCTL32_Alloc((strlenW(lpcml->lpszSubKey) + 1) *
+					    sizeof(WCHAR));
+    strcpyW((LPWSTR)mp->extview.lpszSubKey, lpcml->lpszSubKey);
+    mp->isUnicode = TRUE;
+
+    return CreateMRUListLazy_common(mp);   
+}
+
+/**************************************************************************
+ *                  CreateMRUListLazyA [COMCTL32.157]
+ */
+HANDLE WINAPI
+CreateMRUListLazyA (LPCREATEMRULISTA lpcml, DWORD dwParam2, DWORD dwParam3, DWORD dwParam4)
+{
+    LPWINEMRULIST mp;
+    DWORD len;
+
+    if (lpcml == NULL)
+	return 0;
+
+    if (lpcml->cbSize < sizeof(CREATEMRULISTA))
+	return 0;
+
+    mp = (LPWINEMRULIST) COMCTL32_Alloc(sizeof(WINEMRULIST));
+    memcpy(&mp->extview, lpcml, sizeof(CREATEMRULISTW));
+    len = MultiByteToWideChar(CP_ACP, 0, lpcml->lpszSubKey, -1, NULL, 0);
+    mp->extview.lpszSubKey = COMCTL32_Alloc(len * sizeof(WCHAR));
+    MultiByteToWideChar(CP_ACP, 0, lpcml->lpszSubKey, -1,
+			(LPWSTR)mp->extview.lpszSubKey, len);
+    mp->isUnicode = FALSE;
+    return CreateMRUListLazy_common(mp);
+}
+
+/**************************************************************************
+ *              CreateMRUListW [COMCTL32.400]
+ *
+ * PARAMS
+ *     lpcml [I] ptr to CREATEMRULIST structure.
+ *
+ * RETURNS
+ *     Handle to MRU list.
+ */
+HANDLE WINAPI
+CreateMRUListW (LPCREATEMRULISTW lpcml)
+{
+    return CreateMRUListLazyW(lpcml, 0, 0, 0);
+}
+
+/**************************************************************************
+ *              CreateMRUListA [COMCTL32.151]
+ */
+HANDLE WINAPI
+CreateMRUListA (LPCREATEMRULISTA lpcml)
+{
+     return CreateMRUListLazyA (lpcml, 0, 0, 0);
+}
+
+
+/**************************************************************************
+ *                EnumMRUListW [COMCTL32.403]
+ *
  * Enumerate item in a list
  *
  * PARAMS
@@ -869,7 +985,7 @@ CreateMRUListLazyA (LPCREATEMRULIST lpcml, DWORD dwParam2, DWORD dwParam3, DWORD
  *    If lpBuffer == NULL or nItemPos is -ve return value is no. of items in
  *    the list. 
  */
-INT WINAPI EnumMRUListA(HANDLE hList, INT nItemPos, LPVOID lpBuffer,
+INT WINAPI EnumMRUListW(HANDLE hList, INT nItemPos, LPVOID lpBuffer,
 DWORD nBufferSize)
 {
     LPWINEMRULIST mp = (LPWINEMRULIST) hList;
@@ -888,6 +1004,40 @@ DWORD nBufferSize)
 	  hList, nItemPos, lpBuffer, nBufferSize, datasize);
     return datasize;
 }
+
+/**************************************************************************
+ *                EnumMRUListA [COMCTL32.154]
+ * 
+ */
+INT WINAPI EnumMRUListA(HANDLE hList, INT nItemPos, LPVOID lpBuffer,
+DWORD nBufferSize)
+{
+    LPWINEMRULIST mp = (LPWINEMRULIST) hList;
+    LPWINEMRUITEM witem;
+    INT desired, datasize;
+    DWORD lenA;
+
+    if (nItemPos >= mp->cursize) return -1;
+    if ((nItemPos < 0) || !lpBuffer) return mp->cursize;
+    desired = mp->realMRU[nItemPos];
+    desired -= 'a';
+    TRACE("nItemPos=%d, desired=%d\n", nItemPos, desired);
+    witem = mp->array[desired];
+    if(mp->extview.dwFlags & MRUF_BINARY_LIST) {
+        datasize = min( witem->size, nBufferSize ); 
+	memcpy( lpBuffer, &witem->datastart, datasize);
+    } else {
+        lenA = WideCharToMultiByte(CP_ACP, 0, (LPWSTR)&witem->datastart, -1,
+				   NULL, 0, NULL, NULL);
+	datasize = min( witem->size, nBufferSize );
+	WideCharToMultiByte(CP_ACP, 0, (LPWSTR)&witem->datastart, -1,
+			    lpBuffer, datasize, NULL, NULL);
+    }
+    TRACE("(%08x, %d, %p, %ld): returning len=%d\n", 
+	  hList, nItemPos, lpBuffer, nBufferSize, datasize);
+    return datasize;
+}
+  
 
 /**************************************************************************
  * Str_GetPtrA [COMCTL32.233]
@@ -1327,23 +1477,14 @@ DSA_SetItem (const HDSA hdsa, INT nIndex, LPVOID pSrc)
 INT WINAPI
 DSA_InsertItem (const HDSA hdsa, INT nIndex, LPVOID pSrc)
 {
-    INT   nNewItems, nSize, i;
+    INT   nNewItems, nSize;
     LPVOID  lpTemp, lpDest;
-    LPDWORD p;
     
     TRACE("(%p %d %p)\n", hdsa, nIndex, pSrc);
 
     if ((!hdsa) || nIndex < 0)
 	return -1;
 
-    for (i = 0; i < hdsa->nItemSize; i += 4) {
-	p = *(DWORD**)((char *) pSrc + i);
-	if (IsBadStringPtrA ((char*)p, 256))
-	    TRACE("-- %d=%p\n", i, (DWORD*)p);
-	else
-	    TRACE("-- %d=%p [%s]\n", i, p, debugstr_a((char*)p));
-    }
-   
     /* when nIndex >= nItemCount then append */
     if (nIndex >= hdsa->nItemCount)
  	nIndex = hdsa->nItemCount;
@@ -2161,8 +2302,9 @@ DoNotify (LPNOTIFYDATA lpNotify, UINT uCode, LPNMHDR lpHdr)
 	    HWND hwndParent = GetParent (lpNotify->hwndFrom);
 	    if (hwndParent) {
 		hwndParent = GetWindow (lpNotify->hwndFrom, GW_OWNER);
-		if (hwndParent)
-		    idFrom = GetDlgCtrlID (lpNotify->hwndFrom);
+		/* the following is done even if the return from above
+		 * is zero.  GLA 12/2001 */
+		idFrom = GetDlgCtrlID (lpNotify->hwndFrom);
 	    }
 	}
 
@@ -2181,8 +2323,8 @@ DoNotify (LPNOTIFYDATA lpNotify, UINT uCode, LPNMHDR lpHdr)
  * SendNotify [COMCTL32.341]
  *
  * PARAMS
- *     hwndFrom [I]
  *     hwndTo   [I]
+ *     hwndFrom [I]
  *     uCode    [I]
  *     lpHdr    [I]
  *
@@ -2192,13 +2334,13 @@ DoNotify (LPNOTIFYDATA lpNotify, UINT uCode, LPNMHDR lpHdr)
  */
 
 LRESULT WINAPI
-COMCTL32_SendNotify (HWND hwndFrom, HWND hwndTo,
+COMCTL32_SendNotify (HWND hwndTo, HWND hwndFrom,
 		     UINT uCode, LPNMHDR lpHdr)
 {
     NOTIFYDATA notify;
 
     TRACE("(0x%04x 0x%04x %d %p)\n",
-	   hwndFrom, hwndTo, uCode, lpHdr);
+	   hwndTo, hwndFrom, uCode, lpHdr);
 
     notify.hwndFrom = hwndFrom;
     notify.hwndTo   = hwndTo;
@@ -2644,28 +2786,17 @@ BOOL WINAPI COMCTL32_415( HWND hwnd, DWORD b, DWORD c, DWORD d, DWORD e)
    return TRUE;
 }
 
-#ifdef __WIN32OS2__
-DWORD WINAPI COMCTL32_389(DWORD x1, DWORD x2)
+/**************************************************************************
+ * @ [COMCTL32.419]
+ *
+ * FIXME: What's this supposed to do?
+ */
+
+BOOL WINAPI COMCTL32_419( DWORD a, DWORD b, DWORD c, DWORD d)
 {
-   dprintf(("comctl32_389: %x %X not implemented!!", x1, x2));
-   return 0; //NT 4 comctl32 returns 0
+
+   FIXME("(%lx, %lx, %lx, %lx): stub!\n", a, b, c, d);
+
+   return TRUE;
 }
 
-DWORD WINAPI COMCTL32_390(DWORD x1, DWORD x2, DWORD x3, DWORD x4)
-{
-  dprintf(("comctl32_390: %x %x %x %x not implemented!!", x1, x2, x3, x4));
-
-  /* Pseudo Assembler
-   push [esp+arg_C]
-   mov  eax, [esp+4+arg_0]
-   push [esp+4+arg_8]
-   mov  dword ptr [eax+1A8h], 1
-   push [esp+8+arg_4]
-   push dword ptr [eax + 38h]
-   call ds:SetDIBColorTable
-   retn 10h
-  */
-
-   return 0;
-}
-#endif

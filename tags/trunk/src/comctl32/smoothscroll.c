@@ -1,5 +1,3 @@
-/* $Id: smoothscroll.cpp,v 1.2 2000-09-30 13:43:21 achimha Exp $ */
-
 /*
  * Undocumented SmoothScrollWindow function from COMCTL32.DLL
  *
@@ -9,16 +7,22 @@
  *     - actually add smooth scrolling
  */
 
-/* WINE CVS 000929 level */
-
 #include "winbase.h"
 #include "winreg.h"
 #include "winerror.h"
 #include "commctrl.h"
+#include "debugtools.h"
+
+DEFAULT_DEBUG_CHANNEL(commctrl);
 
 static DWORD	smoothscroll = 2;
 
+#ifdef __WIN32OS2__
+typedef BOOL (* CALLBACK SCROLLWINDOWEXPROC)(HWND,INT,INT,LPRECT,LPRECT,HRGN,LPRECT,DWORD);
+#else
 typedef BOOL (CALLBACK *SCROLLWINDOWEXPROC)(HWND,INT,INT,LPRECT,LPRECT,HRGN,LPRECT,DWORD);
+#endif
+
 typedef struct tagSMOOTHSCROLLSTRUCT {
 	DWORD			dwSize;
 	DWORD			x2;
@@ -93,9 +97,9 @@ BOOL WINAPI SmoothScrollWindow( SMOOTHSCROLLSTRUCT *smooth ) {
 	   );
    }
 
-//   FIXME("(hwnd=%x,flags=%lx,x2=%lx): should smooth scroll here.\n",
-//	   smooth->hwnd,flags,smooth->x2
-//   );
+   FIXME("(hwnd=%x,flags=%lx,x2=%lx): should smooth scroll here.\n",
+	   smooth->hwnd,flags,smooth->x2
+   );
    /* FIXME: do timer based smooth scrolling */
    if ((smooth->x2 & 1) && smooth->scrollfun)
        return smooth->scrollfun(

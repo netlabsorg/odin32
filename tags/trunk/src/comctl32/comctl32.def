@@ -1,4 +1,4 @@
-; $Id: comctl32.def,v 1.24 2001-07-21 09:07:16 sandervl Exp $
+; $Id: comctl32.def,v 1.25 2002-02-06 17:23:18 sandervl Exp $
 LIBRARY COMCTL32 INITINSTANCE
 DESCRIPTION 'Odin32 System DLL - ComCtl32 - Common Controls Library'
 DATA MULTIPLE NONSHARED
@@ -20,88 +20,86 @@ EXPORTS
   DrawInsert                   = _DrawInsert@12                      @15
   CreateUpDownControl          = _CreateUpDownControl@48             @16
   InitCommonControls           = _InitCommonControls@0               @17
-  CreatePropertySheetPageA     = _CreatePropertySheetPageA@4         @18
-  CreatePropertySheetPageW     = _CreatePropertySheetPageW@4         @19
-  CreateStatusWindow           = _CreateStatusWindowA@16             @20
-  CreateStatusWindowW          = _CreateStatusWindowW@16             @21
-  CreateToolbarEx              = _CreateToolbarEx@52                 @22
-  DestroyPropertySheetPage     = _DestroyPropertySheetPage@4         @23
-  DllGetVersion                = _COMCTL32_DllGetVersion@4           @24
-  DllInstall                   = _COMCTL32_DllInstall@8              @25
-  DrawStatusText               = _DrawStatusTextA@16                 @26
-  DrawStatusTextW              = _DrawStatusTextW@16                 @27
-
-  FlatSB_EnableScrollBar       = _FlatSB_EnableScrollBar@12          @28
-  FlatSB_GetScrollInfo         = _FlatSB_GetScrollInfo@12            @29
-  FlatSB_GetScrollPos          = _FlatSB_GetScrollPos@8              @30
-  FlatSB_GetScrollProp         = _FlatSB_GetScrollProp@12            @31
-  FlatSB_GetScrollRange        = _FlatSB_GetScrollRange@16           @32
-  FlatSB_SetScrollInfo         = _FlatSB_SetScrollInfo@16            @33
-  FlatSB_SetScrollPos          = _FlatSB_SetScrollPos@16             @34
-  FlatSB_SetScrollProp         = _FlatSB_SetScrollProp@16            @35
-  FlatSB_SetScrollRange        = _FlatSB_SetScrollRange@20           @36
-  FlatSB_ShowScrollBar         = _FlatSB_ShowScrollBar@12            @37
-  GetMUILanguage               = _GetMUILanguage@0                   @38
-
-  ImageList_Add                = _ImageList_Add@12                   @39
-  ImageList_AddIcon            = _ImageList_AddIcon@8                @40
-  ImageList_AddMasked          = _ImageList_AddMasked@12             @41
-  ImageList_BeginDrag          = _ImageList_BeginDrag@16             @42
-  ImageList_Copy               = _ImageList_Copy@20                  @43
-  ImageList_Create             = _ImageList_Create@20                @44
-  ImageList_Destroy            = _ImageList_Destroy@4                @45
-  ImageList_DragEnter          = _ImageList_DragEnter@12             @46
-  ImageList_DragLeave          = _ImageList_DragLeave@4              @47
-  ImageList_DragMove           = _ImageList_DragMove@8               @48
-  ImageList_DragShowNolock     = _ImageList_DragShowNolock@4         @49
-  ImageList_Draw               = _ImageList_Draw@24                  @50
-  ImageList_DrawEx             = _ImageList_DrawEx@40                @51
-  ImageList_DrawIndirect       = _ImageList_DrawIndirect@4           @52
-  ImageList_Duplicate          = _ImageList_Duplicate@4              @53
-  ImageList_EndDrag            = _ImageList_EndDrag@0                @54
-  ImageList_GetBkColor         = _ImageList_GetBkColor@4             @55
-  ImageList_GetDragImage       = _ImageList_GetDragImage@8           @56
-  ;;stub ImageList_GetFlags                                          @57
-  ImageList_GetIcon            = _ImageList_GetIcon@12               @58
-  ImageList_GetIconSize        = _ImageList_GetIconSize@12           @59
-  ImageList_GetImageCount      = _ImageList_GetImageCount@4          @60
-  ImageList_GetImageInfo       = _ImageList_GetImageInfo@12          @61
-  ImageList_GetImageRect       = _ImageList_GetImageRect@12          @62
-  ImageList_LoadImage          = _ImageList_LoadImageA@28            @63
-  ImageList_LoadImageA         = _ImageList_LoadImageA@28            @64
-  ImageList_LoadImageW         = _ImageList_LoadImageW@28            @65
-  ImageList_Merge              = _ImageList_Merge@24                 @66
-  ImageList_Read               = _ImageList_Read@4                   @67
-  ImageList_Remove             = _ImageList_Remove@8                 @68
-  ImageList_Replace            = _ImageList_Replace@16               @69
-  ImageList_ReplaceIcon        = _ImageList_ReplaceIcon@12           @70
+  CreatePropertySheetPage      = _CreatePropertySheetPageA@4         @18
+  CreatePropertySheetPageA     = _CreatePropertySheetPageA@4         @19
+  CreatePropertySheetPageW     = _CreatePropertySheetPageW@4         @20
+  CreateStatusWindow           = _CreateStatusWindowA@16             @21
+  CreateStatusWindowW          = _CreateStatusWindowW@16             @22
+  CreateToolbarEx              = _CreateToolbarEx@52                 @23
+  DestroyPropertySheetPage     = _DestroyPropertySheetPage@4         @24
+  DllGetVersion                = _COMCTL32_DllGetVersion@4           @25
+  DllInstall                   = _COMCTL32_DllInstall@8              @26
+  DrawStatusText               = _DrawStatusTextA@16                 @27
+  DrawStatusTextW              = _DrawStatusTextW@16                 @28
+  FlatSB_EnableScrollBar       = _FlatSB_EnableScrollBar@12          @29
+  FlatSB_GetScrollInfo         = _FlatSB_GetScrollInfo@12            @30
+  FlatSB_GetScrollPos          = _FlatSB_GetScrollPos@8              @31
+  FlatSB_GetScrollProp         = _FlatSB_GetScrollProp@12            @32
+  FlatSB_GetScrollRange        = _FlatSB_GetScrollRange@16           @33
+  FlatSB_SetScrollInfo         = _FlatSB_SetScrollInfo@16            @34
+  FlatSB_SetScrollPos          = _FlatSB_SetScrollPos@16             @35
+  FlatSB_SetScrollProp         = _FlatSB_SetScrollProp@16            @36
+  FlatSB_SetScrollRange        = _FlatSB_SetScrollRange@20           @37
+  FlatSB_ShowScrollBar         = _FlatSB_ShowScrollBar@12            @38
+  GetMUILanguage               = _GetMUILanguage@0                   @39
+  ImageList_Add                = _ImageList_Add@12                   @40
+  ImageList_AddIcon            = _ImageList_AddIcon@8                @41
+  ImageList_AddMasked          = _ImageList_AddMasked@12             @42
+  ImageList_BeginDrag          = _ImageList_BeginDrag@16             @43
+  ImageList_Copy               = _ImageList_Copy@20                  @44
+  ImageList_Create             = _ImageList_Create@20                @45
+  ImageList_Destroy            = _ImageList_Destroy@4                @46
+  ImageList_DragEnter          = _ImageList_DragEnter@12             @47
+  ImageList_DragLeave          = _ImageList_DragLeave@4              @48
+  ImageList_DragMove           = _ImageList_DragMove@8               @49
+  ImageList_DragShowNolock     = _ImageList_DragShowNolock@4         @50
+  ImageList_Draw               = _ImageList_Draw@24                  @51
+  ImageList_DrawEx             = _ImageList_DrawEx@40                @52
+  ImageList_DrawIndirect       = _ImageList_DrawIndirect@4           @53
+  ImageList_Duplicate          = _ImageList_Duplicate@4              @54
+  ImageList_EndDrag            = _ImageList_EndDrag@0                @55
+  ImageList_GetBkColor         = _ImageList_GetBkColor@4             @56
+  ImageList_GetDragImage       = _ImageList_GetDragImage@8           @57
+  ImageList_GetFlags           = _ImageList_GetFlags@4               @58
+  ImageList_GetIcon            = _ImageList_GetIcon@12               @59
+  ImageList_GetIconSize        = _ImageList_GetIconSize@12           @60
+  ImageList_GetImageCount      = _ImageList_GetImageCount@4          @61
+  ImageList_GetImageInfo       = _ImageList_GetImageInfo@12          @62
+  ImageList_GetImageRect       = _ImageList_GetImageRect@12          @63
+  ImageList_LoadImage          = _ImageList_LoadImageA@28            @64
+  ImageList_LoadImageA         = _ImageList_LoadImageA@28            @65
+  ImageList_LoadImageW         = _ImageList_LoadImageW@28            @66
+  ImageList_Merge              = _ImageList_Merge@24                 @67
+  ImageList_Read               = _ImageList_Read@4                   @68
+  ImageList_Remove             = _ImageList_Remove@8                 @69
+  ImageList_Replace            = _ImageList_Replace@16               @70
   Alloc                        = _COMCTL32_Alloc@4                   @71
   ReAlloc                      = _COMCTL32_ReAlloc@8                 @72
   Free                         = _COMCTL32_Free@4                    @73
   GetSize                      = _COMCTL32_GetSize@4                 @74
-  ImageList_SetBkColor         = _ImageList_SetBkColor@8             @75
-  ImageList_SetDragCursorImage = _ImageList_SetDragCursorImage@16    @76
-  ImageList_SetFilter          = _ImageList_SetFilter@12             @77
-  ;;stub ImageList_SetFlags                                          @78
-  ImageList_SetIconSize        = _ImageList_SetIconSize@12           @79
-  ImageList_SetImageCount      = _ImageList_SetImageCount@8          @80
-  ImageList_SetOverlayImage    = _ImageList_SetOverlayImage@12       @81
-  ImageList_Write              = _ImageList_Write@8                  @82
-
-  InitCommonControlsEx         = _InitCommonControlsEx@4             @83
-  InitMUILanguage              = _InitMUILanguage@4                  @84
-  InitializeFlatSB             = _InitializeFlatSB@4                 @85
-  PropertySheet                = _PropertySheetA@4                   @86
-  PropertySheetA               = _PropertySheetA@4                   @87
-  PropertySheetW               = _PropertySheetW@4                   @88
-  UninitializeFlatSB           = _UninitializeFlatSB@4               @89
-  _TrackMouseEvent             = __TrackMouseEvent@4                 @90
+  ImageList_ReplaceIcon        = _ImageList_ReplaceIcon@12           @75
+  ImageList_SetBkColor         = _ImageList_SetBkColor@8             @76
+  ImageList_SetDragCursorImage = _ImageList_SetDragCursorImage@16    @77
+  ImageList_SetFilter          = _ImageList_SetFilter@12             @78
+  ImageList_SetFlags           = _ImageList_SetFlags@8               @79
+  ImageList_SetIconSize        = _ImageList_SetIconSize@12           @80
+  ImageList_SetImageCount      = _ImageList_SetImageCount@8          @81
+  ImageList_SetOverlayImage    = _ImageList_SetOverlayImage@12       @82
+  ImageList_Write              = _ImageList_Write@8                  @83
+  InitCommonControlsEx         = _InitCommonControlsEx@4             @84
+  InitMUILanguage              = _InitMUILanguage@4                  @85
+  InitializeFlatSB             = _InitializeFlatSB@4                 @86
+  PropertySheet                = _PropertySheetA@4                   @87
+  PropertySheetA               = _PropertySheetA@4                   @88
+  PropertySheetW               = _PropertySheetW@4                   @89
+  UninitializeFlatSB           = _UninitializeFlatSB@4               @90
+  _TrackMouseEvent             = __TrackMouseEvent@4                 @91
 
 
 
   CreateMRUListA      = _CreateMRUListA@4          @151
 ; ordinals????
-  FreeMRUListA        = _FreeMRUListA@4            @152
+  FreeMRUList         = _FreeMRUList@4             @152
   AddMRUStringA       = _AddMRUStringA@8           @153
   EnumMRUListA        = _EnumMRUListA@16           @154
   FindMRUStringA      = _FindMRUStringA@12         @155
@@ -179,14 +177,17 @@ EXPORTS
                         _COMCTL32_389@8            @389 NONAME
                         _COMCTL32_390@16           @390 NONAME
 
-;400 stub CreateMRUListW@4
-;401 stub AddMRUStringW@8
-;402 stub FindMRUStringW@12
-;403 stub EnumMRUListW@16
-;404 stub CreateMRUListLazyW@16
+  CreateMRUListW      = _CreateMRUListW@4          @400
+  AddMRUStringW       = _AddMRUStringW@8           @401
+  FindMRUStringW      = _FindMRUStringW@12         @402
+  EnumMRUListW        = _EnumMRUListW@16           @403
+  CreateMRUListLazyW  = _CreateMRUListLazyW@16     @404
 
                         _COMCTL32_410@16           @410 NONAME
                         _COMCTL32_411@12           @411 NONAME
                         _COMCTL32_412@12           @412 NONAME
                         _COMCTL32_413@16           @413 NONAME
                         _COMCTL32_415@20           @415 NONAME
+
+                        _COMCTL32_419@16           @419 NONAME
+

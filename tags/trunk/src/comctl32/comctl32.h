@@ -1,4 +1,4 @@
-/* $Id: comctl32.h,v 1.20 2001-04-29 10:30:56 sandervl Exp $ */
+/* $Id: comctl32.h,v 1.21 2002-02-06 17:23:18 sandervl Exp $ */
 /*
  * Win32 common controls implementation
  *
@@ -25,6 +25,13 @@
 #define _OS2WIN_H
 #define NO_ULONG
 #include <misc.h>
+
+#ifndef __cplusplus
+#undef inline
+#define inline
+#endif
+
+extern HBRUSH  COMCTL32_hPattern55AABrush;
 
 #ifdef __cplusplus
 extern "C" {
