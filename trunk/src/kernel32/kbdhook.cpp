@@ -1,4 +1,4 @@
-/* $Id: kbdhook.cpp,v 1.1 2004-01-12 09:55:25 sandervl Exp $ */
+/* $Id: kbdhook.cpp,v 1.2 2004-02-10 15:36:04 sandervl Exp $ */
 /*
  * OS/2 native Presentation Manager hooks
  *
@@ -210,9 +210,8 @@ BOOL EXPENTRY hookPreAccelHook(HAB hab, PQMSG pqmsg, ULONG option)
                // to rewrite the message so PM will ignore the key
                // and won't translate the message to anything else.
 
-               pqmsg->msg = WM_CHAR_SPECIAL;
-
-               break;
+               WinPostMsg(pqmsg->hwnd, WM_CHAR_SPECIAL, pqmsg->mp1, pqmsg->mp2);
+               return TRUE;
 
         //
         // AltGr needs special handling
@@ -253,8 +252,6 @@ BOOL EXPENTRY hookPreAccelHook(HAB hab, PQMSG pqmsg, ULONG option)
 
                 flags = SHORT1FROMMP(pqmsg->mp1);
 
-                pqmsg->msg = WM_CHAR_SPECIAL;
-
                 if (flags & KC_KEYUP)
                 {   
                   //AltGr up
@@ -266,14 +263,14 @@ BOOL EXPENTRY hookPreAccelHook(HAB hab, PQMSG pqmsg, ULONG option)
                       mp1 |= (1 << 16);			//repeat count
                       mp1 |= (KC_ALT | KC_KEYUP | KC_VIRTUALKEY | KC_SCANCODE);
                       mp2  = (VK_CTRL << 16);		//virtual keycode
-                      pqmsg->msg = WM_CHAR_SPECIAL_ALTGRCONTROL;
-                      pqmsg->mp1 = (MPARAM)mp1;
-                      pqmsg->mp2 = (MPARAM)mp2;
+                      WinPostMsg(msg.hwnd, WM_CHAR_SPECIAL_ALTGRCONTROL, (MPARAM)mp1, (MPARAM)mp2);
 
                       //and finally, post the AltGr WM_CHAR message
                       WinPostMsg(msg.hwnd, WM_CHAR_SPECIAL, msg.mp1, msg.mp2);
                   }
-                  //else do nothing
+                  else {
+                      WinPostMsg(pqmsg->hwnd, WM_CHAR_SPECIAL, pqmsg->mp1, pqmsg->mp2);
+                  }
                }
                else
                {
@@ -286,9 +283,8 @@ BOOL EXPENTRY hookPreAccelHook(HAB hab, PQMSG pqmsg, ULONG option)
                       mp1 |= (1 << 16);			//repeat count
                       mp1 |= (KC_KEYUP | KC_VIRTUALKEY | KC_SCANCODE);
                       mp2  = (VK_CTRL << 16);		//virtual keycode
-                      pqmsg->msg = WM_CHAR_SPECIAL_ALTGRCONTROL;
-                      pqmsg->mp1 = (MPARAM)mp1;
-                      pqmsg->mp2 = (MPARAM)mp2;
+
+                      WinPostMsg(pqmsg->hwnd, WM_CHAR_SPECIAL_ALTGRCONTROL, (MPARAM)mp1, (MPARAM)mp2);
                   }
                   //send left control key down message
                   mp1  = (PMSCAN_CTRLLEFT << 24);	//scancode
@@ -304,14 +300,12 @@ BOOL EXPENTRY hookPreAccelHook(HAB hab, PQMSG pqmsg, ULONG option)
                   else
                   {
                       //translate this message into control key down
-                      pqmsg->msg = WM_CHAR_SPECIAL_ALTGRCONTROL;
-                      pqmsg->mp1 = (MPARAM)mp1;
-                      pqmsg->mp2 = (MPARAM)mp2;
+                      WinPostMsg(pqmsg->hwnd, WM_CHAR_SPECIAL_ALTGRCONTROL, (MPARAM)mp1, (MPARAM)mp2);
                   }
                   //and finally, post the AltGr WM_CHAR message
                   WinPostMsg(msg.hwnd, WM_CHAR_SPECIAL, msg.mp1, msg.mp2);
               }
-              break;
+              return TRUE;
            }
         }
         break; // WM_CHAR
