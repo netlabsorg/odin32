@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.19 2000-10-21 18:42:17 sandervl Exp $
+# $Id: makefile,v 1.20 2000-11-09 21:09:28 sandervl Exp $
 
 #
 # Odin32 API
@@ -81,6 +81,31 @@ dep:
     $(DEPEND) -I$(PDWIN32_INCLUDE);$(PDWIN32_INCLUDE)\win \
         *.c *.cpp *.h *.asm *.inc $(PDWIN32_INCLUDE)\*.h
 
+
+$(OBJDIR)\rsrc.obj: \
+cdlg_Ca.orc \
+cdlg_Cs.orc \
+cdlg_Da.orc \
+cdlg_De.orc \
+cdlg_En.orc \
+cdlg_Eo.orc \
+cdlg_Es.orc \
+cdlg_Fi.orc \
+cdlg_Fr.orc \
+cdlg_Hu.orc \
+cdlg_It.orc \
+cdlg_Ja.orc \
+cdlg_Ko.orc \
+cdlg_Nl.orc \
+cdlg_No.orc \
+cdlg_Pl.orc \
+cdlg_Pt.orc \
+cdlg_Ru.orc \
+cdlg_Sk.orc \
+cdlg_Sv.orc \
+cdlg_Wa.orc \
+cdlg_xx.orc \
+rsrc.orc
 
 # Includes the common rules.
 !include $(PDWIN32_INCLUDE)/pdwin32.post

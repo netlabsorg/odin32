@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.74 2000-11-04 16:28:24 sandervl Exp $
+# $Id: Makefile,v 1.75 2000-11-09 21:10:07 sandervl Exp $
 
 #
 # Odin32 API
@@ -136,6 +136,8 @@ dep:
     $(DEPEND) -I$(PDWIN32_INCLUDE);$(PDWIN32_INCLUDE)\win \
         *.c *.cpp *.h *.asm *.inc $(PDWIN32_INCLUDE)\*.h
 
+
+$(OBJDIR)\user32rsrc.obj: user32rsrc.orc
 
 # Includes the common rules.
 !include $(PDWIN32_INCLUDE)/pdwin32.post

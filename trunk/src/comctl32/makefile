@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.27 2000-09-29 07:37:04 achimha Exp $
+# $Id: makefile,v 1.28 2000-11-09 21:09:40 sandervl Exp $
 
 #
 # Odin32 API
@@ -94,6 +94,31 @@ $(TARGET).def
 dep:
     $(DEPEND) -I$(PDWIN32_INCLUDE);$(PDWIN32_INCLUDE)\win \
         *.c *.cpp *.h *.asm *.inc $(PDWIN32_INCLUDE)\*.h
+
+
+$(OBJDIR)\rsrc.obj: \
+cctl_Ca.orc \
+cctl_Ca.orc \
+cctl_Cs.orc \
+cctl_Da.orc \
+cctl_De.orc \
+cctl_En.orc \
+cctl_Eo.orc \
+cctl_Es.orc \
+cctl_Fi.orc \
+cctl_Fr.orc \
+cctl_Hu.orc \
+cctl_It.orc \
+cctl_Ko.orc \
+cctl_Nl.orc \
+cctl_No.orc \
+cctl_Pl.orc \
+cctl_Pt.orc \
+cctl_Ru.orc \
+cctl_Sv.orc \
+cctl_Wa.orc \
+cctl_xx.orc \
+rsrc.orc 
 
 
 # Includes the common rules.
