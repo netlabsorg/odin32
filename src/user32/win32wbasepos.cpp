@@ -1,4 +1,4 @@
-/* $Id: win32wbasepos.cpp,v 1.21 2001-02-22 18:18:59 sandervl Exp $ */
+/* $Id: win32wbasepos.cpp,v 1.22 2001-02-23 14:52:42 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2 (nonclient/position methods)
  *
@@ -223,7 +223,7 @@ static void WINPOS_FindIconPos( HWND hwnd, POINT &pt )
 
     hwndParent = GetParent(hwnd);
     if(hwndParent == 0) {
-        DebugInt3();
+        dprintf(("WINPOS_FindIconPos: no parent found for window %x", hwnd));
         return;
     }
 
@@ -268,11 +268,11 @@ static void WINPOS_FindIconPos( HWND hwnd, POINT &pt )
 
             if (!hwndChild) /* No window was found, so it's OK for us */
             {
-		        pt.x = x + (xspacing - GetSystemMetrics(SM_CXICON)) / 2;
-		        pt.y = y - (yspacing + GetSystemMetrics(SM_CYICON)) / 2;
-		        return;
+                pt.x = x + (xspacing - GetSystemMetrics(SM_CXICON)) / 2;
+                pt.y = y - (yspacing + GetSystemMetrics(SM_CYICON)) / 2;
+                return;
             }
-	        x += xspacing;
+            x += xspacing;
         } while(x <= rectParent.right-xspacing);
 
         y -= yspacing;
