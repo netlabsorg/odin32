@@ -1,10 +1,11 @@
-/* $Id: changelog,v 1.2186 2002-06-25 17:54:31 sandervl Exp $ */
+/* $Id: changelog,v 1.2187 2002-06-25 18:09:52 sandervl Exp $ */
 
  2002-06-25: Sander van Leeuwen <sandervl@innotek.de>
     - KERNEL32: o RegQueryValueExA(/W) fix for querying the length of string
                   key data; registry.dll returns the wrong value (too big;
                   appears size of internal storage)
                 o FileTimeToSystemTime fix (no problems with WGSS implementation)
+                o Removed bad unicode change
 
  2002-06-25: knut st. osmundsen <bird@anduin.net>
     - UNICODE:  o Fancy 16 step fallthru case isn't cool if the src length
