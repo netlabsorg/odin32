@@ -1,4 +1,10 @@
- /* $Id: ChangeLog,v 1.825 2000-03-21 08:19:36 davidr Exp $ */
+ /* $Id: ChangeLog,v 1.826 2000-03-21 17:27:40 cbratschi Exp $ */
+
+ 2000-03-21: Christoph Bratschi <cbratschi@datacomm.ch>
+	- COMCTL32: optimized header/treeview for AMD cpuid
+		    fixed dispinfo callbacks
+		    reduced listview redraws
+		    fixed wrong ASCII definitions in commctrl.h
 
  2000-03-20: David Raison <djr@lemur.co.uk>
  	- OLE32: Ported OleQueryCreateFromData, OleCreateFromData from
