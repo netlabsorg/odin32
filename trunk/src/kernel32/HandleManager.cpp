@@ -1,4 +1,4 @@
-/* $Id: HandleManager.cpp,v 1.33 1999-12-30 18:49:32 sandervl Exp $ */
+/* $Id: HandleManager.cpp,v 1.34 2000-01-05 19:39:54 sandervl Exp $ */
 
 /*
  * Win32 Unified Handle Manager for OS/2
@@ -2784,8 +2784,7 @@ BOOL HMGetCommState(INT hCommDev, LPDCB lpdcb)
 
 DWORD HMOpenThreadToken(HANDLE  ThreadHandle,
                         DWORD   DesiredAccess,
-                        BOOLEAN OpenAsSelf,
-                        DWORD   dwUserData,
+                        DWORD   OpenAsSelf,
                         HANDLE *TokenHandle)
 {
   int             iIndex;                     /* index into the handle table */
@@ -2825,7 +2824,6 @@ DWORD HMOpenThreadToken(HANDLE  ThreadHandle,
   // @@@PH: Note: hFile is a Win32-style handle, it's not (yet) converted to
   //              a valid HandleManager-internal handle!
   rc = pDeviceHandler->OpenThreadToken(&TabWin32Handles[iIndexNew].hmHandleData,
-                                       dwUserData,
                                        ThreadHandle,
                                        OpenAsSelf);
 

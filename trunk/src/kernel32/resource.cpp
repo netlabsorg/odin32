@@ -1,4 +1,4 @@
-/* $Id: resource.cpp,v 1.13 1999-12-19 19:54:30 sandervl Exp $ */
+/* $Id: resource.cpp,v 1.14 2000-01-05 19:39:56 sandervl Exp $ */
 
 /*
  * Misc resource procedures
@@ -180,7 +180,7 @@ BOOL WIN32API EnumResourceNamesA(HINSTANCE        hModule,
 {
     Win32ImageBase *pModule;
 
-    dprintf(("KERNEL32:EnumResourceNamesA(%08x,%08x,%08x,%08x) not implemented\n",
+    dprintf(("KERNEL32:EnumResourceNamesA(%08x,%08x,%08x,%08x)",
               hModule, lpszType, lpEnumFunc, lParam
              ));
 

@@ -1,4 +1,4 @@
-/* $Id: hmtoken.h,v 1.1 1999-12-18 21:45:55 sandervl Exp $ */
+/* $Id: hmtoken.h,v 1.2 2000-01-05 19:39:56 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -34,7 +34,6 @@ public:
   HMDeviceTokenClass(LPCSTR lpDeviceName) : HMDeviceKernelObjectClass(lpDeviceName) {}
 
   virtual DWORD  OpenThreadToken(PHMHANDLEDATA pHMHandleData, 
- 			         DWORD   dwUserData,
                                  HANDLE  ThreadHandle,
                                  BOOL OpenAsSelf);
 

@@ -1,4 +1,4 @@
-/* $Id: hmdevice.cpp,v 1.14 1999-12-18 21:45:54 sandervl Exp $ */
+/* $Id: hmdevice.cpp,v 1.15 2000-01-05 19:39:55 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -1138,7 +1138,6 @@ BOOL HMDeviceHandler::GetCommState(PHMHANDLEDATA pHMHandleData, LPDCB lpdcb)
  *****************************************************************************/
 
 DWORD HMDeviceHandler::OpenThreadToken(PHMHANDLEDATA pHMHandleData, 
-				       DWORD   dwUserData,
                                        HANDLE  ThreadHandle,
                                        BOOL    OpenAsSelf)
 {
@@ -1161,7 +1160,7 @@ DWORD HMDeviceHandler::OpenThreadToken(PHMHANDLEDATA pHMHandleData,
  *****************************************************************************/
 
 DWORD HMDeviceHandler::OpenProcessToken(PHMHANDLEDATA pHMHandleData, 
- 				        DWORD   dwUserData,
+                                        DWORD dwUserData,
                                         HANDLE  ProcessHandle)
 {
   dprintf(("KERNEL32: HandleManager::DeviceHandler::OpenProcessToken(%08xh,%08xh)\n",

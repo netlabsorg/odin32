@@ -1,4 +1,4 @@
-/* $Id: hmdevice.h,v 1.14 1999-12-18 21:45:54 sandervl Exp $ */
+/* $Id: hmdevice.h,v 1.15 2000-01-05 19:39:56 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -294,7 +294,7 @@ public:
 
  virtual BOOL GetCommState(PHMHANDLEDATA pHMHandleData, LPDCB lpdcb);
 
- virtual DWORD  OpenThreadToken(PHMHANDLEDATA pHMHandleData, DWORD dwUserData,
+ virtual DWORD  OpenThreadToken(PHMHANDLEDATA pHMHandleData, 
                                  HANDLE  ThreadHandle,
                                  BOOL    OpenAsSelf);
 

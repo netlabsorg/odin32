@@ -1,10 +1,11 @@
-/* $Id: thread.cpp,v 1.21 2000-01-03 21:36:11 sandervl Exp $ */
+/* $Id: thread.cpp,v 1.22 2000-01-05 19:39:56 sandervl Exp $ */
 
 /*
  * Win32 Thread API functions
  *
- * Copyright 1998 Sander van Leeuwen (sandervl@xs4all.nl)
+ * TODO: Initialize threadInfo structure during thread creation
  *
+ * Copyright 1998 Sander van Leeuwen (sandervl@xs4all.nl)
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *
