@@ -1,5 +1,4 @@
-/* $Id: oslibmisc.cpp,v 1.7 2000-02-23 00:57:39 sandervl Exp $ */
-//#define DEBUG
+/* $Id: oslibmisc.cpp,v 1.8 2000-02-23 01:06:59 sandervl Exp $ */
 /*
  * Misc OS/2 util. procedures
  *
@@ -59,7 +58,6 @@ ULONG OSLibiGetModuleHandleA(char * pszModule)
   PTIB pTIB;                              /* parameters for DosGetInfoBlocks */
   PPIB pPIB;
 
-  _interrupt(3);
   dprintf(("KERNEL32:GetModuleHandle(%x)\n",
            pszModule));
 
