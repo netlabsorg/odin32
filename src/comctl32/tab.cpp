@@ -1,4 +1,4 @@
-/* $Id: tab.cpp,v 1.1 2000-02-23 17:09:48 cbratschi Exp $ */
+/* $Id: tab.cpp,v 1.2 2000-03-18 16:17:30 cbratschi Exp $ */
 /*
  * Tab control
  *
@@ -15,12 +15,16 @@
  */
 
 /* inconsistent: report! */
-/* WINE 991212 level */
+/*
+ - Corel WINE 20000317 level
+ - (WINE 991212 level)
+*/
 
 #include <string.h>
 
 #include "winbase.h"
 #include "commctrl.h"
+#include "ccbase.h"
 #include "tab.h"
 #include "comctl32.h"
 
@@ -41,7 +45,7 @@
 #define BUTTON_SPACINGX         10
 #define DEFAULT_TAB_WIDTH       96
 
-#define TAB_GetInfoPtr(hwnd) ((TAB_INFO *)GetWindowLongA(hwnd,0))
+#define TAB_GetInfoPtr(hwnd) ((TAB_INFO*)getInfoPtr(hwnd))
 
 /******************************************************************************
  * Prototypes
@@ -49,20 +53,6 @@
 static void TAB_Refresh (HWND hwnd, HDC hdc);
 static void TAB_InvalidateTabArea(HWND      hwnd, TAB_INFO* infoPtr);
 static void TAB_EnsureSelectionVisible(HWND hwnd, TAB_INFO* infoPtr);
-
-static BOOL
-TAB_SendSimpleNotify (HWND hwnd, UINT code)
-{
-    NMHDR nmhdr;
-
-    nmhdr.hwndFrom = hwnd;
-    nmhdr.idFrom = GetWindowLongA(hwnd, GWL_ID);
-    nmhdr.code = code;
-
-    return (BOOL) SendMessageA (GetParent (hwnd), WM_NOTIFY,
-            (WPARAM) nmhdr.idFrom, (LPARAM) &nmhdr);
-}
-
 
 static VOID
 TAB_RelayEvent (HWND hwndTip, HWND hwndMsg, UINT uMsg,
@@ -80,8 +70,6 @@ TAB_RelayEvent (HWND hwndTip, HWND hwndMsg, UINT uMsg,
 
     SendMessageA (hwndTip, TTM_RELAYEVENT, 0, (LPARAM)&msg);
 }
-
-
 
 static LRESULT
 TAB_GetCurSel (HWND hwnd)
@@ -139,9 +127,9 @@ TAB_SetCurFocus (HWND hwnd,WPARAM wParam)
 //    FIXME (tab,"Should set input focus\n");
   } else {
     if (infoPtr->iSelected != iItem) {
-      if (TAB_SendSimpleNotify(hwnd, TCN_SELCHANGING)!=TRUE)  {
+      if (sendNotify(hwnd,TCN_SELCHANGING) != TRUE)  {
         infoPtr->iSelected = iItem;
-        TAB_SendSimpleNotify(hwnd, TCN_SELCHANGE);
+        sendNotify(hwnd,TCN_SELCHANGE);
 
         TAB_EnsureSelectionVisible(hwnd, infoPtr);
         TAB_InvalidateTabArea(hwnd, infoPtr);
@@ -281,11 +269,11 @@ static LRESULT TAB_KeyUp(
        (newItem < infoPtr->uNumItem) &&
        (infoPtr->uFocus != newItem) )
   {
-    if (!TAB_SendSimpleNotify(hwnd, TCN_SELCHANGING))
+    if (!sendNotify(hwnd,TCN_SELCHANGING))
     {
       infoPtr->iSelected = newItem;
       infoPtr->uFocus    = newItem;
-      TAB_SendSimpleNotify(hwnd, TCN_SELCHANGE);
+      sendNotify(hwnd,TCN_SELCHANGE);
 
       TAB_EnsureSelectionVisible(hwnd, infoPtr);
       TAB_InvalidateTabArea(hwnd, infoPtr);
@@ -403,11 +391,11 @@ TAB_LButtonDown (HWND hwnd, WPARAM wParam, LPARAM lParam)
   if ( (newItem!=-1) &&
        (infoPtr->iSelected != newItem) )
   {
-    if (TAB_SendSimpleNotify(hwnd, TCN_SELCHANGING)!=TRUE)
+    if (sendNotify(hwnd,TCN_SELCHANGING) != TRUE)
     {
       infoPtr->iSelected = newItem;
       infoPtr->uFocus    = newItem;
-      TAB_SendSimpleNotify(hwnd, TCN_SELCHANGE);
+      sendNotify(hwnd, TCN_SELCHANGE);
 
       TAB_EnsureSelectionVisible(hwnd, infoPtr);
 
@@ -439,18 +427,18 @@ TAB_LButtonUp (HWND hwnd, WPARAM wParam, LPARAM lParam)
   if ( (newItem!=-1) &&
        (infoPtr->iSelected != newItem) )
   {
-    if (TAB_SendSimpleNotify(hwnd, TCN_SELCHANGING)!=TRUE)
+    if (sendNotify(hwnd,TCN_SELCHANGING) != TRUE)
     {
       infoPtr->iSelected = newItem;
       infoPtr->uFocus    = newItem;
-      TAB_SendSimpleNotify(hwnd, TCN_SELCHANGE);
+      sendNotify(hwnd,TCN_SELCHANGE);
 
       TAB_EnsureSelectionVisible(hwnd, infoPtr);
 
       TAB_InvalidateTabArea(hwnd, infoPtr);
     }
   }
-  TAB_SendSimpleNotify(hwnd, NM_CLICK);
+  sendNotify(hwnd,NM_CLICK);
 
   return 0;
 }
@@ -458,7 +446,8 @@ TAB_LButtonUp (HWND hwnd, WPARAM wParam, LPARAM lParam)
 static LRESULT
 TAB_RButtonDown (HWND hwnd, WPARAM wParam, LPARAM lParam)
 {
-  TAB_SendSimpleNotify(hwnd, NM_RCLICK);
+  sendNotify(hwnd,NM_RCLICK);
+
   return 0;
 }
 
@@ -803,6 +792,10 @@ static void TAB_SetItemBounds (HWND hwnd)
    */
   infoPtr->needsScrolling = (curItemLeftPos + (2*SELECTED_TAB_OFFSET) >
                              clientRect.right);
+
+  /* Don't need scrolling, then update infoPtr->leftmostVisible */
+  if(!infoPtr->needsScrolling)
+    infoPtr->leftmostVisible = 0;
 
   TAB_SetupScrolling(hwnd, infoPtr, &clientRect);
 
@@ -1378,12 +1371,12 @@ static LRESULT TAB_InsertItemA (HWND hwnd, WPARAM wParam, LPARAM lParam)
   if (pti->mask & TCIF_PARAM)
     infoPtr->items[iItem].lParam = pti->lParam;
 
+  TAB_SetItemBounds(hwnd);
   TAB_InvalidateTabArea(hwnd, infoPtr);
 
 //  TRACE(tab, "[%04x]: added item %d '%s'\n",
 //      hwnd, iItem, infoPtr->items[iItem].pszText);
 
-  TAB_SetItemBounds(hwnd);
   return iItem;
 }
 
@@ -1445,12 +1438,12 @@ static LRESULT TAB_InsertItemW(HWND hwnd, WPARAM wParam, LPARAM lParam)
   if (pti->mask & TCIF_PARAM)
     infoPtr->items[iItem].lParam = pti->lParam;
 
+  TAB_SetItemBounds(hwnd);
   TAB_InvalidateTabArea(hwnd, infoPtr);
 
 //  TRACE(tab, "[%04x]: added item %d '%s'\n",
 //      hwnd, iItem, infoPtr->items[iItem].pszText);
 
-  TAB_SetItemBounds(hwnd);
   return iItem;
 }
 
@@ -1782,10 +1775,9 @@ TAB_Create (HWND hwnd, WPARAM wParam, LPARAM lParam)
   TEXTMETRICA fontMetrics;
   HDC hdc;
   HFONT hOldFont;
+  DWORD dwStyle;
 
-  infoPtr = (TAB_INFO *)COMCTL32_Alloc (sizeof(TAB_INFO));
-
-  SetWindowLongA(hwnd, 0, (DWORD)infoPtr);
+  infoPtr = (TAB_INFO*)initControl(hwnd,sizeof(TAB_INFO));
 
   infoPtr->uNumItem        = 0;
   infoPtr->hFont           = 0;
@@ -1799,28 +1791,16 @@ TAB_Create (HWND hwnd, WPARAM wParam, LPARAM lParam)
   infoPtr->hwndUpDown      = 0;
   infoPtr->leftmostVisible = 0;
 
-//  TRACE(tab, "Created tab control, hwnd [%04x]\n", hwnd);
-  if (GetWindowLongA(hwnd, GWL_STYLE) & TCS_TOOLTIPS) {
-    /* Create tooltip control */
-    infoPtr->hwndToolTip =
-      CreateWindowExA (0, TOOLTIPS_CLASSA, NULL, 0,
-                       CW_USEDEFAULT, CW_USEDEFAULT,
-                       CW_USEDEFAULT, CW_USEDEFAULT,
-                       hwnd, 0, 0, 0);
+  /* The tab control always has the WS_CLIPSIBLINGS style. Even
+     if you don't specify in CreateWindow. This is necesary in
+     order for paint to work correctly. This follows windows behaviour. */
+  dwStyle = GetWindowLongA(hwnd, GWL_STYLE);
+  SetWindowLongA(hwnd, GWL_STYLE, dwStyle|WS_CLIPSIBLINGS);
 
-    /* Send NM_TOOLTIPSCREATED notification */
-    if (infoPtr->hwndToolTip) {
-      NMTOOLTIPSCREATED nmttc;
 
-      nmttc.hdr.hwndFrom = hwnd;
-      nmttc.hdr.idFrom = GetWindowLongA(hwnd, GWL_ID);
-      nmttc.hdr.code = NM_TOOLTIPSCREATED;
-      nmttc.hwndToolTips = infoPtr->hwndToolTip;
-
-      SendMessageA (GetParent (hwnd), WM_NOTIFY,
-                    (WPARAM)GetWindowLongA(hwnd, GWL_ID), (LPARAM)&nmttc);
-    }
-  }
+  /* Create tooltip control */
+  if (dwStyle & TCS_TOOLTIPS)
+    infoPtr->hwndToolTip = createToolTip(hwnd,0,FALSE);
 
   /*
    * We need to get text information so we need a DC and we need to select
@@ -1872,7 +1852,8 @@ TAB_Destroy (HWND hwnd, WPARAM wParam, LPARAM lParam)
   if (infoPtr->hwndUpDown)
     DestroyWindow(infoPtr->hwndUpDown);
 
-  COMCTL32_Free (infoPtr);
+  doneControl(hwnd);
+
   return 0;
 }
 
@@ -2043,7 +2024,7 @@ TAB_WindowProc (HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 //      if (uMsg >= WM_USER)
 //      ERR (tab, "unknown msg %04x wp=%08x lp=%08lx\n",
 //           uMsg, wParam, lParam);
-      return DefWindowProcA (hwnd, uMsg, wParam, lParam);
+      return defComCtl32ProcA (hwnd, uMsg, wParam, lParam);
     }
 
     return 0;
@@ -2054,9 +2035,6 @@ VOID
 TAB_Register (VOID)
 {
   WNDCLASSA wndClass;
-
-//SvL: Don't check this now
-//  if (GlobalFindAtomA (WC_TABCONTROLA)) return;
 
   ZeroMemory (&wndClass, sizeof(WNDCLASSA));
   wndClass.style         = CS_GLOBALCLASS | CS_DBLCLKS | CS_SAVEBITS;
@@ -2074,7 +2052,6 @@ TAB_Register (VOID)
 VOID
 TAB_Unregister (VOID)
 {
-  if (GlobalFindAtomA (WC_TABCONTROLA))
-    UnregisterClassA (WC_TABCONTROLA, (HINSTANCE)NULL);
+  UnregisterClassA (WC_TABCONTROLA, (HINSTANCE)NULL);
 }
 

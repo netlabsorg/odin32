@@ -1,4 +1,4 @@
-/* $Id: tooltips.cpp,v 1.3 2000-03-17 17:13:26 cbratschi Exp $ */
+/* $Id: tooltips.cpp,v 1.4 2000-03-18 16:17:32 cbratschi Exp $ */
 /*
  * Tool tip control
  *
@@ -16,12 +16,16 @@
  *     hittest.exe, needtext.exe, newrect.exe, updtext.exe and winfrpt.exe.
  */
 
-/* WINE 20000130 level */
+/*
+ - Corel WINE 20000317 level
+ - (WINE 20000130 level)
+*/
 
 #include <string.h>
 
 #include "winbase.h"
 #include "commctrl.h"
+#include "ccbase.h"
 #include "tooltips.h"
 #include "comctl32.h"
 
@@ -1925,8 +1929,7 @@ TOOLTIPS_Create (HWND hwnd, WPARAM wParam, LPARAM lParam)
     INT nResult;
 
     /* allocate memory for info structure */
-    infoPtr = (TOOLTIPS_INFO *)COMCTL32_Alloc(sizeof(TOOLTIPS_INFO));
-    SetWindowLongA(hwnd,0,(DWORD)infoPtr);
+    infoPtr = (TOOLTIPS_INFO*)initControl(hwnd,sizeof(TOOLTIPS_INFO));
 
     /* initialize info structure */
     infoPtr->szTipText[0] = '\0';
@@ -1953,14 +1956,6 @@ TOOLTIPS_Create (HWND hwnd, WPARAM wParam, LPARAM lParam)
     infoPtr->nInitialTime   = 500;
 
     SetRectEmpty(&infoPtr->rcMargin);
-
-    nResult = (INT)SendMessageA(GetParent(hwnd),WM_NOTIFYFORMAT,(WPARAM)hwnd,(LPARAM)NF_QUERY);
-//    if (nResult == NFR_ANSI)
-//      TRACE (tooltips, " -- WM_NOTIFYFORMAT returns: NFR_ANSI\n");
-//    else if (nResult == NFR_UNICODE)
-//      FIXME (tooltips, " -- WM_NOTIFYFORMAT returns: NFR_UNICODE\n");
-//    else
-//      FIXME (tooltips, " -- WM_NOTIFYFORMAT returns: error!\n");
 
     SetWindowPos(hwnd,HWND_TOP,0,0,0,0,SWP_NOZORDER | SWP_HIDEWINDOW | SWP_NOACTIVATE);
 
@@ -2012,7 +2007,7 @@ TOOLTIPS_Destroy (HWND hwnd, WPARAM wParam, LPARAM lParam)
     DeleteObject (infoPtr->hFont);
 
     /* free tool tips info data */
-    COMCTL32_Free(infoPtr);
+    doneControl(hwnd);
 
     return 0;
 }
@@ -2086,14 +2081,6 @@ TOOLTIPS_NCHitTest (HWND hwnd, WPARAM wParam, LPARAM lParam)
     }
 
     return DefWindowProcA (hwnd, WM_NCHITTEST, wParam, lParam);
-}
-
-static LRESULT
-TOOLTIPS_NotifyFormat (HWND hwnd, WPARAM wParam, LPARAM lParam)
-{
-//    FIXME ("hwnd=%x wParam=%x lParam=%lx\n", hwnd, wParam, lParam);
-
-    return 0;
 }
 
 static LRESULT
@@ -2243,25 +2230,19 @@ TOOLTIPS_SubclassProc (HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
         case WM_RBUTTONDOWN:
         case WM_RBUTTONUP:
             infoPtr = TOOLTIPS_GetInfoPtr(lpttsi->hwndToolTip);
-                nTool = TOOLTIPS_GetToolFromMessage (infoPtr, hwnd);
+            if (!infoPtr) break;
+            nTool = TOOLTIPS_GetToolFromMessage (infoPtr, hwnd);
 
-//              TRACE (tooltips, "subclassed mouse message %04x\n", uMsg);
-                infoPtr->nOldTool = infoPtr->nTool;
-                infoPtr->nTool = nTool;
+            infoPtr->nOldTool = infoPtr->nTool;
+            infoPtr->nTool = nTool;
             TOOLTIPS_Hide (lpttsi->hwndToolTip, infoPtr);
             break;
 
         case WM_MOUSEMOVE:
                 infoPtr = TOOLTIPS_GetInfoPtr (lpttsi->hwndToolTip);
-                //@@@AH 2000/02/25 check if there is a valid instance data pointer
-                if (!infoPtr)
-                {
-                  dprintf(("Tooltips:SubclassProc:WM_MOUSEMOVE: infoPtr == NULL!\n"));
-                  break;
-                }
+                if (!infoPtr) break;
                 nTool = TOOLTIPS_GetToolFromMessage (infoPtr, hwnd);
 
-//              TRACE (tooltips, "subclassed WM_MOUSEMOVE\n");
                 infoPtr->nOldTool = infoPtr->nTool;
                 infoPtr->nTool = nTool;
 
@@ -2270,7 +2251,7 @@ TOOLTIPS_SubclassProc (HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
                     if (infoPtr->nOldTool == -1) {
                     SetTimer (hwnd, ID_TIMERSHOW,
                                     infoPtr->nInitialTime, 0);
-//                      TRACE (tooltips, "timer 1 started!\n");
+                      //TRACE (tooltips, "timer 1 started!\n");
                     }
                     else {
                     TOOLTIPS_Hide (lpttsi->hwndToolTip, infoPtr);
@@ -2444,9 +2425,6 @@ TOOLTIPS_WindowProc (HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
         case WM_NCHITTEST:
             return TOOLTIPS_NCHitTest (hwnd, wParam, lParam);
 
-        case WM_NOTIFYFORMAT:
-            return TOOLTIPS_NotifyFormat (hwnd, wParam, lParam);
-
         case WM_PAINT:
             return TOOLTIPS_Paint (hwnd, wParam, lParam);
 
@@ -2463,7 +2441,7 @@ TOOLTIPS_WindowProc (HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 //            if (uMsg >= WM_USER)
 //              ERR (tooltips, "unknown msg %04x wp=%08x lp=%08lx\n",
 //                   uMsg, wParam, lParam);
-            return DefWindowProcA (hwnd, uMsg, wParam, lParam);
+            return defComCtl32ProcA (hwnd, uMsg, wParam, lParam);
     }
     return 0;
 }

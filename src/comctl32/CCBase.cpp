@@ -1,4 +1,4 @@
-/* $Id: CCBase.cpp,v 1.3 2000-03-17 17:13:22 cbratschi Exp $ */
+/* $Id: CCBase.cpp,v 1.4 2000-03-18 16:17:20 cbratschi Exp $ */
 /*
  * COMCTL32 Base Functions and Macros for all Controls
  *
@@ -13,7 +13,7 @@
 
 BOOL checkVersion(INT iVersion)
 {
-  return TRUE; //CB: todo
+  return iVersion <= COMCTL32_VERSION;
 }
 
 //init-done
@@ -212,7 +212,7 @@ LRESULT sendVScroll(HWND hwnd,UINT wNotifyCode)
 
 //Tooltips
 
-HWND createToolTip(HWND hwnd,UINT flags)
+HWND createToolTip(HWND hwnd,UINT flags,BOOL addtool)
 {
   HWND hwndToolTip;
   NMTOOLTIPSCREATED nmttc;
@@ -230,15 +230,18 @@ HWND createToolTip(HWND hwnd,UINT flags)
   nmttc.hwndToolTips = hwndToolTip;
   sendNotify(hwnd,NM_TOOLTIPSCREATED,&nmttc.hdr);
 
-  ZeroMemory(&ti,sizeof(TTTOOLINFOA));
-  ti.cbSize   = sizeof(TTTOOLINFOA);
-  ti.uFlags   = flags;
-  ti.hwnd     = hwnd;
-  ti.uId      = 0;
-  ti.lpszText = "";
-  SetRectEmpty (&ti.rect);
+  if (addtool)
+  {
+    ZeroMemory(&ti,sizeof(TTTOOLINFOA));
+    ti.cbSize   = sizeof(TTTOOLINFOA);
+    ti.uFlags   = flags;
+    ti.hwnd     = hwnd;
+    ti.uId      = 0;
+    ti.lpszText = "";
+    SetRectEmpty (&ti.rect);
 
-  SendMessageA(hwndToolTip,TTM_ADDTOOLA,0,(LPARAM)&ti);
+    SendMessageA(hwndToolTip,TTM_ADDTOOLA,0,(LPARAM)&ti);
+  }
 
   return hwndToolTip;
 }
