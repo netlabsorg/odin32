@@ -1,4 +1,9 @@
-/* $Id: changelog,v 1.2343 2002-10-24 16:56:22 sandervl Exp $ */
+/* $Id: changelog,v 1.2344 2002-10-28 12:22:53 sandervl Exp $ */
+
+ 2002-10-28: Platon Fomichev <platon@innotek   >
+    - USER32:   o Fix for WinPeekMsg bug (?); sometimes returns a message
+                  we didn't ask for (filter)
+    - GDI32:    o StretchDIBits fix for partial blits & RGB conversion
 
  2002-10-24: Platon Fomichev <platon@innotek   >
     - USER32:   o TranslateWinMsg bugfix
