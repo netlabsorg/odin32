@@ -1,4 +1,8 @@
-/* $Id: ChangeLog,v 1.1570 2001-07-07 10:45:54 achimha Exp $ */
+/* $Id: ChangeLog,v 1.1571 2001-07-07 13:57:49 sandervl Exp $ */
+
+ 2001-07-07: Sander van Leeuwen <sandervl@xs4all.nl>
+    - KERNEL32: o Rewrote atom functions (no longer relies on Open32)
+                o Fixed GetAtomNameW
 
  2001-07-07: Achim Hasenmueller <achimha@innotek.de>
     - WS2_32:   o import WSAEventSelect from WSOCK32 (although a
@@ -12,7 +16,7 @@
     - URLMON:   o Stubbed HlinkSimpleNavigateToString and RegisterBindStatusCallback
                   to fix SYS2048 during RealPlayer install.
     - WIN32K:   o Fixed the DBExpert bug in the longdllname code.
-                  BTW. Thanks to Randell at Sunnidal Systems and Alex Newman
+                  BTW. Thanks to Randell at Sundial Systems and Alex Newman
                   for reporting this and begin very helpful tracking it down.
                 o The longdllname feature now differs from the OS/2 loader on
                   one points: <br>
