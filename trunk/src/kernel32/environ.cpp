@@ -1,4 +1,4 @@
-/* $Id: environ.cpp,v 1.4 2000-05-10 13:13:32 sandervl Exp $ */
+/* $Id: environ.cpp,v 1.5 2000-09-07 21:40:28 phaller Exp $ */
 
 /*
  * Win32 environment file functions for OS/2
@@ -16,6 +16,11 @@
  * Project Odin Software License can be found in LICENSE.TXT
  *
  */
+
+/*****************************************************************************
+ * Includes                                                                  *
+ *****************************************************************************/
+
 #include <odin.h>
 #include <odinwrap.h>
 #include <os2sel.h>
@@ -32,23 +37,27 @@
 #define DBG_LOCALLOG	DBG_environ
 #include "dbglocal.h"
 
+/*****************************************************************************
+ * Defines                                                                   *
+ *****************************************************************************/
+
+ODINDEBUGCHANNEL(KERNEL32-ENVIRONMENT)
+
+
 //******************************************************************************
 //******************************************************************************
-LPSTR WIN32API GetEnvironmentStringsA(void)
+ODINFUNCTION0(LPSTR, GetEnvironmentStringsA)
 {
-    dprintf(("KERNEL32:  OS2GetEnvironmentStringsA\n"));
-    return (LPSTR) O32_GetEnvironmentStrings();
+  return (LPSTR) O32_GetEnvironmentStrings();
 }
 //******************************************************************************
 //******************************************************************************
-LPWSTR WIN32API GetEnvironmentStringsW(VOID)
+ODINFUNCTION0(LPWSTR, GetEnvironmentStringsW)
 {
  char *envstrings = (char *)O32_GetEnvironmentStrings();
  char *tmp;
  LPWSTR wenvstrings;
  int len, i;
-
-  dprintf(("KERNEL32:  GetEnvironmentStringsW\n"));
 
   if(envstrings == NULL)
     return(NULL);
@@ -72,66 +81,74 @@ LPWSTR WIN32API GetEnvironmentStringsW(VOID)
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API FreeEnvironmentStringsA(LPSTR envstrings)
+ODINFUNCTION1(BOOL, FreeEnvironmentStringsA,
+              LPSTR, envstrings)
 {
-  dprintf(("KERNEL32:  FreeEnvironmentStringsA\n"));
+  dprintf(("not correctly implemented.\n"));
+  //free(envstrings);
   return(TRUE);
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API FreeEnvironmentStringsW(LPWSTR envstrings)
+ODINFUNCTION1(BOOL,   FreeEnvironmentStringsW,
+              LPWSTR, envstrings)
 {
-  dprintf(("KERNEL32:  FreeEnvironmentStringsW\n"));
-  free(envstrings);
+  dprintf(("not correctly implemented.\n"));
+  //free(envstrings);
   return(TRUE);
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API SetEnvironmentVariableA(LPCSTR arg1, LPCSTR arg2)
+ODINFUNCTION2(BOOL,   SetEnvironmentVariableA,
+              LPCSTR, lpszName,
+              LPCSTR, lpszValue)
 {
-    dprintf(("KERNEL32:  SetEnvironmentVariable %s to %s\n", arg1, arg2));
-    return O32_SetEnvironmentVariable(arg1, arg2);
+  return O32_SetEnvironmentVariable(lpszName, lpszValue);
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API SetEnvironmentVariableW(LPCWSTR lpName, LPCWSTR lpValue)
+ODINFUNCTION2(BOOL,    SetEnvironmentVariableW,
+              LPCWSTR, lpszName,
+              LPCWSTR, lpszValue)
 {
- char *asciiname, *asciivalue;
- BOOL  rc;
+  char *asciiname, *asciivalue;
+  BOOL  rc;
 
-    dprintf(("KERNEL32:  OS2SetEnvironmentVariableW\n"));
-    asciiname  = UnicodeToAsciiString((LPWSTR)lpName);
-    asciivalue = UnicodeToAsciiString((LPWSTR)lpValue);
-    rc = O32_SetEnvironmentVariable(asciiname, asciivalue);
-    FreeAsciiString(asciivalue);
-    FreeAsciiString(asciiname);
-    return(rc);
+  asciiname  = UnicodeToAsciiString((LPWSTR)lpszName);
+  asciivalue = UnicodeToAsciiString((LPWSTR)lpszValue);
+  rc = O32_SetEnvironmentVariable(asciiname, asciivalue);
+  FreeAsciiString(asciivalue);
+  FreeAsciiString(asciiname);
+  return(rc);
 }
 //******************************************************************************
 //******************************************************************************
-DWORD WIN32API GetEnvironmentVariableA(LPCSTR arg1, LPSTR arg2, DWORD  arg3)
+ODINFUNCTION3(DWORD,  GetEnvironmentVariableA,
+              LPCSTR, lpName,
+              LPSTR,  lpBuffer,
+              DWORD,  nSize)
 {
-    dprintf(("KERNEL32:  GetEnvironmentVariable %s\n", arg1));
-    return O32_GetEnvironmentVariable(arg1, arg2, arg3);
+  return O32_GetEnvironmentVariable(lpName, lpBuffer, nSize);
 }
 //******************************************************************************
 //******************************************************************************
-DWORD WIN32API GetEnvironmentVariableW(LPCWSTR lpName, LPWSTR lpBuffer,
-                                       DWORD nSize)
+ODINFUNCTION3(DWORD,   GetEnvironmentVariableW,
+              LPCWSTR, lpName,
+              LPWSTR,  lpBuffer,
+              DWORD,   nSize)
 {
   char *astring, *asciibuffer;
   DWORD rc;
 
-    dprintf(("KERNEL32:  OS2GetEnvironmentVariableW\n"));
-    asciibuffer = (char *)malloc(nSize+1);
-    *asciibuffer = 0;
-    astring     = UnicodeToAsciiString((LPWSTR)lpName);
+  asciibuffer = (char *)malloc(nSize+1);
+  *asciibuffer = 0;
+  astring     = UnicodeToAsciiString((LPWSTR)lpName);
 
-    rc = O32_GetEnvironmentVariable(astring, asciibuffer, nSize);
-    AsciiToUnicode(asciibuffer, lpBuffer);
-    FreeAsciiString(astring);
-    free(asciibuffer);
-    return(rc);
+  rc = O32_GetEnvironmentVariable(astring, asciibuffer, nSize);
+  AsciiToUnicode(asciibuffer, lpBuffer);
+  FreeAsciiString(astring);
+  free(asciibuffer);
+  return(rc);
 }
 /***********************************************************************
  *           ENV_FindVariable
@@ -168,69 +185,68 @@ static LPCSTR ENV_FindVariable( LPCSTR env, LPCSTR name, INT len )
  *
  *****************************************************************************/
 
-DWORD WIN32API ExpandEnvironmentStringsA( LPCSTR src, LPSTR dst, DWORD count )
+ODINFUNCTION3(DWORD,  ExpandEnvironmentStringsA,
+              LPCSTR, lpSrc,
+              LPSTR,  lpDst,
+              DWORD,  nSize)
 {
     DWORD len, total_size = 1;  /* 1 for terminating '\0' */
     LPCSTR p, var;
 
-    dprintf(("KERNEL32:ExpandEnvironmentStringsA '%s', %08x, %08x",
-              src, dst, count
-              ));
+    if (!nSize) lpDst = NULL;
 
-    if (!count) dst = NULL;
-
-    while (*src)
+    while (*lpSrc)
     {
-        if (*src != '%')
+        if (*lpSrc != '%')
         {
-            if ((p = strchr( src, '%' ))) len = p - src;
-            else len = strlen(src);
-            var = src;
-            src += len;
+            if ((p = strchr( lpSrc, '%' ))) len = p - lpSrc;
+            else len = strlen(lpSrc);
+            var = lpSrc;
+            lpSrc += len;
         }
         else  /* we are at the start of a variable */
         {
-            if ((p = strchr( src + 1, '%' )))
+            if ((p = strchr( lpSrc + 1, '%' )))
             {
-                len = p - src - 1;  /* Length of the variable name */	
+                len = p - lpSrc - 1;  /* Length of the variable name */	
                 if ((var = ENV_FindVariable( GetEnvironmentStringsA(),
-                                             src + 1, len )))
+                                             lpSrc + 1, len )))
                 {
-                    src += len + 2;  /* Skip the variable name */
+                    lpSrc += len + 2;  /* Skip the variable name */
                     len = strlen(var);
                 }
                 else
                 {
-                    var = src;  /* Copy original name instead */
+                    var = lpSrc;  /* Copy original name instead */
                     len += 2;
-                    src += len;
+                    lpSrc += len;
                 }
             }
             else  /* unfinished variable name, ignore it */
             {
-                var = src;
-                len = strlen(src);  /* Copy whole string */
-                src += len;
+                var = lpSrc;
+                len = strlen(lpSrc);  /* Copy whole string */
+                lpSrc += len;
             }
         }
         total_size += len;
-        if (dst)
+        if (lpDst)
         {
-            if (count < len) len = count;
-            memcpy( dst, var, len );
-            dst += len;
-            count -= len;
+            if (nSize < len) len = nSize;
+            memcpy( lpDst, var, len );
+            lpDst += len;
+            nSize -= len;
         }
     }
 
     /* Null-terminate the string */
-    if (dst)
+    if (lpDst)
     {
-        if (!count) dst--;
-        *dst = '\0';
+        if (!nSize) lpDst--;
+        *lpDst = '\0';
     }
     dprintf(("KERNEL32:ExpandEnvironmentStringsA returned %s %d",
-              dst, total_size));
+              lpDst, total_size));
     return total_size;
 }
 
@@ -253,12 +269,13 @@ DWORD WIN32API ExpandEnvironmentStringsA( LPCSTR src, LPSTR dst, DWORD count )
  *
  *****************************************************************************/
 
-DWORD WIN32API ExpandEnvironmentStringsW(LPCWSTR lpSrc, LPWSTR lpDst, DWORD nSize)
+ODINFUNCTION3(DWORD,  ExpandEnvironmentStringsW,
+              LPCWSTR,lpSrc,
+              LPWSTR, lpDst,
+              DWORD,  nSize)
 {
     LPSTR srcA = HEAP_strdupWtoA( GetProcessHeap(), 0, lpSrc );
     LPSTR dstA = lpDst ? (LPSTR)HeapAlloc( GetProcessHeap(), 0, nSize ) : NULL;
-
-    dprintf(("KERNEL32:ExpandEnvironmentStringsW(%08x,%08x,%08x)", lpSrc, lpDst, nSize));
 
     DWORD ret  = ExpandEnvironmentStringsA( srcA, dstA, nSize );
     if (dstA)

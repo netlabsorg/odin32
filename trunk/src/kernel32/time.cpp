@@ -1,4 +1,4 @@
-/* $Id: time.cpp,v 1.9 2000-09-03 18:04:56 phaller Exp $ */
+/* $Id: time.cpp,v 1.10 2000-09-07 21:40:27 phaller Exp $ */
 
 /*
  * Win32 time/date API functions
@@ -13,7 +13,18 @@
  *
  * Project Odin Software License can be found in LICENSE.TXT
  */
+
+
+/*****************************************************************************
+ * Includes                                                                  *
+ *****************************************************************************/
+
+#include <odin.h>
+#include <odinwrap.h>
+#include <os2sel.h>
+
 #include <os2win.h>
+
 #include <winnls.h>
 #include "winuser.h"
 #include <stdlib.h>
@@ -23,6 +34,14 @@
 
 #define DBG_LOCALLOG	DBG_time
 #include "dbglocal.h"
+
+/*****************************************************************************
+ * Defines                                                                   *
+ *****************************************************************************/
+
+ODINDEBUGCHANNEL(KERNEL32-TIME)
+
+
 
 #define lstrcpynAtoW(unicode,ascii,asciilen) AsciiToUnicodeN(ascii,unicode,asciilen);
 
@@ -130,9 +149,9 @@ DWORD WIN32API GetTickCount(void)
 }
 //******************************************************************************
 //******************************************************************************
-VOID WIN32API GetSystemTime( LPSYSTEMTIME arg1)
+ODINPROCEDURE1(GetSystemTime,
+               LPSYSTEMTIME, arg1)
 {
-    dprintf(("KERNEL32:  OS2GetSystemTime\n"));
     O32_GetSystemTime(arg1);
 }
 //******************************************************************************
