@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.15 1999-09-13 19:18:23 dengert Exp $ */
+/* $Id: win32wbase.cpp,v 1.16 1999-09-15 18:03:46 dengert Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -1001,9 +1001,12 @@ ULONG Win32BaseWindow::MsgMouseMove(ULONG keystate, ULONG x, ULONG y)
 }
 //******************************************************************************
 //******************************************************************************
-ULONG Win32BaseWindow::MsgPaint(ULONG tmp1, ULONG tmp2)
+ULONG Win32BaseWindow::MsgPaint(ULONG tmp1, BOOL select)
 {
-    return SendInternalMessageA(WM_PAINT, 0, 0);
+    if (select && isIcon)
+        return SendInternalMessageA(WM_PAINTICON, 0, 0);
+    else
+        return SendInternalMessageA(WM_PAINT, 0, 0);
 }
 //******************************************************************************
 //TODO: Is the clipper region of the window DC equal to the invalidated rectangle?
