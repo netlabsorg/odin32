@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.1 2001-08-19 14:02:12 sandervl Exp $
+# $Id: makefile,v 1.2 2001-08-23 18:34:22 sandervl Exp $
 
 #
 # Odin32 API
@@ -27,9 +27,18 @@ CDEFINES   += -DICOM_CINTERFACE -DCINTERFACE
 # Object files. Prefix with OBJDIR and one space before the '\'.
 #
 OBJS = \
+$(OBJDIR)\amerror.obj \
+$(OBJDIR)\complist.obj \
 $(OBJDIR)\fgraph.obj \
 $(OBJDIR)\ifgraph.obj \
 $(OBJDIR)\imem.obj \
+$(OBJDIR)\ibasaud.obj \
+$(OBJDIR)\ibasvid.obj \
+$(OBJDIR)\imcntl.obj \
+$(OBJDIR)\imevent.obj \
+$(OBJDIR)\impos.obj \
+$(OBJDIR)\imseek.obj \
+$(OBJDIR)\ividwin.obj \
 $(OBJDIR)\initterm.obj \
 $(OBJDIR)\initquartz.obj \
 $(OBJDIR)\irclock.obj \
