@@ -1,4 +1,4 @@
-/* $Id: ChangeLog,v 1.2459 2003-01-23 15:06:24 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.2460 2003-01-23 20:21:06 sandervl Exp $ */
 
  2003-01-23: knut st. osmundsen <bird-odin-spam@anduin.net>
     - TOOLS\COMMON, TOOLS\WRC\U:
@@ -16,6 +16,10 @@
 
  2003-01-23: Platon Fomichev <platon@innotek   >
     - DOC:      o Added build instructions for GCC
+    - NTDLL:    o Made initntdll a C file to remove C++ GCC stuff for now
+                  and added RtlBitmap support from Wine.
+    - INCLUDE:  o Correced odinlx.h header - problem while compiling with
+                  C compiler.
 
  2003-01-22: Sander van Leeuwen <sandervl@innotek   >
     - ODINCRT:  o Renamed wrapper functions
