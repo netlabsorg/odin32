@@ -1,5 +1,5 @@
 *
-* $Id: win32k.ddp,v 1.1 1999-11-10 02:51:43 bird Exp $
+* $Id: win32k.ddp,v 1.2 1999-12-01 09:41:28 bird Exp $
 *
 * Win32k.sys
 *
@@ -15,4 +15,4 @@ win32k.sys \os2\boot\win32k.sys
 win32k.sym \os2\boot\win32k.sym
 
 :CONFIG
-deivce=\os2\boot\win32k.sys
+device=\os2\boot\win32k.sys
