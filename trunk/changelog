@@ -1,4 +1,13 @@
-/* $Id: changelog,v 1.2512 2003-03-04 15:57:08 sandervl Exp $ */
+/* $Id: changelog,v 1.2513 2003-03-05 14:48:08 sandervl Exp $ */
+
+ 2003-03-05: Sander van Leeuwen <sandervl@innotek   >
+    - WINMM:    o timeBegin/EndPeriod: check for upper and lower boundaries
+                o waveoutGetPosition: return 0 if stream is not active (DART)
+                o waveinGetPosition: return 0 if stream is not active (DART)
+                o Don't print a warning for CALLBACK_NULL callbacks
+                o Added ODIN_waveInSetFixedBuffers, renamed SetFixedWaveBufferSize
+                  to ODIN_waveOutSetFixedBuffers. Used to tell WINMM to use
+                  the waveOutWrite buffer size for the DART buffers.
 
  2003-03-04: Platon Fomichev <stauff@innotek   >
     - USER32:   o We did not pay attention to numlock state on numpad keyboard.
