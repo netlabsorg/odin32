@@ -1,4 +1,4 @@
-/* $Id: button.cpp,v 1.46 2002-06-10 09:12:35 sandervl Exp $ */
+/* $Id: button.cpp,v 1.47 2003-04-02 12:58:01 sandervl Exp $ */
 /* File: button.cpp -- Button type widgets
  *
  * Copyright (C) 1993 Johannes Ruscheinski
@@ -334,7 +334,7 @@ static LRESULT BUTTON_SetText(HWND hwnd,WPARAM wParam,LPARAM lParam)
 {
   DWORD dwStyle = GetWindowLongA(hwnd,GWL_STYLE);
 
-  DefWindowProcA(hwnd,WM_SETTEXT,wParam,lParam);
+  LRESULT result = DefWindowProcA(hwnd,WM_SETTEXT,wParam,lParam);
 #ifdef __WIN32OS2__
   BUTTONINFO* infoPtr = (BUTTONINFO*)GetInfoPtr(hwnd);
   if ((dwStyle & 0x0f) == BS_GROUPBOX) {
@@ -366,7 +366,7 @@ static LRESULT BUTTON_SetText(HWND hwnd,WPARAM wParam,LPARAM lParam)
 
   if (dwStyle & WS_VISIBLE) PAINT_BUTTON(hwnd,dwStyle & 0x0f,ODA_DRAWENTIRE);
 
-  return 0;
+  return result;
 }
 
 static LRESULT BUTTON_SetFont(HWND hwnd,WPARAM wParam,LPARAM lParam)

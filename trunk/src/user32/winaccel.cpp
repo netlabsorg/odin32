@@ -1,4 +1,4 @@
-/* $Id: winaccel.cpp,v 1.10 2001-11-21 11:51:39 sandervl Exp $ */
+/* $Id: winaccel.cpp,v 1.11 2003-04-02 12:58:02 sandervl Exp $ */
 /*
  * Win32 accelerator key functions for OS/2
  *
@@ -404,7 +404,7 @@ HACCEL WINAPI CreateAcceleratorTableW(LPACCEL lpaccel, INT cEntries)
        accel[i].fVirt = lpaccel[i].fVirt;
        if( !(accel[i].fVirt & FVIRTKEY) ) {
     	    ckey = (char) lpaccel[i].key;
-            MultiByteToWideChar(CP_ACP, MB_PRECOMPOSED, &ckey, 1, &accel[i].key, 1);
+            MultiByteToWideChar(CP_ACP, MB_PRECOMPOSED, &ckey, 1, (LPWSTR)&accel[i].key, 1);
        }
        else  accel[i].key = lpaccel[i].key;
        accel[i].cmd = lpaccel[i].cmd;

@@ -1,4 +1,4 @@
-/* $Id: display.cpp,v 1.12 2001-06-23 07:27:08 achimha Exp $ */
+/* $Id: display.cpp,v 1.13 2003-04-02 12:58:02 sandervl Exp $ */
 /*
  * Display/Monitor Win32 apis
  *
@@ -506,7 +506,7 @@ HMONITOR WIN32API MonitorFromWindow(HWND hWnd, DWORD dwFlags)
 }
 //******************************************************************************
 //******************************************************************************
-HMONITOR WIN32API MonitorFromRect(LPRECT lprcScreenCoords, DWORD dwFlags)
+HMONITOR WIN32API MonitorFromRect(LPCRECT lprcScreenCoords, DWORD dwFlags)
 {
     dprintf(("USER32: MonitorFromRect (%d,%d)(%d,%d) %x", lprcScreenCoords->left, lprcScreenCoords->top, lprcScreenCoords->right, lprcScreenCoords->bottom, dwFlags));
 
