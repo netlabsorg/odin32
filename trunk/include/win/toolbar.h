@@ -1,4 +1,4 @@
-/* $Id: toolbar.h,v 1.2 1999-07-07 16:48:26 achimha Exp $ */
+/* $Id: toolbar.h,v 1.3 1999-07-10 17:16:44 achimha Exp $ */
 
 /*
  * Toolbar class extra info
@@ -54,7 +54,7 @@ typedef struct tagTOOLBAR_INFO
     INT      nOldHit;
     INT      nHotItem;        /* index of the "hot" item */
     HFONT    hFont;           /* text font */
-    HIMAGELIST himlStd;         /* standard image list for TB_ADDBITMAP command*/
+    HIMAGELIST himlInt;         /* image list created internally */
     HIMAGELIST himlDef;         /* default image list for TB_SETIMAGELIST*/
     HIMAGELIST himlHot;         /* hot image list */
     HIMAGELIST himlDis;         /* disabled image list */
@@ -71,7 +71,6 @@ typedef struct tagTOOLBAR_INFO
     TBUTTON_INFO *buttons;      /* pointer to button array */
     LPWSTR       *strings;      /* pointer to string array */
     //Customize dialog
-    HDSA hDsa;
     HWND hwndToolbar;
 } TOOLBAR_INFO;
 
