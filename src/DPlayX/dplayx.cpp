@@ -1,4 +1,4 @@
-/* $Id: dplayx.cpp,v 1.1 1999-09-15 16:07:26 phaller Exp $ */
+/* $Id: dplayx.cpp,v 1.2 1999-09-15 17:27:23 phaller Exp $ */
 
 /* Direct Play 3 and Direct Play Lobby 2 Implementation
  *
@@ -401,6 +401,12 @@ static ULONG WINAPI IDirectPlayLobby2WImpl_AddRef
   return IDirectPlayLobby2AImpl_AddRef( (LPDIRECTPLAYLOBBY2) This );
 }
 
+static ULONG WINAPI IDirectPlayLobbyAImpl_AddRef
+( LPDIRECTPLAYLOBBYA iface )
+{
+  return IDirectPlayLobby2AImpl_AddRef( (LPDIRECTPLAYLOBBY2A)iface );
+}
+
 
 /*
  * Simple COM procedure. Decrease the reference count to this object.
@@ -436,6 +442,12 @@ static ULONG WINAPI IDirectPlayLobby2WImpl_Release
   return IDirectPlayLobby2AImpl_Release( (LPDIRECTPLAYLOBBY2A) This );
 }
 
+static ULONG WINAPI IDirectPlayLobbyAImpl_Release
+( LPDIRECTPLAYLOBBYA iface )
+{
+  return IDirectPlayLobby2AImpl_Release( (LPDIRECTPLAYLOBBY2A)iface );
+}
+
 
 /********************************************************************
  *
@@ -454,6 +466,7 @@ static HRESULT WINAPI IDirectPlayLobby2AImpl_Connect
   FIXME(": dwFlags=%08lx %p %p stub\n", dwFlags, lplpDP, pUnk );
   return DPERR_OUTOFMEMORY;
 }
+
 
 static HRESULT WINAPI IDirectPlayLobby2WImpl_Connect
 ( LPDIRECTPLAYLOBBY2 iface,
@@ -522,6 +535,19 @@ static HRESULT WINAPI IDirectPlayLobby2WImpl_Connect
 
 }
 
+static HRESULT WINAPI IDirectPlayLobbyAImpl_Connect
+( LPDIRECTPLAYLOBBYA iface,
+  DWORD dwFlags,
+  LPDIRECTPLAY2* lplpDP,
+  IUnknown *pUnk)
+{
+  return IDirectPlayLobby2AImpl_Connect( (LPDIRECTPLAYLOBBY2A)iface,
+                                         dwFlags,
+                                         (LPDIRECTPLAY2*)lplpDP,
+                                         pUnk);
+}
+
+
 /********************************************************************
  *
  * Creates a DirectPlay Address, given a service provider-specific network
@@ -557,6 +583,24 @@ static HRESULT WINAPI IDirectPlayLobby2WImpl_CreateAddress
   return DPERR_OUTOFMEMORY;
 }
 
+static HRESULT WINAPI IDirectPlayLobbyAImpl_CreateAddress
+( LPDIRECTPLAYLOBBYA iface,
+  REFGUID guidSP,
+  REFGUID guidDataType,
+  LPCVOID lpData,
+  DWORD dwDataSize,
+  LPVOID lpAddress,
+  LPDWORD lpdwAddressSize )
+{
+  return IDirectPlayLobby2AImpl_CreateAddress( (LPDIRECTPLAYLOBBY2A)iface,
+                                              guidSP,
+                                              guidDataType,
+                                              lpData,
+                                              dwDataSize,
+                                              lpAddress,
+                                              lpdwAddressSize);
+}
+
 
 /********************************************************************
  *
@@ -585,6 +629,21 @@ static HRESULT WINAPI IDirectPlayLobby2WImpl_EnumAddress
   FIXME(":stub\n");
   return DPERR_OUTOFMEMORY;
 }
+
+static HRESULT WINAPI IDirectPlayLobbyAImpl_EnumAddress
+( LPDIRECTPLAYLOBBYA iface,
+  LPDPENUMADDRESSCALLBACK lpEnumAddressCallback,
+  LPCVOID lpAddress,
+  DWORD dwAddressSize,
+  LPVOID lpContext)
+{
+  return IDirectPlayLobby2AImpl_EnumAddress( (LPDIRECTPLAYLOBBY2A)iface,
+                                             lpEnumAddressCallback,
+                                             lpAddress,
+                                             dwAddressSize,
+                                             lpContext);
+}
+
 
 /********************************************************************
  *
@@ -1197,63 +1256,49 @@ static HRESULT WINAPI IDirectPlayLobby2AImpl_CreateCompoundAddress
 }
 
 
-/* Note: Hack so we can reuse the old functions without compiler warnings */
-#if !defined(__STRICT_ANSI__) && defined(__GNUC__)
-# define XCAST(fun)     (typeof(directPlayLobbyAVT.fn##fun))
-#else
-# define XCAST(fun)     (void*)
-#endif
-
 /* Direct Play Lobby 1 (ascii) Virtual Table for methods */
 /* All lobby 1 methods are exactly the same except QueryInterface */
+
+
 struct ICOM_VTABLE(IDirectPlayLobby) directPlayLobbyAVT =
 {
   ICOM_MSVTABLE_COMPAT_DummyRTTIVALUE
   IDirectPlayLobbyAImpl_QueryInterface,
-  XCAST(AddRef)IDirectPlayLobby2AImpl_AddRef,
-  XCAST(Release)IDirectPlayLobby2AImpl_Release,
-  XCAST(Connect)IDirectPlayLobby2AImpl_Connect,
-  XCAST(CreateAddress)IDirectPlayLobby2AImpl_CreateAddress,
-  XCAST(EnumAddress)IDirectPlayLobby2AImpl_EnumAddress,
-  XCAST(EnumAddressTypes)IDirectPlayLobby2AImpl_EnumAddressTypes,
-  XCAST(EnumLocalApplications)IDirectPlayLobby2AImpl_EnumLocalApplications,
-  XCAST(GetConnectionSettings)IDirectPlayLobby2AImpl_GetConnectionSettings,
-  XCAST(ReceiveLobbyMessage)IDirectPlayLobby2AImpl_ReceiveLobbyMessage,
-  XCAST(RunApplication)IDirectPlayLobby2AImpl_RunApplication,
-  XCAST(SendLobbyMessage)IDirectPlayLobby2AImpl_SendLobbyMessage,
-  XCAST(SetConnectionSettings)IDirectPlayLobby2AImpl_SetConnectionSettings,
-  XCAST(SetLobbyMessageEvent)IDirectPlayLobby2AImpl_SetLobbyMessageEvent
+  IDirectPlayLobbyAImpl_AddRef,
+  IDirectPlayLobbyAImpl_Release,
+  IDirectPlayLobbyAImpl_Connect,
+  IDirectPlayLobbyAImpl_CreateAddress,
+  IDirectPlayLobbyAImpl_EnumAddress,
+  IDirectPlayLobbyAImpl_EnumAddressTypes,
+  IDirectPlayLobbyAImpl_EnumLocalApplications,
+  IDirectPlayLobbyAImpl_GetConnectionSettings,
+  IDirectPlayLobbyAImpl_ReceiveLobbyMessage,
+  IDirectPlayLobbyAImpl_RunApplication,
+  IDirectPlayLobbyAImpl_SendLobbyMessage,
+  IDirectPlayLobbyAImpl_SetConnectionSettings,
+  IDirectPlayLobbyAImpl_SetLobbyMessageEvent
 };
-#undef XCAST
 
-
-/* Note: Hack so we can reuse the old functions without compiler warnings */
-#if !defined(__STRICT_ANSI__) && defined(__GNUC__)
-# define XCAST(fun)     (typeof(directPlayLobbyWVT.fn##fun))
-#else
-# define XCAST(fun)     (void*)
-#endif
 
 /* Direct Play Lobby 1 (unicode) Virtual Table for methods */
 ICOM_VTABLE(IDirectPlayLobby) directPlayLobbyWVT =
 {
   ICOM_MSVTABLE_COMPAT_DummyRTTIVALUE
   IDirectPlayLobbyW_QueryInterface,
-  XCAST(AddRef)IDirectPlayLobby2WImpl_AddRef,
-  XCAST(Release)IDirectPlayLobby2WImpl_Release,
-  XCAST(Connect)IDirectPlayLobby2WImpl_Connect,
-  XCAST(CreateAddress)IDirectPlayLobby2WImpl_CreateAddress,
-  XCAST(EnumAddress)IDirectPlayLobby2WImpl_EnumAddress,
-  XCAST(EnumAddressTypes)IDirectPlayLobby2WImpl_EnumAddressTypes,
-  XCAST(EnumLocalApplications)IDirectPlayLobby2WImpl_EnumLocalApplications,
-  XCAST(GetConnectionSettings)IDirectPlayLobby2WImpl_GetConnectionSettings,
-  XCAST(ReceiveLobbyMessage)IDirectPlayLobby2WImpl_ReceiveLobbyMessage,
-  XCAST(RunApplication)IDirectPlayLobby2WImpl_RunApplication,
-  XCAST(SendLobbyMessage)IDirectPlayLobby2WImpl_SendLobbyMessage,
-  XCAST(SetConnectionSettings)IDirectPlayLobby2WImpl_SetConnectionSettings,
-  XCAST(SetLobbyMessageEvent)IDirectPlayLobby2WImpl_SetLobbyMessageEvent
+  IDirectPlayLobbyAImpl_AddRef,
+  IDirectPlayLobbyAImpl_Release,
+  IDirectPlayLobbyAImpl_Connect,
+  IDirectPlayLobbyAImpl_CreateAddress,
+  IDirectPlayLobbyAImpl_EnumAddress,
+  IDirectPlayLobbyAImpl_EnumAddressTypes,
+  IDirectPlayLobbyAImpl_EnumLocalApplications,
+  IDirectPlayLobbyWImpl_GetConnectionSettings,
+  IDirectPlayLobbyAImpl_ReceiveLobbyMessage,
+  IDirectPlayLobbyAImpl_RunApplication,
+  IDirectPlayLobbyAImpl_SendLobbyMessage,
+  IDirectPlayLobbyAImpl_SetConnectionSettings,
+  IDirectPlayLobbyAImpl_SetLobbyMessageEvent
 };
-#undef XCAST
 
 
 /* Direct Play Lobby 2 (ascii) Virtual Table for methods */
@@ -1729,6 +1774,11 @@ static ULONG WINAPI DirectPlay3WImpl_AddRef
   return (This->ref);
 }
 
+static ULONG WINAPI DirectPlay2WImpl_AddRef (LPDIRECTPLAY2 iface)
+{
+  return DirectPlay3WImpl_AddRef( (LPDIRECTPLAY3) iface );
+}
+
 static ULONG WINAPI DirectPlay3WImpl_Release
 ( LPDIRECTPLAY3 iface )
 {
@@ -1751,6 +1801,11 @@ static ULONG WINAPI DirectPlay3WImpl_Release
   return This->ref;
 }
 
+static ULONG WINAPI DirectPlay2WImpl_Release (LPDIRECTPLAY2 iface)
+{
+  return DirectPlay3WImpl_Release( (LPDIRECTPLAY3) iface );
+}
+
 static ULONG WINAPI DirectPlay3A_Release
 ( LPDIRECTPLAY3A iface )
 {
@@ -1771,6 +1826,11 @@ static ULONG WINAPI DirectPlay3A_Release
   }
 
   return This->ref;
+}
+
+static ULONG WINAPI DirectPlay2AImpl_AddRef (LPDIRECTPLAY2A iface)
+{
+  return DirectPlay3AImpl_AddRef( (LPDIRECTPLAY3A) iface );
 }
 
 HRESULT WINAPI DirectPlay3A_AddPlayerToGroup
@@ -2484,96 +2544,80 @@ HRESULT WINAPI DirectPlay3WImpl_GetPlayerFlags
 }
 
 
-/* Note: Hack so we can reuse the old functions without compiler warnings */
-#if !defined(__STRICT_ANSI__) && defined(__GNUC__)
-# define XCAST(fun)     (typeof(directPlay2WVT.fn##fun))
-#else
-# define XCAST(fun)     (void*)
-#endif
-
 ICOM_VTABLE(IDirectPlay2) directPlay2WVT =
 {
   ICOM_MSVTABLE_COMPAT_DummyRTTIVALUE
   DirectPlay2W_QueryInterface,
-  XCAST(AddRef)DirectPlay3WImpl_AddRef,
-  XCAST(Release)DirectPlay3WImpl_Release,
-  XCAST(AddPlayerToGroup)DirectPlay3WImpl_AddPlayerToGroup,
-  XCAST(Close)DirectPlay3WImpl_Close,
-  XCAST(CreateGroup)DirectPlay3WImpl_CreateGroup,
-  XCAST(CreatePlayer)DirectPlay3WImpl_CreatePlayer,
-  XCAST(DeletePlayerFromGroup)DirectPlay3WImpl_DeletePlayerFromGroup,
-  XCAST(DestroyGroup)DirectPlay3WImpl_DestroyGroup,
-  XCAST(DestroyPlayer)DirectPlay3WImpl_DestroyPlayer,
-  XCAST(EnumGroupPlayers)DirectPlay3WImpl_EnumGroupPlayers,
-  XCAST(EnumGroups)DirectPlay3WImpl_EnumGroups,
-  XCAST(EnumPlayers)DirectPlay3WImpl_EnumPlayers,
-  XCAST(EnumSessions)DirectPlay3WImpl_EnumSessions,
-  XCAST(GetCaps)DirectPlay3WImpl_GetCaps,
-  XCAST(GetGroupData)DirectPlay3WImpl_GetGroupData,
-  XCAST(GetGroupName)DirectPlay3WImpl_GetGroupName,
-  XCAST(GetMessageCount)DirectPlay3WImpl_GetMessageCount,
-  XCAST(GetPlayerAddress)DirectPlay3WImpl_GetPlayerAddress,
-  XCAST(GetPlayerCaps)DirectPlay3WImpl_GetPlayerCaps,
-  XCAST(GetPlayerData)DirectPlay3WImpl_GetPlayerData,
-  XCAST(GetPlayerName)DirectPlay3WImpl_GetPlayerName,
-  XCAST(GetSessionDesc)DirectPlay3WImpl_GetSessionDesc,
-  XCAST(Initialize)DirectPlay3WImpl_Initialize,
-  XCAST(Open)DirectPlay3WImpl_Open,
-  XCAST(Receive)DirectPlay3WImpl_Receive,
-  XCAST(Send)DirectPlay3WImpl_Send,
-  XCAST(SetGroupData)DirectPlay3WImpl_SetGroupData,
-  XCAST(SetGroupName)DirectPlay3WImpl_SetGroupName,
-  XCAST(SetPlayerData)DirectPlay3WImpl_SetPlayerData,
-  XCAST(SetPlayerName)DirectPlay3WImpl_SetPlayerName,
-  XCAST(SetSessionDesc)DirectPlay3WImpl_SetSessionDesc
+  DirectPlay2WImpl_AddRef,
+  DirectPlay2WImpl_Release,
+  DirectPlay2WImpl_AddPlayerToGroup,
+  DirectPlay2WImpl_Close,
+  DirectPlay2WImpl_CreateGroup,
+  DirectPlay2WImpl_CreatePlayer,
+  DirectPlay2WImpl_DeletePlayerFromGroup,
+  DirectPlay2WImpl_DestroyGroup,
+  DirectPlay2WImpl_DestroyPlayer,
+  DirectPlay2WImpl_EnumGroupPlayers,
+  DirectPlay2WImpl_EnumGroups,
+  DirectPlay2WImpl_EnumPlayers,
+  DirectPlay2WImpl_EnumSessions,
+  DirectPlay2WImpl_GetCaps,
+  DirectPlay2WImpl_GetGroupData,
+  DirectPlay2WImpl_GetGroupName,
+  DirectPlay2WImpl_GetMessageCount,
+  DirectPlay2WImpl_GetPlayerAddress,
+  DirectPlay2WImpl_GetPlayerCaps,
+  DirectPlay2WImpl_GetPlayerData,
+  DirectPlay2WImpl_GetPlayerName,
+  DirectPlay2WImpl_GetSessionDesc,
+  DirectPlay2WImpl_Initialize,
+  DirectPlay2WImpl_Open,
+  DirectPlay2WImpl_Receive,
+  DirectPlay2WImpl_Send,
+  DirectPlay2WImpl_SetGroupData,
+  DirectPlay2WImpl_SetGroupName,
+  DirectPlay2WImpl_SetPlayerData,
+  DirectPlay2WImpl_SetPlayerName,
+  DirectPlay2WImpl_SetSessionDesc
 };
-#undef XCAST
 
-
-/* Note: Hack so we can reuse the old functions without compiler warnings */
-#if !defined(__STRICT_ANSI__) && defined(__GNUC__)
-# define XCAST(fun)     (typeof(directPlay2AVT.fn##fun))
-#else
-# define XCAST(fun)     (void*)
-#endif
 
 ICOM_VTABLE(IDirectPlay2) directPlay2AVT =
 {
   ICOM_MSVTABLE_COMPAT_DummyRTTIVALUE
   DirectPlay2A_QueryInterface,
-  XCAST(AddRef)DirectPlay3WImpl_AddRef,
-  XCAST(Release)DirectPlay3A_Release,
-  XCAST(AddPlayerToGroup)DirectPlay3A_AddPlayerToGroup,
-  XCAST(Close)DirectPlay3A_Close,
-  XCAST(CreateGroup)DirectPlay3A_CreateGroup,
-  XCAST(CreatePlayer)DirectPlay3A_CreatePlayer,
-  XCAST(DeletePlayerFromGroup)DirectPlay3A_DeletePlayerFromGroup,
-  XCAST(DestroyGroup)DirectPlay3A_DestroyGroup,
-  XCAST(DestroyPlayer)DirectPlay3A_DestroyPlayer,
-  XCAST(EnumGroupPlayers)DirectPlay3A_EnumGroupPlayers,
-  XCAST(EnumGroups)DirectPlay3A_EnumGroups,
-  XCAST(EnumPlayers)DirectPlay3A_EnumPlayers,
-  XCAST(EnumSessions)DirectPlay3A_EnumSessions,
-  XCAST(GetCaps)DirectPlay3A_GetCaps,
-  XCAST(GetGroupData)DirectPlay3A_GetGroupData,
-  XCAST(GetGroupName)DirectPlay3A_GetGroupName,
-  XCAST(GetMessageCount)DirectPlay3A_GetMessageCount,
-  XCAST(GetPlayerAddress)DirectPlay3A_GetPlayerAddress,
-  XCAST(GetPlayerCaps)DirectPlay3A_GetPlayerCaps,
-  XCAST(GetPlayerData)DirectPlay3A_GetPlayerData,
-  XCAST(GetPlayerName)DirectPlay3A_GetPlayerName,
-  XCAST(GetSessionDesc)DirectPlay3A_GetSessionDesc,
-  XCAST(Initialize)DirectPlay3A_Initialize,
-  XCAST(Open)DirectPlay3A_Open,
-  XCAST(Receive)DirectPlay3A_Receive,
-  XCAST(Send)DirectPlay3A_Send,
-  XCAST(SetGroupData)DirectPlay3A_SetGroupData,
-  XCAST(SetGroupName)DirectPlay3A_SetGroupName,
-  XCAST(SetPlayerData)DirectPlay3A_SetPlayerData,
-  XCAST(SetPlayerName)DirectPlay3A_SetPlayerName,
-  XCAST(SetSessionDesc)DirectPlay3A_SetSessionDesc
+  DirectPlay2WImpl_AddRef, //???
+  DirectPlay2A_Release,
+  DirectPlay2A_AddPlayerToGroup,
+  DirectPlay2A_Close,
+  DirectPlay2A_CreateGroup,
+  DirectPlay2A_CreatePlayer,
+  DirectPlay2A_DeletePlayerFromGroup,
+  DirectPlay2A_DestroyGroup,
+  DirectPlay2A_DestroyPlayer,
+  DirectPlay2A_EnumGroupPlayers,
+  DirectPlay2A_EnumGroups,
+  DirectPlay2A_EnumPlayers,
+  DirectPlay2A_EnumSessions,
+  DirectPlay2A_GetCaps,
+  DirectPlay2A_GetGroupData,
+  DirectPlay2A_GetGroupName,
+  DirectPlay2A_GetMessageCount,
+  DirectPlay2A_GetPlayerAddress,
+  DirectPlay2A_GetPlayerCaps,
+  DirectPlay2A_GetPlayerData,
+  DirectPlay2A_GetPlayerName,
+  DirectPlay2A_GetSessionDesc,
+  DirectPlay2A_Initialize,
+  DirectPlay2A_Open,
+  DirectPlay2A_Receive,
+  DirectPlay2A_Send,
+  DirectPlay2A_SetGroupData,
+  DirectPlay2A_SetGroupName,
+  DirectPlay2A_SetPlayerData,
+  DirectPlay2A_SetPlayerName,
+  DirectPlay2A_SetSessionDesc
 };
-#undef XCAST
 
 
 ICOM_VTABLE(IDirectPlay3) directPlay3AVT =
