@@ -1,4 +1,7 @@
- /* $Id: changelog,v 1.558 1999-12-19 22:05:14 sandervl Exp $ */
+ /* $Id: changelog,v 1.559 1999-12-20 10:11:30 sandervl Exp $ */
+
+ 99-12-19: Jens Wiessner <wiessnej@rfi.de>
+	- MSVCRT: Added stubs
 
  99-12-19: Christoph Bratschi <cbratschi@datacomm.ch>
 	- USER32: fixed child positioning
