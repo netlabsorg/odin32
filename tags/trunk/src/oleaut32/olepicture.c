@@ -164,7 +164,12 @@ static OLEPictureImpl* OLEPictureImpl_Construct(LPPICTDESC pictDesc, BOOL fOwn)
   OLEPictureImpl* newObject = 0;
 
   if (pictDesc)
-      TRACE("(%p) type = %d\n", pictDesc, pictDesc->picType);
+  {
+    // PH 2001-11-29 TRACE must be in curly braces otherwise
+    // the scope of the if statement is left and we'll crash
+    // on picDesc == NULL
+    TRACE("(%p) type = %d\n", pictDesc, pictDesc->picType);
+  }
 
   /*
    * Allocate space for the object.
