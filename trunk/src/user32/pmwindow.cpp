@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.177 2002-06-03 07:25:13 sandervl Exp $ */
+/* $Id: pmwindow.cpp,v 1.178 2002-06-17 14:04:54 sandervl Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -113,6 +113,8 @@ BOOL InitPM()
         {
             dprintf(("WinInitialize or WinCreateMsgQueue failed %x %x", hab, hmq));
             dprintf((" Error = %x",error));
+            if(error == PMERR_NOT_IN_A_PM_SESSION) return TRUE;
+
             return(FALSE);
         }
         else
@@ -782,6 +784,8 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
         win32wnd->DispatchMsgA(pWinMsg);
         break;
 
+//temporarily disabled
+#if 0
     case DM_DRAGOVER:
     {
         PDRAGINFO pDragInfo = (PDRAGINFO)mp1;
@@ -874,6 +878,7 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
         }  
         break;
     }
+#endif
 
     case WM_DDE_INITIATE:
     case WM_DDE_INITIATEACK:
