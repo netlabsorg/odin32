@@ -1,4 +1,4 @@
-/* $Id: CCBase.cpp,v 1.2 2000-02-25 17:00:15 cbratschi Exp $ */
+/* $Id: CCBase.cpp,v 1.3 2000-03-17 17:13:22 cbratschi Exp $ */
 /*
  * COMCTL32 Base Functions and Macros for all Controls
  *
@@ -34,6 +34,7 @@ PVOID initControl(HWND hwnd,DWORD dwSize)
   infoPtr->iVersion      = 0;
   infoPtr->fUnicode      = IsWindowUnicode(hwnd);
   infoPtr->uNotifyFormat = sendNotifyFormat(GetParent(hwnd),hwnd,NF_QUERY);
+  infoPtr->hwndNotify    = GetParent(hwnd);
 
   return infoPtr;
 }
@@ -108,6 +109,17 @@ LRESULT defComCtl32Proc(HWND hwnd,UINT Msg,WPARAM wParam,LPARAM lParam,BOOL unic
       }
       break;
     }
+
+    case CCM_SETNOTIFYWINDOW:
+    {
+      infoPtr = getInfoPtr(hwnd);
+
+      if (!infoPtr) break;
+
+      infoPtr->hwndNotify = (HWND)wParam;
+
+      break;
+    }
   }
 
   if (unicode)
@@ -142,6 +154,20 @@ BOOL isUnicodeNotify(HWND hwnd)
   return isUnicodeNotify(infoPtr);
 }
 
+HWND getNotifyWindow(COMCTL32_HEADER *infoPtr)
+{
+  if (!infoPtr) return 0;
+
+  return infoPtr->hwndNotify;
+}
+
+HWND getNotifyWindow(HWND hwnd)
+{
+  COMCTL32_HEADER *infoPtr = getInfoPtr(hwnd);
+
+  return getNotifyWindow(infoPtr);
+}
+
 LRESULT sendNotify(HWND hwnd,UINT code)
 {
   NMHDR nmhdr;
@@ -150,7 +176,7 @@ LRESULT sendNotify(HWND hwnd,UINT code)
   nmhdr.idFrom   = GetWindowLongA(hwnd,GWL_ID);
   nmhdr.code     = code;
 
-  return SendMessageA(GetParent(hwnd),WM_NOTIFY,nmhdr.idFrom,(LPARAM)&nmhdr);
+  return SendMessageA(getNotifyWindow(hwnd),WM_NOTIFY,nmhdr.idFrom,(LPARAM)&nmhdr);
 }
 
 LRESULT sendNotify(HWND hwnd,UINT code,LPNMHDR nmhdr)
@@ -161,7 +187,7 @@ LRESULT sendNotify(HWND hwnd,UINT code,LPNMHDR nmhdr)
   nmhdr->idFrom   = GetWindowLongA(hwnd,GWL_ID);
   nmhdr->code     = code;
 
-  return SendMessageA(GetParent(hwnd),WM_NOTIFY,nmhdr->idFrom,(LPARAM)nmhdr);
+  return SendMessageA(getNotifyWindow(hwnd),WM_NOTIFY,nmhdr->idFrom,(LPARAM)nmhdr);
 }
 
 LRESULT sendNotifyFormat(HWND hwnd,HWND hwndFrom,LPARAM command)
@@ -171,7 +197,17 @@ LRESULT sendNotifyFormat(HWND hwnd,HWND hwndFrom,LPARAM command)
 
 LRESULT sendCommand(HWND hwnd,UINT wNotifyCode)
 {
-  return SendMessageA(GetParent(hwnd),WM_COMMAND,MAKEWPARAM(GetWindowLongA(hwnd,GWL_ID),wNotifyCode),(LPARAM)hwnd);
+  return SendMessageA(getNotifyWindow(hwnd),WM_COMMAND,MAKEWPARAM(GetWindowLongA(hwnd,GWL_ID),wNotifyCode),(LPARAM)hwnd);
+}
+
+LRESULT sendHScroll(HWND hwnd,UINT wNotifyCode)
+{
+  return SendMessageA(getNotifyWindow(hwnd),WM_HSCROLL,(WPARAM)wNotifyCode,(LPARAM)hwnd);
+}
+
+LRESULT sendVScroll(HWND hwnd,UINT wNotifyCode)
+{
+  return SendMessageA(getNotifyWindow(hwnd),WM_VSCROLL,(WPARAM)wNotifyCode,(LPARAM)hwnd);
 }
 
 //Tooltips

@@ -23,6 +23,7 @@
 #include "win.h"
 #include "commctrl.h"
 #include "comctl32.h"
+#include "ccbase.h"
 #include "monthcal.h"
 #include "winnls.h"
 #include <stdio.h>
@@ -44,7 +45,7 @@ const char * const daytxt[] = {"Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"};
 static const int DayOfWeekTable[] = {0, 3, 2, 5, 0, 3, 5, 1, 4, 6, 2, 4};
 
 
-#define MONTHCAL_GetInfoPtr(hwnd) ((MONTHCAL_INFO *)GetWindowLongA(hwnd, 0))
+#define MONTHCAL_GetInfoPtr(hwnd) ((MONTHCAL_INFO *)getInfoPtr(hwnd))
 
 /* helper functions  */
 
@@ -1094,14 +1095,10 @@ static void MONTHCAL_GoToNextMonth(HWND hwnd, MONTHCAL_INFO *infoPtr)
     NMDAYSTATE nmds;
     int i;
 
-    nmds.nmhdr.hwndFrom = hwnd;
-    nmds.nmhdr.idFrom   = GetWindowLongA(hwnd, GWL_ID);
-    nmds.nmhdr.code     = MCN_GETDAYSTATE;
     nmds.cDayState      = infoPtr->monthRange;
     nmds.prgDayState    = (DWORD*)COMCTL32_Alloc(infoPtr->monthRange * sizeof(MONTHDAYSTATE));
 
-    SendMessageA(GetParent(hwnd), WM_NOTIFY,
-    (WPARAM)nmds.nmhdr.idFrom, (LPARAM)&nmds);
+    sendNotify(hwnd,MCN_GETDAYSTATE,&nmds.nmhdr);
     for(i=0; i<infoPtr->monthRange; i++)
       infoPtr->monthdayState[i] = nmds.prgDayState[i];
   }
@@ -1124,15 +1121,11 @@ static void MONTHCAL_GoToPrevMonth(HWND hwnd,  MONTHCAL_INFO *infoPtr)
     NMDAYSTATE nmds;
     int i;
 
-    nmds.nmhdr.hwndFrom = hwnd;
-    nmds.nmhdr.idFrom   = GetWindowLongA(hwnd, GWL_ID);
-    nmds.nmhdr.code     = MCN_GETDAYSTATE;
     nmds.cDayState      = infoPtr->monthRange;
     nmds.prgDayState    = (DWORD*)COMCTL32_Alloc
                         (infoPtr->monthRange * sizeof(MONTHDAYSTATE));
 
-    SendMessageA(GetParent(hwnd), WM_NOTIFY,
-        (WPARAM)nmds.nmhdr.idFrom, (LPARAM)&nmds);
+    sendNotify(hwnd,MCN_GETDAYSTATE,&nmds.nmhdr);
     for(i=0; i<infoPtr->monthRange; i++)
        infoPtr->monthdayState[i] = nmds.prgDayState[i];
   }
@@ -1208,14 +1201,10 @@ MONTHCAL_LButtonDown(HWND hwnd, WPARAM wParam, LPARAM lParam)
     NMSELCHANGE nmsc;
 
     //TRACE("\n");
-    nmsc.nmhdr.hwndFrom = hwnd;
-    nmsc.nmhdr.idFrom   = GetWindowLongA(hwnd, GWL_ID);
-    nmsc.nmhdr.code     = MCN_SELCHANGE;
     MONTHCAL_CopyTime(&nmsc.stSelStart, &infoPtr->minSel);
     MONTHCAL_CopyTime(&nmsc.stSelEnd, &infoPtr->maxSel);
 
-    SendMessageA(GetParent(hwnd), WM_NOTIFY,
-           (WPARAM)nmsc.nmhdr.idFrom,(LPARAM)&nmsc);
+    sendNotify(hwnd,MCN_SELCHANGE,&nmsc.nmhdr);
 
     MONTHCAL_CopyTime(&ht.st, &selArray[0]);
     MONTHCAL_CopyTime(&ht.st, &selArray[1]);
@@ -1247,7 +1236,6 @@ MONTHCAL_LButtonUp(HWND hwnd, WPARAM wParam, LPARAM lParam)
 {
   MONTHCAL_INFO *infoPtr = MONTHCAL_GetInfoPtr(hwnd);
   NMSELCHANGE nmsc;
-  NMHDR nmhdr;
   HDC hdc;
   BOOL redraw = FALSE;
 
@@ -1264,22 +1252,12 @@ MONTHCAL_LButtonUp(HWND hwnd, WPARAM wParam, LPARAM lParam)
 
   infoPtr->status = MC_SEL_LBUTUP;
 
-  nmhdr.hwndFrom = hwnd;
-  nmhdr.idFrom   = GetWindowLongA( hwnd, GWL_ID);
-  nmhdr.code     = NM_RELEASEDCAPTURE;
-  //TRACE("Sent notification from %x to %x\n", hwnd, GetParent(hwnd));
+  sendNotify(hwnd,NM_RELEASEDCAPTURE);
 
-  SendMessageA(GetParent(hwnd), WM_NOTIFY,
-                                (WPARAM)nmhdr.idFrom, (LPARAM)&nmhdr);
-
-  nmsc.nmhdr.hwndFrom = hwnd;
-  nmsc.nmhdr.idFrom   = GetWindowLongA(hwnd, GWL_ID);
-  nmsc.nmhdr.code     = MCN_SELECT;
   MONTHCAL_CopyTime(&nmsc.stSelStart, &infoPtr->minSel);
   MONTHCAL_CopyTime(&nmsc.stSelEnd, &infoPtr->maxSel);
 
-  SendMessageA(GetParent(hwnd), WM_NOTIFY,
-           (WPARAM)nmsc.nmhdr.idFrom, (LPARAM)&nmsc);
+  sendNotify(hwnd,MCN_SELECT,&nmsc.nmhdr);
 
   /* redraw if necessary */
   if(redraw) {
@@ -1568,8 +1546,7 @@ MONTHCAL_Create(HWND hwnd, WPARAM wParam, LPARAM lParam)
   LOGFONTA      logFont;
 
   /* allocate memory for info structure */
-  infoPtr =(MONTHCAL_INFO*)COMCTL32_Alloc(sizeof(MONTHCAL_INFO));
-  SetWindowLongA(hwnd, 0, (DWORD)infoPtr);
+  infoPtr =(MONTHCAL_INFO*)initControl(hwnd,sizeof(MONTHCAL_INFO));
 
   if(infoPtr == NULL) {
     //ERR( "could not allocate info memory!\n");
@@ -1619,7 +1596,7 @@ MONTHCAL_Destroy(HWND hwnd, WPARAM wParam, LPARAM lParam)
   MONTHCAL_INFO *infoPtr = MONTHCAL_GetInfoPtr(hwnd);
 
   /* free month calendar info data */
-  COMCTL32_Free(infoPtr);
+  doneControl(hwnd);
 
   return 0;
 }
@@ -1729,7 +1706,7 @@ MONTHCAL_WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
   default:
     //if(uMsg >= WM_USER)
     //  ERR( "unknown msg %04x wp=%08x lp=%08lx\n", uMsg, wParam, lParam);
-    return DefWindowProcA(hwnd, uMsg, wParam, lParam);
+    return defComCtl32ProcA(hwnd, uMsg, wParam, lParam);
   }
   return 0;
 }
@@ -1739,9 +1716,6 @@ void
 MONTHCAL_Register(void)
 {
   WNDCLASSA wndClass;
-
-//SvL: Don't check this now
-//  if(GlobalFindAtomA(MONTHCAL_CLASSA)) return;
 
   ZeroMemory(&wndClass, sizeof(WNDCLASSA));
   wndClass.style         = CS_GLOBALCLASS;
@@ -1759,6 +1733,5 @@ MONTHCAL_Register(void)
 void
 MONTHCAL_Unregister(void)
 {
-  if(GlobalFindAtomA(MONTHCAL_CLASSA))
-    UnregisterClassA(MONTHCAL_CLASSA, (HINSTANCE)NULL);
+  UnregisterClassA(MONTHCAL_CLASSA, (HINSTANCE)NULL);
 }

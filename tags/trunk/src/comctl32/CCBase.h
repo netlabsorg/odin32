@@ -1,4 +1,4 @@
-/* $Id: CCBase.h,v 1.3 2000-02-25 17:00:15 cbratschi Exp $ */
+/* $Id: CCBase.h,v 1.4 2000-03-17 17:13:22 cbratschi Exp $ */
 /*
  * COMCTL32 Base Functions and Macros for all Controls
  *
@@ -16,6 +16,7 @@ typedef struct
   INT   iVersion;      //version
   BOOL  fUnicode;      //Unicode flag
   UINT  uNotifyFormat; //notify format
+  HWND  hwndNotify;    //notify window
 } COMCTL32_HEADER;
 
 PVOID initControl(HWND hwnd,DWORD dwSize);
@@ -27,10 +28,15 @@ LRESULT defComCtl32ProcW(HWND hwnd,UINT Msg,WPARAM wParam,LPARAM lParam);
 BOOL isUnicodeNotify(COMCTL32_HEADER *infoPtr);
 BOOL isUnicodeNotify(HWND hwnd);
 
+HWND getNotifyWindow(COMCTL32_HEADER *infoPtr);
+HWND getNotifyWindow(COMCTL32_HEADER *infoPtr);
+
 LRESULT sendNotify(HWND hwnd,UINT code);
 LRESULT sendNotify(HWND hwnd,UINT code,LPNMHDR nmhdr);
 LRESULT sendNotifyFormat(HWND hwnd,HWND hwndFrom,LPARAM command);
 LRESULT sendCommand(HWND hwnd,UINT wNotifyCode);
+LRESULT sendHScroll(HWND hwnd,UINT wNotifyCode);
+LRESULT sendVScroll(HWND hwnd,UINT wNotifyCode);
 
 HWND createToolTip(HWND hwnd,UINT flags);
 VOID destroyToolTip(HWND hwndToolTip);
