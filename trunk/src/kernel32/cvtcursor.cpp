@@ -1,4 +1,4 @@
-/* $Id: cvtcursor.cpp,v 1.5 1999-09-25 14:11:30 sandervl Exp $ */
+/* $Id: cvtcursor.cpp,v 1.6 1999-09-25 14:31:00 sandervl Exp $ */
 
 /*
  * PE2LX cursor conversion code
@@ -117,9 +117,8 @@ void *ConvertCursor(CursorComponent *curHdr, int size, int *os2size, int offsetB
   }
   else    bwsize = bhdr->biSizeImage;
 
-  //write XOR and AND mask in reversed order (Win32 XOR-AND, PM AND-XOR)
-  memcpy((char *)os2rgb, (char *)rgb+bwsize/2, bwsize/2);
-  memcpy((char *)os2rgb+bwsize/2, (char *)rgb, bwsize/2);
+  //write XOR and AND mask
+  memcpy((char *)os2rgb, (char *)rgb, bwsize);
 
   *os2size = cursorsize;
   return cursorhdr;
