@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.204 2000-07-01 09:51:53 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.205 2000-07-02 14:31:34 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -1114,17 +1114,19 @@ ULONG Win32BaseWindow::MsgFormatFrame(WINDOWPOS *lpWndPos)
 #if 1
 //this doesn't always work 
 //  if(!fNoSizeMsg && (client.left != rectClient.left || client.top != rectClient.top)) 
-  if(!fNoSizeMsg && (oldWindowRect.right - oldWindowRect.left < rectClient.left 
-                  || oldWindowRect.bottom - oldWindowRect.top < rectClient.top))
+  if(!fNoSizeMsg && ((oldWindowRect.right - oldWindowRect.left < rectClient.left 
+                  || oldWindowRect.bottom - oldWindowRect.top < rectClient.top) ||
+     (EqualRect(&oldWindowRect, &rectWindow) && (client.left != rectClient.left || client.top != rectClient.top))))
   {
    Win32BaseWindow *child = (Win32BaseWindow *)getFirstChild();
 
 	//client rectangle has moved -> inform children
 	dprintf(("MsgFormatFrame -> client rectangle has changed, move children"));
 	while(child) {
-		child->SetWindowPos(HWND_TOP, child->getClientRectPtr()->left, 
-                                    child->getClientRectPtr()->top, 0, 0, 
-                                    SWP_NOACTIVATE|SWP_NOSIZE|SWP_NOZORDER);
+		::SetWindowPos(child->getWindowHandle(), 
+                               HWND_TOP, child->getWindowRect()->left, 
+                               child->getWindowRect()->top, 0, 0, 
+                               SWP_NOACTIVATE|SWP_NOSIZE|SWP_NOZORDER);
 		child = (Win32BaseWindow *)child->getNextChild();
 	}
   }
@@ -2270,7 +2272,6 @@ BOOL Win32BaseWindow::SetWindowPos(HWND hwndInsertAfter, int x, int y, int cx, i
 		UnionRect(&oldClientRect, &oldClientRect, &rectClient);
 	        OffsetRect(&oldClientRect, -rectClient.left, -rectClient.top);
 		InvalidateRect(getWindowHandle(), &oldClientRect, TRUE);
-//TODO: move child windows!!
         }
         return TRUE;
     }
@@ -2316,7 +2317,6 @@ BOOL Win32BaseWindow::SetWindowPos(HWND hwndInsertAfter, int x, int y, int cx, i
 	UnionRect(&oldClientRect, &oldClientRect, &rectClient);
         OffsetRect(&oldClientRect, -rectClient.left, -rectClient.top);
 	InvalidateRect(getWindowHandle(), &oldClientRect, TRUE);
-//TODO: move child windows!!
     }
     return (rc);
 }
