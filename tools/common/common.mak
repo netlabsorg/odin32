@@ -1,4 +1,4 @@
-# $Id: common.mak,v 1.3 2000-12-16 20:10:07 bird Exp $
+# $Id: common.mak,v 1.4 2001-04-17 04:07:32 bird Exp $
 
 #
 # Odin32 API
@@ -34,9 +34,10 @@ CXXFLAGS += $(CXXEXCEPTIONS)
 # Object files. Prefix with OBJDIR and one space before the '\'.
 #
 OBJS = \
-$(OBJDIR)\kFilePe.obj \
-$(OBJDIR)\kFileDef.obj \
-$(OBJDIR)\kFileLx.obj \
+$(OBJDIR)\kFileDEF.obj \
+$(OBJDIR)\kFileLX.obj \
+$(OBJDIR)\kFilePE.obj \
+$(OBJDIR)\kFileSDF.obj \
 $(OBJDIR)\kFileFormatBase.obj \
 $(OBJDIR)\kFile.obj
 
