@@ -1,4 +1,4 @@
-/* $Id: winimagepeldr.cpp,v 1.104 2003-01-05 13:16:41 sandervl Exp $ */
+/* $Id: winimagepeldr.cpp,v 1.105 2003-02-18 18:58:47 sandervl Exp $ */
 
 /*
  * Win32 PE loader Image base class
@@ -147,7 +147,7 @@ Win32PeLdrImage::Win32PeLdrImage(char *pszFileName, BOOL isExe) :
 Win32PeLdrImage::~Win32PeLdrImage()
 {
     if(memmap)
-        delete memmap;
+        memmap->Release();
 
     if(hFile) {
         OSLibDosClose(hFile);
@@ -664,7 +664,7 @@ DWORD Win32PeLdrImage::init(ULONG reservedMem, ULONG ulPEOffset)
 
 failure:
     if(memmap) {
-        delete memmap;
+        memmap->Release();
         memmap = NULL;
     }
     if(hFile) {
