@@ -1,4 +1,4 @@
-/* $Id: api.h,v 1.1 2001-01-20 15:47:08 bird Exp $
+/* $Id: api.h,v 1.2 2001-01-20 23:49:54 bird Exp $
  *
  * API Overload Init and Helper Function - public header.
  *
@@ -20,7 +20,8 @@
 
 
 void _Optlink   APIInit(void);
-BOOL _Optlink   APIQueryEnabled(int iAPI, USHORT usCS, LONG ulEIP);
+BOOL _Optlink   APIQueryEnabled(int iApi, USHORT usCS, LONG ulEIP);
+
 
 
 #endif
