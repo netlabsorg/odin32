@@ -1,4 +1,4 @@
-/* $Id: odin32ftp2.cmd,v 1.7 2001-01-10 13:51:18 bird Exp $
+/* $Id: odin32ftp2.cmd,v 1.8 2001-01-18 14:47:06 bird Exp $
  *
  * Uploads the relase and debug builds to the FTP sites.
  *
@@ -52,32 +52,44 @@ do i = 1 to 5 /* (Retries 5 times) */
      */
     if (sLoc = '' | sLoc = 'os2') then
     do
-        rc = deletefunction(   '/daily/'sDeleteDbg,    '/daily/'sDeleteRel,     'os2-delete', 'www.os2.org');
-        rc = deletefunction('/daily/'sDeleteDbgWPI, '/daily/'sDeleteRelWPI, 'os2-delete-wpi', 'www.os2.org');
+        rc = deletefunction(     '/daily/'sDeleteDbg,      '/daily/'sDeleteRel,       'os2-delete', 'www.os2.org');
+/*      rc = deletefunction('/daily/'sDeleteGlideDbg, '/daily/'sDeleteGlideRel, 'os2-delete-glide', 'www.os2.org'); */
+        rc = deletefunction(  '/daily/'sDeleteDbgWPI,   '/daily/'sDeleteRelWPI,   'os2-delete-wpi', 'www.os2.org');
         rc = forwardSF(sFileDbg,              'os2-debug', '/daily', 'www.os2.org');
-/*        rc = forwardSF(sFileGlideDbg,   'os2-glide-debug', '/daily', 'www.os2.org'); */
+/*      rc = forwardSF(sFileGlideDbg,   'os2-glide-debug', '/daily', 'www.os2.org'); */
         rc = forwardSF(sFileRel,            'os2-release', '/daily', 'www.os2.org');
-/*        rc = forwardSF(sFileGlideRel, 'os2-glide-release', '/daily', 'www.os2.org'); */
+/*      rc = forwardSF(sFileGlideRel, 'os2-glide-release', '/daily', 'www.os2.org'); */
         rc = forwardSF(sFileDbgWPI,       'os2-debug-wpi', '/daily', 'www.os2.org');
         rc = forwardSF(sFileRelWPI,     'os2-release-wpi', '/daily', 'www.os2.org');
         rc = forwardSF(sChangeLog,        'os2-ChangeLog', '/daily', 'www.os2.org');
 
     end
 
-    if (0 /*sLoc = '' | sLoc = 'netlabs'*/) then
+    if (sLoc = '' | sLoc = 'netlabs') then
     do
         /*                 (                    sDeleteFile1,                     sDeleteFile2,             sLockFile,             sSite); */
-        rc = deletefunction(     '/odinftp/daily/'sDeleteDbg,      '/odinftp/daily/'sDeleteRel,      'netlabs-delete', 'ftp.netlabs.org');
-        rc = deletefunction('/odinftp/daily/'sDeleteGlideDbg, '/odinftp/daily/'sDeleteGlideRel,'netlabs-delete-glide', 'ftp.netlabs.org');
-        rc = deletefunction(  '/odinftp/daily/'sDeleteDbgWPI,   '/odinftp/daily/'sDeleteRelWPI,  'netlabs-delete-wpi', 'ftp.netlabs.org');
-        /*              (sFile,              sFileRemote,           sLockFile,             sSite); */
-        rc = putfunction(sFileDbg,      '/odinftp/daily',     'netlabs-debug', 'ftp.netlabs.org');
-/*        rc = putfunction(sFileGlideDbg, '/odinftp/daily',     'netlabs-debug', 'ftp.netlabs.org'); */
-        rc = putfunction(sFileRel,      '/odinftp/daily',   'netlabs-release', 'ftp.netlabs.org');
-/*        rc = putfunction(sFileGlideRel, '/odinftp/daily',   'netlabs-release', 'ftp.netlabs.org'); */
-        rc = putfunction(sFileDbgWPI,   '/odinftp/daily',     'netlabs-debug', 'ftp.netlabs.org');
-        rc = putfunction(sFileRelWPI,   '/odinftp/daily',   'netlabs-release', 'ftp.netlabs.org');
-        rc = putfunction('ChangeLog',   '/odinftp/daily', 'netlabs-ChangeLog', 'ftp.netlabs.org');
+        rc = deletefunction(             '/daily/'sDeleteDbg,      '/odinftp/daily/'sDeleteRel,      'netlabs-delete', 'ftp.netlabs.org');
+/*      rc = deletefunction('/odinftp/daily/'sDeleteGlideDbg, '/odinftp/daily/'sDeleteGlideRel,'netlabs-delete-glide', 'ftp.netlabs.org'); */
+        rc = deletefunction(          '/daily/'sDeleteDbgWPI,   '/odinftp/daily/'sDeleteRelWPI,  'netlabs-delete-wpi', 'ftp.netlabs.org');
+        if 1 then do
+        /*              (sFile,      sFileRemote,           sLockFile,             sSite); */
+        rc = putfunction(sFileDbg,      '/daily',     'netlabs-debug', 'ftp.netlabs.org');
+/*      rc = putfunction(sFileGlideDbg, '/daily',     'netlabs-debug', 'ftp.netlabs.org'); */
+        rc = putfunction(sFileRel,      '/daily',   'netlabs-release', 'ftp.netlabs.org');
+/*      rc = putfunction(sFileGlideRel, '/daily',   'netlabs-release', 'ftp.netlabs.org'); */
+        rc = putfunction(sFileDbgWPI,   '/daily',     'netlabs-debug', 'ftp.netlabs.org');
+        rc = putfunction(sFileRelWPI,   '/daily',   'netlabs-release', 'ftp.netlabs.org');
+        rc = putfunction('ChangeLog',   '/daily', 'netlabs-ChangeLog', 'ftp.netlabs.org');
+        end else do
+        /*            (sFile,                  sLockFile,  sRemoteDir,             sSite); */
+        rc = forwardSF(sFileDbg,         'netlabs-debug',    '/daily', 'ftp.netlabs.org');
+/*      rc = forwardSF(sFileGlideDbg,    'netlabs-debug',    '/daily', 'ftp.netlabs.org'); */
+        rc = forwardSF(sFileRel,       'netlabs-release',    '/daily', 'ftp.netlabs.org');
+/*      rc = forwardSF(sFileGlideRel,  'netlabs-release',    '/daily', 'ftp.netlabs.org'); */
+        rc = forwardSF(sFileDbgWPI,      'netlabs-debug',    '/daily', 'ftp.netlabs.org');
+        rc = forwardSF(sFileRelWPI,    'netlabs-release',    '/daily', 'ftp.netlabs.org');
+        rc = forwardSF('ChangeLog',  'netlabs-ChangeLog',    '/daily', 'ftp.netlabs.org');
+        end
     end
 end
 
