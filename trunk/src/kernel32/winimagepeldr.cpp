@@ -1,4 +1,4 @@
-/* $Id: winimagepeldr.cpp,v 1.8 1999-10-23 12:34:48 sandervl Exp $ */
+/* $Id: winimagepeldr.cpp,v 1.9 1999-10-27 10:35:42 sandervl Exp $ */
 
 /*
  * Win32 PE loader Image base class
@@ -43,6 +43,7 @@
 #include "oslibmisc.h"
 #include "initterm.h"
 #include <win\virtual.h>
+#include "oslibdos.h"
 
 char szErrorTitle[]     = "Odin";
 char szMemErrorMsg[]    = "Memory allocation failure";
@@ -66,16 +67,29 @@ extern ULONG flAllocMem;    /*Tue 03.03.1998: knut */
 
 //******************************************************************************
 //******************************************************************************
-Win32PeLdrImage::Win32PeLdrImage(char *szFileName, int loadtype) :
+Win32PeLdrImage::Win32PeLdrImage(char *pszFileName, int loadtype) :
     Win32ImageBase(-1),
     nrsections(0), imageSize(0),
     imageVirtBase(-1), realBaseAddress(0), imageVirtEnd(0),
     nrNameExports(0), nrOrdExports(0), nameexports(NULL), ordexports(NULL),
     pResSection(NULL), fImgMapping(0)
 {
+ HFILE  dllfile;
+
   loadType = loadtype;
 
-  strcpy(this->szFileName, szFileName);
+  strcpy(szFileName, pszFileName);
+  strupr(szFileName);
+  if(!strchr(szFileName, (int)'.')) {
+	strcat(szFileName,".DLL");
+  }
+  dllfile = OSLibDosOpen(szFileName, OSLIB_ACCESS_READONLY|OSLIB_ACCESS_SHAREDENYNONE);
+  if(dllfile == NULL) {//search in libpath for dll
+	strcpy(szModule, kernel32Path);
+	strcat(szModule, szFileName);
+	strcpy(szFileName, szModule);
+  }
+  else	OSLibDosClose(dllfile);
 
   strcpy(szModule, OSLibStripPath(szFileName));
   strupr(szModule);
