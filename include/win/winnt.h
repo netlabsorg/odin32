@@ -11,8 +11,6 @@
 
 /* Defines */
 
-#define UNREFERENCED_PARAMETER(a)
-
 /* Argument 1 passed to the DllEntryProc. */
 #define	DLL_PROCESS_DETACH	0	/* detach process (unload library) */
 #define	DLL_PROCESS_ATTACH	1	/* attach process (load library) */
@@ -186,11 +184,11 @@ typedef struct _FLOATING_SAVE_AREA
 {
     DWORD   ControlWord;
     DWORD   StatusWord;
-    DWORD   TagWord;    
+    DWORD   TagWord;
     DWORD   ErrorOffset;
     DWORD   ErrorSelector;
     DWORD   DataOffset;
-    DWORD   DataSelector;    
+    DWORD   DataSelector;
     BYTE    RegisterArea[SIZE_OF_80387_REGISTERS];
     DWORD   Cr0NpxState;
 } FLOATING_SAVE_AREA, *PFLOATING_SAVE_AREA;
@@ -214,18 +212,18 @@ typedef struct _CONTEXT86
     DWORD   SegGs;
     DWORD   SegFs;
     DWORD   SegEs;
-    DWORD   SegDs;    
+    DWORD   SegDs;
 
     /* These are selected by CONTEXT_INTEGER */
     DWORD   Edi;
     DWORD   Esi;
     DWORD   Ebx;
-    DWORD   Edx;    
+    DWORD   Edx;
     DWORD   Ecx;
     DWORD   Eax;
 
     /* These are selected by CONTEXT_CONTROL */
-    DWORD   Ebp;    
+    DWORD   Ebp;
     DWORD   Eip;
     DWORD   SegCs;
     DWORD   EFlags;
@@ -262,7 +260,7 @@ typedef CONTEXT86 CONTEXT;
 #ifdef _ALPHA_
 
 #define CONTEXT_ALPHA   0x00020000
- 
+
 #define CONTEXT_CONTROL		(CONTEXT_ALPHA | 0x00000001L)
 #define CONTEXT_FLOATING_POINT	(CONTEXT_ALPHA | 0x00000002L)
 #define CONTEXT_INTEGER		(CONTEXT_ALPHA | 0x00000004L)
@@ -577,10 +575,10 @@ typedef struct _STACK_FRAME_HEADER
 
 #ifdef __sparc__
 
-/* 
- * FIXME:  
+/*
+ * FIXME:
  *
- * There is no official CONTEXT structure defined for the SPARC 
+ * There is no official CONTEXT structure defined for the SPARC
  * architecture, so I just made one up.
  *
  * This structure is valid only for 32-bit SPARC architectures,
@@ -590,8 +588,8 @@ typedef struct _STACK_FRAME_HEADER
  * the rest of the register window chain is not visible.
  *
  * The layout follows the Solaris 'prgregset_t' structure.
- * 
- */ 
+ *
+ */
 
 #define CONTEXT_SPARC            0x10000000
 
@@ -653,6 +651,7 @@ typedef struct _CONTEXT
 
 #endif
 
+
 #if !defined(CONTEXT_FULL) && !defined(RC_INVOKED)
 #error You need to define a CONTEXT for your CPU
 #endif
@@ -699,7 +698,7 @@ typedef HANDLE *PHANDLE;
 #define CH_reg(context)      (*((BYTE*)&ECX_reg(context)+1))
 #define DL_reg(context)      (*(BYTE*)&EDX_reg(context))
 #define DH_reg(context)      (*((BYTE*)&EDX_reg(context)+1))
-                            
+
 #define SET_CFLAG(context)   (EFL_reg(context) |= 0x0001)
 #define RESET_CFLAG(context) (EFL_reg(context) &= ~0x0001)
 #define SET_ZFLAG(context)   (EFL_reg(context) |= 0x0040)
@@ -772,12 +771,290 @@ typedef HANDLE *PHANDLE;
 #ifdef __sparc__
 # define GET_IP(context) ((LPVOID)(context)->pc)
 #endif
- 
+
 #if !defined(GET_IP) && !defined(RC_INVOKED)
 # error You must define GET_IP for this CPU
 #endif
 
 #endif  /* __WINE__ */
+
+/* bird-start: from newer winnt.h */
+/*
+ * Language IDs
+ */
+
+#define MAKELCID(l, s)		(MAKELONG(l, s))
+
+#define MAKELANGID(p, s)        ((((WORD)(s))<<10) | (WORD)(p))
+#define PRIMARYLANGID(l)        ((WORD)(l) & 0x3ff)
+#define SUBLANGID(l)            ((WORD)(l) >> 10)
+
+#define LANGIDFROMLCID(lcid)	((WORD)(lcid))
+#define SORTIDFROMLCID(lcid)	((WORD)((((DWORD)(lcid)) >> 16) & 0x0f))
+
+#define LANG_SYSTEM_DEFAULT	(MAKELANGID(LANG_NEUTRAL, SUBLANG_SYS_DEFAULT))
+#define LANG_USER_DEFAULT	(MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT))
+#define LOCALE_SYSTEM_DEFAULT	(MAKELCID(LANG_SYSTEM_DEFAULT, SORT_DEFAULT))
+#define LOCALE_USER_DEFAULT	(MAKELCID(LANG_USER_DEFAULT, SORT_DEFAULT))
+#define LOCALE_NEUTRAL		(MAKELCID(MAKELANGID(LANG_NEUTRAL,SUBLANG_NEUTRAL),SORT_DEFAULT))
+
+#define UNREFERENCED_PARAMETER(u)	(u)
+#define DBG_UNREFERENCED_PARAMETER(u)	(u)
+#define DBG_UNREFERENCED_LOCAL_VARIABLE(u) (u)
+
+/* FIXME: are the symbolic names correct for LIDs:  0x17, 0x28,
+ *	  0x30, 0x31, 0x32, 0x33, 0x34, 0x35, 0x3a, 0x3b, 0x3c
+ */
+#define LANG_NEUTRAL        0x00
+#define LANG_INVARIANT      0x7f
+
+#define LANG_AFRIKAANS      0x36
+#define LANG_ALBANIAN       0x1c
+#define LANG_ARABIC         0x01
+#define LANG_ARMENIAN       0x2b
+#define LANG_ASSAMESE       0x4d
+#define LANG_AZERI          0x2c
+#define LANG_BASQUE         0x2d
+#define LANG_BELARUSIAN     0x23
+#define LANG_BENGALI        0x45
+#define LANG_BULGARIAN      0x02
+#define LANG_CATALAN        0x03
+#define LANG_CHINESE        0x04
+#define LANG_CROATIAN       0x1a
+#define LANG_CZECH          0x05
+#define LANG_DANISH         0x06
+#define LANG_DIVEHI         0x65
+#define LANG_DUTCH          0x13
+#define LANG_ENGLISH        0x09
+#define LANG_ESTONIAN       0x25
+#define LANG_FAEROESE       0x38
+#define LANG_FARSI          0x29
+#define LANG_FINNISH        0x0b
+#define LANG_FRENCH         0x0c
+#define LANG_GALICIAN       0x56
+#define LANG_GEORGIAN       0x37
+#define LANG_GERMAN         0x07
+#define LANG_GREEK          0x08
+#define LANG_GUJARATI       0x47
+#define LANG_HEBREW         0x0d
+#define LANG_HINDI          0x39
+#define LANG_HUNGARIAN      0x0e
+#define LANG_ICELANDIC      0x0f
+#define LANG_INDONESIAN     0x21
+#define LANG_ITALIAN        0x10
+#define LANG_JAPANESE       0x11
+#define LANG_KANNADA        0x4b
+#define LANG_KASHMIRI       0x60
+#define LANG_KAZAK          0x3f
+#define LANG_KONKANI        0x57
+#define LANG_KOREAN         0x12
+#define LANG_KYRGYZ         0x40
+#define LANG_LATVIAN        0x26
+#define LANG_LITHUANIAN     0x27
+#define LANG_MACEDONIAN     0x2f
+#define LANG_MALAY          0x3e
+#define LANG_MALAYALAM      0x4c
+#define LANG_MANIPURI       0x58
+#define LANG_MARATHI        0x4e
+#define LANG_MONGOLIAN      0x50
+#define LANG_NEPALI         0x61
+#define LANG_NORWEGIAN      0x14
+#define LANG_ORIYA          0x48
+#define LANG_POLISH         0x15
+#define LANG_PORTUGUESE     0x16
+#define LANG_PUNJABI        0x46
+#define LANG_ROMANIAN       0x18
+#define LANG_RUSSIAN        0x19
+#define LANG_SANSKRIT       0x4f
+#define LANG_SERBIAN        0x1a
+#define LANG_SINDHI         0x59
+#define LANG_SLOVAK         0x1b
+#define LANG_SLOVENIAN      0x24
+#define LANG_SPANISH        0x0a
+#define LANG_SWAHILI        0x41
+#define LANG_SWEDISH        0x1d
+#define LANG_SYRIAC         0x5a
+#define LANG_TAMIL          0x49
+#define LANG_TATAR          0x44
+#define LANG_TELUGU         0x4a
+#define LANG_THAI           0x1e
+#define LANG_TURKISH        0x1f
+#define LANG_UKRAINIAN      0x22
+#define LANG_URDU           0x20
+#define LANG_UZBEK          0x43
+#define LANG_VIETNAMESE     0x2a
+
+/* FIXME: these are not in the Windows header */
+#define LANG_GAELIC         0x3c
+#define LANG_MALTESE        0x3a
+#define LANG_MAORI          0x28
+#define LANG_RHAETO_ROMANCE 0x17
+#define LANG_SAAMI          0x3b
+#define LANG_SORBIAN        0x2e
+#define LANG_SUTU           0x30
+#define LANG_TSONGA         0x31
+#define LANG_TSWANA         0x32
+#define LANG_VENDA          0x33
+#define LANG_XHOSA          0x34
+#define LANG_ZULU           0x35
+
+/* non standard; keep the number high enough (but < 0xff) */
+#define LANG_ESPERANTO			 0x8f
+#define LANG_WALON			 0x90
+#define LANG_CORNISH                     0x91
+#define LANG_WELSH                       0x92
+#define LANG_BRETON                      0x93
+
+/* Sublanguage definitions */
+#define SUBLANG_NEUTRAL                  0x00    /* language neutral */
+#define SUBLANG_DEFAULT                  0x01    /* user default */
+#define SUBLANG_SYS_DEFAULT              0x02    /* system default */
+
+#define SUBLANG_ARABIC_SAUDI_ARABIA        0x01
+#define SUBLANG_ARABIC_IRAQ                0x02
+#define SUBLANG_ARABIC_EGYPT               0x03
+#define SUBLANG_ARABIC_LIBYA               0x04
+#define SUBLANG_ARABIC_ALGERIA             0x05
+#define SUBLANG_ARABIC_MOROCCO             0x06
+#define SUBLANG_ARABIC_TUNISIA             0x07
+#define SUBLANG_ARABIC_OMAN                0x08
+#define SUBLANG_ARABIC_YEMEN               0x09
+#define SUBLANG_ARABIC_SYRIA               0x0a
+#define SUBLANG_ARABIC_JORDAN              0x0b
+#define SUBLANG_ARABIC_LEBANON             0x0c
+#define SUBLANG_ARABIC_KUWAIT              0x0d
+#define SUBLANG_ARABIC_UAE                 0x0e
+#define SUBLANG_ARABIC_BAHRAIN             0x0f
+#define SUBLANG_ARABIC_QATAR               0x10
+#define SUBLANG_AZERI_LATIN                0x01
+#define SUBLANG_AZERI_CYRILLIC             0x02
+#define SUBLANG_CHINESE_TRADITIONAL        0x01
+#define SUBLANG_CHINESE_SIMPLIFIED         0x02
+#define SUBLANG_CHINESE_HONGKONG           0x03
+#define SUBLANG_CHINESE_SINGAPORE          0x04
+#define SUBLANG_CHINESE_MACAU              0x05
+#define SUBLANG_DUTCH                      0x01
+#define SUBLANG_DUTCH_BELGIAN              0x02
+#define SUBLANG_ENGLISH_US                 0x01
+#define SUBLANG_ENGLISH_UK                 0x02
+#define SUBLANG_ENGLISH_AUS                0x03
+#define SUBLANG_ENGLISH_CAN                0x04
+#define SUBLANG_ENGLISH_NZ                 0x05
+#define SUBLANG_ENGLISH_EIRE               0x06
+#define SUBLANG_ENGLISH_SOUTH_AFRICA       0x07
+#define SUBLANG_ENGLISH_JAMAICA            0x08
+#define SUBLANG_ENGLISH_CARIBBEAN          0x09
+#define SUBLANG_ENGLISH_BELIZE             0x0a
+#define SUBLANG_ENGLISH_TRINIDAD           0x0b
+#define SUBLANG_ENGLISH_ZIMBABWE           0x0c
+#define SUBLANG_ENGLISH_PHILIPPINES        0x0d
+#define SUBLANG_FRENCH                     0x01
+#define SUBLANG_FRENCH_BELGIAN             0x02
+#define SUBLANG_FRENCH_CANADIAN            0x03
+#define SUBLANG_FRENCH_SWISS               0x04
+#define SUBLANG_FRENCH_LUXEMBOURG          0x05
+#define SUBLANG_FRENCH_MONACO              0x06
+#define SUBLANG_GERMAN                     0x01
+#define SUBLANG_GERMAN_SWISS               0x02
+#define SUBLANG_GERMAN_AUSTRIAN            0x03
+#define SUBLANG_GERMAN_LUXEMBOURG          0x04
+#define SUBLANG_GERMAN_LIECHTENSTEIN       0x05
+#define SUBLANG_ITALIAN                    0x01
+#define SUBLANG_ITALIAN_SWISS              0x02
+#define SUBLANG_KASHMIRI_SASIA             0x02
+#define SUBLANG_KASHMIRI_INDIA             0x02
+#define SUBLANG_KOREAN                     0x01
+#ifdef __WIN32OS2__                     /* This have been removed from the SDK. But kernel32 use it. */
+#define SUBLANG_KOREAN_JOHAB               0x02
+#endif
+#define SUBLANG_LITHUANIAN                 0x01
+#define SUBLANG_MALAY_MALAYSIA             0x01
+#define SUBLANG_MALAY_BRUNEI_DARUSSALAM    0x02
+#define SUBLANG_NEPALI_INDIA               0x02
+#define SUBLANG_NORWEGIAN_BOKMAL           0x01
+#define SUBLANG_NORWEGIAN_NYNORSK          0x02
+#define SUBLANG_PORTUGUESE                 0x02
+#define SUBLANG_PORTUGUESE_BRAZILIAN       0x01
+#define SUBLANG_SERBIAN_LATIN              0x02
+#define SUBLANG_SERBIAN_CYRILLIC           0x03
+#define SUBLANG_SPANISH                    0x01
+#define SUBLANG_SPANISH_MEXICAN            0x02
+#define SUBLANG_SPANISH_MODERN             0x03
+#define SUBLANG_SPANISH_GUATEMALA          0x04
+#define SUBLANG_SPANISH_COSTA_RICA         0x05
+#define SUBLANG_SPANISH_PANAMA             0x06
+#define SUBLANG_SPANISH_DOMINICAN_REPUBLIC 0x07
+#define SUBLANG_SPANISH_VENEZUELA          0x08
+#define SUBLANG_SPANISH_COLOMBIA           0x09
+#define SUBLANG_SPANISH_PERU               0x0a
+#define SUBLANG_SPANISH_ARGENTINA          0x0b
+#define SUBLANG_SPANISH_ECUADOR            0x0c
+#define SUBLANG_SPANISH_CHILE              0x0d
+#define SUBLANG_SPANISH_URUGUAY            0x0e
+#define SUBLANG_SPANISH_PARAGUAY           0x0f
+#define SUBLANG_SPANISH_BOLIVIA            0x10
+#define SUBLANG_SPANISH_EL_SALVADOR        0x11
+#define SUBLANG_SPANISH_HONDURAS           0x12
+#define SUBLANG_SPANISH_NICARAGUA          0x13
+#define SUBLANG_SPANISH_PUERTO_RICO        0x14
+#define SUBLANG_SWEDISH                    0x01
+#define SUBLANG_SWEDISH_FINLAND            0x02
+#define SUBLANG_URDU_PAKISTAN              0x01
+#define SUBLANG_URDU_INDIA                 0x02
+#define SUBLANG_UZBEK_LATIN                0x01
+#define SUBLANG_UZBEK_CYRILLIC             0x02
+
+/* FIXME: these are not in the Windows header */
+#define SUBLANG_DUTCH_SURINAM              0x03
+#define SUBLANG_ROMANIAN                   0x01
+#define SUBLANG_ROMANIAN_MOLDAVIA          0x02
+#define SUBLANG_RUSSIAN                    0x01
+#define SUBLANG_RUSSIAN_MOLDAVIA           0x02
+#define SUBLANG_CROATIAN                   0x01
+#define SUBLANG_LITHUANIAN_CLASSIC         0x02
+#define SUBLANG_GAELIC                     0x01
+#define SUBLANG_GAELIC_SCOTTISH            0x02
+#define SUBLANG_GAELIC_MANX                0x03
+
+
+/*
+ * Sort definitions
+ */
+
+#define SORT_DEFAULT                     0x0
+#define SORT_JAPANESE_XJIS               0x0
+#define SORT_JAPANESE_UNICODE            0x1
+#define SORT_CHINESE_BIG5                0x0
+#define SORT_CHINESE_UNICODE             0x1
+#define SORT_KOREAN_KSC                  0x0
+#define SORT_KOREAN_UNICODE              0x1
+
+
+
+/*
+ * Definitions for IsTextUnicode()
+ */
+
+#define IS_TEXT_UNICODE_ASCII16		   0x0001
+#define IS_TEXT_UNICODE_STATISTICS         0x0002
+#define IS_TEXT_UNICODE_CONTROLS           0x0004
+#define IS_TEXT_UNICODE_SIGNATURE	   0x0008
+#define IS_TEXT_UNICODE_UNICODE_MASK       0x000F
+#define IS_TEXT_UNICODE_REVERSE_ASCII16	   0x0010
+#define IS_TEXT_UNICODE_REVERSE_STATISTICS 0x0020
+#define IS_TEXT_UNICODE_REVERSE_CONTROLS   0x0040
+#define IS_TEXT_UNICODE_REVERSE_SIGNATURE  0x0080
+#define IS_TEXT_UNICODE_REVERSE_MASK       0x00F0
+#define IS_TEXT_UNICODE_ILLEGAL_CHARS	   0x0100
+#define IS_TEXT_UNICODE_ODD_LENGTH	   0x0200
+#define IS_TEXT_UNICODE_DBCS_LEADBYTE      0x0400
+#define IS_TEXT_UNICODE_NOT_UNICODE_MASK   0x0F00
+#define IS_TEXT_UNICODE_NULL_BYTES         0x1000
+#define IS_TEXT_UNICODE_NOT_ASCII_MASK     0xF000
+
+/* bird-end: from newer winnt.h */
+
+
 
 /* Error Masks */
 #define APPLICATION_ERROR_MASK       0x20000000
@@ -789,7 +1066,7 @@ typedef HANDLE *PHANDLE;
 /*
  * Exception codes
  */
- 
+
 #define STATUS_SUCCESS                   0x00000000
 #define STATUS_WAIT_0                    0x00000000
 #define STATUS_ABANDONED_WAIT_0          0x00000080
@@ -797,7 +1074,7 @@ typedef HANDLE *PHANDLE;
 #define STATUS_TIMEOUT                   0x00000102
 #define STATUS_PENDING                   0x00000103
 
-#define STATUS_GUARD_PAGE_VIOLATION      0x80000001    
+#define STATUS_GUARD_PAGE_VIOLATION      0x80000001
 #define STATUS_DATATYPE_MISALIGNMENT     0x80000002
 #define STATUS_BREAKPOINT                0x80000003
 #define STATUS_SINGLE_STEP               0x80000004
@@ -959,7 +1236,7 @@ typedef HANDLE *PHANDLE;
 #define STATUS_NO_TOKEN                  0xC000007C
 #define STATUS_BAD_INHERITANCE_ACL       0xC000007D
 #define STATUS_RANGE_NOT_LOCKED          0xC000007E
-#define STATUS_DISK_FULL                 0xC000007F 
+#define STATUS_DISK_FULL                 0xC000007F
 #define STATUS_SERVER_DISABLED           0xC0000080
 #define STATUS_SERVER_NOT_DISABLED       0xC0000081
 #define STATUS_TOO_MANY_GUIDS_REQUESTED  0xC0000082
@@ -1492,11 +1769,11 @@ typedef HANDLE *PHANDLE;
 #define ExceptionContinueSearch    1
 #define ExceptionNestedException   2
 #define ExceptionCollidedUnwind    3
- 
+
 /*
  * Return values from filters in except() and from UnhandledExceptionFilter
  */
- 
+
 #define EXCEPTION_EXECUTE_HANDLER        1
 #define EXCEPTION_CONTINUE_SEARCH        0
 #define EXCEPTION_CONTINUE_EXECUTION    -1
@@ -1514,9 +1791,9 @@ typedef HANDLE *PHANDLE;
 
 #define EXCEPTION_CONTINUABLE        0
 #define EXCEPTION_NONCONTINUABLE     EH_NONCONTINUABLE
- 
+
 /*
- * The exception record used by Win32 to give additional information 
+ * The exception record used by Win32 to give additional information
  * about exception to exception handlers.
  */
 
@@ -1537,8 +1814,8 @@ typedef struct __EXCEPTION_RECORD
  * The exception pointers structure passed to exception filters
  * in except() and the UnhandledExceptionFilter().
  */
- 
-typedef struct _EXCEPTION_POINTERS 
+
+typedef struct _EXCEPTION_POINTERS
 {
   PEXCEPTION_RECORD  ExceptionRecord;
   PCONTEXT           ContextRecord;
@@ -1546,8 +1823,8 @@ typedef struct _EXCEPTION_POINTERS
 
 
 /*
- * The exception frame, used for registering exception handlers 
- * Win32 cares only about this, but compilers generally emit 
+ * The exception frame, used for registering exception handlers
+ * Win32 cares only about this, but compilers generally emit
  * larger exception frames for their own use.
  */
 
@@ -1619,7 +1896,7 @@ struct _TEB  *WINAPI GetThreadTEB();
 
 /*
  * Here follows typedefs for security and tokens.
- */ 
+ */
 
 /*
  * First a constant for the following typdefs.
@@ -1635,17 +1912,17 @@ typedef PVOID PACCESS_TOKEN;
  */
 
 typedef enum _TOKEN_INFORMATION_CLASS {
-  TokenUser = 1, 
-  TokenGroups, 
-  TokenPrivileges, 
-  TokenOwner, 
-  TokenPrimaryGroup, 
-  TokenDefaultDacl, 
-  TokenSource, 
-  TokenType, 
-  TokenImpersonationLevel, 
-  TokenStatistics 
-} TOKEN_INFORMATION_CLASS; 
+  TokenUser = 1,
+  TokenGroups,
+  TokenPrivileges,
+  TokenOwner,
+  TokenPrimaryGroup,
+  TokenDefaultDacl,
+  TokenSource,
+  TokenType,
+  TokenImpersonationLevel,
+  TokenStatistics
+} TOKEN_INFORMATION_CLASS;
 
 #ifndef _SECURITY_DEFINED
 #define _SECURITY_DEFINED
@@ -1681,8 +1958,8 @@ typedef struct _SID {
 #define	SID_RECOMMENDED_SUB_AUTHORITIES	(1)	/* recommended subauths */
 
 
-/* 
- * ACL 
+/*
+ * ACL
  */
 
 #define ACL_REVISION1 1
@@ -1756,22 +2033,22 @@ typedef struct {
     PACL Dacl;
 } SECURITY_DESCRIPTOR, *PSECURITY_DESCRIPTOR;
 
-#define SECURITY_DESCRIPTOR_MIN_LENGTH   (sizeof(SECURITY_DESCRIPTOR)) 
+#define SECURITY_DESCRIPTOR_MIN_LENGTH   (sizeof(SECURITY_DESCRIPTOR))
 
 
 #endif /* _SECURITY_DEFINED */
 
 
-/* 
+/*
  * SID_AND_ATTRIBUTES
  */
 
 
 typedef struct _SID_AND_ATTRIBUTES {
-  PSID  Sid; 
-  DWORD Attributes; 
-} SID_AND_ATTRIBUTES ; 
- 
+  PSID  Sid;
+  DWORD Attributes;
+} SID_AND_ATTRIBUTES ;
+
 /* security entities */
 #define SECURITY_NULL_RID			(0x00000000L)
 #define SECURITY_WORLD_RID			(0x00000000L)
@@ -1787,7 +2064,7 @@ typedef struct _SID_AND_ATTRIBUTES {
 
 /* S-1-3 */
 #define SECURITY_CREATOR_SID_AUTHORITY		{0,0,0,0,0,3}
-#define SECURITY_CREATOR_OWNER_RID		(0x00000000L) 
+#define SECURITY_CREATOR_OWNER_RID		(0x00000000L)
 #define SECURITY_CREATOR_GROUP_RID		(0x00000001L)
 #define SECURITY_CREATOR_OWNER_SERVER_RID	(0x00000002L)
 #define SECURITY_CREATOR_GROUP_SERVER_RID	(0x00000003L)
@@ -1796,7 +2073,7 @@ typedef struct _SID_AND_ATTRIBUTES {
 #define SECURITY_NON_UNIQUE_AUTHORITY		{0,0,0,0,0,4}
 
 /* S-1-5 */
-#define SECURITY_NT_AUTHORITY			{0,0,0,0,0,5} 
+#define SECURITY_NT_AUTHORITY			{0,0,0,0,0,5}
 #define SECURITY_DIALUP_RID                     0x00000001L
 #define SECURITY_NETWORK_RID                    0x00000002L
 #define SECURITY_BATCH_RID                      0x00000003L
@@ -1825,23 +2102,23 @@ typedef struct _SID_AND_ATTRIBUTES {
 #define SECURITY_SERVER_LOGON_RID		SECURITY_ENTERPRISE_CONTROLLERS_RID
 
 #define SECURITY_LOGON_IDS_RID_COUNT		(3L)
- 
+
 /*
  * TOKEN_USER
  */
 
 typedef struct _TOKEN_USER {
-  SID_AND_ATTRIBUTES User; 
-} TOKEN_USER; 
+  SID_AND_ATTRIBUTES User;
+} TOKEN_USER;
 
 /*
  * TOKEN_GROUPS
  */
 
 typedef struct _TOKEN_GROUPS  {
-  DWORD GroupCount; 
-  SID_AND_ATTRIBUTES Groups[ANYSIZE_ARRAY]; 
-} TOKEN_GROUPS, *PTOKEN_GROUPS; 
+  DWORD GroupCount;
+  SID_AND_ATTRIBUTES Groups[ANYSIZE_ARRAY];
+} TOKEN_GROUPS, *PTOKEN_GROUPS;
 
 /*
  * LUID_AND_ATTRIBUTES
@@ -1880,9 +2157,9 @@ typedef union _ULARGE_INTEGER {
 typedef LARGE_INTEGER LUID,*PLUID;
 
 typedef struct _LUID_AND_ATTRIBUTES {
-  LUID   Luid; 
-  DWORD  Attributes; 
-} LUID_AND_ATTRIBUTES; 
+  LUID   Luid;
+  DWORD  Attributes;
+} LUID_AND_ATTRIBUTES;
 
 /*
  * PRIVILEGE_SET
@@ -1899,34 +2176,34 @@ typedef struct _PRIVILEGE_SET {
  */
 
 typedef struct _TOKEN_PRIVILEGES {
-  DWORD PrivilegeCount; 
-  LUID_AND_ATTRIBUTES Privileges[ANYSIZE_ARRAY]; 
-} TOKEN_PRIVILEGES, *PTOKEN_PRIVILEGES; 
+  DWORD PrivilegeCount;
+  LUID_AND_ATTRIBUTES Privileges[ANYSIZE_ARRAY];
+} TOKEN_PRIVILEGES, *PTOKEN_PRIVILEGES;
 
 /*
  * TOKEN_OWNER
  */
 
 typedef struct _TOKEN_OWNER {
-  PSID Owner; 
-} TOKEN_OWNER; 
+  PSID Owner;
+} TOKEN_OWNER;
 
 /*
  * TOKEN_PRIMARY_GROUP
  */
 
 typedef struct _TOKEN_PRIMARY_GROUP {
-  PSID PrimaryGroup; 
-} TOKEN_PRIMARY_GROUP; 
+  PSID PrimaryGroup;
+} TOKEN_PRIMARY_GROUP;
 
 
 /*
  * TOKEN_DEFAULT_DACL
  */
 
-typedef struct _TOKEN_DEFAULT_DACL { 
-  PACL DefaultDacl; 
-} TOKEN_DEFAULT_DACL; 
+typedef struct _TOKEN_DEFAULT_DACL {
+  PACL DefaultDacl;
+} TOKEN_DEFAULT_DACL;
 
 /*
  * TOKEN_SOURCEL
@@ -1944,20 +2221,20 @@ typedef struct _TOKEN_SOURCE {
  */
 
 typedef enum tagTOKEN_TYPE {
-  TokenPrimary = 1, 
-  TokenImpersonation 
-} TOKEN_TYPE; 
+  TokenPrimary = 1,
+  TokenImpersonation
+} TOKEN_TYPE;
 
 /*
  * SECURITY_IMPERSONATION_LEVEL
  */
 
 typedef enum _SECURITY_IMPERSONATION_LEVEL {
-  SecurityAnonymous, 
-  SecurityIdentification, 
-  SecurityImpersonation, 
-  SecurityDelegation 
-} SECURITY_IMPERSONATION_LEVEL, *PSECURITY_IMPERSONATION_LEVEL; 
+  SecurityAnonymous,
+  SecurityIdentification,
+  SecurityImpersonation,
+  SecurityDelegation
+} SECURITY_IMPERSONATION_LEVEL, *PSECURITY_IMPERSONATION_LEVEL;
 
 
 typedef BOOLEAN SECURITY_CONTEXT_TRACKING_MODE,
@@ -1978,20 +2255,20 @@ typedef struct _SECURITY_QUALITY_OF_SERVICE {
  */
 
 typedef struct _TOKEN_STATISTICS {
-  LUID  TokenId; 
-  LUID  AuthenticationId; 
-  LARGE_INTEGER ExpirationTime; 
-  TOKEN_TYPE    TokenType; 
-  SECURITY_IMPERSONATION_LEVEL ImpersonationLevel; 
-  DWORD DynamicCharged; 
-  DWORD DynamicAvailable; 
-  DWORD GroupCount; 
-  DWORD PrivilegeCount; 
-  LUID  ModifiedId; 
-} TOKEN_STATISTICS; 
+  LUID  TokenId;
+  LUID  AuthenticationId;
+  LARGE_INTEGER ExpirationTime;
+  TOKEN_TYPE    TokenType;
+  SECURITY_IMPERSONATION_LEVEL ImpersonationLevel;
+  DWORD DynamicCharged;
+  DWORD DynamicAvailable;
+  DWORD GroupCount;
+  DWORD PrivilegeCount;
+  LUID  ModifiedId;
+} TOKEN_STATISTICS;
 
-/* 
- *	ACLs of NT 
+/*
+ *	ACLs of NT
  */
 
 #define	ACL_REVISION	2
@@ -2023,7 +2300,7 @@ typedef struct _ACE_HEADER {
 #define	SUCCESSFUL_ACCESS_ACE_FLAG	0x40
 #define	FAILED_ACCESS_ACE_FLAG		0x80
 
-/* different ACEs depending on AceType 
+/* different ACEs depending on AceType
  * SidStart marks the begin of a SID
  * so the thing finally looks like this:
  * 0: ACE_HEADER
@@ -2122,8 +2399,8 @@ typedef enum tagSID_NAME_USE {
 #define THREAD_DIRECT_IMPERSONATION 0x0200
 #define THREAD_ALL_ACCESS          (STANDARD_RIGHTS_REQUIRED|SYNCHRONIZE|0x3ff)
 
-#define THREAD_BASE_PRIORITY_LOWRT  15 
-#define THREAD_BASE_PRIORITY_MAX    2 
+#define THREAD_BASE_PRIORITY_LOWRT  15
+#define THREAD_BASE_PRIORITY_MAX    2
 #define THREAD_BASE_PRIORITY_MIN   -2
 #define THREAD_BASE_PRIORITY_IDLE  -15
 
@@ -2173,20 +2450,20 @@ typedef enum tagSID_NAME_USE {
 #define FILE_ATTRIBUTE_COMPRESSED       0x00000800L
 #define FILE_ATTRIBUTE_OFFLINE		0x00001000L
 #define FILE_NOTIFY_CHANGE_FILE_NAME    0x00000001L
-#define FILE_NOTIFY_CHANGE_DIR_NAME     0x00000002L   
-#define FILE_NOTIFY_CHANGE_ATTRIBUTES   0x00000004L   
-#define FILE_NOTIFY_CHANGE_SIZE         0x00000008L   
-#define FILE_NOTIFY_CHANGE_LAST_WRITE   0x00000010L   
-#define FILE_NOTIFY_CHANGE_LAST_ACCESS  0x00000020L   
-#define FILE_NOTIFY_CHANGE_CREATION     0x00000040L   
-#define FILE_NOTIFY_CHANGE_SECURITY     0x00000100L   
-#define FILE_ACTION_ADDED               0x00000001L   
-#define FILE_ACTION_REMOVED             0x00000002L   
-#define FILE_ACTION_MODIFIED            0x00000003L   
-#define FILE_ACTION_RENAMED_OLD_NAME    0x00000004L   
-#define FILE_ACTION_RENAMED_NEW_NAME    0x00000005L   
-#define MAILSLOT_NO_MESSAGE             ((DWORD)-1) 
-#define MAILSLOT_WAIT_FOREVER           ((DWORD)-1) 
+#define FILE_NOTIFY_CHANGE_DIR_NAME     0x00000002L
+#define FILE_NOTIFY_CHANGE_ATTRIBUTES   0x00000004L
+#define FILE_NOTIFY_CHANGE_SIZE         0x00000008L
+#define FILE_NOTIFY_CHANGE_LAST_WRITE   0x00000010L
+#define FILE_NOTIFY_CHANGE_LAST_ACCESS  0x00000020L
+#define FILE_NOTIFY_CHANGE_CREATION     0x00000040L
+#define FILE_NOTIFY_CHANGE_SECURITY     0x00000100L
+#define FILE_ACTION_ADDED               0x00000001L
+#define FILE_ACTION_REMOVED             0x00000002L
+#define FILE_ACTION_MODIFIED            0x00000003L
+#define FILE_ACTION_RENAMED_OLD_NAME    0x00000004L
+#define FILE_ACTION_RENAMED_NEW_NAME    0x00000005L
+#define MAILSLOT_NO_MESSAGE             ((DWORD)-1)
+#define MAILSLOT_WAIT_FOREVER           ((DWORD)-1)
 
 /* File alignments (NT) */
 #define	FILE_BYTE_ALIGNMENT		0x00000000
@@ -2244,7 +2521,7 @@ typedef enum tagSID_NAME_USE {
                            SERVICE_DRIVER | SERVICE_INTERACTIVE_PROCESS )
 
 
-typedef enum _CM_SERVICE_NODE_TYPE 
+typedef enum _CM_SERVICE_NODE_TYPE
 {
   DriverType               = SERVICE_KERNEL_DRIVER,
   FileSystemType           = SERVICE_FILE_SYSTEM_DRIVER,
@@ -2254,7 +2531,7 @@ typedef enum _CM_SERVICE_NODE_TYPE
   RecognizerType           = SERVICE_RECOGNIZER_DRIVER
 } SERVICE_NODE_TYPE;
 
-typedef enum _CM_SERVICE_LOAD_TYPE 
+typedef enum _CM_SERVICE_LOAD_TYPE
 {
   BootLoad    = SERVICE_BOOT_START,
   SystemLoad  = SERVICE_SYSTEM_START,
@@ -2263,7 +2540,7 @@ typedef enum _CM_SERVICE_LOAD_TYPE
   DisableLoad = SERVICE_DISABLED
 } SERVICE_LOAD_TYPE;
 
-typedef enum _CM_ERROR_CONTROL_TYPE 
+typedef enum _CM_ERROR_CONTROL_TYPE
 {
   IgnoreError   = SERVICE_ERROR_IGNORE,
   NormalError   = SERVICE_ERROR_NORMAL,
@@ -2392,7 +2669,7 @@ typedef IMAGE_AUX_SYMBOL *PIMAGE_AUX_SYMBOL;
 
 //#include "guiddef.h"
 
-typedef struct _RTL_CRITICAL_SECTION_DEBUG 
+typedef struct _RTL_CRITICAL_SECTION_DEBUG
 {
   WORD   Type;
   WORD   CreatorBackTraceIndex;
@@ -2461,4 +2738,4 @@ typedef void (__stdcall *WAITORTIMERCALLBACKFUNC) (PVOID, BOOLEAN );
 
 
 
-#endif  
+#endif
