@@ -1,4 +1,4 @@
-/* $Id: MapSym.cmd,v 1.6 2002-05-05 19:03:32 bird Exp $
+/* $Id: MapSym.cmd,v 1.7 2002-08-24 04:33:52 bird Exp $
  *
  * Helper script for calling MAPSYM.EXE.
  *
@@ -14,7 +14,15 @@
 sWatcom = ';wat11c;wat11;watcom;wat11c-16;wat11-16;'
 sIBMOld = ';vac3xx;vac365;vac308;link386;emx;emxpgcc;mscv6;mscv6-16;ibmold;'
 sVAC40  = ';vac40;'
-sLinkers = strip(sVAC40, 'T', ';')||strip(sIBMOld, 'T', ';')||strip(sWatcom, 'T', ';')||';'
+sLinkers= strip(sVAC40, 'T', ';')||strip(sIBMOld, 'T', ';')||strip(sWatcom, 'T', ';')||';'
+/* look for 4os2 */
+f4OS2   = 0;
+Address CMD 'set 4os2test_env=%@eval[2 + 2]';
+if (value('4os2test_env',, 'OS2ENVIRONMENT') = '4') then
+    f4OS2 = 1;
+sCopy = '@copy'
+if (f4OS2) then
+    sCopy = '@copy /Q'
 
 /*
  * Parse arguments.
@@ -106,7 +114,7 @@ end
 select
     when (sLinker = 'IBMOLD') then
     do
-        '@copy' sMapFile sTmpMapFile
+        sCopy sMapFile sTmpMapFile
         if (rc <> 0) then
         do
             say 'error: failed to copy '''sMapFile''' to '''sTmpMapFile'''. (rc='rc')';
@@ -160,7 +168,7 @@ call directory(sOldDir);
 /*
  * Copy the symfile to the target path.
  */
-'@copy' left(sTmpMapFile, length(sTmpMapFile) - 4)||'.sym' sSymFile;
+sCopy left(sTmpMapFile, length(sTmpMapFile) - 4)||'.sym' sSymFile;
 if (rc <> 0) then
 do
     say 'error: failed to copy '''left(sTmpMapFile, length(sTmpMapFile) - 4)||'.sym'' to '''sSymFile'''. (rc='rc')';
@@ -286,7 +294,7 @@ vac40conv: procedure;
                         /*say 'SegLn: seg='iSeg 'off='iSegOffset 'name='sSegName 'class='sSegClass; say sSegment*/
                         if (length(sSegName) < 22) then sSegName = left(sSegName, 22, ' ');
                         call lineout sOutFile, ' '||strip(iSeg)':'iSegOffset right(DecToHex(cbSegment), 9, '0'),
-                                     ||'H     '||sSegName||' '||strip(sSegClass);
+                                     ||'H '||sSegName||' '||strip(sSegClass);
                         sSegment = '';
                         cbSegment = 0;
                     end
@@ -300,9 +308,9 @@ vac40conv: procedure;
             do
                 if (sState = sNewState) then
                 do
-                    sLine = translate(sLine, '', '"');
+                    sLine = translate(sLine, '', '"'||d2c(9));
                     if ((strip(sLine) <> '') & (pos('|', sLine) <= 0) & (pos('@', sLine) <= 0)) then
-                        call lineout sOutFile, sLine;
+                        call lineout sOutFile, ' '||word(sLine, 1)||'       '||word(sLine, 2);
                 end
                 else if (sNewState = 'PublicValue') then
                 do  /* first call */
