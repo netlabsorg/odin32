@@ -1,4 +1,4 @@
-/* $Id: misc.h,v 1.15 2000-01-13 20:09:59 sandervl Exp $ */
+/* $Id: misc.h,v 1.16 2000-08-11 09:57:49 sandervl Exp $ */
 
 /*
  * Miscellaneous definitions
@@ -114,7 +114,6 @@ void ClosePrivateLogFiles();
 #endif
 
 
-#include "versionos2.h"
 #include "unicode.h"
 
 #endif
