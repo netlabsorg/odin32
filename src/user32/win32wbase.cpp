@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.224 2000-11-21 11:36:09 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.225 2000-12-17 15:04:11 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -193,6 +193,11 @@ Win32BaseWindow::~Win32BaseWindow()
         setParent(NULL);  //or else we'll crash in the dtor of the ChildWindow class
     }
 
+    /* Decrement class window counter */
+    if(windowClass) {
+        windowClass->DecreaseWindowCount();
+    }
+
     if(isOwnDC())
         releaseOwnDC(ownDC);
 
@@ -289,18 +294,21 @@ BOOL Win32BaseWindow::CreateWindowExA(CREATESTRUCTA *cs, ATOM classAtom)
             return FALSE;  /* WS_CHILD needs a parent, but WS_POPUP doesn't */
     }
 
-  /* Find the window class */
-  windowClass = Win32WndClass::FindClass(cs->hInstance, (LPSTR)classAtom);
-  if (!windowClass)
-  {
+    /* Find the window class */
+    windowClass = Win32WndClass::FindClass(cs->hInstance, (LPSTR)classAtom);
+    if (!windowClass)
+    {
         GlobalGetAtomNameA( classAtom, buffer, sizeof(buffer) );
         dprintf(("Bad class '%s'\n", buffer ));
         SetLastError(ERROR_INVALID_PARAMETER);
         return 0;
-  }
+    }
+    /* Increment class window counter */
+    windowClass->IncreaseWindowCount();
+
 #ifdef DEBUG
-  if(HIWORD(cs->lpszClass))
-  {
+    if(HIWORD(cs->lpszClass))
+    {
         char *astring;
 
         if(isUnicode) astring = UnicodeToAsciiString((LPWSTR)cs->lpszClass);
@@ -308,15 +316,15 @@ BOOL Win32BaseWindow::CreateWindowExA(CREATESTRUCTA *cs, ATOM classAtom)
 
         dprintf(("Window class %s", astring));
         if(isUnicode) FreeAsciiString(astring);
-  }
-  else  dprintf(("Window class %x", cs->lpszClass));
+    }
+    else dprintf(("Window class %x", cs->lpszClass));
 #endif
 
-  /* Fix the lpszClass field: from existing programs, it seems ok to call a CreateWindowXXX
-   * with an atom as the class name, put some programs expect to have a *REAL* string in
-   * lpszClass when the CREATESTRUCT is sent with WM_CREATE
-   */
-  if (!HIWORD(cs->lpszClass) ) {
+    /* Fix the lpszClass field: from existing programs, it seems ok to call a CreateWindowXXX
+     * with an atom as the class name, put some programs expect to have a *REAL* string in
+     * lpszClass when the CREATESTRUCT is sent with WM_CREATE
+     */
+    if (!HIWORD(cs->lpszClass) ) {
         if (isUnicode) {
                 GlobalGetAtomNameW( classAtom, (LPWSTR)buffer, sizeof(buffer) );
         }
@@ -324,13 +332,13 @@ BOOL Win32BaseWindow::CreateWindowExA(CREATESTRUCTA *cs, ATOM classAtom)
                 GlobalGetAtomNameA( classAtom, buffer, sizeof(buffer) );
         }
         cs->lpszClass = buffer;
-  }
+    }
 
-  /* Fix the coordinates */
-  fXDefault = FALSE;
-  fCXDefault = FALSE;
-  if ((cs->x == CW_USEDEFAULT) || (cs->x == CW_USEDEFAULT16))
-  {
+    /* Fix the coordinates */
+    fXDefault = FALSE;
+    fCXDefault = FALSE;
+    if ((cs->x == CW_USEDEFAULT) || (cs->x == CW_USEDEFAULT16))
+    {
        /* Never believe Microsoft's documentation... CreateWindowEx doc says
         * that if an overlapped window is created with WS_VISIBLE style bit
         * set and the x parameter is set to CW_USEDEFAULT, the system ignores
@@ -353,39 +361,39 @@ BOOL Win32BaseWindow::CreateWindowExA(CREATESTRUCTA *cs, ATOM classAtom)
         cs->x = 0;
         cs->y = 0;
         fXDefault = TRUE;
-  }
-  if ((cs->cx == CW_USEDEFAULT) || (cs->cx == CW_USEDEFAULT16))
-  {
+    }
+    if ((cs->cx == CW_USEDEFAULT) || (cs->cx == CW_USEDEFAULT16))
+    {
         cs->cx = 600; /* FIXME */
         cs->cy = 400;
         fCXDefault = TRUE;
-  }
-  if (cs->style & (WS_POPUP | WS_CHILD))
-  {
-    fXDefault = FALSE;
-    if (fCXDefault)
-    {
-      fCXDefault = FALSE;
-      cs->cx = cs->cy = 0;
     }
-  }
-  if (fXDefault && !fCXDefault) fXDefault = FALSE; //CB: only x positioning doesn't work (calc.exe,cdrlabel.exe)
+    if (cs->style & (WS_POPUP | WS_CHILD))
+    {
+        fXDefault = FALSE;
+        if (fCXDefault)
+        {
+        fCXDefault = FALSE;
+        cs->cx = cs->cy = 0;
+        }
+    }
+    if (fXDefault && !fCXDefault) fXDefault = FALSE; //CB: only x positioning doesn't work (calc.exe,cdrlabel.exe)
 
-  if (cs->x < 0) cs->x = 0;
-  if (cs->y < 0) cs->y = 0;
+    if (cs->x < 0) cs->x = 0;
+    if (cs->y < 0) cs->y = 0;
 
-  //Allocate window words
-  nrUserWindowLong = windowClass->getExtraWndWords();
-  if(nrUserWindowLong) {
+    //Allocate window words
+    nrUserWindowLong = windowClass->getExtraWndWords();
+    if(nrUserWindowLong) {
         userWindowLong = (ULONG *)_smalloc(nrUserWindowLong);
         memset(userWindowLong, 0, nrUserWindowLong);
-  }
+    }
 
-  if ((cs->style & WS_CHILD) && cs->hwndParent)
-  {
+    if ((cs->style & WS_CHILD) && cs->hwndParent)
+    {
         SetParent(cs->hwndParent);
 //        owner = GetWindowFromHandle(cs->hwndParent);
-    owner = 0;
+        owner = 0;
 /*        if(owner == NULL)
         {
             dprintf(("HwGetWindowHandleData couldn't find owner window %x!!!", cs->hwndParent));
@@ -394,9 +402,9 @@ BOOL Win32BaseWindow::CreateWindowExA(CREATESTRUCTA *cs, ATOM classAtom)
         }*/
         //SvL: Shell positioning shouldn't be done for child windows! (breaks Notes)
         fXDefault = fCXDefault = FALSE;
-  }
-  else
-  {
+    }
+    else
+    {
         SetParent(0);
         if (!cs->hwndParent || (cs->hwndParent == windowDesktop->getWindowHandle())) {
             owner = NULL;
@@ -411,117 +419,57 @@ BOOL Win32BaseWindow::CreateWindowExA(CREATESTRUCTA *cs, ATOM classAtom)
                 return FALSE;
             }
         }
-  }
+    }
 
-  WINPROC_SetProc((HWINDOWPROC *)&win32wndproc, windowClass->getWindowProc(), WINPROC_GetProcType(windowClass->getWindowProc()), WIN_PROC_WINDOW);
-  hInstance = cs->hInstance;
-  dwStyle   = cs->style & ~WS_VISIBLE;
-  dwExStyle = cs->dwExStyle;
+    WINPROC_SetProc((HWINDOWPROC *)&win32wndproc, windowClass->getWindowProc(), WINPROC_GetProcType(windowClass->getWindowProc()), WIN_PROC_WINDOW);
+    hInstance = cs->hInstance;
+    dwStyle   = cs->style & ~WS_VISIBLE;
+    dwExStyle = cs->dwExStyle;
 
-  hwndLinkAfter = ((cs->style & (WS_CHILD|WS_MAXIMIZE)) == WS_CHILD) ? HWND_BOTTOM : HWND_TOP;
+    hwndLinkAfter = ((cs->style & (WS_CHILD|WS_MAXIMIZE)) == WS_CHILD) ? HWND_BOTTOM : HWND_TOP;
 
-  /* Increment class window counter */
-  windowClass->IncreaseWindowCount();
-
-  if (HOOK_IsHooked( WH_CBT ))
-  {
-        CBT_CREATEWNDA cbtc;
-        LRESULT ret;
-
-        cbtc.lpcs = cs;
-        cbtc.hwndInsertAfter = hwndLinkAfter;
-        ret = HOOK_CallHooksA(WH_CBT, HCBT_CREATEWND, getWindowHandle(), (LPARAM)&cbtc);
-        if(ret)
-        {
-            dprintf(("CBT-hook returned 0!!"));
-            SetLastError(ERROR_CAN_NOT_COMPLETE); //todo: wrong error
-            return FALSE;
-        }
-  }
-
-  /* Correct the window style */
-  if (!(cs->style & WS_CHILD))
-  {
+    /* Correct the window style */
+    if (!(cs->style & WS_CHILD))
+    {
         dwStyle |= WS_CLIPSIBLINGS;
         if (!(cs->style & WS_POPUP))
         {
             dwStyle |= WS_CAPTION;
             flags |= WIN_NEED_SIZE;
         }
-  }
-  if (cs->dwExStyle & WS_EX_DLGMODALFRAME) dwStyle &= ~WS_THICKFRAME;
-
-  if (cs->style & WS_HSCROLL)
-  {
-        horzScrollInfo = (SCROLLBAR_INFO*)malloc(sizeof(SCROLLBAR_INFO));
-        horzScrollInfo->MinVal = horzScrollInfo->CurVal = horzScrollInfo->Page = 0;
-        horzScrollInfo->MaxVal = 100;
-        horzScrollInfo->flags  = ESB_ENABLE_BOTH;
-  }
-
-  if (cs->style & WS_VSCROLL)
-  {
-        vertScrollInfo = (SCROLLBAR_INFO*)malloc(sizeof(SCROLLBAR_INFO));
-        vertScrollInfo->MinVal = vertScrollInfo->CurVal = vertScrollInfo->Page = 0;
-        vertScrollInfo->MaxVal = 100;
-        vertScrollInfo->flags  = ESB_ENABLE_BOTH;
-  }
-
-  if(HIWORD(cs->lpszName))
-  {
-    if (!isUnicode)
-    {
-        wndNameLength = strlen(cs->lpszName);
-        windowNameA = (LPSTR)_smalloc(wndNameLength+1);
-        strcpy(windowNameA,cs->lpszName);
-        windowNameW = (LPWSTR)_smalloc((wndNameLength+1)*sizeof(WCHAR));
-        lstrcpyAtoW(windowNameW,windowNameA);
-        windowNameA[wndNameLength] = 0;
-        windowNameW[wndNameLength] = 0;
     }
-    else
-    {
-        wndNameLength = lstrlenW((LPWSTR)cs->lpszName);
-        windowNameA = (LPSTR)_smalloc(wndNameLength+1);
-        lstrcpyWtoA(windowNameA,(LPWSTR)cs->lpszName);
-        windowNameW = (LPWSTR)_smalloc((wndNameLength+1)*sizeof(WCHAR));
-        lstrcpyW(windowNameW,(LPWSTR)cs->lpszName);
-        windowNameA[wndNameLength] = 0;
-        windowNameW[wndNameLength] = 0;
-    }
-  }
+    if (cs->dwExStyle & WS_EX_DLGMODALFRAME) dwStyle &= ~WS_THICKFRAME;
 
-  //copy pointer of CREATESTRUCT for usage in MsgCreate method
-  tmpcs = cs;
+    //copy pointer of CREATESTRUCT for usage in MsgCreate method
+    tmpcs = cs;
 
-  //Store our window object pointer in thread local memory, so PMWINDOW.CPP can retrieve it
-  TEB *teb = GetThreadTEB();
-
-  if(teb == NULL) {
+    //Store our window object pointer in thread local memory, so PMWINDOW.CPP can retrieve it
+    TEB *teb = GetThreadTEB();
+    if(teb == NULL) {
         dprintf(("Window creation failed - teb == NULL")); //this is VERY bad
         ExitProcess(666);
         return FALSE;
-  }
+    }
 
-  teb->o.odin.newWindow = (ULONG)this;
+    teb->o.odin.newWindow = (ULONG)this;
 
-  DWORD dwOSWinStyle;
+    DWORD dwOSWinStyle;
 
-  OSLibWinConvertStyle(dwStyle,dwExStyle,&dwOSWinStyle);
+    OSLibWinConvertStyle(dwStyle,dwExStyle,&dwOSWinStyle);
 
-  OS2Hwnd = OSLibWinCreateWindow((getParent()) ? getParent()->getOS2WindowHandle() : OSLIB_HWND_DESKTOP,
-                                 dwOSWinStyle,(char *)windowNameA,
-                                 (owner) ? owner->getOS2WindowHandle() : ((getParent()) ? getParent()->getOS2WindowHandle() : OSLIB_HWND_DESKTOP),
-                                 (hwndLinkAfter == HWND_BOTTOM) ? TRUE : FALSE,
-                                 0, fTaskList,fXDefault | fCXDefault,windowClass->getStyle());
-  if(OS2Hwnd == 0) {
+    OS2Hwnd = OSLibWinCreateWindow((getParent()) ? getParent()->getOS2WindowHandle() : OSLIB_HWND_DESKTOP,
+                                   dwOSWinStyle,(char *)windowNameA,
+                                   (owner) ? owner->getOS2WindowHandle() : ((getParent()) ? getParent()->getOS2WindowHandle() : OSLIB_HWND_DESKTOP),
+                                   (hwndLinkAfter == HWND_BOTTOM) ? TRUE : FALSE,
+                                   0, fTaskList,fXDefault | fCXDefault,windowClass->getStyle());
+    if(OS2Hwnd == 0) {
         dprintf(("Window creation failed!! OS LastError %0x", OSLibWinGetLastError()));
         SetLastError(ERROR_OUTOFMEMORY); //TODO: Better error
         return FALSE;
-  }
-  OSLibWinSetVisibleRegionNotify(OS2Hwnd, TRUE);
-  SetLastError(0);
-  return TRUE;
+    }
+    OSLibWinSetVisibleRegionNotify(OS2Hwnd, TRUE);
+    SetLastError(0);
+    return TRUE;
 }
 //******************************************************************************
 //******************************************************************************
@@ -530,20 +478,79 @@ BOOL Win32BaseWindow::MsgCreate(HWND hwndOS2)
  CREATESTRUCTA  *cs = tmpcs;  //pointer to CREATESTRUCT used in CreateWindowExA method
  POINT maxSize, maxPos, minTrack, maxTrack;
 
-  OS2Hwnd      = hwndOS2;
+    OS2Hwnd      = hwndOS2;
 
-  fNoSizeMsg = TRUE;
+    fNoSizeMsg = TRUE;
 
-  if(OSLibWinSetWindowULong(OS2Hwnd, OFFSET_WIN32WNDPTR, (ULONG)this) == FALSE) {
+    if(OSLibWinSetWindowULong(OS2Hwnd, OFFSET_WIN32WNDPTR, (ULONG)this) == FALSE) {
         dprintf(("WM_CREATE: WinSetWindowULong %X failed!!", OS2Hwnd));
         SetLastError(ERROR_OUTOFMEMORY); //TODO: Better error
         return FALSE;
-  }
-  if(OSLibWinSetWindowULong(OS2Hwnd, OFFSET_WIN32PM_MAGIC, WIN32PM_MAGIC) == FALSE) {
+    }
+    if(OSLibWinSetWindowULong(OS2Hwnd, OFFSET_WIN32PM_MAGIC, WIN32PM_MAGIC) == FALSE) {
         dprintf(("WM_CREATE: WinSetWindowULong2 %X failed!!", OS2Hwnd));
         SetLastError(ERROR_OUTOFMEMORY); //TODO: Better error
         return FALSE;
-  }
+    }
+
+    if (HOOK_IsHooked( WH_CBT ))
+    {
+        CBT_CREATEWNDA cbtc;
+        LRESULT ret;
+
+        cbtc.lpcs = cs;
+        cbtc.hwndInsertAfter = hwndLinkAfter;
+        ret = (isUnicode) ? HOOK_CallHooksW(WH_CBT, HCBT_CREATEWND, getWindowHandle(), (LPARAM)&cbtc)
+                          : HOOK_CallHooksA(WH_CBT, HCBT_CREATEWND, getWindowHandle(), (LPARAM)&cbtc);
+        if(ret)
+        {
+            dprintf(("CBT-hook returned 0!!"));
+            SetLastError(ERROR_CAN_NOT_COMPLETE); //todo: wrong error
+            return FALSE;
+        }
+        //todo: if hook changes parent, we need to do so too!!!!!!!!!!
+    }
+
+    if (cs->style & WS_HSCROLL)
+    {
+        horzScrollInfo = (SCROLLBAR_INFO*)malloc(sizeof(SCROLLBAR_INFO));
+        horzScrollInfo->MinVal = horzScrollInfo->CurVal = horzScrollInfo->Page = 0;
+        horzScrollInfo->MaxVal = 100;
+        horzScrollInfo->flags  = ESB_ENABLE_BOTH;
+    }
+
+    if (cs->style & WS_VSCROLL)
+    {
+        vertScrollInfo = (SCROLLBAR_INFO*)malloc(sizeof(SCROLLBAR_INFO));
+        vertScrollInfo->MinVal = vertScrollInfo->CurVal = vertScrollInfo->Page = 0;
+        vertScrollInfo->MaxVal = 100;
+        vertScrollInfo->flags  = ESB_ENABLE_BOTH;
+    }
+
+    if(HIWORD(cs->lpszName))
+    {
+        if (!isUnicode)
+        {
+            wndNameLength = strlen(cs->lpszName);
+            windowNameA = (LPSTR)_smalloc(wndNameLength+1);
+            strcpy(windowNameA,cs->lpszName);
+            windowNameW = (LPWSTR)_smalloc((wndNameLength+1)*sizeof(WCHAR));
+            lstrcpyAtoW(windowNameW,windowNameA);
+            windowNameA[wndNameLength] = 0;
+            windowNameW[wndNameLength] = 0;
+        }
+        else
+        {
+            wndNameLength = lstrlenW((LPWSTR)cs->lpszName);
+            windowNameA = (LPSTR)_smalloc(wndNameLength+1);
+            lstrcpyWtoA(windowNameA,(LPWSTR)cs->lpszName);
+            windowNameW = (LPWSTR)_smalloc((wndNameLength+1)*sizeof(WCHAR));
+            lstrcpyW(windowNameW,(LPWSTR)cs->lpszName);
+            windowNameA[wndNameLength] = 0;
+            windowNameW[wndNameLength] = 0;
+        }
+    }
+
 
 //SvL: This completely messes up MS Word 97 (no button bar, no menu)
 #if 0
@@ -572,33 +579,34 @@ BOOL Win32BaseWindow::MsgCreate(HWND hwndOS2)
   }
 #endif
 
-  fakeWinBase.hwndThis     = OS2Hwnd;
-  fakeWinBase.pWindowClass = windowClass;
+    fakeWinBase.hwndThis     = OS2Hwnd;
+    fakeWinBase.pWindowClass = windowClass;
 
-  //Set icon from window or class
-  if (hIcon)
-    OSLibWinSetIcon(OS2Hwnd,hIcon);
-  else if (windowClass->getIcon())
-    OSLibWinSetIcon(OS2Hwnd,windowClass->getIcon());
+    //Set icon from window or class
+    if (hIcon)
+        OSLibWinSetIcon(OS2Hwnd,hIcon);
+    else
+    if (windowClass->getIcon())
+        OSLibWinSetIcon(OS2Hwnd,windowClass->getIcon());
 
-  /* Get class or window DC if needed */
-  if(windowClass->getStyle() & CS_OWNDC) {
+    /* Get class or window DC if needed */
+    if(windowClass->getStyle() & CS_OWNDC) {
         dprintf(("Class with CS_OWNDC style"));
         ownDC = GetDCEx(getWindowHandle(), NULL, DCX_USESTYLE);
-  }
-  else
-  if (windowClass->getStyle() & CS_PARENTDC)  {
+    }
+    else
+    if (windowClass->getStyle() & CS_PARENTDC)  {
         fParentDC = TRUE;
         ownDC = 0;
-  }
-  else
-  if (windowClass->getStyle() & CS_CLASSDC)  {
+    }
+    else
+    if (windowClass->getStyle() & CS_CLASSDC)  {
         dprintf(("WARNING: Class with CS_CLASSDC style!"));
         ownDC = 0;
-  }
-  /* Set the window menu */
-  if ((dwStyle & (WS_CAPTION | WS_CHILD)) == WS_CAPTION )
-  {
+    }
+    /* Set the window menu */
+    if ((dwStyle & (WS_CAPTION | WS_CHILD)) == WS_CAPTION )
+    {
         if (cs->hMenu) {
             ::SetMenu(getWindowHandle(), cs->hMenu);
         }
@@ -611,58 +619,58 @@ if (!cs->hMenu) cs->hMenu = LoadMenuA(windowClass->getInstance(),"MYAPP");
                         if (cs->hMenu) ::SetMenu(getWindowHandle(), cs->hMenu );
                 }
         }
-  }
-  else
-  {
+    }
+    else
+    {
         setWindowId((DWORD)cs->hMenu);
-  }
-  hSysMenu = (dwStyle & WS_SYSMENU) ? MENU_GetSysMenu(Win32Hwnd,0):0;
+    }
+    hSysMenu = (dwStyle & WS_SYSMENU) ? MENU_GetSysMenu(Win32Hwnd,0):0;
 
-  /* Send the WM_GETMINMAXINFO message and fix the size if needed */
-  if ((cs->style & WS_THICKFRAME) || !(cs->style & (WS_POPUP | WS_CHILD)))
-  {
-        GetMinMaxInfo(&maxSize, &maxPos, &minTrack, &maxTrack);
+    /* Send the WM_GETMINMAXINFO message and fix the size if needed */
+    if ((cs->style & WS_THICKFRAME) || !(cs->style & (WS_POPUP | WS_CHILD)))
+    {
+         GetMinMaxInfo(&maxSize, &maxPos, &minTrack, &maxTrack);
         if (maxSize.x < cs->cx) cs->cx = maxSize.x;
         if (maxSize.y < cs->cy) cs->cy = maxSize.y;
         if (cs->cx < minTrack.x) cs->cx = minTrack.x;
         if (cs->cy < minTrack.y) cs->cy = minTrack.y;
-  }
+    }
 
-  if(cs->style & WS_CHILD)
-  {
+    if(cs->style & WS_CHILD)
+    {
         if(cs->cx < 0) cs->cx = 0;
         if(cs->cy < 0) cs->cy = 0;
-  }
-  else
-  {
+    }
+    else
+    {
         if (cs->cx <= 0) cs->cx = 1;
         if (cs->cy <= 0) cs->cy = 1;
-  }
+    }
 
-  //set client & window rectangles from CreateWindowEx CREATESTRUCT
-  rectWindow.left = cs->x;
-  rectWindow.right = cs->x+cs->cx;
-  rectWindow.top = cs->y;
-  rectWindow.bottom = cs->y+cs->cy;
-  rectClient = rectWindow;
-  OffsetRect(&rectClient, -rectClient.left, -rectClient.top);
+    //set client & window rectangles from CreateWindowEx CREATESTRUCT
+    rectWindow.left = cs->x;
+    rectWindow.right = cs->x+cs->cx;
+    rectWindow.top = cs->y;
+    rectWindow.bottom = cs->y+cs->cy;
+    rectClient = rectWindow;
+    OffsetRect(&rectClient, -rectClient.left, -rectClient.top);
 
-  /* Send the WM_CREATE message
-   * Perhaps we shouldn't allow width/height changes as well.
-   * See p327 in "Internals".
-   */
-  maxPos.x = rectWindow.left; maxPos.y = rectWindow.top;
+    /* Send the WM_CREATE message
+     * Perhaps we shouldn't allow width/height changes as well.
+     * See p327 in "Internals".
+     */
+    maxPos.x = rectWindow.left; maxPos.y = rectWindow.top;
 
-  //Note: Solitaire crashes when receiving WM_SIZE messages before WM_CREATE
-  fCreated = TRUE;
+    //Note: Solitaire crashes when receiving WM_SIZE messages before WM_CREATE
+    fCreated = TRUE;
 
-  if(fTaskList) {
-    hTaskList = OSLibWinAddToTaskList(OS2Hwnd, windowNameA, (cs->style & WS_VISIBLE) ? 1 : 0);
-  }
+    if(fTaskList) {
+        hTaskList = OSLibWinAddToTaskList(OS2Hwnd, windowNameA, (cs->style & WS_VISIBLE) ? 1 : 0);
+    }
 
-  //cs is ascii version of create structure. so use SendInternalMessageA
-  if(SendInternalMessageA(WM_NCCREATE,0,(LPARAM)cs))
-  {
+    //cs is ascii version of create structure. so use SendInternalMessageA
+    if(SendInternalMessageA(WM_NCCREATE,0,(LPARAM)cs))
+    {
         RECT tmpRect;
 
         //CB: recheck flags
@@ -721,11 +729,11 @@ if (!cs->hMenu) cs->hMenu = LoadMenuA(windowClass->getInstance(),"MYAPP");
             SetLastError(0);
             return TRUE;
         }
-  }
-  dprintf(("Window creation FAILED (NCCREATE cancelled creation)"));
-  SetLastError(ERROR_OUTOFMEMORY); //TODO: Better error
+    }
+    dprintf(("Window creation FAILED (NCCREATE cancelled creation)"));
+    SetLastError(ERROR_OUTOFMEMORY); //TODO: Better error
 end:
-  return FALSE;
+    return FALSE;
 }
 //******************************************************************************
 //******************************************************************************
@@ -2366,8 +2374,8 @@ BOOL Win32BaseWindow::SetWindowPos(HWND hwndInsertAfter, int x, int y, int cx, i
 void Win32BaseWindow::NotifyFrameChanged(WINDOWPOS *wpos, RECT *oldClientRect)
 {
     MsgFormatFrame(NULL);
-    if(RECT_WIDTH(rectClient) != RECT_WIDTH(*oldClientRect) || 
-       RECT_HEIGHT(rectClient) != RECT_HEIGHT(*oldClientRect)) 
+    if(RECT_WIDTH(rectClient) != RECT_WIDTH(*oldClientRect) ||
+       RECT_HEIGHT(rectClient) != RECT_HEIGHT(*oldClientRect))
     {
          wpos->flags &= ~SWP_NOSIZE;
     }
@@ -2823,43 +2831,44 @@ HWND Win32BaseWindow::GetWindow(UINT uCmd)
     switch(uCmd)
     {
     case GW_HWNDFIRST:
-        if(getParent()) {
-             window = (Win32BaseWindow *)getParent();
-             hwndRelated = OSLibWinQueryWindow(window->getOS2WindowHandle(), QWOS_TOP);
-             window = GetWindowFromOS2Handle(hwndRelated);
-         if(window) {
+        if(getParent())
+        {
+            window = (Win32BaseWindow *)getParent();
+            hwndRelated = OSLibWinQueryWindow(window->getOS2WindowHandle(), QWOS_TOP);
+            window = GetWindowFromOS2Handle(hwndRelated);
+            if(window) {
                   hwndRelated = window->getWindowHandle();
-             }
-             else hwndRelated = 0;
+            }
+            else hwndRelated = 0;
         }
-    else hwndRelated = 0; //TODO: not correct; should get first child in z-order of desktop
+        else hwndRelated = 0; //TODO: not correct; should get first child in z-order of desktop
         break;
 
     case GW_HWNDLAST:
         hwndRelated = OSLibWinQueryWindow(getOS2WindowHandle(), QWOS_BOTTOM);
-    window = GetWindowFromOS2Handle(hwndRelated);
-    if(window) {
+        window = GetWindowFromOS2Handle(hwndRelated);
+        if(window) {
              hwndRelated = window->getWindowHandle();
         }
-    else hwndRelated = 0;
+        else hwndRelated = 0;
         break;
 
     case GW_HWNDNEXT:
         hwndRelated = OSLibWinQueryWindow(getOS2WindowHandle(), QWOS_NEXT);
-    window = GetWindowFromOS2Handle(hwndRelated);
-    if(window) {
+        window = GetWindowFromOS2Handle(hwndRelated);
+        if(window) {
              hwndRelated = window->getWindowHandle();
         }
-    else hwndRelated = 0;
+        else hwndRelated = 0;
         break;
 
     case GW_HWNDPREV:
         hwndRelated = OSLibWinQueryWindow(getOS2WindowHandle(), QWOS_PREV);
-    window = GetWindowFromOS2Handle(hwndRelated);
-    if(window) {
+        window = GetWindowFromOS2Handle(hwndRelated);
+        if(window) {
              hwndRelated = window->getWindowHandle();
         }
-    else hwndRelated = 0;
+        else hwndRelated = 0;
         break;
 
     case GW_OWNER:
@@ -2870,11 +2879,11 @@ HWND Win32BaseWindow::GetWindow(UINT uCmd)
 
     case GW_CHILD:
         hwndRelated = OSLibWinQueryWindow(getOS2WindowHandle(), QWOS_TOP);
-    window = GetWindowFromOS2Handle(hwndRelated);
-    if(window) {
+        window = GetWindowFromOS2Handle(hwndRelated);
+        if(window) {
              hwndRelated = window->getWindowHandle();
         }
-    else hwndRelated = 0;
+        else hwndRelated = 0;
         break;
     }
 #else
@@ -2982,6 +2991,7 @@ BOOL Win32BaseWindow::EnableWindow(BOOL fEnable)
 {
  BOOL rc;
 
+  dprintf(("Win32BaseWindow::EnableWindow %x %d", getWindowHandle(), fEnable));
   //return true if previous state was disabled, else false (sdk docs)
   rc = (getStyle() & WS_DISABLED) != 0;
   if(rc && !fEnable) {

@@ -1,7 +1,11 @@
-/* $Id: caret.cpp,v 1.13 2000-07-20 18:08:12 sandervl Exp $ */
+/* $Id: caret.cpp,v 1.14 2000-12-17 15:04:09 sandervl Exp $ */
 
 /*
  * Caret functions for USER32
+ *
+ *
+ * TODO: Getting height of window instead of checking whether it needs 
+ *       to be window or client appears to be wrong....
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *
