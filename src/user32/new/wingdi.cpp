@@ -1,4 +1,4 @@
-/* $Id: wingdi.cpp,v 1.11 1999-08-30 11:59:54 sandervl Exp $ */
+/* $Id: wingdi.cpp,v 1.12 1999-09-01 18:48:50 sandervl Exp $ */
 /*
  * Win32 Window graphics apis for OS/2
  *
@@ -113,12 +113,12 @@ HDC WIN32API GetWindowDC(HWND hwnd)
 
    window = Win32BaseWindow::GetWindowFromHandle(hwnd);
    if(!window) {
-    dprintf(("GetWindowDC, window %x not found", hwnd));
-    return 0;
+    	dprintf(("GetWindowDC, window %x not found", hwnd));
+    	return 0;
    }
    dprintf(("GetWindowDC %x", hwnd));
 #ifdef OPEN32_GDI
-   return O32_GetWindowDC(window->getOS2WindowHandle());
+   return O32_GetWindowDC(window->getOS2FrameWindowHandle());
 #else
    return OSLibWinGetPS(window->getOS2FrameWindowHandle());
 #endif
