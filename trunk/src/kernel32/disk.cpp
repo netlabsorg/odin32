@@ -1,4 +1,4 @@
-/* $Id: disk.cpp,v 1.9 2000-02-16 14:25:39 sandervl Exp $ */
+/* $Id: disk.cpp,v 1.10 2000-03-28 17:24:27 sandervl Exp $ */
 
 /*
  * Win32 Disk API functions for OS/2
@@ -20,7 +20,7 @@
 #include <string.h>
 #include "unicode.h"
 
-#define DBG_LOCALLOG	DBG_disk
+#define DBG_LOCALLOG  DBG_disk
 #include "dbglocal.h"
 
 
@@ -54,8 +54,28 @@ BOOL WIN32API SetVolumeLabelW(LPCWSTR lpRootPathName, LPCWSTR lpVolumeName)
 //******************************************************************************
 BOOL WIN32API GetDiskFreeSpaceA( LPCSTR arg1, PDWORD arg2, PDWORD arg3, PDWORD arg4, PDWORD  arg5)
 {
-    dprintf(("KERNEL32:  OS2GetDiskFreeSpaceA\n"));
-    return O32_GetDiskFreeSpace(arg1, arg2, arg3, arg4, arg5);
+    BOOL rc;
+    DWORD dwSectorsPerCluster;	// address of sectors per cluster ter
+    DWORD dwBytesPerSector;	// address of bytes per sector
+    DWORD dwNumberOfFreeClusters;	// address of number of free clusters
+    DWORD dwTotalNumberOfClusters; 	// address of total number of clusters
+    dprintf(("KERNEL32:  OS2GetDiskFreeSpaceA %s, 0x%08X, 0x%08X, 0x%08X, 0x%08X,\n",
+             arg1!=NULL?arg1:"NULL", arg2,arg3,arg4,arg5));
+    rc = O32_GetDiskFreeSpace(arg1, &dwSectorsPerCluster, &dwBytesPerSector,
+                              &dwNumberOfFreeClusters, &dwTotalNumberOfClusters);
+    if(rc)
+    {
+      if (arg2!=NULL)
+        *arg2 = dwSectorsPerCluster;
+      if (arg3!=NULL)
+        *arg3 = dwBytesPerSector;
+      if (arg4!=NULL)
+        *arg4 = dwNumberOfFreeClusters;
+      if (arg5!=NULL)
+        *arg5 = dwTotalNumberOfClusters;
+    }
+    dprintf((" returned %d\n",rc));
+    return rc;
 }
 //******************************************************************************
 //******************************************************************************
@@ -75,39 +95,39 @@ BOOL WIN32API GetDiskFreeSpaceW(LPCWSTR arg1, PDWORD arg2, PDWORD arg3, PDWORD a
 /*****************************************************************************
  * Name      : GetDiskFreeSpaceEx
  * Purpose   :
- * Parameters: lpDirectoryName [in] Pointer to a null-terminated string that 
+ * Parameters: lpDirectoryName [in] Pointer to a null-terminated string that
  *                             specifies a directory on the disk of interest.
- *                             This string can be a UNC name. If this 
- *                             parameter is a UNC name, you must follow it 
- *                             with an additional backslash. For example, you 
- *                             would specify \\MyServer\MyShare as 
+ *                             This string can be a UNC name. If this
+ *                             parameter is a UNC name, you must follow it
+ *                             with an additional backslash. For example, you
+ *                             would specify \\MyServer\MyShare as
  *                             \\MyServer\MyShare\.
- *                             If lpDirectoryName is NULL, the 
- *                             GetDiskFreeSpaceEx function obtains 
+ *                             If lpDirectoryName is NULL, the
+ *                             GetDiskFreeSpaceEx function obtains
  *                             information about the object store.
- *                             Note that lpDirectoryName does not have to 
- *                             specify the root directory on a disk. The 
+ *                             Note that lpDirectoryName does not have to
+ *                             specify the root directory on a disk. The
  *                             function accepts any directory on the disk.
  *
  *             lpFreeBytesAvailableToCaller
- *                             [out] Pointer to a variable to receive the 
- *                             total number of free bytes on the disk that 
- *                             are available to the user associated with the 
+ *                             [out] Pointer to a variable to receive the
+ *                             total number of free bytes on the disk that
+ *                             are available to the user associated with the
  *                             calling thread.
  *             lpTotalNumberOfBytes
- *                             [out] Pointer to a variable to receive the 
- *                             total number of bytes on the disk that are 
- *                             available to the user associated with the 
+ *                             [out] Pointer to a variable to receive the
+ *                             total number of bytes on the disk that are
+ *                             available to the user associated with the
  *                             calling thread.
  *             lpTotalNumberOfFreeBytes
- *                             [out] Pointer to a variable to receive the 
+ *                             [out] Pointer to a variable to receive the
  *                             total number of free bytes on the disk.
  *                             This parameter can be NULL.
  * Variables :
- * Result    : Nonzero indicates success. Zero indicates failure. To get 
+ * Result    : Nonzero indicates success. Zero indicates failure. To get
  *             extended error information, call GetLastError.
- * Remark    : Note that the values obtained by this function are of type 
- *             ULARGE_INTEGER. Be careful not to truncate these values to 
+ * Remark    : Note that the values obtained by this function are of type
+ *             ULARGE_INTEGER. Be careful not to truncate these values to
  *             32 bits.
  * Status    :
  *
@@ -121,7 +141,7 @@ ODINFUNCTION4(BOOL,GetDiskFreeSpaceExA,
               PULARGE_INTEGER, lpTotalNumberOfFreeBytes )
 {
   dprintf(("not yet implemented"));
-  
+
   return TRUE;
 }
 
@@ -133,7 +153,7 @@ ODINFUNCTION4(BOOL,GetDiskFreeSpaceExW,
               PULARGE_INTEGER, lpTotalNumberOfFreeBytes )
 {
   dprintf(("not yet implemented"));
-  
+
   return TRUE;
 }
 
@@ -142,8 +162,10 @@ ODINFUNCTION4(BOOL,GetDiskFreeSpaceExW,
 //******************************************************************************
 UINT WIN32API GetDriveTypeA( LPCSTR arg1)
 {
-    dprintf(("KERNEL32:  GetDriveType %s\n", arg1));
-    return O32_GetDriveType(arg1);
+    UINT rc;
+    rc = O32_GetDriveType(arg1);
+    dprintf(("KERNEL32:  GetDriveType %s = %d\n", arg1,rc));
+    return rc;
 }
 //******************************************************************************
 //******************************************************************************
