@@ -1,4 +1,4 @@
-/* $Id: windowclass.cpp,v 1.23 2001-08-31 13:37:39 phaller Exp $ */
+/* $Id: windowclass.cpp,v 1.24 2001-12-20 20:45:56 sandervl Exp $ */
 /*
  * Win32 Window Class Code for OS/2
  *
@@ -405,7 +405,10 @@ ODINFUNCTION3(int,   GetClassNameA,
     *lpszClassName = 0;
     rc = (wnd->getClass())->getClassName(lpszClassName, cchClassName);
     RELEASE_WNDOBJ(wnd);
-    dprintf(("USER32: GetClassNameA %x %s (%d)", hwnd, lpszClassName, rc));
+    if(HIWORD(lpszClassName)) {
+         dprintf(("USER32: GetClassNameA %x %s", hwnd, lpszClassName));
+    }
+    else dprintf(("USER32: GetClassNameA %x %x", hwnd, lpszClassName));
     return rc;
 }
 //******************************************************************************
@@ -418,7 +421,6 @@ ODINFUNCTION3(int,    GetClassNameW,
  Win32BaseWindow *wnd;
  int              ret;
 
-    dprintf(("USER32: GetClassNameW\n"));
     wnd = Win32BaseWindow::GetWindowFromHandle(hwnd);
     if(!wnd) {
         dprintf(("GetClassNameA wnd == NULL"));
@@ -426,6 +428,10 @@ ODINFUNCTION3(int,    GetClassNameW,
     }
     ret = (wnd->getClass())->getClassName(lpszClassName, cchClassName);
     RELEASE_WNDOBJ(wnd);
+    if(HIWORD(lpszClassName)) {
+         dprintf(("USER32: GetClassNameW %x %ls", hwnd, lpszClassName));
+    }
+    else dprintf(("USER32: GetClassNameW %x %x", hwnd, lpszClassName));
     return ret;
 }
 //******************************************************************************
