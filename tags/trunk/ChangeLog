@@ -1,4 +1,4 @@
- /* $Id: ChangeLog,v 1.1161 2000-10-02 19:07:53 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.1162 2000-10-02 21:33:24 phaller Exp $ */
 
  2000-10-02: Sander van Leeuwen <sandervl@xs4all.nl>
     - SHLWAPI:  Rewrote VERSION_OsIsUnicode (same as SHELL_OsIsUnicode now)
@@ -16,8 +16,13 @@
                 Changes/fixes for new ODINFUNCTION macros
 
  2000-10-02: Patrick Haller <phaller@gmx.net>
+    - *:        major change in ODINWRAP macros
+                and (all) affected sources
     - GDI32:    fixed possible error in text.cpp (strrchr)
     - WNETAP32: started implementation of LAN Manager support :)
+                NetApiBuffer*
+                NetStatisticsGet
+                NetWkstaGetInfo
     - KERNEL32: added HEAP_size export
 
  2000-10-02: knut st. osmundsen <knut.stange.osmundsen@mynd.no>
