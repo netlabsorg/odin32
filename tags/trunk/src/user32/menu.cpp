@@ -1,4 +1,4 @@
-/* $Id: menu.cpp,v 1.46 2002-05-23 13:49:41 sandervl Exp $*/
+/* $Id: menu.cpp,v 1.47 2002-06-02 10:07:57 sandervl Exp $*/
 /*
  * Menu functions
  *
@@ -4280,7 +4280,7 @@ HMENU WINAPI LoadMenuA( HINSTANCE instance, LPCSTR name )
     dprintf(("USER32: LoadMenuA %x %x hrsrc %x", instance, name, hrsrc));
 
     if (!hrsrc) return 0;
-    return LoadMenuIndirectA( (MENUITEMTEMPLATEHEADER*)LoadResource( instance, hrsrc ));
+    return LoadMenuIndirectA( (LPCVOID)LoadResource( instance, hrsrc ));
 }
 
 
@@ -4294,14 +4294,14 @@ HMENU WINAPI LoadMenuW( HINSTANCE instance, LPCWSTR name )
     dprintf(("USER32: LoadMenuW %x %x hrsrc %x", instance, name, hrsrc));
 
     if (!hrsrc) return 0;
-    return LoadMenuIndirectW( (MENUITEMTEMPLATEHEADER*)LoadResource( instance, hrsrc ));
+    return LoadMenuIndirectW( (LPCVOID)LoadResource( instance, hrsrc ));
 }
 
 
 /**********************************************************************
  *          LoadMenuIndirect32A    (USER32.371)
  */
-HMENU WINAPI LoadMenuIndirectA(CONST MENUITEMTEMPLATEHEADER *lpMenuTemplate)
+HMENU WINAPI LoadMenuIndirectA(LPCVOID lpMenuTemplate)
 {
     HMENU hMenu;
     WORD version, offset;
@@ -4344,7 +4344,7 @@ HMENU WINAPI LoadMenuIndirectA(CONST MENUITEMTEMPLATEHEADER *lpMenuTemplate)
 /**********************************************************************
  *          LoadMenuIndirect32W    (USER32.372)
  */
-HMENU WINAPI LoadMenuIndirectW(CONST MENUITEMTEMPLATEHEADER *lpMenuTemplate )
+HMENU WINAPI LoadMenuIndirectW(LPCVOID lpMenuTemplate )
 {
     dprintf(("USER32: LoadMenuIndirectW"));
 
