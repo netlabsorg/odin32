@@ -1,4 +1,4 @@
-/* $Id: text.cpp,v 1.9 2000-02-23 17:05:17 cbratschi Exp $ */
+/* $Id: text.cpp,v 1.10 2000-12-17 15:04:11 sandervl Exp $ */
 
 /*
  * Font and Text Functions
@@ -21,13 +21,8 @@
 
 INT WIN32API DrawTextA(HDC hDC,LPCSTR lpString,INT nCount,PRECT lpRect,UINT nFormat)
 {
- int bla;
-
   dprintf(("USER32: DrawTextA %x %s %d (%d,%d)(%d,%d) %x",hDC, lpString, nCount, lpRect->left, lpRect->top, lpRect->right, lpRect->bottom, nFormat));
 
-  if(nFormat == 0x828) {
-        bla = 1;
-  }
   return InternalDrawTextExA(hDC,lpString,nCount,lpRect,nFormat,NULL,FALSE);
 }
 //******************************************************************************

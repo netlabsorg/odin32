@@ -1,4 +1,4 @@
-/* $Id: windlg.cpp,v 1.18 2000-10-04 19:35:31 sandervl Exp $ */
+/* $Id: windlg.cpp,v 1.19 2000-12-17 15:04:13 sandervl Exp $ */
 /*
  * Win32 dialog apis for OS/2
  *
@@ -40,8 +40,10 @@ HWND WIN32API CreateDialogParamA(HINSTANCE hInst, LPCSTR lpszTemplate,
 {
   HANDLE hrsrc = FindResourceA( hInst, lpszTemplate, RT_DIALOGA );
 
-    if (!hrsrc)
+    if (!hrsrc) {
+        dprintf(("WARNING: CreateDialogParamA: Dialog %x not found!!", lpszTemplate));
         return 0;
+    }
 
     return CreateDialogIndirectParamA(hInst, (LPCDLGTEMPLATEA)LoadResource(hInst, hrsrc),
                                       hwndOwner, dlgproc, lParamInit);
@@ -54,9 +56,10 @@ HWND WIN32API CreateDialogParamW(HINSTANCE hInst, LPCWSTR lpszTemplate,
 {
   HANDLE hrsrc = FindResourceW( hInst, lpszTemplate, RT_DIALOGW );
 
-    if (!hrsrc)
+    if (!hrsrc) {
+        dprintf(("WARNING: CreateDialogParamW: Dialog %x not found!!", lpszTemplate));
         return 0;
-
+    }
     return CreateDialogIndirectParamW(hInst, (LPCDLGTEMPLATEW)LoadResource(hInst, hrsrc),
                                       hwndOwner, dlgproc, lParamInit);
 }

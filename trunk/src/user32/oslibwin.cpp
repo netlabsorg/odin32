@@ -1,4 +1,4 @@
-/* $Id: oslibwin.cpp,v 1.84 2000-11-04 16:28:25 sandervl Exp $ */
+/* $Id: oslibwin.cpp,v 1.85 2000-12-17 15:04:10 sandervl Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -87,7 +87,7 @@ HWND OSLibWinCreateWindow(HWND hwndParent,ULONG dwWinStyle,
   dprintf(("WinCreateWindow %x %s %x task %d shell %d classstyle %x winstyle %x bottom %d", hwndParent, pszName, id, fTaskList, fShellPosition, classStyle, dwWinStyle, fHWND_BOTTOM));
 
   return WinCreateWindow (hwndParent,
-                          WIN32_STDFRAMECLASS,
+                          hwndParent == HWND_DESKTOP ? WIN32_STDFRAMECLASS : WIN32_STDCLASS,
                           pszName, dwWinStyle, 0, 0, 0, 0,
                           Owner, (fHWND_BOTTOM) ? HWND_BOTTOM : HWND_TOP,
                           id, NULL, NULL);
