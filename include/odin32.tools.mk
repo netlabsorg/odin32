@@ -1,4 +1,4 @@
-# $Id: odin32.tools.mk,v 1.1 2000-12-02 23:50:49 bird Exp $
+# $Id: odin32.tools.mk,v 1.2 2000-12-16 23:38:41 bird Exp $
 
 #
 # Odin32 API
@@ -46,6 +46,7 @@ IMPDEF      = $(ODIN32_TOOLS)\impdef.exe
 DEPEND      = $(ODIN32_TOOLS)\fastdep.exe -o$$(OBJDIR) -cy+
 CREATEPATH  = $(ODIN32_TOOLS)\CreatePath.cmd
 EXECEXCL    = $(ODIN32_TOOLS)\ExecExcl.cmd
+BLDLEVELINF = $(ODIN32_TOOLS)\BldLevelInf.cmd
 
 
 #
