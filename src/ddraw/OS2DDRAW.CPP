@@ -1,4 +1,4 @@
-/* $Id: OS2DDRAW.CPP,v 1.20 2000-03-03 19:21:23 hugh Exp $ */
+/* $Id: OS2DDRAW.CPP,v 1.21 2000-05-23 18:47:23 sandervl Exp $ */
 
 /*
  * DX Draw base class implementation
@@ -1051,19 +1051,33 @@ HRESULT __stdcall DrawGetCaps(THIS, LPDDCAPS lpDDDriverCaps, LPDDCAPS lpDDHELCap
     // Caller wants HEL Caps
     dprintf(("DDRAW:  HEL\n"));
 
+#if 1
+//SvL: PowerDVD uses size 316
+    if( (sizeof(DDCAPS)     != lpDDHELCaps->dwSize) &&
+        (sizeof(DDCAPS_DX5) != lpDDHELCaps->dwSize) &&
+        (sizeof(DDCAPS_DX3) != lpDDHELCaps->dwSize) )
+    {
+      dprintf( ("Size %d Not supported ",
+                lpDDHELCaps->dwSize));
+      return(DDERR_INVALIDPARAMS);
+    }
+#else
     if(sizeof(DDCAPS)!=lpDDHELCaps->dwSize)
     {
       dprintf(("DDRAW: Size Not Set\n"));
       return(DDERR_INVALIDPARAMS);
     }
+#endif
     // Clear structure so we only have to set the supported flags
 
-
-    memset(lpDDHELCaps,0,sizeof(DDCAPS));
+    dwSize = lpDDDriverCaps->dwSize;
+    memset( lpDDDriverCaps,
+            0,
+            lpDDDriverCaps->dwSize);
 
 
     // Reset the size
-    lpDDHELCaps->dwSize = sizeof(DDCAPS);
+    lpDDHELCaps->dwSize = dwSize;
 
     // Now report the CAPs back which we support
     lpDDHELCaps->dwCaps = DDCAPS_BLT |              // We do blitting
@@ -1113,19 +1127,23 @@ HRESULT __stdcall DrawGetCaps(THIS, LPDDCAPS lpDDDriverCaps, LPDDCAPS lpDDHELCap
     lpDDHELCaps->dwSSBCKeyCaps = DDCKEYCAPS_SRCBLT;      // Only source transparent blitting
     lpDDHELCaps->dwSSBFXCaps;            //  .
     lpDDHELCaps->dwSSBRops[DD_ROP_SPACE]; //  .
-    lpDDHELCaps->dwSVBCaps2 = DDCAPS2_CANRENDERWINDOWED | // Better check for Voodoo ?!
-                                 DDCAPS2_COPYFOURCC |        // yepp memcpy will do this
-                                 DDCAPS2_WIDESURFACES;       // Any size you want!
-    lpDDHELCaps->dwNLVBCaps = DDCAPS_BLT |              // We do blitting
-                                 DDCAPS_BLTCOLORFILL |     // We do colorfills
-                                 DDCAPS_COLORKEY |         // We support Colorkeying
-                                 DDCAPS_COLORKEYHWASSIST;
-    lpDDHELCaps->dwNLVBCaps2 = DDCAPS2_CANRENDERWINDOWED | // Better check for Voodoo ?!
-                                  DDCAPS2_COPYFOURCC |        // yepp memcpy will do this
-                                  DDCAPS2_WIDESURFACES;       // Any size you want!
-    lpDDHELCaps->dwNLVBCKeyCaps = DDCKEYCAPS_SRCBLT;      // Only source transparent blitting
-    lpDDHELCaps->dwNLVBFXCaps;            //  .
-    lpDDHELCaps->dwNLVBRops[DD_ROP_SPACE];//  .
+    // These are ony in >DX5
+    if(dwSize>sizeof(DDCAPS_DX3))
+    {
+    	lpDDHELCaps->dwSVBCaps2 = DDCAPS2_CANRENDERWINDOWED | // Better check for Voodoo ?!
+	                          DDCAPS2_COPYFOURCC |        // yepp memcpy will do this
+	                          DDCAPS2_WIDESURFACES;       // Any size you want!
+    	lpDDHELCaps->dwNLVBCaps = DDCAPS_BLT |              // We do blitting
+                                  DDCAPS_BLTCOLORFILL |     // We do colorfills
+                                  DDCAPS_COLORKEY |         // We support Colorkeying
+                                  DDCAPS_COLORKEYHWASSIST;
+    	lpDDHELCaps->dwNLVBCaps2 = DDCAPS2_CANRENDERWINDOWED | // Better check for Voodoo ?!
+                                   DDCAPS2_COPYFOURCC |        // yepp memcpy will do this
+                                   DDCAPS2_WIDESURFACES;       // Any size you want!
+    	lpDDHELCaps->dwNLVBCKeyCaps = DDCKEYCAPS_SRCBLT;      // Only source transparent blitting
+    	lpDDHELCaps->dwNLVBFXCaps;            //  .
+    	lpDDHELCaps->dwNLVBRops[DD_ROP_SPACE];//  .
+    }
 
   }
 
