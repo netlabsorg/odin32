@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.36 2000-01-12 15:14:16 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.37 2000-01-12 17:37:29 cbratschi Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -1033,21 +1033,17 @@ ULONG Win32BaseWindow::MsgNCPaint()
     ULONG rc;
     RECT client = rectClient;
 
-//CB: bug in dc.cpp!!!
-    if ((rect.left == rect.right) || (rect.bottom == rect.top)) return 0;
     mapWin32Rect(getParent() ? getParent()->getOS2WindowHandle():OSLIB_HWND_DESKTOP,OS2HwndFrame,&client);
     if ((rect.left >= client.left) && (rect.left < client.right) &&
         (rect.right >= client.left) && (rect.right < client.right) &&
         (rect.top  >= client.top) && (rect.top < client.bottom) &&
         (rect.bottom >= client.top) && (rect.bottom < client.bottom))
       return 0;
+
     hrgn = CreateRectRgnIndirect(&rect);
     if (!hrgn) return 0;
-//CB: bug in GetDCEx with region!!!
-    rc = SendInternalMessageA(WM_NCPAINT,/*hrgn*/0,0);
-//dprintf(("CB: %d %d %d %d",rect.left,rect.top,rect.bottom,rect.right));
+    rc = SendInternalMessageA(WM_NCPAINT,hrgn,0);
     DeleteObject(hrgn);
-    //CB: todo: check if intersection with client, what does PM's frame???
 
     return rc;
   }
