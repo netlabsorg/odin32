@@ -1,4 +1,4 @@
-/* $Id: oslibmsgtranslate.cpp,v 1.44 2001-03-30 23:59:46 sandervl Exp $ */
+/* $Id: oslibmsgtranslate.cpp,v 1.45 2001-03-31 10:48:41 sandervl Exp $ */
 /*
  * Window message translation functions for OS/2
  *
@@ -389,11 +389,13 @@ BOOL OS2ToWinMsgTranslate(void *pTeb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode,
 #ifdef ODIN_HITTEST
         HWND hwnd;
 
+        DisableLogging();
         hwnd = WindowFromPoint(winMsg->pt);
         if(win32wnd->getWindowHandle() != hwnd) {
             win32wnd = Win32BaseWindow::GetWindowFromHandle(hwnd);
             if(win32wnd == NULL) {
                 DebugInt3();
+                EnableLogging();
                 goto dummymessage;
             }
             winMsg->hwnd = hwnd;
@@ -428,6 +430,9 @@ BOOL OS2ToWinMsgTranslate(void *pTeb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode,
             winMsg->wParam  = GetMouseKeyState();
             winMsg->lParam  = MAKELONG(ClientPoint.x, ClientPoint.y); //client coordinates
         }
+#ifdef ODIN_HITTEST
+        EnableLogging();
+#endif
         if((fMsgRemoved == MSG_REMOVE) && ISMOUSE_CAPTURED())
         {
             if(DInputMouseHandler(win32wnd->getWindowHandle(), winMsg->message, winMsg->pt.x, winMsg->pt.y)) {
@@ -466,11 +471,13 @@ BOOL OS2ToWinMsgTranslate(void *pTeb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode,
 #ifdef ODIN_HITTEST
         HWND hwnd;
 
+        DisableLogging();
         hwnd = WindowFromPoint(winMsg->pt);
         if(win32wnd->getWindowHandle() != hwnd) {
             win32wnd = Win32BaseWindow::GetWindowFromHandle(hwnd);
             if(win32wnd == NULL) {
                 DebugInt3();
+                EnableLogging();
                 goto dummymessage;
             }
             winMsg->hwnd = hwnd;
@@ -507,6 +514,9 @@ BOOL OS2ToWinMsgTranslate(void *pTeb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode,
             winMsg->wParam  = GetMouseKeyState();
             winMsg->lParam  = MAKELONG(ClientPoint.x, ClientPoint.y); //client coordinates
         }
+#ifdef ODIN_HITTEST
+        EnableLogging();
+#endif
         if((fMsgRemoved == MSG_REMOVE) && ISMOUSE_CAPTURED())
         {
             if(DInputMouseHandler(win32wnd->getWindowHandle(), winMsg->message, winMsg->pt.x, winMsg->pt.y)) {
