@@ -1,4 +1,4 @@
-/* $Id: OS2UTIL.CPP,v 1.11 2001-03-20 23:18:55 mike Exp $ */
+/* $Id: OS2UTIL.CPP,v 1.12 2001-06-16 09:24:24 sandervl Exp $ */
 
 /*
  * OS/2 Utility functions
@@ -87,8 +87,11 @@ int InitIO()
     return rc;
   }
 
+  USHORT sel = RestoreOS2FS();
+
   io_init2(gdt);
 
+  SetFS(sel);
   return 0;
 }
 
