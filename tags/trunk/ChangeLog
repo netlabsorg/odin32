@@ -1,13 +1,16 @@
-/* $Id: ChangeLog,v 1.1740 2001-10-11 15:16:23 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.1741 2001-10-11 17:04:40 sandervl Exp $ */
 
  2001-10-11: Sander van Leeuwen <sandervl@xs4all.nl>
     - USER32:   o SetScrollRange: return error if min > max or out of range
                                   (ERROR_INVALID_SCROLLBAR_RANGE)
                   (behaviour of NT4, SP6)
-                o Scrollbar control not disabled properly when using EnableWindow
-                  instead of EnableScrollbar. (handle WM_ENABLE and call
-                  EnableScrollbar)
- 
+                o Scrollbar control window not disabled properly when using 
+                  EnableWindow instead of EnableScrollbar. (handle WM_ENABLE 
+                  and call EnableScrollbar)
+                o Forward WM_SYSCOMMAND to Parent (for scrollbar control window
+                  with size grip style)
+    - WSOCK32:  o Fake IP_HDRINCL & IP_TTL
+
  2001-10-11: Patrick Haller <patrick.haller@innotek.de>
     - KERNEL32: o added ODIN performance profiler 
                   (perf_0.log for PROFILE builds)
