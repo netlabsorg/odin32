@@ -1,4 +1,4 @@
-/* $Id: windlllx.cpp,v 1.12 2000-08-11 10:56:18 sandervl Exp $ */
+/* $Id: windlllx.cpp,v 1.13 2000-08-11 21:45:23 sandervl Exp $ */
 
 /*
  * Win32 LX Dll class (compiled in OS/2 using Odin32 api)
@@ -266,7 +266,6 @@ Win32LxDll *Win32LxDll::findModuleByOS2Handle(HINSTANCE hinstance)
 
    Win32LxDll *mod = (Win32LxDll*)Win32DllBase::head;
    while(mod != NULL) {
-	dbgCheckObj(mod);
 	if(mod->isLxDll() && mod->hinstanceOS2 == hinstance) {
 		dlllistmutex.leave();
 		return(mod);
