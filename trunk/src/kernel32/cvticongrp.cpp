@@ -1,4 +1,4 @@
-/* $Id: cvticongrp.cpp,v 1.3 1999-09-15 23:38:01 sandervl Exp $ */
+/* $Id: cvticongrp.cpp,v 1.4 1999-09-21 08:24:53 sandervl Exp $ */
 
 /*
  * PE2LX Icon group code
@@ -72,10 +72,6 @@ void *ConvertIconGroup(IconHeader *ihdr, int size, Win32ImageBase *module)
                 rdir++;
                 continue;
         }
-        if(i != ihdr->wCount -1) {
-                bafh->offNext = (int)&bafh->bfh2 - (int)orgbafh + winres->getSize();
-        }
-        else    bafh->offNext = 0;
 
 	iconhdr = (WINBITMAPINFOHEADER *)winres->lockResource();
 	os2icon = ConvertIcon(iconhdr, winres->getSize(), &os2iconsize, (int)bafh - (int)orgbafh + sizeof(BITMAPARRAYFILEHEADER2)-sizeof(BITMAPFILEHEADER2));
@@ -86,6 +82,11 @@ void *ConvertIconGroup(IconHeader *ihdr, int size, Win32ImageBase *module)
                 rdir++;
                 continue;
         }
+
+        if(i != ihdr->wCount -1) {
+                bafh->offNext = (int)&bafh->bfh2 - (int)orgbafh + os2iconsize;
+        }
+        else    bafh->offNext = 0;
 
         memcpy((char *)&bafh->bfh2, os2icon, os2iconsize);
 	free(os2icon);
