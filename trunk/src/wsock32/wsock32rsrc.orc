@@ -1,4 +1,4 @@
-/* $Id: wsock32rsrc.orc,v 1.1 2000-03-06 23:39:20 bird Exp $ */
+/* $Id: wsock32rsrc.orc,v 1.2 2000-03-24 19:28:12 sandervl Exp $ */
 
 #include "winuser.h"
 #include "odinrsrc.h"

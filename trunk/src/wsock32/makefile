@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.24 2000-03-22 20:07:22 sandervl Exp $
+# $Id: makefile,v 1.25 2000-03-24 19:28:06 sandervl Exp $
 
 #
 # Odin32 API
@@ -25,16 +25,19 @@ CLEANEXTRAS = wsock32rsrc.asm
 OBJS = \
 $(OBJDIR)\wsock32.obj \
 $(OBJDIR)\unknown.obj \
-$(OBJDIR)\relaywin.obj \
+$(OBJDIR)\wsa.obj \
+$(OBJDIR)\wsastruct.obj \
 $(OBJDIR)\wsock32rsrc.obj \
 $(OBJDIR)\initterm.obj \
-#$(OBJDIR)\async.obj \
-#$(OBJDIR)\asyncthread.obj \
+$(OBJDIR)\asyncapi.obj \
+$(OBJDIR)\asyncthread.obj \
 $(OBJDIR)\dbglocal.obj
 
 
 # Target name - name of the dll without extention and path.
 TARGET = wsock32
+
+CXXFLAGS = $(CXXFLAGS) -DNEW_ASYNC
 
 
 # All rule - build objs, target dll, copies dll to bin and makes libs.
@@ -60,7 +63,7 @@ $(OBJDIR)\$(TARGET).lrf: makefile
 /MAP:$(OBJDIR)\$(TARGET).map
 $(OBJS)
 $(TARGET).def
-pmwsock.lib
+tcp32dll.lib so32dll.lib
 $(PDWIN32_LIB)\kernel32.lib
 $(PDWIN32_LIB)/user32.lib
 $(PDWIN32_LIB)/odincrt.lib

@@ -1,4 +1,4 @@
-/* $Id: dbglocal.h,v 1.3 2000-03-22 20:07:21 sandervl Exp $ */
+/* $Id: dbglocal.h,v 1.4 2000-03-24 19:28:05 sandervl Exp $ */
 
 /*
  * debug logging functions for OS/2
@@ -19,12 +19,13 @@ void ParseLogStatus();
 #define DBG_ENVNAME        "dbg_wsock32"
 
 #define DBG_initterm       0
-#define DBG_relaywin       1
+#define DBG_wsastruct      1
 #define DBG_wsock32        2
 #define DBG_unknown        3
 #define DBG_async          4
 #define DBG_asyncthread    5
-#define DBG_MAXFILES       6
+#define DBG_wsa            6
+#define DBG_MAXFILES       7
 
 extern USHORT DbgEnabled[DBG_MAXFILES];
 
