@@ -1,4 +1,3 @@
-/* $Id: obj_picture.h,v 1.5 1999-08-22 22:52:09 sandervl Exp $ */
 /*
  * Defines the COM interfaces and APIs related to OLE picture support.
  *
@@ -24,6 +23,10 @@ typedef LONG OLE_YPOS_HIMETRIC;
 typedef LONG OLE_XSIZE_HIMETRIC;
 typedef LONG OLE_YSIZE_HIMETRIC;
 
+typedef enum tagPicture { /* bitmasks */
+    PICTURE_SCALABLE	= 0x1,
+    PICTURE_TRANSPARENT	= 0x2
+} PICTUREATTRIBUTES;
 
 
 /*****************************************************************************

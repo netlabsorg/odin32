@@ -99,7 +99,7 @@ typedef enum tagCALLCONV {
 	CC_MPWCDECL   = CC_SYSCALL + 1,
 	CC_MPWPASCAL  = CC_MPWCDECL + 1,
 	CC_MAX    = CC_MPWPASCAL + 1
-} CALLCONV_OLE2;
+} CALLCONV;
 
 typedef CY CURRENCY;
 
@@ -360,7 +360,7 @@ typedef struct tagFUNCDESC
 	ELEMDESC *lprgelemdescParam;
 	FUNCKIND funckind;
 	INVOKEKIND invkind;
-	CALLCONV_OLE2 callconv;
+	CALLCONV callconv;
 	SHORT cParams;
 	SHORT cParamsOpt;
 	SHORT oVft;
