@@ -1,4 +1,4 @@
-/* $Id: changelog,v 1.2001 2002-02-23 23:52:30 bird Exp $ */
+/* $Id: changelog,v 1.2002 2002-02-24 02:57:14 bird Exp $ */
 
  2002-02-23: knut st. osmundsen <bird@anduin.net>
     - MAKEFILES:
@@ -12,6 +12,8 @@
     - /src/Makefile:
                 o Corrected directory locking for lib module.
                   (Can now build debug and release builds concurrently.)
+    - Tools:    o Synced the common kFile* classes with os2tools.
+                  (The thing you do when you're supposed to do something else.. ;) )
 
  2002-02-23: Sander van Leeuwen <sandervl@xs4all.nl>
     - WSOCK32:  o Don't send FD_CONNECT is socket was already connected
