@@ -1,4 +1,4 @@
-/* $Id: crtdll.cpp,v 1.13 1999-11-30 20:19:52 sandervl Exp $ */
+/* $Id: crtdll.cpp,v 1.14 1999-11-30 20:42:10 sandervl Exp $ */
 
 /*
  * The C RunTime DLL
@@ -23,6 +23,7 @@
 #include <heapstring.h>
 #include <ctype.h>
 #include <setjmp.h>
+#include <ntddk.h>
 #include <debugtools.h>
 
 #include <wchar.h>
@@ -47,7 +48,6 @@
 #include <crtdll.h>
 #include "crtinc.h"
 #include "ieee.h"
-#include <ntddk.h>
 
 DEFAULT_DEBUG_CHANNEL(crtdll)
 
@@ -334,8 +334,8 @@ DWORD CDECL CRTDLL__GetMainArgs(LPDWORD argc,LPSTR **argv,
 	*argc		= xargc;
 	CRTDLL_argv_dll	= xargv;
 	*argv		= xargv;
-	dprintf(("CRTDLL: GetMainArgs end\n"));
 	CRTDLL_environ_dll = *environ = GetEnvironmentStringsA();
+	dprintf(("CRTDLL: GetMainArgs end\n"));
 	return 0;
 }
 
@@ -651,13 +651,13 @@ int CDECL CRTDLL__close(int handle)
 /*********************************************************************
  *                  CRTDLL__commit    (CRTDLL.58)
  */
-int CDECL CRTDLL__commit( int handle )
+int CDECL CRTDLL__commit( int _fd )
 {
-  dprintf(("CRTDLL: _commit not implemented.\n"));
-//  if (! FlushFileBuffers(_get_osfhandle(_fd)) ) {
-//	__set_errno(EBADF);
-//	return -1;
-//  }
+  dprintf(("CRTDLL: _commit\n"));
+  if (! FlushFileBuffers((HFILE)CRTDLL__get_osfhandle(_fd)) ) {
+	__set_errno(EBADF);
+	return -1;
+  }
   return 0;
 }
 
@@ -862,11 +862,31 @@ int CDECL CRTDLL__execl(const char* szPath, const char* szArgv0, ...)
 /*********************************************************************
  *           CRTDLL__execle   (CRTDLL.80)
  */
-int CDECL CRTDLL__execle( char *s1, char *s2, ...)
+int CDECL CRTDLL__execle(char *path, char *szArgv0, ...)
 {
-  dprintf(("CRTDLL: _execle not implemented.\n"));
-  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
-  return FALSE;
+  dprintf(("CRTDLL: _execle not correct implemented.\n"));
+  char *szArg[100];
+  const char *a;
+  char *ptr;
+  int i = 0;
+  va_list l = 0;
+  va_start(l,szArgv0);
+  do {
+  	a = (const char *)va_arg(l,const char *);
+	szArg[i++] = (char *)a;
+  } while ( a != NULL && i < 100 );
+
+
+// szArg0 is passed and not environment if there is only one parameter;
+
+  if ( i >=2 ) {
+  	ptr = szArg[i-2];
+  	szArg[i-2] = NULL;
+  }
+  else
+	ptr = NULL;
+
+  return _spawnve(P_OVERLAY, path, szArg, (char**)ptr);
 }
 
 
@@ -892,11 +912,30 @@ int CDECL CRTDLL__execlp( char *szPath, char *szArgv0, ...)
 /*********************************************************************
  *           CRTDLL__execlpe   (CRTDLL.82)
  */
-int CDECL CRTDLL__execlpe( char *s1, char *s2, ...)
+int CDECL CRTDLL__execlpe( char *path, char *szArgv0, ...)
 {
-  dprintf(("CRTDLL: _execlpe not implemented.\n"));
-  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
-  return FALSE;
+  dprintf(("CRTDLL: _execlpe not correct implemented.\n"));
+  char *szArg[100];
+  const char *a;
+  char *ptr;
+  int i = 0;
+  va_list l = 0;
+  va_start(l,szArgv0);
+  do {
+  	a = (const char *)va_arg(l,const char *);
+	szArg[i++] = (char *)a;
+  } while ( a != NULL && i < 100 );
+
+
+// szArg0 is passed and not environment if there is only one parameter;
+
+  if ( i >=2 ) {
+  	ptr = szArg[i-2];
+  	szArg[i-2] = NULL;
+  }
+  else
+	ptr = NULL;
+  return spawnvpe(P_OVERLAY, path, szArg, (char**)ptr);
 }
 
 
@@ -1238,7 +1277,7 @@ int CDECL CRTDLL__fstat(int file, struct stat* buf)
 /*********************************************************************
  *                  _ftime        (CRTDLL.112)
  */
-int CDECL CRTDLL__ftime( struct timeb *timeptr )
+int CDECL CRTDLL__ftime( struct timeb *timebuf )
 {
   dprintf(("CRTDLL: _ftime not implemented.\n"));
   SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
@@ -1280,11 +1319,10 @@ char * CDECL CRTDLL__gcvt( double val, int ndig, char *buf )
 /*********************************************************************
  *                  _get_osfhandle     (CRTDLL.117)
  */
-long CDECL CRTDLL__get_osfhandle( int posixhandle )
+void* CDECL CRTDLL__get_osfhandle( int fileno )
 {
-  dprintf(("CRTDLL: _get_osfhandle not implemented.\n"));
-  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
-  return FALSE;
+  dprintf(("CRTDLL: _get_osfhandle\n"));
+  return filehnd(fileno);
 }
 
 
@@ -2016,10 +2054,6 @@ void CDECL CRTDLL__makepath( char *path, char *drive,
 /*********************************************************************
  *                  _matherr	(CRTDLL.181)
  */
-#if (__IBMCPP__ > 300)
-#define exception _exception
-#endif
-
 double CDECL CRTDLL__matherr( struct exception * excep )
 {
   dprintf(("CRTDLL: _matherr\n"));
@@ -3519,11 +3553,31 @@ int CDECL CRTDLL__spawnl(int nMode, const char* szPath, const char* szArgv0,...)
 /*********************************************************************
  *           CRTDLL__spawnle 	 (CRTDLL.270)
  */
-int CDECL CRTDLL__spawnle( int i, char *s1, char *s2, ... )
+int CDECL CRTDLL__spawnle( int mode, char *path, char **szArgv0, ... )
 {
-  dprintf(("CRTDLL: _spawnle not implemented.\n"));
-  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
-  return FALSE;
+  dprintf(("CRTDLL: _spawnle not correct implemented.\n"));
+  char *szArg[100];
+  char *a;
+  char *ptr;
+  int i = 0;
+  va_list l = 0;
+  va_start(l,szArgv0);
+  do {
+  	a = (char*)va_arg(l,const char *);
+	szArg[i++] = (char *)a;
+  } while ( a != NULL && i < 100 );
+
+
+// szArg0 is passed and not environment if there is only one parameter;
+
+  if ( i >=2 ) {
+  	ptr = szArg[i-2];
+  	szArg[i-2] = NULL;
+  }
+  else
+	ptr = NULL;
+
+  return _spawnve(mode, path, szArg, (char**)ptr);
 }
 
 
@@ -3549,11 +3603,31 @@ int CDECL CRTDLL__spawnlp(int nMode, const char* szPath, const char* szArgv0, ..
 /*********************************************************************
  *           CRTDLL__spawnlpe 	 (CRTDLL.272)
  */
-int CDECL CRTDLL__spawnlpe( int i, char *s1, char *s2, ... )
+int CDECL CRTDLL__spawnlpe( int mode, char *path, char *szArgv0, ... )
 {
-  dprintf(("CRTDLL: _spawnlpe not implemented.\n"));
-  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
-  return FALSE;
+  dprintf(("CRTDLL: _spawnlpe not correct implemented.\n"));
+  char *szArg[100];
+  const char *a;
+  char *ptr;
+  int i = 0;
+  va_list l = 0;
+  va_start(l,szArgv0);
+  do {
+  	a = (char *)va_arg(l,const char *);
+	szArg[i++] = (char *)a;
+  } while ( a != NULL && i < 100 );
+
+
+// szArg0 is passed and not environment if there is only one parameter;
+
+  if ( i >=2 ) {
+  	ptr = szArg[i-2];
+  	szArg[i-2] = NULL;
+  }
+  else
+	ptr = NULL;
+
+  return _spawnvpe(mode, path, szArg, (char**)ptr);
 }
 
 
@@ -4858,7 +4932,7 @@ void CDECL CRTDLL_perror( const char *s )
  */
 int CDECL CRTDLL_printf( const char *format, ... )
 {
-  dprintf(("CRTDLL: printf not implemented.\n"));
+  dprintf(("CRTDLL: printf\n"));
   va_list arg;
   int done;
 
@@ -5372,4 +5446,39 @@ int _isinf(double __x)
 {
 	double_t * x = (double_t *)&__x;
 	return ( x->exponent == 0x7ff  && ( x->mantissah == 0 && x->mantissal == 0 ));	
+}
+
+
+/*********************************************************************
+ *                  _filehnd    (INTERNAL-#6)
+ */
+void* filehnd(int fileno)
+{
+	if ( fileno < 0 )
+		return (void *)-1;
+#define STD_AUX_HANDLE 3
+#define STD_PRINTER_HANDLE 4
+
+	switch(fileno)
+	{
+	case 0:
+		return (void*)GetStdHandle(STD_INPUT_HANDLE);
+	case 1:
+		return (void*)GetStdHandle(STD_OUTPUT_HANDLE);
+	case 2:
+		return (void*)GetStdHandle(STD_ERROR_HANDLE);
+	case 3:
+		return (void*)GetStdHandle(STD_AUX_HANDLE);
+	case 4:
+		return (void*)GetStdHandle(STD_PRINTER_HANDLE);
+	default:
+		break;
+	}
+		
+	if ( fileno >= maxfno )
+		return (void *)-1;
+
+	if ( fileno_modes[fileno].fd == -1 )
+		return (void *)-1;
+	return (void*)fileno_modes[fileno].hFile;
 }
