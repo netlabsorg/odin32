@@ -1,4 +1,4 @@
-/* $Id: ntdll.h,v 1.10 1999-12-19 12:25:55 sandervl Exp $ */
+/* $Id: ntdll.h,v 1.11 2000-01-05 19:37:29 sandervl Exp $ */
 
 /*
    this file defines interfaces mainly exposed to device drivers and
@@ -656,27 +656,6 @@ BOOL WINAPI LookupAccountSidA(LPCSTR,PSID,LPCSTR,LPDWORD,LPCSTR,LPDWORD,
 BOOL WINAPI LookupAccountSidW(LPCWSTR,PSID,LPCWSTR,LPDWORD,LPCWSTR,LPDWORD,
                                   PSID_NAME_USE);
 PSID_IDENTIFIER_AUTHORITY WINAPI GetSidIdentifierAuthority(PSID);
-
-//SvL: Security data for win32 process (nothing fancy; just trying to fool apps
-//     into thinking the security subsystem is in perfect shape.
-#define SECTYPE_THREAD		0
-#define SECTYPE_PROCESS		1
-
-typedef struct {
- DWORD               dwType;
- TOKEN_USER          SidUser;
- TOKEN_GROUPS       *pTokenGroups;
- PRIVILEGE_SET      *pPrivilegeSet;
- TOKEN_PRIVILEGES   *pTokenPrivileges;
- TOKEN_OWNER         TokenOwner;
- TOKEN_PRIMARY_GROUP PrimaryGroup;
- TOKEN_DEFAULT_DACL  DefaultDACL;
- TOKEN_SOURCE        TokenSource;
- TOKEN_TYPE          TokenType;
-} PROCESSTHREAD_SECURITYINFO;
-
-//Per process info; Should probably be stored in process database structure
-extern PROCESSTHREAD_SECURITYINFO ProcSecInfo;
 
 #ifdef __cplusplus
 }

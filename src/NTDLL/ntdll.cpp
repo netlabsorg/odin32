@@ -1,4 +1,4 @@
-/* $Id: ntdll.cpp,v 1.5 1999-12-18 21:45:13 sandervl Exp $ */
+/* $Id: ntdll.cpp,v 1.6 2000-01-05 19:37:29 sandervl Exp $ */
 
 /*
  *
@@ -41,7 +41,7 @@
 #include "unicode.h"
 
 #include "ntdll.h"
-
+#include <ntdllsec.h>
 
 /*****************************************************************************
  * Types & Defines                                                           *
@@ -93,7 +93,7 @@ BOOL WINAPI NTDLL_LibMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserve
 
      	NTDLL_hHeap = HeapCreate(0, 0x10000, 0);
 
-	ProcSecInfo.dwType = SECTYPE_PROCESS;
+	ProcSecInfo.dwType = SECTYPE_PROCESS | SECTYPE_INITIALIZED;
         RtlAllocateAndInitializeSid(&sidIdAuth, 1, 0, 0, 0, 0, 0, 0, 0, 0, &ProcSecInfo.SidUser.User.Sid);
 	ProcSecInfo.SidUser.User.Attributes = 0; //?????????
 
