@@ -1,4 +1,4 @@
-/* $Id: ModuleBase.h,v 1.3.4.1 2000-07-16 22:43:26 bird Exp $
+/* $Id: ModuleBase.h,v 1.3.4.2 2000-08-25 04:47:22 bird Exp $
  *
  * ModuleBase - Declaration of the Basic module class.
  *
@@ -115,18 +115,20 @@ public:
     virtual ~ModuleBase();
 
     /** @cat Public Main methods */
-    virtual ULONG  init(PCSZ pszFilename);
-    virtual ULONG  read(ULONG offLXFile, PVOID pvBuffer, ULONG fpBuffer, ULONG cbToRead, PMTE pMTE) = 0;
-    virtual ULONG  applyFixups(PMTE pMTE, ULONG iObject, ULONG iPageTable, PVOID pvPage,
-                               ULONG ulPageAddress, PVOID pvPTDA); /*(ldrEnum32bitRelRecs)*/
-    virtual ULONG  openPath(PCHAR pachModname, USHORT cchModname, ldrlv_t *pLdrLv, PULONG pfl); /*(ldrOpenPath)*/
+    virtual ULONG   init(PCSZ pszFilename);
+    virtual ULONG   read(ULONG offLXFile, PVOID pvBuffer, ULONG fpBuffer, ULONG cbToRead, PMTE pMTE) = 0;
+    virtual ULONG   applyFixups(PMTE pMTE, ULONG iObject, ULONG iPageTable, PVOID pvPage,
+                                ULONG ulPageAddress, PVOID pvPTDA); /*(ldrEnum32bitRelRecs)*/
+    virtual ULONG   openPath(PCHAR pachFilename, USHORT cchFilename, ldrlv_t *pLdrLv, PULONG pful); /* (ldrOpenPath) */
     #ifndef RING0
-    virtual ULONG  writeFile(PCSZ pszLXFilename);
+    virtual ULONG   writeFile(PCSZ pszLXFilename);
     #endif
 
     /** @cat public Helper methods */
-    virtual VOID   dumpVirtualLxFile() = 0;
-    BOOL           queryIsModuleName(PCSZ pszFilename);
+    virtual VOID    dumpVirtualLxFile() = 0;
+    BOOL            queryIsModuleName(PCSZ pszFilename);
+    PCSZ            getFilename();
+    PCSZ            getModuleName();
 
     /** @cat static print method */
     static VOID     printf(PCSZ pszFormat, ...);
@@ -138,7 +140,7 @@ protected:
     #endif
     SFN         hFile;                  /* filehandle */
     PSZ         pszFilename;            /* fullpath */
-    PSZ         pszModuleName;          /* filename without extention. */
+    PSZ         pszModuleName;          /* filename without path and extention. */
 
     /** @cat public static data. */
 public:

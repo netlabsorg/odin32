@@ -1,4 +1,4 @@
-/* $Id: LdrCalls.h,v 1.3.4.6 2000-08-22 03:00:19 bird Exp $
+/* $Id: LdrCalls.h,v 1.3.4.7 2000-08-25 04:47:23 bird Exp $
  *
  * Prototypes for the loader overrided function.
  *
@@ -212,6 +212,21 @@ extern PKSEMMTX    pLdrSem;
  */
 extern PMTE LDRCALL ldrValidateMteHandle(HMTE hMTE);
 
+
+/**
+ * Gets the pMTE from a hMTE. No checks.
+ * @returns     Pointer to the pMTE for a given hMTE.
+ * @param       hMTE    Module handle.
+ * @sketch
+ */
+extern PMTE KRNLCALL ldrASMpMTEFromHandle(HMTE  hMTE);
+
+
+/**
+ * Pointer to the loader filename buffer.
+ * Upon return from ldrOpen (and ldrOpenPath which calls ldrOpen) this is
+ * set to the fully qualified filename of the file last opened (successfully).
+ */
 extern PSZ *pldrpFileNameBuf;
 #define ldrpFileNameBuf (*pldrpFileNameBuf)
 

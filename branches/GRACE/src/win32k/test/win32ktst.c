@@ -1,4 +1,4 @@
-/* $Id: win32ktst.c,v 1.1.4.5 2000-08-23 04:25:46 bird Exp $
+/* $Id: win32ktst.c,v 1.1.4.6 2000-08-25 04:47:28 bird Exp $
  *
  * Win32k test module.
  *
@@ -861,12 +861,12 @@ int TestCaseExeLoad2(void)
     /*
      * Do the real execution.
      */
-    printf("--- TestcaseExeLoad3 - loading win32ktst.exe (LX image) ----\n");
+    printf("--- TestcaseExeLoad2 - loading win32ktst.exe (LX image) ----\n");
     rc = CalltkExecPgm(EXEC_LOAD, NULL, NULL, "win32ktst.exe");
     if (rc == NO_ERROR)
     {
         psz = "BIN\\DEBUG\\LIBCONV.EXE\0";
-        printf("--- TestcaseExeLoad3 - loading libconv.exe (LX image) ----\n");
+        printf("--- TestcaseExeLoad2 - loading libconv.exe (LX image) ----\n");
         rc = CalltkExecPgm(EXEC_LOAD, NULL, NULL, "bin\\debug\\libconv.exe");
         if (rc == NO_ERROR)
         {
@@ -886,7 +886,7 @@ int TestCaseExeLoad2(void)
     if (rc == NO_ERROR)
     {
         psz = "REXX\\TST.CMD\0OriginalArgument1 OriginalArgument2\0OriginalArgument3\0";
-        printf("--- TestcaseExeLoad3 - loading rexx\\tst.cmd (REXX script) ----\n");
+        printf("--- TestcaseExeLoad2 - loading rexx\\tst.cmd (REXX script) ----\n");
         rc = CalltkExecPgm(EXEC_LOAD, psz, NULL, "rexx\\tst.cmd");
         if (rc == NO_ERROR)
         {
@@ -904,7 +904,7 @@ int TestCaseExeLoad2(void)
     if (rc == NO_ERROR)
     {
         psz = "TEST\\TST.SH\0OrgArg1 OrgArg2\0OrgArg3\0";
-        printf("--- TestcaseExeLoad3 - loading test\\tst.sh (UNIX shell script) ----\n");
+        printf("--- TestcaseExeLoad2 - loading test\\tst.sh (UNIX shell script) ----\n");
         rc = CalltkExecPgm(EXEC_LOAD, psz, NULL, "test\\tst.sh");
         if (rc == NO_ERROR)
         {
@@ -922,7 +922,7 @@ int TestCaseExeLoad2(void)
     if (rc == NO_ERROR)
     {
         psz = "TEST\\TST2.SH\0OrgArg1 OrgArg2\0OrgArg3\0";
-        printf("--- TestcaseExeLoad3 - loading test\\tst2.sh (UNIX shell script) ----\n");
+        printf("--- TestcaseExeLoad2 - loading test\\tst2.sh (UNIX shell script) ----\n");
         rc = CalltkExecPgm(EXEC_LOAD, psz, NULL, "test\\tst2.sh");
         if (rc == NO_ERROR)
         {
@@ -939,14 +939,14 @@ int TestCaseExeLoad2(void)
 
     if (rc == NO_ERROR)
     {
-        printf("--- TestcaseExeLoad3 - loading SOL.EXE (PE image) ----\n");
-        rc = CalltkExecPgm(EXEC_LOAD, NULL, NULL, "e:\\Win32Prog\\Sol\\Sol.exe");
+        psz = "E:\\WIN32PROG\\SOL\\SOL.EXE\0";
+        printf("--- TestcaseExeLoad2 - loading SOL.EXE (PE image) ----\n");
+        rc = CalltkExecPgm(EXEC_LOAD, psz, NULL, "e:\\Win32Prog\\Sol\\Sol.exe");
         if (rc == NO_ERROR)
         {
             /* check result */
-            psz = "E:\\WIN32PROG\\SOL\\SOL.EXE\0";
             cch = strlen(psz) + 1 + 1;
-            if (memcmp(achTkExecPgmArguments + strlen(achTkExecPgmArguments) + 1, psz, cch) != 0)
+            if (memcmp(achTkExecPgmArguments, psz, cch) != 0)
             {
                 rc  = ERROR_BAD_ARGUMENTS;
                 printf("Bad Arguments! (achTkExecPgmArguments=%s).\n", achTkExecPgmArguments + strlen(achTkExecPgmArguments) + 1);
