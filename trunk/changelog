@@ -1,8 +1,10 @@
- /* $Id: changelog,v 1.879 2000-04-09 11:29:33 sandervl Exp $ */
+ /* $Id: changelog,v 1.880 2000-04-09 15:08:53 sandervl Exp $ */
 
  2000-04-09: Sander van Leeuwen <sandervl@xs4all.nl>
         - GDI32: Y inversion fix for dib sections blits
 	- WINMM: GetPosition fix (don't return 0 when stream not active)
+	- KERNEL32: Fixed OSLibDosFindFirst. Return error if First DosFirstFirst
+                    fails. (fixes RealPlayer 7 install)
 
  2000-04-09: Yuri Dario <mc6530@mclink.it>
 	- INCLUDE(\WIN): 
