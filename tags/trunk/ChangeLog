@@ -1,4 +1,10 @@
- /* $Id: ChangeLog,v 1.852 2000-03-30 20:53:28 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.853 2000-03-31 14:41:33 cbratschi Exp $ */
+
+ 2000-03-31: Christoph Bratschi <cbratschi@datacomm.ch>
+	- USER32: readded CS_HITTEST for HT_TRANSPARENT handling, transparent
+		  tooltips are now supported
+		  (why is HT_TRANSPARENT in the groupbox control commented out?)
+	- COMCTL32: treeview: added TTF_TRANSPARENT tooltip style
 
  2000-03-30: Christoph Bratschi <cbratschi@datacomm.ch>
 	- KERNEL32:
