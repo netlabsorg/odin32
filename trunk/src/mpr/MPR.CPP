@@ -1,4 +1,4 @@
-/* $Id: MPR.CPP,v 1.6 1999-11-04 10:55:30 phaller Exp $ */
+/* $Id: MPR.CPP,v 1.7 2000-08-02 16:24:07 bird Exp $ */
 
 /*
  *
@@ -81,7 +81,7 @@ static struct _MPRGlobals
  * Variables :
  * Result    : API-Returncode
  * Remark    : not documented
- * Status    : UNTESTED
+ * Status    : UNTESTED STUB
  *
  * Author    : Patrick Haller [Thu, 1999/11/04 19:55]
  *****************************************************************************/
@@ -104,7 +104,7 @@ ODINFUNCTION2(DWORD,                  MultinetGetConnectionPerformanceA,
  * Variables :
  * Result    : API-Returncode
  * Remark    : not documented
- * Status    : UNTESTED
+ * Status    : UNTESTED STUB
  *
  * Author    : Patrick Haller [Thu, 1999/11/04 19:55]
  *****************************************************************************/
@@ -1102,7 +1102,7 @@ ODINFUNCTION5(DWORD, WNetOpenEnumW,
  * Variables :
  * Result    : API-Returncode
  * Remark    : not documented
- * Status    : UNTESTED
+ * Status    : PARTIALLY IMPLEMENTED
  *
  * Author    : Patrick Haller [Fri, 1998/02/27 11:55]
  *****************************************************************************/
@@ -1128,7 +1128,7 @@ ODINFUNCTION3(DWORD, WNetSetLastErrorA,
  * Variables :
  * Result    : API-Returncode
  * Remark    : not documented
- * Status    : UNTESTED
+ * Status    : PARTIALLY IMPLEMENTED
  *
  * Author    : Patrick Haller [Fri, 1998/02/27 11:55]
  *****************************************************************************/
@@ -1159,7 +1159,7 @@ ODINFUNCTION3(DWORD, WNetSetLastErrorW,
  * Variables :
  * Result    : API-Returncode
  * Remark    : not documented
- * Status    : UNTESTED
+ * Status    : UNTESTED STUB
  *
  * Author    : Patrick Haller [Thu, 1999/11/04 19:55]
  *****************************************************************************/
@@ -1194,7 +1194,7 @@ ODINFUNCTION8(DWORD,         WNetUseConnectionA,
  * Variables :
  * Result    : API-Returncode
  * Remark    : not documented
- * Status    : UNTESTED
+ * Status    : UNTESTED STUB
  *
  * Author    : Patrick Haller [Thu, 1999/11/04 19:55]
  *****************************************************************************/
