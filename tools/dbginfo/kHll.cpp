@@ -1,4 +1,4 @@
-/* $Id: kHll.cpp,v 1.13 2000-05-27 02:15:41 bird Exp $
+/* $Id: kHll.cpp,v 1.14 2000-05-29 19:46:28 bird Exp $
  *
  * kHll - Implementation of the class kHll.
  *        That class is used to create HLL debuginfo.
@@ -94,7 +94,7 @@ int kHllBaseEntry::writeList(FILE *phFile, kHllBaseEntry *pEntry)
 
 
 /**
- * Loops thru the given list and call the dump function for each
+ * Loops thru the given list and call the dump method for each
  * node with the passed in parameters.
  * @param       ph          Dump file handle.
  * @param       cchIndent   Indent.
@@ -113,6 +113,24 @@ void kHllBaseEntry::dumpList(FILE *ph, int cchIndent, kHllBaseEntry *pEntry)
 }
 
 
+/**
+ * Loops thru the given list and call the ida method for each
+ * node with the passed in parameters.
+ * !!!NOTE!!! THIS IS ONLY TO BE USED FOR YOUR OWN PROGRAMS!!!
+ * @param       pFile   Output file.
+ * @param       pEntry      Indent.
+ */
+void kHllBaseEntry::idaList(kFile *pFile, kHllBaseEntry *pEntry)
+{
+    /*
+     * Loop thru the list staring at pEntry and call ida for each entry.
+     */
+    while (pEntry != NULL)
+    {
+        pEntry->ida(pFile);
+        pEntry = (kHllBaseEntry*)pEntry->getNext();
+    }
+}
 
 
 
@@ -199,15 +217,39 @@ void            kHllPubSymEntry::dump(FILE *ph, int cchIndent)
     /*
      * Dump public symbol entry
      */
-    fprintf(ph, "%*.s0x%04x:0x%08x  type:%04d(0x%04)  name: %.*s\n",
+    fprintf(ph, "%*.s0x%04x:0x%08x  type:%5d(0x%04x)  name: %.*s\n",
             cchIndent, "",
             pPubSym->iObject,
             pPubSym->off,
             pPubSym->iType,
             pPubSym->iType,
-            pPubSym->cchName, pPubSym->achName
+            pPubSym->cchName, &pPubSym->achName[0]
             );
 }
+
+
+/**
+ * Create IDC (IDA Pro) calls which adds info contained in the entry
+ * to the ida pro database.
+ * !!!NOTE!!! THIS IS ONLY TO BE USED FOR YOUR OWN PROGRAMS!!!
+ * @param       pFile   Output file.
+ */
+void            kHllPubSymEntry::ida(kFile *pFile) throw(int)
+{
+    #if 0
+    pFile->printf("    /* PubSym %.*s */\n",
+                  pPubSym->cchName, &pPubSym->achName[0]);
+    #endif
+    pFile->printf("    ea = SegByBase(%d) + 0x%08x; MakeName(ea, \"\"); MakeName(ea, \"%.*s\");\n",
+                  pPubSym->iObject,
+                  pPubSym->off,
+                  pPubSym->cchName, &pPubSym->achName[0]
+                  );
+}
+
+
+
+
 
 
 
@@ -380,6 +422,20 @@ void            kHllLineNumberChunk::dump(FILE *ph, int cchIndent)
     fprintf(ph, "%*.s-------  end  kHllLineNumberChunk object 0x%08x -------\n",
             cchIndent, "", this);
 }
+
+
+/**
+ * Create IDC (IDA Pro) calls which adds info contained in the entry
+ * to the ida pro database.
+ * !!!NOTE!!! THIS IS ONLY TO BE USED FOR YOUR OWN PROGRAMS!!!
+ * @param       pFile   Output file.
+ */
+void            kHllLineNumberChunk::ida(kFile *pFile) throw(int)
+{
+    pFile->printf("    /* Line number chunk */\n");
+}
+
+
 
 
 
@@ -623,6 +679,17 @@ void            kHllSrcEntry::dump(FILE *ph, int cchIndent)
             cchIndent, "", this, cFilenames);
 }
 
+
+/**
+ * Create IDC (IDA Pro) calls which adds info contained in the entry
+ * to the ida pro database.
+ * !!!NOTE!!! THIS IS ONLY TO BE USED FOR YOUR OWN PROGRAMS!!!
+ * @param       pFile   Output file.
+ */
+void            kHllSrcEntry::ida(kFile *pFile) throw(int)
+{
+    pFile->printf("    /* Source entry */\n");
+}
 
 
 
@@ -1058,6 +1125,27 @@ void            kHllModuleEntry::dump(FILE *ph)
 }
 
 
+/**
+ * Create IDC (IDA Pro) calls which adds info contained in the entry
+ * to the ida pro database.
+ * !!!NOTE!!! THIS IS ONLY TO BE USED FOR YOUR OWN PROGRAMS!!!
+ * @param       pFile   Output file.
+ */
+void            kHllModuleEntry::ida(kFile *pFile) throw(int)
+{
+    pFile->printf("    /* kHllModuleEntry */\n");
+
+    /*
+     * Write the sub-entries.
+     */
+    kHllBaseEntry::idaList(pFile, PublicSymbols.getFirst());
+    /*
+    kHllBaseEntry::dumpList(ph, 8, Types.getFirst());
+    kHllBaseEntry::dumpList(ph, 8, Symbols.getFirst());
+    kHllBaseEntry::dumpList(ph, 8, Source.getFirst());
+    */
+    Source.ida(pFile);
+}
 
 
 
@@ -1288,13 +1376,39 @@ kHll::kHll(kFile *pFile) throw (int)
 
                 if (paSegInfo != NULL)
                     free(paSegInfo);
-                fprintf(stderr, "Module directory entry: %s\n", szName);
                 break;
             }
 
-            case HLL_DE_PUBLICS:        /* Public symbols */
-                fprintf(stderr, "Publics directory entry\n");
-                break;
+
+            /*
+             * Public symbols
+             */
+            case HLL_DE_PUBLICS:
+            {
+                HLLPUBLICSYM  pubSym;
+
+                if (pCurMod == NULL || iCurMod != pDirEntry->iMod)
+                {
+                    fprintf(stderr, "hmm. iMod in public entry not equal to current module\n");
+                    break;
+                }
+
+                fprintf(stderr, "HLL_DE_PUBLICS\n");
+                pFile->set(pDirEntry->off + offHllHdr);
+                while (pFile->getPos() - pDirEntry->off - offHllHdr < pDirEntry->cb)
+                {
+                    pFile->read(&pubSym, sizeof(pubSym) - 1);
+                    pFile->read(szName, pubSym.cchName);
+                    szName[pubSym.cchName] = '\0';
+
+                    fprintf(stderr, "HLL_DE_PUBLICS\n");
+                    pCurMod->addPublicSymbol(szName,
+                                             pubSym.cchName,
+                                             pubSym.off,
+                                             pubSym.iObject,
+                                             (void*)pubSym.iType);
+                }
+            }
 
             case HLL_DE_TYPES:          /* Types */
                 fprintf(stderr, "Types directory entry\n");
@@ -1428,6 +1542,34 @@ void            kHll::dump()
             "-------  end  dumping kHll object 0x%08x --- %d modules -------\n",
             this, Modules.getCount());
 }
+
+
+/**
+ * Create IDC (IDA Pro) scripts which adds debuginfo to the ida pro database.
+ * !!!NOTE!!! THIS IS ONLY TO BE USED FOR YOUR OWN PROGRAMS!!!
+ * @param       pFile   Output file.
+ */
+void            kHll::ida(kFile *pFile) throw(int)
+{
+    pFile->printf("/* !!!NOTE!!! THIS IS ONLY TO BE USED FOR YOUR OWN PROGRAMS!!!*/\n"
+                  "#include <idc.idc>\n"
+                  "static main() {\n"
+                  "    auto ea;\n"
+                  );
+
+    kHllModuleEntry *   pMod =  Modules.getFirst();
+    while (pMod != NULL)
+    {
+        /* Dump it */
+        pMod->ida(pFile);
+
+        /* Next module */
+        pMod = (kHllModuleEntry*)pMod->getNext();
+    }
+
+    pFile->printf("}\n\n");
+}
+
 
 
 /**
@@ -1669,12 +1811,14 @@ void main(int argc, char **argv)
 {
     kHll *pHll;
 
-    /* read my self */
-    pHll = kHll::readLX(argv[0]);
+    /* read last argument */
+    pHll = kHll::readLX(argv[argc-1]);
     if (pHll)
     {
         printf("Successfully read %s\n", argv[0]);
         pHll->dump();
+        kFile kidc("dbg.idc", FALSE);
+        pHll->ida(&kidc);
     }
     argc = argc;
     delete (pHll);
