@@ -1,4 +1,4 @@
-/* $Id: directory.cpp,v 1.38 2001-06-24 16:40:44 sandervl Exp $ */
+/* $Id: directory.cpp,v 1.39 2001-08-10 19:32:26 sandervl Exp $ */
 
 /*
  * Win32 Directory functions for OS/2
@@ -37,6 +37,7 @@
 #include <string.h>
 #include "oslibdos.h"
 #include "profile.h"
+#include "fileio.h"
 
 #define DBG_LOCALLOG	DBG_directory
 #include "dbglocal.h"
@@ -259,13 +260,14 @@ ODINFUNCTION2(BOOL,                CreateDirectoryA,
   // PH Note 2000/06/12:
   // Creation of an existing directory is NO ERROR it seems.
   DWORD dwAttr = GetFileAttributesA(lpstrDirectory);
-  if (dwAttr != -1)
-    if (dwAttr & FILE_ATTRIBUTE_DIRECTORY)
-    {
-      SetLastError(ERROR_SUCCESS);
-      return TRUE;
-    }
-  
+  if(dwAttr != -1) 
+  {
+      if (dwAttr & FILE_ATTRIBUTE_DIRECTORY)
+      {
+          SetLastError(ERROR_SUCCESS);
+          return TRUE;
+      }
+  }  
   return(OSLibDosCreateDirectory(lpstrDirectory));
 }
 
