@@ -1,4 +1,4 @@
-/* $Id: initgdi32.cpp,v 1.13 2002-07-29 11:26:48 sandervl Exp $
+/* $Id: initgdi32.cpp,v 1.14 2003-07-16 10:46:18 sandervl Exp $
  *
  * DLL entry point
  *
@@ -34,11 +34,13 @@
 #include <win32api.h>
 #include <winconst.h>
 #include <odinlx.h>
-#include <misc.h>       /*PLF Wed  98-03-18 23:18:15*/
+#include <cpuhlp.h>
+#include <dbglog.h>
 #include "region.h"
 #include <initdll.h>
 #include <stats.h>
 #include "dibsect.h"
+#include "rgbcvt.h"
 
 #define DBG_LOCALLOG    DBG_initterm
 #include "dbglocal.h"
@@ -47,7 +49,11 @@ extern "C" {
  //Win32 resource table (produced by wrc)
  extern DWORD gdi32_PEResTab;
 }
+
 static HMODULE dllHandle = 0;
+void (_Optlink *pRGB555to565)(WORD *dest, WORD *src, ULONG num) = NULL;
+void (_Optlink *pRGB565to555)(WORD *dest, WORD *src, ULONG num) = NULL;
+
 //******************************************************************************
 //******************************************************************************
 BOOL WINAPI GdiLibMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID fImpLoad)
@@ -96,6 +102,14 @@ ULONG APIENTRY inittermGdi32(ULONG hModule, ULONG ulFlag)
              return 0UL;
          }
          DIBSection::initDIBSection();
+         if(CPUFeatures & CPUID_MMX) {
+             pRGB555to565 = RGB555to565MMX;
+             pRGB565to555 = RGB565to555MMX;
+         }
+         else {
+             pRGB555to565 = RGB555to565;
+             pRGB555to565 = RGB565to555;
+         }
          dllHandle = RegisterLxDll(hModule, GdiLibMain, (PVOID)&gdi32_PEResTab,
                                    GDI32_MAJORIMAGE_VERSION, GDI32_MINORIMAGE_VERSION,
                                    IMAGE_SUBSYSTEM_NATIVE);
