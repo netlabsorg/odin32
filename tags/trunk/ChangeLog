@@ -1,8 +1,12 @@
- /* $Id: ChangeLog,v 1.870 2000-04-07 10:05:30 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.871 2000-04-07 12:54:17 sandervl Exp $ */
 
  2000-04-07: Sander van Leeuwen <sandervl@xs4all.nl>
 	- WINMM:  Don't restart when already playing
         - USER32: Print mark in debug log with WriteLog (#ifdef DEBUG), not dprintf
+                  Workaround for paint problems in RealPlayer 7 Update 1.
+                  (don't clip the dc with a region in DoNCPaint if the clip
+                   region has the same size as the window; doing so creates
+                   update problems for no obvious reason)
 
  2000-04-07: David Raison <djr@lemur.co.uk>
 	- USER32: Set lfSmCaptionFont structure in NONCLIENTMETRICSA
