@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.69 2001-05-08 12:16:48 bird Exp $
+# $Id: makefile,v 1.70 2001-06-10 01:21:05 bird Exp $
 
 #
 # Odin32 API
@@ -72,7 +72,7 @@ startsmp:   # Internal helper for the smp rule.
 # dep:      Invokes the dep rule in every directory.
 #
 build:
-    $(DOWITHDIRS) -e$(NOTTOBEMADE) -lbld -c $(EXTRA) \
+    $(DOWITHDIRS) -e$(NOTTOBEMADE) -lbld$(CCENV)$(DEBUG) -c $(EXTRA) \
         $(MAKE_CMD) all
 
 lib libs:
@@ -84,7 +84,7 @@ dep:
         $(MAKE_CMD) NODEP=1 dep
 
 clean:
-    $(DOWITHDIRS) -e$(NOTTOBEMADE) -c -lcln $(EXTRA) \
+    $(DOWITHDIRS) -e$(NOTTOBEMADE) -c -lcln$(CCENV)$(DEBUG) $(EXTRA) \
         $(MAKE_CMD) NODEP=1 clean
 
 
