@@ -1,4 +1,4 @@
-/* $Id: odin32get.cmd,v 1.3 2002-06-26 22:11:43 bird Exp $
+/* $Id: odin32get.cmd,v 1.4 2003-04-14 22:52:42 bird Exp $
  *
  * Gets the CVS tree from netlabs.
  *
@@ -17,6 +17,7 @@
 
     'cvs checkout .'
     if (RC <> 0) then call failure rc, 'CVS checkout . failed';
+    'copy ..\scripts\bin\buildenv.cmd.paths tools\bin\'
     exit(0);
 
 
