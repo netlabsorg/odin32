@@ -1,4 +1,4 @@
-/* $Id: msvfw32.cpp,v 1.8 2001-07-21 17:39:44 sandervl Exp $ */
+/* $Id: msvfw32.cpp,v 1.9 2002-08-27 08:31:48 sandervl Exp $ */
 /*
  * Copyright 1998 Marcus Meissner
  * Copyright 1999 Jens Wiessner
@@ -155,42 +155,6 @@ void VFWAPI ICCompressorFree(PCOMPVARS pc)
     dprintf(("MSVFW32: ICCompressorFree not implemented\n"));
 #endif
   return;
-}
-
-
-/****************************************************************************
- *    ICImageCompress     [MSVFW.31]
- */
-HANDLE VFWAPI ICImageCompress(
-        HIC                 hic,        // compressor to use
-        UINT                uiFlags,    // flags (none yet)
-        LPBITMAPINFO      lpbiIn,     // format to compress from
-        LPVOID              lpBits,     // data to compress
-        LPBITMAPINFO        lpbiOut,    // compress to this (NULL ==> default)
-        LONG                lQuality,   // quality to use
-        LONG  *             plSize)     // compress to this size (0=whatever)
-{
-#ifdef DEBUG
-    dprintf(("MSVFW32: ICImageCompress not implemented\n"));
-#endif
-  return 0;
-}
-
-
-/****************************************************************************
- *    ICImageDecompress   [MSVFW.32]
- */
-HANDLE VFWAPI ICImageDecompress(
-        HIC                 hic,        // compressor to use
-        UINT                uiFlags,    // flags (none yet)
-        LPBITMAPINFO        lpbiIn,     // format to decompress from
-        LPVOID              lpBits,     // data to decompress
-        LPBITMAPINFO        lpbiOut)    // decompress to this (NULL ==> default)
-{
-#ifdef DEBUG
-    dprintf(("MSVFW32: ICImageDecompress not implemented\n"));
-#endif
-  return 0;
 }
 
 
