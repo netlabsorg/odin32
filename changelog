@@ -1,4 +1,7 @@
-/* $Id: changelog,v 1.2590 2003-05-28 08:53:14 sandervl Exp $ */
+/* $Id: changelog,v 1.2591 2003-05-30 11:37:00 sandervl Exp $ */
+
+ 2003-05-29: Platon Fomichev <stauff@innotek   >
+    - COMCTL32: o Listview selection draw code was not ok with OS/2 look
 
  2003-05-28: Platon Fomichev <stauff@innotek   >
     - COMCTL32: o OWNERDRAW fixes for ListView control
