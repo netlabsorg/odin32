@@ -13,12 +13,39 @@
  * Compiler Environment Definition
  */
 
+#ifdef CDECL
+#  undef CDECL
+#endif
+
+#ifdef EXPORT
+#  undef EXPORT
+#endif
+
+#ifdef WIN32API
+#  undef WIN32API
+#endif
+
+#ifdef SYSTEM
+#  undef SYSTEM
+#endif
+
+#ifdef PASCAL
+#  undef PASCAL
+#endif
+
+#ifdef UNALIGNED
+#  undef UNALIGNED
+#endif
+
+
 /* ---------- WATCOM C ---------- */
 #ifdef __WATCOMC__
   #define CDECL     _cdecl
   #define EXPORT    _export
   #define WIN32API  __stdcall
   #define SYSTEM    __stdcall
+  #define PASCAL    _Pascal
+  #define UNALIGNED
 #else
 
 /* ---------- GCC/EMX ---------- */
@@ -27,6 +54,8 @@
   #define EXPORT    _export
   #define WIN32API  __stdcall
   #define SYSTEM    __stdcall
+  #define PASCAL    _Pascal
+  #define UNALIGNED
 #else
 
 /* ---------- VAC ---------- */
@@ -47,6 +76,9 @@
 
 
 /* map WINE to ODIN */
+#ifdef WINAPI
+#  undef WINAPI
+#endif
 #define WINAPI WIN32API
 
 #include <builtin.h>
