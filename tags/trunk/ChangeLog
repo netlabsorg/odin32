@@ -1,7 +1,8 @@
-/* $Id: ChangeLog,v 1.1540 2001-06-23 08:44:25 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.1541 2001-06-23 16:58:46 sandervl Exp $ */
 
  2001-06-23: Sander van Leeuwen <sandervl@xs4all.nl>
     - KERNEL32: o HeapSize must return -1 for invalid pointer
+    - KERNEL32: o Semaphore updates (finished; not activated yet)
 
  2001-06-23: knut st. osmundsen <knut.stange.osmundsen@mynd.no>
     - KERNEL32: o Added Odin32 Spesific API for getting Odin build number.
