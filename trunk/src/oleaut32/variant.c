@@ -48,18 +48,6 @@
 
 DEFAULT_DEBUG_CHANNEL(ole);
 
-#ifdef __WIN32OS2__
-#undef FIXME
-#undef TRACE
-#ifdef DEBUG
-#define FIXME WriteLogNoEOL("FIXME %s: ", __FUNCTION__); WriteLog
-#define TRACE WriteLogNoEOL("%s", __FUNCTION__); WriteLog
-#else
-#define FIXME 1 ? (void)0 : (void)((int (*)(char *, ...)) NULL)
-#define TRACE 1 ? (void)0 : (void)((int (*)(char *, ...)) NULL)
-#endif
-#endif
-
 #ifndef FLT_MAX
 # ifdef MAXFLOAT
 #  define FLT_MAX MAXFLOAT

@@ -141,6 +141,8 @@ HRESULT WINAPI SafeArrayAllocData(
 {
   ULONG  ulWholeArraySize;   /* to store the size of the whole thing */
 
+  dprintf(("SafeArrayAllocData %x", psa));
+
   if(! validArg(psa)) 
     return E_INVALIDARG;
 
@@ -169,6 +171,8 @@ SAFEARRAY* WINAPI SafeArrayCreate(
   SAFEARRAY *psa;
   HRESULT   hRes;
   USHORT    cDim;
+
+  dprintf(("SafeArrayCreate %x %d %x", vt, cDims, rgsabound));
 
   /* Validate supported VARTYPE */
   if ( (vt >= LAST_VARTYPE) ||
@@ -209,6 +213,8 @@ SAFEARRAY* WINAPI SafeArrayCreate(
 HRESULT WINAPI SafeArrayDestroyDescriptor(
   SAFEARRAY *psa)
 {
+  dprintf(("SafeArrayDestroyDescriptor %x", psa));
+
   /* Check for lockness before to free... */
   if(psa->cLocks > 0) 
     return DISP_E_ARRAYISLOCKED;
@@ -232,6 +238,8 @@ HRESULT WINAPI SafeArrayDestroyDescriptor(
 HRESULT WINAPI SafeArrayLock(
   SAFEARRAY *psa)
 {
+  dprintf(("SafeArrayLock %x", psa));
+
   if(! validArg(psa))     
     return E_INVALIDARG;
 
@@ -247,6 +255,8 @@ HRESULT WINAPI SafeArrayLock(
 HRESULT WINAPI SafeArrayUnlock(
   SAFEARRAY *psa)
 {
+  dprintf(("SafeArrayUnlock %x", psa));
+
   if(! validArg(psa)) 
     return E_INVALIDARG;
 
@@ -270,6 +280,8 @@ HRESULT WINAPI SafeArrayPutElement(
                                          the desired one... */
   PVOID elementStorageAddress = NULL; /* Adress to store the data */
   BSTR  pbstrReAllocStr     = NULL; /* BSTR reallocated */
+
+  dprintf(("SafeArrayPutElement %x %x %x", psa, rgIndices, pv));
 
   /* Validate the index given */
   if(! validCoordinate(rgIndices, psa)) 
@@ -328,6 +340,8 @@ HRESULT WINAPI SafeArrayGetElement(
   PVOID elementStorageAddress = NULL; /* Adress to store the data */
   BSTR  pbstrReturnedStr    = NULL; /* BSTR reallocated */
 
+  dprintf(("SafeArrayGetElement %x %x %x", psa, rgIndices, pv));
+
   if(! validArg(psa)) 
     return E_INVALIDARG;
   
@@ -372,6 +386,9 @@ HRESULT WINAPI SafeArrayGetUBound(
   UINT    nDim,
   LONG      *plUbound)
 {
+
+  dprintf(("SafeArrayGetUBound %x %x %x", psa, nDim, plUbound));
+
   if(! validArg(psa))   
     return E_INVALIDARG;
 
@@ -790,7 +807,6 @@ static BOOL validArg(
 
   /* Check whether the size of the chunk makes sense... That's the only thing
      I can think of now... */
-
   psaSize = HeapSize(GetProcessHeap(), 0, psa);
   if (psaSize == -1)
     /* uh, foreign heap. Better don't mess with it ! */
