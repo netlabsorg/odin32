@@ -1,6 +1,10 @@
-/* $Id: changelog,v 1.1428 2001-05-19 13:51:06 sandervl Exp $ */
+/* $Id: changelog,v 1.1429 2001-05-19 19:14:55 sandervl Exp $ */
 
  2001-05-19: Sander van Leeuwen <sandervl@xs4all.nl>
+    - INCLUDE\odinwrap.h:
+                o ODINFUNCTIONNODBG & ODINPROCEDURENODBG should still save
+                  and restore FS!!!
+                  (FS corruption in release build; mainly affects wsock32)
     - WS2_32:   o Added more exports
     - KERNEL32: o Export TryEnterCriticalSection
                 o InterlockedCompareExchange bugfix; should not always return
