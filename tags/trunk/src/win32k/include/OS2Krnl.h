@@ -1,4 +1,4 @@
-/* $Id: OS2Krnl.h,v 1.10 2001-02-10 11:11:43 bird Exp $
+/* $Id: OS2Krnl.h,v 1.11 2001-02-11 15:11:34 bird Exp $
  *
  * OS/2 kernel structures, typedefs and macros.
  *
@@ -23,6 +23,19 @@
     #define USHORT  unsigned short
     #define ULONG   unsigned long
     #define PCHAR   char *
+#endif
+
+#ifndef PAGESHIFT
+#define PAGESHIFT                   12      /* bytes to pages or pages to bytes shift value. */
+#endif
+#ifndef PAGESIZE
+#define PAGESIZE                    0x1000  /* pagesize on i386 */
+#endif
+#ifndef PAGEOFFSET
+#define PAGEOFFSET(addr) ((addr) &  (PAGESIZE-1)) /* Gets the offset into the page addr points into. */
+#endif
+#ifndef PAGESTART
+#define PAGESTART(addr)  ((addr) & ~(PAGESIZE-1)) /* Gets the address of the page addr points into. */
 #endif
 
 
