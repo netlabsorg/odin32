@@ -1,4 +1,4 @@
-# $Id: win32k.tools.mk,v 1.5 2001-01-20 15:48:20 bird Exp $
+# $Id: win32k.tools.mk,v 1.6 2001-01-21 07:56:16 bird Exp $
 
 #
 # Win32k common tools makefile.
@@ -80,7 +80,7 @@ ILIB        = wlib /nobackup /nologo \
 # Assembler and other DDK tools.
 #
 AS      = alp
-ASFLAGS = -Sv:ALP -Mb -Li +Od
+AFLAGS  = -Sv:ALP -Mb -Li +Od
 H2INC   = $(DDKPATH)\tools\h2inc.exe
 
 
@@ -90,11 +90,11 @@ H2INC   = $(DDKPATH)\tools\h2inc.exe
 !ifdef DEBUG
 CDEFINES    = -DWIN32K -DRING0 -D__WIN32OS2__ -D__WINE__ -DDEBUG
 CDEFINES16  = -DRING0    -DDEBUG
-ASDEFINES   = -D:WIN32K -D:DEBUG
+ADEFINES    = -D:WIN32K -D:DEBUG
 !else
 CDEFINES    = -DWIN32K -DRING0 -D__WIN32OS2__ -D__WINE__ -DRELEASE
 CDEFINES16  = -DRING0    -DRELEASE
-ASDEFINES   = -D:WIN32K -D:RELEASE
+ADEFINES    = -D:WIN32K -D:RELEASE
 !endif
 
 CDEFINES_TST    = $(CDEFINES)   -DR3TST
@@ -141,7 +141,7 @@ C16COMPILE          = $(CC16) -c $(CFLAGS16) $(CDEFINES16) $(CINCLUDES16) -Fa$(W
 C16COMPILE_INIT     = $(CC16) -c $(CFLAGS16) $(CDEFINES16) $(CINCLUDES16) -Fa$(WIN32KLIST)\$(@B).s -Fo$(WIN32KOBJ)\$(@F) /NTCODE16_INIT /NDDATA16_INIT $<
 CCOMPILE            = $(CC)   -c $(CFLAGS)   $(CDEFINES)   $(CINCLUDES)   -Fa$(WIN32KLIST)\$(@B).s -Fo$(WIN32KOBJ)\$(@F) $<
 CPPCOMPILE          = $(CCPP) -c $(CPPFLAGS) $(CDEFINES)   $(CINCLUDES)   -Fa$(WIN32KLIST)\$(@B).s -Fo$(WIN32KOBJ)\$(@F) $<
-ASMCOMPILE          = $(AS)     $(ASFLAGS)   $(ADEFINES)   $(AINCLUDES) $< -Fl:$(WIN32KLIST)\$(@B).lst -Fo:$(WIN32KOBJ)\$(@F)
+ASMCOMPILE          = $(AS)     $(AFLAGS)    $(ADEFINES)   $(AINCLUDES) $< -Fl:$(WIN32KLIST)\$(@B).lst -Fo:$(WIN32KOBJ)\$(@F)
 
 C16COMPILE_TST      = $(CC16) -c $(CFLAGS16) $(CDEFINES16_TST) $(CINCLUDES16) -Fa$(WIN32KLIST)\$(@B).tst.s -Fo$(WIN32KOBJ)\$(@F) $<
 C16COMPILE_TST_INIT = $(CC16) -c $(CFLAGS16) $(CDEFINES16_TST) $(CINCLUDES16) -Fa$(WIN32KLIST)\$(@B).tst.s -Fo$(WIN32KOBJ)\$(@F) /NTCODE16_INIT /NDDATA16_INIT $<
@@ -291,10 +291,10 @@ SOURCEFILE  = $^.
 
 {misc}.asm{$(WIN32KOBJ)}.obj:
     @$(ECHO) assembling misc:        $(SOURCEFILE)
-    @$(ASMCOMPILE)
+    $(ASMCOMPILE)
 {misc}.asm.obj:
     @$(ECHO) assembling misc:        $(SOURCEFILE)
-    @$(ASMCOMPILE)
+    $(ASMCOMPILE)
 
 {misc}.c{$(WIN32KOBJ)}.obj:
     @$(ECHO) compiling 32bit misc:   $(SOURCEFILE)
