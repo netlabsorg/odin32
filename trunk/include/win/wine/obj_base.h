@@ -1,4 +1,4 @@
-/* $Id: obj_base.h,v 1.16 2000-03-18 17:00:47 davidr Exp $ */
+/* $Id: obj_base.h,v 1.17 2000-04-27 11:09:38 achimha Exp $ */
 /*
  * This file defines the macros and types necessary to define COM interfaces,
  * and the three most basic COM interfaces: IUnknown, IMalloc and IClassFactory.
@@ -26,7 +26,10 @@
 /*****************************************************************************
  * Defines the basic types
  */
+/* @@@AH workaround for wrc.problem */
+#ifndef RC_INVOKED
 #include <string.h>
+#endif
 #include "wtypes.h"
 
 
