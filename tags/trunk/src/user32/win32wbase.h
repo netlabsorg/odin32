@@ -1,4 +1,4 @@
-/* $Id: win32wbase.h,v 1.2 1999-09-21 08:24:05 sandervl Exp $ */
+/* $Id: win32wbase.h,v 1.3 1999-09-21 17:05:36 dengert Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -287,6 +287,19 @@ public:
          void   setOwnDC(HDC hdc) { ownDC = hdc; }
 protected:
          HDC    ownDC;
+
+         ULONG  EraseBkgndFlag:1,
+                PSEraseFlag:1,
+                SupressEraseFlag:1,
+                filler:29;
+public:
+         VOID   setEraseBkgnd (BOOL erase, BOOL PSErase = FALSE)
+                    { EraseBkgndFlag = erase; PSEraseFlag = PSErase; }
+         VOID   setSupressErase (BOOL erase = FALSE)
+                    { SupressEraseFlag = erase; }
+         BOOL   isEraseBkgnd()   { return EraseBkgndFlag; }
+         BOOL   isPSErase()      { return EraseBkgndFlag | PSEraseFlag; }
+         BOOL   isSupressErase() { return SupressEraseFlag; }
 };
 
 

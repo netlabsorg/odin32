@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.5 1999-09-21 08:24:05 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.6 1999-09-21 17:05:36 dengert Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -115,6 +115,10 @@ void Win32BaseWindow::Init()
   acceltableResource = NULL;
   menuResource       = NULL;
   iconResource       = NULL;
+
+  EraseBkgndFlag     = TRUE;
+  PSEraseFlag        = FALSE;
+  SupressEraseFlag   = FALSE;
 }
 //******************************************************************************
 //todo get rid of resources (menu, accel, icon etc)
@@ -1026,14 +1030,14 @@ ULONG Win32BaseWindow::MsgEraseBackGround(HDC hdc)
     HDC   hdcErase = hdc;
 
     if (hdcErase == 0)
-        hdcErase = GetDC(Win32Hwnd);
+        hdcErase = O32_GetDC(OS2Hwnd);
 
     if(isIcon)
         rc = SendInternalMessageA(WM_ICONERASEBKGND, hdcErase, 0);
     else
         rc = SendInternalMessageA(WM_ERASEBKGND, hdcErase, 0);
     if (hdc == 0)
-        ReleaseDC(Win32Hwnd, hdcErase);
+        O32_ReleaseDC(OS2Hwnd, hdcErase);
     return (rc);
 }
 //******************************************************************************
@@ -1179,9 +1183,6 @@ LRESULT Win32BaseWindow::DefWindowProcA(UINT Msg, WPARAM wParam, LPARAM lParam)
 
         if (!windowClass->getBackgroundBrush()) return 0;
 
-        /*  Since WM_ERASEBKGND may receive either a window dc or a    */
-        /*  client dc, the area to be erased has to be retrieved from  */
-        /*  the device context.                                    */
         rc = GetClipBox( (HDC)wParam, &rect );
         if ((rc == SIMPLEREGION) || (rc == COMPLEXREGION))
             FillRect( (HDC)wParam, &rect, windowClass->getBackgroundBrush());
@@ -1553,12 +1554,11 @@ BOOL Win32BaseWindow::SetWindowPos(HWND hwndInsertAfter, int x, int y, int cx, i
 
    dprintf (("SetWindowPos %x %x (%d,%d)(%d,%d) %x", Win32Hwnd, hwndInsertAfter, x, y, cx, cy, fuFlags));
 
-   /* Validate the flags passed in ...                   */
-   if ( fuFlags &
-        ~(SWP_NOSIZE     | SWP_NOMOVE     | SWP_NOZORDER     |
-          SWP_NOREDRAW   | SWP_NOACTIVATE | SWP_FRAMECHANGED |
-          SWP_SHOWWINDOW | SWP_HIDEWINDOW | SWP_NOCOPYBITS   |
-          SWP_NOOWNERZORDER) )
+   if (fuFlags &
+       ~(SWP_NOSIZE     | SWP_NOMOVE     | SWP_NOZORDER     |
+         SWP_NOREDRAW   | SWP_NOACTIVATE | SWP_FRAMECHANGED |
+         SWP_SHOWWINDOW | SWP_HIDEWINDOW | SWP_NOCOPYBITS   |
+         SWP_NOOWNERZORDER))
    {
       return FALSE;
    }
@@ -1566,9 +1566,6 @@ BOOL Win32BaseWindow::SetWindowPos(HWND hwndInsertAfter, int x, int y, int cx, i
    WINDOWPOS wpos;
    SWP swp, swpOld;
 
-   //****************************
-   // Set up with Windows values.
-   //****************************
    wpos.flags            = fuFlags;
    wpos.cy               = cy;
    wpos.cx               = cx;
@@ -1577,9 +1574,6 @@ BOOL Win32BaseWindow::SetWindowPos(HWND hwndInsertAfter, int x, int y, int cx, i
    wpos.hwndInsertAfter  = hwndInsertAfter;
    wpos.hwnd             = getWindowHandle();
 
-   //**********************************************
-   // Convert from Windows to PM coords and flags.
-   //**********************************************
    if(~fuFlags & (SWP_NOMOVE | SWP_NOSIZE)) {
        if (isChild())
        {
@@ -1588,21 +1582,10 @@ BOOL Win32BaseWindow::SetWindowPos(HWND hwndInsertAfter, int x, int y, int cx, i
        } else
            OSLibWinQueryWindowPos(OS2HwndFrame, &swpOld);
    }
-   OSLibMapWINDOWPOStoSWP(&wpos, &swp, &swpOld, hParent, OS2HwndFrame);
 
-   /* MapSWP can clear the SWP_MOVE and SWP_SIZE flags if the window is not
-    * being moved or sized.  If these were the only operations to be done
-    * and they have been cleared, return now.
-    */
+   OSLibMapWINDOWPOStoSWP(&wpos, &swp, &swpOld, hParent, OS2HwndFrame);
    if (swp.fl == 0)
       return TRUE;
-
-   //*********************************************************************
-   //On Windows, a WM_GETMINMAXINFO is made to the app from within this API.
-   //We'll send a WM_QUERYTRACKINFO which is translated into a WM_GETMINMAXINFO
-   //and passed on to the app. Compare the values returned with the SWP cx and
-   //cy values.  They cannot be bigger than the max nor smaller than the min.
-   //*********************************************************************
 
    if ((swp.fl & SWPOS_ZORDER) && (swp.hwndInsertBehind > HWNDOS_BOTTOM))
    {
@@ -1624,9 +1607,6 @@ BOOL Win32BaseWindow::SetWindowPos(HWND hwndInsertAfter, int x, int y, int cx, i
       swp.hwnd = OS2Hwnd;
    dprintf (("WinSetWindowPos %x %x (%d,%d)(%d,%d) %x", swp.hwnd, swp.hwndInsertBehind, swp.x, swp.y, swp.cx, swp.cy, swp.fl));
 
-   //*****************************************************************************
-   // Squibble the window.  (WinSetMultWindowPos is faster than WinSetWindowPos.)
-   //*****************************************************************************
    rc = OSLibWinSetMultWindowPos(&swp, 1);
 
    if (rc == FALSE)
@@ -1635,16 +1615,8 @@ BOOL Win32BaseWindow::SetWindowPos(HWND hwndInsertAfter, int x, int y, int cx, i
    }
    else
    {
-      /* To implement support for SWP_FRAMECHANGED_W correctly, we would need
-      ** to send a WM_NCCALCSIZE message. This means DAX would have to support
-      ** the WM_NCCALCSIZE message. I don't think DAX can support this
-      ** message because it is tightly bound with the architecture of
-      ** overlapped windows (the "just one window" architecture). However,
-      ** we *can* support the SWP_FRAMECHANGED flag by sending the window
-      ** a WM_UPDATEFRAME, which will provide the behavior of WM_NCCALCSIZE.
-      */
-//      if (fuFlags & SWP_FRAMECHANGED_W)
-//         WinSendMsg(hWindow, WM_UPDATEFRAME, (MPARAM)-1, 0);
+      if (fuFlags & SWP_FRAMECHANGED_W)
+         OSLibSendMessage (OS2HwndFrame, 0x42 /*WM_UPDATEFRAME*/, -1, 0);
    }
 
    return (rc);

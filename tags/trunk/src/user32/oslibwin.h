@@ -1,4 +1,4 @@
-/* $Id: oslibwin.h,v 1.2 1999-09-17 18:49:53 dengert Exp $ */
+/* $Id: oslibwin.h,v 1.3 1999-09-21 17:04:27 dengert Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -44,6 +44,7 @@ BOOL  OSLibWinSetWindowULong(HWND hwnd, ULONG offset, ULONG value);
 ULONG OSLibWinGetWindowULong(HWND hwnd, ULONG offset);
 
 BOOL  OSLibPostMessage(HWND hwnd, ULONG msg, ULONG wParam, ULONG lParam);
+ULONG OSLibSendMessage(HWND hwnd, ULONG msg, ULONG wParam, ULONG lParam);
 
 #define WAOS_WARNING                 0
 #define WAOS_NOTE                    1

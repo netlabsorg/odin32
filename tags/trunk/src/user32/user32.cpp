@@ -1,4 +1,4 @@
-/* $Id: user32.cpp,v 1.27 1999-09-19 13:27:48 cbratschi Exp $ */
+/* $Id: user32.cpp,v 1.28 1999-09-21 17:04:27 dengert Exp $ */
 
 /*
  * Win32 misc user32 API functions for OS/2
@@ -7,6 +7,7 @@
  * Copyright 1998 Patrick Haller
  * Copyright 1998 Peter Fitzsimmons
  * Copyright 1999 Christoph Bratschi
+ * Copyright 1999 Daniela Engert (dani@ngrt.de)
  *
  *
  * Project Odin Software License can be found in LICENSE.TXT
