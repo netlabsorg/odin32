@@ -1,10 +1,11 @@
-# $Id: setup.mak,v 1.2 2002-04-07 22:43:25 bird Exp $
+# $Id: setup.mak,v 1.3 2002-04-13 04:39:59 bird Exp $
 
 #
-# Unix-like tools for OS/2
+# Generic makefile system.
 #
 #   Setting up the build environment variables
 #
+#   Many of the variables are a subject to change from project to project.
 #
 
 
@@ -12,143 +13,169 @@
 MAKE_SETUP_INCLUDED=YES
 
 
+# -----------------------------------------------------------------------------
+# Validate the build the requested environment setup.
+# -----------------------------------------------------------------------------
 
-# -----------
-# Directories
-# -----------
-
-# Note: external makefiles are supposed to set the
-# correct *RELATIVE* path to the projects root.
-# PATH_ROOT= .., ..\.., whatever
-!ifndef PATH_ROOT
-!error fatal error: PATH_ROOT undefined.
-!endif
-
-PATH_CURRENT=$(MAKEDIR)
-PATH_MAKE=$(PATH_ROOT)\make
-PATH_TOOLS=$(PATH_ROOT)\tools\bin
-PATH_INCLUDE=$(PATH_ROOT)\include;$(PATH_ROOT)\include\win
-PATH_BIN=$(PATH_ROOT)\bin\$(BUILD_MODE)
-PATH_LIB=$(PATH_ROOT)\lib\$(BUILD_MODE)
-PATH_DLL=$(PATH_ROOT)\bin\$(BUILD_MODE)
-PATH_SYS=$(PATH_ROOT)\bin\$(BUILD_MODE)
-PATH_DOC=$(PATH_ROOT)\bin\$(BUILD_MODE)
-
-BUILD_TIMESTAMP=$(TIMESTAMP)
-
-
-# -----------------------------------------------------------------------
-# Common variables
-# We provide some variables that can be overridden by the specific setups
-# -----------------------------------------------------------------------
-
-TOOL_MAKE=$(MAKE) -nologo
-
-
-# ----------------------
-# Build the environments
-# ----------------------
-
-# BUILD_PLATFORM: OS2, WIN32, ...
-# BUILD_ENV: VAC308, VAC365, VAC4, EMX, MSC6, WATCOM
-# BUILD_MODE: RELEASE, PROFILE, DEBUG
-
-!ifndef BUILD_PLATFORM
-!error Please set BUILD_PLATFORM to OS2, WIN32, ...
-!endif
-
-!ifndef BUILD_MODE
-!error Please set BUILD_MODE to RELEASE, PROFILE, or DEBUG
-!endif
-
-!ifndef BUILD_ENV
-!error Please set BUILD_ENV to VAC308, VAC365, VAC4, EMX, MSVC6, ...
-!endif
-
-
-# ----------------------
-# Build the environments
-# ----------------------
-
-# Build the appropriate setup.xxx name from the BUILD environment variables.
-
+SHT_TRGPLTFRM=
 !if "$(BUILD_PLATFORM)" == "OS2"
-NAME_1=os2
+SHT_TRGPLTFRM=os2
 !endif
 !if "$(BUILD_PLATFORM)" == "WIN32"
-NAME_1=win32
+SHT_TRGPLTFRM=win32
 !endif
-!if "$(NAME_1)" == ""
-! error The current setting of BUILD_PLATFORM is unknown or incorrect ($(BUILD_PLATFORM)) (1)
+!if "$(SHT_TRGPLTFRM)" == ""
+! error Fatal error: Env.var BUILD_PLATFORM is either unspecified or incorrect. ($(BUILD_PLATFORM)) Valid values: OS2 and WIN32
 !endif
 
 
+SHT_BLDMD=
 !if "$(BUILD_MODE)" == "RELEASE"
-NAME_2=rel
+SHT_BLDMD=rel
 !endif
 !if "$(BUILD_MODE)" == "DEBUG"
-NAME_2=deb
+SHT_BLDMD=deb
 !endif
 !if "$(BUILD_MODE)" == "PROFILE"
-NAME_2=prf
+SHT_BLDMD=prf
 !endif
-!if "$(NAME_2)" == ""
-! error The current setting of BUILD_MODE is unknown or incorrect ($(BUILD_MODE)) (2)
+!if "$(SHT_BLDMD)" == ""
+! error Fatal error: Env.var BUILD_MODE is either unspecified or incorrect. ($(BUILD_MODE)) Valid values: RELEASE, DEBUG and PROFILE
 !endif
 
 
+SHT_BLDENV=
 !if "$(BUILD_ENV)" == "VAC308"
-NAME_3=vac308
+SHT_BLDENV=vac308
 !endif
 !if "$(BUILD_ENV)" == "VAC365"
-NAME_3=vac365
+SHT_BLDENV=vac365
 !endif
 !if "$(BUILD_ENV)" == "VAC4"
-NAME_3=vac4
+SHT_BLDENV=vac4
 !endif
 !if "$(BUILD_ENV)" == "EMX"
-NAME_3=emx
+SHT_BLDENV=emx
 !endif
 !if "$(BUILD_ENV)" == "MSCV6"
-NAME_3=mscv6
+SHT_BLDENV=mscv6
+!endif
+!if "$(BUILD_ENV)" == "WAT11"
+SHT_BLDENV=wat11
 !endif
 !if "$(BUILD_ENV)" == "WATCOM"
-NAME_3=wat11
+SHT_BLDENV=wat11
 !endif
-!if "$(NAME_3)" == ""
-! error The current setting of BUILD_ENV is unknown or incorrect ($(BUILD_ENV)) (3)
+!if "$(SHT_BLDENV)" == ""
+! error Fatal error: Env.var BUILD_ENV is either unspecified or incorrect. ($(BUILD_MODE)) Valid values: VAC308, VAC365, VAC4, EMX, MSCV6 and WATCOM
 !endif
 
 
-# build name from the fragments
-!include <$(PATH_MAKE)\setup.tools.mk>
-MAKE_INCLUDE_SETUP=$(PATH_MAKE)\setup.$(NAME_1)$(NAME_2)$(NAME_3).mk
-!if [$(ECHO) Including platform setup file $(CLRFIL)"$(MAKE_INCLUDE_SETUP)"$(CLRRST)]
+
+# -----------------------------------------------------------------------------
+# Directories
+# -----------------------------------------------------------------------------
+
+# current directory.
+PATH_CURRENT    = $(MAKEDIR)
+# Where build system files are located. (like this file)
+PATH_MAKE       = $(PATH_ROOT)\make
+# Where the bulid system and other tools are located
+PATH_TOOLS      = $(PATH_ROOT)\tools\bin
+# Where platform-specific files are located. (like the .def files)
+# (default) PATH_DEF        = $(SHT_TRGPLTFRM)
+PATH_DEF        = .
+# Where the include files are located.
+PATH_INCLUDES   = $(PATH_ROOT)\include;$(PATH_ROOT)\include\win
+
+# Where the temporary files goes.
+PATH_OBJ    = $(PATH_ROOT)\obj\$(SHT_TRGPLTFRM)$(SHT_BLDMD)$(SHT_BLDENV)
+# Where the executable binaries goes.
+PATH_BIN    = $(PATH_ROOT)\bin\$(BUILD_MODE)
+# Where the public libraries goes.
+PATH_LIB    = $(PATH_ROOT)\lib\$(BUILD_MODE)
+# Where the dynamic link libraries goes.
+PATH_DLL    = $(PATH_ROOT)\bin\$(BUILD_MODE)
+# Where the drivers goes. (common for IFS and SYS.)
+PATH_SYS    = $(PATH_ROOT)\bin\$(BUILD_MODE)
+# Where the documentation goes.
+PATH_DOC    = $(PATH_ROOT)\bin\$(BUILD_MODE)
+# Where the helpfiles goes.
+PATH_HLP    = $(PATH_ROOT)\bin\$(BUILD_MODE)
+
+
+# Note: Makefiles are supposed to set the correct *RELATIVE* path to the
+#       projects root. Using '\' slashes please. No trailing slash.
+#
+# Example:
+#       PATH_ROOT= ..\..\..
+# Assert PATH_ROOT
+!if "$(PATH_ROOT)" == ""
+!error fatal error: PATH_ROOT empty or undefined.
 !endif
-!include <$(MAKE_INCLUDE_SETUP)>
 
-# set the path name for platform-specific generated files.
-PATH_OBJ=$(PATH_ROOT)\obj\$(NAME_1)$(NAME_2)$(NAME_3)
 
-# set the path name for platform-specific definitino files.
-PATH_DEF=
+# -----------------------------------------------------------------------------
+# Common variables / Project variables
+# -----------------------------------------------------------------------------
 
-# ensure this path exists
-!if "$(PATH_OBJ)" != ""
-! if [$(TOOL_EXISTS) $(PATH_OBJ)] != 0
-!  if [$(ECHO) Target path $(PATH_OBJ) does NOT exist. Creating. $(CLRRST)]
-!  endif
-!  if [$(TOOL_CREATEPATH) $(PATH_OBJ)]
-!   error Could not create $(PATH_OBJ)
-!  endif
+# The default definitions.
+BUILD_DEFINES = -D__WIN32OS2__ -D__WINE__ -D__i386__
+
+# This is the process file to include at end of the makefile.
+MAKE_INCLUDE_PROCESS    = $(PATH_MAKE)\process.mak
+
+
+
+# -----------------------------------------------------------------------------
+# Build the environments
+# -----------------------------------------------------------------------------
+
+# EXPERIMENTAL
+!if 0
+# These strings are passed on to the BuildEnv.cmd script to setup
+# the correct environment.
+BUILD_ENVS_BASE_POST    = toolkit40
+BUILD_ENVS_BASE_PRE     =
+
+# Check for forced change in default compiler environment.
+!ifdef BUILD_ENV_FORCE
+!if "$(BUILD_ENV)" != "$(BUILD_ENV_FORCE)" || "$(BUILD_ENVS_PRE)" != "" || "$(BUILD_ENVS_POST)" != ""
+#
+# Remove old compiler and insert new compiler into the environment.
+# The individual makefiles requests changes using BUILD_ENVS_[PRE|POST].
+#
+!if [echo call $(PATH_TOOLS)\BuildEnv.cmd $(BUILD_ENV)- $(BUILD_ENVS_BASE_PRE) $(BUILD_ENVS_PRE) $(BUILD_ENV_FORCE) $(BUILD_ENVS_BASE_POST) $(BUILD_ENVS_POST)]
+!endif
+!if [call $(PATH_TOOLS)\BuildEnv.cmd $(BUILD_ENV)- $(BUILD_ENVS_BASE_PRE) $(BUILD_ENVS_PRE) $(BUILD_ENV_FORCE) $(BUILD_ENVS_BASE_POST) $(BUILD_ENVS_POST)]
+!endif
+#BUILD_ENV = $(BUILD_ENV_FORCE)
+!endif
+!endif
+
+!endif
+
+
+
+# -----------------------------------------------------------------------------
+# Include the setup.
+#   First the default common tools setup is included.
+#   The the environment specific setup.
+# -----------------------------------------------------------------------------
+
+!include $(PATH_MAKE)\setup.tools.mk
+
+MAKE_INCLUDE_SETUP = $(PATH_MAKE)\setup.$(SHT_TRGPLTFRM)$(SHT_BLDMD)$(SHT_BLDENV).mk
+!ifndef BUILD_QUIET
+! if [$(ECHO) Including platform setup file $(CLRFIL)"$(MAKE_INCLUDE_SETUP)"$(CLRRST)]
 ! endif
 !endif
+!include $(MAKE_INCLUDE_SETUP)
 
 
-# -----------------------
-# Verify the environments
-# Note: "foreach" is not used to provide compatibility with older NMAKEs.
-# -----------------------
+# -----------------------------------------------------------------------------
+# Verify the environment setups.
+# -----------------------------------------------------------------------------
 
 !ifndef ENV_NAME
 !error No environment signature has been defined ($(NAME_COMPLETE))
@@ -166,10 +193,6 @@ PATH_DEF=
 !error Environment $(ENV_NAME) does not define variable (CC).
 !endif
 
-!ifndef CD
-!error Environment $(ENV_NAME) does not define variable (CD).
-!endif
-
 !ifndef CC_FLAGS_EXE
 !error Environment $(ENV_NAME) does not define variable (CC_FLAGS_EXE).
 !endif
@@ -183,10 +206,21 @@ PATH_DEF=
 !endif
 
 
-# -----------------------------------------
-# Now we setup some final, common variables
-# -----------------------------------------
-MAKE_INCLUDE_PROCESS=$(PATH_MAKE)\process.mak
+# -----------------------------------------------------------------------------
+# Ensure the output path exists
+# -----------------------------------------------------------------------------
+!if "$(PATH_OBJ)" != ""
+! if [$(TOOL_EXISTS) $(PATH_OBJ)] != 0
+!  ifndef BUILD_QUIET
+!   if [$(ECHO) Target path $(PATH_OBJ) does NOT exist. Creating. $(CLRRST)]
+!   endif
+!  endif
+!  if [$(TOOL_CREATEPATH) $(PATH_OBJ)]
+!   error Fatal error: Could not create $(PATH_OBJ).
+!  endif
+! endif
+!endif
 
 
 !endif MAKE_SETUP_INCLUDED
+

@@ -1,4 +1,4 @@
-# $Id: setup.tools.mk,v 1.2 2002-04-07 22:43:27 bird Exp $
+# $Id: setup.tools.mk,v 1.3 2002-04-13 04:40:01 bird Exp $
 
 #
 # Standard tools - may be overridden by compiler specific setupfiles.
@@ -9,8 +9,8 @@ TOOL_DODIRS=$(PATH_TOOLS)\dodirs.cmd
 TOOL_DOMAKES=$(PATH_TOOLS)\domakes.cmd
 TOOL_MAKE=$(MAKE) -nologo
 TOOL_DEP=$(PATH_TOOLS)\fastdep.exe
-TOOL_DEP_FLAGS=-i $(PATH_INCLUDE) $(CC_INCLUDES) $(CXX_INCLUDES) $(AS_INCLUDES) $(ALL_INCLUDES)
-TOOL_DEP_FILES=*.c *.cpp *.asm *.h *.rc *.dlg
+TOOL_DEP_FLAGS=$(CC_INCLUDES) $(CXX_INCLUDES) $(AS_INCLUDES) $(ALL_INCLUDES) -i$(PATH_INCLUDES:;= -i)
+TOOL_DEP_FILES=*.c *.cpp *.asm *.h *.rc *.dlg *.orc *.inc *.ipf
 TOOL_CREATEPATH=$(PATH_TOOLS)\CreatePath.cmd
 TOOL_EXISTS=$(PATH_TOOLS)\Exists.cmd
 TOOL_CMP=$(PATH_TOOLS)\cmp.exe
@@ -45,7 +45,7 @@ ECHO=@echo $(CLRTXT)
 
 #
 # Default Extensions.
-# 
+#
 EXT_OBJ = obj
 EXT_LIB = lib
 EXT_ILIB= lib
