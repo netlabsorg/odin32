@@ -1,4 +1,4 @@
-/* $Id: registry.cpp,v 1.3 2000-09-05 20:35:39 sandervl Exp $ */
+/* $Id: registry.cpp,v 1.4 2000-10-02 22:17:33 sandervl Exp $ */
 
 /*
  * Win32 registry API functions for OS/2
@@ -84,7 +84,7 @@ static HKEY ConvertKey(HKEY winkey)
 
 ODINFUNCTION1(LONG,RegCloseKey,HKEY,hKey)
 {
-  return _O32_RegCloseKey(ConvertKey(hKey));
+  return O32_RegCloseKey(ConvertKey(hKey));
 }
 
 
@@ -105,7 +105,7 @@ ODINFUNCTION3(LONG,RegCreateKeyA,HKEY,  hKey,
                                  PHKEY, phkResult)
 {
   dprintf(("RegCreateKeyA %x %s", hKey, lpszSubKey));
-  return _O32_RegCreateKey(ConvertKey(hKey),
+  return O32_RegCreateKey(ConvertKey(hKey),
                           lpszSubKey,
                           phkResult);
 }
@@ -131,7 +131,7 @@ ODINFUNCTION3(LONG,RegCreateKeyW,HKEY,   hKey,
   LONG  rc;
 
   dprintf(("RegCreateKeyW %x %s", hKey, astring));
-  rc = _O32_RegCreateKey(ConvertKey(hKey),
+  rc = O32_RegCreateKey(ConvertKey(hKey),
                         astring,
                         phkResult);
 
@@ -164,7 +164,7 @@ ODINFUNCTION9(LONG,RegCreateKeyExA,HKEY,                 hKey,
 {
   dprintf(("RegCreateKeyExA %x %s", hKey, lpszSubKey));
 
-  return _O32_RegCreateKeyEx(ConvertKey(hKey),
+  return O32_RegCreateKeyEx(ConvertKey(hKey),
                              lpszSubKey,
                              dwReserved,
                              lpszClass,
@@ -204,7 +204,7 @@ ODINFUNCTION9(LONG,RegCreateKeyExW,HKEY,                 hKey,
 
   dprintf(("RegCreateKeyExW %x %s", hKey, astring1));
 
-  rc = _O32_RegCreateKeyEx(ConvertKey(hKey),
+  rc = O32_RegCreateKeyEx(ConvertKey(hKey),
                           astring1,
                           dwReserved,
                           astring2,
@@ -239,7 +239,7 @@ ODINFUNCTION2(LONG,RegDeleteKeyW,HKEY,  hKey,
   LONG  rc;
 
   dprintf(("RegDeleteKeyW %s", astring));
-  rc = _O32_RegDeleteKey(ConvertKey(hKey),
+  rc = O32_RegDeleteKey(ConvertKey(hKey),
                         astring);
   FreeAsciiString(astring);
   return(rc);
@@ -262,7 +262,7 @@ ODINFUNCTION2(LONG,RegDeleteKeyA,HKEY,  hKey,
                                  LPCSTR,lpszSubKey)
 {
   dprintf(("RegDeleteKeyW %s", lpszSubKey));
-  return _O32_RegDeleteKey(ConvertKey(hKey),
+  return O32_RegDeleteKey(ConvertKey(hKey),
                           lpszSubKey);
 }
 
@@ -282,7 +282,7 @@ ODINFUNCTION2(LONG,RegDeleteKeyA,HKEY,  hKey,
 ODINFUNCTION2(LONG,RegDeleteValueA,HKEY, hKey,
                                    LPSTR,lpszValue)
 {
-  return _O32_RegDeleteValue(ConvertKey(hKey),
+  return O32_RegDeleteValue(ConvertKey(hKey),
                             lpszValue);
 }
 
@@ -305,7 +305,7 @@ ODINFUNCTION2(LONG,RegDeleteValueW,HKEY,  hKey,
   char *astring = UnicodeToAsciiString(lpszValue);
   LONG  rc;
 
-  rc = _O32_RegDeleteValue(ConvertKey(hKey),
+  rc = O32_RegDeleteValue(ConvertKey(hKey),
                           astring);
   FreeAsciiString(astring);
   return(rc);
@@ -329,7 +329,7 @@ ODINFUNCTION4(LONG,RegEnumKeyA,HKEY, hKey,
                                LPSTR,lpszName,
                                DWORD,cchName)
 {
-  return _O32_RegEnumKey(ConvertKey(hKey),
+  return O32_RegEnumKey(ConvertKey(hKey),
                         iSubKey,
                         lpszName,
                         cchName);
@@ -356,7 +356,7 @@ ODINFUNCTION4(LONG,RegEnumKeyW,HKEY,  hKey,
   char *astring;
   LONG  rc;
 
-  rc = _O32_RegEnumKey(ConvertKey(hKey),
+  rc = O32_RegEnumKey(ConvertKey(hKey),
                       iSubKey,
                       (char *)lpszName,
                       cchName);
@@ -392,7 +392,7 @@ ODINFUNCTION8(LONG,RegEnumKeyExA,HKEY,      arg1,
                                  LPDWORD,   arg7,
                                  LPFILETIME,arg8)
 {
-  return _O32_RegEnumKeyEx(ConvertKey(arg1),
+  return O32_RegEnumKeyEx(ConvertKey(arg1),
                           arg2,
                           arg3,
                           arg4,
@@ -427,7 +427,7 @@ ODINFUNCTION8(LONG,RegEnumKeyExW,HKEY,      arg1,
   char *astring;
   LONG  rc;
 
-  rc = _O32_RegEnumKeyEx(ConvertKey(arg1),
+  rc = O32_RegEnumKeyEx(ConvertKey(arg1),
                         arg2,
                         (char *)arg3,
                         arg4,
@@ -472,7 +472,7 @@ ODINFUNCTION8(LONG,RegEnumValueA,HKEY,   arg1,
                                  LPBYTE, arg7,
                                  LPDWORD,arg8)
 {
-  return _O32_RegEnumValue(ConvertKey(arg1),
+  return O32_RegEnumValue(ConvertKey(arg1),
                           arg2,
                           arg3,
                           arg4,
@@ -507,7 +507,7 @@ ODINFUNCTION8(LONG,RegEnumValueW,HKEY,   arg1,
   char *astring;
   LONG  rc;
 
-  rc = _O32_RegEnumValue(ConvertKey(arg1),
+  rc = O32_RegEnumValue(ConvertKey(arg1),
                         arg2,
                         (char *)arg3,
                         arg4,
@@ -546,7 +546,7 @@ ODINFUNCTION3(LONG,RegOpenKeyA,HKEY,  arg1,
 
   dprintf(("RegOpenKey %s", arg2));
 
-  rc = _O32_RegOpenKey(ConvertKey(arg1),
+  rc = O32_RegOpenKey(ConvertKey(arg1),
                       arg2,
                       arg3);
   if(rc)
@@ -575,7 +575,7 @@ ODINFUNCTION3(LONG,RegOpenKeyW,HKEY,   arg1,
   char *astring = UnicodeToAsciiString((LPWSTR)arg2);
   LONG  rc;
 
-  rc = _O32_RegOpenKey(ConvertKey(arg1),
+  rc = O32_RegOpenKey(ConvertKey(arg1),
                       astring,
                       arg3);
   if(rc)
@@ -607,7 +607,7 @@ ODINFUNCTION5(LONG,RegOpenKeyExA,HKEY,  arg1,
   LONG rc;
 
   dprintf(("RegOpenKeyEx %s", arg2));
-  rc = _O32_RegOpenKeyEx(ConvertKey(arg1),
+  rc = O32_RegOpenKeyEx(ConvertKey(arg1),
                         arg2,
                         arg3,
                         arg4,
@@ -643,7 +643,7 @@ ODINFUNCTION5(LONG,RegOpenKeyExW,HKEY,   arg1,
   char *astring = UnicodeToAsciiString((LPWSTR)arg2);
   LONG  rc;
 
-  rc = _O32_RegOpenKeyEx(ConvertKey(arg1),
+  rc = O32_RegOpenKeyEx(ConvertKey(arg1),
                         astring,
                         arg3,
                         arg4,
@@ -683,7 +683,7 @@ ODINFUNCTION12(LONG,RegQueryInfoKeyA,HKEY,       arg1,
                                       LPDWORD,    arg11,
                                       LPFILETIME, arg12)
 {
-  return _O32_RegQueryInfoKey(ConvertKey(arg1),
+  return O32_RegQueryInfoKey(ConvertKey(arg1),
                              arg2,
                              arg3,
                              arg4,
@@ -726,7 +726,7 @@ ODINFUNCTION12(LONG,RegQueryInfoKeyW,HKEY,       arg1,
   char *astring;
   LONG  rc;
 
-  rc = _O32_RegQueryInfoKey(ConvertKey(arg1),
+  rc = O32_RegQueryInfoKey(ConvertKey(arg1),
                            (char *)arg2,
                            arg3,
                            arg4,
@@ -771,7 +771,7 @@ ODINFUNCTION4(LONG,RegQueryValueA,HKEY,  arg1,
 {
   dprintf(("ADVAPI32:Registry key=%s\n",
            arg2));
-  return _O32_RegQueryValue(ConvertKey(arg1),
+  return O32_RegQueryValue(ConvertKey(arg1),
                            arg2,
                            arg3,
                            arg4);
@@ -799,7 +799,7 @@ ODINFUNCTION4(LONG,RegQueryValueW,HKEY,   hkey,
   char *astring2;
   LONG  rc;
 
-  rc = _O32_RegQueryValue(ConvertKey(hkey),
+  rc = O32_RegQueryValue(ConvertKey(hkey),
                          astring1,
                          (char *)lpszValue,
                          pcbValue);
@@ -838,7 +838,7 @@ ODINFUNCTION6(LONG,RegQueryValueExA,HKEY,   arg1,
 {
   dprintf(("ADVAPI32:Registry key=%s\n",
            arg2));
-  return _O32_RegQueryValueEx(ConvertKey(arg1),
+  return O32_RegQueryValueEx(ConvertKey(arg1),
                              arg2,
                              arg3,
                              arg4,
@@ -869,7 +869,7 @@ ODINFUNCTION6(LONG,RegQueryValueExW,HKEY,   arg1,
   char *astring = UnicodeToAsciiString(arg2);
   LONG  rc;
 
-  rc = _O32_RegQueryValueEx(ConvertKey(arg1),
+  rc = O32_RegQueryValueEx(ConvertKey(arg1),
                            astring,
                            arg3,
                            arg4,
@@ -904,7 +904,7 @@ ODINFUNCTION5(LONG,RegSetValueA,HKEY,  hkey,
   if(cbData == 0)
     cbData = strlen(lpData);
 
-  rc = _O32_RegSetValue(ConvertKey(hkey),
+  rc = O32_RegSetValue(ConvertKey(hkey),
                          lpSubKey,
                          dwType,
                          lpData,
@@ -913,7 +913,7 @@ ODINFUNCTION5(LONG,RegSetValueA,HKEY,  hkey,
   {
     char regdata = 0;
 	//SvL: Netscape sets an empty string key this way; Open32 doesn't like it
-	rc = _O32_RegSetValue(ConvertKey(hkey),
+	rc = O32_RegSetValue(ConvertKey(hkey),
                          lpSubKey,
                          dwType,
                          &regdata,
@@ -949,7 +949,7 @@ ODINFUNCTION5(LONG,RegSetValueW,HKEY,   hkey,
   if(cbData == 0)
     cbData = strlen(astring2);
 
-  rc = _O32_RegSetValue(ConvertKey(hkey),
+  rc = O32_RegSetValue(ConvertKey(hkey),
                        astring1,
                        dwType,
                        astring2,
@@ -980,7 +980,7 @@ ODINFUNCTION6(LONG,RegSetValueExA,HKEY,  arg1,
                                   BYTE*, arg5,
                                   DWORD, arg6)
 {
-  return _O32_RegSetValueEx(ConvertKey(arg1),
+  return O32_RegSetValueEx(ConvertKey(arg1),
                            arg2,
                            arg3,
                            arg4,
@@ -1019,7 +1019,7 @@ ODINFUNCTION6(LONG,RegSetValueExW,HKEY,  arg1,
            arg5,
            arg6));
 
-  rc = _O32_RegSetValueEx(ConvertKey(arg1),
+  rc = O32_RegSetValueEx(ConvertKey(arg1),
                          astring,
                          arg3,
                          arg4,
