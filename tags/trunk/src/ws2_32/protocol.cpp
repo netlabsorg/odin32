@@ -1,4 +1,4 @@
-/* $Id: protocol.cpp,v 1.1 2002-03-08 11:36:11 sandervl Exp $ */
+/* $Id: protocol.cpp,v 1.2 2002-03-09 16:07:11 achimha Exp $ */
 /*
  * based on Windows Sockets 1.1 specs
  * (ftp.microsoft.com:/Advsys/winsock/spec11/WINSOCK.TXT)
@@ -27,7 +27,7 @@
 #include <odinwrap.h>
 #include <wchar.h>
 
-#include "nspapi.h"
+//#include "nspapi.h"
 
 ODINDEBUGCHANNEL(WS2_32-PROTOCOL)
 
