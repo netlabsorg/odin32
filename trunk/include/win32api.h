@@ -1,4 +1,4 @@
-/* $Id: win32api.h,v 1.13 2000-06-08 18:11:02 sandervl Exp $ */
+/* $Id: win32api.h,v 1.14 2000-06-14 13:19:44 sandervl Exp $ */
 
 /*
  *
@@ -105,5 +105,7 @@ int     WIN32API GetDeviceCaps(HDC hdc, int nIndex);
 int     WIN32API GetMapMode(HDC hdc);
 BOOL    WIN32API DPtoLP(HDC,LPPOINT,INT);
 BOOL    WIN32API RedrawWindow(HWND,const RECT*,HRGN, DWORD);
+HGDIOBJ WIN32API SelectObject(HDC,HGDIOBJ);
+BOOL    WIN32API DeleteObject(HANDLE hObj);
 
 #endif
