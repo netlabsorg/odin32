@@ -1,123 +1,143 @@
-# $Id: makefile,v 1.5 2000-03-04 19:30:05 bird Exp $
+# $Id: makefile,v 1.6 2000-03-07 11:12:31 bird Exp $
+
 #
-# PD-Win32
+# Odin32 API
 #
 # Makefile for Mesa OpenGL
 #
 
+# Directory macros.
 PDWIN32_INCLUDE = ..\..\..\include
-PDWIN32_LIB = ..\..\..\lib
-PDWIN32_BIN = ..\..\..\bin
-PDWIN32_TOOLS = ..\..\..\tools\bin
+PDWIN32_LIB     = ..\..\..\lib
+PDWIN32_BIN     = ..\..\..\$(OBJDIR)
+PDWIN32_TOOLS   = ..\..\..\tools\bin
 
+
+# Compiler, tools, and interference rules.
 !include $(PDWIN32_INCLUDE)/pdwin32.mk
+
+# Flag overloads and local macros.
+CLEANEXTRAS = lz32rsrc.asm
+
 
 MESADEFS = -DNO_PARALLEL -DNO_STEREO -DGL_MESA_window_pos -DTHREADS -DDIVE \
            -DUSE_X86_ASM -DUSE_MMX_ASM -DUSE_3DNOW_ASM_NOT
+CFLAGS   = -I. -IGL $(CFLAGS_WIN32APP)   -I..\glut $(MESADEFS) /Tdp /Wcnd-
+CXXFLAGS = -I. -IGL $(CXXFLAGS_WIN32APP) -I..\glut $(MESADEFS) /Tdp /Wcnd-
 
-CFLAGS   = -I. -IGL $(CFLAGS_WIN32APP)   -I$(PDWIN32_INCLUDE) -I..\glut $(MESADEFS) /Tdp /Wcnd-
-CXXFLAGS = -I. -IGL $(CXXFLAGS_WIN32APP) -I$(PDWIN32_INCLUDE) -I..\glut $(MESADEFS) /Tdp /Wcnd-
 
-TARGET = OPENGL32
-
-all: $(TARGET).DLL $(TARGET).LIB
-
-lib: $(TARGET).lib
-
+# Object files. All objects should be prefixed with $(OBJDIR)!
 OBJS = \
-  wgl.obj \
-  accum.obj \
-  alpha.obj \
-  alphabuf.obj \
-  api1.obj \
-  api2.obj \
-  apiext.obj \
-  attrib.obj \
-  bbox.obj \
-  bitmap.obj \
-  blend.obj \
-  clip.obj \
-  colortab.obj \
-  config.obj \
-  context.obj \
-  copypix.obj \
-  cva.obj \
-  depth.obj \
-  dlist.obj \
-  drawpix.obj \
-  enable.obj \
-  enums.obj \
-  eval.obj \
-  extensions.obj \
-  feedback.obj \
-  fog.obj \
-  get.obj \
-  glmisc.obj \
-  hash.obj \
-  image.obj \
-  light.obj \
-  lines.obj \
-  logic.obj \
-  masking.obj \
-  matrix.obj \
-  mmath.obj \
-  pb.obj \
-  pixel.obj \
-  pipeline.obj \
-  points.obj \
-  pointers.obj \
-  polygon.obj \
-  quads.obj \
-  rastpos.obj \
-  readpix.obj \
-  rect.obj \
-  scissor.obj \
-  shade.obj \
-  span.obj \
-  stages.obj \
-  stencil.obj \
-  teximage.obj \
-  texobj.obj \
-  texstate.obj \
-  translate.obj \
-  triangle.obj \
-  varray.obj \
-  vb.obj \
-  vbcull.obj \
-  vbfill.obj \
-  vbindirect.obj \
-  vbrender.obj \
-  vbxform.obj \
-  vector.obj \
-  vertices.obj \
-  winpos.obj \
-  xform.obj \
-  zoom.obj \
-  x86.obj \
-  common_x86.obj \
-  initterm.obj \
-  texture.obj \
-  mthreads.obj \
-  wmesa.obj \
-  x86a.obj \
-  vertex.obj \
-  mmx_blend.obj \
-  osmesa.obj \
-  resource.obj \
-  mesadive.obj \
-  internal.obj
+$(OBJDIR)\wgl.obj \
+$(OBJDIR)\accum.obj \
+$(OBJDIR)\alpha.obj \
+$(OBJDIR)\alphabuf.obj \
+$(OBJDIR)\api1.obj \
+$(OBJDIR)\api2.obj \
+$(OBJDIR)\apiext.obj \
+$(OBJDIR)\attrib.obj \
+$(OBJDIR)\bbox.obj \
+$(OBJDIR)\bitmap.obj \
+$(OBJDIR)\blend.obj \
+$(OBJDIR)\clip.obj \
+$(OBJDIR)\colortab.obj \
+$(OBJDIR)\config.obj \
+$(OBJDIR)\context.obj \
+$(OBJDIR)\copypix.obj \
+$(OBJDIR)\cva.obj \
+$(OBJDIR)\depth.obj \
+$(OBJDIR)\dlist.obj \
+$(OBJDIR)\drawpix.obj \
+$(OBJDIR)\enable.obj \
+$(OBJDIR)\enums.obj \
+$(OBJDIR)\eval.obj \
+$(OBJDIR)\extensions.obj \
+$(OBJDIR)\feedback.obj \
+$(OBJDIR)\fog.obj \
+$(OBJDIR)\get.obj \
+$(OBJDIR)\glmisc.obj \
+$(OBJDIR)\hash.obj \
+$(OBJDIR)\image.obj \
+$(OBJDIR)\light.obj \
+$(OBJDIR)\lines.obj \
+$(OBJDIR)\logic.obj \
+$(OBJDIR)\masking.obj \
+$(OBJDIR)\matrix.obj \
+$(OBJDIR)\mmath.obj \
+$(OBJDIR)\pb.obj \
+$(OBJDIR)\pixel.obj \
+$(OBJDIR)\pipeline.obj \
+$(OBJDIR)\points.obj \
+$(OBJDIR)\pointers.obj \
+$(OBJDIR)\polygon.obj \
+$(OBJDIR)\quads.obj \
+$(OBJDIR)\rastpos.obj \
+$(OBJDIR)\readpix.obj \
+$(OBJDIR)\rect.obj \
+$(OBJDIR)\scissor.obj \
+$(OBJDIR)\shade.obj \
+$(OBJDIR)\span.obj \
+$(OBJDIR)\stages.obj \
+$(OBJDIR)\stencil.obj \
+$(OBJDIR)\teximage.obj \
+$(OBJDIR)\texobj.obj \
+$(OBJDIR)\texstate.obj \
+$(OBJDIR)\translate.obj \
+$(OBJDIR)\triangle.obj \
+$(OBJDIR)\varray.obj \
+$(OBJDIR)\vb.obj \
+$(OBJDIR)\vbcull.obj \
+$(OBJDIR)\vbfill.obj \
+$(OBJDIR)\vbindirect.obj \
+$(OBJDIR)\vbrender.obj \
+$(OBJDIR)\vbxform.obj \
+$(OBJDIR)\vector.obj \
+$(OBJDIR)\vertices.obj \
+$(OBJDIR)\winpos.obj \
+$(OBJDIR)\xform.obj \
+$(OBJDIR)\zoom.obj \
+$(OBJDIR)\x86.obj \
+$(OBJDIR)\common_x86.obj \
+$(OBJDIR)\initterm.obj \
+$(OBJDIR)\texture.obj \
+$(OBJDIR)\mthreads.obj \
+$(OBJDIR)\wmesa.obj \
+$(OBJDIR)\x86a.obj \
+$(OBJDIR)\vertex.obj \
+$(OBJDIR)\mmx_blend.obj \
+$(OBJDIR)\osmesa.obj \
+$(OBJDIR)\mesadive.obj \
+$(OBJDIR)\internal.obj \
+$(OBJDIR)\mesarsrc.obj
 
-resource.asm: $(TARGET).rc
-    $(RC) $(RCFLAGS) -o resource.asm $(TARGET).rc
 
-$(TARGET).DLL: $(OBJS) $(TARGET).lrf $(TARGET).def
-    -$(LD2) /FREE $(LD2FLAGS) @$(TARGET).lrf
-    $(CP) $@ $(PDWIN32_BIN)
 
-$(TARGET).lrf: makefile
-  @echo Creating file <<$(@B).lrf
+# Target name - name of the dll without extention and path.
+TARGET = opengl32
+
+
+# All rule - build objs, target dll, copies dll to bin and makes libs.
+all:    $(OBJDIR) \
+        $(OBJDIR)\$(TARGET).dll \
+        $(PDWIN32_BIN)\$(TARGET).dll \
+        lib
+
+
+# Lib rule - build importlibrary (and evt. other libs)
+lib: $(TARGET).lib $(PDWIN32_LIB)\$(TARGET).lib
+
+
+# Dll rule - builds the target dll.
+$(OBJDIR)\$(TARGET).dll: $(OBJS) $(TARGET).def $(OBJDIR)\$(TARGET).lrf
+    -4 $(LD2) $(LD2FLAGS) @$(OBJDIR)\$(TARGET).lrf
+
+
+# Linker file - creates the parameter file passed on to the linker.
+$(OBJDIR)\$(TARGET).lrf: makefile
+    @echo Creating file <<$@
+/OUT:$(OBJDIR)\$(TARGET).dll
+/MAP:$(OBJDIR)\$(TARGET).map
 $(OBJS)
-/OUT:$(TARGET).DLL
 $(PDWIN32_LIB)\ODINCRT.LIB
 $(PDWIN32_LIB)\KERNEL32.LIB
 $(PDWIN32_LIB)\GDI32.LIB
@@ -128,23 +148,14 @@ MMPM2.LIB
 $(TARGET).def
 <<keep
 
-$(TARGET).lib: $(TARGET)exp.def
-    $(IMPLIB) $(IMPLIBFLAGS) $@ $(TARGET)exp.def
-    $(CP) $@ $(PDWIN32_LIB)
-
-$(TARGET)exp.def: $(TARGET).def
-    $(IMPDEF) $** $@
 
 
+# Dep rule - makes depenencies for C, C++ and Asm files.
 dep:
     $(DEPEND) -I$(PDWIN32_INCLUDE);$(PDWIN32_INCLUDE)\win -IGL \
         *.c *.cpp *.h *.asm *.inc $(PDWIN32_INCLUDE)\*.h
 
-!ifndef NODEP
-!include .depend
-!endif
 
-clean:
-    $(RM) *.obj *.dll *.lib *.lrf resource.asm  $(TARGET)exp.def \
-        $(PDWIN32_BIN)\$(TARGET).dll $(PDWIN32_LIB)\$(TARGET).lib
+# Includes the common rules.
+!include $(PDWIN32_INCLUDE)/pdwin32.post
 
