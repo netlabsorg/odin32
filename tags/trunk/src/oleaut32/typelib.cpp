@@ -1,4 +1,4 @@
-/* $Id: typelib.cpp,v 1.9 2000-01-05 19:44:34 sandervl Exp $ */
+/* $Id: typelib.cpp,v 1.10 2000-01-09 14:12:19 davidr Exp $ */
 /* 
  * ITypelib interface
  * 
@@ -1060,8 +1060,6 @@ void TypeLibExtract::ParseTypeInfo(ITypeInfoImpl * pTypeInfo, TLBTypeInfoBase * 
     pTypeInfo->TypeAttr.wMinorVerNum = HIWORD(pBase->version);
     pTypeInfo->TypeAttr.cImplTypes = pBase->cImplTypes;
     pTypeInfo->TypeAttr.cbSizeVft = pBase->cbSizeVft; // FIXME: this is only the non inherited part
-    if (pTypeInfo->TypeAttr.typekind  == TKIND_ALIAS)
-        GetTypedesc(pBase->datatype1, &pTypeInfo->TypeAttr.tdescAlias) ;
 
     /*  FIXME: */
     /*    IDLDESC  idldescType; *//* never saw this one ! =  zero  */
@@ -1077,12 +1075,39 @@ void TypeLibExtract::ParseTypeInfo(ITypeInfoImpl * pTypeInfo, TLBTypeInfoBase * 
      * library. Further HelpString and Docstring appear to be the same thing :(
      */
 
+    // ImplTypes {DR: not sure this is OK yet}
+    switch(pTypeInfo->TypeAttr.typekind)
+    {
+	case TKIND_ALIAS:
+	    GetTypedesc(pBase->datatype1, &pTypeInfo->TypeAttr.tdescAlias) ;
+	    break;
+
+	case TKIND_COCLASS:
+	    ParseImplemented(pTypeInfo, pBase);
+	    break;
+
+	case TKIND_DISPATCH:
+	    break;
+
+	default:
+	    if (pBase->datatype1 != 0xffffffff)
+	    {
+		TLBRefType *	pNew = new TLBRefType;
+		memset(pNew, 0, sizeof(*pNew));	// Ensure that unset fields get nulled out.
+
+		ParseReference(pBase->datatype1, pNew);
+		pTypeInfo->pImplements.AddAtEnd(pNew);
+	    }
+	
+    }
+
 #if defined(DEBUG)	    
     dprintfLine2();
     dprintf((LOG, "TypeInfo        %s", pTypeInfo->szName));
     dprintf((LOG, "  .typeKind:    %08x (%s)", pTypeInfo->TypeAttr.typekind,
 						TypeKindAsString(pTypeInfo->TypeAttr.typekind)));
     char	guid[128];
+    char	buf[1024];
     WINE_StringFromCLSID(&pTypeInfo->TypeAttr.guid, guid);
     dprintf((LOG, "  .GUID:        %s", guid));
     dprintf((LOG, "  .lcid:        %08x", pTypeInfo->TypeAttr.lcid));
@@ -1097,28 +1122,34 @@ void TypeLibExtract::ParseTypeInfo(ITypeInfoImpl * pTypeInfo, TLBTypeInfoBase * 
     dprintf((LOG, "  .MinorVerNum: %08x", pTypeInfo->TypeAttr.wMinorVerNum));
     dprintf((LOG, "  .cImplTypes:  %08x", pTypeInfo->TypeAttr.cImplTypes));
     dprintf((LOG, "  .cbSizeVft:   %08x", pTypeInfo->TypeAttr.cbSizeVft));
+    if (pTypeInfo->TypeAttr.typekind == TKIND_ALIAS)
+    {
+	sprintfTypeDesc(buf, &pTypeInfo->TypeAttr.tdescAlias);
+	dprintf((LOG, "  .tdesc        %s", buf));
+    }
+    dprintf((LOG, "  .DocString    %s", pTypeInfo->szDocString));
+    dprintf((LOG, "  .HelpStrCtx   %08x", pTypeInfo->lHelpStringContext));
+    dprintf((LOG, "  .HelpCtx      %08x", pTypeInfo->lHelpContext));
+
+    dprintf((LOG, "pBase"));
+    dprintf((LOG, "  .res2         %08x", pBase->res2));
+    dprintf((LOG, "  .res3         %08x", pBase->res3));
+    dprintf((LOG, "  .res4         %08x", pBase->res4));
+    dprintf((LOG, "  .res5         %08x", pBase->res5));
+    dprintf((LOG, "  .res7         %08x", pBase->res7));
+    dprintf((LOG, "  .res8         %08x", pBase->res8));
+    dprintf((LOG, "  .res9         %08x", pBase->res9));
+    dprintf((LOG, "  .resA         %08x", pBase->resA));
+    dprintf((LOG, "  .datatype1    %08x", pBase->datatype1));
+    dprintf((LOG, "  .datatype2    %08x", pBase->datatype2));
+    dprintf((LOG, "  .res18        %08x", pBase->res18));
+    dprintf((LOG, "  .res19        %08x", pBase->res19));
+
 #endif
 
     // Functions/
     ParseMembers(pTypeInfo, pBase);
 
-    // ImplTypes {DR: not sure this is OK yet}
-    if (pTypeInfo->TypeAttr.typekind == TKIND_COCLASS)
-	ParseImplemented(pTypeInfo, pBase);
-
-    // RefTypes {DR: not sure this is OK yet}
-    else if (pTypeInfo->TypeAttr.typekind != TKIND_DISPATCH)
-    {
-	if (pBase->datatype1 != 0xffffffff)
-	{
-	    TLBRefType *	pNew = new TLBRefType;
-	    memset(pNew, 0, sizeof(*pNew));	// Ensure that unset fields get nulled out.
-
-	    dprintf((LOG, "Datatype1:      %08x", pBase->datatype1));
-	    ParseReference(pBase->datatype1, pNew);
-	    pTypeInfo->pImplements.AddAtEnd(pNew);
-	}
-    }
 
     // Load Custom data
     ParseCustomData(pBase->oCustData, &pTypeInfo->pCustData);
