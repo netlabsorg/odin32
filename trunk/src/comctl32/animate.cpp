@@ -1,4 +1,4 @@
-/* $Id: animate.cpp,v 1.2 2000-03-23 17:14:33 cbratschi Exp $ */
+/* $Id: animate.cpp,v 1.3 2000-05-22 17:25:06 cbratschi Exp $ */
 /*
  * Animation control
  *
@@ -7,9 +7,19 @@
  * Copyright 1999 Achim Hasenmueller
  * Copyright 1999 Christoph Bratschi
  *
- * Status: complete
+ * TODO:
+ *   - check for the 'rec ' list in some AVI files
+ *   - implement some missing flags (ACS_TRANSPARENT and ACS_CENTER)
+ *   - protection between service thread and wndproc messages handling
+ *     concurrent access to infoPtr
+ *
+ * Status: complete (read above)
  * Version: 5.00
  */
+
+/*
+ - Corel WINE 20000513 level
+*/
 
 #include "winbase.h"
 #include "commctrl.h"

@@ -1,4 +1,4 @@
-/* $Id: status.cpp,v 1.2 2000-03-18 16:17:29 cbratschi Exp $ */
+/* $Id: status.cpp,v 1.3 2000-05-22 17:25:11 cbratschi Exp $ */
 /*
  * Interface code to StatusWindow widget/control
  *
@@ -8,7 +8,7 @@
  * Copyright 1999 Christoph Bratschi
  */
 
-/* WINE 990923 level */
+/* Corel WINE 20000513 level */
 
 #include "winbase.h"
 #include "commctrl.h"
@@ -916,9 +916,6 @@ STATUSBAR_WMDestroy (HWND hwnd)
     /* delete default font */
     if (infoPtr->hDefaultFont)
         DeleteObject (infoPtr->hDefaultFont);
-
-    /* delete tool tip control */
-    destroyToolTip(infoPtr->hwndToolTip);
 
     doneControl(hwnd);
 

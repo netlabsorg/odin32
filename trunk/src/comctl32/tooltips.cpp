@@ -1,4 +1,4 @@
-/* $Id: tooltips.cpp,v 1.7 2000-03-31 14:44:23 cbratschi Exp $ */
+/* $Id: tooltips.cpp,v 1.8 2000-05-22 17:25:12 cbratschi Exp $ */
 /*
  * Tool tip control
  *
@@ -17,7 +17,7 @@
  */
 
 /*
- - Corel WINE 20000317 level
+ - Corel WINE 20000513 level
  - (WINE 20000130 level)
 */
 
@@ -1511,6 +1511,15 @@ TOOLTIPS_Pop (HWND hwnd, WPARAM wParam, LPARAM lParam)
 {
     TOOLTIPS_INFO *infoPtr = TOOLTIPS_GetInfoPtr (hwnd);
 
+    /*
+     * Need to set nCurrentTool to nOldTool so we hide the tool.
+     *  nTool and nOldTool values change when the mouse leaves the window.
+     * If using TTM_UPDATETIPTEXT we can end up with an nCurrentTool = -1 if the
+     * text can't be found, thus the tooltip would never be hidden.
+     */
+    if (infoPtr->nTool != infoPtr->nOldTool)
+      infoPtr->nCurrentTool = infoPtr->nOldTool;
+
     TOOLTIPS_Hide (hwnd, infoPtr);
 
     return 0;
@@ -1552,28 +1561,37 @@ TOOLTIPS_RelayEvent (HWND hwnd, WPARAM wParam, LPARAM lParam)
             ScreenToClient(lpMsg->hwnd,&pt);
             infoPtr->nOldTool = infoPtr->nTool;
             infoPtr->nTool = TOOLTIPS_GetToolFromPoint(infoPtr,lpMsg->hwnd,&pt);
-//          TRACE (tooltips, "tool (%x) %d %d\n",
-//                 hwnd, infoPtr->nOldTool, infoPtr->nTool);
-//          TRACE (tooltips, "WM_MOUSEMOVE (%04x %ld %ld)\n",
-//                 hwnd, pt.x, pt.y);
+            //TRACE (tooltips, "tool (%x) %d %d\n",
+            //       hwnd, infoPtr->nOldTool, infoPtr->nTool);
+            //TRACE (tooltips, "WM_MOUSEMOVE (%04x %ld %ld)\n",
+            //       hwnd, pt.x, pt.y);
 
             if (infoPtr->bActive && (infoPtr->nTool != infoPtr->nOldTool))
             {
               if (infoPtr->nOldTool == -1)
               {
                 SetTimer(hwnd,ID_TIMERSHOW,infoPtr->nInitialTime,0);
-//              TRACE (tooltips, "timer 1 started!\n");
+                //TRACE (tooltips, "timer 1 started!\n");
               } else
               {
+		/*
+		 * Need to set nCurrentTool to nOldTool so we hide the tool.
+		 *  nTool and nOldTool values change when the mouse leaves the window.
+		 * If using TTM_UPDATETIPTEXT we can end up with an nCurrentTool = -1 if the
+		 * text can't be found, thus the tooltip would never be hidden.
+		 */
+		if (infoPtr->nTool != infoPtr->nOldTool)
+            	  infoPtr->nCurrentTool = infoPtr->nOldTool;
+
                 TOOLTIPS_Hide(hwnd,infoPtr);
                 SetTimer (hwnd,ID_TIMERSHOW,infoPtr->nReshowTime,0);
-//              TRACE (tooltips, "timer 2 started!\n");
+                //TRACE (tooltips, "timer 2 started!\n");
               }
             }
             if (infoPtr->nCurrentTool != -1)
             {
               SetTimer(hwnd,ID_TIMERLEAVE,100,0);
-//            TRACE (tooltips, "timer 3 started!\n");
+              //TRACE (tooltips, "timer 3 started!\n");
             }
             break;
     }

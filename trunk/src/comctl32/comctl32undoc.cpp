@@ -1,4 +1,4 @@
-/* $Id: comctl32undoc.cpp,v 1.3 2000-04-15 14:22:11 cbratschi Exp $ */
+/* $Id: comctl32undoc.cpp,v 1.4 2000-05-22 17:25:07 cbratschi Exp $ */
 /*
  * Undocumented functions from COMCTL32.DLL
  *
@@ -12,7 +12,7 @@
  */
 
 /*
- - Corel 20000317 level
+ - Corel 20000513 level
  - (WINE 20000130 level)
 */
 
@@ -1276,14 +1276,14 @@ DPA_InsertPtr (const HDPA hdpa, INT i, LPVOID p)
     if (!hdpa->ptrs) {
         hdpa->ptrs =
             (LPVOID*)HeapAlloc (hdpa->hHeap, HEAP_ZERO_MEMORY,
-                                2 * hdpa->nGrow * sizeof(LPVOID));
+                                hdpa->nGrow * sizeof(LPVOID));
         if (!hdpa->ptrs)
             return -1;
-        hdpa->nMaxCount = hdpa->nGrow * 2;
+        hdpa->nMaxCount = hdpa->nGrow;
         nIndex = 0;
     }
     else {
-        if (hdpa->nItemCount >= hdpa->nMaxCount) {
+        if (hdpa->nItemCount == hdpa->nMaxCount) {
 //          TRACE (commctrl, "-- resizing\n");
             nNewItems = hdpa->nMaxCount + hdpa->nGrow;
             nSize = nNewItems * sizeof(LPVOID);
@@ -1349,12 +1349,12 @@ DPA_SetPtr (const HDPA hdpa, INT i, LPVOID p)
         /* within the old array */
         if (hdpa->nMaxCount > i) {
             /* within the allocated space, set a new boundary */
-            hdpa->nItemCount = i;
+            hdpa->nItemCount = i+1;
         }
         else {
             /* resize the block of memory */
             INT nNewItems =
-                hdpa->nGrow * ((INT)(((i+1) - 1) / hdpa->nGrow) + 1);
+                hdpa->nGrow * (((i+1) / hdpa->nGrow) + 1);
             INT nSize = nNewItems * sizeof(LPVOID);
 
             lpTemp = (LPVOID*)HeapReAlloc (hdpa->hHeap, HEAP_ZERO_MEMORY,
@@ -1412,10 +1412,11 @@ DPA_DeletePtr (const HDPA hdpa, INT i)
     }
 
     hdpa->nItemCount --;
+    hdpa->ptrs[hdpa->nItemCount] = NULL;
 
     /* free memory ?*/
-    if ((hdpa->nMaxCount - hdpa->nItemCount) >= hdpa->nGrow) {
-        INT nNewItems = MAX(hdpa->nGrow*2,hdpa->nItemCount);
+    if ((hdpa->nMaxCount - hdpa->nItemCount) > hdpa->nGrow) {
+        INT nNewItems = hdpa->nMaxCount - hdpa->nGrow;
 
         nSize = nNewItems * sizeof(LPVOID);
         lpDest = (LPVOID*)HeapReAlloc (hdpa->hHeap, HEAP_ZERO_MEMORY,
@@ -1704,7 +1705,125 @@ DPA_CreateEx (INT nGrow, HANDLE hHeap)
 
     return hdpa;
 }
+#if 0
+/**************************************************************************
+ * DPA_LoadStream [COMCTL32.9]
+ *
+ * Loads a dynamic pointer array from a stream
+ *
+ * PARAMS
+ *     phDpa    [O] pointer to a handle to a dynamic pointer array
+ *     loadProc [I] pointer to a callback function
+ *     pStream  [I] pointer to a stream
+ *     lParam   [I] application specific value
+ *
+ * NOTES
+ *     No more information available yet!
+ */
+HRESULT WINAPI
+DPA_LoadStream (HDPA *phDpa, DPALOADPROC loadProc, IStream *pStream, LPARAM lParam)
+{
+    HRESULT errCode;
+    LARGE_INTEGER position;
+    ULARGE_INTEGER newPosition;
+    STREAMDATA  streamData;
+    LOADDATA loadData;
+    ULONG ulRead;
+    HDPA hDpa;
+    PVOID *ptr;
 
+    //FIXME ("phDpa=3D%p loadProc=3D%p pStream=3D%p lParam=3D%lx\n",phDpa, loadProc, pStream, lParam);
+
+    if (!phDpa || !loadProc || !pStream)
+        return E_INVALIDARG;
+
+    *phDpa = (HDPA)NULL;
+
+    position.s.LowPart = 0;
+    position.s.HighPart = 0;
+
+
+
+    errCode = IStream_Seek (pStream, position, STREAM_SEEK_CUR, &newPosition);
+
+    if (errCode != S_OK)
+        return errCode;
+
+
+    errCode = IStream_Read (pStream, &streamData, sizeof(STREAMDATA), = &ulRead);
+
+    if (errCode != S_OK)
+        return errCode;
+
+    //FIXME ("dwSize=3D%lu dwData2=3D%lu dwItems=3D%lu\n",streamData.dwSize, streamData.dwData2, streamData.dwItems);
+
+    if (lParam < sizeof(STREAMDATA) ||
+        streamData.dwSize < sizeof(STREAMDATA) ||
+        streamData.dwData2 < 1) {
+        errCode = E_FAIL;
+    }
+
+    /* create the dpa */
+
+    hDpa = DPA_Create (streamData.dwItems);
+
+    if (!hDpa)
+        return E_OUTOFMEMORY;
+
+    if (!DPA_Grow (hDpa, streamData.dwItems))
+        return E_OUTOFMEMORY;
+
+    /* load data from the stream into the dpa */
+
+    ptr = hDpa->ptrs;
+    for (loadData.nCount = 0; loadData.nCount < streamData.dwItems; loadData.nCount++) {
+        errCode = (loadProc)(&loadData, pStream, lParam);
+
+        if (errCode != S_OK) {
+            errCode = S_FALSE;
+            break;
+        }
+
+        *ptr = loadData.ptr;
+        ptr++;
+    }
+
+    /* set the number of items */
+
+    hDpa->nItemCount = loadData.nCount;
+
+    /* store the handle to the dpa */
+
+    *phDpa = hDpa;
+
+    //FIXME ("new hDpa=3D%p\n", hDpa);
+
+    return errCode;
+
+}
+
+/**************************************************************************
+ * DPA_SaveStream [COMCTL32.10]
+ *
+ * Saves a dynamic pointer array to a stream
+ *
+ * PARAMS
+ *     hDpa     [I] handle to a dynamic pointer array
+ *     loadProc [I] pointer to a callback function
+ *     pStream  [I] pointer to a stream
+ *     lParam   [I] application specific value
+ *
+ * NOTES
+ *     No more information available yet!
+ */
+HRESULT WINAPI
+DPA_SaveStream (const HDPA hDpa, DPALOADPROC loadProc, IStream *pStream,LPARAM lParam)
+{
+    //FIXME ("hDpa=3D%p loadProc=3D%p pStream=3D%p lParam=3D%lx\n",hDpa, loadProc, pStream, lParam);
+
+    return E_FAIL;
+}
+#endif
 /**************************************************************************
  * Notification functions
  */

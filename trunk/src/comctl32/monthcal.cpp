@@ -17,7 +17,7 @@
  *  FIXME: keyboard handling.
  */
 
-/* WINE 20000130 level */
+/* Corel WINE 20000513 level */
 
 #include "winbase.h"
 #include "win.h"

@@ -1,4 +1,4 @@
-/*$Id: listview.cpp,v 1.18 2000-05-10 19:50:32 cbratschi Exp $*/
+/*$Id: listview.cpp,v 1.19 2000-05-22 17:25:08 cbratschi Exp $*/
 /*
  * Listview control
  *
@@ -49,7 +49,7 @@
 
 /*
  Most identical with:
- - Corel 20000317 level
+ - Corel 20000513 level
  - (WINE 20000130 level)
 */
 
@@ -830,6 +830,20 @@ static INT LISTVIEW_GetItemHeight(HWND hwnd)
   return nItemHeight;
 }
 
+static BOOL LISTVIEW_IsItemSelected(LISTVIEW_INFO *infoPtr,INT nItem)
+{
+  LISTVIEW_ITEM *lpItem;
+  INT pos = 0;
+
+  while ((lpItem = (LISTVIEW_ITEM*)DPA_GetPtr(infoPtr->hdpaSelItems,pos)) != NULL)
+  {
+    if (DPA_GetPtrIndex(infoPtr->hdpaItems,lpItem) == nItem) return TRUE;
+    pos++;
+  }
+
+  return FALSE;
+}
+
 /***
  * DESCRIPTION:
  * Adds a block of selections.
@@ -850,11 +864,13 @@ static VOID LISTVIEW_AddGroupSelection(HWND hwnd, INT nItem)
 
   for (i = nFirst; i <= nLast; i++)
   {
-    LISTVIEW_SetItemState(hwnd,i,LVIS_SELECTED,LVIS_SELECTED);
+    if (!LISTVIEW_IsItemSelected(infoPtr,nItem))
+    {
+      LISTVIEW_SetItemState(hwnd,i,LVIS_SELECTED,LVIS_SELECTED);
+    }
   }
 
   LISTVIEW_SetItemFocus(hwnd, nItem);
-  infoPtr->nSelectionMark = nItem;
 }
 
 /***
@@ -872,10 +888,12 @@ static VOID LISTVIEW_AddSelection(HWND hwnd, INT nItem)
 {
   LISTVIEW_INFO *infoPtr = (LISTVIEW_INFO *)LISTVIEW_GetInfoPtr(hwnd);
 
-  LISTVIEW_SetItemState(hwnd,nItem,LVIS_SELECTED,LVIS_SELECTED);
+  if (!LISTVIEW_IsItemSelected(infoPtr,nItem))
+  {
+    LISTVIEW_SetItemState(hwnd,nItem,LVIS_SELECTED,LVIS_SELECTED);
+  }
 
   LISTVIEW_SetItemFocus(hwnd, nItem);
-  infoPtr->nSelectionMark = nItem;
 }
 
 /***
@@ -893,21 +911,31 @@ static VOID LISTVIEW_AddSelection(HWND hwnd, INT nItem)
 static BOOL LISTVIEW_ToggleSelection(HWND hwnd, INT nItem)
 {
   LISTVIEW_INFO *infoPtr = (LISTVIEW_INFO *)LISTVIEW_GetInfoPtr(hwnd);
-  BOOL bResult;
+  BOOL bResult = FALSE;
+  DWORD state = 0,stateMask = 0;
 
-  if (LISTVIEW_GetItemState(hwnd, nItem, LVIS_SELECTED) & LVIS_SELECTED)
+  if (nItem != infoPtr->nFocusedItem)
   {
-    LISTVIEW_SetItemState(hwnd,nItem,0,LVIS_SELECTED);
-    bResult = FALSE;
+    stateMask = LVIS_FOCUSED;
+    LISTVIEW_SetItemState(hwnd,infoPtr->nFocusedItem,state,stateMask);
   }
-  else
+
+  stateMask = LVIS_SELECTED;
+  if (!LISTVIEW_IsItemSelected(infoPtr,nItem))
   {
-    LISTVIEW_SetItemState(hwnd,nItem,LVIS_SELECTED,LVIS_SELECTED);
     bResult = TRUE;
+    state = LVIS_SELECTED;
   }
-
-  LISTVIEW_SetItemFocus(hwnd, nItem);
   infoPtr->nSelectionMark = nItem;
+  LISTVIEW_SetItemState(hwnd,nItem,state,stateMask);
+
+  if (nItem != infoPtr->nFocusedItem)
+  {
+    state =  LVIS_FOCUSED;
+    stateMask = LVIS_FOCUSED;
+    infoPtr->nFocusedItem = nItem;
+    LISTVIEW_SetItemState(hwnd,nItem,state,stateMask);
+  }
 
   return bResult;
 }
@@ -969,13 +997,24 @@ static VOID LISTVIEW_SetGroupSelection(HWND hwnd, INT nItem)
     {
       if ((i < nFirst) || (i > nLast))
       {
-        LISTVIEW_SetItemState(hwnd,i,0,LVIS_SELECTED);
+        if (LISTVIEW_IsItemSelected(infoPtr,i))
+        {
+          LISTVIEW_SetItemState(hwnd,i,0,LVIS_SELECTED);
+        }
       }
       else
       {
-        LISTVIEW_SetItemState(hwnd,i,LVIS_SELECTED,LVIS_SELECTED);
+        if (!LISTVIEW_IsItemSelected(infoPtr,i))
+        {
+          LISTVIEW_SetItemState(hwnd,i,LVIS_SELECTED,LVIS_SELECTED);
+        }
       }
     }
+    LISTVIEW_SetItemState(hwnd,infoPtr->nFocusedItem,0,LVIS_FOCUSED);
+
+    infoPtr->nFocusedItem = nItem;
+    LISTVIEW_SetItemState(hwnd,nItem,LVIS_SELECTED | LVIS_FOCUSED,LVIS_SELECTED | LVIS_FOCUSED);
+
   }
   else
   {
@@ -990,9 +1029,8 @@ static VOID LISTVIEW_SetGroupSelection(HWND hwnd, INT nItem)
     rcSel.right = max(ptSelMark.x, ptItem.x) + infoPtr->nItemWidth;
     rcSel.bottom = max(ptSelMark.y, ptItem.y) + infoPtr->nItemHeight;
     LISTVIEW_SetSelectionRect(hwnd, rcSel);
+    LISTVIEW_SetItemFocus(hwnd, nItem);
   }
-
-  LISTVIEW_SetItemFocus(hwnd, nItem);
 }
 
 /***
@@ -3638,10 +3676,10 @@ static LRESULT LISTVIEW_GetItem(HWND hwnd,LPLVITEMW lpLVItem,BOOL unicode,BOOL i
             {
               if (isUnicodeNotify(&infoPtr->header))
               {
-                Str_SetPtrW(&lpItemData->pszText,dispInfo.item.pszText);
+                Str_SetPtrW(&lpItemData->pszText,(dispInfo.item.pszText == LPSTR_TEXTCALLBACKW) ? NULL:dispInfo.item.pszText);
               } else
               {
-                INT len = dispInfo.item.pszText ? lstrlenA((LPSTR)dispInfo.item.pszText):0;
+                INT len = (dispInfo.item.pszText && (dispInfo.item.pszText != LPSTR_TEXTCALLBACKW)) ? lstrlenA((LPSTR)dispInfo.item.pszText):0;
 
                 if (lpItemData->pszText != LPSTR_TEXTCALLBACKW) COMCTL32_Free(lpItemData->pszText);
                 if (len > 0)
@@ -3653,7 +3691,7 @@ static LRESULT LISTVIEW_GetItem(HWND hwnd,LPLVITEMW lpLVItem,BOOL unicode,BOOL i
               }
             }
             /* Make sure the source string is valid */
-            if (!dispInfo.item.pszText)
+            if (!dispInfo.item.pszText || (dispInfo.item.pszText == LPSTR_TEXTCALLBACKW))
             {
               if (!internal)
               {
@@ -6485,6 +6523,11 @@ static LRESULT LISTVIEW_VScroll(HWND hwnd,INT nScrollCode,SHORT nCurrentPos,HWND
   LISTVIEW_INFO *infoPtr = (LISTVIEW_INFO*)LISTVIEW_GetInfoPtr(hwnd);
   INT maxY = infoPtr->maxScroll.y-infoPtr->scrollPage.y,oldY = infoPtr->lefttop.y;
 
+  if (infoPtr->hwndEdit)
+  {
+    SendMessageA(infoPtr->hwndEdit, WM_KILLFOCUS, 0, 0);
+  }
+
   switch (nScrollCode)
   {
     case SB_LINEUP:
@@ -6566,6 +6609,11 @@ static LRESULT LISTVIEW_HScroll(HWND hwnd,INT nScrollCode,SHORT nCurrentPos,HWND
 {
   LISTVIEW_INFO *infoPtr = (LISTVIEW_INFO*)LISTVIEW_GetInfoPtr(hwnd);
   INT maxX = infoPtr->maxScroll.x-infoPtr->scrollPage.x,oldX = infoPtr->lefttop.x;
+
+  if (infoPtr->hwndEdit)
+  {
+    SendMessageA(infoPtr->hwndEdit, WM_KILLFOCUS, 0, 0);
+  }
 
   switch (nScrollCode)
   {
@@ -6742,12 +6790,28 @@ static LRESULT LISTVIEW_KeyDown(HWND hwnd, INT nVirtualKey, LONG lKeyData)
     nItem = LISTVIEW_GetNextItem(hwnd, infoPtr->nFocusedItem, LVNI_BELOW);
     break;
 
-  case VK_PRIOR:
-    /* TO DO */
+  case VK_NEXT:
+    if (infoPtr->uView == LVS_REPORT)
+    {
+      nItem = infoPtr->nFocusedItem + LISTVIEW_GetCountPerColumn(hwnd);
+    }
+    else
+    {
+      nItem = infoPtr->nFocusedItem + LISTVIEW_GetCountPerColumn(hwnd) * LISTVIEW_GetCountPerRow(hwnd);
+    }
+    if(nItem >= GETITEMCOUNT(infoPtr)) nItem = GETITEMCOUNT(infoPtr) - 1;
     break;
 
-  case VK_NEXT:
-    /* TO DO */
+  case VK_PRIOR:
+    if (infoPtr->uView == LVS_REPORT)
+    {
+      nItem = infoPtr->nFocusedItem - LISTVIEW_GetCountPerColumn(hwnd);
+    }
+    else
+    {
+      nItem = infoPtr->nFocusedItem - LISTVIEW_GetCountPerColumn(hwnd) * LISTVIEW_GetCountPerRow(hwnd);
+    }
+    if(nItem < 0) nItem = 0;
     break;
   }
 
@@ -7010,7 +7074,7 @@ static LRESULT LISTVIEW_LButtonDown(HWND hwnd, WORD wKey, WORD wPosX, WORD wPosY
   /* send NM_RELEASEDCAPTURE notification */
   sendNotify(hwnd,NM_RELEASEDCAPTURE);
 
-  if (infoPtr->bFocus == FALSE)
+  if (!infoPtr->bFocus)
     SetFocus(hwnd);
 
   /* set left button down flag */
@@ -7023,7 +7087,7 @@ static LRESULT LISTVIEW_LButtonDown(HWND hwnd, WORD wKey, WORD wPosX, WORD wPosY
   {
     if (infoPtr->dwStyle & LVS_SINGLESEL)
     {
-      if ((LISTVIEW_GetItemState(hwnd, nItem, LVIS_SELECTED) & LVIS_SELECTED) && infoPtr->bDoEditLabel != TRUE)
+      if (LISTVIEW_IsItemSelected(infoPtr,nItem) && !infoPtr->bDoEditLabel)
         infoPtr->bDoEditLabel = TRUE;
       else
         LISTVIEW_SetSelection(hwnd, nItem);
@@ -7032,7 +7096,7 @@ static LRESULT LISTVIEW_LButtonDown(HWND hwnd, WORD wKey, WORD wPosX, WORD wPosY
     {
       if ((wKey & MK_CONTROL) && (wKey & MK_SHIFT))
       {
-        if (bGroupSelect != FALSE)
+        if (bGroupSelect)
         {
           LISTVIEW_AddGroupSelection(hwnd, nItem);
         }
@@ -7051,7 +7115,7 @@ static LRESULT LISTVIEW_LButtonDown(HWND hwnd, WORD wKey, WORD wPosX, WORD wPosY
       }
       else
       {
-        if ((LISTVIEW_GetItemState(hwnd, nItem, LVIS_SELECTED) & LVIS_SELECTED) && (infoPtr->bDoEditLabel != TRUE))
+        if (LISTVIEW_IsItemSelected(infoPtr,nItem) && !infoPtr->bDoEditLabel)
           infoPtr->bDoEditLabel = TRUE;
         else
           LISTVIEW_SetSelection(hwnd, nItem);

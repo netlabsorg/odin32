@@ -1,4 +1,4 @@
-/* $Id: propsheet.cpp,v 1.3 2000-03-18 16:17:26 cbratschi Exp $ */
+/* $Id: propsheet.cpp,v 1.4 2000-05-22 17:25:10 cbratschi Exp $ */
 /*
  * Property Sheets
  *
@@ -13,7 +13,7 @@
  */
 
 /*
- - Corel WINE 20000317 level
+ - Corel WINE 20000513 level
  - (WINE 991212 level)
 */
 
@@ -379,7 +379,7 @@ static INT PROPSHEET_DoDialogBox( HWND hwnd, HWND owner)
        }
        EnableWindow( owner, TRUE );
    }
-   retval = dlgInfo->idResult;
+   retval = dlgInfo->dlgExtra->idResult;
 #endif
    DestroyWindow( hwnd );
    return retval;
@@ -1000,9 +1000,8 @@ static int PROPSHEET_CreatePage(HWND hwndParent,
 {
   DLGTEMPLATE* pTemplate;
   HWND hwndPage;
-  RECT rc;
+
   PropPageInfo* ppInfo = psInfo->proppage;
-  PADDING_INFO padding;
 
 //  TRACE("index %d\n", index);
 
@@ -1043,7 +1042,7 @@ static int PROPSHEET_CreatePage(HWND hwndParent,
   }
   else
   {
-    pTemplate->style |= WS_CHILD | DS_CONTROL;
+    pTemplate->style |= WS_CHILDWINDOW | DS_CONTROL;
     pTemplate->style &= ~DS_MODALFRAME;
     pTemplate->style &= ~WS_CAPTION;
     pTemplate->style &= ~WS_SYSMENU;
@@ -1065,31 +1064,6 @@ static int PROPSHEET_CreatePage(HWND hwndParent,
 
   ppInfo[index].hwndPage = hwndPage;
 
-  rc.left = psInfo->x;
-  rc.top = psInfo->y;
-  rc.right = psInfo->width;
-  rc.bottom = psInfo->height;
-
-  MapDialogRect(hwndParent, &rc);
-
-  if (psInfo->ppshheader->dwFlags & PSH_WIZARD)
-    padding = PROPSHEET_GetPaddingInfoWizard(hwndParent);
-  else
-  {
-    /*
-     * Ask the Tab control to fit this page in.
-     */
-
-    HWND hwndTabCtrl = GetDlgItem(hwndParent, IDC_TABCONTROL);
-    SendMessageA(hwndTabCtrl, TCM_ADJUSTRECT, FALSE, (LPARAM)&rc);
-    padding = PROPSHEET_GetPaddingInfo(hwndParent);
-  }
-
-  SetWindowPos(hwndPage, HWND_TOP,
-               rc.left + padding.x,
-               rc.top + padding.y,
-               0, 0, SWP_NOSIZE);
-
   return TRUE;
 }
 
@@ -1100,6 +1074,10 @@ static int PROPSHEET_CreatePage(HWND hwndParent,
  */
 static BOOL PROPSHEET_ShowPage(HWND hwndDlg, int index, PropSheetInfo * psInfo)
 {
+  RECT rc;
+  PADDING_INFO padding;
+  UINT pageWidth,pageHeight;
+
   if (index == psInfo->active_page)
     {
       if (GetTopWindow(hwndDlg) != psInfo->proppage[index].hwndPage)
@@ -1132,7 +1110,42 @@ static BOOL PROPSHEET_ShowPage(HWND hwndDlg, int index, PropSheetInfo * psInfo)
       */
   }
 
-  ShowWindow(psInfo->proppage[index].hwndPage, SW_SHOW);
+  if (psInfo->active_page != -1)
+  {
+     ShowWindow(psInfo->proppage[psInfo->active_page].hwndPage, SW_HIDE);
+  }
+
+  /* HACK: Sometimes a property page doesn't get displayed at the right place inside the
+   *	   property sheet. This will force the window to be placed at the proper location
+   *	   before it is displayed.
+   */
+  rc.left = psInfo->x;
+  rc.top = psInfo->y;
+  rc.right = psInfo->width;
+  rc.bottom = psInfo->height;
+
+  MapDialogRect(hwndDlg, &rc);
+
+  pageWidth = rc.right - rc.left;
+  pageHeight = rc.bottom - rc.top;
+
+  if (psInfo->ppshheader->dwFlags & PSH_WIZARD)
+    padding = PROPSHEET_GetPaddingInfoWizard(hwndDlg);
+  else
+  {
+    /*
+     * Ask the Tab control to fit this page in.
+     */
+
+    HWND hwndTabCtrl = GetDlgItem(hwndDlg, IDC_TABCONTROL);
+    SendMessageA(hwndTabCtrl, TCM_ADJUSTRECT, FALSE, (LPARAM)&rc);
+    padding = PROPSHEET_GetPaddingInfo(hwndDlg);
+  }
+
+  SetWindowPos(psInfo->proppage[index].hwndPage, HWND_TOP,
+     	       rc.left + padding.x,
+     	       rc.top + padding.y,
+     	       pageWidth, pageHeight, SWP_SHOWWINDOW);
 
   if (!(psInfo->ppshheader->dwFlags & PSH_WIZARD))
   {
@@ -1304,9 +1317,23 @@ static BOOL PROPSHEET_Apply(HWND hwndDlg, LPARAM lParam)
     }
   }
 
+  EnableWindow(GetDlgItem(hwndDlg, IDC_APPLY_BUTTON), FALSE);
+
   if(lParam)
   {
+     int result = TRUE;
+
      psInfo->activeValid = FALSE;
+
+     if (psInfo->restartWindows)
+        result = ID_PSRESTARTWINDOWS;
+
+     /* reboot system takes precedence over restart windows */
+     if (psInfo->rebootSystem)
+        result = ID_PSREBOOTSYSTEM;
+
+     if (!psInfo->isModeless)
+        EndDialog(hwndDlg, result);
   }
   else if(psInfo->active_page >= 0)
   {
@@ -1450,29 +1477,35 @@ static void PROPSHEET_PressButton(HWND hwndDlg, int buttonID)
   switch (buttonID)
   {
     case PSBTN_APPLYNOW:
-      SendMessageA(hwndDlg, WM_COMMAND, IDC_APPLY_BUTTON, 0);
+      PROPSHEET_Apply(hwndDlg, 0);
       break;
+
     case PSBTN_BACK:
       PROPSHEET_Back(hwndDlg);
       break;
+
     case PSBTN_CANCEL:
-      SendMessageA(hwndDlg, WM_COMMAND, IDCANCEL, 0);
+      PROPSHEET_Cancel(hwndDlg, 0);
       break;
+
     case PSBTN_FINISH:
       PROPSHEET_Finish(hwndDlg);
       break;
+
     case PSBTN_HELP:
-      SendMessageA(hwndDlg, WM_COMMAND, IDHELP, 0);
+      PROPSHEET_Help(hwndDlg);
       break;
+
     case PSBTN_NEXT:
       PROPSHEET_Next(hwndDlg);
       break;
+
     case PSBTN_OK:
-      SendMessageA(hwndDlg, WM_COMMAND, IDOK, 0);
+      PROPSHEET_Apply(hwndDlg, 1);
       break;
-    default:
-        //FIXME(propsheet, "Invalid button index %d\n", buttonID);
-        break;
+
+    //default:
+    //  FIXME("Invalid button index %d\n", buttonID);
   }
 }
 
@@ -2184,40 +2217,14 @@ PROPSHEET_DialogProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
     case WM_COMMAND:
     {
       WORD wID = LOWORD(wParam);
+      PropSheetInfo* psInfo = (PropSheetInfo*) GetPropA(hwnd,PropSheetInfoStr);
 
       switch (wID)
       {
         case IDOK:
         case IDC_APPLY_BUTTON:
-        {
-          HWND hwndApplyBtn = GetDlgItem(hwnd, IDC_APPLY_BUTTON);
-
-          if (PROPSHEET_Apply(hwnd, wID == IDOK ? 1: 0) == FALSE)
-            break;
-
-          if (wID == IDOK)
-          {
-            PropSheetInfo* psInfo = (PropSheetInfo*) GetPropA(hwnd,
-                                                            PropSheetInfoStr);
-            int result = TRUE;
-
-            if (psInfo->restartWindows)
-              result = ID_PSRESTARTWINDOWS;
-
-            /* reboot system takes precedence over restart windows */
-            if (psInfo->rebootSystem)
-              result = ID_PSREBOOTSYSTEM;
-
-            if (psInfo->isModeless)
-              psInfo->activeValid = FALSE;
-            else
-              EndDialog(hwnd, result);
-          }
-          else
-             EnableWindow(hwndApplyBtn, FALSE);
-
+          PROPSHEET_Apply(hwnd, wID == IDOK ? 1: 0);
           break;
-        }
 
         case IDC_BACK_BUTTON:
           PROPSHEET_Back(hwnd);
@@ -2238,6 +2245,13 @@ PROPSHEET_DialogProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
         case IDHELP:
           PROPSHEET_Help(hwnd);
           break;
+
+        default:
+          if(psInfo->active_page != -1)
+          {
+             return SendMessageA(psInfo->proppage[psInfo->active_page].hwndPage,
+                                 uMsg, wParam, lParam);
+          }
       }
 
       return TRUE;
