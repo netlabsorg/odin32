@@ -1,4 +1,4 @@
-/* $Id: stubs.cpp,v 1.12 2001-10-03 19:21:59 sandervl Exp $ */
+/* $Id: stubs.cpp,v 1.13 2002-02-15 15:07:40 sandervl Exp $ */
 /* 
  * Win32 COM/OLE stubs for OS/2
  * 
@@ -679,39 +679,5 @@ HCURSOR WIN32API OleIconToCursor(HINSTANCE hinstExe, HICON hIcon)
     dprintf(("OLEAUT32: OleIconToCursor - stub"));
     return S_OK;
 }
-
 //*****************************************************************************
 //*****************************************************************************
-
-typedef struct tagOCPFIPARAMS
-{
-    ULONG cbStructSize;
-    HWND hWndOwner;
-    int x;
-    int y;
-    LPCOLESTR lpszCaption;
-    ULONG cObjects;
-    LPUNKNOWN * lplpUnk;
-    ULONG cPages;
-    CLSID * lpPages;
-    LCID lcid;
-    DISPID dispidInitialProperty;
-
-} OCPFIPARAMS, * LPOCPFIPARAMS;
-
-HRESULT WIN32API OleCreatePropertyFrameIndirect(LPOCPFIPARAMS lpParams)
-{
-    dprintf(("OLEAUT32: OleCreatePropertyFrameIndirect - stub"));
-    return S_OK;
-}
-
-//*****************************************************************************
-//*****************************************************************************
-HRESULT WIN32API OleCreatePropertyFrame(HWND hwndOwner, UINT x, UINT y,
-    LPCOLESTR lpszCaption, ULONG cObjects, LPUNKNOWN * ppUnk, ULONG cPages,
-    LPCLSID pPageClsID, LCID lcid, DWORD dwReserved, LPVOID pvReserved)
-{
-    dprintf(("OLEAUT32: OleCreatePropertyFrame - stub"));
-    return S_OK;
-}
-
