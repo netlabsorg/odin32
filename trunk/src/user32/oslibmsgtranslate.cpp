@@ -1,4 +1,4 @@
-/* $Id: oslibmsgtranslate.cpp,v 1.95 2002-09-18 10:56:49 sandervl Exp $ */
+/* $Id: oslibmsgtranslate.cpp,v 1.96 2003-01-02 12:35:36 sandervl Exp $ */
 /*
  * Window message translation functions for OS/2
  *
@@ -1048,7 +1048,10 @@ BOOL OSLibWinTranslateMessage(MSG *msg)
         return FALSE;
       }
 
-      if(fl & KC_VIRTUALKEY)
+      //the KC_COMPOSITE flag might be set; in that case this key will
+      //be combined with the previous dead key, so we must use the scancode
+      //(e.g. ^ on german keyboards)
+      if(fl & (KC_VIRTUALKEY|KC_COMPOSITE) == KC_VIRTUALKEY)
       {
         if(msg->wParam)
         {
