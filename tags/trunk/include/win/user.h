@@ -1,5 +1,3 @@
-/* $Id: user.h,v 1.2 2001-09-19 15:37:47 sandervl Exp $ */
-
 /*
  * USER definitions
  *
