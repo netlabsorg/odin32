@@ -1,4 +1,4 @@
-/* $Id: dibsect.h,v 1.26 2001-12-31 12:08:21 sandervl Exp $ */
+/* $Id: dibsect.h,v 1.27 2003-11-14 17:31:47 sandervl Exp $ */
 
 /*
  * GDI32 DIB sections
@@ -137,6 +137,9 @@ private:
 
     static    CRITICAL_SECTION dibcritsect;
 };
+
+#define DIBSECTION_MARK_INVALID(a)
+#define DIBSECTION_CHECK_IF_DIRTY(a)
 
 #endif
 
