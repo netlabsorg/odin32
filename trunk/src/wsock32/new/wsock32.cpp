@@ -1,4 +1,4 @@
-/* $Id: wsock32.cpp,v 1.2 1999-11-25 23:02:30 phaller Exp $ */
+/* $Id: wsock32.cpp,v 1.3 1999-11-26 21:46:36 phaller Exp $ */
 
 /*
  *
@@ -1339,8 +1339,17 @@ ODINFUNCTION4(int,OS2WSAAsyncSelect,
               u_int,wMsg,
               long,lEvent)
 {
-  return (WSAAsyncSelect(s,
-                         hWnd,
-                         wMsg,
-                         lEvent));
+  int rc;
+  int iError;
+  
+  rc = WSAAsyncSelect(s,
+                      hWnd,
+                      wMsg,
+                      lEvent);
+
+  iError = WSAGetLastError();
+  dprintf(("res=%d, err=%d\n",
+           rc,
+           iError));
+  return (rc);
 }
