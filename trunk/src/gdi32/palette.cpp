@@ -1,4 +1,4 @@
-/* $Id: palette.cpp,v 1.6 2000-08-18 18:14:58 sandervl Exp $ */
+/* $Id: palette.cpp,v 1.7 2000-08-30 18:05:25 sandervl Exp $ */
 
 /*
  * GDI32 palette apis
@@ -65,10 +65,12 @@ HPALETTE WIN32API CreatePalette( const LOGPALETTE * arg1)
 {
   HPALETTE rc;
 
+#ifdef DEBUG_PALETTE
    for(int i=0; i<arg1->palNumEntries;i++)
    {
      	dprintf2(("Index %d : 0x%08X\n",i, *((DWORD*)(&arg1->palPalEntry[i])) ));
    }
+#endif
    rc = O32_CreatePalette(arg1);
    dprintf(("GDI32: CreatePalette %x %d returns 0x%08X\n", arg1, arg1->palNumEntries, rc));
 

@@ -1,4 +1,4 @@
-/* $Id: blit.cpp,v 1.16 2000-08-18 18:14:56 sandervl Exp $ */
+/* $Id: blit.cpp,v 1.17 2000-08-30 18:05:24 sandervl Exp $ */
 
 /*
  * GDI32 blit code
@@ -224,7 +224,6 @@ INT WIN32API StretchDIBits(HDC hdc, INT xDst, INT yDst, INT widthDst,
                            INT heightSrc, const void *bits,
                            const BITMAPINFO *info, UINT wUsage, DWORD dwRop )
 {
-#if 1
  INT rc;
 
     dprintf(("GDI32: StretchDIBits %x to (%d,%d) (%d,%d) from (%d,%d) (%d,%d), %x %x %x %x", hdc, xDst, yDst, widthDst, heightDst, xSrc, ySrc, widthSrc, heightSrc, bits, info, wUsage, dwRop));
@@ -262,7 +261,13 @@ INT WIN32API StretchDIBits(HDC hdc, INT xDst, INT yDst, INT widthDst,
 	else {
   		DIBSection *destdib = DIBSection::findHDC(hdc);
   		if(destdib) {
-			destdib->sync(hdc, yDst, heightDst);
+			if(widthDst == widthSrc && heightDst == heightSrc &&
+                           destdib->GetBitCount() == infoLoc->bmiHeader.biBitCount &&
+                           destdib->GetBitCount() == 8) 
+                        {
+				destdib->sync(xDst, yDst, widthDst, heightDst, (PVOID)bits);
+ 			}
+			else	destdib->sync(hdc, yDst, heightDst);
   		}
 	}
 
@@ -276,16 +281,18 @@ INT WIN32API StretchDIBits(HDC hdc, INT xDst, INT yDst, INT widthDst,
     }
     else {
   	DIBSection *destdib = DIBSection::findHDC(hdc);
-  	if(destdib) {
-		destdib->sync(hdc, yDst, heightDst);
-  	}
+ 	if(destdib) {
+		if(widthDst == widthSrc && heightDst == heightSrc &&
+                   destdib->GetBitCount() == info->bmiHeader.biBitCount &&
+                   destdib->GetBitCount() == 8) 
+                {
+			destdib->sync(xDst, yDst, widthDst, heightDst, (PVOID)bits);
+		}
+		else	destdib->sync(hdc, yDst, heightDst);
+	}
     }
 
     return rc;
-#else
-    dprintf(("GDI32: StretchDIBits\n"));
-    return O32_StretchDIBits(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, (void *)arg10, (PBITMAPINFO)arg11, arg12, arg13);
-#endif
 }
 //******************************************************************************
 //******************************************************************************

@@ -1,4 +1,4 @@
-/* $Id: dibsect.h,v 1.19 2000-06-14 18:30:18 sandervl Exp $ */
+/* $Id: dibsect.h,v 1.20 2000-08-30 18:05:24 sandervl Exp $ */
 
 /*
  * GDI32 DIB sections
@@ -48,6 +48,12 @@ typedef struct
     LPVOID bmBits;
 } BITMAP_W, *LPBITMAP_W;
 
+typedef struct {
+	BITMAPINFOHEADER_W bmiHeader;
+	RGBQUAD	bmiColors[1];
+} BITMAPINFO_W;
+typedef BITMAPINFO *LPBITMAPINFO;
+
 #ifdef OS2_ONLY
 #define DIB_RGB_COLORS   0
 #define DIB_PAL_COLORS   1
@@ -75,6 +81,7 @@ public:
               void  UnSelectDIBObject()      { this->hdc = 0;   };
 
 	      DWORD GetBitmapHandle()	     { return handle; };
+              void  SetBitmapHandle(DWORD bmphandle) { handle = bmphandle; };
 	      DWORD GetRGBUsage()            { return iUsage; };
 
               BOOL  BitBlt(HDC hdcDest, int nXdest, int nYDest,
@@ -83,6 +90,7 @@ public:
                            int nSrcWidth, int nSrcHeight,
                            DWORD Rop);
               void  sync(HDC hdc, DWORD nYdest, DWORD nDestHeight);
+              void  sync(DWORD xDst, DWORD yDst, DWORD widthDst, DWORD heightDst, PVOID bits);
                int  SetDIBColorTable(int startIdx, int cEntries, RGBQUAD *rgb);
 
                int  SetDIBits(HDC hdc, HBITMAP hbitmap, UINT startscan, UINT
@@ -99,7 +107,7 @@ protected:
 
 private:
           DWORD handle, iUsage;
-          DWORD hSection;
+          DWORD hSection, dwOffset;
           HWND  hwndParent;
           HDC   hdc;
           char *bmpBits, *bmpBitsDblBuffer;
