@@ -1,4 +1,4 @@
- /* $Id: ChangeLog,v 1.627 2000-01-09 16:51:46 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.628 2000-01-09 17:12:57 cbratschi Exp $ */
 
  2000-01-09: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32: Added border size for top-level windows in OSLibWinConvertStyle 
@@ -16,6 +16,7 @@
  2000-01-09: Christoph Bratschi <cbratschi@datacomm.ch>
 	- USER32/NEW: implemented scrollbar nc handling
 		      windows without menus work now fine
+		      implemented gradient filled title bars
 
  2000-01-08: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32: ModifyMenuA bugfix (changing menu ids didn't work)
