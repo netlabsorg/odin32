@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.136 2000-01-09 15:56:04 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.137 2000-01-09 16:52:54 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -877,7 +877,7 @@ ULONG Win32BaseWindow::MsgScroll(ULONG msg, ULONG scrollCode, ULONG scrollPos)
 ULONG Win32BaseWindow::MsgHitTest(ULONG x, ULONG y)
 {
   lastHitTestVal = SendInternalMessageA(WM_NCHITTEST, 0, MAKELONG((USHORT)x, (USHORT)y));
-  dprintf(("MsgHitTest (%d,%d) (%d,%d) (%d,%d) returned %x", x, y, rectWindow.left, rectWindow.right, rectWindow.top, rectWindow.bottom, lastHitTestVal));
+  dprintf2(("MsgHitTest (%d,%d) (%d,%d) (%d,%d) returned %x", x, y, rectWindow.left, rectWindow.right, rectWindow.top, rectWindow.bottom, lastHitTestVal));
   return lastHitTestVal;
 }
 //******************************************************************************
@@ -958,7 +958,7 @@ ULONG Win32BaseWindow::MsgButton(MSG *msg)
 {
  BOOL  fClick = FALSE;
 
-    dprintf(("MsgButton at (%d,%d)", msg->pt.x, msg->pt.y));
+    dprintf2(("MsgButton at (%d,%d)", msg->pt.x, msg->pt.y));
     switch(msg->message) {
         case WM_LBUTTONDBLCLK:
         case WM_RBUTTONDBLCLK:
