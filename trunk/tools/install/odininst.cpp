@@ -1,4 +1,4 @@
-/* $Id: odininst.cpp,v 1.12 2002-06-15 12:33:46 sandervl Exp $ */
+/* $Id: odininst.cpp,v 1.13 2003-01-07 20:01:47 sandervl Exp $ */
 /*
  * Odin WarpIn installation app
  *
@@ -35,6 +35,7 @@
 #include <os2win.h>
 #include <string.h>
 #include <stdio.h>
+#include <heapstring.h>
 #include <ctype.h>
 #include "winreg.h"
 #include "global.h"
@@ -51,6 +52,7 @@
 BOOL CreateSystemDirectories();
 BOOL SetupControlPanelKeys();
 BOOL InitSystemAndRegistry();
+void SetupTimeZoneInfo();
 
 //******************************************************************************
 //******************************************************************************
@@ -80,6 +82,8 @@ int main(int argc, char *argv[])
   InitSystemAndRegistry();
   CreateSystemDirectories();
   SetupControlPanelKeys();
+
+  SetupTimeZoneInfo();
   return 0;
 }
 //******************************************************************************
@@ -1076,3 +1080,105 @@ BOOL SetupControlPanelKeys()
     RegCloseKey(hkey);
     return TRUE;
 }
+//******************************************************************************
+//[HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\TimeZoneInformation]
+//"Bias"=dword:ffffffc4
+//"StandardName"="Romance Standard Time"
+//"StandardBias"=dword:00000000
+//"StandardStart"=hex:00,00,0a,00,05,00,03,00,00,00,00,00,00,00,00,00
+// typedef struct _SYSTEMTIME {
+//  WORD wYear;
+//  WORD wMonth;
+//  WORD wDayOfWeek;
+//  WORD wDay;
+//  WORD wHour;
+//  WORD wMinute;
+//  WORD wSecond;
+//  WORD wMilliseconds;
+//} SYSTEMTIME, *PSYSTEMTIME;
+//"DaylightName"="Romance Daylight Time"
+//"DaylightBias"=dword:ffffffc4
+//"DaylightStart"=hex:00,00,03,00,05,00,02,00,00,00,00,00,00,00,00,00
+//"ActiveTimeBias"=dword:ffffffc4
+//******************************************************************************
+void SetupTimeZoneInfo()
+{
+    HKEY hkey;
+    DWORD val = 0;
+    char szTimeZoneStd[4];
+    char szTimeZoneDay[4];
+    int  sign = FALSE;
+    int  bias;
+    char *pszTZ = NULL;
+    SYSTEMTIME stime = {0};
+    SYSTEMTIME dtime = {0};
+
+    if (RegCreateKey(HKEY_LOCAL_MACHINE, "SYSTEM\\CurrentControlSet\\Control\\TimeZoneInformation", &hkey) != ERROR_SUCCESS)
+    {
+        dprintf(("SetupTimeZoneInfo: Unable to create key"));
+        return;
+    }
+    //Little bit difficult to map the 3 letter timezone to a name
+    //(duplicate values for different regions)
+    //So we just copy that timezone string and hope the apps don't really
+    //on hardcoded timezone names.
+
+    //parse TZ environment variable
+    pszTZ = getenv("TZ");
+    if(pszTZ == NULL) {
+        //default is Central European Time
+        pszTZ = "CET-1CDT";
+    }
+    strncpy(szTimeZoneStd, pszTZ, 3);
+    szTimeZoneStd[3] = 0;
+    if(pszTZ[3] == '-') {
+         sign   = TRUE;
+         pszTZ += 4;
+    }
+    else pszTZ += 3;
+
+    if(isdigit(*pszTZ)) {
+        bias = (int)(*pszTZ - '0') * 60;
+        pszTZ++;
+        if(isdigit(*pszTZ)) {//double digit hour difference
+            bias *= 10;
+            bias += (int)(*pszTZ - '0') * 60;
+            pszTZ++;
+        }
+    }
+    else bias = 0;
+
+    if(sign) bias = -bias;
+
+    if(isalpha(*pszTZ)) {//daylight timezone name follows
+         strncpy(szTimeZoneDay, pszTZ, 3);
+         szTimeZoneDay[3] = 0;
+    }
+    else szTimeZoneDay[0] = 0;
+
+    RegSetValueEx(hkey, "Bias",0,REG_DWORD, (LPBYTE)&bias, sizeof(bias));
+    RegSetValueEx(hkey, "ActiveTimeBias",0,REG_DWORD, (LPBYTE)&bias, sizeof(bias));
+
+    RegSetValueEx(hkey, "StandardName", 0, REG_SZ, (LPBYTE)szTimeZoneStd, strlen(szTimeZoneStd));
+    RegSetValueEx(hkey, "StandardBias",0,REG_DWORD, (LPBYTE)&bias, sizeof(bias));
+    RegSetValueEx(hkey, "StandardStart",0,REG_BINARY, (LPBYTE)&stime, sizeof(stime));
+    RegSetValueEx(hkey, "DaylightName", 0, REG_SZ, (LPBYTE)szTimeZoneDay, strlen(szTimeZoneDay));
+    RegSetValueEx(hkey, "DaylightBias",0,REG_DWORD, (LPBYTE)&bias, sizeof(bias));
+    RegSetValueEx(hkey, "DaylightStart",0,REG_BINARY, (LPBYTE)&dtime, sizeof(dtime));
+    RegCloseKey(hkey);
+
+    TIME_ZONE_INFORMATION tzinfo;
+
+    tzinfo.Bias         = bias;
+    lstrcpynAtoW(tzinfo.StandardName, szTimeZoneStd, sizeof(tzinfo.StandardName)/sizeof(WCHAR));
+    tzinfo.StandardDate = stime;
+    tzinfo.StandardBias = bias;
+    lstrcpynAtoW(tzinfo.DaylightName, szTimeZoneDay, sizeof(tzinfo.StandardName)/sizeof(WCHAR));
+    tzinfo.DaylightDate = dtime;
+    tzinfo.DaylightBias = bias;
+
+    SetTimeZoneInformation(&tzinfo);
+}
+//******************************************************************************
+//******************************************************************************
+
