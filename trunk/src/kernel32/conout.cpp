@@ -1,4 +1,4 @@
-/* $Id: conout.cpp,v 1.15 2003-08-06 09:59:55 sandervl Exp $ */
+/* $Id: conout.cpp,v 1.16 2003-08-06 10:02:19 sandervl Exp $ */
 
 /*
  * Win32 Console API Translation for OS/2
@@ -134,7 +134,7 @@ DWORD HMDeviceConsoleOutClass::CreateFile (LPCSTR        lpFileName,
 #endif
 
     fResult = SetConsoleScreenBufferSize(hConsole,
-                                         pConsoleGlobals->Options.coordWindowSize);
+                                         pConsoleGlobals->coordWindowSize);
     if (fResult == FALSE)
     {
       dprintf(("KERNEL32/CONSOLE:OS2SetConsoleScreenBufferSize=%u.\n",
