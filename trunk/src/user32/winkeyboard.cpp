@@ -1,4 +1,4 @@
-/* $Id: winkeyboard.cpp,v 1.11 2001-07-03 20:36:54 sandervl Exp $ */
+/* $Id: winkeyboard.cpp,v 1.12 2001-07-04 06:39:01 sandervl Exp $ */
 /*
  * Win32 <-> PM key translation
  *
@@ -14,6 +14,7 @@
 #include "oslibwin.h"
 #include <heapstring.h>
 #include <pmscan.h>
+#include <winuser32.h>
 
 #define DBG_LOCALLOG	DBG_winkeyboard
 #include "dbglocal.h"
@@ -776,7 +777,7 @@ int WIN32API ToAscii(UINT   uVirtKey,
        if(shiftstate & TCF_CONTROL) {
            if(uVirtKey >= VK_A && uVirtKey <= VK_Z) {
                //NT returns key-0x60 (or so it seems) for ctrl-(shift-)-a..z
-               if(shiftstate & TCF_SHIFT) {
+               if(shiftstate & (TCF_SHIFT|TCF_CAPSLOCK)) {
                     *(char *)lpwTransKey -= 0x40;
                }
                else *(char *)lpwTransKey -= 0x60;
@@ -832,7 +833,7 @@ int WIN32API ToAsciiEx(UINT   uVirtKey,
                        UINT   fuState,
                        HKL    hkl)
 {
-  dprintf(("USER32:ToAsciiEx (%u,%u,%08xh,%08xh,%u,%08x) not implemented.\n",
+  dprintf(("USER32:ToAsciiEx (%u,%u,%08xh,%08xh,%u,%08x) partially implemented",
          uVirtKey,
          uScanCode,
          lpbKeyState,
@@ -840,7 +841,7 @@ int WIN32API ToAsciiEx(UINT   uVirtKey,
          fuState,
          hkl));
 
-  return (0);
+  return ToAscii(uVirtKey, uScanCode, lpbKeyState, lpwTransKey, fuState);
 }
 /*****************************************************************************
  * Name      : int WIN32API ToUnicode
@@ -889,6 +890,338 @@ int WIN32API ToUnicode(UINT   uVirtKey,
          pwszBuff,
          cchBuff,
          wFlags));
+
+  return (0);
+}
+/*****************************************************************************
+ * Name      : UINT WIN32API GetKBCodePage
+ * Purpose   : The GetKBCodePage function is provided for compatibility with
+ *             earlier versions of Windows. In the Win32 application programming
+ *             interface (API) it just calls the GetOEMCP function.
+ * Parameters:
+ * Variables :
+ * Result    : If the function succeeds, the return value is an OEM code-page
+ *             identifier, or it is the default identifier if the registry
+ *             value is not readable. For a list of OEM code-page identifiers,
+ *             see GetOEMCP.
+ * Remark    :
+ * Status    : COMPLETELY IMPLEMENTED UNTESTED
+ *
+ * Author    : Patrick Haller [Thu, 1998/02/26 11:55]
+ *****************************************************************************/
+
+UINT WIN32API GetKBCodePage(VOID)
+{
+  return (GetOEMCP());
+}
+//******************************************************************************
+//******************************************************************************
+int WIN32API GetKeyNameTextA( LPARAM lParam, LPSTR lpString, int  nSize)
+{
+    dprintf(("USER32:  GetKeyNameTextA\n"));
+    return O32_GetKeyNameText(lParam,lpString,nSize);
+}
+//******************************************************************************
+//******************************************************************************
+int WIN32API GetKeyNameTextW( LPARAM lParam, LPWSTR lpString, int  nSize)
+{
+    dprintf(("USER32:  GetKeyNameTextW DOES NOT WORK\n"));
+    // NOTE: This will not work as is (needs UNICODE support)
+    return 0;
+//    return O32_GetKeyNameText(arg1, arg2, arg3);
+}
+//******************************************************************************
+//******************************************************************************
+SHORT WIN32API GetKeyState( int nVirtKey)
+{
+    dprintf2(("USER32: GetKeyState %x", nVirtKey));
+    return O32_GetKeyState(nVirtKey);
+}
+//******************************************************************************
+//******************************************************************************
+WORD WIN32API GetAsyncKeyState(INT nVirtKey)
+{
+    dprintf2(("USER32: GetAsyncKeyState %x", nVirtKey));
+    return O32_GetAsyncKeyState(nVirtKey);
+}
+//******************************************************************************
+//******************************************************************************
+UINT WIN32API MapVirtualKeyA( UINT uCode, UINT  uMapType)
+{
+    dprintf(("USER32: MapVirtualKeyA %x %x", uCode, uMapType));
+    /* A quick fix for Commandos, very incomplete */
+    switch (uMapType) {
+    case 2:
+      if (uCode >= VK_A && uCode <= VK_Z) {
+         return 'A' + uCode - VK_A;
+      }
+      break;
+    }
+    return O32_MapVirtualKey(uCode,uMapType);
+}
+//******************************************************************************
+//******************************************************************************
+UINT WIN32API MapVirtualKeyW( UINT uCode, UINT  uMapType)
+{
+    dprintf(("USER32:  MapVirtualKeyW\n"));
+    // NOTE: This will not work as is (needs UNICODE support)
+    return O32_MapVirtualKey(uCode,uMapType);
+}
+/*****************************************************************************
+ * Name      : UINT WIN32API MapVirtualKeyExA
+ * Purpose   : The MapVirtualKeyEx function translates (maps) a virtual-key
+ *             code into a scan code or character value, or translates a scan
+ *             code into a virtual-key code. The function translates the codes
+ *             using the input language and physical keyboard layout identified
+ *             by the given keyboard layout handle.
+ * Parameters:
+ * Variables :
+ * Result    : The return value is either a scan code, a virtual-key code, or
+ *             a character value, depending on the value of uCode and uMapType.
+ *             If there is no translation, the return value is zero.
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Thu, 1998/02/26 11:55]
+ *****************************************************************************/
+UINT WIN32API MapVirtualKeyExA(UINT uCode, UINT uMapType, HKL  dwhkl)
+{
+  dprintf(("USER32:MapVirtualKeyExA (%u,%u,%08x) partially implemented",
+         uCode,
+         uMapType,
+         dwhkl));
+
+  return MapVirtualKeyA(uCode, uMapType);
+}
+/*****************************************************************************
+ * Name      : UINT WIN32API MapVirtualKeyExW
+ * Purpose   : The MapVirtualKeyEx function translates (maps) a virtual-key
+ *             code into a scan code or character value, or translates a scan
+ *             code into a virtual-key code. The function translates the codes
+ *             using the input language and physical keyboard layout identified
+ *             by the given keyboard layout handle.
+ * Parameters:
+ * Variables :
+ * Result    : The return value is either a scan code, a virtual-key code, or
+ *             a character value, depending on the value of uCode and uMapType.
+ *             If there is no translation, the return value is zero.
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Thu, 1998/02/26 11:55]
+ *****************************************************************************/
+UINT WIN32API MapVirtualKeyExW(UINT uCode, UINT uMapType, HKL  dwhkl)
+{
+  dprintf(("USER32:MapVirtualKeyExW (%u,%u,%08x) partially implemented",
+          uCode, uMapType, dwhkl));
+
+  return MapVirtualKeyW(uCode, uMapType);
+}
+/*****************************************************************************
+ * Name      : DWORD WIN32API OemKeyScan
+ * Purpose   : The OemKeyScan function maps OEM ASCII codes 0 through 0x0FF
+ *             into the OEM scan codes and shift states. The function provides
+ *             information that allows a program to send OEM text to another
+ *             program by simulating keyboard input.
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Thu, 1998/02/26 11:55]
+ *****************************************************************************/
+DWORD WIN32API OemKeyScan(WORD wOemChar)
+{
+  dprintf(("USER32:OemKeyScan (%u) not implemented.\n",
+         wOemChar));
+
+  return (wOemChar);
+}
+//******************************************************************************
+//******************************************************************************
+BOOL WIN32API RegisterHotKey(HWND hwnd, int idHotKey, UINT fuModifiers, UINT uVirtKey)
+{
+  dprintf(("USER32:  RegisterHotKey %x %d %x %x not implemented", hwnd, idHotKey, fuModifiers, uVirtKey));
+  hwnd = Win32ToOS2Handle(hwnd);
+  return(TRUE);
+}
+//******************************************************************************
+//******************************************************************************
+BOOL WIN32API UnregisterHotKey(HWND hwnd, int idHotKey)
+{
+  dprintf(("USER32:  UnregisterHotKey %x %d not implemented", hwnd, idHotKey));
+  hwnd = Win32ToOS2Handle(hwnd);
+
+  return(TRUE);
+}
+//******************************************************************************
+//SvL: 24-6-'97 - Added
+//******************************************************************************
+WORD WIN32API VkKeyScanA( char ch)
+{
+    dprintf(("USER32: VkKeyScanA %x", ch));
+    return O32_VkKeyScan(ch);
+}
+//******************************************************************************
+//******************************************************************************
+WORD WIN32API VkKeyScanW( WCHAR wch)
+{
+    dprintf(("USER32:  VkKeyScanW %x", wch));
+    // NOTE: This will not work as is (needs UNICODE support)
+    return O32_VkKeyScan((char)wch);
+}
+/*****************************************************************************
+ * Name      : SHORT WIN32API VkKeyScanExW
+ * Purpose   : The VkKeyScanEx function translates a character to the
+ *             corresponding virtual-key code and shift state. The function
+ *             translates the character using the input language and physical
+ *             keyboard layout identified by the given keyboard layout handle.
+ * Parameters: UINT uChar character to translate
+ *             HKL  hkl   keyboard layout handle
+ * Variables :
+ * Result    : see docs
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Thu, 1998/02/26 11:55]
+ *****************************************************************************/
+WORD WIN32API VkKeyScanExW(WCHAR uChar,
+                           HKL   hkl)
+{
+  dprintf(("USER32:VkKeyScanExW (%u,%08x) partially implemented",
+          uChar,hkl));
+
+  return VkKeyScanW(uChar);
+}
+/*****************************************************************************
+ * Name      : SHORT WIN32API VkKeyScanExA
+ * Purpose   : The VkKeyScanEx function translates a character to the
+ *             corresponding virtual-key code and shift state. The function
+ *             translates the character using the input language and physical
+ *             keyboard layout identified by the given keyboard layout handle.
+ * Parameters: UINT uChar character to translate
+ *             HKL  hkl   keyboard layout handle
+ * Variables :
+ * Result    : see docs
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Thu, 1998/02/26 11:55]
+ *****************************************************************************/
+WORD WIN32API VkKeyScanExA(CHAR uChar,
+                           HKL  hkl)
+{
+  dprintf(("USER32:VkKeyScanExA (%u,%08x) partially implemented",
+         uChar, hkl));
+
+  return VkKeyScanA(uChar);
+}
+/*****************************************************************************
+ * Name      : VOID WIN32API keybd_event
+ * Purpose   : The keybd_event function synthesizes a keystroke. The system
+ *             can use such a synthesized keystroke to generate a WM_KEYUP or
+ *             WM_KEYDOWN message. The keyboard driver's interrupt handler calls
+ *             the keybd_event function.
+ * Parameters: BYTE  bVk         virtual-key code
+
+ *             BYTE  bScan       hardware scan code
+ *             DWORD dwFlags     flags specifying various function options
+ *             DWORD dwExtraInfo additional data associated with keystroke
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Thu, 1998/02/26 11:55]
+ *****************************************************************************/
+VOID WIN32API keybd_event (BYTE bVk,
+                           BYTE bScan,
+                           DWORD dwFlags,
+                           DWORD dwExtraInfo)
+{
+  dprintf(("USER32:keybd_event (%u,%u,%08xh,%08x) not implemented.\n",
+         bVk,
+         bScan,
+         dwFlags,
+         dwExtraInfo));
+}
+/*****************************************************************************
+ * Name      : HLK WIN32API LoadKeyboardLayoutA
+ * Purpose   : The LoadKeyboardLayout function loads a new keyboard layout into
+ *             the system. Several keyboard layouts can be loaded at a time, but
+ *             only one per process is active at a time. Loading multiple keyboard
+ *             layouts makes it possible to rapidly switch between layouts.
+ * Parameters:
+ * Variables :
+ * Result    : If the function succeeds, the return value is the handle of the
+ *               keyboard layout.
+ *             If the function fails, the return value is NULL. To get extended
+ *               error information, call GetLastError.
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Thu, 1998/02/26 11:55]
+ *****************************************************************************/
+HKL WIN32API LoadKeyboardLayoutA(LPCTSTR pwszKLID,
+                                 UINT    Flags)
+{
+  dprintf(("USER32:LeadKeyboardLayoutA (%s,%u) not implemented.\n",
+         pwszKLID,
+         Flags));
+
+  return (NULL);
+}
+/*****************************************************************************
+ * Name      : HLK WIN32API LoadKeyboardLayoutW
+ * Purpose   : The LoadKeyboardLayout function loads a new keyboard layout into
+ *             the system. Several keyboard layouts can be loaded at a time, but
+ *             only one per process is active at a time. Loading multiple keyboard
+ *             layouts makes it possible to rapidly switch between layouts.
+ * Parameters:
+ * Variables :
+ * Result    : If the function succeeds, the return value is the handle of the
+ *               keyboard layout.
+ *             If the function fails, the return value is NULL. To get extended
+ *               error information, call GetLastError.
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Thu, 1998/02/26 11:55]
+ *****************************************************************************/
+HKL WIN32API LoadKeyboardLayoutW(LPCWSTR pwszKLID,
+                                 UINT    Flags)
+{
+  dprintf(("USER32:LeadKeyboardLayoutW (%s,%u) not implemented.\n",
+         pwszKLID,
+         Flags));
+
+  return (NULL);
+}
+//******************************************************************************
+//******************************************************************************
+BOOL WIN32API ActivateKeyboardLayout(HKL hkl, UINT fuFlags)
+{
+  dprintf(("USER32:  ActivateKeyboardLayout, not implemented\n"));
+  return(TRUE);
+}
+/*****************************************************************************
+ * Name      : BOOL WIN32API UnloadKeyboardLayout
+ * Purpose   : The UnloadKeyboardLayout function removes a keyboard layout.
+ * Parameters: HKL hkl handle of keyboard layout
+ * Variables :
+ * Result    : If the function succeeds, the return value is the handle of the
+ *             keyboard layout; otherwise, it is NULL. To get extended error
+ *             information, use the GetLastError function.
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Thu, 1998/02/26 11:55]
+ *****************************************************************************/
+BOOL WIN32API UnloadKeyboardLayout (HKL hkl)
+{
+  dprintf(("USER32:UnloadKeyboardLayout (%08x) not implemented.\n",
+         hkl));
 
   return (0);
 }
