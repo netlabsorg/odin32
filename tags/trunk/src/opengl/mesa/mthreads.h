@@ -1,4 +1,4 @@
-/* $Id: mthreads.h,v 1.1 2000-02-29 00:48:34 sandervl Exp $ */
+/* $Id: mthreads.h,v 1.2 2000-03-02 13:27:30 sandervl Exp $ */
 
 /*
  * Mesa 3-D graphics library
@@ -126,11 +126,7 @@ typedef thread_t MesaThread;
 
 #if defined(WIN32) || defined(__WIN32OS2__)
 
-#ifdef __WIN32OS2__
-#include <os2win.h>
-#else
 #include <windows.h>
-#endif
 
 typedef struct {
   DWORD key;
@@ -149,7 +145,12 @@ typedef HANDLE MesaThread;
  * Platform independent thread specific data API.
  */
 void  MesaInitTSD(MesaTSD *);
+
+#ifdef __WIN32OS2__
+void *MesaGetTSD (MesaTSD * tsd, void (*initfunc)(void)) ;
+#else
 void* MesaGetTSD (MesaTSD *);
+#endif
 void  MesaSetTSD (MesaTSD *, void *, void (*initfunc)(void));
 
 
