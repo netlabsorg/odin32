@@ -1,4 +1,4 @@
-/* $Id: wingdi.h,v 1.11 2000-01-29 17:37:20 phaller Exp $ */
+/* $Id: wingdi.h,v 1.12 2000-02-29 00:55:09 sandervl Exp $ */
 
 #ifndef __WINE_WINGDI_H
 #define __WINE_WINGDI_H
@@ -8,6 +8,8 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+#define WINGDIAPI
 
 #define _WINGDI_
 
@@ -67,6 +69,31 @@ typedef struct tagPIXELFORMATDESCRIPTOR {
     DWORD dwVisibleMask;
     DWORD dwDamageMask;
 } PIXELFORMATDESCRIPTOR, *LPPIXELFORMATDESCRIPTOR;
+
+#define PFD_TYPE_RGBA        0
+#define PFD_TYPE_COLORINDEX  1
+
+#define PFD_MAIN_PLANE       0
+#define PFD_OVERLAY_PLANE    1
+#define PFD_UNDERLAY_PLANE   (-1)
+
+#define PFD_DOUBLEBUFFER            0x00000001
+#define PFD_STEREO                  0x00000002
+#define PFD_DRAW_TO_WINDOW          0x00000004
+#define PFD_DRAW_TO_BITMAP          0x00000008
+#define PFD_SUPPORT_GDI             0x00000010
+#define PFD_SUPPORT_OPENGL          0x00000020
+#define PFD_GENERIC_FORMAT          0x00000040
+#define PFD_NEED_PALETTE            0x00000080
+#define PFD_NEED_SYSTEM_PALETTE     0x00000100
+#define PFD_SWAP_EXCHANGE           0x00000200
+#define PFD_SWAP_COPY               0x00000400
+#define PFD_SWAP_LAYER_BUFFERS      0x00000800
+#define PFD_GENERIC_ACCELERATED     0x00001000
+
+#define PFD_DEPTH_DONTCARE          0x20000000
+#define PFD_DOUBLEBUFFER_DONTCARE   0x40000000
+#define PFD_STEREO_DONTCARE         0x80000000
 
 typedef struct tagCOLORADJUSTMENT
 {
@@ -2638,6 +2665,98 @@ typedef struct _RGNDATA {
 
 typedef BOOL (* CALLBACK ABORTPROC)(HDC, INT);
 
+typedef struct _POINTFLOAT {
+    FLOAT   x;
+    FLOAT   y;
+} POINTFLOAT, *PPOINTFLOAT;
+
+typedef struct _GLYPHMETRICSFLOAT {
+    FLOAT       gmfBlackBoxX;
+    FLOAT       gmfBlackBoxY;
+    POINTFLOAT  gmfptGlyphOrigin;
+    FLOAT       gmfCellIncX;
+    FLOAT       gmfCellIncY;
+} GLYPHMETRICSFLOAT, *PGLYPHMETRICSFLOAT, *LPGLYPHMETRICSFLOAT;
+
+#define WGL_FONT_LINES      0
+#define WGL_FONT_POLYGONS   1
+
+// Layer plane descriptor
+typedef struct tagLAYERPLANEDESCRIPTOR {
+    WORD  nSize;
+    WORD  nVersion;
+    DWORD dwFlags;
+    BYTE  iPixelType;
+    BYTE  cColorBits;
+    BYTE  cRedBits;
+    BYTE  cRedShift;
+    BYTE  cGreenBits;
+    BYTE  cGreenShift;
+    BYTE  cBlueBits;
+    BYTE  cBlueShift;
+    BYTE  cAlphaBits;
+    BYTE  cAlphaShift;
+    BYTE  cAccumBits;
+    BYTE  cAccumRedBits;
+    BYTE  cAccumGreenBits;
+    BYTE  cAccumBlueBits;
+    BYTE  cAccumAlphaBits;
+    BYTE  cDepthBits;
+    BYTE  cStencilBits;
+    BYTE  cAuxBuffers;
+    BYTE  iLayerPlane;
+    BYTE  bReserved;
+    COLORREF crTransparent;
+} LAYERPLANEDESCRIPTOR, *PLAYERPLANEDESCRIPTOR, *LPLAYERPLANEDESCRIPTOR;
+
+// LAYERPLANEDESCRIPTOR flags
+#define LPD_DOUBLEBUFFER        0x00000001
+#define LPD_STEREO              0x00000002
+#define LPD_SUPPORT_GDI         0x00000010
+#define LPD_SUPPORT_OPENGL      0x00000020
+#define LPD_SHARE_DEPTH         0x00000040
+#define LPD_SHARE_STENCIL       0x00000080
+#define LPD_SHARE_ACCUM         0x00000100
+#define LPD_SWAP_EXCHANGE       0x00000200
+#define LPD_SWAP_COPY           0x00000400
+#define LPD_TRANSPARENT         0x00001000
+
+#define LPD_TYPE_RGBA        0
+#define LPD_TYPE_COLORINDEX  1
+
+// wglSwapLayerBuffers flags
+#define WGL_SWAP_MAIN_PLANE     0x00000001
+#define WGL_SWAP_OVERLAY1       0x00000002
+#define WGL_SWAP_OVERLAY2       0x00000004
+#define WGL_SWAP_OVERLAY3       0x00000008
+#define WGL_SWAP_OVERLAY4       0x00000010
+#define WGL_SWAP_OVERLAY5       0x00000020
+#define WGL_SWAP_OVERLAY6       0x00000040
+#define WGL_SWAP_OVERLAY7       0x00000080
+#define WGL_SWAP_OVERLAY8       0x00000100
+#define WGL_SWAP_OVERLAY9       0x00000200
+#define WGL_SWAP_OVERLAY10      0x00000400
+#define WGL_SWAP_OVERLAY11      0x00000800
+#define WGL_SWAP_OVERLAY12      0x00001000
+#define WGL_SWAP_OVERLAY13      0x00002000
+#define WGL_SWAP_OVERLAY14      0x00004000
+#define WGL_SWAP_OVERLAY15      0x00008000
+#define WGL_SWAP_UNDERLAY1      0x00010000
+#define WGL_SWAP_UNDERLAY2      0x00020000
+#define WGL_SWAP_UNDERLAY3      0x00040000
+#define WGL_SWAP_UNDERLAY4      0x00080000
+#define WGL_SWAP_UNDERLAY5      0x00100000
+#define WGL_SWAP_UNDERLAY6      0x00200000
+#define WGL_SWAP_UNDERLAY7      0x00400000
+#define WGL_SWAP_UNDERLAY8      0x00800000
+#define WGL_SWAP_UNDERLAY9      0x01000000
+#define WGL_SWAP_UNDERLAY10     0x02000000
+#define WGL_SWAP_UNDERLAY11     0x04000000
+#define WGL_SWAP_UNDERLAY12     0x08000000
+#define WGL_SWAP_UNDERLAY13     0x10000000
+#define WGL_SWAP_UNDERLAY14     0x20000000
+#define WGL_SWAP_UNDERLAY15     0x40000000
+
 #include "poppack.h"
 
 
@@ -2989,6 +3108,35 @@ typedef int (* CALLBACK ICMENUMPROCW)(LPWSTR, LPARAM);
 int WINAPI EnumICMProfilesA(HDC,ICMENUMPROCA,LPARAM);
 int WINAPI EnumICMProfilesW(HDC,ICMENUMPROCW,LPARAM);
 #define     EnumICMProfiles WINELIB_NAME_AW(EnumICMProfiles)
+
+
+// OpenGL wgl prototypes
+
+BOOL  WINAPI wglCopyContext(HGLRC, HGLRC, UINT);
+HGLRC WINAPI wglCreateContext(HDC);
+HGLRC WINAPI wglCreateLayerContext(HDC, int);
+BOOL  WINAPI wglDeleteContext(HGLRC);
+HGLRC WINAPI wglGetCurrentContext(VOID);
+HDC   WINAPI wglGetCurrentDC(VOID);
+PROC  WINAPI wglGetProcAddress(LPCSTR);
+BOOL  WINAPI wglMakeCurrent(HDC, HGLRC);
+BOOL  WINAPI wglShareLists(HGLRC, HGLRC);
+BOOL  WINAPI wglUseFontBitmapsA(HDC, DWORD, DWORD, DWORD);
+BOOL  WINAPI wglUseFontBitmapsW(HDC, DWORD, DWORD, DWORD);
+#define wglUseFontBitmaps  WINELIB_NAME_AW(wglUseFontBitmaps)
+
+
+BOOL WINAPI wglDescribeLayerPlane(HDC, int, int, UINT, LPLAYERPLANEDESCRIPTOR);
+int  WINAPI wglSetLayerPaletteEntries(HDC, int, int, int, CONST COLORREF *);
+int  WINAPI wglGetLayerPaletteEntries(HDC, int, int, int, COLORREF *);
+BOOL WINAPI wglRealizeLayerPalette(HDC, int, BOOL);
+BOOL WINAPI wglSwapLayerBuffers(HDC, UINT);
+BOOL  WINAPI wglUseFontOutlinesA(HDC, DWORD, DWORD, DWORD, FLOAT,
+                                 FLOAT, int, LPGLYPHMETRICSFLOAT);
+BOOL  WINAPI wglUseFontOutlinesW(HDC, DWORD, DWORD, DWORD, FLOAT,
+                                 FLOAT, int, LPGLYPHMETRICSFLOAT);
+
+#define     wglUseFontOutlines WINELIB_NAME_AW(wglUseFontOutlines)
 
 #ifdef __cplusplus
 }
