@@ -1,4 +1,4 @@
-/* $Id: odin.cmd,v 1.40 2002-02-21 23:13:08 sandervl Exp $
+/* $Id: odin.cmd,v 1.41 2002-04-11 16:25:31 bird Exp $
  *
  * Odin32 API WarpIn installation script generator.
  *
@@ -77,9 +77,11 @@ do while ((asArg.i <> '') & (i < 9))
         say 'failed to create WarpIn script.'
         exit(2);
     end
-    if (PackFiles('odin32inst.wis', asArg.i, MakeArchiveName(asArg.i)) <> 0) then
+
+    rc = PackFiles('odin32inst.wis', asArg.i, MakeArchiveName(asArg.i));
+    if (rc <> 0) then
     do
-        say 'failed to create WarpIn script.'
+        say 'failed to pack archive.(rc='rc')'
         exit(3);
     end
     i = i + 1;
@@ -491,66 +493,72 @@ sMainDir = filespec('drive', sCurDir) || substr(sMainDir, 1, length(sMainDir) - 
 sDocDir = sMainDir||'\doc';
 sBinDir = sMainDir||'\bin';
 sDllDir = sBinDir||'\'||sDllDir;
-sWICCmd = 'wic.exe '||sInstallArchive ' -a';
+sWICFile = 'wicinput.lst';
 
 /*
  * Remove any old target install archive file.
  */
 call SysFileDelete sInstallArchive
+call SysFileDelete sWICFile
+rc = stream(sWICFile, 'c', 'open write');
+if (pos('READY', rc) <> 1) then
+do
+    say 'Failed to open '''sWICFile'''. (rc='rc')';
+    parse rc .':'irc
+    return irc;
+end
 
 /*
- * Script
+ * Script.
  */
-'wic.exe' sInstallArchive '-s' sInstFile
+call lineout sWICFile, sInstallArchive '-s' sInstFile '-a'
 
 /*
  * Packet 1
  */
-sWICCmd '1 -c'||sMainDir 'ChangeLog LICENSE.TXT WGSS50.lic';
-if (rc <> 0) then return rc;
-sWICCmd '1 -c'||sDocDir 'ChangeLog-1999 ChangeLog-2000 ChangeLog-2001 ChangeLog-2002 Readme.txt ReportingBugs.txt Logging.txt Odin.ini.txt Readme.Odinbug';
-if (rc <> 0) then return rc;
-sWICCmd '1 -c'||sBinDir||' Odinbug.exe';
-if (rc <> 0) then return rc;
+call lineout sWICFile, '1 -c'||sMainDir 'ChangeLog LICENSE.TXT WGSS50.lic';
+call lineout sWICFile, '1 -c'||sDocDir 'ChangeLog-1999 ChangeLog-2000 ChangeLog-2001 ChangeLog-2002 Readme.txt ReportingBugs.txt Logging.txt Odin.ini.txt Readme.Odinbug';
+call lineout sWICFile, '1 -c'||sBinDir||' Odinbug.exe';
 
 /*
  * Packet 2
  */
-/* sWICCmd '2 -c'||sBinDir' odin.ini'; */
 /* if (rc <> 0) then return rc; */
-sWICCmd '2 -c'||sDllDir||' pe.exe *.dll pec.exe odininst.exe regsvr32.exe win32k.sys win32k.ddp Win32kCC.exe kRx.exe Xx2Lx.exe';
-if (rc <> 0) then return rc;
-sWICCmd '2 -c'||sBinDir||' wgss50.dll';
-if (rc <> 0) then return rc;
+call lineout sWICFile, '2 -c'||sDllDir||' pe.exe *.dll pec.exe odininst.exe regsvr32.exe win32k.sys win32k.ddp Win32kCC.exe kRx.exe Xx2Lx.exe';
+call lineout sWICFile, '2 -c'||sBinDir||' wgss50.dll';
 
 if (pos('DEBUG', translate(filespec('name', sDllDir)))) then
 do
     iDbg = lastpos('DEBUG', translate(sDllDir));
     sRelDir = substr(sDllDir, 1, iDbg - 1)||'release'||substr(sDllDir, iDbg + 5);
-    sWICCmd '2 -c'||sRelDir 'odincrt.dll odincrt.sym';
-    if (rc <> 0) then return rc;
-
-    sWICCmd '2 -c'||sDllDir '*.sym';
-    if (rc <> 0) then return rc;
+    call lineout sWICFile, '2 -c'||sRelDir 'odincrt.dll odincrt.sym';
+    call lineout sWICFile, '2 -c'||sDllDir '*.sym';
 end
 
 
 /*
  * Packet 3 is only win32k.sys config.sys line but it seems like we have to add something.
  */
-sWICCmd '3 -c'||sDllDir '*.ddp';
-if (rc <> 0) then return rc;
+call lineout sWICFile, '3 -c'||sDllDir '*.ddp';
 
 
 /*
  * Packet 4 is the .sym files and only present in release mode.
  */
 if (pos('DEBUG', translate(filespec('name', sDllDir))) <= 0) then
-do
-    sWICCmd '4 -c'||sDllDir '*.sym';
-    if (rc <> 0) then return rc;
-end
+    call lineout sWICFile, '4 -c'||sDllDir '*.sym';
 
+/*
+ * Close input file.
+ */
+call stream sWICFile, 'c', 'close';
+
+/*
+ * Call wic.exe
+ */
+say 'wic.exe @'||sWICFile;
+'wic.exe @'||sWICFile;
+if (rc <> 0) then say 'wic failed';
 
 return rc;
 
