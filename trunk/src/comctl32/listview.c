@@ -5278,7 +5278,7 @@ static LRESULT LISTVIEW_GetItemA(HWND hwnd, LPLVITEMA lpLVItem, BOOL internal)
 
   lpItem = (LISTVIEW_ITEM *)DPA_GetPtr(hdpaSubItems, 0);
 #ifdef __WIN32OS2__
-  if (lpItem == NULL || lpItem->iImage == -1) {
+  if (lpItem == NULL || lpItem == -1) {
     dprintf(("WARNING: lpItem (%x) INVALID", lpItem));
     return FALSE;
   }
