@@ -1,4 +1,4 @@
-; $Id: comctl32.def,v 1.12 1999-11-02 21:44:01 achimha Exp $
+; $Id: comctl32.def,v 1.13 1999-11-14 13:09:58 achimha Exp $
 LIBRARY COMCTL32 INITINSTANCE
 DESCRIPTION 'COMCTL32 Common Controls Library'
 DATA MULTIPLE NONSHARED
@@ -131,6 +131,7 @@ EXPORTS
   StrCSpnA            = _COMCTL32_StrCSpnA@8       @356
   StrChrW             = _COMCTL32_StrChrW@8        @358
   StrCmpNA            = _COMCTL32_StrCmpNA@12      @352
+  StrCmpNIA           = _COMCTL32_StrCmpNIA@12     @353
   StrCmpNW            = _COMCTL32_StrCmpNW@12      @360
   StrRChrA            = _COMCTL32_StrRChrA@12      @351
   StrRChrW            = _COMCTL32_StrRChrW@12      @359
