@@ -1,4 +1,4 @@
-/* $Id: region.cpp,v 1.34 2003-11-14 17:30:47 sandervl Exp $ */
+/* $Id: region.cpp,v 1.35 2003-11-14 17:31:47 sandervl Exp $ */
 
 /*
  * GDI32 region code
@@ -46,9 +46,6 @@
 
 #define DBG_LOCALLOG    DBG_region
 #include "dbglocal.h"
-
-#define DIBSECTION_MARK_INVALID(a)
-#define DIBSECTION_CHECK_IF_DIRTY(a)
 
 //GPI and Windows use the same values
 #define GPI_TO_WIN_COMPLEXITY(a)	a
