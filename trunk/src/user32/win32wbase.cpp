@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.79 1999-11-10 17:11:30 cbratschi Exp $ */
+/* $Id: win32wbase.cpp,v 1.80 1999-11-10 20:02:48 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -1150,11 +1150,11 @@ ULONG Win32BaseWindow::MsgMouseMove(ULONG keystate, ULONG x, ULONG y)
  ULONG setcursormsg = WM_MOUSEMOVE;
 
     if(ISMOUSE_CAPTURED()) {
-    POINT point = {x,y};
+    	POINT point = {x,y};
 
         MapWindowPoints(getWindowHandle(), HWND_DESKTOP, &point, 1);
-    if(DInputMouseHandler(getWindowHandle(), MOUSEMSG_MOVE, point.x, point.y, keystate))
-        return 0;
+    	if(DInputMouseHandler(getWindowHandle(), MOUSEMSG_MOVE, point.x, point.y, keystate))
+        	return 0;
     }
 
     if(keystate & WMMOVE_LBUTTON)
@@ -1178,7 +1178,7 @@ ULONG Win32BaseWindow::MsgMouseMove(ULONG keystate, ULONG x, ULONG y)
     if(lastHitTestVal != HTCLIENT) {
             SendInternalMessageA(WM_NCMOUSEMOVE, lastHitTestVal, MAKELONG(x, y));
     }
-    return  SendInternalMessageA(WM_MOUSEMOVE, keystate, MAKELONG(x, y));
+    return  SendInternalMessageA(WM_MOUSEMOVE, winstate, MAKELONG(x, y));
 }
 //******************************************************************************
 //******************************************************************************
