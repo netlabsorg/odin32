@@ -1,4 +1,4 @@
-/* $Id: profile.cpp,v 1.23 2000-07-06 21:18:44 sandervl Exp $ */
+/* $Id: profile.cpp,v 1.24 2000-08-27 03:25:42 bird Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -32,6 +32,8 @@
 
 #define DBG_LOCALLOG	DBG_profile
 #include "dbglocal.h"
+
+#include "initterm.h"
 
 ODINDEBUGCHANNEL(PROFILE)
 
@@ -966,14 +968,20 @@ ODINFUNCTION0(int,PROFILE_LoadOdinIni)
       fclose( f );
       strncpy(PROFILE_OdinIniUsed,p,MAX_PATHNAME_LEN);
       PROFILE_OdinIniUsed[MAX_PATHNAME_LEN-1] = 0;
-    } 
+    }
     else
     {
+      #if 0 /* Aug 27 2000 4:26am: Why not use the global kernel32Path
+             *                (LoadLibrary may cause harm if used...) */
       HINSTANCE hInstance = LoadLibraryA("KERNEL32.DLL");
       GetModuleFileNameA(hInstance,PROFILE_OdinIniUsed,sizeof(PROFILE_OdinIniUsed));
       FreeLibrary(hInstance);
       strcpy(strrchr(PROFILE_OdinIniUsed,'\\')+1,ODINININAME);
-      f = fopen(PROFILE_OdinIniUsed,"r");
+      #else
+      strcpy(PROFILE_OdinIniUsed, kernel32Path);
+      strcat(PROFILE_OdinIniUsed, ODINININAME);
+      #endif
+      f = fopen(PROFILE_OdinIniUsed, "r");
       PROFILE_OdinProfile = PROFILE_Load(f);
       fclose(f);
     }
