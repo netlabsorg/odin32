@@ -1,4 +1,4 @@
-/* $Id: asmutil.h,v 1.1 2002-05-10 14:55:10 sandervl Exp $ */
+/* $Id: asmutil.h,v 1.2 2003-03-27 14:13:10 sandervl Exp $ */
 
 /*
  * Misc assembly functions for OS/2
@@ -27,6 +27,11 @@ USHORT getGS();
 void CDECL Mul32x32to64(PVOID result, DWORD op1, DWORD op2);
 void CDECL Sub64(LARGE_INTEGER *a, LARGE_INTEGER *b, LARGE_INTEGER *result);
 void CDECL Add64(LARGE_INTEGER *a, LARGE_INTEGER *b, LARGE_INTEGER *result);
+
+
+void CDECL set_bit(int bitnr, void *addr);
+void CDECL clear_bit(int bitnr, void *addr);
+int  CDECL test_bit(int bitnr, void *addr);
 
 #ifdef __cplusplus
 }
