@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.129 1999-12-30 18:32:59 cbratschi Exp $ */
+/* $Id: win32wbase.cpp,v 1.130 2000-01-01 12:18:07 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -820,7 +820,9 @@ ULONG Win32BaseWindow::MsgShow(BOOL fShow)
 //******************************************************************************
 ULONG Win32BaseWindow::MsgPosChanging(LPARAM lp)
 {
-    if(fNoSizeMsg)
+    //SvL: Notes crashes when switching views (calls DestroyWindow -> PM sends
+    //     a WM_WINDOWPOSCHANGED msg -> crash)
+    if(fNoSizeMsg || fDestroyWindowCalled)
         return 1;
 
     return SendInternalMessageA(WM_WINDOWPOSCHANGING, 0, lp);
@@ -829,7 +831,9 @@ ULONG Win32BaseWindow::MsgPosChanging(LPARAM lp)
 //******************************************************************************
 ULONG Win32BaseWindow::MsgPosChanged(LPARAM lp)
 {
-    if(fNoSizeMsg)
+    //SvL: Notes crashes when switching views (calls DestroyWindow -> PM sends
+    //     a WM_WINDOWPOSCHANGED msg -> crash)
+    if(fNoSizeMsg || fDestroyWindowCalled)
         return 1;
 
     return SendInternalMessageA(WM_WINDOWPOSCHANGED, 0, lp);
