@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.33 2001-07-20 15:35:30 sandervl Exp $
+# $Id: makefile,v 1.34 2001-07-21 09:07:17 sandervl Exp $
 
 #
 # Odin32 API
@@ -54,6 +54,7 @@ $(OBJDIR)\smoothscroll.obj
 #
 LIBS = \
 $(ODIN32_LIB)/kernel32.lib \
+$(ODIN32_LIB)/ntdll.lib \
 $(ODIN32_LIB)/gdi32.lib \
 $(ODIN32_LIB)/user32.lib \
 $(ODIN32_LIB)/msvfw32.lib \
