@@ -1,4 +1,4 @@
-/* $Id: shlfolder.cpp,v 1.5 2000-01-08 02:43:27 phaller Exp $ */
+/* $Id: shlfolder.cpp,v 1.6 2000-01-08 04:37:01 phaller Exp $ */
 /*
  * Shell Folder stuff
  *
@@ -2065,7 +2065,7 @@ static HRESULT WINAPI ISF_MyComputer_fnGetDetailsOf(
          {
            _ILSimpleGetText(pidl, szPath, MAX_PATH);
            GetDiskFreeSpaceExA(szPath, NULL, &ulBytes, NULL);
-           StrFormatByteSizeA(ulBytes.s.LowPart, psd->str.u.cStr, MAX_PATH);
+           StrFormatByteSizeA(ulBytes.LowPart, psd->str.u.cStr, MAX_PATH);
          }
          break;
        case 3: /* free size */
@@ -2073,7 +2073,7 @@ static HRESULT WINAPI ISF_MyComputer_fnGetDetailsOf(
          {
            _ILSimpleGetText(pidl, szPath, MAX_PATH);
            GetDiskFreeSpaceExA(szPath, &ulBytes, NULL, NULL);
-           StrFormatByteSizeA(ulBytes.s.LowPart, psd->str.u.cStr, MAX_PATH);
+           StrFormatByteSizeA(ulBytes.LowPart, psd->str.u.cStr, MAX_PATH);
          }
          break;
      }
