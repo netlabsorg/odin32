@@ -1,4 +1,4 @@
-/* $Id: socket.cpp,v 1.9 2001-07-07 14:29:22 achimha Exp $ */
+/* $Id: socket.cpp,v 1.10 2001-10-10 19:08:08 phaller Exp $ */
 /*
  * based on Windows Sockets 1.1 specs
  * (ftp.microsoft.com:/Advsys/winsock/spec11/WINSOCK.TXT)
@@ -16,25 +16,34 @@
  * ws_XXXXent32 (winsock2.h) and 1-byte forced ws_XXXXent16 (winsock16.h).
  */
 
+
+/*****************************************************************************
+ * Includes                                                                  *
+ *****************************************************************************/
+
 #include <odin.h>
 #include <winsock2.h>
 #include <debugtools.h>
+#include <odinwrap.h>
+
+
+ODINDEBUGCHANNEL(WS2_32-SOCKET)
+
 
 /***********************************************************************
  *      WSACreateEvent()          (WS2_32.???)
  *
  */
-WSAEVENT WINAPI WSACreateEvent(void)
+ODINFUNCTION0(WSAEVENT, WSACreateEvent)
 {
     /* Create a manual-reset event, with initial state: unsignealed */
-    TRACE("WSACreateEvent");
     
     return CreateEventA(NULL, TRUE, FALSE, NULL);    
 }
 
-BOOL WINAPI WSASetEvent(WSAEVENT hEvent)
+ODINFUNCTION1(BOOL, WSASetEvent,
+              WSAEVENT, hEvent)
 {
-    TRACE("WSASetEvent event=0x%x\n", hEvent);
     return SetEvent(hEvent);
 }
 
@@ -42,10 +51,9 @@ BOOL WINAPI WSASetEvent(WSAEVENT hEvent)
  *      WSACloseEvent()          (WS2_32.???)
  *
  */
-BOOL WINAPI WSACloseEvent(WSAEVENT hEvent)
+ODINFUNCTION1(BOOL, WSACloseEvent,
+              WSAEVENT, hEvent)
 {
-    TRACE ("WSACloseEvent event=0x%x\n", hEvent);
-
     return CloseHandle(hEvent);
 }
 
@@ -53,10 +61,15 @@ BOOL WINAPI WSACloseEvent(WSAEVENT hEvent)
  *      WSASocketA()          (WS2_32.???)
  *
  */
-SOCKET WINAPI WSASocketA(int af, int type, int protocol,
-                         LPWSAPROTOCOL_INFOA lpProtocolInfo,
-                         GROUP g, DWORD dwFlags)
+ODINFUNCTION6(SOCKET, WSASocketA,
+              int, af,
+              int, type,
+              int, protocol,
+              LPWSAPROTOCOL_INFOA, lpProtocolInfo,
+              GROUP, g,
+              DWORD, dwFlags)
 {
+  dprintf(("WSASocketA incorrectly implemented"));
    /* 
       FIXME: The "advanced" parameters of WSASocketA (lpProtocolInfo,
       g, dwFlags) are ignored.
@@ -72,10 +85,15 @@ SOCKET WINAPI WSASocketA(int af, int type, int protocol,
  *      WSASocketA()          (WS2_32.???)
  *
  */
-SOCKET WINAPI WSASocketW(int af, int type, int protocol,
-                         LPWSAPROTOCOL_INFOW lpProtocolInfo,
-                         GROUP g, DWORD dwFlags)
+ODINFUNCTION6(SOCKET, WSASocketW,
+              int, af,
+              int, type,
+              int, protocol,
+              LPWSAPROTOCOL_INFOW, lpProtocolInfo,
+              GROUP, g,
+              DWORD, dwFlags)
 {
+  dprintf(("WSASocketW incorrectly implemented"));
    /* 
       FIXME: The "advanced" parameters of WSASocketA (lpProtocolInfo,
       g, dwFlags) are ignored.
