@@ -1,4 +1,4 @@
-/* $Id: sorter.cpp,v 1.2 2000-09-22 20:49:20 jeroen Exp $ */
+/* $Id: sorter.cpp,v 1.3 2002-01-05 11:13:53 sandervl Exp $ */
 /*
 ** License Applicability. Except to the extent portions of this file are
 ** made subject to an alternative license as permitted in the SGI Free
@@ -36,8 +36,8 @@
 /*
  * sorter.c++
  *
- * $Date: 2000-09-22 20:49:20 $ $Revision: 1.2 $
- * $Header: /home/ktk/tmp/odin/2007/netlabs.cvs/odin32/src/opengl/glu/nurbs/internals/sorter.cpp,v 1.2 2000-09-22 20:49:20 jeroen Exp $
+ * $Date: 2002-01-05 11:13:53 $ $Revision: 1.3 $
+ * $Header: /home/ktk/tmp/odin/2007/netlabs.cvs/odin32/src/opengl/glu/nurbs/internals/sorter.cpp,v 1.3 2002-01-05 11:13:53 sandervl Exp $
  */
 
 #include "glimports.h"
