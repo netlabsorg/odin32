@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.1 1999-09-05 02:34:31 bird Exp $
+# $Id: makefile,v 1.2 2000-02-09 23:49:55 bird Exp $
 
 #
 # PD-Win32 API
@@ -15,6 +15,8 @@ omfdumper.exe:  omfdumper.c omf.h
 
 ..\bin\omfdumper.exe: omfdumper.exe
    $(CP) $** $@
+
+dep: # dummy rule
 
 clean:
    -@$(RM) *.obj

@@ -7,7 +7,9 @@
 #If the ar command fails on your system, consult the ar manpage
 #for your system.
 
-!include ..\..\..\include\pdwin32.tools
+PDWIN32_INCLUDE = ..\..\..\include
+PDWIN32_TOOLS = ..\..\bin
+!include $(PDWIN32_INCLUDE)\pdwin32.mk
 
 CC=gcc
 AR=ar
@@ -54,23 +56,27 @@ LDFLAGS   = $(CFZOMF)
 all: gdgcc.$(A) gddemo.exe giftogd.exe webgif.exe
 
 gdgcc.$(A): gd.$(O) gdfontt.$(O) gdfonts.$(O) gdfontmb.$(O) gdfontl.$(O) gdfontg.$(O) \
-        gd.h gdfontt.h gdfonts.h gdfontmb.h gdfontl.h gdfontg.h
-        -@$(RM) gdgcc.$(A)
-        $(AR) rc gdgcc.$(A) gd.$(O) gdfontt.$(O) gdfonts.$(O) gdfontmb.$(O) \
-                gdfontl.$(O) gdfontg.$(O)
+    gd.h gdfontt.h gdfonts.h gdfontmb.h gdfontl.h gdfontg.h
+    @$(RM) gdgcc.$(A)
+    $(AR) rc gdgcc.$(A) gd.$(O) gdfontt.$(O) gdfonts.$(O) gdfontmb.$(O) \
+        gdfontl.$(O) gdfontg.$(O)
 
 gddemo.exe: gddemo.$(O) gdgcc.$(A) gd.h gdfonts.h gdfontl.h
-        $(LD) $(LDFLAGS) gddemo.$(O) -o $@ $(LIBS)
+    $(LD) $(LDFLAGS) gddemo.$(O) -o $@ $(LIBS)
 
 giftogd.exe: giftogd.$(O) gdgcc.$(A) gd.h
-        $(LD) $(LDFLAGS) giftogd.$(O) -o $@ $(LIBS)
+    $(LD) $(LDFLAGS) giftogd.$(O) -o $@ $(LIBS)
 
 webgif.exe: webgif.$(O) gdgcc.$(A) gd.h
-        $(LD) $(LDFLAGS) webgif.$(O) -o $@ $(LIBS)
+    $(LD) $(LDFLAGS) webgif.$(O) -o $@ $(LIBS)
+
+dep:
+    @nmake /nologo -f makefile NODEP=1 dep
+
+!ifndef NODEP
+!include .depend
+!endif
 
 clean:
-       -@$(RM) *.$(O)
-       -@$(RM) *.$(A)
-       -@$(RM) *.exe
-       -@$(RM) *.map
+    -@$(RM) *.$(O) *.$(A) *.exe *.map
 

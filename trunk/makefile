@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.9 2000-02-09 23:46:57 bird Exp $
+# $Id: makefile,v 1.10 2000-02-09 23:47:56 bird Exp $
 
 #
 # PD-Win32 API
@@ -6,7 +6,7 @@
 #	Top of the tree makefile
 #
 #
-#	Usage: nmake ( debug | nodebuginfo | release | all | clean )
+#	Usage: nmake ( debug | nodebuginfo | release | all | dep | clean )
 #
 #            debug: Change to a debug build.
 #            debugsmp: Start nmake process in background that processes all
@@ -16,6 +16,7 @@
 #            release: Change to a release build.
 #            releasesmp: Change to an SMP release build.
 #            all: Build the entire tree.
+#            dep: Make dependencies for the entire tree.
 #            clean: Bring tree back to a "virgin" state.
 #
 #

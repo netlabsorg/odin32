@@ -8,8 +8,8 @@
 #for your system.
 
 
-# common include directory
 PDWIN32_INCLUDE = ..\..\..\include
+PDWIN32_TOOLS = ..\..\bin
 !include $(PDWIN32_INCLUDE)\pdwin32.mk
 
 
@@ -23,24 +23,27 @@ all: gdicc.lib gddemo.exe giftogd.exe webgif.exe
 
 
 gdicc.lib: gd.obj gdfontt.obj gdfonts.obj gdfontmb.obj gdfontl.obj gdfontg.obj \
-        gd.h gdfontt.h gdfonts.h gdfontmb.h gdfontl.h gdfontg.h
-        -@$(RM) $@
-        $(AR) $@ +gd.obj +gdfontt.obj +gdfonts.obj +gdfontmb.obj \
-                +gdfontl.obj +gdfontg.obj, NUL
+    gd.h gdfontt.h gdfonts.h gdfontmb.h gdfontl.h gdfontg.h
+    @$(RM) $@
+    $(AR) $@ +gd.obj +gdfontt.obj +gdfonts.obj +gdfontmb.obj \
+          +gdfontl.obj +gdfontg.obj, NUL
 
 gddemo.exe: gddemo.obj gdicc.lib gd.h gdfonts.h gdfontl.h
-        $(LD) gddemo.obj -Fe$@ $(LIBS)
+    $(LD) gddemo.obj -Fe$@ $(LIBS)
 
 giftogd.exe: giftogd.obj gdicc.lib gd.h
-        $(LD) giftogd.obj -Fe$@ $(LIBS)
+    $(LD) giftogd.obj -Fe$@ $(LIBS)
 
 webgif.exe: webgif.obj gdicc.lib gd.h
-        $(LD) webgif.obj -Fe$@ $(LIBS)
+    $(LD) webgif.obj -Fe$@ $(LIBS)
+
+dep:
+    @nmake /nologo -f makefile NODEP=1 dep
+
+!ifndef NODEP
+!include .depend
+!endif
 
 clean:
-       -@$(RM) *.obj
-       -@$(RM) *.exe
-       -@$(RM) *.map
-       -@$(RM) gdicc.lib
-       -@$(RM) cset*.pch
+    @$(RM) *.obj *.exe *.map gdicc.lib cset*.pch
 
