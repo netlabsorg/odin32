@@ -1,4 +1,4 @@
-/* $Id: libconv.c,v 1.2 2001-10-19 00:07:30 bird Exp $
+/* $Id: libconv.c,v 1.3 2002-03-10 04:56:46 bird Exp $
  *
  * Very simple OMF/LIB dumper.
  *
@@ -69,7 +69,7 @@
 #include <malloc.h>
 
 
-#include "include\omf.h"
+#include "omf.h"
 
 int fUpcase = 0;
 int fRemoveExtra = 0;
