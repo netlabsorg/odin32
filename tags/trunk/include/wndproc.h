@@ -1,4 +1,4 @@
-/* $Id: wndproc.h,v 1.4 1999-06-26 13:21:53 sandervl Exp $ */
+/* $Id: wndproc.h,v 1.5 1999-06-27 21:56:00 sandervl Exp $ */
 
 /*
  *
@@ -25,7 +25,8 @@ class Win32WindowProc;
 
 //used in COMDLG32.DLL
 Win32WindowProc *SYSTEM CreateWindowProc(WNDPROC pUserCallback);
-LRESULT EXPENTRY_O32 WndCallback(HWND, UINT, WPARAM, LPARAM);
+LRESULT EXPENTRY_O32 OS2ToWin32Callback(HWND, UINT, WPARAM, LPARAM);
+LRESULT EXPENTRY     Win32ToOS2Callback(HWND, UINT, WPARAM, LPARAM);
 
 //Notify parent window of creation/destruction and buttondown messages (if required)
 void NotifyParent(HWND hwnd, UINT Msg, WPARAM wParam, LPARAM lParam);
@@ -34,11 +35,13 @@ class Win32WindowProc
 {
 public:
 	Win32WindowProc(WNDPROC pUserCallback);
+	Win32WindowProc(WNDPROC pUserCallback, WNDPROC_O32 pOS2Callback);
 	Win32WindowProc(WNDPROC pUserCallback, DLGTEMPLATE *os2dlg);
 	Win32WindowProc(HINSTANCE hinst, LPCSTR lpszClassName);
        ~Win32WindowProc();
 
  static WNDPROC_O32 GetOS2Callback();
+ static WNDPROC     GetWin32ToOS2Callback();
 
  static void DeleteWindow(HWND hwnd);
  static Win32WindowProc *FindProc(HWND hwnd);
@@ -61,6 +64,7 @@ Win32WindowClass *GetWindowClass() { return win32class; };
 private:
 
  WNDPROC        pCallback;
+ WNDPROC_O32    pOS2Callback;
  HWND           hwnd;
  DWORD          threadid;
  int            fIsWindow;
@@ -71,7 +75,8 @@ private:
  static	        Win32WindowProc  *windows;
   	        Win32WindowProc  *next;
 
- friend LRESULT EXPENTRY_O32 WndCallback(HWND, UINT, WPARAM, LPARAM);
+ friend LRESULT EXPENTRY_O32 OS2ToWin32Callback(HWND, UINT, WPARAM, LPARAM);
+ friend LRESULT EXPENTRY     Win32ToOS2Callback(HWND, UINT, WPARAM, LPARAM);
 };
 
 #endif
