@@ -1,4 +1,21 @@
- /* $Id: changelog,v 1.376 1999-10-27 19:52:09 phaller Exp $ */
+ /* $Id: changelog,v 1.377 1999-10-28 11:59:04 sandervl Exp $ */
+
+ 99-10-28: Sander van Leeuwen <sandervl@xs4all.nl>
+	- KERNEL32: GetVersion fix. Low byte = major version, high byte = minor version
+                    Destroyed shared heap on dll unload (refcount == 0)
+                    Shared heap fixes.
+                    GetWindowsDirectory & GetSystemDirectory return string that don't end with
+                    a backslash.                    
+	- USER32: Fixed style conversion (use dwStyle, not cs->style, same for dwExStyle)
+                  -> title bar in prof. minesweeper
+                  NOTE: Breaks winamp; there's no a titlebar when there shouldn't be one
+                  Fixed bug in pmframe WM_WINDOWPOSCHANGED handler (didn't restore OS/2
+                  selector before returning)
+                  Don't delete global window classes.
+		  Removed shared heap, use the one in kernel32 instead.
+
+ 99-10-28: Jens Wiessner <wiessnej@rfi.de>
+	- MSVCRT: Added stubs
 
  99-10-27: Patrick Haller <phaller@gmx.net>
 	- KERNEL32:	Fix: console (unicode) updates, NT4'S CMD.EXE works.
