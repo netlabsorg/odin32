@@ -1,4 +1,4 @@
-/* $Id: oslibmsgtranslate.cpp,v 1.41 2001-02-21 20:51:06 sandervl Exp $ */
+/* $Id: oslibmsgtranslate.cpp,v 1.42 2001-03-25 22:41:50 sandervl Exp $ */
 /*
  * Window message translation functions for OS/2
  *
@@ -35,74 +35,126 @@
 #define DBG_LOCALLOG    DBG_oslibmsgtranslate
 #include "dbglocal.h"
 
-//Used for key translation while processing WM_CHAR message
-USHORT virtualKeyTable [66] = {
-               0x00,    //   OS/2 VK         Win32 VK,    Entry 0 is not used
-               0x01,    // VK_BUTTON1       VK_LBUTTON
-               0x02,    // VK_BUTTON2       VK_RBUTTON
-               0x04,    // VK_BUTTON3       VK_MBUTTON
-               0x03,    // VK_BREAK         VK_CANCEL
-               0x08,    // VK_BACKSPACE     VK_BACK
-               0x09,    // VK_TAB           VK_TAB
-               0x00,    // VK_BACKTAB       No equivalent!
-               0x0D,    // VK_NEWLINE       VK_RETURN
-               0x10,    // VK_SHIFT         VK_SHIFT
-               0x11,    // VK_CTRL          VK_CONTROL
-               0x12,    // VK_ALT           VK_MENU, best match I guess
-               0x12,    // VK_ALTGRAF       VK_MENU, best match I guess
-               0x13,    // VK_PAUSE         VK_PAUSE
-               0x14,    // VK_CAPSLOCK      VK_CAPITAL
-               0x1B,    // VK_ESC           VK_ESCAPE
-               0x20,    // VK_SPACE         VK_SPACE
-               0x21,    // VK_PAGEUP        VK_PRIOR
-               0x22,    // VK_PAGEDOWN      VK_NEXT
-               0x23,    // VK_END           VK_END
-               0x24,    // VK_HOME          VK_HOME
-               0x25,    // VK_LEFT          VK_LEFT
-               0x26,    // VK_UP            VK_UP
-               0x27,    // VK_RIGHT         VK_RIGHT
-               0x28,    // VK_DOWN          VK_DOWN
-               0x2C,    // VK_PRINTSCRN     VK_SNAPSHOT
-               0x2D,    // VK_INSERT        VK_INSERT
-               0x2E,    // VK_DELETE        VK_DELETE
-               0x91,    // VK_SCRLLOCK      VK_SCROLL
-               0x90,    // VK_NUMLOCK       VK_NUMLOCK
-               0x0D,    // VK_ENTER         VK_RETURN
-               0x00,    // VK_SYSRQ         No equivalent!
-               0x70,    // VK_F1            VK_F1
-               0x71,    // VK_F2            VK_F2
-               0x72,    // VK_F3            VK_F3
-               0x73,    // VK_F4            VK_F4
-               0x74,    // VK_F5            VK_F5
-               0x75,    // VK_F6            VK_F6
-               0x76,    // VK_F7            VK_F7
-               0x77,    // VK_F8            VK_F8
-               0x78,    // VK_F9            VK_F9
-               0x79,    // VK_F10           VK_F10
-               0x7A,    // VK_F11           VK_F11
-               0x7B,    // VK_F12           VK_F12
-               0x7C,    // VK_F13           VK_F13
-               0x7D,    // VK_F14           VK_F14
-               0x7E,    // VK_F15           VK_F15
-               0x7F,    // VK_F16           VK_F16
-               0x80,    // VK_F17           VK_F17
-               0x81,    // VK_F18           VK_F18
-               0x82,    // VK_F19           VK_F19
-               0x83,    // VK_F20           VK_F20
-               0x84,    // VK_F21           VK_F21
-               0x85,    // VK_F22           VK_F22
-               0x86,    // VK_F23           VK_F23
-               0x87,    // VK_F24           VK_F24
-               0x00,    // VK_ENDDRAG       No equivalent!
-               0x0C,    // VK_CLEAR         VK_CLEAR
-               0xF9,    // VK_EREOF         VK_EREOF
-               0xFD,    // VK_PA1           VK_PA1
-               0xF6,    // VK_ATTN          VK_ATTN
-               0xF7,    // VK_CRSEL         VK_CRSEL
-               0xF8,    // VK_EXSEL         VK_EXSEL
-               0x00,    // VK_COPY          No equivalent!
-               0x00,    // VK_BLK1          No equivalent!
-               0x00};   // VK_BLK2          No equivalent!
+// Formerly used method of translation based on OS/2 VKEY value didn't work
+// right. We need to take a look at the scan code we get from PM and derive
+// the Win32 VKEY and scancode from that because sometimes even the scancode
+// used in Win32 is different from the PM scancode!
+// The format is:
+// Win VKEY, Win scancode, (PM scancode) (key description)
+USHORT pmscan2winkey [][2] = {
+    0, 0,           // 0x00
+    0x1B, 0x01,     // 0x01 Esc
+    0x31, 0x02,     // 0x02 1
+    0x32, 0x03,     // 0x03 2
+    0x33, 0x04,     // 0x04 3
+    0x34, 0x05,     // 0x05 4
+    0x35, 0x06,     // 0x06 5
+    0x36, 0x07,     // 0x07 6
+    0x37, 0x08,     // 0x08 7
+    0x38, 0x09,     // 0x09 8
+    0x39, 0x0A,     // 0x0A 9
+    0x30, 0x0B,     // 0x0B 0
+    0xBD, 0x0C,     // 0x0C -
+    0xBB, 0x0D,     // 0x0D =
+    0x08, 0x0E,     // 0x0E Bksp
+    0x09, 0x0F,     // 0x0F Tab
+    0x51, 0x10,     // 0x10 q
+    0x57, 0x11,     // 0x11 w
+    0x45, 0x12,     // 0x12 e
+    0x52, 0x13,     // 0x13 r
+    0x54, 0x14,     // 0x14 t
+    0x59, 0x15,     // 0x15 y
+    0x55, 0x16,     // 0x16 u
+    0x49, 0x17,     // 0x17 i
+    0x4F, 0x18,     // 0x18 o
+    0x50, 0x19,     // 0x19 p
+    0xDB, 0x1A,     // 0x1A [
+    0xDD, 0x1B,     // 0x1B ]
+    0x0D, 0x1C,     // 0x1C Enter
+    0x11, 0x1D,     // 0x1D LCtrl
+    0x41, 0x1E,     // 0x1E a
+    0x53, 0x1F,     // 0x1F s
+    0x44, 0x20,     // 0x20 d
+    0x46, 0x21,     // 0x21 f
+    0x47, 0x22,     // 0x22 g
+    0x48, 0x23,     // 0x23 h
+    0x4A, 0x24,     // 0x24 j
+    0x4B, 0x25,     // 0x25 k
+    0x4C, 0x26,     // 0x26 l
+    0xBA, 0x27,     // 0x27 ;
+    0xDE, 0x28,     // 0x28 '
+    0xC0, 0x29,     // 0x29 `
+    0x10, 0x2A,     // 0x2A LShift
+    0xDC, 0x2B,     // 0x2B Bkslsh
+    0x5A, 0x2C,     // 0x2C z
+    0x58, 0x2D,     // 0x2D x
+    0x43, 0x2E,     // 0x2E c
+    0x56, 0x2F,     // 0x2F v
+    0x42, 0x30,     // 0x30 b
+    0x4E, 0x31,     // 0x31 n
+    0x4D, 0x32,     // 0x32 m
+    0xBC, 0x33,     // 0x33 ,
+    0xBE, 0x34,     // 0x34 .
+    0xBF, 0x35,     // 0x35 /
+    0x10, 0x36,     // 0x36 RShift
+    0x6A, 0x37,     // 0x37 * Pad
+    0x12, 0x38,     // 0x38 LAlt
+    0x20, 0x39,     // 0x39 Space
+    0x14, 0x3A,     // 0x3A CapsLk
+    0x70, 0x3B,     // 0x3B F1
+    0x71, 0x3C,     // 0x3C F2
+    0x72, 0x3D,     // 0x3D F3
+    0x73, 0x3E,     // 0x3E F4
+    0x74, 0x3F,     // 0x3F F5
+    0x75, 0x40,     // 0x40 F6
+    0x76, 0x41,     // 0x41 F7
+    0x77, 0x42,     // 0x42 F8
+    0x78, 0x43,     // 0x43 F9
+    0x79, 0x44,     // 0x44 F10 (?)
+    0x90, 0x145,    // 0x45 NumLk
+    0x91, 0x46,     // 0x46 ScrLk
+    0x24, 0x47,     // 0x47 7 Pad
+    0x26, 0x48,     // 0x48 8 Pad
+    0x21, 0x49,     // 0x49 9 Pad
+    0x6D, 0x4A,     // 0x4A - Pad
+    0x25, 0x4B,     // 0x4B 4 Pad
+    0x0C, 0x4C,     // 0x4C 5 Pad
+    0x27, 0x4D,     // 0x4D 6 Pad
+    0x6B, 0x4E,     // 0x4E + Pad
+    0x23, 0x4F,     // 0x4F 1 Pad
+    0x28, 0x50,     // 0x50 2 Pad
+    0x22, 0x51,     // 0x51 3 Pad
+    0x2D, 0x52,     // 0x52 0 Pad
+    0x2E, 0x53,     // 0x53 . Pad
+    0, 0,           // 0x54
+    0, 0,           // 0x55
+    0, 0,           // 0x56
+    0x7A, 0x57,     // 0x57 F11
+    0x7B, 0x58,     // 0x58 F12
+    0, 0,           // 0x59
+    0x0D, 0x11C,    // 0x5A Enter Pad
+    0x11, 0x11D,    // 0x5B RCtrl
+    0x6F, 0x135,    // 0x5C / Pad
+    0x2D, 0x152,    // 0x5D PrtSc
+    0x12, 0x5E,     // 0x5E RAlt
+    0x13, 0x45,     // 0x5F Pause
+    0, 0,           // 0x60
+    0, 0,           // 0x61
+    0, 0,           // 0x62
+    0, 0,           // 0x63
+    0, 0,           // 0x64
+    0, 0,           // 0x65
+    0, 0,           // 0x66
+    0, 0,           // 0x67
+    0, 0,           // 0x68
+    0, 0,           // 0x69
+    0, 0,           // 0x6A
+    0, 0,           // 0x6B
+    0x5D, 0x15D,    // 0x6C RWin (PM scan 0x7C)
+    0, 0,           // 0x6D
+    0x5B, 0x15B,    // 0x6E LWin (PM scan 0x7E)
+    0x5C, 0x15C     // 0x6F RMenu? (PM scan 0x7F)
+};
 
 //******************************************************************************
 //******************************************************************************
@@ -232,11 +284,11 @@ BOOL OS2ToWinMsgTranslate(void *pTeb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode,
             }
         }
         if(win32wnd->getParent()) {
-   	      OSLibMapSWPtoWINDOWPOS(pswp, &teb->o.odin.wp, &swpOld, win32wnd->getParent()->getWindowHeight(), 
+              OSLibMapSWPtoWINDOWPOS(pswp, &teb->o.odin.wp, &swpOld, win32wnd->getParent()->getWindowHeight(),
                                      win32wnd->getParent()->getClientRectPtr()->left,
                                      win32wnd->getParent()->getClientRectPtr()->top,
                                      win32wnd->getOS2WindowHandle());
-        } 
+        }
         else  OSLibMapSWPtoWINDOWPOS(pswp, &teb->o.odin.wp, &swpOld, OSLibQueryScreenHeight(), 0, 0, win32wnd->getOS2WindowHandle());
 
         if (!win32wnd->CanReceiveSizeMsgs())    goto dummymessage;
@@ -250,8 +302,8 @@ BOOL OS2ToWinMsgTranslate(void *pTeb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode,
                 {
                         Win32BaseWindow *wndAfter = Win32BaseWindow::GetWindowFromOS2Handle(pswp->hwndInsertBehind);
                         if(wndAfter)
-                  	      teb->o.odin.wp.hwndInsertAfter = wndAfter->getWindowHandle();
-			else  teb->o.odin.wp.hwndInsertAfter = HWND_TOP_W;
+                              teb->o.odin.wp.hwndInsertAfter = wndAfter->getWindowHandle();
+                        else  teb->o.odin.wp.hwndInsertAfter = HWND_TOP_W;
                 }
         }
         winMsg->message = WINWM_WINDOWPOSCHANGED;
@@ -265,11 +317,11 @@ BOOL OS2ToWinMsgTranslate(void *pTeb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode,
       BOOL fMinimized = FALSE;
 
         hwndActivate = OS2ToWin32Handle(hwndActivate);
-	if(hwndActivate == 0) {
+        if(hwndActivate == 0) {
                 //another (non-win32) application's window
                 //set to desktop window handle
-		hwndActivate = windowDesktop->getWindowHandle();
-	}
+                hwndActivate = windowDesktop->getWindowHandle();
+        }
 
         if(win32wnd->getStyle() & WS_MINIMIZE_W)
         {
@@ -312,10 +364,10 @@ BOOL OS2ToWinMsgTranslate(void *pTeb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode,
       winMsg->wParam  = 0;
       winMsg->lParam  = MAKELONG(winMsg->pt.x,winMsg->pt.y);
       if(!win32wnd->IsWindowEnabled()) {
-		if(win32wnd->getParent()) {
-			winMsg->hwnd = win32wnd->getParent()->getWindowHandle();
-		}
-		else	goto dummymessage; //don't send mouse messages to disabled windows
+                if(win32wnd->getParent()) {
+                        winMsg->hwnd = win32wnd->getParent()->getWindowHandle();
+                }
+                else    goto dummymessage; //don't send mouse messages to disabled windows
       }
       break;
 
@@ -331,18 +383,18 @@ BOOL OS2ToWinMsgTranslate(void *pTeb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode,
         //WM_NC*BUTTON* is posted when the cursor is in a non-client area of the window
 
 #ifdef ODIN_HITTEST
-	//Send WM_HITTEST message
+        //Send WM_HITTEST message
         win32wnd->sendHitTest(MAKELONG(winMsg->pt.x,winMsg->pt.y));
 #endif
         win32wnd->sendHitTest(MAKELONG(winMsg->pt.x,winMsg->pt.y));
 
-	//if a window is disabled, it's parent receives the mouse messages
-	if(!win32wnd->IsWindowEnabled()) {
-		if(win32wnd->getParent()) {
-			win32wnd = win32wnd->getParent();
-		}
-		fWasDisabled = TRUE;
-	}
+        //if a window is disabled, it's parent receives the mouse messages
+        if(!win32wnd->IsWindowEnabled()) {
+                if(win32wnd->getParent()) {
+                        win32wnd = win32wnd->getParent();
+                }
+                fWasDisabled = TRUE;
+        }
 
         if(IsNCMouseMsg(win32wnd)) {
             winMsg->message = WINWM_NCLBUTTONDOWN + (os2Msg->msg - WM_BUTTON1DOWN);
@@ -366,12 +418,12 @@ BOOL OS2ToWinMsgTranslate(void *pTeb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode,
             }
         }
 
-	if(fWasDisabled) {
-		if(win32wnd) {
-			winMsg->hwnd = win32wnd->getWindowHandle();
-		}
-		else	goto dummymessage; //don't send mouse messages to disabled windows
-	}
+        if(fWasDisabled) {
+                if(win32wnd) {
+                        winMsg->hwnd = win32wnd->getWindowHandle();
+                }
+                else    goto dummymessage; //don't send mouse messages to disabled windows
+        }
         break;
 
     case WM_BUTTON2CLICK:
@@ -394,17 +446,17 @@ BOOL OS2ToWinMsgTranslate(void *pTeb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode,
         //WM_NCMOUSEMOVE is posted when the cursor moves into a non-client area of the window
 
 #ifdef ODIN_HITTEST
-	//Send WM_HITTEST message
+        //Send WM_HITTEST message
         win32wnd->sendHitTest(MAKELONG(winMsg->pt.x,winMsg->pt.y));
 #endif
 
-	//if a window is disabled, it's parent receives the mouse messages
-	if(!win32wnd->IsWindowEnabled()) {
-		if(win32wnd->getParent()) {
-			win32wnd = win32wnd->getParent();
-		}
-		fWasDisabled = TRUE;
-	}
+        //if a window is disabled, it's parent receives the mouse messages
+        if(!win32wnd->IsWindowEnabled()) {
+                if(win32wnd->getParent()) {
+                        win32wnd = win32wnd->getParent();
+                }
+                fWasDisabled = TRUE;
+        }
         if(IsNCMouseMsg(win32wnd))
         {
           winMsg->message = WINWM_NCMOUSEMOVE;
@@ -428,12 +480,12 @@ BOOL OS2ToWinMsgTranslate(void *pTeb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode,
                 goto dummymessage; //dinput swallowed message
             }
         }
-	if(fWasDisabled) {
-		if(win32wnd) {
-			winMsg->hwnd = win32wnd->getWindowHandle();
-		}
-		else	goto dummymessage; //don't send mouse messages to disabled windows
-	}
+        if(fWasDisabled) {
+                if(win32wnd) {
+                        winMsg->hwnd = win32wnd->getWindowHandle();
+                }
+                else    goto dummymessage; //don't send mouse messages to disabled windows
+        }
         //OS/2 Window coordinates -> Win32 Window coordinates
         break;
     }
@@ -496,7 +548,7 @@ BOOL OS2ToWinMsgTranslate(void *pTeb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode,
     {
         ULONG repeatCount=0, virtualKey=0, keyFlags=0, scanCode=0;
         ULONG flags = SHORT1FROMMP(os2Msg->mp1);
-        BOOL keyWasPressed;
+        BOOL keyWasPressed, isExtended = FALSE;
         char c;
 
         teb->o.odin.fTranslated = FALSE;
@@ -511,9 +563,10 @@ BOOL OS2ToWinMsgTranslate(void *pTeb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode,
         if ( ( SHORT1FROMMP(os2Msg->mp2) & 0x0FF ) == 0x0E0 )
         {
             // an extended key ( arrows, ins, del and so on )
-            // get "virtual" scancode from character code cause
+            // get "virtual" scancode from character code because
             // for "regular" keys they are equal
             scanCode = ( SHORT1FROMMP(os2Msg->mp2) >> 8) & 0x0FF;
+            isExtended = TRUE;
         }
         // vitali add end
 
@@ -540,44 +593,26 @@ BOOL OS2ToWinMsgTranslate(void *pTeb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode,
             }
         }
 
-        // convert OS/2 virtual keys to Win32 virtual key
-        if (SHORT2FROMMP (os2Msg->mp2) <= VK_BLK2)
-            virtualKey = virtualKeyTable [SHORT2FROMMP (os2Msg->mp2)];
-
 VirtualKeyFound:
-        dprintf (("VIRTUALKEYFOUND:(%x)", virtualKey));
+//        dprintf (("VIRTUALKEYFOUND:(%x)", virtualKey));
 
-        winMsg->wParam  = virtualKey;
+        // Adjust PM scancodes for Win* keys
+        if (scanCode >= 0x70)
+            scanCode -= 0x10;
+        winMsg->wParam  = pmscan2winkey[scanCode][0];
         winMsg->lParam  = repeatCount & 0x0FFFF;                 // bit 0-15, repeatcount
-        winMsg->lParam |= (scanCode & 0x0FF) << 16;              // bit 16-23, scancode
+        winMsg->lParam |= (pmscan2winkey[scanCode][1] & 0x1FF) << 16;  // bit 16-23, scancode + bit 15 extended
 
-        //TODO: Is this correct and complete? (how does PM differentiate between
-        //      i.e numeric pad pgdn & 'normal' pgdn??)
-        //Check if it's an extended key
-        switch(virtualKey) {
-        case VK_RETURN_W:
-                //The enter key on the numeric keypad is an extended key
-                if(SHORT2FROMMP(os2Msg->mp2) != VK_NEWLINE)
-                        break;
-                //no break
-        case VK_LEFT_W:
-        case VK_RIGHT_W:
-        case VK_DOWN_W:
-        case VK_UP_W:
-        case VK_PRIOR_W:
-        case VK_NEXT_W:
-        case VK_END_W:
-        case VK_DIVIDE_W:
-        case VK_DELETE_W:
-        case VK_HOME_W:
-        case VK_INSERT_W:
-        case VK_RCONTROL_W:
-        case VK_RMENU_W: //is this the right alt???
-                winMsg->lParam = winMsg->lParam | (1<<24);
-                break;
-        }
+        // Adjust VKEY value for pad digits if NumLock is on
+        if ((scanCode >= 0x47) && (scanCode <= 0x53) &&
+            (virtualKey >= 0x30) && (virtualKey >= 39))
+            winMsg->wParam = virtualKey + 0x30;
 
-        if(!(SHORT1FROMMP(os2Msg->mp1) & KC_ALT))
+        // Set the extended bit when appropriate
+        if (isExtended)
+            winMsg->lParam = winMsg->lParam | (1<<24);
+
+        if (!(SHORT1FROMMP(os2Msg->mp1) & KC_ALT))
         {
             //
             // the Alt key is not pressed
@@ -613,13 +648,13 @@ VirtualKeyFound:
                 if (keyWasPressed)
                     winMsg->lParam |= 1 << 30;                          // bit 30, previous state, 1 means key was pressed
             }
-	    if(winMsg->wParam == VK_MENU_W) {
+            if(winMsg->wParam == VK_MENU_W) {
                 winMsg->message = 0; //WM_SYS* already implies Alt
             }
         }
-        if(ISKDB_CAPTURED())
+        if (ISKDB_CAPTURED())
         {
-            if(DInputKeyBoardHandler(winMsg)) {
+            if (DInputKeyBoardHandler(winMsg)) {
                 goto dummymessage; //dinput swallowed message
             }
         }
@@ -762,8 +797,12 @@ BOOL OSLibWinTranslateMessage(MSG *msg)
             }
 
             if(fl & KC_VIRTUALKEY) {
-                if(msg->wParam)
+                if(msg->wParam) {
+                    if ((msg->wParam >= VK_NUMPAD0_W) && (msg->wParam <= VK_NUMPAD9_W))
+                        extramsg.wParam = msg->wParam - 0x30;
+                    else
                         extramsg.wParam = msg->wParam;
+                }
                 else    extramsg.wParam = SHORT2FROMMP(teb->o.odin.os2msg.mp2);
             }
 
