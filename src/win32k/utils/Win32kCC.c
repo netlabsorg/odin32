@@ -1,4 +1,4 @@
-/* $Id: Win32kCC.c,v 1.11 2001-02-02 08:41:31 bird Exp $
+/* $Id: Win32kCC.c,v 1.12 2001-02-11 23:41:46 bird Exp $
  *
  * Win32CC - Win32k Control Center.
  *
@@ -363,6 +363,7 @@ MRESULT EXPENTRY Win32kCCDlgProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
                     if (!pThis->NewOptions.fJava)               strcat(szArgs, " -Java:N");
                     if (pThis->NewOptions.fNoLoader)            strcat(szArgs, " -Noloader");
                     if (!pThis->NewOptions.fDllFixes)           strcat(szArgs, " -DllFixes:D"); /* default is enabled */
+                    if (!pThis->NewOptions.fForcePreload)       strcat(szArgs, " -ForcePreload:Y"); /* default is disabled */
                     if (pThis->NewOptions.cbSwpHeapMax != CB_SWP_MAX)
                         sprintf(szArgs + strlen(szArgs), " -HeapMax:%d", pThis->NewOptions.cbSwpHeapMax); /* FIXME - to be changed */
                     if (pThis->NewOptions.cbResHeapMax != CB_RES_MAX)
@@ -546,6 +547,7 @@ MRESULT EXPENTRY Win32kCCDlgProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
 
             /* OS/2 Loader Fixes */
             WinSendDlgItemMsg(hwnd, CB_LDRFIX_DLLFIXES,     BM_SETCHECK,    (MPARAM)(pThis->Options.fDllFixes),                 NULL);
+            WinSendDlgItemMsg(hwnd, CB_LDRFIX_FORCEPRELOAD, BM_SETCHECK,    (MPARAM)(pThis->Options.fForcePreload),             NULL);
 
             /* heaps */
             /* Resident */
@@ -686,6 +688,7 @@ MRESULT EXPENTRY Win32kCCDlgProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
              * OS/2 Loader Fixes.
              */
             pThis->NewOptions.fDllFixes = WinSendDlgItemMsg(hwnd, CB_LDRFIX_DLLFIXES, BM_QUERYCHECK, NULL, NULL) != 0;
+            pThis->NewOptions.fForcePreload = WinSendDlgItemMsg(hwnd, CB_LDRFIX_FORCEPRELOAD, BM_QUERYCHECK, NULL, NULL) != 0;
 
             /*
              * Heaps
