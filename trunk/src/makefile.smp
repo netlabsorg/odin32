@@ -1,4 +1,4 @@
-# $Id: makefile.smp,v 1.3 1999-12-24 18:41:12 sandervl Exp $
+# $Id: makefile.smp,v 1.4 1999-12-28 13:02:23 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -51,6 +51,8 @@ all:
         cd ..\capi2032
         $(MAKE_CMD)
         cd ..\wsock32
+        $(MAKE_CMD)
+        cd ..\wininet
         $(MAKE_CMD)
         cd ..\tapi32
         $(MAKE_CMD)
