@@ -1,4 +1,4 @@
-/* $Id: changelog,v 1.1474 2001-06-02 14:27:41 sandervl Exp $ */
+/* $Id: changelog,v 1.1475 2001-06-02 17:28:27 achimha Exp $ */
 
  2001-06-02: Achim Hasenmueller <achimha@innotek.de>
     - COMDLG32: o fix crash due to uninitialized COM object pointer in
@@ -7,6 +7,9 @@
                   OFN_NOVALIDATE mode is used
                   (fixes crash in FrameMaker 5.5 file dialog when opening
                    a file that has broken image references)
+    - KERNEL32: o log both error and no error conditions for GetLastError
+                  with default error level. Sometimes, we don't set an error
+                  where we should so this logging information is important
 
  2001-06-02: Sander van Leeuwen <sandervl@xs4all.nl>
     - WINMM:    o Default waveout volume can be controlled by a key in odin.ini:
