@@ -1,4 +1,4 @@
-/* $Id: menu.cpp,v 1.22 2000-05-22 17:21:09 cbratschi Exp $*/
+/* $Id: menu.cpp,v 1.23 2000-05-22 19:03:45 sandervl Exp $*/
 /*
  * Menu functions
  *
@@ -3203,7 +3203,10 @@ BOOL WINAPI TrackPopupMenu( HMENU hMenu, UINT wFlags, INT x, INT y,
 {
     BOOL ret = FALSE;
 
-    dprintf(("USER32: TrackPopupMenu"));
+    if(lpRect) {
+    	 dprintf(("USER32: TrackPopupMenu %x %x (%d,%d) %x %x (%d,%d)(%d,%d)", hMenu, wFlags, x, y, nReserved, hWnd, lpRect->left, lpRect->top, lpRect->right, lpRect->bottom));
+    }
+    else dprintf(("USER32: TrackPopupMenu %x %x (%d,%d) %x %x lpRect=NULL", hMenu, wFlags, x, y, nReserved, hWnd));
 
     MENU_InitTracking(hWnd, hMenu, TRUE, wFlags);
 
