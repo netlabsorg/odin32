@@ -1,4 +1,4 @@
-;/* $Id: opengl32.def,v 1.2 2000-02-01 19:41:56 sandervl Exp $ */
+;/* $Id: opengl32.def,v 1.3 2000-02-05 15:54:54 sandervl Exp $ */
 LIBRARY OPENGL32 INITINSTANCE
 
 DATA MULTIPLE NONSHARED
@@ -742,8 +742,3 @@ EXPORTS
    wglUseFontBitmapsW=_wglUseFontBitmapsW@16    @366
    wglUseFontOutlinesA=_wglUseFontOutlinesA@28  @367
    wglUseFontOutlinesW=_wglUseFontOutlinesW@28  @368
-   OS2wglChoosePixelFormat
-   OS2wglSetPixelFormat
-   OS2wglGetPixelFormat
-   OS2wglSwapBuffers
-   OS2wglDescribePixelFormat

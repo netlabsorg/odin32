@@ -1,4 +1,4 @@
-/* $Id: opengl32.cpp,v 1.2 2000-02-01 19:41:55 sandervl Exp $ */
+/* $Id: opengl32.cpp,v 1.3 2000-02-05 15:54:53 sandervl Exp $ */
 /*****************************************************************************/
 /*                                                                           */
 /* OpenGL32                                                                  */
@@ -3023,43 +3023,6 @@ void WIN32API glVertexPointer(GLint size,
                               const GLvoid *pointer)
 {
   OS2glVertexPointer(size,type,stride,count,pointer);
-}
-
-/*****************************************************************************/
-/*                                                                           */
-/* Interface for opengl.cpp - resolve OS2xxx calls                           */
-/*                                                                           */
-/*****************************************************************************/
-
-int APIENTRY OS2wglChoosePixelFormat(HDC hdc,
-                                     PIXELFORMATDESCRIPTOR *p)
-{
-  return wglChoosePixelFormat(hdc,p);
-}
-
-int APIENTRY OS2wglSetPixelFormat(HDC hdc,
-                                  int iFormat,
-                                  PIXELFORMATDESCRIPTOR *p)
-{
-  return wglSetPixelFormat(hdc,iFormat,p);
-}
-
-int APIENTRY OS2wglGetPixelFormat(HDC hdc)
-{
-  return wglGetPixelFormat(hdc);
-}
-
-BOOL APIENTRY OS2wglSwapBuffers(HDC hdc)
-{
-  return wglSwapBuffers(hdc);
-}
-
-int APIENTRY OS2wglDescribePixelFormat(HDC hdc,
-                                       int iFormat,
-                                       UINT nBytes,
-                                       LPPIXELFORMATDESCRIPTOR p)
-{
-  return wglDescribePixelFormat(hdc,iFormat,nBytes,p);
 }
 
 /*****************************************************************************/
