@@ -1,4 +1,4 @@
-/* $Id: win32wbase.h,v 1.61 1999-12-30 09:31:03 sandervl Exp $ */
+/* $Id: win32wbase.h,v 1.62 1999-12-30 18:33:00 cbratschi Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -100,6 +100,8 @@ virtual  WORD   GetWindowWord(int index);
          void   setStyle(DWORD newstyle)        { dwStyle = newstyle; };
          DWORD  getExStyle()                    { return dwExStyle; };
          void   setExStyle(DWORD newexstyle)    { dwExStyle = newexstyle; };
+         ULONG  getInstance()                   { return hInstance; };
+         void   setInstance(ULONG newinstance)  { hInstance = newinstance; };
          HWND   getWindowHandle()               { return Win32Hwnd; };
          HWND   getOS2WindowHandle()            { return OS2Hwnd; };
          HWND   getOS2FrameWindowHandle()       { return OS2HwndFrame; };
@@ -192,8 +194,10 @@ Win32BaseWindow *GetTopParent();
          BOOL   SetWindowTextW(LPWSTR lpsz);
          BOOL   hasWindowName(LPSTR wndname, BOOL fUnicode = 0);
 Win32WndClass  *getClass()  { return windowClass; };
-        char   *getWindowNameA()              { return windowNameA; };
-Win32BaseWindow *getOwner()                   { return owner; };
+        //CB: windowNameA isn't always the window name!
+        char   *getWindowNameA()                    { return windowNameA; };
+Win32BaseWindow *getOwner()                         { return owner; };
+        void    setOwner(Win32BaseWindow *newOwner) { owner = newOwner; };
 
  SCROLLBAR_INFO *getScrollInfo(int nBar);
        HWND      getVertScrollHandle()               { return hwndVertScroll; };
