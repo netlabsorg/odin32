@@ -13,7 +13,7 @@ Notation:
     Identifing when and what happens.
 
 
-Init packet - $win32ki
+Init packet - $elf
 -----------------------
 _strategyAsm0                                               (devFirst.asm)
 _strategyAsm                                                (devFirst.asm)
@@ -33,12 +33,57 @@ _strategyAsm                                                (devFirst.asm)
     init - dev 1:
     --> dev1Init(PRPINITIN pRpIn, PRPINITOUT pRpOut)        (d16init.c)
         --> ProbeKrnl                                       (probkrnl.c)
-            <--
-        <Opens $win32ki>
-        <issue IO Ctrl to $win32ki - D16_IOCTL_RING0INIT>
+            <Opens $elf>
+            <issues IO Ctrl to $elf - D16_IOCTL_GETKRNLINFO>
+            <Opens $elf>
+            <issues IO Ctrl to $elf - D16_IOCTL_VERIFYIMPORTTAB>
+            <-- (NO_ERROR - may fail)
+        <Opens $elf>
+        <issue IO Ctrl to $elf - D16_IOCTL_RING0INIT>
         <-- (STATUS_DONE - may fail)
     <-- (fwd)
 <-- (fwd)
+
+
+D16_IOCTL_GETKERNELINFO packet
+------------------------------
+_strategyAsm0                                               (devFirst.asm)
+_strategyAsm                                                (devFirst.asm)
+--> strategy(PRPH pRpH, unsigned short usDev)               (d16strat.c)
+    gen IO-Ctrl - dev 0:
+    --> dev0GenIOCtl(PRP_GENIOCTL pRp)                      (d16strat.c)
+        D16_IOCTL_GETKERNELINFO:
+        --> CallGetKernelInfo32(ULONG addressKrnlInfoBuf)   (devfirst.asm)
+            --> GetKernelInfo32(PKRNLINFO pKrnlInfo)        (d32init.c)
+                --> GetOS2KrnlMTE(void)                     (devfirst.asm)
+                    <--
+                <--
+            <--
+        <--
+    <--
+<--
+
+D16_IOCTL_VERIFYIMPORTTAB packet
+--------------------------------
+_strategyAsm0                                               (devFirst.asm)
+_strategyAsm                                                (devFirst.asm)
+--> strategy(PRPH pRpH, unsigned short usDev)               (d16strat.c)
+    gen IO-Ctrl - dev 0:
+    --> dev0GenIOCtl(PRP_GENIOCTL pRp)                      (d16strat.c)
+        D16_IOCTL_VERIFYIMPORTTAB:
+        --> CallVerifyImportTab32(void)                     (devlast.c)
+            --> VerifyImportTab32(void)                     (d32init.c)
+                --> GetOS2KrnlMTE(void)                     (devfirst.asm)
+                    <--
+                --> interpretFunctionProlog32(..)
+                    <--
+                --> interpretFunctionProlog16(..)
+                    <--
+                <--
+            <--
+        <--
+    <--
+<--
 
 
 D16_IOCTL_RING0INIT packet
@@ -48,14 +93,11 @@ _strategyAsm                                                (devFirst.asm)
 --> strategy(PRPH pRpH, unsigned short usDev)               (d16strat.c)
     gen IO-Ctrl - dev 0:
     --> dev0GenIOCtl(PRP_GENIOCTL pRp)                      (d16strat.c)
-        D16RING0INIT:
+        D16_IOCTL_RING0INIT:
         --> R0Init16(PRP_GENIOCTL pRp)                      (d16init.c)
-            --> _CallR0Init32(LIN pRpInit)                  (devlast.asm)
+            --> CallR0Init32(LIN pRpInit)                   (devlast.asm)
                 --> R0Init32(RP32INIT *pRpInit)             (d32init.c)
                     --> heapInit(unsigned cbSize)           (malloc.c)
-                        ...
-                        <--
-                    --> coutInit(USHORT usCom)              (cout.c)
                         ...
                         <--
                     --> ldrInit(void)                       (ldr.cpp)
