@@ -1,4 +1,7 @@
-/* $Id: ChangeLog,v 1.2585 2003-05-26 14:03:26 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.2586 2003-05-26 16:48:09 sandervl Exp $ */
+
+ 2003-05-26: Sander van Leeuwen <sandervl@innotek   >
+    - COMCTL32: o Use the new resources from Wine.
 
  2003-05-26: Platon Fomichev <stauff@innotek   >
     - COMCTL32: o Listview selection draw code was incomplete due to resync.
