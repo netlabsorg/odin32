@@ -1,4 +1,4 @@
-/* $Id: dialog.cpp,v 1.3 1999-06-10 17:08:53 phaller Exp $ */
+/* $Id: dialog.cpp,v 1.4 1999-06-21 01:16:23 buerkle Exp $ */
 
 /*
  * PE2LX dialog conversion code
@@ -538,7 +538,6 @@ static int ConvertClassAndStyle(int    winclass,
  int os2style = ConvertDlgItemStyle(style);
 
   *fIconBmp = FALSE;
-  style &= 0xFFFF;
 
   switch(winclass) {
         case WIN_BUTTON:
@@ -621,10 +620,13 @@ static int ConvertClassAndStyle(int    winclass,
       if(style & WINES_AUTOHSCROLL) os2style |= ES_AUTOSCROLL;
       if(style & WINES_READONLY)    os2style |= ES_READONLY;
       if(style & WINES_PASSWORD)    os2style |= ES_UNREADABLE;
+      if(style & WINWS_BORDER)      os2style |= ES_MARGIN;
+
     }
     break;
 
         case WIN_STATIC:
+                style &= 0xFFFF;
                 *os2class = (int)WC_STATIC & 0xFFFF;
                 if(style == WINSS_LEFT)
                         os2style |= SS_TEXT | DT_LEFT;
