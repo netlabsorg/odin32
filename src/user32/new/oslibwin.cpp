@@ -1,4 +1,4 @@
-/* $Id: oslibwin.cpp,v 1.15 1999-07-18 18:04:29 sandervl Exp $ */
+/* $Id: oslibwin.cpp,v 1.16 1999-07-19 18:40:43 sandervl Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -225,8 +225,17 @@ HWND OSLibWinQueryWindow(HWND hwnd, ULONG lCode)
 BOOL OSLibWinSetWindowPos(HWND hwnd, HWND hwndInsertBehind, LONG x, LONG y, LONG cx,
                           LONG cy, ULONG fl)
 {
+ HWND hwndParent = hwndInsertBehind;
+
   if(fl & SWP_MOVE) {
-        y = MapOS2ToWin32Y(hwnd, cy, y);
+        switch(hwndParent)
+        {
+            case HWNDOS_TOP:
+            case HWNDOS_BOTTOM:
+                hwndParent = HWND_DESKTOP;
+                break;
+        }
+        y = MapOS2ToWin32Y(hwndParent, cy, y);
   }
   dprintf(("WinSetWindowPos %x %x %d %d %d %d %x", hwnd, hwndInsertBehind, x, y, cx, cy, fl));
   return WinSetWindowPos(hwnd, hwndInsertBehind, x, y, cx, cy, fl);
@@ -254,6 +263,7 @@ BOOL OSLibWinDestroyWindow(HWND hwnd)
   return WinDestroyWindow(hwnd);
 }
 //******************************************************************************
+//Returns rectangle in Win32 window coordinates
 //******************************************************************************
 BOOL OSLibWinQueryUpdateRect(HWND hwnd, PVOID pRect)
 {
@@ -262,8 +272,9 @@ BOOL OSLibWinQueryUpdateRect(HWND hwnd, PVOID pRect)
 
   rc = WinQueryUpdateRect(hwnd, (PRECTL)&rectl);
   if(rc) {
-    MapOS2ToWin32Rectl(hwnd, &rectl, (PRECT)pRect);
+        MapOS2ToWin32Rectl(&rectl, (PRECT)pRect);
   }
+  else  memset(pRect, 0, sizeof(RECT));
   return rc;
 }
 //******************************************************************************

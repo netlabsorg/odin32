@@ -1,4 +1,4 @@
-/* $Id: oslibgdi.cpp,v 1.2 1999-07-18 14:39:35 sandervl Exp $ */
+/* $Id: oslibgdi.cpp,v 1.3 1999-07-19 18:40:43 sandervl Exp $ */
 /*
  * Window GDI wrapper functions for OS/2
  *
@@ -18,138 +18,64 @@
 
 #include <misc.h>
 #include <oslibgdi.h>
+#include <oslibwin.h>
 
-//******************************************************************************
-//******************************************************************************
-inline PRECTL Win32ToOS2Rect(PVOID pRectl)
-{
- PRECTL pWinRect = (PRECTL)pRectl;
- ULONG  tmp;
-
-  tmp = pWinRect->yBottom;
-  pWinRect->yBottom = pWinRect->yTop;
-  pWinRect->yTop = tmp;
-  return pWinRect;
-}
-//******************************************************************************
-//******************************************************************************
-inline ULONG MAPWIN32POINT(RECTLOS2 *parent, RECTLOS2 *child, ULONG y)
-{
-  return (parent->yTop - parent->yBottom - (child->yTop - child->yBottom) - y - 1);
-}
 //******************************************************************************
 //******************************************************************************
 inline ULONG MAPWIN32POINT(RECTLOS2 *parent, ULONG cy, ULONG y)
 {
-  return (parent->yTop - parent->yBottom - cy - y - 1);
+    return (parent->yTop - parent->yBottom - cy - y);
 }
 //******************************************************************************
+//Map win32 y coordinate (in parent window coordinates) to OS/2 y coord. (in parent window coordinates)
 //******************************************************************************
-ULONG MapOS2ToWin32Y(HWND hwndChild)
+ULONG MapOS2ToWin32Y(HWND hwndParent, ULONG cy, ULONG y)
 {
- HWND     hwndParent;
- RECTLOS2 rectParent = {0}, rectChild = {0};
-
-   WinQueryWindowRect(hwndChild, (PRECTL)&rectChild);
-   hwndParent = WinQueryWindow(hwndChild, QW_PARENT);
-   WinQueryWindowRect(hwndParent, (PRECTL)&rectParent);
-   return MAPWIN32POINT(&rectParent, &rectChild, rectChild.yBottom);
-}
-//******************************************************************************
-//******************************************************************************
-ULONG MapOS2ToWin32Y(HWND hwndChild, ULONG y)
-{
- HWND     hwndParent;
- RECTLOS2 rectParent = {0}, rectChild = {0};
-
-   WinQueryWindowRect(hwndChild, (PRECTL)&rectChild);
-   hwndParent = WinQueryWindow(hwndChild, QW_PARENT);
-   WinQueryWindowRect(hwndParent, (PRECTL)&rectParent);
-   return MAPWIN32POINT(&rectParent, &rectChild, y);
-}
-//******************************************************************************
-//******************************************************************************
-ULONG MapOS2ToWin32Y(HWND hwndChild, ULONG cy, ULONG y)
-{
- HWND     hwndParent;
  RECTLOS2 rectParent = {0};
 
-   hwndParent = WinQueryWindow(hwndChild, QW_PARENT);
-   WinQueryWindowRect(hwndParent, (PRECTL)&rectParent);
-   return MAPWIN32POINT(&rectParent, cy, y);
+    if(hwndParent == OSLIB_HWND_DESKTOP) {
+        hwndParent = HWND_DESKTOP;
+    }
+    WinQueryWindowRect(hwndParent, (PRECTL)&rectParent);
+    return MAPWIN32POINT(&rectParent, cy, y);
 }
 //******************************************************************************
 //******************************************************************************
-ULONG MapOS2ToWin32Y(PRECTLOS2 rectParent, PRECTLOS2 rectChild, ULONG y)
+BOOL MapOS2ToWin32Point(HWND hwndParent, HWND hwndChild, OSLIBPOINT *point)
 {
-   return MAPWIN32POINT(rectParent, rectChild, y);
-}
-//******************************************************************************
-//******************************************************************************
-ULONG MapOS2ToWin32Y(PRECTLOS2 rectParent, HWND hwndChild, ULONG y)
-{
- RECTLOS2 rectChild = {0};
-
-   WinQueryWindowRect(hwndChild, (PRECTL)&rectChild);
-   return MAPWIN32POINT(rectParent, &rectChild, y);
-}
-//******************************************************************************
-//******************************************************************************
-ULONG MapOS2ToWin32Y(HWND hwndChild, PRECTLOS2 rectChild, ULONG y)
-{
- HWND     hwndParent;
  RECTLOS2 rectParent = {0};
 
-   hwndParent = WinQueryWindow(hwndChild, QW_PARENT);
-   WinQueryWindowRect(hwndParent, (PRECTL)&rectParent);
-   return MAPWIN32POINT(&rectParent, rectChild, y);
+    if(hwndParent == OSLIB_HWND_DESKTOP) {
+        hwndParent = HWND_DESKTOP;
+    }
+    if(WinMapWindowPoints(hwndChild, hwndParent, (POINTL *)point, 1) != 0) {
+        dprintf(("MapOS2ToWin32Point:WinMapWindowPoint %x %x returned false", hwndParent, hwndChild));
+        return FALSE;
+    }
+    WinQueryWindowRect(hwndParent, (PRECTL)&rectParent);
+    point->y = rectParent.yTop - point->y;
+    return TRUE;
 }
 //******************************************************************************
 // MapOS2ToWin32Rectl
 //   Convert OS/2 to Win32 RECTL structure
 //
 // Parameters:
-//   hwndChild: Child window handle
-//   rectChild: OS/2 child window RECTL
+//   rectOS2:    OS/2 child window RECTL
+//   rectWin32:  Win32 Child window RECT   (IN)
 //
 // Returns:
-//   rectChild: Converted OS/2 rectange stored in Win32 RECTL (yTop & yBottom reversed)
 //   TRUE:      Success
 //   FALSE:     Failures
 //******************************************************************************
-BOOL MapOS2ToWin32Rectl(HWND hwndChild, PRECTLOS2 rectChild, PRECT rectWin32)
+BOOL MapOS2ToWin32Rectl(PRECTLOS2 rectOS2, PRECT rectWin32)
 {
- HWND     hwndParent;
- RECTLOS2 rectParent = {0};
+ ULONG length = rectOS2->yTop - rectOS2->yBottom;
 
-   hwndParent = WinQueryWindow(hwndChild, QW_PARENT);
-   WinQueryWindowRect(hwndParent, (PRECTL)&rectParent);
-
-   rectWin32->yTop    = MAPWIN32POINT(&rectParent, rectChild->yTop - rectChild->yBottom, rectChild->yBottom);
-   rectWin32->yBottom = MAPWIN32POINT(&rectParent, rectChild->yTop - rectChild->yBottom, rectChild->yTop);
-   rectWin32->xLeft   = rectChild->xLeft;
-   rectWin32->xRight  = rectChild->xRight;
-   return TRUE;
-}
-//******************************************************************************
-// MapOS2ToWin32Rectl
-//   Convert OS/2 to Win32 RECTL structure
-//
-// Parameters:
-//   rectParent: OS/2 Parent window RECTL
-//   rectChild:  OS/2 Child window RECTL
-//
-// Returns:
-//   rectChild:  Converted OS/2 rectange stored in Win32 RECTL (yTop & yBottom reversed)
-//   TRUE:       Success
-//   FALSE:      Failures
-//******************************************************************************
-BOOL MapOS2ToWin32Rectl(PRECTLOS2 rectParent, PRECTLOS2 rectChild, PRECT rectWin32)
-{
-   rectWin32->yTop    = MAPWIN32POINT(rectParent, rectChild->yTop - rectChild->yBottom, rectChild->yBottom);
-   rectWin32->yBottom = MAPWIN32POINT(rectParent, rectChild->yTop - rectChild->yBottom, rectChild->yTop);
-   rectWin32->xLeft   = rectChild->xLeft;
-   rectWin32->xRight  = rectChild->xRight;
+   rectWin32->bottom = length - rectOS2->yBottom;
+   rectWin32->top    = length - rectOS2->yTop;
+   rectWin32->left   = rectOS2->xLeft;
+   rectWin32->right  = rectOS2->xRight;
    return TRUE;
 }
 //******************************************************************************
@@ -157,55 +83,35 @@ BOOL MapOS2ToWin32Rectl(PRECTLOS2 rectParent, PRECTLOS2 rectChild, PRECT rectWin
 //   Convert Win32 to OS/2 RECTL structure
 //
 // Parameters:
-//   hwndChild:  OS/2  Child window handle (IN)
 //   rectWin32:  Win32 Child window RECT   (IN)
-//   rectChild:  OS/2  Child window RECTL  (OUT)
+//   rectOS2:    OS/2  Child window RECTL  (OUT)
 // Returns:
 //   TRUE:       Success
 //   FALSE:      Failures
 //******************************************************************************
-BOOL MapWin32ToOS2Rectl(HWND hwndChild, PRECT rectWin32, PRECTLOS2 rectChild)
+BOOL MapWin32ToOS2Rectl(PRECT rectWin32, PRECTLOS2 rectOS2)
 {
- HWND     hwndParent;
- RECTLOS2 rectParent = {0};
+ ULONG length = rectWin32->top - rectWin32->bottom;
 
-   hwndParent = WinQueryWindow(hwndChild, QW_PARENT);
-   WinQueryWindowRect(hwndParent, (PRECTL)&rectParent);
-
-   rectChild->yTop    = MAPWIN32POINT(&rectParent, rectWin32->yBottom - rectWin32->yTop, rectWin32->yBottom);
-   rectChild->yBottom = MAPWIN32POINT(&rectParent, rectWin32->yBottom - rectWin32->yTop, rectWin32->yTop);
-   rectChild->xLeft   = rectWin32->xLeft;
-   rectChild->xRight  = rectWin32->xRight;
-   return TRUE;
-}
-//******************************************************************************
-// MapWin32ToOS2Rectl
-//   Convert Win32 to OS/2 RECTL structure
-//
-// Parameters:
-//   rectParent: OS/2  Parent window RECTL (IN)
-//   rectWin32:  Win32 Child window RECT   (IN)
-//   rectChild:  OS/2  Child window RECTL  (OUT)
-// Returns:
-//   TRUE:       Success
-//   FALSE:      Failures
-//******************************************************************************
-BOOL MapWin32ToOS2Rectl(PRECTLOS2 rectParent, PRECT rectWin32, PRECTLOS2 rectChild)
-{
-   rectChild->yTop    = MAPWIN32POINT(rectParent, rectWin32->yBottom - rectWin32->yTop, rectWin32->yBottom);
-   rectChild->yBottom = MAPWIN32POINT(rectParent, rectWin32->yBottom - rectWin32->yTop, rectWin32->yTop);
-   rectChild->xLeft   = rectWin32->xLeft;
-   rectChild->xRight  = rectWin32->xRight;
-   return TRUE;
+    rectOS2->yBottom = length - rectWin32->bottom;
+    rectOS2->yTop    = length - rectWin32->top;
+    rectOS2->xLeft   = rectWin32->left;
+    rectOS2->xRight  = rectWin32->right;
+    return TRUE;
 }
 //******************************************************************************
 //******************************************************************************
-HDC OSLibWinBeginPaint(HWND hwnd, PVOID pRectl)
+HDC OSLibWinBeginPaint(HWND hwnd, RECT *rectWin32)
 {
- RECTLOS2 rectlOS2;
+ RECTL rectl;
 
-  MapWin32ToOS2Rectl(hwnd, (PRECT)pRectl, &rectlOS2);
-  return WinBeginPaint(hwnd, NULLHANDLE, (PRECTL)&rectlOS2);
+    if(WinQueryUpdateRect(hwnd, &rectl) == FALSE)
+    {
+        dprintf(("BeginPaint, NO update rectl"));
+        return 0;
+    }
+    MapOS2ToWin32Rectl((RECTLOS2 *)&rectl, rectWin32);
+    return WinBeginPaint(hwnd, NULLHANDLE, &rectl);
 }
 //******************************************************************************
 //******************************************************************************
