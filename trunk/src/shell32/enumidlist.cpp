@@ -1,4 +1,4 @@
-/* $Id: enumidlist.cpp,v 1.3 2000-03-27 15:09:19 cbratschi Exp $ */
+/* $Id: enumidlist.cpp,v 1.4 2000-03-29 15:24:03 cbratschi Exp $ */
 
 /*
  * Win32 SHELL32 for OS/2
@@ -186,8 +186,10 @@ static BOOL CreateFolderEnumList(
 {
         ICOM_THIS(IEnumIDListImpl,iface);
 
+        const MULTICOUNT = 64;
         LPITEMIDLIST    pidl=NULL;
-        WIN32_FIND_DATAA stffile;
+        WIN32_FIND_DATAA *stffile = NULL;
+        DWORD count;
         HANDLE hFile;
         CHAR  szPath[MAX_PATH];
 
@@ -203,33 +205,38 @@ static BOOL CreateFolderEnumList(
         if(dwFlags & SHCONTF_FOLDERS)
         {
           TRACE("-- (%p)-> enumerate SHCONTF_FOLDERS of %s\n",This,debugstr_a(szPath));
-          hFile = FindFirstFileA(szPath,&stffile);
-          if ( hFile != INVALID_HANDLE_VALUE )
+          count = MULTICOUNT;
+          stffile = (WIN32_FIND_DATAA*)malloc(count*sizeof(WIN32_FIND_DATAA));
+          hFile = FindFirstFileMultiA(szPath,stffile,&count);
+          if (hFile != INVALID_HANDLE_VALUE)
           {
             do
             {
-              if (stffile.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
-              { //directory
-                if (strcmp (stffile.cFileName, ".") && strcmp (stffile.cFileName, ".."))
-                {
-                  pidl = _ILCreateFolder (&stffile);
-                  if(pidl && AddToEnumList((IEnumIDList*)This, pidl))
+              for (int x = 0;x < count;x++)
+              {
+                if (stffile[x].dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
+                { //directory
+                  if (strcmp (stffile[x].cFileName, ".") && strcmp (stffile[x].cFileName, ".."))
                   {
-                    continue;
+                    pidl = _ILCreateFolder (&stffile[x]);
+                    if (pidl && AddToEnumList((IEnumIDList*)This, pidl))
+                      continue;
+                    free(stffile);
+                    FindClose(hFile);
+                    return FALSE;
                   }
+                } else if (dwFlags & SHCONTF_NONFOLDERS)
+                { //file
+                  pidl = _ILCreateValue(&stffile[x]);
+                  if (pidl && AddToEnumList2((IEnumIDList*)This, pidl))
+                    continue;
+                  free(stffile);
+                  FindClose(hFile);
                   return FALSE;
                 }
-              } else if (dwFlags & SHCONTF_NONFOLDERS)
-              { //file
-                pidl = _ILCreateValue(&stffile);
-                if(pidl && AddToEnumList2((IEnumIDList*)This, pidl))
-                {
-                  continue;
-                }
-                return FALSE;
               }
-            } while( FindNextFileA(hFile,&stffile));
-            FindClose (hFile);
+            } while(FindNextFileMultiA(hFile,stffile,&(count = MULTICOUNT)));
+            FindClose(hFile);
             UniteEnumLists((IEnumIDList*)This);
           }
         }
@@ -238,24 +245,31 @@ static BOOL CreateFolderEnumList(
         if((dwFlags & SHCONTF_NONFOLDERS) && !(dwFlags & SHCONTF_FOLDERS))
         {
           TRACE("-- (%p)-> enumerate SHCONTF_NONFOLDERS of %s\n",This,debugstr_a(szPath));
-          hFile = FindFirstFileA(szPath,&stffile);
-          if ( hFile != INVALID_HANDLE_VALUE )
+          count = MULTICOUNT;
+          if (!stffile) stffile = (WIN32_FIND_DATAA*)malloc(count*sizeof(WIN32_FIND_DATAA));
+          hFile = FindFirstFileMultiA(szPath,stffile,&count);
+          if (hFile != INVALID_HANDLE_VALUE)
           {
             do
             {
-              if (! (stffile.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) )
+              for (int x = 0;x < count;x++)
               {
-                pidl = _ILCreateValue(&stffile);
-                if(pidl && AddToEnumList((IEnumIDList*)This, pidl))
+                if (! (stffile[x].dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) )
                 {
-                  continue;
+                  pidl = _ILCreateValue(&stffile[x]);
+                  if (pidl && AddToEnumList((IEnumIDList*)This, pidl))
+                    continue;
+                  free(stffile);
+                  FindClose(hFile);
+                  return FALSE;
                 }
-                return FALSE;
               }
-            } while( FindNextFileA(hFile,&stffile));
+            } while(FindNextFileMultiA(hFile,stffile,&(count = MULTICOUNT)));
             FindClose (hFile);
           }
         }
+        if (stffile) free(stffile);
+
         return TRUE;
 }
 

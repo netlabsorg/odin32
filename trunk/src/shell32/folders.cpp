@@ -1,4 +1,4 @@
-/* $Id: folders.cpp,v 1.2 2000-03-26 16:34:41 cbratschi Exp $ */
+/* $Id: folders.cpp,v 1.3 2000-03-29 15:24:03 cbratschi Exp $ */
 
 /*
  * Win32 SHELL32 for OS/2
@@ -216,19 +216,34 @@ static HRESULT WINAPI IExtractIconA_fnGetIconLocation(
         }
         else    /* object is file */
         {
-          if (_ILGetExtension (pSimplePidl, sTemp, MAX_PATH)
-              && HCR_MapTypeToValue(sTemp, sTemp, MAX_PATH, TRUE)
-              && HCR_GetDefaultIcon(sTemp, sTemp, MAX_PATH, &dwNr))
+          if (_ILGetExtension (pSimplePidl, sTemp, MAX_PATH))
           {
-            if (!strcmp("%1",sTemp))            /* icon is in the file */
+            if (HCR_MapTypeToValue(sTemp, sTemp, MAX_PATH, TRUE)
+              && HCR_GetDefaultIcon(sTemp, sTemp, MAX_PATH, &dwNr))
             {
-              SHGetPathFromIDListA(This->pidl, sTemp);
-              dwNr = 0;
+              if (!strcmp("%1",sTemp))            /* icon is in the file */
+              {
+                SHGetPathFromIDListA(This->pidl, sTemp);
+                dwNr = 0;
+              }
+              lstrcpynA(szIconFile, sTemp, cchMax);
+              *piIndex = dwNr;
+            } else
+            {
+              //icon is in the file/file is icon
+              if (stricmp(sTemp,"EXE") == 0) //CB: add more
+              {
+                SHGetPathFromIDListA(This->pidl, sTemp);
+                dwNr = 0;
+                lstrcpynA(szIconFile, sTemp, cchMax);
+                *piIndex = dwNr;
+              } else //default icon
+              {
+                lstrcpynA(szIconFile, "shell32.dll", cchMax);
+                *piIndex = 0;
+              }
             }
-            lstrcpynA(szIconFile, sTemp, cchMax);
-            *piIndex = dwNr;
-          }
-          else                                  /* default icon */
+          } else                                  /* default icon */
           {
             lstrcpynA(szIconFile, "shell32.dll", cchMax);
             *piIndex = 0;

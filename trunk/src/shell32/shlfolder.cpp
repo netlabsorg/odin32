@@ -1,4 +1,4 @@
-/* $Id: shlfolder.cpp,v 1.11 2000-03-28 15:28:53 cbratschi Exp $ */
+/* $Id: shlfolder.cpp,v 1.12 2000-03-29 15:24:06 cbratschi Exp $ */
 /*
  * Shell Folder stuff
  *
@@ -1720,11 +1720,13 @@ static HRESULT WINAPI ISF_Desktop_fnGetDetailsOf(
      psd->fmt = DesktopSFHeader[iColumn].fmt;
      psd->cxChar = DesktopSFHeader[iColumn].cxChar;
      psd->str.uType = STRRET_CSTRA;
+     psd->str.u.cStr[0] = 0;
      LoadStringA(shell32_hInstance, DesktopSFHeader[iColumn].colnameid, psd->str.u.cStr, MAX_PATH);
      return S_OK;
    }
    else
    {
+     psd->str.u.cStr[0] = 0;
      /* the data from the pidl */
      switch(iColumn)
      {
