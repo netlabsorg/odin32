@@ -1,4 +1,4 @@
-/* $Id: windowmsg.cpp,v 1.17 2000-01-18 20:11:10 sandervl Exp $ */
+/* $Id: windowmsg.cpp,v 1.18 2000-01-30 18:48:29 sandervl Exp $ */
 /*
  * Win32 window message APIs for OS/2
  *
@@ -129,7 +129,7 @@ LRESULT WIN32API SendMessageA(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 
     window = Win32BaseWindow::GetWindowFromHandle(hwnd);
     if(!window) {
-        dprintf(("SendMessageA, window %x not found", hwnd));
+        dprintf(("SendMessageA, %x %x %x window %x not found", msg, wParam, lParam, hwnd));
         return 0;
     }
     return window->SendMessageA(msg, wParam, lParam);
