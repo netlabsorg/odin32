@@ -1,4 +1,4 @@
-/* $Id: window.cpp,v 1.75 2000-09-07 18:14:35 sandervl Exp $ */
+/* $Id: window.cpp,v 1.76 2000-09-07 22:23:07 phaller Exp $ */
 /*
  * Win32 window apis for OS/2
  *
@@ -18,6 +18,15 @@
  *
  */
 
+/*****************************************************************************
+ * Includes                                                                  *
+ *****************************************************************************/
+
+#include <odin.h>
+#include <odinwrap.h>
+#include <os2sel.h>
+
+
 #include <os2win.h>
 #include <misc.h>
 #include <string.h>
@@ -35,6 +44,13 @@
 
 #define DBG_LOCALLOG    DBG_window
 #include "dbglocal.h"
+
+/*****************************************************************************
+ * Defines                                                                   *
+ *****************************************************************************/
+
+ODINDEBUGCHANNEL(USER32-WINDOW)
+
 
 //******************************************************************************
 //******************************************************************************
@@ -434,7 +450,12 @@ BOOL WIN32API IsIconic( HWND hwnd)
 }
 //******************************************************************************
 //******************************************************************************
-HWND WIN32API GetWindow(HWND hwnd, UINT uCmd)
+//HWND WIN32API GetWindow(HWND hwnd, UINT uCmd)
+// @@@PH 2000/09/07: it seems GetWindow came back with FS: corrupted
+// when trying with Netscape.
+ODINFUNCTION2(HWND, GetWindow,
+              HWND, hwnd,
+              UINT, uCmd)
 {
   Win32BaseWindow *window;
   HWND rc;
