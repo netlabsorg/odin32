@@ -1,4 +1,4 @@
-/* $Id: ordinal_odin.cpp,v 1.3 2001-08-30 23:37:03 phaller Exp $ */
+/* $Id: ordinal_odin.cpp,v 1.4 2001-08-31 19:56:34 phaller Exp $ */
 
 /*
  * Win32 Lightweight SHELL32 for OS/2
@@ -175,7 +175,7 @@ static PROTOCOLTABLEENTRY tabProtocolTable[] =
   { "about",      17,  5, 0x05 },
   { "res",        18,  3, 0x04 }
 };
-#define END_OF_PROTOCOLTABLE (tabProtocolTable + sizeof(tabProtocolTable))
+#define END_OF_PROTOCOLTABLE (tabProtocolTable + (sizeof(tabProtocolTable) / sizeof(PROTOCOLTABLEENTRY)) )
 
 
 
@@ -238,9 +238,10 @@ ODINFUNCTION2(DWORD,   SHLWAPI_1,
 
   dprintf(("SHLWAPI-SHLWAPI1: URL=%s",
     lpszURL));
-
+  
+  LPSTR lpszColon;
   INT iProtocolLength = extractProtocolFromURL(lpszURL,
-                                               &lpszURL);
+                                               &lpszColon);
   lpHandler->dwProtocolNameLength = iProtocolLength;
   if (0 == iProtocolLength)
     return 0x80041001; // unknown error constant
@@ -248,7 +249,7 @@ ODINFUNCTION2(DWORD,   SHLWAPI_1,
   lpHandler->lpszProtocolName = lpszURL;
 
   DWORD ID = getProtocolTableEntry(lpszURL,
-                                                       iProtocolLength);
+                                   iProtocolLength);
   lpHandler->ProtocolID = ID;
   lpHandler->lpszURL    = (LPSTR)(lpszURL + iProtocolLength + 1);
   
