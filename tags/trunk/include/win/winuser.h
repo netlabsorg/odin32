@@ -3908,6 +3908,7 @@ INT       WINAPI ToAscii(UINT,UINT,LPBYTE,LPWORD,UINT);
 INT       WINAPI ToAsciiEx(UINT,UINT,LPBYTE,LPWORD,UINT,HKL);
 BOOL      WINAPI TrackPopupMenu(HMENU,UINT,INT,INT,INT,HWND,const RECT*);
 INT       WINAPI TranslateAcceleratorA(HWND,HACCEL,LPMSG);
+INT       WINAPI TranslateAcceleratorW(HWND,HACCEL,LPMSG);
 #define     TranslateAccelerator TranslateAcceleratorA
 BOOL      WINAPI TranslateMDISysAccel(HWND,LPMSG);
 BOOL      WINAPI TranslateMessage(const MSG*);
