@@ -1,4 +1,4 @@
-/* $Id: heap.cpp,v 1.24 2001-01-22 18:26:50 sandervl Exp $ */
+/* $Id: heap.cpp,v 1.25 2001-02-11 17:24:09 sandervl Exp $ */
 
 /*
  * Win32 heap API functions for OS/2
@@ -293,7 +293,9 @@ PVOID WIN32API LocalLock(HLOCAL hMem)
 {
     dprintf(("KERNEL32:  LocalLock %X\n", hMem));
 
-    OS2ProcessHeap->Lock((LPVOID)hMem);
+    if(OS2ProcessHeap->Lock((LPVOID)hMem) == FALSE) {
+        return NULL;
+    }
     return (PVOID)hMem;
 }
 //******************************************************************************
