@@ -1,5 +1,3 @@
-/* $Id: wingdi.h,v 1.16 2000-11-16 18:02:29 sandervl Exp $ */
-
 #ifndef __WINE_WINGDI_H
 #define __WINE_WINGDI_H
 
@@ -2487,11 +2485,18 @@ DECL_WINELIB_TYPE_AW(LPDEVMODE)
 #define DM_DUPLEX		0x00001000L
 #define DM_YRESOLUTION		0x00002000L
 #define DM_TTOPTION		0x00004000L
+#define DM_COLLATE              0x00008000L
 #define DM_BITSPERPEL           0x00040000L
 #define DM_PELSWIDTH            0x00080000L
 #define DM_PELSHEIGHT           0x00100000L
 #define DM_DISPLAYFLAGS         0x00200000L
 #define DM_DISPLAYFREQUENCY     0x00400000L
+#define DM_ICMMETHOD            0x00800000L
+#define DM_ICMINTENT            0x01000000L
+#define DM_MEDIATYPE            0x02000000L
+#define DM_DITHERTYPE           0x04000000L
+#define DM_PANNINGWIDTH         0x08000000L
+#define DM_PANNINGHEIGHT        0x10000000L
 
 /* etc.... */
 
