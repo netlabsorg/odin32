@@ -1,4 +1,4 @@
-/* $Id: oslibwin.cpp,v 1.105 2001-07-04 09:55:17 sandervl Exp $ */
+/* $Id: oslibwin.cpp,v 1.106 2001-07-15 15:39:03 sandervl Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -26,6 +26,7 @@
 #include "oslibmsg.h"
 #include "oslibgdi.h"
 #include "pmwindow.h"
+#include "initterm.h"
 
 #define DBG_LOCALLOG    DBG_oslibwin
 #include "dbglocal.h"
@@ -191,7 +192,8 @@ BOOL OSLibWinPositionFrameControls(HWND hwndFrame, RECTLOS2 *pRect, DWORD dwStyl
           if((dwStyle & WS_MINIMIZEBOX_W) || (dwStyle & WS_MAXIMIZEBOX_W)) {
               swp[i].cx -= minmaxwidth;
           }
-          if(dwStyle & WS_SYSMENU_W) {
+          //there is no close button in warp 3
+          if((dwStyle & WS_SYSMENU_W) && !fVersionWarp3) {
               swp[i].cx -= minmaxwidth/2;
           }
           swp[i].cy = minmaxheight;
@@ -216,7 +218,8 @@ BOOL OSLibWinPositionFrameControls(HWND hwndFrame, RECTLOS2 *pRect, DWORD dwStyl
           if((dwStyle & WS_MINIMIZEBOX_W) || (dwStyle & WS_MAXIMIZEBOX_W)) {
               swp[i].cx += minmaxwidth;
           }
-          if(dwStyle & WS_SYSMENU_W) {
+          //there is no close button in warp 3
+          if((dwStyle & WS_SYSMENU_W) && !fVersionWarp3) {
               swp[i].cx += minmaxwidth/2;
           }
           swp[i].cy = minmaxheight;
