@@ -1,4 +1,4 @@
-/* $Id: olectl.h,v 1.1 1999-05-24 20:19:16 ktk Exp $ */
+/* $Id: olectl.h,v 1.2 1999-11-14 21:01:22 davidr Exp $ */
 
 #ifndef __WINE_OLECTL_H
 #define __WINE_OLECTL_H
@@ -7,12 +7,6 @@
 
 #define WINOLECTLAPI INT WINAPI
 
-#ifdef __cplusplus
-#define DUMMY_UNION_NAME
-#else
-#define DUMMY_UNION_NAME u
-#endif
- 
 /*
  * Ole Control Interfaces
  */
@@ -88,6 +82,12 @@ typedef struct tagFONTDESC {
 /* COREL MOD PQ mar 9 - redecl in mfc */
 /*WINOLECTLAPI OleCreateFontIndirect(LPFONTDESC lpFontDesc, REFIID riid, VOID** ppvObj);*/
 
+typedef enum tagPICTURE
+{
+    PICTURE_SCALEABLE 		= 0x00000001,
+    PICTURE_TRANSPARENT 	= 0x00000002
+} PICTURE;
+
 #define PICTYPE_UNINITIALIZED (-1)
 #define PICTYPE_NONE          0
 #define PICTYPE_BITMAP        1
@@ -95,26 +95,27 @@ typedef struct tagFONTDESC {
 #define PICTYPE_ICON          3
 #define PICTYPE_ENHMETAFILE   4
 
+// DjR - Removed DUMMY stuff as it seemed unworkable in ICC
 typedef struct tagPICTDESC {
-	UINT cbSizeofstruct;
-	UINT picType;
-	union {
-			struct {
-					HBITMAP hbitmap;
-					HPALETTE hpal;
-			} bmp;
-			struct {
-					HMETAFILE hmeta;
-					int xExt;
-					int yExt;
-			} wmf;
-			struct {
-					HICON hicon;
-			} icon;
-			struct {
-					HENHMETAFILE hemf;
-			} emf;
-	} DUMMY_UNION_NAME;
+    UINT cbSizeofstruct;
+    UINT picType;
+    union {
+	struct {
+	    HBITMAP hbitmap;
+	    HPALETTE hpal;
+	} bmp;
+	struct {
+	    HMETAFILE hmeta;
+	    int xExt;
+	    int yExt;
+	} wmf;
+	struct {
+	    HICON hicon;
+	} icon;
+	struct {
+	    HENHMETAFILE hemf;
+	} emf;
+    } u;
 } PICTDESC, *LPPICTDESC;
 
 typedef long OLE_XPOS_PIXELS;
