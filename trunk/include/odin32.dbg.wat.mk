@@ -1,4 +1,4 @@
-# $Id: odin32.dbg.wat.mk,v 1.1 2000-12-02 23:50:46 bird Exp $
+# $Id: odin32.dbg.wat.mk,v 1.2 2000-12-16 23:41:35 bird Exp $
 
 #
 # Odin32 API
@@ -8,12 +8,18 @@
 
 
 #
+# Rule attributes.
+#
+SYMBOLIC = .SYMBOLIC
+
+
+#
 # Library macros.
 #
 SOMLIB   = somtk.lib
 RTLLIB   = clib3r.lib
 RTLLIB_O = clib3r.lib
-DLLENTRY = $(ODIN32_LIB)\dllentry_watcom.obj
+DLLENTRY = $(ODIN32_LIB)\dllentry.obj
 ODINCRT  = odincrtd
 
 
@@ -77,7 +83,7 @@ CXXFLAGS_ODINCRT = -w4 -wcd=726 -e25 -od -d2 -hw -bm -mf -5r -bt=os2 -zq -fp5 -f
 CFLAGS_WIN32APP  = -w4 -wcd=726 -e25 -od -d2 -hw -bm -mf -5r -bt=os2 -zq -fp5 -fpi87
 CXXFLAGS_WIN32APP= -w4 -wcd=726 -e25 -od -d2 -hw -bm -mf -5r -bt=os2 -zq -fp5 -fpi87
 
-CINCLUDES        = -i$(%WATCOM)\h -i$(ODIN32_INCLUDE)\Win -i. -i$(ODIN32_INCLUDE)
+CINCLUDES        = -I$(%WATCOM)\h -I$(ODIN32_INCLUDE)\Win -I. -I$(ODIN32_INCLUDE)
 CDEFINES_WIN32APP= -DDEBUG -D__WIN32OS2__ -D__i386__
 CDEFINES_ODINCRT = -DDEBUG -D__WIN32OS2__ -D__i386__ -D__WINE__
 CDEFINES         = -DDEBUG -D__WIN32OS2__ -D__i386__ -D__WINE__ -DTCPV40HDRS -DCOMCTL32UNDOC \
@@ -105,8 +111,8 @@ CXXFLAGS         += -bd
 #
 # Linker flags.
 #
-LDFLAGS          = option maxe=125, quiet, symfile, nodefaultlibs
-LDFLAGS_ODINCRT  = option maxe=125, quiet, symfile
+LDFLAGS          = option maxe=125, quiet, symfile, nodefaultlibs  LIBPath $(%WATCOM)\lib386\os2;$(%WATCOM)\lib386
+LDFLAGS_ODINCRT  = option maxe=125, quiet, symfile  LIBPath $(%WATCOM)\lib386\os2;$(%WATCOM)\lib386
 
 !ifndef NODEBUGINFO
 LDFLAGS          += debug all

@@ -16,7 +16,7 @@
   //be stored in the _privateLogFile variable
   //dprintf can be called like this:
   //dprintf((LOG, "PE file           : %s", szFileName));
-  #define LOG		  (void*)_privateLogFile
+  #define LOG       (void*)_privateLogFile
   #define dprintf(a)      WritePrivateLog a
   #define dprintfGlobal(a)      WriteLog a
 #else
@@ -24,7 +24,7 @@
 #endif
   #define eprintf(a)      WriteLog a ; WriteLogError a
   #define dassert(a, b)   if(!(a)) WriteLogError b
-  #define dbgCheckObj(a)	a->checkObject()
+  #define dbgCheckObj(a)   a->checkObject()
   #define DisableLogging  DecreaseLogCount
   #define EnableLogging   IncreaseLogCount
 
@@ -212,23 +212,23 @@ static LPCSTR debugstr_an (LPCSTR src, int n)
     {
       BYTE c = *src++;
       switch (c)
-	{
-	case '\n': *dst++ = '\\'; *dst++ = 'n'; break;
-	case '\r': *dst++ = '\\'; *dst++ = 'r'; break;
-	case '\t': *dst++ = '\\'; *dst++ = 't'; break;
-	case '"': *dst++ = '\\'; *dst++ = '"'; break;
-	case '\\': *dst++ = '\\'; *dst++ = '\\'; break;
-	default:
-	  if (c >= ' ' && c <= 126)
-	    *dst++ = c;
-	  else
-	    {
-	      *dst++ = '\\';
-	      *dst++ = '0' + ((c >> 6) & 7);
-	      *dst++ = '0' + ((c >> 3) & 7);
-	      *dst++ = '0' + ((c >> 0) & 7);
-	    }
-	}
+   {
+   case '\n': *dst++ = '\\'; *dst++ = 'n'; break;
+   case '\r': *dst++ = '\\'; *dst++ = 'r'; break;
+   case '\t': *dst++ = '\\'; *dst++ = 't'; break;
+   case '"': *dst++ = '\\'; *dst++ = '"'; break;
+   case '\\': *dst++ = '\\'; *dst++ = '\\'; break;
+   default:
+     if (c >= ' ' && c <= 126)
+       *dst++ = c;
+     else
+       {
+         *dst++ = '\\';
+         *dst++ = '0' + ((c >> 6) & 7);
+         *dst++ = '0' + ((c >> 3) & 7);
+         *dst++ = '0' + ((c >> 0) & 7);
+       }
+   }
     }
   *dst++ = '"';
   if (*src)
@@ -259,22 +259,22 @@ static LPCSTR debugstr_wn (LPCWSTR src, int n)
     {
       WORD c = *src++;
       switch (c)
-	{
-	case '\n': *dst++ = '\\'; *dst++ = 'n'; break;
-	case '\r': *dst++ = '\\'; *dst++ = 'r'; break;
-	case '\t': *dst++ = '\\'; *dst++ = 't'; break;
-	case '"': *dst++ = '\\'; *dst++ = '"'; break;
-	case '\\': *dst++ = '\\'; *dst++ = '\\'; break;
-	default:
-	  if (c >= ' ' && c <= 126)
-	    *dst++ = c;
-	  else 
-	    {
-	      *dst++ = '\\';
-              sprintf(dst,"%04x",c);
-              dst+=4;
-	    }
-	}
+   {
+   case '\n': *dst++ = '\\'; *dst++ = 'n'; break;
+   case '\r': *dst++ = '\\'; *dst++ = 'r'; break;
+   case '\t': *dst++ = '\\'; *dst++ = 't'; break;
+   case '"': *dst++ = '\\'; *dst++ = '"'; break;
+   case '\\': *dst++ = '\\'; *dst++ = '\\'; break;
+   default:
+     if (c >= ' ' && c <= 126)
+       *dst++ = (char)c;
+     else
+       {
+         *dst++ = '\\';
+          sprintf(dst,"%04x",c);
+          dst+=4;
+       }
+   }
     }
   *dst++ = '"';
   if (*src)
