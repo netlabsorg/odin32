@@ -1,4 +1,14 @@
- /* $Id: changelog,v 1.601 2000-01-02 20:16:09 sandervl Exp $ */
+ /* $Id: changelog,v 1.602 2000-01-02 21:32:50 davidr Exp $ */
+
+ 2000-01-02: David Raison <djr@lemur.co.uk>
+        - OLEAUT32: Typelib fixes - Custom Data & Default values.
+                    Added private logging to tlib_n.log when reading a TLIB.
+                    (Should clarify what is being read & why)
+                    Now supports embedded named TLIBS in the format
+                    <path>\<libname>\<id> (required for VB6, etc.)
+                    Preparatory work to reduce dependance on 
+                    current file position to enable delaying parsing 
+                    data until it is requested by user.
 
  2000-01-02: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32: Implemented Set/GetWindowRgn (not activated)
