@@ -1,4 +1,4 @@
-/* $Id: windlllx.cpp,v 1.21 2001-07-29 19:00:32 sandervl Exp $ */
+/* $Id: windlllx.cpp,v 1.22 2001-08-06 19:36:42 sandervl Exp $ */
 
 /*
  * Win32 LX Dll class (compiled in OS/2 using Odin32 api)
@@ -40,12 +40,14 @@
 #include "dbglocal.h"
 
 char *lpszCustomDllName = NULL;
+ULONG dwOrdinalBase = 0;
 
 //******************************************************************************
 //******************************************************************************
-void WIN32API SetCustomBuildName(char *lpszName) 
+void WIN32API SetCustomBuildName(char *lpszName, DWORD ordinalbase) 
 {
     lpszCustomDllName = lpszName;
+    dwOrdinalBase     = ordinalbase;
 }
 //******************************************************************************
 //Create LX Dll object and send process attach message
