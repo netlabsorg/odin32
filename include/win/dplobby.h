@@ -1,4 +1,4 @@
-// $Id: dplobby.h,v 1.5 2000-10-02 17:37:42 sandervl Exp $
+// $Id: dplobby.h,v 1.6 2001-03-13 23:13:27 hugh Exp $
 #ifndef __WINE_DPLOBBY_H
 #define __WINE_DPLOBBY_H
 
@@ -275,7 +275,7 @@ typedef struct tagDPLAPPINFO
     {
         LPSTR   lpszAppNameA;
         LPWSTR  lpszAppName;
-    } appName;
+    } DUMMYUNIONNAME;
 
 } DPLAPPINFO, *LPDPLAPPINFO;
 typedef const DPLAPPINFO *LPCDPLAPPINFO;
@@ -297,7 +297,7 @@ typedef struct tagDPAPPLICATIONDESC
     {
         LPSTR       lpszApplicationNameA;
         LPWSTR      lpszApplicationName;
-    } appName;
+    } DUMMYUNIONNAME1;
 
     GUID        guidApplication;
 
@@ -305,25 +305,25 @@ typedef struct tagDPAPPLICATIONDESC
     {
         LPSTR       lpszFilenameA;
         LPWSTR      lpszFilename;
-    } fileName;
+    } DUMMYUNIONNAME2;
 
     union
     {
         LPSTR       lpszCommandLineA;
         LPWSTR      lpszCommandLine;
-    } cmdLine;
+    } DUMMYUNIONNAME3;
 
     union
     {
         LPSTR       lpszPathA;
         LPWSTR      lpszPath;
-    } path;
+    } DUMMYUNIONNAME4;
 
     union
     {
         LPSTR       lpszCurrentDirectoryA;
         LPWSTR      lpszCurrentDirectory;
-    } curDir;
+    } DUMMYUNIONNAME5;
 
     LPSTR       lpszDescriptionA;
     LPWSTR      lpszDescriptionW;

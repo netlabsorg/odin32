@@ -1,4 +1,4 @@
-// $Id: dplayx_main.cpp,v 1.3 2001-02-14 15:14:41 sandervl Exp $
+// $Id: dplayx_main.cpp,v 1.4 2001-03-13 23:13:27 hugh Exp $
 /*
  * DPLAYX.DLL LibMain
  *
@@ -22,10 +22,7 @@
 #endif
 
 DEFAULT_DEBUG_CHANNEL(dplay);
-
-DEFINE_GUID(GUID_NULL,0,0,0,0,0,0,0,0,0,0,0);
-
-static DWORD DPLAYX_dwProcessesAttached = 0;
+DEFINE_GUID(GUID_NULL, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 
 /* This is a globally exported variable at ordinal 6 of DPLAYX.DLL */
 DWORD gdwDPlaySPRefCount = 0; /* FIXME: Should it be initialized here? */
@@ -33,35 +30,24 @@ DWORD gdwDPlaySPRefCount = 0; /* FIXME: Should it be initialized here? */
 BOOL WINAPI DPLAYX_LibMain( HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved )
 {
 
-  TRACE( "(%u,0x%08lx,%p) & 0x%08lx\n", hinstDLL, fdwReason, lpvReserved, DPLAYX_dwProcessesAttached );
+  TRACE( "(%u,0x%08lx,%p) & 0x%08lx\n", hinstDLL, fdwReason, lpvReserved, gdwDPlaySPRefCount );
 
   switch ( fdwReason )
   {
     case DLL_PROCESS_ATTACH:
-    {
-
-      if ( DPLAYX_dwProcessesAttached++ == 0 )
-      {
         /* First instance perform construction of global processor data */
         return DPLAYX_ConstructData();
-      }
-
-      break;
-    }
 
     case DLL_PROCESS_DETACH:
     {
-
-      if ( --DPLAYX_dwProcessesAttached == 0 )
-      {
-        BOOL rc;
-        /* Last instance performs destruction of global processor data */
-        rc = DPLAYX_DestructData();
+      BOOL rc;
+      /* Last instance performs destruction of global processor data */
+      rc = DPLAYX_DestructData();
 #ifdef __WIN32OS2__
+      if(gdwDPlaySPRefCount==0) // only do this the last time ?
         ctordtorTerm();
 #endif
         return rc;
-      }
 
       break;
     }
