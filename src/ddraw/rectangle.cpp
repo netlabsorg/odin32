@@ -1,4 +1,4 @@
-/* $Id: rectangle.cpp,v 1.5 2001-03-20 23:18:56 mike Exp $ */
+/* $Id: rectangle.cpp,v 1.6 2001-10-03 13:49:41 sandervl Exp $ */
 
 /*
  * Rectangle class Implementaion
@@ -13,10 +13,10 @@ typedef unsigned long BOOL;
 
 #include "rectangle.h"
 
-DDRectangle::DDRectangle ( Coord y1,
-                    Coord x1,
-                    Coord y2,
-                    Coord x2 )
+DDRectangle::DDRectangle ( Coord x1,
+                    Coord y1,
+                    Coord x2,
+                    Coord y2 )
 {
   lTop    = y1;
   lLeft   = x1;

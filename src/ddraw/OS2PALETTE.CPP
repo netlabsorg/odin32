@@ -1,9 +1,9 @@
-/* $Id: OS2PALETTE.CPP,v 1.14 2001-03-18 21:44:42 mike Exp $ */
+/* $Id: OS2PALETTE.CPP,v 1.15 2001-10-03 13:49:40 sandervl Exp $ */
 
 /*
  * DX palette class implementation
  *
- * Copyright 1998 Sander va Leeuwen
+ * Copyright 1998 Sander van Leeuwen
  * Copyright 1999 Markus Montkowski
  *
  * Project Odin Software License can be found in LICENSE.TXT
