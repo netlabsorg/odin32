@@ -1,4 +1,4 @@
-/* $Id: heap.cpp,v 1.29 2001-07-06 13:47:18 sandervl Exp $ */
+/* $Id: heap.cpp,v 1.30 2001-07-06 19:03:42 sandervl Exp $ */
 
 /*
  * Win32 heap API functions for OS/2
@@ -20,6 +20,7 @@
 #include "os2heap.h"
 #include <heap.h>
 #include <odinwrap.h>
+#include "initterm.h"
 
 #define DBG_LOCALLOG	DBG_heap
 #include "dbglocal.h"
@@ -567,6 +568,13 @@ HGLOBAL WINAPI GlobalFree(
    HGLOBAL        hreturned = 0;
 
    dprintf(("KERNEL32: GlobalFree %x", hmem));
+
+   /* verify lpMem address */
+   if (hmem >= (HGLOBAL)ulMaxAddr || hmem < (HGLOBAL)0x10000)
+   {
+    	dprintf(("GlobalFree ERROR BAD HEAP POINTER:%X\n", hmem));
+    	return 0;
+   }
 
    if(ISPOINTER(hmem)) /* POINTER */
    {
