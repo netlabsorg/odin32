@@ -1,4 +1,4 @@
-/* $Id: hash.cpp,v 1.2 2001-08-10 19:36:04 sandervl Exp $ */
+/* $Id: hash.cpp,v 1.3 2002-02-07 10:51:09 sandervl Exp $ */
 /* 
  * LHash functions.
  * 
@@ -123,7 +123,7 @@ USHORT	Hash::GetBaseVal(HashElem * pElem)
 
     while(*pName)
     {
-    	usVal ^= (int)towupper(*pName);
+    	usVal ^= (int)toupperW(*pName);
     	usVal <<= 1;
 	pName++;
     }
