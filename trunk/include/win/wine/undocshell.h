@@ -1,4 +1,3 @@
-/* $Id: undocshell.h,v 1.6 2000-08-29 21:20:50 sandervl Exp $ */
 #ifndef __WINE_UNDOCSHELL_H
 #define __WINE_UNDOCSHELL_H
 
@@ -101,31 +100,19 @@ HRESULT WINAPI StrRetToStrNA (
 	LPVOID dest,
 	DWORD len,
 	LPSTRRET src,
-	LPITEMIDLIST pidl);
+	const ITEMIDLIST *pidl);
 
 HRESULT WINAPI StrRetToStrNW (
 	LPVOID dest,
 	DWORD len,
 	LPSTRRET src,
-	LPITEMIDLIST pidl);
+	const ITEMIDLIST *pidl);
 
 HRESULT WINAPI StrRetToStrNAW (
 	LPVOID dest,
 	DWORD len,
 	LPSTRRET src,
-	LPITEMIDLIST pidl);
-
-HRESULT WINAPI StrRetToBufA (
-	LPSTRRET src,
-	LPITEMIDLIST pidl,
-	LPSTR dest,
-	DWORD len);
-
-HRESULT WINAPI StrRetToBufW (
-	LPSTRRET src,
-	LPITEMIDLIST pidl,
-	LPWSTR dest,
-	DWORD len);
+	const ITEMIDLIST *pidl);
 
 /****************************************************************************
 * SHChangeNotifyRegister API
