@@ -1,4 +1,4 @@
-/* $Id: winimagebase.cpp,v 1.12 2000-04-15 12:43:31 sandervl Exp $ */
+/* $Id: winimagebase.cpp,v 1.13 2000-04-15 16:32:35 sandervl Exp $ */
 
 /*
  * Win32 PE Image base class
@@ -35,6 +35,7 @@
 #include "oslibmisc.h"
 #include "oslibdos.h"
 #include "initterm.h"
+#include "directory.h"
 #include <win\virtual.h>
 
 #define DBG_LOCALLOG	DBG_winimagebase
@@ -143,38 +144,41 @@ void Win32ImageBase::findDll(char *szFileName, char *szFullName, int cchFullFile
   if(!strchr(szFullName, (int)'.')) {
     	strcat(szFullName,".DLL");
   }
+
   //search order:
-  //1) current dir
-  //2) exe dir
+  //1) exe dir
+  //2) current dir
   //3) windows system dir (kernel32 path)
-  //4) path
-  dllfile = OSLibDosOpen(szFullName, OSLIB_ACCESS_READONLY|OSLIB_ACCESS_SHAREDENYNONE);
-  if(dllfile == NULL) {//search in libpath for dll
-	strcpy(modname, WinExe->getFullPath());
-	//remove file name from full path
-	imagepath = modname + strlen(modname) - 1;
-	while(*imagepath != '\\') imagepath--;
-	imagepath[1] = 0;
-	strcat(modname, szFileName);
-	dllfile = OSLibDosOpen(modname, OSLIB_ACCESS_READONLY|OSLIB_ACCESS_SHAREDENYNONE);
+  //4) windows dir
+  //5) path
+  strcpy(modname, WinExe->getFullPath());
+  //remove file name from full path
+  imagepath = modname + strlen(modname) - 1;
+  while(*imagepath != '\\') imagepath--;
+  imagepath[1] = 0;
+  strcat(modname, szFullName);
+  dllfile = OSLibDosOpen(modname, OSLIB_ACCESS_READONLY|OSLIB_ACCESS_SHAREDENYNONE);
+  if(dllfile == NULL) {
+	strcpy(modname, szFullName);
+  	dllfile = OSLibDosOpen(szFullName, OSLIB_ACCESS_READONLY|OSLIB_ACCESS_SHAREDENYNONE);
 	if(dllfile == NULL) {
-	    	strcpy(modname, kernel32Path);
-	    	strcat(modname, szFileName);
+	    	strcpy(modname, InternalGetSystemDirectoryA());
+		strcat(modname, "\\");
+	    	strcat(modname, szFullName);
 		dllfile = OSLibDosOpen(modname, OSLIB_ACCESS_READONLY|OSLIB_ACCESS_SHAREDENYNONE);
 		if(dllfile == NULL) {
-			OSLibDosSearchPath(OSLIB_SEARCHENV, "PATH", szFullName, szFullName, cchFullFileName);
+			strcpy(modname, InternalGetWindowsDirectoryA());
+			strcat(modname, "\\");
+	    		strcat(modname, szFullName);
+			dllfile = OSLibDosOpen(modname, OSLIB_ACCESS_READONLY|OSLIB_ACCESS_SHAREDENYNONE);
+			if(dllfile == NULL) {
+				OSLibDosSearchPath(OSLIB_SEARCHENV, "PATH", szFullName, modname, sizeof(modname));
+			}
 		}
-	    	else {
-			strcpy(szFullName, modname);
-			OSLibDosClose(dllfile);
-		}
-	}
-    	else {
-		strcpy(szFullName, modname);
-		OSLibDosClose(dllfile);
 	}
   }
-  else  OSLibDosClose(dllfile);
+  strcpy(szFullName, modname);
+  if(dllfile) OSLibDosClose(dllfile);
 }
 //******************************************************************************
 //******************************************************************************

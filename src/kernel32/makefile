@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.92 2000-03-23 19:23:46 sandervl Exp $
+# $Id: makefile,v 1.93 2000-04-15 16:32:35 sandervl Exp $
 
 #
 # Odin32 API
@@ -22,7 +22,8 @@ CLEANEXTRAS = kernelrsrc.asm
 
 #CFLAGS   = $(CFLAGS) -DDEBUG
 #CXXFLAGS = $(CXXFLAGS) /Fa+
-
+#LD2FLAGS = /nologo /DE /noe /map /NOD /dbgpack /packcode /packdata /exepack:2
+#CXXFLAGS = $(CXXFLAGS) /Ti+
 
 # Object files. All objects should be prefixed with $(OBJDIR)!
 OBJS = \
