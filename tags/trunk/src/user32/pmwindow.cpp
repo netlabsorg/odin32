@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.200 2003-02-22 09:54:25 sandervl Exp $ */
+/* $Id: pmwindow.cpp,v 1.201 2003-02-27 14:22:43 sandervl Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -706,6 +706,13 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
         }
         break;
 
+    case WIN32APP_CHNGEFRAMECTRLS:
+    {
+      dprintf(("OS2: WIN32APP_CHANGEFRAMECTRLS"));
+      OSLibSetWindowStyle(win32wnd->getOS2FrameWindowHandle(), win32wnd->getOS2WindowHandle(), (ULONG)mp1, win32wnd->getExStyle(), (ULONG)mp2);
+      break;
+    }
+
     case WM_SETFOCUS:
     {
       HWND hwndFocus = (HWND)mp1;
@@ -1327,11 +1334,11 @@ MRESULT EXPENTRY Win32FrameWindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM m
 
         if(win32wnd->getOldStyle() != win32wnd->getStyle())
         {
-             OSLibSetWindowStyle(win32wnd->getOS2FrameWindowHandle(), win32wnd->getOS2WindowHandle(), win32wnd->getStyle(), win32wnd->getExStyle());
+             OSLibSetWindowStyle(win32wnd->getOS2FrameWindowHandle(), win32wnd->getOS2WindowHandle(), win32wnd->getStyle(), win32wnd->getExStyle(), win32wnd->getStyle());
              if(fOS2Look) {
                  DWORD dwOldStyle = win32wnd->getOldStyle();
                  DWORD dwStyle    = win32wnd->getStyle();
-
+    
                  win32wnd->setOldStyle(dwStyle);
                  if((dwOldStyle & WS_MINIMIZE_W) && !(dwStyle & WS_MINIMIZE_W)) {
                      //SC_RESTORE -> SC_MINIMIZE
@@ -1339,7 +1346,7 @@ MRESULT EXPENTRY Win32FrameWindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM m
                      FrameReplaceMenuItem(WinWindowFromID(hwnd, FID_MINMAX), 0, SC_RESTORE, SC_MINIMIZE, hbmFrameMenu[PMMENU_MINBUTTON]);
                      if(dwStyle & WS_MAXIMIZE_W) {
                          //SC_MAXIMIZE -> SC_RESTORE
-                         dprintf(("%x -> SC_MAXIMIZE -> SC_RESTORE", win32wnd->getWindowHandle()));
+                         dprintf(("%x -> SC_MAXIMIZE -> SC_RESTORE (1)", win32wnd->getWindowHandle()));
                          FrameReplaceMenuItem(WinWindowFromID(hwnd, FID_MINMAX), MIT_END, SC_MAXIMIZE, SC_RESTORE, hbmFrameMenu[PMMENU_RESTOREBUTTON]);
                      }
                  }
@@ -1358,7 +1365,7 @@ MRESULT EXPENTRY Win32FrameWindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM m
                  else
                  if(!(dwOldStyle & WS_MAXIMIZE_W) && (dwStyle & WS_MAXIMIZE_W)) {
                      //SC_MAXIMIZE -> SC_RESTORE
-                     dprintf(("%x -> SC_MAXIMIZE -> SC_RESTORE", win32wnd->getWindowHandle()));
+                     dprintf(("%x -> SC_MAXIMIZE -> SC_RESTORE (2)", win32wnd->getWindowHandle()));
                      FrameReplaceMenuItem(WinWindowFromID(hwnd, FID_MINMAX), MIT_END, SC_MAXIMIZE, SC_RESTORE, hbmFrameMenu[PMMENU_RESTOREBUTTON]);
                  }
              }
@@ -2076,6 +2083,9 @@ void FrameReplaceMenuItem(HWND hwndMenu, ULONG nIndex, ULONG idOld, ULONG   idNe
         mi.hItem = (ULONG)hbmNew;
         WinSendMsg(hwndMenu, MM_INSERTITEM, (MPARAM)&mi, 0);
     }
+    else
+     dprintf(("WARNING: FrameReplaceMenuItem control %x not found",idOld));
+
     WinEnableWindowUpdate(hwndMenu, TRUE);
 
     WinInvalidateRect(hwndMenu, NULL, TRUE);
