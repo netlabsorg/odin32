@@ -122,5 +122,8 @@ void WIN32API DisableCDIo();
 //Force DirectDraw to report only one fullscreen mode
 void WIN32API SetCustomFullScreenMode(DWORD dwWidth, DWORD dwHeight, DWORD dwBPP);
 
+//Force DirectSurface Lock & Unlock methods to hide & show the mouse cursor
+BOOL WIN32API SetCustomHideCursorOnLock(BOOL state);
+
 #endif  /*__CUSTOMBUILD_H__*/
 
