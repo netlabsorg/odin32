@@ -1,4 +1,4 @@
-/* $Id: oslibdos.cpp,v 1.86 2001-11-28 23:33:37 phaller Exp $ */
+/* $Id: oslibdos.cpp,v 1.87 2001-11-29 10:53:28 phaller Exp $ */
 /*
  * Wrappers for OS/2 Dos* API
  *
@@ -18,6 +18,7 @@
 #define INCL_DOSFILEMGR
 #define INCL_DOSERRORS
 #define INCL_DOSDEVIOCTL
+#define INCL_DOSDEVICES
 #define INCL_NPIPES
 #include <os2wrap.h>                     //Odin32 OS/2 api wrappers
 #include <stdlib.h>
@@ -2896,3 +2897,8 @@ BOOL OSLibDosQueryAffinity(DWORD fMaskType, DWORD *pdwThreadAffinityMask)
 }
 //******************************************************************************
 //******************************************************************************
+DWORD OSLibDosDevConfig(PVOID pdevinfo,
+                         ULONG item)
+{
+  return (DWORD)DosDevConfig(pdevinfo, item);
+}
