@@ -1,1 +1,146 @@
-#run nmake depend
+..\Object\avl.obj: \
+       ..\misc\avl.c \
+       c:\appl\os2\toolkt40\h\os2.h \
+       ..\include\avl.h \
+       ..\include\dev32.h \
+       c:\appl\os2\IBMCPP30\INCLUDE\builtin.h
+..\Object\cout.obj: \
+       ..\misc\cout.cpp \
+       c:\appl\os2\toolkt40\h\os2.h \
+       c:\appl\os2\IBMCPP30\INCLUDE\builtin.h \
+       c:\appl\os2\IBMCPP30\INCLUDE\stdarg.h \
+       ..\include\cout.h \
+       ..\include\options.h \
+       ..\include\sprintf.h \
+       ..\include\yield.h
+..\Object\heaptest.obj: \
+       ..\misc\heaptest.c \
+       ..\include\rmalloc.h \
+       ..\include\smalloc.h \
+       ..\include\macros.h \
+       ..\include\asmutils.h \
+       c:\appl\os2\IBMCPP30\INCLUDE\stdio.h \
+       c:\appl\os2\IBMCPP30\INCLUDE\stdlib.h \
+       c:\appl\os2\IBMCPP30\INCLUDE\memory.h
+..\Object\log.obj: \
+       ..\misc\log.c \
+       c:\appl\os2\toolkt40\h\os2.h \
+       c:\appl\os2\IBMCPP30\INCLUDE\string.h \
+       c:\appl\os2\IBMCPP30\INCLUDE\stdarg.h \
+       c:\appl\os2\IBMCPP30\INCLUDE\builtin.h \
+       ..\include\dev32.h \
+       ..\include\options.h \
+       ..\include\log.h \
+       ..\include\sprintf.h \
+       ..\include\yield.h
+..\Object\malloc.obj: \
+       ..\misc\malloc.c \
+       c:\appl\os2\toolkt40\h\os2.h \
+       ..\include\smalloc.h \
+       ..\include\rmalloc.h \
+       ..\include\options.h
+..\Object\malloc_old.obj: \
+       ..\misc\malloc_old.c \
+       c:\appl\os2\toolkt40\h\os2.h \
+       ..\include\dev32hlp.h \
+       ..\include\asmutils.h \
+       ..\include\log.h \
+       ..\include\malloc.h \
+       c:\appl\os2\IBMCPP30\INCLUDE\memory.h
+..\Object\new.obj: \
+       ..\misc\new.cpp \
+       c:\appl\os2\toolkt40\h\os2.h \
+       ..\include\new.h \
+       ..\include\rmalloc.h \
+       ..\include\log.h
+..\Object\rmalloc.obj: \
+       ..\misc\rmalloc.c \
+       c:\appl\os2\toolkt40\h\os2.h \
+       ..\include\dev32hlp.h \
+       ..\include\asmutils.h \
+       c:\appl\os2\IBMCPP30\INCLUDE\builtin.h \
+       ..\include\log.h \
+       ..\include\rmalloc.h \
+       c:\appl\os2\IBMCPP30\INCLUDE\memory.h \
+       ..\include\dev32.h \
+       ..\include\macros.h
+..\Object\rmalloc_avl.obj: \
+       ..\misc\rmalloc_avl.c \
+       c:\appl\os2\toolkt40\h\os2.h \
+       ..\include\dev32hlp.h \
+       ..\include\asmutils.h \
+       ..\include\log.h \
+       ..\include\rmalloc.h \
+       ..\include\dev32.h \
+       ..\include\avl.h \
+       ..\include\macros.h \
+       c:\appl\os2\IBMCPP30\INCLUDE\memory.h
+..\Object\smalloc_avl.obj: \
+       ..\misc\smalloc_avl.c \
+       c:\appl\os2\toolkt40\h\os2.h \
+       ..\include\dev32hlp.h \
+       ..\include\asmutils.h \
+       ..\include\log.h \
+       ..\include\smalloc.h \
+       ..\include\rmalloc.h \
+       ..\include\dev32.h \
+       ..\include\avl.h \
+       ..\include\macros.h \
+       c:\appl\os2\IBMCPP30\INCLUDE\memory.h
+..\Object\stricmp.obj: \
+       ..\misc\stricmp.c \
+       c:\appl\os2\IBMCPP30\INCLUDE\string.h
+..\Object\vprintf.obj: \
+       ..\misc\vprintf.c \
+       c:\appl\os2\toolkt40\h\os2.h \
+       c:\appl\os2\IBMCPP30\INCLUDE\stdarg.h \
+       ..\include\dev32.h \
+       ..\include\vprintf.h \
+       c:\appl\os2\IBMCPP30\INCLUDE\builtin.h \
+       ..\include\options.h \
+       ..\include\Yield.h
+..\Object\vsprintf.obj: \
+       ..\misc\vsprintf.c \
+       c:\appl\os2\toolkt40\h\os2.h \
+       c:\appl\os2\IBMCPP30\INCLUDE\stdarg.h \
+       ..\include\dev32.h \
+       ..\include\sprintf.h
+..\Object\yield.obj: \
+       ..\misc\yield.c \
+       c:\appl\os2\toolkt40\h\os2.h \
+       ..\include\dev32.h \
+       ..\include\dev32hlp.h \
+       ..\include\yield.h
+..\include\asmutils.h: \
+       c:\appl\os2\IBMCPP30\INCLUDE\builtin.h
+..\include\avl.h:
+..\include\cout.h:
+..\include\dev16.h:
+..\include\dev1632.h:
+..\include\dev32.h:
+..\include\dev32hlp.h:
+..\include\elf.h:
+..\include\elf2lx.h:
+..\include\ldr.h:
+..\include\ldrCalls.h:
+..\include\log.h: \
+       c:\appl\os2\IBMCPP30\INCLUDE\stdarg.h \
+       ..\include\vprintf.h
+..\include\macros.h:
+..\include\malloc.h:
+..\include\ModuleBase.h:
+..\include\new.h:
+..\include\omf.h:
+..\include\options.h:
+..\include\OS2KIO.h:
+..\include\OS2Krnl.h: \
+       ..\include\OS2KIO.h
+..\include\pe2lx.h:
+..\include\probkrnl.h:
+..\include\rmalloc.h:
+..\include\smalloc.h:
+..\include\sprintf.h:
+..\include\sym.h:
+..\include\types.h:
+..\include\vprintf.h:
+..\include\yield.h:
