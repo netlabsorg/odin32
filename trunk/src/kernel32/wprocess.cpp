@@ -1,10 +1,12 @@
-/* $Id: wprocess.cpp,v 1.190 2004-01-11 12:12:34 sandervl Exp $ */
+/* $Id: wprocess.cpp,v 1.191 2004-01-15 10:41:39 sandervl Exp $ */
 
 /*
  * Win32 process functions
  *
  * Copyright 1998-2000 Sander van Leeuwen (sandervl@xs4all.nl)
  * Copyright 2000 knut st. osmundsen (knut.stange.osmundsen@mynd.no)
+ * Copyright 2003 Innotek Systemberatung GmbH (sandervl@innotek.de)
+ *
  *
  * NOTE: Even though Odin32 OS/2 apps don't switch FS selectors,
  *       we still allocate a TEB to store misc information.
@@ -49,6 +51,7 @@
 #include "directory.h"
 
 #include <win\ntddk.h>
+#include <win\psapi.h>
 
 #include <custombuild.h>
 
@@ -63,6 +66,9 @@
 
 ODINDEBUGCHANNEL(KERNEL32-WPROCESS)
 
+
+//environ.cpp
+char *CreateNewEnvironment(char *lpEnvironment);
 
 /*******************************************************************************
 *   Global Variables                                                           *
@@ -267,9 +273,8 @@ TEB *WIN32API InitializeMainThread()
     InitializeCriticalSection(&ProcessENVDB.section);
 
     ProcessPDB.unknown10       = (PVOID)&unknownPDBData[0];
-
     //initialize the startup info part of the db entry.
-////    O32_GetStartupInfo(&StartupInfo);
+    O32_GetStartupInfo(&StartupInfo);
     StartupInfo.cb             = sizeof(StartupInfo);
     /* Set some defaults as GetStartupInfo() used to set... */
     if (!(StartupInfo.dwFlags & STARTF_USESHOWWINDOW))
@@ -281,7 +286,6 @@ TEB *WIN32API InitializeMainThread()
         StartupInfo.lpDesktop  = "Desktop";
     if (!StartupInfo.lpTitle)
         StartupInfo.lpTitle    = "Title";
-
     ProcessENVDB.hStdin  = StartupInfo.hStdInput  = GetStdHandle(STD_INPUT_HANDLE);
     ProcessENVDB.hStdout = StartupInfo.hStdOutput = GetStdHandle(STD_OUTPUT_HANDLE);
     ProcessENVDB.hStderr = StartupInfo.hStdError  = GetStdHandle(STD_ERROR_HANDLE);
@@ -529,6 +533,20 @@ VOID WIN32API ExitProcess(DWORD exitcode)
 
     fExitProcess = TRUE;
 
+    // Lower priority of all threads to minimize the chance that they're scheduled
+    // during ExitProcess. Can't kill them as that's possibly dangerous (deadlocks
+    // in WGSS for instance)
+    threadListMutex.enter();
+    teb = threadList;
+    while(teb) {
+        if(teb->o.odin.hThread != hThread) {
+            dprintf(("Active thread id %d, handle %x", LOWORD(teb->o.odin.threadId), teb->o.odin.hThread));
+            SetThreadPriority(teb->o.odin.hThread, THREAD_PRIORITY_LOWEST);
+        }
+        teb = teb->o.odin.next;
+    }
+    threadListMutex.leave();
+
     HMDeviceCommClass::CloseOverlappedIOHandlers();
 
     //detach all dlls (LIFO order) before really unloading them; this
@@ -555,11 +573,14 @@ VOID WIN32API ExitProcess(DWORD exitcode)
     teb = threadList;
     while(teb) {
         dprintf(("Active thread id %d, handle %x", LOWORD(teb->o.odin.threadId), teb->o.odin.hThread));
-        if(teb->o.odin.hThread != hThread && teb->o.odin.dwSuspend > 0) {
-            //kill any threads that are suspended; dangerous, but so is calling
-            //SuspendThread; we assume the app knew what it was doing
-            TerminateThread(teb->o.odin.hThread, 0);
-            ResumeThread(teb->o.odin.hThread);
+        if(teb->o.odin.hThread != hThread) {
+            if(teb->o.odin.dwSuspend > 0) {
+                //kill any threads that are suspended; dangerous, but so is calling
+                //SuspendThread; we assume the app knew what it was doing
+                TerminateThread(teb->o.odin.hThread, 0);
+                ResumeThread(teb->o.odin.hThread);
+            }
+            else SetThreadPriority(teb->o.odin.hThread, THREAD_PRIORITY_LOWEST);
         }
         teb = teb->o.odin.next;
     }
@@ -1574,7 +1595,7 @@ LPCWSTR WIN32API GetCommandLineW(void)
             SetLastError(rc);
     }
 
-    dprintf(("KERNEL32:  GetCommandLineW: %s\n", pszCmdLineA));
+    dprintf(("KERNEL32:  GetCommandLineW: %ls\n", pszCmdLineW));
     return pszCmdLineW;
 }
 
@@ -1854,6 +1875,9 @@ BOOL InitLoaders()
 BOOL WIN32API ODIN_SetLoaders(LPCSTR pszPECmdLoader, LPCSTR pszPEGUILoader,
                               LPCSTR pszNELoader)
 {
+    if(pszPECmdLoader) dprintf(("PE Cmd %s", pszPECmdLoader));
+    if(pszPEGUILoader) dprintf(("PE GUI %s", pszPEGUILoader));
+    if(pszNELoader)    dprintf(("NE %s", pszNELoader));
     if(pszPECmdLoader)   strcpy(szPECmdLoader, pszPECmdLoader);
     if(pszPEGUILoader)   strcpy(szPEGUILoader, pszPEGUILoader);
     if(pszNELoader)      strcpy(szNELoader, pszNELoader);
@@ -1884,13 +1908,22 @@ BOOL WINAPI CreateProcessA( LPCSTR lpApplicationName, LPSTR lpCommandLine,
 {
  STARTUPINFOA startinfo;
  TEB *pThreadDB = (TEB*)GetThreadTEB();
- char *cmdline = NULL;
+ char *cmdline = NULL, *newenv = NULL;
  BOOL  rc;
 
     dprintf(("KERNEL32: CreateProcessA %s cline:%s inherit:%d cFlags:%x Env:%x CurDir:%s StartupFlags:%x\n",
             lpApplicationName, lpCommandLine, bInheritHandles, dwCreationFlags,
             lpEnvironment, lpCurrentDirectory, lpStartupInfo));
 
+    if(lpEnvironment) {
+        newenv = CreateNewEnvironment((char *)lpEnvironment);
+        if(newenv == NULL) {
+            SetLastError(ERROR_NOT_ENOUGH_MEMORY);
+            rc = FALSE;
+            goto finished;
+        }
+        lpEnvironment = newenv;
+    }
 #ifdef DEBUG
     if(lpStartupInfo) {
         dprintf(("lpStartupInfo->lpReserved %x", lpStartupInfo->lpReserved));
@@ -1923,7 +1956,8 @@ BOOL WINAPI CreateProcessA( LPCSTR lpApplicationName, LPSTR lpCommandLine,
 
         if(retcode) {
             SetLastError(ERROR_INVALID_HANDLE);
-            return FALSE;
+            rc = FALSE;
+            goto finished;
         }
 
         lpStartupInfo = &startinfo;
@@ -2008,11 +2042,10 @@ BOOL WINAPI CreateProcessA( LPCSTR lpApplicationName, LPSTR lpCommandLine,
     if(fileAttr == -1 || (fileAttr & FILE_ATTRIBUTE_DIRECTORY)) {
         dprintf(("CreateProcess: can't find executable!"));
 
-        if(cmdline)
-            free(cmdline);
-
         SetLastError(ERROR_FILE_NOT_FOUND);
-        return FALSE;
+
+        rc = FALSE;
+        goto finished;
     }
 
     DWORD Characteristics, SubSystem, fNEExe, fPEExe;
@@ -2051,9 +2084,8 @@ BOOL WINAPI CreateProcessA( LPCSTR lpApplicationName, LPSTR lpCommandLine,
             lpProcessInfo->dwThreadId = MAKE_THREADID(lpProcessInfo->dwProcessId, lpProcessInfo->dwThreadId);
         }
 
-        if(cmdline)
-            free(cmdline);
-        return(TRUE);
+        rc = TRUE;
+        goto finished;
       }
 
       // verify why O32_CreateProcess actually failed.
@@ -2067,10 +2099,8 @@ BOOL WINAPI CreateProcessA( LPCSTR lpApplicationName, LPSTR lpCommandLine,
           dprintf(("CreateProcess: O32_CreateProcess failed with rc=%d, not PE-executable !", dwError));
 
           // the current value of GetLastError() is still valid.
-          if(cmdline)
-              free(cmdline);
-
-          return FALSE;
+          rc = FALSE;
+          goto finished;
       }
     }
 
@@ -2189,9 +2219,6 @@ BOOL WINAPI CreateProcessA( LPCSTR lpApplicationName, LPSTR lpCommandLine,
       else
         pThreadDB->o.odin.pidDebuggee = 0;
     }
-    if(cmdline)
-        free(cmdline);
-
     if(lpProcessInfo)
     {
         lpProcessInfo->dwThreadId = MAKE_THREADID(lpProcessInfo->dwProcessId, lpProcessInfo->dwThreadId);
@@ -2201,6 +2228,11 @@ BOOL WINAPI CreateProcessA( LPCSTR lpApplicationName, LPSTR lpCommandLine,
     }
     else
       dprintf(("KERNEL32:  CreateProcess returned %d\n", rc));
+
+finished:
+
+    if(cmdline) free(cmdline);
+    if(newenv)  free(newenv);
     return(rc);
 }
 //******************************************************************************
@@ -2364,7 +2396,7 @@ HINSTANCE WINAPI LoadModule( LPCSTR name, LPVOID paramBlock )
 FARPROC WIN32API GetProcAddress(HMODULE hModule, LPCSTR lpszProc)
 {
  Win32ImageBase *winmod;
- FARPROC   proc;
+ FARPROC   proc = 0;
  ULONG     ulAPIOrdinal;
 
   if(hModule == 0 || hModule == -1 || (WinExe && hModule == WinExe->getInstanceHandle())) {
@@ -2377,7 +2409,10 @@ FARPROC WIN32API GetProcAddress(HMODULE hModule, LPCSTR lpszProc)
         if (ulAPIOrdinal <= 0x0000FFFF) {
                 proc = (FARPROC)winmod->getApi((int)ulAPIOrdinal);
         }
-        else    proc = (FARPROC)winmod->getApi((char *)lpszProc);
+        else 
+        if (lpszProc && *lpszProc) {
+                proc = (FARPROC)winmod->getApi((char *)lpszProc);
+        }
         if(proc == 0) {
 #ifdef DEBUG
                 if(ulAPIOrdinal <= 0x0000FFFF) {
@@ -2386,6 +2421,7 @@ FARPROC WIN32API GetProcAddress(HMODULE hModule, LPCSTR lpszProc)
                 else    dprintf(("GetProcAddress %x %s not found!", hModule, lpszProc));
 #endif
                 SetLastError(ERROR_PROC_NOT_FOUND);
+                return 0;
         }
         if(HIWORD(lpszProc))
                 dprintf(("KERNEL32:  GetProcAddress %s from %X returned %X\n", lpszProc, hModule, proc));
@@ -2439,6 +2475,7 @@ FARPROC WIN32API ODIN_SetProcAddress(HMODULE hModule, LPCSTR lpszProc,
                 else    dprintf(("ODIN_SetProcAddress %x %s not found!", hModule, lpszProc));
 #endif
                 SetLastError(ERROR_PROC_NOT_FOUND);
+                return (FARPROC)-1;
         }
         if(HIWORD(lpszProc))
                 dprintf(("KERNEL32:  ODIN_SetProcAddress %s from %X returned %X\n", lpszProc, hModule, proc));
@@ -2506,9 +2543,66 @@ BOOL WIN32API DisableThreadLibraryCalls(HMODULE hModule)
   }
 }
 //******************************************************************************
+// Forwarder for PSAPI.DLL
+//
+// Returns the handles of all loaded modules
+//
 //******************************************************************************
+BOOL WINAPI PSAPI_EnumProcessModules(HANDLE hProcess, HMODULE *lphModule, 
+                                     DWORD cb, LPDWORD lpcbNeeded)
+{
+  DWORD	count;
+  DWORD	countMax;
+  HMODULE     hModule;
 
+  dprintf(("KERNEL32: EnumProcessModules %p, %ld, %p", lphModule, cb, lpcbNeeded));
 
+  if ( lphModule == NULL )
+        cb = 0;
+
+  if ( lpcbNeeded != NULL )
+       *lpcbNeeded = 0;
+  
+  count = 0;
+  countMax = cb / sizeof(HMODULE);
+
+  count = Win32DllBase::enumDlls(lphModule, countMax);
+   
+  if ( lpcbNeeded != NULL )
+     *lpcbNeeded = sizeof(HMODULE) * count;
+
+  return TRUE;
+}
+//******************************************************************************
+// Forwarder for PSAPI.DLL
+//
+// Returns some information about the module identified by hModule
+//
+//******************************************************************************
+BOOL WINAPI PSAPI_GetModuleInformation(HANDLE hProcess, HMODULE hModule, 
+                                       LPMODULEINFO lpmodinfo, DWORD cb)
+{
+    BOOL ret = FALSE;
+    Win32DllBase *winmod = NULL;
+
+    dprintf(("KERNEL32: GetModuleInformation hModule=%x", hModule));
+ 
+    if (!lpmodinfo || cb < sizeof(MODULEINFO)) return FALSE;
+
+    winmod = Win32DllBase::findModule((HINSTANCE)hModule);
+    if (!winmod) {
+        dprintf(("GetModuleInformation failed to find module"));
+        return FALSE;
+    }
+
+    lpmodinfo->SizeOfImage = winmod->getImageSize();
+    lpmodinfo->EntryPoint  = winmod->getEntryPoint();
+    lpmodinfo->lpBaseOfDll = (void*)hModule;
+
+    return TRUE;
+}
+//******************************************************************************
+//******************************************************************************
 /**
  * Gets the startup info which was passed to CreateProcess when
  * this process was created.
