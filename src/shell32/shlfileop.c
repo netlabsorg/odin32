@@ -1,4 +1,3 @@
-/* $Id: shlfileop.c,v 1.1 2000-08-30 13:52:57 sandervl Exp $ */
 /*
  * SHFileOperation
  */
@@ -9,26 +8,51 @@
 #include <string.h>
 #include "debugtools.h"
 #include "shellapi.h"
-#include "shell32_main.h"
+#include "shlwapi.h"
 
 #include "shlobj.h"
 #include "shresdef.h"
+#include "shell32_main.h"
 #include "wine/undocshell.h"
+#include "shlwapi.h"
 
 DEFAULT_DEBUG_CHANNEL(shell);
 
-#define ASK_DELETE_FILE 1
-#define ASK_DELETE_FOLDER 2
-#define ASK_DELETE_MULTIPLE_FILE 3
-
-static BOOL SHELL_WarnFolderDelete (int nKindOfDialog, LPCSTR szDir)
+BOOL SHELL_WarnItemDelete (int nKindOfDialog, LPCSTR szDir)
 {
 	char szCaption[255], szText[255], szBuffer[MAX_PATH + 256];
 
-	LoadStringA(shell32_hInstance, IDS_DELETEFOLDER_TEXT, szText, sizeof(szText));
-	LoadStringA(shell32_hInstance, IDS_DELETEFOLDER_CAPTION, szCaption, sizeof(szCaption));
+        if(nKindOfDialog == ASK_DELETE_FILE)
+        {
+	  LoadStringA(shell32_hInstance, IDS_DELETEITEM_TEXT, szText, 
+		sizeof(szText));
+	  LoadStringA(shell32_hInstance, IDS_DELETEITEM_CAPTION, 
+		szCaption, sizeof(szCaption));
+	}
+        else if(nKindOfDialog == ASK_DELETE_FOLDER)
+        {
+	  LoadStringA(shell32_hInstance, IDS_DELETEITEM_TEXT, szText, 
+		sizeof(szText));
+	  LoadStringA(shell32_hInstance, IDS_DELETEFOLDER_CAPTION, 
+		szCaption, sizeof(szCaption));
+        }
+        else if(nKindOfDialog == ASK_DELETE_MULTIPLE_ITEM)
+        {
+	  LoadStringA(shell32_hInstance, IDS_DELETEMULTIPLE_TEXT, szText, 
+		sizeof(szText));
+	  LoadStringA(shell32_hInstance, IDS_DELETEITEM_CAPTION, 
+		szCaption, sizeof(szCaption));
+        }
+	else {
+          FIXME("Called without a valid nKindOfDialog specified!");
+	  LoadStringA(shell32_hInstance, IDS_DELETEITEM_TEXT, szText, 
+		sizeof(szText));
+	  LoadStringA(shell32_hInstance, IDS_DELETEITEM_CAPTION, 
+		szCaption, sizeof(szCaption));
+	}          
+
 	FormatMessageA(FORMAT_MESSAGE_FROM_STRING|FORMAT_MESSAGE_ARGUMENT_ARRAY,
-	    szText, 0, 0, szBuffer, sizeof(szBuffer), (DWORD*)&szDir);
+	    szText, 0, 0, szBuffer, sizeof(szBuffer), (va_list*)&szDir);
 
 	return (IDOK == MessageBoxA(GetActiveWindow(), szBuffer, szCaption, MB_OKCANCEL | MB_ICONEXCLAMATION));
 }
@@ -50,7 +74,8 @@ BOOL SHELL_DeleteDirectoryA(LPCSTR pszDir, BOOL bShowUI)
 	PathAddBackslashA(szTemp);
 	strcat(szTemp, "*.*");
 	
-	if (bShowUI && !SHELL_WarnFolderDelete(ASK_DELETE_FOLDER, pszDir)) return FALSE;
+	if (bShowUI && !SHELL_WarnItemDelete(ASK_DELETE_FOLDER, pszDir))
+	  return FALSE;
 	
 	if(INVALID_HANDLE_VALUE != (hFind = FindFirstFileA(szTemp, &wfd)))
 	{
@@ -74,6 +99,18 @@ BOOL SHELL_DeleteDirectoryA(LPCSTR pszDir, BOOL bShowUI)
 	}
 
 	return ret;
+}
+
+/**************************************************************************
+ *	SHELL_DeleteFileA()
+ */
+
+BOOL SHELL_DeleteFileA(LPCSTR pszFile, BOOL bShowUI)
+{
+	if (bShowUI && !SHELL_WarnItemDelete(ASK_DELETE_FILE, pszFile))
+		return FALSE;
+ 
+        return DeleteFileA(pszFile);
 }
 
 /*************************************************************************
@@ -122,7 +159,52 @@ BOOL WINAPI Win32DeleteFile(LPSTR fName)
  */
 DWORD WINAPI SHFileOperationA (LPSHFILEOPSTRUCTA lpFileOp)   
 {
-	FIXME("(%p):stub.\n", lpFileOp);
+	LPSTR pFrom = (LPSTR)lpFileOp->pFrom;
+	LPSTR pTo = (LPSTR)lpFileOp->pTo;
+	LPSTR pTempTo;
+	
+	switch(lpFileOp->wFunc) {
+	case FO_COPY:
+		TRACE("File Copy:\n");
+		while(1) {
+			if(!pFrom[0]) break;
+			if(!pTo[0]) break;
+			TRACE("   From='%s' To='%s'\n", pFrom, pTo);
+
+                        pTempTo = HeapAlloc(GetProcessHeap(), 0, strlen(pTo)+1);
+                        if (pTempTo)
+                        {
+                            strcpy( pTempTo, pTo );
+                            PathRemoveFileSpecA(pTempTo);
+                            TRACE("   Creating Directory '%s'\n", pTempTo);
+                            SHCreateDirectory(NULL,pTempTo);
+                            HeapFree(GetProcessHeap(), 0, pTempTo);
+                        }
+                        CopyFileA(pFrom, pTo, FALSE);
+
+			pFrom += strlen(pFrom) + 1;
+			pTo += strlen(pTo) + 1;
+		}
+		TRACE("Setting AnyOpsAborted=FALSE\n");
+		lpFileOp->fAnyOperationsAborted=FALSE;
+		return 0;
+
+	case FO_DELETE:
+		TRACE("File Delete:\n");
+		while(1) {
+			if(!pFrom[0]) break;
+			TRACE("   File='%s'\n", pFrom);
+			DeleteFileA(pFrom);
+			pFrom += strlen(pFrom) + 1;
+		}
+		TRACE("Setting AnyOpsAborted=FALSE\n");
+		lpFileOp->fAnyOperationsAborted=FALSE;
+		return 0;
+
+	default:
+		FIXME("Unhandled shell file operation %d\n", lpFileOp->wFunc);
+	}
+
 	return 1;
 }
 
@@ -167,3 +249,13 @@ HRESULT WINAPI SheChangeDirW(LPWSTR u)
 	return 0;
 }
 
+/*************************************************************************
+ * IsNetDrive			[SHELL32.66]
+ */
+BOOL WINAPI IsNetDrive(DWORD drive)
+{
+	char root[4];
+	strcpy(root, "A:\\");
+	root[0] += drive;
+	return (GetDriveTypeA(root) == DRIVE_REMOTE);
+}

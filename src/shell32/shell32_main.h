@@ -1,4 +1,4 @@
-/* $Id: shell32_main.h,v 1.6 2000-08-30 13:50:57 sandervl Exp $ */
+/* $Id: shell32_main.h,v 1.7 2001-04-19 08:32:18 sandervl Exp $ */
 /*
  * 	internal Shell32 Library definitions
  */
@@ -179,7 +179,13 @@ void InitChangeNotifications(void);
 void FreeChangeNotifications(void);
 
 /* file operation */
+#define ASK_DELETE_FILE		 1
+#define ASK_DELETE_FOLDER	 2
+#define ASK_DELETE_MULTIPLE_ITEM 3
+
 BOOL SHELL_DeleteDirectoryA(LPCSTR pszDir, BOOL bShowUI);
+BOOL SHELL_DeleteFileA(LPCSTR pszFile, BOOL bShowUI);
+BOOL SHELL_WarnItemDelete(int nKindOfDialog, LPCSTR szDir);
 
 #ifdef __WIN32OS2__
 #ifdef __cplusplus
