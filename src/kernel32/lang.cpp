@@ -1,4 +1,4 @@
-/* $Id: lang.cpp,v 1.21 2000-05-23 18:45:12 sandervl Exp $ */
+/* $Id: lang.cpp,v 1.22 2000-06-18 12:55:17 phaller Exp $ */
 /*
  * Win32 language API functions for OS/2
  *
@@ -861,10 +861,9 @@ ODINFUNCTION4(int, GetLocaleInfoA, LCID, lcid, LCTYPE, LCType, LPSTR, buf,
   ret_len = ODIN_GetLocaleInfoW(lcid, LCType, lpWStr, len);
 
   if (ret_len && buf)
-  {
     UnicodeToAscii(lpWStr,buf);
-    free(lpWStr);
-  }
+  
+  if (lpWStr) free(lpWStr); // free prevooisly allocated memory
 
   dprintf(("KERNEL32:  OS2GetLocaleInfoA returned %d\n",ret_len));
 
