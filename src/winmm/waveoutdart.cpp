@@ -1,4 +1,4 @@
-/* $Id: waveoutdart.cpp,v 1.19 2003-03-06 15:42:33 sandervl Exp $ */
+/* $Id: waveoutdart.cpp,v 1.20 2003-03-06 18:18:56 sandervl Exp $ */
 
 /*
  * Wave playback class (DART)
@@ -51,6 +51,20 @@
 LONG APIENTRY WaveOutHandler(ULONG ulStatus, PMCI_MIX_BUFFER pBuffer, ULONG ulFlags);
 
 static BOOL fFixedWaveBufferSize = FALSE;
+
+//#define DEBUG_DUMP_PCM
+#ifdef DEBUG_DUMP_PCM
+#include <stdio.h>
+
+typedef struct {
+	int bits;
+	int rate;
+	int format;
+	int numchan;
+} REC_STRUCT;
+
+FILE *pcmfile = NULL;
+#endif
 
 //******************************************************************************
 // ODIN_waveOutSetFixedBuffers
@@ -129,6 +143,10 @@ DartWaveOut::~DartWaveOut()
 
     State = STATE_STOPPED;
 
+#ifdef DEBUG_DUMP_PCM
+    if(pcmfile) fclose(pcmfile);
+#endif
+
     if(!ulError) {
         // Generic parameters
         GenericParms.hwndCallback = 0;   //hwndFrame
@@ -183,6 +201,16 @@ MMRESULT DartWaveOut::write(LPWAVEHDR pwh, UINT cbwh)
 
         dprintf(("bps %d, sps %d chan %d\n", BitsPerSample, SampleRate, nChannels));
 
+#ifdef DEBUG_DUMP_PCM
+        REC_STRUCT recinfo;
+
+        pcmfile = fopen("dartpcm.dat", "wb");
+        recinfo.bits = BitsPerSample;
+        recinfo.rate = SampleRate;
+        recinfo.format = MCI_WAVE_FORMAT_PCM;
+        recinfo.numchan = nChannels;
+        fwrite(&recinfo, sizeof(recinfo), 1, pcmfile);
+#endif
         /* Setup the mixer for playback of wave data
          */
         MixSetupParms->ulFormatMode = MCI_PLAY;
@@ -670,6 +698,10 @@ void DartWaveOut::writeBuffer()
         buflength = min((ULONG)MixBuffer[curFillBuf].ulBufferLength - curPlayPos,
                         (ULONG)curhdr->dwBufferLength - curFillPos);
         dprintf2(("WINMM: copied %d bytes, cufFillPos = %d, curPlayPos = %d, dwBufferLength = %d\n", buflength, curFillPos, curPlayPos, curhdr->dwBufferLength));
+
+#ifdef DEBUG_DUMP_PCM
+        fwrite(curhdr->lpData + curFillPos, buflength, 1, pcmfile);
+#endif
 
         memcpy((char *)MixBuffer[curFillBuf].pBuffer + curPlayPos,
                curhdr->lpData + curFillPos,  buflength);
