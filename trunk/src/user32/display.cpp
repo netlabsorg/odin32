@@ -1,4 +1,4 @@
-/* $Id: display.cpp,v 1.8 2000-10-03 17:29:20 sandervl Exp $ */
+/* $Id: display.cpp,v 1.9 2000-10-05 13:47:06 sandervl Exp $ */
 /*
  * Display/Monitor Win32 apis
  *
@@ -294,6 +294,7 @@ BOOL WIN32API EnumDisplaySettingsA(
 	}
 	memset(devmode, 0, sizeof(*devmode));
 	devmode->dmSize = sizeof(*devmode);
+        devmode->dmDisplayFrequency = 70; //todo: get real refresh rate
         if(n==0) {
                 devmode->dmBitsPerPel = ScreenBitsPerPel;
                 devmode->dmPelsHeight = ScreenHeight;

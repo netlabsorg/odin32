@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.212 2000-09-07 18:14:34 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.213 2000-10-05 13:47:06 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -2767,12 +2767,11 @@ HWND Win32BaseWindow::GetWindow(UINT uCmd)
     switch(uCmd)
     {
     case GW_HWNDFIRST:
-    	hwndRelated = OSLibWinQueryWindow(getOS2WindowHandle(), QWOS_TOP);
-	window = GetWindowFromOS2Handle(hwndRelated);
-	if(window) {
-             hwndRelated = window->getWindowHandle();
+        if(getParent()) {
+            window = (Win32BaseWindow *)getParent();
+            hwndRelated = OSLibWinQueryWindow(window->getOS2WindowHandle(), QWOS_TOP);
         }
-	else hwndRelated = 0;
+	else hwndRelated = 0; //TODO: not correct; should get first child in z-order of desktop
         break;
 
     case GW_HWNDLAST:
@@ -2809,9 +2808,12 @@ HWND Win32BaseWindow::GetWindow(UINT uCmd)
         break;
 
     case GW_CHILD:
-        if(getFirstChild()) {
-            hwndRelated = ((Win32BaseWindow *)getFirstChild())->getWindowHandle();
+    	hwndRelated = OSLibWinQueryWindow(getOS2WindowHandle(), QWOS_TOP);
+	window = GetWindowFromOS2Handle(hwndRelated);
+	if(window) {
+             hwndRelated = window->getWindowHandle();
         }
+	else hwndRelated = 0;
         break;
     }
 #else
