@@ -1,4 +1,4 @@
-/* $Id: KERNEL32.CPP,v 1.70 2001-10-16 17:50:18 sandervl Exp $ */
+/* $Id: KERNEL32.CPP,v 1.71 2002-02-10 13:12:50 sandervl Exp $ */
 
 /*
  * Win32 compatibility file functions for OS/2
@@ -299,7 +299,7 @@ int WIN32API MulDiv(int arg1, int arg2, int  arg3)
 //******************************************************************************
 //Borrowed from Wine
 //******************************************************************************
-ODINPROCEDURE1(GetStartupInfoA,LPSTARTUPINFOA,lpStartupInfo)
+void WIN32API GetStartupInfoA(LPSTARTUPINFOA lpStartupInfo)
 {
   lpStartupInfo->cb               = sizeof(STARTUPINFOA);
   lpStartupInfo->lpReserved       = "<Reserved>";
@@ -321,7 +321,6 @@ ODINPROCEDURE1(GetStartupInfoA,LPSTARTUPINFOA,lpStartupInfo)
   lpStartupInfo->wShowWindow      = SW_SHOWDEFAULT;
   lpStartupInfo->cbReserved2      = 0;
   lpStartupInfo->lpReserved2      = NULL; /* must be NULL for VC runtime */
-  /* @@@PH 98/07/13 Handlemanager support */
   lpStartupInfo->hStdInput        = GetStdHandle(STD_INPUT_HANDLE);
   lpStartupInfo->hStdOutput       = GetStdHandle(STD_OUTPUT_HANDLE);
   lpStartupInfo->hStdError        = GetStdHandle(STD_ERROR_HANDLE);
@@ -330,7 +329,7 @@ ODINPROCEDURE1(GetStartupInfoA,LPSTARTUPINFOA,lpStartupInfo)
 //******************************************************************************
 //Borrowed from Wine
 //******************************************************************************
-ODINPROCEDURE1(GetStartupInfoW,LPSTARTUPINFOW,lpStartupInfo)
+void WIN32API GetStartupInfoW(LPSTARTUPINFOW lpStartupInfo)
 {
   static WCHAR lpReserved[] = {'<', 'R','e','s','e','r','v','e','d','>', 0};
   static WCHAR lpDesktop[]  = {'D', 'e','s','k','t','o','p', 0};
