@@ -1,8 +1,10 @@
-/* $Id: changelog,v 1.2022 2002-03-18 13:01:41 sandervl Exp $ */
+/* $Id: changelog,v 1.2023 2002-03-18 13:19:22 sandervl Exp $ */
 
  2002-03-18: Sander van Leeuwen <sandervl@xs4all.nl>
     - WGSS50:   o WGSS update from IBM
     - WSOCK32:  o Return requested version in WSAStartup
+    - GDI32:    o Renamed LibMain to avoid name conflict with custom build
+                  (shell32)
 
  2002-03-16: Platon Fomichev <platon@innotek.de>
     - COMCTL32: o Ownerdrawn listview control items have no margin
