@@ -1,4 +1,4 @@
-/* $Id: odin32env.cmd,v 1.6 2000-06-07 22:14:21 bird Exp $
+/* $Id: odin32env.cmd,v 1.7 2000-06-07 22:15:28 bird Exp $
  *
  * Sets the build environment.
  *
@@ -15,9 +15,9 @@
      *
      * In addition the CVSROOT, USER and HOME directories right below have to corrected.
      */
-    call EnvVar_Set 0, 'SET CVSROOT',   ':pserver:bird@www.netlabs.org:d:/netlabs.src/odin32'
-    call EnvVar_Set 0, 'HOME',          'd:\knut\home'
-    call EnvVar_Set 0, 'USER',          'bird'
+    call EnvVar_Set 0, 'CVSROOT',   ':pserver:bird@www.netlabs.org:d:/netlabs.src/odin32'
+    call EnvVar_Set 0, 'HOME',      'd:\knut\home'
+    call EnvVar_Set 0, 'USER',      'bird'
 
     /*
      * Call the procedures which configure each tool.
