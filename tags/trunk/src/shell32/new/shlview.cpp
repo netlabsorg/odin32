@@ -59,23 +59,22 @@ typedef struct
 	LPITEMIDLIST	*apidl;
 } IShellViewImpl;
 
-static struct ICOM_VTABLE(IShellView) svvt;
-
-static struct ICOM_VTABLE(IOleCommandTarget) ctvt;
+//static struct ICOM_VTABLE(IShellView) svvt;
+//static struct ICOM_VTABLE(IOleCommandTarget) ctvt;
 #define _IOleCommandTarget_Offset ((int)(&(((IShellViewImpl*)0)->lpvtblOleCommandTarget)))
-#define _ICOM_THIS_From_IOleCommandTarget(class, name) class* This = (class*)(((char*)name)-_IOleCommandTarget_Offset);
+#define _ICOM_THIS_From_IOleCommandTarget(myClass, name) myClass* This = (myClass*)(((char*)name)-_IOleCommandTarget_Offset);
 
 static struct ICOM_VTABLE(IDropTarget) dtvt;
 #define _IDropTarget_Offset ((int)(&(((IShellViewImpl*)0)->lpvtblDropTarget)))
-#define _ICOM_THIS_From_IDropTarget(class, name) class* This = (class*)(((char*)name)-_IDropTarget_Offset);
+#define _ICOM_THIS_From_IDropTarget(myClass, name) myClass* This = (myClass*)(((char*)name)-_IDropTarget_Offset);
 
 static struct ICOM_VTABLE(IDropSource) dsvt;
 #define _IDropSource_Offset ((int)(&(((IShellViewImpl*)0)->lpvtblDropSource)))
-#define _ICOM_THIS_From_IDropSource(class, name) class* This = (class*)(((char*)name)-_IDropSource_Offset);
+#define _ICOM_THIS_From_IDropSource(myClass, name) myClass* This = (myClass*)(((char*)name)-_IDropSource_Offset);
 
 static struct ICOM_VTABLE(IViewObject) vovt;
 #define _IViewObject_Offset ((int)(&(((IShellViewImpl*)0)->lpvtblViewObject)))
-#define _ICOM_THIS_From_IViewObject(class, name) class* This = (class*)(((char*)name)-_IViewObject_Offset);
+#define _ICOM_THIS_From_IViewObject(myClass, name) myClass* This = (myClass*)(((char*)name)-_IViewObject_Offset);
 
 /*menu items */
 #define IDM_VIEW_FILES  (FCIDM_SHVIEWFIRST + 0x500)
@@ -365,7 +364,7 @@ static HRESULT ShellView_FillList(IShellViewImpl * This)
 	}
 
 	/*sort the array*/
-	pDPA_Sort(hdpa, ShellView_CompareItems, (LPARAM)This->pSFParent);
+	pDPA_Sort(hdpa, (PFNDPACOMPARE)ShellView_CompareItems, (LPARAM)This->pSFParent);
 
 	/*turn the listview's redrawing off*/
 	SendMessageA(This->hWndList, WM_SETREDRAW, FALSE, 0);
@@ -992,7 +991,7 @@ static LRESULT ShellView_OnNotify(IShellViewImpl * This, UINT CtlID, LPNMHDR lpn
 	     break;
 	
 	  default:
-	    TRACE("-- %p WM_COMMAND %s unhandled\n", This, SPY_GetMsgName(lpnmh->code));
+//	    TRACE("-- %p WM_COMMAND %s unhandled\n", This, SPY_GetMsgName(lpnmh->code));
 	    break;;
 	}
 	return 0;
