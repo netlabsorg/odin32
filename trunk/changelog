@@ -1,4 +1,7 @@
- /* $Id: changelog,v 1.672 2000-01-28 22:26:40 sandervl Exp $ */
+ /* $Id: changelog,v 1.673 2000-01-29 10:43:17 sandervl Exp $ */
+
+ 2000-01-29: Przemyslaw Dobrowolski <dobrawka@asua.org.pl>
+	- KERNEL32: Added GlobalWire/GlobalUnwire
 
  2000-01-28: Sander van Leeuwen <sandervl@xs4all.nl>
 	- GDI32: Wrong return values for GetDIBits & SetDIBitsToDevice
