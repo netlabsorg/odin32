@@ -1,4 +1,4 @@
-/* $Id: dcrgn.cpp,v 1.4 2001-05-11 08:39:42 sandervl Exp $ */
+/* $Id: dcrgn.cpp,v 1.5 2001-05-11 13:31:54 sandervl Exp $ */
 
 /*
  * DC functions for USER32
@@ -66,6 +66,7 @@ BOOL WIN32API GetUpdateRect(HWND hwnd, LPRECT pRect, BOOL erase)
 
     BOOL updateRegionExists = WinQueryUpdateRect(wnd->getOS2WindowHandle(), pRect ? &rectl : NULL);
     if (!pRect) {
+        dprintf(("GetUpdateRect returned %d", updateRegionExists));
         return (updateRegionExists);
     }
 
@@ -94,6 +95,7 @@ BOOL WIN32API GetUpdateRect(HWND hwnd, LPRECT pRect, BOOL erase)
         }
    }
 
+   dprintf(("GetUpdateRect returned (%d,%d)(%d,%d)", pRect->left, pRect->top, pRect->right, pRect->bottom));
    return updateRegionExists;
 }
 //******************************************************************************
