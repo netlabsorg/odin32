@@ -1,4 +1,4 @@
-/* $Id: dc.cpp,v 1.8 1999-09-27 18:21:25 dengert Exp $ */
+/* $Id: dc.cpp,v 1.9 1999-09-28 08:00:56 dengert Exp $ */
 
 /*
  * DC functions for USER32
@@ -452,6 +452,23 @@ LONG clientHeight(Win32BaseWindow *wnd, HWND hwnd, pDCData pHps)
    {
       return MEM_HPS_MAX;
    }
+}
+
+BOOL isYup (pDCData pHps)
+{
+   if (((pHps->windowExt.cy < 0) && (pHps->viewportYExt > 0.0)) ||
+       ((pHps->windowExt.cy > 0) && (pHps->viewportYExt < 0.0)))
+   {
+      if ((pHps->graphicsMode == GM_COMPATIBLE_W) ||
+          ((pHps->graphicsMode == GM_ADVANCED_W) && (pHps->xform.eM22 >= 0.0)))
+         return TRUE;
+   }
+   else
+   {
+      if ((pHps->graphicsMode == GM_ADVANCED_W) && (pHps->xform.eM22 < 0.0))
+         return TRUE;
+   }
+   return FALSE;
 }
 
 VOID removeClientArea(pDCData pHps)

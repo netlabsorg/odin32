@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.24 1999-09-27 12:32:27 bird Exp $
+# $Id: Makefile,v 1.25 1999-09-28 08:00:57 dengert Exp $
 
 #
 # PD-Win32 API
@@ -34,6 +34,7 @@ OBJS =  user32.obj loadres.obj \
         oslibutil.obj oslibmsg.obj dib.obj oslibdos.obj win32wmdichild.obj \
         winprop.obj wingdi.obj oslibgdi.obj winaccel.obj \
         nativerc.obj oslibres.obj dummy.obj oslibmenu.obj dc.obj timer.obj \
+        caret.obj \
         windlgmsg.obj windlg.obj win32wdesktop.obj
 
 
@@ -117,8 +118,9 @@ oslibmenu.obj:  oslibmenu.cpp oslibmenu.h
 oslibgdi.obj:   oslibgdi.cpp oslibgdi.h win32wbase.h
 oslibres.obj:   oslibres.cpp oslibwin.h oslibres.h $(PDWIN32_INCLUDE)\winconst.h
 oslibdos.obj:   oslibdos.cpp oslibdos.h
-dc.obj:         dc.cpp win32wbase.h dc.h
+dc.obj:         dc.cpp win32wbase.h dc.h dcdata.h
 timer.obj:      timer.cpp win32wbase.h timer.h
+caret.obj:      caret.cpp win32wbase.h caret.h dcdata.h
 
 clipboard.obj:  clipboard.cpp
 dib.obj:        dib.cpp dib.h

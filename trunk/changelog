@@ -1,12 +1,15 @@
- /* $Id: changelog,v 1.250 1999-09-28 01:18:45 phaller Exp $ */
+ /* $Id: changelog,v 1.251 1999-09-28 08:00:58 dengert Exp $ */
+
+ 99-09-28: Daniela Engert <dani@ngrt.de>
+	- USER32: Caret functions implemented
 
  99-09-28: Patrick Haller <phaller@gmx.net>
-	- KERNEL32: 	Add: debug info for missing API imports (WinImagePeLdr)
+	- KERNEL32:	Add: debug info for missing API imports (WinImagePeLdr)
 			Fix: source cleanup, introduction of WIN32.DIR.SYSTEM and WIN32.DIR.WINDOWS
 			     as overrides over the STUPID Open32 result. I don't want to have Win32 apps
 			     messing up x:\OS2 ....
 
- 99-09-25: Daniela Engert <dani@ngrt.de>
+ 99-09-26: Daniela Engert <dani@ngrt.de>
 	- USER32: SetTimer/KillTimer work now.
 
  99-09-26: Achim Hasenmueller <achimha@innotek.de>
@@ -20,9 +23,9 @@
 		    Send WM_INITDLG after creation of dialog controls.
 		    Set last error to 0 at end of BeginPaint/EndPaint.
 		    Set last error when window not found (window.cpp/windlg.cpp)
-                    WM_(SYS)KEYUP/DOWN bugfix (repeat cnt & scancode reversed)
-                    Generate WM_CHAR message when TranslateMessage is called for
-                    WM_CHAR (PM) message. (sent after WM_(SYS)KEYUP/DOWN)
+		    WM_(SYS)KEYUP/DOWN bugfix (repeat cnt & scancode reversed)
+		    Generate WM_CHAR message when TranslateMessage is called for
+		    WM_CHAR (PM) message. (sent after WM_(SYS)KEYUP/DOWN)
 
  99-09-25: Christoph Bratschi <cbratschi@datacomm.ch>
 	- USER32: WS_EX_* 3D frame support for child windows
