@@ -1,8 +1,19 @@
-/* $Id: changelog,v 1.2258 2002-08-12 10:05:00 sandervl Exp $ */
+/* $Id: changelog,v 1.2259 2002-08-12 15:04:51 sandervl Exp $ */
+
+ 2002-08-12: Sander van Leeuwen <sandervl@innotek   >
+    - DDRAW:    o SetCustomFullScreenMode added to force DirectDraw to
+                  report only one fullscreen mode
+                o Added cases for 32 bpp in mode enumeration
+                o DrawEnumDisplayModes bugfixes
+                o Call ShowWindow in SetCooperativeLevel (if valid window)
+                o Resize associated window to full screen in SetCooperativeLevel
+                  (not sure if this is correct)
+                o Call DrawSetDisplayMode2 in DrawSetDisplayMode (code duplication)
 
  2002-08-12: Platon Fomichev <platon@innotek   >
     - COMCTL32: o Tooltips: ignore TTS_ALWAYSTIP style. Windows 2000 appears
                   to do the same.
+    - USER32:   o Wine (X11) resync for AdjustRectOuter
 
  2002-08-10: Sander van Leeuwen <sandervl@innotek   >
     - WGSS50:   o Update from IBM
