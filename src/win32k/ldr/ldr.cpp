@@ -1,4 +1,4 @@
-/* $Id: ldr.cpp,v 1.1 1999-09-06 02:20:00 bird Exp $
+/* $Id: ldr.cpp,v 1.2 1999-10-14 01:25:38 bird Exp $
  *
  * ldr.cpp - Loader helper functions a structures.
  *
@@ -17,92 +17,32 @@
 *   Header Files                                                               *
 *******************************************************************************/
 #include <os2.h>
-#include <string.h>
 
 #include "malloc.h"
 #include "new.h"
+#include <memory.h>
+#include <stdlib.h>
+
 #include "log.h"
-#include "pefile.h"
-#include "lx.h"
+#include <peexe.h>
+#include <exe386.h>
+#include "OS2Krnl.h"
+#include "pe2lx.h"
 #include "ldr.h"
 
 
 /*******************************************************************************
 *   Global Variables                                                           *
 *******************************************************************************/
-unsigned char   ahStates[MAX_FILE_HANDLES/4];
-UNCERTAIN       ahUncertain[MAX_UNCERTAIN_FILES];
 PPENODE         pPE;
+unsigned char   achHandleStates[MAX_FILE_HANDLES/8];
 
 
 /*******************************************************************************
 *   Internal Functions                                                         *
 *******************************************************************************/
 static PPENODE  findNodePtr2(PPENODE pRoot, const char *pszFilename);
-static ULONG    freeNode(PPENODE pNode);
 static ULONG    depth(PPENODE pNode);
-
-
-/**
- * Get a free entry in the ahUncertain table.
- * @returns   Index to free entry in the ahUncertain table.
- */
-ULONG getFreeUncertainEntry(void)
-{
-    ULONG i;
-
-    i = 0;
-    while (i < MAX_UNCERTAIN_FILES && ahUncertain[i].hFile != 0xFFFF)
-        i++;
-
-    return i < MAX_UNCERTAIN_FILES ? i : -1;
-}
-
-
-/**
- * Free uncertain entry.
- * Mark entry with hFile in the uncertain table as unused
- * @returns   NO_ERROR on success, -1 on error.
- * @param     hFile  Filehandle (key) to free.
- */
-ULONG freeUncertainEntry(SFN hFile)
-{
-    int i;
-    int rc;
-
-    i = 0;
-    while (i < MAX_UNCERTAIN_FILES && ahUncertain[i].hFile != hFile)
-        i++;
-
-    if (i < MAX_UNCERTAIN_FILES && ahUncertain[i].hFile == hFile)
-    {
-        ahUncertain[i].hFile = 0xFFFF;
-        ahUncertain[i].offsetNEHdr = 0;
-        ahUncertain[i].fMZ = 0;
-        ahUncertain[i].fPE = 0;
-        free(ahUncertain[i].pszName);
-        ahUncertain[i].pszName = NULL;
-        rc = NO_ERROR;
-    }
-    else
-        rc  = -1;
-    return rc;
-}
-
-
-/**
- * Find the uncertain entry for hFile
- * @returns   Index into ahUncertain if found. ~0UL on error.
- * @param     hFile  Filehandle (key) to find.
- */
-ULONG findUncertainEntry(SFN hFile)
-{
-    int i = 0;
-    while (i < MAX_UNCERTAIN_FILES && ahUncertain[i].hFile != hFile)
-        i++;
-
-    return i < MAX_UNCERTAIN_FILES ? (ULONG)i : ~0UL;
-}
 
 
 /**
@@ -321,7 +261,7 @@ static PPENODE findNodePtr2(PPENODE pRoot, const char *pszFilename)
     PPENODE pNode = NULL;
 
     /*depth first search thru the whole tree */
-    if ( pRoot == NULL || pRoot->lxfile.queryIsModuleName(pszFilename))
+    if (pRoot == NULL || pRoot->pPe2Lx->queryIsModuleName(pszFilename))
         return pRoot;
 
     //search subtrees
@@ -343,7 +283,7 @@ PPENODE allocateNode(void)
 
     pNode = new PENODE;
     if (pNode == NULL)
-        kprintf(("allocateNode: malloc returned an NULL-pointer\n"));
+        kprintf(("allocateNode: new returned a NULL-pointer\n"));
 
     return pNode;
 }
@@ -354,7 +294,7 @@ PPENODE allocateNode(void)
  * @returns   NO_ERROR on success.
  * @param     pNode  Pointer to node which is to be freed.
  */
-static ULONG freeNode(PPENODE pNode)
+ULONG freeNode(PPENODE pNode)
 {
     if (pNode != NULL)
         delete pNode;
@@ -403,18 +343,7 @@ ULONG ldrInit(void)
     int i;
 
     /* init state table */
-    for (i = 0; i < MAX_FILE_HANDLES/4; i++)
-        ahStates[i] = 0;
-
-    /* init uncertain files */
-    for (i = 0; i < MAX_UNCERTAIN_FILES; i++)
-    {
-        ahUncertain[i].hFile = 0xFFFF;
-        ahUncertain[i].offsetNEHdr = 0;
-        ahUncertain[i].fMZ = 0;
-        ahUncertain[i].fPE = 0;
-        ahUncertain[i].pszName = NULL;
-    }
+    memset(&achHandleStates[0], 0, sizeof(achHandleStates));
 
     /* init pPEFiles* */
     pPE = NULL;

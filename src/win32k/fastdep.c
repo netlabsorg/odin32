@@ -407,7 +407,7 @@ static int makeDependent(FILE *phDep, const char *pszFilename, POPTIONS pOptions
                             }
                             else
                                 fprintf(stderr, "%s(%d): warning include file '%s' not found!\n",
-                                        pszFilename, iLine, szFullname+1);
+                                        pszFilename, iLine, szFullname);
                         }
                     }
                 }

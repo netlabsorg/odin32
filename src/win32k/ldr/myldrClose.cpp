@@ -1,4 +1,4 @@
-/* $Id: myldrClose.cpp,v 1.1 1999-09-06 02:20:01 bird Exp $
+/* $Id: myldrClose.cpp,v 1.2 1999-10-14 01:25:38 bird Exp $
  *
  * myldrClose - _ldrClose
  *
@@ -17,13 +17,14 @@
 *******************************************************************************/
 #include <os2.h>
 
-#include "OS2Krnl.h"
+#include <memory.h>
+#include <stdlib.h>
+
 #include "log.h"
-#if 0
-    #include "lxFile.h"
-#else
-    #define LXFile class { public: BOOL queryIsModuleName(const char *) {return FALSE;}}
-#endif
+#include <peexe.h>
+#include <exe386.h>
+#include "OS2Krnl.h"
+#include "pe2lx.h"
 #include "ldr.h"
 #include "ldrCalls.h"
 
@@ -40,18 +41,14 @@ ULONG LDRCALL myldrClose(SFN hFile)
 
     /* closes handle */
     kprintf(("_ldrClose: hFile = %.4x\n", hFile));
-    if (GetState(hFile) == HSTATE_CHECK)
-        freeUncertainEntry(hFile);
-    else
+    if (GetState(hFile) == HSTATE_OUR)
     {
-        if (GetState(hFile) == HSTATE_PE)
-        {
-            rc = deleteNode(hFile);
-            if (rc != NO_ERROR)
-                kprintf(("Funny! deleteNode failed rc = %d\n", rc));
-        }
+        rc = deleteNode(hFile);
+        if (rc != NO_ERROR)
+            kprintf(("Funny! deleteNode failed rc = %d\n", rc));
+
+        SetState(hFile, HSTATE_UNUSED);
     }
 
-    SetState(hFile, HSTATE_UNUSED);
     return _ldrClose(hFile);
 }
