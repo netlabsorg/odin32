@@ -1,4 +1,4 @@
-/* $Id: win32api.h,v 1.8 2000-04-02 10:25:56 sandervl Exp $ */
+/* $Id: win32api.h,v 1.9 2000-04-18 11:09:53 sandervl Exp $ */
 
 /*
  *
@@ -88,5 +88,9 @@ BOOL   WIN32API ShowCaret(HWND hwnd);
 HDC    WIN32API GetDCEx(HWND hwnd, HRGN hrgn, ULONG flags);
 int    WIN32API ReleaseDC(HWND hwnd, HDC hdc);
 int    WIN32API ExtSelectClipRgn(HDC hdc, HRGN hrgn, int fnMode);
+int    WIN32API SelectClipRgn( HDC hdc, HRGN hRgn);
+BOOL   WIN32API GetWindowRect( HWND hwnd, PRECT pRect);
+BOOL   WIN32API GetClientRect( HWND hwnd, PRECT pRect);
+int    WIN32API GetStretchBltMode( HDC hdc);
 
 #endif
