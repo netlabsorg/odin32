@@ -1,4 +1,4 @@
-/* $Id: commdlg.h,v 1.8 2001-01-10 20:38:00 sandervl Exp $ */
+/* $Id: commdlg.h,v 1.9 2001-01-10 20:53:46 sandervl Exp $ */
 /* 
  * COMMDLG - Common Wine Dialog ... :-)
  */
@@ -14,11 +14,9 @@ extern "C" {
 #include "winuser.h"
 #include "pshpack1.h"
 
-#ifdef __cplusplus
-#define SNDMSG ::SendMessage
-#else   /* __cplusplus */
-#define SNDMSG SendMessage
-#endif  /* __cplusplus */
+#ifndef SNDMSG
+#define SNDMSG WINELIB_NAME_AW(SendMessage)
+#endif
 
 #define OFN_READONLY                 0x00000001
 #define OFN_OVERWRITEPROMPT          0x00000002
