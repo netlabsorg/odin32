@@ -1,4 +1,4 @@
-/* $Id: crtinc.h,v 1.7 1999-10-09 13:32:26 sandervl Exp $ */
+/* $Id: crtinc.h,v 1.8 1999-11-28 17:22:27 sandervl Exp $ */
 
 /* Definitions for the CRTDLL library (CRTDLL.DLL)
  *
@@ -122,6 +122,13 @@ typedef struct
     int   drive;
 } DOS_FULL_NAME;
 
+/* Definition for _cabs */
+struct _complex
+{
+	double	x;	/* Real part */
+	double	y;	/* Imaginary part */
+};
+
 
 #ifndef _DISKFREE_T_DEFINED
 #define _DISKFREE_T_DEFINED
@@ -204,6 +211,7 @@ int 		CDECL CRTDLL__ismbbalpha( unsigned int c );
 int 		CDECL CRTDLL__ismbbtrail( unsigned int c );
 int 		CDECL CRTDLL__ismbblead( unsigned int c );
 char * 		CDECL CRTDLL_getenv( const char *name );
+int 		CDECL CRTDLL__isnan( double __x );
 
 
 //

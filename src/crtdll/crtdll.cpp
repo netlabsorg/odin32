@@ -1,4 +1,4 @@
-/* $Id: crtdll.cpp,v 1.10 1999-10-09 13:32:25 sandervl Exp $ */
+/* $Id: crtdll.cpp,v 1.11 1999-11-28 17:22:26 sandervl Exp $ */
 
 /*
  * The C RunTime DLL
@@ -547,11 +547,10 @@ void CDECL CRTDLL__c_exit(INT ret)
 /*********************************************************************
  *           CRTDLL__cabs   (CRTDLL.48)
  */
-double CDECL CRTDLL__cabs(struct complex * z)
+double CDECL CRTDLL__cabs(struct _complex z)
 {
-  dprintf(("CRTDLL: _cabs not implemented\n"));
-  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
-  return FALSE;
+  dprintf(("CRTDLL: _cabs\n"));
+  return sqrt( z.x*z.x + z.y*z.y );
 }
 
 
@@ -709,11 +708,20 @@ double CDECL CRTDLL__copysign( double __d, double __s )
 /*********************************************************************
  *                  _cprintf    (CRTDLL.63)
  */
-INT CDECL CRTDLL__cprintf( char *s, ... )
+INT CDECL CRTDLL__cprintf( char *fmt, ... )
 {
-  dprintf(("CRTDLL: _cprintf not implemented.\n"));
-  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
-  return FALSE;
+  dprintf(("CRTDLL: _cprintf.\n"));
+
+  int     cnt;
+  char    buf[ 2048 ];		/* this is buggy, because buffer might be too small. */
+  va_list ap;
+  
+  va_start(ap, fmt);
+  cnt = vsprintf(buf, fmt, ap);
+  va_end(ap);
+  
+  _cputs(buf);
+  return cnt;
 }
 
 
@@ -843,9 +851,19 @@ INT CDECL CRTDLL__except_handler2 ( PEXCEPTION_RECORD rec,
  */
 int CDECL CRTDLL__execl(const char* szPath, const char* szArgv0, ...)
 {
-  dprintf(("CRTDLL: _execl not implemented.\n"));
-  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
-  return FALSE;
+  dprintf(("CRTDLL: _execl\n"));
+
+  char *szArg[100];
+  const char *a;
+  int i = 0;
+  va_list l = 0;
+  va_start(l,szArgv0);
+  do {
+  	a = va_arg(l,const char *);
+	szArg[i++] = (char *)a;
+  } while ( a != NULL && i < 100 );
+
+  return _spawnve(P_OVERLAY, (char*)szPath, szArg, _environ);
 }
 
 
@@ -863,11 +881,19 @@ int CDECL CRTDLL__execle( char *s1, char *s2, ...)
 /*********************************************************************
  *           CRTDLL__execlp   (CRTDLL.81)
  */
-int CDECL CRTDLL__execlp( char *s1, char *s2, ...)
+int CDECL CRTDLL__execlp( char *szPath, char *szArgv0, ...)
 {
-  dprintf(("CRTDLL: _execlp not implemented.\n"));
-  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
-  return FALSE;
+  dprintf(("CRTDLL: _execlp\n"));
+  char *szArg[100];
+  const char *a;
+  int i = 0;
+  va_list l = 0;
+  va_start(l,szArgv0);
+  do {
+  	a = (const char *)va_arg(l,const char *);
+	szArg[i++] = (char *)a;
+  } while ( a != NULL && i < 100 );
+  return _spawnvpe(P_OVERLAY, szPath,szArg, _environ);
 }
 
 
@@ -1167,11 +1193,10 @@ INT CDECL CRTDLL__fpieee_flt( unsigned long exc_code, struct _EXCEPTION_POINTERS
 /*********************************************************************
  *                  _fpreset     (CRTDLL.107)
  */
-INT CDECL CRTDLL__fpreset(void)
+void CDECL CRTDLL__fpreset(void)
 {
   dprintf(("CRTDLL: _fpreset not implemented.\n"));
   SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
-  return FALSE;
 }
 
 
@@ -1774,7 +1799,7 @@ int CDECL CRTDLL__ismbcspace( unsigned int c )
  */
 int CDECL CRTDLL__ismbcsymbol( unsigned int c )
 {
-  dprintf(("CRTDLL: _ismbcsymbol\n"));
+  dprintf(("CRTDLL: _ismbcsymbol not implemented.\n"));
   if ((c & 0xFF00) != 0) {
 	// true multibyte character
 	return 0;
@@ -1887,13 +1912,18 @@ int CDECL CRTDLL__kbhit( void )
 /*********************************************************************
  *                  _lfind     (CRTDLL.170)
  */
-void * CDECL CRTDLL__lfind(const void *v1, const void *v2, unsigned int *i1, unsigned int i2,
-        int (CDECL *i3)(const void *v3, const void *v4))
+void * CDECL CRTDLL__lfind(const void *key, const void *base, size_t *nelp,
+         size_t width, int (*compar)(const void *, const void *))
 {
-  dprintf(("CRTDLL: _lfind not implemented.\n"));
-  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
-  return FALSE;
-//  return (_lfind(v1,v2,i1,i2,i3(v3,v4)));
+  dprintf(("CRTDLL: _lfind\n"));
+  char *char_base = (char *)base;
+  int i;
+  for(i=0;i<*nelp;i++) {
+ 	if ( compar(key,char_base) == 0)
+		return char_base;
+	char_base += width;
+  }
+  return NULL;
 }
 
 
@@ -1961,13 +1991,12 @@ unsigned long CDECL CRTDLL__lrotr( unsigned long value, unsigned int shift )
 /*********************************************************************
  *                  _lsearch   (CRTDLL.177)
  */
-void * CDECL CRTDLL__lsearch(const void *v1, void  *v2, unsigned int *i1, unsigned int i2,
-        int (CDECL *i3)(const void *v3, const void *v4))
+void * CDECL CRTDLL__lsearch(const void *key, void *base, size_t *nelp, size_t width,
+         int (*compar)(const void *, const void *))
 {
   dprintf(("CRTDLL: _lsearch not implemented.\n"));
   SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
   return FALSE;
-//  return (_lsearch(v1,v2,i1,i2,i3(v3,v4)));
 }
 
 
@@ -3147,9 +3176,13 @@ size_t CDECL CRTDLL__msize( void *ptr )
  */
 double CDECL CRTDLL__nextafter( double x, double y )
 {
-  dprintf(("CRTDLL: _nextafter not implemented.\n"));
-  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
-  return FALSE;
+  dprintf(("CRTDLL: _nextafter\n"));
+  if ( x == y)
+	return x;
+  if ( CRTDLL__isnan(x) || CRTDLL__isnan(y) )
+	return x;
+
+  return x;
 }
 
 
@@ -3474,11 +3507,20 @@ int CDECL CRTDLL__sopen( const char *s, int i1, int i2, ... )
 /*********************************************************************
  *           CRTDLL__spawnl 	 (CRTDLL.269)
  */
-int CDECL CRTDLL__spawnl( int i, char *s1, char *s2, ... )
+int CDECL CRTDLL__spawnl(int nMode, const char* szPath, const char* szArgv0,...)
 {
-  dprintf(("CRTDLL: _spawnl not implemented.\n"));
-  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
-  return FALSE;
+  dprintf(("CRTDLL: _spawnl\n"));
+  char *szArg[100];
+  const char *a;
+  int i = 0;
+  va_list l = 0;
+  va_start(l,szArgv0);
+  do {
+  	a = va_arg(l,const char *);
+	szArg[i++] = (char *)a;
+  } while ( a != NULL && i < 100 );
+  
+  return _spawnve(nMode, (char*)szPath, szArg, _environ);
 }
 
 
@@ -3496,11 +3538,19 @@ int CDECL CRTDLL__spawnle( int i, char *s1, char *s2, ... )
 /*********************************************************************
  *           CRTDLL__spawnlp 	 (CRTDLL.271)
  */
-int CDECL CRTDLL__spawnlp( int i, char *s1, char *s2, ... )
+int CDECL CRTDLL__spawnlp(int nMode, const char* szPath, const char* szArgv0, ...)
 {
-  dprintf(("CRTDLL: _spawnlp not implemented.\n"));
-  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
-  return FALSE;
+  dprintf(("CRTDLL: _spawnlp\n"));
+  char *szArg[100];
+  const char *a;
+  int i = 0;
+  va_list l = 0;
+  va_start(l,szArgv0);
+  do {
+  	a = (const char *)va_arg(l,const char *);
+	szArg[i++] = (char *)a;
+  } while ( a != NULL && i < 100 );
+  return _spawnvpe(nMode, (char*)szPath,szArg, _environ);
 }
 
 
@@ -3888,7 +3938,7 @@ LPWSTR CDECL CRTDLL__wcsdup( LPCWSTR str )
   if (str)
   {
       int size = (wcslen((const wchar_t*)str) + 1) * sizeof(WCHAR);
-// FIXME     ret = CRTDLL_malloc( size );
+// FIXME      ret = CRTDLL_malloc( size );
       if (ret) memcpy( ret, str, size );
   }
   return ret;
@@ -4433,7 +4483,7 @@ long int CDECL CRTDLL_ftell( FILE *fp )
 /*********************************************************************
  *                  fwprintf 	  (CRTDLL.382)
  */
-int CDECL CRTDLL_fwprintf( FILE *strm, const wchar_t *format, ... )
+int CDECL CRTDLL_fwprintf( FILE *iop, const wchar_t *fmt, ... )
 {
   dprintf(("CRTDLL: fwprintf not implemented.\n"));
   SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
@@ -4522,8 +4572,8 @@ struct tm * CDECL CRTDLL_gmtime( const time_t *timer )
  */
 INT CDECL CRTDLL_is_wctype(wint_t wc, wctype_t wctypeFlags)
 {
-        dprintf(("CRTDLL: is_wctype not implemented.\n"));
-	return 0;
+        dprintf(("CRTDLL: is_wctype\n"));
+	return ((CRTDLL_pwctype_dll[(unsigned char)(wc & 0xFF)]&wctypeFlags) == wctypeFlags );
 }
 
 
@@ -4816,9 +4866,14 @@ void CDECL CRTDLL_perror( const char *s )
  */
 int CDECL CRTDLL_printf( const char *format, ... )
 {
-    dprintf(("CRTDLL: printf not implemented.\n"));
-    SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
-    return FALSE;
+  dprintf(("CRTDLL: printf not implemented.\n"));
+  va_list arg;
+  int done;
+
+  va_start (arg, format);
+  done = vprintf (format, arg);
+  va_end (arg);
+  return done;
 }
 
 
