@@ -1,8 +1,8 @@
-/* $Id: changelog,v 1.1885 2001-12-06 10:15:56 sandervl Exp $ */
+/* $Id: changelog,v 1.1886 2001-12-06 15:58:24 sandervl Exp $ */
 
  2001-12-06: Sander van Leeuwen <sandervl@xs4all.nl>
-    - KERNEL32: o Added (incomplete) FindFirstFileExA/FindFirstFileExW
-                  (TODO)
+    - KERNEL32: o Added FindFirstFileExA/FindFirstFileExW
+                o Overlapped IO updates (still untested)
     - DINPUT:   o Link with guidlib.lib
     - GUIDLIB:  o Include dinput.h for DirectInput GUIDs
 
