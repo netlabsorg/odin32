@@ -1,4 +1,4 @@
-/* $Id: treeview.h,v 1.4 1999-08-14 17:23:24 achimha Exp $ */
+/* $Id: treeview.h,v 1.5 1999-12-18 18:56:20 achimha Exp $ */
 /*
  * Treeview class extra info
  *
@@ -41,6 +41,8 @@ typedef struct {
   RECT      rect;
   RECT      text;
   RECT      expandBox;      /* expand box (+/-) coordinate */
+  RECT		bitmap;
+  RECT      statebitmap;
 } TREEVIEW_ITEM;
 
 
@@ -68,11 +70,14 @@ typedef struct tagTREEVIEW_INFO
   HTREEITEM     editItem;       /* handle to item currently editted, 0 if none */
   HTREEITEM     firstVisible;   /* handle to first visible item */
   HTREEITEM     dropItem;       /* handle to item selected by drag cursor */
+  HTREEITEM     insertMarkItem; /* item after which insertion mark is placed */
+  BOOL			insertBeforeorAfter; /* flag used by TVM_SETINSERTMARK */
   HIMAGELIST    dragList;       /* Bitmap of dragged item */
   INT           cx,cy;          /* current x/y place in list */
   COLORREF      clrBk;
   COLORREF      clrText;
   COLORREF      clrLine;
+  COLORREF  	clrInsertMark;
   HFONT         hFont;
   HFONT         hBoldFont;
   HWND          hwndToolTip;
