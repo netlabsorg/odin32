@@ -1,4 +1,8 @@
-/* $Id: ChangeLog,v 1.1361 2001-04-16 06:42:34 bird Exp $ */
+/* $Id: ChangeLog,v 1.1362 2001-04-16 08:31:18 sandervl Exp $ */
+
+ 2001-04-16: Sander van Leeuwen <sandervl@xs4all.nl>
+    - KERNEL32: o Fix for LoadLibrary(Ex)W. (free must not be called for
+                  converted strings; use FreeAsciiString instead)
 
  2001-04-16: knut st. osmundsen <knut.stange.osmundsen@mynd.no>
     - DSOUND:   o Removed pmwinx.lib from makefile. Wasn't used; and it had
