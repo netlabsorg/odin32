@@ -1,4 +1,14 @@
- /* $Id: ChangeLog,v 1.291 1999-10-08 21:11:30 cbratschi Exp $ */
+ /* $Id: ChangeLog,v 1.292 1999-10-09 09:43:38 sandervl Exp $ */
+
+ 99-10-09: Sander van Leeuwen <sandervl@xs4all.nl>
+	- USER32: Clipboard fixes (window handle translation)
+
+ 99-10-09: Jens Wiessner <wiessnej@rfi.de>
+	- CRTDLL: Implemented functions; only 80 stubs left
+
+ 99-10-09: Edgar Buerkle <Edgar.Buerkle@gmx.net>
+        - USER32: Enabled accelerator WM_COMMANDs
+	- COMDLG32: Fix for GetOpenFileNameW (owner hwnd translation)
 
  99-10-08: Daniela Engert <dani@ngrt.de>
 	- USER32: fix: miscoloured bitmaps
