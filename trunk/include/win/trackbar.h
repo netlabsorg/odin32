@@ -1,4 +1,4 @@
-/* $Id: trackbar.h,v 1.3 1999-09-18 12:09:47 sandervl Exp $ */
+/* $Id: trackbar.h,v 1.4 2000-03-17 17:10:53 cbratschi Exp $ */
 
 /*
  * Trackbar class extra info
@@ -12,6 +12,8 @@
 
 typedef struct tagTRACKBAR_INFO
 {
+    COMCTL32_HEADER header;
+
     INT  nRangeMin;
     INT  nRangeMax;
     INT  nLineSize;
@@ -22,7 +24,6 @@ typedef struct tagTRACKBAR_INFO
     UINT uThumbLen;
     UINT uNumTics;
     UINT  uTicFreq;
-    HWND hwndNotify;
     HWND hwndToolTip;
     HWND hwndBuddyLA;
     HWND hwndBuddyRB;

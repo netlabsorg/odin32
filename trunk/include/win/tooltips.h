@@ -1,4 +1,4 @@
-/* $Id: tooltips.h,v 1.1 1999-05-24 20:19:20 ktk Exp $ */
+/* $Id: tooltips.h,v 1.2 2000-03-17 17:10:53 cbratschi Exp $ */
 
 /*
  * Tool tips class extra info
@@ -25,9 +25,9 @@ typedef struct tagTTTOOL_INFO
     UINT      uId;
     RECT      rect;
     HINSTANCE hinst;
-    LPWSTR      lpszText;
-    LPARAM      lParam;
-} TTTOOL_INFO; 
+    LPWSTR    lpszText;
+    LPARAM    lParam;
+} TTTOOL_INFO;
 
 
 typedef struct tagTOOLTIPS_INFO

@@ -1,4 +1,8 @@
- /* $Id: changelog,v 1.813 2000-03-17 16:13:07 sandervl Exp $ */
+ /* $Id: changelog,v 1.814 2000-03-17 17:09:59 cbratschi Exp $ */
+
+ 2000-03-17: Christoph Bratschi <cbratschi@datacomm.ch>
+	- COMCTL32: fixed trackbar buddy alignment
+		    added useful internal tooltip styles
 
  2000-03-17: Sander van Leeuwen <sandervl@xs4all.nl>
 	- WSOCK32: Semaphore protection for relay slot alloc/free

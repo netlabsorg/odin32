@@ -1,4 +1,4 @@
-/* $Id: nativefont.h,v 1.1 1999-05-24 20:19:15 ktk Exp $ */
+/* $Id: nativefont.h,v 1.2 2000-03-17 17:10:52 cbratschi Exp $ */
 
 /*
  * Native font class extra info
@@ -11,8 +11,7 @@
 
 typedef struct tagNATIVEFONT_INFO
 {
-    DWORD  dwDummy;   /* just to keep the compiler happy ;-) */
-
+    COMCTL32_HEADER header;
 } NATIVEFONT_INFO;
 
 
