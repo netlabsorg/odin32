@@ -1,4 +1,11 @@
-/* $Id: changelog,v 1.2024 2002-03-18 15:27:21 sandervl Exp $ */
+/* $Id: changelog,v 1.2025 2002-03-20 10:30:30 sandervl Exp $ */
+
+ 2002-03-20: Platon Fomichev <platon@innotek.de>
+    - USER32:   o Fixes and changes for minimizing windows (minimized window
+                  list; restore; icon paint)
+ 
+ 2002-03-20: Sander van Leeuwen <sandervl@xs4all.nl>
+    - USER32:   o BeginPaint change; use entire window if window is minimized
 
  2002-03-18: Sander van Leeuwen <sandervl@xs4all.nl>
     - WGSS50:   o WGSS update from IBM
