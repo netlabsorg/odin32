@@ -4,6 +4,7 @@
 //HKEY_LOCAL_MACHINE
 #define CUSTOM_BUILD_OPTIONS_KEY  "System\\CustomBuild"
 #define DISABLE_AUDIO_KEY         "DisableAudio"
+#define DISABLE_ASPI_KEY          "DisableASPI"
 
 extern BOOL fCustomBuild;
 
@@ -82,6 +83,9 @@ void WIN32API SetCustomPMHookDll(LPSTR pszKbdDllName);
 
 //Turn off wave audio in winmm
 void WIN32API DisableWaveAudio();
+
+//Turn off ASPI
+void WIN32API DisableASPI();
 
 //force color to mono cursor conversion
 void WIN32API CustForceMonoCursor();
