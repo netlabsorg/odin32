@@ -1,4 +1,4 @@
-/* $Id: initkernel32.cpp,v 1.19 2002-06-11 16:36:53 sandervl Exp $
+/* $Id: initkernel32.cpp,v 1.20 2002-07-13 15:57:57 sandervl Exp $
  *
  * KERNEL32 DLL entry point
  *
@@ -113,7 +113,8 @@ ULONG APIENTRY inittermKernel32(ULONG hModule, ULONG ulFlag)
              * located. Currently that is within Open32. I'm quite sure that it's
              * not relocated during run, so we're pretty well off.
              */
-            if (!libWin32kInit())
+            //Note: we do NOT want to use any win32k services with custom builds
+            if (fCustomBuild == FALSE && !libWin32kInit())
             {
                 rc = libWin32kSetEnvironment((PSZ)_O32_GetEnvironmentStrings(), 0, 0);
                 if (rc)
