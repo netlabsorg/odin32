@@ -1,4 +1,4 @@
-/* $Id: odin32env.cmd,v 1.8 2000-06-21 18:42:17 bird Exp $
+/* $Id: odin32env.cmd,v 1.9 2000-08-08 13:54:17 bird Exp $
  *
  * Sets the build environment.
  *
@@ -91,7 +91,7 @@ EMX: procedure
     call EnvVar_AddFront fRM, 'HELPNDX',            'emxbook.ndx', '+', 1
     call EnvVar_Set      fRM, 'EMXOPT',             '-c -n -h1024'
     if EnvVar_Get('TERM') = '' then do
-        call EnvVar_Set  fRM, 'TERM',               'mono'
+        call EnvVar_Set  fRM, 'TERM',               'ansi'
         call EnvVar_Set  fRM, 'TERMCAP',            sEMXForw'/etc/termcap.dat'
     end
     return 0;
@@ -149,6 +149,7 @@ mySQL: procedure
     call EnvVar_AddFront fRM, 'path',           sMySQLMain'\bin;'
     call EnvVar_AddFront fRM, 'beginlibpath',   sMySQLMain'\dll;'
     call EnvVar_AddFront fRM, 'include',        sMySQLMain'\include;'
+    call EnvVar_AddEnd   fRM, 'bookshelf',      sMySQLMain'\book;'
     /*call EnvVar_AddFront fRM, 'lib',            sMySQLMain'\lib;'*/
     return 0;
 
