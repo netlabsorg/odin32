@@ -1,4 +1,9 @@
-/* $Id: changelog,v 1.1696 2001-09-25 18:28:00 sandervl Exp $ */
+/* $Id: changelog,v 1.1697 2001-09-26 15:29:17 phaller Exp $ */
+
+ 2001-09-26: Patrick Haller <patrick.haller@innotek.de>
+    - ODINWRAP: o fixed FNEPILOGUE position
+      (MISC)    o added support for calldepth tracing
+    - OLE32:    o fixed wrong prototype in regsvr32.cpp
 
  2001-09-25: Sander van Leeuwen <sandervl@xs4all.nl>
     - COMCTL32: o Wine updates (MRU functions)
