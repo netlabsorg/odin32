@@ -1,4 +1,4 @@
-/* $Id: win32wmdiclient.cpp,v 1.31 2000-12-17 15:04:12 sandervl Exp $ */
+/* $Id: win32wmdiclient.cpp,v 1.32 2000-12-24 14:54:07 sandervl Exp $ */
 /*
  * Win32 MDI Client Window Class for OS/2
  *
@@ -565,6 +565,28 @@ LRESULT Win32MDIClientWindow::setMDIMenu(HMENU hmenuFrame, HMENU hmenuWindow)
 
         AppendMenuA( hmenuWindow, MF_SEPARATOR, 0, NULL);
 
+#if 1
+        if( nActiveChildren )
+        {
+            INT j = i - nActiveChildren + 1;
+            char buffer[100];
+            UINT id,state;
+
+            for( ; i >= j ; i-- )
+            {
+                id = GetMenuItemID(hWindowMenu,i );
+                state = GetMenuState(hWindowMenu,i,MF_BYPOSITION);
+
+                GetMenuStringA(hWindowMenu, i, buffer, 100, MF_BYPOSITION);
+
+                DeleteMenu(hWindowMenu, i , MF_BYPOSITION);
+                InsertMenuA(hmenuWindow, pos, MF_BYPOSITION | MF_STRING,
+                              id, buffer);
+                CheckMenuItem(hmenuWindow ,pos , MF_BYPOSITION | (state & MF_CHECKED));
+            }
+        }
+#else
+//doesn't work:
         if( nActiveChildren )
         {
             INT j;
@@ -602,7 +624,7 @@ LRESULT Win32MDIClientWindow::setMDIMenu(HMENU hmenuFrame, HMENU hmenuWindow)
 		}
             }
         }
-
+#endif
         /* remove separator */
         DeleteMenu(hWindowMenu, i, MF_BYPOSITION);
 
