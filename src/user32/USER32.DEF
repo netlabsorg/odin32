@@ -1,4 +1,4 @@
-; $Id: USER32.DEF,v 1.5 1999-06-10 16:50:36 phaller Exp $
+; $Id: USER32.DEF,v 1.6 1999-06-23 22:39:01 phaller Exp $
 
 ;Created by BLAST for IBM's compiler
 LIBRARY USER32 INITINSTANCE
@@ -69,7 +69,7 @@ EXPORTS
     CopyIcon                   = _CopyIcon@4                 @62
     CopyImage                  = _CopyImage@20               @63
     CopyRect                   = _CopyRect@8                 @64
-    CountClipboardFormats      = _CountClipboardFormats@0   @65
+    CountClipboardFormats      = _CountClipboardFormats@0    @65
     CreateAcceleratorTableA    = _CreateAcceleratorTableA@8  @66
     CreateAcceleratorTableW    = _CreateAcceleratorTableW@8  @67
     CreateCaret                = _CreateCaret@16             @68
@@ -350,6 +350,7 @@ EXPORTS
     IsDialogMessageW           = _IsDialogMessageW@8         @343
     IsDlgButtonChecked         = _IsDlgButtonChecked@8       @344
     IsHungThread               = _IsHungThread@4             @345
+    IsHungAppWindow            = _IsHungAppWindow@8
     IsIconic                   = _IsIconic@4                 @346
     IsMenu                     = _IsMenu@4                   @347
     IsRectEmpty                = _IsRectEmpty@4              @348
