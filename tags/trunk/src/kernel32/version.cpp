@@ -1,4 +1,4 @@
-/* $Id: version.cpp,v 1.7 2001-12-08 16:17:34 sandervl Exp $ */
+/* $Id: version.cpp,v 1.8 2002-06-28 20:15:06 sandervl Exp $ */
 
 /*
  * Win32 compatibility file functions for OS/2
@@ -179,6 +179,11 @@ BOOL WIN32API GetVersionExA(OSVERSIONINFOA *lpVersionInformation)
    lpVersionInformation->dwPlatformId   = VersionData[winversion].getVersionEx.dwPlatformId;
    strcpy(lpVersionInformation->szCSDVersion, VersionData[winversion].getVersionEx.szCSDVersion );
 
+   dprintf(("version      %x.%x", lpVersionInformation->dwMajorVersion, lpVersionInformation->dwMinorVersion));
+   dprintf(("build nr     %x", lpVersionInformation->dwBuildNumber));
+   dprintf(("Platform Id  %x", lpVersionInformation->dwPlatformId));
+   dprintf(("szCSDVersion %s", lpVersionInformation->szCSDVersion));
+
    if(lpVersionInformation->dwOSVersionInfoSize == sizeof(OSVERSIONINFOEXA)) 
    {//Windows 2000 (and up) extension
        LPOSVERSIONINFOEXA lpVersionExInformation = (LPOSVERSIONINFOEXA)lpVersionInformation;
@@ -187,7 +192,10 @@ BOOL WIN32API GetVersionExA(OSVERSIONINFOA *lpVersionInformation)
        lpVersionExInformation->wServicePackMinor = VersionData[winversion].getVersionEx.wServicePackMinor;
        lpVersionExInformation->wReserved[0]      = VersionData[winversion].getVersionEx.wReserved[0];
        lpVersionExInformation->wReserved[1]      = VersionData[winversion].getVersionEx.wReserved[1];
+
+       dprintf(("service pack version %x.%x", lpVersionExInformation->wServicePackMajor, lpVersionExInformation->wServicePackMinor));
    }
+
    SetLastError(ERROR_SUCCESS);
    return(TRUE);
 }
