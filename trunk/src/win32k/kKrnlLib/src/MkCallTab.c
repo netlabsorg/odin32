@@ -1,4 +1,4 @@
-/* $Id: MkCallTab.c,v 1.3 2002-03-31 19:23:41 bird Exp $
+/* $Id: MkCallTab.c,v 1.4 2002-04-01 12:46:35 bird Exp $
  *
  * Description:     Generates the calltab.asm from aImportTab.
  *
@@ -22,7 +22,7 @@
 /*
  * Ordinal Ranges - Org exports.
  */
-#define ORD_ORGDISPLACEMENT 1200        /* Displacement of the Org ordinals */
+#define ORD_ORGDISPLACEMENT 2000        /* Displacement of the Org ordinals */
                                         /* from the ones in aImportTab.     */
 
 /*
@@ -71,115 +71,107 @@ struct Entry
 } aEntries[] =
 {   /* ord, name                       nameexp                          Flags */
     {   1, "ulkKrnlLibBuild",          "ulkKrnlLibBuild",               EXP_ABSOLUTE32},
-    {   2, "_options.ulBuild",         "ulKernelBuild",                 EXP_ABSOLUTE32},
-    {   3, "_options.fKernel",         "flKernel",                      EXP_ABSOLUTE32},
+    {   2, "_ulKernelBuild",           "ulKernelBuild",                 EXP_ABSOLUTE32},
+    {   3, "_fKernel",                 "flKernel",                      EXP_ABSOLUTE32},
     {   4, "_TKSSBase16",              "TKSSBase",                      EXP_ABSOLUTE32},
     {   5, "_TKSSBase16",              "_TKSSBase",                     EXP_ABSOLUTE32},
     {   6, "_R0FlatCS16",              "R0FlatCS",                      EXP_ABSOLUTE16},
     {   7, "_R0FlatDS16",              "R0FlatDS",                      EXP_ABSOLUTE16},
 
-    /* 16-bit funcions */
-    {   8, "_printf16",                "_printf16",                     EXP_16},
-    {   9, "_vprintf16",               "_vprintf16",                    EXP_16},
+    /* 16-bit functions */
+    {  30, "_printf16",                "_printf16",                     EXP_16},
+    {  31, "_vprintf16",               "_vprintf16",                    EXP_16},
+    {  32, "_kargncpy",                "_kargncpy",                     EXP_16},
+    {  33, "_fopen",                   "_fopen",                        EXP_16},
+    {  34, "_kstrchr",                 "_kstrchr",                      EXP_16},
+    {  35, "_fread",                   "_fread",                        EXP_16},
+    {  36, "_fseek",                   "_fseek",                        EXP_16},
+    {  37, "_fsize",                   "_fsize",                        EXP_16},
+    {  38, "_feof",                    "_feof",                         EXP_16},
+    {  39, "_fgets",                   "_fgets",                        EXP_16},
+    {  40, "_kstrstr",                 "_kstrstr",                      EXP_16},
+    {  41, "_kstrncmp",                "_kstrncmp",                     EXP_16},
+    {  42, "_kstrlen",                 "_kstrlen",                      EXP_16},
+    {  43, "_kstrcpy",                 "_kstrcpy",                      EXP_16},
+    {  44, "_kstrncpy",                "_kstrncpy",                     EXP_16},
+    {  45, "_kstrcat",                 "_kstrcat",                      EXP_16},
+    {  46, "_kstrtok",                 "_kstrtok",                      EXP_16},
+
+    /* 16-bit crt functions */
+    {  60, "_inp",                     "_inp",                          EXP_16},
+    {  61, "_outp",                    "_outp",                         EXP_16},
+    {  62, "__aNFaldiv",               "__aNFaldiv",                    EXP_16},
+    {  63, "__aNFalmul",               "__aNFalmul",                    EXP_16},
+    {  64, "__aNFalrem",               "__aNFalrem",                    EXP_16},
+    {  65, "__aNFauldiv",              "__aNFauldiv",                   EXP_16},
+    {  66, "__aNFaulmul",              "__aNFaulmul",                   EXP_16},
+    {  67, "__aNlmul",                 "__aNlmul",                      EXP_16},
+    {  68, "__aNldiv",                 "__aNldiv",                      EXP_16},
+    {  69, "__aNlrem",                 "__aNlrem",                      EXP_16},
+    {  70, "__aNlshl",                 "__aNlshl",                      EXP_16},
+    {  71, "__aNuldiv",                "__aNuldiv",                     EXP_16},
+    {  72, "__aNulmul",                "__aNulmul",                     EXP_16},
+    {  73, "__aNulrem",                "__aNulrem",                     EXP_16},
+    {  74, "__fmemcpy",                "__fmemcpy",                     EXP_16},
+
+    /* 16-bit crt variables */
+    /*{  99, "__AHINCR",                 "__AHINCR",                      EXP_16}, - doesn't work I'm afraid...*/
+
 
     /* clib functions */
-    {  10, "GetCS",                     "GetCS",                        EXP_32},
-    {  11, "GetDS",                     "GetDS",                        EXP_32},
-    {  12, "GetES",                     "GetES",                        EXP_32},
-    {  13, "GetFS",                     "GetFS",                        EXP_32},
-    {  14, "GetGS",                     "GetGS",                        EXP_32},
-    {  15, "GetSS",                     "GetSS",                        EXP_32},
-    {  16, "DisableInterrupts",         "DisableInterrupts",            EXP_32},
-    {  17, "EnableInterrupts",          "EnableInterrupts",             EXP_32},
+    { 100, "__nw__FUi"                 , "__nw__FUi"                  , EXP_32},
+    { 101, "__nw__FUiPv"               , "__nw__FUiPv"                , EXP_32},
+    { 102, "__vn__FUi"                 , "__vn__FUi"                  , EXP_32},
+    { 103, "__vn__FUiPv"               , "__vn__FUiPv"                , EXP_32},
+    { 104, "__dl__FPv"                 , "__dl__FPv"                  , EXP_32},
+    { 105, "__vd__FPv"                 , "__vd__FPv"                  , EXP_32},
 
-    {  20, "AVLStrRemove"              , "AVLStrRemove"               , EXP_32},
-    {  21, "AVLStrInsert"              , "AVLStrInsert"               , EXP_32},
-    {  22, "AVLStrGet"                 , "AVLStrGet"                  , EXP_32},
-    {  23, "AVLStrBeginEnumTree"       , "AVLStrBeginEnumTree"        , EXP_32},
-    {  24, "AVLStrGetNextNode"         , "AVLStrGetNextNode"          , EXP_32},
-    {  25, "AVLStrDoWithAll"           , "AVLStrDoWithAll"            , EXP_32},
-    {  26, "AVLStrIRemove"             , "AVLStrIRemove"              , EXP_32},
-    {  27, "AVLStrIInsert"             , "AVLStrIInsert"              , EXP_32},
-    {  28, "AVLStrIGet"                , "AVLStrIGet"                 , EXP_32},
-    {  29, "AVLStrIBeginEnumTree"      , "AVLStrIBeginEnumTree"       , EXP_32},
-    {  30, "AVLStrIGetNextNode"        , "AVLStrIGetNextNode"         , EXP_32},
-    {  31, "AVLStrIDoWithAll"          , "AVLStrIDoWithAll"           , EXP_32},
-    {  32, "AVLPVRemove"               , "AVLPVRemove"                , EXP_32},
-    {  33, "AVLPVInsert"               , "AVLPVInsert"                , EXP_32},
-    {  34, "AVLPVGet"                  , "AVLPVGet"                   , EXP_32},
-    {  35, "AVLPVGetWithParent"        , "AVLPVGetWithParent"         , EXP_32},
-    {  36, "AVLPVGetWithAdjacentNodes" , "AVLPVGetWithAdjacentNodes"  , EXP_32},
-    {  37, "AVLPVGetBestFit"           , "AVLPVGetBestFit"            , EXP_32},
-    {  38, "AVLPVRemoveBestFit"        , "AVLPVRemoveBestFit"         , EXP_32},
-    {  39, "AVLPVBeginEnumTree"        , "AVLPVBeginEnumTree"         , EXP_32},
-    {  40, "AVLPVGetNextNode"          , "AVLPVGetNextNode"           , EXP_32},
-    {  41, "AVLPVDoWithAll"            , "AVLPVDoWithAll"             , EXP_32},
-    {  42, "AVLULMRemove"              , "AVLULMRemove"               , EXP_32},
-    {  43, "AVLULMRemove2"             , "AVLULMRemove2"              , EXP_32},
-    {  44, "AVLULMInsert"              , "AVLULMInsert"               , EXP_32},
-    {  45, "AVLULMGet"                 , "AVLULMGet"                  , EXP_32},
-    {  46, "AVLULMGet2"                , "AVLULMGet2"                 , EXP_32},
-    {  47, "AVLULMGetWithParent"       , "AVLULMGetWithParent"        , EXP_32},
-    {  48, "AVLULMGetWithAdjacentNodes", "AVLULMGetWithAdjacentNodes" , EXP_32},
-    {  49, "AVLULMGetBestFit"          , "AVLULMGetBestFit"           , EXP_32},
-    {  50, "AVLULMRemoveBestFit"       , "AVLULMRemoveBestFit"        , EXP_32},
-    {  51, "AVLULMBeginEnumTree"       , "AVLULMBeginEnumTree"        , EXP_32},
-    {  52, "AVLULMGetNextNode"         , "AVLULMGetNextNode"          , EXP_32},
-    {  53, "AVLULMDoWithAll"           , "AVLULMDoWithAll"            , EXP_32},
+    { 106, "__nw__FUiPCcT1"            , "__nw__FUiPCcT1"             , EXP_32},
+    { 107, "__nw__FUiPCcT1Pv"          , "__nw__FUiPCcT1Pv"           , EXP_32},
+    { 108, "__vn__FUiPCcT1"            , "__vn__FUiPCcT1"             , EXP_32},
+    { 109, "__vn__FUiPCcT1Pv"          , "__vn__FUiPCcT1Pv"           , EXP_32},
+    { 110, "__dl__FPvPCcUi"            , "__dl__FPvPCcUi"             , EXP_32},
+    { 111, "__vd__FPvPCcUi"            , "__vd__FPvPCcUi"             , EXP_32},
 
-    {  60, "__nw__FUi"                 , "__nw__FUi"                  , EXP_32},
-    {  61, "__nw__FUiPv"               , "__nw__FUiPv"                , EXP_32},
-    {  62, "__vn__FUi"                 , "__vn__FUi"                  , EXP_32},
-    {  63, "__vn__FUiPv"               , "__vn__FUiPv"                , EXP_32},
-    {  64, "__dl__FPv"                 , "__dl__FPv"                  , EXP_32},
-    {  65, "__vd__FPv"                 , "__vd__FPv"                  , EXP_32},
+    { 112, "malloc"                    , "malloc"                     , EXP_32},
+    { 113, "realloc"                   , "realloc"                    , EXP_32},
+    { 114, "free"                      , "free"                       , EXP_32},
+    { 115, "_msize"                    , "_msize"                     , EXP_32},
+    { 116, "_memfree"                  , "_memfree"                   , EXP_32},
+    { 117, "_heap_check"               , "_heap_check"                , EXP_32},
+    { 118, "smalloc"                    , "smalloc"                   , EXP_32},
+    { 119, "srealloc"                   , "srealloc"                  , EXP_32},
+    { 120, "sfree"                      , "sfree"                     , EXP_32},
+    { 121, "_swp_msize"                 , "_swp_msize"                , EXP_32},
+    { 122, "_swp_memfree"               , "_swp_memfree"              , EXP_32},
+    { 123, "_swp_heap_check"            , "_swp_heap_check"           , EXP_32},
+    { 124, "_swp_heapmin"               , "_swp_heapmin"              , EXP_32},
+    { 125, "_swp_state"                 , "_swp_state"                , EXP_32},
+    { 126, "rmalloc"                    , "rmalloc"                   , EXP_32},
+    { 127, "rrealloc"                   , "rrealloc"                  , EXP_32},
+    { 128, "rfree"                      , "rfree"                     , EXP_32},
+    { 129, "_res_msize"                 , "_res_msize"                , EXP_32},
+    { 130, "_res_memfree"               , "_res_memfree"              , EXP_32},
+    { 131, "_res_heap_check"            , "_res_heap_check"           , EXP_32},
+    { 132, "_res_heapmin"               , "_res_heapmin"              , EXP_32},
+    { 133, "_res_state"                 , "_res_state"                , EXP_32},
 
-    {  66, "__nw__FUiPCcT1"            , "__nw__FUiPCcT1"             , EXP_32},
-    {  67, "__nw__FUiPCcT1Pv"          , "__nw__FUiPCcT1Pv"           , EXP_32},
-    {  68, "__vn__FUiPCcT1"            , "__vn__FUiPCcT1"             , EXP_32},
-    {  69, "__vn__FUiPCcT1Pv"          , "__vn__FUiPCcT1Pv"           , EXP_32},
-    {  70, "__dl__FPvPCcUi"            , "__dl__FPvPCcUi"             , EXP_32},
-    {  71, "__vd__FPvPCcUi"            , "__vd__FPvPCcUi"             , EXP_32},
+    { 170, "stricmp"                    , "stricmp"                   , EXP_32},
+    { 171, "strnicmp"                   , "strnicmp"                  , EXP_32},
 
-    {  72, "malloc"                    , "malloc"                     , EXP_32},
-    {  73, "realloc"                   , "realloc"                    , EXP_32},
-    {  74, "free"                      , "free"                       , EXP_32},
-    {  75, "_msize"                    , "_msize"                     , EXP_32},
-    {  76, "_memfree"                  , "_memfree"                   , EXP_32},
-    {  77, "_heap_check"               , "_heap_check"                , EXP_32},
-    {  78, "smalloc"                    , "smalloc"                   , EXP_32},
-    {  79, "srealloc"                   , "srealloc"                  , EXP_32},
-    {  80, "sfree"                      , "sfree"                     , EXP_32},
-    {  81, "_swp_msize"                 , "_swp_msize"                , EXP_32},
-    {  82, "_swp_memfree"               , "_swp_memfree"              , EXP_32},
-    {  83, "_swp_heap_check"            , "_swp_heap_check"           , EXP_32},
-    {  84, "_swp_heapmin"               , "_swp_heapmin"              , EXP_32},
-    {  85, "_swp_state"                 , "_swp_state"                , EXP_32},
-    {  86, "rmalloc"                    , "rmalloc"                   , EXP_32},
-    {  87, "rrealloc"                   , "rrealloc"                  , EXP_32},
-    {  88, "rfree"                      , "rfree"                     , EXP_32},
-    {  89, "_res_msize"                 , "_res_msize"                , EXP_32},
-    {  90, "_res_memfree"               , "_res_memfree"              , EXP_32},
-    {  91, "_res_heap_check"            , "_res_heap_check"           , EXP_32},
-    {  92, "_res_heapmin"               , "_res_heapmin"              , EXP_32},
-    {  93, "_res_state"                 , "_res_state"                , EXP_32},
+    { 172, "vsprintf"                   , "vsprintf"                  , EXP_32},
+    { 173, "sprintf"                    , "sprintf"                   , EXP_32},
 
-    { 100, "stricmp"                    , "stricmp"                   , EXP_32},
-    { 101, "strnicmp"                   , "strnicmp"                  , EXP_32},
+    { 174, "vprintf"                    , "vprintf"                   , EXP_32},
+    { 175, "vprintf2"                   , "vprintf2"                  , EXP_32},
+    { 176, "vprintf"                    , "_vprintfieee"              , EXP_32},
+    { 177, "printf"                     , "printf"                    , EXP_32},
+    { 178, "printf"                     , "_printfieee"               , EXP_32},
+    { 179, "printf"                     , "_printf_ansi"              , EXP_32},
 
-    { 102, "vsprintf"                   , "vsprintf"                  , EXP_32},
-    { 103, "sprintf"                    , "sprintf"                   , EXP_32},
-
-    { 104, "vprintf"                    , "vprintf"                   , EXP_32},
-    { 105, "vprintf2"                   , "vprintf2"                  , EXP_32},
-    { 106, "vprintf"                    , "_vprintfieee"              , EXP_32},
-    { 107, "printf"                     , "printf"                    , EXP_32},
-    { 108, "printf"                     , "_printfieee"               , EXP_32},
-    { 109, "printf"                     , "_printf_ansi"              , EXP_32},
-
-    { 110, "abort"                      , "abort"                     , EXP_32},
-    { 111, "abort"                      , "__PureVirtualCalled"       , EXP_32},
-    { 112, "_fltused"                   , "_fltused"                  , EXP_32},
+    { 180, "abort"                      , "abort"                     , EXP_32},
+    { 181, "abort"                      , "__PureVirtualCalled"       , EXP_32},
+    { 182, "_fltused"                   , "_fltused"                  , EXP_32},
 
     /* overload functions (190-199) */
     { 190, "kKLOverload32"              , "kKLOverload32"             , EXP_32},
@@ -207,7 +199,7 @@ struct Entry
     { 214, "strrchr"                    , "strrchr"                   , EXP_32},
     { 215, "strstr"                     , "strstr"                    , EXP_32},
 
-    /* devhelps */
+    /* 32-bits devhelps */
     { 300, "D32Hlp_VirtToLin"           , "D32Hlp_VirtToLin"          , EXP_32},
     { 301, "D32Hlp_VirtToLin2"          , "D32Hlp_VirtToLin2"         , EXP_32},
     { 302, "D32Hlp_VirtToLin3"          , "D32Hlp_VirtToLin3"         , EXP_32},
@@ -219,7 +211,109 @@ struct Entry
     { 308, "D32Hlp_VMLock"              , "D32Hlp_VMLock"             , EXP_32},
     { 309, "D32Hlp_VMLock2"             , "D32Hlp_VMLock2"            , EXP_32},
     { 310, "D32Hlp_VMUnLock"            , "D32Hlp_VMUnLock"           , EXP_32},
+
+    /* 16-bit devhelps */
+    { 400, "DEVHELP_VIRTTOLIN"          , "DEVHELP_VIRTTOLIN"         , EXP_16},
+    { 401, "DEVHELP_GETDOSVAR"          , "DEVHELP_GETDOSVAR"         , EXP_16},
+    { 402, "DEVHELP_VMUNLOCK"           , "DEVHELP_VMUNLOCK"          , EXP_16},
+    { 403, "DEVHELP_VMLOCK"             , "DEVHELP_VMLOCK"            , EXP_16},
+    { 404, "DEVHELP_SAVE_MESSAGE"       , "DEVHELP_SAVE_MESSAGE"      , EXP_16},
+    { 405, "DEVHELP_VIRTTOLIN"          , "DEVHELP_VIRTTOLIN"         , EXP_16},
+    { 406, "DEVHELP_LINTOPAGELIST"      , "DEVHELP_LINTOPAGELIST"     , EXP_16},
+    { 407, "DEVHELP_VERIFYACCESS"       , "DEVHELP_VERIFYACCESS"      , EXP_16},
+
+    /* Access functions */
+    { 500, "ptdaGet_ptda_environ"       , "ptdaGet_ptda_environ"      , EXP_32},
+    { 501, "ptdaGet_ptda_handle"        , "ptdaGet_ptda_handle"       , EXP_32},
+    { 502, "ptdaGet_ptda_module"        , "ptdaGet_ptda_module"       , EXP_32},
+    { 503, "ptda_ptda_ptdasem"          , "ptda_ptda_ptdasem"         , EXP_32},
+    { 504, "ptdaGet_ptda_pBeginLIBPATH" , "ptdaGet_ptda_pBeginLIBPATH", EXP_32},
+    { 505, "ptdaGet_ptda_pEndLIBPATH"   , "ptdaGet_ptda_pEndLIBPATH"  , EXP_32},
+    { 506, "tcbGetTCBFailErr"           , "tcbGetTCBFailErr"          , EXP_32},
+    { 507, "tcbSetTCBFailErr"           , "tcbSetTCBFailErr"          , EXP_32},
+    { 508, "GetEnv"                     , "GetEnv"                    , EXP_32},
+    { 509, "ScanEnv"                    , "ScanEnv"                   , EXP_32},
+
+    /* kLib functions */
+    { 600, "kAssertMsg"                 , "kAssertMsg"                , EXP_32},
+    { 601, "kLogFixPrintf1"             , "kLogFixPrintf1"            , EXP_32},
+    { 602, "kLogFixPrintf2"             , "kLogFixPrintf2"            , EXP_32},
+    { 603, "kLogv"                      , "kLogv"                     , EXP_32},
+    { 604, "kLogExit"                   , "kLogExit"                  , EXP_32},
+    { 605, "kLogEntry"                  , "kLogEntry"                 , EXP_32},
+    { 606, "kLogStop"                   , "kLogStop"                  , EXP_32},
+    { 607, "kLogStart"                  , "kLogStart"                 , EXP_32},
+    { 608, "kLogTermMod"                , "kLogTermMod"               , EXP_32},
+    { 609, "kLogInitMod"                , "kLogInitMod"               , EXP_32},
+    { 610, "kLog"                       , "kLog"                      , EXP_32},
+    { 611, "kLogInit"                   , "kLogInit"                  , EXP_32},
+    { 612, "kLIFOPop"                   , "kLIFOPop"                  , EXP_32},
+    { 613, "kLIFOPush"                  , "kLIFOPush"                 , EXP_32},
+    { 614, "kFIFORemove"                , "kFIFORemove"               , EXP_32},
+    { 615, "kFIFOInsert"                , "kFIFOInsert"               , EXP_32},
+    { 616, "kFIFOAtomicRemove"          , "kFIFOAtomicRemove"         , EXP_32},
+    { 617, "kFIFOAtomicInsert"          , "kFIFOAtomicInsert"         , EXP_32},
+    { 618, "kLIFOAtomicPop"             , "kLIFOAtomicPop"            , EXP_32},
+    { 619, "kLIFOAtomicPush"            , "kLIFOAtomicPush"           , EXP_32},
+    { 620, "kAtomicSetEqual"            , "kAtomicSetEqual"           , EXP_32},
+    { 621, "kAtomicSet"                 , "kAtomicSet"                , EXP_32},
+    { 622, "kAtomicIncWrap"             , "kAtomicIncWrap"            , EXP_32},
+    { 623, "kAtomicInc"                 , "kAtomicInc"                , EXP_32},
+    { 624, "kAtomicDec"                 , "kAtomicDec"                , EXP_32},
+    { 625, "GetSS"                      , "GetSS"                     , EXP_32},
+    { 626, "GetGS"                      , "GetGS"                     , EXP_32},
+    { 627, "GetFS"                      , "GetFS"                     , EXP_32},
+    { 628, "GetES"                      , "GetES"                     , EXP_32},
+    { 629, "GetDS"                      , "GetDS"                     , EXP_32},
+    { 630, "GetCS"                      , "GetCS"                     , EXP_32},
+    { 631, "AVLStrRemove"              , "AVLStrRemove"               , EXP_32},
+    { 632, "AVLStrInsert"              , "AVLStrInsert"               , EXP_32},
+    { 633, "AVLStrGet"                 , "AVLStrGet"                  , EXP_32},
+    { 634, "AVLStrBeginEnumTree"       , "AVLStrBeginEnumTree"        , EXP_32},
+    { 635, "AVLStrGetNextNode"         , "AVLStrGetNextNode"          , EXP_32},
+    { 636, "AVLStrDoWithAll"           , "AVLStrDoWithAll"            , EXP_32},
+    { 637, "AVLStrIRemove"             , "AVLStrIRemove"              , EXP_32},
+    { 638, "AVLStrIInsert"             , "AVLStrIInsert"              , EXP_32},
+    { 639, "AVLStrIGet"                , "AVLStrIGet"                 , EXP_32},
+    { 640, "AVLStrIBeginEnumTree"      , "AVLStrIBeginEnumTree"       , EXP_32},
+    { 641, "AVLStrIGetNextNode"        , "AVLStrIGetNextNode"         , EXP_32},
+    { 642, "AVLStrIDoWithAll"          , "AVLStrIDoWithAll"           , EXP_32},
+    { 643, "AVLPVRemove"               , "AVLPVRemove"                , EXP_32},
+    { 644, "AVLPVInsert"               , "AVLPVInsert"                , EXP_32},
+    { 645, "AVLPVGet"                  , "AVLPVGet"                   , EXP_32},
+    { 646, "AVLPVGetWithParent"        , "AVLPVGetWithParent"         , EXP_32},
+    { 647, "AVLPVGetWithAdjacentNodes" , "AVLPVGetWithAdjacentNodes"  , EXP_32},
+    { 648, "AVLPVGetBestFit"           , "AVLPVGetBestFit"            , EXP_32},
+    { 649, "AVLPVRemoveBestFit"        , "AVLPVRemoveBestFit"         , EXP_32},
+    { 650, "AVLPVBeginEnumTree"        , "AVLPVBeginEnumTree"         , EXP_32},
+    { 651, "AVLPVGetNextNode"          , "AVLPVGetNextNode"           , EXP_32},
+    { 652, "AVLPVDoWithAll"            , "AVLPVDoWithAll"             , EXP_32},
+    { 653, "AVLULRemove"               , "AVLULRemove"                , EXP_32},
+    { 654, "AVLULInsert"               , "AVLULInsert"                , EXP_32},
+    { 655, "AVLULGet"                  , "AVLULGet"                   , EXP_32},
+    { 656, "AVLULGetWithParent"        , "AVLULGetWithParent"         , EXP_32},
+    { 657, "AVLULGetWithAdjacentNodes" , "AVLULGetWithAdjacentNodes"  , EXP_32},
+    { 658, "AVLULGetBestFit"           , "AVLULGetBestFit"            , EXP_32},
+    { 659, "AVLULRemoveBestFit"        , "AVLULRemoveBestFit"         , EXP_32},
+    { 660, "AVLULBeginEnumTree"        , "AVLULBeginEnumTree"         , EXP_32},
+    { 661, "AVLULGetNextNode"          , "AVLULGetNextNode"           , EXP_32},
+    { 662, "AVLULDoWithAll"            , "AVLULDoWithAll"             , EXP_32},
+    { 663, "AVLULMRemove"              , "AVLULMRemove"               , EXP_32},
+    { 664, "AVLULMRemove2"             , "AVLULMRemove2"              , EXP_32},
+    { 665, "AVLULMInsert"              , "AVLULMInsert"               , EXP_32},
+    { 666, "AVLULMGet"                 , "AVLULMGet"                  , EXP_32},
+    { 667, "AVLULMGet2"                , "AVLULMGet2"                 , EXP_32},
+    { 668, "AVLULMGetWithParent"       , "AVLULMGetWithParent"        , EXP_32},
+    { 669, "AVLULMGetWithAdjacentNodes", "AVLULMGetWithAdjacentNodes" , EXP_32},
+    { 670, "AVLULMGetBestFit"          , "AVLULMGetBestFit"           , EXP_32},
+    { 671, "AVLULMRemoveBestFit"       , "AVLULMRemoveBestFit"        , EXP_32},
+    { 672, "AVLULMBeginEnumTree"       , "AVLULMBeginEnumTree"        , EXP_32},
+    { 673, "AVLULMGetNextNode"         , "AVLULMGetNextNode"          , EXP_32},
+    { 674, "AVLULMDoWithAll"           , "AVLULMDoWithAll"            , EXP_32},
 };
+
+
+
 
 
 /*******************************************************************************
@@ -293,7 +387,7 @@ int GenerateCalltab(void)
     /*
      * Write Start of file.
      */
-    printf16("; $Id: MkCallTab.c,v 1.3 2002-03-31 19:23:41 bird Exp $\n"
+    printf16("; $Id: MkCallTab.c,v 1.4 2002-04-01 12:46:35 bird Exp $\n"
              ";\n"
              "; Autogenerated calltab file.\n"
              ";\n"
@@ -423,6 +517,12 @@ int GenerateCalltab(void)
                      45 - 2 - kstrlen(pszMacro) - aImportTab[i].cchName - kstrlen(pszExtra),
                      "",
                      i);
+            if ((aImportTab[i].fType & EPT_WRAPPED))
+            {
+                printf16("extrn %s%s:NEAR\n",
+                         pszName,
+                         aImportTab[i].achExtra);
+            }
         }
     }
 
@@ -1008,7 +1108,7 @@ int findNextOrdinal(int iOrd, char *pszName, char *pszNameExp, int *pfType, int 
         {
             iOrdRet = aImportTab[i].iOrdinal;
             kstrcpy(pszName, aImportTab[i].achName);
-            kstrcat(pszName, EPTWrapped(aImportTab[i]) ? "_wrapped" : aImportTab[i].achExtra);
+            kstrcat(pszName, /*EPTWrapped(aImportTab[i]) ? "_wrapped" :*/ aImportTab[i].achExtra);
             kstrcpy(pszNameExp, aImportTab[i].achName);
             kstrcat(pszNameExp, aImportTab[i].achExtra);
             if (EPTVar(aImportTab[i]))
@@ -1036,7 +1136,7 @@ int findNextOrdinal(int iOrd, char *pszName, char *pszNameExp, int *pfType, int 
             {
                 iOrdRet = aImportTab[i].iOrdinal + ORD_ORGDISPLACEMENT;
                 kstrcpy(pszName, aImportTab[i].achName);
-                kstrcat(pszName, EPTWrapped(aImportTab[i]) ? "_wrapped" : aImportTab[i].achExtra);
+                kstrcat(pszName, /*EPTWrapped(aImportTab[i]) ? "_wrapped" :*/ aImportTab[i].achExtra);
 
                 if (aImportTab[i].achName[0] == '_')
                 {
@@ -1071,7 +1171,7 @@ int GenerateDefFile(void)
     char    szName[64];
     char    szNameExp[64];
 
-    printf16(";/* $Id: MkCallTab.c,v 1.3 2002-03-31 19:23:41 bird Exp $\n"
+    printf16(";/* $Id: MkCallTab.c,v 1.4 2002-04-01 12:46:35 bird Exp $\n"
              "; *\n"
              "; * Autogenerated .c file.\n"
              "; *\n"
@@ -1107,7 +1207,7 @@ int GenerateTstFakers(void)
     /*
      * Write Start of file.
      */
-    printf16("/* $Id: MkCallTab.c,v 1.3 2002-03-31 19:23:41 bird Exp $\n"
+    printf16("/* $Id: MkCallTab.c,v 1.4 2002-04-01 12:46:35 bird Exp $\n"
              " *\n"
              " * Autogenerated TstFakers.c file.\n"
              " *\n"
