@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.34 2001-02-01 18:01:52 sandervl Exp $
+# $Id: makefile,v 1.35 2001-05-28 09:17:55 phaller Exp $
 
 #
 # Odin32 API
@@ -24,6 +24,7 @@ CDEFINES    = $(CDEFINES) -DINVERT
 #
 OBJS = \
 $(OBJDIR)\gdi32.obj \
+$(OBJDIR)\icm.obj \
 $(OBJDIR)\driver.obj \
 $(OBJDIR)\opengl.obj \
 $(OBJDIR)\callback.obj \
