@@ -1,4 +1,4 @@
-/* $Id: stubs.cpp,v 1.6 2000-04-05 22:28:48 davidr Exp $ */
+/* $Id: stubs.cpp,v 1.7 2000-11-21 12:16:22 sandervl Exp $ */
 /* 
  * Win32 COM/OLE stubs for OS/2
  * 
@@ -425,30 +425,6 @@ HRESULT WIN32API VarDecFromUI2(USHORT uiIn, DECIMAL *pdecOut)
 HRESULT WIN32API VarDecFromUI4(ULONG ulIn, DECIMAL *pdecOut)
 {
     dprintf(("OLEAUT32: VarDecFromUI4 - stub"));
-    return S_OK;
-}
-
-//*****************************************************************************
-//*****************************************************************************
-HRESULT WIN32API GetErrorInfo(ULONG dwReserved, IErrorInfo ** pperrinfo)
-{
-    dprintf(("OLEAUT32: GetErrorInfo - stub"));
-    return S_OK;
-}
-
-//*****************************************************************************
-//*****************************************************************************
-HRESULT WIN32API SetErrorInfo(ULONG dwReserved, IErrorInfo * perrinfo)
-{
-    dprintf(("OLEAUT32: SetErrorInfo - stub"));
-    return S_OK;
-}
-
-//*****************************************************************************
-//*****************************************************************************
-HRESULT WIN32API CreateErrorInfo(ICreateErrorInfo ** pperrinfo)
-{
-    dprintf(("OLEAUT32: CreateErrorInfo - stub"));
     return S_OK;
 }
 
