@@ -1,4 +1,4 @@
-/* $Id: versionos2.h,v 1.15 2001-01-13 09:26:36 bird Exp $ */
+/* $Id: versionos2.h,v 1.16 2001-01-15 04:27:42 bird Exp $ */
 
 #ifndef __VERSIONOS2__H__
 #define __VERSIONOS2__H__
@@ -27,7 +27,7 @@
 #define ODIN32_VERSION_MAJOR 0
 #define ODIN32_VERSION_MINOR 5
 #define ODIN32_VERSION       "0.5"
-#define ODIN32_BUILD_NR       305        /* This started at 300 on the 17th Des 2000. */
+#define ODIN32_BUILD_NR       306        /* This started at 300 on the 17th Des 2000. */
 
 
 #ifndef SYSTEM
@@ -81,6 +81,7 @@ ULONG SYSTEM GetVersionSize(char *modname);
 #define WINVERSION_MAX          3
 
 #endif
+
 
 
 
