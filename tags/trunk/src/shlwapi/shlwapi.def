@@ -1,4 +1,4 @@
-; $Id: shlwapi.def,v 1.8 2000-03-27 21:46:20 sandervl Exp $
+; $Id: shlwapi.def,v 1.9 2000-03-30 15:40:44 cbratschi Exp $
 
 LIBRARY SHLWAPI INITINSTANCE TERMINSTANCE
 DATA MULTIPLE NONSHARED
@@ -416,6 +416,11 @@ IMPORTS
     ;
 
 EXPORTS
+    SHLWAPI_8           = _SHLWAPI_8@4                         @8
+    SHLWAPI_9           = _SHLWAPI_9@4                         @9
+    SHLWAPI_10          = _SHLWAPI_10@4                        @10
+    SHLWAPI_16          = _SHLWAPI_16@4                        @16
+
     PathAddBackslashA = _PathAddBackslashA@4                    @169
     PathAddBackslashW = _PathAddBackslashW@4                    @170
 
@@ -464,11 +469,17 @@ EXPORTS
     PathSkipRootA        = _PathSkipRootA@4                     @257
     PathSkipRootW        = _PathSkipRootW@4                     @258
 
+    PathStripToRootA     = _PathStripToRootA@4                  @261
+    PathStripToRootW     = _PathStripToRootW@4                  @262
+
     PathUnquoteSpacesA   = _PathUnquoteSpacesA@4                @265
     PathUnquoteSpacesW   = _PathUnquoteSpacesW@4                @266
 
     SHGetValueA          = _SHGetValueA@24                      @281
     SHGetValueW          = _SHGetValueW@24                      @282
+
+    PathFindExtensionA   = _PathFindExtensionA@4                @191
+    PathFindExtensionW   = _PathFindExtensionW@4                @192
 
     SHRegGetBoolUSValueA = _SHRegGetBoolUSValueA@20             @301
     SHRegGetBoolUSValueW = _SHRegGetBoolUSValueW@20             @302
@@ -490,7 +501,7 @@ EXPORTS
     StrStrIA             = _StrStrIA@8                          @355
     StrStrIW             = _StrStrIW@8                          @356
 
+    StrToIntA            = _StrToIntA@4                         @358
+
     StrRetToBufA         = _StrRetToBufA@16                     @400
     StrRetToBufW         = _StrRetToBufW@16                     @401
-
-
