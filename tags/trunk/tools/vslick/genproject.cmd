@@ -1,4 +1,4 @@
-/* $Id: genproject.cmd,v 1.1 2000-01-23 03:33:08 bird Exp $
+/* $Id: genproject.cmd,v 1.2 2000-04-21 22:39:32 bird Exp $
  *
  * This script generates a Visual Slick project of the source and include
  * files found in the directory tree starting at the current directory.
@@ -13,7 +13,7 @@
 
     parse arg sArg
 
-    sIncludes.0 = 0;
+    sIncludes = '';
     sProjFile = '';
 
     sArgs.0 = 0;
@@ -48,11 +48,11 @@
         sArg = sArgs.i;
         if substr(sArg, 1, 1) == '-' | substr(sArg, 1, 1) == '/' then do
             /* option */
-            sArg = substr(sArg, 2);
-            chArg = substr(sArg, 1, 1);
+            chArg = substr(sArg, 2, 1);
+            sArg  = substr(sArg, 3);
             select
                 when chArg = 'I' | chArg = 'i' then do
-
+                    sIncludes = sIncludes||sArg;
                 end
 
                 when chArg = 'h' | chArg = '?' | sArg = '-help' then do
@@ -60,7 +60,7 @@
                 end
 
                 otherwise  do
-                    say 'illegal option: 'sArg
+                    say 'illegal option: 'chArg||sArg
                     call syntax;
                 end
             end
@@ -76,14 +76,7 @@
     end /* do */
 
     say 'Will now generate :' sProjFile
-    sInclude='';
-    do i = 1 to sIncludes.0
-        if i = 1 then
-            say 'Includes specified:' sIncludes.i
-        else
-            say '                   ' sIncludes.i
-        sInclude=sInclude||sIncludes.i||';'
-    end
+    say 'Includes specified:' sIncludes
 
     /* delete old target files */
     call SysFileDelete sProjFile;
@@ -95,7 +88,7 @@
         call lineout sProjFile, '[COMPILER]'
         call lineout sProjFile, 'MACRO=odin32_maketagfile();\n'
         call lineout sProjFile, 'FILTEREXPANSION=1 1 0 0 1'
-        call lineout sProjFile, 'compile=concur|capture|clear|:Compile:&Compile,nmake object\%n.obj'
+        call lineout sProjFile, 'compile=concur|capture|clear|:Compile:&Compile,nmake %n.obj'
         call lineout sProjFile, 'make=concur|capture|clear|:Build:&Build,nmake'
         call lineout sProjFile, 'rebuild=concur|capture|clear|:Rebuild:&Rebuild,nmake /A'
         call lineout sProjFile, 'debug=:Debug:&Debug,'
@@ -105,7 +98,7 @@
         call lineout sProjFile, 'usertool_resource_editor=hide|:Resource Editor:Resource Editor,dlgedit'
         call lineout sProjFile, 'workingdir='directory()
         /* TODO */
-        call lineout sProjFile, 'includedirs='||sInclude||'%(INCLUDE)'
+        call lineout sProjFile, 'includedirs='||sIncludes||'%(INCLUDE)'
         call lineout sProjFile, 'tagfiles='
         call lineout sProjFile, 'reffile='
 
@@ -197,7 +190,7 @@ filterDirectory: procedure
         i = i + 1;
     sDir = substr(sDir, i);
 
-    sExcludeDir = 'CVS;';
+    sExcludeDir = 'CVS;old;new;object;list;bin;obj;';
 
     /* look for sExt in sIncludeExt */
     do while pos(';', sExcludeDir) > 0
