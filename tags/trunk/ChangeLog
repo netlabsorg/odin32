@@ -1,7 +1,8 @@
-/* $Id: ChangeLog,v 1.2696 2004-03-12 10:59:36 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.2697 2004-03-12 11:44:13 sandervl Exp $ */
 
  2004-03-12: Sander van Leeuwen <sandervl@innotek   >
     - SHELL32:  o Disabled Shell_NotifyIconA
+    - USER32:   o SPI_GETNONCLIENTMETRICS: corrected caption width and height
 
  2004-03-11: Sander van Leeuwen <sandervl@innotek   >
     - USER32:   o More WH_MOUSE changes
