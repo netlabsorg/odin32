@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.115 1999-12-19 17:46:25 cbratschi Exp $ */
+/* $Id: win32wbase.cpp,v 1.116 1999-12-19 19:55:41 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -281,7 +281,7 @@ BOOL Win32BaseWindow::isChild()
 //******************************************************************************
 BOOL Win32BaseWindow::IsWindowUnicode()
 {
-//    dprintf2(("IsWindowUnicode %x %d", getWindowHandle(), WINPROC_GetProcType(getWindowProc()) == WIN_PROC_32W));
+    dprintf2(("IsWindowUnicode %x %d", getWindowHandle(), WINPROC_GetProcType(getWindowProc()) == WIN_PROC_32W));
     return (WINPROC_GetProcType(getWindowProc()) == WIN_PROC_32W);
 }
 //******************************************************************************
@@ -1955,7 +1955,7 @@ LRESULT Win32BaseWindow::SendMessageW(ULONG Msg, WPARAM wParam, LPARAM lParam)
 
     //if the destination window is created by this process & thread, call window proc directly
     if(dwProcessId == currentProcessId && dwThreadId == GetCurrentThreadId()) {
-        return SendInternalMessageA(Msg, wParam, lParam);
+        return SendInternalMessageW(Msg, wParam, lParam);
     }
     //otherwise use WinSendMsg to send it to the right process/thread
     packet = (POSTMSG_PACKET *)_smalloc(sizeof(POSTMSG_PACKET));
