@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.54 1999-11-17 17:04:53 cbratschi Exp $ */
+/* $Id: pmwindow.cpp,v 1.55 1999-11-23 19:34:19 sandervl Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -11,6 +11,8 @@
  */
 #define INCL_WIN
 #define INCL_GPI
+#define INCL_DEV                /* Device Function definitions  */
+#define INCL_GPICONTROL         /* GPI control Functions        */
 
 #include <os2wrap.h>
 #include <stdlib.h>
@@ -38,6 +40,7 @@ HAB  hab = 0;
 RECTL desktopRectl = {0};
 ULONG ScreenWidth  = 0;
 ULONG ScreenHeight = 0;
+ULONG ScreenBitsPerPel = 0;
 
 //Used for key translation while processing WM_CHAR message
 USHORT virtualKeyTable [66] = {
@@ -174,6 +177,17 @@ BOOL InitPM()
    WinQueryWindowRect(HWND_DESKTOP, &desktopRectl);
    ScreenWidth  = desktopRectl.xRight;
    ScreenHeight = desktopRectl.yTop;
+   
+    
+   HDC   hdc;              /* Device-context handle                */
+   /* context data structure */
+   DEVOPENSTRUC dop = {NULL, "DISPLAY", NULL, NULL, NULL, NULL,
+                       NULL, NULL, NULL};
+ 
+   /* create memory device context */
+   hdc = DevOpenDC(hab, OD_MEMORY, "*", 5L, (PDEVOPENDATA)&dop, NULLHANDLE);
+   DevQueryCaps(hdc, CAPS_COLOR_BITCOUNT, 1, (PLONG)&ScreenBitsPerPel);
+   DevCloseDC(hdc);
 
    dprintf(("InitPM: Desktop (%d,%d)", ScreenWidth, ScreenHeight));
    return OSLibInitMsgQueue();
