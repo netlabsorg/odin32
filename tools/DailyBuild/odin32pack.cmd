@@ -1,4 +1,4 @@
-/* $Id: odin32pack.cmd,v 1.16 2001-04-18 08:00:24 bird Exp $
+/* $Id: odin32pack.cmd,v 1.17 2001-06-02 13:15:35 bird Exp $
  *
  * Make the two zip files.
  *
@@ -39,7 +39,10 @@
     /*
      * Make copy.
      */
-    'copy *.wpi *.zip e:\DailyBuildArchive\'
+    if (DATE('B')//7 = 3) then
+        'copy *.wpi e:\DailyBuildArchive\'
+    else
+        'copy *.zip e:\DailyBuildArchive\'
 
     /* return successfully */
     exit(0);
