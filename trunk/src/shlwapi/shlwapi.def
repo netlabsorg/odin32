@@ -1,4 +1,4 @@
-; $Id: shlwapi.def,v 1.26 2001-08-30 23:37:03 phaller Exp $
+; $Id: shlwapi.def,v 1.27 2001-08-31 19:56:34 phaller Exp $
 
 ; updated export ordinals to NT4 SP6 version of SHLWAPI.DLL
 ; Note: W95/W98 has DIFFERENT export ordinals
@@ -194,7 +194,8 @@ EXPORTS
                              _SHLWAPI_223@4                       @223 NONAME
                              _SHLWAPI_237@4                       @237 NONAME
                              _SHLWAPI_240@16                      @240 NONAME
-                             _SHLWAPI_241@0                       @241 NONAME
+; PH                          _SHLWAPI_241@0                       @241 NONAME
+                             _PathRemoveArgsA@4                   @241 NONAME
                              _SHLWAPI_243@20                      @243 NONAME
 ;   AssocCreate            = _AssocCreate@20                      @253 ;by name
 ;   AssocQueryKeyA         = _AssocQueryKeyA@20                   @254 ;by name
@@ -202,7 +203,7 @@ EXPORTS
                              _SHLWAPI_266@16                      @266 NONAME
                              _SHLWAPI_267@16                      @267 NONAME
                              _SHLWAPI_268@8                       @268 NONAME
-                             _SHLWAPI_276@0                       @276 NONAME
+                             _SHLWAPI_276@0                       @276 NONAME ; -> SHEnumKeyExA
                              _SHLWAPI_278@24                      @278 NONAME
                              _WritePrivateProfileStringW@16       @298 NONAME
 
