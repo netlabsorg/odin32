@@ -70,6 +70,7 @@ rc = lineout(instfile, '');
 rc = lineout(instfile, 'Odin is available thanks to the work of the following people:');
 rc = lineout(instfile, '');
 rc = lineout(instfile, '     Christoph Bratschi');
+rc = lineout(instfile, '     Oliver Braun');
 rc = lineout(instfile, '     Edgar Buerkle');
 rc = lineout(instfile, '     Yuri Dario');
 rc = lineout(instfile, '     Przemyslaw Dobrowolski');
