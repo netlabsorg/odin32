@@ -1,4 +1,10 @@
-/* $Id: changelog,v 1.2046 2002-04-13 07:44:08 bird Exp $ */
+/* $Id: changelog,v 1.2047 2002-04-16 00:23:58 bird Exp $ */
+
+ 2002-04-13: knut st. osmundsen <bird@anduin.net>
+    - KERNEL32: o Cache CDROM drive letters in OSLibGetDriveType.
+                o Added testcases to makescripts in the testcase subdir.
+                  'nmake build testcase' from that dir will build test
+                  program(s) and run testcases.
 
  2002-04-13: knut st. osmundsen <bird@anduin.net>
     - Windefs.h:
