@@ -1,4 +1,4 @@
-/* $Id: caret.cpp,v 1.6 1999-10-22 18:11:42 sandervl Exp $ */
+/* $Id: caret.cpp,v 1.7 1999-10-25 20:17:16 sandervl Exp $ */
 
 /*
  * Caret functions for USER32
@@ -32,7 +32,7 @@
 
 #pragma data_seg(_GLOBALDATA)
 
-static HWND hwndCaret;
+static HWND hwndCaret = 0;
 static HBITMAP hbmCaret;
 static int CaretWidth, CaretHeight;
 static int CaretPosX, CaretPosY;
@@ -43,7 +43,7 @@ static BOOL CaretIsVisible;
 
 BOOL WIN32API CreateCaret (HWND hwnd, HBITMAP hBmp, int width, int height)
 {
-   dprintf(("USER32:  CreateCaret"));
+   dprintf(("USER32:  CreateCaret %x", hwnd));
 
    if (hwnd == NULLHANDLE)
    {
@@ -215,7 +215,7 @@ BOOL WIN32API ShowCaret (HWND hwnd)
 {
    BOOL   rc = FALSE;
 
-   dprintf(("USER32:  ShowCaret"));
+   dprintf(("USER32:  ShowCaret %x", hwnd));
 
    CaretIsVisible = TRUE;
    rc = _ShowCaret (Win32BaseWindow::Win32ToOS2Handle (hwnd));

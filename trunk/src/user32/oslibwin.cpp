@@ -1,4 +1,4 @@
-/* $Id: oslibwin.cpp,v 1.35 1999-10-23 23:04:35 sandervl Exp $ */
+/* $Id: oslibwin.cpp,v 1.36 1999-10-25 20:17:19 sandervl Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -198,12 +198,18 @@ BOOL OSLibWinConvertStyle(ULONG dwStyle, ULONG *dwExStyle, ULONG *OSWinStyle, UL
 //******************************************************************************
 BOOL OSLibWinSetWindowULong(HWND hwnd, ULONG offset, ULONG value)
 {
+  if(offset == OSLIB_QWL_USER)
+	offset = QWL_USER;
+
   return WinSetWindowULong(hwnd, offset, value);
 }
 //******************************************************************************
 //******************************************************************************
 ULONG OSLibWinGetWindowULong(HWND hwnd, ULONG offset)
 {
+  if(offset == OSLIB_QWL_USER)
+	offset = QWL_USER;
+
   return WinQueryWindowULong(hwnd, offset);
 }
 //******************************************************************************
