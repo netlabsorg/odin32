@@ -1,7 +1,7 @@
- /* $Id: changelog,v 1.403 1999-11-03 18:19:29 phaller Exp $ */
+ /* $Id: changelog,v 1.404 1999-11-03 19:52:55 sandervl Exp $ */
 
  99-11-03: Christoph Bratschi <cbratschi@datacomm.ch>
-	USER32: fixed modal dialogs
+	- USER32: fixed modal dialogs
 
  99-11-03: Patrick Haller <phaller@gmx.net>
 	- KERNEL32:	Fix: 	undocumented behaviour in SearchPathA 
@@ -9,9 +9,9 @@
 	- USER32:	Fix:	TrackPopupMenuEx lpPM can be NULL
 
  99-11-02  Markus Montkowski <mmontkowski@gmx.de>
-                 Changed debug output to DDRAW: ...
+	- DDRAW: Changed debug output to DDRAW: ...
                  Copied Framebuffer if in colorconversion mode for Normal Blits to
-                  the primary surface. => Map Editor of Red Alert works.
+                 the primary surface. => Map Editor of Red Alert works.
 
  00-11-02: Achim Hasenmueller <achimha@innotek.de>
         - COMCTL32: Incorporated latest WINE 991031 updates
