@@ -1,4 +1,4 @@
-/* $Id: oslibmsg.cpp,v 1.46 2001-10-25 15:35:53 phaller Exp $ */
+/* $Id: oslibmsg.cpp,v 1.47 2001-10-26 09:10:12 phaller Exp $ */
 /*
  * Window message translation functions for OS/2
  *
@@ -20,6 +20,7 @@
 #define  INCL_PM
 #define  INCL_DOSPROCESS
 #include <os2wrap.h>
+#include <odinwrap.h>
 #include <string.h>
 #include <misc.h>
 #include "oslibmsg.h"
@@ -36,6 +37,9 @@
 
 #define DBG_LOCALLOG	DBG_oslibmsg
 #include "dbglocal.h"
+
+
+ODINDEBUGCHANNEL(USER32-OSLIBMSG)
 
 
 
@@ -115,6 +119,7 @@ MSGTRANSTAB MsgTransTab[] = {
 //******************************************************************************
 void WinToOS2MsgTranslate(MSG *winMsg, QMSG *os2Msg, BOOL isUnicode)
 {
+  dprintf(("WinToOS2MsgTranslate not implemented"));
 //  memcpy(os2Msg, winMsg, sizeof(MSG));
 //  os2Msg->hwnd = Win32ToOS2Handle(winMsg->hwnd);
 //  os2Msg->reserved = 0;
@@ -200,7 +205,7 @@ LONG OSLibWinDispatchMsg(MSG *msg, BOOL isUnicode)
 }
 //******************************************************************************
 //******************************************************************************
-BOOL OSLibWinGetMsg(LPMSG pMsg, HWND hwnd, UINT uMsgFilterMin, UINT uMsgFilterMax,
+BOOL i_OSLibWinGetMsg(LPMSG pMsg, HWND hwnd, UINT uMsgFilterMin, UINT uMsgFilterMax,
                     BOOL isUnicode)
 {
  BOOL rc, eaten;
@@ -238,6 +243,15 @@ BOOL OSLibWinGetMsg(LPMSG pMsg, HWND hwnd, UINT uMsgFilterMin, UINT uMsgFilterMa
         memcpy(pMsg, &teb->o.odin.msgWCHAR, sizeof(MSG));
         teb->o.odin.os2msg.msg  = 0;
         teb->o.odin.os2msg.hwnd = 0;
+    
+        // @@@PH verify this
+        // if this is a keyup or keydown message, we've got to
+        // call the keyboard hook here
+        if(pMsg->message <= WINWM_KEYLAST && pMsg->message >= WINWM_KEYDOWN)
+        {
+          ProcessKbdHook(pMsg, TRUE);
+        }
+    
         return (pMsg->message != WINWM_QUIT);
   }
 
@@ -287,10 +301,6 @@ continuegetmsg:
   // send keyboard messages to the registered hooks
   if(pMsg->message <= WINWM_KEYLAST && pMsg->message >= WINWM_KEYDOWN)
   {
-//    if(ProcessKbdHookLL(pMsg, TRUE))
-//      goto continuegetmsg;
-    
-    // @@@PH
     // only supposed to be called upon WM_KEYDOWN
     // and WM_KEYUP according to docs.
     if(ProcessKbdHook(pMsg, TRUE))
@@ -298,6 +308,16 @@ continuegetmsg:
   }
   return rc;
 }
+BOOL OSLibWinGetMsg(LPMSG pMsg, HWND hwnd, UINT uMsgFilterMin, UINT uMsgFilterMax,
+                    BOOL isUnicode)
+{
+  dprintf(("OSLibWinGetMsg enter"));
+  BOOL fRes = i_OSLibWinGetMsg(pMsg, hwnd, uMsgFilterMin, uMsgFilterMax, isUnicode);
+  dprintf(("OSLibWinGetMsg leave"));
+  return fRes;
+}
+
+
 //******************************************************************************
 //PeekMessage retrieves only messages associated with the window identified by the 
 //hwnd parameter or any of its children as specified by the IsChild function, and within 
@@ -310,7 +330,7 @@ continuegetmsg:
 //available messages (no range filtering is performed). 
 //TODO: Not working as specified right now!
 //******************************************************************************
-BOOL OSLibWinPeekMsg(LPMSG pMsg, HWND hwnd, UINT uMsgFilterMin, UINT uMsgFilterMax,
+BOOL i_OSLibWinPeekMsg(LPMSG pMsg, HWND hwnd, UINT uMsgFilterMin, UINT uMsgFilterMax,
                      DWORD fRemove, BOOL isUnicode)
 {
  BOOL  rc, eaten;
@@ -349,6 +369,14 @@ BOOL OSLibWinPeekMsg(LPMSG pMsg, HWND hwnd, UINT uMsgFilterMin, UINT uMsgFilterM
             teb->o.odin.os2msg.hwnd = 0;
         }
         memcpy(pMsg, &teb->o.odin.msgWCHAR, sizeof(MSG));
+    
+        // @@@PH verify this
+        // if this is a keyup or keydown message, we've got to
+        // call the keyboard hook here
+        if(pMsg->message <= WINWM_KEYLAST && pMsg->message >= WINWM_KEYDOWN)
+        {
+          ProcessKbdHook(pMsg, fRemove);
+        }
         return TRUE;
   }
 
@@ -392,10 +420,6 @@ continuepeekmsg:
   // send keyboard messages to the registered hooks
   if(pMsg->message <= WINWM_KEYLAST && pMsg->message >= WINWM_KEYDOWN)
   {
-//    if(ProcessKbdHookLL(pMsg, fRemove))
-//      goto continuepeekmsg;
-
-    // @@@PH
     // only supposed to be called upon WM_KEYDOWN
     // and WM_KEYUP according to docs.
     if(ProcessKbdHook(pMsg, fRemove))
@@ -404,6 +428,15 @@ continuepeekmsg:
 
   return rc;
 }
+BOOL OSLibWinPeekMsg(LPMSG pMsg, HWND hwnd, UINT uMsgFilterMin, UINT uMsgFilterMax,
+                    BOOL fRemove, BOOL isUnicode)
+{
+  dprintf(("OSLibWinPeekMsg enter"));
+  BOOL fRes = i_OSLibWinPeekMsg(pMsg, hwnd, uMsgFilterMin, uMsgFilterMax, fRemove, isUnicode);
+  dprintf(("OSLibWinPeekMsg leave"));
+  return fRes;
+}
+
 //******************************************************************************
 //******************************************************************************
 ULONG OSLibWinQueryMsgTime()

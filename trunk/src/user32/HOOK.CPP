@@ -1,4 +1,4 @@
-/* $Id: HOOK.CPP,v 1.29 2001-10-24 12:26:56 phaller Exp $ */
+/* $Id: HOOK.CPP,v 1.30 2001-10-26 09:10:12 phaller Exp $ */
 
 /*
  * Windows hook functions
@@ -817,9 +817,12 @@ BOOL ProcessKbdHook(LPMSG msg, BOOL remove )
 	    SendMessageA(msg->hwnd, WM_HELP, 0, (LPARAM)&hi);
 	}
     }
-
+  
+    // this undoc (don't care) bit isn't passed through to this hook
+    DWORD lParam = msg->lParam & ~0x02000000;
+  
     return (HOOK_CallHooksA( WH_KEYBOARD, remove ? HC_ACTION : HC_NOREMOVE,
-                             LOWORD (msg->wParam), msg->lParam )
+                             LOWORD (msg->wParam), lParam )
                              ? TRUE : FALSE);
 }
 
@@ -844,7 +847,7 @@ BOOL ProcessKbdHookLL(LPMSG msg, BOOL flagRemove, BOOL flagInjected )
   BOOL fAltDown = GetAsyncKeyState(VK_LMENU);
   
   kbhs.vkCode      = msg->wParam;
-  kbhs.scanCode    = ( (msg->lParam & 0x00ff0000) >> 16);
+  kbhs.scanCode    = ( (msg->lParam & 0x03ff0000) >> 16);
   
   BOOL fKeyUp      = (msg->message == WM_KEYUP) ||
                      (msg->message == WM_SYSKEYUP);

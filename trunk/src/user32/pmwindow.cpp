@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.158 2001-10-25 10:40:45 sandervl Exp $ */
+/* $Id: pmwindow.cpp,v 1.159 2001-10-26 09:10:12 phaller Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -44,6 +44,7 @@
 #include "syscolor.h"
 #include "options.h"
 #include "menu.h"
+#include <pmkbdhk.h>
 
 #define DBG_LOCALLOG    DBG_pmwindow
 #include "dbglocal.h"
@@ -501,7 +502,10 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
     case WM_DESTROYCLIPBOARD:
         win32wnd->DispatchMsgA(pWinMsg);
         break;
-
+      
+    case WM_CHAR_SPECIAL:
+      /* NO BREAK! FALLTHRU CASE! */
+      
     case WM_CHAR:
         dprintf(("OS2: WM_CHAR %x %x %x, %x %x", win32wnd->getWindowHandle(), mp1, mp2, pWinMsg->wParam, pWinMsg->lParam));
         win32wnd->MsgChar(pWinMsg);
