@@ -1,4 +1,4 @@
-/* $Id: dc.cpp,v 1.72 2000-10-08 14:03:48 sandervl Exp $ */
+/* $Id: dc.cpp,v 1.73 2000-10-08 14:09:40 sandervl Exp $ */
 
 /*
  * DC functions for USER32
@@ -342,7 +342,7 @@ VOID removeClientArea(Win32BaseWindow *window, pDCData pHps)
                    0,
                    SETUPDC_ORIGIN | SETUPDC_VISRGN | SETUPDC_RECALCCLIP);
    }
-   else dprintf(("removeClientArea: %x (%d,%d)", window->getWindowHandle(), point.x, point.y));
+   else dprintf2(("removeClientArea: %x (%d,%d)", window->getWindowHandle(), point.x, point.y));
 
 }
 //******************************************************************************
@@ -377,7 +377,7 @@ void selectClientArea(Win32BaseWindow *window, pDCData pHps)
    if(pHps->isClientArea) 
    {
 	//TODO: counter
-	dprintf(("WARNING: selectClientArea %x; already selected! origin (%d,%d) original origin (%d,%d)", window->getWindowHandle(), rcltemp.xLeft, rcltemp.yBottom, pHps->ptlOrigin.x, pHps->ptlOrigin.y));
+	dprintf2(("WARNING: selectClientArea %x; already selected! origin (%d,%d) original origin (%d,%d)", window->getWindowHandle(), rcltemp.xLeft, rcltemp.yBottom, pHps->ptlOrigin.x, pHps->ptlOrigin.y));
 	RECT rectWindow;
         RECTL rectWindowOS2;
 	GetWindowRect(window->getWindowHandle(), &rectWindow);
@@ -385,7 +385,7 @@ void selectClientArea(Win32BaseWindow *window, pDCData pHps)
 	if(rectWindowOS2.xLeft + rcl.xLeft != rcltemp.xLeft ||
            rectWindowOS2.yBottom + rcl.yBottom != rcltemp.yBottom) 
         {
-		dprintf(("WARNING: origin changed (%d,%d) instead of (%d,%d)!", rcltemp.xLeft, rcltemp.yBottom, rectWindowOS2.xLeft + rcl.xLeft, rectWindowOS2.yBottom + rcl.yBottom));
+		dprintf2(("WARNING: origin changed (%d,%d) instead of (%d,%d)!", rcltemp.xLeft, rcltemp.yBottom, rectWindowOS2.xLeft + rcl.xLeft, rectWindowOS2.yBottom + rcl.yBottom));
         	rcl.xLeft   += rectWindowOS2.xLeft;
         	rcl.xRight  += rectWindowOS2.xLeft;
         	rcl.yTop    += rectWindowOS2.yBottom;
