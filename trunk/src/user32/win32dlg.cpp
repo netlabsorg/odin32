@@ -1,4 +1,4 @@
-/* $Id: win32dlg.cpp,v 1.62 2001-05-11 08:39:44 sandervl Exp $ */
+/* $Id: win32dlg.cpp,v 1.63 2001-05-17 09:50:30 sandervl Exp $ */
 /*
  * Win32 Dialog Code for OS/2
  *
@@ -252,15 +252,21 @@ ULONG Win32Dialog::MsgCreate(HWND hwndOS2)
         fDialogInit = TRUE; //WM_NCCALCSIZE can now be sent to dialog procedure
 
         HWND hwndPreInitFocus = GetFocus();
-        if(SendInternalMessageA(WM_INITDIALOG, (WPARAM)hwndFocus, param)) {
-            SetFocus(hwndFocus);
+        if(SendInternalMessageA(WM_INITDIALOG, (WPARAM)hwndFocus, param)) 
+        {
+            /* check where the focus is again,
+	     * some controls status might have changed in WM_INITDIALOG */
+            hwndFocus = GetNextDlgTabItem( getWindowHandle(), 0, FALSE );
+            if(GetFocus() != hwndFocus) {
+                SetFocus(hwndFocus);
+            }
         }
         else
         {
             /* If the dlgproc has returned FALSE (indicating handling of keyboard focus)
                but the focus has not changed, set the focus where we expect it. */
-                if ( (getStyle() & WS_VISIBLE) && ( GetFocus() == hwndPreInitFocus ) )
-                    SetFocus( hwndFocus );
+            if ( (getStyle() & WS_VISIBLE) && ( GetFocus() == hwndPreInitFocus ) )
+                SetFocus( hwndFocus );
         }
 
         if (dlgInfo.style & WS_VISIBLE && !(getStyle() & WS_VISIBLE))

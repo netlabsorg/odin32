@@ -1,4 +1,4 @@
-/* $Id: menu.cpp,v 1.29 2001-01-01 11:48:10 sandervl Exp $*/
+/* $Id: menu.cpp,v 1.30 2001-05-17 09:50:29 sandervl Exp $*/
 /*
  * Menu functions
  *
@@ -2082,7 +2082,9 @@ static void MENU_HideSubPopups( HWND hwndOwner, HMENU hmenu,
 
         if (submenu->hWnd == MENU_GetTopPopupWnd() )
         {
-            ShowWindow( submenu->hWnd, SW_HIDE );
+            DestroyWindow( submenu->hWnd );
+            submenu->hWnd = 0;
+//            ShowWindow( submenu->hWnd, SW_HIDE );
             uSubPWndLevel = 0;
         }
         else
@@ -3035,8 +3037,10 @@ static INT MENU_TrackMenu(HMENU hmenu,UINT wFlags,INT x,INT y,HWND hwnd,BOOL inM
 
         if (menu && menu->wFlags & MF_POPUP)
         {
-            ShowWindow( menu->hWnd, SW_HIDE );
-            uSubPWndLevel = 0;
+                DestroyWindow( menu->hWnd );
+                menu->hWnd = 0;
+//            ShowWindow( menu->hWnd, SW_HIDE );
+                uSubPWndLevel = 0;
         }
         MENU_SelectItem( mt.hOwnerWnd, mt.hTopMenu, NO_SELECTED_ITEM, FALSE, 0 );
         SendMessageA( mt.hOwnerWnd, WM_MENUSELECT, MAKELONG(0,0xffff), 0 );

@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.257 2001-05-16 07:42:26 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.258 2001-05-17 09:50:30 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -3093,6 +3093,10 @@ HWND Win32BaseWindow::SetActiveWindow()
  HWND hwndActive;
 
     dprintf(("SetActiveWindow %x", getWindowHandle()));
+    if(GetActiveWindow() == getWindowHandle()) {
+        dprintf(("Window already active"));
+        return getWindowHandle();
+    }
     if (HOOK_IsHooked( WH_CBT ))
     {
         CBTACTIVATESTRUCT cbta;
