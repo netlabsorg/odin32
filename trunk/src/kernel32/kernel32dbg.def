@@ -1,4 +1,4 @@
-; $Id: kernel32dbg.def,v 1.6 2002-02-11 16:08:15 sandervl Exp $
+; $Id: kernel32dbg.def,v 1.7 2002-02-12 11:43:32 sandervl Exp $
 
 ;Basis is Windows95 KERNEL32
 LIBRARY KERNEL32 INITINSTANCE TERMINSTANCE
@@ -563,8 +563,8 @@ EXPORTS
      GlobalAlloc                = _DbgGlobalAlloc@8              @436
      GlobalCompact              = _DbgGlobalCompact@4            @437
      GlobalDeleteAtom           = _DbgGlobalDeleteAtom@4         @438
-     GlobalFindAtomA            = _DbgGlobalFindAtomA@4          @439
-     GlobalFindAtomW            = _DbgGlobalFindAtomW@4          @440
+     GlobalFindAtomA            = _GlobalFindAtomA@4          @439
+     GlobalFindAtomW            = _GlobalFindAtomW@4          @440
      GlobalFix                  = _DbgGlobalFix@4                @441
      GlobalFlags                = _DbgGlobalFlags@4              @442
      GlobalFree                 = _DbgGlobalFree@4               @443
