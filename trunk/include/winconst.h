@@ -1,4 +1,4 @@
-/* $Id: winconst.h,v 1.21 2000-01-13 13:55:20 sandervl Exp $ */
+/* $Id: winconst.h,v 1.22 2000-01-20 21:54:41 sandervl Exp $ */
 
 /*
  * Win32 constants
@@ -988,5 +988,9 @@
 #define ERROR_RPL_NOT_ALLOWED_W                 4006L
 
 
+#ifndef LOWORD
 #define LOWORD(l)              ((WORD)(DWORD)(l))
+#endif
+#ifndef HIWORD
 #define HIWORD(l)              ((WORD)((DWORD)(l) >> 16))
+#endif
