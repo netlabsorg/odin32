@@ -1,13 +1,3 @@
-/* $Id: OS2PALSET.H,v 1.3 1999-06-10 17:10:56 phaller Exp $ */
-
-/*
- * OS/2 Palette function definitions
- *
- * Copyright 1998 Sander van Leeuwen (sandervl@xs4all.nl)
- *
- * Project Odin Software License can be found in LICENSE.TXT
- *
- */
 #ifndef __OS2PALSET_H__
 #define __OS2PALSET_H__
 
@@ -21,7 +11,7 @@
 #endif
 
 //void OS2SetPhysPalette(PALETTEENTRY *pDirectXPal);
-void OS2SetPhysPalette(HWND hwndClient, void *pal);
+void OS2SetPhysPalette(void *pal);
 void OS2ResetPhysPalette();
 
 #endif

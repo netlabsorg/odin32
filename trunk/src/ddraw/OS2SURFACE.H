@@ -1,169 +1,239 @@
-/* $Id: OS2SURFACE.H,v 1.3 1999-06-10 17:10:56 phaller Exp $ */
-
-/*
- * DirectDraw Surface class
- *
- * Copyright 1998 Sander van Leeuwen (sandervl@xs4all.nl)
- *
- * Project Odin Software License can be found in LICENSE.TXT
- *
- */
 #ifndef __OS2SURFACE_H__
 #define __OS2SURFACE_H__
-
+#define FAR
+#define INITGUID
 #include "os2ddraw.h"
 #include "os2clipper.h"
 #include "os2palette.h"
+#include <dive.h>
+#include <iseq.h>
+#include <irect.hpp>
 
+#define FAR
+#undef THIS
+#define THIS VOID*
 
- typedef struct _OS2RECTL {
+typedef struct _OS2RECTL {
    LONG     xLeft;    /*  X-coordinate of left-hand edge of rectangle. */
    LONG     yBottom;  /*  Y-coordinate of bottom edge of rectangle. */
    LONG     xRight;   /*  X-coordinate of right-hand edge of rectangle. */
    LONG     yTop;     /*  Y-coordinate of top edge of rectangle. */
  } OS2RECTL;
 
-#define MAX_COLORKEYTYPE    4
-#define COLORKEY_DEST       0
-#define COLORKEY_DESTOVERLAY    1
-#define COLORKEY_SRC        2
-#define COLORKEY_SRCOVERLAY 3
-
-
-
- /* KSO Apr 19 1999: Set correct interface.           *
- * (INTERFACE is used in the THIS and THIS_ macros)  */
-#undef  INTERFACE
-#define INTERFACE   IDirectDrawSurface2
-
+typedef struct _SURFPRIVATEDATA
+{
+  GUID    guidTag;
+  void    *pData;
+  DWORD   dwFlags;
+  DWORD   dwSize;
+  BOOL    isValid;
+}SURFPRIVATEDATA , *PSURFPRIVATEDATA;
 
 class OS2IDirectDrawSurface
 {
  public:
-    //this one has to go first!
-    IDirectDrawSurface2Vtbl *lpVtbl;
-    IDirectDrawSurface2Vtbl  Vtbl;
+  //this one has to go first!
+  IDirectDrawSurface4Vtbl *lpVtbl;
+  IDirectDrawSurface2Vtbl  Vtbl2;
+  IDirectDrawSurface3Vtbl  Vtbl3;
+  IDirectDrawSurface4Vtbl  Vtbl; // With Dx6 CreateSurface creates per default one with Interface 4 !
 
-    OS2IDirectDrawSurface(OS2IDirectDraw *lpDirectDraw, LPDDSURFACEDESC lpDDSurfaceDesc);
-    ~OS2IDirectDrawSurface();
+  OS2IDirectDrawSurface( OS2IDirectDraw *lpDirectDraw,
+                         LPDDSURFACEDESC2 lpDDSurfaceDesc,
+                         BOOL Implicit = FALSE,    // Indicates that this surface was created  as result of a complex surface
+                         BOOL Mainchain = FALSE);  // Indicates if an implicit surface belongs to the primary surface
+  ~OS2IDirectDrawSurface();
+          int           Referenced;
+  inline  HRESULT       GetLastError() { return lastError; };
+  inline  int           GetDiveBufNr() { return diveBufNr; };
+  inline  BOOL          IsImplicitSurface() {return ImplicitSurface; };
+  inline  OS2IDirectDrawSurface* GetFrontBuffer(){ return FrontBuffer;};
+  inline  void          SetFrontBuffer( OS2IDirectDrawSurface* NewFBuffer);
+          void          ColorConversion(LPRECT lpRect);
 
-            int           Referenced;
-    inline  HRESULT       GetLastError() { return lastError; };
-    inline  int           GetDiveBufNr() { return diveBufNr; };
  private:
-
+        HRESULT         ColorFill(LPRECT, DWORD);
  protected:
-          HRESULT                lastError;
-          HDIVE                  hDive;
-          ULONG                  height, width;
-          ULONG                  surfaceType;
-          ULONG                  diveBufNr;
-          double                 screenXFact, screenYFact;
-          ULONG                  fccColorFormat, bpp;
-          OS2IDirectDraw        *lpDraw;
-          OS2IDirectDrawClipper *lpClipper;
-          OS2IDirectDrawPalette *lpPalette;
-          DDSURFACEDESC          DDSurfaceDesc;
-          DDCAPS                 SurfaceCaps;
-          BOOL                   fLocked;
-          HDC                    hdcImage;
-          HBITMAP                hbmImage;
-          HGDIOBJ                hgdiOld;
-          char                  *bitmapData;
-          char                  *pFrameBuffer;
-          PBYTE                  lpBuffer;  //non-primary buffers
+        HRESULT                lastError;
+        HDIVE                  hDive;
+        HDIVE                  hDiveCC; // Color conversion DIVE Handle
+        ULONG                  height, width;
+        ULONG                  screenHeight, screenWidth;
+        ULONG                  surfaceType;
+        ULONG                  diveBufNr;
+        OS2IDirectDraw        *lpDraw;
+        OS2IDirectDrawClipper *lpClipper;
+        OS2IDirectDrawPalette *lpPalette;
+        DDSURFACEDESC2         DDSurfaceDesc;
+        BOOL                   fLocked;
+        HDC                    hdcImage;
+        HBITMAP                hbmImage;
+        HGDIOBJ                hgdiOld;
+        DWORD                  dwLastDCUnique;
+        // The real pointers hold the allocated memory (for the free)
+        // The other an pointer addjusted to QWORDs which we use and report
+        char                  *pFrameBuffer, *pFBreal;
+        char                  *pDiveBuffer, *pDBreal;
+        DWORD                 *pTransBufferSrc;
+        DWORD                 *pTransBufferDest;
+        DWORD                  dwPitchFB;
+        DWORD                  dwPitchDB;
+        DWORD                  dwBytesPPDive;
+        BOOL                   Updated;
+        BOOL                   ImplicitSurface;
 
-          ULONG                  ColorKeyFlags;
-          ULONG                  ColorSpaceLowValue[MAX_COLORKEYTYPE];
-          ULONG                  ColorSpaceHighValue[MAX_COLORKEYTYPE];
+             // DDraw internal vars
 
-          OS2IDirectDrawSurface* attached;           // attached surfaces
-          OS2IDirectDrawSurface* flip;           // surface used for next flip
+        DWORD                  dwUniqueValue;
+        ISequence<PSURFPRIVATEDATA> SurfaceSequencePrivateData;
+        BOOL                   fOverlayValid;
+        LONG                   lOverlayX;
+        LONG                   lOverlayY;
 
-              // Linked list management
-              OS2IDirectDrawSurface* next;                   // Next OS2IDirectDraw
-    static    OS2IDirectDrawSurface* ddraw;                  // List of OS2IDirectDraw
+        // surface management
 
-    friend    HRESULT __stdcall SurfQueryInterface(THIS_ REFIID riid, LPVOID FAR * ppvObj);
+        OS2IDirectDrawSurface*  BackBuffer;  // Backbuffer goes in here
+        OS2IDirectDrawSurface*  FrontBuffer; // NULL if the real frontbuffer of a Flipchain otherwise  the prev. Backbuffer
+        OS2IDirectDrawSurface*  NextFlip;    // Only valid in a frontbuffer
+        ISequence <OS2IDirectDrawSurface*> SurfaceSequenceMipMap;    // MipMaps go in this one
+        ISequence <OS2IDirectDrawSurface*> SurfaceSequenceAttached;  // Other attached go in this one
+        ISequence <OS2IDirectDrawSurface*>::Cursor *SurfaceCursorMipMap;    // Iterator for MipMaps
+        ISequence <OS2IDirectDrawSurface*>::Cursor *SurfaceCursorAttached;  // Iterator for other attached surfaces
+
+        ISequence <IRectangle*> LockedRectSequence;            // List for locked rectangles
+
+    friend    HRESULT __stdcall SurfQueryInterface(THIS, REFIID riid, LPVOID FAR * ppvObj);
     friend    ULONG   __stdcall SurfAddRef(THIS);
     friend    ULONG   __stdcall SurfRelease(THIS);
-    friend    HRESULT __stdcall SurfAddAttachedSurface(THIS_ LPDIRECTDRAWSURFACE2);
-    friend    HRESULT __stdcall SurfAddOverlayDirtyRect(THIS_ W32_LPRECT);
-    friend    HRESULT __stdcall SurfBlt(THIS_ W32_LPRECT,LPDIRECTDRAWSURFACE2,W32_LPRECT,DWORD, LPDDBLTFX);
-    friend    HRESULT __stdcall SurfBltBatch(THIS_ LPDDBLTBATCH, DWORD, DWORD );
-    friend    HRESULT __stdcall SurfBltFast(THIS_ DWORD,DWORD,LPDIRECTDRAWSURFACE2, W32_LPRECT,DWORD);
-    friend    HRESULT __stdcall SurfDeleteAttachedSurface(THIS_ DWORD,LPDIRECTDRAWSURFACE2);
-    friend    HRESULT __stdcall SurfEnumAttachedSurfaces(THIS_ LPVOID,LPDDENUMSURFACESCALLBACK);
-    friend    HRESULT __stdcall SurfEnumOverlayZOrders(THIS_ DWORD,LPVOID,LPDDENUMSURFACESCALLBACK);
-    friend    HRESULT __stdcall SurfFlip(THIS_ LPDIRECTDRAWSURFACE2, DWORD);
-    friend    HRESULT __stdcall SurfGetAttachedSurface(THIS_ LPDDSCAPS, LPDIRECTDRAWSURFACE2 FAR *);
-    friend    HRESULT __stdcall SurfGetBltStatus(THIS_ DWORD);
-    friend    HRESULT __stdcall SurfGetCaps(THIS_ LPDDSCAPS);
-    friend    HRESULT __stdcall SurfGetClipper(THIS_ LPDIRECTDRAWCLIPPER FAR*);
-    friend    HRESULT __stdcall SurfGetColorKey(THIS_ DWORD, LPDDCOLORKEY);
-    friend    HRESULT __stdcall SurfGetDC(THIS_ W32_HDC FAR *);
-    friend    HRESULT __stdcall SurfGetFlipStatus(THIS_ DWORD);
-    friend    HRESULT __stdcall SurfGetOverlayPosition(THIS_ LPLONG, LPLONG );
-    friend    HRESULT __stdcall SurfGetPalette(THIS_ LPDIRECTDRAWPALETTE FAR*);
-    friend    HRESULT __stdcall SurfGetPixelFormat(THIS_ LPDDPIXELFORMAT);
-    friend    HRESULT __stdcall SurfGetSurfaceDesc(THIS_ LPDDSURFACEDESC);
-    friend    HRESULT __stdcall SurfInitialize(THIS_ LPDIRECTDRAW, LPDDSURFACEDESC);
+    friend    HRESULT __stdcall SurfAddAttachedSurface(THIS, LPDIRECTDRAWSURFACE2);
+    friend    HRESULT __stdcall SurfAddAttachedSurface4(THIS, LPDIRECTDRAWSURFACE4);
+    friend    HRESULT __stdcall SurfAddOverlayDirtyRect(THIS, LPRECT);
+    friend    HRESULT __stdcall SurfBlt(THIS, LPRECT,LPDIRECTDRAWSURFACE2, LPRECT,DWORD, LPDDBLTFX);
+    friend    HRESULT __stdcall SurfBlt4(THIS, LPRECT,LPDIRECTDRAWSURFACE4, LPRECT,DWORD, LPDDBLTFX);
+    friend    HRESULT __stdcall SurfBltBatch(THIS, LPDDBLTBATCH, DWORD, DWORD );
+    friend    HRESULT __stdcall SurfBltFast(THIS, DWORD,DWORD,LPDIRECTDRAWSURFACE2, LPRECT,DWORD);
+    friend    HRESULT __stdcall SurfBltFast4(THIS, DWORD,DWORD,LPDIRECTDRAWSURFACE4, LPRECT,DWORD);
+    friend    HRESULT __stdcall SurfDeleteAttachedSurface(THIS, DWORD,LPDIRECTDRAWSURFACE2);
+    friend    HRESULT __stdcall SurfDeleteAttachedSurface4(THIS, DWORD,LPDIRECTDRAWSURFACE4);
+    friend    HRESULT __stdcall SurfEnumAttachedSurfaces(THIS, LPVOID,LPDDENUMSURFACESCALLBACK);
+    friend    HRESULT __stdcall SurfEnumAttachedSurfaces4(THIS, LPVOID,LPDDENUMSURFACESCALLBACK2);
+    friend    HRESULT __stdcall SurfEnumOverlayZOrders(THIS, DWORD,LPVOID,LPDDENUMSURFACESCALLBACK);
+    friend    HRESULT __stdcall SurfEnumOverlayZOrders4(THIS, DWORD,LPVOID,LPDDENUMSURFACESCALLBACK2);
+    friend    HRESULT __stdcall SurfFlip(THIS, LPDIRECTDRAWSURFACE2 , DWORD);
+    friend    HRESULT __stdcall SurfFlip4(THIS, LPDIRECTDRAWSURFACE4 , DWORD);
+    friend    HRESULT __stdcall SurfGetAttachedSurface(THIS, LPDDSCAPS, LPDIRECTDRAWSURFACE2 FAR *);
+    friend    HRESULT __stdcall SurfGetAttachedSurface4(THIS, LPDDSCAPS2, LPDIRECTDRAWSURFACE4 FAR *);
+    friend    HRESULT __stdcall SurfGetBltStatus(THIS, DWORD);
+    friend    HRESULT __stdcall SurfGetCaps(THIS, LPDDSCAPS);
+    friend    HRESULT __stdcall SurfGetCaps4(THIS, LPDDSCAPS2);
+    friend    HRESULT __stdcall SurfGetClipper(THIS, LPDIRECTDRAWCLIPPER FAR*);
+    friend    HRESULT __stdcall SurfGetColorKey(THIS, DWORD, LPDDCOLORKEY);
+    friend    HRESULT __stdcall SurfGetDC(THIS, HDC FAR *);
+    friend    HRESULT __stdcall SurfGetFlipStatus(THIS, DWORD);
+    friend    HRESULT __stdcall SurfGetOverlayPosition(THIS, LPLONG, LPLONG );
+    friend    HRESULT __stdcall SurfGetPalette(THIS, LPDIRECTDRAWPALETTE FAR*);
+    friend    HRESULT __stdcall SurfGetPixelFormat(THIS, LPDDPIXELFORMAT);
+    friend    HRESULT __stdcall SurfGetSurfaceDesc(THIS, LPDDSURFACEDESC);
+    friend    HRESULT __stdcall SurfGetSurfaceDesc4(THIS, LPDDSURFACEDESC2);
+    friend    HRESULT __stdcall SurfInitialize(THIS, LPDIRECTDRAW, LPDDSURFACEDESC);
+    friend    HRESULT __stdcall SurfInitialize4(THIS, LPDIRECTDRAW, LPDDSURFACEDESC2);
     friend    HRESULT __stdcall SurfIsLost(THIS);
-    friend    HRESULT __stdcall SurfLock(THIS_ W32_LPRECT,LPDDSURFACEDESC,DWORD,W32_HANDLE);
-    friend    HRESULT __stdcall SurfReleaseDC(THIS_ W32_HDC);
+    friend    HRESULT __stdcall SurfLock(THIS, LPRECT,LPDDSURFACEDESC,DWORD,HANDLE);
+    friend    HRESULT __stdcall SurfLock4(THIS, LPRECT,LPDDSURFACEDESC2,DWORD,HANDLE);
+    friend    HRESULT __stdcall SurfReleaseDC(THIS, HDC);
     friend    HRESULT __stdcall SurfRestore(THIS);
-    friend    HRESULT __stdcall SurfSetClipper(THIS_ LPDIRECTDRAWCLIPPER);
-    friend    HRESULT __stdcall SurfSetColorKey(THIS_ DWORD, LPDDCOLORKEY);
-    friend    HRESULT __stdcall SurfSetOverlayPosition(THIS_ LONG, LONG );
-    friend    HRESULT __stdcall SurfSetPalette(THIS_ LPDIRECTDRAWPALETTE);
-    friend    HRESULT __stdcall SurfUnlock(THIS_ LPVOID);
-    friend    HRESULT __stdcall SurfUpdateOverlay(THIS_ W32_LPRECT, LPDIRECTDRAWSURFACE2,W32_LPRECT,DWORD, LPDDOVERLAYFX);
-    friend    HRESULT __stdcall SurfUpdateOverlayDisplay(THIS_ DWORD);
-    friend    HRESULT __stdcall SurfUpdateOverlayZOrder(THIS_ DWORD, LPDIRECTDRAWSURFACE2);
-    friend    HRESULT __stdcall SurfGetDDInterface(THIS_ LPVOID FAR *);
-    friend    HRESULT __stdcall SurfPageLock(THIS_ DWORD);
-    friend    HRESULT __stdcall SurfPageUnlock(THIS_ DWORD);
+    friend    HRESULT __stdcall SurfSetClipper(THIS, LPDIRECTDRAWCLIPPER);
+    friend    HRESULT __stdcall SurfSetColorKey(THIS, DWORD, LPDDCOLORKEY);
+    friend    HRESULT __stdcall SurfSetOverlayPosition(THIS, LONG, LONG );
+    friend    HRESULT __stdcall SurfSetPalette(THIS, LPDIRECTDRAWPALETTE);
+    friend    HRESULT __stdcall SurfUnlock(THIS, LPRECT);
+    friend    HRESULT __stdcall SurfUpdateOverlay(THIS, LPRECT, LPDIRECTDRAWSURFACE2,LPRECT,DWORD, LPDDOVERLAYFX);
+    friend    HRESULT __stdcall SurfUpdateOverlay4(THIS, LPRECT, LPDIRECTDRAWSURFACE4,LPRECT,DWORD, LPDDOVERLAYFX);
+    friend    HRESULT __stdcall SurfUpdateOverlayDisplay(THIS, DWORD);
+    friend    HRESULT __stdcall SurfUpdateOverlayZOrder(THIS, DWORD, LPDIRECTDRAWSURFACE2);
+    friend    HRESULT __stdcall SurfUpdateOverlayZOrder4(THIS, DWORD, LPDIRECTDRAWSURFACE4);
+    // Added in V2 interface
+    friend    HRESULT __stdcall SurfGetDDInterface(THIS, LPVOID FAR *);
+    friend    HRESULT __stdcall SurfPageLock(THIS, DWORD);
+    friend    HRESULT __stdcall SurfPageUnlock(THIS, DWORD);
+    // Added in V3 interface
+    friend    HRESULT __stdcall SurfSetSurfaceDesc(THIS, LPDDSURFACEDESC, DWORD);
+    friend    HRESULT __stdcall SurfSetSurfaceDesc4(THIS, LPDDSURFACEDESC2, DWORD);
+    // Added in V4 interface
+    friend    HRESULT __stdcall SurfSetPrivateData(THIS, REFGUID, LPVOID, DWORD, DWORD);
+    friend    HRESULT __stdcall SurfGetPrivateData(THIS, REFGUID, LPVOID, LPDWORD);
+    friend    HRESULT __stdcall SurfFreePrivateData(THIS, REFGUID);
+    friend    HRESULT __stdcall SurfGetUniquenessValue(THIS, LPDWORD);
+    friend    HRESULT __stdcall SurfChangeUniquenessValue(THIS);
 };
 
 
-HRESULT __stdcall SurfQueryInterface(THIS_ REFIID riid, LPVOID FAR * ppvObj);
+HRESULT __stdcall SurfQueryInterface(THIS, REFIID riid, LPVOID FAR * ppvObj);
 ULONG   __stdcall SurfAddRef(THIS);
 ULONG   __stdcall SurfRelease(THIS);
-HRESULT __stdcall SurfAddAttachedSurface(THIS_ LPDIRECTDRAWSURFACE2);
-HRESULT __stdcall SurfAddOverlayDirtyRect(THIS_ W32_LPRECT);
-HRESULT __stdcall SurfBlt(THIS_ W32_LPRECT,LPDIRECTDRAWSURFACE2, W32_LPRECT,DWORD, LPDDBLTFX);
-HRESULT __stdcall SurfBltBatch(THIS_ LPDDBLTBATCH, DWORD, DWORD );
-HRESULT __stdcall SurfBltFast(THIS_ DWORD,DWORD,LPDIRECTDRAWSURFACE2, W32_LPRECT,DWORD);
-HRESULT __stdcall SurfDeleteAttachedSurface(THIS_ DWORD,LPDIRECTDRAWSURFACE2);
-HRESULT __stdcall SurfEnumAttachedSurfaces(THIS_ LPVOID,LPDDENUMSURFACESCALLBACK);
-HRESULT __stdcall SurfEnumOverlayZOrders(THIS_ DWORD,LPVOID,LPDDENUMSURFACESCALLBACK);
-HRESULT __stdcall SurfFlip(THIS_ LPDIRECTDRAWSURFACE2, DWORD);
-HRESULT __stdcall SurfGetAttachedSurface(THIS_ LPDDSCAPS, LPDIRECTDRAWSURFACE2 FAR *);
-HRESULT __stdcall SurfGetBltStatus(THIS_ DWORD);
-HRESULT __stdcall SurfGetCaps(THIS_ LPDDSCAPS);
-HRESULT __stdcall SurfGetClipper(THIS_ LPDIRECTDRAWCLIPPER FAR*);
-HRESULT __stdcall SurfGetColorKey(THIS_ DWORD, LPDDCOLORKEY);
-HRESULT __stdcall SurfGetDC(THIS_ W32_HDC FAR *);
-HRESULT __stdcall SurfGetFlipStatus(THIS_ DWORD);
-HRESULT __stdcall SurfGetOverlayPosition(THIS_ LPLONG, LPLONG );
-HRESULT __stdcall SurfGetPalette(THIS_ LPDIRECTDRAWPALETTE FAR*);
-HRESULT __stdcall SurfGetPixelFormat(THIS_ LPDDPIXELFORMAT);
-HRESULT __stdcall SurfGetSurfaceDesc(THIS_ LPDDSURFACEDESC);
-HRESULT __stdcall SurfInitialize(THIS_ LPDIRECTDRAW, LPDDSURFACEDESC);
+HRESULT __stdcall SurfAddAttachedSurface(THIS, LPDIRECTDRAWSURFACE2);
+HRESULT __stdcall SurfAddAttachedSurface4(THIS, LPDIRECTDRAWSURFACE4);
+HRESULT __stdcall SurfAddOverlayDirtyRect(THIS, LPRECT);
+HRESULT __stdcall SurfBlt(THIS, LPRECT,LPDIRECTDRAWSURFACE2, LPRECT,DWORD, LPDDBLTFX);
+HRESULT __stdcall SurfBlt4(THIS, LPRECT,LPDIRECTDRAWSURFACE4, LPRECT,DWORD, LPDDBLTFX);
+HRESULT __stdcall SurfBltBatch(THIS, LPDDBLTBATCH, DWORD, DWORD );
+HRESULT __stdcall SurfBltFast(THIS, DWORD,DWORD,LPDIRECTDRAWSURFACE2, LPRECT,DWORD);
+HRESULT __stdcall SurfBltFast4(THIS, DWORD,DWORD,LPDIRECTDRAWSURFACE4, LPRECT,DWORD);
+HRESULT __stdcall SurfDeleteAttachedSurface(THIS, DWORD,LPDIRECTDRAWSURFACE2);
+HRESULT __stdcall SurfDeleteAttachedSurface4(THIS, DWORD,LPDIRECTDRAWSURFACE4);
+HRESULT __stdcall SurfEnumAttachedSurfaces(THIS, LPVOID,LPDDENUMSURFACESCALLBACK);
+HRESULT __stdcall SurfEnumAttachedSurfaces4(THIS, LPVOID,LPDDENUMSURFACESCALLBACK2);
+HRESULT __stdcall SurfEnumOverlayZOrders(THIS, DWORD,LPVOID,LPDDENUMSURFACESCALLBACK);
+HRESULT __stdcall SurfEnumOverlayZOrders4(THIS, DWORD,LPVOID,LPDDENUMSURFACESCALLBACK2);
+HRESULT __stdcall SurfFlip(THIS, LPDIRECTDRAWSURFACE2 , DWORD);
+HRESULT __stdcall SurfFlip4(THIS, LPDIRECTDRAWSURFACE4 , DWORD);
+HRESULT __stdcall SurfGetAttachedSurface(THIS, LPDDSCAPS, LPDIRECTDRAWSURFACE2 FAR *);
+HRESULT __stdcall SurfGetAttachedSurface4(THIS, LPDDSCAPS2, LPDIRECTDRAWSURFACE4 FAR *);
+HRESULT __stdcall SurfGetBltStatus(THIS, DWORD);
+HRESULT __stdcall SurfGetCaps4(THIS, LPDDSCAPS2);
+HRESULT __stdcall SurfGetCaps(THIS, LPDDSCAPS);
+HRESULT __stdcall SurfGetClipper(THIS, LPDIRECTDRAWCLIPPER FAR*);
+HRESULT __stdcall SurfGetColorKey(THIS, DWORD, LPDDCOLORKEY);
+HRESULT __stdcall SurfGetDC(THIS, HDC FAR *);
+HRESULT __stdcall SurfGetFlipStatus(THIS, DWORD);
+HRESULT __stdcall SurfGetOverlayPosition(THIS, LPLONG, LPLONG );
+HRESULT __stdcall SurfGetPalette(THIS, LPDIRECTDRAWPALETTE FAR*);
+HRESULT __stdcall SurfGetPixelFormat(THIS, LPDDPIXELFORMAT);
+HRESULT __stdcall SurfGetSurfaceDesc(THIS, LPDDSURFACEDESC);
+HRESULT __stdcall SurfGetSurfaceDesc4(THIS, LPDDSURFACEDESC2);
+HRESULT __stdcall SurfInitialize(THIS, LPDIRECTDRAW, LPDDSURFACEDESC);
+HRESULT __stdcall SurfInitialize4(THIS, LPDIRECTDRAW, LPDDSURFACEDESC2);
 HRESULT __stdcall SurfIsLost(THIS);
-HRESULT __stdcall SurfLock(THIS_ W32_LPRECT,LPDDSURFACEDESC,DWORD,W32_HANDLE);
-HRESULT __stdcall SurfReleaseDC(THIS_ W32_HDC);
+HRESULT __stdcall SurfLock(THIS, LPRECT,LPDDSURFACEDESC,DWORD,HANDLE);
+HRESULT __stdcall SurfLock4(THIS, LPRECT,LPDDSURFACEDESC2,DWORD,HANDLE);
+HRESULT __stdcall SurfReleaseDC(THIS, HDC);
 HRESULT __stdcall SurfRestore(THIS);
-HRESULT __stdcall SurfSetClipper(THIS_ LPDIRECTDRAWCLIPPER);
-HRESULT __stdcall SurfSetColorKey(THIS_ DWORD, LPDDCOLORKEY);
-HRESULT __stdcall SurfSetOverlayPosition(THIS_ LONG, LONG );
-HRESULT __stdcall SurfSetPalette(THIS_ LPDIRECTDRAWPALETTE);
-HRESULT __stdcall SurfUnlock(THIS_ LPVOID);
-HRESULT __stdcall SurfUpdateOverlay(THIS_ W32_LPRECT, LPDIRECTDRAWSURFACE2,W32_LPRECT,DWORD, LPDDOVERLAYFX);
-HRESULT __stdcall SurfUpdateOverlayDisplay(THIS_ DWORD);
-HRESULT __stdcall SurfUpdateOverlayZOrder(THIS_ DWORD, LPDIRECTDRAWSURFACE2);
-HRESULT __stdcall SurfGetDDInterface(THIS_ LPVOID FAR *);
-HRESULT __stdcall SurfPageLock(THIS_ DWORD);
-HRESULT __stdcall SurfPageUnlock(THIS_ DWORD);
+HRESULT __stdcall SurfSetClipper(THIS, LPDIRECTDRAWCLIPPER);
+HRESULT __stdcall SurfSetColorKey(THIS, DWORD, LPDDCOLORKEY);
+HRESULT __stdcall SurfSetOverlayPosition(THIS, LONG, LONG );
+HRESULT __stdcall SurfSetPalette(THIS, LPDIRECTDRAWPALETTE);
+HRESULT __stdcall SurfUnlock(THIS, LPRECT);
+HRESULT __stdcall SurfUpdateOverlay(THIS, LPRECT, LPDIRECTDRAWSURFACE2,LPRECT,DWORD, LPDDOVERLAYFX);
+HRESULT __stdcall SurfUpdateOverlay4(THIS, LPRECT, LPDIRECTDRAWSURFACE4,LPRECT,DWORD, LPDDOVERLAYFX);
+HRESULT __stdcall SurfUpdateOverlayDisplay(THIS, DWORD);
+HRESULT __stdcall SurfUpdateOverlayZOrder(THIS, DWORD, LPDIRECTDRAWSURFACE2);
+HRESULT __stdcall SurfUpdateOverlayZOrder4(THIS, DWORD, LPDIRECTDRAWSURFACE4);
+HRESULT __stdcall SurfGetDDInterface(THIS, LPVOID FAR *);
+HRESULT __stdcall SurfPageLock(THIS, DWORD);
+HRESULT __stdcall SurfPageUnlock(THIS, DWORD);
+HRESULT __stdcall SurfSetSurfaceDesc(THIS, LPDDSURFACEDESC, DWORD);
+HRESULT __stdcall SurfSetSurfaceDesc4(THIS, LPDDSURFACEDESC2, DWORD);
+HRESULT __stdcall SurfSetPrivateData(THIS, REFGUID, LPVOID, DWORD, DWORD);
+HRESULT __stdcall SurfGetPrivateData(THIS, REFGUID, LPVOID, LPDWORD);
+HRESULT __stdcall SurfFreePrivateData(THIS, REFGUID);
+HRESULT __stdcall SurfGetUniquenessValue(THIS, LPDWORD);
+HRESULT __stdcall SurfChangeUniquenessValue(THIS);
+
+void __cdecl MoveRects(char* pBuffer, LPRECT lpDestRect, LPRECT lpSrcRect, int bbp, LONG lPitch);
+void __cdecl TransSRCBlit8(LPDDSURFACEDESC2 pDestDesc, LPDDSURFACEDESC2 pSrcDesc,  char *pAlpha, LPRECT lpSrcRect);
+void __cdecl TransSRCBlit16(LPDDSURFACEDESC2 pDestDesc, LPDDSURFACEDESC2 pSrcDesc,  char *pAlpha, LPRECT lpSrcRect);
+void __cdecl TransSRCBlit24(LPDDSURFACEDESC2 pDestDesc, LPDDSURFACEDESC2 pSrcDesc,  char *pAlpha, LPRECT lpSrcRect);
+void __cdecl TransSRCBlit32(LPDDSURFACEDESC2 pDestDesc, LPDDSURFACEDESC2 pSrcDesc,  char *pAlpha, LPRECT lpSrcRect);
+
 
 #endif
