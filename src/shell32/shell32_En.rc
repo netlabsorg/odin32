@@ -1,4 +1,4 @@
-/* $Id: shell32_En.rc,v 1.2 1999-10-09 11:17:01 sandervl Exp $ */
+/* $Id: shell32_En.rc,v 1.3 1999-10-11 20:17:11 sandervl Exp $ */
 LANGUAGE LANG_ENGLISH, SUBLANG_DEFAULT
 
 SHELL_ABOUT_MSGBOX DIALOG LOADONCALL MOVEABLE DISCARDABLE 15, 40, 210, 152
@@ -10,6 +10,6 @@ FONT 10, "System"
  LISTBOX 99, 8, 65, 137, 82, LBS_NOTIFY | WS_VSCROLL | WS_BORDER
  ICON "", 1088, 189, 10, 14, 16
  LTEXT "", 100, 8, 10, 137, 33
- LTEXT "Wine was brought to you by:", 98, 8, 55, 137, 10
+ LTEXT "Odin was brought to you by:", 98, 8, 55, 137, 10
 }
 

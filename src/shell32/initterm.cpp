@@ -1,4 +1,4 @@
-/* $Id: initterm.cpp,v 1.8 1999-10-09 11:13:19 sandervl Exp $ */
+/* $Id: initterm.cpp,v 1.9 1999-10-11 20:17:10 sandervl Exp $ */
 
 /*
  * DLL entry point
@@ -40,6 +40,13 @@ void CDECL _ctordtorInit( void );
 void CDECL _ctordtorTerm( void );
 }
 
+extern "C" {
+ //Win32 resource table (produced by wrc)
+ extern DWORD _Resource_PEResTab;
+}
+
+BOOL WINAPI Shell32LibMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID fImpLoad);
+
 /*-------------------------------------------------------------------*/
 /* A clean up routine registered with DosExitList must be used if    */
 /* runtime calls are required and the runtime is dynamically linked. */
@@ -80,7 +87,7 @@ unsigned long SYSTEM _DLL_InitTerm(unsigned long hModule, unsigned long
          /* are required and the runtime is dynamically linked.             */
          /*******************************************************************/
 
-	 if(RegisterLxDll(hModule, 0, 0) == FALSE) 
+	 if(RegisterLxDll(hModule, Shell32LibMain, (PVOID)&_Resource_PEResTab) == FALSE) 
 		return 0UL;
 
          rc = DosExitList(0x0000F000|EXLST_ADD, cleanup);
