@@ -1,4 +1,3 @@
-/* $Id: ole2stubs.c,v 1.2 2001-09-05 13:17:11 bird Exp $ */
 /*
  * Temporary place for ole2 stubs.
  *
@@ -19,8 +18,8 @@ DEFAULT_DEBUG_CHANNEL(ole);
  *               OleCreateLinkToFile        [OLE32.96]
  */
 HRESULT WINAPI  OleCreateLinkToFile(LPCOLESTR lpszFileName, REFIID riid,
-            DWORD renderopt, LPFORMATETC lpFormatEtc,
-            LPOLECLIENTSITE pClientSite, LPSTORAGE pStg, LPVOID* ppvObj)
+	  		DWORD renderopt, LPFORMATETC lpFormatEtc,
+			LPOLECLIENTSITE pClientSite, LPSTORAGE pStg, LPVOID* ppvObj)
 {
     FIXME("(%p,%p,%li,%p,%p,%p,%p), stub!\n",lpszFileName, riid, renderopt, lpFormatEtc, pClientSite, pStg, ppvObj);
     return S_OK;
@@ -31,18 +30,18 @@ HRESULT WINAPI  OleCreateLinkToFile(LPCOLESTR lpszFileName, REFIID riid,
  *              OleDuplicateData        [OLE32.102]
  */
 HRESULT WINAPI OleDuplicateData(HANDLE hSrc, CLIPFORMAT cfFormat,
-                              UINT uiFlags)
+	                          UINT uiFlags)
 {
     FIXME("(%x,%x,%x), stub!\n", hSrc, cfFormat, uiFlags);
     return S_OK;
 }
 
-
+ 
 /***********************************************************************
  *               WriteFmtUserTypeStg (OLE32.160)
  */
 HRESULT WINAPI WriteFmtUserTypeStg(
-      LPSTORAGE pstg, CLIPFORMAT cf, LPOLESTR lpszUserType)
+	  LPSTORAGE pstg, CLIPFORMAT cf, LPOLESTR lpszUserType)
 {
     FIXME("(%p,%x,%s) stub!\n",pstg,cf,debugstr_w(lpszUserType));
     return S_OK;
@@ -81,17 +80,17 @@ HRESULT WINAPI SetConvertStg(LPSTORAGE pStg, BOOL fConvert)
  *
  */
 HRESULT WINAPI OleCreate(
-    REFCLSID rclsid,
-    REFIID riid,
-    DWORD renderopt,
-    LPFORMATETC pFormatEtc,
-    LPOLECLIENTSITE pClientSite,
-    LPSTORAGE pStg,
-    LPVOID* ppvObj)
+	REFCLSID rclsid,
+	REFIID riid,
+	DWORD renderopt,
+	LPFORMATETC pFormatEtc,
+	LPOLECLIENTSITE pClientSite,
+	LPSTORAGE pStg,
+	LPVOID* ppvObj)
 {
   HRESULT hres, hres1;
   IUnknown * pUnk = NULL;
-
+    
   FIXME("\n\t%s\n\t%s stub!\n", debugstr_guid(rclsid), debugstr_guid(riid));
 
   if (SUCCEEDED((hres = CoCreateInstance(rclsid, 0, CLSCTX_INPROC_SERVER, riid, (LPVOID*)&pUnk))))
@@ -105,14 +104,14 @@ HRESULT WINAPI OleCreate(
         TRACE("trying to set clientsite %p\n", pClientSite);
         hres1 = IOleObject_SetClientSite(pOE, pClientSite);
         TRACE("-- result 0x%08lx\n", hres1);
-    IOleObject_Release(pOE);
+	IOleObject_Release(pOE);
       }
       if (SUCCEEDED((hres = IUnknown_QueryInterface( pUnk, &IID_IPersistStorage, (LPVOID*)&pPS))))
       {
         TRACE("trying to set stg %p\n", pStg);
-    hres1 = IPersistStorage_InitNew(pPS, pStg);
+	hres1 = IPersistStorage_InitNew(pPS, pStg);
         TRACE("-- result 0x%08lx\n", hres1);
-    IPersistStorage_Release(pPS);
+	IPersistStorage_Release(pPS);
       }
     }
   }
@@ -208,7 +207,7 @@ HRESULT WINAPI OleRegEnumVerbs (REFCLSID clsid, LPENUMOLEVERB* ppenum)
  *           OleRegEnumFormatEtc    [OLE32.119]
  */
 HRESULT     WINAPI OleRegEnumFormatEtc (
-  REFCLSID clsid,
+  REFCLSID clsid, 
   DWORD    dwDirection,
   LPENUMFORMATETC* ppenumFormatetc)
 {
@@ -218,37 +217,37 @@ HRESULT     WINAPI OleRegEnumFormatEtc (
 }
 
 /***********************************************************************
- *           PropVariantClear               [OLE32.166]
+ *           PropVariantClear			    [OLE32.166]
  */
 HRESULT WINAPI PropVariantClear(void *pvar) /* [in/out] FIXME: PROPVARIANT * */
 {
-    FIXME("(%p): stub:\n", pvar);
+	FIXME("(%p): stub:\n", pvar);
 
-    *(LPWORD)pvar = 0;
-    /* sets at least the vt field to VT_EMPTY */
-    return S_OK;
+	*(LPWORD)pvar = 0;
+	/* sets at least the vt field to VT_EMPTY */
+	return S_OK;
 }
 
 /***********************************************************************
- *           PropVariantCopy                [OLE32.246]
+ *           PropVariantCopy			    [OLE32.246]
  */
 HRESULT WINAPI PropVariantCopy(void *pvarDest,      /* [out] FIXME: PROPVARIANT * */
-                   const void *pvarSrc) /* [in] FIXME: const PROPVARIANT * */
+			       const void *pvarSrc) /* [in] FIXME: const PROPVARIANT * */
 {
-    FIXME("(%p, %p): stub:\n", pvarDest, pvarSrc);
+	FIXME("(%p, %p): stub:\n", pvarDest, pvarSrc);
 
-    return S_OK;
+	return S_OK;
 }
 
 /***********************************************************************
- *           FreePropVariantArray               [OLE32.195]
+ *           FreePropVariantArray			    [OLE32.195]
  */
 HRESULT WINAPI FreePropVariantArray(ULONG cVariants, /* [in] */
-                    void *rgvars)    /* [in/out] FIXME: PROPVARIANT * */
+				    void *rgvars)    /* [in/out] FIXME: PROPVARIANT * */
 {
-    FIXME("(%lu, %p): stub:\n", cVariants, rgvars);
+	FIXME("(%lu, %p): stub:\n", cVariants, rgvars);
 
-    return S_OK;
+	return S_OK;
 }
 
 /***********************************************************************

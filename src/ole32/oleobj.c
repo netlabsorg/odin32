@@ -1,8 +1,7 @@
-/* $Id: oleobj.c,v 1.2 2001-09-05 13:17:11 bird Exp $ */
 /*
- *  OLE2 COM objects
+ *	OLE2 COM objects
  *
- *  Copyright 1998 Eric Kohl
+ *	Copyright 1998 Eric Kohl
  *      Copyright 1999 Francis Beaudet
  */
 
@@ -12,6 +11,18 @@
 #include "winerror.h"
 #include "debugtools.h"
 #include "oleidl.h"
+
+#ifdef __WIN32OS2__
+#undef FIXME
+#undef TRACE
+#ifdef DEBUG
+#define TRACE WriteLog("OLE32: %s", __FUNCTION__); WriteLog
+#define FIXME WriteLog("FIXME OLE32: %s", __FUNCTION__); WriteLog
+#else
+#define TRACE 1 ? (void)0 : (void)((int (*)(char *, ...)) NULL)
+#define FIXME 1 ? (void)0 : (void)((int (*)(char *, ...)) NULL)
+#endif
+#endif
 
 DEFAULT_DEBUG_CHANNEL(ole);
 
@@ -71,15 +82,15 @@ static LPOLEADVISEHOLDER OleAdviseHolderImpl_Constructor()
   DWORD                index;
 
   lpoah= (OleAdviseHolderImpl*)HeapAlloc(GetProcessHeap(),
-                     0,
-                     sizeof(OleAdviseHolderImpl));
-
+					 0,
+					 sizeof(OleAdviseHolderImpl));
+  
   ICOM_VTBL(lpoah) = &oahvt;
   lpoah->ref = 1;
   lpoah->maxSinks = INITIAL_SINKS;
   lpoah->arrayOfSinks = HeapAlloc(GetProcessHeap(),
-                  0,
-                  lpoah->maxSinks * sizeof(IAdviseSink*));
+				  0,
+				  lpoah->maxSinks * sizeof(IAdviseSink*));
 
   for (index = 0; index < lpoah->maxSinks; index++)
     lpoah->arrayOfSinks[index]=0;
@@ -105,15 +116,15 @@ static void OleAdviseHolderImpl_Destructor(
       ptrToDestroy->arrayOfSinks[index] = NULL;
     }
   }
+  
+  HeapFree(GetProcessHeap(),
+	   0,
+	   ptrToDestroy->arrayOfSinks);
+  
 
   HeapFree(GetProcessHeap(),
-       0,
-       ptrToDestroy->arrayOfSinks);
-
-
-  HeapFree(GetProcessHeap(),
-       0,
-       ptrToDestroy);
+	   0,
+	   ptrToDestroy);
 }
 
 /**************************************************************************
@@ -121,10 +132,10 @@ static void OleAdviseHolderImpl_Destructor(
  */
 static HRESULT WINAPI OleAdviseHolderImpl_QueryInterface(
   LPOLEADVISEHOLDER iface,
-  REFIID            riid,
+  REFIID            riid, 
   LPVOID*           ppvObj)
 {
-  ICOM_THIS(OleAdviseHolderImpl, iface);
+  ICOM_THIS(OleAdviseHolderImpl, iface); 
   TRACE("(%p)->(%s,%p)\n",This,debugstr_guid(riid),ppvObj);
   /*
    * Sanity check
@@ -134,12 +145,12 @@ static HRESULT WINAPI OleAdviseHolderImpl_QueryInterface(
 
   *ppvObj = NULL;
 
-  if (IsEqualIID(riid, &IID_IUnknown))
+  if (IsEqualIID(riid, &IID_IUnknown)) 
   {
     /* IUnknown */
-    *ppvObj = This;
+    *ppvObj = This; 
   }
-  else if(IsEqualIID(riid, &IID_IOleAdviseHolder))
+  else if(IsEqualIID(riid, &IID_IOleAdviseHolder)) 
   {
     /* IOleAdviseHolder */
     *ppvObj = (IOleAdviseHolder*) This;
@@ -147,7 +158,7 @@ static HRESULT WINAPI OleAdviseHolderImpl_QueryInterface(
 
   if(*ppvObj == NULL)
     return E_NOINTERFACE;
-
+  
   /*
    * A successful QI always increments the reference count.
    */
@@ -162,8 +173,8 @@ static HRESULT WINAPI OleAdviseHolderImpl_QueryInterface(
 static ULONG WINAPI OleAdviseHolderImpl_AddRef(
   LPOLEADVISEHOLDER iface)
 {
-  ICOM_THIS(OleAdviseHolderImpl, iface);
-  TRACE("(%p)->(ref=%ld)\n", This, This->ref);
+  ICOM_THIS(OleAdviseHolderImpl, iface); 
+  TRACE("(%p)->(ref=%ld)\n", This, This->ref); 
   return ++(This->ref);
 }
 
@@ -173,8 +184,8 @@ static ULONG WINAPI OleAdviseHolderImpl_AddRef(
 static ULONG WINAPI OleAdviseHolderImpl_Release(
   LPOLEADVISEHOLDER iface)
 {
-  ICOM_THIS(OleAdviseHolderImpl, iface);
-  TRACE("(%p)->(ref=%ld)\n", This, This->ref);
+  ICOM_THIS(OleAdviseHolderImpl, iface); 
+  TRACE("(%p)->(ref=%ld)\n", This, This->ref); 
   This->ref--;
 
   if (This->ref == 0)
@@ -196,8 +207,8 @@ static HRESULT WINAPI OleAdviseHolderImpl_Advise(
   DWORD*            pdwConnection)
 {
   DWORD index;
-
-  ICOM_THIS(OleAdviseHolderImpl, iface);
+  
+  ICOM_THIS(OleAdviseHolderImpl, iface); 
 
   TRACE("(%p)->(%p, %p)\n", This, pAdvise, pdwConnection);
 
@@ -206,7 +217,7 @@ static HRESULT WINAPI OleAdviseHolderImpl_Advise(
    */
   if (pdwConnection==NULL)
     return E_POINTER;
-
+  
   *pdwConnection = 0;
 
   /*
@@ -227,13 +238,13 @@ static HRESULT WINAPI OleAdviseHolderImpl_Advise(
 
     This->maxSinks+=INITIAL_SINKS;
 
-    This->arrayOfSinks = HeapReAlloc(GetProcessHeap(),
-                     0,
-                     This->arrayOfSinks,
-                     This->maxSinks*sizeof(IAdviseSink*));
+    This->arrayOfSinks = HeapReAlloc(GetProcessHeap(), 
+				     0,
+				     This->arrayOfSinks,
+				     This->maxSinks*sizeof(IAdviseSink*));
 
     for (i=index;i < This->maxSinks; i++)
-      This->arrayOfSinks[i]=0;
+      This->arrayOfSinks[i]=0;      
   }
 
   /*
@@ -258,24 +269,24 @@ static HRESULT WINAPI OleAdviseHolderImpl_Advise(
  * OleAdviseHolderImpl_Unadvise
  */
 static HRESULT WINAPI OleAdviseHolderImpl_Unadvise(
-  LPOLEADVISEHOLDER iface,
+  LPOLEADVISEHOLDER iface, 
   DWORD             dwConnection)
 {
-  ICOM_THIS(OleAdviseHolderImpl, iface);
+  ICOM_THIS(OleAdviseHolderImpl, iface); 
 
   TRACE("(%p)->(%lu)\n", This, dwConnection);
 
   /*
-   * So we don't return 0 as a cookie, the index was
+   * So we don't return 0 as a cookie, the index was 
    * incremented by 1 in OleAdviseHolderImpl_Advise
    * we have to compensate.
    */
   dwConnection--;
-
+  
   /*
    * Check for invalid cookies.
    */
-  if ( (dwConnection < 0) ||
+  if ( (dwConnection < 0) || 
        (dwConnection >= This->maxSinks) )
     return OLE_E_NOCONNECTION;
 
@@ -297,7 +308,7 @@ static HRESULT WINAPI OleAdviseHolderImpl_Unadvise(
 static HRESULT WINAPI
 OleAdviseHolderImpl_EnumAdvise (LPOLEADVISEHOLDER iface, IEnumSTATDATA **ppenumAdvise)
 {
-    ICOM_THIS(OleAdviseHolderImpl, iface);
+    ICOM_THIS(OleAdviseHolderImpl, iface); 
     FIXME("(%p)->(%p)\n", This, ppenumAdvise);
 
     *ppenumAdvise = NULL;
@@ -311,7 +322,7 @@ OleAdviseHolderImpl_EnumAdvise (LPOLEADVISEHOLDER iface, IEnumSTATDATA **ppenumA
 static HRESULT WINAPI
 OleAdviseHolderImpl_SendOnRename (LPOLEADVISEHOLDER iface, IMoniker *pmk)
 {
-    ICOM_THIS(OleAdviseHolderImpl, iface);
+    ICOM_THIS(OleAdviseHolderImpl, iface); 
     FIXME("(%p)->(%p)\n", This, pmk);
 
 
@@ -324,7 +335,7 @@ OleAdviseHolderImpl_SendOnRename (LPOLEADVISEHOLDER iface, IMoniker *pmk)
 static HRESULT WINAPI
 OleAdviseHolderImpl_SendOnSave (LPOLEADVISEHOLDER iface)
 {
-    ICOM_THIS(OleAdviseHolderImpl, iface);
+    ICOM_THIS(OleAdviseHolderImpl, iface); 
     FIXME("(%p)\n", This);
 
     return S_OK;
@@ -336,7 +347,7 @@ OleAdviseHolderImpl_SendOnSave (LPOLEADVISEHOLDER iface)
 static HRESULT WINAPI
 OleAdviseHolderImpl_SendOnClose (LPOLEADVISEHOLDER iface)
 {
-    ICOM_THIS(OleAdviseHolderImpl, iface);
+    ICOM_THIS(OleAdviseHolderImpl, iface); 
     FIXME("(%p)\n", This);
 
 
@@ -350,7 +361,7 @@ typedef struct DataAdviseConnection {
   IAdviseSink *sink;
   FORMATETC fmat;
   DWORD advf;
-} DataAdviseConnection;
+} DataAdviseConnection;  
 
 typedef struct DataAdviseHolder
 {
@@ -367,31 +378,31 @@ typedef struct DataAdviseHolder
 static IDataAdviseHolder* DataAdviseHolder_Constructor();
 static void               DataAdviseHolder_Destructor(DataAdviseHolder* ptrToDestroy);
 static HRESULT WINAPI     DataAdviseHolder_QueryInterface(
-                IDataAdviseHolder*      iface,
-                REFIID                  riid,
-                void**                  ppvObject);
-static ULONG WINAPI       DataAdviseHolder_AddRef(
+			    IDataAdviseHolder*      iface,
+			    REFIID                  riid,
+			    void**                  ppvObject);
+static ULONG WINAPI       DataAdviseHolder_AddRef( 
                             IDataAdviseHolder*      iface);
-static ULONG WINAPI       DataAdviseHolder_Release(
+static ULONG WINAPI       DataAdviseHolder_Release( 
                             IDataAdviseHolder*      iface);
-static HRESULT WINAPI     DataAdviseHolder_Advise(
+static HRESULT WINAPI     DataAdviseHolder_Advise( 
                             IDataAdviseHolder*      iface,
-                IDataObject*            pDataObject,
-                FORMATETC*              pFetc,
-                DWORD                   advf,
-                IAdviseSink*            pAdvise,
-                DWORD*                  pdwConnection);
-static HRESULT WINAPI     DataAdviseHolder_Unadvise(
+			    IDataObject*            pDataObject, 
+			    FORMATETC*              pFetc, 
+			    DWORD                   advf, 
+			    IAdviseSink*            pAdvise, 
+			    DWORD*                  pdwConnection);
+static HRESULT WINAPI     DataAdviseHolder_Unadvise( 
                             IDataAdviseHolder*      iface,
-                DWORD                   dwConnection);
-static HRESULT WINAPI     DataAdviseHolder_EnumAdvise(
-                            IDataAdviseHolder*      iface,
-                IEnumSTATDATA**         ppenumAdvise);
-static HRESULT WINAPI     DataAdviseHolder_SendOnDataChange(
-                            IDataAdviseHolder*      iface,
-                IDataObject*            pDataObject,
-                DWORD                   dwReserved,
-                DWORD                   advf);
+			    DWORD                   dwConnection);
+static HRESULT WINAPI     DataAdviseHolder_EnumAdvise( 
+                            IDataAdviseHolder*      iface,       
+			    IEnumSTATDATA**         ppenumAdvise);
+static HRESULT WINAPI     DataAdviseHolder_SendOnDataChange( 
+                            IDataAdviseHolder*      iface, 
+			    IDataObject*            pDataObject, 
+			    DWORD                   dwReserved, 
+			    DWORD                   advf);
 
 /**************************************************************************
  *  DataAdviseHolderImpl_VTable
@@ -416,16 +427,16 @@ static IDataAdviseHolder* DataAdviseHolder_Constructor()
   DataAdviseHolder* newHolder;
 
   newHolder = (DataAdviseHolder*)HeapAlloc(GetProcessHeap(),
-                       0,
-                       sizeof(DataAdviseHolder));
-
+					   0,
+					   sizeof(DataAdviseHolder));
+  
   ICOM_VTBL(newHolder) = &DataAdviseHolderImpl_VTable;
   newHolder->ref = 1;
   newHolder->maxCons = INITIAL_SINKS;
   newHolder->Connections = HeapAlloc(GetProcessHeap(),
-                     HEAP_ZERO_MEMORY,
-                     newHolder->maxCons *
-                     sizeof(DataAdviseConnection));
+				     HEAP_ZERO_MEMORY,
+				     newHolder->maxCons * 
+				     sizeof(DataAdviseConnection));
 
   TRACE("returning %p\n", newHolder);
   return (IDataAdviseHolder*)newHolder;
@@ -447,7 +458,7 @@ static void DataAdviseHolder_Destructor(DataAdviseHolder* ptrToDestroy)
       ptrToDestroy->Connections[index].sink = NULL;
     }
   }
-
+  
   HeapFree(GetProcessHeap(), 0, ptrToDestroy->Connections);
   HeapFree(GetProcessHeap(), 0, ptrToDestroy);
 }
@@ -462,14 +473,14 @@ static HRESULT WINAPI DataAdviseHolder_QueryInterface(
   REFIID                  riid,
   void**                  ppvObject)
 {
-  ICOM_THIS(DataAdviseHolder, iface);
+  ICOM_THIS(DataAdviseHolder, iface); 
   TRACE("(%p)->(%s,%p)\n",This,debugstr_guid(riid),ppvObject);
   /*
    * Perform a sanity check on the parameters.
    */
   if ( (This==0) || (ppvObject==0) )
     return E_INVALIDARG;
-
+  
   /*
    * Initialize the return parameter.
    */
@@ -483,7 +494,7 @@ static HRESULT WINAPI DataAdviseHolder_QueryInterface(
   {
     *ppvObject = iface;
   }
-
+  
   /*
    * Check that we obtained an interface.
    */
@@ -491,14 +502,14 @@ static HRESULT WINAPI DataAdviseHolder_QueryInterface(
   {
     return E_NOINTERFACE;
   }
-
+  
   /*
    * Query Interface always increases the reference count by one when it is
-   * successful.
+   * successful. 
    */
   IUnknown_AddRef((IUnknown*)*ppvObject);
 
-  return S_OK;;
+  return S_OK;;  
 }
 
 /************************************************************************
@@ -506,10 +517,10 @@ static HRESULT WINAPI DataAdviseHolder_QueryInterface(
  *
  * See Windows documentation for more details on IUnknown methods.
  */
-static ULONG WINAPI       DataAdviseHolder_AddRef(
+static ULONG WINAPI       DataAdviseHolder_AddRef(                             
   IDataAdviseHolder*      iface)
 {
-  ICOM_THIS(DataAdviseHolder, iface);
+  ICOM_THIS(DataAdviseHolder, iface); 
   TRACE("(%p) (ref=%ld)\n", This, This->ref);
   This->ref++;
 
@@ -521,7 +532,7 @@ static ULONG WINAPI       DataAdviseHolder_AddRef(
  *
  * See Windows documentation for more details on IUnknown methods.
  */
-static ULONG WINAPI DataAdviseHolder_Release(
+static ULONG WINAPI DataAdviseHolder_Release( 
   IDataAdviseHolder*      iface)
 {
   ICOM_THIS(DataAdviseHolder, iface);
@@ -541,7 +552,7 @@ static ULONG WINAPI DataAdviseHolder_Release(
 
     return 0;
   }
-
+  
   return This->ref;
 }
 
@@ -551,24 +562,24 @@ static ULONG WINAPI DataAdviseHolder_Release(
  */
 static HRESULT WINAPI DataAdviseHolder_Advise(
   IDataAdviseHolder*      iface,
-  IDataObject*            pDataObject,
-  FORMATETC*              pFetc,
-  DWORD                   advf,
-  IAdviseSink*            pAdvise,
+  IDataObject*            pDataObject, 
+  FORMATETC*              pFetc, 
+  DWORD                   advf, 
+  IAdviseSink*            pAdvise, 
   DWORD*                  pdwConnection)
 {
   DWORD index;
-
-  ICOM_THIS(DataAdviseHolder, iface);
+  
+  ICOM_THIS(DataAdviseHolder, iface); 
 
   TRACE("(%p)->(%p, %p, %08lx, %p, %p)\n", This, pDataObject, pFetc, advf,
-    pAdvise, pdwConnection);
+	pAdvise, pdwConnection);
   /*
    * Sanity check
    */
   if (pdwConnection==NULL)
     return E_POINTER;
-
+  
   *pdwConnection = 0;
 
   /*
@@ -587,8 +598,8 @@ static HRESULT WINAPI DataAdviseHolder_Advise(
   {
     This->maxCons+=INITIAL_SINKS;
     This->Connections = HeapReAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY,
-                    This->Connections,
-                    This->maxCons*sizeof(DataAdviseConnection));
+				    This->Connections,
+				    This->maxCons*sizeof(DataAdviseConnection));
   }
   /*
    * Store the new sink
@@ -616,25 +627,25 @@ static HRESULT WINAPI DataAdviseHolder_Advise(
 /******************************************************************************
  * DataAdviseHolder_Unadvise
  */
-static HRESULT WINAPI     DataAdviseHolder_Unadvise(
+static HRESULT WINAPI     DataAdviseHolder_Unadvise( 
   IDataAdviseHolder*      iface,
   DWORD                   dwConnection)
 {
-  ICOM_THIS(DataAdviseHolder, iface);
+  ICOM_THIS(DataAdviseHolder, iface); 
 
   TRACE("(%p)->(%lu)\n", This, dwConnection);
 
   /*
-   * So we don't return 0 as a cookie, the index was
+   * So we don't return 0 as a cookie, the index was 
    * incremented by 1 in OleAdviseHolderImpl_Advise
    * we have to compensate.
    */
   dwConnection--;
-
+  
   /*
    * Check for invalid cookies.
    */
-  if ( (dwConnection < 0) ||
+  if ( (dwConnection < 0) || 
        (dwConnection >= This->maxCons) )
     return OLE_E_NOCONNECTION;
 
@@ -649,11 +660,11 @@ static HRESULT WINAPI     DataAdviseHolder_Unadvise(
   return S_OK;
 }
 
-static HRESULT WINAPI     DataAdviseHolder_EnumAdvise(
-  IDataAdviseHolder*      iface,
+static HRESULT WINAPI     DataAdviseHolder_EnumAdvise( 
+  IDataAdviseHolder*      iface,       
   IEnumSTATDATA**         ppenumAdvise)
 {
-  ICOM_THIS(DataAdviseHolder, iface);
+  ICOM_THIS(DataAdviseHolder, iface); 
 
   FIXME("(%p)->(%p)\n", This, ppenumAdvise);
   return E_NOTIMPL;
@@ -662,13 +673,13 @@ static HRESULT WINAPI     DataAdviseHolder_EnumAdvise(
 /******************************************************************************
  * DataAdviseHolder_SendOnDataChange
  */
-static HRESULT WINAPI     DataAdviseHolder_SendOnDataChange(
-  IDataAdviseHolder*      iface,
-  IDataObject*            pDataObject,
-  DWORD                   dwReserved,
+static HRESULT WINAPI     DataAdviseHolder_SendOnDataChange( 
+  IDataAdviseHolder*      iface, 
+  IDataObject*            pDataObject, 
+  DWORD                   dwReserved, 
   DWORD                   advf)
 {
-  ICOM_THIS(DataAdviseHolder, iface);
+  ICOM_THIS(DataAdviseHolder, iface); 
   DWORD index;
   STGMEDIUM stg;
   HRESULT res;
@@ -678,20 +689,20 @@ static HRESULT WINAPI     DataAdviseHolder_SendOnDataChange(
   for(index = 0; index < This->maxCons; index++) {
     if(This->Connections[index].sink != NULL) {
       if(!(This->Connections[index].advf & ADVF_NODATA)) {
-    TRACE("Calling IDataObject_GetData\n");
-    res = IDataObject_GetData(pDataObject,
-                  &(This->Connections[index].fmat),
-                  &stg);
-    TRACE("returns %08lx\n", res);
+	TRACE("Calling IDataObject_GetData\n");
+	res = IDataObject_GetData(pDataObject,
+				  &(This->Connections[index].fmat),
+				  &stg);
+	TRACE("returns %08lx\n", res);
       }
       TRACE("Calling IAdviseSink_OnDataChange\n");
       IAdviseSink_OnDataChange(This->Connections[index].sink,
-                     &(This->Connections[index].fmat),
-                     &stg);
+				     &(This->Connections[index].fmat),
+				     &stg);
       TRACE("Done IAdviseSink_OnDataChange\n");
       if(This->Connections[index].advf & ADVF_ONLYONCE) {
-    TRACE("Removing connection\n");
-    DataAdviseHolder_Unadvise(iface, index+1);
+	TRACE("Removing connection\n");
+	DataAdviseHolder_Unadvise(iface, index+1);
       }
     }
   }

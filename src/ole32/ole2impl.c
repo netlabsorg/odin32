@@ -1,4 +1,3 @@
-/* $Id: ole2impl.c,v 1.2 2001-09-05 13:17:11 bird Exp $ */
 /*
  * Ole 2 Create functions implementation
  *
