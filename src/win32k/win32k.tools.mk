@@ -1,4 +1,4 @@
-# $Id: win32k.tools.mk,v 1.10.2.6 2001-11-19 03:17:48 bird Exp $
+# $Id: win32k.tools.mk,v 1.10.2.7 2002-01-09 00:52:37 bird Exp $
 
 #
 # Win32k common tools makefile.
@@ -84,7 +84,7 @@ ILIB        = wlib /nobackup /nologo \
 #
 # Assembler and other DDK tools.
 #
-AS      = alp
+AS      = @$(CMDQD_SUB) alp
 AFLAGS  = -Sv:ALP -Mb -Li +Od
 H2INC   = $(DDKPATH)\tools\h2inc.exe -c -w -f -d
 
@@ -168,286 +168,205 @@ SOURCEFILE  = $^.
 
 
 {dev16}.c.obj:
-    @$(ECHO) compiling 16bit dev16:  $(SOURCEFILE)
-    $(C16COMPILE)
+    @$(ECHO) compiling 16bit dev16:  $(SOURCEFILE) & $(C16COMPILE)
 {dev16}.c.obj_init:
-    @$(ECHO) compiling 16bit dev16:  $(SOURCEFILE)
-    $(C16COMPILE_INIT)
-    @$(CP) $@ $@.obj
+    @$(ECHO) compiling 16bit dev16:  $(SOURCEFILE) & $(C16COMPILE_INIT) && $(CP) $@ $@.obj
 
 {dev16}.c.obj_tst:
-    @$(ECHO) compiling 16bit dev16 tst:  $(SOURCEFILE)
-    @$(C16COMPILE_TST)
+    @$(ECHO) compiling 16bit dev16 tst:  $(SOURCEFILE) & $(C16COMPILE_TST)
 #    @$(CP) $@ $@.obj
 {dev16}.c.obj_tst_init:
-    @$(ECHO) compiling 16bit dev16 tst:  $(SOURCEFILE)
-    @$(C16COMPILE_TST_INIT)
+    @$(ECHO) compiling 16bit dev16 tst:  $(SOURCEFILE) & $(C16COMPILE_TST_INIT)
 #    @$(CP) $@ $@.obj
 
 
 {dev32}.asm{$(WIN32KOBJ)}.obj:
-    @$(ECHO) assembling dev32:       $(SOURCEFILE)
-    @$(ASMCOMPILE)
+    @$(CMDQD_SUB) @$(ECHO) assembling dev32:       $(SOURCEFILE) & $(ASMCOMPILE)
 {dev32}.asm.obj:
-    @$(ECHO) assembling dev32:       $(SOURCEFILE)
-    @$(ASMCOMPILE)
+    @$(CMDQD_SUB) @$(ECHO) assembling dev32:       $(SOURCEFILE) & $(ASMCOMPILE)
 
 {dev32}.c{$(WIN32KOBJ)}.obj:
-    @$(ECHO) compiling 32bit dev32:  $(SOURCEFILE)
-    @$(CCOMPILE)
+    @$(CMDQD_SUB) @$(ECHO) compiling 32bit dev32:  $(SOURCEFILE) & $(CCOMPILE)
 {dev32}.c.obj:
-    @$(ECHO) compiling 32bit dev32:  $(SOURCEFILE)
-    @$(CCOMPILE)
+    @$(CMDQD_SUB) @$(ECHO) compiling 32bit dev32:  $(SOURCEFILE) & $(CCOMPILE)
 
 {dev32}.c{$(WIN32KOBJ)}.obj_tst:
-    @$(ECHO) compiling 32bit dev32 tst: $(SOURCEFILE)
-    @$(CCOMPILE_TST)
-    @$(CP) $@ $@.obj
+    @$(CMDQD_SUB) @$(ECHO) compiling 32bit dev32 tst: $(SOURCEFILE) & $(CCOMPILE_TST) && $(CP) $@ $@.obj
 {dev32}.c.obj_tst:
-    @$(ECHO) compiling 32bit dev32 tst: $(SOURCEFILE)
-    @$(CCOMPILE_TST)
-    @$(CP) $@ $@.obj
+    @$(CMDQD_SUB) @$(ECHO) compiling 32bit dev32 tst: $(SOURCEFILE) & $(CCOMPILE_TST) && $(CP) $@ $@.obj
 
 {dev32}.cpp{$(WIN32KOBJ)}.obj:
-    @$(ECHO) compiling 32bit dev32:  $(SOURCEFILE)
-    @$(CCOMPILE)
+    @$(CMDQD_SUB) @$(ECHO) compiling 32bit dev32:  $(SOURCEFILE) & $(CCOMPILE)
 {dev32}.cpp.obj:
-    @$(ECHO) compiling 32bit dev32:  $(SOURCEFILE)
-    @$(CCOMPILE)
+    @$(CMDQD_SUB) @$(ECHO) compiling 32bit dev32:  $(SOURCEFILE) & $(CCOMPILE)
 
 
 {elf2lx}.c{$(WIN32KOBJ)}.obj:
-    @$(ECHO) compiling 32bit elf2lx: $(SOURCEFILE)
-    @$(CCOMPILE)
+    @$(CMDQD_SUB) @$(ECHO) compiling 32bit elf2lx: $(SOURCEFILE) & $(CCOMPILE)
 {elf2lx}.c.obj:
-    @$(ECHO) compiling 32bit elf2lx: $(SOURCEFILE)
-    @$(CCOMPILE)
+    @$(CMDQD_SUB) @$(ECHO) compiling 32bit elf2lx: $(SOURCEFILE) & $(CCOMPILE)
 
 {elf2lx}.cpp{$(WIN32KOBJ)}.obj:
-    @$(ECHO) compiling 32bit elf2lx: $(SOURCEFILE)
-    @$(CPPCOMPILE)
+    @$(CMDQD_SUB) @$(ECHO) compiling 32bit elf2lx: $(SOURCEFILE) & $(CPPCOMPILE)
 {elf2lx}.cpp.obj:
-    @$(ECHO) compiling 32bit elf2lx: $(SOURCEFILE)
-    @$(CPPCOMPILE)
+    @$(CMDQD_SUB) @$(ECHO) compiling 32bit elf2lx: $(SOURCEFILE) & $(CPPCOMPILE)
 
 
 {k32}.asm{$(WIN32KOBJ)}.obj:
-    @$(ECHO) assembling k32:         $(SOURCEFILE)
-    @$(ASMCOMPILE)
+    @$(CMDQD_SUB) @$(ECHO) assembling k32:         $(SOURCEFILE) & $(ASMCOMPILE)
 {k32}.asm.obj:
-    @$(ECHO) assembling k32:         $(SOURCEFILE)
-    @$(ASMCOMPILE)
+    @$(CMDQD_SUB) @$(ECHO) assembling k32:         $(SOURCEFILE) & $(ASMCOMPILE)
 
 {k32}.c{$(WIN32KOBJ)}.obj:
-    @$(ECHO) compiling 32bit k32:    $(SOURCEFILE)
-    @$(CCOMPILE)
+    @$(CMDQD_SUB) @$(ECHO) compiling 32bit k32:    $(SOURCEFILE) & $(CCOMPILE)
 {k32}.c.obj:
-    @$(ECHO) compiling 32bit k32:    $(SOURCEFILE)
-    @$(CCOMPILE)
+    @$(CMDQD_SUB) @$(ECHO) compiling 32bit k32:    $(SOURCEFILE) & $(CCOMPILE)
 
 {k32}.cpp{$(WIN32KOBJ)}.obj:
-    @$(ECHO) compiling 32bit k32:    $(SOURCEFILE)
-    @$(CPPCOMPILE)
+    @$(CMDQD_SUB) @$(ECHO) compiling 32bit k32:    $(SOURCEFILE) & $(CPPCOMPILE)
 {k32}.cpp.obj:
-    @$(ECHO) compiling 32bit k32:    $(SOURCEFILE)
-    @$(CPPCOMPILE)
+    @$(CMDQD_SUB) @$(ECHO) compiling 32bit k32:    $(SOURCEFILE) & $(CPPCOMPILE)
 
 
 {ldr}.asm{$(WIN32KOBJ)}.obj:
-    @$(ECHO) assembling ldr:         $(SOURCEFILE)
-    @$(ASMCOMPILE)
+    @$(CMDQD_SUB) @$(ECHO) assembling ldr:         $(SOURCEFILE) & $(ASMCOMPILE)
 {ldr}.asm.obj:
-    @$(ECHO) assembling ldr:         $(SOURCEFILE)
-    @$(ASMCOMPILE)
+    @$(CMDQD_SUB) @$(ECHO) assembling ldr:         $(SOURCEFILE) & $(ASMCOMPILE)
 
 {ldr}.c{$(WIN32KOBJ)}.obj:
-    @$(ECHO) compiling 32bit ldr:    $(SOURCEFILE)
-    @$(CCOMPILE)
+    @$(CMDQD_SUB) @$(ECHO) compiling 32bit ldr:    $(SOURCEFILE) & $(CCOMPILE)
 {ldr}.c.obj:
-    @$(ECHO) compiling 32bit ldr:    $(SOURCEFILE)
-    @$(CCOMPILE)
+    @$(CMDQD_SUB) @$(ECHO) compiling 32bit ldr:    $(SOURCEFILE) & $(CCOMPILE)
 
 {ldr}.cpp{$(WIN32KOBJ)}.obj:
-    @$(ECHO) compiling 32bit ldr:    $(SOURCEFILE)
-    @$(CPPCOMPILE)
+    @$(CMDQD_SUB) @$(ECHO) compiling 32bit ldr:    $(SOURCEFILE) & $(CPPCOMPILE)
 {ldr}.cpp.obj:
-    @$(ECHO) compiling 32bit ldr:    $(SOURCEFILE)
-    @$(CPPCOMPILE)
+    @$(CMDQD_SUB) @$(ECHO) compiling 32bit ldr:    $(SOURCEFILE) & $(CPPCOMPILE)
 
 
 {api}.asm{$(WIN32KOBJ)}.obj:
-    @$(ECHO) assembling api:         $(SOURCEFILE)
-    @$(ASMCOMPILE)
+    @$(CMDQD_SUB) @$(ECHO) assembling api:         $(SOURCEFILE) & $(ASMCOMPILE)
 {api}.asm.obj:
-    @$(ECHO) assembling api:         $(SOURCEFILE)
-    @$(ASMCOMPILE)
+    @$(CMDQD_SUB) @$(ECHO) assembling api:         $(SOURCEFILE) & $(ASMCOMPILE)
 
 {api}.c{$(WIN32KOBJ)}.obj:
-    @$(ECHO) compiling 32bit api:    $(SOURCEFILE)
-    @$(CCOMPILE)
+    @$(CMDQD_SUB) @$(ECHO) compiling 32bit api:    $(SOURCEFILE) & $(CCOMPILE)
 {api}.c.obj:
-    @$(ECHO) compiling 32bit api:    $(SOURCEFILE)
-    @$(CCOMPILE)
+    @$(CMDQD_SUB) @$(ECHO) compiling 32bit api:    $(SOURCEFILE) & $(CCOMPILE)
 
 {api}.cpp{$(WIN32KOBJ)}.obj:
-    @$(ECHO) compiling 32bit api:    $(SOURCEFILE)
-    @$(CPPCOMPILE)
+    @$(CMDQD_SUB) @$(ECHO) compiling 32bit api:    $(SOURCEFILE) & $(CPPCOMPILE)
 {api}.cpp.obj:
-    @$(ECHO) compiling 32bit api:    $(SOURCEFILE)
-    @$(CPPCOMPILE)
+    @$(CMDQD_SUB) @$(ECHO) compiling 32bit api:    $(SOURCEFILE) & $(CPPCOMPILE)
 
 
 {misc}.asm{$(WIN32KOBJ)}.obj:
-    @$(ECHO) assembling misc:        $(SOURCEFILE)
-    $(ASMCOMPILE)
+    @$(CMDQD_SUB) @$(ECHO) assembling misc:        $(SOURCEFILE) & $(ASMCOMPILE)
 {misc}.asm.obj:
-    @$(ECHO) assembling misc:        $(SOURCEFILE)
-    $(ASMCOMPILE)
+    @$(CMDQD_SUB) @$(ECHO) assembling misc:        $(SOURCEFILE) & $(ASMCOMPILE)
 
 {misc}.c{$(WIN32KOBJ)}.obj:
-    @$(ECHO) compiling 32bit misc:   $(SOURCEFILE)
-    @$(CCOMPILE)
+    @$(CMDQD_SUB) @$(ECHO) compiling 32bit misc:   $(SOURCEFILE) & $(CCOMPILE)
 {misc}.c.obj:
-    @$(ECHO) compiling 32bit misc:   $(SOURCEFILE)
-    @$(CCOMPILE)
+    @$(CMDQD_SUB) @$(ECHO) compiling 32bit misc:   $(SOURCEFILE) & $(CCOMPILE)
 
 {misc}.c{$(WIN32KOBJ)}.obj_tst:
-    @$(ECHO) compiling 32bit misc tst: $(SOURCEFILE)
-    @$(CCOMPILE_TST)
+    @$(CMDQD_SUB) @$(ECHO) compiling 32bit misc tst: $(SOURCEFILE) & $(CCOMPILE_TST)
 #    @$(CP) $@ $@.obj
 {misc}.c.obj_tst:
-    @$(ECHO) compiling 32bit misc tst: $(SOURCEFILE)
-    @$(CCOMPILE_TST)
+    @$(CMDQD_SUB) @$(ECHO) compiling 32bit misc tst: $(SOURCEFILE) & $(CCOMPILE_TST)
 #    @$(CP) $@ $@.obj
 
 {misc}.cpp{$(WIN32KOBJ)}.obj:
-    @$(ECHO) compiling 32bit misc:   $(SOURCEFILE)
-    @$(CPPCOMPILE)
+    @$(CMDQD_SUB) @$(ECHO) compiling 32bit misc:   $(SOURCEFILE) & $(CPPCOMPILE)
 {misc}.cpp.obj:
-    @$(ECHO) compiling 32bit misc:   $(SOURCEFILE)
-    @$(CPPCOMPILE)
+    @$(CMDQD_SUB) @$(ECHO) compiling 32bit misc:   $(SOURCEFILE) & $(CPPCOMPILE)
 
 
 {Krnl}.asm{$(WIN32KOBJ)}.obj:
-    @$(ECHO) assembling Krnl:       $(SOURCEFILE)
-    @$(ASMCOMPILE)
+    @$(CMDQD_SUB) @$(ECHO) assembling Krnl:       $(SOURCEFILE) & $(ASMCOMPILE)
 {Krnl}.asm.obj:
-    @$(ECHO) assembling Krnl:       $(SOURCEFILE)
-    @$(ASMCOMPILE)
+    @$(CMDQD_SUB) @$(ECHO) assembling Krnl:       $(SOURCEFILE) & $(ASMCOMPILE)
 
 {Krnl}.c{$(WIN32KOBJ)}.obj:
-    @$(ECHO) compiling 32bit Krnl:  $(SOURCEFILE)
-    @$(CCOMPILE)
+    @$(CMDQD_SUB) @$(ECHO) compiling 32bit Krnl:  $(SOURCEFILE) & $(CCOMPILE)
 {Krnl}.c.obj:
-    @$(ECHO) compiling 32bit Krnl:  $(SOURCEFILE)
-    @$(CCOMPILE)
+    @$(CMDQD_SUB) @$(ECHO) compiling 32bit Krnl:  $(SOURCEFILE) & $(CCOMPILE)
 
 {Krnl}.c{$(WIN32KOBJ)}.obj_tst:
-    @$(ECHO) compiling 32bit Krnl tst: $(SOURCEFILE)
-    @$(CCOMPILE_TST)
-    @$(CP) $@ $@.obj
+    @$(CMDQD_SUB) @$(ECHO) compiling 32bit Krnl tst: $(SOURCEFILE) & $(CCOMPILE_TST) && $(CP) $@ $@.obj
 {Krnl}.c.obj_tst:
-    @$(ECHO) compiling 32bit Krnl tst: $(SOURCEFILE)
-    @$(CCOMPILE_TST)
-    @$(CP) $@ $@.obj
+    @$(CMDQD_SUB) @$(ECHO) compiling 32bit Krnl tst: $(SOURCEFILE) & $(CCOMPILE_TST) && $(CP) $@ $@.obj
 
 {Krnl}.cpp{$(WIN32KOBJ)}.obj:
-    @$(ECHO) compiling 32bit Krnl:  $(SOURCEFILE)
-    @$(CCOMPILE)
+    @$(CMDQD_SUB) @$(ECHO) compiling 32bit Krnl:  $(SOURCEFILE) & $(CCOMPILE)
 {Krnl}.cpp.obj:
-    @$(ECHO) compiling 32bit Krnl:  $(SOURCEFILE)
-    @$(CCOMPILE)
+    @$(CMDQD_SUB) @$(ECHO) compiling 32bit Krnl:  $(SOURCEFILE) & $(CCOMPILE)
 
 
 {clib}.asm{$(WIN32KOBJ)}.obj:
-    @$(ECHO) assembling Krnl:       $(SOURCEFILE)
-    @$(ASMCOMPILE)
+    @$(CMDQD_SUB) @$(ECHO) assembling Krnl:       $(SOURCEFILE) & $(ASMCOMPILE)
 {clib}.asm.obj:
-    @$(ECHO) assembling Krnl:       $(SOURCEFILE)
-    @$(ASMCOMPILE)
+    @$(CMDQD_SUB) @$(ECHO) assembling Krnl:       $(SOURCEFILE) & $(ASMCOMPILE)
 
 {clib}.c{$(WIN32KOBJ)}.obj:
-    @$(ECHO) compiling 32bit Krnl:  $(SOURCEFILE)
-    @$(CCOMPILE)
+    @$(CMDQD_SUB) @$(ECHO) compiling 32bit Krnl:  $(SOURCEFILE) & $(CCOMPILE)
 {clib}.c.obj:
-    @$(ECHO) compiling 32bit Krnl:  $(SOURCEFILE)
-    @$(CCOMPILE)
+    @$(CMDQD_SUB) $(ECHO) compiling 32bit Krnl:  $(SOURCEFILE) & $(CCOMPILE)
 
 {clib}.c{$(WIN32KOBJ)}.obj_tst:
-    @$(ECHO) compiling 32bit Krnl tst: $(SOURCEFILE)
-    @$(CCOMPILE_TST)
-    @$(CP) $@ $@.obj
+    @$(CMDQD_SUB) $(ECHO) compiling 32bit Krnl tst: $(SOURCEFILE) & $(CCOMPILE_TST) && $(CP) $@ $@.obj
 {clib}.c.obj_tst:
-    @$(ECHO) compiling 32bit Krnl tst: $(SOURCEFILE)
-    @$(CCOMPILE_TST)
-    @$(CP) $@ $@.obj
+    @$(CMDQD_SUB) $(ECHO) compiling 32bit Krnl tst: $(SOURCEFILE) & $(CCOMPILE_TST) && $(CP) $@ $@.obj
 
 {clib}.cpp{$(WIN32KOBJ)}.obj:
-    @$(ECHO) compiling 32bit Krnl:  $(SOURCEFILE)
-    @$(CCOMPILE)
+    @$(CMDQD_SUB) @$(ECHO) compiling 32bit Krnl:  $(SOURCEFILE) & $(CCOMPILE)
 {clib}.cpp.obj:
-    @$(ECHO) compiling 32bit Krnl:  $(SOURCEFILE)
-    @$(CCOMPILE)
+    @$(CMDQD_SUB) @$(ECHO) compiling 32bit Krnl:  $(SOURCEFILE) & $(CCOMPILE)
 
 
 
 
 {pe2lx}.c{$(WIN32KOBJ)}.obj:
-    @$(ECHO) compiling 32bit pe2lx:  $(SOURCEFILE)
-    @$(CCOMPILE)
+    @$(CMDQD_SUB) @$(ECHO) compiling 32bit pe2lx:  $(SOURCEFILE) & $(CCOMPILE)
 {pe2lx}.c.obj:
-    @$(ECHO) compiling 32bit pe2lx:  $(SOURCEFILE)
-    @$(CCOMPILE)
+    @$(CMDQD_SUB) @$(ECHO) compiling 32bit pe2lx:  $(SOURCEFILE) & $(CCOMPILE)
 
 {pe2lx}.cpp{$(WIN32KOBJ)}.obj:
-    @$(ECHO) compiling 32bit pe2lx:  $(SOURCEFILE)
-    @$(CPPCOMPILE)
+    @$(CMDQD_SUB) @$(ECHO) compiling 32bit pe2lx:  $(SOURCEFILE) & $(CPPCOMPILE)
 {pe2lx}.cpp.obj:
-    @$(ECHO) compiling 32bit pe2lx:  $(SOURCEFILE)
-    @$(CPPCOMPILE)
+    @$(CMDQD_SUB) @$(ECHO) compiling 32bit pe2lx:  $(SOURCEFILE) & $(CPPCOMPILE)
 
 
 {test}.asm{$(WIN32KOBJ)}.obj:
-    @$(ECHO) assembling test:        $(SOURCEFILE)
-    @$(ASMCOMPILE_TST)
+    @$(CMDQD_SUB) @$(ECHO) assembling test:        $(SOURCEFILE) & $(ASMCOMPILE_TST)
 {test}.asm.obj:
-    @$(ECHO) assembling test:        $(SOURCEFILE)
-    @$(ASMCOMPILE_TST)
+    @$(CMDQD_SUB) @$(ECHO) assembling test:        $(SOURCEFILE) & $(ASMCOMPILE_TST)
 
 {test}.c{$(WIN32KOBJ)}.obj:
-    @$(ECHO) compiling 32bit test:   $(SOURCEFILE)
-    @$(CCOMPILE_TST_TEST)
+    @$(CMDQD_SUB) @$(ECHO) compiling 32bit test:   $(SOURCEFILE) & $(CCOMPILE_TST_TEST)
 {test}.c.obj:
-    @$(ECHO) compiling 32bit test:   $(SOURCEFILE)
-    @$(CCOMPILE_TST_TEST)
+    @$(CMDQD_SUB) @$(ECHO) compiling 32bit test:   $(SOURCEFILE) & $(CCOMPILE_TST_TEST)
 
 {test}.cpp{$(WIN32KOBJ)}.obj:
-    @$(ECHO) compiling 32bit test:   $(SOURCEFILE)
-    @$(CPPCOMPILE_TST_TEST)
+    @$(CMDQD_SUB) @$(ECHO) compiling 32bit test:   $(SOURCEFILE) & $(CPPCOMPILE_TST_TEST)
 {test}.cpp.obj:
-    @$(ECHO) compiling 32bit test:   $(SOURCEFILE)
-    @$(CPPCOMPILE_TST_TEST)
+    @$(CMDQD_SUB) @$(ECHO) compiling 32bit test:   $(SOURCEFILE) & $(CPPCOMPILE_TST_TEST)
 
 
 
 {testcase}.asm{$(WIN32KOBJ)}.obj:
-    @$(ECHO) assembling testcase:    $(SOURCEFILE)
-    @$(ASMCOMPILE_TST)
+    @$(CMDQD_SUB) @$(ECHO) assembling testcase:    $(SOURCEFILE) & @$(CMDQD_SUB) $(ASMCOMPILE_TST)
 {testcase}.asm.obj:
-    @$(ECHO) assembling testcase:    $(SOURCEFILE)
-    @$(ASMCOMPILE_TST)
+    @$(CMDQD_SUB) @$(ECHO) assembling testcase:    $(SOURCEFILE) & $(ASMCOMPILE_TST)
 
 {testcase}.c{$(WIN32KOBJ)}.obj:
-    @$(ECHO) compiling 32bit testcase: $(SOURCEFILE)
-    @$(CCOMPILE_TST_TEST)
+    @$(CMDQD_SUB) @$(ECHO) compiling 32bit testcase: $(SOURCEFILE) & $(CCOMPILE_TST_TEST)
 {testcase}.c.obj:
-    @$(ECHO) compiling 32bit testcase: $(SOURCEFILE)
-    @$(CCOMPILE_TST_TEST)
+    @$(CMDQD_SUB) @$(ECHO) compiling 32bit testcase: $(SOURCEFILE) & $(CCOMPILE_TST_TEST)
 
 {testcase}.cpp{$(WIN32KOBJ)}.obj:
-    @$(ECHO) compiling 32bit testcase: $(SOURCEFILE)
-    @$(CPPCOMPILE_TST_TEST)
+    @$(CMDQD_SUB) @$(ECHO) compiling 32bit testcase: $(SOURCEFILE) & $(CPPCOMPILE_TST_TEST)
 {testcase}.cpp.obj:
-    @$(ECHO) compiling 32bit testcase: $(SOURCEFILE)
-    @$(CPPCOMPILE_TST_TEST)
+    @$(CMDQD_SUB) @$(ECHO) compiling 32bit testcase: $(SOURCEFILE) & $(CPPCOMPILE_TST_TEST)
 
