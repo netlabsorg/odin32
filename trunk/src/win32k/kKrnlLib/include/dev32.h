@@ -1,4 +1,4 @@
-/* $Id: dev32.h,v 1.3 2001-09-16 03:38:50 bird Exp $
+/* $Id: dev32.h,v 1.4 2001-09-17 02:45:47 bird Exp $
  *
  * dev32 - header file for 32-bit part of the driver.
  *
@@ -58,13 +58,8 @@ extern "C" {
  * Function prototypes.
  */
 #if !defined(__cplusplus) && defined(RING0)
-USHORT _loadds _Far32 _Pascal R0Init32(RP32INIT *pRpInit);
 USHORT _loadds _Far32 _Pascal GetKernelInfo32(PKRNLINFO pKrnlInfo);
 USHORT _loadds _Far32 _Pascal VerifyImportTab32(void);
-USHORT _loadds _Far32 _Pascal ElfIOCtl(PRP32GENIOCTL pRpIOCtl);
-USHORT _loadds _Far32 _Pascal Win32kIOCtl(PRP32GENIOCTL pRpIOCtl);
-USHORT _loadds _Far32 _Pascal Win32kOpen(PRP32OPENCLOSE pRpOpen);
-USHORT _loadds _Far32 _Pascal Win32kClose(PRP32OPENCLOSE pRpClose);
 #endif
 #ifdef _OS2KLDR_H_
 PMTE _System GetOS2KrnlMTE(void); /* (devfirst.asm) */
