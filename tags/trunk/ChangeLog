@@ -1,4 +1,4 @@
- /* $Id: ChangeLog,v 1.342 1999-10-19 12:56:04 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.343 1999-10-19 18:02:31 sandervl Exp $ */
 
  99-10-19: Sander van Leeuwen <sandervl@xs4all.nl>
 	- KERNEL32: FindResource bugfix: "DIB" type is the same as "BITMAP"
@@ -6,7 +6,8 @@
                     NOTE: Currently disabled. VPBuddy expects something other
                           than a pointer to the raw resource data for such
                           bitmaps. (TODO)
-        - USER32: Windows without a parent have the desktop window as parent
+        - USER32: Windows without a parent have the desktop window as parent.
+                  MDI additions.
 
  99-10-19: Yuri Dario <mc6530@mclink.it>
 	- USER32: Initialize MDI client variables before calling Win32BaseWindow
