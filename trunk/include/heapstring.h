@@ -23,6 +23,10 @@
 extern "C" {
 #endif
 
+extern BOOL fIsDBCSEnv;
+
+#define IsDBCSEnv()	fIsDBCSEnv
+
 int    WIN32API lstrlenA       (LPCSTR arg1);
 int    WIN32API lstrlenW       (LPCWSTR arg1);
 LPSTR  WIN32API lstrcatA       (LPSTR arg1, LPCSTR arg2);
@@ -46,6 +50,7 @@ LPSTR  WIN32API lstrcpyWtoA    (LPSTR ascii, LPCWSTR unicode);
 LPWSTR WIN32API lstrcpyAtoW    (LPWSTR unicode, LPCSTR ascii);
 int    WIN32API lstrlenWtoA    ( LPCWSTR ustring, int ulen );
 int    WIN32API lstrlenAtoW    ( LPCSTR astring, int alen );
+int    WIN32API lstrtrunc      ( LPSTR astring, int max );
 
 LPVOID WIN32API HEAP_xalloc    ( HANDLE heap, DWORD flags, DWORD size );
 LPVOID WIN32API HEAP_xrealloc  ( HANDLE heap, DWORD flags, LPVOID lpMem, DWORD size );
