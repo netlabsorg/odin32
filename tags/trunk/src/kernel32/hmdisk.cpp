@@ -1,4 +1,4 @@
-/* $Id: hmdisk.cpp,v 1.31 2001-11-29 13:38:51 sandervl Exp $ */
+/* $Id: hmdisk.cpp,v 1.32 2001-11-29 16:33:01 phaller Exp $ */
 
 /*
  * Win32 Disk API functions for OS/2
@@ -66,6 +66,19 @@ HMDeviceDiskClass::HMDeviceDiskClass(LPCSTR lpDeviceName) : HMDeviceKernelObject
  *****************************************************************************/
 BOOL HMDeviceDiskClass::FindDevice(LPCSTR lpClassDevName, LPCSTR lpDeviceName, int namelength)
 {
+  // check for "x:"
+  if (namelength == 2)
+  {
+    if (lpDeviceName[1] != ':')
+      return FALSE;
+
+    if ( (lpDeviceName[0] < 'A') ||
+         (lpDeviceName[0] > 'Z') )
+      return FALSE;
+
+    return TRUE;
+  }
+  
     //\\.\x:                -> length 6
     //\\.\PHYSICALDRIVEn    -> length 18
     if(namelength != 6 && namelength != 18) {
@@ -108,12 +121,16 @@ DWORD HMDeviceDiskClass::CreateFile (HANDLE        hHandle,
         dprintf(("Invalid creation flags %x!!", pHMHandleData->dwCreation));
         return ERROR_INVALID_PARAMETER;
     }
+  
+#if 0
+  // will never be triggered
     if(strncmp(lpFileName,       // "support" for local unc names
              "\\\\.\\",
              4) == 0)
     {
         lpFileName+=4;
     }
+#endif
 
     //Disable error popus. NT allows an app to open a cdrom/dvd drive without a disk inside
     //OS/2 fails in that case with error ERROR_NOT_READY
@@ -273,13 +290,7 @@ static BOOL ioctlCDROMSimple(PHMHANDLEDATA pHMHandleData,
                          NULL,
                          0,
                          &dwDataSize);
-  if(ret)
-  {
-    SetLastError(error2WinError(ret));
-    return FALSE;
-  }
-  SetLastError(ERROR_SUCCESS);
-  return TRUE;
+  return (ret == ERROR_SUCCESS);
 }
 
 
@@ -318,13 +329,7 @@ static BOOL ioctlDISKUnlockEject(PHMHANDLEDATA pHMHandleData,
                          NULL,
                          0,
                          &dwDataSize);
-  if(ret)
-  {
-    SetLastError(error2WinError(ret));
-    return FALSE;
-  }
-  SetLastError(ERROR_SUCCESS);
-  return TRUE;
+  return (ret == ERROR_SUCCESS);
 }
 
 
@@ -791,13 +796,7 @@ BOOL HMDeviceDiskClass::DeviceIoControl(PHMHANDLEDATA pHMHandleData, DWORD dwIoC
                              NULL,
                              0,
                              &dwDataSize);
-      if(ret)
-      {
-        SetLastError(error2WinError(ret));
-        return FALSE;
-      }
-      SetLastError(ERROR_SUCCESS);
-      return TRUE;
+      return (ret == ERROR_SUCCESS);
     }
       
     case IOCTL_CDROM_SEEK_AUDIO_MSF:
@@ -843,10 +842,9 @@ BOOL HMDeviceDiskClass::DeviceIoControl(PHMHANDLEDATA pHMHandleData, DWORD dwIoC
         ret = OSLibDosDevIOCtl(pHMHandleData->hHMHandle, 0x81, 0x60, drvInfo->signature, 4, &parsize,
                                volbuf, 8, &datasize);
 
-        if(ret) {
-            SetLastError(error2WinError(ret));
+        if(ret)
             return FALSE;
-        }
+
         if(lpBytesReturned) {
             *lpBytesReturned = sizeof(VOLUME_CONTROL);
         }
@@ -885,10 +883,9 @@ BOOL HMDeviceDiskClass::DeviceIoControl(PHMHANDLEDATA pHMHandleData, DWORD dwIoC
         ret = OSLibDosDevIOCtl(pHMHandleData->hHMHandle, 0x81, 0x40, drvInfo->signature, 4, &parsize,
                                volbuf, 8, &datasize);
 
-        if(ret) {
-            SetLastError(error2WinError(ret));
+        if(ret)
             return FALSE;
-        }
+
         SetLastError(ERROR_SUCCESS);
         return TRUE;
     }
