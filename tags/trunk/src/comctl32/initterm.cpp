@@ -1,4 +1,4 @@
-/* $Id: initterm.cpp,v 1.8 1999-10-22 18:04:10 sandervl Exp $ */
+/* $Id: initterm.cpp,v 1.9 2000-02-05 01:53:54 sandervl Exp $ */
 /*
  * COMCTL32 DLL entry point
  *
@@ -32,6 +32,7 @@
 #include <string.h>
 #include <misc.h>       /*PLF Wed  98-03-18 23:18:29*/
 #include <win32type.h>
+#include <winconst.h>
 #include <odinlx.h>
 
 extern "C" {
@@ -42,17 +43,30 @@ void CDECL _ctordtorTerm( void );
  extern DWORD _Resource_PEResTab;
 }
 
-/*-------------------------------------------------------------------*/
-/* A clean up routine registered with DosExitList must be used if    */
-/* runtime calls are required and the runtime is dynamically linked. */
-/* This will guarantee that this clean up routine is run before the  */
-/* library DLL is terminated.                                        */
-/*-------------------------------------------------------------------*/
-static void APIENTRY cleanup(ULONG reason);
-
 void CDECL RegisterCOMCTL32WindowClasses(unsigned long hinstDLL);
 void CDECL UnregisterCOMCTL32WindowClasses(void);
 
+//******************************************************************************
+//******************************************************************************
+BOOL WINAPI LibMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID fImpLoad)
+{
+   switch (fdwReason)
+   {
+   case DLL_PROCESS_ATTACH:
+	return TRUE;
+
+   case DLL_THREAD_ATTACH:
+   case DLL_THREAD_DETACH:
+	return TRUE;
+
+   case DLL_PROCESS_DETACH:
+   	/* unregister Win32 window classes */
+   	UnregisterCOMCTL32WindowClasses();
+   	_ctordtorTerm();
+	return TRUE;
+   }
+   return FALSE;
+}
 /****************************************************************************/
 /* _DLL_InitTerm is the function that gets called by the operating system   */
 /* loader when it loads and frees this DLL for each process that accesses   */
@@ -83,12 +97,8 @@ unsigned long _System _DLL_InitTerm(unsigned long hModule, unsigned long
          /* are required and the runtime is dynamically linked.             */
          /*******************************************************************/
 
-	 if(RegisterLxDll(hModule, 0, (PVOID)&_Resource_PEResTab) == FALSE) 
+	 if(RegisterLxDll(hModule, LibMain, (PVOID)&_Resource_PEResTab) == FALSE) 
 		return 0UL;
-
-         rc = DosExitList(0x0000F000|EXLST_ADD, cleanup);
-         if(rc)
-                return 0UL;
 
          CheckVersionFromHMOD(PE2LX_VERSION, hModule); /*PLF Wed  98-03-18 05:28:48*/
 
@@ -108,12 +118,5 @@ unsigned long _System _DLL_InitTerm(unsigned long hModule, unsigned long
    /***********************************************************/
    return 1UL;
 }
-
-static void APIENTRY cleanup(ULONG ulReason)
-{
-   /* unregister Win32 window classes */
-   UnregisterCOMCTL32WindowClasses();
-   _ctordtorTerm();
-   DosExitList(EXLST_EXIT, cleanup);
-   return ;
-}
+//******************************************************************************
+//******************************************************************************
