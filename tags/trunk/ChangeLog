@@ -1,4 +1,8 @@
- /* $Id: ChangeLog,v 1.99 1999-08-18 17:15:26 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.100 1999-08-18 23:42:19 phaller Exp $ */
+ 99-08-18: Patrick Haller <phaller@gmx.net>
+        - NTDLL:    tons of new stubs and crt functions
+        - WNETAP32: tons of new stubs
+
  99-08-18: Sander van Leeuwen <sandervl@xs4all.nl>
 	- Put back version check in most dlls (except odincrt.dll & peldr.dll
 	  we don't want a kernel32 dependency there)
