@@ -1,4 +1,4 @@
-/* $Id: hmdisk.cpp,v 1.53 2002-09-26 16:06:06 sandervl Exp $ */
+/* $Id: hmdisk.cpp,v 1.54 2002-09-27 13:42:48 sandervl Exp $ */
 
 /*
  * Win32 Disk API functions for OS/2
@@ -2051,6 +2051,12 @@ BOOL HMDeviceDiskClass::WriteFile(PHMHANDLEDATA pHMHandleData,
 DWORD HMDeviceDiskClass::GetFileSize(PHMHANDLEDATA pHMHandleData,
                                      PDWORD        lpdwFileSizeHigh)
 {
+#if 1
+    //Verified in NT4
+    dprintf(("GetFileSize doesn't work for drive objects"));
+    SetLastError(ERROR_INVALID_PARAMETER);
+    return -1; //INVALID_SET_FILE_POINTER
+#else
     DRIVE_INFO *drvInfo = (DRIVE_INFO*)pHMHandleData->dwUserData;
     if(drvInfo == NULL) {
         dprintf(("ERROR: GetFileSize: drvInfo == NULL!!!"));
@@ -2096,6 +2102,7 @@ DWORD HMDeviceDiskClass::GetFileSize(PHMHANDLEDATA pHMHandleData,
 
         return size.LowPart;
     }
+#endif
 }
 
 /*****************************************************************************
