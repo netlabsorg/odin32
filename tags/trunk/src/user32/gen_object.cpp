@@ -1,4 +1,4 @@
-/* $Id: gen_object.cpp,v 1.10 2001-06-10 12:05:38 sandervl Exp $ */
+/* $Id: gen_object.cpp,v 1.11 2001-06-11 14:37:46 sandervl Exp $ */
 /*
  * Generic Object Class for OS/2
  *
@@ -90,7 +90,7 @@ void GenericObject::unlink()
 #ifdef DEBUG
 LONG GenericObject::addRef()
 {
-////  dprintf(("addRef %x -> refcount %x", this, refCount));
+  dprintf2(("addRef %x -> refcount %x", this, refCount+1));
   return InterlockedIncrement(&refCount);
 }
 #endif
@@ -98,13 +98,14 @@ LONG GenericObject::addRef()
 //******************************************************************************
 LONG GenericObject::release()
 {
-////  dprintf(("release %x -> refcount %x", this, refCount));
+  dprintf2(("release %x -> refcount %x", this, refCount-1));
 #ifdef DEBUG
   if(refCount-1 < 0) {
       DebugInt3();
   }
 #endif
   if(InterlockedDecrement(&refCount) == 0 && fDeletePending) {
+      dprintf2(("marked for deletion -> delete now"));
       delete this;
       return 0;
   }
