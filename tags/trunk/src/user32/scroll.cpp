@@ -1,4 +1,4 @@
-/* $Id: scroll.cpp,v 1.35 2000-02-20 18:28:33 cbratschi Exp $ */
+/* $Id: scroll.cpp,v 1.36 2000-03-24 17:12:20 cbratschi Exp $ */
 /*
  * Scrollbar control
  *
@@ -688,6 +688,15 @@ LRESULT SCROLL_Create(HWND hwnd,WPARAM wParam,LPARAM lParam)
   return 0;
 }
 
+static LRESULT SCROLL_Destroy(HWND hwnd,WPARAM wParam,LPARAM lParam)
+{
+  SCROLLBAR_INFO* infoPtr = (SCROLLBAR_INFO*)GetInfoPtr(hwnd);
+
+  free(infoPtr);
+
+  return 0;
+}
+
 /***********************************************************************
  *           SCROLL_HandleScrollEvent
  *
@@ -1104,6 +1113,9 @@ LRESULT WINAPI ScrollBarWndProc( HWND hwnd, UINT message, WPARAM wParam,
     case WM_CREATE:
       return SCROLL_Create(hwnd,wParam,lParam);
 
+    case WM_DESTROY:
+      return SCROLL_Destroy(hwnd,wParam,lParam);
+
     case WM_LBUTTONDOWN:
     case WM_LBUTTONUP:
     case WM_NCHITTEST:
@@ -1479,9 +1491,10 @@ BOOL WINAPI ShowScrollBar(
     dprintf(("ShowScrollBar %04x %d %d\n", hwnd, nBar, fShow));
     if (!win32wnd) return FALSE;
 
+    //CB: does Win32 send a WM_STYLECHANGED message?
     switch(nBar)
     {
-     case SB_CTL:
+      case SB_CTL:
        ShowWindow(hwnd,fShow ? SW_SHOW:SW_HIDE);
        return TRUE;
 
