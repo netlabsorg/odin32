@@ -1,4 +1,4 @@
-/* $Id: pe.cpp,v 1.5 1999-07-06 08:50:11 sandervl Exp $ */
+/* $Id: pe.cpp,v 1.6 1999-07-07 08:11:11 sandervl Exp $ */
 
 /*
  * PE2LX PE image interpreter
@@ -229,6 +229,8 @@ char *winfile=NULL, *os2file=NULL;
         OS2Exe.SetModuleName(winfile);
   else  OS2Exe.SetModuleName(os2file);
 
+  OS2Exe.SetEntryPoint(oh.AddressOfEntryPoint+oh.ImageBase);
+
   nSections = NR_SECTIONS(win32file);
 
   if ((psh = (PIMAGE_SECTION_HEADER)SECTIONHDROFF (win32file)) != NULL) {
@@ -275,6 +277,24 @@ char *winfile=NULL, *os2file=NULL;
                                             type);
                         continue;
                 }
+		if(strcmp(psh[i].Name, ".tls") == 0)
+		{
+ 		  IMAGE_TLS_DIRECTORY *tlsDir;
+
+			tlsDir = (IMAGE_TLS_DIRECTORY *)ImageDirectoryOffset(win32file, IMAGE_DIRECTORY_ENTRY_TLS);
+			if(tlsDir) {
+				cout << "TLS Directory" << endl;
+				cout << "TLS Address of Index     " << hex((ULONG)tlsDir->AddressOfIndex) << endl;
+				cout << "TLS Address of Callbacks " << hex((ULONG)tlsDir->AddressOfCallBacks) << endl;
+				cout << "TLS SizeOfZeroFill       " << hex(tlsDir->SizeOfZeroFill) << endl;
+				cout << "TLS Characteristics      " << hex(tlsDir->Characteristics) << endl;
+				OS2Exe.SetTLSAddress(tlsDir->StartAddressOfRawData);
+				OS2Exe.SetTLSIndexAddress((ULONG)tlsDir->AddressOfIndex);
+				OS2Exe.SetTLSInitSize(tlsDir->EndAddressOfRawData - tlsDir->StartAddressOfRawData);
+				OS2Exe.SetTLSTotalSize(tlsDir->EndAddressOfRawData - tlsDir->StartAddressOfRawData + tlsDir->SizeOfZeroFill);
+				OS2Exe.SetTLSCallBackAddr((ULONG)tlsDir->AddressOfCallBacks);
+			}
+		}
 
                 if ((psh[i].Characteristics & IMAGE_SCN_CNT_CODE)
                  //KSO Sun 1998-08-09: Borland does not alway set the CODE flag for its "CODE" section (TIB fix need to have the first section marked as code)
@@ -286,6 +306,7 @@ char *winfile=NULL, *os2file=NULL;
                         if(oh.AddressOfEntryPoint < psh[i].VirtualAddress)
                                 OS2Exe.SetEntryAddress(oh.AddressOfEntryPoint - oh.BaseOfCode);
                         else    OS2Exe.SetEntryAddress(oh.AddressOfEntryPoint-psh[i].VirtualAddress);
+
                         OS2Exe.StoreSection((char *)win32file+psh[i].PointerToRawData,
                                             psh[i].SizeOfRawData, psh[i].Misc.VirtualSize,
                                             psh[i].VirtualAddress + oh.ImageBase,
@@ -331,6 +352,9 @@ char *winfile=NULL, *os2file=NULL;
 
   prel = (PIMAGE_BASE_RELOCATION) ImageDirectoryOffset (win32file, IMAGE_DIRECTORY_ENTRY_BASERELOC);
   OS2Exe.SetNrOff32Fixups((prel) ? oh.DataDirectory[IMAGE_DIRECTORY_ENTRY_BASERELOC].Size/2 : 0);
+
+  //SvL: Add EntryPoint & TLS fixups (if required)
+  OS2Exe.AddExtraFixups();
 
   if(prel) {
         j = 1;

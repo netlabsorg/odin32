@@ -1,4 +1,4 @@
-/* $Id: windll.h,v 1.2 1999-05-27 15:17:59 phaller Exp $ */
+/* $Id: windll.h,v 1.3 1999-07-07 08:11:09 sandervl Exp $ */
 
 /*
  *
@@ -54,6 +54,18 @@ public:
 
 	Win32Dll *getNext()  { return next; };
 static 	Win32Dll *getFirst();
+
+//Send DLL_THREAD_ATTACH message to all dlls for a new thread
+static  void      attachThreadToAllDlls();
+
+//Send DLL_THREAD_DETACH message to all dlls for thread that's about to die
+static  void      detachThreadFromAllDlls();
+
+//Setup TLS structure for all dlls for a new thread
+static  void      tlsAttachThreadToAllDlls();
+
+//Destroy TLS structure for all dlls for a thread that's about to die
+static  void      tlsDetachThreadFromAllDlls();
 
 	ULONG     getApi(char *name);
 	ULONG     getApi(int ordinal);

@@ -1,4 +1,4 @@
-/* $Id: winimage.cpp,v 1.4 1999-06-19 10:54:43 sandervl Exp $ */
+/* $Id: winimage.cpp,v 1.5 1999-07-07 08:11:10 sandervl Exp $ */
 
 /*
  * Win32 PE Image class
@@ -59,6 +59,7 @@ Win32Image::Win32Image(char *szFileName) :
     imageVirtBase(-1), baseAddress(0), realBaseAddress(0), imageVirtEnd(0),
     nrNameExports(0), nrOrdExports(0), nameexports(NULL), ordexports(NULL),
     szFileName(NULL), NameTable(NULL), Win32Table(NULL), fullpath(NULL),
+    tlsAddress(0), tlsIndexAddr(0), tlsInitSize(0), tlsTotalSize(0), tlsCallBackAddr(0), tlsIndex(-1),
     pResSection(NULL), pResDir(NULL), winres(NULL), VersionId(-1)
 {
   //native win32 exe/dll, converted dll or native OS/2 dll
@@ -83,6 +84,7 @@ Win32Image::Win32Image(HINSTANCE hinstance, int NameTableId, int Win32TableId) :
     imageVirtBase(-1), baseAddress(0), realBaseAddress(0), imageVirtEnd(0),
     nrNameExports(0), nrOrdExports(0), nameexports(NULL), ordexports(NULL),
     szFileName(NULL), NameTable(NULL), Win32Table(NULL), fullpath(NULL),
+    tlsAddress(0), tlsIndexAddr(0), tlsInitSize(0), tlsTotalSize(0), tlsCallBackAddr(0), tlsIndex(-1),
     pResSection(NULL), pResDir(NULL), winres(NULL)
 {
 #ifdef DEBUG

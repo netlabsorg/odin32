@@ -1,4 +1,4 @@
-/* $Id: thread.cpp,v 1.6 1999-06-20 10:55:36 sandervl Exp $ */
+/* $Id: thread.cpp,v 1.7 1999-07-07 08:11:10 sandervl Exp $ */
 
 /*
  * Win32 Thread API functions
@@ -13,8 +13,10 @@
 #include <stdarg.h>
 #include "thread.h"
 #include "except.h"
-#include "misc.h"
+#include <misc.h>
 #include <wprocess.h>
+#include <windll.h>
+#include <winexe.h>
 
 static DWORD OPEN32API Win32ThreadProc(LPVOID lpData);
 
@@ -45,8 +47,7 @@ HANDLE WIN32API CreateThread(LPSECURITY_ATTRIBUTES lpsa, DWORD cbStack,
 //******************************************************************************
 DWORD WIN32API GetCurrentThreadId()
 {
-  dprintf(("GetCurrentThreadId\n"));
-
+////  dprintf(("GetCurrentThreadId\n"));
   return(O32_GetCurrentThreadId());
 }
 //******************************************************************************
@@ -120,9 +121,10 @@ VOID WIN32API ExitThread(DWORD exitcode)
   dprintf(("ExitThread (%08xu)\n",
            exitcode));
 
-#ifdef WIN32_TIBSEL
+  Win32Dll::detachThreadFromAllDlls(); 	//send DLL_THREAD_DETACH message to all dlls
+  Win32Dll::tlsDetachThreadFromAllDlls(); //destroy TLS structures of all dlls
+  WinExe->tlsDetachThread();			//destroy TLS structure of main exe
   DestroyTIB();
-#endif
   O32_ExitThread(exitcode);
 }
 //******************************************************************************
@@ -152,12 +154,12 @@ static DWORD OPEN32API Win32ThreadProc(LPVOID lpData)
  Win32Thread     *me = (Win32Thread *)lpData;
  WIN32THREADPROC  winthread = me->pCallback;
  LPVOID           userdata  = me->lpUserData;
+ DWORD            rc;
 
   delete me;    //only called once
 
   dprintf(("Win32ThreadProc %d\n", GetCurrentThreadId()));
 
-#ifdef WIN32_TIBSEL
   TEB *winteb = (TEB *)InitializeTIB();
   if(winteb == NULL) {
 	dprintf(("Win32ThreadProc: InitializeTIB failed!!"));
@@ -169,11 +171,19 @@ static DWORD OPEN32API Win32ThreadProc(LPVOID lpData)
   THDB *thdb   = (THDB *)(winteb+1);
   thdb->entry_point = (void *)winthread;
   thdb->entry_arg   = (void *)userdata;
+
   SetWin32TIB();
-#else
-  ReplaceExceptionHandler();
-#endif
-  return(winthread(userdata));
+  WinExe->tlsAttachThread();		  //setup TLS structure of main exe
+  Win32Dll::tlsAttachThreadToAllDlls(); //setup TLS structures of all dlls
+  Win32Dll::attachThreadToAllDlls();	  //send DLL_THREAD_ATTACH message to all dlls
+
+  rc = winthread(userdata);
+
+  Win32Dll::detachThreadFromAllDlls();  //send DLL_THREAD_DETACH message to all dlls
+  Win32Dll::tlsDetachThreadFromAllDlls(); //destroy TLS structures of all dlls
+  WinExe->tlsDetachThread();		  //destroy TLS structure of main exe
+  DestroyTIB();
+  return rc;
 }
 //******************************************************************************
 //******************************************************************************

@@ -1,4 +1,4 @@
-; $Id: kernel32.def,v 1.15 1999-07-04 11:44:03 sandervl Exp $
+; $Id: kernel32.def,v 1.16 1999-07-07 08:11:09 sandervl Exp $
 
 ;Created by BLAST for IBM's compiler
 ;Basis is Windows95 KERNEL32
@@ -931,15 +931,15 @@ EXPORTS
     WriteLogError                 = WriteLogError                  @1214
 
 ;Used by tibfix page in exe (change ordinal in lx.cpp too!!)
-    RegisterResourceUsage         = _RegisterResourceUsage@20      @1203
+    RegisterExe                   = _RegisterExe@48      	   @1203
 ;VMutex
    enter__6VMutexFUl                                               @1204
    leave__6VMutexFv                                                @1205
    __ct__6VMutexFv                                                 @1206
    __dt__6VMutexFv                                                 @1207
 ;Used by tibfix page in dll (change ordinal in lx.cpp too!!)
-    DLLExitList                   = _DLLExitList@4                 @1208
-    RegisterDll                   = _RegisterDll@20                @1209
+;;;    DLLExitList                   = _DLLExitList@4                 @1208
+    RegisterDll                   = _RegisterDll@48                @1209
 ;Unicode
    UnicodeToAsciiString = _UnicodeToAsciiString@4                  @1210
    UnicodeToAscii       = _UnicodeToAscii@8                        @1211
