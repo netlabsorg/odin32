@@ -1,4 +1,8 @@
- /* $Id: changelog,v 1.849 2000-03-29 17:13:41 sandervl Exp $ */
+ /* $Id: changelog,v 1.850 2000-03-30 10:51:38 sandervl Exp $ */
+
+ 2000-03-30: Sander van Leeuwen <sandervl@xs4all.nl>
+	- KERNEL32: Also double thread stack in release build
+                    (RealPlayer 7 runs out of stack sometimes)
 
  2000-03-29: Sander van Leeuwen <sandervl@xs4all.nl>
 	- KERNEL32: Throw exception when critical section times out
@@ -10,7 +14,7 @@
  2000-03-29: Christoph Bratschi <cbratschi@datacomm.ch>
 	- KERNEL32: added FindFileFirstMultiA for internal usage
 
- 2000-03-12: Markus Montkowski <mmontkowski@gmx.de>
+ 2000-03-28: Markus Montkowski <mmontkowski@gmx.de>
         - KERNEL32: Added workaround for GetDiskFreeSpaceA; Open32 api doesn't
                     like NULL pointers
 
