@@ -1,4 +1,4 @@
-/* $Id: windllpe2lx.cpp,v 1.2 1999-10-14 01:37:55 bird Exp $ */
+/* $Id: windllpe2lx.cpp,v 1.3 1999-10-17 01:49:08 bird Exp $ */
 
 /*
  * Win32 PE2LX Dll class
@@ -87,34 +87,30 @@ ULONG WIN32API RegisterPe2LxDll(ULONG ulPe2LxVersion, HINSTANCE hinstance, ULONG
         dprintf(("RegisterPe2LxExe: name = %s\n", OSLibGetDllName(hinstance)));
 
         /* Try create pe2lx dll object. */
-        try
+        pWinMod = new Win32Pe2LxDll(hinstance, (ulPe2LxVersion & 0x80000000UL) == 0x80000000UL);
+        if (pWinMod == NULL)
         {
-            pWinMod = new Win32Pe2LxDll(hinstance, (ulPe2LxVersion & 0x80000000UL) == 0x80000000UL);
-            if (pWinMod == NULL)
-                throw ((ULONG)ERROR_NOT_ENOUGH_MEMORY);
-
-            /* @@@PH 1998/03/17 Console devices initialization */
-            iConsoleDevicesRegister();
-
-            /* Add reference and attach dll to process. */
-            pWinMod->AddRef();
-            pWinMod->attachProcess();
+            eprintf(("RegisterPe2LxDll: new returned a NULL-pointer\n"));
+            return 0;
         }
-        catch(ULONG ul)
+        if (!pWinMod->init())
         {
-            eprintf(("RegisterPe2LxDLL: Failed to create module object, ul=%d\n", ul));
-            DebugInt3();
-            return 0;  /* fail dll load */
+            eprintf(("RegisterPe2LxDll: init-method failed.\n"));
+            delete pWinMod;
+            return 0;
         }
+
+        /* @@@PH 1998/03/17 Console devices initialization */
+        iConsoleDevicesRegister();
+
+        /* Add reference and attach dll to process. */
+        pWinMod->AddRef();
+        pWinMod->attachProcess();
     }
     else
     {   /* process detach */
         if (pWinMod != NULL && !fFreeLibrary)
             return 0;   /* don't unload (OS/2 dll unload bug) - see OS2.bugs in root dir. */
-
-        #if 0 /* Runtime environment could already be gone, so don't do this */
-            dprintf(("KERNEL32: Dll Removed by FreeLibrary or ExitProcess\n"));
-        #endif
     }
 
     return 1;   /* success */
@@ -129,14 +125,12 @@ ULONG WIN32API RegisterPe2LxDll(ULONG ulPe2LxVersion, HINSTANCE hinstance, ULONG
  * @status    completely implemented.
  * @author    Sander van Leeuwen, knut st. osmundsen
  */
-Win32Pe2LxDll::Win32Pe2LxDll(HINSTANCE hinstance, BOOL fWin32k) throw(ULONG)
+Win32Pe2LxDll::Win32Pe2LxDll(HINSTANCE hinstance, BOOL fWin32k)
     : Win32ImageBase(hinstance),
     Win32DllBase(hinstance, NULL),
     Win32Pe2LxImage(hinstance, fWin32k)
 {
     dprintf(("Win32Pe2LxDll::Win32Pe2LxDll %s", szModule));
-    /* set entry point. */
-    dllEntryPoint = (WIN32DLLENTRY)entryPoint;
 }
 
 
@@ -150,6 +144,27 @@ Win32Pe2LxDll::~Win32Pe2LxDll()
     dprintf(("Win32Pe2LxDll::~Win32Pe2LxDll %s", szModule));
 }
 
+
+/**
+ * Init object.
+ * Must be called immedeately after objecte construction.
+ * @returns   Success indicator. (TRUE == success)
+ * @sketch    call init method of the parten class.
+ *            set dllEntryPoint
+ * @status    completely implemented.
+ * @author    knut st. osmundsen
+ */
+BOOL Win32Pe2LxDll::init()
+{
+    if (Win32Pe2LxImage::init())
+    {
+        /* set entry point. */
+        dllEntryPoint = (WIN32DLLENTRY)entryPoint;
+    }
+    else
+        return FALSE;
+    return TRUE;
+}
 
 /**
  * Gets pointer to an exported procedure by procedure name.

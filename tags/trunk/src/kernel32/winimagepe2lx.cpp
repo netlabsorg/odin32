@@ -1,4 +1,4 @@
-/* $Id: winimagepe2lx.cpp,v 1.2 1999-10-14 01:37:56 bird Exp $ */
+/* $Id: winimagepe2lx.cpp,v 1.3 1999-10-17 01:49:09 bird Exp $ */
 
 /*
  * Win32 PE2LX Image base class
@@ -117,6 +117,31 @@
  * @param     hinstance   OS/2 module handle.
  * @param     fWin32k     TRUE:  Win32k module.
  *                        FALSE: Pe2Lx module.
+ * @status    partially implemented.
+ * @author    knut st. osmundsen, Sander van Leeuwen
+ */
+Win32Pe2LxImage::Win32Pe2LxImage(HINSTANCE hinstance, BOOL fWin32k)
+    : Win32ImageBase(hinstance),
+    paSections(NULL), cSections(0), pNtHdrs(NULL), fWin32k(fWin32k)
+{
+}
+
+
+/**
+ * Free memory associated with this object.
+ * @status    completely implemented.
+ * @author    knut st. osmundsen, Sander van Leeuwen
+ */
+Win32Pe2LxImage::~Win32Pe2LxImage()
+{
+    cleanup();
+}
+
+
+/**
+ * Initiates the object.
+ * Must be called immediately after the object construction.
+ * @returns   Success indicator, TRUE == success; FALSE = failure.
  * @sketch    Get section placement and sizes for this module. (paSections, cSections)
  *            Verify that there is at least one section - the header section.
  *            Locate the NT headers.
@@ -126,12 +151,11 @@
  *            Locate and set the entrypoint.
  *            Locate the resource directory (if any). (pResDir, pResourceSectionStart)
  *            TLS - FIXME!
- * @status    partially implmented.
- * @author    knut st. osmundsen, Sander van Leeuwen
+ * @status    completely implemented.
+ * @author    knut st. osmundsen
+ * @remark    Object must be destroyed if failure!
  */
-Win32Pe2LxImage::Win32Pe2LxImage(HINSTANCE hinstance, BOOL fWin32k) throw(ULONG)
-    : Win32ImageBase(hinstance),
-    paSections(NULL), cSections(0), pNtHdrs(NULL), fWin32k(fWin32k)
+BOOL Win32Pe2LxImage::init()
 {
     APIRET rc;
 
@@ -141,16 +165,14 @@ Win32Pe2LxImage::Win32Pe2LxImage(HINSTANCE hinstance, BOOL fWin32k) throw(ULONG)
     {
         dprintf(("Win32Pe2LxImage::Win32Pe2LxImage: error - getSection failed with rc=%d\n",
                  rc));
-        Win32Pe2LxImage::~Win32Pe2LxImage();
-        throw((ULONG)rc);
+        return FALSE;
     }
 
     /* Verify that there is at least one section - the header section. */
     if (cSections < 1)
     {
         dprintf(("Win32Pe2LxImage::Win32Pe2LxImage: no header section, cSections is 0\n"));
-        Win32Pe2LxImage::~Win32Pe2LxImage();
-        throw((ULONG)ERROR_BAD_EXE_FORMAT);
+        return FALSE;
     }
 
     /* Locate the NT headers. */
@@ -163,8 +185,7 @@ Win32Pe2LxImage::Win32Pe2LxImage(HINSTANCE hinstance, BOOL fWin32k) throw(ULONG)
         )
     {
         dprintf(("Win32Pe2LxImage::Win32Pe2LxImage: Not a pe2lx image!(?)\n"));
-        Win32Pe2LxImage::~Win32Pe2LxImage();
-        throw((ULONG)ERROR_BAD_EXE_FORMAT);
+        return FALSE;
     }
 
     /* Set pNtHdrs pointer. */
@@ -185,8 +206,7 @@ Win32Pe2LxImage::Win32Pe2LxImage(HINSTANCE hinstance, BOOL fWin32k) throw(ULONG)
         )
     {
         dprintf(("Win32Pe2LxImage::Win32Pe2LxImage: Not a pe2lx image!(?)\n"));
-        Win32Pe2LxImage::~Win32Pe2LxImage();
-        throw((ULONG)ERROR_BAD_EXE_FORMAT);
+        return FALSE;
     }
 
     /* set RVAs */
@@ -194,8 +214,7 @@ Win32Pe2LxImage::Win32Pe2LxImage(HINSTANCE hinstance, BOOL fWin32k) throw(ULONG)
     if (rc != NO_ERROR)
     {
         dprintf(("Win32Pe2LxImage::Win32Pe2LxImage: setSectionRVAs failed with rc=%d\n", rc));
-        Win32Pe2LxImage::~Win32Pe2LxImage();
-        throw((ULONG)rc);
+        return FALSE;
     }
 
     /* Locate and set the entrypoint. */
@@ -207,8 +226,7 @@ Win32Pe2LxImage::Win32Pe2LxImage(HINSTANCE hinstance, BOOL fWin32k) throw(ULONG)
     {
         dprintf(("Win32Pe2LxImage::Win32Pe2LxImage: entrypoint is incorrect, AddrOfEP=0x%08x, entryPoint=0x%08x\n",
                  pNtHdrs->OptionalHeader.AddressOfEntryPoint, entryPoint));
-        Win32Pe2LxImage::~Win32Pe2LxImage();
-        throw((ULONG)ERROR_INVALID_STARTING_CODESEG);
+        return FALSE;
     }
 
     /* Locate the resource directory (if any) */
@@ -219,19 +237,55 @@ Win32Pe2LxImage::Win32Pe2LxImage(HINSTANCE hinstance, BOOL fWin32k) throw(ULONG)
         pResDir = (PIMAGE_RESOURCE_DIRECTORY)getPointerFromRVA(pResourceSectionStart);
     }
 
-    /* TLS - FIXME! */
+    /* TLS - Thread Local Storage */
+    if (pNtHdrs->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_TLS].VirtualAddress != 0UL
+        && pNtHdrs->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_TLS].Size != 0UL)
+    {
+        PIMAGE_TLS_DIRECTORY pTLSDir;
+        pTLSDir = (PIMAGE_TLS_DIRECTORY)getPointerFromRVA(pNtHdrs->OptionalHeader.
+                                                          DataDirectory[IMAGE_DIRECTORY_ENTRY_TLS].
+                                                          VirtualAddress);
+
+        if (pTLSDir != NULL)
+        {
+            PVOID pv;
+            pv = getPointerFromRVA(pTLSDir->StartAddressOfRawData);
+            if (pv == NULL)
+            {
+                eprintf(("Win32Pe2LxImage::init: invalid RVA to TLS StartAddressOfRawData - %#8x.\n",
+                         pTLSDir->StartAddressOfRawData));
+                return FALSE;
+            }
+            setTLSAddress(pv);
+            setTLSInitSize(pTLSDir->EndAddressOfRawData - pTLSDir->StartAddressOfRawData);
+            setTLSTotalSize(pTLSDir->EndAddressOfRawData - pTLSDir->StartAddressOfRawData + pTLSDir->SizeOfZeroFill);
+            pv = getPointerFromRVA((ULONG)pTLSDir->AddressOfIndex);
+            if (pv == NULL)
+            {
+                eprintf(("Win32Pe2LxImage::init: invalid RVA to TLS AddressOffIndex - %#8x.\n",
+                         pTLSDir->AddressOfIndex));
+                return FALSE;
+            }
+            setTLSIndexAddr((LPDWORD)pv);
+            pv = getPointerFromRVA((ULONG)pTLSDir->AddressOfCallBacks);
+            if (pv == NULL)
+            {
+                eprintf(("Win32Pe2LxImage::init: invalid RVA to TLS AddressOffIndex - %#8x.\n",
+                         pTLSDir->AddressOfIndex));
+                return FALSE;
+            }
+            setTLSCallBackAddr((PIMAGE_TLS_CALLBACK*)pv);
+        }
+        else
+        {
+            eprintf(("Win32Pe2LxImage::init: invalid RVA to TLS Dir - %#8x. (getPointerFromRVA failed)\n",
+                     pNtHdrs->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_TLS].VirtualAddress));
+            return FALSE;
+        }
+    }
+    return TRUE;
 }
 
-
-/**
- * Free memory associated with this object.
- * @status    completely implemented.
- * @author    knut st. osmundsen, Sander van Leeuwen
- */
-Win32Pe2LxImage::~Win32Pe2LxImage()
-{
-    cleanup();
-}
 
 
 /**
