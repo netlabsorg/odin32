@@ -1,4 +1,4 @@
-/* $Id: winimgres.cpp,v 1.44 2000-08-16 08:04:44 sandervl Exp $ */
+/* $Id: winimgres.cpp,v 1.45 2000-08-17 18:22:18 sandervl Exp $ */
 
 /*
  * Win32 PE Image class (resource methods)
@@ -165,6 +165,7 @@ HRSRC Win32ImageBase::findResourceA(LPCSTR lpszName, LPSTR lpszType, ULONG lang)
     }
     else    dprintf(("FindResource %s: resource %x (type %x, lang %x)", szModule, lpszName, lpszType, lang));
 
+    SetLastError(ERROR_SUCCESS);
     return hRes;
 }
 //******************************************************************************
@@ -213,6 +214,7 @@ HRSRC Win32ImageBase::findResourceW(LPWSTR lpszName, LPWSTR lpszType, ULONG lang
     }
     else hRes = getResourceLangEx(pResDirRet, lang);
 
+    SetLastError(ERROR_SUCCESS);
     return hRes;
 }
 //******************************************************************************
@@ -316,6 +318,7 @@ BOOL Win32ImageBase::getVersionStruct(char *verstruct, ULONG bufLength)
         return 0;
     }
     memcpy(verstruct, getResourceAddr(hRes), min(bufLength, getResourceSize(hRes)));
+    SetLastError(ERROR_SUCCESS);
     return TRUE;
 }
 
