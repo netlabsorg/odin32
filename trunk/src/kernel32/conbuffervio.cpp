@@ -1,4 +1,4 @@
-/* $Id: conbuffervio.cpp,v 1.6 2001-12-05 18:05:59 sandervl Exp $ */
+/* $Id: conbuffervio.cpp,v 1.7 2003-04-11 12:08:35 sandervl Exp $ */
 
 /*
  * Win32 Console API Translation for OS/2
@@ -272,6 +272,7 @@ BOOL HMDeviceConsoleVioBufferClass::WriteFile(PHMHANDLEDATA pHMHandleData,
         else {
             VioWrtCharStr(&pszBuffer[ulCounter], numchar, pConsoleBuffer->coordCursorPosition.Y, pConsoleBuffer->coordCursorPosition.X, 0);
             pConsoleBuffer->coordCursorPosition.X += numchar;
+            VioSetCurPos(pConsoleBuffer->coordCursorPosition.Y, pConsoleBuffer->coordCursorPosition.X, 0);
         }
         ulCounter += numchar;
     }
@@ -282,4 +283,76 @@ BOOL HMDeviceConsoleVioBufferClass::WriteFile(PHMHANDLEDATA pHMHandleData,
   return TRUE;
 }
 
+DWORD HMDeviceConsoleVioBufferClass::FillConsoleOutputAttribute(PHMHANDLEDATA pHMHandleData,
+                                                             WORD    wAttribute,
+                                                             DWORD   nLength,
+                                                             COORD   dwWriteCoord,
+                                                             LPDWORD lpNumberOfAttrsWritten)
+{
+  APIRET  rc;
+
+#ifdef DEBUG_LOCAL2
+  WriteLog("KERNEL32/CONSOLE: HMDeviceConsoleVioBufferClass::FillConsoleOutputAttribute(%08x,attr=%04x,%u,x=%u y=%u,res=%08x).\n",
+           pHMHandleData,
+           wAttribute,
+           nLength,
+           dwWriteCoord.X,
+           dwWriteCoord.Y,
+           lpNumberOfAttrsWritten);
+#endif
+
+  if (HMDeviceConsoleBufferClass::FillConsoleOutputAttribute(pHMHandleData,
+                                                             wAttribute,
+                                                             nLength,
+                                                             dwWriteCoord,
+                                                             lpNumberOfAttrsWritten))
+  {
+    rc = VioWrtNAttr((PBYTE)&wAttribute, *lpNumberOfAttrsWritten, dwWriteCoord.Y, dwWriteCoord.X,
+                     0);
+    if (rc == NO_ERROR)
+    {
+      return TRUE;
+    } else
+    {
+      return FALSE;
+    }
+  } else
+    return FALSE;
+}
+
+DWORD HMDeviceConsoleVioBufferClass::FillConsoleOutputCharacterA(PHMHANDLEDATA pHMHandleData,
+                                                              UCHAR   ucCharacter,
+                                                              DWORD   nLength,
+                                                              COORD   dwWriteCoord,
+                                                              LPDWORD lpNumberOfCharsWritten)
+{
+  APIRET  rc;
+
+#ifdef DEBUG_LOCAL2
+  WriteLog("KERNEL32/CONSOLE: HMDeviceConsoleVioBufferClass::FillConsoleOutputCharacterA(%08x,char=%02x,%u,x=%u y=%u,res=%08x).\n",
+           pHMHandleData,
+           ucCharacter,
+           nLength,
+           dwWriteCoord.X,
+           dwWriteCoord.Y,
+           lpNumberOfCharsWritten);
+#endif
+  if (HMDeviceConsoleBufferClass::FillConsoleOutputCharacterA(pHMHandleData,
+                                                                 ucCharacter,
+                                                                 nLength,
+                                                                 dwWriteCoord,
+                                                                 lpNumberOfCharsWritten))
+  {
+    rc = VioWrtNChar((PCH)&ucCharacter, *lpNumberOfCharsWritten, dwWriteCoord.Y, dwWriteCoord.X,
+         0);
+    if (rc == NO_ERROR)
+    {
+      return TRUE;
+    } else
+    {
+      return FALSE;
+    }
+  } else
+    return FALSE;
+}
 

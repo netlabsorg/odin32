@@ -83,6 +83,9 @@ HANDLE  HMGetStdHandle(DWORD nStdHandle);
 BOOL    HMSetStdHandle(DWORD  nStdHandle,
                                HANDLE hHandle);
 
+BOOL    HMUpdtStdHandle(DWORD  nStdHandle,
+                                HANDLE hHandle);
+
 
 /*****************************************************************************/
 /* handle translation buffer management                                      */
