@@ -314,7 +314,9 @@ typedef struct tagDRAGLISTINFO
 #define DL_COPYCURSOR           2
 #define DL_MOVECURSOR           3
 
-#define DRAGLISTMSGSTRING       TEXT("commctrl_DragListMsg")
+#define DRAGLISTMSGSTRINGA      "commctrl_DragListMsg"
+#define DRAGLISTMSGSTRINGW      L"commctrl_DragListMsg"
+#define DRAGLISTMSGSTRING       WINELIB_NAME_AW(DRAGLISTMSGSTRING)
 
 BOOL WINAPI MakeDragList (HWND);
 VOID   WINAPI DrawInsert (HWND, HWND, INT);
