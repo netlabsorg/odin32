@@ -1,4 +1,7 @@
- /* $Id: changelog,v 1.874 2000-04-07 19:43:08 sandervl Exp $ */
+ /* $Id: changelog,v 1.875 2000-04-08 09:17:15 sandervl Exp $ */
+
+ 2000-04-08: Sander van Leeuwen <sandervl@xs4all.nl>
+        - WINMM: Restart, pause & underrun fixes
 
  2000-04-07: Michal Necasek <mike@mendelu.cz>
         - DDRAW\NEW: Experimental fullscreen DDraw, VIDEOPMI based.
