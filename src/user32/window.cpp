@@ -1,4 +1,4 @@
-/* $Id: window.cpp,v 1.58 2000-03-01 13:30:07 sandervl Exp $ */
+/* $Id: window.cpp,v 1.59 2000-03-14 20:04:09 sandervl Exp $ */
 /*
  * Win32 window apis for OS/2
  *
@@ -818,11 +818,12 @@ BOOL WIN32API AdjustWindowRectEx( PRECT rect, DWORD style, BOOL menu, DWORD exSt
 
     /* Correct the window style */
     if (!(style & (WS_POPUP | WS_CHILD)))  /* Overlapped window */
-    style |= WS_CAPTION;
+    	style |= WS_CAPTION;
 
-    style &= (WS_DLGFRAME | WS_BORDER | WS_THICKFRAME | WS_CHILD | WS_VSCROLL | WS_HSCROLL);
-    exStyle &= (WS_EX_DLGMODALFRAME | WS_EX_CLIENTEDGE |
-        WS_EX_STATICEDGE | WS_EX_TOOLWINDOW);
+    //SvL: Include WS_POPUP -> otherwise HAS_THINFRAME is true for popup windows
+    //     Also include WS_CHILD -> otherwise HAS_THICKFRAME doesn't work correctly
+    style &= (WS_DLGFRAME | WS_BORDER | WS_THICKFRAME | WS_CHILD | WS_VSCROLL | WS_HSCROLL | WS_POPUP);
+    exStyle &= (WS_EX_DLGMODALFRAME | WS_EX_CLIENTEDGE | WS_EX_STATICEDGE | WS_EX_TOOLWINDOW);
     if (exStyle & WS_EX_DLGMODALFRAME) style &= ~WS_THICKFRAME;
 
     //Adjust rect outer (Win32BaseWindow::AdjustRectOuter)
