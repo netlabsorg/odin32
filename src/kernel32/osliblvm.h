@@ -1,4 +1,4 @@
-/* $Id: osliblvm.h,v 1.3 2002-09-26 16:06:07 sandervl Exp $ */
+/* $Id: osliblvm.h,v 1.4 2002-09-27 14:35:56 sandervl Exp $ */
 /*
  * OS/2 LVM (Logical Volume Management) functions
  *
@@ -326,7 +326,7 @@ BOOL   OSLibLVMInit();
 void   OSLibLVMExit();
 HANDLE OSLibLVMQueryVolumeControlData();
 void   OSLibLVMFreeVolumeControlData(HANDLE hVolumeControlData);
-BOOL   OSLibLVMQueryVolumeName(HANDLE hVolumeControlData, ULONG volindex, 
+BOOL   OSLibLVMQueryVolumeName(HANDLE hVolumeControlData, ULONG *pVolIndex, 
                                LPSTR lpszVolumeName, DWORD cchBufferLength);
 
 BOOL   OSLibLVMGetPartitionInfo(ULONG driveLetter, LPSTR lpszVolumeName, PPARTITION_INFORMATION pPartition);
