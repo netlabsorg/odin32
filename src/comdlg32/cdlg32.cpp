@@ -1,4 +1,4 @@
-/* $Id: cdlg32.cpp,v 1.4 1999-11-20 16:00:14 achimha Exp $ */
+/* $Id: cdlg32.cpp,v 1.5 2000-05-16 20:00:13 sandervl Exp $ */
 /*
  *  Common Dialog Boxes interface (32 bit)
  *  Find/Replace
@@ -28,6 +28,8 @@ static DWORD	COMDLG32_TlsIndex;
 static int	COMDLG32_Attach = 0;
 
 HINSTANCE	COMCTL32_hInstance = 0;
+
+#ifndef __WIN32OS2__
 HINSTANCE	SHELL32_hInstance = 0;
 HINSTANCE       SHLWAPI_hInstance = 0;
 
@@ -65,6 +67,7 @@ LPCSTR (WINAPI *COMDLG32_PathFindFilenameA)(LPCSTR path);
 DWORD (WINAPI *COMDLG32_PathRemoveFileSpecA)(LPSTR fn);
 BOOL (WINAPI *COMDLG32_PathMatchSpecW)(LPCWSTR x, LPCWSTR y);
 LPSTR (WINAPI *COMDLG32_PathAddBackslashA)(LPSTR path);
+#endif
 
 /***********************************************************************
  *	COMDLG32_DllEntryPoint			(COMDLG32.entry)
@@ -103,6 +106,7 @@ BOOL WINAPI COMDLG32_DllEntryPoint(HINSTANCE hInstance, DWORD Reason, LPVOID Res
 			return FALSE;
 		}
 
+#ifndef __WIN32OS2__
 		COMCTL32_hInstance = LoadLibraryA("COMCTL32.DLL");	
 		SHELL32_hInstance = LoadLibraryA("SHELL32.DLL");
 		SHLWAPI_hInstance = LoadLibraryA("SHLWAPI.DLL");
@@ -155,6 +159,7 @@ BOOL WINAPI COMDLG32_DllEntryPoint(HINSTANCE hInstance, DWORD Reason, LPVOID Res
 		*(VOID **)&COMDLG32_PathRemoveFileSpecA = (void*)GetProcAddress(SHLWAPI_hInstance,"PathRemoveFileSpecA");
 		*(VOID **)&COMDLG32_PathFindFilenameA = (void*)GetProcAddress(SHLWAPI_hInstance,"PathFindFileNameA");
 		*(VOID **)&COMDLG32_PathAddBackslashA = (void*)GetProcAddress(SHLWAPI_hInstance,"PathAddBackslashA");
+#endif
 		break;
 
 	case DLL_PROCESS_DETACH:
@@ -164,9 +169,11 @@ BOOL WINAPI COMDLG32_DllEntryPoint(HINSTANCE hInstance, DWORD Reason, LPVOID Res
 			COMDLG32_hInstance = 0;
 
 		}
+#ifndef __WIN32OS2__
 		FreeLibrary(COMCTL32_hInstance);
 		FreeLibrary(SHELL32_hInstance);
 		FreeLibrary(SHLWAPI_hInstance);
+#endif
 		break;
 	}
 	return TRUE;
