@@ -1,4 +1,4 @@
-/* $Id: conout.cpp,v 1.8 2000-10-03 17:28:28 sandervl Exp $ */
+/* $Id: conout.cpp,v 1.9 2001-01-23 18:31:25 sandervl Exp $ */
 
 /*
  * Win32 Console API Translation for OS/2
@@ -242,34 +242,17 @@ BOOL HMDeviceConsoleOutClass::WriteFile(PHMHANDLEDATA pHMHandleData,
                                                                 /* be true ! */
   if (pHMHandleData->hHMHandle != pConsoleGlobals->hConsoleBuffer)
   {
-#if 0
-    HMDeviceRequest(pConsoleGlobals->hConsoleBuffer,        /* hide the cursor */
-                    DRQ_INTERNAL_CONSOLECURSORSHOW,
-                    CONSOLECURSOR_HIDE,
-                    0,
-                    0,
-                    0);
-#endif
-
     dwResult = HMWriteFile(pConsoleGlobals->hConsoleBuffer,
                            lpBuffer,
                            nNumberOfBytesToWrite,
                            lpNumberOfBytesWritten,
                            lpOverlapped);
 
-#if 0
-    HMDeviceRequest(pConsoleGlobals->hConsoleBuffer,        /* show the cursor */
-                    DRQ_INTERNAL_CONSOLECURSORSHOW,
-                    CONSOLECURSOR_SHOW,
-                    0,
-                    0,
-                    0);
-#endif
-
     return (dwResult);                                 /* return result code */
   }
-  else
+  else {
     return (FALSE);                    /* raise error condition */
+  }
 }
 
 
