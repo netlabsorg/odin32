@@ -1,4 +1,4 @@
-/* $Id: changelog,v 1.2699 2004-03-12 18:14:18 sandervl Exp $ */
+/* $Id: changelog,v 1.2700 2004-03-12 18:20:27 sandervl Exp $ */
 
  2004-03-12: Sander van Leeuwen <sandervl@innotek   >
     - SHELL32:  o Disabled Shell_NotifyIconA
@@ -7,6 +7,9 @@
                   and/or size has been changed.
     - GDI32:    o SetDIBitsToDevice/StretchDIBits; set coloruse to DIB_RGB_COLORS
                   for high (>=15) bpp bitmaps; GPI will crash with DIB_PAL_COLORS
+
+ 2004-03-12: knut st. osmundsen <bird-changelog@innotek    >
+    - KERNEL32: o Added interface to HM for querying the object type.
 
  2004-03-11: Sander van Leeuwen <sandervl@innotek   >
     - USER32:   o More WH_MOUSE changes
