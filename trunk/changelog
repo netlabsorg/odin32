@@ -1,12 +1,17 @@
-/* $Id: changelog,v 1.2534 2003-03-31 10:28:36 sandervl Exp $ */
+/* $Id: changelog,v 1.2535 2003-03-31 11:52:55 sandervl Exp $ */
 
  2003-03-31: Dietrich Teickner <Dietrich_Teickner@t-online   >
     - SHELL32:  o Shell file operations update
+
+ 2003-03-31: Platon Fomichev <platon@innotek   >
+    - KERNEL32: o Added vsnprintfW/snprintfW funcs for syncing with latest 
+                  wine NTDLL 
 
  2003-03-31: knut st. osmundsen <bird-odin-spam@anduin   >
     - PE2LX/WIN32K:
                 o Custombuild feature for excluding dlls. Cleanups.
                 o Option for making all object RW file.
+    - KERNEL32: o Made Pe2Lx'ed DLLs work.
 
  2003-03-28: Sander van Leeuwen <sandervl@innotek   >
     - USER32:   o Removed changes for window tracking (move/size) with full
