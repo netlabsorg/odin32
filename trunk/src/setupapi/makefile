@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.2 2002-05-15 12:39:55 sandervl Exp $
+# $Id: makefile,v 1.3 2002-06-15 10:56:59 sandervl Exp $
 
 #
 # Odin32 API
@@ -6,6 +6,11 @@
 #       setupapi.dll makefile
 #
 
+
+!if "$(DEBUG)" == "1"
+DEFFILE    = setupapidbg.def
+ORGDEFFILE = setupapi.def
+!endif
 
 #
 # Compiler, tools, and interference rules.
@@ -26,6 +31,9 @@ $(OBJDIR)\queue.obj \
 $(OBJDIR)\stubs.obj \
 ##$(OBJDIR)\virtcopy.obj \
 $(OBJDIR)\setupapirsrc.obj \
+!if "$(DEBUG)" == "1"
+$(OBJDIR)\dbgwrap.obj \
+!endif
 $(DLLENTRY)
 
 
