@@ -2040,4 +2040,68 @@
 #define OBJ_ENHMETADC_W       12
 #define OBJ_ENHMETAFILE_W     13
 
+#define PS_SOLID_W         0x00000000
+#define PS_DASH_W          0x00000001
+#define PS_DOT_W           0x00000002
+#define PS_DASHDOT_W       0x00000003
+#define PS_DASHDOTDOT_W    0x00000004
+#define PS_NULL_W          0x00000005
+#define PS_INSIDEFRAME_W   0x00000006
+#define PS_USERSTYLE_W     0x00000007
+#define PS_ALTERNATE_W     0x00000008
+#define PS_STYLE_MASK_W    0x0000000f
+
+/* DC Graphics Mode */
+#define GM_COMPATIBLE_W     1
+#define GM_ADVANCED_W       2
+
+#define DCX_WINDOW_W                    0x00000001L
+#define DCX_CACHE_W                     0x00000002L
+#define DCX_NORESETATTRS_W              0x00000004L
+#define DCX_CLIPCHILDREN_W              0x00000008L
+#define DCX_CLIPSIBLINGS_W              0x00000010L
+#define DCX_PARENTCLIP_W                0x00000020L
+#define DCX_EXCLUDERGN_W                0x00000040L
+#define DCX_INTERSECTRGN_W              0x00000080L
+#define DCX_EXCLUDEUPDATE_W             0x00000100L
+#define DCX_INTERSECTUPDATE_W           0x00000200L
+#define DCX_LOCKWINDOWUPDATE_W          0x00000400L
+#define DCX_USESTYLE_W                  0x00010000L
+#define DCX_VALIDATE_W                  0x00200000L
+
+#define RDW_INVALIDATE_W       0x0001
+#define RDW_INTERNALPAINT_W    0x0002
+#define RDW_ERASE_W            0x0004
+#define RDW_VALIDATE_W         0x0008
+#define RDW_NOINTERNALPAINT_W  0x0010
+#define RDW_NOERASE_W          0x0020
+#define RDW_NOCHILDREN_W       0x0040
+#define RDW_ALLCHILDREN_W      0x0080
+#define RDW_UPDATENOW_W        0x0100
+#define RDW_ERASENOW_W         0x0200
+#define RDW_FRAME_W            0x0400
+#define RDW_NOFRAME_W          0x0800
+/* Xform FLAGS */
+#define MWT_IDENTITY_W        1
+#define MWT_LEFTMULTIPLY_W    2
+#define MWT_RIGHTMULTIPLY_W   3
+
+/* Mapping Modes */
+#define MM_TEXT_W             1
+#define MM_LOMETRIC_W         2
+#define MM_HIMETRIC_W         3
+#define MM_LOENGLISH_W        4
+#define MM_HIENGLISH_W        5
+#define MM_TWIPS_W            6
+#define MM_ISOTROPIC_W        7
+#define MM_ANISOTROPIC_W      8
+
+#define RGN_OR_W              2
+
+/* Window scrolling */
+#define SW_SCROLLCHILDREN_W    0x0001
+#define SW_INVALIDATE_W        0x0002
+#define SW_ERASE_W             0x0004
+#define SW_SMOOTHSCROLL_W      0x0010
+
 #endif //__WINCONST_H__

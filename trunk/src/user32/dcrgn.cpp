@@ -1,4 +1,4 @@
-/* $Id: dcrgn.cpp,v 1.8 2003-03-22 20:27:11 sandervl Exp $ */
+/* $Id: dcrgn.cpp,v 1.9 2003-11-12 14:10:19 sandervl Exp $ */
 
 /*
  * DC functions for USER32
@@ -40,6 +40,29 @@
 
 #define DBG_LOCALLOG    DBG_dcrgn
 #include "dbglocal.h"
+
+#ifdef DEBUG
+//#define dprintfRegion(a,b,c) if(DbgEnabledLvl2USER32[DBG_LOCALLOG] == 1) dprintfRegion1(a,b,c)
+//#define dprintfRegion(a,b,c) dprintfRegion1(a,b,c)
+
+static void dprintfRegion(HWND hWnd, HRGN hrgnClip)
+{
+ RGNRECT rgnRect = {0, 16, 0, RECTDIR_LFRT_TOPBOT};
+ RECTL   rectRegion[16];
+ APIRET  rc;
+ HDC     hdc;
+   
+   hdc = GetDCEx(hWnd, NULL, DCX_CACHE_W|DCX_USESTYLE_W);
+   dprintf(("dprintfRegion %x %x", hWnd, hdc));
+   rc = GpiQueryRegionRects(hdc, hrgnClip, NULL, &rgnRect, &rectRegion[0]);
+   for(int i=0;i<rgnRect.crcReturned;i++) {
+        dprintf(("(%d,%d)(%d,%d)", rectRegion[i].xLeft, rectRegion[i].yBottom, rectRegion[i].xRight, rectRegion[i].yTop));
+   }
+   ReleaseDC(hWnd, hdc);
+}
+#else
+#define dprintfRegion(b,c)
+#endif
 
 //******************************************************************************
 //******************************************************************************
@@ -133,6 +156,7 @@ int WIN32API GetUpdateRgn(HWND hwnd, HRGN hrgn, BOOL erase)
 
     if(lComplexity != RGN_NULL)
     {
+        dprintfRegion(hwnd, hrgn);
         if(!setWinDeviceRegionFromPMDeviceRegion(hrgn, hrgn, NULL, wnd->getOS2WindowHandle()))
         {
             dprintf(("WARNING: GetUpdateRgn %x %x %d; setWinDeviceRegionFromPMDeviceRegion failed!", hwnd, hrgn, erase));
@@ -141,6 +165,44 @@ int WIN32API GetUpdateRgn(HWND hwnd, HRGN hrgn, BOOL erase)
             return ERROR_W;
         }
         if(erase) sendEraseBkgnd(wnd);
+    }
+    RELEASE_WNDOBJ(wnd);
+    return lComplexity;
+}
+//******************************************************************************
+//TODO: Seems to return region in window coordinates instead of client coordinates
+//******************************************************************************
+int WIN32API GetUpdateRgnFrame(HWND hwnd, HRGN hrgn)
+{
+    LONG lComplexity;
+    Win32BaseWindow *wnd = Win32BaseWindow::GetWindowFromHandle(hwnd);
+
+    hrgn = ObjWinToOS2Region(hrgn);
+    if(!wnd || !hrgn)
+    {
+        dprintf(("WARNING: GetUpdateRgnFrame %x %x invalid handle", hwnd, hrgn));
+        SetLastError(ERROR_INVALID_WINDOW_HANDLE_W);
+        if(wnd) RELEASE_WNDOBJ(wnd);
+        return ERROR_W;
+    }
+    lComplexity = WinQueryUpdateRegion(wnd->getOS2FrameWindowHandle(), hrgn);
+    if(lComplexity == RGN_ERROR) {
+        dprintf(("WARNING: GetUpdateRgnFrame %x %x RGN_ERROR", hwnd, hrgn));
+        SetLastError(ERROR_INVALID_WINDOW_HANDLE_W);
+        RELEASE_WNDOBJ(wnd);
+        return ERROR_W;
+    }
+
+    if(lComplexity != RGN_NULL)
+    {
+        dprintfRegion(hwnd, hrgn);
+        if(!setWinDeviceRegionFromPMDeviceRegion(hrgn, hrgn, NULL, wnd->getOS2FrameWindowHandle()))
+        {
+            dprintf(("WARNING: GetUpdateRgnFrame %x %x; setWinDeviceRegionFromPMDeviceRegion failed!", hwnd, hrgn));
+            SetLastError(ERROR_INVALID_WINDOW_HANDLE_W);
+            RELEASE_WNDOBJ(wnd);
+            return ERROR_W;
+        }
     }
     RELEASE_WNDOBJ(wnd);
     return lComplexity;

@@ -1318,4 +1318,81 @@ typedef BOOL (* CALLBACK ENUMRESLANGPROCW)(HMODULE,LPCWSTR,LPCWSTR,WORD,LONG);
 
 typedef VOID (CALLBACK *TIMERPROC)(HWND hwnd, UINT msg, UINT id, DWORD dwTime);
 
+typedef struct
+{
+    unsigned short  fract;
+    signed short   value;
+} FIXED_W;
+
+
+typedef struct
+{
+    FIXED_W  eM11;
+    FIXED_W  eM12;
+    FIXED_W  eM21;
+    FIXED_W  eM22;
+} MAT2, *LPMAT2;
+
+typedef struct
+{
+    UINT	gmBlackBoxX;
+    UINT	gmBlackBoxY;
+    POINT	gmptGlyphOrigin;
+    INT16	gmCellIncX;
+    INT16	gmCellIncY;
+} GLYPHMETRICS, *LPGLYPHMETRICS;
+
+typedef struct
+{
+    INT  lfHeight;
+    INT  lfWidth;
+    INT  lfEscapement;
+    INT  lfOrientation;
+    INT  lfWeight;
+    BYTE   lfItalic;
+    BYTE   lfUnderline;
+    BYTE   lfStrikeOut;
+    BYTE   lfCharSet;
+    BYTE   lfOutPrecision;
+    BYTE   lfClipPrecision;
+    BYTE   lfQuality;
+    BYTE   lfPitchAndFamily;
+    CHAR   lfFaceName[32];
+} LOGFONTA, *PLOGFONTA, *LPLOGFONTA;
+
+typedef struct
+{
+    UINT   lopnStyle;
+    POINT  lopnWidth;
+    ULONG  lopnColor;
+} LOGPEN_W, *LPLOGPEN_W;
+
+typedef struct tagEXTLOGPEN
+{
+    DWORD elpPenStyle;
+    DWORD elpWidth;
+    DWORD elpBrushStyle;
+    DWORD elpColor;
+    DWORD elpNumEntries;
+    DWORD elpStyleEntry[1];
+} EXTLOGPEN_W, *PEXTLOGPEN_W, *NPEXTLOGPEN_W, *LPEXTLOGPEN_W;
+
+typedef struct
+{
+    UINT   lbStyle;
+    ULONG  lbColor;
+    INT    lbHatch;
+} LOGBRUSH_W, *LPLOGBRUSH_W;
+
+typedef struct
+{
+    HDC   hdc;
+    BOOL  fErase;
+    RECT  rcPaint;
+    BOOL  fRestore;
+    BOOL  IncUpdate;
+    BYTE  rgbReserved[32];
+} PAINTSTRUCT_W, *PPAINTSTRUCT_W, *LPPAINTSTRUCT_W;
+
+
 #endif

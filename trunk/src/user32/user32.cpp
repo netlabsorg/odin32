@@ -1,4 +1,4 @@
-/* $Id: user32.cpp,v 1.129 2003-10-20 17:17:23 sandervl Exp $ */
+/* $Id: user32.cpp,v 1.130 2003-11-12 14:10:20 sandervl Exp $ */
 
 /*
  * Win32 misc user32 API functions for OS/2
@@ -1143,39 +1143,7 @@ BOOL WIN32API PaintDesktop(HDC hdc)
 
 /* Filled Shape Functions */
 
-  /* Last COLOR id */
-#define COLOR_MAX   COLOR_GRADIENTINACTIVECAPTION
 
-int WIN32API FillRect(HDC hDC, const RECT * lprc, HBRUSH hbr)
-{
-    //SvL: brush 0 means current selected brush (verified in NT4)
-    if(hbr == 0) {
-        hbr = GetCurrentObject(hDC, OBJ_BRUSH);
-    }
-    else
-    if (hbr <= (HBRUSH) (COLOR_MAX + 1)) {
-	hbr = GetSysColorBrush( (INT) hbr - 1 );
-    }
-    dprintf(("USER32:  FillRect %x (%d,%d)(%d,%d) brush %X", hDC, lprc->left, lprc->top, lprc->right, lprc->bottom, hbr));
-    return O32_FillRect(hDC,lprc,hbr);
-}
-//******************************************************************************
-//******************************************************************************
-int WIN32API FrameRect( HDC hDC, const RECT * lprc, HBRUSH  hbr)
-{
-    dprintf(("USER32: FrameRect %x (%d,%d)(%d,%d) brush %x", hDC, lprc->top, lprc->left, lprc->bottom, lprc->right, hbr));
-    return O32_FrameRect(hDC,lprc,hbr);
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API InvertRect( HDC hDC, const RECT * lprc)
-{
-    if(lprc) {
-         dprintf(("USER32: InvertRect %x (%d,%d)(%d,%d)", hDC, lprc->left, lprc->top, lprc->right, lprc->bottom));
-    }
-    else dprintf(("USER32: InvertRect %x NULL", hDC));
-    return O32_InvertRect(hDC,lprc);
-}
 
 /* System Information Functions */
 

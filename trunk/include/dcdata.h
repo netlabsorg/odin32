@@ -1,4 +1,3 @@
-/* $Id: dcdata.h,v 1.3 2001-01-09 18:14:44 sandervl Exp $ */
 /*
  * GDI32: public dc data definitions
  *
@@ -11,6 +10,10 @@
  */
 #ifndef __DCDATA_H__
 #define __DCDATA_H__
+
+//Flags for Reserved DWORD in DCData structure
+#define DC_FLAG_SEND_POSTSCRIPT_SETUP_STRING	1
+#define DC_FLAG_POLYGON_PRINTER_HACK		2
 
 enum PS_Type { MICRO_CACHED, MICRO, NORMAL };
 enum HDC_Type{ TYPE_0, TYPE_1, TYPE_2, TYPE_3, TYPE_4 };
@@ -147,7 +150,7 @@ typedef struct _DCData
    double      viewportYExt;
    POINTL      windowOrg;
    SIZEL       windowExt;
-   HRGN        hrgnVis;
+   HRGN        hrgnWin32Clip;	//current Win32 clip region handle
 
    POINTL      ptlOrigin;
 
@@ -183,6 +186,10 @@ typedef struct _DCData
    MATRIXLF    defView;
    int         yInvert;
    int         yInvert4Enable;
+
+   ULONG       Reserved;
+
+   HRGN        hrgnWinVis;	//current Win32 visible region handle
    struct      _DCData *nextHPS_HDC;
 } tDCData, *pDCData;
 #pragma pack()

@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.223 2003-10-22 12:43:51 sandervl Exp $ */
+/* $Id: pmwindow.cpp,v 1.224 2003-11-12 14:10:19 sandervl Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -58,13 +58,14 @@
 #include "dragdrop.h"
 #include "menu.h"
 #include "user32api.h"
+#include <kbdhook.h>
 
 #define DBG_LOCALLOG    DBG_pmwindow
 #include "dbglocal.h"
 
+
 #define ODIN_SetExceptionHandler(a)
 #define ODIN_UnsetExceptionHandler(a)
-
 
 // Notification that focus change has completed (UNDOCUMENTED)
 #define WM_FOCUSCHANGED            0x000e
@@ -83,8 +84,8 @@ BOOL    fForceMonoCursor = FALSE;
 BOOL    fDragDropActive = FALSE;
 BOOL    fDragDropDisabled = FALSE;
 
-const char WIN32_CDCLASS[]       = "Win32CDWindowClass";
-      char WIN32_STDCLASS[255]   = "Win32WindowClass";
+const char WIN32_CDCLASS[]       = ODIN_WIN32_CDCLASS;
+      char WIN32_STDCLASS[255]   = ODIN_WIN32_STDCLASS;
 
 #define PMMENU_MINBUTTON           0
 #define PMMENU_MAXBUTTON           1
@@ -189,6 +190,9 @@ BOOL InitPM()
     dprintf(("InitPM: hmq = %x", hmq));
     SetThreadMessageQueue(hmq);
 
+    //initialize keyboard hook for first thread  
+    hookInit(hab);
+
     BOOL rc = WinSetCp(hmq, GetDisplayCodepage());
     dprintf(("InitPM: WinSetCP was %sOK", rc ? "" : "not "));
 
@@ -254,10 +258,32 @@ BOOL InitPM()
 
     // query the font height to find out whether we have small or large fonts
     DevQueryCaps(hdc, CAPS_GRAPHICS_CHAR_HEIGHT, 1, (PLONG)&CapsCharHeight);
+    dprintf(("CAPS_GRAPHICS_CHAR_HEIGHT = %d", CapsCharHeight));
+    if(CapsCharHeight > 16) {
+       CapsCharHeight = 16; 
+    }
+
+#ifdef DEBUG
+    ULONG temp;
+    DevQueryCaps(hdc, CAPS_GRAPHICS_CHAR_WIDTH, 1, (PLONG)&temp);
+    dprintf(("CAPS_GRAPHICS_CHAR_WIDTH = %d", temp));
+    DevQueryCaps(hdc, CAPS_CHAR_HEIGHT, 1, (PLONG)&temp);
+    dprintf(("CAPS_CHAR_HEIGTH = %d", temp));
+    DevQueryCaps(hdc, CAPS_CHAR_WIDTH, 1, (PLONG)&temp);
+    dprintf(("CAPS_CHAR_WIDTH = %d", temp));
+    DevQueryCaps(hdc, CAPS_SMALL_CHAR_HEIGHT, 1, (PLONG)&temp);
+    dprintf(("CAPS_SMALL_CHAR_HEIGTH = %d", temp));
+    DevQueryCaps(hdc, CAPS_SMALL_CHAR_WIDTH, 1, (PLONG)&temp);
+    dprintf(("CAPS_SMALL_CHAR_WIDTH = %d", temp));
+    DevQueryCaps(hdc, CAPS_VERTICAL_FONT_RES, 1,(PLONG)&temp);
+    dprintf(("CAPS_VERTICAL_FONT_RES = %d", temp));
+    DevQueryCaps(hdc, CAPS_HORIZONTAL_FONT_RES, 1,(PLONG)&temp);
+    dprintf(("CAPS_HORIZONTAL_FONT_RES = %d", temp));
+#endif
 
     DevCloseDC(hdc);
 
-    dprintf(("InitPM: Desktop (%d,%d) bpp %d", ScreenWidth, ScreenHeight, ScreenBitsPerPel));
+    dprintf(("InitPM: Desktop (%d,%d) bpp %d font size %d", ScreenWidth, ScreenHeight, ScreenBitsPerPel, CapsCharHeight));
     return TRUE;
 } /* End of main */
 //******************************************************************************
@@ -637,9 +663,23 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
         break;
 
     case WM_SHOW:
+    {
         dprintf(("OS2: WM_SHOW %x %d", hwnd, mp1));
         win32wnd->MsgShow((ULONG)mp1);
+ 
+        //if a child window is hidden, then the update region of the 
+        //parent changes and a WM_ERASEBKGND is required during the next
+        //BeginPaint call.
+        if((ULONG)mp1 == FALSE) 
+        {
+            Win32BaseWindow *parent = win32wnd->getParent();
+            if(parent) {
+                dprintf(("PM Update region changed for parent %x", win32wnd->getWindowHandle()));
+                parent->SetPMUpdateRegionChanged(TRUE);
+            }
+        }
         break;
+    }
 
     case WM_ACTIVATE:
     {
@@ -657,7 +697,7 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
     case WM_SIZE:
     {
         dprintf(("OS2: WM_SIZE (%d,%d) (%d,%d)", SHORT1FROMMP(mp2), SHORT2FROMMP(mp2), SHORT1FROMMP(mp1), SHORT2FROMMP(mp1)));
-        win32wnd->SetVisibleRegionChanged(TRUE);
+        win32wnd->SetPMUpdateRegionChanged(TRUE);
         goto RunDefWndProc;
     }
 
@@ -1266,7 +1306,11 @@ MRESULT EXPENTRY Win32FrameWindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM m
 
     case WM_PAINT:
     {
-      RECTL rectl;
+        RECTL rectl;
+        HRGN  hrgn;
+
+        hrgn = CreateRectRgn(0, 0, 0, 0);
+        GetUpdateRgnFrame(win32wnd->getWindowHandle(), hrgn);
 
         HPS hps = WinBeginPaint(hwnd, NULL, &rectl);
         dprintf(("PMFRAME: WM_PAINT %x (%d,%d) (%d,%d)", win32wnd->getWindowHandle(), rectl.xLeft, rectl.yBottom, rectl.xRight, rectl.yTop));
@@ -1284,10 +1328,12 @@ MRESULT EXPENTRY Win32FrameWindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM m
                 RECT rectUpdate;
 
                 mapOS2ToWin32Rect(win32wnd->getWindowHeight(), (PRECTLOS2)&rectl, &rectUpdate);
-                win32wnd->MsgNCPaint(&rectUpdate);
+                win32wnd->MsgNCPaint(&rectUpdate, hrgn);
             }
         }
         WinEndPaint(hps);
+
+        DeleteObject(hrgn);
         break;
     }
 
@@ -1598,8 +1644,8 @@ adjustend:
 
         if ((pswp->fl & SWP_MAXIMIZE) && (win32wnd->getExStyle() & WS_EX_MDICHILD_W))
         {
-         SendMessageA(win32wnd->getWindowHandle(), WM_SYSCOMMAND_W, SC_MAXIMIZE_W, 0);
-         goto PosChangedEnd;
+            SendMessageA(win32wnd->getWindowHandle(), WM_SYSCOMMAND_W, SC_MAXIMIZE_W, 0);
+            goto PosChangedEnd;
         }
 
         //SvL: When a window is made visible, then we don't receive a
@@ -2474,6 +2520,12 @@ failure:
 void WIN32API SetCustomStdClassName(LPSTR pszStdClassName)
 {
    strcpy(WIN32_STDCLASS, pszStdClassName);
+}
+//******************************************************************************
+//******************************************************************************
+char *WIN32API QueryCustomStdClassName()
+{
+   return WIN32_STDCLASS;
 }
 //******************************************************************************
 //******************************************************************************

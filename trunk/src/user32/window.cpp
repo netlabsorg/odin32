@@ -1,4 +1,4 @@
-/* $Id: window.cpp,v 1.136 2003-06-25 17:02:04 sandervl Exp $ */
+/* $Id: window.cpp,v 1.137 2003-11-12 14:10:21 sandervl Exp $ */
 /*
  * Win32 window apis for OS/2
  *
@@ -43,6 +43,7 @@
 #include <heapstring.h>
 #include <winuser32.h>
 #include "hook.h"
+#include <wprocess.h>
 
 #define DBG_LOCALLOG    DBG_window
 #include "dbglocal.h"
@@ -710,6 +711,14 @@ end:
 HWND WINAPI GetAncestor( HWND hwnd, UINT type )
 {
     HWND hwndAncestor = 0;
+    Win32BaseWindow *window;
+
+    window = Win32BaseWindow::GetWindowFromHandle(hwnd);
+    if(!window) {
+        dprintf(("GetAncestor, window %x not found", hwnd));
+        SetLastError(ERROR_INVALID_WINDOW_HANDLE);
+        return FALSE;
+    }
 
     if (type == GA_PARENT)
     {
@@ -718,10 +727,30 @@ HWND WINAPI GetAncestor( HWND hwnd, UINT type )
             hwndAncestor = GetParent(hwnd);
         }
         //else no child -> no parent (GetParent returns owner otherwise!)
-        return hwndAncestor;
     }
-    dprintf(("Unsupported type %d", type));
-    return 0;
+    else 
+    if (type == GA_ROOT) 
+    {
+         hwndAncestor = window->GetTopParent();
+    }
+    else
+    if (type == GA_ROOTOWNER) 
+    {
+         if(hwnd != GetDesktopWindow()) 
+         {
+             hwndAncestor = hwnd;
+             for(;;)
+             {
+                HWND parent = GetParent( hwndAncestor );
+                if (!parent) break;
+                hwndAncestor = parent;
+             }
+         }
+    }
+    else dprintf(("Unsupported type %d", type));
+
+    RELEASE_WNDOBJ(window);
+    return hwndAncestor;
 }
 //******************************************************************************
 BOOL fIgnoreKeystrokes = FALSE;
@@ -759,9 +788,8 @@ HWND WIN32API SetFocus(HWND hwnd)
             dprintf(("hook cancelled SetFocus call!"));
             return 0;
         }
-        SendMessageA(lastFocus_W, WM_KILLFOCUS, 0, 0);
-
         fIgnoreKeystrokes = TRUE;
+        SendMessageA(lastFocus_W, WM_KILLFOCUS, 0, 0);
 
         return lastFocus_W;
     }
@@ -2148,6 +2176,22 @@ INT WIN32API EnumPropsExW(HWND hwnd, PROPENUMPROCEXW func, LPARAM lParam)
     INT ret = window->enumPropsExW(func, lParam);
     RELEASE_WNDOBJ(window);
     return ret;
+}
+//******************************************************************************
+//The GetWindowModuleFileName function retrieves the full path and file name of 
+//the module associated with the specified window handle.
+//******************************************************************************
+UINT WIN32API GetWindowModuleFileNameA(HWND hwnd, LPTSTR lpszFileName, UINT cchFileNameMax)
+{
+    WNDPROC lpfnWindowProc;
+
+    if (!IsWindow(hwnd)) {
+        dprintf(("warning: GetWindowModuleFileName: window %x not found!", hwnd));
+        SetLastError(ERROR_INVALID_WINDOW_HANDLE);
+        return 0;
+    }
+    lpfnWindowProc = (WNDPROC)GetWindowLongA(hwnd, GWL_WNDPROC);
+    return GetProcModuleFileNameA((ULONG)lpfnWindowProc, lpszFileName, cchFileNameMax);
 }
 //******************************************************************************
 //******************************************************************************
