@@ -1,4 +1,7 @@
-/* $Id: ChangeLog,v 1.1592 2001-07-12 17:17:02 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.1593 2001-07-13 08:07:28 sandervl Exp $ */
+
+ 2001-07-13: Sander van Leeuwen <sandervl@xs4all.nl>
+    - COMDLG32: o Fix for windows 3.1 style file dialog
 
  2001-07-12: Sander van Leeuwen <sandervl@xs4all.nl>
     - KERNEL32: o Atom fixes
