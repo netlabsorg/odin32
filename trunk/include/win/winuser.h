@@ -1,4 +1,4 @@
-/* $Id: winuser.h,v 1.15 1999-11-04 19:05:26 phaller Exp $ */
+/* $Id: winuser.h,v 1.16 1999-11-05 10:32:48 phaller Exp $ */
 
 #ifndef __INCLUDE_WINUSER_H
 #define __INCLUDE_WINUSER_H
@@ -3649,8 +3649,8 @@ DWORD     WINAPI WNetAddConnectionW(LPCWSTR,LPCWSTR,LPCWSTR);
 INT       WINAPIV wsnprintfA(LPSTR,UINT,LPCSTR,...);
 INT       WINAPIV wsnprintfW(LPWSTR,UINT,LPCWSTR,...);
 #define     wsnprintf WINELIB_NAME_AW(wsnprintf)
-INT       WINAPIV wsprintfA(LPSTR,LPCSTR,...);
-INT       WINAPIV wsprintfW(LPWSTR,LPCWSTR,...);
+INT       WINAPIV wsprintfA(LPSTR,LPCSTR,va_list);
+INT       WINAPIV wsprintfW(LPWSTR,LPCWSTR,va_list);
 #define     wsprintf WINELIB_NAME_AW(wsprintf)
 INT       WINAPI wvsnprintfA(LPSTR,UINT,LPCSTR,va_list);
 INT       WINAPI wvsnprintfW(LPWSTR,UINT,LPCWSTR,va_list);
