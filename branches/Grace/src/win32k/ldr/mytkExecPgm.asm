@@ -1,4 +1,4 @@
-; $Id: mytkExecPgm.asm,v 1.10.4.2 2000-08-17 08:23:34 bird Exp $
+; $Id: mytkExecPgm.asm,v 1.10.4.3 2000-08-19 14:37:16 bird Exp $
 ;
 ; mytkExecPgm - tkExecPgm overload
 ;
@@ -83,6 +83,7 @@ CCHMAXPATH      EQU CCHFILENAME - 1     ; Max path length
     public mytkExecPgm
     public tkExecPgmCopyEnv
 
+    public fLdrSemTaken
     public fTkExecPgm
     public achTkExecPgmFilename
     public achTkExecPgmArguments
@@ -99,6 +100,8 @@ CCHMAXPATH      EQU CCHFILENAME - 1     ; Max path length
 ; This data is only valid at isLdrStateExecPgm time
 ; (and you'll have to be behind the loader semaphore of course!)
 DATA16 SEGMENT
+fLdrSemTaken            db 0            ; 0 - Loader Semaphore not taken
+                                        ; 1 - Loader semaphore is taken and will be freed at exit.
 fTkExecPgm              db 0            ; 0 - achTkExecPgmFilename and achTkExecPgmArguments is INVALID
                                         ; 1 - achTkExecPgmFilename and achTkExecPgmArguments is VALID.
 achTkExecPgmFilename    db CCHFILENAME dup (0)  ; The filename  passed in to tkExecPgm if (fTkExec is TRUE)
@@ -222,10 +225,11 @@ tkepgm1:
     je      tkepgm_backout              ; BACKOUT on NULL pointer. (paranoia)
 
     push    0ffffffffh                  ; Wait indefinitely.
-    push    dword ptr eax               ; LDRSem handle.
+    push    eax                         ; LDRSem handle.
     call    near ptr FLAT:_KSEMRequestMutex@8
     or      eax, eax                    ; Check if failed.
     jnz     tkepgm_backout              ; Backout on failure.
+    mov     fLdrSemTaken, 1             ; Marks that the loader semaphore is taken
 
 
     ;
@@ -312,22 +316,14 @@ tkepgm_setup_parms:
 tkepgm_callbehind:
     push    cs                          ; Problem calling far into the calltab segement.
     call    near ptr FLAT:_g_tkExecPgm
-    pushfd
-
-    ;
-    ; Clear loader semaphore.
-    ;
+    pushfd                              ; preserve flags
     push    eax                         ; preserve result.
     push    ecx                         ; preserve ecx just in case
     push    edx                         ; preserve edx just in case
     mov     ax, seg FLAT:DATA32
     mov     ds, ax
     mov     es, ax
-    ASSUME  ds:FLAT, es:FLAT
-    call    near ptr FLAT:_LDRClearSem@0
-    pop     edx                         ; restore edx
-    pop     ecx                         ; restore ecx
-    pop     eax                         ; restore result.
+    ASSUME  ds:FLAT, es:FLAT            ; both ds and es are now FLAT
 
     ;
     ; Clear loader state, current exe module and tkExecPgm global data flag.
@@ -337,13 +333,25 @@ tkepgm_callbehind:
     mov     fTkExecPgm, 0               ; Marks global data invalid.
 
     ;
+    ; Clear loader semaphore.
+    ;
+    cmp     fLdrSemTaken, 0             ; is the semaphore still taken?
+    je      tkepgm_callbehindret        ; jmp if not taken.
+    mov     fLdrSemTaken, 0             ; Loader semaphore is not taken any longer!
+    call    near ptr FLAT:_LDRClearSem@0
+
+    ;
     ; Restore ds and es (probably unecessary but...) and Return
     ;
+tkepgm_callbehindret:
     push    dword ptr [ebp + SegFilename]
     pop     ds
     push    dword ptr [ebp + SegEnv]
     pop     es
-    popfd
+    pop     edx                         ; restore edx
+    pop     ecx                         ; restore ecx
+    pop     eax                         ; restore result.
+    popfd                               ; restore flags
     leave
     retf
 

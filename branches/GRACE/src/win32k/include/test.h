@@ -1,4 +1,4 @@
-/* $Id: test.h,v 1.1.4.2 2000-08-17 08:23:33 bird Exp $
+/* $Id: test.h,v 1.1.4.3 2000-08-19 14:37:11 bird Exp $
  *
  * Definitions and declarations for test moduls.
  *
@@ -95,6 +95,7 @@ APIRET KRNLCALL fakeVMObjHandleInfo(
 ULONG LDRCALL fakeldrOpenPath(PCHAR pachFilename, USHORT cchFilename, ldrlv_t *plv, PULONG pful);
 ULONG LDRCALL fakeLDRClearSem(void);
 ULONG KRNLCALL fakeKSEMRequestMutex(HKMTX hkmtx, ULONG ulTimeout);
+ULONG KRNLCALL fakeKSEMReleaseMutex(HKMTX hkmtx);
 extern HKMTX        fakeLDRSem;
 ULONG KRNLCALL   fakeTKFuBuff(PVOID pv, PVOID pvUsr, ULONG cb, ULONG fl);
 ULONG KRNLCALL   fakeTKSuBuff(PVOID pvUsr, PVOID pv, ULONG cb, ULONG fl);

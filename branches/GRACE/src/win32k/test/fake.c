@@ -1,4 +1,4 @@
-/* $Id: fake.c,v 1.1.4.1 2000-08-11 02:21:09 bird Exp $
+/* $Id: fake.c,v 1.1.4.2 2000-08-19 14:37:21 bird Exp $
  *
  * Fake stubs for the ldr and kernel functions we imports or overloads.
  *
@@ -738,6 +738,29 @@ ULONG KRNLCALL fakeKSEMRequestMutex(HKMTX hkmtx, ULONG ulTimeout)
 
     return NO_ERROR;
 }
+
+
+/**
+ * KSEMReleaseMutex faker.
+ * @returns   NO_ERROR
+ * @param     hkmtx
+ * @param     ulTimeout
+ * @status    completely implemented.
+ * @remark
+ */
+ULONG KRNLCALL fakeKSEMReleaseMutex(HKMTX hkmtx)
+{
+    printf("fakeKSEMReleaseMutex:           hkmtx = %p, usage count = %d, rc = %d\n",
+           hkmtx, *(PLONG)hkmtx, NO_ERROR);
+
+    if ((*(PLONG)hkmtx) == 0)
+        kprintf(("fakeKSEMReleaseMutex: sempahore is 0 allready\n"));
+    else
+        (*(PLONG)hkmtx)--;
+
+    return NO_ERROR;
+}
+
 
 
 /**

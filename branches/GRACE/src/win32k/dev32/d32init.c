@@ -1,4 +1,4 @@
-/* $Id: d32init.c,v 1.19.4.5 2000-08-17 08:23:32 bird Exp $
+/* $Id: d32init.c,v 1.19.4.6 2000-08-19 14:37:04 bird Exp $
  *
  * d32init.c - 32-bits init routines.
  *
@@ -1154,7 +1154,8 @@ int importTabInit(void)
         0,                              /* 27 */
         0,                              /* 28 */
         0,                              /* 29 */
-        0                               /* 30 */
+        0,                              /* 30 */
+        0                               /* 31 */
     };
     int i;
     int cb;
@@ -1426,6 +1427,7 @@ VOID R3TstFixImportTab(VOID)
         {(unsigned)fakeldrOpenPath,         1},
         {(unsigned)fakeLDRClearSem,         1},
         {(unsigned)fakeKSEMRequestMutex,    1},
+        {(unsigned)fakeKSEMReleaseMutex,    1},
         {(unsigned)&fakeLDRSem,             3},
         {(unsigned)fakeTKSuBuff,            1},
         {(unsigned)fakeTKFuBuff,            1},

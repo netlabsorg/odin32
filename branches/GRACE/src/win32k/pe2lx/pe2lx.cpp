@@ -1,4 +1,4 @@
-/* $Id: pe2lx.cpp,v 1.18.4.2 2000-08-11 02:26:59 bird Exp $
+/* $Id: pe2lx.cpp,v 1.18.4.3 2000-08-19 14:37:18 bird Exp $
  *
  * Pe2Lx class implementation. Ring 0 and Ring 3
  *
@@ -1305,7 +1305,11 @@ ULONG  Pe2Lx::applyFixups(PMTE pMTE, ULONG iObject, ULONG iPageTable, PVOID pvPa
  */
 ULONG  Pe2Lx::openPath(PCHAR pachModname, USHORT cchModname, ldrlv_t *pLdrLv, PULONG pfl) /* (ldrOpenPath) */
 {
-    #if 0 //def RING0
+    #ifdef RING0
+    #if 1
+    return ldrOpenPath(pachModname, cchModname, pLdrLv, pfl);
+    #else
+
 
     /* These defines sets the order the paths and pathlists are examined. */
     #define FINDDLL_EXECUTABLEDIR   1
@@ -1552,6 +1556,7 @@ end:
 
 
     return ldrOpenPath(pachModname, cchModname, pLdrLv, pfl);
+    #endif
     #else
     NOREF(pachModname);
     NOREF(cchModname);
