@@ -1,4 +1,4 @@
-/* $Id: kFileLX.cpp,v 1.2 2000-08-31 03:00:13 bird Exp $
+/* $Id: kFileLX.cpp,v 1.3 2000-12-04 08:48:08 bird Exp $
  *
  *
  *
@@ -46,7 +46,9 @@
 #include <assert.h>
 
 #include "kFileFormatBase.h"
+#include "kInterfaces.h"
 #include "kFileLX.h"
+
 
 /*******************************************************************************
 *   Structures and Typedefs                                                    *
@@ -126,16 +128,17 @@ kFileLX::kFileLX(const char *pszFilename)
         offLXHdr = 0;
 
     pe32 = (struct e32_exe*)((char*)pvBase + offLXHdr);
-    if (*(PUSHORT)pe32 == E32MAGIC)
-    {
-        paObject = (struct o32_obj*)((char*)pvBase + pe32->e32_objtab + offLXHdr);
-    }
-    else
+    if (*(PUSHORT)pe32 != E32MAGIC)
     {
         free(pvBase);
         pvBase = NULL;
         throw(2);
     }
+
+    paObject = pe32->e32_objtab && pe32->e32_objcnt
+        ? (struct o32_obj*)((char*)pvBase + pe32->e32_objtab + offLXHdr) : NULL;
+    paMap = pe32->e32_objmap
+        ? (struct o32_map*)((char*)pvBase + pe32->e32_objmap + offLXHdr) : NULL;
 }
 
 
@@ -371,3 +374,240 @@ int kFileLX::getObjectCount()
     return (int)pe32->e32_objcnt;
 }
 
+#if 0
+
+/** @cat Get and put page methods. (the first ones are generic) */
+BOOL kFileLX::getPage(char *pachPage, ULONG ulAddress)
+{
+    int iObj;
+
+    for (iObj = 0; iObj < pe32->e32_objcnt; iObj++)
+        if (    paObject[iObj].o32_base > ulAddress
+            &&  paObject[iObj].o32_base + paObject[iObj].o32_size > ulAddress
+            )
+            return getPage(pachPage, iObj, ulAddress - paObject[iObj].o32_base);
+
+    return FALSE;
+}
+
+BOOL kFileLX::getPage(char *pachPage, int iObject, int offObject)
+{
+    offObject &= ~(PAGESIZE - 1);
+    if (    iObject >= pe32->e32_objcnt
+        &&  offObject >= paObject[iObject].o32_size
+        )
+        return FALSE;
+
+    /*
+     * Is there a pagemap entry for the requested page?
+     */
+    if ((offObject >> PAGESHIFT) < paObject[iObject].o32_mapsize)
+    {   /* yes */
+        int     iPage = (offObject >> PAGESIZE) + paObject[iObject].o32_pagemap - 1;
+        char *  pchPageData = (char*)((paMap[iPage].o32_pagedataoffset << pe32->e32_pageshift) + pe32->e32_datapage + (char*)pvBase);
+
+        if (pchPageData )
+        {
+        }
+
+    }
+    else
+    {   /* no, so it's a zero page */
+        memset(pachPage, 0, PAGESIZE);
+    }
+
+    return FALSE;
+}
+
+BOOL kFileLX::putPage(const char *pachPage, ULONG ulAddress)
+{
+    return FALSE;
+}
+
+BOOL kFileLX::putPage(const char *pachPage, int iObject, int offObject)
+{
+    return FALSE;
+}
+
+BOOL kFileLX::getPageLX(char *pachPage, int iObject, int iPage)
+{
+    return FALSE;
+}
+
+BOOL kFileLX::getPageLX(char *pachPage, int iPage)
+{
+    return FALSE;
+}
+
+BOOL kFileLX::putPageLX(const char *pachPage, int iObject, int iPage)
+{
+    return FALSE;
+}
+
+BOOL kFileLX::putPageLX(const char *pachPage, int iPage)
+{
+    return FALSE;
+}
+
+
+/**
+ * Expands a page compressed with the old exepack method introduced with OS/2 2.0.
+ * (/EXEPACK or just /EXEPACK)
+ * @returns Successindicator.
+ * @param   pachPage        Pointer to output page. size: PAGESIZE
+ *                          Upon successful return this will contain the expanded page data.
+ * @param   pachSrcPage     Pointer to source data. size: cchSrcPage.
+ *                          This data should be compressed with EXEPACK:2!
+ * @sketch  Have no good idea right now.
+ * @status  Completely implemented.
+ * @author  knut st. osmundsen (knut.stange.osmundsen@mynd.no)
+ * @remark
+ */
+BOOL kFileLX::expandPage1(char *pachPage, const char * pachSrcPage, int cchSrcPage)
+{
+    struct LX_Iter *pIter = (struct LX_Iter *)pachSrcPage;
+    char *          pachDestPage = pachPage; /* Store the pointer for boundrary checking. */
+
+    /* Validate size of data. */
+    if (cchSrcPage >= PAGESIZE - 2)
+        return FALSE;
+
+    /*
+     * Expand the page.
+     */
+    while (pIter->LX_nIter)
+    {
+        /* Check if we're out of bound. */
+        if (    pachPage - pachDesPage + pIter->LX_nIter * pIter->LX_nBytes > PAGESIZE
+            ||  cchSrcPage <= 0)
+            return FALSE;
+
+        if (pIter->LX_nBytes == 1)
+        {   /* one databyte */
+            memset(pachPage, &pIter->LX_Iterdata, pIter->LX_nIter);
+            pchPage += pIter->LX_nIter;
+            cchSrcPage -= pIter->LX_nIter + 4;
+            pIter++;
+        }
+        else
+        {
+            for (int i = 0; i < pIter->LX_nIter; i++, pachPage += pIter->LX_nBytes)
+                memcpy(pachPage, &pIter->LX_Iterdata, pIter->LX_nBytes);
+            cchSrcPage -= 4 + pIter->LX_nBytes;
+            pIter   = (pIter)((char*)pIter 4 + pIter->LX_nBytes);
+        }
+    }
+    return TRUE;
+#if 0
+/* example code */
+    int             off;
+    struct LX_Iter *pIter;
+    char *          pch = pvPage; /* Current position on page */
+
+    off = pe32->e32_datapage + (pObjMap->o32_pagedataoffset << pe32->e32_pageshift);
+    if (pObjMap->o32_pagesize && (off + pObjMap->o32_pagesize - 1) >= cbFile)
+    {
+        fprintf(stderr, "Error: Page resides outside of the file.\n");
+        return 1;
+    }
+    pIter = (struct LX_Iter *)((char*)pvFile + off);
+
+    /* expand page */
+    while (pIter->LX_nIter > 0)
+    {
+        if (pch + (pIter->LX_nBytes * pIter->LX_nIter) > (char*)pvPage + OBJPAGELEN)
+        {
+            fprintf(stderr, "Error: Iterated page expands to more than a page!\n");
+            return 1;
+        }
+
+        if (pIter->LX_nBytes == 1)
+        {
+            memset(pch, pIter->LX_Iterdata, pIter->LX_nIter);
+            pch += pIter->LX_nIter;
+            pIter++;
+        }
+        else
+        {
+            int i;
+            for (i = 0; i < pIter->LX_nIter; i++, pch += pIter->LX_nBytes)
+                memcpy(pch, &pIter->LX_Iterdata, pIter->LX_nBytes);
+            #if 1 /* curious */
+            if (pIter->LX_nBytes > 2) fprintf(stdout, "pIter->LX_nBytes = %\n", pIter->LX_nBytes);
+            #endif
+
+            pIter = (struct LX_Iter*)((char*)pIter + 4 + pIter->LX_nBytes);
+        }
+    }
+
+    return FALSE;
+#endif
+}
+
+
+/**
+ * Expands a page compressed with the exepack method introduced with OS/2 Warp 3.0.
+ * (/EXEPACK:2)
+ * @returns Successindicator.
+ * @param   pachPage        Pointer to output page. size: PAGESIZE
+ *                          Upon successful return this will contain the expanded page data.
+ * @param   pachSrcPage     Pointer to source data. size: cchSrcPage.
+ *                          This data should be compressed with EXEPACK:2!
+ * @sketch  Have no good idea right now.
+ * @status  Stub.
+ * @author  knut st. osmundsen (knut.stange.osmundsen@mynd.no)
+ * @remark
+ */
+BOOL kFileLX::expandPage2(char *pachPage, const char * pachSrcPage, int cchSrcPage)
+{
+    NOREF(pachPage);
+    NOREF(pachSrcPage);
+    NOREF(cchSrcPage);
+    return FALSE;
+}
+
+
+/**
+ * Compresses a page using the old exepack method introduced with OS/2 2.0.
+ * (/EXEPACK:1 or just /EXEPACK)
+ * @returns Size of the compressed page in the pachPage buffer.
+ *          PAGESIZE if failed to compress the page.
+ *          -1 on error.
+ * @param   pachPage        Pointer to output buffer. size: PAGESIZE.
+ *                          This will hold the compressed page data upon return.
+ * @param   pachSrcPage     Pointer to page to compress. size: PAGESIZE.
+ * @sketch
+ * @status  stub.
+ * @author  knut st. osmundsen (knut.stange.osmundsen@mynd.no)
+ * @remark  Not implemented.
+ */
+int kFileLX::compressPage1(char *pachPage, const char * pachSrcPage)
+{
+    NOREF(pachPage);
+    NOREF(pachSrcPage);
+    return -1;
+}
+
+
+/**
+ * Compresses a page using the exepack method introduced with OS/2 Warp 3.0.
+ * (/EXEPACK:2)
+ * @returns Size of the compressed page in the pachPage buffer.
+ *          PAGESIZE if failed to compress the page.
+ *          -1 on error.
+ * @param   pachPage        Pointer to output buffer. size: PAGESIZE.
+ *                          This will hold the compressed page data upon return.
+ * @param   pachSrcPage     Pointer to page to compress. size: PAGESIZE.
+ * @sketch  Have no idea!
+ * @status  stub.
+ * @author  knut st. osmundsen (knut.stange.osmundsen@mynd.no)
+ * @remark  Not implemented.
+ */
+int kFileLX::compressPage2(char *pachPage, const char * pachSrcPage)
+{
+    NOREF(pachPage);
+    NOREF(pachSrcPage);
+    return -1;
+}
+
+#endif
