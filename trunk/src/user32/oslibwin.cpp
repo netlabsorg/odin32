@@ -1,4 +1,4 @@
-/* $Id: oslibwin.cpp,v 1.36 1999-10-25 20:17:19 sandervl Exp $ */
+/* $Id: oslibwin.cpp,v 1.37 1999-10-28 15:20:25 sandervl Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -69,13 +69,13 @@ HWND OSLibWinCreateWindow(HWND hwndParent, ULONG dwWinStyle, ULONG dwFrameStyle,
   ULONG dwClientStyle;
 
 //  if(dwFrameStyle || hwndParent == HWND_DESKTOP) {
-        dwClientStyle = dwWinStyle & ~(WS_TABSTOP | WS_GROUP);
+        dwClientStyle = dwWinStyle & ~(WS_TABSTOP | WS_GROUP | WS_CLIPSIBLINGS);
 
         dwFrameStyle |= FCF_NOBYTEALIGN;
         if (hwndParent == HWND_DESKTOP && dwFrameStyle & FCF_TITLEBAR)
                 dwFrameStyle |= FCF_TASKLIST | FCF_NOMOVEWITHOWNER;
 
-        dwWinStyle   &= ~WS_CLIPCHILDREN;
+        dwWinStyle &= ~(WS_CLIPCHILDREN | WS_CLIPSIBLINGS);
 
         *hwndFrame = WinCreateStdWindow(hwndParent, dwWinStyle,
                                        &dwFrameStyle, WIN32_STDCLASS,
@@ -138,11 +138,15 @@ BOOL OSLibWinConvertStyle(ULONG dwStyle, ULONG *dwExStyle, ULONG *OSWinStyle, UL
     {
       *OSFrameStyle |= FCF_SIZEBORDER;
       *borderHeight = *borderWidth = 2;
-    } else if (*dwExStyle & WS_EX_DLGMODALFRAME_W)
+    }
+    else
+    if (*dwExStyle & WS_EX_DLGMODALFRAME_W)
     {
       *OSFrameStyle |= FCF_SIZEBORDER;
       *borderHeight = *borderWidth = 3;
-    } else if (*dwExStyle & WS_EX_STATICEDGE_W)
+    }
+    else
+    if (*dwExStyle & WS_EX_STATICEDGE_W)
     {
       *OSFrameStyle |= FCF_SIZEBORDER;
       *borderHeight = *borderWidth = 2;
@@ -162,13 +166,16 @@ BOOL OSLibWinConvertStyle(ULONG dwStyle, ULONG *dwExStyle, ULONG *OSWinStyle, UL
   }
   else
   {
-    if((dwStyle & WS_CAPTION_W) == WS_CAPTION_W)
-          *OSFrameStyle |= FCF_TITLEBAR;
-    if(dwStyle & WS_DLGFRAME_W)
-          *OSFrameStyle |= FCF_DLGBORDER;
+    if((dwStyle & WS_CAPTION_W) == WS_DLGFRAME_W)
+        *OSFrameStyle |= FCF_DLGBORDER;
     else
-    if(dwStyle & WS_BORDER_W)
-          *OSFrameStyle |= FCF_BORDER;
+    {
+        if((dwStyle & WS_CAPTION_W) == WS_CAPTION_W)
+            *OSFrameStyle |= (FCF_TITLEBAR | FCF_BORDER);
+        else
+        if(dwStyle & WS_BORDER_W)
+            *OSFrameStyle |= FCF_BORDER;
+    }
 
     if(dwStyle & WS_VSCROLL_W)
           *OSFrameStyle |= FCF_VERTSCROLL;
@@ -199,7 +206,7 @@ BOOL OSLibWinConvertStyle(ULONG dwStyle, ULONG *dwExStyle, ULONG *OSWinStyle, UL
 BOOL OSLibWinSetWindowULong(HWND hwnd, ULONG offset, ULONG value)
 {
   if(offset == OSLIB_QWL_USER)
-	offset = QWL_USER;
+    offset = QWL_USER;
 
   return WinSetWindowULong(hwnd, offset, value);
 }
@@ -208,7 +215,7 @@ BOOL OSLibWinSetWindowULong(HWND hwnd, ULONG offset, ULONG value)
 ULONG OSLibWinGetWindowULong(HWND hwnd, ULONG offset)
 {
   if(offset == OSLIB_QWL_USER)
-	offset = QWL_USER;
+    offset = QWL_USER;
 
   return WinQueryWindowULong(hwnd, offset);
 }
@@ -1035,51 +1042,63 @@ void OSLibSetWindowStyle(HWND hwnd, ULONG dwStyle)
 
   OSLibWinConvertStyle(dwStyle, &dwExStyle, &OSWinStyle, &OSFrameStyle, &borderWidth, &borderHeight);
 
-  OSWinStyle = OSWinStyle & ~(WS_TABSTOP | WS_GROUP | WS_CLIPCHILDREN);
+  OSWinStyle = OSWinStyle & ~(WS_TABSTOP | WS_GROUP | WS_CLIPCHILDREN | WS_CLIPSIBLINGS);
 
   WinSetWindowULong(hwnd, QWL_STYLE,
                     (WinQueryWindowULong(hwnd, QWL_STYLE) & ~0xffff0000) |
                     OSWinStyle);
 
-  //CB: bug: it doesn't work with child windows!
-
-  if(OSFrameStyle != 0)  // maybe WinQueryClassName == WC_FRAME is better
+  if(OSFrameStyle & FCF_TITLEBAR)
   {
-    if(OSFrameStyle & FCF_TITLEBAR)
-    {
       WinSetParent(OSLibWinObjectWindowFromID(hwnd, FID_TITLEBAR), hwnd, FALSE);
       WinSetParent(OSLibWinObjectWindowFromID(hwnd, FID_MENU), hwnd, FALSE);
-    }
-    else
-    {
+  }
+  else
+  {
       WinSetParent(WinWindowFromID(hwnd, FID_TITLEBAR), HWND_OBJECT, FALSE);
       WinSetParent(WinWindowFromID(hwnd, FID_MENU), HWND_OBJECT, FALSE);
-    }
-    if(OSFrameStyle & FCF_SYSMENU)
+  }
+  if(OSFrameStyle & FCF_SYSMENU)
       WinSetParent(OSLibWinObjectWindowFromID(hwnd, FID_SYSMENU), hwnd, FALSE);
-    else
+  else
       WinSetParent(WinWindowFromID(hwnd, FID_SYSMENU), HWND_OBJECT, FALSE);
 
-    if(OSFrameStyle & FCF_MINBUTTON | OSFrameStyle & FCF_MAXBUTTON)
+  if(OSFrameStyle & FCF_MINBUTTON | OSFrameStyle & FCF_MAXBUTTON)
       WinSetParent(OSLibWinObjectWindowFromID(hwnd, FID_MINMAX), hwnd, FALSE);
-    else
+  else
       WinSetParent(WinWindowFromID(hwnd, FID_MINMAX), HWND_OBJECT, FALSE);
 
-    if(OSFrameStyle & FCF_VERTSCROLL)
+  if(OSFrameStyle & FCF_VERTSCROLL)
       WinSetParent(OSLibWinObjectWindowFromID(hwnd, FID_VERTSCROLL), hwnd, FALSE);
-    else
+  else
       WinSetParent(WinWindowFromID(hwnd, FID_VERTSCROLL), HWND_OBJECT, FALSE);
 
-    if(OSFrameStyle & FCF_HORZSCROLL)
+  if(OSFrameStyle & FCF_HORZSCROLL)
       WinSetParent(OSLibWinObjectWindowFromID(hwnd, FID_HORZSCROLL), hwnd, FALSE);
-    else
+  else
       WinSetParent(WinWindowFromID(hwnd, FID_HORZSCROLL), HWND_OBJECT, FALSE);
 
-    WinSendMsg(hwnd, WM_UPDATEFRAME,
-               MPFROMLONG(FCF_TITLEBAR | FCF_SYSMENU | FCF_MINMAX |
-                          FCF_MENU | FCF_VERTSCROLL | FCF_HORZSCROLL),
-               MPVOID);
-  }
+#if 0
+  WNDPARAMS wndparam = {0};
+  FRAMECDATA framecdata = {0};
+
+  framecdata.cb = sizeof(FRAMECDATA);
+
+  wndparam.fsStatus  = WPM_CTLDATA;
+  wndparam.cbCtlData = framecdata.cb;
+  wndparam.pCtlData  = (PVOID)&framecdata;
+  WinSendMsg(hwnd, WM_QUERYWINDOWPARAMS, &wndparam, 0);
+
+  wndparam.fsStatus = WPM_CTLDATA;
+  wndparam.pCtlData = (PVOID)&framecdata;
+  framecdata.flCreateFlags = OSFrameStyle;
+  WinSendMsg(hwnd, WM_SETWINDOWPARAMS, &wndparam, 0);
+#endif
+
+  WinSendMsg(hwnd, WM_UPDATEFRAME,
+             MPFROMLONG(FCF_TITLEBAR | FCF_SYSMENU | FCF_MINMAX |
+                        FCF_MENU | FCF_VERTSCROLL | FCF_HORZSCROLL),
+             MPVOID);
 }
 //******************************************************************************
 //******************************************************************************
