@@ -1,4 +1,4 @@
-/* $Id: authors.h,v 1.12 2000-11-17 09:55:59 sandervl Exp $ */
+/* $Id: authors.h,v 1.13 2000-12-02 11:39:35 sandervl Exp $ */
 #ifndef __WINE_AUTHORS_H
 #define __WINE_AUTHORS_H
 
@@ -33,6 +33,7 @@ static const char * const SHELL_People[] =
     "Vit Timchishin",
     "Joel Troster",
     "Jens Wiessner",
+    "Chris Wohlgemuth",
     "Vince Vielhaber",
     "<<< all the WINE people >>>",
     NULL
