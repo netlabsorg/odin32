@@ -1,4 +1,4 @@
-/* $Id: windlgmsg.cpp,v 1.7 2000-03-18 16:13:41 cbratschi Exp $ */
+/* $Id: windlgmsg.cpp,v 1.8 2001-04-12 14:04:33 sandervl Exp $ */
 /*
  * Win32 dialog message APIs for OS/2
  *
@@ -92,7 +92,7 @@ static BOOL DIALOG_IsAccelerator( HWND hwnd, HWND hwndDlg, WPARAM vKey )
               dlgCode = SendMessageA( hwndControl, WM_GETDLGCODE, 0, 0 );
               if (dlgCode & (DLGC_BUTTON | DLGC_STATIC))
               {
-                INT textLen = win32wnd->GetWindowTextLength();
+                INT textLen = win32wnd->GetWindowTextLengthA();
 
                 if (textLen > 0)
                 {

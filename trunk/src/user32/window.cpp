@@ -1,4 +1,4 @@
-/* $Id: window.cpp,v 1.92 2001-03-30 23:59:47 sandervl Exp $ */
+/* $Id: window.cpp,v 1.93 2001-04-12 14:04:33 sandervl Exp $ */
 /*
  * Win32 window apis for OS/2
  *
@@ -797,12 +797,12 @@ int WIN32API GetWindowTextLengthA( HWND hwnd)
 
     window = Win32BaseWindow::GetWindowFromHandle(hwnd);
     if(!window) {
-        dprintf(("GetWindowTextLength, window %x not found", hwnd));
+        dprintf(("GetWindowTextLengthA, window %x not found", hwnd));
         SetLastError(ERROR_INVALID_WINDOW_HANDLE);
         return 0;
     }
-    dprintf(("GetWindowTextLength %x", hwnd));
-    return window->GetWindowTextLength();
+    dprintf(("GetWindowTextLengthA %x", hwnd));
+    return window->GetWindowTextLengthA();
 }
 //******************************************************************************
 //******************************************************************************
@@ -825,8 +825,16 @@ int WIN32API GetWindowTextA( HWND hwnd, LPSTR lpsz, int cch)
 //******************************************************************************
 int WIN32API GetWindowTextLengthW( HWND hwnd)
 {
-    dprintf(("USER32:  GetWindowTextLengthW\n"));
-    return GetWindowTextLengthA(hwnd);
+   Win32BaseWindow *window;
+
+    window = Win32BaseWindow::GetWindowFromHandle(hwnd);
+    if(!window) {
+        dprintf(("GetWindowTextLengthW, window %x not found", hwnd));
+        SetLastError(ERROR_INVALID_WINDOW_HANDLE);
+        return 0;
+    }
+    dprintf(("GetWindowTextLengthW %x", hwnd));
+    return window->GetWindowTextLengthW();
 }
 //******************************************************************************
 //******************************************************************************
