@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.77 1999-11-08 13:44:15 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.78 1999-11-09 19:23:17 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -1035,8 +1035,8 @@ ULONG Win32BaseWindow::MsgButton(ULONG msg, ULONG ncx, ULONG ncy, ULONG clx, ULO
  BOOL  fClick = FALSE;
 
     if(ISMOUSE_CAPTURED()) {
-	if(DInputMouseHandler(getWindowHandle(), MOUSEMSG_BUTTON, ncx, ncy, msg))
-		return 0;
+    if(DInputMouseHandler(getWindowHandle(), MOUSEMSG_BUTTON, ncx, ncy, msg))
+        return 0;
     }
 
     dprintf(("MsgButton to (%d,%d)", ncx, ncy));
@@ -1106,19 +1106,19 @@ ULONG Win32BaseWindow::MsgButton(ULONG msg, ULONG ncx, ULONG ncy, ULONG clx, ULO
                 return 1;
     }
 
-    if(fClick) 
+    if(fClick)
     {
      HWND hwndTop;
 
         /* Activate the window if needed */
-	if(isSubclassedOS2Wnd()) {
-		Win32BaseWindow *parentwnd = GetWindowFromOS2FrameHandle(OSLibWinQueryWindow(OS2Hwnd, QWOS_PARENT));
-		if(parentwnd) {
-			hwndTop = (parentwnd->GetTopParent()) ? parentwnd->GetTopParent()->getWindowHandle() : 0;
-		}
-		else	hwndTop = 0;
-	}
-	else	hwndTop = (GetTopParent()) ? GetTopParent()->getWindowHandle() : 0;
+    if(isSubclassedOS2Wnd()) {
+        Win32BaseWindow *parentwnd = GetWindowFromOS2FrameHandle(OSLibWinQueryWindow(OS2Hwnd, QWOS_PARENT));
+        if(parentwnd) {
+            hwndTop = (parentwnd->GetTopParent()) ? parentwnd->GetTopParent()->getWindowHandle() : 0;
+        }
+        else    hwndTop = 0;
+    }
+    else    hwndTop = (GetTopParent()) ? GetTopParent()->getWindowHandle() : 0;
 
         if (hwndTop && getWindowHandle() != GetActiveWindow())
         {
@@ -1153,11 +1153,11 @@ ULONG Win32BaseWindow::MsgMouseMove(ULONG keystate, ULONG x, ULONG y)
  ULONG setcursormsg = WM_MOUSEMOVE;
 
     if(ISMOUSE_CAPTURED()) {
-	POINT point = {x,y};
-        
+    POINT point = {x,y};
+
         MapWindowPoints(getWindowHandle(), HWND_DESKTOP, &point, 1);
-	if(DInputMouseHandler(getWindowHandle(), MOUSEMSG_MOVE, point.x, point.y, keystate))
-		return 0;
+    if(DInputMouseHandler(getWindowHandle(), MOUSEMSG_MOVE, point.x, point.y, keystate))
+        return 0;
     }
 
     if(keystate & WMMOVE_LBUTTON)
@@ -1564,15 +1564,45 @@ LRESULT Win32BaseWindow::DefWindowProcA(UINT Msg, WPARAM wParam, LPARAM lParam)
     }
 
     case WM_SYSKEYDOWN:
-        if(HIWORD(lParam) & KEYDATA_ALT)
+        if(wParam == VK_F4) /* try to close the window */
         {
-            if(wParam == VK_F4) /* try to close the window */
-            {
-                Win32BaseWindow *window = GetTopParent();
-                if(window && !(window->getClass()->getStyle() & CS_NOCLOSE) )
-                    window->PostMessageA(WM_SYSCOMMAND, SC_CLOSE, 0);
-            }
+            Win32BaseWindow *window = GetTopParent();
+            if(window && !(window->getClass()->getStyle() & CS_NOCLOSE))
+                window->PostMessageA(WM_SYSCOMMAND, SC_CLOSE, 0);
         }
+
+        Win32BaseWindow *siblingWindow;
+        HWND sibling;
+        char nameBuffer [40], mnemonic;
+        int nameLength;
+
+        GetWindowTextA (nameBuffer, 40);
+
+        // search all sibling to see it this key is their mnemonic
+        sibling = GetWindow (GW_HWNDFIRST);
+        while (sibling != 0) {
+          siblingWindow = GetWindowFromHandle (sibling);
+          nameLength = siblingWindow->GetWindowTextA (nameBuffer, 40);
+
+          // find the siblings mnemonic
+          mnemonic = '\0';
+          for (int i=0 ; i<nameLength ; i++) {
+            if (nameBuffer [i] == '&') {
+              mnemonic = nameBuffer [i+1];
+              if ((mnemonic >= 'a') && (mnemonic <= 'z'))
+                mnemonic -= 32; // make it uppercase
+              break;  // stop searching
+            }
+          }
+
+          // key matches siblings mnemonic, send mouseclick
+          if (mnemonic == (char) wParam) {
+            siblingWindow->SendMessageA (BM_CLICK, 0, 0);
+          }
+
+          sibling = siblingWindow->GetNextWindow (GW_HWNDNEXT);
+        }
+
         return 0;
 
     case WM_QUERYOPEN:
@@ -2500,7 +2530,7 @@ BOOL Win32BaseWindow::GetWindowRect(PRECT pRect)
 BOOL Win32BaseWindow::hasWindowName(LPSTR wndname, BOOL fUnicode)
 {
     if(wndname == NULL)
-      return FALSE;  
+      return FALSE;
 
     if(fUnicode) {
             return (lstrcmpW(windowNameW, (LPWSTR)wndname) == 0);
