@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.8 1999-11-05 14:27:09 sandervl Exp $
+# $Id: makefile,v 1.9 2000-02-09 23:46:57 bird Exp $
 
 #
 # PD-Win32 API
@@ -22,43 +22,49 @@
 #
 
 all:		odin_libraries  needed_tools
-		cd src
-		nmake -nologo all
+    cd src
+    nmake -nologo all
 
 clean:
-        cd lib
-        nmake -nologo clean
-        cd ..\tools
-        nmake -nologo clean
-	cd ..\src
-	nmake -nologo clean
+    cd lib
+    nmake -nologo clean
+    cd ..\tools
+    nmake -nologo clean
+    cd ..\src
+    nmake -nologo clean
 
 debug:		odin_libraries  needed_tools
-		cd src
-		nmake -nologo all DEBUG=1
+    cd src
+    nmake -nologo all DEBUG=1
 
 debugsmp:	odin_libraries  needed_tools
-		cd src
-		start nmake -i -f makefile.smp -nologo all DEBUG=1
-		nmake -nologo all DEBUG=1
+    cd src
+    start nmake -i -f makefile.smp -nologo all DEBUG=1
+    nmake -nologo all DEBUG=1
 
 nodebuginfo:	odin_libraries  needed_tools
-		cd src
-		nmake -nologo all DEBUG=1 NODEBUGINFO=1
+    cd src
+    nmake -nologo all DEBUG=1 NODEBUGINFO=1
 
 nodebuginfosmp:	odin_libraries  needed_tools
-		cd src
-		start nmake -i -f makefile.smp -nologo all DEBUG=1 NODEBUGINFO=1
-		nmake -nologo all DEBUG=1 NODEBUGINFO=1
+    cd src
+    start nmake -i -f makefile.smp -nologo all DEBUG=1 NODEBUGINFO=1
+    nmake -nologo all DEBUG=1 NODEBUGINFO=1
 
 release:	odin_libraries  needed_tools
-		cd src
-		nmake -nologo all
+    cd src
+    nmake -nologo all
 
 releasesmp:	odin_libraries  needed_tools
-		cd src
-		start nmake -i -f makefile.smp -nologo all
-		nmake -nologo all
+    cd src
+    start nmake -i -f makefile.smp -nologo all
+    nmake -nologo all
+
+dep: needed_tools
+    cd tools
+    nmake -nologo dep
+    cd ..\src
+    nmake -nologo dep
 
 
 # --- common section ---
