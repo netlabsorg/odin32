@@ -1,4 +1,4 @@
-/* $Id: virtual.cpp,v 1.38 2000-12-12 23:57:16 sandervl Exp $ */
+/* $Id: virtual.cpp,v 1.39 2001-09-10 11:03:13 sandervl Exp $ */
 
 /*
  * Win32 virtual memory functions
@@ -625,7 +625,8 @@ ODINFUNCTION3(DWORD, VirtualQuery, LPCVOID, lpvAddress,
          sizeof(MEMORY_BASIC_INFORMATION));
 
   pmbiBuffer->BaseAddress = lpBase;
-  pmbiBuffer->RegionSize  = cbRangeSize;
+  //round to next page boundary
+  pmbiBuffer->RegionSize  = (cbRangeSize + 0xFFF) & 0xFFFFF000;
 
   if(dAttr & PAG_READ && !(dAttr & PAG_WRITE))
     pmbiBuffer->Protect |= PAGE_READONLY;
