@@ -1,4 +1,4 @@
-/* $Id: conprop2.cpp,v 1.1 1999-10-27 12:38:47 phaller Exp $ */
+/* $Id: conprop2.cpp,v 1.2 1999-10-27 13:10:35 phaller Exp $ */
 
 /*
  * Win32 Console API Translation for OS/2
@@ -84,7 +84,32 @@ LONG  _System _O32_RegCreateKeyEx(HKEY,LPCSTR,DWORD,LPSTR,DWORD,REGSAM,
                               LPSECURITY_ATTRIBUTES,LPHKEY,LPDWORD);
 LONG  _System _O32_RegQueryValueEx(HKEY,LPSTR,LPDWORD,LPDWORD,LPBYTE,LPDWORD);
 LONG  _System _O32_RegCloseKey(HKEY);
+LONG  _System _O32_RegSetValueEx( HKEY, LPCSTR, DWORD, DWORD, LPBYTE, DWORD );
+
 DWORD _System GetModuleFileNameA(HMODULE,LPSTR,DWORD);
+
+
+/*****************************************************************************
+ * Name      : iQueryModuleKeyName
+ * Funktion  : determine name of key to store the console properties for
+ *             this process
+ * Parameter :
+ * Variablen :
+ * Ergebnis  :
+ * Bemerkung :
+ *
+ * Autor     : Patrick Haller [1998/06/13 23:20]
+ *****************************************************************************/
+
+static DWORD iQueryModuleKeyName(LPSTR lpstrProcessName,
+                                 DWORD dwProcessNameLength)
+{
+  // Note: one might want to scan the string and replace illegal characters
+  // or use a module name only instead of the fully qualified path!
+  return(GetModuleFileNameA(NULL,
+                            lpstrProcessName,
+                            dwProcessNameLength));
+}
 
 
 /*****************************************************************************
@@ -155,9 +180,8 @@ DWORD ConsolePropertyLoad(PICONSOLEOPTIONS pConsoleOptions)
   DWORD dwType;
 
   // query process's name
-  dwRes = GetModuleFileNameA(NULL,
-                             (LPSTR)&szProcessName,
-                             sizeof(szProcessName));
+  dwRes = iQueryModuleKeyName((LPSTR)&szProcessName,
+                              sizeof(szProcessName));
   if (dwRes == 0)
   {
     dprintf(("KERNEL32: ConProp: ConsolePropertyLoad: GetModuleFileName failed\n"));
@@ -248,6 +272,77 @@ DWORD ConsolePropertySave(PICONSOLEOPTIONS pConsoleOptions)
   dprintf (("KERNEL32: Console:ConsolePropertySave(%08xh) not implemented.\n",
             pConsoleOptions));
 
+  // HKEY_CURRENT_USER/SOFTWARE/ODIN/ConsoleProperties/<process name>/<option name>
+  LONG  lRes = ERROR_SUCCESS;
+  HKEY  hkConsole;
+  char  szKey[256];
+  char  szProcessName[256];
+  DWORD dwRes;
+  DWORD dwSize;
+  DWORD dwType;
+  DWORD dwDisposition = 0;
+
+  // query process's name
+  dwRes = iQueryModuleKeyName((LPSTR)&szProcessName,
+                              sizeof(szProcessName));
+  if (dwRes == 0)
+  {
+    dprintf(("KERNEL32: ConProp: ConsolePropertyLoad: GetModuleFileName failed\n"));
+    lRes = ERROR_INVALID_PARAMETER;
+  }
+  else
+  {
+    // open process key
+    sprintf (szKey,
+             "Software\\ODIN\\ConsoleProperties\\%s",
+             szProcessName);
+
+    lRes = _O32_RegCreateKeyEx(HKEY_CURRENT_USER_O32,
+                               szKey,
+                               0,
+                               "",
+                               0,
+                               KEY_ALL_ACCESS,
+                               NULL,
+                               &hkConsole,
+                               &dwDisposition);
+    if (lRes != ERROR_SUCCESS)
+       return lRes;
+  }
+
+
+#define REGSAVEVALUE(name,var) \
+  lRes = _O32_RegSetValueEx(hkConsole, name, 0, REG_DWORD, \
+                 (LPBYTE)&pConsoleOptions->var, sizeof(pConsoleOptions->var));
+
+  REGSAVEVALUE("AutomaticTermination",     fTerminateAutomatically)
+  REGSAVEVALUE("Speaker",                  fSpeakerEnabled)
+  REGSAVEVALUE("SpeakerDuration",          ulSpeakerDuration)
+  REGSAVEVALUE("SpeakerFrequency",         ulSpeakerFrequency)
+  REGSAVEVALUE("UpdateLimit",              ulUpdateLimit)
+  REGSAVEVALUE("SetWindowPosition",        fSetWindowPosition)
+  REGSAVEVALUE("DefaultPosition_x",        coordDefaultPosition.X)
+  REGSAVEVALUE("DefaultPosition_y",        coordDefaultPosition.Y)
+  REGSAVEVALUE("DefaultSize_x",            coordDefaultSize.X)
+  REGSAVEVALUE("DefaultSize_y",            coordDefaultSize.Y)
+  REGSAVEVALUE("BufferSize_x",             coordBufferSize.X)
+  REGSAVEVALUE("BufferSize_y",             coordBufferSize.Y)
+  REGSAVEVALUE("QuickInsert",              fQuickInsert)
+  REGSAVEVALUE("InsertMode",               fInsertMode)
+  REGSAVEVALUE("MouseActions",             fMouseActions)
+  REGSAVEVALUE("Toolbar",                  fToolbarActive)
+  REGSAVEVALUE("TabSize",                  ulTabSize)
+  REGSAVEVALUE("DefaultAttribute",         ucDefaultAttribute)
+  REGSAVEVALUE("CursorDivisor",            ucCursorDivisor)
+  REGSAVEVALUE("ConsolePriorityClass",     ulConsoleThreadPriorityClass)
+  REGSAVEVALUE("ConsolePriorityDelta",     ulConsoleThreadPriorityDelta)
+  REGSAVEVALUE("ApplicationPriorityClass", ulAppThreadPriorityClass)
+  REGSAVEVALUE("ApplicationPriorityDelta", ulAppThreadPriorityDelta)
+#undef REGSAVEVALUE
+
+  _O32_RegCloseKey(hkConsole);
+
   return (NO_ERROR);
+
 }
 
