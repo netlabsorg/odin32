@@ -1,4 +1,4 @@
-/* $Id: ChangeLog,v 1.1578 2001-07-08 15:44:08 achimha Exp $ */
+/* $Id: ChangeLog,v 1.1579 2001-07-08 15:52:57 sandervl Exp $ */
 
  2001-07-08: Achim Hasenmueller <achimha@innotek.de>
     - WSOCK32:  o error message to human readable text translation
@@ -14,7 +14,21 @@
                   outside the scroll window during scrolling.
                 o Changed menu behaviour in OS/2 mode; no mouse tracking
                   when right or left mouse button not pressed.
+                o Clipboard (Get/SetClipboardData: must translated open32 
+                  to kernel32 global memory handles (due to Global memory 
+                  api rewrite)
+                o Key translation for arrow keys and insert/del, home/end, page up/down
+                  added (WM_CHAR message translation)
+                o Edit control bugfix for draw selected text
     - KERNEL32: o More pointer checks added to GlobalLock/Unlock
+                o Add default rename entry for crtdll
+                o Fixed FS corruption in atom functions (wrapper for LookupAtom)
+    - CRTDLL:   o Renamed to crtdll32 to avoid problems with some Lotus
+                  apps that come with their own crtdll
+    - NTDLL:    o Link with crtdll32.lib
+    - VERSION:  o Link with crtdll32.lib
+    - SHLWAPI:  o Link with crtdll32.lib
+    - PELDR:    o Fix for file not found error
 
  2001-07-08: knut st. osmundsen <kosmunds@csc.com>:
     - KERNEL32: o Added call in initterm to tell win32k where the Odin32
