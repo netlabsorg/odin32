@@ -168,5 +168,16 @@ BOOL    WIN32API ODIN_SetDllLoadCallback(ODINPROC_DLLLOAD pfnMyDllLoad);
 //******************************************************************************
 FARPROC WIN32API ODIN_SetProcAddress(HMODULE hModule, LPCSTR lpszProc, FARPROC pfnNewProc);
 
+//******************************************************************************
+// ODIN_SetTIBSwitch: override TIB switching
+// 
+// Parameters:
+//      BOOL fSwitchTIB
+//              FALSE  -> no TIB selector switching
+//              TRUE   -> force TIB selector switching
+//
+//******************************************************************************
+void WIN32API ODIN_SetTIBSwitch(BOOL fSwitchTIB);
+
 #endif  /*__CUSTOMBUILD_H__*/
 
