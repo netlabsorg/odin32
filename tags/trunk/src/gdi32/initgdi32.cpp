@@ -85,6 +85,7 @@ ULONG inittermGdi32(ULONG hModule, ULONG ulFlag)
       case 0 :
          ParseLogStatusGDI32();
 
+         InitializeKernel32();
 	 if(InitRegionSpace() == FALSE) {
 		return 0UL;
          }
