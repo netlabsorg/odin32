@@ -1,4 +1,4 @@
-/* $Id: hmcomm.cpp,v 1.37 2002-07-06 09:57:31 sandervl Exp $ */
+/* $Id: hmcomm.cpp,v 1.38 2002-08-21 17:23:12 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -60,7 +60,10 @@ BAUDTABLEENTRY BaudTable[] =
 static DWORD CommReadIOHandler(LPASYNCIOREQUEST lpRequest, DWORD *lpdwResult, DWORD *lpdwTimeOut);
 static DWORD CommWriteIOHandler(LPASYNCIOREQUEST lpRequest, DWORD *lpdwResult, DWORD *lpdwTimeOut);
 static DWORD CommPollIOHandler(LPASYNCIOREQUEST lpRequest, DWORD *lpdwResult, DWORD *lpdwTimeOut);
-
+#ifdef DEBUG
+static char *DebugCommEvent(DWORD dwEvents);
+static char *DebugModemStatus(DWORD dwModemStatus);
+#endif
 //******************************************************************************
 //******************************************************************************
 static VOID *CreateDevData()
@@ -415,12 +418,15 @@ DWORD CommPollIOHandler(LPASYNCIOREQUEST lpRequest, DWORD *lpdwResult, DWORD *lp
                           &COMEvt,ulLen,&ulLen);
     if(!rc)
     {
+#ifdef DEBUG
+        if(COMEvt) dprintf(("ASYNC_GETCOMMEVENT %x", COMEvt));
+#endif
         dwEvent |= (COMEvt&0x0001)? EV_RXCHAR:0;
         //dwEvent |= (COMEvt&0x0002)? 0:0;
         dwEvent |= (COMEvt&0x0004)? EV_TXEMPTY:0;
         dwEvent |= (COMEvt&0x0008)? EV_CTS:0;
         dwEvent |= (COMEvt&0x0010)? EV_DSR:0;
-        //dwEvent |= (COMEvt&0x0020)? 0:0; DCS = RLSD?
+        dwEvent |= (COMEvt&0x0020)? EV_RLSD:0;
         dwEvent |= (COMEvt&0x0040)? EV_BREAK:0;
         dwEvent |= (COMEvt&0x0080)? EV_ERR:0;
         dwEvent |= (COMEvt&0x0100)? EV_RING:0;
@@ -441,7 +447,7 @@ DWORD CommPollIOHandler(LPASYNCIOREQUEST lpRequest, DWORD *lpdwResult, DWORD *lp
             }
         }
         if((dwEvent & dwMask)) {
-            dprintf(("CommPollIOHandler: event(s) %x occured", (dwEvent & dwMask)));
+            dprintf(("CommPollIOHandler: event(s) %s %x occured", DebugCommEvent((dwEvent & dwMask)), (dwEvent & dwMask)));
             *lpdwResult = (dwEvent & dwMask);
             return ERROR_SUCCESS;
         }
@@ -688,7 +694,7 @@ BOOL HMDeviceCommClass::WaitCommEvent( PHMHANDLEDATA pHMHandleData,
             dwEvent |= (COMEvt&0x0004)? EV_TXEMPTY:0;
             dwEvent |= (COMEvt&0x0008)? EV_CTS:0;
             dwEvent |= (COMEvt&0x0010)? EV_DSR:0;
-            //dwEvent |= (COMEvt&0x0020)? 0:0; DCS = RLSD?
+            dwEvent |= (COMEvt&0x0020)? EV_RLSD:0;
             dwEvent |= (COMEvt&0x0040)? EV_BREAK:0;
             dwEvent |= (COMEvt&0x0080)? EV_ERR:0;
             dwEvent |= (COMEvt&0x0100)? EV_RING:0;
@@ -700,7 +706,7 @@ BOOL HMDeviceCommClass::WaitCommEvent( PHMHANDLEDATA pHMHandleData,
     }
     if(dwMask == pDevData->dwEventMask) {
         *lpfdwEvtMask = (rc==0) ? (dwEvent & dwMask) : 0;
-        dprintf(("WaitCommEvent returned %x", *lpfdwEvtMask));
+        dprintf(("WaitCommEvent returned %s %x", DebugCommEvent(*lpfdwEvtMask), *lpfdwEvtMask));
     }
     else  *lpfdwEvtMask = 0;
 
@@ -833,11 +839,11 @@ BOOL HMDeviceCommClass::SetCommMask( PHMHANDLEDATA pHMHandleData,
   PHMDEVCOMDATA pDevData = (PHMDEVCOMDATA)pHMHandleData->lpHandlerData;
   dprintf(("HMDeviceCommClass::SetCommMask %x", fdwEvtMask));
 
-  if(fdwEvtMask & (EV_RLSD|EV_RXFLAG)) {
-      dprintf(("!WARNING! SetCommMask: unsupported flags EV_RLSD and/or EV_RXFLAG!!"));
+  if(fdwEvtMask & (EV_RXFLAG)) {
+      dprintf(("!WARNING! SetCommMask: unsupported flag EV_RXFLAG!!"));
   }
 
-  pDevData->dwEventMask = fdwEvtMask & ~(EV_RLSD|EV_RXFLAG); // Clear the 2 not supported Flags.
+  pDevData->dwEventMask = fdwEvtMask & ~(EV_RXFLAG); // Clear the not supported Flag.
   return(TRUE);
 }
 //******************************************************************************
@@ -1050,10 +1056,10 @@ BOOL HMDeviceCommClass::GetCommModemStatus( PHMHANDLEDATA pHMHandleData,
     *lpModemStat |= (ucStatus & 0x10)? MS_CTS_ON:0;
     *lpModemStat |= (ucStatus & 0x20)? MS_DSR_ON:0;
     *lpModemStat |= (ucStatus & 0x40)? MS_RING_ON:0;
-    //*lpModemStat |= (ucStatus & 0x80)? MS_RSLD_ON:0;
+    *lpModemStat |= (ucStatus & 0x80)? MS_RLSD_ON:0;
   }
 
-  dprintf2(("HMDeviceCommClass::GetCommModemStatus -> %x rc=%d", *lpModemStat, rc));
+  dprintf2(("HMDeviceCommClass::GetCommModemStatus -> %s %x rc=%d", DebugModemStatus(*lpModemStat), *lpModemStat, rc));
   return(rc==0);
 }
 //******************************************************************************
@@ -1583,6 +1589,64 @@ void HMDeviceCommClass::CloseOverlappedIOHandlers()
         }
     }
 }
+#ifdef DEBUG
+//******************************************************************************
+//******************************************************************************
+static char *DebugCommEvent(DWORD dwEvents)
+{
+    static char szCommEvents[128];
+ 
+    szCommEvents[0] = 0;
+
+    if(dwEvents & EV_RXCHAR) {
+        strcat(szCommEvents, "EV_RXCHAR ");
+    }
+    if(dwEvents & EV_TXEMPTY) {
+        strcat(szCommEvents, "EV_TXEMPTY ");
+    }
+    if(dwEvents & EV_CTS) {
+        strcat(szCommEvents, "EV_CTS ");
+    }
+    if(dwEvents & EV_DSR) {
+        strcat(szCommEvents, "EV_DSR ");
+    }
+    if(dwEvents & EV_RLSD) {
+        strcat(szCommEvents, "EV_RLSD ");
+    }
+    if(dwEvents & EV_BREAK) {
+        strcat(szCommEvents, "EV_BREAK ");
+    }
+    if(dwEvents & EV_ERR) {
+        strcat(szCommEvents, "EV_ERR ");
+    }
+    if(dwEvents & EV_RING) {
+        strcat(szCommEvents, "EV_RING ");
+    }
+    return szCommEvents;
+}
+//******************************************************************************
+//******************************************************************************
+static char *DebugModemStatus(DWORD dwModemStatus)
+{
+    static char szModemStatus[128];
+ 
+    szModemStatus[0] = 0;
+
+    if(dwModemStatus & MS_CTS_ON) {
+        strcat(szModemStatus, "MS_CTS_ON ");
+    }
+    if(dwModemStatus & MS_DSR_ON) {
+        strcat(szModemStatus, "MS_DSR_ON ");
+    }
+    if(dwModemStatus & MS_RING_ON) {
+        strcat(szModemStatus, "MS_RING_ON ");
+    }
+    if(dwModemStatus & MS_RLSD_ON) {
+        strcat(szModemStatus, "MS_RLSD_ON ");
+    }
+    return szModemStatus;
+}
+#endif
 //******************************************************************************
 //******************************************************************************
 OverlappedIOHandler *HMDeviceCommClass::handler[MAX_COMPORTS] = {NULL};
