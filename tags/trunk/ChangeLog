@@ -1,4 +1,8 @@
- /* $Id: ChangeLog,v 1.193 1999-09-12 15:44:19 dengert Exp $ */
+ /* $Id: ChangeLog,v 1.194 1999-09-12 21:54:51 davidr Exp $ */
+
+ 99-09-08: David Raison
+	- OLEAUT32: Updated TypeLib code to find typelibs in EXE/DLL etc
+	            NB Still need to fix typelib translation.
 
  99-09-12: Daniela Engert <dani@ngrt.de>
 	- USER32\NEW: DC/related code: GetDCEx implemented. Slightly enhanced
@@ -18,7 +22,7 @@
 	- USER32\NEW:	added stubs for GetMenuInfo + SetMenuInfo
 
  99-09-08: David Raison
-	- Src\OleAut32 Added stubs for undefined exports in OLEAut32
+	- OLEAUT32 Added stubs for undefined exports in OLEAUT32
 
  99-09-08: Yuri Dario <mc6530@mclink.it>
 	- INCLUDE\WIN: Changes to wingdi.h (more WINELIB_NAME defs) & winuser.h (mssing definitions)
