@@ -1,4 +1,4 @@
- /* $Id: ChangeLog,v 1.309 1999-10-12 18:15:31 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.310 1999-10-12 18:50:08 sandervl Exp $ */
 
  99-10-12: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32: DrawMenuBar & DrawCaptionTempA bugfix (window handle translation)
@@ -15,7 +15,8 @@
         - USER32: Added support for extra messages in default window handler.
                   Partial support for WM_SYSCOMMAND in default window handler.
                   MDI child bugfix (window now displayed correctly)
-                  Only subclass frame when it has a 3d border.
+                  Only subclass frame when it has a 3d border OR *only* the
+                  WS_BORDER borderstyle.
                   Fixed y mapping bug in OSLibMapWINDOWPOStoSWP (converted
                   twice (win32 -> os2 -> win32))
 
