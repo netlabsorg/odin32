@@ -1,0 +1,35 @@
+;******************************************************************************
+; Copyright 1998-2000 knut st. osmundsen
+; Definition file for Win32k
+; Project Odin Software License can be found in LICENSE.TXT
+;******************************************************************************
+NAME Grace WINDOWCOMPAT
+DESCRIPTION "$@#knut st. osmundsen:v0.5.0alpha#@Grace - Odin32 and OS2NIX Ring-0 part - Copyright (c) 1998-2000 knut st. osmundsen"
+
+STACKSIZE 4096
+;CODE PRELOAD EXECUTEREAD
+;DATA PRELOAD
+
+SEGMENTS
+    DATA16          class 'FAR_DATA'
+    DATA16_BSS      class 'FAR_DATA'
+    DATA16_CONST    class 'FAR_DATA'
+    CODE16          class 'CODE'
+    CODE32          class 'CODE'
+    CALLTAB         class 'DATA'
+    DATA32          class 'DATA'
+    c_common        class 'DATA'
+    DDE4_DATA32     class 'DATA'
+    CTOR_DTOR1      class 'DATA'
+    CTOR_DTOR2      class 'DATA'
+    CTOR_DTOR3      class 'DATA'
+    _VFT            class 'CONST'
+    CONST32_RO      class 'CONST'
+    EH_DATA         class 'CONST'
+    BSS32           class 'BSS'
+
+IMPORTS
+     _DosWrite        = DOSCALL1.282
+     _DOS16OPEN       = DOSCALL1.70
+     _DOS16CLOSE      = DOSCALL1.59
+
