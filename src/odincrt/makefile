@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.25 2001-11-22 10:41:43 phaller Exp $
+# $Id: makefile,v 1.26 2002-04-07 14:35:24 sandervl Exp $
 
 #
 # Odin32 API
@@ -65,7 +65,9 @@ $(OBJDIR)\math64.obj \
 !endif
 $(OBJDIR)\malloc.obj \
 $(OBJDIR)\string.obj \
-$(OBJDIR)\file.obj
+$(OBJDIR)\file.obj \
+$(OBJDIR)\critsect.obj \
+$(OBJDIR)\interlock.obj \
 !else
 !ifdef NMAKE
 $(WATCOM)\lib386\os2\$(RTLLIB_O)
