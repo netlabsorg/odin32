@@ -1,4 +1,4 @@
-/* $Id: myldrOpen.cpp,v 1.10.4.9 2000-08-29 13:02:27 bird Exp $
+/* $Id: myldrOpen.cpp,v 1.10.4.10 2000-08-29 22:52:36 bird Exp $
  *
  * myldrOpen - ldrOpen.
  *
@@ -339,69 +339,135 @@ ULONG LDRCALL myldrOpen(PSFN phFile, PSZ pszFilename, PULONG pfl)
              */
             if (*u1.pul == 0xBEBAFECAUL) //CAh FEh BAh BEh
             {
+                char *pszName = NULL;
+                int   cchName;
+
                 if (isJAVADisabled())
                     goto cleanup_noerror;
 
                 /** @sketch
                  * Java signature found.
+                 * Copy the name to a temporary buffer. (only if necessary)
+                 * Remove the extention (.class) and insert a space between the name and the path.
+                 *  (This is the needed processing of the class filename to make it a classpath
+                 *   entry (path) and a class name (filename).)
                  * Try find the java executor in current dir or PATH: java.exe
                  */
                 kprintf(("myldrOpen-%d: Jave image!\n", cNesting));
-                #if 1
+
+                if (isLdrStateExecPgm() && fTkExecPgm)
+                {
+                    cchName = strlen(ldrpFileNameBuf);
+                    pszName = (char*)rmalloc(cchName + 2);
+                    if (pszName == NULL)
+                    {
+                        rc = ERROR_NOT_ENOUGH_MEMORY;
+                        goto cleanup;
+                    }
+                    memcpy(pszName, ldrpFileNameBuf, cchName+1);
+
+                    psz = pszName + strlen(pszName) - 1;
+                    while (psz > pszName && *psz != '.' && *psz != '\\' && *psz != '/')
+                        psz--;
+                    if (*psz == '.')
+                    {
+                        cchName = psz - pszName;
+                        *psz-- = '\0';
+                        while (psz > pszName && *psz != '\\' && *psz != '/')
+                            psz--;
+
+                        /* check for root and evt. make room for an extra slash. */
+                        if (psz - pszName == 2)
+                        {
+                            memmove(psz + 1, psz, cchName - 2);
+                            *psz++ = '\\';
+                        }
+                    }
+                    *psz = ' ';              //assume fully qualified path...
+                }
+
                 ldrClose(*phFile);
-                strcpy(u1.pach, "JAVA.EXE");
-                rc = ldrOpen(phFile, u1.pach, pfl);
+                rc = ldrOpen(phFile, ".\\JAVA.EXE", pfl);
                 if (rc != NO_ERROR)
-                    rc = OpenPATH(phFile, u1.pach, pfl);
+                    rc = OpenPATH(phFile, "JAVA.EXE", pfl);
                 if (rc == NO_ERROR)
                 {
-                    kprintf(("myldrOpen-%d: java - %s\n", cNesting, u1.pach));
+                    kprintf(("myldrOpen-%d: java - %s\n", cNesting, ldrpFileNameBuf));
+
                     /** @sketch
-                     * If we're in tkExecPgm state we'll have to create an extra agrument, the
-                     * class name without a .class extention. We'll do this after the filename
-                     * in the u1 buffer. This argument is of course added to the front.
-                     * Then the Executable name is to be updated.
+                     * To be able to execute any given class name we'll have to pass in the
+                     * directory as -classpath. But -classpath seems to override the default
+                     * and environmental CLASSPATHs. So, we'll have to pass in the value of
+                     * the CLASSPATH env.var. or generate the default class path (what ever that is).
+                     *
                      */
                     if (isLdrStateExecPgm() && fTkExecPgm)
                     {
-                        psz = u1.pach + 1 + CCHMAXPATH; /* ASSUMES that buffer is at least CCHMAXPATH*2 + 1 */
-                        strcpy(psz, pszFilename);
-                        psz2 = psz + strlen(psz);
-                        while (psz2 > psz && *psz2 != '\\' && *psz2 != '/')
-                        {
-                            if (*psz2 == '.')
-                            {
-                                *psz2 = '\0';
-                                break;
-                            }
-                            psz2--;
-                        }
+                        psz = u1.pach;
 
-                        rc = AddArgsToFront(1, psz);
-                        if (rc == NO_ERROR)
-                        {
-                            rc = AddArgsToFront(1, u1.pach);
-                            if (rc == NO_ERROR)
-                            {
-                                rc = SetExecName(u1.pach);
-                                if (rc != NO_ERROR)
-                                    kprintf(("myldrOpen-%d: java - failed to set java.exe as execname. rc=%d\n", cNesting, rc));
+                        /*
+                         * Get classpath and add it as a parameter
+                         */
+                        strcpy(u1.pach, "-classpath ");
+                        psz = u1.pach + strlen(u1.pach);
+
+                        psz3 = (char*)ScanEnv(GetEnv(TRUE), "CLASSPATH");
+                        if (psz3 != NULL)
+                        {   /* environment variable set */
+                            if (strlen(psz3) > 640 - 11 - 1 - cchName) //check for overflow
+                            {   // TODO? should reallocate...
+                                memcpy(psz, psz3, 640 - 11 - 1 - cchName);
+                                psz[640 - 11 - 1 - cchName] = '\0';
                             }
                             else
-                                kprintf(("myldrOpen-%d: java - failed to add programname as argument. rc=%d\n", cNesting, rc));
+                                strcpy(psz, psz3);
+                            psz += strlen(psz);
                         }
                         else
-                            kprintf(("myldrOpen-%d: java - failed to add class file as argument. rc=%d\n", cNesting, rc));
+                        {
+                            /* Make default classpath by taking the java.exe path + '..\lib\classes.zip' */
+                            strcpy(psz, ldrpFileNameBuf);
+                            psz3 = psz + strlen(psz) - 1;
+                            while (psz3 > psz && *psz3 != '\\' && *psz3 != '/')
+                                psz3--;
+                            strcpy(++psz3, "..\\lib\\classes.zip");
+                            psz = psz3 + strlen(psz3);
+                        }
+
+                        /*
+                         * Add the class directory (as the last classpath entry) and the class name.
+                         */
+                        *psz++ = ';';
+                        strcpy(psz, pszName);
+                        if (pszName != NULL)
+                            rfree(pszName);
+
+                        /*
+                         * Setup JAVA.EXE as executable with the parameters we've build.
+                         */
+                        rc = AddArgsToFront(2, ldrpFileNameBuf, u1.pach);
+                        kprintf(("myldrOpen-%d: java - Exe: %s  Args: %s\n", cNesting, ldrpFileNameBuf, u1.pach));
+                        if (rc == NO_ERROR)
+                        {
+                            rc = SetExecName(ldrpFileNameBuf);
+                            if (rc != NO_ERROR)
+                                kprintf(("myldrOpen-%d: java - failed to set java.exe as execname. rc=%d\n", cNesting, rc));
+                        }
+                        else
+                            kprintf(("myldrOpen-%d: java - failed to setup the parameters. rc=%d\n", cNesting, rc));
+
                         goto cleanup_noerror;
                     }
                 }
                 else
                     kprintf(("myldrOpen-%d: java - couldn't find/open java.exe\n", cNesting));
 
-                #endif
+
                 /** @sketch
                  *  End of Java loading. (return)
                  */
+                if (pszName != NULL)
+                    rfree(pszName);
                 goto cleanup;
             }
 
