@@ -1,4 +1,4 @@
- /* $Id: changelog,v 1.455 1999-11-18 09:26:07 bird Exp $ */
+ /* $Id: changelog,v 1.456 1999-11-18 18:59:31 cbratschi Exp $ */
 
  99-11-18: knut st. osmundsen <knut.stange.osmundsen@pmsc.no>
     - KERNEL32:   Win32Pe2LxImage didn't issue the setFullPath(szFileName)
@@ -9,6 +9,8 @@
 
  99-11-17: Christoph Bratschi <cbratschi@datacomm.ch>
 	- USER32/COMCTL32: Fixed cursor handling
+
+*****************************Official Alpha 5 version*********************************
 
  99-11-14  Markus Montkowski <mmontkowski@gmx.de>
         - DDRAW:  Code cleanup and some fixes in handling blts in the virtuel buffers.
