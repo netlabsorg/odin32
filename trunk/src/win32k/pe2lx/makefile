@@ -1,5 +1,5 @@
 ##############################################################################
-# $Id: makefile,v 1.7 1999-11-16 18:38:36 sandervl Exp $
+# $Id: makefile,v 1.8 1999-12-09 10:57:48 sandervl Exp $
 #
 # PD-Win32 API
 #
@@ -11,6 +11,7 @@
 # Directories
 ##############################################################################
 PDWIN32_INCLUDE = ..\..\..\include
+PDWIN32_LIB     = ..\..\..\lib
 PDWIN32_BIN     = ..\..\..\bin
 PE2LXOBJ        = ..\object
 PE2LXLIST       = ..\list
@@ -35,7 +36,7 @@ CXXFLAGS   = $(CXXFLAGS) -DRING3 -I$(PDWIN32_INCLUDE) -I$(WIN32K_INCLUDE) \
              -Ge+ -Wall+ppt-ppc-inl-cnv-gnr-vft- -Gm- -Gn- -Ti+ -Gx -Rn
 
 LD         = ilink
-LDFLAGS    = /nologo /NOI /A:16 /NOE /O:$@ /packcode /packdata \
+LDFLAGS    = /nologo /NOI /A:16 /NOD /NOE /O:$@ /packcode /packdata \
              /MAP:$(PE2LXLIST)\$(@B).map /pmtype:vio /Stack:4096 \
 !ifdef DEBUG
 !ifndef NODEBUGINFO
@@ -105,7 +106,7 @@ all: $(TARGET).exe
 
 $(TARGET).exe: $(OBJS)
     @echo linking $@
-    $(LD) $(LDFLAGS) $**
+    $(LD) $(LDFLAGS) $(PDWIN32_LIB)/odincrt.lib OS2386.LIB $(RTLLIB_O) $**
     $(CP) $@ $(PDWIN32_BIN)
 
 
