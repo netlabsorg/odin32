@@ -216,8 +216,6 @@ void WIN32API AsciiToUnicodeN(char *ascii, WCHAR *unicode, int asciilen)
   }
 
   unicode[asciilen] = 0;
-//SvL: Messes up the heap
-//  unicode[len+1] = 0; /* @@@PH 98/06/07 */
 }
 //******************************************************************************
 //******************************************************************************
