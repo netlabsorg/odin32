@@ -10,19 +10,26 @@
 
 #include "controls.h"
 #include "button.h"
+#include "static.h"
 
 /* registration */
 
 void CONTROLS_Register()
 {
   dprintf(("Register BUTTON class"));
-  BUTTON_Register() ? dprintf(("done")):dprintf(("failed!!!"));
+  if (!BUTTON_Register()) dprintf(("failed!!!"));
+
+  dprintf(("Register STATIC class"));
+  if (!STATIC_Register()) dprintf(("failed!!!"));
 }
 
 void CONTROLS_Unregister()
 {
   dprintf(("Unregister BUTTON class"));
   BUTTON_Unregister();
+
+  dprintf(("Unregister STATIC class"));
+  STATIC_Unregister();
 }
 
 /* Win32 <-> internal control name */
@@ -34,6 +41,9 @@ char* Win32ToOdinControlName(char* name)
   if (stricmp(name,WIN32BUTTONCLASSNAME))
     return ODINBUTTONCLASSNAME;
 
+  if (stricmp(name,WIN32STATICCLASSNAME))
+    return ODINSTATICCLASSNAME;
+
   return name; //original name
 }
 
@@ -43,6 +53,9 @@ char* OdinToWin32ControlName(char* name)
 
   if (stricmp(name,ODINBUTTONCLASSNAME))
     return WIN32BUTTONCLASSNAME;
+
+  if (stricmp(name,ODINSTATICCLASSNAME))
+    return WIN32STATICCLASSNAME;
 
   return name; //original name
 }

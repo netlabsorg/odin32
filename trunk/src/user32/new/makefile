@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.14 1999-07-20 15:46:53 sandervl Exp $
+# $Id: makefile,v 1.15 1999-07-20 20:24:54 cbratschi Exp $
 
 #
 # PD-Win32 API
@@ -28,7 +28,8 @@ OBJS =  user32.obj resstring.obj dialog.obj loadres.obj \
         pmwindow.obj win32class.obj win32wnd.obj win32dlg.obj \
         msgbox.obj window.obj windowmsg.obj windowclass.obj windlgmsg.obj \
         windowword.obj gen_object.obj oslibwin.obj win32wndchild.obj \
-        controls.obj button.obj oslibutil.obj oslibmsg.obj windlg.obj \
+        controls.obj button.obj static.obj \
+        oslibutil.obj oslibmsg.obj windlg.obj \
         winprop.obj wingdi.obj oslibgdi.obj winaccel.obj winscrollbar.obj \
         nativerc.obj oslibres.obj
 
@@ -73,6 +74,7 @@ spy.obj: spy.cpp $(PDWIN32_INCLUDE)\spy.h
 
 controls.obj: controls.cpp $(PDWIN32_INCLUDE)\win\controls.h
 button.obj: button.cpp $(PDWIN32_INCLUDE)\win\button.h
+static.obj: static.cpp $(PDWIN32_INCLUDE)\win\static.h
 
 nativerc.obj: nativerc.cpp
 
