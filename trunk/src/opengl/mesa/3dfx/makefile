@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.1 2000-02-29 00:46:20 sandervl Exp $
+# $Id: makefile,v 1.2 2000-03-01 14:26:49 sandervl Exp $
 #
 # PD-Win32
 #
@@ -55,7 +55,7 @@ OBJS = 	fxapi.obj \
 
 $(TARGET).DLL: $(OBJS) $(TARGET).lrf $(TARGET).def
     -ILINK /FREE /NOE $(L) @$(TARGET).lrf
-    $(CP) $@ $(PDWIN32_BIN)
+    $(CP) $@ $(PDWIN32_BIN)\Glide
 
 $(TARGET).lrf: makefile
   @echo Creating file <<$(@B).lrf
@@ -70,13 +70,6 @@ $(RTLLIB_O)
 OS2386.LIB
 $(TARGET).def
 <<keep
-
-$(TARGET).lib: $(TARGET)exp.def
-        $(IMPLIB) $(IMPLIBFLAGS) $@ $(TARGET)exp.def
-        $(CP) $@ $(PDWIN32_LIB)
-
-$(TARGET)exp.def: $(TARGET).def
-        $(IMPDEF) $** $@
 
 resource.asm: fxmesa32.rc
     $(RC) $(RCFLAGS) -o resource.asm fxmesa32.rc

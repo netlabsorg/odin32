@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.1 2000-02-25 00:37:43 sandervl Exp $
+# $Id: makefile,v 1.2 2000-03-01 14:26:49 sandervl Exp $
 #
 # PD-Win32 API
 #
@@ -17,8 +17,8 @@ TARGET=glide
 
 CINCLUDE=-I..\incsrc;..\..\swlibs\fxmisc;..\init\initvg;..\init;..\texus;..\..\swlibs\pcilib;$(PDWIN32_INCLUDE)
 
-CFLAGS = $(CFLAGS) $(CINCLUDE)
-CXXFLAGS = $(CXXFLAGS) $(CINCLUDE)
+CFLAGS = $(CFLAGS) $(CINCLUDE) /Os-
+CXXFLAGS = $(CXXFLAGS) $(CINCLUDE) /Os-
 
 OBJS =	CPUDTECT.OBJ    DDGUMP.OBJ      DIGLIDE.OBJ     DIGUTEX.OBJ     DISST.OBJ \
 	DITEX.OBJ       G3DF.OBJ        GAA.OBJ         GBANNER.OBJ \

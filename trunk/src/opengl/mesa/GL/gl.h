@@ -1,4 +1,4 @@
-/* $Id: gl.h,v 1.2 2000-02-29 13:56:52 sandervl Exp $ */
+/* $Id: gl.h,v 1.3 2000-03-01 14:26:49 sandervl Exp $ */
 
 /*
  * Mesa 3-D graphics library
@@ -98,22 +98,6 @@ typedef int (GLAPIENTRY *PROC)();
 typedef void *HGLRC;
 typedef void *HDC;
 typedef unsigned long COLORREF;
-#endif
-
-#if defined(_WIN32) && !defined(_WINGDI_) && !defined(OPENSTEP)
-#	define WGL_FONT_LINES      0
-#	define WGL_FONT_POLYGONS   1
-#	ifdef UNICODE
-#		define wglUseFontBitmaps  wglUseFontBitmapsW
-#		define wglUseFontOutlines  wglUseFontOutlinesW
-#	else
-#		define wglUseFontBitmaps  wglUseFontBitmapsA
-#		define wglUseFontOutlines  wglUseFontOutlinesA
-#	endif /* !UNICODE */
-typedef struct tagLAYERPLANEDESCRIPTOR LAYERPLANEDESCRIPTOR, *PLAYERPLANEDESCRIPTOR, *LPLAYERPLANEDESCRIPTOR;
-typedef struct _GLYPHMETRICSFLOAT GLYPHMETRICSFLOAT, *PGLYPHMETRICSFLOAT, *LPGLYPHMETRICSFLOAT;
-typedef struct tagPIXELFORMATDESCRIPTOR PIXELFORMATDESCRIPTOR, *PPIXELFORMATDESCRIPTOR, *LPPIXELFORMATDESCRIPTOR;
-#include <gl/mesa_wgl.h>
 #endif
 
 #ifdef __cplusplus
