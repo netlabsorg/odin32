@@ -1,4 +1,4 @@
-/* $Id: misc.h,v 1.11 1999-12-03 01:20:02 phaller Exp $ */
+/* $Id: misc.h,v 1.12 1999-12-12 14:31:29 sandervl Exp $ */
 
 /*
  * Miscellaneous definitions
@@ -30,18 +30,35 @@
 
 
 #ifdef DEBUG
+#ifdef PRIVATE_LOGGING
+  //To use private dll logging, define PRIVATE_LOGGING and
+  //add Open/ClosePrivateLogFiles (see below) functions to the dll
+  //to open close the private logfile. The logfile handle should
+  //be stored in the _privateLogFile variable
+  //dprintf can be called like this:
+  //dprintf((LOG, "PE file           : %s", szFileName));
+  #define LOG		  (void*)_privateLogFile
+  #define dprintf(a)      WritePrivateLog a
+  #define dprintfGlobal(a)      WriteLog a
+#else
   #define dprintf(a)      WriteLog a
+#endif
   #define eprintf(a)      WriteLog a ; WriteLogError a
   #define dassert(a, b)   if(!(a)) WriteLogError b
   #define dbgCheckObj(a)	a->checkObject()
 
 #ifdef DEBUG_ENABLELOG_LEVEL2
-  #define dprintf2(a)     WriteLog a
+#ifdef PRIVATE_LOGGING
+  #define dprintf2(a)      WritePrivateLog a
+#else
+  #define dprintf2(a)      WriteLog a
+#endif
 #else
   #define dprintf2(a)
 #endif
 
 #else
+  #define dprintfGlobal(a)
   #define dprintf(a)
   #define dprintf2(a)
   #define eprintf(a)
@@ -66,6 +83,7 @@
 
 
 int  SYSTEM WriteLog(char *tekst, ...);
+int  SYSTEM WritePrivateLog(void *logfile, char *tekst, ...);
 
 int  SYSTEM WriteLogError(char *tekst, ...);
 
@@ -77,6 +95,10 @@ int  SYSTEM DebugErrorBox(ULONG  iErrorCode,
                           char*  pszFormat,
                           ...);
 
+//To use private logfiles for dlls, you must have these functions and call
+//them when the dll is loaded (open) and the exitlist handler is called (close)
+void OpenPrivateLogFiles();
+void ClosePrivateLogFiles();
 
 #ifdef __cplusplus
         }

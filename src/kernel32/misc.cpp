@@ -1,4 +1,4 @@
-/* $Id: misc.cpp,v 1.14 1999-11-11 19:10:09 sandervl Exp $ */
+/* $Id: misc.cpp,v 1.15 1999-12-12 14:32:38 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -27,6 +27,7 @@
 #include <win32type.h>
 #include <misc.h>
 #include "initterm.h"
+#include "logging.h"
 
 /*****************************************************************************
  * PMPRINTF Version                                                          *
@@ -283,6 +284,26 @@ int SYSTEM EXPORT WriteLog(char *tekst, ...)
   return 1;
 }
 //******************************************************************************
+//******************************************************************************
+int SYSTEM EXPORT WritePrivateLog(void *logfile, char *tekst, ...)
+{
+  USHORT  sel = RestoreOS2FS();
+  va_list argptr;
+
+  if(fLogging && logfile)
+  {
+    va_start(argptr, tekst);
+    vfprintf((FILE *)logfile, tekst, argptr);
+    va_end(argptr);
+
+    if(tekst[strlen(tekst)-1] != '\n')
+      fprintf((FILE *)logfile, "\n");
+  }
+
+  SetFS(sel);
+  return 1;
+}
+//******************************************************************************
 //NOTE: No need to save/restore FS, as our FS selectors have already been
 //      destroyed and FS == 0x150B.
 //******************************************************************************
@@ -290,6 +311,20 @@ void CloseLogFile()
 {
   fclose(flog);
   flog = 0;
+}
+//******************************************************************************
+//Used to open any private logfiles used in kernel32 (for now only in winimagepeldr.cpp)
+//******************************************************************************
+void OpenPrivateLogFiles()
+{
+  OpenPrivateLogFilePE();
+}
+//******************************************************************************
+//Used to close all private logfiles used in kernel32 (for now only in winimagepeldr.cpp)
+//******************************************************************************
+void ClosePrivateLogFiles()
+{
+  ClosePrivateLogFilePE();
 }
 //******************************************************************************
 //******************************************************************************
