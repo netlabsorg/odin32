@@ -102,12 +102,14 @@ void ClosePrivateLogFiles();
 #  include <builtin.h>
 #ifdef DEBUG
 #ifdef __cplusplus
-void inline BreakPoint(char *szFile, char *szFunction)
+
+#define DebugInt3() BreakPoint(__FILE__, __FUNCTION__, __LINE__)
+
+void inline BreakPoint(char *szFile, char *szFunction, int iLine)
 {
-  dprintf(("BREAKPOINT %s %s", szFile, szFunction));
-  _interrupt(3);
+    dprintf(("BREAKPOINT %s %s %d", szFile, szFunction, iLine));
+    _interrupt(3);
 }
-  #define DebugInt3()	BreakPoint(__FILE__, __FUNCTION__)
 
 #else
   #define DebugInt3()	_interrupt(3)
