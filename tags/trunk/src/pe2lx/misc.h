@@ -1,4 +1,4 @@
-/* $Id: misc.h,v 1.3 1999-06-10 17:08:55 phaller Exp $ */
+/* $Id: misc.h,v 1.4 1999-07-05 12:36:12 sandervl Exp $ */
 
 /*
  * PE2LX ascii to unicode
@@ -12,9 +12,9 @@
 #ifndef __MISC_H__
 #define __MISC_H__
 
-char *UnicodeToAscii(int length, WCHAR *NameString);
+char *UnicodeToAscii(int length, WCHAR *NameString, int cp=0);
+char *UnicodeToAscii(WCHAR *wstring, int cp=0);
 int UniStrlen(WCHAR *wstring);
-char *UnicodeToAscii(WCHAR *wstring);
 void UpCase(char *mixedcase);
 
 #endif
