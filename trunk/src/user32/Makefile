@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.59 2000-02-03 23:04:50 sandervl Exp $
+# $Id: Makefile,v 1.60 2000-02-04 17:17:56 cbratschi Exp $
 
 #
 # PD-Win32 API
@@ -146,9 +146,9 @@ oslibmsgtranslate.obj: oslibmsgtranslate.cpp oslibmsg.h timer.h win32wbase.h win
 oslibgdi.obj:   oslibgdi.cpp oslibgdi.h win32wbase.h
 oslibres.obj:   oslibres.cpp oslibwin.h oslibres.h $(PDWIN32_INCLUDE)\winconst.h
 oslibdos.obj:   oslibdos.cpp oslibdos.h
-dc.obj:         dc.cpp win32wbase.h dc.h $(PDWIN32_INCLUDE)\dcdata.h
+dc.obj:         dc.cpp win32wbase.h dc.h dcdata.h
 timer.obj:      timer.cpp win32wbase.h timer.h
-caret.obj:      caret.cpp win32wbase.h caret.h $(PDWIN32_INCLUDE)\dcdata.h
+caret.obj:      caret.cpp win32wbase.h caret.h dcdata.h
 text.obj:       text.cpp
 
 clipboard.obj:  clipboard.cpp win32wbase.h
