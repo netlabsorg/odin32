@@ -1,4 +1,4 @@
-/* $Id: misc.h,v 1.14 2000-01-06 20:03:03 sandervl Exp $ */
+/* $Id: misc.h,v 1.15 2000-01-13 20:09:59 sandervl Exp $ */
 
 /*
  * Miscellaneous definitions
@@ -46,6 +46,8 @@
   #define eprintf(a)      WriteLog a ; WriteLogError a
   #define dassert(a, b)   if(!(a)) WriteLogError b
   #define dbgCheckObj(a)	a->checkObject()
+  #define DisableLogging  DecreaseLogCount
+  #define EnableLogging   IncreaseLogCount
 
 #ifdef DEBUG_ENABLELOG_LEVEL2
 #ifdef PRIVATE_LOGGING
@@ -64,6 +66,8 @@
   #define eprintf(a)
   #define dassert(a, b)
   #define dbgCheckObj(a)
+  #define DisableLogging
+  #define EnableLogging
 #endif
 
 
@@ -88,6 +92,9 @@ int  SYSTEM WriteLog(char *tekst, ...);
 int  SYSTEM WritePrivateLog(void *logfile, char *tekst, ...);
 
 int  SYSTEM WriteLogError(char *tekst, ...);
+
+void SYSTEM DecreaseLogCount();
+void SYSTEM IncreaseLogCount();
 
 void SYSTEM CheckVersion(ULONG version, char *modname);
 
