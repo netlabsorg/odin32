@@ -1,7 +1,12 @@
-; $Id: cppopa3_fix2.asm,v 1.1 2002-04-11 19:53:40 bird Exp $
+; $Id: cppopa3_fix2.asm,v 1.2 2002-04-11 19:56:23 bird Exp $
 ;
 ; Fix for the DosLoadModule traps in debugee
 ; during tracing init.
+;
+;
+; NOTE!!! Currently the address of the doscall1 init proc is
+;         HARDCODED.
+;
 ;
 ; Copyright (c) 2002 knut st. osmundsen (bird@anduin.net)
 ;
