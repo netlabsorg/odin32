@@ -1,4 +1,4 @@
-/* $Id: wprocess.cpp,v 1.147 2002-02-18 22:15:53 phaller Exp $ */
+/* $Id: wprocess.cpp,v 1.148 2002-02-19 12:51:53 sandervl Exp $ */
 
 /*
  * Win32 process functions
@@ -240,16 +240,20 @@ TEB * WIN32API InitializeTIB(BOOL fMainThread)
     SID_IDENTIFIER_AUTHORITY sidIdAuth = {0};
     winteb->o.odin.threadinfo.dwType = SECTYPE_PROCESS | SECTYPE_INITIALIZED;
   
-    if (NULL != RtlAllocateAndInitializeSid)
-      RtlAllocateAndInitializeSid(&sidIdAuth, 1, 0, 0, 0, 0, 0, 0, 0, 0, &winteb->o.odin.threadinfo.SidUser.User.Sid);
-  
+    if (NULL != RtlAllocateAndInitializeSid) {
+        RtlAllocateAndInitializeSid(&sidIdAuth, 1, 0, 0, 0, 0, 0, 0, 0, 0, &winteb->o.odin.threadinfo.SidUser.User.Sid);
+    }
+    else DebugInt3();
+
     winteb->o.odin.threadinfo.SidUser.User.Attributes = 0; //?????????
 
     winteb->o.odin.threadinfo.pTokenGroups = (TOKEN_GROUPS*)malloc(sizeof(TOKEN_GROUPS));
     winteb->o.odin.threadinfo.pTokenGroups->GroupCount = 1;
   
-    if (NULL != RtlAllocateAndInitializeSid)
-      RtlAllocateAndInitializeSid(&sidIdAuth, 1, 0, 0, 0, 0, 0, 0, 0, 0, &winteb->o.odin.threadinfo.PrimaryGroup.PrimaryGroup);
+    if (NULL != RtlAllocateAndInitializeSid) {
+        RtlAllocateAndInitializeSid(&sidIdAuth, 1, 0, 0, 0, 0, 0, 0, 0, 0, &winteb->o.odin.threadinfo.PrimaryGroup.PrimaryGroup);
+    }
+    else DebugInt3();
   
     winteb->o.odin.threadinfo.pTokenGroups->Groups[0].Sid = winteb->o.odin.threadinfo.PrimaryGroup.PrimaryGroup;
     winteb->o.odin.threadinfo.pTokenGroups->Groups[0].Attributes = 0; //????
@@ -1572,7 +1576,7 @@ HANDLE WIN32API GetModuleHandleA(LPCTSTR lpszModule)
           // SetLastError(ERROR_INVALID_HANDLE);
           // Wrong: in an ODIN32-LX environment, just
           // assume a fake handle
-          hMod = 0xffffffff;
+          hMod = -1;
         }
     }
     else
