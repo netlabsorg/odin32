@@ -1,4 +1,4 @@
-/* $Id: api.cpp,v 1.3 2001-01-21 07:52:46 bird Exp $
+/* $Id: api.cpp,v 1.4 2001-01-22 08:06:38 bird Exp $
  *
  * API Overload Init and Helper Function.
  *
@@ -37,8 +37,21 @@
 #include "api.h"
 #include "options.h"
 #include "locks.h"
+#include "sprintf.h"
 
 
+/*******************************************************************************
+*   Defined Constants And Macros                                               *
+*******************************************************************************/
+#if 1//ndef RING0
+#include <stdio.h>
+#define IOSftClose(hFile)   DosClose(hFile)
+#define rmalloc             malloc
+#define realloc             realloc
+#define rfree               free
+#undef kprintf
+#define kprintf(a)          printf a
+#endif
 
 
 /*******************************************************************************
@@ -81,6 +94,11 @@ void    apiSortMaskArray(PMASKARRAY pMasks);
 BOOL    apiFindNameInMaskArray(PSZ pszName, PMASKARRAY pMasks);
 APIRET  apiGetProccessName(PSZ pszName);
 APIRET  apiGetModuleName(PSZ pszName, USHORT usCS, ULONG ulEIP);
+#if 1 //ndef RING0
+APIRET  apiWriteIniFile(PSZ pszIniFile);
+APIRET  apiWriteMasks(SFN sfn, PULONG poff, PMASKARRAY pMasks, PSZ pszType, BOOL fEnabled);
+APIRET  apiWriteLine(SFN sfn, PULONG poff, PSZ pszString);
+#endif
 
 
 /**
@@ -124,7 +142,7 @@ APIRET  apiReadIniFile(PSZ pszIniFile)
                 PSZ pszNewFile = (PSZ)rmalloc((size_t)  cbFile + 1);
                 if (pszNewFile)
                 {
-                    ULONG   cbRead;
+                    ULONG   cbRead = cbFile;
 
                     rc = IOSftReadAt(sfn, &cbRead, pszNewFile, 0UL, 0UL);
                     if (rc == NO_ERROR)
@@ -231,6 +249,8 @@ APIRET  apiParseIniFile(PSZ pszFile)
                                 pMaskArray = strstr(pszLine, "INC")
                                     ? &paNewApiData[iApi].ModuleInc
                                     : &paNewApiData[iApi].ModuleExc; /* default */
+                            if (strstr(pszLine, "DIS"))
+                                paNewApiData[iApi].fEnabled = FALSE;
                         }
                         else
                         {
@@ -269,7 +289,6 @@ APIRET  apiParseIniFile(PSZ pszFile)
     /*
      * If we were successfull we'll replace the existing api data with
      * the data we've just read.
-     *   (TODO: Not sure (ie. quite sure) if we need some kind of serialization here...)
      * If not we'll free any used memory before returning failure.
      */
     if (rc == NO_ERROR)
@@ -394,32 +413,6 @@ int     apiInterpretApiNo(PSZ pszSection)
 
 
 /**
- * Frees internal data in a api data structure.
- * @param   paApiData   Pointer to api data table.
- * @sketch  Loop thru all api entries and free mask array pointers.
- * @status  Completely implemented.
- * @author  knut st. osmundsen (knut.stange.osmundsen@mynd.no)
- * @remark  Any serialization is not my problem.
- */
-void    apiFreeApiData(PAPIDATAENTRY paApiData)
-{
-    int i;
-
-    for (i = 0; i < API_CENTRIES; i++)
-    {
-        if (paApiData[i].ProcessInc.cMasks)
-            rfree(paApiData[i].ProcessInc.papszMasks);
-        if (paApiData[i].ProcessExc.cMasks)
-            rfree(paApiData[i].ProcessExc.papszMasks);
-        if (paApiData[i].ModuleInc.cMasks)
-            rfree(paApiData[i].ModuleInc.papszMasks);
-        if (paApiData[i].ModuleExc.cMasks)
-            rfree(paApiData[i].ModuleExc.papszMasks);
-    }
-}
-
-
-/**
  * Sort the entire api data structure.
  * @param   paApiData   Pointer to api data to sort.
  * @sketch  Loop thru all entries and sort all four mask arrays.
@@ -479,6 +472,268 @@ void    apiSortMaskArray(PMASKARRAY pMasks)
 
 
 /**
+ * Frees internal data in a api data structure.
+ * @param   paApiData   Pointer to api data table.
+ * @sketch  Loop thru all api entries and free mask array pointers.
+ * @status  Completely implemented.
+ * @author  knut st. osmundsen (knut.stange.osmundsen@mynd.no)
+ * @remark  Any serialization is not my problem.
+ */
+void    apiFreeApiData(PAPIDATAENTRY paApiData)
+{
+    int i;
+
+    for (i = 0; i < API_CENTRIES; i++)
+    {
+        if (paApiData[i].ProcessInc.cMasks)
+            rfree(paApiData[i].ProcessInc.papszMasks);
+        if (paApiData[i].ProcessExc.cMasks)
+            rfree(paApiData[i].ProcessExc.papszMasks);
+        if (paApiData[i].ModuleInc.cMasks)
+            rfree(paApiData[i].ModuleInc.papszMasks);
+        if (paApiData[i].ModuleExc.cMasks)
+            rfree(paApiData[i].ModuleExc.papszMasks);
+    }
+}
+
+#if 1 //ndef RING0
+/**
+ * Write the internal data to a fresh ini file.
+ * This is a service routine used by the configuration program.
+ * @returns OS/2 return code.
+ * @param   pszIniFile  Pointer to the name of the ini file.
+ * @sketch
+ * @status
+ * @author  knut st. osmundsen (knut.stange.osmundsen@mynd.no)
+ * @remark
+ */
+APIRET  apiWriteIniFile(PSZ pszIniFile)
+{
+    SFN     sfn;
+    APIRET  rc;
+
+
+    rc = IOSftOpen(pszIniFile,
+                   OPEN_ACTION_CREATE_IF_NEW | OPEN_ACTION_REPLACE_IF_EXISTS,
+                   OPEN_SHARE_DENYREADWRITE | OPEN_ACCESS_WRITEONLY,
+                   (PSFN)SSToDS(&sfn),
+                   NULL);
+    if (rc == NO_ERROR)
+    {
+        int     i;
+        ULONG   off = 0;
+        PULONG  poff = (PULONG)SSToDS(&off);
+        char    sz[80];
+        PSZ     psz = (PSZ)SSToDS(&sz[0]);
+
+        for (i = 0; i < API_CENTRIES; i++)
+        {
+            sprintf(psz, "[%d]", i);
+            if ((rc = apiWriteLine(sfn, poff, psz)) != NO_ERROR)
+                break;
+
+            rc = apiWriteMasks(sfn, poff, &aApiData[i].ProcessExc, "Process Exclude", aApiData[i].fEnabled);
+            if (rc != NO_ERROR)
+                break;
+
+            if (aApiData[i].ProcessInc.cMasks)
+            {
+                rc = apiWriteMasks(sfn, poff, &aApiData[i].ProcessInc, "Process Include", TRUE);
+                if (rc != NO_ERROR)
+                    break;
+            }
+
+            if (aApiData[i].ModuleExc.cMasks)
+            {
+                rc = apiWriteMasks(sfn, poff, &aApiData[i].ModuleExc, "Module Exclude", TRUE);
+                if (rc != NO_ERROR)
+                    break;
+            }
+
+            if (aApiData[i].ModuleInc.cMasks)
+            {
+                rc = apiWriteMasks(sfn, poff, &aApiData[i].ModuleInc, "Module Include", TRUE);
+                if (rc != NO_ERROR)
+                    break;
+            }
+            rc = apiWriteLine(sfn, poff, "");
+        }
+
+        IOSftClose(sfn);
+    }
+    else
+        kprintf(("apiWriteIniFile: Failed open %s for write. rc=%d\n", pszIniFile, rc));
+
+    return rc;
+}
+
+
+/**
+ * Writes the content of a mask array to the ini file.
+ * @returns OS/2 return code.
+ * @param   sfn         File handle. (sfn = System File Number)
+ * @param   poff        Pointer to the file offset variable.
+ *                      (We're required to keep track of the current offset due to
+ *                       the IOSftWriteAt function.)
+ * @param   pMasks      Pointer to the mask array struct to be written to file.
+ * @param   pszType     Type string for these masks.
+ * @param   fEnabled    If the api entry is enabled or not.
+ * @status  completely implemented.
+ * @author  knut st. osmundsen (knut.stange.osmundsen@mynd.no)
+ */
+APIRET  apiWriteMasks(SFN sfn, PULONG poff, PMASKARRAY pMasks, PSZ pszType, BOOL fEnabled)
+{
+    char    sz[48];
+    PSZ     psz = (PSZ)SSToDS(&sz[0]);
+    APIRET  rc = NO_ERROR;
+    int     i;
+
+    if (fEnabled)
+        sprintf(psz, "Type=%s", pszType);
+    else
+        sprintf(psz, "Type=%s Disabled", pszType);
+    rc = apiWriteLine(sfn, poff, psz);
+    if (rc != NO_ERROR)
+        return rc;
+
+    for (i = 0, rc = NO_ERROR; rc == NO_ERROR && i < pMasks->cMasks; i++)
+        rc = apiWriteLine(sfn, poff, pMasks->papszMasks[i]);
+
+    return rc;
+}
+
+
+/**
+ * Writes a string to the file and advances to the next line.
+ * @returns OS/2 return code.
+ * @param   sfn         File handle. (sfn = System File Number)
+ * @param   poff        Pointer to the file offset variable.
+ *                      (We're required to keep track of the current offset due to
+ *                       the IOSftWriteAt function.)
+ * @param   pszString   String to be written.
+ * @status  completely implemented.
+ * @author  knut st. osmundsen (knut.stange.osmundsen@mynd.no)
+ */
+APIRET  apiWriteLine(SFN sfn, PULONG poff, PSZ pszString)
+{
+    ULONG   cb = strlen(pszString);
+    APIRET  rc;
+
+    rc = IOSftWriteAt(sfn, &cb, pszString, 0UL, *poff);
+    if (rc == NO_ERROR)
+    {
+        *poff += cb;
+        cb = 2;
+        rc = IOSftWriteAt(sfn, &cb, "\r\n", 0UL, *poff);
+        if (rc == NO_ERROR)
+            *poff += cb;
+    }
+
+    return rc;
+}
+
+
+/**
+ * Opens a given file.
+ * @returns  NO_ERROR on success. OS/2 error code on error.
+ * @param    pszFilename   Pointer to filename.
+ * @param    flOpenFlags   Open flags. (similar to DosOpen)
+ * @param    flOpenMode    Open mode flags. (similar to DosOpen)
+ * @param    phFile        Pointer to filehandle.
+ * @param    pulsomething  16-bit near (?) pointer to a variable - unknown. NULL is allowed. EA?
+ */
+APIRET KRNLCALL IOSftOpen(
+    PSZ pszFilename,
+    ULONG flOpenFlags,
+    ULONG flOpenMode,
+    PSFN phFile,
+    PULONG pulsomething
+    )
+{
+    APIRET  rc;
+    ULONG   ulAction = 0;
+
+    rc = DosOpen(pszFilename, phFile, &ulAction, 0, 0, flOpenFlags, flOpenMode, NULL);
+
+    pulsomething = pulsomething;
+    return rc;
+}
+
+/**
+ * Read at a given offset in the a file.
+ * @returns  NO_ERROR on success. OS/2 error code on error.
+ * @param    hFile      File handle - System File Number.
+ * @param    pcbActual  Pointer to variable which upon input holds the number
+ *                      of bytes to read, on output the actual number of bytes read.
+ * @param    pvBuffer   Pointer to the read buffer.
+ * @param    flFlags    Read flags?
+ * @param    ulOffset   File offset to read from. (0=start of file)
+ */
+APIRET KRNLCALL IOSftReadAt(
+    SFN hFile,
+    PULONG pcbActual,
+    PVOID pvBuffer,
+    ULONG flFlags,
+    ULONG ulOffset)
+{
+    APIRET  rc;
+    ULONG   ul;
+    rc = DosSetFilePtr(hFile, ulOffset, FILE_BEGIN, &ul);
+    if (rc == NO_ERROR)
+        rc = DosRead(hFile, pvBuffer, *pcbActual, pcbActual);
+    flFlags = flFlags;
+    return rc;
+}
+
+
+/**
+ * Write at a given offset in the a file.
+ * @returns  NO_ERROR on success. OS/2 error code on error.
+ * @param    hFile      File handle - System File Number.
+ * @param    pcbActual  Pointer to variable which upon input holds the number
+ *                      of bytes to write, on output the actual number of bytes write.
+ * @param    pvBuffer   Pointer to the write buffer.
+ * @param    flFlags    Read flags?
+ * @param    ulOffset   File offset to write from. (0=start of file)
+ */
+APIRET KRNLCALL IOSftWriteAt(
+    SFN hFile,
+    PULONG pcbActual,
+    PVOID pvBuffer,
+    ULONG flFlags,
+    ULONG ulOffset)
+{
+    APIRET  rc;
+    ULONG   ul;
+    rc = DosSetFilePtr(hFile, ulOffset, FILE_BEGIN, &ul);
+    if (rc == NO_ERROR)
+        rc = DosWrite(hFile, pvBuffer, *pcbActual, pcbActual);
+    flFlags = flFlags;
+    return rc;
+}
+
+/**
+ * Gets the filesize.
+ * @returns   NO_ERROR on success; OS/2 error code on error.
+ * @param     hFile    File handle - System File Number.
+ * @param     pcbFile  Pointer to ULONG which will hold the file size upon return.
+ */
+APIRET KRNLCALL SftFileSize(
+    SFN hFile,
+    PULONG pcbFile)
+{
+    FILESTATUS3 fsts3;
+    APIRET      rc;
+
+    rc = DosQueryFileInfo(hFile, FIL_STANDARD, &fsts3, sizeof(fsts3));
+    if (rc == NO_ERROR)
+        *pcbFile = fsts3.cbFile;
+    return rc;
+}
+
+#endif
+
+/**
  * Searches a mask array if there is any match for the given name.
  * @returns TRUE if found.
  *          FALSE if not found.
@@ -495,6 +750,7 @@ BOOL    apiFindNameInMaskArray(PSZ pszName, PMASKARRAY pMasks)
 }
 
 
+#ifdef RING0
 /**
  * Get the current process executable name.
  * @returns OS/2 return code.
@@ -672,7 +928,6 @@ BOOL _Optlink   APIQueryEnabled(int iApi, USHORT usCS, LONG ulEIP)
 }
 
 
-
 /**
  * Init The Api Overloading SubSystem.
  * @returns OS/2 return code.
@@ -689,4 +944,5 @@ APIRET _Optlink APIInit(void)
 
     return rc;
 }
+#endif
 
