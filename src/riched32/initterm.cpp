@@ -1,5 +1,3 @@
-/* $Id: initterm.cpp,v 1.2 2000-08-11 10:56:24 sandervl Exp $ */
-
 /*
  * DLL entry point
  *
@@ -36,11 +34,9 @@
 #include <odinlx.h>
 #include <misc.h>       /*PLF Wed  98-03-18 23:18:15*/
 #include <twain.h>
+#include <initdll.h>
 
 extern "C" {
-void CDECL _ctordtorInit( void );
-void CDECL _ctordtorTerm( void );
-
 //Win32 resource table (produced by wrc)
 extern DWORD _Resource_PEResTab;
 
@@ -51,7 +47,9 @@ static HMODULE dllHandle = 0;
 //******************************************************************************
 //******************************************************************************
 BOOL WINAPI LibMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID fImpLoad)
-{
+{ 
+ BOOL ret;
+
    switch (fdwReason)
    {
    case DLL_PROCESS_ATTACH:
@@ -62,8 +60,9 @@ BOOL WINAPI LibMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID fImpLoad)
 	return RICHED32_LibMain(hinstDLL, fdwReason, fImpLoad);
 
    case DLL_PROCESS_DETACH:
-	_ctordtorTerm();
-	return RICHED32_LibMain(hinstDLL, fdwReason, fImpLoad);
+	ret = RICHED32_LibMain(hinstDLL, fdwReason, fImpLoad);
+	__ctordtorTerm();
+        return ret;
    }
    return FALSE;
 }
@@ -90,7 +89,7 @@ unsigned long SYSTEM _DLL_InitTerm(unsigned long hModule, unsigned long
 
    switch (ulFlag) {
       case 0 :
-         _ctordtorInit();
+         __ctordtorInit();
 
          CheckVersionFromHMOD(PE2LX_VERSION, hModule); /*PLF Wed  98-03-18 05:28:48*/
 

@@ -1,4 +1,4 @@
-/* $Id: dllentry.cpp,v 1.3 2000-12-16 23:31:07 bird Exp $ */
+/* $Id: dllentry.cpp,v 1.4 2001-02-14 11:40:59 sandervl Exp $ */
 
 /*
  * DLL entry point
@@ -35,13 +35,9 @@
 #include <winconst.h>
 #include <odinlx.h>
 #include <misc.h>       /*PLF Wed  98-03-18 23:18:15*/
-
+#include <initdll.h>
 
 extern "C" {
-#ifdef __IBMCPP__
-void CDECL _ctordtorInit( void );
-void CDECL _ctordtorTerm( void );
-#endif
  //Win32 resource table (produced by wrc)
  extern DWORD _Resource_PEResTab;
 }
@@ -63,7 +59,7 @@ BOOL WINAPI LibMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID fImpLoad)
 
       case DLL_PROCESS_DETACH:
 #ifdef __IBMCPP__
-         _ctordtorTerm();
+         __ctordtorTerm();
 #endif
          return TRUE;
    }
@@ -92,7 +88,7 @@ unsigned long SYSTEM _DLL_InitTerm(unsigned long hModule, unsigned long ulFlag)
    switch (ulFlag)
    {
       case 0:
-         _ctordtorInit();
+         __ctordtorInit();
          CheckVersionFromHMOD(PE2LX_VERSION, hModule); /*PLF Wed  98-03-18 05:28:48*/
          dllHandle = RegisterLxDll(hModule, LibMain, (PVOID)&_Resource_PEResTab);
          if (dllHandle == 0)
