@@ -264,6 +264,8 @@ USHORT WIN32API ODIN_ThreadLeaveOdinContextNested(void *pExceptionRegRec, BOOL f
 /** Re-enter Odin context after being back in OS/2 code. */
 void   WIN32API ODIN_ThreadEnterOdinContextNested(void *pExceptionRegRec, BOOL fRestoreOdinExcpt, USHORT selFSOld);
 
+/* Turn on CD Polling (window with 2 second timer to check CD disk presence) */
+void WIN32API CustEnableCDPolling();
 
 #endif  /*__CUSTOMBUILD_H__*/
 
