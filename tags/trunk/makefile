@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.22 2003-11-11 14:01:51 bird Exp $
+# $Id: makefile,v 1.23 2005-03-06 10:35:48 sao2l02 Exp $
 
 #
 # Odin32
@@ -59,7 +59,7 @@ ALL_DIRS = include lib src tools
 all:            odin_libraries  needed
     @$(DODIRS) "$(BLDDIRS)"     $(MAKE_CMD) all
 
-clean nothing:
+clean cleandlls nothing:
     @$(DODIRS) "$(ALL_DIRS)"    $(MAKE_CMD) $@
 
 libs: lib

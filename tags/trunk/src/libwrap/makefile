@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.6 2004-12-04 10:22:28 sao2l02 Exp $
+# $Id: makefile,v 1.7 2005-03-06 10:36:24 sao2l02 Exp $
 
 #
 # Odin32 API
@@ -27,6 +27,10 @@ all clean lib:  # add all common rules here
 dep:
     $(MAKE_CMD) -f libwrap0.mak $@
 
+#
+# Dummy rules.
+#
+cleandlls:
 
 #
 # Do not includes the common rules.

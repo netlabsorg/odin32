@@ -739,6 +739,9 @@ static LRESULT notify_hdr(LISTVIEW_INFO *infoPtr, INT code, LPNMHDR pnmh)
     pnmh->hwndFrom = infoPtr->hwndSelf;
     pnmh->idFrom = GetWindowLongW(infoPtr->hwndSelf, GWL_ID);
     pnmh->code = code;
+#ifdef __WIN32OS2__
+    if (code == -150) return FALSE;
+#endif
     result = SendMessageW(infoPtr->hwndNotify, WM_NOTIFY,
 			  (WPARAM)pnmh->idFrom, (LPARAM)pnmh);
 
@@ -4396,7 +4399,7 @@ static BOOL LISTVIEW_DeleteColumn(LISTVIEW_INFO *infoPtr, INT nColumn)
     Free(DPA_GetPtr(infoPtr->hdpaColumns, nColumn));
     DPA_DeletePtr(infoPtr->hdpaColumns, nColumn);
   
-    if (!(infoPtr->dwStyle & LVS_OWNERDATA))
+    if (!(infoPtr->dwStyle & LVS_OWNERDATA) && nColumn)
     {
 	SUBITEM_INFO *lpSubItem, *lpDelItem;
 	HDPA hdpaSubItems;
@@ -6242,9 +6245,8 @@ static INT LISTVIEW_InsertItemT(LISTVIEW_INFO *infoPtr, const LVITEMW *lpLVItem,
 
     if (!is_assignable_item(lpLVItem, infoPtr->dwStyle)) return -1;
 
-    if ( !(lpItem = (ITEM_INFO *)Alloc(sizeof(ITEM_INFO))) )
-	return -1;
-
+    if (!(lpItem = (ITEM_INFO *)Alloc(sizeof(ITEM_INFO)))) return -1;
+    
     /* insert item in listview control data structure */
     if ( !(hdpaSubItems = DPA_Create(8)) ) goto fail;
     if ( !DPA_SetPtr(hdpaSubItems, 0, lpItem) ) assert (FALSE);

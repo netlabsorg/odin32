@@ -1,4 +1,4 @@
-; $Id: ADVAPI32.DEF,v 1.18 2005-01-23 18:10:25 sao2l02 Exp $
+; $Id: ADVAPI32.DEF,v 1.19 2005-03-06 10:36:07 sao2l02 Exp $
 
 ;
 ; Based on NT 4.0 SP6: ADVAPI32.DLL 
@@ -438,7 +438,8 @@ EXPORTS
 
      UnlockServiceDatabase      = _UnlockServiceDatabase@4           @401
 
-    AddAccessAllowedAceEx = _AddAccessAllowedAceEx@20  @420
+    AddAccessAllowedAceEx  = _AddAccessAllowedAceEx@20 @420
     ConvertSidToStringSidA = _ConvertSidToStringSidA@8 @421
     ConvertSidToStringSidW = _ConvertSidToStringSidW@8 @422
+    CheckTokenMembership   = _CheckTokenMembership@12  @423
 

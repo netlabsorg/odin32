@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.88 2003-04-14 23:08:52 bird Exp $
+# $Id: makefile,v 1.89 2005-03-06 10:36:03 sao2l02 Exp $
 
 #
 # Odin32 API
@@ -72,6 +72,7 @@ startsmp:   # Internal helper for the smp rule.
 #
 # build:    Invokes the all rule in every directory.
 # clean:    Invokes the clean rule in every directory.
+# cleandlls:Invokes the cleandlls rule in every directory.
 # lib(s):   Invokes the lib rule in every directory known to support it.
 # dep:      Invokes the dep rule in every directory.
 #
@@ -88,12 +89,12 @@ dep:
         $(CMDQD_SUB) $(MAKE_CMD) NODEP=1 dep
     $(CMDQD_WAIT)
 
-clean cleanall:
+clean cleanall cleandlls:
     @$(DOWITHDIRS) -e$(NOTTOBEMADE) -c -lcln$(CCENV)$(DEBUG) $(EXTRA) \
         $(CMDQD_SUB)  $(MAKE_CMD) NODEP=1 $@
     $(CMDQD_WAIT)
 
-$(COMMONRULES:cleanall clean dep lib all=):
+$(COMMONRULES:cleanall clean cleandlls dep lib all=):
     @$(DOWITHDIRS) -e$(NOTTOBEMADE) -c -l$@$(CCENV)$(DEBUG) $(EXTRA) \
         $(MAKE_CMD) $@
 

@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.3 2003-02-28 10:31:35 sandervl Exp $
+# $Id: Makefile,v 1.4 2005-03-06 10:36:36 sao2l02 Exp $
 
 #
 # Odin32 API
@@ -45,7 +45,7 @@ clean cleanall:
 #
 # Dummy rules.
 #
-dep lib:
+dep cleandlls lib:
 
 
 #

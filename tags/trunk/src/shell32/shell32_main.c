@@ -1,4 +1,4 @@
-/* $Id: shell32_main.c,v 1.10 2005-01-23 18:11:03 sao2l02 Exp $ */
+/* $Id: shell32_main.c,v 1.11 2005-03-06 10:36:28 sao2l02 Exp $ */
 /*
  * 				Shell basics
  *
@@ -46,46 +46,47 @@ DEFAULT_DEBUG_CHANNEL(shell);
  * CommandLineToArgvW			[SHELL32.7]
  */
  /*************************************************************************
-* CommandLineToArgvW[SHELL32.@]
-*
-* We must interpret the quotes in the command line to rebuild the argv
-* array correctly:
-* - arguments are separated by spaces or tabs
-* - quotes serve as optional argument delimiters
-*   '"a b"'   -> 'a b'
-* - escaped quotes must be converted back to '"'
-*   '\"'      -> '"'
-* - an odd number of '\'s followed by '"' correspond to half that number
-*   of '\' followed by a '"' (extension of the above)
-*   '\\\"'    -> '\"'
-*   '\\\\\"'  -> '\\"'
-* - an even number of '\'s followed by a '"' correspond to half that number
-*   of '\', plus a regular quote serving as an argument delimiter (which
-*   means it does not appear in the result)
-*   'a\\"b c"'   -> 'a\b c'
-*   'a\\\\"b c"' -> 'a\\b c'
-* - '\' that are not followed by a '"' are copied literally
-*   'a\b'     -> 'a\b'
-*   'a\\b'    -> 'a\\b'
-*
-* Note:
-* '\t' == 0x0009
-* ' '  == 0x0020
-* '"'  == 0x0022
-* '\\' == 0x005c
-*/
+ * CommandLineToArgvW            [SHELL32.@]
+ *
+ * We must interpret the quotes in the command line to rebuild the argv
+ * array correctly:
+ * - arguments are separated by spaces or tabs
+ * - quotes serve as optional argument delimiters
+ *   '"a b"'   -> 'a b'
+ * - escaped quotes must be converted back to '"'
+ *   '\"'      -> '"'
+ * - an odd number of '\'s followed by '"' correspond to half that number
+ *   of '\' followed by a '"' (extension of the above)
+ *   '\\\"'    -> '\"'
+ *   '\\\\\"'  -> '\\"'
+ * - an even number of '\'s followed by a '"' correspond to half that number
+ *   of '\', plus a regular quote serving as an argument delimiter (which
+ *   means it does not appear in the result)
+ *   'a\\"b c"'   -> 'a\b c'
+ *   'a\\\\"b c"' -> 'a\\b c'
+ * - '\' that are not followed by a '"' are copied literally
+ *   'a\b'     -> 'a\b'
+ *   'a\\b'    -> 'a\\b'
+ *
+ * Note:
+ * '\t' == 0x0009
+ * ' '  == 0x0020
+ * '"'  == 0x0022
+ * '\\' == 0x005c
+ */
 LPWSTR* WINAPI CommandLineToArgvW(LPCWSTR lpCmdline, int* numargs)
 {
-  DWORD argc;
-  HGLOBAL hargv;
-  LPWSTR  *argv;
-  LPCWSTR cs;
-  LPWSTR arg,s,d;
-  LPWSTR cmdline;
-  int in_quotes,bcount;
-  
-  if (*lpCmdline==0) {
-  /* Return the path to the executable */
+    DWORD argc;
+    HGLOBAL hargv;
+    LPWSTR  *argv;
+    LPCWSTR cs;
+    LPWSTR arg,s,d;
+    LPWSTR cmdline;
+    int in_quotes,bcount;
+
+    if (*lpCmdline==0)
+    {
+        /* Return the path to the executable */
     DWORD size;
     
     hargv=0;
@@ -95,107 +96,127 @@ LPWSTR* WINAPI CommandLineToArgvW(LPCWSTR lpCmdline, int* numargs)
       hargv=GlobalReAlloc(hargv, size, 0);
       argv=GlobalLock(hargv);
     } while (GetModuleFileNameW((HMODULE)0, (LPWSTR)(argv+1), size-sizeof(LPWSTR)) == 0);
-    argv[0]=(LPWSTR)(argv+1);
-    if (numargs)
-      *numargs=2;
-    
-    return argv;
-  }
-  
-  /* to get a writeable copy */
-  argc=0;
-  bcount=0;
-  in_quotes=0;
-  cs=lpCmdline;
-  while (1) {
-    if (*cs==0 || ((*cs==0x0009 || *cs==0x0020) && !in_quotes)) {
-    /* space */
-      argc++;
-      /* skip the remaining spaces */
-      while (*cs==0x0009 || *cs==0x0020) {
+        argv[0]=(LPWSTR)(argv+1);
+        if (numargs)
+            *numargs=2;
+
+        return argv;
+    }
+
+    /* to get a writeable copy */
+    argc=0;
+    bcount=0;
+    in_quotes=0;
+    cs=lpCmdline;
+    while (1)
+    {
+        if (*cs==0 || ((*cs==0x0009 || *cs==0x0020) && !in_quotes))
+        {
+            /* space */
+            argc++;
+            /* skip the remaining spaces */
+            while (*cs==0x0009 || *cs==0x0020) {
+                cs++;
+            }
+            if (*cs==0)
+                break;
+            bcount=0;
+            continue;
+        }
+        else if (*cs==0x005c)
+        {
+            /* '\', count them */
+            bcount++;
+        }
+        else if ((*cs==0x0022) && ((bcount & 1)==0))
+        {
+            /* unescaped '"' */
+            in_quotes=!in_quotes;
+            bcount=0;
+        }
+        else
+        {
+            /* a regular character */
+            bcount=0;
+        }
         cs++;
-      }
-      if (*cs==0)
-        break;
-      bcount=0;
-      continue;
-    } else if (*cs==0x005c) {
-    /* '\', count them */
-      bcount++;
-    } else if ((*cs==0x0022) && ((bcount & 1)==0)) {
-    /* unescaped '"' */
-      in_quotes=!in_quotes;
-      bcount=0;
-    } else {
-    /* a regular character */
-      bcount=0;
     }
-    cs++;
-  }
-  /* Allocate in a single lump, the string array, and the strings that go with it.
-  * This way the caller can make a single GlobalFree call to free both, as per MSDN.
-    */
+    /* Allocate in a single lump, the string array, and the strings that go with it.
+     * This way the caller can make a single GlobalFree call to free both, as per MSDN.
+     */
     hargv=GlobalAlloc(0, argc*sizeof(LPWSTR)+(strlenW(lpCmdline)+1)*sizeof(WCHAR));
-  argv=GlobalLock(hargv);
-  if (!argv)
-    return NULL;
-  cmdline=(LPWSTR)(argv+argc);
-  strcpyW(cmdline, lpCmdline);
-  
-  argc=0;
-  bcount=0;
-  in_quotes=0;
-  arg=d=s=cmdline;
-  while (*s) {
-    if ((*s==0x0009 || *s==0x0020) && !in_quotes) {
-    /* Close the argument and copy it */
-      *d=0;
-      argv[argc++]=arg;
-      
-      /* skip the remaining spaces */
-      do {
-        s++;
-      } while (*s==0x0009 || *s==0x0020);
-      
-      /* Start with a new argument */
-      arg=d=s;
-      bcount=0;
-    } else if (*s==0x005c) {
-    /* '\\' */
-      *d++=*s++;
-      bcount++;
-    } else if (*s==0x0022) {
-    /* '"' */
-      if ((bcount & 1)==0) {
-      /* Preceeded by an even number of '\', this is half that
-        * number of '\', plus a quote which we erase.
-          */
-          d-=bcount/2;
-        in_quotes=!in_quotes;
-        s++;
-      } else {
-      /* Preceeded by an odd number of '\', this is half that
-        * number of '\' followed by a '"'
-          */
-          d=d-bcount/2-1;
-        *d++='"';
-        s++;
-      }
-      bcount=0;
-    } else {
-    /* a regular character */
-      *d++=*s++;
-      bcount=0;
+    argv=GlobalLock(hargv);
+    if (!argv)
+        return NULL;
+    cmdline=(LPWSTR)(argv+argc);
+    strcpyW(cmdline, lpCmdline);
+
+    argc=0;
+    bcount=0;
+    in_quotes=0;
+    arg=d=s=cmdline;
+    while (*s)
+    {
+        if ((*s==0x0009 || *s==0x0020) && !in_quotes)
+        {
+            /* Close the argument and copy it */
+            *d=0;
+            argv[argc++]=arg;
+
+            /* skip the remaining spaces */
+            do {
+                s++;
+            } while (*s==0x0009 || *s==0x0020);
+
+            /* Start with a new argument */
+            arg=d=s;
+            bcount=0;
+        }
+        else if (*s==0x005c)
+        {
+            /* '\\' */
+            *d++=*s++;
+            bcount++;
+        }
+        else if (*s==0x0022)
+        {
+            /* '"' */
+            if ((bcount & 1)==0)
+            {
+                /* Preceeded by an even number of '\', this is half that
+                 * number of '\', plus a quote which we erase.
+                 */
+                d-=bcount/2;
+                in_quotes=!in_quotes;
+                s++;
+            }
+            else
+            {
+                /* Preceeded by an odd number of '\', this is half that
+                 * number of '\' followed by a '"'
+                 */
+                d=d-bcount/2-1;
+                *d++='"';
+                s++;
+            }
+            bcount=0;
+        }
+        else
+        {
+            /* a regular character */
+            *d++=*s++;
+            bcount=0;
+        }
     }
-  }
-  if (*arg) {
-    *d='\0';
-    argv[argc++]=arg;
-  }
-  if (numargs)
-    *numargs=argc;
-  
-  return argv;
+    if (*arg)
+    {
+        *d='\0';
+        argv[argc++]=arg;
+    }
+    if (numargs)
+        *numargs=argc;
+
+    return argv;
 }
 
 /*************************************************************************
@@ -249,12 +270,13 @@ DWORD WINAPI SHGetFileInfoA(LPCSTR path,DWORD dwFileAttributes,
 		NULL, OPEN_EXISTING, 0, 0 );
 	  if ( hfile == INVALID_HANDLE_VALUE ) return 0;
 
-	/* The next section is adapted from MODULE_GetBinaryType, as we need
-	 * to examine the image header to get OS and version information. We
-	 * know from calling GetBinaryTypeA that the image is valid and either
-	 * an NE or PE, so much error handling can be omitted.
-	 * Seek to the start of the file and read the header information.
-	 */
+        /*
+         * The next section is adapted from MODULE_GetBinaryType, as we need
+         * to examine the image header to get OS and version information. We
+         * know from calling GetBinaryTypeA that the image is valid and either
+         * an NE or PE, so much error handling can be omitted.
+         * Seek to the start of the file and read the header information.
+         */
 
 	  SetFilePointer( hfile, 0, NULL, SEEK_SET );
 	  ReadFile( hfile, &mz_header, sizeof(mz_header), &len, NULL );
@@ -308,37 +330,46 @@ DWORD WINAPI SHGetFileInfoA(LPCSTR path,DWORD dwFileAttributes,
 	  hr = SHILCreateFromPathA ( path, &pidl, &dwAttributes);
 	  /* note: the attributes in ISF::ParseDisplayName are not implemented */
 	}
-	
-	/* get the parent shellfolder */
-	if (pidl)
-	{
-	  hr = SHBindToParent( pidl, &IID_IShellFolder, (LPVOID*)&psfParent, &pidlLast);
-	}
-	
-	/* get the attributes of the child */
-	if (SUCCEEDED(hr) && (flags & SHGFI_ATTRIBUTES))
-	{
-	  if (!(flags & SHGFI_ATTR_SPECIFIED))
-	  {
-	    psfi->dwAttributes = 0xffffffff;
-	  }
-	  IShellFolder_GetAttributesOf(psfParent, 1 , &pidlLast, &(psfi->dwAttributes));
-	}
+    if ((flags & SHGFI_PIDL) || !(flags & SHGFI_USEFILEATTRIBUTES))
+    {
+        /* get the parent shellfolder */
+        if (pidl)
+        {
+            hr = SHBindToParent( pidl, &IID_IShellFolder, (LPVOID*)&psfParent,
+                                (LPCITEMIDLIST*)&pidlLast );
+//            ILFree(pidl); // we have this not allocated, wine does this in SHGetFileInfoA for SHGetFileInfoW
+        }
+        else
+        {
+            ERR("pidl is null!\n");
+            return FALSE;
+        }
+    }
 
-	/* get the displayname */
-	if (SUCCEEDED(hr) && (flags & SHGFI_DISPLAYNAME))
-	{ 
-	  if (flags & SHGFI_USEFILEATTRIBUTES)
-	  {
+    /* get the attributes of the child */
+    if (SUCCEEDED(hr) && (flags & SHGFI_ATTRIBUTES))
+    {
+        if (!(flags & SHGFI_ATTR_SPECIFIED))
+        {
+            psfi->dwAttributes = 0xffffffff;
+        }
+	  IShellFolder_GetAttributesOf(psfParent, 1 , &pidlLast, &(psfi->dwAttributes));
+    }
+
+    /* get the displayname */
+    if (SUCCEEDED(hr) && (flags & SHGFI_DISPLAYNAME))
+    {
+        if (flags & SHGFI_USEFILEATTRIBUTES)
+        {
 	    strcpy (psfi->szDisplayName, PathFindFileNameA(path));
-	  }
-	  else
-	  {
-	    STRRET str;
+        }
+        else
+        {
+            STRRET str;
 	    hr = IShellFolder_GetDisplayNameOf(psfParent, pidlLast, SHGDN_INFOLDER, &str);
 	    StrRetToStrNA (psfi->szDisplayName, MAX_PATH, &str, pidlLast);
-	  }
-	}
+        }
+    }
 
 	/* get the type name */
 	if (SUCCEEDED(hr) && (flags & SHGFI_TYPENAME))
@@ -359,6 +390,14 @@ DWORD WINAPI SHGetFileInfoA(LPCSTR path,DWORD dwFileAttributes,
 	}
 
 	/* ### icons ###*/
+#ifndef __WIN32OS2__
+    if (flags & SHGFI_ADDOVERLAYS)
+        FIXME("SHGFI_ADDOVERLAYS unhandled\n");
+
+    if (flags & SHGFI_OVERLAYINDEX)
+        FIXME("SHGFI_OVERLAYINDEX unhandled\n");
+#endif
+
 	if (flags & SHGFI_LINKOVERLAY)
 	  FIXME("set icon to link, stub\n");
 
@@ -510,20 +549,19 @@ HICON WINAPI DuplicateIcon( HINSTANCE hInstance, HICON hIcon)
     ICONINFO IconInfo;
     HICON hDupIcon = 0;
 
-    TRACE("(%04x, %04x)\n", hInstance, hIcon);
+    TRACE("%p %p\n", hInstance, hIcon);
 
-    if(GetIconInfo(hIcon, &IconInfo))
+    if (GetIconInfo(hIcon, &IconInfo))
     {
         hDupIcon = CreateIconIndirect(&IconInfo);
 
         /* clean up hbmMask and hbmColor */
-        DeleteObject(IconInfo.hbmMask);        
-        DeleteObject(IconInfo.hbmColor);        
+        DeleteObject(IconInfo.hbmMask);
+        DeleteObject(IconInfo.hbmColor);
     }
- 
+
     return hDupIcon;
 }
-    
 
 /*************************************************************************
  * ExtractIconA				[SHELL32.133]
@@ -642,12 +680,15 @@ typedef struct
 extern HICON hIconTitleFont;
 
 static BOOL __get_dropline( HWND hWnd, LPRECT lprect )
-{ HWND hWndCtl = GetDlgItem(hWnd, IDC_WINE_TEXT);
+{
+    HWND hWndCtl = GetDlgItem(hWnd, IDC_WINE_TEXT);
+
     if( hWndCtl )
-  { GetWindowRect( hWndCtl, lprect );
-	MapWindowPoints( 0, hWnd, (LPPOINT)lprect, 2 );
-	lprect->bottom = (lprect->top += DROP_FIELD_TOP);
-	return TRUE;
+    {
+        GetWindowRect( hWndCtl, lprect );
+        MapWindowPoints( 0, hWnd, (LPPOINT)lprect, 2 );
+        lprect->bottom = (lprect->top += DROP_FIELD_TOP);
+        return TRUE;
     }
     return FALSE;
 }
@@ -657,60 +698,61 @@ static BOOL __get_dropline( HWND hWnd, LPRECT lprect )
  */
 UINT WINAPI SHAppBarMessage(DWORD msg, PAPPBARDATA data)
 {
-        int width=data->rc.right - data->rc.left;
-        int height=data->rc.bottom - data->rc.top;
-        RECT rec=data->rc;
-        switch (msg)
-        { case ABM_GETSTATE:
-               return ABS_ALWAYSONTOP | ABS_AUTOHIDE;
-          case ABM_GETTASKBARPOS:
-               GetWindowRect(data->hWnd, &rec);
-               data->rc=rec;
-               return TRUE;
-          case ABM_ACTIVATE:
-               SetActiveWindow(data->hWnd);
-               return TRUE;
-          case ABM_GETAUTOHIDEBAR:
-               data->hWnd=GetActiveWindow();
-               return TRUE;
-          case ABM_NEW:
+    int width=data->rc.right - data->rc.left;
+    int height=data->rc.bottom - data->rc.top;
+    RECT rec=data->rc;
+
+    switch (msg)
+    {
+    case ABM_GETSTATE:
+        return ABS_ALWAYSONTOP | ABS_AUTOHIDE;
+    case ABM_GETTASKBARPOS:
+        GetWindowRect(data->hWnd, &rec);
+        data->rc=rec;
+        return TRUE;
+    case ABM_ACTIVATE:
+        SetActiveWindow(data->hWnd);
+        return TRUE;
+    case ABM_GETAUTOHIDEBAR:
+        data->hWnd=GetActiveWindow();
+        return TRUE;
+    case ABM_NEW:
+        SetWindowPos(data->hWnd,HWND_TOP,rec.left,rec.top,
+                          width,height,SWP_SHOWWINDOW);
+        return TRUE;
+    case ABM_QUERYPOS:
+        GetWindowRect(data->hWnd, &(data->rc));
+        return TRUE;
+    case ABM_REMOVE:
+        FIXME("ABM_REMOVE broken\n");
+        /* FIXME: this is wrong; should it be DestroyWindow instead? */
+        /*CloseHandle(data->hWnd);*/
+        return TRUE;
+    case ABM_SETAUTOHIDEBAR:
+        SetWindowPos(data->hWnd,HWND_TOP,rec.left+1000,rec.top,
+                         width,height,SWP_SHOWWINDOW);
+        return TRUE;
+    case ABM_SETPOS:
+        data->uEdge=(ABE_RIGHT | ABE_LEFT);
+        SetWindowPos(data->hWnd,HWND_TOP,data->rc.left,data->rc.top,
+                     width,height,SWP_SHOWWINDOW);
+        return TRUE;
+    case ABM_WINDOWPOSCHANGED:
                SetWindowPos(data->hWnd,HWND_TOP,rec.left,rec.top,
                                         width,height,SWP_SHOWWINDOW);
-               return TRUE;
-          case ABM_QUERYPOS:
-               GetWindowRect(data->hWnd, &(data->rc));
-               return TRUE;
-          case ABM_REMOVE:
-               FIXME("ABM_REMOVE broken\n");
-               /* FIXME: this is wrong; should it be DestroyWindow instead? */
-               /*CloseHandle(data->hWnd);*/
-               return TRUE;
-          case ABM_SETAUTOHIDEBAR:
-               SetWindowPos(data->hWnd,HWND_TOP,rec.left+1000,rec.top,
-                                       width,height,SWP_SHOWWINDOW);          
-               return TRUE;
-          case ABM_SETPOS:
-               data->uEdge=(ABE_RIGHT | ABE_LEFT);
-               SetWindowPos(data->hWnd,HWND_TOP,data->rc.left,data->rc.top,
-                                  width,height,SWP_SHOWWINDOW);
-               return TRUE;
-          case ABM_WINDOWPOSCHANGED:
-               SetWindowPos(data->hWnd,HWND_TOP,rec.left,rec.top,
-                                        width,height,SWP_SHOWWINDOW);
-               return TRUE;
-          }
-      return FALSE;
+        return TRUE;
+    }
+    return FALSE;
 }
 
 /*************************************************************************
  * SHHelpShortcuts_RunDLL		[SHELL32.224]
  *
  */
-DWORD WINAPI SHHelpShortcuts_RunDLL (DWORD dwArg1, DWORD dwArg2, DWORD dwArg3, DWORD dwArg4)
-{ FIXME("(%lx, %lx, %lx, %lx) empty stub!\n",
-	dwArg1, dwArg2, dwArg3, dwArg4);
-
-  return 0;
+DWORD WINAPI SHHelpShortcuts_RunDLL(DWORD dwArg1, DWORD dwArg2, DWORD dwArg3, DWORD dwArg4)
+{
+    FIXME("(%lx, %lx, %lx, %lx) stub!\n", dwArg1, dwArg2, dwArg3, dwArg4);
+    return 0;
 }
 
 /*************************************************************************
@@ -966,7 +1008,17 @@ BOOL WINAPI ShellAboutW( HWND hWnd, LPCWSTR szApp, LPCWSTR szOtherStuff,
  * FreeIconList
  */
 void WINAPI FreeIconList( DWORD dw )
-{ FIXME("(%lx): stub\n",dw);
+{
+    FIXME("%lx: stub\n",dw);
+}
+
+
+/*************************************************************************
+ * ShellDDEInit (SHELL32.@)
+ */
+void WINAPI ShellDDEInit(BOOL start)
+{
+    FIXME("stub: %d\n", start);
 }
 
 /***********************************************************************
@@ -1076,20 +1128,6 @@ BOOL WINAPI Shell32LibMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID fImpLoad)
 	    pDLLInitComctl=(void*)GetProcAddress(hComctl32, "InitCommonControlsEx");
 	    pCOMCTL32_Alloc=(void*)GetProcAddress(hComctl32, (LPCSTR)71L);
             pCOMCTL32_Free=(void*)GetProcAddress(hComctl32, (LPCSTR)73L);
-#if 0
-            lpDPA_Create=(void*)GetProcAddress(hComctl32, (LPCSTR)328L);
-            lpDPA_Destroy=(void*)GetProcAddress(hComctl32, (LPCSTR)329L);
-            lpDPA_GetPtr=(void*)GetProcAddress(hComctl32, (LPCSTR)332L);
-            lpDPA_InsertPtr=(void*)GetProcAddress(hComctl32, (LPCSTR)334L);
-            lpDPA_DeletePtr=(void*)GetProcAddress(hComctl32, (LPCSTR)336L);
-            lpDPA_Sort=(void*)GetProcAddress(hComctl32, (LPCSTR)338L);
-            lpDPA_Search=(void*)GetProcAddress(hComctl32, (LPCSTR)339L);
-            lpCreateMRUListA=(void*)GetProcAddress(hComctl32, (LPCSTR)151L /*"CreateMRUListA"*/);
-            lpFreeMRUListA=(void*)GetProcAddress(hComctl32, (LPCSTR)152L /*"FreeMRUList"*/);
-            lpAddMRUData=(void*)GetProcAddress(hComctl32, (LPCSTR)167L /*"AddMRUData"*/);
-            lpFindMRUData=(void*)GetProcAddress(hComctl32, (LPCSTR)169L /*"FindMRUData"*/);
-            lpEnumMRUListA=(void*)GetProcAddress(hComctl32, (LPCSTR)154L /*"EnumMRUListA"*/);
-#endif
             /* initialize the common controls */
             if (pDLLInitComctl)
             {
@@ -1144,16 +1182,15 @@ BOOL WINAPI Shell32LibMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID fImpLoad)
  * DllInstall         [SHELL32.202]
  *
  * PARAMETERS
- *   
+ *
  *    BOOL bInstall - TRUE for install, FALSE for uninstall
  *    LPCWSTR pszCmdLine - command line (unused by shell32?)
  */
 
 HRESULT WINAPI SHELL32_DllInstall(BOOL bInstall, LPCWSTR cmdline)
 {
-   FIXME("(%s, %s): stub!\n", bInstall ? "TRUE":"FALSE", debugstr_w(cmdline));
-
-   return S_OK;		/* indicate success */
+    FIXME("%s %s: stub\n", bInstall ? "TRUE":"FALSE", debugstr_w(cmdline));
+    return S_OK;        /* indicate success */
 }
 
 /***********************************************************************
@@ -1161,7 +1198,6 @@ HRESULT WINAPI SHELL32_DllInstall(BOOL bInstall, LPCWSTR cmdline)
  */
 HRESULT WINAPI SHELL32_DllCanUnloadNow(void)
 {
-    FIXME("(void): stub\n");
-
+    FIXME("stub\n");
     return S_FALSE;
 }

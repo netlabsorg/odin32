@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.16 2003-02-28 10:31:34 sandervl Exp $
+# $Id: makefile,v 1.17 2005-03-06 10:36:32 sao2l02 Exp $
 
 #
 # Odin32 API
@@ -92,6 +92,7 @@ force:  $(SYMBOLIC)
 #
 # Lib rule - dummy rule
 #
+cleandlls:
 lib:    $(SYMBOLIC)
 
 

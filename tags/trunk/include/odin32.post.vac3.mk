@@ -1,4 +1,4 @@
-# $Id: odin32.post.vac3.mk,v 1.31 2004-12-30 18:44:25 sao2l02 Exp $
+# $Id: odin32.post.vac3.mk,v 1.32 2005-03-06 10:35:58 sao2l02 Exp $
 
 #
 # Odin32 API
@@ -489,6 +489,8 @@ vslick $(ORGTARGET).vpj:
 !ifndef CLEAN2
 clean:
 !else
+cleandlls:
+
 clean:  clean2
 !endif
     if exist .\copying.lib ren .\copying.lib copying.lix
@@ -510,6 +512,22 @@ clean:  clean2
     if exist .\copying.lix ren .\copying.lix copying.lib
 !ifdef SUBDIRS
     @$(DODIRS) "$(SUBDIRS)"  $(MAKE_CMD) clean
+!endif
+!endif
+
+#
+# Common: clean rule. To clean only targets, no libs/obj/def-files
+#
+!ifndef NOCLEAN
+!ifndef CLEAN2
+cleandlls:
+    $(RM) \
+!if "$(OBJDIR)" != ""
+     $(OBJDIR)\*.$(TARGET_EXTENSION) $(OBJDIR)\*.sym \
+!endif
+        $(ODIN32_BIN)\$(TARGET).$(TARGET_EXTENSION) *.$(TARGET_EXTENSION) \
+        $(ODIN32_BIN)\$(TARGET).sym *.sym
+    @$(DODIRS) "$(SUBDIRS)"  $(MAKE_CMD) cleandlls
 !endif
 !endif
 
