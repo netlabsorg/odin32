@@ -1,4 +1,4 @@
-/* $Id: initwinmm.cpp,v 1.9 2002-06-04 17:36:55 sandervl Exp $
+/* $Id: initwinmm.cpp,v 1.10 2002-07-12 08:59:24 sandervl Exp $
  *
  * WINMM DLL entry point
  *
@@ -66,7 +66,7 @@ void IRTMidiShutdown();  // IRTMidi shutdown routine
 static HMODULE dllHandle = 0;
 static HMODULE MMPMLibraryHandle = 0;
 
-BOOL fMMPMAvailable = FALSE;
+BOOL fMMPMAvailable = TRUE;
 
 DWORD (APIENTRY *pfnmciSendCommand)(WORD   wDeviceID,
                                    WORD   wMessage,
@@ -81,9 +81,9 @@ DWORD (APIENTRY *pfnmciGetErrorString)(DWORD   dwError,
 //******************************************************************************
 void WIN32API DisableWaveAudio()
 {
-    fMMPMAvailable = FALSE;
+    fMMPMAvailable       = FALSE;
     pfnmciGetErrorString = NULL;
-    pfnmciSendCommand = NULL;
+    pfnmciSendCommand    = NULL;
 }
 //******************************************************************************
 //******************************************************************************
@@ -114,41 +114,45 @@ BOOL WINAPI LibMainWinmm(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID fImpLoad)
         dwVolume = (dwVolume << 16) | dwVolume;
         WaveOut::setDefaultVolume(dwVolume);
 
-        // try to load the MDM library, not MMPM directly!!!
-        if (DosLoadModule(szError, sizeof(szError),
-                          "MDM.DLL", &MMPMLibraryHandle) != NO_ERROR)
-        {
-            // this system has no MMPM :-(
-            fMMPMAvailable = FALSE;
-        } 
-        else
-        {
-            /* detect if MMPM is available */
-            if (DosQueryProcAddr(MMPMLibraryHandle,
-                                 1, /* ORD_MCISENDCOMMAND */
-                                 NULL,
-                                (PFN*)&pfnmciSendCommand) != NO_ERROR)
+        if(fMMPMAvailable == TRUE) 
+        {//if audio access wasn't disabled already, check if mmpm2 is installed
+            // try to load the MDM library, not MMPM directly!!!
+            if (DosLoadModule(szError, sizeof(szError),
+                              "MDM.DLL", &MMPMLibraryHandle) != NO_ERROR)
             {
+                // this system has no MMPM :-(
                 fMMPMAvailable = FALSE;
             } 
             else
             {
-                fMMPMAvailable = TRUE;
-            }
-
-            /* see if we can get the address for the mciGetErrorString function */
-            if (fMMPMAvailable == TRUE)
-            {
+                /* detect if MMPM is available */
                 if (DosQueryProcAddr(MMPMLibraryHandle,
-                                     3, /* ORD_MCIGETERRORSTRING */
+                                     1, /* ORD_MCISENDCOMMAND */
                                      NULL,
-                                     (PFN*)&pfnmciGetErrorString) != NO_ERROR)
-                    pfnmciGetErrorString = NULL;
+                                    (PFN*)&pfnmciSendCommand) != NO_ERROR)
+                {
+                    fMMPMAvailable = FALSE;
+                } 
+                else
+                {
+                    fMMPMAvailable = TRUE;
+                }
+
+                /* see if we can get the address for the mciGetErrorString function */
+                if (fMMPMAvailable == TRUE)
+                {
+                    if (DosQueryProcAddr(MMPMLibraryHandle,
+                                         3, /* ORD_MCIGETERRORSTRING */
+                                         NULL,
+                                         (PFN*)&pfnmciGetErrorString) != NO_ERROR)
+                        pfnmciGetErrorString = NULL;
+                }
+                dprintf(("MMPM/2 is available; hmod %x", MMPMLibraryHandle));
+                dprintf(("mciSendCommand    %x", pfnmciSendCommand));
+                dprintf(("mciGetErrorString %x", pfnmciGetErrorString));
             }
-            dprintf(("MMPM/2 is available; hmod %x", MMPMLibraryHandle));
-            dprintf(("mciSendCommand    %x", pfnmciSendCommand));
-            dprintf(("mciGetErrorString %x", pfnmciGetErrorString));
         }
+
         if(fMMPMAvailable && RegOpenKeyA(HKEY_LOCAL_MACHINE, CUSTOM_BUILD_OPTIONS_KEY, &hKey) == 0) 
         {
             DWORD dwSize, dwType;
