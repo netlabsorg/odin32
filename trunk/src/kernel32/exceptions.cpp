@@ -1,4 +1,4 @@
-/* $Id: exceptions.cpp,v 1.70 2003-02-27 17:16:26 sandervl Exp $ */
+/* $Id: exceptions.cpp,v 1.71 2003-03-03 16:41:03 sandervl Exp $ */
 
 /*
  * Win32 Exception functions for OS/2
@@ -1354,32 +1354,6 @@ CrashAndBurn:
         //inside fprintf
         //NOTE:!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-        Win32MemMap *map;
-        BOOL  fWriteAccess = FALSE, ret;
-        ULONG offset, accessflag;
-
-        switch(pERepRec->ExceptionInfo[0]) {
-        case XCPT_READ_ACCESS:
-                accessflag = MEMMAP_ACCESS_READ;
-                break;
-        case XCPT_WRITE_ACCESS:
-                accessflag = MEMMAP_ACCESS_WRITE;
-                fWriteAccess = TRUE;
-                break;
-        default:
-                goto continueGuardException;
-        }
-
-        map = Win32MemMapView::findMapByView(pERepRec->ExceptionInfo[1], &offset, accessflag);
-        if(map == NULL) {
-            goto continueGuardException;
-        }
-        ret = map->commitGuardPage(pERepRec->ExceptionInfo[1], offset, fWriteAccess);
-        map->Release();
-        if(ret == TRUE)
-            goto continueexecution;
-
-continueGuardException:
         goto continuesearch;
     }
 
