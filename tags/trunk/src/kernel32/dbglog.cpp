@@ -1,4 +1,4 @@
-/* $Id: dbglog.cpp,v 1.3 2002-10-03 13:05:55 sandervl Exp $ */
+/* $Id: dbglog.cpp,v 1.4 2002-10-10 16:28:40 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -254,6 +254,8 @@ static int  oldcrtmsghandle = 0;
 static BOOL fDisableThread[5] = {0};
 static BOOL fFlushLines = FALSE;
 
+static char *pszLastLogEntry = NULL;
+
 //#define CHECK_ODINHEAP
 #if defined(DEBUG) && defined(CHECK_ODINHEAP)
 int checkOdinHeap = 1;
@@ -286,6 +288,8 @@ int SYSTEM WriteLog(char *tekst, ...)
   USHORT  sel = RestoreOS2FS();
   va_list argptr;
   TEB *teb = GetThreadTEB();
+
+  pszLastLogEntry = tekst;
 
   ODIN_HEAPCHECK();
 
@@ -451,8 +455,13 @@ int SYSTEM WriteLog(char *tekst, ...)
 
         int rc;
 
-        rc = sendto(logSocket, logbuffer, strlen(logbuffer)+1, 0, (struct sockaddr *)&servername, sizeof(servername));
+        servername.sin_family      = AF_INET;
+        servername.sin_port        = WIN32_IP_LOG_PORT;
 
+        rc = sendto(logSocket, logbuffer, strlen(logbuffer)+1, 0, (struct sockaddr *)&servername, sizeof(servername));
+        if(rc == -1) {
+            rc = sock_errno();
+        }
         if(teb) teb->o.odin.logfile = 0;
         va_end(argptr);
     }
