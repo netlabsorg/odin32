@@ -1,4 +1,4 @@
-/* $Id: win32wbase.h,v 1.24 2000-01-11 17:34:44 cbratschi Exp $ */
+/* $Id: win32wbase.h,v 1.25 2000-01-12 12:40:49 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -114,7 +114,6 @@ virtual  ULONG  MsgActivate(BOOL fActivate, BOOL fMinimized, HWND hwnd);
          ULONG  MsgMouseMove(MSG *msg);
          ULONG  MsgPaint(ULONG tmp1, BOOL select = TRUE);
          ULONG  MsgEraseBackGround(HDC hdc);
-         ULONG  MsgInitMenu(MSG *msg);
 	 ULONG  MsgHitTest(ULONG x, ULONG y);
          ULONG  MsgNCPaint();
          ULONG  MsgFormatFrame();
@@ -124,7 +123,6 @@ virtual  ULONG  MsgActivate(BOOL fActivate, BOOL fMinimized, HWND hwnd);
          ULONG  MsgSetText(LPSTR lpsz, LONG cch);
          ULONG  MsgGetTextLength();
          char  *MsgGetText();
-         ULONG  MsgContextMenu(ULONG x,ULONG y);
          VOID   updateWindowStyle(DWORD oldExStyle,DWORD oldStyle);
 
 virtual  LONG   SetWindowLongA(int index, ULONG value, BOOL fUnicode = FALSE);

@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.35 2000-01-11 13:52:18 sandervl Exp $ */
+/* $Id: pmwindow.cpp,v 1.36 2000-01-12 12:40:46 sandervl Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -244,7 +244,11 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
         break;
 
     case WM_ADJUSTWINDOWPOS:
+    {
+      PSWP      pswp   = (PSWP)mp1;
+        dprintf(("PMWINDOW: WM_WINDOWPOSCHANGED (%x) %x %x (%d,%d) (%d,%d)", mp2, win32wnd->getWindowHandle(), pswp->fl, pswp->x, pswp->y, pswp->cx, pswp->cy));
         goto RunDefWndProc;
+    }
 
     case WM_WINDOWPOSCHANGED:
     {
@@ -365,17 +369,8 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
         win32wnd->DispatchMsgA(pWinMsg);
         break;
 
-    case WM_INITMENU:
-        win32wnd->MsgInitMenu(pWinMsg);
-        break;
-
     case WM_TIMER:
         win32wnd->DispatchMsgA(pWinMsg);
-        goto RunDefWndProc;
-
-    case WM_MENUSELECT:
-    case WM_MENUEND:
-    case WM_NEXTMENU:
         goto RunDefWndProc;
 
     case WM_SETWINDOWPARAMS:
@@ -433,6 +428,10 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
         dprintf(("OS2: WM_FOCUSCHANGE %x", win32wnd->getWindowHandle()));
         goto RunDefWndProc;
 
+    case WM_INITMENU:
+    case WM_MENUSELECT:
+    case WM_MENUEND:
+    case WM_NEXTMENU:
     case WM_SYSCOLORCHANGE:
     case WM_SYSVALUECHANGED:
     case WM_SETSELECTION:
