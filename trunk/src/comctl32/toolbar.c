@@ -1,4 +1,4 @@
-/* $Id: toolbar.c,v 1.8 1999-06-30 15:52:18 cbratschi Exp $ */
+/* $Id: toolbar.c,v 1.9 1999-07-04 21:06:00 cbratschi Exp $ */
 /*
  * Toolbar control
  *
@@ -13,7 +13,6 @@
  *   - Notifications.
  *   - Fix TB_SETROWS.
  *   - Tooltip support (almost complete).
- *   - Unicode suppport.
  *   - Internal COMMCTL32 bitmaps.
  *   - Fix TOOLBAR_SetButtonInfo32A.
  *   - Customize dialog (under construction).
@@ -35,13 +34,10 @@
 #include <string.h>
 
 #include "winbase.h"
-#include "winuser.h"
-#include "wingdi.h"
 #include "commctrl.h"
 #include "cache.h"
 #include "comctl32.h"
 #include "toolbar.h"
-
 
 #define SEPARATOR_WIDTH    8
 #define TOP_BORDER         2
@@ -731,7 +727,7 @@ TOOLBAR_RelayEvent (HWND hwndTip, HWND hwndMsg, UINT uMsg,
 BOOL WINAPI
 TOOLBAR_CustomizeDialogProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
-    TOOLBAR_INFO *infoPtr = (TOOLBAR_INFO *)GetWindowLongA (hwnd, DWL_USER);
+    TOOLBAR_INFO *infoPtr;
     static HDSA hDsa = NULL;
 
     switch (uMsg)
@@ -803,6 +799,8 @@ TOOLBAR_CustomizeDialogProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 //              FIXME(toolbar, "action: %x itemState: %x\n",
 //                    lpdis->itemAction, lpdis->itemState);
 
+                infoPtr = (TOOLBAR_INFO *)GetWindowLongA(hwnd,DWL_USER);
+
                 if (lpdis->itemState & ODS_FOCUS)
                 {
                     oldBk = SetBkColor (lpdis->hDC, GetSysColor(COLOR_HIGHLIGHT));
@@ -852,6 +850,8 @@ TOOLBAR_CustomizeDialogProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
             if (wParam == IDC_AVAILBTN_LBOX || wParam == IDC_TOOLBARBTN_LBOX)
             {
                 MEASUREITEMSTRUCT *lpmis = (MEASUREITEMSTRUCT*)lParam;
+
+                infoPtr = (TOOLBAR_INFO *)GetWindowLongA(hwnd,DWL_USER);
 
                 if (infoPtr)
                     lpmis->itemHeight = infoPtr->nBitmapHeight + 8;
@@ -1013,6 +1013,13 @@ TOOLBAR_AddButtonsA (HWND hwnd, WPARAM wParam, LPARAM lParam)
     return TRUE;
 }
 
+
+static LRESULT TOOLBAR_AddButtonsW(HWND hwnd,WPARAM wParam,LPARAM lParam)
+{
+  //CB: just call AddButtonsA, no Unicode used?!?
+
+  return TOOLBAR_AddButtonsA(hwnd,wParam,lParam);
+}
 
 /* << TOOLBAR_AddButtons32W >> */
 
@@ -1305,7 +1312,6 @@ TOOLBAR_CommandToIndex (HWND hwnd, WPARAM wParam, LPARAM lParam)
     return TOOLBAR_GetButtonIndex (infoPtr, (INT)wParam);
 }
 
-
 static LRESULT
 TOOLBAR_Customize (HWND hwnd)
 {
@@ -1323,6 +1329,18 @@ TOOLBAR_Customize (HWND hwnd)
     SendMessageA (infoPtr->hwndNotify, WM_NOTIFY,
                   (WPARAM)nmhdr.idFrom, (LPARAM)&nmhdr);
 
+    //load OS/2 dialog
+
+    ret = NativeDlgBoxIP(COMCTL32_hModule,
+                         GetWindowLongA(hwnd,GWL_HINSTANCE),
+                         MAKEINTRESOURCEA(IDD_TBCUSTOMIZE),
+                         hwnd,
+                         (DLGPROC)TOOLBAR_CustomizeDialogProc,
+                         (LPARAM)infoPtr);
+
+    if (ret == (INT)-1) return FALSE;
+
+/* //original WINE code
     if (!(hRes = FindResourceA (COMCTL32_hModule,
                                 MAKEINTRESOURCEA(IDD_TBCUSTOMIZE),
                                 RT_DIALOGA)))
@@ -1336,6 +1354,7 @@ TOOLBAR_Customize (HWND hwnd)
                                    hwnd,
                                    (DLGPROC)TOOLBAR_CustomizeDialogProc,
                                    (LPARAM)infoPtr);
+*/
 
     /* send TBN_ENDADJUST notification */
     nmhdr.code = TBN_ENDADJUST;
@@ -1515,14 +1534,55 @@ TOOLBAR_GetButtonInfoA (HWND hwnd, WPARAM wParam, LPARAM lParam)
         lpTbInfo->fsStyle = btnPtr->fsStyle;
     if (lpTbInfo->dwMask & TBIF_TEXT) {
         if ((btnPtr->iString >= 0) || (btnPtr->iString < infoPtr->nNumStrings))
-            lstrcpynA (lpTbInfo->pszText,
-                         (LPSTR)infoPtr->strings[btnPtr->iString],
+            lstrcpynWtoA (lpTbInfo->pszText,
+                         infoPtr->strings[btnPtr->iString],
                          lpTbInfo->cchText);
     }
 
     return nIndex;
 }
 
+static LRESULT TOOLBAR_GetButtonInfoW(HWND hwnd,WPARAM wParam,LPARAM lParam)
+{
+    TOOLBAR_INFO *infoPtr = TOOLBAR_GetInfoPtr (hwnd);
+    LPTBBUTTONINFOW lpTbInfo = (LPTBBUTTONINFOW)lParam;
+    TBUTTON_INFO *btnPtr;
+    INT nIndex;
+
+    if (infoPtr == NULL)
+        return -1;
+    if (lpTbInfo == NULL)
+        return -1;
+    if (lpTbInfo->cbSize < sizeof(TBBUTTONINFOW))
+        return -1;
+
+    nIndex = TOOLBAR_GetButtonIndex (infoPtr, (INT)wParam);
+    if (nIndex == -1)
+        return -1;
+
+    btnPtr = &infoPtr->buttons[nIndex];
+
+    if (lpTbInfo->dwMask & TBIF_COMMAND)
+        lpTbInfo->idCommand = btnPtr->idCommand;
+    if (lpTbInfo->dwMask & TBIF_IMAGE)
+        lpTbInfo->iImage = btnPtr->iBitmap;
+    if (lpTbInfo->dwMask & TBIF_LPARAM)
+        lpTbInfo->lParam = btnPtr->dwData;
+    if (lpTbInfo->dwMask & TBIF_SIZE)
+        lpTbInfo->cx = (WORD)(btnPtr->rect.right - btnPtr->rect.left);
+    if (lpTbInfo->dwMask & TBIF_STATE)
+        lpTbInfo->fsState = btnPtr->fsState;
+    if (lpTbInfo->dwMask & TBIF_STYLE)
+        lpTbInfo->fsStyle = btnPtr->fsStyle;
+    if (lpTbInfo->dwMask & TBIF_TEXT) {
+        if ((btnPtr->iString >= 0) || (btnPtr->iString < infoPtr->nNumStrings))
+            lstrcpynW (lpTbInfo->pszText,
+                       infoPtr->strings[btnPtr->iString],
+                       lpTbInfo->cchText);
+    }
+
+    return nIndex;
+}
 
 /* << TOOLBAR_GetButtonInfo32W >> */
 
@@ -1556,11 +1616,33 @@ TOOLBAR_GetButtonTextA (HWND hwnd, WPARAM wParam, LPARAM lParam)
 
     if (lParam == 0) return -1;
 
-    lstrcpyA ((LPSTR)lParam, (LPSTR)infoPtr->strings[nStringIndex]);
+    lstrcpyWtoA ((LPSTR)lParam, infoPtr->strings[nStringIndex]);
 
-    return lstrlenA ((LPSTR)infoPtr->strings[nStringIndex]);
+    return lstrlenW (infoPtr->strings[nStringIndex]);
 }
 
+static LRESULT TOOLBAR_GetButtonTextW (HWND hwnd, WPARAM wParam, LPARAM lParam)
+{
+    TOOLBAR_INFO *infoPtr = TOOLBAR_GetInfoPtr (hwnd);
+    INT nIndex, nStringIndex;
+
+    nIndex = TOOLBAR_GetButtonIndex (infoPtr, (INT)wParam);
+    if (nIndex == -1)
+        return -1;
+
+    nStringIndex = infoPtr->buttons[nIndex].iString;
+
+//    TRACE (toolbar, "index=%d stringIndex=%d\n", nIndex, nStringIndex);
+
+    if ((nStringIndex < 0) || (nStringIndex >= infoPtr->nNumStrings))
+        return -1;
+
+    if (lParam == 0) return -1;
+
+    lstrcpyW ((LPWSTR)lParam, infoPtr->strings[nStringIndex]);
+
+    return lstrlenW (infoPtr->strings[nStringIndex]);
+}
 
 /* << TOOLBAR_GetButtonText32W >> */
 /* << TOOLBAR_GetColorScheme >> */
@@ -1897,6 +1979,12 @@ TOOLBAR_InsertButtonA (HWND hwnd, WPARAM wParam, LPARAM lParam)
     return TRUE;
 }
 
+static LRESULT TOOLBAR_InsertButtonW (HWND hwnd, WPARAM wParam, LPARAM lParam)
+{
+  //CB: just call InsertButtonA, no Unicode used?!?
+
+  return TOOLBAR_InsertButtonA(hwnd,wParam,lParam);
+}
 
 /* << TOOLBAR_InsertButton32W >> */
 /* << TOOLBAR_InsertMarkHitTest >> */
@@ -2050,6 +2138,33 @@ TOOLBAR_SaveRestoreA (HWND hwnd, WPARAM wParam, LPARAM lParam)
     return 0;
 }
 
+static LRESULT TOOLBAR_SaveRestoreW(HWND hwnd,WPARAM wParam,LPARAM lParam)
+{
+#if 0
+    TOOLBAR_INFO *infoPtr = TOOLBAR_GetInfoPtr (hwnd);
+    LPTBSAVEPARAMSW lpSave = (LPTBSAVEPARAMSW)lParam;
+
+    if (lpSave == NULL) return 0;
+
+    if ((BOOL)wParam) {
+        /* save toolbar information */
+//      FIXME (toolbar, "save to \"%s\" \"%s\"\n",
+//             lpSave->pszSubKey, lpSave->pszValueName);
+
+
+    }
+    else {
+        /* restore toolbar information */
+
+//      FIXME (toolbar, "restore from \"%s\" \"%s\"\n",
+//             lpSave->pszSubKey, lpSave->pszValueName);
+
+
+    }
+#endif
+
+    return 0;
+}
 
 /* << TOOLBAR_SaveRestore32W >> */
 /* << TOOLBAR_SetAnchorHighlight >> */
@@ -2060,7 +2175,7 @@ TOOLBAR_SetBitmapSize (HWND hwnd, WPARAM wParam, LPARAM lParam)
 {
     TOOLBAR_INFO *infoPtr = TOOLBAR_GetInfoPtr (hwnd);
 
-    if ((LOWORD(lParam) <= 0) || (HIWORD(lParam) <= 0)) return FALSE;
+    if (((INT)LOWORD(lParam) <= 0) || ((INT)HIWORD(lParam) <= 0)) return FALSE;
 
     infoPtr->nBitmapWidth = (INT)LOWORD(lParam);
     infoPtr->nBitmapHeight = (INT)HIWORD(lParam);
@@ -2104,7 +2219,7 @@ TOOLBAR_SetButtonInfoA (HWND hwnd, WPARAM wParam, LPARAM lParam)
         if ((btnPtr->iString >= 0) ||
             (btnPtr->iString < infoPtr->nNumStrings)) {
 #if 0
-            CHAR **lpString = &infoPtr->strings[btnPtr->iString];
+            CHAR **lpString = &infoPtr->strings[btnPtr->iString]; //wrong, it's Unicode!!!
             INT len = lstrlenA (lptbbi->pszText);
             *lpString = COMCTL32_ReAlloc (lpString, sizeof(char)*(len+1));
 #endif
@@ -2117,6 +2232,52 @@ TOOLBAR_SetButtonInfoA (HWND hwnd, WPARAM wParam, LPARAM lParam)
     return TRUE;
 }
 
+static LRESULT TOOLBAR_SetButtonInfoW (HWND hwnd, WPARAM wParam, LPARAM lParam)
+{
+    TOOLBAR_INFO *infoPtr = TOOLBAR_GetInfoPtr (hwnd);
+    LPTBBUTTONINFOW lptbbi = (LPTBBUTTONINFOW)lParam;
+    TBUTTON_INFO *btnPtr;
+    INT nIndex;
+
+    if (lptbbi == NULL)
+        return FALSE;
+    if (lptbbi->cbSize < sizeof(TBBUTTONINFOW))
+        return FALSE;
+
+    nIndex = TOOLBAR_GetButtonIndex (infoPtr, (INT)wParam);
+    if (nIndex == -1)
+        return FALSE;
+
+    btnPtr = &infoPtr->buttons[nIndex];
+    if (lptbbi->dwMask & TBIF_COMMAND)
+        btnPtr->idCommand = lptbbi->idCommand;
+    if (lptbbi->dwMask & TBIF_IMAGE)
+        btnPtr->iBitmap = lptbbi->iImage;
+    if (lptbbi->dwMask & TBIF_LPARAM)
+        btnPtr->dwData = lptbbi->lParam;
+/*    if (lptbbi->dwMask & TBIF_SIZE) */
+/*      btnPtr->cx = lptbbi->cx; */
+    if (lptbbi->dwMask & TBIF_STATE)
+        btnPtr->fsState = lptbbi->fsState;
+    if (lptbbi->dwMask & TBIF_STYLE)
+        btnPtr->fsStyle = lptbbi->fsStyle;
+
+    if (lptbbi->dwMask & TBIF_TEXT) {
+        if ((btnPtr->iString >= 0) ||
+            (btnPtr->iString < infoPtr->nNumStrings)) {
+#if 0
+            WCHAR **lpString = &infoPtr->strings[btnPtr->iString];
+            INT len = lstrlenW (lptbbi->pszText);
+            *lpString = COMCTL32_ReAlloc (lpString, sizeof(wchar)*(len+1));
+#endif
+
+            /* this is the ultimate sollution */
+/*          Str_SetPtrW (&infoPtr->strings[btnPtr->iString], lptbbi->pszText); */
+        }
+    }
+
+    return TRUE;
+}
 
 /* << TOOLBAR_SetButtonInfo32W >> */
 
@@ -2126,7 +2287,7 @@ TOOLBAR_SetButtonSize (HWND hwnd, WPARAM wParam, LPARAM lParam)
 {
     TOOLBAR_INFO *infoPtr = TOOLBAR_GetInfoPtr (hwnd);
 
-    if ((LOWORD(lParam) <= 0) || (HIWORD(lParam) <= 0)) return FALSE;
+    if (((INT)LOWORD(lParam) <= 0) || ((INT)HIWORD(lParam) <= 0)) return FALSE;
 
     infoPtr->nButtonWidth = (INT)LOWORD(lParam);
     infoPtr->nButtonHeight = (INT)HIWORD(lParam);
@@ -2965,7 +3126,8 @@ ToolbarWindowProc (HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
         case TB_ADDBUTTONSA:
             return TOOLBAR_AddButtonsA (hwnd, wParam, lParam);
 
-/*      case TB_ADDBUTTONSW: */
+        case TB_ADDBUTTONSW:
+            return TOOLBAR_AddButtonsW(hwnd,wParam,lParam);
 
         case TB_ADDSTRINGA:
             return TOOLBAR_AddStringA (hwnd, wParam, lParam);
@@ -3014,7 +3176,8 @@ ToolbarWindowProc (HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
         case TB_GETBUTTONINFOA:
             return TOOLBAR_GetButtonInfoA (hwnd, wParam, lParam);
 
-/*      case TB_GETBUTTONINFOW:         */ /* 4.71 */
+        case TB_GETBUTTONINFOW:         /* 4.71 */
+            return TOOLBAR_GetButtonInfoW(hwnd,wParam,lParam);
 
         case TB_GETBUTTONSIZE:
             return TOOLBAR_GetButtonSize (hwnd);
@@ -3022,7 +3185,9 @@ ToolbarWindowProc (HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
         case TB_GETBUTTONTEXTA:
             return TOOLBAR_GetButtonTextA (hwnd, wParam, lParam);
 
-/*      case TB_GETBUTTONTEXTW: */
+        case TB_GETBUTTONTEXTW:
+            return TOOLBAR_GetButtonTextW(hwnd,wParam,lParam);
+
 /*      case TB_GETCOLORSCHEME:                 */ /* 4.71 */
 
         case TB_GETDISABLEDIMAGELIST:
@@ -3084,7 +3249,9 @@ ToolbarWindowProc (HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
         case TB_INSERTBUTTONA:
             return TOOLBAR_InsertButtonA (hwnd, wParam, lParam);
 
-/*      case TB_INSERTBUTTONW: */
+        case TB_INSERTBUTTONW:
+            return TOOLBAR_InsertButtonW(hwnd,wParam,lParam);
+
 /*      case TB_INSERTMARKHITTEST:              */ /* 4.71 */
 
         case TB_ISBUTTONCHECKED:
@@ -3119,7 +3286,9 @@ ToolbarWindowProc (HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
         case TB_SAVERESTOREA:
             return TOOLBAR_SaveRestoreA (hwnd, wParam, lParam);
 
-/*      case TB_SAVERESTOREW: */
+        case TB_SAVERESTOREW:
+            return TOOLBAR_SaveRestoreW(hwnd,wParam,lParam);
+
 /*      case TB_SETANCHORHIGHLIGHT:             */ /* 4.71 */
 
         case TB_SETBITMAPSIZE:
@@ -3128,7 +3297,8 @@ ToolbarWindowProc (HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
         case TB_SETBUTTONINFOA:
             return TOOLBAR_SetButtonInfoA (hwnd, wParam, lParam);
 
-/*      case TB_SETBUTTONINFOW:                 */ /* 4.71 */
+        case TB_SETBUTTONINFOW:                 /* 4.71 */
+            return TOOLBAR_SetButtonInfoW(hwnd,wParam,lParam);
 
         case TB_SETBUTTONSIZE:
             return TOOLBAR_SetButtonSize (hwnd, wParam, lParam);
