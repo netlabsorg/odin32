@@ -1,4 +1,14 @@
-/* $Id: changelog,v 1.1305 2001-03-14 15:55:24 sandervl Exp $ */
+/* $Id: changelog,v 1.1306 2001-03-15 20:12:21 bird Exp $ */
+
+ 2001-03-15: knut st. osmundsen <knut.stange.osmundsen@mynd.no>
+    - tools/dailbuild:
+                o Added jade and DocBook to the environment.
+    - include/win32k.h:
+                o Defines OBJ_ANY on demand. (For use with DosAllocMemEx().)
+    - tools/fastdep:
+                o Ported to NT by faking the necessary OS/2 APIs.
+                  Tested with Watcom C/C++ v11.0.
+                  Makefile target: fastdepnt.exe
 
  2001-03-14: Markus Montkowski <mmontkowski@gmx.de>
     - DPLAYX:   o Sync with latest WINE stuff
