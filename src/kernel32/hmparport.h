@@ -1,4 +1,4 @@
-/* $Id: hmparport.h,v 1.2 2001-11-08 15:10:38 phaller Exp $ */
+/* $Id: hmparport.h,v 1.3 2001-11-08 15:38:42 phaller Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -36,6 +36,29 @@ class HMDeviceParPortClass : public HMDeviceHandler
   virtual BOOL ClearCommError( PHMHANDLEDATA pHMHandleData,
                                LPDWORD lpdwErrors,
                                LPCOMSTAT lpcst);
+  
+  virtual BOOL SetCommConfig( PHMHANDLEDATA pHMHandleData,
+                              LPCOMMCONFIG lpCC,
+                              DWORD dwSize );
+  
+  virtual BOOL GetCommConfig( PHMHANDLEDATA pHMHandleData,
+                              LPCOMMCONFIG lpCC,
+                              LPDWORD lpdwSize );
+  
+  virtual BOOL SetDefaultCommConfig( PHMHANDLEDATA pHMHandleData,
+                                     LPCOMMCONFIG lpCC,
+                                     DWORD dwSize);
+  
+  virtual BOOL GetDefaultCommConfig( PHMHANDLEDATA pHMHandleData,
+                                     LPCOMMCONFIG lpCC,
+                                     LPDWORD lpdwSize);
+  
+  /* this is a handler method for calls to DeviceIoControl() */
+  virtual BOOL   DeviceIoControl    (PHMHANDLEDATA pHMHandleData, DWORD dwIoControlCode,
+                                     LPVOID lpInBuffer, DWORD nInBufferSize,
+                                     LPVOID lpOutBuffer, DWORD nOutBufferSize,
+                                     LPDWORD lpBytesReturned, LPOVERLAPPED lpOverlapped);
+  
   
                            /* this is a handler method for calls to ReadFile() */
   virtual BOOL   ReadFile   (PHMHANDLEDATA pHMHandleData,

@@ -1,4 +1,4 @@
-/* $Id: hmparport.cpp,v 1.2 2001-11-08 15:10:39 phaller Exp $ */
+/* $Id: hmparport.cpp,v 1.3 2001-11-08 15:38:43 phaller Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -91,6 +91,7 @@ typedef struct _HMDEVPARPORTDATA
 {
   ULONG ulMagic;
   // Win32 Device Control Block
+  COMMCONFIG   CommCfg;
   //OS/2 Device Control Block
 } HMDEVPARPORTDATA, *PHMDEVPARPORTDATA;
 
@@ -102,6 +103,9 @@ static VOID *CreateDevData()
   {
     memset(pData,0,sizeof(HMDEVPARPORTDATA));
     pData->ulMagic = MAGIC_PARPORT;
+    pData->CommCfg.dwSize   = sizeof(COMMCONFIG);
+    pData->CommCfg.wVersion = 1;
+    pData->CommCfg.dwProviderSubType = PST_PARALLELPORT;
   }
   return pData;
 }
@@ -552,4 +556,121 @@ BOOL HMDeviceParPortClass::ClearCommError( PHMHANDLEDATA pHMHandleData,
 #endif
   
   return(rc==0);
+}
+
+
+BOOL HMDeviceParPortClass::DeviceIoControl(PHMHANDLEDATA pHMHandleData, DWORD dwIoControlCode,
+                             LPVOID lpInBuffer, DWORD nInBufferSize,
+                             LPVOID lpOutBuffer, DWORD nOutBufferSize,
+                             LPDWORD lpBytesReturned, LPOVERLAPPED lpOverlapped)
+{
+#ifdef DEBUG
+    char *msg = NULL;
+
+    switch(dwIoControlCode)
+    {
+/**
+    case IOCTL_DISK_FORMAT_TRACKS:
+        msg = "IOCTL_DISK_FORMAT_TRACKS";
+        break;
+*/
+    }
+  
+    if(msg) {
+        dprintf(("HMDeviceParPortClass::DeviceIoControl %s %x %d %x %d %x %x", msg, lpInBuffer, nInBufferSize,
+                 lpOutBuffer, nOutBufferSize, lpBytesReturned, lpOverlapped));
+    }
+#endif
+
+    switch(dwIoControlCode)
+    {
+//    case IOCTL_SCSI_RESCAN_BUS:
+//        break;
+
+    }
+    dprintf(("HMDeviceParPortClass::DeviceIoControl: unimplemented dwIoControlCode=%08lx\n", dwIoControlCode));
+    SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+    return FALSE;
+}
+
+
+BOOL HMDeviceParPortClass::SetDefaultCommConfig( PHMHANDLEDATA pHMHandleData,
+                                                LPCOMMCONFIG lpCC,
+                                                DWORD dwSize)
+{
+  PHMDEVPARPORTDATA pDevData = (PHMDEVPARPORTDATA)pHMHandleData->lpDeviceData;
+  if((NULL==pDevData) || (pDevData->ulMagic != MAGIC_PARPORT) )
+  {
+    SetLastError(ERROR_INVALID_HANDLE);
+    return FALSE;
+  }
+  memset(&pDevData->CommCfg,0, sizeof(COMMCONFIG));
+  memcpy(&pDevData->CommCfg,lpCC,dwSize>sizeof(COMMCONFIG)?sizeof(COMMCONFIG):dwSize);
+
+  return(TRUE);
+}
+
+
+BOOL HMDeviceParPortClass::GetDefaultCommConfig( PHMHANDLEDATA pHMHandleData,
+                                                LPCOMMCONFIG lpCC,
+                                                LPDWORD lpdwSize)
+{
+  PHMDEVPARPORTDATA pDevData = (PHMDEVPARPORTDATA)pHMHandleData->lpDeviceData;
+
+  if( O32_IsBadWritePtr(lpCC,sizeof(COMMCONFIG)) ||
+      *lpdwSize< sizeof(COMMCONFIG) )
+  {
+    SetLastError(ERROR_INSUFFICIENT_BUFFER);
+    *lpdwSize= sizeof(COMMCONFIG);
+    return FALSE;
+  }
+
+  if((NULL==pDevData) || (pDevData->ulMagic != MAGIC_PARPORT) )
+  {
+    SetLastError(ERROR_INVALID_HANDLE);
+    return FALSE;
+  }
+
+  memcpy(lpCC,&pDevData->CommCfg,sizeof(COMMCONFIG));
+  *lpdwSize = sizeof(COMMCONFIG);
+  return(TRUE);
+}
+
+
+BOOL HMDeviceParPortClass::SetCommConfig( PHMHANDLEDATA pHMHandleData,
+                                         LPCOMMCONFIG lpCC,
+                                         DWORD dwSize )
+{
+  dprintf(("HMDeviceParPortClass::SetCommConfig not implemented"));
+
+
+  return(TRUE);
+}
+
+
+BOOL HMDeviceParPortClass::GetCommConfig( PHMHANDLEDATA pHMHandleData,
+                                         LPCOMMCONFIG lpCC,
+                                         LPDWORD lpdwSize )
+{
+  PHMDEVPARPORTDATA pDevData = (PHMDEVPARPORTDATA)pHMHandleData->lpHandlerData;
+
+  dprintf(("HMDeviceParPortClass::GetCommConfig"));
+
+  if( O32_IsBadWritePtr(lpCC,sizeof(COMMCONFIG)) ||
+      *lpdwSize< sizeof(COMMCONFIG) )
+  {
+    SetLastError(ERROR_INSUFFICIENT_BUFFER);
+    *lpdwSize= sizeof(COMMCONFIG);
+    return FALSE;
+  }
+
+  if((NULL==pDevData) || (pDevData->ulMagic != MAGIC_PARPORT) )
+  {
+    SetLastError(ERROR_INVALID_HANDLE);
+    return FALSE;
+  }
+
+  memcpy(lpCC,&pDevData->CommCfg,sizeof(COMMCONFIG));
+  *lpdwSize = sizeof(COMMCONFIG);
+  return(TRUE);
 }
