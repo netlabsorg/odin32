@@ -1,4 +1,4 @@
-# $Id: setup.tools.mk,v 1.5 2002-04-22 00:30:54 bird Exp $
+# $Id: setup.tools.mk,v 1.6 2002-04-22 01:59:34 bird Exp $
 
 
 #
@@ -44,6 +44,7 @@ TOOL_EXISTS     = $(PATH_TOOLS)\Exists.cmd
 TOOL_MAKE       = $(MAKE) -nologo
 TOOL_RM         = rm.exe -f
 TOOL_TYPE       = type
+TOOL_BUILDENV   = $(PATH_TOOLS)\BuildEnv.cmd
 
 
 #
