@@ -1,4 +1,3 @@
-/* $Id: obj_shelllink.h,v 1.6 2000-08-18 02:04:23 phaller Exp $ */
 /*
  * Defines the COM interfaces and APIs related to IShellLink.
  *
@@ -21,6 +20,7 @@ extern "C" {
  */
 typedef struct IShellLinkA IShellLinkA,*LPSHELLLINK;
 typedef struct IShellLinkW IShellLinkW,*LPSHELLLINKW;
+#define IShellLink WINELIB_NAME_AW(IShellLink)
 
 /*****************************************************************************
  * 

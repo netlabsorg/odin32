@@ -1,5 +1,3 @@
-/* $Id: windowsx.h,v 1.10 2000-07-18 18:30:42 sandervl Exp $ */
-
 /* Copyright (C) 1999 Corel Corporation (Paul Quinn) */
 
 #ifndef __WINE_WINDOWSX_H
@@ -941,6 +939,12 @@ extern "C" {
     (void)(fn)((hwnd), WM_CONTEXTMENU, (WPARAM)(HWND)(hwndContext), MAKELPARAM((UINT)(xPos), (UINT)(yPos)))
 
 /****** COMBOBOX control message APIs *****************************************/
+
+#define ComboBox_Enable(hwndCtl, fEnable)       EnableWindow((hwndCtl), (fEnable))
+#define ComboBox_GetText(hwndCtl, lpch, cchMax) GetWindowText((hwndCtl), (lpch), (cchMax))
+#define ComboBox_GetTextLength(hwndCtl)         GetWindowTextLength(hwndCtl)
+#define ComboBox_SetText(hwndCtl, lpsz)         SetWindowText((hwndCtl), (lpsz))
+
 #define ComboBox_GetCount(hwndCtl)            \
 		((int)(DWORD)SendMessage((hwndCtl), CB_GETCOUNT, 0L, 0L))
 
@@ -1129,6 +1133,13 @@ extern "C" {
 	    ((fn)((hwnd), (const DRAWITEMSTRUCT *)(lParam)), 0L)
 #define FORWARD_WM_DRAWITEM(hwnd, lpDrawItem, fn) \
         (void)(fn)((hwnd), WM_DRAWITEM, (WPARAM)(((const DRAWITEMSTRUCT *)lpDrawItem)->CtlID), (LPARAM)(const DRAWITEMSTRUCT *)(lpDrawItem))
+
+
+#define GET_WPARAM(wp, lp)                      (wp)
+#define GET_LPARAM(wp, lp)                      (lp)
+
+#define GET_X_LPARAM(lp)                        ((int)(short)LOWORD(lp))
+#define GET_Y_LPARAM(lp)                        ((int)(short)HIWORD(lp))
 				
 /****** C runtime porting macros ****************************************/
 

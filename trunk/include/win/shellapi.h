@@ -1,5 +1,3 @@
-/* $Id: shellapi.h,v 1.10 2000-11-24 13:15:55 sandervl Exp $ */
-
 #ifndef _WINE_SHELLAPI_H
 #define _WINE_SHELLAPI_H
 
@@ -285,6 +283,9 @@ typedef struct _NOTIFYICONDATAW
 	WCHAR szTip[64];
 } NOTIFYICONDATAW, *PNOTIFYICONDATAW;
 
+BOOL WINAPI Shell_NotifyIconA(DWORD dwMessage, PNOTIFYICONDATAA lpData);
+BOOL WINAPI Shell_NotifyIconW(DWORD dwMessage, PNOTIFYICONDATAW lpData);
+#define Shell_NotifyIcon WINELIB_NAME_AW(Shell_NotifyIcon)
 
 #define SEE_MASK_CLASSNAME      0x00000001
 #define SEE_MASK_CLASSKEY       0x00000003

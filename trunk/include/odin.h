@@ -51,7 +51,7 @@
   #define WIN32API  __stdcall
   #define WINAPI    __stdcall
   #define SYSTEM    __stdcall
-  #define PASCAL    _Pascal
+  #define PASCAL    __stdcall
   #define UNALIGNED
 #else
 
@@ -62,7 +62,7 @@
   #define WIN32API  __stdcall
   #define WINAPI    __stdcall
   #define SYSTEM    __stdcall
-  #define PASCAL    _Pascal
+  #define PASCAL    __stdcall
   #define UNALIGNED
 #else
 
@@ -73,7 +73,7 @@
   #define WIN32API  __stdcall
   #define WINAPI    __stdcall
   #define SYSTEM    _System
-  #define PASCAL    _Pascal
+  #define PASCAL    __stdcall
   #define UNALIGNED
   #define __inline__ inline
 
