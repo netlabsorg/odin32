@@ -3173,6 +3173,9 @@ void MENU_TrackKbdMenuBar( HWND hwnd, UINT wParam, INT vkey)
     if (!hTrackMenu || IsIconic(hwnd) || vkey == VK_SPACE )
     {
         if (!(GetWindowLongA( hwnd, GWL_STYLE ) & WS_SYSMENU)) return;
+#ifdef __WIN32OS2__
+        if ((GetWindowLongA( hwnd, GWL_EXSTYLE ) & WS_EX_TOOLWINDOW)) return;
+#endif
         hTrackMenu = get_win_sys_menu( hwnd );
         uItem = 0;
         wParam |= HTSYSMENU; /* prevent item lookup */
