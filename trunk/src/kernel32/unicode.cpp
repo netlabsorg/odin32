@@ -1,4 +1,4 @@
-/* $Id: unicode.cpp,v 1.15 1999-11-25 19:19:57 sandervl Exp $ */
+/* $Id: unicode.cpp,v 1.16 1999-11-28 23:23:46 bird Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -71,25 +71,25 @@ BOOL getUconvObject( void )
  *
  */
 INT WINAPI MultiByteToWideChar(UINT page, DWORD flags,
-			         LPCSTR src, INT srclen,
+                     LPCSTR src, INT srclen,
                                  LPWSTR dst, INT dstlen)
 {
     int ret;
 
     if (srclen == -1)
-	srclen = lstrlenA(src)+1;
+    srclen = lstrlenA(src)+1;
     if (!dstlen || !dst)
-	return srclen;
+    return srclen;
 
     ret = srclen;
     while (srclen && dstlen) {
-	*dst = (WCHAR)(unsigned char)*src;
-	dst++;    src++;
-	dstlen--; srclen--;
+    *dst = (WCHAR)(unsigned char)*src;
+    dst++;    src++;
+    dstlen--; srclen--;
     }
     if (!dstlen && srclen) {
-	SetLastError(ERROR_INSUFFICIENT_BUFFER);
-	return 0;
+    SetLastError(ERROR_INSUFFICIENT_BUFFER);
+    return 0;
     }
     return ret;
 }
@@ -105,7 +105,7 @@ INT WINAPI MultiByteToWideChar(UINT page, DWORD flags,
  *   dst [in]     Destination buffer
  *   dstlen [in]  Length of destination buffer
  *   defchar [in] Default character to use for conversion if no exact
- *		    conversion can be made
+ *          conversion can be made
  *   used [out]   Set if default character was used in the conversion
  *
  * NOTES
@@ -127,8 +127,8 @@ INT WINAPI MultiByteToWideChar(UINT page, DWORD flags,
  *
  */
 INT WIN32API WideCharToMultiByte(UINT page, DWORD flags, LPCWSTR src,
-				 INT srclen,LPSTR dst, INT dstlen,
-				 LPCSTR defchar, BOOL *used)
+                 INT srclen,LPSTR dst, INT dstlen,
+                 LPCSTR defchar, BOOL *used)
 {
     int count = 0;
     int eos = 0;
@@ -136,55 +136,55 @@ INT WIN32API WideCharToMultiByte(UINT page, DWORD flags, LPCWSTR src,
     int dont_copy= (dstlen==0);
 
     if ((!src) || ((!dst) && (!dont_copy)) )
-    {	SetLastError(ERROR_INVALID_PARAMETER);
-	return 0;
+    {   SetLastError(ERROR_INVALID_PARAMETER);
+    return 0;
     }
-    
+
     if (page!=GetACP() && page!=CP_OEMCP && page!=CP_ACP)
-	dprintf(("WideCharToMultiByte, Conversion in CP %d not supported\n",page));
+    dprintf(("WideCharToMultiByte, Conversion in CP %d not supported\n",page));
 #if 0
     if (flags)
-	dprintf(("WideCharToMultiByte, flags %lx not supported\n",flags));
+    dprintf(("WideCharToMultiByte, flags %lx not supported\n",flags));
 #endif
     if(used)
-	*used=0;
+    *used=0;
     if (srclen == -1)
       {
-	srclen = lstrlenW(src)+1;
-	 care_for_eos=1;
+    srclen = lstrlenW(src)+1;
+     care_for_eos=1;
       }
     while(srclen && (dont_copy || dstlen))
     {
-	if(!dont_copy){
-	    if(*src<256)
-		*dst = *src;
-	    else
-	    {
-		/* ??? The WC_DEFAULTCHAR flag only gets used in
-		 * combination with the WC_COMPOSITECHECK flag or at
-		 * least this is what it seems from using the function
-		 * on NT4.0 in combination with reading the documentation.
-		 */
-		*dst = defchar ? *defchar : '?';
-		if(used)*used=1;
-	    }
-	    dstlen--;
-	    dst++;
-	}
-	count++;
-	srclen--;
-	if((!*src) && care_for_eos) {
-	    eos = 1;
-	    break;
-	}
-	src++;
+    if(!dont_copy){
+        if(*src<256)
+        *dst = *src;
+        else
+        {
+        /* ??? The WC_DEFAULTCHAR flag only gets used in
+         * combination with the WC_COMPOSITECHECK flag or at
+         * least this is what it seems from using the function
+         * on NT4.0 in combination with reading the documentation.
+         */
+        *dst = defchar ? *defchar : '?';
+        if(used)*used=1;
+        }
+        dstlen--;
+        dst++;
+    }
+    count++;
+    srclen--;
+    if((!*src) && care_for_eos) {
+        eos = 1;
+        break;
+    }
+    src++;
     }
     if (dont_copy)
-	return count;
+    return count;
 
     if (!eos && srclen > 0) {
-	SetLastError(ERROR_INSUFFICIENT_BUFFER);
-	return 0;
+    SetLastError(ERROR_INSUFFICIENT_BUFFER);
+    return 0;
     }
     return count;
 }
@@ -203,7 +203,7 @@ BOOL WIN32API GetCPInfo(UINT uCodePage, CPINFO *lpCPInfo)
 // unilen: length of astring buffer (including 0 terminator)
 // returns string length
 //******************************************************************************
-int WIN32API UnicodeToAsciiN(WCHAR *ustring, char *astring, int unilen)
+int WIN32API UnicodeToAsciiN(LPCWSTR ustring, char *astring, int unilen)
 {
   int i;
   int rc;
@@ -263,7 +263,7 @@ int WIN32API UnicodeToAsciiN(WCHAR *ustring, char *astring, int unilen)
 // Converts unicode string to ascii string
 // returns length of ascii string
 //******************************************************************************
-int WIN32API UnicodeToAscii(WCHAR *ustring, char *astring)
+int WIN32API UnicodeToAscii(LPCWSTR ustring, char *astring)
 {
   /* forward to function with len parameter */
   return UnicodeToAsciiN(ustring, astring, UniStrlen((UniChar*)ustring)+1); //end included
@@ -272,7 +272,7 @@ int WIN32API UnicodeToAscii(WCHAR *ustring, char *astring)
 // Converts unicode string to ascii string
 // returns pointer to ascii string
 //******************************************************************************
-char * WIN32API UnicodeToAsciiString(WCHAR *ustring)
+char * WIN32API UnicodeToAsciiString(LPCWSTR ustring)
 {
   char *astring;
 
@@ -284,7 +284,7 @@ char * WIN32API UnicodeToAsciiString(WCHAR *ustring)
 }
 //******************************************************************************
 //******************************************************************************
-char * WIN32API UnicodeToAsciiStringN(WCHAR *ustring, ULONG length)
+char * WIN32API UnicodeToAsciiStringN(LPCWSTR ustring, ULONG length)
 {
   char *astring;
 
@@ -298,7 +298,7 @@ char * WIN32API UnicodeToAsciiStringN(WCHAR *ustring, ULONG length)
 // Converts ascii string to unicode string
 // returns pointer to unicode string
 //******************************************************************************
-WCHAR * WIN32API AsciiToUnicodeString(char *astring)
+WCHAR * WIN32API AsciiToUnicodeString(const char *astring)
 {
   WCHAR *ustring;
 
@@ -321,15 +321,15 @@ void WIN32API FreeAsciiString(char *astring)
 //******************************************************************************
 // asciilen: max length of unicode buffer (including end 0)
 //******************************************************************************
-void WIN32API AsciiToUnicodeN(char *ascii, WCHAR *unicode, int asciilen)
+void WIN32API AsciiToUnicodeN(const char *ascii, WCHAR *unicode, int asciilen)
 {
   int rc;
   int i;
   size_t uni_chars_left;
   size_t in_bytes_left;
   size_t num_subs;
-  UniChar * out_buf;
-  char    * in_buf;
+  UniChar     * out_buf;
+  const char  * in_buf;
 
 
   dprintf(("KERNEL32: AsciiToUnicodeN(%s,%08xh)\n",
@@ -386,7 +386,7 @@ void WIN32API AsciiToUnicodeN(char *ascii, WCHAR *unicode, int asciilen)
 //******************************************************************************
 // Copies the full string from ascii to unicode
 //******************************************************************************
-void WIN32API AsciiToUnicode(char *ascii, WCHAR *unicode)
+void WIN32API AsciiToUnicode(const char *ascii, WCHAR *unicode)
 {
   /* achimha for security, strlen might trap if garbage in */
   /* @@@PH 98/06/07 */
