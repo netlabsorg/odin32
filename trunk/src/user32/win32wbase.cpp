@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.377 2003-08-08 13:30:20 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.378 2003-10-06 09:49:38 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -1585,11 +1585,6 @@ LRESULT Win32BaseWindow::DefWindowProcA(UINT Msg, WPARAM wParam, LPARAM lParam)
         }
         else
         {
-          // determine length of new text
-          int iTextLength = strlen(lpsz);
-
-          if (windowNameLengthA < iTextLength)
-          {
             if (windowNameA)
             {
               free(windowNameA);
@@ -1601,15 +1596,12 @@ LRESULT Win32BaseWindow::DefWindowProcA(UINT Msg, WPARAM wParam, LPARAM lParam)
               free(windowNameW);
               windowNameW = NULL;
             }
-          }
 
-          windowNameLengthA = iTextLength;
-          if(!windowNameA)
-            windowNameA = (LPSTR)_smalloc(windowNameLengthA+1);
+          windowNameLengthA = strlen( lpsz );
+          windowNameA = (LPSTR)_smalloc(windowNameLengthA+1);
           strcpy(windowNameA, lpsz);
-          windowNameLengthW = lstrlenAtoW( windowNameA, -1 );
-          if(!windowNameW)
-            windowNameW = (LPWSTR)_smalloc(( windowNameLengthW + 1 )*sizeof(WCHAR));
+          windowNameLengthW = lstrlenAtoW( lpsz, -1 );
+          windowNameW = (LPWSTR)_smalloc(( windowNameLengthW + 1 )*sizeof(WCHAR));
           lstrcpyAtoW( windowNameW, windowNameA );
         }
 
@@ -2123,8 +2115,8 @@ LRESULT Win32BaseWindow::DefWindowProcA(UINT Msg, WPARAM wParam, LPARAM lParam)
         return 0; //comctl32 controls expect this
 
     case WM_IME_CHAR:
-        if( wParam & 0xFF00 ) // DBCS ? 
-            SendMessageA( getWindowHandle(), WM_CHAR, ( WPARAM )( BYTE )( wParam >> 8 ), lParam ); 
+        if( wParam & 0xFF00 ) // DBCS ?
+            SendMessageA( getWindowHandle(), WM_CHAR, ( WPARAM )( BYTE )( wParam >> 8 ), lParam );
         SendMessageA( getWindowHandle(), WM_CHAR, ( WPARAM )( BYTE )( wParam & 0xFF ), lParam );
         break;
 
@@ -2168,11 +2160,6 @@ LRESULT Win32BaseWindow::DefWindowProcW(UINT Msg, WPARAM wParam, LPARAM lParam)
         }
         else
         {
-          // determine length of new text
-          int iTextLength = lstrlenW(lpsz);
-
-          if (windowNameLengthW < iTextLength)
-          {
             if (windowNameA)
             {
               free(windowNameA);
@@ -2184,15 +2171,12 @@ LRESULT Win32BaseWindow::DefWindowProcW(UINT Msg, WPARAM wParam, LPARAM lParam)
               free(windowNameW);
               windowNameW = NULL;
             }
-          }
 
-          windowNameLengthW = iTextLength;
-          if(!windowNameW)
-            windowNameW = (LPWSTR)_smalloc((windowNameLengthW+1)*sizeof(WCHAR));
+          windowNameLengthW = lstrlenW( lpsz );
+          windowNameW = (LPWSTR)_smalloc((windowNameLengthW+1)*sizeof(WCHAR));
           strcpyW(windowNameW, lpsz);
-          windowNameLengthA = lstrlenWtoA( windowNameW, -1 );
-          if(!windowNameA)
-            windowNameA = (LPSTR)_smalloc( windowNameLengthA + 1 );
+          windowNameLengthA = lstrlenWtoA( lpsz, -1 );
+          windowNameA = (LPSTR)_smalloc( windowNameLengthA + 1 );
           lstrcpyWtoA( windowNameA, windowNameW );
         }
 
