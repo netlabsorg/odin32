@@ -35,6 +35,16 @@
 DEFAULT_DEBUG_CHANNEL(shell);
 
 
+/****************************************************************************
+ * local prototypes
+ ****************************************************************************/
+
+DWORD        _Optlink ODIN_ILFree       (LPITEMIDLIST pidl);
+LPITEMIDLIST _Optlink ODIN_ILCombine    (LPCITEMIDLIST pidl1, LPCITEMIDLIST pidl2);
+LPITEMIDLIST _Optlink ODIN_ILClone      (LPCITEMIDLIST pidl);
+LPITEMIDLIST _Optlink ODIN_ILCloneFirst (LPCITEMIDLIST pidl);
+
+
 /***************************************************************************
  * debughelper: print out the return adress
  *  helps especially to track down unbalanced AddRef/Release
@@ -118,13 +128,13 @@ static HRESULT SHELL32_ParseNextElement(
 	  hr = IShellFolder_ParseDisplayName(psfChild, hwndOwner, NULL, szNext, pEaten, &pidlOut, pdwAttributes);
 	  IShellFolder_Release(psfChild);
 
-	  pidlTemp = ILCombine(*pidlInOut, pidlOut);
+	  pidlTemp = ODIN_ILCombine(*pidlInOut, pidlOut);
 
 	  if (pidlOut) 
-	    ILFree(pidlOut);
+	    ODIN_ILFree(pidlOut);
 	}
 
-	ILFree(*pidlInOut);
+	ODIN_ILFree(*pidlInOut);
 	*pidlInOut = pidlTemp;
 
 	TRACE("-- pidl=%p ret=0x%08lx\n", pidlInOut? *pidlInOut: NULL, hr);
@@ -159,7 +169,7 @@ static HRESULT SHELL32_CoCreateInitSF (
 	  hr = IPersistFolder_QueryInterface(pPersistFolder, iid, (LPVOID*)&pShellFolder);
 	  if (SUCCEEDED(hr))
 	  {
-	    absPidl = ILCombine (pidlRoot, pidlChild);
+	    absPidl = ODIN_ILCombine (pidlRoot, pidlChild);
 	    hr = IPersistFolder_Initialize(pPersistFolder, absPidl);
 	    IPersistFolder_Release(pPersistFolder);
 	    SHFree(absPidl);
@@ -186,7 +196,7 @@ static HRESULT SHELL32_GetDisplayNameOfChild(
 	TRACE("(%p)->(pidl=%p 0x%08lx %p 0x%08lx)\n",psf,pidl,dwFlags,szOut, dwOutLen);
 	pdump(pidl);
 	
-	if ((pidlFirst = ILCloneFirst(pidl)))
+	if ((pidlFirst = ODIN_ILCloneFirst(pidl)))
 	{ 
 	  hr = IShellFolder_BindToObject(psf, pidlFirst, NULL, &IID_IShellFolder, (LPVOID*)&psfChild);
 	  if (SUCCEEDED(hr))
@@ -201,7 +211,7 @@ static HRESULT SHELL32_GetDisplayNameOfChild(
 
 	    IShellFolder_Release(psfChild);
 	  }
-	  ILFree(pidlFirst);
+	  ODIN_ILFree(pidlFirst);
 	}
 
 	TRACE("-- ret=0x%08lx %s\n", hr, szOut);
@@ -517,7 +527,7 @@ IShellFolder * IShellFolder_Constructor(
 	{
 	  int len;
 
-	  sf->absPidl = ILCombine(This->absPidl, pidl);	/* build a absolute pidl */
+	  sf->absPidl = ODIN_ILCombine(This->absPidl, pidl);	/* build a absolute pidl */
 
 	  if (!_ILIsSpecialFolder(pidl))				/* only file system paths */
 	  {
@@ -751,7 +761,7 @@ static HRESULT WINAPI IShellFolder_fnBindToObject( IShellFolder2 * iface, LPCITE
 	  if (  SUCCEEDED(SHCoCreateInstance(NULL, iid, NULL, riid, (LPVOID*)&pShellFolder))
 	     && SUCCEEDED(IShellFolder_QueryInterface(pShellFolder, &IID_IPersistFolder, (LPVOID*)&pPersistFolder)))
 	    {
-	      absPidl = ILCombine (This->absPidl, pidl);
+	      absPidl = ODIN_ILCombine (This->absPidl, pidl);
 	      IPersistFolder_Initialize(pPersistFolder, absPidl);
 	      IPersistFolder_Release(pPersistFolder);
 	      SHFree(absPidl);
@@ -763,9 +773,9 @@ static HRESULT WINAPI IShellFolder_fnBindToObject( IShellFolder2 * iface, LPCITE
 	}
 	else if(_ILIsFolder(pidl))
 	{
-	  LPITEMIDLIST pidltemp = ILCloneFirst(pidl);
+	  LPITEMIDLIST pidltemp = ODIN_ILCloneFirst(pidl);
 	  pShellFolder = IShellFolder_Constructor(iface, pidltemp);
-	  ILFree(pidltemp);
+	  ODIN_ILFree(pidltemp);
 	}
 	else
 	{
@@ -887,7 +897,7 @@ static HRESULT WINAPI  IShellFolder_fnCompareIDs(
 
 	      if (pidl1 && pidl1->mkid.cb)		/* go deeper? */	
 	      {
-	        pidlTemp = ILCloneFirst(pidl1);
+	        pidlTemp = ODIN_ILCloneFirst(pidl1);
 	        pidl2 = ILGetNext(pidl2);
 	
 	        hr = IShellFolder_BindToObject(iface, pidlTemp, NULL, &IID_IShellFolder, (LPVOID*)&psf);
@@ -897,7 +907,7 @@ static HRESULT WINAPI  IShellFolder_fnCompareIDs(
 	          IShellFolder_Release(psf);
 	          hr = ResultFromShort(nReturn);
 	        }
-	        ILFree(pidlTemp);
+	        ODIN_ILFree(pidlTemp);
 	      }
 	      else
 	      {
@@ -1053,7 +1063,7 @@ static HRESULT WINAPI IShellFolder_fnGetUIObjectOf(
 	  }
 	  else if (IsEqualIID(riid, &IID_IExtractIconA) && (cidl == 1))
 	  {
-	    pidl = ILCombine(This->absPidl,apidl[0]);
+	    pidl = ODIN_ILCombine(This->absPidl,apidl[0]);
 	    pObj = (LPUNKNOWN)IExtractIconA_Constructor( pidl );
 	    SHFree(pidl);
 	    hr = S_OK;
@@ -1463,7 +1473,7 @@ static HRESULT WINAPI ISFHelper_fnAddFolder(
 
 	  pidlitem = SHSimpleIDListFromPathA(lpstrNewDir);
 
-	  pidl = ILCombine(This->absPidl, pidlitem);
+	  pidl = ODIN_ILCombine(This->absPidl, pidlitem);
 	  SHChangeNotifyA(SHCNE_MKDIR, SHCNF_IDLIST, pidl, NULL);
 	  SHFree(pidl); 
 
@@ -1528,7 +1538,7 @@ static HRESULT WINAPI ISFHelper_fnDeleteItems(
               TRACE("delete %s failed, bConfirm=%d", szPath, bConfirm);
 	      return E_FAIL;
 	    }
-	    pidl = ILCombine(This->absPidl, apidl[i]);
+	    pidl = ODIN_ILCombine(This->absPidl, apidl[i]);
 	    SHChangeNotifyA(SHCNE_RMDIR, SHCNF_IDLIST, pidl, NULL);
 	    SHFree(pidl); 
 	  }
@@ -1542,7 +1552,7 @@ static HRESULT WINAPI ISFHelper_fnDeleteItems(
               TRACE("delete %s failed, bConfirm=%d", szPath, bConfirm);
 	      return E_FAIL;
 	    }
-	    pidl = ILCombine(This->absPidl, apidl[i]);
+	    pidl = ODIN_ILCombine(This->absPidl, apidl[i]);
 	    SHChangeNotifyA(SHCNE_DELETE, SHCNF_IDLIST, pidl, NULL);
 	    SHFree(pidl); 
 	  }
@@ -1795,8 +1805,8 @@ static HRESULT WINAPI ISF_Desktop_fnBindToObject( IShellFolder2 * iface, LPCITEM
 
 	  /* combine pidls */
 	  SHGetSpecialFolderLocation(0, CSIDL_DESKTOPDIRECTORY, &deskpidl);
-	  firstpidl = ILCloneFirst(pidl);
-	  completepidl = ILCombine(deskpidl, firstpidl);
+	  firstpidl = ODIN_ILCloneFirst(pidl);
+	  completepidl = ODIN_ILCombine(deskpidl, firstpidl);
 
 	  pShellFolder = IShellFolder_Constructor(NULL, NULL);
 	  if (SUCCEEDED(IShellFolder_QueryInterface(pShellFolder, &IID_IPersistFolder, (LPVOID*)&ppf)))
@@ -1804,9 +1814,9 @@ static HRESULT WINAPI ISF_Desktop_fnBindToObject( IShellFolder2 * iface, LPCITEM
 	    IPersistFolder_Initialize(ppf, completepidl);
 	    IPersistFolder_Release(ppf);
 	  }
-	  ILFree(completepidl);
-	  ILFree(deskpidl);
-	  ILFree(firstpidl);
+	  ODIN_ILFree(completepidl);
+	  ODIN_ILFree(deskpidl);
+	  ODIN_ILFree(firstpidl);
 	}
 	
 	if (_ILIsPidlSimple(pidl))	/* no sub folders */
@@ -2227,9 +2237,9 @@ static HRESULT WINAPI ISF_MyComputer_fnBindToObject( IShellFolder2 * iface, LPCI
 	{
 	  if (!_ILIsDrive(pidl)) return E_INVALIDARG;
 
-	  pidltemp = ILCloneFirst(pidl);
+	  pidltemp = ODIN_ILCloneFirst(pidl);
 	  pShellFolder = IShellFolder_Constructor(iface, pidltemp);
-	  ILFree(pidltemp);
+	  ODIN_ILFree(pidltemp);
 	}
 
 	if (_ILIsPidlSimple(pidl))	/* no sub folders */
