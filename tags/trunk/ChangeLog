@@ -1,7 +1,11 @@
-/* $Id: ChangeLog,v 1.1724 2001-10-07 08:25:04 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.1725 2001-10-07 11:49:03 sandervl Exp $ */
 
  2001-10-07: Sander van Leeuwen <sandervl@xs4all.nl>
     - DDRAW:    o Don't use Dive for blitting to/from 8 bpp surfaces
+    - USER32:   o Eliminated flickering during frame sizing due to 
+                  unnecessary drawing
+                o Fixed handling of WM_SIZING/WM_MOVING (changing rectangles)
+                o WM_TRACKFRAME: call Frame_SysCommandSizeMove with SC_MOVE+HTCAPTION
 
  2001-10-06: Sander van Leeuwen <sandervl@xs4all.nl>
     - QUARTZ/OLEAUT32: 
