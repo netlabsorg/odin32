@@ -1,4 +1,4 @@
-/* $Id: shellord.cpp,v 1.2 1999-10-09 11:17:05 sandervl Exp $ */
+/* $Id: shellord.cpp,v 1.3 1999-11-02 19:17:15 phaller Exp $ */
 /*
  * The parameters of many functions changes between different OS versions
  * (NT uses Unicode strings, 95 uses ASCII strings)
@@ -23,6 +23,7 @@
 #include "shlobj.h"
 #include "shell32_main.h"
 #include "wine/undocshell.h"
+#include "shpolicy.h"
 
 #include <heapstring.h>
 #include <misc.h>
@@ -340,40 +341,119 @@ ShellMessageBoxA(HMODULE hmod,HWND hwnd,DWORD idText,DWORD idTitle,DWORD uType,L
  * SHRestricted				[SHELL32.100]
  *
  * walks through policy table, queries <app> key, <type> value, returns
- * queried (DWORD) value.
- * {0x00001,Explorer,NoRun}
- * {0x00002,Explorer,NoClose}
- * {0x00004,Explorer,NoSaveSettings}
- * {0x00008,Explorer,NoFileMenu}
- * {0x00010,Explorer,NoSetFolders}
- * {0x00020,Explorer,NoSetTaskbar}
- * {0x00040,Explorer,NoDesktop}
- * {0x00080,Explorer,NoFind}
- * {0x00100,Explorer,NoDrives}
- * {0x00200,Explorer,NoDriveAutoRun}
- * {0x00400,Explorer,NoDriveTypeAutoRun}
- * {0x00800,Explorer,NoNetHood}
- * {0x01000,Explorer,NoStartBanner}
- * {0x02000,Explorer,RestrictRun}
- * {0x04000,Explorer,NoPrinterTabs}
- * {0x08000,Explorer,NoDeletePrinter}
- * {0x10000,Explorer,NoAddPrinter}
- * {0x20000,Explorer,NoStartMenuSubFolders}
- * {0x40000,Explorer,MyDocsOnNet}
- * {0x80000,WinOldApp,NoRealMode}
+ * queried (DWORD) value, and caches it between called to SHInitRestricted
+ * to prevent unnecessary registry access.
  *
  * NOTES
  *     exported by ordinal
+ *
+ * REFERENCES:
+ *     MS System Policy Editor
+ *     98Lite 2.0 (which uses many of these policy keys) http://www.98lite.net/
+ *     "The Windows 95 Registry", by John Woram, 1996 MIS: Press
  */
 DWORD WINAPI SHRestricted (DWORD pol) {
+        char regstr[256];
 	HKEY	xhkey;
+	DWORD   retval, polidx, i, datsize = 4;
 
-	FIXME("(%08lx):stub.\n",pol);
-	if (RegOpenKeyA(HKEY_CURRENT_USER,"Software\\Microsoft\\Windows\\CurrentVersion\\Policies",&xhkey))
+	TRACE("(%08lx)\n",pol);
+
+	polidx = -1;
+
+	/* scan to see if we know this policy ID */
+	for (i = 0; i < SHELL_MAX_POLICIES; i++)
+	{
+	     if (pol == sh32_policy_table[i].polflags)
+	     {
+	         polidx = i;
+		 break;
+	     }
+	}
+
+	if (polidx == -1)
+	{
+	    /* we don't know this policy, return 0 */
+	    TRACE("unknown policy: (%08lx)\n", pol);
 		return 0;
-	/* FIXME: do nothing for now, just return 0 (== "allowed") */
+	}
+
+	/* we have a known policy */
+      	lstrcpyA(regstr, "Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\");
+	lstrcatA(regstr, sh32_policy_table[polidx].appstr);
+
+	/* first check if this policy has been cached, return it if so */
+	if (sh32_policy_table[polidx].cache != SHELL_NO_POLICY)
+	{
+	    return sh32_policy_table[polidx].cache;
+	}
+
+	/* return 0 and don't set the cache if any registry errors occur */
+	retval = 0;
+	if (RegOpenKeyA(HKEY_CURRENT_USER, regstr, &xhkey) == ERROR_SUCCESS)
+	{
+	    if (RegQueryValueExA(xhkey, sh32_policy_table[polidx].keystr, NULL, NULL, (LPBYTE)&retval, &datsize) == ERROR_SUCCESS)
+	    {
+	        sh32_policy_table[polidx].cache = retval;
+	    }
+
 	RegCloseKey(xhkey);
-	return 0;
+}
+
+	return retval;
+}
+
+/*************************************************************************
+ *      SHInitRestricted                         [SHELL32.244]
+ *
+ * Win98+ by-ordinal only routine called by Explorer and MSIE 4 and 5.
+ * Inits the policy cache used by SHRestricted to avoid excess
+ * registry access.
+ *
+ * INPUTS
+ * Two inputs: one is a string or NULL.  If non-NULL the pointer
+ * should point to a string containing the following exact text:
+ * "Software\Microsoft\Windows\CurrentVersion\Policies".
+ * The other input is unused.
+ *
+ * NOTES
+ * If the input is non-NULL and does not point to a string containing
+ * that exact text the routine will do nothing.
+ *
+ * If the text does match or the pointer is NULL, then the routine
+ * will init SHRestricted()'s policy cache to all 0xffffffff and
+ * returns 0xffffffff as well.
+ *
+ * I haven't yet run into anything calling this with inputs other than
+ * (NULL, NULL), so I may have the inputs reversed.
+ */
+
+BOOL WINAPI SHInitRestricted(LPSTR inpRegKey, LPSTR parm2)
+{
+     int i;
+
+     dprintf(("SHELL32:SHELLORD:SHInitRestricted(%p, %p)\n", inpRegKey, parm2));
+
+     /* first check - if input is non-NULL and points to the secret
+        key string, then pass.  Otherwise return 0.
+     */
+
+     if (inpRegKey != (LPSTR)NULL)
+     {
+         if (lstrcmpiA(inpRegKey, "Software\\Microsoft\\Windows\\CurrentVersion\\Policies"))
+	 {
+	     /* doesn't match, fail */
+	     return 0;
+	 }
+     }
+
+     /* check passed, init all policy cache entries with SHELL_NO_POLICY */
+     for (i = 0; i < SHELL_MAX_POLICIES; i++)
+     {
+          sh32_policy_table[i].cache = SHELL_NO_POLICY;
+     }
+
+     return SHELL_NO_POLICY;
 }
 
 /*************************************************************************
@@ -804,7 +884,7 @@ HRESULT WINAPI SHGetInstanceExplorer (LPUNKNOWN * lpUnknown)
 	if (!SHELL32_IExplorerInterface)
 	  return E_FAIL;
 
-	SHELL32_IExplorerInterface->lpvtbl->fnAddRef(SHELL32_IExplorerInterface);
+	IUnknown_AddRef(SHELL32_IExplorerInterface);
 	return NOERROR;
 }
 /*************************************************************************
@@ -863,17 +943,6 @@ HRESULT WINAPI SHRegOpenKeyW (HKEY hkey, LPCWSTR lpszSubKey, LPHKEY retkey)
 {	WARN("0x%04x %s %p\n",hkey,debugstr_w(lpszSubKey),retkey);
 	return RegOpenKeyW( hkey, lpszSubKey, retkey );
 }
-/*************************************************************************
- * SHRegQueryValueA				[NT4.0:SHELL32.?]
- *
- */
-HRESULT WINAPI SHRegQueryValueA (HKEY hkey, LPSTR lpszSubKey,
-				 LPSTR lpszData, LPDWORD lpcbData )
-{	WARN("0x%04x %s %p %p semi-stub\n",
-		hkey, lpszSubKey, lpszData, lpcbData);
-	return RegQueryValueA( hkey, lpszSubKey, lpszData, (LPLONG)lpcbData );
-}
-
 /*************************************************************************
  * SHRegQueryValueExA				[SHELL32.509]
  *
@@ -1174,6 +1243,28 @@ HRESULT WINAPI SHFlushClipboard(void)
 	return 1;
 }
 /*************************************************************************
+ * StrRChrA					[SHELL32.346]
+ *
+ */
+LPSTR WINAPI StrRChrA(LPCSTR lpStart, LPCSTR lpEnd, DWORD wMatch)
+{
+    	if (!lpStart)
+	    return NULL;
+
+	/* if the end not given, search*/
+	if (!lpEnd)
+	{ lpEnd=lpStart;
+	  while (*lpEnd)
+	    lpEnd++;
+	}
+
+	for (--lpEnd;lpStart <= lpEnd; lpEnd--)
+	    if (*lpEnd==(char)wMatch)
+		return (LPSTR)lpEnd;
+
+	return NULL;
+}
+/*************************************************************************
  * StrRChrW					[SHELL32.320]
  *
  */
@@ -1345,3 +1436,36 @@ HRESULT WINAPI DoEnvironmentSubstAW(LPVOID x, LPVOID y)
 	return DoEnvironmentSubstA((LPSTR)x, (LPSTR)y);
 }
 
+/*************************************************************************
+ *      shell32_243                             [SHELL32.243]
+ *
+ * Win98+ by-ordinal routine.  In Win98 this routine returns zero and
+ * does nothing else.  Possibly this does something in NT or SHELL32 5.0?
+ *
+ */
+
+BOOL WINAPI shell32_243(DWORD a, DWORD b)
+{
+  return FALSE;
+}
+
+/************************************************************************
+ *      Win32DeleteFile                         [SHELL32.164]
+ *
+ * Deletes a file.  Also triggers a change notify if one exists, but
+ * that mechanism doesn't yet exist in Wine's SHELL32.
+ *
+ * FIXME:
+ * Verified on Win98 / IE 5 (SHELL32 4.72, March 1999 build) to be
+ * ANSI.  Is this Unicode on NT?
+ *
+ */
+
+BOOL WINAPI Win32DeleteFile(LPSTR fName)
+{
+  dprintf(("SHELL32:SHELLORD:Win32DeleteFile %p(%s): partial stub\n", fName, fName));
+
+  DeleteFileA(fName);
+
+  return TRUE;
+}
