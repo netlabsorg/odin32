@@ -1,9 +1,11 @@
- /* $Id: changelog,v 1.827 2000-03-21 19:52:40 sandervl Exp $ */
+ /* $Id: changelog,v 1.828 2000-03-21 21:23:37 sandervl Exp $ */
 
  2000-03-21: Sander van Leeuwen <sandervl@xs4all.nl>
 	- GDI32: Added RGB 555 to 565 conversion in dibsection blit.
                  (fixes wrong colors in RealPlayer 7 Update 1 (rm videos
                   only))
+	- include\odinwrap.h: Disable heap checking by default for debug
+                              build -> kills performance!
 
  2000-03-21: Edgar Buerkle <Edgar.Buerkle@gmx.net>
         - MSVCRT: Adding logging statement to _EH_prolog
