@@ -1,4 +1,4 @@
-/* $Id: toolbar.c,v 1.15 1999-10-22 18:04:13 sandervl Exp $ */
+/* $Id: toolbar.c,v 1.16 1999-10-24 22:49:47 sandervl Exp $ */
 /*
  * Toolbar control
  *
@@ -4192,7 +4192,8 @@ TOOLBAR_Register (VOID)
 {
     WNDCLASSA wndClass;
 
-    if (GlobalFindAtomA (TOOLBARCLASSNAMEA)) return;
+//SvL: Don't check this now
+//    if (GlobalFindAtomA (TOOLBARCLASSNAMEA)) return;
 
     ZeroMemory (&wndClass, sizeof(WNDCLASSA));
     wndClass.style         = CS_GLOBALCLASS | CS_DBLCLKS;

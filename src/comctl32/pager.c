@@ -1,4 +1,4 @@
-/* $Id: pager.c,v 1.4 1999-08-14 16:13:12 cbratschi Exp $ */
+/* $Id: pager.c,v 1.5 1999-10-24 22:49:45 sandervl Exp $ */
 /*
  * Pager control
  *
@@ -366,7 +366,8 @@ PAGER_Register (VOID)
 {
     WNDCLASSA wndClass;
 
-    if (GlobalFindAtomA (WC_PAGESCROLLERA)) return;
+//SvL: Don't check this now
+//    if (GlobalFindAtomA (WC_PAGESCROLLERA)) return;
 
     ZeroMemory (&wndClass, sizeof(WNDCLASSA));
     wndClass.style         = CS_GLOBALCLASS | CS_DBLCLKS | CS_SAVEBITS;

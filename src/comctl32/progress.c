@@ -1,4 +1,4 @@
-/* $Id: progress.c,v 1.10 1999-08-21 12:10:01 cbratschi Exp $ */
+/* $Id: progress.c,v 1.11 1999-10-24 22:49:46 sandervl Exp $ */
 /*
  * Progress control
  *
@@ -574,7 +574,8 @@ PROGRESS_Register (VOID)
 {
     WNDCLASSA wndClass;
 
-    if (GlobalFindAtomA(PROGRESS_CLASSA)) return;
+//SvL: Don't check this now
+//    if (GlobalFindAtomA(PROGRESS_CLASSA)) return;
 
     ZeroMemory (&wndClass, sizeof( WNDCLASSA));
     wndClass.style         = CS_GLOBALCLASS | CS_VREDRAW | CS_HREDRAW;

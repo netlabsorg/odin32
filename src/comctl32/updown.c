@@ -1,4 +1,4 @@
-/* $Id: updown.c,v 1.9 1999-09-18 12:21:26 cbratschi Exp $ */
+/* $Id: updown.c,v 1.10 1999-10-24 22:49:50 sandervl Exp $ */
 /*
  * Updown control
  *
@@ -1163,7 +1163,8 @@ UPDOWN_Register(void)
 {
     WNDCLASSA wndClass;
 
-    if( GlobalFindAtomA( UPDOWN_CLASSA ) ) return;
+//SvL: Don't check this now
+//    if( GlobalFindAtomA( UPDOWN_CLASSA ) ) return;
 
     ZeroMemory( &wndClass, sizeof( WNDCLASSA ) );
     wndClass.style         = CS_GLOBALCLASS | CS_VREDRAW;

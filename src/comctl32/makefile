@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.16 1999-10-22 18:04:10 sandervl Exp $
+# $Id: makefile,v 1.17 1999-10-24 22:49:45 sandervl Exp $
 #
 # PD-Win32 API
 #
@@ -78,7 +78,7 @@ listview.obj: listview.c
 draglist.obj: draglist.c
 
 clean:
-        $(RM) *.obj *.lib *.dll *~ *.map *.pch
+        $(RM) *.obj *.lib *.dll *.map *.pch
         $(RM) $(PDWIN32_BIN)\$(TARGET).dll
         $(RM) $(PDWIN32_LIB)\$(TARGET).lib
 
