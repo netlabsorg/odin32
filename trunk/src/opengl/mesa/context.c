@@ -1,4 +1,4 @@
-/* $Id: context.c,v 1.4 2000-05-23 20:40:25 jeroen Exp $ */
+/* $Id: context.c,v 1.5 2001-10-10 22:34:36 phaller Exp $ */
 
 /*
  * Mesa 3-D graphics library
@@ -109,16 +109,21 @@ struct immediate *_mesa_CurrentInput = NULL;
 
 #ifdef PROFILE
 
+#ifndef __WIN32OS2__
 #include <sys/times.h>
 #include <sys/param.h>
-
+#endif
 
 /*
  * Return system time in seconds.
  * NOTE:  this implementation may not be very portable!
  */
+
 GLdouble gl_time( void )
 {
+#ifdef __WIN32OS2__
+  return 1; // @@@PH
+#else
    static GLdouble prev_time = 0.0;
    static GLdouble time;
    struct tms tm;
@@ -139,6 +144,7 @@ GLdouble gl_time( void )
    else {
       return prev_time;
    }
+#endif
 }
 
 /*
@@ -254,7 +260,6 @@ static void print_timings( GLcontext *ctx )
    printf("Average number of vertices per begin/end: %8.3f\n", avgvertices );
 }
 #endif
-
 
 
 
