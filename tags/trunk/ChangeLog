@@ -6,6 +6,12 @@
 	- GDI32: Fixed SetDIBitsToDevice bugfix (palette size)
 	- USER32: Fixed RegisterSystemClasses
 
+ 99-07-06: Achim Hasenmueller
+	- Added comctl32, mostly untested includes all controls, some undocumented
+	  APIs missing
+	- Added internal GetSysColorPen() to user32 - handy API used in WINE
+	  Modified syscolor.cpp to support new Win98 colors and create pens
+
  99-06-06: Sander van Leeuwen
 	- Bugfixes in VirtualAlloc (KERNEL32), GetScrollPos & RegisterSystemClasses (USER32)
           as reported on mailinglist by Edgar Buerkle.
