@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.89 2000-04-15 15:11:13 sandervl Exp $ */
+/* $Id: pmwindow.cpp,v 1.90 2000-05-12 18:09:41 sandervl Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -139,7 +139,7 @@ BOOL InitPM()
    DevCloseDC(hdc);
 
    dprintf(("InitPM: Desktop (%d,%d)", ScreenWidth, ScreenHeight));
-   return OSLibInitMsgQueue();
+   return TRUE;
 } /* End of main */
 //******************************************************************************
 //Win32 window message handler
@@ -438,9 +438,21 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
     }
 
     case WM_PAINT:
+    {
+//     RECTL rectl;
+
         dprintf(("OS2: WM_PAINT"));
         win32wnd->DispatchMsgA(pWinMsg);
-        goto RunDefWndProc;
+	//SvL: Not calling the default window procedure causes all sorts of
+        //     strange problems (redraw & hanging app)
+//   	WinQueryUpdateRect(hwnd, &rectl);
+//        if(rectl.xLeft == 0 && rectl.yTop == 0 && rectl.xRight == 0 && rectl.yBottom == 0) {
+//        	RestoreOS2TIB();
+//        	return (MRESULT)FALSE;
+//	}
+//	dprintf(("Update rectangle (%d,%d)(%d,%d) not empty, msg %x", rectl.xLeft, rectl.yTop, rectl.xRight, rectl.yBottom, pWinMsg->message));
+	goto RunDefWndProc;
+    }
 
     case WM_CONTEXTMENU:
     {

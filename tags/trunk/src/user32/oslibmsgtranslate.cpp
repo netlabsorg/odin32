@@ -1,4 +1,4 @@
-/* $Id: oslibmsgtranslate.cpp,v 1.29 2000-05-02 20:50:49 sandervl Exp $ */
+/* $Id: oslibmsgtranslate.cpp,v 1.30 2000-05-12 18:09:40 sandervl Exp $ */
 /*
  * Window message translation functions for OS/2
  *
@@ -864,13 +864,13 @@ BOOL OSLibWinTranslateMessage(MSG *msg)
     }
     //NOTE: These actually need to be posted so that the next message retrieved by GetMessage contains
     //      the newly generated WM_CHAR message.
-    if(!thdb->fTranslated && MsgThreadPtr->msg == WM_CHAR && !((SHORT1FROMMP(MsgThreadPtr->mp1) & KC_KEYUP) == KC_KEYUP))
+    if(!thdb->fTranslated && thdb->os2msg.msg == WM_CHAR && !((SHORT1FROMMP(thdb->os2msg.mp1) & KC_KEYUP) == KC_KEYUP))
     {//TranslatedMessage was called before DispatchMessage, so queue WM_CHAR message
-            ULONG fl = SHORT1FROMMP(MsgThreadPtr->mp1);
+            ULONG fl = SHORT1FROMMP(thdb->os2msg.mp1);
             MSG extramsg;
 
             memcpy(&extramsg, msg, sizeof(MSG));
-            extramsg.wParam = SHORT1FROMMP(MsgThreadPtr->mp2);
+            extramsg.wParam = SHORT1FROMMP(thdb->os2msg.mp2);
             extramsg.lParam = 0;
 
             if(!(fl & KC_CHAR)) {
@@ -880,7 +880,7 @@ BOOL OSLibWinTranslateMessage(MSG *msg)
             if(fl & KC_VIRTUALKEY) {
                 if(msg->wParam)
                         extramsg.wParam = msg->wParam;
-                else    extramsg.wParam = SHORT2FROMMP(MsgThreadPtr->mp2);
+                else    extramsg.wParam = SHORT2FROMMP(thdb->os2msg.mp2);
             }
 
             if(msg->message >= WINWM_SYSKEYDOWN) {

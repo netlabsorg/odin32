@@ -1,4 +1,4 @@
-/* $Id: oslibmsg.h,v 1.12 2000-01-18 20:08:11 sandervl Exp $ */
+/* $Id: oslibmsg.h,v 1.13 2000-05-12 18:09:40 sandervl Exp $ */
 /*
  * Window message translation functions for OS/2
  *
@@ -21,8 +21,6 @@ ULONG TranslateWinMsg(ULONG msg);
 BOOL  OS2ToWinMsgTranslate(void *pThdb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode, BOOL fMsgRemoved);
 void  WinToOS2MsgTranslate(MSG *winMsg, QMSG *os2Msg, BOOL isUnicode);
 
-extern QMSG *MsgThreadPtr;
-
 #endif
 
 BOOL  OSLibWinGetMsg(LPMSG pMsg, HWND hwnd, UINT uMsgFilterMin, 
@@ -34,7 +32,6 @@ LONG  OSLibWinDispatchMsg(MSG *msg, BOOL isUnicode = FALSE);
 BOOL  OSLibWinTranslateMessage(MSG *msg);
 
 ULONG OSLibWinQueryMsgTime();
-BOOL  OSLibInitMsgQueue();
 BOOL  OSLibWinWaitMessage();
 BOOL  OSLibWinInSendMessage();
 DWORD OSLibWinGetMessagePos();
