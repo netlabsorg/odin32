@@ -1,4 +1,4 @@
-/* $Id: windlg.cpp,v 1.10 1999-10-31 01:14:44 sandervl Exp $ */
+/* $Id: windlg.cpp,v 1.11 1999-11-05 17:50:30 achimha Exp $ */
 /*
  * Win32 dialog apis for OS/2
  *
@@ -462,7 +462,7 @@ static BOOL DIALOG_DlgDirSelect( HWND hwnd, LPSTR str, INT len,
     SendMessageA( listbox, combo ? CB_GETLBTEXT : LB_GETTEXT,
                   item, (LPARAM)buffer );
 
-    if ((ret = (buffer[0] == '[')))  /* drive or directory */
+    if ((ret = (buffer[0] == '[')) != 0)  /* drive or directory */
     {
         if (buffer[1] == '-')  /* drive */
         {
@@ -516,8 +516,8 @@ static INT DIALOG_DlgDirList( HWND hDlg, LPSTR spec, INT idLBox,
     {
         char *p, *p2;
         p = spec;
-        if ((p2 = strrchr( p, '\\' ))) p = p2;
-        if ((p2 = strrchr( p, '/' ))) p = p2;
+        if ((p2 = strrchr( p, '\\' )) != 0) p = p2;
+        if ((p2 = strrchr( p, '/' )) != 0) p = p2;
         if (p != spec)
         {
             char sep = *p;
@@ -572,7 +572,7 @@ static INT DIALOG_DlgDirList( HWND hDlg, LPSTR spec, INT idLBox,
     {
         /* Update the original file spec */
         char *p = spec;
-        while ((*orig_spec++ = *p++));
+        while ((*orig_spec++ = *p++) != 0);
     }
 
     return TRUE;
