@@ -1,4 +1,4 @@
-/* $Id: win32wnd.cpp,v 1.12 1999-07-18 14:56:37 sandervl Exp $ */
+/* $Id: win32wnd.cpp,v 1.13 1999-07-18 18:04:30 sandervl Exp $ */
 /*
  * Win32 Window Code for OS/2
  *
@@ -1282,6 +1282,12 @@ HWND Win32Window::SetActiveWindow()
 BOOL Win32Window::EnableWindow(BOOL fEnable)
 {
   return OSLibWinEnableWindow(OS2Hwnd, fEnable);
+}
+//******************************************************************************
+//******************************************************************************
+BOOL Win32Window::CloseWindow()
+{
+  return OSLibWinMinimizeWindow(OS2Hwnd);
 }
 //******************************************************************************
 //******************************************************************************

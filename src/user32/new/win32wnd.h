@@ -1,4 +1,4 @@
-/* $Id: win32wnd.h,v 1.12 1999-07-18 17:12:03 sandervl Exp $ */
+/* $Id: win32wnd.h,v 1.13 1999-07-18 18:04:30 sandervl Exp $ */
 /*
  * Win32 Window Code for OS/2
  *
@@ -101,11 +101,13 @@ virtual	 WORD   GetWindowWord(int index);
 	 BOOL   IsIconic();
          HWND   GetWindow(UINT uCmd);
 	 BOOL   EnableWindow(BOOL fEnable);
+	 BOOL   CloseWindow();
  	 BOOL   BringWindowToTop();
   static HWND   GetActiveWindow();
 	 BOOL   IsWindow();
 	 BOOL   IsWindowEnabled();
 	 BOOL   IsWindowVisible();
+	 BOOL   IsUnicode()  { return isUnicode; };
 
 	 BOOL   GetWindowRect(PRECT pRect);
 	 int    GetWindowTextLengthA();
