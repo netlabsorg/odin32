@@ -1,7 +1,10 @@
- /* $Id: changelog,v 1.97 1999-08-18 10:56:09 sandervl Exp $ */
+ /* $Id: changelog,v 1.98 1999-08-18 12:25:09 sandervl Exp $ */
  99-08-18: Sander van Leeuwen <sandervl@xs4all.nl>
 	- Put back version check in most dlls (except odincrt.dll & peldr.dll
-          we don't want a kernel32 dependency there)
+	  we don't want a kernel32 dependency there)
+	- PELDR/KERNEL32: Use reserved memory by peldr.dll to store win32 exe
+                          sections. (now loads exes without fixups & low base address)
+                          Added TLS support.
 
  99-08-18: Przemyslaw Dobrowolski <dobrawka@asua.org.pl>
 	- KERNEL32: Profile bugfix (line 506) && removed redundant '\r' 
