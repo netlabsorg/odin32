@@ -1,4 +1,4 @@
-/* $Id: win32wbase.h,v 1.11 1999-10-03 20:13:04 achimha Exp $ */
+/* $Id: win32wbase.h,v 1.12 1999-10-03 20:38:02 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -106,6 +106,8 @@ virtual  WORD   GetWindowWord(int index);
  Win32WndClass *getWindowClass()                { return windowClass; };
 
          BOOL   isFrameWindow()                 { return OS2Hwnd != OS2HwndFrame; };
+virtual  BOOL   isMDIClient();
+
 Win32BaseWindow *getParent()                    { return (Win32BaseWindow *)ChildWindow::GetParent(); };
          void   setParent(Win32BaseWindow *pwindow) { ChildWindow::SetParent((ChildWindow *)pwindow); };
        WNDPROC  getWindowProc()                 { return win32wndproc; };
@@ -174,7 +176,6 @@ Win32WndClass  *getClass()  { return windowClass; };
 Win32BaseWindow *getOwner()                   { return owner; };
 
 Win32BaseWindow *getTopParent();
-BOOL isMDIClient();
  SCROLLBAR_INFO *getScrollInfo(int nBar);
        LONG      setScrollInfo(int nBar, SCROLLINFO *info, int fRedraw);
 
