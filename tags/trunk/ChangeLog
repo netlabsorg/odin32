@@ -1,4 +1,9 @@
-/* $Id: ChangeLog,v 1.2503 2003-02-27 11:26:51 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.2504 2003-02-27 14:21:56 sandervl Exp $ */
+
+ 2003-02-27: Platon Fomichev <stauff@innotek   >
+    - USER32:   o Illegal PM sequence of maximizing from icon state corrected.
+                  Inter-thread controls change caused PM lockups. Rewrote
+                  PM window frame controls manipulation procedure.
 
  2000-02-27: Achim Hasenmueller <achimha@innotek   >
     - KERNEL32: o MoveFile: detect if source and target file names are on a 
