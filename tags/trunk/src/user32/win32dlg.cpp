@@ -1,4 +1,4 @@
-/* $Id: win32dlg.cpp,v 1.79 2002-12-18 12:28:06 sandervl Exp $ */
+/* $Id: win32dlg.cpp,v 1.80 2002-12-18 14:04:24 sandervl Exp $ */
 /*
  * Win32 Dialog Code for OS/2
  *
@@ -1019,13 +1019,26 @@ void Win32Dialog::setFocus(HWND hwndCtrl )
 {
     HWND hwndPrev = GetFocus();
 
+#ifdef __WIN32OS2__
+    if(hwndPrev == hwndCtrl) {
+        //do nothing
+        //Acrobat Reader 4.05 opening screen (when EULA has not been shown
+        //local machine/software/adobe/acrobat reader/4.0/adobeviewer/EULA = 0)
+        //All text selected in edit control because focus set when the control
+        //already has focus.
+        //Not entirely sure this is 100% correct, but at least now it behaves
+        //like AR 4.05 in Windows NT 4.0 SP6
+        return;
+    }
+#endif
+
     if (IsChild( hwndPrev ))
     {
         if (::SendMessageA( hwndPrev, WM_GETDLGCODE, 0, 0 ) & DLGC_HASSETSEL)
             ::SendMessageA( hwndPrev, EM_SETSEL, TRUE, MAKELONG( -1, 0 ) );
     }
     if (::SendMessageA(hwndCtrl, WM_GETDLGCODE, 0, 0 ) & DLGC_HASSETSEL)
-        ::SendMessageA(hwndCtrl, EM_SETSEL, FALSE, MAKELONG( 0, -1 ) );
+        ::SendMessageA(hwndCtrl, EM_SETSEL, 0, -1 );
     SetFocus( hwndCtrl );
 }
 
