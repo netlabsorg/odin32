@@ -1,11 +1,11 @@
-/* $Id: progress.cpp,v 1.2 2000-03-17 17:13:23 cbratschi Exp $ */
+/* $Id: progress.cpp,v 1.3 2000-04-17 17:04:13 cbratschi Exp $ */
 /*
  * Progress control
  *
  * Copyright 1997 Dimitrie O. Paun
  * Copyright 1998, 1999 Eric Kohl
  * Copyright 1999 Achim Hasenmueller
- * Copyright 1999 Christoph Bratschi
+ * Copyright 1999 Christoph Bratschi (cbratschi@datacomm.ch)
  *
  * Status: complete
  * Version: 5.80
@@ -38,9 +38,6 @@ PROGRESS_Draw (HWND hwnd, HDC hdc, INT lastVal, BOOL inUpdate)
   int lastBar;
   RECT rect;
   DWORD dwStyle;
-
-//  TRACE(progress, "refresh pos=%d min=%d, max=%d\n",
-//             infoPtr->CurVal, infoPtr->MinVal, infoPtr->MaxVal);
 
   if (infoPtr->MinVal == infoPtr->MaxVal) return; //Prevent division through 0
 
@@ -329,7 +326,6 @@ static LRESULT PROGRESS_DeltaPos(HWND hwnd,WPARAM wParam,LPARAM lParam)
   PROGRESS_INFO *infoPtr = PROGRESS_GetInfoPtr(hwnd);
   INT temp;
 
-  //if(lParam) UNKNOWN_PARAM(PBM_DELTAPOS, wParam, lParam);
   temp = infoPtr->CurVal;
   if (wParam != 0)
   {
@@ -346,7 +342,6 @@ static LRESULT PROGRESS_SetPos(HWND hwnd,WPARAM wParam,LPARAM lParam)
   PROGRESS_INFO *infoPtr = PROGRESS_GetInfoPtr(hwnd);
   INT temp;
 
-  //if (lParam) UNKNOWN_PARAM(PBM_SETPOS, wParam, lParam);
   temp = infoPtr->CurVal;
   if (temp != wParam)
   {
@@ -363,7 +358,6 @@ static LRESULT PROGRESS_SetRange(HWND hwnd,WPARAM wParam,LPARAM lParam)
   PROGRESS_INFO *infoPtr = PROGRESS_GetInfoPtr(hwnd);
   INT temp;
 
-  //if (wParam) UNKNOWN_PARAM(PBM_SETRANGE, wParam, lParam);
   temp = MAKELONG(infoPtr->MinVal,infoPtr->MaxVal);
   if (temp != lParam)
   {
@@ -382,7 +376,6 @@ static LRESULT PROGRESS_SetStep(HWND hwnd,WPARAM wParam,LPARAM lParam)
   PROGRESS_INFO *infoPtr = PROGRESS_GetInfoPtr(hwnd);
   INT temp;
 
-  //if (lParam) UNKNOWN_PARAM(PBM_SETSTEP, wParam, lParam);
   temp = infoPtr->Step;
   infoPtr->Step = (INT)wParam; //CB: negative steps allowed
 
@@ -394,7 +387,6 @@ static LRESULT PROGRESS_StepIt(HWND hwnd,WPARAM wParam,LPARAM lParam)
   PROGRESS_INFO *infoPtr = PROGRESS_GetInfoPtr(hwnd);
   INT temp;
 
-  //if (wParam || lParam) UNKNOWN_PARAM(PBM_STEPIT, wParam, lParam);
   temp = infoPtr->CurVal;
   infoPtr->CurVal += infoPtr->Step;
   if(infoPtr->CurVal > infoPtr->MaxVal) infoPtr->CurVal = infoPtr->MinVal;
@@ -438,8 +430,6 @@ static LRESULT PROGRESS_GetPos(HWND hwnd,WPARAM wParam,LPARAM lParam)
 {
   PROGRESS_INFO *infoPtr = PROGRESS_GetInfoPtr(hwnd);
 
-  //if (wParam || lParam) UNKNOWN_PARAM(PBM_STEPIT, wParam, lParam);
-
   return (infoPtr->CurVal);
 }
 
@@ -448,7 +438,6 @@ static LRESULT PROGRESS_SetBarColor(HWND hwnd,WPARAM wParam,LPARAM lParam)
   PROGRESS_INFO *infoPtr = PROGRESS_GetInfoPtr(hwnd);
   COLORREF oldColorBar = infoPtr->ColorBar;
 
-  //if (wParam) UNKNOWN_PARAM(PBM_SETBARCOLOR, wParam, lParam);
   infoPtr->ColorBar = (COLORREF)lParam;
   if (infoPtr->ColorBar != oldColorBar) PROGRESS_Refresh(hwnd);
 
@@ -460,7 +449,6 @@ static LRESULT PROGRESS_SetBkColor(HWND hwnd,WPARAM wParam,LPARAM lParam)
   PROGRESS_INFO *infoPtr = PROGRESS_GetInfoPtr(hwnd);
   COLORREF oldColorBk = infoPtr->ColorBk;
 
-  //if (wParam) UNKNOWN_PARAM(PBM_SETBKCOLOR, wParam, lParam);
   infoPtr->ColorBk = (COLORREF)lParam;
   if (infoPtr->ColorBk != oldColorBk) PROGRESS_Refresh (hwnd);
 
@@ -530,9 +518,9 @@ static LRESULT WINAPI ProgressWindowProc(HWND hwnd, UINT message,
       return PROGRESS_SetBkColor(hwnd,wParam,lParam);
 
     default:
-//      if (message >= WM_USER)
-//      ERR(progress, "unknown msg %04x wp=%04x lp=%08lx\n",
-//                  message, wParam, lParam );
+      //if (message >= WM_USER)
+      //ERR(progress, "unknown msg %04x wp=%04x lp=%08lx\n",
+      //            message, wParam, lParam );
       return defComCtl32ProcA( hwnd, message, wParam, lParam );
     }
 
