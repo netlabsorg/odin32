@@ -23,6 +23,10 @@
 #ifndef __WINE_COMCTL32_H
 #define __WINE_COMCTL32_H
 
+#ifdef __WIN32OS2__
+#include <heapstring.h>
+#endif
+
 extern HMODULE COMCTL32_hModule;
 extern HBRUSH  COMCTL32_hPattern55AABrush;
 
