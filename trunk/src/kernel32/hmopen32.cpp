@@ -1,4 +1,4 @@
-/* $Id: hmopen32.cpp,v 1.20 2000-03-28 17:11:49 sandervl Exp $ */
+/* $Id: hmopen32.cpp,v 1.21 2000-05-09 18:56:08 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -580,13 +580,20 @@ DWORD HMDeviceOpen32Class::SetFilePointer(PHMHANDLEDATA pHMHandleData,
            dwMoveMethod));
 
 #if 1
+  DWORD ret;
+
   if(lpDistanceToMoveHigh)
     *lpDistanceToMoveHigh = 0;
 
-  return O32_SetFilePointer(pHMHandleData->hHMHandle,
-                            lDistanceToMove,
-                            lpDistanceToMoveHigh,
-                            dwMoveMethod);
+  ret = O32_SetFilePointer(pHMHandleData->hHMHandle,
+                           lDistanceToMove,
+                           lpDistanceToMoveHigh,
+                           dwMoveMethod);
+
+//  if(ret == -1) {
+//	dprintf(("current position %x (error = %x)", O32_SetFilePointer(pHMHandleData->hHMHandle,0, 0, 1), GetLastError()));
+//  }
+  return ret;
 #else
 
   if(lpDistanceToMoveHigh)

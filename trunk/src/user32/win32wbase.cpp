@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.184 2000-05-05 11:32:36 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.185 2000-05-09 18:56:58 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -796,7 +796,7 @@ ULONG Win32BaseWindow::MsgEnable(BOOL fEnable)
 //******************************************************************************
 ULONG Win32BaseWindow::MsgShow(BOOL fShow)
 {
-    if(fNoSizeMsg) {
+    if(fNoSizeMsg || fDestroyWindowCalled) {
         return 1;
     }
 
@@ -864,6 +864,10 @@ ULONG Win32BaseWindow::MsgActivate(BOOL fActivate, BOOL fMinimized, HWND hwnd, H
 {
  ULONG rc, procidhwnd = -1, threadidhwnd = 0;
 
+    //SvL: Don't send WM_(NC)ACTIVATE messages when the window is being destroyed
+    if(fDestroyWindowCalled) {
+	return 0;
+    }
 
     //According to SDK docs, if app returns FALSE & window is being deactivated,
     //default processing is cancelled
@@ -909,12 +913,21 @@ ULONG Win32BaseWindow::DispatchMsgW(MSG *msg)
 //******************************************************************************
 ULONG Win32BaseWindow::MsgSetFocus(HWND hwnd)
 {
+    //SvL: Don't send WM_(NC)ACTIVATE messages when the window is being destroyed
+    if(fDestroyWindowCalled) {
+	return 0;
+    }
+
     return  SendInternalMessageA(WM_SETFOCUS, hwnd, 0);
 }
 //******************************************************************************
 //******************************************************************************
 ULONG Win32BaseWindow::MsgKillFocus(HWND hwnd)
 {
+    //SvL: Don't send WM_(NC)ACTIVATE messages when the window is being destroyed
+    if(fDestroyWindowCalled) {
+	return 0;
+    }
     return  SendInternalMessageA(WM_KILLFOCUS, hwnd, 0);
 }
 //******************************************************************************
@@ -2023,26 +2036,13 @@ HICON Win32BaseWindow::IconForWindow(WPARAM fType)
 BOOL Win32BaseWindow::ShowWindow(ULONG nCmdShow)
 {
  ULONG showstate = 0;
- HWND hWinAfter;
+ HWND  hWinAfter;
+ BOOL  rc;
 
     dprintf(("ShowWindow %x %x", getWindowHandle(), nCmdShow));
 
-    if (flags & WIN_NEED_SIZE)
-    {
-        /* should happen only in CreateWindowEx() */
-        int wParam = SIZE_RESTORED;
-
-        flags &= ~WIN_NEED_SIZE;
-        if (dwStyle & WS_MAXIMIZE)
-            wParam = SIZE_MAXIMIZED;
-        else
-        if (dwStyle & WS_MINIMIZE)
-            wParam = SIZE_MINIMIZED;
-
-        SendInternalMessageA(WM_SIZE, wParam,
-                     MAKELONG(rectClient.right-rectClient.left,
-                              rectClient.bottom-rectClient.top));
-        SendInternalMessageA(WM_MOVE,0,MAKELONG(rectClient.left,rectClient.top));
+    if(getWindowHandle() == 0x68000002) {
+//	DebugInt3();
     }
     switch(nCmdShow)
     {
@@ -2088,9 +2088,27 @@ BOOL Win32BaseWindow::ShowWindow(ULONG nCmdShow)
     }
     else    setStyle(getStyle() & ~WS_VISIBLE);
 
-    BOOL rc = OSLibWinShowWindow(OS2HwndFrame, showstate);
+    rc = OSLibWinShowWindow(OS2HwndFrame, showstate);
 
     SendInternalMessageA(WM_SHOWWINDOW, (showstate & SWPOS_SHOW) ? 1 : 0, 0);
+
+    if (flags & WIN_NEED_SIZE)
+    {
+        /* should happen only in CreateWindowEx() */
+        int wParam = SIZE_RESTORED;
+
+        flags &= ~WIN_NEED_SIZE;
+        if (dwStyle & WS_MAXIMIZE)
+            wParam = SIZE_MAXIMIZED;
+        else
+        if (dwStyle & WS_MINIMIZE)
+            wParam = SIZE_MINIMIZED;
+
+        SendInternalMessageA(WM_SIZE, wParam,
+                     MAKELONG(rectClient.right-rectClient.left,
+                              rectClient.bottom-rectClient.top));
+        SendInternalMessageA(WM_MOVE,0,MAKELONG(rectClient.left,rectClient.top));
+    }
 
     return rc;
 }
@@ -2255,6 +2273,10 @@ BOOL Win32BaseWindow::SetWindowPlacement(WINDOWPLACEMENT *winpos)
 //******************************************************************************
 BOOL Win32BaseWindow::DestroyWindow()
 {
+ HWND hwnd = getWindowHandle();
+
+    dprintf(("DestroyWindow %x", hwnd));
+
     /* Call hooks */
     if(HOOK_CallHooksA( WH_CBT, HCBT_DESTROYWND, getWindowHandle(), 0L))
     {
@@ -2273,13 +2295,26 @@ BOOL Win32BaseWindow::DestroyWindow()
         {
              /* Notify the parent window only */
              getParent()->SendMessageA(WM_PARENTNOTIFY, MAKEWPARAM(WM_DESTROY, getWindowId()), (LPARAM)getWindowHandle());
-             if( !::IsWindow(getWindowHandle()) )
+             if(!::IsWindow(hwnd) )
              {
                 return TRUE;
              }
         }
         else DebugInt3();
     }
+
+    /* Hide the window */
+    if(IsWindowVisible())
+    {
+        SetWindowPos(0, 0, 0, 0, 0, SWP_HIDEWINDOW |
+		     SWP_NOACTIVATE|SWP_NOZORDER|SWP_NOMOVE|SWP_NOSIZE);
+        if(!::IsWindow(hwnd))
+        {
+		return TRUE;
+        }
+    }
+    dprintf(("DestroyWindow %x -> HIDDEN", hwnd));
+
     fDestroyWindowCalled = TRUE;
     return OSLibWinDestroyWindow(OS2HwndFrame);
 }

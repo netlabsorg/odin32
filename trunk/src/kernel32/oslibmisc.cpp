@@ -1,4 +1,4 @@
-/* $Id: oslibmisc.cpp,v 1.8 2000-02-23 01:06:59 sandervl Exp $ */
+/* $Id: oslibmisc.cpp,v 1.9 2000-05-09 18:56:09 sandervl Exp $ */
 /*
  * Misc OS/2 util. procedures
  *
@@ -14,6 +14,7 @@
 #define INCL_BASE
 #define INCL_DOSPROCESS
 #define INCL_DOSSEL
+#define INCL_DOSNLS        /* National Language Support values */
 #include <os2wrap.h>	//Odin32 OS/2 api wrappers
 #include <string.h>
 #include <stdlib.h>
@@ -238,6 +239,23 @@ ULONG OSLibWinQueryMsgQueue(ULONG hab)
 
 //  hmq = WinQueryWindowULong(HWND_DESKTOP, QWL_HMQ);
   return (ULONG)WinCreateMsgQueue((HAB)hab, 0);
+}
+//******************************************************************************
+//******************************************************************************
+ULONG OSLibQueryCountry()
+{
+ COUNTRYCODE  Country    = {0};   /* Country code info (0 = current country) */
+ COUNTRYINFO  CtryInfo   = {0};   /* Buffer for country-specific information */
+ ULONG        ulInfoLen  = 0;
+ APIRET       rc         = NO_ERROR;  /* Return code                         */
+ 
+    rc = DosQueryCtryInfo(sizeof(CtryInfo), &Country,
+                          &CtryInfo, &ulInfoLen);
+ 
+    if (rc != NO_ERROR) {
+        return -1;
+    }
+    return CtryInfo.country;
 }
 //******************************************************************************
 //******************************************************************************

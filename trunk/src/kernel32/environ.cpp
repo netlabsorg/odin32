@@ -1,4 +1,4 @@
-/* $Id: environ.cpp,v 1.2 2000-02-16 14:25:39 sandervl Exp $ */
+/* $Id: environ.cpp,v 1.3 2000-05-09 18:56:08 sandervl Exp $ */
 
 /*
  * Win32 environment file functions for OS/2
@@ -141,6 +141,16 @@ DWORD WIN32API GetEnvironmentVariableW(LPCWSTR lpName, LPWSTR lpBuffer,
  */
 static LPCSTR ENV_FindVariable( LPCSTR env, LPCSTR name, INT len )
 {
+//temporary hack for MS Office 2000 install
+#if 1
+    char tempvar[] = "tmp";
+
+    if(len == 4 && !lstrncmpiA(name, "TEMP", 4)) {
+	name = tempvar;
+	len = 3;
+    }
+#endif
+
     while (*env)
     {
         if (!lstrncmpiA( name, env, len ) && (env[len] == '='))
@@ -173,7 +183,7 @@ DWORD WIN32API ExpandEnvironmentStringsA( LPCSTR src, LPSTR dst, DWORD count )
     DWORD len, total_size = 1;  /* 1 for terminating '\0' */
     LPCSTR p, var;
 
-    dprintf(("KERNEL32:ExpandEnvironmentStringsA(%08x,%08x,%08x) not implemented\n",
+    dprintf(("KERNEL32:ExpandEnvironmentStringsA '%s', %08x, %08x",
               src, dst, count
               ));
 
@@ -229,6 +239,8 @@ DWORD WIN32API ExpandEnvironmentStringsA( LPCSTR src, LPSTR dst, DWORD count )
         if (!count) dst--;
         *dst = '\0';
     }
+    dprintf(("KERNEL32:ExpandEnvironmentStringsA returned %s %d",
+              dst, total_size));
     return total_size;
 }
 

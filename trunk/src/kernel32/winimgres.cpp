@@ -1,4 +1,4 @@
-/* $Id: winimgres.cpp,v 1.34 2000-03-29 17:17:18 sandervl Exp $ */
+/* $Id: winimgres.cpp,v 1.35 2000-05-09 18:56:10 sandervl Exp $ */
 
 /*
  * Win32 PE Image class (resource methods)
@@ -15,6 +15,7 @@
  *
  */
 #include <os2win.h>
+#include <winnls.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -150,6 +151,7 @@ PIMAGE_RESOURCE_DATA_ENTRY
 
   if(*nodeData == 0xFFFFFFFF) {//shouldn't happen!
         dprintf(("ProcessResSubDir: *nodeData == 0xFFFFFFFF!\n"));
+	DebugInt3();
         return(NULL);
   }
   prdType = (PIMAGE_RESOURCE_DIRECTORY)((ULONG)prdType & ~0x80000000);
@@ -158,17 +160,17 @@ PIMAGE_RESOURCE_DATA_ENTRY
   //level 2 (id)   -> get first id?
   //level 3 (lang) -> get first language?
   if(*nodeData == IDLANG_GETFIRST) {
-    nrres  = prdType->NumberOfNamedEntries + prdType->NumberOfIdEntries;
-    fNumId = (prdType->NumberOfNamedEntries == 0);
+    	nrres  = prdType->NumberOfNamedEntries + prdType->NumberOfIdEntries;
+    	fNumId = (prdType->NumberOfNamedEntries == 0);
   }
   else {
-    fNumId = HIWORD(*nodeData) == 0;
+    	fNumId = HIWORD(*nodeData) == 0;
 
-    if(fNumId) {//numeric or string id?
-        nrres = prdType->NumberOfIdEntries;
-        prde += prdType->NumberOfNamedEntries;  //skip name entries
-    }
-    else    nrres = prdType->NumberOfNamedEntries;
+    	if(fNumId) {//numeric or string id?
+        	nrres = prdType->NumberOfIdEntries;
+	        prde += prdType->NumberOfNamedEntries;  //skip name entries
+    	}
+    	else    nrres = prdType->NumberOfNamedEntries;
   }
 
   for(i=0;i<nrres;i++) {
@@ -176,9 +178,9 @@ PIMAGE_RESOURCE_DATA_ENTRY
         prdType2 = (PIMAGE_RESOURCE_DIRECTORY)((ULONG)pResDir + (ULONG)prde->u2.OffsetToData);
 
         if(*nodeData == IDLANG_GETFIRST) {
-        fFound = TRUE; //always take the first one
-    }
-    else
+        	fFound = TRUE; //always take the first one
+    	}
+    	else
         if(!fNumId) {//name or id entry?
             nameOffset = prde->u1.Name;
             if(prde->u1.s.NameIsString) //unicode directory string /*PLF Sat  97-06-21 22:30:35*/
@@ -221,6 +223,19 @@ ULONG Win32ImageBase::getPEResourceSize(ULONG id, ULONG type, ULONG lang)
 {
  PIMAGE_RESOURCE_DATA_ENTRY      pData = NULL;
 
+    switch(lang) {
+    case LOCALE_SYSTEM_DEFAULT:
+	lang = GetSystemDefaultLangID();
+	break;    
+    case LOCALE_USER_DEFAULT:
+	lang = GetUserDefaultLangID();
+	break;    
+    case LOCALE_NEUTRAL:
+	//TODO: Not correct; should take language associated with current thread
+	lang = IDLANG_GETFIRST;
+	break;    
+    }
+
     pData = getPEResourceEntry(id, type, lang);
     if(pData == NULL) {
         dprintf(("Win32ImageBase::getPEResourceSize: couldn't find resource %d (type %d, lang %x)", id, type, lang));
@@ -259,6 +274,18 @@ HRSRC Win32ImageBase::findResourceA(LPCSTR lpszName, LPSTR lpszType, ULONG lang)
     }
     else  type = (ULONG)lpszType;
 
+    switch(lang) {
+    case LOCALE_SYSTEM_DEFAULT:
+	lang = GetSystemDefaultLangID();
+	break;    
+    case LOCALE_USER_DEFAULT:
+	lang = GetUserDefaultLangID();
+	break;    
+    case LOCALE_NEUTRAL:
+	//TODO: Not correct; should take language associated with current thread
+	lang = IDLANG_GETFIRST;
+	break;    
+    }
     id = (ULONG)lpszName;
 
     pData = getPEResourceEntry(id, type, lang);

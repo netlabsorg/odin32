@@ -1,4 +1,4 @@
-/* $Id: misc.cpp,v 1.22 2000-05-02 20:53:13 sandervl Exp $ */
+/* $Id: misc.cpp,v 1.23 2000-05-09 18:56:09 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -244,6 +244,7 @@ static FILE *flog = NULL;   /*PLF Mon  97-09-08 20:00:15*/
 static BOOL init = FALSE;
 static BOOL fLogging = TRUE;
 static int  dwEnableLogging = 1;
+static int  oldcrtmsghandle = 0;
 
 //#define CHECK_ODINHEAP
 #if defined(DEBUG) && defined(CHECK_ODINHEAP)
@@ -277,6 +278,7 @@ int SYSTEM EXPORT WriteLog(char *tekst, ...)
 		sprintf(logname, "%sodin32_%d.log", kernel32Path, loadNr);
 	      	flog = fopen(logname, "w");
 	}
+        oldcrtmsghandle = _set_crt_msg_handle(fileno(flog));
     }
     else
       fLogging = FALSE;
@@ -410,6 +412,9 @@ void CheckLogException()
 //******************************************************************************
 void CloseLogFile()
 {
+  if(oldcrtmsghandle)
+	_set_crt_msg_handle(oldcrtmsghandle);
+
   fclose(flog);
   flog = 0;
 }

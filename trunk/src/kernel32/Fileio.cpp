@@ -1,4 +1,4 @@
-/* $Id: Fileio.cpp,v 1.30 2000-05-02 20:53:11 sandervl Exp $ */
+/* $Id: Fileio.cpp,v 1.31 2000-05-09 18:56:07 sandervl Exp $ */
 
 /*
  * Win32 File IO API functions for OS/2
@@ -280,7 +280,8 @@ ODINFUNCTION1(BOOL, DeleteFileA,
               LPCSTR, lpszFile)
 {
   dprintf(("DeleteFileA %s", lpszFile));
-  return O32_DeleteFile(lpszFile);
+//  return O32_DeleteFile(lpszFile);
+  return TRUE;
 }
 //******************************************************************************
 //******************************************************************************
