@@ -1,4 +1,5 @@
-/*
+/* $Id: hmmailslot.cpp,v 1.2 2001-09-05 12:57:58 bird Exp $
+ *
  * Win32 mailslot APIs
  *
  * Copyright 2001 Sander van Leeuwen (sandervl@xs4all.nl)
@@ -21,7 +22,7 @@
 #define DBG_LOCALLOG    DBG_hmmailslot
 #include "dbglocal.h"
 
-HMMailSlotInfo::HMMailSlotInfo(LPCSTR lpszName, HANDLE hPipe, DWORD nMaxMessageSize, 
+HMMailSlotInfo::HMMailSlotInfo(LPCSTR lpszName, HANDLE hPipe, DWORD nMaxMessageSize,
                                DWORD lReadTimeout, BOOL fServer,
                                LPSECURITY_ATTRIBUTES lpSecurityAttributes)
 {
@@ -128,13 +129,13 @@ BOOL HMMailslotClass::CreateMailslotA(PHMHANDLEDATA pHMHandleData,
   strcpy(pipename, "\\\\.\\pipe\\");
   strcat(pipename, lpName);
   //TODO: lookup name and fail if exists
-  hPipe = CreateNamedPipeA(pipename, PIPE_ACCESS_INBOUND, 
-                           PIPE_TYPE_MESSAGE | PIPE_READMODE_MESSAGE | PIPE_NOWAIT, 
-                           PIPE_UNLIMITED_INSTANCES, MAILSLOT_SIZE, 
-                           (nMaxMessageSize) ? nMaxMessageSize : MAILSLOT_SIZE, 
+  hPipe = CreateNamedPipeA(pipename, PIPE_ACCESS_INBOUND,
+                           PIPE_TYPE_MESSAGE | PIPE_READMODE_MESSAGE | PIPE_NOWAIT,
+                           PIPE_UNLIMITED_INSTANCES, MAILSLOT_SIZE,
+                           (nMaxMessageSize) ? nMaxMessageSize : MAILSLOT_SIZE,
                            lReadTimeout, lpSecurityAttributes);
 
-  if(hPipe == INVALID_HANDLE_VALUE) { 
+  if(hPipe == INVALID_HANDLE_VALUE) {
       dprintf(("CreateMailslotA: unable to create pipe %s", pipename));
       return FALSE;
   }
@@ -145,7 +146,7 @@ BOOL HMMailslotClass::CreateMailslotA(PHMHANDLEDATA pHMHandleData,
      ::SetNamedPipeHandleState(hPipe, &mode, NULL, NULL);
   }
   else
-  if(lReadTimeout != 0) { 
+  if(lReadTimeout != 0) {
      dprintf(("WARNING: timeout %x not supported", lReadTimeout));
   }
   mailslot = new HMMailSlotInfo(lpName, hPipe, nMaxMessageSize, lReadTimeout, TRUE, lpSecurityAttributes);
@@ -167,7 +168,7 @@ BOOL HMMailslotClass::CreateMailslotA(PHMHANDLEDATA pHMHandleData,
  *             PHMHANDLEDATA pHMHandleDataTemplate data of the template handle
  * Variables :
  * Result    :
- * Remark    : 
+ * Remark    :
  * Status    : NO_ERROR - API succeeded
  *             other    - what is to be set in SetLastError
  *
@@ -201,7 +202,7 @@ tryagain:
                         pHMHandleData->dwCreation,
                         pHMHandleData->dwFlags, 0);
 
-  if(hPipe == INVALID_HANDLE_VALUE) { 
+  if(hPipe == INVALID_HANDLE_VALUE) {
       if(pipename[11] == '*') {
           dprintf(("pipename with asterix not supported; connect only to one mailslot"));
           pipename[11] = '.';

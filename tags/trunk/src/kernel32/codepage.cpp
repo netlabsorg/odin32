@@ -1,8 +1,9 @@
-/*
+/* $Id: codepage.cpp,v 1.17 2001-09-05 12:57:58 bird Exp $
+ *
  * Code page functions
  *
  * Based on Wine code (memory\codepage.c)
- * 
+ *
  * Copyright 2000 Alexandre Julliard
  *
  * Project Odin Software License can be found in LICENSE.TXT
@@ -24,7 +25,7 @@
 #include <options.h>
 #include "codepage.h"
 
-#define DBG_LOCALLOG	DBG_codepage
+#define DBG_LOCALLOG    DBG_codepage
 #include "dbglocal.h"
 #endif
 
@@ -91,7 +92,7 @@ void CODEPAGE_Init(void)
     LCID lcid = GetUserDefaultLCID();
 
     if (!ansi_cptable) init_codepages();  /* just in case */
-    
+
     if ((table = get_locale_cp( lcid, LOCALE_IDEFAULTANSICODEPAGE ))) ansi_cptable = table;
     if ((table = get_locale_cp( lcid, LOCALE_IDEFAULTMACCODEPAGE ))) mac_cptable = table;
     if ((table = get_locale_cp( lcid, LOCALE_IDEFAULTCODEPAGE ))) oem_cptable = table;
@@ -196,7 +197,7 @@ BOOL WINAPI GetCPInfo( UINT codepage, LPCPINFO cpinfo )
     dprintf(("GetCPInfo %d %x", codepage, cpinfo));
 #endif
 
-    if (!table) 
+    if (!table)
     {
         SetLastError( ERROR_INVALID_PARAMETER );
         return FALSE;
@@ -365,7 +366,7 @@ INT WINAPI MultiByteToWideChar( UINT page, DWORD flags, LPCSTR src, INT srclen,
  *   dst [in]     Destination buffer
  *   dstlen [in]  Length of destination buffer
  *   defchar [in] Default character to use for conversion if no exact
- *		    conversion can be made
+ *          conversion can be made
  *   used [out]   Set if default character was used in the conversion
  *
  * NOTES

@@ -1,4 +1,5 @@
-/*
+/* $Id: initterm.cpp,v 1.63 2001-09-05 12:57:58 bird Exp $
+ *
  * KERNEL32 DLL entry point
  *
  * Copyright 1998 Sander van Leeuwen
@@ -87,7 +88,7 @@ ULONG DLLENTRYPOINT_CCONV DLLENTRYPOINT_NAME(ULONG hModule, ULONG ulFlag)
     size_t i;
     APIRET rc;
     ULONG  ulSysinfo, version[2];
-    
+
     /*-------------------------------------------------------------------------*/
     /* If ulFlag is zero then the DLL is being loaded so initialization should */
     /* be performed.  If ulFlag is 1 then the DLL is being freed so            */
@@ -121,7 +122,7 @@ ULONG DLLENTRYPOINT_CCONV DLLENTRYPOINT_NAME(ULONG hModule, ULONG ulFlag)
                     fVersionWarp3 = TRUE;
                 }
             }
-            
+
             rc = inittermKernel32(hModule, ulFlag);
             break;
         }

@@ -1,4 +1,5 @@
-/*
+/* $Id: module.cpp,v 1.3 2001-09-05 12:57:59 bird Exp $
+ *
  * GetBinaryTypeA/W (Wine Port)
  *
  * Copyright 1995 Alexandre Julliard
@@ -12,7 +13,7 @@
 #include <heapstring.h>
 #include <misc.h>
 
-#define DBG_LOCALLOG	DBG_module
+#define DBG_LOCALLOG    DBG_module
 #include "dbglocal.h"
 
 #define FILE_strcasecmp  strcmpi
@@ -37,25 +38,25 @@ static DWORD MODULE_Decide_OS2_OldWin(HANDLE hfile, IMAGE_DOS_HEADER *mz, IMAGE_
       || (!(modtab = (LPWORD)HeapAlloc( GetProcessHeap(), 0, ne->ne_cmod*sizeof(WORD))))
       || (!(ReadFile(hfile, modtab, ne->ne_cmod*sizeof(WORD), &len, NULL)))
       || (len != ne->ne_cmod*sizeof(WORD)) )
-	goto broken;
+    goto broken;
 
     /* read imported names table */
     if ( (SetFilePointer( hfile, mz->e_lfanew + ne->ne_imptab, NULL, SEEK_SET ) == -1)
       || (!(nametab = (LPSTR)HeapAlloc( GetProcessHeap(), 0, ne->ne_enttab - ne->ne_imptab)))
       || (!(ReadFile(hfile, nametab, ne->ne_enttab - ne->ne_imptab, &len, NULL)))
       || (len != ne->ne_enttab - ne->ne_imptab) )
-	goto broken;
+    goto broken;
 
     for (i=0; i < ne->ne_cmod; i++)
     {
-	LPSTR module = &nametab[modtab[i]];
-	TRACE("modref: %.*s\n", module[0], &module[1]);
-	if (!(strncmp(&module[1], "KERNEL", module[0])))
-	{ /* very old Windows file */
-	    MESSAGE("This seems to be a very old (pre-3.0) Windows executable. Expect crashes, especially if this is a real-mode binary !\n");
-	    type = SCS_WOW_BINARY;
-	    goto good;
-	}
+    LPSTR module = &nametab[modtab[i]];
+    TRACE("modref: %.*s\n", module[0], &module[1]);
+    if (!(strncmp(&module[1], "KERNEL", module[0])))
+    { /* very old Windows file */
+        MESSAGE("This seems to be a very old (pre-3.0) Windows executable. Expect crashes, especially if this is a real-mode binary !\n");
+        type = SCS_WOW_BINARY;
+        goto good;
+    }
     }
 
 broken:
@@ -106,7 +107,7 @@ static BOOL MODULE_GetBinaryType( HANDLE hfile, LPCSTR filename, LPDWORD lpBinar
 
     /* Seek to the start of the file and read the DOS header information.
      */
-    if (    SetFilePointer( hfile, 0, NULL, SEEK_SET ) != -1  
+    if (    SetFilePointer( hfile, 0, NULL, SEEK_SET ) != -1
          && ReadFile( hfile, &mz_header, sizeof(mz_header), &len, NULL )
          && len == sizeof(mz_header) )
     {
@@ -131,7 +132,7 @@ static BOOL MODULE_GetBinaryType( HANDLE hfile, LPCSTR filename, LPDWORD lpBinar
                 if ( ( mz_header.e_crlc == 0 ) ||
                      ( mz_header.e_lfarlc >= sizeof(IMAGE_DOS_HEADER) ) )
                     if (    mz_header.e_lfanew >= sizeof(IMAGE_DOS_HEADER)
-                         && SetFilePointer( hfile, mz_header.e_lfanew, NULL, SEEK_SET ) != -1  
+                         && SetFilePointer( hfile, mz_header.e_lfanew, NULL, SEEK_SET ) != -1
                          && ReadFile( hfile, magic, sizeof(magic), &len, NULL )
                          && len == sizeof(magic) )
                         lfanewValid = TRUE;
@@ -161,13 +162,13 @@ static BOOL MODULE_GetBinaryType( HANDLE hfile, LPCSTR filename, LPDWORD lpBinar
                     /* The IMAGE_OS2_SIGNATURE indicates that the
                      * "extended header is a Windows executable (NE)
                      * header."  This can mean either a 16-bit OS/2
-                     * or a 16-bit Windows or even a DOS program 
+                     * or a 16-bit Windows or even a DOS program
                      * (running under a DOS extender).  To decide
                      * which, we'll have to read the NE header.
                      */
 
                      IMAGE_OS2_HEADER ne;
-                     if (    SetFilePointer( hfile, mz_header.e_lfanew, NULL, SEEK_SET ) != -1  
+                     if (    SetFilePointer( hfile, mz_header.e_lfanew, NULL, SEEK_SET ) != -1
                           && ReadFile( hfile, &ne, sizeof(ne), &len, NULL )
                           && len == sizeof(ne) )
                      {
@@ -176,8 +177,8 @@ static BOOL MODULE_GetBinaryType( HANDLE hfile, LPCSTR filename, LPDWORD lpBinar
                          case 2:  *lpBinaryType = SCS_WOW_BINARY;   return TRUE;
                          case 5:  *lpBinaryType = SCS_DOS_BINARY;   return TRUE;
                          default: *lpBinaryType =
-				  MODULE_Decide_OS2_OldWin(hfile, &mz_header, &ne);
-				  return TRUE;
+                  MODULE_Decide_OS2_OldWin(hfile, &mz_header, &ne);
+                  return TRUE;
                          }
                      }
                      /* Couldn't read header, so abort. */
@@ -186,10 +187,10 @@ static BOOL MODULE_GetBinaryType( HANDLE hfile, LPCSTR filename, LPDWORD lpBinar
                 else
                 {
                     /* Unknown extended header, but this file is nonetheless
-		       DOS-executable.
+               DOS-executable.
                      */
                     *lpBinaryType = SCS_DOS_BINARY;
-	            return TRUE;
+                return TRUE;
                 }
             }
         }

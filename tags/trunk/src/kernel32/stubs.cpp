@@ -1,5 +1,5 @@
-
-/*
+/* $Id: stubs.cpp,v 1.32 2001-09-05 12:58:00 bird Exp $
+ *
  * Win32 KERNEL32 Subsystem for OS/2
  *
  * 1998/05/19 PH Patrick Haller (haller@zebra.fh-weingarten.de)

@@ -1,4 +1,5 @@
-/*
+/* $Id: initterm.cpp,v 1.20 2001-09-05 12:53:52 bird Exp $
+ *
  * DLL entry point
  *
  * Copyright 1998 Sander van Leeuwen
@@ -33,7 +34,7 @@
 #include <winconst.h>
 #include <odinlx.h>
 #include <misc.h>       /*PLF Wed  98-03-18 23:18:15*/
-#define DBG_LOCALLOG	DBG_initterm
+#define DBG_LOCALLOG    DBG_initterm
 #include "dbglocal.h"
 #include "region.h"
 #include <initdll.h>
