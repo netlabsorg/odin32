@@ -55,8 +55,8 @@ typedef struct tagLISTVIEW_INFO
     INT            nItemWidth;
     INT            nSelectionMark;
     INT            nHotItem;
-    RECT           rcList;
-    RECT           rcView;
+    RECT           rcList;       //visible part of client
+    RECT           rcView;       //bounding rectangle for icon view
     SIZE           iconSize;
     SIZE           iconSpacing;
     UINT           uCallbackMask;
@@ -74,6 +74,7 @@ typedef struct tagLISTVIEW_INFO
     POINT          lefttop;      //in scroll units
     POINT          maxScroll;    //in scroll units
     POINT          scrollPage;   //in scroll units
+    POINT          scrollStep;   //in pixels
     DWORD          refreshFlags;
 
     WPARAM charCode;
