@@ -1,4 +1,4 @@
-/* $Id: gdi32.cpp,v 1.68 2001-04-27 17:37:23 sandervl Exp $ */
+/* $Id: gdi32.cpp,v 1.69 2001-05-15 10:34:01 sandervl Exp $ */
 
 /*
  * GDI32 apis
@@ -983,9 +983,27 @@ BOOL WIN32API GetTextMetricsW( HDC arg1, LPTEXTMETRICW pwtm)
 }
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION3(BOOL, LPtoDP, HDC, hdc, PPOINT, lpPoints, int, nCount)
+BOOL WIN32API LPtoDP(HDC hdc, PPOINT lpPoints, int nCount)
 {
-    return O32_LPtoDP(hdc, lpPoints, nCount);
+ BOOL ret;
+
+    dprintf(("LPtoDP %x %x %d", hdc, lpPoints, nCount));
+#ifdef DEBUG
+    if(nCount && lpPoints) {
+        for(int i=0;i<nCount;i++) {
+            dprintf(("LPtoDP in (%d,%d)", lpPoints[i].x, lpPoints[i].y));
+        }
+    }
+#endif
+    ret = O32_LPtoDP(hdc, lpPoints, nCount);
+#ifdef DEBUG
+    if(nCount && lpPoints) {
+        for(int i=0;i<nCount;i++) {
+            dprintf(("LPtoDP out (%d,%d)", lpPoints[i].x, lpPoints[i].y));
+        }
+    }
+#endif
+    return ret;
 }
 //******************************************************************************
 //******************************************************************************
