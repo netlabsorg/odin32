@@ -225,11 +225,17 @@ static HRESULT WINAPI IPersistFile_fnIsDirty(IPersistFile* iface)
 }
 static HRESULT WINAPI IPersistFile_fnLoad(IPersistFile* iface, LPCOLESTR pszFileName, DWORD dwMode)
 {
-	_ICOM_THIS_From_IPersistFile(IShellLinkImpl, iface)
+	HRESULT		hRet = E_FAIL;
+        LPSTR           sFile;
+  
+        _ICOM_THIS_From_IPersistFile(IShellLinkImpl, iface)
 	_IPersistStream_From_ICOM_THIS(IPersistStream, This)
 
-	LPSTR		sFile = HEAP_strdupWtoA ( GetProcessHeap(), 0, pszFileName);
-	HRESULT		hRet = E_FAIL;
+#ifdef __WIN32OS2__
+        STACK_strdupWtoA(pszFileName, sFile)
+#else
+	sFile = HEAP_strdupWtoA ( GetProcessHeap(), 0, pszFileName);
+#endif
 
 	TRACE("(%p, %s)\n",This, sFile);
 	
@@ -241,10 +247,15 @@ static HRESULT WINAPI IPersistFile_fnLoad(IPersistFile* iface, LPCOLESTR pszFile
 	{
 	  if SUCCEEDED (IPersistStream_Load(StreamThis, This->lpFileStream))
 	  {
-	    return NOERROR;
+	    hRet = NOERROR;
 	  }
 	}
 	
+#ifndef __WIN32OS2__
+       // PH 2001-11-13 memory leak in WINE?
+       HeapFree( GetProcessHeap(), 0, sFile);
+#endif
+
 	return hRet;
 }
 
@@ -1128,6 +1139,7 @@ static ULONG WINAPI IShellLinkA_fnRelease(IShellLinkA * iface)
 	    
 	  if (This->sArgs)
 	    HeapFree(GetProcessHeap(), 0, This->sArgs);
+
 
 	  if (This->sWorkDir)
 	    HeapFree(GetProcessHeap(), 0, This->sWorkDir);
