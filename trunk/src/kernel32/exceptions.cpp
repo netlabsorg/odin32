@@ -1,4 +1,4 @@
-/* $Id: exceptions.cpp,v 1.26 1999-10-22 18:07:18 sandervl Exp $ */
+/* $Id: exceptions.cpp,v 1.27 1999-10-26 23:38:12 phaller Exp $ */
 
 /*
  * Win32 Device IOCTL API functions for OS/2
@@ -950,7 +950,7 @@ ULONG APIENTRY OS2ExceptionHandler(PEXCEPTIONREPORTRECORD       pERepRec,
   case XCPT_FLOAT_OVERFLOW:
   case XCPT_FLOAT_STACK_CHECK:
   case XCPT_FLOAT_UNDERFLOW:
-  	dprintf(("KERNEL32: OS2ExceptionHandler: FPU exception, fix and continue\n"));
+  	dprintf(("KERNEL32: OS2ExceptionHandler: FPU exception\n"));
 	if(fIsOS2Image == FALSE)  //Only for real win32 apps
 	{
 		if(OSLibDispatchException(pERepRec, pERegRec, pCtxRec, p) == FALSE)
@@ -960,9 +960,14 @@ ULONG APIENTRY OS2ExceptionHandler(PEXCEPTIONREPORTRECORD       pERepRec,
 		        pCtxRec->ctx_stack[0].hisig = 0;
 		        pCtxRec->ctx_stack[0].signexp = 0;
 		}
+  	dprintf(("KERNEL32: OS2ExceptionHandler: fix and continue\n"));
 	      	return (XCPT_CONTINUE_EXECUTION);
 	}
-      	else	return (XCPT_CONTINUE_SEARCH);
+	else
+	{
+	  dprintf(("KERNEL32: OS2ExceptionHandler: continue search\n"));
+	  return (XCPT_CONTINUE_SEARCH);
+	}
 
   case XCPT_PROCESS_TERMINATE:
   case XCPT_ASYNC_PROCESS_TERMINATE:
