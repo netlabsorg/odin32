@@ -1,4 +1,4 @@
-; $Id: shell32.def,v 1.37 2002-03-08 11:01:00 sandervl Exp $
+; $Id: shell32.def,v 1.38 2002-06-07 08:21:43 sandervl Exp $
 
 ; Based on Windows 95
 LIBRARY SHELL32 INITINSTANCE
@@ -244,7 +244,7 @@ EXPORTS
     RegenerateUserEnvironment         = _RegenerateUserEnvironment@8          @233
     SHAddToRecentDocs                 = _SHAddToRecentDocs@8                  @234
     SHAppBarMessage                   = _SHAppBarMessage@8                    @235
-    SHBrowseForFolder                 = _SHBrowseForFolder@4                  @236
+    SHBrowseForFolder                 = _SHBrowseForFolderA@4                 @236
     SHBrowseForFolderA                = _SHBrowseForFolderA@4                 @237
     SHBrowseForFolderW                = _SHBrowseForFolderW@4                 @238
     SHChangeNotify                    = _SHChangeNotifyAW@16                  @239

@@ -1,4 +1,4 @@
-/* $Id: unknown.cpp,v 1.11 2002-02-14 12:10:12 sandervl Exp $ */
+/* $Id: unknown.c,v 1.1 2002-06-07 08:22:04 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -10,17 +10,14 @@
  * Includes                                                                  *
  *****************************************************************************/
 
-#include <odin.h>
-#include <odinwrap.h>
-#include <os2win.h>
+#include <winbase.h>
 #include <shellapi.h>
+#include <shlobj.h>
 #include <winreg.h>
 #include <unicode.h>
+#include <dbglog.h>
 
 //#include "shell32.h"
-
-
-ODINDEBUGCHANNEL(SHELL32-UNKNOWN)
 
 /*****************************************************************************
  * Defines                                                                   *

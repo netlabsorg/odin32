@@ -1,4 +1,4 @@
-/* $Id: enumidlist.c,v 1.4 2002-03-08 11:00:59 sandervl Exp $ */
+/* $Id: enumidlist.c,v 1.5 2002-06-07 08:21:43 sandervl Exp $ */
 /*
  *	IEnumIDList
  *
@@ -15,8 +15,9 @@
 #include "winreg.h"
 #include "wine/obj_base.h"
 #include "wine/obj_enumidlist.h"
-#include "wine/undocshell.h"
+#include "undocshell.h"
 #include "winerror.h"
+#include "shlwapi.h"
 
 #include "pidl.h"
 #include "shlguid.h"

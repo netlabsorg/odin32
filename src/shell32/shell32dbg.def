@@ -1,4 +1,4 @@
-; $Id: shell32dbg.def,v 1.2 2002-03-08 11:01:01 sandervl Exp $
+; $Id: shell32dbg.def,v 1.3 2002-06-07 08:21:43 sandervl Exp $
 
 ; Based on Windows 95
 LIBRARY SHELL32 INITINSTANCE
@@ -244,7 +244,7 @@ EXPORTS
     RegenerateUserEnvironment         = _DbgRegenerateUserEnvironment@8          @233
     SHAddToRecentDocs                 = _DbgSHAddToRecentDocs@8                  @234
     SHAppBarMessage                   = _DbgSHAppBarMessage@8                    @235
-    SHBrowseForFolder                 = _DbgSHBrowseForFolder@4                  @236
+    SHBrowseForFolder                 = _DbgSHBrowseForFolderA@4                 @236
     SHBrowseForFolderA                = _DbgSHBrowseForFolderA@4                 @237
     SHBrowseForFolderW                = _DbgSHBrowseForFolderW@4                 @238
     SHChangeNotify                    = _DbgSHChangeNotifyAW@16                  @239
