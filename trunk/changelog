@@ -1,4 +1,8 @@
-/* $Id: changelog,v 1.2713 2004-03-22 12:45:18 sandervl Exp $ */
+/* $Id: changelog,v 1.2714 2004-03-23 15:55:25 sandervl Exp $ */
+
+ 2004-03-23: Sander van Leeuwen <sandervl@innotek   >
+    - USER32:   o MapVirtualKeyA: must convert return value from PM to windows
+                  scancodes
 
  2004-03-22: Sander van Leeuwen <sandervl@innotek   >
     - COMCTL32: o Rebar: changed resize fix again
