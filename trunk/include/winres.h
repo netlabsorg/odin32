@@ -1,14 +1,12 @@
-/* $Id: winres.h,v 1.3 1999-06-10 19:11:31 phaller Exp $ */
+/* $Id: winres.h,v 1.1 1999-07-19 11:51:03 sandervl Exp $ */
 
-/*
- *
- * Project Odin Software License can be found in LICENSE.TXT
- *
- */
 /*
  * Win32 resource class
  *
  * Copyright 1998 Sander van Leeuwen (sandervl@xs4all.nl)
+ *
+ *
+ * Project Odin Software License can be found in LICENSE.TXT
  *
  */
 #ifndef __WINRES_H__
@@ -71,7 +69,9 @@ public:
 	                         ULONG size, char *resdata);
                   ~Win32Resource();
 
-             PVOID lockResource();
+    virtual  PVOID lockResource();	//get original win32 resource
+    virtual  PVOID lockOS2Resource();	//get converted OS/2 resource
+
              ULONG sizeofResource() { return ressize; };
 
     static    void destroyAll(Win32Image *module);
@@ -79,10 +79,11 @@ public:
 protected:
 
 private:
-               Win32Image *module;
+       Win32Image *module;
 
              HRSRC hres;
              ULONG type;
+	     ULONG orgos2type;
              ULONG id;
 
              PVOID os2resdata;
