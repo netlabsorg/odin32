@@ -1,6 +1,5 @@
-/* $Id: uuidp.h,v 1.1 2000-04-02 22:02:59 davidr Exp $ */
+/* $Id: uuidp.h,v 1.2 2000-04-09 12:37:21 davidr Exp $ */
 /* Private DCE UUID definition
- * Based on OSF sources (see below)
  *
  * Copyright 2000 D.J.Raison
  */
