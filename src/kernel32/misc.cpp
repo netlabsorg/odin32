@@ -1,4 +1,4 @@
-/* $Id: misc.cpp,v 1.8 1999-08-22 08:33:14 sandervl Exp $ */
+/* $Id: misc.cpp,v 1.9 1999-08-23 13:54:43 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -26,7 +26,8 @@
 #include <stdarg.h>
 #include <win32type.h>
 #include "misc.h"
-
+#include "os2util.h"
+#include "initterm.h"
 
 /*****************************************************************************
  * PMPRINTF Version                                                          *
@@ -252,8 +253,12 @@ int SYSTEM EXPORT WriteLog(char *tekst, ...)
   {
     init = TRUE;
 
-    if(!getenv("NOWIN32LOG"))
-      flog = fopen("win32os2.log", "w");
+    if(!getenv("NOWIN32LOG")) {
+	char logname[CCHMAXPATH];
+
+	sprintf(logname, "odin32_%d.log", loadNr);
+      	flog = fopen(logname, "w");
+    }
     else
       fLogging = FALSE;
   }
@@ -277,6 +282,7 @@ int SYSTEM EXPORT WriteLog(char *tekst, ...)
 void CloseLogFile()
 {
   fclose(flog);
+  flog = 0;
 }
 
 
