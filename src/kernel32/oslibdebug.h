@@ -1,4 +1,4 @@
-/* $Id: oslibdebug.h,v 1.1 1999-12-31 10:47:11 sandervl Exp $ */
+/* $Id: oslibdebug.h,v 1.2 2002-05-28 09:53:34 sandervl Exp $ */
 
 /*
  * OS/2 debug apis
@@ -20,5 +20,6 @@
 VOID OSLibStartDebugger(ULONG *pid);
 BOOL OSLibContinueDebugEvent(DWORD dwProcessId, DWORD dwThreadId, DWORD dwContinueStatus);
 BOOL OSLibWaitForDebugEvent(LPDEBUG_EVENT lpde, DWORD dwTimeout);
-
+VOID OSLibDebugReadMemory(LPCVOID lpBaseAddress,LPVOID lpBuffer, DWORD cbRead, LPDWORD lpNumberOfBytesRead);
+BOOL OSLibAddWin32Event(LPDEBUG_EVENT lpde);
 #endif //__OSLIBDEBUG_H__
