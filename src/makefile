@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.24 1999-10-14 13:17:55 bird Exp $
+# $Id: makefile,v 1.25 1999-10-15 22:28:09 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -100,7 +100,7 @@ all:
 clean:
         cd odincrt
         $(MAKE_CMD) clean
-        cd ..\pe2lx
+        cd ..\win32k\pe2lx
         $(MAKE_CMD) clean
         cd ..\kernel32
         $(MAKE_CMD) clean
