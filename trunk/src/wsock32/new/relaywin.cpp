@@ -54,7 +54,7 @@ ODINDEBUGCHANNEL(WSOCK32-RELAYWIN)
 #define MAX_ASYNC_SOCKETS 64
 
 // static table for id / hwnd-msg translation
-static HWNDMSGPAIR arrHwndMsgPair[MAX_ASYNC_SOCKETS];
+static HWNDMSGPAIR arrHwndMsgPair[MAX_ASYNC_SOCKETS] = {0};
 static char*       ODIN_WSOCK_RELAY_CLASS = "ODIN_WSOCK_RELAY";
 static HWND        hwndRelay              = NULLHANDLE;
 
@@ -79,7 +79,8 @@ ULONG RelayAlloc(HWND  hwnd,
                  ULONG ulRequestType,
                  BOOL  fSingleRequestPerWindow,
                  PVOID pvUserData1,
-                 PVOID pvUserData2)
+                 PVOID pvUserData2,
+                 PVOID pvUserData3)
 {
   ULONG ulCounter;
 
@@ -97,6 +98,7 @@ ULONG RelayAlloc(HWND  hwnd,
       arrHwndMsgPair[ulCounter].ulRequestType = ulRequestType;
       arrHwndMsgPair[ulCounter].pvUserData1   = pvUserData1;
       arrHwndMsgPair[ulCounter].pvUserData2   = pvUserData2;
+      arrHwndMsgPair[ulCounter].pvUserData3   = pvUserData3;
       return ulCounter + 1; // return "id"
     }
 
@@ -123,6 +125,11 @@ ULONG RelayFree(ULONG ulID)
     return -1; // error
 
   arrHwndMsgPair[ulID-1].hwnd = 0; // mark free
+  arrHwndMsgPair[ulID-1].ulMsg = 0;
+  arrHwndMsgPair[ulID-1].ulRequestType = 0;
+  arrHwndMsgPair[ulID-1].pvUserData1 = 0;
+  arrHwndMsgPair[ulID-1].pvUserData2 = 0;
+  arrHwndMsgPair[ulID-1].pvUserData3 = 0;
 
   return 0; // OK
 }

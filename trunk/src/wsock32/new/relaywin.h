@@ -1,4 +1,4 @@
-/* $Id: relaywin.h,v 1.4 1999-12-02 21:35:29 phaller Exp $ */
+/* $Id: relaywin.h,v 1.5 1999-12-03 12:59:40 achimha Exp $ */
 
 /*
  *
@@ -37,13 +37,13 @@
 
 /* these are the request types so we can interpret the messages and convert the results */
 
-#define  ASYNCREQUEST_GETHOSTBYNAME     0
-#define  ASYNCREQUEST_GETHOSTBYADDR     1
-#define  ASYNCREQUEST_GETSERVBYNAME     2
-#define  ASYNCREQUEST_GETSERVBYPORT     3
-#define  ASYNCREQUEST_GETPROTOBYNAME    4
-#define  ASYNCREQUEST_GETPROTOBYNUMBER  5
-#define  ASYNCREQUEST_SELECT            6
+#define  ASYNCREQUEST_GETHOSTBYNAME     100
+#define  ASYNCREQUEST_GETHOSTBYADDR     101
+#define  ASYNCREQUEST_GETSERVBYNAME     102
+#define  ASYNCREQUEST_GETSERVBYPORT     103
+#define  ASYNCREQUEST_GETPROTOBYNAME    104
+#define  ASYNCREQUEST_GETPROTOBYNUMBER  105
+#define  ASYNCREQUEST_SELECT            106
 
 
 typedef struct tagHwndMsgPair
@@ -53,6 +53,7 @@ typedef struct tagHwndMsgPair
   ULONG ulRequestType; /* the type of request that this belongs to */
   PVOID pvUserData1; /* request specific data field */
   PVOID pvUserData2; /* request specific data field */
+  PVOID pvUserData3; /* request specific data field */
 } HWNDMSGPAIR, *PHWNDMSGPAIR;
 
 
@@ -65,7 +66,8 @@ ULONG            RelayAlloc     (HWND  hwnd,
                                  ULONG ulRequestType,
                                  BOOL  fSingleRequestPerWindow,
                                  PVOID pvUserData1 = 0, 
-                                 PVOID pvUserData2 = 0);
+                                 PVOID pvUserData2 = 0,
+                                 PVOID pvUserData3 = 0);
 
 ULONG            RelayFree      (ULONG ulID);
 
