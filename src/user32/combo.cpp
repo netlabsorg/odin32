@@ -1,4 +1,4 @@
-/* $Id: combo.cpp,v 1.4 1999-10-08 21:23:37 cbratschi Exp $ */
+/* $Id: combo.cpp,v 1.5 1999-10-19 19:26:07 sandervl Exp $ */
 /*
  * Combo controls
  *
@@ -24,7 +24,7 @@
  * Additional combo box definitions
  */
 
-#define CB_GETPTR( hwnd )      (*(LPHEADCOMBO*)(GetInfoPtr(hwnd)))
+#define CB_GETPTR( hwnd )      ((LPHEADCOMBO)(GetInfoPtr(hwnd)))
 #define CB_NOTIFY( lphc, code ) \
         (SendMessageA( (lphc)->owner, WM_COMMAND, \
                          MAKEWPARAM(GetWindowLongA((lphc)->hwndself,GWL_ID), (code)), (lphc)->hwndself))
@@ -1237,7 +1237,7 @@ HWND COMBO_GetLBWindow( HWND hwnd )
   LONG          ptr = GetInfoPtr(hwnd);
   if(ptr)
   {
-    lphc =  (*(LPHEADCOMBO*)(ptr));
+    lphc =  (LPHEADCOMBO )ptr;
     if( lphc ) return lphc->hWndLBox;
   }
   return 0;
@@ -1774,7 +1774,7 @@ LRESULT WINAPI ComboWndProc( HWND hwnd, UINT message,
       LONG          ptr = GetInfoPtr(hwnd);
 
       if(ptr)
-        lphc = (*(LPHEADCOMBO*)(ptr));
+        lphc = (LPHEADCOMBO)ptr;
 
       //TRACE("[%04x]: msg %s wp %08x lp %08lx\n",
       //             pWnd->hwndSelf, SPY_GetMsgName(message), wParam, lParam );
