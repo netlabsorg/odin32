@@ -1,10 +1,13 @@
-/* $Id: ddraw.CPP,v 1.1 2000-04-07 18:21:11 mike Exp $ */
+/* $Id: ddraw.CPP,v 1.2 2001-01-19 02:06:55 mike Exp $ */
 
 /*
  * DXDraw DLL implementaion
  *
- * Copyright 1998 Sander va Leeuwen
+ * Copyright 1998 Sander van Leeuwen
  * Copyright 1999 Markus Montkowski
+ *
+ * WARNING: DirectDrawCreate defaults to ddraw v4 if lpGUID == NULL!!
+ *
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *
@@ -45,6 +48,7 @@ HRESULT WIN32API OS2DirectDrawCreate( GUID FAR *lpGUID,
   else
   {
     newdraw->Vtbl.AddRef((IDirectDraw2 *)newdraw);
+
     rc = newdraw->GetLastError();
     if(rc != DD_OK)
     {
@@ -57,6 +61,15 @@ HRESULT WIN32API OS2DirectDrawCreate( GUID FAR *lpGUID,
   }
   return(rc);
 }
+//******************************************************************************
+//******************************************************************************
+HRESULT WIN32API DirectDrawCreateEx(LPGUID lpGUID, LPVOID* lplpDD, REFIID iid, LPUNKNOWN pUnkOuter)
+{
+  dprintf(("DirectDrawCreateEx: %x %x %x %x", lpGUID, lplpDD, iid, pUnkOuter));
+  /* I don't know about what functionality is unique to Ex */
+  return OS2DirectDrawCreate(lpGUID,(LPDIRECTDRAW*)lplpDD,pUnkOuter);
+}
+
 //******************************************************************************
 typedef BOOL (FAR PASCAL * LPDDENUMCALLBACKA)(GUID FAR *, LPSTR, LPSTR, LPVOID);
 //******************************************************************************

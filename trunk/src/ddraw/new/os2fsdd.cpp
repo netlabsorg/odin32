@@ -261,6 +261,7 @@ ULONG SetSVGAMode (ULONG     ulHorRes,
                            pCLUTData,
                            NULL);
 
+
    return rc;
 }
 
