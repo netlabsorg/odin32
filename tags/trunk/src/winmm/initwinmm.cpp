@@ -1,4 +1,4 @@
-/* $Id: initwinmm.cpp,v 1.5 2001-10-27 08:21:42 sandervl Exp $
+/* $Id: initwinmm.cpp,v 1.6 2001-12-23 09:43:12 sandervl Exp $
  *
  * WINMM DLL entry point
  *
@@ -76,6 +76,14 @@ DWORD (APIENTRY *pfnmciGetErrorString)(DWORD   dwError,
                                       LPSTR   lpstrBuffer,
                                       WORD    wLength) = NULL;
 
+//******************************************************************************
+//******************************************************************************
+void WIN32API DisableWaveAudio()
+{
+    fMMPMAvailable = FALSE;
+    pfnmciGetErrorString = NULL;
+    pfnmciSendCommand = NULL;
+}
 //******************************************************************************
 //******************************************************************************
 BOOL WINAPI LibMainWinmm(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID fImpLoad)
