@@ -1,4 +1,4 @@
-# $Id: oleautos2.mak,v 1.1 2003-10-06 10:09:02 sandervl Exp $
+# $Id: oleautos2.mak,v 1.2 2004-12-30 18:45:03 sao2l02 Exp $
 
 #
 # Odin32 API
@@ -7,14 +7,16 @@
 #
 
 
-!if "$(DEBUG)" == "1"
-DEFFILE    = oleaut32dbg.def
-ORGDEFFILE = oleaut32.def
-!endif
+#
+# Target and original target names - names of the dll without extention and path
+#
+TARGET      = olautos2
+ORGTARGET   = oleaut32
 
 #
 # Compiler, tools, and interference rules.
 #
+ODIN32_DBGWRAP = 1
 !include ../../makefile.inc
 
 CDEFINES = $(CDEFINES) -DHAVE_LIBJPEG -DHAVE_JPEGLIB_H -DHAVE_GIF_LIB_H -I.\include
@@ -37,9 +39,6 @@ $(OBJDIR)\safearray.obj \
 $(OBJDIR)\connpt.obj \
 $(OBJDIR)\dispatch.obj \
 $(OBJDIR)\stubs.obj \
-!if "$(DEBUG)" == "1"
-$(OBJDIR)\dbgwrap.obj \
-!endif
 $(DLLENTRY) \
 $(OBJDIR)\oleaut32rsrc.obj
 
@@ -60,13 +59,6 @@ $(ODIN32_LIB)/jpeglib.lib \
 $(ODIN32_LIB)/$(ODINCRT).lib \
 OS2386.LIB \
 $(RTLLIB_O)
-
-
-#
-# Target and original target names - names of the dll without extention and path
-#
-TARGET      = olautos2
-ORGTARGET   = oleaut32
 
 
 #

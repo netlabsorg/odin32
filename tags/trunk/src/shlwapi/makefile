@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.27 2002-06-07 08:02:17 sandervl Exp $
+# $Id: makefile,v 1.28 2004-12-30 18:45:14 sao2l02 Exp $
 
 #
 # Odin32 API
@@ -6,15 +6,15 @@
 #       shlwapi.dll makefile
 #
 
+#
+# Target name - name of the dll without extention and path.
+#
+TARGET = shlwapi
 
 #
 # Compiler, tools, and interference rules.
 #
-!if "$(DEBUG)" == "1"
-DEFFILE    = shlwapidbg.def
-ORGDEFFILE = shlwapi.def
-!endif
-
+ODIN32_DBGWRAP = 1
 !include ../../makefile.inc
 
 
@@ -36,9 +36,6 @@ $(OBJDIR)\string.obj \
 $(OBJDIR)\ordinal.obj \
 $(OBJDIR)\ordinal_odin.obj \
 $(OBJDIR)\wsprintf.obj \
-!if "$(DEBUG)" == "1"
-$(OBJDIR)\dbgwrap.obj \
-!endif
 $(OBJDIR)\shlwapirsrc.obj \
 $(DLLENTRY)
 
@@ -59,13 +56,6 @@ $(RTLLIB_O)
 
 
 #
-# Target name - name of the dll without extention and path.
-#
-TARGET = shlwapi
-
-
-#
 # Includes the common rules.
 #
 !include $(ODIN32_POST_INC)
-

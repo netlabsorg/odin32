@@ -1,4 +1,22 @@
-/* $Id: ChangeLog,v 1.2749 2004-12-20 18:11:02 sao2l02 Exp $ */
+/* $Id: ChangeLog,v 1.2750 2004-12-30 18:44:12 sao2l02 Exp $ */
+2004-12-30: Dietrich Teickner <dietrich_teickner@arcor   >
+    - user32:   o \src\user32\dc.cpp
+                  Remming out the unsupported flag DCX_VALIDATE_W.
+                  Makes trubble in debug-build with MySQLQueryBrowser.exe.
+                  \src\user32\timer.cpp
+                  Small optimizing.
+2004-12-30: Dietrich Teickner <dietrich_teickner@arcor   >
+    - odincrt:  o \src\odincrt\critsect.cpp
+                  Small optimizing for the first/only using the critical section. 
+2004-12-30: Dietrich Teickner <dietrich_teickner@arcor   >
+    - urlmon:   o \src\urlmon\stubs.cpp
+                  Some stubs for MySQLQueryBrowser.exe. 
+2004-12-30: Dietrich Teickner <dietrich_teickner@arcor   >
+    - oleaut32: o \src\oleaut32\ole2disp.c
+                  In SysReAllocStringLen, we must check if *old the same as in,
+                  if this the same we can not free *old, at next see also into wine. 
+2004-12-30: Dietrich Teickner <dietrich_teickner@arcor   >
+    - makefile: o same changes for the dbdwrap.cpp in same dlls-dirs.
 2004-12-20: Dietrich Teickner <dietrich_teickner@arcor   >
     - Kernel32: o \include\win\thread.h,
                   \src\kernel32\dbglog.cpp,src\kernel32\wprocess.cpp

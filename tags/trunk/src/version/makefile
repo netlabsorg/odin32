@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.22 2003-10-29 19:18:14 sandervl Exp $
+# $Id: makefile,v 1.23 2004-12-30 18:45:43 sao2l02 Exp $
 
 #
 # Odin32 API
@@ -6,15 +6,15 @@
 #       version.dll makefile
 #
 
-!if "$(DEBUG)" == "1"
-DEFFILE    = versiondbg.def
-ORGDEFFILE = version.def
-!endif
-
+#
+# Target name - name of the dll without extention and path.
+#
+TARGET = version
 
 #
 # Compiler, tools, and interference rules.
 #
+ODIN32_DBGWRAP = 1
 !include ../../makefile.inc
 
 
@@ -26,9 +26,6 @@ $(OBJDIR)\install.obj \
 $(OBJDIR)\info.obj \
 $(OBJDIR)\resource.obj \
 $(OBJDIR)\dbglocal.obj \
-!ifdef DEBUG
-$(OBJDIR)\dbgwrap.obj \
-!endif
 $(OBJDIR)\versionrsrc.obj \
 $(DLLENTRY)
 
@@ -46,13 +43,6 @@ $(RTLLIB_O)
 
 
 #
-# Target name - name of the dll without extention and path.
-#
-TARGET = version
-
-
-#
 # Includes the common rules.
 #
 !include $(ODIN32_POST_INC)
-

@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.1 2002-06-02 10:09:30 sandervl Exp $
+# $Id: makefile,v 1.2 2004-12-30 18:45:39 sao2l02 Exp $
 
 #
 # Odin32 API
@@ -6,7 +6,13 @@
 #       odinctrl.dll makefile
 #
 
+#
+# Target name - name of the dll without extention and path.
+#
+TARGET = odinctrl
 
+
+ODIN32_DBGWRAP = 1
 !include ../../../makefile.inc
 
 
@@ -31,7 +37,6 @@ $(OBJDIR)\dialog.obj \
 $(OBJDIR)\defdlg.obj \
 $(OBJDIR)\desktop.obj \
 !ifdef DEBUG
-$(OBJDIR)\dbgwrap.obj \
 $(OBJDIR)\dbglocal.obj 
 !endif
 
@@ -51,13 +56,6 @@ $(RTLLIB_O)
 
 
 #
-# Target name - name of the dll without extention and path.
-#
-TARGET = odinctrl
-
-
-#
 # Includes the common rules.
 #
 !include $(ODIN32_POST_INC)
-

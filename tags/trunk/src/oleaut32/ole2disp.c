@@ -248,16 +248,18 @@ int WINAPI SysReAllocStringLen(BSTR* old, const OLECHAR* in, unsigned int len)
     if (old==NULL)
       return 0;
 
+    if (*old != in) {
     /*
      * Make sure we free the old string.
      */
-    if (*old!=NULL)
-      SysFreeString(*old);
+      if (*old!=NULL)
+        SysFreeString(*old);
 
     /*
      * Allocate the new string
      */
-    *old = SysAllocStringLen(in, len);
+      *old = SysAllocStringLen(in, len);
+    } /* endif */
 
     return 1;
 }

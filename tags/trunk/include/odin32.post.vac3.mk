@@ -1,4 +1,4 @@
-# $Id: odin32.post.vac3.mk,v 1.30 2003-10-26 01:47:51 bird Exp $
+# $Id: odin32.post.vac3.mk,v 1.31 2004-12-30 18:44:25 sao2l02 Exp $
 
 #
 # Odin32 API
@@ -62,7 +62,6 @@ TARGET_EXTENSION=dll
 !   endif
 !endif
 
-
 !ifndef OLD_STYLE
 
 # Set default MAKEFILE if needed
@@ -73,6 +72,17 @@ MAKEFILE = makefile
 # Set default ORGTARGET if needed.
 !ifndef ORGTARGET
 ORGTARGET=$(TARGET)
+!endif
+
+#
+# Set the Wrapper definition for DEBUG
+#
+!ifdef ODIN32_DBGWRAP
+!  if "$(DEBUG)" == "1"
+DEFFILE    = $(ORGTARGET)dbg.def
+ORGDEFFILE = $(ORGTARGET).def
+OBJS = $(OBJS) $(OBJDIR)\dbgwrap.obj
+!  endif
 !endif
 
 # Set default DEFFILE if needed. (Required for both DLLs and EXEs!)
@@ -481,6 +491,7 @@ clean:
 !else
 clean:  clean2
 !endif
+    if exist .\copying.lib ren .\copying.lib copying.lix
     $(RM) *.lib *.res *.map *.pch dummy.c \
 !if "$(OBJDIR)" != ""
      $(OBJDIR)\* \
@@ -496,6 +507,7 @@ clean:  clean2
 !else
         $(CLEANEXTRAS)
 !endif
+    if exist .\copying.lix ren .\copying.lix copying.lib
 !ifdef SUBDIRS
     @$(DODIRS) "$(SUBDIRS)"  $(MAKE_CMD) clean
 !endif

@@ -1,4 +1,4 @@
-/* $Id: critsect.cpp,v 1.13 2004-11-30 19:08:23 sao2l02 Exp $ */
+/* $Id: critsect.cpp,v 1.14 2004-12-30 18:44:48 sao2l02 Exp $ */
 /*
  * Critical sections in the Win32 sense
  *
@@ -199,12 +199,6 @@ ULONG WIN32API DosEnterCriticalSection( CRITICAL_SECTION_OS2 *crit, ULONG ulTime
     {
     	DosInitializeCriticalSection(crit, NULL);
     }
-    // if the same thread is requesting it again, memorize it
-    if (crit->OwningThread == threadid)
-    {
-        crit->RecursionCount++;
-        return NO_ERROR;
-    }
 
     // do an atomic increase of the lockcounter
     DosInterlockedIncrement(&crit->LockCount);
@@ -216,6 +210,13 @@ testenter:
     {
         // the crit sect is in use
         ULONG ulnrposts;
+
+    // if the same thread is requesting it again, memorize it
+    if (crit->OwningThread == threadid)
+    {
+        crit->RecursionCount++;
+        return NO_ERROR;
+    }
 
         // now wait for it
         APIRET rc = DosWaitEventSem(crit->hevLock, ulTimeout);
@@ -247,6 +248,7 @@ ULONG WIN32API DosLeaveCriticalSection( CRITICAL_SECTION_OS2 *crit )
 
     if (--crit->RecursionCount)
     {
+        DosInterlockedDecrement( &crit->LockCount );
         //just return
         return NO_ERROR;
     }

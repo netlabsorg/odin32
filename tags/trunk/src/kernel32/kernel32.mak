@@ -1,4 +1,4 @@
-# $Id: kernel32.mak,v 1.46 2004-12-04 10:22:26 sao2l02 Exp $
+# $Id: kernel32.mak,v 1.47 2004-12-30 18:44:40 sao2l02 Exp $
 
 #
 # Odin32 API
@@ -12,14 +12,16 @@
 MAKEFILE=kernel32.mak
 
 #
+# Target name - name of the dll without extention and path.
+#
+TARGET = kernel32
+
+#
 # Compiler, tools, and interference rules.
 #
-!if "$(DEBUG)" == "1"
-DEFFILE    = kernel32dbg.def
-ORGDEFFILE = kernel32.def
-!endif
-
+ODIN32_DBGWRAP = 1
 WRC_PREFIX_RESOURCE=1
+
 !include ../../makefile.inc
 
 ##CDEFINES = $(CDEFINES) /Fa+
@@ -146,7 +148,6 @@ $(OBJDIR)\version.obj \
 $(OBJDIR)\mmapnotify.obj \
 !ifdef DEBUG
 $(OBJDIR)\exceptstackdump.obj \
-$(OBJDIR)\dbgwrap.obj \
 !endif
 $(OBJDIR)\module.obj \
 $(OBJDIR)\hmmailslot.obj \
@@ -184,12 +185,6 @@ $(RTLLIB_O)
 #
 OS2RES = \
 $(OBJDIR)\console.res
-
-
-#
-# Target name - name of the dll without extention and path.
-#
-TARGET = kernel32
 
 #
 # Includes the common rules.

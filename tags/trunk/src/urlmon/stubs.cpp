@@ -1,4 +1,4 @@
-/* $Id: stubs.cpp,v 1.2 2004-02-12 16:15:32 sandervl Exp $
+/* $Id: stubs.cpp,v 1.3 2004-12-30 18:45:18 sao2l02 Exp $
  *
  * Stubs.
  *
@@ -119,4 +119,21 @@ HRESULT WIN32API CreateAsyncBindCtx(DWORD dwReserved, IBindStatusCallback *pbsc,
     dprintf(("URLMON: CreateAsyncBindCtx(%x, %x %x %x) - STUB\n",
              dwReserved, pbsc, penumfmtetc, ppbc));
     return E_INVALIDARG;
+}
+/***********************************************************************
+ *           CoInternetCreateSecurityManager (URLMON.@)
+ *
+ */
+HRESULT WINAPI CoInternetCreateSecurityManager(void* pSP, void** ppSM, DWORD dwReserved )
+{
+    dprintf(("URLMON: CoInternetCreateSecurityManager(%p %p %ld) - STUB\n", pSP, ppSM, dwReserved ));
+    return NULL;
+}
+/********************************************************************
+ *      CoInternetCreateZoneManager (URLMON.@)
+ */
+HRESULT WINAPI CoInternetCreateZoneManager(void* pSP, void** ppZM, DWORD dwReserved)
+{
+    dprintf(("URLMON: CoInternetCreateZoneManager(%p %p %lx) - STUB\n", pSP, ppZM, dwReserved));
+    return NULL;
 }

@@ -1,4 +1,4 @@
-# $Id: winmm.mak,v 1.13 2004-12-04 10:22:47 sao2l02 Exp $
+# $Id: winmm.mak,v 1.14 2004-12-30 18:45:47 sao2l02 Exp $
 
 #
 # Odin32 API
@@ -8,20 +8,22 @@
 
 
 #
+# Target name - name of the dll without extention and path.
+#
+TARGET = winmm
+
+
+#
 # Alternate makefile name.
 #
-!if "$(DEBUG)" == "1"
-DEFFILE    = winmmdbg.def
-ORGDEFFILE = winmm.def
-!endif
-WRC_PREFIX_RESOURCE=1
-
 MAKEFILE = winmm.mak
 
 
 #
 # Compiler, tools, and interference rules.
 #
+ODIN32_DBGWRAP = 1
+WRC_PREFIX_RESOURCE=1
 !include ../../makefile.inc
 
 
@@ -55,9 +57,6 @@ $(OBJDIR)\driver.obj \
 $(OBJDIR)\playsound.obj \
 $(OBJDIR)\joyos2.obj \
 $(OBJDIR)\winmmrsrc.obj \
-!ifdef DEBUG
-$(OBJDIR)\dbgwrap.obj \
-!endif
 $(OBJDIR)\dbglocal.obj
 
 
@@ -75,13 +74,6 @@ $(RTLLIB_O)
 
 
 #
-# Target name - name of the dll without extention and path.
-#
-TARGET = winmm
-
-
-#
 # Includes the common rules.
 #
 !include $(ODIN32_POST_INC)
-

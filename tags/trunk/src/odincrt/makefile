@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.34 2004-12-04 10:22:32 sao2l02 Exp $
+# $Id: makefile,v 1.35 2004-12-30 18:44:51 sao2l02 Exp $
 
 #
 # Odin32 API
@@ -7,6 +7,10 @@
 #
 
 
+#
+# Target name - name of the dll without extention and path.
+#
+TARGET = odincrt
 #
 # Tell the buildenvironment not to
 #

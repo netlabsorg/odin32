@@ -1,4 +1,4 @@
-/* $Id: timer.cpp,v 1.17 2004-03-18 13:18:33 sandervl Exp $ */
+/* $Id: timer.cpp,v 1.18 2004-12-30 18:45:35 sao2l02 Exp $ */
 
 /*
  * timer functions for USER32
@@ -136,8 +136,9 @@ BOOL TIMER_HandleTimer (PQMSG pMsg)
 
 static UINT TIMER_SetTimer (HWND hwnd, UINT id, UINT timeout, TIMERPROC proc, BOOL sys)
 {
-    int i;
+    int i, j;
     TIMER *pTimer;
+    TIMER *pTimerZ = NULL;
     HWND hwndOS2;
     Win32BaseWindow *wnd = Win32BaseWindow::GetWindowFromHandle(hwnd);
 
@@ -155,18 +156,23 @@ static UINT TIMER_SetTimer (HWND hwnd, UINT id, UINT timeout, TIMERPROC proc, BO
 
     /* Check if there's already a timer with the same hwnd and id */
 
-    for (i = 0, pTimer = TimersArray; i < NB_TIMERS; i++, pTimer++)
-        if (pTimer->inUse && (pTimer->hwnd == hwnd) && (pTimer->id == id) && ((sys && pTimer->inUse == TIMER::SystemTimer) || !sys))
+    for (i = 0, pTimer = TimersArray; i < NB_TIMERS; i++, pTimer++) {
+        if (!pTimer->inUse) {
+           if (!pTimerZ) {j = i;pTimerZ = pTimer;}
+           continue;      
+        }
+        if ((pTimer->hwnd == hwnd) && (pTimer->id == id) && (!sys || (pTimer->inUse == TIMER::SystemTimer)))
             break;
+    }
 
     if (i == NB_TIMERS)  /* no matching timer found */
     {
         /* Find a free timer */
 
-        for (i = 0, pTimer = TimersArray; i < NB_TIMERS; i++, pTimer++)
-            if (!pTimer->inUse) break;
+        i = j;
+        pTimer = pTimerZ;
 
-        if ((i >= NB_TIMERS) ||
+        if ((!pTimer) ||
             (!sys && (i >= NB_TIMERS-NB_RESERVED_TIMERS)))
         {
             LeaveCriticalSection();

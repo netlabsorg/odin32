@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.3 2002-06-15 10:56:59 sandervl Exp $
+# $Id: makefile,v 1.4 2004-12-30 18:45:07 sao2l02 Exp $
 
 #
 # Odin32 API
@@ -6,15 +6,15 @@
 #       setupapi.dll makefile
 #
 
-
-!if "$(DEBUG)" == "1"
-DEFFILE    = setupapidbg.def
-ORGDEFFILE = setupapi.def
-!endif
+#
+# Target name - name of the dll without extention and path.
+#
+TARGET = setupapi
 
 #
 # Compiler, tools, and interference rules.
 #
+ODIN32_DBGWRAP = 1
 !include ../../makefile.inc
 
 
@@ -31,9 +31,6 @@ $(OBJDIR)\queue.obj \
 $(OBJDIR)\stubs.obj \
 ##$(OBJDIR)\virtcopy.obj \
 $(OBJDIR)\setupapirsrc.obj \
-!if "$(DEBUG)" == "1"
-$(OBJDIR)\dbgwrap.obj \
-!endif
 $(DLLENTRY)
 
 
@@ -49,12 +46,6 @@ $(ODIN32_LIB)/ole32.lib \
 $(ODIN32_LIB)/$(ODINCRT).lib \
 OS2386.LIB \
 $(RTLLIB_O)
-
-
-#
-# Target name - name of the dll without extention and path.
-#
-TARGET = setupapi
 
 
 #

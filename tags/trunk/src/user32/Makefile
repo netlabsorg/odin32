@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.113 2004-12-04 10:22:44 sao2l02 Exp $
+# $Id: Makefile,v 1.114 2004-12-30 18:45:25 sao2l02 Exp $
 
 #
 # Odin32 API
@@ -6,15 +6,15 @@
 #       user32.dll makefile
 #
 
+#
+# Target name - name of the dll without extention and path.
+#
+TARGET = user32
 
 #
 # Compiler, tools, and interference rules.
 #
-!if "$(DEBUG)" == "1"
-DEFFILE    = user32dbg.def
-ORGDEFFILE = user32.def
-!endif
-
+ODIN32_DBGWRAP = 1
 WRC_PREFIX_RESOURCE=1
 !include ../../makefile.inc
 
@@ -113,9 +113,6 @@ $(OBJDIR)\oslibprf.obj \
 $(OBJDIR)\dragdrop.obj \
 $(OBJDIR)\oslibdnd.obj \
 $(OBJDIR)\oslibclipbrd.obj \
-!ifdef DEBUG
-$(OBJDIR)\dbgwrap.obj \
-!endif
 $(OBJDIR)\stats.obj
 
 
@@ -133,12 +130,6 @@ $(ODIN32_LIB)/$(ODINCRT).lib \
 $(ODIN32_LIB)/imm32os2.lib \
 OS2386.LIB \
 $(RTLLIB_O)
-
-
-#
-# Target name - name of the dll without extention and path.
-#
-TARGET = user32
 
 
 #

@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.40 2003-05-15 14:26:27 sandervl Exp $
+# $Id: makefile,v 1.41 2004-12-30 18:44:33 sao2l02 Exp $
 
 #
 # Odin32 API
@@ -6,17 +6,16 @@
 #       comctl32.dll makefile
 #
 
+#
+# Target name - name of the dll without extention and path.
+#
+TARGET = comctl32
 
 #
 # Compiler, tools, and interference rules.
 #
+ODIN32_DBGWRAP = 1
 WRC_PREFIX_RESOURCE=1
-
-!if "$(DEBUG)" == "1"
-DEFFILE    = comctl32dbg.def
-ORGDEFFILE = comctl32.def
-!endif
-
 !include ../../makefile.inc
 
 
@@ -52,9 +51,6 @@ $(OBJDIR)\propsheet.obj \
 $(OBJDIR)\listview.obj \
 $(OBJDIR)\draglist.obj \
 $(OBJDIR)\ipaddress.obj \
-!if "$(DEBUG)" == "1"
-$(OBJDIR)\dbgwrap.obj \
-!endif
 $(OBJDIR)\rsrc.obj \
 $(OBJDIR)\smoothscroll.obj
 
@@ -73,15 +69,7 @@ $(ODIN32_LIB)/$(ODINCRT).lib \
 os2386.lib \
 $(RTLLIB_O)
 
-
-#
-# Target name - name of the dll without extention and path.
-#
-TARGET = comctl32
-
-
 #
 # Includes the common rules.
 #
 !include $(ODIN32_POST_INC)
-
