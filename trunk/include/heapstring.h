@@ -19,6 +19,9 @@
 /*****************************************************************************
  * Prototypes                                                                *
  *****************************************************************************/
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 int    WIN32API lstrlenA       (LPCSTR arg1);
 int    WIN32API lstrlenW       (LPCWSTR arg1);
@@ -57,6 +60,9 @@ LPSTR  WIN32API HEAP_strdupWtoA( HANDLE heap, DWORD flags, LPCWSTR str );
 INT WIN32API WideCharToLocal(LPSTR pLocal, LPWSTR pWide, INT dwChars);
 INT WIN32API LocalToWideChar(LPWSTR pWide, LPSTR pLocal, INT dwChars);
 
+#ifdef __cplusplus
+}
+#endif
 
 /*****************************************************************************
  * Special accelerator macros (avoid heap trashing)                          *

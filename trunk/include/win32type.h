@@ -27,7 +27,7 @@
  * Base types (already defined in OS2DEF.H)                                  *
  *****************************************************************************/
 
-#ifndef OS2DEF_INCLUDED
+#if !(defined(OS2DEF_INCLUDED)) && !(defined(__EMX__))
 // void
 typedef void            VOID;
 typedef void*           PVOID;
@@ -95,7 +95,7 @@ typedef float FLOAT, *PFLOAT, *LPFLOAT;
  * Common types                                                              *
  *****************************************************************************/
 
-#if !(defined(__WINE_WINDEF_H) || defined(OS2DEF_INCLUDED))
+#if !(defined(__WINE_WINDEF_H) || defined(OS2DEF_INCLUDED) || defined(__EMX__) )
 
 typedef       unsigned int    INT;
 typedef       unsigned int *  PINT;
