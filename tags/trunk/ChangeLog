@@ -1,4 +1,11 @@
- /* $Id: ChangeLog,v 1.785 2000-03-05 10:21:10 jeroen Exp $ */
+ /* $Id: ChangeLog,v 1.786 2000-03-05 14:42:32 bird Exp $ */
+
+ 2000-03-04: knut st. osmundsen <knut.stange.osmundse@pmsc.no>
+        - include\pdwin32.vac*: Added OS2RC and OS2RCFLAGS. This defines the
+                OS/2 resource compiler and the flags used during compilation.
+                When it comes to linking we should assume NO flags and simply
+                invoke the it like this: $(OS2RC) <source>.res <target>.dll.
+                (See src\kernel32\makefile for an example.)
 
  2000-03-05: Jeroen van den Horn <J.vandenHorn@fibre.a2000.nl>
         - GLUT32: Really fixed optimized build now. Was not a VACPP bug but
