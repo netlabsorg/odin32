@@ -1,4 +1,7 @@
-/* $Id: changelog,v 1.1260 2001-02-17 14:49:58 sandervl Exp $ */
+/* $Id: changelog,v 1.1261 2001-02-17 15:38:47 sandervl Exp $ */
+
+ 2000-02-17: Yuri Dario <mc6530@mclink.it>
+    - INCLUDE:  o Header changes for compiling Opera
 
  2001-02-17: Sander van Leeuwen <sandervl@xs4all.nl>
     - USER32:   o Store active status in custom window word. QWS_FLAGS appears
