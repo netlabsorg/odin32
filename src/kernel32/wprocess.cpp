@@ -1,4 +1,4 @@
-/* $Id: wprocess.cpp,v 1.67 2000-02-09 13:42:13 sandervl Exp $ */
+/* $Id: wprocess.cpp,v 1.68 2000-02-16 14:25:46 sandervl Exp $ */
 
 /*
  * Win32 process functions
@@ -39,6 +39,8 @@
 #include <wprocess.h>
 #include "mmap.h"
 
+#define DBG_LOCALLOG	DBG_wprocess
+#include "dbglocal.h"
 
 ODINDEBUGCHANNEL(KERNEL32-WPROCESS)
 

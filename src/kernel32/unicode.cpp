@@ -1,4 +1,4 @@
-/* $Id: unicode.cpp,v 1.21 2000-01-06 20:07:10 sandervl Exp $ */
+/* $Id: unicode.cpp,v 1.22 2000-02-16 14:25:45 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -18,6 +18,9 @@
 #include "misc.h"
 #include "codepage.h"
 #include <unicode.h>
+
+#define DBG_LOCALLOG	DBG_unicode
+#include "dbglocal.h"
 
 /*static UconvObject uconv_object = NULL;*/
 /*

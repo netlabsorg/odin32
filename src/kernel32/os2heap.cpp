@@ -1,4 +1,4 @@
-/* $Id: os2heap.cpp,v 1.13 1999-11-18 09:21:34 bird Exp $ */
+/* $Id: os2heap.cpp,v 1.14 2000-02-16 14:25:43 sandervl Exp $ */
 
 /*
  * Heap class for OS/2
@@ -26,6 +26,9 @@
 #include "misc.h"
 #include "vmutex.h"
 #include "initterm.h"
+
+#define DBG_LOCALLOG	DBG_os2heap
+#include "dbglocal.h"
 
 #ifndef HEAP_NO_SERIALIZE
   #define HEAP_NO_SERIALIZE 1

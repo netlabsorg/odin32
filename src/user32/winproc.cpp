@@ -1,4 +1,4 @@
-/* $Id: winproc.cpp,v 1.3 2000-01-18 20:11:21 sandervl Exp $ */
+/* $Id: winproc.cpp,v 1.4 2000-02-16 14:28:28 sandervl Exp $ */
 /*
  * Window procedure callbacks
  *
@@ -20,6 +20,9 @@
 #include <win\debugtools.h>
 #include <heapcode.h>
 #include "win32wbase.h"
+
+#define DBG_LOCALLOG	DBG_winproc
+#include "dbglocal.h"
 
 DECLARE_DEBUG_CHANNEL(relay)
 

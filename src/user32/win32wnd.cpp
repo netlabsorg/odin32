@@ -1,4 +1,4 @@
-/* $Id: win32wnd.cpp,v 1.7 2000-01-18 20:11:01 sandervl Exp $ */
+/* $Id: win32wnd.cpp,v 1.8 2000-02-16 14:28:24 sandervl Exp $ */
 /*
  * Win32 Window Class for OS/2
  *
@@ -35,6 +35,8 @@
 #include "mdi.h"
 #include "win32wmdiclient.h"
 
+#define DBG_LOCALLOG	DBG_win32wnd
+#include "dbglocal.h"
 
 //******************************************************************************
 //******************************************************************************

@@ -1,4 +1,4 @@
-/* $Id: windlg.cpp,v 1.15 2000-02-06 17:39:35 cbratschi Exp $ */
+/* $Id: windlg.cpp,v 1.16 2000-02-16 14:28:25 sandervl Exp $ */
 /*
  * Win32 dialog apis for OS/2
  *
@@ -24,6 +24,9 @@
 #include "win32dlg.h"
 #include <heapstring.h>
 #include <win\drive.h>
+
+#define DBG_LOCALLOG	DBG_windlg
+#include "dbglocal.h"
 
 static INT  DIALOG_DlgDirListW( HWND hDlg, LPWSTR spec, INT idLBox, INT idStatic, UINT attrib, BOOL combo );
 static INT  DIALOG_DlgDirList( HWND hDlg, LPSTR spec, INT idLBox, INT idStatic, UINT attrib, BOOL combo );

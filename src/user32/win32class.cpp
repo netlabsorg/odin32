@@ -1,4 +1,4 @@
-/* $Id: win32class.cpp,v 1.13 2000-02-06 22:00:23 sandervl Exp $ */
+/* $Id: win32class.cpp,v 1.14 2000-02-16 14:28:22 sandervl Exp $ */
 /*
  * Win32 Window Class Managment Code for OS/2
  *
@@ -23,6 +23,9 @@
 #include <win32class.h>
 #include <win32wnd.h>
 #include <win\winproc.h>
+
+#define DBG_LOCALLOG	DBG_win32class
+#include "dbglocal.h"
 
 static fDestroyAll = FALSE;
 

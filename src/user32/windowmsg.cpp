@@ -1,4 +1,4 @@
-/* $Id: windowmsg.cpp,v 1.18 2000-01-30 18:48:29 sandervl Exp $ */
+/* $Id: windowmsg.cpp,v 1.19 2000-02-16 14:28:26 sandervl Exp $ */
 /*
  * Win32 window message APIs for OS/2
  *
@@ -23,6 +23,9 @@
 #include "oslibutil.h"
 #include "oslibwin.h"
 #include "oslibmsg.h"
+
+#define DBG_LOCALLOG	DBG_windowmsg
+#include "dbglocal.h"
 
 //******************************************************************************
 //******************************************************************************

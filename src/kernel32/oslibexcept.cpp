@@ -1,4 +1,4 @@
-/* $Id: oslibexcept.cpp,v 1.1 1999-10-09 15:03:23 sandervl Exp $ */
+/* $Id: oslibexcept.cpp,v 1.2 2000-02-16 14:25:45 sandervl Exp $ */
 /*
  * Exception handler util. procedures
  *
@@ -17,6 +17,9 @@
 #include <misc.h>
 #include "oslibexcept.h"
 #include <exceptions.h>
+
+#define DBG_LOCALLOG	DBG_oslibexcept
+#include "dbglocal.h"
 
 //******************************************************************************
 //Dispatches OS/2 exception to win32 handler

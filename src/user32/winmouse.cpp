@@ -1,4 +1,4 @@
-/* $Id: winmouse.cpp,v 1.4 2000-01-18 20:11:19 sandervl Exp $ */
+/* $Id: winmouse.cpp,v 1.5 2000-02-16 14:28:28 sandervl Exp $ */
 /*
  * Mouse handler for DINPUT
  *
@@ -14,6 +14,9 @@
 #include "winmouse.h"
 #include "oslibmsg.h"
 #include "pmwindow.h"
+
+#define DBG_LOCALLOG	DBG_winmouse
+#include "dbglocal.h"
 
 LPMOUSE_EVENT_PROC mouseHandler = NULL;
 WNDPROC            keyboardHandler = NULL;

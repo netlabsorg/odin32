@@ -1,4 +1,4 @@
-/* $Id: winprop.cpp,v 1.6 2000-01-18 20:11:22 sandervl Exp $ */
+/* $Id: winprop.cpp,v 1.7 2000-02-16 14:28:28 sandervl Exp $ */
 /*
  * Win32 Property apis for OS/2
  *
@@ -12,6 +12,9 @@
 #include <user32.h>
 #include <misc.h>
 #include "win32wbase.h"
+
+#define DBG_LOCALLOG	DBG_winprop
+#include "dbglocal.h"
 
 #undef DEBUG
 

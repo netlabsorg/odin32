@@ -1,4 +1,4 @@
-/* $Id: win32wmdichild.cpp,v 1.21 2000-02-05 14:08:54 sandervl Exp $ */
+/* $Id: win32wmdichild.cpp,v 1.22 2000-02-16 14:28:24 sandervl Exp $ */
 /*
  * Win32 MDI Child Window Class for OS/2
  *
@@ -40,6 +40,8 @@
 #include "syscolor.h"
 #include "win32wndhandle.h"
 
+#define DBG_LOCALLOG	DBG_win32wmdichild
+#include "dbglocal.h"
 
 //******************************************************************************
 //******************************************************************************

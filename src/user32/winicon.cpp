@@ -1,4 +1,4 @@
-/* $Id: winicon.cpp,v 1.8 2000-01-18 20:11:15 sandervl Exp $ */
+/* $Id: winicon.cpp,v 1.9 2000-02-16 14:28:27 sandervl Exp $ */
 /*
  * Win32 Icon Code for OS/2
  *
@@ -20,6 +20,9 @@
 #include <os2win.h>
 #include <winicon.h>
 #include <win\cursoricon.h>
+
+#define DBG_LOCALLOG	DBG_winicon
+#include "dbglocal.h"
 
 //******************************************************************************
 //******************************************************************************
