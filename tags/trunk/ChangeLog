@@ -1,7 +1,8 @@
- /* $Id: ChangeLog,v 1.239 1999-09-25 15:07:28 cbratschi Exp $ */
+ /* $Id: ChangeLog,v 1.240 1999-09-25 16:48:18 cbratschi Exp $ */
 
  99-09-25: Christoph Bratschi<cbratschi@datacomm.ch>
         - USER32: WS_EX_* 3D frame support for child windows
+	- USER32: Double click handling changed
 
  99-09-25: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32:   Cursor fixes. Cursor shown correctly in winhlp32.
