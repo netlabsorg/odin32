@@ -1,4 +1,8 @@
- /* $Id: ChangeLog,v 1.751 2000-02-25 09:56:39 achimha Exp $ */
+ /* $Id: ChangeLog,v 1.752 2000-02-25 18:09:25 cbratschi Exp $ */
+
+ 2000-02-25: Christoph Bratschi <cbratschi@datacomm.ch>
+	- COMCTL32: added listview unicode support
+		    fixed treeview WM_VSCROLL, trap in UNILIB
 
  2000-02-24: Achim Hasenmueller <achimha@innotek.de>
 	- COMCTL32: Added infoPtr == NULL checks in tooltips control
