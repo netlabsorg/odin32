@@ -1,4 +1,4 @@
-/* $Id: cpu.cpp,v 1.10 2000-08-23 18:03:33 sandervl Exp $ */
+/* $Id: cpu.cpp,v 1.11 2000-10-03 17:28:29 sandervl Exp $ */
 /*
  * Odin win32 CPU apis
  *
@@ -138,8 +138,44 @@ VOID WINAPI GetSystemInfo(LPSYSTEM_INFO si)	/* [out] system information */
 			memset(buf, 0, sizeof(buf));
 			GetCPUVendorString(buf);
 			RegSetValueExA(xhkey,"VendorIdentifier",0,REG_SZ,(LPBYTE)buf,strlen(buf));
-		}
+#ifdef __WIN32OS2__
+			if(i==0) {
+				DWORD mhz;
+				features = GetCPUFeatures();
+				if(features & CPUID_TIME_STAMP_COUNTER) {
+					LARGE_INTEGER tsc1, tsc2, freq, time1, time2;
+					double clockticks, millisec, frequency, tmp, tmp1, mhertz;
 
+					QueryPerformanceFrequency(&freq);
+
+					GetTSC((LONG *)&tsc1.LowPart, &tsc1.HighPart);
+					QueryPerformanceCounter(&time1);
+
+					Sleep(32);	//sleep for about 32 ms
+					
+					GetTSC((LONG *)&tsc2.LowPart, &tsc2.HighPart);
+					QueryPerformanceCounter(&time2);
+					tmp  = (double)time2.LowPart + (double)time2.HighPart*4.0*1024.0*1024.0;
+					tmp1 = (double)time1.LowPart + (double)time1.HighPart*4.0*1024.0*1024.0;
+					millisec = tmp - tmp1;
+					frequency= (double)freq.LowPart;
+					frequency= frequency / 1000.0;
+					millisec = millisec / frequency;
+
+					tmp  = (double)tsc2.LowPart + (double)tsc2.HighPart*4.0*1024.0*1024.0;
+					tmp1 = (double)tsc1.LowPart + (double)tsc1.HighPart*4.0*1024.0*1024.0;
+					clockticks = tmp - tmp1;
+
+					tmp = 1000 / millisec;
+					clockticks = clockticks * tmp;	//ticks per second
+					mhertz = clockticks / 1000000.0;
+					mhz = (DWORD)mhertz;
+				}
+				else	mhz = 100;
+				RegSetValueExA(xhkey,"~Mhz",0,REG_DWORD, (LPBYTE)&mhz, sizeof(DWORD));
+			}
+#endif
+		}
 //TODO: FPU fdiv bug
 #if 0
 		if (!lstrncmpiA(line,"fdiv_bug",strlen("fdiv_bug"))) {

@@ -1,4 +1,4 @@
-/* $Id: initsystem.cpp,v 1.16 2000-09-13 21:10:59 sandervl Exp $ */
+/* $Id: initsystem.cpp,v 1.17 2000-10-03 17:28:30 sandervl Exp $ */
 /*
  * Odin system initialization (registry, directories & environment)
  *
@@ -79,6 +79,15 @@
 #define DIRECTX_INSTALLED_VERSION 0x0004
 #define ODIN_WINMM_PLAYBACK 	"OS/2 Dart Audio Playback"
 #define ODIN_WINMM_RECORD	"OS/2 Dart Audio Record"
+
+#define KEY_DEVICE_TYPE		"Type"
+#define KEY_DEVICE_START	"Start"
+#define KEY_DEVICE_GROUP        "Group"
+#define KEY_DEVICE_ERRORCONTROL "ErrorControl"
+#define KEY_DEVICE_AUTORUN      "Autorun"
+#define KEY_DEVICE_TAG          "Tag"
+#define DEVICE_GROUP_FILESYSTEM "File system"
+#define DEVICE_GROUP_SCSICDROM  "SCSI CDROM Class"
 
 //******************************************************************************
 //******************************************************************************
@@ -491,6 +500,67 @@ BOOL InitSystemAndRegistry()
    //todo
    RegCloseKey(hkey);
 #endif
+
+// [HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\Cdfs]
+// "Type"=dword:00000002
+// "Start"=dword:00000004
+// "Group"="File system"
+// "ErrorControl"=dword:00000001
+// "DependOnGroup"=hex(7):53,43,53,49,20,43,44,52,4f,4d,20,43,6c,61,73,73,00,00
+
+   if(RegCreateKeyA(HKEY_LOCAL_MACHINE,"SYSTEM\\CurrentControlSet\\Services\\Cdfs",&hkey)!=ERROR_SUCCESS) {
+   	goto initreg_error;
+   }
+   val = 0x2;
+   RegSetValueExA(hkey, KEY_DEVICE_TYPE,0,REG_DWORD, (LPBYTE)&val, sizeof(DWORD));
+   val = 0x4;
+   RegSetValueExA(hkey, KEY_DEVICE_START,0,REG_DWORD, (LPBYTE)&val, sizeof(DWORD));
+   val = 0x1;
+   RegSetValueExA(hkey, KEY_DEVICE_ERRORCONTROL,0,REG_DWORD, (LPBYTE)&val, sizeof(DWORD));
+   RegSetValueExA(hkey, KEY_DEVICE_GROUP,0,REG_SZ, (LPBYTE)DEVICE_GROUP_FILESYSTEM, sizeof(DEVICE_GROUP_FILESYSTEM));
+   //todo dependongroup
+   RegCloseKey(hkey);
+
+
+/*
+// [HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\Cdfs\Enum]
+// "0"="Root\\LEGACY_CDFS\\0000"
+// "Count"=dword:00000001
+// "NextInstance"=dword:00000001
+*/
+// [HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\Cdrom]
+// "Type"=dword:00000001
+// "Start"=dword:00000001
+// "Group"="SCSI CDROM Class"
+// "ErrorControl"=dword:00000000
+// "Tag"=dword:00000002
+// "DependOnGroup"=hex(7):53,43,53,49,20,6d,69,6e,69,70,6f,72,74,00,00
+// "Autorun"=dword:00000001
+
+   if(RegCreateKeyA(HKEY_LOCAL_MACHINE,"SYSTEM\\CurrentControlSet\\Services\\Cdrom",&hkey)!=ERROR_SUCCESS) {
+   	goto initreg_error;
+   }
+   val = 0x1;
+   RegSetValueExA(hkey, KEY_DEVICE_TYPE,0,REG_DWORD, (LPBYTE)&val, sizeof(DWORD));
+   val = 0x1;
+   RegSetValueExA(hkey, KEY_DEVICE_START,0,REG_DWORD, (LPBYTE)&val, sizeof(DWORD));
+   val = 0x0;
+   RegSetValueExA(hkey, KEY_DEVICE_ERRORCONTROL,0,REG_DWORD, (LPBYTE)&val, sizeof(DWORD));
+   val = 0x2;
+   RegSetValueExA(hkey, KEY_DEVICE_TAG,0,REG_DWORD, (LPBYTE)&val, sizeof(DWORD));
+   val = 0x0;
+   RegSetValueExA(hkey, KEY_DEVICE_AUTORUN,0,REG_DWORD, (LPBYTE)&val, sizeof(DWORD));
+   RegSetValueExA(hkey, KEY_DEVICE_GROUP,0,REG_SZ, (LPBYTE)DEVICE_GROUP_SCSICDROM, sizeof(DEVICE_GROUP_SCSICDROM));
+   //todo dependongroup
+   RegCloseKey(hkey);
+
+/*
+[HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\Cdrom\Enum]
+"0"="Root\\LEGACY_CDROM\\0000"
+"Count"=dword:00000001
+"NextInstance"=dword:00000001
+*/
+
    return TRUE;
 
 initreg_error:

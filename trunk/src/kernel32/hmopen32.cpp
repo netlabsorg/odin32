@@ -1,4 +1,4 @@
-/* $Id: hmopen32.cpp,v 1.26 2000-09-20 21:32:52 hugh Exp $ */
+/* $Id: hmopen32.cpp,v 1.27 2000-10-03 17:28:30 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -153,7 +153,6 @@ DWORD HMDeviceOpen32Class::GetFileType(PHMHANDLEDATA pHMHandleData)
            lpHMDeviceName,
            pHMHandleData));
 
-  //TODO: return FILE_TYPE_UNKNOWN for standard in/out handles; correct??
   return O32_GetFileType(pHMHandleData->hHMHandle);
 }
 

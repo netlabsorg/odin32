@@ -1,4 +1,4 @@
-/* $Id: windlllx.cpp,v 1.14 2000-08-12 16:58:39 sandervl Exp $ */
+/* $Id: windlllx.cpp,v 1.15 2000-10-03 17:28:31 sandervl Exp $ */
 
 /*
  * Win32 LX Dll class (compiled in OS/2 using Odin32 api)
@@ -178,6 +178,7 @@ Win32LxDll::~Win32LxDll()
 {
 }
 //******************************************************************************
+//Returns reference count or -1 if load failed (PE loader only!)
 //******************************************************************************
 #ifdef DEBUG
 ULONG Win32LxDll::AddRef(char *parentname)
@@ -215,8 +216,10 @@ ULONG Win32LxDll::AddRef()
 #endif
 		item = loadedDlls.getNext(item);
 	}
-   	if(attachProcess() == 0)
-		return 0;
+   	if(attachProcess() == 0) {
+		dprintf(("WARNING: Dll %s refused to be loaded; aborting", getName()));
+		return -1;
+	}
   }
   return ret;  
 }

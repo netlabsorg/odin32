@@ -1,4 +1,4 @@
-/* $Id: conout.h,v 1.1 1999-06-17 18:21:39 phaller Exp $ */
+/* $Id: conout.h,v 1.2 2000-10-03 17:28:29 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -59,14 +59,14 @@ class HMDeviceConsoleOutClass : public HMDeviceHandler
                              PHMHANDLEDATA pHMHandleDataTemplate);
 
                            /* this is a handler method for calls to ReadFile() */
-  virtual DWORD  ReadFile   (PHMHANDLEDATA pHMHandleData,
+  virtual BOOL   ReadFile   (PHMHANDLEDATA pHMHandleData,
                              LPCVOID       lpBuffer,
                              DWORD         nNumberOfBytesToRead,
                              LPDWORD       lpNumberOfBytesRead,
                              LPOVERLAPPED  lpOverlapped);
 
                         /* this is a handler method for calls to WriteFile() */
-  virtual DWORD  WriteFile  (PHMHANDLEDATA pHMHandleData,
+  virtual BOOL   WriteFile  (PHMHANDLEDATA pHMHandleData,
                              LPCVOID       lpBuffer,
                              DWORD         nNumberOfBytesToWrite,
                              LPDWORD       lpNumberOfBytesWritten,
@@ -80,6 +80,10 @@ class HMDeviceConsoleOutClass : public HMDeviceHandler
                                 ULONG         arg2,
                                 ULONG         arg3,
                                 ULONG         arg4);
+
+                      /* this is a handler method for calls to GetFileType() */
+  virtual DWORD GetFileType (PHMHANDLEDATA pHMHandleData);
+
 };
 
 #endif /* _CONSOLE_OUT_H_ */

@@ -1,4 +1,4 @@
-/* $Id: conin.h,v 1.2 1999-12-09 19:08:26 sandervl Exp $ */
+/* $Id: conin.h,v 1.3 2000-10-03 17:28:28 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -137,6 +137,9 @@ class HMDeviceConsoleInClass : public HMDeviceHandler
                                     PINPUT_RECORD pirBuffer,
                                     DWORD         cInRecords,
                                     LPDWORD       lpcWritten);
+
+                      /* this is a handler method for calls to GetFileType() */
+  virtual DWORD GetFileType (PHMHANDLEDATA pHMHandleData);
 
 };
 

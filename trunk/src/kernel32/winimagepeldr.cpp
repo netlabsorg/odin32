@@ -1,4 +1,4 @@
-/* $Id: winimagepeldr.cpp,v 1.53 2000-08-14 19:15:37 sandervl Exp $ */
+/* $Id: winimagepeldr.cpp,v 1.54 2000-10-03 17:28:31 sandervl Exp $ */
 
 /*
  * Win32 PE loader Image base class
@@ -1404,7 +1404,12 @@ BOOL Win32PeLdrImage::processImports(char *win32file)
 			return(FALSE);
 		}
 		lxdll->setDllHandleOS2(hInstanceNewDll);
-		lxdll->AddRef();
+		if(lxdll->AddRef() == -1) {//-1 -> load failed (attachProcess)
+			dprintf((LOG, "Dll %s refused to be loaded; aborting", modname));
+			delete lxdll;
+			errorState = ERROR_INTERNAL;
+			return(FALSE);
+		}
                 WinDll = (Win32DllBase*)lxdll;
 	}
 	else {
@@ -1422,6 +1427,7 @@ BOOL Win32PeLdrImage::processImports(char *win32file)
 	        dprintf((LOG, "**********************************************************************" ));
 	        if(pedll->init(0) == FALSE) {
 	            dprintf((LOG, "Internal WinDll error ", pedll->getError() ));
+		    delete pedll;
 	            return(FALSE);
 	        }
 #ifdef DEBUG

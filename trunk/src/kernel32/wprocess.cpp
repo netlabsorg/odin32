@@ -1,4 +1,4 @@
-/* $Id: wprocess.cpp,v 1.98 2000-10-02 13:38:58 sandervl Exp $ */
+/* $Id: wprocess.cpp,v 1.99 2000-10-03 17:28:32 sandervl Exp $ */
 
 /*
  * Win32 process functions
@@ -787,14 +787,21 @@ HINSTANCE WIN32API LoadLibraryExA(LPCTSTR lpszLibFile, HANDLE hFile, DWORD dwFla
 
                 if(pModule->isLxDll())
                 {
-                    ((Win32LxDll *)pModule)->setDllHandleOS2(hDll);
-                    if (fPeLoader)
-                        pModule->AddRef();
+                    	((Win32LxDll *)pModule)->setDllHandleOS2(hDll);
+                    	if(fPeLoader) 
+ 			{
+                        	if(pModule->AddRef() == -1) {//-1 -> load failed (attachProcess)
+					dprintf(("Dll %s refused to be loaded; aborting", szModname));
+					delete pModule;
+					return 0;
+				}
+                    	}
                 }
                 pModule->incDynamicLib();
             }
             else
                 return hDll; //happens when LoadLibrary is called in kernel32's initterm (nor harmful)
+
             dprintf(("KERNEL32: LoadLibraryExA(%s, 0x%x, 0x%x): returns 0x%x. Loaded %s using O32_LoadLibrary.",
                      lpszLibFile, hFile, dwFlags, hDll, szModname));
             return pModule->getInstanceHandle();
@@ -901,6 +908,7 @@ HINSTANCE WIN32API LoadLibraryExA(LPCTSTR lpszLibFile, HANDLE hFile, DWORD dwFla
                          lpszLibFile, hFile, dwFlags));
                 SetLastError(ERROR_DLL_INIT_FAILED);
                 delete peldrDll;
+		return NULL;
             }
         }
         else
@@ -909,6 +917,7 @@ HINSTANCE WIN32API LoadLibraryExA(LPCTSTR lpszLibFile, HANDLE hFile, DWORD dwFla
                      lpszLibFile, hFile, dwFlags, peldrDll->getError()));
             SetLastError(ERROR_INVALID_EXE_SIGNATURE);
             delete peldrDll;
+		return NULL;
         }
     }
     else
@@ -916,6 +925,7 @@ HINSTANCE WIN32API LoadLibraryExA(LPCTSTR lpszLibFile, HANDLE hFile, DWORD dwFla
         dprintf(("KERNEL32: LoadLibraryExA(%s, 0x%x, 0x%x) library wasn't found (%s) or isn't loadable; err %x",
                  lpszLibFile, hFile, dwFlags, szModname, fPE));
         SetLastError(fPE);
+	return NULL;
     }
 
     return hDll;
@@ -1099,7 +1109,8 @@ ULONG InitCommandLine(const char *pszPeExe)
             dprintf(("KERNEL32: InitCommandLine(%p): malloc(%d) failed\n", pszPeExe, cch));
             return ERROR_NOT_ENOUGH_MEMORY;
         }
-
+	strcpy((char *)pszCmdLineA, pszPeExe);
+	
         rc = NO_ERROR;
     }
     else
