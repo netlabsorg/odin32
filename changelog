@@ -1,7 +1,7 @@
-/* $Id: changelog,v 1.1637 2001-08-06 19:39:45 sandervl Exp $ */
+/* $Id: changelog,v 1.1638 2001-08-07 10:04:40 bird Exp $ */
 
  2001-08-06: Sander van Leeuwen <sandervl@xs4all.nl>
-    - KERNEL32: o Check for ERROR_ACCESS_DENIED in CreateProcess 
+    - KERNEL32: o Check for ERROR_ACCESS_DENIED in CreateProcess
                   (fixes Notes + installers)
                 o Memory map fixes (GetCurrentProcess returns handles
                   that are no unique)
@@ -13,8 +13,12 @@
  2001-08-06: Dietrich Teickner <Dietrich_Teickner@t-online.de>
     - COMCTL32: o Datetime fixes
 
+ 2001-08-04: knut st. osmundsen <kosmunds@csc.com>
+    - Makefiles:
+                o Depend on libraries. (Thanks goes to Yuri for this!)
+
  2001-08-04: Sander van Leeuwen <sandervl@xs4all.nl>
-    - CUSTOMBUILD: 
+    - CUSTOMBUILD:
                 o Add registration of gdi32 & advapi32
                 o Use toupperW in kernel32 instead of toupper (C runtime lib)
                 o Removed NTDLL dependency
