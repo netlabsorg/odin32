@@ -1,4 +1,4 @@
-/* $Id: win32k.h,v 1.3 2000-12-11 06:17:20 bird Exp $
+/* $Id: win32k.h,v 1.4 2001-02-02 08:42:56 bird Exp $
  *
  * Top level make file for the Win32k library.
  * Contains library and 32-bit IOCtl definition.
@@ -28,12 +28,33 @@
 #define K32_QUERYOPTIONSSTATUS  0x03
 #define K32_SETOPTIONS          0x04
 #define K32_PROCESSREADWRITE    0x05
+#define K32_HANDLESYSTEMEVENT   0x06
 
 /*
  * Elf category
  */
 #define ELF_DUMMY               0x01
 
+
+/*
+ * System event Identifiers.
+ */
+#define K32_SYSEVENT_SM_MOUSE               0x00    /* dh SendEvent - Session Manager (mouse)    */
+#define K32_SYSEVENT_CTRL_BREAK             0x01    /* dh SendEvent - Ctrl-Break                 */
+#define K32_SYSEVENT_CTRL_C                 0x02    /* dh SendEvent - Ctrl-C                     */
+#define K32_SYSEVENT_CTRL_SCREEN_LOCK       0x03    /* dh SendEvent - Ctrl-ScrollLock            */
+#define K32_SYSEVENT_CTRL_PRINT_SCREEN      0x04    /* dh SendEvent - Ctrl-PrtSc                 */
+#define K32_SYSEVENT_SHIFT_PRINT_SCREEN     0x05    /* dh SendEvent - Shift-PrtSc                */
+#define K32_SYSEVENT_SM_KEYBOARD            0x06    /* dh SendEvent - Session Manager (keyboard) */
+#define K32_SYSEVENT_SM_CTRL_ALT_DELETE     0x07    /* dh SendEvent - Ctrl-Alt-Del               */
+#define K32_SYSEVENT_HOT_PLUG               0x08    /* dh SendEvent - Keyboard Hot Plug/Reset    */
+#define K32_SYSEVENT_POWER                  0x09    /* dh SendEvent - Power suspend event        */
+#define K32_SYSEVENT_POWEROFF               0x0a    /* dh SendEvent - Power off event            */
+#define K32_SYSEVENT_CTRL_ALT_2xNUMLOCK     0x0b    /* VectorSDF    - System Dump                */
+#define K32_SYSEVENT_LAST                   K32_SYSEVENT_CTRL_ALT_2xNUMLOCK
+
+
+#ifndef INCL_16                         /* We don't need this in 16-bit code. */
 
 /*******************************************************************************
 *   Structures and Typedefs                                                    *
@@ -79,6 +100,7 @@ typedef struct _K32Options
 
     /** @cat Options affecting the generated LX executables */
     ULONG       fPE;                    /* Flags set the type of conversion. */
+    ULONG       fPEOneObject;           /* All in one object. */
     ULONG       ulInfoLevel;            /* Pe2Lx InfoLevel. */
 
     /** @cat Options affecting the generated ELF executables */
@@ -198,6 +220,16 @@ typedef struct _k32ProcessReadWrite
     ULONG       rc;                     /* Return code. */
 } K32PROCESSREADWRITE, *PK32PROCESSREADWRITE;
 
+typedef struct _k32HandleSystemEvent
+{
+    ULONG       ulEvent;                /* Event identifier. One of the K32_SYSEVENT_ defines. */
+    HEV         hev;                    /* Handle of shared event semaphore which should be */
+                                        /* posted when the the requested event occurs.      */
+    BOOL        fHandle;                /* Action flag. */
+                                        /* TRUE:  Take control of the event. */
+                                        /* FALSE: Give control back to the OS of this event. (hev must match the current handle!) */
+    ULONG       rc;                     /* Return code. */
+} K32HANDLESYSTEMEVENT, *PK32HANDLESYSTEMEVENT;
 
 
 #pragma pack()
@@ -218,11 +250,14 @@ APIRET APIENTRY  libWin32kSetOption(PK32OPTIONS pOptions);
 APIRET APIENTRY  DosAllocMemEx(PPVOID ppv, ULONG cb, ULONG flag);
 APIRET APIENTRY  W32kQueryOTEs(HMODULE hMTE, PQOTEBUFFER pQOte, ULONG cbQOte);
 APIRET APIENTRY  W32kProcessReadWrite(PID pid, ULONG cb, PVOID pvSource, PVOID pvTarget, BOOL fRead);
+APIRET APIENTRY  W32kHandleSystemEvent(ULONG ulEvent, HEV hev, BOOL fHandle);
 
 /* Helper function */
 USHORT APIENTRY  libHelperGetCS(void);
 
 
 #endif
+
+#endif /* !defined(INCL_16) */
 
 #endif
