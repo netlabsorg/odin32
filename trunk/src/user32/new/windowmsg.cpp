@@ -1,4 +1,4 @@
-/* $Id: windowmsg.cpp,v 1.3 1999-07-15 18:03:03 sandervl Exp $ */
+/* $Id: windowmsg.cpp,v 1.4 1999-07-15 18:41:46 sandervl Exp $ */
 /*
  * Win32 window message APIs for OS/2
  *
@@ -17,6 +17,7 @@
 #include <win32wnd.h>
 #include <handlemanager.h>
 #include <win.h>
+#include <hooks.h>
 
 //******************************************************************************
 //******************************************************************************
@@ -128,6 +129,7 @@ BOOL WIN32API TranslateMessage( const MSG * arg1)
     return O32_TranslateMessage(arg1);
 }
 //******************************************************************************
+//TODO: hwnd == HWND_BROADCAST
 //******************************************************************************
 LRESULT WIN32API SendMessageA(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
@@ -140,6 +142,7 @@ LRESULT WIN32API SendMessageA(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
     return window->SendMessageA(msg, wParam, lParam);
 }
 //******************************************************************************
+//TODO: hwnd == HWND_BROADCAST
 //******************************************************************************
 LRESULT WIN32API SendMessageW(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
@@ -152,10 +155,14 @@ LRESULT WIN32API SendMessageW(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
     return window->SendMessageW(msg, wParam, lParam);
 }
 //******************************************************************************
+//TODO: hwnd == HWND_BROADCAST
 //******************************************************************************
 BOOL WIN32API PostMessageA(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
   Win32Window *window;
+
+    if(hwnd == NULL)
+	return PostThreadMessageA(GetCurrentThreadId(), msg, wParam, lParam);
 
     if(HMHandleTranslateToOS2(hwnd, (PULONG)&window) != NO_ERROR) {
 	dprintf(("PostMessageA, window %x not found", hwnd));
@@ -164,10 +171,14 @@ BOOL WIN32API PostMessageA(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
     return window->PostMessageA(msg, wParam, lParam);
 }
 //******************************************************************************
+//TODO: hwnd == HWND_BROADCAST
 //******************************************************************************
 BOOL WIN32API PostMessageW(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
   Win32Window *window;
+
+    if(hwnd == NULL)
+	return PostThreadMessageW(GetCurrentThreadId(), msg, wParam, lParam);
 
     if(HMHandleTranslateToOS2(hwnd, (PULONG)&window) != NO_ERROR) {
 	dprintf(("PostMessageW, window %x not found", hwnd));
@@ -267,25 +278,6 @@ UINT WIN32API RegisterWindowMessageW( LPCWSTR arg1)
     rc = O32_RegisterWindowMessage(astring);
     FreeAsciiString(astring);
     return rc;
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API CallMsgFilterA( LPMSG arg1, int  arg2)
-{
-#ifdef DEBUG
-    WriteLog("USER32:  CallMsgFilterA\n");
-#endif
-    return O32_CallMsgFilter(arg1, arg2);
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API CallMsgFilterW( LPMSG arg1, int  arg2)
-{
-#ifdef DEBUG
-    WriteLog("USER32:  CallMsgFilterW\n");
-#endif
-    // NOTE: This will not work as is (needs UNICODE support)
-    return O32_CallMsgFilter(arg1, arg2);
 }
 //******************************************************************************
 //******************************************************************************

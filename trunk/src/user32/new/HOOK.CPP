@@ -1,4 +1,4 @@
-/* $Id: HOOK.CPP,v 1.1 1999-07-14 08:35:33 sandervl Exp $ */
+/* $Id: HOOK.CPP,v 1.2 1999-07-15 18:41:46 sandervl Exp $ */
 
 /*
  * Win32 hook API functions for OS/2
@@ -214,6 +214,40 @@ LRESULT WIN32API CallNextHookEx(HHOOK arg1, int arg2, WPARAM arg3, LPARAM  arg4)
 		return hook->CallNextHook(arg1, arg2, arg3, arg4);
     }
     else	return O32_CallNextHookEx(arg1, arg2, arg3, arg4);
+}
+//******************************************************************************
+//TODO
+//******************************************************************************
+BOOL WIN32API CallMsgFilterA( LPMSG msg, int nCode)
+{
+#ifdef DEBUG
+    WriteLog("USER32:  CallMsgFilterA\n");
+#endif
+#if 0
+    if(HkSysMsgFilter::OS2HkCBTProc(msg->hwnd, nCode, 0, (LPARAM)msg))
+	return TRUE;
+
+    return HkMsgFilter::OS2HkCBTProc(hwnd, Msg, wParam, lParam);
+#else
+    return 0;
+#endif
+}
+//******************************************************************************
+//TODO
+//******************************************************************************
+BOOL WIN32API CallMsgFilterW( LPMSG msg, int nCode)
+{
+#ifdef DEBUG
+    WriteLog("USER32:  CallMsgFilterW\n");
+#endif
+#if 0
+    if(HkSysMsgFilter::OS2HkCBTProc(msg->hwnd, nCode, 0, (LPARAM)msg))
+	return TRUE;
+
+    return HkMsgFilter::OS2HkCBTProc(hwnd, Msg, wParam, lParam);
+#else
+    return 0;
+#endif
 }
 //******************************************************************************
 //******************************************************************************
