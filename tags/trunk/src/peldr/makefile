@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.8 1999-08-21 19:11:27 sandervl Exp $
+# $Id: makefile,v 1.9 1999-09-21 18:35:01 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -45,7 +45,7 @@ $(TARGETDLL).lib: $(TARGETDLL).dll
 
 initterm.obj: initterm.cpp
 misc.obj: misc.cpp
-pe.obj: pe.cpp pe.h $(PDWIN32_INCLUDE)\winimage.h $(PDWIN32_INCLUDE)\winexe.h
+pe.obj: pe.cpp pe.h $(PDWIN32_INCLUDE)\winimagebase.h $(PDWIN32_INCLUDE)\winexebase.h $(PDWIN32_INCLUDE)\exceptions.h ..\kernel32\exceptutil.h
 
 clean:
         $(RM) *.obj *.lib *.dll *~ *.map *.pch *.exe
