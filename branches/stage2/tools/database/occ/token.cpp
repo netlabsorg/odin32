@@ -874,7 +874,9 @@ static void InitializeOtherKeywords()
     assert(Lex::RecordKeyword("__int8",  CHAR));
     assert(Lex::RecordKeyword("__int16", SHORT));
     assert(Lex::RecordKeyword("__int32", INT));
+    #if !defined(__IBMCPP__) || __IBMCPP__ > 300
     assert(Lex::RecordKeyword("__int64",  INT64));
+    #endif
 #endif
 #if defined(OS2)                                                //kso
     bool fRc;                                                   //kso
