@@ -1,4 +1,4 @@
-/* $Id: StateUpd.cpp,v 1.15 2000-02-14 17:26:34 bird Exp $
+/* $Id: StateUpd.cpp,v 1.16 2000-02-14 17:29:25 bird Exp $
  *
  * StateUpd - Scans source files for API functions and imports data on them.
  *
@@ -289,21 +289,24 @@ int main(int argc, char **argv)
         }
 
         /* write status to log */
-        ul2 = dbGetNumberOfUpdatedFunction(options.lDllRefcode);
-        ul1 = dbCountFunctionInDll(options.lDllRefcode, FALSE);
-        ul0 = dbCountFunctionInDll(options.lDllRefcode, TRUE);
-        if (ul0 > ul2)
+        if (options.fIntegrityOnly)
         {
-            fprintf(phSignal, "%d functions where not found (found=%d, total=%d).\n", ul0 - ul2, ul2, ul0);
-            ulRc += 0x00010000;
+            ul2 = dbGetNumberOfUpdatedFunction(options.lDllRefcode);
+            ul1 = dbCountFunctionInDll(options.lDllRefcode, FALSE);
+            ul0 = dbCountFunctionInDll(options.lDllRefcode, TRUE);
+            if (ul0 > ul2)
+            {
+                fprintf(phSignal, "%d functions where not found (found=%d, total=%d).\n", ul0 - ul2, ul2, ul0);
+                ulRc += 0x00010000;
+            }
+            fprintf(phLog, "-------------------------------------------------\n");
+            fprintf(phLog, "-------- Functions which was not updated --------\n");
+            dbGetNotUpdatedFunction(options.lDllRefcode, dbNotUpdatedCallBack);
+            fprintf(phLog, "-------------------------------------------------\n");
+            fprintf(phLog, "-------------------------------------------------\n\n");
+            fprintf(phLog,"Number of function in this DLL:        %4ld (%ld)\n", ul1, ul0);
+            fprintf(phLog,"Number of successfully processed APIs: %4ld (%ld)\n", (long)(0x0000FFFF & ulRc), ul2);
         }
-        fprintf(phLog, "-------------------------------------------------\n");
-        fprintf(phLog, "-------- Functions which was not updated --------\n");
-        dbGetNotUpdatedFunction(options.lDllRefcode, dbNotUpdatedCallBack);
-        fprintf(phLog, "-------------------------------------------------\n");
-        fprintf(phLog, "-------------------------------------------------\n\n");
-        fprintf(phLog,"Number of function in this DLL:        %4ld (%ld)\n", ul1, ul0);
-        fprintf(phLog,"Number of successfully processed APIs: %4ld (%ld)\n", (long)(0x0000FFFF & ulRc), ul2);
         fprintf(phLog,"Number of signals:                     %4ld\n", (long)(ulRc >> 16));
 
         /* close the logs */
@@ -313,8 +316,11 @@ int main(int argc, char **argv)
         dbDisconnect();
 
         /* warn if error during processing. */
-        fprintf(stdout,"Number of function in this DLL:        %4ld (%ld)\n", ul1, ul0);
-        fprintf(stdout,"Number of successfully processed APIs: %4ld (%ld)\n", (long)(0x0000FFFF & ulRc), ul2);
+        if (options.fIntegrityOnly)
+        {
+            fprintf(stdout,"Number of function in this DLL:        %4ld (%ld)\n", ul1, ul0);
+            fprintf(stdout,"Number of successfully processed APIs: %4ld (%ld)\n", (long)(0x0000FFFF & ulRc), ul2);
+        }
         fprintf(stdout,"Number of signals:                     %4ld\n", (long)(ulRc >> 16));
         if ((int)(ulRc >> 16) > 0)
             fprintf(stderr, "Check signal file 'Signals.Log'.\n");
