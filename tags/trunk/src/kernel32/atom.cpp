@@ -1,4 +1,4 @@
-/* $Id: atom.cpp,v 1.11 2001-07-12 16:23:52 sandervl Exp $ */
+/* $Id: atom.cpp,v 1.12 2002-02-12 11:43:31 sandervl Exp $ */
 
 /*
  * Win32 ATOM api functions
@@ -278,14 +278,14 @@ ATOM WIN32API GlobalFindAtomA( LPCSTR atomName)
     ATOM     atom = 0;
 
     if(HIWORD(atomName)) {
-         dprintf(("GlobalFindAtomA %s", atomName));
+         dprintf(("KERNEL32: GlobalFindAtomA %s", atomName));
     }
-    else dprintf(("GlobalFindAtomA %x", atomName));
+    else dprintf(("KERNEL32: GlobalFindAtomA %x", atomName));
 
     atom = LookupAtom(atomTable, HIWORD(atomName) ? 
                       (PSZ) atomName : (PSZ) (LOWORD(atomName) | 0xFFFF0000),
                       LOOKUP_FIND | LOOKUP_NOCASE);
-    dprintf(("GlobalFindAtomA returned %x", atom));
+    dprintf(("KERNEL32: GlobalFindAtomA returned %x", atom));
 
     if(!atom) {
          SetLastError(ERROR_INVALID_PARAMETER_W); //TODO: find real error
