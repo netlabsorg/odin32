@@ -1,4 +1,4 @@
-/* $Id: iconcache.cpp,v 1.6 2000-03-29 15:24:04 cbratschi Exp $ */
+/* $Id: iconcache.cpp,v 1.7 2000-03-30 15:38:11 cbratschi Exp $ */
 
 /*
  * Win32 SHELL32 for OS/2
@@ -484,6 +484,8 @@ HGLOBAL WINAPI ICO_ExtractIconEx(LPCSTR lpszExeFileName, HICON * RetPtr, UINT nI
          RetPtr[i]=0;
          continue;
        }
+//CB: bug in Open32 USER32.CreateIconFromResourceEx: returns 0
+//    anyway, the Odin (Open32) icon handling is too far away from Win32
        RetPtr[i] = (HICON) pCreateIconFromResourceEx(idata,idataent->Size,TRUE,0x00030000, cxDesired, cyDesired, LR_DEFAULTCOLOR);
      }
      hRet = RetPtr[0];                   /* return first icon */
