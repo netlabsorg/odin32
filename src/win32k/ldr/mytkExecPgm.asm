@@ -1,4 +1,4 @@
-; $Id: mytkExecPgm.asm,v 1.3 2000-02-19 08:40:31 bird Exp $
+; $Id: mytkExecPgm.asm,v 1.4 2000-02-21 05:00:53 bird Exp $
 ;
 ; mytkExecPgm - tkExecPgm overload
 ;
@@ -22,6 +22,8 @@ DATA32 ENDS
     extrn  AcquireBuffer:PROC
     extrn  ReleaseBuffer:PROC
     extrn  QueryBufferSegmentOffset:PROC
+    extrn  f_FuStrLenZ
+    extrn  f_FuBuff
 
 ;
 ;   Exported symbols
