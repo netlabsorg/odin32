@@ -1,4 +1,4 @@
-/* $Id: os2native.cpp,v 1.6 1999-08-24 12:23:24 sandervl Exp $ */
+/* $Id: os2native.cpp,v 1.7 1999-08-25 08:57:14 phaller Exp $ */
 
 /*
  * Misc procedures
@@ -19,7 +19,7 @@
 #define INCL_DOSEXCEPTIONS
 #define INCL_DOSMEMMGR
 #define INCL_DOSPROCESS
-#include <os2wrap.h>	//Odin32 OS/2 api wrappers
+#include <os2wrap.h>                     //Odin32 OS/2 api wrappers
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -79,7 +79,7 @@ LPVOID WIN32API VirtualAlloc(LPVOID lpvAddress, DWORD cbSize, DWORD fdwAllocatio
 
   if (cbSize > 0x7fc00000)  /* 2Gb - 4Mb */
   {
-	dprintf(("VirtualAlloc: size too large"));
+   dprintf(("VirtualAlloc: size too large"));
 //        SetLastError( ERROR_OUTOFMEMORY );
         return NULL;
   }
@@ -87,7 +87,7 @@ LPVOID WIN32API VirtualAlloc(LPVOID lpvAddress, DWORD cbSize, DWORD fdwAllocatio
   if (!(fdwAllocationType & (MEM_COMMIT | MEM_RESERVE)) ||
        (fdwAllocationType & ~(MEM_COMMIT | MEM_RESERVE)))
   {
-	dprintf(("VirtualAlloc: Invalid parameter"));
+   dprintf(("VirtualAlloc: Invalid parameter"));
 //        SetLastError( ERROR_INVALID_PARAMETER );
         return NULL;
   }
@@ -102,65 +102,76 @@ LPVOID WIN32API VirtualAlloc(LPVOID lpvAddress, DWORD cbSize, DWORD fdwAllocatio
 
   if(fdwProtect & PAGE_EXECUTE_READWRITE) flag |= (PAG_EXECUTE | PAG_WRITE | PAG_READ);
   if(fdwProtect & PAGE_EXECUTE_READ) flag |= (PAG_EXECUTE | PAG_READ);
-  if(fdwProtect & PAGE_EXECUTE)	     flag |= PAG_EXECUTE;
+  if(fdwProtect & PAGE_EXECUTE)               flag |= PAG_EXECUTE;
 
   if(fdwProtect & PAGE_GUARD)        flag |= PAG_GUARD;
 
   //just do this if other options are used
-  if(!(flag & (PAG_READ | PAG_WRITE | PAG_EXECUTE)) || flag == 0) {
-	dprintf(("VirtualAlloc: Unknown protection flags, default to read/write"));
-        flag |= PAG_READ | PAG_WRITE;
+  if(!(flag & (PAG_READ | PAG_WRITE | PAG_EXECUTE)) || flag == 0)
+  {
+    dprintf(("VirtualAlloc: Unknown protection flags, default to read/write"));
+      flag |= PAG_READ | PAG_WRITE;
   }
 
-  if(fdwAllocationType & MEM_COMMIT && lpvAddress != NULL) {
-        Address = lpvAddress;
+  if(fdwAllocationType & MEM_COMMIT && lpvAddress != NULL)
+  {
+    Address = lpvAddress;
 
-        rc = DosSetMem(lpvAddress, cbSize, flag);
+    rc = DosSetMem(lpvAddress, cbSize, flag);
         //might try to commit larger part with same base address
-    	if(rc == ERROR_ACCESS_DENIED && cbSize > 4096 ) {//knut: AND more than one page
-        	char *newbase = (char *)lpvAddress + ((cbSize-1) & 0xFFFFF000); //knut: lets not start after the last page!
-                ULONG size, os2flags;
+    if(rc == ERROR_ACCESS_DENIED && cbSize > 4096 )
+    { //knut: AND more than one page
+      char *newbase = (char *)lpvAddress + ((cbSize-1) & 0xFFFFF000); //knut: lets not start after the last page!
+      ULONG size, os2flags;
 
-        	while(newbase >= (char *)lpvAddress) {  //knut: should check first page to!!
-                        size     = 4096;
-                        os2flags = 0;
-                        rc = DosQueryMem(newbase, &size, &os2flags);
-                        if(rc)  break;
-                        if(os2flags & PAG_COMMIT) {
-                                newbase += 4096;
-                                break;
-                        }
-                        newbase -= 4096;
-                }
-                if(rc == 0) {
-                        //In case it wants to commit bytes that fall into the last
-                        //page of the previous commit command
-                        if(cbSize > ((int)newbase - (int)lpvAddress)) {
-                                rc = DosSetMem(newbase, cbSize - ((int)newbase - (int)lpvAddress), flag);
-                        }
-                }
-                else    return(NULL);
+      while(newbase >= (char *)lpvAddress)
+      {  //knut: should check first page to!!
+        size     = 4096;
+        os2flags = 0;
+        rc = DosQueryMem(newbase, &size, &os2flags);
+        if(rc)
+          break;
+
+        if(os2flags & PAG_COMMIT)
+        {
+          newbase += 4096;
+          break;
         }
-	else 
-	{
-		if(rc == ERROR_INVALID_ADDRESS)
-		{
-		    	rc = DosAllocMem(&Address, cbSize, flag | flAllocMem );
-		}
-		else	
-		if(rc)	dprintf(("Unexpected DosSetMem error %x", rc));
-	}
+        newbase -= 4096;
+      }
+
+      if(rc == 0)
+      {
+        //In case it wants to commit bytes that fall into the last
+        //page of the previous commit command
+        if(cbSize > ((int)newbase - (int)lpvAddress))
+          rc = DosSetMem(newbase, cbSize - ((int)newbase - (int)lpvAddress), flag);
+      }
+      else
+        return(NULL);
+
+    }
+    else
+    {
+      if(rc == ERROR_INVALID_ADDRESS)
+        rc = DosAllocMem(&Address, cbSize, flag | flAllocMem );
+      else
+        if(rc)
+          dprintf(("Unexpected DosSetMem error %x", rc));
+    }
   }
-  else {
+  else
+  {
     /*knut: flAllocMem */
     rc = DosAllocMem(&Address, cbSize, flag | flAllocMem );
   }
 
   //TODO: Set last error in case rc != 0
-  if(rc) {
-        dprintf(("DosSetMem returned %d\n", rc));
+  if(rc)
+  {
+    dprintf(("DosSetMem returned %d\n", rc));
 //        SetLastError( ERROR_OUTOFMEMORY );
-        return(NULL);
+    return(NULL);
   }
 
   dprintf(("VirtualAlloc returned %X\n", Address));
@@ -264,13 +275,13 @@ DWORD WIN32API VirtualQuery(LPVOID lpvAddress, PMEMORY_BASIC_INFORMATION pmbiBuf
  APIRET rc;
 
   if(lpvAddress == NULL || pmbiBuffer == NULL || cbLength == 0) {
-	return 0;
+   return 0;
   }
   cbRangeSize = cbLength;
   rc = DosQueryMem(lpvAddress, &cbRangeSize, &dAttr);
   if(rc) {
-  	dprintf(("VirtualQuery - DosQueryMem %x %x returned %d\n", lpvAddress, cbLength, rc));
-	return 0;
+   dprintf(("VirtualQuery - DosQueryMem %x %x returned %d\n", lpvAddress, cbLength, rc));
+   return 0;
   }
   memset(pmbiBuffer, 0, sizeof(MEMORY_BASIC_INFORMATION));
   pmbiBuffer->BaseAddress = lpvAddress;
@@ -290,34 +301,34 @@ DWORD WIN32API VirtualQuery(LPVOID lpvAddress, PMEMORY_BASIC_INFORMATION pmbiBuf
         pmbiBuffer->Protect |= PAGE_GUARD;
 
   if(dAttr & PAG_FREE)
-	pmbiBuffer->State = MEM_FREE;
+   pmbiBuffer->State = MEM_FREE;
   else
   if(dAttr & PAG_COMMIT)
-	pmbiBuffer->State = MEM_COMMIT;
-  else	pmbiBuffer->State = MEM_RESERVE;
-  
+   pmbiBuffer->State = MEM_COMMIT;
+  else   pmbiBuffer->State = MEM_RESERVE;
+
   if(!(dAttr & PAG_SHARED))
-	pmbiBuffer->Type = MEM_PRIVATE;
+   pmbiBuffer->Type = MEM_PRIVATE;
 
   //TODO: This is not correct: AllocationProtect should contain the protection
   //      flags used in the initial call to VirtualAlloc
   pmbiBuffer->AllocationProtect = pmbiBuffer->Protect;
   if(dAttr & PAG_BASE) {
-	pmbiBuffer->AllocationBase = lpvAddress;
+   pmbiBuffer->AllocationBase = lpvAddress;
   }
   else {
-	while(lpvAddress > 0) {
-  		rc = DosQueryMem(lpvAddress, &cbRangeSize, &dAttr);
-  		if(rc) {
-  			dprintf(("VirtualQuery - DosQueryMem %x %x returned %d\n", lpvAddress, cbLength, rc));
-			break;
-  		}
-		if(dAttr & PAG_BASE) {
-			pmbiBuffer->AllocationBase = lpvAddress;
-			break;
-		}
-		lpvAddress = (LPVOID)((ULONG)lpvAddress - PAGE_SIZE);
-	}
+   while(lpvAddress > 0) {
+      rc = DosQueryMem(lpvAddress, &cbRangeSize, &dAttr);
+      if(rc) {
+         dprintf(("VirtualQuery - DosQueryMem %x %x returned %d\n", lpvAddress, cbLength, rc));
+         break;
+      }
+      if(dAttr & PAG_BASE) {
+         pmbiBuffer->AllocationBase = lpvAddress;
+         break;
+      }
+      lpvAddress = (LPVOID)((ULONG)lpvAddress - PAGE_SIZE);
+   }
   }
   return sizeof(MEMORY_BASIC_INFORMATION);
 }
