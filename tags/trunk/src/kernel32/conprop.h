@@ -1,10 +1,3 @@
-/* $Id: conprop.h,v 1.1 1999-05-24 20:19:43 ktk Exp $ */
-
-/*
- *
- * Project Odin Software License can be found in LICENSE.TXT
- *
- */
 /*
  * Win32 Console Subsystem for OS/2
  *
@@ -68,8 +61,9 @@ typedef struct _Options
 
   BOOL  fSetWindowPosition;           /* TRUE if window has to be positioned */
 
-  COORD coordDefaultPosition;
-  COORD coordDefaultSize;
+  COORD coordDefaultPosition;      /* default position of the console window */
+  COORD coordDefaultSize;          /* default size     of the console window */
+  COORD coordBufferSize;           /* size of the console buffer             */
 
   BOOL  fQuickInsert;                         /* like NT's quick insert mode */
   BOOL  fInsertMode;                                          /* insert mode */
