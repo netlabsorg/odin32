@@ -1,3 +1,4 @@
+/* $Id: shell.cpp,v 1.2 1999-10-09 11:17:01 sandervl Exp $ */
 /*
  * 				Shell Library Functions
  *

@@ -1,3 +1,4 @@
+/* $Id: pidl.cpp,v 1.2 1999-10-09 11:17:00 sandervl Exp $ */
 /*
  *	pidl Handling
  *

@@ -1,3 +1,4 @@
+/* $Id: shelllink.cpp,v 1.2 1999-10-09 11:17:04 sandervl Exp $ */
 /*
  *
  *	Copyright 1997	Marcus Meissner
