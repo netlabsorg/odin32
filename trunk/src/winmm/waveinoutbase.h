@@ -1,4 +1,4 @@
-/* $Id: waveinoutbase.h,v 1.1 2001-03-23 16:23:45 sandervl Exp $ */
+/* $Id: waveinoutbase.h,v 1.2 2002-06-05 11:05:56 sandervl Exp $ */
 
 /*
  * Wave playback & recording base class
@@ -10,10 +10,11 @@
 #ifndef __WAVEINOUTBASE_H__
 #define __WAVEINOUTBASE_H__
 
-#define STATE_STOPPED   0
-#define STATE_PLAYING   1
-#define STATE_PAUSED    2
-#define STATE_RECORDING 3
+#define STATE_STOPPED               0
+#define STATE_PLAYING               1
+#define STATE_PAUSED                2
+#define STATE_RECORDING             3
+#define STATE_POSTPONE_RECORDING    4
 
 #ifdef OS2_ONLY
 #include "winmmtype.h"

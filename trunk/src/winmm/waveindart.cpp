@@ -1,4 +1,4 @@
-/* $Id: waveindart.cpp,v 1.4 2002-05-28 14:09:25 sandervl Exp $ */
+/* $Id: waveindart.cpp,v 1.5 2002-06-05 11:05:56 sandervl Exp $ */
 
 /*
  * Wave record class
@@ -76,10 +76,8 @@ DartWaveIn::DartWaveIn(LPWAVEFORMATEX pwfx, ULONG fdwOpen, ULONG nCallback, ULON
     AmpOpenParms.usDeviceID = ( USHORT ) 0;
     AmpOpenParms.pszDeviceType = ( PSZ ) MCI_DEVTYPE_AUDIO_AMPMIX;
 
-    rc = mymciSendCommand(0, MCI_OPEN,
-                       MCI_WAIT | MCI_OPEN_TYPE_ID | MCI_OPEN_SHAREABLE,
-                       (PVOID) &AmpOpenParms,
-                       0);
+    rc = mymciSendCommand(0, MCI_OPEN, MCI_WAIT | MCI_OPEN_TYPE_ID | MCI_OPEN_SHAREABLE,
+                          (PVOID) &AmpOpenParms, 0);
     DeviceId = AmpOpenParms.usDeviceID;
     if(rc) {
         dprintf(("MCI_OPEN failed\n"));
@@ -143,20 +141,28 @@ DartWaveIn::~DartWaveIn()
 }
 /******************************************************************************/
 /******************************************************************************/
-/******************************************************************************/
-/******************************************************************************/
 MMRESULT DartWaveIn::start()
 {
- MCI_GENERIC_PARMS    GenericParms = {0};
- MCI_AMP_OPEN_PARMS   AmpOpenParms;
- MCI_CONNECTOR_PARMS  ConnectorParms;
- MCI_AMP_SET_PARMS    AmpSetParms ;
- APIRET rc;
- int i, curbuf, buflength;
+    MCI_GENERIC_PARMS    GenericParms = {0};
+    MCI_AMP_OPEN_PARMS   AmpOpenParms;
+    MCI_CONNECTOR_PARMS  ConnectorParms;
+    MCI_AMP_SET_PARMS    AmpSetParms ;
+    APIRET rc;
+    int i, curbuf, buflength;
 
     dprintf(("DartWaveIn::start"));
     if(State == STATE_RECORDING)
         return(MMSYSERR_NOERROR);
+
+    //if the app hasn't yet given us any buffers, then we can't possibly determine the
+    //right buffer size for DART recording, so postpone recording until the
+    //first buffer has been added
+    if(wavehdr == NULL) {
+        wmutex.enter();
+        State = STATE_POSTPONE_RECORDING;
+        wmutex.leave();
+        return MMSYSERR_NOERROR;
+    }
 
     if(fMixerSetup == FALSE)
     {
@@ -179,11 +185,8 @@ MMRESULT DartWaveIn::start()
         MixSetupParms->ulDeviceType = MCI_DEVTYPE_WAVEFORM_AUDIO;
         MixSetupParms->pmixEvent    = WaveInHandler;
 
-        rc = mymciSendCommand(DeviceId,
-                            MCI_MIXSETUP,
-                            MCI_WAIT | MCI_MIXSETUP_INIT,
-                            (PVOID)MixSetupParms,
-                            0);
+        rc = mymciSendCommand(DeviceId, MCI_MIXSETUP, MCI_WAIT | MCI_MIXSETUP_INIT,
+                              (PVOID)MixSetupParms, 0);
 
         if ( rc != MCIERR_SUCCESS ) {
             mciError(rc);
@@ -207,7 +210,7 @@ MMRESULT DartWaveIn::start()
             dprintf(("mix setup %d, %d\n", pwh->dwBufferLength, pwh->dwBufferLength));
 
             ulBufSize = pwh->dwBufferLength/2;
-            if(ulBufSize < minbufsize) {
+            if(ulBufSize > minbufsize) {
                 dprintf(("set buffer size to %d bytes (org size = %d)", minbufsize, pwh->dwBufferLength));
                 ulBufSize = minbufsize;
             }
@@ -242,13 +245,9 @@ MMRESULT DartWaveIn::start()
         /* Set the connector to 'line in' */
         memset( &ConnectorParms, '\0', sizeof( MCI_CONNECTOR_PARMS ) );
         ConnectorParms.ulConnectorType = MCI_LINE_IN_CONNECTOR;
-        rc = mymciSendCommand( DeviceId,
-                             MCI_CONNECTOR,
-                             MCI_WAIT |
-                             MCI_ENABLE_CONNECTOR |
-                             MCI_CONNECTOR_TYPE,
-                             ( PVOID ) &ConnectorParms,
-                             0 );
+        rc = mymciSendCommand(DeviceId, MCI_CONNECTOR, MCI_WAIT |
+                              MCI_ENABLE_CONNECTOR | MCI_CONNECTOR_TYPE,
+                              ( PVOID ) &ConnectorParms, 0 );
 
         /* Allow the user to hear what is being recorded
          * by turning the monitor on
@@ -271,17 +270,15 @@ MMRESULT DartWaveIn::start()
     dprintf(("Dart opened, bufsize = %d\n", MixBuffer[0].ulBufferLength));
 
     dprintf(("MixSetupParms = %X\n", MixSetupParms));
-    State     = STATE_RECORDING;
+    State    = STATE_RECORDING;
     fOverrun = FALSE;
     wmutex.leave();
 
     dprintf(("Dart recording"));
 
     // Start recording.
-    USHORT selTIB = GetFS(); // save current FS selector
-    MixSetupParms->pmixRead( MixSetupParms->ulMixHandle,
-                             &MixBuffer[0],
-                             PREFILLBUF_DART_REC);
+    USHORT selTIB = RestoreOS2FS(); // save current FS selector
+    MixSetupParms->pmixRead(MixSetupParms->ulMixHandle, &MixBuffer[0], PREFILLBUF_DART_REC);
     SetFS(selTIB);           // switch back to the saved FS selector
 
     return(MMSYSERR_NOERROR);
@@ -290,7 +287,7 @@ MMRESULT DartWaveIn::start()
 /******************************************************************************/
 MMRESULT DartWaveIn::stop()
 {
- MCI_GENERIC_PARMS Params;
+    MCI_GENERIC_PARMS Params;
 
     wmutex.enter();
     if(State != STATE_RECORDING) {
@@ -313,12 +310,23 @@ MMRESULT DartWaveIn::stop()
 /******************************************************************************/
 MMRESULT DartWaveIn::reset()
 {
- MCI_GENERIC_PARMS Params;
- LPWAVEHDR tmpwavehdr;
+    MCI_GENERIC_PARMS Params;
+    LPWAVEHDR tmpwavehdr;
 
     dprintf(("DartWaveIn::reset %s", (State == STATE_RECORDING) ? "recording" : "stopped"));
-    if(State != STATE_RECORDING)
+    
+    wmutex.enter();
+    if(State == STATE_POSTPONE_RECORDING) {
+        dprintf(("reset postponed recording"));
+        State = STATE_STOPPED;
+        wmutex.leave();
+        return MMSYSERR_NOERROR;
+    }
+    if(State != STATE_RECORDING) {
+        wmutex.leave();
         return(MMSYSERR_HANDLEBUSY);
+    }
+    wmutex.leave();
 
     memset(&Params, 0, sizeof(Params));
 
@@ -351,7 +359,7 @@ MMRESULT DartWaveIn::reset()
 /******************************************************************************/
 MMRESULT DartWaveIn::addBuffer(LPWAVEHDR pwh, UINT cbwh)
 {
- int i;
+    int i;
 
     wmutex.enter();
     pwh->lpNext          = NULL;
@@ -366,6 +374,10 @@ MMRESULT DartWaveIn::addBuffer(LPWAVEHDR pwh, UINT cbwh)
     else    wavehdr = pwh;
     wmutex.leave();
 
+    if(State == STATE_POSTPONE_RECORDING) {
+        //if recording was postponed due to lack of buffers, then start now
+        start();
+    }
     return(MMSYSERR_NOERROR);
 }
 /******************************************************************************/
@@ -551,7 +563,7 @@ void DartWaveIn::handler(ULONG ulStatus, PMCI_MIX_BUFFER pBuffer, ULONG ulFlags)
 
     //Transfer buffer to DART
     // MCI_MIXSETUP_PARMS->pMixWrite does alter FS: selector!
-    USHORT selTIB = GetFS(); // save current FS selector
+    USHORT selTIB = RestoreOS2FS(); // save current FS selector
     MixSetupParms->pmixRead(MixSetupParms->ulMixHandle, pBuffer, 1);
     SetFS(selTIB);           // switch back to the saved FS selector
 }
