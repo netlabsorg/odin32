@@ -1,4 +1,4 @@
-/* $Id: stubs.cpp,v 1.11 2000-03-19 15:33:09 davidr Exp $ */
+/* $Id: stubs.cpp,v 1.12 2000-03-19 22:32:13 davidr Exp $ */
 /* 
  * Win32 COM/OLE stubs for OS/2
  * 
@@ -14,6 +14,27 @@
 
 #include "ole32.h"
 
+//*******************************************************************************
+//*******************************************************************************
+HRESULT WIN32API DllDebugObjectRPCHook()
+{
+    dprintf(("OLE32: DllDebugObjectRPCHook, UNKNOWN API - stub"));
+    return 0;
+}
+//*******************************************************************************
+//*******************************************************************************
+HRESULT WIN32API DllGetClassObject(REFCLSID rclsid, REFIID riid, LPVOID *ppv)
+{
+    dprintf(("OLE32: DllGetClassObject - stub"));
+    return E_OUTOFMEMORY;
+}
+//*******************************************************************************
+//*******************************************************************************
+HRESULT WIN32API DllGetClassObjectWOW()
+{
+    dprintf(("OLE32: DllGetClassObjectWOW, UNKNOWN API - stub"));
+    return 0;
+}
 //*****************************************************************************
 //*****************************************************************************
 HRESULT WIN32API CoCreateFreeThreadedMarshaler(LPUNKNOWN punkOuter,
@@ -226,27 +247,6 @@ HRESULT WIN32API CreatePointerMoniker(LPUNKNOWN punk, LPMONIKER *ppmk)
 {
     dprintf(("OLE32: CreatePointerMoniker - stub"));
     return E_OUTOFMEMORY;
-}
-//*******************************************************************************
-//*******************************************************************************
-HRESULT WIN32API DllDebugObjectRPCHook()
-{
-    dprintf(("OLE32: DllDebugObjectRPCHook, UNKNOWN API - stub"));
-    return 0;
-}
-//*******************************************************************************
-//*******************************************************************************
-HRESULT WIN32API DllGetClassObject(REFCLSID rclsid, REFIID riid, LPVOID *ppv)
-{
-    dprintf(("OLE32: DllGetClassObject - stub"));
-    return E_OUTOFMEMORY;
-}
-//*******************************************************************************
-//*******************************************************************************
-HRESULT WIN32API DllGetClassObjectWOW()
-{
-    dprintf(("OLE32: DllGetClassObjectWOW, UNKNOWN API - stub"));
-    return 0;
 }
 //*******************************************************************************
 //*******************************************************************************
@@ -566,20 +566,6 @@ HRESULT WIN32API OpenOrCreateStream()
 }
 //*******************************************************************************
 //*******************************************************************************
-HRESULT WIN32API ProgIDFromCLSID(REFCLSID clsid, LPOLESTR *lplpszProgID)
-{
-    dprintf(("OLE32: ProgIDFromCLSID - stub"));
-    return(REGDB_E_CLASSNOTREG);
-}
-//*******************************************************************************
-//*******************************************************************************
-HRESULT WIN32API ReadClassStm(IStream *pStm, CLSID *pclsid)
-{
-    dprintf(("OLE32: ReadClassStm - stub"));
-    return(STG_E_READFAULT);
-}
-//*******************************************************************************
-//*******************************************************************************
 HRESULT WIN32API ReadFmtUserTypeStg(IStorage *pStg, CLIPFORMAT *pcf,
                                        LPWSTR *lplpszUserType)
 {
@@ -650,13 +636,7 @@ HRESULT WIN32API UtGetDvtd32Info()
     dprintf(("OLE32: UtGetDvtd32Info, UNKNOWN API - stub"));
     return(E_OUTOFMEMORY);
 }
-//*******************************************************************************
-//*******************************************************************************
-HRESULT WIN32API WriteClassStm(IStream *pStm, REFCLSID rclsid)
-{
-    dprintf(("OLE32: WriteClassStm - stub"));
-    return(STG_E_MEDIUMFULL);
-}
+
 //*******************************************************************************
 //*******************************************************************************
 HRESULT WIN32API WriteFmtUserTypeStg(LPSTORAGE pstg, CLIPFORMAT cf, LPOLESTR lpszUserType)

@@ -1,8 +1,9 @@
- /* $Id: changelog,v 1.821 2000-03-19 15:28:12 davidr Exp $ */
+ /* $Id: changelog,v 1.822 2000-03-19 22:33:36 davidr Exp $ */
 
  2000-03-19: David Raison <djr@lemur.co.uk>
  	- OLE32: Bugfixes.
  	         Ported changes from wine/corel sources.
+ 	         Created ReadClassStm, WriteClassStm, ProgIDFromCLSID
 
  2000-03-19: Sander van Leeuwen <sandervl@xs4all.nl>
 	- ODINCRT: Fixed FS wrapper for _fdopen & others in file.cpp

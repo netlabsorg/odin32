@@ -1,4 +1,4 @@
-/* $Id: clsid.cpp,v 1.10 2000-03-19 15:33:05 davidr Exp $ */
+/* $Id: clsid.cpp,v 1.11 2000-03-19 22:32:12 davidr Exp $ */
 /*
  *
  * Project Odin Software License can be found in LICENSE.TXT
@@ -331,3 +331,81 @@ int WIN32API CONCRETE_IsEqualGUID(REFGUID rguid1, REFGUID rguid2)
     return IsEqualGUID(rguid1, rguid2);
 }
 
+// ----------------------------------------------------------------------
+// ReadClassStm
+// ----------------------------------------------------------------------
+HRESULT WIN32API ReadClassStm(IStream *pStm, CLSID *rclsid)
+{
+    ULONG nbByte;
+    HRESULT res;
+
+    dprintf(("OLE32: ReadClassStm"));
+
+    if (rclsid == NULL)
+        return E_INVALIDARG;
+
+    res = IStream_Read(pStm,(void*)rclsid,sizeof(CLSID),&nbByte);
+
+    if (FAILED(res))
+        return res;
+
+    if (nbByte != sizeof(CLSID))
+        return S_FALSE;
+
+    return S_OK;
+}
+
+// ----------------------------------------------------------------------
+// WriteClassStm
+// ----------------------------------------------------------------------
+HRESULT WIN32API WriteClassStm(IStream *pStm, REFCLSID rclsid)
+{
+    dprintf(("OLE32: WriteClassStm"));
+
+    if (rclsid == NULL)
+        return E_INVALIDARG;
+
+    return IStream_Write(pStm, rclsid, sizeof(CLSID), NULL);
+}
+
+// ----------------------------------------------------------------------
+// ProgIDFromCLSID
+// ----------------------------------------------------------------------
+HRESULT WIN32API ProgIDFromCLSID(REFCLSID clsid, LPOLESTR *lplpszProgID)
+{
+    oStringA		tClsId(clsid);
+    oStringA		szKey("CLSID\\");
+    LONG		lDataLen = 255;
+    oStringA		szProgID(lDataLen, 1);
+    HKEY		hKey;
+    HRESULT		rc;
+    LPOLESTR		tmp;
+    LPMALLOC		pMllc;
+
+    dprintf(("OLE32: ProgIDFromCLSID"));
+    dprintf(("       clsid = %s", (char *)tClsId));
+
+    szKey += tClsId + "\\ProgID";
+
+    // Open key...
+    if (RegOpenKeyA(HKEY_CLASSES_ROOT, szKey, &hKey))
+    	return REGDB_E_CLASSNOTREG;
+
+    // Get default string from the key...
+    rc = RegQueryValueA(hKey, NULL, szProgID, &lDataLen);
+    RegCloseKey(hKey);
+    if (rc != 0)
+	return REGDB_E_CLASSNOTREG;
+
+    if (CoGetMalloc(0, &pMllc))		// Singleton instance, no need to release
+	return E_OUTOFMEMORY;
+
+    tmp = (LPOLESTR)IMalloc_Alloc(pMllc, (strlen(szProgID) + 1) * 2); 
+    if (tmp == NULL)
+	return E_OUTOFMEMORY;
+
+    AsciiToUnicode(szProgID, tmp);
+    *lplpszProgID = tmp;
+
+    return S_OK;
+}
