@@ -1,4 +1,4 @@
-/* $Id: myldrOpen.cpp,v 1.12 2000-09-12 04:40:57 bird Exp $
+/* $Id: myldrOpen.cpp,v 1.13 2000-12-11 06:30:59 bird Exp $
  *
  * myldrOpen - ldrOpen.
  *
@@ -74,12 +74,26 @@ ULONG LDRCALL myldrOpen(PSFN phFile, PSZ pszFilename, PULONG pfl)
                                         /* The maximum nesting level is currently 3.  */
                                         /* When the maximum depth has been reached    */
                                         /* we'll not intercept loading any longer!    */
-    ULONG rc;                           /* Return value. */
+    ULONG   rc;                         /* Return value. */
 
     /** @sketch
-     * Try open the file (that's why this function is called anyway)
+     * Try open the file (that's why this function is called)
+     *   Apply Extention fix if this is requested.
      */
-    rc = ldrOpen(phFile, pszFilename, pfl);
+    if (fldrOpenExtentionFix)
+    {
+        int cchFilename = strlen(pszFilename);
+        pszFilename[cchFilename - 4] = '\0';
+        rc = ldrOpen(phFile, pszFilename, pfl);
+        if (rc != NO_ERROR)
+        {
+            pszFilename[cchFilename - 4] = '.';
+            rc = ldrOpen(phFile, pszFilename, pfl);
+        }
+    }
+    else
+        rc = ldrOpen(phFile, pszFilename, pfl);
+
     if (rc == NO_ERROR)
         kprintf(("myldrOpen-%d:  phFile=%#.4x, flags=%#.8x, pszFn=%s\n", cNesting, *phFile, pfl, pszFilename));
 
@@ -770,7 +784,7 @@ ret:
  *                        normally the executable name.
  *
  * @status    completly implemented.
- * @author    knut st. osmundsen (knut.stange.osmundsen@pmsc.no)
+ * @author    knut st. osmundsen (knut.stange.osmundsen@mynd.no)
  * @remark    Implementation note:
  *  The arguments convention is as follows:
  *      First argument, which should be the executable name, is terminated with a '\0'.
@@ -898,7 +912,7 @@ APIRET AddArgsToFront(int cArgs,  ...)
  * @returns   OS/2 return code.
  * @param     pszExecName   Pointer to new executable name.
  * @status    completly implemented.
- * @author    knut st. osmundsen (knut.stange.osmundsen@pmsc.no)
+ * @author    knut st. osmundsen (knut.stange.osmundsen@mynd.no)
  * @remark    .
  */
 APIRET SetExecName(const char *pszExecName)
@@ -940,7 +954,7 @@ APIRET SetExecName(const char *pszExecName)
  *                          On failiure it's undefined.
  * @param     pfl           Some flags set by ldrOpen.
  * @sketch    stub
- * @author    knut st. osmundsen (knut.stange.osmundsen@pmsc.no)
+ * @author    knut st. osmundsen (knut.stange.osmundsen@mynd.no)
  * @remark
  */
 APIRET OpenPATH(PSFN phFile, char *pszFilename, PULONG pfl)
