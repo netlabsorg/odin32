@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.167 2002-01-07 11:18:10 sandervl Exp $ */
+/* $Id: pmwindow.cpp,v 1.168 2002-02-12 13:10:14 sandervl Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -1681,8 +1681,8 @@ PosChangedEnd:
     default:
         goto RunDefFrameWndProc;
     }
-    RestoreOS2TIB();
     if(win32wnd) RELEASE_WNDOBJ(win32wnd);
+    RestoreOS2TIB();
     return (MRESULT)rc;
 
 RunDefFrameWndProc:

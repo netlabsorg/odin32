@@ -1,4 +1,4 @@
-/* $Id: window.cpp,v 1.118 2002-02-11 16:05:59 sandervl Exp $ */
+/* $Id: window.cpp,v 1.119 2002-02-12 13:10:14 sandervl Exp $ */
 /*
  * Win32 window apis for OS/2
  *
@@ -731,7 +731,7 @@ HWND WIN32API SetFocus(HWND hwnd)
  Win32BaseWindow *window;
  Win32BaseWindow *oldfocuswnd;
  HWND lastFocus, lastFocus_W, hwnd_O, hwndTopParent;
- BOOL activate;
+ BOOL activate, ret;
  TEB *teb;
 
     teb = GetThreadTEB();
@@ -769,6 +769,7 @@ HWND WIN32API SetFocus(HWND hwnd)
 
     if(HOOK_CallHooksA(WH_CBT, HCBT_SETFOCUS, hwnd, (LPARAM)lastFocus_W)) {
         dprintf(("hook cancelled SetFocus call!"));
+        RELEASE_WNDOBJ(window);
         return 0;
     }
 
@@ -780,13 +781,16 @@ HWND WIN32API SetFocus(HWND hwnd)
         //mp1 = win32 window handle
         //mp2 = top parent if activation required
         OSLibPostMessageDirect(hwnd_O, WIN32APP_SETFOCUSMSG, hwnd, (activate) ? hwndTopParent : 0);
+        RELEASE_WNDOBJ(window);
         return lastFocus_W;
     }
     teb->o.odin.hwndFocus = 0;
     if(!IsWindow(hwnd)) return FALSE;       //abort if window destroyed
 
     //NOTE: Don't always activate the window or else the z-order will be changed!!
-    return (OSLibWinSetFocus(OSLIB_HWND_DESKTOP, hwnd_O, activate)) ? lastFocus_W : 0;
+    ret = (OSLibWinSetFocus(OSLIB_HWND_DESKTOP, hwnd_O, activate)) ? lastFocus_W : 0;
+    RELEASE_WNDOBJ(window);
+    return ret;
 }
 //******************************************************************************
 //******************************************************************************
