@@ -1,4 +1,4 @@
-/* $Id: scissor.c,v 1.1 2000-02-29 00:46:24 sandervl Exp $ */
+/* $Id: scissor.c,v 1.2 2000-03-01 22:45:26 jeroen Exp $ */
 
 /*
  * Mesa 3-D graphics library
@@ -37,10 +37,10 @@
 #else
 #include "GL/xf86glx.h"
 #endif
+#include "types.h"
 #include "context.h"
 #include "macros.h"
 #include "scissor.h"
-#include "types.h"
 #endif
 
 

@@ -1,4 +1,4 @@
-/* $Id: texstate.c,v 1.1 2000-02-29 00:46:26 sandervl Exp $ */
+/* $Id: texstate.c,v 1.2 2000-03-01 22:45:28 jeroen Exp $ */
 
 /*
  * Mesa 3-D graphics library
@@ -35,6 +35,7 @@
 #else
 #include "GL/xf86glx.h"
 #endif
+#include "types.h"
 #include "context.h"
 #include "enums.h"
 #include "extensions.h"
@@ -43,7 +44,6 @@
 #include "texobj.h"
 #include "texstate.h"
 #include "texture.h"
-#include "types.h"
 #include "xform.h"
 #endif
 

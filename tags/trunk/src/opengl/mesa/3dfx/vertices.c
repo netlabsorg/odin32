@@ -1,4 +1,4 @@
-/* $Id: vertices.c,v 1.1 2000-02-29 00:46:30 sandervl Exp $ */
+/* $Id: vertices.c,v 1.2 2000-03-01 22:45:30 jeroen Exp $ */
 
 /*
  * Mesa 3-D graphics library
@@ -67,11 +67,11 @@
 #endif
 
 
-static void transform_v16(GLfloat *f,
-			  const GLfloat *m,
-			  const GLfloat *obj,
-			  GLuint obj_stride,
-			  GLuint count )
+static void __cdecl transform_v16(GLfloat *f,
+                          const GLfloat *m,
+                          const GLfloat *obj,
+                          GLuint obj_stride,
+                          GLuint count )
 {
    GLuint i;
 
@@ -89,9 +89,9 @@ static void transform_v16(GLfloat *f,
  * at least one such vertex.
  */
 static void project_verts(GLfloat *first,
-			  GLfloat *last,
-			  const GLfloat *m,
-			  GLuint stride )
+                          GLfloat *last,
+                          const GLfloat *m,
+                          GLuint stride )
 {
    const GLfloat sx = m[0], sy = m[5], sz = m[10];
    const GLfloat tx = m[12], ty = m[13], tz = m[14];
@@ -108,10 +108,10 @@ static void project_verts(GLfloat *first,
 }
 
 static void project_clipped_verts(GLfloat *first,
-				  GLfloat *last,
-				  const GLfloat *m,
-				  GLuint stride,
-				  const GLubyte *clipmask )
+                                  GLfloat *last,
+                                  const GLfloat *m,
+                                  GLuint stride,
+                                  const GLubyte *clipmask )
 {
    const GLfloat sx = m[0], sy = m[5], sz = m[10];
    const GLfloat tx = m[12], ty = m[13], tz = m[14];
@@ -120,11 +120,11 @@ static void project_clipped_verts(GLfloat *first,
    for ( f = first ; f != last ; STRIDE_F(f,stride), clipmask++)
    {
       if (!*clipmask) {
-	 const GLfloat oow = 1.0F / f[3];
-	 f[0] = sx * f[0] * oow + tx;
-	 f[1] = sy * f[1] * oow + ty;
-	 f[2] = sz * f[2] * oow + tz;
-	 f[3] = oow;
+         const GLfloat oow = 1.0F / f[3];
+         f[0] = sx * f[0] * oow + tx;
+         f[1] = sy * f[1] * oow + ty;
+         f[2] = sz * f[2] * oow + tz;
+         f[3] = oow;
       }
    }
 }
@@ -132,12 +132,12 @@ static void project_clipped_verts(GLfloat *first,
 
 
 
-static void cliptest_v16( GLfloat *first,
-			  GLfloat *last,
-			  GLubyte *p_clipOr,
-			  GLubyte *p_clipAnd,
-			  GLubyte *clipmask )
-{	
+static void __cdecl cliptest_v16( GLfloat *first,
+                          GLfloat *last,
+                          GLubyte *p_clipOr,
+                          GLubyte *p_clipAnd,
+                          GLubyte *clipmask )
+{
    GLubyte clipAnd = (GLubyte) ~0;
    GLubyte clipOr = 0;
    GLfloat *f = first;

@@ -1,4 +1,4 @@
-/* $Id: image.c,v 1.1 2000-02-29 00:46:18 sandervl Exp $ */
+/* $Id: image.c,v 1.2 2000-03-01 22:45:23 jeroen Exp $ */
 
 /*
  * Mesa 3-D graphics library
@@ -36,12 +36,12 @@
 #else
 #include "GL/xf86glx.h"
 #endif
+#include "types.h"
 #include "context.h"
 #include "image.h"
 #include "macros.h"
 #include "mmath.h"
 #include "pixel.h"
-#include "types.h"
 #endif
 
 
@@ -56,13 +56,13 @@ void gl_flip_bytes( GLubyte *p, GLuint n )
    for (i=0;i<n;i++) {
       b = (GLuint) p[i];
       a = ((b & 0x01) << 7) |
-	  ((b & 0x02) << 5) |
-	  ((b & 0x04) << 3) |
-	  ((b & 0x08) << 1) |
-	  ((b & 0x10) >> 1) |
-	  ((b & 0x20) >> 3) |
-	  ((b & 0x40) >> 5) |
-	  ((b & 0x80) >> 7);
+          ((b & 0x02) << 5) |
+          ((b & 0x04) << 3) |
+          ((b & 0x08) << 1) |
+          ((b & 0x10) >> 1) |
+          ((b & 0x20) >> 3) |
+          ((b & 0x40) >> 5) |
+          ((b & 0x80) >> 7);
       p[i] = (GLubyte) a;
    }
 }
