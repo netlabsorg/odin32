@@ -1246,6 +1246,7 @@ OS2IDirectDrawSurface::OS2IDirectDrawSurface(OS2IDirectDraw *lpDirectDraw,
             dprintf(("DDRAW:  No CC_Buffer needed\n"));
             // Yes => No Colorconversion is needed so point to the same buffer
             pDiveBuffer  = pFrameBuffer;
+            dwPitchDB = dwPitchFB;
           }
           else
           {
@@ -1415,10 +1416,8 @@ HRESULT OS2IDirectDrawSurface::ColorFill(LPRECT lpDestRect,DWORD dwFillColor)
 
   if(NULL!=lpDestRect)
   {
-    #ifdef DEBUG
-      dprintf(("DDRAW: Fill only Rect(%d,%d)(%d,%d)\n", lpDestRect->left, lpDestRect->top,
-               lpDestRect->right, lpDestRect->bottom));
-    #endif
+    dprintf(("DDRAW: Fill only Rect(%d,%d)(%d,%d)\n", lpDestRect->left, lpDestRect->top,
+             lpDestRect->right, lpDestRect->bottom));
     FillWidth  = lpDestRect->right - lpDestRect->left;
     FillHeight = lpDestRect->bottom - lpDestRect->top -1;
     pLine = pDiveBuffer +
@@ -1433,6 +1432,10 @@ HRESULT OS2IDirectDrawSurface::ColorFill(LPRECT lpDestRect,DWORD dwFillColor)
     pLine = pDiveBuffer;
   }
   dprintf(("DDRAW: 0x%08X (%d/%d) at\n", pLine,FillWidth,FillHeight));
+
+  // Better safe then sorry
+  if(FillHeight<=0)
+    return(DD_OK);
 
   if(pDiveBuffer!=pFrameBuffer)
   {
@@ -1487,9 +1490,12 @@ HRESULT OS2IDirectDrawSurface::ColorFill(LPRECT lpDestRect,DWORD dwFillColor)
       if(pDiveBuffer!=pFrameBuffer)
       {
         if(8==lpDraw->GetScreenBpp())
-          dwFillColor = pPal16[dwFillColor];
+          dwColor = (pPal16[dwFillColor]<<16) + pPal16[dwFillColor];
       }
-      dwColor = (dwFillColor<<16) + (dwFillColor);
+      else
+      {
+        dwColor = (dwFillColor<<16) + (dwFillColor);
+      }
       dprintf(("DDRAW: Fill with 0x%08X\n",dwColor));
       for(i=0,pColor = (DWORD*)pLine;i<(FillWidth/2);i++)
         pColor[i] = dwColor;
@@ -1522,9 +1528,11 @@ HRESULT OS2IDirectDrawSurface::ColorFill(LPRECT lpDestRect,DWORD dwFillColor)
       return DDERR_GENERIC;
   } // end switch(dest->DDSurfaceDesc.ddpfPixelFormat.dwRGBBitCount)
 
-
+  // First Line has been Filled so FillHeight-1 are left by one
+  FillHeight--;
   pFillPos = pLine + dwPitchDB;
-  FillWidth = FillWidth*dwBytesPPDive;;
+  FillWidth = FillWidth*dwBytesPPDive;
+
   for( y=0;y<FillHeight;y++,pFillPos+=dwPitchDB)
   {
     #ifdef USE_ASM
@@ -1539,22 +1547,26 @@ HRESULT OS2IDirectDrawSurface::ColorFill(LPRECT lpDestRect,DWORD dwFillColor)
 
   if(pDiveBuffer!=pFrameBuffer)
   {
-    dprintf(("DDRAW: CC-Mode Fill FrameBuffer\n"));
+    dprintf(("DDRAW: CC-Mode Fill FrameBuffer %08X\n",pFrameBuffer));
 
     if(NULL!=lpDestRect)
     {
+      dprintf(("DDRAW: Fill only Rect(%d,%d)(%d,%d)\n", lpDestRect->left, lpDestRect->top,
+               lpDestRect->right, lpDestRect->bottom));
       FillWidth  = lpDestRect->right - lpDestRect->left;
       FillHeight = lpDestRect->bottom - lpDestRect->top -1;
       pLine = pFrameBuffer +
               (lpDestRect->top*dwPitchFB) +
-              (lpDestRect->left*lpDraw->GetScreenBpp());
+              (lpDestRect->left*(lpDraw->GetScreenBpp()>>3));
     }
     else
     {
+      dprintf(("DDRAW: Fill all at addr "));
       FillWidth  = width;
       FillHeight = height -1;
       pLine = pFrameBuffer;
     }
+    dprintf(("DDRAW: 0x%08X width,height(%d/%d) \n", pLine,FillWidth,FillHeight));
 
     // Colorconversion mode we must also fill the other buffer
     switch(lpDraw->GetScreenBpp())
@@ -1563,12 +1575,12 @@ HRESULT OS2IDirectDrawSurface::ColorFill(LPRECT lpDestRect,DWORD dwFillColor)
         dprintf(("DDRAW: 8 Bit\n"));
         dwColor = (dwFillColor<<24) + (dwFillColor<<16) +
                   (dwFillColor<<8)  + (dwFillColor);
-        dprintf(("DDRAW: Fill with 0x%08X\n",dwColor));
+        dprintf(("DDRAW: Fill with %08X => 0x%08X\n",dwFillColor,dwColor));
         for(i=0,pColor = (DWORD*)pLine;i<(FillWidth/4);i++)
           pColor[i] = dwColor;
         if(FillWidth % 4)
         {
-           pFillPos = (char*) (&pColor[i-1]);
+          pFillPos = (char*) (&pColor[i-1]);
           for(i=0;i<FillWidth % 4;i++)
              pFillPos[i] = (UCHAR) dwColor;
         }
@@ -1599,10 +1611,16 @@ HRESULT OS2IDirectDrawSurface::ColorFill(LPRECT lpDestRect,DWORD dwFillColor)
         dwColor = dwFillColor;
         for(i=0,pColor = (DWORD*)pLine;i<FillWidth;i++)
           pColor[i] = dwColor;
+        break;
+      default:
+        dprintf(("DDRAW: Unsupported # of Bits %d",lpDraw->GetScreenBpp()));
     }
 
+    // First Line has been Filled so FillHeight-1 are left by one
+    FillHeight--;
+
     pFillPos = pLine + dwPitchFB;
-    FillWidth = FillWidth*lpDraw->GetScreenBpp();
+    FillWidth = FillWidth*(lpDraw->GetScreenBpp()>>3);
     for( y=0;y<FillHeight;y++,pFillPos+=dwPitchFB)
     {
       #ifdef USE_ASM
