@@ -1,9 +1,9 @@
-/* $Id: pe.cpp,v 1.27 2001-04-10 17:09:08 sandervl Exp $ */
+/* $Id: pe.cpp,v 1.28 2001-06-10 22:00:04 sandervl Exp $ */
 
 /*
  * PELDR main exe loader code
  *
- * Copyright 1998-2000 Sander van Leeuwen (sandervl@xs4all.nl)
+ * Copyright 1998-2001 Sander van Leeuwen (sandervl@xs4all.nl)
  *
  * Command line options:
  *   /OPT:[x1=y,x2=z,..]	 
@@ -18,6 +18,7 @@
 #define INCL_DOSPROCESS          /* DOS Process values       */
 #define INCL_DOSMISC             /* DOS Miscellanous values  */
 #define INCL_DOSMODULEMGR
+#define INCL_DOSSESMGR
 #define INCL_WIN
 #include <os2.h>
 #include <bseord.h>
@@ -42,6 +43,7 @@ char szExeErrorMsg[]    = "File isn't an executable";
 char szInteralErrorMsg[]= "Internal Error";
 char szNoKernel32Msg[]  = "Can't load/find kernel32.dll (rc=%d, module %s)";
 char szDosInfoBlocks[]  = "DosInfoBlocks failed!";
+char szErrDosStartSession[] = "Failed to start win16 session (rc=%d)";
 
 char fullpath[CCHMAXPATH];
 
@@ -72,7 +74,7 @@ WIN32CTOR   CreateWin32Exe       = 0;
 ULONG       reservedMemory       = 0;
 BOOL        fConsoleApp          = FALSE;
 
-void AllocateExeMem(char *filename);
+BOOL AllocateExeMem(char *filename, BOOL *fNEExe);
 
 //******************************************************************************
 //******************************************************************************
@@ -83,12 +85,13 @@ int main(int argc, char *argv[])
  char   exeName[CCHMAXPATH];
  char   fullpath[CCHMAXPATH];
  char   errorMod[CCHMAXPATH];
+ char  *pszErrorMsg = NULL;
  APIRET  rc;
  HMODULE hmodPMWin = 0, hmodKernel32 = 0;
  PTIB   ptib;
  PPIB   ppib;
  char  *cmdline, *win32cmdline, *peoptions, *newcmdline;
- BOOL   fQuote = FALSE, fVioConsole;
+ BOOL   fQuote = FALSE, fVioConsole, fIsNEExe;
  int    nrTries = 1;
 
   if(argc >= 2) {
@@ -161,12 +164,29 @@ tryagain:
 	}
 	else {//should never happen!
 filenotfound:
-  		rc = DosLoadModule(exeName, sizeof(exeName), "PMWIN.DLL", &hmodPMWin);
-  		rc = DosQueryProcAddr(hmodPMWin, ORD_WIN32MESSAGEBOX, NULL, (PFN *)&MyWinMessageBox);
-		MyWinMessageBox(HWND_DESKTOP, NULL, szDosInfoBlocks, szErrorTitle, 0, MB_OK | MB_ERROR | MB_MOVEABLE);
-		goto fail;
+                pszErrorMsg = szDosInfoBlocks;
+                goto failerror;
 	}
-	AllocateExeMem(exeName);
+	AllocateExeMem(exeName, &fIsNEExe);
+        if(fIsNEExe) {
+            STARTDATA sdata = {0};
+            ULONG idSession;
+            PID   pid;
+            sdata.Length    = sizeof(sdata);
+            sdata.PgmName   = "w16odin.exe";
+            strcpy(fullpath, exeName);
+            strcat(fullpath, " ");
+            strcat(fullpath, win32cmdline);
+            sdata.PgmInputs = fullpath;
+            sdata.SessionType = SSF_TYPE_WINDOWEDVDM;
+            rc = DosStartSession(&sdata, &idSession, &pid);
+            if(rc) {
+      	        sprintf(fullpath, szErrDosStartSession, rc);
+                pszErrorMsg = fullpath;
+                goto failerror;
+            }
+            return 0;
+        }
   }
 
 #ifdef COMMAND_LINE_VERSION
@@ -226,13 +246,33 @@ fail:
   if(hmodPMWin) 	DosFreeModule(hmodPMWin);
   if(hmodKernel32) 	DosFreeModule(hmodKernel32);
   return(1);
+
+failerror:
+  rc = DosLoadModule(exeName, sizeof(exeName), "PMWIN.DLL", &hmodPMWin);
+  rc = DosQueryProcAddr(hmodPMWin, ORD_WIN32INITIALIZE, NULL, (PFN *)&MyWinInitialize);
+  rc = DosQueryProcAddr(hmodPMWin, ORD_WIN32TERMINATE, NULL, (PFN *)&MyWinTerminate);
+  rc = DosQueryProcAddr(hmodPMWin, ORD_WIN32CREATEMSGQUEUE, NULL, (PFN *)&MyWinCreateMsgQueue);
+  rc = DosQueryProcAddr(hmodPMWin, ORD_WIN32DESTROYMSGQUEUE, NULL, (PFN *)&MyWinDestroyMsgQueue);
+  rc = DosQueryProcAddr(hmodPMWin, ORD_WIN32MESSAGEBOX, NULL, (PFN *)&MyWinMessageBox);
+  if(rc == 0) {
+      if ((hab = MyWinInitialize(0)) == 0L) /* Initialize PM     */
+   	goto fail;
+
+      hmq = MyWinCreateMsgQueue(hab, 0);
+
+      MyWinMessageBox(HWND_DESKTOP, NULL, pszErrorMsg, szErrorTitle, 0, MB_OK | MB_ERROR | MB_MOVEABLE);
+  }
+  if(hmq) MyWinDestroyMsgQueue( hmq );             /* Tidy up...                   */
+  if(hab) MyWinTerminate( hab );                   /* Terminate the application    */
+  if(hmodPMWin) 	DosFreeModule(hmodPMWin);
+  return 1;
 }
 //******************************************************************************
 //SvL: Reserve memory for win32 exes without fixups
 //     This is done before any Odin or PMWIN dll is loaded, so we'll get
 //     a very low virtual address. (which is exactly what we want)
 //******************************************************************************
-void AllocateExeMem(char *filename)
+BOOL AllocateExeMem(char *filename, BOOL *fNEExe)
 {
  HFILE  dllfile = 0;
  char   szFileName[CCHMAXPATH], *tmp;
@@ -247,7 +287,9 @@ void AllocateExeMem(char *filename)
  ULONG  alloccnt = 0;
  ULONG  diff, i, baseAddress;
  ULONG  ulSysinfo, flAllocMem = 0;
+ BOOL   ret = FALSE;
 
+  *fNEExe = FALSE;
   strcpy(szFileName, filename);
 
   rc = DosOpen(szFileName, &dllfile, &action, 0, FILE_READONLY, OPEN_ACTION_OPEN_IF_EXISTS|OPEN_ACTION_FAIL_IF_NEW, OPEN_SHARE_DENYNONE|OPEN_ACCESS_READONLY, NULL);
@@ -290,6 +332,9 @@ void AllocateExeMem(char *filename)
     	goto end;
   }
   if(doshdr.e_magic != IMAGE_DOS_SIGNATURE || signature != IMAGE_NT_SIGNATURE) {
+        if(LOWORD(signature) == IMAGE_OS2_SIGNATURE) {
+            *fNEExe = TRUE;
+        }
     	goto end;
   }
   fConsoleApp = (oh.Subsystem == IMAGE_SUBSYSTEM_WINDOWS_CUI);
@@ -311,8 +356,8 @@ void AllocateExeMem(char *filename)
 	flAllocMem = 0;
   }
   else {
-	if(flAllocMem == 0) {
-		goto end; //no support for > 512 MB
+        if(flAllocMem == 0) {
+            goto end; //no support for > 512 MB
 	}
   }
   while(TRUE) {
@@ -345,9 +390,10 @@ void AllocateExeMem(char *filename)
   for(i=0;i<alloccnt;i++) {
     	DosFreeMem((PVOID)memallocs[i]);
   }
+  ret = TRUE;
 end:
   if(dllfile) DosClose(dllfile);
-  return;
+  return ret;
 }
 //******************************************************************************
 //******************************************************************************
