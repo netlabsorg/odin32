@@ -1,4 +1,4 @@
-/* $Id: winmenu.cpp,v 1.13 1999-11-03 18:16:19 phaller Exp $ */
+/* $Id: winmenu.cpp,v 1.14 1999-11-05 12:54:11 sandervl Exp $ */
 
 /*
  * Win32 menu API functions for OS/2
@@ -724,14 +724,18 @@ ODINFUNCTION5(BOOL, InsertMenuA,
               UINT, id,
               LPCSTR, str)
 {
-    dprintf(("USER32: InsertMenuA %x %d %x %d %s", hMenu, pos, flags, id, str));
+    if(IS_STRING_ITEM(flags) && HIWORD(str)) {
+    	 dprintf(("USER32: InsertMenuA %x %d %x %d %s", hMenu, pos, flags, id, str));
+    }
+    else dprintf(("USER32: InsertMenuA %x %d %x %d %x", hMenu, pos, flags, id, str));
+
     if(hMenu == 0)
     {
         SetLastError(ERROR_INVALID_PARAMETER);
         return 0;
     }
 
-    if(!str || *str == NULL) {
+    if(IS_STRING_ITEM(flags) && (!str || *str == NULL)) {
         flags |= MF_SEPARATOR;
     }
     return O32_InsertMenu(hMenu, pos, flags, id, str);

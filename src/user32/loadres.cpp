@@ -1,14 +1,15 @@
-/* $Id: loadres.cpp,v 1.13 1999-11-05 09:16:21 sandervl Exp $ */
+/* $Id: loadres.cpp,v 1.14 1999-11-05 12:54:10 sandervl Exp $ */
 
 /*
  * Win32 resource API functions for OS/2
  *
  * Copyright 1998 Sander van Leeuwen
  *
- * Parts based on Wine code (objects\bitmap.c):
+ * Parts based on Wine code (objects\bitmap.c, loader\resource.c):
  *
  * Copyright 1993 Alexandre Julliard
  *           1998 Huw D M Davies
+ *           1993 Robert J. Amstadt
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *
@@ -24,65 +25,70 @@
 
 //******************************************************************************
 //******************************************************************************
-int WIN32API LoadStringA(HINSTANCE hinst, UINT wID, LPSTR lpBuffer, int cchBuffer)
+INT WIN32API LoadStringA(HINSTANCE instance, UINT resource_id,
+                         LPSTR buffer, INT buflen )
 {
- Win32Resource *winres;
- LPWSTR  resstring;
- int     resstrlen = 0;
+  INT retval;
+  LPWSTR buffer2 = NULL;
 
-    winres = (Win32Resource *)FindResourceA(hinst, (LPSTR)wID, RT_STRINGA);
-    if(winres == NULL) {
-        dprintf(("LoadStringA NOT FOUND from %X, id %d buffersize %d\n", hinst, wID, cchBuffer));
-//TODO: BAD HACK!
-        if(cchBuffer > 3)
-        {
-          strcpy(lpBuffer, "XXX");
-          return 3;
-        }
-//TODO: BAD HACK!
-        *lpBuffer = 0;
-        return 0;
+    if (buffer && buflen)
+	buffer2 = (LPWSTR)HeapAlloc( GetProcessHeap(), 0, buflen * 2 );
+
+    retval = LoadStringW(instance,resource_id,buffer2,buflen);
+
+    if (buffer2)
+    {
+	if (retval) {
+	    lstrcpynWtoA( buffer, buffer2, buflen );
+	    retval = lstrlenA( buffer );
+	}
+	else
+	    *buffer = 0;
+	HeapFree( GetProcessHeap(), 0, buffer2 );
     }
-
-    resstring = (LPWSTR)winres->lockResource();
-    if(resstring) {
-        resstrlen = min(lstrlenW(resstring)+1, cchBuffer);
-        lstrcpynWtoA(lpBuffer, resstring, resstrlen);
-        lpBuffer[resstrlen-1] = 0;
-        resstrlen--;
-        dprintf(("LoadStringA (%d) %s", resstrlen, lpBuffer));
-    }
-    delete winres;
-
-    dprintf(("LoadStringA from %X, id %d buffersize %d\n", hinst, wID, cchBuffer));
-    return(resstrlen);
+    return retval;
 }
 //******************************************************************************
 //******************************************************************************
 int WIN32API LoadStringW(HINSTANCE hinst, UINT wID, LPWSTR lpBuffer, int cchBuffer)
 {
  Win32Resource *winres;
- LPWSTR resstring;
- int    resstrlen = 0;
+ WCHAR *p;
+ int string_num;
+ int i = 0;
 
-    winres = (Win32Resource *)FindResourceW(hinst, (LPWSTR)wID, RT_STRINGW);
+    /* Use bits 4 - 19 (incremented by 1) as resourceid, mask out 
+     * 20 - 31. */
+    winres = (Win32Resource *)FindResourceW(hinst, (LPWSTR)(((wID>>4)&0xffff)+1), RT_STRINGW);
     if(winres == NULL) {
         dprintf(("LoadStringW NOT FOUND from %X, id %d buffersize %d\n", hinst, wID, cchBuffer));
         *lpBuffer = 0;
         return 0;
     }
 
-    resstring = (LPWSTR)winres->lockResource();
-    if(resstring) {
-        resstrlen = min(lstrlenW(resstring)+1, cchBuffer);
-        lstrcpynW(lpBuffer, resstring, resstrlen);
-        lpBuffer[resstrlen-1] = 0;
-        resstrlen--;
+    p = (LPWSTR)winres->lockResource();
+    if(p) {
+    	string_num = wID & 0x000f;
+    	for (i = 0; i < string_num; i++)
+		p += *p + 1;
+     
+    	if (lpBuffer == NULL) return *p;
+    	i = min(cchBuffer - 1, *p);
+    	if (i > 0) {
+		memcpy(lpBuffer, p + 1, i * sizeof (WCHAR));
+		lpBuffer[i] = (WCHAR) 0;
+    	} 
+	else {
+		if (cchBuffer > 1) {
+	    		lpBuffer[0] = (WCHAR) 0;
+	    		return 0;
+		}
+    	}
     }
     delete winres;
 
     dprintf(("LoadStringW from %X, id %d buffersize %d\n", hinst, wID, cchBuffer));
-    return(resstrlen);
+    return(i);
 }
 //******************************************************************************
 //******************************************************************************
