@@ -1,10 +1,11 @@
-/* $Id: OS2SURFACE.CPP,v 1.33 2001-09-30 22:23:44 sandervl Exp $ */
+/* $Id: OS2SURFACE.CPP,v 1.34 2001-10-03 13:49:40 sandervl Exp $ */
 
 /*
  * DirectDraw Surface class implementaion
  *
  * Copyright 1999 Markus Montkowski
  * Copyright 2000 Michal Necasek
+ * Copyright 1998-2001 Sander van Leeuwen
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *
@@ -2161,30 +2162,15 @@ HRESULT WIN32API SurfBlt3(THIS This, LPRECT lpDestRect, LPDIRECTDRAWSURFACE3 lpD
 HRESULT WIN32API SurfBlt4(THIS This, LPRECT lpDestRect, LPDIRECTDRAWSURFACE4 lpDDSrcSurface,
         LPRECT lpSrcRect, DWORD dwFlags, LPDDBLTFX lpDDBltFx)
 {
-   // We have determine between 3 different blit senarios.
-   // 1. Blitting between Divebuffers (Front/Backbuffer and primary surface)
-   // 2. Blitting between memory and Divebuffers (Front/Backbuffer and primary surface).
-   // 3. Blitting between memory buffers.
-   // 1 and 3 are easy. DiveBlitImage or memcpy will do the job for non transparent blits
-   // 2 is now also easy as we do colorconverion via Dive after each unlocking of a surface
-   // The advantage is that we don't have to call DiveSetupBlitter each time. The Blitter will be
-   // setup only when the screen resolution is changed by ddraw. I guess we should see a big performance
-   // increase by doing it this way, unless the software blits directly from memory to the primary surface)
-   // But even then this could be faster as the SetupBlitter call is timeconsumeing and DIVE does emulate
-   // the blit in SW anyway as there is no interface in the driver to blit with HW support from the sysmem.
-
  OS2IDirectDrawSurface *dest = (OS2IDirectDrawSurface *)This;
  OS2IDirectDrawSurface *src  = (OS2IDirectDrawSurface *)lpDDSrcSurface;
 
- int                    x, i, BlitWidth, BlitHeight;
- PALETTEENTRY           SysPal[257];
- PLOGPALETTE            pLogPal = (PLOGPALETTE) SysPal;
- char                   *pBltPos, *pSrcPos;
- DDSURFACEDESC2         DestSurfaceDesc, SrcSurfaceDesc;
- DDRectangle             *pIRectDest,*pIRectSrc,*pIRectTest;
- RECTL                  DestRect, SrcRect;
- BOOL Found;
- DWORD dwSrcColor, dwDestColor;
+ DDSURFACEDESC2  DestSurfaceDesc, SrcSurfaceDesc;
+ DDRectangle    *pIRectDest,*pIRectSrc,*pIRectTest;
+ RECT            DestRect, SrcRect;
+ BOOL            Found;
+ int             i;
+ HRESULT         ret = DD_OK;
 
   #ifdef DEBUG
     dprintf(("DDRAW: SurfBlt4 To Surf %08X, from Surf %08X\n",dest,src));
@@ -2196,10 +2182,9 @@ HRESULT WIN32API SurfBlt4(THIS This, LPRECT lpDestRect, LPDIRECTDRAWSURFACE4 lpD
     _dump_DDBLT(dwFlags);
   #endif
 
-
   if (NULL!=lpDestRect)
   {
-    // HACK: RA does pss in negative values we might be better etrun an error,
+    // HACK: RA does pass in negative values we might be better return an error,
     //for now we clip
 #define RA_HACK 1
 
@@ -2242,22 +2227,19 @@ HRESULT WIN32API SurfBlt4(THIS This, LPRECT lpDestRect, LPDIRECTDRAWSURFACE4 lpD
        right = dest->width;
 #endif    // RA_HACK
 
-    pIRectDest = new DDRectangle( top,
-                                  left,
-                                  bottom,
-                                  right);
+    pIRectDest = new DDRectangle( left, top, right, bottom);
 #ifdef RA_HACK
     DestRect.top    = top;
     DestRect.left   = left;
     DestRect.bottom = bottom;
     DestRect.right  = right;
 #else
-    memcpy(&DestRect,lpDestRect,sizeof(RECTL) );
+    memcpy(&DestRect,lpDestRect,sizeof(RECT) );
 #endif //RA_HACK
   }
   else
   {
-    pIRectDest = new DDRectangle( 0, 0, dest->height, dest->width);
+    pIRectDest = new DDRectangle( 0, 0, dest->width, dest->height);
     DestRect.top    = 0;
     DestRect.left   = 0;
     DestRect.bottom = dest->height;
@@ -2287,7 +2269,6 @@ HRESULT WIN32API SurfBlt4(THIS This, LPRECT lpDestRect, LPDIRECTDRAWSURFACE4 lpD
       }
 
     }
-
     if (Found)
     {
       delete pIRectDest;
@@ -2295,6 +2276,176 @@ HRESULT WIN32API SurfBlt4(THIS This, LPRECT lpDestRect, LPDIRECTDRAWSURFACE4 lpD
       return(DDERR_SURFACEBUSY);
     }
   }
+  delete pIRectDest;
+
+  if (NULL!=lpSrcRect)
+  {
+#ifdef RA_HACK
+    // Same as for dest rectangle now for src
+
+    int top,left,bottom,right;
+
+    top    = lpSrcRect->top;
+    left   = lpSrcRect->left;
+    bottom = lpSrcRect->bottom;
+    right  = lpSrcRect->right;
+
+    if(top<0)
+    {
+      bottom += top;
+      top = 0;
+    }
+
+    if(top > src->height)
+      return DDERR_INVALIDPARAMS;
+
+    if(bottom<0)
+      return DDERR_INVALIDPARAMS;
+
+    if(bottom>src->height)
+      bottom=src->height;
+
+    if(left<0)
+    {
+      right += left;
+      left = 0;
+    }
+
+    if(left>src->width)
+      return DDERR_INVALIDPARAMS;
+
+    if(right<0)
+      return DDERR_INVALIDPARAMS;
+
+    if(right>src->width)
+       right = src->width;
+#endif    // RA_HACK
+
+    pIRectSrc = new DDRectangle( left, top, right, bottom );
+#ifdef RA_HACK
+    SrcRect.top    = top;
+    SrcRect.left   = left;
+    SrcRect.bottom = bottom;
+    SrcRect.right  = right;
+#else
+    memcpy(&SrcRect,lpSrcRect,sizeof(RECT) );
+#endif
+  }
+  else
+  {
+    pIRectSrc = new DDRectangle( 0, 0, src->width, src->height);
+    SrcRect.top    = 0;
+    SrcRect.left   = 0;
+    SrcRect.bottom = src->height;
+    SrcRect.right  = src->width;
+  }
+
+  if(src->fLocked)
+  {
+    if (NULL==lpSrcRect)
+    {
+      // If anything is locked we can't blit from the complete surface as
+      // a part is locked
+      Found = TRUE;
+    }
+    else
+    {
+      // If the src Rectangle intersects with any of the locked rectangles of the
+      // source surface we can't blit from it
+
+      Found = FALSE;
+      i=0;
+
+      while((i<DPA_GetPtrCount(src->DPA_LockedRects) ) && !Found)
+      {
+        pIRectTest = (DDRectangle*) DPA_FastGetPtr(src->DPA_LockedRects,i);
+        Found = pIRectDest->intersects(*pIRectTest);
+        i++;
+      }
+
+    }
+
+    if (Found)
+    {
+      delete pIRectSrc;
+      dprintf(("DDRAW: Blt: Src Surface partly locked\n"));
+
+      return(DDERR_SURFACEBUSY);
+    }
+  }
+  delete pIRectSrc;
+
+  //TODO: do we need to check the source for clipping information in case
+  //      the app wants to copy from the frame buffer?
+  if(dest->lpClipper) 
+  {
+      DWORD rgnsize;
+      if(ClipGetClipList((IDirectDrawClipper*)dest->lpClipper, NULL, NULL, &rgnsize) == DD_OK) 
+      {
+          LPRGNDATA lpRgnData = (LPRGNDATA)alloca(rgnsize);
+          if(lpRgnData == NULL) {
+              DebugInt3();
+              goto doblit;
+          }
+          if(ClipGetClipList((IDirectDrawClipper*)dest->lpClipper, NULL, lpRgnData, &rgnsize) == DD_OK) 
+          {
+              RECT newdest, newsrc;
+              LPRECT lpClipRect = (LPRECT)&lpRgnData->Buffer;
+
+              for(i=0;i<lpRgnData->rdh.nCount;i++) 
+              {
+                  if(IntersectRect(&newdest, &DestRect, &lpClipRect[i]) == TRUE) 
+                  {
+                      //TODO: This is not correct for stretching blits
+                      newsrc.left   = SrcRect.left + (newdest.left - DestRect.left);
+                      newsrc.top    = SrcRect.top + (newdest.top - DestRect.top);
+                      newsrc.right  = newsrc.left + RECT_WIDTH(&newdest);
+                      newsrc.bottom = newsrc.top + RECT_HEIGHT(&newdest);
+
+                      ret = SurfDoBlt(This, &newdest, lpDDSrcSurface, &newsrc, dwFlags, lpDDBltFx);
+                      if(ret != DD_OK) {
+                          break;
+                      }
+                  }
+              }
+              return ret;
+          }
+      }
+  }
+doblit:
+  return SurfDoBlt(This, &DestRect, lpDDSrcSurface, &SrcRect, dwFlags, lpDDBltFx);
+}
+//******************************************************************************
+//******************************************************************************
+HRESULT WIN32API SurfDoBlt(THIS This, LPRECT lpDestRect, LPDIRECTDRAWSURFACE4 lpDDSrcSurface,
+                           LPRECT lpSrcRect, DWORD dwFlags, LPDDBLTFX lpDDBltFx)
+{
+   // We have determine between 3 different blit senarios.
+   // 1. Blitting between Divebuffers (Front/Backbuffer and primary surface)
+   // 2. Blitting between memory and Divebuffers (Front/Backbuffer and primary surface).
+   // 3. Blitting between memory buffers.
+   // 1 and 3 are easy. DiveBlitImage or memcpy will do the job for non transparent blits
+   // 2 is now also easy as we do colorconverion via Dive after each unlocking of a surface
+   // The advantage is that we don't have to call DiveSetupBlitter each time. The Blitter will be
+   // setup only when the screen resolution is changed by ddraw. I guess we should see a big performance
+   // increase by doing it this way, unless the software blits directly from memory to the primary surface)
+   // But even then this could be faster as the SetupBlitter call is timeconsumeing and DIVE does emulate
+   // the blit in SW anyway as there is no interface in the driver to blit with HW support from the sysmem.
+
+ OS2IDirectDrawSurface *dest = (OS2IDirectDrawSurface *)This;
+ OS2IDirectDrawSurface *src  = (OS2IDirectDrawSurface *)lpDDSrcSurface;
+
+ int                    x, i, BlitWidth, BlitHeight;
+ char                  *pBltPos, *pSrcPos;
+ DDSURFACEDESC2         DestSurfaceDesc, SrcSurfaceDesc;
+ BOOL Found;
+ DWORD dwSrcColor, dwDestColor;
+
+  dprintf(("DDRAW: SurfDoBlt To Surf %08X, from Surf %08X\n",dest,src));
+  if ( (NULL!=lpDestRect)&& (NULL!=lpSrcRect))
+      dprintf(("DDRAW: SurfDoBlt to (%d,%d)(%d,%d) at %08X from (%d,%d)(%d,%d) at %08X\n", lpDestRect->left, lpDestRect->top,
+               lpDestRect->right, lpDestRect->bottom, dest, lpSrcRect->left, lpSrcRect->top,
+               lpSrcRect->right, lpSrcRect->bottom, src));
 
   DestSurfaceDesc.dwSize = sizeof(DDSURFACEDESC2);
   SrcSurfaceDesc.dwSize = sizeof(DDSURFACEDESC2);
@@ -2378,105 +2529,6 @@ HRESULT WIN32API SurfBlt4(THIS This, LPRECT lpDestRect, LPDIRECTDRAWSURFACE4 lpD
     return DD_OK;
   }
 
-  if (NULL!=lpSrcRect)
-  {
-#ifdef RA_HACK
-    // Same as for dest rectangle now for src
-
-    int top,left,bottom,right;
-
-    top    = lpSrcRect->top;
-    left   = lpSrcRect->left;
-    bottom = lpSrcRect->bottom;
-    right  = lpSrcRect->right;
-
-    if(top<0)
-    {
-      bottom += top;
-      top = 0;
-    }
-
-    if(top > src->height)
-      return DDERR_INVALIDPARAMS;
-
-    if(bottom<0)
-      return DDERR_INVALIDPARAMS;
-
-    if(bottom>src->height)
-      bottom=src->height;
-
-    if(left<0)
-    {
-      right += left;
-      left = 0;
-    }
-
-    if(left>src->width)
-      return DDERR_INVALIDPARAMS;
-
-    if(right<0)
-      return DDERR_INVALIDPARAMS;
-
-    if(right>src->width)
-       right = src->width;
-#endif    // RA_HACK
-
-    pIRectSrc = new DDRectangle( top,
-                                 left,
-                                 bottom,
-                                 right);
-#ifdef RA_HACK
-    SrcRect.top    = top;
-    SrcRect.left   = left;
-    SrcRect.bottom = bottom;
-    SrcRect.right  = right;
-#else
-    memcpy(&SrcRect,lpSrcRect,sizeof(RECTL) );
-#endif
-  }
-  else
-  {
-    pIRectSrc = new DDRectangle( 0, 0, src->height, src->width);
-    SrcRect.top    = 0;
-    SrcRect.left   = 0;
-    SrcRect.bottom = src->height;
-    SrcRect.right  = src->width;
-  }
-
-  if(src->fLocked)
-  {
-    if (NULL==lpSrcRect)
-    {
-      // If anything is locked we can't blit from the complete surface as
-      // a part is locked
-      Found = TRUE;
-    }
-    else
-    {
-      // If the src Rectangle intersects with any of the locked rectangles of the
-      // source surface we can't blit from it
-
-      Found = FALSE;
-      i=0;
-
-      while((i<DPA_GetPtrCount(src->DPA_LockedRects) ) && !Found)
-      {
-        pIRectTest = (DDRectangle*) DPA_FastGetPtr(src->DPA_LockedRects,i);
-        Found = pIRectDest->intersects(*pIRectTest);
-        i++;
-      }
-
-    }
-
-    if (Found)
-    {
-      delete pIRectSrc;
-      dprintf(("DDRAW: Blt: Src Surface partly locked\n"));
-
-      return(DDERR_SURFACEBUSY);
-    }
-  }
-
   if( ( (NULL==lpDestRect) && (NULL!=lpSrcRect) ) ||
       ( (NULL==lpSrcRect) && (NULL!=lpDestRect) ) )
   {
@@ -2485,8 +2537,8 @@ HRESULT WIN32API SurfBlt4(THIS This, LPRECT lpDestRect, LPDIRECTDRAWSURFACE4 lpD
 //    return DDERR_NOSTRETCHHW;
   }
 
-  if( ( pIRectDest->width()  != pIRectSrc->width() ) ||
-      ( pIRectDest->height() != pIRectSrc->height() )
+  if( ( RECT_WIDTH(lpDestRect)  != RECT_WIDTH(lpSrcRect) ) ||
+      ( RECT_HEIGHT(lpDestRect) != RECT_HEIGHT(lpSrcRect) )
     )
   {
     // Stretching not supported
@@ -2504,22 +2556,22 @@ HRESULT WIN32API SurfBlt4(THIS This, LPRECT lpDestRect, LPDIRECTDRAWSURFACE4 lpD
 
       dprintf(("DDRAW: Src is Primary Surface\n"));
 
-      if( *pIRectDest == *pIRectSrc)
+      if( RECT_EQUAL(lpDestRect, lpSrcRect))
         return DD_OK; // rects are the same => no blit needed
 
       // Todo: might add transparent blits but I don't think they are used here, so later!
 
       MoveRects( dest->pDiveBuffer,
-                 (LPRECT)&DestRect,
-                 (LPRECT)&SrcRect,
+                 lpDestRect,
+                 lpSrcRect,
                  dest->dwBytesPPDive,
                  dest->dwPitchDB);
       // MoveRects in framebuufer if we use colorconversion
       if(dest->pFrameBuffer != dest->pDiveBuffer)
       {
         MoveRects( dest->pFrameBuffer,
-                   (LPRECT)&DestRect,
-                   (LPRECT)&SrcRect,
+                   lpDestRect,
+                   lpSrcRect,
                    dest->lpDraw->GetScreenBpp()>>3,
                    dest->dwPitchFB);
       }
@@ -2553,16 +2605,16 @@ HRESULT WIN32API SurfBlt4(THIS This, LPRECT lpDestRect, LPDIRECTDRAWSURFACE4 lpD
 
         dest->BltSolid( dest->pDiveBuffer,
                         dest->pFrameBuffer,
-                        DestRect.top,
-                        DestRect.left,
+                        lpDestRect->top,
+                        lpDestRect->left,
                         dest->dwPitchDB,
                         dest->dwPitchFB,
                         src->pDiveBuffer,
                         src->pFrameBuffer,
-                        SrcRect.top,
-                        SrcRect.left,
-                        pIRectDest->width(),
-                        pIRectDest->height(),
+                        lpSrcRect->top,
+                        lpSrcRect->left,
+                        RECT_WIDTH(lpDestRect),
+                        RECT_HEIGHT(lpDestRect),
                         src->dwPitchDB,
                         src->dwPitchFB
                         );
@@ -2570,14 +2622,14 @@ HRESULT WIN32API SurfBlt4(THIS This, LPRECT lpDestRect, LPDIRECTDRAWSURFACE4 lpD
       }
       else
       {
-        pBltPos = (char*) dest->pDiveBuffer + (DestRect.top * dest->dwPitchDB) +
-                  (DestRect.left * dest->dwBytesPPDive);
+        pBltPos = (char*) dest->pDiveBuffer + (lpDestRect->top * dest->dwPitchDB) +
+                  (lpDestRect->left * dest->dwBytesPPDive);
 
-        pSrcPos = (char*) src->pDiveBuffer + (SrcRect.top * src->dwPitchDB) +
-                  (SrcRect.left * src->dwBytesPPDive);
+        pSrcPos = (char*) src->pDiveBuffer + (lpSrcRect->top * src->dwPitchDB) +
+                  (lpSrcRect->left * src->dwBytesPPDive);
 
-        BlitHeight = pIRectDest->height();
-        BlitWidth = pIRectDest->width();
+        BlitHeight = RECT_HEIGHT(lpDestRect);
+        BlitWidth  = RECT_WIDTH(lpDestRect);
         // Transparent Blit
         if( (dwFlags &DDBLT_KEYSRC) || (dwFlags & DDBLT_KEYSRCOVERRIDE) )
         {
@@ -2608,30 +2660,30 @@ HRESULT WIN32API SurfBlt4(THIS This, LPRECT lpDestRect, LPDIRECTDRAWSURFACE4 lpD
       {
         // DIVE => DIVE  or Mem => Dive
         // or a rectangle from streen to a buffer can be handelt in the same way
-        pBltPos = (char*) dest->pDiveBuffer + (DestRect.top * dest->dwPitchDB) +
-                  (DestRect.left * dest->dwBytesPPDive);
+        pBltPos = (char*) dest->pDiveBuffer + (lpDestRect->top * dest->dwPitchDB) +
+                  (lpDestRect->left * dest->dwBytesPPDive);
 
-        pSrcPos = (char*) src->pDiveBuffer + (SrcRect.top * src->dwPitchDB) +
-                  (SrcRect.left * src->dwBytesPPDive);
+        pSrcPos = (char*) src->pDiveBuffer + (lpSrcRect->top * src->dwPitchDB) +
+                  (lpSrcRect->left * src->dwBytesPPDive);
 
-        BlitHeight = pIRectDest->height();
-        BlitWidth = pIRectDest->width();
+        BlitHeight = RECT_HEIGHT(lpDestRect);
+        BlitWidth  = RECT_WIDTH(lpDestRect);
 
         // Check for transparent blit
         if(!dwFlags)
         {
           dest->BltSolid( dest->pDiveBuffer,
                           dest->pFrameBuffer,
-                          DestRect.top,
-                          DestRect.left,
+                          lpDestRect->top,
+                          lpDestRect->left,
                           dest->dwPitchDB,
                           dest->dwPitchFB,
                           src->pDiveBuffer,
                           src->pFrameBuffer,
-                          SrcRect.top,
-                          SrcRect.left,
-                          pIRectDest->width(),
-                          pIRectDest->height(),
+                          lpSrcRect->top,
+                          lpSrcRect->left,
+                          RECT_WIDTH(lpDestRect),
+                          RECT_HEIGHT(lpDestRect),
                           src->dwPitchDB,
                           src->dwPitchFB
                           );
@@ -2662,15 +2714,15 @@ HRESULT WIN32API SurfBlt4(THIS This, LPRECT lpDestRect, LPDIRECTDRAWSURFACE4 lpD
       // DIVE => DIVE  or Mem => Dive can be handelt in the same way
 
       if( (src->pDiveBuffer == dest->pDiveBuffer) &&
-          (pIRectDest->intersects(*pIRectSrc) ) )
+          (intersects(lpDestRect, lpSrcRect) ) )
       {
         // Overlapping rects  on the same surface ?
 
         // ToDo : Maybe implement all the fancy blit flags here too ? ;)
 
         MoveRects( dest->pDiveBuffer,
-                   (LPRECT)&DestRect,
-                   (LPRECT)&SrcRect,
+                   lpDestRect,
+                   lpSrcRect,
                    dest->dwBytesPPDive,
                    dest->dwPitchDB);
 
@@ -2678,8 +2730,8 @@ HRESULT WIN32API SurfBlt4(THIS This, LPRECT lpDestRect, LPDIRECTDRAWSURFACE4 lpD
         if(dest->pFrameBuffer != dest->pDiveBuffer)
         {
           MoveRects( dest->pFrameBuffer,
-                     (LPRECT)&DestRect,
-                     (LPRECT)&SrcRect,
+                     lpDestRect,
+                     lpSrcRect,
                      dest->lpDraw->GetScreenBpp()>>3,
                      dest->dwPitchFB);
         }
@@ -2691,30 +2743,30 @@ HRESULT WIN32API SurfBlt4(THIS This, LPRECT lpDestRect, LPDIRECTDRAWSURFACE4 lpD
       {
         dest->BltSolid( dest->pDiveBuffer,
                         dest->pFrameBuffer,
-                        DestRect.top,
-                        DestRect.left,
+                        lpDestRect->top,
+                        lpDestRect->left,
                         dest->dwPitchDB,
                         dest->dwPitchFB,
                         src->pDiveBuffer,
                         src->pFrameBuffer,
-                        SrcRect.top,
-                        SrcRect.left,
-                        pIRectDest->width(),
-                        pIRectDest->height(),
+                        lpSrcRect->top,
+                        lpSrcRect->left,
+                        RECT_WIDTH(lpDestRect),
+                        RECT_HEIGHT(lpDestRect),
                         src->dwPitchDB,
                         src->dwPitchFB
                         );
       }
       else
       {
-        pBltPos = (char*) dest->pDiveBuffer + (DestRect.top * dest->dwPitchDB) +
-                  (DestRect.left * dest->dwBytesPPDive);
+        pBltPos = (char*) dest->pDiveBuffer + (lpDestRect->top * dest->dwPitchDB) +
+                  (lpDestRect->left * dest->dwBytesPPDive);
 
-        pSrcPos = (char*) src->pDiveBuffer + (SrcRect.top * src->dwPitchDB) +
-                  (SrcRect.left * src->dwBytesPPDive);
+        pSrcPos = (char*) src->pDiveBuffer + (lpSrcRect->top * src->dwPitchDB) +
+                  (lpSrcRect->left * src->dwBytesPPDive);
 
-        BlitHeight = pIRectDest->height();
-        BlitWidth = pIRectDest->width();
+        BlitHeight = RECT_HEIGHT(lpDestRect);
+        BlitWidth  = RECT_WIDTH(lpDestRect);
         DWORD dwPitch = dest->dwPitchDB;
 
         if(dwFlags &DDBLT_ROTATIONANGLE)
@@ -2750,8 +2802,8 @@ HRESULT WIN32API SurfBlt4(THIS This, LPRECT lpDestRect, LPDIRECTDRAWSURFACE4 lpD
             // switching the the direction can be integrated with other flags
             dwPitch = -dwPitch;
             pBltPos = (char*) dest->pDiveBuffer +
-                      ((DestRect.top +BlitHeight)* dest->dwPitchDB) +
-                      (DestRect.left * dest->dwBytesPPDive);
+                      ((lpDestRect->top +BlitHeight)* dest->dwPitchDB) +
+                      (lpDestRect->left * dest->dwBytesPPDive);
 
             dwFx &= ~DDBLTFX_MIRRORUPDOWN;  // remove handled flag
           }
@@ -4653,7 +4705,6 @@ HRESULT WIN32API SurfLock4( THIS This,
     me->fLocked = TRUE;
   }
 
-
   return rc;
 }
 //******************************************************************************
@@ -4999,7 +5050,7 @@ HRESULT WIN32API SurfUnlock(THIS This, LPVOID lpSurfaceData)
     pIRectEnum = (DDRectangle*)DPA_FastGetPtr(me->DPA_LockedRects,0);
     Found = (pIRectEnum != NULL);
 #else
-    pIRectUnlock = new DDRectangle( 0, 0, me->height, me->width);
+    pIRectUnlock = new DDRectangle( 0, 0, me->width, me->height);
 
     while(i<DPA_GetPtrCount(me->DPA_LockedRects) && !Found)
     {
@@ -5114,15 +5165,13 @@ HRESULT WIN32API SurfUnlock4(THIS This, LPRECT lpSurfaceRect)
   if(NULL!=lpSurfaceRect)
   {
     dprintf(("DDRAW: Unlock rectangle\n"));
-    pIRectUnlock = new DDRectangle( lpSurfaceRect->top,
-                                    lpSurfaceRect->left,
-                                    lpSurfaceRect->bottom,
-                                    lpSurfaceRect->right);
+    pIRectUnlock = new DDRectangle( lpSurfaceRect->left, lpSurfaceRect->top,
+                                    lpSurfaceRect->right, lpSurfaceRect->bottom);
   }
   else
   {
     dprintf(("DDRAW: Unlock complete surface\n"));
-    pIRectUnlock = new DDRectangle( 0, 0, me->height, me->width);
+    pIRectUnlock = new DDRectangle( 0, 0, me->width, me->height);
   }
 
   dprintf(( "Try to Unlock Rectangle (%d/%d) x (%d/%d)\n",
@@ -5190,6 +5239,7 @@ HRESULT WIN32API SurfUnlock4(THIS This, LPRECT lpSurfaceRect)
 
     dprintf(("DDRAW: Unlock OK\n\n"));
     rc = DD_OK;
+
   }
 
   return rc;

@@ -1,12 +1,14 @@
-/* $Id: OS2CLIPPER.CPP,v 1.13 2001-09-30 22:23:44 sandervl Exp $ */
+/* $Id: OS2CLIPPER.CPP,v 1.14 2001-10-03 13:49:39 sandervl Exp $ */
 
 /*
  * DX clipper class routines
  *
- * Copyright 1998 Sander van Leeuwen
+ * Copyright 1998-2001 Sander van Leeuwen
  * Copyright 1999 Markus Montkowski
  *
  * Project Odin Software License can be found in LICENSE.TXT
+ *
+ * TODO: This is NOT THREAD SAFE!!!
  *
  */
 
@@ -47,6 +49,7 @@ OS2IDirectDrawClipper::OS2IDirectDrawClipper(void) :
   lpDraw                  = NULL;
   // lpDraw->Vtbl.AddRef(lpDraw);
   // hDive                   = lpDirectDraw->GetDiveInstance();
+
 }
 
 //******************************************************************************
@@ -141,7 +144,10 @@ HRESULT WIN32API ClipGetClipList(THIS This, LPRECT lpRect, LPRGNDATA lpClipList,
   dprintf(("DDRAW: ClipGetClipList %x %x %x %x", This, lpRect, lpClipList, lpdwSize));
 
   if(!lpdwSize) {
-	return DDERR_INVALIDPARAMS;
+      return DDERR_INVALIDPARAMS;
+  }
+  if(lpRect) {
+      dprintf(("WARNING: clipping the cliplist is not yet implemented"));
   }
   if(me->clipWindow) 
   {
@@ -152,6 +158,7 @@ HRESULT WIN32API ClipGetClipList(THIS This, LPRECT lpRect, LPRGNDATA lpClipList,
           DebugInt3();
           return DDERR_NOCLIPLIST;
       }
+      //TODO: This is NOT THREAD SAFE!!!
       regiondatasize = me->lpRgnData->rdh.dwSize + me->lpRgnData->rdh.nCount*sizeof(RECT);
       if(lpClipList == NULL) {
           *lpdwSize = regiondatasize;

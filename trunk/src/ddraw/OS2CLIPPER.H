@@ -1,4 +1,4 @@
-/* $Id: OS2CLIPPER.H,v 1.9 2001-09-30 22:23:44 sandervl Exp $ */
+/* $Id: OS2CLIPPER.H,v 1.10 2001-10-03 13:49:39 sandervl Exp $ */
 
 /*
  * DX clipper class definition
@@ -12,6 +12,7 @@
 #define __OS2CLIPPER_H__
 
 #include "divewrap.h"
+
 #define FAR
 #undef THIS
 #define THIS IDirectDrawClipper*
@@ -28,6 +29,7 @@ class OS2IDirectDrawClipper
 
         int             Referenced;
         inline  HRESULT       GetLastError() { return lastError; };
+
  private:
 
  protected:
