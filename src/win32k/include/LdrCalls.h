@@ -1,4 +1,4 @@
-/* $Id: LdrCalls.h,v 1.7 2000-12-11 06:45:03 bird Exp $
+/* $Id: LdrCalls.h,v 1.8 2000-12-17 22:46:32 bird Exp $
  *
  * Prototypes for the loader overrided function.
  *
@@ -235,6 +235,55 @@ ULONG LDRCALL ldrFindModule(        /* retd  0x10 */
     );
 
 ULONG LDRCALL myldrFindModule(PCHAR pachFilename, USHORT cchFilename, USHORT usClass, PPMTE ppMTE);
+
+
+/**
+ * Checks if a module was loaded using DosLoadModule.
+ * This is called from LDRGetProcAddr and LDRFreeModule.
+ * @returns NO_ERROR if the module was LoadModuled or executable.
+ *          ERROR_INVALID_HANDLE if not LoadModuled.
+ * @param   hmte    MTE handle.
+ * @param   pptda   Pointer to the PTDA of the process calling. (current)
+ * @param   pcUsage Pointer to usage variable. (output)
+ *                  The usage count is returned.
+ * @sketch
+ */
+#ifdef _ptda_h_
+ULONG LDRCALL ldrWasLoadModuled(        /* retd 0x0c */
+    HMTE        hmte,                   /* ebp + 0x08 */
+    PPTDA       pptda,                  /* ebp + 0x0c */
+    PULONG      pcUsage);               /* ebp + 0x10 */
+
+ULONG LDRCALL myldrWasLoadModuled(HMTE hmte, PPTDA pptda, PULONG pcUsage);
+#endif
+
+
+/**
+ * LDRGetProcAddr gets address and proctype for a entry point to a module.
+ * @returns NO_ERROR if the module was LoadModuled.
+ *          ERROR_INVALID_HANDLE if not LoadModuled.
+ * @param   hmte            Handle of module.
+ * @param   ulOrdinal       Procedure ordinal.
+ * @param   pszName         Pointer to procedure name.
+ *                          NULL is allowed. Ignored if ulOrdinal is not zero.
+ * @param   pulAddress      Pointer to address variable. (output)
+ * @param   fFlat           TRUE if a flat 0:32 address is to be returned.
+ *                          FALSE if a far 16:16 address is to be returned.
+ * @param   pulProcType     Pointer to procedure type variable. (output)
+ *                          NULL is allowed. (DosQueryProcAddr uses NULL)
+ *                          In user space.
+ * @sketch
+ */
+ULONG LDRCALL LDRGetProcAddr(           /* retd 0x14 */
+    HMTE        hmte,                   /* ebp + 0x08 */
+    ULONG       ulOrdinal,              /* ebp + 0x0c */
+    PCSZ        pszName,                /* ebp + 0x10 */
+    PULONG      pulAddress,             /* ebp + 0x14 */
+    BOOL        fFlat,                  /* ebp + 0x18 */
+    PULONG      pulProcType);           /* ebp + 0x1c */
+
+ULONG LDRCALL myLDRGetProcAddr(HMTE hmte, ULONG ulOrdinal, PCSZ pszName, PULONG pulAddress, BOOL fFlat, PULONG pulProcType);
+
 
 
 /**
