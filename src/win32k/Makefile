@@ -1,0 +1,340 @@
+################################################################################
+#
+# Copyright 1998 knut st. osmundsen
+#
+################################################################################
+################################################################################
+# Include path definitions
+################################################################################
+!include makefile.inc
+
+NAME = win32k
+
+################################################################################
+# COMPILER/LINKER/ASSEMBLER
+################################################################################
+CC16        = cl
+CC          = icc
+LD          = ilink
+AS          = alp
+
+CFLAGS      = -q -Ge -Gs- -Gr+ -Rn -Ss+ -Mp
+CFLAGS16    = -c -W4 -Asfw /NTCODE16 /NDDATA16 -G2s -Zp -Zl -nologo -Fo$@ -Fa
+CPPFLAGS    = -q -Ge -Gs- -Gr+ -Rn -Ss+ -Mp -Gx
+ASFLAGS     = -Sv:ALP -Mb -Li
+LFLAGS      = /nologo /MAP /NOI /NOE /NOD /A:16 /MAP /O:$@
+CDEFINES    = -DWIN32K -DRING0 -D__WIN32OS2__ -D__WINE__
+CDEFINES16  =
+ADEFINES    = -D:WIN32K
+
+
+
+!ifdef %RELEASE
+# RELEASE
+CFLAGS      = $(CFLAGS)     -G5 -O+
+CFLAGS16    = $(CFLAGS16)   -Ogeitln -Gs
+CPPFLAGS    = $(CPPFLAGS)   -G5 -O+
+LFLAGS      = $(LFLAGS)     /EXEPACK:2 /NODEBUG /PACKC /PACKD
+CDEFINES    = $(CDEFINES)   -DRELEASE
+CDEFINES16  = $(CDEFINES16) -DRELEASE
+ASDEFINES   = $(ASDEFINES)  -D:RELEASE
+
+!else
+
+# DEBUG
+CFLAGS      = $(CFLAGS)     -O- -Ti+
+CFLAGS16    = $(CFLAGS16)   -Zi -Od
+CPPFLAGS    = $(CPPFLAGS)   -O- -Ti+
+LFLAGS      = $(LFLAGS)     /NOEXEPACK /DEBUG
+ASFLAGS     = $(ASFLAGS)    -Od+
+CDEFINES    = $(CDEFINES)   -DDEBUG
+CDEFINES16  = $(CDEFINES16) -DDEBUG
+ASDEFINES   = $(ASDEFINES)  -D:DEBUG
+!endif
+
+
+
+################################################################################
+# COMPILER/ASSEMBLER INCLUDEPATHS
+################################################################################
+CINCLUDES  = -I$(WIN32KBASE)\include                \
+             -I$(TOOLKIT)\h                         \
+             -I$(VACPATH)\include                   \
+             -I$(DDKPATH)\h                         \
+             -I$(DDKPATH)\src\dev\dasd\diskh        \
+             -I.                                    \
+             -I$(PDWIN32_INCLUDE)                   \
+             -I$(PDWIN32_INCLUDE)\win
+
+CINCLUDES16= -I$(WIN32KBASE)\include                \
+             -I.                                    \
+             -I$(DDKPATH)\h                         \
+             -If:\ddktools\toolkits\msc60\include   \
+             -I$(PDWIN32_INCLUDE)
+
+AINCLUDES  = -Fdi:$(WIN32KBASE)\include             \
+             -Fdi:$(DDKPATH)\inc
+
+
+################################################################################
+# SUFFIXES AND INFERENCE RULES
+################################################################################
+.SUFFIXES: .obj .cpp .c .asm
+
+{dev16}.c{object}.obj:
+    @echo compiling: $<
+    @$(CC16) $(CFLAGS16) $(CDEFINES16) -Fa$(WIN32KLIST)\$(*B).s -Fo$@ $(CINCLUDES16) $<
+
+{dev32}.asm{object}.obj:
+    @echo assembling: $<
+    @$(AS) $(ASFLAGS) $(ADEFINES) $(AINCLUDES) $< -Fo:$@ -Fl:$(WIN32KLIST)\$(*B).lst
+{dev32}.c{object}.obj:
+    @echo compiling: $<
+    @$(CC) -c $(CFLAGS) $(CDEFINES) -Fa$(WIN32KLIST)\$(*B).s -Fo$@ $(CINCLUDES) $<
+{dev32}.cpp{object}.obj:
+    @echo compiling: $<
+    @$(CC) -c $(CPPFLAGS) $(CDEFINES) -Fa$(WIN32KLIST)\$(*B).s -Fo$@ $(CINCLUDES) $<
+
+{ldr}.asm{object}.obj:
+    @echo assembling: $<
+    @$(AS) $(ASFLAGS) $(ADEFINES) $(AINCLUDES) $< -Fo:$@ -Fl:$(WIN32KLIST)\$(*B).lst
+{ldr}.c{object}.obj:
+    @echo compiling: $<
+    @$(CC) -c $(CFLAGS) $(CDEFINES) -Fa$(WIN32KLIST)\$(*B).s -Fo$@ $(CINCLUDES) $<
+{ldr}.cpp{object}.obj:
+    @echo compiling: $<
+    @$(CC) -c $(CPPFLAGS) $(CDEFINES) -Fa$(WIN32KLIST)\$(*B).s -Fo$@ $(CINCLUDES) $<
+
+{misc}.asm{object}.obj:
+    @echo assembling: $<
+    @$(AS) $(ASFLAGS) $(ADEFINES) $(AINCLUDES) $< -Fo:$@ -Fl:$(WIN32KLIST)\$(*B).lst
+{misc}.c{object}.obj:
+    @echo compiling: $<
+    @$(CC) -c $(CFLAGS) $(CDEFINES) -Fa$(WIN32KLIST)\$(*B).s -Fo$@ $(CINCLUDES) $<
+{misc}.cpp{object}.obj:
+    @echo compiling: $<
+    @$(CC) -c $(CPPFLAGS) $(CDEFINES) -Fa$(WIN32KLIST)\$(*B).s -Fo$@ $(CINCLUDES) $<
+
+{pe2lx}.c{object}.obj:
+    @echo compiling: $<
+    @$(CC) -c $(CFLAGS) $(CDEFINES) -Fa$(WIN32KLIST)\$(*B).s -Fo$@ $(CINCLUDES) $<
+{pe2lx}.cpp{object}.obj:
+    @echo compiling: $<
+    @$(CC) -c $(CPPFLAGS) $(CDEFINES) -Fa$(WIN32KLIST)\$(*B).s -Fo$@ $(CINCLUDES) $<
+
+{devhlpadd}.asm{object}.obj:
+    @echo assembling: $<
+    $(AS) $(ASFLAGS) $(ADEFINES) $(AINCLUDES) $< -Fo:$@ -Fl:$(WIN32KLIST)\$(*B).lst
+
+
+
+################################################################################
+# TARGETS
+################################################################################
+all:$(NAME).sys
+
+
+
+################################################################################
+# OBJECTS and LIBRARIES - Don't mess with the order or objects and libraries!
+################################################################################
+OBJS  = object\devfirst.obj                 \
+        object\d16strat.obj                 \
+        object\d32hlp.obj                   \
+        object\d32globals.obj               \
+        object\asmutils.obj                 \
+        object\calltab.obj                  \
+        object\cout.obj                     \
+        object\log.obj                      \
+        object\malloc.obj                   \
+        object\new.obj                      \
+        object\stricmp.obj                  \
+        object\yield.obj                    \
+        object\vsprintf.obj                 \
+        object\ldr.obj                      \
+        object\myldrClose.obj               \
+        object\myldrOpen.obj                \
+        object\myldrRead.obj                \
+        object\myLDRQAppType.obj            \
+        object\lxSuper.obj                  \
+        object\lxFile.obj                   \
+        object\accelerator.obj              \
+        object\bitmap.obj                   \
+        object\cursor.obj                   \
+        object\cursorgrp.obj                \
+        object\dialog.obj                   \
+        object\icon.obj                     \
+        object\icongrp.obj                  \
+        object\menu.obj                     \
+        object\misc.obj                     \
+        object\pefile.obj                   \
+        object\rcdata.obj                   \
+        object\strings.obj                  \
+
+
+OBJSINIT =                                  \
+        object\d16init.obj                  \
+        object\d32init.obj                  \
+        object\probkrnl.obj
+
+
+LIBS  = $(VACPATH)\lib\cppon30.lib          \
+        $(DDKPATH)\lib\os2286.lib
+
+LIBSINIT = \
+        devhelp.lib \
+        clib.lib
+
+#
+# Old stuff
+#
+AOBJS = object\asmutils.obj                 \
+        object\devhlp32_vmsetmem.obj        \
+        object\devhlp32_PhysToVirt.obj      \
+        object\calltab.obj
+
+
+COBJS = object\dev32_idc.obj                \
+        object\dev32_open.obj               \
+        object\dev32_close.obj              \
+        object\dev32_ioctl.obj              \
+        object\dev32_init.obj               \
+        object\dev32_read.obj               \
+        object\dev32_strategy.obj           \
+        object\dev32_shutdown.obj           \
+        object\dev32_init_complete.obj      \
+        object\dev32_data.obj               \
+        object\dev32_invalid_command.obj    \
+        object\ioctl.obj                    \
+        object\ldrinit.obj                  \
+        object\kernels.obj                  \
+        object\myldrClose.obj               \
+        object\myldrOpen.obj                \
+        object\myldrRead.obj                \
+        object\myLDRQAppType.obj            \
+        object\pefilter.obj                 \
+        object\malloc.obj                   \
+        object\log.obj                      \
+        object\log2.obj                     \
+        object\new.obj                      \
+        object\Yield.obj                    \
+        object\lxSuper.obj                  \
+        object\lxFile.obj                   \
+        object\accelerator.obj              \
+        object\bitmap.obj                   \
+        object\cursor.obj                   \
+        object\cursorgrp.obj                \
+        object\dialog.obj                   \
+        object\icon.obj                     \
+        object\icongrp.obj                  \
+        object\menu.obj                     \
+        object\misc.obj                     \
+        object\pefile.obj                   \
+        object\rcdata.obj                   \
+        object\strings.obj                  \
+        object\vsprintf.obj
+
+
+################################################################################
+# SPECIAL RULES - Testing
+################################################################################
+ProbKrnl.exe: dev16\ProbKrnl.c $(WIN32KBASE)\include\sym.h \
+              $(WIN32KBASE)\include\probKrnl.h
+    $(CC16) -c -W4 -Asfw -G2s -Zp -Zl -nologo -Fo$@ -Fa -Zi -Od -Lp \
+        $(CDEFINES16) -DDEBUGR3 -Fa$(WIN32KLIST)\$(*B).s     \
+        -Foprobkrnl.obj $(CINCLUDES16) dev16\probkrnl.c
+    link /NOD /MAP:FULL /CO /pmtype:vio probkrnl.obj, probkrnl.exe, probkrnl.map, f:\toolkit\lib\os2286.lib + $(MSCPATH)\lib\clibcep.lib;
+
+
+
+
+################################################################################
+# Win32k.sys rule. Don't mess with the order or objects and libraries!
+################################################################################
+$(NAME).sys: $(OBJS) $(LIBS) last.lib $(OBJSINIT) $(LIBSINIT) $(NAME).def
+    -@echo linking: $@
+    $(LD) $(LFLAGS) @<<
+$(OBJS) $(LIBS) last.lib $(OBJSINIT) /IG $(LIBSINIT) $(NAME).def
+<<
+    @mapsym $*.map > nul
+#    @copy $@ $(PDWIN32_BIN)
+
+
+################################################################################
+# Libraries - segments are renamed for the 16-bit libraries.
+################################################################################
+devhelp.lib: $(DDKPATH)\lib\dhcalls.lib libconv.exe
+    libconv $(DDKPATH)\lib\dhcalls.lib $@
+    ilib /nologo /nobackup /convformat $@;
+
+clib.lib: $(MSCPATH)\lib\slibcep.lib libconv.exe
+    libconv $(MSCPATH)\lib\clibcep.lib $@ > nul
+    ilib /nologo /nobackup /convformat $@;
+
+last.lib: object\devlast.obj
+    -@del $@ > nul 2> nul
+    ilib /nologo /nobackup $@ $**;
+
+libconv.exe: libconv.c
+    icc -Q+ libconv.c
+
+
+#################################################################################
+# Documentation generation - require SDS - http://www.ii.uib.no/~stig/
+################################################################################
+lxdoc:
+   exp cpp2sds -o DocsA\ -i include\lx.h pe2lx\lx*.cpp
+   cd Docs
+   exp sds2doc -ai *.sds
+
+fulldoc:
+   exp cpp2sds -o DocsA\ -i include\*.h *.cpp ldr\*.cpp misc\*.cpp pe2lx\*.cpp
+   cd Docs
+   exp sds2doc -ai *.sds
+
+#################################################################################
+# Visual SlickEdit project file
+################################################################################
+win32k.vpj:
+    genproject.cmd $@ $(CINCLUDES)
+
+################################################################################
+# Cleanup
+################################################################################
+clean:
+   -@echo cleaning....
+   -@echo #do nmake depend > .depend
+   -@rm -f $(NAME).sys
+   -@rm -f *.lib
+   -@rm -f $(WIN32KOBJ)\*
+   -@rm -f $(WIN32KLIST)\*
+   -@rm -f *.obj
+   -@rm -f *.exe
+   -@rm -f *.map
+#   @cd ..\pe2lx
+#   -@nmake /NOLOGO clean
+#   @cd ..\lib
+#   -@nmake /NOLOGO clean
+#   @cd ..\bin
+#   -@nmake /NOLOGO clean
+#   @cd ..
+#   -@del docsA\* >& nul
+
+
+################################################################################
+# DEPENDENCIES - c and c++ deps are autogenereated.
+#                asm deps must be updated by hand
+################################################################################
+depend: fastdep.exe
+    @fastdep -oObject $(CINCLUDES) misc\*.c* ldr\*.c* dev32\*.c* dev16\*.c* pe2lx\*.c* -o include\*.h pe2lx\*.h*
+
+fastdep.exe: fastdep.c
+    @icc fastdep.c
+
+object\asmutils.obj:            misc\asmutils.asm     include\devsegdf.inc
+object\calltab.obj:             ldr\calltab.asm
+object\d32hlp.obj:              dev32\d32hlp.asm      include\devsegdf.inc
+object\devfirst.obj:            dev32\devfirst.asm    include\devsegdf.inc
+object\devlast.obj:             dev32\devlast.asm     include\devsegdf.inc
+
+!include .depend
