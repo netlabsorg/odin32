@@ -1,13 +1,21 @@
-/* $Id: changelog,v 1.2439 2003-01-10 13:13:09 sandervl Exp $ */
+/* $Id: changelog,v 1.2440 2003-01-10 15:17:31 sandervl Exp $ */
 
  2003-01-10: Sander van Leeuwen <sandervl@innotek   >
     - KERNEL32: o Don't close handle in CloseHandle if HANDLE_FLAG_PROTECT_FROM_CLOSE
                   flag set.
                 o Implemented Set/GetHandleInformation
-                o CreateFile; create handles that are not inherited by child
-                              processes
-                o Named Pipes: default = not inherited by child processes
+                o CreateFile: create handles that are not inherited by child
+                              processes by default
+                              Only enable inheritance if specified in security struct
+                o Create(Named)Pipe: default = not inherited by child processes
+                                     Only enable inheritance if specified in security 
+                                     struct.
                 o DuplicateHandle; set inheritance flag with SetHandleInformation
+                o CreateProcess: support for setting stdin/out/err handles
+                                 of child process
+                o PeekNamedPipe: - return ERROR_BROKEN_PIPE when used for unnamed
+                                   pipes (which is not allowed in OS/2)
+                                   (workaround)
 
  2003-01-10: Platon Fomichev <platon@innotek   >
     - MSVCRT:   o Updates
