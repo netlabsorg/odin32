@@ -1,4 +1,4 @@
-/* $Id: oslibmsgtranslate.cpp,v 1.121 2004-03-11 13:42:00 sandervl Exp $ */
+/* $Id: oslibmsgtranslate.cpp,v 1.122 2004-03-23 16:50:08 sandervl Exp $ */
 /*
  * Window message translation functions for OS/2
  *
@@ -1154,7 +1154,7 @@ BOOL OSLibWinTranslateMessage(MSG *msg)
 
       if(!(fl & KC_CHAR) && msg->message < WINWM_SYSKEYDOWN)
       {
-        return FALSE;
+         return FALSE;
       }
 
       //the KC_COMPOSITE flag might be set; in that case this key will
@@ -1162,23 +1162,12 @@ BOOL OSLibWinTranslateMessage(MSG *msg)
       //(e.g. ^ on german keyboards)
       if((fl & (KC_VIRTUALKEY|KC_COMPOSITE)) == KC_VIRTUALKEY)
       {
-        if(msg->wParam)
-        {
-          if ((msg->wParam >= VK_NUMPAD0_W) &&
-              (msg->wParam <= VK_NUMPAD9_W))
-            extramsg.wParam = msg->wParam - 0x30;
-          else
-           if (msg->wParam == VK_DECIMAL_W)
-             extramsg.wParam = VK_DELETE_W;
-           else
-             /* PM Sends Bogus Things when pressing Shift+NUMAsterisk */
-             if (msg->wParam != VK_MULTIPLY_W)
-                extramsg.wParam = msg->wParam;
+        if(!msg->wParam)
+        {//TODO: Why is this here???? 
+            DebugInt3();
+            extramsg.wParam = SHORT2FROMMP(teb->o.odin.os2msg.mp2);
         }
-        else
-          extramsg.wParam = SHORT2FROMMP(teb->o.odin.os2msg.mp2);
       }
-
 
       //After SetFocus(0), all keystrokes are converted in WM_SYS*
       if(msg->message >= WINWM_SYSKEYDOWN || fIgnoreKeystrokes)
