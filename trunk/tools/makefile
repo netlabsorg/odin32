@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.8 2000-02-10 01:16:30 sandervl Exp $
+# $Id: makefile,v 1.9 2000-04-29 18:23:33 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -39,6 +39,8 @@ all:
     $(MAKE_CMD)
     cd ..\sdf
     $(MAKE_CMD)
+    cd ..\install
+    $(MAKE_CMD)
     cd ..
 
 # compile tools needed to compile rest of the tree.
@@ -48,6 +50,8 @@ needed:
     cd ..\common
     $(MAKE_CMD) NODEP=1 dep
     $(MAKE_CMD) needed
+    cd ..\install
+    $(MAKE_CMD)
     cd ..\impdef
     $(MAKE_CMD) NODEP=1 dep
     $(MAKE_CMD)
