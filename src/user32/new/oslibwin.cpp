@@ -1,9 +1,10 @@
-/* $Id: oslibwin.cpp,v 1.23 1999-08-22 18:29:37 dengert Exp $ */
+/* $Id: oslibwin.cpp,v 1.24 1999-08-25 15:08:50 dengert Exp $ */
 /*
  * Window API wrappers for OS/2
  *
  *
  * Copyright 1999 Sander van Leeuwen (sandervl@xs4all.nl)
+ * Copyright 1999 Daniela Engert (dani@ngrt.de)
  *
  *
  * Project Odin Software License can be found in LICENSE.TXT
@@ -17,6 +18,7 @@
 #include <string.h>
 
 #include <misc.h>
+#include "win32type.h"
 #include <winconst.h>
 #include "oslibwin.h"
 #include "oslibutil.h"
@@ -30,7 +32,7 @@ BOOL OSLibWinSetParent(HWND hwnd, HWND hwndParent, ULONG fRedraw)
 {
   if(hwndParent == OSLIB_HWND_DESKTOP)
   {
-	hwndParent = HWND_DESKTOP;
+        hwndParent = HWND_DESKTOP;
   }
 
   return (WinSetParent(hwnd, hwndParent, fRedraw) == 0);
@@ -38,45 +40,45 @@ BOOL OSLibWinSetParent(HWND hwnd, HWND hwndParent, ULONG fRedraw)
 //******************************************************************************
 //******************************************************************************
 HWND OSLibWinCreateWindow(HWND hwndParent, ULONG dwWinStyle, ULONG dwFrameStyle,
-			  char *pszName, HWND Owner, ULONG fHWND_BOTTOM, HWND *hwndFrame)
+                          char *pszName, HWND Owner, ULONG fHWND_BOTTOM, HWND *hwndFrame)
 {
  HWND  hwndClient;
 
   dprintf(("WinCreateWindow %x %x %x %s", hwndParent, dwWinStyle, dwFrameStyle, pszName));
 
   if(pszName && *pszName == 0) {
-	pszName = NULL;
+        pszName = NULL;
   }
   if(hwndParent == OSLIB_HWND_DESKTOP) {
-	hwndParent = HWND_DESKTOP;
+        hwndParent = HWND_DESKTOP;
   }
   if(Owner == OSLIB_HWND_DESKTOP) {
-	Owner = HWND_DESKTOP;
+        Owner = HWND_DESKTOP;
   }
 
   if(dwFrameStyle) {
-	ULONG dwClientStyle;
+        ULONG dwClientStyle;
 
-	dwClientStyle = dwWinStyle & ~(WS_TABSTOP | WS_GROUP);
-	if(pszName)
-		dwFrameStyle |= FCF_TITLEBAR;
+        dwClientStyle = dwWinStyle & ~(WS_TABSTOP | WS_GROUP);
+        if(pszName)
+                dwFrameStyle |= FCF_TITLEBAR;
 
-	dwFrameStyle |= FCF_TASKLIST;
-	*hwndFrame = WinCreateStdWindow(hwndParent, dwWinStyle,
-				       &dwFrameStyle, WIN32_STDCLASS,
-				       "", dwClientStyle, 0, 0, &hwndClient);
-	if(*hwndFrame) {
-		if(pszName) {
-			WinSetWindowText(*hwndFrame, pszName);
-		}
-		return hwndClient;
-	}
-	dprintf(("OSLibWinCreateWindow: WinCreateStdWindow failed (%x)", WinGetLastError(GetThreadHAB())));
-	return 0;
+        dwFrameStyle |= FCF_TASKLIST;
+        *hwndFrame = WinCreateStdWindow(hwndParent, dwWinStyle,
+                                       &dwFrameStyle, WIN32_STDCLASS,
+                                       "", dwClientStyle, 0, 0, &hwndClient);
+        if(*hwndFrame) {
+                if(pszName) {
+                        WinSetWindowText(*hwndFrame, pszName);
+                }
+                return hwndClient;
+        }
+        dprintf(("OSLibWinCreateWindow: WinCreateStdWindow failed (%x)", WinGetLastError(GetThreadHAB())));
+        return 0;
   }
   hwndClient = WinCreateWindow(hwndParent, WIN32_STDCLASS, pszName, dwWinStyle, 0, 0, 0, 0,
-			       Owner, (fHWND_BOTTOM) ? HWND_BOTTOM :HWND_TOP, 0, NULL,
-			       NULL);
+                               Owner, (fHWND_BOTTOM) ? HWND_BOTTOM :HWND_TOP, 0, NULL,
+                               NULL);
   *hwndFrame = hwndClient;
   return hwndClient;
 }
@@ -84,53 +86,53 @@ HWND OSLibWinCreateWindow(HWND hwndParent, ULONG dwWinStyle, ULONG dwFrameStyle,
 //******************************************************************************
 BOOL OSLibWinConvertStyle(ULONG dwStyle, ULONG dwExStyle, ULONG *OSWinStyle, ULONG *OSFrameStyle)
 {
-  *OSWinStyle	= 0;
+  *OSWinStyle   = 0;
   *OSFrameStyle = 0;
 
   /* Window styles */
   if(dwStyle & WS_MINIMIZE_W)
-	*OSWinStyle |= WS_MINIMIZED;
+        *OSWinStyle |= WS_MINIMIZED;
 //Done explicitely in CreateWindowExA
 #if 0
   if(dwStyle & WS_VISIBLE_W)
-	*OSWinStyle |= WS_VISIBLE;
+        *OSWinStyle |= WS_VISIBLE;
 #endif
   if(dwStyle & WS_DISABLED_W)
-	*OSWinStyle |= WS_DISABLED;
+        *OSWinStyle |= WS_DISABLED;
   if(dwStyle & WS_CLIPSIBLINGS_W)
-	*OSWinStyle |= WS_CLIPSIBLINGS;
+        *OSWinStyle |= WS_CLIPSIBLINGS;
   if(dwStyle & WS_CLIPCHILDREN_W)
-	*OSWinStyle |= WS_CLIPCHILDREN;
+        *OSWinStyle |= WS_CLIPCHILDREN;
   if(dwStyle & WS_MAXIMIZE_W)
-	*OSWinStyle |= WS_MAXIMIZED;
+        *OSWinStyle |= WS_MAXIMIZED;
   if(dwStyle & WS_GROUP_W)
-	*OSWinStyle |= WS_GROUP;
+        *OSWinStyle |= WS_GROUP;
   if(dwStyle & WS_TABSTOP_W)
-	*OSWinStyle |= WS_TABSTOP;
+        *OSWinStyle |= WS_TABSTOP;
 
   if(dwStyle & WS_CAPTION_W)
-	*OSFrameStyle |= FCF_TITLEBAR;
+        *OSFrameStyle |= FCF_TITLEBAR;
   if(dwStyle & WS_DLGFRAME_W)
-	*OSFrameStyle |= FCF_DLGBORDER;
+        *OSFrameStyle |= FCF_DLGBORDER;
   else
   if(dwStyle & WS_BORDER_W)
-	*OSFrameStyle |= FCF_BORDER;
+        *OSFrameStyle |= FCF_BORDER;
 
   if(dwStyle & WS_VSCROLL_W)
-	*OSFrameStyle |= FCF_VERTSCROLL;
+        *OSFrameStyle |= FCF_VERTSCROLL;
   if(dwStyle & WS_HSCROLL_W)
-	*OSFrameStyle |= FCF_HORZSCROLL;
+        *OSFrameStyle |= FCF_HORZSCROLL;
   if(dwStyle & WS_SYSMENU_W)
-	*OSFrameStyle |= FCF_SYSMENU;
+        *OSFrameStyle |= FCF_SYSMENU;
   if(dwStyle & WS_THICKFRAME_W)
-	*OSFrameStyle |= FCF_SIZEBORDER;	//??
+        *OSFrameStyle |= FCF_SIZEBORDER;        //??
   if(dwStyle & WS_MINIMIZEBOX_W)
-	*OSFrameStyle |= FCF_MINBUTTON;
+        *OSFrameStyle |= FCF_MINBUTTON;
   if(dwStyle & WS_MAXIMIZEBOX_W)
-	*OSFrameStyle |= FCF_MAXBUTTON;
+        *OSFrameStyle |= FCF_MAXBUTTON;
 
   if(dwExStyle & WS_EX_DLGMODALFRAME_W)
-	*OSFrameStyle |= FCF_DLGBORDER;
+        *OSFrameStyle |= FCF_DLGBORDER;
 
   return TRUE;
 }
@@ -225,24 +227,30 @@ HWND OSLibWinQueryWindow(HWND hwnd, ULONG lCode)
 //******************************************************************************
 //******************************************************************************
 BOOL OSLibWinSetWindowPos(HWND hwnd, HWND hwndInsertBehind, LONG x, LONG y, LONG cx,
-			  LONG cy, ULONG fl)
+                          LONG cy, ULONG fl)
 {
  HWND hwndParent = hwndInsertBehind;
  BOOL rc;
 
     if(fl & SWP_MOVE) {
-	switch(hwndParent)
-	{
-	    case HWNDOS_TOP:
-	    case HWNDOS_BOTTOM:
-		hwndParent = HWND_DESKTOP;
-		break;
-	}
-	y = MapOS2ToWin32Y(hwndParent, cy, y);
+        switch(hwndParent)
+        {
+            case HWNDOS_TOP:
+            case HWNDOS_BOTTOM:
+                hwndParent = HWND_DESKTOP;
+                break;
+        }
+        y = MapOS2ToWin32Y(hwndParent, cy, y);
     }
     rc = WinSetWindowPos(hwnd, hwndInsertBehind, x, y, cx, cy, fl);
     dprintf(("WinSetWindowPos %x %x %d %d %d %d %x returned %d (%x)", hwnd, hwndInsertBehind, x, y, cx, cy, fl, rc, WinGetLastError(GetThreadHAB())));
     return rc;
+}
+//******************************************************************************
+//******************************************************************************
+BOOL OSLibWinSetMultWindowPos(PSWP pswp, ULONG num)
+{
+    return WinSetMultWindowPos(GetThreadHAB(), pswp, num);
 }
 //******************************************************************************
 //******************************************************************************
@@ -251,13 +259,13 @@ BOOL OSLibWinShowWindow(HWND hwnd, ULONG fl)
  BOOL rc;
 
   if(fl & SWP_SHOW) {
-	 rc = WinShowWindow(hwnd, TRUE);
+         rc = WinShowWindow(hwnd, TRUE);
   }
   if(rc == 0)
-	dprintf(("WinShowWindow %x failed %x", hwnd, WinGetLastError(GetThreadHAB())));
+        dprintf(("WinShowWindow %x failed %x", hwnd, WinGetLastError(GetThreadHAB())));
   rc = WinSetWindowPos(hwnd, HWND_TOP, 0, 0, 0, 0, fl);
   if(rc == 0)
-	dprintf(("WinShowWindow %x failed %x", hwnd, WinGetLastError(GetThreadHAB())));
+        dprintf(("WinShowWindow %x failed %x", hwnd, WinGetLastError(GetThreadHAB())));
   return rc;
 }
 //******************************************************************************
@@ -270,17 +278,17 @@ BOOL OSLibWinDestroyWindow(HWND hwnd)
 //******************************************************************************
 BOOL OSLibWinQueryWindowRect(HWND hwnd, PRECT pRect, int RelativeTo)
 {
- BOOL	  rc;
+ BOOL     rc;
  RECTLOS2 rectl;
 
   rc = WinQueryWindowRect(hwnd, (PRECTL)&rectl);
   if(rc) {
-	if(RelativeTo == RELATIVE_TO_SCREEN) {
-		MapOS2ToWin32Rectl(OSLIB_HWND_DESKTOP, hwnd, &rectl, pRect);
-	}
-	else	MapOS2ToWin32Rectl(&rectl, pRect);
+        if(RelativeTo == RELATIVE_TO_SCREEN) {
+                MapOS2ToWin32Rectl(OSLIB_HWND_DESKTOP, hwnd, &rectl, pRect);
+        }
+        else    MapOS2ToWin32Rectl(&rectl, pRect);
   }
-  else	memset(pRect, 0, sizeof(RECT));
+  else  memset(pRect, 0, sizeof(RECT));
   return rc;
 }
 //******************************************************************************
@@ -292,13 +300,13 @@ BOOL OSLibWinIsIconic(HWND hwnd)
 
   rc = WinQueryWindowPos(hwnd, &swp);
   if(rc == FALSE) {
-	dprintf(("OSLibWinIsIconic: WinQueryWindowPos %x failed", hwnd));
-	return FALSE;
+        dprintf(("OSLibWinIsIconic: WinQueryWindowPos %x failed", hwnd));
+        return FALSE;
   }
 
   if(swp.fl & SWP_MINIMIZE)
-	return TRUE;
-  else	return FALSE;
+        return TRUE;
+  else  return FALSE;
 }
 //******************************************************************************
 //******************************************************************************
@@ -385,6 +393,239 @@ BOOL OSLibWinGetBorderSize(HWND hwnd, OSLIBPOINT *pointl)
 BOOL OSLibWinSetIcon(HWND hwnd, HANDLE hIcon)
 {
     return (BOOL) WinSendMsg(hwnd, WM_SETICON, (MPARAM)hIcon, 0);
+}
+//******************************************************************************
+//******************************************************************************
+BOOL OSLibWinQueryWindowPos (HWND hwnd, PSWP pswp)
+{
+  return WinQueryWindowPos(hwnd, pswp);
+}
+//******************************************************************************
+//******************************************************************************
+void OSLibMapSWPtoWINDOWPOS(PSWP pswp, PWINDOWPOS pwpos, PSWP pswpOld, ULONG parentHeight)
+{
+   HWND hWindow            = pswp->hwnd;
+   HWND hWndInsertAfter    = pswp->hwndInsertBehind;
+   long x                  = pswp->x;
+   long y                  = pswp->y;
+   long cx                 = pswp->cx;
+   long cy                 = pswp->cy;
+   UINT fuFlags            = (UINT)pswp->fl;
+
+   HWND  hWinAfter;
+   ULONG flags = 0;
+
+   //***************************************************
+   // Map constant HWNDs (e.g. HWND_DESKTOP, HWND_TOP)
+   //***************************************************
+   HWND  hWnd = (hWindow == HWND_DESKTOP) ? HWND_DESKTOP_W: hWindow;
+
+   if ( hWndInsertAfter == HWND_TOP )
+      hWinAfter = HWND_TOP_W;
+   else if ( hWndInsertAfter == HWND_BOTTOM )
+      hWinAfter = HWND_BOTTOM_W;
+   else
+      hWinAfter = (HWND) hWndInsertAfter;
+
+   //***********************************
+   // convert PM flags to Windows flags
+   //***********************************
+   if (!(fuFlags & SWP_SIZE))       flags |= SWP_NOSIZE_W;
+   if (!(fuFlags & SWP_MOVE))       flags |= SWP_NOMOVE_W;
+   if (!(fuFlags & SWP_ZORDER))     flags |= SWP_NOZORDER_W;
+   if (  fuFlags & SWP_NOREDRAW)    flags |= SWP_NOREDRAW_W;
+   if (!(fuFlags & SWP_ACTIVATE))   flags |= SWP_NOACTIVATE_W;
+   if (  fuFlags & SWP_SHOW)        flags |= SWP_SHOWWINDOW_W;
+   if (  fuFlags & SWP_HIDE)        flags |= SWP_HIDEWINDOW_W;
+
+   //**************************************************************************
+   // When moving or sizing we'll have to do some calculations for Y inversion.
+   //
+   // If moving - invert Y coord.
+   //
+   // If sizing - if the height is changing, have to move the window to
+   //             maintain correct windows position.  If we just size then the
+   //             TR corner will extend.  The Windows behaviour should be to
+   //             extend the BR corner.
+   //
+   // If this is a child window then we'll have to move within the client
+   // area of the parent.
+   //
+   // If this is an overlapped or popup window we'll have to move around
+   // within the desktop.
+   //**************************************************************************
+   if ( fuFlags & (SWP_MOVE | SWP_SIZE) )
+   {
+      if (fuFlags & SWP_SIZE)
+      {
+         // If height is changing we MUST move to maintain top-left alignment
+         if (cy != pswpOld->cy)
+         {
+            flags &= ~SWP_NOMOVE_W;
+         }
+      }
+      else
+      {
+         cx = pswpOld->cx;
+         cy = pswpOld->cy;
+      }
+
+      //**********************************************************
+      // We'll need both a y and cy for the Y inversion code.
+      // If either wasn't passed in, calculate the current value.
+      //**********************************************************
+      if ((fuFlags & SWP_MOVE) == 0)
+      {
+         x = pswpOld->x;
+         y = pswpOld->y;
+      }
+
+      //********************************************************
+      // Y inversion here... old Y is top left corner of window
+      // relative to top left of parent.
+      //********************************************************
+      y = parentHeight - y - cy;
+
+      LONG oldY = parentHeight - pswpOld->y - pswpOld->cy;
+
+      // Set the SWP_NOMOVE_W flag if the window has not moved in windows
+      // coordinates.
+      if ( ( pswpOld->x == x ) && ( oldY == y ) )
+         flags |= SWP_NOMOVE_W;
+
+      // Set the SWP_NOSIZE_W flag if the window is not really being sized.
+      if ( ( pswpOld->cx == cx ) && ( pswpOld->cy == cy ) )
+         flags |= SWP_NOSIZE_W;
+   }
+
+   // Fill in the WINDOWPOS structure with the now calculated PM values.
+   pwpos->flags            = (UINT)flags;
+   pwpos->cy               = (int)cy;
+   pwpos->cx               = (int)cx;
+   pwpos->x                = (int)x;
+   pwpos->y                = (int)y;
+   pwpos->hwndInsertAfter  = hWinAfter;
+   pwpos->hwnd             = hWindow;
+}
+//******************************************************************************
+//******************************************************************************
+void OSLibMapWINDOWPOStoSWP(PWINDOWPOS pwpos, PSWP pswp, PSWP pswpOld, ULONG parentHeight)
+{
+   HWND hWnd              = pwpos->hwnd;
+   HWND hWndInsertAfter   = pwpos->hwndInsertAfter;
+   long x                 = pwpos->x;
+   long y                 = pwpos->y;
+   long cx                = pwpos->cx;
+   long cy                = pwpos->cy;
+   UINT fuFlags           = pwpos->flags;
+
+   HWND  hWinAfter;
+   ULONG flags = 0;
+
+   //***************************************************
+   // Map constant HWNDs (e.g. HWND_DESKTOP, HWND_TOP)
+   //***************************************************
+   HWND  hWindow = hWnd ? (HWND)hWnd : HWND_DESKTOP;
+
+   if ( hWndInsertAfter == HWND_TOPMOST_W )
+//      hWinAfter = HWND_TOPMOST;
+      hWinAfter = HWND_TOP;
+   else if ( hWndInsertAfter == HWND_NOTOPMOST_W )
+//      hWinAfter = HWND_NOTOPMOST;
+      hWinAfter = HWND_TOP;
+   else if ( hWndInsertAfter == HWND_TOP_W )
+      hWinAfter = HWND_TOP;
+   else if ( hWndInsertAfter == HWND_BOTTOM_W )
+      hWinAfter = HWND_BOTTOM;
+   else
+      hWinAfter = (HWND) hWndInsertAfter;
+
+   //***********************************
+   // convert Windows flags to PM flags
+   //***********************************
+   if ( ! ( fuFlags & SWP_NOSIZE_W     ) ) flags |= SWP_SIZE;
+   if ( ! ( fuFlags & SWP_NOMOVE_W     ) ) flags |= SWP_MOVE;
+   if ( ! ( fuFlags & SWP_NOZORDER_W   ) ) flags |= SWP_ZORDER;
+   if (     fuFlags & SWP_NOREDRAW_W   )   flags |= SWP_NOREDRAW;
+   if ( ! ( fuFlags & SWP_NOACTIVATE_W ) ) flags |= SWP_ACTIVATE;
+   if (     fuFlags & SWP_SHOWWINDOW_W )   flags |= SWP_SHOW;
+   if (     fuFlags & SWP_HIDEWINDOW_W )   flags |= SWP_HIDE;
+   /* no PM equivalent for SWP_FRAMECHANGED_W, SWP_NOCOPYBITS_W and SWP_NOOWNERZORDER_W */
+
+   //**************************************************************************
+   // When moving or sizing we'll have to do some calculations for Y inversion.
+   //
+   // If moving - invert Y coord.
+   //
+   // If sizing - if the height is changing, have to move the window to
+   //             maintain correct windows position.  If we just size then the
+   //             TR corner will extend.  The Windows behaviour should be to
+   //             extend the BR corner.
+   //
+   // If this is a child window then we'll have to move within the client
+   // area of the parent.
+   //
+   // If this is an overlapped or popup window we'll have to move around
+   // within the desktop.
+   //**************************************************************************
+   if ( flags & (SWP_MOVE | SWP_SIZE) )
+   {
+      //**********************************************************
+      // We'll need both a y and cy for the Y inversion code.
+      // If either wasn't passed in, calculate the current value.
+      //**********************************************************
+      if ((flags & SWP_MOVE) == 0)
+      {
+         x = pswpOld->x;
+         y = pswpOld->y;
+
+         // If the window is at (x,0) with a height of zero then this calculation
+         // won't quite work.  Instead of calculating the Windows y coord, we set
+         // it at (x,0).
+         if (!(y == 0 && pswpOld->cy == 0))
+         {
+            // convert Y coordinate back to Windows's for later conversion with new size
+            y = parentHeight - y - pswpOld->cy;
+         }
+      }
+
+      if (flags & SWP_SIZE)
+      {
+         // If height is changing we MUST move to maintain top-left alignment
+         if (cy != pswpOld->cy)
+            flags |= SWP_MOVE;
+      }
+      else
+      {
+         cx = pswpOld->cx;
+         cy = pswpOld->cy;
+      }
+
+      //********************************************************
+      // Y inversion here... old Y is top left corner of window
+      // relative to top left of parent.
+      //********************************************************
+      y = parentHeight - y - cy;
+
+      // Clear the SWP_MOVE flag if the window is not really being moved.
+      if ( ( pswpOld->x == x ) && ( pswpOld->y == y ) )
+         flags &= ~SWP_MOVE;
+
+      // Clear the SWP_SIZE flag if the window is not really being sized.
+      if ( ( pswpOld->cx == cx ) && ( pswpOld->cy == cy ) )
+         flags &= ~SWP_SIZE;
+   }
+
+   // Fill in the WINDOWPOS structure with the now calculated PM values.
+   pswp->fl               = flags;
+   pswp->cy               = cy;
+   pswp->cx               = cx;
+   pswp->x                = x;
+   pswp->y                = y;
+   pswp->hwndInsertBehind = hWinAfter;
+   pswp->hwnd             = hWindow;
+   pswp->ulReserved1      = 0;
+   pswp->ulReserved2      = 0;
 }
 //******************************************************************************
 //******************************************************************************

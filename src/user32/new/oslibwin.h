@@ -1,9 +1,10 @@
-/* $Id: oslibwin.h,v 1.20 1999-08-20 20:09:51 sandervl Exp $ */
+/* $Id: oslibwin.h,v 1.21 1999-08-25 15:08:50 dengert Exp $ */
 /*
  * Window API wrappers for OS/2
  *
  *
  * Copyright 1999 Sander van Leeuwen (sandervl@xs4all.nl)
+ * Copyright 1999      Daniela Engert (dani@ngrt.de)
  *
  *
  * Project Odin Software License can be found in LICENSE.TXT
@@ -12,6 +13,21 @@
 #ifndef __OSLIBWIN_H__
 #define __OSLIBWIN_H__
 #include <oslibgdi.h>
+
+#ifndef WIN_INCLUDED
+typedef struct _SWP    /* swp */
+{
+   ULONG   fl;
+   LONG    cy;
+   LONG    cx;
+   LONG    y;
+   LONG    x;
+   HWND    hwndInsertBehind;
+   HWND    hwnd;
+   ULONG   ulReserved1;
+   ULONG   ulReserved2;
+} SWP, *PSWP;
+#endif
 
 #define OSLIB_HWND_DESKTOP      0
 BOOL  OSLibWinSetParent(HWND hwnd, HWND hwndParent, ULONG fRedraw = TRUE);
@@ -38,6 +54,9 @@ HWND OSLibWinQueryFocus(HWND hwndDeskTop);
 HWND OSLibWinWindowFromID(HWND hwndParent,ULONG id);
 BOOL OSLibWinSetFocus(HWND hwndDeskTop,HWND hwndNewFocus);
 ULONG OSLibGetWindowHeight(HWND hwnd); //for point transformation
+
+extern ULONG ScreenHeight;
+inline ULONG OSLibQueryScreenHeight(void) { return (ScreenHeight); }
 
 //reserved deleted
 
@@ -167,6 +186,7 @@ BOOL OSLibWinQueryPointerPos(HWND hwndDeskTop,PPOINT pptlPoint); //pptlPoint == 
 #define HWNDOS_BOTTOM                   (HWND)4
 
 BOOL  OSLibWinSetWindowPos(HWND hwnd, HWND hwndInsertBehind, LONG x, LONG y, LONG cx, LONG cy, ULONG fl);
+BOOL  OSLibWinSetMultWindowPos(struct _SWP *pswp, ULONG num);
 BOOL  OSLibWinShowWindow(HWND hwnd, ULONG fl);
 
 BOOL  OSLibWinDestroyWindow(HWND hwnd);
@@ -211,5 +231,9 @@ BOOL  OSLibWinMinimizeWindow(HWND hwnd);
 
 BOOL  OSLibWinGetBorderSize(HWND hwnd, OSLIBPOINT *pointl);
 BOOL  OSLibWinSetIcon(HWND hwnd, HANDLE hIcon);
+
+BOOL  OSLibWinQueryWindowPos (HWND hwnd, PSWP pswp);
+void  OSLibMapSWPtoWINDOWPOS(PSWP pswp, struct tagWINDOWPOS *pwpos, PSWP pswpOld, ULONG parentHeight);
+void  OSLibMapWINDOWPOStoSWP(struct tagWINDOWPOS *pwpos, PSWP pswp, PSWP pswpOld, ULONG parentHeight);
 
 #endif //__OSLIBWIN_H__
