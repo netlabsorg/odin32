@@ -1,4 +1,4 @@
-/* $Id: queue.h,v 1.1 1999-05-24 20:19:18 ktk Exp $ */
+/* $Id: queue.h,v 1.2 2000-05-12 18:04:11 sandervl Exp $ */
 
 /*
  * Message queues definitions
@@ -12,17 +12,6 @@
 #include "windef.h"
 #include "winuser.h"
 #include "thread.h"
-
-
-  /* Message as stored in the queue (contains the extraInfo field) */
-typedef struct tagQMSG
-{
-    MSG   msg;
-    DWORD   extraInfo;  /* Only in 3.1 */
-    
-    struct tagQMSG *nextMsg;
-    struct tagQMSG *prevMsg;
-} QMSG;
 
 
 typedef struct tagSMSG
