@@ -1,4 +1,4 @@
-/* $Id: oslibwin.cpp,v 1.136 2003-01-02 17:02:04 sandervl Exp $ */
+/* $Id: oslibwin.cpp,v 1.137 2003-01-03 16:35:55 sandervl Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -1168,6 +1168,7 @@ BOOL OSLibWinSetCapture(HWND hwnd)
 //******************************************************************************
 BOOL OSLibWinRemoveFromTasklist(HANDLE hTaskList)
 {
+    dprintf(("OSLibWinRemoveFromTasklist %x", hTaskList));
     return (WinRemoveSwitchEntry(hTaskList)) ? FALSE : TRUE;
 }
 //******************************************************************************
@@ -1193,7 +1194,9 @@ HANDLE OSLibWinAddToTaskList(HWND hwndFrame, char *title, BOOL fVisible)
         swctrl.szSwtitle[0] = 0;
         swctrl.uchVisibility    = SWL_INVISIBLE;
     }
-    return WinAddSwitchEntry(&swctrl);
+    HANDLE hTaskList = WinAddSwitchEntry(&swctrl);
+    dprintf(("OSLibWinAddToTaskList %s %x", swctrl.szSwtitle, hTaskList));
+    return hTaskList;
 }
 //******************************************************************************
 //******************************************************************************

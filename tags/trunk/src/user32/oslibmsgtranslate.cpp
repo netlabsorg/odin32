@@ -1,4 +1,4 @@
-/* $Id: oslibmsgtranslate.cpp,v 1.96 2003-01-02 12:35:36 sandervl Exp $ */
+/* $Id: oslibmsgtranslate.cpp,v 1.97 2003-01-03 16:35:54 sandervl Exp $ */
 /*
  * Window message translation functions for OS/2
  *
@@ -92,7 +92,7 @@ LONG IsNCMouseMsg(Win32BaseWindow *win32wnd)
 }
 //******************************************************************************
 //******************************************************************************
-void SetMenuDoubleClick(BOOL fSet)
+void OSLibSetMenuDoubleClick(BOOL fSet)
 {
   fGenerateDoubleClick = fSet;
 }
@@ -375,13 +375,15 @@ BOOL OS2ToWinMsgTranslate(void *pTeb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode,
                       winMsg->message += (WINWM_LBUTTONDBLCLK - WINWM_LBUTTONDOWN);
                  }
                  else winMsg->message += (WINWM_LBUTTONDBLCLK - WINWM_NCLBUTTONDOWN);
-                 doubleClickMsg.message = 0;
+                 if(fMsgRemoved) doubleClickMsg.message = 0;
             }
             else {
                  dprintf(("save for double click"));
-                 doubleClickMsg = *winMsg;
-                 if(doubleClickMsg.message >= WINWM_NCLBUTTONDOWN && doubleClickMsg.message <= WINWM_NCMBUTTONDOWN) {
-                      doubleClickMsg.message += (WINWM_LBUTTONDOWN - WINWM_NCLBUTTONDOWN);
+                 if(fMsgRemoved) {
+                     doubleClickMsg = *winMsg;
+                     if(doubleClickMsg.message >= WINWM_NCLBUTTONDOWN && doubleClickMsg.message <= WINWM_NCMBUTTONDOWN) {
+                          doubleClickMsg.message += (WINWM_LBUTTONDOWN - WINWM_NCLBUTTONDOWN);
+                     }
                  }
             }
         }

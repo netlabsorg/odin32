@@ -1,4 +1,4 @@
-/* $Id: win32wmisc.h,v 1.1 2001-09-19 15:39:51 sandervl Exp $ */
+/* $Id: win32wmisc.h,v 1.2 2003-01-03 16:35:58 sandervl Exp $ */
 /*
  * Misc. functions for window management
  *
@@ -19,12 +19,19 @@
 extern "C" {
 #endif
 
+#define get_win_sys_menu( hwnd ) getSysMenu(hwnd)
+
 MDICLIENTINFO *get_client_info( HWND client );
 HMENU WIN32API getSysMenu(HWND hwnd);
 VOID setSysMenu(HWND hwnd,HMENU hMenu);
 void GetWindowRectParent(HWND hwnd, RECT *pRect);
-void NC_GetSysPopupPos( HWND hwnd, RECT* rect );
 HWND *WIN_ListChildren( HWND hwnd );
+
+void NC_GetSysPopupPos( HWND hwnd, RECT* rect );
+BOOL NC_DrawSysButton95 (HWND hwnd, HDC hdc, BOOL down);
+INT  NC_HandleNCHitTest( HWND hwnd, POINT pt);
+
+HWND WINAPI GetAncestor( HWND hwnd, UINT type );
 
 #ifdef __cplusplus
 }
