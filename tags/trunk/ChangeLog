@@ -1,9 +1,11 @@
- /* $Id: ChangeLog,v 1.525 1999-12-09 11:01:34 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.526 1999-12-09 11:59:53 sandervl Exp $ */
 
  99-12-09: Sander van Leeuwen <sandervl@xs4all.nl>
 	- KERNEL32: Fixes in lstrcpynWtoA
                     Added code heap.
                     Ported ExpandEnvironmentStringsA/W (Wine: 991114)
+                    Create HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Windows
+                    key and necessary subkeys (including CSD version)
 	- USER32: Major changes for window procedures
                   Now identical to Wine. Window is unicode only if it's
                   window procedure comes from a unicode class.
