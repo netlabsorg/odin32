@@ -77,10 +77,10 @@ typedef struct
     INT        *tabs;           /* Array of tabs */
     BOOL        caret_on;       /* Is caret on? */
     BOOL        captured;       /* Is mouse captured? */
-    BOOL	in_focus;
+    BOOL    in_focus;
     HFONT       font;           /* Current font */
     LCID          locale;         /* Current locale for string comparisons */
-    LPHEADCOMBO   lphc;		  /* ComboLBox */
+    LPHEADCOMBO   lphc;       /* ComboLBox */
 } LB_DESCR;
 
 
@@ -150,7 +150,7 @@ const struct builtin_class_descr COMBOLBOX_builtin_class =
 
 
 #ifdef __WIN32OS2__
-#define is_old_app( hwnd )	0
+#define is_old_app( hwnd )  0
 #else
 /* check whether app is a Win 3.1 app */
 inline static BOOL is_old_app( HWND hwnd )
@@ -549,14 +549,14 @@ static void LISTBOX_PaintItem( HWND hwnd, LB_DESCR *descr, HDC hdc,
         HRGN hrgn;
         UINT id = GetWindowLongA( hwnd, GWL_ID );
 
-	if (!item)
-	{
-	    if (action == ODA_FOCUS)
-		DrawFocusRect( hdc, rect );
-	    else
-	        FIXME("called with an out of bounds index %d(%d) in owner draw, Not good.\n",index,descr->nb_items);
-	    return;
-	}
+    if (!item)
+    {
+        if (action == ODA_FOCUS)
+        DrawFocusRect( hdc, rect );
+        else
+            FIXME("called with an out of bounds index %d(%d) in owner draw, Not good.\n",index,descr->nb_items);
+        return;
+    }
 
         /* some programs mess with the clipping region when
         drawing the item, *and* restore the previous region
@@ -612,14 +612,14 @@ static void LISTBOX_PaintItem( HWND hwnd, LB_DESCR *descr, HDC hdc,
                          ETO_OPAQUE | ETO_CLIPPED, rect, item->str,
                          strlenW(item->str), NULL );
         else
-	{
-	    /* Output empty string to paint background in the full width. */
+    {
+        /* Output empty string to paint background in the full width. */
             ExtTextOutW( hdc, rect->left + 1, rect->top,
                          ETO_OPAQUE | ETO_CLIPPED, rect, NULL, 0, NULL );
             TabbedTextOutW( hdc, rect->left + 1 , rect->top,
                             item->str, strlenW(item->str),
                             descr->nb_tabs, descr->tabs, 0);
-	}
+    }
         if (item && item->selected)
         {
             SetBkColor( hdc, oldBk );
@@ -741,9 +741,9 @@ static BOOL LISTBOX_SetTabStops( HWND hwnd, LB_DESCR *descr, INT count,
 
         TRACE("[%04x]: settabstops ", hwnd );
         for (i = 0; i < descr->nb_tabs; i++) {
-	    descr->tabs[i] = *p++<<1; /* FIXME */
+        descr->tabs[i] = *p++<<1; /* FIXME */
             if (TRACE_ON(listbox)) DPRINTF("%hd ", descr->tabs[i]);
-	}
+    }
         if (TRACE_ON(listbox)) DPRINTF("\n");
     }
     else memcpy( descr->tabs, tabs, descr->nb_tabs * sizeof(INT) );
@@ -763,7 +763,7 @@ static LRESULT LISTBOX_GetText( LB_DESCR *descr, INT index, LPARAM lParam, BOOL 
         if (!lParam)
             return strlenW(descr->items[index].str);
 
-	TRACE("index %d (0x%04x) %s\n", index, index, debugstr_w(descr->items[index].str));
+    TRACE("index %d (0x%04x) %s\n", index, index, debugstr_w(descr->items[index].str));
 
         if(unicode)
         {
@@ -1030,11 +1030,11 @@ static LRESULT LISTBOX_Paint( HWND hwnd, LB_DESCR *descr, HDC hdc )
 
         if (i == descr->focus_item)
         {
-	    /* keep the focus rect, to paint the focus item after */
-	    focusRect.left = rect.left;
-	    focusRect.right = rect.right;
-	    focusRect.top = rect.top;
-	    focusRect.bottom = rect.bottom;
+        /* keep the focus rect, to paint the focus item after */
+        focusRect.left = rect.left;
+        focusRect.right = rect.right;
+        focusRect.top = rect.top;
+        focusRect.bottom = rect.bottom;
         }
         LISTBOX_PaintItem( hwnd, descr, hdc, &rect, i, ODA_DRAWENTIRE, TRUE );
         rect.top = rect.bottom;
@@ -1153,8 +1153,8 @@ static LRESULT LISTBOX_SetItemHeight( HWND hwnd, LB_DESCR *descr, INT index,
         TRACE("[%04x]: item %d height = %d\n", hwnd, index, height );
         descr->items[index].height = height;
         LISTBOX_UpdateScroll( hwnd, descr );
-	if (repaint)
-	    LISTBOX_InvalidateItems( hwnd, descr, index );
+    if (repaint)
+        LISTBOX_InvalidateItems( hwnd, descr, index );
     }
     else if (height != descr->item_height)
     {
@@ -1162,8 +1162,8 @@ static LRESULT LISTBOX_SetItemHeight( HWND hwnd, LB_DESCR *descr, INT index,
         descr->item_height = height;
         LISTBOX_UpdatePage( hwnd, descr );
         LISTBOX_UpdateScroll( hwnd, descr );
-	if (repaint)
-	    InvalidateRect( hwnd, 0, TRUE );
+    if (repaint)
+        InvalidateRect( hwnd, 0, TRUE );
     }
     return LB_OKAY;
 }
@@ -1392,9 +1392,9 @@ static LRESULT LISTBOX_SetSelection( HWND hwnd, LB_DESCR *descr, INT index,
         if (index != -1) LISTBOX_RepaintItem( hwnd, descr, index, ODA_SELECT );
         if (send_notify && descr->nb_items) SEND_NOTIFICATION( hwnd, descr,
                                (index != -1) ? LBN_SELCHANGE : LBN_SELCANCEL );
-	else
-	    if( descr->lphc ) /* set selection change flag for parent combo */
-		descr->lphc->wState |= CBF_SELCHANGE;
+    else
+        if( descr->lphc ) /* set selection change flag for parent combo */
+        descr->lphc->wState |= CBF_SELCHANGE;
     }
     return LB_OKAY;
 }
@@ -1749,7 +1749,7 @@ static LRESULT LISTBOX_Directory( HWND hwnd, LB_DESCR *descr, UINT attrib,
                 else  /* not a directory */
                 {
 #ifdef __WIN32OS2__
-//SvL: Must check for FILE_ATTRIBUTE_NORMAL or else files are removed from 
+//SvL: Must check for FILE_ATTRIBUTE_NORMAL or else files are removed from
 //     the directory listing in common file dialogs
 #define ATTRIBS (FILE_ATTRIBUTE_READONLY | FILE_ATTRIBUTE_HIDDEN | \
                  FILE_ATTRIBUTE_SYSTEM | FILE_ATTRIBUTE_ARCHIVE | FILE_ATTRIBUTE_NORMAL)
@@ -2000,8 +2000,8 @@ static LRESULT LISTBOX_HandleLButtonDown( HWND hwnd, LB_DESCR *descr,
         {
             POINT pt;
 
-	    pt.x = x;
-	    pt.y = y;
+        pt.x = x;
+        pt.y = y;
 
             if (DragDetect( hwnd, pt ))
                 SendMessageW( descr->owner, WM_BEGINDRAG, 0, 0 );
@@ -2071,11 +2071,11 @@ static LRESULT LISTBOX_HandleLButtonDownCombo( HWND hwnd, LB_DESCR *pDescr,
             LISTBOX_SetSelection( hwnd, pDescr, pDescr->lphc->droppedIndex, FALSE, FALSE );
 #ifdef __WIN32OS2__
             COMBO_RollupListbox(pDescr->lphc);
- 
+
              /* @@PF Previous code is all wrong here. Here we are supposed to close
                 and only close dropdown, instead flip, flips it. This happens because
                 previous code did not pay attention to the fact that combobox can be
-                closed with SendMessage by application, as MFC apps do     
+                closed with SendMessage by application, as MFC apps do
                 COMBO_FlipListbox( pDescr->lphc, FALSE, FALSE ); */
 #else
             COMBO_FlipListbox( pDescr->lphc, FALSE, FALSE );
@@ -2340,11 +2340,11 @@ static LRESULT LISTBOX_HandleKeyDown( HWND hwnd, LB_DESCR *descr, WPARAM wParam 
         LISTBOX_SetSelection( hwnd, descr, caret, TRUE, FALSE);
         if (descr->style & LBS_NOTIFY)
         {
-	    if( descr->lphc )
+        if( descr->lphc )
             {
-		/* make sure that combo parent doesn't hide us */
-		descr->lphc->wState |= CBF_NOROLLUP;
-	    }
+        /* make sure that combo parent doesn't hide us */
+        descr->lphc->wState |= CBF_NOROLLUP;
+        }
             if (descr->nb_items) SEND_NOTIFICATION( hwnd, descr, LBN_SELCHANGE );
         }
     }
@@ -2416,25 +2416,25 @@ static BOOL LISTBOX_Create( HWND hwnd, LPHEADCOMBO lphc )
     descr->tabs          = NULL;
     descr->caret_on      = lphc ? FALSE : TRUE;
     if (descr->style & LBS_NOSEL) descr->caret_on = FALSE;
-    descr->in_focus 	 = FALSE;
+    descr->in_focus      = FALSE;
     descr->captured      = FALSE;
     descr->font          = 0;
     descr->locale        = 0;  /* FIXME */
-    descr->lphc		 = lphc;
+    descr->lphc      = lphc;
 
     if (is_old_app(hwnd) && ( descr->style & ( WS_VSCROLL | WS_HSCROLL ) ) )
     {
-	/* Win95 document "List Box Differences" from MSDN:
-	   If a list box in a version 3.x application has either the
-	   WS_HSCROLL or WS_VSCROLL style, the list box receives both
-	   horizontal and vertical scroll bars.
-	*/
-	descr->style |= WS_VSCROLL | WS_HSCROLL;
+    /* Win95 document "List Box Differences" from MSDN:
+       If a list box in a version 3.x application has either the
+       WS_HSCROLL or WS_VSCROLL style, the list box receives both
+       horizontal and vertical scroll bars.
+    */
+    descr->style |= WS_VSCROLL | WS_HSCROLL;
     }
 
     if( lphc )
     {
-	TRACE_(combo)("[%04x]: resetting owner %04x -> %04x\n",
+    TRACE_(combo)("[%04x]: resetting owner %04x -> %04x\n",
                       hwnd, descr->owner, lphc->self );
         descr->owner = lphc->self;
     }
@@ -2450,13 +2450,13 @@ static BOOL LISTBOX_Create( HWND hwnd, LPHEADCOMBO lphc )
 
     if (descr->style & LBS_OWNERDRAWFIXED)
     {
-	if( descr->lphc && (descr->lphc->dwStyle & CBS_DROPDOWN))
-	{
-	    /* WinWord gets VERY unhappy if we send WM_MEASUREITEM from here */
-	  descr->item_height = lphc->fixedOwnerDrawHeight;
-	}
-	else
-	{
+    if( descr->lphc && (descr->lphc->dwStyle & CBS_DROPDOWN))
+    {
+        /* WinWord gets VERY unhappy if we send WM_MEASUREITEM from here */
+      descr->item_height = lphc->fixedOwnerDrawHeight;
+    }
+    else
+    {
             UINT id = GetWindowLongA( hwnd, GWL_ID );
             mis.CtlType    = ODT_LISTBOX;
             mis.CtlID      = id;
@@ -2466,7 +2466,7 @@ static BOOL LISTBOX_Create( HWND hwnd, LPHEADCOMBO lphc )
             mis.itemHeight = descr->item_height;
             SendMessageW( descr->owner, WM_MEASUREITEM, id, (LPARAM)&mis );
             descr->item_height = mis.itemHeight ? mis.itemHeight : 1;
-	}
+    }
     }
 
     TRACE("owner: %04x, style: %08x, width: %d, height: %d\n", descr->owner, descr->style, descr->width, descr->height);
@@ -2630,14 +2630,14 @@ static LRESULT WINAPI ListBoxWndProc_common( HWND hwnd, UINT msg,
     case LB_GETCURSEL16:
     case LB_GETCURSEL:
         if (descr->nb_items==0)
-	  return LB_ERR;
+      return LB_ERR;
         if (!IS_MULTISELECT(descr))
           return descr->selected_item;
-	/* else */
-	if (descr->selected_item!=-1)
-	  return descr->selected_item;
-	/* else */
-	return descr->focus_item;
+    /* else */
+    if (descr->selected_item!=-1)
+      return descr->selected_item;
+    /* else */
+    return descr->focus_item;
         /* otherwise, if the user tries to move the selection with the    */
         /* arrow keys, we will give the application something to choke on */
     case LB_GETTOPINDEX16:
@@ -2659,12 +2659,12 @@ static LRESULT WINAPI ListBoxWndProc_common( HWND hwnd, UINT msg,
             POINT pt;
             RECT rect;
 
-	    pt.x = LOWORD(lParam);
-	    pt.y = HIWORD(lParam);
-	    rect.left = 0;
-	    rect.top = 0;
-	    rect.right = descr->width;
-	    rect.bottom = descr->height;
+        pt.x = LOWORD(lParam);
+        pt.y = HIWORD(lParam);
+        rect.left = 0;
+        rect.top = 0;
+        rect.right = descr->width;
+        rect.bottom = descr->height;
 
             return MAKELONG( LISTBOX_GetItemFromPoint(descr, pt.x, pt.y),
                              !PtInRect( &rect, pt ) );
@@ -2698,7 +2698,7 @@ static LRESULT WINAPI ListBoxWndProc_common( HWND hwnd, UINT msg,
             ret = LISTBOX_GetItemRect( descr, (INT16)wParam, &rect );
             CONV_RECT32TO16( &rect, MapSL(lParam) );
         }
-	return ret;
+    return ret;
 
     case LB_GETITEMRECT:
         return LISTBOX_GetItemRect( descr, wParam, (RECT *)lParam );
@@ -2758,9 +2758,9 @@ static LRESULT WINAPI ListBoxWndProc_common( HWND hwnd, UINT msg,
         INT index;
         LPWSTR textW;
 
-	if(HAS_STRINGS(descr))
-	    TRACE("LB_SELECTSTRING: %s\n", unicode ? debugstr_w((LPWSTR)lParam) :
-						     debugstr_a((LPSTR)lParam));
+    if(HAS_STRINGS(descr))
+        TRACE("LB_SELECTSTRING: %s\n", unicode ? debugstr_w((LPWSTR)lParam) :
+                             debugstr_a((LPSTR)lParam));
         if(unicode || !HAS_STRINGS(descr))
             textW = (LPWSTR)lParam;
         else
@@ -2774,10 +2774,10 @@ static LRESULT WINAPI ListBoxWndProc_common( HWND hwnd, UINT msg,
         if(!unicode && HAS_STRINGS(descr))
             HeapFree(GetProcessHeap(), 0, textW);
         if (index != LB_ERR)
-	{
+    {
             LISTBOX_SetCaretIndex( hwnd, descr, index, TRUE );
             LISTBOX_SetSelection( hwnd, descr, index, TRUE, FALSE );
-	}
+    }
         return index;
     }
 
@@ -2854,7 +2854,7 @@ static LRESULT WINAPI ListBoxWndProc_common( HWND hwnd, UINT msg,
         /* according to Win16 docs, DDL_DRIVES should make DDL_EXCLUSIVE
          * be set automatically (this is different in Win32) */
         if (wParam & DDL_DRIVES) wParam |= DDL_EXCLUSIVE;
-	lParam = (LPARAM)MapSL(lParam);
+    lParam = (LPARAM)MapSL(lParam);
         /* fall through */
     case LB_DIR:
     {
@@ -2991,6 +2991,27 @@ static LRESULT WINAPI ListBoxWndProc_common( HWND hwnd, UINT msg,
         return LISTBOX_HandleKeyDown( hwnd, descr, wParam );
     case WM_CHAR:
     {
+#ifdef __WIN32OS2__
+        static BOOL bDbcsLead = FALSE;
+        static CHAR cDbcsLead = 0;
+
+        WCHAR charW;
+        if(unicode)
+            charW = (WCHAR)wParam;
+        else
+        {
+            WCHAR charA = bDbcsLead ? (( wParam << 8 ) | cDbcsLead ) : wParam;
+            int   size = bDbcsLead ? 2 : 1;
+
+            bDbcsLead = !bDbcsLead && IsDBCSLeadByte( wParam );
+
+            if( bDbcsLead )
+                cDbcsLead = wParam;
+            else
+                MultiByteToWideChar(CP_ACP, 0, (LPSTR)&charA, size, &charW, 1);
+        }
+        return bDbcsLead ? 0 : LISTBOX_HandleChar( hwnd, descr, charW );
+#else
         WCHAR charW;
         if(unicode)
             charW = (WCHAR)wParam;
@@ -3000,7 +3021,9 @@ static LRESULT WINAPI ListBoxWndProc_common( HWND hwnd, UINT msg,
             MultiByteToWideChar(CP_ACP, 0, &charA, 1, &charW, 1);
         }
         return LISTBOX_HandleChar( hwnd, descr, charW );
+#endif
     }
+
     case WM_SYSTIMER:
         return LISTBOX_HandleSystemTimer( hwnd, descr );
     case WM_ERASEBKGND:
@@ -3009,14 +3032,14 @@ static LRESULT WINAPI ListBoxWndProc_common( HWND hwnd, UINT msg,
             RECT rect;
             HBRUSH hbrush = SendMessageW( descr->owner, WM_CTLCOLORLISTBOX,
                                               wParam, (LPARAM)hwnd );
-	    TRACE("hbrush = %04x\n", hbrush);
-	    if(!hbrush)
-		hbrush = GetSysColorBrush(COLOR_WINDOW);
-	    if(hbrush)
-	    {
-		GetClientRect(hwnd, &rect);
-		FillRect((HDC)wParam, &rect, hbrush);
-	    }
+        TRACE("hbrush = %04x\n", hbrush);
+        if(!hbrush)
+        hbrush = GetSysColorBrush(COLOR_WINDOW);
+        if(hbrush)
+        {
+        GetClientRect(hwnd, &rect);
+        FillRect((HDC)wParam, &rect, hbrush);
+        }
         }
         return 1;
     case WM_DROPFILES:
@@ -3029,14 +3052,14 @@ static LRESULT WINAPI ListBoxWndProc_common( HWND hwnd, UINT msg,
     case WM_QUERYDROPOBJECT:
     case WM_DRAGSELECT:
     case WM_DRAGMOVE:
-	if( !descr->lphc )
+    if( !descr->lphc )
         {
             LPDRAGINFO16 dragInfo = MapSL( lParam );
             dragInfo->l = LISTBOX_GetItemFromPoint( descr, dragInfo->pt.x,
                                                 dragInfo->pt.y );
             return SendMessage16( descr->owner, msg, wParam, lParam );
         }
-	break;
+    break;
 
     default:
         if ((msg >= WM_USER) && (msg < 0xc000))
@@ -3221,7 +3244,7 @@ static LRESULT WINAPI ComboLBWndProc_common( HWND hwnd, UINT msg,
  *           ComboLBWndProcA
  *
  *  NOTE: in Windows, winproc address of the ComboLBox is the same
- *	  as that of the Listbox.
+ *    as that of the Listbox.
  */
 LRESULT WINAPI ComboLBWndProcA( HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam )
 {
