@@ -1,4 +1,4 @@
-# $Id: process.mak,v 1.15 2002-06-26 04:45:45 bird Exp $
+# $Id: process.mak,v 1.16 2002-08-19 15:00:25 bird Exp $
 
 #
 # Unix-like tools for OS/2
@@ -64,13 +64,18 @@
 !        if "$(TARGET_MODE)" != "IFSLIB"
 # Dummy/Hub/TopLevel empty makefile. This has no target.
 !         if "$(TARGET_MODE)" != "EMPTY"
-!          if "$(TARGET_MODE)" != "TESTCASE"
-!           ifndef MAKEVER
-!            if [$(ECHO) $(CLRERR)Fatal Error: Bad TARGET_MODE="$(TARGET_MODE)". Valid ones are: EXE, DLL, SYS, IFS, VDD, LIB, SYSLIB, IFSLIB, TESTCASE and EMPTY.$(CLRRST)]
+# Dependency only makefile. (typical for include directories)
+!          if "$(TARGET_MODE)" != "DEPEND"
+# Testcase makefile.
+!           if "$(TARGET_MODE)" != "TESTCASE"
+# Bad TARGET_MODE complain.
+!            ifndef MAKEVER
+!             if [$(ECHO) $(CLRERR)Fatal Error: Bad TARGET_MODE="$(TARGET_MODE)". Valid ones are: EXE, DLL, SYS, IFS, VDD, LIB, SYSLIB, IFSLIB, TESTCASE and EMPTY.$(CLRRST)]
+!             endif
+!             error
+!            else
+!             error $(CLRERR)Fatal Error: Bad TARGET_MODE="$(TARGET_MODE)". Valid ones are: EXE, DLL, SYS, IFS, VDD, LIB, SYSLIB, IFSLIB, TESTCASE and EMPTY.$(CLRRST)
 !            endif
-!            error
-!           else
-!            error $(CLRERR)Fatal Error: Bad TARGET_MODE="$(TARGET_MODE)". Valid ones are: EXE, DLL, SYS, IFS, VDD, LIB, SYSLIB, IFSLIB, TESTCASE and EMPTY.$(CLRRST)
 !           endif
 !          endif
 !         endif
@@ -116,6 +121,9 @@ TARGET_EXT  = $(EXT_LIB)
 ! endif
 ! if "$(TARGET_MODE)" == "EMPTY"
 TARGET_EXT  = empty
+! endif
+! if "$(TARGET_MODE)" == "DEPEND"
+TARGET_EXT  = depend
 ! endif
 ! if "$(TARGET_MODE)" == "TESTCASE"
 TARGET_EXT  = testcase
@@ -924,9 +932,14 @@ $(TARGET_PUBNAME): $(TARGET)
 # -----------------------------------------------------------------------------
 # The $(TARGET) rule - For EMPTY targets.
 # -----------------------------------------------------------------------------
-!if "$(TARGET_MODE)" == "EMPTY"
+# this doesn't work as we don't have a target name. Hence not needed.
+#!if "$(TARGET_MODE)" == "EMPTY"
 #$(TARGET):
 #    @$(ECHO) .
+#!endif
+!if "$(TARGET_MODE)" == "DEPEND"
+$(TARGET):
+    @$(ECHO) .
 !endif
 
 
@@ -961,7 +974,7 @@ $(TARGET_ILIB): $(TARGET_IDEF)
 # -----------------------------------------------------------------------------
 # Read Dependencies.
 # -----------------------------------------------------------------------------
-!if "$(TARGET_MODE)" != "TESTCASE"
+!if "$(TARGET_MODE)" != "TESTCASE" && "$(TARGET_MODE)" != "DEPEND"
 !if "$(TARGET_MODE)" != "EMPTY" && "$(NODEP)" == ""
 
 #
