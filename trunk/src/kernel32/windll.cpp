@@ -1,4 +1,4 @@
-/* $Id: windll.cpp,v 1.11 1999-08-22 11:11:11 sandervl Exp $ */
+/* $Id: windll.cpp,v 1.12 1999-08-22 15:11:35 sandervl Exp $ */
 
 /*
  * Win32 DLL class
@@ -122,6 +122,7 @@ ULONG Win32Dll::Release()
 //******************************************************************************
 BOOL Win32Dll::init(ULONG reservedMem)
 {
+ char   modname[CCHMAXPATH];
  char  *syspath;
  FILE  *dllfile;
  APIRET rc;
@@ -129,16 +130,20 @@ BOOL Win32Dll::init(ULONG reservedMem)
 
   if(fSystemDll == FALSE && fNativePEImage == TRUE) 
   {//might be win32 dll, so check this
+	strupr(szFileName);
+	if(!strstr(szFileName, ".DLL")) {
+		strcat(szFileName,".DLL");
+	}
 	dllfile = fopen(szFileName, "r");
 	if(dllfile == NULL) {//search in libpath for dll
 		syspath = getenv("WIN32LIBPATH");
 		if(syspath) {
-			strcpy(szModule, syspath);
-			if(szModule[strlen(szModule)-1] != '\\') {
-				strcat(szModule, "\\");
+			strcpy(modname, syspath);
+			if(modname[strlen(modname)-1] != '\\') {
+				strcat(modname, "\\");
 			}
-			strcat(szModule, szFileName);
-			szFileName = szModule;
+			strcat(modname, szFileName);
+			strcpy(szFileName, modname);
 		}
 	}
 	else	fclose(dllfile);
@@ -277,7 +282,7 @@ BOOL Win32Dll::attachProcess()
   tlsAlloc();
   tlsAttachThread();	//setup TLS (main thread)
 
-  if(fSystemDll || fSkipEntryCalls) {
+  if(fSystemDll || fSkipEntryCalls || dllEntryPoint == NULL) {
         dprintf(("attachProcess not required for dll %s", szModule));
 	return(TRUE);
   }
@@ -304,7 +309,7 @@ BOOL Win32Dll::detachProcess()
  USHORT sel;
  BOOL rc;
 
-  if(fSystemDll || fSkipEntryCalls) {
+  if(fSystemDll || fSkipEntryCalls || dllEntryPoint == NULL) {
         tlsDetachThread();	//destroy TLS (main thread)
 	return(TRUE);
   }
@@ -333,7 +338,7 @@ BOOL Win32Dll::attachThread()
  WINEXCEPTION_FRAME exceptFrame;
  BOOL               rc;
 
-  if(fSystemDll || fSkipEntryCalls)
+  if(fSystemDll || fSkipEntryCalls || dllEntryPoint == NULL)
 	return(TRUE);
 
   dprintf(("attachThread to dll %s", szModule));
@@ -353,7 +358,7 @@ BOOL Win32Dll::detachThread()
  WINEXCEPTION_FRAME exceptFrame;
  BOOL               rc;
 
-  if(fSystemDll || fSkipEntryCalls)
+  if(fSystemDll || fSkipEntryCalls || dllEntryPoint == NULL)
 	return(TRUE);
 
   dprintf(("attachThread from dll %s", szModule));
