@@ -1,4 +1,4 @@
-/* $Id: winimagelx.h,v 1.6 2002-02-03 13:16:23 sandervl Exp $ */
+/* $Id: winimagelx.h,v 1.7 2002-11-18 13:53:55 sandervl Exp $ */
 
 /*
  * Win32 LX Image base class
@@ -29,9 +29,10 @@ virtual ULONG     getApi(int ordinal);
          * @returns OS/2 module handle. */
         HINSTANCE   getHMOD() const { return hinstanceOS2; }
 protected:
-  LPVOID header;
+  LPVOID    header;
   HINSTANCE hinstanceOS2;
-  DWORD  dwOrdinalBase;
+  DWORD     dwOrdinalBase;
+  LPSTR     lpszExportPrefix;
 private:
 };
 
