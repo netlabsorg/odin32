@@ -1,4 +1,4 @@
-/* $Id: progress.c,v 1.4 1999-06-16 15:29:26 cbratschi Exp $ */
+/* $Id: progress.c,v 1.5 1999-06-16 20:25:43 cbratschi Exp $ */
 /*
  * Progress control
  *
@@ -7,6 +7,7 @@
  * Copyright 1999 Achim Hasenmueller
  * Copyright 1999 Christoph Bratschi
  *
+ * Status: complete
  */
 
 #include "winbase.h"
@@ -373,7 +374,7 @@ LRESULT WINAPI ProgressWindowProc(HWND hwnd, UINT message,
         UNKNOWN_PARAM(PBM_SETPOS, wParam, lParam);
       temp = infoPtr->CurVal;
       if(temp != wParam){
-        infoPtr->CurVal = (UINT16)wParam;
+        infoPtr->CurVal = (UINT16)wParam; //CB: 0..65535 allowed
         PROGRESS_CoercePos(hwnd);
         PROGRESS_Update (hwnd,temp);
       }
@@ -397,7 +398,7 @@ LRESULT WINAPI ProgressWindowProc(HWND hwnd, UINT message,
       if (lParam)
         UNKNOWN_PARAM(PBM_SETSTEP, wParam, lParam);
       temp = infoPtr->Step;
-      infoPtr->Step = (INT)wParam;
+      infoPtr->Step = (INT)wParam; //CB: negative steps allowed
       return temp;
 
     case PBM_STEPIT:
