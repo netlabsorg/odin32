@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.43 1999-10-23 23:04:37 sandervl Exp $ */
+/* $Id: pmwindow.cpp,v 1.44 1999-10-24 12:30:28 sandervl Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -440,14 +440,14 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
     }
 
     case WM_FOCUSCHANGE:
-        dprintf(("OS2: WM_FOCUSCHANGE %x", hwnd));
+        dprintf(("OS2: WM_FOCUSCHANGE %x", win32wnd->getWindowHandle()));
         goto RunDefWndProc;
 
     case WM_SETFOCUS:
     {
       HWND hwndFocus = (HWND)mp1;
 
-        dprintf(("OS2: WM_SETFOCUS %x %d", hwnd, mp2));
+        dprintf(("OS2: WM_SETFOCUS %x %d", win32wnd->getWindowHandle(), mp2));
         if(WinQueryWindowULong(hwndFocus, OFFSET_WIN32PM_MAGIC) != WIN32PM_MAGIC) {
                 //another (non-win32) application's window
                 //set to NULL (allowed according to win32 SDK) to avoid problems
@@ -464,6 +464,7 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
         }
         break;
     }
+
     //**************************************************************************
     //Mouse messages (OS/2 Window coordinates -> Win32 coordinates relative to screen
     //**************************************************************************
