@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.28 1999-08-21 12:29:31 sandervl Exp $
+# $Id: makefile,v 1.29 1999-08-21 19:10:59 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -30,7 +30,7 @@ OBJS =  user32.obj dialog.obj loadres.obj \
         windowword.obj gen_object.obj oslibwin.obj win32wndchild.obj \
         controls.obj button.obj static.obj scroll.obj listbox.obj \
         combo.obj edit.obj clipboard.obj winicon.obj \
-        oslibutil.obj oslibmsg.obj windlg.obj \
+        oslibutil.obj oslibmsg.obj windlg.obj dib.obj \
         winprop.obj wingdi.obj oslibgdi.obj winaccel.obj winscrollbar.obj \
         nativerc.obj oslibres.obj
 
@@ -56,7 +56,7 @@ $(TARGET).lib: $(TARGET)exp.def
 user32.obj: user32.cpp $(PDWIN32_INCLUDE)\wndproc.h \
             $(PDWIN32_INCLUDE)\winicon.h syscolor.h
 char.obj: char.cpp user32.h
-loadres.obj: loadres.cpp user32.h
+loadres.obj: loadres.cpp user32.h dib.h
 icon.obj: icon.cpp $(PDWIN32_INCLUDE)\winicon.h
 winmenu.obj: winmenu.cpp user32.h $(PDWIN32_INCLUDE)\winres.h
 syscolor.obj: syscolor.cpp syscolor.h
@@ -109,6 +109,7 @@ oslibgdi.obj:   oslibgdi.cpp oslibgdi.h
 oslibres.obj:   oslibres.cpp oslibwin.h oslibres.h $(PDWIN32_INCLUDE)\winconst.h
 
 clipboard.obj:  clipboard.cpp
+dib.obj:        dib.cpp dib.h
 
 clean:
         $(RM) *.obj *.lib *.dll *~ *.map *.pch
