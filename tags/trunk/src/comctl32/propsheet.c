@@ -3,6 +3,7 @@
  *
  * Copyright 1998 Francis Beaudet
  * Copyright 1999 Thuy Nguyen
+ * Copyright 1999 Achim Hasenmueller
  *
  * TODO:
  *   - Modeless mode

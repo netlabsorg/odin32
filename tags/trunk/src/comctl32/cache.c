@@ -3,6 +3,7 @@
  * infinite duplication of trivial code and data. 
  * 
  * Copyright 1997 Bertho A. Stultiens
+ * Copyright 1999 Achim Hasenmueller
  *
  */
 

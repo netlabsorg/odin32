@@ -3,6 +3,7 @@
  *
  * Copyright 1998, 1999 Eric Kohl
  * Copyright 1998 Alex Priem <alexp@sci.kun.nl>
+ * Copyright 1999 Achim Hasenmueller
  *
  * NOTES
 

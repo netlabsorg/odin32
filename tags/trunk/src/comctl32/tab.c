@@ -4,6 +4,7 @@
  * Copyright 1998 Anders Carlsson
  * Copyright 1999 Alex Priem <alexp@sci.kun.nl>
  * Copyright 1999 Francis Beaudet
+ * Copyright 1999 Achim Hasenmueller
  *
  * TODO:
  *  Image list support
