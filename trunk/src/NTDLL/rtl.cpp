@@ -1,4 +1,4 @@
-/* $Id: rtl.cpp,v 1.9 1999-11-09 09:54:47 phaller Exp $ */
+/* $Id: rtl.cpp,v 1.10 2000-08-02 16:31:34 bird Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -625,7 +625,7 @@ DWORD WINAPI RtlQueryEnvironmentVariable_U(DWORD           x1,
  * Variables :
  * Result    :
  * Remark    : NTDLL.321
- * Status    : VERIFIED
+ * Status    : COMPLETELY ? IMPLEMENTED TESTED ?
  *
  * Author    : Patrick Haller [Tue, 1999/11/09 09:00]
  *****************************************************************************/
