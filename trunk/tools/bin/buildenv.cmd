@@ -1,4 +1,4 @@
-/* $Id: buildenv.cmd,v 1.10 2002-06-14 22:48:53 bird Exp $
+/* $Id: buildenv.cmd,v 1.11 2002-06-14 23:24:49 bird Exp $
  *
  * This is the master tools environment script. It contains environment
  * configurations for many development tools. Each tool can be installed
@@ -77,6 +77,7 @@
     aCfg.i.sId = 'mscv6';           aCfg.i.sGrp = 'comp32';     aCfg.i.sSet = 'MSCV6_32';               aCfg.i.sDesc = 'MicroSoft C v6.0 32-bit';   i = i + 1;
     aCfg.i.sId = 'mscv6-16';        aCfg.i.sGrp = 'comp16';     aCfg.i.sSet = 'MSCV6_16';               aCfg.i.sDesc = 'MicroSoft C v6.0a 16-bit';  i = i + 1;
     aCfg.i.sId = 'mysql';           aCfg.i.sGrp = 'database';   aCfg.i.sSet = 'mySQL';                  aCfg.i.sDesc = 'MySql any version (latest from Yuri is recommended)'; i = i + 1;
+    aCfg.i.sId = 'nasm9833';        aCfg.i.sGrp = 'asm';        aCfg.i.sSet = 'NASM,''nasm9833''';      aCfg.i.sDesc = 'NASM version 0.98.33 compiled on May 28 2002'; i = i + 1;
     aCfg.i.sId = 'netqos2';         aCfg.i.sGrp = 'misc';       aCfg.i.sSet = 'NetQOS2';                aCfg.i.sDesc = 'NetQOS2 - help system for VAC40,VAC365,DB2 and more.'; i = i + 1;
     aCfg.i.sId = 'odin32testcase';  aCfg.i.sGrp = 'tests';      aCfg.i.sSet = 'Odin32Testcase';         aCfg.i.sDesc = 'Odin32 testcase setup'; i = i + 1;
     aCfg.i.sId = 'perl';            aCfg.i.sGrp = 'script';     aCfg.i.sSet = 'Perl';                   aCfg.i.sDesc = 'Perl v5.0053'; i = i + 1;
@@ -329,10 +330,10 @@ CfgInstallUninstall: procedure expose aCfg. aPath. sPathFile
 
     /* make rexx expression */
     if (pos(',', aCfg.iTool.sSet) > 0) then
-        sRexx = substr(aCfg.iTool.sSet, 1, pos(',', aCfg.iTool.sSet) - 1) || '(aCfg.iTool.sSet,sOperation,fRM,fQuiet',
+        sRexx = substr(aCfg.iTool.sSet, 1, pos(',', aCfg.iTool.sSet) - 1) || '(aCfg.iTool.sId,sOperation,fRM,fQuiet',
              || substr(aCfg.iTool.sSet, pos(',', aCfg.iTool.sSet)) || ')';
     else
-        sRexx = aCfg.iTool.sSet || '(aCfg.iTool.sSet,sOperation,fRM,fQuiet)';
+        sRexx = aCfg.iTool.sSet || '(aCfg.iTool.sId,sOperation,fRM,fQuiet)';
     fQuiet = 0;
     if (\fRM) then  sOperation = 'install';
     else            sOperation = 'uninstall';
@@ -395,10 +396,10 @@ CfgConfigure: procedure expose aCfg. aPath. sPathFile
 
     /* make rexx expression */
     if (pos(',', aCfg.iTool.sSet) > 0) then
-        sRexx = substr(aCfg.iTool.sSet, 1, pos(',', aCfg.iTool.sSet) - 1) || '(aCfg.iTool.sSet,sOperation,fRM,fQuiet',
+        sRexx = substr(aCfg.iTool.sSet, 1, pos(',', aCfg.iTool.sSet) - 1) || '(aCfg.iTool.sId,sOperation,fRM,fQuiet',
              || substr(aCfg.iTool.sSet, pos(',', aCfg.iTool.sSet)) || ')';
     else
-        sRexx = aCfg.iTool.sSet || '(aCfg.iTool.sSet,sOperation,fRM,fQuiet)';
+        sRexx = aCfg.iTool.sSet || '(aCfg.iTool.sId,sOperation,fRM,fQuiet)';
     if (fForced) then   sOperation = 'forcedconfig';
     else                sOperation = 'config';
     fRM = 0;
@@ -452,10 +453,10 @@ CfgVerify: procedure expose aCfg. aPath. sPathFile
 
     /* make rexx expression */
     if (pos(',', aCfg.iTool.sSet) > 0) then
-        sRexx = substr(aCfg.iTool.sSet, 1, pos(',', aCfg.iTool.sSet) - 1) || '(aCfg.iTool.sSet,sOperation,fRM,fQuiet',
+        sRexx = substr(aCfg.iTool.sSet, 1, pos(',', aCfg.iTool.sSet) - 1) || '(aCfg.iTool.sId,sOperation,fRM,fQuiet',
              || substr(aCfg.iTool.sSet, pos(',', aCfg.iTool.sSet)) || ')';
     else
-        sRexx = aCfg.iTool.sSet || '(aCfg.iTool.sSet,sOperation,fRM,fQuiet)';
+        sRexx = aCfg.iTool.sSet || '(aCfg.iTool.sId,sOperation,fRM,fQuiet)';
     if (fQuiet) then    sOperation = 'quietverify';
     else                sOperation = 'verify';
     fRM = 0;
@@ -507,10 +508,10 @@ CfgIsConfigured: procedure expose aCfg. aPath. sPathFile
 
     /* make rexx expression */
     if (pos(',', aCfg.iTool.sSet) > 0) then
-        sRexx = substr(aCfg.iTool.sSet, 1, pos(',', aCfg.iTool.sSet) - 1) || '(aCfg.iTool.sSet,''quietisconfig'',0,1',
+        sRexx = substr(aCfg.iTool.sSet, 1, pos(',', aCfg.iTool.sSet) - 1) || '(aCfg.iTool.sId,''quietisconfig'',0,1',
              || substr(aCfg.iTool.sSet, pos(',', aCfg.iTool.sSet)) || ')';
     else
-        sRexx = aCfg.iTool.sSet || '(aCfg.iTool.sSet,''quietisconfig'',0,1)';
+        sRexx = aCfg.iTool.sSet || '(aCfg.iTool.sId,''quietisconfig'',0,1)';
     interpret 'iRc = '||sRexx;
 return (iRc = 0);
 
@@ -602,8 +603,8 @@ PathQuery: procedure expose aCfg. aPath. sPathFile
      * Path wasn't found!
      */
 
-    /* for quiet verify and configured test, fail sliently. */
-    if ((sOperation = 'quietisconfig') | (sOperation = 'quietverify')) then
+    /* for quiet verify, configured test and uninstall, fail sliently. */
+    if ((sOperation = 'quietisconfig') | (sOperation = 'quietverify') | (sOperation = 'quietuninstall')) then
         return '';
 
     /* if configure operation the configure it. */
@@ -749,6 +750,7 @@ PathSetDefault: procedure expose aCfg. aPath. sPathFile
         aPath.i.sPId = 'home';                      aPath.i.sPath = 'e:\user\kso';                  i = i + 1;
         aPath.i.sPId = 'mscv6-16';                  aPath.i.sPath = 'f:\ddktools\toolkits\msc60';   i = i + 1;
         aPath.i.sPId = 'mysql';                     aPath.i.sPath = 'f:\mysql2';                    i = i + 1;
+        aPath.i.sPId = 'nasm9833';                  aPath.i.sPath = 'f:\nasm\os2\0.98.33';          i = i + 1;
         aPath.i.sPId = 'netqos2';                   aPath.i.sPath = 'f:\netqos2';                   i = i + 1;
         aPath.i.sPId = 'perl';                      aPath.i.sPath = 'f:\perllib';                   i = i + 1;
         aPath.i.sPId = 'python';                    aPath.i.sPath = 'f:\python';                    i = i + 1;
@@ -1992,6 +1994,48 @@ mySQL: procedure expose aCfg. aPath. sPathFile
         ) then
         return 2;
     rc = CheckCmdOutput('mysql --version', 0, fQuiet, ', for ');
+return rc;
+
+
+
+/*
+ * NASM - NetWide Assembler (all versions)
+ */
+NASM: procedure expose aCfg. aPath. sPathFile
+    parse arg sToolId,sOperation,fRM,fQuiet,sPathId
+
+    /*
+     * Get NASM directory
+     */
+    sPathNASM = PathQuery(sPathId, sToolId, sOperation);
+    if (sPathNASM = '') then
+        return 1;
+    /* If config operation we're done now. */
+    if (pos('config', sOperation) > 0) then
+        return 0;
+
+    /*
+     * Installing the environment variables.
+     */
+    call EnvSet      fRM, 'PATH_NASM',      sPathNASM;
+    call EnvAddFront fRM, 'path',           sPathNASM
+
+    /*
+     * Verify.
+     */
+    if (pos('verify', sOperation) <= 0) then
+        return 0;
+    if (    \CfgVerifyFile(sPathNASM'\nasm.exe', fQuiet),
+        |   \CfgVerifyFile(sPathNASM'\ndisasm.exe', fQuiet),
+        ) then
+        return 2;
+    select
+        when (sPathId = 'nasm9833') then    sVer = '0.98.33 compiled';
+        otherwise do; say 'internal error invalid pathid! sPathId='sPathId; exit(16); end
+    end
+    rc = CheckCmdOutput('nasm -version', 0, fQuiet, 'NASM version '||sVer);
+    if (rc = 0) then
+        rc = CheckCmdOutput('ndisasm -version', 0, fQuiet, 'NDISASM version '||sVer);
 return rc;
 
 
