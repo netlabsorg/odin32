@@ -1,4 +1,4 @@
-/* $Id: hmstd.cpp,v 1.6 2001-12-05 14:16:05 sandervl Exp $ */
+/* $Id: hmstd.cpp,v 1.7 2001-12-05 18:06:02 sandervl Exp $ */
 
 /*
  * Handle Manager class for standard in, out & error handles
@@ -81,6 +81,9 @@ BOOL HMDeviceStandardClass::ReadFile(PHMHANDLEDATA pHMHandleData,
            lpNumberOfBytesRead,
            lpOverlapped));
 
+  if(lpCompletionRoutine) {
+      dprintf(("!WARNING!: lpCompletionRoutine not supported -> fall back to sync IO"));
+  }
 
   if(lpNumberOfBytesRead == NULL) {
      lpNumberOfBytesRead = &bytesread;
@@ -129,6 +132,10 @@ BOOL HMDeviceStandardClass::WriteFile(PHMHANDLEDATA pHMHandleData,
   if(lpNumberOfBytesWritten == NULL) {
      lpNumberOfBytesWritten = &byteswritten;
   }
+  if(lpCompletionRoutine) {
+      dprintf(("!WARNING!: lpCompletionRoutine not supported -> fall back to sync IO"));
+  }
+
   if(pHMHandleData->dwUserData == STD_INPUT_HANDLE) {
      return FALSE;
   }

@@ -1,4 +1,4 @@
-/* $Id: conbuffervio.cpp,v 1.5 2001-12-05 14:15:57 sandervl Exp $ */
+/* $Id: conbuffervio.cpp,v 1.6 2001-12-05 18:05:59 sandervl Exp $ */
 
 /*
  * Win32 Console API Translation for OS/2
@@ -118,6 +118,10 @@ BOOL HMDeviceConsoleVioBufferClass::WriteFile(PHMHANDLEDATA pHMHandleData,
            lpNumberOfBytesWritten,
            lpOverlapped);
 #endif
+
+  if(lpCompletionRoutine) {
+      dprintf(("!WARNING!: lpCompletionRoutine not supported -> fall back to sync IO"));
+  }
 
   /* check if we're called with non-existing line buffer */
   if (pConsoleBuffer->ppszLine == NULL) {

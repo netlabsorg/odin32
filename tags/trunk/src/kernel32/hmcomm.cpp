@@ -1,4 +1,4 @@
-/* $Id: hmcomm.cpp,v 1.26 2001-12-05 14:15:59 sandervl Exp $ */
+/* $Id: hmcomm.cpp,v 1.27 2001-12-05 18:06:00 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -322,6 +322,10 @@ BOOL HMDeviceCommClass::WriteFile(PHMHANDLEDATA pHMHandleData,
   if(!(pHMHandleData->dwFlags & FILE_FLAG_OVERLAPPED) && lpOverlapped) {
     dprintf(("Warning: lpOverlapped != NULL & !FILE_FLAG_OVERLAPPED; sync operation"));
   }
+  if(lpCompletionRoutine) {
+      dprintf(("!WARNING!: lpCompletionRoutine not supported -> fall back to sync IO"));
+  }
+
 //testestestest
   dprintf2(("Bytes to write:"));
   for(int i=0;i<nNumberOfBytesToWrite;i++) {
@@ -383,6 +387,10 @@ BOOL HMDeviceCommClass::ReadFile(PHMHANDLEDATA pHMHandleData,
   }
   if(!(pHMHandleData->dwFlags & FILE_FLAG_OVERLAPPED) && lpOverlapped) {
     dprintf(("!WARNING!: lpOverlapped != NULL & !FILE_FLAG_OVERLAPPED; sync operation"));
+  }
+
+  if(lpCompletionRoutine) {
+      dprintf(("!WARNING!: lpCompletionRoutine not supported -> fall back to sync IO"));
   }
 
   RXQUEUE qInfo;

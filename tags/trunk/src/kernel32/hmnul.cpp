@@ -1,4 +1,4 @@
-/* $Id: hmnul.cpp,v 1.2 2001-12-05 14:16:02 sandervl Exp $ */
+/* $Id: hmnul.cpp,v 1.3 2001-12-05 18:06:01 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -130,6 +130,10 @@ BOOL HMDeviceNulClass::WriteFile(PHMHANDLEDATA pHMHandleData,
   if(!(pHMHandleData->dwFlags & FILE_FLAG_OVERLAPPED) && lpOverlapped) {
     dprintf(("Warning: lpOverlapped != NULL & !FILE_FLAG_OVERLAPPED; sync operation"));
   }
+
+  if(lpCompletionRoutine) {
+      dprintf(("!WARNING!: lpCompletionRoutine not supported -> fall back to sync IO"));
+  }
   
   // this is real NUL I/O
   ret = NO_ERROR;
@@ -187,6 +191,10 @@ BOOL HMDeviceNulClass::ReadFile(PHMHANDLEDATA pHMHandleData,
   }
   if(!(pHMHandleData->dwFlags & FILE_FLAG_OVERLAPPED) && lpOverlapped) {
     dprintf(("Warning: lpOverlapped != NULL & !FILE_FLAG_OVERLAPPED; sync operation"));
+  }
+
+  if(lpCompletionRoutine) {
+      dprintf(("!WARNING!: lpCompletionRoutine not supported -> fall back to sync IO"));
   }
   
   // this is real NUL I/O
