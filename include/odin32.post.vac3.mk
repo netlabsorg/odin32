@@ -1,4 +1,4 @@
-# $Id: odin32.post.vac3.mk,v 1.22 2001-10-01 01:29:15 bird Exp $
+# $Id: odin32.post.vac3.mk,v 1.23 2001-10-29 10:00:57 achimha Exp $
 
 #
 # Odin32 API
@@ -134,6 +134,9 @@ $(OBJDIR)\$(TARGET).$(TARGET_EXTENSION): $(LIBS) $(OBJS) $(OS2RES) $(DEFFILE) $(
     $(OS2RC) $(OS2RCLFLAGS) $(OS2RES) $@
 !endif
 !if !defined(DEBUG) && !defined(NO_LXLITE)
+# remove all EAs from the file to prevent errors running LXLITE on
+# a LAN server mounted JFS volume
+    eautil $@ nul /s
     $(LXLITE) $@
 !endif
 !endif
@@ -206,6 +209,9 @@ $(OBJDIR)\$(TARGET).$(TARGET_EXTENSION): $(LIBS) $(OBJS) $(OS2RES) $(DEFFILE) $(
     $(OS2RC) $(OS2RCLFLAGS) $(OS2RES) $@
 !endif
 !if !defined(DEBUG) && !defined(NO_LXLITE)
+# remove all EAs from the file to prevent errors running LXLITE on
+# a LAN server mounted JFS volume
+    eautil $@ nul /s
     $(LXLITE) $@
 !endif
 !endif
