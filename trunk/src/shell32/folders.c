@@ -1,4 +1,4 @@
-/* $Id: folders.c,v 1.6 2000-11-27 10:21:59 sandervl Exp $ */
+/* $Id: folders.c,v 1.7 2000-11-28 11:00:47 sandervl Exp $ */
 /*
  *  Copyright 1997  Marcus Meissner
  *  Copyright 1998  Juergen Schmied
@@ -155,7 +155,7 @@ static HRESULT WINAPI IExtractIconA_fnGetIconLocation(
     {
       lstrcpynA(szIconFile, "shell32.dll", cchMax);
 #ifdef __WIN32OS2__
-      *piIndex = SHLICON_DESKTOP - 1;
+      *piIndex = SHLICON_DESKTOP;
 #else
       *piIndex = 34;
 #endif
@@ -193,7 +193,7 @@ static HRESULT WINAPI IExtractIconA_fnGetIconLocation(
     {
 #ifdef __WIN32OS2__
       lstrcpynA(szIconFile, "shell32.dll", cchMax);
-      *piIndex = SHLICON_HARDDISK - 1;
+      *piIndex = SHLICON_HARDDISK;
 
       if ( _ILGetDrive( pSimplePidl, sTemp, cchMax ) )
       {
@@ -201,7 +201,7 @@ static HRESULT WINAPI IExtractIconA_fnGetIconLocation(
              ( sTemp[ 0 ] == 'B' ) || ( sTemp[ 0 ] == 'b' ) )
         {
             /* FIXME determine 5.25 Floppy */
-            *piIndex = SHLICON_FLOPPY35 - 1;
+            *piIndex = SHLICON_FLOPPY35;
         }
         else
         {
@@ -209,11 +209,11 @@ static HRESULT WINAPI IExtractIconA_fnGetIconLocation(
             switch ( nType )
             {
                 case DRIVE_REMOVABLE:
-                    *piIndex = SHLICON_REMOVABLE_DISK - 1;
+                    *piIndex = SHLICON_REMOVABLE_DISK;
                     break;
 
                 case DRIVE_FIXED:
-                    *piIndex = SHLICON_HARDDISK - 1;
+                    *piIndex = SHLICON_HARDDISK;
                     break;
 
                 case DRIVE_REMOTE:
@@ -221,29 +221,29 @@ static HRESULT WINAPI IExtractIconA_fnGetIconLocation(
                     /* FIXME: connected / disconnected state */
                     BOOL connected = TRUE;
                     if ( connected )
-                        *piIndex = SHLICON_NETDRIVE_CONN - 1;
+                        *piIndex = SHLICON_NETDRIVE_CONN;
                     else
-                        *piIndex = SHLICON_NETDRIVE_DISCON - 1;
+                        *piIndex = SHLICON_NETDRIVE_DISCON;
                     break;
                 }
                 case DRIVE_CDROM:
-                    *piIndex = SHLICON_CDROM_DRIVE - 1;
+                    *piIndex = SHLICON_CDROM_DRIVE;
                     break;
 
                 case DRIVE_RAMDISK:
-                    *piIndex = SHLICON_RAMDRIVE - 1;
+                    *piIndex = SHLICON_RAMDRIVE;
                     break;
 
                 case DRIVE_UNKNOWN:
                 case DRIVE_NO_ROOT_DIR:
                 default:
-                    *piIndex = SHLICON_HARDDISK - 1;
+                    *piIndex = SHLICON_HARDDISK;
                     break;
             }
         }
       }
 
-      if ( ( *piIndex == ( SHLICON_HARDDISK - 1  ) ) &&
+      if ( ( *piIndex == ( SHLICON_HARDDISK ) ) &&
            HCR_GetDefaultIcon( "Drive", sTemp, MAX_PATH, &dwNr ) )
       {
         /* kso: Are there special registry keys for particular drives? */
@@ -275,7 +275,7 @@ static HRESULT WINAPI IExtractIconA_fnGetIconLocation(
         lstrcpynA(szIconFile, "shell32.dll", cchMax);
 #ifdef __WIN32OS2__
         *piIndex = (uFlags & GIL_OPENICON)
-				 ? SHLICON_FOLDER_OPEN - 1 : SHLICON_FOLDER_CLOSED - 1;
+				 ? SHLICON_FOLDER_OPEN : SHLICON_FOLDER_CLOSED;
 #else
         *piIndex = (uFlags & GIL_OPENICON)? 4 : 3;
 #endif
@@ -310,13 +310,13 @@ static HRESULT WINAPI IExtractIconA_fnGetIconLocation(
               {
                 SHGetPathFromIDListA(This->pidl, sTemp);
                 lstrcpynA(szIconFile, "shell32.dll", cchMax);
-                *piIndex = SHLICON_COMPUTERS - 1;
+                *piIndex = SHLICON_COMPUTERS;
               }
               else if (stricmp(sTemp,"COM") == 0)
               {
                 SHGetPathFromIDListA(This->pidl, sTemp);
                 lstrcpynA(szIconFile, "shell32.dll", cchMax);
-                *piIndex = SHLICON_APPLICATION - 1;
+                *piIndex = SHLICON_APPLICATION;
               }
 #if 0
     // icons not yet in resources
