@@ -1,4 +1,4 @@
-/* $Id: pmframe.cpp,v 1.34 2000-01-09 14:37:09 sandervl Exp $ */
+/* $Id: pmframe.cpp,v 1.35 2000-01-09 17:57:47 sandervl Exp $ */
 /*
  * Win32 Frame Managment Code for OS/2
  *
@@ -403,6 +403,19 @@ PosChangedEnd:
         RestoreOS2TIB();
         return 0;
     }
+
+    case WM_COMMAND:
+    {
+      	dprintf(("PMFRAME: WM_COMMAND %x %x %x", hwnd, mp1, mp2));
+	HWND hSysMenu = win32wnd->getSystemMenu();
+	USHORT id = (USHORT)(ULONG)mp1;
+	if(hSysMenu) {
+		if((int)WinSendMsg(hSysMenu, MM_ITEMPOSITIONFROMID, MPFROM2SHORT(id, TRUE), 0) != MIT_NONE) {
+			return (MRESULT)WinPostMsg(win32wnd->getOS2WindowHandle(), WM_SYSCOMMAND, mp1, (MPARAM)1);
+		}
+	}
+        goto RunDefFrameProc;
+    } 
 
     case WM_DESTROY:
       #ifdef PMFRAMELOG
