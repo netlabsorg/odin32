@@ -1,4 +1,7 @@
- /* $Id: ChangeLog,v 1.904 2000-04-19 22:19:36 bird Exp $ */
+ /* $Id: ChangeLog,v 1.905 2000-04-20 06:45:29 phaller Exp $ */
+
+ 2000-04-19: Patrick Haller <phaller@gmx.net>
+        - INCLUDE/PDWIN32.TOOLS: fix build rule for (old) .asm sources
 
  2000-04-19: knut st. osmundsen <knut.stange.osmundsen@pmsc.no>
         - KERNEL32: Added fix for bug in FP13 DosQuerySysInfo.
