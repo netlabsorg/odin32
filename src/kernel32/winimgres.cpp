@@ -1,4 +1,4 @@
-/* $Id: winimgres.cpp,v 1.21 1999-10-06 08:07:41 sandervl Exp $ */
+/* $Id: winimgres.cpp,v 1.22 1999-10-08 16:27:21 sandervl Exp $ */
 
 /*
  * Win32 PE Image class (resource methods)
@@ -264,9 +264,9 @@ HRSRC Win32ImageBase::findResourceA(LPCSTR lpszName, LPSTR lpszType, ULONG lang)
   pData = getPEResourceEntry(id, type, lang);
   if(pData == NULL) {
 	if(HIWORD(id)) {
-		dprintf(("Win32ImageBase::getPEResource: couldn't find resource %s (type %d, lang %d)", id, type, lang));
+		dprintf(("Win32ImageBase::getPEResource %s: couldn't find resource %s (type %d, lang %d)", szModule, id, type, lang));
 	}
-	else	dprintf(("Win32ImageBase::getPEResource: couldn't find resource %d (type %d, lang %d)", id, type, lang));
+	else	dprintf(("Win32ImageBase::getPEResource %s: couldn't find resource %d (type %d, lang %d)", szModule, id, type, lang));
 	return 0;
   }
   //pResourceSectionStart contains the virtual address of the imagebase in the PE header
