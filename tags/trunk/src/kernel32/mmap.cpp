@@ -1,4 +1,4 @@
-/* $Id: mmap.cpp,v 1.47 2000-12-16 18:37:26 sandervl Exp $ */
+/* $Id: mmap.cpp,v 1.48 2001-01-14 17:16:55 sandervl Exp $ */
 
 /*
  * Win32 Memory mapped file & view classes
@@ -18,6 +18,7 @@
  * TODO: Memory mapped files with views that extend the file (not 100% correct now)
  * TODO: Suspend all threads when a page is committed (possible that another thread
  *       accesses the same memory before the page is read from disk
+ * TODO: File maps for new files (must select an initial size)!
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *
