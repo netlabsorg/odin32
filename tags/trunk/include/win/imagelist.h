@@ -1,13 +1,12 @@
-/* $Id: imagelist.h,v 1.1 1999-05-24 20:19:12 ktk Exp $ */
-
 /*
  * ImageList definitions
  *
  * Copyright 1998 Eric Kohl
+ * Copyright 1999 Achim Hasenmueller
  */
  
-#ifndef __WINE_IMAGELIST_H
-#define __WINE_IMAGELIST_H
+#ifndef _IMAGELIST_H
+#define _IMAGELIST_H
 
 #include "wingdi.h"
 
@@ -32,5 +31,5 @@ struct _IMAGELIST
  
 typedef struct _IMAGELIST *HIMAGELIST;
 
-#endif  /* __WINE_IMAGELIST_H */
+#endif  /* _IMAGELIST_H */
 
