@@ -1,4 +1,4 @@
-/* $Id: window.cpp,v 1.5 1999-07-18 10:39:52 sandervl Exp $ */
+/* $Id: window.cpp,v 1.6 1999-07-18 17:12:03 sandervl Exp $ */
 /*
  * Win32 window apis for OS/2
  *
@@ -18,6 +18,10 @@
 #include <os2win.h>
 #include <misc.h>
 #include <win32wnd.h>
+#include <oslibwin.h>
+#include "user32.h"
+#include "icon.h"
+#include "usrcall.h"
 
 //******************************************************************************
 //******************************************************************************
@@ -377,6 +381,13 @@ BOOL WIN32API SetWindowPos(HWND hwnd, HWND hwndInsertAfter, int x, int y, int cx
 }
 //******************************************************************************
 //******************************************************************************
+BOOL WIN32API SetWindowPlacement( HWND arg1, const WINDOWPLACEMENT *  arg2)
+{
+    dprintf(("USER32:  SetWindowPlacement\n"));
+    return O32_SetWindowPlacement(arg1, arg2);
+}
+//******************************************************************************
+//******************************************************************************
 BOOL WIN32API IsWindow( HWND hwnd)
 {
   Win32Window *window;
@@ -417,6 +428,30 @@ BOOL WIN32API IsWindowVisible( HWND hwnd)
     dprintf(("IsWindowVisible %x", hwnd));
     return window->IsWindowVisible();
 }
+//******************************************************************************
+//******************************************************************************
+HWND WIN32API SetFocus( HWND hwnd)
+{
+ HWND lastFocus;
+
+    dprintf(("USER32:  SetFocus\n"));
+
+    lastFocus = GetFocus();
+    hwnd = Win32Window::Win32ToOS2Handle(hwnd);
+    return (OSLibWinSetFocus(OSLIB_HWND_DESKTOP,hwnd)) ? lastFocus:0;
+}
+//******************************************************************************
+//******************************************************************************
+HWND WIN32API GetFocus(void)
+{
+    HWND hwnd;
+//    dprintf(("USER32:  GetFocus\n"));
+
+    hwnd = OSLibWinQueryFocus(OSLIB_HWND_DESKTOP);
+    return Win32Window::OS2ToWin32Handle(hwnd);
+}
+//******************************************************************************
+//******************************************************************************
 /***********************************************************************
  *           GetInternalWindowPos   (USER32.245)
  */
@@ -433,9 +468,9 @@ UINT WIN32API GetInternalWindowPos(HWND    hwnd,
 
     if (O32_GetWindowPlacement( hwnd, &wndpl ))
     {
-   if (rectWnd) *rectWnd = wndpl.rcNormalPosition;
-   if (ptIcon)  *ptIcon = wndpl.ptMinPosition;
-   return wndpl.showCmd;
+   	if (rectWnd) *rectWnd = wndpl.rcNormalPosition;
+   	if (ptIcon)  *ptIcon = wndpl.ptMinPosition;
+   	return wndpl.showCmd;
     }
     return 0;
 }
@@ -540,6 +575,20 @@ BOOL WIN32API SetWindowTextW( HWND arg1, LPCWSTR arg2)
    FreeAsciiString(astring);
    return(rc);
 }
+/*******************************************************************
+ *      InternalGetWindowText    (USER32.326)
+ */
+int WIN32API InternalGetWindowText(HWND   hwnd,
+                                   LPWSTR lpString,
+                                   INT    nMaxCount )
+{
+    dprintf(("USER32: InternalGetWindowText(%08xh,%08xh,%08xh) not properly implemented.\n",
+             hwnd,
+             lpString,
+             nMaxCount));
+
+    return GetWindowTextW(hwnd,lpString,nMaxCount);
+}
 //******************************************************************************
 //******************************************************************************
 BOOL WIN32API SetForegroundWindow(HWND arg1)
@@ -561,6 +610,13 @@ BOOL WIN32API GetClientRect( HWND arg1, PRECT  arg2)
 }
 //******************************************************************************
 //******************************************************************************
+HWND WIN32API GetDesktopWindow(void)
+{
+    dprintf(("USER32:  GetDesktopWindow\n"));
+    return OSLIB_HWND_DESKTOP;
+}
+//******************************************************************************
+//******************************************************************************
 HWND WIN32API FindWindowA(LPCSTR arg1, LPCSTR arg2)
 {
 #ifdef DEBUG
@@ -579,12 +635,10 @@ HWND WIN32API FindWindowExA(HWND arg1, HWND arg2, LPCSTR arg3, LPCSTR arg4)
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API FlashWindow( HWND arg1, BOOL  arg2)
+BOOL WIN32API FlashWindow(HWND hwnd, BOOL fFlash)
 {
-#ifdef DEBUG
-    WriteLog("USER32:  FlashWindow\n");
-#endif
-    return O32_FlashWindow(arg1, arg2);
+    dprintf(("FlashWindow %x %d\n", hwnd, fFlash));
+    return OSLibWinFlashWindow(Win32Window::Win32ToOS2Handle(hwnd), fFlash);
 }
 //******************************************************************************
 //******************************************************************************
@@ -782,6 +836,68 @@ BOOL WIN32API SwitchToThisWindow(HWND hwnd,
            x2));
 
   return (FALSE); /* default */
+}
+//******************************************************************************
+//******************************************************************************
+BOOL WIN32API EnumThreadWindows(DWORD dwThreadId, WNDENUMPROC lpfn, LPARAM lParam)
+{
+ BOOL                rc;
+ EnumWindowCallback *callback = new EnumWindowCallback(lpfn, lParam);
+
+  dprintf(("USER32:  EnumThreadWindows\n"));
+  //CB: replace
+  rc = O32_EnumThreadWindows(dwThreadId, callback->GetOS2Callback(), (LPARAM)callback);
+  if(callback)
+    delete callback;
+  return(rc);
+}
+//******************************************************************************
+//******************************************************************************
+BOOL WIN32API GetUpdateRect( HWND hwnd, PRECT lpRect, BOOL  bErase)
+{
+    dprintf(("GetUpdateRect %x %d\n", hwnd, bErase));
+    if (!lpRect) return FALSE;
+
+    return OSLibWinQueryUpdateRect(Win32Window::Win32ToOS2Handle(hwnd), (PVOID)&lpRect);
+}
+//******************************************************************************
+//******************************************************************************
+BOOL WIN32API EnableScrollBar( HWND arg1, INT arg2, UINT  arg3)
+{
+#ifdef DEBUG
+    WriteLog("USER32:  EnableScrollBar\n");
+#endif
+    //CB: implement in window class
+    return O32_EnableScrollBar(arg1, arg2, arg3);
+}
+//******************************************************************************
+//******************************************************************************
+UINT WIN32API ArrangeIconicWindows( HWND arg1)
+{
+#ifdef DEBUG
+    WriteLog("USER32:  ArrangeIconicWindows\n");
+#endif
+    return O32_ArrangeIconicWindows(arg1);
+}
+//******************************************************************************
+//restores iconized window to previous size/position
+//******************************************************************************
+BOOL WIN32API OpenIcon(HWND hwnd)
+{
+#ifdef DEBUG
+  WriteLog("USER32:  OpenIcon\n");
+#endif
+  if(!IsIconic(hwnd))
+        return FALSE;
+  ShowWindow(hwnd, SW_SHOWNORMAL);
+  return TRUE;
+}
+//******************************************************************************
+//******************************************************************************
+BOOL WIN32API ShowOwnedPopups( HWND arg1, BOOL  arg2)
+{
+    dprintf(("USER32:  ShowOwnedPopups\n"));
+    return O32_ShowOwnedPopups(arg1, arg2);
 }
 //******************************************************************************
 //******************************************************************************
