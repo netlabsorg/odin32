@@ -107,25 +107,25 @@ int WINAPI WSAEventSelect(SOCKET s, WSAEVENT hEvent, LONG lEvent)
     // log all event event bits set
     char tmpbuf[300];
     strcpy(tmpbuf, "");
-    if (lEvent | FD_READ)
+    if (lEvent & FD_READ)
         strcat(tmpbuf, " FD_READ");
-    if (lEvent | FD_WRITE)
+    if (lEvent & FD_WRITE)
         strcat(tmpbuf, " FD_WRITE");
-    if (lEvent | FD_OOB)
+    if (lEvent & FD_OOB)
         strcat(tmpbuf, " FD_OOB");    
-    if (lEvent | FD_ACCEPT)
+    if (lEvent & FD_ACCEPT)
         strcat(tmpbuf, " FD_ACCEPT");
-    if (lEvent | FD_CONNECT)
+    if (lEvent & FD_CONNECT)
         strcat(tmpbuf, " FD_CONNECT");
-    if (lEvent | FD_CLOSE)
+    if (lEvent & FD_CLOSE)
         strcat(tmpbuf, " FD_CLOSE");
-    if (lEvent | FD_QOS)
+    if (lEvent & FD_QOS)
         strcat(tmpbuf, " FD_QOS");
-    if (lEvent | FD_GROUP_QOS)
+    if (lEvent & FD_GROUP_QOS)
         strcat(tmpbuf, " FD_GROUP_QOS");
-    if (lEvent | FD_ROUTING_INTERFACE_CHANGE)
+    if (lEvent & FD_ROUTING_INTERFACE_CHANGE)
         strcat(tmpbuf, " FD_ROUTING_INTERFACE_CHANGE");
-    if (lEvent | FD_ADDRESS_LIST_CHANGE)
+    if (lEvent & FD_ADDRESS_LIST_CHANGE)
         strcat(tmpbuf, " FD_ADDRESS_LIST_CHANGE");
     dprintf(("event bits:%s", tmpbuf));
 #endif
