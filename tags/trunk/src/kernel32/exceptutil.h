@@ -1,4 +1,4 @@
-/* $Id: exceptutil.h,v 1.1 1999-08-22 12:55:57 sandervl Exp $ */
+/* $Id: exceptutil.h,v 1.2 1999-08-22 22:11:21 sandervl Exp $ */
 
 /*
  * Exception + misc functions for OS/2
@@ -24,6 +24,7 @@ ULONG GetDllEntryPoint();
 
 void  OS2SetExceptionHandler(void *exceptframe);
 void  OS2UnsetExceptionHandler(void *exceptframe);
+void  SetOS2ExceptionChain(ULONG val);
 
 ULONG  getEAX();
 ULONG  getEBX();

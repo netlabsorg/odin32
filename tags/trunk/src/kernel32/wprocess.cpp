@@ -1,4 +1,4 @@
-/* $Id: wprocess.cpp,v 1.25 1999-08-22 14:24:35 sandervl Exp $ */
+/* $Id: wprocess.cpp,v 1.26 1999-08-22 22:11:23 sandervl Exp $ */
 
 /*
  * Win32 process functions
@@ -327,6 +327,8 @@ VOID WIN32API ExitProcess(DWORD exitcode)
 {
   dprintf(("KERNEL32:  ExitProcess %d\n", exitcode));
   dprintf(("KERNEL32:  ExitProcess FS = %x\n", GetFS()));
+
+  SetOS2ExceptionChain(-1);
 
   //avoid crashes since win32 & OS/2 exception handler aren't identical
   //(terminate process generates two exceptions)
@@ -673,16 +675,16 @@ BOOL WIN32API CreateProcessA(LPCSTR lpszImageName, LPSTR lpszCommandLine,
  BOOL  fAllocStr = FALSE;
 
     if(O32_CreateProcess(lpszImageName, lpszCommandLine, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10) == TRUE)
-    return(TRUE);
+    	return(TRUE);
 
     //probably a win32 exe, so run it in the pe loader
     if(lpszImageName) {
-     if(lpszCommandLine) {
-        cmdline = (char *)malloc(strlen(lpszImageName)+strlen(lpszCommandLine) + 16);
-        sprintf(cmdline, "%s %s", lpszImageName, lpszCommandLine);
-        fAllocStr = TRUE;
-     }
-     else   cmdline = (char *)lpszImageName;
+     	 if(lpszCommandLine) {
+        	cmdline = (char *)malloc(strlen(lpszImageName)+strlen(lpszCommandLine) + 16);
+        	sprintf(cmdline, "%s %s", lpszImageName, lpszCommandLine);
+        	fAllocStr = TRUE;
+     	 }
+     	 else   cmdline = (char *)lpszImageName;
     }
     else cmdline = (char *)lpszCommandLine;
 
