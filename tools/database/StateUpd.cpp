@@ -1,4 +1,4 @@
-/* $Id: StateUpd.cpp,v 1.35 2001-09-05 23:14:12 bird Exp $
+/* $Id: StateUpd.cpp,v 1.36 2001-09-06 03:07:31 bird Exp $
  *
  * StateUpd - Scans source files for API functions and imports data on them.
  *
@@ -64,6 +64,7 @@ static char *findEndOfWord(const char *psz);
 static char *findStartOfWord(const char *psz, const char *pszStart);
 inline char *trim(char *psz);
 inline char *trimR(char *psz);
+static char *trimHtml(char *psz);
 inline char *skip(const char *psz);
 static void  copy(char *psz, char *pszFrom, int iFrom, char *pszTo, int iTo, char **papszLines);
 static void  copy(char *psz, int jFrom, int iFrom, int jTo, int iTo, char **papszLines);
@@ -826,7 +827,7 @@ static unsigned long processDesignNote(char **papszLines, int i, int &iRet, cons
 {
     unsigned long   ulRc = 0;
     char            szBuffer[0x10000];
-    char *          psz;
+    char *          pszTitle;
 
     /*
      *  Find and parse the @design tag/keyword.
@@ -834,30 +835,119 @@ static unsigned long processDesignNote(char **papszLines, int i, int &iRet, cons
      *                  <text>
      *
      */
-    psz = stristr(papszLines[i], "@design");
-    if (psz != NULL && (psz[7] == '\0' || psz[7] == ' '))
+    pszTitle = stristr(papszLines[i], "@design");
+    if (pszTitle != NULL && (pszTitle[7] == '\0' || pszTitle[7] == ' '))
     {
+        char *          psz;
         signed long     lSeqNbr;
+        signed long     lSeqNbrNote;
+        signed long     lRefCode;
+        long            alSeqNbrs[1024];
+        long            lLevel;
 
-        psz = findEndOfWord(psz+1)+1;
-        lSeqNbr = atol(psz);
+        memset(alSeqNbrs, 0, sizeof(alSeqNbrs));
+
+        /*
+         * Get title and seqnbr. Then copy the entire stuff to the buffer.
+         */
+        pszTitle = findEndOfWord(pszTitle+1)+1;
+        lSeqNbr = atol(pszTitle);
         if (lSeqNbr != 0)
-            psz = findEndOfWord(psz);
-        psz = trim(psz);
-        if (psz != NULL && strstr(psz, "*/") != NULL)
+            pszTitle = findEndOfWord(pszTitle);
+        pszTitle = trim(pszTitle);
+        if (pszTitle != NULL && strstr(pszTitle, "*/") != NULL)
         {
             szBuffer[0] = '\0';
-            *strstr(psz, "*/") = '\0';
+            *strstr(pszTitle, "*/") = '\0';
         }
         else
             copyComment(&szBuffer[0], 0, i+1, papszLines, TRUE, TRUE);
+        pszTitle = trim(pszTitle);
 
-        /* Update database */
-        if (!dbAddDesignNote(pOptions->lDllRefcode, pOptions->lFileRefcode, psz, &szBuffer[0], lSeqNbr, pOptions->lSeqFile++, i + 1))
+        /*
+         * Add design note section by section.
+         */
+        psz = &szBuffer[0];
+        lLevel = 0;
+        lSeqNbrNote = 0;
+        do
         {
-            ulRc = 0x00010000;
-            fprintf(phSignal, "%s(%d): Failed to add designnote. %s\n", dbGetLastErrorDesc());
-        }
+            char *  pszEnd;
+            long    lNextLevel = -1;
+
+            /*
+             * Parse out title and section/squence number if not lLevel 0.
+             * (psz = "@sub...")
+             */
+            if (lLevel > 0)
+            {
+                pszTitle = findEndOfWord(psz+1);
+                lSeqNbr = atol(pszTitle);
+                if (lSeqNbr != 0)
+                {
+                    pszTitle = findEndOfWord(pszTitle);
+                    alSeqNbrs[lLevel] = lSeqNbr;
+                }
+                else
+                    lSeqNbr = ++alSeqNbrs[lLevel];
+
+                pszTitle = trim(pszTitle);
+                if (pszTitle != NULL && (psz = strstr(pszTitle, "\n")) != NULL)
+                    *psz++ = '\0';
+                else
+                    psz = "";
+            }
+
+
+            /*
+             * Find end of this section.
+             * (pszEnd will point at @sub or '\0'.)
+             */
+            pszEnd = psz;
+            do
+            {
+                while (*pszEnd == '\n' || *pszEnd == ' ' || *pszEnd == '\t' || *pszEnd == '\r')
+                    ++pszEnd;
+                if (!strnicmp(pszEnd, "@sub", 4) && !strnicmp(findEndOfWord(pszEnd + 1) - 7, "section", 7))
+                {
+                    lNextLevel = 1;
+                    while (!strnicmp(pszEnd + 1 + lNextLevel * 3, "sub", 3))
+                        lNextLevel++;
+                    break;
+                }
+            } while ((pszEnd = strchr(pszEnd, '\n')) != NULL);
+            if (!pszEnd)
+                pszEnd = psz + strlen(psz);
+            else
+                pszEnd[-1] = '\0';
+
+            /*
+             * Strip end and start of section.
+             */
+            psz = trimHtml(psz);
+            pszTitle = trimHtml(pszTitle);
+
+            /*
+             * Add the note.
+             */
+            if (!dbAddDesignNote(pOptions->lDllRefcode, pOptions->lFileRefcode,
+                                 pszTitle, psz,
+                                 lLevel, lSeqNbr, lSeqNbrNote++, i + 1, lLevel > 0, &lRefCode))
+            {
+                ulRc += 0x00010000;
+                fprintf(phSignal, "%s(%d): Failed to add designnote. %s\n", pszFilename, i, dbGetLastErrorDesc());
+            }
+
+            /*
+             * Next.
+             */
+            psz = pszEnd;
+            if (lLevel < lNextLevel)
+                memset(&alSeqNbrs[lLevel+1], 0, (lNextLevel - lLevel) * sizeof(alSeqNbrs[0]));
+            lLevel = lNextLevel;
+
+        } while (*psz);
+
 
         /* Skip to line after comment end. */
         while (papszLines[i] != NULL && strstr(papszLines[i++], "*/") == NULL)
@@ -2453,6 +2543,46 @@ inline char *trimR(char *psz)
     while (i >= 0 && (psz[i] == ' ' || *psz == '\t'))
         i--;
     psz[i+1] = '\0';
+    return psz;
+}
+
+/**
+ * Trims string. <BR>, <P>, '@', '\t', '\n' and '\t' is trimmed from both ends of the string.
+ * @returns Pointer to string.
+ * @param   psz     String to trim.
+ */
+char *trimHtml(char *psz)
+{
+    if (!psz)
+        return NULL;
+
+    char *pszEnd = psz + strlen(psz) - 1;
+
+    while (pszEnd > psz)
+    {
+        if (*pszEnd == '@' || *pszEnd == ' ' || *pszEnd == '\t' || *pszEnd == '\n' || *pszEnd == '\r')
+            pszEnd--;
+        else if (!strnicmp(pszEnd - 3, "<BR>", 4))
+            pszEnd -= 4;
+        else if (!strnicmp(pszEnd - 2, "<P>", 3))
+            pszEnd -= 3;
+        else
+            break;
+    }
+    *++pszEnd = '\0';
+
+    while (psz < pszEnd)
+    {
+        if (*psz == '@' || *psz == ' ' || *psz == '\t' || *psz == '\n' || *psz == '\r')
+            psz++;
+        else if (!strnicmp(psz, "<BR>", 4))
+            psz += 4;
+        else if (!strnicmp(psz, "<P>", 3))
+            psz += 3;
+        else
+            break;
+    }
+
     return psz;
 }
 
