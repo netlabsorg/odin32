@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.1 2001-11-22 10:43:59 phaller Exp $
+# $Id: makefile,v 1.2 2002-02-23 23:50:47 bird Exp $
 
 #
 # Odin32 API
@@ -44,8 +44,11 @@ $(OBJDIR)\symfile.obj
 #
 # Libraries. One space before the '\'.
 #
+LIBS = $(LIB_DEMANGLE)
+!if "$(LIB_DEMANGLE)" == ""
+!error demangle not configured for this compiler
+!endif
 
-LIBS = demangl.lib
 
 #
 # Target name - name of the dll without extention and path.
