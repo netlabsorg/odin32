@@ -1,4 +1,4 @@
-/* $Id: buildenv.cmd,v 1.8 2002-06-07 01:37:07 bird Exp $
+/* $Id: buildenv.cmd,v 1.9 2002-06-07 12:58:14 bird Exp $
  *
  * This is the master tools environment script. It contains environment
  * configurations for many development tools. Each tool can be installed
@@ -82,6 +82,7 @@
     aCfg.i.sId = 'toolkit40';       aCfg.i.sGrp = 'tlktos2';    aCfg.i.sSet = 'Toolkit40';              aCfg.i.sDesc = 'Toolkit v4.0 CSD 4'; i = i + 1;
     aCfg.i.sId = 'toolkit45';       aCfg.i.sGrp = 'tlktos2';    aCfg.i.sSet = 'Toolkit45';              aCfg.i.sDesc = 'Toolkit v4.5'; i = i + 1;
     aCfg.i.sId = 'toolkit451';      aCfg.i.sGrp = 'tlktos2';    aCfg.i.sSet = 'Toolkit451';             aCfg.i.sDesc = 'Toolkit v4.5.1'; i = i + 1;
+    aCfg.i.sId = 'toolkit452';      aCfg.i.sGrp = 'tlktos2';    aCfg.i.sSet = 'Toolkit452';             aCfg.i.sDesc = 'Toolkit v4.5.2'; i = i + 1;
     aCfg.i.sId = 'unix';            aCfg.i.sGrp = 'misc';       aCfg.i.sSet = 'Unix';                   aCfg.i.sDesc = 'Misc unix stuff.'; i = i + 1;
     aCfg.i.sId = 'vac308';          aCfg.i.sGrp = 'comp32';     aCfg.i.sSet = 'VAC308';                 aCfg.i.sDesc = 'VisualAge for C++ v3.08'; i = i + 1;
     aCfg.i.sId = 'vac365';          aCfg.i.sGrp = 'comp32';     aCfg.i.sSet = 'VAC365';                 aCfg.i.sDesc = 'VisualAge for C++ v3.6.5 FP2 with latest optimizer fixes.'; i = i + 1;
@@ -110,12 +111,12 @@
          *
          */
         ch = substr(sEnv.i, length(sEnv.i), 1);
-        if (ch = '-' | ch = '+' | ch = '*' | ch = '!' | ch = '@') then
+        if (ch = '-' | ch = '+' | ch = '*' | ch = '!' | ch = '?') then
             sEnv.i = substr(sEnv.i, 1, length(sEnv.i) - 1);
         fRM = (ch = '-');
         fCfg = (ch = '*');
         fForcedCfg = (ch = '!');
-        fVerify = (ch = '@')
+        fVerify = (ch = '?')
 
         /*
          * do the switch.
@@ -750,6 +751,7 @@ PathSetDefault: procedure expose aCfg. aPath. sPathFile
         aPath.i.sPId = 'toolkit40';                 aPath.i.sPath = 'f:\toolkit';                   i = i + 1;
         aPath.i.sPId = 'toolkit45';                 aPath.i.sPath = 'f:\toolkit45';                 i = i + 1;
         aPath.i.sPId = 'toolkit451';                aPath.i.sPath = 'f:\toolkit451';                i = i + 1;
+      /*aPath.i.sPId = 'toolkit452';                aPath.i.sPath = 'f:\toolkit452';                i = i + 1;*/
         aPath.i.sPId = 'unixroot';                  aPath.i.sPath = 'e:\unix';                      i = i + 1;
         aPath.i.sPId = 'xfree86';                   aPath.i.sPath = 'e:\xfree86';                   i = i + 1;
         aPath.i.sPId = 'vac308';                    aPath.i.sPath = 'f:\ibmcpp';                    i = i + 1;
@@ -774,34 +776,35 @@ PathSetDefault: procedure expose aCfg. aPath. sPathFile
     if (translate(EnvGet('HOSTNAME')) = 'BIRD') then
     do
         say 'Info: No or empty path file, using birds work defaults.';
-        aPath.i.sPId = 'cvs';                       aPath.i.sPath = 'e:\cvs';                       i = i + 1;
+        aPath.i.sPId = 'cvs';                       aPath.i.sPath = 'e:\cvs111';                    i = i + 1;
         aPath.i.sPId = 'emx';                       aPath.i.sPath = 'e:\emx';                       i = i + 1;
         aPath.i.sPId = 'emxpgcc';                   aPath.i.sPath = 'e:\emxpgcc';                   i = i + 1;
-        aPath.i.sPId = 'db2v52';                    aPath.i.sPath = 'e:\sqllib52';                  i = i + 1;
+      /*aPath.i.sPId = 'db2v52';                    aPath.i.sPath = 'e:\sqllib52';                  i = i + 1;
         aPath.i.sPId = 'icatgam';                   aPath.i.sPath = 'e:\icatos2';                   i = i + 1;
         aPath.i.sPId = 'icatgam406rc1';             aPath.i.sPath = 'e:\icatos2.4.0.6.rc1';         i = i + 1;
         aPath.i.sPId = 'icatpe';                    aPath.i.sPath = 'e:\icatpe';                    i = i + 1;
         aPath.i.sPId = 'ida38';                     aPath.i.sPath = 'e:\ida38';                     i = i + 1;
-        aPath.i.sPId = 'ida40';                     aPath.i.sPath = 'e:\ida401';                    i = i + 1;
+        aPath.i.sPId = 'ida40';                     aPath.i.sPath = 'e:\ida401';                    i = i + 1; */
         aPath.i.sPId = 'ida414';                    aPath.i.sPath = 'e:\ida414';                    i = i + 1;
-        aPath.i.sPId = 'idasdk';                    aPath.i.sPath = 'e:\idasdk';                    i = i + 1;
+      /*aPath.i.sPId = 'idasdk';                    aPath.i.sPath = 'e:\idasdk';                    i = i + 1; */
         aPath.i.sPId = 'ddkbase';                   aPath.i.sPath = 'e:\ddk\base';                  i = i + 1;
-        aPath.i.sPId = 'home';                      aPath.i.sPath = 'e:\user\kso';                  i = i + 1;
+        aPath.i.sPId = 'home';                      aPath.i.sPath = 'x:\home';                      i = i + 1;
         aPath.i.sPId = 'mscv6-16';                  aPath.i.sPath = 'e:\ddktools\toolkits\msc60';   i = i + 1;
-        aPath.i.sPId = 'mysql';                     aPath.i.sPath = 'e:\mysql2';                    i = i + 1;
+      /*aPath.i.sPId = 'mysql';                     aPath.i.sPath = 'e:\mysql2';                    i = i + 1;
         aPath.i.sPId = 'netqos2';                   aPath.i.sPath = 'e:\netqos2';                   i = i + 1;
         aPath.i.sPId = 'perl';                      aPath.i.sPath = 'e:\perllib';                   i = i + 1;
         aPath.i.sPId = 'python';                    aPath.i.sPath = 'e:\python';                    i = i + 1;
         aPath.i.sPId = 'toolkit40';                 aPath.i.sPath = 'e:\toolkit';                   i = i + 1;
         aPath.i.sPId = 'toolkit45';                 aPath.i.sPath = 'e:\toolkit45';                 i = i + 1;
-        aPath.i.sPId = 'toolkit451';                aPath.i.sPath = 'e:\toolkit451';                i = i + 1;
+        aPath.i.sPId = 'toolkit451';                aPath.i.sPath = 'e:\toolkit451';                i = i + 1; */
+        aPath.i.sPId = 'toolkit452';                aPath.i.sPath = 'e:\toolkit452';                i = i + 1; 
         aPath.i.sPId = 'unixroot';                  aPath.i.sPath = 'e:\unix';                      i = i + 1;
         aPath.i.sPId = 'xfree86';                   aPath.i.sPath = 'e:\xfree86';                   i = i + 1;
-        aPath.i.sPId = 'vac308';                    aPath.i.sPath = 'e:\ibmcpp';                    i = i + 1;
-        aPath.i.sPId = 'vac365';                    aPath.i.sPath = 'e:\ibmcxxo';                   i = i + 1;
-        aPath.i.sPId = 'vac40';                     aPath.i.sPath = 'e:\ibmcpp40';                  i = i + 1;
+        aPath.i.sPId = 'vac308';                    aPath.i.sPath = 'e:\ibmcpp308';                 i = i + 1;
+      /*aPath.i.sPId = 'vac365';                    aPath.i.sPath = 'e:\ibmcxxo';                   i = i + 1;
+        aPath.i.sPId = 'vac40';                     aPath.i.sPath = 'e:\ibmcpp40';                  i = i + 1;*/
         aPath.i.sPId = 'warpin';                    aPath.i.sPath = 'e:\warpin';                    i = i + 1;
-        aPath.i.sPId = 'watcom11';                  aPath.i.sPath = 'e:\watcom';                    i = i + 1;
+      /*aPath.i.sPId = 'watcom11';                  aPath.i.sPath = 'e:\watcom';                    i = i + 1;*/
         aPath.i.sPId = 'watcom11c';                 aPath.i.sPath = 'e:\watcom11c';                 i = i + 1;
         aPath.i.sPId = 'testcase_drive_unused';     aPath.i.sPath = 't'; /* reqired */              i = i + 1;
         aPath.i.sPId = 'testcase_drive_fixed';      aPath.i.sPath = 'd'; /* reqired */              i = i + 1;
@@ -2365,6 +2368,98 @@ Toolkit451: procedure expose aCfg. aPath. sPathFile
         rc = CheckCmdOutput('nmake', 2, fQuiet, 'Version 4.00.000 Oct 20 2000');
     if (rc = 0) then
         rc = CheckCmdOutput('nmake32', 0, fQuiet, 'Version 5.00.003 Oct 20 2000');
+return rc;
+
+
+
+/*
+ * OS/2 Programmers Toolkit v4.5.2
+ */
+Toolkit452: procedure expose aCfg. aPath. sPathFile
+    parse arg sToolId,sOperation,fRM,fQuiet
+
+    /*
+     * Toolkit (4.5.1) main directory.
+     */
+     sPathTK    = PathQuery('toolkit452', sToolId, sOperation);
+    if (sPathTK = '') then
+        return 1;
+    /* If config operation we're done now. */
+    if (pos('config', sOperation) > 0) then
+        return 0;
+
+    /*
+     * Installing the environment variables.
+     */
+    call EnvSet      fRM, 'PATH_TOOLKIT',  sPathTK;
+    call EnvAddFront fRM, 'path',        sPathTK'\bin;'sPathTK'\som\common;'sPathTK'\som\bin'
+    call EnvAddFront fRM, 'dpath',       sPathTK'\msg;'sPathTK'\book;'sPathTK'\SOM\COMMON\SYSTEM;'sPathTK'\SOM\MSG;'
+    call EnvAddFront fRM, 'beginlibpath', sPathTK'\dll;'sPathTK'\som\common\dll;'sPathTK'\som\lib;'
+    call EnvAddFront fRM, 'help',        sPathTK'\help;'
+    call EnvAddFront fRM, 'bookshelf',   sPathTK'\book;'sPathTK'\archived;'
+    call EnvAddFront fRM, 'somir',       sPathTK'\SOM\COMMON\ETC\214\SOM.IR;'
+    call EnvAddEnd   fRM, 'somir',       sPathTK'\SAMPLES\REXX\SOM\ANIMAL\ORXSMP.IR;'
+    call EnvAddFront fRM, 'nlspath',     sPathTK'\msg\%N;'
+    call EnvAddEnd   fRM, 'ulspath',     sPathTK'\language;'
+    call EnvAddFront fRM, 'include',     sPathTK'\H\ARPA;'sPathTK'\H\NET;'sPathTK'\H\NETINET;'sPathTK'\H\NETNB;'sPathTK'\H\RPC;'sPathTK'\SPEECH\H;'sPathTK'\H\GL;'sPathTK'\H;'sPathTK'\SOM\INCLUDE;'sPathTK'\INC;'
+    call EnvAddFront fRM, 'lib',         sPathTK'\lib;'
+    call EnvAddEnd   fRM, 'lib',         sPathTK'\SAMPLES\MM\LIB;'sPathTK'\SPEECH\LIB;'
+    call EnvAddFront fRM, 'helpndx',     'EPMKWHLP.NDX+', '+'
+    call EnvAddFront fRM, 'ipfc',        sPathTK'\ipfc;'
+    call EnvSet      fRM, 'sombase',     sPathTK'\SOM'
+    call EnvSet      fRM, 'somruntime',  sPathTK'\SOM\COMMON'
+    call EnvSet      fRM, 'LANG',        'en_us'
+
+    call EnvSet      fRM, 'CPREF',       'CP1.INF+CP2.INF+CP3.INF'
+    call EnvSet      fRM, 'GPIREF',      'GPI1.INF+GPI2.INF+GPI3.INF+GPI4.INF'
+    call EnvSet      fRM, 'MMREF',       'MMREF1.INF+MMREF2.INF+MMREF3.INF'
+    call EnvSet      fRM, 'PMREF',       'PM1.INF+PM2.INF+PM3.INF+PM4.INF+PM5.INF'
+    call EnvSet      fRM, 'WPSREF',      'WPS1.INF+WPS2.INF+WPS3.INF'
+    call EnvAddFront fRM, 'sminclude',   sPathTK'\H;'sPathTK'\IDL;'sPathTK'\SOM\INCLUDE;.;'
+    call EnvSet      fRM, 'smaddstar',   '1'
+    call EnvSet      fRM, 'smemit',      'h;ih;c'
+    call EnvSet      fRM, 'smtmp',       EnvGet('tmp');
+    call EnvSet      fRM, 'smclasses',   'WPTYPES.IDL'
+    /*
+    call EnvSet      fRM, 'CAT_MACHINE', 'COM1:57600'
+    call EnvSet      fRM, 'CAT_HOST_BIN_PATH', TKMAIN'\BIN'
+    call EnvSet      fRM, 'CAT_COMMUNICATION_TYPE', 'ASYNC_SIGBRK'
+    call EnvSet      fRM, 'CAT_HOST_SOURCE_PATH',TKMAIN'\BIN;'
+    */
+
+    /*
+     * Verify.
+     */
+    if (pos('verify', sOperation) <= 0) then
+        return 0;
+    if (    \CfgVerifyFile(sPathTK'\bin\alp.exe', fQuiet),
+        |   \CfgVerifyFile(sPathTK'\bin\rc.exe', fQuiet),
+        |   \CfgVerifyFile(sPathTK'\bin\ipfc.exe', fQuiet),
+        |   \CfgVerifyFile(sPathTK'\bin\implib.exe', fQuiet),
+        |   \CfgVerifyFile(sPathTK'\bin\mkmsgf.exe', fQuiet),
+        |   \CfgVerifyFile(sPathTK'\bin\mapsym.exe', fQuiet),
+        |   \CfgVerifyFile(sPathTK'\bin\nmake.exe', fQuiet),
+        |   \CfgVerifyFile(sPathTK'\bin\nmake32.exe', fQuiet),
+        |   \CfgVerifyFile(sPathTK'\lib\os2386.lib', fQuiet),
+        |   \CfgVerifyFile(sPathTK'\lib\pmbidi.lib', fQuiet),
+        |   \CfgVerifyFile(sPathTK'\lib\tcpip32.lib', fQuiet),
+        |   \CfgVerifyFile(sPathTK'\h\os2.h', fQuiet),
+        |   \CfgVerifyFile(sPathTK'\h\os2win.h', fQuiet),
+        |   \CfgVerifyFile(sPathTK'\h\stack16\pmwsock.h', fQuiet),
+        |   \CfgVerifyFile(sPathTK'\som\bin\sc.exe', fQuiet),
+        ) then
+        return 2;
+    rc = CheckCmdOutput('syslevel '||sPathTK||'\bin', 0, fQuiet, 'IBM OS/2 Developer''s Toolkit Version 4.5'||'0d0a'x||'Version 4.50.2     Component ID 5639F9300');
+    if (rc = 0) then
+        rc = CheckCmdOutput('sc -V', -1, fQuiet, '", Version: 2.54.');
+    if (rc = 0) then
+        rc = CheckCmdOutput('rc', 1, fQuiet, 'Version 4.00.011 Oct 04 2001');
+    if (rc = 0) then
+        rc = CheckCmdOutput('ipfc', 0, fQuiet, 'Version 4.00.007 Oct 02 2000');
+    if (rc = 0) then
+        rc = CheckCmdOutput('nmake -?', 0, fQuiet, 'Version 4.00.001 Oct  4 2001');
+    if (rc = 0) then
+        rc = CheckCmdOutput('nmake32 -?', 0, fQuiet, 'Version 5.00.003 Oct  4 2001');
 return rc;
 
 
