@@ -1,4 +1,4 @@
-/* $Id: network.cpp,v 1.4 1999-06-19 10:54:42 sandervl Exp $ */
+/* $Id: network.cpp,v 1.5 1999-06-22 08:09:29 sandervl Exp $ */
 
 /*
  *
@@ -14,7 +14,7 @@
 #define INCL_DOSEXCEPTIONS
 #define INCL_DOSMEMMGR
 #include <os2wrap.h>	//Odin32 OS/2 api wrappers
-#include <pmwsock.h>
+//#include <pmwsock.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
