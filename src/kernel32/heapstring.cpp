@@ -1,4 +1,4 @@
-/* $Id: heapstring.cpp,v 1.54 2003-07-31 15:59:49 sandervl Exp $ */
+/* $Id: heapstring.cpp,v 1.55 2004-03-18 11:13:41 sandervl Exp $ */
 /*
  * Project Odin Software License can be found in LICENSE.TXT
  *
@@ -900,7 +900,7 @@ LPWSTR WIN32API HEAP_strdupW(HANDLE heap, DWORD flags, LPCWSTR str )
 {
     INT len = lstrlenW(str) + 1;
     LPWSTR p = (LPWSTR)HEAP_xalloc( heap, flags, len * sizeof(WCHAR) );
-    memcpy( p, str, len );
+    memcpy( p, str, len * sizeof(WCHAR) );
     return p;
 }
 
