@@ -1,4 +1,4 @@
-/* $Id: kdev.e,v 1.1 2002-09-11 02:30:18 bird Exp $
+/* $Id: kdev.e,v 1.2 2002-09-11 02:53:32 bird Exp $
  *
  * Visual SlickEdit Documentation Macros.
  *
@@ -2086,7 +2086,7 @@ static k_menu_create()
      * Insert the "Extra" menu.
      */
     mhExtra = _menu_insert(menu_handle, 9, MF_SUBMENU, "E&xtra", "", "Extra");
-    mhCode=_menu_insert(mhExtra, -1, MF_ENABLED | MF_SUBMENU,   "Coding Style",  "", "coding");
+    mhCode=_menu_insert(mhExtra, -1, MF_ENABLED | MF_SUBMENU,   "Coding &Style",  "", "coding");
     rc   = _menu_insert(mhCode,  -1, MF_ENABLED | MF_UNCHECKED, "Braces 2, Syntax Indent 4 (knut)",    "k_menu_style Opt2Ind4",    "Opt2Ind4");
     rc   = _menu_insert(mhCode,  -1, MF_ENABLED | MF_UNCHECKED, "Braces 2, Syntax Indent 3",           "k_menu_style Opt2Ind3",    "Opt2Ind3");
     rc   = _menu_insert(mhCode,  -1, MF_ENABLED | MF_UNCHECKED, "Braces 2, Syntax Indent 8",           "k_menu_style Opt2Ind8",    "Opt2Ind8");
@@ -2104,15 +2104,21 @@ static k_menu_create()
     rc   = _menu_insert(mhLic,   -1, MF_ENABLED | MF_UNCHECKED, "&Confidential",        "k_menu_license Confidential",  "Confidential");
 
     rc   = _menu_insert(mhExtra, -1, MF_ENABLED, "-", "", "dash vars");
-    rc   = _menu_insert(mhExtra, -1, MF_ENABLED, skChange  == '' ? '&Change...'  : 'Change - ' skChange '...',   "k_menu_change", "");
-    rc   = _menu_insert(mhExtra, -1, MF_ENABLED, skProgram == '' ? '&Program...' : 'Program - ' skProgram '...', "k_menu_program", "");
-    rc   = _menu_insert(mhExtra, -1, MF_ENABLED, skCompany == '' ? '&Company...' : 'Company - ' skCompany '...', "k_menu_company", "");
+    rc   = _menu_insert(mhExtra, -1, MF_ENABLED, skChange  == '' ? '&Change...'  : '&Change (' skChange ')...',   "k_menu_change", "");
+    rc   = _menu_insert(mhExtra, -1, MF_ENABLED, skProgram == '' ? '&Program...' : '&Program (' skProgram ')...', "k_menu_program", "");
+    rc   = _menu_insert(mhExtra, -1, MF_ENABLED, skCompany == '' ? 'Co&mpany...' : 'Co&mpany (' skCompany ')...', "k_menu_company", "");
+    rc   = _menu_insert(mhExtra, -1, MF_ENABLED, '&User Name (' skUserName ')...',          "k_menu_user_name",     "username");
+    rc   = _menu_insert(mhExtra, -1, MF_ENABLED, 'User &e-mail (' skUserEmail ')...',       "k_menu_user_email",    "useremail");
+    rc   = _menu_insert(mhExtra, -1, MF_ENABLED, 'User &Initials (' skUserInitials ')...',  "k_menu_user_initials", "userinitials");
     rc   = _menu_insert(mhExtra, -1, MF_ENABLED, "-", "", "dash preset");
     mhPre= _menu_insert(mhExtra, -1, MF_SUBMENU, "P&resets", "", "");
-    rc   = _menu_insert(mhPre,   -1, MF_ENABLED, "Odin32",      "k_menu_preset javadoc, Odin32, Opt2Ind4,,Odin32",                              "odin32");
-    rc   = _menu_insert(mhPre,   -1, MF_ENABLED, "Linux Kernel","k_menu_preset linux, GPL, Opt1Ind4,,Linux",                                    "linux");
-    rc   = _menu_insert(mhPre,   -1, MF_ENABLED, "The Bird",    "k_menu_preset javadoc, GPL, Opt2Ind4",                                         "bird");
-    rc   = _menu_insert(mhPre,   -1, MF_ENABLED, "Innotek",     "k_menu_preset javadoc, Confidential, Opt2Ind4, InnoTek Systemberatung GmbH",   "Innotek");
+    rc   = _menu_insert(mhPre,   -1, MF_ENABLED, "Odin32",      "k_menu_preset javadoc, Odin32, Opt2Ind4,,Odin32",      "odin32");
+    rc   = _menu_insert(mhPre,   -1, MF_ENABLED, "Linux Kernel","k_menu_preset linux, GPL, Opt1Ind4,,Linux",            "linux");
+    rc   = _menu_insert(mhPre,   -1, MF_ENABLED, "The Bird",    "k_menu_preset javadoc, GPL, Opt2Ind4",                 "bird");
+    rc   = _menu_insert(mhPre,   -1, MF_ENABLED, "Win32k",      "k_menu_preset javadoc, GPL, Opt2Ind4,, Win32k",        "Win32k");
+    rc   = _menu_insert(mhPre,   -1, MF_ENABLED, "kKrnlLib",    "k_menu_preset javadoc, GPL, Opt2Ind4,, kKrnlLib",      "kKrnlLib");
+    rc   = _menu_insert(mhPre,   -1, MF_ENABLED, "kLib",        "k_menu_preset javadoc, GPL, Opt2Ind4,, kLib",          "kLib");
+    rc   = _menu_insert(mhPre,   -1, MF_ENABLED, "Innotek",     "k_menu_preset javadoc, Confidential, Opt2Ind4, InnoTek Systemberatung GmbH",           "Innotek");
 
     k_menu_doc_style();
     k_menu_license();
@@ -2163,6 +2169,49 @@ _command k_menu_company()
         k_menu_create();
     }
 }
+
+
+/**
+ * Change user name.
+ */
+_command k_menu_user_name()
+{
+    sRc = show("-modal k_form_simple_input", "User Name", skUserName);
+    if (sRc != "\r" && sRc != '')
+    {
+        skUserName = sRc;
+        k_menu_create();
+    }
+}
+
+
+/**
+ * Change user email.
+ */
+_command k_menu_user_email()
+{
+    sRc = show("-modal k_form_simple_input", "User e-mail", skUserEmail);
+    if (sRc != "\r" && sRc != '')
+    {
+        skUserEmail = sRc;
+        k_menu_create();
+    }
+}
+
+
+/**
+ * Change user initials.
+ */
+_command k_menu_user_initials()
+{
+    sRc = show("-modal k_form_simple_input", "User e-mail", skUserInitials);
+    if (sRc != "\r" && sRc != '')
+    {
+        skUserInitials = sRc;
+        k_menu_create();
+    }
+}
+
 
 
 /**
