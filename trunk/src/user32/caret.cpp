@@ -1,4 +1,4 @@
-/* $Id: caret.cpp,v 1.19 2002-09-06 12:31:40 sandervl Exp $ */
+/* $Id: caret.cpp,v 1.20 2004-01-11 12:03:13 sandervl Exp $ */
 
 /*
  * Caret functions for USER32
@@ -118,6 +118,13 @@ UINT WIN32API GetCaretBlinkTime()
    return (rc);
 }
 
+/* 
+ * The SetCaretPos function moves the caret to the specified coordinates. If 
+ * the window that owns the caret was created with the CS_OWNDC class style, 
+ * then the specified coordinates are subject to the mapping mode of the device
+ * context associated with that window.
+ *
+ */
 BOOL WIN32API SetCaretPos (int x, int y)
 {
    LONG       xNew = 0, yNew = 0;

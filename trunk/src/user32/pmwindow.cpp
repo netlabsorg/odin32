@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.225 2003-11-15 12:28:47 sandervl Exp $ */
+/* $Id: pmwindow.cpp,v 1.226 2004-01-11 12:03:16 sandervl Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -43,6 +43,7 @@
 #include "dc.h"
 #include <thread.h>
 #include <wprocess.h>
+#include <objhandle.h>
 #include "caret.h"
 #include "timer.h"
 #include <codepage.h>
@@ -63,10 +64,6 @@
 #define DBG_LOCALLOG    DBG_pmwindow
 #include "dbglocal.h"
 
-
-#define ODIN_SetExceptionHandler(a)
-#define ODIN_UnsetExceptionHandler(a)
-#define hookInit(a)
 
 // Notification that focus change has completed (UNDOCUMENTED)
 #define WM_FOCUSCHANGED            0x000e
@@ -331,13 +328,21 @@ static void QueryPMMenuBitmaps()
 
         //Create win32 bitmap handles of the OS/2 min, max and restore buttons
         hBmpMinButton     = O32_CreateBitmapFromPMHandle(hbmFrameMenu[PMMENU_MINBUTTON]);
+        ObjSetHandleFlag(hBmpMinButton, OBJHANDLE_FLAG_NODELETE, 1);
         hBmpMinButtonDown = O32_CreateBitmapFromPMHandle(hbmFrameMenu[PMMENU_MINBUTTONDOWN]);
+        ObjSetHandleFlag(hBmpMinButtonDown, OBJHANDLE_FLAG_NODELETE, 1);
         hBmpMaxButton     = O32_CreateBitmapFromPMHandle(hbmFrameMenu[PMMENU_MAXBUTTON]);
+        ObjSetHandleFlag(hBmpMaxButton, OBJHANDLE_FLAG_NODELETE, 1);
         hBmpMaxButtonDown = O32_CreateBitmapFromPMHandle(hbmFrameMenu[PMMENU_MAXBUTTONDOWN]);
+        ObjSetHandleFlag(hBmpMaxButtonDown, OBJHANDLE_FLAG_NODELETE, 1);
         hBmpRestoreButton = O32_CreateBitmapFromPMHandle(hbmFrameMenu[PMMENU_RESTOREBUTTON]);
+        ObjSetHandleFlag(hBmpRestoreButton, OBJHANDLE_FLAG_NODELETE, 1);
         hBmpRestoreButtonDown = O32_CreateBitmapFromPMHandle(hbmFrameMenu[PMMENU_RESTOREBUTTONDOWN]);
+        ObjSetHandleFlag(hBmpRestoreButtonDown, OBJHANDLE_FLAG_NODELETE, 1);
         hBmpCloseButton   = O32_CreateBitmapFromPMHandle(hbmFrameMenu[PMMENU_CLOSEBUTTON]);
+        ObjSetHandleFlag(hBmpCloseButton, OBJHANDLE_FLAG_NODELETE, 1);
         hBmpCloseButtonDown   = O32_CreateBitmapFromPMHandle(hbmFrameMenu[PMMENU_CLOSEBUTTONDOWN]);
+        ObjSetHandleFlag(hBmpCloseButtonDown, OBJHANDLE_FLAG_NODELETE, 1);
         DevCloseDC(hdc);
     }
 }
@@ -2125,7 +2130,11 @@ PosChangedEnd:
         PSWP pswp   = (PSWP)mp1;
 
         dprintf(("PMFRAME:WM_OWNERPOSCHANGE %x %x %x (%s) (%d,%d) (%d,%d)", win32wnd->getWindowHandle(), pswp->hwnd, pswp->fl, DbgGetStringSWPFlags(pswp->fl), pswp->x, pswp->y, pswp->cx, pswp->cy));
-        goto RunDefFrameWndProc;
+        RestoreOS2TIB();
+        rc = pfnFrameWndProc(hwnd, msg, mp1, mp2);
+        SetWin32TIB();
+        dprintf(("PMFRAME: DEF WM_OWNERPOSCHANGE %x %x %x (%s) (%d,%d) (%d,%d)", win32wnd->getWindowHandle(), pswp->hwnd, pswp->fl, DbgGetStringSWPFlags(pswp->fl), pswp->x, pswp->y, pswp->cx, pswp->cy));
+        break;
     }
 #endif
 

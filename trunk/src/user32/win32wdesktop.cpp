@@ -1,4 +1,4 @@
-/* $Id: win32wdesktop.cpp,v 1.20 2002-12-18 12:28:07 sandervl Exp $ */
+/* $Id: win32wdesktop.cpp,v 1.21 2004-01-11 12:03:21 sandervl Exp $ */
 /*
  * Win32 Desktop Window for OS/2
  *
@@ -87,6 +87,38 @@ BOOL Win32Desktop::DestroyWindow()
 {
   dprintf(("WARNING: can't destroy desktop window!!"));
   return FALSE;
+}
+//******************************************************************************
+//******************************************************************************
+HWND Win32Desktop::GetWindow(UINT uCmd)
+{
+ HWND hwndRelated = 0;
+ Win32BaseWindow *window;
+
+    switch(uCmd)
+    {
+    case GW_CHILD:
+        //special case for the desktop window. we need to find the first Odin
+        //window in the z-order
+        hwndRelated = OSLibWinQueryWindow(getOS2WindowHandle(), QWOS_TOP);
+        while(hwndRelated) 
+        {
+            window = GetWindowFromOS2FrameHandle(hwndRelated);
+            if(window) {
+                 hwndRelated = window->getWindowHandle();
+                 RELEASE_WNDOBJ(window); 
+                 break;
+            }
+            hwndRelated = OSLibWinQueryWindow(hwndRelated, QWOS_NEXT);
+        }
+        break;
+
+    default:
+        return Win32BaseWindow::GetWindow(uCmd);
+    }
+end:
+    dprintf(("GetWindow %x %d returned %x", getWindowHandle(), uCmd, hwndRelated));
+    return hwndRelated;
 }
 //******************************************************************************
 //Dummy window procedure. Does nothing.
