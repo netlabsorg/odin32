@@ -1,4 +1,4 @@
-/* $Id: time.cpp,v 1.13 2000-10-01 21:21:09 phaller Exp $ */
+/* $Id: time.cpp,v 1.14 2000-12-28 17:10:47 phaller Exp $ */
 
 /*
  * Win32 time/date API functions
@@ -86,23 +86,25 @@ static const WCHAR null_stringW[] = { '(', 'n', 'u', 'l', 'l', ')', 0 };
 
 //******************************************************************************
 //******************************************************************************
-VOID WIN32API GetLocalTime( LPSYSTEMTIME arg1)
+ODINPROCEDURE1(GetLocalTime,
+               LPSYSTEMTIME, arg1)
 {
-///    dprintf(("KERNEL32:  GetLocalTime\n"));
-    O32_GetLocalTime(arg1);
+  O32_GetLocalTime(arg1);
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API SetLocalTime( const SYSTEMTIME * arg1)
+ODINFUNCTION1(BOOL, SetLocalTime,
+              const SYSTEMTIME *, arg1)
 {
-    dprintf(("KERNEL32:  SetLocalTime\n"));
-    return O32_SetLocalTime(arg1);
+  return O32_SetLocalTime(arg1);
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API FileTimeToDosDateTime(const FILETIME * arg1, LPWORD arg2, LPWORD  arg3)
+ODINFUNCTION3(BOOL,FileTimeToDosDateTime,
+              const FILETIME *, arg1, 
+              LPWORD, arg2, 
+              LPWORD,  arg3)
 {
-    dprintf(("KERNEL32:  FileTimeToDosDateTime\n"));
     return O32_FileTimeToDosDateTime(arg1, arg2, arg3);
 }
 //******************************************************************************
@@ -129,9 +131,11 @@ ODINFUNCTION2(BOOL, FileTimeToSystemTime,
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API DosDateTimeToFileTime( WORD arg1, WORD arg2, LPFILETIME arg3)
+ODINFUNCTION3(BOOL,DosDateTimeToFileTime,
+              WORD, arg1, 
+              WORD, arg2, 
+              LPFILETIME, arg3)
 {
-    dprintf(("KERNEL32:  DosDateTimeToFileTime\n"));
     return O32_DosDateTimeToFileTime(arg1, arg2, arg3);
 }
 //******************************************************************************
@@ -157,31 +161,34 @@ ODINPROCEDURE1(GetSystemTime,
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API SystemTimeToFileTime( const SYSTEMTIME * arg1, LPFILETIME  arg2)
+ODINFUNCTION2(BOOL, SystemTimeToFileTime,
+              const SYSTEMTIME *, arg1, 
+              LPFILETIME,  arg2)
 {
-    dprintf(("KERNEL32:  OS2SystemTimeToFileTime\n"));
-    return O32_SystemTimeToFileTime(arg1, arg2);
+  return O32_SystemTimeToFileTime(arg1, arg2);
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API SystemTimeToTzSpecificLocalTime( LPTIME_ZONE_INFORMATION arg1, LPSYSTEMTIME arg2, LPSYSTEMTIME  arg3)
+ODINFUNCTION3(BOOL, SystemTimeToTzSpecificLocalTime,
+              LPTIME_ZONE_INFORMATION, arg1,
+              LPSYSTEMTIME, arg2,
+              LPSYSTEMTIME, arg3)
 {
-    dprintf(("KERNEL32:  OS2SystemTimeToTzSpecificLocalTime\n"));
-    return O32_SystemTimeToTzSpecificLocalTime(arg1, arg2, arg3);
+  return O32_SystemTimeToTzSpecificLocalTime(arg1, arg2, arg3);
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API SetTimeZoneInformation( const LPTIME_ZONE_INFORMATION arg1)
+ODINFUNCTION1(BOOL, SetTimeZoneInformation,
+              const LPTIME_ZONE_INFORMATION, arg1)
 {
-    dprintf(("KERNEL32:  OS2SetTimeZoneInformation\n"));
-    return O32_SetTimeZoneInformation(arg1);
+  return O32_SetTimeZoneInformation(arg1);
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API SetSystemTime(const SYSTEMTIME * arg1)
+ODINFUNCTION1(BOOL,SetSystemTime,
+              const SYSTEMTIME *, arg1)
 {
-    dprintf(("KERNEL32:  OS2SetSystemTime\n"));
-    return O32_SetSystemTime(arg1);
+  return O32_SetSystemTime(arg1);
 }
 
 /***********************************************************************
