@@ -1,4 +1,4 @@
-/* $Id: OS2SNDBUFFER.CPP,v 1.5 1999-11-14 22:12:15 hugh Exp $ */
+/* $Id: OS2SNDBUFFER.CPP,v 1.6 2000-02-04 19:29:16 hugh Exp $ */
 
 /*
  * DirectSound SoundBuffer class
@@ -99,6 +99,8 @@ OS2IDirectSoundBuffer::OS2IDirectSoundBuffer(const DSBUFFERDESC *lpDSBufferDesc)
           bufferdesc.lpwfxFormat,
           bufferdesc.lpwfxFormat->cbSize + sizeof(WAVEFORMATEX));
 
+  bufferdesc.lpwfxFormat = lpfxFormat;
+
   lpBuffer = (LPSTR)VirtualAlloc( 0, bufferdesc.dwBufferBytes, MEM_COMMIT, PAGE_READWRITE);
   if(lpBuffer == NULL)
   {
@@ -107,6 +109,7 @@ OS2IDirectSoundBuffer::OS2IDirectSoundBuffer(const DSBUFFERDESC *lpDSBufferDesc)
       lastError = DSERR_OUTOFMEMORY;
       return;
   }
+
 }
 //******************************************************************************
 //******************************************************************************
@@ -209,10 +212,13 @@ HRESULT __stdcall SoundBufGetCurrentPosition(THIS_ LPDWORD lpdwCurrentPlayCursor
     CurrentTicks = GetTickCountOS2();
     Ticks = CurrentTicks-me->LastTickCnt;
     dprintf(("  Is Playing, Ticks: Last %d Current %d Difference %d",me->LastTickCnt, CurrentTicks,Ticks));
-    me->LastTickCnt = CurrentTicks;
+    dprintf(("  Frequency: %d Bits per Sample %d",me->frequency,me->lpfxFormat->wBitsPerSample));
 
-    NewPos = ((me->frequency*Ticks)/1000)*(me->bufferdesc.lpwfxFormat->wBitsPerSample/8);
+    NewPos = ((me->frequency*Ticks)/1000)*(me->lpfxFormat->wBitsPerSample/8);
     dprintf(("  advance pos by %d bytes",NewPos));
+
+    if(NewPos)
+      me->LastTickCnt = CurrentTicks;
 
     if(me->playpos+NewPos >= me->bufferdesc.dwBufferBytes)
     {
@@ -234,7 +240,7 @@ HRESULT __stdcall SoundBufGetCurrentPosition(THIS_ LPDWORD lpdwCurrentPlayCursor
     me->writepos = me->playpos + 2048;
     if(me->writepos >= me->bufferdesc.dwBufferBytes)
       me->writepos = me->writepos % me->bufferdesc.dwBufferBytes;
-
+    dprintf(("  new Pos Write: %d   Play: %d",me->writepos,me->playpos));
   }
   else
   {
@@ -360,24 +366,29 @@ HRESULT __stdcall SoundBufLock(THIS_ DWORD dwWriteCursor, DWORD dwWriteBytes,
   {
     dwWriteCursor = me->writepos;
   }
+  dprintf(("  Buffer at 0x%08X Size %d",me->lpBuffer,me->bufferdesc.dwBufferBytes));
   if(dwWriteCursor + dwWriteBytes > me->bufferdesc.dwBufferBytes )
   {
     *(DWORD *)lplpvAudioPtr1  = (DWORD)(me->lpBuffer + dwWriteCursor);
     *lpdwAudioBytes1          = me->bufferdesc.dwBufferBytes - dwWriteCursor;
+    dprintf(("  Lock1 at 0x%08X Size %d",*(DWORD *)lplpvAudioPtr1,*lpdwAudioBytes1));
     if(lplpvAudioPtr2 && lpdwAudioBytes2)
     {
-        *(DWORD *)lplpvAudioPtr2   = (DWORD)me->lpBuffer;
-        *lpdwAudioBytes2           = dwWriteBytes - *lpdwAudioBytes1;
+      *(DWORD *)lplpvAudioPtr2   = (DWORD)me->lpBuffer;
+      *lpdwAudioBytes2           = dwWriteBytes - *lpdwAudioBytes1;
+      dprintf(("  Lock2 at 0x%08X Size %d",*(DWORD *)lplpvAudioPtr2,*lpdwAudioBytes2));
     }
   }
   else
   {
     *(DWORD *)lplpvAudioPtr1  = (DWORD)(me->lpBuffer + dwWriteCursor);
     *lpdwAudioBytes1          = dwWriteBytes;
+    dprintf(("  Lock1 at 0x%08X Size %d",*(DWORD *)lplpvAudioPtr1,*lpdwAudioBytes1));
     if(lplpvAudioPtr2 && lpdwAudioBytes2)
     {
-        *(DWORD *)lplpvAudioPtr2   = 0;
-        *lpdwAudioBytes2           = 0;
+      *(DWORD *)lplpvAudioPtr2   = 0;
+      *lpdwAudioBytes2           = 0;
+      dprintf(("  Lock2 at 0x%08X Size %d",*(DWORD *)lplpvAudioPtr2,*lpdwAudioBytes2));
     }
   }
   me->fLocked = TRUE;
@@ -492,7 +503,7 @@ HRESULT __stdcall SoundBufStop(THIS  )
     Ticks = CurrentTicks - me->LastTickCnt;
     me->LastTickCnt = CurrentTicks;
 
-    NewPos = ((me->frequency*Ticks)/1000)*(me->bufferdesc.lpwfxFormat->wBitsPerSample>>8);
+    NewPos = ((me->frequency*Ticks)/1000)*(me->lpfxFormat->wBitsPerSample>>8);
     if(me->playpos+NewPos >= me->bufferdesc.dwBufferBytes)
     {
       if(me->fLoop)
@@ -530,6 +541,7 @@ HRESULT __stdcall SoundBufUnlock(THIS_ LPVOID,DWORD,LPVOID,DWORD )
   {
     return DSERR_INVALIDPARAM;
   }
+
   return DS_OK;
 }
 //******************************************************************************
