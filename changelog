@@ -1,7 +1,11 @@
-/* $Id: changelog,v 1.1841 2001-11-20 09:53:01 sandervl Exp $ */
+/* $Id: changelog,v 1.1842 2001-11-20 15:25:37 sandervl Exp $ */
 
  2001-11-20: Sander van Leeuwen <sandervl@xs4all.nl>
     - USER32:   o Destroy CD notification window during dll unload
+                o Focus fix for dialog windows
+                  Experiments in NT4 show that dialogs that are children don't
+                  receive focus. Not sure if this is always true. (couldn't
+                  find any info about this in the SDK docs)
 
  2001-11-19: Sander van Leeuwen <sandervl@xs4all.nl>
     - GUIDLIB:  o Library with all GUIDs used by Odin
