@@ -1,12 +1,18 @@
-/* $Id: odin32dbupl.cmd,v 1.1 2002-02-08 10:56:02 bird Exp $
+/* $Id: odin32dbupl.cmd,v 1.2 2002-06-26 22:10:23 bird Exp $
  *
  * Updates the Odin32 API database.
  *
- * Copyright (c) 1999-2000 knut st. osmundsen (knut.stange.osmundsen@mynd.no)
+ * Copyright (c) 1999-2002 knut st. osmundsen (bird@anduin.net)
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *
  */
+
+    /* get build settings */
+    sDate = value('BUILD_DATE',, 'OS2ENVIRONMENT');
+    sType = value('BUILD_TYPE',, 'OS2ENVIRONMENT');
+    if ((sDate = '') | (sType = '')) then do say 'BUILD_DATE/BUILD_TYPE unset, you didn''t start job.cmd.'; exit(16); end
+
     /* load rexxutils functions */
     call RxFuncAdd 'SysLoadFuncs', 'RexxUtil', 'SysLoadFuncs';
     call SysloadFuncs;
