@@ -1,4 +1,4 @@
-/* $Id: mmap.cpp,v 1.4 1999-06-10 20:47:53 phaller Exp $ */
+/* $Id: mmap.cpp,v 1.5 1999-06-17 22:06:10 phaller Exp $ */
 
 /*
  *
@@ -9,52 +9,147 @@
 #include "unicode.h"
 #include "mmap.h"
 
-//******************************************************************************
-//******************************************************************************
-HANDLE WIN32API CreateFileMappingA(HANDLE hFile, LPSECURITY_ATTRIBUTES lpsa,
-                      DWORD fdwProtect, DWORD dwMaximumSizeHigh,
-                      DWORD dwMaximumSizeLow, LPCTSTR lpszMapName)
+// REMARK: HANDLEMANAGER SUPPORT TO INTEGRATE ! (PH)
+
+
+/*****************************************************************************
+ * Name      : HANDLE WIN32API CreateFileMappingA
+ * Purpose   : forward call to Open32
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    :
+ *
+ * Author    : Patrick Haller [Fri, 1998/06/12 03:44]
+ *****************************************************************************/
+
+HANDLE WIN32API CreateFileMappingA(HANDLE                hFile,
+                                   LPSECURITY_ATTRIBUTES lpsa,
+                                   DWORD                 fdwProtect,
+                                   DWORD                 dwMaximumSizeHigh,
+                                   DWORD                 dwMaximumSizeLow,
+                                   LPCTSTR               lpszMapName)
 {
-  dprintf(("CreateFileMappingA Not Implemented!\n"));
-  dprintf(("CreateFileMappingA handle %d, dwMaximumSize %X%X!\n", hFile, dwMaximumSizeHigh, dwMaximumSizeLow));
-  if(lpszMapName){
-    dprintf(("lpszMapName %s\n", lpszMapName));
-  }
+  dprintf(("KERNEL32: CreateFileMappingA(%08xh,%08xh,%08xh,%08xh,%s) not implemented.\n",
+           hFile,
+           lpsa,
+           fdwProtect,
+           dwMaximumSizeHigh,
+           dwMaximumSizeLow,
+           lpszMapName));
+
   return(0);
 }
-//******************************************************************************
-//******************************************************************************
-HANDLE WIN32API CreateFileMappingW(HANDLE hFile, LPSECURITY_ATTRIBUTES lpsa,
-                      DWORD fdwProtect, DWORD dwMaximumSizeHigh,
-                      DWORD dwMaximumSizeLow, LPCWSTR lpszMapName)
+
+
+/*****************************************************************************
+ * Name      : HANDLE WIN32API CreateFileMappingW
+ * Purpose   : forward call to Open32
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    :
+ *
+ * Author    : Patrick Haller [Fri, 1998/06/12 03:44]
+ *****************************************************************************/
+
+HANDLE WIN32API CreateFileMappingW(HANDLE                hFile,
+                                   LPSECURITY_ATTRIBUTES lpsa,
+                                   DWORD                 fdwProtect,
+                                   DWORD                 dwMaximumSizeHigh,
+                                   DWORD                 dwMaximumSizeLow,
+                                   LPCWSTR               lpszMapName)
 {
-  dprintf(("CreateFileMappingW Not Implemented!\n"));
+  dprintf(("KERNEL32: CreateFileMappingW(%08xh,%08xh,%08xh,%08xh,%08xh) not implemented.\n",
+           hFile,
+           lpsa,
+           fdwProtect,
+           dwMaximumSizeHigh,
+           dwMaximumSizeLow,
+           lpszMapName));
+
   return(0);
 }
-//******************************************************************************
-//******************************************************************************
-LPVOID WIN32API MapViewOfFileEx(HANDLE hMapObject, DWORD fdwAccess,
-                   DWORD dwOffsetHigh, DWORD dwOffsetLow,
-                   DWORD cbMap, LPVOID lpvBase)
+
+
+/*****************************************************************************
+ * Name      : LPVOID WIN32API MapViewOfFileEx
+ * Purpose   : forward call to Open32
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    :
+ *
+ * Author    : Patrick Haller [Fri, 1998/06/12 03:44]
+ *****************************************************************************/
+
+LPVOID WIN32API MapViewOfFileEx(HANDLE hMapObject,
+                                DWORD fdwAccess,
+                                DWORD dwOffsetHigh,
+                                DWORD dwOffsetLow,
+                                DWORD cbMap,
+                                LPVOID lpvBase)
 {
-  dprintf(("MapViewOfFileEx Not Implemented!\n"));
+  dprintf(("KERNEL32: MapViewOfFileEx(%08xh,%08xh,%08xh,%08xh,%08xh,%08xh) not implemented.\n",
+           hMapObject,
+           fdwAccess,
+           dwOffsetHigh,
+           dwOffsetLow,
+           cbMap,
+           lpvBase));
+
   return(NULL);
 }
-//******************************************************************************
-//******************************************************************************
+
+
+/*****************************************************************************
+ * Name      : BOOL WIN32API UnmapViewOfFileEx
+ * Purpose   : forward call to Open32
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    :
+ *
+ * Author    : Patrick Haller [Fri, 1998/06/12 03:44]
+ *****************************************************************************/
+
 BOOL WIN32API UnmapViewOfFile(LPVOID lpBaseAddress)
 {
-  dprintf(("UnmapViewOfFile Not Implemented! - TRUE\n"));
+  dprintf(("KERNEL32: UnmapViewOfFile(%08xh) not impemented.\n",
+           lpBaseAddress));
+
   return(TRUE);
 }
-//******************************************************************************
-//******************************************************************************
-LPVOID WIN32API MapViewOfFile(HANDLE hMapObject, DWORD fdwAccess,
-                 DWORD dwOffsetHigh, DWORD dwOffsetLow,
-                 DWORD cbMap)
+
+
+/*****************************************************************************
+ * Name      : BOOL WIN32API MapViewOfFile
+ * Purpose   : forward call to Open32
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    :
+ *
+ * Author    : Patrick Haller [Fri, 1998/06/12 03:44]
+ *****************************************************************************/
+
+LPVOID WIN32API MapViewOfFile(HANDLE hMapObject,
+                              DWORD  fdwAccess,
+                              DWORD  dwOffsetHigh,
+                              DWORD  dwOffsetLow,
+                              DWORD  cbMap)
 {
-  dprintf(("MapViewOfFile Not Implemented!\n"));
+  dprintf(("KERNEL32: MapViewOfFile(%08xh,%08xh,%08xh,%08xh,%08xh) not implemented.\n",
+           hMapObject,
+           fdwAccess,
+           dwOffsetHigh,
+           dwOffsetLow,
+           cbMap));
+
   return(NULL);
 }
-//******************************************************************************
-//******************************************************************************
