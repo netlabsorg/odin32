@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.240 2001-02-21 20:51:06 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.241 2001-02-21 21:30:43 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -68,6 +68,13 @@ static ULONG currentProcessId = -1;
 Win32BaseWindow::Win32BaseWindow(DWORD objType) : GenericObject(&windows, objType)
 {
   Init();
+}
+//******************************************************************************
+//******************************************************************************
+Win32BaseWindow::Win32BaseWindow(HWND hwndOS2, ULONG reserved) : GenericObject(&windows, OBJTYPE_WINDOW), ChildWindow()
+{
+  Init();
+  OS2Hwnd = hwndOS2;
 }
 //******************************************************************************
 //******************************************************************************
@@ -2185,7 +2192,7 @@ BOOL Win32BaseWindow::ShowWindow(ULONG nCmdShow)
         SWP_NOACTIVATE | SWP_NOZORDER;
         break;
 
-	case SW_SHOWMINNOACTIVE:
+    case SW_SHOWMINNOACTIVE:
         swp |= SWP_NOACTIVATE | SWP_NOZORDER;
         /* fall through */
     case SW_SHOWMINIMIZED:

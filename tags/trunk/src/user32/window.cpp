@@ -1,4 +1,4 @@
-/* $Id: window.cpp,v 1.88 2001-02-15 00:33:01 sandervl Exp $ */
+/* $Id: window.cpp,v 1.89 2001-02-21 21:30:44 sandervl Exp $ */
 /*
  * Win32 window apis for OS/2
  *
@@ -219,6 +219,20 @@ HWND WIN32API CreateWindowExW(DWORD exStyle, LPCWSTR className,
     {
         dprintf(("Win32BaseWindow error found!!"));
         delete window;
+        return 0;
+    }
+    return window->getWindowHandle();
+}
+//******************************************************************************
+//******************************************************************************
+HWND WIN32API CreateFakeWindowEx(HWND hwndOS2)
+{
+ Win32BaseWindow *window;
+
+    window = new Win32BaseWindow(hwndOS2, 0);
+    if(window == NULL)
+    {
+        dprintf(("Win32BaseWindow creation failed!!"));
         return 0;
     }
     return window->getWindowHandle();
