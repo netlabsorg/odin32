@@ -1,4 +1,4 @@
-/* $Id: initterm.cpp,v 1.5 2000-01-10 23:27:57 sandervl Exp $ */
+/* $Id: initterm.cpp,v 1.6 2000-01-11 20:38:48 sandervl Exp $ */
 
 /*
  * DLL entry point
@@ -156,9 +156,6 @@ unsigned long SYSTEM _DLL_InitTerm(unsigned long hModule, unsigned long
 
          break;
       case 1 :
-         if(hTWAIN) 
-	 	FreeLibrary(hTWAIN);
-         hTWAIN = 0;
 	 UnregisterLxDll(hModule);
          break;
       default  :
