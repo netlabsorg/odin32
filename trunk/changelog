@@ -1,4 +1,7 @@
-/* $Id: changelog,v 1.1392 2001-04-30 21:05:31 sandervl Exp $ */
+/* $Id: changelog,v 1.1393 2001-05-03 17:50:08 sandervl Exp $ */
+
+ 2000-05-03: Yuri Dario <mc6530@mclink.it>
+    - USER32:   o SendNCCalcSize call bugfix (client rectangle parameter)
 
  2001-04-30: Sander van Leeuwen <sandervl@xs4all.nl>
     - DSOUND:   o DirectAudio interface updates
