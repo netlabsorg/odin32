@@ -1,4 +1,4 @@
-/* $Id: d32init.c,v 1.41 2001-07-10 05:18:04 bird Exp $
+/* $Id: d32init.c,v 1.42 2002-06-21 00:56:05 bird Exp $
  *
  * d32init.c - 32-bits init routines.
  *
@@ -756,6 +756,16 @@ int ModR_M_16bit(char bModRM)
 int interpretFunctionProlog32(char *pach, BOOL fOverload)
 {
     int cb = -3;
+
+    /*
+     * Something else must be wrong, but this is where we crash.
+     * TODO: make a real fix for this!
+     */
+    if (pach >= 0xffff0000 || pach <= 0x10000)
+    {
+        kprintf(("interpretFunctionProlog32: Bad address! pach=0x%08x\n", pach));
+        return 0;
+    }
     kprintf2(("interpretFunctionProlog32(0x%08x, %d):\n"
               "\t%02x %02x %02x %02x - %02x %02x %02x %02x\n"
               "\t%02x %02x %02x %02x - %02x %02x %02x %02x\n",
