@@ -1,4 +1,4 @@
-/* $Id: menu.cpp,v 1.42 2001-11-30 13:53:49 sandervl Exp $*/
+/* $Id: menu.cpp,v 1.43 2001-12-01 16:02:16 sandervl Exp $*/
 /*
  * Menu functions
  *
@@ -667,7 +667,11 @@ static MENUITEM *MENU_FindItem( HMENU *hmenu, UINT *nPos, UINT wFlags )
             {
                 HMENU hsubmenu = item->hSubMenu;
                 MENUITEM *subitem = MENU_FindItem( &hsubmenu, nPos, wFlags );
+#ifdef __WIN32OS2__
+                if (subitem && subitem!=item)
+#else
                 if (subitem)
+#endif
                 {
                     *hmenu = hsubmenu;
                     return subitem;
