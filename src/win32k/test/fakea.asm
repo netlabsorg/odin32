@@ -1,4 +1,4 @@
-; $Id: fakea.asm,v 1.1.4.4 2000-08-24 01:36:29 bird Exp $
+; $Id: fakea.asm,v 1.1.4.5 2000-08-25 04:47:28 bird Exp $
 ;
 ; Fake assembly imports.
 ;
@@ -344,7 +344,9 @@ fakeg_tkExecPgm PROC NEAR
     jmp     ftkep_ret2                  ; <Currently no parameters are implemented.>
 
 ftkep_ret:
-    call    _fakeLDRClearSem@0
+    push    eax
+    call    _fakeLDRClearSem@0          ; clear the semaphore.
+    pop     eax
 
 ftkep_ret2:
     leave
