@@ -1,5 +1,9 @@
-/* $Id: changelog,v 1.2050 2002-04-24 08:55:21 sandervl Exp $ */
+/* $Id: changelog,v 1.2051 2002-04-28 15:47:24 sandervl Exp $ */
 
+ 2002-04-28: Platon Fomichev <platon@innotek.de>
+    - USER32:   o Focus fix when minimizing window
+    - IPHLPAPI: o Bugfix
+ 
  2002-04-24: Platon Fomichev <platon@innotek.de>
     - USER32:   o Don't activate window when it's minimized (ShowWindow)
                 o Deactivate window & move to bottom of z-order when it's
