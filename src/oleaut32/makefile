@@ -34,6 +34,7 @@ OBJS =  oleaut32.obj guid.obj \
 	typelib.obj \
 	itypelib.obj \
 	itypeinfo.obj \
+	hash.obj \
 	safearray.obj stubs.obj
 
 all: $(TARGET).dll $(ORGTARGET).lib
@@ -58,6 +59,7 @@ $(ORGTARGET).lib: $(ORGTARGET)exp.def
 $(ORGTARGET)exp.def: $(ORGTARGET).def
         $(IMPDEF) $** $@
 
+hash.obj:		hash.cpp oList.h
 oList.obj:		oList.cpp oList.h
 oleaut32.obj:		oleaut32.cpp oleaut32.h
 initterm.obj:		initterm.cpp

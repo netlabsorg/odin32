@@ -1,4 +1,4 @@
-/* $Id: typelib.cpp,v 1.7 2000-01-02 21:29:58 davidr Exp $ */
+/* $Id: typelib.cpp,v 1.8 2000-01-05 18:29:54 davidr Exp $ */
 /* 
  * ITypelib interface
  * 
@@ -1522,9 +1522,13 @@ void	TypeLibExtract::ParseMembers(ITypeInfoImpl * pTypeInfo, TLBTypeInfoBase * p
         dprintf((LOG, "  .HelpStrCtx   %08x", pNew->lHelpStringContext));
         dprintf((LOG, "  .HelpStr      %s", pNew->szHelpString));
 
+#if 0
         dprintf((LOG, "pVarRec"));
 	for (jj = 0; jj < iAttrCount; jj++)
 	    dprintf((LOG, "  .optattr[%d]   %08lx", jj, pVarRec->OptAttr[jj]));
+
+#endif
+
         }
 
 #endif // defined(DEBUG)
