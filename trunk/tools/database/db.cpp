@@ -1,4 +1,4 @@
-/* $Id: db.cpp,v 1.27 2001-09-07 10:31:44 bird Exp $ *
+/* $Id: db.cpp,v 1.28 2002-02-15 14:09:56 bird Exp $ *
  *
  * DB - contains all database routines.
  *
@@ -124,6 +124,7 @@ BOOL _System dbConnect(const char *pszHost, const char *pszUser, const char *psz
 
     /* connect to server */
     memset(&mysql, 0, sizeof(mysql));
+    mysql_init(&mysql);
     pmysql = mysql_connect(&mysql, pszHost, pszUser, pszPassword);
     if (pmysql != NULL)
     {
