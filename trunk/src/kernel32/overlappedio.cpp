@@ -1,4 +1,4 @@
-/* $Id: overlappedio.cpp,v 1.14 2001-12-14 13:45:19 sandervl Exp $ */
+/* $Id: overlappedio.cpp,v 1.15 2002-06-10 17:46:53 sandervl Exp $ */
 
 /*
  * Win32 overlapped IO class
@@ -242,9 +242,11 @@ DWORD OverlappedIOHandler::threadHandler(DWORD dwOperation)
                 {
                     lpOverlapped->Internal     = lpRequest->dwLastError;
                     lpOverlapped->InternalHigh = dwResult;
-                    if(lpRequest->lpdwResult) {
-                        *lpRequest->lpdwResult = dwResult;
-                    }
+
+                    //must NOT store result in specified location!!! (stack corruption)
+                    //if(lpRequest->lpdwResult) {
+                    //    *lpRequest->lpdwResult = dwResult;
+                    //}
 #ifdef DEBUG
                     if(lpRequest->dwAsyncType == ASYNCIO_READ) {
                          dprintf(("ASYNCIO_READ %x finished; result %x, last error %d", lpOverlapped, dwResult, lpRequest->dwLastError));
@@ -329,7 +331,9 @@ BOOL OverlappedIOHandler::WriteFile(HANDLE        hHandle,
     lpRequest->hHandle             = hHandle;
     lpRequest->lpBuffer            = lpBuffer;
     lpRequest->nNumberOfBytes      = nNumberOfBytesToWrite;
-    lpRequest->lpdwResult          = lpNumberOfBytesWritten;
+    //must NOT store result in specified location!!! (stack corruption)
+////    lpRequest->lpdwResult          = lpNumberOfBytesWritten;
+    lpRequest->lpdwResult          = NULL;
     lpRequest->lpOverlapped        = lpOverlapped;
     lpRequest->lpCompletionRoutine = lpCompletionRoutine;
     lpRequest->dwUserData          = dwUserData;
@@ -390,7 +394,9 @@ BOOL OverlappedIOHandler::ReadFile(HANDLE        hHandle,
     lpRequest->hHandle             = hHandle;
     lpRequest->lpBuffer            = lpBuffer;
     lpRequest->nNumberOfBytes      = nNumberOfBytesToRead;
-    lpRequest->lpdwResult          = lpNumberOfBytesRead;
+    //must NOT store result in specified location!!! (stack corruption)
+////    lpRequest->lpdwResult          = lpNumberOfBytesRead;
+    lpRequest->lpdwResult          = NULL;
     lpRequest->lpOverlapped        = lpOverlapped;
     lpRequest->lpCompletionRoutine = lpCompletionRoutine;
     lpRequest->dwUserData          = dwUserData;
@@ -450,6 +456,7 @@ BOOL OverlappedIOHandler::WaitForEvent(HANDLE        hHandle,
     lpRequest->hHandle             = hHandle;
     lpRequest->lpBuffer            = NULL;
     lpRequest->nNumberOfBytes      = 0;
+    //must store result also in specified location
     lpRequest->lpdwResult          = lpfdwEvtMask;
     lpRequest->lpOverlapped        = lpOverlapped;
     lpRequest->lpCompletionRoutine = lpCompletionRoutine;
