@@ -1,4 +1,4 @@
-/* $Id: user32.cpp,v 1.11 1999-06-21 00:42:48 buerkle Exp $ */
+/* $Id: user32.cpp,v 1.12 1999-06-21 13:57:28 sandervl Exp $ */
 
 /*
  * Win32 misc user32 API functions for OS/2
@@ -558,7 +558,8 @@ HWND WIN32API CreateWindowExA(DWORD     dwExStyle,
 
   // 6-12-99 CB: WS_CLIPCHILDREN not set -> controls not redrawn
   // Problems with group boxes
-  dwStyle |= WS_CLIPCHILDREN;
+  //SvL: Not necessary anymore (EB's fixes)
+//  dwStyle |= WS_CLIPCHILDREN;
 
   //SvL: Correct window style (like Wine does)
   if(dwStyle & WS_CHILD) {
