@@ -1,4 +1,8 @@
-/* $Id: ChangeLog,v 1.1199 2000-12-31 12:28:01 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.1200 2001-01-01 11:47:30 sandervl Exp $ */
+
+ 2001-01-01: Sander van Leeuwen <sandervl@xs4all.nl>
+    - USER32:   o Menu cast bugfix (bitmap handle is 32 bits)
+                  (Fixes menu bitmaps in Lotus Notes 5)
 
  2000-12-31: Sander van Leeuwen <sandervl@xs4all.nl>
     - KERNEL32: o Implemented ReadFile/WriteFile for COM devices (UNTESTED)
