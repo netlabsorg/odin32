@@ -1,4 +1,4 @@
-/* $Id: kFile.cpp,v 1.1 2000-05-23 18:23:05 bird Exp $
+/* $Id: kFile.cpp,v 1.2 2000-05-27 02:14:20 bird Exp $
  *
  * kFile - Simple (for the time being) file class.
  *
@@ -46,7 +46,6 @@ BOOL    kFile::refreshFileStatus()
 }
 
 
-
 /**
  * Changes the real file position to match the virtual file position.
  * @returns     Success indicator.
@@ -72,7 +71,6 @@ BOOL    kFile::position()
 
     return TRUE;
 }
-
 
 
 /**
@@ -115,10 +113,9 @@ kFile::kFile(const char *pszFilename, BOOL fReadOnly/*=TRUE*/)
     if (rc != NO_ERROR)
         throw (rc);
 
-    if (refreshFileStatus())
+    if (!refreshFileStatus())
         throw (rc);
 }
-
 
 
 /**
@@ -128,7 +125,6 @@ kFile::~kFile()
 {
     DosClose(hFile);
 }
-
 
 
 /**
@@ -156,7 +152,6 @@ BOOL            kFile::read(void *pvBuffer, long cbBuffer)
 }
 
 
-
 /**
  * Reads <cbBuffer> bytes at file offset <off>.
  * @returns     success indicator. (TRUE/FALSE)
@@ -168,7 +163,6 @@ BOOL            kFile::readAt(void *pvBuffer, long cbBuffer, long off)
 {
     return set(off) && read(pvBuffer, cbBuffer);
 }
-
 
 
 /**
@@ -214,7 +208,6 @@ BOOL            kFile::writeAt(void *pvBuffer, long cbBuffer, long off)
 {
     return set(off) && write(pvBuffer, cbBuffer);
 }
-
 
 
 /**
@@ -297,14 +290,13 @@ BOOL            kFile::start()
 }
 
 
-
 /**
  * Get the size of the file.
  * @returns     Returns file size on success.
  *              -1 on error.
  * @remark      Will only throw error if refreshFileStatus failes.
  */
-LONG            kFile::getSize()
+long            kFile::getSize()
 {
     if (!refreshFileStatus())
         return -1;
@@ -312,6 +304,16 @@ LONG            kFile::getSize()
     return filestatus.cbFile;
 }
 
+
+/**
+ * Get current position.
+ * @returns     The current file position.
+ * @remark      Will only throw error if refreshFileStatus failes.
+ */
+long            kFile::getPos() const
+{
+    return offVirtual;
+}
 
 
 /**
@@ -331,7 +333,6 @@ BOOL            kFile::isEOF()
     return filestatus.cbFile >= offReal; //???
     #endif
 }
-
 
 
 /**
@@ -366,7 +367,7 @@ BOOL            kFile::setFailOnErrors()
  * @returns     OS/2 error code for the last operation.
  * @remark      Will never throw errors.
  */
-int            kFile::getLastError()
+int            kFile::getLastError() const
 {
     return rc;
 }
