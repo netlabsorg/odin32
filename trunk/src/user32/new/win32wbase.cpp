@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.20 2000-01-02 20:20:02 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.21 2000-01-03 20:53:50 cbratschi Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -535,7 +535,7 @@ BOOL Win32BaseWindow::CreateWindowExA(CREATESTRUCTA *cs, ATOM classAtom)
         vertScrollInfo->MaxVal = 100;
         vertScrollInfo->flags  = ESB_ENABLE_BOTH;
   }
-#if 0 //CB: PM frame not yet created!
+
   /* Send the WM_GETMINMAXINFO message and fix the size if needed */
   if ((cs->style & WS_THICKFRAME) || !(cs->style & (WS_POPUP | WS_CHILD)))
   {
@@ -545,7 +545,7 @@ BOOL Win32BaseWindow::CreateWindowExA(CREATESTRUCTA *cs, ATOM classAtom)
         if (cs->cx < minTrack.x ) cs->cx = minTrack.x;
         if (cs->cy < minTrack.y ) cs->cy = minTrack.y;
   }
-#endif
+
   if(cs->style & WS_CHILD)
   {
         if(cs->cx < 0) cs->cx = 0;
@@ -610,7 +610,6 @@ BOOL Win32BaseWindow::CreateWindowExA(CREATESTRUCTA *cs, ATOM classAtom)
                                  (owner) ? owner->getOS2WindowHandle() : OSLIB_HWND_DESKTOP,
                                  (hwndLinkAfter == HWND_BOTTOM) ? TRUE : FALSE,
                                  &OS2HwndFrame, 0, fTaskList);
-
   if(OS2Hwnd == 0) {
         dprintf(("Window creation failed!!"));
         SetLastError(ERROR_OUTOFMEMORY); //TODO: Better error
@@ -1353,7 +1352,7 @@ VOID Win32BaseWindow::TrackCloseButton(WORD wParam)
   if (hSysMenu == 0)
     return;
   state = GetMenuState(hSysMenu, SC_CLOSE, MF_BYCOMMAND);
-#endif	
+#endif
   /* If the item close of the sysmenu is disabled or not there do nothing */
   if((state & MF_DISABLED) || (state & MF_GRAYED) || (state == 0xFFFFFFFF))
     return;
@@ -1391,12 +1390,12 @@ LONG Win32BaseWindow::HandleNCLButtonDown(WPARAM wParam,LPARAM lParam)
       if(dwStyle & WS_SYSMENU )
       {
         if( !(dwStyle & WS_MINIMIZE) )
-	{
+        {
           HDC hDC = GetWindowDC(Win32Hwnd);
           DrawSysButton(hDC,TRUE);
-	  ReleaseDC(Win32Hwnd,hDC);
-	}
-	SendInternalMessageA(WM_SYSCOMMAND,SC_MOUSEMENU+HTSYSMENU,lParam);
+          ReleaseDC(Win32Hwnd,hDC);
+        }
+        SendInternalMessageA(WM_SYSCOMMAND,SC_MOUSEMENU+HTSYSMENU,lParam);
       }
       break;
 
@@ -1414,7 +1413,7 @@ LONG Win32BaseWindow::HandleNCLButtonDown(WPARAM wParam,LPARAM lParam)
 
     case HTMINBUTTON:
     case HTMAXBUTTON:
-      TrackMinMaxBox(wParam);	
+      TrackMinMaxBox(wParam);
       break;
 
     case HTCLOSE:

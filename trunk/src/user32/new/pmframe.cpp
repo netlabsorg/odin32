@@ -1,4 +1,4 @@
-/* $Id: pmframe.cpp,v 1.3 2000-01-02 19:30:43 cbratschi Exp $ */
+/* $Id: pmframe.cpp,v 1.4 2000-01-03 20:53:50 cbratschi Exp $ */
 /*
  * Win32 Frame Managment Code for OS/2
  *
@@ -270,6 +270,7 @@ MRESULT EXPENTRY Win32FrameProc(HWND hwnd,ULONG msg,MPARAM mp1,MPARAM mp2)
       SetWin32TIB();
       mapWin32ToOS2Rect(WinQueryWindow(hwnd,QW_PARENT),win32wnd->getClientRectPtr(),(PRECTLOS2)&rect);
       WinMapWindowPoints(WinQueryWindow(hwnd,QW_PARENT),hwnd,(PPOINTL)&rect,2);
+//dprintf(("CB: %d %d %d %d",rect.xLeft,rect.yBottom,rect.xRight,rect.yTop));
       swpClient = &pswp[ccount-1];
       swpClient->x = rect.xLeft;
       swpClient->y = rect.yBottom;

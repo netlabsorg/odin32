@@ -1,4 +1,4 @@
-/* $Id: loadres.cpp,v 1.13 2000-01-01 14:57:16 cbratschi Exp $ */
+/* $Id: loadres.cpp,v 1.14 2000-01-03 20:53:49 cbratschi Exp $ */
 
 /*
  * Win32 resource API functions for OS/2
@@ -94,9 +94,9 @@ int WIN32API LoadStringW(HINSTANCE hinst, UINT wID, LPWSTR lpBuffer, int cchBuff
 
 #ifdef DEBUG_ENABLELOG_LEVEL2
     if(i) {
-    	char *astring = (char *)HEAP_strdupWtoA(GetProcessHeap(), 0, lpBuffer);
-    	dprintf(("LoadStringW from %X, id %d %s\n", hinst, wID, astring));
-    	HEAP_free(astring);
+        char *astring = (char *)HEAP_strdupWtoA(GetProcessHeap(), 0, lpBuffer);
+        dprintf(("LoadStringW from %X, id %d %s\n", hinst, wID, astring));
+        HEAP_free(astring);
     }
 #else
     dprintf(("LoadStringW from %X, id %d buffersize %d\n", hinst, wID, cchBuffer));
@@ -231,68 +231,6 @@ HCURSOR WIN32API LoadCursorW(HINSTANCE hinst, LPCWSTR lpszCursor)
     return(hCursor);
 }
 //******************************************************************************
-//******************************************************************************
-BOOL IsSystemBitmap(ULONG *id)
-{
-   switch(*id)
-   {
-        case OBM_UPARROW_W:
-        case OBM_DNARROW_W:
-        case OBM_RGARROW_W:
-        case OBM_LFARROW_W:
-        case OBM_RESTORE_W:
-        case OBM_RESTORED_W:
-        case OBM_UPARROWD_W:
-        case OBM_DNARROWD_W:
-        case OBM_RGARROWD_W:
-        case OBM_LFARROWD_W:
-        case OBM_OLD_UPARROW_W:
-        case OBM_OLD_DNARROW_W:
-        case OBM_OLD_RGARROW_W:
-        case OBM_OLD_LFARROW_W:
-        case OBM_CHECK_W:
-        case OBM_CHECKBOXES_W:
-        case OBM_BTNCORNERS_W:
-        case OBM_COMBO_W:
-        case OBM_REDUCE_W:
-        case OBM_REDUCED_W:
-        case OBM_ZOOM_W:
-        case OBM_ZOOMD_W:
-        case OBM_SIZE_W:
-        case OBM_CLOSE_W:
-        case OBM_MNARROW_W:
-        case OBM_UPARROWI_W:
-        case OBM_DNARROWI_W:
-        case OBM_RGARROWI_W:
-        case OBM_LFARROWI_W:
-                return TRUE;
-
-        //TODO: Not supported by Open32. Replacement may not be accurate
-        case OBM_OLD_CLOSE_W:
-                *id = OBM_CLOSE_W;
-                return TRUE;
-
-        case OBM_BTSIZE_W:
-                *id = OBM_SIZE_W;
-                return TRUE;
-
-        case OBM_OLD_REDUCE_W:
-                *id = OBM_REDUCE_W;
-                return TRUE;
-
-        case OBM_OLD_ZOOM_W:
-                *id = OBM_ZOOM_W;
-                return TRUE;
-
-        case OBM_OLD_RESTORE_W:
-                *id = OBM_RESTORE_W;
-                return TRUE;
-
-        default:
-                return FALSE;
-   }
-}
-//******************************************************************************
 //NOTE: LR_CREATEDIBSECTION flag doesn't work (crash in GDI32)!
 //******************************************************************************
 HANDLE LoadBitmapA(HINSTANCE hinst, LPCSTR lpszName, int cxDesired, int cyDesired,
@@ -389,14 +327,7 @@ HBITMAP WIN32API LoadBitmapA(HINSTANCE hinst, LPCSTR lpszBitmap)
 {
  HBITMAP hBitmap = 0;
 
-  if (!hinst)
-  {
-    if(IsSystemBitmap((ULONG *)&lpszBitmap))
-    {
-      hBitmap = O32_LoadBitmap(hInstanceUser32,lpszBitmap);
-      if (!hBitmap) hBitmap = O32_LoadBitmap(hinst,lpszBitmap);
-    } else hBitmap = 0;
-  } else hBitmap = LoadBitmapA(hinst, lpszBitmap, 0, 0, 0);
+  return LoadBitmapA((hinst == 0) ? hInstanceUser32:hinst,lpszBitmap,0,0,0);
   dprintf(("LoadBitmapA returned %08xh\n", hBitmap));
 
   return(hBitmap);
@@ -408,23 +339,13 @@ HBITMAP WIN32API LoadBitmapW(HINSTANCE hinst, LPCWSTR lpszBitmap)
 {
  HBITMAP hBitmap = 0;
 
-  if (!hinst)
-  {
-    if(IsSystemBitmap((ULONG *)&lpszBitmap))
-    {
-      hBitmap = O32_LoadBitmap(hInstanceUser32,(LPCSTR)lpszBitmap);
-      if (!hBitmap) hBitmap = O32_LoadBitmap(hinst,(LPCSTR)lpszBitmap);
-    } else hBitmap = 0;
-  } else
-  {
-    if(HIWORD(lpszBitmap) != 0)
-      lpszBitmap = (LPWSTR)UnicodeToAsciiString((LPWSTR)lpszBitmap);
+  if(HIWORD(lpszBitmap) != 0)
+    lpszBitmap = (LPWSTR)UnicodeToAsciiString((LPWSTR)lpszBitmap);
 
-    hBitmap = LoadBitmapA(hinst, (LPSTR)lpszBitmap, 0, 0, 0);
+  hBitmap = LoadBitmapA((hinst == 0) ? hInstanceUser32:hinst, (LPSTR)lpszBitmap, 0, 0, 0);
 
-    if(HIWORD(lpszBitmap) != 0)
-      FreeAsciiString((LPSTR)lpszBitmap);
-  }
+  if(HIWORD(lpszBitmap) != 0)
+    FreeAsciiString((LPSTR)lpszBitmap);
 
   dprintf(("LoadBitmapW returned %08xh\n", hBitmap));
 
@@ -540,10 +461,10 @@ HICON WINAPI CopyImage( HANDLE hnd, UINT type, INT desiredx,
 //      case IMAGE_BITMAP:
 //              return BITMAP_CopyBitmap(hnd);
         case IMAGE_ICON:
-		return CopyIcon(hnd);
+                return CopyIcon(hnd);
         case IMAGE_CURSOR:
-		return CopyCursor(hnd);
-//		return CopyCursorIcon(hnd,type, desiredx, desiredy, flags);
+                return CopyCursor(hnd);
+//              return CopyCursorIcon(hnd,type, desiredx, desiredy, flags);
         default:
                 dprintf(("CopyImage: Unsupported type"));
     }
