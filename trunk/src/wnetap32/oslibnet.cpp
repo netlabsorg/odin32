@@ -27,6 +27,7 @@
 #include <netcons.h>
 #include <wksta.h>
 #include <neterr.h>
+#include <netstats.h>
 
 
 //******************************************************************************
@@ -221,8 +222,44 @@ DWORD OSLibNetWkstaGetInfo (const unsigned char * pszServer,
                     unsigned long         ulBuffer,      
                     unsigned long       * pulTotalAvail) 
 {
-  APIRET rc = Net32WkstaGetInfo(pszServer, ulLevel, pbBuffer, ulBuffer, pulTotalAvail);
-  return error2WinError(rc);
+  USHORT sel = RestoreOS2FS();
+  
+  APIRET rc = error2WinError(Net32WkstaGetInfo(pszServer, ulLevel, pbBuffer, ulBuffer, pulTotalAvail));
+  SetFS(sel);
+  return rc;
 }
 
 
+/*****************************************************************************
+ * Name      : NET_API_STATUS OSLibNetStatisticsGet
+ * Purpose   :
+ * Parameters: 
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller 2000/01/10 01:42
+ *****************************************************************************/
+
+DWORD OSLibNetStatisticsGet(const unsigned char * pszServer,
+                            const unsigned char * pszService,
+                            unsigned long         ulReserved,
+                            unsigned long         ulLevel,
+                            unsigned long         flOptions,
+                            unsigned char       * pbBuffer,
+                            unsigned long         ulBuffer,
+                            unsigned long       * pulTotalAvail)
+{
+  USHORT sel = RestoreOS2FS();
+  APIRET rc = error2WinError(Net32StatisticsGet2(pszServer,
+                                  pszService,
+                                  ulReserved,
+                                  ulLevel,
+                                  flOptions,
+                                  pbBuffer,
+                                  ulBuffer,
+                                  pulTotalAvail));
+  SetFS(sel);
+  return rc;
+}

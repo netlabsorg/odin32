@@ -17,4 +17,13 @@ DWORD OSLibNetWkstaGetInfo (const unsigned char * pszServer,
                     unsigned long         ulBuffer,      
                     unsigned long       * pulTotalAvail);
 
+DWORD OSLibNetStatisticsGet(const unsigned char * pszServer,
+                            const unsigned char * pszService,
+                            unsigned long         ulReserved,
+                            unsigned long         ulLevel,
+                            unsigned long         flOptions,
+                            unsigned char       * pbBuffer,
+                            unsigned long         ulBuffer,
+                            unsigned long       * pulTotalAvail);
+
 #endif

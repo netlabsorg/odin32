@@ -1,11 +1,12 @@
-; $Id: netapi32.def,v 1.2 2000-10-02 13:03:01 phaller Exp $
+; $Id: netapi32.def,v 1.3 2000-10-02 21:19:11 phaller Exp $
 
 LIBRARY WNETAP32 INITINSTANCE
 DATA MULTIPLE NONSHARED
 
 IMPORTS
-    Net32WkstaGetInfo = NETAPI32.146
-    Net32WkstaSetInfo = NETAPI32.147
+    Net32StatisticsGet2 = NETAPI32.125
+    Net32WkstaGetInfo   = NETAPI32.146
+    Net32WkstaSetInfo   = NETAPI32.147
 
 EXPORTS
 ;    0000    0000f1ba  I_BrowserDebugCall
