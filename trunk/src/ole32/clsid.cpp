@@ -1,4 +1,4 @@
-/* $Id: clsid.cpp,v 1.6 1999-09-08 11:29:27 davidr Exp $ */
+/* $Id: clsid.cpp,v 1.7 1999-09-08 15:39:55 davidr Exp $ */
 /*
  *
  * Project Odin Software License can be found in LICENSE.TXT
@@ -75,7 +75,7 @@ HRESULT WIN32API IIDFromString(LPSTR lpsz, LPIID lpiid)
 LPWSTR WIN32API HEAP_strdupAtoW( HANDLE heap, DWORD flags, LPCSTR str );
 
 HRESULT WIN32API CLSIDFromStringA(
-    LPSTR		lpsz,		// [in] - ASCII string CLSID
+    LPCSTR		lpsz,		// [in] - ASCII string CLSID
     LPCLSID		pclsid)		// [out] - Binary CLSID
 {
   LPWSTR  lpszOle = HEAP_strdupAtoW(GetProcessHeap(),
