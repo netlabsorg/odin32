@@ -1,4 +1,4 @@
-/* $Id: win32api.h,v 1.17 2000-08-01 23:18:26 sandervl Exp $ */
+/* $Id: win32api.h,v 1.18 2000-09-12 19:00:31 sandervl Exp $ */
 
 /*
  *
@@ -117,5 +117,8 @@ HRGN    WIN32API CreateRoundRectRgn(INT,INT,INT,INT,INT,INT);
 INT     WIN32API CombineRgn(HRGN,HRGN,HRGN,INT);
 BOOL    WIN32API SetRectRgn(HRGN,INT,INT,INT,INT);
 BOOL    WIN32API EnumChildWindows(HWND hwnd, WNDENUMPROC lpfn, LPARAM lParam);
+
+LPCSTR  WIN32API GetCommandLineA(VOID);
+LPCWSTR WIN32API GetCommandLineW(VOID);
 
 #endif
