@@ -1,4 +1,4 @@
-/* $Id: initterm.cpp,v 1.4 1999-06-19 13:57:51 sandervl Exp $ */
+/* $Id: initterm.cpp,v 1.5 1999-06-20 10:55:36 sandervl Exp $ */
 
 /*
  * KERNEL32 DLL entry point
@@ -33,6 +33,7 @@
 #include <string.h>
 #include <misc.h>
 #include <wprocess.h>
+#include <handlemanager.h>
 
 extern "C" {
 /*-------------------------------------------------------------------*/
@@ -129,6 +130,9 @@ unsigned long SYSTEM _DLL_InitTerm(unsigned long hModule, unsigned long
             else   flAllocMem = 0;        // no high memory support
 
 	    InitializeTIB(TRUE);
+	    //SvL: Do it here instead of during the exe object creation
+	    //(std handles can be used in win32 dll initialization routines
+	    HMInitialize();             /* store standard handles within HandleManager */
             break;
         case 1 :
             break;

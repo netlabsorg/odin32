@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.7 1999-06-19 17:58:32 sandervl Exp $
+# $Id: makefile,v 1.8 1999-06-20 10:55:36 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -94,7 +94,7 @@ kernel32.OBJ: kernel32.cpp \
     except.h \
     $(PDWIN32_INCLUDE)\unicode.h \
     heap.h \
-    wprocess.h \
+    $(PDWIN32_INCLUDE)\wprocess.h \
     os2util.h \
     $(PDWIN32_INCLUDE)\nameid.h
 
@@ -231,7 +231,7 @@ mmap.OBJ: \
 
 lfile.OBJ: \
     .\lfile.cpp \
-    wprocess.h \
+    $(PDWIN32_INCLUDE)\wprocess.h \
     os2util.h
 
 obsolete.OBJ: \
