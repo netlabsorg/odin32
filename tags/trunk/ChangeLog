@@ -1,4 +1,8 @@
- /* $Id: ChangeLog,v 1.215 1999-09-20 19:17:10 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.216 1999-09-20 20:42:29 davidr Exp $ */
+
+ 99-09-19: David Raison <djr@lemur.co.uk>
+        - OLE32: Added AntiMoniker,
+                 Updated regsvr32 to use RegisterLxExe
 
  99-09-20: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32: Fix background of button, group & static text
