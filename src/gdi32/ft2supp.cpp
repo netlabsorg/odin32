@@ -40,16 +40,16 @@ static BOOL fFT2LIBIntegration = FALSE;
 //******************************************************************************
 void WIN32API SetFreeTypeIntegration(BOOL fEnabled)
 {
-    fFT2LIBIntegration = fEnabled;   
+    fFT2LIBIntegration = fEnabled;
 
     FT2Module.init();
 }
 //******************************************************************************
 // Constructor
 //******************************************************************************
-CFT2Module::CFT2Module(char* sModuleName): bEnabled(FALSE), hftModule(0), pfnGetGlyphIndices(NULL), 
+CFT2Module::CFT2Module(char* sModuleName): bEnabled(FALSE), hftModule(0), pfnGetGlyphIndices(NULL),
                 pfnFt2GetTextExtentW(NULL), pfnFt2EnableFontEngine(NULL),
-                pfnFt2GetGlyphOutline(NULL), pfnFt2CharStringPosAtA(NULL),  
+                pfnFt2GetGlyphOutline(NULL), pfnFt2CharStringPosAtA(NULL),
                 pfnFt2CharStringPosAtW(NULL), pfnFt2GetFontData(NULL),
                 pfnFt2RegisterUconv(NULL), pfnFt2QueryStringWidthW(NULL),
                 pfnFt2GetVersion(NULL)
@@ -70,10 +70,10 @@ void CFT2Module::init()
     }
 
     rc = DosLoadModule((PSZ)Loaderror, sizeof(Loaderror), pszModuleName, &hftModule);
-    if (rc != 0) 
+    if (rc != 0)
         dprintf(("Freetype2 library load error: return code = %u\n", rc));
     else
-       bEnabled = TRUE;   
+       bEnabled = TRUE;
 
     if(bEnabled) {
        pfnFt2GetVersion = (PFN_FT2GETVERSION)QueryProcAddress("Ft2GetVersion");
@@ -110,10 +110,10 @@ void CFT2Module::init()
        if(!pfnFt2QueryStringWidthW) dprintf(("Ft2QueryStringWidthW not found!!"));
 
        // Do not register functions for Mozilla plugins
-       if(IsDummyExeLoaded() == FALSE) 
+       if(IsDummyExeLoaded() == FALSE)
        {
            pfnFt2RegisterUconv = (PFN_FT2REGISTERUCONV)QueryProcAddress("Ft2RegisterUconv");
-           if(pfnFt2RegisterUconv) 
+           if(pfnFt2RegisterUconv)
                 pfnFt2RegisterUconv(WideCharToMultiByte, MultiByteToWideChar);
            else dprintf(("Ft2QueryFontType not found!!"));
        }
@@ -122,7 +122,7 @@ void CFT2Module::init()
     return;
 
 failure:
-    if(pfnFt2RegisterUconv) 
+    if(pfnFt2RegisterUconv)
         pfnFt2RegisterUconv(NULL, NULL);
     if(pfnFt2EnableFontEngine)
         pfnFt2EnableFontEngine(FALSE);
@@ -130,11 +130,11 @@ failure:
     pfnGetGlyphIndices     = NULL;
     pfnFt2GetTextExtentW   = NULL;
     pfnFt2EnableFontEngine = NULL;
-    pfnFt2GetGlyphOutline  = NULL; 
-    pfnFt2CharStringPosAtA = NULL;  
-    pfnFt2CharStringPosAtW = NULL; 
+    pfnFt2GetGlyphOutline  = NULL;
+    pfnFt2CharStringPosAtA = NULL;
+    pfnFt2CharStringPosAtW = NULL;
     pfnFt2GetFontData      = NULL;
-    pfnFt2RegisterUconv    = NULL; 
+    pfnFt2RegisterUconv    = NULL;
     pfnFt2QueryStringWidthW= NULL;
     pfnFt2GetVersion       = NULL;
     bEnabled = FALSE;
@@ -161,7 +161,7 @@ PFN CFT2Module::QueryProcAddress(int ordinal)
     APIRET rc;
     PFN ModuleAddr;
 
-    rc = DosQueryProcAddr(hftModule, ordinal, NULL, &ModuleAddr); 
+    rc = DosQueryProcAddr(hftModule, ordinal, NULL, &ModuleAddr);
     if (rc != 0) {
         dprintf(("FreeType2 QueryProcAddr error: return code = %u\n", rc));
         return 0;
@@ -175,7 +175,7 @@ PFN CFT2Module::QueryProcAddress(char * procname)
     APIRET rc;
     PFN ModuleAddr;
 
-    rc = DosQueryProcAddr(hftModule, 0, procname, &ModuleAddr); 
+    rc = DosQueryProcAddr(hftModule, 0, procname, &ModuleAddr);
     if (rc != 0) {
         dprintf(("FreeType2 QueryProcAddr error: return code = %u\n", rc));
         return 0;
@@ -202,7 +202,7 @@ DWORD CFT2Module::Ft2GetGlyphOutline(HPS hps, UINT glyph, UINT format, LPGLYPHME
 //
 // This is basically the same as Ft2QueryTextBoxW, but it behaves as the Win32
 // API GetTextExtent (which ignores character attributes and underhang/overhang)
-// 
+//
 // The fallback case is not accurate!! (but the same as our old code)
 //
 //******************************************************************************
@@ -241,12 +241,13 @@ BOOL CFT2Module::Ft2GetTextExtentW(HPS hps, LONG lCount1,LPCWSTR pchString, PPOI
     pplos2 = ( PPOINTLOS2 )malloc(( lenA + 1 ) * sizeof( POINTLOS2 ));
 
     ret = OSLibGpiQueryCharStringPosAt( pHps, &start, 0, lenA, strA, NULL, pplos2 );
-
-    cx = labs( pplos2[ lenA ].x - pplos2[ 0 ].x );
-    cy = labs( pplos2[ lenA ].y - pplos2[ 0 ].y );
-
     if( ret )
     {
+        TEXTMETRICW tmW;
+
+        cx = labs( pplos2[ lenA ].x - pplos2[ 0 ].x );
+        cy = labs( pplos2[ lenA ].y - pplos2[ 0 ].y );
+
         aptlPoints[ TXTBOX_BOTTOMLEFT ].x = 0;
         aptlPoints[ TXTBOX_BOTTOMLEFT ].y = 0;
         aptlPoints[ TXTBOX_BOTTOMRIGHT ].x = cx;
@@ -257,18 +258,17 @@ BOOL CFT2Module::Ft2GetTextExtentW(HPS hps, LONG lCount1,LPCWSTR pchString, PPOI
         aptlPoints[ TXTBOX_TOPRIGHT ].y = cy;
         aptlPoints[ TXTBOX_CONCAT ].x = cx;
         aptlPoints[ TXTBOX_CONCAT ].y = cy;
-    }
 
-    calcDimensions(aptlPoints, pwidthHeight);
+        calcDimensions(aptlPoints, pwidthHeight);
 
-    TEXTMETRICW tmW;
-    if(GetTextMetricsW( hps, &tmW ) == TRUE) 
-    {
-        pwidthHeight->y = tmW.tmHeight;    // *Must* use the maximum height of the font
-    }
+        if(GetTextMetricsW( hps, &tmW ) == TRUE)
+        {
+            pwidthHeight->y = tmW.tmHeight;    // *Must* use the maximum height of the font
+        }
 #ifdef DEBUG
-    else DebugInt3();
+        else DebugInt3();
 #endif
+    }
 
     free( pplos2 );
     free( strA );
@@ -279,16 +279,16 @@ BOOL CFT2Module::Ft2GetTextExtentW(HPS hps, LONG lCount1,LPCWSTR pchString, PPOI
 //******************************************************************************
 BOOL CFT2Module::Ft2CharStringPosAtA(HPS hps,PPOINTLOS2 ptl,PRECTLOS2 rct,ULONG flOptions,LONG lCount,LPCSTR pchString,CONST INT *alAdx, DWORD fuWin32Options)
 {
-    DWORD  ret; 
+    DWORD  ret;
     USHORT sel;
 
-    // All FreeType calls should be wrapped for saving FS 
+    // All FreeType calls should be wrapped for saving FS
     if(pfnFt2CharStringPosAtA) {
         sel  = RestoreOS2FS();
         ret  = pfnFt2CharStringPosAtA(hps, ptl,rct,flOptions,lCount,pchString,alAdx, fuWin32Options);
         SetFS(sel);
         if(ret || (ret == FALSE && ERRORIDERROR(WinGetLastError(0)) != PMERR_FUNCTION_NOT_SUPPORTED))
-            return ret; 
+            return ret;
     }
     //else fall back to GPI
     //NOTE: We don't support fuWin32Options in the fallback case
@@ -299,16 +299,16 @@ BOOL CFT2Module::Ft2CharStringPosAtA(HPS hps,PPOINTLOS2 ptl,PRECTLOS2 rct,ULONG 
 //******************************************************************************
 BOOL CFT2Module::Ft2CharStringPosAtW(HPS hps, PPOINTLOS2 ptl,PRECTLOS2 rct,ULONG flOptions,LONG lCount,LPCWSTR pchString,CONST INT *alAdx, DWORD fuWin32Options)
 {
-    DWORD  ret; 
+    DWORD  ret;
     USHORT sel;
 
-    // All FreeType calls should be wrapped for saving FS 
+    // All FreeType calls should be wrapped for saving FS
     if(pfnFt2CharStringPosAtW) {
         sel  = RestoreOS2FS();
         ret  = pfnFt2CharStringPosAtW(hps, ptl,rct,flOptions,lCount,pchString,alAdx, fuWin32Options);
         SetFS(sel);
         if(ret || (ret == FALSE && ERRORIDERROR(WinGetLastError(0)) != PMERR_FUNCTION_NOT_SUPPORTED))
-            return ret; 
+            return ret;
     }
     //else fall back to GPI
     //NOTE: We don't support fuWin32Options in the fallback case
@@ -335,21 +335,21 @@ DWORD CFT2Module::Ft2GetFontData(HPS hps, DWORD dwTable, DWORD dwOffset,
     return(GDI_ERROR);
 }
 //******************************************************************************
-// Query the font type current selected into the presentation space, or, 
+// Query the font type current selected into the presentation space, or,
 // when hps == NULL, query the type of the font with the specified name
 //******************************************************************************
 DWORD CFT2Module::Ft2QueryFontType(HPS hps, LPCSTR lpszFontName)
 {
-    DWORD  ret; 
+    DWORD  ret;
     USHORT sel;
 
-    // All FreeType calls should be wrapped for saving FS 
+    // All FreeType calls should be wrapped for saving FS
     if(pfnFt2QueryFontType) {
         sel  = RestoreOS2FS();
         ret  = pfnFt2QueryFontType(hps, lpszFontName);
         SetFS(sel);
         if(ret || (ret == GDI_ERROR && ERRORIDERROR(WinGetLastError(0)) != PMERR_FUNCTION_NOT_SUPPORTED))
-            return ret; 
+            return ret;
     }
     //no fallback
     return FT2_FONTTYPE_UNKNOWN;
@@ -358,7 +358,7 @@ DWORD CFT2Module::Ft2QueryFontType(HPS hps, LPCSTR lpszFontName)
 //******************************************************************************
 BOOL CFT2Module::Ft2GetStringWidthW(HDC hdc, LPWSTR lpszString, UINT cbString, PINT pWidthArray)
 {
-    DWORD  ret; 
+    DWORD  ret;
     USHORT sel;
     pDCData pHps;
 
@@ -369,7 +369,7 @@ BOOL CFT2Module::Ft2GetStringWidthW(HDC hdc, LPWSTR lpszString, UINT cbString, P
         return 0;
     }
 
-    // All FreeType calls should be wrapped for saving FS 
+    // All FreeType calls should be wrapped for saving FS
     if(pfnFt2QueryStringWidthW) {
         sel  = RestoreOS2FS();
         ret  = pfnFt2QueryStringWidthW((HPS)hdc, lpszString, cbString, (LONG *)pWidthArray);
@@ -381,7 +381,7 @@ BOOL CFT2Module::Ft2GetStringWidthW(HDC hdc, LPWSTR lpszString, UINT cbString, P
                LONG alArray[2];
 
                if(OSLibDevQueryCaps(pHps, OSLIB_CAPS_HORIZONTAL_RESOLUTION, 2, &alArray[0]) &&
-                  alArray[0] != alArray[1]) 
+                  alArray[0] != alArray[1])
                {
                    dprintf(("Different hor/vert resolutions (%d,%d)", alArray[0], alArray[1]));
                    for (int i = 0; i < cbString; i++)
@@ -390,7 +390,7 @@ BOOL CFT2Module::Ft2GetStringWidthW(HDC hdc, LPWSTR lpszString, UINT cbString, P
                    }
                 }
             }
-            return ret; 
+            return ret;
         }
     }
     //fallback method
@@ -437,7 +437,7 @@ DWORD CFT2Module::Ft2GetCharacterPlacementW(HDC           hdc,
                                             GCP_RESULTSW *lpResults,
                                             DWORD         dwFlags)
 {
-    DWORD  ret; 
+    DWORD  ret;
     USHORT sel;
     SIZE   size;
     UINT   i, nSet;
@@ -453,17 +453,17 @@ DWORD CFT2Module::Ft2GetCharacterPlacementW(HDC           hdc,
     dprintf(("%ls, %d, %d, 0x%08lx\n", lpString, uCount, nMaxExtent, dwFlags));
 
     dprintf(("lStructSize=%ld, lpOutString=%p, lpOrder=%p, lpDx=%p, lpCaretPos=%p, lpClass=%p, lpGlyphs=%p, nGlyphs=%u, nMaxFit=%d\n",
-	    lpResults->lStructSize, lpResults->lpOutString, lpResults->lpOrder,
-	    lpResults->lpDx, lpResults->lpCaretPos, lpResults->lpClass,
-	    lpResults->lpGlyphs, lpResults->nGlyphs, lpResults->nMaxFit));
+        lpResults->lStructSize, lpResults->lpOutString, lpResults->lpOrder,
+        lpResults->lpDx, lpResults->lpCaretPos, lpResults->lpClass,
+        lpResults->lpGlyphs, lpResults->nGlyphs, lpResults->nMaxFit));
 
     if(dwFlags&(~0))            dprintf(("unsupported flags 0x%08lx\n", dwFlags));
-    if(lpResults->lpCaretPos)	dprintf(("caret positions not implemented\n"));
-    if(lpResults->lpClass)	dprintf(("classes not implemented\n"));
+    if(lpResults->lpCaretPos)   dprintf(("caret positions not implemented\n"));
+    if(lpResults->lpClass)  dprintf(("classes not implemented\n"));
 
     nSet = (UINT)uCount;
     if(nSet > lpResults->nGlyphs)
-	nSet = lpResults->nGlyphs;
+    nSet = lpResults->nGlyphs;
 
     /* return number of initialized fields */
     lpResults->nGlyphs = nSet;
@@ -487,7 +487,7 @@ DWORD CFT2Module::Ft2GetCharacterPlacementW(HDC           hdc,
     }
 
     if(lpResults->lpGlyphs)
-  	GetGlyphIndicesW(hdc, lpString, nSet, lpResults->lpGlyphs, 0);
+    GetGlyphIndicesW(hdc, lpString, nSet, lpResults->lpGlyphs, 0);
 
     if (GetTextExtentPoint32W(hdc, lpString, uCount, &size))
          ret = MAKELONG(size.cx, size.cy);
