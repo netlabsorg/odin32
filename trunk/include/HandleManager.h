@@ -1,4 +1,4 @@
-/* $Id: HandleManager.h,v 1.2 1999-07-05 07:55:09 phaller Exp $ */
+/* $Id: HandleManager.h,v 1.3 1999-07-05 09:58:13 phaller Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -48,15 +48,6 @@ typedef struct {
  * Defines & Macros                                                          *
  *****************************************************************************/
 
-      /* all handles to our special pseudo-devices are ORed with this define */
-   /* this allows us to determine quickly how to where to route requests to. */
-#define HM_HANDLE_ID   0x77770000
-#define HM_HANDLE_MASK 0x0000FFFF
-
-
-//#define IS_HM_HANDLE(hHandle) ( (hHandle & ~HM_HANDLE_MASK) == HM_HANDLE_ID )
-
-
                                      /* 1998/02/12 PH Correction of os2win.h */
 #undef FILE_TYPE_UNKNOWN
 #define FILE_TYPE_UNKNOWN   0x0000
@@ -81,21 +72,6 @@ typedef struct {
 /*****************************************************************************
  * Structures                                                                *
  *****************************************************************************/
-
-typedef struct _HMHANDLEDATA
-{
-  HANDLE          hHMHandle;                         /* a copy of the handle */
-  HANDLE          hWinHandle;                /* a copy of the windows handle */
-
-  DWORD           dwType;                          /* handle type identifier */
-
-  DWORD           dwAccess;                     /* access mode of the handle */
-  DWORD           dwShare;                       /* share mode of the handle */
-  DWORD           dwCreation;                       /* dwCreationDisposition */
-  DWORD           dwFlags;                           /* flags and attributes */
-
-  LPVOID          lpHandlerData;    /* for private use of the device handler */
-} HMHANDLEDATA, *PHMHANDLEDATA;
 
 
 /*****************************************************************************
