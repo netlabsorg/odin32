@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.91 2001-07-31 07:56:48 sandervl Exp $
+# $Id: Makefile,v 1.92 2001-08-31 20:23:44 phaller Exp $
 
 #
 # Odin32 API
@@ -36,6 +36,7 @@ $(OBJDIR)\dde.obj \
 $(OBJDIR)\wsprintf.obj \
 $(OBJDIR)\winkeyboard.obj \
 $(OBJDIR)\winmouse.obj \
+$(OBJDIR)\winevent.obj \
 $(OBJDIR)\defwndproc.obj \
 $(OBJDIR)\syscolor.obj \
 $(OBJDIR)\char.obj \

@@ -1,4 +1,4 @@
-/* $Id: user32.cpp,v 1.112 2001-08-27 08:42:13 sandervl Exp $ */
+/* $Id: user32.cpp,v 1.113 2001-08-31 20:23:44 phaller Exp $ */
 
 /*
  * Win32 misc user32 API functions for OS/2
@@ -2233,27 +2233,6 @@ DWORD WIN32API SetLogonNotifyWindow(HWINSTA hwinsta,HWND hwnd)
   return 1;
 }
 
-
-DWORD WIN32API NotifyWinEvent(DWORD arg1, DWORD arg2, DWORD arg3, DWORD arg4)
-{
-  dprintf(("USER32: NotifyWinEvent %x %x %x %x - empty stub!!", arg1, arg2, arg3, arg4));
-
-  return 0;
-}
-
-DWORD WIN32API UnhookWinEvent(DWORD arg1)
-{
-  dprintf(("USER32: UnhookWinEvent %x - empty stub!!", arg1));
-
-  return 0;
-}
-
-DWORD WIN32API SetWinEventHook(DWORD arg1, DWORD arg2, DWORD arg3, DWORD arg4, DWORD arg5, DWORD arg6, DWORD arg7)
-{
-  dprintf(("USER32: SetWinEventHook %x %x %x %x %x %x %x - empty stub!!", arg1, arg2, arg3, arg4, arg5, arg6, arg7));
-
-  return 0;
-}
 
 DWORD WIN32API GetGUIThreadInfo(DWORD arg1, DWORD arg2)
 {
