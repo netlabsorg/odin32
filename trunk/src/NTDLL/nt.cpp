@@ -1,4 +1,4 @@
-/* $Id: nt.cpp,v 1.3 1999-12-18 20:01:13 sandervl Exp $ */
+/* $Id: nt.cpp,v 1.4 1999-12-18 21:45:13 sandervl Exp $ */
 
 
 /*
@@ -14,6 +14,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+#include <os2win.h>
+#include <handlemanager.h>
 
 #include "ntdll.h"
 
@@ -257,13 +259,17 @@ NTSTATUS WINAPI NtOpenProcessToken(HANDLE  ProcessHandle,
                                    DWORD   DesiredAccess,
                                    PHANDLE TokenHandle)
 {
-  dprintf(("NTDLL: NtOpenProcessToken(%08xh,%08xh,%08xh) not implemented.\n",
+  dprintf(("NTDLL: NtOpenProcessToken(%08xh,%08xh,%08xh) not correctly implemented.\n",
            ProcessHandle,
            DesiredAccess,
            TokenHandle));
 
-  *TokenHandle = 0xcafe;
-  return 0;
+  if(ProcessHandle == GetCurrentProcess()) {
+	HMOpenProcessToken(ProcessHandle, DesiredAccess, (ULONG)&ProcSecInfo, TokenHandle);
+	return STATUS_SUCCESS;
+  }
+  *TokenHandle = 0;
+  return ERROR_INVALID_HANDLE;
 }
 
 
@@ -281,8 +287,8 @@ NTSTATUS WINAPI NtOpenThreadToken(HANDLE  ThreadHandle,
            OpenAsSelf,
            TokenHandle));
 
-  *TokenHandle = 0xcafe;
-  return 0;
+  *TokenHandle = 0;
+  return ERROR_INVALID_HANDLE;
 }
 
 
@@ -320,13 +326,19 @@ NTSTATUS WINAPI NtQueryInformationToken(HANDLE  Token,
                                         DWORD   TokenInformationLength,
                                         LPDWORD ReturnLength)
 {
-  dprintf(("NTDLL: NtQueryInformationToken(%08xh,%08xh,%08xh,%08xh,%08xh) not implemented.\n",
+ PROCESSTHREAD_SECURITYINFO *pSecInfo;
+
+  dprintf(("NTDLL: NtQueryInformationToken(%08xh,%08xh,%08xh,%08xh,%08xh) not correctly implemented.\n",
            Token,
            TokenInformationClass,
            TokenInformation,
            TokenInformationLength,
            ReturnLength));
 
+  pSecInfo = (PROCESSTHREAD_SECURITYINFO*)HMHandleGetUserData(Token);
+  if((ULONG)pSecInfo == -1) {
+	return ERROR_INVALID_HANDLE;
+  }
   switch (TokenInformationClass)
   {
     case TokenGroups:                    /* 2 */
@@ -334,7 +346,7 @@ NTSTATUS WINAPI NtQueryInformationToken(HANDLE  Token,
 	if(TokenInformationLength < sizeof (TOKEN_GROUPS)) {
 		return STATUS_BUFFER_TOO_SMALL;
 	}
-	memset(TokenInformation, 0, sizeof(TOKEN_GROUPS));
+	memcpy(TokenInformation, (LPVOID)pSecInfo->pTokenGroups, sizeof(TOKEN_GROUPS));
 	break;
     case TokenUser:                     /* 1 */
       	*ReturnLength = sizeof (TOKEN_USER);
