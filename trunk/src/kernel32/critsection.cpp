@@ -1,4 +1,4 @@
-/* $Id: critsection.cpp,v 1.2 1999-11-14 17:25:04 sandervl Exp $ */
+/* $Id: critsection.cpp,v 1.3 2000-01-06 20:24:25 sandervl Exp $ */
 /*
  * Win32 critical sections
  * 
@@ -17,7 +17,6 @@
 #include <misc.h>
 #include <odinwrap.h>
 
-DEFAULT_DEBUG_CHANNEL(win32)
 DECLARE_DEBUG_CHANNEL(relay)
 
 
