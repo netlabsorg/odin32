@@ -1,4 +1,4 @@
-/* $Id: mmap.h,v 1.28 2003-04-02 11:03:32 sandervl Exp $ */
+/* $Id: mmap.h,v 1.29 2003-05-06 12:06:11 sandervl Exp $ */
 
 /*
  * Memory mapped class
@@ -36,6 +36,8 @@
 #define MEMMAP_ACCESS_COPYONWRITE	8
 
 #define MMAP_FLUSHVIEW_ALL		0xFFFFFFFF
+
+#define MMAP_MAX_FILENAME_LENGTH        260
 
 typedef enum
 {
@@ -123,6 +125,7 @@ static void deleteAll();
 protected:
    HANDLE hMemFile;
    HANDLE hOrgMemFile;
+   LPSTR  lpszFileName;
    ULONG  mSize;
    ULONG  mProtFlags;
    ULONG  mProcessId;
@@ -168,6 +171,7 @@ virtual BOOL   commitPage(ULONG ulFaultAddr, ULONG offset, BOOL fWriteAccess, in
 protected:
             Win32MemMap *parent;
 
+            HANDLE       hDupMemFile;
 private:
 };
 //******************************************************************************

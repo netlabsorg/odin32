@@ -1,4 +1,4 @@
-/* $Id: hmfile.cpp,v 1.44 2003-05-06 10:12:00 sandervl Exp $ */
+/* $Id: hmfile.cpp,v 1.45 2003-05-06 12:06:09 sandervl Exp $ */
 
 /*
  * File IO win32 apis
@@ -1082,6 +1082,30 @@ BOOL HMDeviceFileClass::GetOverlappedResult(PHMHANDLEDATA pHMHandleData,
 //                                 arg3,
 //                                 arg4));
 }
+/******************************************************************************
+ * Name      : DWORD HMDeviceFileClass::GetFileNameFromHandle
+ * Purpose   : the name of the file associated with the system handle (if any)
+ * Parameters: PHMHANDLEDATA pHMHandleData
+ * Variables :
+ * Result    : BOOLEAN
+ * Remark    : 
+ * Status    :
+ *
+ * Author    : SvL
+ ******************************************************************************/
+BOOL HMDeviceFileClass::GetFileNameFromHandle(PHMHANDLEDATA pHMHandleData,
+                                              LPSTR lpszFileName, DWORD cbFileName)
+{
+  HMFileInfo *fileInfo = (HMFileInfo *)pHMHandleData->dwUserData;
+
+  if(fileInfo == NULL || strlen(fileInfo->lpszFileName) >= cbFileName) {
+      if(fileInfo) DebugInt3();
+      return FALSE;
+  }
+  strcpy(lpszFileName, fileInfo->lpszFileName);
+
+  return TRUE;
+}
 
 //******************************************************************************
 //******************************************************************************
@@ -1258,6 +1282,30 @@ DWORD HMDeviceInfoFileClass::GetFileSize(PHMHANDLEDATA pHMHandleData,
   }
   FindClose(hFind);
   return finddata.nFileSizeLow;
+}
+/******************************************************************************
+ * Name      : DWORD HMDeviceFileClass::GetFileNameFromHandle
+ * Purpose   : the name of the file associated with the system handle (if any)
+ * Parameters: PHMHANDLEDATA pHMHandleData
+ * Variables :
+ * Result    : BOOLEAN
+ * Remark    : 
+ * Status    :
+ *
+ * Author    : SvL
+ ******************************************************************************/
+BOOL HMDeviceInfoFileClass::GetFileNameFromHandle(PHMHANDLEDATA pHMHandleData,
+                                                  LPSTR lpszFileName, DWORD cbFileName)
+{
+  HMFileInfo *fileInfo = (HMFileInfo *)pHMHandleData->dwUserData;
+
+  if(fileInfo == NULL || strlen(fileInfo->lpszFileName) >= cbFileName) {
+      if(fileInfo) DebugInt3();
+      return FALSE;
+  }
+  strcpy(lpszFileName, fileInfo->lpszFileName);
+
+  return TRUE;
 }
 /******************************************************************************
  * Name      : DWORD HMDeviceFileClass::GetFileType
