@@ -1,4 +1,7 @@
-/* $Id: ChangeLog,v 1.2706 2004-03-16 17:18:18 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.2707 2004-03-16 17:24:21 sandervl Exp $ */
+
+ 2004-03-16: Vitali Pelenyov <sunlover@innotek   >
+    - ODINCRT:  o New os2 fast critical section implementation
 
  2004-03-16: Sander van Leeuwen <sandervl@innotek   >
     - USER32:   o Changed SPI_ICONHORIZONTALSPACING & SPI_ICONHORIZONTALSPACING
