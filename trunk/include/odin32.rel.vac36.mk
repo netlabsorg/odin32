@@ -1,20 +1,21 @@
-# $Id: pdwin32.vac36.rel,v 1.22 2000-11-21 04:39:19 bird Exp $
-# ODIN / win32os2 Project
+# $Id: odin32.rel.vac36.mk,v 1.1 2000-12-02 23:50:48 bird Exp $
+
 #
-# RELEASE makefile for the VAC 3.6.5 compiler environment
+# Odin32 API
 #
-# phaller@gmx.net, 1999/05/27
+#       RELEASE makefile for the VAC 3.6.5 compiler environment.
 #
 
 
 #
 # Library macros.
 #
-SOMLIB   = somtk.lib
-RTLLIB   = cpprms36.lib
-RTLLIB_O = cpprmo36.lib
-DLLENTRY = $(PDWIN32_LIB)\dllentry.obj
-ODINCRT  = odincrt
+SOMLIB      = somtk.lib
+RTLLIB      = cpprms36.lib
+RTLLIB_O    = cpprmo36.lib
+RTLLIB_NRE  = cpprni36.lib
+DLLENTRY    = $(ODIN32_LIB)\dllentry.obj
+ODINCRT     = odincrt
 
 
 #
@@ -33,7 +34,7 @@ LD     = icc
 LD2    = ilink
 IMPLIB = implib
 ILIB   = ilib
-RC     = $(PDWIN32_TOOLS)\wrc
+RC     = $(ODIN32_TOOLS)\wrc
 OS2RC  = rc
 
 
@@ -66,7 +67,7 @@ CXXFLAGS         = -Q -Si -G5 -O+ -Oi+ -Ss+ -W3 -Gm+ /Gn+ $(CXXTARGETFLAGS) /Gx+
 CXXFLAGS_ODINCRT = -Q -Si -G5 -O+ -Oi+ -Ss+ -W3 -Gm+ /Gn- $(CXXTARGETFLAGS) /Gx+
 CFLAGS_WIN32APP  = -Q -Si -G5 -O+ -Oi+ -Ss+ -W3 -Gm+ /Gn+ $(CTARGETFLAGS)
 CXXFLAGS_WIN32APP= -Q -Si -G5 -O+ -Oi+ -Ss+ -W3 -Gm+ /Gn+ $(CXXTARGETFLAGS)
-CINCLUDES        = -I$(PDWIN32_INCLUDE)\Win -I. -I$(PDWIN32_INCLUDE)
+CINCLUDES        = -I$(ODIN32_INCLUDE)\Win -I. -I$(ODIN32_INCLUDE)
 CDEFINES         = -D__WIN32OS2__ -D__WINE__ -D__i386__ -DTCPV40HDRS -DCOMCTL32UNDOC
 CDEFINES_ODINCRT = -D__WIN32OS2__ -D__WINE__ -D__i386__
 CDEFINES_WIN32APP= -D__WIN32OS2__ -D__i386__

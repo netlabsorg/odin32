@@ -1,9 +1,9 @@
-# $Id: pdwin32.wat.dbg,v 1.7 2000-11-21 04:39:19 bird Exp $
-# ODIN / win32os2 Project
+# $Id: odin32.dbg.wat.mk,v 1.1 2000-12-02 23:50:46 bird Exp $
+
 #
-# DEBUG makefile for the Watcom C/C++ compiler environment
+# Odin32 API
 #
-#
+#       DEBUG makefile for the Watcom C/C++ compiler environment.
 #
 
 
@@ -13,7 +13,7 @@
 SOMLIB   = somtk.lib
 RTLLIB   = clib3r.lib
 RTLLIB_O = clib3r.lib
-DLLENTRY = $(PDWIN32_LIB)\dllentry_watcom.obj
+DLLENTRY = $(ODIN32_LIB)\dllentry_watcom.obj
 ODINCRT  = odincrtd
 
 
@@ -33,7 +33,7 @@ LD     = wlink
 LD2    = $(LD)
 IMPLIB = implib
 ILIB   = ilib
-RC     = $(PDWIN32_TOOLS)\wrc
+RC     = $(ODIN32_TOOLS)\wrc
 OS2RC  = rc
 
 
@@ -50,20 +50,20 @@ OS2RCLFLAGS      = -x2 -n
 
 #
 # Watcom compiler flags:
-# w4  		warning level 4
+# w4            warning level 4
 # wcd=726       disable warning 726 (unreferened local variable or parameter)
-# e25 		error limit
-# d2		generate symbolic debug information
-# od 		no optimizations
-# bm		multithreaded environment
-# mf		flat memory model
-# 5r		pentium register calling convention
-# br		use dll for runtime library functions
-# bt=os2	target os = OS/2
-# zq		operate quietly (display only errors)
-# fp5		optimize floating-point for pentium
-# fpi87		inline fpu instructions
-# hw		generate Watcom debug information
+# e25           error limit
+# d2            generate symbolic debug information
+# od            no optimizations
+# bm            multithreaded environment
+# mf            flat memory model
+# 5r            pentium register calling convention
+# br            use dll for runtime library functions
+# bt=os2        target os = OS/2
+# zq            operate quietly (display only errors)
+# fp5           optimize floating-point for pentium
+# fpi87         inline fpu instructions
+# hw            generate Watcom debug information
 # xd        disable exception handling (default)
 # xs        enable exception handling
 # bd        build target is a dynamic link library (DLL)
@@ -77,7 +77,7 @@ CXXFLAGS_ODINCRT = -w4 -wcd=726 -e25 -od -d2 -hw -bm -mf -5r -bt=os2 -zq -fp5 -f
 CFLAGS_WIN32APP  = -w4 -wcd=726 -e25 -od -d2 -hw -bm -mf -5r -bt=os2 -zq -fp5 -fpi87
 CXXFLAGS_WIN32APP= -w4 -wcd=726 -e25 -od -d2 -hw -bm -mf -5r -bt=os2 -zq -fp5 -fpi87
 
-CINCLUDES        = -i$(%WATCOM)\h -i$(PDWIN32_INCLUDE)\Win -i. -i$(PDWIN32_INCLUDE)
+CINCLUDES        = -i$(%WATCOM)\h -i$(ODIN32_INCLUDE)\Win -i. -i$(ODIN32_INCLUDE)
 CDEFINES_WIN32APP= -DDEBUG -D__WIN32OS2__ -D__i386__
 CDEFINES_ODINCRT = -DDEBUG -D__WIN32OS2__ -D__i386__ -D__WINE__
 CDEFINES         = -DDEBUG -D__WIN32OS2__ -D__i386__ -D__WINE__ -DTCPV40HDRS -DCOMCTL32UNDOC \
