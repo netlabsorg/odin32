@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.23 1999-09-26 16:09:04 dengert Exp $
+# $Id: Makefile,v 1.24 1999-09-27 12:32:27 bird Exp $
 
 #
 # PD-Win32 API
@@ -54,9 +54,8 @@ $(TARGET).lib: $(TARGET)exp.def
         $(IMPLIB) $(IMPLIBFLAGS) $@ $(TARGET)exp.def
         $(CP) $@ $(PDWIN32_LIB)
 
-#SvL: Does not work correctly for GetOS2Callback__15Win32WindowProcFv
-#$(TARGET)exp.def: $(TARGET).def
-#        $(IMPDEF) $** $@
+$(TARGET)exp.def: $(TARGET).def
+        $(IMPDEF) $** $@
 
 
 user32.obj: user32.cpp $(PDWIN32_INCLUDE)\wndproc.h \
