@@ -1,4 +1,4 @@
-/* $Id: oslibwin.h,v 1.52 2001-04-05 09:31:27 sandervl Exp $ */
+/* $Id: oslibwin.h,v 1.53 2001-04-15 17:05:29 sandervl Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -42,7 +42,7 @@ HWND  OSLibWinCreateWindow(HWND hwndParent,ULONG dwWinStyle,
                            ULONG id, BOOL fTaskList,BOOL fShellPosition, int classStyle);
 
 BOOL  OSLibWinConvertStyle(ULONG dwStyle, ULONG dwExStyle, ULONG *OSWinStyle);
-void  OSLibSetWindowStyle(HWND hwnd, ULONG dwStyle, BOOL fTaskList);
+void  OSLibSetWindowStyle(HWND hwnd, ULONG dwStyle, ULONG dwExStyle);
 DWORD OSLibQueryWindowStyle(HWND hwnd);
 
 #define OSLIB_QWL_USER -4
