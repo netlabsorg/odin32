@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.10 2000-03-06 23:39:09 bird Exp $
+# $Id: makefile,v 1.11 2000-04-25 01:59:34 phaller Exp $
 
 #
 # Odin32 API
@@ -24,6 +24,7 @@ CLEANEXTRAS = shlwapirsrc.asm
 # Object files. All objects should be prefixed with $(OBJDIR)!
 OBJS = \
 $(OBJDIR)\shlwapi.obj \
+$(OBJDIR)\url.obj \
 $(OBJDIR)\shlwapirsrc.obj \
 $(PDWIN32_LIB)/dllentry.obj
 
