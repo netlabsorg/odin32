@@ -1,4 +1,4 @@
-/* $Id: OS2KTK.h,v 1.4 2000-12-11 06:53:50 bird Exp $
+/* $Id: OS2KTK.h,v 1.5 2001-07-10 05:23:21 bird Exp $
  *
  * OS2KTK - OS/2 Kernel Task.
  *
@@ -9,6 +9,10 @@
  */
 #ifndef _OS2KTK_h_
 #define _OS2KTK_h_
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 
 /*******************************************************************************
@@ -66,7 +70,9 @@
 
 
 
-
+/*******************************************************************************
+*   External Functions                                                         *
+*******************************************************************************/
 
 /**
  * Copy user memory into system memory.
@@ -123,6 +129,103 @@ extern ULONG KRNLCALL   TKSuFuBuff(PVOID pvTarget, PVOID pvSource, ULONG cb, ULO
  *                      the PTDA pointer on successful return.
  */
 extern ULONG KRNLCALL  TKPidToPTDA(PID pid, PPPTDA ppPTDA);
+#endif
+
+
+/**
+ * Post signal to one or more processes.
+ * @returns  NO_ERROR on success.
+ *           On error ERROR_NOT_DESCENDANT, ERROR_SIGNAL_REFUSED,
+ *           ERROR_INVALID_PROCID, ERROR_ZOMBIE_PROCESS, ERROR_SIGNAL_PENDING. (it seems)
+ * @param    usSignal       Signal number.
+ * @param    usAction       Action.
+ *                          0 - the process and all children.
+ *                          1 - only the process
+ *                          2 - the process and all it's decendants.
+ *                          3 - all processes in that screen group.
+ * @param    usSignalArg    Signal argument.
+ * @param    usPIDSGR       Process Id or Screen Group Id.
+ */
+extern ULONG _Optlink POST_SIGNAL32(USHORT usSignal, USHORT usAction, USHORT usSignalArg, USHORT usPIDSGR);
+
+#ifdef __cplusplus
+}
+#endif
+
+
+#ifdef INCL_OS2KRNL_TCB
+/**
+ * Force a thread to be made ready.
+ * @param   flFlag  Which flag(s?) to set.
+ * @param   pTCB    Pointer to the thread control block of the thread to be forced.
+ */
+extern void KRNLCALL TKForceThread(ULONG flFlag, PTCB pTCB);
+#endif
+
+#ifdef INCL_OS2KRNL_PTDA
+/**
+ * Set force flag on a task.
+ * @param   flFlag  Which flag(s?) to set.
+ * @param   pPTDA   Pointer to the PTDA of the task to be processed.
+ * @param   fForce  FALSE   Just set the flag on all threads.
+ *                  TRUE    Force all threads ready by calling TKForceThread.
+ */
+extern void KRNLCALL  TKForceTask(ULONG flFlag, PPTDA pPTDA, BOOL fForce);
+#endif
+
+#ifdef INCL_OS2KRNL_TCB
+/**
+ * Get priotity of a thread.
+ * @returns Thread priority.
+ * @param   pTCB    pointer to the TCB of the thread in question.
+ */
+extern ULONG KRNLCALL TKGetPriority(PTCB pTCB);
+#endif
+
+/**
+ * Make current thread sleep.
+ * @returns NO_ERROR on success.
+ *          ERROR_INTERRUPT if a signal is forced on the thread.
+ *          ERROR_TIMEOUT if we timeout.
+ * @param   ulSleepId   32-bit sleep id which TKWakeup will be called with.
+ * @param   ulTimeout   Number of milliseconds to sleep. (0 is not yield)
+ *                      -1 means forever or till wakeup.
+ * @param   fUnint      TRUE:  may not interrupt sleep.
+ *                      FALSE: may interrupt sleep.
+ * @param   flSleepType ???
+ */
+extern ULONG KRNLCALL TKSleep(ULONG ulSleepId, ULONG ulTimeout, ULONG fUnInterruptable, ULONG flWakeupType);
+
+/**
+ * Wakeup sleeping thread(s).
+ * @returns NO_ERROR on succes.
+ *          Appropriate error code on failure.
+ * @param   ulSleepId       32-bit sleep id which threads are sleeping on.
+ * @param   flWakeUpType    How/what to wakeup.
+ * @param   pcWakedUp       Pointer to variable which is to hold the count of
+ *                          thread waked up.
+ */
+extern ULONG KRNLCALL TKWakeup(ULONG ulSleepId, ULONG flWakeupType, PULONG cWakedUp);
+
+#ifdef INCL_OS2KRNL_TCB
+/**
+ * Wake up a single thread.
+ * @returns NO_ERROR on succes.
+ *          Appropriate error code on failure.
+ * @param   pTCB    Pointer to the TCB of the thread to be waken.
+ */
+extern ULONG KRNLCALL TKWakeThread(PTCB pTCB);
+#endif
+
+#ifdef INCL_OS2KRNL_TCB
+/**
+ * See which thread will be Wakeup.
+ * @returns Pointer to TCB of the thread on success.
+ *          NULL on failure or no threads.
+ * @param   ulSleepId       32-bit sleep id which threads are sleeping on.
+ * @param   flWakeUpType    How/what to wakeup.
+ */
+extern PTCB  KRNLCALL TKQueryWakeup(ULONG ulSleepId, ULONG flWakeupType);
 #endif
 
 #endif
