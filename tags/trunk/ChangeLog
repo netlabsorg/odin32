@@ -1,4 +1,12 @@
-/* $Id: ChangeLog,v 1.1625 2001-07-30 18:55:36 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.1626 2001-07-30 22:58:00 bird Exp $ */
+
+ 2001-07-29: knut st. osmundsen <kosmunds@csc.com>
+    - Custombuild, Makefiles:
+                o Made the custombuild simpler by reusing the common makefiles.
+                  Any initterm.obj is replaced by an empty dummy object and the
+                  make is invoked with CUSTOMBUILD=1. makefile in /src have the
+                  common targets all prefixed with custombuild_.
+                o Merged odin32.post.emx.mk into odin32.post.vac3.mk.
 
  2001-07-30: Sander van Leeuwen <sandervl@xs4all.nl>
     - WINMM:    o Rewrote timeGetSystemTime & timeGetTime
