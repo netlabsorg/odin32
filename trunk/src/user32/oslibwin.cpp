@@ -1,4 +1,4 @@
-/* $Id: oslibwin.cpp,v 1.20 1999-10-11 16:04:50 cbratschi Exp $ */
+/* $Id: oslibwin.cpp,v 1.21 1999-10-11 20:54:24 sandervl Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -118,7 +118,7 @@ BOOL OSLibWinConvertStyle(ULONG dwStyle, ULONG *dwExStyle, ULONG *OSWinStyle, UL
   if(dwStyle & WS_TABSTOP_W)
         *OSWinStyle |= WS_TABSTOP;
 
-  if (dwStyle & WS_CHILD_W)
+  if(dwStyle & WS_CHILD_W && !((dwStyle & WS_CAPTION_W) == WS_CAPTION_W))
   {
 //SvL: Causes crash in VPBuddy if enabled -> find bug
 #if 0
@@ -139,20 +139,13 @@ BOOL OSLibWinConvertStyle(ULONG dwStyle, ULONG *dwExStyle, ULONG *OSWinStyle, UL
       *borderHeight = *borderWidth = 1;
 
     } else if (*dwExStyle & WS_EX_WINDOWEDGE_W); //no border
-//SvL: Causes crash in VPBuddy if enabled -> find bug
-#if 0
-    else if (dwStyle & WS_BORDER_W)
-    {
-      *OSFrameStyle |= FCF_SIZEBORDER;
-      *borderHeight = *borderWidth = 1;
-    }
-#endif
 
     if(dwStyle & WS_VSCROLL_W)
           *OSFrameStyle |= FCF_VERTSCROLL;
     if(dwStyle & WS_HSCROLL_W)
           *OSFrameStyle |= FCF_HORZSCROLL;
-  } else
+  } 
+  else
   {
     if((dwStyle & WS_CAPTION_W) == WS_CAPTION_W)
           *OSFrameStyle |= FCF_TITLEBAR;
