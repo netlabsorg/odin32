@@ -1,4 +1,4 @@
-/* $Id: dibitmap.cpp,v 1.4 2000-02-16 14:18:09 sandervl Exp $ */
+/* $Id: dibitmap.cpp,v 1.5 2000-03-16 19:18:14 sandervl Exp $ */
 
 /*
  * GDI32 dib & bitmap code
@@ -47,10 +47,10 @@ HBITMAP WIN32API CreateDIBitmap(HDC hdc, const BITMAPINFOHEADER *lpbmih,
 }
 //******************************************************************************
 //******************************************************************************
-HBITMAP WIN32API CreateCompatibleBitmap( HDC arg1, int arg2, int  arg3)
+HBITMAP WIN32API CreateCompatibleBitmap( HDC hdc, int nWidth, int nHeight)
 {
-    dprintf(("GDI32: CreateCompatibleBitmap\n"));
-    return O32_CreateCompatibleBitmap(arg1, arg2, arg3);
+    dprintf(("GDI32: CreateCompatibleBitmap %x (%d,%d)", hdc, nWidth, nHeight));
+    return O32_CreateCompatibleBitmap(hdc, nWidth, nHeight);
 }
 //******************************************************************************
 //CreateDisardableBitmap is obsolete and can be replaced by CreateCompatibleBitmap
@@ -86,6 +86,7 @@ HBITMAP WIN32API CreateDIBSection( HDC hdc, BITMAPINFO *pbmi, UINT iUsage,
  HBITMAP res = 0;
  BOOL    fFlip = 0;
  int     iHeight, iWidth;
+ BOOL    fCreateDC = FALSE;
 
   dprintf(("GDI32: CreateDIBSection %x %x %x %x %d", hdc, iUsage, ppvBits, hSection, dwOffset));
 
@@ -105,6 +106,11 @@ HBITMAP WIN32API CreateDIBSection( HDC hdc, BITMAPINFO *pbmi, UINT iUsage,
     	fFlip |= FLIP_VERT;
   }
 
+  //SvL: RP7 (update) calls this api with hdc == 0
+  if(hdc == 0) {
+	hdc = GetWindowDC(GetDesktopWindow());
+	fCreateDC = TRUE;
+  }
   res = O32_CreateDIBitmap(hdc, &pbmi->bmiHeader, 0, NULL, pbmi, iUsage);
   if (res)
   {
@@ -149,9 +155,11 @@ HBITMAP WIN32API CreateDIBSection( HDC hdc, BITMAPINFO *pbmi, UINT iUsage,
       pbmi->bmiHeader.biWidth = iWidth;
       pbmi->bmiHeader.biHeight = iHeight;
 
+      if(fCreateDC)	ReleaseDC(GetDesktopWindow(), hdc);
       return(res);
     }
   }
+  if(fCreateDC)	ReleaseDC(GetDesktopWindow(), hdc);
 
   /* Error.  */
   if (res)
