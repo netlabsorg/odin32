@@ -1,4 +1,4 @@
-/* $Id: windlllx.cpp,v 1.2 1999-09-18 17:47:10 sandervl Exp $ */
+/* $Id: windlllx.cpp,v 1.3 1999-10-21 12:18:47 sandervl Exp $ */
 
 /*
  * Win32 LX Dll class (compiled in OS/2 using Odin32 api)
@@ -51,6 +51,7 @@ BOOL WIN32API RegisterLxDll(HINSTANCE hInstance, WIN32DLLENTRY EntryPoint,
 	dprintf(("RegisterLxDll: windll == NULL!!!"));
 	return FALSE;
    }
+   windll->AddRef();
    return windll->attachProcess();
 }
 //******************************************************************************
