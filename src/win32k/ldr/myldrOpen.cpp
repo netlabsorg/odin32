@@ -1,4 +1,4 @@
-/* $Id: myldrOpen.cpp,v 1.10.4.1 2000-07-16 22:43:36 bird Exp $
+/* $Id: myldrOpen.cpp,v 1.10.4.2 2000-08-11 02:23:19 bird Exp $
  *
  * myldrOpen - ldrOpen.
  *
@@ -73,7 +73,7 @@ ULONG LDRCALL myldrOpen(PSFN phFile, PSZ pszFilename, PULONG pfl)
     ULONG rc;                           /* Return value. */
 
     /** @sketch
-     * Try open the file (thats why this function is called anyway)
+     * Try open the file (that's why this function is called anyway)
      */
     rc = ldrOpen(phFile, pszFilename, pfl);
     if (rc == NO_ERROR)
@@ -96,6 +96,7 @@ ULONG LDRCALL myldrOpen(PSFN phFile, PSZ pszFilename, PULONG pfl)
         union _u_ReadBufferPointers         /* Read buffer pointer(s). */
         {
             char               *pach;       /* Pointer to the buffer as char. */
+            unsigned long      *pul;        /* Pointer to the buffer as unsigned long. */
             PIMAGE_DOS_HEADER   pMzHdr;     /* Use the buffer as a dosheader. */
             PIMAGE_NT_HEADERS   pNtHdrs;    /* Use the buffer as a NT header. */
         } u1;
@@ -250,9 +251,12 @@ ULONG LDRCALL myldrOpen(PSFN phFile, PSZ pszFilename, PULONG pfl)
                             delete pPe2Lx;
                     }
                     else
+                    {
                         kprintf(("myldrOpen-%d: Failed to allocate Pe2Lx object.\n", cNesting));
+                        rc = ERROR_NOT_ENOUGH_MEMORY;
+                    }
 
-                     goto cleanup;
+                    goto cleanup;
                 }
 
 
@@ -311,7 +315,7 @@ ULONG LDRCALL myldrOpen(PSFN phFile, PSZ pszFilename, PULONG pfl)
             /** @sketch
              * ELF image?
              */
-            if (u1.pach[0] == ELFMAG0 && u1.pach[1] == ELFMAG1 && u1.pach[2] == ELFMAG2 && u1.pach[3] == ELFMAG3)
+            if (*u1.pul == ELFMAGICLSB)
             {
                 if (isELFDisabled())
                     goto cleanup_noerror;
@@ -331,7 +335,7 @@ ULONG LDRCALL myldrOpen(PSFN phFile, PSZ pszFilename, PULONG pfl)
             /** @sketch
              * Java image?
              */
-            if (u1.pach[0] == 0xCA && u1.pach[1] == 0xFE && u1.pach[2] == 0xBA && u1.pach[3] == 0xBE)
+            if (*u1.pul == 0xBEBAFECAUL) //CAh FEh BAh BEh
             {
                 if (isJAVADisabled())
                     goto cleanup_noerror;
@@ -392,6 +396,7 @@ ULONG LDRCALL myldrOpen(PSFN phFile, PSZ pszFilename, PULONG pfl)
                  */
                 goto cleanup;
             }
+
         }
         else
         {
@@ -504,22 +509,44 @@ ULONG LDRCALL myldrOpen(PSFN phFile, PSZ pszFilename, PULONG pfl)
                      *  ENDIF
                      *  Open the new executable file recursively. (psz)
                      */
-                     if (isLdrStateExecPgm())
-                     {
-                         if (*psz2)
-                            rc = AddArgsToFront(3, psz, psz2, achTkExecPgmFilename);
-                         else
-                            rc = AddArgsToFront(2, psz, achTkExecPgmFilename);
-                         if (rc != NO_ERROR)
-                         {
-                             kprintf(("myldrOpen-%d: AddArgsToFront failed with rc=%d\n", cNesting));
-                             goto cleanup_noerror;
-                         }
-                         rc = SetExecName(psz);
-                         if (rc != NO_ERROR)
-                             kprintf(("myldrOpen-%d: SetExecName failed with rc=%d\n", cNesting));
-                     }
-                     rc = myldrOpen(phFile, psz, pfl);
+                    if (isLdrStateExecPgm())
+                    {
+                        if (*psz2)
+                           rc = AddArgsToFront(3, psz, psz2, achTkExecPgmFilename);
+                        else
+                           rc = AddArgsToFront(2, psz, achTkExecPgmFilename);
+                        if (rc != NO_ERROR)
+                        {
+                            kprintf(("myldrOpen-%d: AddArgsToFront failed with rc=%d\n", cNesting));
+                            goto cleanup_noerror;
+                        }
+                        rc = SetExecName(psz);
+                        if (rc != NO_ERROR)
+                            kprintf(("myldrOpen-%d: SetExecName failed with rc=%d\n", cNesting));
+                    }
+                    ldrClose(*phFile);
+                    rc = myldrOpen(phFile, psz, pfl);
+                    if (rc != NO_ERROR)
+                    {
+                        psz2 = psz + strlen(psz);
+                        if (psz + 4 >= psz2 || strcmp(psz2 - 4, ".EXE") != 0)
+                        {
+                            strcpy(psz2, ".EXE");
+                            rc = myldrOpen(phFile, psz, pfl);
+                            *psz2 = '\0';
+                        }
+                        else
+                            psz2 = NULL;
+
+                        //should we search the PATH??? For a starting, we'll do it.
+                        if (rc != NO_ERROR
+                            && (rc = OpenPATH(phFile, psz, pfl)) != NO_ERROR
+                            && psz2 != NULL)
+                        {
+                            *psz2 = '.';
+                            rc = OpenPATH(phFile, psz, pfl);
+                        }
+                    }
                 }
                 else
                 {
@@ -676,10 +703,11 @@ APIRET AddArgsToFront(int cArgs,  ...)
         return ERROR_INVALID_PARAMETER;
     }
 
-    cchOldArgs = iSecondArg = strlen(&achTkExecPgmArguments[0]) + 1;
-    psz = &achTkExecPgmArguments[cchOldArgs];
+    iSecondArg = strlen(&achTkExecPgmArguments[0]) + 1;
+    psz = &achTkExecPgmArguments[iSecondArg];
     while (*psz != '\0')
-        psz = &achTkExecPgmArguments[(cchOldArgs += strlen(psz) + 1)];
+        psz += strlen(psz) + 1;
+    cchOldArgs = psz - &achTkExecPgmArguments[iSecondArg];
 
     va_start(vaarg, cArgs);
     for (cchNewArgs = i = 0; i < cArgs; i++)
@@ -700,20 +728,20 @@ APIRET AddArgsToFront(int cArgs,  ...)
      *    !IMPORTANT! The first existing arguments (executable name) is skipped !IMPORTANT!
      *    !IMPORTANT! in this move as this have to be re-added in this call!    !IMPORTANT!
      */
-    if (cchOldArgs + 1 + cchNewArgs > CCHARGUMENTS)
+    if (cchOldArgs + cchNewArgs + 1 > CCHARGUMENTS)
     {
         kprintf(("AddArgsToFront: argument buffer is too small to hold the arguments to add, cchOldArgs=%d, cchNewArgs=%d\n",
                  cchOldArgs, cchNewArgs));
         return ERROR_BAD_ARGUMENTS;
     }
 
-    if (cchOldArgs > 1)
+    if (cchOldArgs > 0)
     {
         memmove(&achTkExecPgmArguments[cchNewArgs], &achTkExecPgmArguments[iSecondArg],
-                cchOldArgs - iSecondArg + 1);
+                cchOldArgs + 1);
     }
     else
-        achTkExecPgmArguments[cchNewArgs + 1] = '\0';
+        achTkExecPgmArguments[cchNewArgs] = '\0';
 
 
     /** @sketch
@@ -726,23 +754,17 @@ APIRET AddArgsToFront(int cArgs,  ...)
      */
     va_start(vaarg, cArgs);
     psz = va_arg(vaarg, char *);
-    iSecondArg = strlen(psz) + 1;
-    memcpy(&achTkExecPgmArguments[0], psz, iSecondArg);
+    memcpy(&achTkExecPgmArguments[0], psz, (i = strlen(psz) + 1));
+    psz = &achTkExecPgmArguments[i];
 
-    psz = &achTkExecPgmArguments[iSecondArg];
-    i = 2;                              /* one in advance to avoid a +1. */
-    while (1)
+    for (i = 1; i < cArgs; i++)
     {
+        if (i > 1) *psz++ = ' ';    //Add space if not second argument.
         strcpy(psz, va_arg(vaarg, char *));
         psz += strlen(psz);
-        /* IF more arguments following (new or old) THEN add a space separator ELSE break loop */
-        if (cchOldArgs > 1 || i < cArgs)
-            *psz++ = ' ';
-        else
-            break;
-        i++;
     }
     va_end(vaarg);
+    if (cchOldArgs > 0) *psz++ = ' ';    //Add space if old arguments
 
     #ifdef DEBUG /* assertion */
     if (psz != &achTkExecPgmArguments[cchNewArgs])
@@ -816,7 +838,8 @@ APIRET OpenPATH(PSFN phFile, char *pszFilename, PULONG pfl)
 {
     APIRET      rc;
     USHORT      TCBFailErr_save;
-    int         cchFilename;            /* Filename length + 1. */
+    int         cchFile;                /* Filename length + 1. */
+    const char *pszFile;                /* Pointer to filename portion. */
     const char *pszPath = ScanEnv(GetEnv(FALSE), "PATH"); /* Current Process environment? */
 
     /**@sketch
@@ -825,7 +848,14 @@ APIRET OpenPATH(PSFN phFile, char *pszFilename, PULONG pfl)
     if (pszPath == NULL)
         return ERROR_FILE_NOT_FOUND;
 
-    cchFilename = strlen(pszFilename) + 1;
+    /**@sketch
+     * Skip any paths in the filename.
+     */
+    pszFile = pszFilename + (cchFile = strlen(pszFilename));
+    while (pszFile >= pszFilename && *pszFile != '\\' && *pszFile != '/')
+        pszFile--;
+    cchFile -= pszFile - pszFilename;
+    pszFile++;
 
     /**@sketch
      * We'll have to save the TCBFailErr since we don't want to cause
@@ -839,28 +869,36 @@ APIRET OpenPATH(PSFN phFile, char *pszFilename, PULONG pfl)
      */
     while (*pszPath != '\0')
     {
-        const char *  pszNext = pszPath;
+        const char *  pszNext;
         int           cchPath;
-        char          chEnd, ch;
+        char          chEnd;
+        register char ch;
 
         /*
          * Find end of this path.
          */
         while (*pszPath == ' ') pszPath++; //skip leading spaces.
-        chEnd = *pszPath == '"' ? '"' : ';';
+        if (*pszPath == '"')
+        {
+            chEnd = '"';
+            pszPath++;
+        }
+        else
+            chEnd = ';';
+        pszNext = pszPath;
         while ((ch = *pszNext) != chEnd && ch != '\0')
             pszNext++;
 
+        cchPath = pszNext - pszPath;
         if (chEnd == '"')
         {
-            cchPath = pszNext - (++pszPath); //pszPath points at '"' before incrementing it.
-            if (ch != '\0')
+            /* Skip anything between the " and the ; or string end. */
+            while ((ch = *pszNext) != ';' && ch != '\0')
                 pszNext++;
         }
         else
         {
             /* Trim the string. */
-            cchPath = pszNext - pszPath;
             while (cchPath > 0 && pszPath[cchPath-1] == ' ') //??
                 cchPath--;
         }
@@ -868,7 +906,7 @@ APIRET OpenPATH(PSFN phFile, char *pszFilename, PULONG pfl)
         /*
          *  No length? No Path! Or path'\'filename too long? => Next
          */
-        if (cchPath > 0 && cchPath + cchFilename + 1 < CCHMAXPATH)
+        if (cchPath > 0 && cchPath + cchFile + 1 < CCHMAXPATH)
         {
             static char     achFilename[CCHMAXPATH];
             /*
@@ -879,7 +917,7 @@ APIRET OpenPATH(PSFN phFile, char *pszFilename, PULONG pfl)
                 cchPath--;
             else
                 achFilename[cchPath] = '\\';
-            memcpy(&achFilename[cchPath + 1], pszFilename, cchFilename); /* cchFilename = length + 1; hence we copy the terminator too. */
+             memcpy(&achFilename[cchPath + 1], pszFile, cchFile); /* cchFile = length + 1; hence we copy the terminator too. */
 
             /*
              * Try open the file.
@@ -897,6 +935,7 @@ APIRET OpenPATH(PSFN phFile, char *pszFilename, PULONG pfl)
                     break;
 
                 case NO_ERROR:
+                    strcpy(pszFilename, achFilename);
                 default:
                     tcbSetTCBFailErr(tcbGetCur(), TCBFailErr_save);
                     return rc;
