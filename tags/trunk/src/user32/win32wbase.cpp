@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.32 1999-10-09 09:45:27 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.33 1999-10-09 18:16:57 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -38,6 +38,7 @@
 #include "heapshared.h"
 #include "dc.h"
 #include "pmframe.h"
+#include "win32wdesktop.h"
 
 #define HAS_DLGFRAME(style,exStyle) \
     (((exStyle) & WS_EX_DLGMODALFRAME) || \
@@ -2529,6 +2530,9 @@ Win32BaseWindow *Win32BaseWindow::GetWindowFromHandle(HWND hwnd)
 {
  Win32BaseWindow *window;
 
+   if(hwnd == NULL && windowDesktop) 
+	return windowDesktop;
+
    if(HwGetWindowHandleData(hwnd, (DWORD *)&window) == TRUE) {
         return window;
    }
@@ -2589,7 +2593,11 @@ HWND Win32BaseWindow::OS2ToWin32Handle(HWND hwnd)
         if(window) {
                 return window->getWindowHandle();
         }
-        else  return hwnd;    //OS/2 window handle
+        window = GetWindowFromOS2FrameHandle(hwnd);
+        if(window) {
+                return window->getWindowHandle();
+        }  
+        else    return hwnd;    //OS/2 window handle
 }
 //******************************************************************************
 //******************************************************************************
