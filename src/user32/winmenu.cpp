@@ -1,4 +1,4 @@
-/* $Id: winmenu.cpp,v 1.5 1999-09-23 14:58:57 phaller Exp $ */
+/* $Id: winmenu.cpp,v 1.6 1999-09-23 17:36:16 phaller Exp $ */
 
 /*
  * Win32 menu API functions for OS/2
@@ -263,6 +263,7 @@ ODINFUNCTION2(HMENU, GetSubMenu,
 
   hMenuReturned = O32_GetSubMenu(menu->getOS2Handle(), arg2);
   /* @@@PH allocate Win32MenuRes object ! */
+  /* @@@PH WARNING, memory leak! */
   menuReturned = new Win32MenuRes(hMenuReturned);
   return ((HMENU)menuReturned);
 }
@@ -287,6 +288,7 @@ ODINFUNCTION2(HMENU, GetSystemMenu,
   hMenuReturned =  O32_GetSystemMenu(hSystemWindow, bRevert);
 
   /* @@@PH allocate Win32MenuRes object ! */
+  /* @@@PH WARNING, memory leak! */
   menuReturned = new Win32MenuRes(hMenuReturned);
   return ((HMENU)menuReturned);
 }
