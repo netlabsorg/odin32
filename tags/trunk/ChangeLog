@@ -1,4 +1,26 @@
-/* $Id: ChangeLog,v 1.2510 2003-02-28 16:20:29 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.2511 2003-03-03 16:42:18 sandervl Exp $ */
+
+ 2003-03-03: Dietrich Teickner <Dietrich_Teickner@t-online   >
+    - GDI32:    o ExtTextOutA: copy string and force zero termination
+    - SHELL32:  o Minor updates
+
+ 2003-03-03: Sander van Leeuwen <sandervl@innotek   >
+    - WSOCK32:  o Removed wrong checks for invalid address parameters in 
+                  sendto & recvfrom
+
+ 2003-03-01: Sander van Leeuwen <sandervl@innotek   >
+    - KERNEL32: o ExitProcess: turn off hard errors & exception popups before
+                  calling O32_ExitProcess (release build only)
+                o DeleteFile: when deleting a .lnk file, verify if it's a shell
+                  link object file. if so, delete WPS object
+                o ODIN_DisableFolderShellLink added: disable object creation in 
+                  Odin folder. Desktop shortcuts will still be created as WPS 
+                  objects on the desktop.
+                o OSLibWinCreateObject: create shelllink file with WPS object id
+    - USER32/KERNEL32:   
+                o Move OSLibWinCreateObject to KERNEL32
+    - SHELL32:  o Shelllink: use kernel32 file functions instead of those from 
+                  the VAC crt
 
  2003-02-28: Sander van Leeuwen <sandervl@innotek   >
     - SRC\makefile:
@@ -8,6 +30,8 @@
                 o Check for invalid data while measuring the CPU speed. DosTmrQueryTime
                   isn't very reliable (on laptops).
                 o ExitProcess: don't remove our exception handler too early
+                o Map ERROR_PATH_NOT_FOUND (OS/2) to ERROR_INVALID_NAME
+    - WINMM:    o Protect linked timer list with VMutex object.
 
  2003-02-28: knut st. osmundsen <Knut.Osmundsen@innotek   >
     - MAKEFILES:
