@@ -1,4 +1,4 @@
-/* $Id: user32.cpp,v 1.8 1999-06-20 14:02:13 sandervl Exp $ */
+/* $Id: user32.cpp,v 1.9 1999-06-20 16:47:39 sandervl Exp $ */
 
 /*
  * Win32 misc user32 API functions for OS/2
@@ -624,13 +624,7 @@ HWND WIN32API CreateWindowExA(DWORD     dwExStyle,
         window = 0;
     }
     if(window) {
-        window->SetWindowHandle(hwnd);
-    }
-    //SvL: Taken from Wine
-    if(dwStyle & WS_CHILD && !(dwExStyle & WS_EX_NOPARENTNOTIFY) )
-    {
-	/* Notify the parent window only */
-	SendMessageA(parent, WM_PARENTNOTIFY, MAKEWPARAM(WM_CREATE, 0), (LPARAM)hwnd );
+       	window->SetWindowHandle(hwnd);
     }
 
     dprintf(("USER32:  ************CreateWindowExA %s (%d,%d,%d,%d), hwnd = %X\n", arg2, x, y, nWidth, nHeight, hwnd));
@@ -954,19 +948,16 @@ LONG WIN32API GetWindowLongA(HWND hwnd, int nIndex)
 {
  LONG rc;
 
-#ifdef DEBUG
-    WriteLog("USER32:  GetWindowLong %X %d\n", hwnd, nIndex);
-#endif
     if(nIndex == GWL_WNDPROC || nIndex == DWL_DLGPROC) {
-     Win32WindowProc *window = Win32WindowProc::FindProc(hwnd);
-     if(window && !(nIndex == DWL_DLGPROC && window->IsWindow() == TRUE)) {
-        return (LONG)window->GetWin32Callback();
-     }
+#ifdef DEBUG
+	WriteLog("USER32:  GetWindowLong %X %d\n", hwnd, nIndex);
+#endif
+     	Win32WindowProc *window = Win32WindowProc::FindProc(hwnd);
+     	if(window && !(nIndex == DWL_DLGPROC && window->IsWindow() == TRUE)) {
+        	return (LONG)window->GetWin32Callback();
+     	}
     }
     rc = O32_GetWindowLong(hwnd, nIndex);
-#ifdef DEBUG
-    WriteLog("USER32:  GetWindowLong returned %X\n", rc);
-#endif
     return(rc);
 }
 //******************************************************************************
@@ -2638,7 +2629,7 @@ BOOL WIN32API PostThreadMessageW( DWORD arg1, UINT arg2, WPARAM arg3, LPARAM  ar
 //******************************************************************************
 BOOL WIN32API PtInRect( const RECT * arg1, POINT  arg2)
 {
-#ifdef DEBUG
+#ifdef DEBUG1
     WriteLog("USER32:  PtInRect\n");
 #endif
     return O32_PtInRect(arg1, arg2);

@@ -1,4 +1,4 @@
- /* $Id: ChangeLog,v 1.13 1999-06-20 14:07:38 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.14 1999-06-20 16:47:37 sandervl Exp $ */
  99-20-06: Sander van Leeuwen
 	- KERNEL32: Call HMInitialize from initterm, not winexe object creation
 	- KERNEL32: Added comctl to list of system dlls (windll.cpp)
@@ -10,6 +10,8 @@
 	  	    differences between OS/2's TIB and Win32's TEB.
 	- COMCTL32: Fixed crash on exit (moved unregister of class into exit list handler)
 	- USER32: Changed bugfix (WS_CLIPCHILDREN) for winhlp32 (same as Wine now)
+	- USER32: Fixed bug in wndproc.cpp (release build only)
+	- USER32: Added preliminary support for parent notification
 
  99-19-06: Sander van Leeuwen
 	- ALL (except dsound/ddraw): Include <os2wrap.h> instead of <os2.h>

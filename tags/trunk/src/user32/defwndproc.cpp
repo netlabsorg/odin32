@@ -1,4 +1,4 @@
-/* $Id: defwndproc.cpp,v 1.2 1999-06-06 12:25:49 cbratschi Exp $ */
+/* $Id: defwndproc.cpp,v 1.3 1999-06-20 16:47:39 sandervl Exp $ */
 
 /*
  * Win32 default window API functions for OS/2
@@ -43,6 +43,9 @@ LRESULT WIN32API DefWindowProcA(HWND hwnd, UINT Msg, WPARAM wParam, LPARAM lPara
                 SetTextColor((HDC)wParam, GetSysColor(COLOR_WINDOWTEXT));
                 return GetSysColorBrush(COLOR_BTNFACE);
 
+	case WM_PARENTNOTIFY: //Open32 doesn't like receiving those!!
+		dprintf(("DefWndProc: WM_PARENTNOTIFY for %x", hwnd));
+		return 0;
         default:
                 return O32_DefWindowProc(hwnd, Msg, wParam, lParam);
     }
@@ -78,6 +81,10 @@ LRESULT WIN32API DefWindowProcW(HWND hwnd, UINT Msg, WPARAM wParam, LPARAM lPara
                 SetTextColor((HDC)wParam, GetSysColor(COLOR_WINDOWTEXT));
                 return GetSysColorBrush(COLOR_BTNFACE);
 
+	case WM_PARENTNOTIFY: //Open32 doesn't like receiving those!!
+		dprintf(("DefWndProc: WM_PARENTNOTIFY for %x", hwnd));
+		return 0;
+
         default:
                 return O32_DefWindowProc(hwnd, Msg, wParam, lParam);
     }
@@ -111,6 +118,10 @@ LRESULT WIN32API DefDlgProcA(HWND hwnd, UINT Msg, WPARAM wParam, LPARAM lParam)
                 SetBkColor((HDC)wParam, GetSysColor(COLOR_WINDOW));
                 SetTextColor((HDC)wParam, GetSysColor(COLOR_WINDOWTEXT));
                 return GetSysColorBrush(COLOR_BTNFACE);
+
+	case WM_PARENTNOTIFY: //Open32 doesn't like receiving those!!
+		dprintf(("DefWndProc: WM_PARENTNOTIFY for %x", hwnd));
+		return 0;
 
         default:
                 return O32_DefDlgProc(hwnd, Msg, wParam, lParam);
@@ -146,6 +157,10 @@ LRESULT WIN32API DefDlgProcW(HWND hwnd, UINT Msg, WPARAM wParam, LPARAM lParam)
                 SetBkColor((HDC)wParam, GetSysColor(COLOR_WINDOW));
                 SetTextColor((HDC)wParam, GetSysColor(COLOR_WINDOWTEXT));
                 return GetSysColorBrush(COLOR_BTNFACE);
+
+	case WM_PARENTNOTIFY: //Open32 doesn't like receiving those!!
+		dprintf(("DefWndProc: WM_PARENTNOTIFY for %x", hwnd));
+		return 0;
 
         default:
                 return O32_DefDlgProc(hwnd, Msg, wParam, lParam);
@@ -188,6 +203,10 @@ LRESULT WIN32API DefFrameProcA(HWND hwndFrame, HWND hwndClient, UINT Msg, WPARAM
                 SetBkColor((HDC)wParam, GetSysColor(COLOR_WINDOW));
                 SetTextColor((HDC)wParam, GetSysColor(COLOR_WINDOWTEXT));
                 return GetSysColorBrush(COLOR_BTNFACE);
+
+	case WM_PARENTNOTIFY: //Open32 doesn't like receiving those!!
+		dprintf(("DefWndProc: WM_PARENTNOTIFY for %x", hwndFrame));
+		return 0;
 
         default:
                 return O32_DefFrameProc(hwndFrame, hwndClient, Msg, wParam, lParam);
@@ -232,6 +251,10 @@ LRESULT WIN32API DefFrameProcW(HWND hwndFrame, HWND hwndClient, UINT Msg, WPARAM
                 SetTextColor((HDC)wParam, GetSysColor(COLOR_WINDOWTEXT));
                 return GetSysColorBrush(COLOR_BTNFACE);
 
+	case WM_PARENTNOTIFY: //Open32 doesn't like receiving those!!
+		dprintf(("DefWndProc: WM_PARENTNOTIFY for %x", hwndFrame));
+		return 0;
+
         default:
                 return O32_DefFrameProc(hwndFrame, hwndClient, Msg, wParam, lParam);
     }
@@ -265,6 +288,10 @@ LRESULT WIN32API DefMDIChildProcA(HWND hwnd, UINT Msg, WPARAM wParam, LPARAM lPa
                 SetBkColor((HDC)wParam, GetSysColor(COLOR_WINDOW));
                 SetTextColor((HDC)wParam, GetSysColor(COLOR_WINDOWTEXT));
                 return GetSysColorBrush(COLOR_BTNFACE);
+
+	case WM_PARENTNOTIFY: //Open32 doesn't like receiving those!!
+		dprintf(("DefWndProc: WM_PARENTNOTIFY for %x", hwnd));
+		return 0;
 
         default:
                 return O32_DefMDIChildProc(hwnd, Msg, wParam, lParam);
@@ -300,6 +327,10 @@ LRESULT WIN32API DefMDIChildProcW(HWND hwnd, UINT Msg, WPARAM wParam, LPARAM lPa
                 SetBkColor((HDC)wParam, GetSysColor(COLOR_WINDOW));
                 SetTextColor((HDC)wParam, GetSysColor(COLOR_WINDOWTEXT));
                 return GetSysColorBrush(COLOR_BTNFACE);
+
+	case WM_PARENTNOTIFY: //Open32 doesn't like receiving those!!
+		dprintf(("DefWndProc: WM_PARENTNOTIFY for %x", hwnd));
+		return 0;
 
         default:
                 return O32_DefMDIChildProc(hwnd, Msg, wParam, lParam);
