@@ -1,4 +1,4 @@
-/* $Id: shell32.cpp,v 1.8 1999-06-24 19:27:49 phaller Exp $ */
+/* $Id: shell32.cpp,v 1.9 1999-09-18 15:57:52 sandervl Exp $ */
 
 /*
  * Win32 SHELL32 for OS/2
@@ -33,7 +33,6 @@
 #include <string.h>
 
 #include <misc.h>
-#include <nameid.h>
 #include <unicode.h>
 
 

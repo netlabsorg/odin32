@@ -1,4 +1,4 @@
-/* $Id: misc.cpp,v 1.1 1999-09-09 21:04:57 phaller Exp $ */
+/* $Id: misc.cpp,v 1.2 1999-09-18 15:57:52 sandervl Exp $ */
 
 /*
  * Win32 SHELL32 for OS/2
@@ -27,7 +27,7 @@
 #include <misc.h>
 //#include <string.h>
 //#include "winbase.h"
-
+#include <heapstring.h>
 
 /*****************************************************************************
  * Types & Defines                                                           *
@@ -404,12 +404,6 @@ void WIN32API ExtractIconResInfoA(VOID)
 void WIN32API ExtractIconResInfoW(VOID)
 {
   dprintf(("SHELL32: undoc ExtractIconResInfoW\n"));
-}
-
-INT WINAPI lstrncmpiA( LPCSTR str1, LPCSTR str2, INT n )
-{
-  //CB: implement!
-  return 0;
 }
 
 /*************************************************************************

@@ -1,4 +1,4 @@
-/* $Id: path.cpp,v 1.1 1999-06-25 09:02:13 phaller Exp $ */
+/* $Id: path.cpp,v 1.2 1999-09-18 15:57:52 sandervl Exp $ */
 
 /*
  * Win32 SHELL32 for OS/2
@@ -29,7 +29,6 @@
 #include <wctype.h>
 
 #include <misc.h>
-#include <nameid.h>
 #include <unicode.h>
 #include <winnls.h>
 #include <ctype.h>
