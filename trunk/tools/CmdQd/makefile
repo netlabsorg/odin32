@@ -1,9 +1,9 @@
-# $Id: makefile,v 1.10 2002-08-24 04:22:30 bird Exp $
+# $Id: makefile,v 1.11 2002-09-05 02:53:25 bird Exp $
 
 #
 # Odin32 API
 #
-#   Makefile for the Quick-and-Dirty dependency utility. (FastDep)
+#   Makefile for the command queue utility. (CmdQd)
 #
 #
 
@@ -20,8 +20,8 @@ PATH_ROOT = ..\..
 #
 TARGET_NAME = CmdQd
 TARGET_MODE = EXE
-TARGET_PUBLIC = 1
-TARGET_PUBNAME = $(PATH_TOOLS)\$(TARGET_NAME).$(EXT_EXE)
+TARGET_NEEDED = 1
+TARGET_PUB_DIR = $(PATH_TOOLS)
 
 #
 # Rules config
@@ -110,12 +110,13 @@ clean2:
     @echo Info: Not removing $(ODIN32_TOOLS)\cmdqd.exe because MULTIJOBS is defined.
 !endif
 
-!endif # new/old makefile
 
 #
 # We need all.
 #
 needed: all
+
+!endif # new/old makefile
 
 #
 # If MULTIJOBS is defined make sure cmdqd is NOT while we make it running.
