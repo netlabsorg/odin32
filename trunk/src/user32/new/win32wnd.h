@@ -1,4 +1,4 @@
-/* $Id: win32wnd.h,v 1.20 1999-07-26 09:01:34 sandervl Exp $ */
+/* $Id: win32wnd.h,v 1.21 1999-07-26 20:03:49 sandervl Exp $ */
 /*
  * Win32 Window Code for OS/2
  *
@@ -87,6 +87,7 @@ virtual	 WORD   GetWindowWord(int index);
 	 HWND   getWindowHandle() 		{ return Win32Hwnd; };
 	 HWND   getOS2WindowHandle() 		{ return OS2Hwnd; };
 	 HWND   getOS2FrameWindowHandle()	{ return OS2HwndFrame; };
+	 BOOL   isFrameWindow()                 { return OS2Hwnd != OS2HwndFrame; };
    Win32Window *getParent()			{ return (Win32Window *)ChildWindow::GetParent(); };
 	 void   setParent(Win32Window *pwindow) { ChildWindow::SetParent((ChildWindow *)pwindow); };
        WNDPROC  getWindowProc()                 { return win32wndproc; };
@@ -123,7 +124,6 @@ virtual	 WORD   GetWindowWord(int index);
          HWND   GetWindow(UINT uCmd);
 	 BOOL   EnableWindow(BOOL fEnable);
 	 BOOL   CloseWindow();
- 	 BOOL   BringWindowToTop();
   static HWND   GetActiveWindow();
 	 BOOL   IsWindow();
 	 BOOL   IsWindowEnabled();
@@ -198,6 +198,7 @@ protected:
 
 	BOOL    isIcon;
 	BOOL    fCreated;
+	BOOL    fFirstShow;
 
    Win32Window *owner;			
 

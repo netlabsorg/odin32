@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.21 1999-07-25 17:47:24 sandervl Exp $
+# $Id: makefile,v 1.22 1999-07-26 20:03:48 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -32,7 +32,7 @@ OBJS =  user32.obj resstring.obj dialog.obj loadres.obj \
         combo.obj edit.obj clipboard.obj winicon.obj \
         oslibutil.obj oslibmsg.obj windlg.obj \
         winprop.obj wingdi.obj oslibgdi.obj winaccel.obj winscrollbar.obj \
-        nativerc.obj oslibres.obj winnonclient.obj
+        nativerc.obj oslibres.obj
 
 
 all: $(TARGET).dll $(TARGET).lib
@@ -108,7 +108,6 @@ oslibmsg.obj:   oslibmsg.cpp oslibmsg.h
 oslibgdi.obj:   oslibgdi.cpp oslibgdi.h
 oslibres.obj:   oslibres.cpp oslibwin.h oslibres.h
 
-winnonclient.obj: winnonclient.cpp
 clipboard.obj:  clipboard.cpp
 
 clean:

@@ -1,4 +1,4 @@
-/* $Id: window.cpp,v 1.13 1999-07-26 09:01:34 sandervl Exp $ */
+/* $Id: window.cpp,v 1.14 1999-07-26 20:03:49 sandervl Exp $ */
 /*
  * Win32 window apis for OS/2
  *
@@ -315,15 +315,7 @@ BOOL WIN32API EnableWindow( HWND hwnd, BOOL fEnable)
 //******************************************************************************
 BOOL WIN32API BringWindowToTop(HWND hwnd)
 {
-  Win32Window *window;
-
-    window = Win32Window::GetWindowFromHandle(hwnd);
-    if(!window) {
-        dprintf(("BringWindowToTop, window %x not found", hwnd));
-        return 0;
-    }
-    dprintf(("BringWindowToTop %x", hwnd));
-    return window->BringWindowToTop();
+    return SetWindowPos( hwnd, HWND_TOP, 0, 0, 0, 0, SWP_NOMOVE|SWP_NOSIZE );
 }
 //******************************************************************************
 //******************************************************************************
@@ -604,13 +596,13 @@ int WIN32API InternalGetWindowText(HWND   hwnd,
     return GetWindowTextW(hwnd,lpString,nMaxCount);
 }
 //******************************************************************************
+//TODO: Correct?
 //******************************************************************************
-BOOL WIN32API SetForegroundWindow(HWND arg1)
+BOOL WIN32API SetForegroundWindow(HWND hwnd)
 {
-#ifdef DEBUG
-    WriteLog("USER32:  SetForegroundWindow\n");
-#endif
-    return O32_SetForegroundWindow(arg1);
+    dprintf((" SetForegroundWindow %x", hwnd));
+
+    return SetWindowPos( hwnd, HWND_TOP, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER );
 }
 //******************************************************************************
 //******************************************************************************
@@ -622,6 +614,24 @@ BOOL WIN32API GetClientRect( HWND hwnd, PRECT pRect)
     rc = OSLibWinQueryWindowRect(hwnd, pRect);
     dprintf(("USER32:  GetClientRect of %X returned (%d,%d) (%d,%d)\n", hwnd, pRect->left, pRect->top, pRect->right, pRect->bottom));
     return rc;
+}
+//******************************************************************************
+//******************************************************************************
+BOOL WIN32API AdjustWindowRect( PRECT arg1, DWORD arg2, BOOL  arg3)
+{
+#ifdef DEBUG
+    WriteLog("USER32:  AdjustWindowRect\n");
+#endif
+    return O32_AdjustWindowRect(arg1, arg2, arg3);
+}
+//******************************************************************************
+//******************************************************************************
+BOOL WIN32API AdjustWindowRectEx( PRECT arg1, DWORD arg2, BOOL arg3, DWORD  arg4)
+{
+#ifdef DEBUG
+    WriteLog("USER32:  AdjustWindowRectEx\n");
+#endif
+    return O32_AdjustWindowRectEx(arg1, arg2, arg3, arg4);
 }
 //******************************************************************************
 //******************************************************************************
@@ -691,13 +701,15 @@ BOOL WIN32API FlashWindow(HWND hwnd, BOOL fFlash)
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API MoveWindow(HWND arg1, int arg2, int arg3, int arg4, int arg5, BOOL arg6)
+BOOL WIN32API MoveWindow( HWND hwnd, INT x, INT y, INT cx, INT cy,
+                          BOOL repaint )
 {
- BOOL rc;
+    int flags = SWP_NOZORDER | SWP_NOACTIVATE;
 
-    rc = O32_MoveWindow(arg1, arg2, arg3, arg4, arg5, arg6);
-    dprintf(("USER32:  MoveWindow %X to (%d,%d) size (%d,%d), repaint = %d returned %d\n", arg1, arg2, arg3, arg4, arg5, arg6, rc));
-    return(rc);
+    if (!repaint) flags |= SWP_NOREDRAW;
+    dprintf(("MoveWindow: %04x %d,%d %dx%d %d\n", hwnd, x, y, cx, cy, repaint ));
+
+    return SetWindowPos( hwnd, 0, x, y, cx, cy, flags );
 }
 //******************************************************************************
 //******************************************************************************
