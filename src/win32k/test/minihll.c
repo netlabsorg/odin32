@@ -1,4 +1,4 @@
-/* $Id: minihll.c,v 1.1.2.3 2001-08-15 03:12:24 bird Exp $
+/* $Id: minihll.c,v 1.1.2.4 2001-08-16 15:57:01 bird Exp $
  *
  * Minimal 'High Level Language' executable.
  *
@@ -24,7 +24,12 @@ unsigned long _System DosPutMessage(unsigned long hFile,
                                     unsigned long cchMsg,
                                     char *  pszMsg);
 #else
+#ifdef __IBMC__
+extern int _Optlink _printf_ansi(register char * pszMsg);
+#else
+//Watcom
 extern int _printf_ansi(register char * pszMsg);
+#endif
 #endif
 
 /*******************************************************************************
@@ -56,7 +61,11 @@ void  minihll(register char *psz)
     #ifndef LIBC
     DosPutMessage(0, 18, szMsg);
     #else
+    #ifdef __IBMC__
+    _printf_ansi(psz = szMsg);
+    #else
     _printf_ansi(szMsg);
+    #endif
     #endif
 }
 
