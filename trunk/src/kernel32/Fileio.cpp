@@ -1,4 +1,4 @@
-/* $Id: Fileio.cpp,v 1.59 2001-12-05 18:05:58 sandervl Exp $ */
+/* $Id: Fileio.cpp,v 1.60 2001-12-06 10:14:45 sandervl Exp $ */
 
 /*
  * Win32 File IO API functions for OS/2
@@ -6,9 +6,10 @@
  * Copyright 1998-2000 Sander van Leeuwen
  * Copyright 1998 Patrick Haller
  *
- * Some parts copied from Wine (CopyFileExA/W)
+ * Some parts copied from Wine (CopyFileExA/W, FindFirstFileExW)
  *
  * Copyright 1993 John Burton
+ * Copyright 1993 Erik Bos
  * Copyright 1996 Alexandre Julliard
  *
  *
@@ -226,33 +227,160 @@ ODINFUNCTION7(HFILE,   CreateFileW,
 }
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION2(HANDLE, FindFirstFileA,
-              LPCSTR, lpFileName,
-              WIN32_FIND_DATAA *, lpFindFileData)
+HANDLE WINAPI FindFirstFileA(LPCSTR lpFileName, WIN32_FIND_DATAA *lpFindFileData)
 {
+  return FindFirstFileExA(lpFileName, FindExInfoStandard, lpFindFileData,
+                          FindExSearchNameMatch, NULL, 0);
+}
+/*****************************************************************************
+ * Name      : HANDLE WIN32API FindFirstFileExA
+ * Purpose   : The FindFirstFileExA function searches a directory for a file
+ *             whose name and attributes match those specified in the
+ *             function call.
+ * Parameters: LPCSTR lpFileName                 pointer to the name of the file
+ *                                               to search for
+ *             FINDEX_INFO_LEVELS fInfoLevelId   information level of the returned data
+ *             LPVOID lpFindFileData             pointer to the returned information
+ *             FINDEX_SEARCH_OPS fSearchOp       type of filtering to perform
+ *             LPVOID lpSearchFilter             pointer to search criteria
+ *             DWORD dwAdditionalFlags           additional search control flags
+ * Variables :
+ * Result    : If the function succeeds, the return value is a search handle
+ *             that can be used in a subsequent call to the FindNextFile or
+ *             FindClose functions.
+ *             If the function fails, the return value is INVALID_HANDLE_VALUE
+ * Remark    :
+ * Status    : 
+ *
+ * Author    : SvL
+ *****************************************************************************/
+ODINFUNCTION6(HANDLE, FindFirstFileExA,	LPCSTR, lpFileName,
+                                        FINDEX_INFO_LEVELS, fInfoLevelId,
+                                        LPVOID, lpFindFileData,
+                                        FINDEX_SEARCH_OPS, fSearchOp,
+                                        LPVOID, lpSearchFilter,
+                                        DWORD, dwAdditionalFlags)
+{   
   HANDLE hFind;
   char  *filename;
   int    namelen;
 
-  dprintf(("FindFirstFileA %s", lpFileName));
-  
-  if(lpFileName == NULL || lpFindFileData == NULL) 
-  {
-    SetLastError(ERROR_INVALID_PARAMETER);
-    return -1;
-  }
-  
-  namelen = strlen(lpFileName);
-  if(lpFileName[namelen-1] == '\\') 
-  {
-    filename = (char *)alloca(namelen+1);
-    strcpy(filename, lpFileName);
-    filename[namelen-1] = 0;
-  }
-  else  
-    filename = (char *)lpFileName;
+    if(lpFileName == NULL || lpFindFileData == NULL) 
+    {
+        SetLastError(ERROR_INVALID_PARAMETER);
+        return INVALID_HANDLE_VALUE;
+    }
 
-  return (HANDLE)OSLibDosFindFirst(filename,lpFindFileData);
+    if ((fSearchOp != FindExSearchNameMatch) || (dwAdditionalFlags != 0))
+    {
+        dprintf(("!ERROR!: options not implemented 0x%08x 0x%08lx\n", fSearchOp, dwAdditionalFlags ));
+        SetLastError(ERROR_INVALID_PARAMETER);
+        return INVALID_HANDLE_VALUE;
+    }
+
+    dprintf(("FindFirstFileExA %s %x %x %x %x %x", lpFileName, fInfoLevelId, lpFindFileData, fSearchOp, lpSearchFilter, dwAdditionalFlags));
+
+    switch(fInfoLevelId)
+    {
+    case FindExInfoStandard:
+        namelen = strlen(lpFileName);
+        if(lpFileName[namelen-1] == '\\') 
+        {
+            filename = (char *)alloca(namelen+1);
+            strcpy(filename, lpFileName);
+            filename[namelen-1] = 0;
+        }
+        else  
+            filename = (char *)lpFileName;
+      
+        return (HANDLE)OSLibDosFindFirst(filename, (WIN32_FIND_DATAA *)lpFindFileData);
+
+    default: //TODO
+        dprintf(("!ERROR! unsupported fInfoLevelId"));
+        SetLastError(ERROR_INVALID_PARAMETER);
+        break;
+    }      
+    return INVALID_HANDLE_VALUE;
+}
+//******************************************************************************
+//******************************************************************************
+HANDLE WINAPI FindFirstFileW(LPCWSTR lpFileName, WIN32_FIND_DATAW *lpFindFileData)
+{
+    return FindFirstFileExW(lpFileName, FindExInfoStandard, lpFindFileData,
+                            FindExSearchNameMatch, NULL, 0);
+}
+/*****************************************************************************
+ * Name      : HANDLE WIN32API FindFirstFileExW
+ * Purpose   : The FindFirstFileExW function searches a directory for a file
+ *             whose name and attributes match those specified in the
+ *             function call.
+ * Parameters: LPCWSTR lpFileName                pointer to the name of the file
+ *                                               to search for
+ *             FINDEX_INFO_LEVELS fInfoLevelId   information level of the returned data
+ *             LPVOID lpFindFileData             pointer to the returned information
+ *             FINDEX_SEARCH_OPS fSearchOp       type of filtering to perform
+ *             LPVOID lpSearchFilter             pointer to search criteria
+ *             DWORD dwAdditionalFlags           additional search control flags
+ * Variables :
+ * Result    : If the function succeeds, the return value is a search handle
+ *             that can be used in a subsequent call to the FindNextFile or
+ *             FindClose functions.
+ *             If the function fails, the return value is INVALID_HANDLE_VALUE
+ * Remark    :
+ * Status    : 
+ *
+ * Author    : Wine
+ *****************************************************************************/
+ODINFUNCTION6(HANDLE, FindFirstFileExW,	LPCWSTR, lpFileName,
+                                        FINDEX_INFO_LEVELS, fInfoLevelId,
+                                        LPVOID, lpFindFileData,
+                                        FINDEX_SEARCH_OPS, fSearchOp,
+                                        LPVOID, lpSearchFilter,
+                                        DWORD, dwAdditionalFlags)
+{
+    HANDLE handle;
+    WIN32_FIND_DATAA dataA;
+    LPVOID _lpFindFileData;
+    LPSTR pathA;
+
+    switch(fInfoLevelId)
+    {
+      case FindExInfoStandard:
+        {
+          _lpFindFileData = &dataA;
+        }
+        break;
+      default:
+        dprintf(("!ERROR! unsupported fInfoLevelId"));
+        SetLastError(ERROR_INVALID_PARAMETER);
+        break;
+    }
+
+    pathA = HEAP_strdupWtoA( GetProcessHeap(), 0, lpFileName );
+    handle = FindFirstFileExA(pathA, fInfoLevelId, _lpFindFileData, fSearchOp, lpSearchFilter, dwAdditionalFlags);
+    HeapFree( GetProcessHeap(), 0, pathA );
+    if (handle == INVALID_HANDLE_VALUE) return handle;
+    
+    switch(fInfoLevelId)
+    {
+      case FindExInfoStandard:
+        {
+          WIN32_FIND_DATAW *dataW = (WIN32_FIND_DATAW*) lpFindFileData;
+          dataW->dwFileAttributes = dataA.dwFileAttributes;
+          dataW->ftCreationTime   = dataA.ftCreationTime;
+          dataW->ftLastAccessTime = dataA.ftLastAccessTime;
+          dataW->ftLastWriteTime  = dataA.ftLastWriteTime;
+          dataW->nFileSizeHigh    = dataA.nFileSizeHigh;
+          dataW->nFileSizeLow     = dataA.nFileSizeLow;
+          MultiByteToWideChar( CP_ACP, 0, dataA.cFileName, -1,
+                               dataW->cFileName, sizeof(dataW->cFileName)/sizeof(WCHAR) );
+          MultiByteToWideChar( CP_ACP, 0, dataA.cAlternateFileName, -1,
+                               dataW->cAlternateFileName,
+                               sizeof(dataW->cAlternateFileName)/sizeof(WCHAR) );
+        }
+        break;
+    }
+    return handle;
 }
 //******************************************************************************
 // internal function for faster access (SHELL32)
@@ -263,40 +391,6 @@ ODINFUNCTION3(HANDLE, FindFirstFileMultiA,
               DWORD *,count)
 {
     return (HANDLE)OSLibDosFindFirstMulti(lpFileName,lpFindFileData,count);
-}
-//******************************************************************************
-//******************************************************************************
-ODINFUNCTION2(HANDLE,  FindFirstFileW,
-              LPCWSTR, lpFileName,
-              WIN32_FIND_DATAW *, lpFindFileData)
-{
-  HANDLE           rc;
-  char             *astring;
-  WIN32_FIND_DATAA wfda;
-
-    astring = UnicodeToAsciiString((LPWSTR)lpFileName);
-    dprintf(("FindFirstFileW %s", astring));
-    rc = (HANDLE)OSLibDosFindFirst(astring,&wfda);
-
-    if(rc == -1) {
-        memset(lpFindFileData, 0, sizeof(WIN32_FIND_DATAW));
-    }
-    else {
-        // convert back the result structure
-        memcpy(lpFindFileData,
-                 &wfda,
-                 sizeof(WIN32_FIND_DATAA));
-
-        lstrcpynAtoW (lpFindFileData->cFileName,
-                      wfda.cFileName,
-                      sizeof(wfda.cFileName));
-
-        lstrcpynAtoW (lpFindFileData->cAlternateFileName,
-                      wfda.cAlternateFileName,
-                      sizeof(wfda.cAlternateFileName));
-    }
-    FreeAsciiString(astring);
-    return(rc);
 }
 //******************************************************************************
 //******************************************************************************
