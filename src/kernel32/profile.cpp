@@ -1,4 +1,4 @@
-/* $Id: profile.cpp,v 1.6 1999-08-04 14:37:52 phaller Exp $ */
+/* $Id: profile.cpp,v 1.7 1999-08-04 21:22:24 phaller Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -47,7 +47,7 @@
 #define HEAP_strdupWtoA(a,b,c)   UnicodeToAsciiString((LPWSTR)c)
 #define lstrcpynAtoW(a,b,c)      AsciiToUnicodeN((char*)a,(LPWSTR)b,(int)c)
 #define lstrcpynWtoA(a,b,c)      UnicodeToAsciiN((LPWSTR)a,(char*)b,(int)c)
-#define lstrcpynA(a,b,c)         strncpy((char*)a,(char*)b,(int)c)
+//#define lstrcpynA(a,b,c)         strncpy((char*)a,(char*)b,(int)c)
 #define CharLowerA(a)            (a)
 
 
@@ -1312,7 +1312,7 @@ BOOL WINAPI GetPrivateProfileStructA (LPCSTR section, LPCSTR key,
     if (PROFILE_Open( filename )) {
         PROFILEKEY *k = PROFILE_Find ( &CurProfile->section, section, key, FALSE);
    if (k) {
-      lstrcpynA( buf, k->value, strlen(k->value));
+      lstrcpynA( (LPSTR)buf, k->value, strlen(k->value));
       ret = TRUE;
    }
     }
