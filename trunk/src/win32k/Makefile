@@ -1,5 +1,5 @@
 ################################################################################
-# $Id: Makefile,v 1.36 2000-03-09 16:49:39 bird Exp $
+# $Id: Makefile,v 1.37 2000-03-09 16:52:56 bird Exp $
 #
 # Copyright 1998-2000 knut st. osmundsen
 #
@@ -373,7 +373,7 @@ win32k.vpj:
 ################################################################################
 clean:
     @$(ECHO) cleaning....
-    $(RM) $(NAME).sys *.lib *.obj *.exe *.sym *.map *.dll *.pch \
+    -$(RM) $(NAME).sys *.lib *.obj *.exe *.sym *.map *.dll *.pch \
 !if "$(WIN32KBIN)" != ""
         $(WIN32KBIN)\* \
 !endif
