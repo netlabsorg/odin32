@@ -1,4 +1,4 @@
-/* $Id: misc.h,v 1.8 1999-09-13 16:28:50 phaller Exp $ */
+/* $Id: misc.h,v 1.9 1999-11-05 13:03:41 achimha Exp $ */
 
 /*
  * Miscellaneous definitions
@@ -47,8 +47,10 @@
   #error ULONG definition is bad.
   #define ULONG nope.
 #endif
-typedef unsigned long ULONG;
-typedef unsigned long HMODULE;
+#ifndef NO_ULONG
+  typedef unsigned long ULONG;
+  typedef unsigned long HMODULE;
+#endif
 
 #ifndef SYSTEM
 #  define SYSTEM _System
