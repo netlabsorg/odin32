@@ -2212,22 +2212,3 @@ DWORD WIN32API SetThreadPriorityBoost(DWORD x1,
 
   return (0);
 }
-
-/*****************************************************************************
- * Name      : ???
- * Purpose   : Unknown (used by explorer.exe)
- * Parameters: Unknown (wrong)
- * Variables :
- * Result    : Unknown
- * Remark    :
- * Status    : UNTESTED STUB
- *
- * Author    : Christoph Bratschi [Wed, 2000/03/29 19:47]
- *****************************************************************************/
-
-VOID WIN32API KERNEL32_99(DWORD x)
-{
-  dprintf(("KERNEL32: Unknown API KERNEL32.99\n"));
-}
-
-
