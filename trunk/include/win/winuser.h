@@ -1,4 +1,4 @@
-/* $Id: winuser.h,v 1.41 2000-05-22 17:19:00 cbratschi Exp $ */
+/* $Id: winuser.h,v 1.42 2000-10-17 17:14:32 sandervl Exp $ */
 
 #ifndef __INCLUDE_WINUSER_H
 #define __INCLUDE_WINUSER_H
@@ -1044,6 +1044,7 @@ typedef struct
 
 #define SC_ABOUTODIN            (SC_SCREENSAVE+1) /* This value has been used in sysres_EN.rc */
 #define SC_PUTMARK              (SC_SCREENSAVE+2)
+#define SC_DEBUGINT3            (SC_SCREENSAVE+3)
 
 #define CS_VREDRAW          0x0001
 #define CS_HREDRAW          0x0002
