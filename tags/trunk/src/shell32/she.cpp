@@ -1,4 +1,4 @@
-/* $Id: she.cpp,v 1.6 1999-09-18 15:57:52 sandervl Exp $ */
+/* $Id: she.cpp,v 1.7 1999-10-09 11:13:20 sandervl Exp $ */
 
 /*
  * Win32 SHELL32 for OS/2
@@ -11,24 +11,32 @@
  * Includes                                                                  *
  *****************************************************************************/
 
+#include <odin.h>
+#include <odinwrap.h>
+
 #include <os2win.h>
 #include <shellapi.h>
 #include <winreg.h>
-#include "shell32.h"
-
 #include <stdarg.h>
 //#include <builtin.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
+
+#define ICOM_CINTERFACE 1
+#include "shell32_main.h"
+
 #include <misc.h>
+//#include <nameid.h>
 #include <unicode.h>
 
 
 /*****************************************************************************
  * Types & Defines                                                           *
  *****************************************************************************/
+
+ODINDEBUGCHANNEL(SHELL32-SHE)
 
 
 /*****************************************************************************
@@ -43,13 +51,14 @@
  * Author    : Patrick Haller [Tue, 1999/06/01 09:00]
  *****************************************************************************/
 
-HRESULT WIN32API SheSetCurDrive(DWORD x1)
+ODINFUNCTION1(HRESULT, SheSetCurDrive,
+              DWORD, x1)
 {
-  dprintf(("SHELL32: SheSetCurDrive(%08xh) not implemented.\n",
-           x1));
+  dprintf(("SHELL32: SheSetCurDrive not implemented.\n"));
 
   return 0;
 }
+
 
 /*****************************************************************************
  * Name      : SheRemoveQuotesA
@@ -63,10 +72,14 @@ HRESULT WIN32API SheSetCurDrive(DWORD x1)
  * Author    : Christoph Bratschi [Fri, 1999/08/6 19:00]
  *****************************************************************************/
 
-void WIN32API SheRemoveQuotesA(VOID)
+ODINFUNCTION1(HRESULT, SheRemoveQuotesA,
+              LPCSTR,  lpszString)
 {
-  dprintf(("SHELL32: undoc SheRemoveQuotesA\n"));
+  dprintf(("SHELL32: SheRemoveQuotesA\n not implemented"));
+
+  return 0;
 }
+
 
 /*****************************************************************************
  * Name      : SheRemoveQuotesW
@@ -80,7 +93,11 @@ void WIN32API SheRemoveQuotesA(VOID)
  * Author    : Christoph Bratschi [Fri, 1999/08/6 19:00]
  *****************************************************************************/
 
-void WIN32API SheRemoveQuotesW(VOID)
+ODINFUNCTION1(HRESULT, SheRemoveQuotesW,
+              LPCWSTR, lpszString)
 {
-  dprintf(("SHELL32: undoc SheRemoveQuotesW\n"));
+  dprintf(("SHELL32: SheRemoveQuotesW\n not implemented"));
+
+  return 0;
 }
+

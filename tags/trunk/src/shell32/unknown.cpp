@@ -1,4 +1,4 @@
-/* $Id: unknown.cpp,v 1.6 1999-08-05 23:19:56 phaller Exp $ */
+/* $Id: unknown.cpp,v 1.7 1999-10-09 11:13:25 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -10,11 +10,15 @@
  * Includes                                                                  *
  *****************************************************************************/
 
+#include <odin.h>
+#include <odinwrap.h>
 #include <os2win.h>
 #include <shellapi.h>
 #include <winreg.h>
-#include "shell32.h"
+//#include "shell32.h"
 
+
+ODINDEBUGCHANNEL(SHELL32-UNKNOWN)
 
 /*****************************************************************************
  * Defines                                                                   *
@@ -46,20 +50,15 @@
  * Author    : Patrick Haller [Tue, 1999/06/01 09:00]
  *****************************************************************************/
 
-HINSTANCE WIN32API RealShellExecuteA(HWND    hwnd,
-                                     LPCTSTR lpOperation,
-                                     LPCTSTR lpFile,
-                                     LPCTSTR lpParameters,
-                                     LPCTSTR lpDirectory,
-                                     INT     nShowCmd)
+ODINFUNCTION6(HINSTANCE, RealShellExecuteA,
+              HWND,      hwnd,
+              LPCTSTR,   lpOperation,
+              LPCTSTR,   lpFile,
+              LPCTSTR,   lpParameters,
+              LPCTSTR,   lpDirectory,
+              INT,       nShowCmd)
 {
-  dprintf (("SHELL32: RealShellExecuteA(%08xh,%s,%s,%s,%s,%08xh) not implemented.\n",
-            hwnd,
-            lpOperation,
-            lpFile,
-            lpParameters,
-            lpDirectory,
-            nShowCmd));
+  dprintf (("SHELL32: RealShellExecuteA not implemented.\n"));
 
   return(0); //out of memory
 }
@@ -82,12 +81,13 @@ HINSTANCE WIN32API RealShellExecuteA(HWND    hwnd,
  * Author    : Patrick Haller [Tue, 1999/06/01 09:00]
  *****************************************************************************/
 
-HINSTANCE WIN32API RealShellExecuteW(HWND    hwnd,
-                                     LPCWSTR lpOperation,
-                                     LPCWSTR lpFile,
-                                     LPCWSTR lpParameters,
-                                     LPCWSTR lpDirectory,
-                                     INT     nShowCmd)
+ODINFUNCTION6(HINSTANCE, RealShellExecuteW,
+              HWND,      hwnd,
+              LPCWSTR,   lpOperation,
+              LPCWSTR,   lpFile,
+              LPCWSTR,   lpParameters,
+              LPCWSTR,   lpDirectory,
+              INT,       nShowCmd)
 {
   HINSTANCE hInstance;
   LPSTR     lpOperationA  = UnicodeToAsciiString((LPWSTR)lpOperation);
@@ -131,10 +131,10 @@ HINSTANCE WIN32API RealShellExecuteW(HWND    hwnd,
  * Author    : Patrick Haller [Tue, 1998/06/15 03:00]
  *****************************************************************************/
 
-BOOL WIN32API RealShellExecuteExA(LPSHELLEXECUTEINFOA lpExecInfo)
+ODINFUNCTION1(BOOL,                RealShellExecuteExA,
+              LPSHELLEXECUTEINFOA, lpExecInfo)
 {
-  dprintf(("SHELL32: RealShellExecuteExA (%08xh) not implemented.\n",
-           lpExecInfo));
+  dprintf(("SHELL32: RealShellExecuteExA not implemented.\n"));
 
   return (0);
 }
@@ -152,10 +152,10 @@ BOOL WIN32API RealShellExecuteExA(LPSHELLEXECUTEINFOA lpExecInfo)
  * Author    : Patrick Haller [Tue, 1998/06/15 03:00]
  *****************************************************************************/
 
-BOOL WIN32API RealShellExecuteExW(LPSHELLEXECUTEINFOW lpExecInfo)
+ODINFUNCTION1(BOOL,                RealShellExecuteExW,
+              LPSHELLEXECUTEINFOW, lpExecInfo)
 {
-  dprintf(("SHELL32: RealShellExecuteExW (%08xh) not implemented.\n",
-           lpExecInfo));
+  dprintf(("SHELL32: RealShellExecuteExW not implemented.\n"));
 
   return (0);
 }
@@ -173,12 +173,11 @@ BOOL WIN32API RealShellExecuteExW(LPSHELLEXECUTEINFOW lpExecInfo)
  * Author    : Patrick Haller [Tue, 1998/06/15 03:00]
  *****************************************************************************/
 
-DWORD WIN32API RegenerateUserEnvironment(DWORD x1,
-                                         DWORD x2)
+ODINFUNCTION2(DWORD, RegenerateUserEnvironment,
+              DWORD, x1,
+              DWORD, x2)
 {
-  dprintf(("SHELL32: RegenerateUserEnvironment(%08xh,%08xhz) not implemented.\n",
-           x1,
-           x2));
+  dprintf(("SHELL32: RegenerateUserEnvironment not implemented.\n"));
 
   return (0);
 }
@@ -196,14 +195,12 @@ DWORD WIN32API RegenerateUserEnvironment(DWORD x1,
  * Author    : Patrick Haller [Tue, 1998/06/15 03:00]
  *****************************************************************************/
 
-DWORD WIN32API RestartDialog(DWORD x1,
-                             DWORD x2,
-                             DWORD x3)
+ODINFUNCTION3(DWORD, RestartDialog,
+              DWORD, x1,
+              DWORD, x2,
+              DWORD, x3)
 {
-  dprintf(("SHELL32: RestartDialog(%08xh,%08xh,%08xh) not implemented.\n",
-           x1,
-           x2,
-           x3));
+  dprintf(("SHELL32: RestartDialog not implemented.\n"));
 
   return (0);
 }
@@ -221,12 +218,11 @@ DWORD WIN32API RestartDialog(DWORD x1,
  * Author    : Patrick Haller [Tue, 1998/06/15 03:00]
  *****************************************************************************/
 
-DWORD WIN32API SheConvertPathW(DWORD x1,
-                               DWORD x2)
+ODINFUNCTION2(DWORD, SheConvertPathW,
+              DWORD, x1,
+              DWORD, x2)
 {
-  dprintf(("SHELL32: SheConvertPathW(%08xh,%08xh) not implemented.\n",
-           x1,
-           x2));
+  dprintf(("SHELL32: SheConvertPathW not implemented.\n"));
 
   return (0);
 }
@@ -244,12 +240,11 @@ DWORD WIN32API SheConvertPathW(DWORD x1,
  * Author    : Patrick Haller [Tue, 1998/06/15 03:00]
  *****************************************************************************/
 
-DWORD WIN32API SheShortenPathW(DWORD x1,
-                               DWORD x2)
+ODINFUNCTION2(DWORD, SheShortenPathW,
+              DWORD, x1,
+              DWORD, x2)
 {
-  dprintf(("SHELL32: SheShortenPathW(%08xh,%08xh) not implemented.\n",
-           x1,
-           x2));
+  dprintf(("SHELL32: SheShortenPathW not implemented.\n"));
 
   return (0);
 }
@@ -267,12 +262,12 @@ DWORD WIN32API SheShortenPathW(DWORD x1,
  * Author    : Patrick Haller [Tue, 1998/06/15 03:00]
  *****************************************************************************/
 
-DWORD WIN32API SheShortenPathA(DWORD x1,
-                               DWORD x2)
+ODINFUNCTION2(DWORD, SheShortenPathA,
+              DWORD, x1,
+              DWORD, x2)
 {
-  dprintf(("SHELL32: SheShortenPathA(%08xh,%08xh) not implemented.\n",
-           x1,
-           x2));
+  dprintf(("SHELL32: SheShortenPathA not implemented.\n"));
 
   return (0);
 }
+
