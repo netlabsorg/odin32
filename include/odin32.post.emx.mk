@@ -1,8 +1,14 @@
-# $Id: pdwin32.vac3.post,v 1.6 2000-11-21 04:39:19 bird Exp $
+# $Id: odin32.post.emx.mk,v 1.1 2000-12-02 23:50:46 bird Exp $
+
 #
 # Odin32 API
 #
 # Common dll makefile rules (must be included at the last line of the makefile)
+#
+# ---------------------------------------------------------------------------------
+# NOTE: this configuration is not supported neither working, it's experimental only.
+# ---------------------------------------------------------------------------------
+#
 #
 # If ORGTARGET is defined it is used to generate the importlibrary.
 #
@@ -38,6 +44,14 @@
 #    makes internal libraries in the subdirectories. The libs rule is one of the
 #    dependencies of the main target.
 #
+
+# Sanity check
+!ifndef ODIN32_LIB
+!   error "ODIN32_LIB is not defined"
+!endif ODIN32_LIB
+!ifndef ODIN32_TOOLS
+!   error "ODIN32_TOOLS is not defined"
+!endif ODIN32_TOOLS
 
 
 !ifndef TARGET_EXTENSION
@@ -98,8 +112,8 @@ all:    $(OBJDIR) \
         $(INTLIBS) \
         $(OBJDIR)\$(TARGET).$(TARGET_EXTENSION) \
         $(OBJDIR)\$(TARGET).sym \
-        $(PDWIN32_BIN)\$(TARGET).$(TARGET_EXTENSION) \
-        $(PDWIN32_BIN)\$(TARGET).sym \
+        $(ODIN32_BIN)\$(TARGET).$(TARGET_EXTENSION) \
+        $(ODIN32_BIN)\$(TARGET).sym \
         lib
 !endif
 
@@ -108,7 +122,8 @@ all:    $(OBJDIR) \
 # Dll: Lib rule - build importlibrary (and evt. other libs)
 #
 !ifndef NO_LIB_RULE
-lib:    $(ORGTARGET).lib $(PDWIN32_LIB)\$(ORGTARGET).lib
+lib:    $(OBJDIR)\$(ORGTARGET).lib \
+        $(ODIN32_LIB)\$(ORGTARGET).lib
 !endif
 
 
@@ -154,8 +169,8 @@ all:    $(OBJDIR) \
         $(INTLIBS) \
         $(OBJDIR)\$(TARGET).$(TARGET_EXTENSION) \
         $(OBJDIR)\$(TARGET).sym \
-        $(PDWIN32_BIN)\$(TARGET).$(TARGET_EXTENSION) \
-        $(PDWIN32_BIN)\$(TARGET).sym
+        $(ODIN32_BIN)\$(TARGET).$(TARGET_EXTENSION) \
+        $(ODIN32_BIN)\$(TARGET).sym
 !endif
 
 
@@ -199,7 +214,7 @@ $(DEFFILE)
 !endif # !ifndef EXETARGET !else
 !else # !ifndef LIBTARGET
 ###############################################################################
-# LIB target (internal object library)
+# LIB target (internal or public object library)
 ###############################################################################
 
 #
@@ -214,7 +229,12 @@ LOCALCLEAN = 1
 !ifndef NO_ALL_RULE
 all:    $(OBJDIR) \
         $(INTLIBS) \
+!ifndef PUBLICLIB
         $(OBJDIR)\$(TARGET).$(TARGET_EXTENSION)
+!else
+        $(OBJDIR)\$(TARGET).$(TARGET_EXTENSION) \
+        $(ODIN32_LIB)\$(TARGET).$(TARGET_EXTENSION)
+!endif
 !endif
 
 
@@ -262,7 +282,7 @@ $(OBJDIR)\$(@B).lst
 dep: dep_internal $(ADDITIONAL_DEP)
 dep_internal:
     $(DEPEND) $(CINCLUDES) *.c *.cpp *.h *.asm *.inc \
-        *.rc *.dlg $(PDWIN32_INCLUDE)\*.h -robj *.orc
+        *.rc *.dlg $(ODIN32_INCLUDE)\*.h -robj *.orc
 !ifdef SUBDIRS
     $(DODIRS) "$(SUBDIRS)"  $(MAKE_CMD) dep
 !endif
@@ -289,7 +309,11 @@ $(INTLIBS):
 #
 # Common: Copy library rule.
 #
-$(PDWIN32_LIB)\$(ORGTARGET).lib: $(ORGTARGET).lib
+!ifndef PUBLICLIB
+$(ODIN32_LIB)\$(ORGTARGET).lib: $(OBJDIR)\$(ORGTARGET).lib
+!else
+$(ODIN32_LIB)\$(TARGET).$(TARGET_EXTENSION): $(OBJDIR)\$(ORGTARGET).$(TARGET_EXTENSION)
+!endif
     @if not exist $(@D) $(CREATEPATH) $(@D)
     $(CP) $** $@
 
@@ -297,7 +321,7 @@ $(PDWIN32_LIB)\$(ORGTARGET).lib: $(ORGTARGET).lib
 #
 # Common: Copy dll/exe rule.
 #
-$(PDWIN32_BIN)\$(TARGET).$(TARGET_EXTENSION): $(OBJDIR)\$(TARGET).$(TARGET_EXTENSION)
+$(ODIN32_BIN)\$(TARGET).$(TARGET_EXTENSION): $(OBJDIR)\$(TARGET).$(TARGET_EXTENSION)
     @if not exist $(@D) $(CREATEPATH) $(@D)
     $(CP) $** $@
 !ifndef NO_MAIN_BIN_COPY
@@ -308,7 +332,7 @@ $(PDWIN32_BIN)\$(TARGET).$(TARGET_EXTENSION): $(OBJDIR)\$(TARGET).$(TARGET_EXTEN
 #
 # Common: Copy sym rule.
 #
-$(PDWIN32_BIN)\$(TARGET).sym: $(OBJDIR)\$(TARGET).sym
+$(ODIN32_BIN)\$(TARGET).sym: $(OBJDIR)\$(TARGET).sym
     @if not exist $(@D) $(CREATEPATH) $(@D)
     $(CP) $** $@
 !ifndef NO_MAIN_BIN_COPY
@@ -328,21 +352,25 @@ $(OBJDIR)\$(TARGET).sym: $(OBJDIR)\$(TARGET).map
 #
 # Common: Make library from the <>exp.def or the <>.def file.
 #
+!ifndef LIBTARGET
 !ifndef NOTEXPDEF
-$(ORGTARGET).lib: $(ORGTARGET)exp.def
+$(OBJDIR)\$(ORGTARGET).lib: $(OBJDIR)\$(ORGTARGET)exp.def
     $(IMPLIB) $(IMPLIBFLAGS) $@ $**
 !else
-$(TARGET).lib: $(DEFFILE)
+$(OBJDIR)\$(TARGET).lib: $(DEFFILE)
     $(IMPLIB) $(IMPLIBFLAGS) $@ $**
+!endif
 !endif
 
 
 #
 # Common: Make the <>exp.def file.
 #
+!ifndef LIBTARGET
 !ifndef NOTEXPDEF
-$(ORGTARGET)exp.def: $(DEFFILE)
+$(OBJDIR)\$(ORGTARGET)exp.def: $(DEFFILE)
     $(IMPDEF) $** $@
+!endif
 !endif
 
 
@@ -367,10 +395,10 @@ clean:  clean2
      $(OBJDIR)\* \
 !endif
 !ifndef LOCALCLEAN
-        $(PDWIN32_LIB)\$(ORGTARGET).lib \
+        $(ODIN32_LIB)\$(ORGTARGET).lib \
         $(ORGTARGET)exp.def \
-        $(PDWIN32_BIN)\$(TARGET).$(TARGET_EXTENSION) *.$(TARGET_EXTENSION) \
-        $(PDWIN32_BIN)\$(TARGET).sym *.sym \
+        $(ODIN32_BIN)\$(TARGET).$(TARGET_EXTENSION) *.$(TARGET_EXTENSION) \
+        $(ODIN32_BIN)\$(TARGET).sym *.sym \
         $(CLEANEXTRAS)
 !else
         $(CLEANEXTRAS)

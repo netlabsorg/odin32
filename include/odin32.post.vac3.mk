@@ -1,4 +1,5 @@
-# $Id: pdwin32.wat.post,v 1.8 2000-11-21 04:39:20 bird Exp $
+# $Id: odin32.post.vac3.mk,v 1.1 2000-12-02 23:50:47 bird Exp $
+
 #
 # Odin32 API
 #
@@ -38,6 +39,14 @@
 #    makes internal libraries in the subdirectories. The libs rule is one of the
 #    dependencies of the main target.
 #
+
+# Sanity check
+!ifndef ODIN32_LIB
+!   error "ODIN32_LIB is not defined"
+!endif ODIN32_LIB
+!ifndef ODIN32_TOOLS
+!   error "ODIN32_TOOLS is not defined"
+!endif ODIN32_TOOLS
 
 
 !ifndef TARGET_EXTENSION
@@ -98,17 +107,18 @@ all:    $(OBJDIR) \
         $(INTLIBS) \
         $(OBJDIR)\$(TARGET).$(TARGET_EXTENSION) \
         $(OBJDIR)\$(TARGET).sym \
-        $(PDWIN32_BIN)\$(TARGET).$(TARGET_EXTENSION) \
-        $(PDWIN32_BIN)\$(TARGET).sym \
-        lib \
-        .SYMBOLIC
+        $(ODIN32_BIN)\$(TARGET).$(TARGET_EXTENSION) \
+        $(ODIN32_BIN)\$(TARGET).sym \
+        lib
 !endif
+
 
 #
 # Dll: Lib rule - build importlibrary (and evt. other libs)
 #
 !ifndef NO_LIB_RULE
-lib:    $(ORGTARGET).lib $(PDWIN32_LIB)\$(ORGTARGET).lib
+lib:    $(OBJDIR)\$(ORGTARGET).lib \
+        $(ODIN32_LIB)\$(ORGTARGET).lib
 !endif
 
 
@@ -117,7 +127,7 @@ lib:    $(ORGTARGET).lib $(PDWIN32_LIB)\$(ORGTARGET).lib
 #
 !ifndef NO_MAIN_RULE
 $(OBJDIR)\$(TARGET).$(TARGET_EXTENSION): $(OBJS) $(OS2RES) $(DEFFILE) $(OBJDIR)\$(TARGET).lrf
-    $(LD2) @$(OBJDIR)\$(TARGET).lrf
+    -4 $(LD2) $(LD2FLAGS) @$(OBJDIR)\$(TARGET).lrf
 !ifdef OS2RES
     $(OS2RC) $(OS2RCLFLAGS) $(OS2RES) $@
 !endif
@@ -128,15 +138,16 @@ $(OBJDIR)\$(TARGET).$(TARGET_EXTENSION): $(OBJS) $(OS2RES) $(DEFFILE) $(OBJDIR)\
 # Dll: Linker file - creates the parameter file passed on to the linker.
 #
 !ifndef NO_LNKFILE_RULE
-$(OBJDIR)\$(TARGET).lrf: makefile $(DEFFILE) $(PDWIN32_INCLUDE)\pdwin32.wat.post
-    $(RM) $(OBJDIR)\$(TARGET).lrf2 $@
-    $(KDEF2WAT) $(DEFFILE) $@ <<$(OBJDIR)\$(TARGET).lrf2
-$(LD2FLAGS)
-name $(OBJDIR)\$(TARGET).$(TARGET_EXTENSION)
-option map=$(OBJDIR)\$(TARGET).map
-file    {$(OBJS)}
-library {$(LIBS)}
-<<
+$(OBJDIR)\$(TARGET).lrf: $(MAKEFILE)
+    @echo Creating file <<$@
+/OUT:$(OBJDIR)\$(TARGET).$(TARGET_EXTENSION)
+/MAP:$(OBJDIR)\$(TARGET).map
+$(OBJS:  =^
+)
+$(LIBS:  =^
+)
+$(DEFFILE)
+<<keep
 !endif
 
 
@@ -153,16 +164,16 @@ all:    $(OBJDIR) \
         $(INTLIBS) \
         $(OBJDIR)\$(TARGET).$(TARGET_EXTENSION) \
         $(OBJDIR)\$(TARGET).sym \
-        $(PDWIN32_BIN)\$(TARGET).$(TARGET_EXTENSION) \
-        $(PDWIN32_BIN)\$(TARGET).sym \
-        .SYMBOLIC
+        $(ODIN32_BIN)\$(TARGET).$(TARGET_EXTENSION) \
+        $(ODIN32_BIN)\$(TARGET).sym
 !endif
+
 
 #
 # Exe: Lib rule - dummy rule
 #
 !ifndef NO_LIB_RULE
-lib: .SYMBOLIC
+lib:
 !endif
 
 
@@ -171,7 +182,7 @@ lib: .SYMBOLIC
 #
 !ifndef NO_MAIN_RULE
 $(OBJDIR)\$(TARGET).$(TARGET_EXTENSION): $(OBJS) $(OS2RES) $(DEFFILE) $(OBJDIR)\$(TARGET).lrf
-    $(LD2) @$(OBJDIR)\$(TARGET).lrf
+    -4 $(LD2) $(LD2FLAGS) @$(OBJDIR)\$(TARGET).lrf
 !ifdef OS2RES
     $(OS2RC) $(OS2RCLFLAGS) $(OS2RES) $@
 !endif
@@ -182,25 +193,23 @@ $(OBJDIR)\$(TARGET).$(TARGET_EXTENSION): $(OBJS) $(OS2RES) $(DEFFILE) $(OBJDIR)\
 # Exe: Linker file - creates the parameter file passed on to the linker.
 #
 !ifndef NO_LNKFILE_RULE
-$(OBJDIR)\$(TARGET).lrf: makefile  $(PDWIN32_INCLUDE)\pdwin32.wat.post $(DEFFILE)
-    $(RM) $(OBJDIR)\$(TARGET).lrf2 $@
-!ifdef DEFFILE
-    $(KDEF2WAT) $(DEFFILE) $@ <<$(OBJDIR)\$(TARGET).lrf2
-!else
-    $(ECHO) Creating <<$@
+$(OBJDIR)\$(TARGET).lrf: $(MAKEFILE)
+    @echo Creating file <<$@
+/OUT:$(OBJDIR)\$(TARGET).$(TARGET_EXTENSION)
+/MAP:$(OBJDIR)\$(TARGET).map
+$(OBJS:  =^
+)
+$(LIBS:  =^
+)
+$(DEFFILE)
+<<keep
 !endif
-$(LD2FLAGS)
-name $(OBJDIR)\$(TARGET).$(TARGET_EXTENSION)
-option map=$(OBJDIR)\$(TARGET).map
-file    {$(OBJS)}
-library {$(LIBS)}
-<<
-!endif
+
 
 !endif # !ifndef EXETARGET !else
 !else # !ifndef LIBTARGET
 ###############################################################################
-# LIB target (internal object library)
+# LIB target (internal or public object library)
 ###############################################################################
 
 #
@@ -215,8 +224,12 @@ LOCALCLEAN = 1
 !ifndef NO_ALL_RULE
 all:    $(OBJDIR) \
         $(INTLIBS) \
+!ifndef PUBLICLIB
+        $(OBJDIR)\$(TARGET).$(TARGET_EXTENSION)
+!else
         $(OBJDIR)\$(TARGET).$(TARGET_EXTENSION) \
-        .SYMBOLIC
+        $(ODIN32_LIB)\$(TARGET).$(TARGET_EXTENSION)
+!endif
 !endif
 
 
@@ -224,7 +237,7 @@ all:    $(OBJDIR) \
 # Lib: Lib rule - dummy rule
 #
 !ifndef NO_LIB_RULE
-lib: .SYMBOLIC
+lib:
 !endif
 
 
@@ -232,20 +245,20 @@ lib: .SYMBOLIC
 # Lib: Internal library rule. Same as the all rule.
 #
 !ifndef NO_INTERNAL_LIBS
-libs: all .SYMBOLIC
+libs: all
 !endif
 
 
 #
 # Lib: Main target rule - builds the target internal library.
-#       (fixme)
+#
 !ifndef NO_MAIN_RULE
 $(OBJDIR)\$(TARGET).$(TARGET_EXTENSION): $(OBJS)
     $(RM) $@
     $(ILIB) $(ILIBFLAGS) $@ @<<
 $(OBJS:  =&^
 )
-$(OBJDIR)\$^&.lst
+$(OBJDIR)\$(@B).lst
 <<
 !endif
 
@@ -261,10 +274,10 @@ $(OBJDIR)\$^&.lst
 # Common (new): Dep rule - makes depenencies for C, C++ and Asm files.
 #
 !ifndef NO_DEP_RULE
-dep: dep_internal $(ADDITIONAL_DEP) .SYMBOLIC
-dep_internal: .SYMBOLIC
+dep: dep_internal $(ADDITIONAL_DEP)
+dep_internal:
     $(DEPEND) $(CINCLUDES) *.c *.cpp *.h *.asm *.inc \
-        *.rc *.dlg $(PDWIN32_INCLUDE)\*.h -robj *.orc
+        *.rc *.dlg $(ODIN32_INCLUDE)\*.h -robj *.orc
 !ifdef SUBDIRS
     $(DODIRS) "$(SUBDIRS)"  $(MAKE_CMD) dep
 !endif
@@ -277,7 +290,7 @@ dep_internal: .SYMBOLIC
 #
 !ifndef NO_INTERNAL_LIBS
 !ifdef INTLIBS
-$(INTLIBS): .SYMBOLIC
+$(INTLIBS):
     $(DODIRS) "$(SUBDIRS)"  $(MAKE_CMD) libs
 !endif
 !endif
@@ -291,30 +304,34 @@ $(INTLIBS): .SYMBOLIC
 #
 # Common: Copy library rule.
 #
-$(PDWIN32_LIB)\$(ORGTARGET).lib: $(ORGTARGET).lib
-    @if not exist $^: $(CREATEPATH) $^:
-    $(CP) $[@ $@
+!ifndef PUBLICLIB
+$(ODIN32_LIB)\$(ORGTARGET).lib: $(OBJDIR)\$(ORGTARGET).lib
+!else
+$(ODIN32_LIB)\$(TARGET).$(TARGET_EXTENSION): $(OBJDIR)\$(ORGTARGET).$(TARGET_EXTENSION)
+!endif
+    @if not exist $(@D) $(CREATEPATH) $(@D)
+    $(CP) $** $@
 
 
 #
 # Common: Copy dll/exe rule.
 #
-$(PDWIN32_BIN)\$(TARGET).$(TARGET_EXTENSION): $(OBJDIR)\$(TARGET).$(TARGET_EXTENSION)
-    @if not exist $^: $(CREATEPATH) $^:
-    $(CP) $[@ $^@
+$(ODIN32_BIN)\$(TARGET).$(TARGET_EXTENSION): $(OBJDIR)\$(TARGET).$(TARGET_EXTENSION)
+    @if not exist $(@D) $(CREATEPATH) $(@D)
+    $(CP) $** $@
 !ifndef NO_MAIN_BIN_COPY
-    -$(CP) $[@ $^:..\..\$^.
+    -$(CP) $** $(@D)..\..\$(@F)
 !endif
 
 
 #
 # Common: Copy sym rule.
 #
-$(PDWIN32_BIN)\$(TARGET).sym: $(OBJDIR)\$(TARGET).sym
-    @if not exist $^: $(CREATEPATH) $^:
-    $(CP) $[@ $@
+$(ODIN32_BIN)\$(TARGET).sym: $(OBJDIR)\$(TARGET).sym
+    @if not exist $(@D) $(CREATEPATH) $(@D)
+    $(CP) $** $@
 !ifndef NO_MAIN_BIN_COPY
-    -$(CP) $[@ $^:..\..\$^.
+    -$(CP) $** $(@D)..\..\$(@F)
 !endif
 
 
@@ -330,28 +347,32 @@ $(OBJDIR)\$(TARGET).sym: $(OBJDIR)\$(TARGET).map
 #
 # Common: Make library from the <>exp.def or the <>.def file.
 #
+!ifndef LIBTARGET
 !ifndef NOTEXPDEF
-$(ORGTARGET).lib: $(ORGTARGET)exp.def
-    $(IMPLIB) $(IMPLIBFLAGS) $@ $[@
+$(OBJDIR)\$(ORGTARGET).lib: $(OBJDIR)\$(ORGTARGET)exp.def
+    $(IMPLIB) $(IMPLIBFLAGS) $@ $**
 !else
-$(TARGET).lib: $(DEFFILE)
-    $(IMPLIB) $(IMPLIBFLAGS) $@ $[@
+$(OBJDIR)\$(TARGET).lib: $(DEFFILE)
+    $(IMPLIB) $(IMPLIBFLAGS) $@ $**
+!endif
 !endif
 
 
 #
 # Common: Make the <>exp.def file.
 #
+!ifndef LIBTARGET
 !ifndef NOTEXPDEF
-$(ORGTARGET)exp.def: $(DEFFILE)
-    $(IMPDEF) $[@ $@
+$(OBJDIR)\$(ORGTARGET)exp.def: $(DEFFILE)
+    $(IMPDEF) $** $@
+!endif
 !endif
 
 
 #
 # Common: Create the object directory.
 #
-$(OBJDIR): .SYMBOLIC
+$(OBJDIR):
     @if not exist $(OBJDIR) $(CREATEPATH) $(OBJDIR)
 
 
@@ -360,19 +381,19 @@ $(OBJDIR): .SYMBOLIC
 #
 !ifndef NOCLEAN
 !ifndef CLEAN2
-clean: .SYMBOLIC
+clean:
 !else
-clean:  clean2 .SYMBOLIC
+clean:  clean2
 !endif
     $(RM) *.lib *.res *.map *.pch \
 !if "$(OBJDIR)" != ""
      $(OBJDIR)\* \
 !endif
 !ifndef LOCALCLEAN
-        $(PDWIN32_LIB)\$(ORGTARGET).lib \
+        $(ODIN32_LIB)\$(ORGTARGET).lib \
         $(ORGTARGET)exp.def \
-        $(PDWIN32_BIN)\$(TARGET).$(TARGET_EXTENSION) *.$(TARGET_EXTENSION) \
-        $(PDWIN32_BIN)\$(TARGET).sym *.sym \
+        $(ODIN32_BIN)\$(TARGET).$(TARGET_EXTENSION) *.$(TARGET_EXTENSION) \
+        $(ODIN32_BIN)\$(TARGET).sym *.sym \
         $(CLEANEXTRAS)
 !else
         $(CLEANEXTRAS)
@@ -387,12 +408,12 @@ clean:  clean2 .SYMBOLIC
 # Common: Include the .depend file.
 #   If the depend file don't exists we'll complain about it.
 #
-#!ifndef NODEP
-#!   if [$(EXISTS) .depend] == 0
-#!       include .depend
-#!   else
-#!       if [$(ECHO) .depend doesn't exist]
-#!       endif
-#!   endif
-#!endif
+!ifndef NODEP
+!   if [$(EXISTS) .depend] == 0
+!       include .depend
+!   else
+!       if [$(ECHO) .depend doesn't exist]
+!       endif
+!   endif
+!endif
 

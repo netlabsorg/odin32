@@ -1,18 +1,17 @@
-# $Id: pdwin32.wat.tools,v 1.7 2000-11-21 04:39:20 bird Exp $
-# ODIN / win32os2 Project
+# $Id: odin32.tools.wat.mk,v 1.1 2000-12-02 23:50:50 bird Exp $
+
 #
-# makefile for the build system tools and standard rules
-# Note: this has to be included after the compiler environment
+# Odin32 API
 #
-#
+#       Watcom C/C++ 11.x tools and interference rules.
 #
 
 
 #
 # Watcom Specific tools
 #
-MAPSYM   = ..\..\$(PDWIN32_TOOLS)\mapsymWat.cmd
-KDEF2WAT = $(PDWIN32_TOOLS)\kDef2Wat.exe
+MAPSYM   = ..\..\$(ODIN32_TOOLS)\mapsymWat.cmd
+KDEF2WAT = $(ODIN32_TOOLS)\kDef2Wat.exe
 
 
 #
@@ -40,8 +39,9 @@ MAKE_CMDLINE= $(MAKE_CMDLINE) NODEP=1
 
 MAKE_CMD    = $(MAKE_CMDLINE) # -f makefile.os2 # What is this?
 
+
 #
-# Targets
+# Interference rules.
 #
 .ERASE
 .EXTENSIONS:
