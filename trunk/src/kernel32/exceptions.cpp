@@ -1,4 +1,4 @@
-/* $Id: exceptions.cpp,v 1.13 1999-08-25 14:27:05 sandervl Exp $ */
+/* $Id: exceptions.cpp,v 1.14 1999-08-25 15:46:52 sandervl Exp $ */
 
 /*
  * Win32 Device IOCTL API functions for OS/2
@@ -454,7 +454,7 @@ void KillWin32Process(void)
   //Restore original OS/2 TIB selector
   RestoreOS2FS();
 
-  SetExceptionChain((ULONG)0);
+  SetExceptionChain((ULONG)-1);
   DosExit(EXIT_PROCESS, 666);
 }
 
