@@ -1,4 +1,4 @@
-/* $Id: winimagepeldr.cpp,v 1.3 1999-09-28 00:37:39 phaller Exp $ */
+/* $Id: winimagepeldr.cpp,v 1.4 1999-10-05 23:23:47 phaller Exp $ */
 
 /*
  * Win32 PE loader Image base class
@@ -350,16 +350,18 @@ BOOL Win32PeLdrImage::init(ULONG reservedMem)
   //SvL: Use pointer to image header as module handle now. Some apps needs this
   hinstance = (HINSTANCE)realBaseAddress;
 
-  if(processImports((char *)win32file) == FALSE) {
-    	fout << "Failed to process imports!" << endl;
-    	goto failure;
-  }
-
+  //PH: get pResDir pointer correct first, since processImports may
+  //    implicitly call functions depending on it.
   IMAGE_SECTION_HEADER sh;
   if(GetSectionHdrByName (win32file, &sh, ".rsrc")) {
     	//get offset in resource object of directory entry
 	pResDir = (PIMAGE_RESOURCE_DIRECTORY)(sh.VirtualAddress + realBaseAddress);
         pResourceSectionStart = (ULONG)pResSection->virtaddr - oh.ImageBase;
+  }
+
+  if(processImports((char *)win32file) == FALSE) {
+    	fout << "Failed to process imports!" << endl;
+    	goto failure;
   }
 
   //set final memory protection flags (storeSections sets them to read/write)
