@@ -1,4 +1,10 @@
-/* $Id: changelog,v 1.2383 2002-12-11 17:12:40 sandervl Exp $ */
+/* $Id: changelog,v 1.2384 2002-12-12 12:32:52 sandervl Exp $ */
+
+ 2002-12-12: Sander van Leeuwen <sandervl@innotek   >
+    - KERNEL32: o Fixed wrong access of global memory map critical section
+                  (custom builds only)
+    - USER32:   o Fixed wrong access of global window handle critical section
+                  (custom builds only)
 
  2002-12-11: Sander van Leeuwen <sandervl@innotek   >
     - KERNEL32: o Added custom build function to disable loading of LX dlls
