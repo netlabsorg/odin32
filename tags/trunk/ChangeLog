@@ -1,4 +1,8 @@
- /* $Id: ChangeLog,v 1.590 1999-12-29 22:52:29 cbratschi Exp $ */
+ /* $Id: ChangeLog,v 1.591 1999-12-30 00:22:45 phaller Exp $ */
+
+ 99-12-30: Patrick Haller <phaller@gmx.net>
+	- SHELL32:	Add: StrChrIA, StrChrIW, StrStrIA, StrStrIW
+	- SHLWAPI:	Add: see above, SHRegGetBoolUSValueA/W
 
  99-12-29: Christoph Bratschi <cbratschi@datacomm.ch>
 	- USER32: rewrote coordinate mapping (map*) and fixed some 1 pixel bugs
