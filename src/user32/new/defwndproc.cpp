@@ -1,4 +1,4 @@
-/* $Id: defwndproc.cpp,v 1.6 1999-08-30 11:59:53 sandervl Exp $ */
+/* $Id: defwndproc.cpp,v 1.7 1999-08-31 17:14:51 sandervl Exp $ */
 
 /*
  * Win32 default window API functions for OS/2
@@ -15,6 +15,7 @@
 #include "syscolor.h"
 #include "win32wbase.h"
 #include "win32wnd.h"
+#include "win32wmdichild.h"
 
 #ifdef DEBUG
 char *GetMsgText(int Msg);
@@ -147,72 +148,27 @@ LRESULT WIN32API DefFrameProcW(HWND hwndFrame, HWND hwndMDIClient, UINT Msg, WPA
 //******************************************************************************
 LRESULT WIN32API DefMDIChildProcA(HWND hwnd, UINT Msg, WPARAM wParam, LPARAM lParam)
 {
-#ifdef DEBUG
-////    WriteLog("*DMP*");
-#endif
-    switch(Msg) {
-        case WM_SETREDRAW: //Open32 does not set the visible flag
-                if(wParam)
-                  SetWindowLongA (hwnd, GWL_STYLE, GetWindowLongA (hwnd, GWL_STYLE) | WS_VISIBLE);
-                else
-                  SetWindowLongA (hwnd, GWL_STYLE, GetWindowLongA (hwnd, GWL_STYLE) & ~WS_VISIBLE);
-                return O32_DefMDIChildProc(hwnd, Msg, wParam, lParam);
-        case WM_NCCREATE://SvL: YAOFM (yet another open32 feature missing)
-                return(TRUE);
-        case WM_CTLCOLORMSGBOX:
-        case WM_CTLCOLOREDIT:
-        case WM_CTLCOLORLISTBOX:
-        case WM_CTLCOLORBTN:
-        case WM_CTLCOLORDLG:
-        case WM_CTLCOLORSTATIC:
-        case WM_CTLCOLORSCROLLBAR:
-                SetBkColor((HDC)wParam, GetSysColor(COLOR_WINDOW));
-                SetTextColor((HDC)wParam, GetSysColor(COLOR_WINDOWTEXT));
-                return GetSysColorBrush(COLOR_BTNFACE);
+  Win32MDIChildWindow *window;
 
-    case WM_PARENTNOTIFY: //Open32 doesn't like receiving those!!
-        dprintf(("DefWndProc: WM_PARENTNOTIFY for %x", hwnd));
+    window = (Win32MDIChildWindow *)Win32BaseWindow::GetWindowFromHandle(hwnd);
+    if(!window) {
+        dprintf(("DefMDIProcA, window %x not found", hwnd));
         return 0;
-
-        default:
-                return O32_DefMDIChildProc(hwnd, Msg, wParam, lParam);
     }
+    return window->DefMDIChildProcA(Msg, wParam, lParam);
 }
 //******************************************************************************
-//NOTE: Unicode msg translation!
 //******************************************************************************
 LRESULT WIN32API DefMDIChildProcW(HWND hwnd, UINT Msg, WPARAM wParam, LPARAM lParam)
 {
-#ifdef DEBUG
-////    WriteLog("*DMPW*");
-#endif
-    switch(Msg) {
-        case WM_SETREDRAW: //Open32 does not set the visible flag
-                if(wParam)
-                  SetWindowLongA (hwnd, GWL_STYLE, GetWindowLongA (hwnd, GWL_STYLE) | WS_VISIBLE);
-                else
-                  SetWindowLongA (hwnd, GWL_STYLE, GetWindowLongA (hwnd, GWL_STYLE) & ~WS_VISIBLE);
-                return O32_DefMDIChildProc(hwnd, Msg, wParam, lParam);
-        case WM_NCCREATE://SvL: YAOFM (yet another open32 feature missing)
-                return(TRUE);
-        case WM_CTLCOLORMSGBOX:
-        case WM_CTLCOLOREDIT:
-        case WM_CTLCOLORLISTBOX:
-        case WM_CTLCOLORBTN:
-        case WM_CTLCOLORDLG:
-        case WM_CTLCOLORSTATIC:
-        case WM_CTLCOLORSCROLLBAR:
-                SetBkColor((HDC)wParam, GetSysColor(COLOR_WINDOW));
-                SetTextColor((HDC)wParam, GetSysColor(COLOR_WINDOWTEXT));
-                return GetSysColorBrush(COLOR_BTNFACE);
+  Win32MDIChildWindow *window;
 
-    case WM_PARENTNOTIFY: //Open32 doesn't like receiving those!!
-        dprintf(("DefWndProc: WM_PARENTNOTIFY for %x", hwnd));
+    window = (Win32MDIChildWindow *)Win32BaseWindow::GetWindowFromHandle(hwnd);
+    if(!window) {
+        dprintf(("DefMDIProcW, window %x not found", hwnd));
         return 0;
-
-        default:
-                return O32_DefMDIChildProc(hwnd, Msg, wParam, lParam);
     }
+    return window->DefMDIChildProcW(Msg, wParam, lParam);
 }
 //******************************************************************************
 //******************************************************************************

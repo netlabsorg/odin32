@@ -1,4 +1,4 @@
-/* $Id: window.cpp,v 1.20 1999-08-31 10:36:24 sandervl Exp $ */
+/* $Id: window.cpp,v 1.21 1999-08-31 17:14:52 sandervl Exp $ */
 /*
  * Win32 window apis for OS/2
  *
@@ -18,6 +18,7 @@
 #include <os2win.h>
 #include <misc.h>
 #include <win32wbase.h>
+#include <win32wmdiclient.h>
 #include <oslibwin.h>
 #include <oslibgdi.h>
 #include "user32.h"
@@ -39,6 +40,8 @@ HWND WIN32API CreateWindowExA(DWORD exStyle, LPCSTR className,
     if(exStyle & WS_EX_MDICHILD)
         return CreateMDIWindowA(className, windowName, style, x, y, width, height, parent, instance, (LPARAM)data);
 
+    //TODO: According to the docs className can be a 16 bits atom
+    //      Wine seems to assume it's a string though...
     /* Find the class atom */
     if (!(classAtom = GlobalFindAtomA(className)))
     {
@@ -65,7 +68,15 @@ HWND WIN32API CreateWindowExA(DWORD exStyle, LPCSTR className,
     cs.lpszClass      = className;
     cs.dwExStyle      = exStyle;
     dprintf(("CreateWindowExA: (%d,%d) (%d,%d), %x %x", x, y, width, height, style, exStyle));
-    window = new Win32BaseWindow( &cs, classAtom, FALSE );
+
+    //TODO: According to the docs className can be a 16 bits atom
+    //      Wine seems to assume it's a string though...
+    if(!stricmp(className, MDICLIENTCLASSNAMEA)) {
+	window = (Win32BaseWindow *) new Win32MDIClientWindow(&cs, classAtom, FALSE);
+    }
+    else {
+    	window = new Win32BaseWindow( &cs, classAtom, FALSE );
+    }
     if(window == NULL)
     {
         dprintf(("Win32BaseWindow creation failed!!"));
@@ -94,6 +105,8 @@ HWND WIN32API CreateWindowExW(DWORD exStyle, LPCWSTR className,
     if(exStyle & WS_EX_MDICHILD)
         return CreateMDIWindowW(className, windowName, style, x, y, width, height, parent, instance, (LPARAM)data);
 
+    //TODO: According to the docs className can be a 16 bits atom
+    //      Wine seems to assume it's a string though...
     /* Find the class atom */
     if (!(classAtom = GlobalFindAtomW(className)))
     {
@@ -119,7 +132,15 @@ HWND WIN32API CreateWindowExW(DWORD exStyle, LPCWSTR className,
     cs.lpszName       = (LPSTR)windowName;
     cs.lpszClass      = (LPSTR)className;
     cs.dwExStyle      = exStyle;
-    window = new Win32BaseWindow( &cs, classAtom, TRUE );
+
+    //TODO: According to the docs className can be a 16 bits atom
+    //      Wine seems to assume it's a string though...
+    if(!lstrcmpW(className, (LPWSTR)MDICLIENTCLASSNAMEW)) {
+	window = (Win32BaseWindow *) new Win32MDIClientWindow(&cs, classAtom, TRUE);
+    }
+    else {
+    	window = new Win32BaseWindow( &cs, classAtom, TRUE );
+    }
     if(window == NULL)
     {
         dprintf(("Win32BaseWindow creation failed!!"));

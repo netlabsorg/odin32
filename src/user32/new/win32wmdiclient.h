@@ -1,4 +1,4 @@
-/* $Id: win32wmdiclient.h,v 1.2 1999-08-31 10:36:23 sandervl Exp $ */
+/* $Id: win32wmdiclient.h,v 1.3 1999-08-31 17:14:52 sandervl Exp $ */
 /*
  * Win32 MDI Client Window Class for OS/2
  *
@@ -14,7 +14,8 @@
 #include <win32wmdichild.h>
 #include <mdi.h>
 
-#define MDICLIENTCLASSNAME "MDICLIENT"
+#define MDICLIENTCLASSNAMEA "MDICLIENT"
+#define MDICLIENTCLASSNAMEW L"MDICLIENT"
 
 //******************************************************************************
 //******************************************************************************

@@ -1,4 +1,4 @@
-/* $Id: win32wmdichild.h,v 1.1 1999-08-31 10:36:23 sandervl Exp $ */
+/* $Id: win32wmdichild.h,v 1.2 1999-08-31 17:14:51 sandervl Exp $ */
 /*
  * Win32 MDI Client Window Class for OS/2
  *
@@ -28,6 +28,9 @@ virtual        ~Win32MDIChildWindow();
 
            BOOL menuModifyItem();
 	   BOOL menuDeleteItem();
+
+        LRESULT DefMDIChildProcA(UINT Msg, WPARAM wParam, LPARAM lParam);
+        LRESULT DefMDIChildProcW(UINT Msg, WPARAM wParam, LPARAM lParam);
 
    static  void calcDefaultChildPos(Win32MDIClientWindow *client, WORD n, LPPOINT lpPos, INT delta);
 private:
