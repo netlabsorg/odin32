@@ -1,4 +1,10 @@
- /* $Id: changelog,v 1.815 2000-03-18 15:14:29 sandervl Exp $ */
+ /* $Id: changelog,v 1.816 2000-03-18 16:10:02 cbratschi Exp $ */
+
+ 2000-03-18: Christoph Bratschi <cbratschi@datacomm.ch>
+	- USER32: merged with Corel WINE 20000317
+		  added GCL_HICONSM support
+		  fixed messagebox with no icon
+	- COMCTL32: merged with Corel WINE 20000317 + bug fixes
 
  2000-03-18: Sander van Leeuwen <sandervl@xs4all.nl>
 	- ODINCRT: Added FS wrapper for _fdopen 
