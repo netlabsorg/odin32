@@ -1,4 +1,4 @@
-/* $Id: thread.cpp,v 1.14 1999-09-15 23:38:02 sandervl Exp $ */
+/* $Id: thread.cpp,v 1.15 1999-10-14 17:18:58 phaller Exp $ */
 
 /*
  * Win32 Thread API functions
@@ -9,6 +9,15 @@
  * Project Odin Software License can be found in LICENSE.TXT
  *
  */
+
+/*****************************************************************************
+ * Includes                                                                  *
+ *****************************************************************************/
+
+#include <odin.h>
+#include <odinwrap.h>
+#include <os2sel.h>
+
 #include <os2win.h>
 #include <stdarg.h>
 #include <string.h>
@@ -20,32 +29,40 @@
 #include <winexebase.h>
 #include <except.h>
 
+ODINDEBUGCHANNEL(KERNEL32-THREAD)
+
+
 static DWORD OPEN32API Win32ThreadProc(LPVOID lpData);
 
 
 //******************************************************************************
 //******************************************************************************
-HANDLE WIN32API CreateThread(LPSECURITY_ATTRIBUTES lpsa, DWORD cbStack,
-                             LPTHREAD_START_ROUTINE lpStartAddr,
-                             LPVOID lpvThreadParm, DWORD fdwCreate,
-                             LPDWORD lpIDThread)
+ODINFUNCTION6(HANDLE,CreateThread,LPSECURITY_ATTRIBUTES,  lpsa,
+                                  DWORD,                  cbStack,
+                                  LPTHREAD_START_ROUTINE, lpStartAddr,
+                                  LPVOID,                 lpvThreadParm,
+                                  DWORD,                  fdwCreate,
+                                  LPDWORD,                lpIDThread)
 {
- Win32Thread *winthread;
+  Win32Thread *winthread;
 
- winthread = new Win32Thread(lpStartAddr, lpvThreadParm, fdwCreate);
+  winthread = new Win32Thread(lpStartAddr, lpvThreadParm, fdwCreate);
 
   if(winthread == 0)
     return(0);
 
-  dprintf(("CreateThread (%08xh,%08xh,%08xh,%08xh,%08xh,%08xh)\n",
-           lpsa,
-           cbStack,
-           lpStartAddr,
-           lpvThreadParm,
-           fdwCreate,
-           lpIDThread));
+#ifdef DEBUG
+  // @@@PH Note: with debug code enabled, ODIN might request more stack space!
+  if (cbStack > 0)
+     cbStack <<= 1;
+#endif
 
-  return(O32_CreateThread(lpsa, cbStack, winthread->GetOS2Callback(), (LPVOID)winthread, fdwCreate, lpIDThread));
+  return(O32_CreateThread(lpsa,
+                          cbStack,
+                          winthread->GetOS2Callback(),
+                          (LPVOID)winthread,
+                          fdwCreate,
+                          lpIDThread));
 }
 //******************************************************************************
 //******************************************************************************
