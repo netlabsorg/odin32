@@ -1,4 +1,4 @@
-/* $Id: menu.cpp,v 1.45 2002-03-08 15:49:29 sandervl Exp $*/
+/* $Id: menu.cpp,v 1.46 2002-05-23 13:49:41 sandervl Exp $*/
 /*
  * Menu functions
  *
@@ -3279,7 +3279,9 @@ void MENU_TrackKbdMenuBar( HWND hWnd, UINT wParam, INT vkey)
                                         vkey, (wParam & HTSYSMENU) );
             if( uItem >= (UINT)(-2) )
             {
+#ifndef __WIN32OS2__
                 if( uItem == (UINT)(-1) ) MessageBeep(0);
+#endif
                 hTrackMenu = 0;
             }
         }
