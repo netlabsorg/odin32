@@ -1,8 +1,10 @@
-/* $Id: changelog,v 1.2218 2002-07-13 16:28:13 sandervl Exp $ */
+/* $Id: changelog,v 1.2219 2002-07-13 16:52:25 achimha Exp $ */
 
  2002-07-13: Sander van Leeuwen <sandervl@innotek.de> 
     - KERNEL32: o We do NOT want to use any win32k services with custom builds
                 o Disabled 64kb alignment in VirtualAlloc for now
+                  (algorithm lead to infinite recursion on SMP kernels,
+                  pending a better algorithm)
 
  2002-07-12: Platon Fomichev <platon@innotek.de>
     - USER32:   o Close menu when RMB is pressed outside menu window
