@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.9 1999-09-24 12:47:50 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.10 1999-09-24 22:45:27 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -1363,13 +1363,13 @@ LRESULT Win32BaseWindow::SendMessageW(ULONG Msg, WPARAM wParam, LPARAM lParam)
   {
         case WM_CREATE:
         {
-                if(win32wndproc(getWindowHandle(), WM_CREATE, 0, lParam) == 0) {
-                        dprintf(("WM_CREATE returned FALSE\n"));
-                        return(0); //don't create window
+                if(win32wndproc(getWindowHandle(), WM_CREATE, 0, lParam) == -1) {
+                        dprintf(("WM_CREATE returned -1\n"));
+                        return(-1); //don't create window
                 }
                 NotifyParent(Msg, wParam, lParam);
 
-                return(1);
+                return(0);
         }
         case WM_SETTEXT: //TODO: Nothing happens if passed to DefWindowProc
                 return win32wndproc(getWindowHandle(), WM_SETTEXT, wParam, lParam);
@@ -1404,13 +1404,13 @@ LRESULT Win32BaseWindow::SendInternalMessageA(ULONG Msg, WPARAM wParam, LPARAM l
   {
         case WM_CREATE:
         {
-                if(win32wndproc(getWindowHandle(), WM_CREATE, 0, lParam) == 0) {
-                        dprintf(("WM_CREATE returned FALSE\n"));
-                        return(0); //don't create window
+                if(win32wndproc(getWindowHandle(), WM_CREATE, 0, lParam) == -1) {
+                        dprintf(("WM_CREATE returned -1\n"));
+                        return(-1); //don't create window
                 }
                 NotifyParent(Msg, wParam, lParam);
 
-                return(1);
+                return(0);
         }
         case WM_LBUTTONDOWN:
         case WM_MBUTTONDOWN:
@@ -1442,13 +1442,13 @@ LRESULT Win32BaseWindow::SendInternalMessageW(ULONG Msg, WPARAM wParam, LPARAM l
   {
         case WM_CREATE:
         {
-                if(win32wndproc(getWindowHandle(), WM_CREATE, 0, lParam) == 0) {
-                        dprintf(("WM_CREATE returned FALSE\n"));
-                        return(0); //don't create window
+                if(win32wndproc(getWindowHandle(), WM_CREATE, 0, lParam) == -1) {
+                        dprintf(("WM_CREATE returned -1\n"));
+                        return(-1); //don't create window
                 }
                 NotifyParent(Msg, wParam, lParam);
 
-                return(1);
+                return(0);
         }
         case WM_LBUTTONDOWN:
         case WM_MBUTTONDOWN:
