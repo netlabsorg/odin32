@@ -1,4 +1,4 @@
-; $Id: devSegDf.inc,v 1.5.4.1 2000-07-16 22:43:28 bird Exp $
+; $Id: devSegDf.inc,v 1.5.4.2 2000-08-13 09:23:59 bird Exp $
 ;
 ; Segment definitions for win32k.sys.
 ;
@@ -22,6 +22,9 @@ DATA16_GROUP    group DATA16, DATA16_CONST, DATA16_BSS
 
 CODE16 segment word public 'CODE' use16
 CODE16 ends
+
+CODE16_IOSEG segment word public 'CODE' use16
+CODE16_IOSEG ends
 
 
 CODE32 segment dword public 'CODE' use32

@@ -1,6 +1,6 @@
 [COMPILER]
 MACRO=odin32_maketagfile();\n
-FILTEREXPANSION=0 0 0 0 0 0 0 0 0 0 0 0 0 0
+FILTEREXPANSION=1 1 1 1 0 0 0 0 1 0 0 0 0 1
 compile=concur|capture|clear|:Compile:&Compile,nmake %n.obj
 make=concur|capture|clear|:Build:&Build,nmake
 rebuild=concur|capture|clear|:Rebuild:&Rebuild,nmake /A
@@ -143,3 +143,34 @@ test\fakea.asm
 test\init.asm
 test\win32ktst.c
 [ASSOCIATION]
+[STATE]
+SCREEN: 1792 1344 272 272 1394 896 0 0 M 0 0 0 0 1514 1042
+CWD: H:\CODING\WORK\ODIN32\src\win32k
+BUFFER: BN="F:\VSLICK40\OS2\vrestore.slk"
+BI: MA=1 254 1  TABS=1 9  WWS=3 IWT=0 ST=0 IN=0 BW=0 US=0 RO=0 SE=0 SN=0 BIN=0 MN=Fundamental	HM=0 MF=1
+VIEW: LN=.0 CL=1 LE=0 CX=0 CY=1 WI=5 BI=20 HT=0 HN=0 HF=0 HC=4
+BUFFER: BN="H:\coding\work\odin32\src\win32k\libconv.c"
+BI: MA=1 74 1  TABS=1 5  WWS=1 IWT=0 ST=0 IN=2 BW=0 US=32000 RO=0 SE=1 SN=0 BIN=0 MN=C	HM=0 MF=616
+VIEW: LN=.4040 CL=17 LE=0 CX=16 CY=25 WI=5 BI=17 HT=0 HN=0 HF=0 HC=4
+BUFFER: BN="H:\coding\work\odin32\src\win32k\include\devSegDf.inc"
+BI: MA=1 74 1  TABS=1 5  WWS=1 IWT=0 ST=0 IN=1 BW=0 US=32000 RO=0 SE=1 SN=0 BIN=0 MN=Assembly	HM=0 MF=40
+VIEW: LN=.532 CL=8 LE=0 CX=7 CY=24 WI=5 BI=19 HT=0 HN=0 HF=0 HC=4
+WINDOW: 156 162 1021 703 -1 -1 M  WF=0 WT=1 "System Monospaced,10,0,1"
+BUFFER: BN="H:\coding\work\odin32\src\win32k\include\devSegDf.inc"
+VIEW: LN=.553 CL=14 LE=0 CX=13 CY=26 WI=84 BI=19 HT=0 HN=0 HF=0 HC=4
+WINDOW: 130 131 1021 704 -1 -1 M  WF=0 WT=2 "System Monospaced,10,0,1"
+BUFFER: BN="H:\coding\work\odin32\src\win32k\libconv.c"
+VIEW: LN=.4235 CL=32 LE=0 CX=31 CY=32 WI=83 BI=17 HT=0 HN=0 HF=0 HC=4
+FILEHIST: 9
+H:\CODING\WORK\ODIN32\src\win32k\dev16\probkrnl.c
+H:\CODING\WORK\ODIN32\src\win32k\include\vprntf16.h
+H:\CODING\WORK\ODIN32\src\win32k\dev16\vprntf16.c
+H:\coding\work\odin32\src\win32k\list\debug\vprntf16.s
+H:\coding\work\odin32\src\win32k\include\omf.h
+H:\coding\work\odin32\src\win32k\object\debug\ext.lib
+H:\coding\work\odin32\src\win32k\object\debug\noext.lib
+H:\coding\work\odin32\src\win32k\libconv.c
+H:\coding\work\odin32\src\win32k\include\devSegDf.inc
+PRINTER: 2
+PRINTER: 2
+PRINTER: 2

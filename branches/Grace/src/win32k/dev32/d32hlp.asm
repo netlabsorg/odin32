@@ -1,4 +1,4 @@
-; $Id: d32hlp.asm,v 1.3.4.1 2000-07-16 22:43:25 bird Exp $
+; $Id: d32hlp.asm,v 1.3.4.2 2000-08-13 09:23:58 bird Exp $
 ;
 ; d32hlp - 32-bit Device Driver Helper Function.
 ;
@@ -36,7 +36,7 @@
     extrn _Device_Help:dword
 
 ;CODE32 segment
-CODE32 segment dword public 'CODE' use32
+CODE32 segment
     assume cs:CODE32, ds:flat, ss:nothing, es:nothing
     .386p
 
@@ -280,7 +280,7 @@ CODE32 ends
 
 
 ;CODE16 segment
-CODE16 segment word public 'CODE' use16
+CODE16 segment
     assume cs:CODE16, ds:FLAT
 
 Thunk16_VirtToLin:
