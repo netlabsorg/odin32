@@ -1,4 +1,4 @@
-/* $Id: initkernel32.cpp,v 1.12 2001-12-13 15:32:34 sandervl Exp $
+/* $Id: initkernel32.cpp,v 1.13 2002-02-24 20:29:56 sandervl Exp $
  *
  * KERNEL32 DLL entry point
  *
@@ -226,7 +226,7 @@ void APIENTRY cleanupKernel32(ULONG ulReason)
     DestroySharedHeap();
     DestroyCodeHeap();
 
-#ifdef DEBUG
+#if defined(DEBUG) && defined(__IBMCPP__) && __IBMCPP__ == 300
     ULONG totalmemalloc, nrcalls_malloc, nrcalls_free;
 
     getcrtstat(&nrcalls_malloc, &nrcalls_free, &totalmemalloc);
