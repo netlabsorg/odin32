@@ -1,9 +1,9 @@
-/* $Id: d16init.c,v 1.11 2001-04-04 21:28:44 bird Exp $
+/* $Id: d16init.c,v 1.12 2001-07-31 21:36:37 bird Exp $
  *
  * d16init - init routines for both drivers.
  *
  * IMPORTANT! Code and data defined here will be discarded after init is
- *            compleated. CodeEnd and DataEnd should not be set here.?
+ *            completed. CodeEnd and DataEnd should not be set here.?
  *
  * Copyright (c) 1999-2000 knut st. osmundsen (knut.stange.osmundsen@mynd.no)
  *
@@ -167,6 +167,7 @@ USHORT NEAR dev1Init(PRPINITIN pRpIn, PRPINITOUT pRpOut)
             printf16("%s\n", npszErrMsg2);
         pRpOut->Status = pRpOut->rph.Status = STATUS_DONE | STERR | ERROR_I24_GEN_FAILURE;
     }
+    printf16("\n");
 
     /* Init is completed. */
     fInitTime = FALSE;
