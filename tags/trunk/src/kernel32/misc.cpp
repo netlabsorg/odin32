@@ -1,4 +1,4 @@
-/* $Id: misc.cpp,v 1.33 2001-03-21 12:32:55 sandervl Exp $ */
+/* $Id: misc.cpp,v 1.34 2001-04-27 17:35:41 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -254,7 +254,12 @@ static BOOL fDisableThread[5] = {0};
 //#define CHECK_ODINHEAP
 #if defined(DEBUG) && defined(CHECK_ODINHEAP)
 int checkOdinHeap = 1;
-#define ODIN_HEAPCHECK()    if(checkOdinHeap)   _heap_check();
+int checkingheap = 0;
+#define ODIN_HEAPCHECK() \
+        if(checkingheap) checkOdinHeap = 0; \
+        checkingheap++; \
+        if(checkOdinHeap)   _heap_check(); \
+        checkingheap--;
 #else
 #define ODIN_HEAPCHECK()
 #endif
