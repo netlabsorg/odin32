@@ -1,4 +1,4 @@
-/* $Id: blit.cpp,v 1.34 2001-09-10 11:02:40 sandervl Exp $ */
+/* $Id: blit.cpp,v 1.35 2001-11-13 13:18:22 sandervl Exp $ */
 
 /*
  * GDI32 blit code
@@ -146,6 +146,8 @@ static INT SetDIBitsToDevice_(HDC hdc, INT xDest, INT yDest, DWORD cx,
         bitfields[1] = (info->bmiHeader.biCompression == BI_BITFIELDS) ?  *((DWORD *)info->bmiColors + 1) : 0x03e0;
         bitfields[2] = (info->bmiHeader.biCompression == BI_BITFIELDS) ?  *((DWORD *)info->bmiColors + 2) : 0x001f;
         break;
+
+    case 24:
     case 32:
         bitfields[0] = (info->bmiHeader.biCompression == BI_BITFIELDS) ? *(DWORD *)info->bmiColors : 0xff0000;
         bitfields[1] = (info->bmiHeader.biCompression == BI_BITFIELDS) ?  *((DWORD *)info->bmiColors + 1) : 0xff00;
@@ -225,9 +227,14 @@ INT WIN32API SetDIBitsToDevice(HDC hdc, INT xDest, INT yDest, DWORD cx,
                                UINT startscan, UINT lines, LPCVOID bits,
                                const BITMAPINFO *info, UINT coloruse)
 {
+    static BOOL fMatrox32BppBug = FALSE;
+    INT rc = 0;
+    char *newBits = NULL;
+
+    //If upside down, reverse scanlines and call SetDIBitsToDevice again
     if(info->bmiHeader.biHeight < 0 && info->bmiHeader.biBitCount != 8 && info->bmiHeader.biCompression == 0) {
         // upside down
-        INT rc = 0;
+        INT rc = -1;
         BITMAPINFO newInfo;
         newInfo.bmiHeader = info->bmiHeader;
         long lLineByte = ((newInfo.bmiHeader.biWidth * (info->bmiHeader.biBitCount == 15 ? 16 : info->bmiHeader.biBitCount) + 31) / 32) * 4;
@@ -243,11 +250,67 @@ INT WIN32API SetDIBitsToDevice(HDC hdc, INT xDest, INT yDest, DWORD cx,
                 pbDst += lLineByte;
                 pbSrc -= lLineByte;
             }
-            rc = SetDIBitsToDevice_( hdc, xDest, yDest, cx, cy, xSrc, ySrc, startscan, lines, (void *)newBits, &newInfo, DIB_RGB_COLORS );
+            rc = SetDIBitsToDevice( hdc, xDest, yDest, cx, cy, xSrc, ySrc, startscan, lines, (void *)newBits, &newInfo, coloruse );
             free( newBits );
         }
+        else DebugInt3();
+
         return rc;
     }
+
+    //We must convert 32 bpp bitmap data to 24 bpp on systems with the Matrox 
+    //display driver. (GpiDrawBits for 32 bpp fails with insufficient memory error)
+    if(info->bmiHeader.biBitCount == 32 && fMatrox32BppBug) 
+    {
+        BITMAPINFO newInfo;
+        newInfo.bmiHeader = info->bmiHeader;
+
+        long lLineWidth;
+        long lHeight    = (newInfo.bmiHeader.biHeight > 0) ? newInfo.bmiHeader.biHeight : -newInfo.bmiHeader.biHeight;
+        long lWidth     = newInfo.bmiHeader.biWidth;
+
+        newInfo.bmiHeader.biBitCount  = 24;
+        newInfo.bmiHeader.biSizeImage = CalcBitmapSize(24, newInfo.bmiHeader.biWidth, 
+                                                       newInfo.bmiHeader.biHeight);
+
+        lLineWidth = newInfo.bmiHeader.biSizeImage / lHeight;
+
+        //convert 32 bits bitmap data to 24 bits
+        newBits = (char *)malloc(newInfo.bmiHeader.biSizeImage+16); //extra room needed for copying (too much)
+        if(!newBits) {
+            DebugInt3();
+            return -1;
+        }
+        unsigned char *pbSrc = (unsigned char *)bits;
+        unsigned char *pbDst = (unsigned char *)newBits;
+        //not very efficient
+        for(int i = 0; i < lHeight; i++) {
+            for(int j=0;j<lWidth;j++) {
+                *(DWORD *)pbDst = *(DWORD *)pbSrc;
+                pbSrc += 4;
+                pbDst += 3;
+            }
+            //24 bpp scanline must be aligned at 4 byte boundary
+            pbDst += (lLineWidth - 3*lWidth);
+        }
+        rc = SetDIBitsToDevice_( hdc, xDest, yDest, cx, cy, xSrc, ySrc, startscan, lines, newBits, &newInfo, coloruse );
+        free(newBits);
+        return rc;
+    }
+    rc = SetDIBitsToDevice_( hdc, xDest, yDest, cx, cy, xSrc, ySrc, startscan, lines, bits, info, coloruse );
+
+    if(rc == -1 && info->bmiHeader.biBitCount == 32 && !fMatrox32BppBug) 
+    {
+        //The Matrox driver seems to have some difficulty blitting 32bpp
+        //data. (out of memory error) The same operation works fine with SDD.
+        fMatrox32BppBug = TRUE;
+        return SetDIBitsToDevice(hdc, xDest, yDest, cx,
+                                 cy, xSrc, ySrc,
+                                 startscan, lines, bits,
+                                 info, coloruse);
+    }
+    return rc;
+
 //SvL: Breaks startup bitmap of Acrobat Reader 4.05
 #if 0
     else
@@ -318,9 +381,6 @@ INT WIN32API SetDIBitsToDevice(HDC hdc, INT xDest, INT yDest, DWORD cx,
         return rc;
     } 
 #endif
-    else {
-        return SetDIBitsToDevice_( hdc, xDest, yDest, cx, cy, xSrc, ySrc, startscan, lines, bits, info, coloruse );
-    }
 }
 //******************************************************************************
 //******************************************************************************
@@ -440,6 +500,7 @@ static INT StretchDIBits_(HDC hdc, INT xDst, INT yDst, INT widthDst,
         bitfields[1] = (info->bmiHeader.biCompression == BI_BITFIELDS) ?  *((DWORD *)info->bmiColors + 1) : 0x03e0;
         bitfields[2] = (info->bmiHeader.biCompression == BI_BITFIELDS) ?  *((DWORD *)info->bmiColors + 2) : 0x001f;
         break;
+    case 24:
     case 32:
         bitfields[0] = (info->bmiHeader.biCompression == BI_BITFIELDS) ? *(DWORD *)info->bmiColors : 0xff0000;
         bitfields[1] = (info->bmiHeader.biCompression == BI_BITFIELDS) ?  *((DWORD *)info->bmiColors + 1) : 0xff00;
@@ -469,7 +530,6 @@ static INT StretchDIBits_(HDC hdc, INT xDst, INT yDst, INT widthDst,
     if(info->bmiHeader.biCompression == BI_BITFIELDS) {
         ((BITMAPINFO *)info)->bmiHeader.biCompression = 0;
         compression = BI_BITFIELDS;
-
     }
 
     rc = O32_StretchDIBits(hdc, xDst, yDst, widthDst, heightDst, xSrc, ySrc,
@@ -628,7 +688,7 @@ ULONG CalcBitmapSize(ULONG cBits, LONG cx, LONG cy)
                         break;
 
                 case 32:
-                        return cx*cy;
+                        return cx*cy*4;
 
                 default:
                         return 0;

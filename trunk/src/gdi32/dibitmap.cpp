@@ -1,4 +1,4 @@
-/* $Id: dibitmap.cpp,v 1.27 2001-08-28 18:58:57 sandervl Exp $ */
+/* $Id: dibitmap.cpp,v 1.28 2001-11-13 13:18:22 sandervl Exp $ */
 
 /*
  * GDI32 dib & bitmap code
@@ -95,8 +95,9 @@ HBITMAP WIN32API CreateDIBitmap(HDC hdc, const BITMAPINFOHEADER *lpbmih,
         bitfields[1] = (lpbmih->biCompression == BI_BITFIELDS) ?  *((DWORD *)lpbmi->bmiColors + 1) : 0x03e0;
         bitfields[2] = (lpbmih->biCompression == BI_BITFIELDS) ?  *((DWORD *)lpbmi->bmiColors + 2) : 0x001f;
         break;
+    case 24:
     case 32:
-        bitfields[0] = (lpbmih->biCompression == BI_BITFIELDS) ? *(DWORD *)lpbmi->bmiColors : 0xff0000;
+        bitfields[0] = (lpbmih->biCompression == BI_BITFIELDS) ? *(DWORD *)lpbmi->bmiColors        : 0xff0000;
         bitfields[1] = (lpbmih->biCompression == BI_BITFIELDS) ?  *((DWORD *)lpbmi->bmiColors + 1) : 0xff00;
         bitfields[2] = (lpbmih->biCompression == BI_BITFIELDS) ?  *((DWORD *)lpbmi->bmiColors + 2) : 0xff;
         break;
@@ -360,9 +361,9 @@ int WIN32API GetDIBits(HDC hdc, HBITMAP hBitmap, UINT uStartScan, UINT cScanLine
            break;
         case 24:
         case 32:
-           ((DWORD*)(lpbi->bmiColors))[0] = 0x0000FF;
+           ((DWORD*)(lpbi->bmiColors))[0] = 0xFF0000;
            ((DWORD*)(lpbi->bmiColors))[1] = 0x00FF00;
-           ((DWORD*)(lpbi->bmiColors))[2] = 0xFF0000;
+           ((DWORD*)(lpbi->bmiColors))[2] = 0x0000FF;
            break;
         }
     }
@@ -447,6 +448,8 @@ int WIN32API SetDIBits(HDC hdc, HBITMAP hBitmap, UINT startscan, UINT numlines, 
         bitfields[1] = (pBitmapInfo->bmiHeader.biCompression == BI_BITFIELDS) ?  *((DWORD *)pBitmapInfo->bmiColors + 1) : 0x03e0;
         bitfields[2] = (pBitmapInfo->bmiHeader.biCompression == BI_BITFIELDS) ?  *((DWORD *)pBitmapInfo->bmiColors + 2) : 0x001f;
         break;
+
+    case 24:
     case 32:
         bitfields[0] = (pBitmapInfo->bmiHeader.biCompression == BI_BITFIELDS) ? *(DWORD *)pBitmapInfo->bmiColors : 0xff0000;
         bitfields[1] = (pBitmapInfo->bmiHeader.biCompression == BI_BITFIELDS) ?  *((DWORD *)pBitmapInfo->bmiColors + 1) : 0xff00;
