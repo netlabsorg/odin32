@@ -1,5 +1,5 @@
 ################################################################################
-# $Id: Makefile,v 1.38 2000-03-09 20:36:57 bird Exp $
+# $Id: Makefile,v 1.39 2000-03-09 20:54:04 bird Exp $
 #
 # Win32k makefile.
 #
@@ -378,17 +378,19 @@ win32k.vpj:
 ################################################################################
 clean:
     @$(ECHO) cleaning....
-    -$(RM) $(NAME).sys *.lib *.obj *.exe *.sym *.map *.dll *.pch \
+    $(RM) $(NAME).sys *.lib *.obj *.exe *.sym *.map \
+           $(PDWIN32_BIN)\$(NAME).sys \
+           $(PDWIN32_BIN)\$(NAME).sym \
+           $(PDWIN32_BIN)\$(NAME).ddp
 !if "$(WIN32KBIN)" != ""
-        $(WIN32KBIN)\* \
+    $(RM) $(WIN32KBIN)\*sy* $(WIN32KBIN)\*map $(WIN32KBIN)\*exe
 !endif
 !if "$(WIN32KOBJ)" != ""
-        $(WIN32KOBJ)\* \
+    $(RM) $(WIN32KOBJ)\*obj $(WIN32KOBJ)\*lib $(WIN32KOBJ)\*pch
 !endif
 !if "$(WIN32KLIST)" != ""
-        $(WIN32KLIST)\* \
+    $(RM) $(WIN32KLIST)\*a* $(WIN32KLIST)\*lst $(WIN32KLIST)\*.s*
 !endif
-        $(PDWIN32_BIN)\$(NAME).sys
     cd pe2lx
     $(MAKE_CMD) clean
     cd ..\lib
