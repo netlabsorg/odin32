@@ -1,4 +1,4 @@
-/* $Id: win32wbase.h,v 1.14 2000-01-02 19:30:45 cbratschi Exp $ */
+/* $Id: win32wbase.h,v 1.15 2000-01-02 20:20:03 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -160,6 +160,9 @@ Win32BaseWindow *getParent();
          BOOL   SetIcon(HICON hIcon);
          HICON  GetIcon()                           { return (HICON) iconResource; };
 
+	 void   SetWindowRegion(HRGN hRegion)       { hWindowRegion = hRegion; };
+	 HRGN   GetWindowRegion()		    { return hWindowRegion; };
+
          BOOL   ShowWindow(ULONG nCmdShow);
          BOOL   SetWindowPos(HWND hwndInsertAfter, int x, int y, int cx, int cy, UINT fuFlags);
          BOOL   SetWindowPlacement(WINDOWPLACEMENT *winpos);
@@ -310,6 +313,8 @@ protected:
         BOOL    fCreated;
         BOOL    fTaskList;              //should be listed in PM tasklist or not
         BOOL    fParentDC;
+
+ 	HRGN    hWindowRegion;
 
         DWORD   dwThreadId;             //id of thread that created this window
         DWORD   dwProcessId;            //id of process that created this window

@@ -1,4 +1,4 @@
-/* $Id: dc.cpp,v 1.31 1999-12-29 22:53:59 cbratschi Exp $ */
+/* $Id: dc.cpp,v 1.32 2000-01-02 20:20:01 sandervl Exp $ */
 
 /*
  * DC functions for USER32
@@ -1427,15 +1427,21 @@ BOOL WIN32API ValidateRgn( HWND hwnd, HRGN  hrgn)
  * Author    : Patrick Haller [Thu, 1998/02/26 11:55]
  *****************************************************************************/
 
-int WIN32API GetWindowRgn (HWND hWnd,
-                              HRGN hRgn)
+int WIN32API GetWindowRgn(HWND hwnd, HRGN hRgn)
 {
-  dprintf(("USER32:GetWindowRgn (%08xh,%08x) not implemented.\n",
-         hWnd,
-         hRgn));
-  //Attention: Win32 hwnd handle!
+  Win32BaseWindow *window;
+  HRGN hWindowRegion;
 
-  return (NULLREGION_W);
+    window = Win32BaseWindow::GetWindowFromHandle(hwnd);
+    if(!window) {
+        dprintf(("SetWindowContextHelpId, window %x not found", hwnd));
+        O32_SetLastError(ERROR_INVALID_WINDOW_HANDLE);
+        return 0;
+    }
+    dprintf(("USER32:GetWindowRgn (%x,%x)", hwnd, hRgn));
+    hWindowRegion = window->GetWindowRegion();
+
+    return O32_CombineRgn(hRgn, hWindowRegion, 0, RGN_COPY_W);
 }
 /*****************************************************************************
  * Name      : int WIN32API SetWindowRgn
@@ -1443,6 +1449,9 @@ int WIN32API GetWindowRgn (HWND hWnd,
  *             window region determines the area within the window where the
  *             operating system permits drawing. The operating system does not
  *             display any portion of a window that lies outside of the window region
+ *             When this function is called, the system sends the WM_WINDOWPOSCHANGING and
+ *             WM_WINDOWPOSCHANGED messages to the window. 
+ *
  * Parameters: HWND  hWnd    handle to window whose window region is to be set
  *             HRGN  hRgn    handle to region
  *             BOOL  bRedraw window redraw flag
@@ -1455,17 +1464,28 @@ int WIN32API GetWindowRgn (HWND hWnd,
  * Author    : Patrick Haller [Thu, 1998/02/26 11:55]
  *****************************************************************************/
 
-int WIN32API SetWindowRgn(HWND hWnd,
-                             HRGN hRgn,
-                             BOOL bRedraw)
+int WIN32API SetWindowRgn(HWND hwnd,
+                          HRGN hRgn,
+                          BOOL bRedraw)
 {
-  dprintf(("USER32:SetWindowRgn (%08xh,%08xh,%u) not implemented.\n",
-         hWnd,
-         hRgn,
-         bRedraw));
-  //Attention: Win32 hwnd handle!
+  Win32BaseWindow *window;
+  HRGN hWindowRegion;
 
-  return (0);
+    window = Win32BaseWindow::GetWindowFromHandle(hwnd);
+    if(!window) {
+        dprintf(("SetWindowContextHelpId, window %x not found", hwnd));
+        O32_SetLastError(ERROR_INVALID_WINDOW_HANDLE);
+        return 0;
+    }
+    dprintf(("USER32:SetWindowRgn (%x,%x,%d)", hwnd, hRgn, bRedraw));
+    window->SetWindowRegion(hRgn);
+    if(bRedraw) {
+	RedrawWindow(hwnd, 0, 0, RDW_UPDATENOW_W);	
+    }
+//TODO:
+//  When this function is called, the system sends the WM_WINDOWPOSCHANGING and
+//  WM_WINDOWPOSCHANGED messages to the window. 
+    return 1;
 }
 //******************************************************************************
 //******************************************************************************
