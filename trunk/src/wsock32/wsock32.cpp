@@ -1,4 +1,4 @@
-/* $Id: wsock32.cpp,v 1.26 2000-03-28 17:13:06 sandervl Exp $ */
+/* $Id: wsock32.cpp,v 1.27 2000-03-30 20:52:56 sandervl Exp $ */
 
 /*
  *
@@ -780,31 +780,37 @@ ODINFUNCTION5(int,OS2select,
         if(ret != 0) {
 		socktmp = sockets;
             	if(readfds != NULL) {
+			j = 0;
                		for(i=0;i<nrread;i++) {
                   		if(socktmp[i] != -1) {
-	                     		readfds->fd_array[j] = socktmp[i];
+	                     		readfds->fd_array[i] = socktmp[i];
+					j++;
 				}
 	                }
-	               	readfds->fd_count = i;
+	               	readfds->fd_count = j;
 			socktmp += nrread;
 	        }
 
             	if(writefds != NULL) {
+			j = 0;
                		for(i=0;i<nrwrite;i++) {
                   		if(socktmp[i] != -1) {
-	                     		writefds->fd_array[j] = socktmp[i];
+	                     		writefds->fd_array[i] = socktmp[i];
+					j++;
 				}
 	                }
-	               	writefds->fd_count = i;
+	               	writefds->fd_count = j;
 			socktmp += nrwrite;
             	}
             	if(exceptfds != NULL) {
+			j = 0;
                		for(i=0;i<nrexcept;i++) {
                   		if(socktmp[i] != -1) {
-	                     		exceptfds->fd_array[j] = socktmp[i];
+	                     		exceptfds->fd_array[i] = socktmp[i];
+					j++;
 				}
 	                }
-	               	exceptfds->fd_count = i;
+	               	exceptfds->fd_count = j;
             	}
          } 
 	else {

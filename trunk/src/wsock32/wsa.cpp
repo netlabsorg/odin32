@@ -1,4 +1,4 @@
-/* $Id: wsa.cpp,v 1.4 2000-03-28 17:13:06 sandervl Exp $ */
+/* $Id: wsa.cpp,v 1.5 2000-03-30 20:52:55 sandervl Exp $ */
 
 /*
  *
@@ -39,6 +39,7 @@ void _System winsockcleanupsockets(void);
 static void WSASetBlocking(BOOL fBlock);
 
 BOOL fWSAInitialized = FALSE;
+static int num_startup = 0;
 
 //******************************************************************************
 WSADATA WINSOCK_data = { 0x0101, 0x0101,
@@ -68,7 +69,7 @@ ODINFUNCTION2(int, WSAStartup,
 
     if (!pwsi) return WSASYSNOTREADY;
 
-    pwsi->num_startup++;
+    num_startup++;
     fWSAInitialized = TRUE;
 
     /* return winsock information */
@@ -82,7 +83,7 @@ ODINFUNCTION0(int,WSACleanup)
 {
     LPWSINFO pwsi = WINSOCK_GetIData();
     if( pwsi ) {
-	if( --pwsi->num_startup > 0 ) return 0;
+	if( --num_startup > 0 ) return 0;
 
         winsockcleanupsockets();
 
