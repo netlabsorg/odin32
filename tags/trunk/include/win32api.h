@@ -242,5 +242,8 @@ HANDLE    WINAPI GetCurrentObject(HDC,UINT);
 BOOL      WIN32API ValidateRgn( HWND hwnd, HRGN  hrgn);
 BOOL      WIN32API ValidateRect( HWND hwnd, const RECT * lprc);
 int       WIN32API GetRgnBox( HRGN  hrgn, PRECT pRect);
+DWORD     WINAPI GetGlyphIndicesW(HDC,LPCWSTR,INT,LPWORD,DWORD);
+BOOL      WINAPI GetTextExtentPoint32W(HDC,LPCWSTR,INT,LPSIZE);
+BOOL      WINAPI GetCharWidth32W(HDC,UINT,UINT,LPINT);
 
 #endif

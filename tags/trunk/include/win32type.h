@@ -1394,5 +1394,17 @@ typedef struct
     BYTE  rgbReserved[32];
 } PAINTSTRUCT_W, *PPAINTSTRUCT_W, *LPPAINTSTRUCT_W;
 
+typedef struct tagGCP_RESULTSW
+{
+    DWORD  lStructSize;
+    LPWSTR lpOutString;
+    UINT   *lpOrder;
+    INT    *lpDx;
+    INT    *lpCaretPos;
+    LPSTR  lpClass;
+    LPWSTR lpGlyphs;
+    UINT   nGlyphs;
+    UINT   nMaxFit;
+} GCP_RESULTSW, *LPGCP_RESULTSW;
 
 #endif
