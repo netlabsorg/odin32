@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.33 2001-09-30 09:12:17 bird Exp $
+# $Id: makefile,v 1.34 2002-07-22 09:53:47 sandervl Exp $
 
 #
 # Odin32 API
@@ -33,6 +33,7 @@ $(OBJDIR)\initterm.obj \
 $(OBJDIR)\initwsock32.obj \
 $(OBJDIR)\asyncapi.obj \
 $(OBJDIR)\asyncthread.obj \
+$(OBJDIR)\vsemaphore.obj \
 $(OBJDIR)\dbglocal.obj \
 $(OBJDIR)\wsock2.obj
 
