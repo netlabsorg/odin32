@@ -1,4 +1,4 @@
-; $Id: mytkExecPgm.asm,v 1.2 2000-02-18 19:54:19 bird Exp $
+; $Id: mytkExecPgm.asm,v 1.3 2000-02-19 08:40:31 bird Exp $
 ;
 ; mytkExecPgm - tkExecPgm overload
 ;
@@ -16,7 +16,9 @@
 ;
 ;   Imported Functions
 ;
+DATA32 SEGMENT
     extrn  g_tkExecPgm:PROC
+DATA32 ENDS
     extrn  AcquireBuffer:PROC
     extrn  ReleaseBuffer:PROC
     extrn  QueryBufferSegmentOffset:PROC
@@ -53,8 +55,8 @@ CODE32 SEGMENT
 ;   The buffer we are using is a C struct as follows.
 ;   struct Buffer
 ;   {
-;       char szFilename[261]; /* offset 0   */
-;       char szArg[4096-261]; /* offset 261 */
+;       char szFilename[261];  /* offset 0   */
+;       char achArg[1536-261]; /* offset 261 */
 ;   };
 ;
 mytkExecPgm PROC FAR
@@ -76,8 +78,20 @@ cchArgs     = dword ptr -14h
     push    es
     push    edi
 
-    ; init local variables
-    mov     [ebp+pBuffer], 0
+IF 0
+;    ; Check if this overloading has anything too say, after all it is using some stack space!
+;    jmp     mytkExecPgm_CalltkExecPgm_X1
+ENDIF
+
+    ; parameter validations
+    mov     ax, ds                      ; pointer to filename
+    cmp     ax, 4
+    jb      mytkExecPgm_CalltkExecPgm_X1
+
+    ; This test is currently disabled. We'll pass on an empty string if the argument pointer is NULL.
+    ; Hopefully an empty string is treated equally to an NULL pointer.
+;    cmp     di, 4
+;    jl      mytkExecPgm_CalltkExecPgm_X1
 
     ; filename length
     mov     ax, ds
@@ -85,6 +99,7 @@ cchArgs     = dword ptr -14h
     xor     eax, eax
     movzx   edi, dx                     ; es:di is now filename address (ds:dx).
     mov     ecx, 0ffffffffh
+    cld
     repne scasb
     not     ecx
 
@@ -97,20 +112,30 @@ cchArgs     = dword ptr -14h
 
     ;
     ; args length
+    ; Note: the arguments are a series of ASCIIZs ended by an empty string (ie. '\0').
     ;
     pop     edi
     push    edi
+    xor     ecx, ecx
+    cmp     di, 4                       ; The argument might me a invalid pointer...
+    jb      mytkExecPgm_CalltkExecPgm_1
     mov     es, di
-    movzx   edi, si                     ; es:di is now args address (di:si), eax is still 0
-    mov     ecx, 0ffffffffh
-    repne scasb
+    movzx   edi, si                     ; es:edi is now args address (di:si), eax is still 0
+    dec     ecx
+    cld
+mytkExecPgm_CalltkExecPgm_loop:         ; loop true all ASCIIZ strings
+    repne scasb                         ; scans forwards until '\0' is read. es:edi is pointing at the char after the '\0'.
+    cmp     byte ptr es:[edi], 0        ; is this char '\0' ? stop looping : loop once more;
+    jnz     mytkExecPgm_CalltkExecPgm_loop
+    dec     ecx                         ; update count - count terminating zero too
     not     ecx
 
+mytkExecPgm_CalltkExecPgm_1:
     mov     [ebp+cchArgs], ecx
     add     ecx, [ebp+cchFilename]      ; filename
     add     ecx, 3 + 260                ;  260 = new argument from a scrip file or something.
                                         ;    3 = two '\0's and a space after added argument.
-    cmp     ecx, 4096                   ; 4096 = Buffersize.  FIXME! Define this!!!
+    cmp     ecx, 1536                   ; 1536 = Buffersize.  FIXME! Define this!!!
     jae     mytkExecPgm_CalltkExecPgm_X1; jmp if argument + file + new file > buffer size
 
     ;
@@ -138,7 +163,8 @@ cchArgs     = dword ptr -14h
     mov     edi, eax                    ; es:di  pBuffer
     movzx   esi, dx                     ; ds:si  Filename pointer (input ds:dx)
     mov     ecx, [ebp+cchFilename]
-    repnz movsb
+    cld
+    rep movsb
 
     ;
     ; Copy Args to pBuffer + 261
@@ -148,15 +174,24 @@ cchArgs     = dword ptr -14h
     pop     edi
     push    edi
     push    esi
+    add     eax, 261                    ; we'll use eax in the branch
+    cmp     di, 4
+    jb      mytkExecPgm_CalltkExecPgm_2
+    and     esi, 00000ffffh             ; remove high part of the register
     mov     ds, di                      ; ds:si -> arguments
-    mov     edi, eax
-    add     edi, 261                    ; es:di -> pBuffer + 261
+    mov     edi, eax                    ; es:di -> pBuffer + 261
     mov     ecx, [ebp+cchArgs]
-    repnz movsb
+    cld
+    rep movsb
+    jmp     mytkExecPgm_CalltkExecPgm_3
+
+mytkExecPgm_CalltkExecPgm_2:
+    mov     byte ptr es:[eax], 0        ; Terminate the empty string!
 
     ;
     ; Set Pointers, pszFilename and pszArguments
     ;
+mytkExecPgm_CalltkExecPgm_3:
     mov     ax, seg FLAT:DATA32
     mov     ds, ax
     ASSUME  ds:FLAT
@@ -196,7 +231,8 @@ cchArgs     = dword ptr -14h
     ;
     ; Call g_tkExecPgm
     ;
-    call far ptr FLAT:g_tkExecPgm;WARNING far call!!!
+    push    cs
+    call    near ptr FLAT:g_tkExecPgm
     pushfd
 
     ;
@@ -234,10 +270,19 @@ mytkExecPgm_CalltkExecPgm_X1:
     pop     eax
 
 mytkExecPgm_CalltkExecPgm:
-    call    far ptr FLAT:g_tkExecPgm
+    call    far ptr FLAT:g_tkExecPgmStub
     leave
     retf
 mytkExecPgm ENDP
+
+
+;;
+; Stub which jumps to g_tkExecPgmStub.
+; (This way I will hopefully get the right selector.)
+g_tkExecPgmStub PROC FAR
+    jmp     near ptr FLAT:g_tkExecPgm
+g_tkExecPgmStub ENDP
+
 
 CODE32 ENDS
 END
