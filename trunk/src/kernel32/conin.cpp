@@ -1,4 +1,4 @@
-/* $Id: conin.cpp,v 1.8 2000-02-16 14:25:31 sandervl Exp $ */
+/* $Id: conin.cpp,v 1.9 2000-03-03 11:15:57 sandervl Exp $ */
 
 /*
  * Win32 Console API Translation for OS/2
@@ -33,6 +33,7 @@
 #define  INCL_AVIO
 #include <os2wrap.h>	//Odin32 OS/2 api wrappers
 
+#include <win32api.h>
 #include <misc.h>
 #include <string.h>
 
@@ -45,24 +46,6 @@
 
 #define DBG_LOCALLOG	DBG_conin
 #include "dbglocal.h"
-
-/***********************************
- * Open32 support for SetLastError *
- ***********************************/
-#include <os2sel.h>
-
-extern "C"
-{
-  void   _System _O32_SetLastError(DWORD  dwError);
-}
-
-inline void SetLastError(DWORD a)
-{
- USHORT sel = GetFS();
-
-    _O32_SetLastError(a);
-    SetFS(sel);
-}
 
 
 /*****************************************************************************
@@ -283,7 +266,7 @@ BOOL HMDeviceConsoleInClass::WriteFile(PHMHANDLEDATA pHMHandleData,
            lpOverlapped);
 #endif
 
-  SetLastError(ERROR_ACCESS_DENIED);
+  SetLastError(ERROR_ACCESS_DENIED_W);
   return FALSE;
 }
 
@@ -400,7 +383,7 @@ DWORD  HMDeviceConsoleInClass::_DeviceRequest (PHMHANDLEDATA pHMHandleData,
            arg4);
 #endif
 
-  SetLastError(ERROR_INVALID_FUNCTION);           /* request not implemented */
+  SetLastError(ERROR_INVALID_FUNCTION_W);           /* request not implemented */
   return(FALSE);                 /* we assume this indicates API call failed */
 }
 

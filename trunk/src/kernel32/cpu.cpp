@@ -1,4 +1,4 @@
-/* $Id: cpu.cpp,v 1.6 2000-02-16 14:25:36 sandervl Exp $ */
+/* $Id: cpu.cpp,v 1.7 2000-03-03 11:15:57 sandervl Exp $ */
 /*
  * Odin win32 CPU apis
  *
@@ -20,7 +20,6 @@
 #include "winreg.h"
 #include "debugtools.h"
 #include <cpuhlp.h>
-#include "initsystem.h"
 
 #define DBG_LOCALLOG	DBG_cpu
 #include "dbglocal.h"
@@ -101,7 +100,7 @@ VOID WINAPI GetSystemInfo(LPSYSTEM_INFO si)	/* [out] system information */
 	/* Hmm, reasonable processor feature defaults? */
 
         /* Create this registry key for all systems */
-	if (ADVAPI32_RegCreateKeyA(HKEY_LOCAL_MACHINE,"HARDWARE\\DESCRIPTION\\System\\CentralProcessor",&hkey)!=ERROR_SUCCESS) {
+	if (RegCreateKeyA(HKEY_LOCAL_MACHINE,"HARDWARE\\DESCRIPTION\\System\\CentralProcessor",&hkey)!=ERROR_SUCCESS) {
             dprintf(("Unable to register CPU information\n"));
         }
 
@@ -112,8 +111,8 @@ VOID WINAPI GetSystemInfo(LPSYSTEM_INFO si)	/* [out] system information */
 		// Create a new processor subkey
 		sprintf(buf,"%d",i);
 		if (xhkey)
-			ADVAPI32_RegCloseKey(xhkey);
-		ADVAPI32_RegCreateKeyA(hkey,buf,&xhkey);
+			RegCloseKey(xhkey);
+		RegCreateKeyA(hkey,buf,&xhkey);
 
 	 	signature = GetCPUSignature();
 
@@ -136,10 +135,10 @@ VOID WINAPI GetSystemInfo(LPSYSTEM_INFO si)	/* [out] system information */
 		/* set the CPU type of the current processor */
 		sprintf(buf,"CPU %ld",cachedsi.dwProcessorType);
 		if (xhkey) {
-			ADVAPI32_RegSetValueExA(xhkey,"Identifier",0,REG_SZ,(LPBYTE)buf,strlen(buf));
+			RegSetValueExA(xhkey,"Identifier",0,REG_SZ,(LPBYTE)buf,strlen(buf));
 			memset(buf, 0, sizeof(buf));
 			GetCPUVendorString(buf);
-			ADVAPI32_RegSetValueExA(xhkey,"VendorIdentifier",0,REG_SZ,(LPBYTE)buf,strlen(buf));
+			RegSetValueExA(xhkey,"VendorIdentifier",0,REG_SZ,(LPBYTE)buf,strlen(buf));
 		}
 		cachedsi.wProcessorRevision = signature & 0xf;
 
@@ -161,13 +160,13 @@ VOID WINAPI GetSystemInfo(LPSYSTEM_INFO si)	/* [out] system information */
 		//Create FPU key if one is present
 		if (features & CPUID_FPU_PRESENT) {
 			if (i == 0) {
-				if(ADVAPI32_RegCreateKeyA(HKEY_LOCAL_MACHINE,"HARDWARE\\DESCRIPTION\\System\\FloatingPointProcessor",&fpukey)!=ERROR_SUCCESS) 
+				if(RegCreateKeyA(HKEY_LOCAL_MACHINE,"HARDWARE\\DESCRIPTION\\System\\FloatingPointProcessor",&fpukey)!=ERROR_SUCCESS) 
             				dprintf(("Unable to register FPU information\n"));
         		}
 			// Create a new processor subkey
 			if(fpukey) {
 				sprintf(buf,"%d",i);
-				ADVAPI32_RegCreateKeyA(fpukey,buf,&xhfpukey);
+				RegCreateKeyA(fpukey,buf,&xhfpukey);
 			}
 		}
 	
@@ -176,13 +175,13 @@ VOID WINAPI GetSystemInfo(LPSYSTEM_INFO si)	/* [out] system information */
 	memcpy(si,&cachedsi,sizeof(*si));
 
 	if (xhkey)
-		ADVAPI32_RegCloseKey(xhkey);
+		RegCloseKey(xhkey);
 	if (hkey)
-		ADVAPI32_RegCloseKey(hkey);
+		RegCloseKey(hkey);
 	if (xhfpukey)
-		ADVAPI32_RegCloseKey(xhfpukey);
+		RegCloseKey(xhfpukey);
 	if (fpukey)
-		ADVAPI32_RegCloseKey(fpukey);
+		RegCloseKey(fpukey);
 
 }
 

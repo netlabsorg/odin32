@@ -1,4 +1,4 @@
-/* $Id: wprocess.cpp,v 1.69 2000-02-24 19:17:51 sandervl Exp $ */
+/* $Id: wprocess.cpp,v 1.70 2000-03-03 11:16:00 sandervl Exp $ */
 
 /*
  * Win32 process functions
@@ -343,7 +343,7 @@ USHORT WIN32API SetWin32TIB()
 }
 //******************************************************************************
 //******************************************************************************
-void _System Win32DllExitList(ULONG reason)
+static void _System Win32DllExitList(ULONG reason)
 {
   dprintf(("Win32DllExitList %d\n", reason));
 

@@ -1,4 +1,4 @@
-/* $Id: conbuffer.cpp,v 1.9 2000-02-16 14:25:30 sandervl Exp $ */
+/* $Id: conbuffer.cpp,v 1.10 2000-03-03 11:15:56 sandervl Exp $ */
 
 /*
  * Win32 Console API Translation for OS/2
@@ -63,6 +63,7 @@
 #define  INCL_AVIO
 #include <os2wrap.h>	//Odin32 OS/2 api wrappers
 
+#include <win32api.h>
 #include <misc.h>
 #include <string.h>
 #include <stdlib.h>
@@ -76,24 +77,6 @@
 
 #define DBG_LOCALLOG	DBG_conbuffer
 #include "dbglocal.h"
-
-/***********************************
- * Open32 support for SetLastError *
- ***********************************/
-#include <os2sel.h>
-
-extern "C"
-{
-  void   _System _O32_SetLastError(DWORD  dwError);
-}
-
-inline void SetLastError(DWORD a)
-{
- USHORT sel = GetFS();
-
-    _O32_SetLastError(a);
-    SetFS(sel);
-}
 
 
 /*****************************************************************************
@@ -143,7 +126,7 @@ DWORD HMDeviceConsoleBufferClass::CreateFile (LPCSTR        lpFileName,
 
   if (pHMHandleData->lpHandlerData == NULL)              /* check allocation */
   {
-    SetLastError(ERROR_NOT_ENOUGH_MEMORY);          /* set error information */
+    SetLastError(ERROR_NOT_ENOUGH_MEMORY_W);          /* set error information */
     return (INVALID_HANDLE_VALUE);                  /* raise error condition */
   }
   else
@@ -232,7 +215,7 @@ BOOL HMDeviceConsoleBufferClass::ReadFile(PHMHANDLEDATA pHMHandleData,
            lpOverlapped);
 #endif
 
-  SetLastError(ERROR_ACCESS_DENIED);
+  SetLastError(ERROR_ACCESS_DENIED_W);
   return FALSE;
 }
 
@@ -272,7 +255,7 @@ BOOL HMDeviceConsoleBufferClass::WriteFile(PHMHANDLEDATA pHMHandleData,
 
                       /* check if we're called with non-existing line buffer */
   if (pConsoleBuffer->ppszLine == NULL) {
-  	SetLastError(ERROR_SYS_INTERNAL);
+  	SetLastError(ERROR_OUTOFMEMORY_W);
   	return FALSE;
   }
   for (ulCounter = 0;
@@ -769,7 +752,7 @@ DWORD  HMDeviceConsoleBufferClass::_DeviceRequest (PHMHANDLEDATA pHMHandleData,
            arg4);
 #endif
 
-  SetLastError(ERROR_INVALID_FUNCTION);           /* request not implemented */
+  SetLastError(ERROR_INVALID_FUNCTION_W);           /* request not implemented */
   return(FALSE);                 /* we assume this indicates API call failed */
 }
 
@@ -815,7 +798,7 @@ DWORD HMDeviceConsoleBufferClass::FillConsoleOutputAttribute(PHMHANDLEDATA pHMHa
     if (lpNumberOfAttrsWritten != NULL)           /* ensure pointer is valid */
       *lpNumberOfAttrsWritten = 0;                /* complete error handling */
 
-    SetLastError(ERROR_INVALID_PARAMETER);
+    SetLastError(ERROR_INVALID_PARAMETER_W);
     return (FALSE);
   }
 
@@ -826,7 +809,7 @@ DWORD HMDeviceConsoleBufferClass::FillConsoleOutputAttribute(PHMHANDLEDATA pHMHa
     if (lpNumberOfAttrsWritten != NULL)           /* ensure pointer is valid */
       *lpNumberOfAttrsWritten = 0;                /* complete error handling */
 
-    SetLastError(ERROR_INVALID_PARAMETER);
+    SetLastError(ERROR_INVALID_PARAMETER_W);
     return (FALSE);
   }
 
@@ -915,7 +898,7 @@ DWORD HMDeviceConsoleBufferClass::FillConsoleOutputCharacterA(PHMHANDLEDATA pHMH
     if (lpNumberOfCharsWritten != NULL)           /* ensure pointer is valid */
       *lpNumberOfCharsWritten = 0;                /* complete error handling */
 
-    SetLastError(ERROR_INVALID_PARAMETER);
+    SetLastError(ERROR_INVALID_PARAMETER_W);
     return (FALSE);
   }
 
@@ -927,7 +910,7 @@ DWORD HMDeviceConsoleBufferClass::FillConsoleOutputCharacterA(PHMHANDLEDATA pHMH
     if (lpNumberOfCharsWritten != NULL)           /* ensure pointer is valid */
       *lpNumberOfCharsWritten = 0;                /* complete error handling */
 
-    SetLastError(ERROR_INVALID_PARAMETER);
+    SetLastError(ERROR_INVALID_PARAMETER_W);
     return (FALSE);
   }
 
@@ -1015,7 +998,7 @@ DWORD HMDeviceConsoleBufferClass::FillConsoleOutputCharacterW(PHMHANDLEDATA pHMH
     if (lpNumberOfCharsWritten != NULL)           /* ensure pointer is valid */
       *lpNumberOfCharsWritten = 0;                /* complete error handling */
 
-    SetLastError(ERROR_INVALID_PARAMETER);
+    SetLastError(ERROR_INVALID_PARAMETER_W);
     return (FALSE);
   }
 
@@ -1027,7 +1010,7 @@ DWORD HMDeviceConsoleBufferClass::FillConsoleOutputCharacterW(PHMHANDLEDATA pHMH
     if (lpNumberOfCharsWritten != NULL)           /* ensure pointer is valid */
       *lpNumberOfCharsWritten = 0;                /* complete error handling */
 
-    SetLastError(ERROR_INVALID_PARAMETER);
+    SetLastError(ERROR_INVALID_PARAMETER_W);
     return (FALSE);
   }
 
@@ -1293,7 +1276,7 @@ DWORD HMDeviceConsoleBufferClass::ReadConsoleOutputA(PHMHANDLEDATA pHMHandleData
   if ( (coordDestBufferSize.X < coordDestBufferCoord.X) ||
        (coordDestBufferSize.Y < coordDestBufferCoord.Y) )
   {
-    SetLastError(ERROR_INVALID_PARAMETER);        /* set detailed error info */
+    SetLastError(ERROR_INVALID_PARAMETER_W);        /* set detailed error info */
     return (FALSE);                                            /* API failed */
   }
 
@@ -1392,7 +1375,7 @@ DWORD HMDeviceConsoleBufferClass::ReadConsoleOutputW(PHMHANDLEDATA pHMHandleData
   if ( (coordDestBufferSize.X < coordDestBufferCoord.X) ||
        (coordDestBufferSize.Y < coordDestBufferCoord.Y) )
   {
-    SetLastError(ERROR_INVALID_PARAMETER);        /* set detailed error info */
+    SetLastError(ERROR_INVALID_PARAMETER_W);        /* set detailed error info */
     return (FALSE);                                            /* API failed */
   }
 
@@ -1481,7 +1464,7 @@ DWORD HMDeviceConsoleBufferClass::ReadConsoleOutputAttribute(PHMHANDLEDATA pHMHa
     if (lpcNumberRead != NULL)                       /* ensure pointer is valid */
       *lpcNumberRead = 0;                            /* complete error handling */
 
-    SetLastError(ERROR_INVALID_PARAMETER);
+    SetLastError(ERROR_INVALID_PARAMETER_W);
     return (FALSE);
   }
 
@@ -1492,7 +1475,7 @@ DWORD HMDeviceConsoleBufferClass::ReadConsoleOutputAttribute(PHMHANDLEDATA pHMHa
     if (lpcNumberRead != NULL)                       /* ensure pointer is valid */
       *lpcNumberRead = 0;                            /* complete error handling */
 
-    SetLastError(ERROR_INVALID_PARAMETER);
+    SetLastError(ERROR_INVALID_PARAMETER_W);
     return (FALSE);
   }
 
@@ -1573,7 +1556,7 @@ DWORD HMDeviceConsoleBufferClass::ReadConsoleOutputCharacterA(PHMHANDLEDATA pHMH
     if (lpcNumberRead != NULL)                    /* ensure pointer is valid */
       *lpcNumberRead = 0;                         /* complete error handling */
 
-    SetLastError(ERROR_INVALID_PARAMETER);
+    SetLastError(ERROR_INVALID_PARAMETER_W);
     return (FALSE);
   }
 
@@ -1584,7 +1567,7 @@ DWORD HMDeviceConsoleBufferClass::ReadConsoleOutputCharacterA(PHMHANDLEDATA pHMH
     if (lpcNumberRead != NULL)                    /* ensure pointer is valid */
       *lpcNumberRead = 0;                         /* complete error handling */
 
-    SetLastError(ERROR_INVALID_PARAMETER);
+    SetLastError(ERROR_INVALID_PARAMETER_W);
     return (FALSE);
   }
 
@@ -1665,7 +1648,7 @@ DWORD HMDeviceConsoleBufferClass::ReadConsoleOutputCharacterW(PHMHANDLEDATA pHMH
     if (lpcNumberRead != NULL)                    /* ensure pointer is valid */
       *lpcNumberRead = 0;                         /* complete error handling */
 
-    SetLastError(ERROR_INVALID_PARAMETER);
+    SetLastError(ERROR_INVALID_PARAMETER_W);
     return (FALSE);
   }
 
@@ -1676,7 +1659,7 @@ DWORD HMDeviceConsoleBufferClass::ReadConsoleOutputCharacterW(PHMHANDLEDATA pHMH
     if (lpcNumberRead != NULL)                    /* ensure pointer is valid */
       *lpcNumberRead = 0;                         /* complete error handling */
 
-    SetLastError(ERROR_INVALID_PARAMETER);
+    SetLastError(ERROR_INVALID_PARAMETER_W);
     return (FALSE);
   }
 
@@ -2099,7 +2082,7 @@ DWORD HMDeviceConsoleBufferClass::SetConsoleCursorInfo(PHMHANDLEDATA        pHMH
   if ( (pCCI->dwSize < 1) ||
        (pCCI->dwSize > 100) )
   {
-    SetLastError(ERROR_INVALID_PARAMETER);        /* set extended error info */
+    SetLastError(ERROR_INVALID_PARAMETER_W);        /* set extended error info */
     return (FALSE);                                            /* API failed */
   }
 
@@ -2391,7 +2374,7 @@ BOOL HMDeviceConsoleBufferClass::SetConsoleWindowInfo(PHMHANDLEDATA pHMHandleDat
          (psrctWindowRect->Bottom <= psrctWindowRect->Top)
        )
     {
-      SetLastError(ERROR_INVALID_PARAMETER);        /* set error information */
+      SetLastError(ERROR_INVALID_PARAMETER_W);        /* set error information */
       return (FALSE);                                               /* error */
     }
 
@@ -2402,7 +2385,7 @@ BOOL HMDeviceConsoleBufferClass::SetConsoleWindowInfo(PHMHANDLEDATA pHMHandleDat
          (psrctWindowRect->Top  >= pConsoleBuffer->coordBufferSize.Y)
        )
     {
-      SetLastError(ERROR_INVALID_PARAMETER);        /* set error information */
+      SetLastError(ERROR_INVALID_PARAMETER_W);        /* set error information */
       return (FALSE);                                               /* error */
     }
 
@@ -2437,7 +2420,7 @@ BOOL HMDeviceConsoleBufferClass::SetConsoleWindowInfo(PHMHANDLEDATA pHMHandleDat
          (iPosY  < 0)
        )
     {
-      SetLastError(ERROR_INVALID_PARAMETER);        /* set error information */
+      SetLastError(ERROR_INVALID_PARAMETER_W);        /* set error information */
       return (FALSE);                                               /* error */
     }
 
@@ -2614,7 +2597,7 @@ DWORD HMDeviceConsoleBufferClass::WriteConsoleOutputA(PHMHANDLEDATA pHMHandleDat
   if ( (coordSrcBufferSize.X < coordSrcBufferCoord.X) ||
        (coordSrcBufferSize.Y < coordSrcBufferCoord.Y) )
   {
-    SetLastError(ERROR_INVALID_PARAMETER);        /* set detailed error info */
+    SetLastError(ERROR_INVALID_PARAMETER_W);        /* set detailed error info */
     return (FALSE);                                            /* API failed */
   }
 
@@ -2720,7 +2703,7 @@ DWORD HMDeviceConsoleBufferClass::WriteConsoleOutputW(PHMHANDLEDATA pHMHandleDat
   if ( (coordSrcBufferSize.X < coordSrcBufferCoord.X) ||
        (coordSrcBufferSize.Y < coordSrcBufferCoord.Y) )
   {
-    SetLastError(ERROR_INVALID_PARAMETER);        /* set detailed error info */
+    SetLastError(ERROR_INVALID_PARAMETER_W);        /* set detailed error info */
     return (FALSE);                                            /* API failed */
   }
 
@@ -2816,7 +2799,7 @@ DWORD HMDeviceConsoleBufferClass::WriteConsoleOutputAttribute(PHMHANDLEDATA pHMH
     if (lpcWritten != NULL)                       /* ensure pointer is valid */
       *lpcWritten = 0;                            /* complete error handling */
 
-    SetLastError(ERROR_INVALID_PARAMETER);
+    SetLastError(ERROR_INVALID_PARAMETER_W);
     return (FALSE);
   }
 
@@ -2827,7 +2810,7 @@ DWORD HMDeviceConsoleBufferClass::WriteConsoleOutputAttribute(PHMHANDLEDATA pHMH
     if (lpcWritten != NULL)                       /* ensure pointer is valid */
       *lpcWritten = 0;                            /* complete error handling */
 
-    SetLastError(ERROR_INVALID_PARAMETER);
+    SetLastError(ERROR_INVALID_PARAMETER_W);
     return (FALSE);
   }
 
@@ -2916,7 +2899,7 @@ DWORD HMDeviceConsoleBufferClass::WriteConsoleOutputCharacterA(PHMHANDLEDATA pHM
     if (lpcWritten != NULL)                       /* ensure pointer is valid */
       *lpcWritten = 0;                            /* complete error handling */
 
-    SetLastError(ERROR_INVALID_PARAMETER);
+    SetLastError(ERROR_INVALID_PARAMETER_W);
     return (FALSE);
   }
 
@@ -2927,7 +2910,7 @@ DWORD HMDeviceConsoleBufferClass::WriteConsoleOutputCharacterA(PHMHANDLEDATA pHM
     if (lpcWritten != NULL)                       /* ensure pointer is valid */
       *lpcWritten = 0;                            /* complete error handling */
 
-    SetLastError(ERROR_INVALID_PARAMETER);
+    SetLastError(ERROR_INVALID_PARAMETER_W);
     return (FALSE);
   }
 
@@ -3016,7 +2999,7 @@ DWORD HMDeviceConsoleBufferClass::WriteConsoleOutputCharacterW(PHMHANDLEDATA pHM
     if (lpcWritten != NULL)                       /* ensure pointer is valid */
       *lpcWritten = 0;                            /* complete error handling */
 
-    SetLastError(ERROR_INVALID_PARAMETER);
+    SetLastError(ERROR_INVALID_PARAMETER_W);
     return (FALSE);
   }
 
@@ -3027,7 +3010,7 @@ DWORD HMDeviceConsoleBufferClass::WriteConsoleOutputCharacterW(PHMHANDLEDATA pHM
     if (lpcWritten != NULL)                       /* ensure pointer is valid */
       *lpcWritten = 0;                            /* complete error handling */
 
-    SetLastError(ERROR_INVALID_PARAMETER);
+    SetLastError(ERROR_INVALID_PARAMETER_W);
     return (FALSE);
   }
 

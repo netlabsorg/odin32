@@ -1,4 +1,4 @@
-/* $Id: initterm.cpp,v 1.35 2000-02-16 14:25:40 sandervl Exp $ */
+/* $Id: initterm.cpp,v 1.36 2000-03-03 11:15:58 sandervl Exp $ */
 
 /*
  * KERNEL32 DLL entry point
@@ -58,7 +58,6 @@
 /* library DLL is terminated.                                        */
 /*-------------------------------------------------------------------*/
 static void APIENTRY cleanup(ULONG reason);
-extern void APIENTRY Win32DllExitList(ULONG reason);
 
 extern "C" {
 void CDECL _ctordtorInit( void );

@@ -1,4 +1,4 @@
-/* $Id: conout.cpp,v 1.6 2000-02-16 14:25:32 sandervl Exp $ */
+/* $Id: conout.cpp,v 1.7 2000-03-03 11:15:57 sandervl Exp $ */
 
 /*
  * Win32 Console API Translation for OS/2
@@ -62,6 +62,7 @@
 #include <string.h>
 
 #include <win32type.h>
+#include <win32api.h>
 #include <misc.h>
 
 #include "conwin.h"          // Windows Header for console only
@@ -75,37 +76,6 @@
 
 #define DBG_LOCALLOG	DBG_conout
 #include "dbglocal.h"
-
-
-/***********************************
- * Open32 support for SetLastError *
- ***********************************/
-#include <os2sel.h>
-
-extern "C"
-{
-  void   _System _O32_SetLastError(DWORD  dwError);
-  int    _System _O32_GetLastError(void);
-}
-
-inline void SetLastError(DWORD a)
-{
- USHORT sel = GetFS();
-
-    _O32_SetLastError(a);
-    SetFS(sel);
-}
-
-inline int GetLastError(void)
-{
-  USHORT sel = GetFS();
-  int    rc;
-
-  rc = _O32_GetLastError();
-  SetFS(sel);
-  return rc;
-}
-
 
 /*****************************************************************************
  * Name      : DWORD HMDeviceConsoleOutClass::CreateFile
@@ -233,7 +203,7 @@ BOOL HMDeviceConsoleOutClass::ReadFile(PHMHANDLEDATA pHMHandleData,
            lpOverlapped);
 #endif
 
-  SetLastError(ERROR_ACCESS_DENIED);
+  SetLastError(ERROR_ACCESS_DENIED_W);
   return FALSE;
 }
 
