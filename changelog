@@ -1,4 +1,7 @@
- /* $Id: changelog,v 1.712 2000-02-09 08:53:56 jeroen Exp $ */
+ /* $Id: changelog,v 1.713 2000-02-09 12:11:43 bird Exp $ */
+
+ 2000-02-09: Knut Stange Osmundsen (knut.stange.osmundsen@pmsc.no)
+        - OpenGL base, GLUT, GLU: NODEBUGINFO implemented in the makefiles.
 
  2000-02-09: Jeroen van den Horn <J.vandenHorn@fibre.a2000.nl>
         - ODIN.INI: OPENGL32.DLL <--> OPENGL.DLL translation, since
