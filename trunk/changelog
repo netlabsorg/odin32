@@ -1,4 +1,7 @@
- /* $Id: changelog,v 1.646 2000-01-14 14:46:45 sandervl Exp $ */
+ /* $Id: changelog,v 1.647 2000-01-14 17:47:13 cbratschi Exp $ */
+
+ 2000-01-14: Christoph Bratschi <cbratschi@datacomm.ch>
+	- USER32/NEW: added caption clipping for faster window text updates
 
  2000-01-14: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32\NEW: Fixed min/max bug for mdi child windows
@@ -32,9 +35,13 @@
                       if child; otherwise relative to screen origin. (needs testing)
                       (WM_NCCALCSIZE needs to be done as well)
 	- COMCTL32:   Version resource version nrs changed (based on NT 4 SP3)
+<<<<<<< ChangeLog
+=======
 	- KERNEL32:   Added DisableLogging & EnableLogging functions to
                       disable logging in parts of code. Logging will only be
                       done if the logcount is bigger than 0.
+>>>>>>> 1.646
+
 
  2000-01-12: Christoph Bratschi <cbratschi@datacomm.ch>
 	- USER32/NEW: fixed WM_CALCVALIDRECTS
