@@ -1,4 +1,4 @@
-/* $Id: objhandle.cpp,v 1.16 2001-07-09 07:57:38 sandervl Exp $ */
+/* $Id: objhandle.cpp,v 1.17 2001-08-18 03:50:32 phaller Exp $ */
 /*
  * Win32 Handle Management Code for OS/2
  *
@@ -342,31 +342,46 @@ DWORD WIN32API GetObjectType( HGDIOBJ hObj)
 //******************************************************************************
 BOOL WIN32API DeleteObject(HANDLE hObj)
 {
- DWORD type;
-
     dprintf(("GDI32: DeleteObject %x", hObj));
 
     //TODO: must use 16 bits gdi object handles
-    if(HIWORD(hObj) == 0) {
+    if(HIWORD(hObj) == 0)
+    {
         hObj |= GDIOBJ_PREFIX;
     }
+
     //System objects can't be deleted (TODO: any others?? (fonts?))!!!!)
-    type = GetObjectType(hObj);
-    if(type == OBJ_PEN && IsSystemPen(hObj)) {
-        SetLastError(ERROR_SUCCESS);
-        return TRUE;
-    }
-    if(type == OBJ_BRUSH && IsSystemBrush(hObj)) {
-        SetLastError(ERROR_SUCCESS);
-        return TRUE;
+    switch (GetObjectType(hObj))
+    {
+        case OBJ_PEN:
+            if(IsSystemPen(hObj))
+            {
+                SetLastError(ERROR_SUCCESS);
+                return TRUE;
+            }
+            else
+                break;
+
+        case OBJ_BRUSH:
+            if(IsSystemBrush(hObj))
+            {
+                SetLastError(ERROR_SUCCESS);
+                return TRUE;
+            }
+            else
+                break;
+
+        // add more system-type objects as required ...
     }
 
-    if(ObjGetHandleType(hObj) == GDIOBJ_REGION) {
+    if(ObjGetHandleType(hObj) == GDIOBJ_REGION)
+    {
         OSLibDeleteRegion(ObjGetHandleData(hObj, GDIOBJ_REGION));
         ObjFreeHandle(hObj);
         SetLastError(ERROR_SUCCESS);
         return TRUE;
     }
+
     DIBSection::deleteSection((DWORD)hObj);
     return O32_DeleteObject(hObj);
 }
