@@ -399,6 +399,7 @@ static int ExtractFromEXEDLL(const char *szFileName, int nIndex, const char *szX
     HGLOBAL hResData;
     GRPICONDIR *pIconDir;
     BITMAPINFO *pIcon;
+    ENUMRESSTRUCT sEnumRes;
     int nMax = 0;
     int i;
 
@@ -408,9 +409,9 @@ static int ExtractFromEXEDLL(const char *szFileName, int nIndex, const char *szX
         goto error1;
     }
 
-    if (nIndex)
+    if (nIndex < 0)
     {
-        hResInfo = FindResourceA(hModule, MAKEINTRESOURCEA(nIndex), RT_GROUP_ICONA);
+        hResInfo = FindResourceA(hModule, MAKEINTRESOURCEA(-nIndex), RT_GROUP_ICONA);
 #ifdef __WIN32OS2__
         if(!hResInfo) {
             hResInfo = FindResourceA(hModule, MAKEINTRESOURCEA(nIndex), RT_ICONA);        
@@ -440,11 +441,15 @@ static int ExtractFromEXEDLL(const char *szFileName, int nIndex, const char *szX
         TRACE("FindResourceA (%s) called, return 0x%x, error %ld\n", szFileName, hResInfo, GetLastError());
     }
     else
-        if (EnumResourceNamesA(hModule, RT_GROUP_ICONA, &EnumResNameProc, (LONG) &hResInfo))
+    {
+        sEnumRes.pResInfo = &hResInfo;
+        sEnumRes.nIndex = nIndex;
+        if (EnumResourceNamesA(hModule, RT_GROUP_ICONA, &EnumResNameProc, (LONG) &sEnumRes))
         {
             TRACE("EnumResourceNamesA failed, error %ld\n", GetLastError());
             goto error2;
         }
+    }
 
     if (!hResInfo)
     {
