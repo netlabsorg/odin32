@@ -1,4 +1,7 @@
-/* $Id: ChangeLog,v 1.1354 2001-04-10 17:08:15 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.1355 2001-04-12 14:05:10 sandervl Exp $ */
+
+ 2001-04-12: Sofiya (sofiya@din.or.jp)
+    - USER32:   o Fixes for DBCS strings
 
  2001-04-10: Sander van Leeuwen <sandervl@xs4all.nl>   
     - PELDR:    o Print module name that contributed to the failure of
