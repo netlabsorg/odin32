@@ -260,10 +260,10 @@ extern WORD GDI_HeapSel;
       ((HGDIOBJ16)(handle)<=LAST_STOCK_HANDLE)) ? \
       0 : LOCAL_Unlock( GDI_HeapSel, (handle) ))
 
-extern BOOL GDI_Init(void);
-extern HGDIOBJ16 GDI_AllocObject( WORD, WORD );
-extern BOOL GDI_FreeObject( HGDIOBJ16 );
 extern GDIOBJHDR * GDI_GetObjPtr( HGDIOBJ16, WORD );
 
+VOID   GDI_ReleaseObj(HANDLE hObject);
+BOOL   GDI_FreeObject(HANDLE hObject, LPVOID lpObjectData);
+LPVOID GDI_AllocObject( int size, DWORD ulType, HANDLE *phObject );
 
 #endif  /* __WINE_GDI_H */
