@@ -1,4 +1,4 @@
-/* $Id: DoWithDirs.cmd,v 1.5 2000-03-11 18:52:49 bird Exp $
+/* $Id: DoWithDirs.cmd,v 1.6 2000-11-19 08:22:30 bird Exp $
  *
  * Syntax: dowithdirs.cmd [-e<list of excludes>] [-c] [-i] [-l] [-r] <cmd with args...>
  *    -e      Exclude directories.
@@ -139,7 +139,7 @@
             if (fCD) then
             do
                 /* exectute the command in the directory */
-                say '# entering directory:' asDirs.i;
+                say '[Entering directory:' asDirs.i']';
                 /* save old dir and enter the new dir. */
                 sOldDir = directory();
                 call directory asDirs.i;
@@ -153,10 +153,10 @@
                         do
                             /* restore old directory and return sucessfully */
                             call directory sOldDir;
-                            say '# - Lock found, stops processing.';
+                            say '[ - Lock found, stops processing.]';
                             exit(0);
                         end
-                        say '# - warning: Skipping '|| asDirs.i || ' - directory was locked.';
+                        say '[ - warning: Skipping '|| asDirs.i || ' - directory was locked.]';
                         fOK = 0;
                     end
 
@@ -175,13 +175,14 @@
                     if (ret <> 0) then
                     do
                         /* complain and fail if errors aren't ignored. */
-                        say '# - rc = 'ret;
+                        say '[ - rc = 'ret']';
                         if (\fIgnoreFailure) then
                             exit(rc);
                     end
                 end
 
                 /* restore old directory */
+                say '[Leaving  directory:' directory()']'
                 call directory sOldDir;
             end
             else
@@ -190,7 +191,7 @@
                 sCmds filespec('name', asDirs.i);
                 if (rc <> 0) then
                 do
-                    say '# - rc = ' || rc;
+                    say '[ - rc = ' || rc']';
                     if (\fIgnoreFailure) then
                         exit(rc);
                 end
