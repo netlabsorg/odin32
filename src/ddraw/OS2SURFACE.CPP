@@ -12,8 +12,10 @@
 #include "misc.h"
 #include "asmutil.h"
 #include <winerror.h>
+#include <odincrt.h>
+
 #ifndef __WATCOMC__
-#include <builtin.h>
+  #include <builtin.h>
 #endif
 
 extern FOURCC  SupportedFourCCs[];
@@ -991,6 +993,9 @@ HRESULT OS2IDirectDrawSurface::ColorFill(LPRECT lpDestRect,DWORD dwFillColor)
 
   pFillPos = pLine + dwPitchDB;
 
+  #ifndef USE_ASM
+    ODIN_FS_BEGIN
+  #endif
   for( y=0;y<FillHeight;y++,pFillPos+=dwPitchDB)
   {
     #ifdef USE_ASM
@@ -1002,6 +1007,9 @@ HRESULT OS2IDirectDrawSurface::ColorFill(LPRECT lpDestRect,DWORD dwFillColor)
       memcpy(pFillPos,pLine,FillWidth);
     #endif
   }
+  #ifndef USE_ASM
+    ODIN_FS_END
+  #endif
 
   return(DD_OK);
 
@@ -1224,7 +1232,8 @@ void OS2IDirectDrawSurface::ColorConversion(LPRECT lpRect)
 // Internal callbacks uses by destructor
 int  DestroyRects(LPVOID lpItem, DWORD dwRes)
 {
-  delete (DDRectangle*) lpItem;
+  DDRectangle *pItem = (DDRectangle*) lpItem;
+  ODIN_delete(pItem);
   return 1;
 }
 
@@ -1241,6 +1250,8 @@ int ReleaseSurfaces(LPVOID lpItem, DWORD dwRes)
 OS2IDirectDrawSurface::~OS2IDirectDrawSurface()
 {
   OS2IDirectDrawSurface  *AttachedSurface;
+
+  ODIN_FS_BEGIN
 
   if(DDSurfaceDesc.ddsCaps.dwCaps & DDSCAPS_PRIMARYSURFACE)
   {
@@ -1316,6 +1327,9 @@ OS2IDirectDrawSurface::~OS2IDirectDrawSurface()
   }
 
   lpDraw->Vtbl.Release(lpDraw);
+
+  ODIN_FS_END
+
 }
 //******************************************************************************
 //******************************************************************************
@@ -1405,7 +1419,7 @@ ULONG __stdcall SurfRelease(THIS This)
     me->Referenced--;
     if(me->Referenced == 0)
     {
-      delete me;
+      ODIN_delete( me);
       #ifndef __WATCOMC__
         //_interrupt(3);
       #endif
@@ -1434,6 +1448,8 @@ HRESULT __stdcall SurfAddAttachedSurface4(THIS This, LPDIRECTDRAWSURFACE4 lpDDSu
   OS2IDirectDrawSurface *AttachedSurface;
   OS2IDirectDrawSurface *BBCursor;
   OS2IDirectDrawSurface *me = (OS2IDirectDrawSurface *)This;
+  int rc;
+
   #ifdef DEBUG
     WriteLog("SurfAddAttachedSurface4\n");
   #endif
@@ -1465,9 +1481,13 @@ HRESULT __stdcall SurfAddAttachedSurface4(THIS This, LPDIRECTDRAWSURFACE4 lpDDSu
     {
       if(me->DDSurfaceDesc.ddsCaps.dwCaps & DDSCAPS_MIPMAP)
       {
-        if( DPA_InsertPtr( me->DPA_SurfaceMipMaps,
-                           DPA_GetPtrCount(me->DPA_SurfaceMipMaps),
-                           AttachedSurface) >=0)
+        ODIN_FS_BEGIN
+          rc = DPA_InsertPtr( me->DPA_SurfaceMipMaps,
+                              DPA_GetPtrCount(me->DPA_SurfaceMipMaps),
+                              AttachedSurface);
+        ODIN_FS_END
+
+        if( rc>=0)
         {
           me->DDSurfaceDesc.dwFlags |= DDSD_MIPMAPCOUNT;
           me->DDSurfaceDesc.dwMipMapCount++;
@@ -1492,9 +1512,13 @@ HRESULT __stdcall SurfAddAttachedSurface4(THIS This, LPDIRECTDRAWSURFACE4 lpDDSu
     }
     else
     {
-      if( DPA_InsertPtr( me->DPA_SurfaceAttached,
-                         DPA_GetPtrCount(me->DPA_SurfaceAttached),
-                         AttachedSurface) >=0)
+      ODIN_FS_BEGIN
+        rc = DPA_InsertPtr( me->DPA_SurfaceAttached,
+                            DPA_GetPtrCount(me->DPA_SurfaceAttached),
+                            AttachedSurface);
+      ODIN_FS_END
+
+      if(rc>=0)
       {
         AttachedSurface->Vtbl.AddRef(AttachedSurface);
       }
@@ -1686,6 +1710,8 @@ HRESULT __stdcall SurfBlt4(THIS This, LPRECT lpDestRect, LPDIRECTDRAWSURFACE4 lp
     _dump_DDBLT(dwFlags);
   #endif
 
+  ODIN_FS_BEGIN
+
   if (NULL!=lpDestRect)
   {
     pIRectDest = new DDRectangle( lpDestRect->top,
@@ -1733,9 +1759,12 @@ HRESULT __stdcall SurfBlt4(THIS This, LPRECT lpDestRect, LPDIRECTDRAWSURFACE4 lp
       #ifdef DEBUG
         WriteLog("Blt: Dest Surface partly locked\n");
       #endif
+      {ODIN_FS_END
       return(DDERR_SURFACEBUSY);
     }
   }
+
+  ODIN_FS_END
 
   DestSurfaceDesc.dwSize = sizeof(DDSURFACEDESC2);
   SrcSurfaceDesc.dwSize = sizeof(DDSURFACEDESC2);
@@ -1823,6 +1852,8 @@ HRESULT __stdcall SurfBlt4(THIS This, LPRECT lpDestRect, LPDIRECTDRAWSURFACE4 lp
     return DD_OK;
   }
 
+  ODIN_FS_BEGIN
+
   if (NULL!=lpSrcRect)
   {
     pIRectSrc = new DDRectangle( lpSrcRect->top,
@@ -1871,9 +1902,12 @@ HRESULT __stdcall SurfBlt4(THIS This, LPRECT lpDestRect, LPDIRECTDRAWSURFACE4 lp
       #ifdef DEBUG
         WriteLog("Blt: Src Surface partly locked\n");
       #endif
+      {ODIN_FS_END
       return(DDERR_SURFACEBUSY);
     }
   }
+
+  ODIN_FS_END
 
   if( ( (NULL==lpDestRect) && (NULL!=lpSrcRect) ) ||
       ( (NULL==lpSrcRect) && (NULL!=lpDestRect) ) )
@@ -1956,6 +1990,7 @@ HRESULT __stdcall SurfBlt4(THIS This, LPRECT lpDestRect, LPDIRECTDRAWSURFACE4 lp
                src->dwPitchDB);
         #else
         // Solid Blit
+        ODIN_FS_BEGIN
         while(1)
         {
           memcpy(pBltPos,pSrcPos,BlitWidth);
@@ -1964,6 +1999,7 @@ HRESULT __stdcall SurfBlt4(THIS This, LPRECT lpDestRect, LPDIRECTDRAWSURFACE4 lp
           if(! (--BlitHeight))
             break;
         }
+        ODIN_FS_END
         #endif
       }
       else
@@ -1971,6 +2007,7 @@ HRESULT __stdcall SurfBlt4(THIS This, LPRECT lpDestRect, LPDIRECTDRAWSURFACE4 lp
         // Transparent Blit
         if( (dwFlags &DDBLT_KEYSRC) || (dwFlags & DDBLT_KEYSRCOVERRIDE) )
         {
+          WriteLog("Transparent src blit not done yet for primary!!");
         }
         else
         {
@@ -2017,6 +2054,7 @@ HRESULT __stdcall SurfBlt4(THIS This, LPRECT lpDestRect, LPDIRECTDRAWSURFACE4 lp
                  src->dwPitchDB);
           #else
           // Solid Blit
+          ODIN_FS_BEGIN
           while(1)
           {
             memcpy(pBltPos,pSrcPos,BlitWidth);
@@ -2025,10 +2063,12 @@ HRESULT __stdcall SurfBlt4(THIS This, LPRECT lpDestRect, LPDIRECTDRAWSURFACE4 lp
             if(! (--BlitHeight))
               break;
           }
+          ODIN_FS_END
           #endif
         }
         else
         {
+          WriteLog("Transblt not done yet");
           if(dwFlags & DDBLT_KEYSRC)
           {
             if(!(src->DDSurfaceDesc.dwFlags & DDCKEY_SRCBLT))
@@ -2087,6 +2127,7 @@ HRESULT __stdcall SurfBlt4(THIS This, LPRECT lpDestRect, LPDIRECTDRAWSURFACE4 lp
                src->dwPitchDB);
         #else
         // Solid Blit
+        ODIN_FS_BEGIN
         while(1)
         {
           memcpy(pBltPos,pSrcPos,BlitWidth);
@@ -2095,6 +2136,7 @@ HRESULT __stdcall SurfBlt4(THIS This, LPRECT lpDestRect, LPDIRECTDRAWSURFACE4 lp
           if(! (--BlitHeight))
             break;
         }
+        ODIN_FS_END
         #endif
       }
       else
@@ -2501,7 +2543,7 @@ HRESULT __stdcall SurfBltBatch(THIS, LPDDBLTBATCH, DWORD, DWORD )
 HRESULT __stdcall SurfBltFast(THIS, DWORD,DWORD,LPDIRECTDRAWSURFACE2, LPRECT,DWORD)
 {
   #ifdef DEBUG
-    WriteLog("SurfBltFast\n");
+    WriteLog("SurfBltFast NIY\n");
   #endif
 
   return(DD_OK);
@@ -2533,6 +2575,8 @@ HRESULT __stdcall SurfBltFast4( THIS This,
     WriteLog("Invalid Parameters %08X, %d %d", lpDDSrcSurface ,dest->width , dest->height);
     return DDERR_INVALIDPARAMS;
   }
+
+  ODIN_FS_BEGIN
 
   if (NULL!=lpSrcRect)
   {
@@ -2834,6 +2878,8 @@ HRESULT __stdcall SurfBltFast4( THIS This,
   }
   dest->lpVtbl->ChangeUniquenessValue(dest);
 
+  ODIN_FS_END
+
   return(DD_OK);
 }
 //******************************************************************************
@@ -2953,6 +2999,8 @@ HRESULT __stdcall SurfDeleteAttachedSurface4(THIS This, DWORD dwFlags , LPDIRECT
 
   }
 
+  ODIN_FS_BEGIN
+
   if ( (!Found) && (AttachedSurface->DDSurfaceDesc.ddsCaps.dwCaps &  DDSCAPS_MIPMAP ) )
   {
     // Surface seams to be a mipmap
@@ -2991,6 +3039,8 @@ HRESULT __stdcall SurfDeleteAttachedSurface4(THIS This, DWORD dwFlags , LPDIRECT
     }
   }
 
+  ODIN_FS_END
+
   return(Found?DD_OK:DDERR_SURFACENOTATTACHED);
 }
 //******************************************************************************
@@ -3011,7 +3061,7 @@ HRESULT __stdcall SurfEnumAttachedSurfaces4(THIS This, LPVOID lpContext ,LPDDENU
   OS2IDirectDrawSurface *me = (OS2IDirectDrawSurface *)This;
   OS2IDirectDrawSurface *EnumSurface;
   DDSURFACEDESC2         EnumDesc;
-  int i;
+  int i,count;
   HRESULT rc;
 
   #ifdef DEBUG
@@ -3022,31 +3072,51 @@ HRESULT __stdcall SurfEnumAttachedSurfaces4(THIS This, LPVOID lpContext ,LPDDENU
 
   rc = DDENUMRET_OK;
 
+
   if(me->BackBuffer != NULL)
   {
-    memcpy(&EnumDesc,&(me->DDSurfaceDesc),sizeof(DDSURFACEDESC2));
+    ODIN_FS_BEGIN
+      memcpy(&EnumDesc,&(me->DDSurfaceDesc),sizeof(DDSURFACEDESC2));
+    ODIN_FS_END
     rc = lpCallBack((LPDIRECTDRAWSURFACE4)me->BackBuffer,&EnumDesc,lpContext);
   }
 
-  if(DPA_GetPtrCount(me->DPA_SurfaceMipMaps)>0)
+  ODIN_FS_BEGIN
+    count = DPA_GetPtrCount(me->DPA_SurfaceMipMaps);
+  ODIN_FS_END
+
+  if(count>0)
   {
     i=0;
-    while( (DDENUMRET_OK == rc) && i<DPA_GetPtrCount(me->DPA_SurfaceMipMaps) )
+    while( (DDENUMRET_OK == rc) && i<count )
     {
-      EnumSurface = (OS2IDirectDrawSurface*) DPA_FastGetPtr(me->DPA_SurfaceMipMaps,i);
-      memcpy(&EnumDesc,&(EnumSurface->DDSurfaceDesc),sizeof(DDSURFACEDESC2));
+      ODIN_FS_BEGIN
+        EnumSurface = (OS2IDirectDrawSurface*) DPA_FastGetPtr(me->DPA_SurfaceMipMaps,i);
+        memcpy( &EnumDesc,
+                &(EnumSurface->DDSurfaceDesc),
+                sizeof(DDSURFACEDESC2));
+      ODIN_FS_END
+      // Calling back into WIN32 app so we had to reset FS
       rc = lpCallBack((LPDIRECTDRAWSURFACE4)EnumSurface,&EnumDesc,lpContext);
       i++;
     }
   }
 
-  if(DPA_GetPtrCount(me->DPA_SurfaceAttached)>0)
+  ODIN_FS_BEGIN
+    count = DPA_GetPtrCount(me->DPA_SurfaceAttached);
+  ODIN_FS_END
+
+  if(count>0)
   {
     i=0;
-    while( (DDENUMRET_OK == rc) && i<DPA_GetPtrCount(me->DPA_SurfaceAttached) )
+    while( (DDENUMRET_OK == rc) && i<count )
     {
-      EnumSurface = (OS2IDirectDrawSurface*) DPA_FastGetPtr(me->DPA_SurfaceAttached,i);
-      memcpy(&EnumDesc,&(EnumSurface->DDSurfaceDesc),sizeof(DDSURFACEDESC2));
+      ODIN_FS_BEGIN
+        EnumSurface = (OS2IDirectDrawSurface*) DPA_FastGetPtr(me->DPA_SurfaceAttached,i);
+        memcpy( &EnumDesc,
+                &(EnumSurface->DDSurfaceDesc),
+                sizeof(DDSURFACEDESC2));
+      ODIN_FS_END
       rc = lpCallBack((LPDIRECTDRAWSURFACE4)EnumSurface,&EnumDesc,lpContext);
       i++;
     }
@@ -3219,6 +3289,7 @@ HRESULT __stdcall SurfGetAttachedSurface4(THIS This, LPDDSCAPS2 lpDDCaps,
   OS2IDirectDrawSurface *me = (OS2IDirectDrawSurface *)This;
   OS2IDirectDrawSurface *EnumSurface = NULL;
   OS2IDirectDrawSurface *AttachedSurface = NULL;
+  HRESULT rc;
   int i;
 
   #ifdef DEBUG
@@ -3233,7 +3304,12 @@ HRESULT __stdcall SurfGetAttachedSurface4(THIS This, LPDDSCAPS2 lpDDCaps,
     return (DDERR_INVALIDPARAMS);
   }
 
-  if( (me->BackBuffer!=NULL) && (me->BackBuffer->DDSurfaceDesc.ddsCaps.dwCaps & lpDDCaps->dwCaps) )
+  ODIN_FS_BEGIN
+
+  rc = DD_OK;
+
+  if( (me->BackBuffer!=NULL) &&
+      (me->BackBuffer->DDSurfaceDesc.ddsCaps.dwCaps & lpDDCaps->dwCaps) )
   {
     WriteLog("Return Backbuffer\n");
     AttachedSurface = me->BackBuffer;
@@ -3250,7 +3326,7 @@ HRESULT __stdcall SurfGetAttachedSurface4(THIS This, LPDDSCAPS2 lpDDCaps,
         if(NULL==AttachedSurface)
           AttachedSurface = EnumSurface;
         else
-          return(DDERR_NOTFOUND); // Not sure if this is the right return value,
+          rc = DDERR_NOTFOUND; // Not sure if this is the right return value,
                                   // but function must fail if more then one surface fits
 
       }
@@ -3269,7 +3345,7 @@ HRESULT __stdcall SurfGetAttachedSurface4(THIS This, LPDDSCAPS2 lpDDCaps,
         if(NULL==AttachedSurface)
           AttachedSurface = EnumSurface;
         else
-          return(DDERR_NOTFOUND); // Not sure if this is the right return value,
+          rc = DDERR_NOTFOUND; // Not sure if this is the right return value,
                                   // but function must fail if more then one surface fits
 
       }
@@ -3277,17 +3353,22 @@ HRESULT __stdcall SurfGetAttachedSurface4(THIS This, LPDDSCAPS2 lpDDCaps,
     }
   }
 
-  if(NULL!=AttachedSurface)
+  if( (DD_OK==rc) &&
+      (NULL!=AttachedSurface) )
   {
     *lpDDSurf = (IDirectDrawSurface4*)AttachedSurface;
     // not sure but as we returned an reference rains usage count
     AttachedSurface->lpVtbl->AddRef(AttachedSurface);
-    return(DD_OK);
   }
   else
+  {
     *lpDDSurf = NULL;
+    rc = DDERR_NOTFOUND;
+  }
 
-  return(DDERR_NOTFOUND);
+  ODIN_FS_END
+
+  return rc;
 }
 //******************************************************************************
 //******************************************************************************
@@ -3328,7 +3409,9 @@ HRESULT __stdcall SurfGetCaps4(THIS This, LPDDSCAPS2 lpDDCaps)
   if(NULL==lpDDCaps)
     return(DDERR_INVALIDPARAMS);
 
-  memcpy(lpDDCaps, &(me->DDSurfaceDesc.ddsCaps), sizeof(DDSCAPS2) );
+  ODIN_FS_BEGIN
+    memcpy(lpDDCaps, &(me->DDSurfaceDesc.ddsCaps), sizeof(DDSCAPS2) );
+  ODIN_FS_END
 
   return(DD_OK);
 }
@@ -3371,7 +3454,9 @@ HRESULT __stdcall SurfGetColorKey(THIS This, DWORD dwFlags, LPDDCOLORKEY lpDDCol
   {
     if(DDCKEY_SRCBLT & dwFlags)
     {
-      memcpy(lpDDColKey,&(me->DDSurfaceDesc.ddckCKSrcBlt),sizeof(DDCOLORKEY) );
+      ODIN_FS_BEGIN
+        memcpy(lpDDColKey,&(me->DDSurfaceDesc.ddckCKSrcBlt),sizeof(DDCOLORKEY) );
+      ODIN_FS_END
     }
     else
       return (DDERR_INVALIDPARAMS); // some other flags where set => error
@@ -3387,7 +3472,7 @@ HRESULT __stdcall SurfGetDC(THIS This, HDC FAR *hdc)
 {
  OS2IDirectDrawSurface *me = (OS2IDirectDrawSurface *)This;
  DDSURFACEDESC2        LockedSurfaceDesc;
-
+ HRESULT rc;
  struct
  {
    BITMAPINFOHEADER  bmiHead;
@@ -3408,6 +3493,10 @@ HRESULT __stdcall SurfGetDC(THIS This, HDC FAR *hdc)
     return(DDERR_DCALREADYCREATED);
   }
 
+  ODIN_FS_BEGIN
+
+  rc = DD_OK;
+
   if(me->hdcImage == NULL)
   {
     // Create a Device context
@@ -3418,11 +3507,12 @@ HRESULT __stdcall SurfGetDC(THIS This, HDC FAR *hdc)
         WriteLog("Can't create compatible DC!\n");
       #endif
       me->Vtbl.Unlock(me,NULL);
-      return(DDERR_GENERIC);
+      rc = DDERR_GENERIC;
     }
   }
 
-  if(me->hbmImage == NULL)
+  if( (DD_OK==rc) &&
+      (me->hbmImage == NULL) )
   {
     memset(&BitmapInfo, 0, sizeof(BitmapInfo));
     BitmapInfo.bmiHead.biSize   = sizeof(BITMAPINFOHEADER);
@@ -3474,12 +3564,13 @@ HRESULT __stdcall SurfGetDC(THIS This, HDC FAR *hdc)
       DeleteDC(me->hdcImage);
       me->hdcImage = NULL;
       me->Vtbl.Unlock(me,NULL);
-      return(DDERR_GENERIC);
+      rc = DDERR_GENERIC;
     }
   }
   else
   {
-    if(me->dwLastDCUnique != me->dwUniqueValue)
+    if( (DD_OK==rc) &&
+        (me->dwLastDCUnique != me->dwUniqueValue) )
     {
       #ifdef DEBUG
         WriteLog("The Surface was locked/unlocked after the last DC was created =>Update Bitmap!\n");
@@ -3527,24 +3618,31 @@ HRESULT __stdcall SurfGetDC(THIS This, HDC FAR *hdc)
     }
   }
 
-  // Allways selct the bitmap into the DC! No matter if the old or a new one
+  // Allways select the bitmap into the DC! No matter if the old or a new one
 
-  if((me->hgdiOld = SelectObject(me->hdcImage, me->hbmImage)) == NULL)
+  if(DD_OK==rc)
   {
-    #ifdef DEBUG
-      WriteLog("Can't select bitmap into dc!\n");
-    #endif
-    DeleteDC(me->hdcImage);
-    me->hdcImage = NULL;
-    DeleteObject(me->hbmImage);
-    me->hbmImage = NULL;
-    me->Vtbl.Unlock(me,NULL);
-    return(DDERR_GENERIC);
+    if((me->hgdiOld = SelectObject(me->hdcImage, me->hbmImage)) == NULL)
+    {
+      #ifdef DEBUG
+        WriteLog("Can't select bitmap into dc!\n");
+      #endif
+      DeleteDC(me->hdcImage);
+      me->hdcImage = NULL;
+      DeleteObject(me->hbmImage);
+      me->hbmImage = NULL;
+      me->Vtbl.Unlock(me,NULL);
+      rc = DDERR_GENERIC;
+    }
+    else
+    {
+      *hdc = me->hdcImage;
+    }
   }
 
-  *hdc = me->hdcImage;
+  ODIN_FS_END
 
-  return(DD_OK);
+  return rc;
 }
 //******************************************************************************
 //******************************************************************************
@@ -3618,7 +3716,12 @@ HRESULT __stdcall SurfGetPixelFormat(THIS This, LPDDPIXELFORMAT lpPixelFormat)
   if(NULL==lpPixelFormat)
     return DDERR_INVALIDPARAMS;
 
-  memcpy((char*)lpPixelFormat,(char*)&(me->DDSurfaceDesc.ddpfPixelFormat), sizeof(DDPIXELFORMAT));
+  ODIN_FS_BEGIN
+    memcpy( (char*)lpPixelFormat,
+            (char*)&(me->DDSurfaceDesc.ddpfPixelFormat),
+            sizeof(DDPIXELFORMAT));
+  ODIN_FS_END
+
 
   return(DD_OK);
 }
@@ -3635,7 +3738,11 @@ HRESULT __stdcall SurfGetSurfaceDesc(THIS This, LPDDSURFACEDESC lpSurface)
   if((lpSurface == NULL)||(lpSurface->dwSize != sizeof(DDSURFACEDESC)) )
     return(DDERR_INVALIDPARAMS);
 
-  memcpy((char *)lpSurface, (char *)&me->DDSurfaceDesc, sizeof(DDSURFACEDESC));
+  ODIN_FS_BEGIN
+    memcpy( (char *)lpSurface,
+            (char *)&me->DDSurfaceDesc,
+            sizeof(DDSURFACEDESC));
+  ODIN_FS_END
 
   return(DD_OK);
 }
@@ -3652,7 +3759,11 @@ HRESULT __stdcall SurfGetSurfaceDesc4(THIS This, LPDDSURFACEDESC2 lpSurface)
   if((lpSurface == NULL)||(lpSurface->dwSize != sizeof(DDSURFACEDESC2)) )
     return(DDERR_INVALIDPARAMS);
 
-  memcpy((char *)lpSurface, (char *)&me->DDSurfaceDesc, sizeof(DDSURFACEDESC2));
+  ODIN_FS_BEGIN
+    memcpy( (char *)lpSurface,
+            (char *)&me->DDSurfaceDesc,
+            sizeof(DDSURFACEDESC2));
+  ODIN_FS_END
 
   return(DD_OK);
 }
@@ -3713,10 +3824,18 @@ HRESULT __stdcall SurfLock( THIS This,
 
   SurfaceDesc4.dwSize = sizeof(DDSURFACEDESC2);
 
-  rc = SurfLock4(This, lpRect, &SurfaceDesc4, dwFlags, hEvent);
+  rc = SurfLock4( This,
+                  lpRect,
+                  &SurfaceDesc4,
+                  dwFlags,
+                  hEvent);
   if (DD_OK==rc)
   {
-    memcpy((char*)lpSurfaceDesc,(char*)&SurfaceDesc4, sizeof(DDSURFACEDESC) );
+    ODIN_FS_BEGIN
+      memcpy( (char*)lpSurfaceDesc,
+              (char*)&SurfaceDesc4,
+              sizeof(DDSURFACEDESC) );
+    ODIN_FS_END
   }
 
   return(rc);
@@ -3734,10 +3853,11 @@ HRESULT __stdcall SurfLock4( THIS This,
   int i;
 
   BOOL Found;
-  ULONG  nrScanLines, rc;
+  ULONG  nrScanLines;
   char *pBuffer;
   DDRectangle *pIRectCurrent,*pIRectNew;
   static int times = 0;
+  HRESULT rc;
 
   #ifdef DEBUG
     WriteLog("SurfLock4 %08X %08X %d %d\n", (int)lpRect, (int)lpSurfaceDesc, dwFlags, hEvent);
@@ -3747,6 +3867,8 @@ HRESULT __stdcall SurfLock4( THIS This,
       (NULL!=hEvent)
     )
     return DDERR_INVALIDPARAMS;
+
+  ODIN_FS_BEGIN
 
   if (NULL!=lpRect)
     pIRectNew = new DDRectangle( lpRect->left, lpRect->top, lpRect->bottom, lpRect->right );
@@ -3759,6 +3881,8 @@ HRESULT __stdcall SurfLock4( THIS This,
             pIRectNew->Left(),
             pIRectNew->Bottom(),
             pIRectNew->Right() );
+
+  rc = DD_OK;
 
   if(me->fLocked)
   {
@@ -3798,38 +3922,44 @@ HRESULT __stdcall SurfLock4( THIS This,
       #ifdef DEBUG
         WriteLog("SurfLock4: Surface already locked\n\n");
       #endif
-      return(DDERR_SURFACEBUSY);
+      rc = DDERR_SURFACEBUSY;
     }
+
   }
 
-  memcpy((char *)lpSurfaceDesc, (char *)&me->DDSurfaceDesc, sizeof(DDSURFACEDESC2));
-
-  if(lpRect != NULL)
+  if(DD_OK == rc)
   {
-    lpSurfaceDesc->lpSurface =  (LPVOID)((char*)me->pFrameBuffer +
-                                (lpRect->top * me->dwPitchFB) +
-                                (lpRect->left * (lpSurfaceDesc->ddpfPixelFormat.dwRGBBitCount>>3)));
-    #ifdef DEBUG
-      WriteLog("SurfLock4 %08X (x,y) = (%d,%d)\n\n", lpSurfaceDesc->lpSurface, lpRect->top, lpRect->left);
-    #endif
+    memcpy((char *)lpSurfaceDesc, (char *)&me->DDSurfaceDesc, sizeof(DDSURFACEDESC2));
+
+    if(lpRect != NULL)
+    {
+      lpSurfaceDesc->lpSurface =  (LPVOID)((char*)me->pFrameBuffer +
+                                  (lpRect->top * me->dwPitchFB) +
+                                  (lpRect->left * (lpSurfaceDesc->ddpfPixelFormat.dwRGBBitCount>>3)));
+      #ifdef DEBUG
+        WriteLog("SurfLock4 %08X (x,y) = (%d,%d)\n\n", lpSurfaceDesc->lpSurface, lpRect->top, lpRect->left);
+      #endif
+    }
+    else
+    {
+      #ifdef DEBUG
+        WriteLog("SurfLock4 %08X \n\n", lpSurfaceDesc->lpSurface);
+      #endif
+    }
+    // Add the rectangle to the list of locked rectangles
+
+    pIRectNew->SetMemPtr(lpSurfaceDesc->lpSurface);
+
+    DPA_InsertPtr( me->DPA_LockedRects,
+                   DPA_GetPtrCount(me->DPA_LockedRects),
+                   pIRectNew);
+
+    me->fLocked = TRUE;
   }
-  else
-  {
-    #ifdef DEBUG
-      WriteLog("SurfLock4 %08X \n\n", lpSurfaceDesc->lpSurface);
-    #endif
-  }
-  // Add the rectangle to the list of locked rectangles
 
-  pIRectNew->SetMemPtr(lpSurfaceDesc->lpSurface);
+  ODIN_FS_END
 
-  DPA_InsertPtr( me->DPA_LockedRects,
-                 DPA_GetPtrCount(me->DPA_LockedRects),
-                 pIRectNew);
-
-  me->fLocked = TRUE;
-
-  return(DD_OK);
+  return rc;
 }
 //******************************************************************************
 //******************************************************************************
@@ -3849,6 +3979,8 @@ HRESULT __stdcall SurfReleaseDC(THIS This, HDC hdc)
 
   if(hdc != me->hdcImage)
     return(DDERR_INVALIDOBJECT);
+
+  ODIN_FS_BEGIN
 
   //unselect our bitmap
   SelectObject(me->hdcImage, me->hgdiOld);
@@ -3895,6 +4027,8 @@ HRESULT __stdcall SurfReleaseDC(THIS This, HDC hdc)
 
   me->Vtbl.Unlock(me,NULL);
   me->dwLastDCUnique = me->dwUniqueValue; // Store this to see if the surface was locked after we released the DC
+
+  ODIN_FS_END
 
   return(DD_OK);
 }
@@ -3950,7 +4084,7 @@ HRESULT __stdcall SurfSetClipper(THIS This, LPDIRECTDRAWCLIPPER lpClipper)
 HRESULT __stdcall SurfSetColorKey(THIS  This, DWORD dwFlags, LPDDCOLORKEY lpDDColKey)
 {
   OS2IDirectDrawSurface *me = (OS2IDirectDrawSurface *)This;
-
+  HRESULT rc;
   #ifdef DEBUG
     WriteLog("SurfSetColorKey\n");
   #endif
@@ -3961,6 +4095,8 @@ HRESULT __stdcall SurfSetColorKey(THIS  This, DWORD dwFlags, LPDDCOLORKEY lpDDCo
   // as we report only src colorkey in the caps return error on all others flags
   if( (DDCKEY_DESTBLT|DDCKEY_DESTOVERLAY|DDCKEY_SRCOVERLAY|DDCKEY_COLORSPACE) & dwFlags)
     return(DDERR_UNSUPPORTED);
+
+  ODIN_FS_BEGIN
 
   if(DDCKEY_SRCBLT & dwFlags)
   {
@@ -3977,11 +4113,14 @@ HRESULT __stdcall SurfSetColorKey(THIS  This, DWORD dwFlags, LPDDCOLORKEY lpDDCo
       memset(&(me->DDSurfaceDesc.ddckCKSrcBlt), 0, sizeof(DDCOLORKEY) );
       me->DDSurfaceDesc.dwFlags &= ~DDCKEY_SRCBLT;
     }
+    rc = DD_OK;
   }
   else
-    return (DDERR_INVALIDPARAMS); // some other flags where set => error
+    rc = DDERR_INVALIDPARAMS; // some other flags where set => error
 
-  return(DD_OK);
+  ODIN_FS_END
+
+  return rc;
 }
 //******************************************************************************
 //******************************************************************************
@@ -4077,6 +4216,7 @@ HRESULT __stdcall SurfUnlock(THIS This, LPVOID lpSurfaceData)
   DDRectangle *pIRectUnlock, *pIRectEnum;
   BOOL Found = FALSE;
   OS2RECTL CCRect;
+  HRESULT rc;
 
   #ifdef DEBUG
     WriteLog("SurfUnlock at %08X\n",lpSurfaceData);
@@ -4089,6 +4229,8 @@ HRESULT __stdcall SurfUnlock(THIS This, LPVOID lpSurfaceData)
     #endif
     return(DDERR_NOTLOCKED);
   }
+
+  ODIN_FS_BEGIN
 
   #ifdef DEBUG
     WriteLog("Start Emuneration of Locked Rects\n");
@@ -4171,66 +4313,72 @@ HRESULT __stdcall SurfUnlock(THIS This, LPVOID lpSurfaceData)
     #ifdef DEBUG
       WriteLog("Rectangle not locked, wrong Rect!\n\n");
     #endif
-    return(DDERR_INVALIDRECT);
+    rc = DDERR_INVALIDRECT;
   }
-
-  #ifdef DEBUG
-    WriteLog("Remove Rect %d from Seq.\n",i);
-  #endif
-
-  DPA_DeletePtr(me->DPA_LockedRects,i);
-
-  #ifdef DEBUG
-    WriteLog("Test if locked Rects main\n");
-  #endif
-
-  if(0==DPA_GetPtrCount(me->DPA_LockedRects))  // Do we have unlocked last rectangle
-  {
-    #ifdef DEBUG
-      WriteLog("No Locked Rects left for surface\n");
-    #endif
-    me->fLocked = FALSE;
-  }
-  #ifdef DEBUG
   else
-    WriteLog( "%d Rects in Seq\n",
-              DPA_GetPtrCount(me->DPA_LockedRects));
-  #endif
-
-  if(me->pFrameBuffer != me->pDiveBuffer)
   {
     #ifdef DEBUG
-      WriteLog( "ColorConversion Needed %08X != %08X\n",
-                me->pFrameBuffer,
-                me->pDiveBuffer);
+      WriteLog("Remove Rect %d from Seq.\n",i);
     #endif
-    if(NULL!=lpSurfaceData)
-    {
-      CCRect.yTop    = pIRectEnum->Top();
-      CCRect.xLeft   = pIRectEnum->Left();
-      CCRect.xRight  = pIRectEnum->Right();
-      CCRect.yBottom = pIRectEnum->Bottom();
 
-      me->ColorConversion( (LPRECT)&CCRect);
+    DPA_DeletePtr(me->DPA_LockedRects,i);
+
+    #ifdef DEBUG
+      WriteLog("Test if locked Rects main\n");
+    #endif
+
+    if(0==DPA_GetPtrCount(me->DPA_LockedRects))  // Do we have unlocked last rectangle
+    {
+      #ifdef DEBUG
+        WriteLog("No Locked Rects left for surface\n");
+      #endif
+      me->fLocked = FALSE;
     }
+    #ifdef DEBUG
     else
+      WriteLog( "%d Rects in Seq\n",
+                DPA_GetPtrCount(me->DPA_LockedRects));
+    #endif
+
+    if(me->pFrameBuffer != me->pDiveBuffer)
     {
-      me->ColorConversion(NULL);
+      #ifdef DEBUG
+        WriteLog( "ColorConversion Needed %08X != %08X\n",
+                  me->pFrameBuffer,
+                  me->pDiveBuffer);
+      #endif
+      if(NULL!=lpSurfaceData)
+      {
+        CCRect.yTop    = pIRectEnum->Top();
+        CCRect.xLeft   = pIRectEnum->Left();
+        CCRect.xRight  = pIRectEnum->Right();
+        CCRect.yBottom = pIRectEnum->Bottom();
+
+        me->ColorConversion( (LPRECT)&CCRect);
+      }
+      else
+      {
+        me->ColorConversion(NULL);
+      }
     }
+    #ifdef DEBUG
+    else
+      WriteLog( "No ColorConversion Needed");
+    #endif
+
+    // delete tne DDRectobject of the found rectangle
+    delete pIRectEnum;
+
+    me->lpVtbl->ChangeUniquenessValue(me);
+
+    WriteLog("Unlock OK\n\n");
+
+    rc = DD_OK;
   }
-  #ifdef DEBUG
-  else
-    WriteLog( "No ColorConversion Needed");
-  #endif
 
-  // delete tne DDRectobject of the found rectangle
-  delete pIRectEnum;
+  ODIN_FS_END
 
-  me->lpVtbl->ChangeUniquenessValue(me);
-
-  WriteLog("Unlock OK\n\n");
-
-  return(DD_OK);
+  return rc;
 }
 //******************************************************************************
 //******************************************************************************
@@ -4248,6 +4396,7 @@ HRESULT __stdcall SurfUnlock4(THIS This, LPRECT lpSurfaceRect)
   int i;
   DDRectangle *pIRectUnlock, *pIRectEnum;
   BOOL Found = FALSE;
+  HRESULT rc;
 
   #ifdef DEBUG
     WriteLog("SurfUnlock4\n");
@@ -4260,6 +4409,8 @@ HRESULT __stdcall SurfUnlock4(THIS This, LPRECT lpSurfaceRect)
     #endif
     return(DDERR_NOTLOCKED);
   }
+
+  ODIN_FS_BEGIN
 
   if(NULL!=lpSurfaceRect)
   {
@@ -4322,38 +4473,43 @@ HRESULT __stdcall SurfUnlock4(THIS This, LPRECT lpSurfaceRect)
       return(DDERR_INVALIDRECT);
     }
     else
-      return SurfUnlock(This, (LPVOID)lpSurfaceRect);
+      rc = SurfUnlock(This, (LPVOID)lpSurfaceRect);
   }
-
-  #ifdef DEBUG
-    WriteLog("Remove Rect from Seq.\n");
-  #endif
-
-  DPA_DeletePtr(me->DPA_LockedRects,i);
-
-  if(0==DPA_GetPtrCount(me->DPA_LockedRects))  // Do we have unlocked last rectangle
+  else
   {
     #ifdef DEBUG
-      WriteLog("No Locked Rects left for surface\n");
+      WriteLog("Remove Rect from Seq.\n");
     #endif
-    me->fLocked = FALSE;
+
+    DPA_DeletePtr(me->DPA_LockedRects,i);
+
+    if(0==DPA_GetPtrCount(me->DPA_LockedRects))  // Do we have unlocked last rectangle
+    {
+      #ifdef DEBUG
+        WriteLog("No Locked Rects left for surface\n");
+      #endif
+      me->fLocked = FALSE;
+    }
+
+    if(me->pFrameBuffer != me->pDiveBuffer)
+    {
+      #ifdef DEBUG
+        WriteLog( "ColorConversion Needed %08X != %08X\n",
+                  me->pFrameBuffer,
+                  me->pDiveBuffer);
+      #endif
+      me->ColorConversion(lpSurfaceRect);
+    }
+
+    me->lpVtbl->ChangeUniquenessValue(me);
+
+    WriteLog("Unlock OK\n\n");
+    rc = DD_OK;
   }
 
-  if(me->pFrameBuffer != me->pDiveBuffer)
-  {
-    #ifdef DEBUG
-      WriteLog( "ColorConversion Needed %08X != %08X\n",
-                me->pFrameBuffer,
-                me->pDiveBuffer);
-    #endif
-    me->ColorConversion(lpSurfaceRect);
-  }
+  ODIN_FS_END
 
-  me->lpVtbl->ChangeUniquenessValue(me);
-
-  WriteLog("Unlock OK\n\n");
-
-  return(DD_OK);
+  return rc;
 }
 //******************************************************************************
 //******************************************************************************
@@ -4454,6 +4610,8 @@ HRESULT __stdcall SurfSetSurfaceDesc(THIS This, LPDDSURFACEDESC lpSurfDesc, DWOR
   if(-1==me->diveBufNr)
     return DDERR_INVALIDSURFACETYPE; // only work for system alloced surfaces
 
+  ODIN_FS_BEGIN
+
   if (!me->Updated)
   {
     me->Updated = TRUE;
@@ -4464,6 +4622,7 @@ HRESULT __stdcall SurfSetSurfaceDesc(THIS This, LPDDSURFACEDESC lpSurfDesc, DWOR
   me->lpVtbl->ChangeUniquenessValue(me);
   memcpy((char *)&(me->DDSurfaceDesc), (char *)lpSurfDesc, sizeof(DDSURFACEDESC));
 
+  ODIN_FS_END
 
   return DD_OK;
 }
@@ -4486,6 +4645,8 @@ HRESULT __stdcall SurfSetSurfaceDesc4(THIS This, LPDDSURFACEDESC2 lpSurfDesc, DW
   if(-1==me->diveBufNr)
     return DDERR_INVALIDSURFACETYPE; // only work for system alloced surfaces
 
+  ODIN_FS_BEGIN
+
   if (!me->Updated)
   {
     me->Updated = TRUE;
@@ -4495,6 +4656,8 @@ HRESULT __stdcall SurfSetSurfaceDesc4(THIS This, LPDDSURFACEDESC2 lpSurfDesc, DW
   }
   me->lpVtbl->ChangeUniquenessValue(me);
   memcpy((char *)&(me->DDSurfaceDesc), (char *)lpSurfDesc, sizeof(DDSURFACEDESC2));
+
+  ODIN_FS_END
 
   return DD_OK;
 }
@@ -4510,6 +4673,7 @@ HRESULT __stdcall SurfSetPrivateData(THIS This, REFGUID refGUID, LPVOID lpData,
   PSURFPRIVATEDATA pSData;
   void *pBuffer;
   BOOL bFound = FALSE;
+  HRESULT rc;
 
   #ifdef DEBUG
     WriteLog("SurfSetPrivateData\n");
@@ -4521,6 +4685,8 @@ HRESULT __stdcall SurfSetPrivateData(THIS This, REFGUID refGUID, LPVOID lpData,
   if((NULL==lpData)||(0==dwDataSize)||
      (dwFlags & ~(DDSPD_IUNKNOWNPOINTER|DDSPD_VOLATILE)))
     return(DDERR_INVALIDPARAMS);
+
+  ODIN_FS_BEGIN
 
   // first check if the refGUID is stored as then the content will be updated
   if( DPA_GetPtrCount(me->DPA_SurfacePrivateData)>0 )
@@ -4566,7 +4732,7 @@ HRESULT __stdcall SurfSetPrivateData(THIS This, REFGUID refGUID, LPVOID lpData,
         else
         {
           delete pSData;
-          return (DDERR_OUTOFMEMORY);
+          rc = DDERR_OUTOFMEMORY;
         }
       }
     }
@@ -4599,7 +4765,7 @@ HRESULT __stdcall SurfSetPrivateData(THIS This, REFGUID refGUID, LPVOID lpData,
             pSData->dwFlags = dwFlags;   // Update the flags
           }
           else
-            return(DDERR_OUTOFMEMORY);
+            rc = DDERR_OUTOFMEMORY;
         }
       }
       else
@@ -4630,7 +4796,7 @@ HRESULT __stdcall SurfSetPrivateData(THIS This, REFGUID refGUID, LPVOID lpData,
             pSData->dwFlags = dwFlags;   // Update the flags
           }
           else
-            return(DDERR_OUTOFMEMORY);
+            rc = DDERR_OUTOFMEMORY;
         }
       }
     }
@@ -4661,27 +4827,30 @@ HRESULT __stdcall SurfSetPrivateData(THIS This, REFGUID refGUID, LPVOID lpData,
           pSData->dwSize  = dwDataSize;
           pSData->dwFlags = dwFlags;
           pSData->isValid = TRUE;
+
+          if( DPA_InsertPtr( me->DPA_SurfacePrivateData,
+                             DPA_GetPtrCount(me->DPA_SurfacePrivateData),
+                             pSData) <0)
+          {
+            delete(pSData);
+            rc = DDERR_OUTOFMEMORY;
+          }
         }
         else
         {
-          delete pSData;
-          return (DDERR_OUTOFMEMORY);
+          delete(pSData);
+          rc = DDERR_OUTOFMEMORY;
         }
-      }
-
-      if( DPA_InsertPtr( me->DPA_SurfacePrivateData,
-                         DPA_GetPtrCount(me->DPA_SurfacePrivateData),
-                         pSData) <0)
-      {
-        delete pSData;
-        return (DDERR_OUTOFMEMORY);
       }
 
     }
     else
-      return (DDERR_OUTOFMEMORY);
+      rc = DDERR_OUTOFMEMORY;
   }
-  return(DD_OK);
+
+  ODIN_FS_END
+
+  return rc;
 }
 //******************************************************************************
 //******************************************************************************
@@ -4690,6 +4859,7 @@ HRESULT __stdcall SurfGetPrivateData(THIS This, REFGUID refGUID, LPVOID lpData, 
   OS2IDirectDrawSurface *me = (OS2IDirectDrawSurface *)This;
   int i;
   PSURFPRIVATEDATA pSData;
+  HRESULT rc;
   BOOL bFound = FALSE;
 
   #ifdef DEBUG
@@ -4701,6 +4871,8 @@ HRESULT __stdcall SurfGetPrivateData(THIS This, REFGUID refGUID, LPVOID lpData, 
 
   if((NULL==lpData)||(NULL==lpDataSize))
     return(DDERR_INVALIDPARAMS);
+
+  ODIN_FS_BEGIN
 
   if(DPA_GetPtrCount(me->DPA_SurfacePrivateData)>0)
   {
@@ -4719,20 +4891,30 @@ HRESULT __stdcall SurfGetPrivateData(THIS This, REFGUID refGUID, LPVOID lpData, 
   if(bFound)
   {
     if(!pSData->isValid)
-      return(DDERR_EXPIRED);
-
-    if(pSData->dwSize > *lpDataSize)
     {
-      // Buffer to small return needed Size
-      *lpDataSize = pSData->dwSize;
-      return(DDERR_MOREDATA);
+      rc =DDERR_EXPIRED;
     }
-
-    memcpy(lpData,pSData->pData,pSData->dwSize);
-    return(DD_OK);
+    else
+    {
+      if(pSData->dwSize > *lpDataSize)
+      {
+        // Buffer to small return needed Size
+        *lpDataSize = pSData->dwSize;
+        rc = DDERR_MOREDATA;
+      }
+      else
+      {
+        memcpy(lpData,pSData->pData,pSData->dwSize);
+        rc = DD_OK;
+      }
+    }
   }
+  else
+   rc = DDERR_NOTFOUND;
 
-  return (DDERR_NOTFOUND);
+  ODIN_FS_END
+
+  return rc;
 }
 //******************************************************************************
 //******************************************************************************
@@ -4749,6 +4931,8 @@ HRESULT __stdcall SurfFreePrivateData(THIS This, REFGUID refGUID)
 
   if(NULL==me)
     return(DDERR_INVALIDOBJECT);
+
+  ODIN_FS_BEGIN
 
   if(DPA_GetPtrCount(me->DPA_SurfacePrivateData)>0)
   {
@@ -4781,6 +4965,9 @@ HRESULT __stdcall SurfFreePrivateData(THIS This, REFGUID refGUID)
       i++;
     }
   }
+
+  ODIN_FS_END
+
   return (bFound?DD_OK:DDERR_NOTFOUND);
 }
 //******************************************************************************
@@ -4805,6 +4992,8 @@ HRESULT __stdcall SurfChangeUniquenessValue(THIS This)
   int i;
   PSURFPRIVATEDATA pSData;
 
+  ODIN_FS_BEGIN
+
   #ifdef DEBUG
     WriteLog("SurfChangeUniquenessValue\n");
   #endif
@@ -4821,7 +5010,7 @@ HRESULT __stdcall SurfChangeUniquenessValue(THIS This)
         // Data becomes unvalid after a Surface change
         if (pSData->dwFlags & DDSPD_IUNKNOWNPOINTER)
         {
-          // pointer to com stored so calll its release
+          // pointer to com stored so call its release
           ((OS2IDirectDrawSurface *) pSData->pData)->lpVtbl->Release(pSData->pData);
         }
         else
@@ -4836,6 +5025,8 @@ HRESULT __stdcall SurfChangeUniquenessValue(THIS This)
     }
   }
 
+  ODIN_FS_END
+
   return (DD_OK);
 }
 
@@ -4847,9 +5038,13 @@ HRESULT __stdcall SurfChangeUniquenessValue(THIS This)
 
 void __cdecl MoveRects(char* pBuffer, LPRECT lpDestRect, LPRECT lpSrcRect, int bpp, LONG lPitch)
 {
+
   char *pBltPos, *pSrcPos;
   int BlitWidth,BlitHeight;
   static char Scanline[6400];  // sufficient for 1600 at 32 bit
+
+  ODIN_FS_BEGIN
+
   // Bridge, we may got a problem ;)
   // Check for Overlapping Rects
 
@@ -4911,6 +5106,7 @@ void __cdecl MoveRects(char* pBuffer, LPRECT lpDestRect, LPRECT lpSrcRect, int b
     }
   }
 
+  ODIN_FS_END
 }
 
 //******************************************************************************

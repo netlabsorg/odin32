@@ -10,6 +10,7 @@
 #include "misc.h"
 #include <winerror.h>
 #include <builtin.h>
+#include <odincrt.h>
 #undef THIS
 #define THIS VOID*
 
@@ -21,7 +22,7 @@ HRESULT __stdcall D3DQueryInterface(THIS This, REFIID riid, LPVOID FAR * ppvObj)
   *ppvObj = NULL;
 
   if(IID_IDirect3D != (GUID &)&riid)
-  return E_NOINTERFACE;
+    return E_NOINTERFACE;
 
   *ppvObj = This;
 
@@ -45,15 +46,19 @@ ULONG __stdcall D3DRelease(THIS This)
 
   dprintf(("OS2IDirectDraw::Release %d\n", me->Referenced-1));
   dprintf(("OS2IDirectDraw::%X \n", me));
-  if(me->Referenced) {
-  me->Referenced--;
-  if(me->Referenced == 0) {
-    delete me;
+  if(me->Referenced)
+  {
+    me->Referenced--;
+    if(me->Referenced == 0)
+    {
+      ODIN_delete(me);
+      return(0);
+    }
+    else
+      return me->Referenced;
+  }
+  else
     return(0);
-  }
-  else    return me->Referenced;
-  }
-  else  return(0);
 }
 //******************************************************************************
 //******************************************************************************
