@@ -1,4 +1,4 @@
-/* $Id: wsock32.cpp,v 1.17 2000-03-04 12:30:22 sandervl Exp $ */
+/* $Id: wsock32.cpp,v 1.18 2000-03-13 20:32:24 sandervl Exp $ */
 
 /*
  *
@@ -45,7 +45,7 @@
 #include <wprocess.h>
 #include <heapstring.h>
 #include <win32wnd.h>
-
+#include <stdlib.h>
 
 #include "wsock32.h"
 #include "relaywin.h"
@@ -730,8 +730,17 @@ ODINFUNCTION5(int,OS2setsockopt,
 
     rc = setsockopt(s,level,optname,(char *)&xx, sizeof(xx));
   }
-  else
+  else 
+  if(level == SOL_SOCKET && (optname == SO_SNDBUF || optname == SO_RCVBUF)) {
+	ULONG size;
+
+	//SvL: Limit send & receive buffer length to 64k
+	size = min(*(ULONG *)optval, 65000);
+	rc = setsockopt(s,level,optname, (char *)&size,optlen);
+  }
+  else {
     rc = setsockopt(s,level,optname,(char *)optval,optlen);
+  }
 
   if (rc == SOCKET_ERROR)
     //OS2WSASetLastError(iTranslateSockErrToWSock(sock_errno()));
