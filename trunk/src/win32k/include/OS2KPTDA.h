@@ -1,4 +1,4 @@
-/* $Id: OS2KPTDA.h,v 1.4 2000-12-11 06:53:49 bird Exp $
+/* $Id: OS2KPTDA.h,v 1.5 2001-07-08 03:06:25 bird Exp $
  *
  * PTDA access functions.
  *
@@ -56,6 +56,8 @@ USHORT      ptdaGet_ptda_environ(PPTDA pPTDA);
 HPTDA       ptdaGet_ptda_handle(PPTDA pPTDA);
 USHORT      ptdaGet_ptda_module(PPTDA pPTDA);
 HKSEMMTX    ptda_ptda_ptdasem(PPTDA pPTDA);
+PSZ         ptdaGet_ptda_pBeginLIBPATH(PPTDA pPTDA);
+PSZ         ptdaGet_ptda_pEndLIBPATH(PPTDA pPTDA);
 
 #ifdef __cplusplus
 }
