@@ -1,7 +1,12 @@
-/* $Id: ChangeLog,v 1.1576 2001-07-08 07:14:22 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.1577 2001-07-08 08:06:48 sandervl Exp $ */
 
  2001-07-08: Sander van Leeuwen <sandervl@xs4all.nl>
     - USER32:   o Some icon fixes
+                o Changed scrollbar behaviour in OS/2 mode; scrollbar doesn't
+                  jump back to last click position when moving the mouse
+                  outside the scroll window during scrolling.
+                o Changed menu behaviour in OS/2 mode; no mouse tracking
+                  when right or left mouse button not pressed.
     - KERNEL32: o More pointer checks added to GlobalLock/Unlock
 
  2001-07-08: knut st. osmundsen <kosmunds@csc.com>:
