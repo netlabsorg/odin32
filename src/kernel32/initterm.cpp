@@ -1,4 +1,4 @@
-/* $Id: initterm.cpp,v 1.36 2000-03-03 11:15:58 sandervl Exp $ */
+/* $Id: initterm.cpp,v 1.37 2000-03-09 19:03:18 sandervl Exp $ */
 
 /*
  * KERNEL32 DLL entry point
@@ -46,6 +46,7 @@
 #include "directory.h"
 #include "hmdevio.h"
 #include <windllbase.h>
+#include "winexepe2lx.h"
 #include "initsystem.h"
 #include <exitlist.h>
 #define DBG_LOCALLOG	DBG_initterm
@@ -126,6 +127,14 @@ unsigned long SYSTEM _DLL_InitTerm(unsigned long hModule, unsigned long
             PROFILE_LoadOdinIni();
             if(RegisterLxDll(hModule, 0, (PVOID)&_Resource_PEResTab) == FALSE)
                 return 0UL;
+
+	    //SvL: Kernel32 is a special case; pe.exe loads it, so increase
+            //     the reference count here
+  	    Win32DllBase *module = Win32DllBase::findModule(hModule);
+  	    if(module && !fPe2Lx) {
+		module->AddRef();
+		module->DisableUnload();
+	    }
 
             /*******************************************************************/
             /* A DosExitList routine must be used to clean up if runtime calls */

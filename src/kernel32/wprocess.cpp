@@ -1,4 +1,4 @@
-/* $Id: wprocess.cpp,v 1.71 2000-03-04 19:52:37 sandervl Exp $ */
+/* $Id: wprocess.cpp,v 1.72 2000-03-09 19:03:23 sandervl Exp $ */
 
 /*
  * Win32 process functions
@@ -19,10 +19,11 @@
 #include <string.h>
 
 #include <unicode.h>
-#include <windllbase.h>
-#include <winexebase.h>
-#include <windllpeldr.h>
-#include <winfakepeldr.h>
+#include "windllbase.h"
+#include "winexebase.h"
+#include "windllpeldr.h"
+#include "winexepe2lx.h"
+#include "winfakepeldr.h"
 #include <vmutex.h>
 
 #ifdef __IBMCPP__
@@ -381,7 +382,18 @@ BOOL WIN32API FreeLibrary(HINSTANCE hinstance)
   winmod = Win32DllBase::findModule(hinstance);
   if(winmod) {
   	dprintf(("FreeLibrary %s", winmod->getName()));
-        winmod->Release();
+	//Only free it when the nrDynamicLibRef != 0
+	//This prevent problems after ExitProcess:
+	//i.e. dll A is referenced by our exe and loaded with LoadLibrary by dll B
+	//     During ExitProcess it's unloaded once (before dll B), dll B calls
+        //     FreeLibrary, but our exe also has a reference -> unloaded too many times
+	if(winmod->isDynamicLib()) {
+        	winmod->decDynamicLib();
+        	winmod->Release();
+	}
+	else {
+		dprintf(("Skipping dynamic unload as nrDynamicLibRef == 0"));
+	}
         return(TRUE);
   }
   dprintf(("KERNEL32: FreeLibrary %s %X\n", OSLibGetDllName(hinstance), hinstance));
@@ -403,8 +415,16 @@ static HINSTANCE iLoadLibraryA(LPCTSTR lpszLibFile, DWORD dwFlags)
 
   module = Win32DllBase::findModule((LPSTR)lpszLibFile);
   if(module) {
+	if(module->isLxDll() && !module->isLoaded() && !fPe2Lx) {
+		//can happen with i.e. wininet
+		//wininet depends on wsock32; when the app loads wsock32 afterwards
+	  	//with LoadLibrary or as a child of another dll, we need to make
+                //sure it's loaded once with DosLoadModule
+		module->setLoadLibrary();
+	}
+	module->incDynamicLib();
         module->AddRef();
-    dprintf(("iLoadLibrary: found %s -> handle %x", lpszLibFile, module->getInstanceHandle()));
+    	dprintf(("iLoadLibrary: found %s -> handle %x", lpszLibFile, module->getInstanceHandle()));
         return module->getInstanceHandle();
   }
 
@@ -420,17 +440,26 @@ static HINSTANCE iLoadLibraryA(LPCTSTR lpszLibFile, DWORD dwFlags)
            GetLastError()));
   if(hDll)
   {
-    return hDll;    //converted dll or win32k took care of it
+  	module = Win32DllBase::findModule(hDll);
+  	if(module && module->isLxDll() && !fPe2Lx) {
+		module->setLoadLibrary();
+		module->AddRef();
+	}
+	if(module)
+		module->incDynamicLib();
+	//system dll, converted dll or win32k took care of it
+	return hDll;
   }
 
   if(!strstr(modname, ".")) {
-    strcat(modname,".DLL");
+    	strcat(modname,".DLL");
   }
 
   if(Win32ImageBase::isPEImage((char *)modname))
   {
         module = Win32DllBase::findModule((char *)modname);
         if(module) {//don't load it again
+  	    module->incDynamicLib();
             module->AddRef();
             return module->getInstanceHandle();
         }
@@ -448,17 +477,14 @@ static HINSTANCE iLoadLibraryA(LPCTSTR lpszLibFile, DWORD dwFlags)
         if(dwFlags & DONT_RESOLVE_DLL_REFERENCES) {
             peldrDll->setNoEntryCalls();
         }
-	//Set flag so this dll doesn't get automatically deleted in ExitProcess
-        //(the first time); give application the chance to free it first
-	//If it's not freed, we delete it the 2nd time in ExitProcess
-	peldrDll->SetDynamicallyLoaded();
+        peldrDll->incDynamicLib();
+        peldrDll->AddRef();
 
         if(peldrDll->attachProcess() == FALSE) {
             dprintf(("LoadLibary %s failed (::attachProcess)\n", lpszLibFile));
             delete(peldrDll);
             return(0);
         }
-        peldrDll->AddRef();
         return peldrDll->getInstanceHandle();
   }
   else  return(0);

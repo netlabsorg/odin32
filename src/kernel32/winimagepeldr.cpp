@@ -1,4 +1,4 @@
-/* $Id: winimagepeldr.cpp,v 1.34 2000-03-04 19:52:36 sandervl Exp $ */
+/* $Id: winimagepeldr.cpp,v 1.35 2000-03-09 19:03:22 sandervl Exp $ */
 
 /*
  * Win32 PE loader Image base class
@@ -36,9 +36,9 @@
 #define PRIVATE_LOGGING
 #include <misc.h>
 #include <win32api.h>
-#include <winimagebase.h>
-#include <winimagepeldr.h>
-#include <windllpeldr.h>
+#include "winimagebase.h"
+#include "winimagepeldr.h"
+#include "windllpeldr.h"
 #include <pefile.h>
 #include <unicode.h>
 #include <winres.h>
@@ -1388,6 +1388,9 @@ BOOL Win32PeLdrImage::processImports(char *win32file)
 			errorState = ERROR_INTERNAL;
 			return(FALSE);
 		}
+		//Mark this dll as loaded by DosLoadModule
+  		WinDll->setLoadLibrary();
+		WinDll->AddRef();
 	}
 	else {
         	WinDll = new Win32PeLdrDll(modname, this);
@@ -1405,19 +1408,42 @@ BOOL Win32PeLdrImage::processImports(char *win32file)
 	            dprintf((LOG, "Internal WinDll error ", WinDll->getError() ));
 	            return(FALSE);
 	        }
+#ifdef DEBUG
+    		WinDll->AddRef(getModuleName());
+#else
+    		WinDll->AddRef();
+#endif
 	        if(WinDll->attachProcess() == FALSE) {
         	    dprintf((LOG, "attachProcess failed!" ));
+		    delete WinDll;
 	            errorState = ERROR_INTERNAL;
 	            return(FALSE);
 	        }
 	}
+
 	dprintf((LOG, "**********************************************************************" ));
 	dprintf((LOG, "**********************  Finished Loading Module  *********************" ));
         dprintf((LOG, "**********************************************************************" ));
     }
-    else    dprintf((LOG, "Already found ", pszCurModule ));
+    else {
+	if(WinDll->isLxDll() && !WinDll->isLoaded()) {
+		//can happen with i.e. wininet
+		//wininet depends on wsock32; when the app loads wsock32 afterwards
+	  	//with LoadLibrary or as a child of another dll, we need to make
+                //sure it's loaded once with DosLoadModule
+		WinDll->loadLibrary();
+	}
+	WinDll->AddRef();
+	
+	dprintf((LOG, "Already found ", pszCurModule));
+    }
+    //add the dll we just loaded to dependency list for this image
+    addDependency((Win32DllBase *)WinDll);
 
-    WinDll->AddRef();
+    //Make sure the dependency list is correct (already done
+    //in the ctor of Win32DllBase, but for LX dlls the parent is
+    //then set to NULL; so change it here again
+    WinDll->setUnloadOrder(this);
 
     pulImport  = (PULONG)((ULONG)pulImport + (ULONG)win32file);
     j          = 0;

@@ -1,4 +1,4 @@
-; $Id: KERNEL32.DEF,v 1.72 2000-03-03 11:15:58 sandervl Exp $
+; $Id: KERNEL32.DEF,v 1.73 2000-03-09 19:03:19 sandervl Exp $
 
 ;Created by BLAST for IBM's compiler
 ;Basis is Windows95 KERNEL32
@@ -19,14 +19,6 @@ IMPORTS
   _DosAliasMem                 =  DOSCALLS.298
    DosQuerySysState            =  DOSCALLS.368
   _DosQuerySysState            =  DOSCALLS.368
-
-  _O32_RegCloseKey             = PMWINX.541
-  _O32_RegCreateKeyEx          = PMWINX.543
-  _O32_RegOpenKeyEx            = PMWINX.550
-  _O32_RegQueryValueEx         = PMWINX.553
-  _O32_RegSetValueEx           = PMWINX.555
-
-
 
 EXPORTS
 
