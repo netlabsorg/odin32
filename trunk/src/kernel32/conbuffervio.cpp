@@ -1,4 +1,4 @@
-/* $Id: conbuffervio.cpp,v 1.4 2001-10-01 01:45:18 bird Exp $ */
+/* $Id: conbuffervio.cpp,v 1.5 2001-12-05 14:15:57 sandervl Exp $ */
 
 /*
  * Win32 Console API Translation for OS/2
@@ -96,7 +96,8 @@ BOOL HMDeviceConsoleVioBufferClass::WriteFile(PHMHANDLEDATA pHMHandleData,
                                               LPCVOID       lpBuffer,
                                               DWORD         nNumberOfBytesToWrite,
                                               LPDWORD       lpNumberOfBytesWritten,
-                                              LPOVERLAPPED  lpOverlapped)
+                                              LPOVERLAPPED lpOverlapped,
+                                              LPOVERLAPPED_COMPLETION_ROUTINE  lpCompletionRoutine)
 {
   PCONSOLEBUFFER pConsoleBuffer = (PCONSOLEBUFFER)pHMHandleData->lpHandlerData;
            ULONG ulCounter;                 /* counter for the byte transfer */
@@ -135,7 +136,7 @@ BOOL HMDeviceConsoleVioBufferClass::WriteFile(PHMHANDLEDATA pHMHandleData,
         *lpNumberOfBytesWritten = 0;
         retcode = WriteFile(pHMHandleData, lpBuffer,
                             min(nNumberOfBytesToWrite, 512), lpNumberOfBytesWritten,
-                            lpOverlapped);
+                            lpOverlapped, lpCompletionRoutine);
         if(retcode != TRUE)     break;
 
         tmp                   += *lpNumberOfBytesWritten;

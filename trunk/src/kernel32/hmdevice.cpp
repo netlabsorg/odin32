@@ -1,4 +1,4 @@
-/* $Id: hmdevice.cpp,v 1.30 2001-12-03 12:13:08 sandervl Exp $ */
+/* $Id: hmdevice.cpp,v 1.31 2001-12-05 14:15:59 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -168,8 +168,7 @@ BOOL HMDeviceHandler::DuplicateHandle(PHMHANDLEDATA pHMHandleData, HANDLE  srcpr
  * Author    : Patrick Haller [Wed, 1998/02/11 20:44]
  *****************************************************************************/
 
-DWORD HMDeviceHandler::CreateFile (HANDLE        hHandle,
-                                   LPCSTR        lpFileName,
+DWORD HMDeviceHandler::CreateFile (LPCSTR        lpFileName,
                                    PHMHANDLEDATA pHMHandleData,
                                    PVOID         lpSecurityAttributes,
                                    PHMHANDLEDATA pHMHandleDataTemplate)
@@ -216,6 +215,7 @@ BOOL HMDeviceHandler::CloseHandle(PHMHANDLEDATA pHMHandleData)
  *             DWORD         nNumberOfBytesToRead,
  *             LPDWORD       lpNumberOfBytesRead,
  *             LPOVERLAPPED  lpOverlapped
+ *             LPOVERLAPPED_COMPLETION_ROUTINE lpCompletionRoutine address of completion routine
  * Variables :
  * Result    : Boolean
  * Remark    :
@@ -228,59 +228,21 @@ BOOL HMDeviceHandler::ReadFile(PHMHANDLEDATA pHMHandleData,
                                LPCVOID       lpBuffer,
                                DWORD         nNumberOfBytesToRead,
                                LPDWORD       lpNumberOfBytesRead,
-                               LPOVERLAPPED  lpOverlapped)
+                               LPOVERLAPPED  lpOverlapped,
+                               LPOVERLAPPED_COMPLETION_ROUTINE  lpCompletionRoutine)
 {
-  dprintf(("KERNEL32:HandleManager::ReadFile %s(%08x,%08x,%08x,%08x,%08x) - stub?\n",
+  dprintf(("KERNEL32:HandleManager::ReadFile %s(%08x,%08x,%08x,%08x,%08x %08x) - stub?\n",
            lpHMDeviceName,
            pHMHandleData->hHMHandle,
            lpBuffer,
            nNumberOfBytesToRead,
            lpNumberOfBytesRead,
-           lpOverlapped));
+           lpOverlapped, lpCompletionRoutine));
 
   SetLastError(ERROR_INVALID_FUNCTION);
   return FALSE;
 }
 
-/*****************************************************************************
- * Name      : BOOL ReadFileEx
- * Purpose   : The ReadFileEx function reads data from a file asynchronously.
- *             It is designed solely for asynchronous operation, unlike the
- *             ReadFile function, which is designed for both synchronous and
- *             asynchronous operation. ReadFileEx lets an application perform
- *             other processing during a file read operation.
- *             The ReadFileEx function reports its completion status asynchronously,
- *             calling a specified completion routine when reading is completed
- *             and the calling thread is in an alertable wait state.
- * Parameters: HANDLE       hFile                handle of file to read
- *             LPVOID       lpBuffer             address of buffer
- *             DWORD        nNumberOfBytesToRead number of bytes to read
- *             LPOVERLAPPED lpOverlapped         address of offset
- *             LPOVERLAPPED_COMPLETION_ROUTINE lpCompletionRoutine address of completion routine
- * Variables :
- * Result    : TRUE / FALSE
- * Remark    :
- * Status    : UNTESTED STUB
- *
- * Author    : Patrick Haller [Mon, 1998/06/15 08:00]
- *****************************************************************************/
-BOOL HMDeviceHandler::ReadFileEx(PHMHANDLEDATA pHMHandleData,
-                           LPVOID       lpBuffer,
-                           DWORD        nNumberOfBytesToRead,
-                           LPOVERLAPPED lpOverlapped,
-                           LPOVERLAPPED_COMPLETION_ROUTINE  lpCompletionRoutine)
-{
-  dprintf(("ERROR: ReadFileEx %s (%08xh,%08xh,%08xh,%08xh,%08xh) not implemented.\n",
-           lpHMDeviceName,
-           pHMHandleData->hHMHandle,
-           lpBuffer,
-           nNumberOfBytesToRead,
-           lpOverlapped,
-           lpCompletionRoutine));
-
-  SetLastError(ERROR_INVALID_FUNCTION);
-  return FALSE;
-}
 
 /*****************************************************************************
  * Name      : BOOL HMDeviceHandler::WriteFile
@@ -290,6 +252,7 @@ BOOL HMDeviceHandler::ReadFileEx(PHMHANDLEDATA pHMHandleData,
  *             DWORD         nNumberOfBytesToWrite,
  *             LPDWORD       lpNumberOfBytesWritten,
  *             LPOVERLAPPED  lpOverlapped
+ *             LPOVERLAPPED_COMPLETION_ROUTINE lpCompletionRoutine address of completion routine
  * Variables :
  * Result    : Boolean
  * Remark    :
@@ -302,55 +265,16 @@ BOOL HMDeviceHandler::WriteFile(PHMHANDLEDATA pHMHandleData,
                                 LPCVOID       lpBuffer,
                                 DWORD         nNumberOfBytesToWrite,
                                 LPDWORD       lpNumberOfBytesWritten,
-                                LPOVERLAPPED  lpOverlapped)
+                                LPOVERLAPPED  lpOverlapped,
+                                LPOVERLAPPED_COMPLETION_ROUTINE  lpCompletionRoutine)
 {
-  dprintf(("KERNEL32:HandleManager::WriteFile %s(%08x,%08x,%08x,%08x,%08x) - stub?\n",
+  dprintf(("KERNEL32:HandleManager::WriteFile %s(%08x,%08x,%08x,%08x,%08x,%08x) - stub?\n",
            lpHMDeviceName,
            pHMHandleData->hHMHandle,
            lpBuffer,
            nNumberOfBytesToWrite,
            lpNumberOfBytesWritten,
-           lpOverlapped));
-
-  SetLastError(ERROR_INVALID_FUNCTION);
-  return FALSE;
-}
-
-
-/*****************************************************************************
- * Name      : BOOL WriteFileEx
- * Purpose   : The WriteFileEx function writes data to a file. It is designed
- *             solely for asynchronous operation, unlike WriteFile, which is
- *             designed for both synchronous and asynchronous operation.
- *             WriteFileEx reports its completion status asynchronously,
- *             calling a specified completion routine when writing is completed
- *             and the calling thread is in an alertable wait state.
- * Parameters: HANDLE       hFile                handle of file to write
- *             LPVOID       lpBuffer             address of buffer
- *             DWORD        nNumberOfBytesToRead number of bytes to write
- *             LPOVERLAPPED lpOverlapped         address of offset
- *             LPOVERLAPPED_COMPLETION_ROUTINE lpCompletionRoutine address of completion routine
- * Variables :
- * Result    : TRUE / FALSE
- * Remark    :
- * Status    : UNTESTED STUB
- *
- * Author    : Patrick Haller [Mon, 1998/06/15 08:00]
- *****************************************************************************/
-
-BOOL HMDeviceHandler::WriteFileEx(PHMHANDLEDATA pHMHandleData,
-                           LPVOID       lpBuffer,
-                           DWORD        nNumberOfBytesToWrite,
-                           LPOVERLAPPED lpOverlapped,
-                           LPOVERLAPPED_COMPLETION_ROUTINE  lpCompletionRoutine)
-{
-  dprintf(("ERROR: WriteFileEx %s (%08xh,%08xh,%08xh,%08xh,%08xh) not implemented.\n",
-           lpHMDeviceName,
-           pHMHandleData->hHMHandle,
-           lpBuffer,
-           nNumberOfBytesToWrite,
-           lpOverlapped,
-           lpCompletionRoutine));
+           lpOverlapped, lpCompletionRoutine));
 
   SetLastError(ERROR_INVALID_FUNCTION);
   return FALSE;
@@ -374,7 +298,7 @@ DWORD HMDeviceHandler::GetFileType(PHMHANDLEDATA pHMHandleData)
            lpHMDeviceName,
            pHMHandleData));
 
-  return pHMHandleData->dwType;
+  return FILE_TYPE_UNKNOWN;
 }
 
 
@@ -626,8 +550,7 @@ DWORD HMDeviceHandler::LockFileEx(PHMHANDLEDATA pHMHandleData,
  * Author    : Patrick Haller [Wed, 1998/02/11 20:44]
  *****************************************************************************/
 
-DWORD HMDeviceHandler::OpenFile (HANDLE        hHandle,
-                                 LPCSTR        lpFileName,
+DWORD HMDeviceHandler::OpenFile (LPCSTR        lpFileName,
                                  PHMHANDLEDATA pHMHandleData,
                                  OFSTRUCT      *pOFStruct,
                                  UINT          arg3)

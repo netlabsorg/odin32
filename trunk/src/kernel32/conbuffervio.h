@@ -1,4 +1,4 @@
-/* $Id: conbuffervio.h,v 1.1 2000-10-20 11:46:45 sandervl Exp $ */
+/* $Id: conbuffervio.h,v 1.2 2001-12-05 14:15:57 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -53,7 +53,8 @@ class HMDeviceConsoleVioBufferClass : public HMDeviceConsoleBufferClass
                              LPCVOID       lpBuffer,
                              DWORD         nNumberOfBytesToWrite,
                              LPDWORD       lpNumberOfBytesWritten,
-                             LPOVERLAPPED  lpOverlapped);
+                             LPOVERLAPPED  lpOverlapped,
+                             LPOVERLAPPED_COMPLETION_ROUTINE  lpCompletionRoutine);
 
 };
 

@@ -1,4 +1,4 @@
-/* $Id: hmparport.cpp,v 1.15 2001-12-04 12:56:52 phaller Exp $ */
+/* $Id: hmparport.cpp,v 1.16 2001-12-05 14:16:04 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -231,8 +231,7 @@ BOOL HMDeviceParPortClass::FindDevice(LPCSTR lpClassDevName, LPCSTR lpDeviceName
   return FALSE;
 }
 
-DWORD HMDeviceParPortClass::CreateFile(HANDLE        hHandle,
-                                       LPCSTR lpFileName,
+DWORD HMDeviceParPortClass::CreateFile(LPCSTR lpFileName,
                                        PHMHANDLEDATA pHMHandleData,
                                        PVOID lpSecurityAttributes,
                                        PHMHANDLEDATA pHMHandleDataTemplate)
@@ -330,7 +329,8 @@ BOOL HMDeviceParPortClass::WriteFile(PHMHANDLEDATA pHMHandleData,
                                      LPCVOID       lpBuffer,
                                      DWORD         nNumberOfBytesToWrite,
                                      LPDWORD       lpNumberOfBytesWritten,
-                                     LPOVERLAPPED  lpOverlapped)
+                                     LPOVERLAPPED  lpOverlapped,
+                                     LPOVERLAPPED_COMPLETION_ROUTINE  lpCompletionRoutine)
 {
   dprintf(("KERNEL32:HMDeviceParPortClass::WriteFile %s(%08x,%08x,%08x,%08x,%08x)",
            lpHMDeviceName,
@@ -366,45 +366,6 @@ BOOL HMDeviceParPortClass::WriteFile(PHMHANDLEDATA pHMHandleData,
 }
 
 /*****************************************************************************
- * Name      : BOOL WriteFileEx
- * Purpose   : The WriteFileEx function writes data to a file. It is designed
- *             solely for asynchronous operation, unlike WriteFile, which is
- *             designed for both synchronous and asynchronous operation.
- *             WriteFileEx reports its completion status asynchronously,
- *             calling a specified completion routine when writing is completed
- *             and the calling thread is in an alertable wait state.
- * Parameters: HANDLE       hFile                handle of file to write
- *             LPVOID       lpBuffer             address of buffer
- *             DWORD        nNumberOfBytesToRead number of bytes to write
- *             LPOVERLAPPED lpOverlapped         address of offset
- *             LPOVERLAPPED_COMPLETION_ROUTINE lpCompletionRoutine address of completion routine
- * Variables :
- * Result    : TRUE / FALSE
- * Remark    :
- * Status    : UNTESTED STUB
- *
- * Author    : Patrick Haller [Mon, 1998/06/15 08:00]
- *****************************************************************************/
-
-BOOL HMDeviceParPortClass::WriteFileEx(PHMHANDLEDATA pHMHandleData,
-                                       LPVOID       lpBuffer,
-                                       DWORD        nNumberOfBytesToWrite,
-                                       LPOVERLAPPED lpOverlapped,
-                                       LPOVERLAPPED_COMPLETION_ROUTINE  lpCompletionRoutine)
-{
-  dprintf(("ERROR: WriteFileEx %s (%08xh,%08xh,%08xh,%08xh,%08xh) not implemented.\n",
-           lpHMDeviceName,
-           pHMHandleData->hHMHandle,
-           lpBuffer,
-           nNumberOfBytesToWrite,
-           lpOverlapped,
-           lpCompletionRoutine));
-
-  SetLastError(ERROR_INVALID_FUNCTION);
-  return FALSE;
-}
-
-/*****************************************************************************
  * Name      : BOOL HMDeviceParPortClass::ReadFile
  * Purpose   : read data from handle / device
  * Parameters: PHMHANDLEDATA pHMHandleData,
@@ -424,7 +385,8 @@ BOOL HMDeviceParPortClass::ReadFile(PHMHANDLEDATA pHMHandleData,
                                     LPCVOID       lpBuffer,
                                     DWORD         nNumberOfBytesToRead,
                                     LPDWORD       lpNumberOfBytesRead,
-                                    LPOVERLAPPED  lpOverlapped)
+                                    LPOVERLAPPED  lpOverlapped,
+                                    LPOVERLAPPED_COMPLETION_ROUTINE  lpCompletionRoutine)
 {
   dprintf(("KERNEL32:HMDeviceParPortClass::ReadFile %s(%08x,%08x,%08x,%08x,%08x)",
            lpHMDeviceName,
@@ -456,46 +418,6 @@ BOOL HMDeviceParPortClass::ReadFile(PHMHANDLEDATA pHMHandleData,
        dprintf(("ERROR: ReadFile failed with rc %d", GetLastError()));
   }
   return ret;
-}
-
-/*****************************************************************************
- * Name      : BOOL ReadFileEx
- * Purpose   : The ReadFileEx function reads data from a file asynchronously.
- *             It is designed solely for asynchronous operation, unlike the
- *             ReadFile function, which is designed for both synchronous and
- *             asynchronous operation. ReadFileEx lets an application perform
- *             other processing during a file read operation.
- *             The ReadFileEx function reports its completion status asynchronously,
- *             calling a specified completion routine when reading is completed
- *             and the calling thread is in an alertable wait state.
- * Parameters: HANDLE       hFile                handle of file to read
- *             LPVOID       lpBuffer             address of buffer
- *             DWORD        nNumberOfBytesToRead number of bytes to read
- *             LPOVERLAPPED lpOverlapped         address of offset
- *             LPOVERLAPPED_COMPLETION_ROUTINE lpCompletionRoutine address of completion routine
- * Variables :
- * Result    : TRUE / FALSE
- * Remark    :
- * Status    : UNTESTED STUB
- *
- * Author    : Patrick Haller [Mon, 1998/06/15 08:00]
- *****************************************************************************/
-BOOL HMDeviceParPortClass::ReadFileEx(PHMHANDLEDATA pHMHandleData,
-                           LPVOID       lpBuffer,
-                           DWORD        nNumberOfBytesToRead,
-                           LPOVERLAPPED lpOverlapped,
-                           LPOVERLAPPED_COMPLETION_ROUTINE  lpCompletionRoutine)
-{
-  dprintf(("ERROR: ReadFileEx %s (%08xh,%08xh,%08xh,%08xh,%08xh) not implemented.\n",
-           lpHMDeviceName,
-           pHMHandleData->hHMHandle,
-           lpBuffer,
-           nNumberOfBytesToRead,
-           lpOverlapped,
-           lpCompletionRoutine));
-
-  SetLastError(ERROR_INVALID_FUNCTION);
-  return FALSE;
 }
 
 BOOL HMDeviceParPortClass::GetCommProperties( PHMHANDLEDATA pHMHandleData,

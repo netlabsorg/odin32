@@ -1,4 +1,4 @@
-/* $Id: conout.cpp,v 1.12 2001-11-29 00:20:46 phaller Exp $ */
+/* $Id: conout.cpp,v 1.13 2001-12-05 14:15:58 sandervl Exp $ */
 
 /*
  * Win32 Console API Translation for OS/2
@@ -93,8 +93,7 @@
  * Author    : Patrick Haller [Wed, 1998/02/11 20:44]
  *****************************************************************************/
 
-DWORD HMDeviceConsoleOutClass::CreateFile (HANDLE        hHandle,
-                                           LPCSTR        lpFileName,
+DWORD HMDeviceConsoleOutClass::CreateFile (LPCSTR        lpFileName,
                                            PHMHANDLEDATA pHMHandleData,
                                            PVOID         lpSecurityAttributes,
                                            PHMHANDLEDATA pHMHandleDataTemplate)
@@ -102,19 +101,15 @@ DWORD HMDeviceConsoleOutClass::CreateFile (HANDLE        hHandle,
   BOOL   fResult;
   HANDLE hConsole;
 
-#ifdef DEBUG_LOCAL2
-  WriteLog("KERNEL32/CONSOLE:HMDeviceConsoleOutClass %s(%s,%08x,%08x,%08x)\n",
+  dprintf(("KERNEL32/CONSOLE:HMDeviceConsoleOutClass %s(%s,%08x,%08x,%08x)\n",
            lpHMDeviceName,
            lpFileName,
            pHMHandleData->hHMHandle,
            lpSecurityAttributes,
-           pHMHandleDataTemplate);
-#endif
-
-  pHMHandleData->dwType = FILE_TYPE_CHAR;        /* we're a character device */
+           pHMHandleDataTemplate));
 
 
-                 /* if no default buffer is available, then do default setup */
+  /* if no default buffer is available, then do default setup */
   if (pConsoleGlobals->hConsoleBuffer == INVALID_HANDLE_VALUE)
   {
                 /* now we need a default screen buffer with the default size */
@@ -125,10 +120,8 @@ DWORD HMDeviceConsoleOutClass::CreateFile (HANDLE        hHandle,
                                          NULL);
     if (hConsole == INVALID_HANDLE_VALUE)
     {
-#ifdef DEBUG_LOCAL
-      WriteLog("KERNEL32/CONSOLE:OS2CreateConsoleScreenBuffer = %u.\n",
-               GetLastError());
-#endif
+      dprintf(("KERNEL32/CONSOLE:OS2CreateConsoleScreenBuffer = %u.\n",
+               GetLastError()));
       return INVALID_HANDLE_VALUE;   /* abort further processing immediately */
     }
 
@@ -144,10 +137,8 @@ DWORD HMDeviceConsoleOutClass::CreateFile (HANDLE        hHandle,
                                          pConsoleGlobals->Options.coordDefaultSize);
     if (fResult == FALSE)
     {
-#ifdef DEBUG_LOCAL
-      WriteLog("KERNEL32/CONSOLE:OS2SetConsoleScreenBufferSize=%u.\n",
-               GetLastError());
-#endif
+      dprintf(("KERNEL32/CONSOLE:OS2SetConsoleScreenBufferSize=%u.\n",
+               GetLastError()));
       HMCloseHandle(hConsole);                          /* free handle again */
       return (INVALID_HANDLE_VALUE);            /* abort further processing */
     }
@@ -155,10 +146,8 @@ DWORD HMDeviceConsoleOutClass::CreateFile (HANDLE        hHandle,
     fResult = SetConsoleActiveScreenBuffer(hConsole);
     if (fResult == FALSE)
     {
-#ifdef DEBUG_LOCAL
-      WriteLog("KERNEL32/CONSOLE:OS2SetConsoleActiveScreenBuffer=%u.\n",
-               GetLastError());
-#endif
+      dprintf(("KERNEL32/CONSOLE:OS2SetConsoleActiveScreenBuffer=%u.\n",
+               GetLastError()));
       HMCloseHandle(hConsole);                          /* free handle again */
       return (INVALID_HANDLE_VALUE);            /* abort further processing */
     }
@@ -172,6 +161,26 @@ DWORD HMDeviceConsoleOutClass::CreateFile (HANDLE        hHandle,
   return(NO_ERROR);
 }
 
+/*****************************************************************************
+ * Name      : DWORD HMDeviceConsoleOutClass::GetFileType
+ * Purpose   : determine the handle type
+ * Parameters: PHMHANDLEDATA pHMHandleData
+ * Variables :
+ * Result    : API returncode
+ * Remark    :
+ * Status    :
+ *
+ * Author    : Patrick Haller [Wed, 1998/02/11 20:44]
+ *****************************************************************************/
+
+DWORD HMDeviceConsoleOutClass::GetFileType(PHMHANDLEDATA pHMHandleData)
+{
+  dprintf(("KERNEL32: HMDeviceConsoleOutClass::GetFileType %s(%08x)\n",
+           lpHMDeviceName,
+           pHMHandleData));
+
+  return FILE_TYPE_CHAR;
+}
 
 /*****************************************************************************
  * Name      :
@@ -189,7 +198,8 @@ BOOL HMDeviceConsoleOutClass::ReadFile(PHMHANDLEDATA pHMHandleData,
                                        LPCVOID       lpBuffer,
                                        DWORD         nNumberOfBytesToRead,
                                        LPDWORD       lpNumberOfBytesRead,
-                                       LPOVERLAPPED  lpOverlapped)
+                                       LPOVERLAPPED  lpOverlapped,
+                                       LPOVERLAPPED_COMPLETION_ROUTINE  lpCompletionRoutine)
 {
 
 #ifdef DEBUG_LOCAL
@@ -223,7 +233,8 @@ BOOL HMDeviceConsoleOutClass::WriteFile(PHMHANDLEDATA pHMHandleData,
                                          LPCVOID       lpBuffer,
                                          DWORD         nNumberOfBytesToWrite,
                                          LPDWORD       lpNumberOfBytesWritten,
-                                         LPOVERLAPPED  lpOverlapped)
+                                         LPOVERLAPPED  lpOverlapped,
+                                         LPOVERLAPPED_COMPLETION_ROUTINE  lpCompletionRoutine)
 {
   BOOL dwResult;                        /* result from subsequent WriteFile */
 
@@ -245,7 +256,7 @@ BOOL HMDeviceConsoleOutClass::WriteFile(PHMHANDLEDATA pHMHandleData,
                            lpBuffer,
                            nNumberOfBytesToWrite,
                            lpNumberOfBytesWritten,
-                           lpOverlapped);
+                           lpOverlapped, lpCompletionRoutine);
 
     return (dwResult);                                 /* return result code */
   }
@@ -299,7 +310,3 @@ DWORD HMDeviceConsoleOutClass::_DeviceRequest (PHMHANDLEDATA pHMHandleData,
 }
 
 
-DWORD HMDeviceConsoleOutClass::GetFileType (PHMHANDLEDATA pHMHandleData)
-{
-   return FILE_TYPE_CHAR;
-}

@@ -1,4 +1,4 @@
-/* $Id: dbglocal.cpp,v 1.18 2001-11-29 00:20:47 phaller Exp $ */
+/* $Id: dbglocal.cpp,v 1.19 2001-12-05 14:15:58 sandervl Exp $ */
 
 /*
  * debug logging functions for OS/2
@@ -125,7 +125,8 @@ static char  *DbgFileNames[DBG_MAXFILES] =
 "mailslot",
 "hmmailslot",
 "hmparport",
-"hmnul"
+"hmnul",
+"overlappedio"
 };
 //******************************************************************************
 //******************************************************************************

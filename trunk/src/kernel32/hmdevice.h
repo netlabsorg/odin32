@@ -1,4 +1,4 @@
-/* $Id: hmdevice.h,v 1.31 2001-12-03 12:13:08 sandervl Exp $ */
+/* $Id: hmdevice.h,v 1.32 2001-12-05 14:16:00 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -34,6 +34,8 @@
 #define HMTYPE_EVENTSEM         7
 #define HMTYPE_MUTEXSEM         8
 #define HMTYPE_SEMAPHORE        9
+#define HMTYPE_COMPORT          10
+#define HMTYPE_PARPORT          11
 //.....
 
 /*****************************************************************************
@@ -43,8 +45,7 @@
 typedef struct _HMHANDLEDATA
 {
   HANDLE          hHMHandle;             /* a copy of the OS/2 system handle */
-
-  DWORD           dwType;                          /* handle type identifier */
+  HANDLE          hWin32Handle;          // win32 handle
 
   DWORD           dwAccess;                     /* access mode of the handle */
   DWORD           dwShare;                       /* share mode of the handle */
@@ -98,52 +99,38 @@ public:
                                DWORD   fdwOptions,
                                DWORD   fdwOdinOptions);
 
-                       /* this is a handler method for calls to CreateFile() */
-  virtual DWORD  CreateFile (HANDLE        hHandle,
-                             LPCSTR        lpFileName,
+  /* this is a handler method for calls to CreateFile() */
+  virtual DWORD  CreateFile (LPCSTR        lpFileName,
                              PHMHANDLEDATA pHMHandleData,
                              PVOID         lpSecurityAttributes,
                              PHMHANDLEDATA pHMHandleDataTemplate);
 
-                       /* this is a handler method for calls to   OpenFile() */
-  virtual DWORD  OpenFile   (HANDLE        hHandle,
-                             LPCSTR        lpFileName,
+  /* this is a handler method for calls to   OpenFile() */
+  virtual DWORD  OpenFile   (LPCSTR        lpFileName,
                              PHMHANDLEDATA pHMHandleData,
                              OFSTRUCT*     pOFStruct,
                              UINT          fuMode);
 
-                      /* this is a handler method for calls to CloseHandle() */
+  /* this is a handler method for calls to CloseHandle() */
   virtual BOOL   CloseHandle(PHMHANDLEDATA pHMHandleData);
 
-                           /* this is a handler method for calls to ReadFile() */
+  /* this is a handler method for calls to ReadFile/Ex */
   virtual BOOL   ReadFile   (PHMHANDLEDATA pHMHandleData,
                              LPCVOID       lpBuffer,
                              DWORD         nNumberOfBytesToRead,
                              LPDWORD       lpNumberOfBytesRead,
-                             LPOVERLAPPED  lpOverlapped);
+                             LPOVERLAPPED  lpOverlapped,
+                             LPOVERLAPPED_COMPLETION_ROUTINE  lpCompletionRoutine);
 
-                        /* this is a handler method for calls to ReadFileEx() */
-  virtual BOOL  ReadFileEx(PHMHANDLEDATA pHMHandleData,
-                           LPVOID       lpBuffer,
-                           DWORD        nNumberOfBytesToRead,
-                           LPOVERLAPPED lpOverlapped,
-                           LPOVERLAPPED_COMPLETION_ROUTINE  lpCompletionRoutine);
-
-                        /* this is a handler method for calls to WriteFile() */
+  /* this is a handler method for calls to WriteFile/Ex */
   virtual BOOL   WriteFile  (PHMHANDLEDATA pHMHandleData,
                              LPCVOID       lpBuffer,
                              DWORD         nNumberOfBytesToWrite,
                              LPDWORD       lpNumberOfBytesWritten,
-                             LPOVERLAPPED  lpOverlapped);
+                             LPOVERLAPPED  lpOverlapped,
+                             LPOVERLAPPED_COMPLETION_ROUTINE  lpCompletionRoutine);
 
-                        /* this is a handler method for calls to WriteFileEx() */
-  virtual BOOL  WriteFileEx(PHMHANDLEDATA pHMHandleData,
-                            LPVOID       lpBuffer,
-                            DWORD        nNumberOfBytesToWrite,
-                            LPOVERLAPPED lpOverlapped,
-                            LPOVERLAPPED_COMPLETION_ROUTINE  lpCompletionRoutine);
-
-                      /* this is a handler method for calls to GetFileType() */
+  /* this is a handler method for calls to GetFileType() */
   virtual DWORD GetFileType (PHMHANDLEDATA pHMHandleData);
 
 
@@ -240,25 +227,25 @@ public:
    * Events                                                                  *
    ***************************************************************************/
 
-                     /* this is a handler method for calls to CreateEvent() */
+  /* this is a handler method for calls to CreateEvent() */
   virtual DWORD CreateEvent (PHMHANDLEDATA         pHMHandleData,
                              LPSECURITY_ATTRIBUTES lpsa,
                              BOOL                  fManualReset,
                              BOOL                  fInitialState,
                              LPCSTR                lpszEventName);
 
-                       /* this is a handler method for calls to OpenEvent() */
+  /* this is a handler method for calls to OpenEvent() */
   virtual DWORD OpenEvent   (PHMHANDLEDATA         pHMHandleData,
                              BOOL                  fInheritHandle,
                              LPCSTR                lpszEventName);
 
-                       /* this is a handle method for calls to ResetEvent() */
+  /* this is a handle method for calls to ResetEvent() */
   virtual BOOL  ResetEvent  (PHMHANDLEDATA         pHMHandleData);
 
-                         /* this is a handle method for calls to SetEvent() */
+  /* this is a handle method for calls to SetEvent() */
   virtual BOOL  SetEvent    (PHMHANDLEDATA         pHMHandleData);
 
-                       /* this is a handle method for calls to PulseEvent() */
+  /* this is a handle method for calls to PulseEvent() */
   virtual BOOL  PulseEvent  (PHMHANDLEDATA         pHMHandleData);
 
 
@@ -266,18 +253,18 @@ public:
    * Mutex                                                                   *
    ***************************************************************************/
 
-                     /* this is a handler method for calls to CreateMutex() */
+  /* this is a handler method for calls to CreateMutex() */
   virtual DWORD CreateMutex (PHMHANDLEDATA         pHMHandleData,
                              LPSECURITY_ATTRIBUTES lpsa,
                              BOOL                  fInitialOwner,
                              LPCSTR                lpszMutexName);
 
-                       /* this is a handler method for calls to OpenMutex() */
+  /* this is a handler method for calls to OpenMutex() */
   virtual DWORD OpenMutex   (PHMHANDLEDATA         pHMHandleData,
                              BOOL                  fInheritHandle,
                              LPCSTR                lpszMutexName);
 
-                     /* this is a handle method for calls to ReleaseMutex() */
+  /* this is a handle method for calls to ReleaseMutex() */
   virtual BOOL  ReleaseMutex(PHMHANDLEDATA         pHMHandleData);
 
 
@@ -285,24 +272,24 @@ public:
    * Semaphores                                                              *
    ***************************************************************************/
 
-                     /* this is a handler method for calls to CreateSemaphore() */
+  /* this is a handler method for calls to CreateSemaphore() */
   virtual DWORD CreateSemaphore (PHMHANDLEDATA         pHMHandleData,
                                  LPSECURITY_ATTRIBUTES lpsa,
                                  LONG                  lInitialCount,
                                  LONG                  lMaximumCount,
                                  LPCSTR                lpszSemaphoreName);
 
-                       /* this is a handler method for calls to OpenSemaphore() */
+  /* this is a handler method for calls to OpenSemaphore() */
   virtual DWORD OpenSemaphore   (PHMHANDLEDATA         pHMHandleData,
                                  BOOL                  fInheritHandle,
                                  LPCSTR                lpszSemaphoreName);
 
-                     /* this is a handle method for calls to ReleaseSemaphore() */
+  /* this is a handle method for calls to ReleaseSemaphore() */
   virtual BOOL  ReleaseSemaphore(PHMHANDLEDATA pHMHandleData,
                                  LONG          cReleaseCount,
                                  LPLONG        lpPreviousCount);
 
-                /* this is a handler method for calls to CreateFileMapping() */
+  /* this is a handler method for calls to CreateFileMapping() */
   virtual DWORD CreateFileMapping   (PHMHANDLEDATA              pHMHandleData,
                                      HANDLE                     hFile,
                                      LPSECURITY_ATTRIBUTES      lpFileMappingAttributes,
@@ -311,21 +298,21 @@ public:
                                      DWORD                      dwMaximumSizeLow,
                                      LPCSTR                     lpName);
 
-                  /* this is a handler method for calls to OpenFileMapping() */
+  /* this is a handler method for calls to OpenFileMapping() */
   virtual DWORD OpenFileMapping     (PHMHANDLEDATA              pHMHandleData,
                          DWORD access,   /* [in] Access mode */
                                      BOOL                       fInherit,
                                      LPCSTR                     lpName);
 
-                    /* this is a handler method for calls to MapViewOfFileEx() */
+  /* this is a handler method for calls to MapViewOfFileEx() */
   virtual LPVOID MapViewOfFileEx    (PHMHANDLEDATA              pHMHandleData,
                                      DWORD                      dwDesiredAccess,
                                      DWORD                      dwFileOffsetHigh,
                                      DWORD                      dwFileOffsetLow,
                                      DWORD                      dwNumberOfBytesToMap,
-                   LPVOID                     lpBaseAddress);
+                                     LPVOID                     lpBaseAddress);
 
-                    /* this is a handler method for calls to DeviceIoControl() */
+  /* this is a handler method for calls to DeviceIoControl() */
   virtual BOOL   DeviceIoControl    (PHMHANDLEDATA pHMHandleData, DWORD dwIoControlCode,
                                      LPVOID lpInBuffer, DWORD nInBufferSize,
                                      LPVOID lpOutBuffer, DWORD nOutBufferSize,

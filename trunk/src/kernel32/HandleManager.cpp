@@ -1,4 +1,4 @@
-/* $Id: HandleManager.cpp,v 1.82 2001-12-03 12:13:06 sandervl Exp $ */
+/* $Id: HandleManager.cpp,v 1.83 2001-12-05 14:15:56 sandervl Exp $ */
 
 /*
  * Win32 Unified Handle Manager for OS/2
@@ -267,6 +267,7 @@ static ULONG _HMHandleGetFree(void)
         TabWin32Handles[ulLoop].hmHandleData.hHMHandle      = ulLoop; 
         TabWin32Handles[ulLoop].hmHandleData.dwUserData     = 0;
         TabWin32Handles[ulLoop].hmHandleData.dwInternalType = HMTYPE_UNKNOWN;
+        TabWin32Handles[ulLoop].hmHandleData.hWin32Handle   = (HANDLE)ulLoop;
         TabWin32Handles[ulLoop].hmHandleData.lpDeviceData   = NULL;
         handleMutex.leave();
         return (ulLoop);                    /* OK, then return it to the caller */
@@ -844,7 +845,6 @@ BOOL HMSetStdHandle(DWORD  nStdHandle, HANDLE hHandleOpen32)
 
   /* initialize the complete HMHANDLEDATA structure */
   pHMHandleData = &TabWin32Handles[hHandle].hmHandleData;
-  pHMHandleData->dwType     = FILE_TYPE_CHAR;
   pHMHandleData->dwAccess   = 0;
   pHMHandleData->dwShare    = 0;
   pHMHandleData->dwCreation = 0;
@@ -915,26 +915,25 @@ BOOL HMDuplicateHandle(HANDLE  srcprocess,
 
   /* initialize the complete HMHANDLEDATA structure */
   pHMHandleData                = &TabWin32Handles[iIndexNew].hmHandleData;
-  pHMHandleData->dwType        = TabWin32Handles[srchandle].hmHandleData.dwType;
   if (fdwOptions & DUPLICATE_SAME_ACCESS)
-    pHMHandleData->dwAccess    = TabWin32Handles[srchandle].hmHandleData.dwAccess;
+      pHMHandleData->dwAccess    = TabWin32Handles[srchandle].hmHandleData.dwAccess;
   else
-    pHMHandleData->dwAccess    = fdwAccess;
+      pHMHandleData->dwAccess    = fdwAccess;
 
   if((fdwOdinOptions & DUPLICATE_ACCESS_READWRITE) == DUPLICATE_ACCESS_READWRITE) {
-  pHMHandleData->dwAccess = GENERIC_READ | GENERIC_WRITE;
+      pHMHandleData->dwAccess = GENERIC_READ | GENERIC_WRITE;
   }
   else
   if(fdwOdinOptions & DUPLICATE_ACCESS_READ) {
-  pHMHandleData->dwAccess = GENERIC_READ;
+      pHMHandleData->dwAccess = GENERIC_READ;
   }
 
   if(fdwOdinOptions & DUPLICATE_SHARE_READ) {
-  pHMHandleData->dwShare = FILE_SHARE_READ;
+      pHMHandleData->dwShare = FILE_SHARE_READ;
   }
   else
   if(fdwOdinOptions & DUPLICATE_SHARE_DENYNONE) {
-  pHMHandleData->dwShare = FILE_SHARE_READ | FILE_SHARE_WRITE;
+      pHMHandleData->dwShare = FILE_SHARE_READ | FILE_SHARE_WRITE;
   }
   else  pHMHandleData->dwShare = TabWin32Handles[srchandle].hmHandleData.dwShare;
 
@@ -1068,7 +1067,6 @@ HFILE HMCreateFile(LPCSTR lpFileName,
             sizeof(HMHANDLEDATA));
   else
   {
-    HMHandleTemp.dwType     = FILE_TYPE_UNKNOWN;      /* unknown handle type */
     HMHandleTemp.dwAccess   = dwDesiredAccess;
     HMHandleTemp.dwShare    = dwShareMode;
     HMHandleTemp.dwCreation = dwCreationDisposition;
@@ -1088,7 +1086,7 @@ HFILE HMCreateFile(LPCSTR lpFileName,
          &HMHandleTemp,
          sizeof(HMHANDLEDATA));
 
-  rc = pDeviceHandler->CreateFile((HANDLE)iIndexNew, lpFileName,     /* call the device handler */
+  rc = pDeviceHandler->CreateFile(lpFileName,     /* call the device handler */
                                   &HMHandleTemp,
                                   lpSecurityAttributes,
                                   pHMHandleData);
@@ -1214,10 +1212,8 @@ HANDLE HMOpenFile(LPCSTR    lpFileName,
     return (INVALID_HANDLE_VALUE);                           /* signal error */
   }
 
-
-                           /* initialize the complete HMHANDLEDATA structure */
+  /* initialize the complete HMHANDLEDATA structure */
   pHMHandleData = &TabWin32Handles[iIndexNew].hmHandleData;
-  pHMHandleData->dwType     = FILE_TYPE_UNKNOWN;      /* unknown handle type */
 
   FILE_ConvertOFMode(fuMode,                                 /* map OF_flags */
                      &pHMHandleData->dwAccess,
@@ -1230,17 +1226,17 @@ HANDLE HMOpenFile(LPCSTR    lpFileName,
   pHMHandleData->lpHandlerData = NULL;
   pHMHandleData->lpDeviceData  = pDevData;
 
-      /* we've got to mark the handle as occupied here, since another device */
-                   /* could be created within the device handler -> deadlock */
+  /* we've got to mark the handle as occupied here, since another device */
+  /* could be created within the device handler -> deadlock */
 
-          /* write appropriate entry into the handle table if open succeeded */
+  /* write appropriate entry into the handle table if open succeeded */
   TabWin32Handles[iIndexNew].hmHandleData.hHMHandle = iIndexNew;
   TabWin32Handles[iIndexNew].pDeviceHandler         = pDeviceHandler;
 
-  rc = pDeviceHandler->OpenFile  ((HANDLE)iIndexNew,  lpFileName,     /* call the device handler */
-                                  &TabWin32Handles[iIndexNew].hmHandleData,
-                                  pOFStruct,
-                                  fuMode);
+  rc = pDeviceHandler->OpenFile(lpFileName,     /* call the device handler */
+                                &TabWin32Handles[iIndexNew].hmHandleData,
+                                pOFStruct,
+                                fuMode);
 
 #ifdef DEBUG_LOCAL
     dprintf(("KERNEL32/HandleManager:CheckPoint3: %s lpHandlerData=%08xh rc=%08xh\n",
@@ -1355,7 +1351,8 @@ BOOL HMReadFile(HANDLE       hFile,
                 LPVOID       lpBuffer,
                 DWORD        nNumberOfBytesToRead,
                 LPDWORD      lpNumberOfBytesRead,
-                LPOVERLAPPED lpOverlapped)
+                LPOVERLAPPED lpOverlapped,
+                LPOVERLAPPED_COMPLETION_ROUTINE  lpCompletionRoutine)
 {
   int       iIndex;                           /* index into the handle table */
   BOOL      fResult;       /* result from the device handler's CloseHandle() */
@@ -1374,45 +1371,7 @@ BOOL HMReadFile(HANDLE       hFile,
                                                 lpBuffer,
                                                 nNumberOfBytesToRead,
                                                 lpNumberOfBytesRead,
-                                                lpOverlapped);
-
-  return (fResult);                                   /* deliver return code */
-}
-/*****************************************************************************
- * Name      : HANDLE  HMReadFileEx
- * Purpose   : Wrapper for the ReadFileEx() API
- * Parameters:
- * Variables :
- * Result    :
- * Remark    :
- * Status    :
- *
- * Author    : SvL
- *****************************************************************************/
-BOOL HMReadFileEx(HANDLE                     hFile,
-                  LPVOID                     lpBuffer,
-                  DWORD                      nNumberOfBytesToRead,
-                  LPOVERLAPPED               lpOverlapped,
-                  LPOVERLAPPED_COMPLETION_ROUTINE  lpCompletionRoutine)
-{
-  int       iIndex;                           /* index into the handle table */
-  BOOL      fResult;       /* result from the device handler's CloseHandle() */
-  PHMHANDLE pHMHandle;       /* pointer to the handle structure in the table */
-
-                                                          /* validate handle */
-  iIndex = _HMHandleQuery(hFile);                           /* get the index */
-  if (-1 == iIndex)                                               /* error ? */
-  {
-    SetLastError(ERROR_INVALID_HANDLE);       /* set win32 error information */
-    return (FALSE);                                        /* signal failure */
-  }
-
-  pHMHandle = &TabWin32Handles[iIndex];               /* call device handler */
-  fResult = pHMHandle->pDeviceHandler->ReadFileEx(&pHMHandle->hmHandleData,
-                                                  lpBuffer,
-                                                  nNumberOfBytesToRead,
-                                                  lpOverlapped,
-                                                  lpCompletionRoutine);
+                                                lpOverlapped, lpCompletionRoutine);
 
   return (fResult);                                   /* deliver return code */
 }
@@ -1433,7 +1392,8 @@ BOOL HMWriteFile(HANDLE       hFile,
                  LPCVOID      lpBuffer,
                  DWORD        nNumberOfBytesToWrite,
                  LPDWORD      lpNumberOfBytesWritten,
-                 LPOVERLAPPED lpOverlapped)
+                 LPOVERLAPPED lpOverlapped,
+                 LPOVERLAPPED_COMPLETION_ROUTINE  lpCompletionRoutine)
 {
   int       iIndex;                           /* index into the handle table */
   BOOL      fResult;       /* result from the device handler's CloseHandle() */
@@ -1452,46 +1412,7 @@ BOOL HMWriteFile(HANDLE       hFile,
                                                  lpBuffer,
                                                  nNumberOfBytesToWrite,
                                                  lpNumberOfBytesWritten,
-                                                 lpOverlapped);
-
-  return (fResult);                                   /* deliver return code */
-}
-
-/*****************************************************************************
- * Name      : HANDLE  HMWriteFileEx
- * Purpose   : Wrapper for the WriteFileEx() API
- * Parameters:
- * Variables :
- * Result    :
- * Remark    :
- * Status    :
- *
- * Author    : SvL
- *****************************************************************************/
-BOOL HMWriteFileEx(HANDLE                     hFile,
-                   LPVOID                     lpBuffer,
-                   DWORD                      nNumberOfBytesToWrite,
-                   LPOVERLAPPED               lpOverlapped,
-                   LPOVERLAPPED_COMPLETION_ROUTINE  lpCompletionRoutine)
-{
-  int       iIndex;                           /* index into the handle table */
-  BOOL      fResult;       /* result from the device handler's CloseHandle() */
-  PHMHANDLE pHMHandle;       /* pointer to the handle structure in the table */
-
-                                                          /* validate handle */
-  iIndex = _HMHandleQuery(hFile);                           /* get the index */
-  if (-1 == iIndex)                                               /* error ? */
-  {
-    SetLastError(ERROR_INVALID_HANDLE);       /* set win32 error information */
-    return (FALSE);                                        /* signal failure */
-  }
-
-  pHMHandle = &TabWin32Handles[iIndex];               /* call device handler */
-  fResult = pHMHandle->pDeviceHandler->WriteFileEx(&pHMHandle->hmHandleData,
-                                                   lpBuffer,
-                                                   nNumberOfBytesToWrite,
-                                                   lpOverlapped,
-                                                   lpCompletionRoutine);
+                                                 lpOverlapped, lpCompletionRoutine);
 
   return (fResult);                                   /* deliver return code */
 }
@@ -2345,7 +2266,6 @@ HANDLE HMCreateEvent(LPSECURITY_ATTRIBUTES lpsa,
 
   /* Initialize the complete HMHANDLEDATA structure */
   pHMHandleData = &TabWin32Handles[iIndexNew].hmHandleData;
-  pHMHandleData->dwType     = FILE_TYPE_UNKNOWN;      /* unknown handle type */
   pHMHandleData->dwAccess   = 0;
   pHMHandleData->dwShare    = 0;
   pHMHandleData->dwCreation = 0;
@@ -2423,7 +2343,6 @@ HANDLE HMCreateMutex(LPSECURITY_ATTRIBUTES lpsa,
 
                            /* initialize the complete HMHANDLEDATA structure */
   pHMHandleData = &TabWin32Handles[iIndexNew].hmHandleData;
-  pHMHandleData->dwType     = FILE_TYPE_UNKNOWN;      /* unknown handle type */
   pHMHandleData->dwAccess   = 0;
   pHMHandleData->dwShare    = 0;
   pHMHandleData->dwCreation = 0;
@@ -2491,7 +2410,6 @@ HANDLE HMOpenEvent(DWORD   fdwAccess,
 
                            /* initialize the complete HMHANDLEDATA structure */
   pHMHandleData = &TabWin32Handles[iIndexNew].hmHandleData;
-  pHMHandleData->dwType     = FILE_TYPE_UNKNOWN;      /* unknown handle type */
   pHMHandleData->dwAccess   = fdwAccess;
   pHMHandleData->dwShare    = 0;
   pHMHandleData->dwCreation = 0;
@@ -2558,7 +2476,6 @@ HANDLE HMOpenMutex(DWORD   fdwAccess,
 
                            /* initialize the complete HMHANDLEDATA structure */
   pHMHandleData = &TabWin32Handles[iIndexNew].hmHandleData;
-  pHMHandleData->dwType     = FILE_TYPE_UNKNOWN;      /* unknown handle type */
   pHMHandleData->dwAccess   = fdwAccess;
   pHMHandleData->dwShare    = 0;
   pHMHandleData->dwCreation = 0;
@@ -2635,7 +2552,6 @@ HANDLE HMCreateSemaphore(LPSECURITY_ATTRIBUTES lpsa,
 
                            /* initialize the complete HMHANDLEDATA structure */
   pHMHandleData = &TabWin32Handles[iIndexNew].hmHandleData;
-  pHMHandleData->dwType     = FILE_TYPE_UNKNOWN;      /* unknown handle type */
   pHMHandleData->dwAccess   = 0;
   pHMHandleData->dwShare    = 0;
   pHMHandleData->dwCreation = 0;
@@ -2704,7 +2620,6 @@ HANDLE HMOpenSemaphore(DWORD   fdwAccess,
 
                            /* initialize the complete HMHANDLEDATA structure */
   pHMHandleData = &TabWin32Handles[iIndexNew].hmHandleData;
-  pHMHandleData->dwType     = FILE_TYPE_UNKNOWN;      /* unknown handle type */
   pHMHandleData->dwAccess   = fdwAccess;
   pHMHandleData->dwShare    = 0;
   pHMHandleData->dwCreation = 0;
@@ -2811,7 +2726,6 @@ HANDLE HMCreateFileMapping(HANDLE                hFile,
 
                            /* initialize the complete HMHANDLEDATA structure */
   pHMHandleData = &TabWin32Handles[iIndexNew].hmHandleData;
-  pHMHandleData->dwType     = FILE_TYPE_UNKNOWN;      /* unknown handle type */
   pHMHandleData->dwAccess   = 0;
   pHMHandleData->dwShare    = 0;
   pHMHandleData->dwCreation = 0;
@@ -2889,7 +2803,6 @@ HANDLE HMOpenFileMapping(DWORD   fdwAccess,
 
   /* initialize the complete HMHANDLEDATA structure */
   pHMHandleData = &TabWin32Handles[iIndexNew].hmHandleData;
-  pHMHandleData->dwType     = FILE_TYPE_UNKNOWN;      /* unknown handle type */
   pHMHandleData->dwAccess   = fdwAccess;
   pHMHandleData->dwShare    = 0;
   pHMHandleData->dwCreation = 0;
@@ -3877,7 +3790,6 @@ DWORD HMOpenThreadToken(HANDLE  ThreadHandle,
 
   /* initialize the complete HMHANDLEDATA structure */
   pHMHandleData = &TabWin32Handles[iIndexNew].hmHandleData;
-  pHMHandleData->dwType     = FILE_TYPE_UNKNOWN;      /* unknown handle type */
   pHMHandleData->dwAccess   = DesiredAccess;
   pHMHandleData->dwShare    = 0;
   pHMHandleData->dwCreation = 0;
@@ -3945,7 +3857,6 @@ DWORD HMOpenProcessToken(HANDLE  ProcessHandle,
 
   /* initialize the complete HMHANDLEDATA structure */
   pHMHandleData = &TabWin32Handles[iIndexNew].hmHandleData;
-  pHMHandleData->dwType     = FILE_TYPE_UNKNOWN;      /* unknown handle type */
   pHMHandleData->dwAccess   = DesiredAccess;
   pHMHandleData->dwShare    = 0;
   pHMHandleData->dwCreation = 0;
@@ -4017,7 +3928,6 @@ HANDLE HMCreateThread(LPSECURITY_ATTRIBUTES  lpsa,
 
   /* initialize the complete HMHANDLEDATA structure */
   pHMHandleData = &TabWin32Handles[iIndexNew].hmHandleData;
-  pHMHandleData->dwType     = FILE_TYPE_UNKNOWN;      /* unknown handle type */
   pHMHandleData->dwAccess   = 0;
   pHMHandleData->dwShare    = 0;
   pHMHandleData->dwCreation = 0;
@@ -4410,7 +4320,6 @@ DWORD HMCreateNamedPipe(LPCTSTR lpName,
 
   /* initialize the complete HMHANDLEDATA structure */
   pHMHandleData = &TabWin32Handles[iIndexNew].hmHandleData;
-  pHMHandleData->dwType     = FILE_TYPE_PIPE;
   pHMHandleData->dwAccess   = 0;
   pHMHandleData->dwShare    = 0;
   pHMHandleData->dwCreation = 0;
@@ -4720,7 +4629,6 @@ BOOL HMCreatePipe(PHANDLE phRead,
 
   /* initialize the complete HMHANDLEDATA structure */
   pHMHandleData = &TabWin32Handles[iIndexNewRead].hmHandleData;
-  pHMHandleData->dwType     = FILE_TYPE_PIPE;
   pHMHandleData->dwAccess   = 0;
   pHMHandleData->dwShare    = 0;
   pHMHandleData->dwCreation = 0;
@@ -4736,7 +4644,6 @@ BOOL HMCreatePipe(PHANDLE phRead,
 
   /* initialize the complete HMHANDLEDATA structure */
   pHMHandleData = &TabWin32Handles[iIndexNewWrite].hmHandleData;
-  pHMHandleData->dwType     = FILE_TYPE_PIPE;
   pHMHandleData->dwAccess   = 0;
   pHMHandleData->dwShare    = 0;
   pHMHandleData->dwCreation = 0;
@@ -4803,7 +4710,6 @@ HANDLE HMCreateMailslotA(LPCSTR lpName, DWORD nMaxMessageSize,
 
   /* initialize the complete HMHANDLEDATA structure */
   pHMHandleData = &TabWin32Handles[iIndexNew].hmHandleData;
-  pHMHandleData->dwType     = FILE_TYPE_UNKNOWN;
   pHMHandleData->dwAccess   = 0;
   pHMHandleData->dwShare    = 0;
   pHMHandleData->dwCreation = 0;

@@ -1,4 +1,4 @@
-/* $Id: conout.h,v 1.3 2001-11-26 14:53:59 sandervl Exp $ */
+/* $Id: conout.h,v 1.4 2001-12-05 14:15:58 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -53,25 +53,29 @@ class HMDeviceConsoleOutClass : public HMDeviceHandler
     }
 
                        /* this is a handler method for calls to CreateFile() */
-  virtual DWORD  CreateFile (HANDLE        hHandle,
-                             LPCSTR        lpFileName,
+  virtual DWORD  CreateFile (LPCSTR        lpFileName,
                              PHMHANDLEDATA pHMHandleData,
                              PVOID         lpSecurityAttributes,
                              PHMHANDLEDATA pHMHandleDataTemplate);
+
+  /* this is a handler method for calls to GetFileType() */
+  virtual DWORD GetFileType (PHMHANDLEDATA pHMHandleData);
 
                            /* this is a handler method for calls to ReadFile() */
   virtual BOOL   ReadFile   (PHMHANDLEDATA pHMHandleData,
                              LPCVOID       lpBuffer,
                              DWORD         nNumberOfBytesToRead,
                              LPDWORD       lpNumberOfBytesRead,
-                             LPOVERLAPPED  lpOverlapped);
+                             LPOVERLAPPED  lpOverlapped,
+                             LPOVERLAPPED_COMPLETION_ROUTINE  lpCompletionRoutine);
 
                         /* this is a handler method for calls to WriteFile() */
   virtual BOOL   WriteFile  (PHMHANDLEDATA pHMHandleData,
                              LPCVOID       lpBuffer,
                              DWORD         nNumberOfBytesToWrite,
                              LPDWORD       lpNumberOfBytesWritten,
-                             LPOVERLAPPED  lpOverlapped);
+                             LPOVERLAPPED  lpOverlapped,
+                             LPOVERLAPPED_COMPLETION_ROUTINE  lpCompletionRoutine);
 
 
                                                 /* handling non-standard I/O */
@@ -81,9 +85,6 @@ class HMDeviceConsoleOutClass : public HMDeviceHandler
                                 ULONG         arg2,
                                 ULONG         arg3,
                                 ULONG         arg4);
-
-                      /* this is a handler method for calls to GetFileType() */
-  virtual DWORD GetFileType (PHMHANDLEDATA pHMHandleData);
 
 };
 
