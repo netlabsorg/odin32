@@ -1,4 +1,4 @@
-/* $Id: os2timer.h,v 1.10 2001-09-16 19:27:24 phaller Exp $ */
+/* $Id: os2timer.h,v 1.11 2001-10-03 13:47:58 sandervl Exp $ */
 
 #ifndef __OS2TIMER_H__
 #define __OS2TIMER_H__
@@ -106,6 +106,10 @@ public:
         void          StopTimer();
         void          KillTimer();
 
+
+        DWORD         getTimerID()         { return timerID; };
+        void          setTimerID(DWORD id) { timerID = id; };
+
 protected:
 
 private:
@@ -119,6 +123,7 @@ private:
 
         BOOL           fFatal;
         int            TimerStatus;
+        DWORD          timerID;
         enum {
                 InActive = 0,
                 Running,
