@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.3 1999-06-10 16:56:36 phaller Exp $
+# $Id: makefile,v 1.4 1999-08-09 21:03:19 phaller Exp $
 
 #
 # PD-Win32 API
@@ -16,12 +16,12 @@ PDWIN32_BIN = ..\..\bin
 
 CFLAGS = $(CFLAGS) -Ge+ /Gd-  -I$(PDWIN32_INCLUDE)
 CXXFLAGS = $(CXXFLAGS) -Ge+ /Gd- -I$(PDWIN32_INCLUDE)
-LDFLAGS = $(LDFLAGS) -Ge+ /B"/pmtype:pm /stack:0x30000 /NOBASE /Map"
+LDFLAGS = $(LDFLAGS) -Ge+ /B"/pmtype:pm /stack:0x30000 /NOBASE /Map" \
+          ..\..\lib\kernel32.lib os2386.lib ..\..\lib\odincrt.lib cppom30.lib
 
 TARGET = pe
 
-OBJS =  pe.obj \
-        ..\kernel32\kernel32.lib
+OBJS =  pe.obj
 
 all: $(TARGET).exe
 
