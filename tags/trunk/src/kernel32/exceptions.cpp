@@ -1,4 +1,4 @@
-/* $Id: exceptions.cpp,v 1.50 2001-02-14 10:36:45 sandervl Exp $ */
+/* $Id: exceptions.cpp,v 1.51 2001-03-13 18:45:33 sandervl Exp $ */
 
 /* WARNING: Compiling this module with ICC with optimizations turned on   */
 /* currently breaks this module. To get correct code, it is not necessary */
@@ -61,7 +61,6 @@
 #include <stdlib.h>
 #include <assert.h>
 #include <string.h>
-#include <builtin.h>
 #include "exceptions.h"
 #include "exceptutil.h"
 #include <misc.h>

@@ -1,4 +1,4 @@
-/* $Id: winres.cpp,v 1.28 2000-11-09 18:18:11 sandervl Exp $ */
+/* $Id: winres.cpp,v 1.29 2001-03-13 18:45:34 sandervl Exp $ */
 
 /*
  * Win32 resource class
@@ -17,9 +17,6 @@
 #define INCL_DOSMODULEMGR
 #include <os2wrap.h>    //Odin32 OS/2 api wrappers
 #include <stdarg.h>
-#ifdef __IBMCPP__
-#include <builtin.h>
-#endif
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

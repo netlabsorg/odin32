@@ -1,4 +1,4 @@
-/* $Id: console.cpp,v 1.25 2001-02-08 10:23:40 sandervl Exp $ */
+/* $Id: console.cpp,v 1.26 2001-03-13 18:45:33 sandervl Exp $ */
 
 /*
  * Win32 Console API Translation for OS/2
@@ -52,7 +52,6 @@
 /*******************************************************************************
 *   Header Files                                                               *
 *******************************************************************************/
-#include <builtin.h>
 #include <stdlib.h>
 #include <string.h>
 
