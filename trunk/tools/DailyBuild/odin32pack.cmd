@@ -1,4 +1,4 @@
-/* $Id: odin32pack.cmd,v 1.1 2000-04-27 11:32:25 bird Exp $
+/* $Id: odin32pack.cmd,v 1.2 2000-05-15 13:57:58 bird Exp $
  *
  * Make the two zip files.
  *
@@ -9,50 +9,115 @@
  * Project Odin Software License can be found in LICENSE.TXT
  *
  */
-    'cd bin\debug'
-    if RC <> 0 then call failure rc, 'ChDir to bin\debug failed.';
-    call packdir 'debug'
+    sStartDir = directory();
 
-    'cd ..\..\bin\release'
-    if RC <> 0 then call failure rc, 'ChDir to bin\release failed.';
-    call packdir 'release'
-    'cd ..\..';
+    call ChDir 'bin';
+    call packdir 'debug', 'debug'
+    call packdir 'release', 'release'
+    call ChDir '..';
 
     exit(0);
 
-packdir: procedure
-parse arg stype;
-    'del /Q /Y /Z *.cmd'
-    'del /Q /Y /Z /X CVS'
-    'del /Q /Y /Z /X .\glide\CVS'
-    'del /Q /Y /Z /X .\glide\Voodoo1\CVS'
-    'del /Q /Y /Z /X .\glide\Voodoo2\CVS'
-    'copy ..\odin.ini odin.ini'
-    if (RC <> 0) then call failure rc, 'copy odin.ini to bin failed.';
-    'copy ..\..\license.txt'
-    if (RC <> 0) then call failure rc, 'copy license.txt to bin failed.';
-    'copy ..\..\readme.txt'
-    if (RC <> 0) then call failure rc, 'copy readme.txt to bin failed.';
-    'copy ..\..\logging.txt logging.txt'
-    if (RC <> 0) then call failure rc, 'copy logging.txt to bin failed.';
-    'copy ..\..\odin.ini.txt .\odin_ini.txt'
-    if (RC <> 0) then call failure rc, 'copy odin.ini.txt to bin failed.';
-    'copy ..\..\ChangeLog'
-    if (RC <> 0) then call failure rc, 'copy ChangeLog to bin failed.';
-    'copy ..\Glide\readme.txt Glide\readme.txt'
-    if (RC <> 0) then call failure rc, 'copy a Glide\readme.txt to bin failed.';
-    'copy ..\Glide\Voodoo1\readme.txt Glide\Voodoo1\readme.txt'
-    if (RC <> 0) then call failure rc, 'copy a Glide\Voodoo1\readme.txt to bin failed.';
-    'copy ..\Glide\Voodoo2\readme.txt Glide\Voodoo2\readme.txt'
-    if (RC <> 0) then call failure rc, 'copy a Glide\Voodoo2\readme.txt to bin failed.';
+packdir: procedure expose sStartDir;
+parse arg sDir, sType;
 
-    'zip -9 -R ..\..\odin32bin-' || DATE(S) || '-' || stype || '.zip * -xCVS';
-    if (RC <> 0) then call failure rc, 'zip...';
+    sZipFile = filespec('path', directory())||'odin32bin-' || DATE(S) || '-' || sType || '.zip';
+
+    /*
+     * Change into the directory we're to pack and do some fixups
+     */
+    call ChDir sDir
+    'del /Q /Y /Z *.cmd > nul 2>&1'
+    'del /Q /Y /Z /X CVS > nul 2>&1'
+    'del /Q /Y /Z /X .\glide\CVS > nul 2>&1'
+    'del /Q /Y /Z /X .\glide\Voodoo1\CVS > nul 2>&1'
+    'del /Q /Y /Z /X .\glide\Voodoo2\CVS > nul 2>&1'
+    call copy '..\odin.ini'
+    call copy '..\..\odin.ini.txt', '.\odin_ini.txt'
+    call copy '..\Glide\readme.txt', 'Glide\readme.txt'
+    call copy '..\Glide\Voodoo1\readme.txt', 'Glide\Voodoo1\readme.txt'
+    call copy '..\Glide\Voodoo2\readme.txt', 'Glide\Voodoo2\readme.txt'
+
+    /*
+     * Create a pack directory in /bin and go into it.
+     * (Don't test on return from mkdir while the directory might exist.)
+     */
+    'mkdir ..\pack'
+    call ChDir '..\pack'
+    'del /Q /Y /Z *' /* Perform some cleanup */
+
+    /* Copy root files into the pack directory. */
+    call copy '..\..\license.txt';
+    call copy '..\..\readme.txt';
+    call copy '..\..\logging.txt';
+    call copy '..\..\ChangeLog';
+
+    /*
+     * Move (=rename) the /bin/<release|debug> dir into /pack/system32
+     * and pack it.
+     */
+    'ren ..\'||sDir '.\system32'
+    if (RC <> 0) then call failure rc, 'renaming' sDir'->system32 failed';
+
+    say 'zip -9 -R' sZipFile '* -xCVS';
+    'zip -9 -R' sZipFile '* -xCVS';
+    if (RC <> 0) then
+    do
+        rc2 = rc;
+        'ren .\system32 ..\'||sDir
+        call failure rc2, 'zip...';
+    end
+    'ren .\system32 ..\'||sDir
+    if (RC <> 0) then call failure rc, 'renaming' sDir'->system32 failed';
+
+    /* restore directory */
+    call ChDir '..';
     return;
 
-failure: procedure
+/*
+ * Changes the directory.
+ * On error we will call failure.
+ */
+ChDir: procedure expose sStartDir;
+    parse arg sDir
+
+    'cd' sDir
+    if (rc <> 0) then
+    do
+        call failure rc, 'Failed to ChDir into' sDir '(CWD='directory()').'
+        return rc;
+    end
+    return 0;
+
+
+/*
+ * Copy a file.
+ * On error we will call failure.
+ */
+Copy: procedure expose sStartDir
+    parse arg sSrc, sDst
+
+    /* if no sDst set default */
+    if (sDst = '') then sDst='.';
+    'copy' sSrc sDst
+    if (rc <> 0) then
+    do
+        call failure rc, 'Copying' sSrc 'to' sDst 'failed.'
+        return rc;
+    end
+    return 0;
+
+
+/*
+ * Complain about a failure and exit the script.
+ * Note. Uses the global variable sStartDir to restore the current
+ *       directory where the script was started from.
+ * @param rc    Error code to write. (usually RC)
+ * @param sText Description.
+ */
+failure: procedure expose sStartDir;
 parse arg rc, sText;
     say 'rc='rc sText
-    'cd ..\..';
+    call directory sStartDir;
     exit(rc);
 
