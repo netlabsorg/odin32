@@ -1,4 +1,4 @@
-/* $Id: win32wbase.h,v 1.27 2000-01-13 20:11:38 sandervl Exp $ */
+/* $Id: win32wbase.h,v 1.28 2000-01-14 14:45:18 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -94,7 +94,6 @@ public:
         DWORD   magic;
 
                 Win32BaseWindow(DWORD objType);
-                Win32BaseWindow(HWND os2Handle,VOID* win32WndProc);
                 Win32BaseWindow(CREATESTRUCTA *lpCreateStructA, ATOM classAtom, BOOL isUnicode);
 virtual        ~Win32BaseWindow();
 
@@ -293,7 +292,6 @@ static Win32BaseWindow *GetWindowFromOS2FrameHandle(HWND hwnd);
 
        PVOID getOldWndProc() { return pOldWndProc; }
        VOID  setOldWndProc(PVOID aOldWndProc) { pOldWndProc = aOldWndProc; }
-       BOOL  isSubclassedOS2Wnd() { return fIsSubclassedOS2Wnd; };
 
 protected:
 #ifndef OS2_INCLUDED
@@ -352,7 +350,6 @@ protected:
         ULONG   borderHeight;
 
         PVOID   pOldWndProc;
-        BOOL    fIsSubclassedOS2Wnd;  //subclassed OS/2 window: Netscape plug-in/scrollbar
 
    Win32BaseWindow *owner;
      Win32Resource *iconResource;
