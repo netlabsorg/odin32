@@ -1,4 +1,8 @@
-/* $Id: ChangeLog,v 1.1552 2001-06-29 20:14:29 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.1553 2001-07-02 18:24:44 bird Exp $ */
+
+ 2001-06-25: knut st. osmundsen <kosmunds@csc.com>
+    - fastdep:  o Fixed a coupla bugs; RC files parsing and .
+                o Support for filenames with spaces.
 
  2001-06-27: Sander van Leeuwen <sandervl@xs4all.nl>
     - KERNEL32: o CreateProcess fixes for finding executables
