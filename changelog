@@ -1,7 +1,8 @@
- /* $Id: changelog,v 1.1034 2000-07-17 00:34:03 phaller Exp $ */
+ /* $Id: changelog,v 1.1035 2000-07-17 00:40:55 phaller Exp $ */
 
  2000-07-17: Patrick Haller <phaller@gmx.net>
     - KERNEL32: fixed ReadFile/WriteFile bugfix
+                fixed return codes for HMWaitForSingleObject
 
  2000-07-16: knut st. osmundsen <knut.stange.osmundsen@mynd.no>
     - Win32k:   Created a development branch called "Grace" and checked my
