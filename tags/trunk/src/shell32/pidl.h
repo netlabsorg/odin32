@@ -1,4 +1,4 @@
-/* $Id: pidl.h,v 1.3 2000-03-26 16:34:43 cbratschi Exp $ */
+/* $Id: pidl.h,v 1.4 2000-03-28 15:28:45 cbratschi Exp $ */
 
 /*
  * Win32 SHELL32 for OS/2
@@ -136,7 +136,7 @@ BOOL    WINAPI _ILGetFileDate           (LPCITEMIDLIST pidl, LPSTR pOut, UINT uO
 DWORD   WINAPI _ILGetFileSize           (LPCITEMIDLIST pidl, LPSTR pOut, UINT uOutSize);
 BOOL    WINAPI _ILGetExtension          (LPCITEMIDLIST pidl, LPSTR pOut, UINT uOutSize);
 void    WINAPI _ILGetFileType           (LPCITEMIDLIST pidl, LPSTR pOut, UINT uOutSize);
-DWORD	WINAPI _ILGetFileAttributes	(LPCITEMIDLIST pidl, LPSTR pOut, UINT uOutSize);
+DWORD   WINAPI _ILGetFileAttributes     (LPCITEMIDLIST pidl, LPSTR pOut, UINT uOutSize);
 DWORD   WINAPI _ILGetFileSizeKB         (LPCITEMIDLIST pidl, LPSTR pOut, UINT uOutSize);
 
 BOOL    WINAPI _ILGetFileDateTime       (LPCITEMIDLIST pidl, FILETIME *ft);
@@ -181,7 +181,12 @@ REFIID          WINAPI _ILGetGUIDPointer        (LPCITEMIDLIST pidl);
 /*
  * debug helper
  */
+#ifdef DEBUG
 void pdump (LPCITEMIDLIST pidl);
+#else
+#define pdump(pidl)
+#endif
+//CB: needed in release build
 BOOL pcheck (LPCITEMIDLIST pidl);
 
 #endif
