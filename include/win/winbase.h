@@ -508,6 +508,7 @@ typedef struct
 #define LMEM_DISCARDABLE    0x0F00
 #define LMEM_DISCARDED      0x4000
 #define LMEM_LOCKCOUNT      0x00FF
+#define LMEM_INVALID_HANDLE 0x8000
 
 #define LHND                (LMEM_MOVEABLE | LMEM_ZEROINIT)
 #define LPTR                (LMEM_FIXED | LMEM_ZEROINIT)
