@@ -1,4 +1,8 @@
-/* $Id: changelog,v 1.2583 2003-05-23 13:53:57 sandervl Exp $ */
+/* $Id: changelog,v 1.2584 2003-05-26 13:41:42 sandervl Exp $ */
+
+ 2003-05-26: Platon Fomichev <stauff@innotek   >
+    - COMCTL32: o Patrick's 2001 fixes broke too much. Stay with ReWind for now.
+                  (Acrobat Defect 387)
 
  2003-05-23: Sander van Leeuwen <sandervl@innotek   >
     - KERNEL32: o ClearCommError: lpdwError is allowed to be NULL
