@@ -8,13 +8,12 @@
  */
 
 #include <stdio.h>
-#include <malloc.h>
+#include <stdlib.h>
 #include <windows.h>
 #include <winreg.h>
 #include <winerror.h>
 #include <winnt.h>
 #include <string.h>
-#include <shell.h>
 
 #ifdef __WIN32OS2__
 #include <heapstring.h>
@@ -25,11 +24,14 @@
 static char *strsep(char **string, char *token)
 {
   char *ret = strchr(*string, *token);
+  char *ret1;
 
    if(ret) {
 	*ret = (char)0;
 	ret++;
 	(*string) = ret;
+        ret1 = strchr(ret, *token);
+        if(ret1) *ret1 = 0;
    }
    return ret;
 }
@@ -120,7 +122,7 @@ static void doRegisterDLL(LPSTR lpsLine);
 static void doUnregisterDLL(LPSTR lpsLine);
 
 /*
- * current supported api
+ * Currently supported api
  */
 static const char* commandNames[COMMAND_COUNT] = {
   "setValue", 
@@ -159,9 +161,9 @@ static const BOOL commandSaveRegistry[COMMAND_COUNT] = {
 };
 
 /* 
- * Generic prototyes
+ * Generic prototypes
  */
-static HKEY    getDataType(LPSTR *lpValue);
+static DWORD   getDataType(LPSTR *lpValue);
 static LPSTR   getRegKeyName(LPSTR lpLine);
 static HKEY    getRegClass(LPSTR lpLine);
 static LPSTR   getArg(LPSTR arg);
@@ -189,15 +191,16 @@ static void    processQueryValue(LPSTR cmdline);
  */
 static char helpText[] =
 "NAME\n"
-"          regapi - provide a command line interface to the wine registry.\n"
+"          regapi - perform certain actions on the wine registry.\n"
 "\n"
 "SYNOPSIS\n"
 "          regapi commandName [-force] < file\n"
 "\n"
 "DESCRIPTION\n"
-"          regapi allows editing the wine registry.  It processes the given\n"
-"          commandName for every line in the stdin data stream.  Input data\n"
-"          format may vary depending on the commandName see INPUT FILE FORMAT.\n"
+"          regapi modifies settings in the wine registry.  It processes\n"
+"          the given commandName for every line in the stdin data stream.\n"
+"          Input data format may vary depending on the commandName\n"
+"          (see INPUT FILE FORMAT).\n"
 "\n"
 "OPTIONS\n"
 "          commandName\n"
@@ -250,10 +253,10 @@ static char helpText[] =
 
 /******************************************************************************
  * This function returns the HKEY associated with the data type encoded in the 
- * value.  It modify the input parameter (key value) in order to skip this 
+ * value.  It modifies the input parameter (key value) in order to skip this 
  * "now useless" data type information.
  */
-HKEY getDataType(LPSTR *lpValue) 
+DWORD getDataType(LPSTR *lpValue) 
 {
   INT   counter  = 0;
   DWORD dwReturn = REG_SZ;
@@ -304,7 +307,7 @@ LPSTR getRegKeyName(LPSTR lpLine)
 
 /******************************************************************************
  * Extracts from a [HKEY/some/key/path] type of line the key class (what 
- * starts after the '[' and end before the first '\'
+ * starts after the '[' and ends before the first '\'
  */
 static HKEY getRegClass(LPSTR lpClass) 
 {
@@ -314,14 +317,12 @@ static HKEY getRegClass(LPSTR lpClass)
   char  lpClassCopy[KEY_MAX_LEN];
   
   if (lpClass == NULL)
-    return ERROR_INVALID_PARAMETER;
+    return (HKEY)ERROR_INVALID_PARAMETER;
 
   strcpy(lpClassCopy, lpClass);
 
   classNameEnd  = strstr(lpClassCopy, "\\");  /* The class name end by '\' */
-  if(classNameEnd) 
-   	*classNameEnd = '\0';                       /* Isolate the class name */
-
+  *classNameEnd = '\0';                       /* Isolate the class name */
   classNameBeg  = &lpClassCopy[1];            /* Skip the '[' */
   
   if      (strcmp( classNameBeg, "HKEY_LOCAL_MACHINE") == IDENTICAL )
@@ -335,7 +336,7 @@ static HKEY getRegClass(LPSTR lpClass)
   else if (strcmp( classNameBeg, "HKEY_CURRENT_USER") == IDENTICAL )
     return  HKEY_CURRENT_USER;
   else
-    return ERROR_INVALID_PARAMETER;
+    return (HKEY)ERROR_INVALID_PARAMETER;
 }
 
 /******************************************************************************
@@ -614,8 +615,8 @@ static HRESULT openKey( LPSTR stdInput)
 
   /* Get the registry class */
   currentKeyClass = getRegClass(stdInput); /* Sets global variable */
-  if (currentKeyClass == ERROR_INVALID_PARAMETER)
-    return ERROR_INVALID_PARAMETER;
+  if (currentKeyClass == (HKEY)ERROR_INVALID_PARAMETER)
+    return (HRESULT)ERROR_INVALID_PARAMETER;
 
   /* Get the key name */
   currentKeyName = getRegKeyName(stdInput); /* Sets global variable */
@@ -641,7 +642,7 @@ static HRESULT openKey( LPSTR stdInput)
 
 }
 /******************************************************************************
- * This function is a wrapper arround the setValue function.  It prepares the 
+ * This function is a wrapper for the setValue function.  It prepares the 
  * land and clean the area once completed.
  */
 static void processSetValue(LPSTR cmdline)
@@ -659,15 +660,6 @@ static void processSetValue(LPSTR cmdline)
   for (counter=0; counter<SET_VALUE_MAX_ARGS; counter++)
     argv[counter]=NULL;
 
-#ifdef __WIN32OS2__
-  if(*cmdline == '"') cmdline++; 
-  argv[0] = cmdline;
-  token = strsep(&cmdline, setValueDelim[argCounter]);
-  if(token && *(token-2) == '"') {
-	*(token-2) = 0;
-  }
-  argv[1] = getArg(token);
-#else
   while( (token = strsep(&cmdline, setValueDelim[argCounter])) != NULL ) 
   {
     argv[argCounter++] = getArg(token);
@@ -675,7 +667,6 @@ static void processSetValue(LPSTR cmdline)
     if (argCounter == SET_VALUE_MAX_ARGS)
       break;  /* Stop processing args no matter what */
   }
-#endif
 
   hRes = setValue(argv);
   if ( hRes == ERROR_SUCCESS ) 
@@ -707,7 +698,7 @@ static void processSetValue(LPSTR cmdline)
 }
 
 /******************************************************************************
- * This function is a wrapper arround the queryValue function.  It prepares the 
+ * This function is a wrapper for the queryValue function.  It prepares the 
  * land and clean the area once completed.
  */
 static void processQueryValue(LPSTR cmdline)
@@ -1029,11 +1020,11 @@ static void doUnregisterDLL(LPSTR stdInput) {
 }
 
 /******************************************************************************
- * MAIN - The main simply validate the first parameter (command to perform)
- *        It then read the STDIN lines by lines forwarding their processing
+ * MAIN - WinMain simply validates the first parameter (command to perform)
+ *        It then reads the STDIN lines by lines forwarding their processing
  *        to the appropriate method.
  */
-int PASCAL WinMain (HANDLE inst, HANDLE prev, LPSTR cmdline, int show)
+int PASCAL WinMain (HINSTANCE inst, HINSTANCE prev, LPSTR cmdline, int show)
 {
   LPSTR  token          = NULL;  /* current token analized */
   LPSTR  stdInput       = NULL;  /* line read from stdin */
