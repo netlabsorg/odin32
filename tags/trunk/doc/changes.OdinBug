@@ -1,3 +1,19 @@
+version 0.5.7  16-08-2002
+                         Changed: Ported the whole program to my new Warp 4
+                                  style notebook emulation.
+                         Removed: Duplicate Buttons on email page. Did not 
+                                  really make sense to have them twice.
+                         Added: Optionally replace WPS objects instead of 
+                                updating them (useful in case of a zombie Odin 
+                                folder).
+                         Added: Proper detection of all flavors of OS/2 
+                                including ACP1/ACP2/MCP1/MCP2 and eComStation
+                         Added: Proper detection of Scitech SNAP
+                         
+version 0.5.6b 27-06-2002
+                         Changed: Made Odin User's Manual object ID compatible
+                                  with the Odin distribution... 
+                         Fixed: Odin picture was lost in 0.5.6 and 0.5.6a.
 version 0.5.6a 09-06-2002
                          Fixed: Silly bug in date translation prevented 0.5.6
                                 from working in May...

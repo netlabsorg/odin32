@@ -5,11 +5,12 @@ MacroPath: VRM:E:\Dev\REXX\VXREXX\Projects\OdinBug
 EXEPath: 
 RunParameters: 
 RunDirectory: 
-VRXWindow: __VREMainWindow,1,527,1987,979,7995
-VRXWindow: __VREFileListWindow,1,542,10058,1912,3358
-VRXWindow: __VRESectionListWindow,1,5661,10058,4291,3373
-VRXWindow: __VREToolsWindow,1,527,60,4996,1681
-VRXWindow: __VREWindListWindow,1,2469,10058,3162,3373
+VRXWindow: __VREMainWindow,1,1039,1987,994,7905
+VRXWindow: __VREFileListWindow,1,602,10901,2665,3358
+VRXWindow: __VRESectionListWindow,1,5977,10901,2650,3342
+VRXWindow: __VREToolsWindow,1,2800,60,5505,1688
+VRXWindow: __VREWindListWindow,1,3297,10901,2650,3150
 UserFile: 1
 UserWindow: OdinBugReport,1
+UserWindow: Progress,1
 UserWindow: AboutPage,1
