@@ -54,7 +54,7 @@ static int prefix_offset;
 
 /*********************************************************************
  *  Return next line of text from a string.
- * 
+ *
  * hdc - handle to DC.
  * str - string to parse into lines.
  * count - length of str.
@@ -67,7 +67,7 @@ static int prefix_offset;
  * or NULL if end of str reached.
  *
  * FIXME:
- * GetTextExtentPoint is used to get the width of each character, 
+ * GetTextExtentPoint is used to get the width of each character,
  * rather than GetCharABCWidth...  So the whitespace between
  * characters is ignored, and the reported len is too great.
  */
@@ -109,7 +109,7 @@ static const WCHAR *TEXT_NextLineW( HDC hdc, const WCHAR *str, int *count,
 		plen += size.cx;
 	    }
 	    break;
-	    
+	
 	case PREFIX:
 	    if (!(format & DT_NOPREFIX) && *count > 1)
                 {
@@ -129,7 +129,7 @@ static const WCHAR *TEXT_NextLineW( HDC hdc, const WCHAR *str, int *count,
                 plen += size.cx;
             }
 	    break;
-	    
+	
 	case TAB:
 	    if (format & DT_EXPANDTABS)
 	    {
@@ -206,7 +206,7 @@ static const WCHAR *TEXT_NextLineW( HDC hdc, const WCHAR *str, int *count,
 	    }
 	}
     }
-    
+
     *len = j;
     return NULL;
 }
@@ -252,7 +252,7 @@ INT WINAPI DrawTextExW( HDC hdc, LPWSTR str, INT i_count,
     int max_width = 0;
 
 #ifdef __WIN32OS2__
-    dprintf(("DrawTextExW: %ls, %d , [(%d,%d),(%d,%d)]\n", str, count,
+    dprintf(("DrawTextExW: %.*ls, %d , [(%d,%d),(%d,%d)]\n", count, str, count,
   	    rect->left, rect->top, rect->right, rect->bottom));
 #else
     TRACE("%s, %d , [(%d,%d),(%d,%d)]\n", debugstr_wn (str, count), count,
@@ -499,7 +499,7 @@ INT WINAPI DrawTextA( HDC hdc, LPCSTR str, INT count, LPRECT rect, UINT flags )
  * rethink the strategy once the migration to NT handles is complete.
  * We are going to get a lot of code-duplication once this migration is
  * completed...
- * 
+ *
  */
 static BOOL TEXT_GrayString(HDC hdc, HBRUSH hb, GRAYSTRINGPROC fn, LPARAM lp, INT len,
                             INT x, INT y, INT cx, INT cy, BOOL unicode, BOOL _32bit)
@@ -521,7 +521,7 @@ static BOOL TEXT_GrayString(HDC hdc, HBRUSH hb, GRAYSTRINGPROC fn, LPARAM lp, IN
 #else
     if(!hdc) return FALSE;
 #endif
-    
+
     if(len == 0)
     {
         if(unicode)
@@ -739,7 +739,7 @@ LONG WINAPI TabbedTextOutA( HDC hdc, INT x, INT y, LPCSTR lpstr, INT count,
                             INT cTabStops, const INT *lpTabPos, INT nTabOrg )
 {
 #ifdef __WIN32OS2__
-    dprintf(("TabbedTextOutA: %04x %d,%d %s %d\n", hdc, x, y, lpstr, count ));
+    dprintf(("TabbedTextOutA: %04x %d,%d %.*s %d\n", hdc, x, y, count, lpstr, count ));
 #else
     TRACE("%04x %d,%d %s %d\n", hdc, x, y, debugstr_an(lpstr,count), count );
 #endif
@@ -761,7 +761,7 @@ LONG WINAPI TabbedTextOutW( HDC hdc, INT x, INT y, LPCWSTR str, INT count,
 
     acount = WideCharToMultiByte(codepage,0,str,count,NULL,0,NULL,NULL);
     p = HeapAlloc( GetProcessHeap(), 0, acount );
-    if(p == NULL) return 0; /* FIXME: is this the correct return on failure */ 
+    if(p == NULL) return 0; /* FIXME: is this the correct return on failure */
     acount = WideCharToMultiByte(codepage,0,str,count,p,acount,NULL,NULL);
     ret = TabbedTextOutA( hdc, x, y, p, acount, cTabStops, lpTabPos, nTabOrg );
     HeapFree( GetProcessHeap(), 0, p );
@@ -789,7 +789,7 @@ DWORD WINAPI GetTabbedTextExtentA( HDC hdc, LPCSTR lpstr, INT count,
                                    INT cTabStops, const INT *lpTabPos )
 {
 #ifdef __WIN32OS2__
-    dprintf(("GetTabbedTextExtentA: %04x %s %d\n", hdc, lpstr, count ));
+    dprintf(("GetTabbedTextExtentA: %04x %.*s %d\n", hdc, count, lpstr, count ));
 #else
     TRACE("%04x %s %d\n", hdc, debugstr_an(lpstr,count), count );
 #endif
