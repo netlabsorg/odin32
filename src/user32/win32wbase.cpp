@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.38 1999-10-12 18:14:56 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.39 1999-10-12 18:51:38 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -556,10 +556,11 @@ BOOL Win32BaseWindow::CreateWindowExA(CREATESTRUCTA *cs, ATOM classAtom)
   }
 
   //Subclass frame
-  if (isFrameWindow() && HAS_3DFRAME(dwExStyle))
+  if(isFrameWindow() && (HAS_3DFRAME(dwExStyle) ||
+     (!HAS_DLGFRAME(dwStyle, dwExStyle) && (dwStyle & (WS_DLGFRAME|WS_BORDER|WS_THICKFRAME)) == WS_BORDER)))
   {
-    pOldFrameProc = FrameSubclassFrameWindow(this);
-    if (isChild()) FrameSetBorderSize(this,TRUE);
+        pOldFrameProc = FrameSubclassFrameWindow(this);
+        if (isChild()) FrameSetBorderSize(this,TRUE);
   }
 
   //Get the client window rectangle
