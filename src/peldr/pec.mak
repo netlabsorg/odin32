@@ -1,4 +1,4 @@
-# $Id: pec.mak,v 1.5 2001-10-01 01:41:13 bird Exp $
+# $Id: pec.mak,v 1.6 2002-12-30 19:05:38 sandervl Exp $
 
 #
 # Odin32 API
@@ -20,6 +20,11 @@ MAKEFILE = pec.mak
 #
 !include ../../makefile.inc
 
+#
+# Overrides.
+#
+CXXFLAGS    = $(CXXFLAGS_ODINCRT)
+LD2FLAGS    = $(LD2FLAGS_ODINCRT)
 
 
 #
@@ -33,7 +38,6 @@ $(OBJDIR)\pec.obj
 # Libraries. One space before the '\'.
 #
 LIBS = \
-$(ODIN32_LIB)/$(ODINCRT).lib \
 $(RTLLIB_O) \
 os2386.lib
 
