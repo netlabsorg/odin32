@@ -1,4 +1,7 @@
- /* $Id: changelog,v 1.569 1999-12-21 16:59:45 cbratschi Exp $ */
+ /* $Id: changelog,v 1.570 1999-12-21 20:41:44 sandervl Exp $ */
+
+ 99-12-21: Jens Wiessner <wiessnej@rfi.de>
+	- MSVCRT: Updated msvcrt20 & msvcrt40 def files
 
  99-12-21: Christoph Bratschi <cbratschi@datacomm.ch>
 	- USER32: merged controls with WINE 991212
