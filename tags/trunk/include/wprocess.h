@@ -47,8 +47,10 @@ void   SetPDBInstance(HINSTANCE hInstance);
 
 extern BOOL fExeStarted;
 extern BOOL fFreeLibrary;
-extern BOOL fIsOS2Image; //TRUE  -> Odin32 OS/2 application (not converted!)
-                         //FALSE -> otherwise
+extern BOOL fIsOS2Image;   //TRUE  -> Odin32 OS/2 application (not converted!)
+                           //FALSE -> otherwise
+extern BOOL fSwitchTIBSel; // TRUE  -> switch TIB selectors
+                           // FALSE -> don't
 extern BOOL fExitProcess;
 
 //Flat pointer to thread TIB structure
