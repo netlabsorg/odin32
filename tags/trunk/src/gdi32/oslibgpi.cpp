@@ -1,4 +1,4 @@
-/* $Id: oslibgpi.cpp,v 1.10 2001-02-18 14:19:08 sandervl Exp $ */
+/* $Id: oslibgpi.cpp,v 1.11 2001-05-10 17:03:18 sandervl Exp $ */
 
 /*
  * GPI interface code
@@ -140,11 +140,6 @@ BOOL includeBottomRightPoint(PVOID pHps,PPOINTLOS2 pptl)
     if(GetDCData(pHps)->graphicsMode != GM_COMPATIBLE_W)
     {
         return TRUE;  // already inclusive/inclusive
-    }
-
-    if(pptl[0].x == pptl[1].x || pptl[0].y == pptl[1].y)
-    {
-        return FALSE; // empty rectangle
     }
 
     if(GetDCData(pHps)->isLeftLeft)
