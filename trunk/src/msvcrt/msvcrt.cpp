@@ -1,4 +1,4 @@
-/* $Id: msvcrt.cpp,v 1.5 1999-11-12 11:38:40 sandervl Exp $ */
+/* $Id: msvcrt.cpp,v 1.6 1999-11-27 19:52:20 sandervl Exp $ */
 
 /*
  * The Visual C RunTime DLL
@@ -31,6 +31,9 @@ extern UINT 	_fmode_dll;
 extern INT	__mb_cur_max_dll;
 extern USHORT	_pctype_dll;
 extern CRTDLL_FILE _iob;
+wchar_t ** __wargv;
+wchar_t * _wpgmptr;
+wchar_t ** _wenviron;
 
 
 /*********************************************************************
@@ -759,6 +762,17 @@ INT CDECL MSVCRT__adjust_fdiv(DWORD ret)
 
 
 /*********************************************************************
+ *                  _atoi64    (MSVCRT.163)
+ */
+__int64 CDECL MSVCRT__atoi64(const char *s)
+{
+  dprintf(("MSVCRT: _atoi64 not implemented.\n"));
+  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+  return FALSE;
+}
+
+
+/*********************************************************************
  *                  _except_handler3  (MSVCRT.203)
  */
 INT CDECL MSVCRT__except_handler3 ( PEXCEPTION_RECORD rec,
@@ -782,6 +796,17 @@ size_t CDECL MSVCRT__get_sbh_threshold( void )
 
 
 /*********************************************************************
+ *                  _getmaxstdio    (MSVCRT.256)
+ */
+int CDECL MSVCRT__getmaxstdio( void )
+{
+  dprintf(("MSVCRT: _getmaxstdio not implemented.\n"));
+  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+  return FALSE;
+}
+
+
+/*********************************************************************
  *                  _getmbcp    (MSVCRT.257)
  */
 int CDECL MSVCRT__getmbcp( void )
@@ -798,6 +823,39 @@ int CDECL MSVCRT__getmbcp( void )
 wchar_t * CDECL MSVCRT__getws( wchar_t *s )
 {
   dprintf(("MSVCRT: _getws not implemented.\n"));
+  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+  return FALSE;
+}
+
+
+/*********************************************************************
+ *                  _heapadd    (MSVCRT.263)
+ */
+int CDECL MSVCRT__heapadd(void *v, size_t s)
+{
+  dprintf(("MSVCRT: _heapadd not implemented.\n"));
+  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+  return FALSE;
+}
+
+
+/*********************************************************************
+ *                  _i64toa    (MSVCRT.270)
+ */
+char * CDECL MSVCRT__i64toa(__int64 i1, char *s, int i2)
+{
+  dprintf(("MSVCRT: _i64toa not implemented.\n"));
+  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+  return FALSE;
+}
+
+
+/*********************************************************************
+ *                  _i64tow    (MSVCRT.271)
+ */
+wchar_t * CDECL MSVCRT__i64tow(__int64 i1, wchar_t *s, int i2)
+{
+  dprintf(("MSVCRT: _i64tow not implemented.\n"));
   SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
   return FALSE;
 }
@@ -969,6 +1027,17 @@ int CDECL MSVCRT__set_sbh_threshold( size_t size )
 
 
 /*********************************************************************
+ *                  _setmaxstdio    (MSVCRT.426)
+ */
+int CDECL MSVCRT__setmaxstdio(int i)
+{
+  dprintf(("MSVCRT: _setmaxstdio not implemented.\n"));
+  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+  return FALSE;
+}
+
+
+/*********************************************************************
  *                  _strncoll    (MSVCRT.453)
  */
 int CDECL MSVCRT__strncoll( const char *s1, const char *s2, size_t n )
@@ -989,6 +1058,30 @@ int CDECL MSVCRT__strnicoll( const char *s1, const char *s2, size_t n )
   return FALSE;
 }
 
+
+/*********************************************************************
+ *                  _ui64toa    (MSVCRT.472)
+ */
+/*
+char * CDECL MSVCRT__ui64toa(unsigned __int64 value, char *s, int i)
+{
+  dprintf(("MSVCRT: _ui64toa not implemented.\n"));
+  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+  return FALSE;
+}
+*/
+
+/*********************************************************************
+ *                  _ui64tow    (MSVCRT.473)
+ */
+/*
+wchar_t * CDECL MSVCRT__ui64tow(unsigned __int64 value, wchar_t *s, int i)
+{
+  dprintf(("MSVCRT: _ui64tow not implemented.\n"));
+  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+  return FALSE;
+}
+*/
 
 /*********************************************************************
  *                  _ultow    (MSVCRT.475)
@@ -1221,6 +1314,19 @@ int CDECL MSVCRT__wfindnext( long handle, struct _wfinddata_t *fileinfo )
   SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
   return FALSE;
 }
+
+
+/*********************************************************************
+ *                  _wfindnexti64     (MSVCRT.515)
+ */
+/*
+int CDECL MSVCRT__wfindnexti64(intptr_t x, struct _wfinddatai64_t *s)
+{
+  dprintf(("MSVCRT: _wfindnexti64 not implemented.\n"));
+  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+  return FALSE;
+}
+*/
 
 
 /*********************************************************************
@@ -1554,6 +1660,17 @@ int CDECL MSVCRT__wstat( const wchar_t *s, struct _wstat *w )
 
 
 /*********************************************************************
+ *                  _wstati64          (MSVCRT.551)
+ */
+int CDECL MSVCRT__wstati64(const wchar_t *s, struct _stati64 *w)
+{
+  dprintf(("MSVCRT: _wstati64 not implemented.\n"));
+  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+  return FALSE;
+}
+
+
+/*********************************************************************
  *                  _wstrdate          (MSVCRT.552)
  */
 wchar_t * CDECL MSVCRT__wstrdate( wchar_t *buf )
@@ -1598,11 +1715,22 @@ wchar_t * CDECL MSVCRT__wtempnam( wchar_t *dir, wchar_t *prefix )
 
 
 /*********************************************************************
- *                  _wtmpnam          (MSVCRT.555)
+ *                  _wtmpnam          (MSVCRT.558)
  */
 wchar_t * CDECL MSVCRT__wtmpnam( wchar_t *tn )
 {
   dprintf(("MSVCRT: _wtmpnam not implemented.\n"));
+  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+  return FALSE;
+}
+
+
+/*********************************************************************
+ *                  _wtoi64          (MSVCRT.556)
+ */
+__int64 CDECL MSVCRT__wtoi64(const wchar_t *wt)
+{
+  dprintf(("MSVCRT: _wtoi64 not implemented.\n"));
   SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
   return FALSE;
 }
