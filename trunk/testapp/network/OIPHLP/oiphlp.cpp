@@ -8,7 +8,7 @@
 
 
 void doPrintIPAddressString(LPSTR lpstrTitle,
-							PIP_ADDR_STRING pipAddr)
+                            PIP_ADDR_STRING pipAddr)
 {
 	printf("%s\n"
 		   "      next = %08xh\n"
@@ -51,7 +51,7 @@ void doPrintAdapterInfo(PIP_ADAPTER_INFO p)
 	printf("  address '");
 	for (i = 0, pb=p->Address;
 		i < p->AddressLength;
-		i++, p++)
+		i++, pb++)
 	{
 		printf("%02xh ",
 			*pb);
