@@ -1,4 +1,7 @@
- /* $Id: ChangeLog,v 1.349 1999-10-20 22:13:23 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.350 1999-10-20 22:37:18 sandervl Exp $ */
+
+ 99-10-20: Edgar Buerkle <Edgar.Buerkle@gmx.net>
+	- GDI32: Implemented EnumFontFamiliesA/W
 
  99-10-20: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32: Added support for WM_WINDOWPOSCHANGING in default window handler
@@ -7,6 +10,8 @@
                   Bugfixes for PM WM_WINDOWPOSCHANGED handling & OSLibMapSWPtoWINDOWPOS.
                   (Win32 WM_WINDOWPOSCHANGED now also sends window coordinates, not client)
                   Rewrote MapWindowPoints. (NOTE: Needs to be tested!)
+                  Combobox bugfix (resizing listbox using old rectangle -> get current
+                  one)
 
  99-10-20: Patrick Haller <phaller@gmx.net>
 	- WSOCK32:  Partial rewrite of WSA async sockets completed.
