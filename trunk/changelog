@@ -1,4 +1,8 @@
-/* $Id: changelog,v 1.2377 2002-12-04 15:21:00 sandervl Exp $ */
+/* $Id: changelog,v 1.2378 2002-12-05 09:23:33 sandervl Exp $ */
+
+ 2002-12-05: Platon Fomichev <platon@innotek   >
+    - USER32:   o Changed system menu in OS/2 GUI mode
+                o Support the standard system menu hotkeys in OS/2 GUI mode
 
  2002-12-04: Sander van Leeuwen <sandervl@innotek   >
     - DDRAW:    o Cleanup
