@@ -1,4 +1,4 @@
-/* $Id: shlobj.h,v 1.4 1999-11-02 19:06:43 sandervl Exp $ */
+/* $Id: shlobj.h,v 1.5 2000-02-03 13:26:23 sandervl Exp $ */
 #ifndef __WINE_SHLOBJ_H
 #define __WINE_SHLOBJ_H
 
@@ -199,7 +199,7 @@ void WINAPI WinExecErrorW(HWND hwnd,INT error, LPCWSTR lpstrFileName, LPCWSTR lp
 /****************************************************************************
  * SHBrowseForFolder API
  */
-typedef INT (CALLBACK* BFFCALLBACK)(HWND hwnd, UINT uMsg, LPARAM lParam, LPARAM lpData);
+typedef INT (* CALLBACK BFFCALLBACK)(HWND hwnd, UINT uMsg, LPARAM lParam, LPARAM lpData);
 
 typedef struct tagBROWSEINFOA {
     HWND        hwndOwner;
@@ -331,7 +331,7 @@ HRESULT WINAPI SHGetSpecialFolderLocation(HWND hwndOwner, INT nFolder, LPITEMIDL
 *  Look there for some clues on what to do here.
 */
 
-typedef HRESULT(CALLBACK *SHELLVIEWPROC)(DWORD dwUserParam,LPSHELLFOLDER psf,
+typedef HRESULT(* CALLBACK SHELLVIEWPROC)(DWORD dwUserParam,LPSHELLFOLDER psf,
                          HWND hwnd,UINT uMsg,UINT wParam,LPARAM lParam);
 
 /* NF valid values for the "viewmode" item of the SHELLTEMPLATE*/
@@ -366,7 +366,7 @@ DWORD WINAPI SHGetMalloc(LPMALLOC *lpmal) ;
 #define	FMF_NO_EMPTY_ITEM	0x01
 #define	FMF_NO_PROGRAM_GROUPS	0x04
 
-typedef void (CALLBACK * LPFNFMCALLBACK)(LPCITEMIDLIST pidlFolder, LPCITEMIDLIST pidlFile);
+typedef void (* CALLBACK  LPFNFMCALLBACK)(LPCITEMIDLIST pidlFolder, LPCITEMIDLIST pidlFile);
 
 /* FileMenu_AppendItem lpszText */
 #define	FM_SEPARATOR		(LPCSTR)1
@@ -377,23 +377,23 @@ typedef void (CALLBACK * LPFNFMCALLBACK)(LPCITEMIDLIST pidlFolder, LPCITEMIDLIST
  * SHGetSettings ()
  */
 typedef struct
-{	BOOL fShowAllObjects : 1;
-	BOOL fShowExtensions : 1;
-	BOOL fNoConfirmRecycle : 1;
-	BOOL fShowSysFiles : 1;
+{	unsigned int fShowAllObjects : 1;
+	unsigned int fShowExtensions : 1;
+	unsigned int fNoConfirmRecycle : 1;
+	unsigned int fShowSysFiles : 1;
 
-	BOOL fShowCompColor : 1;
-	BOOL fDoubleClickInWebView : 1;
-	BOOL fDesktopHTML : 1;
-	BOOL fWin95Classic : 1;
+	unsigned int fShowCompColor : 1;
+	unsigned int fDoubleClickInWebView : 1;
+	unsigned int fDesktopHTML : 1;
+	unsigned int fWin95Classic : 1;
 
-	BOOL fDontPrettyPath : 1;
-	BOOL fShowAttribCol : 1;
-	BOOL fMapNetDrvBtn : 1;
-	BOOL fShowInfoTip : 1;
+	unsigned int fDontPrettyPath : 1;
+	unsigned int fShowAttribCol : 1;
+	unsigned int fMapNetDrvBtn : 1;
+	unsigned int fShowInfoTip : 1;
 
-	BOOL fHideIcons : 1;
-	UINT fRestFlags : 3;
+	unsigned int fHideIcons : 1;
+	unsigned int fRestFlags : 3;
 } SHELLFLAGSTATE, * LPSHELLFLAGSTATE;
 
 void WINAPI SHGetSettings(LPSHELLFLAGSTATE lpsfs, DWORD dwMask, DWORD dwx);

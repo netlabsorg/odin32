@@ -1,4 +1,4 @@
-/* $Id: obj_oleaut.h,v 1.6 1999-12-22 23:27:14 davidr Exp $ */
+/* $Id: obj_oleaut.h,v 1.7 2000-02-03 13:26:23 sandervl Exp $ */
 /*
  * Defines the COM interfaces and APIs related to OLE automation support.
  */
@@ -224,7 +224,7 @@ typedef struct tagEXCEPINFO
     BSTR  bstrHelpFile;
     DWORD dwHelpContext;
     PVOID pvReserved;
-    HRESULT (__stdcall *pfnDeferredFillIn)(struct tagEXCEPINFO *);
+    HRESULT (* __stdcall pfnDeferredFillIn)(struct tagEXCEPINFO *);
     SCODE scode;
 } EXCEPINFO, * LPEXCEPINFO;
 

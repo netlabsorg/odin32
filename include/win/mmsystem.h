@@ -1,4 +1,4 @@
-/* $Id: mmsystem.h,v 1.5 2000-01-26 23:17:48 sandervl Exp $ */
+/* $Id: mmsystem.h,v 1.6 2000-02-03 13:26:22 sandervl Exp $ */
 /* 
  * MMSYSTEM - Multimedia Wine Extension ... :-)
  */
@@ -162,8 +162,8 @@ typedef struct {
 #define CALLBACK_FUNCTION   	0x00030000l    	/* dwCallback is a FARPROC */
 #define CALLBACK_EVENT		0x00050000l	/* dwCallback is an EVENT Handler */
 
-typedef void (CALLBACK *LPDRVCALLBACK16) (HDRVR16 h, UINT16 uMessage, DWORD dwUser, DWORD dw1, DWORD dw2);
-typedef void (CALLBACK *LPDRVCALLBACK) (HDRVR h, UINT uMessage, DWORD dwUser, DWORD dw1, DWORD dw2);
+typedef void (* CALLBACK LPDRVCALLBACK16) (HDRVR16 h, UINT16 uMessage, DWORD dwUser, DWORD dw1, DWORD dw2);
+typedef void (* CALLBACK LPDRVCALLBACK) (HDRVR h, UINT uMessage, DWORD dwUser, DWORD dw1, DWORD dw2);
 
 #define MM_MICROSOFT            1       /* Microsoft Corp. */
 
@@ -787,8 +787,8 @@ UINT		WINAPI	auxOutMessage(UINT,UINT,DWORD,DWORD);
 #define TIMERR_NOCANDO        (TIMERR_BASE+1)      /* request not completed */
 #define TIMERR_STRUCT         (TIMERR_BASE+33)     /* time struct size */
 
-typedef void (CALLBACK *LPTIMECALLBACK16)(UINT16 uTimerID, UINT16 uMessage, DWORD dwUser, DWORD dw1, DWORD dw2);
-typedef void (CALLBACK *LPTIMECALLBACK)(UINT uTimerID, UINT uMessage, DWORD dwUser, DWORD dw1, DWORD dw2);
+typedef void (* CALLBACK LPTIMECALLBACK16)(UINT16 uTimerID, UINT16 uMessage, DWORD dwUser, DWORD dw1, DWORD dw2);
+typedef void (* CALLBACK LPTIMECALLBACK)(UINT uTimerID, UINT uMessage, DWORD dwUser, DWORD dw1, DWORD dw2);
 
 #define TIME_ONESHOT			0x0000	/* program timer for single event */
 #define TIME_PERIODIC			0x0001	/* program for continuous periodic event */
@@ -1500,9 +1500,9 @@ UINT		WINAPI	mixerSetControlDetails(HMIXEROBJ,LPMIXERCONTROLDETAILS,DWORD);
 #define CFSEPCHAR       '+'             /* compound file name separator char. */
 
 typedef DWORD           FOURCC;         /* a four character code */
-typedef LONG (CALLBACK *LPMMIOPROC16)(LPSTR lpmmioinfo, UINT16 uMessage,
+typedef LONG (* CALLBACK LPMMIOPROC16)(LPSTR lpmmioinfo, UINT16 uMessage,
                                       LPARAM lParam1, LPARAM lParam2);
-typedef LONG (CALLBACK *LPMMIOPROC)(LPSTR lpmmioinfo, UINT uMessage,
+typedef LONG (* CALLBACK LPMMIOPROC)(LPSTR lpmmioinfo, UINT uMessage,
 				    LPARAM lParam1, LPARAM lParam2);
 
 typedef struct {
