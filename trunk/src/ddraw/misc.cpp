@@ -1,3 +1,4 @@
+/* $Id: misc.cpp,v 1.3 1999-10-26 17:53:09 sandervl Exp $ */
 #define INCL_BASE
 #define INCL_WIN
 #define INCL_WINERRORS
