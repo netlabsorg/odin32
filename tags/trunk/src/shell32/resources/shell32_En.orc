@@ -1,4 +1,4 @@
-/* $Id: shell32_En.orc,v 1.2 2002-06-11 06:30:56 sandervl Exp $ */
+/* $Id: shell32_En.orc,v 1.3 2003-11-12 14:04:53 sandervl Exp $ */
 LANGUAGE LANG_ENGLISH, SUBLANG_DEFAULT
 
 #if 1
@@ -80,4 +80,20 @@ STRINGTABLE DISCARDABLE
     IDS_35FLOPPY            "3.5 disk"
     IDS_525FLOPPY           "5.25 disk"
 }
+#if 0
+STRINGTABLE DISCARDABLE
+{
+	IDS_CREATEFOLDER_DENIED "Can not create new Folder: Permission denied."
+	IDS_CREATEFOLDER_CAPTION "Error during creating a new folder"
+	IDS_DELETEITEM_CAPTION "Confirm file delete"
+	IDS_DELETEFOLDER_CAPTION "Confirm folder delete"
+	IDS_DELETEITEM_TEXT "Are you sure you want to delete '%1'?"
+	IDS_DELETEMULTIPLE_TEXT "Are you sure you want to delete these %1 items?"
+#ifdef __WIN32OS2__
+	IDS_OVERWRITEFILE_TEXT "OverWrite File %1?"
+	IDS_OVERWRITEFILE_CAPTION "Confirm File OverWrite"
+    IDS_COPY_X_OF_TEXT "Copy () of "
+#endif
+}
+#endif
 

@@ -1,4 +1,4 @@
-/* $Id: shell32_Wa.orc,v 1.1 2002-06-08 07:27:02 sandervl Exp $ */
+/* $Id: shell32_Wa.orc,v 1.2 2003-11-12 14:04:55 sandervl Exp $ */
 LANGUAGE LANG_WALON, SUBLANG_DEFAULT
 
 /*
@@ -6,6 +6,21 @@ LANGUAGE LANG_WALON, SUBLANG_DEFAULT
  * vos poloz scrîre a l' adresse emile <linux-wa@chanae.alphanet.ch>
  */
 
+#if 1
+SHELL_ABOUT_MSGBOX DIALOG LOADONCALL MOVEABLE DISCARDABLE 15, 40, 216, 170
+STYLE DS_MODALFRAME | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
+CAPTION "Å dfait di %s"
+FONT 10, "System"
+{
+ DEFPUSHBUTTON "OK", IDOK, 156, 147, 50, 12, WS_TABSTOP
+ LISTBOX 99, 8, 85, 137, 82, LBS_NOTIFY | WS_VSCROLL | WS_BORDER
+ ICON "", 1088, 189, 50, 14, 16
+ LTEXT "", 100, 8, 50, 137, 33
+ LTEXT "Odin a estu fwait par:", 98, 8, 75, 90, 10
+ LTEXT "", 2002, 100, 75, 90, 10
+ CONTROL "",2001,"Static",SS_BITMAP,8,2,148,26
+}
+#else
 SHELL_ABOUT_MSGBOX DIALOG LOADONCALL MOVEABLE DISCARDABLE 15, 40, 210, 152
 STYLE DS_MODALFRAME | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
 CAPTION "Å dfait di %s"
@@ -17,4 +32,5 @@ FONT 10, "System"
  LTEXT "", 100, 8, 10, 137, 33
  LTEXT "Odin a estu fwait par:", 98, 8, 55, 137, 10
 }
+#endif
 
