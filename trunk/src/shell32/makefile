@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.30 2000-11-19 08:50:16 bird Exp $
+# $Id: makefile,v 1.31 2000-11-24 13:19:12 sandervl Exp $
 
 #
 # Odin32 API
@@ -11,6 +11,12 @@
 # Compiler, tools, and interference rules.
 #
 !include ../../include/pdwin32.mk
+
+
+#
+# Overrides
+#
+RCFLAGS = $(RCFLAGS) -D__WIN32OS2__
 
 
 #

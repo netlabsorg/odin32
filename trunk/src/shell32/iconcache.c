@@ -1,4 +1,4 @@
-/* $Id: iconcache.c,v 1.2 2000-11-17 09:57:35 sandervl Exp $ */
+/* $Id: iconcache.c,v 1.3 2000-11-24 13:19:12 sandervl Exp $ */
 /*
  *	shell icon cache (SIC)
  *
@@ -217,6 +217,257 @@ static BYTE * ICO_GetIconDirectory( HFILE hFile, LPicoICONDIR* lplpiID, ULONG *u
 	HeapFree( GetProcessHeap(), 0, lpiID);
 	return 0;
 }
+
+#ifdef __WIN32OS2__
+
+/*************************************************************************/
+
+typedef struct
+{
+	INT		nStartIndex;
+	UINT	nIcons;
+	UINT	cx;
+	UINT	cy;
+	UINT	nCurrIndex;
+	HICON * phIcons;
+	UINT	nRetrieved;
+
+} GETICONSPROCPARAM;
+
+static BOOL CALLBACK GetIconsProc( HANDLE  hModule,
+								   LPCTSTR lpszType,
+								   LPTSTR  lpszName,
+								   LONG    lParam )
+{
+	GETICONSPROCPARAM* pIcons = (GETICONSPROCPARAM *)lParam;
+
+	if ( ( pIcons->nStartIndex == -1 ) && !pIcons->phIcons && !pIcons->nIcons )
+	{
+		/* number of icons ( RT_GROUP_ICON resources ) requested. */
+		pIcons->nRetrieved++;
+	}
+	else if ( pIcons->nStartIndex < 0 )
+	{
+		/* begins by extracting the icon whose resource identifier
+		   is equal to	the absolute value of nStartIndex. */
+
+		INT iResId = abs( pIcons->nStartIndex );
+		if ( lpszName < 0x10000 )
+		{
+			if ( (INT)lpszName == iResId )
+			{
+				/* Found icondir with resid iResId. */
+				/* This is the starting index.      */
+				pIcons->nStartIndex = pIcons->nCurrIndex;			
+			}			 		   	
+		}
+		else
+		{
+			char buffer[ 8 ];
+			sprintf( buffer, "#%u", iResId ); 		
+			if ( strcmp( lpszName, buffer ) == 0 )
+			{
+				/* Found icondir with resid iResId. */
+				/* This is the starting index.      */
+				pIcons->nStartIndex = pIcons->nCurrIndex;			
+			}			 		   	
+		}
+	}
+	
+	if ( pIcons->nStartIndex >= 0 )
+	{
+		/* extract icons by index */	
+	
+		if ( pIcons->nCurrIndex >= pIcons->nStartIndex )
+		{
+			HICON hIcon	= LoadImageA( hModule,
+									  lpszName,
+									  IMAGE_ICON,
+									  pIcons->cx,
+									  pIcons->cy,
+									  LR_DEFAULTCOLOR );
+			*pIcons->phIcons = hIcon;
+			if ( hIcon )
+				pIcons->nRetrieved++;
+				
+			pIcons->phIcons++;
+		}
+		
+		if ( pIcons->nCurrIndex
+						== ( pIcons->nStartIndex + pIcons->nIcons - 1 ) )
+		{
+			/* done, stop enumeration */
+			return FALSE;
+		}
+	}
+	
+	/* continue enumeration */
+	pIcons->nCurrIndex++;
+	return TRUE;
+}
+
+/*************************************************************************
+ *
+ * returns
+ *	failure: 0
+ *	success: nr of icons in file, if nIconIndex is -1,
+ *			 nr of icons successfully extracted, otherwise.
+ */
+UINT WINAPI ICO_ExtractIconEx( LPCSTR lpszExeFileName,
+							   HICON * RetPtr,
+							   INT nIconIndex,
+							   UINT n,
+							   UINT cxDesired,
+							   UINT cyDesired )
+{
+	UINT nIconCount = 0;
+	HINSTANCE hInst = 0;
+
+	TRACE( "file=%s, index=%d, n=%u\n", lpszExeFileName, nIconIndex, n );
+
+#if 0
+	if ( stricmp( lpszExeFileName, "shell32.dll" ) == 0 )
+	{
+		/* Use original renamed dll, if present. It contains all icons. ;-) */
+		hInst = LoadLibraryExA( "shell32_pe.dll", 0, LOAD_LIBRARY_AS_DATAFILE );
+	}
+		
+	if ( !hInst )
+#endif	
+		hInst = LoadLibraryExA( lpszExeFileName, 0, LOAD_LIBRARY_AS_DATAFILE );
+
+	if ( hInst )
+	{
+		GETICONSPROCPARAM icons = {
+				nIconIndex,	n, cxDesired, cyDesired, 0, RetPtr, 0 };
+		
+		EnumResourceNamesA(
+			hInst, RT_GROUP_ICONA, &GetIconsProc, (LONG)&icons );
+			
+		nIconCount = icons.nRetrieved;
+
+		FreeLibrary( hInst );
+	}
+	else
+	{
+		HFILE		hFile;
+		OFSTRUCT	ofs;
+		DWORD		sig;
+		LPBYTE		pData;
+		UINT16		iconDirCount = 0,iconCount = 0;
+		ULONG		uSize;
+
+		if( nIconIndex!=-1 && !n )
+			return 0;
+
+		hFile = OpenFile( lpszExeFileName, &ofs, OF_READ );
+					
+		if( hFile == HFILE_ERROR )
+	  		return 0;
+
+		sig = SHELL_GetResourceTable(hFile,&pData);
+
+		if( sig==IMAGE_OS2_SIGNATURE || sig==1 ) /* .ICO file */
+		{
+			/* NE image ( OS/2 1.x / Win 3.x ) / ico file */
+	
+	 		BYTE			*pCIDir = 0;
+	  		NE_TYPEINFO		*pTInfo = (NE_TYPEINFO*)(pData + 2);
+	  		NE_NAMEINFO		*pIconStorage = NULL;
+	  		NE_NAMEINFO		*pIconDir = NULL;
+	  		LPicoICONDIR	lpiID = NULL;
+
+	  		TRACE("-- OS2/icon Signature (0x%08lx)\n", sig);
+
+	  		if( pData == (BYTE*)-1 )
+	  		{
+	  			pCIDir = ICO_GetIconDirectory(hFile, &lpiID, &uSize);	/* check for .ICO file */
+	    		if( pCIDir )
+	    		{
+	    			iconDirCount = 1; iconCount = lpiID->idCount;
+	      			TRACE("-- icon found %p 0x%08lx 0x%08x 0x%08x\n", pCIDir, uSize, iconDirCount, iconCount);
+	    		}
+	  		}
+	  		else while( pTInfo->type_id && !(pIconStorage && pIconDir) )
+	  		{
+	  			if( pTInfo->type_id == NE_RSCTYPE_GROUP_ICON )	/* find icon directory and icon repository */
+	    		{
+	    			iconDirCount = pTInfo->count;
+	      			pIconDir = ((NE_NAMEINFO*)(pTInfo + 1));
+	      			TRACE("\tfound directory - %i icon families\n", iconDirCount);
+	    		}
+	    		if( pTInfo->type_id == NE_RSCTYPE_ICON )
+	    		{
+	    			iconCount = pTInfo->count;
+	      			pIconStorage = ((NE_NAMEINFO*)(pTInfo + 1));
+	      			TRACE("\ttotal icons - %i\n", iconCount);
+	    		}
+	    		pTInfo = (NE_TYPEINFO *)((char*)(pTInfo+1)+pTInfo->count*sizeof(NE_NAMEINFO));
+	  		}
+
+	  		if( (pIconStorage && pIconDir) || lpiID )	  /* load resources and create icons */
+	  		{
+	  			if( nIconIndex == (UINT16)-1 )
+	    		{
+		  			/* icon count requested */
+	    			nIconCount = iconDirCount;
+	    		}
+	    		else if( nIconIndex < iconDirCount )
+	    		{
+	    			UINT16   i, icon;
+	      			if( n > iconDirCount - nIconIndex )
+	        			n = iconDirCount - nIconIndex;
+
+	      			for( i = nIconIndex; i < nIconIndex + n; i++ )
+	      			{
+	      				/* .ICO files have only one icon directory */
+
+	        			if( lpiID == NULL )	/* *.ico */
+	          				pCIDir = SHELL_LoadResource( hFile, pIconDir + i, *(WORD*)pData, &uSize );
+	          				
+	        			RetPtr[i-nIconIndex] = pLookupIconIdFromDirectoryEx( pCIDir, TRUE,  GetSystemMetrics(SM_CXICON), GetSystemMetrics(SM_CYICON), 0);
+	        			
+	        			if ( RetPtr[i-nIconIndex] )
+	        				nIconCount++;
+	        				
+	        			HeapFree(GetProcessHeap(), 0, pCIDir);
+	      			}
+
+	      			for( icon = nIconIndex; icon < nIconIndex + n; icon++ )
+	      			{
+	      				pCIDir = NULL;
+	        			if( lpiID )
+	        				pCIDir = ICO_LoadIcon( hFile, lpiID->idEntries + RetPtr[icon-nIconIndex], &uSize);
+	        			else
+	        			{
+	        				for( i = 0; i < iconCount; i++ )
+	          				{
+	          					if( pIconStorage[i].id == (RetPtr[icon-nIconIndex] | 0x8000) )
+	            					pCIDir = SHELL_LoadResource( hFile, pIconStorage + i,*(WORD*)pData, &uSize );
+	          				}
+	        			}
+	        			if( pCIDir )
+	        			{
+	        				RetPtr[icon-nIconIndex] = (HICON) pCreateIconFromResourceEx(pCIDir,uSize,TRUE,0x00030000, cxDesired, cyDesired, LR_DEFAULTCOLOR);
+		        			if ( RetPtr[icon-nIconIndex] )
+		        				nIconCount++;
+	        			}
+	        			else
+	        				RetPtr[icon-nIconIndex] = 0;
+	      			}
+	    		}
+	  		}
+	  		if( lpiID )
+	    		HeapFree( GetProcessHeap(), 0, lpiID);
+	  		else
+	    		HeapFree( GetProcessHeap(), 0, pData);
+		}
+		_lclose( hFile);
+	}
+	return nIconCount;
+}
+
+#else /* ! __WIN32OS2__ */
 
 /*************************************************************************
  *
@@ -468,37 +719,6 @@ HICON WINAPI ICO_ExtractIconEx(LPCSTR lpszExeFileName, HICON * RetPtr, INT nIcon
 	  hRet = RetPtr[0];	/* return first icon */
 	  goto end_3;		/* sucess */
 	}
-#ifdef __WIN32OS2__
-	else
-    {
-    	if( nIconIndex == -1 )
-	    {
-	        TRACE( "ICO_ExtractIconEx : iconcount not implemented!\n" );
-	    }
-        else
-        {
-            /* Try to get icon(s) using LoadImageA. This works for
-               LX images, like Odin's shell32.dll! */
-            HINSTANCE hInst = LoadLibraryA( lpszExeFileName );
-            if ( hInst )
-            {
-                INT icon;
-	            for( icon = nIconIndex; icon < nIconIndex + n; icon++ )
-	            {
-	                RetPtr[ icon - nIconIndex ]
-	                    = LoadImageA( hInst,
-                                      MAKEINTRESOURCEA( icon ),
-	                                  IMAGE_ICON,
-	                                  cxDesired,
-	                                  cyDesired,
-	                                  LR_DEFAULTCOLOR );
-	            }
-                hRet = RetPtr[ 0 ];
-                FreeLibrary( hInst );	
-            }
-        }
-    }
-#endif
 	goto end_1;		/* unknown filetype */
 
 /* cleaning up (try & catch would be nicer:-) ) */
@@ -507,6 +727,8 @@ end_2:	CloseHandle(fmapping);
 end_1:	_lclose( hFile);
 	return hRet;
 }
+
+#endif /* ! __WIN32OS2__ */
 
 /********************** THE ICON CACHE ********************************/
 
@@ -695,7 +917,7 @@ BOOL SIC_Initialize(void)
 	pImageList_SetBkColor(ShellSmallIconList, GetSysColor(COLOR_WINDOW));
 	pImageList_SetBkColor(ShellBigIconList, GetSysColor(COLOR_WINDOW));
 
-	for (index=1; index<39; index++)
+	for (index=1; index<46; index++)
 	{
 	  hSm = LoadImageA(shell32_hInstance, MAKEINTRESOURCEA(index), IMAGE_ICON, 16, 16,LR_SHARED);
 	  hLg = LoadImageA(shell32_hInstance, MAKEINTRESOURCEA(index), IMAGE_ICON, 32, 32,LR_SHARED);
@@ -854,6 +1076,97 @@ INT WINAPI Shell_GetCachedImageIndexAW(LPCVOID szPath, INT nIndex, BOOL bSimulat
 	return Shell_GetCachedImageIndexA(szPath, nIndex, bSimulateDoc);
 }
 
+#ifdef __WIN32OS2__
+
+/*************************************************************************
+ * ExtractIconEx			[shell32.189]
+ */
+UINT WINAPI ExtractIconExAW ( LPCVOID lpszFile, INT nIconIndex, HICON * phiconLarge, HICON * phiconSmall, UINT nIcons )
+{	if (SHELL_OsIsUnicode())
+	  return ExtractIconExW ( lpszFile, nIconIndex, phiconLarge, phiconSmall, nIcons);
+	return ExtractIconExA ( lpszFile, nIconIndex, phiconLarge, phiconSmall, nIcons);
+}
+/*************************************************************************
+ * ExtractIconExA			[shell32.190]
+ *
+ * PARAMETERS
+ *	lpszFile [in] 		Pointer to a null-terminated string specifying the name
+ *				  		of an executable file, DLL, or icon file from which
+ *						icons will be extracted.
+ *
+ *	nIconIndex [in] 	Specifies the zero-based index of the first icon to
+ *						extract. For example, if this value is zero, the
+ *						function extracts the first icon in the specified file.
+ *
+ *						If this value is -1 and phIconLarge and phiconSmall are
+ *						both NULL, the function returns the total number of
+ *						icons in the specified file. If the file is an
+ *						executable file	or DLL, the return value is the number
+ *						of RT_GROUP_ICON resources. If the file is an .ico file,
+ *						the return value is 1.
+ *
+ *						Windows 95/98, Windows NT 4.0, and Windows 2000:
+ *						If this value is a negative number and either
+ *						phIconLarge	or phiconSmall is not NULL, the function
+ *						begins by extracting the icon whose resource identifier
+ *						is equal to	the absolute value of nIconIndex. For
+ *						example, use -3 to extract the icon whose resource
+ *						identifier is 3.
+ *
+ *	phiconLarge [out] 	Pointer to an array of icon handles that receives
+ *						handles to the large icons extracted from the file.
+ *						If this parameter is NULL, no large icons are extracted
+ *						from the file.
+ *
+ *	phiconSmall [out] 	Pointer to an array of icon handles that receives
+ *						handles to the small icons extracted from the file.
+ *						If this parameter is NULL, no small icons are extracted
+ *						from the file.
+ *
+ *	nIcons [in] 		Specifies the number of icons to extract from the file.
+ *
+ * RETURNS
+ *	If the nIconIndex parameter is -1, the phiconLarge parameter is NULL, and
+ *	the phiconSmall parameter is NULL, then the return value is the number of
+ *	icons contained in the specified file. Otherwise, the return value is the
+ *	number of icons successfully extracted from the file.
+ */
+UINT WINAPI ExtractIconExA ( LPCSTR lpszFile, INT nIconIndex, HICON * phiconLarge, HICON * phiconSmall, UINT nIcons )
+{	UINT ret=0;
+
+	TRACE("file=%s idx=%i %p %p num=%i\n", lpszFile, nIconIndex, phiconLarge, phiconSmall, nIcons );
+
+	if ( ( nIconIndex == -1 ) && !phiconLarge && !phiconSmall )	/* Number of icons requested */
+	  return ICO_ExtractIconEx(lpszFile, NULL, -1, 0, 0, 0	);
+
+	/* KSO: What, if phiconLarge and phiconSmall are given, and first call
+			to ICO_ExtractIconEx returns a value other than the second one?
+	 */
+	if (phiconLarge)
+	  ret = ICO_ExtractIconEx(lpszFile, phiconLarge, nIconIndex, nIcons, 32, 32  );
+
+	if (phiconSmall)
+	  ret = ICO_ExtractIconEx(lpszFile, phiconSmall, nIconIndex, nIcons, 16, 16  );
+
+	return ret;
+}
+/*************************************************************************
+ * ExtractIconExW			[shell32.191]
+ */
+UINT WINAPI ExtractIconExW ( LPCWSTR lpszFile, INT nIconIndex, HICON * phiconLarge, HICON * phiconSmall, UINT nIcons )
+{	LPSTR sFile;
+	UINT ret;
+
+	TRACE("file=%s idx=%i %p %p num=%i\n", debugstr_w(lpszFile), nIconIndex, phiconLarge, phiconSmall, nIcons );
+
+	sFile = HEAP_strdupWtoA (GetProcessHeap(),0,lpszFile);
+	ret = ExtractIconExA ( sFile, nIconIndex, phiconLarge, phiconSmall, nIcons);
+	HeapFree(GetProcessHeap(),0,sFile);
+	return ret;
+}
+
+#else /* ! __WIN32OS2__ */
+
 /*************************************************************************
  * ExtractIconEx			[shell32.189]
  */
@@ -912,3 +1225,6 @@ HICON WINAPI ExtractIconExW ( LPCWSTR lpszFile, INT nIconIndex, HICON * phiconLa
 	HeapFree(GetProcessHeap(),0,sFile);
 	return ret;
 }
+
+#endif /* ! __WIN32OS2__ */
+
