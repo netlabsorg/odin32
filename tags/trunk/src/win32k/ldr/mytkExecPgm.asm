@@ -1,4 +1,4 @@
-; $Id: mytkExecPgm.asm,v 1.4 2000-02-21 05:00:53 bird Exp $
+; $Id: mytkExecPgm.asm,v 1.5 2000-02-21 09:24:01 bird Exp $
 ;
 ; mytkExecPgm - tkExecPgm overload
 ;
@@ -22,8 +22,29 @@ DATA32 ENDS
     extrn  AcquireBuffer:PROC
     extrn  ReleaseBuffer:PROC
     extrn  QueryBufferSegmentOffset:PROC
-    extrn  f_FuStrLenZ
-    extrn  f_FuBuff
+
+    ; Scans strings until empy-string is reached.
+    ; input:  bx:di
+    ; uses:   nearly all (save bp)
+    ; return: cx size - CF clear
+    ;         ax error- CF set
+    extrn  f_FuStrLenZ:PROC
+
+    ; Stringlength
+    ; input:  bx:di
+    ; uses:   nearly all (save bp)
+    ; return: cx size - CF clear
+    ;         ax error- CF set
+    extrn  f_FuStrLen:PROC
+
+    ;memcpy
+    ;input:  bx:si pointer to source
+    ;        es:di pointer to target
+    ;        cx    count of bytes to copy
+    ;uses:   nearly all (save bp)
+    ;return: success CF clear
+    ;        failure CF set
+    extrn  f_FuBuff:PROC
 
 ;
 ;   Exported symbols
@@ -80,37 +101,32 @@ cchArgs     = dword ptr -14h
     push    es
     push    edi
 
-IF 0
-;    ; Check if this overloading has anything too say, after all it is using some stack space!
-;    jmp     mytkExecPgm_CalltkExecPgm_X1
-ENDIF
-
     ; parameter validations
     mov     ax, ds                      ; pointer to filename
     cmp     ax, 4
     jb      mytkExecPgm_CalltkExecPgm_X1
 
-    ; This test is currently disabled. We'll pass on an empty string if the argument pointer is NULL.
-    ; Hopefully an empty string is treated equally to an NULL pointer.
-;    cmp     di, 4
-;    jl      mytkExecPgm_CalltkExecPgm_X1
-
+    ;
     ; filename length
+    ;
     mov     ax, ds
     mov     es, ax
-    xor     eax, eax
-    movzx   edi, dx                     ; es:di is now filename address (ds:dx).
-    mov     ecx, 0ffffffffh
-    cld
-    repne scasb
-    not     ecx
+    pushad
+    mov     bx, ds
+    mov     di, dx                      ; es:di is now filename address (ds:dx).
+    push    cs                          ; Problem calling far into the calltab segement.
+    call    near ptr FLAT:f_FuStrLen
+    movzx   ecx, cx
+    mov     [ebp+cchFilename], ecx
+    popad
+    jc      mytkExecPgm_CalltkExecPgm_X1; If the FuStrLen call failed we bail out!
 
     ;
     ; if filename length is more that CCHMAXPATH then we don't do anything!.
     ;
+    mov     ecx, [ebp+cchFilename]
     cmp     ecx, 260
     jae     mytkExecPgm_CalltkExecPgm_X1; length >= 260
-    mov     [ebp+cchFilename], ecx
 
     ;
     ; args length
@@ -121,19 +137,19 @@ ENDIF
     xor     ecx, ecx
     cmp     di, 4                       ; The argument might me a invalid pointer...
     jb      mytkExecPgm_CalltkExecPgm_1
-    mov     es, di
-    movzx   edi, si                     ; es:edi is now args address (di:si), eax is still 0
-    dec     ecx
-    cld
-mytkExecPgm_CalltkExecPgm_loop:         ; loop true all ASCIIZ strings
-    repne scasb                         ; scans forwards until '\0' is read. es:edi is pointing at the char after the '\0'.
-    cmp     byte ptr es:[edi], 0        ; is this char '\0' ? stop looping : loop once more;
-    jnz     mytkExecPgm_CalltkExecPgm_loop
-    dec     ecx                         ; update count - count terminating zero too
-    not     ecx
+
+    pushad
+    mov     bx, di                      ;
+    mov     di, si                      ; bx:di -> arguments
+    push    cs                          ; Problem calling far into the calltab segement.
+    call    near ptr FLAT:f_FuStrLenZ
+    movzx   ecx, cx
+    mov     [ebp+cchArgs], ecx
+    popad
+    jc      mytkExecPgm_CalltkExecPgm_X1
 
 mytkExecPgm_CalltkExecPgm_1:
-    mov     [ebp+cchArgs], ecx
+    mov     ecx, [ebp+cchArgs]
     add     ecx, [ebp+cchFilename]      ; filename
     add     ecx, 3 + 260                ;  260 = new argument from a scrip file or something.
                                         ;    3 = two '\0's and a space after added argument.
@@ -161,34 +177,36 @@ mytkExecPgm_CalltkExecPgm_1:
     ;
     ; Copy filename to pBuffer.
     ;
-    push    esi
-    mov     edi, eax                    ; es:di  pBuffer
-    movzx   esi, dx                     ; ds:si  Filename pointer (input ds:dx)
+    pushad
+    mov     di, ax                      ; es:di  pBuffer
+    mov     si, dx
+    mov     bx, ds                      ; bx:si  Filename pointer (input ds:dx)
     mov     ecx, [ebp+cchFilename]
-    cld
-    rep movsb
+    push    cs                          ; Problem calling far into the calltab segement.
+    call    near ptr FLAT:f_FuBuff
+    popad
+    jc      mytkExecPgm_CalltkExecPgm_X2
 
     ;
     ; Copy Args to pBuffer + 261
     ;
-    ; stack: esi, edi, es, ds, ecx, eax
-    pop     esi
+    ; stack: edi, es, ds, ecx, eax
     pop     edi
     push    edi
-    push    esi
     add     eax, 261                    ; we'll use eax in the branch
     cmp     di, 4
     jb      mytkExecPgm_CalltkExecPgm_2
-    and     esi, 00000ffffh             ; remove high part of the register
-    mov     ds, di                      ; ds:si -> arguments
-    mov     edi, eax                    ; es:di -> pBuffer + 261
+    pushad
     mov     ecx, [ebp+cchArgs]
-    cld
-    rep movsb
+    mov     bx, di                      ; ds:si -> arguments
+    push    cs                          ; Problem calling far into the calltab segement.
+    call    near ptr FLAT:f_FuBuff
+    popad
+    jc      mytkExecPgm_CalltkExecPgm_X2
     jmp     mytkExecPgm_CalltkExecPgm_3
 
 mytkExecPgm_CalltkExecPgm_2:
-    mov     byte ptr es:[eax], 0        ; Terminate the empty string!
+    mov     word ptr es:[eax], 0        ; Terminate the empty string!
 
     ;
     ; Set Pointers, pszFilename and pszArguments
@@ -205,8 +223,7 @@ mytkExecPgm_CalltkExecPgm_3:
     ;
     ; Restore variables pushed on the stack
     ;
-    ; stack: esi, edi, es, ds, ecx, eax
-    pop     esi
+    ; stack: edi, es, ds, ecx, eax
     pop     edi
     pop     es
     pop     ds
@@ -233,7 +250,7 @@ mytkExecPgm_CalltkExecPgm_3:
     ;
     ; Call g_tkExecPgm
     ;
-    push    cs
+    push    cs                          ; Problem calling far into the calltab segement.
     call    near ptr FLAT:g_tkExecPgm
     pushfd
 

@@ -1,4 +1,4 @@
-/* $Id: d32init.c,v 1.13 2000-02-21 04:45:46 bird Exp $
+/* $Id: d32init.c,v 1.14 2000-02-21 09:24:00 bird Exp $
  *
  * d32init.c - 32-bits init routines.
  *
@@ -838,7 +838,7 @@ static int importTabInit(void)
         (unsigned)myldrRead,
         (unsigned)myldrOpen,
         (unsigned)myldrClose,
-        0,//(unsigned)myLDRQAppType,
+        (unsigned)myLDRQAppType,
         (unsigned)myldrEnum32bitRelRecs,
         0,
         0,
@@ -849,6 +849,7 @@ static int importTabInit(void)
         0,
         0,
         (unsigned)&mytkExecPgm,
+        0,
         0,
         0
     };
@@ -992,7 +993,7 @@ static int importTabInit(void)
                      * Note: the displacement is relative to the next instruction
                      */
                     callTab[i][0] = 0xE9; /* jmp */
-                    *(unsigned*)(void*)&callTab[i][1] = _aImportTab[i].ulAddress - (unsigned)&callTab[i][cb+5];
+                    *(unsigned*)(void*)&callTab[i][1] = _aImportTab[i].ulAddress - (unsigned)&callTab[i][5];
                 }
                 else
                 {   /* !fatal! - this should never really happen... */
