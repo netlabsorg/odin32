@@ -1,4 +1,4 @@
-; $Id: exceptutil.asm,v 1.7 2000-05-02 20:53:12 sandervl Exp $
+; $Id: exceptutil.asm,v 1.8 2000-08-15 17:59:46 sandervl Exp $
 
 ;/*
 ; * Project Odin Software License can be found in LICENSE.TXT
@@ -21,7 +21,7 @@ _RaiseException@16 proc near
         push dword ptr [esp+28] ;DWORD *lpArguments
         push dword ptr [esp+16] ;return address
         push esp
-        sub  dword ptr [esp-4], 20
+        sub  dword ptr [esp], 20
         push ebp
         pushfd
         push eax
@@ -31,7 +31,7 @@ _RaiseException@16 proc near
         push edi
         push esi
         xor  eax, eax
-        mov  eax, cs    ;does 'push cs' push a dword??
+        mov  eax, cs
         push eax
         mov  eax, ds
         push eax
@@ -58,7 +58,7 @@ _RtlUnwind@16 proc near
         push dword ptr [esp+28] ;DWORD  returnEax
         push dword ptr [esp+16] ;return address
         push esp
-        sub  dword ptr [esp-4], 20
+        sub  dword ptr [esp], 20
         push ebp
         pushfd
         push eax
@@ -68,7 +68,7 @@ _RtlUnwind@16 proc near
         push edi
         push esi
         xor  eax, eax
-        mov  eax, cs    ;does 'push cs' push a dword??
+        mov  eax, cs
         push eax
         mov  eax, ds
         push eax
