@@ -7,9 +7,8 @@
 #ifndef __WINE_UNICODE_H
 #define __WINE_UNICODE_H
 
-#include "windef.h"
-#ifndef USE_INLINE_UNICODEFUNCS
-#include <heapstring.h>
+#ifndef OS2_INCLUDED
+#include <windef.h>
 #endif
 
 #ifndef __cplusplus
@@ -69,7 +68,6 @@ static inline int is_dbcs_leadbyte( const union cptable *table, unsigned char ch
     return (table->info.char_size == 2) && (table->dbcs.cp2uni_leadbytes[ch]);
 }
 
-#ifdef USE_INLINE_UNICODEFUNCS
 static inline WCHAR tolowerW( WCHAR ch )
 {
     extern const WCHAR casemap_lower[];
@@ -81,7 +79,6 @@ static inline WCHAR toupperW( WCHAR ch )
     extern const WCHAR casemap_upper[];
     return ch + casemap_upper[casemap_upper[ch >> 8] + (ch & 0xff)];
 }
-#endif
 
 /* the character type contains the C1_* flags in the low 12 bits */
 /* and the C2_* type in the high 4 bits */
@@ -93,7 +90,6 @@ static inline unsigned short get_char_typeW( WCHAR ch )
 
 /* some useful string manipulation routines */
 
-#ifdef USE_INLINE_UNICODEFUNCS
 static inline unsigned int strlenW( const WCHAR *str )
 {
 #if defined(__i386__) && defined(__GNUC__)
@@ -126,7 +122,9 @@ static inline WCHAR *strcpyW( WCHAR *dst, const WCHAR *src )
                           : "memory" );
 #else
     WCHAR *p = dst;
-    while ((*p++ = *src++));
+    while(*src) {
+       *p++ = *src++;
+    }
 #endif
     return dst;
 }
@@ -174,17 +172,22 @@ static inline WCHAR *strrchrW( const WCHAR *str, WCHAR ch )
 static inline WCHAR *strlwrW( WCHAR *str )
 {
     WCHAR *ret = str;
-    while ((*str = tolowerW(*str))) str++;
+    while(*str) {
+      *str = tolowerW(*str);
+      str++;
+    } 
     return ret;
 }
 
 static inline WCHAR *struprW( WCHAR *str )
 {
     WCHAR *ret = str;
-    while ((*str = toupperW(*str))) str++;
+    while(*str) {
+      *str = toupperW(*str);
+      str++;
+    } 
     return ret;
 }
-#endif
 
 extern int strcmpiW( const WCHAR *str1, const WCHAR *str2 );
 extern int strncmpiW( const WCHAR *str1, const WCHAR *str2, int n );
