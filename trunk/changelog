@@ -1,3 +1,11 @@
+ 99-07-06: Sander van Leeuwen
+	- Removed unecessary files
+	- Modified os2win.h to save FS selector before calling Open32 api
+	  and restoring it afterwards.
+	- Renamed all .C files (except comctl32) to .CPP and fixed compiler errors 
+	- GDI32: Fixed SetDIBitsToDevice bugfix (palette size)
+	- USER32: Fixed RegisterSystemClasses
+
  99-06-06: Sander van Leeuwen
 	- Bugfixes in VirtualAlloc (KERNEL32), GetScrollPos & RegisterSystemClasses (USER32)
           as reported on mailinglist by Edgar Buerkle.
