@@ -1,4 +1,4 @@
-/* $Id: pe2lx.cpp,v 1.16 2000-01-27 23:45:59 bird Exp $
+/* $Id: pe2lx.cpp,v 1.17 2000-02-01 11:10:54 bird Exp $
  *
  * Pe2Lx class implementation. Ring 0 and Ring 3
  *
@@ -2418,7 +2418,7 @@ ULONG Pe2Lx::makeFixups()
         if (fBaseRelocs && BaseReloc.VirtualAddress == ulRVAPage)
         {
             ULONG c = (BaseReloc.SizeOfBlock - sizeof(BaseReloc.SizeOfBlock) - sizeof(BaseReloc.VirtualAddress)) / sizeof(WORD); /* note that sizeof(BaseReloc) is 12 bytes! */
-            PWORD pawoffFixup;
+            PWORD pawoffFixup = NULL;
 
             if (c != 0)
             {
