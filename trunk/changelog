@@ -1,4 +1,10 @@
-/* $Id: changelog,v 1.2455 2003-01-22 17:08:59 sandervl Exp $ */
+/* $Id: changelog,v 1.2456 2003-01-23 12:31:43 sandervl Exp $ */
+
+ 2003-01-23: Sander van Leeuwen <sandervl@innotek   >
+    - INCLUDE\*.mk: 
+                o Don't use include\incl_vac for statically linked targets
+                  (e.g. tools)
+    - ODINCRT:  o Added wrappers for new & delete operators
 
  2003-01-22: Sander van Leeuwen <sandervl@innotek   >
     - ODINCRT:  o Renamed wrapper functions
