@@ -1,4 +1,4 @@
-/* $Id: oslibwin.cpp,v 1.97 2001-06-10 12:05:38 sandervl Exp $ */
+/* $Id: oslibwin.cpp,v 1.98 2001-06-12 08:02:35 sandervl Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -140,10 +140,12 @@ BOOL OSLibWinPositionFrameControls(HWND hwndFrame, RECTLOS2 *pRect)
   SWP  swp[3];
   HWND hwndControl;
   int  i = 0;
-  static int minmaxwidth = 0;
+  static int minmaxwidth  = 0;
+  static int minmaxheight = 0;
 
   if(minmaxwidth == 0) {
-      minmaxwidth = WinQuerySysValue(HWND_DESKTOP, SV_CXMINMAXBUTTON);
+      minmaxwidth  = WinQuerySysValue(HWND_DESKTOP, SV_CXMINMAXBUTTON);
+      minmaxheight = WinQuerySysValue(HWND_DESKTOP, SV_CYMINMAXBUTTON);
   }
 
   hwndControl = WinWindowFromID(hwndFrame, FID_SYSMENU);
@@ -152,10 +154,14 @@ BOOL OSLibWinPositionFrameControls(HWND hwndFrame, RECTLOS2 *pRect)
       swp[i].hwndInsertBehind = HWND_TOP;
       swp[i].x  = pRect->xLeft;
       swp[i].y  = pRect->yBottom;
+      if(pRect->yTop - pRect->yBottom > minmaxheight) {
+          swp[i].y += pRect->yTop - pRect->yBottom - minmaxheight;
+      }
       swp[i].cx = minmaxwidth/2;
-      swp[i].cy = pRect->yTop - pRect->yBottom;
+      swp[i].cy = minmaxheight;;
       swp[i].fl = SWP_SIZE | SWP_MOVE | SWP_SHOW;
-      pRect->xLeft += swp[i].cx;
+      dprintf(("FID_SYSMENU (%d,%d)(%d,%d)", swp[i].x, swp[i].y, swp[i].cx, swp[i].cy));
+      pRect->xLeft += minmaxwidth/2;
       i++;
   }
   hwndControl = WinWindowFromID(hwndFrame, FID_TITLEBAR);
@@ -166,10 +172,11 @@ BOOL OSLibWinPositionFrameControls(HWND hwndFrame, RECTLOS2 *pRect)
       swp[i].y  = pRect->yBottom;
       swp[i].cx = pRect->xRight - pRect->xLeft;
       if(WinWindowFromID(hwndFrame, FID_MINMAX)) {
-          swp[i].cx -= minmaxwidth - minmaxwidth/2;
+          swp[i].cx -= (minmaxwidth + minmaxwidth/2);
       }
       swp[i].cy = pRect->yTop - pRect->yBottom;
       swp[i].fl = SWP_SIZE | SWP_MOVE | SWP_SHOW;
+      dprintf(("FID_TITLEBAR (%d,%d)(%d,%d)", swp[i].x, swp[i].y, swp[i].cx, swp[i].cy));
       pRect->xLeft += swp[i].cx;
       i++;
   }
@@ -179,9 +186,13 @@ BOOL OSLibWinPositionFrameControls(HWND hwndFrame, RECTLOS2 *pRect)
       swp[i].hwndInsertBehind = HWND_TOP;
       swp[i].x  = pRect->xLeft;
       swp[i].y  = pRect->yBottom;
+      if(pRect->yTop - pRect->yBottom > minmaxheight) {
+          swp[i].y += pRect->yTop - pRect->yBottom - minmaxheight;
+      }
       swp[i].cx = minmaxwidth + minmaxwidth/2;
-      swp[i].cy = pRect->yTop - pRect->yBottom;
+      swp[i].cy = minmaxheight;
       swp[i].fl = SWP_SIZE | SWP_MOVE | SWP_SHOW;
+      dprintf(("FID_MINMAX (%d,%d)(%d,%d)", swp[i].x, swp[i].y, swp[i].cx, swp[i].cy));
       pRect->xLeft += swp[i].cx;
       i++;
   }
