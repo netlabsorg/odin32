@@ -1,4 +1,4 @@
-/* $Id: user32.cpp,v 1.8 1999-07-18 17:12:02 sandervl Exp $ */
+/* $Id: user32.cpp,v 1.9 1999-07-24 14:01:44 sandervl Exp $ */
 
 /*
  * Win32 misc user32 API functions for OS/2
@@ -77,22 +77,6 @@
 // WIN32API YieldTask
 
 //Coordinate transformation
-
-inline void Win32ToOS2Rect(POSRECTL dest,PRECT source,ULONG windowH)
-{
-  dest->xLeft   = source->left;
-  dest->xRight  = source->right;
-  dest->yTop    = windowH-source->top;
-  dest->yBottom = windowH-source->bottom;
-}
-
-inline void OS2ToWin32Rect(PRECT dest,POSRECTL source,ULONG windowH)
-{
-  dest->left   = source->xLeft;
-  dest->right  = source->xRight;
-  dest->top    = windowH-source->yTop;
-  dest->bottom = windowH-source->yBottom;
-}
 
 inline void OS2ToWin32ScreenPos(POINT *dest,POINT *source)
 {
@@ -278,28 +262,6 @@ BOOL WIN32API CopyRect( PRECT lprcDst, const RECT * lprcSrc)
     memcpy(lprcDst,lprcSrc,sizeof(RECT));
 
     return TRUE;
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API InvalidateRect(HWND hWnd, const RECT *lpRect, BOOL bErase)
-{
-#ifdef DEBUG
-    if(lpRect)
-        WriteLog("USER32:  InvalidateRect for window %X (%d,%d)(%d,%d) %d\n", hWnd, lpRect->left, lpRect->top, lpRect->right, lpRect->bottom, bErase);
-    else    WriteLog("USER32:  InvalidateRect for window %X NULL, %d\n", hWnd, bErase);
-#endif
-
-    //CB: bErase no quite the same
-    hWnd = Win32Window::Win32ToOS2Handle(hWnd);
-    if (lpRect)
-    {
-      OSRECTL rect;
-      ULONG windowH;
-
-      windowH = OSLibGetWindowHeight(hWnd);
-      Win32ToOS2Rect(&rect,(PRECT)lpRect,windowH);
-      return OSLibWinInvalidateRect(hWnd,&rect,bErase); //rect == RECTL
-    } else return OSLibWinInvalidateRect(hWnd,NULL,bErase);
 }
 //******************************************************************************
 //******************************************************************************
