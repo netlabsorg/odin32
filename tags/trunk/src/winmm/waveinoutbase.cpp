@@ -1,4 +1,4 @@
-/* $Id: waveinoutbase.cpp,v 1.6 2003-03-05 14:49:04 sandervl Exp $ */
+/* $Id: waveinoutbase.cpp,v 1.7 2003-10-13 09:18:38 sandervl Exp $ */
 
 /*
  * Wave playback class (DART)
@@ -99,8 +99,8 @@ WaveInOut::~WaveInOut()
 /******************************************************************************/
 void WaveInOut::callback(UINT uMessage, DWORD dw1, DWORD dw2)
 {
-    dprintf(("WINMM:WaveInOut::callback type %x (HDRVR h=%08xh, UINT uMessage=%08xh, DWORD dwUser=%08xh, DWORD dw1=%08xh, DWORD dw2=%08xh)\n",
-             fdwOpen, this, uMessage, dwInstance, dw1, dw2));
+    dprintf(("WINMM:WaveInOut::callback type %x, callback 0x%x (HDRVR h=%08xh, UINT uMessage=%08xh, DWORD dwUser=%08xh, DWORD dw1=%08xh, DWORD dw2=%08xh)",
+             fdwOpen, dwCallback, this, uMessage, dwInstance, dw1, dw2));
 
     switch(fdwOpen & CALLBACK_TYPEMASK) {
     case CALLBACK_WINDOW:
@@ -117,14 +117,17 @@ void WaveInOut::callback(UINT uMessage, DWORD dw1, DWORD dw2)
         USHORT selCallback;
         LPDRVCALLBACK mthdCallback = (LPDRVCALLBACK)dwCallback;
 
-        selCallback = GetProcessTIBSel();
+        if(selTIB == SELECTOR_OS2_FS) {
+             selCallback = GetProcessTIBSel();
+        }
+        else selCallback = selTIB;
 
         //TODO: may not be very safe. perhaps we should allocate a new TIB for the DART thread or let another thread do the actual callback
         if(selCallback)
         {
             SetFS(selCallback);      // switch to callback win32 tib selector (stored in WaveInOutOpen)
 
-            //@@@PH 1999/12/28 Shockwave Flashes seem to make assumptions on a
+            //@@@PH 1999/12/28 Shockwave Flash seem to make assumptions on a
             // specific stack layout. Do we have the correct calling convention here?
             mthdCallback((HDRVR)this, uMessage, dwInstance, dw1, dw2);
             SetFS(selTIB);           // switch back to the saved FS selector

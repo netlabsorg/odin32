@@ -1,4 +1,4 @@
-/* $Id: os2timer.cpp,v 1.21 2003-03-06 15:42:33 sandervl Exp $ */
+/* $Id: os2timer.cpp,v 1.22 2003-10-13 09:18:37 sandervl Exp $ */
 
 /*
  * OS/2 Timer class
@@ -238,7 +238,7 @@ int OS2TimerResolution::queryCurrentResolution()
 /******************************************************************************/
 OS2Timer::OS2Timer() : TimerSem(0), TimerHandle(0), hTimerThread(0),
                   clientCallback(NULL), TimerStatus(Stopped), fFatal(FALSE),
-                  next(NULL), timerID(0)
+                  next(NULL), timerID(0), refCount(0)
 {
   dprintf(("WINMM:OS2Timer: OS2Timer::OS2Timer(%08xh)\n",
            this));
@@ -265,9 +265,12 @@ OS2Timer::OS2Timer() : TimerSem(0), TimerHandle(0), hTimerThread(0),
     dprintf(("WINMM: OS2Timer: DosCreateEventSem failed rc=#%08xh\n", rc));
     return; // terminate thread
   }
-  
-  
-  //hTimerThread = _beginthread(TimerHlpHandler, NULL, 0x4000, (void *)this);
+ 
+  //increase reference count for creation
+  addRef();
+
+  //increase reference count since the thread will access the object
+  addRef();  
   hTimerThread = CreateThread(NULL,
                               0x4000,
                               TimerHlpHandler,
@@ -391,6 +394,31 @@ void OS2Timer::KillTimer()
   }
   TimerStatus = InActive;
 }
+//******************************************************************************
+//******************************************************************************
+#ifdef DEBUG
+LONG OS2Timer::addRef()
+{ 
+////  dprintf2(("addRef %x -> refcount %x", this, refCount+1));
+    return InterlockedIncrement(&refCount); 
+};
+#endif
+/******************************************************************************/
+//******************************************************************************
+LONG OS2Timer::release()
+{
+#ifdef DEBUG
+  if(refCount-1 < 0) {
+      DebugInt3();
+  }
+#endif
+  if(InterlockedDecrement(&refCount) == 0) {
+      dprintf2(("marked for deletion -> delete now"));
+      delete this;
+      return 0;
+  }
+  return refCount;
+}
 /******************************************************************************/
 //******************************************************************************
 void OS2Timer::TimerHandler()
@@ -413,8 +441,16 @@ void OS2Timer::TimerHandler()
              dwFlags,
             clientCallback));
     
-    DosWaitEventSem(TimerSem, SEM_INDEFINITE_WAIT);
-    DosResetEventSem(TimerSem, &Count);
+    rc = DosWaitEventSem(TimerSem, SEM_INDEFINITE_WAIT);
+    if(rc) {
+        dprintf(("DosWaitEventSem failed with %d", rc));
+        DebugInt3();
+    }
+    rc = DosResetEventSem(TimerSem, &Count);
+    if(rc) {
+        dprintf(("DosResetEventSem failed with %d", rc));
+        DebugInt3();
+    }
     if(!fFatal)
     {
         // @@@PH: we're calling the client with PRTYC_TIMECRITICAL !!!
@@ -433,9 +469,7 @@ void OS2Timer::TimerHandler()
             case TIME_CALLBACK_FUNCTION:
               if (clientCallback != NULL)
               {
-                selTIB = SetWin32TIB();
-                clientCallback((UINT)timerID, 0, userData, 0, 0);
-                SetFS(selTIB);
+                  clientCallback((UINT)timerID, 0, userData, 0, 0);
               }
               break;
             
@@ -461,6 +495,9 @@ void OS2Timer::TimerHandler()
            this));
   
   DosCloseEventSem(TimerSem);
+
+  //release object
+  release();
   
   // mark this thread as terminated
   ExitThread(0);
@@ -473,8 +510,6 @@ static DWORD WIN32API TimerHlpHandler(LPVOID timer)
 
   return 0;
 }
-
-
 //******************************************************************************
 //******************************************************************************
 OS2TimerResolution *OS2TimerResolution::sTimerResolutions = NULL;
