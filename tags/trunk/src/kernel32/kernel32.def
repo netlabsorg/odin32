@@ -1,4 +1,4 @@
-; $Id: kernel32.def,v 1.54 1999-12-01 18:40:47 sandervl Exp $
+; $Id: kernel32.def,v 1.55 1999-12-05 21:11:40 sandervl Exp $
 
 ;Created by BLAST for IBM's compiler
 ;Basis is Windows95 KERNEL32
@@ -981,12 +981,13 @@ EXPORTS
    __dt__6VMutexFv                                                @1207
 
 ;Unicode
-   UnicodeToAsciiString = _UnicodeToAsciiString@4                 @1210
-   UnicodeToAscii       = _UnicodeToAscii@8                       @1211
-   FreeAsciiString      = _FreeAsciiString@4                      @1212
-   AsciiToUnicode       = _AsciiToUnicode@8                       @1213
-   UnicodeToAsciiN      = _UnicodeToAsciiN@12                     @1215
-   AsciiToUnicodeN      = _AsciiToUnicodeN@12                     @1216
+   UnicodeToAsciiString  = _UnicodeToAsciiString@4                 @1210
+   UnicodeToAscii        = _UnicodeToAscii@8                       @1211
+   FreeAsciiString       = _FreeAsciiString@4                      @1212
+   AsciiToUnicode        = _AsciiToUnicode@8                       @1213
+   UnicodeToAsciiN       = _UnicodeToAsciiN@12                     @1215
+   AsciiToUnicodeN       = _AsciiToUnicodeN@12                     @1216
+   UnicodeToAsciiStringN = _UnicodeToAsciiStringN@8                @1217
 
 ;Get version resource
    GetVersionStruct     = GetVersionStruct                        @1221
@@ -1051,6 +1052,7 @@ EXPORTS
     _smalloc__FUi                                                 @1271
 
 ;Export for MSACM32
-    _wsnprintfA	                                                  @2000
+    _wsnprintfA                                                   @2000
 
     IsExeStarted__Fv     @2001
+
