@@ -1,4 +1,4 @@
-/* $Id: hmdisk.cpp,v 1.10 2001-06-19 10:50:24 sandervl Exp $ */
+/* $Id: hmdisk.cpp,v 1.11 2001-06-20 20:51:57 sandervl Exp $ */
 
 /*
  * Win32 Disk API functions for OS/2
@@ -280,6 +280,72 @@ BOOL HMDeviceDiskClass::DeviceIoControl(PHMHANDLEDATA pHMHandleData, DWORD dwIoC
     case IOCTL_IDE_PASS_THROUGH:
         msg = "IOCTL_IDE_PASS_THROUGH";
         break;
+    case IOCTL_CDROM_UNLOAD_DRIVER:
+        msg = "IOCTL_CDROM_UNLOAD_DRIVER";
+        break;
+    case IOCTL_CDROM_READ_TOC:
+        msg = "IOCTL_CDROM_READ_TOC";
+        break;
+    case IOCTL_CDROM_GET_CONTROL:
+        msg = "IOCTL_CDROM_GET_CONTROL";
+        break;
+    case IOCTL_CDROM_PLAY_AUDIO_MSF:
+        msg = "IOCTL_CDROM_PLAY_AUDIO_MSF";
+        break;
+    case IOCTL_CDROM_SEEK_AUDIO_MSF:
+        msg = "IOCTL_CDROM_SEEK_AUDIO_MSF";
+        break;
+    case IOCTL_CDROM_STOP_AUDIO:
+        msg = "IOCTL_CDROM_STOP_AUDIO";
+        break;
+    case IOCTL_CDROM_PAUSE_AUDIO:
+        msg = "IOCTL_CDROM_PAUSE_AUDIO";
+        break;
+    case IOCTL_CDROM_RESUME_AUDIO:
+        msg = "IOCTL_CDROM_RESUME_AUDIO";
+        break;
+    case IOCTL_CDROM_GET_VOLUME:
+        msg = "IOCTL_CDROM_GET_VOLUME";
+        break;
+    case IOCTL_CDROM_SET_VOLUME:
+        msg = "IOCTL_CDROM_SET_VOLUME";
+        break;
+    case IOCTL_CDROM_READ_Q_CHANNEL:
+        msg = "IOCTL_CDROM_READ_Q_CHANNEL";
+        break;
+    case IOCTL_CDROM_GET_LAST_SESSION:
+        msg = "IOCTL_CDROM_GET_LAST_SESSION";
+        break;
+    case IOCTL_CDROM_RAW_READ:
+        msg = "IOCTL_CDROM_RAW_READ";
+        break;
+    case IOCTL_CDROM_DISK_TYPE:
+        msg = "IOCTL_CDROM_DISK_TYPE";
+        break;
+    case IOCTL_CDROM_GET_DRIVE_GEOMETRY:
+        msg = "IOCTL_CDROM_GET_DRIVE_GEOMETRY";
+        break;
+    case IOCTL_CDROM_CHECK_VERIFY:
+        msg = "IOCTL_CDROM_CHECK_VERIFY";
+        break;
+    case IOCTL_CDROM_MEDIA_REMOVAL:
+        msg = "IOCTL_CDROM_MEDIA_REMOVAL";
+        break;
+    case IOCTL_CDROM_EJECT_MEDIA:
+        msg = "IOCTL_CDROM_EJECT_MEDIA";
+        break;
+    case IOCTL_CDROM_LOAD_MEDIA:
+        msg = "IOCTL_CDROM_LOAD_MEDIA";
+        break;
+    case IOCTL_CDROM_RESERVE:
+        msg = "IOCTL_CDROM_RESERVE";
+        break;
+    case IOCTL_CDROM_RELEASE:
+        msg = "IOCTL_CDROM_RELEASE";
+        break;
+    case IOCTL_CDROM_FIND_NEW_DEVICES:
+        msg = "IOCTL_CDROM_FIND_NEW_DEVICES";
+        break;
     }
     if(msg) {
         dprintf(("HMDeviceDiskClass::DeviceIoControl %s", msg));
@@ -318,7 +384,7 @@ BOOL HMDeviceDiskClass::DeviceIoControl(PHMHANDLEDATA pHMHandleData, DWORD dwIoC
         if(lpBytesReturned) {
             *lpBytesReturned = 0;
         }
-        if(OSLibDosGetDiskGeometry(pHMHandleData->dwUserData, pGeom) == FALSE) {
+        if(OSLibDosGetDiskGeometry(pHMHandleData->hHMHandle, pHMHandleData->dwUserData, pGeom) == FALSE) {
             return FALSE;
         }
         if(lpBytesReturned) {
@@ -337,6 +403,30 @@ BOOL HMDeviceDiskClass::DeviceIoControl(PHMHANDLEDATA pHMHandleData, DWORD dwIoC
     case IOCTL_DISK_SET_PARTITION_INFO:
     case IOCTL_DISK_VERIFY:
     case IOCTL_SERIAL_LSRMST_INSERT:
+        break;
+
+    case IOCTL_CDROM_UNLOAD_DRIVER:
+    case IOCTL_CDROM_READ_TOC:
+    case IOCTL_CDROM_GET_CONTROL:
+    case IOCTL_CDROM_PLAY_AUDIO_MSF:
+    case IOCTL_CDROM_SEEK_AUDIO_MSF:
+    case IOCTL_CDROM_STOP_AUDIO:
+    case IOCTL_CDROM_PAUSE_AUDIO:
+    case IOCTL_CDROM_RESUME_AUDIO:
+    case IOCTL_CDROM_GET_VOLUME:
+    case IOCTL_CDROM_SET_VOLUME:
+    case IOCTL_CDROM_READ_Q_CHANNEL:
+    case IOCTL_CDROM_GET_LAST_SESSION:
+    case IOCTL_CDROM_RAW_READ:
+    case IOCTL_CDROM_DISK_TYPE:
+    case IOCTL_CDROM_GET_DRIVE_GEOMETRY:
+    case IOCTL_CDROM_CHECK_VERIFY:
+    case IOCTL_CDROM_MEDIA_REMOVAL:
+    case IOCTL_CDROM_EJECT_MEDIA:
+    case IOCTL_CDROM_LOAD_MEDIA:
+    case IOCTL_CDROM_RESERVE:
+    case IOCTL_CDROM_RELEASE:
+    case IOCTL_CDROM_FIND_NEW_DEVICES:
         break;
 
     case IOCTL_STORAGE_CHECK_VERIFY:
@@ -373,7 +463,7 @@ BOOL HMDeviceDiskClass::DeviceIoControl(PHMHANDLEDATA pHMHandleData, DWORD dwIoC
         }
 
         if(nOutBufferSize < sizeof(SCSI_PASS_THROUGH_DIRECT) ||
-           !pPacket || pPacket->Length < sizeof(SCSI_PASS_THROUGH_DIRECT)) 
+           !pPacket || pPacket->Length < sizeof(SCSI_PASS_THROUGH_DIRECT))
         {
             SetLastError(ERROR_INSUFFICIENT_BUFFER);
             return FALSE;
