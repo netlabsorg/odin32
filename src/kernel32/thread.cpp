@@ -1,4 +1,4 @@
-/* $Id: thread.cpp,v 1.33 2001-11-10 12:47:48 sandervl Exp $ */
+/* $Id: thread.cpp,v 1.34 2001-11-12 23:04:56 phaller Exp $ */
 
 /*
  * Win32 Thread API functions
@@ -89,6 +89,33 @@ void WIN32API dbg_IncThreadCallDepth()
 }
 
 
+#define MAX_CALLSTACK_SIZE 128
+void WIN32API dbg_ThreadPushCall(char *pszCaller)
+{
+#ifdef DEBUG
+  TEB *teb;
+  
+  // embedded dbg_IncThreadCallDepth
+  teb = GetThreadTEB();
+  if(teb == NULL)
+    return;
+    
+  teb->o.odin.dbgCallDepth++;
+  
+  // add caller name to call stack trace
+  int iIndex = teb->o.odin.dbgCallDepth;
+  
+  // allocate callstack on demand
+  if (teb->o.odin.arrstrCallStack == NULL)
+    teb->o.odin.arrstrCallStack = (PVOID*)malloc( sizeof(LPSTR) * MAX_CALLSTACK_SIZE);
+  
+  // insert entry
+  if (iIndex < MAX_CALLSTACK_SIZE)
+    teb->o.odin.arrstrCallStack[iIndex] = (PVOID)pszCaller;
+#endif
+}
+
+
 void WIN32API dbg_DecThreadCallDepth()
 {
 #ifdef DEBUG
@@ -98,6 +125,49 @@ void WIN32API dbg_DecThreadCallDepth()
   if(teb != NULL)
     --(teb->o.odin.dbgCallDepth);
 #endif
+}
+
+
+void WIN32API dbg_ThreadPopCall()
+{
+#ifdef DEBUG
+  TEB *teb;
+  
+  // embedded dbg_DecThreadCallDepth
+  teb = GetThreadTEB();
+  if(teb == NULL)
+    return;
+  
+  --(teb->o.odin.dbgCallDepth);
+  
+  // add caller name to call stack trace
+  int iIndex = teb->o.odin.dbgCallDepth;
+  
+  // insert entry
+  if (teb->o.odin.arrstrCallStack)
+    if (iIndex < MAX_CALLSTACK_SIZE)
+      teb->o.odin.arrstrCallStack[iIndex] = NULL;
+#endif
+}
+
+char* WIN32API dbg_GetLastCallerName()
+{
+  // retrieve last caller name from stack
+  TEB *teb;
+  
+  // embedded dbg_DecThreadCallDepth
+  teb = GetThreadTEB();
+  if(teb != NULL)
+  {
+    int iIndex = teb->o.odin.dbgCallDepth - 1;
+    if ( (iIndex > 0) &&
+         (iIndex < MAX_CALLSTACK_SIZE) )
+    {
+      return (char*)teb->o.odin.arrstrCallStack[iIndex];
+    }
+  }
+  
+  return NULL;
 }
 
 
