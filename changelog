@@ -1,4 +1,7 @@
- /* $Id: changelog,v 1.478 1999-11-27 19:52:44 sandervl Exp $ */
+ /* $Id: changelog,v 1.479 1999-11-28 12:35:22 sandervl Exp $ */
+
+ 99-11-28: Sander van Leeuwen <sandervl@xs4all.nl>
+	- COMDLG32: Merged with latest wine code (CVS tree dated 991126)
 
  99-11-27: Jens Wiessner <wiessnej@rfi.de>
 	- MSVCRT: Added stubs
