@@ -1,4 +1,4 @@
-/* $Id: APIImport.cmd,v 1.2 2000-02-14 14:31:35 bird Exp $
+/* $Id: APIImport.cmd,v 1.3 2000-02-15 13:31:40 bird Exp $
  *
  * Helper script which invokes APIImport.exe with the correct .def file.
  *
@@ -18,11 +18,9 @@
     if (sDllName = 'msvcrt') then
     do
         call MakeTempDeffile sDllName, 'APIImport.def';
-        sAPIImport || ' APIImport.def';
         call MakeTempDeffile sDllName||'20', 'APIImport20.def';
-        sAPIImport || ' APIImport20.def';
         call MakeTempDeffile sDllName||'40', 'APIImport40.def';
-        sAPIImport || ' APIImport40.def';
+        sAPIImport || ' APIImport.def APIImport20.def APIImport40.def';
     end
     else
     do
