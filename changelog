@@ -1,9 +1,13 @@
-/* $Id: changelog,v 1.2635 2003-10-20 17:15:13 sandervl Exp $ */
+/* $Id: changelog,v 1.2636 2003-10-20 17:19:04 sandervl Exp $ */
 
  2003-10-20: Sander van Leeuwen <sandervl@innotek   >
     - USER32:   o PM windows should have no owner if none is specified. (instead 
                   of their parent) 
                   (NOTE: Potentially dangerous change!)
+
+ 2003-10-20: Platon Fomichev <stauff@innotek   >
+    - USER32:   o On init we should migrate fonts that Windows applications 
+                  installed globally.
 
  2003-10-16: Sander van Leeuwen <sandervl@innotek   >
     - SHELL32:  o CommandLineToArgvW bugfix from Wine
