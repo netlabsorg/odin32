@@ -1,4 +1,4 @@
-/* $Id: listbox.cpp,v 1.28 2002-04-24 08:56:16 sandervl Exp $ */
+/* $Id: listbox.cpp,v 1.29 2002-05-07 13:28:12 sandervl Exp $ */
 /*
  * Listbox controls
  *
@@ -1769,6 +1769,7 @@ static LRESULT LISTBOX_HandleVScroll( HWND hwnd, LB_DESCR *descr,
     SCROLLINFO info;
 
     if (descr->style & LBS_MULTICOLUMN) return 0;
+    dprintf(("We are handling scroll"));
     switch(LOWORD(wParam))
     {
     case SB_LINEUP:
@@ -2036,12 +2037,14 @@ static LRESULT LISTBOX_HandleLButtonDownCombo( HWND hwnd, LB_DESCR *pDescr,
 
       if (!PtInRect(&screenRect,screenMousePos))
       {
+        dprintf(("Scrollbar hittest - plain branch"));
         ReleaseCapture();
+        LISTBOX_SetCaretIndex( hwnd, pDescr, pDescr->lphc->droppedIndex, FALSE );
         LISTBOX_SetSelection( hwnd, pDescr, pDescr->lphc->droppedIndex, FALSE, FALSE );
 #ifdef __WIN32OS2__
         COMBO_RollupListbox(pDescr->lphc);
  
-       /* @@PF Previous code is all wrong here. Here we are supposed to close
+         /* @@PF Previous code is all wrong here. Here we are supposed to close
          and only close dropdown, instead flip, flips it. This happens because
          previous code did not pay attention to the fact that combobox can be
          closed with SendMessage by application, as MFC apps do     
@@ -2050,24 +2053,44 @@ static LRESULT LISTBOX_HandleLButtonDownCombo( HWND hwnd, LB_DESCR *pDescr,
         COMBO_FlipListbox( pDescr->lphc, FALSE, FALSE );
 #endif
         return 0;
-      } else
+      } 
+      else
       {
-        /* Check to see the NC is a scrollbar */
-        INT nHitTestType = SendMessageA(hwnd,WM_NCHITTEST,0,MAKELONG(screenMousePos.x,screenMousePos.y));
+            INT nHitTestType=0;
+            LONG style = GetWindowLongA( hwnd, GWL_STYLE );
+            /* Check Vertical scroll bar */
+            if (style & WS_VSCROLL)
+            {
+                clientRect.right += GetSystemMetrics(SM_CXVSCROLL);
+                if (PtInRect( &clientRect, mousePos ))
+                {
+                    nHitTestType = HTVSCROLL;
+                }
+            }
+              /* Check horizontal scroll bar */
+            if (style & WS_HSCROLL)
+            {
+                clientRect.bottom += GetSystemMetrics(SM_CYHSCROLL);
+                if (PtInRect( &clientRect, mousePos ))
+                {
+                    nHitTestType = HTHSCROLL;
+                }
+            }
+            /* Windows sends this message when a scrollbar is clicked 
+             */
 
-        /* Windows sends this message when a scrollbar is clicked
-         */
-        if (nHitTestType != HTCLIENT)
-        {
-          SendMessageA(hwnd,(msg == WM_LBUTTONDOWN) ? WM_NCLBUTTONDOWN:WM_NCLBUTTONDBLCLK,nHitTestType,MAKELONG(screenMousePos.x,screenMousePos.y));
-        }
+            if(nHitTestType != 0)
+            {
+                SendMessageW(hwnd, WM_NCLBUTTONDOWN, nHitTestType,
+                    MAKELONG(screenMousePos.x, screenMousePos.y));
+            }
+            /* Resume the Capture after scrolling is complete 
+             */
+            if(hWndOldCapture != 0)
+            {
+                SetCapture(hWndOldCapture);
+            }
 
-        /* Resume the Capture after scrolling is complete
-         */
-        if (hWndOldCapture)
-        {
-          SetCapture(hWndOldCapture);
-        }
       }
     }
     return 0;
