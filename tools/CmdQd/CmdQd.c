@@ -1,4 +1,4 @@
-/* $Id: CmdQd.c,v 1.10 2001-11-24 06:05:31 bird Exp $
+/* $Id: CmdQd.c,v 1.11 2001-11-24 20:40:44 bird Exp $
  *
  * Command Queue Daemon / Client.
  *
@@ -290,6 +290,7 @@ typedef struct JobOutput
 typedef struct Job
 {
     struct Job *    pNext;              /* Pointer to next job. */
+    int             iJobId;             /* JobId. */
     int             rc;                 /* Result. */
     PJOBOUTPUT      pJobOutput;         /* Output. */
     struct Submit   JobInfo;            /* Job. */
@@ -330,6 +331,9 @@ HMTX        hmtxExec;                   /* Execute childs mutex sem. Required */
                                         /* since we redirect standard files handles */
                                         /* and changes the currentdirectory. */
 
+PSZ         pszSharedMem = SHARED_MEM_NAME; /* Default shared memname */
+                                        /* Could be overridden by env.var. CMDQD_MEM_NAME. */
+
 /*******************************************************************************
 *   Internal Functions                                                         *
 *******************************************************************************/
@@ -366,6 +370,8 @@ void _Optlink Error(const char *pszFormat, ...);
 
 int main(int argc, char **argv)
 {
+    char *  psz;
+    char    szShrMemName[CCHMAXPATH];
 
     /*
      * Display help.
@@ -379,6 +385,21 @@ int main(int argc, char **argv)
             return -1;
         }
         return 0;
+    }
+
+    /*
+     * Check for environment variable which gives us
+     * the alternate shared mem name.
+     */
+    if ((psz = getenv("CMDQD_MEM_NAME")) != NULL)
+    {
+        if (strlen(psz) >= CCHMAXPATH - sizeof("\\SHAREMEM\\"))
+           {
+           printf("fatal error: CMDQD_MEM_NAME is is too long.\n");
+           return -1;
+           }
+        strcpy(pszSharedMem = &szShrMemName[0], "\\SHAREMEM\\");
+        strcat(pszSharedMem, psz);
     }
 
     /*
@@ -492,6 +513,9 @@ void syntax(void)
         "    showcompletedjobs  - shows jobs succesfully executed.\n"
         "    showfailedjobs     - shows jobs which failed.\n"
         "\n"
+        "   To use multiple daemons for different purposed assing different\n"
+        "   values to CMDQD_MEM_NAME (env.var.) for the sessions.\n"
+        "\n"
         "Copyright (c) 2001 knut st. osmundsen (kosmunds@csc.com)\n"
         );
 }
@@ -587,7 +611,7 @@ int Daemon(int cWorkers)
                         pJobQueueEnd->pNext = pJob;
                         pJobQueueEnd = pJob;
                     }
-                    cJobs++;
+                    pJob->iJobId = cJobs++;
                     DosReleaseMutexSem(hmtxJobQueue);
 
                     /*
@@ -803,10 +827,11 @@ int Daemon(int cWorkers)
                              * it's space left in the share buffer.
                              */
                             cch = sprintf(szTmp,
-                                          "------------------ Job %d\n"
+                                          "------------------ JobId %d - %d\n"
                                           " command:  %s\n"
                                           " curdir:   %s\n"
                                           " rcIgnore: %d\n",
+                                          pJob->iJobId,
                                           iJob,
                                           pJob->JobInfo.szCommand,
                                           pJob->JobInfo.szCurrentDir,
@@ -833,6 +858,8 @@ int Daemon(int cWorkers)
                          */
                         *pszOutput = '\0';
                         pShrMem->u1.ShowJobsResponse.fMore = pJob != NULL;
+                        if (!pJob)
+                           DosReleaseMutexSem(hmtxJobQueue);
                         rc = shrmemSendDaemon(TRUE);
 
                     } while (!rc && pJob);
@@ -912,10 +939,11 @@ int Daemon(int cWorkers)
                              * it's space left in the share buffer.
                              */
                             cch = sprintf(szTmp,
-                                          "------------------ Failed Job %d\n"
+                                          "------------------ Failed JobId %d - %d\n"
                                           " command:  %s\n"
                                           " curdir:   %s\n"
                                           " rc:       %d  (rcIgnore=%d)\n",
+                                          pJob->iJobId,
                                           iJob,
                                           pJob->JobInfo.szCommand,
                                           pJob->JobInfo.szCurrentDir,
@@ -943,6 +971,8 @@ int Daemon(int cWorkers)
                          */
                         *pszOutput = '\0';
                         pShrMem->u1.ShowFailedJobsResponse.fMore = pJob != NULL;
+                        if (!pJob)
+                           DosReleaseMutexSem(hmtxJobQueueFine);
                         rc = shrmemSendDaemon(TRUE);
 
                     } while (!rc && pJob);
@@ -1022,10 +1052,11 @@ int Daemon(int cWorkers)
                              * it's space left in the share buffer.
                              */
                             cch = sprintf(szTmp,
-                                          "------------------ Running Job %d\n"
+                                          "------------------ Running JobId %d - %d\n"
                                           " command:  %s\n"
                                           " curdir:   %s\n"
                                           " rcIgnore: %d\n",
+                                          pJob->iJobId,
                                           iJob,
                                           pJob->JobInfo.szCommand,
                                           pJob->JobInfo.szCurrentDir,
@@ -1052,6 +1083,8 @@ int Daemon(int cWorkers)
                          */
                         *pszOutput = '\0';
                         pShrMem->u1.ShowRunningJobsResponse.fMore = pJob != NULL;
+                        if (!pJob)
+                           DosReleaseMutexSem(hmtxJobQueue);
                         rc = shrmemSendDaemon(TRUE);
 
                     } while (!rc && pJob);
@@ -1132,10 +1165,11 @@ int Daemon(int cWorkers)
                              * it's space left in the share buffer.
                              */
                             cch = sprintf(szTmp,
-                                          "------------------ Completed Job %d\n"
+                                          "------------------ Completed JobId %d - %d\n"
                                           " command:  %s\n"
                                           " curdir:   %s\n"
                                           " rcIgnore: %d\n",
+                                          pJob->iJobId,
                                           iJob,
                                           pJob->JobInfo.szCommand,
                                           pJob->JobInfo.szCurrentDir,
@@ -1162,6 +1196,8 @@ int Daemon(int cWorkers)
                          */
                         *pszOutput = '\0';
                         pShrMem->u1.ShowCompletedJobsResponse.fMore = pJob != NULL;
+                        if (!pJob)
+                           DosReleaseMutexSem(hmtxJobQueueFine);
                         rc = shrmemSendDaemon(TRUE);
 
                     } while (!rc && pJob);
@@ -1391,9 +1427,9 @@ void Worker(void * iWorkerId)
             }
 
             /* insert into running */
-            pJob ->pNext = NULL;
+            pJob->pNext = NULL;
             if (pJobRunningEnd)
-                pJobRunningEnd->pNext = pJob;
+                pJobRunningEnd = pJobRunningEnd->pNext = pJob;
             else
                 pJobRunning = pJobRunningEnd = pJob;
         }
@@ -1559,7 +1595,7 @@ void Worker(void * iWorkerId)
                 PJOB pJobCur = pJobRunning;
                 while (pJobCur)
                 {
-                    if (pJobCur->pNext != pJob)
+                    if (pJobCur->pNext == pJob)
                     {
                         pJobCur->pNext = pJob->pNext;
                         if (pJob == pJobRunningEnd)
@@ -1999,7 +2035,7 @@ int QueryRunning(void)
 {
     APIRET rc;
     rc = DosGetNamedSharedMem((PPVOID)(PVOID)&pShrMem,
-                              SHARED_MEM_NAME,
+                              pszSharedMem,
                               PAG_READ | PAG_WRITE);
     if (!rc)
         DosFreeMem(pShrMem);
@@ -2225,7 +2261,7 @@ int shrmemCreate(void)
 {
     int rc;
     rc = DosAllocSharedMem((PPVOID)(PVOID)&pShrMem,
-                           SHARED_MEM_NAME,
+                           pszSharedMem,
                            SHARED_MEM_SIZE,
                            PAG_COMMIT | PAG_READ | PAG_WRITE);
     if (rc)
@@ -2300,7 +2336,7 @@ int shrmemOpen(void)
      * Get memory.
      */
     rc = DosGetNamedSharedMem((PPVOID)(PVOID)&pShrMem,
-                              SHARED_MEM_NAME,
+                              pszSharedMem,
                               PAG_READ | PAG_WRITE);
     if (rc)
     {
