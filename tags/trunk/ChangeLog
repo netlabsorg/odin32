@@ -1,13 +1,10 @@
- /* $Id: ChangeLog,v 1.1052 2000-08-06 14:38:33 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.1053 2000-08-06 20:32:14 sandervl Exp $ */
 
  2000-08-06: Sander van Leeuwen <sandervl@xs4all.nl>
     - doc\ReportingBugs.txt:
                 Added a little more information
     - tools\install
                 Add Logging.txt + symbol files to debug build.
-
- 2000-08-06: Przemyslaw Dobrowolski <dobrawka@asua.org.pl>
-    - COMCTL32: Updated toolbar to Wine 20000801 (tooltips + toolbar)
 
  2000-08-04: Sander van Leeuwen <sandervl@xs4all.nl>
     - KERNEL32: Temporary workaround for differences in share mode between
