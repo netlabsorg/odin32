@@ -81,4 +81,6 @@ ULONG APIENTRY inittermWsock32(ULONG hModule, ULONG ulFlag);
 ULONG APIENTRY inittermRpcrt4(ULONG hModule, ULONG ulFlag);
 ULONG APIENTRY inittermAvifil32(ULONG hModule, ULONG ulFlag);
 
+ULONG APIENTRY InitializeKernel32();
+
 #endif //__INITDLL_H__
