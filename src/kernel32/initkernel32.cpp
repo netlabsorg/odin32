@@ -1,4 +1,4 @@
-/* $Id: initkernel32.cpp,v 1.25 2003-01-20 10:46:26 sandervl Exp $
+/* $Id: initkernel32.cpp,v 1.26 2003-02-28 11:32:27 sandervl Exp $
  *
  * KERNEL32 DLL entry point
  *
@@ -75,6 +75,7 @@ extern "C" {
        char    kernel32Path[CCHMAXPATH] = "";
 static HMODULE dllHandle = 0;
        BOOL    fInit     = FALSE;
+       BOOL    fWin32k   = FALSE;
 
 /****************************************************************************/
 /* _DLL_InitTerm is the function that gets called by the operating system   */
@@ -121,6 +122,7 @@ ULONG APIENTRY inittermKernel32(ULONG hModule, ULONG ulFlag)
                 {
                     dprintf(("KERNEL32: initterm: libWin32kSetEnvironment failed with rc=%d\n", rc));
                 }
+                else fWin32k = TRUE;
             }
             strcpy(kernel32Path, OSLibGetDllName(hModule));
             char *endofpath = strrchr(kernel32Path, '\\');

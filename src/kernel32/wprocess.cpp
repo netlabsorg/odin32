@@ -1,4 +1,4 @@
-/* $Id: wprocess.cpp,v 1.182 2003-02-24 17:02:17 sandervl Exp $ */
+/* $Id: wprocess.cpp,v 1.183 2003-02-28 11:32:28 sandervl Exp $ */
 
 /*
  * Win32 process functions
@@ -1994,58 +1994,63 @@ BOOL WINAPI CreateProcessA( LPCSTR lpApplicationName, LPSTR lpCommandLine,
         return FALSE;
     }
 
+    DWORD Characteristics, SubSystem, fNEExe, fPEExe;
+
+    fPEExe = Win32ImageBase::isPEImage(szAppName, &Characteristics, &SubSystem, &fNEExe) == 0;
+
     // open32 does not support DEBUG_ONLY_THIS_PROCESS
     if(dwCreationFlags & DEBUG_ONLY_THIS_PROCESS)
       dwCreationFlags |= DEBUG_PROCESS;
 
-    if(O32_CreateProcess(szAppName, lpCommandLine, lpProcessAttributes,
+    //Only use WGSS to launch the app if it's not PE or PE & win32k loaded
+    if(!fPEExe || (fPEExe && fWin32k)) 
+    {
+      if(O32_CreateProcess(szAppName, lpCommandLine, lpProcessAttributes,
                          lpThreadAttributes, bInheritHandles, dwCreationFlags,
                          lpEnvironment, lpCurrentDirectory, lpStartupInfo,
                          lpProcessInfo) == TRUE)
-    {
-      if (dwCreationFlags & DEBUG_PROCESS && pThreadDB != NULL)
       {
-        if(pThreadDB->o.odin.pidDebuggee != 0)
+        if (dwCreationFlags & DEBUG_PROCESS && pThreadDB != NULL)
         {
-          // TODO: handle this
-          dprintf(("KERNEL32: CreateProcess ERROR: This thread is already a debugger\n"));
+          if(pThreadDB->o.odin.pidDebuggee != 0)
+          {
+            // TODO: handle this
+            dprintf(("KERNEL32: CreateProcess ERROR: This thread is already a debugger\n"));
+          }
+          else
+          {
+            pThreadDB->o.odin.pidDebuggee = lpProcessInfo->dwProcessId;
+            OSLibStartDebugger((ULONG*)&pThreadDB->o.odin.pidDebuggee);
+          }
         }
-        else
+        else pThreadDB->o.odin.pidDebuggee = 0;
+
+        if(lpProcessInfo)
         {
-          pThreadDB->o.odin.pidDebuggee = lpProcessInfo->dwProcessId;
-          OSLibStartDebugger((ULONG*)&pThreadDB->o.odin.pidDebuggee);
+            lpProcessInfo->dwThreadId = MAKE_THREADID(lpProcessInfo->dwProcessId, lpProcessInfo->dwThreadId);
         }
-      }
-      else pThreadDB->o.odin.pidDebuggee = 0;
-
-      if(lpProcessInfo)
-      {
-          lpProcessInfo->dwThreadId = MAKE_THREADID(lpProcessInfo->dwProcessId, lpProcessInfo->dwThreadId);
-      }
-
-      if(cmdline)
-          free(cmdline);
-      return(TRUE);
-    }
-
-    // PH 2001-05-07
-    // verify why O32_CreateProcess actually failed.
-    // If GetLastError() == 191 (ERROR_INVALID_EXE_SIGNATURE)
-    // we can continue to call "PE.EXE".
-    // Note: Open32 does not translate ERROR_INVALID_EXE_SIGNATURE,
-    // it is also valid in Win32.
-    DWORD dwError = GetLastError();
-    if (ERROR_INVALID_EXE_SIGNATURE != dwError && ERROR_FILE_NOT_FOUND != dwError && ERROR_ACCESS_DENIED != dwError)
-    {
-        dprintf(("CreateProcess: O32_CreateProcess failed with rc=%d, not PE-executable !",
-                dwError));
-
-        // the current value of GetLastError() is still valid.
-
+  
         if(cmdline)
             free(cmdline);
+        return(TRUE);
+      }
+  
+      // verify why O32_CreateProcess actually failed.
+      // If GetLastError() == 191 (ERROR_INVALID_EXE_SIGNATURE)
+      // we can continue to call "PE.EXE".
+      // Note: Open32 does not translate ERROR_INVALID_EXE_SIGNATURE,
+      // it is also valid in Win32.
+      DWORD dwError = GetLastError();
+      if (ERROR_INVALID_EXE_SIGNATURE != dwError && ERROR_FILE_NOT_FOUND != dwError && ERROR_ACCESS_DENIED != dwError)
+      {
+          dprintf(("CreateProcess: O32_CreateProcess failed with rc=%d, not PE-executable !", dwError));
 
-        return FALSE;
+          // the current value of GetLastError() is still valid.
+          if(cmdline)
+              free(cmdline);
+
+          return FALSE;
+      }
     }
 
     // else ...
@@ -2053,8 +2058,7 @@ BOOL WINAPI CreateProcessA( LPCSTR lpApplicationName, LPSTR lpCommandLine,
     //probably a win32 exe, so run it in the pe loader
     dprintf(("KERNEL32: CreateProcess %s %s", szAppName, lpCommandLine));
 
-    DWORD Characteristics, SubSystem, fNEExe;
-    if(Win32ImageBase::isPEImage(szAppName, &Characteristics, &SubSystem, &fNEExe) == 0)
+    if(fPEExe)
     {
       char *lpszPE;
       char *lpszExecutable;
@@ -2097,16 +2101,16 @@ BOOL WINAPI CreateProcessA( LPCSTR lpApplicationName, LPSTR lpCommandLine,
         if(lpCurrentDirectory) {
             char *newcmdline;
 
-            newcmdline = (char *)malloc(strlen(lpCurrentDirectory) + iNewCommandLineLength + strlen(lpszPE) + 64);
-            sprintf(newcmdline, "%s /OPT:[CURDIR=%s] %s %s", lpszPE, lpCurrentDirectory, szAppName, lpCommandLine);
+            newcmdline = (char *)malloc(strlen(lpCurrentDirectory) + iNewCommandLineLength + 64);
+            sprintf(newcmdline, " /OPT:[CURDIR=%s] %s %s", lpCurrentDirectory, szAppName, lpCommandLine);
             free(cmdline);
             cmdline = newcmdline;
         }
         else {
             char *newcmdline;
 
-            newcmdline = (char *)malloc(iNewCommandLineLength + strlen(lpszPE) + 16);
-            sprintf(newcmdline, "%s %s %s", lpszPE, szAppName, lpCommandLine);
+            newcmdline = (char *)malloc(iNewCommandLineLength + 16);
+            sprintf(newcmdline, " %s %s", szAppName, lpCommandLine);
             free(cmdline);
             cmdline = newcmdline;
         }
@@ -2124,9 +2128,9 @@ BOOL WINAPI CreateProcessA( LPCSTR lpApplicationName, LPSTR lpCommandLine,
     if(fNEExe) {//16 bits windows app
         char *newcmdline;
 
-        newcmdline = (char *)malloc(strlen(szAppName) + strlen(cmdline) + strlen(szNELoader) + strlen(szPEGUILoader) + strlen(lpCommandLine) + 32);
+        newcmdline = (char *)malloc(strlen(szAppName) + strlen(cmdline) + strlen(szPEGUILoader) + strlen(lpCommandLine) + 32);
 
-        sprintf(newcmdline, "%s /PELDR=[%s] %s", szNELoader, szPEGUILoader, szAppName, lpCommandLine);
+        sprintf(newcmdline, " /PELDR=[%s] %s", szPEGUILoader, szAppName, lpCommandLine);
         free(cmdline);
         cmdline = newcmdline;
         //Force Open32 to use DosStartSession (DosExecPgm won't do)
