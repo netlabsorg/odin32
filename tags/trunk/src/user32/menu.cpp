@@ -1,4 +1,4 @@
-/* $Id: menu.cpp,v 1.51 2002-11-05 18:59:49 sandervl Exp $*/
+/* $Id: menu.cpp,v 1.52 2002-12-05 09:25:05 sandervl Exp $*/
 /*
  * Menu functions
  *
@@ -338,7 +338,12 @@ POPUPMENU *MENU_GetMenu(HMENU hMenu)
  */
 static HMENU MENU_CopySysPopup(void)
 {
+#ifndef __WIN32OS2__
     HMENU hMenu = LoadMenuA(GetModuleHandleA("USER32"), "SYSMENU");
+#else
+    HMENU hMenu;
+    hMenu = LoadMenuA(GetModuleHandleA("USER32"), fOS2Look ? "SYSMENUWARP" : "SYSMENU");
+#endif
 
     if( hMenu ) {
 #ifdef __WIN32OS2__
