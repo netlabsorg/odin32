@@ -1,4 +1,4 @@
-// $Id: dplay.cpp,v 1.2 2000-09-24 22:47:36 hugh Exp $
+// $Id: dplay.cpp,v 1.3 2000-10-06 19:49:03 hugh Exp $
 /* Direct Play 2,3,4 Implementation
  *
  * Copyright 1998,1999,2000 - Peter Hunnisett
@@ -31,6 +31,7 @@
 
 DEFAULT_DEBUG_CHANNEL(dplay)
 
+#undef debugstr_guid
 #define debugstr_guid(a) a
 
 
@@ -273,8 +274,9 @@ static BOOL DP_CreateDirectPlay2( LPVOID lpDP )
   /* We are a emulating a dp 6 implementation */
   This->dp2->spData.dwSPVersion = DPSP_MAJORVERSION;
 
-  This->dp2->spData.lpCB = (LPDPSP_SPCALLBACKS)HeapAlloc( GetProcessHeap(), HEAP_ZERO_MEMORY,
-                                      sizeof( *This->dp2->spData.lpCB ) );
+  This->dp2->spData.lpCB = (DPSP_SPCALLBACKS*)HeapAlloc( GetProcessHeap(),
+                                                         HEAP_ZERO_MEMORY,
+                                                         sizeof( *This->dp2->spData.lpCB ) );
   This->dp2->spData.lpCB->dwSize = sizeof( *This->dp2->spData.lpCB );
   This->dp2->spData.lpCB->dwVersion = DPSP_MAJORVERSION;
 
@@ -633,6 +635,8 @@ HRESULT DP_HandleMessage( IDirectPlay2Impl* This, LPCVOID lpMessageBody,
          This, lpMessageBody, dwMessageBodySize, lpMessageHeader, wCommandId,
          wVersion );
 
+  DebugBreak();
+
   switch( wCommandId )
   {
     case DPMSGCMD_REQUESTNEWPLAYERID:
@@ -649,7 +653,25 @@ HRESULT DP_HandleMessage( IDirectPlay2Impl* This, LPCVOID lpMessageBody,
                                                         HEAP_ZERO_MEMORY,
                                                         *lpdwMsgSize );
 
-      FIXME( "Ignoring dwFlags in msg\n" );
+      FIXME( "Ignoring dwFlags in request msg\n" );
+
+#if 0
+      /* This is just a test. See how large the SPData is and send it */
+      {
+        LPVOID lpData;
+        DWORD  dwDataSize;
+        HRESULT hr;
+
+        hr = IDirectPlaySP_GetSPData( This->dp2->spData.lpISP, &lpData,
+                                      &dwDataSize, DPSET_REMOTE );
+
+        if( FAILED(hr) )
+        {
+          ERR( "Unable to get remote SPData %s\n", DPLAYX_HresultToString(hr) );
+        }
+
+      }
+#endif
 
       /* Setup the reply */
       lpReply = (LPDPMSG_NEWPLAYERIDREPLY)( (BYTE*)(*lplpReply) +
@@ -659,18 +681,16 @@ HRESULT DP_HandleMessage( IDirectPlay2Impl* This, LPCVOID lpMessageBody,
       lpReply->envelope.wCommandId = DPMSGCMD_NEWPLAYERIDREPLY;
       lpReply->envelope.wVersion   = DPMSGVER_DP6;
 
-#if 0
-      /* FIXME: Need to know the proper contents of the message! */
       lpReply->dpidNewPlayerId = DP_NextObjectId();
-#endif
+
+      TRACE( "Allocating new playerid 0x%08lx from remote request\n",
+             lpReply->dpidNewPlayerId );
 
       break;
     }
 
     case DPMSGCMD_NEWPLAYERIDREPLY:
     {
-
-      DebugBreak();
 
       if( This->dp2->hMsgReceipt )
       {
@@ -683,7 +703,7 @@ HRESULT DP_HandleMessage( IDirectPlay2Impl* This, LPCVOID lpMessageBody,
       }
       else
       {
-        ERR( "No receipt event set\n" );
+        ERR( "No receipt event set - only expecting in reply mode\n" );
       }
 
       break;
@@ -1315,6 +1335,7 @@ static HRESULT WINAPI DP_IF_CreatePlayer
   DWORD dwFlags,
   BOOL bAnsi )
 {
+  HANDLE hr = DP_OK;
   lpPlayerData lpPData;
   lpPlayerList lpPList;
 
@@ -1352,7 +1373,7 @@ static HRESULT WINAPI DP_IF_CreatePlayer
     }
     else
     {
-      HRESULT hr = DP_MSG_SendRequestPlayerId( This, dwFlags, lpidPlayer );
+      hr = DP_MSG_SendRequestPlayerId( This, dwFlags, lpidPlayer );
 
       if( FAILED(hr) )
       {
@@ -1420,7 +1441,34 @@ static HRESULT WINAPI DP_IF_CreatePlayer
     data.lpSPMessageHeader = lpMsgHdr;
     data.lpISP             = This->dp2->spData.lpISP;
 
-    (*This->dp2->spData.lpCB->CreatePlayer)( &data );
+    hr = (*This->dp2->spData.lpCB->CreatePlayer)( &data );
+  }
+
+  if( FAILED(hr) )
+  {
+    ERR( "Failed to create player with sp: %s\n", DPLAYX_HresultToString(hr) );
+    return hr;
+  }
+
+  /* Now let the SP know that this player is a member of the system group */
+  if( This->dp2->spData.lpCB->AddPlayerToGroup )
+  {
+    DPSP_ADDPLAYERTOGROUPDATA data;
+
+    data.idPlayer = *lpidPlayer;
+    data.idGroup  = DPID_SYSTEM_GROUP;
+    data.lpISP    = This->dp2->spData.lpISP;
+
+    TRACE( "Calling SP AddPlayerToGroup (sys group)\n" );
+
+    hr = (*This->dp2->spData.lpCB->AddPlayerToGroup)( &data );
+  }
+
+  if( FAILED(hr) )
+  {
+    ERR( "Failed to add player to sys groupwith sp: %s\n",
+         DPLAYX_HresultToString(hr) );
+    return hr;
   }
 
   /* Inform all other peers of the creation of a new player. If there are
@@ -1446,11 +1494,11 @@ static HRESULT WINAPI DP_IF_CreatePlayer
     /* FIXME: Correct to just use send effectively? */
     /* FIXME: Should size include data w/ message or just message "header" */
     /* FIXME: Check return code */
-    DP_SendEx( This, DPID_SERVERPLAYER, DPID_ALLPLAYERS, 0, &msg, sizeof( msg ),
-               0, 0, NULL, NULL, bAnsi );
+    hr = DP_SendEx( This, DPID_SERVERPLAYER, DPID_ALLPLAYERS, 0, &msg,
+                    sizeof( msg ), 0, 0, NULL, NULL, bAnsi );
   }
 
-  return DP_OK;
+  return hr;
 }
 
 static HRESULT WINAPI DirectPlay2AImpl_CreatePlayer
@@ -1946,6 +1994,9 @@ static void DP_InvokeEnumSessionCallbacks
   LPDPSESSIONDESC2 lpSessionDesc;
 
   FIXME( ": not checking for conditions\n" );
+
+  /* Not sure if this should be pruning but it's convenient */
+  NS_PruneSessionCache( lpNSInfo );
 
   NS_ResetSessionEnumeration( lpNSInfo );
 
@@ -2674,7 +2725,7 @@ static HRESULT WINAPI DP_SecureOpen
 
   if( dwFlags & DPOPEN_JOIN )
   {
-    DPID dpidServerId = DPID_SERVERPLAYER;
+    DPID dpidServerId = DPID_UNKNOWN;
 
     /* Create the server player for this interface. This way we can receive
      * messages for this session.
@@ -2694,6 +2745,12 @@ static HRESULT WINAPI DP_SecureOpen
 
     hr = DP_IF_CreatePlayer( This, NULL, &dpidNameServerId, NULL, 0, NULL,
                              0, DPPLAYER_SERVERPLAYER, bAnsi );
+  }
+
+  if( FAILED(hr) )
+  {
+    ERR( "Couldn't create name server/system player: %s\n",
+         DPLAYX_HresultToString(hr) );
   }
 
   return hr;
@@ -3405,7 +3462,7 @@ static HRESULT WINAPI DirectPlay3AImpl_EnumConnections
     return DPERR_INVALIDFLAGS;
   }
 
-  if( (LPVOID)lpEnumCallback==NULL || *(int*)lpEnumCallback==NULL )
+  if( lpEnumCallback==NULL || *(DWORD*)lpEnumCallback==0 )
   {
      return DPERR_INVALIDPARAMS;
   }
@@ -3459,7 +3516,7 @@ static HRESULT WINAPI DirectPlay3AImpl_EnumConnections
          continue;
       }
 
-      if( RegQueryValueExA( hkServiceProvider, guidDataSubKey,
+      if( RegQueryValueExA( hkServiceProvider, (LPSTR)guidDataSubKey,
                             NULL, &returnTypeGUID, (LPBYTE)returnBuffer,
                             &sizeOfReturnBuffer ) != ERROR_SUCCESS )
       {
@@ -3468,7 +3525,7 @@ static HRESULT WINAPI DirectPlay3AImpl_EnumConnections
       }
 
       /* FIXME: Check return types to ensure we're interpreting data right */
-      lpWGUIDString = HEAP_strdupAtoW( GetProcessHeap(), 0, (LPCSTR)returnBuffer );
+      lpWGUIDString = HEAP_strdupAtoW( GetProcessHeap(), 0, returnBuffer );
       CLSIDFromString( (LPCOLESTR)lpWGUIDString, &serviceProviderGUID );
       HeapFree( GetProcessHeap(), 0, lpWGUIDString );
       /* FIXME: Have I got a memory leak on the serviceProviderGUID? */
@@ -3565,7 +3622,7 @@ static HRESULT WINAPI DirectPlay3AImpl_EnumConnections
          continue;
       }
 
-      if( RegQueryValueExA( hkServiceProvider, guidDataSubKey,
+      if( RegQueryValueExA( hkServiceProvider, (LPSTR)guidDataSubKey,
                             NULL, &returnTypeGUID, (LPBYTE)returnBuffer,
                             &sizeOfReturnBuffer ) != ERROR_SUCCESS )
       {
@@ -3909,7 +3966,7 @@ static HRESULT WINAPI DirectPlay3AImpl_InitializeConnection
   /* Initialize what we can of the Service Provider required information.
    * The rest will be done in DP_LoadSP
    */
-  This->dp2->spData.lpAddress = (LPDPADDRESS)lpConnection;
+  This->dp2->spData.lpAddress = (DPADDRESS*)lpConnection;
   This->dp2->spData.dwAddressSize = dwAddrSize;
   This->dp2->spData.lpGuid = &guidSP;
 

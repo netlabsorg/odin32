@@ -1,4 +1,4 @@
-// $Id: dplayx_messages.h,v 1.2 2000-09-24 22:47:39 hugh Exp $
+// $Id: dplayx_messages.h,v 1.3 2000-10-06 19:49:06 hugh Exp $
 
 #ifndef __WINE_DPLAYX_MESSAGES__
 #define __WINE_DPLAYX_MESSAGES__
@@ -20,9 +20,6 @@ DWORD CreateLobbyMessageReceptionThread( HANDLE hNotifyEvent, HANDLE hStart,
 #define DPMSGCMD_ENUMSESSIONSREPLY    1
 #define DPMSGCMD_ENUMSESSIONSREQUEST  2
 
-#define DPMSGCMD_GETSETNAMETABLE      3 /* Request info from NS about
-                                           existing players/groups etc. Is
-                                           also used for reply */
 
 #define DPMSGCMD_REQUESTNEWPLAYERID   5
 
@@ -35,7 +32,9 @@ DWORD CreateLobbyMessageReceptionThread( HANDLE hNotifyEvent, HANDLE hStart,
 
 #define DPMSGCMD_ENUMGROUPS           17
 
-#define DPMSGCMD_FORWARDCREATEPLAYER  19  /* This may be a get name table req */
+#define DPMSGCMD_GETNAMETABLE         19
+
+#define DPMSGCMD_GETNAMETABLEREPLY    29
 
 /* This is what DP 6 defines it as. Don't know what it means. All messages
  * defined below are DPMSGVER_DP6.
@@ -49,7 +48,7 @@ DWORD CreateLobbyMessageReceptionThread( HANDLE hNotifyEvent, HANDLE hStart,
  * the message.
  */
 
-/* Size is 4 bytes */
+/* Size is 8 bytes */
 typedef struct tagDPMSG_SENDENVELOPE
 {
   DWORD dwMagic;
@@ -127,15 +126,17 @@ typedef struct tagDPMSG_REQUESTNEWPLAYERID
 } DPMSG_REQUESTNEWPLAYERID, *LPDPMSG_REQUESTNEWPLAYERID;
 typedef const DPMSG_REQUESTNEWPLAYERID* LPCDPMSG_REQUESTNEWPLAYERID;
 
-/* 64 byte - ~18 header ~= 46 bytes msg */
+/* 48 bytes msg */
 typedef struct tagDPMSG_NEWPLAYERIDREPLY
 {
   DPMSG_SENDENVELOPE envelope;
 
-#if 0
   DPID dpidNewPlayerId;
-#else
-  BYTE unknown[38];
+#if 1
+  /* Assume that this is data that is tacked on to the end of the message
+   * that comes from the SP remote data stored that needs to be propagated.
+   */
+  BYTE unknown[36];     /* This appears to always be 0 - not sure though */
 #endif
 
 } DPMSG_NEWPLAYERIDREPLY, *LPDPMSG_NEWPLAYERIDREPLY;

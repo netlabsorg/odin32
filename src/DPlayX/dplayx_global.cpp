@@ -1,4 +1,4 @@
-// $Id: dplayx_global.cpp,v 1.2 2000-09-24 22:47:37 hugh Exp $
+// $Id: dplayx_global.cpp,v 1.3 2000-10-06 19:49:05 hugh Exp $
 /* dplayx.dll global data implementation.
  *
  * Copyright 1999,2000 - Peter Hunnisett
@@ -31,6 +31,7 @@
 
 DEFAULT_DEBUG_CHANNEL(dplay);
 
+#undef  debugstr_guid
 #define debugstr_guid(a) a
 
 
