@@ -1,4 +1,4 @@
-/* $Id: fastdep.c,v 1.40 2002-08-27 21:48:45 bird Exp $
+/* $Id: fastdep.c,v 1.41 2002-08-28 02:12:55 bird Exp $
  *
  * Fast dependents. (Fast = Quick and Dirty!)
  *
@@ -3780,7 +3780,8 @@ BOOL depCheckCyclic(PDEPRULE pdepRule, const char *pszDep)
     char *  apszHistory[HISTORY];
     int     iHistory;
     int     j;
-    int     k;
+    int     iStart;
+    int     iEnd;
     int     iCmp;
 #endif
     PDEPRULE pdep;
@@ -3826,12 +3827,12 @@ BOOL depCheckCyclic(PDEPRULE pdepRule, const char *pszDep)
                 /*
                  * Check if in history, if so we'll skip it.
                  */
-                #if 1
+                #if 0
                 for (j = 0;  j < iHistory; j++)
                     if (!strcmp(apszHistory[j], pdep->pszRule))
                         break;
                 if (j != iHistory)
-                    continue;
+                    continue;           /* found */
 
                 /*
                  * Push into history - might concider make this binary sorted one day.
@@ -3840,26 +3841,28 @@ BOOL depCheckCyclic(PDEPRULE pdepRule, const char *pszDep)
                     apszHistory[iHistory++] = pdep->pszRule;
 
                 #else
+
                 /*
                  * Check if in history, if so we'll skip it.
                  *  (Binary search)
                  * ASSUMES: Always something in the history!
                  */
+                iEnd = iHistory - 1;
+                iStart = 0;
                 j = iHistory / 2;
-                k = (iHistory + 1) / 2;
-                do 
+                while (    (iCmp = strcmp(pdep->pszRule, apszHistory[j])) != 0
+                       &&   iEnd != iStart)
                 {
-                    iCmp = strcmp(pdep->pszRule, apszHistroy[j]);
-                    if (!iCmp) 
-                        break;
-                    k = (k + 1) / 2;
-                    if (iCmp > 0)
-                        j += k;
+                    if (iCmp < 0)
+                        iEnd = j - 1;
                     else
-                        j -= k;
-                } while (!k);
+                        iStart = j + 1;
+                    if (iStart > iEnd)
+                        break;
+                    j = (iStart + iEnd) / 2;
+                }
 
-                if (!iCmp) 
+                if (!iCmp)
                     continue;           /* found */
 
                 /*
@@ -3867,9 +3870,10 @@ BOOL depCheckCyclic(PDEPRULE pdepRule, const char *pszDep)
                  */
                 if (iHistory < HISTORY)
                 {
+                    int k;
                     if (iCmp > 0)       /* Insert after. */
                         j++;
-                    for (k = iHistory; k < j; k--) 
+                    for (k = iHistory; k > j; k--)
                         apszHistory[k] = apszHistory[k - 1];
                     apszHistory[j] = pdep->pszRule;
                     iHistory++;
