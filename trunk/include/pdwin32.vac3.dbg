@@ -1,4 +1,4 @@
-# $Id: pdwin32.vac3.dbg,v 1.21 2000-03-05 14:52:42 bird Exp $
+# $Id: pdwin32.vac3.dbg,v 1.22 2000-03-06 23:42:12 bird Exp $
 # ODIN / win32os2 Project
 #
 # DEBUG makefile for the VAC3 compiler environment
@@ -28,11 +28,11 @@ OS2RC  = rc
 #
 # Tool Flags
 #
-CFLAGS           = -Q  -Si -Ti -Tm+ -Ge- -Ss+ -W3 -Gm+ /Gn+ -I$(PDWIN32_INCLUDE)\Win -I. -D__WIN32OS2__ -D__WINE__ -DDEBUG -D__i386__
-CXXFLAGS         = -Q  -Si -Ti -Tm+ -Ge- -Ss+ -W3 -Gm+ /Gn+ -I$(PDWIN32_INCLUDE)\Win -I. -D__WIN32OS2__ -D__WINE__ -DDEBUG -D__i386__
-CXXFLAGS_ODINCRT = -Q  -Si -Ti -Tm+ -Ge- -Ss+ -W3 -Gm+ /Gn- -I$(PDWIN32_INCLUDE)\Win -I. -D__WIN32OS2__ -D__WINE__ -DDEBUG -D__i386__
-CFLAGS_WIN32APP  = -Q  -Si -Ti -Tm+ -Ge- -Ss+ -W3 -Gm+ /Gn+ -I$(PDWIN32_INCLUDE)\Win -I. -D__WIN32OS2__ -D__i386__
-CXXFLAGS_WIN32APP= -Q  -Si -Ti -Tm+ -Ge- -Ss+ -W3 -Gm+ /Gn+ -I$(PDWIN32_INCLUDE)\Win -I. -D__WIN32OS2__ -D__i386__
+CFLAGS           = -Q  -Si -Ti -Tm+ -Ge- -Ss+ -W3 -Gm+ /Gn+ -I$(PDWIN32_INCLUDE)\Win -I. -I$(PDWIN32_INCLUDE) -D__WIN32OS2__ -D__WINE__ -DDEBUG -D__i386__
+CXXFLAGS         = -Q  -Si -Ti -Tm+ -Ge- -Ss+ -W3 -Gm+ /Gn+ -I$(PDWIN32_INCLUDE)\Win -I. -I$(PDWIN32_INCLUDE) -D__WIN32OS2__ -D__WINE__ -DDEBUG -D__i386__
+CXXFLAGS_ODINCRT = -Q  -Si -Ti -Tm+ -Ge- -Ss+ -W3 -Gm+ /Gn- -I$(PDWIN32_INCLUDE)\Win -I. -I$(PDWIN32_INCLUDE) -D__WIN32OS2__ -D__WINE__ -DDEBUG -D__i386__
+CFLAGS_WIN32APP  = -Q  -Si -Ti -Tm+ -Ge- -Ss+ -W3 -Gm+ /Gn+ -I$(PDWIN32_INCLUDE)\Win -I. -I$(PDWIN32_INCLUDE) -D__WIN32OS2__ -D__i386__
+CXXFLAGS_WIN32APP= -Q  -Si -Ti -Tm+ -Ge- -Ss+ -W3 -Gm+ /Gn+ -I$(PDWIN32_INCLUDE)\Win -I. -I$(PDWIN32_INCLUDE) -D__WIN32OS2__ -D__i386__
 
 !ifdef DEBUGALL
 CFLAGS           = $(CFLAGS) -DDEBUG_ENABLELOG_LEVEL2
@@ -54,5 +54,15 @@ LDFLAGS          = $(LDFLAGS) /B"/nodebug /nodbgpack"
 LDFLAGS_ODINCRT  = $(LDFLAGS_ODINCRT) /B"/nodebug /nodbgpack"
 LD2FLAGS         = $(LD2FLAGS) /nodebug /nodbgpack
 LD2FLAGS_ODINCRT = $(LD2FLAGS_ODINCRT) /nodebug  /nodbgpack
+CFLAGS           = $(CFLAGS) -DDEFAULT_LOGGING_OFF
+CXXFLAGS         = $(CXXFLAGS) -DDEFAULT_LOGGING_OFF
 !endif
 
+!ifdef EXETARGET
+CFLAGS           = $(CFLAGS) -Ge+ -Gn-
+CXXFLAGS         = $(CXXFLAGS) -Ge+ -Gn-
+LDFLAGS          = $(LDFLAGS) -Ge+
+LDFLAGS_ODINCRT  = $(LDFLAGS_ODINCRT) -Ge+
+LD2FLAGS         = $(LD2FLAGS) /EXEC
+LD2FLAGS_ODINCRT = $(LD2FLAGS_ODINCRT) /EXEC
+!endif

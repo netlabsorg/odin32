@@ -1,4 +1,4 @@
-# $Id: pdwin32.mk,v 1.7 1999-09-07 18:57:54 sandervl Exp $
+# $Id: pdwin32.mk,v 1.8 2000-03-06 23:42:11 bird Exp $
 #
 # PD-Win32 Project
 #
@@ -13,6 +13,7 @@
 #    CCENV:
 #      VAC3 - use IBM VisualAge for C++ 3 compiler environment (default)
 #      EMX - use GNU/EMX compiler environment
+#
 
 # include compiler environment
 !ifndef CCENV
