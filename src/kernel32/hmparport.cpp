@@ -1,4 +1,4 @@
-/* $Id: hmparport.cpp,v 1.10 2001-11-28 23:52:50 phaller Exp $ */
+/* $Id: hmparport.cpp,v 1.11 2001-11-29 00:20:48 phaller Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -152,21 +152,23 @@ HMDeviceParPortClass::HMDeviceParPortClass(LPCSTR lpDeviceName) : HMDeviceHandle
   
   // add symbolic links to the "real name" of the device
   {
+    // Note: \\.\LPTx: is invalid (NT4SP6)
     PSZ pszLPT  = strdup("\\\\.\\LPTx");
-    PSZ pszLPT2 = strdup("\\\\.\\LPTx:");
-    PSZ pszLPT3 = strdup("\\Device\\ParallelPort1");
+    PSZ pszLPT2 = strdup("\\Device\\ParallelPort1");
     for (char ch = '1'; ch <= '3'; ch++)
     {
       pszLPT[7] = ch;
-      pszLPT2[7] = ch;
-      pszLPT3[20] = ch;
+      pszLPT2[20] = ch;
       HandleNamesAddSymbolicLink(pszLPT, pszLPT+4);
       HandleNamesAddSymbolicLink(pszLPT2, pszLPT+4);
-      HandleNamesAddSymbolicLink(pszLPT3, pszLPT+4);
     }
     free(pszLPT);
     free(pszLPT2);
-    free(pszLPT3);
+    
+    // add "PRN" device
+    HandleNamesAddSymbolicLink("PRN",        "LPT1");
+    HandleNamesAddSymbolicLink("PRN:",       "LPT1");
+    HandleNamesAddSymbolicLink("\\\\.\\PRN", "LPT1");
   }
 }
 

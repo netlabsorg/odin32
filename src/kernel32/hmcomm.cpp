@@ -1,4 +1,4 @@
-/* $Id: hmcomm.cpp,v 1.19 2001-11-28 23:52:50 phaller Exp $ */
+/* $Id: hmcomm.cpp,v 1.20 2001-11-29 00:20:47 phaller Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -96,18 +96,20 @@ HMDeviceCommClass::HMDeviceCommClass(LPCSTR lpDeviceName) : HMDeviceHandler(lpDe
   {
     // @@@PH what's the long device name: SerialPortx ?
     // HandleNamesAddSymbolicLink("\\Device\\ParallelPort3", "COM3");
+    // Note: \\.\COMx: is invalid (NT4SP6)
     
     PSZ pszCOM = strdup("\\\\.\\COMx");
-    PSZ pszCOM2 = strdup("\\\\.\\COMx:");
     for (char ch = '1'; ch <= '9'; ch++)
     {
       pszCOM[7] = ch;
-      pszCOM2[7] = ch;
       HandleNamesAddSymbolicLink(pszCOM, pszCOM+4);
-      HandleNamesAddSymbolicLink(pszCOM2, pszCOM+4);
     }
     free(pszCOM);
-    free(pszCOM2);
+  
+    // add "AUX" device
+    HandleNamesAddSymbolicLink("AUX",        "COM1");
+    HandleNamesAddSymbolicLink("AUX:",       "COM1");
+    HandleNamesAddSymbolicLink("\\\\.\\AUX", "COM1");
   }
 }
 
