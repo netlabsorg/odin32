@@ -1,4 +1,4 @@
-/* $Id: ADVAPI32.CPP,v 1.6 1999-08-11 21:19:49 phaller Exp $ */
+/* $Id: ADVAPI32.CPP,v 1.7 1999-08-25 11:25:24 sandervl Exp $ */
 
 /*
  * Win32 advanced API functions for OS/2
@@ -684,7 +684,6 @@ BOOL WIN32API AdjustTokenGroups(HANDLE         TokenHandle,
  * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
  *****************************************************************************/
 
-#define PSID_IDENTIFIER_AUTHORITY LPVOID
 BOOL WIN32API AllocateAndInitializeSid(PSID_IDENTIFIER_AUTHORITY  pIdentifierAuthority,
                                           BYTE  nSubAuthorityCount,
                                           DWORD  dwSubAuthority0,
@@ -1449,7 +1448,6 @@ BOOL WIN32API DestroyPrivateObjectSecurity(PSECURITY_DESCRIPTOR *ObjectDescripto
  * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
  *****************************************************************************/
 
-#define SECURITY_IMPERSONATION_LEVEL DWORD
 BOOL WIN32API DuplicateToken(HANDLE                       ExistingTokenHandle,
                                 SECURITY_IMPERSONATION_LEVEL ImpersonationLevel,
                                 PHANDLE                      DuplicateTokenHandle)
@@ -1719,10 +1717,11 @@ BOOL WIN32API FindFirstFreeAce(PACL pAcl,
  * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
  *****************************************************************************/
 
-VOID WIN32API FreeSid(PSID pSid)
+PVOID WIN32API FreeSid(PSID pSid)
 {
   dprintf(("ADVAPI32: FreeSid(%08xh) not implemented.\n",
            pSid));
+  return NULL;
 }
 
 
@@ -2341,7 +2340,6 @@ PUCHAR  WIN32API GetSidSubAuthorityCount(PSID pSid)
  * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
  *****************************************************************************/
 
-#define TOKEN_INFORMATION_CLASS DWORD
 BOOL WIN32API GetTokenInformation(HANDLE                  TokenHandle,
                                      TOKEN_INFORMATION_CLASS TokenInformationClass,
                                      LPVOID                  TokenInformation,
