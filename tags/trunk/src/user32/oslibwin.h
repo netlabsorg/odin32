@@ -1,4 +1,4 @@
-/* $Id: oslibwin.h,v 1.59 2001-07-03 18:33:27 sandervl Exp $ */
+/* $Id: oslibwin.h,v 1.60 2001-07-14 09:21:42 sandervl Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -132,6 +132,10 @@ inline ULONG OSLibQueryScreenWidth(void)  { return (ScreenWidth); }
 #define SVOS_CXALIGN                 49
 #define SVOS_CYBYTEALIGN             50
 #define SVOS_CYALIGN                 50
+#define SVOS_DESKTOPWORKAREAYTOP     51
+#define SVOS_DESKTOPWORKAREAYBOTTOM  52
+#define SVOS_DESKTOPWORKAREAXRIGHT   53
+#define SVOS_DESKTOPWORKAREAXLEFT    54
 
 /* The following value enables any greater value to be set by WinSetSysValue. */
 /* This is to enable the setting of SV_EXTRAKEYBEEP by applications.          */
@@ -179,6 +183,14 @@ inline ULONG OSLibQueryScreenWidth(void)  { return (ScreenWidth); }
 #define SVOS_KBDALTERED              96
 #define SVOS_PRINTSCREEN             97
 #define SVOS_LOCKSTARTINPUT          98
+#define SVOS_DYNAMICDRAG             99
+#define SVOS_ALTTABWINDOW            100
+#define SVOS_VIOMOUSEACTIONS         101
+#define SVOS_ASYNCFOCUSCHANGE        102
+#define SVOS_AFCSENSITIVITY          103
+#define SVOS_CLOSEVIOWITHOUTCONFIRM  104
+#define SVOS_CXCURSOR                106
+#define SVOS_CYCURSOR                107
 #define SVOS_CSYSVALUES              108
 
 LONG OSLibWinQuerySysValue(LONG iSysValue);
