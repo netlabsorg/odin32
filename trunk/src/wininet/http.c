@@ -636,8 +636,13 @@ BOOL HTTP_HttpSendRequestA(HINTERNET hHttpRequest, LPCSTR lpszHeaders,
     {
             if (lpwhr->pCustHeaders[i].wFlags & HDR_ISREQUEST)
             {
+#ifdef __WIN32OS2__
+            requestStringLen += (lpwhr->pCustHeaders[i].lpszField) ? strlen(lpwhr->pCustHeaders[i].lpszField) : 0 +
+                (lpwhr->pCustHeaders[i].lpszValue) ? strlen(lpwhr->pCustHeaders[i].lpszValue) : 0 + 4; /*: \r\n */
+#else
             requestStringLen += strlen(lpwhr->pCustHeaders[i].lpszField) +
                 strlen(lpwhr->pCustHeaders[i].lpszValue) + 4; /*: \r\n */
+#endif
             }
     }
 
@@ -646,8 +651,13 @@ BOOL HTTP_HttpSendRequestA(HINTERNET hHttpRequest, LPCSTR lpszHeaders,
     {
        if (lpwhr->StdHeaders[i].wFlags & HDR_ISREQUEST)
        {
+#ifdef __WIN32OS2__
+          requestStringLen += (lpwhr->StdHeaders[i].lpszField) ? strlen(lpwhr->StdHeaders[i].lpszField) : 0 +
+             (lpwhr->StdHeaders[i].lpszValue) ? strlen(lpwhr->StdHeaders[i].lpszValue) : 0 + 4; /*: \r\n */
+#else
           requestStringLen += strlen(lpwhr->StdHeaders[i].lpszField) +
              strlen(lpwhr->StdHeaders[i].lpszValue) + 4; /*: \r\n */
+#endif
        }
     }
 
