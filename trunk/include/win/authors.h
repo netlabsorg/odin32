@@ -18,6 +18,7 @@ static const char * const SHELL_People[] =
     "Nenad Milenkovic",
     "Markus Montkowski",
     "Knut Stange Osmundsen",
+    "Vitali E. Pelenyov",
     "Rene Pronk",
     "David Raison",
     "Joel Troster",
