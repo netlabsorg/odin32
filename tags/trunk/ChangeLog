@@ -1,8 +1,10 @@
-/* $Id: ChangeLog,v 1.2522 2003-03-20 09:15:08 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.2523 2003-03-20 13:20:19 sandervl Exp $ */
 
  2003-03-20: Sander van Leeuwen <sandervl@innotek   >
     - USER32:   o WindowFromPoint: only send WM_NCHITTEST to windows belonging
                   to the current thread
+                o Changes for fake windows. Moved them into a seperate C++ class
+                  and overload some methods to correct the behaviour.
 
  2003-03-18: Platon Fomichev <platon@innotek   >
     - USER32:   o Shift/Ctrl/Alt+Numpad keys illegal behaviour. Generic numpad
