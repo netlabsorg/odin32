@@ -1,4 +1,4 @@
-/* $Id: oslibmsgtranslate.cpp,v 1.17 2000-02-16 14:34:27 sandervl Exp $ */
+/* $Id: oslibmsgtranslate.cpp,v 1.18 2000-02-24 19:19:08 sandervl Exp $ */
 /*
  * Window message translation functions for OS/2
  *
@@ -324,6 +324,16 @@ BOOL OS2ToWinMsgTranslate(void *pThdb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode
         OSLibMapSWPtoWINDOWPOS(pswp, &thdb->wp, &swpOld, hParent, win32wnd->getOS2FrameWindowHandle());
 
         if (!win32wnd->CanReceiveSizeMsgs())    goto dummymessage;
+
+	ULONG windowStyle = WinQueryWindowULong(os2Msg->hwnd, QWL_STYLE);
+	win32wnd->setStyle(win32wnd->getStyle() & ~(WS_MAXIMIZE_W|WS_MINIMIZE_W));
+	if (windowStyle & WS_MINIMIZED) {
+		win32wnd->setStyle(win32wnd->getStyle() | WS_MINIMIZE_W);
+	}
+	else
+	if (windowStyle & WS_MAXIMIZED) {
+		win32wnd->setStyle(win32wnd->getStyle() | WS_MAXIMIZE_W);
+	}
 
         if(pswp->fl & (SWP_MOVE | SWP_SIZE)) {
                 dprintf(("Set client rectangle to (%d,%d)(%d,%d)", swpOld.x, swpOld.y, swpOld.x + swpOld.cx, swpOld.y + swpOld.cy));
@@ -666,7 +676,7 @@ VirtualKeyFound:
 
     case WM_PAINT:
     {
-        if(win32wnd->IsIconic()) {
+        if(win32wnd->IsWindowIconic()) {
                 winMsg->message = WINWM_PAINTICON;
         }
         else    winMsg->message = WINWM_PAINT;
