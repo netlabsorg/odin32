@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.360 2003-02-27 14:22:44 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.361 2003-02-28 09:56:00 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -2578,7 +2578,7 @@ BOOL Win32BaseWindow::SetWindowPos(HWND hwndInsertAfter, int x, int y, int cx,
         {
             NotifyFrameChanged(&wpos, &oldClientRect);
         }
-        if(!fShowWindow && !(getStyle() & WS_MINIMIZE))
+        if(!fShowWindow && !(getStyle() & WS_MINIMIZE) && !(fuFlags & (SWP_NOSIZE | SWP_NOMOVE)))
         {
             //Restore position always changes when the window position is changed
             dprintf(("Save new restore position %x (%d,%d)(%d,%d)", getWindowHandle(), rectWindow.left, rectWindow.top, rectWindow.right, rectWindow.bottom));
