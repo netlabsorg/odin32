@@ -1,4 +1,4 @@
-/* $Id: kernelrsrc.orc,v 1.2 2000-08-19 13:00:30 sandervl Exp $ */
+/* $Id: kernelrsrc.orc,v 1.3 2002-02-07 16:34:52 sandervl Exp $ */
 
 #include "winuser.h"
 #include "odinrsrc.h"
@@ -39,3 +39,5 @@ BEGIN
 	VALUE "Translation", 0x409, 0x04E4
     END
 END
+
+#include "nls\locale_rc.rc"
