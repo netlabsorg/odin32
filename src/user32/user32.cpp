@@ -1,4 +1,4 @@
-/* $Id: user32.cpp,v 1.38 1999-10-01 15:51:53 cbratschi Exp $ */
+/* $Id: user32.cpp,v 1.39 1999-10-08 21:29:50 cbratschi Exp $ */
 
 /*
  * Win32 misc user32 API functions for OS/2
@@ -1891,8 +1891,6 @@ BOOL WIN32API CheckRadioButton( HWND hDlg, UINT nIDFirstButton, UINT nIDLastButt
       SetLastError(ERROR_INVALID_PARAMETER);
       return (FALSE);
     }
-
-    hDlg = Win32Window::Win32ToOS2Handle(hDlg);
 
     for (UINT x = nIDFirstButton;x <= nIDLastButton;x++)
     {
