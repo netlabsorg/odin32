@@ -1,4 +1,4 @@
-# $Id: odin32.post.vac3.mk,v 1.25 2001-12-09 22:03:07 sandervl Exp $
+# $Id: odin32.post.vac3.mk,v 1.26 2002-02-09 17:26:36 sandervl Exp $
 
 #
 # Odin32 API
@@ -79,6 +79,9 @@ ORGTARGET=$(TARGET)
 !ifndef DEFFILE
 DEFFILE = $(ORGTARGET).def
 !endif
+!ifndef ORGDEFFILE
+ORGDEFFILE = $(ORGTARGET).def
+!endif
 
 # Set INTLIBS (interal) if SUBDIRS is defined and NO_INTERNAL_LIBS is undefined.
 !ifdef SUBDIRS
@@ -127,7 +130,7 @@ lib:    $(OBJDIR) \
 # Dll: Main target rule - builds the target dll.
 #
 !ifndef NO_MAIN_RULE
-$(OBJDIR)\$(TARGET).$(TARGET_EXTENSION): $(LIBS) $(OBJS) $(OS2RES) $(DEFFILE) $(OBJDIR)\bldlevel.$(DEFFILE) $(OBJDIR)\$(TARGET).lrf
+$(OBJDIR)\$(TARGET).$(TARGET_EXTENSION): $(LIBS) $(OBJS) $(OS2RES) $(DEFFILE) $(OBJDIR)\bldlevel.$(ORGDEFFILE) $(OBJDIR)\$(TARGET).lrf
     $(CMDQD_WAIT)
     -4 $(LD2) $(LD2FLAGS) @$(OBJDIR)\$(TARGET).lrf
 !ifdef OS2RES
@@ -155,7 +158,7 @@ $(OBJS:  =^
 )
 $(LIBS:  =^
 )
-$(OBJDIR)\bldlevel.$(DEFFILE)
+$(OBJDIR)\bldlevel.$(ORGDEFFILE)
 <<keep
 !else
     @echo Creating file <<$@
@@ -165,7 +168,7 @@ $(OBJDIR)\$(TARGET).$(TARGET_EXTENSION),
 $(OBJDIR)\$(TARGET).map,
 $(LIBS: =+^
 ),
-$(OBJDIR)\bldlevel.$(DEFFILE);
+$(OBJDIR)\bldlevel.$(ORGDEFFILE);
 <<keep
 !endif
 !endif
@@ -202,7 +205,7 @@ lib:
 # Exe: Main target rule - builds the target exe.
 #
 !ifndef NO_MAIN_RULE
-$(OBJDIR)\$(TARGET).$(TARGET_EXTENSION): $(LIBS) $(OBJS) $(OS2RES) $(DEFFILE) $(OBJDIR)\bldlevel.$(DEFFILE) $(OBJDIR)\$(TARGET).lrf
+$(OBJDIR)\$(TARGET).$(TARGET_EXTENSION): $(LIBS) $(OBJS) $(OS2RES) $(DEFFILE) $(OBJDIR)\bldlevel.$(ORGDEFFILE) $(OBJDIR)\$(TARGET).lrf
     $(CMDQD_WAIT)
     -4 $(LD2) $(LD2FLAGS) @$(OBJDIR)\$(TARGET).lrf
 !ifdef OS2RES
@@ -230,7 +233,7 @@ $(OBJS:  =^
 )
 $(LIBS:  =^
 )
-$(OBJDIR)\bldlevel.$(DEFFILE)
+$(OBJDIR)\bldlevel.$(ORGDEFFILE)
 <<keep
 !else
     @echo Creating file <<$@
@@ -240,7 +243,7 @@ $(OBJDIR)\$(TARGET).$(TARGET_EXTENSION),
 $(OBJDIR)\$(TARGET).map,
 $(LIBS: =+^
 ),
-$(OBJDIR)\bldlevel.$(DEFFILE);
+$(OBJDIR)\bldlevel.$(ORGDEFFILE);
 <<keep
 !endif
 !endif
@@ -421,7 +424,7 @@ $(OBJDIR)\$(TARGET).lib: $(DEFFILE)
 #
 !ifndef LIBTARGET
 !ifndef NOTEXPDEF
-$(OBJDIR)\$(ORGTARGET)exp.def: $(DEFFILE)
+$(OBJDIR)\$(ORGTARGET)exp.def: $(ORGDEFFILE)
     $(IMPDEF) $(IMPDEF_FLAGS) $** $@
 !endif
 !endif
@@ -430,7 +433,7 @@ $(OBJDIR)\$(ORGTARGET)exp.def: $(DEFFILE)
 #
 # Common: Make .def-file with buildlevel info.
 #
-$(OBJDIR)\bldlevel.$(DEFFILE): $(DEFFILE)
+$(OBJDIR)\bldlevel.$(ORGDEFFILE): $(DEFFILE)
     $(BLDLEVELINF) $(DEFFILE) $@ -R"$(DEFFILE)" \
         -V"#define=ODIN32_VERSION,$(ODIN32_INCLUDE)\odinbuild.h" \
         -M"#define=ODIN32_BUILD_NR,$(ODIN32_INCLUDE)\odinbuild.h"
