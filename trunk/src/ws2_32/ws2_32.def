@@ -1,4 +1,4 @@
-; $Id: ws2_32.def,v 1.10 2001-10-11 19:24:38 sandervl Exp $
+; $Id: ws2_32.def,v 1.11 2001-10-17 10:22:37 sandervl Exp $
 
 ;Created by BLAST for IBM's compiler
 LIBRARY WS2_32 INITINSTANCE
@@ -85,8 +85,8 @@ EXPORTS
 ; WSAEnumNameSpaceProvidersA                       @34
 ; WSAEnumNameSpaceProvidersW                       @35
   WSAEnumNetworkEvents                             @36
-; WSAEnumProtocolsA                                @37
-; WSAEnumProtocolsW                                @38
+  WSAEnumProtocolsA = _WSAEnumProtocolsA@12        @37
+  WSAEnumProtocolsW = _WSAEnumProtocolsW@12        @38
   WSAEventSelect                                   @39
 ; WSAGetOverlappedResult                           @40
 ; WSAGetQOSByName                                  @41
