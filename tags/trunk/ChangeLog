@@ -1,4 +1,7 @@
- /* $Id: ChangeLog,v 1.477 1999-11-27 14:15:15 cbratschi Exp $ */
+ /* $Id: ChangeLog,v 1.478 1999-11-27 19:52:44 sandervl Exp $ */
+
+ 99-11-27: Jens Wiessner <wiessnej@rfi.de>
+	- MSVCRT: Added stubs
 
  99-11-27: Christoph Bratschi <cbratschi@datacomm.ch>
 	- USER32: fixed edit bugs
