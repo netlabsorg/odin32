@@ -1,4 +1,4 @@
-/* $Id: buildenv.cmd,v 1.30 2002-09-05 01:18:31 bird Exp $
+/* $Id: buildenv.cmd,v 1.31 2002-09-05 01:20:11 bird Exp $
  *
  * This is the master tools environment script. It contains environment
  * configurations for many development tools. Each tool can be installed
@@ -2787,7 +2787,7 @@ Toolkit45: procedure expose aCfg. aPath. sPathFile
         return 2;
 
     rc = CheckSyslevel(sPathTK||'\bin\syslevel.tlk', fQuiet,,
-                       '5639F9300', '4.50', 'XR04500',,
+                       '5639F9300', '4.50.0', 'XR04500',,
                        'IBM OS/2 Developer''s Toolkit Version 4.5',,
                        15, '0');
     if (rc = 0) then
