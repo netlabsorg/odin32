@@ -1,4 +1,9 @@
- /* $Id: changelog,v 1.198 1999-09-13 19:46:07 phaller Exp $ */
+ /* $Id: changelog,v 1.199 1999-09-14 20:48:48 sandervl Exp $ */
+
+ 99-09-14: Sander van Leeuwen <sandervl@xs4all.nl>
+	- USER32\NEW: Implemented Enum(Thread/Child)Windows based on Edgar
+                      Buerkle's code with modifications for new user32 and
+                      added some enhancements.
 
  99-09-13: Jens Wiessner <wiessnej@rfi.de>
 	- NTDLL: Added CRT-functions.
