@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.205 2003-03-28 13:56:59 sandervl Exp $ */
+/* $Id: pmwindow.cpp,v 1.206 2003-03-29 16:37:59 sandervl Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -643,10 +643,12 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
 
 
     case WM_VRNENABLED:
+    {
         dprintf(("OS2: WM_VRNENABLED %x %x %x", win32wnd->getWindowHandle(), mp1, mp2));
         //Always call handler; even if mp1 is 0. If we don't do this, the
         //DivX 4 player will never be allowed to draw after putting another window
         //on top of it.
+
         win32wnd->callVisibleRgnNotifyProc(TRUE);
         if(!win32wnd->isComingToTop() && ((win32wnd->getExStyle() & WS_EX_TOPMOST_W) == WS_EX_TOPMOST_W))
         {
@@ -668,13 +670,17 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
             break;
         }
         goto RunDefWndProc;
+    }
 
     case WM_VRNDISABLED:
+    {
         dprintf(("OS2: WM_VRNDISABLED %x %x %x", win32wnd->getWindowHandle(), mp1, mp2));
         //visible region is about to change or WinLockWindowUpdate called
         //suspend window drawing
+
         win32wnd->callVisibleRgnNotifyProc(FALSE);
         goto RunDefWndProc;
+    }
 
     case WIN32APP_DDRAWFULLSCREEN:
         //Changing the size of the win32 window in SetCooperativeLevel can
@@ -1465,13 +1471,13 @@ adjustend:
                 }
             }
         }
+#ifdef DEBUG
         dprintf(("WM_ADJUSTWINDOWPOS ret %x flags %x", ret, WinQueryWindowUShort(hwnd, QWS_FLAGS)));
-//testestset
         if(ret == 0x0f) {
             dprintf(("PMFRAME:WM_ADJUSTWINDOWPOS, app changed windowpos struct"));
             dprintf(("%x (%s) (%d,%d), (%d,%d)", pswp->fl, DbgGetStringSWPFlags(pswp->fl), pswp->x, pswp->y, pswp->cx, pswp->cy));
         }
-//testestset
+#endif
         rc = (MRESULT)ret;
         break;
     }

@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.364 2003-03-27 10:42:41 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.365 2003-03-29 16:38:00 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -119,6 +119,7 @@ void Win32BaseWindow::Init()
   fEraseBkgndFlag  = TRUE;
   fIsDragDropActive= FALSE;
   fDirtyUpdateRegion = FALSE;
+  fWindowLocked    = FALSE;
 
   state            = STATE_INIT;
   windowNameA      = NULL;
@@ -4008,6 +4009,53 @@ WORD Win32BaseWindow::GetWindowWord(int index)
     dprintf(("WARNING: GetWindowWord %x %d returned %x INVALID index!", getWindowHandle(), index));
     SetLastError(ERROR_INVALID_INDEX);  //verified in NT4, SP6
     return 0;
+}
+//******************************************************************************
+// Win32BaseWindow::setVisibleRgnNotifyProc
+//
+// Sets the visible region change notification handler. Called when
+// the window receives a WM_VRNDISABLED or WM_VRNENABLED message (PM).
+//
+// Parameters:
+//    VISRGN_NOTIFY_PROC lpNotifyProc    - notification handler
+//    DWORD              dwUserData      - caller supplied parameter for handler invocations
+// 
+// Returns:
+//    TRUE              - Success
+//    FALSE             - Failure
+//
+//******************************************************************************
+BOOL Win32BaseWindow::setVisibleRgnNotifyProc(VISRGN_NOTIFY_PROC lpNotifyProc, DWORD dwUserData)
+{
+    lpVisRgnNotifyProc  = lpNotifyProc;
+    dwVisRgnNotifyParam = dwUserData;
+    return TRUE;
+}
+//******************************************************************************
+// Win32BaseWindow::callVisibleRgnNotifyProc
+//
+// Call the visible region change notification handler. Called when
+// the window receives a WM_VRNDISABLED or WM_VRNENABLED message (PM).
+//
+// Parameters:
+//    BOOL   fDrawingAllowed    - drawing is allowed or not
+// 
+// Returns:
+//    TRUE              - Success
+//    FALSE             - Failure
+//
+//******************************************************************************
+void Win32BaseWindow::callVisibleRgnNotifyProc(BOOL fDrawingAllowed) 
+{
+    if(fDrawingAllowed) {
+        fWindowLocked = TRUE;
+    }
+    else {
+        fWindowLocked = FALSE;
+    }
+    if(lpVisRgnNotifyProc) {
+        lpVisRgnNotifyProc(getWindowHandle(), fDrawingAllowed, dwVisRgnNotifyParam);
+    }
 }
 //******************************************************************************
 //Locates window in linked list and increases reference count (if found)
