@@ -139,30 +139,40 @@ extern const char * const debug_ch_name[];
 #  undef DEFAULT_DEBUG_CHANNEL
 #  define DEFAULT_DEBUG_CHANNEL ODINDEBUGCHANNEL
 #  undef TRACE
-#  define TRACE WriteLog
 #  undef TRACE_
-#  define TRACE_(ch) WriteLog
 #  undef TRACE_ON
 #  define TRACE_ON(ch) 0
 #  undef FIXME
-#  define FIXME WriteLog
 #  undef FIXME_
-#  define FIXME_(ch) WriteLog
 #  undef FIXME_ON
 #  define FIXME_ON(ch) 0
 #  undef WARN
-#  define WARN  WriteLog
 #  undef WARN_
-#  define WARN_(ch) WriteLog
 #  undef WARN_ON
 #  define WARN_ON(ch)  0
 #  undef ERR
-#  define ERR  WriteLog
 #  undef ERR_
-#  define ERR_(ch) WriteLog
 #  undef ERR_ON
 #  define ERR_ON(ch)   0
-
+#ifdef DEBUG
+#  define TRACE WriteLog
+#  define TRACE_(ch) WriteLog
+#  define FIXME WriteLog
+#  define FIXME_(ch) WriteLog
+#  define WARN  WriteLog
+#  define WARN_(ch) WriteLog
+#  define ERR_(ch) WriteLog
+#  define ERR  WriteLog
+#else
+#  define TRACE 1 ? (void)0 : (void)((int (*)(char *, ...)) NULL)
+#  define TRACE_(ch) 1 ? (void)0 : (void)((int (*)(char *, ...)) NULL)
+#  define FIXME 1 ? (void)0 : (void)((int (*)(char *, ...)) NULL)
+#  define FIXME_(ch) 1 ? (void)0 : (void)((int (*)(char *, ...)) NULL)
+#  define WARN  1 ? (void)0 : (void)((int (*)(char *, ...)) NULL)
+#  define WARN_(ch) 1 ? (void)0 : (void)((int (*)(char *, ...)) NULL)
+#  define ERR_(ch) 1 ? (void)0 : (void)((int (*)(char *, ...)) NULL)
+#  define ERR  1 ? (void)0 : (void)((int (*)(char *, ...)) NULL)
+#endif
 #undef __GET_DEBUGGING
 #define __GET_DEBUGGING(dbcl,dbch)
 #undef  __SET_DEBUGGING
