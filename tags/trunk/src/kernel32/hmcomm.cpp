@@ -1,4 +1,4 @@
-/* $Id: hmcomm.cpp,v 1.16 2001-11-27 12:33:23 sandervl Exp $ */
+/* $Id: hmcomm.cpp,v 1.17 2001-11-28 15:35:15 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -26,6 +26,10 @@
 #define DBG_LOCALLOG  DBG_hmcomm
 #include "dbglocal.h"
 
+#undef dprintf
+#define dprintf(a) WriteLog a
+#undef dprintf2
+#define dprintf2(a) WriteLog a
 
 BAUDTABLEENTRY BaudTable[] =
 {
@@ -103,10 +107,10 @@ HMDeviceCommClass::HMDeviceCommClass(LPCSTR lpDeviceName) : HMDeviceHandler(lpDe
  *****************************************************************************/
 BOOL HMDeviceCommClass::FindDevice(LPCSTR lpClassDevName, LPCSTR lpDeviceName, int namelength)
 {
-    dprintf(("HMDeviceCommClass::FindDevice %s %s", lpClassDevName, lpDeviceName));
+    dprintf2(("HMDeviceCommClass::FindDevice %s %s", lpClassDevName, lpDeviceName));
 
     if(namelength > 5) {
-        if(lstrncmpA(lpDeviceName, "\\\\.\\", 4) != 0) {
+        if(namelength != 9 || lstrncmpA(lpDeviceName, "\\\\.\\", 4) != 0) {
             return FALSE;  //can't be com name
         }
         lpDeviceName += 4; //skip prefix
@@ -155,12 +159,12 @@ DWORD HMDeviceCommClass::CreateFile(HANDLE hComm,
   comname[4] = 0;   //get rid of : (if present) (eg COM1:)
 
   //AH: TODO parse Win32 security handles
-  ULONG oldmode = SetErrorMode(SEM_FAILCRITICALERRORS);
+  ULONG oldmode = ::SetErrorMode(SEM_FAILCRITICALERRORS);
   pHMHandleData->hHMHandle = OSLibDosOpen(comname,
                                           OSLIB_ACCESS_READWRITE |
                                           OSLIB_ACCESS_SHAREDENYREAD |
                                           OSLIB_ACCESS_SHAREDENYWRITE);
-  SetErrorMode(oldmode);
+  ::SetErrorMode(oldmode);
   if (pHMHandleData->hHMHandle != 0)
   {
     ULONG ulLen;
@@ -287,7 +291,7 @@ BOOL HMDeviceCommClass::WriteFile(PHMHANDLEDATA pHMHandleData,
 
   if((pHMHandleData->dwFlags & FILE_FLAG_OVERLAPPED) && !lpOverlapped) {
     dprintf(("FILE_FLAG_OVERLAPPED flag set, but lpOverlapped NULL!!"));
-    SetLastError(ERROR_INVALID_PARAMETER);
+    ::SetLastError(ERROR_INVALID_PARAMETER);
     return FALSE;
   }
   if(!(pHMHandleData->dwFlags & FILE_FLAG_OVERLAPPED) && lpOverlapped) {
@@ -299,6 +303,7 @@ BOOL HMDeviceCommClass::WriteFile(PHMHANDLEDATA pHMHandleData,
 
   if(lpNumberOfBytesWritten) {
        *lpNumberOfBytesWritten = (ret) ? ulBytesWritten : 0;
+       dprintf2(("KERNEL32:HMDeviceCommClass::WriteFile %d bytes written", ulBytesWritten));
   }
   if(ret == FALSE) {
        dprintf(("!ERROR!: WriteFile failed with rc %d", GetLastError()));
@@ -343,11 +348,11 @@ BOOL HMDeviceCommClass::WriteFileEx(PHMHANDLEDATA pHMHandleData,
 
   if(!(pHMHandleData->dwFlags & FILE_FLAG_OVERLAPPED)) {
       dprintf(("!WARNING!: Handle not created with FILE_FLAG_OVERLAPPED!"));
-      SetLastError(ERROR_ACCESS_DENIED); //todo: right error?
+      ::SetLastError(ERROR_ACCESS_DENIED); //todo: right error?
       return FALSE;
   }
 
-  SetLastError(ERROR_INVALID_FUNCTION);
+  ::SetLastError(ERROR_INVALID_FUNCTION);
   return FALSE;
 }
 /*****************************************************************************
@@ -385,7 +390,7 @@ BOOL HMDeviceCommClass::ReadFile(PHMHANDLEDATA pHMHandleData,
 
   if((pHMHandleData->dwFlags & FILE_FLAG_OVERLAPPED) && !lpOverlapped) {
     dprintf(("FILE_FLAG_OVERLAPPED flag set, but lpOverlapped NULL!!"));
-    SetLastError(ERROR_INVALID_PARAMETER);
+    ::SetLastError(ERROR_INVALID_PARAMETER);
     return FALSE;
   }
   if(!(pHMHandleData->dwFlags & FILE_FLAG_OVERLAPPED) && lpOverlapped) {
@@ -397,6 +402,7 @@ BOOL HMDeviceCommClass::ReadFile(PHMHANDLEDATA pHMHandleData,
 
   if(lpNumberOfBytesRead) {
        *lpNumberOfBytesRead = (ret) ? ulBytesRead : 0;
+       dprintf2(("KERNEL32:HMDeviceCommClass::ReadFile %d bytes read", ulBytesRead));
   }
   if(ret == FALSE) {
        dprintf(("!ERROR!: ReadFile failed with rc %d", GetLastError()));
@@ -442,11 +448,11 @@ BOOL HMDeviceCommClass::ReadFileEx(PHMHANDLEDATA pHMHandleData,
 
   if(!(pHMHandleData->dwFlags & FILE_FLAG_OVERLAPPED)) {
       dprintf(("!WARNING!: Handle not created with FILE_FLAG_OVERLAPPED!"));
-      SetLastError(ERROR_ACCESS_DENIED); //todo: right error?
+      ::SetLastError(ERROR_ACCESS_DENIED); //todo: right error?
       return FALSE;
   }
 
-  SetLastError(ERROR_INVALID_FUNCTION);
+  ::SetLastError(ERROR_INVALID_FUNCTION);
   return FALSE;
 }
 /*****************************************************************************
@@ -468,7 +474,7 @@ BOOL HMDeviceCommClass::SetupComm( PHMHANDLEDATA pHMHandleData,
   PHMDEVCOMDATA pDevData = (PHMDEVCOMDATA)pHMHandleData->lpHandlerData;
   if((NULL==pDevData) || (pDevData->ulMagic != MAGIC_COM) )
   {
-      SetLastError(ERROR_INVALID_HANDLE);
+      ::SetLastError(ERROR_INVALID_HANDLE);
       return FALSE;
   }
   pDevData->dwInBuffer  = dwInQueue;
@@ -490,7 +496,6 @@ DWORD CALLBACK SerialCommThread(LPVOID lpThreadParam)
   USHORT        COMEvt;
   DWORD         dwEvent,dwMask;
 
-  dprintf(("SerialCommThread %x entered", hComm));
   pHMHandleData = HMQueryHandleData(hComm);
   if(!pHMHandleData) {
       dprintf(("!ERROR!: Invalid handle -> aborting"));
@@ -499,15 +504,18 @@ DWORD CALLBACK SerialCommThread(LPVOID lpThreadParam)
 
   pDevData = (PHMDEVCOMDATA)pHMHandleData->lpHandlerData;
   if(!pDevData) {
+      dprintf(("!ERROR! SerialCommThread !pDevData"));
       DebugInt3();
       return 0;
   }
   HANDLE hEvent   = pDevData->hEventSem;
   HANDLE hCommOS2 = pHMHandleData->hHMHandle;
   if(!hCommOS2 || !hEvent) {
+      dprintf(("!ERROR! SerialCommThread !hCommOS2 || !hEvent"));
       DebugInt3();
       return 0;
   } 
+  dprintf(("SerialCommThread %x entered", hComm));
 
   while(TRUE) 
   {
@@ -597,6 +605,10 @@ DWORD CALLBACK SerialCommThread(LPVOID lpThreadParam)
       if((dwEvent & dwMask) && (dwMask == pDevData->dwEventMask)) {
           pDevData->overlapped.Internal |= (rc==0) ? (dwEvent & dwMask) : 0;
           pDevData->dwLastError = rc;
+
+          //We're also supposed to write the result to the address supplied
+          //by the call to WaitCommEvent
+          if(pDevData->lpfdwEvtMask) *pDevData->lpfdwEvtMask = (rc==0) ? (dwEvent & dwMask) : 0;
           dprintf(("Overlapped: WaitCommEvent returned %x", pDevData->overlapped.Internal));
 
           //signal to app that a comm event has occurred
@@ -618,11 +630,11 @@ BOOL HMDeviceCommClass::WaitCommEvent( PHMHANDLEDATA pHMHandleData,
 
   PHMDEVCOMDATA pDevData = (PHMDEVCOMDATA)pHMHandleData->lpHandlerData;
 
-  dprintf2(("HMDeviceCommClass::WaitCommEvent %x", pHMHandleData->hHMHandle));
+  dprintf(("HMDeviceCommClass::WaitCommEvent %x %x %x", pHMHandleData->hHMHandle, lpfdwEvtMask, lpo));
 
   if((pHMHandleData->dwFlags & FILE_FLAG_OVERLAPPED) && !lpo) {
       dprintf(("!WARNING! pHMHandleData->dwFlags & FILE_FLAG_OVERLAPPED) && !lpo"));
-      SetLastError(ERROR_INVALID_PARAMETER);
+      ::SetLastError(ERROR_INVALID_PARAMETER);
       return FALSE;
   }
 
@@ -663,9 +675,15 @@ BOOL HMDeviceCommClass::WaitCommEvent( PHMHANDLEDATA pHMHandleData,
         pDevData->overlapped.InternalHigh = 0;
         pDevData->overlapped.Offset       = 0;
         pDevData->overlapped.OffsetHigh   = 0;
+        //We're also supposed to write the result to the address supplied
+        //by this call
+        pDevData->lpfdwEvtMask            = lpfdwEvtMask;
+        //Set app event semaphore to non-signalled state
+        ::ResetEvent(lpo->hEvent);
+
         //signal async comm thread to start polling comm status
         ::SetEvent(pDevData->hEventSem);
-        SetLastError(ERROR_IO_PENDING);
+        ::SetLastError(ERROR_IO_PENDING);
         return FALSE;
     }
     DosSleep(TIMEOUT_COMM);
@@ -676,7 +694,7 @@ BOOL HMDeviceCommClass::WaitCommEvent( PHMHANDLEDATA pHMHandleData,
   }
   else  *lpfdwEvtMask = 0;
 
-  SetLastError(rc);
+  ::SetLastError(rc);
   return (rc==0);
 }
 /*****************************************************************************
@@ -695,7 +713,7 @@ BOOL HMDeviceCommClass::CancelIo(PHMHANDLEDATA pHMHandleData)
 
     dprintf(("HMDeviceCommClass::CancelIo"));
     if(pDevData == NULL || !(pHMHandleData->dwFlags & FILE_FLAG_OVERLAPPED)) {
-        SetLastError(ERROR_ACCESS_DENIED); //todo: wrong error?
+        ::SetLastError(ERROR_ACCESS_DENIED); //todo: wrong error?
         return FALSE;
     }
 
@@ -703,7 +721,7 @@ BOOL HMDeviceCommClass::CancelIo(PHMHANDLEDATA pHMHandleData)
     pDevData->fCancelIo = TRUE;
     ::SetEvent(pDevData->hEventSem);
 
-    SetLastError(ERROR_SUCCESS);
+    ::SetLastError(ERROR_SUCCESS);
     return(TRUE);
 }
 /*****************************************************************************
@@ -727,30 +745,30 @@ BOOL HMDeviceCommClass::GetOverlappedResult(PHMHANDLEDATA pHMHandleData,
 {
   PHMDEVCOMDATA pDevData = (PHMDEVCOMDATA)pHMHandleData->lpHandlerData;
 
-  dprintf(("KERNEL32-WARNING: HMDeviceCommClass::GetOverlappedResult(%08xh,%08xh,%08xh,%08xh) STUB!!",
+  dprintf(("KERNEL32-WARNING: HMDeviceCommClass::GetOverlappedResult(%08xh,%08xh,%08xh,%08xh) partly implemented",
             pHMHandleData->hHMHandle,
             lpoOverlapped,
             lpcbTransfer,
             fWait));
 
   if(pDevData == NULL || !(pHMHandleData->dwFlags & FILE_FLAG_OVERLAPPED)) {
-      SetLastError(ERROR_ACCESS_DENIED); //todo: wrong error?
+      ::SetLastError(ERROR_ACCESS_DENIED); //todo: wrong error?
       return FALSE;
   }
   if(!lpoOverlapped) {
-      SetLastError(ERROR_INVALID_PARAMETER);
+      ::SetLastError(ERROR_INVALID_PARAMETER);
       return FALSE;
   }
   if(lpoOverlapped->hEvent != pDevData->overlapped.hEvent) {
       dprintf(("!WARNING!: GetOverlappedResult called for unknown operation"));
-      SetLastError(ERROR_ACCESS_DENIED); //todo: wrong error?
+      ::SetLastError(ERROR_ACCESS_DENIED); //todo: wrong error?
       return FALSE;
   }
   if(pDevData->overlapped.Internal) {
       lpoOverlapped->Internal       = pDevData->overlapped.Internal;
       pDevData->overlapped.Internal = 0; //not entirely safe
       pDevData->dwLastError         = 0;
-      SetLastError(pDevData->dwLastError);
+      ::SetLastError(pDevData->dwLastError);
       return lpoOverlapped->Internal;
   }
   if(fWait) {
@@ -758,11 +776,11 @@ BOOL HMDeviceCommClass::GetOverlappedResult(PHMHANDLEDATA pHMHandleData,
       ::ResetEvent(pDevData->overlapped.hEvent);
       lpoOverlapped->Internal       = pDevData->overlapped.Internal;
       pDevData->overlapped.Internal = 0; //not entirely safe
-      SetLastError(ERROR_SUCCESS);
+      ::SetLastError(ERROR_SUCCESS);
       return lpoOverlapped->Internal;
   }
   else {
-      SetLastError(ERROR_IO_PENDING);
+      ::SetLastError(ERROR_IO_PENDING);
       return FALSE;
   }
 }
@@ -926,19 +944,24 @@ BOOL HMDeviceCommClass::SetCommState( PHMHANDLEDATA pHMHandleData,
   dprintf(("HMDeviceCommClass::SetCommState"));
 
   rc = 0;
-  if(pCurDCB->BaudRate != lpDCB->BaudRate)
-    rc = SetBaud( pHMHandleData,
-                  lpDCB->BaudRate);
+  if(pCurDCB->BaudRate != lpDCB->BaudRate) {
+      dprintf(("SetCommState: change baud rate from %d to %d", pCurDCB->BaudRate, lpDCB->BaudRate));
+      rc = SetBaud( pHMHandleData,
+                    lpDCB->BaudRate);
+  }
 
   if(!rc)
   {
     if( (pCurDCB->ByteSize != lpDCB->ByteSize) ||
         (pCurDCB->Parity   != lpDCB->Parity) ||
         (pCurDCB->StopBits != lpDCB->StopBits))
+    {
+      dprintf(("SetCommState: change line %d %d %d", lpDCB->ByteSize, lpDCB->Parity, lpDCB->StopBits));
       rc = SetLine( pHMHandleData,
                     lpDCB->ByteSize,
                     lpDCB->Parity,
                     lpDCB->StopBits);
+    }
   }
 
   if(!rc)
@@ -957,6 +980,8 @@ BOOL HMDeviceCommClass::SetCommState( PHMHANDLEDATA pHMHandleData,
         (pCurDCB->XonChar            != lpDCB->XonChar) ||
         (pCurDCB->XoffChar           != lpDCB->XoffChar) ||
         (pCurDCB->ErrorChar          != lpDCB->ErrorChar))
+    {
+      dprintf(("SetCommState: change flags cts %d dsr %d dtr %d dsr %d tx %d out %d in %d ferror %d null %d rts %d abort %d xon %d xoff %d error %d", lpDCB->fOutxCtsFlow, lpDCB->fOutxDsrFlow,lpDCB->fDtrControl,lpDCB->fDsrSensitivity,lpDCB->fDsrSensitivity,lpDCB->fTXContinueOnXoff,lpDCB->fOutX, lpDCB->fInX,lpDCB->fErrorChar,lpDCB->fNull,lpDCB->fRtsControl,lpDCB->fAbortOnError,lpDCB->XonChar,lpDCB->XoffChar,lpDCB->ErrorChar));
       SetOS2DCB( pHMHandleData,
                  lpDCB->fOutxCtsFlow, lpDCB->fOutxDsrFlow,
                  lpDCB->fDtrControl,  lpDCB->fDsrSensitivity,
@@ -965,6 +990,7 @@ BOOL HMDeviceCommClass::SetCommState( PHMHANDLEDATA pHMHandleData,
                  lpDCB->fNull, lpDCB->fRtsControl,
                  lpDCB->fAbortOnError, lpDCB->XonChar,
                  lpDCB->XoffChar,lpDCB->ErrorChar);
+    }
   }
 
   return(rc==0);
@@ -976,9 +1002,14 @@ BOOL HMDeviceCommClass::GetCommState( PHMHANDLEDATA pHMHandleData,
 {
   PHMDEVCOMDATA pDevData = (PHMDEVCOMDATA)pHMHandleData->lpHandlerData;
 
-  dprintf(("HMDeviceCommClass::GetCommState"));
-  memcpy(lpdcb,&pDevData->CommCfg.dcb,sizeof(DCB));
+  dprintf(("HMDeviceCommClass::GetCommState %x", lpdcb));
 
+  if(lpdcb == NULL) {
+      ::SetLastError(ERROR_INVALID_PARAMETER);
+      return FALSE;
+  }
+
+  memcpy(lpdcb,&pDevData->CommCfg.dcb,sizeof(DCB));
   return(TRUE);
 }
 //******************************************************************************
@@ -992,6 +1023,11 @@ BOOL HMDeviceCommClass::GetCommModemStatus( PHMHANDLEDATA pHMHandleData,
   UCHAR ucStatus;
 
   dprintf(("HMDeviceCommClass::GetCommModemStatus %x", lpModemStat));
+  if(lpModemStat == NULL) {
+      ::SetLastError(ERROR_INVALID_PARAMETER);
+      return FALSE;
+  }
+
   ulLen = sizeof(CHAR);
 
   ulLen = 1;
@@ -1010,6 +1046,7 @@ BOOL HMDeviceCommClass::GetCommModemStatus( PHMHANDLEDATA pHMHandleData,
     //*lpModemStat |= (ucStatus & 0x80)? MS_RSLD_ON:0;
   }
 
+  dprintf2(("HMDeviceCommClass::GetCommModemStatus -> %x rc=%d", *lpModemStat, rc));
   return(rc==0);
 }
 //******************************************************************************
@@ -1019,7 +1056,13 @@ BOOL HMDeviceCommClass::GetCommTimeouts( PHMHANDLEDATA pHMHandleData,
 {
   PHMDEVCOMDATA pDevData = (PHMDEVCOMDATA)pHMHandleData->lpHandlerData;
 
-  dprintf(("HMDeviceCommClass::GetCommTimeouts stub"));
+  dprintf(("HMDeviceCommClass::GetCommTimeouts %x stub", lpctmo));
+
+  if(lpctmo == NULL) {
+      ::SetLastError(ERROR_INVALID_PARAMETER);
+      return FALSE;
+  }
+
   memcpy( lpctmo,
           &pDevData->CommTOuts,
           sizeof(COMMTIMEOUTS));
@@ -1035,6 +1078,13 @@ BOOL HMDeviceCommClass::SetCommTimeouts( PHMHANDLEDATA pHMHandleData,
   ULONG ulLen;
   APIRET rc;
   UCHAR fbTimeOut;
+
+  if(lpctmo == NULL) {
+      dprintf(("!WARNING! HMDeviceCommClass::SetCommTimeouts %x -> invalid parameter", lpctmo));
+      ::SetLastError(ERROR_INVALID_PARAMETER);
+      return FALSE;
+  }
+
   dprintf(("HMDeviceCommClass::SetCommTimeouts\n"
            " ReadIntervalTimeout         : 0x%x\n"
            " ReadTotalTimeoutMultiplier  : %d\n"
@@ -1186,14 +1236,14 @@ BOOL HMDeviceCommClass::GetCommConfig( PHMHANDLEDATA pHMHandleData,
   if( O32_IsBadWritePtr(lpCC,sizeof(COMMCONFIG)) ||
       *lpdwSize< sizeof(COMMCONFIG) )
   {
-    SetLastError(ERROR_INSUFFICIENT_BUFFER);
+    ::SetLastError(ERROR_INSUFFICIENT_BUFFER);
     *lpdwSize= sizeof(COMMCONFIG);
     return FALSE;
   }
 
   if((NULL==pDevData) || (pDevData->ulMagic != MAGIC_COM) )
   {
-    SetLastError(ERROR_INVALID_HANDLE);
+    ::SetLastError(ERROR_INVALID_HANDLE);
     return FALSE;
   }
 
@@ -1286,7 +1336,7 @@ BOOL HMDeviceCommClass::EscapeCommFunction( PHMHANDLEDATA pHMHandleData,
       break;
     default:
       dprintf(("!ERROR!: EscapeCommFunction: unknown function"));
-      SetLastError(ERROR_INVALID_PARAMETER);
+      ::SetLastError(ERROR_INVALID_PARAMETER);
       return(FALSE);
   }
 
@@ -1301,9 +1351,11 @@ BOOL HMDeviceCommClass::SetDefaultCommConfig( PHMHANDLEDATA pHMHandleData,
   PHMDEVCOMDATA pDevData = (PHMDEVCOMDATA)pHMHandleData->lpDeviceData;
   if((NULL==pDevData) || (pDevData->ulMagic != MAGIC_COM) )
   {
-    SetLastError(ERROR_INVALID_HANDLE);
+    ::SetLastError(ERROR_INVALID_HANDLE);
     return FALSE;
   }
+
+  dprintf(("SetDefaultCommConfig %x %d", lpCC, dwSize));
   memset(&pDevData->CommCfg,0, sizeof(COMMCONFIG));
   memcpy(&pDevData->CommCfg,lpCC,dwSize>sizeof(COMMCONFIG)?sizeof(COMMCONFIG):dwSize);
 
@@ -1320,16 +1372,17 @@ BOOL HMDeviceCommClass::GetDefaultCommConfig( PHMHANDLEDATA pHMHandleData,
   if( O32_IsBadWritePtr(lpCC,sizeof(COMMCONFIG)) ||
       *lpdwSize< sizeof(COMMCONFIG) )
   {
-    SetLastError(ERROR_INSUFFICIENT_BUFFER);
+    ::SetLastError(ERROR_INSUFFICIENT_BUFFER);
     *lpdwSize= sizeof(COMMCONFIG);
     return FALSE;
   }
 
   if((NULL==pDevData) || (pDevData->ulMagic != MAGIC_COM) )
   {
-    SetLastError(ERROR_INVALID_HANDLE);
+    ::SetLastError(ERROR_INVALID_HANDLE);
     return FALSE;
   }
+  dprintf(("GetDefaultCommConfig %x %x", lpCC, lpdwSize));
 
   memcpy(lpCC,&pDevData->CommCfg,sizeof(COMMCONFIG));
   *lpdwSize = sizeof(COMMCONFIG);
@@ -1371,7 +1424,9 @@ APIRET HMDeviceCommClass::SetLine( PHMHANDLEDATA pHMHandleData,
     pCurDCB->Parity   = ucParity;
     pCurDCB->StopBits = ucStop;
   }
-
+  else {
+    dprintf(("!ERROR! SetLine: OSLibDosDevIOCtl failed with rc %d", rc));
+  }
   return rc;
 }
 //******************************************************************************
@@ -1465,8 +1520,11 @@ APIRET HMDeviceCommClass::SetBaud( PHMHANDLEDATA pHMHandleData,
   ULONG ulLen;
   EXTBAUDSET SetBaud;
   EXTBAUDGET GetBaud;
+  PHMDEVCOMDATA pDevData = (PHMDEVCOMDATA)pHMHandleData->lpHandlerData;
+
   ulLen = sizeof(SetBaud);
   SetBaud.ulBaud = dwNewBaud;
+  SetBaud.ucFrac = 0;
   rc = OSLibDosDevIOCtl( pHMHandleData->hHMHandle,
                     IOCTL_ASYNC,
                     ASYNC_EXTSETBAUDRATE,
@@ -1482,14 +1540,21 @@ APIRET HMDeviceCommClass::SetBaud( PHMHANDLEDATA pHMHandleData,
                       &GetBaud,ulLen,&ulLen);
     if(0==rc)
     {
-      if(dwNewBaud !=GetBaud.ulCurrBaud)
+      if(dwNewBaud != GetBaud.ulCurrBaud) {
+        dprintf(("!WARNING! dwNewBaud (%d) != GetBaud.ulCurrBaud (%d)", dwNewBaud, GetBaud.ulCurrBaud));
         rc = 1; // ToDo set a proper Errorhandling
+      }
       else
       {
-        ((PHMDEVCOMDATA)pHMHandleData->lpDeviceData)->CommCfg.dcb.BaudRate = dwNewBaud;
-        ((PHMDEVCOMDATA)pHMHandleData->lpDeviceData)->CommCfg.dcb.BaudRate = dwNewBaud;
+        pDevData->CommCfg.dcb.BaudRate = dwNewBaud;
       }
     }
+    else {
+        dprintf(("!WARNING! SetBaud: (get) OSLibDosDevIOCtl failed with rc %d", rc));
+    }
+  }
+  else {
+    dprintf(("!WARNING! SetBaud: (set) OSLibDosDevIOCtl failed with rc %d", rc));
   }
   return rc;
 }
