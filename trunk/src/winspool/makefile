@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.20 2003-08-08 15:55:08 sandervl Exp $
+# $Id: makefile,v 1.21 2003-08-14 09:30:35 sandervl Exp $
 
 #
 # Odin32 API
@@ -21,7 +21,6 @@ OBJS = \
 $(OBJDIR)\winspool.obj \
 $(OBJDIR)\oslibspl.obj \
 $(OBJDIR)\winspoolrsrc.obj \
-$(OBJDIR)\initwinspool.obj \
 $(OBJDIR)\initterm.obj 
 
 
