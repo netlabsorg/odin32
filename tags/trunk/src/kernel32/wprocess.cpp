@@ -1,4 +1,4 @@
-/* $Id: wprocess.cpp,v 1.184 2003-02-28 16:20:57 sandervl Exp $ */
+/* $Id: wprocess.cpp,v 1.185 2003-03-03 16:38:20 sandervl Exp $ */
 
 /*
  * Win32 process functions
@@ -573,6 +573,9 @@ VOID WIN32API ExitProcess(DWORD exitcode)
         iConsoleWaitClose();
 
     dprintf(("KERNEL32:  ExitProcess done (time %x)", GetCurrentTime()));
+#ifndef DEBUG
+    OSLibDisablePopups();
+#endif
     O32_ExitProcess(exitcode);
 }
 //******************************************************************************

@@ -1,4 +1,4 @@
-/* $Id: oslibmisc.h,v 1.11 2003-01-05 12:31:24 sandervl Exp $ */
+/* $Id: oslibmisc.h,v 1.12 2003-03-03 16:38:20 sandervl Exp $ */
 /*
  * Misc util. procedures
  *
@@ -27,6 +27,11 @@ void  OSLibWait(ULONG msec);
 ULONG OSLibAllocSel(ULONG size, USHORT *selector);
 ULONG OSLibFreeSel(USHORT selector);
 PVOID OSLibSelToFlat(USHORT selector);
+
+//******************************************************************************
+// Turn off hard errors & exception popups
+//******************************************************************************
+BOOL  OSLibDisablePopups();
 
 #define TIB_STACKTOP 	0
 #define TIB_STACKLOW 	1
