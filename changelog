@@ -1,4 +1,10 @@
-/* $Id: changelog,v 1.2707 2004-03-16 17:24:21 sandervl Exp $ */
+/* $Id: changelog,v 1.2708 2004-03-17 16:39:21 sandervl Exp $ */
+
+ 2004-03-17: Sander van Leeuwen <sandervl@innotek   >
+    - COMCTL32: o Merged latest Wine rebar, toolbar and status controls
+                o Status: invalidate window if SBARS_SIZEGRIP and width or
+                          height changed
+                o Rebar: resize control to match parent width in WM_SIZE
 
  2004-03-16: Vitali Pelenyov <sunlover@innotek   >
     - ODINCRT:  o New os2 fast critical section implementation
