@@ -1,8 +1,14 @@
- /* $Id: changelog,v 1.798 2000-03-11 15:11:36 sandervl Exp $ */
+ /* $Id: changelog,v 1.799 2000-03-11 17:27:13 bird Exp $ */
+
+ 2000-03-11: knut st. osmundsen <knut.stange.osmundse@pmsc.no>
+        - OPENGL\GLUT: Fix for gettimeofday. This is defined conflicting in
+                the toolkit sys\time.h.
+        - TOOLS\BIN: Implemented an optional directory locking in
+                dowithdirs.cmd. (Useful for SMP builds.)
 
  2000-03-11: Sander van Leeuwen <sandervl@xs4all.nl>
 	- OPENGL\GLUT: Fixed compile problems + cleanup
-                       (use C(XX)FLAGS_WIN32APP so you don't have to 
+                       (use C(XX)FLAGS_WIN32APP so you don't have to
                         explicitely specify which api type you use (ascii or unicode)!)
 
 	- OPENGL\GLIDE: Fixed wrong binary path for voodoo1 glide
