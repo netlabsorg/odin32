@@ -1,4 +1,4 @@
-/* $Id: thread.cpp,v 1.18 1999-11-30 20:19:34 sandervl Exp $ */
+/* $Id: thread.cpp,v 1.19 1999-12-18 17:17:55 sandervl Exp $ */
 
 /*
  * Win32 Thread API functions
@@ -27,6 +27,7 @@
 #include <wprocess.h>
 #include <windllbase.h>
 #include <winexebase.h>
+#include "exceptutil.h"
 
 ODINDEBUGCHANNEL(KERNEL32-THREAD)
 
@@ -141,8 +142,21 @@ BOOL WIN32API SetThreadPriority(HANDLE hThread, int priority)
 //******************************************************************************
 BOOL WIN32API GetThreadContext(HANDLE hThread, PCONTEXT lpContext)
 {
+ USHORT cs, ds;
+
   dprintf(("GetThreadContext NOT IMPLEMENTED!! (TRUE)\n"));
   memset(lpContext, 0, sizeof(CONTEXT));
+
+  /* make up some plausible values for segment registers */
+  cs = getCS();
+  ds = getDS();
+  lpContext->SegCs   = cs;
+  lpContext->SegDs   = ds;
+  lpContext->SegEs   = ds;
+  lpContext->SegGs   = ds;
+  lpContext->SegSs   = ds;
+  lpContext->SegFs   = ds;
+
   return TRUE;
 }
 //******************************************************************************
