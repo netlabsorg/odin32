@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.206 2000-07-04 08:42:07 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.207 2000-07-18 18:35:39 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -520,7 +520,7 @@ BOOL Win32BaseWindow::CreateWindowExA(CREATESTRUCTA *cs, ATOM classAtom)
                                  (hwndLinkAfter == HWND_BOTTOM) ? TRUE : FALSE,
                                  0, fTaskList,fXDefault | fCXDefault,windowClass->getStyle());
   if(OS2Hwnd == 0) {
-        dprintf(("Window creation failed!!"));
+        dprintf(("Window creation failed!! OS LastError %0x", OSLibWinGetLastError()));
         SetLastError(ERROR_OUTOFMEMORY); //TODO: Better error
         return FALSE;
   }
@@ -2403,7 +2403,7 @@ BOOL Win32BaseWindow::DestroyWindow()
 
     if((getStyle() & WS_CHILD) && !(getExStyle() & WS_EX_NOPARENTNOTIFY))
     {
-        if(getParent())
+        if(getParent() && getParent()->IsWindowDestroyed() == FALSE)
         {
              /* Notify the parent window only */
              getParent()->SendMessageA(WM_PARENTNOTIFY, MAKEWPARAM(WM_DESTROY, getWindowId()), (LPARAM)getWindowHandle());
@@ -2412,7 +2412,7 @@ BOOL Win32BaseWindow::DestroyWindow()
                 return TRUE;
              }
         }
-        else DebugInt3();
+////        else DebugInt3();
     }
     /* Hide the window */
     if(IsWindowVisible())
