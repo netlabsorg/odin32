@@ -1,4 +1,4 @@
-/* $Id: kLog.h,v 1.9 2001-11-18 04:09:43 bird Exp $
+/* $Id: kLog.h,v 1.10 2001-11-19 03:09:40 bird Exp $
  *
  * kLog - Generic Logging and Trace Routines.
  *
@@ -249,7 +249,7 @@ void        KLIBCALL kLogFixPrintf2(HKLOGMOD hLogMod, KLOGPOS_DECL, int iType, i
 /*******************************************************************************
 *   Macros                                                                     *
 *******************************************************************************/
-#if defined(DEBUG) || defined(LOGGING_ENABLED)
+#if (defined(DEBUG) || defined(LOGGING_ENABLED)) && !defined(LOGGING_DISABLED)
     #define KLOGINITMOD(pMod)                                           KLOGMODHANDLE = kLogInitMod(pMod, KLOGPOS_EXT)
     #define KLOGTERMMOD()                                               kLogTermMod(KLOGMODHANDLE, KLOGPOS_EXT)
 
@@ -313,33 +313,39 @@ void        KLIBCALL kLogFixPrintf2(HKLOGMOD hLogMod, KLOGPOS_DECL, int iType, i
     #define KLOGINITMOD(pMod)                                           ((HKLOGMOD)-1)
     #define KLOGTERMMOD()                                               ((void)0)
 
-    #define KLOGSTART( pszRetType, pszProto, arg0)                      void//((void)0)
-    #define KLOGSTART0(pszRetType)                                      void//((void)0)
-    #define KLOGSTART1(pszRetType, pszProto, a0)                        void//((void)0)
-    #define KLOGSTART2(pszRetType, pszProto, a0,a1)                     void//((void)0)
-    #define KLOGSTART3(pszRetType, pszProto, a0,a1,a2)                  void//((void)0)
-    #define KLOGSTART4(pszRetType, pszProto, a0,a1,a2,a3)               void//((void)0)
-    #define KLOGSTART5(pszRetType, pszProto, a0,a1,a2,a3,a4)            void//((void)0)
-    #define KLOGSTART6(pszRetType, pszProto, a0,a1,a2,a3,a4,a5)         void//((void)0)
-    #define KLOGSTART7(pszRetType, pszProto, a0,a1,a2,a3,a4,a5,a6)      void//((void)0)
-    #define KLOGSTART8(pszRetType, pszProto, a0,a1,a2,a3,a4,a5,a6,a7)   void//((void)0)
-    #define KLOGSTART9(pszRetType, pszProto, a0,a1,a2,a3,a4,a5,a6,a7,a8)            void//((void)0)
-    #define KLOGSTART10(pszRetType, pszProto, a0,a1,a2,a3,a4,a5,a6,a7,a8,a9)        void//((void)0)
-    #define KLOGSTART11(pszRetType, pszProto, a0,a1,a2,a3,a4,a5,a6,a7,a8,a9,a10)    void//((void)0)
+    #ifdef __cplusplus
+        #define KLOGDUMMY   ((void)0)
+    #else
+        #define KLOGDUMMY   void
+    #endif
 
-    #define KLOGENTRY( pszRetType, pszProto, arg0)                      void//((void)0)
-    #define KLOGENTRY0(pszRetType)                                      void//((void)0)
-    #define KLOGENTRY1(pszRetType, pszProto, a0)                        void//((void)0)
-    #define KLOGENTRY2(pszRetType, pszProto, a0,a1)                     void//((void)0)
-    #define KLOGENTRY3(pszRetType, pszProto, a0,a1,a2)                  void//((void)0)
-    #define KLOGENTRY4(pszRetType, pszProto, a0,a1,a2,a3)               void//((void)0)
-    #define KLOGENTRY5(pszRetType, pszProto, a0,a1,a2,a3,a4)            void//((void)0)
-    #define KLOGENTRY6(pszRetType, pszProto, a0,a1,a2,a3,a4,a5)         void//((void)0)
-    #define KLOGENTRY7(pszRetType, pszProto, a0,a1,a2,a3,a4,a5,a6)      void//((void)0)
-    #define KLOGENTRY8(pszRetType, pszProto, a0,a1,a2,a3,a4,a5,a6,a7)   void//((void)0)
-    #define KLOGENTRY9(pszRetType, pszProto, a0,a1,a2,a3,a4,a5,a6,a7,a8)            void//((void)0)
-    #define KLOGENTRY10(pszRetType, pszProto, a0,a1,a2,a3,a4,a5,a6,a7,a8,a9)        void//((void)0)
-    #define KLOGENTRY11(pszRetType, pszProto, a0,a1,a2,a3,a4,a5,a6,a7,a8,a9,a10)    void//((void)0)
+    #define KLOGSTART( pszRetType, pszProto, arg0)                      KLOGDUMMY
+    #define KLOGSTART0(pszRetType)                                      KLOGDUMMY
+    #define KLOGSTART1(pszRetType, pszProto, a0)                        KLOGDUMMY
+    #define KLOGSTART2(pszRetType, pszProto, a0,a1)                     KLOGDUMMY
+    #define KLOGSTART3(pszRetType, pszProto, a0,a1,a2)                  KLOGDUMMY
+    #define KLOGSTART4(pszRetType, pszProto, a0,a1,a2,a3)               KLOGDUMMY
+    #define KLOGSTART5(pszRetType, pszProto, a0,a1,a2,a3,a4)            KLOGDUMMY
+    #define KLOGSTART6(pszRetType, pszProto, a0,a1,a2,a3,a4,a5)         KLOGDUMMY
+    #define KLOGSTART7(pszRetType, pszProto, a0,a1,a2,a3,a4,a5,a6)      KLOGDUMMY
+    #define KLOGSTART8(pszRetType, pszProto, a0,a1,a2,a3,a4,a5,a6,a7)   KLOGDUMMY
+    #define KLOGSTART9(pszRetType, pszProto, a0,a1,a2,a3,a4,a5,a6,a7,a8)            KLOGDUMMY
+    #define KLOGSTART10(pszRetType, pszProto, a0,a1,a2,a3,a4,a5,a6,a7,a8,a9)        KLOGDUMMY
+    #define KLOGSTART11(pszRetType, pszProto, a0,a1,a2,a3,a4,a5,a6,a7,a8,a9,a10)    KLOGDUMMY
+
+    #define KLOGENTRY( pszRetType, pszProto, arg0)                      KLOGDUMMY
+    #define KLOGENTRY0(pszRetType)                                      KLOGDUMMY
+    #define KLOGENTRY1(pszRetType, pszProto, a0)                        KLOGDUMMY
+    #define KLOGENTRY2(pszRetType, pszProto, a0,a1)                     KLOGDUMMY
+    #define KLOGENTRY3(pszRetType, pszProto, a0,a1,a2)                  KLOGDUMMY
+    #define KLOGENTRY4(pszRetType, pszProto, a0,a1,a2,a3)               KLOGDUMMY
+    #define KLOGENTRY5(pszRetType, pszProto, a0,a1,a2,a3,a4)            KLOGDUMMY
+    #define KLOGENTRY6(pszRetType, pszProto, a0,a1,a2,a3,a4,a5)         KLOGDUMMY
+    #define KLOGENTRY7(pszRetType, pszProto, a0,a1,a2,a3,a4,a5,a6)      KLOGDUMMY
+    #define KLOGENTRY8(pszRetType, pszProto, a0,a1,a2,a3,a4,a5,a6,a7)   KLOGDUMMY
+    #define KLOGENTRY9(pszRetType, pszProto, a0,a1,a2,a3,a4,a5,a6,a7,a8)            KLOGDUMMY
+    #define KLOGENTRY10(pszRetType, pszProto, a0,a1,a2,a3,a4,a5,a6,a7,a8,a9)        KLOGDUMMY
+    #define KLOGENTRY11(pszRetType, pszProto, a0,a1,a2,a3,a4,a5,a6,a7,a8,a9,a10)    KLOGDUMMY
 
     #define KLOGEXIT(uValue)                                            ((void)0)
     #define KLOGEXITVOID()                                              ((void)0)
