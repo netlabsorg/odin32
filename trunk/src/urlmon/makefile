@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.4 2000-12-02 23:56:48 bird Exp $
+# $Id: makefile,v 1.5 2001-07-07 04:36:29 bird Exp $
 
 #
 # Odin32 API
@@ -19,6 +19,7 @@
 OBJS = \
 $(OBJDIR)\urlmon.obj \
 $(OBJDIR)\umon.obj \
+$(OBJDIR)\stubs.obj \
 $(OBJDIR)\urlmonrsrc.obj \
 $(DLLENTRY)
 
