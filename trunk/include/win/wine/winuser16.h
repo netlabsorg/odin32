@@ -1,4 +1,3 @@
-/* $Id: winuser16.h,v 1.8 2002-06-02 10:10:33 sandervl Exp $ */
 #ifndef __WINE_WINE_WINUSER16_H
 #define __WINE_WINE_WINUSER16_H
 
