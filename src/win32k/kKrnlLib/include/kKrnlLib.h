@@ -1,10 +1,13 @@
-/* $Id: kKrnlLib.h,v 1.6 2002-03-31 19:01:04 bird Exp $
+/* $Id: kKrnlLib.h,v 1.7 2002-04-01 13:51:16 bird Exp $
  *
  * Top level header file for kKrnlLib exports.
  *
- * Copyright (c) 2001 knut st. osmundsen (kosmunds@csc.com)
+ * NOTE: This there is no need to include any kLib stuff.
+ *       Everything goes thru this header file.
  *
- * Project Odin Software License can be found in LICENSE.TXT
+ * Copyright (c) 2002 knut st. osmundsen (bird@anduin.net)
+ *
+ * GPL
  *
  */
 #ifndef _kKrnlLib_h_
@@ -20,6 +23,7 @@
     #define INCL_KKL_PRINTF
     #define INCL_KKL_AVL
     #define INCL_KKL_FUNC
+    #define INCL_KKL_MISC
 #endif
 
 
@@ -30,6 +34,22 @@
  * Basis types and macros.
  */
 #include <kLib/kTypes.h>
+
+
+/*
+ * Basic kernel info.
+ */
+#ifndef NO_KKL_KERNEL
+    #include <kKLkernel.h>
+#endif
+
+
+/*
+ * Standard arg stuff.
+ */
+#ifndef NO_KKL_STDARG
+    #include "kKLstdarg.h"
+#endif
 
 
 /*
@@ -67,8 +87,7 @@
 /*
  * Logging.
  */
-#ifdef INCL_KKL_LOG
-    #include "kKLstdarg.h"
+#ifndef NO_KKL_LOG
     #include <kLib/kLog.h>
 #endif
 
@@ -87,17 +106,6 @@
 #ifdef INCL_KKL_MISC
     #include <kLib/kMisc.h>
 #endif
-
-
-/*******************************************************************************
-*   Global Variables                                                           *
-*******************************************************************************/
-
-
-
-/*******************************************************************************
-*   Exported Functions                                                         *
-*******************************************************************************/
 
 
 

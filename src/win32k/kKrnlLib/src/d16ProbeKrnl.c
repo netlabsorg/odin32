@@ -1,4 +1,4 @@
-/* $Id: d16ProbeKrnl.c,v 1.2 2002-04-01 12:48:08 bird Exp $
+/* $Id: d16ProbeKrnl.c,v 1.3 2002-04-01 13:51:17 bird Exp $
  *
  * Description:   Autoprobes the os2krnl file and os2krnl[*].sym files.
  *                Another Hack!
@@ -78,6 +78,7 @@
 #include "kkLlog.h"
 #include "options.h"
 #include "kKLInitHlp.h"
+#include "kKLkernel.h"
 #include "d16vprintf.h"
 #include "d16crt.h"
 
