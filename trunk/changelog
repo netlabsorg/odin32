@@ -1,4 +1,10 @@
-/* $Id: changelog,v 1.2030 2002-03-24 13:10:55 sandervl Exp $ */
+/* $Id: changelog,v 1.2031 2002-03-28 11:25:13 sandervl Exp $ */
+
+ 2002-03-28: Platon Fomichev <platon@innotek.de>
+    - USER32:   o Gracefully handle WM_QUIT message sent by window list:
+                  do not return from GetMessage with FALSE, but send
+                  WM_CLOSE to window. WM_QUIT sent by PostQuitMessage
+                  will be handled properly.
 
  2002-03-24: Sander van Leeuwen <sandervl@xs4all.nl>
     - KERNEL32: o OpenFileMapping fix
