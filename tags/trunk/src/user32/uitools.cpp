@@ -1,4 +1,4 @@
-/* $Id: uitools.cpp,v 1.11 1999-10-09 16:28:25 cbratschi Exp $ */
+/* $Id: uitools.cpp,v 1.12 1999-10-10 11:26:34 cbratschi Exp $ */
 /*
  * User Interface Functions
  *
@@ -796,7 +796,7 @@ static BOOL UITOOLS95_DFC_ButtonRadio(HDC dc, LPRECT r, UINT uFlags)
     yc = myr.top  + SmallDiam - SmallDiam/2;
 
     /* Define bounding box */
-    i = 14*SmallDiam/16;
+    i = (14*SmallDiam)/16;
     myr.left   = xc - i+i/2;
     myr.right  = xc + i/2;
     myr.top    = yc - i+i/2;
@@ -844,7 +844,7 @@ static BOOL UITOOLS95_DFC_ButtonRadio(HDC dc, LPRECT r, UINT uFlags)
             SelectObject(dc, hpsave);
         }
 
-        i = 10*SmallDiam/16;
+        i = (10*SmallDiam)/16,1;
         myr.left   = xc - i+i/2;
         myr.right  = xc + i/2;
         myr.top    = yc - i+i/2;
@@ -852,14 +852,14 @@ static BOOL UITOOLS95_DFC_ButtonRadio(HDC dc, LPRECT r, UINT uFlags)
         i= !(uFlags & (DFCS_INACTIVE|DFCS_PUSHED)) ? COLOR_WINDOW : COLOR_BTNFACE;
         hpsave = (HPEN)SelectObject(dc, GetSysColorPen(i));
         hbsave = (HBRUSH)SelectObject(dc, GetSysColorBrush(i));
-        Pie(dc, myr.left, myr.top, myr.right, myr.bottom, xe, ye, xe, ye);
+        Ellipse(dc,myr.left,myr.top,myr.right,myr.bottom);
         SelectObject(dc, hbsave);
         SelectObject(dc, hpsave);
     }
 
     if(uFlags & DFCS_CHECKED)
     {
-        i = 6*SmallDiam/16;
+        i = (6*SmallDiam)/16;
         i = i < 1 ? 1 : i;
         myr.left   = xc - i+i/2;
         myr.right  = xc + i/2;
@@ -869,7 +869,7 @@ static BOOL UITOOLS95_DFC_ButtonRadio(HDC dc, LPRECT r, UINT uFlags)
         i = uFlags & DFCS_INACTIVE ? COLOR_BTNSHADOW : COLOR_WINDOWTEXT;
         hbsave = (HBRUSH)SelectObject(dc, GetSysColorBrush(i));
         hpsave = (HPEN)SelectObject(dc, GetSysColorPen(i));
-        Pie(dc, myr.left, myr.top, myr.right, myr.bottom, xe, ye, xe, ye);
+        Ellipse(dc,myr.left,myr.top,myr.right,myr.bottom);
         SelectObject(dc, hpsave);
         SelectObject(dc, hbsave);
     }
