@@ -1,8 +1,9 @@
-/* $Id: changelog,v 1.1764 2001-10-18 07:50:30 sandervl Exp $ */
+/* $Id: changelog,v 1.1765 2001-10-18 11:01:41 sandervl Exp $ */
 
  2001-10-18: Sander van Leeuwen <sandervl@xs4all.nl>
     - DDRAW:    o Check if DirectDraw object is associated with Clipper.
     - SHELL32:  o Compile fix for release build
+    - USER32:   o Fix for pointer conversion
 
  2001-10-17: knut stange osmundsen <kosmunds@csc.com>
     - common:   o Corrected bug in kFile buffering which caused impdef to
