@@ -1,8 +1,13 @@
-/* $Id: changelog,v 1.2581 2003-05-16 09:25:41 sandervl Exp $ */
+/* $Id: changelog,v 1.2582 2003-05-16 10:59:43 sandervl Exp $ */
 
  2003-05-16: Sander van Leeuwen <sandervl@innotek   >
     - USER32:   o Use our fast critical sections instead of OS/2 mutex semaphores 
                   in the timer code.
+                o Handle WM_(SYS)TIMER timer calls in DispatchMessageA/W.
+                  We previously called timer handlers when we received WM_TIMER
+                  from PM. That's not correct. These messages must be returned
+                  by Get/PeekMessage. The handler will not be called if the 
+                  timer message is not dispatched. (verified in NT4)
 
  2003-05-16: Platon Fomichev <stauff@innotek   >
     - USER32:   o Eat first WM_MOUSEMOVE while menu tracking like windows does
