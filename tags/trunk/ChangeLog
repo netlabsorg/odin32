@@ -1,8 +1,13 @@
- /* $Id: ChangeLog,v 1.116 1999-08-21 12:52:57 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.117 1999-08-21 19:10:21 sandervl Exp $ */
 
  99-08-21: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32\NEW: Fixed window class bug. Freecell menu now properly
                       loaded.
+	- USER32\NEW: Changed LoadBitmapA/W to load bitmaps internally 
+                      (also ported some Wine code for that purpose)
+	              Not correct yet: some of Solitaire's bitmaps look bad
+	- KERNEL32:   Fixed name id lookup bug for PE loader resources
+	- PELDR:      Corrected makefile
 
  99-08-21: Yuri Dario <mc6530@mclink.it>
 	- Makefiles: Link with predefined VAC lib (RTLLIB(_O))
