@@ -1,4 +1,4 @@
-; $Id: kernel32.def,v 1.24 1999-08-18 22:00:57 phaller Exp $
+; $Id: kernel32.def,v 1.25 1999-08-19 02:10:16 phaller Exp $
 
 ;Created by BLAST for IBM's compiler
 ;Basis is Windows95 KERNEL32
@@ -556,10 +556,10 @@ EXPORTS
     InitAtomTable              = _InitAtomTable@4             @471
     InitializeCriticalSection  = _InitializeCriticalSection@4 @472
 ;   InitializeCriticialSectionAndSpinCount = _InitializeCriticalSectionAndSpinCount@?? ;NT
-    InterlockedCompareExchange = _InterlockedCompareExchange@12 @785        ;NT
+    InterlockedCompareExchange = _InterlockedCompareExchange@12 @787        ;NT
     InterlockedDecrement       = _InterlockedDecrement@4     @473
     InterlockedExchange        = _InterlockedExchange@8      @474
-    InterlockedExchangeAdd     = _InterlockedExchangeAdd@8      @786        ;NT
+    InterlockedExchangeAdd     = _InterlockedExchangeAdd@8      @788        ;NT
     InterlockedIncrement       = _InterlockedIncrement@4     @475
 ;   InvalidateNLSCache         = _InvalidateNLSCache@??      @476       ;W95
 ;   InvalidateConsoleDIBits    = _InvalidateConsoleDIBits@??            ;NT
@@ -793,7 +793,7 @@ EXPORTS
 ;   SetThreadIdealProcessor    = _SetThreadIdealProcessor@??            ;NT
     SetThreadLocale            = _SetThreadLocale@4         @671
     SetThreadPriority          = _SetThreadPriority@8       @672
-    SetThreadPriorityBoost     = _SetThreadPriorityBoost@8  @787        ;NT
+    SetThreadPriorityBoost     = _SetThreadPriorityBoost@8  @789        ;NT
     SetTimeZoneInformation     = _SetTimeZoneInformation@4  @673
     SetUnhandledExceptionFilter  = _SetUnhandledExceptionFilter@4 @674
 ;   SetVDMCurrentDirectories   = _SetVDMCurrentDirectories@??           ;NT
@@ -923,6 +923,8 @@ EXPORTS
     lstrcpynWtoA               = _lstrcpynWtoA@12            @782
     lstrcpyAtoW                = _lstrcpyAtoW@8              @783
     lstrcpyWtoA                = _lstrcpyWtoA@8              @784
+    lstrncmpA                  = _lstrncmpA@12               @785
+    lstrncmpW                  = _lstrncmpW@12               @786
 
 
 
