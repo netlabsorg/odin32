@@ -1,10 +1,13 @@
-; $Id: pmkbdhk.def,v 1.2 2001-12-13 12:25:21 sandervl Exp $
+; $Id: pmkbdhk.def,v 1.3 2003-10-22 12:45:13 sandervl Exp $
 
-LIBRARY PMKBDHK INITGLOBAL
+LIBRARY PMKBDHK INITINSTANCE TERMINSTANCE
 DESCRIPTION 'Odin OS/2 Presentation Manager Keyboard Hook'
-DATA SINGLE SHARED
+DATA MULTIPLE NONSHARED LOADONCALL
 CODE SHARED LOADONCALL
 
+IMPORTS
+        DosQuerySysState   = DOSCALLS.368
+
 EXPORTS
-        hookKill        @2
-        hookInit        @3
+        _hookKill@0        @2
+        _hookInit@8        @3
