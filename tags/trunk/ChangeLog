@@ -1,4 +1,4 @@
- /* $Id: ChangeLog,v 1.306 1999-10-11 20:15:07 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.307 1999-10-11 20:57:55 sandervl Exp $ */
 
  99-10-11: Christoph Bratschi <cbratschi@datacomm.ch>
 	- USER32: pmframe finished
@@ -18,6 +18,13 @@
                    Call Wine dll entrypoint in initterm.cpp.
 	- INCLUDE: Only include stdlib.h when wrc is not active
                    Extra definitions for compiling win32 apps in OS/2
+
+ 99-10-11: Edgar Buerkle <Edgar.Buerkle@gmx.net>
+	- GDI32: GetTextFaceW bugfix
+	- USER32: Init ownDC to 0
+		  Create empty dialog in CreateWindowExA/W if class == dialog
+                  Support for class atoms in CreateWindowExA/W
+                  Win32Dialog::getNextDlgGroupItem() bugfix
 
  99-10-11: Christoph Bratschi <cbratschi@datacomm.ch>
 	- GDI32: Bugfix for Pie Open32 api
