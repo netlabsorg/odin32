@@ -1,4 +1,4 @@
-# $Id: pdwin32.vac36.dbg,v 1.2 1999-08-29 14:57:51 sandervl Exp $
+# $Id: pdwin32.vac36.dbg,v 1.3 1999-08-31 14:39:16 sandervl Exp $
 # ODIN / win32os2 Project
 #
 # DEBUG makefile for the VAC 3.6.5 compiler environment
@@ -25,7 +25,7 @@ CFLAGS           = -Q  -Si -Ti -Tm+ -Ge- -Ss+ -W3 -Gm+ /Gn+ -I$(PDWIN32_INCLUDE)
 CXXFLAGS         = -Q  -Si -Ti -Tm+ -Ge- -Ss+ -W3 -Gm+ /Gn+ -I$(PDWIN32_INCLUDE)\Win -D__WIN32OS2__ -D__WINE__ -DDEBUG
 CXXFLAGS_ODINCRT = -Q  -Si -Ti -Tm+ -Ge- -Ss+ -W3 -Gm+ /Gn- -I$(PDWIN32_INCLUDE)\Win -D__WIN32OS2__ -D__WINE__ -DDEBUG
 ASFLAGS          = -Sc -Sv:ALP
-LDFLAGS          = -Q  -Si -Ti -Ge- -Ss+ -W3 -Gm+ /B"/noe /NOD"
-LDFLAGS_ODINCRT  = -Q  -Si -Ti -Ge- -Ss+ -W3 -Gm+ /B"/noe"
+LDFLAGS          = -Q  -Si -Ti -Ge- -Ss+ -W3 -Gm+ /B"/noe /NOD /dbgpack"
+LDFLAGS_ODINCRT  = -Q  -Si -Ti -Ge- -Ss+ -W3 -Gm+ /B"/noe /dbgpack"
 IMPLIBFLAGS = /nologo
 

@@ -1,4 +1,4 @@
-/* $Id: winres.h,v 1.6 1999-08-19 19:51:18 sandervl Exp $ */
+/* $Id: winres.h,v 1.7 1999-08-31 14:39:16 sandervl Exp $ */
 
 /*
  * Win32 resource class
@@ -16,13 +16,16 @@ class Win32Image;
 
 //Use to distinguish between converted OS/2 resources in an image (pe2lx'ed) or
 //resources that are loaded from the original win32 image (pe loader)
-#define RSRC_PELOADER	0
-#define RSRC_PE2LX	1
+#define RSRC_PELOADER        0
+#define RSRC_PE2LX	     1
+#define RSRC_CUSTOMNODATA    2  //resources created in runtime without data (i.e. CreateMenu)
+#define RSRC_CUSTOMINDIRECT  3  //resources indirectly created in runtime (i.e. CreateMenuIndirect)
 
 class Win32Resource
 {
 public:
                    // Constructors and destructors
+                   Win32Resource(); //custum resource (i.e. created by app in runtime)
                    Win32Resource(Win32Image *module, HRSRC hRes, ULONG id, ULONG type);
                    Win32Resource(Win32Image *module, ULONG id, ULONG type,
 	                         ULONG size, char *resdata);
@@ -40,7 +43,6 @@ public:
 
 protected:
 
-private:
              PVOID convertOS2Bitmap(void *bmpdata);
 
 	     PVOID convertResource(void *win32res);
@@ -63,6 +65,7 @@ private:
                                // Linked list management
   Win32Resource*   next;               // Next Resource in module
 
+private:
     friend    class Win32Image;
 };
 
