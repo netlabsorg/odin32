@@ -1,4 +1,4 @@
-/* $Id: kKrnlLibTst.c,v 1.1 2001-09-17 01:41:14 bird Exp $
+/* $Id: kKrnlLibTst.c,v 1.2 2001-09-23 06:51:07 bird Exp $
  *
  * kKrnlLib test module.
  *
@@ -22,6 +22,8 @@
 #define FlatToSel(flataddr) \
     (PVOID)( ( (((unsigned)(flataddr) << 3) & 0xfff80000) | (SEL_LDT_RPL3 << 16) ) | ((unsigned)(flataddr) & 0xffff) )
 
+#define assert(expr) ((expr) ? (void)0 : __interrupt(3))
+
 #define DWORD   ULONG
 #define WORD    USHORT
 
@@ -30,8 +32,10 @@
 *******************************************************************************/
 #define INCL_BASE
 #define INCL_SSTODS
+#define FOR_EXEHDR 1
 #include <os2.h>
 #include <exe386.h>
+#include <newexe.h>
 
 #include "devSegDf.h"                   /* kKrnlLib segment definitions. */
 
@@ -49,6 +53,8 @@
 #define INCL_KKL_ALL
 #include "kKrnlLib.h"
 
+#include "ProbKrnl.h"
+#include "krnlPrivate.h"
 #include "testcase.h"
 
 #include <stdlib.h>
@@ -255,6 +261,7 @@ int     TestCase1(int argc, char **argv);
 int     TestCase2(void);
 int     CompareOptions(struct kKLOptions *pOpt);
 int     TestCaseExeLoad2(void);
+int     WritekKrnlLibDll(void);
 
 
 /**
@@ -707,7 +714,7 @@ int TestCase2(void)
             rc = CompareOptions(SSToDS(&opt));
             if (rc == NO_ERROR)
             {
-                 rc = TestCaseExeLoad2();
+                rc = WritekKrnlLibDll();
             }
         }
         else
@@ -719,163 +726,126 @@ int TestCase2(void)
     return rc;
 }
 
-/**
- * Test case 3.
- * Checks that all parameters are read correctly (1).
- *
- * @sketch  Create init packet with no arguments.
- *          Initiate kKrnlHlp
- *          Create init packet with no arguments.
- *          Initiate kKrnlLib
- * @returns 0 on success.
- *          1 on failure.
- * @status  completely implemented.
- * @author  knut st. osmundsen (knut.stange.osmundsen@mynd.no)
- */
-int TestCase3(void)
+
+
+int WritekKrnlLibDll(void)
 {
-    int         rc = 1;
-    RP32INIT    rpinit;
-    char *      pszInitArgs = "-C1 -L:N -Verbose -Quiet -Elf:Yes -Pe:PE -Script:Yes -Rexx:NES -Java:NYes -W4 -Heap:512000 -ResHeap:0256000 -HeapMax:4096000 -ResHeapMax:0x100000";
+    ULONG   ulAction;
+    int     rc;
+    HFILE   hFile = NULLHANDLE;
 
-    /* kKrnlHlp */
-    initRPInit(SSToDS(&rpinit), pszInitArgs);
-    rc = InitkKrnlHlp(&rpinit);              /* no SSToDS! */
-    printf("InitkKrnlHlp returned status=0x%04x\n", rpinit.rph.Status);
-    if ((rpinit.rph.Status & (STDON | STERR)) == STDON)
+    /*
+     * Open the file.
+     */
+    rc = DosOpen("kKrnlLib.Dll", SSToDS(&hFile), SSToDS(&ulAction), 0, FILE_NORMAL,
+                 OPEN_ACTION_CREATE_IF_NEW | OPEN_ACTION_REPLACE_IF_EXISTS,
+                 OPEN_FLAGS_SEQUENTIAL | OPEN_SHARE_DENYREAD | OPEN_ACCESS_WRITEONLY,
+                 NULL);
+    if (rc == NO_ERROR)
     {
-        /* kKrnlLib */
-        initRPInit(SSToDS(&rpinit), pszInitArgs);
-        rc = InitkKrnlLib(&rpinit);       /* no SSToDS! */
-        printf("InitkKrnlLib returned status=0x%04x\n", rpinit.rph.Status);
-        if ((rpinit.rph.Status & (STDON | STERR)) == STDON)
-        {
-            struct kKLOptions opt = DEFAULT_OPTION_ASSIGMENTS;
-            opt.cbSwpHeapInit   = 512000;
-            opt.cbSwpHeapMax    = 4096000;
-            opt.cbResHeapInit   = 0256000;
-            opt.cbResHeapMax    = 0x100000;
-            opt.fQuiet          = TRUE;
-            opt.fLogging        = FALSE;
-            opt.usCom           = OUTPUT_COM1;
+        static struct e32_exe   exehdr;
+        static struct o32_obj   aObjTab[24];
+        struct o32_map          page;
+        int                     i;
+        int                     j;
+        ULONG                   ulWritten;
+        ULONG                   ulPos;
+        ULONG                   ulNULL = 0;
 
-            rc = CompareOptions(SSToDS(&opt));
-            if (rc == NO_ERROR)
+
+        /* make exehdr */
+        memset(&exehdr, 0, sizeof(exehdr));
+        exehdr.e32_magic[0] = E32MAGIC1;
+        exehdr.e32_magic[1] = E32MAGIC2;
+        exehdr.e32_cpu      = E32CPU486;
+        exehdr.e32_os       = NE_OS2;
+        exehdr.e32_mflags   = E32MODDLL | E32PMW;
+        exehdr.e32_mpages   = 0;
+        for (i = 0; i < KKL_SwapMTE.smte_objcnt; i++)
+            exehdr.e32_mpages += (KKL_SwapMTE.smte_objtab[i].ote_size + 0xfff) >> 12;
+        exehdr.e32_startobj = 2;
+        exehdr.e32_eip      = 0;
+        exehdr.e32_pagesize = 0x1000;
+        exehdr.e32_fixupsize= exehdr.e32_mpages * sizeof(unsigned long)
+                            + 4;
+        exehdr.e32_ldrsize  = KKL_SwapMTE.smte_objcnt * sizeof(struct o32_obj)
+                            + exehdr.e32_mpages * sizeof(struct o32_map)
+                            + &KKL_ResNameTabEND[0] - (char*)KKL_SwapMTE.smte_restab
+                            + exehdr.e32_mpages * sizeof(unsigned long)
+                            + 4;
+        exehdr.e32_objtab   = sizeof(exehdr);
+        exehdr.e32_objcnt   = KKL_SwapMTE.smte_objcnt;
+        exehdr.e32_objmap   = exehdr.e32_objtab + exehdr.e32_objcnt * sizeof(struct o32_obj);
+        exehdr.e32_restab   = exehdr.e32_objmap + exehdr.e32_mpages * sizeof(struct o32_map);
+        exehdr.e32_enttab   = exehdr.e32_restab + &KKL_ResNameTabEND[0] - (char*)KKL_SwapMTE.smte_restab;
+        exehdr.e32_fpagetab = exehdr.e32_enttab + &KKL_EntryTabEND[0] - (char*)KKL_SwapMTE.smte_enttab;
+        exehdr.e32_frectab  = exehdr.e32_fpagetab+exehdr.e32_mpages * sizeof(unsigned long);
+        exehdr.e32_datapage = exehdr.e32_frectab + 4;
+        exehdr.e32_nrestab  = 0;
+        exehdr.e32_cbnrestab= 0;
+
+        /* make object table */
+        memcpy(&aObjTab[0], KKL_SwapMTE.smte_objtab, KKL_SwapMTE.smte_objcnt * sizeof(struct o32_obj));
+        for (i = 0, j = 1; i < KKL_SwapMTE.smte_objcnt; i++)
+        {
+            aObjTab[i].o32_reserved = 0;
+            aObjTab[i].o32_pagemap = j;
+            j += aObjTab[i].o32_mapsize = (aObjTab[i].o32_size + 0xfff) >> 12;
+            printf("obj %02d: base=%08x size=%08x page=%08x pages=%08x\n",
+                   i, aObjTab[i].o32_base, aObjTab[i].o32_size, aObjTab[i].o32_pagemap, aObjTab[i].o32_mapsize);
+        }
+
+        /* write the header stuff */
+        DosWrite(hFile, &exehdr, sizeof(exehdr), SSToDS(&ulWritten));
+        assert(!DosSetFilePtr(hFile, 0, FILE_CURRENT, SSToDS(&ulPos)) && ulPos == exehdr.e32_objtab);
+        DosWrite(hFile, &aObjTab[0], exehdr.e32_objcnt * sizeof(struct o32_obj), SSToDS(&ulWritten));
+        assert(!DosSetFilePtr(hFile, 0, FILE_CURRENT, SSToDS(&ulPos)) && ulPos == exehdr.e32_objmap);
+        for (i = 0, page.o32_pagedataoffset = 0; i < KKL_SwapMTE.smte_objcnt; i++)
+        {
+            for (j = 0; j < aObjTab[i].o32_mapsize;j++, page.o32_pagedataoffset += 0x1000)
             {
-                 rc = TestCaseExeLoad2();
+                page.o32_pageflags = VALID;
+                page.o32_pagesize = 0x1000;
+                DosWrite(hFile, SSToDS(&page), sizeof(struct o32_map), SSToDS(&ulWritten));
             }
         }
-        else
-            printf("!failed!\n");
-    }
-    else
-        printf("!failed!\n");
-
-    return rc;
-}
-
-
-/**
- * Test case 4.
- * Checks that all parameters are read correctly (3).
- *
- * @sketch  Create init packet with no arguments.
- *          Initiate kKrnlHlp
- *          Create init packet with no arguments.
- *          Initiate kKrnlLib
- * @returns 0 on success.
- *          1 on failure.
- * @status  completely implemented.
- * @author  knut st. osmundsen (knut.stange.osmundsen@mynd.no)
- */
-int TestCase4(void)
-{
-    int         rc = 1;
-    RP32INIT    rpinit;
-    char *      pszInitArgs = "-P:pe";
-
-    /* kKrnlHlp */
-    initRPInit(SSToDS(&rpinit), pszInitArgs);
-    rc = InitkKrnlHlp(&rpinit);              /* no SSToDS! */
-    printf("InitkKrnlHlp returned status=0x%04x\n", rpinit.rph.Status);
-    if ((rpinit.rph.Status & (STDON | STERR)) == STDON)
-    {
-        /* kKrnlLib */
-        initRPInit(SSToDS(&rpinit), pszInitArgs);
-        rc = InitkKrnlLib(&rpinit);       /* no SSToDS! */
-        printf("InitkKrnlLib returned status=0x%04x\n", rpinit.rph.Status);
-        if ((rpinit.rph.Status & (STDON | STERR)) == STDON)
+        assert(!DosSetFilePtr(hFile, 0, FILE_CURRENT, SSToDS(&ulPos)) && ulPos == exehdr.e32_restab);
+        DosWrite(hFile, &KKL_ResNameTab[0], &KKL_ResNameTabEND[0] - (char*)KKL_SwapMTE.smte_restab, SSToDS(&ulWritten));
+        assert(!DosSetFilePtr(hFile, 0, FILE_CURRENT, SSToDS(&ulPos)) && ulPos == exehdr.e32_enttab);
+        DosWrite(hFile, &KKL_EntryTab[0], &KKL_EntryTabEND[0] - (char*)KKL_SwapMTE.smte_enttab, SSToDS(&ulWritten));
+        assert(!DosSetFilePtr(hFile, 0, FILE_CURRENT, SSToDS(&ulPos)) && ulPos == exehdr.e32_fpagetab);
+        for (i = 0, page.o32_pagedataoffset = 0; i < KKL_SwapMTE.smte_objcnt; i++)
         {
-            struct kKLOptions opt = DEFAULT_OPTION_ASSIGMENTS;
-
-            rc = CompareOptions(SSToDS(&opt));
-            /*
-            if (rc == NO_ERROR)
-            {
-                 rc = TestCaseExeLoad2();
-            }
-            */
+            for (j = 0; j < aObjTab[i].o32_mapsize;j++, page.o32_pagedataoffset += 0x1000)
+                DosWrite(hFile, SSToDS(&ulNULL), sizeof(ulNULL), SSToDS(&ulWritten));
         }
-        else
-            printf("!failed!\n");
-    }
-    else
-        printf("!failed!\n");
+        assert(!DosSetFilePtr(hFile, 0, FILE_CURRENT, SSToDS(&ulPos)) && ulPos == exehdr.e32_frectab);
+        DosWrite(hFile, SSToDS(&ulNULL), sizeof(ulNULL), SSToDS(&ulWritten));
 
-    return rc;
-}
-
-
-/**
- * Test case 5.
- * Checks that all parameters are read correctly (3).
- *
- * @sketch  Create init packet with no arguments.
- *          Initiate kKrnlHlp
- *          Create init packet with no arguments.
- *          Initiate kKrnlLib
- * @returns 0 on success.
- *          1 on failure.
- * @status  completely implemented.
- * @author  knut st. osmundsen (knut.stange.osmundsen@mynd.no)
- */
-int TestCase5(void)
-{
-    int         rc = 1;
-    RP32INIT    rpinit;
-    char *      pszInitArgs = "-Pe:pe";
-
-    /* kKrnlHlp */
-    initRPInit(SSToDS(&rpinit), pszInitArgs);
-    rc = InitkKrnlHlp(&rpinit);              /* no SSToDS! */
-    printf("InitkKrnlHlp returned status=0x%04x\n", rpinit.rph.Status);
-    if ((rpinit.rph.Status & (STDON | STERR)) == STDON)
-    {
-        /* kKrnlLib */
-        initRPInit(SSToDS(&rpinit), pszInitArgs);
-        rc = InitkKrnlLib(&rpinit);       /* no SSToDS! */
-        printf("InitkKrnlLib returned status=0x%04x\n", rpinit.rph.Status);
-        if ((rpinit.rph.Status & (STDON | STERR)) == STDON)
-        {
-            struct kKLOptions opt = DEFAULT_OPTION_ASSIGMENTS;
-
-            rc = CompareOptions(SSToDS(&opt));
-            /*
-            if (rc == NO_ERROR)
+        /* Write data pages. */
+        assert(!DosSetFilePtr(hFile, 0, FILE_CURRENT, SSToDS(&ulPos)) && ulPos == exehdr.e32_datapage);
+        for (i = 0; i < KKL_SwapMTE.smte_objcnt; i++)
+            for (j = 0; j < aObjTab[i].o32_mapsize; j++)
             {
-                 rc = TestCaseExeLoad2();
+                static char achPage[0x1000];
+                char    *pchData = (char*)aObjTab[i].o32_base + j * 0x1000;
+                int k;
+                if (aObjTab[i].o32_flags & (OBJINVALID | OBJIOPL))
+                    memset(achPage[0], 0x1000, 0);
+                else
+                    for (k = 0; k < 0x1000; k++, pchData++)
+                        achPage[k] = *pchData;
+                DosWrite(hFile, &achPage[0], 0x1000, SSToDS(&ulWritten));
             }
-            */
-        }
-        else
-            printf("!failed!\n");
+
+        /*
+         * Close file - We're finished in a way.
+         */
+        DosClose(hFile);
     }
-    else
-        printf("!failed!\n");
 
-    return rc;
+    return 0;
 }
-
 
 /**
  * Compares the options with the option struct passed in.
@@ -919,137 +889,3 @@ int CompareOptions(struct kKLOptions *pOpt)
 
     return rc;
 }
-
-
-/**
- * Simulates a executable loading (no errors).
- * This test requires a PE executable file named ExecLoad1.exe which
- * imports the dll ExecLoad1d.dll.
- *
- * @returns 0 on success.
- *          > 0 on failure.
- * @sketch
- * @status
- * @author    knut st. osmundsen (knut.stange.osmundsen@mynd.no)
- * @remark
- */
-int TestCaseExeLoad2(void)
-{
-    APIRET rc;
-    int    cch;
-    char * psz;
-
-    /*
-     * Set global parameters... FIXME.
-     */
-
-    /*
-     * Do the real execution.
-     */
-    printf("--- TestcaseExeLoad2 - loading win32ktst.exe (LX image) ----\n");
-    rc = CalltkExecPgm(EXEC_LOAD, NULL, NULL, "GLC6000.TMP");
-    if (rc == NO_ERROR)
-    {
-        psz = "BIN\\DEBUG\\LIBCONV.EXE\0";
-        printf("--- TestcaseExeLoad2 - loading libconv.exe (LX image) ----\n");
-        rc = CalltkExecPgm(EXEC_LOAD, NULL, NULL, "bin\\debug\\libconv.exe");
-        if (rc == NO_ERROR)
-        {
-            #if 0 //not implemented by CalltkExecPgm...???
-            /* check result */
-            if (memcmp(achTkExecPgmArguments, psz, strlen(psz) + 1) != 0)
-            {
-                rc  = ERROR_BAD_ARGUMENTS;
-                printf("Bad Arguments! (%s)\n", achTkExecPgmArguments);
-            }
-            #else
-            psz = psz;
-            #endif
-        }
-    }
-
-    if (rc == NO_ERROR)
-    {
-        psz = "REXX\\TST.RX\0OriginalArgument1 OriginalArgument2\0OriginalArgument3\0";
-        printf("--- TestcaseExeLoad2 - loading rexx\\tst.rx (REXX script) ----\n");
-        rc = CalltkExecPgm(EXEC_LOAD, psz, NULL, "rexx\\tst.rx");
-        if (rc == NO_ERROR)
-        {
-            /* check result */
-            psz = "REXX\\TST.RX OriginalArgument1 OriginalArgument2\0OriginalArgument3\0";
-            cch = strlen(psz);
-            #if 0
-            if (memcmp(achTkExecPgmArguments + strlen(achTkExecPgmArguments) + 1, psz, cch) != 0)
-            {
-                rc = ERROR_BAD_ARGUMENTS;
-                printf("Bad Arguments! (achTkExecPgmArguments=%s).\n", achTkExecPgmArguments + strlen(achTkExecPgmArguments) + 1);
-            }
-            #endif
-        }
-    }
-
-    if (rc == NO_ERROR)
-    {
-        psz = "TEST\\TST.SH\0OrgArg1 OrgArg2\0OrgArg3\0";
-        printf("--- TestcaseExeLoad2 - loading test\\tst.sh (UNIX shell script) ----\n");
-        rc = CalltkExecPgm(EXEC_LOAD, psz, NULL, "test\\tst.sh");
-        if (rc == NO_ERROR)
-        {
-            /* check result */
-            psz = "TEST\\TST.SH OrgArg1 OrgArg2\0OrgArg3\0";
-            cch = strlen(psz);
-            #if 0
-            if (memcmp(achTkExecPgmArguments + strlen(achTkExecPgmArguments) + 1, psz, cch) != 0)
-            {
-                rc  = ERROR_BAD_ARGUMENTS;
-                printf("Bad Arguments! (achTkExecPgmArguments=%s).\n", achTkExecPgmArguments + strlen(achTkExecPgmArguments) + 1);
-            }
-            #endif
-        }
-    }
-
-    if (rc == NO_ERROR)
-    {
-        psz = "TEST\\TST2.SH\0OrgArg1 OrgArg2\0OrgArg3\0";
-        printf("--- TestcaseExeLoad2 - loading test\\tst2.sh (UNIX shell script) ----\n");
-        rc = CalltkExecPgm(EXEC_LOAD, psz, NULL, "test\\tst2.sh");
-        if (rc == NO_ERROR)
-        {
-            /* check result */
-            psz = "-arg1 -arg2 -arg3 TEST\\TST2.SH OrgArg1 OrgArg2\0OrgArg3\0";
-            cch = strlen(psz) + 1;
-            #if 0
-            if (memcmp(achTkExecPgmArguments + strlen(achTkExecPgmArguments) + 1, psz, cch) != 0)
-            {
-                rc  = ERROR_BAD_ARGUMENTS;
-                printf("Bad Arguments! (achTkExecPgmArguments=%s).\n", achTkExecPgmArguments + strlen(achTkExecPgmArguments) + 1);
-            }
-            #endif
-        }
-    }
-
-    if (rc == NO_ERROR)
-    {
-        psz = "E:\\WIN32PROG\\SOL\\SOL.EXE\0";
-        printf("--- TestcaseExeLoad2 - loading SOL.EXE (PE image) ----\n");
-        rc = CalltkExecPgm(EXEC_LOAD, psz, NULL, "e:\\Win32Prog\\Sol\\Sol.exe");
-        #if 0
-        if (rc == NO_ERROR)
-        {
-            /* check result */
-            cch = strlen(psz) + 1 + 1;
-            if (memcmp(achTkExecPgmArguments, psz, cch) != 0)
-            {
-                rc  = ERROR_BAD_ARGUMENTS;
-                printf("Bad Arguments! (achTkExecPgmArguments=%s).\n", achTkExecPgmArguments + strlen(achTkExecPgmArguments) + 1);
-            }
-        }
-        #endif
-    }
-
-    /*
-     * The test is successful if rc == NO_ERROR (== 0).
-     */
-    return rc;
-}
-
