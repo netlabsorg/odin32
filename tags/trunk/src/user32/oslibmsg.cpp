@@ -1,4 +1,4 @@
-/* $Id: oslibmsg.cpp,v 1.2 1999-09-26 16:09:04 dengert Exp $ */
+/* $Id: oslibmsg.cpp,v 1.3 1999-09-26 22:24:28 sandervl Exp $ */
 /*
  * Window message translation functions for OS/2
  *
@@ -22,6 +22,8 @@
 #include <win32wnd.h>
 #include "oslibutil.h"
 #include "timer.h"
+#include <thread.h>
+#include <wprocess.h>
 
 QMSG *MsgThreadPtr = 0;
 
@@ -53,9 +55,19 @@ void OS2ToWinMsgTranslate(QMSG *os2Msg, MSG *winMsg, BOOL isUnicode)
 }
 //******************************************************************************
 //TODO!!!
+//Signal that the incoming messages in pmwindow need to be translated
+//(i.e. PM WM_CHAR when translated generates WM_CHAR messages, otherwise
+// WM_KEYUP/DOWN (etc))
 //******************************************************************************
 ULONG TranslateWinMsg(ULONG msg)
 {
+ THDB *thdb;
+
+  thdb = GetThreadTHDB();
+  if(thdb) {
+	thdb->fMsgTranslated = TRUE;
+  }
+  
   return 0;
 }
 //******************************************************************************

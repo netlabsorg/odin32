@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.9 1999-09-26 10:09:59 sandervl Exp $ */
+/* $Id: pmwindow.cpp,v 1.10 1999-09-26 22:24:28 sandervl Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -27,6 +27,8 @@
 #include "oslibgdi.h"
 #include "oslibmsg.h"
 #include "dc.h"
+#include <thread.h>
+#include <wprocess.h>
 
 HMQ  hmq = 0;                             /* Message queue handle         */
 HAB  hab = 0;
@@ -34,6 +36,75 @@ HAB  hab = 0;
 RECTL desktopRectl = {0};
 ULONG ScreenWidth  = 0;
 ULONG ScreenHeight = 0;
+
+//Used for key translation while processing WM_CHAR message
+USHORT virtualKeyTable [66] = {
+               0x00,    //   OS/2 VK         Win32 VK,    Entry 0 is not used
+               0x01,    // VK_BUTTON1       VK_LBUTTON
+               0x02,    // VK_BUTTON2       VK_RBUTTON
+               0x04,    // VK_BUTTON3       VK_MBUTTON
+               0x03,    // VK_BREAK         VK_CANCEL
+               0x08,    // VK_BACKSPACE     VK_BACK
+               0x09,    // VK_TAB           VK_TAB
+               0x00,    // VK_BACKTAB       No equivalent!
+               0x0D,    // VK_NEWLINE       VK_RETURN
+               0x10,    // VK_SHIFT         VK_SHIFT
+               0x11,    // VK_CTRL          VK_CONTROL
+               0x12,    // VK_ALT           VK_MENU, best match I guess
+               0x12,    // VK_ALTGRAF       VK_MENU, best match I guess
+               0x13,    // VK_PAUSE         VK_PAUSE
+               0x14,    // VK_CAPSLOCK      VK_CAPITAL
+               0x1B,    // VK_ESC           VK_ESCAPE
+               0x20,    // VK_SPACE         VK_SPACE
+               0x22,    // VK_PAGEUP        VK_NEXT
+               0x21,    // VK_PAGEDOWN      VK_PRIOR
+               0x23,    // VK_END           VK_END
+               0x24,    // VK_HOME          VK_HOME
+               0x25,    // VK_LEFT          VK_LEFT
+               0x26,    // VK_UP            VK_UP
+               0x27,    // VK_RIGHT         VK_RIGHT
+               0x28,    // VK_DOWN          VK_DOWN
+               0x2C,    // VK_PRINTSCRN     VK_SNAPSHOT
+               0x2D,    // VK_INSERT        VK_INSERT
+               0x2E,    // VK_DELETE        VK_DELETE
+               0x91,    // VK_SCRLLOCK      VK_SCROLL
+               0x90,    // VK_NUMLOCK       VK_NUMLOCK
+               0x2B,    // VK_ENTER         VK_EXECUTE, best match I guess
+               0x00,    // VK_SYSRQ         No equivalent!
+               0x70,    // VK_F1            VK_F1
+               0x71,    // VK_F2            VK_F2
+               0x72,    // VK_F3            VK_F3
+               0x73,    // VK_F4            VK_F4
+               0x74,    // VK_F5            VK_F5
+               0x75,    // VK_F6            VK_F6
+               0x76,    // VK_F7            VK_F7
+               0x77,    // VK_F8            VK_F8
+               0x78,    // VK_F9            VK_F9
+               0x79,    // VK_F10           VK_F10
+               0x7A,    // VK_F11           VK_F11
+               0x7B,    // VK_F12           VK_F12
+               0x7C,    // VK_F13           VK_F13
+               0x7D,    // VK_F14           VK_F14
+               0x7E,    // VK_F15           VK_F15
+               0x7F,    // VK_F16           VK_F16
+               0x80,    // VK_F17           VK_F17
+               0x81,    // VK_F18           VK_F18
+               0x82,    // VK_F19           VK_F19
+               0x83,    // VK_F20           VK_F20
+               0x84,    // VK_F21           VK_F21
+               0x85,    // VK_F22           VK_F22
+               0x86,    // VK_F23           VK_F23
+               0x87,    // VK_F24           VK_F24
+               0x00,    // VK_ENDDRAG       No equivalent!
+               0x0C,    // VK_CLEAR         VK_CLEAR
+               0xF9,    // VK_EREOF         VK_EREOF
+               0xFD,    // VK_PA1           VK_PA1
+               0xF6,    // VK_ATTN          VK_ATTN
+               0xF7,    // VK_CRSEL         VK_CRSEL
+               0xF8,    // VK_EXSEL         VK_EXSEL
+               0x00,    // VK_COPY          No equivalent!
+               0x00,    // VK_BLK1          No equivalent!
+               0x00};   // VK_BLK2          No equivalent!
 
 MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2);
 
@@ -470,7 +541,7 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
             keystate |= WMMOVE_CTRL;
 
         //OS/2 Window coordinates -> Win32 Window coordinates
-	//NOTE: Do not call the default OS/2 window handler as that one changes
+    //NOTE: Do not call the default OS/2 window handler as that one changes
         //      the mousepointer!
         win32wnd->MsgMouseMove(keystate, SHORT1FROMMP(mp1), MapOS2ToWin32Y(win32wnd, SHORT2FROMMP(mp1)));
         break;
@@ -484,16 +555,16 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
     {
      ULONG scrollPos, scrollCode, scrollMsg;
 
-	scrollCode = SHORT2FROMMP(mp2);
-	scrollPos  = SHORT1FROMMP(mp2);
-	scrollMsg  = msg;
+    scrollCode = SHORT2FROMMP(mp2);
+    scrollPos  = SHORT1FROMMP(mp2);
+    scrollMsg  = msg;
 
-	OSLibTranslateScrollCmdAndMsg(&scrollMsg, &scrollCode);
+    OSLibTranslateScrollCmdAndMsg(&scrollMsg, &scrollCode);
 
         if(win32wnd->MsgScroll(scrollMsg, scrollCode, scrollPos)) {
             goto RunDefWndProc;
         }
-	break;
+    break;
     }
 
     case WM_CONTROL:
@@ -521,26 +592,26 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
         }
         switch(SHORT1FROMMP(mp1)) {
         case SC_MOVE:
-            win32sc = WIN32SC_MOVE;
+            win32sc = SC_MOVE_W;
             break;
         case SC_CLOSE:
-            win32sc = WIN32SC_CLOSE;
+            win32sc = SC_CLOSE_W;
             break;
         case SC_MAXIMIZE:
-            win32sc = WIN32SC_MAXIMIZE;
+            win32sc = SC_MAXIMIZE_W;
             break;
         case SC_MINIMIZE:
-            win32sc = WIN32SC_MINIMIZE;
+            win32sc = SC_MINIMIZE_W;
             break;
         case SC_NEXTFRAME:
         case SC_NEXTWINDOW:
-            win32sc = WIN32SC_NEXTWINDOW;
+            win32sc = SC_NEXTWINDOW_W;
             break;
         case SC_RESTORE:
-            win32sc = WIN32SC_RESTORE;
+            win32sc = SC_RESTORE_W;
             break;
         case SC_TASKMANAGER:
-            win32sc = WIN32SC_TASKLIST;
+            win32sc = SC_TASKLIST_W;
             break;
         default:
             goto RunDefWndProc;
@@ -553,81 +624,14 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
     }
     case WM_CHAR:
     {
+        THDB *thdb;
         ULONG repeatCount=0, virtualKey=0, keyFlags=0, scanCode=0;
         ULONG flags = SHORT1FROMMP(mp1);
-        BOOL keyWasPressed;
+        BOOL keyWasPressed, fTranslated = FALSE, fRunDefWndProc = FALSE;
         char c;
-        USHORT virtualKeyTable [66] = {
-               0x00,    //   OS/2 VK         Win32 VK,    Entry 0 is not used
-               0x01,    // VK_BUTTON1       VK_LBUTTON
-               0x02,    // VK_BUTTON2       VK_RBUTTON
-               0x04,    // VK_BUTTON3       VK_MBUTTON
-               0x03,    // VK_BREAK         VK_CANCEL
-               0x08,    // VK_BACKSPACE     VK_BACK
-               0x09,    // VK_TAB           VK_TAB
-               0x00,    // VK_BACKTAB       No equivalent!
-               0x0D,    // VK_NEWLINE       VK_RETURN
-               0x10,    // VK_SHIFT         VK_SHIFT
-               0x11,    // VK_CTRL          VK_CONTROL
-               0x12,    // VK_ALT           VK_MENU, best match I guess
-               0x12,    // VK_ALTGRAF       VK_MENU, best match I guess
-               0x13,    // VK_PAUSE         VK_PAUSE
-               0x14,    // VK_CAPSLOCK      VK_CAPITAL
-               0x1B,    // VK_ESC           VK_ESCAPE
-               0x20,    // VK_SPACE         VK_SPACE
-               0x00,    // VK_PAGEUP        No equivalent! At least, I think
-               0x00,    // VK_PAGEDOWN      No equivalent! At least, I think
-               0x23,    // VK_END           VK_END
-               0x24,    // VK_HOME          VK_HOME
-               0x25,    // VK_LEFT          VK_LEFT
-               0x26,    // VK_UP            VK_UP
-               0x27,    // VK_RIGHT         VK_RIGHT
-               0x28,    // VK_DOWN          VK_DOWN
-               0x2C,    // VK_PRINTSCRN     VK_SNAPSHOT
-               0x2D,    // VK_INSERT        VK_INSERT
-               0x2E,    // VK_DELETE        VK_DELETE
-               0x91,    // VK_SCRLLOCK      VK_SCROLL
-               0x90,    // VK_NUMLOCK       VK_NUMLOCK
-               0x2B,    // VK_ENTER         VK_EXECUTE, best match I guess
-               0x00,    // VK_SYSRQ         No equivalent!
-               0x70,    // VK_F1            VK_F1
-               0x71,    // VK_F2            VK_F2
-               0x72,    // VK_F3            VK_F3
-               0x73,    // VK_F4            VK_F4
-               0x74,    // VK_F5            VK_F5
-               0x75,    // VK_F6            VK_F6
-               0x76,    // VK_F7            VK_F7
-               0x77,    // VK_F8            VK_F8
-               0x78,    // VK_F9            VK_F9
-               0x79,    // VK_F10           VK_F10
-               0x7A,    // VK_F11           VK_F11
-               0x7B,    // VK_F12           VK_F12
-               0x7C,    // VK_F13           VK_F13
-               0x7D,    // VK_F14           VK_F14
-               0x7E,    // VK_F15           VK_F15
-               0x7F,    // VK_F16           VK_F16
-               0x80,    // VK_F17           VK_F17
-               0x81,    // VK_F18           VK_F18
-               0x82,    // VK_F19           VK_F19
-               0x83,    // VK_F20           VK_F20
-               0x84,    // VK_F21           VK_F21
-               0x85,    // VK_F22           VK_F22
-               0x86,    // VK_F23           VK_F23
-               0x87,    // VK_F24           VK_F24
-               0x00,    // VK_ENDDRAG       No equivalent!
-               0x0C,    // VK_CLEAR         VK_CLEAR
-               0xF9,    // VK_EREOF         VK_EREOF
-               0xFD,    // VK_PA1           VK_PA1
-               0xF6,    // VK_ATTN          VK_ATTN
-               0xF7,    // VK_CRSEL         VK_CRSEL
-               0xF8,    // VK_EXSEL         VK_EXSEL
-               0x00,    // VK_COPY          No equivalent!
-               0x00,    // VK_BLK1          No equivalent!
-               0x00};   // VK_BLK2          No equivalent!
 
-
-        repeatCount = SHORT2FROMMP (mp1) >> 8;
-        scanCode = SHORT2FROMMP (mp1) & 255;
+        repeatCount = CHAR3FROMMP(mp1);
+        scanCode = CHAR4FROMMP(mp1);
         keyWasPressed = ((SHORT1FROMMP (mp1) & KC_PREVDOWN) == KC_PREVDOWN);
 
         // both WM_KEYUP & WM_KEYDOWN want a virtual key, find the right Win32 virtual key
@@ -657,7 +661,7 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
 
 VirtualKeyFound:
 
-        if ((WinGetKeyState (HWND_DESKTOP, VK_ALT) & 0x8000) == 0)
+        if(!(SHORT1FROMMP(mp1) & KC_ALT))
         {
             //
             // the Alt key is not pressed
@@ -666,13 +670,13 @@ VirtualKeyFound:
                 // send WM_KEYUP message
 
                 if(win32wnd->MsgKeyUp (repeatCount, scanCode, virtualKey)) {
-                    goto RunDefWndProc;
+                    fRunDefWndProc = TRUE;
                 }
             }
             else {
                 // send WM_KEYDOWN message
                 if (win32wnd->MsgKeyDown (repeatCount, scanCode, virtualKey, keyWasPressed))
-                    goto RunDefWndProc;
+                    fRunDefWndProc = TRUE;
             }
         }
         else {
@@ -683,49 +687,53 @@ VirtualKeyFound:
                 // send WM_SYSKEYUP message
 
                 if(win32wnd->MsgSysKeyUp (repeatCount, scanCode, virtualKey)) {
-                    goto RunDefWndProc;
+                    fRunDefWndProc = TRUE;
                 }
             }
             else {
                 // send WM_SYSKEYDOWN message
                 if (win32wnd->MsgSysKeyDown (repeatCount, scanCode, virtualKey, keyWasPressed))
-                    goto RunDefWndProc;
+                    fRunDefWndProc = TRUE;
             }
         }
 
-        break;
-    }
-#if 0
-    case WM_CHAR:
-    {
-     ULONG keyflags = 0, vkey = 0;
-     ULONG fl = SHORT1FROMMP(mp1);
+        thdb = GetThreadTHDB();
+        if(thdb) {
+            fTranslated = thdb->fMsgTranslated;
+            thdb->fMsgTranslated = FALSE;  //reset flag
+        }
+        //NOTE: These actually need to be posted so that the next message retrieved by GetMessage contains
+        //      the newly generated WM_CHAR message.
+        if(fTranslated) {//TranslatedMessage was called before DispatchMessage, so send WM_CHAR messages
+            ULONG keyflags = 0, vkey = 0;
+            ULONG fl = SHORT1FROMMP(mp1);
 
-        if(!(fl & KC_CHAR)) {
-//            dprintf(("WM_CHAR: no valid character code"));
-            goto RunDefWndProc;
+            if(!(fl & KC_CHAR)) {
+                goto RunDefWndProc;
+            }
+            if(fl & KC_VIRTUALKEY) {
+                vkey = SHORT2FROMMP(mp2);
+            }
+            if(fl & KC_KEYUP) {
+                keyflags |= KEY_UP;
+            }
+            if(fl & KC_ALT) {
+                keyflags |= KEY_ALTDOWN;
+            }
+            if(fl & KC_PREVDOWN) {
+                keyflags |= KEY_PREVDOWN;
+            }
+            if(fl & KC_DEADKEY) {
+                keyflags |= KEY_DEADKEY;
+            }
+            if(win32wnd->MsgChar(SHORT1FROMMP(mp2), CHAR3FROMMP(mp1), CHAR4FROMMP(mp1), virtualKey, keyflags)) {
+                goto RunDefWndProc;
+            }
         }
-        if(fl & KC_VIRTUALKEY) {
-            vkey = SHORT2FROMMP(mp2);
-        }
-        if(fl & KC_KEYUP) {
-            keyflags |= KEY_UP;
-        }
-        if(fl & KC_ALT) {
-            keyflags |= KEY_ALTDOWN;
-        }
-        if(fl & KC_PREVDOWN) {
-            keyflags |= KEY_PREVDOWN;
-        }
-        if(fl & KC_DEADKEY) {
-            keyflags |= KEY_DEADKEY;
-        }
-        if(win32wnd->MsgChar(SHORT1FROMMP(mp2), CHAR3FROMMP(mp1), CHAR4FROMMP(mp1), vkey, keyflags)) {
-            goto RunDefWndProc;
-        }
+        if(fRunDefWndProc) goto RunDefWndProc;
         break;
     }
-#endif
+
     case WM_INITMENU:
     case WM_MENUSELECT:
     case WM_MENUEND:

@@ -1,4 +1,4 @@
-/* $Id: thread.h,v 1.5 1999-07-17 09:19:15 sandervl Exp $ */
+/* $Id: thread.h,v 1.6 1999-09-26 22:24:51 sandervl Exp $ */
 
 /*
  * Thread definitions
@@ -9,12 +9,16 @@
 #ifndef __WINE_THREAD_H
 #define __WINE_THREAD_H
 
-#include "config.h"
-#include "winbase.h"
-//#include "selectors.h"  /* for SET_FS */
-
 #ifdef __WIN32OS2__
 #define TLS_MINIMUM_AVAILABLE 	64
+ #ifndef __OS2_H__
+  #include "config.h"
+  #include "winbase.h"
+ #endif
+#else
+#include "config.h"
+#include "winbase.h"
+#include "selectors.h"  /* for SET_FS */
 #endif
 
 struct _PDB;
@@ -99,6 +103,7 @@ typedef struct _THDB
     DWORD          OrgTIBSel;	   // Original OS/2 TIB selector (always the same, but let's not assume too much for future compatibility)
     ULONG          hmq;		   // Thread message queue
     ULONG          hab;            // Thread Anchor block
+    BOOL           fMsgTranslated; // TranslateMessage called for this message?
 #endif
 } THDB;
 

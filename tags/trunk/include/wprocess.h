@@ -1,4 +1,4 @@
-/* $Id: wprocess.h,v 1.7 1999-09-15 23:29:09 sandervl Exp $ */
+/* $Id: wprocess.h,v 1.8 1999-09-26 22:24:51 sandervl Exp $ */
 /*
  * Process help functions
  *
@@ -13,13 +13,10 @@
 
 #define WIN32_TIBSEL
 
-#ifdef OS2_INCLUDED
-typedef DWORD TEB;
-typedef DWORD THDB;
-#else
+#ifndef OS2_INCLUDED
 #include <winprocess.h>
-#include <thread.h>
 #endif
+#include <thread.h>
 
 TEB *InitializeTIB(BOOL fMainThread = FALSE);
 void DestroyTIB();

@@ -1,4 +1,4 @@
-/* $Id: win32wbase.h,v 1.7 1999-09-26 10:10:01 sandervl Exp $ */
+/* $Id: win32wbase.h,v 1.8 1999-09-26 22:24:31 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -199,6 +199,7 @@ protected:
        LRESULT  SendInternalMessageA(ULONG msg, WPARAM wParam, LPARAM lParam);
        LRESULT  SendInternalMessageW(ULONG msg, WPARAM wParam, LPARAM lParam);
         void    Init();
+        void    setExtendedKey(ULONG virtualkey, ULONG *lParam);
 
         HWND    OS2Hwnd;
         HWND    OS2HwndFrame;
@@ -310,23 +311,6 @@ public:
 #define CMD_MENU                1
 #define CMD_CONTROL             2
 #define CMD_ACCELERATOR         3
-
-#define WIN32SC_SIZE         0xf000
-#define WIN32SC_MOVE         0xf010
-#define WIN32SC_MINIMIZE     0xf020
-#define WIN32SC_MAXIMIZE     0xf030
-#define WIN32SC_NEXTWINDOW   0xf040
-#define WIN32SC_PREVWINDOW   0xf050
-#define WIN32SC_CLOSE        0xf060
-#define WIN32SC_VSCROLL      0xf070
-#define WIN32SC_HSCROLL      0xf080
-#define WIN32SC_MOUSEMENU    0xf090
-#define WIN32SC_KEYMENU      0xf100
-#define WIN32SC_ARRANGE      0xf110
-#define WIN32SC_RESTORE      0xf120
-#define WIN32SC_TASKLIST     0xf130
-#define WIN32SC_SCREENSAVE   0xf140
-#define WIN32SC_HOTKEY       0xf150
 
 #define KEY_ALTDOWN             1
 #define KEY_PREVDOWN            2
