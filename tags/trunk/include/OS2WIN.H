@@ -1,4 +1,3 @@
-/* $Id: OS2WIN.H,v 1.9 2000-09-20 21:32:56 hugh Exp $ */
 #ifndef _OS2WIN_H
   #define _OS2WIN_H
 
@@ -344,7 +343,7 @@ DWORD   OPEN32API _O32_DdeGetData( HDDEDATA, PVOID, DWORD, DWORD );
 
 UINT    OPEN32API _O32_DdeGetLastError(DWORD );
 
-UINT    OPEN32API _O32_DdeInitialize(PDWORD, PFNCALLBACK, DWORD, DWORD );
+UINT    OPEN32API _O32_DdeInitialize(PDWORD, PFNCALLBACK_O32, DWORD, DWORD );
 
 BOOL    OPEN32API _O32_DdeKeepStringHandle(DWORD, HSZ );
 
@@ -566,6 +565,8 @@ BOOL    OPEN32API _O32_FreeDDElParam( UINT, LONG );
 
 BOOL    OPEN32API _O32_FreeLibrary( HINSTANCE );
 
+BOOL    OPEN32API _O32_GdiComment(HDC hdc, UINT cbSize, CONST BYTE * lpData);
+
 UINT    OPEN32API _O32_GetACP( VOID );
 
 HWND    OPEN32API _O32_GetActiveWindow( void);
@@ -714,6 +715,7 @@ int       OPEN32API _O32_GetKeyboardType( int );
 
 int       OPEN32API _O32_GetKeyNameText( LPARAM, LPSTR, int );
 
+USHORT  OPEN32API _O32_GetAsyncKeyState(INT nVirtKey);
 SHORT   OPEN32API _O32_GetKeyState( int );
 
 HWND    OPEN32API _O32_GetLastActivePopup( HWND );
@@ -2897,7 +2899,7 @@ inline UINT O32_DdeGetLastError(DWORD a)
     return yyrc;
 } 
 
-inline UINT O32_DdeInitialize(PDWORD a, PFNCALLBACK b, DWORD c, DWORD d)
+inline UINT O32_DdeInitialize(PDWORD a, PFNCALLBACK_O32 b, DWORD c, DWORD d)
 {
  UINT yyrc;
  USHORT sel = RestoreOS2FS();
@@ -4094,6 +4096,17 @@ inline BOOL O32_FreeLibrary(HINSTANCE a)
     return yyrc;
 } 
 
+inline BOOL O32_GdiComment(HDC hdc, UINT cbSize, CONST BYTE * lpData)
+{
+ BOOL yyrc;
+ USHORT sel = RestoreOS2FS();
+
+    yyrc = _O32_GdiComment(hdc, cbSize, lpData);
+    SetFS(sel);
+
+    return yyrc;
+}
+
 inline UINT O32_GetACP()
 {
  UINT yyrc;
@@ -4903,6 +4916,17 @@ inline int O32_GetKeyNameText(LPARAM a, LPSTR b, int c)
  USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_GetKeyNameText(a, b, c);
+    SetFS(sel);
+
+    return yyrc;
+} 
+
+inline SHORT O32_GetAsyncKeyState(int a)
+{
+ SHORT yyrc;
+ USHORT sel = RestoreOS2FS();
+
+    yyrc = _O32_GetAsyncKeyState(a);
     SetFS(sel);
 
     return yyrc;
