@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.23 1999-10-09 11:03:23 sandervl Exp $ */
+/* $Id: pmwindow.cpp,v 1.24 1999-10-09 15:36:58 sandervl Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -297,12 +297,7 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
         }
         classStyle = win32wnd->getClass()->getStyle();
 
-#if 0
-        if ((yDelta != 0) && ((classStyle & CS_VREDRAW_W) ||
-           ((classStyle & CS_HREDRAW_W) && (pswp->cx != pswpo->cx))))
-#else
         if (yDelta != 0 || xDelta != 0)
-#endif
         {
             HENUM henum = WinBeginEnumWindows(pswp->hwnd);
             SWP swp[10];
@@ -325,9 +320,15 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
                          yDelta, swp[i].x, swp[i].y, swp[i].cx, swp[i].cy));
 #endif
 
-                swp[i].y += yDelta;
+                if(swp[i].y != 0) {
+                    //child window at offset <> 0 from client area -> offset now changes
+                    swp[i].y  += yDelta;
+                    swp[i].fl &= ~SWP_NOREDRAW;
+                }
+                //else child window with the same start coorindates as the client area
+                //The app should resize it.
 
-                if (i == 9)
+               if (i == 9)
                 {
                     WinSetMultWindowPos(GetThreadHAB(), swp, 10);
                     i = 0;
@@ -354,7 +355,7 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
         }
         win32wnd->MsgPosChanged((LPARAM)&wp);
 
-	goto RunDefWndProc;
+    goto RunDefWndProc;
 //        break;
     }
 
