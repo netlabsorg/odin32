@@ -1,0 +1,17 @@
+LIBRARY DINPUT INITINSTANCE TERMINSTANCE
+
+PROTMODE
+DATA MULTIPLE NONSHARED READWRITE LOADONCALL
+CODE LOADONCALL
+
+IMPORTS
+
+EXPORTS
+ DirectInputCreateA = _DirectInputCreateA@16 		@1
+; DirectInputCreateW = _DirectInputCreateW@16 		@2
+
+;DllCanUnloadNow@3
+;DllGetClassObject@4
+;DllRegisterServer@5
+;DllUnregisterServer@6
+
