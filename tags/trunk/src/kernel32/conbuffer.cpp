@@ -1,4 +1,4 @@
-/* $Id: conbuffer.cpp,v 1.5 1999-10-27 18:36:33 phaller Exp $ */
+/* $Id: conbuffer.cpp,v 1.6 1999-10-27 19:47:38 phaller Exp $ */
 
 /*
  * Win32 Console API Translation for OS/2
@@ -156,7 +156,7 @@ DWORD HMDeviceConsoleBufferClass::CreateFile (LPCSTR        lpFileName,
     pConsoleBuffer->dwConsoleMode = ENABLE_PROCESSED_OUTPUT |
                                     ENABLE_WRAP_AT_EOL_OUTPUT;
 
-    pConsoleBuffer->CursorInfo.dwSize   = 2;                  /* 2 scanlines */
+    pConsoleBuffer->CursorInfo.dwSize   = 20;             /* 20% cell height */
     pConsoleBuffer->CursorInfo.bVisible = TRUE;
   }
 
