@@ -1,4 +1,4 @@
-/* $Id: StateUpd.cpp,v 1.36 2001-09-06 03:07:31 bird Exp $
+/* $Id: StateUpd.cpp,v 1.37 2001-09-06 03:17:37 bird Exp $
  *
  * StateUpd - Scans source files for API functions and imports data on them.
  *
@@ -907,7 +907,7 @@ static unsigned long processDesignNote(char **papszLines, int i, int &iRet, cons
             do
             {
                 while (*pszEnd == '\n' || *pszEnd == ' ' || *pszEnd == '\t' || *pszEnd == '\r')
-                    ++pszEnd;
+                    pszEnd++;
                 if (!strnicmp(pszEnd, "@sub", 4) && !strnicmp(findEndOfWord(pszEnd + 1) - 7, "section", 7))
                 {
                     lNextLevel = 1;
@@ -918,8 +918,10 @@ static unsigned long processDesignNote(char **papszLines, int i, int &iRet, cons
             } while ((pszEnd = strchr(pszEnd, '\n')) != NULL);
             if (!pszEnd)
                 pszEnd = psz + strlen(psz);
-            else
+            else if (psz != pszEnd)
                 pszEnd[-1] = '\0';
+            else
+                psz = "";
 
             /*
              * Strip end and start of section.
@@ -2568,8 +2570,8 @@ char *trimHtml(char *psz)
             pszEnd -= 3;
         else
             break;
+        pszEnd[1] = '\0';
     }
-    *++pszEnd = '\0';
 
     while (psz < pszEnd)
     {
