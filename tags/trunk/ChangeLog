@@ -1,4 +1,7 @@
- /* $Id: ChangeLog,v 1.362 1999-10-24 23:26:30 hugh Exp $ */
+ /* $Id: ChangeLog,v 1.363 1999-10-25 15:07:52 phaller Exp $ */
+
+ 99-10-25: Patrick Haller <phaller@gmx.net>
+	- ODINWRAP: Fix: Bugfix + Heap Check embracing every wrapper function 
 
  99-10-25: Markus Montkowski <mmontkowski@gmx.de>
         - DDRAW:  Fixed bug in Color conversion of surfaces DDEX1.EXE now works,
