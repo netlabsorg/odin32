@@ -1,7 +1,8 @@
-/* $Id: changelog,v 1.2489 2003-02-18 11:38:45 sandervl Exp $ */
+/* $Id: changelog,v 1.2490 2003-02-18 18:49:08 sandervl Exp $ */
 
  2003-02-18: Sander van Leeuwen <sandervl@innotek   >
     - KERNEL32: o Touch last stack page using ESP. (just in case)
+                o Cleaned up memory map code.
 
  2003-02-17: Sander van Leeuwen <sandervl@innotek   >
     - KERNEL32: o FindFirstFile: return ERROR_FILE_NOT_FOUND if DosFindFirst
