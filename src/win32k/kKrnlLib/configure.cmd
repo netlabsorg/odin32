@@ -1,4 +1,4 @@
-/* $Id: configure.cmd,v 1.1 2001-09-11 01:27:21 bird Exp $
+/* $Id: configure.cmd,v 1.2 2001-10-14 22:54:34 bird Exp $
  *
  * Configuration script.
  * Generates makefile.inc and an empty .depend file.
@@ -36,7 +36,7 @@
                     fkKrnlLib = 0;
                 when (ch = '?' | ch = 'H' | substr(sArg, 1, 2) = '-H') then
                 do
-                    say 'Odin32 Configure.cmd. $Revision: 1.1 $.'
+                    say 'Odin32 Configure.cmd. $Revision: 1.2 $.'
                     say 'syntax: Configure.cmd [-n] [-w]'
                     say '  -n   Noninteractive.'
                     say '  -w   Don''t build kKrnlLib.'
@@ -73,6 +73,7 @@
         call lineout sIncFile, 'WIN32KDEV32      =' kKrnlLibBase'\dev32'
         call lineout sIncFile, 'WIN32KELF2LX     =' kKrnlLibBase'\elf2lx'
         call lineout sIncFile, 'WIN32KINCLUDE    =' kKrnlLibBase'\include'
+        call lineout sIncFile, 'KKRNLLIBINCLUDE  =' kKrnlLibBase'\include'
         call lineout sIncFile, 'WIN32KK32        =' kKrnlLibBase'\k32'
         call lineout sIncFile, 'WIN32KLDR        =' kKrnlLibBase'\ldr'
         call lineout sIncFile, 'WIN32KLIB        =' kKrnlLibBase'\lib'
@@ -82,10 +83,12 @@
         call lineout sIncFile, 'WIN32KBIN        =' kKrnlLibBase'\out\bin\debug.$(CCENV)'
         call lineout sIncFile, 'WIN32KLIST       =' kKrnlLibBase'\out\list\debug.$(CCENV)'
         call lineout sIncFile, 'WIN32KOBJ        =' kKrnlLibBase'\out\object\debug.$(CCENV)'
+        call lineout sIncFile, 'KKRNLLIBR3       =' kKrnlLibBase'\out\r3lib\debug.$(CCENV)'
         call lineout sIncFile, '!else'
         call lineout sIncFile, 'WIN32KBIN        =' kKrnlLibBase'\out\bin\release.$(CCENV)'
         call lineout sIncFile, 'WIN32KLIST       =' kKrnlLibBase'\out\list\release.$(CCENV)'
         call lineout sIncFile, 'WIN32KOBJ        =' kKrnlLibBase'\out\object\release.$(CCENV)'
+        call lineout sIncFile, 'KKRNLLIBR3       =' kKrnlLibBase'\out\r3lib\release.$(CCENV)'
         call lineout sIncFile, '!endif'
         call lineout sIncFile, 'WIN32KOBJECT     = $(WIN32KOBJ)'
         call lineout sIncFile, ''
