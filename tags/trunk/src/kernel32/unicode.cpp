@@ -108,9 +108,9 @@ BOOL WIN32API GetCPInfo(UINT uCodePage, CPINFO *lpCPInfo)
 }
 //******************************************************************************
 //******************************************************************************
-int WIN32API UnicodeToAscii(WCHAR *ustring, char *astring)
+int WIN32API UnicodeToAsciiN(WCHAR *ustring, char *astring, int unilen)
 {
-  int ulen, i;
+  int i;
   int rc;
   size_t uni_chars_left;
   size_t out_bytes_left;
@@ -121,28 +121,34 @@ int WIN32API UnicodeToAscii(WCHAR *ustring, char *astring)
   if(ustring == NULL)
     return(NULL);
 
-//  dprintf(("KERNEL32: UnicodeToAscii\n"));
-  ulen = UniStrlen((UniChar*)ustring);
-  if ( getUconvObject() )
+//  dprintf(("KERNEL32: UnicodeToAsciiN\n"));
+  if (getUconvObject())
   {
-    uni_chars_left = ulen + 1;
+    uni_chars_left = unilen + 1;
     out_bytes_left = uni_chars_left;
     in_buf  = (UniChar*)ustring;
     out_buf = astring;
-    rc = UniUconvFromUcs( uconv_object,
-                          &in_buf,  &uni_chars_left,
-                          (void**)&out_buf, &out_bytes_left,
-                          &num_subs );
-//    dprintf(("KERNEL32: UnicodeToAscii(%d) '%s'\n", rc, astring ));
+    rc = UniUconvFromUcs(uconv_object,
+                         &in_buf, &uni_chars_left,
+                         (void**)&out_buf, &out_bytes_left,
+                         &num_subs);
+//    dprintf(("KERNEL32: UnicodeToAsciiN(%d) '%s'\n", rc, astring ));
   }
   else
   {
-   for(i=0;i<ulen;i++) {
+   for(i = 0; i < unilen; i++) {
         astring[i] = (char)ustring[i];
    }
-   astring[ulen] = 0;
+   astring[unilen] = 0;
   }
-  return(ulen);
+  return(unilen);
+}
+//******************************************************************************
+//******************************************************************************
+int WIN32API UnicodeToAscii(WCHAR *ustring, char *astring)
+{
+  /* forward to function with len parameter */
+  return UnicodeToAsciiN(ustring, astring, UniStrlen((UniChar*)ustring));
 }
 //******************************************************************************
 //******************************************************************************
@@ -166,10 +172,10 @@ void WIN32API FreeAsciiString(char *astring)
 }
 //******************************************************************************
 //******************************************************************************
-void WIN32API AsciiToUnicode(char *ascii, WCHAR *unicode)
+void WIN32API AsciiToUnicodeN(char *ascii, WCHAR *unicode, int asciilen)
 {
   int rc;
-  int i, len;
+  int i;
   size_t uni_chars_left;
   size_t in_bytes_left;
   size_t num_subs;
@@ -177,7 +183,7 @@ void WIN32API AsciiToUnicode(char *ascii, WCHAR *unicode)
   char    * in_buf;
 
 
-  dprintf(("KERNEL32: AsciiToUnicode(%s,%08xh)\n",
+  dprintf(("KERNEL32: AsciiToUnicodeN(%s,%08xh)\n",
            ascii,
            unicode));
 
@@ -186,14 +192,11 @@ void WIN32API AsciiToUnicode(char *ascii, WCHAR *unicode)
        (unicode == NULL) )
     return;
 
-  /* determine length of ascii string */
-  len = strlen(ascii);
-
-//  dprintf(("KERNEL32: AsciiToUnicode %s\n", ascii));
-  if ( getUconvObject() )
+//  dprintf(("KERNEL32: AsciiToUnicodeN %s\n", ascii));
+  if (getUconvObject())
   {
     in_buf        = ascii;
-    in_bytes_left = len;
+    in_bytes_left = asciilen;
     out_buf = (UniChar*)unicode;
 
     uni_chars_left = in_bytes_left +1;
@@ -207,14 +210,26 @@ void WIN32API AsciiToUnicode(char *ascii, WCHAR *unicode)
   else
   {
     for(i=0;
-        i<len;
+        i < asciilen;
         i++)
       unicode[i] = ascii[i];
   }
 
-  unicode[len] = 0;
+  unicode[asciilen] = 0;
 //SvL: Messes up the heap
 //  unicode[len+1] = 0; /* @@@PH 98/06/07 */
+}
+//******************************************************************************
+//******************************************************************************
+void WIN32API AsciiToUnicode(char *ascii, WCHAR *unicode)
+{
+  /* achimha for security, strlen might trap if garbage in */
+  /* @@@PH 98/06/07 */
+  if ( (ascii   == NULL) ||                     /* garbage in, garbage out ! */
+       (unicode == NULL) )
+    return;
+  /* forward to call with length parameter */
+  AsciiToUnicodeN(ascii, unicode, strlen(ascii));
 }
 //******************************************************************************
 //TODO: use OS/2 unicode stuff
