@@ -1,4 +1,4 @@
-# $Id: win32k.mak,v 1.9 2001-03-11 16:46:08 bird Exp $
+# $Id: win32k.mak,v 1.10 2001-04-29 20:43:07 bird Exp $
 
 #
 # Win32k.sys makefile.
@@ -414,7 +414,7 @@ $(WIN32KBIN)\mkcalltab.exe: clfix.exe $(MKCALLTABOBJS)
 # Interference rule to make the MkCallTab objects.
 {dev16}.c.obj_c:
     @$(ECHO) compiling 16bit (mkcalltab): $<
-    @$(CC16) -c -W3 -Asfw -G2s -Zp -Zl -nologo -Fo$@ -Fa -Zi -Od -Lp -DDEBUG -DEXTRACT \
+    @$(CC16) -c -W3 -Asfw -G2s -Zp -Zl -nologo -Fa -Zi -Od -Lp -DDEBUG -DEXTRACT \
         -Fa$(WIN32KLIST)\$(*B)_c.s -Fo$(WIN32KOBJ)\$(@B).obj_c $(CINCLUDES16) $<
 
 
@@ -455,7 +455,7 @@ extract.exe: $(WIN32KBIN)\extract.exe
 # Interference rule to make the Extract objects.
 {dev16}.c.obj_e:
     @$(ECHO) compiling 16bit (extract): $<
-    @$(CC16) -c -W3 -Asfw -G2s -Zp -Zl -nologo -Fo$@ -Fa -Zi -Od -Lp -DDEBUG -DEXTRACT \
+    @$(CC16) -c -W3 -Asfw -G2s -Zp -Zl -nologo -Fa -Zi -Od -Lp -DDEBUG -DEXTRACT \
         -Fa$(WIN32KLIST)\$(*B)_e.s -Fo$(WIN32KOBJ)\$(@B).obj_e $(CINCLUDES16) $<
 
 
