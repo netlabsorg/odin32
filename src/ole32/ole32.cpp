@@ -81,20 +81,6 @@ struct COM_ExternalLockList
 static COM_ExternalLockList elList = { EL_END_OF_LIST };
 
 /*
- * This open DLL table belongs in a per process table, but my guess is that
- * it shouldn't live in the kernel, so I'll put them out here in DLL
- * space assuming that there is one OLE32 per process.
- */
-typedef struct tagOpenDll 
-{
-    char *	DllName;                /* really only needed for debugging */
-    HINSTANCE 	hLibrary;
-    struct tagOpenDll * next;
-} OpenDll;
-
-static OpenDll * openDllList = NULL;	/* linked list of open dlls */
-
-/*
  * Com Library reference count...
  *
  * Used to control loading / unloading of Library resources,
@@ -464,6 +450,135 @@ HRESULT WIN32API CoGetClassObject
 	return DllGetClassObject(rclsid, iid, ppv);
     }
     return hres;
+}
+
+// ----------------------------------------------------------------------
+// CoLockObjectExternal
+// ----------------------------------------------------------------------
+HRESULT WIN32API CoLockObjectExternal(IUnknown *pUnk, BOOL fLock, BOOL fLastUnlockReleases)
+{
+    dprintf(("OLE32: CoLockObjectExternal"));
+
+    if (fLock) 
+    {
+	/* 
+	 * Increment the external lock coutner, COM_ExternalLockAddRef also
+	 * increment the object's internal lock counter.
+	 */
+	COM_ExternalLockAddRef( pUnk); 
+    }
+    else
+    {
+	/* 
+	 * Decrement the external lock coutner, COM_ExternalLockRelease also
+	 * decrement the object's internal lock counter.
+	 */
+	COM_ExternalLockRelease( pUnk, fLastUnlockReleases);
+    }
+
+    return S_OK;
+}
+
+// ----------------------------------------------------------------------
+// CoRegisterClassObject
+// ----------------------------------------------------------------------
+HRESULT WINAPI CoRegisterClassObject(
+    REFCLSID		rclsid,
+    LPUNKNOWN		pUnk,
+    DWORD		dwClsContext, 	// Context in which to run the executable 
+    DWORD		flags,        	// how connections are made 
+    LPDWORD		lpdwRegister) 
+{
+    RegisteredClass *	newClass;
+    LPUNKNOWN       	foundObject;
+    HRESULT         	hr;
+    oStringA		tClsid(rclsid);
+
+    dprintf(("OLE32: CoRegisterClassObject(%s)", (char *)tClsid));
+
+    // Perform a sanity check on the parameters
+    if ((lpdwRegister == 0) || (pUnk == 0))
+	return E_INVALIDARG;
+
+    // Initialize the cookie (out parameter)
+    *lpdwRegister = 0;
+
+    // First, check if the class is already registered.
+    // If it is, this should cause an error.
+    hr = COM_GetRegisteredClassObject(rclsid, dwClsContext, &foundObject);
+    if (hr == S_OK)
+    {
+	// The COM_GetRegisteredClassObject increased the reference count on the
+	// object so it has to be released.
+	IUnknown_Release(foundObject);
+
+	return CO_E_OBJISREG;
+    }
+
+    // If it is not registered, we must create a new entry for this class and
+    // append it to the registered class list.
+    // We use the address of the chain node as the cookie since we are sure it's
+    // unique.
+    newClass = (RegisteredClass *)HeapAlloc(GetProcessHeap(), 0, sizeof(RegisteredClass));
+
+    // Initialize the node.
+    newClass->classIdentifier = *rclsid;
+    newClass->runContext      = dwClsContext;
+    newClass->connectFlags    = flags;
+    newClass->dwCookie        = (DWORD)newClass;
+    newClass->nextClass       = firstRegisteredClass;
+
+    // Since we're making a copy of the object pointer, we have to increase it's
+    // reference count.
+    newClass->classObject     = pUnk;
+    IUnknown_AddRef(newClass->classObject);
+
+    firstRegisteredClass = newClass;
+
+    // Assign the out parameter (cookie)
+    *lpdwRegister = newClass->dwCookie;
+
+    return S_OK;
+}
+
+// ----------------------------------------------------------------------
+// CoRegisterClassObject
+// ----------------------------------------------------------------------
+// This method will remove a class object from the class registry
+HRESULT WINAPI CoRevokeClassObject(DWORD dwRegister) 
+{
+    RegisteredClass * *	prevClassLink;
+    RegisteredClass *	curClass;
+
+    dprintf(("OLE32: CoRegisterClassObject"));
+
+    // Iterate through the whole list and try to match the cookie.
+    curClass      = firstRegisteredClass;
+    prevClassLink = &firstRegisteredClass;
+
+    while (curClass != 0)
+    {
+	// Check if we have a match on the cookie.
+	if (curClass->dwCookie == dwRegister)
+	{
+	    // Remove the class from the chain.
+	    *prevClassLink = curClass->nextClass;
+
+	    // Release the reference to the class object.
+	    IUnknown_Release(curClass->classObject);
+
+	    // Free the memory used by the chain node.
+	    HeapFree(GetProcessHeap(), 0, curClass);
+
+	    return S_OK;
+	}
+
+	// Step to the next class in the list.
+	prevClassLink = &(curClass->nextClass);
+	curClass      = curClass->nextClass;
+    }
+
+    return E_INVALIDARG;
 }
 
 // ======================================================================
