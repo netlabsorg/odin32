@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.13 1999-07-20 07:42:36 sandervl Exp $ */
+/* $Id: pmwindow.cpp,v 1.14 1999-07-25 09:19:21 sandervl Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -27,6 +27,8 @@
 
 HMQ  hmq = 0;                             /* Message queue handle         */
 HAB  hab = 0;
+
+RECTL desktopRectl = {0};
 
 MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2);
 
@@ -75,6 +77,8 @@ BOOL InitPM()
         return(FALSE);
    }
 
+   WinQueryWindowRect(HWND_DESKTOP, &desktopRectl);
+   dprintf(("InitPM: Desktop (%d,%d)", desktopRectl.xRight, desktopRectl.yTop));
    return OSLibInitMsgQueue();
 } /* End of main */
 //******************************************************************************
@@ -193,7 +197,9 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
 
     case WM_WINDOWPOSCHANGED:
     {
-        dprintf(("OS2: WM_WINDOWPOSCHANGED %x", hwnd));
+     PSWP pswp = (PSWP)mp1;
+
+        dprintf(("OS2: WM_WINDOWPOSCHANGED %x %x (%d,%d) (%d,%d)", hwnd, pswp->fl, pswp->x, pswp->y, pswp->cx, pswp->cy));
         goto RunDefWndProc;
     }
 
@@ -219,12 +225,12 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
     {
      SWP swp;
 
-        dprintf(("OS2: WM_SIZE %x", hwnd));
         rc = WinQueryWindowPos(hwnd, &swp);
         if(rc == FALSE) {
                 dprintf(("WM_SIZE: WinQueryWindowPos failed!"));
                 break;
         }
+        dprintf(("OS2: WM_SIZE %x %x (%d,%d) (%d,%d)", hwnd, swp.fl, swp.x, swp.y, swp.cx, swp.cy));
         if(win32wnd->MsgSize(SHORT1FROMMP(mp2), SHORT2FROMMP(mp2),
                                 (swp.fl & SWP_MINIMIZE) != 0,
                                 (swp.fl & SWP_MAXIMIZE) != 0))
@@ -257,7 +263,7 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
     {
       HWND hwndFocus = (HWND)mp1;
 
-        dprintf(("OS2: WM_SETFOCUS %x", hwnd));
+        dprintf(("OS2: WM_SETFOCUS %x %d", hwnd, mp2));
         if(WinQueryWindowULong(hwndFocus, OFFSET_WIN32PM_MAGIC) != WIN32PM_MAGIC) {
                 //another (non-win32) application's window
                 //set to NULL (allowed according to win32 SDK) to avoid problems
@@ -377,6 +383,7 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
             keystate |= WMMOVE_CTRL;
 
         //OS/2 Window coordinates -> Win32 Window coordinates
+        //TODO: What do windows apps that handle this messages return?
         if(!win32wnd->MsgMouseMove(keystate, SHORT1FROMMP(mp1), MapOS2ToWin32Y(win32wnd, SHORT2FROMMP(mp1)))) {
                 goto RunDefWndProc;
         }
@@ -402,12 +409,74 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
         break;
 
     case WM_SYSCOMMAND:
-        dprintf(("WM_SYSCOMMAND"));
+    {
+      ULONG x = 0, y = 0;
+      ULONG win32sc;
+
+        if(SHORT2FROMMP(mp2) == TRUE) {//syscommand caused by mouse action
+            POINTL pointl;
+            WinQueryPointerPos(HWND_DESKTOP, &pointl);
+            x = pointl.x;
+            y = desktopRectl.yTop - y;
+        }
+        switch(SHORT1FROMMP(mp1)) {
+        case SC_MOVE:
+            win32sc = WIN32SC_MOVE;
+            break;
+        case SC_CLOSE:
+            win32sc = WIN32SC_CLOSE;
+            break;
+        case SC_MAXIMIZE:
+            win32sc = WIN32SC_MAXIMIZE;
+            break;
+        case SC_MINIMIZE:
+            win32sc = WIN32SC_MINIMIZE;
+            break;
+        case SC_NEXTFRAME:
+        case SC_NEXTWINDOW:
+            win32sc = WIN32SC_NEXTWINDOW;
+            break;
+        case SC_RESTORE:
+            win32sc = WIN32SC_RESTORE;
+            break;
+        case SC_TASKMANAGER:
+            win32sc = WIN32SC_TASKLIST;
+            break;
+        default:
+            goto RunDefWndProc;
+        }
+        dprintf(("WM_SYSCOMMAND %x %x (%d,%d)", hwnd, win32sc, x, y));
+        if(win32wnd->MsgSysCommand(win32sc, x, y)) {
+            goto RunDefWndProc;
+        }
         break;
-
+    }
     case WM_CHAR:
-        dprintf(("WM_CHAR"));
+    {
+     ULONG keyflags = 0, vkey = 0;
+     ULONG fl = SHORT1FROMMP(mp1);
 
+        if(!(fl & KC_CHAR)) {
+            dprintf(("WM_CHAR: no valid character code"));
+            goto RunDefWndProc;
+        }
+        if(fl & KC_VIRTUALKEY) {
+            vkey = SHORT2FROMMP(mp2);
+        }
+        if(fl & KC_KEYUP) {
+            keyflags |= KEY_UP;
+        }
+        if(fl & KC_ALT) {
+            keyflags |= KEY_ALTDOWN;
+        }
+        if(fl & KC_PREVDOWN) {
+            keyflags |= KEY_PREVDOWN;
+        }
+        if(win32wnd->MsgChar(SHORT1FROMMP(mp2), CHAR3FROMMP(mp1), CHAR4FROMMP(mp1), vkey, keyflags)) {
+            goto RunDefWndProc;
+        }
+        break;
+    }
     case WM_INITMENU:
     case WM_MENUSELECT:
     case WM_MENUEND:

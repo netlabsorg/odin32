@@ -1,4 +1,4 @@
-/* $Id: defwndproc.cpp,v 1.2 1999-07-18 14:39:34 sandervl Exp $ */
+/* $Id: defwndproc.cpp,v 1.3 1999-07-25 09:19:21 sandervl Exp $ */
 
 /*
  * Win32 default window API functions for OS/2
@@ -28,7 +28,7 @@ LRESULT WIN32API DefWindowProcA(HWND hwnd, UINT Msg, WPARAM wParam, LPARAM lPara
     {
     case WM_SETREDRAW: //Open32 does not set the visible flag
         if(wParam)
-               	SetWindowLongA (hwnd, GWL_STYLE, GetWindowLongA (hwnd, GWL_STYLE) | WS_VISIBLE);
+                SetWindowLongA (hwnd, GWL_STYLE, GetWindowLongA (hwnd, GWL_STYLE) | WS_VISIBLE);
         else    SetWindowLongA (hwnd, GWL_STYLE, GetWindowLongA (hwnd, GWL_STYLE) & ~WS_VISIBLE);
 
         return 0; //TODO
@@ -75,12 +75,12 @@ LRESULT WIN32API DefWindowProcA(HWND hwnd, UINT Msg, WPARAM wParam, LPARAM lPara
         return 1;
     }
     case WM_MOUSEMOVE:
-    	return 0;
-    	
+        return 0;
+
     case WM_ERASEBKGND:
     case WM_ICONERASEBKGND:
-    	return 0;
-    	
+        return 0;
+
     case WM_NCLBUTTONDOWN:
     case WM_NCLBUTTONUP:
     case WM_NCLBUTTONDBLCLK:
@@ -90,11 +90,11 @@ LRESULT WIN32API DefWindowProcA(HWND hwnd, UINT Msg, WPARAM wParam, LPARAM lPara
     case WM_NCMBUTTONDOWN:
     case WM_NCMBUTTONUP:
     case WM_NCMBUTTONDBLCLK:
-		return 0;           //TODO: Send WM_SYSCOMMAND if required
-		
+        return 0;           //TODO: Send WM_SYSCOMMAND if required
+
     case WM_NCHITTEST: //TODO:
-    	return 0;
-    	
+        return 0;
+
     default:
         return 1;
     }

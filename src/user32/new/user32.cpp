@@ -1,4 +1,4 @@
-/* $Id: user32.cpp,v 1.9 1999-07-24 14:01:44 sandervl Exp $ */
+/* $Id: user32.cpp,v 1.10 1999-07-25 09:19:21 sandervl Exp $ */
 
 /*
  * Win32 misc user32 API functions for OS/2
@@ -1072,43 +1072,9 @@ int WIN32API GetUpdateRgn( HWND arg1, HRGN arg2, BOOL  arg3)
     return O32_GetUpdateRgn(arg1, arg2, arg3);
 }
 //******************************************************************************
-//******************************************************************************
-BOOL WIN32API GetWindowPlacement( HWND arg1, LPWINDOWPLACEMENT arg2)
-{
-#ifdef DEBUG
-    WriteLog("USER32:  GetWindowPlacement\n");
-#endif
-    return O32_GetWindowPlacement(arg1, arg2);
-}
-//******************************************************************************
 
 
 //******************************************************************************
-int WIN32API GetWindowTextLengthW( HWND arg1)
-{
-#ifdef DEBUG
-    WriteLog("USER32:  GetWindowTextLengthW\n");
-#endif
-    return O32_GetWindowTextLength(arg1);
-}
-//******************************************************************************
-//******************************************************************************
-int WIN32API GetWindowTextW(HWND hwnd, LPWSTR lpsz, int cch)
-{
- char title[128];
- int  rc;
-
-   rc = O32_GetWindowText(hwnd, title, sizeof(title));
-#ifdef DEBUG
-   WriteLog("USER32:  GetWindowTextW returned %s\n", title);
-#endif
-   if(rc > cch) {
-    title[cch-1] = 0;
-    rc = cch;
-   }
-   AsciiToUnicode(title, lpsz);
-   return(rc);
-}
 //******************************************************************************
 //******************************************************************************
 DWORD WIN32API GetWindowThreadProcessId(HWND arg1, PDWORD  arg2)
