@@ -1,4 +1,10 @@
- /* $Id: changelog,v 1.147 1999-08-28 09:25:55 achimha Exp $ */
+ /* $Id: changelog,v 1.148 1999-08-28 14:11:40 sandervl Exp $ */
+
+ 99-08-28: Sander van Leeuwen <sandervl@xs4all.nl>
+ 	- USER32\NEW: Use shared memory for window & class objects
+		      Implemented FindWindow(Ex). Not yet tested
+                      Fixed window names.
+                      Created shared heap using VAC's _ucreate.
 
  99-08-28: Achim Hasenmueller <achimha@innotek.de>
         - COMCTL32: Merged with latest WINE updates (990815)
