@@ -1,4 +1,4 @@
-/* $Id: odin32get.cmd,v 1.5 2003-04-14 22:53:04 bird Exp $
+/* $Id: odin32get.cmd,v 1.6 2003-06-19 20:29:42 bird Exp $
  *
  * Gets the CVS tree from netlabs.
  *
@@ -15,8 +15,12 @@
     if ((sDate = '') | (sType = '')) then do say 'BUILD_DATE/BUILD_TYPE unset, you didn''t start job.cmd.'; exit(16); end
     */
 
+    sDrive = filespec('drive', directory());
+    'cache386 /LAZY:'sDrive'OFF';
     'cvs checkout .'
-    if (RC <> 0) then call failure rc, 'CVS checkout . failed';
+    iRc = rc;
+    'cache386 /LAZY:'sDrive'ON';
+    if (iRc <> 0) then call failure iRc, 'CVS checkout . failed';
     'copy ..\scripts\bin\buildenv.cmd.paths tools\bin\buildenv.cmd.paths'
     exit(0);
 
