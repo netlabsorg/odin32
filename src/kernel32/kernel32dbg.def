@@ -1,4 +1,4 @@
-; $Id: kernel32dbg.def,v 1.4 2002-02-09 17:27:31 sandervl Exp $
+; $Id: kernel32dbg.def,v 1.5 2002-02-11 09:43:19 sandervl Exp $
 
 ;Basis is Windows95 KERNEL32
 LIBRARY KERNEL32 INITINSTANCE TERMINSTANCE
@@ -1093,6 +1093,7 @@ EXPORTS
 
    GetFS               = GetFS                                    @1226 NONAME
    SetFS               = SetFS                                    @1227 NONAME
+   SetReturnFS         = SetReturnFS                              @1235 NONAME
 
    RestoreOS2TIB        = _RestoreOS2TIB@0                        @1228 NONAME
    SetWin32TIB          = _SetWin32TIB@4                          @1229 NONAME
