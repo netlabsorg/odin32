@@ -1,4 +1,4 @@
-/* $Id: critsection.cpp,v 1.4 2000-02-16 14:25:36 sandervl Exp $ */
+/* $Id: critsection.cpp,v 1.5 2000-03-29 17:17:17 sandervl Exp $ */
 /*
  * Win32 critical sections
  * 
@@ -86,30 +86,35 @@ void WINAPI EnterCriticalSection( CRITICAL_SECTION *crit )
             crit->RecursionCount++;
             return;
         }
+
         /* Now wait for it */
+        for (;;)
+        {
+            res = ODIN_WaitForSingleObject( crit->LockSemaphore, 5000L );
+            if ( res == WAIT_TIMEOUT )
+            {
+                dprintf(("Critical section %p wait timed out, retrying (60 sec)\n", crit ));
+                res = ODIN_WaitForSingleObject( crit->LockSemaphore, 60000L );
+                if ( res == WAIT_TIMEOUT && TRACE_ON(relay) )
+                {
+                    dprintf(("Critical section %p wait timed out, retrying (5 min)\n", crit ));
+                    res = WaitForSingleObject( crit->LockSemaphore, 300000L );
+                }
+            }
+            if (res == STATUS_WAIT_0) break;
 
-        if ( crit->Reserved && crit->Reserved != GetCurrentProcessId() )
-        {
-            dprintf(("Crst %p belongs to process %ld, current is %ld!\n", 
-                          crit, crit->Reserved, GetCurrentProcessId() ));
-            return;
-        }
+#if 0
+            EXCEPTION_RECORD rec;
 
-        res = ODIN_WaitForSingleObject( crit->LockSemaphore, 5000L );
-        if ( res == WAIT_TIMEOUT )
-        {
-            dprintf(("Critical section %p wait timed out, retrying (60 sec)\n", crit ));
-            res = WaitForSingleObject( crit->LockSemaphore, 60000L );
-        }
-        if ( res == WAIT_TIMEOUT && TRACE_ON(relay) )
-        {
-            dprintf(("Critical section %p wait timed out, retrying (5 min)\n", crit ));
-            res = WaitForSingleObject( crit->LockSemaphore, 300000L );
-        }
-        if (res != STATUS_WAIT_0)
-        {
-            dprintf(("Critical section %p wait failed err=%lx\n", crit, res ));
-            /* FIXME: should raise an exception */
+            rec.ExceptionCode    = EXCEPTION_CRITICAL_SECTION_WAIT;
+            rec.ExceptionFlags   = 0;
+            rec.ExceptionRecord  = NULL;
+            rec.ExceptionAddress = RaiseException;  /* sic */
+            rec.NumberParameters = 1;
+            rec.ExceptionInformation[0] = (DWORD)crit;
+            RtlRaiseException( &rec );
+#endif
+            RaiseException(EXCEPTION_CRITICAL_SECTION_WAIT, 0, 1, (DWORD *)crit);
         }
     }
     crit->OwningThread   = GetCurrentThreadId();

@@ -1,4 +1,4 @@
-/* $Id: winimgres.cpp,v 1.33 2000-03-24 19:25:34 sandervl Exp $ */
+/* $Id: winimgres.cpp,v 1.34 2000-03-29 17:17:18 sandervl Exp $ */
 
 /*
  * Win32 PE Image class (resource methods)
@@ -223,7 +223,7 @@ ULONG Win32ImageBase::getPEResourceSize(ULONG id, ULONG type, ULONG lang)
 
     pData = getPEResourceEntry(id, type, lang);
     if(pData == NULL) {
-        dprintf(("Win32ImageBase::getPEResourceSize: couldn't find resource %d (type %d, lang %d)", id, type, lang));
+        dprintf(("Win32ImageBase::getPEResourceSize: couldn't find resource %d (type %d, lang %x)", id, type, lang));
         return 0;
     }
     return pData->Size;
@@ -264,9 +264,9 @@ HRSRC Win32ImageBase::findResourceA(LPCSTR lpszName, LPSTR lpszType, ULONG lang)
     pData = getPEResourceEntry(id, type, lang);
     if(pData == NULL) {
         if(HIWORD(id)) {
-                dprintf(("Win32ImageBase::getPEResource %s: couldn't find resource %s (type %d, lang %d)", szModule, id, type, lang));
+                dprintf(("Win32ImageBase::getPEResource %s: couldn't find resource %s (type %d, lang %x)", szModule, id, type, lang));
         }
-        else    dprintf(("Win32ImageBase::getPEResource %s: couldn't find resource %d (type %d, lang %d)", szModule, id, type, lang));
+        else    dprintf(("Win32ImageBase::getPEResource %s: couldn't find resource %d (type %d, lang %x)", szModule, id, type, lang));
         return 0;
     }
     if(HIWORD(id)) {
