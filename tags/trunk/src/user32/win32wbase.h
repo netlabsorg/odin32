@@ -1,4 +1,4 @@
-/* $Id: win32wbase.h,v 1.31 1999-10-20 13:46:28 sandervl Exp $ */
+/* $Id: win32wbase.h,v 1.32 1999-10-22 18:11:48 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -263,6 +263,7 @@ protected:
                                         //sent by PM and those sent by apps
         BOOL    fNoSizeMsg;
         BOOL    fIsDestroyed;
+        BOOL    fCreated;
 
         PVOID   pOldFrameProc;
         ULONG   borderWidth;

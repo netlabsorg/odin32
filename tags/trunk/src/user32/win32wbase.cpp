@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.58 1999-10-21 12:19:28 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.59 1999-10-22 18:11:48 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -136,6 +136,7 @@ void Win32BaseWindow::Init()
   fInternalMsg     = FALSE;
   fNoSizeMsg       = FALSE;
   fIsDestroyed     = FALSE;
+  fCreated         = FALSE;
 
   windowNameA      = NULL;
   windowNameW      = NULL;
@@ -557,11 +558,15 @@ BOOL Win32BaseWindow::MsgCreate(HWND hwndFrame, HWND hwndClient)
 {
  POINT maxPos;
  CREATESTRUCTA  *cs = tmpcs;  //pointer to CREATESTRUCT used in CreateWindowExA method
+ RECT rectWndTmp, rectClientTmp;
 
   OS2Hwnd      = hwndClient;
   OS2HwndFrame = hwndFrame;
-//  if(!isFrameWindow())
-//        OS2HwndFrame = hwndClient;
+
+  //make backup copy of rectangles (some calls below result in WM_WINDOWPOSCHANGED with weird values since we haven't
+  //set our window size just yet)
+  rectWndTmp   = rectWindow;
+  rectClientTmp = rectClient;
 
   fNoSizeMsg = TRUE;
 
@@ -620,7 +625,6 @@ BOOL Win32BaseWindow::MsgCreate(HWND hwndFrame, HWND hwndClient)
 
   fakeWinBase.hwndThis     = OS2Hwnd;
   fakeWinBase.pWindowClass = windowClass;
-//  SetFakeOpen32();
 
   //Set icon from class
   if(windowClass->getIcon())
@@ -648,6 +652,11 @@ BOOL Win32BaseWindow::MsgCreate(HWND hwndFrame, HWND hwndClient)
   pOldFrameProc = FrameSubclassFrameWindow(this);
   if (isChild()) FrameSetBorderSize(this,TRUE);
 
+  //restore rectangles (some calls below result in WM_WINDOWPOSCHANGED with weird values since we haven't
+  //set our window size just yet)
+  rectWindow = rectWndTmp;
+  rectClient = rectClientTmp;
+
   /* Send the WM_CREATE message
    * Perhaps we shouldn't allow width/height changes as well.
    * See p327 in "Internals".
@@ -671,6 +680,8 @@ BOOL Win32BaseWindow::MsgCreate(HWND hwndFrame, HWND hwndClient)
 
   if(SendMessageA(WM_NCCREATE, 0, (LPARAM)cs) )
   {
+        fCreated = TRUE;
+
         SendNCCalcSize(FALSE, &rectWindow, NULL, NULL, 0, &rectClient );
 
 //        OffsetRect(&rectWindow, maxPos.x - rectWindow.left, maxPos.y - rectWindow.top);
@@ -1558,8 +1569,13 @@ LRESULT Win32BaseWindow::DefWindowProcA(UINT Msg, WPARAM wParam, LPARAM lParam)
 
             return result;
     }
+    case WM_NOTIFY:
+        return 0; //comctl32 controls expect this
 
     default:
+        if(Msg > WM_USER) {
+            return 0;
+        }
         return 1;
     }
 }
@@ -1592,6 +1608,14 @@ LRESULT Win32BaseWindow::SendMessageA(ULONG Msg, WPARAM wParam, LPARAM lParam)
 {
  LRESULT rc;
  BOOL    fInternalMsgBackup = fInternalMsg;
+
+  //SvL: Some Wine controls send WM_COMMAND messages when they receive the focus -> apps don't like to
+  //     receive those before they get their WM_CREATE message
+  //NOTE: May need to refuse more messages
+  if(fCreated == FALSE && Msg == WM_COMMAND) {
+        dprintf(("SendMessageA BEFORE creation! %s for %x %x %x", GetMsgText(Msg), getWindowHandle(), wParam, lParam));
+        return 0;
+  }
 
   if(Msg != WM_GETDLGCODE && Msg != WM_ENTERIDLE) {//sent *very* often
         if(PostSpyMessage(getWindowHandle(), Msg, wParam, lParam) == FALSE)
@@ -1645,6 +1669,14 @@ LRESULT Win32BaseWindow::SendMessageW(ULONG Msg, WPARAM wParam, LPARAM lParam)
 {
  LRESULT rc;
  BOOL    fInternalMsgBackup = fInternalMsg;
+
+  //SvL: Some Wine controls send WM_COMMAND messages when they receive the focus -> apps don't like to
+  //     receive those before they get their WM_CREATE message
+  //NOTE: May need to refuse more messages
+  if(fCreated == FALSE && Msg == WM_COMMAND) {
+        dprintf(("SendMessageA BEFORE creation! %s for %x %x %x", GetMsgText(Msg), getWindowHandle(), wParam, lParam));
+        return 0;
+  }
 
   if(Msg != WM_GETDLGCODE && Msg != WM_ENTERIDLE) {//sent *very* often
         if(PostSpyMessage(getWindowHandle(), Msg, wParam, lParam) == FALSE)

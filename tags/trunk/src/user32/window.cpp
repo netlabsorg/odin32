@@ -1,4 +1,4 @@
-/* $Id: window.cpp,v 1.22 1999-10-20 22:35:54 sandervl Exp $ */
+/* $Id: window.cpp,v 1.23 1999-10-22 18:11:50 sandervl Exp $ */
 /*
  * Win32 window apis for OS/2
  *
@@ -800,15 +800,15 @@ int WIN32API MapWindowPoints(HWND hwndFrom, HWND hwndTo, LPPOINT lpPoints,
     OSLibWinMapWindowPoints(wndfrom->getOS2WindowHandle(), wndto->getOS2WindowHandle(), &point, 1);
     point.y = wndto->getWindowHeight() - point.y;
 
-    WORD xinc = point.x - lpPoints->x;
-    WORD yinc = point.y - lpPoints->y;
+    short int xinc = point.x - lpPoints->x;
+    short int yinc = point.y - lpPoints->y;
 
-    for(int i=1;i<cPoints;i++)
+    for(int i=0;i<cPoints;i++)
     {
         lpPoints[i].x += xinc;
         lpPoints[i].y += yinc;
     }
-    retval = ((DWORD)yinc << 16) | xinc;
+    retval = ((LONG)yinc << 16) | xinc;
     return retval;
 }
 //******************************************************************************
