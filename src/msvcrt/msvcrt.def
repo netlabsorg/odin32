@@ -1,4 +1,4 @@
-; $Id: msvcrt.def,v 1.8 1999-11-30 14:17:09 sandervl Exp $
+; $Id: msvcrt.def,v 1.9 1999-11-30 19:44:04 sandervl Exp $
 
 ;Created by BLAST for IBM's compiler
 LIBRARY MSVCRT INITINSTANCE TERMINSTANCE
@@ -846,7 +846,7 @@ EXPORTS
     _mbscat			= CRTDLL__mbscat		@344
     _mbschr			= CRTDLL__mbschr		@345
     _mbscmp			= CRTDLL__mbscmp		@346
-    _mbscoll			= CRTDLL__mbscmp		@347
+    _mbscoll			= CRTDLL__mbscmp 		@347
     _mbscpy			= CRTDLL__mbscpy		@348
     _mbscspn			= CRTDLL__mbscspn		@349
     _mbsdec			= CRTDLL__mbsdec		@350
