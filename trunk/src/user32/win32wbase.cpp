@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.55 1999-10-19 12:52:30 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.56 1999-10-19 19:26:08 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -640,6 +640,7 @@ BOOL Win32BaseWindow::MsgCreate(HWND hwndFrame, HWND hwndClient)
   }
   else
   {
+        dprintf(("Set window ID to %x", cs->hMenu));
         setWindowId((DWORD)cs->hMenu);
   }
 
@@ -2452,6 +2453,10 @@ int Win32BaseWindow::GetWindowTextLength()
 //******************************************************************************
 int Win32BaseWindow::GetWindowTextA(LPSTR lpsz, int cch)
 {
+    if(windowNameA == NULL) {
+        *lpsz = 0;
+        return 0;
+    }
     strncpy(lpsz, windowNameA, cch);
     return wndNameLength;
 }
@@ -2459,6 +2464,10 @@ int Win32BaseWindow::GetWindowTextA(LPSTR lpsz, int cch)
 //******************************************************************************
 int Win32BaseWindow::GetWindowTextW(LPWSTR lpsz, int cch)
 {
+    if(windowNameW == NULL) {
+        *lpsz = 0;
+        return 0;
+    }
     lstrcpynW((LPWSTR)lpsz, windowNameW, cch);
     return wndNameLength;
 }
