@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.77 2001-09-05 09:30:49 bird Exp $
+# $Id: makefile,v 1.78 2001-09-30 00:35:13 bird Exp $
 
 #
 # Odin32 API
@@ -72,25 +72,25 @@ startsmp:   # Internal helper for the smp rule.
 # dep:      Invokes the dep rule in every directory.
 #
 build:
-    $(DOWITHDIRS) -e$(NOTTOBEMADE) -lbld$(CCENV)$(DEBUG) -c $(EXTRA) \
+    @$(DOWITHDIRS) -e$(NOTTOBEMADE) -lbld$(CCENV)$(DEBUG) -c $(EXTRA) \
         $(MAKE_CMD) all
 
 lib libs:
-    $(DOWITHDIRS) -e$(NOTHAVELIBS) -c -llib $(EXTRA) \
+    @$(DOWITHDIRS) -e$(NOTHAVELIBS) -c -llib $(EXTRA) \
         $(MAKE_CMD) lib
 
 dep:
-    $(DOWITHDIRS) -e$(NOTTOBEMADE) -c -ldep $(EXTRA) \
+    @$(DOWITHDIRS) -e$(NOTTOBEMADE) -c -ldep $(EXTRA) \
         $(CMDQD_SUB) $(MAKE_CMD) NODEP=1 dep
     $(CMDQD_WAIT)
 
 clean:
-    $(DOWITHDIRS) -e$(NOTTOBEMADE) -c -lcln$(CCENV)$(DEBUG) $(EXTRA) \
+    @$(DOWITHDIRS) -e$(NOTTOBEMADE) -c -lcln$(CCENV)$(DEBUG) $(EXTRA) \
         $(CMDQD_SUB)  $(MAKE_CMD) NODEP=1 clean
     $(CMDQD_WAIT)
 
 $(COMMONRULES:clean dep lib all=):
-    $(DOWITHDIRS) -e$(NOTTOBEMADE) -c -l$@$(CCENV)$(DEBUG) $(EXTRA) \
+    @$(DOWITHDIRS) -e$(NOTTOBEMADE) -c -l$@$(CCENV)$(DEBUG) $(EXTRA) \
         $(MAKE_CMD) $@
 
 
@@ -99,42 +99,42 @@ $(COMMONRULES:clean dep lib all=):
 #
 CUSTOMBUILD = kernel32 user32 gdi32 comctl32 comdlg32 shell32 shlwapi msvfw32 wsock32 winmm ole32 rpcrt4 version lz32
 custombuild:
-    $(DODIRS) "$(CUSTOMBUILD)" $(MAKE_CMD) all CUSTOMBUILD=1
-    $(DODIRS) ".\win32k\lib custombuild" $(MAKE_CMD) all
+    @$(DODIRS) "$(CUSTOMBUILD)" $(MAKE_CMD) all CUSTOMBUILD=1
+    @$(DODIRS) ".\win32k\lib custombuild" $(MAKE_CMD) all
 
 custombuild_all custombuild_clean custombuild_dep:
-    $(DODIRS) "$(CUSTOMBUILD)" $(MAKE_CMD) $(@:custombuild_=) CUSTOMBUILD=1
-    $(DODIRS) ".\win32k\lib custombuild" $(MAKE_CMD) $(@:custombuild_=)
+    @$(DODIRS) "$(CUSTOMBUILD)" $(MAKE_CMD) $(@:custombuild_=) CUSTOMBUILD=1
+    @$(DODIRS) ".\win32k\lib custombuild" $(MAKE_CMD) $(@:custombuild_=)
 
 
 #
 # Odin32 API DB Management
 #
 APIImport:
-    $(DOWITHDIRS) -e$(NOTWIN32DLLS) -cp \
+    @$(DOWITHDIRS) -e$(NOTWIN32DLLS) -cp \
         ..\..\tools\bin\APIImport.cmd
 
 StateUpd:
     ..\tools\bin\StateUpd.exe -io+
-    -$(DOWITHDIRS) -e$(NOTWIN32DLLS) -cp -i \
+    -@$(DOWITHDIRS) -e$(NOTWIN32DLLS) -cp -i \
         ..\..\tools\bin\StateUpd.cmd -ie- -ib-
-    $(DODIRS) ".\win32k" $(MAKE_CMD) StateUpd
+    @$(DODIRS) ".\win32k" $(MAKE_CMD) StateUpd
     ..\tools\bin\StateUpd.exe -io+
 
 ReadSignals:
-    -$(DOWITHDIRS) -e$(NOTWIN32DLLS:win32k;=) -cp -i \
+    -@$(DOWITHDIRS) -e$(NOTWIN32DLLS:win32k;=) -cp -i \
         IF EXIST signals.log list signals.log
 
 ReadStateUpdLogs:
-    -$(DOWITHDIRS) -e$(NOTWIN32DLLS:win32k;=) -cp -i \
+    -@$(DOWITHDIRS) -e$(NOTWIN32DLLS:win32k;=) -cp -i \
         IF EXIST stateupd.log list stateupd.log
 
 ReadAPIImportLogs:
-    -$(DOWITHDIRS) -e$(NOTWIN32DLLS) -cp -i \
+    -@$(DOWITHDIRS) -e$(NOTWIN32DLLS) -cp -i \
         IF EXIST apiimport.log list apiimport.log
 
 CleanDBLogs:
-    $(DOWITHDIRS) -e$(NOTWIN32DLLS:win32k;=) -cp \
+    @$(DOWITHDIRS) -e$(NOTWIN32DLLS:win32k;=) -cp \
         $(RM) apiimport.log signals.log stateupd.log apiimport.def
     $(RM) signals.log stateupd.log
 
