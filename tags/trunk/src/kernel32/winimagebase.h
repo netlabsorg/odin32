@@ -1,4 +1,4 @@
-/* $Id: winimagebase.h,v 1.4 2000-04-16 04:19:58 bird Exp $ */
+/* $Id: winimagebase.h,v 1.5 2000-04-16 04:27:38 bird Exp $ */
 
 /*
  * Win32 PE Image base class
