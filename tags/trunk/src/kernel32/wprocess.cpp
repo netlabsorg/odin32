@@ -1,4 +1,4 @@
-/* $Id: wprocess.cpp,v 1.84 2000-07-18 18:37:30 sandervl Exp $ */
+/* $Id: wprocess.cpp,v 1.85 2000-08-09 18:59:03 sandervl Exp $ */
 
 /*
  * Win32 process functions
@@ -79,9 +79,10 @@ static HINSTANCE hInstNTDll = 0;
 //******************************************************************************
 TEB *WIN32API GetThreadTEB()
 {
-    if(TIBFlatPtr == NULL)
+    if(TIBFlatPtr == NULL) {
+	DebugInt3();
         return 0;
-
+    }
     return (TEB *)*TIBFlatPtr;
 }
 //******************************************************************************
@@ -260,8 +261,10 @@ TEB *InitializeTIB(BOOL fMainThread)
         ProcessPDB.next            = NULL;
         ProcessPDB.winver          = 0xffff; /* to be determined */
         ProcessPDB.server_pid      = (void *)GetCurrentProcessId();
+        ProcessPDB.tls_bits[0]     = 0; //all tls slots are free
+        ProcessPDB.tls_bits[1]     = 0;
 
-        GetSystemTime(&ProcessPDB.creationTime);
+        GetSystemTime(&ProcessPDB.creationTime) ;
 
         /* Initialize the critical section */
         InitializeCriticalSection( &ProcessPDB.crit_section );
