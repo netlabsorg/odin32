@@ -1,4 +1,4 @@
-/* $Id: window.cpp,v 1.133 2003-03-20 13:20:46 sandervl Exp $ */
+/* $Id: window.cpp,v 1.134 2003-04-02 12:58:02 sandervl Exp $ */
 /*
  * Win32 window apis for OS/2
  *
@@ -1776,9 +1776,9 @@ BOOL WIN32API IsWindowUnicode(HWND hwnd)
 /***********************************************************************
  *             SwitchToThisWindow   (USER32.539)
  */
-DWORD WINAPI SwitchToThisWindow( HWND hwnd,  BOOL restore )
+VOID WINAPI SwitchToThisWindow( HWND hwnd,  BOOL restore )
 {
-    return ShowWindow( hwnd, restore ? SW_RESTORE : SW_SHOWMINIMIZED );
+    ShowWindow( hwnd, restore ? SW_RESTORE : SW_SHOWMINIMIZED );
 }
 //******************************************************************************
 //******************************************************************************
