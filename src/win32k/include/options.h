@@ -1,4 +1,4 @@
-/* $Id: options.h,v 1.21 2001-02-11 23:44:38 bird Exp $
+/* $Id: options.h,v 1.22 2001-06-14 01:06:47 bird Exp $
  *
  * Options.
  *
@@ -28,6 +28,27 @@
 #define KF_REV_C            0x0030
 #define KF_REV_D            0x0040
 #define KF_REV_E            0x0050
+#define KF_REV_F            0x0060
+#define KF_REV_G            0x0070
+#define KF_REV_H            0x0080
+#define KF_REV_I            0x0090
+#define KF_REV_J            0x00a0
+#define KF_REV_K            0x00b0
+#define KF_REV_L            0x00c0
+#define KF_REV_M            0x00d0
+#define KF_REV_N            0x00e0
+#define KF_REV_O            0x00f0
+#define KF_REV_P            0x0100
+#define KF_REV_Q            0x0110
+#define KF_REV_R            0x0120
+#define KF_REV_S            0x0130
+#define KF_REV_T            0x0140
+#define KF_REV_U            0x0150
+#define KF_REV_V            0x0160
+#define KF_REV_W            0x0170
+#define KF_REV_X            0x0180
+#define KF_REV_Y            0x0190
+#define KF_REV_Z            0x01a0
 #define KF_REV_ECS          0x0900
 #define KF_DEBUG            0x1000
 #define KF_HAS_DEBUGTYPE    0x2000
