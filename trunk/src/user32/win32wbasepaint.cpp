@@ -1,4 +1,4 @@
-/* $Id: win32wbasepaint.cpp,v 1.3 2000-01-09 16:52:55 sandervl Exp $ */
+/* $Id: win32wbasepaint.cpp,v 1.4 2000-01-09 17:57:50 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -42,6 +42,9 @@
 #include "controls.h"
 #include "initterm.h"
 
+#define SC_ABOUTODIN            (SC_SCREENSAVE+1)
+#define SC_PUTMARK              (SC_SCREENSAVE+2)
+
 #define HAS_DLGFRAME(style,exStyle) \
     (((exStyle) & WS_EX_DLGMODALFRAME) || \
      (((style) & WS_DLGFRAME) && !((style) & WS_THICKFRAME)))
@@ -82,6 +85,8 @@ static HBITMAP hbitmapMaximizeD = 0;
 static HBITMAP hbitmapRestore = 0;
 static HBITMAP hbitmapRestoreD = 0;
 static HMENU   hSysMenu = 0;
+
+static INT (* WINAPI ShellAboutA)(HWND,LPCSTR,LPCSTR,HICON) = 0;
 
 BYTE lpGrayMask[] = { 0xAA, 0xA0,
                       0x55, 0x50,
@@ -1014,11 +1019,27 @@ LONG Win32BaseWindow::HandleSysCommand(WPARAM wParam, POINT *pt32)
 
             hwndTitleBar = OSLibWinGetFrameControlHandle(getOS2FrameWindowHandle(), OSLIB_FID_TITLEBAR);
             OSLibWinQueryWindowRect(hwndTitleBar, &rect, RELATIVE_TO_SCREEN);
-            TrackPopupMenu((OS2SysMenu) ? OS2SysMenu : hSysMenu, TPM_LEFTALIGN|TPM_LEFTBUTTON,
-                           rect.left, rect.bottom+1,
-                           0, getWindowHandle(), NULL);
+            //Need to use Open32 api directly, as we want the msgs to go to the frame window
+            O32_TrackPopupMenu((OS2SysMenu) ? OS2SysMenu : hSysMenu, TPM_LEFTALIGN|TPM_LEFTBUTTON,
+                               rect.left, rect.bottom+1,
+                               0, getOS2FrameWindowHandle(), NULL);
         }
         //MENU_TrackMouseMenuBar( wndPtr, wParam & 0x000F, pt32 );
+        break;
+
+    case SC_SCREENSAVE:
+        if (wParam == SC_ABOUTODIN) {
+            if(ShellAboutA == 0) {
+                HINSTANCE hShell32 = LoadLibraryA("SHELL32");
+                if(hShell32 == 0)
+                    break;
+                *(VOID **)&ShellAboutA = (VOID *)GetProcAddress(hShell32, "ShellAboutA");
+            }
+            ShellAboutA(Win32Hwnd,"Odin","Odin alpha release compiled with IBM VAC++",0);
+        }
+        else
+        if (wParam == SC_PUTMARK)
+            dprintf(("Mark requested by user\n"));
         break;
 
 #if 0
@@ -1039,20 +1060,21 @@ LONG Win32BaseWindow::HandleSysCommand(WPARAM wParam, POINT *pt32)
         WinExec( "taskman.exe", SW_SHOWNORMAL );
         break;
 
-    case SC_SCREENSAVE:
-        if (wParam == SC_ABOUTWINE)
-            ShellAboutA(hwnd, "Odin", WINE_RELEASE_INFO, 0);
-        else
-        if (wParam == SC_PUTMARK)
-            dprintf(("Mark requested by user\n"));
-        break;
-
     case SC_HOTKEY:
     case SC_ARRANGE:
     case SC_NEXTWINDOW:
     case SC_PREVWINDOW:
         break;
 #endif
+    }
+    return 0;
+}
+//******************************************************************************
+//******************************************************************************
+HMENU Win32BaseWindow::getSystemMenu()
+{
+    if(!fOS2Look) {
+        return (OS2SysMenu) ? OS2SysMenu : hSysMenu;
     }
     return 0;
 }
