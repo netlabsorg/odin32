@@ -1,4 +1,4 @@
-/* $Id: winimgres.cpp,v 1.16 1999-09-23 13:53:38 phaller Exp $ */
+/* $Id: winimgres.cpp,v 1.17 1999-09-23 14:12:14 phaller Exp $ */
 
 /*
  * Win32 PE Image class (resource methods)
@@ -379,22 +379,34 @@ HRSRC Win32Pe2LxImage::findResourceA(LPCSTR lpszName, LPSTR lpszType, ULONG lang
 //******************************************************************************
 HRSRC Win32ImageBase::findResourceW(LPWSTR lpszName, LPWSTR lpszType, ULONG lang)
 {
- HRSRC hres;
- char *astring1 = NULL,
-      *astring2 = NULL;
+  HRSRC hres;
+  char *astring1 = NULL,
+       *astring2 = NULL;
+  BOOL fAllocated1 = FALSE;
+  BOOL fAllocated2 = FALSE;
 
-    if(HIWORD(lpszType) != 0) astring1 = UnicodeToAsciiString(lpszType);
-    else                      astring1 = (char *)lpszType;
-    if(HIWORD(lpszName) != 0) astring2 = UnicodeToAsciiString(lpszName);
-    else                      astring2 = (char *)lpszName;
+  if(HIWORD(lpszName) != 0)
+  {
+    astring1 = UnicodeToAsciiString((LPWSTR)lpszName);
+    fAllocated1 = TRUE;
+  }
+  else
+    astring1 = (char *)lpszName;
 
-    hres = (HRSRC) findResourceA(astring1, astring2);
+  if(HIWORD(lpszType) != 0)
+  {
+    astring2 = UnicodeToAsciiString(lpszType);
+    fAllocated2 = TRUE;
+  }
+  else
+    astring2 = (char *)lpszType;
+  hres = (HRSRC) findResourceA(astring1, astring2);
 
-    /* do NOT free untranslated numerical Resource IDs */
-    if(HIWORD(astring1)) FreeAsciiString(astring1);
-    if(HIWORD(astring2)) FreeAsciiString(astring2);
+   /* do NOT free untranslated numerical Resource IDs */
+  if(fAllocated1) FreeAsciiString(astring1);
+  if(fAllocated2) FreeAsciiString(astring2);
 
-    return(hres);
+  return(hres);
 }
 //******************************************************************************
 //TODO:
@@ -414,24 +426,35 @@ ULONG Win32ImageBase::getResourceSizeA(LPCSTR lpszName, LPSTR lpszType, ULONG la
 //******************************************************************************
 ULONG Win32ImageBase::getResourceSizeW(LPCWSTR lpszName, LPWSTR lpszType, ULONG lang)
 {
- char *astring1 = NULL, *astring2 = NULL;
- ULONG ressize;
+  char *astring1 = NULL,
+       *astring2 = NULL;
+  ULONG ressize;
+  BOOL fAllocated1 = FALSE;
+  BOOL fAllocated2 = FALSE;
 
-    if(HIWORD(lpszType) != 0) {
-         	char *resname = UnicodeToAsciiString(lpszType);
-    }
-    else	astring1 = (char *)lpszType;
+  if(HIWORD(lpszName) != 0)
+  {
+    astring1 = UnicodeToAsciiString((LPWSTR)lpszName);
+    fAllocated1 = TRUE;
+  }
+  else
+    astring1 = (char *)lpszName;
 
-    if(HIWORD(lpszName) != 0) {
-         	astring2 = UnicodeToAsciiString((LPWSTR)lpszName);
-    }
-    else	astring2 = (char *)lpszName;
+  if(HIWORD(lpszType) != 0)
+  {
+    astring2 = UnicodeToAsciiString(lpszType);
+    fAllocated2 = TRUE;
+  }
+  else
+    astring2 = (char *)lpszType;
 
-    ressize =  getResourceSizeA(astring1, astring2, lang);
-    if(astring1) FreeAsciiString(astring1);
-    if(astring2) FreeAsciiString(astring2);
+  ressize =  getResourceSizeA(astring1, astring2, lang);
 
-    return(ressize);
+  /* do NOT free untranslated numerical Resource IDs */
+  if(fAllocated1) FreeAsciiString(astring1);
+  if(fAllocated2) FreeAsciiString(astring2);
+
+  return(ressize);
 }
 //******************************************************************************
 //******************************************************************************
