@@ -1,4 +1,4 @@
-/* $Id: hmfile.cpp,v 1.39 2003-02-04 11:28:57 sandervl Exp $ */
+/* $Id: hmfile.cpp,v 1.40 2003-02-18 18:48:54 sandervl Exp $ */
 
 /*
  * File IO win32 apis
@@ -533,6 +533,7 @@ BOOL HMDeviceFileClass::ReadFile(PHMHANDLEDATA pHMHandleData,
            nrpages++;
 
        map->commitPage(offset & ~0xfff, TRUE, nrpages);
+       map->Release();
   }
   else lpRealBuf = (LPVOID)lpBuffer;
 
@@ -620,6 +621,7 @@ BOOL HMDeviceFileClass::WriteFile(PHMHANDLEDATA pHMHandleData,
            nrpages++;
  
        map->commitPage(offset & ~0xfff, TRUE, nrpages);
+       map->Release();
   }
   else lpRealBuf = (LPVOID)lpBuffer;
 

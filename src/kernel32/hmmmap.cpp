@@ -1,4 +1,4 @@
-/* $Id: hmmmap.cpp,v 1.20 2002-05-20 13:47:58 sandervl Exp $ */
+/* $Id: hmmmap.cpp,v 1.21 2003-02-18 18:48:54 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -73,7 +73,7 @@ DWORD HMDeviceMemMapClass::CreateFileMapping(PHMHANDLEDATA         pHMHandleData
 
   map = Win32MemMap::findMap((LPSTR)name);
   if(map != NULL) {
-	dprintf(("CreateFileMappingA: duplicating map %s!", name));
+        dprintf(("CreateFileMappingA: duplicating map %s!", name));
 
   	DWORD protflags = map->getProtFlags();
   	switch(protect) {
@@ -93,15 +93,36 @@ DWORD HMDeviceMemMapClass::CreateFileMapping(PHMHANDLEDATA         pHMHandleData
 	//TODO:
 	//Is it allowed to open an existing view with different flags?
         //(i.e. write access to readonly object)
-	dprintf(("CreateFileMapping: duplicate handle of existing file mapping %s", name));
+        // -> for the same file handle, yes
 
         //if map already exists, we must create a new handle to the existing
         //map object and return ERROR_ALREADY_EXISTS
-  	map->AddRef();
         pHMHandleData->dwUserData = (ULONG)map;
         pHMHandleData->dwInternalType = HMTYPE_MEMMAP;
+
+        //findMap already incremented the reference count, so we simply don't
+        //release it here
         return ERROR_ALREADY_EXISTS;
   }
+  
+#if 0
+  //We reuse the original memory map object if another one is created for
+  //the same file handle
+  //TODO: different file handles can exist for the same file (DuplicateHandle)
+  map = Win32MemMap::findMapByFile(hFile);
+  if(map) {
+        dprintf(("CreateFileMappingA: duplicating map with file %x!", hFile));
+
+        //if map already exists, we must create a new handle to the existing
+        //map object
+        pHMHandleData->dwUserData = (ULONG)map;
+        pHMHandleData->dwInternalType = HMTYPE_MEMMAP;
+
+        //findMap already incremented the reference count, so we simply don't
+        //release it here
+        return ERROR_SUCCESS;
+  }
+#endif
   else {
 	map = new Win32MemMap(hFile, size_low, protect, (LPSTR)name);
 
@@ -130,6 +151,7 @@ DWORD HMDeviceMemMapClass::OpenFileMapping(PHMHANDLEDATA         pHMHandleData,
 {
  Win32MemMap *map;
  DWORD        protflags;
+ DWORD        ret;
 
   if(name == NULL)
 	return ERROR_INVALID_PARAMETER;
@@ -143,22 +165,33 @@ DWORD HMDeviceMemMapClass::OpenFileMapping(PHMHANDLEDATA         pHMHandleData,
   switch(access) {
   case FILE_MAP_WRITE:
   case FILE_MAP_ALL_ACCESS:
-	if(!(protflags & (PAGE_WRITECOPY|PAGE_READWRITE)))
-		return ERROR_INVALID_PARAMETER;
+	if(!(protflags & (PAGE_WRITECOPY|PAGE_READWRITE))) {
+            ret = ERROR_INVALID_PARAMETER;
+            goto fail;
+        }
 	break;
   case FILE_MAP_READ:
-	if(!(protflags & (PAGE_READWRITE | PAGE_READONLY)))
-		return ERROR_INVALID_PARAMETER;
+	if(!(protflags & (PAGE_READWRITE | PAGE_READONLY))) {
+            ret = ERROR_INVALID_PARAMETER;
+            goto fail;
+        }
 	break;
   case FILE_MAP_COPY:
-	if(!(protflags & PAGE_WRITECOPY))
-		return ERROR_INVALID_PARAMETER;
+	if(!(protflags & PAGE_WRITECOPY)) {
+            ret = ERROR_INVALID_PARAMETER;
+            goto fail;
+        }
 	break;
   }
-  map->AddRef();
+  //findMap already incremented the reference count, so we simply don't
+  //release it here
   pHMHandleData->dwUserData = (ULONG)map;
   pHMHandleData->dwInternalType = HMTYPE_MEMMAP;
   return NO_ERROR;
+
+fail:
+  map->Release();
+  return ret;
 }
 //******************************************************************************
 //******************************************************************************
