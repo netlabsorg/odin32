@@ -1,4 +1,4 @@
-; $Id: imm32os2.def,v 1.1 2004-04-28 09:02:29 sandervl Exp $
+; $Id: imm32os2.def,v 1.2 2004-05-24 08:51:00 sandervl Exp $
 
 LIBRARY IMM32OS2 INITINSTANCE
 DESCRIPTION 'Odin32 System DLL - IMM32'

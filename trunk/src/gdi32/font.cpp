@@ -1,4 +1,4 @@
-/* $Id: font.cpp,v 1.35 2004-01-11 11:42:11 sandervl Exp $ */
+/* $Id: font.cpp,v 1.36 2004-05-24 08:50:31 sandervl Exp $ */
 
 /*
  * GDI32 font apis
@@ -318,6 +318,11 @@ HFONT WIN32API CreateFontIndirectA(const LOGFONTA* lplf)
 
         strcpy( afont.lfFaceName, "WarpSans Combined" );
     }
+
+#if 1
+    if( afont.lfCharSet == ANSI_CHARSET )
+        afont.lfCharSet = DEFAULT_CHARSET;
+#endif
   }
 
   dprintf(("GDI32: CreateFontIndirectA\n"));
@@ -900,33 +905,33 @@ LPWSTR FONT_mbtowc(HDC hdc, LPCSTR str, INT count, INT *plenW, UINT *pCP)
         cp = csi.ciACP;
     else {
         switch(charset) {
-	case OEM_CHARSET:
-	    cp = GetOEMCP();
-	    break;
-	case DEFAULT_CHARSET:
-	    cp = GetACP();
-	    break;
+    case OEM_CHARSET:
+        cp = GetOEMCP();
+        break;
+    case DEFAULT_CHARSET:
+        cp = GetACP();
+        break;
 
-	case VISCII_CHARSET:
-	case TCVN_CHARSET:
-	case KOI8_CHARSET:
-	case ISO3_CHARSET:
-	case ISO4_CHARSET:
-	  /* FIXME: These have no place here, but because x11drv
-	     enumerates fonts with these (made up) charsets some apps
-	     might use them and then the FIXME below would become
-	     annoying.  Now we could pick the intended codepage for
-	     each of these, but since it's broken anyway we'll just
-	     use CP_ACP and hope it'll go away...
-	  */
-	    cp = CP_ACP;
-	    break;
+    case VISCII_CHARSET:
+    case TCVN_CHARSET:
+    case KOI8_CHARSET:
+    case ISO3_CHARSET:
+    case ISO4_CHARSET:
+      /* FIXME: These have no place here, but because x11drv
+         enumerates fonts with these (made up) charsets some apps
+         might use them and then the FIXME below would become
+         annoying.  Now we could pick the intended codepage for
+         each of these, but since it's broken anyway we'll just
+         use CP_ACP and hope it'll go away...
+      */
+        cp = CP_ACP;
+        break;
 
 
-	default:
-	    dprintf(("Can't find codepage for charset %d\n", charset));
-	    break;
-	}
+    default:
+        dprintf(("Can't find codepage for charset %d\n", charset));
+        break;
+    }
     }
 
     dprintf(("cp == %d\n", cp));
@@ -934,12 +939,12 @@ LPWSTR FONT_mbtowc(HDC hdc, LPCSTR str, INT count, INT *plenW, UINT *pCP)
     if(count == -1) count = strlen(str);
     if(cp != CP_SYMBOL) {
         lenW = MultiByteToWideChar(cp, 0, str, count, NULL, 0);
-	strW = (WCHAR*)HeapAlloc(GetProcessHeap(), 0, (lenW + 1) * sizeof(WCHAR));
-	MultiByteToWideChar(cp, 0, str, count, strW, lenW);
+    strW = (WCHAR*)HeapAlloc(GetProcessHeap(), 0, (lenW + 1) * sizeof(WCHAR));
+    MultiByteToWideChar(cp, 0, str, count, strW, lenW);
     } else {
         lenW = count;
-	strW = (WCHAR*)HeapAlloc(GetProcessHeap(), 0, (lenW + 1) * sizeof(WCHAR));
-	for(i = 0; i < count; i++) strW[i] = (BYTE)str[i];
+    strW = (WCHAR*)HeapAlloc(GetProcessHeap(), 0, (lenW + 1) * sizeof(WCHAR));
+    for(i = 0; i < count; i++) strW[i] = (BYTE)str[i];
     }
     strW[lenW] = '\0';
     dprintf(("mapped %s -> %ls\n", str, strW));
@@ -952,7 +957,7 @@ LPWSTR FONT_mbtowc(HDC hdc, LPCSTR str, INT count, INT *plenW, UINT *pCP)
  * GetGlyphIndicesA [GDI32.@]
  */
 DWORD WINAPI GetGlyphIndicesA(HDC hdc, LPCSTR lpstr, INT count,
-			      LPWORD pgi, DWORD flags)
+                  LPWORD pgi, DWORD flags)
 {
     DWORD ret;
     WCHAR *lpstrW;
@@ -972,7 +977,7 @@ DWORD WINAPI GetGlyphIndicesA(HDC hdc, LPCSTR lpstr, INT count,
  * GetGlyphIndicesW [GDI32.@]
  */
 DWORD WINAPI GetGlyphIndicesW(HDC hdc, LPCWSTR lpstr, INT count,
-			      LPWORD pgi, DWORD flags)
+                  LPWORD pgi, DWORD flags)
 {
     DWORD ret;
 
@@ -981,7 +986,7 @@ DWORD WINAPI GetGlyphIndicesW(HDC hdc, LPCWSTR lpstr, INT count,
 
     if(!hdc) return GDI_ERROR;
 
-    ret = FT2Module.Ft2GetGlyphIndices(hdc, lpstr, count , pgi, flags); 
+    ret = FT2Module.Ft2GetGlyphIndices(hdc, lpstr, count , pgi, flags);
     if(ret != GDI_ERROR) {
         for(int i=0;i<ret;i++) {
             dprintf(("GetGlyphIndices: %c (%x)-> %d", lpstr[i], lpstr[i], pgi[i]));
@@ -1006,26 +1011,26 @@ DWORD WINAPI GetGlyphOutlineA( HDC hdc, UINT uChar, UINT fuFormat,
         p = FONT_mbtowc(hdc, (char*)&uChar, 1, NULL, NULL);
         if (p)
         {
-	    c = p[0];
-	}
-	else
-	{
+        c = p[0];
+    }
+    else
+    {
             SetLastError(ERROR_NOT_ENOUGH_MEMORY);
-	    return GDI_ERROR;
-	}
+        return GDI_ERROR;
+    }
     }
     else
     {
         c = uChar;
     }
-    
+
     ret = GetGlyphOutlineW (hdc, c, fuFormat, lpgm, cbBuffer, lpBuffer, lpmat2);
-    
+
     if (p != NULL)
     {
         HeapFree (GetProcessHeap(), 0, p);
     }
-    
+
     return ret;
 }
 

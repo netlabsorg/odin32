@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.13 2004-04-27 08:28:45 sandervl Exp $
+# $Id: makefile,v 1.14 2004-05-24 08:51:00 sandervl Exp $
 
 #
 # Odin32 API
@@ -10,6 +10,7 @@
 #
 # Compiler, tools, and interference rules.
 #
+WRC_PREFIX_RESOURCE=1
 !include ../../makefile.inc
 
 
@@ -17,9 +18,11 @@
 # Object files. Prefix with OBJDIR and one space before the '\'.
 #
 OBJS = \
+$(OBJDIR)\im32.obj \
 $(OBJDIR)\imm32.obj \
 $(OBJDIR)\imm32rsrc.obj \
-$(DLLENTRY)
+$(OBJDIR)\initterm.obj \
+$(OBJDIR)\initimm32.obj
 
 
 #
@@ -27,6 +30,8 @@ $(DLLENTRY)
 #
 LIBS = \
 $(ODIN32_LIB)/kernel32.lib \
+$(ODIN32_LIB)/user32.lib \
+$(ODIN32_LIB)/libwrap.lib \
 $(ODIN32_LIB)/$(ODINCRT).lib \
 OS2386.LIB \
 $(RTLLIB_O)
@@ -35,7 +40,7 @@ $(RTLLIB_O)
 #
 # Target name - name of the dll without extention and path.
 #
-TARGET = imm32os2
+TARGET = imm32
 
 
 #
