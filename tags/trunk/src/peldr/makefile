@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.19 2000-12-02 23:57:55 bird Exp $
+# $Id: makefile,v 1.20 2001-08-04 14:14:31 bird Exp $
 
 #
 # Odin32 API
@@ -20,7 +20,7 @@
 #
 _all: all
 
-all clean:  # add all common rules here
+$(COMMONRULES:dep lib=):
     $(MAKE_CMD) -f pe.mak $@
     $(MAKE_CMD) -f pec.mak $@
 
