@@ -1,4 +1,4 @@
-/* $Id: shellord.cpp,v 1.9 2000-08-02 17:53:33 bird Exp $ */
+/* $Id: shellord.cpp,v 1.10 2000-08-18 02:01:22 phaller Exp $ */
 /*
  * The parameters of many functions changes between different OS versions
  * (NT uses Unicode strings, 95 uses ASCII strings)
@@ -50,59 +50,6 @@ ODINDEBUGCHANNEL(shell32-shellord)
 
 
 /*************************************************************************
- * SHChangeNotifyRegister                       [SHELL32.2]
- *
- * NOTES
- *   Idlist is an array of structures and Count specifies how many items in the array
- *   (usually just one I think).
- */
-DWORD WINAPI
-SHChangeNotifyRegister(
-    HWND hwnd,
-    LONG events1,
-    LONG events2,
-    DWORD msg,
-    int count,
-    IDSTRUCT *idlist)
-{
-        FIXME("SHChangeNotifyRegister: (0x%04x,0x%08lx,0x%08lx,0x%08lx,0x%08x,%p):stub.\n",
-                hwnd,events1,events2,msg,count,idlist);
-        return 0;
-}
-/*************************************************************************
- * SHChangeNotifyDeregister                     [SHELL32.4]
- */
-DWORD WINAPI
-SHChangeNotifyDeregister(LONG x1)
-{       FIXME("(0x%08lx):stub.\n",x1);
-        return 0;
-}
-/*************************************************************************
- * NTSHChangeNotifyRegister                     [SHELL32.640]
- * NOTES
- *   Idlist is an array of structures and Count specifies how many items in the array
- *   (usually just one I think).
- */
-DWORD WINAPI NTSHChangeNotifyRegister(
-    HWND hwnd,
-    LONG events1,
-    LONG events2,
-    DWORD msg,
-    int count,
-    IDSTRUCT *idlist)
-{       FIXME("(0x%04x,0x%08lx,0x%08lx,0x%08lx,0x%08x,%p):stub.\n",
-                hwnd,events1,events2,msg,count,idlist);
-        return 0;
-}
-/*************************************************************************
- * NTSHChangeNotifyDeregister                   [SHELL32.641]
- */
-DWORD WINAPI NTSHChangeNotifyDeregister(LONG x1)
-{       FIXME("(0x%08lx):stub.\n",x1);
-        return 0;
-}
-
-/*************************************************************************
  * ParseField                                   [SHELL32.58]
  *
  */
@@ -129,26 +76,28 @@ DWORD WINAPI ParseFieldA(LPCSTR src, DWORD field, LPSTR dst, DWORD len)
         return TRUE;
 }
 
-/*************************************************************************
- * PickIconDlg                                  [SHELL32.62]
- *
- */
-DWORD WINAPI PickIconDlg(DWORD x,DWORD y,DWORD z,DWORD a)
-{       FIXME("PickIconDlg(%08lx,%08lx,%08lx,%08lx):stub.\n",x,y,z,a);
-        return 0xffffffff;
-}
 
 /*************************************************************************
  * GetFileNameFromBrowse                        [SHELL32.63]
  *
  */
-DWORD WINAPI GetFileNameFromBrowse(HWND howner, LPSTR targetbuf, DWORD len, DWORD x, LPCSTR suffix, LPCSTR y, LPCSTR cmd)
-{       FIXME("(%04x,%p,%ld,%08lx,%s,%s,%s):stub.\n",
-            howner,targetbuf,len,x,suffix,y,cmd);
+ODINFUNCTION7(BOOL,   GetFileNameFromBrowse,
+              HWND,   hwndOwner,
+              LPSTR,  lpstrFile,
+              DWORD,  nMaxFile,
+              LPCSTR, lpstrInitialDir,
+              LPCSTR, lpstrDefExt,
+              LPCSTR, lpstrFIlter,
+              LPCSTR, lpstrTitle)
+{
+  dprintf(("SHELL32: GetFileNameFromBrowse not implemented"));
+
     /* puts up a Open Dialog and requests input into targetbuf */
     /* OFN_HIDEREADONLY|OFN_NOCHANGEDIR|OFN_FILEMUSTEXIST|OFN_unknown */
-    lstrcpyA(targetbuf,"x:\\dummy.exe");
-    return 1;
+  lstrcpynA(lpstrFile,
+            "x:\\dummy.exe",
+            nMaxFile);
+  return 1;
 }
 
 /*************************************************************************
@@ -222,63 +171,15 @@ void WINAPI SHGetSettings(LPSHELLFLAGSTATE lpsfs, DWORD dwMask, DWORD dwx)
  *    shell view to re-sort the item list. lParam identifies the column
  *    that was clicked.
  */
-int WINAPI SHShellFolderView_Message(HWND hwndCabinet,UINT uMsg,LPARAM lParam)
-{ FIXME("%04x %08ux %08lx stub\n",hwndCabinet,uMsg,lParam);
+ODINFUNCTION3(int, SHShellFolderView_Message,
+              HWND, hwndCabinet,
+              DWORD, dwMessage,
+              DWORD, dwParam)
+{
+  dprintf(("SHELL32: SHShellFolderView_Message not implemented"));
   return 0;
 }
 
-/*************************************************************************
- * OleStrToStrN                                 [SHELL32.78]
- */
-BOOL WINAPI OleStrToStrNA (LPSTR lpStr, INT nStr, LPCWSTR lpOle, INT nOle)
-{
-        TRACE("%p %x %s %x\n", lpStr, nStr, debugstr_w(lpOle), nOle);
-        return WideCharToMultiByte (0, 0, lpOle, nOle, lpStr, nStr, NULL, NULL);
-}
-
-BOOL WINAPI OleStrToStrNW (LPWSTR lpwStr, INT nwStr, LPCWSTR lpOle, INT nOle)
-{
-        TRACE("%p %x %s %x\n", lpwStr, nwStr, debugstr_w(lpOle), nOle);
-
-        if (lstrcpynW ( lpwStr, lpOle, nwStr))
-        { return lstrlenW (lpwStr);
-        }
-        return 0;
-}
-
-BOOL WINAPI OleStrToStrNAW (LPVOID lpOut, INT nOut, LPCVOID lpIn, INT nIn)
-{
-        if (VERSION_OsIsUnicode())
-          return OleStrToStrNW ((LPWSTR)lpOut, nOut, (LPCWSTR)lpIn, nIn);
-        return OleStrToStrNA ((LPSTR)lpOut, nOut, (LPCWSTR)lpIn, nIn);
-}
-
-/*************************************************************************
- * StrToOleStrN                                 [SHELL32.79]
- *  lpMulti, nMulti, nWide [IN]
- *  lpWide [OUT]
- */
-BOOL WINAPI StrToOleStrNA (LPWSTR lpWide, INT nWide, LPCSTR lpStrA, INT nStr)
-{
-        TRACE("%p %x %s %x\n", lpWide, nWide, lpStrA, nStr);
-        return MultiByteToWideChar (0, 0, lpStrA, nStr, lpWide, nWide);
-}
-BOOL WINAPI StrToOleStrNW (LPWSTR lpWide, INT nWide, LPCWSTR lpStrW, INT nStr)
-{
-        TRACE("%p %x %s %x\n", lpWide, nWide, debugstr_w(lpStrW), nStr);
-
-        if (lstrcpynW (lpWide, lpStrW, nWide))
-        { return lstrlenW (lpWide);
-        }
-        return 0;
-}
-
-BOOL WINAPI StrToOleStrNAW (LPWSTR lpWide, INT nWide, LPCVOID lpStr, INT nStr)
-{
-        if (VERSION_OsIsUnicode())
-          return StrToOleStrNW (lpWide, nWide, (LPWSTR)lpStr, nStr);
-        return StrToOleStrNA (lpWide, nWide, (LPSTR)lpStr, nStr);
-}
 
 /*************************************************************************
  * RegisterShellHook                            [SHELL32.181]
@@ -290,8 +191,12 @@ BOOL WINAPI StrToOleStrNAW (LPWSTR lpWide, INT nWide, LPCVOID lpStr, INT nStr)
  * NOTES
  *     exported by ordinal
  */
-void WINAPI RegisterShellHook(HWND hwnd, DWORD y) {
-    FIXME("(0x%08x,0x%08lx):stub.\n",hwnd,y);
+ODINFUNCTION2(BOOL,  RegisterShellHook,
+              HWND,  hWnd,
+              DWORD, dwType)
+{
+  dprintf(("SHELL32: RegisterShellHook not implemented"));
+  return FALSE;
 }
 /*************************************************************************
  * ShellMessageBoxW                             [SHELL32.182]
@@ -357,145 +262,6 @@ ShellMessageBoxA(HMODULE hmod,HWND hwnd,DWORD idText,DWORD idTitle,DWORD uType,L
         return MessageBoxA(hwnd,szTemp,pszTitle,uType);
 }
 
-/*************************************************************************
- * SHRestricted                         [SHELL32.100]
- *
- * walks through policy table, queries <app> key, <type> value, returns
- * queried (DWORD) value, and caches it between called to SHInitRestricted
- * to prevent unnecessary registry access.
- *
- * NOTES
- *     exported by ordinal
- *
- * REFERENCES:
- *     MS System Policy Editor
- *     98Lite 2.0 (which uses many of these policy keys) http://www.98lite.net/
- *     "The Windows 95 Registry", by John Woram, 1996 MIS: Press
- */
-DWORD WINAPI SHRestricted (DWORD pol) {
-        char regstr[256];
-        HKEY    xhkey;
-        DWORD   retval, polidx, i, datsize = 4;
-
-        TRACE("(%08lx)\n",pol);
-
-        polidx = -1;
-
-        /* scan to see if we know this policy ID */
-        for (i = 0; i < SHELL_MAX_POLICIES; i++)
-        {
-             if (pol == sh32_policy_table[i].polflags)
-             {
-                 polidx = i;
-                 break;
-             }
-        }
-
-        if (polidx == -1)
-        {
-            /* we don't know this policy, return 0 */
-            TRACE("unknown policy: (%08lx)\n", pol);
-                return 0;
-        }
-
-        /* we have a known policy */
-        lstrcpyA(regstr, "Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\");
-        lstrcatA(regstr, sh32_policy_table[polidx].appstr);
-
-        /* first check if this policy has been cached, return it if so */
-        if (sh32_policy_table[polidx].cache != SHELL_NO_POLICY)
-        {
-            return sh32_policy_table[polidx].cache;
-        }
-
-        /* return 0 and don't set the cache if any registry errors occur */
-        retval = 0;
-        if (RegOpenKeyA(HKEY_CURRENT_USER, regstr, &xhkey) == ERROR_SUCCESS)
-        {
-            if (RegQueryValueExA(xhkey, sh32_policy_table[polidx].keystr, NULL, NULL, (LPBYTE)&retval, &datsize) == ERROR_SUCCESS)
-            {
-                sh32_policy_table[polidx].cache = retval;
-            }
-
-        RegCloseKey(xhkey);
-}
-
-        return retval;
-}
-
-/*************************************************************************
- *      SHInitRestricted                         [SHELL32.244]
- *
- * Win98+ by-ordinal only routine called by Explorer and MSIE 4 and 5.
- * Inits the policy cache used by SHRestricted to avoid excess
- * registry access.
- *
- * INPUTS
- * Two inputs: one is a string or NULL.  If non-NULL the pointer
- * should point to a string containing the following exact text:
- * "Software\Microsoft\Windows\CurrentVersion\Policies".
- * The other input is unused.
- *
- * NOTES
- * If the input is non-NULL and does not point to a string containing
- * that exact text the routine will do nothing.
- *
- * If the text does match or the pointer is NULL, then the routine
- * will init SHRestricted()'s policy cache to all 0xffffffff and
- * returns 0xffffffff as well.
- *
- * I haven't yet run into anything calling this with inputs other than
- * (NULL, NULL), so I may have the inputs reversed.
- */
-
-BOOL WINAPI SHInitRestricted(LPSTR inpRegKey, LPSTR parm2)
-{
-     int i;
-
-     dprintf(("SHELL32:SHELLORD:SHInitRestricted(%p, %p)\n", inpRegKey, parm2));
-
-     /* first check - if input is non-NULL and points to the secret
-        key string, then pass.  Otherwise return 0.
-     */
-
-     if (inpRegKey != (LPSTR)NULL)
-     {
-         if (lstrcmpiA(inpRegKey, "Software\\Microsoft\\Windows\\CurrentVersion\\Policies"))
-         {
-             /* doesn't match, fail */
-             return 0;
-         }
-     }
-
-     /* check passed, init all policy cache entries with SHELL_NO_POLICY */
-     for (i = 0; i < SHELL_MAX_POLICIES; i++)
-     {
-          sh32_policy_table[i].cache = SHELL_NO_POLICY;
-     }
-
-     return SHELL_NO_POLICY;
-}
-
-/*************************************************************************
- * SHCreateDirectory                            [SHELL32.165]
- *
- * NOTES
- *  exported by ordinal
- *  not sure about LPSECURITY_ATTRIBUTES
- */
-DWORD WINAPI SHCreateDirectory(LPSECURITY_ATTRIBUTES sec,LPCSTR path) {
-        TRACE("(%p,%s):stub.\n",sec,path);
-        if (CreateDirectoryA(path,sec))
-                return TRUE;
-        /* SHChangeNotify(8,1,path,0); */
-        return FALSE;
-#if 0
-        if (SHELL32_79(path,(LPVOID)x))
-                return 0;
-        FIXME("(%08lx,%s):stub.\n",x,path);
-        return 0;
-#endif
-}
 
 /*************************************************************************
  * SHFree                                       [SHELL32.195]
@@ -505,26 +271,27 @@ DWORD WINAPI SHCreateDirectory(LPSECURITY_ATTRIBUTES sec,LPCSTR path) {
  *     exported by ordinal
  */
 #define MEM_DEBUG 0
-DWORD WINAPI SHFree(LPVOID x)
+void WINAPI SHFree(LPVOID x)
 {
 #if MEM_DEBUG
-        WORD len = *(LPWORD)(x-2);
+  WORD len = *(LPWORD)(x-2);
 
-        if ( *(LPWORD)(x+len) != 0x7384)
-          ERR("MAGIC2!\n");
+  if ( *(LPWORD)(x+len) != 0x7384)
+    ERR("MAGIC2!\n");
 
-        if ( (*(LPWORD)(x-4)) != 0x8271)
-          ERR("MAGIC1!\n");
-        else
-          memset(x-4, 0xde, len+6);
+  if ( (*(LPWORD)(x-4)) != 0x8271)
+    ERR("MAGIC1!\n");
+  else
+    memset(x-4, 0xde, len+6);
 
-        TRACE("%p len=%u\n",x, len);
+  TRACE("%p len=%u\n",x, len);
 
-        x -= 4;
+  x -= 4;
 #else
-        TRACE("%p\n",x);
+  TRACE("%p\n",x);
 #endif
-        return HeapFree(GetProcessHeap(), 0, x);
+  
+  HeapFree(GetProcessHeap(), 0, x);
 }
 
 /*************************************************************************
@@ -561,10 +328,12 @@ LPVOID WINAPI SHAlloc(DWORD len)
  * NOTES
  *     exported by ordinal
  */
-DWORD WINAPI SHRegisterDragDrop(HWND hWnd,IDropTarget * pDropTarget)
+ODINFUNCTION2(HRESULT,      SHRegisterDragDrop,
+              HWND,         hWnd,
+              LPDROPTARGET, lpDropTarget)
 {
-        FIXME("(0x%08x,%p):stub.\n", hWnd, pDropTarget);
-        return     RegisterDragDrop(hWnd, pDropTarget);
+  dprintf(("SHELL32: SHRegisterDragDrop not correctly implemented"));
+  return     RegisterDragDrop(hWnd, lpDropTarget);
 }
 
 /*************************************************************************
@@ -573,9 +342,11 @@ DWORD WINAPI SHRegisterDragDrop(HWND hWnd,IDropTarget * pDropTarget)
  * NOTES
  *     exported by ordinal
  */
-DWORD WINAPI SHRevokeDragDrop(DWORD x) {
-    FIXME("(0x%08lx):stub.\n",x);
-    return 0;
+ODINFUNCTION1(HRESULT, SHRevokeDragDrop,
+              HWND,    hWnd)
+{
+  dprintf(("SHELL32: SHRevokeDragDrop not implemented"));
+  return 0;
 }
 
 /*************************************************************************
@@ -584,51 +355,31 @@ DWORD WINAPI SHRevokeDragDrop(DWORD x) {
  * NOTES
  *     exported by ordinal
  */
-DWORD WINAPI SHDoDragDrop(DWORD u, DWORD v, DWORD w, DWORD x, DWORD y, DWORD z) {
-    FIXME("(0x%08lx 0x%08lx 0x%08lx 0x%08lx 0x%08lx 0x%08lx):stub.\n",u,v,w,x,y,z);
-    return 0;
+ODINFUNCTION5(HRESULT,      SHDoDragDrop,
+              HWND,         hWnd,
+              LPDATAOBJECT, lpDataObject,
+              LPDROPSOURCE, lpDropSource,
+              DWORD,        dwOKEffect,
+              LPDWORD,      pdwEffect)
+{
+  dprintf(("SHELL32: SHDoDragDrop not implemented"));
+  return 0;
 }
 
-/*************************************************************************
- * RunFileDlg                                   [SHELL32.61]
- *
- * NOTES
- *     Original name: RunFileDlg (exported by ordinal)
- */
-DWORD WINAPI
-RunFileDlg (HWND hwndOwner, DWORD dwParam1, DWORD dwParam2,
-            LPSTR lpszTitle, LPSTR lpszPrompt, UINT uFlags)
-{
-    FIXME("(0x%08x 0x%lx 0x%lx \"%s\" \"%s\" 0x%x):stub.\n",
-           hwndOwner, dwParam1, dwParam2, lpszTitle, lpszPrompt, uFlags);
-    return 0;
-}
-
-/*************************************************************************
- * ExitWindowsDialog                            [SHELL32.60]
- *
- * NOTES
- *     exported by ordinal
- */
-void WINAPI ExitWindowsDialog (HWND hWndOwner)
-{
-        TRACE("(0x%08x)\n", hWndOwner);
-        if (MessageBoxA( hWndOwner, "Do you want to exit Odin?", "Shutdown", MB_YESNO|MB_ICONQUESTION) == IDYES)
-        { SendMessageA ( hWndOwner, WM_QUIT, 0, 0);
-        }
-}
 
 /*************************************************************************
  * ArrangeWindows                               [SHELL32.184]
  *
  */
-DWORD WINAPI
-ArrangeWindows (DWORD dwParam1, DWORD dwParam2, DWORD dwParam3,
-                DWORD dwParam4, DWORD dwParam5)
+ODINFUNCTION5(WORD,        ArrangeWindows,
+              HWND,        hwndParent,
+              DWORD,       dwReserved,
+              LPCRECT,     lpRect,
+              WORD,        cKids,
+              CONST HWND*, lpKids)
 {
-    FIXME("(0x%lx 0x%lx 0x%lx 0x%lx 0x%lx):stub.\n",
-           dwParam1, dwParam2, dwParam3, dwParam4, dwParam5);
-    return 0;
+  dprintf(("SHELL32: ArrangeWindows not implemented"));
+  return 0;
 }
 
 /*************************************************************************
@@ -664,36 +415,6 @@ DWORD WINAPI SHAddToRecentDocs (UINT uFlags,LPCVOID pv)
         }
   return 0;
 }
-/*************************************************************************
- * SHFileOperation                              [SHELL32.242]
- *
- */
-DWORD WINAPI SHFileOperationAW(DWORD x)
-{       FIXME("0x%08lx stub\n",x);
-        return 0;
-
-}
-
-/*************************************************************************
- * SHFileOperationA                             [SHELL32.243]
- *
- * NOTES
- *     exported by name
- */
-DWORD WINAPI SHFileOperationA (LPSHFILEOPSTRUCTA lpFileOp)
-{ FIXME("(%p):stub.\n", lpFileOp);
-  return 1;
-}
-/*************************************************************************
- * SHFileOperationW                             [SHELL32.244]
- *
- * NOTES
- *     exported by name
- */
-DWORD WINAPI SHFileOperationW (LPSHFILEOPSTRUCTW lpFileOp)
-{ FIXME("(%p):stub.\n", lpFileOp);
-  return 1;
-}
 
 /*************************************************************************
  * SHChangeNotify                               [SHELL32.239]
@@ -715,26 +436,23 @@ DWORD WINAPI SHChangeNotify (
  * NOTES
  *  see IShellFolder::CreateViewObject
  */
-HRESULT WINAPI SHCreateShellFolderViewEx(
-  LPSHELLVIEWDATA psvcbi, /*[in ] shelltemplate struct*/
-  LPVOID* ppv)            /*[out] IShellView pointer*/
+ODINFUNCTION2(HRESULT, SHCreateShellFolderViewEx,
+              LPCSHELLFOLDERVIEWINFO, pshfvi,
+              LPSHELLVIEW*, ppshv)
 {
-        IShellView * psf;
-        HRESULT hRes;
+  IShellView * psf;
+  HRESULT hRes;
 
-        TRACE("sf=%p pidl=%p cb=%p mode=0x%08lx parm=0x%08lx\n",
-          psvcbi->pShellFolder, psvcbi->pidl, psvcbi->pCallBack, psvcbi->viewmode, psvcbi->dwUserParam);
+  psf = IShellView_Constructor(pshfvi->pshf);
 
-        psf = IShellView_Constructor(psvcbi->pShellFolder);
+  if (!psf)
+    return E_OUTOFMEMORY;
 
-        if (!psf)
-          return E_OUTOFMEMORY;
+  IShellView_AddRef(psf);
+  hRes = IShellView_QueryInterface(psf, &IID_IShellView, (LPVOID *)ppshv);
+  IShellView_Release(psf);
 
-        IShellView_AddRef(psf);
-        hRes = IShellView_QueryInterface(psf, &IID_IShellView, (LPVOID *)ppv);
-        IShellView_Release(psf);
-
-        return hRes;
+  return hRes;
 }
 /*************************************************************************
  *  SHWinHelp                                   [SHELL32.127]
@@ -830,7 +548,7 @@ BOOL WINAPI ShellExecuteExA (LPSHELLEXECUTEINFOA sei)
 	      HGLOBAL hmem = SHAllocShared ( (LPITEMIDLIST)sei->lpIDList, ILGetSize((LPITEMIDLIST)sei->lpIDList), 0);
 	      pv = SHLockShared(hmem,0);
 	      sprintf(szPidl,":%p",pv );
-	      SHUnlockShared((HANDLE)pv);
+	      SHUnlockShared(pv);
 
 	      gap = strlen(szPidl);
 	      len = strlen(pos)-2;
@@ -946,9 +664,9 @@ HRESULT WINAPI SHGetInstanceExplorer (LPUNKNOWN * lpUnknown)
  * NOTES
  *  exported by name
  */
-HRESULT WINAPI SHFreeUnusedLibraries (void)
-{       FIXME("stub\n");
-        return TRUE;
+ODINPROCEDURE0(SHFreeUnusedLibraries)
+{ 
+  dprintf(("SHELL32: SHFreeUnusedLibraries not implemented"));
 }
 /*************************************************************************
  * DAD_SetDragImage                             [SHELL32.136]
@@ -956,8 +674,11 @@ HRESULT WINAPI SHFreeUnusedLibraries (void)
  * NOTES
  *  exported by name
  */
-HRESULT WINAPI DAD_SetDragImage (DWORD u, DWORD v)
-{ FIXME("0x%08lx 0x%08lx stub\n",u, v);
+ODINFUNCTION2(BOOL, DAD_SetDragImage,
+              HIMAGELIST, himlTrack,
+              LPPOINT, lppt)
+{ 
+  dprintf(("SHELL32: DAD_SetDragImage not implemented"));
   return 0;
 }
 /*************************************************************************
@@ -966,76 +687,11 @@ HRESULT WINAPI DAD_SetDragImage (DWORD u, DWORD v)
  * NOTES
  *  exported by name
  */
-HRESULT WINAPI DAD_ShowDragImage (DWORD u)
-{ FIXME("0x%08lx stub\n",u);
+ODINFUNCTION1(BOOL, DAD_ShowDragImage,
+              BOOL, bShow)
+{ 
+  dprintf(("SHELL32: DAD_ShowDragImage not implemented"));
   return 0;
-}
-/*************************************************************************
- * SHRegCloseKey                        [NT4.0:SHELL32.505]
- *
- */
-HRESULT WINAPI SHRegCloseKey (HKEY hkey)
-{       TRACE("0x%04x\n",hkey);
-        return RegCloseKey( hkey );
-}
-/*************************************************************************
- * SHRegOpenKeyA                                [SHELL32.506]
- *
- */
-HRESULT WINAPI SHRegOpenKeyA(HKEY hKey, LPSTR lpSubKey, LPHKEY phkResult)
-{
-        TRACE("(0x%08x, %s, %p)\n", hKey, debugstr_a(lpSubKey), phkResult);
-        return RegOpenKeyA(hKey, lpSubKey, phkResult);
-}
-
-/*************************************************************************
- * SHRegOpenKeyW                                [NT4.0:SHELL32.507]
- *
- */
-HRESULT WINAPI SHRegOpenKeyW (HKEY hkey, LPCWSTR lpszSubKey, LPHKEY retkey)
-{       WARN("0x%04x %s %p\n",hkey,debugstr_w(lpszSubKey),retkey);
-        return RegOpenKeyW( hkey, lpszSubKey, retkey );
-}
-/*************************************************************************
- * SHRegQueryValueExA                           [SHELL32.509]
- *
- */
-HRESULT WINAPI SHRegQueryValueExA(
-        HKEY hkey,
-        LPSTR lpValueName,
-        LPDWORD lpReserved,
-        LPDWORD lpType,
-        LPBYTE lpData,
-        LPDWORD lpcbData)
-{
-        TRACE("0x%04x %s %p %p %p %p\n", hkey, lpValueName, lpReserved, lpType, lpData, lpcbData);
-        return RegQueryValueExA (hkey, lpValueName, lpReserved, lpType, lpData, lpcbData);
-}
-/*************************************************************************
- * SHRegQueryValueW                             [NT4.0:SHELL32.510]
- *
- */
-HRESULT WINAPI SHRegQueryValueW (HKEY hkey, LPWSTR lpszSubKey,
-                                 LPWSTR lpszData, LPDWORD lpcbData )
-{       WARN("0x%04x %s %p %p semi-stub\n",
-                hkey, debugstr_w(lpszSubKey), lpszData, lpcbData);
-        return RegQueryValueW( hkey, lpszSubKey, lpszData, (LPLONG)lpcbData );
-}
-
-/*************************************************************************
- * SHRegQueryValueExW                           [NT4.0:SHELL32.511]
- *
- * FIXME
- *  if the datatype REG_EXPAND_SZ then expand the string and change
- *  *pdwType to REG_SZ.
- */
-HRESULT WINAPI SHRegQueryValueExW (HKEY hkey, LPWSTR pszValue, LPDWORD pdwReserved,
-                 LPDWORD pdwType, LPVOID pvData, LPDWORD pcbData)
-{       DWORD ret;
-        WARN("0x%04x %s %p %p %p %p semi-stub\n",
-                hkey, debugstr_w(pszValue), pdwReserved, pdwType, pvData, pcbData);
-        ret = RegQueryValueExW ( hkey, pszValue, pdwReserved, pdwType, (LPBYTE)pvData, pcbData);
-        return ret;
 }
 
 /*************************************************************************
@@ -1083,78 +739,11 @@ HRESULT WINAPI StrRetToBufA (LPSTRRET src, LPITEMIDLIST pidl, LPSTR dest, DWORD 
         return StrRetToStrNA(dest, len, src, pidl);
 }
 
-HRESULT WINAPI StrRetToStrNA (LPVOID dest, DWORD len, LPSTRRET src, LPITEMIDLIST pidl)
-{
-        TRACE("dest=0x%p len=0x%lx strret=0x%p pidl=%p stub\n",dest,len,src,pidl);
-
-        switch (src->uType)
-        {
-          case STRRET_WSTR:
-            WideCharToMultiByte(CP_ACP, 0, src->u.pOleStr, -1, (LPSTR)dest, len, NULL, NULL);
-            SHFree(src->u.pOleStr);
-            break;
-
-          case STRRET_CSTRA:
-            lstrcpynA((LPSTR)dest, src->u.cStr, len);
-            break;
-
-          case STRRET_OFFSETA:
-            lstrcpynA((LPSTR)dest, ((LPCSTR)&pidl->mkid)+src->u.uOffset, len);
-            break;
-
-          default:
-            FIXME("unknown type!\n");
-            if (len)
-            {
-              *(LPSTR)dest = '\0';
-            }
-            return(FALSE);
-        }
-        return S_OK;
-}
-
 HRESULT WINAPI StrRetToBufW (LPSTRRET src, LPITEMIDLIST pidl, LPWSTR dest, DWORD len)
 {
         return StrRetToStrNW(dest, len, src, pidl);
 }
 
-HRESULT WINAPI StrRetToStrNW (LPVOID dest, DWORD len, LPSTRRET src, LPITEMIDLIST pidl)
-{
-        TRACE("dest=0x%p len=0x%lx strret=0x%p pidl=%p stub\n",dest,len,src,pidl);
-
-        switch (src->uType)
-        {
-          case STRRET_WSTR:
-            lstrcpynW((LPWSTR)dest, src->u.pOleStr, len);
-            SHFree(src->u.pOleStr);
-            break;
-
-          case STRRET_CSTRA:
-            lstrcpynAtoW((LPWSTR)dest, src->u.cStr, len);
-            break;
-
-          case STRRET_OFFSETA:
-            if (pidl)
-            {
-              lstrcpynAtoW((LPWSTR)dest, ((LPSTR)&pidl->mkid)+src->u.uOffset, len);
-            }
-            break;
-
-          default:
-            FIXME("unknown type!\n");
-            if (len)
-            { *(LPSTR)dest = '\0';
-            }
-            return(FALSE);
-        }
-        return S_OK;
-}
-HRESULT WINAPI StrRetToStrNAW (LPVOID dest, DWORD len, LPSTRRET src, LPITEMIDLIST pidl)
-{
-        if(VERSION_OsIsUnicode())
-          return StrRetToStrNW (dest, len, src, pidl);
-        return StrRetToStrNA (dest, len, src, pidl);
-}
 
 /*************************************************************************
  * StrChrA                                      [NT 4.0:SHELL32.651]
@@ -1256,9 +845,12 @@ LPVOID WINAPI SHLockShared(HANDLE hmem, DWORD procID)
  * NOTES
  *  parameter1 is return value from SHLockShared
  */
-BOOL WINAPI SHUnlockShared(HANDLE pmem)
-{       TRACE("handle=0x%04x\n",pmem);
-        return GlobalUnlock(pmem);
+ODINFUNCTION1(BOOL, SHUnlockShared,
+              LPVOID, pv)
+{       
+  TRACE("handle=0x%08x\n",pv);
+  //@@@PH rather VirtualUnlock ?
+  return GlobalUnlock((HANDLE)pv);
 }
 /*************************************************************************
  * SHFreeShared                                 [SHELL32.523]
@@ -1308,9 +900,13 @@ HRESULT WINAPI SHAbortInvokeCommand(void)
  * SHOutOfMemoryMessageBox                      [SHELL32.126]
  *
  */
-HRESULT WINAPI SHOutOfMemoryMessageBox(DWORD u, DWORD v, DWORD w)
-{       FIXME("0x%04lx 0x%04lx 0x%04lx stub\n",u,v,w);
-        return 0;
+ODINFUNCTION3(int,    SHOutOfMemoryMessageBox,
+              HWND,   hwndOwner,
+              LPCSTR, lpCaption,
+              UINT,   uType)
+{ 
+  dprintf(("SHELL32: SHOutOfMemoryMessageBox not implemented."));
+  return 0;
 }
 /*************************************************************************
  * SHFlushClipboard                             [SHELL32.121]
@@ -1407,9 +1003,13 @@ LPWSTR WINAPI StrFormatByteSizeW ( DWORD dw, LPWSTR pszBuf, UINT cchBuf )
  * SHWaitForFileToOpen                          [SHELL32.97]
  *
  */
-HRESULT WINAPI SHWaitForFileToOpen(DWORD u, DWORD v, DWORD w)
-{       FIXME("0x%04lx 0x%04lx 0x%04lx stub\n",u,v,w);
-        return 0;
+ODINFUNCTION3(BOOL, SHWaitForFileToOpen,
+              LPCITEMIDLIST, pidl,
+              DWORD, dwFlags,
+              DWORD, dwTimeout)
+{ 
+  dprintf(("SHELL32: SHWaitForFileToOpen not implemented"));
+  return 0;
 }
 /*************************************************************************
  * Control_FillCache_RunDLL                     [SHELL32.8]
@@ -1450,35 +1050,6 @@ HRESULT WINAPI shell32_654 (DWORD x, DWORD y)
 DWORD WINAPI RLBuildListOfPaths (void)
 {       FIXME("stub\n");
         return 0;
-}
-/************************************************************************
- *      StrToOleStr                     [SHELL32.163]
- *
- */
-int WINAPI StrToOleStrA (LPWSTR lpWideCharStr, LPCSTR lpMultiByteString)
-{
-        TRACE("%p %p(%s)\n",
-        lpWideCharStr, lpMultiByteString, lpMultiByteString);
-
-        return MultiByteToWideChar(0, 0, lpMultiByteString, -1, lpWideCharStr, MAX_PATH);
-
-}
-int WINAPI StrToOleStrW (LPWSTR lpWideCharStr, LPCWSTR lpWString)
-{
-        TRACE("%p %p(%s)\n",
-        lpWideCharStr, lpWString, debugstr_w(lpWString));
-
-        if (lstrcpyW (lpWideCharStr, lpWString ))
-        { return lstrlenW (lpWideCharStr);
-        }
-        return 0;
-}
-
-BOOL WINAPI StrToOleStrAW (LPWSTR lpWideCharStr, LPCVOID lpString)
-{
-        if (VERSION_OsIsUnicode())
-          return StrToOleStrW (lpWideCharStr, (LPCWSTR)lpString);
-        return StrToOleStrA (lpWideCharStr, (LPCSTR)lpString);
 }
 
 /************************************************************************
@@ -1525,27 +1096,6 @@ HRESULT WINAPI DoEnvironmentSubstAW(LPVOID x, LPVOID y)
 BOOL WINAPI shell32_243(DWORD a, DWORD b)
 {
   return FALSE;
-}
-
-/************************************************************************
- *      Win32DeleteFile                         [SHELL32.164]
- *
- * Deletes a file.  Also triggers a change notify if one exists, but
- * that mechanism doesn't yet exist in Wine's SHELL32.
- *
- * FIXME:
- * Verified on Win98 / IE 5 (SHELL32 4.72, March 1999 build) to be
- * ANSI.  Is this Unicode on NT?
- *
- */
-
-BOOL WINAPI Win32DeleteFile(LPSTR fName)
-{
-  dprintf(("SHELL32:SHELLORD:Win32DeleteFile %p(%s): partial stub\n", fName, fName));
-
-  DeleteFileA(fName);
-
-  return TRUE;
 }
 
 

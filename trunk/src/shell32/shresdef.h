@@ -1,4 +1,4 @@
-/* $Id: shresdef.h,v 1.5 2000-03-28 15:28:54 cbratschi Exp $ */
+/* $Id: shresdef.h,v 1.6 2000-08-18 02:01:27 phaller Exp $ */
 
 /*
  * Win32 SHELL32 for OS/2
@@ -35,6 +35,11 @@
 #define IDS_VIEW_SMALL          25
 #define IDS_VIEW_LIST           26
 #define IDS_VIEW_DETAILS        27
+
+#define IDS_CREATEFOLDER_DENIED 30
+#define IDS_CREATEFOLDER_CAPTION 31
+#define IDS_DELETEFOLDER_TEXT   32
+#define IDS_DELETEFOLDER_CAPTION 33
 
 #define IDS_SHV_INVALID_FILENAME_TITLE 28
 #define IDS_SHV_INVALID_FILENAME       29

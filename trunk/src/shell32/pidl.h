@@ -1,4 +1,4 @@
-/* $Id: pidl.h,v 1.4 2000-03-28 15:28:45 cbratschi Exp $ */
+/* $Id: pidl.h,v 1.5 2000-08-18 02:01:18 phaller Exp $ */
 
 /*
  * Win32 SHELL32 for OS/2
@@ -188,5 +188,12 @@ void pdump (LPCITEMIDLIST pidl);
 #endif
 //CB: needed in release build
 BOOL pcheck (LPCITEMIDLIST pidl);
+
+/*
+ * aPidl helper
+ */
+void WINAPI _ILFreeaPidl(LPITEMIDLIST * apidl, UINT cidl);
+LPITEMIDLIST * WINAPI _ILCopyaPidl(LPITEMIDLIST * apidlsrc, UINT cidl);
+LPITEMIDLIST * WINAPI _ILCopyCidaToaPidl(LPITEMIDLIST* pidl, LPCIDA cida);
 
 #endif

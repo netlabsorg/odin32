@@ -1,4 +1,4 @@
-/* $Id: shell32_main.h,v 1.3 2000-03-26 16:34:50 cbratschi Exp $ */
+/* $Id: shell32_main.h,v 1.4 2000-08-18 02:01:20 phaller Exp $ */
 
 /*
  * Win32 SHELL32 for OS/2
@@ -45,8 +45,9 @@
 /*******************************************
 *  global SHELL32.DLL variables
 */
-extern HINSTANCE shell32_hInstance;
-extern INT        shell32_ObjCount;
+extern HMODULE          huser32;
+extern HINSTANCE        shell32_hInstance;
+extern LONG             shell32_ObjCount;
 extern HIMAGELIST       ShellSmallIconList;
 extern HIMAGELIST       ShellBigIconList;
 extern HDPA             sic_hdpa;
@@ -80,11 +81,15 @@ extern HICON (WINAPI *pCreateIconFromResourceEx)(LPBYTE bits,UINT cbSize, BOOL b
 
 /* ole2 */
 extern HRESULT (WINAPI* pOleInitialize)(LPVOID reserved);
-extern void (WINAPI* pOleUninitialize)(void);
-extern HRESULT (WINAPI* pDoDragDrop)(IDataObject* pDataObject, IDropSource * pDropSource, DWORD dwOKEffect, DWORD * pdwEffect);
+extern void    (WINAPI* pOleUninitialize)(void);
 extern HRESULT (WINAPI* pRegisterDragDrop)(HWND hwnd, IDropTarget* pDropTarget);
 extern HRESULT (WINAPI* pRevokeDragDrop)(HWND hwnd);
+extern HRESULT (WINAPI* pDoDragDrop)(LPDATAOBJECT,LPDROPSOURCE,DWORD,DWORD*);
+extern void (WINAPI* pReleaseStgMedium)(STGMEDIUM* pmedium);
+extern HRESULT (WINAPI* pOleSetClipboard)(IDataObject* pDataObj);
+extern HRESULT (WINAPI* pOleGetClipboard)(IDataObject** ppDataObj);
 
+    
 BOOL WINAPI Shell_GetImageList(HIMAGELIST * lpBigList, HIMAGELIST * lpSmallList);
 
 HRESULT WINAPI StrRetToStrNA (LPVOID dest, DWORD len, LPSTRRET src, LPITEMIDLIST pidl);
@@ -95,7 +100,7 @@ HRESULT WINAPI StrRetToStrN (LPVOID dest, DWORD len, LPSTRRET src, LPITEMIDLIST 
 #define INVALID_INDEX -1
 BOOL SIC_Initialize(void);
 void SIC_Destroy(void);
-BOOL PidlToSicIndex (IShellFolder * sh, LPITEMIDLIST pidl, BOOL bBigIcon, UINT * pIndex);
+BOOL PidlToSicIndex (IShellFolder * sh, LPITEMIDLIST pidl, BOOL bBigIcon, UINT uFlags, UINT * pIndex);
 
 /* Classes Root */
 BOOL HCR_MapTypeToValue ( LPCSTR szExtension, LPSTR szFileType, DWORD len, BOOL bPrependDot);
@@ -106,11 +111,6 @@ BOOL HCR_GetFolderAttributes (REFIID riid, LPDWORD szDest);
 
 DWORD   WINAPI ParseFieldA(LPCSTR src,DWORD field,LPSTR dst,DWORD len);
 
-HGLOBAL WINAPI SHAllocShared(LPVOID psrc, DWORD size, DWORD procID);
-LPVOID  WINAPI SHLockShared(HANDLE hmem, DWORD procID);
-BOOL    WINAPI SHUnlockShared(HANDLE pmem);
-HANDLE  WINAPI SHFreeShared(HANDLE hmem, DWORD procID);
-
 /****************************************************************************
  * Class constructors
  */
@@ -118,8 +118,8 @@ LPDATAOBJECT    IDataObject_Constructor(HWND hwndOwner, LPITEMIDLIST myPidl, LPI
 LPENUMFORMATETC IEnumFORMATETC_Constructor(UINT, const FORMATETC []);
 
 LPCLASSFACTORY  IClassFactory_Constructor(REFCLSID);
-IContextMenu *  IContextMenu_Constructor(LPSHELLFOLDER pSFParent, LPCITEMIDLIST pidl, LPCITEMIDLIST *aPidls, UINT uItemCount);
-IContextMenu *  ISvBgCm_Constructor(void);
+IContextMenu *  ISvItemCm_Constructor(LPSHELLFOLDER pSFParent, LPCITEMIDLIST pidl, LPCITEMIDLIST *aPidls, UINT uItemCount);
+IContextMenu *  ISvBgCm_Constructor(LPSHELLFOLDER pSFParent);
 LPSHELLVIEW     IShellView_Constructor(LPSHELLFOLDER);
 LPSHELLLINK     IShellLink_Constructor(BOOL);
 
@@ -138,7 +138,6 @@ HRESULT         CreateStreamOnFile (LPCSTR pszFilename, IStream ** ppstm);
 /* fixme: rename the functions when the shell32.dll has it's own exports namespace */
 HRESULT WINAPI  SHELL32_DllGetClassObject(REFCLSID rclsid, REFIID riid, LPVOID * ppv);
 HRESULT WINAPI  SHELL32_DllCanUnloadNow(void);
-LRESULT WINAPI SHCoCreateInstance(LPSTR,REFCLSID,LPUNKNOWN,REFIID,LPVOID *);
 
 /* fixme: move away */
 #define ResultFromShort(i) MAKE_SCODE(SEVERITY_SUCCESS, 0, (USHORT)(i))
@@ -165,11 +164,46 @@ HRESULT WINAPI Shell_MergeMenus (HMENU hmDst, HMENU hmSrc, UINT uInsert, UINT uI
 
 /* Systray */
 BOOL SYSTRAY_Init(void);
+    
+/* Clipboard */
+void InitShellOle(void);
+void FreeShellOle(void);
+BOOL GetShellOle(void);
+    
+/* PH: This creates an auto variable just in any importer...
+HRESULT (WINAPI* pOleInitialize)(LPVOID reserved);
+void    (WINAPI* pOleUninitialize)(void);
+HRESULT (WINAPI* pRegisterDragDrop)(HWND hwnd, IDropTarget* pDropTarget);
+HRESULT (WINAPI* pRevokeDragDrop)(HWND hwnd);
+HRESULT (WINAPI* pDoDragDrop)(LPDATAOBJECT,LPDROPSOURCE,DWORD,DWORD*);
+void (WINAPI* pReleaseStgMedium)(STGMEDIUM* pmedium);
+HRESULT (WINAPI* pOleSetClipboard)(IDataObject* pDataObj);
+HRESULT (WINAPI* pOleGetClipboard)(IDataObject** ppDataObj);
+*/
+    
+HGLOBAL RenderHDROP(LPITEMIDLIST pidlRoot, LPITEMIDLIST * apidl, UINT cidl);
+HGLOBAL RenderSHELLIDLIST (LPITEMIDLIST pidlRoot, LPITEMIDLIST * apidl, UINT cidl);
+HGLOBAL RenderSHELLIDLISTOFFSET (LPITEMIDLIST pidlRoot, LPITEMIDLIST * apidl, UINT cidl);
+HGLOBAL RenderFILECONTENTS (LPITEMIDLIST pidlRoot, LPITEMIDLIST * apidl, UINT cidl);
+HGLOBAL RenderFILEDESCRIPTOR (LPITEMIDLIST pidlRoot, LPITEMIDLIST * apidl, UINT cidl);
+HGLOBAL RenderFILENAME (LPITEMIDLIST pidlRoot, LPITEMIDLIST * apidl, UINT cidl);
+HGLOBAL RenderPREFEREDDROPEFFECT (DWORD dwFlags);
 
+/* Change Notification */
+void InitChangeNotifications(void);
+void FreeChangeNotifications(void);
+
+/* file operation */
+BOOL SHELL_DeleteDirectoryA(LPCSTR pszDir, BOOL bShowUI);
+
+inline static BOOL SHELL_OsIsUnicode(void)
+{
+/* if high-bit of version is 0, we are emulating NT */
+  return !(GetVersion() & 0x80000000);
+}
+    
 #ifdef __cplusplus
   }
 #endif /* defined(__cplusplus) */
-
-
 
 #endif

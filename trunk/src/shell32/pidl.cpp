@@ -1,4 +1,4 @@
-/* $Id: pidl.cpp,v 1.8 2000-05-01 01:33:25 phaller Exp $ */
+/* $Id: pidl.cpp,v 1.9 2000-08-18 02:01:17 phaller Exp $ */
 
 /*
  * Win32 SHELL32 for OS/2
@@ -747,21 +747,21 @@ ODINFUNCTION1(DWORD,ILFree,LPITEMIDLIST, pidl)
    if (!pidl)
      return FALSE;
 
-   return SHFree(pidl);
+  SHFree(pidl);
+  return TRUE;
 }
 /*************************************************************************
  * ILGlobalFree [SHELL32.156]
  *
  */
 
-ODINFUNCTION1(DWORD,ILGlobalFree,LPITEMIDLIST, pidl)
+ODINPROCEDURE1(ILGlobalFree,
+               LPITEMIDLIST, pidl)
 {
    TRACE_(pidl)("%p\n",pidl);
 
-   if (!pidl)
-     return FALSE;
-
-   return pCOMCTL32_Free (pidl);
+   if (pidl)
+     pCOMCTL32_Free (pidl);
 }
 /*************************************************************************
  * ILCreateFromPath [SHELL32.157]
@@ -802,7 +802,7 @@ ODINFUNCTION1(LPITEMIDLIST,ILCreateFromPathAW,LPCVOID,path)
  *  SHSimpleIDListFromPath [SHELL32.162]
  */
 
-ODINFUNCTION1(LPITEMIDLIST,SHSimpleIDListFromPathA,LPSTR, lpszPath)
+ODINFUNCTION1(LPITEMIDLIST,SHSimpleIDListFromPathA,LPCSTR, lpszPath)
 {
    LPITEMIDLIST   pidl=NULL;
    HANDLE   hFile;
@@ -827,16 +827,16 @@ ODINFUNCTION1(LPITEMIDLIST,SHSimpleIDListFromPathA,LPSTR, lpszPath)
    return pidl;
 }
 
-ODINFUNCTION1(LPITEMIDLIST,SHSimpleIDListFromPathW,LPWSTR, lpszPath)
+ODINFUNCTION1(LPITEMIDLIST,SHSimpleIDListFromPathW,LPCWSTR, lpszPath)
 {
    char  lpszTemp[MAX_PATH];
 
-   WideCharToLocal(lpszTemp, lpszPath, MAX_PATH);
+   WideCharToLocal(lpszTemp, (LPWSTR)lpszPath, MAX_PATH);
 
    return SHSimpleIDListFromPathA (lpszTemp);
 }
 
-ODINFUNCTION1(LPITEMIDLIST,SHSimpleIDListFromPathAW,LPVOID, lpszPath)
+ODINFUNCTION1(LPITEMIDLIST,SHSimpleIDListFromPathAW,LPCVOID, lpszPath)
 {
    if ( VERSION_OsIsUnicode())
      return SHSimpleIDListFromPathW ((LPWSTR)lpszPath);
@@ -1877,7 +1877,9 @@ ODINFUNCTION3(BOOL, _ILGetFileAttributes, LPCITEMIDLIST, pidl,
     LPPIDLDATA pData =ODIN__ILGetDataPointer(pidl);
     WORD wAttrib = 0;
     int i;
-
+  
+    if (! pData) return 0;
+  
     switch(pData->type)
     {
         case PT_FOLDER:
@@ -1887,6 +1889,7 @@ ODINFUNCTION3(BOOL, _ILGetFileAttributes, LPCITEMIDLIST, pidl,
             wAttrib = pData->u.file.uFileAttribs;
             break;
     }
+  
     if(uOutSize >= 6)
     {
       i=0;
@@ -1915,3 +1918,63 @@ ODINFUNCTION3(BOOL, _ILGetFileAttributes, LPCITEMIDLIST, pidl,
     return wAttrib;
 }
 
+
+/*************************************************************************
+* ILFreeaPidl
+*
+* free a aPidl struct
+*/
+ODINPROCEDURE2(_ILFreeaPidl,
+               LPITEMIDLIST *, apidl, 
+               UINT, cidl)
+{
+	int   i;
+
+	if(apidl)
+	{
+	  for(i = 0; i < cidl; i++) SHFree(apidl[i]);
+	  SHFree(apidl);
+	}
+}
+
+/*************************************************************************
+* ILCopyaPidl
+*
+* copys a aPidl struct
+*/
+ODINFUNCTION2(LPITEMIDLIST *,_ILCopyaPidl,
+              LPITEMIDLIST *,apidlsrc, 
+              UINT,          cidl)
+{
+	int i;
+	LPITEMIDLIST * apidldest = (LPITEMIDLIST*)SHAlloc(cidl * sizeof(LPITEMIDLIST));
+	if(!apidlsrc) return NULL;
+
+	for(i = 0; i < cidl; i++)
+	  apidldest[i] = ILClone(apidlsrc[i]);
+
+	return apidldest;
+}
+
+/*************************************************************************
+* _ILCopyCidaToaPidl
+*
+* creates aPidl from CIDA
+*/
+ODINFUNCTION2(LPITEMIDLIST*, _ILCopyCidaToaPidl,
+              LPITEMIDLIST*, pidl, 
+              LPCIDA,        cida)
+{
+	int i;
+	LPITEMIDLIST * dst = (LPITEMIDLIST*)SHAlloc(cida->cidl * sizeof(LPITEMIDLIST));
+
+	if(!dst) return NULL;
+
+	if (pidl)
+	  *pidl = ILClone((LPITEMIDLIST)(&((LPBYTE)cida)[cida->aoffset[0]]));
+
+	for(i = 0; i < cida->cidl; i++)
+	  dst[i] = ILClone((LPITEMIDLIST)(&((LPBYTE)cida)[cida->aoffset[i + 1]]));
+
+	return dst;
+}

@@ -1,4 +1,4 @@
-/* $Id: shlview.cpp,v 1.14 2000-07-02 15:00:18 sandervl Exp $ */
+/* $Id: shlview.cpp,v 1.15 2000-08-18 02:01:25 phaller Exp $ */
 /*
  * ShellView
  *
@@ -810,7 +810,7 @@ static void ShellView_DoContextMenu(IShellViewImpl * This, WORD x, WORD y, BOOL 
    {
      hMenu = CreatePopupMenu();
 
-     pCM = ISvBgCm_Constructor();
+     pCM = ISvBgCm_Constructor(This->pSFParent);
      IContextMenu_QueryContextMenu(pCM, hMenu, 0, FCIDM_SHVIEWFIRST, FCIDM_SHVIEWLAST, 0);
 
      uCommand = TrackPopupMenu( hMenu, TPM_LEFTALIGN | TPM_RETURNCMD,x,y,0,This->hWnd,NULL);
@@ -1756,7 +1756,7 @@ static HRESULT WINAPI IShellView_fnGetItemObject(IShellView * iface, UINT uItem,
    switch(uItem)
    {
      case SVGIO_BACKGROUND:
-       *ppvOut = ISvBgCm_Constructor();
+       *ppvOut = ISvBgCm_Constructor(This->pSFParent);
        break;
 
      case SVGIO_SELECTION:

@@ -1,4 +1,4 @@
-/* $Id: iconcache.cpp,v 1.8 2000-05-18 14:16:02 sandervl Exp $ */
+/* $Id: iconcache.cpp,v 1.9 2000-08-18 02:01:15 phaller Exp $ */
 
 /*
  * Win32 SHELL32 for OS/2
@@ -35,8 +35,11 @@
 #include "winversion.h"
 
 #include "shellapi.h"
+#include "shlguid.h"
+#include "shlwapi.h"
 #include "pidl.h"
 #include "shell32_main.h"
+#include "wine/undocshell.h"
 
 #include <heapstring.h>
 #include <misc.h>
@@ -764,7 +767,11 @@ ODINFUNCTION2(BOOL,Shell_GetImageList,HIMAGELIST*, lpBigList,
  * pIndex   [OUT] index within the SIC
  *
  */
-BOOL PidlToSicIndex (IShellFolder * sh, LPITEMIDLIST pidl, BOOL bBigIcon, UINT * pIndex)
+BOOL PidlToSicIndex (IShellFolder * sh, 
+                     LPITEMIDLIST pidl, 
+                     BOOL bBigIcon, 
+                     UINT uFlags,
+                     UINT * pIndex)
 {
    IExtractIcon   *ei;
    char     szIconFile[MAX_PATH];        /* file containing the icon */
@@ -776,7 +783,7 @@ BOOL PidlToSicIndex (IShellFolder * sh, LPITEMIDLIST pidl, BOOL bBigIcon, UINT *
 
    if (SUCCEEDED (IShellFolder_GetUIObjectOf(sh, 0, 1, &pidl, &IID_IExtractIconA, 0, (void **)&ei)))
    {
-     if (NOERROR==IExtractIconA_GetIconLocation(ei, 0, szIconFile, MAX_PATH, &iSourceIndex, &dwFlags))
+     if (NOERROR==IExtractIconA_GetIconLocation(ei, uFlags, szIconFile, MAX_PATH, &iSourceIndex, &dwFlags))
      { *pIndex = SIC_GetIconIndex(szIconFile, iSourceIndex);
        ret = TRUE;
      }
@@ -800,17 +807,18 @@ BOOL PidlToSicIndex (IShellFolder * sh, LPITEMIDLIST pidl, BOOL bBigIcon, UINT *
  *
  */
 
-ODINFUNCTION3(UINT,SHMapPIDLToSystemImageListIndex,LPSHELLFOLDER, sh,
-                                                   LPITEMIDLIST,  pidl,
-                                                   UINT*,         pIndex)
+ODINFUNCTION3(int,SHMapPIDLToSystemImageListIndex,
+              LPSHELLFOLDER, sh,
+              LPITEMIDLIST,  pidl,
+              UINT*,         pIndex)
 {
    UINT  Index;
 
    pdump(pidl);
 
    if (pIndex)
-     PidlToSicIndex ( sh, pidl, 1, pIndex);
-   PidlToSicIndex ( sh, pidl, 0, &Index);
+     PidlToSicIndex ( sh, pidl, 1, 0, pIndex);
+   PidlToSicIndex ( sh, pidl, 0, 0, &Index);
    return Index;
 }
 
