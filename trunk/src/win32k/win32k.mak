@@ -1,4 +1,4 @@
-# $Id: win32k.mak,v 1.3 2000-12-16 23:18:55 bird Exp $
+# $Id: win32k.mak,v 1.4 2001-01-21 07:59:51 bird Exp $
 
 #
 # Win32k.sys makefile.
@@ -43,6 +43,7 @@ OBJS  =\
     $(WIN32KOBJ)\abort.obj \
     $(WIN32KOBJ)\asmutils.obj \
     $(WIN32KOBJ)\calltaba.obj \
+    $(WIN32KOBJ)\locks.obj \
     $(WIN32KOBJ)\malloc.obj \
     $(WIN32KOBJ)\smalloc_avl.obj \
     $(WIN32KOBJ)\avl.obj \
@@ -100,6 +101,7 @@ $(NAME).sys: $(WIN32KBIN)\$(NAME).sys
 
 $(WIN32KBIN)\$(NAME).sys:   clfix.exe \
                             $(WIN32KINCLUDE)\options.inc \
+                            $(WIN32KINCLUDE)\api.inc \
                             $(OBJS) \
                             $(LIBS) \
                             $(WIN32KOBJ)\$(NAME)bldlevel.def \
@@ -142,8 +144,8 @@ $(WIN32KOBJ)\$(NAME)bldlevel.def
 $(WIN32KOBJ)\$(NAME)bldlevel.def: $(NAME).def win32k.mak MakeDesc.cmd
     -$(ECHO) Creates $@ with bldlevel signature string.
     $(BLDLEVELINF) $(NAME).def $@ -R"$(NAME).def" \
-        -V"#define=ODIN32_VERSION,$(ODIN32_INCLUDE)\versionos2.h" \
-        -M"#define=ODIN32_BUILD_NR,$(ODIN32_INCLUDE)\versionos2.h"
+        -V"#define=ODIN32_VERSION,$(ODIN32_INCLUDE)\odinbuild.h" \
+        -M"#define=ODIN32_BUILD_NR,$(ODIN32_INCLUDE)\odinbuild.h"
 
 
 #
@@ -168,6 +170,7 @@ TSTOBJS =\
     $(WIN32KOBJ)\abort.obj \
     $(WIN32KOBJ)\asmutils.obj \
     $(WIN32KOBJ)\calltaba.obj \
+    $(WIN32KOBJ)\locks.obj \
     $(WIN32KOBJ)\malloc.obj_tst. \
     $(WIN32KOBJ)\smalloc_avl.obj \
     $(WIN32KOBJ)\avl.obj \
@@ -346,6 +349,15 @@ $(WIN32KBASE)\test\TstFakers.c: dev16\probkrnl.c include\probkrnl.h $(WIN32KBIN)
 $(WIN32KINCLUDE)\options.inc:  $(WIN32KINCLUDE)\options.h
     @$(ECHO) H2Inc: $**
     $(H2INC) $** > $@
+
+
+#
+# Make assembly version of api.h; api.inc
+#
+$(WIN32KINCLUDE)\api.inc:  $(WIN32KINCLUDE)\api.h
+    @$(ECHO) H2Inc: $**
+    $(H2INC) $** > $@
+
 
 
 #
