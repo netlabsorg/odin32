@@ -1,4 +1,4 @@
-/* $Id: windowmsg.cpp,v 1.5 1999-07-16 11:32:10 sandervl Exp $ */
+/* $Id: windowmsg.cpp,v 1.6 1999-07-17 11:52:24 sandervl Exp $ */
 /*
  * Win32 window message APIs for OS/2
  *
@@ -17,119 +17,66 @@
 #include <win32wnd.h>
 #include <win.h>
 #include <hooks.h>
+#include "oslibwin.h"
 
 //******************************************************************************
 //******************************************************************************
 VOID WIN32API PostQuitMessage( int nExitCode)
 {
     dprintf(("USER32:  PostQuitMessage\n"));
-
-    O32_PostQuitMessage(nExitCode);
+    OSLibWinPostQuitMessage(nExitCode);
 }
 //******************************************************************************
 //******************************************************************************
-LONG WIN32API DispatchMessageA( const MSG * msg)
+LONG WIN32API DispatchMessageA(const MSG * msg)
 {
-  LONG         retval;
-  int          painting;
-  Win32Window *window;
-    
-      /* Process timer messages */
-    if ((msg->message == WM_TIMER) || (msg->message == WM_SYSTIMER))
-    {
-	if (msg->lParam)
-        {
-	    return SendMessageA(msg->hwnd, msg->message, msg->wParam, GetTickCount());
-        }
-    }
-
-    if (!msg->hwnd) return 0;
-
-    window = Win32Window::GetWindowFromHandle(msg->hwnd);
-    if(!window) {
-	dprintf(("DispatchMessageA, window %x not found", msg->hwnd));
-	return 0;
-    }
-
-    painting = (msg->message == WM_PAINT);
-    if (painting) window->setFlags(window->getFlags() | WIN_NEEDS_BEGINPAINT);
-
-    retval = window->SendMessageA(msg->message, msg->wParam, msg->lParam );
-
-#if 0
-    window = Win32Window::GetWindowFromHandle(msg->hwnd);
-    if(!window) {
-	dprintf(("DispatchMessageA, window %x not found", msg->hwnd));
-	return 0;
-    }
-
-    if (painting && (wndPtr->getFlags() & WIN_NEEDS_BEGINPAINT) && wndPtr->hrgnUpdate)
-    {
-	ERR_(msg)("BeginPaint not called on WM_PAINT for hwnd %04x!\n", 
-	    msg->hwnd);
-	wndPtr->flags &= ~WIN_NEEDS_BEGINPAINT;
-        /* Validate the update region to avoid infinite WM_PAINT loop */
-        ValidateRect( msg->hwnd, NULL );
-    }
-#endif
-    return retval;
+  return OSLibWinDispatchMsg((MSG *)msg);
 }
 //******************************************************************************
 //******************************************************************************
 LONG WIN32API DispatchMessageW( const MSG * msg)
 {
-  LONG         retval;
-  int          painting;
-  Win32Window *window;
-    
-    /* Process timer messages */
-    if ((msg->message == WM_TIMER) || (msg->message == WM_SYSTIMER))
-    {
-	if (msg->lParam)
-        {
-	    return SendMessageW(msg->hwnd, msg->message, msg->wParam, GetTickCount());
-        }
-    }
-
-    if (!msg->hwnd) return 0;
-
-    window = Win32Window::GetWindowFromHandle(msg->hwnd);
-    if(!window) {
-	dprintf(("DispatchMessageW, window %x not found", msg->hwnd));
-	return 0;
-    }
-
-    painting = (msg->message == WM_PAINT);
-    if (painting) window->setFlags(window->getFlags() | WIN_NEEDS_BEGINPAINT);
-
-    retval = window->SendMessageW(msg->message, msg->wParam, msg->lParam );
-
-#if 0
-    window = Win32Window::GetWindowFromHandle(msg->hwnd);
-    if(!window) {
-	dprintf(("DispatchMessageW, window %x not found", msg->hwnd));
-	return 0;
-    }
-
-    if (painting && (wndPtr->getFlags() & WIN_NEEDS_BEGINPAINT) && wndPtr->hrgnUpdate)
-    {
-	ERR_(msg)("BeginPaint not called on WM_PAINT for hwnd %04x!\n", 
-	    msg->hwnd);
-	wndPtr->flags &= ~WIN_NEEDS_BEGINPAINT;
-        /* Validate the update region to avoid infinite WM_PAINT loop */
-        ValidateRect( msg->hwnd, NULL );
-    }
-#endif
-    return retval;
+  return OSLibWinDispatchMsg((MSG *)msg, TRUE);
 }
 //******************************************************************************
 //******************************************************************************
 BOOL WIN32API TranslateMessage( const MSG * arg1)
 {
-#ifdef DEBUG
-////    WriteLog("USER32:  TranslateMessage\n");
-#endif
-    return O32_TranslateMessage(arg1);
+//    return O32_TranslateMessage(arg1);
+   return TRUE;
+}
+//******************************************************************************
+//******************************************************************************
+BOOL WIN32API GetMessageA( LPMSG pMsg, HWND hwnd, UINT uMsgFilterMin, UINT uMsgFilterMax)
+{
+    return OSLibWinGetMsg(pMsg, hwnd, uMsgFilterMin, uMsgFilterMax);
+}
+//******************************************************************************
+//******************************************************************************
+BOOL WIN32API GetMessageW( LPMSG pMsg, HWND hwnd, UINT uMsgFilterMin, UINT uMsgFilterMax)
+{
+    return OSLibWinGetMsg(pMsg, hwnd, uMsgFilterMin, uMsgFilterMax, TRUE);
+}
+//******************************************************************************
+//******************************************************************************
+LONG WIN32API GetMessageExtraInfo(void)
+{
+    dprintf(("USER32:  GetMessageExtraInfo\n"));
+    return O32_GetMessageExtraInfo();
+}
+//******************************************************************************
+//******************************************************************************
+DWORD WIN32API GetMessagePos(void)
+{
+    dprintf(("USER32:  GetMessagePos\n"));
+    return O32_GetMessagePos();
+}
+//******************************************************************************
+//******************************************************************************
+LONG WIN32API GetMessageTime(void)
+{
+    dprintf(("USER32:  GetMessageTime\n"));
+    return O32_GetMessageTime();
 }
 //******************************************************************************
 //TODO: hwnd == HWND_BROADCAST

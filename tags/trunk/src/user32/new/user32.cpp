@@ -1,4 +1,4 @@
-/* $Id: user32.cpp,v 1.2 1999-07-16 17:50:10 cbratschi Exp $ */
+/* $Id: user32.cpp,v 1.3 1999-07-17 11:52:22 sandervl Exp $ */
 
 /*
  * Win32 misc user32 API functions for OS/2
@@ -262,11 +262,6 @@ HWND WIN32API GetNextDlgTabItem( HWND arg1, HWND arg2, BOOL  arg3)
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API GetMessageA( LPMSG arg1, HWND  arg2, UINT arg3, UINT  arg4)
-{
-////    dprintf(("USER32:  GetMessage\n"));
-    return O32_GetMessage(arg1, arg2, arg3, arg4);
-}
 //******************************************************************************
 //******************************************************************************
 HWND WIN32API GetFocus(void)
@@ -1428,36 +1423,6 @@ HWND WIN32API GetLastActivePopup( HWND arg1)
 }
 //******************************************************************************
 //******************************************************************************
-LONG WIN32API GetMessageExtraInfo(void)
-{
-    dprintf(("USER32:  GetMessageExtraInfo\n"));
-    return O32_GetMessageExtraInfo();
-}
-//******************************************************************************
-//******************************************************************************
-DWORD WIN32API GetMessagePos(void)
-{
-    dprintf(("USER32:  GetMessagePos\n"));
-    return O32_GetMessagePos();
-}
-//******************************************************************************
-//******************************************************************************
-LONG WIN32API GetMessageTime(void)
-{
-    dprintf(("USER32:  GetMessageTime\n"));
-    return O32_GetMessageTime();
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API GetMessageW(LPMSG arg1, HWND arg2, UINT arg3, UINT arg4)
-{
- BOOL rc;
-
-    // NOTE: This will not work as is (needs UNICODE support)
-    rc = O32_GetMessage(arg1, arg2, arg3, arg4);
-    dprintf(("USER32:  GetMessageW %X returned %d\n", arg2, rc));
-    return(rc);
-}
 //******************************************************************************
 //******************************************************************************
 HWND WIN32API GetNextDlgGroupItem( HWND arg1, HWND arg2, BOOL  arg3)

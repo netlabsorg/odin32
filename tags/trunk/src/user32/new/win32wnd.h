@@ -1,4 +1,4 @@
-/* $Id: win32wnd.h,v 1.5 1999-07-17 09:17:58 sandervl Exp $ */
+/* $Id: win32wnd.h,v 1.6 1999-07-17 11:52:23 sandervl Exp $ */
 /*
  * Win32 Window Code for OS/2
  *
@@ -23,7 +23,8 @@ class Win32Window;
 #define OFFSET_WIN32WNDPTR	0
 #define OFFSET_WIN32PM_MAGIC	4
 
-#define WIN32PM_MAGIC	0x12345678
+#define WIN32PM_MAGIC		0x12345678
+#define CheckMagicDword(a)	(a==WIN32PM_MAGIC)
 
 typedef struct {
 	USHORT		cb;
@@ -95,6 +96,13 @@ virtual	 WORD   GetWindowWord(int index);
 	 HWND   GetTopWindow();
 	 BOOL   UpdateWindow();
 	 BOOL   IsIconic();
+         HWND   GetWindow(UINT uCmd);
+	 BOOL   EnableWindow(BOOL fEnable);
+ 	 BOOL   BringWindowToTop();
+  static HWND   GetActiveWindow();
+	 BOOL   IsWindow();
+	 BOOL   IsWindowEnabled();
+	 BOOL   IsWindowVisible();
 
        LRESULT  SendMessageA(ULONG msg, WPARAM wParam, LPARAM lParam);
        LRESULT  SendMessageW(ULONG msg, WPARAM wParam, LPARAM lParam);
