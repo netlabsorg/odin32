@@ -1,4 +1,4 @@
-/* $Id: dc.cpp,v 1.66 2000-07-15 08:08:01 sandervl Exp $ */
+/* $Id: dc.cpp,v 1.67 2000-07-18 18:35:38 sandervl Exp $ */
 
 /*
  * DC functions for USER32
@@ -1193,9 +1193,10 @@ error:
    if (hpsTemp)
       WinReleasePS (hpsTemp);
 
-   if (!success)
-      SetLastError(ERROR_INVALID_PARAMETER_W);
-
+   if (!success) {
+	dprintf(("RedrawWindow failure!"));
+      	SetLastError(ERROR_INVALID_PARAMETER_W);
+   }
    return (success);
 }
 //******************************************************************************

@@ -1,4 +1,4 @@
-/* $Id: windlg.cpp,v 1.16 2000-02-16 14:28:25 sandervl Exp $ */
+/* $Id: windlg.cpp,v 1.17 2000-07-18 18:35:40 sandervl Exp $ */
 /*
  * Win32 dialog apis for OS/2
  *
@@ -82,7 +82,7 @@ HWND WIN32API CreateDialogIndirectParamA(HINSTANCE hInst,
     }
     if(GetLastError() != 0)
     {
-        dprintf(("Win32Dialog error found!!"));
+        dprintf(("Win32Dialog error found (%0x)!!", GetLastError()));
         delete dialog;
         return 0;
     }
