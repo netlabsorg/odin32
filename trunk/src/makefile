@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.31 1999-11-03 23:28:03 sandervl Exp $
+# $Id: makefile,v 1.32 1999-11-04 18:51:43 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -49,13 +49,15 @@ all: libs
         $(MAKE_CMD)
         cd ..\advapi32
         $(MAKE_CMD)
-        cd ..\comdlg32
+        cd ..\shell32
         $(MAKE_CMD)
         cd ..\comctl32
         $(MAKE_CMD)
         cd ..\capi2032
         $(MAKE_CMD)
         cd ..\wsock32
+        $(MAKE_CMD)
+        cd ..\comdlg32
         $(MAKE_CMD)
         cd ..\tapi32
         $(MAKE_CMD)
@@ -90,8 +92,6 @@ all: libs
         cd ..\olecli32
         $(MAKE_CMD)
         cd ..\oledlg
-        $(MAKE_CMD)
-        cd ..\shell32
         $(MAKE_CMD)
         cd ..\imm32
         $(MAKE_CMD)
