@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.26 2001-07-07 19:08:39 sandervl Exp $
+# $Id: makefile,v 1.27 2001-07-19 20:00:22 sandervl Exp $
 
 #
 # Odin32 API
@@ -20,8 +20,6 @@
 CDEFINES    = $(CDEFINES) -DNONAMELESSUNION
 !endif
 
-CDEFINES = $(CDEFINES) -DUSING_OPEN32
-
 #
 # Object files. Prefix with OBJDIR and one space before the '\'.
 #
@@ -36,6 +34,7 @@ $(OBJDIR)\filedlg.obj \
 $(OBJDIR)\filedlg95.obj \
 $(OBJDIR)\comdlg32.obj \
 $(OBJDIR)\filedlgbrowser.obj \
+##$(OBJDIR)\printdlg.obj \
 $(OBJDIR)\comdlgguid.obj \
 $(OBJDIR)\rsrc.obj
 
@@ -51,8 +50,8 @@ $(ODIN32_LIB)/shlwapi.lib \
 $(ODIN32_LIB)/shell32.lib \
 $(ODIN32_LIB)/comctl32.lib \
 $(ODIN32_LIB)/gdi32.lib \
-####$(ODIN32_LIB)/wgss50.lib \
-$(ODIN32_LIB)/pmwinx.lib \
+$(ODIN32_LIB)/winspool.lib \
+$(ODIN32_LIB)/wgss50.lib \
 os2386.lib \
 $(RTLLIB_O)
 
