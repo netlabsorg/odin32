@@ -1,4 +1,4 @@
-/* $Id: reg.cpp,v 1.2 2000-06-12 08:09:39 phaller Exp $ */
+/* $Id: reg.cpp,v 1.3 2000-06-12 11:35:14 phaller Exp $ */
 
 /*
  * Win32 URL-handling APIs for OS/2
@@ -179,18 +179,48 @@ ODINFUNCTION8(LONG,SHRegGetUSValueW,LPCWSTR, pSubKey,
  * Author    : Patrick Haller [Wed, 1999/12/29 23:02]
  *****************************************************************************/
 
-ODINFUNCTION5(LONG,    SHRegGetBoolUSValueA,
-              LPCSTR,  pSubKey,
-              DWORD,   arg2,
-              DWORD,   arg3,
-              DWORD,   arg4,
-              DWORD,   arg5)
+ODINFUNCTION4(BOOL,    SHRegGetBoolUSValueA,
+              LPCSTR,  pszSubKey,
+              LPCSTR,  pszValue,
+              BOOL,    fIgnoreHKCU,
+              BOOL,    fDefault)
 {
-  char  szBuffer[264];
-  int   iLength;
-
-  dprintf(("(%p),stub!\n", pSubKey));
-
+  char  szBuffer[260];
+  DWORD dwLength = sizeof(szBuffer);
+  LONG  rc;
+  
+  dprintf(("subkey=%s, value=%s\n",
+           pszSubKey,
+           pszValue));
+  
+  rc = SHRegGetUSValueA(pszSubKey,
+                        pszValue,
+                        &fDefault,
+                        szBuffer,
+                        &dwLength,
+                        fIgnoreHKCU,
+                        fDefault ? "YES" : "NO",
+                        fDefault ? 4 : 3);
+  if (rc != ERROR_SUCCESS)
+    return rc;
+  
+  if (lstrcmpiA("YES",
+                szBuffer) == 0)
+    return 1;
+  else
+  if (lstrcmpiA("TRUE",
+                szBuffer) == 0)
+    return 1;
+  else
+  if (lstrcmpiA("NO",
+                szBuffer) == 0)
+    return 0;
+  else
+  if (lstrcmpiA("FALSE",
+                szBuffer) == 0)
+    return 0;
+  
+  
   return ERROR_SUCCESS;  /* return success */
 }
 
@@ -207,17 +237,16 @@ ODINFUNCTION5(LONG,    SHRegGetBoolUSValueA,
  * Author    : Patrick Haller [Wed, 1999/12/29 23:02]
  *****************************************************************************/
 
-ODINFUNCTION5(LONG,    SHRegGetBoolUSValueW,
-              LPCWSTR, pSubKey,
-              DWORD,   arg2,
-              DWORD,   arg3,
-              DWORD,   arg4,
-              DWORD,   arg5)
+ODINFUNCTION4(BOOL,    SHRegGetBoolUSValueW,
+              LPCWSTR, pszSubKey,
+              LPCWSTR, pszValue,
+              BOOL,    fIgnoreHKCU,
+              BOOL,    fDefault)
 {
   char  szBuffer[264];
   int   iLength;
 
-  dprintf(("(%p),stub!\n", pSubKey));
+  dprintf(("(%p),stub!\n", pszSubKey));
 
   return ERROR_SUCCESS;  /* return success */
 }

@@ -1,4 +1,4 @@
-/* $Id: shlwapi.h,v 1.2 2000-06-12 08:09:44 phaller Exp $ */
+/* $Id: shlwapi.h,v 1.3 2000-06-12 11:35:14 phaller Exp $ */
 
 /*
  * Win32 Lightweight SHELL32 for OS/2
@@ -30,6 +30,32 @@
  * Prototypes                                                                *
  *****************************************************************************/
     
+// REG.CPP
+BOOL WIN32API SHRegGetBoolUSValueA(LPCSTR pszSubKey,
+                                   LPCSTR pszValue,
+                                   BOOL   fIgnoreHKCU,
+                                   BOOL   fDefault);
+    
+BOOL WIN32API SHRegGetBoolUSValueW(LPCWSTR pszSubKey,
+                                   LPCWSTR pszValue,
+                                   BOOL    fIgnoreHKCU,
+                                   BOOL    fDefault);
+    
+LONG WIN32API SHRegGetUSValueA(LPCSTR   pSubKey,
+                               LPCSTR   pValue,
+                               LPDWORD  pwType,
+                               LPVOID   pvData,
+                               LPDWORD  pbData,
+                               BOOL     fIgnoreHKCU,
+                               LPVOID   pDefaultData,
+                               DWORD    wDefaultDataSize);
+    
+// PATH.CPP
+LPSTR WIN32API PathRemoveFileSpecA(LPSTR lpstrFilename);
+LPSTR WIN32API PathAppendA(LPSTR lpstrPath,
+                           LPSTR lpstrAppend);
+    
+// STRING.CPP
 LPSTR WIN32API StrStrIA(LPCSTR lpFirst, LPCSTR lpSrch);
     
 
