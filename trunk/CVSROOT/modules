@@ -28,4 +28,5 @@ DailyBuild          tools/DailyBuild
 win32k              src/win32k
 kKrnlLib            src/win32k/kKrnlLib
 include             include
+odin32include       include
 
