@@ -1,4 +1,14 @@
- /* $Id: changelog,v 1.1115 2000-09-08 15:28:24 bird Exp $ */
+ /* $Id: changelog,v 1.1116 2000-09-08 18:10:32 sandervl Exp $ */
+
+ 2000-09-08: Michal Necasek <mike@mendelu.cz>
+    - KERNEL32: Changes and fixes for exception handling (now dispatches
+                exceptions to win32 apps)
+
+ 2000-09-08: Sander van Leeuwen <sandervl@xs4all.nl>
+    - KERNEL32: Implemented EnumResourceLanguagesA/W
+                Put back some code that was changed. (environ.cpp & heap.cpp)
+    - GDI32:    Fixed FS bug in OSLibDeleteRegion
+    - USER32:   Removed wrapper for GetWindow; not required
 
  2000-09-07: knut st. osmundsen <knut.stange.osmundsen@mynd.no>
     - Win32k:   Added last FP14 kernel to Symbol database.
