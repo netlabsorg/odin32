@@ -1,4 +1,4 @@
-/* $Id: winevent.cpp,v 1.1 2001-08-31 20:31:03 phaller Exp $ */
+/* $Id: winevent.cpp,v 1.2 2002-02-11 13:48:42 sandervl Exp $ */
 
 /*
  * Win32 windows special event handling
@@ -61,11 +61,7 @@ ODINDEBUGCHANNEL(USER32-WINEVENT)
  * Author    : Patrick Haller [2001-08-31]
  *****************************************************************************/
 
-ODINPROCEDURE4(NotifyWinEvent,
-               DWORD, event,
-               HWND,  hwnd,
-               LONG,  idObjectType,
-               LONG,  idObject)
+void WIN32API NotifyWinEvent(DWORD event, HWND hwnd, LONG idObjectType, LONG idObject)
 {
   /*
   dprintf(("USER32::NotifyWinEvent not implemented"));

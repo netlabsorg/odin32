@@ -1,4 +1,4 @@
-/* $Id: user32.cpp,v 1.119 2002-02-05 17:58:59 sandervl Exp $ */
+/* $Id: user32.cpp,v 1.120 2002-02-11 13:48:41 sandervl Exp $ */
 
 /*
  * Win32 misc user32 API functions for OS/2
@@ -2057,9 +2057,7 @@ BOOL WIN32API RegisterNetworkCapabilities(DWORD x1,
  *
  * Author    : Patrick Haller [Wed, 1998/06/16 11:55]
  *****************************************************************************/
-BOOL WIN32API EndTask(DWORD x1,
-                         DWORD x2,
-                         DWORD x3)
+BOOL WIN32API EndTask(DWORD x1, DWORD x2, DWORD x3)
 {
   dprintf(("USER32: EndTask(%08xh,%08xh,%08xh) not implemented.\n",
            x1,
@@ -2079,8 +2077,7 @@ BOOL WIN32API EndTask(DWORD x1,
  *
  * Author    : Patrick Haller [Wed, 1998/06/16 11:55]
  *****************************************************************************/
-BOOL WIN32API GetNextQueueWindow(DWORD x1,
-                                    DWORD x2)
+BOOL WIN32API GetNextQueueWindow(DWORD x1, DWORD x2)
 {
   dprintf(("USER32: GetNextQueueWindow(%08xh,%08xh) not implemented.\n",
            x1,
@@ -2177,7 +2174,7 @@ BOOL WIN32API UserSignalProc(DWORD x1,
                                 DWORD x3,
                                 DWORD x4)
 {
-  dprintf(("USER32: SysErrorBox(%08xh,%08xh,%08xh,%08xh) not implemented.\n",
+  dprintf(("USER32: UserSignalProc(%08xh,%08xh,%08xh,%08xh) not implemented.\n",
            x1,
            x2,
            x3,

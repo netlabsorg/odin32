@@ -1,4 +1,4 @@
-/* $Id: winkeyboard.cpp,v 1.29 2002-01-02 18:37:09 sandervl Exp $ */
+/* $Id: winkeyboard.cpp,v 1.30 2002-02-11 13:48:43 sandervl Exp $ */
 /*
  * Win32 <-> PM key translation
  *
@@ -1771,8 +1771,7 @@ ODINFUNCTION2(BOOL,  ActivateKeyboardLayout,
  *
  * Author    : Patrick Haller [Thu, 1998/02/26 11:55]
  *****************************************************************************/
-ODINFUNCTION1(BOOL, UnloadKeyboardLayout,
-              HKL,  hkl)
+BOOL WIN32API UnloadKeyboardLayout(HKL hkl)
 {
   dprintf(("not implemented.\n"));
 

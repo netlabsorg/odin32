@@ -1,4 +1,4 @@
-/* $Id: window.cpp,v 1.116 2002-02-06 16:31:48 sandervl Exp $ */
+/* $Id: window.cpp,v 1.117 2002-02-11 13:48:42 sandervl Exp $ */
 /*
  * Win32 window apis for OS/2
  *
@@ -592,9 +592,7 @@ ODINFUNCTION2(BOOL, ShowWindow,
  *
  * Author    : Patrick Haller [Thu, 1998/02/26 11:55]
  *****************************************************************************/
-ODINFUNCTION2(BOOL, ShowWindowAsync,
-              HWND, hwnd,
-              int,  nCmdShow)
+BOOL WIN32API ShowWindowAsync(HWND hwnd, int nCmdShow)
 {
   dprintf(("USER32:ShowWindowAsync (%08xh,%08x) not correctly implemented.\n",
          hwnd,

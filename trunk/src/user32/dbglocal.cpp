@@ -1,4 +1,4 @@
-/* $Id: dbglocal.cpp,v 1.8 2002-02-05 17:58:58 sandervl Exp $ */
+/* $Id: dbglocal.cpp,v 1.9 2002-02-11 13:48:40 sandervl Exp $ */
 
 /*
  * debug logging functions for OS/2
@@ -88,7 +88,8 @@ static char  *DbgFileNames[DBG_MAXFILES] =
 "win32wbasenonclient",
 "win32wbaseprop",
 "dcrgn",
-"message"
+"message",
+"trace"
 };
 //******************************************************************************
 //******************************************************************************
