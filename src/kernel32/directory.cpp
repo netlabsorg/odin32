@@ -1,4 +1,4 @@
-/* $Id: directory.cpp,v 1.5 1999-09-28 01:17:01 phaller Exp $ */
+/* $Id: directory.cpp,v 1.6 1999-10-20 08:09:04 sandervl Exp $ */
 
 /*
  * Win32 Directory functions for OS/2
@@ -21,6 +21,7 @@
 #include <stdlib.h>
 #include <unicode.h>
 #include <heapstring.h>
+#include <options.h>
 
 
 ODINDEBUGCHANNEL(KERNEL32-DIRECTORY)
@@ -169,21 +170,27 @@ ODINFUNCTION2(BOOL,CreateDirectoryW,LPCWSTR,             arg1,
  * Author    : Patrick Haller [Wed, 1999/09/28 20:44]
  *****************************************************************************/
 
-ODINFUNCTION2(UINT,GetSystemDirectoryA,LPSTR,arg1,
-                                       UINT, arg2)
+ODINFUNCTION2(UINT,GetSystemDirectoryA,LPSTR,lpBuffer,
+                                       UINT,uSize)
 {
   LPSTR lpstrEnv = getenv("WIN32.DIR.SYSTEM");          /* query environment */
 
   if (lpstrEnv != NULL)
   {
-    lstrcpynA(arg1,                   /* copy environment variable to buffer */
+    lstrcpynA(lpBuffer,                   /* copy environment variable to buffer */
               lpstrEnv,
-              arg2);
-    return (lstrlenA(arg1));                /* return number of copies bytes */
-  }
-  else
+              uSize);
+    return (lstrlenA(lpBuffer));                /* return number of copies bytes */
+  } else
+  {
+    int len;
+
+    len = PROFILE_GetOdinIniString(ODINDIRECTORIES,"SYSTEM","",lpBuffer,uSize);
+    if (len > 2) return len;
+    else
                                /* if no override by environment is available */
-    return O32_GetSystemDirectory(arg1, arg2);
+      return O32_GetSystemDirectory(lpBuffer,uSize);
+  }
 }
 
 
@@ -224,22 +231,28 @@ ODINFUNCTION2(UINT,GetSystemDirectoryW,LPWSTR,lpBuffer,
  * Author    : Patrick Haller [Wed, 1999/09/28 20:44]
  *****************************************************************************/
 
-ODINFUNCTION2(UINT,GetWindowsDirectoryA,LPSTR,arg1,
-                                        UINT, arg2)
+ODINFUNCTION2(UINT,GetWindowsDirectoryA,LPSTR,lpBuffer,
+                                        UINT,uSize)
 {
   LPSTR lpstrEnv = getenv("WIN32.DIR.WINDOWS");         /* query environment */
 
   if (lpstrEnv != NULL)
   {
-    lstrcpynA(arg1,                   /* copy environment variable to buffer */
+    lstrcpynA(lpBuffer,                   /* copy environment variable to buffer */
               lpstrEnv,
-              arg2);
-    return (lstrlenA(arg1));                /* return number of copies bytes */
-  }
-  else
+              uSize);
+    return (lstrlenA(lpBuffer));                /* return number of copies bytes */
+  } else
+  {
+    int len;
+
+    len = PROFILE_GetOdinIniString(ODINDIRECTORIES,"WINDOWS","",lpBuffer,uSize);
+    if (len > 2) return len;
+    else
+
                                /* if no override by environment is available */
-    return O32_GetWindowsDirectory(arg1,
-                                   arg2);
+      return O32_GetWindowsDirectory(lpBuffer,uSize);
+  }
 }
 
 

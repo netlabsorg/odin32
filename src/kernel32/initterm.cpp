@@ -1,4 +1,4 @@
-/* $Id: initterm.cpp,v 1.14 1999-09-15 23:26:07 sandervl Exp $ */
+/* $Id: initterm.cpp,v 1.15 1999-10-20 08:09:04 sandervl Exp $ */
 
 /*
  * KERNEL32 DLL entry point
@@ -87,15 +87,15 @@ unsigned long SYSTEM _DLL_InitTerm(unsigned long hModule, unsigned long
     switch (ulFlag)
     {
         case 0 :
-	    loadNr = globLoadNr++;
+            loadNr = globLoadNr++;
 
             dprintf(("kernel32 init\n"));
             _ctordtorInit();
 
             CheckVersionFromHMOD(PE2LX_VERSION, hModule); /*PLF Wed  98-03-18 05:28:48*/
 
-	    if(RegisterLxDll(hModule, 0, 0) == FALSE) 
-		return 0UL;
+            if(RegisterLxDll(hModule, 0, 0) == FALSE)
+                return 0UL;
 
             /*******************************************************************/
             /* A DosExitList routine must be used to clean up if runtime calls */
@@ -117,9 +117,10 @@ unsigned long SYSTEM _DLL_InitTerm(unsigned long hModule, unsigned long
             //SvL: Do it here instead of during the exe object creation
             //(std handles can be used in win32 dll initialization routines
             HMInitialize();             /* store standard handles within HandleManager */
+            PROFILE_LoadOdinIni();
             break;
         case 1 :
- 	    UnregisterLxDll(hModule);
+            UnregisterLxDll(hModule);
             break;
         default  :
             return 0UL;
