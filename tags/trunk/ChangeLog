@@ -1,9 +1,16 @@
-/* $Id: ChangeLog,v 1.1372 2001-04-22 08:59:48 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.1373 2001-04-22 10:36:47 sandervl Exp $ */
 
  2001-04-22: Sander van Leeuwen <sandervl@xs4all.nl>
     - KERNEL32: o Removed wrong segment definitions introduced by yesterday's
                   EXC_CallHandler rewrite.
                   (fixes global data section)
+                o Build fake header for LX executable
+                  (fixes crash during Acrobat Reader 5 install (regsvr32.exe))
+    - NTDLL:    o Updated rtlstr.c (Wine)
+                o Wrote partial implementation of RtlGetAce. Not tested well.
+                  Enough to prevent Acrobat Reader 5 install from crashing.
+    - ADVAPI32: o Forward AddAce, FindFirstFreeAce, GetAce & AddAccessAllowedAce
+                  to NTDLL
 
  2001-04-21: Sander van Leeuwen <sandervl@xs4all.nl>
     - KERNEL32: o DosWrite for stdout doesn't accept high addresses
