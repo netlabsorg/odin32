@@ -1,4 +1,4 @@
-/* $Id: msgbox.c,v 1.6 2001-11-14 18:33:03 sandervl Exp $ */
+/* $Id: msgbox.c,v 1.7 2003-05-06 13:50:36 sandervl Exp $ */
 /*
  * Message boxes (based on Wine code)
  *
@@ -185,7 +185,11 @@ static HFONT MSGBOX_OnInit(HWND hwnd, LPMSGBOXPARAMSA lpmb)
 
     if (hFont)
         SelectObject(hdc, hPrevFont);
+#ifdef __WIN32OS2__
+    ReleaseDC(hwnd, hdc);
+#else
     ReleaseDC(hItem, hdc);
+#endif
 
     tiheight = 16 + MAX(iheight, theight);
     wwidth  = tleft + twidth + ileft + borwidth;

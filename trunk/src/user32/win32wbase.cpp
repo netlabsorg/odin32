@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.371 2003-05-02 17:18:57 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.372 2003-05-06 13:50:37 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -4110,6 +4110,7 @@ BOOL Win32BaseWindow::queryOpenDCs(HDC *phdcWindow, int  chdcWindow, int *pnrdcs
         return FALSE;
     }
 
+    lock(&critsect);
     int j = 0;
     for(int i=0;i<MAX_OPENDCS && j<nrOpenDCs;i++) {
         if(hdcWindow[i] != 0) {
@@ -4117,6 +4118,7 @@ BOOL Win32BaseWindow::queryOpenDCs(HDC *phdcWindow, int  chdcWindow, int *pnrdcs
             j++;
         }
     }
+    unlock(&critsect);
     *pnrdcs = nrOpenDCs;
     return TRUE;
 }
@@ -4133,17 +4135,20 @@ BOOL Win32BaseWindow::queryOpenDCs(HDC *phdcWindow, int  chdcWindow, int *pnrdcs
 //******************************************************************************
 void Win32BaseWindow::addOpenDC(HDC hdc)
 {
+    lock(&critsect);
     for(int i=0;i<MAX_OPENDCS;i++) {
         if(hdcWindow[i] == 0) {
             hdcWindow[i] = hdc;
             break;
         }
     }
+    unlock(&critsect);
     if(i == MAX_OPENDCS) {
         DebugInt3(); //no room!
         return;
     }
 
+    dprintf2(("Win32BaseWindow::addOpenDC %x %x %d", getWindowHandle(), hdc, nrOpenDCs+1));
     nrOpenDCs++;
 }
 //******************************************************************************
@@ -4160,19 +4165,24 @@ void Win32BaseWindow::addOpenDC(HDC hdc)
 void Win32BaseWindow::removeOpenDC(HDC hdc)
 {
     if(nrOpenDCs == 0) {
+        dprintf(("Win32BaseWindow::removeOpenDC %x hdc %x not found!! (1)", getWindowHandle(), hdc));
         DebugInt3();
         return;
     }
+    lock(&critsect);
     for(int i=0;i<MAX_OPENDCS;i++) {
         if(hdcWindow[i] == hdc) {
             hdcWindow[i] = 0;
             break;
         }
     }
+    unlock(&critsect);
     if(i == MAX_OPENDCS) {
+        dprintf(("Win32BaseWindow::removeOpenDC hdc %x not found!!", hdc));
         DebugInt3(); //not found
         return;
     }
+    dprintf2(("Win32BaseWindow::removeOpenDC %x %x", getWindowHandle(), hdc, nrOpenDCs-1));
     nrOpenDCs--;
 }
 //******************************************************************************
