@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.9 2000-04-29 18:23:33 sandervl Exp $
+# $Id: makefile,v 1.10 2000-05-02 11:24:53 bird Exp $
 
 #
 # PD-Win32 API
@@ -50,8 +50,6 @@ needed:
     cd ..\common
     $(MAKE_CMD) NODEP=1 dep
     $(MAKE_CMD) needed
-    cd ..\install
-    $(MAKE_CMD)
     cd ..\impdef
     $(MAKE_CMD) NODEP=1 dep
     $(MAKE_CMD)
