@@ -1,9 +1,16 @@
-/* $Id: changelog,v 1.1425 2001-05-19 09:12:19 sandervl Exp $ */
+/* $Id: changelog,v 1.1426 2001-05-19 11:12:26 sandervl Exp $ */
 
  2001-05-19: Sander van Leeuwen <sandervl@xs4all.nl>
     - WS2_32:   o Added more exports
     - KERNEL32: o Export TryEnterCriticalSection
+                o InterlockedCompareExchange bugfix; should not always return
+                  old destination; return whatever cmpxchg puts in eax
     - SHLWAPI:  o Export SHSetValueW
+                o Ordinal export 342 is InterlockedCompareExchange implementation
+                  Takes 3 parameters, not 4. (Wine bug)
+    - USER32:   o Added TrackMouseEvent, GetGUIThreadInfo & SendInput stubs
+    - ADVAPI32: o Added undocumented SystemFunctionXXX functions (stubs)
+                o Set lasterror in EnumServicesStatusA/W stubs
 
  2001-05-19: Dietrich Teickner <Dietrich_Teickner@t-online.de>
     - KERNEL32: o LOCALE_IFIRSTDAYOFWEEK fix (GetLocaleInfo)
