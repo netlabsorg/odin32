@@ -1,4 +1,4 @@
-/* $Id: crt.cpp,v 1.4 2000-01-06 20:08:06 sandervl Exp $ */
+/* $Id: crt.cpp,v 1.5 2000-01-08 14:24:03 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -1315,6 +1315,203 @@ LONG CDECL CRTDLL__CIpow()
 	POP_FPU(y);
 	POP_FPU(x);
 	return pow(x,y);
+}
+
+
+/*********************************************************************
+ *                  _CIacos    (CRTDLL.004)
+ */
+double CDECL CRTDLL__CIacos()
+{
+ double x;
+
+  dprintf2(("CRTDLL: _CIacos\n"));
+  POP_FPU(x);
+  return acos(x);
+}
+
+
+/*********************************************************************
+ *                  _CIasin    (CRTDLL.005)
+ */
+double CDECL CRTDLL__CIasin()
+{
+ double x;
+
+  dprintf2(("CRTDLL: _CIasin\n"));
+  POP_FPU(x);
+  return asin(x);
+}
+
+
+/*********************************************************************
+ *                  _CIatan    (CRTDLL.006)
+ */
+double CDECL CRTDLL__CIatan()
+{
+ double x;
+
+  dprintf2(("CRTDLL: _CIatan\n"));
+  POP_FPU(x);
+  return atan(x);
+}
+
+
+/*********************************************************************
+ *                  _CIatan2    (CRTDLL.007)
+ */
+double CDECL CRTDLL__CIatan2()
+{
+ double x, y;
+
+  dprintf2(("CRTDLL: _CIatan2\n"));
+  POP_FPU(y);
+  POP_FPU(x);
+  return atan2(x,y);
+}
+
+
+/*********************************************************************
+ *                  _CIcos    (CRTDLL.008)
+ */
+double CDECL CRTDLL__CIcos()
+{
+ double x;
+
+  dprintf2(("CRTDLL: _CIcos\n"));
+  POP_FPU(x);
+  return cos(x);
+}
+
+
+/*********************************************************************
+ *                  _CIcosh    (CRTDLL.009)
+ */
+double CDECL CRTDLL__CIcosh()
+{
+ double x;
+
+  dprintf2(("CRTDLL: _CIcosh\n"));
+  POP_FPU(x);
+  return cosh(x);
+}
+
+
+/*********************************************************************
+ *                  _CIexp    (CRTDLL.010)
+ */
+double CDECL CRTDLL__CIexp()
+{
+ double x;
+
+  dprintf2(("CRTDLL: _CIexp\n"));
+  POP_FPU(x);
+  return exp(x);
+}
+
+
+/*********************************************************************
+ *                  _CIfmod     (CRTDLL.011)
+ */
+double CDECL CRTDLL__CIfmod( )
+{
+ double x, y;
+
+  dprintf2(("CRTDLL: _CIfmod\n"));
+  POP_FPU(y);
+  POP_FPU(x);
+  return fmod(x,y);
+}
+
+
+/*********************************************************************
+ *                  _CIlog    (CRTDLL.012)
+ */
+double CDECL CRTDLL__CIlog()
+{
+ double x;
+
+  dprintf2(("CRTDLL: _CIlog\n"));
+  POP_FPU(x);
+  return log(x);
+}
+
+
+/*********************************************************************
+ *                  _CIlog10    (CRTDLL.013)
+ */
+double CDECL CRTDLL__CIlog10()
+{
+ double x;
+
+  dprintf2(("CRTDLL: _CIlog10\n"));
+  POP_FPU(x);
+  return log10(x);
+}
+
+
+/*********************************************************************
+ *                  _CIsin     (CRTDLL.015)
+ */
+double CDECL CRTDLL__CIsin()
+{
+ double x;
+
+  dprintf2(("CRTDLL: _CIsin\n"));
+  POP_FPU(x);
+  return sin(x);
+}
+
+
+/*********************************************************************
+ *                  _CIsinh    (CRTDLL.016)
+ */
+double CDECL CRTDLL__CIsinh()
+{
+ double x;
+
+  dprintf2(("CRTDLL: _CIsinh\n"));
+  POP_FPU(x);
+  return sinh(x);
+}
+
+
+/*********************************************************************
+ *                  _CIsqrt    (CRTDLL.017)
+ */
+double CDECL CRTDLL__CIsqrt()
+{
+ double x;
+
+  dprintf2(("CRTDLL: _CIsqrt\n"));
+  POP_FPU(x);
+  return sqrt(x);
+}
+
+
+/*********************************************************************
+ *                  _CItan    (CRTDLL.018)
+ */
+double CDECL CRTDLL__CItan()
+{
+ double x;
+
+  dprintf2(("CRTDLL: _CItan\n"));
+  POP_FPU(x);
+  return tan(x);
+}
+
+
+/*********************************************************************
+ *                  _CItanh    (CRTDLL.019)
+ */
+double CDECL CRTDLL__CItanh()
+{
+ double x;
+
+  dprintf2(("CRTDLL: _CItanh\n"));
+  POP_FPU(x);
+  return tanh(x);
 }
 
 
