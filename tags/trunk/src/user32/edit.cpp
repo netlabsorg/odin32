@@ -1,4 +1,4 @@
-/* $Id: edit.cpp,v 1.25 1999-12-26 17:30:14 cbratschi Exp $ */
+/* $Id: edit.cpp,v 1.26 1999-12-27 17:08:07 cbratschi Exp $ */
 /*
  *      Edit control
  *
@@ -3723,6 +3723,8 @@ static VOID EDIT_Refresh(HWND hwnd,EDITSTATE *es)
   HDC hdc,hdcCompatible;
   HBITMAP bitmap,oldbmp;
   RECT rect;
+
+  if (!IsWindowVisible(hwnd)) return;
 
   //CB: original controls redraws many times, cache drawing
   HideCaret(hwnd);
