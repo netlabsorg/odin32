@@ -1,4 +1,4 @@
-/* $Id: hmmmap.cpp,v 1.15 2000-09-10 21:54:06 sandervl Exp $ */
+/* $Id: hmmmap.cpp,v 1.16 2001-01-22 18:26:51 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -55,8 +55,7 @@ DWORD HMDeviceMemMapClass::CreateFileMapping(PHMHANDLEDATA         pHMHandleData
                 	 		     DWORD protect,   /* [in] Protection for mapping object */
                 		   	     DWORD size_high, /* [in] High-order 32 bits of object size */
                 		   	     DWORD size_low,  /* [in] Low-order 32 bits of object size */
-                		   	     LPCSTR name,     /* [in] Name of file-mapping object */ 
-				             HFILE *hOldMap)  // if create an existing memmap, return handle of old one
+                		   	     LPCSTR name)     /* [in] Name of file-mapping object */ 
 {
  Win32MemMap *map;
 
@@ -94,11 +93,14 @@ DWORD HMDeviceMemMapClass::CreateFileMapping(PHMHANDLEDATA         pHMHandleData
 	//TODO:
 	//Is it allowed to open an existing view with different flags?
         //(i.e. write access to readonly object)
-	//Return handle of existing file mapping
-	dprintf(("CreateFileMapping: Return handle of existing file mapping %s", name));
+	dprintf(("CreateFileMapping: duplicate handle of existing file mapping %s", name));
+
+        //if map already exists, we must create a new handle to the existing
+        //map object and return ERROR_ALREADY_EXISTS
   	map->AddRef();
-	*hOldMap = map->getMapHandle();
-	return ERROR_ALREADY_EXISTS;
+        pHMHandleData->dwUserData = (ULONG)map;
+        pHMHandleData->dwInternalType = HMTYPE_MEMMAP;
+        return ERROR_ALREADY_EXISTS;
   }
   else {
 	map = new Win32MemMap(hFile, size_low, protect, (LPSTR)name);
@@ -108,7 +110,7 @@ DWORD HMDeviceMemMapClass::CreateFileMapping(PHMHANDLEDATA         pHMHandleData
 		return ERROR_OUTOFMEMORY;
   	} 
 
-  	if(map->Init(pHMHandleData->hHMHandle) == FALSE) {
+  	if(map->Init() == FALSE) {
 		dprintf(("CreateFileMappingA: init failed!"));
 		delete map;
 		return ERROR_GEN_FAILURE;
@@ -217,7 +219,7 @@ DWORD HMDeviceMemMapClass::CloseHandle(PHMHANDLEDATA pHMHandleData)
   //mapping object, the system keeps the corresponding file open until the last
   //view of the file is unmapped.
   map = (Win32MemMap *)pHMHandleData->dwUserData;
-  map->close();
+  map->Release();
 
   return NO_ERROR;
 }

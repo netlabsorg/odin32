@@ -1,4 +1,4 @@
-/* $Id: hmdevice.cpp,v 1.24 2000-11-14 14:27:00 sandervl Exp $ */
+/* $Id: hmdevice.cpp,v 1.25 2001-01-22 18:26:50 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -1106,8 +1106,7 @@ DWORD HMDeviceHandler::CreateFileMapping(PHMHANDLEDATA              pHMHandleDat
                                          DWORD                      flProtect,
                                          DWORD                      dwMaximumSizeHigh,
                                          DWORD                      dwMaximumSizeLow,
-                                 LPCSTR lpName,
-                 HFILE *hOldMap)  // if create an existing memmap, return handle of old one
+                                 LPCSTR lpName)
 {
   dprintf(("KERNEL32: HandleManager::DeviceHandler::CreateFileMapping(%08xh,%08xh,%08xh,%08xh,%08xh,%08xh,%s)\n",
            pHMHandleData->hHMHandle,

@@ -1,4 +1,4 @@
-/* $Id: heap.cpp,v 1.23 2000-11-06 20:01:26 sandervl Exp $ */
+/* $Id: heap.cpp,v 1.24 2001-01-22 18:26:50 sandervl Exp $ */
 
 /*
  * Win32 heap API functions for OS/2
@@ -46,7 +46,7 @@ ODINFUNCTIONNODBG4(LPVOID, HeapReAlloc, HANDLE, hHeap, DWORD, dwFlags, LPVOID,
 {
  OS2Heap *curheap = OS2Heap::find(hHeap);
 
-  dprintf2(("HeapReAlloc %X bytes", dwBytes));
+  dprintf2(("HeapReAlloc %x %x %x %X bytes", hHeap, dwFlags, lpMem, dwBytes));
   if(curheap == NULL)
         return(NULL);
 
@@ -387,7 +387,7 @@ PVOID WIN32API GlobalLock(HGLOBAL arg1)
 //******************************************************************************
 HGLOBAL WIN32API GlobalReAlloc(HGLOBAL arg1, DWORD arg2, UINT  arg3)
 {
-    dprintf(("KERNEL32:  GlobalReAlloc\n"));
+    dprintf(("KERNEL32: GlobalReAlloc %x %x %d", arg1, arg2, arg3));
 
     return O32_GlobalReAlloc(arg1, arg2, arg3);
 }
