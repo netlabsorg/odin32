@@ -1,4 +1,8 @@
-/* $Id: changelog,v 1.1843 2001-11-21 11:50:42 sandervl Exp $ */
+/* $Id: changelog,v 1.1844 2001-11-21 12:13:40 bird Exp $ */
+
+ 2001-11-21: knut st. osmundsen <kosmunds@csc.com>
+    - src/makefile:
+                o Added guidlib to NOTDLLS.
 
  2001-11-21: Sander van Leeuwen <sandervl@xs4all.nl>
     - COMCTL32: o Tooltips bugfixes (wrong pointer used to free memory)
@@ -23,7 +27,7 @@
     - OLEAUT32: o Don't include guid file in custom build library
 
  2000-11-18: Yuri Dario <mc6530@mclink.it>
-    - USER32:   o WM_SETTEXT (unicode) fix 
+    - USER32:   o WM_SETTEXT (unicode) fix
                   (latest changes broke Opera among other things)
 
  2001-11-16: Sander van Leeuwen <sandervl@xs4all.nl>
@@ -36,7 +40,7 @@
                   a performance loss of a few clock cycles and a code size
                   increase of 2k, I prefer the 1st option.
     - WSOCK32:  o ODINWRAP changes break winsock. This code still depended
-                  on FS save/restore. Now added a wrapper header for all 
+                  on FS save/restore. Now added a wrapper header for all
                   OS/2 socket functions.
 
  2001-11-16: Patrick Haller <patrick.haller@innotek.de>
