@@ -1,4 +1,4 @@
-/* $Id: ToDO.txt,v 1.12 2001-02-04 13:54:25 sandervl Exp $ */
+/* $Id: ToDO.txt,v 1.13 2001-05-30 03:31:48 phaller Exp $ */
 
 To Do list for ODIN:
 
@@ -56,7 +56,7 @@ NOONE	        KERNEL32: Async file io
 NOONE           KERNEL32: Vio support for console applications
                         (partially done)
 
-NOONE           WSOCK32: Winsock 2 implementation
+NOONE           WSOCK32: Winsock 2 implementation (WS2_32.DLL, WS2HELP.DLL)
 
 NOONE           GDI32: Rewrite using Gpi api (remove Open32 dependancy)
 

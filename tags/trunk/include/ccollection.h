@@ -1,4 +1,4 @@
-/* $Id: ccollection.h,v 1.1 2001-05-30 01:30:56 phaller Exp $ */
+/* $Id: ccollection.h,v 1.2 2001-05-30 03:27:36 phaller Exp $ */
 
 /*
  * Collection class:
@@ -157,10 +157,10 @@ class CHashtableLookup : public CCollection
         void* getElement(char *pszName);
         void  clear();
         void  rehash();
+        void  setSize(int iNewSize);
 
     protected:
         unsigned long nextPrime(unsigned long x);
-        friend unsigned long static _Optlink hashcode(int iRing, char *pszName);
 
         // the array of linear lists
         CLinearList** parrLists;
