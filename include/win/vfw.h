@@ -60,7 +60,11 @@ typedef struct tagWINE_HIC {
 	DWORD		type;		/* 08: */
 	DWORD		handler;	/* 0C: */
 	HDRVR		hdrv;		/* 10: */
+#ifdef __WIN32OS2__
+	DWORD		privatevfw;	/* 14:(handled by SendDriverMessage)*/
+#else
 	DWORD		private;	/* 14:(handled by SendDriverMessage)*/
+#endif
 	FARPROC		driverproc;	/* 18:(handled by SendDriverMessage)*/
 	DWORD		x1;		/* 1c: name? */
 	WORD		x2;		/* 20: */

@@ -1,4 +1,4 @@
-/* $Id: internal.cpp,v 1.5 2000-08-02 15:49:32 bird Exp $ */
+/* $Id: internal.cpp,v 1.6 2000-11-19 13:08:42 sandervl Exp $ */
 /* -*- tab-width: 8; c-basic-offset: 4 -*- */
 
 /*
@@ -14,7 +14,7 @@
 #include "winbase.h"
 #include "winuser.h"
 #include "winerror.h"
-#include "driver.h"
+////#include "driver.h"
 #include "heapstring.h"
 #include "mmsystem.h"
 #include "msacm.h"

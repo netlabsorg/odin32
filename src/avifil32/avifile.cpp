@@ -1,4 +1,4 @@
-/* $Id: avifile.cpp,v 1.6 2000-01-10 23:27:12 sandervl Exp $ */
+/* $Id: avifile.cpp,v 1.7 2000-11-19 13:12:09 sandervl Exp $ */
 /*				   
  * Copyright 1999 Marcus Meissner
  */
@@ -14,7 +14,7 @@
 #include "winbase.h"
 #include "vfw.h"
 #include "wine/winestring.h"
-#include "driver.h"
+////#include "driver.h"
 #include "mmsystem.h"
 #include "winerror.h"
 #include "debugstr.h"
