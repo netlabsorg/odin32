@@ -1,5 +1,5 @@
 ################################################################################
-# $Id: Makefile,v 1.15 2000-01-24 18:18:59 bird Exp $
+# $Id: Makefile,v 1.16 2000-01-26 23:19:59 sandervl Exp $
 #
 # Copyright 1998-1999 knut st. osmundsen
 #
@@ -197,7 +197,7 @@ ProbKrnl.exe: dev16\ProbKrnl.c $(WIN32KBASE)\include\sym.h \
     $(CC16) -c -W4 -Asfw -G2s -Zp -Zl -nologo -Fo$@ -Fa -Zi -Od -Lp \
         $(CDEFINES16) -DDEBUGR3 -Fa$(WIN32KLIST)\$(*B).s     \
         -Foprobkrnl.obj $(CINCLUDES16) dev16\probkrnl.c
-    link /NOD /MAP:FULL /CO /pmtype:vio probkrnl.obj, probkrnl.exe, probkrnl.map, $(TOOLKIT)\lib\os2286.lib + $(MSCPATH)\lib\clibcep.lib;
+    $(MSCPATH)\BINB\link /NOD /MAP:FULL /CO /pmtype:vio probkrnl.obj, probkrnl.exe, probkrnl.map, $(TOOLKIT)\lib\os2286.lib + $(MSCPATH)\lib\clibcep.lib;
 
 
 

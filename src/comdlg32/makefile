@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.9 1999-12-28 23:27:11 sandervl Exp $
+# $Id: makefile,v 1.10 2000-01-26 23:19:54 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -41,6 +41,9 @@ $(TARGET).dll: $(OBJS) $(TARGET).def
 $(TARGET).lib: $(TARGET)exp.def
 	$(IMPLIB) $(IMPLIBFLAGS) $@ $(TARGET)exp.def
 	$(CP) $@ $(PDWIN32_LIB)
+
+$(TARGET)exp.def: $(TARGET).def
+        $(IMPDEF) $** $@
 
 resource.asm: rsrc.rc 
     $(RC) $(RCFLAGS) -o resource.asm rsrc.rc 
