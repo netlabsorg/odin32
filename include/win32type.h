@@ -1,4 +1,4 @@
-/* $Id: win32type.h,v 1.11 1999-07-19 18:39:43 sandervl Exp $ */
+/* $Id: win32type.h,v 1.12 1999-07-22 19:10:50 sandervl Exp $ */
 
 #ifndef __WIN32TYPE_H__
 #define __WIN32TYPE_H__
@@ -249,6 +249,9 @@ typedef struct
     DWORD       dwExStyle;
 } CREATESTRUCTW, *LPCREATESTRUCTW;
 
+#ifndef RECT
+//conflict with mcios2.h
+
 typedef struct tagRECT
 {
     INT  left;
@@ -257,5 +260,6 @@ typedef struct tagRECT
     INT  bottom;
 } RECT, *PRECT, *LPRECT;
 typedef const RECT *LPCRECT;
+#endif
 
 #endif
