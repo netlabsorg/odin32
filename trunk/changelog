@@ -1,4 +1,8 @@
-/* $Id: changelog,v 1.1878 2001-12-03 12:14:47 sandervl Exp $ */
+/* $Id: changelog,v 1.1879 2001-12-03 12:57:33 phaller Exp $ */
+
+ 2001-12-03: Patrick Haller <patrick.haller@innotek.de>
+    - KERNEL32: o put in correct ioctl identifiers for parport support
+                  in winioctl.h
 
  2001-12-03: Sander van Leeuwen <sandervl@xs4all.nl>
     - KERNEL32: o Use DosSleep in Sleep (don't call WGSS)
