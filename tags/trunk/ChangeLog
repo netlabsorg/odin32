@@ -1,10 +1,11 @@
- /* $Id: ChangeLog,v 1.1170 2000-10-04 19:39:12 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.1171 2000-10-05 01:27:07 bird Exp $ */
 
  2000-10-04: Sander van Leeuwen <sandervl@xs4all.nl>
     - KERNEL32: Added forwarder support for PE loader (required for msvcrt40.dll)
 
  2000-10-04: knut st. osmundsen <knut.stange.osmundsen@mynd.no>
     - tools\ImpDef: Corrected wrong DESCRIPTION statement.
+                Corrected exception when processing src\icmp\icmp.def.
 
  2000-10-03: Sander van Leeuwen <sandervl@xs4all.nl>
     - Include\uniconv.h
