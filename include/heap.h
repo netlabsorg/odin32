@@ -1,4 +1,4 @@
-/* $Id: heap.h,v 1.1 1999-08-10 12:43:21 phaller Exp $ */
+/* $Id: heap.h,v 1.2 1999-12-18 19:30:46 achimha Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -29,7 +29,7 @@ static HANDLE SegptrHeap;
 
 //extern LPVOID HEAP_xalloc      ( HANDLE heap, DWORD flags, DWORD size );
 //extern LPVOID HEAP_xrealloc    ( HANDLE heap, DWORD flags, LPVOID lpMem, DWORD size );
-//extern LPSTR  HEAP_strdupA     ( HANDLE heap, DWORD flags, LPCSTR str );
+extern LPSTR WIN32API HEAP_strdupA     ( HANDLE heap, DWORD flags, LPCSTR str );
 //extern LPWSTR HEAP_strdupW     ( HANDLE heap, DWORD flags, LPCWSTR str );
 //extern LPWSTR HEAP_strdupAtoW  ( HANDLE heap, DWORD flags, LPCSTR str );
 //extern LPSTR  HEAP_strdupWtoA  ( HANDLE heap, DWORD flags, LPCWSTR str );
