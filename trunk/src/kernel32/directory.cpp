@@ -1,4 +1,4 @@
-/* $Id: directory.cpp,v 1.35 2001-03-12 14:16:33 sandervl Exp $ */
+/* $Id: directory.cpp,v 1.36 2001-05-28 16:23:42 phaller Exp $ */
 
 /*
  * Win32 Directory functions for OS/2
@@ -232,6 +232,15 @@ ODINFUNCTION2(BOOL,                CreateDirectoryA,
               LPCSTR,              lpstrDirectory,
               PSECURITY_ATTRIBUTES,arg2)
 {
+  // 2001-05-28 PH
+  // verify filename first (NT4SP6)
+  // @@@PH: if (IsBadStringPtr( (LPVOID)lpstrDirectory, 0xFFFF))
+  if (lpstrDirectory == NULL)
+  {
+      SetLastError(ERROR_PATH_NOT_FOUND);
+      return FALSE;
+  }
+
   int len = strlen(lpstrDirectory);
   
   // cut off trailing backslashes
