@@ -1,4 +1,4 @@
-# $Id: process.mak,v 1.14 2002-06-19 02:16:27 bird Exp $
+# $Id: process.mak,v 1.15 2002-06-26 04:45:45 bird Exp $
 
 #
 # Unix-like tools for OS/2
@@ -663,11 +663,13 @@ dep:
 !ifndef BUILD_VERBOSE
     @ \
 !endif
+!if "$(TARGET_MODE)" != "EMPTY" && "$(TARGET_MODE)" != "TESTCASE"
     $(TOOL_DEP) $(TOOL_DEP_FLAGS) -o$$(PATH_TARGET) -d$(TARGET_DEPEND)\
-!ifdef TARGET_NO_DEP
+! ifdef TARGET_NO_DEP
         -x$(TARGET_NO_DEP: =;)\
-!endif
+! endif
         $(TOOL_DEP_FILES)
+!endif
 !ifdef SUBDIRS
     @$(TOOL_DODIRS) "$(SUBDIRS)" $(TOOL_MAKE) -f $(BUILD_MAKEFILE) NODEP=1 $@
 !endif
