@@ -68,7 +68,7 @@ static void dumpIcoDir ( LPicoICONDIR entry )
 #endif
 
 
-static HDPA		sic_hdpa = 0;
+HDPA		sic_hdpa = 0;
 static CRITICAL_SECTION	SHELL32_SicCS;
 
 
@@ -575,7 +575,7 @@ INT SIC_GetIconIndex (LPCSTR sSourceFile, INT dwSourceIndex )
 
 	if (NULL != pDPA_GetPtr (sic_hdpa, 0))
 	{
-	  index = pDPA_Search (sic_hdpa, &sice, -1L, SIC_CompareEntrys, 0, 0);
+	  index = pDPA_Search (sic_hdpa, &sice, -1L, (PFNDPACOMPARE)SIC_CompareEntrys, 0, 0);
 	}
 
 	if ( INVALID_INDEX == index )
@@ -681,7 +681,7 @@ void SIC_Destroy(void)
 	{
 	  for (i=0; i < pDPA_GetPtrCount(sic_hdpa); ++i)
 	  {
-	    lpsice = pDPA_GetPtr(sic_hdpa, i);
+	    lpsice = (LPSIC_ENTRY)pDPA_GetPtr(sic_hdpa, i);
 	    SHFree(lpsice);
 	  }
 	  pDPA_Destroy(sic_hdpa);

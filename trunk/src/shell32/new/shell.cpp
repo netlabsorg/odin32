@@ -6,7 +6,7 @@
 #include <assert.h>
 #include <stdlib.h>
 #include <string.h>
-#include <unistd.h>
+//#include <unistd.h>
 #include <ctype.h>
 
 #include <odin.h>
@@ -14,9 +14,9 @@
 #define ICOM_CINTERFACE 1
 #define CINTERFACE 1
 
-#include "wine/winuser16.h"
-#include "wine/winbase16.h"
-#include "wine/shell16.h"
+//#include "wine/winuser16.h"
+//#include "wine/winbase16.h"
+//#include "wine/shell16.h"
 #include "winerror.h"
 #include "file.h"
 #include "heap.h"

@@ -209,9 +209,9 @@ typedef struct
 	BOOL		fAcceptFmt;			/* flag for pending Drop */
 } IGenericSFImpl;
 
-//static struct ICOM_VTABLE(IShellFolder) sfvt;
-//static struct ICOM_VTABLE(IPersistFolder) psfvt;
-//static struct ICOM_VTABLE(IDropTarget) dtvt;
+extern struct ICOM_VTABLE(IShellFolder) sfvt;
+extern struct ICOM_VTABLE(IPersistFolder) psfvt;
+extern struct ICOM_VTABLE(IDropTarget) dtvt;
 
 static IShellFolder * ISF_MyComputer_Constructor(void);
 
@@ -981,7 +981,7 @@ static HRESULT WINAPI IShellFolder_fnGetFolderPath(IShellFolder * iface, LPSTR l
 	return TRUE;
 }
 
-static ICOM_VTABLE(IShellFolder) sfvt =
+ICOM_VTABLE(IShellFolder) sfvt =
 {	
 	ICOM_MSVTABLE_COMPAT_DummyRTTIVALUE
 	IShellFolder_fnQueryInterface,
@@ -1003,7 +1003,7 @@ static ICOM_VTABLE(IShellFolder) sfvt =
 /***********************************************************************
 * 	[Desktopfolder]	IShellFolder implementation
 */
-static struct ICOM_VTABLE(IShellFolder) sfdvt;
+extern struct ICOM_VTABLE(IShellFolder) sfdvt;
 
 /**************************************************************************
 *	ISF_Desktop_Constructor
@@ -1330,7 +1330,7 @@ static HRESULT WINAPI ISF_Desktop_fnGetDisplayNameOf(
 	return S_OK;
 }
 
-static ICOM_VTABLE(IShellFolder) sfdvt =
+ICOM_VTABLE(IShellFolder) sfdvt =
 {	
 	ICOM_MSVTABLE_COMPAT_DummyRTTIVALUE
 	ISF_Desktop_fnQueryInterface,
@@ -1354,7 +1354,7 @@ static ICOM_VTABLE(IShellFolder) sfdvt =
 *   IShellFolder [MyComputer] implementation
 */
 
-static struct ICOM_VTABLE(IShellFolder) sfmcvt;
+extern struct ICOM_VTABLE(IShellFolder) sfmcvt;
 
 /**************************************************************************
 *	ISF_MyComputer_Constructor
@@ -1663,7 +1663,7 @@ static HRESULT WINAPI ISF_MyComputer_fnGetDisplayNameOf(
 	return S_OK;
 }
 
-static ICOM_VTABLE(IShellFolder) sfmcvt =
+ICOM_VTABLE(IShellFolder) sfmcvt =
 {	
 	ICOM_MSVTABLE_COMPAT_DummyRTTIVALUE
 	IShellFolder_fnQueryInterface,
@@ -1767,7 +1767,7 @@ static HRESULT WINAPI ISFPersistFolder_Initialize(
 	return S_OK;
 }
 
-static ICOM_VTABLE(IPersistFolder) psfvt =
+ICOM_VTABLE(IPersistFolder) psfvt =
 {
 	ICOM_MSVTABLE_COMPAT_DummyRTTIVALUE
 	ISFPersistFolder_QueryInterface,
@@ -1899,7 +1899,7 @@ static HRESULT WINAPI ISFDropTarget_Drop(
 	return E_NOTIMPL;
 }
 
-static struct ICOM_VTABLE(IDropTarget) dtvt =
+struct ICOM_VTABLE(IDropTarget) dtvt =
 {
 	ICOM_MSVTABLE_COMPAT_DummyRTTIVALUE
 	ISFDropTarget_QueryInterface,
