@@ -1,4 +1,4 @@
-/* $Id: win32api.h,v 1.5 2000-03-21 20:13:30 sandervl Exp $ */
+/* $Id: win32api.h,v 1.6 2000-03-22 18:47:01 sandervl Exp $ */
 
 /*
  *
@@ -60,5 +60,22 @@ HWND   WIN32API WindowFromDC(HDC hdc);
 BOOL   WIN32API UnmapViewOfFile(LPVOID addr);
 LPVOID WIN32API MapViewOfFile(HANDLE mapping, DWORD access, DWORD offset_high,
                               DWORD offset_low, DWORD count);
+
+HANDLE WIN32API GetCurrentProcess(void);
+DWORD  WIN32API GetCurrentProcessId(void);
+HANDLE WIN32API GetCurrentThread(void);
+DWORD  WIN32API GetCurrentThreadId(void);
+HANDLE WIN32API GetProcessHeap(void);
+
+LPVOID WIN32API HeapAlloc(HANDLE,DWORD,DWORD);
+DWORD  WIN32API HeapCompact(HANDLE,DWORD);
+HANDLE WIN32API HeapCreate(DWORD,DWORD,DWORD);
+BOOL   WIN32API HeapDestroy(HANDLE);
+BOOL   WIN32API HeapFree(HANDLE,DWORD,LPVOID);
+BOOL   WIN32API HeapLock(HANDLE);
+LPVOID WIN32API HeapReAlloc(HANDLE,DWORD,LPVOID,DWORD);
+DWORD  WIN32API HeapSize(HANDLE,DWORD,LPVOID);
+BOOL   WIN32API HeapUnlock(HANDLE);
+BOOL   WIN32API HeapValidate(HANDLE,DWORD,LPCVOID);
 
 #endif
