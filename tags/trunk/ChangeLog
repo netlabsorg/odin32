@@ -1,13 +1,16 @@
- /* $Id: ChangeLog,v 1.524 1999-12-09 00:55:31 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.525 1999-12-09 11:01:34 sandervl Exp $ */
 
  99-12-09: Sander van Leeuwen <sandervl@xs4all.nl>
 	- KERNEL32: Fixes in lstrcpynWtoA
-                    Added code heap
-                    Temporarily removed winres fix. (breaks Lotus Notes for some reason)
+                    Added code heap.
+                    Ported ExpandEnvironmentStringsA/W (Wine: 991114)
 	- USER32: Major changes for window procedures
                   Now identical to Wine. Window is unicode only if it's
                   window procedure comes from a unicode class.
                   Add thunk code for procedures to store type.
+	- ODINCRT: Replaced strncpy with one that stops at terminating 0
+	- INCLUDE\string.h: VAC version + minor change for strncpy
+	- WIN32K\PE2LX: Link with odincrt.lib for rtl functions
 
  99-12-08: David Raison <djr@lemur.co.uk>
  	- OLEAUT32: Typelib handling:
