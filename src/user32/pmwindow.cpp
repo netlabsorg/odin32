@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.59 1999-11-27 14:16:35 cbratschi Exp $ */
+/* $Id: pmwindow.cpp,v 1.60 1999-11-30 12:39:14 dengert Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -699,7 +699,7 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
             // get "virtual" scancode from character code cause
             // for "regular" keys they are equal
             scanCode = ( SHORT1FROMMP(mp2) >> 8) & 0x0FF;
-        }       
+        }
         // vitali add end
 
         // both WM_KEYUP & WM_KEYDOWN want a virtual key, find the right Win32 virtual key
@@ -893,7 +893,7 @@ VirtualKeyFound:
         dprintf(("OS2: WM_PAINT %x", hwnd));
 
         if (WinQueryUpdateRect (hwnd, NULL)) {
-            if (!win32wnd->isSupressErase()) {
+            if (!win32wnd->isSupressErase() && win32wnd->isEraseBkgnd()) {
                 BOOL erased = sendEraseBkgnd (win32wnd);
                 win32wnd->setEraseBkgnd (!erased, !erased);
             }
