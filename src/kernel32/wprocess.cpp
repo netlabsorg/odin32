@@ -1,4 +1,4 @@
-/* $Id: wprocess.cpp,v 1.149 2002-02-26 11:11:17 sandervl Exp $ */
+/* $Id: wprocess.cpp,v 1.150 2002-04-29 17:05:30 sandervl Exp $ */
 
 /*
  * Win32 process functions
@@ -339,7 +339,16 @@ void WIN32API DestroyTIB()
             }
         }
         threadListMutex.leave();
-
+      
+        // PH 2002-04-11
+        // free allocated memory
+        free( winteb->o.odin.threadinfo.pTokenGroups );
+      
+#ifdef DEBUG
+        if (winteb->o.odin.arrstrCallStack != NULL)
+          free( winteb->o.odin.arrstrCallStack );
+#endif
+      
         //Restore our original FS selector
         SetFS(orgtibsel);
 
@@ -1202,6 +1211,10 @@ ULONG InitCommandLine(const char *pszPeExe)
          *  Add arguments.
          */
         cch = strlen(pszPeExe)+1;
+      
+        // PH 2002-04-11
+        // Note: intentional memory leak, pszCmdLineW will not be freed
+        // or allocated after process startup
         pszCmdLineA = psz = (PSZ)malloc(cch);
         if (psz == NULL)
         {
@@ -1303,6 +1316,9 @@ ULONG InitCommandLine(const char *pszPeExe)
      */
     if (rc == NO_ERROR)
     {
+      // PH 2002-04-11
+      // Note: intentional memory leak, pszCmdLineW will not be freed
+      // or allocated after process startup
         pszCmdLineW = (WCHAR*)malloc(cch * 2);
         if (pszCmdLineW != NULL)
             AsciiToUnicode(pszCmdLineA, (WCHAR*)pszCmdLineW);
@@ -1401,6 +1417,17 @@ LPCWSTR WIN32API GetCommandLineW(void)
  * @returns     Bytes written to the buffer (lpszPath). This count includes the
  *              terminating '\0'.
  *              On error 0 is returned. Last error is set.
+ *
+ *              2002-04-25 PH
+ *              Q - Do we set ERROR_BUFFER_OVERFLOW when cch > cchPath?
+ *              Q - Does NT really set the last error?
+ *              A > Win2k does not set LastError here, remains OK
+ *
+ *              While GetModuleFileName does add a trailing termination zero
+ *              if there is enough room, the returned number of characters
+ *              *MUST NOT* include the zero character!
+ *              (Notes R6 Installer on Win2kSP6, verified Testcase)
+ *
  * @param       hModule     Handle to the module you like to get the file name to.
  * @param       lpszPath    Output buffer for full path and file name.
  * @param       cchPath     Size of the lpszPath buffer.
@@ -1420,15 +1447,16 @@ LPCWSTR WIN32API GetCommandLineW(void)
  * @status      Completely implemented, Open32.
  * @author      knut st. osmundsen (knut.stange.osmundsen@mynd.no)
  *              Sander van Leeuwen (sandervl@xs4all.nl)
+ *              Patrick Haller     (patrick.haller@innotek.de)
  * @remark      - Do we still have to call Open32?
- *              - Do we set ERROR_BUFFER_OVERFLOW when cch > cchPath?
- *              - Does NT really set the last error?
  */
 DWORD WIN32API GetModuleFileNameA(HMODULE hModule, LPTSTR lpszPath, DWORD cchPath)
 {
     Win32ImageBase *    pMod;           /* Pointer to the module object. */
-    DWORD               cch;            /* Length of the  */
-
+    DWORD               cch = 0;        /* Length of the  */
+  
+    // PH 2002-04-24 Note:
+    // WIN2k just crashes in NTDLL if lpszPath is invalid!
     if (!VALID_PSZ(lpszPath))
     {
         dprintf(("KERNEL32:  GetModuleFileNameA(0x%x, 0x%x, 0x%x): invalid pointer lpszLibFile = 0x%x\n",
@@ -1443,11 +1471,15 @@ DWORD WIN32API GetModuleFileNameA(HMODULE hModule, LPTSTR lpszPath, DWORD cchPat
         const char *pszFn = pMod->getFullPath();
         if (pszFn)
         {
-            cch = strlen(pszFn) + 1;
-            if (cch > cchPath)
-                cch = cchPath;
+            cch = strlen(pszFn);
+            if (cch >= cchPath)
+              cch = cchPath;
+            else
+              // if there is sufficient room for the zero termination,
+              // write it additionally, uncounted
+              lpszPath[cch] = '\0';
+              
             memcpy(lpszPath, pszFn, cch);
-            lpszPath[cch - 1] = '\0';
         }
         else
         {
@@ -1462,7 +1494,6 @@ DWORD WIN32API GetModuleFileNameA(HMODULE hModule, LPTSTR lpszPath, DWORD cchPat
         //only needed for call inside kernel32's initterm (profile init)
         //(console init only it seems...)
         cch = OSLibDosGetModuleFileName(hModule, lpszPath, cchPath);
-        if (cch > 0)    cch++;          /* Open32 doesn't count the terminator. */
     }
 
     if (cch > 0)
@@ -1793,19 +1824,50 @@ BOOL WINAPI CreateProcessA( LPCSTR lpApplicationName, LPSTR lpCommandLine,
     dprintf(("KERNEL32: CreateProcess %s %s", szAppName, lpCommandLine));
 
     DWORD Characteristics, SubSystem, fNEExe;
-    if(Win32ImageBase::isPEImage(szAppName, &Characteristics, &SubSystem, &fNEExe) == 0) {
-        char *lpszPE;
-        if(SubSystem == IMAGE_SUBSYSTEM_WINDOWS_CUI) {
-             lpszPE = "PEC.EXE";
-        }
-        else lpszPE = "PE.EXE";
+    if(Win32ImageBase::isPEImage(szAppName, &Characteristics, &SubSystem, &fNEExe) == 0)
+    {
+      char *lpszPE;
+      char *lpszExecutable;
+      int  iNewCommandLineLength;
 
+      // calculate base length for the new command line
+      iNewCommandLineLength = strlen(szAppName) + strlen(lpCommandLine);
+      
+      if(SubSystem == IMAGE_SUBSYSTEM_WINDOWS_CUI)
+        lpszExecutable = "PEC.EXE";
+      else
+        lpszExecutable = "PE.EXE";
+      
+      lpszPE = lpszExecutable;
+      
+      // 2002-04-24 PH
+      // set the ODIN32.DEBUG_CHILD environment variable to start new PE processes
+      // under a new instance of the (IPMD) debugger.
+#ifdef DEBUG
+      CHAR debug_szPE[ 512 ];
+      PSZ debug_pszOS2Debugger  = getenv("ODIN32.DEBUG_CHILD");
+      if (NULL != debug_pszOS2Debugger)
+      {
+        // build new start command
+        strcpy(debug_szPE, debug_pszOS2Debugger);
+        strcat(debug_szPE, " ");
+        strcat(debug_szPE, lpszExecutable);
+        
+        // we require more space in the new command line
+        iNewCommandLineLength += strlen( debug_szPE );
+        
+        // only launch the specified executable (ICSDEBUG.EXE)
+        lpszPE = debug_szPE;
+        lpszExecutable = debug_pszOS2Debugger;
+      }
+#endif
+      
         //SvL: Allright. Before we call O32_CreateProcess, we must take care of
         //     lpCurrentDirectory ourselves. (Open32 ignores it!)
         if(lpCurrentDirectory) {
             char *newcmdline;
 
-            newcmdline = (char *)malloc(strlen(lpCurrentDirectory) + strlen(szAppName) + strlen(lpCommandLine) + 32);
+            newcmdline = (char *)malloc(strlen(lpCurrentDirectory) + iNewCommandLineLength + 32);
             sprintf(newcmdline, "%s /OPT:[CURDIR=%s] %s %s", lpszPE, lpCurrentDirectory, szAppName, lpCommandLine);
             free(cmdline);
             cmdline = newcmdline;
@@ -1813,12 +1875,17 @@ BOOL WINAPI CreateProcessA( LPCSTR lpApplicationName, LPSTR lpCommandLine,
         else {
             char *newcmdline;
 
-            newcmdline = (char *)malloc(strlen(szAppName) + strlen(lpCommandLine) + 16);
+            newcmdline = (char *)malloc(iNewCommandLineLength + 16);
             sprintf(newcmdline, "%s %s %s", lpszPE, szAppName, lpCommandLine);
             free(cmdline);
             cmdline = newcmdline;
         }
-        rc = O32_CreateProcess(lpszPE, (LPCSTR)cmdline,lpProcessAttributes,
+      
+        dprintf(("KERNEL32: CreateProcess starting [%s],[%s]",
+                 lpszExecutable,
+                 cmdline));
+      
+        rc = O32_CreateProcess(lpszExecutable, (LPCSTR)cmdline,lpProcessAttributes,
                                lpThreadAttributes, bInheritHandles, dwCreationFlags,
                                lpEnvironment, lpCurrentDirectory, lpStartupInfo,
                                lpProcessInfo);
