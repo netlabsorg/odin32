@@ -1,4 +1,4 @@
-/* $Id: win32wbase.h,v 1.42 1999-11-10 17:11:31 cbratschi Exp $ */
+/* $Id: win32wbase.h,v 1.43 1999-11-11 13:17:32 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -106,6 +106,9 @@ virtual  WORD   GetWindowWord(int index);
          HWND   getOS2WindowHandle()            { return OS2Hwnd; };
          HWND   getOS2FrameWindowHandle()       { return OS2HwndFrame; };
  Win32WndClass *getWindowClass()                { return windowClass; };
+
+ 	 DWORD  getWindowContextHelpId()        { return contextHelpId; };
+         void   setWindowContextHelpId(DWORD id){ contextHelpId = id; };
 
          BOOL   isFrameWindow();
 virtual  BOOL   isMDIClient();
@@ -267,6 +270,7 @@ protected:
 
          HWND   hwndLinkAfter;
         DWORD   flags;
+	DWORD   contextHelpId;
         LONG    lastHitTestVal;         //Last value returned by WM_NCHITTEST handler
 
         BOOL    isIcon;

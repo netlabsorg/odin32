@@ -1,4 +1,4 @@
-/* $Id: dc.h,v 1.7 1999-11-02 19:13:00 sandervl Exp $ */
+/* $Id: dc.h,v 1.8 1999-11-11 13:17:29 sandervl Exp $ */
 /*
  * public dc functions
  *
@@ -330,6 +330,19 @@ inline HRGN O32_CreateRectRgn(int a, int b, int c, int d)
 
     return yyrc;
 }
+
+BOOL    OPEN32API _O32_ExcludeUpdateRgn( HDC, HWND );
+
+inline BOOL O32_ExcludeUpdateRgn(HDC a, HWND b)
+{
+ BOOL yyrc;
+ USHORT sel = RestoreOS2FS();
+
+    yyrc = _O32_ExcludeUpdateRgn(a, b);
+    SetFS(sel);
+
+    return yyrc;
+} 
 
 BOOL OPEN32API _O32_CreateCaret (HWND hwnd, HBITMAP hbm, int width, int height);
 

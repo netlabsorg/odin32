@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.80 1999-11-10 20:02:48 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.81 1999-11-11 13:17:31 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -172,6 +172,7 @@ void Win32BaseWindow::Init()
   hInstance        = 0;
   windowId         = 0xFFFFFFFF;        //default = -1
   userData         = 0;
+  contextHelpId    = 0;
 
   pOldFrameProc = NULL;
   borderWidth   = 0;
@@ -1150,11 +1151,11 @@ ULONG Win32BaseWindow::MsgMouseMove(ULONG keystate, ULONG x, ULONG y)
  ULONG setcursormsg = WM_MOUSEMOVE;
 
     if(ISMOUSE_CAPTURED()) {
-    	POINT point = {x,y};
+        POINT point = {x,y};
 
         MapWindowPoints(getWindowHandle(), HWND_DESKTOP, &point, 1);
-    	if(DInputMouseHandler(getWindowHandle(), MOUSEMSG_MOVE, point.x, point.y, keystate))
-        	return 0;
+        if(DInputMouseHandler(getWindowHandle(), MOUSEMSG_MOVE, point.x, point.y, keystate))
+            return 0;
     }
 
     if(keystate & WMMOVE_LBUTTON)
@@ -2691,7 +2692,8 @@ LONG Win32BaseWindow::SetWindowLongA(int index, ULONG value)
 {
  LONG oldval;
 
-   switch(index) {
+    dprintf2(("SetWindowLongA %x %d %x", getWindowHandle(), index, value));
+    switch(index) {
         case GWL_EXSTYLE:
         {
            STYLESTRUCT ss;
@@ -2751,13 +2753,14 @@ LONG Win32BaseWindow::SetWindowLongA(int index, ULONG value)
                 }
                 SetLastError(ERROR_INVALID_PARAMETER);
                 return 0;
-   }
+    }
 }
 //******************************************************************************
 //******************************************************************************
 ULONG Win32BaseWindow::GetWindowLongA(int index)
 {
-   switch(index) {
+    dprintf2(("GetWindowLongA %x %d", getWindowHandle(), index));
+    switch(index) {
         case GWL_EXSTYLE:
                 return dwExStyle;
         case GWL_STYLE:
@@ -2782,7 +2785,7 @@ ULONG Win32BaseWindow::GetWindowLongA(int index)
                 }
                 SetLastError(ERROR_INVALID_PARAMETER);
                 return 0;
-   }
+    }
 }
 //******************************************************************************
 //******************************************************************************
@@ -2837,6 +2840,11 @@ Win32BaseWindow *Win32BaseWindow::GetWindowFromOS2Handle(HWND hwnd)
 {
  Win32BaseWindow *win32wnd;
  DWORD        magic;
+
+  if(hwnd == OSLIB_HWND_DESKTOP)
+  {
+    return windowDesktop;
+  }
 
   win32wnd = (Win32BaseWindow *)OSLibWinGetWindowULong(hwnd, OFFSET_WIN32WNDPTR);
   magic    = OSLibWinGetWindowULong(hwnd, OFFSET_WIN32PM_MAGIC);
