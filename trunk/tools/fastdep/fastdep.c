@@ -1,4 +1,4 @@
-/* $Id: fastdep.c,v 1.12 2000-03-17 04:26:32 bird Exp $
+/* $Id: fastdep.c,v 1.13 2000-03-17 10:42:22 bird Exp $
  *
  * Fast dependents. (Fast = Quick and Dirty!)
  *
@@ -2449,6 +2449,12 @@ static BOOL depCheckCyclic(PDEPRULE pdepRule, const char *pszDep)
             if ((pdep = (PDEPRULE)(void*)AVLGet((PPAVLNODECORE)(void*)&pdepTree, *ppsz++)) != NULL
                 && pdep->papszDep != NULL)
             {
+                if (i >= DEPTH)
+                {
+                    fprintf(stderr, "error: too deap chain (%d). pszRule=%s  pszDep=%s\n",
+                            i, pszRule, pszDep);
+                    return FALSE;
+                }
                 appsz[i++] = ppsz; /* save next */
                 ppsz = pdep->papszDep; /* start processing new node */
             }
