@@ -1,4 +1,4 @@
-/* $Id: lang.cpp,v 1.33 2001-04-04 09:00:58 sandervl Exp $ */
+/* $Id: lang.cpp,v 1.34 2001-05-15 07:38:31 sandervl Exp $ */
 /*
  * Win32 language API functions for OS/2
  *
@@ -515,6 +515,12 @@ ODINFUNCTION4(int, GetLocaleInfoW, LCID, lcid, LCTYPE, LCType, LPWSTR, wbuf,
 
       case LOCALE_SINTLSYMBOL:
         UniQueryLocaleItem(locale_object, SINTLSYMBOL,&pInfoItem);
+        LocaleFromUniStr(pInfoItem,wbuf,&ulInfoLen);
+        UniFreeMem(pInfoItem);
+        break;
+
+      case LOCALE_IFIRSTDAYOFWEEK:
+        UniQueryLocaleItem(locale_object, LOCALE_IFIRSTDAYOFWEEK,&pInfoItem);
         LocaleFromUniStr(pInfoItem,wbuf,&ulInfoLen);
         UniFreeMem(pInfoItem);
         break;
@@ -1081,3 +1087,4 @@ ODINFUNCTION3(DWORD,VerLanguageNameW,DWORD,  wLang,
 
 
 #endif
+
