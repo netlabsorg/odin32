@@ -1,4 +1,4 @@
-# $Id: setup.os2debemx.mk,v 1.7 2002-08-27 03:58:00 bird Exp $
+# $Id: setup.os2debemx.mk,v 1.8 2002-08-28 03:42:43 bird Exp $
 
 # ---OS2, DEBUG, EMX----------------------------
 ENV_NAME="OS/2, Debug, EMX/GCC Compiler"
@@ -23,8 +23,10 @@ SPACE=_
 # Include some shared standard stuff: ALP, VAC optional stuff.
 #
 !include $(PATH_MAKE)\setup.os2debalp.mk
-!include $(PATH_MAKE)\setup.os2prfrc.mk
-!include $(PATH_MAKE)\setup.os2prfwrc.mk
+!include $(PATH_MAKE)\setup.os2debrc.mk
+!include $(PATH_MAKE)\setup.os2debwrc.mk
+_LD_LAST_LIB = end.$(EXT_LIB)
+!include $(PATH_MAKE)\setup.os2debilink.mk
 !include $(PATH_MAKE)\setup.optional.emx.mk
 
 
@@ -38,7 +40,6 @@ AR=lib.exe
 !endif
 CC=gcc.exe
 CXX=gcc.exe
-LINK=ilink.exe
 IMPLIB=implib.exe
 
 
@@ -110,25 +111,6 @@ CC_FLAGS_IFS=$(CXX_FLAGS_IFS)
 !endif
 
 IMPLIB_FLAGS=/NOI /Nologo
-
-LINK_FLAGS=/nofree /nologo /de /map /linenumbers /NOIgnorecase /NOE /NOD /PACKCODE /PACKDATA
-LINK_FLAGS_EXE=$(LINK_FLAGS) /EXECutable /STACK:$(TARGET_STACKSIZE)
-LINK_FLAGS_DLL=$(LINK_FLAGS) /DLL
-LINK_FLAGS_SYS=$(LINK_FLAGS) /PDD /Align:16
-LINK_FLAGS_VDD=$(LINK_FLAGS) /VDD /Align:16
-LINK_FLAGS_IFS=$(LINK_FLAGS_DLL)
-LINK_CMD_EXE=$(LINK) $(LINK_FLAGS_EXE) crt0.obj @$(TARGET_LNK)
-LINK_CMD_DLL=$(LINK) $(LINK_FLAGS_DLL) dll0.obj @$(TARGET_LNK)
-LINK_CMD_SYS=$(LINK) $(LINK_FLAGS_SYS) crt0.obj @$(TARGET_LNK)
-LINK_CMD_VDD=$(LINK) $(LINK_FLAGS_VDD) crt0.obj @$(TARGET_LNK)
-LINK_CMD_IFS=$(LINK) $(LINK_FLAGS_IFS) dll0.obj @$(TARGET_LNK)
-LINK_LNK1=$(TARGET_OBJS: =+^
-),
-LINK_LNK2=$(TARGET),
-LINK_LNK3=$(TARGET_MAP),
-LINK_LNK4=$(TARGET_LIBS: =+^
-) end.lib,
-LINK_LNK5=$(TARGET_DEF_LINK)
 
 
 #

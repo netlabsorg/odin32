@@ -1,4 +1,4 @@
-# $Id: setup.os2relmscv6-16.mk,v 1.9 2002-08-27 03:58:02 bird Exp $
+# $Id: setup.os2relmscv6-16.mk,v 1.10 2002-08-28 03:42:45 bird Exp $
 
 # ---OS2, RELEASE, MSCV6-------------------------
 ENV_NAME="OS/2, Release, Microsoft C v6.0a 16-bit"
@@ -17,6 +17,7 @@ ENV_16BIT = 16
 !include $(PATH_MAKE)\setup.os2relalp.mk
 !include $(PATH_MAKE)\setup.os2relrc.mk
 !include $(PATH_MAKE)\setup.os2relwrc.mk
+!include $(PATH_MAKE)\setup.os2relilink.mk
 !include $(PATH_MAKE)\setup.optional.mscvx-16.mk
 
 
@@ -26,7 +27,6 @@ ENV_16BIT = 16
 AR=ilib.exe
 CC=cl.exe
 CXX=false
-LINK=ilink.exe
 IMPLIB=implib.exe
 
 
@@ -73,26 +73,6 @@ CXX_PC_2_STDOUT=
 !endif
 
 IMPLIB_FLAGS=/NOI /Nologo
-
-LINK_FLAGS=/nofree /nologo /map /linenumbers /NOIgnorecase /NOE /NOD /PACKCODE /PACKDATA /EXEPACK:2 /Debug
-LINK_FLAGS_EXE=$(LINK_FLAGS) /EXECutable /BASE:0x10000 /STACK:$(TARGET_STACKSIZE)
-LINK_FLAGS_DLL=$(LINK_FLAGS) /DLL
-LINK_FLAGS_SYS=$(LINK_FLAGS) /PDD /Align:16
-LINK_FLAGS_VDD=$(LINK_FLAGS) /VDD /Align:16
-LINK_FLAGS_IFS=$(LINK_FLAGS_DLL)
-LINK_CMD_EXE=$(LINK) $(LINK_FLAGS_EXE) @"$(TARGET_LNK)"
-LINK_CMD_DLL=$(LINK) $(LINK_FLAGS_DLL) @"$(TARGET_LNK)"
-LINK_CMD_SYS=$(LINK) $(LINK_FLAGS_SYS) @"$(TARGET_LNK)"
-LINK_CMD_VDD=$(LINK) $(LINK_FLAGS_VDD) @"$(TARGET_LNK)"
-LINK_CMD_IFS=$(LINK) $(LINK_FLAGS_IFS) @"$(TARGET_LNK)"
-LINK_LNK1=$(TARGET_OBJS: =+^
-),
-LINK_LNK2=$(TARGET),
-LINK_LNK3=$(TARGET_MAP),
-LINK_LNK4=$(TARGET_LIBS: =+^
-),
-LINK_LNK5=$(TARGET_DEF_LINK)
-
 
 
 #
