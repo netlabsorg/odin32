@@ -25,13 +25,13 @@
 #define KEY_DIRECT2 "\\Software\\Win32OS2\\Direct2"
 #define KEY_DIRECT2DRAW "\\Software\\Win32OS2\\Direct2\\Draw"
 
-FOURCC  SupportedFourCCs[] = {FOURCC_LUT8,FOURCC_R565,FOURCC_RGB3,FOURCC_RGB4};
+FOURCC  SupportedFourCCs[] = {FOURCC_SCRN,FOURCC_LUT8,FOURCC_R565,FOURCC_RGB3,FOURCC_RGB4};
 //******************************************************************************
 //******************************************************************************
 OS2IDirectDraw::OS2IDirectDraw(GUID *lpGUID) :
      Referenced(0), lastError(DD_OK),
      pFrameBuffer(NULL), hwndClient(0), screenwidth(640),
-     screenheight(480), screenbpp(8),PrimaryExists(FALSE)
+     screenheight(480), screenbpp(8),PrimaryExists(FALSE),pPrimSurf(NULL)
 
 {
   HKEY  hkDirectDraw2;
@@ -336,7 +336,7 @@ HRESULT __stdcall DrawCreatePalette(THIS This, DWORD dwFlags,
       WriteLog("CreatePalette with %d colors\n", palsize);
     #endif
 
-    newpal = new OS2IDirectDrawPalette(me, palsize, lpColorTable, dwFlags);
+    newpal = new OS2IDirectDrawPalette((VOID*)me, palsize, lpColorTable, dwFlags);
 
     if(newpal == NULL)
     {
@@ -753,7 +753,7 @@ HRESULT __stdcall DrawFlipToGDISurface(THIS)
 HRESULT __stdcall DrawGetCaps(THIS, LPDDCAPS lpDDDriverCaps, LPDDCAPS lpDDHELCaps)
 {
   #ifdef DEBUG
-    WriteLog("GetCaps\n");
+    WriteLog("DDGetCaps of ");
   #endif
 
   if( (NULL==lpDDDriverCaps) && (NULL==lpDDHELCaps) )
@@ -763,9 +763,13 @@ HRESULT __stdcall DrawGetCaps(THIS, LPDDCAPS lpDDDriverCaps, LPDDCAPS lpDDHELCap
   {
     // Caller want Driver Caps
 
-    if(sizeof(DDCAPS)!=lpDDDriverCaps->dwSize)
-      return(DDERR_INVALIDPARAMS);
+    WriteLog("Driver\n");
 
+    if(sizeof(DDCAPS)!=lpDDDriverCaps->dwSize)
+    {
+      WriteLog("Size Not Set\n");
+      return(DDERR_INVALIDPARAMS);
+    }
     // Clear structure so we only have to set the supported flags
 
 
@@ -776,12 +780,12 @@ HRESULT __stdcall DrawGetCaps(THIS, LPDDCAPS lpDDDriverCaps, LPDDCAPS lpDDHELCap
     lpDDDriverCaps->dwSize = sizeof(DDCAPS);
 
     // Now report the CAPs back which we support
-   lpDDDriverCaps->dwCaps = DDCAPS_BLT |              // We do blitting
-                            DDCAPS_BLTCOLORFILL |     // We do colorfills
-                            DDCAPS_COLORKEY |         // We support Colorkeying
-                            DDCAPS_COLORKEYHWASSIST | // But we (may) use the CPU
-                            DDCAPS_GDI |              // Maybe check if we are on Voodoo ?
-                            DDCAPS_PALETTEVSYNC;      // Got VSync
+    lpDDDriverCaps->dwCaps = DDCAPS_BLT |              // We do blitting
+                             DDCAPS_BLTCOLORFILL |     // We do colorfills
+                             DDCAPS_COLORKEY |         // We support Colorkeying
+                             DDCAPS_COLORKEYHWASSIST | // But we (may) use the CPU
+                             DDCAPS_GDI |              // Maybe check if we are on Voodoo ?
+                             DDCAPS_PALETTEVSYNC;      // Got VSync
 
     lpDDDriverCaps->dwCaps2 = DDCAPS2_CERTIFIED |         // Who cares so say yes
                               DDCAPS2_CANRENDERWINDOWED | // Better check for Voodoo ?!
@@ -842,9 +846,84 @@ HRESULT __stdcall DrawGetCaps(THIS, LPDDCAPS lpDDDriverCaps, LPDDCAPS lpDDHELCap
 
   if(NULL!=lpDDHELCaps)
   {
-    // Caler wants HEL Caps
+    // Caller wants HEL Caps
+    WriteLog(" HEL\n");
+
     if(sizeof(DDCAPS)!=lpDDHELCaps->dwSize)
+    {
+      WriteLog("Size Not Set\n");
       return(DDERR_INVALIDPARAMS);
+    }
+    // Clear structure so we only have to set the supported flags
+
+
+    memset(lpDDHELCaps,0,sizeof(DDCAPS));
+
+
+    // Reset the size
+    lpDDHELCaps->dwSize = sizeof(DDCAPS);
+
+    // Now report the CAPs back which we support
+    lpDDHELCaps->dwCaps = DDCAPS_BLT |              // We do blitting
+                             DDCAPS_BLTCOLORFILL |     // We do colorfills
+                             DDCAPS_COLORKEY |         // We support Colorkeying
+                             DDCAPS_COLORKEYHWASSIST | // But we (may) use the CPU
+                             DDCAPS_GDI |              // Maybe check if we are on Voodoo ?
+                             DDCAPS_PALETTEVSYNC;      // Got VSync
+
+    lpDDHELCaps->dwCaps2 = DDCAPS2_CERTIFIED |         // Who cares so say yes
+                              DDCAPS2_CANRENDERWINDOWED | // Better check for Voodoo ?!
+                              DDCAPS2_COPYFOURCC |        // yepp memcpy will do this
+                              DDCAPS2_NONLOCALVIDMEM |    // All surfaces are in memory
+                              DDCAPS2_WIDESURFACES;       // Any size you want!
+
+    lpDDHELCaps->dwCKeyCaps = DDCKEYCAPS_SRCBLT;      // Only source transparent blitting
+
+//    lpDDDriverCaps->dwFXCaps = DDFXCAPS_BLTMIRRORUPDOWN; // DIVE supports this, do we also ?
+                                                         // Maybe later add stretching support?
+
+    lpDDHELCaps->dwPalCaps = DDPCAPS_8BIT |          // Only 8 Bits pals
+                                DDPCAPS_ALLOW256 |      // But all 256 colors
+                                DDPCAPS_VSYNC  |        // Vsync yet
+                                DDPCAPS_PRIMARYSURFACE; //
+    lpDDHELCaps->dwVidMemTotal = 2048*1024;           // total video memory
+    lpDDHELCaps->dwVidMemFree  = 2048*1024;            // total free video memory
+    lpDDHELCaps->dwNumFourCCCodes;        // number of supported FOURCC codes
+    lpDDHELCaps->dwRops[DD_ROP_SPACE];    // supported raster ops
+    lpDDHELCaps->dwSVBCaps = DDCAPS_BLT |              // We do blitting
+                                DDCAPS_BLTCOLORFILL |     // We do colorfills
+                                DDCAPS_COLORKEY |         // We support Colorkeying
+                                DDCAPS_COLORKEYHWASSIST;
+    lpDDHELCaps->dwSVBCKeyCaps = DDCKEYCAPS_SRCBLT;      // Only source transparent blitting
+    lpDDHELCaps->dwSVBFXCaps;             //  .
+    lpDDHELCaps->dwSVBRops[DD_ROP_SPACE]; //  .
+    lpDDHELCaps->dwVSBCaps = DDCAPS_BLT |              // We do blitting
+                                DDCAPS_BLTCOLORFILL |     // We do colorfills
+                                DDCAPS_COLORKEY |         // We support Colorkeying
+                                DDCAPS_COLORKEYHWASSIST;
+    lpDDHELCaps->dwVSBCKeyCaps = DDCKEYCAPS_SRCBLT;      // Only source transparent blitting
+    lpDDHELCaps->dwVSBFXCaps;             //  .
+    lpDDHELCaps->dwVSBRops[DD_ROP_SPACE]; //  .
+    lpDDHELCaps->dwSSBCaps = DDCAPS_BLT |              // We do blitting
+                                DDCAPS_BLTCOLORFILL |     // We do colorfills
+                                DDCAPS_COLORKEY |         // We support Colorkeying
+                                DDCAPS_COLORKEYHWASSIST;
+    lpDDHELCaps->dwSSBCKeyCaps = DDCKEYCAPS_SRCBLT;      // Only source transparent blitting
+    lpDDHELCaps->dwSSBFXCaps;            //  .
+    lpDDHELCaps->dwSSBRops[DD_ROP_SPACE]; //  .
+    lpDDHELCaps->dwSVBCaps2 = DDCAPS2_CANRENDERWINDOWED | // Better check for Voodoo ?!
+                                 DDCAPS2_COPYFOURCC |        // yepp memcpy will do this
+                                 DDCAPS2_WIDESURFACES;       // Any size you want!
+    lpDDHELCaps->dwNLVBCaps = DDCAPS_BLT |              // We do blitting
+                                 DDCAPS_BLTCOLORFILL |     // We do colorfills
+                                 DDCAPS_COLORKEY |         // We support Colorkeying
+                                 DDCAPS_COLORKEYHWASSIST;
+    lpDDHELCaps->dwNLVBCaps2 = DDCAPS2_CANRENDERWINDOWED | // Better check for Voodoo ?!
+                                  DDCAPS2_COPYFOURCC |        // yepp memcpy will do this
+                                  DDCAPS2_WIDESURFACES;       // Any size you want!
+    lpDDHELCaps->dwNLVBCKeyCaps = DDCKEYCAPS_SRCBLT;      // Only source transparent blitting
+    lpDDHELCaps->dwNLVBFXCaps;            //  .
+    lpDDHELCaps->dwNLVBRops[DD_ROP_SPACE];//  .
 
   }
 
