@@ -1,4 +1,8 @@
- /* $Id: ChangeLog,v 1.414 1999-11-05 12:53:18 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.415 1999-11-05 12:57:36 phaller Exp $ */
+
+ 99-11-05: Patrick Haller <phaller@gmx.net>
+	- COMCTL32:	Fix: TREEVIEW_Edit_Subclass is called with freed infoPtr
+			     This only cures the symptoms, not the origin!
 
  99-11-05: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32: Fixed InsertMenuA
