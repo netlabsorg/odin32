@@ -1,4 +1,4 @@
-/* $Id: DoWithDirs.cmd,v 1.4 2000-03-11 17:11:30 bird Exp $
+/* $Id: DoWithDirs.cmd,v 1.5 2000-03-11 18:52:49 bird Exp $
  *
  * Syntax: dowithdirs.cmd [-e<list of excludes>] [-c] [-i] [-l] [-r] <cmd with args...>
  *    -e      Exclude directories.
@@ -7,7 +7,9 @@
  *            Default action is to pass the directory name as last argument.
  *    -i      Ignore command failure (rc=0)
  *    -r      Process diretories in reverse order.
- *    -l      Lock directories for other dowithdirs.cmd processes. (-c required!)
+ *    -l<tag> Lock directories for other dowithdirs.cmd processes. (-c required!)
+ *            Processing stops (rc=0) on the first locked directory.
+ *            <tag> is a name of the lock.
  */
 
     call RxFuncAdd 'SysLoadFuncs', 'RexxUtil', 'SysLoadFuncs'
@@ -19,6 +21,8 @@
     fCD = 0;
     fLocking = 0;
     fReverse = 0;
+    fExitOnLock = 1;
+    sLockTag = '';
 
     /* parse arguments */
     parse arg sArg.1 sArg.2 sArg.3 sArg.4 sArg.5 sArg.6 sArg.7
@@ -72,6 +76,7 @@
                     when ch = 'L' then
                     do
                         fLocking = 1;
+                        sLockTag = substr(sArg.i, 3);
                     end
 
                     otherwise
@@ -142,8 +147,15 @@
                 /* Lock the directory? */
                 fOK = 1;
                 if (fLocking) then
-                    if (\lockdir()) then
+                    if (\lockdir(sLockTag)) then
                     do
+                        if (fExitOnLock) then
+                        do
+                            /* restore old directory and return sucessfully */
+                            call directory sOldDir;
+                            say '# - Lock found, stops processing.';
+                            exit(0);
+                        end
                         say '# - warning: Skipping '|| asDirs.i || ' - directory was locked.';
                         fOK = 0;
                     end
@@ -157,7 +169,7 @@
 
                     /* unlock directory */
                     if (fLocking & fOk) then
-                        call unlockdir;
+                        call unlockdir sLockTag;
 
                     /* check for return? */
                     if (ret <> 0) then
@@ -190,14 +202,16 @@
 
 
 syntax:
-    say 'Syntax: dowithdirs.cmd [-e<list of excludes>] [-c] [-i] [-l] [-r] <cmd with args...>';
+    say 'Syntax: dowithdirs.cmd [-e<list of excludes>] [-c] [-i] [-l<tag>] [-r] <cmd with args...>';
     say '   -e      Exclude directories.';
     say '   <list of excludes> is a INCLUDE-path styled list of directories.';
     say '   -c      CD into the directory and execute the command.';
     say '           Default action is to pass the directory name as last argument.';
     say '   -i      Ignore command failure (rc=0)';
     say '   -r      Process diretories in reverse order.';
-    say '   -l      Lock directories for other dowithdirs.cmd processes. (-c required!)';
+    say '   -l<tag> Lock directories for other dowithdirs.cmd processes. (-c required!)';
+    say '           Processing stops (rc=0) on the first locked directory.';
+    say '           <tag> is a name of the lock.';
     exit(-1)
 
 
@@ -207,7 +221,8 @@ syntax:
  *          0 on error
  */
 lockdir: procedure
-    rc = stream('.dirlocked', 'c', 'open write');
+    parse arg sTag
+    rc = stream('.dirlocked' || sTag, 'c', 'open write');
     return substr(rc, 1, 5) = 'READY';
 
 
@@ -215,7 +230,8 @@ lockdir: procedure
  * Unlocks thedirectory by deleting the .dirlocked file.
  */
 unlockdir: procedure
-    rc = stream('.dirlocked', 'c', 'close');
+    parse arg sTag
+    rc = stream('.dirlocked' || sTag, 'c', 'close');
     call SysFileDelete '.dirlocked';
     return 0;
 
