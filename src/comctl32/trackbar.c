@@ -1,4 +1,4 @@
-/* $Id: trackbar.c,v 1.8 1999-06-26 14:20:32 cbratschi Exp $ */
+/* $Id: trackbar.c,v 1.9 1999-06-28 15:46:28 cbratschi Exp $ */
 /*
  * Trackbar control
  *
@@ -1383,7 +1383,7 @@ static void TRACKBAR_QuickSort(LPLONG list,INT lo,INT hi)
   i = lo;
   j = hi;
   x = list[(lo+hi)/2];
-  while (i <= j)
+  do
   {
     while (list[i] < x) i++;
     while (x < list[j]) j--;
@@ -1395,7 +1395,7 @@ static void TRACKBAR_QuickSort(LPLONG list,INT lo,INT hi)
       i++;
       j--;
     }
-  }
+  } while (i <= j);
   if (lo < j) TRACKBAR_QuickSort(list,lo,j);
   if (i < hi) TRACKBAR_QuickSort(list,i,hi);
 }

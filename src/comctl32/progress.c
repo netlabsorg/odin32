@@ -1,4 +1,4 @@
-/* $Id: progress.c,v 1.6 1999-06-26 14:20:31 cbratschi Exp $ */
+/* $Id: progress.c,v 1.7 1999-06-28 15:46:25 cbratschi Exp $ */
 /*
  * Progress control
  *
@@ -283,22 +283,211 @@ static void PROGRESS_CoercePos(HWND hwnd)
 }
 
 
+static LRESULT PROGRESS_NCCreate(HWND hwnd,WPARAM wParam,LPARAM lParam)
+{
+  DWORD dwExStyle;
+
+  dwExStyle = GetWindowLongA(hwnd,GWL_EXSTYLE);
+  SetWindowLongA(hwnd,GWL_EXSTYLE,dwExStyle | WS_EX_STATICEDGE);
+
+  return TRUE;
+}
+
+static LRESULT PROGRESS_Create(HWND hwnd,WPARAM wParam,LPARAM lParam)
+{
+  PROGRESS_INFO *infoPtr;
+
+  /* allocate memory for info struct */
+  infoPtr = (PROGRESS_INFO *)COMCTL32_Alloc(sizeof(PROGRESS_INFO));
+  SetWindowLongA(hwnd,0,(DWORD)infoPtr);
+
+  /* initialize the info struct */
+  infoPtr->MinVal = 0;
+  infoPtr->MaxVal = 100;
+  infoPtr->CurVal = 0;
+  infoPtr->Step = 10;
+  infoPtr->ColorBar = CLR_DEFAULT;
+  infoPtr->ColorBk = CLR_DEFAULT;
+  infoPtr->hFont = (HANDLE)NULL;
+//      TRACE(progress, "Progress Ctrl creation, hwnd=%04x\n", hwnd);
+
+  return 0;
+}
+
+static LRESULT PROGRESS_Destroy(HWND hwnd,WPARAM wParam,LPARAM lParam)
+{
+  PROGRESS_INFO *infoPtr = PROGRESS_GetInfoPtr(hwnd);
+
+  //      TRACE (progress, "Progress Ctrl destruction, hwnd=%04x\n", hwnd);
+  COMCTL32_Free (infoPtr);
+
+  return 0;
+}
+
+static LRESULT PROGRESS_GetFont(HWND hwnd,WPARAM wParam,LPARAM lParam)
+{
+  PROGRESS_INFO *infoPtr = PROGRESS_GetInfoPtr(hwnd);
+
+  return (LRESULT)infoPtr->hFont;
+}
+
 /***********************************************************************
  *           PROGRESS_SetFont
  * Set new Font for progress bar
  */
-static HFONT
-PROGRESS_SetFont (HWND hwnd, WPARAM wParam, LPARAM lParam)
+static HFONT PROGRESS_SetFont (HWND hwnd,WPARAM wParam,LPARAM lParam)
 {
-    PROGRESS_INFO *infoPtr = PROGRESS_GetInfoPtr(hwnd);
+  PROGRESS_INFO *infoPtr = PROGRESS_GetInfoPtr(hwnd);
   HFONT hOldFont = infoPtr->hFont;
 
   infoPtr->hFont = (HFONT)wParam;
-  if (LOWORD(lParam))
-        PROGRESS_Refresh (hwnd);
+  if (LOWORD(lParam)) PROGRESS_Refresh (hwnd);
+
   return hOldFont;
 }
 
+static LRESULT PROGRESS_DeltaPos(HWND hwnd,WPARAM wParam,LPARAM lParam)
+{
+  PROGRESS_INFO *infoPtr = PROGRESS_GetInfoPtr(hwnd);
+  INT temp;
+
+  //if(lParam) UNKNOWN_PARAM(PBM_DELTAPOS, wParam, lParam);
+  temp = infoPtr->CurVal;
+  if (wParam != 0)
+  {
+    infoPtr->CurVal += (INT)wParam;
+    PROGRESS_CoercePos(hwnd);
+    PROGRESS_Update(hwnd,temp);
+  }
+
+  return temp;
+}
+
+static LRESULT PROGRESS_SetPos(HWND hwnd,WPARAM wParam,LPARAM lParam)
+{
+  PROGRESS_INFO *infoPtr = PROGRESS_GetInfoPtr(hwnd);
+  INT temp;
+
+  //if (lParam) UNKNOWN_PARAM(PBM_SETPOS, wParam, lParam);
+  temp = infoPtr->CurVal;
+  if (temp != wParam)
+  {
+    infoPtr->CurVal = (UINT16)wParam; //CB: 0..65535 allowed
+    PROGRESS_CoercePos(hwnd);
+    PROGRESS_Update(hwnd,temp);
+  }
+
+  return temp;
+}
+
+static LRESULT PROGRESS_SetRange(HWND hwnd,WPARAM wParam,LPARAM lParam)
+{
+  PROGRESS_INFO *infoPtr = PROGRESS_GetInfoPtr(hwnd);
+  INT temp;
+
+  //if (wParam) UNKNOWN_PARAM(PBM_SETRANGE, wParam, lParam);
+  temp = MAKELONG(infoPtr->MinVal,infoPtr->MaxVal);
+  if (temp != lParam)
+  {
+    infoPtr->MinVal = LOWORD(lParam);
+    infoPtr->MaxVal = HIWORD(lParam);
+    if (infoPtr->MaxVal <= infoPtr->MinVal) infoPtr->MaxVal = infoPtr->MinVal+1;
+    PROGRESS_CoercePos(hwnd);
+    PROGRESS_Refresh(hwnd);
+  }
+
+  return temp;
+}
+
+static LRESULT PROGRESS_SetStep(HWND hwnd,WPARAM wParam,LPARAM lParam)
+{
+  PROGRESS_INFO *infoPtr = PROGRESS_GetInfoPtr(hwnd);
+  INT temp;
+
+  //if (lParam) UNKNOWN_PARAM(PBM_SETSTEP, wParam, lParam);
+  temp = infoPtr->Step;
+  infoPtr->Step = (INT)wParam; //CB: negative steps allowed
+
+  return temp;
+}
+
+static LRESULT PROGRESS_StepIt(HWND hwnd,WPARAM wParam,LPARAM lParam)
+{
+  PROGRESS_INFO *infoPtr = PROGRESS_GetInfoPtr(hwnd);
+  INT temp;
+
+  //if (wParam || lParam) UNKNOWN_PARAM(PBM_STEPIT, wParam, lParam);
+  temp = infoPtr->CurVal;
+  infoPtr->CurVal += infoPtr->Step;
+  if(infoPtr->CurVal > infoPtr->MaxVal) infoPtr->CurVal = infoPtr->MinVal;
+  if(temp != infoPtr->CurVal) PROGRESS_Update (hwnd,temp);
+
+  return temp;
+}
+
+static LRESULT PROGRESS_SetRange32(HWND hwnd,WPARAM wParam,LPARAM lParam)
+{
+  PROGRESS_INFO *infoPtr = PROGRESS_GetInfoPtr(hwnd);
+  INT temp;
+
+  temp = MAKELONG(infoPtr->MinVal,infoPtr->MaxVal);
+  if((infoPtr->MinVal != (INT)wParam) || (infoPtr->MaxVal != (INT)lParam))
+  {
+    infoPtr->MinVal = (INT)wParam;
+    infoPtr->MaxVal = (INT)lParam;
+    if(infoPtr->MaxVal <= infoPtr->MinVal) infoPtr->MaxVal = infoPtr->MinVal+1;
+    PROGRESS_CoercePos(hwnd);
+    PROGRESS_Refresh(hwnd);
+  }
+
+  return temp;
+}
+
+static LRESULT PROGRESS_GetRange(HWND hwnd,WPARAM wParam,LPARAM lParam)
+{
+  PROGRESS_INFO *infoPtr = PROGRESS_GetInfoPtr(hwnd);
+
+  if (lParam)
+  {
+    ((PPBRANGE)lParam)->iLow = infoPtr->MinVal;
+    ((PPBRANGE)lParam)->iHigh = infoPtr->MaxVal;
+  }
+
+  return (wParam) ? infoPtr->MinVal : infoPtr->MaxVal;
+}
+
+static LRESULT PROGRESS_GetPos(HWND hwnd,WPARAM wParam,LPARAM lParam)
+{
+  PROGRESS_INFO *infoPtr = PROGRESS_GetInfoPtr(hwnd);
+
+  //if (wParam || lParam) UNKNOWN_PARAM(PBM_STEPIT, wParam, lParam);
+
+  return (infoPtr->CurVal);
+}
+
+static LRESULT PROGRESS_SetBarColor(HWND hwnd,WPARAM wParam,LPARAM lParam)
+{
+  PROGRESS_INFO *infoPtr = PROGRESS_GetInfoPtr(hwnd);
+  COLORREF oldColorBar = infoPtr->ColorBar;
+
+  //if (wParam) UNKNOWN_PARAM(PBM_SETBARCOLOR, wParam, lParam);
+  infoPtr->ColorBar = (COLORREF)lParam;
+  if (infoPtr->ColorBar != oldColorBar) PROGRESS_Refresh(hwnd);
+
+  return 0;
+}
+
+static LRESULT PROGRESS_SetBkColor(HWND hwnd,WPARAM wParam,LPARAM lParam)
+{
+  PROGRESS_INFO *infoPtr = PROGRESS_GetInfoPtr(hwnd);
+  COLORREF oldColorBk = infoPtr->ColorBk;
+
+  //if (wParam) UNKNOWN_PARAM(PBM_SETBKCOLOR, wParam, lParam);
+  infoPtr->ColorBk = (COLORREF)lParam;
+  if (infoPtr->ColorBk != oldColorBk) PROGRESS_Refresh (hwnd);
+
+  return 0;
+}
 
 /***********************************************************************
  *           ProgressWindowProc
@@ -306,40 +495,16 @@ PROGRESS_SetFont (HWND hwnd, WPARAM wParam, LPARAM lParam)
 LRESULT WINAPI ProgressWindowProc(HWND hwnd, UINT message,
                                   WPARAM wParam, LPARAM lParam)
 {
-    PROGRESS_INFO *infoPtr = PROGRESS_GetInfoPtr(hwnd);
-  INT temp;
-
   switch(message)
     {
     case WM_NCCREATE:
-            {
-                DWORD dwExStyle;
-                dwExStyle = GetWindowLongA(hwnd, GWL_EXSTYLE);
-                SetWindowLongA(hwnd, GWL_EXSTYLE, dwExStyle | WS_EX_STATICEDGE);
-            }
-      return TRUE;
+      return PROGRESS_NCCreate(hwnd,wParam,lParam);
 
     case WM_CREATE:
-      /* allocate memory for info struct */
-      infoPtr =
-        (PROGRESS_INFO *)COMCTL32_Alloc (sizeof(PROGRESS_INFO));
-      SetWindowLongA(hwnd, 0, (DWORD)infoPtr);
-
-      /* initialize the info struct */
-      infoPtr->MinVal=0;
-      infoPtr->MaxVal=100;
-      infoPtr->CurVal=0;
-      infoPtr->Step=10;
-      infoPtr->ColorBar=CLR_DEFAULT;
-      infoPtr->ColorBk=CLR_DEFAULT;
-      infoPtr->hFont=(HANDLE)NULL;
-//      TRACE(progress, "Progress Ctrl creation, hwnd=%04x\n", hwnd);
-      break;
+      return PROGRESS_Create(hwnd,wParam,lParam);
 
     case WM_DESTROY:
-//      TRACE (progress, "Progress Ctrl destruction, hwnd=%04x\n", hwnd);
-      COMCTL32_Free (infoPtr);
-      break;
+      return PROGRESS_Destroy(hwnd,wParam,lParam);
 
     case WM_ERASEBKGND:
       /* pretend to erase it here, but we will do it in the paint
@@ -347,107 +512,44 @@ LRESULT WINAPI ProgressWindowProc(HWND hwnd, UINT message,
       return 1;
 
     case WM_GETFONT:
-      return (LRESULT)infoPtr->hFont;
+      return PROGRESS_GetFont(hwnd,wParam,lParam);
 
     case WM_SETFONT:
-      return PROGRESS_SetFont (hwnd, wParam, lParam);
+      return PROGRESS_SetFont (hwnd,wParam,lParam);
 
     case WM_PAINT:
-      PROGRESS_Paint (hwnd);
+      PROGRESS_Paint(hwnd);
       break;
 
     case PBM_DELTAPOS:
-      if(lParam)
-        UNKNOWN_PARAM(PBM_DELTAPOS, wParam, lParam);
-      temp = infoPtr->CurVal;
-      if(wParam != 0){
-        infoPtr->CurVal += (INT)wParam;
-        PROGRESS_CoercePos (hwnd);
-        PROGRESS_Update (hwnd,temp);
-      }
-      return temp;
+      return PROGRESS_DeltaPos(hwnd,wParam,lParam);
 
     case PBM_SETPOS:
-      if (lParam)
-        UNKNOWN_PARAM(PBM_SETPOS, wParam, lParam);
-      temp = infoPtr->CurVal;
-      if(temp != wParam){
-        infoPtr->CurVal = (UINT16)wParam; //CB: 0..65535 allowed
-        PROGRESS_CoercePos(hwnd);
-        PROGRESS_Update (hwnd,temp);
-      }
-      return temp;
+      return PROGRESS_SetPos(hwnd,wParam,lParam);
 
     case PBM_SETRANGE:
-      if (wParam)
-        UNKNOWN_PARAM(PBM_SETRANGE, wParam, lParam);
-      temp = MAKELONG(infoPtr->MinVal, infoPtr->MaxVal);
-      if(temp != lParam){
-        infoPtr->MinVal = LOWORD(lParam);
-        infoPtr->MaxVal = HIWORD(lParam);
-        if(infoPtr->MaxVal <= infoPtr->MinVal)
-          infoPtr->MaxVal = infoPtr->MinVal+1;
-        PROGRESS_CoercePos(hwnd);
-        PROGRESS_Refresh (hwnd);
-      }
-      return temp;
+      return PROGRESS_SetRange(hwnd,wParam,lParam);
 
     case PBM_SETSTEP:
-      if (lParam)
-        UNKNOWN_PARAM(PBM_SETSTEP, wParam, lParam);
-      temp = infoPtr->Step;
-      infoPtr->Step = (INT)wParam; //CB: negative steps allowed
-      return temp;
+      return PROGRESS_SetStep(hwnd,wParam,lParam);
 
     case PBM_STEPIT:
-      if (wParam || lParam)
-        UNKNOWN_PARAM(PBM_STEPIT, wParam, lParam);
-      temp = infoPtr->CurVal;
-      infoPtr->CurVal += infoPtr->Step;
-      if(infoPtr->CurVal > infoPtr->MaxVal)
-        infoPtr->CurVal = infoPtr->MinVal;
-      if(temp != infoPtr->CurVal)
-        PROGRESS_Update (hwnd,temp);
-      return temp;
+      return PROGRESS_StepIt(hwnd,wParam,lParam);
 
     case PBM_SETRANGE32:
-      temp = MAKELONG(infoPtr->MinVal, infoPtr->MaxVal);
-      if((infoPtr->MinVal != (INT)wParam) ||
-         (infoPtr->MaxVal != (INT)lParam)) {
-        infoPtr->MinVal = (INT)wParam;
-        infoPtr->MaxVal = (INT)lParam;
-        if(infoPtr->MaxVal <= infoPtr->MinVal)
-          infoPtr->MaxVal = infoPtr->MinVal+1;
-        PROGRESS_CoercePos(hwnd);
-        PROGRESS_Refresh (hwnd);
-      }
-      return temp;
+      return PROGRESS_SetRange32(hwnd,wParam,lParam);
 
     case PBM_GETRANGE:
-      if (lParam){
-        ((PPBRANGE)lParam)->iLow = infoPtr->MinVal;
-        ((PPBRANGE)lParam)->iHigh = infoPtr->MaxVal;
-      }
-      return (wParam) ? infoPtr->MinVal : infoPtr->MaxVal;
+      return PROGRESS_GetRange(hwnd,wParam,lParam);
 
     case PBM_GETPOS:
-      if (wParam || lParam)
-        UNKNOWN_PARAM(PBM_STEPIT, wParam, lParam);
-      return (infoPtr->CurVal);
+      return PROGRESS_GetPos(hwnd,wParam,lParam);
 
     case PBM_SETBARCOLOR:
-      if (wParam)
-        UNKNOWN_PARAM(PBM_SETBARCOLOR, wParam, lParam);
-      infoPtr->ColorBar = (COLORREF)lParam;
-      PROGRESS_Refresh (hwnd);
-      break;
+      return PROGRESS_SetBarColor(hwnd,wParam,lParam);
 
     case PBM_SETBKCOLOR:
-      if (wParam)
-        UNKNOWN_PARAM(PBM_SETBKCOLOR, wParam, lParam);
-      infoPtr->ColorBk = (COLORREF)lParam;
-      PROGRESS_Refresh (hwnd);
-      break;
+      return PROGRESS_SetBkColor(hwnd,wParam,lParam);
 
     default:
 //      if (message >= WM_USER)

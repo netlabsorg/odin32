@@ -1,4 +1,4 @@
-/* $Id: treeview.c,v 1.5 1999-06-23 19:45:02 achimha Exp $ */
+/* $Id: treeview.c,v 1.6 1999-06-28 15:46:28 cbratschi Exp $ */
 /* Treeview control
  *
  * Copyright 1998 Eric Kohl <ekohl@abo.rhein-zeitung.de>
@@ -893,16 +893,16 @@ TREEVIEW_SetItemA (HWND hwnd, WPARAM wParam, LPARAM lParam)
 
   if (tvItem->mask & TVIF_TEXT) {
                 if (tvItem->pszText!=LPSTR_TEXTCALLBACKA) {
-        len=lstrlenA (tvItem->pszText);
-        if (len>wineItem->cchTextMax)
-                        wineItem->pszText= COMCTL32_ReAlloc (wineItem->pszText, len+1);
+        len = lstrlenA (tvItem->pszText);
+        if (len > wineItem->cchTextMax)
+                        wineItem->pszText = COMCTL32_ReAlloc (wineItem->pszText, len+1);
         lstrcpynA (wineItem->pszText, tvItem->pszText,len);
                 } else {
                         if (wineItem->cchTextMax) {
                                 COMCTL32_Free (wineItem->pszText);
                                 wineItem->cchTextMax=0;
                         }
-                wineItem->pszText=LPSTR_TEXTCALLBACKA;
+                wineItem->pszText = LPSTR_TEXTCALLBACKA;
                 }
    }
 
@@ -1165,7 +1165,7 @@ TREEVIEW_GetItemA (HWND hwnd, WPARAM wParam, LPARAM lParam)
 //              ERR (treeview," GetItem called with LPSTR_TEXTCALLBACK\n");
         }
         else if (wineItem->pszText) {
-            lstrcpynA (tvItem->pszText, wineItem->pszText, tvItem->cchTextMax);
+            lstrcpynA (tvItem->pszText, wineItem->pszText, MIN(tvItem->cchTextMax,lstrlenA(wineItem->pszText)));
         }
    }
 
