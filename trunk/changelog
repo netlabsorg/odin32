@@ -1,7 +1,11 @@
-/* $Id: changelog,v 1.1564 2001-07-05 10:45:02 sandervl Exp $ */
+/* $Id: changelog,v 1.1565 2001-07-05 18:07:47 sandervl Exp $ */
 
- 2001-07-04: Sander van Leeuwen <sandervl@xs4all.nl>
+ 2001-07-05: Sander van Leeuwen <sandervl@xs4all.nl>
     - USER32:   o WM_WINDOWPOSCHANGED dispatch bugfix (introduced yesterday)
+    - KERNEL32: o Added GlobalFix and GlobalUnfix
+                o Local memory functions now use Global memory functions
+                o Ported Wine Global memory functions (we no longer depend
+                  on Open32 for these)
 
  2001-07-04: Sander van Leeuwen <sandervl@xs4all.nl>
     - USER32:   o Partial implementation of ToAsciiEx (just calls ToAscii)
