@@ -1,4 +1,20 @@
-/* $Id: ChangeLog,v 1.1229 2001-01-21 13:36:11 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.1230 2001-01-22 18:25:33 sandervl Exp $ */
+
+ 2001-01-22: Sander van Leeuwen <sandervl@xs4all.nl>
+    - KERNEL32: o CreateFileMapping fix; create new handle even when called
+                  with name of existing map (and return ERROR_ALREADY_EXISTS)
+                o _HMHandleGetFree fix; handle allocation wasn't thread safe
+                  (_HMHandleGetFree checks if hHMHandle == INVALID_HANDLE_VALUE,
+                   but calling functions sets this value afterwards -> possible
+                   that two threads allocate the same handle)
+                  (solution: set hHMHandle in _HMHandleGetFree)
+                  HMCreatePipe call also failed because of this. (two handles
+                  allocated -> both allocate the same handle)
+                o HMCreatePipe change (free 1st handle if 2nd handle alloc fails)
+    - DOC\Readme.txt:
+                o Added remark about the need to run odininst.exe when installing
+                  Odin manually.
+                o Updates
 
  2000-01-21: Przemyslaw Dobrowolski <dobrawka@asua.org.pl>
     - WINMM/MCICDA:
