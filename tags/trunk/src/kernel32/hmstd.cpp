@@ -1,4 +1,4 @@
-/* $Id: hmstd.cpp,v 1.10 2002-06-27 12:35:56 sandervl Exp $ */
+/* $Id: hmstd.cpp,v 1.11 2002-06-30 09:54:51 sandervl Exp $ */
 
 /*
  * Handle Manager class for standard in, out & error handles
@@ -22,9 +22,10 @@
 
 #include <os2win.h>
 #include <stdlib.h>
+#include <stdio.h>
 #include <string.h>
 #include <unicode.h>
-#include <misc.h>
+#include <dbglog.h>
 
 #include "HandleManager.H"
 #include "hmstd.h"
@@ -70,29 +71,24 @@ BOOL HMDeviceStandardClass::ReadFile(PHMHANDLEDATA pHMHandleData,
                                  LPOVERLAPPED  lpOverlapped,
                                  LPOVERLAPPED_COMPLETION_ROUTINE  lpCompletionRoutine)
 {
-  BOOL         bRC;
-  DWORD        bytesread;
+    BOOL         bRC;
+    DWORD        bytesread;
 
-  dprintf2(("KERNEL32: HMDeviceStandardClass::ReadFile %s(%08x,%08x,%08x,%08x,%08x) - NOT IMPLEMENTED\n",
-           lpHMDeviceName,
-           pHMHandleData,
-           lpBuffer,
-           nNumberOfBytesToRead,
-           lpNumberOfBytesRead,
-           lpOverlapped));
+    dprintf2(("KERNEL32: HMDeviceStandardClass::ReadFile %s(%08x,%08x,%08x,%08x,%08x) - NOT IMPLEMENTED\n",
+              lpHMDeviceName, pHMHandleData, lpBuffer, nNumberOfBytesToRead, lpNumberOfBytesRead, lpOverlapped));
 
-  if(lpCompletionRoutine) {
-      dprintf(("!WARNING!: lpCompletionRoutine not supported -> fall back to sync IO"));
-  }
-
-  if(lpNumberOfBytesRead == NULL) {
-     lpNumberOfBytesRead = &bytesread;
-  }
-  if(pHMHandleData->dwUserData != STD_INPUT_HANDLE) {
-     return FALSE;
-  }
-  return O32_ReadFile(pHMHandleData->hHMHandle, (LPVOID)lpBuffer, nNumberOfBytesToRead,
-                      lpNumberOfBytesRead, lpOverlapped);
+    if(lpCompletionRoutine) {
+        dprintf(("!WARNING!: lpCompletionRoutine not supported -> fall back to sync IO"));
+    }
+    
+    if(lpNumberOfBytesRead == NULL) {
+        lpNumberOfBytesRead = &bytesread;
+    }
+    if(pHMHandleData->dwUserData != STD_INPUT_HANDLE) {
+        return FALSE;
+    }
+    return O32_ReadFile(pHMHandleData->hHMHandle, (LPVOID)lpBuffer, nNumberOfBytesToRead,
+                        lpNumberOfBytesRead, lpOverlapped);
 }
 
 
@@ -111,6 +107,8 @@ BOOL HMDeviceStandardClass::ReadFile(PHMHANDLEDATA pHMHandleData,
  *
  * Author    : Patrick Haller [Wed, 1998/02/11 20:44]
  *****************************************************************************/
+#define CARRIAGE_RETURN 0xD
+#define LINE_FEED       0xA
 
 BOOL HMDeviceStandardClass::WriteFile(PHMHANDLEDATA pHMHandleData,
                                       LPCVOID       lpBuffer,
@@ -123,32 +121,66 @@ BOOL HMDeviceStandardClass::WriteFile(PHMHANDLEDATA pHMHandleData,
     LPVOID lpLowMemBuffer;
 
     dprintf(("KERNEL32: HMDeviceStandardClass::WriteFile %s(%08x,%08x,%08x,%08x,%08x)",
-             lpHMDeviceName,
-             pHMHandleData,
-             lpBuffer,
-             nNumberOfBytesToWrite,
-             lpNumberOfBytesWritten,
+             lpHMDeviceName, pHMHandleData, lpBuffer, nNumberOfBytesToWrite, lpNumberOfBytesWritten,
              lpOverlapped));
-    if (lpNumberOfBytesWritten == NULL)
+
+    if(lpNumberOfBytesWritten == NULL)
         lpNumberOfBytesWritten = &byteswritten;
-    if (lpCompletionRoutine)
+
+    if(lpCompletionRoutine)
     {
         dprintf(("!WARNING!: lpCompletionRoutine not supported -> fall back to sync IO"));
     }
 
-    if (pHMHandleData->dwUserData == STD_INPUT_HANDLE)
+    if(pHMHandleData->dwUserData == STD_INPUT_HANDLE)
         return FALSE;
+
+    //count linefeed without carriage return occurances
+    char *src, *dest;
+    int  i         = 0;
+    int  missingCR = 0;
+    char prevchar  = 0;
+
+    src = (char *)lpBuffer;
+    while(i < nNumberOfBytesToWrite) {
+        if(src[i] == LINE_FEED && prevchar != CARRIAGE_RETURN) {
+            missingCR++;
+        }
+        prevchar = src[i];
+        i++;
+    }
+    nNumberOfBytesToWrite += missingCR;
+    dprintf(("missingCR %d", missingCR));
+
     lpLowMemBuffer = alloca(nNumberOfBytesToWrite);
-    if (lpLowMemBuffer == NULL)
+    if(lpLowMemBuffer == NULL)
     {
         DebugInt3();
         return FALSE;
     }
-    memcpy(lpLowMemBuffer, lpBuffer, nNumberOfBytesToWrite);
 
-    if (    WinExe
-        &&  !WinExe->isConsoleApp()
-        &&  O32_GetFileType(pHMHandleData->hHMHandle) == FILE_TYPE_UNKNOWN) /* kso */
+    //convert linefeed without carriage return into LF+CR
+    i         = 0;
+    missingCR = 0;
+    prevchar  = 0;
+    src       = (char *)lpBuffer;
+    dest      = (char *)lpLowMemBuffer;
+
+    while(i < nNumberOfBytesToWrite) {
+        if(src[i] == LINE_FEED && prevchar != CARRIAGE_RETURN) {
+            dest[i+missingCR] = CARRIAGE_RETURN;
+            missingCR++;
+            dest[i+missingCR] = LINE_FEED;
+        }
+        else {
+            dest[i+missingCR] = src[i];
+        }
+        prevchar = src[i];
+        i++;
+    }
+    //memcpy(lpLowMemBuffer, lpBuffer, nNumberOfBytesToWrite);
+
+    if(WinExe && !WinExe->isConsoleApp() && O32_GetFileType(pHMHandleData->hHMHandle) == FILE_TYPE_UNKNOWN) /* kso */
     {
         //DosWrite returns error 436 when PM apps try to write to std out
         //kso - Jun 23 2002 2:54am:
@@ -161,10 +193,11 @@ BOOL HMDeviceStandardClass::WriteFile(PHMHANDLEDATA pHMHandleData,
 
     dprintf(("%s: %.*s", pHMHandleData->dwUserData == STD_ERROR_HANDLE ? "STDERR" : "STDOUT",
              nNumberOfBytesToWrite, lpLowMemBuffer));
-    if (!O32_WriteFile(pHMHandleData->hHMHandle, lpLowMemBuffer, nNumberOfBytesToWrite,
-                       lpNumberOfBytesWritten, lpOverlapped))
+
+
+    if(!O32_WriteFile(pHMHandleData->hHMHandle, lpLowMemBuffer, nNumberOfBytesToWrite,
+                      lpNumberOfBytesWritten, lpOverlapped))
     {
-        /* Open32 wasn't made for console apps... */
         dprintf(("STD*: failed with lasterror=%d\n", GetLastError()));
         return FALSE;
     }
