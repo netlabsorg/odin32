@@ -1,4 +1,4 @@
-/* $Id: crt.cpp,v 1.3 1999-06-25 13:59:01 phaller Exp $ */
+/* $Id: crt.cpp,v 1.4 1999-07-23 18:06:25 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -8,6 +8,7 @@
 
 #include <odin.h>
 #include <stdlib.h>
+#include <stdio.h>
 #include <string.h>
 #include <math.h>
 #include <ctype.h>
