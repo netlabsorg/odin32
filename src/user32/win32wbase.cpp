@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.272 2001-07-04 09:29:51 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.273 2001-07-04 09:55:18 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -637,10 +637,10 @@ BOOL Win32BaseWindow::MsgCreate(HWND hwndOS2)
 
     //Set icon from window or class
     if (hIcon)
-        OSLibWinSetIcon(OS2Hwnd,hIcon);
+        OSLibWinSetIcon(OS2HwndFrame,hIcon);
     else
     if (windowClass->getIcon())
-        OSLibWinSetIcon(OS2Hwnd,windowClass->getIcon());
+        OSLibWinSetIcon(OS2HwndFrame,windowClass->getIcon());
 
     /* Get class or window DC if needed */
     if(windowClass->getStyle() & CS_OWNDC) {
@@ -1874,7 +1874,7 @@ LRESULT Win32BaseWindow::DefWindowProcA(UINT Msg, WPARAM wParam, LPARAM lParam)
             {
               hIcon = (HICON)lParam;
               if ((dwStyle & WS_CAPTION) == WS_CAPTION)
-                OSLibWinSetIcon(OS2Hwnd,hIcon);
+                OSLibWinSetIcon(OS2HwndFrame,hIcon);
             }
           }
           if ((Msg == WM_SETICON) && ((dwStyle & WS_CAPTION) == WS_CAPTION))

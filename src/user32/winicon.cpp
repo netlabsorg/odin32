@@ -1,4 +1,4 @@
-/* $Id: winicon.cpp,v 1.24 2001-06-11 20:08:26 sandervl Exp $ */
+/* $Id: winicon.cpp,v 1.25 2001-07-04 09:55:18 sandervl Exp $ */
 /*
  * Win32 Icon Code for OS/2
  *
@@ -208,6 +208,19 @@ HICON WIN32API CopyIcon( HICON hIcon)
 {
     dprintf(("USER32:  CopyIcon %x", hIcon));
     return CURSORICON_Copy( hIcon );
+}
+//******************************************************************************
+//******************************************************************************
+HICON WIN32API GetOS2Icon(HICON hIcon)
+{
+    CURSORICONINFO  *ciconinfo;
+
+    ciconinfo = (CURSORICONINFO *)GlobalLock((HGLOBAL)hIcon);
+    if (!ciconinfo)
+        return 0;
+    HICON hOS2Icon = ciconinfo->hColorBmp;
+    GlobalUnlock(hIcon);
+    return hOS2Icon;
 }
 /**********************************************************************
  *          GetIconInfo     (USER32.242)
@@ -1073,10 +1086,8 @@ static HGLOBAL CURSORICON_CreateFromResource( HINSTANCE hInstance, DWORD dwResGr
         else {
             GetBitmapBits( hXorBits, sizeXor, (char *)(info + 1) + sizeAnd);
         }
-        if(!bIcon) {
-            info->hColorBmp = OSLibWinCreateCursor(info, (char *)(info + 1), (LPBITMAP_W)&bmpAnd, (char *)(info + 1) + sizeAnd, (LPBITMAP_W)&bmpXor);
-            dprintf(("Create cursor %x with OS/2 pointer handle %x", hObj, info->hColorBmp));
-        }
+        info->hColorBmp = OSLibWinCreatePointer(info, (char *)(info + 1), (LPBITMAP_W)&bmpAnd, (char *)(info + 1) + sizeAnd, (LPBITMAP_W)&bmpXor, bIcon == FALSE);
+        dprintf(("Create cursor/icon %x with OS/2 pointer handle %x", hObj, info->hColorBmp));
         GlobalUnlock( hObj );
     }
 

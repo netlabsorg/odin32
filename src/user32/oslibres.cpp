@@ -1,4 +1,4 @@
-/* $Id: oslibres.cpp,v 1.14 2001-05-17 11:25:48 sandervl Exp $ */
+/* $Id: oslibres.cpp,v 1.15 2001-07-04 09:55:17 sandervl Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -45,6 +45,7 @@ HANDLE OSLibWinSetAccelTable(HWND hwnd, HANDLE hAccel, PVOID acceltemplate)
     }
     else    return 0;
 }
+#if 0
 //******************************************************************************
 //TODO: change search method for icon array (cxDesired, cyDesired)
 //TODO: PM rescales the icon internally!!! ($W(#*&$(*%&)
@@ -227,11 +228,13 @@ HANDLE OSLibWinCreatePointer(PVOID cursorbitmap, ULONG cxDesired, ULONG cyDesire
     WinReleasePS(hps);
     return hPointer;
 }
+#endif
 //******************************************************************************
 //NOTE: Depends on origin of bitmap data!!!
 //      Assumes 1 bpp bitmaps have a top left origin and all others have a bottom left origin
 //******************************************************************************
-HANDLE OSLibWinCreateCursor(CURSORICONINFO *pInfo, char *pAndBits, BITMAP_W *pAndBmp, char *pXorBits, BITMAP_W *pXorBmp)
+HANDLE OSLibWinCreatePointer(CURSORICONINFO *pInfo, char *pAndBits, BITMAP_W *pAndBmp, char *pXorBits, 
+                             BITMAP_W *pXorBmp, BOOL fCursor)
 {
  POINTERINFO  pointerInfo = {0};
  HANDLE       hPointer;
@@ -337,7 +340,7 @@ HANDLE OSLibWinCreateCursor(CURSORICONINFO *pInfo, char *pAndBits, BITMAP_W *pAn
         }
     }
 
-    pointerInfo.fPointer   = TRUE;
+    pointerInfo.fPointer   = fCursor; //FALSE = icon
     pointerInfo.xHotspot   = pInfo->ptHotSpot.x;
     pointerInfo.yHotspot   = mapY(pInfo->nHeight, pInfo->ptHotSpot.y);
     pointerInfo.hbmColor   = hbmColor;
