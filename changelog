@@ -1,4 +1,10 @@
-/* $Id: changelog,v 1.2004 2002-02-25 12:04:09 sandervl Exp $ */
+/* $Id: changelog,v 1.2005 2002-02-26 11:14:12 sandervl Exp $ */
+
+ 2002-02-25: Sander van Leeuwen <sandervl@xs4all.nl>
+    - USER32:   o Rewrote GetWindowThreadProcessId (no longer uses WGSS)
+    - KERNEL32: o Changed GetCurrentThreadId to return unique global thread id
+                  ((processid << 16) | threadid)
+                  Thread ids return by WGSS are unique to the process only.
 
  2002-02-25: Sander van Leeuwen <sandervl@xs4all.nl>
     - KERNEL32: o Added hooks for FindResource(Ex)A/W (custom build)
