@@ -1,4 +1,4 @@
-/* $Id: windlg.cpp,v 1.34 2002-06-10 09:12:35 sandervl Exp $ */
+/* $Id: windlg.cpp,v 1.35 2002-09-26 16:04:35 sandervl Exp $ */
 /*
  * Win32 dialog apis for OS/2
  *
@@ -544,6 +544,8 @@ UINT WIN32API GetDlgItemInt(HWND hwnd, INT id, BOOL *translated, BOOL fSigned)
     return (UINT)result;
 }
 //******************************************************************************
+//Note: This implementation is correct, but it can't cope with z-order changes
+//      of dialog controls. That's ok, since Windows can't either.
 //******************************************************************************
 HWND WIN32API GetNextDlgGroupItem( HWND hwndDlg, HWND hwndCtrl, BOOL fPrevious)
 {
