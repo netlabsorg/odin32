@@ -591,6 +591,7 @@ EXPORTS
     _lstrncmpW@12                             @786
     _OS2memmove                               @906
     ConvertNameId                             @1200
+    DebugErrorBox                             @1201
     WriteLog                                  @1202
     WriteLogError                             @1214
     _RegisterExe@48                           @1203
@@ -622,6 +623,8 @@ EXPORTS
     _GetThreadTEB@0                           @1234
     _GetThreadTHDB@0                          @1235
     _CreateWin32Exe@4                         @1236
+    _RegisterLxDll@12                         @1238
+    _UnregisterLxDll@4                        @1239
     _HEAP_xalloc@12                           @1240
     _HEAP_xrealloc@16                         @1241
     _HEAP_malloc@4                            @1242
