@@ -1,83 +1,54 @@
-/* $Id: OS2CLIPPER.CPP,v 1.3 1999-06-10 17:10:56 phaller Exp $ */
-
-/*
- * DirectDraw Clipper Class
- *
- * Copyright 1998 Sander van Leeuwen (sandervl@xs4all.nl)
- *
- * Project Odin Software License can be found in LICENSE.TXT
- *
- */
-
-/*@Const************************************************************************
-*   Defined Constants                                                          *
-*******************************************************************************/
-#define INCL_GUID
-#define WIN32SDK_NOPOSTWRAPPER
-
-/*@Header***********************************************************************
-*   Header Files                                                               *
-*******************************************************************************/
-#include <os2win.h>
-#include <dive.h>
-
 #include <memory.h>
 
-#include "no.h"
-#include <w_windows.h>
-#include <ddraw.h>
-#include <d3d.h>
-#include <Win32SDKPostWrapper.h>
-
+#define INITGUID
 #include "os2ddraw.h"
 #include "os2clipper.h"
+#define _OS2WIN_H
+#define FAR
 #include "misc.h"
-
-/*** IDirect3D methods ***/
-/* KSO Apr 19 1999: Set correct interface.           *
- * (INTERFACE is used in the THIS and THIS_ macros)  */
-#undef  INTERFACE
-#define INTERFACE   IDirectDrawClipper
-
+#include <winerror.h>
 
 //******************************************************************************
 //******************************************************************************
 OS2IDirectDrawClipper::OS2IDirectDrawClipper(OS2IDirectDraw *lpDirectDraw) :
-                           Referenced(0), lastError(DD_OK),
-                           clipWindow(0)
+                 Referenced(0), lastError(DD_OK),
+                 clipWindow(0)
 {
-  lpVtbl                    = &Vtbl;
-  Vtbl.AddRef               = ClipAddRef;
-  Vtbl.Release              = ClipRelease;
-  Vtbl.QueryInterface       = ClipQueryInterface;
-  Vtbl.GetClipList          = ClipGetClipList;
-  Vtbl.GetHWnd              = ClipGetHWnd;
-  Vtbl.Initialize           = ClipInitialize;
-  Vtbl.IsClipListChanged    = ClipIsClipListChanged;
-  Vtbl.SetClipList          = ClipSetClipList;
-  Vtbl.SetHWnd              = ClipSetHWnd;
+  lpVtbl                  = &Vtbl;
+  Vtbl.AddRef             = ClipAddRef;
+  Vtbl.Release            = ClipRelease;
+  Vtbl.QueryInterface     = ClipQueryInterface;
+  Vtbl.GetClipList        = ClipGetClipList;
+  Vtbl.GetHWnd            = ClipGetHWnd;
+  Vtbl.Initialize         = ClipInitialize;
+  Vtbl.IsClipListChanged  = ClipIsClipListChanged;
+  Vtbl.SetClipList        = ClipSetClipList;
+  Vtbl.SetHWnd            = ClipSetHWnd;
 
-  lpDraw                        = lpDirectDraw;
-  lpDraw->Vtbl.AddRef((IDirectDraw2*)lpDraw);
-  hDive                         = lpDirectDraw->GetDiveInstance();
+  lpDraw                  = lpDirectDraw;
+  lpDraw->Vtbl.AddRef(lpDraw);
+  hDive                   = lpDirectDraw->GetDiveInstance();
 }
 //******************************************************************************
 //******************************************************************************
 OS2IDirectDrawClipper::~OS2IDirectDrawClipper()
 {
-  lpDraw->Vtbl.Release((IDirectDraw2*)lpDraw);
+  lpDraw->Vtbl.Release(lpDraw);
 }
 //******************************************************************************
 //******************************************************************************
-HRESULT __stdcall ClipQueryInterface(THIS_ REFIID riid, LPVOID FAR * ppvObj)
+HRESULT __stdcall ClipQueryInterface(THIS This, REFIID riid, LPVOID FAR * ppvObj)
 {
-  dprintf(("ClipQueryInterface\n"));
+  #ifdef DEBUG
+    WriteLog("ClipQueryInterface\n");
+  #endif
+
   *ppvObj = NULL;
 
   if(!IsEqualGUID(riid, IID_IDirectDrawClipper) &&
      !IsEqualGUID(riid, CLSID_DirectDrawClipper))
 //&& !IsEqualGUID(riid, IID_IUnknown))
-    return E_NOINTERFACE;
+  return E_NOINTERFACE;
 
   *ppvObj = This;
 
@@ -86,76 +57,104 @@ HRESULT __stdcall ClipQueryInterface(THIS_ REFIID riid, LPVOID FAR * ppvObj)
 }
 //******************************************************************************
 //******************************************************************************
-ULONG   __stdcall ClipAddRef(THIS)
+ULONG   __stdcall ClipAddRef(THIS This)
 {
  OS2IDirectDrawClipper *me = (OS2IDirectDrawClipper *)This;
 
-  dprintf(("OS2IDirectDrawClipper::AddRef %d\n", me->Referenced+1));
+  #ifdef DEBUG
+    WriteLog("OS2IDirectDrawClipper::AddRef %d\n", me->Referenced+1);
+  #endif
+
   return ++me->Referenced;
 }
 //******************************************************************************
 //******************************************************************************
-ULONG   __stdcall ClipRelease(THIS)
+ULONG   __stdcall ClipRelease(THIS This)
 {
  OS2IDirectDrawClipper *me = (OS2IDirectDrawClipper *)This;
 
-  dprintf(("OS2IDirectDrawClipper::Release %d\n", me->Referenced-1));
-  if(me->Referenced) {
+  #ifdef DEBUG
+    WriteLog("OS2IDirectDrawClipper::Release %d\n", me->Referenced-1);
+  #endif
+
+  if(me->Referenced)
+  {
     me->Referenced--;
-    if(me->Referenced == 0) {
-        delete me;
-        return(0);
+    if(me->Referenced == 0)
+    {
+      delete me;
+      return(0);
     }
-    else    return me->Referenced;
+    else
+      return me->Referenced;
   }
-  else  return(0);
+  else
+   return(0);
 }
 //******************************************************************************
 //******************************************************************************
-HRESULT __stdcall ClipGetClipList(THIS_ W32_LPRECT, W32_LPRGNDATA, LPDWORD)
+HRESULT __stdcall ClipGetClipList(THIS, LPRECT, LPRGNDATA, LPDWORD)
 {
-  dprintf(("ClipGetClipList\n"));
+  #ifdef DEBUG
+    WriteLog("ClipGetClipList\n");
+  #endif
+
   return(DD_OK);
 }
 //******************************************************************************
 //******************************************************************************
-HRESULT __stdcall ClipGetHWnd(THIS_ W32_HWND FAR *pHwnd)
+HRESULT __stdcall ClipGetHWnd(THIS This, HWND FAR *pHwnd)
 {
  OS2IDirectDrawClipper *me = (OS2IDirectDrawClipper *)This;
 
-  dprintf(("ClipGetHWnd\n"));
+  #ifdef DEBUG
+    WriteLog("ClipGetHWnd\n");
+  #endif
+
   *pHwnd = me->clipWindow;
   return(DD_OK);
 }
 //******************************************************************************
 //******************************************************************************
-HRESULT __stdcall ClipInitialize(THIS_ LPDIRECTDRAW, DWORD)
+HRESULT __stdcall ClipInitialize(THIS, LPDIRECTDRAW, DWORD)
 {
-  dprintf(("ClipInitialize\n"));
+  #ifdef DEBUG
+    WriteLog("ClipInitialize\n");
+  #endif
+
+  return(DDERR_ALREADYINITIALIZED); // Init is done during creation see M$ Doc
+}
+//******************************************************************************
+//******************************************************************************
+HRESULT __stdcall ClipIsClipListChanged(THIS, BOOL FAR *)
+{
+  #ifdef DEBUG
+    WriteLog("ClipIsClipListChanged\n");
+  #endif
+
   return(DD_OK);
 }
 //******************************************************************************
 //******************************************************************************
-HRESULT __stdcall ClipIsClipListChanged(THIS_ BOOL FAR *)
+HRESULT __stdcall ClipSetClipList(THIS, LPRGNDATA,DWORD)
 {
-  dprintf(("ClipIsClipListChanged\n"));
-  return(DD_OK);
-}
-//******************************************************************************
-//******************************************************************************
-HRESULT __stdcall ClipSetClipList(THIS_ W32_LPRGNDATA,DWORD)
-{
-  dprintf(("ClipSetClipList\n"));
+  #ifdef DEBUG
+    WriteLog("ClipSetClipList\n");
+  #endif
+
   return(DD_OK);
 }
 //******************************************************************************
 //DWORD param not used in DirectX 3
 //******************************************************************************
-HRESULT __stdcall ClipSetHWnd(THIS_ DWORD reserved, W32_HWND hwnd)
+HRESULT __stdcall ClipSetHWnd(THIS This, DWORD reserved, HWND hwnd)
 {
  OS2IDirectDrawClipper *me = (OS2IDirectDrawClipper *)This;
 
-  dprintf(("ClipSetHWnd\n"));
+  #ifdef DEBUG
+    WriteLog("ClipSetHWnd\n");
+  #endif
+
   me->clipWindow = hwnd;
   return(DD_OK);
 }
