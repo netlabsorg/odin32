@@ -27,6 +27,7 @@ class scsiObj
     BOOL        openDriver();
     BOOL        closeDriver();
     BOOL        initBuffer();
+    ULONG       hmtxDriver;
 
   public:
     scsiObj();
@@ -49,18 +50,15 @@ class scsiObj
     BOOL        waitPost();
     ULONG       SendSRBlock(VOID);
     ULONG       getNumHosts();
+    BOOL        access(BOOL fWait);
+    BOOL        release();
+
 
     SRBOS2      SRBlock;                // SCSI Request Block
     SRBOS2      AbortSRB;               // Abort SRB
     PVOID       buffer;                 // Our data buffer
 };
 
-
-extern "C"
-{
-  BOOL fGainDrvAccess( BOOL fWait, ULONG *phSem);
-  BOOL fReleaseDrvAccess(ULONG hSem);
-}
-
+extern scsiObj *aspi;
 
 #endif // _ASPILIB_H_

@@ -1,4 +1,4 @@
-/* $Id: winaspi32.cpp,v 1.8 2000-09-14 19:09:17 sandervl Exp $ */
+/* $Id: winaspi32.cpp,v 1.9 2000-09-15 13:25:50 sandervl Exp $ */
 /*
  * WNASPI routines
  *
@@ -26,6 +26,10 @@
 //#include "odinaspi.h"
 #include "aspilib.h"
 //#include "callback.h"
+
+#ifdef DEBUG
+#define DEBUG_BUFFER
+#endif
 
 DEFAULT_DEBUG_CHANNEL(aspi)
 ODINDEBUGCHANNEL(WNASPI32)
@@ -79,15 +83,14 @@ ASPI_DebugPrintCmd(SRB_ExecSCSICmd *prb)
   TRACE("POST Proc: %lx\n", (DWORD) prb->SRB_PostProc);
   cdb = &prb->CDBByte[0];
   cmd = prb->CDBByte[0];
-  if (TRACE_ON(aspi))
-  {
-      DPRINTF("CDB buffer[");
+#ifdef DEBUG_BUFFER
+      dprintfNoEOL(("CDB buffer["));
       for (i = 0; i < prb->SRB_CDBLen; i++) {
-          if (i != 0) DPRINTF(",");
-          DPRINTF("%02x", *cdb++);
+          if (i != 0) dprintfNoEOL((",0x%02x", *cdb++));
+	  else        dprintfNoEOL(("0x%02x", *cdb++));
       }
-      DPRINTF("]\n");
-  }
+      dprintfNoEOL(("]\n"));
+#endif
 }
 
 static void
@@ -177,6 +180,16 @@ static WORD ASPI_ExecScsiCmd( scsiObj *aspi, SRB_ExecSCSICmd *lpPRB)
       memcpy( aspi->buffer,
               lpPRB->SRB_BufPointer,
               lpPRB->SRB_BufLen);
+
+#ifdef DEBUG_BUFFER
+      char *cdb = (char *)lpPRB->SRB_BufPointer;
+      dprintfNoEOL(("Write SRB buffer["));
+      for (int i = 0; i < lpPRB->SRB_BufLen; i++) {
+          if (i != 0) dprintfNoEOL((",0x%02x", *cdb++));
+	  else        dprintfNoEOL(("0x%02x", *cdb++));
+      }
+      dprintfNoEOL(("]\n"));
+#endif
     }
   }
 
@@ -194,6 +207,16 @@ static WORD ASPI_ExecScsiCmd( scsiObj *aspi, SRB_ExecSCSICmd *lpPRB)
           memcpy( lpPRB->SRB_BufPointer,
                   aspi->buffer,
                   lpPRB->SRB_BufLen);
+#ifdef DEBUG_BUFFER
+      char *cdb = (char *)lpPRB->SRB_BufPointer;
+      dprintfNoEOL(("Read SRB buffer["));
+      for (int i = 0; i < lpPRB->SRB_BufLen; i++) {
+          if (i != 0) dprintfNoEOL((",0x%02x", *cdb++));
+	  else        dprintfNoEOL(("0x%02x", *cdb++));
+      }
+      dprintfNoEOL(("]\n"));
+#endif
+
         }
       }
 
@@ -250,8 +273,6 @@ static WORD ASPI_ExecScsiCmd( scsiObj *aspi, SRB_ExecSCSICmd *lpPRB)
 ODINFUNCTION0(DWORD, GetASPI32SupportInfo)
 {
   LONG rc;
-  scsiObj *aspi;
-  ULONG hmtxDriver;
   BYTE bNumDrv;
   HKEY hkeyDrvInfo;
   DWORD dwType;
@@ -262,14 +283,8 @@ ODINFUNCTION0(DWORD, GetASPI32SupportInfo)
 
   bNumDrv = 0;
 
-  aspi = new scsiObj();
-
-  if( fGainDrvAccess( FALSE, &hmtxDriver) ) // Do nonblocking call for info
+  if(aspi->access(FALSE)) //'non-blocking' call
   {
-
-    if(aspi->init(65535)==TRUE)
-    {
-
         bNumDrv = aspi->getNumHosts();
         brc = SS_COMP;
         rc = RegOpenKeyA ( HKEY_LOCAL_MACHINE,
@@ -286,12 +301,7 @@ ODINFUNCTION0(DWORD, GetASPI32SupportInfo)
                           sizeof(DWORD));
           RegCloseKey( hkeyDrvInfo);
         }
-        aspi->close();
-    }
-    else
-      brc = SS_FAILED_INIT;
-
-    fReleaseDrvAccess( hmtxDriver);
+        aspi->release();
   }
   else
   {
@@ -323,7 +333,6 @@ ODINFUNCTION0(DWORD, GetASPI32SupportInfo)
       brc = SS_COMP;
     }
   }
-  delete aspi;
 
   return ((brc << 8) | bNumDrv); /* FIXME: get # of host adapters installed */
 }
@@ -336,8 +345,6 @@ DWORD SendASPICommand(LPSRB lpSRB)
     DWORD dwRC;
     ULONG ulParam, ulReturn;
     BYTE  bRC;
-    scsiObj *aspi;
-    ULONG hmtxDriver;
     LONG rc;
 
     if(NULL==lpSRB)
@@ -356,14 +363,10 @@ DWORD SendASPICommand(LPSRB lpSRB)
      	return SS_INVALID_SRB; // shoud be invalid command
     }
 
-    aspi = new scsiObj();
-
     dwRC = SS_ERR;
 
-    if( fGainDrvAccess( TRUE, &hmtxDriver) ) // Block if a SRB is pending
+    if(aspi->access(TRUE)) // Block if a SRB is pending
     {
-      if(aspi->init(65535)==TRUE)
-      {
         switch (lpSRB->common.SRB_Cmd)
         {
           case SC_HA_INQUIRY:
@@ -413,22 +416,14 @@ DWORD SendASPICommand(LPSRB lpSRB)
              dwRC = aspi->SRBlock.status;
              break;
 
-          } // end switch (lpSRB->common.SRB_Cmd)
+        } // end switch (lpSRB->common.SRB_Cmd)
 
-      }
-      else
-      {
-        dwRC = bRC;
-      }
-
-      fReleaseDrvAccess( hmtxDriver);
-      aspi->close();
+      	aspi->release();
     }
     else
     {
-      dwRC = SS_NO_ASPI;
+        dwRC = SS_NO_ASPI;
     }
-    delete aspi;
 
     return dwRC;
 }
