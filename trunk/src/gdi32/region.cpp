@@ -1,4 +1,4 @@
-/* $Id: region.cpp,v 1.25 2001-12-15 18:50:27 sandervl Exp $ */
+/* $Id: region.cpp,v 1.26 2002-01-29 14:36:31 sandervl Exp $ */
 
 /*
  * GDI32 region code
@@ -721,7 +721,7 @@ ODINFUNCTIONNODBG5(int, IntersectClipRect, HDC, hdc, int, left, int, top, int, r
     BOOL      success;
 
     if(!pHps) {
-        dprintf(("WARNING: IntersectClipRgn %x (%d,%d)(%d,%d) invalid hdc", hdc, left, top, right, bottom));
+        dprintf(("WARNING: IntersectClipRect %x (%d,%d)(%d,%d) invalid hdc", hdc, left, top, right, bottom));
         SetLastError(ERROR_INVALID_HANDLE_W);
         return ERROR_W;
     }
@@ -743,7 +743,7 @@ ODINFUNCTIONNODBG5(int, IntersectClipRect, HDC, hdc, int, left, int, top, int, r
     }
 #endif
 
-    dprintf(("IntersectClipRgn %x (%d,%d)(%d,%d)", hdc, left, top, right, bottom));
+    dprintf(("IntersectClipRect %x (%d,%d)(%d,%d)", hdc, left, top, right, bottom));
     lComplexity = GpiIntersectClipRectangle(pHps->hps, &rectl);
 
     //todo metafile recording

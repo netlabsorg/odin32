@@ -1,4 +1,4 @@
-/* $Id: blit.cpp,v 1.37 2001-12-31 12:08:20 sandervl Exp $ */
+/* $Id: blit.cpp,v 1.38 2002-01-29 14:36:31 sandervl Exp $ */
 
 /*
  * GDI32 blit code
@@ -202,10 +202,10 @@ static INT SetDIBitsToDevice_(HDC hdc, INT xDest, INT yDest, DWORD cx,
     if(info->bmiHeader.biCompression == BI_BITFIELDS) {
         ((BITMAPINFO *)info)->bmiHeader.biCompression = 0;
         compression = BI_BITFIELDS;
-
     }
     if(startscan != 0 || lines != info->bmiHeader.biHeight) {
 	dprintf(("WARNING: SetDIBitsToDevice startscan != 0 || lines != info->bmiHeader.biHeight"));
+        dprintf(("info bmp (%d,%d)", info->bmiHeader.biWidth, info->bmiHeader.biHeight));
     }
 
     result = O32_StretchDIBits(hdc, xDest, yDest, cx, cy, xSrc, ySrc,
