@@ -1,4 +1,4 @@
-# $Id: odin32.profile.wat.mk,v 1.1 2000-12-09 16:03:38 phaller Exp $
+# $Id: odin32.profile.wat.mk,v 1.2 2002-02-23 23:51:50 bird Exp $
 
 #
 # Odin32 API
@@ -13,14 +13,10 @@
 SOMLIB   = somtk.lib
 RTLLIB   = clib3r.lib
 RTLLIB_O = clib3r.lib
+RTLLIB_NRE = clib3r.lib
 DLLENTRY = $(ODIN32_LIB)\dllentry_watcom.obj
 ODINCRT  = odincrtd
-
-
-#
-# Object directory.
-#
-OBJDIR   = .\bin\debug.wat
+LIB_DEMANGLE =
 
 
 #

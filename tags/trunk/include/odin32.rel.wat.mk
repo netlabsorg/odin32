@@ -1,4 +1,4 @@
-# $Id: odin32.rel.wat.mk,v 1.6 2001-07-29 18:58:54 sandervl Exp $
+# $Id: odin32.rel.wat.mk,v 1.7 2002-02-23 23:51:50 bird Exp $
 
 #
 # Odin32 API
@@ -19,14 +19,10 @@ SYMBOLIC = .SYMBOLIC
 SOMLIB   = somtk.lib
 RTLLIB   = clib3r.lib
 RTLLIB_O = clib3r.lib plbrdll.lib mt7rdll.lib
+RTLLIB_NRE = clib3r.lib
 DLLENTRY = $(ODIN32_LIB)\dllentry.obj
 ODINCRT  = odincrtd
-
-
-#
-# Object directory.
-#
-OBJDIR   = .\bin\release.wat
+LIB_DEMANGLE =
 
 
 #
