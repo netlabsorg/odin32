@@ -1,4 +1,4 @@
- /* $Id: ChangeLog,v 1.437 1999-11-11 13:14:46 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.438 1999-11-11 19:08:27 sandervl Exp $ */
 
  99-11-11: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32: Implemented GetWindowContextHelpId & SetWindowContextHelpId
@@ -8,6 +8,10 @@
                   Fixed Win32Dialog::SetWindowLongA for dlg proc.
 	- GDI32: Implemented EnumFontsA/W. Fixed bugs in EnumFontFamiliesW
                  (NEWTEXTMETRICW is different from NEWTEXTMETRICA)
+	- KERNEL32: Turn off debugging by default when compiling the nodebuginfo
+                    build (can be enabled by setting the env. variable WIN32LOG_ENABLED)
+                    Fixes for GetVersionSize/Struct for images that aren't loaded.
+		    Fixed heap corruption in GetEnvironmentVariableW.
 
  99-11-10: Christoph Bratschi <cbratschi@datacomm.ch>
 	- USER32: ShowScrollBar: create not existing scrollbars
