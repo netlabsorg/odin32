@@ -1,11 +1,15 @@
- /* $Id: changelog,v 1.1008 2000-06-26 12:24:31 sandervl Exp $ */
+ /* $Id: changelog,v 1.1009 2000-06-27 18:20:44 mike Exp $ */
+
+ 2000-06-27: Michal Necasek <michalnec@volny.cz>
+    - DINPUT:      Fixed some key values, MS uses mostly raw scan
+                   codes but not always, why am I not surprised?
 
  2000-06-26: Sander van Leeuwen <sandervl@xs4all.nl>
     - GDI32:       Fixed inverse video in RealPlayer 7 with SDD video drivers
     - USER32:      Fixed bug in InvalidateRect/Rgn, don't include children
                    in WinInvalidateRect/Region call -> fixes painting of
                    background bitmap in XWing vs Tie Fighter install app.
-                   WinInvalidateRegion with fIncludeChildren=0 invalidates both 
+                   WinInvalidateRegion with fIncludeChildren=0 invalidates both
                    the parent and child windows (for !WS_CLIPCHILDREN window)
                    fIncludeChildren=1 -> invalidates only child (in xwing case
                    as it overlaps the invalid region completely; though parent
@@ -13,7 +17,6 @@
     - KERNEL32:    Added check for crossing limit of relocation section when
                    applying fixups. (fixes crash in IBM VisualAge Java setup)
 
- 2000-06-24: Michal Necasek <mike@mendelu.cz>
     - KERNEL32:    When creating files and mode is readonly, change to
                    read/write (or else DosOpen fails)
                    GetFileTime failed in OpenFile because handle wasn't
@@ -75,7 +78,7 @@
                    DuplicateHandle fix
     - USER32:      Region fixes (RedrawWindow)
                    Get/SetWindowRgn fixes
-    - INCLUDE\OS2WRAP.H: 
+    - INCLUDE\OS2WRAP.H:
                    Added missing wrappers for GpiCreatePolygonRegion,
                    GpiCreateEllipticRegion & GpiCreateRoundRectRegion
 
@@ -88,7 +91,7 @@
  2000-06-14: Patrick Haller <phaller@gmx.net>
     - KERNEL32:     - fix in HandleManager::DuplicateHandler to call
                       OSLibDosDupHandle() instead of CreateFile
-                    - fix oslibdos.h FILE_ SetFilePointer constants 
+                    - fix oslibdos.h FILE_ SetFilePointer constants
                       were shifted by 1
                     - fix for signed negative 32-bit seek from llseek()
                       forwarded to the 64-bit OS/2 DosSetFilePtrL()
@@ -99,7 +102,7 @@
  2000-06-14: Sander van Leeuwen <sandervl@xs4all.nl>
     - USER32:       Rewrote ExcludeUpdateRgn & GetUpdateRgn
                     Check if update rectangle is emtpy in PM WM_PAINT msg;
-                    ignore it when that's the case 
+                    ignore it when that's the case
                     -> fixes excessive redrawing in Lotus Notes
     - GDI32:        Put back region apis
                     Rewrote region functions
@@ -144,7 +147,7 @@
                     Call MsgNCPaint in RedrawWindow (WM_NCPAINT is not posted
                     if update region doesn't include (part of) the nonclient area.
                     -> fixes RealPlayer 7 titlebar, borders & menu
-                    GetTopWindow fix. (should work properly now)                  
+                    GetTopWindow fix. (should work properly now)
 
  2000-08-03: knut st. osmundsen <knut.stange.osmundsen@mynd.no>
     - tools/install:Added a stram 'close' on the changelog.
