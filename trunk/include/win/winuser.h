@@ -1,4 +1,4 @@
-/* $Id: winuser.h,v 1.21 1999-12-01 18:21:30 cbratschi Exp $ */
+/* $Id: winuser.h,v 1.22 1999-12-16 16:50:51 cbratschi Exp $ */
 
 #ifndef __INCLUDE_WINUSER_H
 #define __INCLUDE_WINUSER_H
@@ -3700,6 +3700,19 @@ WORD        WINAPI SYSTEM_KillSystemTimer( WORD );
 HPEN      WINAPI GetSysColorPen(INT);
 INT       WINAPI LoadMessageA(HMODULE,UINT,WORD,LPSTR,INT);
 INT       WINAPI LoadMessageW(HMODULE,UINT,WORD,LPWSTR,INT);
+
+ //USER32 functions imported from GDI32
+
+#ifndef SYSTEM
+ #define SYSTEM _System
+#endif
+
+INT       SYSTEM InternalDrawTextExA(HDC,LPCSTR,INT,LPRECT,UINT,LPDRAWTEXTPARAMS,BOOL);
+INT       SYSTEM InternalDrawTextExW(HDC,LPCWSTR,INT,LPRECT,UINT,LPDRAWTEXTPARAMS,BOOL);
+DWORD     SYSTEM InternalGetTabbedTextExtentA(HDC,LPCSTR,INT,INT,LPINT);
+DWORD     SYSTEM InternalGetTabbedTextExtentW(HDC,LPCWSTR,INT,INT,LPINT);
+LONG      SYSTEM InternalTabbedTextOutA(HDC,INT,INT,LPCSTR,INT,INT,LPINT,INT);
+LONG      SYSTEM InternalTabbedTextOutW(HDC,INT,INT,LPCWSTR,INT,INT,LPINT,INT);
 
 VOID      WINAPI TrackWin32Window(HWND,BOOL);
 
