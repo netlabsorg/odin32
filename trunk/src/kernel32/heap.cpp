@@ -1,4 +1,4 @@
-/* $Id: heap.cpp,v 1.19 2000-02-16 14:23:57 sandervl Exp $ */
+/* $Id: heap.cpp,v 1.20 2000-04-30 16:31:47 sandervl Exp $ */
 
 /*
  * Win32 heap API functions for OS/2
@@ -201,7 +201,7 @@ HLOCAL WIN32API LocalAlloc(UINT fuFlags, DWORD cbBytes)
 //******************************************************************************
 HLOCAL WIN32API LocalDiscard(HLOCAL hMem)
 {
-    dprintf(("KERNEL32:  LocalDiscard\n"));
+    dprintf(("KERNEL32:  LocalDiscard NOT IMPLEMENTED\n"));
 
 //    return O32_LocalDiscard(arg1);
     return(hMem);   //TODO: Possible memory leak
@@ -218,16 +218,16 @@ UINT WIN32API LocalFlags(HLOCAL hMem)
 //******************************************************************************
 HLOCAL WIN32API LocalFree(HLOCAL hMem)
 {
-    dprintf(("KERNEL32: LocalFree %X\n", hMem));
+  dprintf(("KERNEL32: LocalFree %X\n", hMem));
 
-    if(OS2ProcessHeap->GetLockCnt((LPVOID)hMem) != 0) {
-      dprintf(("LocalFree, lock count != 0\n"));
-      return(hMem);   //TODO: SetLastError
-    }
-    if(OS2ProcessHeap->Free(0, (LPVOID)hMem) == FALSE) {
-      return(hMem);   //TODO: SetLastError
-    }
-    return NULL; //success
+  if(OS2ProcessHeap->GetLockCnt((LPVOID)hMem) != 0) {
+      	dprintf(("LocalFree, lock count != 0\n"));
+      	return(hMem);   //TODO: SetLastError
+  }
+  if(OS2ProcessHeap->Free(0, (LPVOID)hMem) == FALSE) {
+      	return(hMem);   //TODO: SetLastError
+  }
+  return NULL; //success
 }
 //******************************************************************************
 //******************************************************************************
