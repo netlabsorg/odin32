@@ -1,4 +1,4 @@
-/* $Id: winimagebase.h,v 1.6 2000-04-16 10:42:12 sandervl Exp $ */
+/* $Id: winimagebase.h,v 1.7 2000-05-02 20:53:14 sandervl Exp $ */
 
 /*
  * Win32 PE Image base class
@@ -97,6 +97,9 @@ static  BOOL  findDll(const char *pszFileName, char *pszFullName,
 
 	void  tlsAttachThread();	//setup TLS structures for new thread
 	void  tlsDetachThread();	//destroy TLS structures
+
+virtual BOOL  insideModule(ULONG address);
+virtual BOOL  insideModuleCode(ULONG address);
 
 virtual	ULONG getApi(char *name)  = 0;
 virtual ULONG getApi(int ordinal) = 0;

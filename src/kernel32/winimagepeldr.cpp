@@ -1,4 +1,4 @@
-/* $Id: winimagepeldr.cpp,v 1.41 2000-04-16 10:42:12 sandervl Exp $ */
+/* $Id: winimagepeldr.cpp,v 1.42 2000-05-02 20:53:15 sandervl Exp $ */
 
 /*
  * Win32 PE loader Image base class
@@ -1471,6 +1471,27 @@ BOOL Win32PeLdrImage::processImports(char *win32file)
 
   free(pszModules);
   return TRUE;
+}
+//******************************************************************************
+//******************************************************************************
+BOOL Win32PeLdrImage::insideModule(ULONG address)
+{
+  if((address >= realBaseAddress) && (address < realBaseAddress + imageSize)) {
+  	return TRUE;
+  }
+  return FALSE;
+}
+//******************************************************************************
+//******************************************************************************
+BOOL Win32PeLdrImage::insideModuleCode(ULONG address)
+{
+ Section *sect;
+
+  sect = findSectionByOS2Addr(address);
+  if(sect && (sect->pageflags & PAG_EXECUTE)) {
+	return TRUE;
+  }
+  return FALSE;
 }
 //******************************************************************************
 //******************************************************************************

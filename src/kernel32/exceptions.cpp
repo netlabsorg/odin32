@@ -1,7 +1,7 @@
-/* $Id: exceptions.cpp,v 1.39 2000-04-14 22:35:27 sandervl Exp $ */
+/* $Id: exceptions.cpp,v 1.40 2000-05-02 20:53:12 sandervl Exp $ */
 
 /*
- * Win32 Device IOCTL API functions for OS/2
+ * Win32 Exception functions for OS/2
  *
  * Ported Wine exception handling code
  *
@@ -64,6 +64,7 @@
 #include "mmap.h"
 #include <wprocess.h>
 #include "oslibexcept.h"
+#include "exceptstackdump.h"
 
 #define DBG_LOCALLOG	DBG_exceptions
 #include "dbglocal.h"
@@ -534,16 +535,6 @@ void KillWin32Process(void)
 }
 
 
-//******************************************************************************
-APIRET APIENTRY DosQueryModFromEIP (PULONG pulModule,
-                                    PULONG pulObject,
-                                    ULONG  ulBufferLength,
-                                    PSZ    pszBuffer,
-                                    PULONG pulOffset,
-                                    ULONG  ulEIP);
-//******************************************************************************
-
-
 /*****************************************************************************
  * Name      : void static dprintfException
  * Purpose   : log the exception to win32os2.log
@@ -839,14 +830,14 @@ void static dprintfException(PEXCEPTIONREPORTRECORD       pERepRec,
   dprintf(("   Exception Address = %08x ",
            pERepRec->ExceptionAddress));
 
-  if (rc == NO_ERROR)
-    dprintf(("%s (#%u), obj #%u:%08x\n",
+  if(rc == NO_ERROR && ulObject != -1)
+    dprintf(("<%s> (#%u), obj #%u:%08x\n",
              szModule,
              ulModule,
              ulObject,
              ulOffset));
   else
-    dprintf(("\n"));
+    dprintf(("<win32 app>\n"));
 
 
   rc = DosGetInfoBlocks (&pTIB,           /* query kernel information blocks */
@@ -919,7 +910,6 @@ void static dprintfException(PEXCEPTIONREPORTRECORD       pERepRec,
 
   dprintf(("---[End Of Exception Information]-----\n"));
 }
-
 
 /*****************************************************************************
  * Name      : ERR _System OS2ExceptionHandler
@@ -1057,7 +1047,12 @@ continueFail:
   case XCPT_IN_PAGE_ERROR:
 CrashAndBurn:
 	CheckLogException();
-  	dprintfException(pERepRec, pERegRec, pCtxRec, p);
+#ifdef DEBUG
+	dprintfException(pERepRec, pERegRec, pCtxRec, p);
+  	if(pCtxRec->ContextFlags & CONTEXT_CONTROL) {
+		dbgPrintStack(pERepRec, pERegRec, pCtxRec, p);
+	}
+#endif
 	if(fIsOS2Image == FALSE)  //Only for real win32 apps
 	{
 		if(OSLibDispatchException(pERepRec, pERegRec, pCtxRec, p) == TRUE)
