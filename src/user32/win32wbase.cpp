@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.174 2000-03-18 16:13:38 cbratschi Exp $ */
+/* $Id: win32wbase.cpp,v 1.175 2000-03-27 21:41:47 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -2254,10 +2254,11 @@ HWND Win32BaseWindow::SetParent(HWND hwndNewParent)
 {
  HWND oldhwnd;
  Win32BaseWindow *newparent;
+ Win32BaseWindow *oldparent = (Win32BaseWindow *)ChildWindow::GetParent();
 
-   if(getParent()) {
-        oldhwnd = getParent()->getWindowHandle();
-        getParent()->RemoveChild(this);
+   if(oldparent) {
+        oldhwnd = oldparent->getWindowHandle();
+        oldparent->RemoveChild(this);
    }
    else oldhwnd = 0;
 
@@ -2739,9 +2740,9 @@ LONG Win32BaseWindow::SetWindowLongA(int index, ULONG value, BOOL fUnicode)
                 if(dwStyle == value)
                     return value;
 
-                value &= ~WS_CHILD;      /* Some bits can't be changed this way (WINE) */
+                value &= ~(WS_CHILD|WS_VISIBLE);      /* Some bits can't be changed this way (WINE) */
                 ss.styleOld = getStyle();
-                ss.styleNew = value | (ss.styleOld & WS_CHILD);
+                ss.styleNew = value | (ss.styleOld & (WS_CHILD|WS_VISIBLE));
                 dprintf(("SetWindowLong GWL_STYLE %x old %x new style %x", getWindowHandle(), ss.styleOld, ss.styleNew));
                 SendInternalMessageA(WM_STYLECHANGING,GWL_STYLE,(LPARAM)&ss);
                 setStyle(ss.styleNew);
