@@ -1,4 +1,13 @@
-/* $Id: changelog,v 1.2449 2003-01-18 20:11:35 sandervl Exp $ */
+/* $Id: changelog,v 1.2450 2003-01-20 10:44:55 sandervl Exp $ */
+
+ 2003-01-19: Sander van Leeuwen <sandervl@innotek   >
+    - KERNEL32: o Only load LVM.DLL when we actually need it.
+                o CreateProcess bugfix for thread id if launched directly
+                o CreateFile returns ERROR_ALREADY_EXISTS if file not found
+                  and CREATE_NEW
+                o Check and correct process type in thread wrapper. WinCreateMsgQueue
+                  fails for non-PM apps. We set it to PM in the VIO loader, but
+                  apparently it can be changed back.
 
  2003-01-18: Sander van Leeuwen <sandervl@innotek   >
     - KERNEL32: o FindFirstFile must return ERROR_FILE_NOT_FOUND when
