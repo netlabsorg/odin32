@@ -1,4 +1,14 @@
- /* $Id: changelog,v 1.1037 2000-07-18 18:33:15 sandervl Exp $ */
+ /* $Id: changelog,v 1.1038 2000-07-19 18:58:46 sandervl Exp $ */
+
+ 2000-07-19: Sander van Leeuwen <sandervl@xs4all.nl>
+    - INCLUDE\makefiles
+      SRC\*\makefile
+      ODINCRT
+                Build different odincrt for debug & release build (odincrtd & odincrt)
+                Odin dlls now link with correct version
+    - GDI32:    Wrapper rewrite for region apis
+                Changed export for user32 (uses stdcall calling convention now
+                to avoid problem when using debug user32 with retail gdi32)
 
  2000-07-18: Yuri Dario <mc6530@mclink.it>
     - INCLUDE\win: 
