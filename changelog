@@ -1,4 +1,10 @@
-/* $Id: changelog,v 1.2623 2003-09-07 03:56:22 bird Exp $ */
+/* $Id: changelog,v 1.2624 2003-09-14 18:56:31 bird Exp $ */
+
+ 2003-09-14: knut st. osmundsen <bird-odinspam@anduin    >
+    - MAKE:     o Synced with other projects using the new buildsystem (which
+                  odin doesn really use yet).
+    - TOOLS/BIN:o Updated BuildEnv.cmd. Will now facilitate a global config
+                  file in the ETC directory if not a local one is found.
 
  2003-09-07: knut st. osmundsen <bird-odinspam@anduin    >
     - LIBWRAP:  o Do all .asm's in with on ALP.
