@@ -2960,6 +2960,14 @@ static LRESULT WINAPI ListBoxWndProc_common( HWND hwnd, UINT msg,
         return LISTBOX_HandleHScroll( hwnd, descr, wParam );
     case WM_VSCROLL:
         return LISTBOX_HandleVScroll( hwnd, descr, wParam );
+#ifdef __WIN32OS2__
+    //TODO: Apparently not necessary in Wine
+    //      Not includding it causes a focus problem in e.g. the file dialog
+    //      (click on drop down listbox button, click again; focus not restored
+    //       to the dialog)
+    case WM_MOUSEACTIVATE:
+        return MA_NOACTIVATE;
+#endif
     case WM_MOUSEWHEEL:
         if (wParam & (MK_SHIFT | MK_CONTROL))
             return DefWindowProcW( hwnd, msg, wParam, lParam );
