@@ -1,4 +1,24 @@
- /* $Id: changelog,v 1.365 1999-10-25 19:25:34 phaller Exp $ */
+ /* $Id: changelog,v 1.366 1999-10-25 20:19:47 sandervl Exp $ */
+
+ 99-10-25: Sander van Leeuwen <sandervl@xs4all.nl>
+	- USER32: Removed SetFocus call in Edit control (WM_LBUTTONDOWN)
+                  Virtual key translation table change (VK_RETURN (PM) -> 0x0A
+                  VK_ENTER (PM_ -> 0x0A (VK_RETURN))
+                  (fixes problems in edit control, but might not be a good fix)
+                  Never call default window handler (PM) after WM_CHAR ->
+                  PM sends the WM_CHAR to the owner window -> focus changes
+                  in notepad.
+	- USER32: (menus)
+                  Rewrote LoadMenuIndirectA/W to use OS/2 apis
+                  Implemented GetMenuInfo & SetMenuInfo (just store new info; nothing else done)
+		  Implemented GetMenuContextHelpId/SetMenuContextHelpId
+		  (based on Wine build 990815)
+                  Partially implemented GetMenuItemInfo.
+                  NOTE: Needs a complete rewrite.
+
+	- INCLUDE\win\commctrl.h: 
+		  Changed back calling convention of callback handlers to CALLBACK.
+                  -> fixes crashes in SHELL32 (DPASearch calls)
 
  99-10-25: Achim Hasenmueller <achimha@innotek.de>
         - KERNEL32: Added ReinitializeCriticalSection, ported WINE code
