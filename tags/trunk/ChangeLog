@@ -1,4 +1,4 @@
- /* $Id: ChangeLog,v 1.533 1999-12-13 21:04:32 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.534 1999-12-13 23:06:59 sandervl Exp $ */
 
  99-12-12: Sander van Leeuwen <sandervl@xs4all.nl>
 	- KERNEL32: Fixes for on-demand page loader; currently disabled by
@@ -6,6 +6,9 @@
                     exceptions are generated)
                     To enable it undefine COMMIT_ALL in kernel32\winimagepeldr.cpp.
                     Dll unload fix for PE loader (fixes crash when Notes quits)
+	- PE2LX:    Don't link with odincrt -> 'Not enough storage to complete
+                    initialization' error. Reason unknown.
+	- INCLUDE\string.h: Use original strncpy for PE2LX
 
  99-12-12: Sander van Leeuwen <sandervl@xs4all.nl>
 	- KERNEL32: Changed logging in winimagepeldr.cpp
