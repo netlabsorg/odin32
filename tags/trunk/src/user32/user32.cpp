@@ -1,4 +1,4 @@
-/* $Id: user32.cpp,v 1.98 2001-05-19 11:16:01 sandervl Exp $ */
+/* $Id: user32.cpp,v 1.99 2001-06-10 12:05:40 sandervl Exp $ */
 
 /*
  * Win32 misc user32 API functions for OS/2
@@ -424,8 +424,10 @@ int WIN32API GetSystemMetrics(int nIndex)
         break;
 
     case SM_CYCAPTION:
-        rc = 19;
-        //rc = OSLibWinQuerySysValue(SVOS_CYTITLEBAR);
+        if(fOS2Look) {
+             rc = OSLibWinQuerySysValue(SVOS_CYTITLEBAR);
+        }
+        else rc = 19;
         break;
 
     case SM_CXBORDER:
@@ -441,7 +443,10 @@ int WIN32API GetSystemMetrics(int nIndex)
     case SM_CYMENU:
     case SM_CXMENUSIZE:
     case SM_CYMENUSIZE:
-        rc = 19;
+        if(fOS2Look) {
+             rc = OSLibWinQuerySysValue(SVOS_CYMENU);
+        }
+        else rc = 19;
         break;
 
     case SM_CXSIZE:

@@ -1,4 +1,4 @@
-/* $Id: pmwindow.h,v 1.10 2001-06-09 14:50:19 sandervl Exp $ */
+/* $Id: pmwindow.h,v 1.11 2001-06-10 12:05:39 sandervl Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -21,6 +21,7 @@ void UnregisterSystemClasses();
 extern ULONG ScreenWidth;
 extern ULONG ScreenHeight;
 extern ULONG ScreenBitsPerPel;
+extern BOOL  fOS2Look;
 
 #define TFOS_LEFT                    0x0001
 #define TFOS_TOP                     0x0002
