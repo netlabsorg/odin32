@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.26 2000-01-09 14:14:24 cbratschi Exp $ */
+/* $Id: win32wbase.cpp,v 1.27 2000-01-09 17:13:39 cbratschi Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -1950,8 +1950,39 @@ VOID Win32BaseWindow::DrawCaption(HDC hdc,RECT *rect,BOOL active)
   //CB: todo:
    //COLOR_GRADIENTACTIVECAPTION
    //COLOR_GRADIENTINACTIVECAPTION
+   //-> end color
 
-  FillRect(hdc,&r,GetSysColorBrush(active ? COLOR_ACTIVECAPTION:COLOR_INACTIVECAPTION));
+  if (SYSCOLOR_GetUseWinColors())
+  {
+    COLORREF startColor = GetSysColor(active ? COLOR_ACTIVECAPTION:COLOR_INACTIVECAPTION),endColor = GetSysColor(active ? COLOR_GRADIENTACTIVECAPTION:COLOR_GRADIENTINACTIVECAPTION);
+
+    if (startColor == endColor)
+      FillRect(hdc,&r,GetSysColorBrush(startColor));
+    else
+    {
+      INT rDiff = GetRValue(endColor)-GetRValue(startColor);
+      INT gDiff = GetGValue(endColor)-GetGValue(startColor);
+      INT bDiff = GetBValue(endColor)-GetBValue(startColor);
+      INT steps = MAX(MAX(abs(rDiff),abs(gDiff)),abs(bDiff));
+      INT w = r.right-r.left;
+      RECT r2;
+
+      if (w < steps) steps = w;
+      r2.left = r2.right = r.left;
+      r2.top = r.top;
+      r2.bottom = r.bottom;
+      for (INT x = 0;x <= steps;x++)
+      {
+        COLORREF color = RGB(GetRValue(startColor)+rDiff*x/steps,GetGValue(startColor)+gDiff*x/steps,GetBValue(startColor)+bDiff*x/steps);
+        HBRUSH brush = CreateSolidBrush(color);
+
+        r2.left = r2.right;
+        r2.right = r.left+w*x/steps;
+        FillRect(hdc,&r2,brush);
+        DeleteObject(brush);
+      }
+    }
+  } else FillRect(hdc,&r,GetSysColorBrush(active ? COLOR_ACTIVECAPTION:COLOR_INACTIVECAPTION));
 
   if (!hbitmapClose)
   {
