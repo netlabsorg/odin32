@@ -690,9 +690,8 @@ IStream * WINAPI SHOpenRegStream2W(HKEY,LPCWSTR,LPCWSTR,DWORD);
 #endif /* SHLWAPI_STREAM */
 
 
-#ifndef __WIN32OS2__
 /* Version Information */
-
+#ifndef __WIN32OS2__
 typedef struct _DllVersionInfo {
     DWORD cbSize;
     DWORD dwMajorVersion;
@@ -700,13 +699,12 @@ typedef struct _DllVersionInfo {
     DWORD dwBuildNumber;
     DWORD dwPlatformID;
 } DLLVERSIONINFO;
+#endif
 
 #define DLLVER_PLATFORM_WINDOWS 0x01 /* Win9x */
 #define DLLVER_PLATFORM_NT      0x02 /* WinNT */
 
 typedef HRESULT (* CALLBACK DLLGETVERSIONPROC)(DLLVERSIONINFO *);
-
-#endif
 
 #ifdef __cplusplus
 } /* extern "C" */
