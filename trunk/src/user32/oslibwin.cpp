@@ -1,4 +1,4 @@
-/* $Id: oslibwin.cpp,v 1.114 2002-02-11 13:48:41 sandervl Exp $ */
+/* $Id: oslibwin.cpp,v 1.115 2002-03-05 16:09:17 sandervl Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -129,10 +129,12 @@ BOOL OSLibWinConvertStyle(ULONG dwStyle, ULONG dwExStyle, ULONG *OSWinStyle, ULO
           {
               *OSFrameStyle |= FCF_SYSMENU;
           }
-          if((dwStyle & WS_MINIMIZEBOX_W) || (dwStyle & WS_MAXIMIZEBOX_W)) {
-              *OSFrameStyle |= FCF_MINMAX;
+          if(dwStyle & WS_MINIMIZEBOX_W) {
+              *OSFrameStyle |= FCF_MINBUTTON;
           }
-          else
+          if(dwStyle & WS_MAXIMIZEBOX_W) {
+              *OSFrameStyle |= FCF_MAXBUTTON;
+          }
           if(dwStyle & WS_SYSMENU_W) {
               *OSFrameStyle |= FCF_CLOSEBUTTON;
           }
@@ -190,8 +192,11 @@ BOOL OSLibWinPositionFrameControls(HWND hwndFrame, RECTLOS2 *pRect, DWORD dwStyl
               swp[i].y += pRect->yTop - pRect->yBottom - minmaxheight;
           }
           swp[i].cx = pRect->xRight - pRect->xLeft;
-          if((dwStyle & WS_MINIMIZEBOX_W) || (dwStyle & WS_MAXIMIZEBOX_W)) {
-              swp[i].cx -= minmaxwidth;
+          if((dwStyle & WS_MINIMIZEBOX_W)) {
+              swp[i].cx -= minmaxwidth/2;
+          }
+          if((dwStyle & WS_MAXIMIZEBOX_W)) {
+              swp[i].cx -= minmaxwidth/2;
           }
           //there is no close button in warp 3
           if((dwStyle & WS_SYSMENU_W) && !fVersionWarp3) {
@@ -216,8 +221,11 @@ BOOL OSLibWinPositionFrameControls(HWND hwndFrame, RECTLOS2 *pRect, DWORD dwStyl
               swp[i].y += pRect->yTop - pRect->yBottom - minmaxheight;
           }
           swp[i].cx = 0;
-          if((dwStyle & WS_MINIMIZEBOX_W) || (dwStyle & WS_MAXIMIZEBOX_W)) {
-              swp[i].cx += minmaxwidth;
+          if((dwStyle & WS_MINIMIZEBOX_W)) {
+              swp[i].cx += minmaxwidth/2;
+          }
+          if((dwStyle & WS_MAXIMIZEBOX_W)) {
+              swp[i].cx += minmaxwidth/2;
           }
           //there is no close button in warp 3
           if((dwStyle & WS_SYSMENU_W) && !fVersionWarp3) {
