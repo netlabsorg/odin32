@@ -1,4 +1,4 @@
-/* $Id: oslibmsg.cpp,v 1.48 2001-10-26 10:03:34 phaller Exp $ */
+/* $Id: oslibmsg.cpp,v 1.49 2001-10-26 17:48:21 sandervl Exp $ */
 /*
  * Window message translation functions for OS/2
  *
@@ -205,7 +205,7 @@ LONG OSLibWinDispatchMsg(MSG *msg, BOOL isUnicode)
 }
 //******************************************************************************
 //******************************************************************************
-BOOL i_OSLibWinGetMsg(LPMSG pMsg, HWND hwnd, UINT uMsgFilterMin, UINT uMsgFilterMax,
+BOOL OSLibWinGetMsg(LPMSG pMsg, HWND hwnd, UINT uMsgFilterMin, UINT uMsgFilterMax,
                     BOOL isUnicode)
 {
  BOOL rc, eaten;
@@ -323,14 +323,6 @@ continuegetmsg:
   
   return rc;
 }
-BOOL OSLibWinGetMsg(LPMSG pMsg, HWND hwnd, UINT uMsgFilterMin, UINT uMsgFilterMax,
-                    BOOL isUnicode)
-{
-  dprintf(("OSLibWinGetMsg enter"));
-  BOOL fRes = i_OSLibWinGetMsg(pMsg, hwnd, uMsgFilterMin, uMsgFilterMax, isUnicode);
-  dprintf(("OSLibWinGetMsg leave"));
-  return fRes;
-}
 
 
 //******************************************************************************
@@ -345,7 +337,7 @@ BOOL OSLibWinGetMsg(LPMSG pMsg, HWND hwnd, UINT uMsgFilterMin, UINT uMsgFilterMa
 //available messages (no range filtering is performed). 
 //TODO: Not working as specified right now!
 //******************************************************************************
-BOOL i_OSLibWinPeekMsg(LPMSG pMsg, HWND hwnd, UINT uMsgFilterMin, UINT uMsgFilterMax,
+BOOL OSLibWinPeekMsg(LPMSG pMsg, HWND hwnd, UINT uMsgFilterMin, UINT uMsgFilterMax,
                      DWORD fRemove, BOOL isUnicode)
 {
  BOOL  rc, eaten;
@@ -458,15 +450,6 @@ continuepeekmsg:
 
   return rc;
 }
-BOOL OSLibWinPeekMsg(LPMSG pMsg, HWND hwnd, UINT uMsgFilterMin, UINT uMsgFilterMax,
-                    BOOL fRemove, BOOL isUnicode)
-{
-  dprintf(("OSLibWinPeekMsg enter"));
-  BOOL fRes = i_OSLibWinPeekMsg(pMsg, hwnd, uMsgFilterMin, uMsgFilterMax, fRemove, isUnicode);
-  dprintf(("OSLibWinPeekMsg leave"));
-  return fRes;
-}
-
 //******************************************************************************
 //******************************************************************************
 ULONG OSLibWinQueryMsgTime()
