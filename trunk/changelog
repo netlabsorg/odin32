@@ -1,5 +1,8 @@
-/* $Id: changelog,v 1.1933 2001-12-30 22:18:17 sandervl Exp $ */
-  
+/* $Id: changelog,v 1.1934 2001-12-31 12:06:22 sandervl Exp $ */
+
+ 2001-12-31: Sander van Leeuwen <sandervl@xs4all.nl>
+    - GDI32:    o Use critical section in dibsection class instead of vmutex
+
  2001-12-31: knut st. osmundsen <bird@anduin.net>
     - Tools/CmdQd:
                 o Corrected bad statement in the clean2 rule.
