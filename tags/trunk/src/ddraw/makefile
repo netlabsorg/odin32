@@ -18,10 +18,10 @@ CXXFLAGS = $(CXXFLAGS) -I$(PDWIN32_INCLUDE);
 TARGET = ddraw
 
 OBJS =  ddraw.obj os2ddraw.obj os2clipper.obj os2d3d.obj iccio1.obj asmutil.obj\
-        os2surface.obj os2palette.obj os2palset.obj misc.obj rectangle.obj initterm.obj
-        
+        os2surface.obj os2palette.obj os2palset.obj rectangle.obj initterm.obj
 
-LIBS =  ..\..\lib\pmwinx.lib mmpm2.lib ..\..\lib\comctl32.lib $(PDWIN32_LIB)\advapi32.lib $(PDWIN32_LIB)\kernel32.lib $(PDWIN32_LIB)\gdi32.lib $(PDWIN32_LIB)\comctl32.lib $(PDWIN32_LIB)/odincrt.lib OS2386.LIB $(RTLLIB_O)
+
+LIBS =  ..\..\lib\pmwinx.lib mmpm2.lib ..\..\lib\comctl32.lib $(PDWIN32_LIB)\advapi32.lib $(PDWIN32_LIB)\kernel32.lib $(PDWIN32_LIB)\gdi32.lib $(PDWIN32_LIB)\comctl32.lib $(PDWIN32_LIB)\kernel32.lib $(PDWIN32_LIB)/odincrt.lib OS2386.LIB $(RTLLIB_O)
 
 all: $(TARGET).dll $(TARGET).lib
 
@@ -52,8 +52,6 @@ os2d3d.obj: os2d3d.cpp \
     os2ddraw.h\
     $(PDWIN32_INCLUDE)\win\ddraw.h \
     $(PDWIN32_INCLUDE)\win\d3d.h
-
-misc.obj: misc.cpp initterm.h
 
 os2palette.obj: os2palette.cpp  \
     os2palette.h \

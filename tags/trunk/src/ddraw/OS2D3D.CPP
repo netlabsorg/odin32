@@ -7,7 +7,7 @@
 #include "os2surface.h"
 #define _OS2WIN_H
 #define FAR
-#include "misc.h"
+#include <misc.h>
 #include <winerror.h>
 #include <builtin.h>
 #undef THIS
