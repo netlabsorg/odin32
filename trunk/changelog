@@ -1,4 +1,8 @@
- /* $Id: changelog,v 1.665 2000-01-22 10:29:52 sandervl Exp $ */
+ /* $Id: changelog,v 1.666 2000-01-25 20:28:31 sandervl Exp $ */
+
+ 2000-01-25: Sander van Leeuwen <sandervl@xs4all.nl>
+	- PELDR/KERNEL32: Allocate low memory at right address and with right size
+                          in peldr.dll (fixes install of Windows Media Player)
 
  2000-01-22: Michal Necasek <mike@mendelu.cz>
 	- DINPUT: Fixes + basic functionality is complete; enough for many games
