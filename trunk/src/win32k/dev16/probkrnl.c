@@ -1,4 +1,4 @@
-/* $Id: probkrnl.c,v 1.11 2000-02-19 23:51:59 bird Exp $
+/* $Id: probkrnl.c,v 1.12 2000-02-20 04:27:23 bird Exp $
  *
  * Description:   Autoprobes the os2krnl file and os2krnl[*].sym files.
  *                Another Hack!
@@ -88,24 +88,24 @@
  *            has to be updated immediately!
  */
 IMPORTKRNLSYM aImportTab[NBR_OF_KRNLIMPORTS] =
-{/* iFound     cchName                  offObject    usSel        */
- /*      iObject      achName                 ulAddress  fType    */
-    {FALSE, -1,  8, "_ldrRead",             -1,  -1, -1, EPT_PROC32},        /* 0 */
-    {FALSE, -1,  8, "_ldrOpen",             -1,  -1, -1, EPT_PROC32},        /* 1 */
-    {FALSE, -1,  9, "_ldrClose",            -1,  -1, -1, EPT_PROC32},        /* 2 */
-    {FALSE, -1, 12, "_LDRQAppType",         -1,  -1, -1, EPT_PROCIMPORT32},  /* 3 */ /* to be removed? */
-    {FALSE, -1, 20, "_ldrEnum32bitRelRecs", -1,  -1, -1, EPT_PROC32},        /* 4 */
-    {FALSE, -1, 10, "_IOSftOpen",           -1,  -1, -1, EPT_PROCIMPORT32},  /* 5 */
-    {FALSE, -1, 11, "_IOSftClose",          -1,  -1, -1, EPT_PROCIMPORT32},  /* 6 */
-    {FALSE, -1, 15, "_IOSftTransPath",      -1,  -1, -1, EPT_PROCIMPORT32},  /* 7 */
-    {FALSE, -1, 12, "_IOSftReadAt",         -1,  -1, -1, EPT_PROCIMPORT32},  /* 8 */
-    {FALSE, -1, 13, "_IOSftWriteAt",        -1,  -1, -1, EPT_PROCIMPORT32},  /* 9 */
-    {FALSE, -1, 12, "_SftFileSize",         -1,  -1, -1, EPT_PROCIMPORT32},  /* 10 */
-    {FALSE, -1, 11, "_VMAllocMem",          -1,  -1, -1, EPT_PROCIMPORT32},  /* 11 */
-    {FALSE, -1, 11, "_VMGetOwner",          -1,  -1, -1, EPT_PROCIMPORT32},  /* 12 */
-    {FALSE, -1, 11, "g_tkExecPgm",          -1,  -1, -1, EPT_PROC32},        /* 13 */
-    {FALSE, -1, 11, "f_FuStrLenZ",          -1,  -1, -1, EPT_PROCIMPORT16},  /* 14 */
-    {FALSE, -1,  8, "f_FuBuff",             -1,  -1, -1, EPT_PROCIMPORT16}   /* 15 */
+{/* iFound     cchName                  offObject    usSel     fType    */
+ /*      iObject      achName                 ulAddress  cProlog        */
+    {FALSE, -1,  8, "_ldrRead",             -1,  -1,  -1,  -1, EPT_PROC32},        /* 0 */
+    {FALSE, -1,  8, "_ldrOpen",             -1,  -1,  -1,  -1, EPT_PROC32},        /* 1 */
+    {FALSE, -1,  9, "_ldrClose",            -1,  -1,  -1,  -1, EPT_PROC32},        /* 2 */
+    {FALSE, -1, 12, "_LDRQAppType",         -1,  -1,  -1,  -1, EPT_PROCIMPORT32},  /* 3 */ /* to be removed? */
+    {FALSE, -1, 20, "_ldrEnum32bitRelRecs", -1,  -1,  -1,  -1, EPT_PROC32},        /* 4 */
+    {FALSE, -1, 10, "_IOSftOpen",           -1,  -1,  -1,  -1, EPT_PROCIMPORT32},  /* 5 */
+    {FALSE, -1, 11, "_IOSftClose",          -1,  -1,  -1,  -1, EPT_PROCIMPORT32},  /* 6 */
+    {FALSE, -1, 15, "_IOSftTransPath",      -1,  -1,  -1,  -1, EPT_PROCIMPORT32},  /* 7 */
+    {FALSE, -1, 12, "_IOSftReadAt",         -1,  -1,  -1,  -1, EPT_PROCIMPORT32},  /* 8 */
+    {FALSE, -1, 13, "_IOSftWriteAt",        -1,  -1,  -1,  -1, EPT_PROCIMPORT32},  /* 9 */
+    {FALSE, -1, 12, "_SftFileSize",         -1,  -1,  -1,  -1, EPT_PROCIMPORT32},  /* 10 */
+    {FALSE, -1, 11, "_VMAllocMem",          -1,  -1,  -1,  -1, EPT_PROCIMPORT32},  /* 11 */
+    {FALSE, -1, 11, "_VMGetOwner",          -1,  -1,  -1,  -1, EPT_PROCIMPORT32},  /* 12 */
+    {FALSE, -1, 11, "g_tkExecPgm",          -1,  -1,  -1,  -1, EPT_PROC32},        /* 13 */
+    {FALSE, -1, 11, "f_FuStrLenZ",          -1,  -1,  -1,  -1, EPT_PROCIMPORT16},  /* 14 */
+    {FALSE, -1,  8, "f_FuBuff",             -1,  -1,  -1,  -1, EPT_PROCIMPORT16}   /* 15 */
 /*    {FALSE, -1, 11, "",          -1,  -1, -1, EPT_PROCIMPORT16} */ /* 16 */
 };
 
@@ -156,28 +156,29 @@ static char szMsgfailed[]= "failed!   ";
 /*******************************************************************************
 *   Internal Functions                                                         *
 *******************************************************************************/
-static void  kmemcpy(char *p1, const char *p2, int len);
-static int   kstrcmp(const char *p1, const char *p2);
-static char *kstrstr(const char *psz1, const char *psz2);
-static int   kstrncmp(const char *p1, const char *p2, int len);
-static int   kstrlen(const char *p);
-static HFILE fopen(char * filename, char * ignored);
-static int   fread(void * pBuffer, USHORT i1, USHORT i2,  HFILE hfile);
-static int   fseek(HFILE hfile, signed long off, int org);
+static HFILE    fopen(const char * pszFilename, const char * pszIgnored);
+static int      fread(void * pvBuffer, USHORT cbBlock, USHORT cBlock,  HFILE hFile);
+static int      fseek(HFILE hfile, signed long off, int iOrg);
 static unsigned long fsize(HFILE hFile);
-static void  puts(char *psz);
-static int   kargncpy(char *pszTarget, const char *pszArg, unsigned cchMaxlen);
+static void     puts(char *psz);
 
-static int   VerifyPrologs(void);
-static int   ProbeSymFile(char *pszFilename);
-static int   VerifyKernelVer(void);
-static int   ReadOS2Krnl(char *filename);
-static int   ReadOS2Krnl2(HFILE krnl, unsigned long  cbKrnl);
-static int   GetKernelOTEs(void);
+static void     kmemcpy(char *psz1, const char *psz2, int cch);
+static char *   kstrstr(const char *psz1, const char *psz2);
+static int      kstrcmp(const char *psz1, const char *psz2);
+static int      kstrncmp(const char *psz1, const char *psz2, int cch);
+static int      kstrlen(const char *psz);
+static int      kargncpy(char *pszTarget, const char *pszArg, unsigned cchMaxlen);
 
-static void  ShowDecNumber(unsigned long n);
-static void  ShowHexNumber(unsigned long int n);
-static void  ShowResult(int rc, int iSym);
+static int      VerifyPrologs(void);
+static int      ProbeSymFile(char *pszFilename);
+static int      VerifyKernelVer(void);
+static int      ReadOS2Krnl(char *pszFilename);
+static int      ReadOS2Krnl2(HFILE hKrnl, unsigned long  cbKrnl);
+static int      GetKernelOTEs(void);
+
+static void     ShowDecNumber(unsigned long ul);
+static void     ShowHexNumber(unsigned long ul);
+static void     ShowResult(int rc, int iSym);
 
 
 
@@ -188,29 +189,28 @@ static void  ShowResult(int rc, int iSym);
 
 /**
  * Quick implementation of fopen.
- * @param    filename   name of file to open (sz)
- * @param    ignored    whatever - it is ignored
+ * @param    pszFilename   name of file to open (sz)
+ * @param    pszIgnored    whatever - it is ignored
  * @return   Handle to file. (not pointer to a FILE stream as in C-library)
  * @remark   binary and readonly is assumed!
  */
-static HFILE fopen(char * filename, char * ignored)
+static HFILE fopen(const char * pszFilename, const char * pszIgnored)
 {
     HFILE   hFile = 0;
     USHORT  rc;
     unsigned short Action = 0;
 
     rc = DosOpen(
-                filename,
-                &hFile,
-                &Action,
-                0,
-                FILE_NORMAL,
-                OPEN_ACTION_FAIL_IF_NEW | OPEN_ACTION_OPEN_IF_EXISTS,
-                OPEN_SHARE_DENYNONE + OPEN_ACCESS_READONLY,
-                NULL
-                );
+        (char*)pszFilename,
+        &hFile,
+        &Action,
+        0,
+        FILE_NORMAL,
+        OPEN_ACTION_FAIL_IF_NEW | OPEN_ACTION_OPEN_IF_EXISTS,
+        OPEN_SHARE_DENYNONE + OPEN_ACCESS_READONLY,
+        NULL);
 
-    ignored = ignored;
+    pszIgnored = pszIgnored;
     return hFile;
 }
 
@@ -218,17 +218,17 @@ static HFILE fopen(char * filename, char * ignored)
 /**
  * fread emulation
  * @returns   Number of blocks read.
- * @param     pBuffer  Buffer to read into
- * @param     i1       blocksize
- * @param     i2       block count
- * @param     hFile    Handle to file (HFILE)
+ * @param     pvBuffer  Buffer to read into
+ * @param     cbBlock   Blocksize
+ * @param     cBlock    Block count
+ * @param     hFile     Handle to file (HFILE)
  */
-static int fread(void * pBuffer, USHORT cbBlock, USHORT cBlock,  HFILE hFile)
+static int fread(void * pvBuffer, USHORT cbBlock, USHORT cBlock,  HFILE hFile)
 {
     USHORT  ulRead;
     USHORT  rc;
 
-    rc = DosRead(hFile, pBuffer, (USHORT)(cbBlock*cBlock), &ulRead);
+    rc = DosRead(hFile, pvBuffer, (USHORT)(cbBlock*cBlock), &ulRead);
     if (rc == 0)
         rc = (USHORT)cBlock;
     else
@@ -245,14 +245,10 @@ static int fread(void * pBuffer, USHORT cbBlock, USHORT cBlock,  HFILE hFile)
  * @param     off     offset into file from origin
  * @param     org     origin
  */
-static int fseek(HFILE hFile, signed long off, int org)
+static int fseek(HFILE hFile, signed long off, int iOrg)
 {
-    USHORT rc;
-    ULONG ole;
-
-    rc = DosChgFilePtr(hFile, off, org, &ole);
-
-    return rc;
+    ULONG  ul;
+    return  (int)DosChgFilePtr(hFile, off, iOrg, &ul);
 }
 
 
@@ -284,39 +280,15 @@ static void puts(char * psz)
 
 /**
  * kmemcpy - memory copy - slow!
- * @param     p1  target
- * @param     p2  source
- * @param     len length
+ * @param     psz1  target
+ * @param     psz2  source
+ * @param     cch length
  */
-static void kmemcpy(char * p1, const char * p2, int len)
+static void     kmemcpy(char *psz1, const char *psz2, int cch)
 {
-    while (len != 0)
-    {
-        *p1 = *p2;
-        p1++;
-        p2++;
-        len--;
-    }
+    while (cch-- != 0)
+        *psz1++ = *psz2++;
 }
-
-#if 0 /* not in use */
-/**
- * kstrcmp - String compare
- * @returns   0 - equal else !0
- * @param     p1  String 1
- * @param     p2  String 2
- */
-static int kstrcmp(const char * p1, const char * p2)
-{
-    while (*p1 == *p2 && *p1 != '\0' && *p2 != '\0')
-    {
-        p1++;
-        p2++;
-    }
-    return *p1 - *p2;
-}
-#endif
-
 
 
 /**
@@ -346,26 +318,44 @@ static char *kstrstr(const char *psz1, const char *psz2)
 }
 
 
+#if 0 /* not in use */
+/**
+ * kstrcmp - String compare
+ * @returns   0 - equal else !0
+ * @param     psz1  String 1
+ * @param     psz2  String 2
+ */
+static int      kstrcmp(const char *psz1, const char *psz2);
+{
+    while (*psz1 == *psz2 && *psz1 != '\0' && *psz2 != '\0')
+    {
+        psz1++;
+        psz2++;
+    }
+    return *psz1 - *psz2;
+}
+#endif
+
+
 
 /**
  * kstrncmp - String 'n' compare.
- * @returns
  * @returns   0 - equal else !0
  * @param     p1  String 1
  * @param     p2  String 2
  * @param     len length
  */
-static int kstrncmp(const char * p1, const char * p2, int len)
+static int      kstrncmp(register const char *psz1, register const char *psz2, int cch)
 {
     int i = 0;
-    while (i < len && *p1 == *p2 && *p1 != '\0' && *p2 != '\0')
+    while (i < cch && *psz1 == *psz2 && *psz1 != '\0' && *psz2 != '\0')
     {
-        p1++;
-        p2++;
+        psz1++;
+        psz2++;
         i++;
     }
 
-    return i - len;
+    return i - cch;
 }
 
 
@@ -376,10 +366,10 @@ static int kstrncmp(const char * p1, const char * p2, int len)
  * @status    completely implemented and tested.
  * @author    knut st. osmundsen
  */
-static int kstrlen(const char * psz)
+static int kstrlen(register const char * psz)
 {
-    int cch = 0;
-    while (psz[cch] != '\0')
+    register int cch = 0;
+    while (*psz++ != '\0')
         cch++;
     return cch;
 }
@@ -507,6 +497,7 @@ static int ProbeSymFile(char * pszFilename)
         dprintf(("Error opening file %s\n", pszFilename));
         return -50;
     }
+    dprintf(("\nSuccessfully opened symbolfile: %s\n", pszFilename));
 
 
     /*
@@ -524,7 +515,7 @@ static int ProbeSymFile(char * pszFilename)
     achBuffer[MapDef.cbModName] = '\0';
     dprintf(("*Module name: %s\n", achBuffer));
     dprintf(("*Segments: %d\n*MaxSymbolLength: %d\n", MapDef.cSegs, MapDef.cbMaxSym));
-    dprintf(("*ppNextMap: 0x%x\n\n", MapDef.ppNextMap ));
+    dprintf(("*ppNextMap: 0x%x\n", MapDef.ppNextMap ));
 
 
     /*
@@ -764,14 +755,9 @@ static int ReadOS2Krnl(char * pszFilename)
  * Worker function for ReadOS2Krnl
  * @returns   0 on success.
  *            errorcodes on failure. (-1 >= rc >= -14)
- * @param     hKrnl
- * @param
- * @equiv
- * @time
- * @sketch
- * @status
+ * @param     hKrnl   Handle to the kernel file.
+ * @param     cbKrnl  Size of the kernel file.
  * @author    knut st. osmundsen
- * @remark
  */
 static int ReadOS2Krnl2(HFILE hKrnl, unsigned long  cbKrnl)
 {
@@ -783,7 +769,6 @@ static int ReadOS2Krnl2(HFILE hKrnl, unsigned long  cbKrnl)
 
 
     /* find bldlevel string - "@#IBM:14.020#@  IBM OS/2 Kernel - 14.020F" */
-    cbKrnl = fsize(hKrnl);
     if (fseek(hKrnl, 0, SEEK_SET))
         return -2;
 

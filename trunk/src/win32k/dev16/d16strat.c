@@ -1,4 +1,4 @@
-/* $Id: d16strat.c,v 1.4 2000-02-15 23:39:18 bird Exp $
+/* $Id: d16strat.c,v 1.5 2000-02-20 04:27:22 bird Exp $
  *
  * d16strat.c - 16-bit strategy routine, device headers, device_helper (ptr)
  *              and 16-bit IOClts.
@@ -152,7 +152,7 @@ USHORT dev0GenIOCtl(PRP_GENIOCTL pRp)
 
             case D16_IOCTL_VERIFYPROCTAB:
                 if (fInitTime)
-                    return CallVerifyProcTab32();
+                    return CallVerifyImportTab32();
                 break;
         }
     }
