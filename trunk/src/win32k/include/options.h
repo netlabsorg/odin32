@@ -1,4 +1,4 @@
-/* $Id: options.h,v 1.8 2000-02-21 14:53:39 bird Exp $
+/* $Id: options.h,v 1.9 2000-02-21 15:59:21 bird Exp $
  *
  * Options.
  *
@@ -96,7 +96,6 @@ struct options
     ULONG       cbResHeapInit;          /* Initial residentheapsize. */
     ULONG       cbResHeapMax;           /* Maxiumem residentheapsize. */
 };
-
 
 /*******************************************************************************
 *   Global Variables                                                           *
