@@ -1,4 +1,4 @@
-/* $Id: button.cpp,v 1.6 1999-10-09 11:03:22 sandervl Exp $ */
+/* $Id: button.cpp,v 1.7 1999-10-09 16:28:24 cbratschi Exp $ */
 /* File: button.cpp -- Button type widgets
  *
  * Copyright (C) 1993 Johannes Ruscheinski
@@ -961,9 +961,24 @@ static void CB_Paint(HWND hwnd,HDC hDC,WORD action)
                              DT_VCENTER);
           } else {
             if (dwStyle & WS_DISABLED)
-                SetTextColor( hDC, GetSysColor(COLOR_GRAYTEXT) );
-            DrawTextA( hDC, text, -1, &rtext,
-                         DT_SINGLELINE | DT_VCENTER );
+            {
+              RECT rect = rtext;
+              COLORREF oldMode;
+              HPEN oldPen;
+
+//CB: bug in Open32 DrawText: underscore is always black!, need workaround
+//    extract to PaintText(HDC hdc,char* text,RECT* rect);
+              SetTextColor(hDC,GetSysColor(COLOR_3DHILIGHT));
+              oldPen = SelectObject(hDC,GetSysColorPen(COLOR_3DHIGHLIGHT));
+              DrawTextA(hDC,text,-1,&rect,DT_SINGLELINE | DT_VCENTER);
+              SetTextColor(hDC,GetSysColor(COLOR_GRAYTEXT));
+              SelectObject(hDC,GetSysColorPen(COLOR_GRAYTEXT));
+              oldMode = SetBkMode(hDC,TRANSPARENT);
+              OffsetRect(&rect,-1,-1);
+              DrawTextA(hDC,text,-1,&rect,DT_SINGLELINE | DT_VCENTER);
+              SetBkMode(hDC,oldMode);
+              SelectObject(hDC,oldPen);
+            } else DrawTextA(hDC,text,-1,&rtext,DT_SINGLELINE | DT_VCENTER);
           }
         }
     }
@@ -1048,10 +1063,19 @@ static void GB_Paint(HWND hwnd,HDC hDC,WORD action)
         text = (char*)malloc(textLen);
         GetWindowTextA(hwnd,text,textLen);
         if (infoPtr->hFont) SelectObject( hDC, infoPtr->hFont );
-        if (dwStyle & WS_DISABLED)
-            SetTextColor( hDC, GetSysColor(COLOR_GRAYTEXT) );
         rc.left += 10;
-        DrawTextA( hDC, text, -1, &rc, DT_SINGLELINE | DT_NOCLIP );
+        if (dwStyle & WS_DISABLED &&
+            GetSysColor(COLOR_GRAYTEXT) == GetBkColor(hDC))
+            PaintGrayOnGray( hDC,infoPtr->hFont,&rc,text,DT_SINGLELINE | DT_NOCLIP );
+         else
+        {
+            SetTextColor( hDC, (dwStyle & WS_DISABLED) ?
+                                 GetSysColor(COLOR_GRAYTEXT) :
+                                 GetSysColor(COLOR_BTNTEXT) );
+            DrawTextA( hDC, text, -1, &rc,
+                         DT_SINGLELINE | DT_NOCLIP );
+        }
+
         free(text);
     }
 }
