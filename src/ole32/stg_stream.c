@@ -9,12 +9,10 @@
  * Copyright 1999 Thuy Nguyen
  */
 #ifdef __WIN32OS2__
-
-#include <odin.h>
 #include "ole32.h"
 #include "heapstring.h"
-
 #endif
+
 #include <assert.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -26,18 +24,6 @@
 #include "debugtools.h"
 
 #include "storage32.h"
-
-#ifdef __WIN32OS2__
-#undef FIXME
-#undef TRACE
-#ifdef DEBUG
-#define TRACE WriteLog("OLE32: %s", __FUNCTION__); WriteLog
-#define FIXME WriteLog("FIXME OLE32: %s", __FUNCTION__); WriteLog
-#else
-#define TRACE 1 ? (void)0 : (void)((int (*)(char *, ...)) NULL)
-#define FIXME 1 ? (void)0 : (void)((int (*)(char *, ...)) NULL)
-#endif
-#endif
 
 DEFAULT_DEBUG_CHANNEL(storage);
 
@@ -103,7 +89,7 @@ StgStreamImpl* StgStreamImpl_Construct(
     newStream->ownerProperty = ownerProperty;
     
     /*
-     * Start the stream at the begining.
+     * Start the stream at the beginning.
      */
     newStream->currentPosition.s.HighPart = 0;
     newStream->currentPosition.s.LowPart = 0;
@@ -265,7 +251,7 @@ void StgStreamImpl_OpenBlockChain(
   BOOL         readSucessful;
 
   /*
-   * Make sure no old object is staying behind.
+   * Make sure no old object is left over.
    */
   if (This->smallBlockChain != 0)
   {
@@ -322,7 +308,7 @@ void StgStreamImpl_OpenBlockChain(
 /***
  * This method is part of the ISequentialStream interface.
  *
- * If reads a block of information from the stream at the current
+ * It reads a block of information from the stream at the current
  * position. It then moves the current position at the end of the
  * read block
  *
@@ -338,12 +324,13 @@ HRESULT WINAPI StgStreamImpl_Read(
 
   ULONG bytesReadBuffer;
   ULONG bytesToReadFromBuffer;
+  HRESULT res = S_FALSE;
 
   TRACE("(%p, %p, %ld, %p)\n",
 	iface, pv, cb, pcbRead);
 
   /* 
-   * If the caller is not interested in the nubmer of bytes read,
+   * If the caller is not interested in the number of bytes read,
    * we use another buffer to avoid "if" statements in the code.
    */
   if (pcbRead==0)
@@ -357,7 +344,7 @@ HRESULT WINAPI StgStreamImpl_Read(
   
   /*
    * Depending on the type of chain that was opened when the stream was constructed,
-   * we delegate the work to the method that read the block chains.
+   * we delegate the work to the method that reads the block chains.
    */
   if (This->smallBlockChain!=0)
   {
@@ -384,7 +371,8 @@ HRESULT WINAPI StgStreamImpl_Read(
      */
 
     *pcbRead = 0;
-    return S_OK;
+    res = S_OK;
+    goto end;
   }
 
   /*
@@ -398,15 +386,23 @@ HRESULT WINAPI StgStreamImpl_Read(
    */
   This->currentPosition.s.LowPart += *pcbRead;
   
-  /*
-   * The function returns S_OK if the buffer was filled completely
-   * it returns S_FALSE if the end of the stream is reached before the
-   * buffer is filled
-   */
-  if(*pcbRead == cb)
-    return S_OK;
+  if(*pcbRead != cb)
+  {
+    WARN("read %ld instead of the required %ld bytes !\n", *pcbRead, cb);
+    /*
+     * this used to return S_FALSE, however MSDN docu says that an app should
+     * be prepared to handle error in case of stream end reached, as *some*
+     * implementations *might* return an error (IOW: most do *not*).
+     * As some program fails on returning S_FALSE, I better use S_OK here.
+     */
+    res = S_OK;
+  }
+  else
+    res = S_OK;
   
-  return S_FALSE;
+end:
+  TRACE("<-- %08lx\n", res);
+  return res;
 }
         
 /***
@@ -553,6 +549,7 @@ HRESULT WINAPI StgStreamImpl_Seek(
     default:
       return STG_E_INVALIDFUNCTION;
   }
+
 #ifdef __WIN32OS2__
   /*
    * do some multiword arithmetic:
@@ -696,7 +693,7 @@ HRESULT WINAPI StgStreamImpl_SetSize(
   }
 
   /*
-   * Write to the property the new information about this stream
+   * Write the new information about this stream to the property
    */
   Success = StorageImpl_ReadProperty(This->parentStorage->ancestorStorage,
                                        This->ownerProperty,
@@ -750,8 +747,8 @@ HRESULT WINAPI StgStreamImpl_CopyTo(
   totalBytesWritten.s.LowPart = totalBytesWritten.s.HighPart = 0;
 
   /*
-   * use stack to store data temporarly
-   * there is surely more performant way of doing it, for now this basic
+   * use stack to store data temporarily
+   * there is surely a more performant way of doing it, for now this basic
    * implementation will do the job
    */
   while ( cb.s.LowPart > 0 )
@@ -770,7 +767,7 @@ HRESULT WINAPI StgStreamImpl_CopyTo(
     totalBytesWritten.s.LowPart += bytesWritten;
 
     /*
-     * Check that read & write operations were succesfull
+     * Check that read & write operations were successful
      */
     if (bytesRead != bytesWritten)
     {

@@ -179,15 +179,15 @@ HRESULT OLECONVERT_CreateCompObjStream(LPSTORAGE pStorage, LPCSTR strOleTypeName
 /****************************************************************************
  * Storage32BaseImpl definitions.
  *
- * This stucture defines the base information contained in all implementations
- * of IStorage32 contained in this filee storage implementation.
+ * This structure defines the base information contained in all implementations
+ * of IStorage32 contained in this file storage implementation.
  *
  * In OOP terms, this is the base class for all the IStorage32 implementations
  * contained in this file.
  */
 struct StorageBaseImpl
 {
-  ICOM_VFIELD(IStorage);   /* Needs to be the first item in the stuct
+  ICOM_VFIELD(IStorage);   /* Needs to be the first item in the struct
 			    * since we want to cast this in a Storage32 pointer */
 
   /*
@@ -281,8 +281,8 @@ HRESULT WINAPI StorageBaseImpl_SetClass(
  */
 struct StorageImpl
 {
-  ICOM_VFIELD(IStorage);   /* Needs to be the first item in the stuct
-				      * since we want to cast this in a Storage32 pointer */
+  ICOM_VFIELD(IStorage); /* Needs to be the first item in the struct
+			  * since we want to cast this in a Storage32 pointer */
 
   /*
    * Declare the member of the Storage32BaseImpl class to allow
@@ -298,7 +298,11 @@ struct StorageImpl
    * class
    */
   HANDLE           hFile;      /* Physical support for the Docfile */
-  
+  LPOLESTR         pwcsName;   /* Full path of the document file */
+
+  /* FIXME: should this be in Storage32BaseImpl ? */
+  WCHAR            filename[PROPERTY_NAME_BUFFER_LEN];
+
   /*
    * File header
    */
@@ -378,13 +382,18 @@ HRESULT WINAPI StorageImpl_SetStateBits(
             IStorage*      iface,
             DWORD          grfStateBits, /* [in] */ 
             DWORD          grfMask);     /* [in] */ 
-        
+
+HRESULT WINAPI StorageImpl_Stat(IStorage* iface,
+                                STATSTG*  pstatstg,     /* [out] */
+                                DWORD     grfStatFlag); /* [in] */
+
 void StorageImpl_Destroy(
 	    StorageImpl* This);
 
 HRESULT StorageImpl_Construct(
             StorageImpl* This,
             HANDLE       hFile,
+            LPCOLESTR    pwcsName,
             ILockBytes*  pLkbyt,
             DWORD        openFlags,
             BOOL         fileBased,
@@ -471,7 +480,7 @@ void Storage32Impl_SetExtDepotBlock(StorageImpl* This,
  */
 struct StorageInternalImpl
 {
-  ICOM_VFIELD(IStorage);	/* Needs to be the first item in the stuct
+  ICOM_VFIELD(IStorage);	/* Needs to be the first item in the struct
 				 * since we want to cast this in a Storage32 pointer */
 
   /*
@@ -515,7 +524,7 @@ HRESULT WINAPI StorageInternalImpl_Revert(
  */
 struct IEnumSTATSTGImpl
 {
-  ICOM_VFIELD(IEnumSTATSTG);    /* Needs to be the first item in the stuct
+  ICOM_VFIELD(IEnumSTATSTG);    /* Needs to be the first item in the struct
 					 * since we want to cast this in a IEnumSTATSTG pointer */
   
   ULONG		 ref;		        /* Reference count */
@@ -600,7 +609,7 @@ INT IEnumSTATSTGImpl_FindParentProperty(
  */
 struct StgStreamImpl
 {
-  ICOM_VFIELD(IStream);  /* Needs to be the first item in the stuct
+  ICOM_VFIELD(IStream);  /* Needs to be the first item in the struct
 				    * since we want to cast this in a IStream pointer */
   
   /*

@@ -1,3 +1,4 @@
+
 /*
  *	OLE2 library
  *
@@ -6,26 +7,29 @@
  *      Copyright 1999  Noel Borthwick 
  */
 
+#include "config.h"
+
 #include <assert.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 
+#include "commctrl.h"
+#include "ole2.h"
+#include "ole2ver.h"
 #include "windef.h"
 #include "winbase.h"
-#include "wingdi.h"
-#include "winuser.h"
 #include "winerror.h"
-#include "ole2.h"
-#include "commctrl.h"
+#include "winuser.h"
+#include "winreg.h"
+
 #include "wine/obj_clientserver.h"
 #include "wine/winbase16.h"
 #include "wine/wingdi16.h"
 #include "wine/winuser16.h"
-#include "debugtools.h"
-#include "ole2ver.h"
-#include "winreg.h"
 #include "ole32_main.h"
+
+#include "debugtools.h"
 
 DEFAULT_DEBUG_CHANNEL(ole);
 DECLARE_DEBUG_CHANNEL(accel);
@@ -145,6 +149,7 @@ static DWORD OLEDD_GetButtonState();
 
 /******************************************************************************
  *		OleBuildVersion	[OLE2.1]
+ *		OleBuildVersion [OLE32.84]
  */
 DWORD WINAPI OleBuildVersion(void)
 {
@@ -153,7 +158,8 @@ DWORD WINAPI OleBuildVersion(void)
 }
 
 /***********************************************************************
- *           OleInitialize       (OLE2.2) (OLE32.108)
+ *           OleInitialize       (OLE2.2)
+ *           OleInitialize       (OLE32.108)
  */
 HRESULT WINAPI OleInitialize(LPVOID reserved)
 {
@@ -182,7 +188,7 @@ HRESULT WINAPI OleInitialize(LPVOID reserved)
    *     In-place activation
    */
   if (OLE_moduleLockCount==0)
-{
+  {
     /* 
      * Initialize the libraries.
      */
@@ -202,7 +208,7 @@ HRESULT WINAPI OleInitialize(LPVOID reserved)
      * OLE shared menu
      */
     OLEMenu_Initialize();
-}
+  }
 
   /*
    * Then, we increase the lock count on the OLE module.
@@ -213,7 +219,8 @@ HRESULT WINAPI OleInitialize(LPVOID reserved)
 }
 
 /******************************************************************************
- *		CoGetCurrentProcess	[COMPOBJ.34] [OLE2.2][OLE32.108]
+ *		CoGetCurrentProcess	[COMPOBJ.34]
+ *		CoGetCurrentProcess	[OLE32.18]
  *
  * NOTES
  *   Is DWORD really the correct return type for this function?
@@ -224,7 +231,8 @@ DWORD WINAPI CoGetCurrentProcess(void)
 }
 
 /******************************************************************************
- *		OleUninitialize	[OLE2.3] [OLE32.131]
+ *		OleUninitialize	[OLE2.3]
+ *		OleUninitialize	[OLE32.131]
  */
 void WINAPI OleUninitialize(void)
 {
@@ -267,8 +275,6 @@ void WINAPI OleUninitialize(void)
   CoUninitialize();
 }
 
-#ifndef __WIN32OS2__
-//imessagefilter.cpp
 /******************************************************************************
  *		CoRegisterMessageFilter	[OLE32.38]
  */
@@ -282,7 +288,6 @@ HRESULT WINAPI CoRegisterMessageFilter(
     }
     return S_OK;
 }
-#endif
 
 /******************************************************************************
  *		OleInitializeWOW	[OLE32.109]
@@ -293,7 +298,7 @@ HRESULT WINAPI OleInitializeWOW(DWORD x) {
 }
 
 /***********************************************************************
- *           RegisterDragDrop16 (OLE2.35)
+ *           RegisterDragDrop (OLE2.35)
  */
 HRESULT WINAPI RegisterDragDrop16(
 	HWND16 hwnd,
@@ -347,7 +352,7 @@ HRESULT WINAPI RegisterDragDrop(
 }
 
 /***********************************************************************
- *           RevokeDragDrop16 (OLE2.36)
+ *           RevokeDragDrop (OLE2.36)
  */
 HRESULT WINAPI RevokeDragDrop16(
 	HWND16 hwnd
@@ -1066,7 +1071,7 @@ BOOL OLEMenu_SetIsServerMenu( HMENU hmenu, OleMenuDescriptor *pOleMenuDescriptor
    * in the groups File, Edit, Container, Object, Window, Help.
    * The Edit, Object & Help groups belong to the server object
    * and the other three belong to the container.
-   * Loop thru the group widths and locate the group we are a member of.
+   * Loop through the group widths and locate the group we are a member of.
    */
   for ( i = 0, nWidth = 0; i < 6; i++ )
   {
@@ -1412,6 +1417,7 @@ BOOL WINAPI IsAccelerator(HACCEL hAccel, int cAccelEntries, LPMSG lpMsg, WORD* l
     int i;
 
     if(!lpMsg) return FALSE;
+
 #ifdef __WIN32OS2__
     if (!hAccel || !(lpAccelTbl = (LPACCEL16)LockResource(hAccel)))
 #else
@@ -1545,10 +1551,10 @@ void WINAPI ReleaseStgMedium(
       if ( (pmedium->pUnkForRelease==0) && 
 	   (pmedium->u.hMetaFilePict!=0) )
       {
-	LPMETAFILEPICT pMP = GlobalLock(pmedium->u.hMetaFilePict);
+	LPMETAFILEPICT pMP = GlobalLock(pmedium->u.hGlobal);
 	DeleteMetaFile(pMP->hMF);
-	GlobalUnlock(pmedium->u.hMetaFilePict);
-	GlobalFree(pmedium->u.hMetaFilePict);
+	GlobalUnlock(pmedium->u.hGlobal);
+	GlobalFree(pmedium->u.hGlobal);
       }
 
       pmedium->u.hMetaFilePict = 0;
@@ -2199,7 +2205,7 @@ static void OLEUTL_ReadRegistryDWORDValue(
 }
 #ifndef __WIN32OS2__
 /******************************************************************************
- * OleMetaFilePictFromIconAndLabel
+ * OleMetaFilePictFromIconAndLabel (OLE2.56)
  *
  * Returns a global memory handle to a metafile which contains the icon and
  * label given.
@@ -2242,8 +2248,9 @@ HGLOBAL16 WINAPI OleMetaFilePictFromIconAndLabel16(
     return hmf;
 }
 #endif
+
 /******************************************************************************
- * DllDebugObjectRPCHook
+ * DllDebugObjectRPCHook (OLE32.62)
  * turns on and off internal debugging,  pointer is only used on macintosh
  */
 

@@ -5,6 +5,7 @@
  *	Copyright 1998	Justin Bradford
  *      Copyright 1999  Francis Beaudet
  *  Copyright 1999  Sylvain St-Germain
+ *  Copyright 2002  Marcus Meissner
  */
 
 #include "config.h"
@@ -13,40 +14,38 @@
 #include <stdio.h>
 #include <string.h>
 #include <assert.h>
+
 #include "windef.h"
-#include "wtypes.h"
-#include "wingdi.h"
-#include "wine/winbase16.h"
-#include "winerror.h"
-#include "wownt32.h"
+#include "objbase.h"
+#include "ole2.h"
 #include "ole2ver.h"
-#include "debugtools.h"
-#include "heap.h"
-#include "winreg.h"
 #include "rpc.h"
-
+#include "winerror.h"
+#include "winreg.h"
+#include "wownt32.h"
+#include "wtypes.h"
+#include "wine/unicode.h"
 #include "wine/obj_base.h"
-#include "wine/obj_misc.h"
-#include "wine/obj_storage.h"
 #include "wine/obj_clientserver.h"
-
-#include "ole.h"
-#include "ifs.h"
+#include "wine/obj_misc.h"
+#include "wine/obj_marshal.h"
+#include "wine/obj_storage.h"
+#include "wine/obj_channel.h"
+#include "wine/winbase16.h"
 #include "compobj_private.h"
+#include "ifs.h"
 
-#ifdef __WIN32OS2__
-#include <heapstring.h>
-#endif
+#include "debugtools.h"
 
 DEFAULT_DEBUG_CHANNEL(ole);
 
 /****************************************************************************
  *  COM External Lock structures and methods declaration
  *
- *  This api provides a linked list to managed external references to 
- *  COM objects.  
+ *  This api provides a linked list to managed external references to
+ *  COM objects.
  *
- *  The public interface consists of three calls: 
+ *  The public interface consists of three calls:
  *      COM_ExternalLockAddRef
  *      COM_ExternalLockRelease
  *      COM_ExternalLockFreeList
@@ -56,7 +55,7 @@ DEFAULT_DEBUG_CHANNEL(ole);
 #define EL_NOT_FOUND   0
 
 /*
- * Declaration of the static structure that manage the 
+ * Declaration of the static structure that manage the
  * external lock to COM  objects.
  */
 typedef struct COM_ExternalLock     COM_ExternalLock;
@@ -81,7 +80,7 @@ struct COM_ExternalLockList
 static COM_ExternalLockList elList = { EL_END_OF_LIST };
 
 /*
- * Public Interface to the external lock list   
+ * Public Interface to the external lock list
  */
 static void COM_ExternalLockFreeList();
 static void COM_ExternalLockAddRef(IUnknown *pUnk);
@@ -89,7 +88,7 @@ static void COM_ExternalLockRelease(IUnknown *pUnk, BOOL bRelAll);
 void COM_ExternalLockDump(); /* testing purposes, not static to avoid warning */
 
 /*
- * Private methods used to managed the linked list   
+ * Private methods used to managed the linked list
  */
 static BOOL COM_ExternalLockInsert(
   IUnknown *pUnk);
@@ -124,7 +123,7 @@ WORD Table_ETask[62];
  * decreased every time CoUninitialize is called. When it hits 0, the COM
  * libraries are freed
  */
-static ULONG s_COMLockCount = 0;
+static LONG s_COMLockCount = 0;
 
 /*
  * This linked list contains the list of registered class objects. These
@@ -141,9 +140,11 @@ typedef struct tagRegisteredClass
   DWORD     runContext;
   DWORD     connectFlags;
   DWORD     dwCookie;
+  HANDLE    hThread; /* only for localserver */
   struct tagRegisteredClass* nextClass;
 } RegisteredClass;
 
+static CRITICAL_SECTION csRegisteredClassList;
 static RegisteredClass* firstRegisteredClass = NULL;
 
 /* this open DLL table belongs in a per process table, but my guess is that
@@ -151,10 +152,11 @@ static RegisteredClass* firstRegisteredClass = NULL;
  * space assuming that there is one OLE32 per process.
  */
 typedef struct tagOpenDll {
-  HINSTANCE hLibrary;       
+  HINSTANCE hLibrary;
   struct tagOpenDll *next;
 } OpenDll;
 
+static CRITICAL_SECTION csOpenDllList;
 static OpenDll *openDllList = NULL; /* linked list of open dlls */
 
 /*****************************************************************************
@@ -169,7 +171,23 @@ static void COM_RevokeAllClasses();
 
 
 /******************************************************************************
+ * Initialize/Uninitialize critical sections.
+ */
+void COMPOBJ_InitProcess( void )
+{
+    InitializeCriticalSection( &csRegisteredClassList );
+    InitializeCriticalSection( &csOpenDllList );
+}
+
+void COMPOBJ_UninitProcess( void )
+{
+    DeleteCriticalSection( &csRegisteredClassList );
+    DeleteCriticalSection( &csOpenDllList );
+}
+
+/******************************************************************************
  *           CoBuildVersion [COMPOBJ.1]
+ *           CoBuildVersion [OLE32.4]
  *
  * RETURNS
  *	Current build version, hiword is majornumber, loword is minornumber
@@ -180,9 +198,8 @@ DWORD WINAPI CoBuildVersion(void)
     return (rmm<<16)+rup;
 }
 
-#ifndef __WIN32OS2__
 /******************************************************************************
- *		CoInitialize16	[COMPOBJ.2]
+ *		CoInitialize	[COMPOBJ.2]
  * Set the win16 IMalloc used for memory management
  */
 HRESULT WINAPI CoInitialize16(
@@ -191,7 +208,6 @@ HRESULT WINAPI CoInitialize16(
     currentMalloc16 = (LPMALLOC16)lpReserved;
     return S_OK;
 }
-#endif
 
 /******************************************************************************
  *		CoInitialize	[OLE32.26]
@@ -203,7 +219,7 @@ HRESULT WINAPI CoInitialize16(
 HRESULT WINAPI CoInitialize(
 	LPVOID lpReserved	/* [in] pointer to win32 malloc interface
                                    (obsolete, should be NULL) */
-) 
+)
 {
   /*
    * Just delegate to the newer method.
@@ -224,7 +240,7 @@ HRESULT WINAPI CoInitialize(
  *                      threading model.
  *
  * BUGS
- * Only the single threaded model is supported. As a result RPC_E_CHANGED_MODE 
+ * Only the single threaded model is supported. As a result RPC_E_CHANGED_MODE
  * is never returned.
  *
  * See the windows documentation for more details.
@@ -233,7 +249,7 @@ HRESULT WINAPI CoInitializeEx(
 	LPVOID lpReserved,	/* [in] pointer to win32 malloc interface
                                    (obsolete, should be NULL) */
 	DWORD dwCoInit		/* [in] A value from COINIT specifies the threading model */
-) 
+)
 {
   HRESULT hr;
 
@@ -247,7 +263,7 @@ HRESULT WINAPI CoInitializeEx(
   /*
    * Check for unsupported features.
    */
-  if (dwCoInit!=COINIT_APARTMENTTHREADED) 
+  if (dwCoInit!=COINIT_APARTMENTTHREADED)
   {
     FIXME(":(%p,%x): unsupported flag %x\n", lpReserved, (int)dwCoInit, (int)dwCoInit);
     /* Hope for the best and continue anyway */
@@ -256,13 +272,16 @@ HRESULT WINAPI CoInitializeEx(
   /*
    * Check the lock count. If this is the first time going through the initialize
    * process, we have to initialize the libraries.
+   *
+   * And crank-up that lock count.
    */
-  if (s_COMLockCount==0)
+  if (InterlockedExchangeAdd(&s_COMLockCount,1)==0)
   {
     /*
      * Initialize the various COM libraries and data structures.
      */
     TRACE("() - Initializing the COM libraries\n");
+
 
     RunningObjectTableImpl_Initialize();
 
@@ -271,18 +290,12 @@ HRESULT WINAPI CoInitializeEx(
   else
     hr = S_FALSE;
 
-  /*
-   * Crank-up that lock count.
-   */
-  s_COMLockCount++;
-
   return hr;
 }
 
-#ifndef __WIN32OS2__
 /***********************************************************************
- *           CoUninitialize16   [COMPOBJ.3]
- * Don't know what it does. 
+ *           CoUninitialize   [COMPOBJ.3]
+ * Don't know what it does.
  * 3-Nov-98 -- this was originally misspelled, I changed it to what I
  *   believe is the correct spelling
  */
@@ -291,7 +304,6 @@ void WINAPI CoUninitialize16(void)
   TRACE("()\n");
   CoFreeAllLibraries();
 }
-#endif
 
 /***********************************************************************
  *           CoUninitialize   [OLE32.47]
@@ -302,18 +314,16 @@ void WINAPI CoUninitialize16(void)
  */
 void WINAPI CoUninitialize(void)
 {
+  LONG lCOMRefCnt;
   TRACE("()\n");
-  
+
   /*
    * Decrease the reference count.
-   */
-  s_COMLockCount--;
-  
-  /*
    * If we are back to 0 locks on the COM library, make sure we free
    * all the associated data structures.
    */
-  if (s_COMLockCount==0)
+  lCOMRefCnt = InterlockedExchangeAdd(&s_COMLockCount,-1);
+  if (lCOMRefCnt==1)
   {
     /*
      * Release the various COM libraries and data structures.
@@ -335,12 +345,17 @@ void WINAPI CoUninitialize(void)
      * This will free list of external references to COM objects.
      */
     COM_ExternalLockFreeList();
-}
+
+  }
+  else if (lCOMRefCnt<1) {
+    ERR( "CoUninitialize() - not CoInitialized.\n" );
+    InterlockedExchangeAdd(&s_COMLockCount,1); /* restore the lock count. */
+  }
 }
 
 #ifndef __WIN32OS2__
 /***********************************************************************
- *           CoGetMalloc16    [COMPOBJ.4]
+ *           CoGetMalloc    [COMPOBJ.4]
  * RETURNS
  *	The current win16 IMalloc
  */
@@ -354,7 +369,6 @@ HRESULT WINAPI CoGetMalloc16(
     return S_OK;
 }
 #endif
-
 /******************************************************************************
  *		CoGetMalloc	[OLE32.20]
  *
@@ -373,7 +387,7 @@ HRESULT WINAPI CoGetMalloc(
 
 #ifndef __WIN32OS2__
 /***********************************************************************
- *           CoCreateStandardMalloc16 [COMPOBJ.71]
+ *           CoCreateStandardMalloc [COMPOBJ.71]
  */
 HRESULT WINAPI CoCreateStandardMalloc16(DWORD dwMemContext,
 					  LPMALLOC16 *lpMalloc)
@@ -383,9 +397,11 @@ HRESULT WINAPI CoCreateStandardMalloc16(DWORD dwMemContext,
     *lpMalloc = IMalloc16_Constructor();
     return S_OK;
 }
+#endif
 
 /******************************************************************************
  *		CoDisconnectObject	[COMPOBJ.15]
+ *		CoDisconnectObject	[OLE32.8]
  */
 HRESULT WINAPI CoDisconnectObject( LPUNKNOWN lpUnk, DWORD reserved )
 {
@@ -394,7 +410,7 @@ HRESULT WINAPI CoDisconnectObject( LPUNKNOWN lpUnk, DWORD reserved )
 }
 
 /***********************************************************************
- *           IsEqualGUID16 [COMPOBJ.18]
+ *           IsEqualGUID [COMPOBJ.18]
  *
  * Compares two Unique Identifiers.
  *
@@ -407,14 +423,13 @@ BOOL16 WINAPI IsEqualGUID16(
 ) {
     return !memcmp( g1, g2, sizeof(GUID) );
 }
-#endif
 
 /******************************************************************************
- *		CLSIDFromString16	[COMPOBJ.20]
- * Converts a unique identifier from its string representation into 
+ *		CLSIDFromString	[COMPOBJ.20]
+ * Converts a unique identifier from its string representation into
  * the GUID struct.
  *
- * Class id: DWORD-WORD-WORD-BYTES[2]-BYTES[6] 
+ * Class id: DWORD-WORD-WORD-BYTES[2]-BYTES[6]
  *
  * RETURNS
  *	the converted GUID
@@ -515,7 +530,8 @@ HRESULT WINAPI CoCreateGuid(
 
 /******************************************************************************
  *		CLSIDFromString	[OLE32.3]
- * Converts a unique identifier from its string representation into 
+ *		IIDFromString   [OLE32.74]
+ * Converts a unique identifier from its string representation into
  * the GUID struct.
  *
  * UNDOCUMENTED
@@ -526,12 +542,14 @@ HRESULT WINAPI CoCreateGuid(
  */
 HRESULT WINAPI CLSIDFromString(
 	LPCOLESTR idstr,	/* [in] string representation of GUID */
-	CLSID *id		/* [out] GUID represented by above string */
-) {
-    LPOLESTR16      xid = HEAP_strdupWtoA(GetProcessHeap(),0,idstr);
-    HRESULT       ret = CLSIDFromString16(xid,id);
+	CLSID *id )		/* [out] GUID represented by above string */
+{
+    char xid[40];
+    HRESULT ret;
 
-    HeapFree(GetProcessHeap(),0,xid);
+    if (!WideCharToMultiByte( CP_ACP, 0, idstr, -1, xid, sizeof(xid), NULL, NULL ))
+        return CO_E_CLASSSTRING;
+    ret = CLSIDFromString16(xid,id);
     if(ret != S_OK) { /* It appears a ProgID is also valid */
         ret = CLSIDFromProgID(idstr, id);
     }
@@ -547,15 +565,9 @@ HRESULT WINAPI CLSIDFromString(
  * RETURNS
  *	the string representation and HRESULT
  */
-#ifdef __WIN32OS2__
-HRESULT WINAPI WINE_StringFromCLSID(
+HRESULT WINE_StringFromCLSID(
 	const CLSID *id,	/* [in] GUID to be converted */
 	LPSTR idstr		/* [out] pointer to buffer to contain converted guid */
-#else
-static HRESULT WINE_StringFromCLSID(
-	const CLSID *id,	/* [in] GUID to be converted */
-	LPSTR idstr		/* [out] pointer to buffer to contain converted guid */
-#endif
 ) {
   static const char *hex = "0123456789ABCDEF";
   char *s;
@@ -566,7 +578,7 @@ static HRESULT WINE_StringFromCLSID(
 	  *idstr = 0x00;
 	  return E_FAIL;
 	}
-	
+
   sprintf(idstr, "{%08lX-%04X-%04X-%02X%02X-",
 	  id->Data1, id->Data2, id->Data3,
 	  id->Data4[0], id->Data4[1]);
@@ -585,9 +597,10 @@ static HRESULT WINE_StringFromCLSID(
 
   return S_OK;
 }
+
 #ifndef __WIN32OS2__
 /******************************************************************************
- *		StringFromCLSID16	[COMPOBJ.19]
+ *		StringFromCLSID	[COMPOBJ.19]
  * Converts a GUID into the respective string representation.
  * The target string is allocated using the OLE IMalloc.
  * RETURNS
@@ -628,8 +641,10 @@ HRESULT WINAPI StringFromCLSID16(
     return WINE_StringFromCLSID(id,MapSL((SEGPTR)*idstr));
 }
 #endif
+
 /******************************************************************************
  *		StringFromCLSID	[OLE32.151]
+ *		StringFromIID   [OLE32.153]
  * Converts a GUID into the respective string representation.
  * The target string is allocated using the OLE IMalloc.
  * RETURNS
@@ -656,7 +671,8 @@ HRESULT WINAPI StringFromCLSID(
 }
 
 /******************************************************************************
- *		StringFromGUID2	[COMPOBJ.76] [OLE32.152]
+ *		StringFromGUID2	[COMPOBJ.76]
+ *		StringFromGUID2	[OLE32.152]
  *
  * Converts a global unique identifier into a string of an API-
  * specified fixed format. (The usual {.....} stuff.)
@@ -728,7 +744,7 @@ HRESULT WINAPI ProgIDFromCLSID(
 }
 
 /******************************************************************************
- *		CLSIDFromProgID16	[COMPOBJ.61]
+ *		CLSIDFromProgID	[COMPOBJ.61]
  * Converts a program id into the respective GUID. (By using a registry lookup)
  * RETURNS
  *	riid associated with the progid
@@ -766,13 +782,30 @@ HRESULT WINAPI CLSIDFromProgID16(
  */
 HRESULT WINAPI CLSIDFromProgID(
 	LPCOLESTR progid,	/* [in] program id as found in registry */
-	LPCLSID riid		/* [out] associated CLSID */
-) {
-	LPOLESTR16 pid = HEAP_strdupWtoA(GetProcessHeap(),0,progid);
-	HRESULT       ret = CLSIDFromProgID16(pid,riid);
+	LPCLSID riid )		/* [out] associated CLSID */
+{
+    static const WCHAR clsidW[] = { '\\','C','L','S','I','D',0 };
+    char buf2[80];
+    DWORD buf2len = sizeof(buf2);
+    HKEY xhkey;
 
-	HeapFree(GetProcessHeap(),0,pid);
-	return ret;
+    WCHAR *buf = HeapAlloc( GetProcessHeap(),0,(strlenW(progid)+8) * sizeof(WCHAR) );
+    strcpyW( buf, progid );
+    strcatW( buf, clsidW );
+    if (RegOpenKeyW(HKEY_CLASSES_ROOT,buf,&xhkey))
+    {
+        HeapFree(GetProcessHeap(),0,buf);
+        return CO_E_CLASSSTRING;
+    }
+    HeapFree(GetProcessHeap(),0,buf);
+
+    if (RegQueryValueA(xhkey,NULL,buf2,&buf2len))
+    {
+        RegCloseKey(xhkey);
+        return CO_E_CLASSSTRING;
+    }
+    RegCloseKey(xhkey);
+    return CLSIDFromString16(buf2,riid);
 }
 
 
@@ -781,12 +814,12 @@ HRESULT WINAPI CLSIDFromProgID(
  *             CoGetPSClsid [OLE32.22]
  *
  * This function returns the CLSID of the DLL that implements the proxy and stub
- * for the specified interface. 
+ * for the specified interface.
  *
- * It determines this by searching the 
+ * It determines this by searching the
  * HKEY_CLASSES_ROOT\Interface\{string form of riid}\ProxyStubClsid32 in the registry
  * and any interface id registered by CoRegisterPSClsid within the current process.
- * 
+ *
  * FIXME: We only search the registry, not ids registered with CoRegisterPSClsid.
  */
 HRESULT WINAPI CoGetPSClsid(
@@ -821,7 +854,7 @@ HRESULT WINAPI CoGetPSClsid(
     HeapFree(GetProcessHeap(),0,buf);
 
     /* ... Once we have the key, query the registry to get the
-       value of CLSID as a string, and convert it into a 
+       value of CLSID as a string, and convert it into a
        proper CLSID structure to be passed back to the app */
     buf2len = sizeof(buf2);
     if ( (RegQueryValueA(xhkey,NULL,buf2,&buf2len)) )
@@ -845,7 +878,7 @@ HRESULT WINAPI CoGetPSClsid(
 
 
 /***********************************************************************
- *		WriteClassStm
+ *		WriteClassStm (OLE32.159)
  *
  * This function write a CLSID on stream
  */
@@ -860,25 +893,25 @@ HRESULT WINAPI WriteClassStm(IStream *pStm,REFCLSID rclsid)
 }
 
 /***********************************************************************
- *		ReadClassStm
+ *		ReadClassStm (OLE32.135)
  *
  * This function read a CLSID from a stream
  */
-HRESULT WINAPI ReadClassStm(IStream *pStm,REFCLSID rclsid)
+HRESULT WINAPI ReadClassStm(IStream *pStm,CLSID *pclsid)
 {
     ULONG nbByte;
     HRESULT res;
-    
-    TRACE("(%p,%p)\n",pStm,rclsid);
 
-    if (rclsid==NULL)
+    TRACE("(%p,%p)\n",pStm,pclsid);
+
+    if (pclsid==NULL)
         return E_INVALIDARG;
-    
-    res = IStream_Read(pStm,(void*)rclsid,sizeof(CLSID),&nbByte);
+
+    res = IStream_Read(pStm,(void*)pclsid,sizeof(CLSID),&nbByte);
 
     if (FAILED(res))
         return res;
-    
+
     if (nbByte != sizeof(CLSID))
         return S_FALSE;
     else
@@ -907,10 +940,10 @@ HRESULT WINAPI SetETask16(HTASK16 hTask, LPVOID p) {
 	hETask = hTask;
 	return 0;
 }
-
+#endif
 /* FIXME: this function is not declared in the WINELIB headers. But where should it go ? */
 /***********************************************************************
- *           CallObjectInWOW (COMPOBJ.201)
+ *           CALLOBJECTINWOW (COMPOBJ.201)
  */
 HRESULT WINAPI CallObjectInWOW(LPVOID p1,LPVOID p2) {
 	FIXME("(%p,%p),stub!\n",p1,p2);
@@ -918,7 +951,7 @@ HRESULT WINAPI CallObjectInWOW(LPVOID p1,LPVOID p2) {
 }
 
 /******************************************************************************
- *		CoRegisterClassObject16	[COMPOBJ.5]
+ *		CoRegisterClassObject	[COMPOBJ.5]
  *
  * Don't know where it registers it ...
  */
@@ -941,7 +974,7 @@ HRESULT WINAPI CoRegisterClassObject16(
 
 
 /******************************************************************************
- *      CoRevokeClassObject16 [COMPOBJ.6]
+ *      CoRevokeClassObject [COMPOBJ.6]
  *
  */
 HRESULT WINAPI CoRevokeClassObject16(DWORD dwRegister) /* [in] token on class obj */
@@ -949,16 +982,30 @@ HRESULT WINAPI CoRevokeClassObject16(DWORD dwRegister) /* [in] token on class ob
     FIXME("(0x%08lx),stub!\n", dwRegister);
     return 0;
 }
-#endif
 
+/******************************************************************************
+ *      CoFileTimeToDosDateTime [COMPOBJ.30]
+ */
+BOOL16 WINAPI CoFileTimeToDosDateTime16(const FILETIME *ft, LPWORD lpDosDate, LPWORD lpDosTime)
+{
+    return FileTimeToDosDateTime(ft, lpDosDate, lpDosTime);
+}
+
+/******************************************************************************
+ *      CoDosDateTimeToFileTime [COMPOBJ.31]
+ */
+BOOL16 WINAPI CoDosDateTimeToFileTime16(WORD wDosDate, WORD wDosTime, FILETIME *ft)
+{
+    return DosDateTimeToFileTime(wDosDate, wDosTime, ft);
+}
 
 /***
  * COM_GetRegisteredClassObject
  *
- * This internal method is used to scan the registered class list to 
+ * This internal method is used to scan the registered class list to
  * find a class object.
  *
- * Params: 
+ * Params:
  *   rclsid        Class ID of the class to find.
  *   dwClsContext  Class context to match.
  *   ppv           [out] returns a pointer to the class object. Complying
@@ -970,7 +1017,10 @@ static HRESULT COM_GetRegisteredClassObject(
 	DWORD       dwClsContext,
 	LPUNKNOWN*  ppUnk)
 {
+  HRESULT hr = S_FALSE;
   RegisteredClass* curClass;
+
+  EnterCriticalSection( &csRegisteredClassList );
 
   /*
    * Sanity check
@@ -1001,7 +1051,8 @@ static HRESULT COM_GetRegisteredClassObject(
 
       IUnknown_AddRef(curClass->classObject);
 
-      return S_OK;
+      hr = S_OK;
+      goto end;
     }
 
     /*
@@ -1010,10 +1061,89 @@ static HRESULT COM_GetRegisteredClassObject(
     curClass = curClass->nextClass;
   }
 
+end:
+  LeaveCriticalSection( &csRegisteredClassList );
   /*
    * If we get to here, we haven't found our class.
    */
-  return S_FALSE;
+  return hr;
+}
+
+static DWORD WINAPI
+_LocalServerThread(LPVOID param) {
+    HANDLE		hPipe;
+    char 		pipefn[200];
+    RegisteredClass *newClass = (RegisteredClass*)param;
+    HRESULT		hres;
+    IStream		*pStm;
+    STATSTG		ststg;
+    unsigned char	*buffer;
+    int 		buflen;
+    IClassFactory	*classfac;
+    LARGE_INTEGER	seekto;
+    ULARGE_INTEGER	newpos;
+    ULONG		res;
+
+    TRACE("Starting threader for %s.\n",debugstr_guid(&newClass->classIdentifier));
+    strcpy(pipefn,PIPEPREF);
+    WINE_StringFromCLSID(&newClass->classIdentifier,pipefn+strlen(PIPEPREF));
+
+    hres = IUnknown_QueryInterface(newClass->classObject,&IID_IClassFactory,(LPVOID*)&classfac);
+    if (hres) return hres;
+
+    hres = CreateStreamOnHGlobal(0,TRUE,&pStm);
+    if (hres) {
+	FIXME("Failed to create stream on hglobal.\n");
+	return hres;
+    }
+    hres = CoMarshalInterface(pStm,&IID_IClassFactory,(LPVOID)classfac,0,NULL,0);
+    if (hres) {
+	FIXME("CoMarshalInterface failed, %lx!\n",hres);
+	return hres;
+    }
+    hres = IStream_Stat(pStm,&ststg,0);
+    if (hres) return hres;
+
+    buflen = ststg.cbSize.s.LowPart;
+    buffer = HeapAlloc(GetProcessHeap(),0,buflen);
+    seekto.s.LowPart = 0;
+    seekto.s.HighPart = 0;
+    hres = IStream_Seek(pStm,seekto,SEEK_SET,&newpos);
+    if (hres) {
+	FIXME("IStream_Seek failed, %lx\n",hres);
+	return hres;
+    }
+    hres = IStream_Read(pStm,buffer,buflen,&res);
+    if (hres) {
+	FIXME("Stream Read failed, %lx\n",hres);
+	return hres;
+    }
+    IStream_Release(pStm);
+
+    while (1) {
+	hPipe = CreateNamedPipeA(
+	    pipefn,
+	    PIPE_ACCESS_DUPLEX,
+	    PIPE_TYPE_BYTE|PIPE_WAIT,
+	    PIPE_UNLIMITED_INSTANCES,
+	    4096,
+	    4096,
+	    NMPWAIT_USE_DEFAULT_WAIT,
+	    NULL
+	);
+	if (hPipe == INVALID_HANDLE_VALUE) {
+	    FIXME("pipe creation failed for %s, le is %lx\n",pipefn,GetLastError());
+	    return 1;
+	}
+	if (!ConnectNamedPipe(hPipe,NULL)) {
+	    ERR("Failure during ConnectNamedPipe %lx, ABORT!\n",GetLastError());
+	    CloseHandle(hPipe);
+	    continue;
+	}
+	WriteFile(hPipe,buffer,buflen,&res,NULL);
+	CloseHandle(hPipe);
+    }
+    return 0;
 }
 
 /******************************************************************************
@@ -1029,29 +1159,18 @@ HRESULT WINAPI CoRegisterClassObject(
 	DWORD dwClsContext, /* [in] CLSCTX flags indicating the context in which to run the executable */
 	DWORD flags,        /* [in] REGCLS flags indicating how connections are made */
 	LPDWORD lpdwRegister
-) 
+)
 {
   RegisteredClass* newClass;
   LPUNKNOWN        foundObject;
   HRESULT          hr;
-    char buf[80];
-
-    WINE_StringFromCLSID(rclsid,buf);
 
   TRACE("(%s,%p,0x%08lx,0x%08lx,%p)\n",
-	buf,pUnk,dwClsContext,flags,lpdwRegister);
+	debugstr_guid(rclsid),pUnk,dwClsContext,flags,lpdwRegister);
 
-  /*
-   * Perform a sanity check on the parameters
-   */
   if ( (lpdwRegister==0) || (pUnk==0) )
-  {
     return E_INVALIDARG;
-}
 
-  /*
-   * Initialize the cookie (out parameter)
-   */
   *lpdwRegister = 0;
 
   /*
@@ -1059,32 +1178,24 @@ HRESULT WINAPI CoRegisterClassObject(
    * If it is, this should cause an error.
    */
   hr = COM_GetRegisteredClassObject(rclsid, dwClsContext, &foundObject);
-
-  if (hr == S_OK)
-  {
-    /*
-     * The COM_GetRegisteredClassObject increased the reference count on the
-     * object so it has to be released.
-     */
+  if (hr == S_OK) {
     IUnknown_Release(foundObject);
-
     return CO_E_OBJISREG;
   }
-    
-  /*
-   * If it is not registered, we must create a new entry for this class and
-   * append it to the registered class list.
-   * We use the address of the chain node as the cookie since we are sure it's
-   * unique.
-   */
-  newClass = HeapAlloc(GetProcessHeap(), 0, sizeof(RegisteredClass));
 
-  /*
-   * Initialize the node.
-   */
+  newClass = HeapAlloc(GetProcessHeap(), 0, sizeof(RegisteredClass));
+  if ( newClass == NULL )
+    return E_OUTOFMEMORY;
+
+  EnterCriticalSection( &csRegisteredClassList );
+
   newClass->classIdentifier = *rclsid;
   newClass->runContext      = dwClsContext;
   newClass->connectFlags    = flags;
+  /*
+   * Use the address of the chain node as the cookie since we are sure it's
+   * unique.
+   */
   newClass->dwCookie        = (DWORD)newClass;
   newClass->nextClass       = firstRegisteredClass;
 
@@ -1096,15 +1207,16 @@ HRESULT WINAPI CoRegisterClassObject(
   IUnknown_AddRef(newClass->classObject);
 
   firstRegisteredClass = newClass;
+  LeaveCriticalSection( &csRegisteredClassList );
 
-  /*
-   * Assign the out parameter (cookie)
-   */
   *lpdwRegister = newClass->dwCookie;
-    
-  /*
-   * We're successful Yippee!
-   */
+
+  if (dwClsContext & CLSCTX_LOCAL_SERVER) {
+      DWORD tid;
+
+      STUBMGR_Start();
+      newClass->hThread=CreateThread(NULL,0,_LocalServerThread,newClass,0,&tid);
+  }
   return S_OK;
 }
 
@@ -1116,12 +1228,15 @@ HRESULT WINAPI CoRegisterClassObject(
  * See the Windows documentation for more details.
  */
 HRESULT WINAPI CoRevokeClassObject(
-        DWORD dwRegister) 
+        DWORD dwRegister)
 {
+  HRESULT hr = E_INVALIDARG;
   RegisteredClass** prevClassLink;
   RegisteredClass*  curClass;
 
   TRACE("(%08lx)\n",dwRegister);
+
+  EnterCriticalSection( &csRegisteredClassList );
 
   /*
    * Iterate through the whole list and try to match the cookie.
@@ -1148,11 +1263,12 @@ HRESULT WINAPI CoRevokeClassObject(
 
       /*
        * Free the memory used by the chain node.
- */
+       */
       HeapFree(GetProcessHeap(), 0, curClass);
 
-    return S_OK;
-}
+      hr = S_OK;
+      goto end;
+    }
 
     /*
      * Step to the next class in the list.
@@ -1161,14 +1277,58 @@ HRESULT WINAPI CoRevokeClassObject(
     curClass      = curClass->nextClass;
   }
 
+end:
+  LeaveCriticalSection( &csRegisteredClassList );
   /*
    * If we get to here, we haven't found our class.
    */
-  return E_INVALIDARG;
+  return hr;
+}
+
+static HRESULT WINAPI Remote_CoGetClassObject(
+    REFCLSID rclsid, DWORD dwClsContext, COSERVERINFO *pServerInfo,
+    REFIID iid, LPVOID *ppv
+) {
+  HKEY		key;
+  char 		buf[200];
+  HRESULT	hres = E_UNEXPECTED;
+  char		xclsid[80];
+  WCHAR 	dllName[MAX_PATH+1];
+  DWORD 	dllNameLen = sizeof(dllName);
+  STARTUPINFOW	sinfo;
+  PROCESS_INFORMATION	pinfo;
+
+  WINE_StringFromCLSID((LPCLSID)rclsid,xclsid);
+
+  sprintf(buf,"CLSID\\%s\\LocalServer32",xclsid);
+  hres = RegOpenKeyExA(HKEY_CLASSES_ROOT, buf, 0, KEY_READ, &key);
+
+  if (hres != ERROR_SUCCESS)
+      return REGDB_E_CLASSNOTREG;
+
+  memset(dllName,0,sizeof(dllName));
+  hres= RegQueryValueExW(key,NULL,NULL,NULL,(LPBYTE)dllName,&dllNameLen);
+  if (hres)
+	  return REGDB_E_CLASSNOTREG; /* FIXME: check retval */
+  RegCloseKey(key);
+
+  TRACE("found LocalServer32 exe %s\n", debugstr_w(dllName));
+
+  memset(&sinfo,0,sizeof(sinfo));
+  sinfo.cb = sizeof(sinfo);
+  if (!CreateProcessW(NULL,dllName,NULL,NULL,FALSE,0,NULL,NULL,&sinfo,&pinfo))
+      return E_FAIL;
+  return create_marshalled_proxy(rclsid,iid,ppv);
 }
 
 /***********************************************************************
  *           CoGetClassObject [COMPOBJ.7]
+ *           CoGetClassObject [OLE32.16]
+ *
+ * FIXME.  If request allows of several options and there is a failure 
+ *         with one (other than not being registered) do we try the
+ *         others or return failure?  (E.g. inprocess is registered but
+ *         the DLL is not found but the server version works)
  */
 HRESULT WINAPI CoGetClassObject(
     REFCLSID rclsid, DWORD dwClsContext, COSERVERINFO *pServerInfo,
@@ -1177,17 +1337,19 @@ HRESULT WINAPI CoGetClassObject(
     LPUNKNOWN	regClassObject;
     HRESULT	hres = E_UNEXPECTED;
     char	xclsid[80];
-    WCHAR dllName[MAX_PATH+1];
-    DWORD dllNameLen = sizeof(dllName);
+    WCHAR ProviderName[MAX_PATH+1];
+    DWORD ProviderNameLen = sizeof(ProviderName);
     HINSTANCE hLibrary;
 #ifdef __WIN32OS2__
-    typedef HRESULT (* CALLBACK DllGetClassObjectFunc)(REFCLSID clsid, 
+    typedef HRESULT (* CALLBACK DllGetClassObjectFunc)(REFCLSID clsid,
 			     REFIID iid, LPVOID *ppv);
 #else
-    typedef HRESULT CALLBACK (*DllGetClassObjectFunc)(REFCLSID clsid, 
+    typedef HRESULT (CALLBACK *DllGetClassObjectFunc)(REFCLSID clsid,
 			     REFIID iid, LPVOID *ppv);
 #endif
     DllGetClassObjectFunc DllGetClassObject;
+    HKEY key;
+    char buf[200];
 
     WINE_StringFromCLSID((LPCLSID)rclsid,xclsid);
 
@@ -1202,7 +1364,7 @@ HRESULT WINAPI CoGetClassObject(
     }
 
     /*
-     * First, try and see if we can't match the class ID with one of the 
+     * First, try and see if we can't match the class ID with one of the
      * registered classes.
      */
     if (S_OK == COM_GetRegisteredClassObject(rclsid, dwClsContext, &regClassObject))
@@ -1222,59 +1384,84 @@ HRESULT WINAPI CoGetClassObject(
       return hres;
     }
 
-    /* out of process and remote servers not supported yet */
-    if (     ((CLSCTX_LOCAL_SERVER|CLSCTX_REMOTE_SERVER) & dwClsContext)
+    if (((CLSCTX_LOCAL_SERVER) & dwClsContext)
+        && !((CLSCTX_INPROC_SERVER|CLSCTX_INPROC_HANDLER) & dwClsContext))
+	return Remote_CoGetClassObject(rclsid,dwClsContext,pServerInfo,iid,ppv);
+
+    /* remote servers not supported yet */
+    if (     ((CLSCTX_REMOTE_SERVER) & dwClsContext)
         && !((CLSCTX_INPROC_SERVER|CLSCTX_INPROC_HANDLER) & dwClsContext)
     ){
-        FIXME("%s %s not supported!\n",
-		(dwClsContext&CLSCTX_LOCAL_SERVER)?"CLSCTX_LOCAL_SERVER":"",
-		(dwClsContext&CLSCTX_REMOTE_SERVER)?"CLSCTX_REMOTE_SERVER":""
-	);
-	return E_ACCESSDENIED;
+        FIXME("CLSCTX_REMOTE_SERVER not supported!\n");
+	return E_NOINTERFACE;
     }
 
     if ((CLSCTX_INPROC_SERVER|CLSCTX_INPROC_HANDLER) & dwClsContext) {
         HKEY key;
 	char buf[200];
 
+	memset(ProviderName,0,sizeof(ProviderName));
 	sprintf(buf,"CLSID\\%s\\InprocServer32",xclsid);
-        hres = RegOpenKeyExA(HKEY_CLASSES_ROOT, buf, 0, KEY_READ, &key);
-
-	if (hres != ERROR_SUCCESS) {
-	    return REGDB_E_CLASSNOTREG;
+        if (((hres = RegOpenKeyExA(HKEY_CLASSES_ROOT, buf, 0, KEY_READ, &key)) != ERROR_SUCCESS) ||
+            ((hres = RegQueryValueExW(key,NULL,NULL,NULL,(LPBYTE)ProviderName,&ProviderNameLen)),
+             RegCloseKey (key),
+             hres != ERROR_SUCCESS))
+        {
+            hres = REGDB_E_CLASSNOTREG;
+        }
+        /* Don't ask me.  MSDN says that CoGetClassObject does NOT call CoLoadLibrary */
+        else if ((hLibrary = CoLoadLibrary(ProviderName, TRUE)) == 0)
+        {
+	    FIXME("couldn't load InprocServer32 dll %s\n", debugstr_w(ProviderName));
+	    hres = E_ACCESSDENIED; /* or should this be CO_E_DLLNOTFOUND? */
 	}
-
-	memset(dllName,0,sizeof(dllName));
-	hres= RegQueryValueExW(key,NULL,NULL,NULL,(LPBYTE)dllName,&dllNameLen);
-	if (hres)
-		return REGDB_E_CLASSNOTREG; /* FIXME: check retval */
-	RegCloseKey(key);
-	TRACE("found InprocServer32 dll %s\n", debugstr_w(dllName));
-
-	/* open dll, call DllGetClassObject */
-	hLibrary = CoLoadLibrary(dllName, TRUE);
-	if (hLibrary == 0) {
-	    FIXME("couldn't load InprocServer32 dll %s\n", debugstr_w(dllName));
-	    return E_ACCESSDENIED; /* or should this be CO_E_DLLNOTFOUND? */
-	}
-	DllGetClassObject = (DllGetClassObjectFunc)GetProcAddress(hLibrary, "DllGetClassObject");
-	if (!DllGetClassObject) {
+	else if (!(DllGetClassObject = (DllGetClassObjectFunc)GetProcAddress(hLibrary, "DllGetClassObject")))
+        {
 	    /* not sure if this should be called here CoFreeLibrary(hLibrary);*/
-	    FIXME("couldn't find function DllGetClassObject in %s\n", debugstr_w(dllName));
-	    return E_ACCESSDENIED;
+	    FIXME("couldn't find function DllGetClassObject in %s\n", debugstr_w(ProviderName));
+	    hres = E_ACCESSDENIED;
 	}
-
-	/*
-	 * Ask the DLL for its class object. (there was a note here about class
-	 * factories but this is good.
-	 */
-	return DllGetClassObject(rclsid, iid, ppv);
+        else
+        {
+	    /* Ask the DLL for its class object. (there was a note here about
+	     * class factories but this is good.
+	     */
+	    return DllGetClassObject(rclsid, iid, ppv);
+        }
     }
+    
+
+    /* Finally try out of process */
+    /* out of process and remote servers not supported yet */
+    if (CLSCTX_LOCAL_SERVER & dwClsContext)
+    {
+	memset(ProviderName,0,sizeof(ProviderName));
+	sprintf(buf,"CLSID\\%s\\LocalServer32",xclsid);
+        if (((hres = RegOpenKeyExA(HKEY_CLASSES_ROOT, buf, 0, KEY_READ, &key)) != ERROR_SUCCESS) ||
+            ((hres = RegQueryValueExW(key,NULL,NULL,NULL,(LPBYTE)ProviderName,&ProviderNameLen)),
+             RegCloseKey (key),
+             hres != ERROR_SUCCESS))
+        {
+            hres = REGDB_E_CLASSNOTREG;
+        }
+        else
+        {
+            /* CO_E_APPNOTFOUND if no exe */
+            FIXME("CLSCTX_LOCAL_SERVER %s registered but not yet supported!\n",debugstr_w(ProviderName));
+            hres = E_ACCESSDENIED;
+	}
+    }
+
+    if (CLSCTX_REMOTE_SERVER & dwClsContext)
+    {
+        FIXME ("CLSCTX_REMOTE_SERVER not supported\n");
+        hres = E_ACCESSDENIED;
+    }
+
     return hres;
 }
-
 /***********************************************************************
- *        CoResumeClassObjects
+ *        CoResumeClassObjects (OLE32.173)
  *
  * Resumes classobjects registered with REGCLS suspended
  */
@@ -1285,11 +1472,11 @@ HRESULT WINAPI CoResumeClassObjects(void)
 }
 
 /***********************************************************************
- *        GetClassFile
+ *        GetClassFile (OLE32.67)
  *
  * This function supplies the CLSID associated with the given filename.
  */
-HRESULT WINAPI GetClassFile(LPOLESTR filePathName,CLSID *pclsid)
+HRESULT WINAPI GetClassFile(LPCOLESTR filePathName,CLSID *pclsid)
 {
     IStorage *pstg=0;
     HRESULT res;
@@ -1315,7 +1502,7 @@ HRESULT WINAPI GetClassFile(LPOLESTR filePathName,CLSID *pclsid)
     /* if the file is not a storage object then attemps to match various bits in the file against a
        pattern in the registry. this case is not frequently used ! so I present only the psodocode for
        this case
-       
+
      for(i=0;i<nFileTypes;i++)
 
         for(i=0;j<nPatternsForType;j++){
@@ -1348,7 +1535,7 @@ HRESULT WINAPI GetClassFile(LPOLESTR filePathName,CLSID *pclsid)
     /* get the extension of the file */
     length=lstrlenW(absFile);
     for(i=length-1; ( (i>=0) && (extention[i]=absFile[i]) );i--);
-        
+
     /* get the progId associated to the extension */
     progId=CoTaskMemAlloc(sizeProgId);
 
@@ -1376,7 +1563,7 @@ HRESULT WINAPI GetClassFile(LPOLESTR filePathName,CLSID *pclsid)
 }
 #ifndef __WIN32OS2__
 /******************************************************************************
- *		CoRegisterMessageFilter16	[COMPOBJ.27]
+ *		CoRegisterMessageFilter	[COMPOBJ.27]
  */
 HRESULT WINAPI CoRegisterMessageFilter16(
 	LPMESSAGEFILTER lpMessageFilter,
@@ -1386,16 +1573,16 @@ HRESULT WINAPI CoRegisterMessageFilter16(
 	return 0;
 }
 #endif
-
 /***********************************************************************
- *           CoCreateInstance [COMPOBJ.13, OLE32.7]
+ *           CoCreateInstance [COMPOBJ.13]
+ *           CoCreateInstance [OLE32.7]
  */
 HRESULT WINAPI CoCreateInstance(
 	REFCLSID rclsid,
 	LPUNKNOWN pUnkOuter,
 	DWORD dwClsContext,
 	REFIID iid,
-	LPVOID *ppv) 
+	LPVOID *ppv)
 {
 	HRESULT hres;
 	LPCLASSFACTORY lpclf = 0;
@@ -1410,7 +1597,7 @@ HRESULT WINAPI CoCreateInstance(
    * Initialize the "out" parameter
    */
   *ppv = 0;
-  
+
   /*
    * Get a class factory to construct the object we want.
    */
@@ -1421,7 +1608,8 @@ HRESULT WINAPI CoCreateInstance(
 			  (LPVOID)&lpclf);
 
   if (FAILED(hres)) {
-    FIXME("no instance created for %s, hres is 0x%08lx\n",debugstr_guid(iid),hres);
+    FIXME("no classfactory created for CLSID %s, hres is 0x%08lx\n",
+	  debugstr_guid(rclsid),hres);
     return hres;
   }
 
@@ -1430,6 +1618,9 @@ HRESULT WINAPI CoCreateInstance(
    */
 	hres = IClassFactory_CreateInstance(lpclf, pUnkOuter, iid, ppv);
 	IClassFactory_Release(lpclf);
+	if(FAILED(hres))
+	  FIXME("no instance created for interface %s of class %s, hres is 0x%08lx\n",
+		debugstr_guid(iid), debugstr_guid(rclsid),hres);
 
 	return hres;
 }
@@ -1438,9 +1629,9 @@ HRESULT WINAPI CoCreateInstance(
  *           CoCreateInstanceEx [OLE32.165]
  */
 HRESULT WINAPI CoCreateInstanceEx(
-  REFCLSID      rclsid, 
+  REFCLSID      rclsid,
   LPUNKNOWN     pUnkOuter,
-  DWORD         dwClsContext, 
+  DWORD         dwClsContext,
   COSERVERINFO* pServerInfo,
   ULONG         cmq,
   MULTI_QI*     pResults)
@@ -1471,7 +1662,7 @@ HRESULT WINAPI CoCreateInstanceEx(
   /*
    * Get the object and get its IUnknown pointer.
    */
-  hr = CoCreateInstance(rclsid, 
+  hr = CoCreateInstance(rclsid,
 			pUnkOuter,
 			dwClsContext,
 			&IID_IUnknown,
@@ -1508,12 +1699,14 @@ HRESULT WINAPI CoCreateInstanceEx(
 }
 
 /***********************************************************************
- *           CoFreeLibrary [COMPOBJ.13]
+ *           CoFreeLibrary [OLE32.13]
  */
 void WINAPI CoFreeLibrary(HINSTANCE hLibrary)
 {
     OpenDll *ptr, *prev;
     OpenDll *tmp;
+
+    EnterCriticalSection( &csOpenDllList );
 
     /* lookup library in linked list */
     prev = NULL;
@@ -1526,7 +1719,7 @@ void WINAPI CoFreeLibrary(HINSTANCE hLibrary)
 
     if (ptr == NULL) {
 	/* shouldn't happen if user passed in a valid hLibrary */
-	return;
+	goto end;
     }
     /* assert: ptr points to the library entry to free */
 
@@ -1541,28 +1734,34 @@ void WINAPI CoFreeLibrary(HINSTANCE hLibrary)
 	HeapFree(GetProcessHeap(), 0, ptr);
 	prev->next = tmp;
     }
-
+end:
+    LeaveCriticalSection( &csOpenDllList );
 }
 
 
 /***********************************************************************
- *           CoFreeAllLibraries [COMPOBJ.12]
+ *           CoFreeAllLibraries [OLE32.12]
  */
 void WINAPI CoFreeAllLibraries(void)
 {
     OpenDll *ptr, *tmp;
+
+    EnterCriticalSection( &csOpenDllList );
 
     for (ptr = openDllList; ptr != NULL; ) {
 	tmp=ptr->next;
 	CoFreeLibrary(ptr->hLibrary);
 	ptr = tmp;
     }
+
+    LeaveCriticalSection( &csOpenDllList );
 }
 
 
 
 /***********************************************************************
  *           CoFreeUnusedLibraries [COMPOBJ.17]
+ *           CoFreeUnusedLibraries [OLE32.14]
  */
 void WINAPI CoFreeUnusedLibraries(void)
 {
@@ -1570,10 +1769,12 @@ void WINAPI CoFreeUnusedLibraries(void)
     typedef HRESULT(*DllCanUnloadNowFunc)(void);
     DllCanUnloadNowFunc DllCanUnloadNow;
 
+    EnterCriticalSection( &csOpenDllList );
+
     for (ptr = openDllList; ptr != NULL; ) {
 	DllCanUnloadNow = (DllCanUnloadNowFunc)
 	    GetProcAddress(ptr->hLibrary, "DllCanUnloadNow");
-	
+
 	if ( (DllCanUnloadNow != NULL) &&
 	     (DllCanUnloadNow() == S_OK) ) {
 	    tmp=ptr->next;
@@ -1583,10 +1784,14 @@ void WINAPI CoFreeUnusedLibraries(void)
 	    ptr=ptr->next;
 	}
     }
+
+    LeaveCriticalSection( &csOpenDllList );
 }
 
 /***********************************************************************
- *           CoFileTimeNow [COMPOBJ.82, OLE32.10]
+ *           CoFileTimeNow [COMPOBJ.82]
+ *           CoFileTimeNow [OLE32.10]
+ *
  * RETURNS
  *	the current system time in lpFileTime
  */
@@ -1607,7 +1812,7 @@ LPVOID WINAPI CoTaskMemAlloc(
     LPMALLOC	lpmalloc;
     HRESULT	ret = CoGetMalloc(0,&lpmalloc);
 
-    if (FAILED(ret)) 
+    if (FAILED(ret))
 	return NULL;
 
     return IMalloc_Alloc(lpmalloc,size);
@@ -1621,7 +1826,7 @@ VOID WINAPI CoTaskMemFree(
     LPMALLOC	lpmalloc;
     HRESULT	ret = CoGetMalloc(0,&lpmalloc);
 
-    if (FAILED(ret)) 
+    if (FAILED(ret))
       return;
 
     IMalloc_Free(lpmalloc, ptr);
@@ -1638,8 +1843,8 @@ LPVOID WINAPI CoTaskMemRealloc(
 {
   LPMALLOC lpmalloc;
   HRESULT  ret = CoGetMalloc(0,&lpmalloc);
-  
-  if (FAILED(ret)) 
+
+  if (FAILED(ret))
     return NULL;
 
   return IMalloc_Realloc(lpmalloc, pvOld, size);
@@ -1653,13 +1858,15 @@ HINSTANCE WINAPI CoLoadLibrary(LPOLESTR lpszLibName, BOOL bAutoFree)
     HINSTANCE hLibrary;
     OpenDll *ptr;
     OpenDll *tmp;
-  
+
     TRACE("(%s, %d)\n", debugstr_w(lpszLibName), bAutoFree);
 
     hLibrary = LoadLibraryExW(lpszLibName, 0, LOAD_WITH_ALTERED_SEARCH_PATH);
 
     if (!bAutoFree)
 	return hLibrary;
+
+    EnterCriticalSection( &csOpenDllList );
 
     if (openDllList == NULL) {
         /* empty list -- add first node */
@@ -1683,7 +1890,9 @@ HINSTANCE WINAPI CoLoadLibrary(LPOLESTR lpszLibName, BOOL bAutoFree)
 	    openDllList->next = tmp;
 	}
     }
-     
+
+    LeaveCriticalSection( &csOpenDllList );
+
     return hLibrary;
 }
 
@@ -1695,9 +1904,8 @@ HRESULT WINAPI CoInitializeWOW(DWORD x,DWORD y) {
     return 0;
 }
 
-#ifndef __WIN32OS2__
 /******************************************************************************
- *		CoLockObjectExternal16	[COMPOBJ.63]
+ *		CoLockObjectExternal	[COMPOBJ.63]
  */
 HRESULT WINAPI CoLockObjectExternal16(
     LPUNKNOWN pUnk,		/* [in] object to be locked */
@@ -1707,7 +1915,6 @@ HRESULT WINAPI CoLockObjectExternal16(
     FIXME("(%p,%d,%d),stub!\n",pUnk,fLock,fLastUnlockReleases);
     return S_OK;
 }
-#endif
 
 /******************************************************************************
  *		CoLockObjectExternal	[OLE32.31]
@@ -1718,17 +1925,17 @@ HRESULT WINAPI CoLockObjectExternal(
     BOOL fLastUnlockReleases) /* [in] unlock all */
 {
 
-  if (fLock) 
+  if (fLock)
   {
-    /* 
+    /*
      * Increment the external lock coutner, COM_ExternalLockAddRef also
      * increment the object's internal lock counter.
      */
-    COM_ExternalLockAddRef( pUnk); 
+    COM_ExternalLockAddRef( pUnk);
   }
   else
   {
-    /* 
+    /*
      * Decrement the external lock coutner, COM_ExternalLockRelease also
      * decrement the object's internal lock counter.
      */
@@ -1738,9 +1945,8 @@ HRESULT WINAPI CoLockObjectExternal(
     return S_OK;
 }
 
-#ifndef __WIN32OS2__
 /***********************************************************************
- *           CoGetState16 [COMPOBJ.115]
+ *           CoGetState [COMPOBJ.115]
  */
 HRESULT WINAPI CoGetState16(LPDWORD state)
 {
@@ -1749,7 +1955,7 @@ HRESULT WINAPI CoGetState16(LPDWORD state)
     return S_OK;
 }
 /***********************************************************************
- *           CoSetState [COM32.42]
+ *           CoSetState [OLE32.42]
  */
 HRESULT WINAPI CoSetState(LPDWORD state)
 {
@@ -1757,42 +1963,33 @@ HRESULT WINAPI CoSetState(LPDWORD state)
     if (state) *state = 0;
     return S_OK;
 }
-#endif
 /***********************************************************************
  *          CoCreateFreeThreadedMarshaler [OLE32.5]
  */
 HRESULT WINAPI CoCreateFreeThreadedMarshaler (LPUNKNOWN punkOuter, LPUNKNOWN* ppunkMarshal)
 {
    FIXME ("(%p %p): stub\n", punkOuter, ppunkMarshal);
-    
+
    return S_OK;
 }
-
-
-/***********************************************************************
- *           DllGetClassObject [OLE32.63]
- */
-HRESULT WINAPI OLE32_DllGetClassObject(REFCLSID rclsid, REFIID iid,LPVOID *ppv)
-{	
-	FIXME("\n\tCLSID:\t%s,\n\tIID:\t%s\n",debugstr_guid(rclsid),debugstr_guid(iid));
-	*ppv = NULL;
-	return CLASS_E_CLASSNOTAVAILABLE;
-}
-
 
 /***
  * COM_RevokeAllClasses
  *
- * This method is called when the COM libraries are uninitialized to 
+ * This method is called when the COM libraries are uninitialized to
  * release all the references to the class objects registered with
  * the library
  */
 static void COM_RevokeAllClasses()
 {
+  EnterCriticalSection( &csRegisteredClassList );
+
   while (firstRegisteredClass!=0)
   {
     CoRevokeClassObject(firstRegisteredClass->dwCookie);
   }
+
+  LeaveCriticalSection( &csRegisteredClassList );
 }
 
 /****************************************************************************
@@ -1800,7 +1997,7 @@ static void COM_RevokeAllClasses()
  */
 
 /****************************************************************************
- * Public - Method that increments the count for a IUnknown* in the linked 
+ * Public - Method that increments the count for a IUnknown* in the linked
  * list.  The item is inserted if not already in the list.
  */
 static void COM_ExternalLockAddRef(
@@ -1821,11 +2018,11 @@ static void COM_ExternalLockAddRef(
   /*
    * Add an internal lock to the object
    */
-  IUnknown_AddRef(pUnk); 
+  IUnknown_AddRef(pUnk);
 }
 
 /****************************************************************************
- * Public - Method that decrements the count for a IUnknown* in the linked 
+ * Public - Method that decrements the count for a IUnknown* in the linked
  * list.  The item is removed from the list if its count end up at zero or if
  * bRelAll is TRUE.
  */
@@ -1842,10 +2039,10 @@ static void COM_ExternalLockRelease(
       externalLock->uRefCount--;  /* release external locks      */
       IUnknown_Release(pUnk);     /* release local locks as well */
 
-      if ( bRelAll == FALSE ) 
+      if ( bRelAll == FALSE )
         break;  /* perform single release */
 
-    } while ( externalLock->uRefCount > 0 );  
+    } while ( externalLock->uRefCount > 0 );
 
     if ( externalLock->uRefCount == 0 )  /* get rid of the list entry */
       COM_ExternalLockDelete(externalLock);
@@ -1863,7 +2060,7 @@ static void COM_ExternalLockFreeList()
   {
     COM_ExternalLockDelete(head);     /* get rid of the head stuff       */
 
-    head = elList.head;               /* get the new head...             */ 
+    head = elList.head;               /* get the new head...             */
   }
 }
 
@@ -1879,10 +2076,10 @@ void COM_ExternalLockDump()
   while ( current != EL_END_OF_LIST )
   {
       DPRINTF( "\t%p with %lu references count.\n", current->pUnk, current->uRefCount);
- 
-    /* Skip to the next item */ 
+
+    /* Skip to the next item */
     current = current->next;
-  } 
+  }
 
 }
 
@@ -1902,13 +2099,13 @@ static COM_ExternalLock* COM_ExternalLockLocate(
   COM_ExternalLock *element,
   IUnknown         *pUnk)
 {
-  if ( element == EL_END_OF_LIST )  
+  if ( element == EL_END_OF_LIST )
     return EL_NOT_FOUND;
 
   else if ( element->pUnk == pUnk )    /* We found it */
     return element;
 
-  else                                 /* Not the right guy, keep on looking */ 
+  else                                 /* Not the right guy, keep on looking */
     return COM_ExternalLockLocate( element->next, pUnk);
 }
 
@@ -1928,13 +2125,13 @@ static BOOL COM_ExternalLockInsert(
 
   if (newLock!=NULL)
   {
-    if ( elList.head == EL_END_OF_LIST ) 
+    if ( elList.head == EL_END_OF_LIST )
     {
       elList.head = newLock;    /* The list is empty */
     }
-    else 
+    else
     {
-      /* 
+      /*
        * insert does it at the head
        */
       previousHead  = elList.head;
@@ -1942,12 +2139,12 @@ static BOOL COM_ExternalLockInsert(
     }
 
     /*
-     * Set new list item data member 
+     * Set new list item data member
      */
     newLock->pUnk      = pUnk;
     newLock->uRefCount = 1;
     newLock->next      = previousHead;
-    
+
     return TRUE;
   }
   else
@@ -1964,34 +2161,33 @@ static void COM_ExternalLockDelete(
 
   if ( current == itemList )
   {
-    /* 
-     * this section handles the deletion of the first node 
+    /*
+     * this section handles the deletion of the first node
      */
     elList.head = itemList->next;
-    HeapFree( GetProcessHeap(), 0, itemList);  
+    HeapFree( GetProcessHeap(), 0, itemList);
   }
   else
   {
-    do 
+    do
     {
       if ( current->next == itemList )   /* We found the item to free  */
       {
         current->next = itemList->next;  /* readjust the list pointers */
-  
-        HeapFree( GetProcessHeap(), 0, itemList);  
-        break; 
+
+        HeapFree( GetProcessHeap(), 0, itemList);
+        break;
       }
- 
-      /* Skip to the next item */ 
+
+      /* Skip to the next item */
       current = current->next;
-  
+
     } while ( current != EL_END_OF_LIST );
   }
 }
 
-#ifndef __WIN32OS2__
 /***********************************************************************
- *      COMPOBJ_DllEntryPoint                   [COMPOBJ.entry]
+ *      DllEntryPoint                   [COMPOBJ.116]
  *
  *    Initialization code for the COMPOBJ DLL
  *
@@ -2014,7 +2210,7 @@ BOOL WINAPI COMPOBJ_DllEntryPoint(DWORD Reason, HINSTANCE16 hInst, WORD ds, WORD
         }
         return TRUE;
 }
-#endif
+
 /******************************************************************************
  *              OleGetAutoConvert        [OLE32.104]
  */
@@ -2053,11 +2249,11 @@ done:
  */
 HRESULT WINAPI OleSetAutoConvert(REFCLSID clsidOld, REFCLSID clsidNew)
 {
-    HKEY hkey = 0, hkeyConvert = 0;
+    HKEY hkey = 0;
     char buf[200], szClsidNew[200];
     HRESULT res = S_OK;
 
-    TRACE("(%p,%p);\n", clsidOld, clsidNew);
+    TRACE("(%s,%s)\n", debugstr_guid(clsidOld), debugstr_guid(clsidNew));
     sprintf(buf,"CLSID\\");WINE_StringFromCLSID(clsidOld,&buf[6]);
     WINE_StringFromCLSID(clsidNew, szClsidNew);
     if (RegOpenKeyA(HKEY_CLASSES_ROOT,buf,&hkey))
@@ -2065,24 +2261,45 @@ HRESULT WINAPI OleSetAutoConvert(REFCLSID clsidOld, REFCLSID clsidNew)
         res = REGDB_E_CLASSNOTREG;
 	goto done;
     }
-    if (RegCreateKeyA(hkey, "AutoConvertTo", &hkeyConvert))
-    {
-        res = REGDB_E_WRITEREGDB;
-	goto done;
-    }
-    if (RegSetValueExA(hkeyConvert, NULL, 0,
-                            REG_SZ, (LPBYTE)szClsidNew, strlen(szClsidNew)+1))
+    if (RegSetValueA(hkey, "AutoConvertTo", REG_SZ, szClsidNew, strlen(szClsidNew)+1))
     {
         res = REGDB_E_WRITEREGDB;
 	goto done;
     }
 
 done:
-    if (hkeyConvert) RegCloseKey(hkeyConvert);
     if (hkey) RegCloseKey(hkey);
-
     return res;
 }
+
+/******************************************************************************
+ *              CoTreatAsClass        [OLE32.46]
+ */
+HRESULT WINAPI CoTreatAsClass(REFCLSID clsidOld, REFCLSID clsidNew)
+{
+    HKEY hkey = 0;
+    char buf[200], szClsidNew[200];
+    HRESULT res = S_OK;
+
+    FIXME("(%s,%s)\n", debugstr_guid(clsidOld), debugstr_guid(clsidNew));
+    sprintf(buf,"CLSID\\");WINE_StringFromCLSID(clsidOld,&buf[6]);
+    WINE_StringFromCLSID(clsidNew, szClsidNew);
+    if (RegOpenKeyA(HKEY_CLASSES_ROOT,buf,&hkey))
+    {
+        res = REGDB_E_CLASSNOTREG;
+	goto done;
+    }
+    if (RegSetValueA(hkey, "AutoTreatAs", REG_SZ, szClsidNew, strlen(szClsidNew)+1))
+    {
+        res = REGDB_E_WRITEREGDB;
+	goto done;
+    }
+
+done:
+    if (hkey) RegCloseKey(hkey);
+    return res;
+}
+
 
 /***********************************************************************
  *           IsEqualGUID [OLE32.76]
@@ -2100,18 +2317,3 @@ BOOL WINAPI IsEqualGUID(
 {
     return !memcmp(rguid1,rguid2,sizeof(GUID));
 }
-
-#ifdef __WIN32OS2__
-// ----------------------------------------------------------------------
-// CLSIDFromStringA()
-// @@@PH: this is not a WINE API, but a replacement for CLSIDFromString16
-//        which used to accept ASCII strings instead of OLE strings
-// ----------------------------------------------------------------------
-
-HRESULT WIN32API CLSIDFromStringA(
-    LPCSTR		lpsz,		// [in] - ASCII string CLSID
-    LPCLSID		pclsid)		// [out] - Binary CLSID
-{
-    return CLSIDFromString16(lpsz, pclsid);
-}
-#endif
