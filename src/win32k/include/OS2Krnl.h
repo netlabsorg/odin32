@@ -1,6 +1,8 @@
-/* $Id: OS2Krnl.h,v 1.2 1999-10-27 02:02:55 bird Exp $
+/* $Id: OS2Krnl.h,v 1.3 1999-11-10 01:45:31 bird Exp $
  *
  * OS/2 kernel structures, typedefs and macros.
+ *
+ * Project Odin Software License can be found in LICENSE.TXT
  *
  */
 

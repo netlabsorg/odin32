@@ -1,8 +1,10 @@
-/* $Id: pe2lxmain.cpp,v 1.3 1999-10-27 02:03:01 bird Exp $
+/* $Id: pe2lxmain.cpp,v 1.4 1999-11-10 01:45:38 bird Exp $
  *
  * Pe2Lx main program. (Ring 3 only!)
  *
  * Copyright (c) 1999 knut st. osmundsen
+ *
+ * Project Odin Software License can be found in LICENSE.TXT
  *
  */
 
@@ -27,6 +29,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include "OS2Krnl.h"
+#include "modulebase.h"
 #include "pe2lx.h"
 #include <stdio.h>
 #include <versionos2.h>
@@ -91,11 +94,11 @@ int main(int argc, char **argv)
                     {
                         switch (*psz)
                         {
-                            case '0': Pe2Lx::ulInfoLevel = Pe2Lx::Quiet; break;
-                            case '1': Pe2Lx::ulInfoLevel = Pe2Lx::Error; break;
-                            case '2': Pe2Lx::ulInfoLevel = Pe2Lx::Warning; break;
-                            case '3': Pe2Lx::ulInfoLevel = Pe2Lx::Info; break;
-                            case '4': Pe2Lx::ulInfoLevel = Pe2Lx::InfoAll; break;
+                            case '0': ModuleBase::ulInfoLevel = ModuleBase::Quiet; break;
+                            case '1': ModuleBase::ulInfoLevel = ModuleBase::Error; break;
+                            case '2': ModuleBase::ulInfoLevel = ModuleBase::Warning; break;
+                            case '3': ModuleBase::ulInfoLevel = ModuleBase::Info; break;
+                            case '4': ModuleBase::ulInfoLevel = ModuleBase::InfoAll; break;
                         }
                     }
                     else

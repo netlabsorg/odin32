@@ -1,4 +1,4 @@
-/* $Id: malloc.h,v 1.4 1999-10-31 23:57:04 bird Exp $
+/* $Id: malloc.h,v 1.5 1999-11-10 01:45:32 bird Exp $
  *
  * Heap.
  *
@@ -6,6 +6,8 @@
  *       Use with care! We're running at Ring-0!
  *
  * Copyright (c) 1999 knut st. osmundsen
+ *
+ * Project Odin Software License can be found in LICENSE.TXT
  *
  */
 

@@ -1,8 +1,10 @@
-/* $Id: new.cpp,v 1.2 1999-10-14 01:19:21 bird Exp $
+/* $Id: new.cpp,v 1.3 1999-11-10 01:45:37 bird Exp $
  *
  * new - new and delete operators.
  *
  * Copyright (c) 1998-1999 knut st. osmundsen
+ *
+ * Project Odin Software License can be found in LICENSE.TXT
  *
  */
 

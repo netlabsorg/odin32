@@ -1,7 +1,10 @@
-/*
+/* $Id: fastdep.c,v 1.6 1999-11-10 01:45:29 bird Exp $
+ *
  * Fast dependants. (Fast = Quick and Dirty!)
  *
  * Copyright (c) 1999 knut st. osmundsen
+ *
+ * Project Odin Software License can be found in LICENSE.TXT
  *
  */
 

@@ -1,8 +1,10 @@
-/* $Id: types.h,v 1.1 1999-09-06 02:20:00 bird Exp $
+/* $Id: types.h,v 1.2 1999-11-10 01:45:34 bird Exp $
  *
  * Common typedeclarations.
  *
  * Copyright (c) 1999 knut st. osmundsen
+ *
+ * Project Odin Software License can be found in LICENSE.TXT
  *
  */
 #ifndef _types_h_

@@ -1,8 +1,10 @@
-/* $Id: ldr.cpp,v 1.5 1999-10-31 23:57:05 bird Exp $
+/* $Id: ldr.cpp,v 1.6 1999-11-10 01:45:36 bird Exp $
  *
  * ldr.cpp - Loader helpers.
  *
  * Copyright (c)  1999 knut  St.  osmundsen
+ *
+ * Project Odin Software License can be found in LICENSE.TXT
  *
  */
 
@@ -28,6 +30,7 @@
 #include <peexe.h>
 #include <exe386.h>
 #include "OS2Krnl.h"
+#include "ModuleBase.h"
 #include "pe2lx.h"
 #include "avl.h"
 #include "ldr.h"
@@ -124,7 +127,7 @@ PMODULE     getModuleByFilename(PCSZ pszFilename)
  * @param     hFile   System file number for the module.
  * @param     pMTE    Pointer to MTE. NULL is valid.
  * @param     fFlags  Type flags for the fFlags field in the node.
- * @param     pvData  Pointer to data.
+ * @param     pModObj Pointer to module object.
  * @sketch    DEBUG: check that the module doesn't exists and parameter check.
  *            (try) Allocate a new node. (return errorcode on failure)
  *            Fill in the node.
@@ -134,7 +137,7 @@ PMODULE     getModuleByFilename(PCSZ pszFilename)
  * @status    completely implemented.
  * @author    knut st. osmundsen
  */
-ULONG       addModule(SFN hFile, PMTE pMTE, ULONG fFlags, void *pvData)
+ULONG       addModule(SFN hFile, PMTE pMTE, ULONG fFlags, ModuleBase *pModObj)
 {
     PMODULE pMod;
     #ifdef DEBUG
@@ -165,7 +168,7 @@ ULONG       addModule(SFN hFile, PMTE pMTE, ULONG fFlags, void *pvData)
     pMod->hFile = hFile;
     pMod->pMTE = pMTE;
     pMod->fFlags = fFlags;
-    pMod->Data.pv = pvData;
+    pMod->Data.pModule = pModObj;
 
     /* insert the module node into the tree(s) */
     AVLInsert(&pSFNRoot, (PAVLNODECORE)pMod);
@@ -247,8 +250,8 @@ ULONG ldrInit(void)
     pSFNRoot = NULL;
     pMTERoot = NULL;
 
-    /* Pe2Lx logging. */
-    Pe2Lx::ulInfoLevel = options.ulInfoLevel;
+    /* ModuleBase logging. */
+    ModuleBase::ulInfoLevel = options.ulInfoLevel;
 
     return rc;
 }

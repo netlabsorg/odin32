@@ -1,8 +1,10 @@
-/* $Id: vprintf.c,v 1.4 1999-11-01 09:28:59 bird Exp $
+/* $Id: vprintf.c,v 1.5 1999-11-10 01:45:37 bird Exp $
  *
  * vprintf and printf
  *
  * Copyright (c) 1999 knut st. osmundsen
+ *
+ * Project Odin Software License can be found in LICENSE.TXT
  *
  */
 
@@ -21,7 +23,13 @@
 #define NTSF_PLUS       0x0020
 #define NTSF_BLANK      0x0040
 
-#define INCL_NOAPI
+
+#ifdef RING0
+    #define INCL_NOAPI
+#else
+    #define INCL_DOSPROCESS
+    #define INCL_DOSERRORS
+#endif
 
 /*******************************************************************************
 *   Header Files                                                               *
@@ -204,20 +212,31 @@ static char * numtostr(long lValue, unsigned int uiBase,
 }
 
 
-#pragma info(notrd)
 /**
  * Partial vprintf implementation.
+ * This function checks the fLogging flag, and will therefore only write if logging is enabled.
  * @returns   number of
- * @param     pszBuffer   Output buffer.
  * @param     pszFormat   Format string.
  * @param     args        Argument list.
  */
 int vprintf(const char *pszFormat, va_list args)
 {
-    #ifdef RING0
-        if (!options.fLogging)
-            return 0;
-    #else
+    if (!options.fLogging)
+        return 0;
+    return vprintf2(pszFormat, args);
+}
+
+#pragma info(notrd)
+/**
+ * Partial vprintf implementation.
+ * This function don't check the fLogging flag, and will therefore allways write.
+ * @returns   number of
+ * @param     pszFormat   Format string.
+ * @param     args        Argument list.
+ */
+int vprintf2(const char *pszFormat, va_list args)
+{
+    #ifndef RING0
         int cch = 0;
     #endif
 
@@ -412,11 +431,6 @@ int printf(const char *pszFormat, ...)
     int     cch;
     va_list arguments;
 
-    #ifdef RING0
-        if (!options.fLogging)
-            return 0;
-    #endif
-
     va_start(arguments, pszFormat);
     cch = vprintf(pszFormat, arguments);
     va_end(arguments);
@@ -431,11 +445,6 @@ int _printfieee(const char *pszFormat, ...)
     int     cch;
     va_list arguments;
 
-    #ifdef RING0
-        if (!options.fLogging)
-            return 0;
-    #endif
-
     va_start(arguments, pszFormat);
     cch = vprintf(pszFormat, arguments);
     va_end(arguments);
@@ -448,11 +457,6 @@ int _printf_ansi(const char *pszFormat, ...)
 {
     int     cch;
     va_list arguments;
-
-    #ifdef RING0
-        if (!options.fLogging)
-            return 0;
-    #endif
 
     va_start(arguments, pszFormat);
     cch = vprintf(pszFormat, arguments);

@@ -1,8 +1,10 @@
-/* $Id: ldr.h,v 1.3 1999-10-27 02:02:56 bird Exp $
+/* $Id: ldr.h,v 1.4 1999-11-10 01:45:32 bird Exp $
  *
  * ldr - loader header file.
  *
  * Copyright (c)  1999 knut  St.  osmundsen
+ *
+ * Project Odin Software License can be found in LICENSE.TXT
  *
  */
 
@@ -44,13 +46,19 @@
             ULONG           fFlags;     /* Flags. Flags if coreMte is in use and what Data contains. */
             union
             {
+                ModuleBase *pModule;    /* Pointer to a Pe2Lx object. (Win32 executables) */
+                #if defined(_PE2LX_H_)
                 Pe2Lx *     pPe2Lx;     /* Pointer to a Pe2Lx object. (Win32 executables) */
-                #if 0
+                #endif
+                #if defined(_ELF2LX_H_)
                 Elf2Lx *    pElf2Lx;    /* Pointer to a Elf2Lx object. (ELF executables) */
+                #endif
+                #if defined(_SCRIPT_H_)
                 Script *    pScript;    /* Pointer to a Script object. (Shell scripts) */
+                #endif
+                #if defined(_PE_H_)
                 Pe *        pPe;        /* Pointer to a Pe object. (Ring3 loader) */
                 #endif
-                void *      pv;
             } Data;                     /* Pointer to data. Currently it's allways a Pe2Lx object! */
         } MODULE, *PMODULE;
 
@@ -69,7 +77,7 @@
         PMODULE     getModuleByMTE(PMTE pMTE);
         PMODULE     getModuleByFilename(PCSZ pszFilename);
 
-        ULONG       addModule(SFN hFile, PMTE pMTE, ULONG fFlags, void *pData);
+        ULONG       addModule(SFN hFile, PMTE pMTE, ULONG fFlags, ModuleBase *pModObj);
         ULONG       removeModule(SFN hFile);
 
     #endif

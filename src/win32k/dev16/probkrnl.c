@@ -1,4 +1,4 @@
-/* $Id: probkrnl.c,v 1.3 1999-10-31 23:57:01 bird Exp $
+/* $Id: probkrnl.c,v 1.4 1999-11-10 01:45:30 bird Exp $
  *
  * Description:   Autoprobes the os2krnl file and os2krnl[*].sym files.
  *                Another Hack!
@@ -20,6 +20,8 @@
  *                6. finished.
  *
  * Copyright (c) 1998-1999 knut st. osmundsen
+ *
+ * Project Odin Software License can be found in LICENSE.TXT
  *
  */
 

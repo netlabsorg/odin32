@@ -1,4 +1,4 @@
-/* $Id: d16init.c,v 1.3 1999-10-31 23:57:00 bird Exp $
+/* $Id: d16init.c,v 1.4 1999-11-10 01:45:30 bird Exp $
  *
  * d16init - init routines for both drivers.
  *
@@ -6,6 +6,8 @@
  *            compleated. CodeEnd and DataEnd should not be set here.?
  *
  * Copyright (c) 1999 knut st. osmundsen
+ *
+ * Project Odin Software License can be found in LICENSE.TXT
  *
  */
 

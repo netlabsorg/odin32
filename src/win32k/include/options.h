@@ -1,4 +1,4 @@
-/* $Id: options.h,v 1.3 1999-10-31 23:57:04 bird Exp $
+/* $Id: options.h,v 1.4 1999-11-10 01:45:33 bird Exp $
  *
  * Options.
  *
@@ -45,7 +45,10 @@
             o.fElf        = FALSE;          \
             o.fScript     = FALSE;          \
             o.fNoLoader   = FALSE;          \
-            o.cbHeap      = 0x100000; /* 1MB */
+            o.cbHeap      = 0x100000; /* 1MB */ \
+            o.cbHeapMax   = 0x100000; /* 1MB */ \
+            o.cbHeapResident    = 0x10000; /* 64KB */ \
+            o.cbHeapMaxResident = 0x1000;  /* 4KB */ \
 
 
 /*******************************************************************************
@@ -82,11 +85,9 @@ struct options
 
     /** @cat Options affecting the heap. */
     ULONG       cbHeap;             /* Initial heapsize. */
-    #if 0
     ULONG       cbHeapMax;          /* Maximum heapsize. */
     ULONG       cbHeapResident;     /* Initial residentheapsize. */
     ULONG       cbHeapMaxResident;  /* Maxiumem residentheapsize. */
-    #endif
 };
 
 
