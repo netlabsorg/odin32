@@ -1,4 +1,4 @@
-/* $Id: winkeyboard.cpp,v 1.39 2003-02-16 15:31:12 sandervl Exp $ */
+/* $Id: winkeyboard.cpp,v 1.40 2003-02-16 18:29:27 sandervl Exp $ */
 /*
  * Win32 <-> PM key translation
  *
@@ -984,6 +984,8 @@ INT WIN32API GetKeyboardType(INT nTypeFlag)
 BOOL WIN32API GetKeyboardState(PBYTE lpKeyState)
 {
 #if 1
+   //temporary solution until we find out why OSLibWinGetScanStateTable always
+   //fails
    int state;
    for(int i=0;i<256;i++) {
        state = GetKeyState(i);
@@ -992,8 +994,6 @@ BOOL WIN32API GetKeyboardState(PBYTE lpKeyState)
            dprintf2(("Win key 0x%0x = %x", i, lpKeyState[i]));
        }
    }
-   return TRUE;
-#if 1
 #else
    BYTE PMScanState[256];
    BOOL rc;
@@ -1021,6 +1021,16 @@ BOOL WIN32API GetKeyboardState(PBYTE lpKeyState)
            dprintf2(("Win key 0x%0x = %x", i, lpKeyState[i]));
        }
    }
+#endif
+
+   //VK_LCONTROL needs special handling due to AltGr
+   state = GetKeyState(VK_RMENU);
+   if (state & 0x8000) 
+   {//if AltGr is down, then pretend VK_LCONTROL is down too
+       lpKeyState[VK_LCONTROL] = ((state & 0x8000) >> 8) | (state & 1);
+       lpKeyState[VK_CONTROL]  = ((state & 0x8000) >> 8) | (state & 1);
+   }
+
    //now process the mouse buttons (left, middle, right)
    state = GetKeyState(VK_LBUTTON);
    lpKeyState[VK_LBUTTON] = ((state & 0x8000) >> 8) | (state & 1);
@@ -1040,38 +1050,6 @@ BOOL WIN32API GetKeyboardState(PBYTE lpKeyState)
    }
 #endif
    return TRUE;
-#endif
-#else
- BYTE   PMKeyState[256];
- BOOL   rc;
-
-  memset(PMKeyState, 0, sizeof(PMKeyState));
-  memset(lpKeyState, 0, 256);
-  rc = OSLibWinGetKeyboardStateTable((PBYTE)&PMKeyState[0] );
-////  rc = O32_GetKeyboardState(lpKeyState);
-  if(rc == TRUE)
-  {
-    KeyTranslatePMToWinBuf((BYTE *)&PMKeyState[0], lpKeyState, 256);
-    
-    // @@@PH
-    // Note: we'd have to check the key state overlay array here, too!
-    
-#ifdef DEBUG
-        for(int i=0;i<256;i++) {
-            if(PMKeyState[i] & 0x80) {
-                dprintf2(("PM  key 0x%0x = %x", i, PMKeyState[i]));
-            }
-        }
-        for(i=0;i<256;i++) {
-            if(lpKeyState[i]) {
-                dprintf2(("Win key 0x%0x = %x", i, lpKeyState[i]));
-            }
-        }
-#endif
-        return TRUE;
-  }
-  return FALSE;
-#endif
 }
 //******************************************************************************
 //******************************************************************************
@@ -1476,6 +1454,15 @@ SHORT WIN32API GetKeyState(int nVirtKey)
       INT  nVirtKey2 = 0;
       WORD result;
 
+      if (nVirtKey == VK_CONTROL || nVirtKey == VK_LCONTROL) 
+      {//if AltGr is down, then pretend VK_LCONTROL is down too
+          result = OSLibWinGetScanState(abWinVKeyToPMScan[VK_RMENU].bPMScanCode);
+          if(result & 0x8000) {
+              return result;
+          }
+          //not down, check the control keys
+      }
+
       if (nVirtKey == VK_MENU)  {
           nVirtKey  = VK_LMENU;
           nVirtKey2 = VK_RMENU;
@@ -1527,6 +1514,14 @@ WORD WIN32API GetAsyncKeyState(INT nVirtKey)
       INT  nVirtKey2 = 0;
       WORD result;
 
+      if (nVirtKey == VK_CONTROL || nVirtKey == VK_LCONTROL) 
+      {//if AltGr is down, then pretend VK_LCONTROL is down too
+          result = OSLibWinGetPhysKeyState(abWinVKeyToPMScan[VK_RMENU].bPMScanCode);
+          if(result & 0x8000) {
+              return result;
+          }
+          //not down, check the control keys
+      }
       if (nVirtKey == VK_MENU)  {
           nVirtKey  = VK_LMENU;
           nVirtKey2 = VK_RMENU;
