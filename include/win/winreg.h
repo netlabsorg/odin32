@@ -88,10 +88,6 @@
 				 KEY_CREATE_LINK	\
 				)
 
-/* fixme: move it to basetsd.h */
-typedef ULONG_PTR DWORD_PTR, *PDWORD_PTR;
-/* end fixme */
-
 /*
  *	registry provider structs
  */
