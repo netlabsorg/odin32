@@ -1,4 +1,23 @@
- /* $Id: changelog,v 1.1093 2000-08-30 18:04:56 sandervl Exp $ */
+ /* $Id: changelog,v 1.1094 2000-08-31 12:44:46 sandervl Exp $ */
+
+ 2000-08-31: Sander van Leeuwen <sandervl@xs4all.nl>
+    - DDRAW:    Extra debug logging
+                GetFourCCCodes should return nr of codes returned (always)
+                QueryInterface; don't change the vtbl of the directdraw object
+                return pointer to new virtual table instead
+                (fixes crashes in dxview)
+                Don't return Direct3D object in DirectDrawEnumerateA; crashes
+                dxview.exe (need to figure out why)
+                Video memory set to zero for HEL caps + no DDCAPS_COLORKEYHWASSIST
+                Fixed HEL caps. (dwFXcaps)
+                Fixed Driver caps (memset for HEL caps overwrote driver structure)
+                Export DirectDrawCreateEx
+    - KERNEL32: Level 2 logging for GetLastError (if lasterror != 0)
+    - INCLUDE:  Header updates for compiling directx applets in OS/2
+
+ 2000-08-31: Przemyslaw Dobrowolski <dobrawka@asua.org.pl>
+    - KERNEL32: Create more class registry keys during installation
+                (for shell32 & IE)
 
  2000-08-30: Sander van Leeuwen <sandervl@xs4all.nl>
     - GDI32:    Workaround in StretchDIBits for PowerDVD (fixes wrong colors)
