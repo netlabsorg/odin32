@@ -40,6 +40,13 @@ A list of Open32 bugs (under construction):
 - Open32 doesn't send any WM_PARENTNOTIFY messages
 - Open32 doesn't send WM_SETCURSOR or WM_MOUSEACTIVATE to parent windows
 - CS_SAVEBITS: window movements are slow, many repaints
+- SetROP2 with R2_XORPEN doesn't work. Example:
+    hOldPen = SelectObject (hdc, GetStockObject (BLACK_PEN));
+    oldRop = SetROP2 (hdc, R2_XORPEN);
+    MoveToEx (hdc, x, rect.top, NULL);
+    LineTo (hdc, x, rect.bottom);
+    SetROP2 (hdc, oldRop);
+    SelectObject (hdc, hOldPen);
 
 Limitations:
 - No support for COMCTL32 controls.
