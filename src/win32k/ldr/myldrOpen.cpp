@@ -1,4 +1,4 @@
-/* $Id: myldrOpen.cpp,v 1.15 2001-02-11 23:43:51 bird Exp $
+/* $Id: myldrOpen.cpp,v 1.16 2001-06-14 12:19:41 bird Exp $
  *
  * myldrOpen - ldrOpen.
  *
@@ -295,6 +295,7 @@ ULONG LDRCALL myldrOpen(PSFN phFile, PSZ pszFilename, PULONG pfl)
                      */
                     kprintf(("myldrOpen-%d: pe.exe - opening\n", cNesting));
                     ldrClose(*phFile);
+                    *phFile = 0xFFFF;
                     strcpy(u1.pach, "PE.EXE");
                     rc = ldrOpen(phFile, u1.pach, pfl); /* This isn't recusive! */
                     if (rc != NO_ERROR)
@@ -423,6 +424,7 @@ ULONG LDRCALL myldrOpen(PSFN phFile, PSZ pszFilename, PULONG pfl)
                 }
 
                 ldrClose(*phFile);
+                *phFile = 0xFFFF;
                 rc = ldrOpen(phFile, ".\\JAVA.EXE", pfl);
                 if (rc != NO_ERROR)
                     rc = OpenPATH(phFile, "JAVA.EXE", pfl);
@@ -640,6 +642,7 @@ ULONG LDRCALL myldrOpen(PSFN phFile, PSZ pszFilename, PULONG pfl)
                             kprintf(("myldrOpen-%d: SetExecName failed with rc=%d\n", cNesting));
                     }
                     ldrClose(*phFile);
+                    *phFile = 0xFFFF;
                     rc = myldrOpen(phFile, psz, pfl);
                     if (rc != NO_ERROR)
                     {
@@ -711,6 +714,7 @@ ULONG LDRCALL myldrOpen(PSFN phFile, PSZ pszFilename, PULONG pfl)
              */
             kprintf(("myldrOpen-%d: Found REXX script\n", cNesting));
             ldrClose(*phFile);
+            *phFile = 0xFFFF;
             psz = "KRX.EXE";
             rc = ldrOpen(phFile, psz, pfl);
             if (rc != NO_ERROR)
@@ -752,6 +756,11 @@ ULONG LDRCALL myldrOpen(PSFN phFile, PSZ pszFilename, PULONG pfl)
          * Decrement the nesting count.
          */
     cleanup:
+        if (rc && *phFile != 0xFFFF)
+        {
+            ldrClose(*phFile);
+            *phFile = 0xFFFF;
+        }
         rfree(u1.pach);
         cNesting--;
     }
