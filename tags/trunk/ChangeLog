@@ -1,5 +1,9 @@
-/* $Id: ChangeLog,v 1.2738 2004-10-11 14:59:09 cinc Exp $ */
+/* $Id: ChangeLog,v 1.2739 2004-10-12 10:16:33 cinc Exp $ */
 
+2004-10-12: Chris Wohlgemuth <cinc@innotek.de>
+    - OLEAUT32:
+                o VarBstrFromDec() and VarDecFromStr() removed from stubs.cpp.
+                  These are now implemented in variant.c.
 
 2004-10-11: Chris Wohlgemuth <cinc@innotek.de>
     - OLEAUT32:
