@@ -1,4 +1,4 @@
-; $Id: USER32.DEF,v 1.52 2001-04-12 14:04:32 sandervl Exp $
+; $Id: USER32.DEF,v 1.53 2001-04-15 14:29:47 sandervl Exp $
 
 LIBRARY USER32 INITINSTANCE TERMINSTANCE
 DESCRIPTION 'Odin32 System Dll - User32'
@@ -19,6 +19,9 @@ IMPORTS
     WinReplyMsg                 = PMMERGE.5325
     _GpiEnableYInversion        = PMGPI.723
     _GpiQueryYInversion         = PMGPI.726
+    _WinQueryPointerClipRect    = PMMERGE.5433
+    _WinSetPointerClipRect      = PMMERGE.5434
+
 ;;;; Present in WGSS50
 ;;;;    _GpiQueryDCData             = PMGPI.665
 
@@ -635,6 +638,16 @@ EXPORTS
     EnumDisplayDevicesW        = _EnumDisplayDevicesW@16        @1007
 
 
+;----------------------------------
+; obsolete WINNLS APIs (Far East)
+;----------------------------------
+    SendIMEMessageExA          = _SendIMEMessageExA@8           @1010
+    SendIMEMessageExW          = _SendIMEMessageExW@8           @1011
+
+    WINNLSEnableIME            = _WINNLSEnableIME@8             @1012
+    WINNLSGetEnableStatus      = _WINNLSGetEnableStatus@4       @1013
+    WINNLSGetIMEHotkey         = _WINNLSGetIMEHotkey@4          @1014
+
 ;------------------------------------------------------------------------------
 ; Wine/Odin helper function
 ;------------------------------------------------------------------------------
@@ -674,12 +687,3 @@ EXPORTS
 
     _CreateFakeWindowEx@4                                        @2028 NONAME
 
-;----------------------------------
-; obsolete WINNLS APIs (Far East)
-;----------------------------------
-    SendIMEMessageExA          = _SendIMEMessageExA@8
-    SendIMEMessageExW          = _SendIMEMessageExW@8
-
-    WINNLSEnableIME            = _WINNLSEnableIME@8
-    WINNLSGetEnableStatus      = _WINNLSGetEnableStatus@4
-    WINNLSGetIMEHotkey         = _WINNLSGetIMEHotkey@4

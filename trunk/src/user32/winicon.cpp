@@ -1,4 +1,4 @@
-/* $Id: winicon.cpp,v 1.21 2001-04-05 09:31:28 sandervl Exp $ */
+/* $Id: winicon.cpp,v 1.22 2001-04-15 14:29:49 sandervl Exp $ */
 /*
  * Win32 Icon Code for OS/2
  *
@@ -379,6 +379,23 @@ BOOL WIN32API SetCursorPos( int X, int Y)
 {
     dprintf(("USER32: SetCursorPos %d %d", X,Y));
     return OSLibWinSetPointerPos(X, mapScreenY(Y));
+}
+//******************************************************************************
+//******************************************************************************
+BOOL WIN32API ClipCursor(const RECT * lpRect)
+{
+    if(lpRect) {
+         dprintf(("USER32: ClipCursor (%d,%d)(%d,%d)", lpRect->left, lpRect->top, lpRect->right, lpRect->bottom));
+    }
+    else dprintf(("USER32: ClipCursor NULL"));
+    return OSLibWinClipCursor(lpRect);
+}
+//******************************************************************************
+//******************************************************************************
+BOOL WIN32API GetClipCursor( LPRECT lpRect)
+{
+    dprintf(("USER32: GetClipCursor %x", lpRect));
+    return OSLibWinGetClipCursor(lpRect);
 }
 //******************************************************************************
 //******************************************************************************
