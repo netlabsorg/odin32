@@ -1,4 +1,4 @@
-/* $Id: menu.cpp,v 1.52 2002-12-05 09:25:05 sandervl Exp $*/
+/* $Id: menu.cpp,v 1.53 2002-12-12 13:55:41 sandervl Exp $*/
 /*
  * Menu functions
  *
@@ -354,20 +354,18 @@ static HMENU MENU_CopySysPopup(void)
         menu->wFlags |= MF_SYSMENU | MF_POPUP;
         SetMenuDefaultItem(hMenu, SC_CLOSE, FALSE);
 #ifdef __WIN32OS2__
-        if(fDisableOdinSysMenuItems) {
-            RemoveMenu(hMenu, 9, MF_BYPOSITION);
-            RemoveMenu(hMenu, 9, MF_BYPOSITION);
-            RemoveMenu(hMenu, 9, MF_BYPOSITION);
-            RemoveMenu(hMenu, 9, MF_BYPOSITION);
-            RemoveMenu(hMenu, 9, MF_BYPOSITION);
-        }
-#ifndef DEBUG
-        else {
-            RemoveMenu(hMenu, SC_PUTMARK, MF_BYCOMMAND);
-            RemoveMenu(hMenu, SC_DEBUGINT3, MF_BYCOMMAND);
-            RemoveMenu(hMenu, 11, MF_BYPOSITION);	//separator
-        }
+        if(!fDisableOdinSysMenuItems) {
+            AppendMenuA(hMenu, MF_SEPARATOR, 0, NULL);
+            AppendMenuA(hMenu,MF_STRING,
+                       SC_ABOUTODIN, (LPSTR)"About Odin");
+#ifdef DEBUG
+            AppendMenuA(hMenu, MF_SEPARATOR, 0, NULL);
+            AppendMenuA(hMenu,MF_STRING,
+                       SC_PUTMARK, (LPSTR)"Put mark in debug log");
+            AppendMenuA(hMenu,MF_STRING,
+                       SC_DEBUGINT3, (LPSTR)"Breakpoint");
 #endif
+        }
 #endif
     }
     else {
