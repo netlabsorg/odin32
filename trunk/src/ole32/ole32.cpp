@@ -1,4 +1,4 @@
-/* $Id: ole32.cpp,v 1.13 2000-02-12 11:51:03 davidr Exp $ */
+/* $Id: ole32.cpp,v 1.14 2000-03-21 00:37:46 davidr Exp $ */
 /* 
  * 
  * Project Odin Software License can be found in LICENSE.TXT
@@ -393,7 +393,8 @@ HRESULT WIN32API CoGetClassObject
     if (dwClsContext & CLSCTX_LOCAL_SERVER)
     {
 	dprintf(("OLE32: CoGetClassObject - CLSCTX_LOCAL_SERVER not supported!\n"));
-	return E_ACCESSDENIED;
+//	return E_ACCESSDENIED;
+	dwClsContext |= CLSCTX_INPROC_SERVER;	// Kludge as VB uses CLSCTX_LOCAL_SERVER
     }
 
     if (dwClsContext & CLSCTX_REMOTE_SERVER)
