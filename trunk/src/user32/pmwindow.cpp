@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.86 2000-02-20 18:28:32 cbratschi Exp $ */
+/* $Id: pmwindow.cpp,v 1.87 2000-03-13 13:10:47 sandervl Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -18,7 +18,7 @@
 #include <os2wrap.h>
 #include <stdlib.h>
 #include <string.h>
-#include "win32type.h"
+#include <win32type.h>
 #include <winconst.h>
 #include <wprocess.h>
 #include <misc.h>

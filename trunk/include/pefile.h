@@ -1,4 +1,4 @@
-/* $Id: pefile.h,v 1.4 2000-01-26 23:17:47 sandervl Exp $ */
+/* $Id: pefile.h,v 1.5 2000-03-13 13:11:46 sandervl Exp $ */
 
 /*
  *
@@ -9,7 +9,7 @@
 #define __PEFILE_H__
 
 #ifndef _OS2WIN_H
-#include <os2.h>
+#include <os2wrap.h>
 #include <win32type.h>
 #include <peexe.h>
 #include <stdlib.h> //min & max

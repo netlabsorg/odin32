@@ -1,4 +1,4 @@
-/* $Id: oslibmsg.cpp,v 1.29 2000-02-29 19:16:11 sandervl Exp $ */
+/* $Id: oslibmsg.cpp,v 1.30 2000-03-13 13:10:46 sandervl Exp $ */
 /*
  * Window message translation functions for OS/2
  *
@@ -19,11 +19,11 @@
 #define  INCL_WIN
 #define  INCL_PM
 #define  INCL_DOSPROCESS
-#include <os2.h>
 #include <os2wrap.h>
 #include <string.h>
 #include <misc.h>
 #include "oslibmsg.h"
+#include <winconst.h>
 #include <win32wnd.h>
 #include "oslibutil.h"
 #include "timer.h"

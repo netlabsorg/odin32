@@ -1,4 +1,4 @@
-/* $Id: oslibwin.cpp,v 1.69 2000-02-16 14:34:29 sandervl Exp $ */
+/* $Id: oslibwin.cpp,v 1.70 2000-03-13 13:10:47 sandervl Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -12,7 +12,6 @@
  */
 #define  INCL_WIN
 #define  INCL_PM
-#include <os2.h>
 #include <os2wrap.h>
 #include <stdlib.h>
 #include <string.h>

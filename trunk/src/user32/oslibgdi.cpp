@@ -1,4 +1,4 @@
-/* $Id: oslibgdi.cpp,v 1.10 2000-02-16 14:34:25 sandervl Exp $ */
+/* $Id: oslibgdi.cpp,v 1.11 2000-03-13 13:10:45 sandervl Exp $ */
 /*
  * Window GDI wrapper functions for OS/2
  *
@@ -11,11 +11,11 @@
  */
 #define  INCL_WIN
 #define  INCL_PM
-#include <os2.h>
 #include <os2wrap.h>
 #include <stdlib.h>
 #include <string.h>
 #include <misc.h>
+#include <winconst.h>
 #include <oslibgdi.h>
 #include <oslibwin.h>
 #include "win32wbase.h"

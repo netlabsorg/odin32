@@ -1,4 +1,4 @@
-/* $Id: oslibmenu.cpp,v 1.11 2000-02-16 14:34:26 sandervl Exp $ */
+/* $Id: oslibmenu.cpp,v 1.12 2000-03-13 13:10:46 sandervl Exp $ */
 /*
  * Window Menu wrapper functions for OS/2
  *
@@ -11,7 +11,6 @@
  */
 #define  INCL_WIN
 #define  INCL_PM
-#include <os2.h>
 #include <os2wrap.h>
 #include <stdlib.h>
 #include <string.h>

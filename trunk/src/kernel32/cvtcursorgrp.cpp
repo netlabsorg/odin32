@@ -1,4 +1,4 @@
-/* $Id: cvtcursorgrp.cpp,v 1.8 2000-02-16 14:25:37 sandervl Exp $ */
+/* $Id: cvtcursorgrp.cpp,v 1.9 2000-03-13 13:10:09 sandervl Exp $ */
 
 /*
  * PE2LX cursor group code
@@ -16,7 +16,7 @@
 #define INCL_DOSPROCESS          /* DOS Process values       */
 #define INCL_DOSMISC             /* DOS Miscellanous values  */
 #define INCL_WIN
-#include <os2.h>
+#include <os2wrap.h>
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
