@@ -1,4 +1,4 @@
-; $Id: ntdll.def,v 1.7 1999-06-22 17:08:16 phaller Exp $
+; $Id: ntdll.def,v 1.8 1999-06-25 13:59:01 phaller Exp $
 
 ;Created by BLAST for IBM's compiler
 ;Basis is NT4.0's NTDLL.DLL
@@ -31,6 +31,9 @@ EXPORTS
     RtlDeleteCriticalSection     =  fwd_RtlDeleteCriticalSection
 
 ; real functions
+    NtAllocateUuids               = _NtAllocateUuids@16               @59
+    ZwAllocateUuids               = _NtAllocateUuids@16
+
     NtOpenFile                    = _NtOpenFile@24                    @127
     ZwOpenFile                    = _NtOpenFile@24
     NtCreateFile                  = _NtCreateFile@44                  @73
@@ -263,8 +266,9 @@ EXPORTS
     RtlNormalizeProcessParams     = _RtlNormalizeProcessParams@4      @441
     RtlNtStatusToDosError         = _RtlNtStatusToDosError@4          @442
     RtlGetNtProductType           = _RtlGetNtProductType@4            @390
+    RtlEnlargedIntegerMultiply    = _RtlEnlargedIntegerMultiply@8     @341
+    RtlExtendedIntegerMultiply    = _RtlExtendedIntegerMultiply@12    @358
     RtlExtendedLargeIntegerDivide = _RtlExtendedLargeIntegerDivide@16 @359
-;   RtlExtendedLargeIntegerMultiply
     RtlFormatCurrentUserKeyPath   = _RtlFormatCurrentUserKeyPath@4    @371
     RtlOpenCurrentUser            = _RtlOpenCurrentUser@8
     RtlDosPathNameToNtPathName_U  = _RtlDosPathNameToNtPathName_U@16  @338
@@ -280,6 +284,7 @@ EXPORTS
 
 ; NTDLL's C runtime
 ; Note: CDECL does not decorate the function names with parameter bytes!
+    _wcsupr                       = _OS2_wcsupr                       @882
     abs                           = _OS2abs                           @883
     atan                          = _OS2atan                          @884
     atoi                          = _OS2atoi                          @885
@@ -295,6 +300,7 @@ EXPORTS
     isspace                       = _OS2isspace                       @895
     isupper                       = _OS2isupper                       @896
 
+    sprintf                       = _OS2sprintf                       @911
     strcat                        = _OS2strcat                        @914
     strchr                        = _OS2strchr                        @915
     strcmp                        = _OS2strcmp                        @916

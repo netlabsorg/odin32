@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.4 1999-06-22 16:18:14 phaller Exp $
+# $Id: makefile,v 1.5 1999-06-25 13:59:01 phaller Exp $
 
 #
 # PD-Win32 API
@@ -29,7 +29,8 @@ OBJS = NTDLL.obj\
        sync.obj\
        initterm.obj\
        crt.obj\
-       time.obj
+       time.obj\
+       unknown.obj
 
 
 TARGET = NTDLL
@@ -71,6 +72,8 @@ time.obj:   .\time.cpp   .\ntdll.h
 initterm.obj: .\initterm.cpp
 
 crt.obj:    .\crt.cpp    .\ntdll.h
+
+unknown.obj: .\unknown.cpp .\ntdll.h
 
 clean:
         $(RM) *.obj *.lib *.dll *~ *.map *.pch

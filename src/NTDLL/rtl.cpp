@@ -1,4 +1,4 @@
-/* $Id: rtl.cpp,v 1.2 1999-06-10 17:06:46 phaller Exp $ */
+/* $Id: rtl.cpp,v 1.3 1999-06-25 13:59:02 phaller Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -527,6 +527,26 @@ REGS_ENTRYPOINT(NTDLL_alloca_probe)
 */
 
 /******************************************************************************
+ * RtlEnlargedIntegerMultiply [NTDLL.341]
+ * Note: This even works, since gcc returns 64bit values in eax/edx just like
+ * the caller expects. However... The relay code won't grok this I think.
+ *
+ * @@@PH: Parameters are unknown
+ */
+/* longlong in VAC++ ? */
+
+INT WINAPI RtlEnlargedIntegerMultiply(INT factor1,
+                                      INT factor2)
+{
+  dprintf(("NTDLL: RtlEnlargedIntegerMultiply(%08xh,%08xh) not implemented.\n",
+           factor1,
+           factor2));
+
+  return factor1 * factor2;
+}
+
+
+/******************************************************************************
  * RtlExtendedLargeIntegerDivide [NTDLL.359]
  */
 INT WINAPI RtlExtendedLargeIntegerDivide(LARGE_INTEGER dividend,
@@ -550,26 +570,29 @@ INT WINAPI RtlExtendedLargeIntegerDivide(LARGE_INTEGER dividend,
 }
 
 /******************************************************************************
- * RtlExtendedLargeIntegerMultiply [NTDLL.359]
+ * RtlExtendedLargeIntegerMultiply [NTDLL.358]
  * Note: This even works, since gcc returns 64bit values in eax/edx just like
  * the caller expects. However... The relay code won't grok this I think.
  */
-#if 0
 /* longlong in VAC++ ? */
-long long WINAPI RtlExtendedIntegerMultiply(LARGE_INTEGER factor1,
-                                            INT factor2)
+
+LARGE_INTEGER WINAPI RtlExtendedIntegerMultiply(LARGE_INTEGER factor1,
+                                                INT           factor2)
 {
-#if SIZEOF_LONG_LONG==8
-   return (*(long long*)&factor1) * factor2;
-#else
-  dprintf(("NTDLL: RtlExtendedLargeIntegerMultiply(%08xh,%08xh) not implemented.\n",
+  LARGE_INTEGER li;
+
+  dprintf(("NTDLL: RtlExtendedIntegerMultiply(%08xh,%08xh) not implemented.\n",
            factor1,
            factor2));
 
-  return 0;
-#endif
+  li.LowPart  = factor1.LowPart * factor2;
+  li.HighPart = factor1.HighPart * factor2;
+  // note: overflow from LowPart To HighPart NOT handled !
+
+  return li;
 }
-#endif
+
+
 /******************************************************************************
  *  RtlFormatCurrentUserKeyPath             [NTDLL.371]
  */
