@@ -1,4 +1,4 @@
-/* $Id: oslibwin.cpp,v 1.1 1999-09-15 23:18:54 sandervl Exp $ */
+/* $Id: oslibwin.cpp,v 1.2 1999-09-17 18:49:53 dengert Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -182,9 +182,15 @@ HWND OSLibWinWindowFromID(HWND hwndParent,ULONG id)
 }
 //******************************************************************************
 //******************************************************************************
-BOOL OSLibWinSetFocus(HWND hwndDeskTop,HWND hwndNewFocus)
+BOOL OSLibWinSetFocus(HWND hwndDeskTop,HWND hwndNewFocus, BOOL activate)
 {
-  return WinSetFocus(hwndDeskTop,hwndNewFocus);
+  return WinFocusChange (hwndDeskTop, hwndNewFocus, activate ? FC_NOLOSEACTIVE : 0);
+}
+//******************************************************************************
+//******************************************************************************
+BOOL OSLibWinIsChild (HWND hwnd, HWND hwndOf)
+{
+  return WinIsChild (hwnd, hwndOf);
 }
 //******************************************************************************
 //******************************************************************************
@@ -676,9 +682,9 @@ void OSLibMapWINDOWPOStoSWP(PWINDOWPOS pwpos, PSWP pswp, PSWP pswpOld, HWND hPar
 //******************************************************************************
 HWND OSLibWinBeginEnumWindows(HWND hwnd)
 {
-   if(hwnd == OSLIB_HWND_DESKTOP)	hwnd = HWND_DESKTOP;
+   if(hwnd == OSLIB_HWND_DESKTOP)       hwnd = HWND_DESKTOP;
    else
-   if(hwnd == OSLIB_HWND_OBJECT)	hwnd = HWND_OBJECT;
+   if(hwnd == OSLIB_HWND_OBJECT)        hwnd = HWND_OBJECT;
 
    return WinBeginEnumWindows(hwnd);
 }
