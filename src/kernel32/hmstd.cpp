@@ -1,4 +1,4 @@
-/* $Id: hmstd.cpp,v 1.4 2001-06-20 20:51:57 sandervl Exp $ */
+/* $Id: hmstd.cpp,v 1.5 2001-08-10 19:32:28 sandervl Exp $ */
 
 /*
  * Handle Manager class for standard in, out & error handles
@@ -23,11 +23,12 @@
 #include <os2win.h>
 #include <stdlib.h>
 #include <string.h>
-#include "unicode.h"
-#include "misc.h"
+#include <unicode.h>
+#include <misc.h>
 
 #include "HandleManager.H"
 #include "hmstd.h"
+#include "winexebase.h"
 
 #define DBG_LOCALLOG	DBG_hmstd
 #include "dbglocal.h"
@@ -154,7 +155,7 @@ BOOL HMDeviceStandardClass::WriteFile(PHMHANDLEDATA pHMHandleData,
  DWORD  byteswritten;
  LPVOID lpLowMemBuffer;
 
-  dprintf2(("KERNEL32: HMDeviceStandardClass::WriteFile %s(%08x,%08x,%08x,%08x,%08x) - stub?\n",
+  dprintf(("KERNEL32: HMDeviceStandardClass::WriteFile %s(%08x,%08x,%08x,%08x,%08x)",
            lpHMDeviceName,
            pHMHandleData,
            lpBuffer,
@@ -173,11 +174,15 @@ BOOL HMDeviceStandardClass::WriteFile(PHMHANDLEDATA pHMHandleData,
      return FALSE;
   }
   memcpy(lpLowMemBuffer, lpBuffer, nNumberOfBytesToWrite);
-#ifdef DEBUG
-//  if(pHMHandleData->dwUserData == STD_ERROR_HANDLE) {
+  if(pHMHandleData->dwUserData == STD_ERROR_HANDLE) {
      dprintf(("STDERR: %s", lpLowMemBuffer));
-//  }
-#endif
+     return TRUE;
+  }
+  if(WinExe && !WinExe->isConsoleApp()) {
+     //DosWrite returns error 436 when PM apps try to write to std out
+     dprintf(("STDOUT (GUI): %s", lpLowMemBuffer));
+     return TRUE;
+  }
   return O32_WriteFile(pHMHandleData->hHMHandle, lpLowMemBuffer, nNumberOfBytesToWrite,
                        lpNumberOfBytesWritten, lpOverlapped);
 }

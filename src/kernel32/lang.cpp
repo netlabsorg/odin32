@@ -1,4 +1,4 @@
-/* $Id: lang.cpp,v 1.36 2001-05-20 08:17:41 sandervl Exp $ */
+/* $Id: lang.cpp,v 1.37 2001-08-10 19:32:30 sandervl Exp $ */
 /*
  * Win32 language API functions for OS/2
  *
@@ -417,6 +417,9 @@ ODINFUNCTION4(int, GetLocaleInfoW, LCID, lcid, LCTYPE, LCType, LPWSTR, wbuf,
         break;
 
       case LOCALE_IDEFAULTLANGUAGE:
+        strcpyW(wbuf, (LPWSTR)L"0409");
+        ulInfoLen = 5;
+        break;
       case LOCALE_ILANGUAGE:
         UniQueryLocaleItem(locale_object, XWINLOCALE,&pInfoItem);
         LocaleFromUniStr(pInfoItem,wbuf,&ulInfoLen);
@@ -865,7 +868,7 @@ ODINFUNCTION4(int, GetLocaleInfoA, LCID, lcid, LCTYPE, LCType, LPSTR, buf,
     return 0;
   }
 
-  dprintf(("KERNEL32:  OS2GetLocaleInfoA lcID=%d,lcType=%x,buf=%X,len=%d\n",lcid,LCType,buf,len));
+  dprintf(("KERNEL32: GetLocaleInfoA lcID=%d,lcType=%x,buf=%X,len=%d\n",lcid,LCType,buf,len));
 
   if (buf)
     lpWStr=(LPWSTR)malloc(len*(sizeof(WCHAR)));
@@ -879,7 +882,7 @@ ODINFUNCTION4(int, GetLocaleInfoA, LCID, lcid, LCTYPE, LCType, LPSTR, buf,
   
   if (lpWStr) free(lpWStr); // free prevooisly allocated memory
 
-  dprintf(("KERNEL32:  OS2GetLocaleInfoA returned %d\n",ret_len));
+  dprintf(("KERNEL32: GetLocaleInfoA returned %d -> %s",ret_len, (ret_len) ? buf : NULL));
 
   return (ret_len);
 }
