@@ -45,8 +45,15 @@
 #include "OS2DSound.h"
 #include "OS2SndBuffer.h"
 #include "OS2PrimBuff.h"
+#include "OS23DListener.h"
 
 #include "dart.h"
+
+#undef THIS
+#define THIS VOID*This
+
+#undef THIS_
+#define THIS_ VOID*This,
 
 //******************************************************************************
 //******************************************************************************
@@ -84,6 +91,7 @@ OS2PrimBuff::OS2PrimBuff(OS2IDirectSound *DSound, const DSBUFFERDESC *lpDSBuffer
    playpos    = 0;
    fPrimary   = TRUE;
    Referenced = 0;
+   listener   = NULL;
 
    lpfxFormat = (WAVEFORMATEX *)malloc(/*bufferdesc.lpwfxFormat->cbSize +*/ sizeof(WAVEFORMATEX));
    lpfxFormat->wBitsPerSample = bps      = 16;
@@ -127,18 +135,31 @@ OS2PrimBuff::~OS2PrimBuff()
 //******************************************************************************
 HRESULT WIN32API PrimBufQueryInterface(THIS, REFIID riid, LPVOID * ppvObj)
 {
+   dprintf(("DSOUND-PrimBuff: QueryInterface"));
+
    if (This == NULL) {
-     return DSERR_INVALIDPARAM;
+      return DSERR_INVALIDPARAM;
    }
    *ppvObj = NULL;
 
-   if (!IsEqualGUID(riid, IID_IDirectSoundBuffer))
-     return E_NOINTERFACE;
+   if (IsEqualGUID(riid, IID_IDirectSoundBuffer)) {
+      *ppvObj = This;
+      PrimBufAddRef(This);
+      return DS_OK;
+   }
 
-   *ppvObj = This;
 
-   PrimBufAddRef(This);
-   return DS_OK;
+   if (IsEqualGUID(riid, IID_IDirectSound3DListener)) {
+      OS2PrimBuff                *me = (OS2PrimBuff *)This;
+      OS2IDirectSound3DListener  *listener;
+
+      listener     = new OS2IDirectSound3DListener(me);
+      *ppvObj      = listener;
+      listener->Vtbl.AddRef((IDirectSound3DListener *)listener);
+      return DS_OK;
+   }
+
+   return E_NOINTERFACE;
 }
 
 //******************************************************************************

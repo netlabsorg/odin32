@@ -17,7 +17,8 @@
 #undef THIS_
 #define THIS_ VOID*This,
 
-
+// a forward declaration is needed here
+class OS2IDirectSound3DListener;
 
 class OS2PrimBuff: public OS2IDirectSoundBuffer
 {
@@ -28,8 +29,12 @@ class OS2PrimBuff: public OS2IDirectSoundBuffer
 
     int     Referenced;
     inline  HRESULT       GetLastError()    { return lastError;    };
+    inline  void          Set3DListener(OS2IDirectSound3DListener *_listener) {
+                                            listener = _listener; };
 
  private:
+ protected:
+
     void *vpMixBuffer;
     void *vpMixSetup;
     void *vpBuffParms;
@@ -41,7 +46,8 @@ class OS2PrimBuff: public OS2IDirectSoundBuffer
     long  bps;     // Bits per sample 8 or 16 !!
     long  channels;// Number of Channels 1 or 2 MONO/Stereo
 
- protected:
+    OS2IDirectSound3DListener* listener;  // pointer to the associated 3DListener object
+
     HRESULT lastError;
 
     friend    HRESULT __stdcall PrimBufQueryInterface(THIS, REFIID riid, LPVOID * ppvObj);

@@ -1,4 +1,4 @@
-/* $Id: OS2DSOUND.CPP,v 1.1 2000-03-06 13:11:38 mike Exp $ */
+/* $Id: OS2DSOUND.CPP,v 1.2 2000-03-08 18:26:47 mike Exp $ */
 
 /*
  * DirectSound main class
@@ -20,10 +20,11 @@
 #define INITGUID
 #include <dsound.h>
 
-#include "os2dsound.h"
-#include "os2sndbuffer.h"
-#include "os2primbuff.h"
-#include "os2notify.h"
+#include "OS2DSound.h"
+#include "OS2SndBuffer.h"
+#include "OS2PrimBuff.h"
+#include "OS23DListener.h"
+#include "OS2Notify.h"
 #include <misc.h>
 
 // TODO: primary buffer should probably created right away when creating the DSound

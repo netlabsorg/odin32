@@ -1,4 +1,4 @@
-/* $Id: OS2SNDBUFFER.CPP,v 1.1 2000-03-06 13:11:39 mike Exp $ */
+/* $Id: OS2SNDBUFFER.CPP,v 1.2 2000-03-08 18:26:47 mike Exp $ */
 
 /*
  * DirectSound SoundBuffer class
@@ -24,10 +24,12 @@
 #define INITGUID
 #include <dsound.h>
 
-#include "os2dsound.h"
-#include "os2sndbuffer.h"
-#include "os2primbuff.h"
-#include "os2notify.h"
+#include "OS2DSound.h"
+#include "OS2SndBuffer.h"
+#include "OS2PrimBuff.h"
+#include "OS23DListener.h"
+#include "OS23DBuffer.h"
+#include "OS2Notify.h"
 #include <misc.h>
 
 
@@ -225,6 +227,17 @@ HRESULT WIN32API SoundBufQueryInterface(THIS, REFIID riid, LPVOID * ppvObj)
       notify->Vtbl.AddRef(notify);
       return DS_OK;
    }
+
+   if (IsEqualGUID(riid, IID_IDirectSound3DBuffer)) {
+      OS2IDirectSoundBuffer   *me     = (OS2IDirectSoundBuffer *)This;
+      OS2IDirectSound3DBuffer *buffer3D;
+
+      buffer3D   = new OS2IDirectSound3DBuffer(me);
+      *ppvObj    = buffer3D;
+      buffer3D->Vtbl.AddRef((IDirectSound3DBuffer *)buffer3D);
+      return DS_OK;
+   }
+
    return E_NOINTERFACE;
 }
 //******************************************************************************

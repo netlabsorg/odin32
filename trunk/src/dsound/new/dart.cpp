@@ -24,6 +24,7 @@ static MCI_MIXSETUP_PARMS *MixSetup_Global;
 static MCI_MIX_BUFFER     *pMixBuffs;
 static long               lLastBuff;
 static char               *pDSoundBuff;
+static BOOL               fIsPlaying = FALSE;
 
 USHORT               usDeviceID;                 /* Amp Mixer device id          */
 MCI_MIX_BUFFER       MixBuffers[NUM_DART_BUFFS]; /* Device buffers               */
@@ -69,10 +70,13 @@ long Dart_Open_Device(USHORT *pusDeviceID, void **vpMixBuffer, void **vpMixSetup
 
    MCI_AMP_OPEN_PARMS  AmpOpenParms;
    //MCI_WAVE_SET_PARMS WaveSetParms;
-   ULONG   rc;
+   ULONG   rc, ulNew;
+   LONG    lAdd = 5;
    short   device = 0;
 
    dprintf(("DSOUND-DART: Dart_Open_Device"));
+
+   DosSetRelMaxFH(&lAdd, &ulNew);
 
    *vpMixBuffer    = &MixBuffers;
    *vpMixSetup     = &MixSetupParms;
@@ -174,6 +178,7 @@ long Dart_Close_Device(USHORT usDeviceID, void *vpMixBuffer, void *vpMixSetup,
    MCI_MIX_BUFFER      *MixBuffer;
    MCI_MIXSETUP_PARMS  *MixSetup;
    MCI_BUFFER_PARMS    *BufferParms;
+   ULONG               rc;
 
    dprintf(("DSOUND-DART: Dart_Close_Device"));
 
@@ -181,14 +186,14 @@ long Dart_Close_Device(USHORT usDeviceID, void *vpMixBuffer, void *vpMixSetup,
    MixSetup    = (MCI_MIXSETUP_PARMS*)vpMixSetup;
    BufferParms = (MCI_BUFFER_PARMS*)vpBuffParms;
 
-    if (MixBuffer->pBuffer) {
-       mciSendCommand(usDeviceID,MCI_BUFFER,MCI_WAIT|MCI_DEALLOCATE_MEMORY, BufferParms,0);
-       MixBuffer->pBuffer=NULL;
-    }
-    if (usDeviceID) {
-        mciSendCommand(usDeviceID,MCI_CLOSE,MCI_WAIT, NULL, 0);
-        usDeviceID=0;
-    }
+   rc = mciSendCommand(usDeviceID, MCI_BUFFER, MCI_WAIT | MCI_DEALLOCATE_MEMORY, BufferParms, 0);
+   if (rc != MCIERR_SUCCESS) {
+      dprintf(("DSOUND-DART: MCI_BUFFER (Close) %d", rc));
+   }
+   rc = mciSendCommand(usDeviceID, MCI_CLOSE, MCI_WAIT, NULL, 0);
+   if (rc != MCIERR_SUCCESS) {
+      dprintf(("DSOUND-DART: MCI_CLOSE (Close) %d", rc));
+   }
 
    dprintf(("DSOUND-DART: Dart_Close_Device returning DS_OK"));
    return DS_OK;
@@ -300,6 +305,22 @@ long Dart_SetFormat(USHORT *pusDeviceID, void *vpMixSetup, void *vpBufferParms, 
       memset(MixBuffer[i].pBuffer, 0, BUFFER_SIZE/NUM_DART_BUFFS);
    }
 
+   /* If the primary buffer was playing, we have to restart it!! */
+   if (fIsPlaying) {
+      dprintf(("DSOUND-DART: Restarting playback!!!!"));
+
+      /* Mix the first buffer before playing */
+      MixCallback(BUFFER_SIZE/NUM_DART_BUFFS);
+      memcpy(pMixBuffs[lLastBuff].pBuffer, &pDSoundBuff[lLastBuff*(BUFFER_SIZE/NUM_DART_BUFFS)], BUFFER_SIZE/NUM_DART_BUFFS);
+
+      USHORT  sel = RestoreOS2FS();
+      /* Note: the call to pmixWrite trashes the FS selector, we have to save */
+      /* and then restore FS!!! Otherwise exception handling will be broken.  */
+      MixSetupParms.pmixWrite(MixSetupParms.ulMixHandle, MixBuffers, 2);
+      SetFS(sel);
+      fIsPlaying = TRUE;
+   }
+
    return DS_OK;
 }
 
@@ -310,6 +331,10 @@ long Dart_Stop(USHORT usDeviceID)
 
    dprintf(("DSOUND-DART: Dart_Stop"));
 
+   if (!fIsPlaying)
+      return DS_OK;
+
+   fIsPlaying = FALSE;
 //   rc = mciSendCommand(usDeviceID, MCI_PAUSE, MCI_WAIT, NULL, 0);
    rc = mciSendCommand(usDeviceID, MCI_STOP, MCI_WAIT, NULL, 0);
    if (rc != MCIERR_SUCCESS) {
@@ -348,6 +373,7 @@ long Dart_Play(USHORT usDeviceID, void *vpMixSetup, void *vpMixBuffer, long play
       /* and then restore FS!!! Otherwise exception handling will be broken.  */
       MixSetupParms.pmixWrite(MixSetupParms.ulMixHandle, MixBuffers, 2);
       SetFS(sel);
+      fIsPlaying = TRUE;
    }
 
    return DS_OK;
