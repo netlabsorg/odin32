@@ -1,4 +1,12 @@
- /* $Id: ChangeLog,v 1.861 2000-04-02 15:10:35 cbratschi Exp $ */
+ /* $Id: ChangeLog,v 1.862 2000-04-02 22:14:49 davidr Exp $ */
+
+ 2000-04-03: David Raison <djr@lemur.co.uk>
+ 	- OLE32: Added CoCreateGUID (calls RPCRT4.UuidCreate)
+ 	- RPCRT4: Beginning of new dll:
+	    RpcStringFreeA, RpcStringFreeW, UuidCompare
+	    UuidCreate, UuidCreateNil, UuidEqual
+	    UuidFromStringA, UuidFromStringW, UuidHash
+	    UuidIsNil, UuidToStringA, UuidToStringW
 
  2000-04-02: Przemyslaw Dobrowolski <dobrawka@asua.org.pl>
 	- SHELL32: don't sort files case sensitive
