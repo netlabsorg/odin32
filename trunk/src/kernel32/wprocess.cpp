@@ -1,4 +1,4 @@
-/* $Id: wprocess.cpp,v 1.55 1999-12-05 10:02:31 sandervl Exp $ */
+/* $Id: wprocess.cpp,v 1.56 1999-12-07 12:28:41 sandervl Exp $ */
 
 /*
  * Win32 process functions
@@ -605,7 +605,7 @@ HANDLE WIN32API GetModuleHandleA(LPCTSTR lpszModule)
 	}
   }
 
-  eprintf(("KERNEL32:  GetModuleHandle %s returned %X\n", lpszModule, hMod));
+  dprintf(("KERNEL32:  GetModuleHandle %s returned %X\n", lpszModule, hMod));
   return(hMod);
 }
 //******************************************************************************
