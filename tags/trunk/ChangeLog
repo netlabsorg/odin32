@@ -1,5 +1,13 @@
- /* $Id: ChangeLog,v 1.637 2000-01-11 20:38:23 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.638 2000-01-12 12:42:03 sandervl Exp $ */
 
+ 2000-01-11: Sander van Leeuwen <sandervl@xs4all.nl>
+	- USER32\NEW: Changed client rectangle positioning (not done by PM frame
+                      handler anymore) -> fixes problems with Shell About dialog
+                      and jumping controls when resizing (Winhlp32)
+                      Fixed menu tracking for different submenus
+                      Fixed delayed repaints of invalidated menu rectangles
+                      Ported Wine messagebox code. (GUI consistency)
+                      
  2000-01-11: Jens Wiessner <wiessnej@rfi.de>
 	- TWAIN_32: Bugfix (removed test code)
 
