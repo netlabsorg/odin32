@@ -1,4 +1,4 @@
-/* $Id: hmstd.cpp,v 1.11 2002-06-30 09:54:51 sandervl Exp $ */
+/* $Id: hmstd.cpp,v 1.12 2002-06-30 09:57:13 sandervl Exp $ */
 
 /*
  * Handle Manager class for standard in, out & error handles
@@ -149,10 +149,8 @@ BOOL HMDeviceStandardClass::WriteFile(PHMHANDLEDATA pHMHandleData,
         prevchar = src[i];
         i++;
     }
-    nNumberOfBytesToWrite += missingCR;
-    dprintf(("missingCR %d", missingCR));
 
-    lpLowMemBuffer = alloca(nNumberOfBytesToWrite);
+    lpLowMemBuffer = alloca(nNumberOfBytesToWrite+missingCR);
     if(lpLowMemBuffer == NULL)
     {
         DebugInt3();
@@ -178,7 +176,7 @@ BOOL HMDeviceStandardClass::WriteFile(PHMHANDLEDATA pHMHandleData,
         prevchar = src[i];
         i++;
     }
-    //memcpy(lpLowMemBuffer, lpBuffer, nNumberOfBytesToWrite);
+    nNumberOfBytesToWrite += missingCR;
 
     if(WinExe && !WinExe->isConsoleApp() && O32_GetFileType(pHMHandleData->hHMHandle) == FILE_TYPE_UNKNOWN) /* kso */
     {
