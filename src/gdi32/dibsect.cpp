@@ -1,4 +1,4 @@
-/* $Id: dibsect.cpp,v 1.26 2000-04-09 11:10:34 sandervl Exp $ */
+/* $Id: dibsect.cpp,v 1.27 2000-04-13 18:47:16 sandervl Exp $ */
 
 /*
  * GDI32 DIB sections
@@ -383,8 +383,9 @@ BOOL DIBSection::BitBlt(HDC hdcDest, int nXdest, int nYdest, int nDestWidth,
  LONG   rc;
  PVOID  bitmapBits = NULL;
  int    oldyinversion = 0;
+ BOOL   fRestoryYInversion = FALSE;
 
-#if 0
+#if 1
   HWND hwndDest = WindowFromDC(hdcDest);
   hwndDest = Win32ToOS2Handle(hwndDest);
   if(hwndDest != 0)
@@ -398,9 +399,13 @@ BOOL DIBSection::BitBlt(HDC hdcDest, int nXdest, int nYdest, int nDestWidth,
   }
 #endif
 
+  if(nDestWidth == 160 && nDestHeight == 120) {
+	nSrcWidth = 160;
+  }
+
   dprintf(("DIBSection::BitBlt %x %X (hps %x) %x to(%d,%d)(%d,%d) from (%d,%d)(%d,%d) rop %x flip %x",
-//          handle, hdcDest, hps, hwndDest, nXdest, nYdest, nDestWidth, nDestHeight,
-          handle, hdcDest, hps, 0, nXdest, nYdest, nDestWidth, nDestHeight,
+          handle, hdcDest, hps, hwndDest, nXdest, nYdest, nDestWidth, nDestHeight,
+//          handle, hdcDest, hps, 0, nXdest, nYdest, nDestWidth, nDestHeight,
           nXsrc, nYsrc, nSrcWidth, nSrcHeight, Rop, fFlip));
 
   //win32 coordinates are of the left top, OS/2 expects left bottom
@@ -427,9 +432,16 @@ BOOL DIBSection::BitBlt(HDC hdcDest, int nXdest, int nYdest, int nDestWidth,
   oldyinversion = GpiQueryYInversion(hps);
   if(fFlip & FLIP_VERT)
   {
-    	GpiEnableYInversion(hps, pOS2bmp->cy-1);
+  	if(oldyinversion != pOS2bmp->cy-1) {
+    		GpiEnableYInversion(hps, pOS2bmp->cy-1);
+		fRestoryYInversion = TRUE;
+	}
   }
-  else	GpiEnableYInversion(hps, 0);
+  else	
+  if(oldyinversion != 0) {
+	GpiEnableYInversion(hps, 0);
+	fRestoryYInversion = TRUE;
+  }
 
   if(fFlip & FLIP_HOR)
   {
@@ -441,7 +453,7 @@ BOOL DIBSection::BitBlt(HDC hdcDest, int nXdest, int nYdest, int nDestWidth,
 
   //SvL: Optimize this.. (don't convert entire bitmap if only a part will be blitted to the dc)
   if(dibinfo.dsBitfields[1] == 0x3E0) {//RGB 555?
-       	dprintf(("DIBSection::BitBlt; convert rgb 555 to 565"));
+       	dprintf(("DIBSection::BitBlt; convert rgb 555 to 565 (old y inv. = %d", oldyinversion));
 
 	if(bmpBitsRGB565 == NULL)
 		DebugInt3();
@@ -470,20 +482,26 @@ BOOL DIBSection::BitBlt(HDC hdcDest, int nXdest, int nYdest, int nDestWidth,
 		}
         }
 	//restore old y inversion height
-	GpiEnableYInversion(hps, oldyinversion);
-//  	if(hwndDest != 0)
-//	{
-//    		WinReleasePS(hps);
-//  	}
+	if(fRestoryYInversion) GpiEnableYInversion(hps, oldyinversion);
+#if 1
+  	if(hwndDest != 0)
+	{
+    		WinReleasePS(hps);
+  	}
+#endif
     	return(TRUE);
   }
-  GpiEnableYInversion(hps, oldyinversion);
-//  if(hwndDest != 0)
-//  {
-//    	WinReleasePS(hps);
-//  }
+  if(fRestoryYInversion) GpiEnableYInversion(hps, oldyinversion);
+#if 1
+  if(hwndDest != 0)
+  {
+    	WinReleasePS(hps);
+  }
+#endif
   dprintf(("DIBSection::BitBlt %X (%d,%d) (%d,%d) to (%d,%d) (%d,%d) returned %d\n", hps, point[0].x, point[0].y, point[1].x, point[1].y, point[2].x, point[2].y, point[3].x, point[3].y, rc));
-//  dprintf(("WinGetLastError returned %X\n", WinGetLastError(WinQueryAnchorBlock(hwndDest)) & 0xFFFF));
+#if 1
+  dprintf(("WinGetLastError returned %X\n", WinGetLastError(WinQueryAnchorBlock(hwndDest)) & 0xFFFF));
+#endif
   return(FALSE);
 }
 //******************************************************************************
