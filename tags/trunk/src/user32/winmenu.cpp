@@ -1,4 +1,4 @@
-/* $Id: winmenu.cpp,v 1.8 1999-10-22 18:11:51 sandervl Exp $ */
+/* $Id: winmenu.cpp,v 1.9 1999-10-25 12:49:20 phaller Exp $ */
 
 /*
  * Win32 menu API functions for OS/2
@@ -38,6 +38,7 @@ ODINFUNCTION2(HMENU,     LoadMenuA,
 
   winres = (Win32MenuRes *)FindResourceA(hinst, lpszMenu, RT_MENUA);
   if(winres) {
+     //@@@PH 1999/10/25 crash in EFCW, stack corruption
 	hMenu = O32_LoadMenuIndirect((MENUITEMTEMPLATEHEADER *)winres->lockOS2Resource());
 	delete winres;
 	return hMenu;
@@ -55,6 +56,7 @@ ODINFUNCTION2(HMENU, LoadMenuW,
 
   winres = (Win32MenuRes *)FindResourceW(hinst, lpszMenu, RT_MENUW);
   if(winres) {
+     //@@@PH 1999/10/25 crash in EFCW, stack corruption
 	hMenu = O32_LoadMenuIndirect((MENUITEMTEMPLATEHEADER *)winres->lockOS2Resource());
 	delete winres;
 	return hMenu;
