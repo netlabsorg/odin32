@@ -1,4 +1,4 @@
-/* $Id: Win32kCC.c,v 1.10 2001-01-08 18:05:26 bird Exp $
+/* $Id: Win32kCC.c,v 1.11 2001-02-02 08:41:31 bird Exp $
  *
  * Win32CC - Win32k Control Center.
  *
@@ -373,7 +373,7 @@ MRESULT EXPENTRY Win32kCCDlgProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
                     /*
                      * Update Config.sys.
                      */
-                    *pszConfigSys = ulBootDrv - 1 + 'A';
+                    *pszConfigSys = (char)(ulBootDrv - 1 + 'A');
                     phConfigSys = fopen(pszConfigSys, "r+");
                     if (phConfigSys)
                     {
@@ -528,6 +528,7 @@ MRESULT EXPENTRY Win32kCCDlgProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
             WinSendDlgItemMsg(hwnd, RB_LDR_PE_MIXED,        BM_SETCHECK,    (MPARAM)(pThis->Options.fPE == FLAGS_PE_MIXED),     NULL);
             WinSendDlgItemMsg(hwnd, RB_LDR_PE_PE,           BM_SETCHECK,    (MPARAM)(pThis->Options.fPE == FLAGS_PE_PE),        NULL);
             WinSendDlgItemMsg(hwnd, RB_LDR_PE_NOT,          BM_SETCHECK,    (MPARAM)(pThis->Options.fPE == FLAGS_PE_NOT),       NULL);
+            WinSendDlgItemMsg(hwnd, CK_LDR_PE_ONEOBJECT,    BM_SETCHECK,    (MPARAM)(pThis->Options.fPEOneObject),              NULL);
             WinSendDlgItemMsg(hwnd, SB_LDR_PE_INFOLEVEL,    SPBM_SETCURRENTVALUE, (MPARAM)(pThis->Options.ulInfoLevel),         NULL); /* FIXME to be changed */
             sprintf(szNumber, "%d", pThis->Status.cPe2LxModules);
             WinSetDlgItemText(hwnd, TX_LDR_PE_MODULES_VAL, szNumber);
@@ -639,6 +640,13 @@ MRESULT EXPENTRY Win32kCCDlgProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
             else if (WinSendDlgItemMsg(hwnd, RB_LDR_PE_NOT, BM_QUERYCHECK, NULL, NULL))
                 pThis->NewOptions.fPE = FLAGS_PE_NOT;
             else
+            {
+                if (fComplain)
+                    Complain(hwnd, IDS_ERR_NO_PE_RADIOBUTTON);
+                return (MPARAM)FALSE;
+            }
+            pThis->NewOptions.fPEOneObject = (ULONG)WinSendDlgItemMsg(hwnd, CK_LDR_PE_ONEOBJECT, BM_QUERYCHECK, NULL, NULL);
+            if (pThis->NewOptions.fPEOneObject > 2)
             {
                 if (fComplain)
                     Complain(hwnd, IDS_ERR_NO_PE_RADIOBUTTON);
@@ -765,7 +773,9 @@ BOOL Complain(HWND hwndOwner, int id, ...)
     if (WinLoadString(WinQueryAnchorBlock(hwndOwner), 0, id, sizeof(szMsg), szMsg))
     {
         va_list args;
+        #pragma info(none)
         va_start(args, id);
+        #pragma info(restore)
         vsprintf(szMsgOutput, szMsg, args);
         va_end(args);
     }
@@ -939,6 +949,6 @@ static char *stristr(const char *pszStr, const char *pszSubStr)
         pszStr++;
     }
 
-    return (char*)(*pszStr != '\0' ? (char*)pszStr - 1 : NULL);
+    return (char*)(*pszStr != '\0' ? (const char*)pszStr - 1 : (const char*)NULL);
 }
 
