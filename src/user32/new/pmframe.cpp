@@ -1,4 +1,4 @@
-/* $Id: pmframe.cpp,v 1.11 2000-01-12 12:40:45 sandervl Exp $ */
+/* $Id: pmframe.cpp,v 1.12 2000-01-12 15:14:16 sandervl Exp $ */
 /*
  * Win32 Frame Managment Code for OS/2
  *
@@ -390,13 +390,31 @@ RunDefWndProc:
   RestoreOS2TIB();
   return WinDefWindowProc(hwnd,msg,mp1,mp2);
 }
-
+//******************************************************************************
+//******************************************************************************
 PVOID FrameSubclassFrameWindow(Win32BaseWindow *win32wnd)
 {
   return WinSubclassWindow(win32wnd->getOS2FrameWindowHandle(),PFNWP(Win32FrameProc));
 }
-
-VOID FrameUpdateFrame(Win32BaseWindow *win32wnd,DWORD flags)
+//******************************************************************************
+//******************************************************************************
+VOID FrameUpdateClient(Win32BaseWindow *win32wnd)
 {
-  WinSendMsg(win32wnd->getOS2FrameWindowHandle(),WM_UPDATEFRAME,(MPARAM)flags,(MPARAM)0);
+  RECTL rect;
+  SWP swpClient = {0};
+
+      	win32wnd->MsgFormatFrame();
+       	//CB: todo: use result for WM_CALCVALIDRECTS
+       	mapWin32ToOS2Rect(WinQueryWindow(win32wnd->getOS2FrameWindowHandle(),QW_PARENT),win32wnd->getOS2FrameWindowHandle(),win32wnd->getClientRectPtr(),(PRECTLOS2)&rect);
+
+	swpClient.hwnd = win32wnd->getOS2WindowHandle();
+	swpClient.hwndInsertBehind = 0;
+       	swpClient.x  = rect.xLeft;
+       	swpClient.y  = rect.yBottom;
+       	swpClient.cx = rect.xRight-rect.xLeft;
+       	swpClient.cy = rect.yTop-rect.yBottom;
+	swpClient.fl = SWP_MOVE | SWP_SIZE;
+	WinSetMultWindowPos(GetThreadHAB(), &swpClient, 1);
 }
+//******************************************************************************
+//******************************************************************************

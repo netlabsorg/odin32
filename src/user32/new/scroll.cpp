@@ -1,4 +1,4 @@
-/* $Id: scroll.cpp,v 1.8 2000-01-09 14:14:23 cbratschi Exp $ */
+/* $Id: scroll.cpp,v 1.9 2000-01-12 15:14:16 sandervl Exp $ */
 /*
  * Scrollbar control
  *
@@ -1470,7 +1470,9 @@ BOOL WINAPI ShowScrollBar(
                     BOOL fShow  /* [I] TRUE = show, FALSE = hide  */)
 {
     Win32BaseWindow *win32wnd = Win32BaseWindow::GetWindowFromHandle(hwnd);
-    BOOL fShowH = (nBar == SB_HORZ) ? 0:fShow,fShowV = (nBar == SB_VERT) ? 0:fShow;
+//    BOOL fShowH = (nBar == SB_HORZ) ? 0:fShow,fShowV = (nBar == SB_VERT) ? 0:fShow;
+    BOOL fShowH = (nBar == SB_HORZ) ? fShow : 0;
+    BOOL fShowV = (nBar == SB_VERT) ? fShow : 0;
 
     dprintf(("ShowScrollBar %04x %d %d\n", hwnd, nBar, fShow));
     if (!win32wnd) return FALSE;

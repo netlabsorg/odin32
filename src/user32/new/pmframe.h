@@ -1,4 +1,4 @@
-/* $Id: pmframe.h,v 1.3 2000-01-09 14:14:23 cbratschi Exp $ */
+/* $Id: pmframe.h,v 1.4 2000-01-12 15:14:16 sandervl Exp $ */
 /*
  * Win32 Frame Managment Code for OS/2
  *
@@ -9,7 +9,7 @@
 #define __PMFRAME_H__
 
 PVOID FrameSubclassFrameWindow(Win32BaseWindow *win32wnd);
-VOID  FrameUpdateFrame(Win32BaseWindow *win32wnd,DWORD flags);
+VOID  FrameUpdateClient(Win32BaseWindow *win32wnd);
 
 #define HTERROR_W             (-2)
 #define HTTRANSPARENT_W       (-1)

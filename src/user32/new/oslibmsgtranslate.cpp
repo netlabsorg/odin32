@@ -1,4 +1,4 @@
-/* $Id: oslibmsgtranslate.cpp,v 1.11 2000-01-12 12:40:44 sandervl Exp $ */
+/* $Id: oslibmsgtranslate.cpp,v 1.12 2000-01-12 15:14:15 sandervl Exp $ */
 /*
  * Window message translation functions for OS/2
  *
@@ -234,7 +234,6 @@ BOOL OS2ToWinMsgTranslate(void *pThdb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode
         winMsg->wParam  = SHORT1FROMMP(os2Msg->mp1);
 	return TRUE;
       }
-
     }
     //do normal translation for all other messages
   }
@@ -294,7 +293,53 @@ BOOL OS2ToWinMsgTranslate(void *pThdb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode
         break;
 
     case WM_WINDOWPOSCHANGED:
-        goto dummymessage;
+    {
+      PSWP      pswp  = (PSWP)os2Msg->mp1;
+      SWP       swpOld = *(pswp + 1);
+      HWND      hParent = NULLHANDLE;
+      LONG      yDelta = pswp->cy - swpOld.cy;
+      LONG      xDelta = pswp->cx - swpOld.cx;
+
+        dprintf(("OS2: WM_WINDOWPOSCHANGED %x %x (%d,%d) (%d,%d)", win32wnd->getWindowHandle(), pswp->fl, pswp->x, pswp->y, pswp->cx, pswp->cy));
+
+        if ((pswp->fl & (SWP_SIZE | SWP_MOVE | SWP_ZORDER)) == 0) goto dummymessage;
+
+        if(pswp->fl & (SWP_MOVE | SWP_SIZE)) {
+            if (win32wnd->isChild()) {
+                if(win32wnd->getParent()) {
+                        hParent = win32wnd->getParent()->getOS2WindowHandle();
+                }
+                else    goto dummymessage; //parent has just been destroyed
+            }
+        }
+        OSLibMapSWPtoWINDOWPOS(pswp, &thdb->wp, &swpOld, hParent, win32wnd->getOS2FrameWindowHandle());
+
+        if (!win32wnd->CanReceiveSizeMsgs())    goto dummymessage;
+
+        dprintf(("Set client rectangle to (%d,%d)(%d,%d)", swpOld.x, swpOld.y, swpOld.x + swpOld.cx, swpOld.y + swpOld.cy));
+        win32wnd->setClientRect(swpOld.x, swpOld.y, swpOld.x + swpOld.cx, swpOld.y + swpOld.cy);
+
+        thdb->wp.hwnd = win32wnd->getWindowHandle();
+        if ((pswp->fl & SWP_ZORDER) && (pswp->hwndInsertBehind > HWND_BOTTOM))
+        {
+           Win32BaseWindow *wndAfter = Win32BaseWindow::GetWindowFromOS2Handle(pswp->hwndInsertBehind);
+	   if(wndAfter)
+           	thdb->wp.hwndInsertAfter = wndAfter->getWindowHandle();
+        }
+
+        PRECT lpRect = win32wnd->getWindowRect();
+        //SvL: Only send it when the client has changed & the frame hasn't
+        //     If the frame size/position has changed, pmframe.cpp will send
+        //     this message
+        if(lpRect->right == thdb->wp.x+thdb->wp.cx && lpRect->bottom == thdb->wp.y+thdb->wp.cy) {
+                winMsg->message = WINWM_WINDOWPOSCHANGED;
+                winMsg->lParam  = (LPARAM)&thdb->wp;
+        }
+        else {
+////            win32wnd->setWindowRect(thdb->wp.x, thdb->wp.y, thdb->wp.x+thdb->wp.cx, thdb->wp.y+thdb->wp.cy);
+            goto dummymessage;
+        }
+    }
 
     case WM_ACTIVATE:
     {
