@@ -1,0 +1,9 @@
+; $Id: iphlpapi.def,v 1.1 2001-05-24 17:35:34 sandervl Exp $
+
+LIBRARY IPHLPAPI INITINSTANCE
+DESCRIPTION 'Odin32 System DLL - IPHLPAPI'
+DATA MULTIPLE NONSHARED
+
+EXPORTS
+ GetAdaptersInfo  = _GetAdaptersInfo@8                    @17
+ GetNetworkParams = _GetNetworkParams@8                   @38
