@@ -93,7 +93,7 @@ BOOL FAR PASCAL SimpleEnum ( GUID FAR *lpGUID,
                             pData->lpContext,
                             NULL);
 
-  WriteLog("Callback returned");
+  WriteLog("Callback returned\n");
   return rc;
 }
 

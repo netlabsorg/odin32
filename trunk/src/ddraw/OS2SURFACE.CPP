@@ -16,13 +16,273 @@
 #include "misc.h"
 #include "asmutil.h"
 #include <winerror.h>
-
+#include <os2win.h>
 #ifndef __WATCOMC__
   #include <builtin.h>
 #endif
 
 extern FOURCC  SupportedFourCCs[];
 // ToDo: Move the following 2 defines in the right WINE headers.
+BYTE DefaultPalette[] = { 0x00,0x00,0x00,   // 0
+                          0x80,0x00,0x00,   // 1
+                          0x00,0x80,0x00,   // 2
+                          0x80,0x80,0x00,   // 3
+                          0x00,0x00,0x80,   // 4
+                          0x80,0x00,0x80,   // 5
+                          0x00,0x80,0x80,   // 6
+                          0xC0,0xC0,0xC0,   // 7
+                          0xC0,0xDC,0xC0,   // 8
+                          0xA6,0xCA,0xF0,   // 9
+                          0x04,0x04,0x04,   // 10
+                          0x08,0x08,0x08,   // 11
+                          0x0C,0x0C,0x0C,   // 12
+                          0x11,0x11,0x11,   // 13
+                          0x16,0x16,0x16,   // 14
+                          0x1C,0x1C,0x1C,   // 15
+                          0x22,0x22,0x22,   // 16
+                          0x29,0x29,0x29,   // 17
+                          0x55,0x55,0x55,   // 18
+                          0x4D,0x4D,0x4D,
+                          0x42,0x42,0x42,
+                          0x39,0x39,0x39,
+                          0x81,0x81,0x81,
+                          0x81,0x00,0x00,
+                          0x00,0x81,0x00,
+                          0x81,0x81,0x00,
+                          0x00,0x00,0x81,
+                          0x81,0x00,0x81,
+                          0x00,0x81,0x81,
+                          0x33,0x00,0x00,
+                          0x66,0x00,0x00,
+                          0x99,0x00,0x00,
+                          0xCC,0x00,0x00,
+                          0x00,0x33,0x00,
+                          0x33,0x33,0x00,
+                          0x66,0x33,0x00,
+                          0x99,0x33,0x00,
+                          0xCC,0x33,0x00,
+                          0xFF,0x33,0x00,
+                          0x00,0x66,0x00,
+                          0x33,0x66,0x00,
+                          0x66,0x66,0x00,
+                          0x99,0x66,0x00,
+                          0xCC,0x66,0x00,
+                          0xFF,0x66,0x00,
+                          0x00,0x99,0x00,
+                          0x33,0x99,0x00,
+                          0x66,0x99,0x00,
+                          0x99,0x99,0x00,
+                          0xCC,0x99,0x00,
+                          0xFF,0x99,0x00,
+                          0x00,0xCC,0x00,
+                          0x33,0xCC,0x00,
+                          0x66,0xCC,0x00,
+                          0x99,0xCC,0x00,
+                          0xCC,0xCC,0x00,
+                          0xFF,0xCC,0x00,
+                          0x66,0xFF,0x00,
+                          0x99,0xFF,0x00,
+                          0xCC,0xFF,0x00,
+                          0x00,0x00,0x33,
+                          0x33,0x00,0x33,
+                          0x66,0x00,0x33,
+                          0x99,0x00,0x33,
+                          0xCC,0x00,0x33,
+                          0xFF,0x00,0x33,
+                          0x00,0x33,0x33,
+                          0x33,0x33,0x33,
+                          0x66,0x33,0x33,
+                          0x99,0x33,0x33,
+                          0xCC,0x33,0x33,
+                          0xFF,0x33,0x33,
+                          0x00,0x66,0x33,
+                          0x33,0x66,0x33,
+                          0x66,0x66,0x33,
+                          0x99,0x66,0x33,
+                          0xCC,0x66,0x33,
+                          0xFF,0x66,0x33,
+                          0x00,0x99,0x33,
+                          0x33,0x99,0x33,
+                          0x66,0x99,0x33,
+                          0x99,0x99,0x33,
+                          0xCC,0x99,0x33,
+                          0xFF,0x99,0x33,
+                          0x00,0xCC,0x33,
+                          0x33,0xCC,0x33,
+                          0x66,0xCC,0x33,
+                          0x99,0xCC,0x33,
+                          0xCC,0xCC,0x33,
+                          0xFF,0xCC,0x33,
+                          0x33,0xFF,0x33,
+                          0x66,0xFF,0x33,
+                          0x99,0xFF,0x33,
+                          0xCC,0xFF,0x33,
+                          0xFF,0xFF,0x33,
+                          0x00,0x00,0x66,
+                          0x33,0x00,0x66,
+                          0x66,0x00,0x66,
+                          0x99,0x00,0x66,
+                          0xCC,0x00,0x66,
+                          0xFF,0x00,0x66,
+                          0x00,0x33,0x66,
+                          0x33,0x33,0x66,
+                          0x66,0x33,0x66,
+                          0x99,0x33,0x66,
+                          0xCC,0x33,0x66,
+                          0xFF,0x33,0x66,
+                          0x00,0x66,0x66,
+                          0x33,0x66,0x66,
+                          0x66,0x66,0x66,
+                          0x99,0x66,0x66,
+                          0xCC,0x66,0x66,
+                          0x00,0x99,0x66,
+                          0x33,0x99,0x66,
+                          0x66,0x99,0x66,
+                          0x99,0x99,0x66,
+                          0xCC,0x99,0x66,
+                          0xFF,0x99,0x66,
+                          0x00,0xCC,0x66,
+                          0x33,0xCC,0x66,
+                          0x99,0xCC,0x66,
+                          0xCC,0xCC,0x66,
+                          0xFF,0xCC,0x66,
+                          0x00,0xFF,0x66,
+                          0x33,0xFF,0x66,
+                          0x99,0xFF,0x66,
+                          0xCC,0xFF,0x66,
+                          0xFF,0x00,0xCC,
+                          0xCC,0x00,0xFF,
+                          0x00,0x99,0x99,
+                          0x99,0x33,0x99,
+                          0x99,0x00,0x99,
+                          0xCC,0x00,0x99,
+                          0x00,0x00,0x99,
+                          0x33,0x33,0x99,
+                          0x66,0x00,0x99,
+                          0xCC,0x33,0x99,
+                          0xFF,0x00,0x99,
+                          0x00,0x66,0x99,
+                          0x33,0x33,0x99,
+                          0x33,0x66,0x99,
+                          0x66,0x33,0x99,
+                          0x99,0x33,0x99,
+                          0xCC,0x66,0x99,
+                          0xFF,0x33,0x99,
+                          0x33,0x99,0x99,
+                          0x66,0x99,0x99,
+                          0x99,0x99,0x99,
+                          0xCC,0x99,0x99,
+                          0xFF,0x99,0x99,
+                          0x00,0xCC,0x99,
+                          0x33,0xCC,0x99,
+                          0x66,0xCC,0x66,
+                          0x99,0xCC,0x99,
+                          0xCC,0xCC,0x99,
+                          0xFF,0xCC,0x99,
+                          0x00,0xFF,0x99,
+                          0x33,0xFF,0x99,
+                          0x66,0xCC,0x99,
+                          0x99,0xFF,0x99,
+                          0xCC,0xFF,0x99,
+                          0xFF,0xFF,0x99,
+                          0x00,0x00,0xCC,
+                          0x33,0x00,0x99,
+                          0x66,0x00,0xCC,
+                          0x99,0x00,0xCC,
+                          0xCC,0x00,0xCC,
+                          0x00,0x33,0x99,
+                          0x33,0x33,0xCC,
+                          0x66,0x33,0xCC,
+                          0x99,0x33,0xCC,
+                          0xCC,0x33,0xCC,
+                          0xFF,0x33,0xCC,
+                          0x00,0x66,0xCC,
+                          0x33,0x66,0xCC,
+                          0x66,0x66,0x99,
+                          0x99,0x66,0xCC,
+                          0xCC,0x66,0xCC,
+                          0xFF,0x66,0x99,
+                          0x00,0x99,0xCC,
+                          0x33,0x99,0xCC,
+                          0x66,0x99,0xCC,
+                          0x99,0x99,0xCC,
+                          0xCC,0x99,0xCC,
+                          0xFF,0x99,0xCC,
+                          0x00,0xCC,0xCC,
+                          0x33,0xCC,0xCC,
+                          0x66,0xCC,0xCC,
+                          0x99,0xCC,0xCC,
+                          0xCC,0xCC,0xCC,
+                          0xFF,0xCC,0xCC,
+                          0x00,0xFF,0xCC,
+                          0x33,0xFF,0xCC,
+                          0x66,0xFF,0x99,
+                          0x99,0xFF,0xCC,
+                          0xCC,0xFF,0xCC,
+                          0xFF,0xFF,0xCC,
+                          0x33,0x00,0xCC,
+                          0x66,0x00,0xFF,
+                          0x99,0x00,0xFF,
+                          0x00,0x33,0xCC,
+                          0x33,0x33,0xFF,
+                          0x66,0x33,0xFF,
+                          0x99,0x33,0xFF,
+                          0xCC,0x33,0xFF,
+                          0xFF,0x33,0xFF,
+                          0x00,0x66,0xFF,
+                          0x33,0x66,0xFF,
+                          0x66,0x66,0xCC,
+                          0x99,0x66,0xFF,
+                          0xCC,0x66,0xFF,
+                          0xFF,0x66,0xCC,
+                          0x00,0x99,0xFF,
+                          0x33,0x99,0xFF,
+                          0x66,0x99,0xFF,
+                          0x99,0x99,0xFF,
+                          0xCC,0x99,0xFF,
+                          0xFF,0x99,0xFF,
+                          0x00,0xCC,0xFF,
+                          0x33,0xCC,0xFF,
+                          0x66,0xCC,0xFF,
+                          0x99,0xCC,0xFF,
+                          0xCC,0xCC,0xFF,
+                          0xFF,0xCC,0xFF,
+                          0x33,0xFF,0xFF,
+                          0x66,0xFF,0xCC,
+                          0x99,0xFF,0xFF,
+                          0xCC,0xFF,0xFF,
+                          0xFF,0x66,0x66,
+                          0x66,0xFF,0x66,
+                          0xFF,0xFF,0x66,
+                          0x66,0x66,0xFF,
+                          0xFF,0x66,0xFF,
+                          0x66,0xFF,0xFF,
+                          0xC1,0xC1,0xC1,
+                          0x5F,0x5F,0x5F,
+                          0x77,0x77,0x77,
+                          0x86,0x86,0x86,
+                          0x96,0x96,0x96,
+                          0xCB,0xCB,0xCB,
+                          0xB2,0xB2,0xB2,
+                          0xD7,0xD7,0xD7,
+                          0xDD,0xDD,0xDD,
+                          0xE3,0xE3,0xE3,
+                          0xEA,0xEA,0xEA,
+                          0xF1,0xF1,0xF1,
+                          0xF8,0xF8,0xF8,
+                          0xFF,0xFB,0xF0,
+                          0xA0,0xA0,0xA4,
+                          0x80,0x80,0x80,
+                          0xFF,0x00,0x00,
+                          0x00,0xFF,0x00,
+                          0xFF,0xFF,0x00,
+                          0x00,0x00,0xFF,
+                          0xFF,0x00,0xFF,
+//                          0x00,0xFF,0xFF,
+                          0xFF,0xFF,0xFF};
+
+WORD wDefaultPalete16[256];
+BOOL fPalInit=FALSE;
 
 #define CBM_CREATEDIB   0x02L   /* create DIB bitmap */
 #define BI_BITFIELDS  0x03L
@@ -112,6 +372,7 @@ static void _dump_DDBLT(DWORD flagmask) {
   for (i=0;i<sizeof(flags)/sizeof(flags[0]);i++)
     if (flags[i].mask & flagmask)
       WriteLog("%s ",flags[i].name);
+  WriteLog("\n");
 }
 
 static void _dump_DDSCAPS(DWORD flagmask) {
@@ -410,13 +671,13 @@ OS2IDirectDrawSurface::OS2IDirectDrawSurface(OS2IDirectDraw *lpDirectDraw,
 
       // Check if OS/2 is running in the requested colormode
 
+      diveBufNr    = DIVE_BUFFER_SCREEN;
       if( lpDraw->dCaps.ulDepth == lpDraw->GetScreenBpp() )
       {
         WriteLog("DirectScreenAccess possible\n");
 
         // Yes so direct access to framebuffer is possible
 
-        diveBufNr    = DIVE_BUFFER_SCREEN;
         pFrameBuffer = lpDraw->GetFrameBuffer();
         pDiveBuffer  = pFrameBuffer;
         dwPitchDB    = lpDraw->dCaps.ulScanLineBytes;
@@ -556,11 +817,18 @@ OS2IDirectDrawSurface::OS2IDirectDrawSurface(OS2IDirectDraw *lpDirectDraw,
           }
 
           BackBuffer = new OS2IDirectDrawSurface(lpDraw, &ComplexSurfaceDesc, TRUE, TRUE);
+
           if (BackBuffer->GetLastError()==DD_OK)
           {
+            WriteLog("created backbuffer");
             // Our Primary Buffer is also the frontbuffer of a flipchain
-            DDSurfaceDesc.dwFlags |= DDSCAPS_FRONTBUFFER | DDSCAPS_FLIP;
+            DDSurfaceDesc.ddsCaps.dwCaps    |= DDSCAPS_FRONTBUFFER | DDSCAPS_FLIP;
+            lpDDSurfaceDesc->ddsCaps.dwCaps |= DDSCAPS_FRONTBUFFER | DDSCAPS_FLIP;
             BackBuffer->SetFrontBuffer(this);
+          }
+          else
+          {
+            WriteLog("Error creating backbuffer");
           }
         }
         else
@@ -809,15 +1077,18 @@ OS2IDirectDrawSurface::OS2IDirectDrawSurface(OS2IDirectDraw *lpDirectDraw,
             if(Mainchain)
             {
               WriteLog("with DIVE\n");
-              // This surface is part of flipchain with the primary surface use dive to alloc
+              // This surface is part of flipchain with the primary surface use dive to assoc memory
+              pDiveBuffer = (char*)malloc( lpDDSurfaceDesc->dwHeight *
+                                           dwPitchDB);
               diveBufNr = 0;
-              DiveAllocImageBuffer( hDive,
-                                    &diveBufNr,
-                                    lpDraw->dCaps.fccColorEncoding,
-                                    lpDDSurfaceDesc->dwWidth,
-                                    lpDDSurfaceDesc->dwHeight,
-                                    dwPitchDB,
-                                    (PBYTE)pDiveBuffer);
+              rc = DiveAllocImageBuffer( hDive,
+                                         &diveBufNr,
+                                         lpDraw->dCaps.fccColorEncoding,
+                                         lpDDSurfaceDesc->dwWidth,
+                                         lpDDSurfaceDesc->dwHeight,
+                                         dwPitchDB,
+                                         (PBYTE)pDiveBuffer);
+               WriteLog("rc = 0x%08X\n",rc);
             }
             else
             {
@@ -951,9 +1222,10 @@ HRESULT OS2IDirectDrawSurface::ColorFill(LPRECT lpDestRect,DWORD dwFillColor)
   char *pLine, *pFillPos;
 
   DWORD *pColor, dwColor,y;
-
+  DWORD *pPal24;
+  WORD  *pPal16;
   #ifdef DEBUG
-    WriteLog("ColorFill\n");
+    WriteLog("ColorFill with %08X\n", dwFillColor);
   #endif
 
   if(NULL!=lpDestRect)
@@ -970,15 +1242,50 @@ HRESULT OS2IDirectDrawSurface::ColorFill(LPRECT lpDestRect,DWORD dwFillColor)
   }
   else
   {
+    WriteLog("Fill all at addr ");
     FillWidth  = width;
     FillHeight = height -1;
     pLine = pDiveBuffer;
   }
+  WriteLog("0x%08X (%d/%d) at\n", pLine,FillWidth,FillHeight);
 
+  if(pDiveBuffer!=pFrameBuffer)
+  {
+    if( (NULL== lpDraw->pPrimSurf) ||
+        (NULL== ((OS2IDirectDrawSurface*)lpDraw->pPrimSurf)->lpPalette) )
+    {
+      if(!fPalInit)
+      {
+        for(DWORD i=0;i<256;i++)
+        {
+          wDefaultPalete16[i] = (DefaultPalette[i*3+2]>>3) +
+                                ((DefaultPalette[i*3+1]>>2) <<5) +
+                                ((DefaultPalette[i*3]>>3) << 11);
+          WriteLog( " # %d : RGB=%02X/%02X/%02X => %04X\n",
+                    i,
+                    DefaultPalette[i*3],
+                    DefaultPalette[i*3+1],
+                    DefaultPalette[i*3+2],
+                    wDefaultPalete16[i]);
+         // aPal24[i] = (lpColorTable[i].peBlue <<8) +
+         //             (lpColorTable[i].peGreen<<16) +
+         //             (lpColorTable[i].peRed<<24);
+        }
+        fPalInit = TRUE;
+      }
+      pPal16 = &wDefaultPalete16[0];
+    }
+    else
+    {
+      pPal16 = ((OS2IDirectDrawSurface*)lpDraw->pPrimSurf)->lpPalette->aPal16;
+      pPal24 = ((OS2IDirectDrawSurface*)lpDraw->pPrimSurf)->lpPalette->aPal24;
+    }
+  }
 
   switch(dwBytesPPDive)
   {
     case 1:
+      WriteLog("8 Bit\n");
       dwColor = (dwFillColor<<24) + (dwFillColor<<16) +
                 (dwFillColor<<8)  + (dwFillColor);
       for(i=0,pColor = (DWORD*)pLine;i<(FillWidth/4);i++)
@@ -987,11 +1294,18 @@ HRESULT OS2IDirectDrawSurface::ColorFill(LPRECT lpDestRect,DWORD dwFillColor)
       {
          pFillPos = (char*) (&pColor[i-1]);
         for(i=0;i<FillWidth % 4;i++)
-         pFillPos[i] = (UCHAR) dwColor;
+           pFillPos[i] = (UCHAR) dwColor;
       }
       break;
     case 2:
+      WriteLog("16 Bit\n");
+      if(pDiveBuffer!=pFrameBuffer)
+      {
+        if(8==lpDraw->GetScreenBpp())
+          dwFillColor = pPal16[dwFillColor];
+      }
       dwColor = (dwFillColor<<16) + (dwFillColor);
+      WriteLog("Fill with 0x%08X\n",dwColor);
       for(i=0,pColor = (DWORD*)pLine;i<(FillWidth/2);i++)
         pColor[i] = dwColor;
       if(FillWidth % 2)
@@ -1001,6 +1315,8 @@ HRESULT OS2IDirectDrawSurface::ColorFill(LPRECT lpDestRect,DWORD dwFillColor)
       }
       break;
     case 3:
+      WriteLog("24 Bit\n");
+
       dwColor = (dwFillColor<<8);
       for(i=0 ; i<FillWidth ; i++)
       {
@@ -1009,6 +1325,7 @@ HRESULT OS2IDirectDrawSurface::ColorFill(LPRECT lpDestRect,DWORD dwFillColor)
       }
       break;
     case 4:
+      WriteLog("32 Bit\n");
       dwColor = dwFillColor;
       for(i=0,pColor = (DWORD*)pLine;i<FillWidth;i++)
         pColor[i] = dwColor;
@@ -1022,7 +1339,7 @@ HRESULT OS2IDirectDrawSurface::ColorFill(LPRECT lpDestRect,DWORD dwFillColor)
 
 
   pFillPos = pLine + dwPitchDB;
-
+  FillWidth = FillWidth*dwBytesPPDive;;
   for( y=0;y<FillHeight;y++,pFillPos+=dwPitchDB)
   {
     #ifdef USE_ASM
@@ -1189,16 +1506,34 @@ void OS2IDirectDrawSurface::ColorConversion(LPRECT lpRect)
   DWORD *pPal24;
   WORD  *pPal16;
 
-  if(NULL== lpDraw->pPrimSurf)
+  if( (NULL== lpDraw->pPrimSurf) ||
+      (NULL== ((OS2IDirectDrawSurface*)lpDraw->pPrimSurf)->lpPalette) )
   {
-    WriteLog("No Primary Surface! => No CC\n");
-    return;
+    if(!fPalInit)
+    {
+      for(DWORD i=0;i<256;i++)
+      {
+          wDefaultPalete16[i] = (DefaultPalette[i*3+2]>>3) +
+                                ((DefaultPalette[i*3+1]>>2) <<5) +
+                                ((DefaultPalette[i*3]>>3) << 11);
+        WriteLog( " # %d : RGB=%02X/%02X/%02X => %04X\n",
+                  i,
+                  DefaultPalette[i*3],
+                  DefaultPalette[i*3+1],
+                  DefaultPalette[i*3+2],
+                  wDefaultPalete16[i]);
+       // aPal24[i] = (lpColorTable[i].peBlue <<8) +
+       //             (lpColorTable[i].peGreen<<16) +
+       //             (lpColorTable[i].peRed<<24);
+      }
+      fPalInit = TRUE;
+    }
+    pPal16 = &wDefaultPalete16[0];
   }
-
-  if(NULL== ((OS2IDirectDrawSurface*)lpDraw->pPrimSurf)->lpPalette)
+  else
   {
-    WriteLog("No DDrawpalette defined!=> No CC\n");
-    return;
+    pPal16 = ((OS2IDirectDrawSurface*)lpDraw->pPrimSurf)->lpPalette->aPal16;
+    pPal24 = ((OS2IDirectDrawSurface*)lpDraw->pPrimSurf)->lpPalette->aPal24;
   }
 
   if(NULL==lpRect)
@@ -1243,11 +1578,9 @@ void OS2IDirectDrawSurface::ColorConversion(LPRECT lpRect)
     case 16:
       if(8==lpDraw->GetScreenBpp())
       {
-        pPal16 = ((OS2IDirectDrawSurface*)lpDraw->pPrimSurf)->lpPalette->aPal16;
         WriteLog("8->16Bit CC\n");
         for(y=0;CCheight;CCheight--,y++)
         {
-          WriteLog("Converting Line %d\n",y);
           for(x=0;x<width;x++)
           {
             *((WORD*)pDLine) = pPal16[pSLine[x]];
@@ -1268,7 +1601,7 @@ void OS2IDirectDrawSurface::ColorConversion(LPRECT lpRect)
       }
       else
       {
-        WriteLog("%d ->16Bit Not implemented",lpDraw->GetScreenBpp());
+        WriteLog("%d ->24Bit Not implemented",lpDraw->GetScreenBpp());
       }
       break;
     case 32:
@@ -1278,7 +1611,7 @@ void OS2IDirectDrawSurface::ColorConversion(LPRECT lpRect)
       }
       else
       {
-        WriteLog("%d ->16Bit Not implemented",lpDraw->GetScreenBpp());
+        WriteLog("%d ->32Bit Not implemented",lpDraw->GetScreenBpp());
       }
       break;
     default:
@@ -1469,9 +1802,14 @@ inline  void OS2IDirectDrawSurface::SetFrontBuffer( OS2IDirectDrawSurface* NewFB
   FrontBuffer = NewFBuffer;
   if (NULL==NewFBuffer)
   {
+
+    WriteLog("Remove Frontbuffer\n");
+
     // The real Frontbuffer was removed check if I'm now the one
     if(NULL!=BackBuffer)
     {
+      WriteLog("We have the a backbuffer so we're the Frontbuffer\n");
+      NextFlip = BackBuffer;
       DDSurfaceDesc.ddsCaps.dwCaps &= ~DDSCAPS_BACKBUFFER;
       DDSurfaceDesc.ddsCaps.dwCaps |=  DDSCAPS_FRONTBUFFER;
       BackBuffer->SetFrontBuffer(this);
@@ -1479,17 +1817,22 @@ inline  void OS2IDirectDrawSurface::SetFrontBuffer( OS2IDirectDrawSurface* NewFB
     else
     {
       // Flipchain is destroyed
+      WriteLog("No longer part of a flipchain\n");
       DDSurfaceDesc.ddsCaps.dwCaps &= ~(DDSCAPS_BACKBUFFER | DDSCAPS_FLIP);
     }
   }
   else
   {
+    WriteLog("Set new Frontbuffer to 0x%08X\n",NewFBuffer);
     if(NULL==NewFBuffer->GetFrontBuffer())
     {
+      WriteLog("We're the 1st backbuffer\n");
       DDSurfaceDesc.ddsCaps.dwCaps |=  DDSCAPS_BACKBUFFER | DDSCAPS_FLIP;
+      FrontBuffer->NextFlip = this;
     }
     else
     {
+      WriteLog("We are oe of many buffers\n");
       DDSurfaceDesc.ddsCaps.dwCaps &=  ~DDSCAPS_BACKBUFFER ;
       DDSurfaceDesc.ddsCaps.dwCaps |=  DDSCAPS_FLIP;
     }
@@ -1769,7 +2112,7 @@ HRESULT __stdcall SurfAddAttachedSurface4(THIS This, LPDIRECTDRAWSURFACE4 lpDDSu
       }// End if not DDSCAPS_BACKBUFFER
     }
   }
-
+  WriteLog("Surface attached\n");
   return(DD_OK);
 }
 //******************************************************************************
@@ -3272,6 +3615,7 @@ HRESULT __stdcall SurfFlip4(THIS This, LPDIRECTDRAWSURFACE4 lpDDSurf, DWORD dwFl
   OS2IDirectDrawSurface *FlipCursor;
   LPVOID Data;
   char *pcrFB,*pcFB,*pcrDB,*pcDB;
+  ULONG rc;
 
   #ifdef DEBUG
     WriteLog("SurfFlip4\n");
@@ -3283,12 +3627,17 @@ HRESULT __stdcall SurfFlip4(THIS This, LPDIRECTDRAWSURFACE4 lpDDSurf, DWORD dwFl
     #ifdef DEBUG
       WriteLog("Flip called on none Frontbuffer/Flip surface\n Flags:\n");
       _dump_DDSCAPS(me->DDSurfaceDesc.ddsCaps.dwCaps);
+      WriteLog("\n");
     #endif
     return(DDERR_NOTFLIPPABLE);
   }
 
   if(NULL!=lpDDSurf)
   {
+    #ifdef DEBUG
+      WriteLog("Check if Surface is in Flipchain!\n");
+    #endif
+
     // We got an override surface check if it is in the flipchain
     FlipSurface = (OS2IDirectDrawSurface*) lpDDSurf;
     FlipCursor = me->BackBuffer;
@@ -3306,8 +3655,12 @@ HRESULT __stdcall SurfFlip4(THIS This, LPDIRECTDRAWSURFACE4 lpDDSurf, DWORD dwFl
     }
   }
   else
+  {
     FlipSurface = me->NextFlip; // Take the next Surface in the Flipchain
-
+    #ifdef DEBUG
+      WriteLog("Next Surface @ 0x%08X\n",FlipSurface);
+    #endif
+  }
 
   if((me->fLocked)||(FlipSurface->fLocked))
   {
@@ -3319,12 +3672,20 @@ HRESULT __stdcall SurfFlip4(THIS This, LPDIRECTDRAWSURFACE4 lpDDSurf, DWORD dwFl
 
   if(-1 != me->diveBufNr)
   {
+    #ifdef DEBUG
+      WriteLog("DIVE Flipchain");
+    #endif
+
     // we got some DIVE surfaces
     // On Dive Buffers More then Double buffering won't get any perf. gain
     // as we have to move all the data to the Frontbuffer and can't simply exchange the pointers
     // Doulebuffering should work best.
 
-    DiveBlitImage(me->hDive, FlipSurface->diveBufNr, me->diveBufNr);
+    rc = DiveBlitImage(me->hDive, FlipSurface->diveBufNr, me->diveBufNr);
+
+    #ifdef DEBUG
+      WriteLog("DiveBlitImage rc = 0x%08X\n");
+    #endif
 
     if(NULL==lpDDSurf)
     {
@@ -3334,6 +3695,9 @@ HRESULT __stdcall SurfFlip4(THIS This, LPDIRECTDRAWSURFACE4 lpDDSurf, DWORD dwFl
   }
   else
   {
+    #ifdef DEBUG
+      WriteLog("Memory Flipchain");
+    #endif
     // Memory Flipchain
     //
     // ToDo : Check what happens to src/dest colorkeys etc do the move also ?
@@ -3345,6 +3709,7 @@ HRESULT __stdcall SurfFlip4(THIS This, LPDIRECTDRAWSURFACE4 lpDDSurf, DWORD dwFl
     //                               Buffer:      FB  BB  TB     FB  BB  TB
     //                               Memory:      11  22  33     22  33  11
     //
+
     Data  = me->DDSurfaceDesc.lpSurface;
     pcrFB = me->pFBreal;
     pcFB  = me->pFrameBuffer;
@@ -3582,6 +3947,7 @@ HRESULT __stdcall SurfGetDC(THIS This, HDC FAR *hdc)
  OS2IDirectDrawSurface *me = (OS2IDirectDrawSurface *)This;
  DDSURFACEDESC2        LockedSurfaceDesc;
  HRESULT rc;
+ BITMAP bmpSurface;
  struct
  {
    BITMAPINFOHEADER  bmiHead;
@@ -3621,17 +3987,34 @@ HRESULT __stdcall SurfGetDC(THIS This, HDC FAR *hdc)
   if( (DD_OK==rc) &&
       (me->hbmImage == NULL) )
   {
+    WriteLog( "Trying to create Bitmap (%d/%d) at %d Bit\n",
+              LockedSurfaceDesc.lPitch/ (LockedSurfaceDesc.ddpfPixelFormat.dwRGBBitCount>>3),
+              LockedSurfaceDesc.dwHeight,
+              LockedSurfaceDesc.ddpfPixelFormat.dwRGBBitCount
+            );
+    #if 0
     memset(&BitmapInfo, 0, sizeof(BitmapInfo));
     BitmapInfo.bmiHead.biSize   = sizeof(BITMAPINFOHEADER);
     BitmapInfo.bmiHead.biWidth  = LockedSurfaceDesc.lPitch/ (LockedSurfaceDesc.ddpfPixelFormat.dwRGBBitCount>>3);
     BitmapInfo.bmiHead.biHeight = LockedSurfaceDesc.dwHeight;
     BitmapInfo.bmiHead.biPlanes = 1;
     BitmapInfo.bmiHead.biBitCount    = LockedSurfaceDesc.ddpfPixelFormat.dwRGBBitCount;
+    #else
+    bmpSurface.bmType       = 0;
+    bmpSurface.bmWidth      = LockedSurfaceDesc.dwWidth;
+    bmpSurface.bmHeight     = LockedSurfaceDesc.dwHeight;
+    bmpSurface.bmWidthBytes = LockedSurfaceDesc.lPitch;
+    bmpSurface.bmPlanes     = 1;
+    bmpSurface.bmBits       = LockedSurfaceDesc.lpSurface;
+    #endif
     switch(LockedSurfaceDesc.ddpfPixelFormat.dwRGBBitCount)
     {
       case 1:
       case 4:
+        WriteLog("1/4 Bit Not yet supported\n");
+        break;
       case 8:
+        #if 0
         BitmapInfo.bmiHead.biCompression = BI_RGB;
         GetSystemPaletteEntries(me->hdcImage,0,255,(PPALETTEENTRY)&BitmapInfo.bmiCols[0]);
         me->hbmImage = CreateDIBitmap( me->hdcImage,
@@ -3640,25 +4023,33 @@ HRESULT __stdcall SurfGetDC(THIS This, HDC FAR *hdc)
                                        LockedSurfaceDesc.lpSurface,
                                        (PBITMAPINFO)&BitmapInfo,
                                        DIB_RGB_COLORS);
+        #else
+        bmpSurface.bmBitsPixel  = 8;
+        me->hbmImage = CreateBitmapIndirect( &bmpSurface);
+        #endif
         break;
       case 16:
       case 32:
-        BitmapInfo.bmiHead.biCompression = BI_BITFIELDS;
-        BitmapInfo.bmiHead.biClrUsed     = 3;
-        *((DWORD *) &(BitmapInfo.bmiCols[0])) = LockedSurfaceDesc.ddpfPixelFormat.dwRBitMask;
-        *((DWORD *) &(BitmapInfo.bmiCols[1])) = LockedSurfaceDesc.ddpfPixelFormat.dwGBitMask;
-        *((DWORD *) &(BitmapInfo.bmiCols[2])) = LockedSurfaceDesc.ddpfPixelFormat.dwBBitMask;
-        me->hbmImage = CreateDIBitmap(me->hdcImage,NULL,CBM_CREATEDIB,LockedSurfaceDesc.lpSurface,
-                                      (PBITMAPINFO)&BitmapInfo,DIB_RGB_COLORS);
+        WriteLog("16/32 Bit not supported by OS/2");
         break;
       case 24:
+        #if 0
         BitmapInfo.bmiHead.biCompression = BI_RGB;
-        me->hbmImage = CreateDIBitmap(me->hdcImage,NULL,CBM_CREATEDIB,LockedSurfaceDesc.lpSurface,
-                                      (PBITMAPINFO)&BitmapInfo,DIB_RGB_COLORS);
+        me->hbmImage = CreateDIBitmap( me->hdcImage,
+                                       NULL,
+                                       CBM_CREATEDIB,
+                                       LockedSurfaceDesc.lpSurface,
+                                       (PBITMAPINFO)&BitmapInfo,
+                                       DIB_RGB_COLORS);
+        #else
+        bmpSurface.bmBitsPixel  = 24;
+        me->hbmImage = CreateBitmapIndirect( &bmpSurface);
+        #endif
         break;
       default:
         #ifdef DEBUG
-          WriteLog("Unexptected BitCount %d \n",LockedSurfaceDesc.ddpfPixelFormat.dwRGBBitCount);
+          WriteLog( "Unexptected BitCount %d \n",
+                    LockedSurfaceDesc.ddpfPixelFormat.dwRGBBitCount);
         #endif
         me->hbmImage=NULL;
     } // end switch (me->DDSurfaceDesc.ddpfPixelFormat.dwRGBBitCount)
@@ -4065,7 +4456,9 @@ HRESULT __stdcall SurfReleaseDC(THIS This, HDC hdc)
    BITMAPINFOHEADER  bmiHead;
    RGBQUAD           bmiCols[256];
  } BitmapInfo;
- int                    i;
+ BITMAP bmpData;
+ char szError[256];
+ int i,rc;
 
   #ifdef DEBUG
     WriteLog("SurfReleaseDC\n");
@@ -4074,15 +4467,15 @@ HRESULT __stdcall SurfReleaseDC(THIS This, HDC hdc)
   if(hdc != me->hdcImage)
     return(DDERR_INVALIDOBJECT);
 
+  #if 1
   //unselect our bitmap
   SelectObject(me->hdcImage, me->hgdiOld);
-
   memset(&BitmapInfo,0, sizeof(BitmapInfo));
   BitmapInfo.bmiHead.biSize     = sizeof(BITMAPINFOHEADER);
   BitmapInfo.bmiHead.biWidth    = me->DDSurfaceDesc.lPitch/ (me->DDSurfaceDesc.ddpfPixelFormat.dwRGBBitCount>>3);
   BitmapInfo.bmiHead.biHeight   = me->DDSurfaceDesc.dwHeight;
   BitmapInfo.bmiHead.biPlanes   = 1;
-  BitmapInfo.bmiHead.biBitCount = me->DDSurfaceDesc.ddpfPixelFormat.dwRGBBitCount;
+  BitmapInfo.bmiHead.biBitCount = 0; // me->DDSurfaceDesc.ddpfPixelFormat.dwRGBBitCount;
 
   switch(me->DDSurfaceDesc.ddpfPixelFormat.dwRGBBitCount)
   {
@@ -4090,9 +4483,25 @@ HRESULT __stdcall SurfReleaseDC(THIS This, HDC hdc)
     case 4:
     case 8:
       BitmapInfo.bmiHead.biCompression = BI_RGB;
-      GetSystemPaletteEntries(me->hdcImage,0,255,(PPALETTEENTRY)&BitmapInfo.bmiCols[0]);
-      GetDIBits(hdc, me->hbmImage, 0, me->DDSurfaceDesc.dwHeight,
+      //GetSystemPaletteEntries(me->hdcImage,0,255,(PPALETTEENTRY)&BitmapInfo.bmiCols[0]);
+      rc = GetDIBits(hdc, me->hbmImage, 0, me->DDSurfaceDesc.dwHeight,
+                NULL,(PBITMAPINFO)&BitmapInfo,DIB_PAL_COLORS);
+      WriteLog( "GetDIBits rc=%d\n Size   :%d\n Width  :%d\n Height :%d\n"
+                " Planes :%d\n BitCount :%d\nLastEror = %d\n",
+                rc,
+                BitmapInfo.bmiHead.biSize,
+                BitmapInfo.bmiHead.biWidth,
+                BitmapInfo.bmiHead.biHeight,
+                BitmapInfo.bmiHead.biPlanes,
+                BitmapInfo.bmiHead.biBitCount,
+                GetLastError());
+      /*
+      rc = GetDIBits(hdc, me->hbmImage, 0, me->DDSurfaceDesc.dwHeight,
                 me->DDSurfaceDesc.lpSurface,(PBITMAPINFO)&BitmapInfo,DIB_PAL_COLORS);
+      WriteLog( "GetDIBits rc=%d\n LastEror = %d\n",
+                rc,
+                GetLastError());
+      */
       break;
     case 16:
     case 32:
@@ -4116,7 +4525,18 @@ HRESULT __stdcall SurfReleaseDC(THIS This, HDC hdc)
       // we might could keep the surface locked and return an error but this is more "safe"
       break;
   } // end switch (me->DDSurfaceDesc.ddpfPixelFormat.dwRGBBitCount)
+  #else
 
+  rc = GetObjectA( me->hbmImage,
+                  sizeof(BITMAP),
+                  &bmpData);
+  WriteLog( "GetObject returned rc=%d\n BitmapInfo:\n Size:(%dx%d)\n Pitch: %d\n Bits %d\n @mem %08X",
+            rc,
+            bmpData.bmWidth, bmpData.bmHeight,
+            bmpData.bmWidthBytes,
+            bmpData.bmBitsPixel,
+            bmpData.bmBits);
+  #endif
   me->Vtbl.Unlock(me,NULL);
   me->dwLastDCUnique = me->dwUniqueValue; // Store this to see if the surface was locked after we released the DC
 

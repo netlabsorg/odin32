@@ -49,11 +49,18 @@ OS2IDirectDrawPalette::OS2IDirectDrawPalette( VOID *lpDirectDraw,
   os2pal = (LPPALETTEENTRY)malloc(palsize*sizeof(PALETTEENTRY));
   memcpy((char *)os2pal, (char *)lpColorTable, palsize*sizeof(PALETTEENTRY));
 
+  WriteLog("Init CC PalTable");
   for(DWORD i=0;i<dwSize;i++)
   {
     aPal16[i] = (lpColorTable[i].peBlue>>3) +
                 ((lpColorTable[i].peGreen>>2) <<5) +
                 ((lpColorTable[i].peRed>>3) << 11);
+    WriteLog( " # %d : RGB=%02X/%02X/%02X => %04X\n",
+              i,
+              lpColorTable[i].peRed,
+              lpColorTable[i].peGreen,
+              lpColorTable[i].peBlue,
+              aPal16[i]);
     aPal24[i] = (lpColorTable[i].peBlue <<8) +
                 (lpColorTable[i].peGreen<<16) +
                 (lpColorTable[i].peRed<<24);
@@ -192,11 +199,18 @@ HRESULT __stdcall PalSetEntries(THIS This, DWORD dwFlags,
          (char *)lpNewEntries,
          dwNumEntries*sizeof(PALETTEENTRY));
 
+  WriteLog("Setting up CC Palentries:\n");
   for(DWORD i=0;i<dwNumEntries;i++)
   {
     me->aPal16[dwBase+i] = (lpNewEntries[i].peBlue>>3) +
                            ((lpNewEntries[i].peGreen>>2) <<5) +
                            ((lpNewEntries[i].peRed>>3) << 11);
+    WriteLog( " # %d : RGB=%02X/%02X/%02X => %04X\n",
+              dwBase+i,
+              lpNewEntries[i].peRed,
+              lpNewEntries[i].peGreen,
+              lpNewEntries[i].peBlue,
+              me->aPal16[dwBase+i]);
     me->aPal24[dwBase+i] = (lpNewEntries[i].peBlue <<8) +
                            (lpNewEntries[i].peGreen<<16) +
                            (lpNewEntries[i].peRed<<24);
@@ -212,25 +226,6 @@ HRESULT __stdcall PalSetEntries(THIS This, DWORD dwFlags,
     if(NULL!=((OS2IDirectDraw*)me->lpDraw)->pPrimSurf)
       ((OS2IDirectDrawSurface*)((OS2IDirectDraw*)me->lpDraw)->pPrimSurf)->ColorConversion(NULL);;
   }
-  /*
-  if(NULL!=me->hDiveCC)
-  {
-    DiveSetSourcePalette( me->hDiveCC,
-                          dwBase,
-                          dwNumEntries,
-                          (PBYTE)lpNewEntries);
-
-  }
-  else
-  {
-    // Only usefull if system and game are in 8bit mode
-    // 16bit games don't use palettes and setting the Phys palette
-    // in >8Bit Modes has no effect.
-
-    if(me->fAttachedToPrimary)
-      me->SetPhysPalette();
-  }
-  */
   return(DD_OK);
 }
 //******************************************************************************
