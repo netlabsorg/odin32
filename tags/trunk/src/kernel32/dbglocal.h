@@ -1,4 +1,4 @@
-/* $Id: dbglocal.h,v 1.9 2000-07-12 18:21:42 sandervl Exp $ */
+/* $Id: dbglocal.h,v 1.10 2000-09-13 21:10:58 sandervl Exp $ */
 
 /*
  * debug logging functions for OS/2
@@ -119,7 +119,8 @@ void ParseLogStatus();
 #define DBG_exceptstackdump 97
 #define DBG_hmfile         98
 #define DBG_hmnpipe        99
-#define DBG_MAXFILES       100
+#define DBG_hmdisk         100
+#define DBG_MAXFILES       101
 
 extern USHORT DbgEnabled[DBG_MAXFILES];
 extern USHORT DbgEnabledLvl2[DBG_MAXFILES];

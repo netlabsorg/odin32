@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.100 2000-09-08 18:07:50 sandervl Exp $
+# $Id: makefile,v 1.101 2000-09-13 21:10:59 sandervl Exp $
 
 #
 # Odin32 API
@@ -126,6 +126,7 @@ $(OBJDIR)\registry.obj \
 $(OBJDIR)\queue.obj \
 $(OBJDIR)\hmthread.obj \
 $(OBJDIR)\hmnpipe.obj \
+$(OBJDIR)\hmdisk.obj \
 !ifdef DEBUG
 $(OBJDIR)\exceptstackdump.obj \
 !endif
