@@ -1,4 +1,4 @@
-/* $Id: dibitmap.cpp,v 1.24 2001-07-04 08:03:54 sandervl Exp $ */
+/* $Id: dibitmap.cpp,v 1.25 2001-07-06 13:46:07 sandervl Exp $ */
 
 /*
  * GDI32 dib & bitmap code
@@ -325,20 +325,22 @@ int WIN32API GetDIBits(HDC hdc, HBITMAP hBitmap, UINT uStartScan, UINT cScanLine
 
     DeleteDC(hdcMem);
 
-    // set proper color masks
-    switch(lpbi->bmiHeader.biBitCount) {
-    case 15:
-    case 16: //RGB 565
-       ((DWORD*)(lpbi->bmiColors))[0] = 0x7c00;
-       ((DWORD*)(lpbi->bmiColors))[1] = 0x03E0;
-       ((DWORD*)(lpbi->bmiColors))[2] = 0x001F;
-       break;
-    case 24:
-    case 32:
-       ((DWORD*)(lpbi->bmiColors))[0] = 0x0000FF;
-       ((DWORD*)(lpbi->bmiColors))[1] = 0x00FF00;
-       ((DWORD*)(lpbi->bmiColors))[2] = 0xFF0000;
-       break;
+    if(lpvBits) {
+        // set proper color masks (only if lpvBits not NULL)
+        switch(lpbi->bmiHeader.biBitCount) {
+        case 15:
+        case 16: //RGB 565
+           ((DWORD*)(lpbi->bmiColors))[0] = 0x7c00;
+           ((DWORD*)(lpbi->bmiColors))[1] = 0x03E0;
+           ((DWORD*)(lpbi->bmiColors))[2] = 0x001F;
+           break;
+        case 24:
+        case 32:
+           ((DWORD*)(lpbi->bmiColors))[0] = 0x0000FF;
+           ((DWORD*)(lpbi->bmiColors))[1] = 0x00FF00;
+           ((DWORD*)(lpbi->bmiColors))[2] = 0xFF0000;
+           break;
+        }
     }
     if(nrlines && lpvBits && lpbi->bmiHeader.biBitCount == 16 && ((DWORD*)(lpbi->bmiColors))[1] == 0x3E0)
     {//RGB 555?
