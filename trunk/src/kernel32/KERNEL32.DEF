@@ -1,4 +1,4 @@
-; $Id: KERNEL32.DEF,v 1.82 2000-06-23 19:02:36 sandervl Exp $
+; $Id: KERNEL32.DEF,v 1.83 2000-07-03 11:20:53 bird Exp $
 
 ;Created by BLAST for IBM's compiler
 ;Basis is Windows95 KERNEL32
@@ -591,7 +591,7 @@ EXPORTS
     IsDBCSLeadByteEx           = _IsDBCSLeadByteEx@8         @485
 ;   IsLSCallback               = _IsLSCallback@??            @486       ;W95
 ;   IsSLCallback               = _IsSLCallback@??            @487       ;W95
-;   IsDebuggerPresent          = _IsDebuggerPresent@??                  ;NT
+    IsDebuggerPresent          = _IsDebuggerPresent@0        @889      ;NT/98
 ;   IsProcessorFeaturePresent  = _IsProcessorFeaturePresent@??          ;NT
     IsValidCodePage            = _IsValidCodePage@4          @488
     IsValidLocale              = _IsValidLocale@8           @489
@@ -954,6 +954,12 @@ EXPORTS
 
     lstrncmpiA                 = _lstrncmpiA@12              @887
     lstrncmpiW                 = _lstrncmpiW@12              @888
+
+;
+; First free ordinal is 890
+;
+
+
 
 ; ----------------------------------------------------------------------------
 ;   KERNEL32 / WINE support functions that do not exist in real Win32
