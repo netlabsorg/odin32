@@ -1,4 +1,4 @@
-/* $Id: user32.cpp,v 1.84 2000-08-02 20:18:24 bird Exp $ */
+/* $Id: user32.cpp,v 1.85 2000-10-18 20:12:45 sandervl Exp $ */
 
 /*
  * Win32 misc user32 API functions for OS/2
@@ -1430,83 +1430,6 @@ BOOL WIN32API RegisterHotKey(HWND hwnd, int idHotKey, UINT fuModifiers, UINT uVi
   dprintf(("USER32:  RegisterHotKey, not implemented\n"));
   hwnd = Win32Window::Win32ToOS2Handle(hwnd);
   return(TRUE);
-}
-/*****************************************************************************
- * Name      : int WIN32API ToAscii
- * Purpose   : The ToAscii function translates the specified virtual-key code
- *             and keyboard state to the corresponding Windows character or characters.
- * Parameters: UINT   uVirtKey    virtual-key code
- *             UINT   uScanCode   scan code
- *             PBYTE  lpbKeyState address of key-state array
- *             LPWORD lpwTransKey buffer for translated key
- *             UINT   fuState     active-menu flag
- * Variables :
- * Result    : 0 The specified virtual key has no translation for the current
- *               state of the keyboard.
- *             1 One Windows character was copied to the buffer.
- *             2 Two characters were copied to the buffer. This usually happens
- *               when a dead-key character (accent or diacritic) stored in the
- *               keyboard layout cannot be composed with the specified virtual
- *               key to form a single character.
- * Remark    :
- * Status    : UNTESTED STUB
- *
- * Author    : Patrick Haller [Thu, 1998/02/26 11:55]
- *****************************************************************************/
-int WIN32API ToAscii(UINT   uVirtKey,
-                        UINT   uScanCode,
-                        PBYTE  lpbKeyState,
-                        LPWORD lpwTransKey,
-                        UINT   fuState)
-{
-  dprintf(("USER32:ToAscii (%u,%u,%08xh,%08xh,%u) not implemented.\n",
-         uVirtKey,
-         uScanCode,
-         lpbKeyState,
-         lpwTransKey,
-         fuState));
-
-  return (0);
-}
-/*****************************************************************************
- * Name      : int WIN32API ToAsciiEx
- * Purpose   : The ToAscii function translates the specified virtual-key code
- *             and keyboard state to the corresponding Windows character or characters.
- * Parameters: UINT   uVirtKey    virtual-key code
- *             UINT   uScanCode   scan code
- *             PBYTE  lpbKeyState address of key-state array
- *             LPWORD lpwTransKey buffer for translated key
- *             UINT   fuState     active-menu flag
- *             HLK    hlk         keyboard layout handle
- * Variables :
- * Result    : 0 The specified virtual key has no translation for the current
- *               state of the keyboard.
- *             1 One Windows character was copied to the buffer.
- *             2 Two characters were copied to the buffer. This usually happens
- *               when a dead-key character (accent or diacritic) stored in the
- *               keyboard layout cannot be composed with the specified virtual
- *               key to form a single character.
- * Remark    :
- * Status    : UNTESTED STUB
- *
- * Author    : Patrick Haller [Thu, 1998/02/26 11:55]
- *****************************************************************************/
-int WIN32API ToAsciiEx(UINT   uVirtKey,
-                          UINT   uScanCode,
-                          PBYTE  lpbKeyState,
-                          LPWORD lpwTransKey,
-                          UINT   fuState,
-                          HKL    hkl)
-{
-  dprintf(("USER32:ToAsciiEx (%u,%u,%08xh,%08xh,%u,%08x) not implemented.\n",
-         uVirtKey,
-         uScanCode,
-         lpbKeyState,
-         lpwTransKey,
-         fuState,
-         hkl));
-
-  return (0);
 }
 /*****************************************************************************
  * Name      : int WIN32API ToUnicode
