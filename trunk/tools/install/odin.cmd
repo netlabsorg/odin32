@@ -1,4 +1,4 @@
-/* $Id: odin.cmd,v 1.42 2002-06-16 08:34:19 sandervl Exp $
+/* $Id: odin.cmd,v 1.43 2002-06-20 01:09:12 bird Exp $
  *
  * Odin32 API WarpIn installation script generator.
  *
@@ -143,7 +143,7 @@ rc = lineout(sInstFile, '     CREATEOBJECT="WPProgram|Registry Editor|<ODINFOLDE
 rc = lineout(sInstFile, '     CREATEOBJECT="WPProgram|Report Odin Bugs|<ODINFOLDER>|EXENAME=$(1)\ODINBUG.EXE;ASSOCTYPE=Odin-Logfiles;ASSOCFILTER=odin32_?.log;OBJECTID=<Report_Odin_Bugs>;');
 rc = lineout(sInstFile, '     CREATEOBJECT="WPProgram|Report Odin Bugs Readme|<ODINFOLDER>|EXENAME=E.EXE;PARAMETERS=$(1)\README.ODINBUG;TITLE=Report Odin Bugs^ReadMe;OBJECTID=<Report_Odin_Bugs_ReadMe>;');
 rc = lineout(sInstFile, '     CREATEOBJECT="WPProgram|Report Odin Bugs Manual|<ODINFOLDER>|EXENAME=VIEW.EXE;PARAMETERS=$(1)\ODINBUG.HLP;TITLE=Report Odin Bugs^Manual;OBJECTID=<Report_Odin_Bugs_Help>;');
-rc = lineout(sInstFile, '     CREATEOBJECT="WPProgram|Odin User's Manual|<ODINFOLDER>|EXENAME=VIEW.EXE;PARAMETERS=$(1)\ODINUSER.INF;TITLE=Odin User's^Manual;OBJECTID=<Odin_Users_Manual>;');
+rc = lineout(sInstFile, '     CREATEOBJECT="WPProgram|Odin User''s Manual|<ODINFOLDER>|EXENAME=VIEW.EXE;PARAMETERS=$(1)\ODINUSER.INF;TITLE=Odin User''s^Manual;OBJECTID=<Odin_Users_Manual>;');
 rc = lineout(sInstFile, '     CREATEOBJECT="WPUrl|Subscribe to odinusers mailing list|<ODINFOLDER>|TITLE=Subscribe to^odinusers mailing list;URL=http://groups.yahoo.com/group/odinusers/join;OBJECTID=<Subscribe_odinusers@yahoogroups>;');
 rc = lineout(sInstFile, '     TARGET="C:\ODIN" BASE');
 title = "     TITLE=""Odin "sType" ("date()")""";
