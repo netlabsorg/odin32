@@ -1,4 +1,4 @@
-/* $Id: user32.cpp,v 1.133 2004-03-15 16:36:51 sandervl Exp $ */
+/* $Id: user32.cpp,v 1.134 2004-03-16 10:06:44 sandervl Exp $ */
 
 /*
  * Win32 misc user32 API functions for OS/2
@@ -746,11 +746,11 @@ BOOL WIN32API SystemParametersInfoA(UINT uiAction, UINT uiParam, PVOID pvParam, 
         break;
 
     case SPI_ICONHORIZONTALSPACING:
-        *(INT *)pvParam = 90; //GetSystemMetrics(SM_CXICONSPACING);
+        *(INT *)pvParam = 75; //GetSystemMetrics(SM_CXICONSPACING);
         break;
 
    case SPI_ICONVERTICALSPACING:
-        *(INT *)pvParam = 64; //GetSystemMetrics(SM_CYICONSPACING);
+        *(INT *)pvParam = 75; //GetSystemMetrics(SM_CYICONSPACING);
         break;
 
     case SPI_GETNONCLIENTMETRICS:
