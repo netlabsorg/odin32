@@ -16,7 +16,7 @@
  * neutral language. This will prevent them from
  * being duplicated for each language.
  */
-#include "cdlg_xx.orc"
+#include "resources\cdlg_xx.orc"
 
 /*
  * Everything specific to any language goes
@@ -25,25 +25,25 @@
  * which also have a neutral version. This is to
  * get localized bitmaps for example.
  */
-#include "cdlg_Ca.orc"
-#include "cdlg_Cs.orc"
-#include "cdlg_Da.orc"
-#include "cdlg_De.orc"
-#include "cdlg_En.orc"
-#include "cdlg_Eo.orc"
-#include "cdlg_Es.orc"
-#include "cdlg_Fi.orc"
-#include "cdlg_Fr.orc"
-#include "cdlg_Hu.orc"
-#include "cdlg_It.orc"
-#include "cdlg_Ko.orc"
-#include "cdlg_Nl.orc"
-#include "cdlg_No.orc"
-#include "cdlg_Pl.orc"
-#include "cdlg_Pt.orc"
-#include "cdlg_Ru.orc"
-#include "cdlg_Sk.orc"
-#include "cdlg_Sv.orc"
-#include "cdlg_Wa.orc"
-#include "cdlg_Ja.orc"
-#include "cdlg_Zh.orc"
+#include "resources\cdlg_Ca.orc"
+#include "resources\cdlg_Cs.orc"
+#include "resources\cdlg_Da.orc"
+#include "resources\cdlg_De.orc"
+#include "resources\cdlg_En.orc"
+#include "resources\cdlg_Eo.orc"
+#include "resources\cdlg_Es.orc"
+#include "resources\cdlg_Fi.orc"
+#include "resources\cdlg_Fr.orc"
+#include "resources\cdlg_Hu.orc"
+#include "resources\cdlg_It.orc"
+#include "resources\cdlg_Ko.orc"
+#include "resources\cdlg_Nl.orc"
+#include "resources\cdlg_No.orc"
+#include "resources\cdlg_Pl.orc"
+#include "resources\cdlg_Pt.orc"
+#include "resources\cdlg_Ru.orc"
+#include "resources\cdlg_Sk.orc"
+#include "resources\cdlg_Sv.orc"
+#include "resources\cdlg_Wa.orc"
+#include "resources\cdlg_Ja.orc"
+#include "resources\cdlg_Zh.orc"
