@@ -1,4 +1,4 @@
-/* $Id: misc.cpp,v 1.43 2001-11-10 17:03:05 sandervl Exp $ */
+/* $Id: misc.cpp,v 1.44 2002-02-02 14:19:01 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -33,7 +33,7 @@
 #include <wprocess.h>
 #include <versionos2.h>
 #include "odinbuild.h"
-
+#include <cpuhlp.h>
 
 /*****************************************************************************
  * PMPRINTF Version                                                          *
@@ -268,6 +268,7 @@ int checkingheap = 0;
 #endif
 
 //#define LOG_TIME
+//#define SHOW_FPU_CONTROLREG
 
 int SYSTEM WriteLog(char *tekst, ...)
 {
@@ -362,14 +363,28 @@ int SYSTEM WriteLog(char *tekst, ...)
 #else
       if(sel == 0x150b && !fIsOS2Image) 
         fprintf(flog, 
+#ifdef SHOW_FPU_CONTROLREG
+                "t%02d (%3d)(%3x) : ",
+                teb->o.odin.threadId,
+                ulCallDepth,
+                CONTROL87(0,0));
+#else
                 "t%02d (%3d): (FS=150B) ",
                 teb->o.odin.threadId,
                 ulCallDepth);
+#endif
       else 
         fprintf(flog, 
-                "t%02d (%3d): ",
+#ifdef SHOW_FPU_CONTROLREG
+                "t%02d (%3d)(%3x) : ",
+                teb->o.odin.threadId,
+                ulCallDepth,
+                CONTROL87(0,0));
+#else
+                "t%02d (%3d) : ",
                 teb->o.odin.threadId,
                 ulCallDepth);
+#endif
 #endif
     }
 #ifdef LOG_TIME

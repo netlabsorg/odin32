@@ -1,4 +1,4 @@
-/* $Id: wprocess.cpp,v 1.141 2001-12-07 14:13:39 sandervl Exp $ */
+/* $Id: wprocess.cpp,v 1.142 2002-02-02 14:19:01 sandervl Exp $ */
 
 /*
  * Win32 process functions
@@ -2032,12 +2032,15 @@ FARPROC WIN32API GetProcAddress(HMODULE hModule, LPCSTR lpszProc)
         if(HIWORD(lpszProc))
                 dprintf(("KERNEL32:  GetProcAddress %s from %X returned %X\n", lpszProc, hModule, proc));
         else    dprintf(("KERNEL32:  GetProcAddress %x from %X returned %X\n", lpszProc, hModule, proc));
+
+        SetLastError(ERROR_SUCCESS);
         return proc;
   }
   proc = (FARPROC)OSLibDosGetProcAddress(hModule, lpszProc);
   if(HIWORD(lpszProc))
         dprintf(("KERNEL32:  GetProcAddress %s from %X returned %X\n", lpszProc, hModule, proc));
   else  dprintf(("KERNEL32:  GetProcAddress %x from %X returned %X\n", lpszProc, hModule, proc));
+  SetLastError(ERROR_SUCCESS);
   return(proc);
 }
 //******************************************************************************
@@ -2068,7 +2071,7 @@ BOOL SYSTEM GetVersionStruct(char *lpszModName, char *verstruct, ULONG bufLength
     }
     else {
         dprintf(("GetVersionStruct; just loaded dll %s, but can't find it now!", lpszModName));
-        DebugInt3();
+////        DebugInt3();
     }
     FreeLibrary(hDll);
     return rc;
@@ -2097,7 +2100,7 @@ ULONG SYSTEM GetVersionSize(char *lpszModName)
     }
     else {
         dprintf(("GetVersionSize; just loaded dll %s, but can't find it now!", lpszModName));
-        DebugInt3();
+////        DebugInt3();
     }
     FreeLibrary(hDll);
     return size;
