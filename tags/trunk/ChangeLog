@@ -1,7 +1,7 @@
-/* $Id: ChangeLog,v 1.1717 2001-10-03 13:51:27 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.1718 2001-10-03 18:36:19 sandervl Exp $ */
 
  2001-10-03: Sander van Leeuwen <sandervl@xs4all.nl>
-    - WINMM:    o Allocate handle for allocated timers and verify handle
+    - WINMM:    o Allocate handle for new timer and verify handle
                   is valid before using it. 
                   (prevents crashes when app attempts to delete timer twice
                    (DivX 4))
@@ -9,235 +9,24 @@
                 o Take clipping into account in SurfBlt4. Windowed DirectDraw
                   blitting now seems to work well. 
                   (only tried DivX 4; needs more testing)
+    - USER32:   o Rewrote sizing & moving of windows (frame tracking)
+                  (ported Wine version + fixed some bugs)
+                  Some applications (e.g. RealPlayer) resize themselves
+                  when receiving WM_SIZING msgs. Not possible to send those
+                  with PM's frame tracking.
+                  TODO: fix flickering of size border (dynamic drag off)
+                  TODO: WM_SIZING handling not 100% correct yet
+                  TODO: Must display size/move cursor when starting action
+                        from system menu
+                o GetDCEx change; always call WinGetClipPS (!CS_OWNDC)
 
  2001-10-02: Sander van Leeuwen <sandervl@xs4all.nl>
     - REGSVR32: o Must use LoadLibrary, not CoLoadLibrary
                   (Some dlls (divx codec) call CoFreeUnusedLibraries which 
-                   unloads our dll if we use CoLoadLibrary (-> crash)
+                   unloads the same dll if we use CoLoadLibrary (-> crash)
                    NT's regsvr32 doesn't use CoLoadLibrary either)
     - USER32:   o OSLibWinGetMsg bugfix
 
  2001-10-01: Sander van Leeuwen <sandervl@xs4all.nl>
     - USER32:   o Lastest Wine revision of GetNextDlgGroupItem ported + modified
-
- 2001-09-30: Sander van Leeuwen <sandervl@xs4all.nl>
-    - INCLUDE:  o Hook constants added to winconst.h
-                  (adding them to winuser.h only completely breaks Odin)
-    - DDRAW:    o Implemented IDirectDrawClipper class for windowed DirectDraw
-                  (only works if app uses clipping info for manual blitting;
-                   IDirectSurface blitting methods need to be updated to
-                   take clipping into account)
-    - USER32:   o Added export to register visible region change callback
-
- 2001-09-30: knut st. osmundsen <kosmunds@csc.com>
-    - Makefiles:
-                o Added a DOMAKES util which should be used when invoking
-                  other makefiles. (see /src/kernel32/makefile)
-                o Silenced most of the command $(DO*) commands so the commandline
-                  doesn't show.
-                o Added some colors on the output from the $(DO*) scripts
-                  to make it easier to separate directory and makefile switching
-                  from all the other output.
-                  Turn this off by using the env.var. BUILD_NOCOLOR.
-                o Did some cleanup of the main Makefile and added some missing rules.
-                o Made separate .depend file for the include files in the /include dir.
-                  This will speedup the 'dep' rule somewhat.
-                o Autostart CmdQd with 7 workers if not started and MULTIJOBS are defined.
-                o Profile builds uses ./bin/Profile.* subdir for output, not ./bin/Debug.*.
-                o PROFILE mode (PROFILE=1) overrides DEBUG and RELEASE modes.
-                o NMAKE version of the Watcom support since WMAKE sucks big time :-(
-                  These are the the odin32.*.watn.mk files. This caused introduction
-                  of the MKFILE macro for the compiler specific filename part.
-                  (Set CCENV=WAT and use NMAKE just like with VAC3.)
-                o Enabled Watcom (NMAKE version) support in mostly all makefiles.
-                  (I.e. places we do compiler specific tweaks.)
-    - Fastdep:  o Corrected processing of C/C++ #include "someheader.h" to
-                  start the search in the source code directory.
-                o Corrected handling of deleted files.
-                o Increased some read and write buffers.
-    - Win32k:   o Changed PSZ to char *, since H2INC doesn't understand PSZ.
-    - Custombulid:
-                o Can now build object libraries for custombuild without separate
-                  makefiles. Define CUSTOMBUILD=1 (=1 is important!) to build an
-                  DLL.
-                o To build all needed object libraries and the custom dll,
-                  go to /src and 'nmake custombuild'. There is currently no
-                  rule in the main makefile for this, so remember to make the
-                  libraries in /lib first.
-                o Removed all the obsolete *lib.mak files.
-    - Watcom:   o ccollection.h: Include odin.h to get min/max.
-                o odin.h:       C INLINE/inline support.
-                o odinwrap.h:   Watcom has problems with the GetCurrentThreadId
-                                redeclaration. (DWORD != unsigned long int)
-                                Exclude prototype if watcomc. (workaround)
-                o windef.h:     __max and __min is defined in stdlib.h, undef before
-                                redefining them.
-                o unicode.h:    static inline workaround (just like VAC).
-                o src/makefile: Temporarily ignore return codes from subdirs.
-                o kernel32/console2.h:
-                                Don't include calling convetion for thread
-                                function. The default is the correct one usually.
-                o kernel32/conbuffervio.cpp:
-                                Alloca is defines in malloc.h for watcom. VAC defines
-                                this in both malloc and stdlib.h.
-                o kernel32/console.cpp:
-                                _beginthread is defined in process.h not stdlib.h as
-                                for VAC.
-
- 2001-09-29: Sander van Leeuwen <sandervl@xs4all.nl>
-    - WGSS50:   o WGSS update
-
- 2001-09-28: Patrick Haller <patrick.haller@innotek.de>
-    - USER32:   o added experimental support for WH_KEYBOARD_LL hook
-                o implemented keybd_event, mouse_event (-> SendInput )
-
- 2001-09-28: Sander van Leeuwen <sandervl@xs4all.nl>
-    - PE2LX:    o Added options to remove fixups and to reroute all
-                  imports to a custom odin dll
-
- 2001-09-27: Patrick Haller <patrick.haller@innotek.de>
-    - USER32:   o partial implementation of SendInput()
-    - KERNEL32: o improved error code mapping (error2WinError)
-                o keep HandleManager from reusing last handle
-                  too quickly (CreateFile after CloseHandle might
-                  return the same handle again, which is correct but doesn't
-                  put the spotlight on buggy apps)
-
- 2001-09-26: Sander van Leeuwen <sandervl@xs4all.nl>
-    - WININET/ICMP/WS2_32/WINSPOOL/CTL3D32:
-                o Makefiles added to build library with obj files
-    - WININET:  o Split up initterm
-    - CUSTOMBUILD:
-                o Ordinals definitions moved into ordinals.h
-
- 2001-09-26: knut st. osmundsen <kosmunds@csc.com>
-    - Win32k:   o Create development branch 'splittup' which in the
-                  splittup of win32k is being implemented.
-                o BTW. I think I've found the jfs/fat32 + win32k problem.
-                  I left some dirty readonly heap pages behind...
-                  That is corrected in the splittup.
-    - Some Makefiles:
-                o Corrected the file header to state correct dllname.
-                  Ye][ow, which is doing some documentation stuff on the Odin32,
-                  pointed this out this for me.
-
- 2001-09-26: Patrick Haller <patrick.haller@innotek.de>
-    - ODINWRAP: o fixed FNEPILOGUE position
-      (MISC)    o added support for calldepth tracing
-    - OLE32:    o fixed wrong prototype in regsvr32.cpp
-
- 2001-09-25: Sander van Leeuwen <sandervl@xs4all.nl>
-    - COMCTL32: o Wine updates (MRU functions)
-    - SHELL32:  o Wine updates (SHAddToRecentDocs)
-    - DDRAW/ADVAPI32: Added makefiles for building library with obj files
-
- 2001-09-24: Sander van Leeuwen <sandervl@xs4all.nl>
-    - DDRAW:    o Set screen resolution + bpp of primary surface to those
-                  of the PM desktop. (used to default to 640x480x8bpp)
-
- 2001-09-24: Patrick Haller <patrick.haller@innotek.de>
-    - USER32:   o added ODINWRAP debug tracing support to WINKEYBOARD.CPP
-
- 2001-09-23: Sander van Leeuwen <sandervl@xs4all.nl>
-    - USER32:   o MDI bugfix: set active child to 0 when last one is destroyed
-                  (fixes crash when closing mdi window in odinapp)
-    - GDI32:    o DIB Section sync bugfix; GpiQueryBitmapBits fails
-                  when cbImage is too small (compressed images only)
-                  This used to work. Maybe related to new SDD version.
-                  (CoolEdit 2000 hits breakpoint in debug build)
-
- 2001-09-23: Dietrich Teickner <Dietrich_Teickner@t-online.de>
-    - SHELL32:  o Small update for shfileop.c
-
- 2001-09-21: Sander van Leeuwen <sandervl@xs4all.nl>
-    - USER32:   o Focus changes
-    - CTL3D32:  o Added stub dll
-
- 2001-09-20: Sander van Leeuwen <sandervl@xs4all.nl>
-    - USER32:   o Activate window when it returns 0 for WM_MOUSEACTIVATE
-                  0 is not documented, but experiments in NT4 show that
-                  the window will get activated when it returns this.
-                  (fixes activation of FreeCell when clicking on the window)
-                o WM_NEXTMENU bugfix (from Wine)
-                  (fixes crash during menu navigation in MDI windows)
-    - SHELL32:  o Shell Folder bugfix from Wine added
-
- 2000-09-19: Oliver Braun <Oliver.Braun@hamburg.de>
-    - USER32:   o PeekMessageW bugfix
-
- 2001-09-19: Sander van Leeuwen <sandervl@xs4all.nl>
-    - USER32:   o Changed GetLastActivePopup (still not complete)
-                o Prevent loop in DIALOG_IsAccelerator
-                o GetMenuItemInfoW bugfixes
-                o Ported the Wine MDI control
-
- 2001-09-17: Patrick Haller <patrick.haller@innotek.de>
-    - WS2_32:   o added stub for WSAIoctl() (Parsec)
-    - WINMM:    o lowered minimum OS/2 timer resolution to 2ms
-                  (for the new CLOCKSCALE feature)
-
- 2001-09-17: Sander van Leeuwen <sandervl@xs4all.nl>
-    - USER32:   o Must return AWP_ACTIVATE/AWP_DEACTIVATE flags in
-                  WM_ADJUSTWINDOWPOS (SWP_ACTIVATE/SWP_DEACTIVATE).
-                  This ensures activation is handled properly.
-                  No longer necessary to manually send WM_ACTIVATE messages.
-                o Only forward SC_CLOSE syscommand to top level window
-                  if generated by keyboard
-
- 2001-09-15: Sander van Leeuwen <sandervl@xs4all.nl>
-    - USER32:   o Some focus/activation changes
-                o Translation fix for WM_SYSCOMMAND; SC_CLOSE now always
-                  directed to top-level window. (OS/2 look only)
-    - ODINBUG:  o Update by Herwig Bauernfeind
-    - OLEAUT32/OLE32/QUARTZ/COMDLG32:
-                o Wine updates
-    - COMCTL32: o Wine updates for toolbar, pager & rebar controls
-                o Treeview bugfix when deleting the selected item
-                  (fixes crash in UltraEdit when opening files)
-    - *         o Put back original sources. Extremely annoying to
-                  add tags and change tabs in files.
-
- 2001-09-11: knut st. osmundsen <kosmunds@csc.com>
-    - kKrnlLib: o FYI: Win32k revamp/split-up. Not yet completed.
-
- 2001-09-10: Sander van Leeuwen <sandervl@xs4all.nl>
-    - KERNEL32: o VirtualQuery fix; DosQueryMem doesn't always return region
-                  size in pages, so round up size to next page boundary
-                  (fixes loop during Netscape 4.7 startup)
-    - GDI32:    o DPtoLP fix; signed/unsigned comparison failed
-                  (fixes huge fonts in Netscape 4.7)
-                o StretchDIBits fix; clear ulCompression for BI_BITFIELDS
-                  or else WGSS blit will fail
-                  (fixes black pictures in Netscape 4.7)
-
- 2001-09-09: Sander van Leeuwen <sandervl@xs4all.nl>
-    - TAPI32:   o Some updates
-    - OLEAUT32: o Wine typelib updates
-
- 2001-09-07: Patrick Haller <patrick.haller@innotek.de>
-    - include:  o removed ./include/wine/server.h (Wine Server)
-                  because of collisiton with server.h in OS/2 toolkit
-    - WNETAP32: o NetServerEnum implemented
-                o split into numerous smaller source modules
-
- 2001-09-05: knut st. osmundsen <kosmunds@csc.com>
-    - src\*:    o Added/fixed CVS $Id tag in source files.
-                  Sorry, if this caused long checkout and compilation. :-)
-    - tools\database:
-                o Fixed a couple of bugs, just in case we get it online some day :-).
-                o More or less implemented @design notes.
-    - tools\dailybuild:
-                o Added automatic uploading of current odin32 api database.
-                  (_test_ it at http://odin.netlabs.org/Odin32DBTest/Odin32DB.phtml)
-
- 2001-09-04: knut st. osmundsen <kosmunds@csc.com>
-    - FastDep:  o Synced FastDep with OS2Tools.
-
- 2001-09-01: knut st. osmundsen <kosmunds@csc.com>
-    - Tools\CmdQd:
-                o Do DosExecPgm directly on programs when possible.
-                  (It's not possible if multiple commands is specified in a job.)
-                o Path search result caching.
-                o Uses CMD.EXE nomatter what is in the COMSPEC.
-                o Corrected memory overwrite in output read loop.
 
