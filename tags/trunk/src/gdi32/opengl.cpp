@@ -1,4 +1,4 @@
-/* $Id: opengl.cpp,v 1.8 2000-02-16 14:18:11 sandervl Exp $ */
+/* $Id: opengl.cpp,v 1.9 2002-11-26 10:53:11 sandervl Exp $ */
 
 /*
  * GDI32 OpenGl stubs
@@ -118,8 +118,7 @@ static BOOL internalOpenGLEnable(void)
  * Author    : Patrick Haller [Fri, 1998/02/27 11:55]
  *****************************************************************************/
 
-ODINFUNCTION2(int,ChoosePixelFormat,HDC,                         hdc,
-                                    CONST PIXELFORMATDESCRIPTOR*,pformat)
+int WIN32API ChoosePixelFormat(HDC hdc, CONST PIXELFORMATDESCRIPTOR* pformat)
 {
   if (glChoosePixelFormat == NULL)
     if (internalOpenGLEnable() == FALSE)
@@ -128,10 +127,8 @@ ODINFUNCTION2(int,ChoosePixelFormat,HDC,                         hdc,
   return(glChoosePixelFormat(hdc, pformat));
 }
 
-ODINFUNCTION4(int,DescribePixelFormat,HDC,hdc,
-                                      int,iFormat,
-                                      UINT,nBytes,
-                                      LPPIXELFORMATDESCRIPTOR,pformat)
+int WIN32API DescribePixelFormat(HDC hdc, int iFormat, UINT nBytes,
+                                      LPPIXELFORMATDESCRIPTOR pformat)
 {
   if (glDescribePixelFormat == NULL)
     if (internalOpenGLEnable() == FALSE)
@@ -140,7 +137,7 @@ ODINFUNCTION4(int,DescribePixelFormat,HDC,hdc,
   return(glDescribePixelFormat(hdc, iFormat, nBytes, pformat));
 }
 
-ODINFUNCTION1(int,GetPixelFormat,HDC,hdc)
+int WIN32API GetPixelFormat(HDC hdc)
 {
   if (glGetPixelFormat == NULL)
     if (internalOpenGLEnable() == FALSE)
@@ -161,9 +158,8 @@ ODINFUNCTION1(int,GetPixelFormat,HDC,hdc)
  * Author    : Patrick Haller [Fri, 1998/02/27 11:55]
  *****************************************************************************/
 
-ODINFUNCTION3(BOOL,SetPixelFormat,HDC,                          hdc,
-                                  int,                          whatever,
-                                  CONST PIXELFORMATDESCRIPTOR*, pformat)
+BOOL WIN32API SetPixelFormat(HDC hdc, int whatever,
+                             CONST PIXELFORMATDESCRIPTOR *pformat)
 {
   if (glSetPixelFormat == NULL)
     if (internalOpenGLEnable() == FALSE)
@@ -185,7 +181,7 @@ ODINFUNCTION3(BOOL,SetPixelFormat,HDC,                          hdc,
  * Author    : Patrick Haller [Fri, 1998/02/27 11:55]
  *****************************************************************************/
 
-ODINFUNCTION1(BOOL,SwapBuffers,HDC,hdc)
+BOOL WIN32API SwapBuffers(HDC hdc)
 {
   if (glSwapBuffers == NULL)
     if (internalOpenGLEnable() == FALSE)

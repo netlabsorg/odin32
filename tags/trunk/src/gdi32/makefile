@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.41 2001-12-15 18:50:27 sandervl Exp $
+# $Id: makefile,v 1.42 2002-11-26 10:53:10 sandervl Exp $
 
 #
 # Odin32 API
@@ -6,6 +6,11 @@
 #       gdi32.dll makefile
 #
 
+
+!if "$(DEBUG)" == "1"
+DEFFILE    = gdi32dbg.def
+ORGDEFFILE = gdi32.def
+!endif
 
 #
 # Compiler, tools, and interference rules.
@@ -52,6 +57,9 @@ $(OBJDIR)\objhandle.obj \
 $(OBJDIR)\printer.obj \
 $(OBJDIR)\gdistats.obj \
 $(OBJDIR)\dbglocal.obj \
+!ifdef DEBUG
+$(OBJDIR)\dbgwrap.obj \
+!endif
 $(OBJDIR)\gdi32rsrc.obj
 
 

@@ -39,7 +39,7 @@ static void STAT_InsertObject(HANDLE hObject, DWORD *pdwObjects)
 static void STAT_DeleteObject(HANDLE hObject, DWORD *pdwObjects)
 {
     for(int i=0;i<STATS_MAX_OBJECTS;i++) {
-        if(pdwObjects[i] == hObject) {
+        if(LOWORD(pdwObjects[i]) == LOWORD(hObject)) {
             pdwObjects[i] = 0;
             break;
         }

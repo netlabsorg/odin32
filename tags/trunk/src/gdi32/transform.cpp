@@ -1,4 +1,4 @@
-/* $Id: transform.cpp,v 1.7 2001-09-10 11:02:41 sandervl Exp $ */
+/* $Id: transform.cpp,v 1.8 2002-11-26 10:53:12 sandervl Exp $ */
 
 /*
  * GDI32 coordinate & transformation code
@@ -707,4 +707,3 @@ int WIN32API GetGraphicsMode(HDC hdc)
 }
 //******************************************************************************
 //******************************************************************************
-
