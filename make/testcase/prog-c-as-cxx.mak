@@ -1,4 +1,4 @@
-# $Id: prog-c-as-cxx.mak,v 1.2 2002-08-20 21:14:29 bird Exp $
+# $Id: prog-c-as-cxx.mak,v 1.3 2002-08-28 03:40:03 bird Exp $
 
 # Testcase for makeing simple C programs as C++.
 
@@ -8,6 +8,7 @@ PATH_ROOT=..\..
 !include $(PATH_ROOT)\make\setup.mak
 
 # target config.
+TARGET_MODE = EXE
 TARGET_NAME = prog-c
 MAKEFILE    = prog-c-as-cxx.mak
 TARGET_LIBS = $(LIB_C_OBJ) $(LIB_OS)    # use the static library!
