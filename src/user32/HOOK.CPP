@@ -1,4 +1,4 @@
-/* $Id: HOOK.CPP,v 1.33 2001-11-09 01:26:14 phaller Exp $ */
+/* $Id: HOOK.CPP,v 1.34 2001-12-11 17:34:52 sandervl Exp $ */
 
 /*
  * Windows hook functions
@@ -779,8 +779,8 @@ ODINFUNCTION2(BOOL, CallMsgFilterW,
 BOOL ProcessKbdHook(LPMSG msg, BOOL remove )
 {
   // call the low level hook first
-  ProcessKbdHookLL(msg, remove, FALSE);
-  
+  if(ProcessKbdHookLL(msg, remove, FALSE) == TRUE) return TRUE;
+
   // ALT-Key comes in with different scan code (0xa4 == VK_LMENU_W),
   // then gets translated to 0x12
   switch (msg->wParam)
@@ -871,6 +871,8 @@ BOOL ProcessKbdHookLL(LPMSG msg, BOOL flagRemove, BOOL flagInjected )
   kbhs.time        = msg->time;
   kbhs.dwExtraInfo = 0; // @@@PH not supported?
   
+  dprintf(("WH_KEYBOARD_LL: kbhs.vkCode %x kbhs.scanCode %x kbhs.flags %x", kbhs.vkCode, kbhs.scanCode, kbhs.flags));
+
   return (HOOK_CallHooksA(WH_KEYBOARD_LL,
                           flagRemove ? HC_ACTION : HC_NOREMOVE,
                           msg->message,
