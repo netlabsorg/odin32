@@ -5,6 +5,18 @@
  * Copyright 1997 Marcus Meissner
  *           1998 Jürgen Schmied
  */
+
+/****************************************************************************
+ * includes
+ ****************************************************************************/
+
+#include <odin.h>
+#include <os2sel.h>
+#include <odinwrap.h>
+
+ODINDEBUGCHANNEL(SHELL32-SHELLORD)
+
+
 #include <string.h>
 #include <stdio.h>
 #include "winerror.h"
@@ -88,14 +100,14 @@ DWORD WINAPI ParseFieldAW(LPCVOID src, DWORD nField, LPVOID dst, DWORD len)
  * GetFileNameFromBrowse			[SHELL32.63]
  * 
  */
-BOOL WINAPI GetFileNameFromBrowse(
-	HWND hwndOwner,
-	LPSTR lpstrFile,
-	DWORD nMaxFile,
-	LPCSTR lpstrInitialDir,
-	LPCSTR lpstrDefExt,
-	LPCSTR lpstrFilter,
-	LPCSTR lpstrTitle)
+ODINFUNCTION7(BOOL, GetFileNameFromBrowse,
+              HWND, hwndOwner,
+              LPSTR, lpstrFile,
+              DWORD, nMaxFile,
+              LPCSTR, lpstrInitialDir,
+              LPCSTR, lpstrDefExt,
+              LPCSTR, lpstrFilter,
+              LPCSTR, lpstrTitle)
 {
 	FIXME("(%04x,%s,%ld,%s,%s,%s,%s):stub.\n",
 	  hwndOwner, lpstrFile, nMaxFile, lpstrInitialDir, lpstrDefExt,
@@ -313,7 +325,9 @@ int WINAPIV ShellMessageBoxA(
  *     exported by ordinal
  */
 #define MEM_DEBUG 0
-void WINAPI SHFree(LPVOID x) 
+
+ODINPROCEDURE1(SHFree,
+               LPVOID, x)
 {
 #if MEM_DEBUG
 	WORD len = *(LPWORD)((LPBYTE)x-2);
@@ -342,7 +356,8 @@ void WINAPI SHFree(LPVOID x)
  *     void *task_alloc(DWORD len), uses SHMalloc allocator
  *     exported by ordinal
  */
-LPVOID WINAPI SHAlloc(DWORD len) 
+ODINFUNCTION1(LPVOID, SHAlloc,
+              DWORD, len)
 {
 	LPBYTE ret;
 

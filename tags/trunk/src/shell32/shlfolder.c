@@ -43,6 +43,10 @@ DWORD        _Optlink ODIN_ILFree       (LPITEMIDLIST pidl);
 LPITEMIDLIST _Optlink ODIN_ILCombine    (LPCITEMIDLIST pidl1, LPCITEMIDLIST pidl2);
 LPITEMIDLIST _Optlink ODIN_ILClone      (LPCITEMIDLIST pidl);
 LPITEMIDLIST _Optlink ODIN_ILCloneFirst (LPCITEMIDLIST pidl);
+LPITEMIDLIST _Optlink ODIN_ILGetNext    (LPITEMIDLIST pidl);
+
+void         _Optlink ODIN_SHFree   (LPVOID x);
+LPVOID       _Optlink ODIN_SHAlloc  (DWORD len);
 
 
 /***************************************************************************
@@ -172,7 +176,7 @@ static HRESULT SHELL32_CoCreateInitSF (
 	    absPidl = ODIN_ILCombine (pidlRoot, pidlChild);
 	    hr = IPersistFolder_Initialize(pPersistFolder, absPidl);
 	    IPersistFolder_Release(pPersistFolder);
-	    SHFree(absPidl);
+	    ODIN_SHFree(absPidl);
 	    *ppvOut = pShellFolder;
 	  }
 	}
@@ -201,7 +205,7 @@ static HRESULT SHELL32_GetDisplayNameOfChild(
 	  hr = IShellFolder_BindToObject(psf, pidlFirst, NULL, &IID_IShellFolder, (LPVOID*)&psfChild);
 	  if (SUCCEEDED(hr))
 	  {
-	    pidlNext = ILGetNext(pidl);
+	    pidlNext = ODIN_ILGetNext(pidl);
 
 	    hr = IShellFolder_GetDisplayNameOf(psfChild, pidlNext, dwFlags | SHGDN_INFOLDER, &strTemp);
 	    if (SUCCEEDED(hr))
@@ -417,8 +421,8 @@ static ULONG WINAPI IUnknown_fnRelease(IUnknown * iface)
 	    pdesktopfolder=NULL;
 	    TRACE("-- destroyed IShellFolder(%p) was Desktopfolder\n",This);
 	  }
-	  if(This->absPidl) SHFree(This->absPidl);
-	  if(This->sMyPath) SHFree(This->sMyPath);
+	  if(This->absPidl) ODIN_SHFree(This->absPidl);
+	  if(This->sMyPath) ODIN_SHFree(This->sMyPath);
 	  HeapFree(GetProcessHeap(),0,This);
 	  return 0;
 	}
@@ -538,7 +542,7 @@ IShellFolder * IShellFolder_Constructor(
 	    }   
 
 	    dwSize += _ILSimpleGetText(pidl,NULL,0);		/* add the size of our name*/
-	    sf->sMyPath = SHAlloc(dwSize + 2);			/* '\0' and backslash */
+	    sf->sMyPath = ODIN_SHAlloc(dwSize + 2);			/* '\0' and backslash */
 
 	    if(!sf->sMyPath) return NULL;
 	    *(sf->sMyPath)=0x00;
@@ -764,7 +768,7 @@ static HRESULT WINAPI IShellFolder_fnBindToObject( IShellFolder2 * iface, LPCITE
 	      absPidl = ODIN_ILCombine (This->absPidl, pidl);
 	      IPersistFolder_Initialize(pPersistFolder, absPidl);
 	      IPersistFolder_Release(pPersistFolder);
-	      SHFree(absPidl);
+	      ODIN_SHFree(absPidl);
 	    }
 	    else
 	    {
@@ -1065,7 +1069,7 @@ static HRESULT WINAPI IShellFolder_fnGetUIObjectOf(
 	  {
 	    pidl = ODIN_ILCombine(This->absPidl,apidl[0]);
 	    pObj = (LPUNKNOWN)IExtractIconA_Constructor( pidl );
-	    SHFree(pidl);
+	    ODIN_SHFree(pidl);
 	    hr = S_OK;
 	  } 
 	  else if (IsEqualIID(riid, &IID_IDropTarget) && (cidl >= 1))
@@ -1475,7 +1479,7 @@ static HRESULT WINAPI ISFHelper_fnAddFolder(
 
 	  pidl = ODIN_ILCombine(This->absPidl, pidlitem);
 	  SHChangeNotifyA(SHCNE_MKDIR, SHCNF_IDLIST, pidl, NULL);
-	  SHFree(pidl); 
+	  ODIN_SHFree(pidl); 
 
 	  if (ppidlOut) *ppidlOut = pidlitem;
 	  hres = S_OK;
@@ -1540,7 +1544,7 @@ static HRESULT WINAPI ISFHelper_fnDeleteItems(
 	    }
 	    pidl = ODIN_ILCombine(This->absPidl, apidl[i]);
 	    SHChangeNotifyA(SHCNE_RMDIR, SHCNF_IDLIST, pidl, NULL);
-	    SHFree(pidl); 
+	    ODIN_SHFree(pidl); 
 	  }
 	  else if (_ILIsValue(apidl[i]))
 	  {
@@ -1554,7 +1558,7 @@ static HRESULT WINAPI ISFHelper_fnDeleteItems(
 	    }
 	    pidl = ODIN_ILCombine(This->absPidl, apidl[i]);
 	    SHChangeNotifyA(SHCNE_DELETE, SHCNF_IDLIST, pidl, NULL);
-	    SHFree(pidl); 
+	    ODIN_SHFree(pidl); 
 	  }
 
 	}
@@ -1596,7 +1600,7 @@ static HRESULT WINAPI ISFHelper_fnCopyItems(
 	      _ILSimpleGetText(apidl[i], szDstPath+strlen(szDstPath), MAX_PATH);
 	      MESSAGE("would copy %s to %s\n", szSrcPath, szDstPath);
 	    }
-	    SHFree(pidl);
+	    ODIN_SHFree(pidl);
 	  }
 	  IPersistFolder2_Release(ppf2);
 	}
@@ -2661,12 +2665,12 @@ static HRESULT WINAPI ISFPersistFolder2_Initialize(
 	/* free the old stuff */
 	if(This->absPidl)
 	{
-	  SHFree(This->absPidl);
+	  ODIN_SHFree(This->absPidl);
 	  This->absPidl = NULL;
 	}
 	if(This->sMyPath)
 	{
-	  SHFree(This->sMyPath);
+	  ODIN_SHFree(This->sMyPath);
 	  This->sMyPath = NULL;
 	}
 
@@ -2676,7 +2680,7 @@ static HRESULT WINAPI ISFPersistFolder2_Initialize(
 	/* set my path */
 	if (SHGetPathFromIDListA(pidl, sTemp))
 	{
-	  This->sMyPath = SHAlloc(strlen(sTemp)+1);
+	  This->sMyPath = ODIN_SHAlloc(strlen(sTemp)+1);
 	  strcpy(This->sMyPath, sTemp);
 	}
 
