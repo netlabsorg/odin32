@@ -1,4 +1,4 @@
-/* $Id: security.cpp,v 1.7 2000-10-26 17:26:59 sandervl Exp $ */
+/* $Id: security.cpp,v 1.8 2001-04-22 10:39:27 sandervl Exp $ */
 /*
  * Win32 security API functions for OS/2
  *
@@ -745,4 +745,78 @@ BOOL WIN32API InitializeAcl(PACL  pAcl,
            dwAclRevision));
 
   CallWin32ToNt (RtlCreateAcl(pAcl, nAclLength, dwAclRevision));
+}
+
+/*****************************************************************************
+ * Name      : AddAce
+ * Purpose   : The AddAce function adds one or more ACEs to a specified ACL.
+ *             An ACE is an access-control entry. An ACL is an access-control list.
+ * Parameters: PACL   pAcl               address of access-control list
+ *             DWORD  dwAceRevision      ACL revision level
+ *             DWORD  dwStartingAceIndex index of ACE position in ACL
+ *             LPVOID pAceList           address of one or more ACEs
+ *             DWORD  nAceListLength     size of buffer for ACEs
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
+ *****************************************************************************/
+
+BOOL WIN32API AddAce(PACL   pAcl,
+                        DWORD  dwAceRevision,
+                        DWORD  dwStartingAceIndex,
+                        LPVOID pAceList,
+                        DWORD  nAceListLength)
+{
+  CallWin32ToNt (RtlAddAce(pAcl, dwAceRevision, dwStartingAceIndex, (PACE_HEADER)pAceList, nAceListLength));
+}
+
+/*****************************************************************************
+ * Name      : AddAccessAllowedAce
+ * Purpose   : The AddAccessAllowedAce function adds an access-allowed ACE to
+ *             an ACL. The access is granted to a specified SID. An ACE is an
+ *             access-control entry. An ACL is an access-control list. A SID is
+ *             a security identifier.
+ * Parameters: PACL  pAcl           address of access-control list
+ *             DWORD dwAceRevision  ACL revision level
+ *             DWORD AccessMask     access mask
+ *             PSID  pSid           address of security identifier
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
+ *****************************************************************************/
+
+BOOL WIN32API AddAccessAllowedAce(PACL  pAcl,
+                                     DWORD dwAceRevision,
+                                     DWORD AccessMask,
+                                     PSID  pSid)
+{
+  CallWin32ToNt (RtlAddAccessAllowedAce(pAcl, dwAceRevision, AccessMask, pSid));
+}
+
+/*****************************************************************************
+ * Name      : GetAce
+ * Purpose   : The GetAce function obtains a pointer to an ACE in an ACL.
+ *             An ACE is an access control entry. An ACL is an access control list.
+ * Parameters: PACL   pAcl        address of access-control list
+ *             DWORD  dwAceIndex  index of ACE to retrieve
+ *             LPVOID *pAce       address of pointer to ACE
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
+ *****************************************************************************/
+
+BOOL WIN32API GetAce(PACL   pAcl,
+                        DWORD  dwAceIndex,
+                        LPVOID *pAce)
+{
+  CallWin32ToNt (RtlGetAce(pAcl, dwAceIndex, pAce));
 }

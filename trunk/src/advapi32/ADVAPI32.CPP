@@ -1,4 +1,4 @@
-/* $Id: ADVAPI32.CPP,v 1.16 2000-10-03 17:41:43 sandervl Exp $ */
+/* $Id: ADVAPI32.CPP,v 1.17 2001-04-22 10:39:26 sandervl Exp $ */
 
 /*
  * Win32 advanced API functions for OS/2
@@ -272,40 +272,6 @@ BOOL WIN32API AccessCheckAndAuditAlarmW(LPCWSTR              SubsystemName,
   return (FALSE);
 }
 
-
-/*****************************************************************************
- * Name      : AddAccessAllowedAce
- * Purpose   : The AddAccessAllowedAce function adds an access-allowed ACE to
- *             an ACL. The access is granted to a specified SID. An ACE is an
- *             access-control entry. An ACL is an access-control list. A SID is
- *             a security identifier.
- * Parameters: PACL  pAcl           address of access-control list
- *             DWORD dwAceRevision  ACL revision level
- *             DWORD AccessMask     access mask
- *             PSID  pSid           address of security identifier
- * Variables :
- * Result    :
- * Remark    :
- * Status    : UNTESTED STUB
- *
- * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
- *****************************************************************************/
-
-BOOL WIN32API AddAccessAllowedAce(PACL  pAcl,
-                                     DWORD dwAceRevision,
-                                     DWORD AccessMask,
-                                     PSID  pSid)
-{
-  dprintf(("ADVAPI32: AddAccessAllowedAce(%08xh,%08xh,%08xh,%08xh) not implemented.\n",
-           pAcl,
-           dwAceRevision,
-           AccessMask,
-           pSid));
-
-  return (FALSE);
-}
-
-
 /*****************************************************************************
  * Name      : AddAccessDeniedAce
  * Purpose   : The AddAccessDeniedAce function adds an access-denied ACE to an
@@ -337,41 +303,6 @@ BOOL WIN32API AddAccessDeniedAce(PACL  pAcl,
 
   return (FALSE);
 }
-
-
-/*****************************************************************************
- * Name      : AddAce
- * Purpose   : The AddAce function adds one or more ACEs to a specified ACL.
- *             An ACE is an access-control entry. An ACL is an access-control list.
- * Parameters: PACL   pAcl               address of access-control list
- *             DWORD  dwAceRevision      ACL revision level
- *             DWORD  dwStartingAceIndex index of ACE position in ACL
- *             LPVOID pAceList           address of one or more ACEs
- *             DWORD  nAceListLength     size of buffer for ACEs
- * Variables :
- * Result    :
- * Remark    :
- * Status    : UNTESTED STUB
- *
- * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
- *****************************************************************************/
-
-BOOL WIN32API AddAce(PACL   pAcl,
-                        DWORD  dwAceRevision,
-                        DWORD  dwStartingAceIndex,
-                        LPVOID pAceList,
-                        DWORD  nAceListLength)
-{
-  dprintf(("ADVAPI32: AddAce(%08xh,%08xh,%08xh,%08xh,%08xh) not implemented.\n",
-           pAcl,
-           dwAceRevision,
-           dwStartingAceIndex,
-           pAceList,
-           nAceListLength));
-
-  return (FALSE);
-}
-
 
 /*****************************************************************************
  * Name      : AddAuditAccessAce
@@ -753,57 +684,7 @@ BOOL WIN32API DuplicateToken(HANDLE                       ExistingTokenHandle,
   return (FALSE); /* signal failure */
 }
 
-/*****************************************************************************
- * Name      : FindFirstFreeAce
- * Purpose   : The FindFirstFreeAce function retrieves a pointer to the first
- *             free byte in an access-control list (ACL).
- * Parameters: PACL   pAcl   address of access-control list
- *             LPVOID *pAce  address of pointer to first free byte
- * Variables :
- * Result    :
- * Remark    :
- * Status    : UNTESTED STUB
- *
- * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
- *****************************************************************************/
 
-BOOL WIN32API FindFirstFreeAce(PACL pAcl,
-                                  LPVOID *pAce)
-{
-  dprintf(("ADVAPI32: FindFirstFreeAce(%08xh, %08xh) not implemented.\n",
-           pAcl,
-           pAce));
-
-  return (FALSE); /* signal failure */
-}
-
-
-/*****************************************************************************
- * Name      : GetAce
- * Purpose   : The GetAce function obtains a pointer to an ACE in an ACL.
- *             An ACE is an access control entry. An ACL is an access control list.
- * Parameters: PACL   pAcl        address of access-control list
- *             DWORD  dwAceIndex  index of ACE to retrieve
- *             LPVOID *pAce       address of pointer to ACE
- * Variables :
- * Result    :
- * Remark    :
- * Status    : UNTESTED STUB
- *
- * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
- *****************************************************************************/
-
-BOOL WIN32API GetAce(PACL   pAcl,
-                        DWORD  dwAceIndex,
-                        LPVOID *pAce)
-{
-  dprintf(("ADVAPI32: GetAce(%08xh,%08xh,%08xh) not implemented.\n",
-           pAcl,
-           dwAceIndex,
-           pAce));
-
-  return (FALSE); /* signal failure */
-}
 
 
 /*****************************************************************************
