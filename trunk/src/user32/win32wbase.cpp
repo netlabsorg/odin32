@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.127 1999-12-30 11:20:34 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.128 1999-12-30 11:21:00 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -2305,9 +2305,6 @@ BOOL Win32BaseWindow::SetWindowPos(HWND hwndInsertAfter, int x, int y, int cx, i
    HWND hParent = 0;
 
     dprintf (("SetWindowPos %x %x (%d,%d)(%d,%d) %x", Win32Hwnd, hwndInsertAfter, x, y, cx, cy, fuFlags));
-    if(cx < -10000) {
-	rc = TRUE;
-    }
 
     if (fuFlags &
        ~(SWP_NOSIZE     | SWP_NOMOVE     | SWP_NOZORDER     |
