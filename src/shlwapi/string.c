@@ -1,18 +1,3 @@
-//Note: Odin changes marked by #ifdef __WIN32OS2__!
-#ifdef __WIN32OS2__
-#include <odin.h>
-#include <odinwrap.h>
-#include <os2sel.h>
-
-#include <string.h>
-#include <wctype.h>
-#include <wcstr.h>
-#define HAVE_WCTYPE_H
-#include <win\shlwapi.h>
-
-#include <heapstring.h>
-#include <winnls.h>
-#endif
 #include <ctype.h>
 #include <stdlib.h> 
 #include <stdio.h>
@@ -23,15 +8,45 @@
 #include "winbase.h"
 #include "wingdi.h"
 #include "winuser.h"
+#include "winreg.h"
+#ifdef __WIN32OS2__
+#include "shlobj.h"
+#define NO_SHLWAPI_STREAM
+#include "shlwapi.h"
+#else
+#define NO_SHLWAPI_STREAM
 #include "shlwapi.h"
 #include "shlobj.h"
+#endif
 #include "wine/unicode.h"
 #include "debugtools.h"
 
 DEFAULT_DEBUG_CHANNEL(shell);
 
 /*************************************************************************
- * StrChrA					[SHLWAPI]
+ * ChrCmpIA					[SHLWAPI.385]
+ *
+ * Note: Returns 0 (FALSE) if characters are equal (insensitive).
+ */
+BOOL WINAPI ChrCmpIA (WORD w1, WORD w2)
+{
+	TRACE("%c ? %c\n", w1, w2);
+	return (toupper(w1) != toupper(w2));
+}
+
+/*************************************************************************
+ * ChrCmpIW					[SHLWAPI.386]
+ *
+ * Note: Returns 0 (FALSE) if characters are equal (insensitive).
+ */
+BOOL WINAPI ChrCmpIW (WCHAR w1, WCHAR w2)
+{
+	TRACE("%c ? %c\n", w1, w2);
+	return (toupperW(w1) != toupperW(w2));
+}
+
+/*************************************************************************
+ * StrChrA					[SHLWAPI.@]
  */
 LPSTR WINAPI StrChrA (LPCSTR str, WORD c)
 {
@@ -40,7 +55,7 @@ LPSTR WINAPI StrChrA (LPCSTR str, WORD c)
 }
 
 /*************************************************************************
- * StrChrW					[SHLWAPI]
+ * StrChrW					[SHLWAPI.@]
  *
  */
 LPWSTR WINAPI StrChrW (LPCWSTR str, WCHAR x )
@@ -48,19 +63,18 @@ LPWSTR WINAPI StrChrW (LPCWSTR str, WCHAR x )
 	TRACE("%s 0x%04x\n",debugstr_w(str),x);
 	return strchrW(str, x);
 }
-#ifndef __WIN32OS2__
+
 /*************************************************************************
- * StrCmpIW					[SHLWAPI]
+ * StrCmpIW					[SHLWAPI.@]
  */
 int WINAPI StrCmpIW ( LPCWSTR wstr1, LPCWSTR wstr2 )
 {
     TRACE("%s %s\n", debugstr_w(wstr1),debugstr_w(wstr2));
     return strcmpiW( wstr1, wstr2 );
 }
-#endif
 
 /*************************************************************************
- * StrCmpNA					[SHLWAPI]
+ * StrCmpNA					[SHLWAPI.@]
  */
 INT WINAPI StrCmpNA ( LPCSTR str1, LPCSTR str2, INT len)
 {
@@ -69,7 +83,7 @@ INT WINAPI StrCmpNA ( LPCSTR str1, LPCSTR str2, INT len)
 }
 
 /*************************************************************************
- * StrCmpNW					[SHLWAPI]
+ * StrCmpNW					[SHLWAPI.@]
  */
 INT WINAPI StrCmpNW ( LPCWSTR wstr1, LPCWSTR wstr2, INT len)
 {
@@ -78,7 +92,7 @@ INT WINAPI StrCmpNW ( LPCWSTR wstr1, LPCWSTR wstr2, INT len)
 }
 
 /*************************************************************************
- * StrCmpNIA					[SHLWAPI]
+ * StrCmpNIA					[SHLWAPI.@]
  */
 int WINAPI StrCmpNIA ( LPCSTR str1, LPCSTR str2, int len)
 {
@@ -87,7 +101,7 @@ int WINAPI StrCmpNIA ( LPCSTR str1, LPCSTR str2, int len)
 }
 
 /*************************************************************************
- * StrCmpNIW					[SHLWAPI]
+ * StrCmpNIW					[SHLWAPI.@]
  */
 int WINAPI StrCmpNIW ( LPCWSTR wstr1, LPCWSTR wstr2, int len)
 {
@@ -96,7 +110,7 @@ int WINAPI StrCmpNIW ( LPCWSTR wstr1, LPCWSTR wstr2, int len)
 }
 
 /*************************************************************************
- * StrCmpW					[SHLWAPI]
+ * StrCmpW					[SHLWAPI.@]
  */
 int WINAPI StrCmpW ( LPCWSTR wstr1, LPCWSTR wstr2 )
 {
@@ -105,7 +119,7 @@ int WINAPI StrCmpW ( LPCWSTR wstr1, LPCWSTR wstr2 )
 }
 
 /*************************************************************************
- * StrCatW					[SHLWAPI]
+ * StrCatW					[SHLWAPI.@]
  */
 LPWSTR WINAPI StrCatW( LPWSTR wstr1, LPCWSTR wstr2 )
 {
@@ -114,7 +128,7 @@ LPWSTR WINAPI StrCatW( LPWSTR wstr1, LPCWSTR wstr2 )
 
 
 /*************************************************************************
- * StrCpyW					[SHLWAPI]
+ * StrCpyW					[SHLWAPI.@]
  */
 LPWSTR WINAPI StrCpyW( LPWSTR wstr1, LPCWSTR wstr2 )
 {
@@ -123,7 +137,7 @@ LPWSTR WINAPI StrCpyW( LPWSTR wstr1, LPCWSTR wstr2 )
 
 
 /*************************************************************************
- * StrCpyNW					[SHLWAPI]
+ * StrCpyNW					[SHLWAPI.@]
  */
 LPWSTR WINAPI StrCpyNW( LPWSTR wstr1, LPCWSTR wstr2, int n )
 {
@@ -132,7 +146,7 @@ LPWSTR WINAPI StrCpyNW( LPWSTR wstr1, LPCWSTR wstr2, int n )
 
 
 /*************************************************************************
- * StrStrA					[SHLWAPI]
+ * StrStrA					[SHLWAPI.@]
  */
 LPSTR WINAPI StrStrA(LPCSTR lpFirst, LPCSTR lpSrch)
 {
@@ -147,7 +161,7 @@ LPSTR WINAPI StrStrA(LPCSTR lpFirst, LPCSTR lpSrch)
 }
 
 /*************************************************************************
- * StrStrW					[SHLWAPI]
+ * StrStrW					[SHLWAPI.@]
  */
 LPWSTR WINAPI StrStrW(LPCWSTR lpFirst, LPCWSTR lpSrch)
 {
@@ -162,7 +176,7 @@ LPWSTR WINAPI StrStrW(LPCWSTR lpFirst, LPCWSTR lpSrch)
 }
 
 /*************************************************************************
- * StrStrIA					[SHLWAPI]
+ * StrStrIA					[SHLWAPI.@]
  */
 LPSTR WINAPI StrStrIA(LPCSTR lpFirst, LPCSTR lpSrch)
 {
@@ -177,7 +191,7 @@ LPSTR WINAPI StrStrIA(LPCSTR lpFirst, LPCSTR lpSrch)
 }
 
 /*************************************************************************
- * StrStrIW					[SHLWAPI]
+ * StrStrIW					[SHLWAPI.@]
  */
 LPWSTR WINAPI StrStrIW(LPCWSTR lpFirst, LPCWSTR lpSrch)
 {
@@ -192,7 +206,7 @@ LPWSTR WINAPI StrStrIW(LPCWSTR lpFirst, LPCWSTR lpSrch)
 }
 
 /*************************************************************************
- *	StrToIntA			[SHLWAPI]
+ *	StrToIntA			[SHLWAPI.@]
  */
 int WINAPI StrToIntA(LPCSTR lpSrc)
 {
@@ -201,7 +215,7 @@ int WINAPI StrToIntA(LPCSTR lpSrc)
 }
 
 /*************************************************************************
- *	StrToIntW			[SHLWAPI]
+ *	StrToIntW			[SHLWAPI.@]
  */
 int WINAPI StrToIntW(LPCWSTR lpSrc)
 {
@@ -214,7 +228,7 @@ int WINAPI StrToIntW(LPCWSTR lpSrc)
 }
 
 /*************************************************************************
- *	StrToIntExA			[SHLWAPI]
+ *	StrToIntExA			[SHLWAPI.@]
  */
 BOOL WINAPI StrToIntExA( LPCSTR pszString, DWORD dwFlags, LPINT piRet)
 {
@@ -224,7 +238,7 @@ BOOL WINAPI StrToIntExA( LPCSTR pszString, DWORD dwFlags, LPINT piRet)
 }
 
 /*************************************************************************
- *	StrToIntExW			[SHLWAPI]
+ *	StrToIntExW			[SHLWAPI.@]
  */
 BOOL WINAPI StrToIntExW( LPCWSTR pszString, DWORD dwFlags, LPINT piRet)
 {
@@ -234,7 +248,7 @@ BOOL WINAPI StrToIntExW( LPCWSTR pszString, DWORD dwFlags, LPINT piRet)
 }
 
 /*************************************************************************
- *	StrDupA			[SHLWAPI]
+ *	StrDupA			[SHLWAPI.@]
  */
 LPSTR WINAPI StrDupA (LPCSTR lpSrc)
 {
@@ -248,7 +262,7 @@ LPSTR WINAPI StrDupA (LPCSTR lpSrc)
 }
 
 /*************************************************************************
- *	StrDupW			[SHLWAPI]
+ *	StrDupW			[SHLWAPI.@]
  */
 LPWSTR WINAPI StrDupW (LPCWSTR lpSrc)
 {
@@ -262,7 +276,7 @@ LPWSTR WINAPI StrDupW (LPCWSTR lpSrc)
 }
 
 /*************************************************************************
- *	StrCSpnA		[SHLWAPI]
+ *	StrCSpnA		[SHLWAPI.@]
  */
 int WINAPI StrCSpnA (LPCSTR lpStr, LPCSTR lpSet)
 {
@@ -286,7 +300,7 @@ int WINAPI StrCSpnA (LPCSTR lpStr, LPCSTR lpSet)
 }
 
 /*************************************************************************
- *	StrCSpnW		[SHLWAPI]
+ *	StrCSpnW		[SHLWAPI.@]
  */
 int WINAPI StrCSpnW (LPCWSTR lpStr, LPCWSTR lpSet)
 {
@@ -319,7 +333,7 @@ LPSTR WINAPI StrRChrA( LPCSTR lpStart, LPCSTR lpEnd, WORD wMatch )
     BOOL dbcs = IsDBCSLeadByte( LOBYTE(wMatch) );
 
     TRACE("(%p, %p, %x)\n", lpStart, lpEnd, wMatch);
-
+    if (!lpStart && !lpEnd) return NULL;
     if (!lpEnd) lpEnd = lpStart + strlen(lpStart);
 
     for(; lpStart < lpEnd; lpStart = CharNextA(lpStart))
@@ -341,6 +355,7 @@ LPWSTR WINAPI StrRChrW( LPCWSTR lpStart, LPCWSTR lpEnd, WORD wMatch)
     LPCWSTR lpGotIt = NULL;
 
     TRACE("(%p, %p, %x)\n", lpStart, lpEnd, wMatch);
+    if (!lpStart && !lpEnd) return NULL;
     if (!lpEnd) lpEnd = lpStart + strlenW(lpStart);
 
     for(; lpStart < lpEnd; lpStart = CharNextW(lpStart))
@@ -350,8 +365,56 @@ LPWSTR WINAPI StrRChrW( LPCWSTR lpStart, LPCWSTR lpEnd, WORD wMatch)
 }
 
 
+/**************************************************************************
+ * StrRChrIA [SHLWAPI.@]
+ *
+ */
+LPSTR WINAPI StrRChrIA( LPCSTR lpStart, LPCSTR lpEnd, WORD wMatch )
+{
+    LPCSTR lpGotIt = NULL;
+    BOOL dbcs = IsDBCSLeadByte( LOBYTE(wMatch) );
+
+    TRACE("(%p, %p, %x)\n", lpStart, lpEnd, wMatch);
+    if (!lpStart && !lpEnd) return NULL;
+    if (!lpEnd) lpEnd = lpStart + strlen(lpStart);
+
+    for(; lpStart < lpEnd; lpStart = CharNextA(lpStart))
+    {
+	if (dbcs) {
+	    /*
+	    if (_mbctoupper(*lpStart) == _mbctoupper(wMatch))
+		lpGotIt = lpStart;
+	    */
+	    if (toupper(*lpStart) == toupper(wMatch)) lpGotIt = lpStart;
+	} else {
+	    if (toupper(*lpStart) == toupper(wMatch)) lpGotIt = lpStart;
+	}
+    }    
+    return (LPSTR)lpGotIt;
+}
+
+
+/**************************************************************************
+ * StrRChrIW [SHLWAPI.@]
+ *
+ */
+LPWSTR WINAPI StrRChrIW( LPCWSTR lpStart, LPCWSTR lpEnd, WORD wMatch)
+{
+    LPCWSTR lpGotIt = NULL;
+
+    TRACE("(%p, %p, %x)\n", lpStart, lpEnd, wMatch);
+    if (!lpStart && !lpEnd) return NULL;
+    if (!lpEnd) lpEnd = lpStart + strlenW(lpStart);
+
+    for(; lpStart < lpEnd; lpStart = CharNextW(lpStart))
+        if (toupperW(*lpStart) == toupperW(wMatch)) lpGotIt = lpStart;
+
+    return (LPWSTR)lpGotIt;
+}
+
+
 /*************************************************************************
- *	StrCatBuffA		[SHLWAPI]
+ *	StrCatBuffA		[SHLWAPI.@]
  *
  * Appends back onto front, stopping when front is size-1 characters long.
  * Returns front.
@@ -369,7 +432,7 @@ LPSTR WINAPI StrCatBuffA(LPSTR front, LPCSTR back, INT size)
 }
 
 /*************************************************************************
- *	StrCatBuffW		[SHLWAPI]
+ *	StrCatBuffW		[SHLWAPI.@]
  *
  * Appends back onto front, stopping when front is size-1 characters long.
  * Returns front.
@@ -393,10 +456,17 @@ LPWSTR WINAPI StrCatBuffW(LPWSTR front, LPCWSTR back, INT size)
  *
  * NOTES
  *  the pidl is for STRRET OFFSET
+ *
+ * ***** NOTE *****
+ *  This routine is identical to StrRetToStrNA in dlls/shell32/shellstring.c.
+ *  It was duplicated there because not every version of Shlwapi.dll exports
+ *  StrRetToBufA. If you change one routine, change them both. YOU HAVE BEEN
+ *  WARNED.
+ * ***** NOTE *****
  */
 HRESULT WINAPI StrRetToBufA (LPSTRRET src, const ITEMIDLIST *pidl, LPSTR dest, DWORD len)
 {
-	TRACE("dest=0x%p len=0x%lx strret=0x%p pidl=%p stub\n",dest,len,src,pidl);
+	TRACE("dest=%p len=0x%lx strret=%p pidl=%p stub\n",dest,len,src,pidl);
 
 	switch (src->uType)
 	{
@@ -431,10 +501,17 @@ HRESULT WINAPI StrRetToBufA (LPSTRRET src, const ITEMIDLIST *pidl, LPSTR dest, D
  *
  * NOTES
  *  the pidl is for STRRET OFFSET
+ *
+ * ***** NOTE *****
+ *  This routine is identical to StrRetToStrNW in dlls/shell32/shellstring.c.
+ *  It was duplicated there because not every version of Shlwapi.dll exports
+ *  StrRetToBufW. If you change one routine, change them both. YOU HAVE BEEN
+ *  WARNED.
+ * ***** NOTE *****
  */
 HRESULT WINAPI StrRetToBufW (LPSTRRET src, const ITEMIDLIST *pidl, LPWSTR dest, DWORD len)
 {
-	TRACE("dest=0x%p len=0x%lx strret=0x%p pidl=%p stub\n",dest,len,src,pidl);
+	TRACE("dest=%p len=0x%lx strret=%p pidl=%p stub\n",dest,len,src,pidl);
 
 	switch (src->uType)
 	{
@@ -468,7 +545,7 @@ HRESULT WINAPI StrRetToBufW (LPSTRRET src, const ITEMIDLIST *pidl, LPWSTR dest, 
 }
 
 /*************************************************************************
- * StrFormatByteSizeA				[SHLWAPI]
+ * StrFormatByteSizeA				[SHLWAPI.@]
  */
 LPSTR WINAPI StrFormatByteSizeA ( DWORD dw, LPSTR pszBuf, UINT cchBuf )
 {	char buf[64];
@@ -490,7 +567,7 @@ LPSTR WINAPI StrFormatByteSizeA ( DWORD dw, LPSTR pszBuf, UINT cchBuf )
 }
 
 /*************************************************************************
- * StrFormatByteSizeW				[SHLWAPI]
+ * StrFormatByteSizeW				[SHLWAPI.@]
  */
 LPWSTR WINAPI StrFormatByteSizeW ( DWORD dw, LPWSTR pszBuf, UINT cchBuf )
 {
@@ -502,7 +579,7 @@ LPWSTR WINAPI StrFormatByteSizeW ( DWORD dw, LPWSTR pszBuf, UINT cchBuf )
 }
 
 /*************************************************************************
- *      StrNCatA	[SHLWAPI]
+ *      StrNCatA	[SHLWAPI.@]
  */
 LPSTR WINAPI StrNCatA(LPSTR front, LPCSTR back, INT cchMax)
 {
@@ -511,7 +588,7 @@ LPSTR WINAPI StrNCatA(LPSTR front, LPCSTR back, INT cchMax)
 }
 
 /*************************************************************************
- *      StrNCatW	[SHLWAPI]
+ *      StrNCatW	[SHLWAPI.@]
  */
 LPWSTR WINAPI StrNCatW(LPWSTR front, LPCWSTR back, INT cchMax)
 {
@@ -545,7 +622,7 @@ BOOL WINAPI StrTrimA(LPSTR pszSource, LPCSTR pszTrimChars)
 }
 
 /*************************************************************************
- *      wnsprintfA	[SHLWAPI]
+ *      wnsprintfA	[SHLWAPI.@]
  */
 int WINAPIV wnsprintfA(LPSTR lpOut, int cchLimitIn, LPCSTR lpFmt, ...)
 {
@@ -559,7 +636,7 @@ int WINAPIV wnsprintfA(LPSTR lpOut, int cchLimitIn, LPCSTR lpFmt, ...)
 }
 
 /*************************************************************************
- *      wnsprintfW	[SHLWAPI]
+ *      wnsprintfW	[SHLWAPI.@]
  */
 int WINAPIV wnsprintfW(LPWSTR lpOut, int cchLimitIn, LPCWSTR lpFmt, ...)
 {

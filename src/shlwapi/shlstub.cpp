@@ -1,4 +1,4 @@
-/* $Id: shlstub.cpp,v 1.2 2001-08-30 19:19:58 phaller Exp $ */
+/* $Id: shlstub.cpp,v 1.3 2002-02-06 20:18:28 sandervl Exp $ */
 
 /*
  * Win32 stub shlwapi APIs for OS/2
@@ -34,8 +34,6 @@
 
 
 ODINDEBUGCHANNEL(SHLWAPI-SHLSTUB)
-
-#include "shlwapi.h"
 
 
 /*****************************************************************************
