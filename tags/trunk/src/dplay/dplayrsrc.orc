@@ -1,4 +1,4 @@
-/* $Id: dplayrsrc.orc,v 1.2 2000-08-18 21:34:53 sandervl Exp $ */
+/* $Id: dplayrsrc.orc,v 1.3 2000-08-18 21:41:24 sandervl Exp $ */
 
 #include "winuser.h"
 #include "odinrsrc.h"
@@ -10,8 +10,8 @@
 //
 
 1 VERSIONINFO
- FILEVERSION 0x04, 0x04, 0x055B, 0x0001
- PRODUCTVERSION 0x04, 0x04, 0x055B, 0x0001
+ FILEVERSION 0x04, 0x00, 0x055B, 0x0001
+ PRODUCTVERSION 0x04, 0x00, 0x055B, 0x0001
  FILEFLAGSMASK 0x3fL
  FILEFLAGS 0xaL
  FILEOS 0x10001L
