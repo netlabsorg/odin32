@@ -1,4 +1,4 @@
-/* $Id: winconst.h,v 1.13 1999-11-27 00:05:03 sandervl Exp $ */
+/* $Id: winconst.h,v 1.14 1999-12-14 19:15:05 sandervl Exp $ */
 
 /*
  * Win32 constants
@@ -266,3 +266,6 @@
 #define QS_INPUT_W        (QS_MOUSE_W | QS_KEY_W)
 #define QS_ALLEVENTS_W    (QS_INPUT_W | QS_POSTMESSAGE_W | QS_TIMER_W | QS_PAINT_W | QS_HOTKEY_W)
 #define QS_ALLINPUT_W     (QS_ALLEVENTS_W | QS_SENDMESSAGE_W)
+
+
+#define ERROR_INVALID_WINDOW_HANDLE_W           1400L
