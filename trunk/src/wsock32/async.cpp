@@ -1,4 +1,4 @@
-/* $Id: async.cpp,v 1.13 1999-11-10 16:36:15 phaller Exp $ */
+/* $Id: async.cpp,v 1.14 1999-11-13 17:55:41 achimha Exp $ */
 
 /*
  *
@@ -1473,10 +1473,10 @@ ODINFUNCTION0(BOOL, WSAIsBlocking)
  *****************************************************************************/
 // the real function calls
 
-ODINFUNCTION4(HANDLE, WSAAsyncSelect,SOCKET,       s,
-                                     HWND,         hwnd,
-                                     unsigned int, wMsg,
-                                     long,         lEvent)
+ODINFUNCTION4(int, WSAAsyncSelect,SOCKET,       s,
+                                  HWND,         hwnd,
+                                  unsigned int, wMsg,
+                                  long,         lEvent)
 {
   PASYNCREQUEST pRequest = wsaWorker->createRequest(WSAASYNC_SELECT,
                                                     (HWND) hwnd,
@@ -1486,6 +1486,9 @@ ODINFUNCTION4(HANDLE, WSAAsyncSelect,SOCKET,       s,
                                                     (ULONG)s,
                                                     (ULONG)lEvent);
   wsaWorker->pushRequest(pRequest);
-  return (HANDLE)pRequest;
+  // return (HANDLE)pRequest;
+  // AH: WINE returns 0 on this call
+  //TODO: what about error handling? can the createRequest fail?
+  return 0;
 }
 
