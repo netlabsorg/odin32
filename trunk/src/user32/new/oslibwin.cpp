@@ -1,4 +1,4 @@
-/* $Id: oslibwin.cpp,v 1.33 2000-01-05 21:25:04 cbratschi Exp $ */
+/* $Id: oslibwin.cpp,v 1.34 2000-01-11 13:06:25 sandervl Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -1161,3 +1161,11 @@ ULONG OSLibWinGetLastError()
 {
   return WinGetLastError(GetThreadHAB()) & 0xFFFF;
 }
+//******************************************************************************
+//******************************************************************************
+void OSLibWinShowTaskList(HWND hwndFrame)
+{
+  WinPostMsg(NULLHANDLE, WM_SYSCOMMAND, (MPARAM)SC_TASKMANAGER, MPFROM2SHORT(CMDSRC_MENU, TRUE));
+}
+//******************************************************************************
+//******************************************************************************

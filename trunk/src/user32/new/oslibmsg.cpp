@@ -1,4 +1,4 @@
-/* $Id: oslibmsg.cpp,v 1.12 2000-01-10 23:29:12 sandervl Exp $ */
+/* $Id: oslibmsg.cpp,v 1.13 2000-01-11 13:06:25 sandervl Exp $ */
 /*
  * Window message translation functions for OS/2
  *
@@ -219,7 +219,7 @@ BOOL OSLibWinGetMsg(LPMSG pMsg, HWND hwnd, UINT uMsgFilterMin, UINT uMsgFilterMa
         memcpy(pMsg, &thdb->msgWCHAR, sizeof(MSG));
         MsgThreadPtr->msg  = 0;
         MsgThreadPtr->hwnd = 0;
-        return (pMsg->message == WINWM_QUIT);
+        return (pMsg->message != WINWM_QUIT);
   }
 
 continuegetmsg:
@@ -230,7 +230,7 @@ continuegetmsg:
         }
         while(rc == FALSE);
 
-        return (pMsg->message == WINWM_QUIT);
+        return (pMsg->message != WINWM_QUIT);
   }
   else
   {
