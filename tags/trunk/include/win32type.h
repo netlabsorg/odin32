@@ -1,4 +1,4 @@
-/* $Id: win32type.h,v 1.33 2000-02-29 19:09:25 sandervl Exp $ */
+/* $Id: win32type.h,v 1.34 2000-03-01 13:31:36 sandervl Exp $ */
 
 /*
  * Win32 type definitions for OS/2
@@ -448,6 +448,7 @@ typedef LRESULT (* CALLBACK FARPROC)();
 typedef LRESULT (* CALLBACK FARPROC16)();
 
 typedef LRESULT (* CALLBACK HOOKPROC)(INT,WPARAM,LPARAM);
+typedef VOID    (* CALLBACK LPMOUSE_EVENT_PROC)(DWORD,DWORD,DWORD,DWORD,DWORD);
 
 typedef union _LARGE_INTEGER {
     struct {
