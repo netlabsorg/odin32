@@ -1,4 +1,4 @@
-/* $Id: oslibres.cpp,v 1.31 2002-06-25 07:11:10 sandervl Exp $ */
+/* $Id: oslibres.cpp,v 1.32 2002-12-13 16:46:12 sandervl Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -25,6 +25,7 @@
 #include "oslibres.h"
 #include "pmwindow.h"
 #include <wingdi32.h>
+#include <custombuild.h>
 
 #define DBG_LOCALLOG    DBG_oslibres
 #include "dbglocal.h"
@@ -737,6 +738,7 @@ BOOL WIN32API OSLibWinCreateObject(LPSTR pszPath, LPSTR pszArgs,
    char    szSystemDir[256];
    char    temp[128];
    char    szWorkDir[256];
+   char    szPEGUILoaderPath[256];
 
    if(pszName) {
        char *tmp;
@@ -763,13 +765,16 @@ BOOL WIN32API OSLibWinCreateObject(LPSTR pszPath, LPSTR pszArgs,
        OSLibStripFile(szWorkDir);
    }
 
+   ODIN_QueryLoaders(NULL, 0, szPEGUILoaderPath, sizeof(szPEGUILoaderPath), NULL, 0);
+
    pszSetupString = (LPSTR)malloc(128 + strlen(pszPath) + strlen(pszName) +
-                                  strlen(pszLink) + 2*strlen(szSystemDir) +
+                                  strlen(pszLink) + strlen(szSystemDir) +
                                   strlen(szWorkDir) + strlen(pszIcoPath) +
+                                  strlen(szPEGUILoaderPath) +
                                   ((pszArgs) ? strlen(pszArgs) : 0) +
                                   ((pszWorkDir) ? strlen(pszWorkDir) : 0));
 
-   sprintf(pszSetupString, "PROGTYPE=PM;OBJECTID=<%s>;EXENAME=%s\\PE.EXE;SET BEGINLIBPATH=%s;STARTUPDIR=%s;ICONFILE=%s;PARAMETERS=\"%s\"", pszName, szSystemDir, szSystemDir, szWorkDir, pszIcoPath, pszPath);
+   sprintf(pszSetupString, "PROGTYPE=PM;OBJECTID=<%s>;EXENAME=%s;SET BEGINLIBPATH=%s;STARTUPDIR=%s;ICONFILE=%s;PARAMETERS=\"%s\"", pszName, szPEGUILoaderPath, szSystemDir, szWorkDir, pszIcoPath, pszPath);
    if(pszArgs && *pszArgs) {
        strcat(pszSetupString, " ");
        strcat(pszSetupString, pszArgs);
