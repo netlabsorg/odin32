@@ -1,4 +1,4 @@
-/* $Id: os2timer.cpp,v 1.19 2001-10-03 13:47:58 sandervl Exp $ */
+/* $Id: os2timer.cpp,v 1.20 2003-03-05 14:49:03 sandervl Exp $ */
 
 /*
  * OS/2 Timer class
@@ -23,7 +23,8 @@
 #include <win32type.h>
 #include <win32api.h>
 #include <wprocess.h>
-#include <misc.h>
+#include <dbglog.h>
+#include <vmutex.h>
 
 #include "time.h"
 #include "os2timer.h"
@@ -35,7 +36,7 @@
 /****************************************************************************
  * Structures                                                               *
  ****************************************************************************/
-  
+static VMutex timeMutex;
 
 /****************************************************************************
  * Local Prototypes                                                         *
@@ -69,6 +70,7 @@ OS2TimerResolution::OS2TimerResolution(int dwPeriod)
            this,
            dwPeriod));
 
+  timeMutex.enter();
   // add to linked list
   OS2TimerResolution *timeRes = OS2TimerResolution::sTimerResolutions;
 
@@ -82,6 +84,8 @@ OS2TimerResolution::OS2TimerResolution(int dwPeriod)
   }
   else
     OS2TimerResolution::sTimerResolutions = this;
+
+  timeMutex.leave();
 
   this->dwPeriod = dwPeriod;
 }
@@ -105,6 +109,8 @@ OS2TimerResolution::~OS2TimerResolution()
            this));
 
 
+  timeMutex.enter();
+
   // remove from linked list
   OS2TimerResolution *timeRes = OS2TimerResolution::sTimerResolutions;
 
@@ -120,6 +126,8 @@ OS2TimerResolution::~OS2TimerResolution()
   }
   else
     OS2TimerResolution::sTimerResolutions = timeRes->next;
+
+  timeMutex.leave();
 }
 
 
@@ -165,6 +173,7 @@ BOOL OS2TimerResolution::leaveResolutionScope(int dwPeriod)
   dprintf(("WINMM:OS2Timer: OS2TimerResolution::leaveResolutionScope(%08xh)\n",
            dwPeriod));
 
+  timeMutex.enter();
   OS2TimerResolution* timeRes = OS2TimerResolution::sTimerResolutions;
 
   if (timeRes != NULL)
@@ -177,9 +186,12 @@ BOOL OS2TimerResolution::leaveResolutionScope(int dwPeriod)
     if (timeRes->dwPeriod == dwPeriod) // do the requested period match?
     {
       delete timeRes;              // so delete that object
+      timeMutex.leave();
       return TRUE;                 // OK, can remove the entry
     }
  }
+ timeMutex.leave();
+
  return FALSE;                     // nope, mismatch !
 }
 
@@ -198,6 +210,7 @@ BOOL OS2TimerResolution::leaveResolutionScope(int dwPeriod)
 
 int OS2TimerResolution::queryCurrentResolution()
 {
+  timeMutex.enter();
   OS2TimerResolution *timeRes = OS2TimerResolution::sTimerResolutions;
   int                iMin = -1;
 
@@ -209,6 +222,7 @@ int OS2TimerResolution::queryCurrentResolution()
       if (timeRes->dwPeriod < iMin) // determine minimum time period
         iMin = timeRes->dwPeriod;
     }
+  timeMutex.leave();
 
   dprintf(("WINMM:OS2Timer: OS2TimerResolution::queryCurrentResolution == %08xh\n",
            iMin));
@@ -229,6 +243,7 @@ OS2Timer::OS2Timer() : TimerSem(0), TimerHandle(0), hTimerThread(0),
   dprintf(("WINMM:OS2Timer: OS2Timer::OS2Timer(%08xh)\n",
            this));
 
+  timeMutex.enter();
   OS2Timer *timer = OS2Timer::timers;
 
   if(timer != NULL)
@@ -241,6 +256,7 @@ OS2Timer::OS2Timer() : TimerSem(0), TimerHandle(0), hTimerThread(0),
   }
   else
     timers = this;
+  timeMutex.leave();
   
   // create timer semaphore
   int rc = DosCreateEventSem(NULL, &TimerSem, DC_SEM_SHARED, 0);
@@ -273,9 +289,10 @@ OS2Timer::~OS2Timer()
   dprintf(("WINMM:OS2Timer: OS2Timer::~OS2Timer(%08xh)\n",
            this));
 
-  OS2Timer *timer = OS2Timer::timers;
-
   KillTimer();
+
+  timeMutex.enter();
+  OS2Timer *timer = OS2Timer::timers;
 
   if(timer != this)
   {
@@ -287,6 +304,8 @@ OS2Timer::~OS2Timer()
   }
   else
     timers = timer->next;
+
+  timeMutex.leave();
 }
 /******************************************************************************/
 /******************************************************************************/
