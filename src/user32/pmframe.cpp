@@ -1,4 +1,4 @@
-/* $Id: pmframe.cpp,v 1.16 1999-11-01 19:11:41 sandervl Exp $ */
+/* $Id: pmframe.cpp,v 1.17 1999-11-02 17:07:25 cbratschi Exp $ */
 /*
  * Win32 Frame Managment Code for OS/2
  *
@@ -244,6 +244,7 @@ MRESULT EXPENTRY Win32FrameProc(HWND hwnd,ULONG msg,MPARAM mp1,MPARAM mp2)
             goto RunDefFrameProc;
 
         if(!win32wnd->CanReceiveSizeMsgs()) {
+            goto RunDefFrameProc; //CB: must call def frame proc or frame control activation is broken
             break;
         }
 
@@ -266,18 +267,22 @@ MRESULT EXPENTRY Win32FrameProc(HWND hwnd,ULONG msg,MPARAM mp1,MPARAM mp2)
            Win32BaseWindow *wndAfter = Win32BaseWindow::GetWindowFromOS2Handle(pswp->hwndInsertBehind);
            if(wndAfter) wp.hwndInsertAfter = wndAfter->getWindowHandle();
         }
+
+        //CB: problems with profmine titlebar tracking
         if(win32wnd->MsgPosChanging((LPARAM)&wp) == 0)
         {//app or default window handler changed wp
             dprintf(("PMFRAME: WM_ADJUSTWINDOWPOS, app changed windowpos struct"));
             dprintf(("%x (%d,%d), (%d,%d)", pswp->fl, pswp->x, pswp->y, pswp->cx, pswp->cy));
+
             OSLibMapWINDOWPOStoSWPFrame(&wp, pswp, &swpOld, hParent, hwnd);
             dprintf(("%x (%d,%d), (%d,%d)", pswp->fl, pswp->x, pswp->y, pswp->cx, pswp->cy));
             pswp->fl |= SWP_NOADJUST;
             pswp->hwndInsertBehind = hwndAfter;
             pswp->hwnd = hwnd;
 
-            RestoreOS2TIB();
-            return (MRESULT)0xf;
+            goto RunDefFrameProc; //CB: must call def frame proc or frame control activation is broken
+            //RestoreOS2TIB();
+            //return (MRESULT)0xf;
         }
         goto RunDefFrameProc; //CB: must call def frame proc or frame control activation is broken
     }
