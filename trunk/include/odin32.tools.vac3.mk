@@ -1,4 +1,4 @@
-# $Id: odin32.tools.vac3.mk,v 1.5 2001-08-16 04:13:20 bird Exp $
+# $Id: odin32.tools.vac3.mk,v 1.6 2001-09-30 00:48:14 bird Exp $
 
 #
 # Odin32 API
@@ -92,29 +92,8 @@ MAKE_CMD    = $(MAKE_CMD) NODEP=1
 
 .orc{$(OBJDIR)}.obj:
     $(RC) $(RCFLAGS) $(CINCLUDES) -o $(OBJDIR)\$(@B).orc_asm $<
-    $(AS) $(ASFLAGS) -Fdo:$(OBJDIR) $(OBJDIR)\$(@B).orc_asm"
+    $(AS) $(ASFLAGS) -Fdo:$(OBJDIR) $(OBJDIR)\$(@B).orc_asm
 
 .rc{$(OBJDIR)}.res:
     $(CMDQD_SUB) $(OS2RC) $(OS2RCFLAGS) $(CINCLUDES:-I=-i ) $< $@
-
-
-!if 0 # disabled.
-#
-# Old Targets
-#
-.c.obj:
-    $(CC) $(CFLAGS) $(CINCLUDES) $(CDEFINES) -c $<
-
-.cpp.obj:
-    $(CXX) $(CXXFLAGS) $(CINCLUDES) $(CDEFINES) -c $<
-
-.asm.obj:
-    $(AS) $(ASFLAGS) -Fdo:$(OBJDIR) $<
-
-.orc.asm:
-    $(RC) $(RCFLAGS) $(CINCLUDES) -o $@ $<
-
-.rc.res:
-    $(OS2RC) $(OS2RCFLAGS) $< $@
-!endif
 
