@@ -1,4 +1,4 @@
-/* $Id: gdi32.cpp,v 1.47 2000-05-22 19:11:28 sandervl Exp $ */
+/* $Id: gdi32.cpp,v 1.48 2000-06-01 11:27:05 sandervl Exp $ */
 
 /*
  * GDI32 apis
@@ -239,10 +239,10 @@ HGDIOBJ WIN32API SelectObject(HDC hdc, HGDIOBJ hObj)
 }
 //******************************************************************************
 //******************************************************************************
-int WIN32API SetBkMode( HDC arg1, int  arg2)
+int WIN32API SetBkMode( HDC hdc, int mode)
 {
-    dprintf(("GDI32: SetBkMode\n"));
-    return O32_SetBkMode(arg1, arg2);
+    dprintf(("GDI32: SetBkMode %x %d (old %d)", hdc, mode, O32_GetBkMode(hdc)));
+    return O32_SetBkMode(hdc, mode);
 }
 //******************************************************************************
 //******************************************************************************
@@ -792,16 +792,6 @@ BOOL WIN32API GetCharWidth32W(HDC arg1, UINT iFirstChar, UINT iLastChar, PINT  a
 {
     dprintf(("GDI32: GetCharWidth32W, not properly implemented"));
     return O32_GetCharWidth(arg1, iFirstChar, iLastChar, arg4);
-}
-//******************************************************************************
-//******************************************************************************
-int WIN32API GetClipBox( HDC arg1, PRECT  arg2)
-{
- int rc;
-
-  rc = O32_GetClipBox(arg1, arg2);
-  dprintf(("GDI32: GetClipBox of %X returned %d\n", arg1, rc));
-  return(rc);
 }
 //******************************************************************************
 //******************************************************************************

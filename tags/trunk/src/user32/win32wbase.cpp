@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.196 2000-05-28 16:43:46 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.197 2000-06-01 11:27:57 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -514,7 +514,7 @@ BOOL Win32BaseWindow::CreateWindowExA(CREATESTRUCTA *cs, ATOM classAtom)
                                  dwOSWinStyle,(char *)windowNameA,
                                  (owner) ? owner->getOS2WindowHandle() : OSLIB_HWND_DESKTOP,
                                  (hwndLinkAfter == HWND_BOTTOM) ? TRUE : FALSE,
-                                 &OS2HwndFrame, 0, fTaskList,fXDefault | fCXDefault,windowClass->getStyle() & CS_SAVEBITS);
+                                 &OS2HwndFrame, 0, fTaskList,fXDefault | fCXDefault,windowClass->getStyle());
   if(OS2Hwnd == 0) {
         dprintf(("Window creation failed!!"));
         SetLastError(ERROR_OUTOFMEMORY); //TODO: Better error
