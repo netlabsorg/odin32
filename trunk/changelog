@@ -1,4 +1,7 @@
-/* $Id: changelog,v 1.2338 2002-10-08 09:48:23 sandervl Exp $ */
+/* $Id: changelog,v 1.2339 2002-10-08 16:42:36 sandervl Exp $ */
+
+ 2001-10-08: Dietrich Teickner <Dietrich_Teickner@t-online   >
+    - SHELL32:  o SHFileOperationA updates
 
  2002-10-08: Sander van Leeuwen <sandervl@innotek   >
     - ODINCRT:  o Updates for shared critical sections
