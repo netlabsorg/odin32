@@ -1,16 +1,17 @@
-#include <os2win.h>
-
+/* $Id: dcscroll.cpp,v 1.2 2001-09-05 13:53:50 bird Exp $ */
 /*
  * ScrollDC implementation
- * 
+ *
  * Ported from Wine (windows\scroll.c)
  * Fixes for clip rectangles & adaption for Odin (SvL)
  *
  * Copyright  David W. Metcalfe, 1993
- *	      Alex Korobka       1995,1996
+ *        Alex Korobka       1995,1996
  *
  *
  */
+
+#include <os2win.h>
 
 //******************************************************************************
 //TODO: Can be more efficient (update rect/rgn calc.)
@@ -23,20 +24,20 @@ BOOL WINAPI ScrollDC( HDC hdc, INT dx, INT dy, const RECT *rc,
     POINT src, dest;
 
     dprintf(("USER32: ScrollDC %04x %d,%d hrgnUpdate=%04x rcUpdate = %p cliprc = (%d,%d-%d,%d), rc=(%d,%d-%d,%d)",
-                   hdc, dx, dy, hrgnUpdate, rcUpdate, 
-		   prLClip ? prLClip->left : 0, prLClip ? prLClip->top : 0, prLClip ? prLClip->right : 0, prLClip ? prLClip->bottom : 0,
-		   rc ? rc->left : 0, rc ? rc->top : 0, rc ? rc->right : 0, rc ? rc->bottom : 0 ));
+                   hdc, dx, dy, hrgnUpdate, rcUpdate,
+           prLClip ? prLClip->left : 0, prLClip ? prLClip->top : 0, prLClip ? prLClip->right : 0, prLClip ? prLClip->bottom : 0,
+           rc ? rc->left : 0, rc ? rc->top : 0, rc ? rc->right : 0, rc ? rc->bottom : 0 ));
 
     if ( !hdc ) return FALSE;
 
     /* compute device clipping region (in device coordinates) */
 
     if ( rc )
-	rect = *rc;
+    rect = *rc;
     else /* maybe we should just return FALSE? */
     {
         DebugInt3();
-	GetClipBox( hdc, &rect );
+    GetClipBox( hdc, &rect );
     }
 
     LPtoDP( hdc, (LPPOINT)&rect, 2 );
@@ -45,7 +46,7 @@ BOOL WINAPI ScrollDC( HDC hdc, INT dx, INT dy, const RECT *rc,
     {
         rClip = *prLClip;
         LPtoDP( hdc, (LPPOINT)&rClip, 2 );
-	IntersectRect( &rClip, &rect, &rClip );
+    IntersectRect( &rClip, &rect, &rClip );
     }
     else
         rClip = rect;
@@ -73,7 +74,7 @@ BOOL WINAPI ScrollDC( HDC hdc, INT dx, INT dy, const RECT *rc,
             dest.y = (src.y = rSrc.top) + dy;
 
             /* copy bits */
-    
+
             DPtoLP( hdc, (LPPOINT)&rSrc, 2 );
             DPtoLP( hdc, &src, 1 );
             DPtoLP( hdc, &dest, 1 );
@@ -102,12 +103,12 @@ BOOL WINAPI ScrollDC( HDC hdc, INT dx, INT dy, const RECT *rc,
             CombineRgn( hrgn, hrgn, hrgn2, RGN_DIFF );
 
             if( rcUpdate )
-	    {
-		GetRgnBox( hrgn, rcUpdate );
+        {
+        GetRgnBox( hrgn, rcUpdate );
 
-		/* Put the rcUpdate in logical coordinate */
-		DPtoLP( hdc, (LPPOINT)rcUpdate, 2 );
-	    }
+        /* Put the rcUpdate in logical coordinate */
+        DPtoLP( hdc, (LPPOINT)rcUpdate, 2 );
+        }
             if (!hrgnUpdate) DeleteObject( hrgn );
             DeleteObject( hrgn2 );
 

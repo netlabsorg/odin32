@@ -1,3 +1,4 @@
+/* $Id: inituser32.cpp,v 1.5 2001-09-05 13:53:50 bird Exp $ */
 /*
  * USER32 DLL entry point
  *
@@ -45,7 +46,7 @@
 #include <exitlist.h>
 #include <initdll.h>
 
-#define DBG_LOCALLOG	DBG_initterm
+#define DBG_LOCALLOG    DBG_initterm
 #include "dbglocal.h"
 
 /*-------------------------------------------------------------------*/
@@ -115,7 +116,7 @@ ULONG APIENTRY inittermUser32(ULONG hModule, ULONG ulFlag)
          break;
       case 1 :
          if(hInstanceUser32) {
-         	UnregisterLxDll(hInstanceUser32);
+            UnregisterLxDll(hInstanceUser32);
          }
          break;
       default  :

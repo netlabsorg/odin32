@@ -1,3 +1,4 @@
+/* $Id: url.c,v 1.4 2001-09-05 13:48:39 bird Exp $ */
 /*
  * Url functions
  *
@@ -52,34 +53,34 @@ static BOOL URL_NeedEscape(CHAR ch, DWORD dwFlags)
 
     if(dwFlags & URL_ESCAPE_SPACES_ONLY) {
         if(ch == ' ')
-	    return TRUE;
-	else
-	    return FALSE;
+        return TRUE;
+    else
+        return FALSE;
     }
 
     if (ch <= 31 || ch >= 127)
-	return TRUE;
+    return TRUE;
 
     else {
         switch (ch) {
-	case ' ':
-	case '<':
-	case '>':
-	case '\"':
-	case '{':
-	case '}':
-	case '|':
-	case '\\':
-	case '^':
-	case ']':
-	case '[':
-	case '`':
-	case '&':
-	    return TRUE;
+    case ' ':
+    case '<':
+    case '>':
+    case '\"':
+    case '{':
+    case '}':
+    case '|':
+    case '\\':
+    case '^':
+    case ']':
+    case '[':
+    case '`':
+    case '&':
+        return TRUE;
 
-	default:
-	    return FALSE;
-	}
+    default:
+        return FALSE;
+    }
     }
 }
 
@@ -87,7 +88,7 @@ static BOOL URL_NeedEscape(CHAR ch, DWORD dwFlags)
  *        UrlCanonicalizeA     [SHLWAPI]
  */
 HRESULT WINAPI UrlCanonicalizeA(LPCSTR pszUrl, LPSTR pszCanonicalized,
-	LPDWORD pcchCanonicalized, DWORD dwFlags)
+    LPDWORD pcchCanonicalized, DWORD dwFlags)
 {
     HRESULT hr = S_OK;
 
@@ -95,7 +96,7 @@ HRESULT WINAPI UrlCanonicalizeA(LPCSTR pszUrl, LPSTR pszCanonicalized,
     INT nLen;
 
     TRACE("(%s %p %p 0x%08lx)\n", debugstr_a(pszUrl), pszCanonicalized,
-	  pcchCanonicalized, dwFlags);
+      pcchCanonicalized, dwFlags);
 
     nLen = strlen(pszUrl);
     lpszUrlCpy = HeapAlloc(GetProcessHeap(), 0, nLen + 1);
@@ -112,38 +113,38 @@ HRESULT WINAPI UrlCanonicalizeA(LPCSTR pszUrl, LPSTR pszCanonicalized,
 
     if(dwFlags & (URL_ESCAPE_UNSAFE | URL_ESCAPE_SPACES_ONLY)) {
         DWORD EscapeFlags = dwFlags & (URL_ESCAPE_SPACES_ONLY
-				       /* | URL_ESCAPE_PERCENT */);
-	hr = UrlEscapeA(lpszUrlCpy, pszCanonicalized, pcchCanonicalized,
-			EscapeFlags);
+                       /* | URL_ESCAPE_PERCENT */);
+    hr = UrlEscapeA(lpszUrlCpy, pszCanonicalized, pcchCanonicalized,
+            EscapeFlags);
     } else { /* No escapping needed, just copy the string */
         nLen = strlen(lpszUrlCpy);
-	if(nLen < *pcchCanonicalized)
-	    memcpy(pszCanonicalized, lpszUrlCpy, nLen + 1);
-	else {
-	    hr = E_POINTER;
-	    nLen++;
-	}
-	*pcchCanonicalized = nLen;
+    if(nLen < *pcchCanonicalized)
+        memcpy(pszCanonicalized, lpszUrlCpy, nLen + 1);
+    else {
+        hr = E_POINTER;
+        nLen++;
+    }
+    *pcchCanonicalized = nLen;
     }
 
     HeapFree(GetProcessHeap(), 0, lpszUrlCpy);
-  
+
     return hr;
 }
 
 /*************************************************************************
  *        UrlCanonicalizeW     [SHLWAPI]
  */
-HRESULT WINAPI UrlCanonicalizeW(LPCWSTR pszUrl, LPWSTR pszCanonicalized, 
-				LPDWORD pcchCanonicalized, DWORD dwFlags)
+HRESULT WINAPI UrlCanonicalizeW(LPCWSTR pszUrl, LPWSTR pszCanonicalized,
+                LPDWORD pcchCanonicalized, DWORD dwFlags)
 {
     FIXME("(%s %p %p 0x%08lx): stub\n",debugstr_w(pszUrl),
-	  pszCanonicalized, pcchCanonicalized, dwFlags);
+      pszCanonicalized, pcchCanonicalized, dwFlags);
     return E_NOTIMPL;
 }
 
 /*************************************************************************
- *      UrlEscapeA	[SHLWAPI]
+ *      UrlEscapeA  [SHLWAPI]
  *
  * Converts unsafe characters into their escape sequences.
  *
@@ -171,10 +172,10 @@ HRESULT WINAPI UrlCanonicalizeW(LPCWSTR pszUrl, LPWSTR pszCanonicalized,
  * For character values that are converted see URL_NeedEscape.
  */
 HRESULT WINAPI UrlEscapeA(
-	LPCSTR pszUrl,
-	LPSTR pszEscaped,
-	LPDWORD pcchEscaped,
-	DWORD dwFlags)
+    LPCSTR pszUrl,
+    LPSTR pszEscaped,
+    LPDWORD pcchEscaped,
+    DWORD dwFlags)
 {
     LPCSTR src;
     DWORD needed = 0, ret;
@@ -184,64 +185,64 @@ HRESULT WINAPI UrlEscapeA(
     INT len;
 
     TRACE("(%s %p %p 0x%08lx)\n", debugstr_a(pszUrl), pszEscaped,
-	  pcchEscaped, dwFlags);
+      pcchEscaped, dwFlags);
 
     if(dwFlags & ~URL_ESCAPE_SPACES_ONLY)
         FIXME("Unimplemented flags: %08lx\n", dwFlags);
 
     for(src = pszUrl; *src; src++) {
         if(!(dwFlags & URL_ESCAPE_SPACES_ONLY) &&
-	   (*src == '#' || *src == '?'))
-	    stop_escapping = TRUE;
+       (*src == '#' || *src == '?'))
+        stop_escapping = TRUE;
 
-	if(URL_NeedEscape(*src, dwFlags) && stop_escapping == FALSE) {
-	    next[0] = '%';
-	    next[1] = hex[(*src >> 4) & 0xf];
-	    next[2] = hex[*src & 0xf];
-	    len = 3;
-	} else {
-	    next[0] = *src;
-	    len = 1;
-	}
+    if(URL_NeedEscape(*src, dwFlags) && stop_escapping == FALSE) {
+        next[0] = '%';
+        next[1] = hex[(*src >> 4) & 0xf];
+        next[2] = hex[*src & 0xf];
+        len = 3;
+    } else {
+        next[0] = *src;
+        len = 1;
+    }
 
-	if(needed + len <= *pcchEscaped) {
-	    memcpy(dst, next, len);
-	    dst += len;
-	}
-	needed += len;
+    if(needed + len <= *pcchEscaped) {
+        memcpy(dst, next, len);
+        dst += len;
+    }
+    needed += len;
     }
 
     if(needed < *pcchEscaped) {
         *dst = '\0';
-	ret = S_OK;
+    ret = S_OK;
     } else {
         needed++; /* add one for the '\0' */
-	ret = E_POINTER;
+    ret = E_POINTER;
     }
     *pcchEscaped = needed;
     return ret;
-}	
+}
 
 /*************************************************************************
- *      UrlEscapeW	[SHLWAPI]
+ *      UrlEscapeW  [SHLWAPI]
  */
 HRESULT WINAPI UrlEscapeW(
-	LPCWSTR pszUrl,
-	LPWSTR pszEscaped,
-	LPDWORD pcchEscaped,
-	DWORD dwFlags)
+    LPCWSTR pszUrl,
+    LPWSTR pszEscaped,
+    LPDWORD pcchEscaped,
+    DWORD dwFlags)
 {
     FIXME("(%s %p %p 0x%08lx): stub\n",debugstr_w(pszUrl),
-	  pszEscaped, pcchEscaped, dwFlags);
+      pszEscaped, pcchEscaped, dwFlags);
     return E_NOTIMPL;
 }
 
 
 /*************************************************************************
- *      UrlUnescapeA	[SHLWAPI]
+ *      UrlUnescapeA    [SHLWAPI]
  *
  * Converts escape sequences back to ordinary characters.
- * 
+ *
  * If URL_ESCAPE_INPLACE is set in dwFlags then pszUnescaped and
  * pcchUnescaped are ignored and the converted string is returned in
  * pszUrl, otherwise the string is returned in pszUnescaped.
@@ -255,10 +256,10 @@ HRESULT WINAPI UrlEscapeW(
  *
  */
 HRESULT WINAPI UrlUnescapeA(
-	LPCSTR pszUrl,
-	LPSTR pszUnescaped,
-	LPDWORD pcchUnescaped,
-	DWORD dwFlags)
+    LPCSTR pszUrl,
+    LPSTR pszUnescaped,
+    LPDWORD pcchUnescaped,
+    DWORD dwFlags)
 {
     char *dst, next;
     LPCSTR src;
@@ -267,7 +268,7 @@ HRESULT WINAPI UrlUnescapeA(
     BOOL stop_unescapping = FALSE;
 
     TRACE("(%s, %p, %p, %08lx): stub\n", debugstr_a(pszUrl), pszUnescaped,
-	  pcchUnescaped, dwFlags);
+      pcchUnescaped, dwFlags);
 
     if(dwFlags & URL_UNESCAPE_INPLACE)
         dst = (char*)pszUrl;
@@ -276,31 +277,31 @@ HRESULT WINAPI UrlUnescapeA(
 
     for(src = pszUrl, needed = 0; *src; src++, needed++) {
         if(dwFlags & URL_DONT_UNESCAPE_EXTRA_INFO &&
-	   (*src == '#' || *src == '?')) {
-	    stop_unescapping = TRUE;
-	    next = *src;
-	} else if(*src == '%' && isxdigit(*(src + 1)) && isxdigit(*(src + 2))
-		  && stop_unescapping == FALSE) {
-	    INT ih;
-	    char buf[3];
-	    memcpy(buf, src + 1, 2);
-	    buf[2] = '\0';
-	    ih = strtol(buf, NULL, 16);
-	    next = (CHAR) ih;
-	    src += 2; /* Advance to end of escape */
-	} else
-	    next = *src;
+       (*src == '#' || *src == '?')) {
+        stop_unescapping = TRUE;
+        next = *src;
+    } else if(*src == '%' && isxdigit(*(src + 1)) && isxdigit(*(src + 2))
+          && stop_unescapping == FALSE) {
+        INT ih;
+        char buf[3];
+        memcpy(buf, src + 1, 2);
+        buf[2] = '\0';
+        ih = strtol(buf, NULL, 16);
+        next = (CHAR) ih;
+        src += 2; /* Advance to end of escape */
+    } else
+        next = *src;
 
-	if(dwFlags & URL_UNESCAPE_INPLACE || needed < *pcchUnescaped)
-	    *dst++ = next;
+    if(dwFlags & URL_UNESCAPE_INPLACE || needed < *pcchUnescaped)
+        *dst++ = next;
     }
 
     if(dwFlags & URL_UNESCAPE_INPLACE || needed < *pcchUnescaped) {
         *dst = '\0';
-	ret = S_OK;
+    ret = S_OK;
     } else {
         needed++; /* add one for the '\0' */
-	ret = E_POINTER;
+    ret = E_POINTER;
     }
     if(!(dwFlags & URL_UNESCAPE_INPLACE))
         *pcchUnescaped = needed;
@@ -309,21 +310,21 @@ HRESULT WINAPI UrlUnescapeA(
 }
 
 /*************************************************************************
- *      UrlUnescapeW	[SHLWAPI]
+ *      UrlUnescapeW    [SHLWAPI]
  */
 HRESULT WINAPI UrlUnescapeW(
-	LPCWSTR pszUrl,
-	LPWSTR pszUnescaped,
-	LPDWORD pcchUnescaped,
-	DWORD dwFlags)
+    LPCWSTR pszUrl,
+    LPWSTR pszUnescaped,
+    LPDWORD pcchUnescaped,
+    DWORD dwFlags)
 {
     FIXME("(%s, %p, %p, %08lx): stub\n", debugstr_w(pszUrl), pszUnescaped,
-	  pcchUnescaped, dwFlags);
+      pcchUnescaped, dwFlags);
     return E_NOTIMPL;
 }
 
 /*************************************************************************
- *      HashData	[SHLWAPI]
+ *      HashData    [SHLWAPI]
  *
  * Hash an input block into a variable sized digest.
  */
@@ -356,7 +357,7 @@ BOOL WINAPI HashData(const unsigned char *lpSrc, INT nSrcLen,
 }
 
 /*************************************************************************
- *      UrlHashA	[SHLWAPI]
+ *      UrlHashA    [SHLWAPI]
  *
  * Hash an ASCII URL.
  */
@@ -370,7 +371,7 @@ HRESULT WINAPI UrlHashA(LPCSTR pszUrl, unsigned char *lpDest, INT nDestLen)
 }
 
 /*************************************************************************
- *      UrlApplySchemeW	[SHLWAPI.@]
+ *      UrlApplySchemeW [SHLWAPI.@]
  */
 HRESULT WINAPI UrlApplySchemeW(LPCWSTR pszIn, LPWSTR pszOut, LPDWORD pcchOut, DWORD dwFlags)
 {
