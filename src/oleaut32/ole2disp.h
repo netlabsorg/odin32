@@ -22,6 +22,15 @@
 #include "wtypes.h"
 #include "wine/windef16.h"
 
+#ifdef __WIN32OS2__
+#define MapSL       _MapSL
+#define UnMapLS     _UnMapLS
+
+#define _MapSL(a)    (a)
+#define _UnMapLS(a)
+
+#endif
+
 BSTR16 WINAPI SysAllocString16(LPCOLESTR16);
 BSTR16 WINAPI SysAllocStringLen16(const char*, int);
 VOID   WINAPI SysFreeString16(BSTR16);
