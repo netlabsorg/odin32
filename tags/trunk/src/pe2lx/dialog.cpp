@@ -1,3 +1,5 @@
+/* $Id: dialog.cpp,v 1.3 1999-06-10 17:08:53 phaller Exp $ */
+
 /*
  * PE2LX dialog conversion code
  *

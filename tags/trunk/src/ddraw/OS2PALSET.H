@@ -1,3 +1,5 @@
+/* $Id: OS2PALSET.H,v 1.3 1999-06-10 17:10:56 phaller Exp $ */
+
 /*
  * OS/2 Palette function definitions
  *

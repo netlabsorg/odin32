@@ -1,3 +1,5 @@
+; $Id: asmutil.asm,v 1.3 1999-06-10 17:10:57 phaller Exp $
+
 ; asmutil.asm Color key bit blitting for DirectDraw
 ;
 ; Copyright 1998 Sander van Leeuwen (sandervl@xs4all.nl)

@@ -1,3 +1,5 @@
+/* $Id: cursor.h,v 1.3 1999-06-10 17:08:52 phaller Exp $ */
+
 /*
  * PE2LX cursor conversion code
  *
@@ -19,7 +21,7 @@ typedef struct {
 //Fout in docs, geen padding
 //  WORD   padding;            // filler for DWORD alignment
 } CursorHeader;
-   
+
 typedef struct {
   WORD   wWidth;
   WORD   wHeight;
@@ -53,7 +55,7 @@ public:
     static               void  DestroyAll();
 
 protected:
-	 
+	
 private:
               int             id, cursorsize, prevoffset;
     BITMAPFILEHEADER         *cursorhdr;

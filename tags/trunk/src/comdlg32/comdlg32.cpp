@@ -1,3 +1,5 @@
+/* $Id: comdlg32.cpp,v 1.4 1999-06-10 17:07:28 phaller Exp $ */
+
 /*
  * COMDLG32 implementation
  *

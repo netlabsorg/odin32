@@ -1,3 +1,5 @@
+/* $Id: time.cpp,v 1.2 1999-06-10 17:06:47 phaller Exp $ */
+
 /*
  * Project Odin Software License can be found in LICENSE.TXT
  * Win32 NT Runtime / NTDLL for OS/2

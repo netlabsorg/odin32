@@ -1,3 +1,5 @@
+/* $Id: dialog.h,v 1.3 1999-06-10 17:08:53 phaller Exp $ */
+
 /*
  * PE2LX dialog conversion code
  *
@@ -90,7 +92,7 @@ typedef struct tagWINDLGITEMTEMPLATEEX{
 //This is followed by class name, title, and creation data for the control,
 //which have the same form as documented in the SDK for DLGITEMTEMPLATE.
 
-//SvL: Yeah, right! 
+//SvL: Yeah, right!
 typedef struct {
   WORD   wPointSize;          // Only here if FONT set for dialog
   DWORD  whatever;

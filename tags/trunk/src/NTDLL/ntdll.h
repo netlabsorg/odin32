@@ -1,3 +1,5 @@
+/* $Id: ntdll.h,v 1.3 1999-06-10 17:06:45 phaller Exp $ */
+
 /*
    this file defines interfaces mainly exposed to device drivers and
    native nt dll's
