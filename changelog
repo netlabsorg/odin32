@@ -1,11 +1,13 @@
-/* $Id: changelog,v 1.2103 2002-05-28 09:53:01 sandervl Exp $ */
-
- 2002-05-29: Platon Fomichev <platon@innotek.de>
-    - USER32:   o Don't send WM_COMMAND to disabled button in DIALOG_IsDialogMessage
-    - KERNEL32: o Debugger updates
+/* $Id: changelog,v 1.2104 2002-05-28 13:33:52 sandervl Exp $ */
 
  2002-05-28: Sander van Leeuwen <sandervl@innotek.de>
     - REGSVR32: o Fixed startup
+    - WINMM:    o Completely implemented mixerSetControlDetails
+                o Mixer updates
+
+ 2002-05-28: Platon Fomichev <platon@innotek.de>
+    - USER32:   o Don't send WM_COMMAND to disabled button in DIALOG_IsDialogMessage
+    - KERNEL32: o Debugger updates
 
  2002-05-27: Sander van Leeuwen <sandervl@innotek.de>
     - WINMM:    o Completely implemented mixerGetControlDetailsA/W
