@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.31 2001-11-19 12:32:00 sandervl Exp $
+# $Id: makefile,v 1.32 2002-10-28 17:55:09 sandervl Exp $
 
 #
 # Odin32 API
@@ -35,9 +35,9 @@ $(OBJDIR)\filetitle.obj \
 $(OBJDIR)\finddlg32.obj \
 $(OBJDIR)\filedlg.obj \
 $(OBJDIR)\filedlg95.obj \
-$(OBJDIR)\comdlg32.obj \
+##$(OBJDIR)\comdlg32.obj \
 $(OBJDIR)\filedlgbrowser.obj \
-##$(OBJDIR)\printdlg.obj \
+$(OBJDIR)\printdlg.obj \
 $(OBJDIR)\rsrc.obj
 
 
