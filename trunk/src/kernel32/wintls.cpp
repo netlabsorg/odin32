@@ -1,4 +1,4 @@
-/* $Id: wintls.cpp,v 1.9 2000-02-16 14:22:13 sandervl Exp $ */
+/* $Id: wintls.cpp,v 1.10 2000-05-27 11:30:36 sandervl Exp $ */
 /*
  * Win32 TLS API functions
  *
@@ -135,14 +135,17 @@ void Win32ImageBase::tlsDetachThread()	//destroy TLS structures
 //******************************************************************************
 DWORD WIN32API TlsAlloc()
 {
-  dprintf(("KERNEL32:  TlsAlloc\n"));
-  return(O32_TlsAlloc());
+ DWORD index;
+
+  index = O32_TlsAlloc();
+  dprintf(("KERNEL32: TlsAlloc returned %d", index));
+  return index;
 }
 //******************************************************************************
 //******************************************************************************
 BOOL WIN32API TlsFree(DWORD index)
 {
-  dprintf(("KERNEL32:  TlsFree\n"));
+  dprintf(("KERNEL32: TlsFree %d", index));
   return(O32_TlsFree(index));
 }
 //******************************************************************************
@@ -152,14 +155,14 @@ LPVOID WIN32API TlsGetValue(DWORD index)
  LPVOID rc;
 
   rc = O32_TlsGetValue(index);
-//  dprintf(("KERNEL32:  TlsGetValue %d returned %X\n", index, rc));
+  dprintf2(("KERNEL32:  TlsGetValue %d returned %X\n", index, rc));
   return(rc);
 }
 //******************************************************************************
 //******************************************************************************
 BOOL WIN32API TlsSetValue(DWORD index, LPVOID val)
 {
-//  dprintf(("KERNEL32:  TlsSetValue\n"));
+  dprintf2(("KERNEL32:  TlsSetValue\n"));
   return(O32_TlsSetValue(index, val));
 }
 //******************************************************************************

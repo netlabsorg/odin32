@@ -1,4 +1,4 @@
-/* $Id: windllpeldr.cpp,v 1.6 2000-02-17 14:08:51 sandervl Exp $ */
+/* $Id: windllpeldr.cpp,v 1.7 2000-05-27 11:30:35 sandervl Exp $ */
 
 /*
  * Win32 PE loader Dll class
@@ -79,6 +79,12 @@ BOOL Win32PeLdrDll::init(ULONG reservedMem)
   else	OSLibDosClose(dllfile);
   fRet = Win32PeLdrImage::init(0);
   dllEntryPoint = (WIN32DLLENTRY)entryPoint;
+
+  if(!(fh.Characteristics & IMAGE_FILE_DLL)) {
+	//executable loaded as dll; don't call entrypoint
+	dprintf(("WARNING: Exe %s loaded as dll; entrypoint not called", szFileName));
+	dllEntryPoint = NULL;
+  }
   return fRet;
 }
 //******************************************************************************
