@@ -1,4 +1,4 @@
-/* $Id: oslibmsgtranslate.cpp,v 1.10 2000-01-08 16:53:38 sandervl Exp $ */
+/* $Id: oslibmsgtranslate.cpp,v 1.11 2000-01-09 14:37:09 sandervl Exp $ */
 /*
  * Window message translation functions for OS/2
  *
@@ -6,6 +6,9 @@
  * Copyright 1998-1999 Sander van Leeuwen (sandervl@xs4all.nl)
  * Copyright 1999      Daniela Engert (dani@ngrt.de)
  * Copyright 1999      Rene Pronk (R.Pronk@twi.tudelft.nl)
+ *
+ * NOTE: WM_NCHITTEST messages are sent whenever the mouse cursor moves or a mouse button is clicked/released
+ *       (directly when receiving those messages)
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *
@@ -118,7 +121,7 @@ BOOL OS2ToWinMsgTranslate(void *pThdb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode
             win32wnd = Win32BaseWindow::GetWindowFromOS2FrameHandle(hwndFrame);
             fIsFrameControl = (win32wnd != 0);
         }
-        //NOTE: We only translate WM_PAINT/WM_HITTEST & mouse messages; the rest must not be seen by win32 apps
+        //NOTE: We only translate WM_PAINT, WM_ACTIVATE & mouse messages; the rest must not be seen by win32 apps
   }
   //PostThreadMessage posts WIN32APP_POSTMSG msg without window handle
   if(win32wnd == 0 && (os2Msg->msg != WM_CREATE && os2Msg->msg != WM_QUIT && os2Msg->msg != WIN32APP_POSTMSG))
@@ -225,8 +228,8 @@ BOOL OS2ToWinMsgTranslate(void *pThdb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode
         //     If the frame size/position has changed, pmframe.cpp will send
         //     this message
         if(lpRect->right == thdb->wp.x+thdb->wp.cx && lpRect->bottom == thdb->wp.y+thdb->wp.cy) {
-                winMsg->message    = WINWM_WINDOWPOSCHANGED;
-                winMsg->lParam = (LPARAM)&thdb->wp;
+                winMsg->message = WINWM_WINDOWPOSCHANGED;
+                winMsg->lParam  = (LPARAM)&thdb->wp;
         }
         else {
             win32wnd->setWindowRect(thdb->wp.x, thdb->wp.y, thdb->wp.x+thdb->wp.cx, thdb->wp.y+thdb->wp.cy);
@@ -251,9 +254,17 @@ BOOL OS2ToWinMsgTranslate(void *pThdb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode
            fMinimized = TRUE;
         }
 
-        winMsg->message = WINWM_ACTIVATE;
-        winMsg->wParam  = MAKELONG((SHORT1FROMMP(os2Msg->mp1)) ? WA_ACTIVE_W : WA_INACTIVE_W, fMinimized);
-        winMsg->lParam  = (LPARAM)hwndActivate;
+        if(fIsFrameControl) {
+            fTranslateFrameControlMsg = TRUE; //we want a win32 app to see this msg for a frame control
+            winMsg->message = WINWM_NCACTIVATE;
+            winMsg->wParam  = SHORT1FROMMP(os2Msg->mp1);
+        }
+        else
+        {
+            winMsg->message = WINWM_ACTIVATE;
+            winMsg->wParam  = MAKELONG((SHORT1FROMMP(os2Msg->mp1)) ? WA_ACTIVE_W : WA_INACTIVE_W, fMinimized);
+            winMsg->lParam  = (LPARAM)hwndActivate;
+        }
         break;
     }
 
@@ -291,14 +302,19 @@ BOOL OS2ToWinMsgTranslate(void *pThdb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode
     case WM_BUTTON3DOWN:
     case WM_BUTTON3UP:
     case WM_BUTTON3DBLCLK:
+    {
+     ULONG hittest;
+
         if(fIsFrameControl) {
             fTranslateFrameControlMsg = TRUE; //we want a win32 app to see this msg for a frame control
         }
 
+        hittest = win32wnd->MsgHitTest(winMsg->pt.x, winMsg->pt.y);
+
         //WM_NC*BUTTON* is posted when the cursor is in a non-client area of the window
-        if(win32wnd->lastHitTestVal != HTCLIENT_W) {
+        if(hittest != HTCLIENT_W) {
             winMsg->message = WINWM_NCLBUTTONDOWN + (os2Msg->msg - WM_BUTTON1DOWN);
-            winMsg->wParam  = win32wnd->lastHitTestVal;
+            winMsg->wParam  = hittest;
             winMsg->lParam  = MAKELONG(winMsg->pt.x, winMsg->pt.y); //screen coordinates
         }
         else {
@@ -310,8 +326,8 @@ BOOL OS2ToWinMsgTranslate(void *pThdb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode
             winMsg->message = WINWM_LBUTTONDOWN + (os2Msg->msg - WM_BUTTON1DOWN);
             winMsg->lParam  = MAKELONG(ClientPoint.x, ClientPoint.y); //client coordinates
         }
-
         break;
+    }
 
     case WM_BUTTON2MOTIONSTART:
     case WM_BUTTON2MOTIONEND:
@@ -326,7 +342,7 @@ BOOL OS2ToWinMsgTranslate(void *pThdb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode
 
     case WM_MOUSEMOVE:
     {
-        ULONG keystate = 0, setcursormsg = WINWM_MOUSEMOVE;
+        ULONG keystate = 0, setcursormsg = WINWM_MOUSEMOVE, hittest;
 
         if(fIsFrameControl) {
             fTranslateFrameControlMsg = TRUE; //we want a win32 app to see this msg for a frame control
@@ -343,11 +359,13 @@ BOOL OS2ToWinMsgTranslate(void *pThdb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode
         if(WinGetKeyState(HWND_DESKTOP, VK_CTRL) & 0x8000)
             keystate |= MK_CONTROL_W;
 
+        hittest = win32wnd->MsgHitTest(winMsg->pt.x, winMsg->pt.y);
+
         //WM_NCMOUSEMOVE is posted when the cursor moves into a non-client area of the window
-        if(win32wnd->lastHitTestVal != HTCLIENT_W)
+        if(hittest != HTCLIENT_W)
         {
           setcursormsg   = WINWM_NCMOUSEMOVE;
-          winMsg->wParam = (WPARAM)win32wnd->lastHitTestVal;
+          winMsg->wParam = (WPARAM)hittest;
           winMsg->lParam = MAKELONG(winMsg->pt.x,winMsg->pt.y);
         }
         else
@@ -545,7 +563,8 @@ VirtualKeyFound:
       WNDPARAMS *wndParams = (WNDPARAMS *)os2Msg->mp1;
 
         if(wndParams->fsStatus & WPM_TEXT) {
-            win32wnd->MsgSetText(wndParams->pszText, wndParams->cchText);
+            winMsg->message = WINWM_SETTEXT;
+            winMsg->lParam  = (LPARAM)wndParams->pszText;
             break;
         }
         goto dummymessage;
@@ -584,22 +603,6 @@ VirtualKeyFound:
                 winMsg->message = WINWM_PAINTICON;
         }
         else    winMsg->message = WINWM_PAINT;
-        break;
-    }
-
-    case WM_HITTEST:
-    {
-        OSLIBPOINT pt;
-
-        fTranslateFrameControlMsg = TRUE; //we want a win32 app to see this msg for a frame control
-
-        pt.x = (*(POINTS *)&os2Msg->mp1).x;
-        pt.y = (*(POINTS *)&os2Msg->mp1).y;
-
-        mapOS2ToWin32Point(os2Msg->hwnd,OSLIB_HWND_DESKTOP,&pt);
-        winMsg->message  = WINWM_NCHITTEST;
-        winMsg->wParam  = 0;
-        winMsg->lParam  = MAKELONG((USHORT)pt.x, (USHORT)pt.y);
         break;
     }
 

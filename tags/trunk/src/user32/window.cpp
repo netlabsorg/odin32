@@ -1,4 +1,4 @@
-/* $Id: window.cpp,v 1.46 1999-12-29 22:54:04 cbratschi Exp $ */
+/* $Id: window.cpp,v 1.47 2000-01-09 14:37:12 sandervl Exp $ */
 /*
  * Win32 window apis for OS/2
  *
@@ -647,9 +647,9 @@ BOOL WIN32API GetWindowRect( HWND hwnd, PRECT pRect)
         SetLastError(ERROR_INVALID_WINDOW_HANDLE);
         return 0;
     }
-    rc = window->GetWindowRect(pRect);
+    *pRect = *window->getWindowRect();
     dprintf(("GetWindowRect %x (%d,%d) (%d,%d)", hwnd, pRect->left, pRect->top, pRect->right, pRect->bottom));
-    return rc;
+    return TRUE;
 }
 //******************************************************************************
 //******************************************************************************
@@ -1008,7 +1008,7 @@ HDWP WIN32API BeginDeferWindowPos(int count)
     HDWP handle;
     DWP *pDWP;
 
-    dprintf(("USER32:  BeginDeferWindowPos\n"));
+    dprintf(("USER32: BeginDeferWindowPos %x", count));
     if (count <= 0)
     {
         SetLastError(ERROR_INVALID_PARAMETER);

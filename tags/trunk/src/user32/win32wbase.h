@@ -1,4 +1,4 @@
-/* $Id: win32wbase.h,v 1.67 2000-01-08 14:15:09 sandervl Exp $ */
+/* $Id: win32wbase.h,v 1.68 2000-01-09 14:37:12 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -83,7 +83,7 @@ virtual  ULONG  MsgActivate(BOOL fActivate, BOOL fMinimized, HWND hwnd);
          ULONG  MsgPaint(ULONG tmp1, BOOL select = TRUE);
          ULONG  MsgEraseBackGround(HDC hdc);
          ULONG  MsgInitMenu(MSG *msg);
-         ULONG  MsgHitTest(MSG *msg);
+         ULONG  MsgHitTest(ULONG x, ULONG y);
          ULONG  MsgNCPaint();
          ULONG  DispatchMsgA(MSG *msg);
          ULONG  DispatchMsgW(MSG *msg);
@@ -110,9 +110,6 @@ virtual  WORD   GetWindowWord(int index);
          HWND   getOS2FrameWindowHandle()       { return OS2HwndFrame; };
  Win32WndClass *getWindowClass()                { return windowClass; };
 
-         BOOL   getIgnoreHitTest()              { return fIgnoreHitTest; }
-         VOID   setIgnoreHitTest(BOOL ignore)   { fIgnoreHitTest = ignore; }
-
 	 BOOL   getDefWndProcCalled()           { return fDefWndProcCalled; };
          void   clearDefWndProcCalled()         { fDefWndProcCalled = 0; };
 
@@ -138,18 +135,16 @@ Win32BaseWindow *getParent();
          BOOL   isChild();
          PRECT  getClientRect()                 { return &rectClient; };
          void   setClientRect(PRECT rect)       { rectClient = *rect; };
-         PRECT  getWindowRect()                 { return &rectWindow; };
          void   setClientRect(LONG left, LONG top, LONG right, LONG bottom)
          {
                 rectClient.left  = left;  rectClient.top    = top;
                 rectClient.right = right; rectClient.bottom = bottom;
          };
-         void   setWindowRect(LONG left, LONG top, LONG right, LONG bottom)
-         {
-                rectWindow.left  = left;  rectWindow.top    = top;
-                rectWindow.right = right; rectWindow.bottom = bottom;
-         };
-         void   setWindowRect(PRECT rect)       { rectWindow = *rect; };
+         PRECT  getWindowRect();
+         void   setWindowRect(LONG left, LONG top, LONG right, LONG bottom);
+         void   setWindowRect(PRECT rect);
+	 void   setWindowRectChanged();
+
          DWORD  getFlags()                      { return flags; };
          void   setFlags(DWORD newflags)        { flags = newflags; };
 
@@ -195,7 +190,6 @@ Win32BaseWindow *GetTopParent();
          //Window procedure type
          BOOL   IsWindowUnicode();
 
-         BOOL   GetWindowRect(PRECT pRect);
          int    GetWindowTextLength();
          int    GetWindowTextA(LPSTR lpsz, int cch);
          int    GetWindowTextW(LPWSTR lpsz, int cch);
@@ -303,24 +297,25 @@ protected:
         DWORD   flags;
         DWORD   contextHelpId;
         LONG    lastHitTestVal;         //Last value returned by WM_NCHITTEST handler
-        BOOL    fIgnoreHitTest;         //Use WinWindowFromPoint during WM_HITTEST
 
-        BOOL    isIcon;
-        BOOL    fFirstShow;
-        BOOL    fIsDialog;
-        BOOL    fIsModalDialog;
-        BOOL    fIsModalDialogOwner;
         HWND    OS2HwndModalDialog;
-        BOOL    fInternalMsg;           //Used to distinguish between messages
-                                        //sent by PM and those sent by apps
-        BOOL    fNoSizeMsg;
-        BOOL    fIsDestroyed;
-        BOOL    fDestroyWindowCalled;   //DestroyWindow was called for this window
-        BOOL    fCreated;
-        BOOL    fTaskList;              //should be listed in PM tasklist or not
-        BOOL    fParentDC;
 
-        BOOL    fDefWndProcCalled;      //set when DefWndProc called; used in PM window handlers to determine what to do next
+        ULONG   isIcon               :1,
+        	fFirstShow	     :1,
+        	fIsDialog            :1,
+        	fIsModalDialog       :1,
+        	fIsModalDialogOwner  :1,
+        	fInternalMsg         :1, //Used to distinguish between messages
+                                         //sent by PM and those sent by apps
+        	fNoSizeMsg           :1,
+        	fIsDestroyed         :1,
+        	fDestroyWindowCalled :1, //DestroyWindow was called for this window
+        	fCreated             :1,
+        	fTaskList            :1, //should be listed in PM tasklist or not
+        	fParentDC            :1, 
+        	fIsSubclassedOS2Wnd  :1, //subclassed OS/2 window: Netscape plug-in/scrollbar
+        	fDefWndProcCalled    :1, //set when DefWndProc called; used in PM window handlers to determine what to do next
+                fWindowRectChanged   :1; //Set when parent window has been moved; cleared when window rect is updated
 
  	HRGN    hWindowRegion;
 
@@ -333,7 +328,6 @@ protected:
         ULONG   borderHeight;
 
         PVOID   pOldWndProc;
-        BOOL    fIsSubclassedOS2Wnd;  //subclassed OS/2 window: Netscape plug-in/scrollbar
 
    Win32BaseWindow *owner;
      Win32Resource *iconResource;
@@ -364,9 +358,6 @@ private:
 #ifndef OS2_INCLUDED
         void  GetMinMaxInfo(POINT *maxSize, POINT *maxPos, POINT *minTrack, POINT *maxTrack );
         LONG  HandleWindowPosChanging(WINDOWPOS *winpos);
-        LONG  HandleNCLButtonDown(WPARAM wParam,LPARAM lParam);
-        LONG  HandleNCLButtonUp(WPARAM wParam,LPARAM lParam);
-        LONG  HandleNCLButtonDblClk(WPARAM wParam,LPARAM lParam);
         LONG  HandleSysCommand(WPARAM wParam, POINT *pt32);
 
         LONG  SendNCCalcSize(BOOL calcValidRect,
@@ -385,6 +376,27 @@ private:
 #else
 friend BOOL  OS2ToWinMsgTranslate(void *pThdb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode, BOOL fTranslateExtraMsgs);
 #endif
+
+        //painting & non-client methods
+        BOOL  DrawSysButton(HDC hdc,BOOL down);
+        BOOL  DrawGrayButton(HDC hdc,int x,int y);
+        VOID  DrawCloseButton(HDC hdc,BOOL down,BOOL bGrayed);
+        VOID  DrawMaxButton(HDC hdc,BOOL down,BOOL bGrayed);
+        VOID  DrawMinButton(HDC hdc,BOOL down,BOOL bGrayed);
+        VOID  DrawCaption(HDC hdc,RECT *rect,BOOL active);
+        VOID  DrawFrame(HDC hdc,RECT *rect,BOOL dlgFrame,BOOL active);
+
+        VOID  GetInsideRect(RECT *rect);
+
+        VOID  TrackMinMaxBox(WORD wParam);
+        VOID  TrackCloseButton(WORD wParam);
+
+        VOID  HandleNCPaint(HRGN clip,BOOL suppress_menupaint);
+	LONG  HandleNCHitTest(POINT pt);
+        LONG  HandleNCActivate(WPARAM wParam);
+        LONG  HandleNCLButtonDown(WPARAM wParam,LPARAM lParam);
+        LONG  HandleNCLButtonUp(WPARAM wParam,LPARAM lParam);
+        LONG  HandleNCLButtonDblClk(WPARAM wParam,LPARAM lParam);
 
 public:
          void SetFakeOpen32()    { WinSetDAXData (OS2Hwnd, &fakeWinBase); }
