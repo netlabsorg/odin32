@@ -1,4 +1,7 @@
- /* $Id: ChangeLog,v 1.450 1999-11-14 16:36:25 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.451 1999-11-14 21:07:18 davidr Exp $ */
+
+ 99-11-14: David Raison <djr@lemur.co.uk>
+ 	- OLEAUT32: Tidy up IPicture implentation - now handles fOwn.
 
  99-11-14: Achim Hasenmueller <achimha@innotek.de>
         - COMCTL32: Fixed strdupAtoW/WtoA calls

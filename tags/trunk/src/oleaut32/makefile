@@ -1,4 +1,4 @@
-#/* $Id: makefile,v 1.6 1999-11-14 01:26:36 davidr Exp $ */
+#/* $Id: makefile,v 1.7 1999-11-14 21:05:23 davidr Exp $ */
 #
 # PD-Win32 API 
 #
@@ -55,7 +55,7 @@ ole2disp.obj:    ole2disp.cpp oleaut32.h
 variant.obj:    variant.cpp parsedt.h
 typelib.obj:    typelib.cpp oleaut32.h
 olefont.obj:    olefont.cpp oleaut32.h
-ipicture.obj:   ipicture.cpp oleaut32.h
+ipicture.obj:   ipicture.cpp ipicture.h oleaut32.h
 parsedt.obj:    parsedt.cpp parsedt.h
 safearray.obj:  safearray.cpp oleaut32.h
 guid.obj:       guid.cpp
