@@ -1,4 +1,4 @@
-/* $Id: obj_base.h,v 1.5 1999-06-24 22:11:39 phaller Exp $ */
+/* $Id: obj_base.h,v 1.6 1999-07-04 09:35:04 sandervl Exp $ */
 /*
  * This file defines the macros and types necessary to define COM interfaces,
  * and the three most basic COM interfaces: IUnknown, IMalloc and IClassFactory.
@@ -19,7 +19,7 @@
  */
 #ifdef INITGUID
 #define DEFINE_GUID(name, l, w1, w2, b1, b2, b3, b4, b5, b6, b7, b8) \
-        const GUID name = \
+        extern const GUID name = \
    { l, w1, w2, { b1, b2,  b3,  b4,  b5,  b6,  b7,  b8 } }
 #else
 #define DEFINE_GUID(name, l, w1, w2, b1, b2, b3, b4, b5, b6, b7, b8) \
