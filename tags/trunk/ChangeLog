@@ -1,4 +1,7 @@
- /* $Id: ChangeLog,v 1.433 1999-11-10 14:19:20 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.434 1999-11-10 17:10:23 cbratschi Exp $ */
+
+ 99-11-10: Christoph Bratschi <cbratschi@datacomm.ch>
+	- USER32: ShowScrollBar: create not existing scrollbars
 
  99-11-10: Sander van Leeuwen <sandervl@xs4all.nl>
 	- KERNEL32: Rewrote OSLibDosAllocMem to only return addresses
