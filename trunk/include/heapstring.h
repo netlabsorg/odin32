@@ -1,4 +1,4 @@
-/* $Id: heapstring.h,v 1.3 1999-08-22 22:46:22 sandervl Exp $ */
+/* $Id: heapstring.h,v 1.4 1999-09-02 17:12:46 phaller Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -42,4 +42,7 @@ LPSTR  WIN32API HEAP_strdupA   ( HANDLE heap, DWORD flags, LPCSTR str );
 LPWSTR WIN32API HEAP_strdupW   ( HANDLE heap, DWORD flags, LPCWSTR str );
 LPWSTR WIN32API HEAP_strdupAtoW( HANDLE heap, DWORD flags, LPCSTR str );
 LPSTR  WIN32API HEAP_strdupWtoA( HANDLE heap, DWORD flags, LPCWSTR str );
+
+INT WIN32API WideCharToLocal(LPSTR pLocal, LPWSTR pWide, INT dwChars);
+INT WIN32API LocalToWideChar(LPWSTR pWide, LPSTR pLocal, INT dwChars);
 

@@ -1,4 +1,4 @@
-/* $Id: heapstring.cpp,v 1.8 1999-08-22 22:11:21 sandervl Exp $ */
+/* $Id: heapstring.cpp,v 1.9 1999-09-02 17:12:32 phaller Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -844,6 +844,74 @@ LPSTR WIN32API HEAP_strdupWtoA( HANDLE heap, DWORD flags, LPCWSTR str )
 }
 
 
+/*****************************************************************************
+ * Name      : WideCharToLocal
+ * Purpose   : similar lstrcpyWtoA, should handle codepages properly
+ * Parameters:
+ * Variables :
+ * Result    : strlen of the destination string
+ * Remark    :
+ * Status    :
+ *
+ * Author    : Patrick Haller [Thu, 1999/08/05 20:46]
+ *****************************************************************************/
+
+INT WIN32API WideCharToLocal(LPSTR pLocal, LPWSTR pWide, INT dwChars)
+{
+  dprintf(("KERNEL32: WideCharToLocal(%08xh,%08xh,%08xh)\n",
+           pLocal,
+           pWide,
+           dwChars));
+
+  *pLocal = 0;
+  WideCharToMultiByte(CP_ACP,
+                      0,
+                      pWide,
+                      -1,
+                      pLocal,
+                      dwChars,
+                      NULL,
+                      NULL);
+
+  return strlen(pLocal);
+}
+
+
+/*****************************************************************************
+ * Name      : LocalToWideChar
+ * Purpose   : similar lstrcpyAtoW, should handle codepages properly
+ * Parameters:
+ * Variables :
+ * Result    : strlen of the destination string
+ * Remark    :
+ * Status    :
+ *
+ * Author    : Patrick Haller [Thu, 1999/08/05 20:46]
+ *****************************************************************************/
+
+INT WIN32API LocalToWideChar(LPWSTR pWide, LPSTR pLocal, INT dwChars)
+{
+  *pWide = 0;
+
+  dprintf(("KERNEL32: LocalToWideChar(%08xh,%08xh,%08xh)\n",
+           pLocal,
+           pWide,
+           dwChars));
+
+  MultiByteToWideChar(CP_ACP,
+                      0,
+                      pLocal,
+                      -1,
+                      pWide,
+                      dwChars);
+
+  return lstrlenW(pWide);
+}
+
+
+
+
+
 
 #if 0
 
@@ -901,4 +969,6 @@ WCHAR * WIN32API AsciiToUnicodeString(char *astring)
 }
 
 #endif
+
+
 
