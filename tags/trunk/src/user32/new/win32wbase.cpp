@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.34 2000-01-11 17:34:43 cbratschi Exp $ */
+/* $Id: win32wbase.cpp,v 1.35 2000-01-12 12:40:47 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -1022,16 +1022,6 @@ ULONG Win32BaseWindow::MsgMouseMove(MSG *msg)
     return SendInternalMessageA(msg->message, msg->wParam, msg->lParam);
 }
 //******************************************************************************
-//TODO: Depending on menu type, we should send WM_INITMENU or WM_INITPOPUPMENU
-//TODO: PM sends it for each submenu that gets activated; Windows only for the first
-//      submenu; once the menu bar is active, moving the cursor doesn't generate other
-//      WM_INITMENU msgs. Not really a problem, but might need to fix this later on.
-//******************************************************************************
-ULONG Win32BaseWindow::MsgInitMenu(MSG *msg)
-{
-    return SendInternalMessageA(msg->message, msg->wParam, msg->lParam);
-}
-//******************************************************************************
 //******************************************************************************
 ULONG Win32BaseWindow::MsgNCPaint()
 {
@@ -1060,7 +1050,8 @@ ULONG Win32BaseWindow::MsgNCPaint()
     //CB: todo: check if intersection with client, what does PM's frame???
 
     return rc;
-  } else return 0;
+  }
+  else return 0;
 }
 //******************************************************************************
 //******************************************************************************
@@ -1099,12 +1090,6 @@ char *Win32BaseWindow::MsgGetText()
 {
     SendInternalMessageA(WM_GETTEXT, wndNameLength, (LPARAM)windowNameA);
     return windowNameA;
-}
-//******************************************************************************
-//******************************************************************************
-ULONG  Win32BaseWindow::MsgContextMenu(ULONG x,ULONG y)
-{
-  return SendInternalMessageA(WM_CONTEXTMENU,Win32Hwnd,MAKELPARAM(x,y));
 }
 //******************************************************************************
 //******************************************************************************

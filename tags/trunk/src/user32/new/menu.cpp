@@ -1,4 +1,4 @@
-/* $Id: menu.cpp,v 1.7 2000-01-11 17:34:42 cbratschi Exp $*/
+/* $Id: menu.cpp,v 1.8 2000-01-12 12:40:43 sandervl Exp $*/
 /*
  * Menu functions
  *
@@ -2401,8 +2401,9 @@ static LRESULT MENU_DoNextMenu( MTRACKER* pmt, UINT vk )
 
         if( hNewWnd != pmt->hOwnerWnd )
         {
-            ReleaseCapture();
+            ReleaseCapture(); 
             pmt->hOwnerWnd = hNewWnd;
+	    SetCapture(pmt->hOwnerWnd); //SvL: Don't know if this is good enough
             //EVENT_Capture( pmt->hOwnerWnd, HTMENU ); //CB: todo
         }
 
@@ -2593,6 +2594,8 @@ static INT MENU_TrackMenu( HMENU hmenu, UINT wFlags, INT x, INT y,
     if (wFlags & TPM_BUTTONDOWN) MENU_ButtonDown( &mt, hmenu, wFlags );
 
     //EVENT_Capture( mt.hOwnerWnd, HTMENU ); //CB: todo
+    //SvL: Set keyboard & mouse event capture
+    SetCapture(mt.hOwnerWnd);
 
     while (!fEndMenu)
     {
@@ -2601,7 +2604,9 @@ static INT MENU_TrackMenu( HMENU hmenu, UINT wFlags, INT x, INT y,
 
         /* we have to keep the message in the queue until it's
          * clear that menu loop is not over yet. */
-        if (!GetMessageA(&msg,msg.hwnd,0,0)) break;
+//        if (!GetMessageA(&msg,msg.hwnd,0,0)) break;
+	//SvL: Getting messages for only the menu delays background paints (i.e. VPBuddy logo)
+        if (!GetMessageA(&msg,0,0,0)) break;
         TranslateMessage( &msg );
         mt.pt = msg.pt;
 
@@ -2609,7 +2614,7 @@ static INT MENU_TrackMenu( HMENU hmenu, UINT wFlags, INT x, INT y,
           enterIdleSent=FALSE;
 
         fRemove = FALSE;
-        if ((msg.message >= WM_MOUSEFIRST) && (msg.message <= WM_MOUSELAST))
+        if((msg.message >= WM_MOUSEFIRST) && (msg.message <= WM_MOUSELAST))
         {
             /* Find a menu for this mouse event */
             POINT pt = msg.pt;

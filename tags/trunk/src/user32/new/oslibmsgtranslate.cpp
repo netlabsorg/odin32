@@ -1,4 +1,4 @@
-/* $Id: oslibmsgtranslate.cpp,v 1.10 2000-01-10 23:29:12 sandervl Exp $ */
+/* $Id: oslibmsgtranslate.cpp,v 1.11 2000-01-12 12:40:44 sandervl Exp $ */
 /*
  * Window message translation functions for OS/2
  *
@@ -560,16 +560,6 @@ VirtualKeyFound:
         break;
     }
 
-    case WM_INITMENU:
-        winMsg->message = WINWM_INITMENU;
-        winMsg->wParam  = (WPARAM)os2Msg->mp2; //hMenu
-        break;
-
-    case WM_MENUSELECT:
-    case WM_MENUEND:
-    case WM_NEXTMENU:
-        goto dummymessage;
-
     case WM_TIMER:
         if (os2Msg->mp2)
         {
@@ -629,18 +619,10 @@ VirtualKeyFound:
     }
 
     case WM_CONTEXTMENU:
-    {
-        OSLIBPOINT pt;
-
-        pt.x = (*(POINTS *)&os2Msg->mp1).x;
-        pt.y = (*(POINTS *)&os2Msg->mp1).y;
-        mapOS2ToWin32Point(os2Msg->hwnd,OSLIB_HWND_DESKTOP,&pt);
-        winMsg->message = WINWM_CONTEXTMENU;
-        winMsg->wParam  = (WPARAM)win32wnd->getWindowHandle();
-        winMsg->lParam  = MAKELONG((USHORT)pt.x, (USHORT)pt.y);
-        break;
-    }
-
+    case WM_INITMENU:
+    case WM_MENUSELECT:
+    case WM_MENUEND:
+    case WM_NEXTMENU:
     case WM_SYSCOLORCHANGE:
     case WM_SYSVALUECHANGED:
     case WM_SETSELECTION:
