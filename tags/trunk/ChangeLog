@@ -1,4 +1,8 @@
-/* $Id: ChangeLog,v 1.1688 2001-09-20 19:05:49 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.1689 2001-09-21 18:36:56 sandervl Exp $ */
+
+ 2001-09-21: Sander van Leeuwen <sandervl@xs4all.nl>
+    - USER32:   o Focus changes
+    - CTL3D32:  o Added stub dll
 
  2001-09-20: Sander van Leeuwen <sandervl@xs4all.nl>
     - USER32:   o Activate window when it returns 0 for WM_MOUSEACTIVATE
