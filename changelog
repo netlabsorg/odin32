@@ -1,4 +1,7 @@
-/* $Id: changelog,v 1.1840 2001-11-19 12:31:15 sandervl Exp $ */
+/* $Id: changelog,v 1.1841 2001-11-20 09:53:01 sandervl Exp $ */
+
+ 2001-11-20: Sander van Leeuwen <sandervl@xs4all.nl>
+    - USER32:   o Destroy CD notification window during dll unload
 
  2001-11-19: Sander van Leeuwen <sandervl@xs4all.nl>
     - GUIDLIB:  o Library with all GUIDs used by Odin
