@@ -1,4 +1,4 @@
-/* $Id: clfix.c,v 1.2 2000-11-09 20:42:43 bird Exp $
+/* $Id: clfix.c,v 1.3 2001-03-02 12:48:41 bird Exp $
  *
  * A wrapper program for cl.exe fix will try fix some of the problems
  * we have seen.
@@ -27,13 +27,15 @@
 int main(int argc, char **argv)
 {
     static char     szArgBuffer[32768];
+	static char		szzEnv[4096];
+	char *			pszEnv = &szzEnv[0];
     RESULTCODES     resc;
     int             argi;
     char *          psz;
     HFILE           hFile;
     APIRET          rc;
 
-
+	
     /*
      * Check that we have cl.exe at least passed in.
      */
@@ -49,6 +51,12 @@ int main(int argc, char **argv)
         return -1;
     }
 
+	/*
+	 * Blow away extra libpaths.
+	 */
+	DosSetExtLIBPATH("", BEGIN_LIBPATH);
+	DosSetExtLIBPATH("", END_LIBPATH);
+
 
     /*
      * First argument
@@ -58,21 +66,40 @@ int main(int argc, char **argv)
     psz++;
 
 
-    /* The other arguments. */
+    /*
+     * The other arguments. 
+	 * 		The -I arguments are put into the environment variable INCLUDE.
+     */
+	strcpy(pszEnv, "INCLUDE=");
+    pszEnv += strlen(pszEnv);
     if (argc > 2)
     {
         argi = 2;
         while (argi < argc)
         {
-            strcpy(psz, argv[argi]);
-            psz += strlen(psz);
-            *psz++ = ' ';
-            argi++;
+            if (   (argv[argi][0] == '-' || argv[argi][0] == '/')
+                && (argv[argi][1] == 'I' || argv[argi][1] == 'i'))
+            {
+                strcpy(pszEnv, &argv[argi][2]);
+                pszEnv += strlen(pszEnv);
+                *pszEnv++ = ';';
+                argi++;
+            }
+			else
+            {
+                strcpy(psz, argv[argi]);
+                psz += strlen(psz);
+                *psz++ = ' ';
+                argi++;
+            }
         }
         psz[-1] = '\0';
     }
     *psz = '\0';
 
+	printf("exe: %s\n", szArgBuffer);
+	printf("arg: %s\n", szArgBuffer + strlen(szArgBuffer)+1);
+	printf("env: %s\n", szzEnv);
 
     /*
      * Set max filehandles
@@ -90,7 +117,7 @@ int main(int argc, char **argv)
     rc = DosDupHandle(1, &hFile);
     if (rc)
         printf("clfix: DosDupHandle failed with rc=%d\n\n", rc);
-
+							  
 
     /*
      * Execute argument without any environment.
@@ -98,7 +125,7 @@ int main(int argc, char **argv)
      *  generally a big environment block. We'll send in an empty environment block and hope
      *  this will solve the problems.
      */
-    if (DosExecPgm(NULL, 0, EXEC_SYNC, szArgBuffer, "\0\0", &resc, szArgBuffer) != NO_ERROR)
+    if (DosExecPgm(NULL, 0, EXEC_SYNC, szArgBuffer, &szzEnv[0], &resc, szArgBuffer) != NO_ERROR)
     {
         /*complain*/
         return -1;
