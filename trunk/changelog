@@ -1,4 +1,14 @@
- /* $Id: changelog,v 1.662 2000-01-20 21:46:04 sandervl Exp $ */
+ /* $Id: changelog,v 1.663 2000-01-21 13:30:58 sandervl Exp $ */
+
+ 2000-01-21: Sander van Leeuwen <sandervl@xs4all.nl>
+	- USER32: Put back old WM_MOVE, MsgFormatChanged & OSLibSWPToWINDOWPOSFrame
+                  Previous changes broke many apps (VPBuddy, MIrc32)
+                  Don't update window if style changes (responsibility of the app)
+                  Store window menu & id in same variable (fixes clock ->
+                  double click on analog window -> titlebar & menu gone; menu
+                  used to stay there)
+                  Put back WM_CALCVALIDRECT code in pmwindow. Fixes updates
+                  of clock window (who's class has CS_H/VREDRAW style).
 
  2000-01-20: Sander van Leeuwen <sandervl@xs4all.nl>
 	- KERNEL32: Disabled creation of pe_x.log if logging disabled
