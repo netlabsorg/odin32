@@ -1,4 +1,4 @@
-/* $Id: OS2DDRAW.CPP,v 1.22 2000-08-31 12:48:41 sandervl Exp $ */
+/* $Id: OS2DDRAW.CPP,v 1.23 2000-08-31 17:57:09 sandervl Exp $ */
 
 /*
  * DX Draw base class implementation
@@ -242,12 +242,11 @@ FOURCC OS2IDirectDraw::GetScreenFourCC()
 }
 //******************************************************************************
 //******************************************************************************
-HRESULT __stdcall DrawQueryInterface(THIS This, REFIID riid, LPVOID FAR * ppvObj)
+HRESULT WIN32API DrawQueryInterface(THIS This, REFIID riid, LPVOID FAR * ppvObj)
 {
  OS2IDirectDraw *me = (OS2IDirectDraw *)This;
-  #ifdef DEBUG
-    dprintf(("DDRAW: OS2IDirectDraw::QueryInterface\n"));
-  #endif
+
+  dprintf(("DDRAW: OS2IDirectDraw::QueryInterface %x %x %x", This, riid, ppvObj));
 
   *ppvObj = NULL;
 
@@ -255,51 +254,19 @@ HRESULT __stdcall DrawQueryInterface(THIS This, REFIID riid, LPVOID FAR * ppvObj
      !IsEqualGUID(riid, IID_IDirectDraw) &&
      !IsEqualGUID(riid, IID_IDirectDraw2) &&
      !IsEqualGUID(riid, IID_IDirectDraw4) &&
-     !IsEqualGUID(riid, IID_IDirect3D) &&
-     !IsEqualGUID(riid, IID_IUnknown))
+     !IsEqualGUID(riid, IID_IDirect3D))
+//     !IsEqualGUID(riid, IID_IUnknown))
   return E_NOINTERFACE;
 
-#if 1
-  if(IsEqualGUID(riid, IID_IUnknown)) {
-     *ppvObj = (LPVOID) This;
-     me->lpVtbl2 = me->lpVtbl;
-  }
-  else
+  // ToDo Better way of returning differnent interfaces for same class
   if(IsEqualGUID(riid, IID_IDirect3D))
   {
-     me->lpVtbl2 = (IDirectDraw4Vtbl *)&me->Vtbl3D;
-     *ppvObj = (LPVOID) &me->lpVtbl2;
-  }
-  else
-  {
-    if(IsEqualGUID(riid, IID_IDirectDraw4))
-    {
-      dprintf(("DDRAW: IID_IDirectDraw4 Interface\n"));
-      me->lpVtbl2 = (IDirectDraw4Vtbl *)&me->Vtbl4;
-      *ppvObj = (LPVOID) &me->lpVtbl2;
-    }
-    else
-    {
-      if(IsEqualGUID(riid, IID_IDirectDraw2))
-      {
-        dprintf(("DDRAW: IID_IDirectDraw2 Interface\n"));
-        me->lpVtbl2 = (IDirectDraw4Vtbl *)&me->Vtbl2;
-        *ppvObj = (LPVOID) &me->lpVtbl2;
-      }
-      else
-      {
-        dprintf(("DDRAW: IID_IDirectDraw Interface\n"));
-        me->lpVtbl2 = (IDirectDraw4Vtbl *)&me->Vtbl;
-        *ppvObj = (LPVOID) &me->lpVtbl;
-      }
-    }
-  }
-  DrawAddRef(This);
-#else
-  // ToDo Better way of returning differnent intterfaces for same class
-  if(IsEqualGUID(riid, IID_IDirect3D))
-  {
-    me->lpVtbl = (IDirectDraw4Vtbl *) &me->Vtbl3D;
+    me->lpVtbl3D         = &me->Vtbl3D;
+    me->lpVtbl3D2        = me->lpVtbl3D;
+    me->pdwUnknownData3D = me->pdwUnknownData;
+    *ppvObj = (LPVOID)&me->lpVtbl3D;
+    DrawAddRef(This);
+    return DD_OK;
   }
   else
   {
@@ -325,13 +292,12 @@ HRESULT __stdcall DrawQueryInterface(THIS This, REFIID riid, LPVOID FAR * ppvObj
   me->lpVtbl2 = me->lpVtbl;
   *ppvObj = This;
   DrawAddRef(This);
-#endif
 
   return(DD_OK);
 }
 //******************************************************************************
 //******************************************************************************
-ULONG __stdcall DrawAddRef(THIS This)
+ULONG WIN32API DrawAddRef(THIS This)
 {
  OS2IDirectDraw *me = (OS2IDirectDraw *)This;
 
@@ -343,7 +309,7 @@ ULONG __stdcall DrawAddRef(THIS This)
 }
 //******************************************************************************
 //******************************************************************************
-ULONG __stdcall DrawRelease(THIS This)
+ULONG WIN32API DrawRelease(THIS This)
 {
  OS2IDirectDraw *me = (OS2IDirectDraw *)This;
  ULONG rc;
@@ -372,7 +338,7 @@ ULONG __stdcall DrawRelease(THIS This)
 }
 //******************************************************************************
 //******************************************************************************
-HRESULT __stdcall DrawCompact(THIS)
+HRESULT WIN32API DrawCompact(THIS)
 {
   #ifdef DEBUG
     dprintf(("DDRAW: Compact\n"));
@@ -382,7 +348,7 @@ HRESULT __stdcall DrawCompact(THIS)
 }
 //******************************************************************************
 //******************************************************************************
-HRESULT __stdcall DrawCreateClipper(THIS This, DWORD, LPDIRECTDRAWCLIPPER FAR *lplpDD, IUnknown FAR * )
+HRESULT WIN32API DrawCreateClipper(THIS This, DWORD, LPDIRECTDRAWCLIPPER FAR *lplpDD, IUnknown FAR * )
 {
  OS2IDirectDraw        *me = (OS2IDirectDraw *)This;
  OS2IDirectDrawClipper *newclip;
@@ -415,7 +381,7 @@ HRESULT __stdcall DrawCreateClipper(THIS This, DWORD, LPDIRECTDRAWCLIPPER FAR *l
 }
 //******************************************************************************
 //******************************************************************************
-HRESULT __stdcall DrawCreatePalette(THIS This, DWORD dwFlags,
+HRESULT WIN32API DrawCreatePalette(THIS This, DWORD dwFlags,
             LPPALETTEENTRY lpColorTable,
             LPDIRECTDRAWPALETTE FAR *lplpDD,
             IUnknown FAR *pUnkOuter)
@@ -475,7 +441,7 @@ HRESULT __stdcall DrawCreatePalette(THIS This, DWORD dwFlags,
 }
 //******************************************************************************
 //******************************************************************************
-HRESULT __stdcall DrawCreateSurface(THIS This, LPDDSURFACEDESC lpDDSurfaceDesc,
+HRESULT WIN32API DrawCreateSurface(THIS This, LPDDSURFACEDESC lpDDSurfaceDesc,
             LPDIRECTDRAWSURFACE FAR *lplpDD,
             IUnknown FAR *pUnkOuter)
 {
@@ -521,7 +487,7 @@ HRESULT __stdcall DrawCreateSurface(THIS This, LPDDSURFACEDESC lpDDSurfaceDesc,
 }
 //******************************************************************************
 //******************************************************************************
-HRESULT __stdcall DrawCreateSurface4(THIS This, LPDDSURFACEDESC2 lpDDSurfaceDesc2,
+HRESULT WIN32API DrawCreateSurface4(THIS This, LPDDSURFACEDESC2 lpDDSurfaceDesc2,
             LPDIRECTDRAWSURFACE4 FAR *lplpDD,
             IUnknown FAR *pUnkOuter)
 {
@@ -568,7 +534,7 @@ HRESULT __stdcall DrawCreateSurface4(THIS This, LPDDSURFACEDESC2 lpDDSurfaceDesc
 }
 //******************************************************************************
 //******************************************************************************
-HRESULT __stdcall DrawDuplicateSurface(THIS, LPDIRECTDRAWSURFACE, LPDIRECTDRAWSURFACE FAR * )
+HRESULT WIN32API DrawDuplicateSurface(THIS, LPDIRECTDRAWSURFACE, LPDIRECTDRAWSURFACE FAR * )
 {
   #ifdef DEBUG
     dprintf(("DDRAW: DuplicateSurface NIY\n"));
@@ -577,7 +543,7 @@ HRESULT __stdcall DrawDuplicateSurface(THIS, LPDIRECTDRAWSURFACE, LPDIRECTDRAWSU
 }
 //******************************************************************************
 //******************************************************************************
-HRESULT __stdcall DrawDuplicateSurface4(THIS, LPDIRECTDRAWSURFACE4, LPDIRECTDRAWSURFACE4 FAR * )
+HRESULT WIN32API DrawDuplicateSurface4(THIS, LPDIRECTDRAWSURFACE4, LPDIRECTDRAWSURFACE4 FAR * )
 {
   #ifdef DEBUG
     dprintf(("DDRAW: DuplicateSurface4 NIY\n"));
@@ -587,7 +553,7 @@ HRESULT __stdcall DrawDuplicateSurface4(THIS, LPDIRECTDRAWSURFACE4, LPDIRECTDRAW
 }
 //******************************************************************************
 //******************************************************************************
-HRESULT __stdcall DrawEnumDisplayModes( THIS This,
+HRESULT WIN32API DrawEnumDisplayModes( THIS This,
                                         DWORD dwFlags,
                                         LPDDSURFACEDESC lpDDSurfaceDesc,
                                         LPVOID lpContext,
@@ -881,7 +847,7 @@ HRESULT __stdcall DrawEnumDisplayModes( THIS This,
 }
 //******************************************************************************
 //******************************************************************************
-HRESULT __stdcall DrawEnumDisplayModes4(THIS This, DWORD dwFlags, LPDDSURFACEDESC2 lpDDSurfaceDesc2,
+HRESULT WIN32API DrawEnumDisplayModes4(THIS This, DWORD dwFlags, LPDDSURFACEDESC2 lpDDSurfaceDesc2,
                                        LPVOID lpContext, LPDDENUMMODESCALLBACK2 lpDDEnumModesCallback2)
 {
   int iMode = 0;
@@ -896,7 +862,7 @@ HRESULT __stdcall DrawEnumDisplayModes4(THIS This, DWORD dwFlags, LPDDSURFACEDES
 }
 //******************************************************************************
 //******************************************************************************
-HRESULT __stdcall DrawEnumSurfaces(THIS, DWORD, LPDDSURFACEDESC, LPVOID,LPDDENUMSURFACESCALLBACK )
+HRESULT WIN32API DrawEnumSurfaces(THIS, DWORD, LPDDSURFACEDESC, LPVOID,LPDDENUMSURFACESCALLBACK )
 {
   #ifdef DEBUG
     dprintf(("DDRAW: EnumSurfaces NIY\n"));
@@ -906,7 +872,7 @@ HRESULT __stdcall DrawEnumSurfaces(THIS, DWORD, LPDDSURFACEDESC, LPVOID,LPDDENUM
 }
 //******************************************************************************
 //******************************************************************************
-HRESULT __stdcall DrawEnumSurfaces4(THIS, DWORD, LPDDSURFACEDESC2, LPVOID,LPDDENUMSURFACESCALLBACK2 )
+HRESULT WIN32API DrawEnumSurfaces4(THIS, DWORD, LPDDSURFACEDESC2, LPVOID,LPDDENUMSURFACESCALLBACK2 )
 {
   #ifdef DEBUG
     dprintf(("DDRAW: EnumSurfaces4 NIY\n"));
@@ -916,7 +882,7 @@ HRESULT __stdcall DrawEnumSurfaces4(THIS, DWORD, LPDDSURFACEDESC2, LPVOID,LPDDEN
 }
 //******************************************************************************
 //******************************************************************************
-HRESULT __stdcall DrawFlipToGDISurface(THIS)
+HRESULT WIN32API DrawFlipToGDISurface(THIS)
 {
   #ifdef DEBUG
     dprintf(("DDRAW: FlipToGDISurface NIY\n"));
@@ -926,7 +892,7 @@ HRESULT __stdcall DrawFlipToGDISurface(THIS)
 }
 //******************************************************************************
 //******************************************************************************
-HRESULT __stdcall DrawGetCaps(THIS This, LPDDCAPS lpDDDriverCaps, LPDDCAPS lpDDHELCaps)
+HRESULT WIN32API DrawGetCaps(THIS This, LPDDCAPS lpDDDriverCaps, LPDDCAPS lpDDHELCaps)
 {
  DWORD dwSize;
  OS2IDirectDraw *me = (OS2IDirectDraw *)This;
@@ -1190,7 +1156,7 @@ HRESULT __stdcall DrawGetCaps(THIS This, LPDDCAPS lpDDDriverCaps, LPDDCAPS lpDDH
 }
 //******************************************************************************
 //******************************************************************************
-HRESULT __stdcall DrawGetDisplayMode(THIS This, LPDDSURFACEDESC lpDDSurfaceDesc)
+HRESULT WIN32API DrawGetDisplayMode(THIS This, LPDDSURFACEDESC lpDDSurfaceDesc)
 {
   OS2IDirectDraw        *me = (OS2IDirectDraw *)This;
 
@@ -1305,7 +1271,7 @@ HRESULT __stdcall DrawGetDisplayMode(THIS This, LPDDSURFACEDESC lpDDSurfaceDesc)
 }
 //******************************************************************************
 //******************************************************************************
-HRESULT __stdcall DrawGetDisplayMode4(THIS This, LPDDSURFACEDESC2 lpDDSurfaceDesc2)
+HRESULT WIN32API DrawGetDisplayMode4(THIS This, LPDDSURFACEDESC2 lpDDSurfaceDesc2)
 {
   OS2IDirectDraw        *me = (OS2IDirectDraw *)This;
 
@@ -1420,7 +1386,7 @@ HRESULT __stdcall DrawGetDisplayMode4(THIS This, LPDDSURFACEDESC2 lpDDSurfaceDes
 }
 //******************************************************************************
 //******************************************************************************
-HRESULT __stdcall DrawGetFourCCCodes(THIS This, LPDWORD lpNumCodes, LPDWORD lpCodes)
+HRESULT WIN32API DrawGetFourCCCodes(THIS This, LPDWORD lpNumCodes, LPDWORD lpCodes)
 {
 //  DWORD dwFCC[MAX_FOURCC_CODES] = {FOURCC_LUT8,FOURCC_R565,FOURCC_RGB3,FOURCC_YUY2};
   DWORD dwFCC[MAX_FOURCC_CODES] = {FOURCC_LUT8,FOURCC_R565,FOURCC_RGB3};
@@ -1447,7 +1413,7 @@ HRESULT __stdcall DrawGetFourCCCodes(THIS This, LPDWORD lpNumCodes, LPDWORD lpCo
 }
 //******************************************************************************
 //******************************************************************************
-HRESULT __stdcall DrawGetGDISurface(THIS, LPDIRECTDRAWSURFACE FAR *)
+HRESULT WIN32API DrawGetGDISurface(THIS, LPDIRECTDRAWSURFACE FAR *)
 {
   #ifdef DEBUG
     dprintf(("DDRAW: GetGDISurface NYI\n"));
@@ -1457,7 +1423,7 @@ HRESULT __stdcall DrawGetGDISurface(THIS, LPDIRECTDRAWSURFACE FAR *)
 }
 //******************************************************************************
 //******************************************************************************
-HRESULT __stdcall DrawGetGDISurface4(THIS, LPDIRECTDRAWSURFACE4 FAR *)
+HRESULT WIN32API DrawGetGDISurface4(THIS, LPDIRECTDRAWSURFACE4 FAR *)
 {
   #ifdef DEBUG
     dprintf(("DDRAW: GetGDISurface NYI\n"));
@@ -1467,7 +1433,7 @@ HRESULT __stdcall DrawGetGDISurface4(THIS, LPDIRECTDRAWSURFACE4 FAR *)
 }
 //******************************************************************************
 //******************************************************************************
-HRESULT __stdcall DrawGetMonitorFrequency(THIS This, LPDWORD lpdwFreq)
+HRESULT WIN32API DrawGetMonitorFrequency(THIS This, LPDWORD lpdwFreq)
 {
   ULONG ulTime1, ulTime2;
   DWORD dwFlags = DDWAITVB_BLOCKBEGIN;
@@ -1506,7 +1472,7 @@ HRESULT __stdcall DrawGetMonitorFrequency(THIS This, LPDWORD lpdwFreq)
 }
 //******************************************************************************
 //******************************************************************************
-HRESULT __stdcall DrawGetScanLine(THIS, LPDWORD lpdwLine)
+HRESULT WIN32API DrawGetScanLine(THIS, LPDWORD lpdwLine)
 {
   BOOL bVertBlank;
   #ifdef DEBUG
@@ -1530,7 +1496,7 @@ HRESULT __stdcall DrawGetScanLine(THIS, LPDWORD lpdwLine)
 }
 //******************************************************************************
 //******************************************************************************
-HRESULT __stdcall DrawGetVerticalBlankStatus(THIS , LPBOOL lpbIsInVB)
+HRESULT WIN32API DrawGetVerticalBlankStatus(THIS , LPBOOL lpbIsInVB)
 {
   int rc;
   #ifdef DEBUG
@@ -1558,7 +1524,7 @@ HRESULT __stdcall DrawGetVerticalBlankStatus(THIS , LPBOOL lpbIsInVB)
 }
 //******************************************************************************
 //******************************************************************************
-HRESULT __stdcall DrawInitialize(THIS, GUID FAR *)
+HRESULT WIN32API DrawInitialize(THIS, GUID FAR *)
 {
   #ifdef DEBUG
     dprintf(("DDRAW: Initialize\n"));
@@ -1568,7 +1534,7 @@ HRESULT __stdcall DrawInitialize(THIS, GUID FAR *)
 }
 //******************************************************************************
 //******************************************************************************
-HRESULT __stdcall DrawRestoreDisplayMode(THIS)
+HRESULT WIN32API DrawRestoreDisplayMode(THIS)
 {
   #ifdef DEBUG
     dprintf(("DDRAW: RestoreDisplayMod\n"));
@@ -1578,7 +1544,7 @@ HRESULT __stdcall DrawRestoreDisplayMode(THIS)
 }
 //******************************************************************************
 //******************************************************************************
-HRESULT __stdcall DrawSetCooperativeLevel(THIS This, HWND hwndClient, DWORD dwFlags)
+HRESULT WIN32API DrawSetCooperativeLevel(THIS This, HWND hwndClient, DWORD dwFlags)
 {
  OS2IDirectDraw        *me = (OS2IDirectDraw *)This;
 
@@ -1601,7 +1567,7 @@ HRESULT __stdcall DrawSetCooperativeLevel(THIS This, HWND hwndClient, DWORD dwFl
 //******************************************************************************
 //Backwards compatibility, what's that??
 //******************************************************************************
-HRESULT __stdcall DrawSetDisplayMode2(THIS This, DWORD dwWidth, DWORD dwHeight,
+HRESULT WIN32API DrawSetDisplayMode2(THIS This, DWORD dwWidth, DWORD dwHeight,
               DWORD dwBPP, DWORD dwRefreshRate,
               DWORD dwFlags)
 {
@@ -1646,7 +1612,7 @@ HRESULT __stdcall DrawSetDisplayMode2(THIS This, DWORD dwWidth, DWORD dwHeight,
 }
 //******************************************************************************
 //******************************************************************************
-HRESULT __stdcall DrawSetDisplayMode(THIS This, DWORD dwWidth, DWORD dwHeight,
+HRESULT WIN32API DrawSetDisplayMode(THIS This, DWORD dwWidth, DWORD dwHeight,
              DWORD dwBPP)
 {
  ULONG rc;
@@ -1688,7 +1654,7 @@ HRESULT __stdcall DrawSetDisplayMode(THIS This, DWORD dwWidth, DWORD dwHeight,
 }
 //******************************************************************************
 //******************************************************************************
-HRESULT __stdcall DrawWaitForVerticalBlank(THIS, DWORD dwFlags, HANDLE hEvent)
+HRESULT WIN32API DrawWaitForVerticalBlank(THIS, DWORD dwFlags, HANDLE hEvent)
 {
   HRESULT rc;
   int rci;
@@ -1747,7 +1713,7 @@ HRESULT __stdcall DrawWaitForVerticalBlank(THIS, DWORD dwFlags, HANDLE hEvent)
 //******************************************************************************
 //*** Added in the v2 interface ***
 //******************************************************************************
-HRESULT __stdcall DrawGetAvailableVidMem(THIS, LPDDSCAPS lpDDSCaps,
+HRESULT WIN32API DrawGetAvailableVidMem(THIS, LPDDSCAPS lpDDSCaps,
                                          LPDWORD lpdwTotal, LPDWORD lpdwFree)
 {
   #ifdef DEBUG
@@ -1772,7 +1738,7 @@ HRESULT __stdcall DrawGetAvailableVidMem(THIS, LPDDSCAPS lpDDSCaps,
 //******************************************************************************
 //
 //******************************************************************************
-HRESULT __stdcall DrawGetAvailableVidMem4(THIS, LPDDSCAPS2 lpDDSCaps2,
+HRESULT WIN32API DrawGetAvailableVidMem4(THIS, LPDDSCAPS2 lpDDSCaps2,
                                          LPDWORD lpdwTotal, LPDWORD lpdwFree)
 {
   #ifdef DEBUG
@@ -1797,7 +1763,7 @@ HRESULT __stdcall DrawGetAvailableVidMem4(THIS, LPDDSCAPS2 lpDDSCaps2,
 //******************************************************************************
 //*** Added in the v4 interface ***
 //******************************************************************************
-HRESULT __stdcall DrawGetSurfaceFromDC(THIS, HDC hdc, LPDIRECTDRAWSURFACE4 *)
+HRESULT WIN32API DrawGetSurfaceFromDC(THIS, HDC hdc, LPDIRECTDRAWSURFACE4 *)
 {
   #ifdef DEBUG
     dprintf(("DDRAW: GetSurfaceFromDC NYI\n"));
@@ -1807,7 +1773,7 @@ HRESULT __stdcall DrawGetSurfaceFromDC(THIS, HDC hdc, LPDIRECTDRAWSURFACE4 *)
 }
 //******************************************************************************
 //******************************************************************************
-HRESULT __stdcall DrawRestoreAllSurfaces(THIS)
+HRESULT WIN32API DrawRestoreAllSurfaces(THIS)
 {
   #ifdef DEBUG
     dprintf(("DDRAW: RestoreAllSurfaces\n"));
@@ -1817,7 +1783,7 @@ HRESULT __stdcall DrawRestoreAllSurfaces(THIS)
 }
 //******************************************************************************
 //******************************************************************************
-HRESULT __stdcall DrawTestCooperativeLevel(THIS)
+HRESULT WIN32API DrawTestCooperativeLevel(THIS)
 {
   #ifdef DEBUG
     dprintf(("DDRAW: TestCooperativeLevel\n"));
@@ -1827,7 +1793,7 @@ HRESULT __stdcall DrawTestCooperativeLevel(THIS)
 }
 //******************************************************************************
 //******************************************************************************
-HRESULT __stdcall DrawGetDeviceIdentifier( THIS, LPDDDEVICEIDENTIFIER lpdddi,
+HRESULT WIN32API DrawGetDeviceIdentifier( THIS, LPDDDEVICEIDENTIFIER lpdddi,
                                            DWORD dwFlags)
 {
   #ifdef DEBUG
