@@ -4345,6 +4345,172 @@ static HWND LISTVIEW_EditLabelA(HWND hwnd, INT nItem)
  *   SUCCESS : TRUE
  *   FAILURE : FALSE
  */
+#ifdef __WIN32OS2__
+static VOID LISTVIEW_ScrollWindow(HWND hwnd,INT xScroll,INT yScroll);
+
+static BOOL LISTVIEW_EnsureVisible(HWND hwnd,INT nItem,BOOL bPartialOk)
+{
+  LISTVIEW_INFO *infoPtr = (LISTVIEW_INFO *)GetWindowLongA(hwnd, 0);
+  DWORD dwStyle = GetWindowLongA(hwnd, GWL_STYLE);
+  UINT uView = dwStyle & LVS_TYPEMASK;
+  INT nScrollPosHeight = 0;
+  INT nScrollPosWidth = 0;
+  RECT rcItem;
+  POINT oldlefttop = infoPtr->lefttop;
+
+  rcItem.left = LVIR_BOUNDS;
+  if (LISTVIEW_GetItemRect(hwnd, nItem, &rcItem))
+  {
+    if (bPartialOk && IntersectRect(NULL,&rcItem,&infoPtr->rcList))
+      return TRUE;
+
+    if (rcItem.left < infoPtr->rcList.left)
+    {
+      if (dwStyle & WS_HSCROLL)
+      {
+        /* scroll left */
+        if (uView == LVS_LIST)
+        {
+          nScrollPosWidth = infoPtr->scrollStep.x;
+          rcItem.left += infoPtr->rcList.left;
+        } else if ((uView == LVS_SMALLICON) || (uView == LVS_ICON))
+        {
+          nScrollPosWidth = infoPtr->scrollStep.x;
+          rcItem.left += infoPtr->rcList.left;
+        }
+
+        /* When in LVS_REPORT view, the scroll position should
+           not be updated. */
+        if (nScrollPosWidth)
+        {
+          if (rcItem.left % nScrollPosWidth == 0)
+            infoPtr->lefttop.x += rcItem.left / nScrollPosWidth;
+          else
+            infoPtr->lefttop.x += rcItem.left / nScrollPosWidth - 1;
+
+          if (infoPtr->lefttop.x != oldlefttop.x)
+          {
+            SCROLLINFO scrollInfo;
+
+            ZeroMemory(&scrollInfo,sizeof(SCROLLINFO));
+            scrollInfo.cbSize = sizeof(SCROLLINFO);
+            scrollInfo.fMask  = SIF_POS;
+            scrollInfo.nPos = infoPtr->lefttop.x;
+            SetScrollInfo(hwnd,SB_HORZ,&scrollInfo,TRUE);
+          }
+        }
+      }
+    } else if (rcItem.right > infoPtr->rcList.right)
+    {
+      if (dwStyle & WS_HSCROLL)
+      {
+        /* scroll right */
+        if (uView == LVS_LIST)
+        {
+          rcItem.right -= infoPtr->rcList.right;
+          nScrollPosWidth = infoPtr->scrollStep.x;
+        } else if ((uView == LVS_SMALLICON) || (uView == LVS_ICON))
+        {
+          rcItem.right -= infoPtr->rcList.right;
+          nScrollPosWidth = infoPtr->scrollStep.x;
+        }
+
+        /* When in LVS_REPORT view, the scroll position should
+           not be updated. */
+        if (nScrollPosWidth)
+        {
+          SCROLLINFO scrollInfo;
+
+          if (rcItem.right % nScrollPosWidth == 0)
+            infoPtr->lefttop.x += rcItem.right / nScrollPosWidth;
+          else
+            infoPtr->lefttop.x += rcItem.right / nScrollPosWidth + 1;
+
+          if (infoPtr->lefttop.x != oldlefttop.x)
+          {
+            SCROLLINFO scrollInfo;
+
+            ZeroMemory(&scrollInfo,sizeof(SCROLLINFO));
+            scrollInfo.cbSize = sizeof(SCROLLINFO);
+            scrollInfo.fMask  = SIF_POS;
+            scrollInfo.nPos   = infoPtr->lefttop.x;
+            SetScrollInfo(hwnd,SB_HORZ,&scrollInfo,TRUE);
+          }
+        }
+      }
+    }
+
+    if (rcItem.top < infoPtr->rcList.top)
+    {
+      /* scroll up */
+      if (dwStyle & WS_VSCROLL)
+      {
+        if (uView == LVS_REPORT)
+        {
+          rcItem.top -= infoPtr->rcList.top;
+          nScrollPosHeight = infoPtr->scrollStep.y;
+        }
+        else if ((uView == LVS_ICON) || (uView == LVS_SMALLICON))
+        {
+          nScrollPosHeight = infoPtr->scrollStep.y;
+          rcItem.top += infoPtr->rcList.top;
+        }
+
+        if (rcItem.top % nScrollPosHeight == 0)
+          infoPtr->lefttop.y += rcItem.top / nScrollPosHeight;
+        else
+          infoPtr->lefttop.y += rcItem.top / nScrollPosHeight - 1;
+
+        if (infoPtr->lefttop.y != oldlefttop.y)
+        {
+          SCROLLINFO scrollInfo;
+
+          ZeroMemory(&scrollInfo,sizeof(SCROLLINFO));
+          scrollInfo.cbSize = sizeof(SCROLLINFO);
+          scrollInfo.fMask  = SIF_POS;
+          scrollInfo.nPos = infoPtr->lefttop.y;
+          SetScrollInfo(hwnd,SB_VERT,&scrollInfo,TRUE);
+        }
+      }
+    } else if (rcItem.bottom > infoPtr->rcList.bottom)
+    {
+      /* scroll down */
+      if (dwStyle & WS_VSCROLL)
+      {
+        if (uView == LVS_REPORT)
+        {
+          rcItem.bottom -= infoPtr->rcList.bottom;
+          nScrollPosHeight = infoPtr->scrollStep.y;
+        } else if ((uView == LVS_ICON) || (uView == LVS_SMALLICON))
+        {
+          nScrollPosHeight = infoPtr->scrollStep.x;
+          rcItem.bottom -= infoPtr->rcList.bottom;
+        }
+
+        if (rcItem.bottom % nScrollPosHeight == 0)
+          infoPtr->lefttop.y += rcItem.bottom / nScrollPosHeight;
+        else
+          infoPtr->lefttop.y += rcItem.bottom / nScrollPosHeight + 1;
+        if (infoPtr->lefttop.y != oldlefttop.y)
+        {
+          SCROLLINFO scrollInfo;
+
+          ZeroMemory(&scrollInfo,sizeof(SCROLLINFO));
+          scrollInfo.cbSize = sizeof(SCROLLINFO);
+          scrollInfo.fMask  = SIF_POS;
+          scrollInfo.nPos = infoPtr->lefttop.y;
+          SetScrollInfo(hwnd,SB_VERT,&scrollInfo,TRUE);
+        }
+      }
+    }
+  }
+
+  if ((oldlefttop.x != infoPtr->lefttop.x) || (oldlefttop.y != infoPtr->lefttop.y))
+    LISTVIEW_ScrollWindow(hwnd,(oldlefttop.x-infoPtr->lefttop.x)*infoPtr->scrollStep.x,(oldlefttop.y-infoPtr->lefttop.y)*infoPtr->scrollStep.y);
+
+  return TRUE;
+}
+#else
 static BOOL LISTVIEW_EnsureVisible(HWND hwnd, INT nItem, BOOL bPartial)
 {
   LISTVIEW_INFO *infoPtr = (LISTVIEW_INFO *)GetWindowLongA(hwnd, 0);
@@ -4497,7 +4663,7 @@ static BOOL LISTVIEW_EnsureVisible(HWND hwnd, INT nItem, BOOL bPartial)
     InvalidateRect(hwnd,NULL,TRUE);
   return TRUE;
 }
-
+#endif
 /***
  * DESCRIPTION:
  * Retrieves the nearest item, given a position and a direction.
@@ -8583,6 +8749,25 @@ static LRESULT LISTVIEW_Notify(HWND hwnd, INT nCtrlId, LPNMHDR lpnmh)
       infoPtr->nItemWidth = LISTVIEW_GetItemWidth(hwnd);
       InvalidateRect(hwnd, NULL, TRUE);
     }
+#ifdef __WIN32OS2__
+    else
+    if ((lpnmh->code == HDN_ITEMCHANGEDA) || (lpnmh->code == HDN_ITEMCHANGEDW))
+    {
+      INT width;
+
+      width = LISTVIEW_GetItemWidth(hwnd);
+      if (width != infoPtr->nItemWidth)
+      {
+        HDC hdc;
+
+        infoPtr->nItemWidth = width;
+        LISTVIEW_UpdateScroll(hwnd);
+        hdc = GetDC(hwnd);
+        LISTVIEW_Refresh(hwnd, hdc);
+        ReleaseDC(hwnd, hdc);
+      }
+    }
+#endif
     else if(lpnmh->code ==  HDN_ITEMCLICKA)
     {
         /* Handle sorting by Header Column */
