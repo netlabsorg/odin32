@@ -13,11 +13,6 @@
 #include <windef.h>
 #endif
 
-#ifndef __cplusplus
-#undef inline
-#define inline
-#endif
-
 /* code page info common to SBCS and DBCS */
 struct cp_info
 {
@@ -52,6 +47,14 @@ union cptable
     struct sbcs_table sbcs;
     struct dbcs_table dbcs;
 };
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#if defined(__IBMC__) || defined(__IBMCPP__)
+#define static
+#endif
 
 extern const union cptable *cp_get_table( unsigned int codepage );
 extern const union cptable *cp_enum_table( unsigned int index );
@@ -93,7 +96,7 @@ static inline unsigned int strlenW( const WCHAR *str )
 #endif
 }
 
-static inline WCHAR *strcpyW( WCHAR *dst, const WCHAR *src ) 
+static inline WCHAR *strcpyW( WCHAR *dst, const WCHAR *src )
 {
 #if defined(__i386__) && defined(__GNUC__)
     int dummy1, dummy2, dummy3;
@@ -115,7 +118,7 @@ static inline WCHAR *strcpyW( WCHAR *dst, const WCHAR *src )
     return dst;
 }
 
-static inline int strcmpW( const WCHAR *str1, const WCHAR *str2 ) 
+static inline int strcmpW( const WCHAR *str1, const WCHAR *str2 )
 {
     while (*str1 && (*str1 == *str2)) { str1++; str2++; }
     return *str1 - *str2;
@@ -147,13 +150,13 @@ static inline WCHAR *strchrW( const WCHAR *str, WCHAR ch )
     for ( ; *str; str++) if (*str == ch) return (WCHAR *)str;
     return NULL;
 }
- 
+
 static inline WCHAR *strrchrW( const WCHAR *str, WCHAR ch )
 {
     WCHAR *ret = NULL;
     for ( ; *str; str++) if (*str == ch) ret = (WCHAR *)str;
     return ret;
-}               
+}
 
 static inline WCHAR *strlwrW( WCHAR *str )
 {
@@ -161,7 +164,7 @@ static inline WCHAR *strlwrW( WCHAR *str )
     while(*str) {
       *str = tolowerW(*str);
       str++;
-    } 
+    }
     return ret;
 }
 
@@ -171,7 +174,7 @@ static inline WCHAR *struprW( WCHAR *str )
     while(*str) {
       *str = toupperW(*str);
       str++;
-    } 
+    }
     return ret;
 }
 
@@ -179,6 +182,15 @@ extern int strcmpiW( const WCHAR *str1, const WCHAR *str2 );
 extern int strncmpiW( const WCHAR *str1, const WCHAR *str2, int n );
 extern WCHAR *strstrW( const WCHAR *str, const WCHAR *sub );
 extern unsigned short get_char_typeW( WCHAR ch );
+
+
+#if defined(__IBMC__) || defined(__IBMCPP__)
+#undef static
+#endif
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif //RC_INVOKED
 
