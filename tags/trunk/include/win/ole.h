@@ -1,4 +1,4 @@
-/* $Id: ole.h,v 1.5 2000-12-24 12:28:19 sandervl Exp $ */
+/* $Id: ole.h,v 1.6 2001-04-26 19:23:31 sandervl Exp $ */
 /*
  *	ole.h	-	Declarations for OLESVR and OLECLI
  */
@@ -285,7 +285,7 @@ OLESTATUS WINAPI OleCreateFromClip16(
 
 /* com functions */
 void WINAPI CoFreeUnusedLibraries(void);
-HINSTANCE WINAPI CoLoadLibrary(LPSTR lpszLibName, BOOL bAutoFree);
+HINSTANCE WINAPI CoLoadLibrary(LPOLESTR lpszLibName, BOOL bAutoFree);
 void WINAPI CoFreeUnusedLibraries(void);
 void WINAPI CoFreeAllLibraries(void);
 
