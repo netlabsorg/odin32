@@ -6,6 +6,19 @@
  * Copyright 2000 Huw D M Davies for CodeWeavers.
  * Copyright 2001 Marcus Meissner
  *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * BUGS
  *
@@ -21,11 +34,6 @@
  * thus an 8x8 bitmap on a 96dpi screen has a size of 212x212 (8/96 * 2540).
  *
  */
-#ifdef __WIN32OS2__
-#define HAVE_FLOAT_H
-#define WINE_LARGE_INTEGER
-#include "oleaut32.h"
-#endif
 
 #include "config.h"
 
@@ -42,7 +50,7 @@
 #include "wine/obj_picture.h"
 #include "wine/obj_connection.h"
 #include "connpt.h"
-#include "debugtools.h"
+#include "wine/debug.h"
 
 #include "wine/wingdi16.h"
 #include "cursoricon.h"
@@ -50,12 +58,14 @@
 #ifdef HAVE_LIBJPEG
 /* This is a hack, so jpeglib.h does not redefine INT32 and the like*/
 #define XMD_H 
+#define UINT16 JPEG_UINT16
 #ifdef HAVE_JPEGLIB_H
 # include <jpeglib.h>
 #endif
+#undef UINT16
 #endif
 
-DEFAULT_DEBUG_CHANNEL(ole);
+WINE_DEFAULT_DEBUG_CHANNEL(ole);
 
 /*************************************************************************
  *  Declaration of implementation class
@@ -152,7 +162,7 @@ static OLEPictureImpl* OLEPictureImpl_Construct(LPPICTDESC pictDesc, BOOL fOwn)
   OLEPictureImpl* newObject = 0;
 
   if (pictDesc)
-    TRACE("(%p) type = %d\n", pictDesc, pictDesc->picType);
+      TRACE("(%p) type = %d\n", pictDesc, pictDesc->picType);
 
   /*
    * Allocate space for the object.
@@ -1270,39 +1280,3 @@ HRESULT WINAPI OleLoadPictureEx( LPSTREAM lpstream, LONG lSize, BOOL fRunmode,
   return S_OK;
 }
  
-#ifdef __WIN32OS2__
-
-// ----------------------------------------------------------------------
-// OleLoadPictureFile
-// ----------------------------------------------------------------------
-HRESULT WIN32API OleLoadPictureFile(VARIANT varFileName, LPDISPATCH* lplpdispPicture)
-{
-    dprintf(("OLEAUT32: OleLoadPictureFile - stub"));
-    return S_OK;
-}
-
-// ----------------------------------------------------------------------
-// OleSavePictureFile
-// ----------------------------------------------------------------------
-HRESULT WIN32API OleSavePictureFile(LPDISPATCH lpdispPicture,
-    BSTR bstrFileName)
-{
-    dprintf(("OLEAUT32: OleSavePictureFile - stub"));
-    return S_OK;
-}
-
-// ----------------------------------------------------------------------
-// OleLoadPicturePath
-// ----------------------------------------------------------------------
-HRESULT WIN32API OleLoadPicturePath
-   (LPOLESTR  		szURLorPath,
-    LPUNKNOWN 		punkCaller,
-    DWORD     		dwReserved,
-    OLE_COLOR 		clrReserved,
-    REFIID    		riid,
-    LPVOID *  		ppvRet )
-{
-    dprintf(("OLEAUT32: OleLoadPicturePath - stub"));
-    return S_OK;
-}
-#endif
