@@ -1,4 +1,4 @@
-/* $Id: oslibdos.cpp,v 1.109 2002-09-26 16:06:07 sandervl Exp $ */
+/* $Id: oslibdos.cpp,v 1.110 2002-12-19 12:55:27 sandervl Exp $ */
 /*
  * Wrappers for OS/2 Dos* API
  *
@@ -672,12 +672,20 @@ BOOL pmDateTimeToFileTime(FDATE *pDate,FTIME *pTime,FILETIME *pFT)
     dosTime = *(USHORT*)pTime;
     dosDate = *(USHORT*)pDate;
 
-    ret = DosDateTimeToFileTime(dosDate, dosTime, &dummy);
-    if(ret == FALSE) {
-        return FALSE;
-    }
     //time we get from OS2 is local time; win32 expects file time (UTC)
-    ret = LocalFileTimeToFileTime(&dummy, pFT);
+    ret = DosDateTimeToFileTime(dosDate, dosTime, &dummy);
+    if(ret) ret = LocalFileTimeToFileTime(&dummy, pFT);
+    return ret;
+}
+//******************************************************************************
+//******************************************************************************
+BOOL pmFileTimeToDateTime(FILETIME *pFT, FDATE *pDate, FTIME *pTime)
+{
+    BOOL 	ret;
+    FILETIME dummy;
+    //time we get from win32 is file time (UTC); OS2 expects local time
+    ret = FileTimeToLocalFileTime(pFT, &dummy);
+    if (ret) ret = FileTimeToDosDateTime(&dummy, (WORD*)pDate, (WORD*)pTime);
     return ret;
 }
 //******************************************************************************
@@ -1390,29 +1398,19 @@ BOOL OSLibDosGetFileInformationByHandle(DWORD hFile, BY_HANDLE_FILE_INFORMATION*
 }
 //******************************************************************************
 //******************************************************************************
-BOOL OSLibDosSetFileTime(DWORD hFile, WORD creationdate, WORD creationtime,
-                         WORD lastaccessdate, WORD lastaccesstime,
-                         WORD lastwritedate, WORD lastwritetime)
+BOOL OSLibDosSetFileTime(DWORD hFile,  LPFILETIME pFT1,
+                         LPFILETIME pFT2, LPFILETIME pFT3)
 {
   FILESTATUS3 fileInfo;
   APIRET      rc;
 
   rc = DosQueryFileInfo(hFile, FIL_STANDARD, &fileInfo, sizeof(fileInfo));
 
-  if(rc == NO_ERROR)
+  if (rc == NO_ERROR)
   {
-    if(creationdate && creationtime) {
-        fileInfo.fdateCreation   = *(FDATE *)&creationdate;
-        fileInfo.ftimeCreation   = *(FTIME *)&creationtime;
-    }
-    if(lastaccessdate && lastaccesstime) {
-        fileInfo.fdateLastAccess = *(FDATE *)&lastaccessdate;
-        fileInfo.ftimeLastAccess = *(FTIME *)&lastaccesstime;
-    }
-    if(lastwritedate && lastwritetime) {
-        fileInfo.fdateLastWrite  = *(FDATE *)&lastwritedate;
-        fileInfo.ftimeLastWrite  = *(FTIME *)&lastwritetime;
-    }
+	if (pFT1) pmFileTimeToDateTime(pFT1, &fileInfo.fdateCreation,  &fileInfo.ftimeCreation);
+	if (pFT2) pmFileTimeToDateTime(pFT2, &fileInfo.fdateLastAccess,&fileInfo.ftimeLastAccess);
+	if (pFT3) pmFileTimeToDateTime(pFT3, &fileInfo.fdateLastWrite, &fileInfo.ftimeLastWrite);
 
     rc = DosSetFileInfo(hFile, FIL_STANDARD, &fileInfo, sizeof(fileInfo));
   }
@@ -1427,9 +1425,8 @@ BOOL OSLibDosSetFileTime(DWORD hFile, WORD creationdate, WORD creationtime,
 }
 //******************************************************************************
 //******************************************************************************
-BOOL OSLibDosGetFileTime(DWORD hFile, WORD *creationdate, WORD *creationtime,
-                         WORD *lastaccessdate, WORD *lastaccesstime,
-                         WORD *lastwritedate, WORD *lastwritetime)
+BOOL OSLibDosGetFileTime(DWORD hFile, LPFILETIME pFT1,
+                         LPFILETIME pFT2, LPFILETIME pFT3)
 {
   FILESTATUS3 fileInfo;
   APIRET      rc;
@@ -1438,14 +1435,10 @@ BOOL OSLibDosGetFileTime(DWORD hFile, WORD *creationdate, WORD *creationtime,
 
   if(rc == NO_ERROR)
   {
-    *creationdate   = *(WORD *)&fileInfo.fdateCreation;
-    *creationtime   = *(WORD *)&fileInfo.ftimeCreation;
-    *lastaccessdate = *(WORD *)&fileInfo.fdateLastAccess;
-    *lastaccesstime = *(WORD *)&fileInfo.ftimeLastAccess;
-    *lastwritedate  = *(WORD *)&fileInfo.fdateLastWrite;
-    *lastwritetime  = *(WORD *)&fileInfo.ftimeLastWrite;
+  	if (pFT1) pmDateTimeToFileTime(&fileInfo.fdateCreation,  &fileInfo.ftimeCreation,  pFT1);
+  	if (pFT2) pmDateTimeToFileTime(&fileInfo.fdateLastAccess,&fileInfo.ftimeLastAccess,pFT2);
+  	if (pFT3) pmDateTimeToFileTime(&fileInfo.fdateLastWrite, &fileInfo.ftimeLastWrite, pFT3);
   }
-
   if(rc)
   {
     SetLastError(error2WinError(rc));

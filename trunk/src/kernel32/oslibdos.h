@@ -1,4 +1,4 @@
-/* $Id: oslibdos.h,v 1.48 2002-08-22 14:21:27 sandervl Exp $ */
+/* $Id: oslibdos.h,v 1.49 2002-12-19 12:55:27 sandervl Exp $ */
 
 /*
  * Wrappers for OS/2 Dos* API
@@ -98,13 +98,13 @@ BOOL  OSLibDosWrite(DWORD hFile, LPVOID lpBuffer, DWORD size, DWORD *nrBytesWrit
 
 BOOL  OSLibDosGetFileInformationByHandle(DWORD hFile, BY_HANDLE_FILE_INFORMATION* pHFI);
 
-BOOL  OSLibDosSetFileTime(DWORD hFile, WORD creationdate, WORD creationtime,
-                          WORD lastaccessdate, WORD lastaccesstime,
-                          WORD lastwritedate, WORD lastwritetime);
+BOOL  OSLibDosSetFileTime(DWORD hFile, LPFILETIME pFT1,
+                                    LPFILETIME pFT2,
+                                    LPFILETIME pFT3);
 
-BOOL  OSLibDosGetFileTime(DWORD hFile, WORD *creationdate, WORD *creationtime,
-                          WORD *lastaccessdate, WORD *lastaccesstime,
-                          WORD *lastwritedate, WORD *lastwritetime);
+BOOL  OSLibDosGetFileTime(DWORD hFile, LPFILETIME pFT1,
+                                    LPFILETIME pFT2,
+                                    LPFILETIME pFT3);
 
 DWORD OSLibDosSetFilePointer(DWORD hFile, DWORD OffsetLow, DWORD *OffsetHigh, DWORD method);
 

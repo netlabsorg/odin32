@@ -1,4 +1,4 @@
-/* $Id: hmfile.cpp,v 1.36 2002-12-03 11:29:27 sandervl Exp $ */
+/* $Id: hmfile.cpp,v 1.37 2002-12-19 12:55:27 sandervl Exp $ */
 
 /*
  * File IO win32 apis
@@ -140,6 +140,8 @@ void HMDeviceFileClass::ParsePath(LPCSTR lpszFileName, LPSTR lpszParsedFileName,
  * Variables :
  * Result    :
  * Remark    : TODO: Check if this implementation is complete and 100% correct
+ *		             UTC Time or Localtime ?
+ *                   GetFileTime is changed, Returns UTC-time yet !!!!! 
  * Status    : NO_ERROR - API succeeded
  *             other    - what is to be set in SetLastError
  *
@@ -219,6 +221,7 @@ DWORD HMDeviceFileClass::OpenFile (LPCSTR        lpszFileName,
                     NULL,
                     &filetime );
 
+		/* UTC Time or Localtime ? GetFileTime Returns UTC-time yet ? !!!!! */ 
         FileTimeToDosDateTime(&filetime,
                               &filedatetime[0],
                               &filedatetime[1] );
@@ -673,7 +676,7 @@ BOOL HMDeviceFileClass::SetEndOfFile(PHMHANDLEDATA pHMHandleData)
     return FALSE;
 }
 
-
+//******************************************************************************
 /*****************************************************************************
  * Name      : BOOL HMDeviceFileClass::SetFileTime
  * Purpose   : set file time
@@ -686,7 +689,7 @@ BOOL HMDeviceFileClass::SetEndOfFile(PHMHANDLEDATA pHMHandleData)
  * Remark    :
  * Status    :
  *
- * Author    : Patrick Haller [Wed, 1999/06/17 20:44]
+ * Author    : Patrick Haller [Wed, 1999/06/17 20:44] mod. DT
  *****************************************************************************/
 
 BOOL HMDeviceFileClass::SetFileTime(PHMHANDLEDATA pHMHandleData,
@@ -694,32 +697,11 @@ BOOL HMDeviceFileClass::SetFileTime(PHMHANDLEDATA pHMHandleData,
                                     LPFILETIME pFT2,
                                     LPFILETIME pFT3)
 {
- WORD creationdate = 0, creationtime = 0;
- WORD lastaccessdate = 0, lastaccesstime = 0;
- WORD lastwritedate = 0, lastwritetime = 0;
-
     dprintfl(("KERNEL32: HMDeviceFileClass::SetFileTime %s(%08xh,%08xh,%08xh,%08xh)\n",
               lpHMDeviceName, pHMHandleData, pFT1, pFT2, pFT3));
 
-    if(pFT1 && pFT1->dwLowDateTime && pFT1->dwHighDateTime) {
-        FileTimeToDosDateTime(pFT1, &creationdate, &creationtime);
-    }
+    if(OSLibDosSetFileTime(pHMHandleData->hHMHandle, pFT1, pFT2, pFT3)) return TRUE;
 
-    if(pFT2 && pFT2->dwLowDateTime && pFT2->dwHighDateTime) {
-        FileTimeToDosDateTime(pFT2, &lastaccessdate, &lastaccesstime);
-    }
-
-    if(pFT3 && pFT3->dwLowDateTime && pFT3->dwHighDateTime) {
-        FileTimeToDosDateTime(pFT3, &lastwritedate, &lastwritetime);
-    }
-
-    if(OSLibDosSetFileTime(pHMHandleData->hHMHandle,
-                           creationdate, creationtime,
-                           lastaccessdate, lastaccesstime,
-                           lastwritedate, lastwritetime))
-    {
-        return TRUE;
-    }
     dprintf(("SetFileTime failed with error %d", GetLastError()));
     return FALSE;
 }
@@ -736,7 +718,7 @@ BOOL HMDeviceFileClass::SetFileTime(PHMHANDLEDATA pHMHandleData,
  * Remark    :
  * Status    :
  *
- * Author    : SvL
+ * Author    : SvL mod. DT
  *****************************************************************************/
 
 BOOL HMDeviceFileClass::GetFileTime(PHMHANDLEDATA pHMHandleData,
@@ -744,33 +726,13 @@ BOOL HMDeviceFileClass::GetFileTime(PHMHANDLEDATA pHMHandleData,
                                     LPFILETIME pFT2,
                                     LPFILETIME pFT3)
 {
- WORD creationdate, creationtime;
- WORD lastaccessdate, lastaccesstime;
- WORD lastwritedate, lastwritetime;
- BOOL rc;
-
   if(!pFT1 && !pFT2 && !pFT3) {//TODO: does NT do this?
     dprintf(("ERROR: GetFileTime: invalid parameter!"));
     SetLastError(ERROR_INVALID_PARAMETER);
     return FALSE;
   }
 
-  if(OSLibDosGetFileTime(pHMHandleData->hHMHandle,
-                         &creationdate, &creationtime,
-                         &lastaccessdate, &lastaccesstime,
-                         &lastwritedate, &lastwritetime))
-  {
-    if(pFT1) {
-        DosDateTimeToFileTime(creationdate, creationtime, pFT1);
-    }
-    if(pFT2) {
-        DosDateTimeToFileTime(lastaccessdate, lastaccesstime, pFT2);
-    }
-    if(pFT3) {
-        DosDateTimeToFileTime(lastwritedate, lastwritetime, pFT3);
-    }
-    return TRUE;
-  }
+  if(OSLibDosGetFileTime(pHMHandleData->hHMHandle, pFT1, pFT2, pFT3)) return TRUE;
   dprintf(("GetFileTime failed with error %d", GetLastError()));
   return FALSE;
 }
