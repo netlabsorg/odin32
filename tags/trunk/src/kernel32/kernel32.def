@@ -1,10 +1,11 @@
-; $Id: kernel32.def,v 1.94 2000-11-21 11:35:07 sandervl Exp $
+; $Id: kernel32.def,v 1.95 2000-12-16 23:24:35 bird Exp $
 
-;Created by BLAST for IBM's compiler
 ;Basis is Windows95 KERNEL32
 LIBRARY KERNEL32 INITINSTANCE TERMINSTANCE
 DATA MULTIPLE NONSHARED LOADONCALL
 CODE SHARED LOADONCALL
+
+DESCRIPTION 'Odin32 System DLL - Kernel32'
 
 SEGMENTS
 
@@ -1011,10 +1012,10 @@ EXPORTS
     RegSetValueW                = _RegSetValueW@20              @1144
     RegUnLoadKeyA               = _RegUnLoadKeyA@8              @1145
     RegUnLoadKeyW               = _RegUnLoadKeyW@8              @1146
-                                                                         
 
-                                                                                   
-; ----------------------------------------------------------------------------     
+
+
+; ----------------------------------------------------------------------------
 ;   KERNEL32 / WINE support functions that do not exist in the Win32 API
 ;   (These starts at ordinal 1200, API have ordinal less than 1200.)
 ; ----------------------------------------------------------------------------
@@ -1147,7 +1148,7 @@ EXPORTS
     _ConvertResourceToOS2@12                                      @2007
     _ConvertCursorToOS2@4                                         @2008
     _FreeOS2Resource@4                                            @2009
- 
+
     GetDisplayCodepage__Fv                                        @3000
     GetWindowsCodepage__Fv                                        @3001
 
