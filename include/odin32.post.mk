@@ -1,4 +1,4 @@
-# $Id: odin32.post.mk,v 1.4 2001-09-30 09:46:16 bird Exp $
+# $Id: odin32.post.mk,v 1.5 2001-10-01 01:24:38 bird Exp $
 
 #
 # Odin32 API
@@ -35,7 +35,7 @@ OBJS = $(OBJS:initterm.obj=dummy.obj)
 #
 # Include compiler spesific post rule file.
 #
-!include $(ODIN32_INCLUDE)/odin32.post.$(CCENV).mk
+!include $(ODIN32_INCLUDE)/odin32.post.$(MKFILE).mk
 
 
 #

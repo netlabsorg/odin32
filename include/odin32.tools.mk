@@ -1,4 +1,4 @@
-# $Id: odin32.tools.mk,v 1.8 2001-09-30 00:41:38 bird Exp $
+# $Id: odin32.tools.mk,v 1.9 2001-10-01 01:24:38 bird Exp $
 
 #
 # Odin32 API
@@ -76,5 +76,5 @@ CMDQD_INIT  = $(CMDQD) kill & $(CMDQD) init $(MULTIJOBS)
 #
 # Include compiler dependent tools
 #
-!include $(ODIN32_INCLUDE)/odin32.tools.$(CCENV).mk
+!include $(ODIN32_INCLUDE)/odin32.tools.$(MKFILE).mk
 
