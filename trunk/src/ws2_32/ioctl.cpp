@@ -1,4 +1,4 @@
-/* $Id: ioctl.cpp,v 1.1 2001-09-18 16:58:59 phaller Exp $ */
+/* $Id: ioctl.cpp,v 1.2 2001-10-10 22:42:30 phaller Exp $ */
 /*
  * based on Windows Sockets 1.1 specs
  * (ftp.microsoft.com:/Advsys/winsock/spec11/WINSOCK.TXT)
@@ -21,13 +21,18 @@
  * Includes                                                                  *
  *****************************************************************************/
 
+// Note: this file is currently incompatible with performance tracing
+#undef PROFILE
+
+#include <odin.h>
+#include <odinwrap.h>
+#include <os2sel.h>
+
+
 #define INCL_BASE
 #include <os2wrap.h>
 #include <stdio.h>
 #include <string.h>
-#include <odin.h>
-#include <odinwrap.h>
-#include <os2sel.h>
 #include <misc.h>
 #include <win32api.h>
 
