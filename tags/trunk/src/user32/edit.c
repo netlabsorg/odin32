@@ -2323,11 +2323,7 @@ static BOOL EDIT_MakeUndoFit(EDITSTATE *es, UINT size)
 
     alloc_size = ROUND_TO_GROW((size + 1) * sizeof(WCHAR));
     if ((es->undo_text = HeapReAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, es->undo_text, alloc_size))) {
-#ifdef __WIN32OS2__
         es->undo_buffer_size = alloc_size/sizeof(WCHAR) - 1;
-#else
-        es->undo_buffer_size = alloc_size/sizeof(WCHAR);
-#endif
         return TRUE;
     }
     else
