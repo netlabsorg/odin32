@@ -1,16 +1,18 @@
-/* $Id: winicon.cpp,v 1.3 1999-11-14 16:35:58 sandervl Exp $ */
+/* $Id: winicon.cpp,v 1.4 1999-11-14 23:29:25 sandervl Exp $ */
 /*
  * Win32 Icon Code for OS/2
  *
  *
  * Copyright 1998 Sander van Leeuwen (sandervl@xs4all.nl)
  *
- * LookupIconIdFromDirectory(Ex) (+help functions) ported from Wine (991031)
+ * Parts based on Wine code (objects\bitmap.c, loader\resource.c, objects\cursoricon.c):
  *
- * Copyright 1995 Alexandre Julliard
+ * Copyright 1993 Alexandre Julliard
+ *           1993 Robert J. Amstadt
  *           1996 Martin Von Loewis
  *           1997 Alex Korobka
  *           1998 Turchanov Sergey
+ *           1998 Huw D M Davies
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *
@@ -87,7 +89,7 @@ HICON WIN32API CreateIconIndirect(LPICONINFO pIcon)
     	SelectObject (hdcDst, iconinfo.hbmMask);
 	SelectObject (hdcSrc, pIcon->hbmMask);
 	BitBlt (hdcDst, 0, 0, bmpsize.cx, bmpsize.cy,
-                hdcSrc, bmpsize.cx, 0, SRCCOPY);
+                hdcSrc, 0, 0, SRCCOPY);
 	PatBlt (hdcDst, bmpsize.cx, bmpsize.cy, bmpsize.cx, bmpsize.cy, BLACKNESS);
     	
 	hIcon = O32_CreateIconIndirect(&iconinfo);
@@ -106,30 +108,119 @@ HICON WIN32API CreateIconIndirect(LPICONINFO pIcon)
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API DestroyIcon( HICON arg1)
+HICON CreateIconIndirect(LPICONINFO pIcon, BOOL bIsIcon, int desiredX, int desiredY, DWORD flags)
 {
-#ifdef DEBUG
-    WriteLog("USER32:  DestroyIcon\n");
-#endif
-    return O32_DestroyIcon(arg1);
+ HICON   hIcon;
+ HDC     hdcSrc, hdcDst;
+ BITMAP  bmp;
+
+    if(pIcon->hbmMask && pIcon->hbmColor) 
+    {
+	ICONINFO iconinfo;
+	HBITMAP hbmOldSrc, hbmOldDst;
+
+	iconinfo = *pIcon;
+	GetObjectA(pIcon->hbmColor, sizeof(BITMAP), (LPVOID)&bmp);
+
+	//if there's a color bitmap, the mask bitmap contains only the AND bits
+        //Open32 calls WinCreatePointerIndirect which expects AND & XOR bits
+        //To solve this we create a bitmap that's 2x height of the mask, copy
+        //the AND bits and set the XOR bits to 0
+    	hdcSrc = CreateCompatibleDC(0);
+    	hdcDst = CreateCompatibleDC(0);
+
+	iconinfo.hbmMask  = CreateCompatibleBitmap (hdcDst, desiredX, desiredY*2);
+    	hbmOldDst = SelectObject (hdcDst, iconinfo.hbmMask);
+	hbmOldSrc = SelectObject (hdcSrc, pIcon->hbmMask);
+	if(desiredX != bmp.bmWidth || desiredY != bmp.bmHeight) {
+		StretchBlt(hdcDst, 0, 0, desiredX, desiredY, hdcSrc, 0, 0, 
+                           bmp.bmWidth, bmp.bmHeight, SRCCOPY);
+	}
+	else {
+		BitBlt (hdcDst, 0, 0, bmp.bmWidth, bmp.bmHeight,
+                	hdcSrc, 0, 0, SRCCOPY);
+	}
+	PatBlt (hdcDst, desiredX, desiredY, desiredX, desiredY, BLACKNESS);
+
+	if(desiredX != bmp.bmWidth || desiredY != bmp.bmHeight) {
+		iconinfo.hbmColor  = CreateCompatibleBitmap (hdcDst, desiredX, desiredY);
+	    	SelectObject (hdcDst, iconinfo.hbmColor);
+		SelectObject (hdcSrc, pIcon->hbmColor);
+		StretchBlt(hdcDst, 0, 0, desiredX, desiredY, hdcSrc, 0, 0, 
+                           bmp.bmWidth, bmp.bmHeight, SRCCOPY);
+	}
+    	
+	hIcon = O32_CreateIconIndirect(&iconinfo);
+
+    	DeleteObject(iconinfo.hbmMask);
+	if(desiredX != bmp.bmWidth || desiredY != bmp.bmHeight) {
+    		DeleteObject(iconinfo.hbmColor);
+	}
+    	SelectObject (hdcDst, hbmOldDst);
+	SelectObject (hdcSrc, hbmOldSrc);
+    	DeleteDC(hdcSrc);
+    	DeleteDC(hdcDst);
+
+	return hIcon;
+    }
+    hIcon = O32_CreateIconIndirect(pIcon);
+    if(hIcon == 0) {
+	dprintf(("CreateIconIndirect %d (%d,%d) %x %x failed with %x", pIcon->fIcon, pIcon->xHotspot, pIcon->yHotspot, pIcon->hbmMask, pIcon->hbmColor, GetLastError()));
+    }
+    return hIcon;
 }
 //******************************************************************************
 //******************************************************************************
-HICON WIN32API CopyIcon( HICON arg1)
+BOOL WIN32API DestroyIcon( HICON hIcon)
 {
-#ifdef DEBUG
-    WriteLog("USER32:  CopyIcon\n");
-#endif
-    return O32_CopyIcon(arg1);
+    dprintf(("USER32: DestroyIcon %x", hIcon));
+    return O32_DestroyIcon(hIcon);
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API GetIconInfo( HICON arg1, LPICONINFO  arg2)
+HICON WIN32API CopyIcon( HICON hIcon)
 {
-#ifdef DEBUG
-    WriteLog("USER32:  GetIconInfo\n");
+    dprintf(("USER32:  CopyIcon %x", hIcon));
+    return O32_CopyIcon(hIcon);
+}
+//******************************************************************************
+//WARNING: MEMORY LEAK & DIRTY HACK TO WORK AROUND OPEN32 BUG
+//OS/2 icon masks must be twice the height of the color bitmap
+//In Windows, the mask only contains the AND data if there's a color bitmap
+//--->> We're allocating a bitmap to replace the mask bitmap, but DON'T DELETE it!
+//WARNING: MEMORY LEAK & DIRTY HACK TO WORK AROUND OPEN32 BUG
+//******************************************************************************
+BOOL WIN32API GetIconInfo( HICON hIcon, LPICONINFO pIconInfo)
+{
+ BOOL rc;
+ HBITMAP hbmMask, hbmOldSrc, hbmOldDst;
+ BITMAP bmp;
+
+    dprintf(("USER32: GetIconInfo %x", hIcon));
+    rc = O32_GetIconInfo(hIcon, pIconInfo);
+#if 1
+    if(rc && pIconInfo->hbmColor) 
+    {
+	HDC  hdcSrc, hdcDst;
+    	hdcSrc = CreateCompatibleDC(0);
+    	hdcDst = CreateCompatibleDC(0);
+
+	GetObjectA(pIconInfo->hbmMask, sizeof(BITMAP), (LPVOID)&bmp);
+
+	hbmMask = CreateCompatibleBitmap (hdcDst, bmp.bmWidth, bmp.bmHeight/2);
+    	hbmOldDst = SelectObject (hdcDst, hbmMask);
+	hbmOldSrc = SelectObject (hdcSrc, pIconInfo->hbmMask);
+	BitBlt (hdcDst, 0, 0, bmp.bmWidth, bmp.bmHeight/2,
+               	hdcSrc, 0, bmp.bmHeight/2, SRCCOPY);
+
+	SelectObject(hdcDst, hbmOldDst);
+	SelectObject(hdcSrc, hbmOldSrc);
+    	DeleteDC(hdcDst);
+    	DeleteDC(hdcSrc);
+	pIconInfo->hbmMask = hbmMask;
+    }
 #endif
-    return O32_GetIconInfo(arg1, arg2);
+    return rc;
 }
 /**********************************************************************
  *	    CURSORICON_FindBestIcon
@@ -282,6 +373,82 @@ INT WIN32API LookupIconIdFromDirectory( LPBYTE dir, BOOL bIcon )
     return LookupIconIdFromDirectoryEx( dir, bIcon, 
 	   bIcon ? GetSystemMetrics(SM_CXICON) : GetSystemMetrics(SM_CXCURSOR),
 	   bIcon ? GetSystemMetrics(SM_CYICON) : GetSystemMetrics(SM_CYCURSOR), bIcon ? 0 : LR_MONOCHROME );
+}
+/*************************************************************************
+ * CURSORICON_ExtCopy 
+ *
+ * Copies an Image from the Cache if LR_COPYFROMRESOURCE is specified
+ *
+ * PARAMS
+ *      Handle     [I] handle to an Image 
+ *      nType      [I] Type of Handle (IMAGE_CURSOR | IMAGE_ICON)
+ *      iDesiredCX [I] The Desired width of the Image
+ *      iDesiredCY [I] The desired height of the Image
+ *      nFlags     [I] The flags from CopyImage
+ *
+ * RETURNS
+ *     Success: The new handle of the Image
+ *
+ * NOTES
+ *     LR_COPYDELETEORG and LR_MONOCHROME are currently not implemented.
+ *     LR_MONOCHROME should be implemented by CURSORICON_CreateFromResource.
+ *     LR_COPYFROMRESOURCE will only work if the Image is in the Cache.
+ *
+ *     
+ * TODO: LR_COPYFROMRESOURCE doesn't work. Uses supplied icon instead
+ *
+ */
+HGLOBAL CopyCursorIcon(HGLOBAL Handle, UINT nType, 
+  	 	       INT iDesiredCX, INT iDesiredCY, 
+		       UINT nFlags)
+{
+    HGLOBAL hNew=0;
+    BOOL bIsIcon = (nType == IMAGE_ICON);
+
+    if(Handle == 0)
+    {
+	return 0;
+    }
+
+    /* Best Fit or Monochrome */
+    if(!bIsIcon || (nFlags & LR_COPYFROMRESOURCE
+        && (iDesiredCX > 0 || iDesiredCY > 0))
+        || nFlags & LR_MONOCHROME) 
+    {
+            LPBYTE pBits;
+            HANDLE hMem;
+            HRSRC hRsrc;
+            DWORD dwBytesInRes;
+            WORD wResId;
+            CURSORICONDIR *pDir;
+            CURSORICONDIRENTRY *pDirEntry;
+
+            /* Completing iDesiredCX CY for Monochrome Bitmaps if needed
+            */
+            if(((nFlags & LR_MONOCHROME) && !(nFlags & LR_COPYFROMRESOURCE))
+                || (iDesiredCX == 0 && iDesiredCY == 0))
+            {
+                iDesiredCY = GetSystemMetrics(bIsIcon ? 
+                    SM_CYICON : SM_CYCURSOR);
+                iDesiredCX = GetSystemMetrics(bIsIcon ? 
+                    SM_CXICON : SM_CXCURSOR);
+            }
+      
+            /* Create a New Icon with the proper dimension
+            */
+	    ICONINFO iconinfo;
+
+	    GetIconInfo(Handle, &iconinfo);
+            hNew = CreateIconIndirect(&iconinfo, bIsIcon, iDesiredCX, iDesiredCY, nFlags);
+    }
+    else
+    {
+	if(bIsIcon) {
+		return CopyIcon(Handle);
+	}
+	else	return CopyCursor(Handle);
+    }
+    return hNew;
 }
 //******************************************************************************
 //******************************************************************************
