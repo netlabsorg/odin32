@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.212 2003-04-28 08:41:07 sandervl Exp $ */
+/* $Id: pmwindow.cpp,v 1.213 2003-05-02 15:33:15 sandervl Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -654,6 +654,33 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
         //on top of it.
 
         win32wnd->callVisibleRgnNotifyProc(TRUE);
+
+        //Workaround for PM/GPI bug when moving/sizing a window with open DCs
+        //
+        //Windows applictions often get a DC and keep it open for the duration
+        //of the application. When the DC's window is moved (full window dragging on)
+        //PM/GPI doesn't seem to update the DC properly/in time.
+        //This can result is visible distortions on the screen.
+        //Debugging showed that querying the visible region of a DC will cure
+        //this problem (GPI probably recalculates the visible region).
+        int  nrdcs = 0;
+        HDC  hdcWindow[MAX_OPENDCS];
+
+        if(win32wnd->queryOpenDCs(hdcWindow, MAX_OPENDCS, &nrdcs)) 
+        {
+            RECTL rcl = {0,0,1,1};
+            HRGN hrgnRect;
+
+            for(int i=0;i<nrdcs;i++) {
+                dprintf(("Recalc visible region of DC %x for window %x", hdcWindow[i], win32wnd->getWindowHandle()));
+                hrgnRect = GreCreateRectRegion(hdcWindow[i], &rcl, 1);
+                GreCopyClipRegion(hdcWindow[i], hrgnRect, 0, COPYCRGN_VISRGN);
+                GreDestroyRegion(hdcWindow[i], hrgnRect);
+            }
+        }
+
+        //Workaround END
+
         if(!win32wnd->isComingToTop() && ((win32wnd->getExStyle() & WS_EX_TOPMOST_W) == WS_EX_TOPMOST_W))
         {
             HWND hwndrelated;

@@ -1,4 +1,4 @@
-/* $Id: dc.cpp,v 1.118 2003-03-22 20:27:10 sandervl Exp $ */
+/* $Id: dc.cpp,v 1.119 2003-05-02 15:33:15 sandervl Exp $ */
 
 /*
  * DC functions for USER32
@@ -884,6 +884,10 @@ int WIN32API ReleaseDC (HWND hwnd, HDC hdc)
         else {
             dprintf2(("ReleaseDC: CS_OWNDC, not released"));
         }
+        if(!isOwnDC && !wnd->isDesktopWindow()) {
+            //remove from list of open DCs for this window
+            wnd->removeOpenDC(hdc);
+        }
         RELEASE_WNDOBJ(wnd);
     }
 
@@ -1102,6 +1106,12 @@ HDC WIN32API GetDCEx (HWND hwnd, HRGN hrgn, ULONG flags)
     GpiSetDrawControl (hps, DCTL_DISPLAY, drawingAllowed ? DCTL_ON : DCTL_OFF);
 
     dprintf (("User32: GetDCEx hwnd %x (%x %x) -> hdc %x", hwnd, hrgn, flags, pHps->hps));
+
+    //add to list of open DCs for this window
+    if(wnd->isDesktopWindow() == FALSE) {//not relevant for the desktop window
+         wnd->addOpenDC((HDC)pHps->hps);
+    }
+
     RELEASE_WNDOBJ(wnd);
 
 
