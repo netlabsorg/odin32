@@ -1,8 +1,8 @@
-: $Id: back.cmd,v 1.1 1999-05-24 20:19:05 ktk Exp $ 
-
 @echo off
 @md backup\%1 > nul
 @copy *.c backup\%1 > nul
+@copy *.l backup\%1 > nul
+@copy *.y backup\%1 > nul
 @copy *.cpp backup\%1 > nul
 @copy *.rc backup\%1 > nul
 @copy *.dlg backup\%1 > nul

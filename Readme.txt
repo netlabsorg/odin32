@@ -1,5 +1,3 @@
-; $Id: Readme.txt,v 1.1 1999-05-24 20:19:05 ktk Exp $ 
-
 15/05/99: Project Odin Source Code Notes
 ========================================
 

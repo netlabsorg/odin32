@@ -1,5 +1,3 @@
-; $Id: LICENSE.TXT,v 1.1 1999-05-24 20:19:05 ktk Exp $ 
-
 Project Odin Software License
 
 You may, without charge, royalty, or other payment, copy and

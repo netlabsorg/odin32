@@ -1,5 +1,3 @@
-/* $Id: advapi32.h,v 1.1 1999-05-24 20:19:33 ktk Exp $ */
-
 /*
  * Win32 advanced API functions for OS/2
  *
@@ -15,14 +13,6 @@
 
 #ifndef __ADVAPI32_H__
 #define __ADVAPI32_H__
-
-//Why are the Open32 keys defined differently?
-#define WINHKEY_CLASSES_ROOT           (( HKEY ) 0x80000000 )
-#define WINHKEY_CURRENT_USER           (( HKEY ) 0x80000001 )
-#define WINHKEY_LOCAL_MACHINE          (( HKEY ) 0x80000002 )
-#define WINHKEY_USERS                  (( HKEY ) 0x80000003 )
-#define WINHKEY_PERFORMANCE_DATA       (( HKEY ) 0x80000004 )
-
 
 // IsTextUnicode
 #define IS_TEXT_UNICODE_ASCII16               0x0001

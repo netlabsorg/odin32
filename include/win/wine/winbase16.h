@@ -1,5 +1,3 @@
-/* $Id: winbase16.h,v 1.1 1999-05-24 20:19:29 ktk Exp $ */
-
 #ifndef _INCLUDE_WINE_WINBASE16_H
 #define _INCLUDE_WINE_WINBASE16_H
 
