@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.170 2002-03-20 10:30:06 sandervl Exp $ */
+/* $Id: pmwindow.cpp,v 1.171 2002-03-28 11:26:00 sandervl Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -887,6 +887,14 @@ MRESULT EXPENTRY Win32FrameWindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM m
         dprintf(("PMFRAME: WM_CREATE %x", hwnd));
         goto RunDefFrameWndProc;
     }
+
+#ifdef DEBUG
+    case WM_CLOSE:
+    {
+        dprintf(("PMFRAME: WM_CLOSE %x", hwnd));
+        goto RunDefFrameWndProc;
+    }
+#endif
 
     case WM_PAINT:
     {
