@@ -1,4 +1,4 @@
-/* $Id: oslibgpi.cpp,v 1.13 2003-01-28 16:21:48 sandervl Exp $ */
+/* $Id: oslibgpi.cpp,v 1.14 2003-07-16 15:47:37 sandervl Exp $ */
 
 /*
  * GPI interface code
@@ -258,9 +258,8 @@ VOID calcDimensions(POINTLOS2 box[],PPOINTLOS2 point)
 
   if (box[TXTBOX_BOTTOMLEFT].y == box[TXTBOX_BOTTOMRIGHT].y)
   {
-    point->y = labs (box[TXTBOX_BOTTOMLEFT].y-box[TXTBOX_TOPLEFT].y);
-    point->x = labs (box[TXTBOX_BOTTOMRIGHT].x-box[TXTBOX_BOTTOMLEFT].x);
-
+    point->y = labs (box[TXTBOX_BOTTOMLEFT].y-box[TXTBOX_TOPLEFT].y) + 1;
+    point->x = labs (box[TXTBOX_BOTTOMRIGHT].x-box[TXTBOX_BOTTOMLEFT].x) + 1;
     if (box[TXTBOX_BOTTOMLEFT].x != box[TXTBOX_TOPLEFT].x)
     {
       if (point->y < 25)
@@ -271,12 +270,12 @@ VOID calcDimensions(POINTLOS2 box[],PPOINTLOS2 point)
     }
   } else
   {
-    cx = labs (box[TXTBOX_BOTTOMLEFT].x-box[TXTBOX_TOPLEFT].x);
-    cy = labs (box[TXTBOX_BOTTOMLEFT].y-box[TXTBOX_TOPLEFT].y);
+    cx = labs (box[TXTBOX_BOTTOMLEFT].x-box[TXTBOX_TOPLEFT].x) + 1;
+    cy = labs (box[TXTBOX_BOTTOMLEFT].y-box[TXTBOX_TOPLEFT].y) + 1;
     point->y = (ULONG)hypot(cx,cy);
 
-    cx = labs (box[TXTBOX_TOPRIGHT].x-box[TXTBOX_TOPLEFT].x);
-    cy = labs (box[TXTBOX_TOPRIGHT].y-box[TXTBOX_TOPLEFT].y);
+    cx = labs (box[TXTBOX_TOPRIGHT].x-box[TXTBOX_TOPLEFT].x) + 1;
+    cy = labs (box[TXTBOX_TOPRIGHT].y-box[TXTBOX_TOPLEFT].y) + 1;
     point->x  = (ULONG)hypot(cx,cy);
   }
 }
@@ -399,20 +398,20 @@ BOOL OSLibGpiSetCp(HDC hdc, ULONG codepage)
 }
 
 
-int OSLibGpiQueryFontMaxHeight(HDC hdc) 
+int OSLibGpiQueryFontMaxHeight(HDC hdc)
 {
   FONTMETRICS metrics;
   BOOL rc;
 
   rc = GpiQueryFontMetrics(hdc, sizeof(metrics), &metrics);
   if(rc) {
-  	return max(metrics.lMaxBaselineExt, 
-                   max(metrics.lMaxAscender+metrics.lMaxDescender, 
+    return max(metrics.lMaxBaselineExt,
+                   max(metrics.lMaxAscender+metrics.lMaxDescender,
                        metrics.lInternalLeading+metrics.lEmHeight));
   }
   else {
-	dprintf(("GpiQueryFontMetrics returned FALSE!!"));
-	return 0;
+    dprintf(("GpiQueryFontMetrics returned FALSE!!"));
+    return 0;
   }
 }
 
@@ -424,7 +423,7 @@ void dprintfOrigin(HDC hdc)
     pDCData  pHps = (pDCData)OSLibGpiQueryDCData((HPS)hdc);
     if(!pHps)
     {
-	return;
+    return;
     }
 
     GreGetDCOrigin(pHps->hps, &point);
