@@ -1,4 +1,4 @@
-/* $Id: dc.cpp,v 1.92 2001-02-22 18:18:59 sandervl Exp $ */
+/* $Id: dc.cpp,v 1.93 2001-03-12 14:16:08 sandervl Exp $ */
 
 /*
  * DC functions for USER32
@@ -392,7 +392,7 @@ VOID removeClientArea(Win32BaseWindow *window, pDCData pHps)
 
    pHps->isClient = FALSE;
 
-   dprintfOrigin(pHps->hps);
+////   dprintfOrigin(pHps->hps);
 
    if(pHps->isClientArea)
    {
@@ -405,7 +405,7 @@ VOID removeClientArea(Win32BaseWindow *window, pDCData pHps)
                    0,
                    SETUPDC_ORIGIN | SETUPDC_VISRGN | SETUPDC_RECALCCLIP);
    }
-   else dprintf2(("removeClientArea: %x (%d,%d) (%d,%d)", window->getWindowHandle(), point.x, point.y, pHps->ptlOrigin.x, pHps->ptlOrigin.y));
+////   else dprintf2(("removeClientArea: %x (%d,%d) (%d,%d)", window->getWindowHandle(), point.x, point.y, pHps->ptlOrigin.x, pHps->ptlOrigin.y));
 
 }
 //******************************************************************************
@@ -751,6 +751,12 @@ HDC WIN32API BeginPaint (HWND hWnd, PPAINTSTRUCT_W lpps)
  LONG     lComplexity;
  RECTL    rectlClient;
  RECTL    rectlClip;
+
+   if(lpps == NULL) {
+        //BeginPaint does NOT change last error in this case
+        //(verified in NT4, SP6)
+        return 0;
+   }
 
    memset(lpps, 0, sizeof(*lpps));
    Win32BaseWindow *wnd = Win32BaseWindow::GetWindowFromHandle(hwnd);
@@ -1899,7 +1905,7 @@ void dprintfOrigin(HDC hdc)
     pDCData  pHps = (pDCData)GpiQueryDCData((HPS)hdc);
     if(!pHps)
     {
-    return;
+        return;
     }
 
     GreGetDCOrigin(pHps->hps, &point);
