@@ -1,4 +1,4 @@
-/* $Id: ProbKrnlErrors.h,v 1.1 2001-09-14 01:55:46 bird Exp $
+/* $Id: ProbKrnlErrors.h,v 1.2 2001-11-18 04:06:59 bird Exp $
  *
  * Error definitions for Win32k.sys
  *
@@ -110,10 +110,7 @@
  * Procedure shift and mask.
  * Used to get or set the procedure number of an error code.
  */
-#define ERROR_D32_ERROR_MASK                        0xff00
-#define ERROR_D32_PROC_MASK                         0x7f00
-#define ERROR_D32_PROC_FLAG                         0x8000
-#define ERROR_D32_PROC_SHIFT                        0x8
+#define ERROR_D32_PROC_SHIFT                        0x16   /* code in probkrnl assumes this */
 
 
 #endif
