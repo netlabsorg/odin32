@@ -1,4 +1,4 @@
-/* $Id: iconcache.cpp,v 1.7 2000-03-30 15:38:11 cbratschi Exp $ */
+/* $Id: iconcache.cpp,v 1.8 2000-05-18 14:16:02 sandervl Exp $ */
 
 /*
  * Win32 SHELL32 for OS/2
@@ -543,7 +543,7 @@ static INT SIC_IconAppend (LPCSTR sSourceFile, INT dwSourceIndex, HICON hSmallIc
 
    lpsice = (LPSIC_ENTRY) SHAlloc (sizeof (SIC_ENTRY));
 
-   lpsice->sSourceFile = HEAP_strdupA (GetProcessHeap(), 0, PathFindFilenameA(sSourceFile));
+   lpsice->sSourceFile = HEAP_strdupA (GetProcessHeap(), 0, PathFindFileNameA(sSourceFile));
    lpsice->dwSourceIndex = dwSourceIndex;
 
    EnterCriticalSection(&SHELL32_SicCS);
@@ -608,7 +608,7 @@ INT SIC_GetIconIndex (LPCSTR sSourceFile, INT dwSourceIndex )
 
    dprintf(("SHELL32:Iconcache SIC_GetIconIndex %s %i\n", sSourceFile, dwSourceIndex));
 
-   sice.sSourceFile = PathFindFilenameA(sSourceFile);
+   sice.sSourceFile = PathFindFileNameA(sSourceFile);
    sice.dwSourceIndex = dwSourceIndex;
 
    EnterCriticalSection(&SHELL32_SicCS);
