@@ -1,4 +1,4 @@
-Sourcecode for OdinBug 0.5.5
+Sourcecode for OdinBug 0.5.7
 ============================
 
 
@@ -7,7 +7,7 @@ A. How to compile OdinBug
    1. Create a project folder named OdinBug in your
       VX-REXX projects folder.
    
-   2. Unzip this OdinBugSrc055.ZIP in this folder.
+   2. Unzip this OdinBugSrc057.ZIP in this folder.
 
    3. Open OdinBug.VRP using VRXedit.
 
@@ -31,7 +31,7 @@ B. Conventions that are used by me in this project:
       necessary) a GUI object. Appropriate measures have to be
       taken to syncronize these two (or three). Check for event 
       routines tied to the entryfields on the settings page and 
-      for the subroutines _GUInit, _GUIEMailInit, _GUIRedraw and 
+      for the subroutines _GUIInit, _GUIEMailInit, _GUIRedraw and 
       _GUIRedraw2 to get an idea how I do this.
    
       Please, no discussion, whether this is sensible or not.
@@ -60,5 +60,5 @@ C. Please, share any changes you make, with me, because OdinBug
    
 D. AUTHOR:
 
-Herwig Bauernfeind, 02-12-2001
+Herwig Bauernfeind, 11-08-2002
 EMail: herwig.bauernfeind@aon.at

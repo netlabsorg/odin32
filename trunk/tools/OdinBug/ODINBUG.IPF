@@ -1,4 +1,4 @@
-:userdoc.:title.OdinBug Help 0.5.6
+:userdoc.:title.OdinBug Help 0.5.7
 :docprof toc=123.
 .***************************************************
 .*** IPF-Generator Version 0.82 for Framework IV ***
@@ -6,7 +6,7 @@
 
 :h1 res=100 x=right y=bottom width=66% height=100%.Introduction
 
-:font facename='Default' size=0x0.:artwork align=center name='E:\DEV\REXX\VXREXX\PROJECTS\ODINBUG\ODIN.BMP' fit.
+:artwork align=center name='E:\DEV\REXX\VXREXX\PROJECTS\ODINBUG\ODIN.BMP' fit.:font facename='Default' size=0x0.
 :p.OdinBug is a helper application for Odin&comma. the Win32-subsystem of
 OS&slr.2 (eCS) . Its purpose is to ease the creation of proper bug reports.
 :p.If everything goes well&comma. you just have to specify :link reftype=hd res=220.a proper logfile:elink. and
@@ -26,7 +26,7 @@ and useful bug reports!
 
 :h2 res=120 x=right y=bottom width=66% height=100%.Reporting Odin bugs
 
-:font facename='Default' size=0x0.:p.To make our job easier when dealing with reports of failures to run 
+:p.:font facename='Default' size=0x0.To make our job easier when dealing with reports of failures to run 
 certain applications&comma. there's a :link reftype=hd res=840.standard form:elink. to report bugs. Use
 OdinBug to create these bug reports.
 
@@ -65,7 +65,7 @@ that on some systems OdinInst.EXE hangs otherwise.:efn.
 
 :h2 res=130 x=right y=bottom width=66% height=100%.Useful tips
 
-:font facename='Default' size=0x0.:p.Crashes are always easy to locate in logfiles (search for 'Exception Information')&comma. 
+:p.:font facename='Default' size=0x0.Crashes are always easy to locate in logfiles (search for 'Exception Information')&comma. 
 but improper behaviour isn't.
 :p.In the system menu (top left button of a window)&comma. there's a menu item called
 'Put mark in debug log'. Selecting this item puts the line 'Mark requested 
@@ -79,7 +79,7 @@ button that causes the problem.
 
 :h2 res=140 x=right y=bottom width=66% height=100%.How to create a bug report in a few easy steps
 
-:font facename='Default' size=0x0.:p.Ideally OdinBug should be called immediately after you experienced a crash
+:p.:font facename='Default' size=0x0.Ideally OdinBug should be called immediately after you experienced a crash
 in a Win32 program and after you have :link reftype=hd res=220.created a log file:elink..
 
 :ol.:font facename='Helv' size=8x4.
@@ -119,7 +119,7 @@ style and you will not see something like that from me!
 
 :h1 res=200 x=right y=bottom width=66% height=100%.Application
 
-:font facename='Default' size=0x0.:p.The "Application" page of OdinBug presents a form to fill in all
+:p.:font facename='Default' size=0x0.The "Application" page of OdinBug presents a form to fill in all
 kind of information about the program that you want to create a
 bug report for.
 :p.The following items have to be entered manually&comma. because
@@ -137,7 +137,7 @@ to create a bug report!
 
 :h2 res=220.Odin logfiles and how to create them
 
-:font facename='Default' size=0x0.:p.The logfile is the main source of bug information for OdinBug. It
+:p.:font facename='Default' size=0x0.The logfile is the main source of bug information for OdinBug. It
 is impossible to create a bugreport without a logfile!
 
 :p.You only get logfiles if you use a debug build and have the
@@ -189,7 +189,7 @@ the file in an standard filesearch dialogue.
 
 :h2 res=230.Windows executable
 
-:font facename='Default' size=0x0.:p.The field "Windows Executable" should hold the name of the binary
+:p.:font facename='Default' size=0x0.The field "Windows Executable" should hold the name of the binary
 program file&comma. that was used to run the Win32-application.
 :p.If the name is not what you think it should be&comma. you might
 have accidentally picked the wrong logfile!
@@ -200,7 +200,7 @@ have accidentally picked the wrong logfile!
 
 :h2 res=240.Application name
 
-:font facename='Default' size=0x0.:p.The application name is not meant to be the name of the
+:p.:font facename='Default' size=0x0.The application name is not meant to be the name of the
 executable&comma. but the name of the program as it is
 advertised&comma. for example&colon.
 
@@ -218,7 +218,7 @@ advertised&comma. for example&colon.
 
 :h2 res=250.Version
 
-:font facename='Default' size=0x0.:p.The version field should contain the exact revision number of the
+:p.:font facename='Default' size=0x0.The version field should contain the exact revision number of the
 program to make it easy for Team Odin to exactly identify the
 program you are using. For example&colon.
 
@@ -236,7 +236,7 @@ program you are using. For example&colon.
 
 :h2 res=260.Ohhh, no
 
-:font facename='Default' size=0x0.:p.Set the "Ohh&comma. no!" checkmark&comma. if a popup messagebox
+:p.:font facename='Default' size=0x0.Set the "Ohh&comma. no!" checkmark&comma. if a popup messagebox
 saying "Ohhh&comma. no! Unhandled exception..." was shown during
 the program was run.
 :hp7.:p.Source of information&colon.:ehp7.
@@ -247,7 +247,7 @@ the program was run.
 
 :h2 res=270.Available from
 
-:font facename='Default' size=0x0.:p.The purpose of the "Available from" field is to tell Team Odin
+:p.:font facename='Default' size=0x0.The purpose of the "Available from" field is to tell Team Odin
 from where they eventually could achieve the application for
 testing it with Odin. This could be a URL or Webpage.
 :p.Do not send them programs automatically without being asked for!
@@ -259,7 +259,7 @@ testing it with Odin. This could be a URL or Webpage.
 
 :h2 res=280.Verbal description
 
-:font facename='Default' size=0x0.:p.The "Verbal description" field is the plcae where you (the user)
+:p.:font facename='Default' size=0x0.The "Verbal description" field is the plcae where you (the user)
 can express in your own words&comma. what you have done&comma.
 seen or heard.
 :p.Your description should be short and as precise as possible. For
@@ -275,7 +275,7 @@ after choosing menu option xyz.
 
 :h2 res=290.Exception page
 
-:font facename='Default' size=0x0.:p.The "Exception"page shows the most important techniscal
+:p.:font facename='Default' size=0x0.The "Exception"page shows the most important techniscal
 information&comma. that Team Odin needs in order to track down a
 bug.
 :p.There is no need for the user to change anything on this
@@ -285,7 +285,7 @@ check whether they all fail at the same (or similar) postion.
 
 :h1 res=300 x=right y=bottom width=66% height=100%.Odin
 
-:font facename='Default' size=0x0.:p.The "Odin" page shows all the necessary information about your
+:p.:font facename='Default' size=0x0.The "Odin" page shows all the necessary information about your
 installed Odin-subsystem.
 :p.All information is gathered from various source around your
 system automatically.
@@ -297,7 +297,7 @@ it might be wrong.
 
 :h2 res=320.Current Odin build
 
-:font facename='Default' size=0x0.:p.The "Current Odin build" field shows the filename of the
+:p.:font facename='Default' size=0x0.The "Current Odin build" field shows the filename of the
 currently installed Odin build. As Odin buildfiles follow a
 strict name scheme&comma. this can usually be determined
 automatically.
@@ -314,7 +314,7 @@ availability.
 
 :h2 res=330.Installation method
 
-:font facename='Default' size=0x0.:p.The field "Installation method" shows whether the last install
+:p.:font facename='Default' size=0x0.The field "Installation method" shows whether the last install
 was done from a daily build ZIP file or from a weekly build WPI
 file.
 
@@ -329,7 +329,7 @@ release build to generate a :link reftype=hd res=220.smaller logfile:elink..
 
 :h2 res=340.Launching method
 
-:font facename='Default' size=0x0.:p.The "Launching method" field shows whether the Win32 program was
+:p.:font facename='Default' size=0x0.The "Launching method" field shows whether the Win32 program was
 launched using PE.EXE&comma. PEC.EXE or the transparent loader
 Win32K.SYS.
 
@@ -344,7 +344,7 @@ odin32_?.log file.
 
 :h2 res=350.Win32K.SYS parameters
 
-:font facename='Default' size=0x0.:p.As Win32K.SYS can operate in various modes&comma. the "WIN32K.SYS
+:p.:font facename='Default' size=0x0.As Win32K.SYS can operate in various modes&comma. the "WIN32K.SYS
 parameters" field shows which parameters were used.
 
 :p.Look at the :link reftype=launch object='E.EXE' data='README.TXT'.readme.txt:elink. :link reftype=fn refid=2.(*):elink. that comes with Odin in order to find
@@ -359,7 +359,7 @@ OdinBug was called from the commandline&comma. sorry!:efn.
 
 :h2 res=360.Last WarpIN installation
 
-:font facename='Default' size=0x0.:p.It is essential that Odin is installed properly. UnZIPping the
+:p.:font facename='Default' size=0x0.It is essential that Odin is installed properly. UnZIPping the
 files only&comma. is not enough to have a proper Odin
 environment.
 :p.Therefore the installtype is checked before creating a bug report
@@ -375,7 +375,7 @@ run :link reftype=fn refid=1.OdinInst.EXE:elink. once in order to update the reg
 
 :h2 res=370.Last OdinInst installation
 
-:font facename='Default' size=0x0.:p.:link reftype=fn refid=1.OdinInst.EXE:elink. updates the registry and creates a bunch of
+:p.:link reftype=fn refid=1.:font facename='Default' size=0x0.OdinInst.EXE:elink. updates the registry and creates a bunch of
 directories.
 :p.Both are vital to have a proper Odin environment.
 :p.OdinBug therefore checks&comma. when :link reftype=fn refid=1.OdinInst.EXE:elink. was run for the
@@ -387,7 +387,7 @@ last time.
 
 :h2 res=380.Odin "Windows" directory
 
-:font facename='Default' size=0x0.:p.Odin creates a directory structure&comma. which resembles the one
+:p.:font facename='Default' size=0x0.Odin creates a directory structure&comma. which resembles the one
 usually found  in a real Windows.
 :p.The "Windows" directory of Odin is the directory that is
 equivalent to C&colon.&bsl.WINDOWS or C&colon.&bsl.WinNT in a
@@ -402,7 +402,7 @@ damaged!
 
 :h2 res=390.Odin "System" directory
 
-:font facename='Default' size=0x0.:p.Odin creates a directory structure&comma. which resembles the one
+:p.:font facename='Default' size=0x0.Odin creates a directory structure&comma. which resembles the one
 usually found  in a real Windows.
 :p.The "System" directory of Odin is the directory that is
 equivalent to C&colon.&bsl.WINDOWS&bsl.SYSTEM or
@@ -415,7 +415,7 @@ C&colon.&bsl.WinNT&bsl.SYSTEM32 in a real Windows.
 
 :h2 res=3100.Evaluated Odin.INI
 
-:font facename='Default' size=0x0.:p.Odin.INI stores specific settings about the Odin environment.
+:p.:font facename='Default' size=0x0.Odin.INI stores specific settings about the Odin environment.
 :p.It is recreated every time :link reftype=fn refid=1.OdinInst.EXE:elink. is called.
 :p.For currently implemented Odin.INI settings read this file
 (:link reftype=launch object='E.EXE' data='ODIN.INI.TXT'.Odin.Ini.txt:elink. :link reftype=fn refid=2.(*):elink.).
@@ -426,7 +426,7 @@ C&colon.&bsl.WinNT&bsl.SYSTEM32 in a real Windows.
 
 :h1 res=400 x=right y=bottom width=66% height=100%.System
 
-:font facename='Default' size=0x0.:p.The "System" page provides necessary information about your
+:p.:font facename='Default' size=0x0.The "System" page provides necessary information about your
 system&comma. especially about your Operating System and your
 display driver.
 :p.A proper detection for the display driver&comma. chipset and
@@ -434,7 +434,7 @@ revision is only implemented for Scitech drivers.
 
 :h2 res=420.OS/2 system type and version
 
-:font facename='Default' size=0x0.:p.The OS&slr.2 (eCS) system type and version is of general
+:p.:font facename='Default' size=0x0.The OS&slr.2 (eCS) system type and version is of general
 importance for Team Odin. It simply tells whether you run Warp
 3&comma. 4&comma. 4.5 aka MCP&comma. WarpServer for eBusiness or
 eComStation.
@@ -448,7 +448,7 @@ eComStation.
 
 :h2 res=430.OS/2 reports and kernel revision
 
-:font facename='Default' size=0x0.:p.This information is of general importance for Team Odin.
+:p.:font facename='Default' size=0x0.This information is of general importance for Team Odin.
 
 :hp7.:p.Source of information&colon.:ehp7.
 
@@ -460,7 +460,7 @@ is directly read from OS2KRNL.
 
 :h2 res=440.FixPack level
 
-:font facename='Default' size=0x0.:p.The "FixPack level" field shows on which fixpack level your
+:p.:font facename='Default' size=0x0.The "FixPack level" field shows on which fixpack level your
 system is.
 :p.Please provide this information manually&comma. if you are on a
 fixpack level prior to Warp 4 Fixpack 10&comma. because the
@@ -476,7 +476,7 @@ gathered&comma. did not exist prior to Fixpack 10.
 
 :h2 res=450.Display driver
 
-:font facename='Default' size=0x0.:p.The "Display driver" field indicates&comma. which video driver
+:p.:font facename='Default' size=0x0.The "Display driver" field indicates&comma. which video driver
 you are currently using.
 :p.This information is very important for Team Odin&comma. because
 some bugs show up only on some video drivers and not on others.
@@ -489,7 +489,7 @@ some bugs show up only on some video drivers and not on others.
 
 :h2 res=460.Display driver version
 
-:font facename='Default' size=0x0.:p.As the name indicates&comma. the "display driver version" field
+:p.:font facename='Default' size=0x0.As the name indicates&comma. the "display driver version" field
 shows the driver revision of your video adapter driver.
 :p.Please provide this information manually&comma. if you do not run
 the Scitech driver suite.
@@ -501,7 +501,7 @@ for Scitech drivers.
 
 :h2 res=470.Display chipset
 
-:font facename='Default' size=0x0.:p.The "Display chipset" field indicates the video chipset your
+:p.:font facename='Default' size=0x0.The "Display chipset" field indicates the video chipset your
 video adapter is using.
 :p.Please provide this information manually&comma. if you do not run
 the Scitech driver suite.
@@ -515,7 +515,7 @@ determined for Scitech drivers.
 
 :h2 res=480.XF86Sup.SYS loaded
 
-:font facename='Default' size=0x0.:p.This checkbox shows whether Holger Veit's XFree86 support driver
+:p.:font facename='Default' size=0x0.This checkbox shows whether Holger Veit's XFree86 support driver
 named XF86SUP.SYS is installed on your system.
 
 :note.OdinBug version 0.5.3 had a bug that made it crash&comma. if
@@ -530,14 +530,14 @@ XF86Sup.SYS was not installed. This has been fixed in version
 
 :h1 res=500 x=right y=bottom width=66% height=100%.Settings
 
-:font facename='Default' size=0x0.:p.The "Settings" page displays all configurable options for
+:p.:font facename='Default' size=0x0.The "Settings" page displays all configurable options for
 OdinBug.
 :p.By setting these you can change the behaviour of OdinBug to a
 limited extent.
 
 :h2 res=520.Add exception info and stack dump and line buffer
 
-:font facename='Default' size=0x0.:p.For Team Odin the exception information and the stack dump is the
+:p.:font facename='Default' size=0x0.For Team Odin the exception information and the stack dump is the
 most important information&comma. when trying to fix a bug.
 :p.The exception information is found on the page "Exception". This
 is exactly what gets added to the bug report of this option is
@@ -547,12 +547,12 @@ cases this will make your bug report useless!
 
 :h2 res=530.Default build directory
 
-:font facename='Default' size=0x0.:p.This is the directory where you store your complete buildfiles
+:p.:font facename='Default' size=0x0.This is the directory where you store your complete buildfiles
 (i.e the odin32bin-20011010-debug.ZIP or .wpi files).
 
 :h2 res=540.Application directory
 
-:font facename='Default' size=0x0.:p.The application directory is the directory&comma. where OdinBug
+:p.:font facename='Default' size=0x0.The application directory is the directory&comma. where OdinBug
 should look for logfiles. This is only useful if you have one
 application that you want to make bug reports for.
 :p.The primary purpose of this setting was to make my life easier
@@ -562,7 +562,7 @@ directory" should be checked.
 
 :h2 res=550.Logfile browser
 
-:font facename='Default' size=0x0.:p.In the logfile browser field you can specify a program&comma.
+:p.:font facename='Default' size=0x0.In the logfile browser field you can specify a program&comma.
 that you want to use to manually investigate the odin32_?.log
 file.
 :p.The VIO version of Michael Shacter's HyperView is a very good
@@ -572,7 +572,7 @@ other editor&comma. if that suits your needs.
 
 :h2 res=560.Ask, whether to delete the logfile
 
-:font facename='Default' size=0x0.:p.If this option is set&comma. OdinBug will ask you&comma. if you
+:p.:font facename='Default' size=0x0.If this option is set&comma. OdinBug will ask you&comma. if you
 would like to delete the currently used odin32_?.log before
 OdinBug itself is closed.
 :p.Please note&comma. that the corresponding pe_?.log is not
@@ -580,7 +580,7 @@ deleted.
 
 :h1 res=600 x=right y=bottom width=66% height=100%.EMail
 
-:font facename='Default' size=0x0.:p.The email settings let you specify&comma. which email client
+:p.:font facename='Default' size=0x0.The email settings let you specify&comma. which email client
 OdinBug should use for sending the email that holds the bug
 report.
 :p.The email support is designed to provide a generic support for
@@ -610,7 +610,7 @@ gone!
 
 :h2 res=620.EMail address
 
-:font facename='Default' size=0x0.:p.This is the address&comma. where the bug report should be sent
+:p.:font facename='Default' size=0x0.This is the address&comma. where the bug report should be sent
 to.
 :p.Currently the only valid address is
 :hp2.odinusers@yahoogroups.com:ehp2.&comma. the address of the odinusers
@@ -624,7 +624,7 @@ created in your Odin folder.)
 
 :h2 res=630.Netscape Messenger 4.61
 
-:font facename='Default' size=0x0.:p.If you click on this radio button&comma. you do not have to enter
+:p.:font facename='Default' size=0x0.If you click on this radio button&comma. you do not have to enter
 anything more&comma. OdinBug will do all the rest for you.
 :p.Please note that current Mozilla and IBM-Webbrowser releases do
 not work with the Netscape 4.61 routine. The generic support has
@@ -632,7 +632,7 @@ to be used at this time for Mozilla.
 
 :h2 res=640.PMMail (via PMMSend)
 
-:font facename='Default' size=0x0.:p.If you use PMMail as your favorite email client&comma. you have
+:p.:font facename='Default' size=0x0.If you use PMMail as your favorite email client&comma. you have
 to check this radio button. OdinBug will take care of all the
 rest.
 :p.PMMSend.EXE will be used to process the email.
@@ -650,14 +650,14 @@ and save again. Now your problem should be gone!
 
 :h2 res=650.MR/2 ICE
 
-:font facename='Default' size=0x0.:p.If you use MR&slr.2 ICE as your favorite email client&comma. you
+:p.:font facename='Default' size=0x0.If you use MR&slr.2 ICE as your favorite email client&comma. you
 have to check this radio button. OdinBug will take care of all
 the rest.
 :i1.MR&slr.2 ICE
 
 :h2 res=660.PolarBar
 
-:font facename='Default' size=0x0.:p.If you use PolarBar as your favorite email client&comma. you have
+:p.:font facename='Default' size=0x0.If you use PolarBar as your favorite email client&comma. you have
 to check this radio button.
 
 :note.You have to specify the PolarBar directory (i.e. the directory
@@ -672,7 +672,7 @@ newly created email&comma. you have to reindex the outbox.
 
 :h2 res=670.Other email client
 
-:font facename='Default' size=0x0.:p.If you are using the generic email support&comma. you will have
+:p.:font facename='Default' size=0x0.If you are using the generic email support&comma. you will have
 to paste the bug report from the clipboard to the body of the
 message. Eventually you will also have to specify the subject.
 :p.You would like to see your favorite email client to be supported
@@ -680,14 +680,14 @@ by OdinBug? :link reftype=hd res=830.Click here!:elink.
 
 :h2 res=680.EMail directory
 
-:font facename='Default' size=0x0.:p.OdinBug changes into this directory before sending the report if
+:p.:font facename='Default' size=0x0.OdinBug changes into this directory before sending the report if
 this field is not empty.
 :p.This field is needed for PMMail support and might be useful for
 generic support.
 
 :h2 res=690.EMail account/Outbox directory
 
-:font facename='Default' size=0x0.:p.:hp2.PMMail users&colon.
+:p.:font facename='Default' size=0x0.P:hp2.MMail users&colon.
 :p.:ehp2.Specify your email account directory name here (normally one of
 the directories 
 "<PMMail-Dir>&bsl.pmmail&bsl.*.ACT)".
@@ -697,12 +697,12 @@ the directories
 
 :h1 res=700 x=right y=bottom width=66% height=100%.Buttons
 
-:font facename='Default' size=0x0.:p.The following pages describe the functions of the various buttons
+:p.:font facename='Default' size=0x0.The following pages describe the functions of the various buttons
 found in OdinBug.
 
 :h2 res=720.Create
 
-:font facename='Default' size=0x0.:p.By pressing this button&comma. the actual report is created in
+:p.:font facename='Default' size=0x0.By pressing this button&comma. the actual report is created in
 the :link reftype=hd res=840.standard form:elink.. All the information has to be gathered and
 entered before doing this.
 :p.The result is a file named OdinBug.RPT&comma. which has all
@@ -711,7 +711,7 @@ information in the :link reftype=hd res=840.appropriate format:elink..
 
 :h2 res=730.EMail
 
-:font facename='Default' size=0x0.:p.Pressing the EMail button will copy the reportfile to the
+:p.:font facename='Default' size=0x0.Pressing the EMail button will copy the reportfile to the
 clipboard&comma. open an instance of your favorite email program.
 
 :p.The appropriate address will be entered automatically.
@@ -723,36 +723,36 @@ the body of your email.
 
 :h2 res=740.Open
 
-:font facename='Default' size=0x0.:p.Pressing this button opens the newly created OdinBug.RPT bug
+:p.:font facename='Default' size=0x0.Pressing this button opens the newly created OdinBug.RPT bug
 report file in your favorite editor&comma. in order to modify it
 manually before sending it to the appropriate email address.
 
 :h2 res=750.Browse
 
-:font facename='Default' size=0x0.:p.Pressing this button opens the program specified as logfile
+:p.:font facename='Default' size=0x0.Pressing this button opens the program specified as logfile
 browser on the settings page with the current odin32_?.log as
 parameter in order to ease the manual investigation of the
 logfile.
 
 :h2 res=760.Help
 
-:font facename='Default' size=0x0.:p.This button opens the file you are just reading.
+:p.:font facename='Default' size=0x0.This button opens the file you are just reading.
 :p.Amazing&comma. ain't it?
 
 :h2 res=770.Exit
 
-:font facename='Default' size=0x0.:p.Pressing this button will close OdinBug without any further
+:p.:font facename='Default' size=0x0.Pressing this button will close OdinBug without any further
 action.
 
 :h2 res=780.Save settings
 
-:font facename='Default' size=0x0.:p.Pressing this button saves all the options to OdinBug.INI&comma.
+:p.:font facename='Default' size=0x0.Pressing this button saves all the options to OdinBug.INI&comma.
 a standard OS&slr.2 (eCS) INI file which resides in the same
 directory as OdinBug.EXE.
 
 :h2 res=790.Recreate objects
 
-:font facename='Default' size=0x0.:p.When OdinBug.EXE is called for the first time (or with the
+:p.:font facename='Default' size=0x0.When OdinBug.EXE is called for the first time (or with the
 &slr.InstallOnly commandline switch)&comma. it will
 create&slr.update its objects and associations in the Odin
 folder.
@@ -760,7 +760,7 @@ folder.
 
 :h2 res=7100.Destroy objects
 
-:font facename='Default' size=0x0.:p.Pressing this button will destroy all objects that are created by
+:p.:font facename='Default' size=0x0.Pressing this button will destroy all objects that are created by
 OdinBug.
 :note.OdinBug also creates the Odin folder&comma. if it is not found on
 your system. However it does not destroy the Odin folder&comma.
@@ -769,7 +769,7 @@ OdinBug.
 
 :h2 res=7110.About
 
-:font facename='Default' size=0x0.:p.Like in every program the "About" button is the most important
+:p.:font facename='Default' size=0x0.Like in every program the "About" button is the most important
 function of all.
 :p.It displays&comma. what you never would have expected&colon. All
 those people&comma. that contributed their time and work to make
@@ -778,12 +778,12 @@ all this possible.
 
 :h1 res=800 x=right y=bottom width=66% height=100%.Miscanellous
 
-:font facename='Default' size=0x0.:p.The following sections of the manual contain various topics
+:p.:font facename='Default' size=0x0.The following sections of the manual contain various topics
 around Odin&comma. logging and reporting bugs.
 
 :h2 res=820.Extended logging feature
 
-:font facename='Default' size=0x0.:p.Disabling or enabling logging for all the Odin dlls isn't always
+:p.:font facename='Default' size=0x0.Disabling or enabling logging for all the Odin dlls isn't always
 useful. To make logging more flexible&comma. you can now disable
 or enable separate source files for each dll.
 
@@ -827,7 +827,7 @@ and wprocess.cpp
 
 :h2 res=830.Email client support and further development
 
-:font facename='Default' size=0x0.:p.In order to provide email support for a specific email
+:p.:font facename='Default' size=0x0.In order to provide email support for a specific email
 program&comma. I need to know how to send emails by command line
 with this program.
 :p.The rest is easy and only little work!
@@ -846,7 +846,7 @@ everything I feel it should do.
 
 :h2 res=840.Standard form of a bug report
 
-:font facename='Default' size=0x0.:lines align=left.:font facename='Courier' size=12x6.--------------------- Begin of Odin Bug Report ----------------------
+:lines align=left.:font facename='Courier' size=12x6.:font facename='Default' size=0x0.--------------------- Begin of Odin Bug Report ----------------------
   
 Odin build information&colon.
   
@@ -891,7 +891,7 @@ ODIN.INI information&colon.
 
 :h2 res=850.Installation of OdinBug
 
-:font facename='Default' size=0x0.:p.As OdinBug.EXE is written in VX-REXX it needs the VROBJ.DLL runtime.
+:p.:font facename='Default' size=0x0.As OdinBug.EXE is written in VX-REXX it needs the VROBJ.DLL runtime.
 
 :p.VROBJ.DLL can be found in the directory x&colon.&bsl.IMAGES (x=CD-ROM drive)
 of  your
@@ -940,7 +940,7 @@ client:elink.on the ":link reftype=hd res=600.EMail:elink." page.
 
 :h2 res=860.Commandline options for OdinBug
 
-:font facename='Default' size=0x0.:p.OdinBug accepts the following items on the commandline&colon.
+:p.:font facename='Default' size=0x0.OdinBug accepts the following items on the commandline&colon.
 :ul.
 :li.:font facename='Courier' size=12x6.&slr.InstallOnly:font facename='Default' size=0x0. (not case sensitive)&colon.
 :p.This will invoke OdinBug invisibly&comma. create&slr.update the WPS objects
@@ -958,7 +958,7 @@ error message.
 
 :h2 res=870.Contributors
 
-:font facename='Default' size=0x0.:p.This compilation was done in November&slr.December 2001 by&colon.
+:p.:font facename='Default' size=0x0.This compilation was done in November&slr.December 2001 by&colon.
 
 :p.Herwig Bauernfeind (:link reftype=fn refid=999.herwig.bauernfeind@aon.at:elink.)
 
@@ -980,7 +980,7 @@ error message.
 
 :h2 res=880.Dedication
 
-:font facename='Default' size=0x0.:p.This release is dedicated to the loving memory of my elder
+:p.:font facename='Default' size=0x0.This release is dedicated to the loving memory of my elder
 brother Walter Bauernfeind&comma. who died from cancer on
 06.01.2002.
 
@@ -990,11 +990,4 @@ brother Walter Bauernfeind&comma. who died from cancer on
 
 
 
-:p.:link reftype=fn refid=IPFGen.About IPF-Generator:elink.
-:fn id=IPFGen.:lines.:hp8.:font facename='Tms Rmn' size=24x14.IPF-Generator Version 0.82:font facename=Helv size=8x4.alpha:ehp8.:font facename='Tms Rmn' size=24x14.
-:font facename=Helv size=8x4.Another fine user developed piece of software
-written in FRED for good, old Framework IV.
-(c) by Herwig Bauernfeind. All rights reserved.
-:elines.:p.IPF-Generator is (1) a printer driver and (2) a bound set of macros, that create the IPF-Tags (not all by now), translate Framework container structures to .IPF structures and call the IBM IPF-Compiler at last.
-:p.Viewers available for OS/2-PM, OS/2-Text, Win16, DOS-Text.:efn.
 :euserdoc.

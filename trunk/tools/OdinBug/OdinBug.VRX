@@ -95,6 +95,7 @@ _AnalyseConfigSys:
        WIN32K.SYS is installed (currently)
        which display driver is installed
      */
+    FoundWin32KSysNow = 0
     ConfigSys = SysBootDrive()'\CONFIG.SYS'
     do while lines(ConfigSys) > 0 
         ConfigLine = translate(strip(Linein(ConfigSys)))
@@ -132,6 +133,7 @@ _AnalyseConfigSys:
     end 
     call lineout(ConfigSys)
 return
+
 /*:VRX         _AnalyseKernel32DLL
 */
 _AnalyseKernel32DLL: 
@@ -185,7 +187,6 @@ _AnalyseOdin32_xLog:
     FoundOdinIni = 0
 
     ExceptFilename = filespec('D',LogFileName)||filespec('P',LogFileName)||'Except.$$$'
-
     LogFileSize = stream(LogfileName,'c','QUERY SIZE')
     ApproxLines = LogFileSize % 41
     call _InitProgress
@@ -234,6 +235,7 @@ _AnalyseOdin32_xLog:
     ok = VRSet("Progress","Visible", 0)
     call lineout(LogFileName)
 return
+
 /*:VRX         _AnalyseOdinIni
 */
 _AnalyseOdinIni: 
@@ -305,6 +307,7 @@ _AnalyseScitechDD:
         LogLine = translate(linein(SDDHelpSys),' ', d2c(0))
         if pos('build',logline) > 0 then do
             SddBuildNr = substr(LogLine,pos('build',logline),10)
+            IsSNAP = sign(Pos('SNAP',LogLine))
         end
     end
     ok = stream(SDDHelpSys,'c','CLOSE')
@@ -312,9 +315,12 @@ _AnalyseScitechDD:
     GraphicsLog = SysBootDrive()'\OS2\DRIVERS\NUCLEUS\CONFIG\GRAPHICS.LOG'
     License = linein(GraphicsLog)
     select 
-        when word(License,1)= 'Valid' & word(License,2) = 'IHV' then Driver = 'Scitech Display Doctor/SE'
-        when word(License,1)= 'Registered' & word(License,2) = 'end' then Driver = 'Scitech Display Doctor/Pro'
-        otherwise Driver = 'Scitech DD/Demo'
+        when word(License,1)= 'Valid' & word(License,2) = 'IHV' & \IsSNAP then Driver = 'Scitech Display Doctor/SE'
+        when word(License,1)= 'Valid' & word(License,2) = 'IHV' & IsSNAP  then Driver = 'Scitech SNAP/OEM'
+        when word(License,1)= 'Registered' & word(License,2) = 'end' & \IsSNAP then Driver = 'Scitech Display Doctor/Pro'
+        when word(License,1)= 'Registered' & word(License,2) = 'end' & IsSNAP  then Driver = 'Scitech SNAP'
+        otherwise if IsSNAP then Driver = 'Scitech SNAP/Demo'
+            else Driver = 'Scitech Display Doctor/Demo'
     end
 
     LogLine = ''
@@ -348,23 +354,40 @@ return
 _AnalyseSysLevelOS2: 
     sys_os2 = SysSearchPath('path', 'syslevel.os2')
     sys_info = Charin(sys_os2, 1, 150)
-    Parse Var sys_info . 61 os_name 141 os_comp 150
+    Parse Var sys_info . 53 os_type 61 os_name 141 os_comp 150
     os_name = Strip(os_name, 't', '00'x)
+    os_type = Strip(os_type, 't', '_')
+    parse var os_type . 4 major 6 minor
     os_ver  = SysOS2Ver()
-    if os_ver = 2.30 then OS2Type = "OS/2 Warp 3 (not supported)"
+    if os_ver = 2.30 then OS2Type = "OS/2 Warp 3.0x (not supported)"
     select 
         when os_comp = '5639A6100' then do
-            if os_ver = 2.40 then OS2Type = "OS/2 Warp 4"
-            if os_ver = 2.45 then OS2Type = "OS/2 Warp 4.5"
+            if os_ver = 2.40 then OS2Type = "OS/2 Warp 4.00"
+            if os_ver = 2.45 then OS2Type = "OS/2 Warp 4.50"
         end
-        when os_comp = '5639A6101' then OS2Type = "OS/2 4.51 MCP or eComStation"
-        when os_comp = '5639A6150' then OS2Type = "OS/2 WSeB uni"
-        when os_comp = '5639A5550' then OS2Type = "OS/2 WSeB smp"
+        when os_comp = '5639A6101' & minor = '01' then OS2Type = "OS/2 Warp 4.51 (MCP1)"
+        when os_comp = '5639A6101' & minor = '02' then OS2Type = "OS/2 Warp 4.52 (MCP2)"
+        when os_comp = '5639A6150' & minor = '00' then OS2Type = "OS/2 WSeB 4.50 uni"
+        when os_comp = '5639A6150' & minor = '01' then OS2Type = "OS/2 WSeB 4.51 uni (ACP1)"
+        when os_comp = '5639A6150' & minor = '02' then OS2Type = "OS/2 WSeB 4.52 uni (ACP2)"
+        when os_comp = '5639A5550' & minor = '00' then OS2Type = "OS/2 WSeB 4.50 smp"
+        when os_comp = '5639A5550' & minor = '01' then OS2Type = "OS/2 WSeB 4.51 smp (ACP1)"
+        when os_comp = '5639A5550' & minor = '02' then OS2Type = "OS/2 WSeB 4.52 smp (ACP2)"
         otherwise do
         end
     end
     ok = stream(sys_os2,'c','CLOSE')
 
+    /* detect eComStation - a very simplicistic approach */    
+    ecs = 1
+    ok = SysFileTree(SysBootDrive()'\WiseMachine.fit',ecs.,'FO')
+    ecs = ecs * ecs.0
+    ok = SysFileTree(SysBootDrive()'\eCS',ecs.,'DO')
+    ecs = ecs * ecs.0
+    ok = SysFileTree(SysBootDrive()'\TVoice',ecs.,'DO')
+    ecs = ecs * ecs.0
+    if ecs then OS2Type = 'eComStation (Base: 'substr(OS2Type,10)')'
+    
     /* get Kernel Version */
     BldInfo     = 'BldInfo.TXT'
     'BLDLevel 'SysBootDrive()'\os2krnl >'BldInfo
@@ -509,7 +532,6 @@ _CheckForEvent:
             interpret EventString
         end
     end
-    /* if UseRxNap then ok = RxNap(1) */
 return
 
 /*:VRX         _CheckForExpiredBuild
@@ -554,9 +576,10 @@ _CheckForExpiredBuild:
         otherwise AllowReport = 1
     end
 return AllowReport
-/*:VRX         _CheckInvalidreport
+
+/*:VRX         _CheckInvalidReport
 */
-_CheckInvalidreport: 
+_CheckInvalidReport: 
     Invalidreport = 0
     InvalidReport = InvalidReport + (VRGet("EF_Build","value") = "")
     InvalidReport = InvalidReport + (VRGet("DDCB_InstallType","value") = "")
@@ -626,60 +649,7 @@ _CreateExceptionAndStackDump:
         call lineout RptFileName, linein(ExceptFileName)
     end
     ok = lineout(ExceptFileName)
-return    
-
-/*
-    call lineout RptFileName, 'Exception information and stack dump:'
-    call lineout RptFileName, '  '
-    LogFileName = VRget("EF_LogFile","Value")
-    if LogFileName = '' then return
-    Buffer.0 = VRGet("SPIN_BufferSize","Value")
-    LogFileSize = stream(LogfileName,'c','QUERY SIZE')
-    call _InitProgress
-    ApproxLines = LogFileSize % 41
-    
-    I = 0
-    do while pos('Exception Information',LogLine) = 0 & lines(LogFileName) <> 0
-        LogLine = linein(LogFileName)
-        I = I + 1
-        idx = I // 10 + 1
-        Buffer.idx = LogLine
-        if I // 1000 = 0 then do
-            call _CheckForEvent
-            Progress = I * 100 % ApproxLines
-            ok = VRSet("SL_Progress","Percentile",Progress)
-        end
-    end
-    if lines(LogFileName) = 0 then do
-        call lineout RptFileName, 'No exception found in logfile!'
-    end
-    else do /* we had an exception lets create the dump */
-        do J = idx+1 to 10
-            call lineout RptFileName, Buffer.J
-        end
-        do J = 1 to idx
-            call lineout RptFileName, Buffer.J
-        end
-        LogLine = linein(LogFileName)
-        do until pos('End Of Exception Information',LogLine) > 0 | lines(LogFileName) = 0
-            LogLine = linein(LogFileName)
-            call lineout RptFileName, LogLine
-        end
-
-        do while pos('** BEGIN STACK DUMP **',LogLine) = 0 & lines(LogFileName) <> 0
-            LogLine = linein(LogFileName)
-            I = I + 1
-            Progress = I * 100 % ApproxLines
-            ok = VRSet("SL_Progress","Percentile",Progress)
-        end 
-        call lineout RptFileName, LogLine
-        do until pos('** END OF STACK DUMP **',LogLine) > 0 | lines(LogFileName) = 0
-            LogLine = linein(LogFileName)
-            call lineout RptFileName,LogLine
-        end
-    end
-    call lineout(LogFileName)
-    ok = VRSet("Progress","Visible", 0) */
+return
 
 /*:VRX         _CreateObject
 */
@@ -888,6 +858,7 @@ EXAMPLE: PMMSEND /F c:\mydir\fax.tif "User <user@domain.com>"
                 "A Fax For You" USER_D1.ACT
 
 Options Must Begin With A Slash '/'  */
+
 /*:VRX         _EMailPolarbar
 */
 _EMailPolarbar: 
@@ -926,6 +897,7 @@ _EMailPolarbar:
         if MessengerDir <> '' then ok = directory(oldDir)
     end
 return
+
 /*:VRX         _FillPageException
 */
 _FillPageException: 
@@ -946,9 +918,9 @@ _GetException:
     threadID = VRMethod( "Application", "StartThread", "GetExcpt", LogFileName)
 return
 
-/*:VRX         _GotNewLogfileName
+/*:VRX         _GotNewLogFileName
 */
-_GotNewLogfileName: 
+_GotNewLogFileName: 
     ok = VRSet("PB_CreateReport","Visible", 1)
     ok = VRset("EF_LogFile","Value",LogFilename)
     TestAppDir  = strip(VRParseFileName( LogFileName, "DP" ),'T','\') || '\'
@@ -1049,6 +1021,7 @@ _GUIEMailInit:
         end 
     end
 return
+
 /*:VRX         _GUIInit
 */
 _GUIInit: 
@@ -1056,7 +1029,7 @@ _GUIInit:
     if WIN32LOG_ENABLED \= '' then ok = VRSet("CB_WIN32LOG_ENABLED","set",1)
                               else ok = VRSet("CB_WIN32LOG_ENABLED","set",0)
 
-    ok = VRSet( "GB_Settings",       "HintText", "Currently using "our_ini)
+    ok = VRSet( "Page_6",            "HintText", "Currently using "our_ini) /* Settings page */
     ok = VRSet( "EF_BuildDir",       "Value", BuildDir       )
     ok = VRSet( "EF_TestAppDir",     "Value", TestAppDir     )
     ok = VRSet( "EF_LogFileBrowser", "Value", LogFileBrowser )
@@ -1076,12 +1049,12 @@ _GUIInit:
     call _GUIEMailInit
 
     /*  enter help file */
-    ok = VRSet("OdinBugReport",   "HelpFile", base_dir"OdinBug.HLP")
-    ok = VRSet("PageApplication", "HelpFile", base_dir"OdinBug.HLP")
-    ok = VRSet("PageOdin",        "HelpFile", base_dir"OdinBug.HLP")
-    ok = VRSet("PageSystem",      "HelpFile", base_dir"OdinBug.HLP")
-    ok = VRSet("PageSettings",    "HelpFile", base_dir"OdinBug.HLP")
-    ok = VRSet("PageEMail",       "HelpFile", base_dir"OdinBug.HLP")
+    ok = VRSet("OdinBugReport", "HelpFile", base_dir"OdinBug.HLP") /* Main Window */
+/*  ok = VRSet("Page_1",        "HelpFile", base_dir"OdinBug.HLP") /* Application */
+    ok = VRSet("Page_3",        "HelpFile", base_dir"OdinBug.HLP") /* Odin */
+    ok = VRSet("Page_4",        "HelpFile", base_dir"OdinBug.HLP") /* System */
+    ok = VRSet("Page_5",        "HelpFile", base_dir"OdinBug.HLP") /* Settings */
+    ok = VRSet("Page_6",        "HelpFile", base_dir"OdinBug.HLP") /* EMail */  */
 return
 
 /*:VRX         _GUIRedraw
@@ -1130,7 +1103,7 @@ return
 
 /*:VRX         _INIRead
 */
-_INIRead: /* Initialize variables, read values from INI file */
+_INIRead: 
     /* Show our window */
     if translate(VRGet("Application","Commandline")) <> '/INSTALLONLY' then do
          ok = VRSet("OdinBugReport","Visible", 1)
@@ -1141,13 +1114,10 @@ _INIRead: /* Initialize variables, read values from INI file */
     ok = SysFileDelete('OdinBug.CF')
     ok = SysFileDelete('OdinBug.CFG')
 
-    /* Disable obsolete RxNap support */
-    UseRxNap                = 0 /* \RxFuncQuery(RxNap) */
- 
     /* Msg.Title = default title for message boxes */
     Msg.Title               = 'Odin Bug Report Generator'
 
-    /*  Initialize variables - former undocumented cfg switches */
+    /*  Initialize variables */
     WarnOld                 = 10 /* days */
     TooOld                  = 20 /* days */
     OverrideTooOld          = 0
@@ -1157,6 +1127,7 @@ _INIRead: /* Initialize variables, read values from INI file */
     TempFile                = ''
     ExceptionSearchDone     = 0
     DestroyWPS              = 0
+    ReplaceObjects          = 0
 
     /* for abbreviation purposes */    
     CRLF                    = d2c(13)||d2c(10)
@@ -1280,7 +1251,7 @@ return
 
 /*:VRX         _INIWrite
 */
-_INIWrite: /* Write settings to INI file */
+_INIWrite: 
     ok = VRSetIni( "OdinBug", "BuildDir", BuildDir, our_ini, 'NoClose' )
     ok = VRSetIni( "OdinBug", "DontSaveAppDir", DontSaveAppDir, our_ini, 'NoClose' )
     if \DontSaveAppDir then ok = VRSetIni( "OdinBug", "TestAppDir", TestAppDir, our_ini, 'NoClose' )
@@ -1305,8 +1276,9 @@ _InstallWPSObjects:
     /* destroy old obsolete OdinBug object */
     ok = SysDestroyObject("<OdinBug>")
 
-    /* Set Creation Disposition - we are polite and update always */
-    CreateCollision = 'Update'
+    /* Set Creation Disposition - we are polite and update per default */
+    if ReplaceObjects then CreateCollision = 'Replace'
+                      else CreateCollision = 'Update'
 
     rc1 = _CreateObject( 'WPFolder','Odin','<WP_PROGRAMSFOLDER>',,
             'HIDEBUTTON=DEFAULT;'||,
@@ -1363,17 +1335,17 @@ _InstallWPSObjects:
             'DEFAULTVIEW=ICON;'||,
             'OBJECTID=<Subscribe_odinusers@yahoogroups>',,
         CreateCollision )
-    rc6 = _CreateObject( 'WPProgram','Project Odin User''s Manual','<ODINFOLDER>',,
+    rc6 = _CreateObject( 'WPProgram','Odin User''s Manual','<ODINFOLDER>',,
             'EXENAME=VIEW.EXE;'||,
             'PROGTYPE=PM;'||,
             'PARAMETERS='||base_dir||'ODINUSER.INF Introduction;'||,
-            'TITLE=Project Odin^User''s Manual;'||,
+            'TITLE=Odin User''s Manual;'||,
             'NOPRINT=YES;'||,
             'HIDEBUTTON=DEFAULT;'||,
             'MINWIN=DEFAULT;'||,
             'CCVIEW=DEFAULT;'||,
             'DEFAULTVIEW=DEFAULT;'||,
-            'OBJECTID=<Project_Odin_Users_Manual>',,
+            'OBJECTID=<Odin_Users_Manual>',,
         CreateCollision )
 
     rc7 = _CreateObject( 'WPUrl','Subscribe to win32os2-wai mailing list^(for developers)','<ODINFOLDER>',,
@@ -1397,6 +1369,7 @@ _InstallWPSObjects:
         call _ShowMsg
     end
 return
+
 /*:VRX         _LaunchPMMail
 */
 _LaunchPMMail: 
@@ -1437,10 +1410,11 @@ _ProcessHotKeys:
         when KeyStr = "{Alt}b" then call PB_BrowseLogFile_Click 
         when KeyStr = "{Alt}h" then call PB_Help_Click 
         when KeyStr = "{Alt}x" then call PB_Exit_Click
+        when KeyStr = "{Alt}{PgUp}" then call Activate max(CurrentPageNr-1,1)
+        when KeyStr = "{Alt}{PgDown}" then call Activate min(CurrentPageNr+1,Pages)
         otherwise ok = VRSet(KeyObj, "KeyString", Keystr)
     end
 return
-
 /*:VRX         _ShowMsg
 */
 _ShowMsg: 
@@ -1460,7 +1434,7 @@ _StartUp:
     if FoundScitech then call _AnalyseScitechDD
     call _AnalyseWarpINdatabase
     call _GUIRedraw
-    if LogFileName = '' 
+    if LogFileName = '' | LogfileName = 'LOGFILENAME'
         then call PB_SearchLogFile_Click
         else call _GotNewLogfileName
 
@@ -1578,6 +1552,29 @@ AboutPage_Init:
     drop window
 return
 
+/*:VRX         Activate
+*/
+Activate: 
+    parse arg Nr
+    call PushbackAll
+    CurrentPageNr = Nr
+    /* ok = VRSet("PB_"Nr,"Font","9.WarpSans Bold") */
+    ok = VRSet("TAB_"Nr,"Top", TabTop-8)
+    ok = VRSet("TAB_"Nr,"Left",TabWidth*(Nr-1)+PageLeft)
+    ok = VRSet("TAB_"Nr,"PicturePath", "#1"||Nr)
+    ok = VRset("DT_PageName", "Caption", VRGet("Page_"Nr, "Caption"))
+    ok = VRSet("Page_"Nr,"Visible", 1)
+    ok = VRSet("Page_"Nr,"BorderType", 'None')
+    ok = VRSet("Page_"Nr,"Height", VRget("GB_Main2","Height")-600)
+    ok = VRSet("Page_"Nr,"Width", VRget("GB_Main2","Width")-450)
+    ok = VRSet("Menu_"Nr,"Checked", 1)
+    select 
+        when Nr = 1 then ok = VRSet("IPB_paper","PicturePath","#4")
+        when Nr = Pages then ok = VRSet("IPB_paper","PicturePath","#6")
+        otherwise ok = VRSet("IPB_paper","PicturePath","#5")
+    end
+return
+
 /*:VRX         CB_AddException_Click
 */
 CB_AddException_Click: 
@@ -1608,10 +1605,10 @@ CB_OverRideTooOld_Click:
     OverRideTooOld = VRGet("CB_OverRideTooOld","set")
 return
 
-/*:VRX         CB_UseRxNap_Click
+/*:VRX         CB_ReplaceObjects_Click
 */
-CB_UseRxNap_Click: 
-    UseRxNap then ok = VRGet("CB_UseRxNap","Set")
+CB_ReplaceObjects_Click: 
+    ReplaceObjects = VRget("CB_replaceObjects","set")
 return
 
 /*:VRX         CB_WIN32LOG_ENABLED_Click
@@ -1733,74 +1730,79 @@ Fini:
     drop window
 return 0
 
+/*:VRX         GB_Main_ContextMenu
+*/
+GB_Main_ContextMenu: 
+    nop
+return
+
+/*:VRX         GetBootDrive
+*/
+GetBootDrive: 
+/* Use SysBootDrive if possible */
+If Rxfuncadd('SysBootDrive', 'RexxUtil', 'SysBootDrive') Then
+   Return Left(Value('RUNWORKPLACE',,'OS2ENVIRONMENT'),2)
+Else
+   Return SysBootDrive()
+
+
 /*:VRX         Halt
 */
 Halt:
     signal _VREHalt
 return
 
-/*:VRX         HelpWindow_Close
-*/
-HelpWindow_Close: 
-    call HelpWindow_Fini
-return
-
-/*:VRX         HelpWindow_Create
-*/
-HelpWindow_Create: 
-    call HelpWindow_Init
-return
-
-/*:VRX         HelpWindow_Fini
-*/
-HelpWindow_Fini: 
-    window = VRInfo( "Window" )
-    call VRDestroy window
-    drop window
-return
-/*:VRX         HelpWindow_Init
-*/
-HelpWindow_Init: 
-    window = VRInfo( "Object" )
-    if( \VRIsChildOf( window, "Notebook" ) ) then do
-        /* call VRMethod window, "CenterWindow" */
-        call VRSet window, "Visible", 1
-        call VRMethod window, "Activate"
-    end
-    drop window
-return
-
 /*:VRX         Init
 */
 Init:
-    window = VRWindow()
-    call VRMethod window, "CenterWindow"
-    call VRSet window, "Visible", 0
-    call VRMethod window, "Activate"
-    drop window
+window = VRWindow()
+call VRMethod window, "CenterWindow"
+call VRSet window, "Visible", 0
+call VRMethod window, "Activate"
+drop window
 return
 
-/*:VRX         NB_Main_PageSelected
+/*:VRX         IPB_Paper_Click
 */
-NB_Main_PageSelected: 
-    /* CurPage = VRMethod("NB_Main","GetPageWindow",VRInfo("Page")) */
-    CurPage = VRInfo("Page")
-    select
-        when CurPage = 1 then ok = VRMethod("EF_Appname","setfocus")
-        when CurPage = 2 then ok = VRMethod("LB_Exception","setfocus")
-        when CurPage = 3 then ok = VRMethod("EF_Build","setfocus")
-        when CurPage = 4 then ok = VRMethod("DDCB_OS2Version","Setfocus")
-        when CurPage = 5 then do
-            ok = VRSet("EF_BuildDir","Value", BuildDir)
-            ok = VRSet("EF_TestAppDir","Value", TestAppDir)
-            ok = VRMethod("EF_BuildDir","SetFocus")
-        end
-        when CurPage = 6 then do
-            ok = VRSet("EF_MessengerDir","Value", MessengerDir)
-            ok = VRMethod("DDCB_EMail","SetFocus")
-        end
-        otherwise nop
-    end
+IPB_Paper_Click: 
+    if VRInfo("Left") >  VRInfo("Top") then call Activate min(CurrentPageNr+1,Pages)
+    if VRInfo("Left") <= VRInfo("Top") then call Activate max(CurrentPageNr-1,1)
+return
+
+/*:VRX         Menu_1_Click
+*/
+Menu_1_Click: 
+    call Activate 1
+return
+
+/*:VRX         Menu_2_Click
+*/
+Menu_2_Click: 
+    call Activate 2
+return
+
+/*:VRX         Menu_3_Click
+*/
+Menu_3_Click: 
+    call Activate 3
+return
+
+/*:VRX         Menu_4_Click
+*/
+Menu_4_Click: 
+    call Activate 4
+return
+
+/*:VRX         Menu_5_Click
+*/
+Menu_5_Click: 
+    call Activate 5
+return
+
+/*:VRX         Menu_6_Click
+*/
+Menu_6_Click: 
+    call Activate 6
 return
 
 /*:VRX         OdinBugReport_Close
@@ -1817,235 +1819,131 @@ OdinBugReport_Close:
     call Quit
 return
 
+/*:VRX         OdinBugReport_ContextMenu
+*/
+OdinBugReport_ContextMenu: 
+    ok = VRMethod( "Menu_TabMenu", "Popup", , , "", "" )
+return
+
 /*:VRX         OdinBugReport_Create
 */
 OdinBugReport_Create: 
     call _LoadOtherFuncs
     window = VRLoadSecondary( "Progress" )
+    ok = VRMethod("PB_Exit","SetFocus")
+    call PushbackAll
+    call TAB_1_Click
     call _INIRead
+    call Page1_Create
+    call Page2_Create
+    call Page3_Create
+    call Page4_Create
+    call Page5_Create
+    call Page6_Create
+    /* call OdinBugReport_Resize */
+
 return
 
-/*:VRX         PageApplication_Close
+/*:VRX         OdinBugReport_KeyPress
 */
-PageApplication_Close: 
-    call PageApplication_Fini
-return
-
-/*:VRX         PageApplication_Create
-*/
-PageApplication_Create: 
-    call PageApplication_Init
-    call _StartUp
-return
-
-/*:VRX         PageApplication_Fini
-*/
-PageApplication_Fini: 
-    window = VRInfo( "Window" )
-    call VRDestroy window
-    drop window
-return
-/*:VRX         PageApplication_Init
-*/
-PageApplication_Init: 
-    window = VRInfo( "Object" )
-    if( \VRIsChildOf( window, "Notebook" ) ) then do
-        call VRMethod window, "CenterWindow"
-        call VRSet window, "Visible", 1
-        call VRMethod window, "Activate"
-    end
-    drop window
-return
-
-/*:VRX         PageApplication_KeyPress
-*/
-PageApplication_KeyPress: 
-    call _ProcessHotkeys
-return
-
-/*:VRX         PageEMail_Close
-*/
-PageEMail_Close: 
-    call PageEMail_Fini
-return
-
-/*:VRX         PageEMail_Create
-*/
-PageEMail_Create: 
-    call PageEMail_Init
-return
-
-/*:VRX         PageEMail_Fini
-*/
-PageEMail_Fini: 
-    window = VRInfo( "Window" )
-    call VRDestroy window
-    drop window
-return
-/*:VRX         PageEMail_Init
-*/
-PageEMail_Init: 
-    window = VRInfo( "Object" )
-    if( \VRIsChildOf( window, "Notebook" ) ) then do
-        call VRMethod window, "CenterWindow"
-        call VRSet window, "Visible", 1
-        call VRMethod window, "Activate"
-    end
-    drop window
-return
-
-/*:VRX         PageEMail_KeyPress
-*/
-PageEMail_KeyPress: 
-    call _ProcessHotkeys
-return
-
-/*:VRX         PageException_Close
-*/
-PageException_Close: 
-    call PageException_Fini
-return
-
-/*:VRX         PageException_Create
-*/
-PageException_Create: 
-    call PageException_Init
-return
-
-/*:VRX         PageException_Fini
-*/
-PageException_Fini: 
-    window = VRInfo( "Window" )
-    call VRDestroy window
-    drop window
-return
-/*:VRX         PageException_Init
-*/
-PageException_Init: 
-    window = VRInfo( "Object" )
-    if( \VRIsChildOf( window, "Notebook" ) ) then do
-        call VRMethod window, "CenterWindow"
-        call VRSet window, "Visible", 1
-        call VRMethod window, "Activate"
-    end
-    drop window
-return
-
-/*:VRX         PageOdin_Close
-*/
-PageOdin_Close: 
-    call PageOdin_Fini
-return
-
-/*:VRX         PageOdin_Create
-*/
-PageOdin_Create: 
-    call PageOdin_Init
-return
-
-/*:VRX         PageOdin_Fini
-*/
-PageOdin_Fini: 
-    window = VRInfo( "Window" )
-    call VRDestroy window
-    drop window
-return
-/*:VRX         PageOdin_Init
-*/
-PageOdin_Init: 
-    window = VRInfo( "Object" )
-    if( \VRIsChildOf( window, "Notebook" ) ) then do
-        call VRMethod window, "CenterWindow"
-        call VRSet window, "Visible", 1
-        call VRMethod window, "Activate"
-    end
-    drop window
-return
-
-/*:VRX         PageOdin_KeyPress
-*/
-PageOdin_KeyPress: 
-    call _ProcessHotkeys
-return
-
-/*:VRX         PageSettings_Close
-*/
-PageSettings_Close: 
-    call PageSettings_Fini
-return
-
-/*:VRX         PageSettings_Create
-*/
-PageSettings_Create: 
-    call PageSettings_Init
-return
-
-/*:VRX         PageSettings_Fini
-*/
-PageSettings_Fini: 
-    window = VRInfo( "Window" )
-    call VRDestroy window
-    drop window
-return
-/*:VRX         PageSettings_Init
-*/
-PageSettings_Init: 
-    window = VRInfo( "Object" )
-    if( \VRIsChildOf( window, "Notebook" ) ) then do
-        call VRMethod window, "CenterWindow"
-        call VRSet window, "Visible", 1
-        call VRMethod window, "Activate"
-    end
-    drop window
-return
-
-/*:VRX         PageSettings_KeyPress
-*/
-PageSettings_KeyPress: 
+OdinBugReport_KeyPress: 
     call _ProcessHotKeys
 return
 
-/*:VRX         PageSystem_Close
+/*:VRX         OdinBugReport_Resize
 */
-PageSystem_Close: 
-    call PageSystem_Fini
-return
-
-/*:VRX         PageSystem_Create
-*/
-PageSystem_Create: 
-    call PageSystem_Init
-return
-
-/*:VRX         PageSystem_Fini
-*/
-PageSystem_Fini: 
-    window = VRInfo( "Window" )
-    call VRDestroy window
-    drop window
-return
-/*:VRX         PageSystem_Init
-*/
-PageSystem_Init: 
-    window = VRInfo( "Object" )
-    if( \VRIsChildOf( window, "Notebook" ) ) then do
-        call VRMethod window, "CenterWindow"
-        call VRSet window, "Visible", 1
-        call VRMethod window, "Activate"
+OdinBugReport_Resize: 
+    MainWin = "OdinBugReport"
+    ok = VRset(MainWin,"Visible", 0)
+    ok = VRSet(MainWin,"Width",max(VRget(MainWin,"Width"),Pages*TabWidth+300))
+    ok = VRset("GB_Main","width",VRget(MainWin,"Width")-150)
+    ok = VRset("GB_Main","Height",VRget(MainWin,"Height")-1175-330)
+    ok = VRset("GB_Main2","width",VRget("GB_Main","Width")-260)
+    ok = VRset("GB_Main2","Height",VRget("GB_Main","Height")-275)
+    ok = VRset("GB_LineVertical","Left",VRget("GB_Main2","Width")-60)
+    ok = VRset("GB_LineVertical","Height",VRget("GB_Main2","Height")-410)
+    ok = VRset("IPB_Paper","Left",VRget("GB_Main2","width")-510)
+    ok = VRset("GB_LineHorizTop","Width",VRget("GB_Main2","width")-480)
+    ok = VRset("GB_LineHorizTop","Width",VRget("GB_Main2","width")-480)
+    ok = VRset("GB_LineHorizSubtitle","Width",VRget("GB_Main2","width")-480)
+    do I = 1 to Pages
+        ok = VRSet("Page_"I,"Height", VRget("GB_Main2","Height")-600)
+        ok = VRSet("Page_"I,"Width", VRget("GB_Main2","Width")-450)
     end
-    drop window
+    ok = VRSEt("PB_CreateReport","top",VRGet("GB_Main","Height")+365)
+    ok = VRSEt("PB_EMail","top",VRGet("GB_Main","Height")+365)
+    ok = VRSEt("PB_OpenReport","top",VRGet("GB_Main","Height")+365)
+    ok = VRSEt("PB_BrowseLogFile","top",VRGet("GB_Main","Height")+365)
+    ok = VRSEt("PB_Help","top",VRGet("GB_Main","Height")+365)
+    ok = VRSEt("PB_Exit","top",VRGet("GB_Main","Height")+365)
+    ButtonDist= 1080
+    ButtonNr  = 6
+    ButtonPos = max((VRget(MainWin,"Width")-ButtonDist*ButtonNr)/2,0)
+    ok = VRSEt("PB_CreateReport","Left",ButtonPos+ButtonDist*(ButtonNr-6))
+    ok = VRSEt("PB_EMail","Left",ButtonPos+ButtonDist*(ButtonNr-5))
+    ok = VRSEt("PB_OpenReport","Left",ButtonPos+ButtonDist*(ButtonNr-4))
+    ok = VRSEt("PB_BrowseLogFile","Left",ButtonPos+ButtonDist*(ButtonNr-3))
+    ok = VRSEt("PB_Help","left",ButtonPos+ButtonDist*(ButtonNr-2))
+    ok = VRSEt("PB_Exit","left",ButtonPos+ButtonDist*(ButtonNr-1))
+    ok = VRset(MainWin,"Visible", 1)
 return
 
-/*:VRX         PageSystem_KeyPress
+/*:VRX         Page1_Create
 */
-PageSystem_KeyPress: 
-    call _ProcessHotkeys
+Page1_Create: 
+    call Page1_Init /* Application */
+    call _StartUp
+Return
+
+/*:VRX         Page1_Init
+*/
+Page1_Init: 
+
 return
 
-/*:VRX         PB_About1_Click
+/*:VRX         Page2_Create
 */
-PB_About1_Click: 
-    window = VRLoadSecondary( "AboutPage", "W" )
+Page2_create:
+
+Return
+/*:VRX         Page2_init
+*/
+Page2_init: 
+
+return
+
+/*:VRX         Page3_Create
+*/
+Page3_create:
+
+Return
+/*:VRX         Page3_Init
+*/
+Page3_Init: 
+
+return
+
+/*:VRX         Page4_Create
+*/
+Page4_Create: 
+
+Return
+/*:VRX         Page4_init
+*/
+Page4_init: 
+
+return
+
+/*:VRX         Page5_Create
+*/
+Page5_Create: 
+
+return
+
+/*:VRX         Page6_Create
+*/
+Page6_Create: 
+
 return
 
 /*:VRX         PB_About_Click
@@ -2065,6 +1963,7 @@ return
 PB_BrowseLogFile_Click: 
     'start "Browsing 'LogFileName'" /F 'LogFileBrowser' "'LogFileName'"'
 return
+
 /*:VRX         PB_CreateReport_Click
 */
 PB_CreateReport_Click: 
@@ -2109,17 +2008,14 @@ return
 PB_Exit_Click: 
     call OdinBugReport_Close
 return
+
 /*:VRX         PB_Help_Click
 */
 PB_Help_Click: 
     'view 'base_dir"OdinBug.HLP Introduction"
     /* ok = SysSetObjectData(base_dir"OdinBug.HLP","OPEN=DEFAULT;PARAMETERS=Introduction") */
 return
-/*:VRX         PB_Install1_Click
-*/
-PB_Install1_Click: 
-    call _InstallWPSObjects
-return
+
 /*:VRX         PB_Install_Click
 */
 PB_Install_Click: 
@@ -2130,6 +2026,7 @@ return
 PB_OpenReport_Click: 
     ok = SysSetObjectData(RPTFileName,"OPEN=DEFAULT")
 return
+
 /*:VRX         PB_SaveSettings1_Click
 */
 PB_SaveSettings1_Click: 
@@ -2204,18 +2101,13 @@ return
 PB_ThankYou_Click: 
     Lines.1 = "Many thanks go to Team Odin and their efforts, especially to Sander van Leeuwen for his (almost) endless patience and to my testers Sven Stroh and Peter Weilbacher."
     Lines.2 = " "
-    Lines.3 = "This program is free, but copyrighted software. The license for Odin is also valid for this program. Current source is freely available by request to the author."
+    Lines.3 = "This program is free, but copyrighted software. The license for Odin is also valid for this program."
     Lines.0 = 3
     Buttons.1 = "OK"
     Buttons.0 = 1
     id = VRMessageStem( VRWindow(), "Lines.", "Thank you", "Information", "Buttons.", buttons.1, buttons.1 )
 return
 
-/*:VRX         PB_UnInstall1_Click
-*/
-PB_UnInstall1_Click: 
-    call _UnInstallWPSObjects
-return
 /*:VRX         PB_UnInstall_Click
 */
 PB_UnInstall_Click: 
@@ -2251,6 +2143,41 @@ Progress_Init:
         call VRMethod window, "Activate"
     end
     drop window
+return
+
+/*:VRX         PushbackAll
+*/
+PushbackAll: 
+    Pages = 6
+    /* Tab distance from top */
+    TabTop = 25
+    TabWidth = 1180
+    TabHeight= 360
+
+    /* Page Position */
+    PageLeft = 120
+    PageTop = PageLeft + TabTop + 330
+
+    /* Page size */
+    PageHeight = 4500
+    PageWidth = 7000
+    ok = VRset("DT_PageName", "Caption", "")
+    ok = VRSet("GB_Main","Left", 0)
+    ok = VRSet("GB_Main","Top", TabTop+290)
+    do I = 1 to Pages
+        ok = VRSet("TAB_"I,"Top", TabTop)
+        ok = VRSet("TAB_"I,"PicturePath","#2"||I)
+        ok = VRSet("TAB_"I,"Left",TabWidth*(I-1)+PageLeft)
+        ok = VRSet("TAB_"I,"Width",TabWidth)
+        ok = VRSet("TAB_"I,"Height",TabHeight)
+        ok = VRSet("Page_"I,"Height", PageHeight)
+        ok = VRSet("Page_"I,"Width", PageWidth)
+        ok = VRSet("Page_"I,"Left", PageLeft)
+        ok = VRSet("Page_"I,"Top", PageTop)
+        ok = VRSet("Page_"I,"Visible", 0)
+        ok = VRSet("Page_"I,"BackColor", "<default>")
+        ok = VRSet("Menu_"I,"Checked", 0)
+    end
 return
 
 /*:VRX         Quit
@@ -2391,6 +2318,78 @@ return
 */
 SPIN_BufferSize_Change: 
     BufferSize = VRget("SPIN_BufferSize","value")
+return
+
+/*:VRX         TAB_1_Click
+*/
+TAB_1_Click: 
+    call Activate 1
+return
+
+/*:VRX         TAB_1_ContextMenu
+*/
+TAB_1_ContextMenu: 
+    ok = VRMethod( "Menu_TabMenu", "Popup", , , "", "" )
+return
+
+/*:VRX         TAB_2_Click
+*/
+TAB_2_Click: 
+    call Activate 2
+return
+
+/*:VRX         TAB_2_ContextMenu
+*/
+TAB_2_ContextMenu: 
+    ok = VRMethod( "Menu_TabMenu", "Popup", , , "", "" )
+return
+
+/*:VRX         TAB_3_Click
+*/
+TAB_3_Click: 
+    call Activate 3
+return
+
+/*:VRX         TAB_3_ContextMenu
+*/
+TAB_3_ContextMenu: 
+    ok = VRMethod( "Menu_TabMenu", "Popup", , , "", "" )
+return
+
+/*:VRX         TAB_4_Click
+*/
+TAB_4_Click: 
+    call Activate 4
+return
+
+/*:VRX         TAB_4_ContextMenu
+*/
+TAB_4_ContextMenu: 
+    ok = VRMethod( "Menu_TabMenu", "Popup", , , "", "" )
+return
+
+/*:VRX         TAB_5_Click
+*/
+TAB_5_Click: 
+    call Activate 5
+return
+
+/*:VRX         TAB_5_ContextMenu
+*/
+TAB_5_ContextMenu: 
+    ok = VRMethod( "Menu_TabMenu", "Popup", , , "", "" )
+return
+
+/*:VRX         TAB_6_Click
+*/
+TAB_6_Click: 
+    call Activate 6
+return
+
+/*:VRX         TAB_6_ContextMenu
+*/
+TAB_6_ContextMenu: 
+    ok = VRMethod( "Menu_TabMenu", "Popup", , , "", "" )
 return
 
 /*:VRX         TM_CheckValid_Trigger
