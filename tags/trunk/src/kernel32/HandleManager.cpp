@@ -1,4 +1,4 @@
-/* $Id: HandleManager.cpp,v 1.61 2001-01-23 11:59:44 sandervl Exp $ */
+/* $Id: HandleManager.cpp,v 1.62 2001-01-23 18:31:25 sandervl Exp $ */
 
 /*
  * Win32 Unified Handle Manager for OS/2
@@ -60,6 +60,7 @@
 #include "HMToken.h"
 #include "HMThread.h"
 #include "HMNPipe.h"
+#include "HMStd.h"
 #include <vmutex.h>
 #include <win\thread.h>
 
@@ -128,7 +129,8 @@ struct _HMGlobals
   BOOL   fIsInitialized;                   /* if HM is initialized already ? */
                                          /* this MUST !!! be false initially */
 
-  HMDeviceHandler        *pHMOpen32;      /* default handle manager instance */
+  HMDeviceHandler        *pHMStandard;     /* default handle manager instance */
+  HMDeviceHandler        *pHMOpen32;       /* default handle manager instance */
   HMDeviceHandler        *pHMEvent;        /* static instances of subsystems */
   HMDeviceHandler        *pHMFile;
   HMDeviceHandler        *pHMDisk;
@@ -252,7 +254,7 @@ static ULONG _HMHandleGetFree(void)
   {
                                                        /* free handle found ? */
     if (INVALID_HANDLE_VALUE == TabWin32Handles[ulLoop].hmHandleData.hHMHandle) {
-        //SvL: Mark handle as taken here. Doing it outside of this function
+        //SvL: Mark handle as allocated here. Doing it outside of this function
         //     isn't thread safe. (and not very smart)
         TabWin32Handles[ulLoop].hmHandleData.hHMHandle      = ulLoop; 
         TabWin32Handles[ulLoop].hmHandleData.dwUserData     = 0;
@@ -402,11 +404,12 @@ DWORD HMInitialize(void)
     HMGlobals.fIsInitialized = TRUE;                             /* OK, done */
 
     /* copy standard handles from OS/2's Open32 Subsystem */
+    HMGlobals.pHMStandard   = new HMDeviceStandardClass("\\\\STANDARD_HANDLE\\");
     HMSetStdHandle(STD_INPUT_HANDLE,  O32_GetStdHandle(STD_INPUT_HANDLE));
     HMSetStdHandle(STD_OUTPUT_HANDLE, O32_GetStdHandle(STD_OUTPUT_HANDLE));
     HMSetStdHandle(STD_ERROR_HANDLE,  O32_GetStdHandle(STD_ERROR_HANDLE));
 
-                        /* create handle manager instance for Open32 handles */
+    /* create handle manager instance for Open32 handles */
     HMGlobals.pHMOpen32     = new HMDeviceOpen32Class("\\\\.\\");
     HMGlobals.pHMEvent      = new HMDeviceEventClass("\\\\EVENT\\");
     HMGlobals.pHMFile       = new HMDeviceFileClass("\\\\FILE\\");
@@ -461,6 +464,8 @@ DWORD HMTerminate(void)
     delete HMGlobals.pHMNamedPipe;
   if(HMGlobals.pHMDisk)
     delete HMGlobals.pHMDisk;
+  if(HMGlobals.pHMStandard);
+    delete HMGlobals.pHMStandard;
 
   return (NO_ERROR);
 }
@@ -706,7 +711,7 @@ DWORD HMHandleTranslateToOS2i (ULONG  hHandle16)
  * Author    : Patrick Haller [Wed, 1998/02/12 20:44]
  *****************************************************************************/
 
-HANDLE  HMGetStdHandle(DWORD nStdHandle)
+HANDLE HMGetStdHandle(DWORD nStdHandle)
 {
   switch (nStdHandle)
   {
@@ -736,9 +741,31 @@ HANDLE  HMGetStdHandle(DWORD nStdHandle)
  * Author    : Patrick Haller [Wed, 1998/02/12 20:44]
  *****************************************************************************/
 
-BOOL    HMSetStdHandle(DWORD  nStdHandle,
-                               HANDLE hHandle)
+BOOL HMSetStdHandle(DWORD  nStdHandle, HANDLE hHandleOpen32)
 {
+ PHMHANDLEDATA pHMHandleData;
+ HANDLE        hHandle;
+
+  hHandle = _HMHandleGetFree();              /* get free handle */
+  if (hHandle == -1)                         /* oops, no free handles ! */
+  {
+    SetLastError(ERROR_NOT_ENOUGH_MEMORY);      /* use this as error message */
+    return 0;
+  }
+
+  /* initialize the complete HMHANDLEDATA structure */
+  pHMHandleData = &TabWin32Handles[hHandle].hmHandleData;
+  pHMHandleData->dwType     = FILE_TYPE_CHAR;
+  pHMHandleData->dwAccess   = 0;
+  pHMHandleData->dwShare    = 0;
+  pHMHandleData->dwCreation = 0;
+  pHMHandleData->dwFlags    = 0;
+  pHMHandleData->dwUserData = nStdHandle;
+  pHMHandleData->hHMHandle  = hHandleOpen32;
+  pHMHandleData->lpHandlerData = NULL;
+
+  TabWin32Handles[hHandle].pDeviceHandler = HMGlobals.pHMStandard;
+
   switch (nStdHandle)
   {
     case STD_INPUT_HANDLE:  HMGlobals.hStandardIn    = hHandle; return TRUE;
@@ -1376,19 +1403,8 @@ DWORD HMGetFileType(HANDLE hFile)
   iIndex = _HMHandleQuery(hFile);                           /* get the index */
   if (-1 == iIndex)                                               /* error ? */
   {
-    //Must return FILE_TYPE_CHAR here; (used to fail index check)
-    //---------->>> ASSUMES that _HMHandleQuery failes!!!!!!!!!!!!!!!!
-    if((hFile == GetStdHandle(STD_INPUT_HANDLE)) ||
-       (hFile == GetStdHandle(STD_OUTPUT_HANDLE)) ||
-       (hFile == GetStdHandle(STD_ERROR_HANDLE)))
-    {
-        return FILE_TYPE_CHAR;
-    }
-    else
-    {
       SetLastError(ERROR_INVALID_HANDLE);     /* set win32 error information */
       return FILE_TYPE_UNKNOWN;                            /* signal failure */
-    }
   }
 
   pHMHandle = &TabWin32Handles[iIndex];               /* call device handler */
