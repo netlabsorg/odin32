@@ -1,4 +1,4 @@
-/* $Id: initkernel32.cpp,v 1.20 2002-07-13 15:57:57 sandervl Exp $
+/* $Id: initkernel32.cpp,v 1.21 2002-07-15 14:40:16 sandervl Exp $
  *
  * KERNEL32 DLL entry point
  *
@@ -139,6 +139,10 @@ ULONG APIENTRY inittermKernel32(ULONG hModule, ULONG ulFlag)
             if (InitializeCodeHeap() == FALSE)
                 return 0UL;
 
+            //SvL: Do it here instead of during the exe object creation
+            //(std handles can be used in win32 dll initialization routines
+            HMInitialize();             /* store standard handles within HandleManager */
+
             InitializeMemMaps();
 
             PROFILE_LoadOdinIni();
@@ -172,9 +176,6 @@ ULONG APIENTRY inittermKernel32(ULONG hModule, ULONG ulFlag)
 
             OSLibDosSetInitialMaxFileHandles(ODIN_DEFAULT_MAX_FILEHANDLES);
 
-            //SvL: Do it here instead of during the exe object creation
-            //(std handles can be used in win32 dll initialization routines
-            HMInitialize();             /* store standard handles within HandleManager */
             InitDirectories();          //Must be done before InitializeTIB (which loads NTDLL -> USER32)
             InitializeMainThread();     //Must be done after HMInitialize!
             RegisterDevices();
