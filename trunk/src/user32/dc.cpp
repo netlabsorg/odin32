@@ -1,4 +1,4 @@
-/* $Id: dc.cpp,v 1.55 2000-05-02 20:50:48 sandervl Exp $ */
+/* $Id: dc.cpp,v 1.56 2000-05-03 20:59:41 achimha Exp $ */
 
 /*
  * DC functions for USER32
@@ -875,7 +875,7 @@ HDC WIN32API GetDCEx (HWND hwnd, HRGN hrgn, ULONG flags)
    }
 
    isWindowOwnDC = (((hWindow == HWND_DESKTOP) ? FALSE : (wnd->isOwnDC()))
-                 && !(flags & DCX_CACHE_W|DCX_WINDOW_W));
+                 && !(flags & (DCX_CACHE_W | DCX_WINDOW_W)));
 
    if (isWindowOwnDC)
    {
