@@ -152,7 +152,7 @@ typedef struct _TEB
               BOOL           fWaitMessageSuspend; 
 
               CONTEXT        context;        // thread context
-              char           savedopcode;    // saved instruction
+              USHORT         savedopcode;    // saved instruction
               LPVOID         lpAlias;        // alias
               DWORD          dwAliasOffset;  // offset
 
