@@ -1,4 +1,4 @@
-/* $Id: odin32.e,v 1.11 2001-10-24 04:00:28 bird Exp $
+/* $Id: odin32.e,v 1.12 2001-11-09 07:45:08 bird Exp $
  *
  * Visual SlickEdit Documentation Macros.
  *
@@ -357,7 +357,7 @@ void odin32_modulebox()
     _begin_line();
     if (file_eq(p_extension, 'asm'))
     {
-        _insert_text("; $Id: odin32.e,v 1.11 2001-10-24 04:00:28 bird Exp $\n");
+        _insert_text("; $Id: odin32.e,v 1.12 2001-11-09 07:45:08 bird Exp $\n");
         _insert_text("; \n");
         _insert_text("; \n");
         _insert_text("; \n");
@@ -370,7 +370,7 @@ void odin32_modulebox()
     }
     else
     {
-        _insert_text("/* $Id: odin32.e,v 1.11 2001-10-24 04:00:28 bird Exp $\n");
+        _insert_text("/* $Id: odin32.e,v 1.12 2001-11-09 07:45:08 bird Exp $\n");
         _insert_text(" * \n");
         _insert_text(" * \n");
         _insert_text(" * \n");
@@ -1146,6 +1146,8 @@ static _str odin32_getreturntype(boolean fPureType = false)
                 sTypeRaw = stranslate(sTypeRaw, "", "loades", "I");
                 sTypeRaw = stranslate(sTypeRaw, "", "WIN32API", "I");
                 sTypeRaw = stranslate(sTypeRaw, "", "WINAPI", "I");
+                sTypeRaw = stranslate(sTypeRaw, "", "LDRCALL", "I");
+                sTypeRaw = stranslate(sTypeRaw, "", "KRNLCALL", "I");
                 sTypeRaw = stranslate(sTypeRaw, "", "__operator__", "I"); /* operator fix */
                 sTypeRaw = stranslate(sTypeRaw, "", "__operator", "I");   /* operator fix */
                 sTypeRaw = stranslate(sTypeRaw, "", "operator__", "I");   /* operator fix */
