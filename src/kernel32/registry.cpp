@@ -1,4 +1,4 @@
-/* $Id: registry.cpp,v 1.16 2002-06-15 17:16:06 sandervl Exp $ */
+/* $Id: registry.cpp,v 1.17 2002-06-16 08:20:16 sandervl Exp $ */
 
 /*
  * Win32 registry API functions for OS/2
@@ -1032,13 +1032,16 @@ LONG WIN32API RegSetValueW(HKEY   hkey,
  * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
  *****************************************************************************/
 
-LONG WIN32API RegSetValueExA(HKEY  hkey,
-                             LPCSTR  lpszValueName,
+LONG WIN32API RegSetValueExA(HKEY   hkey,
+                             LPCSTR lpszValueName,
                              DWORD  dwReserved,
                              DWORD  fdwType,
                              BYTE*  lpbData,
                              DWORD  cbData)
 {
+  LPSTR lpszExpandedString = NULL;
+  LONG  ret;
+
   if(fdwType == REG_SZ || fdwType == REG_EXPAND_SZ) {
     dprintf(("ADVAPI32: RegSetValueExA)%08xh,%s,%08xh,%08xh,%s,%08xh)",
                hkey,
@@ -1061,13 +1064,24 @@ LONG WIN32API RegSetValueExA(HKEY  hkey,
   if(fdwType == REG_EXPAND_SZ) {
       dprintf(("!WARNING!: REG_EXPAND_SZ converted to REG_SZ"));
       fdwType = REG_SZ; //registry.dll doesn't like this type
+
+      //Expand string
+      lpszExpandedString = (LPSTR)malloc(cbData);
+      if(lpszExpandedString == NULL) {
+          DebugInt3();
+          return ERROR_NOT_ENOUGH_MEMORY;
+      }
+      ExpandEnvironmentStringsA((LPSTR)lpbData, lpszExpandedString, cbData);
+      lpbData = (BYTE *)lpszExpandedString;
+      cbData  = strlen(lpszExpandedString)+1;
+      dprintf(("Expanded to: %s", lpszExpandedString));
   }
-  return O32_RegSetValueEx(ConvertKey(hkey),
-                           lpszValueName,
-                           dwReserved,
-                           fdwType,
-                           lpbData,
-                           cbData);
+  ret = O32_RegSetValueEx(ConvertKey(hkey), lpszValueName, dwReserved,
+                          fdwType, lpbData, cbData);
+
+  if(lpszExpandedString) free(lpszExpandedString);
+
+  return ret;
 }
 
 
