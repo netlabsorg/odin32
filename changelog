@@ -1,4 +1,18 @@
- /* $Id: changelog,v 1.959 2000-05-24 19:26:28 sandervl Exp $ */
+ /* $Id: changelog,v 1.960 2000-05-26 18:41:21 sandervl Exp $ */
+
+ 2000-05-26: Sander van Leeuwen <sandervl@xs4all.nl>
+    - USER32:   Don't call Dinput handlers (mouse & keyboard) during message
+                translation in PeekMessage unless msg is removed.
+                Don't use FCF_TASKLIST style anymore; manually add/remove
+                windows from tasklist (only windows with no parent are added;
+                visible in window list if window is visible; change tasklist
+                status in SetWindowPos (SWP_SHOW/HIDEWINDOW) or ShowWindow)
+    - KERNEL32: Don't delete a memory map when it's file handle is closed.
+                Delete it when the last view has been unmapped. (and the handle
+                is closed)
+                Added method to query the size of a win32 image.
+    - INCLUDE\makefiles:
+                Added TCPV40HDRS definition
 
  2000-05-24: Sander van Leeuwen <sandervl@xs4all.nl>
     - KERNEL32: Fixed some memory map bugs (memory sdk sample works again)
@@ -8,7 +22,7 @@
  2000-05-24: Patrick Haller <phaller@gmx.net>
     - WINMM:    finally fixed callback type of timeSetEvent() timers
     - KERNEL32: changed (experimentally) behaviour of MapViewOfFileEx:
-                  lpBaseAddress is ignored (VAJ3 loads)
+                lpBaseAddress is ignored (VAJ3 loads)
 
  2000-05-23: Sander van Leeuwen <sandervl@xs4all.nl>
     - KERNEL32: Rewrote GetVolumeInformationA/W
