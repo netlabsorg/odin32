@@ -1,4 +1,4 @@
-/* $Id: windllbase.cpp,v 1.5 1999-11-22 20:35:52 sandervl Exp $ */
+/* $Id: windllbase.cpp,v 1.6 1999-12-06 21:31:43 sandervl Exp $ */
 
 /*
  * Win32 Dll base class
@@ -285,6 +285,12 @@ void Win32DllBase::setDefaultRenaming()
   {
 	ODIN_PROFILE_SetOdinIniString(DLLRENAMEWIN_SECTION, "OLE32", "OLE32OS2");
 	ODIN_PROFILE_SetOdinIniString(DLLRENAMEOS2_SECTION, "OLE32OS2", "OLE32");
+  }
+  if(ODIN_PROFILE_GetOdinIniString(DLLRENAMEWIN_SECTION, "OLEAUT32", "", renameddll, 
+                                   sizeof(renameddll)-1) <= 1) 
+  {
+	ODIN_PROFILE_SetOdinIniString(DLLRENAMEWIN_SECTION, "OLEAUT32", "OLAUTOS2");
+	ODIN_PROFILE_SetOdinIniString(DLLRENAMEOS2_SECTION, "OLAUTOS2", "OLEAUT32");
   }
   if(ODIN_PROFILE_GetOdinIniString(DLLRENAMEWIN_SECTION, "NETAPI32", "", renameddll, 
                                    sizeof(renameddll)-1) <= 1) 
