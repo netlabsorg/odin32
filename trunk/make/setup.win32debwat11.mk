@@ -1,4 +1,4 @@
-# $Id: setup.win32debwat11.mk,v 1.6 2002-08-24 05:00:17 bird Exp $
+# $Id: setup.win32debwat11.mk,v 1.7 2002-08-24 22:33:13 bird Exp $
 
 # ---WIN32, DEBUG, WAT11-------------------------
 ENV_NAME="Win32, Debug, Watcom C/C++ v11.0c"
@@ -28,7 +28,6 @@ LINK=wlink.exe
 IMPLIB=implib.exe
 RC=rc.exe
 RL=rc.exe
-EXEPACK=lxlite.exe
 
 
 #

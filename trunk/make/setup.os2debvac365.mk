@@ -1,4 +1,4 @@
-# $Id: setup.os2debvac365.mk,v 1.13 2002-08-24 04:59:47 bird Exp $
+# $Id: setup.os2debvac365.mk,v 1.14 2002-08-24 22:33:11 bird Exp $
 
 # ---OS2, DEBUG, VAC365-------------------------
 ENV_NAME="OS/2, Debug, IBM VisualAge for C++ 3.6.5"
@@ -29,7 +29,6 @@ LINK=ilink.exe
 IMPLIB=implib.exe
 RC=rc.exe
 RL=rc.exe
-EXEPACK=lxlite.exe
 
 
 #

@@ -1,4 +1,4 @@
-# $Id: setup.os2prfvac365.mk,v 1.13 2002-08-24 04:59:48 bird Exp $
+# $Id: setup.os2prfvac365.mk,v 1.14 2002-08-24 22:33:12 bird Exp $
 
 # ---OS2, PROFILE, VAC365-------------------------
 ENV_NAME="OS/2, Profile, IBM VisualAge for C++ 3.6.5"
@@ -29,7 +29,6 @@ LINK=ilink.exe
 IMPLIB=implib.exe
 RC=rc.exe
 RL=rc.exe
-EXEPACK=lxlite.exe
 
 
 #

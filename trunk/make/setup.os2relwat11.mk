@@ -1,4 +1,4 @@
-# $Id: setup.os2relwat11.mk,v 1.4 2002-08-24 04:59:49 bird Exp $
+# $Id: setup.os2relwat11.mk,v 1.5 2002-08-24 22:33:13 bird Exp $
 
 # ---OS2, RELEASE, WAT11-------------------------
 ENV_NAME="OS/2, Release, Watcom C/C++ v11.0c"
@@ -29,7 +29,6 @@ LINK=wlink.exe
 IMPLIB=implib.exe
 RC=rc.exe
 RL=rc.exe
-EXEPACK=lxlite.exe
 
 
 #
@@ -90,7 +89,7 @@ CXX_FLAGS_IFS=$(CC_FLAGS_IFS)
 
 IMPLIB_FLAGS=/NOI /Nologo
 
-LINK_FLAGS=Sort global Option quiet, dosseg, eliminate, manglednames, caseexact
+LINK_FLAGS=Sort global Debug codeview Option quiet, dosseg, eliminate, manglednames, caseexact
 LINK_FLAGS_EXE=$(LINK_FLAGS)
 LINK_FLAGS_DLL=$(LINK_FLAGS)
 LINK_FLAGS_SYS=$(LINK_FLAGS) Option oneautodata, internalrelocs, togglerelocs
