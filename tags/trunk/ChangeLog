@@ -1,4 +1,4 @@
- /* $Id: ChangeLog,v 1.290 1999-10-08 19:45:22 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.291 1999-10-08 21:11:30 cbratschi Exp $ */
 
  99-10-08: Daniela Engert <dani@ngrt.de>
 	- USER32: fix: miscoloured bitmaps
@@ -7,6 +7,10 @@
 	- USER32: added WM_STYLECHANGING/WM_STYLECHANGED.
 		  button,combo: bitmap fix.
 		  added frame to children with WS_* border flags
+		  subclass frame windows
+		  SendDlgItemMessageA/W fixed
+		  CheckRadioButton fixed
+		  merged controls with WINE 990923
 
  99-10-08: Edgar Buerkle <Edgar.Buerkle@gmx.net>
 	- KERNEL32: Accelerator conversion fixes + changes
