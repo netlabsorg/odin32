@@ -1,4 +1,4 @@
-/* $Id: os2timer.cpp,v 1.14 2000-02-17 14:09:32 sandervl Exp $ */
+/* $Id: os2timer.cpp,v 1.15 2000-05-24 01:56:25 phaller Exp $ */
 
 /*
  * OS/2 Timer class
@@ -50,6 +50,16 @@ extern "C"
                                LPVOID lpvThreadParm,
                                DWORD fdwCreate,
                                LPDWORD lpIDThread);
+  
+  VOID WIN32API ExitThread(DWORD dwExitCode);
+  
+  BOOL WIN32API TerminateThread(HANDLE hThread,
+                                DWORD dwExitCode);
+  
+  BOOL WIN32API SetEvent   (HANDLE hEvent);
+    
+  BOOL WIN32API PulseEvent (HANDLE hEvent);
+    
 }
 
 /****************************************************************************
@@ -237,7 +247,7 @@ int OS2TimerResolution::queryCurrentResolution()
 
 /******************************************************************************/
 /******************************************************************************/
-OS2Timer::OS2Timer() : TimerSem(0), TimerHandle(0), TimerThreadID(0),
+OS2Timer::OS2Timer() : TimerSem(0), TimerHandle(0), hTimerThread(0),
                   clientCallback(NULL), TimerStatus(Stopped), fFatal(FALSE),
                   next(NULL)
 {
@@ -256,8 +266,8 @@ OS2Timer::OS2Timer() : TimerSem(0), TimerHandle(0), TimerThreadID(0),
   }
   else
     timers = this;
-
-  //TimerThreadID = _beginthread(TimerHlpHandler, NULL, 0x4000, (void *)this);
+  
+  //hTimerThread = _beginthread(TimerHlpHandler, NULL, 0x4000, (void *)this);
   hTimerThread = CreateThread(NULL,
                               0x4000,
                               (LPTHREAD_START_ROUTINE)TimerHlpHandler,
@@ -265,10 +275,9 @@ OS2Timer::OS2Timer() : TimerSem(0), TimerHandle(0), TimerThreadID(0),
                               0, // thread creation flags
                               &TimerThreadID);
 
-
   //@@@PH: CreateThread() should be used instead
   //@@@PH: logic sux ... waits for creation of semaphores
-  DosSleep(100);
+  DosSleep(10);
 }
 /******************************************************************************/
 /******************************************************************************/
@@ -309,16 +318,18 @@ BOOL OS2Timer::StartTimer(int period,
            fuEvent));
 
   APIRET rc;
-
-  if(TimerThreadID == -1)
+  
+  // has the thread been created properly?
+  if(hTimerThread == NULLHANDLE)
     return(FALSE);
 
   if(TimerStatus == Stopped)
   {
-    clientCallback = lptc;
-    userData       = dwUser;
+    clientCallback = lptc;    // callback data (id / addr)
+    userData       = dwUser;  // user-supplied data
+    dwFlags        = fuEvent; // type of timer / callback
 
-    if(fuEvent == TIME_PERIODIC)
+    if(fuEvent & TIME_PERIODIC)
       rc = DosStartTimer(period, (HSEM)TimerSem, &TimerHandle);
     else
       rc = DosAsyncTimer(period, (HSEM)TimerSem, &TimerHandle);
@@ -327,7 +338,7 @@ BOOL OS2Timer::StartTimer(int period,
     {
 
 #ifdef DEBUG
-      if(fuEvent == TIME_PERIODIC)
+      if(fuEvent & TIME_PERIODIC)
         WriteLog("DosStartTimer failed %d\n", rc);
       else
         WriteLog("DosAsyncTimer failed %d\n", rc);
@@ -364,11 +375,13 @@ void OS2Timer::KillTimer()
            this));
 
   fFatal = TRUE;
-  DosStopTimer(TimerHandle);
+  
+  StopTimer();
+  
   if(DosPostEventSem(TimerSem))
-  {  //something went wrong
-     DosKillThread(TimerThreadID);
-     DosCloseEventSem(TimerSem);
+  {  
+    //something went wrong, kill the thread
+    TerminateThread(hTimerThread, -1);
   }
   TimerStatus = InActive;
 }
@@ -405,13 +418,47 @@ void OS2Timer::TimerHandler()
     {
         // @@@PH: we're calling the client with PRTYC_TIMECRITICAL !!!
         //        It'd be much nicer to call with original priority!
-
-        selTIB = SetWin32TIB();
-        clientCallback((UINT)this, 0, userData, 0, 0);
-        SetFS(selTIB);
+      
+        // check timer running condition
+        if (TimerStatus == Running)
+        {
+          // process the event
+          switch (dwFlags & 0x0030)
+          {
+            case TIME_CALLBACK_FUNCTION:
+              if (clientCallback != NULL)
+              {
+                selTIB = SetWin32TIB();
+                clientCallback((UINT)this, 0, userData, 0, 0);
+                SetFS(selTIB);
+              }
+              break;
+            
+            case TIME_CALLBACK_EVENT_SET:
+              SetEvent( (HANDLE)clientCallback );
+              break;
+            
+            case TIME_CALLBACK_EVENT_PULSE:
+              PulseEvent( (HANDLE)clientCallback );
+              break;
+            
+            default:
+              dprintf(("WINMM: OS2Timer %08xh: unknown type for mmtime callback(%08xh)\n",
+                       this,
+                       dwFlags));
+          }
+        }
     }
   }
+  
+  // last message
+  dprintf(("WINMM: OS2Timer: Timer thread terminating (%08xh)\n",
+           this));
+  
   DosCloseEventSem(TimerSem);
+  
+  // mark this thread as terminated
+  ExitThread(0);
 }
 //******************************************************************************
 //******************************************************************************

@@ -1,4 +1,4 @@
-/* $Id: os2timer.h,v 1.8 1999-12-29 08:36:10 phaller Exp $ */
+/* $Id: os2timer.h,v 1.9 2000-05-24 01:56:25 phaller Exp $ */
 
 #ifndef __OS2TIMER_H__
 #define __OS2TIMER_H__
@@ -106,6 +106,7 @@ private:
         DWORD          TimerThreadID;
         LPTIMECALLBACK clientCallback;
         DWORD          userData;
+        DWORD          dwFlags; // corresponds with fuEvent
 
         BOOL           fFatal;
         int            TimerStatus;
