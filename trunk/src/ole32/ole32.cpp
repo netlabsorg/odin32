@@ -1,4 +1,4 @@
-/* $Id: ole32.cpp,v 1.12 2000-01-08 09:27:56 davidr Exp $ */
+/* $Id: ole32.cpp,v 1.13 2000-02-12 11:51:03 davidr Exp $ */
 /* 
  * 
  * Project Odin Software License can be found in LICENSE.TXT
@@ -698,7 +698,7 @@ static HRESULT COM_GetRegisteredClassObject
     while (curClass != 0)
     {
 	// Check if we have a match on the class ID.
-	if (IsEqualGUID(&curClass->classIdentifier, &rclsid))
+	if (IsEqualGUID(&curClass->classIdentifier, rclsid))
 	{
 	    // Since we don't do out-of process or DCOM just right away,
 	    // let's ignore the class context.
