@@ -1,4 +1,4 @@
-/* $Id: pe2lx.cpp,v 1.8 1999-11-10 01:53:41 bird Exp $
+/* $Id: pe2lx.cpp,v 1.9 1999-11-16 16:11:43 bird Exp $
  *
  * Pe2Lx class implementation. Ring 0 and Ring 3
  *
@@ -189,7 +189,10 @@ struct Pe2Lx::PeCharacteristicsToLxFlags Pe2Lx::paSecChars2Flags[] =
 struct Pe2Lx::LieListEntry Pe2Lx::paLieList[] =
 {   /* Win32 Module name                   Odin32 Module name*/
     {"NETAPI32",                           "WNETAP32"},
+    {"NETAPI32.DLL",                       "WNETAP32"},
     {"OLE32",                              "OLE32OS2"},
+    {"OLE32.DLL",                          "OLE32OS2"},
+    {"WINSPOOL.DRV",                       "WINSPOOL.DLL"},
     {NULL,                                 NULL} /* end-of-list entry */
 };
 
