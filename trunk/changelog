@@ -1,4 +1,7 @@
-/* $Id: changelog,v 1.2662 2004-01-15 11:19:32 sandervl Exp $ */
+/* $Id: changelog,v 1.2663 2004-01-19 12:39:26 sandervl Exp $ */
+
+ 2004-01-19: Sander van Leeuwen <sandervl@innotek   >
+    - USER32:   o Allocate DC for windows with CS_CLASSDC style (one per window)
 
  2004-01-15: KO Myung-Hun <komh@chollian    >
     - GDI32:    o Cleanup of text functions
