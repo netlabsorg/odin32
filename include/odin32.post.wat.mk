@@ -1,4 +1,4 @@
-# $Id: odin32.post.wat.mk,v 1.14 2001-07-30 22:50:52 bird Exp $
+# $Id: odin32.post.wat.mk,v 1.15 2001-08-04 14:18:54 bird Exp $
 
 #
 # Odin32 API
@@ -128,7 +128,7 @@ lib:    $(OBJDIR) \
 # Dll: Main target rule - builds the target dll.
 #
 !ifndef NO_MAIN_RULE
-$(OBJDIR)\$(TARGET).$(TARGET_EXTENSION): $(OBJS) $(OS2RES) $(OBJDIR)\$(TARGET).lrf
+$(OBJDIR)\$(TARGET).$(TARGET_EXTENSION): $(LIBS) $(OBJS) $(OS2RES) $(OBJDIR)\$(TARGET).lrf
     $(LD2) @$(OBJDIR)\$(TARGET).lrf
 !ifdef OS2RES
     $(OS2RC) $(OS2RCLFLAGS) $(OS2RES) $@
@@ -186,7 +186,7 @@ lib: .SYMBOLIC
 # Exe: Main target rule - builds the target exe.
 #
 !ifndef NO_MAIN_RULE
-$(OBJDIR)\$(TARGET).$(TARGET_EXTENSION): $(OBJS) $(OS2RES) $(OBJDIR)\$(TARGET).lrf
+$(OBJDIR)\$(TARGET).$(TARGET_EXTENSION): $(LIBS) $(OBJS) $(OS2RES) $(OBJDIR)\$(TARGET).lrf
     $(LD2) @$(OBJDIR)\$(TARGET).lrf
 !ifdef OS2RES
     $(OS2RC) $(OS2RCLFLAGS) $(OS2RES) $@

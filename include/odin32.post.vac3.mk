@@ -1,4 +1,4 @@
-# $Id: odin32.post.vac3.mk,v 1.15 2001-07-30 22:50:52 bird Exp $
+# $Id: odin32.post.vac3.mk,v 1.16 2001-08-04 14:18:23 bird Exp $
 
 #
 # Odin32 API
@@ -127,7 +127,7 @@ lib:    $(OBJDIR) \
 # Dll: Main target rule - builds the target dll.
 #
 !ifndef NO_MAIN_RULE
-$(OBJDIR)\$(TARGET).$(TARGET_EXTENSION): $(OBJS) $(OS2RES) $(DEFFILE) $(OBJDIR)\bldlevel.$(DEFFILE) $(OBJDIR)\$(TARGET).lrf
+$(OBJDIR)\$(TARGET).$(TARGET_EXTENSION): $(LIBS) $(OBJS) $(OS2RES) $(DEFFILE) $(OBJDIR)\bldlevel.$(DEFFILE) $(OBJDIR)\$(TARGET).lrf
     -4 $(LD2) $(LD2FLAGS) @$(OBJDIR)\$(TARGET).lrf
 !ifdef OS2RES
     $(OS2RC) $(OS2RCLFLAGS) $(OS2RES) $@
@@ -198,7 +198,7 @@ lib:
 # Exe: Main target rule - builds the target exe.
 #
 !ifndef NO_MAIN_RULE
-$(OBJDIR)\$(TARGET).$(TARGET_EXTENSION): $(OBJS) $(OS2RES) $(DEFFILE) $(OBJDIR)\bldlevel.$(DEFFILE) $(OBJDIR)\$(TARGET).lrf
+$(OBJDIR)\$(TARGET).$(TARGET_EXTENSION): $(LIBS) $(OBJS) $(OS2RES) $(DEFFILE) $(OBJDIR)\bldlevel.$(DEFFILE) $(OBJDIR)\$(TARGET).lrf
     -4 $(LD2) $(LD2FLAGS) @$(OBJDIR)\$(TARGET).lrf
 !ifdef OS2RES
     $(OS2RC) $(OS2RCLFLAGS) $(OS2RES) $@
