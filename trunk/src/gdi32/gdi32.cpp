@@ -1,4 +1,4 @@
-/* $Id: gdi32.cpp,v 1.34 2000-01-28 22:24:57 sandervl Exp $ */
+/* $Id: gdi32.cpp,v 1.35 2000-01-30 15:04:40 sandervl Exp $ */
 
 /*
  * GDI32 apis
@@ -1262,12 +1262,17 @@ BOOL WIN32API GetCurrentPositionEx( HDC arg1, PPOINT  arg2)
 int WIN32API GetDIBits(HDC hdc, HBITMAP hBitmap, UINT uStartScan, UINT cScanLines, 
                        void *lpvBits, PBITMAPINFO lpbi, UINT uUsage)
 {
+#if 1
+    dprintf(("GDI32: GetDIBits"));
+    return O32_GetDIBits(hdc, hBitmap, uStartScan, cScanLines, lpvBits, lpbi, uUsage);
+#else
  int rc;
 
     rc = O32_GetDIBits(hdc, hBitmap, uStartScan, cScanLines, lpvBits, lpbi, uUsage);
     dprintf(("GDI32: GetDIBits %x %x %d %d %x %x %d returned %d", hdc, hBitmap, uStartScan, cScanLines, lpvBits, lpbi, uUsage, rc));
     //SvL: Wrong Open32 return value
     return (rc == TRUE) ? cScanLines : 0;
+#endif
 }
 //******************************************************************************
 //******************************************************************************
