@@ -32,4 +32,4 @@ IMPORTS
      _DosWrite        = DOSCALL1.282
      _DOS16OPEN       = DOSCALL1.70
      _DOS16CLOSE      = DOSCALL1.59
-
+     DosQuerySysState = DOSCALL1.368
