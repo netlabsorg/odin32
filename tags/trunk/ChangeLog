@@ -1,4 +1,7 @@
- /* $Id: ChangeLog,v 1.371 1999-10-26 22:48:22 phaller Exp $ */
+ /* $Id: ChangeLog,v 1.372 1999-10-27 09:54:31 bird Exp $ */
+ 99-10-27: knut st. osmundsen <knut.stange.osmundsen@pmsc.no>
+        - WIN32K: It's working! At least on my testmachine running
+                  the WSeB astrict UNI kernel and the Warp 4 astrict kernel.
 
  99-10-26: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32: Fixed bugs in menu apis (Append/InsertMenuA/W)
@@ -21,7 +24,7 @@
 
  99-10-26: Patrick Haller <phaller@gmx.net>
 	- USER32: Add: Ported Wine menu(ex) parser and integrated it into menu code
-	- WINMM:  Fix: invalid callback check in dwaveout.cpp (Q2 makes noise again) 
+	- WINMM:  Fix: invalid callback check in dwaveout.cpp (Q2 makes noise again)
 
  99-10-25: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32: Removed SetFocus call in Edit control (WM_LBUTTONDOWN)
@@ -39,7 +42,7 @@
                   Partially implemented GetMenuItemInfo.
                   NOTE: Needs a complete rewrite.
 
-	- INCLUDE\win\commctrl.h: 
+	- INCLUDE\win\commctrl.h:
 		  Changed back calling convention of callback handlers to CALLBACK.
                   -> fixes crashes in SHELL32 (DPASearch calls)
 
@@ -48,10 +51,10 @@
                     for this function and UninitializeCriticalSection
 
  99-10-25: Patrick Haller <phaller@gmx.net>
-	- ODINWRAP: Fix: Bugfix + Heap Check embracing every wrapper function 
+	- ODINWRAP: Fix: Bugfix + Heap Check embracing every wrapper function
 	- NTDLL:    Add: functions by Jens Wiesner
 	- KERNEL32: Fix: enable WIN32.DEBUGBREAK environment variable for DebugBreak() API
-	- WSOCK32:  Fix: invalid structure alignment for asynchronous operations 
+	- WSOCK32:  Fix: invalid structure alignment for asynchronous operations
 
  99-10-25: Markus Montkowski <mmontkowski@gmx.de>
         - DDRAW:  Fixed bug in Color conversion of surfaces DDEX1.EXE now works,
