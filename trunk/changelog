@@ -1,4 +1,7 @@
-/* $Id: changelog,v 1.2018 2002-03-08 15:48:57 sandervl Exp $ */
+/* $Id: changelog,v 1.2019 2002-03-14 13:33:57 bird Exp $ */
+
+ 2002-03-14: knut st. osmundsen <bird@anduin.net>
+    - Fastdep:  o Some minor -E<somthing> issues (non Odin32 use).
 
  2002-03-08: Platon Fomichev <platon@innotek.de>
     - USER32:   o Menu: fix for double click on minimized window (icon)
