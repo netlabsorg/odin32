@@ -1,9 +1,9 @@
-# $Id: MkCallTab.mak,v 1.12 2002-12-16 00:46:47 bird Exp $
+# $Id: MkCallTab.mak,v 1.13 2002-12-16 00:48:05 bird Exp $
 
 #
-# MkCallTab - 16-bit source generator.
+# MkCallTab - source generator.
 #
-# Copyright (c) 2000-2002 knut st. osmundsen (bird@anduin.net)
+# Copyright (c) 2000-2003 knut st. osmundsen (bird@anduin.net)
 #
 # GPL
 #
