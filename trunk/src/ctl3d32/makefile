@@ -1,9 +1,9 @@
-# $Id: makefile,v 1.1 2001-09-21 18:38:12 sandervl Exp $
+# $Id: makefile,v 1.2 2001-09-26 22:46:04 bird Exp $
 
 #
 # Odin32 API
 #
-#       dplay.dll makefile
+#       ctl32d32.dll makefile
 #
 
 
