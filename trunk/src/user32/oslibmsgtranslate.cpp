@@ -1,4 +1,4 @@
-/* $Id: oslibmsgtranslate.cpp,v 1.37 2000-10-08 18:45:35 sandervl Exp $ */
+/* $Id: oslibmsgtranslate.cpp,v 1.38 2000-11-15 20:30:46 sandervl Exp $ */
 /*
  * Window message translation functions for OS/2
  *
@@ -684,6 +684,15 @@ VirtualKeyFound:
         winMsg->message = WINWM_CONTEXTMENU;
         winMsg->wParam  = win32wnd->getWindowHandle();
         winMsg->lParam  = MAKELONG(winMsg->pt.x,winMsg->pt.y);
+        break;
+
+    case WM_RENDERFMT:
+        winMsg->message = WINWM_RENDERFORMAT;
+        winMsg->wParam  = (UINT) os2Msg->mp1;
+        break;
+
+    case WM_RENDERALLFMTS:
+        winMsg->message = WINWM_RENDERALLFORMATS;
         break;
 
     case WM_INITMENU:

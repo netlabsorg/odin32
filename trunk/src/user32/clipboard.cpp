@@ -1,4 +1,4 @@
-/* $Id: clipboard.cpp,v 1.8 2000-06-07 14:51:25 sandervl Exp $ */
+/* $Id: clipboard.cpp,v 1.9 2000-11-15 20:30:45 sandervl Exp $ */
 
 /*
  * Win32 Clipboard API functions for OS/2
@@ -168,14 +168,16 @@ BOOL WIN32API OpenClipboard( HWND hwnd)
 {
   Win32BaseWindow *window;
 
-    window = Win32BaseWindow::GetWindowFromHandle(hwnd);
-    if(!window) {
-        dprintf(("OpenClipboard, window %x not found", hwnd));
-        SetLastError(ERROR_INVALID_WINDOW_HANDLE);
-        return 0;
+    if (hwnd) {
+        window = Win32BaseWindow::GetWindowFromHandle(hwnd);
+        if(!window) {
+            dprintf(("OpenClipboard, window %x not found", hwnd));
+            SetLastError(ERROR_INVALID_WINDOW_HANDLE);
+            return 0;
+        }
     }
     dprintf(("USER32:  OpenClipboard\n"));
-    return O32_OpenClipboard(window->getOS2WindowHandle());
+    return O32_OpenClipboard(hwnd ? window->getOS2WindowHandle() : NULL);
 }
 //******************************************************************************
 //******************************************************************************
