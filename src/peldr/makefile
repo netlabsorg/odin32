@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.6 1999-08-16 16:28:03 sandervl Exp $
+# $Id: makefile,v 1.7 1999-08-21 12:29:31 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -17,7 +17,7 @@ PDWIN32_BIN = ..\..\bin
 CFLAGS = $(CFLAGS) /Ge+ -I$(PDWIN32_INCLUDE)
 CXXFLAGS = $(CXXFLAGS) /Ge+ -I$(PDWIN32_INCLUDE)
 LDFLAGSEXE = $(LDFLAGS) /Ge+ /B"/pmtype:pm /stack:0x30000 /NOBASE /Map" \
-             $(PDWIN32_LIB)\peldr.lib os2386.lib $(PDWIN32_LIB)\odincrt.lib cppom30O.lib
+             $(PDWIN32_LIB)\peldr.lib os2386.lib $(PDWIN32_LIB)\odincrt.lib $(RTLLIB_O)
 
 
 TARGET = pe
@@ -34,7 +34,7 @@ $(TARGET).exe: $(OBJS)
         $(CP) $(TARGET).exe $(PDWIN32_BIN)
 
 $(TARGETDLL).dll: $(OBJSDLL) $(TARGETDLL).def 
-	$(LD) $(LDFLAGS) -Fe$@ $(OBJSDLL) sbsstub.obj $(TARGETDLL).def OS2386.LIB CPPOM30.LIB
+	$(LD) $(LDFLAGS) -Fe$@ $(OBJSDLL) $(TARGETDLL).def OS2386.LIB $(RTLLIB_O)
 	$(CP) $@ $(PDWIN32_BIN)
 
 $(TARGETDLL).lib: $(TARGETDLL).dll

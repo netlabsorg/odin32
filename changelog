@@ -1,4 +1,8 @@
- /* $Id: changelog,v 1.114 1999-08-20 20:10:42 sandervl Exp $ */
+ /* $Id: changelog,v 1.115 1999-08-21 12:29:27 sandervl Exp $ */
+
+ 99-08-21: Yuri Dario <mc6530@mclink.it>
+	- Makefiles: Link with predefined VAC lib (RTLLIB(_O))
+                     Needed for VAC 3.6.5
 
  99-08-20: Sander van Leeuwen <sandervl@xs4all.nl>
 	- KERNEL32: PE resource loading fixes
