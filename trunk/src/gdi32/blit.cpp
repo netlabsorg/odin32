@@ -1,4 +1,4 @@
-/* $Id: blit.cpp,v 1.12 2000-05-22 19:11:27 sandervl Exp $ */
+/* $Id: blit.cpp,v 1.13 2000-05-29 22:43:54 sandervl Exp $ */
 
 /*
  * GDI32 blit code
@@ -271,7 +271,7 @@ INT WIN32API StretchDIBits(HDC hdc, INT xDst, INT yDst, INT widthDst,
     rc = O32_StretchDIBits(hdc, xDst, yDst, widthDst, heightDst, xSrc, ySrc,
                              widthSrc, heightSrc, (void *)bits,
                              (PBITMAPINFO)info, wUsage, dwRop);
-    if(rc != heightDst) {
+    if(rc != heightSrc) {
 	dprintf(("StretchDIBits failed with rc %x", rc));
     }
     else {
