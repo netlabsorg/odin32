@@ -1,4 +1,4 @@
-/* $Id: oslibwin.h,v 1.44 2000-05-20 14:57:22 sandervl Exp $ */
+/* $Id: oslibwin.h,v 1.45 2000-05-26 18:43:34 sandervl Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -284,5 +284,9 @@ void  OSLibWinSetVisibleRegionNotify(HWND hwnd, BOOL fNotify);
 
 HWND  OSLibWinQueryCapture();
 BOOL  OSLibWinSetCapture(HWND hwnd);
+
+BOOL   OSLibWinRemoveFromTasklist(HANDLE hTaskList);
+HANDLE OSLibWinAddToTaskList(HWND hwndFrame, char *title, BOOL fVisible);
+BOOL   OSLibWinChangeTaskList(HANDLE hTaskList, HWND hwndFrame, char *title, BOOL fVisible);
 
 #endif //__OSLIBWIN_H__

@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.194 2000-05-24 19:30:06 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.195 2000-05-26 18:43:34 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -148,6 +148,8 @@ void Win32BaseWindow::Init()
   hWindowRegion      = 0;
   hClipRegion        = 0;
 
+  hTaskList          = 0;
+
   if(currentProcessId == -1)
   {
         currentProcessId = GetCurrentProcessId();
@@ -160,6 +162,10 @@ void Win32BaseWindow::Init()
 //******************************************************************************
 Win32BaseWindow::~Win32BaseWindow()
 {
+    if(hTaskList) {
+	OSLibWinRemoveFromTasklist(hTaskList);
+    }
+
     OSLibWinSetVisibleRegionNotify(OS2HwndFrame, FALSE);
     OSLibWinSetWindowULong(OS2Hwnd, OFFSET_WIN32WNDPTR, 0);
     OSLibWinSetWindowULong(OS2Hwnd, OFFSET_WIN32PM_MAGIC, 0);
@@ -239,6 +245,10 @@ BOOL Win32BaseWindow::CreateWindowExA(CREATESTRUCTA *cs, ATOM classAtom)
 #ifdef DEBUG
     PrintWindowStyle(cs->style, cs->dwExStyle);
 #endif
+
+    //If window has no owner/parent window, then it will be added to the tasklist
+    //(depending on visibility state)
+    if (!cs->hwndParent) fTaskList = TRUE;
 
     sw = SW_SHOW;
     SetLastError(0);
@@ -500,13 +510,6 @@ BOOL Win32BaseWindow::CreateWindowExA(CREATESTRUCTA *cs, ATOM classAtom)
   DWORD dwOSWinStyle;
 
   OSLibWinConvertStyle(dwStyle,dwExStyle,&dwOSWinStyle);
-#if 0
-  if(((dwStyle & (WS_CAPTION|WS_POPUP)) == WS_CAPTION) && (getParent() == NULL || getParent() == windowDesktop)) {
-        fTaskList = TRUE;
-  }
-#else
-  if (((dwStyle & (WS_CAPTION | WS_SYSMENU | 0xC0000000)) == (WS_CAPTION | WS_SYSMENU))) fTaskList = TRUE;
-#endif
 
   OS2Hwnd = OSLibWinCreateWindow((getParent()) ? getParent()->getOS2WindowHandle() : OSLIB_HWND_DESKTOP,
                                  dwOSWinStyle,(char *)windowNameA,
@@ -519,7 +522,6 @@ BOOL Win32BaseWindow::CreateWindowExA(CREATESTRUCTA *cs, ATOM classAtom)
         return FALSE;
   }
   OSLibWinSetVisibleRegionNotify(OS2HwndFrame, TRUE);
-
   SetLastError(0);
   return TRUE;
 }
@@ -663,6 +665,10 @@ if (!cs->hMenu) cs->hMenu = LoadMenuA(windowClass->getInstance(),"MYAPP");
 
   //Note: Solitaire crashes when receiving WM_SIZE messages before WM_CREATE
   fCreated = TRUE;
+
+  if(fTaskList) {
+  	hTaskList = OSLibWinAddToTaskList(OS2HwndFrame, windowNameA, (cs->style & WS_VISIBLE) ? 1 : 0);
+  }
 
   if (SendInternalMessageA(WM_NCCREATE,0,(LPARAM)cs))
   {
@@ -1336,7 +1342,9 @@ LRESULT Win32BaseWindow::DefWindowProcA(UINT Msg, WPARAM wParam, LPARAM lParam)
         if ((dwStyle & WS_CAPTION) == WS_CAPTION)
         {
           HandleNCPaint((HRGN)1);
-          OSLibWinSetWindowText(OS2HwndFrame,(LPSTR)windowNameA);
+          if(hTaskList) {
+		OSLibWinChangeTaskList(hTaskList, OS2HwndFrame, getWindowNameA(), (getStyle() & WS_VISIBLE) ? 1 : 0);
+	  }
         }
 
         return TRUE;
@@ -1794,7 +1802,9 @@ LRESULT Win32BaseWindow::DefWindowProcW(UINT Msg, WPARAM wParam, LPARAM lParam)
         if ((dwStyle & WS_CAPTION) == WS_CAPTION)
         {
           HandleNCPaint((HRGN)1);
-          OSLibWinSetWindowText(OS2HwndFrame,(LPSTR)windowNameA);
+          if(hTaskList) {
+		OSLibWinChangeTaskList(hTaskList, OS2HwndFrame, getWindowNameA(), (getStyle() & WS_VISIBLE) ? 1 : 0);
+	  }
         }
 
         return TRUE;
@@ -2097,10 +2107,17 @@ BOOL Win32BaseWindow::ShowWindow(ULONG nCmdShow)
         showstate &= ~SWPOS_ACTIVATE;
 
     if(showstate & SWPOS_SHOW) {
-            setStyle(getStyle() | WS_VISIBLE);
+         setStyle(getStyle() | WS_VISIBLE);
+	 if(hTaskList) {
+		OSLibWinChangeTaskList(hTaskList, OS2HwndFrame, getWindowNameA(), (getStyle() & WS_VISIBLE) ? 1 : 0);
+	 }
     }
-    else    setStyle(getStyle() & ~WS_VISIBLE);
-
+    else {
+	if(hTaskList) {
+		OSLibWinChangeTaskList(hTaskList, OS2HwndFrame, getWindowNameA(), (getStyle() & WS_VISIBLE) ? 1 : 0);
+	}
+	setStyle(getStyle() & ~WS_VISIBLE);
+    }
     showFlag = (nCmdShow != SW_HIDE);
 
     rc = OSLibWinShowWindow(OS2HwndFrame, showstate);
@@ -2247,12 +2264,18 @@ BOOL Win32BaseWindow::SetWindowPos(HWND hwndInsertAfter, int x, int y, int cx, i
         setStyle(getStyle() | WS_VISIBLE);
         //SvL: TODO: Send WM_SHOWWINDOW??
         OSLibWinShowWindow(OS2Hwnd, SWPOS_SHOW);
+	if(hTaskList) {
+		OSLibWinChangeTaskList(hTaskList, OS2HwndFrame, getWindowNameA(), (getStyle() & WS_VISIBLE) ? 1 : 0);
+	}
     }
     else
     if(fuFlags & SWP_HIDEWINDOW && IsWindowVisible()) {
         setStyle(getStyle() & ~WS_VISIBLE);
         //SvL: TODO: Send WM_SHOWWINDOW??
         OSLibWinShowWindow(OS2Hwnd, SWPOS_HIDE);
+	if(hTaskList) {
+		OSLibWinChangeTaskList(hTaskList, OS2HwndFrame, getWindowNameA(), (getStyle() & WS_VISIBLE) ? 1 : 0);
+	}
     }
     rc = OSLibWinSetMultWindowPos(&swp, 1);
 

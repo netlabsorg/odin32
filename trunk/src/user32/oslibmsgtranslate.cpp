@@ -1,4 +1,4 @@
-/* $Id: oslibmsgtranslate.cpp,v 1.31 2000-05-24 19:30:05 sandervl Exp $ */
+/* $Id: oslibmsgtranslate.cpp,v 1.32 2000-05-26 18:43:33 sandervl Exp $ */
 /*
  * Window message translation functions for OS/2
  *
@@ -520,7 +520,7 @@ BOOL OS2ToWinMsgTranslate(void *pThdb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode
             winMsg->wParam  = GetMouseKeyState();
             winMsg->lParam  = MAKELONG(ClientPoint.x, ClientPoint.y); //client coordinates
         }
-        if(ISMOUSE_CAPTURED())
+        if((fMsgRemoved == MSG_REMOVE) && ISMOUSE_CAPTURED())
         {
             if(DInputMouseHandler(win32wnd->getWindowHandle(), winMsg->message, winMsg->pt.x, winMsg->pt.y)) {
                 goto dummymessage; //dinput swallowed message
@@ -574,7 +574,7 @@ BOOL OS2ToWinMsgTranslate(void *pThdb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode
           winMsg->wParam  = GetMouseKeyState();
           winMsg->lParam  = MAKELONG(SHORT1FROMMP(os2Msg->mp1),mapY(win32wnd,SHORT2FROMMP(os2Msg->mp1)));
         }
-        if(ISMOUSE_CAPTURED())
+        if((fMsgRemoved == MSG_REMOVE) && ISMOUSE_CAPTURED())
         {
             if(DInputMouseHandler(win32wnd->getWindowHandle(), winMsg->message, winMsg->pt.x, winMsg->pt.y)) {
                 goto dummymessage; //dinput swallowed message
@@ -766,7 +766,7 @@ VirtualKeyFound:
                     winMsg->lParam |= 1 << 30;                          // bit 30, previous state, 1 means key was pressed
             }
         }
-        if(ISKDB_CAPTURED())
+        if((fMsgRemoved == MSG_REMOVE) && ISKDB_CAPTURED())
         {
             if(DInputKeyBoardHandler(winMsg)) {
                 goto dummymessage; //dinput swallowed message

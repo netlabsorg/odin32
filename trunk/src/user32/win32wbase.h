@@ -1,4 +1,4 @@
-/* $Id: win32wbase.h,v 1.95 2000-05-24 19:30:07 sandervl Exp $ */
+/* $Id: win32wbase.h,v 1.96 2000-05-26 18:43:35 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -388,6 +388,8 @@ protected:
         RECT    rectClient;  //relative to parent
 
     PROPERTY   *propertyList;
+       
+        HANDLE  hTaskList; //PM specific (switchentry handle)
 
 CREATESTRUCTA  *tmpcs; //temporary pointer to CREATESTRUCT used in CreateWindowEx
         ULONG   sw;    //set in CreateWindowExA, used in MsgCreate method
