@@ -1,4 +1,4 @@
-/* $Id: edit.cpp,v 1.40 2000-09-29 22:28:10 sandervl Exp $ */
+/* $Id: edit.cpp,v 1.41 2000-10-03 17:29:22 sandervl Exp $ */
 /*
  *      Edit control
  *
@@ -3010,8 +3010,10 @@ static void EDIT_WM_Char(HWND hwnd, EDITSTATE *es, CHAR c, DWORD key_data)
 
                   if (es->style & ES_NUMBER)
                   {
-                    if (((BYTE)c < '0') || ((BYTE)c > '9')) MessageBeep(MB_ICONEXCLAMATION);
-                    return;
+                    	if (((BYTE)c < '0') || ((BYTE)c > '9')) {
+				MessageBeep(MB_ICONEXCLAMATION);
+                    		return;
+			}
                   }
                   str[0] = c;
                   str[1] = '\0';
