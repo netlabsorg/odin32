@@ -1,4 +1,4 @@
-# $Id: odin32.dbg.emx.mk,v 1.1 2000-12-02 23:50:46 bird Exp $
+# $Id: odin32.dbg.emx.mk,v 1.2 2001-01-20 18:17:36 bird Exp $
 
 #
 # Odin32 API
@@ -84,6 +84,7 @@ CDEFINES         = -DDEBUG -D__WIN32OS2__ -D__i386__ -D__WINE__ -DTCPV40HDRS -DC
 #   when we add new flags to for example LD2FLAGS too many times.
 #
 !ifdef EXETARGET
+# STACKSIZE is not supported.
 !   ifdef VIO
 LDTARGETFLAGS    = -Zexe /Zstack 80
 LD2TARGETFLAGS   = -Zexe /Zstack 80
