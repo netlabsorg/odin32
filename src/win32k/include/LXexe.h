@@ -1,4 +1,4 @@
-/* $Id: LXexe.h,v 1.1.2.1 2002-04-01 08:28:33 bird Exp $
+/* $Id: LXexe.h,v 1.1.2.2 2002-04-01 08:31:11 bird Exp $
  *
  * LX DEFINITIONS AND DECLARATIONS.
  * --------------------------------
@@ -47,6 +47,18 @@
 #define E32CPU286       0x001      /* Intel 80286 or upwardly compatibile */
 #define E32CPU386       0x002      /* Intel 80386 or upwardly compatibile */
 #define E32CPU486       0x003      /* Intel 80486 or upwardly compatibile */
+
+
+/*
+ *  Target operating systems
+ */
+#ifndef NE_OS2
+#define NE_UNKNOWN      0x0             /* Unknown (any "new-format" OS) */
+#define NE_OS2          0x1             /* OS/2 (default)  */
+#define NE_WINDOWS      0x2             /* Windows */
+#define NE_DOS4         0x3             /* DOS 4.x */
+#define NE_DEV386       0x4             /* Windows 386 */
+#endif
 
 
 /**

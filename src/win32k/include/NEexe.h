@@ -1,4 +1,4 @@
-/* $Id: NEexe.h,v 1.1.2.1 2002-04-01 08:28:33 bird Exp $
+/* $Id: NEexe.h,v 1.1.2.2 2002-04-01 08:31:10 bird Exp $
  *
  * NE DEFINITIONS AND DECLARATIONS.
  * --------------------------------
@@ -12,6 +12,18 @@
 #define _NEexe_h_
 
 #define IMAGE_OS2_SIGNATURE     0x454E /* NE */
+
+/*
+ *  Target operating systems
+ */
+#ifndef NE_OS2
+#define NE_UNKNOWN      0x0             /* Unknown (any "new-format" OS) */
+#define NE_OS2          0x1             /* OS/2 (default)  */
+#define NE_WINDOWS      0x2             /* Windows */
+#define NE_DOS4         0x3             /* DOS 4.x */
+#define NE_DEV386       0x4             /* Windows 386 */
+#endif
+
 
 /*
  * This is the Windows executable (NE) header.
