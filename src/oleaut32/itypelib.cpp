@@ -1,4 +1,4 @@
-/* $Id: itypelib.cpp,v 1.3 2000-04-05 22:28:48 davidr Exp $ */
+/* $Id: itypelib.cpp,v 1.4 2000-09-17 22:31:41 davidr Exp $ */
 /* 
  * ITypelib interface
  * 
@@ -53,7 +53,7 @@ ITypeLibImpl * ITypeLibImpl_Constructor()
 {
     ITypeLibImpl *	pNew;
 
-    dprintf(("OLEAUT32: ITypeLib()->Constructor()"));
+//    dprintf(("OLEAUT32: ITypeLib()->Constructor()"));
 
     pNew = new ITypeLibImpl;
 
@@ -71,7 +71,7 @@ void ITypeLibImpl_Destructor(ITypeLibImpl * This)
 {
     dprintf(("OLEAUT32: ITypeLibImpl(%p)->Destructor()", This));
 
-    // TODO - nead to relase all substructures etc.
+    // TODO - need to relase all substructures etc.
 //    delete This;
 }
 
@@ -97,13 +97,29 @@ HRESULT WIN32API ITypeLibImpl_QueryInterface(LPTYPELIB iface,
 
     // Go find the correct interface...
     if (IsEqualIID(&IID_IUnknown, riid))
+    {
+	dprintf(("          ->IUnknown"));
 	*ppvObject = &(This->lpvtbl);
+    }
     else if (IsEqualIID(&IID_ITypeLib, riid))
+    {
+	dprintf(("          ->ITypeLib"));
 	*ppvObject = &(This->lpvtbl);
+    }
     else if (IsEqualIID(&IID_ITypeLib2, riid))
+    {
+	dprintf(("          ->ITypeLib2"));
 	*ppvObject = &(This->lpvtbl);
+    }
     else
+    {
+	char	tmp[50];
+
+	WINE_StringFromCLSID(riid, tmp);
+
+	dprintf(("          ->E_NOINTERFACE(%s)", tmp));
 	return E_NOINTERFACE; 
+    }
 
     // Query Interface always increases the reference count by one...
     ITypeLibImpl_AddRef((LPTYPELIB)This);
@@ -374,9 +390,10 @@ HRESULT WIN32API ITypeLibImpl_IsName(LPTYPELIB iface,
 {
     ICOM_THIS(ITypeLibImpl, iface);
 
-    dprintf(("OLEAUT32: ITypeLibImpl(%p)->IsName()\n", This));
-
     char *	astr = HEAP_strdupWtoA( GetProcessHeap(), 0, szNameBuf );
+
+    dprintf(("OLEAUT32: ITypeLibImpl(%p,%s)->IsName(%s)\n", This, This->szName, astr));
+
     BOOL	fFound = IsNameSub(This, astr);
 
     *pfName = fFound;
@@ -606,4 +623,3 @@ HRESULT WIN32API ITypeLib2Impl_GetAllCustData(LPTYPELIB iface,
 
     return S_OK;
 }
-
