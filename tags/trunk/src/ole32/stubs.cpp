@@ -1,4 +1,4 @@
-/* $Id: stubs.cpp,v 1.9 1999-09-24 21:49:45 davidr Exp $ */
+/* $Id: stubs.cpp,v 1.10 1999-12-03 11:57:20 sandervl Exp $ */
 /* 
  * Win32 COM/OLE stubs for OS/2
  * 
@@ -176,10 +176,11 @@ HRESULT WIN32API CoRevokeMallocSpy()
 }
 //*******************************************************************************
 //*******************************************************************************
-HRESULT WIN32API CoSetState()
+HRESULT WIN32API CoSetState(LPDWORD state)
 {
-    dprintf(("OLE32: CoSetState, UNKNOWN API - stub"));
-    return 0;
+    dprintf(("OLE32: CoSetState (%p),stub!\n", state));
+    if (state) *state = 0;
+    return S_OK;
 }
 
 //*******************************************************************************
