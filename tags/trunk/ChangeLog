@@ -1,4 +1,8 @@
-/* $Id: ChangeLog,v 1.1409 2001-05-11 19:22:05 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.1410 2001-05-13 19:31:31 sandervl Exp $ */
+
+ 2001-05-13: Dietrich Teickner <Dietrich_Teickner@t-online.de>
+    - COMCTL32: o Fixed wrong return values for datetime control
+                  (DTM_GETSYSTEMTIME & DTM_SETSYSTEMTIME)
 
  2001-05-11: Sander van Leeuwen <sandervl@xs4all.nl>
     - USER32:   o Rewrote window handling. Back to using frame and client windows
