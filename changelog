@@ -1,4 +1,7 @@
-/* $Id: changelog,v 1.2012 2002-03-05 16:09:37 sandervl Exp $ */
+/* $Id: changelog,v 1.2013 2002-03-06 16:20:54 sandervl Exp $ */
+
+ 2002-03-06: Platon Fomichev <platon@innotek.de>
+    - USER32:   o Fixes for minimized dragging icon and minimized icon distortion
 
  2002-03-05: Platon Fomichev <platon@innotek.de>
     - USER32:   o Allow single minimize or maximize button in titlebar (os/2
