@@ -1,4 +1,4 @@
-/* $Id: hmdevice.cpp,v 1.29 2001-11-26 14:54:00 sandervl Exp $ */
+/* $Id: hmdevice.cpp,v 1.30 2001-12-03 12:13:08 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -1482,12 +1482,12 @@ HANDLE HMDeviceHandler::CreateThread(PHMHANDLEDATA pHMHandleData,
  *
  * Author    : SvL
  *****************************************************************************/
-INT HMDeviceHandler::GetThreadPriority(PHMHANDLEDATA pHMHandleData)
+INT HMDeviceHandler::GetThreadPriority(HANDLE hThread, PHMHANDLEDATA pHMHandleData)
 {
   dprintf(("KERNEL32: ERROR: HandleManager::DeviceHandler::GetThreadPriority %08xh",
            pHMHandleData->hHMHandle));
 
-  return ERROR_INVALID_HANDLE;
+  return THREAD_PRIORITY_ERROR_RETURN;
 }
 /*****************************************************************************
  * Name      : DWORD HMDeviceHandler::SuspendThread
@@ -1499,12 +1499,12 @@ INT HMDeviceHandler::GetThreadPriority(PHMHANDLEDATA pHMHandleData)
  *
  * Author    : SvL
  *****************************************************************************/
-DWORD HMDeviceHandler::SuspendThread(PHMHANDLEDATA pHMHandleData)
+DWORD HMDeviceHandler::SuspendThread(HANDLE hThread, PHMHANDLEDATA pHMHandleData)
 {
   dprintf(("KERNEL32: ERROR: HandleManager::DeviceHandler::SuspendThread %08xh",
            pHMHandleData->hHMHandle));
 
-  return ERROR_INVALID_HANDLE;
+  return -1;
 }
 /*****************************************************************************
  * Name      : DWORD HMDeviceHandler::SetThreadPriority
@@ -1516,12 +1516,12 @@ DWORD HMDeviceHandler::SuspendThread(PHMHANDLEDATA pHMHandleData)
  *
  * Author    : SvL
  *****************************************************************************/
-BOOL HMDeviceHandler::SetThreadPriority(PHMHANDLEDATA pHMHandleData, int priority)
+BOOL HMDeviceHandler::SetThreadPriority(HANDLE hThread, PHMHANDLEDATA pHMHandleData, int priority)
 {
   dprintf(("KERNEL32: ERROR: HandleManager::DeviceHandler::SetThreadPriority %08xh",
            pHMHandleData->hHMHandle));
 
-  return ERROR_INVALID_HANDLE;
+  return FALSE;
 }
 /*****************************************************************************
  * Name      : DWORD HMDeviceHandler::GetThreadContext
@@ -1533,12 +1533,12 @@ BOOL HMDeviceHandler::SetThreadPriority(PHMHANDLEDATA pHMHandleData, int priorit
  *
  * Author    : SvL
  *****************************************************************************/
-BOOL HMDeviceHandler::GetThreadContext(PHMHANDLEDATA pHMHandleData, PCONTEXT lpContext)
+BOOL HMDeviceHandler::GetThreadContext(HANDLE hThread, PHMHANDLEDATA pHMHandleData, PCONTEXT lpContext)
 {
   dprintf(("KERNEL32: ERROR: HandleManager::DeviceHandler::GetThreadContext %08xh",
            pHMHandleData->hHMHandle));
 
-  return ERROR_INVALID_HANDLE;
+  return FALSE;
 }
 /*****************************************************************************
  * Name      : DWORD HMDeviceHandler::SetThreadContext
@@ -1550,12 +1550,12 @@ BOOL HMDeviceHandler::GetThreadContext(PHMHANDLEDATA pHMHandleData, PCONTEXT lpC
  *
  * Author    : SvL
  *****************************************************************************/
-BOOL HMDeviceHandler::SetThreadContext(PHMHANDLEDATA pHMHandleData, const CONTEXT *lpContext)
+BOOL HMDeviceHandler::SetThreadContext(HANDLE hThread, PHMHANDLEDATA pHMHandleData, const CONTEXT *lpContext)
 {
   dprintf(("KERNEL32: ERROR: HandleManager::DeviceHandler::SetThreadContext %08xh",
            pHMHandleData->hHMHandle));
 
-  return ERROR_INVALID_HANDLE;
+  return FALSE;
 }
 /*****************************************************************************
  * Name      : DWORD HMDeviceHandler::TerminateThread
@@ -1567,12 +1567,12 @@ BOOL HMDeviceHandler::SetThreadContext(PHMHANDLEDATA pHMHandleData, const CONTEX
  *
  * Author    : SvL
  *****************************************************************************/
-BOOL HMDeviceHandler::TerminateThread(PHMHANDLEDATA pHMHandleData, DWORD exitcode)
+BOOL HMDeviceHandler::TerminateThread(HANDLE hThread, PHMHANDLEDATA pHMHandleData, DWORD exitcode)
 {
   dprintf(("KERNEL32: ERROR: HandleManager::DeviceHandler::TerminateThread %08xh",
            pHMHandleData->hHMHandle));
 
-  return ERROR_INVALID_HANDLE;
+  return FALSE;
 }
 /*****************************************************************************
  * Name      : DWORD HMDeviceHandler::ResumeThread
@@ -1584,12 +1584,12 @@ BOOL HMDeviceHandler::TerminateThread(PHMHANDLEDATA pHMHandleData, DWORD exitcod
  *
  * Author    : SvL
  *****************************************************************************/
-DWORD  HMDeviceHandler::ResumeThread(PHMHANDLEDATA pHMHandleData)
+DWORD  HMDeviceHandler::ResumeThread(HANDLE hThread, PHMHANDLEDATA pHMHandleData)
 {
   dprintf(("KERNEL32: ERROR: HandleManager::DeviceHandler::ResumeThread %08xh",
            pHMHandleData->hHMHandle));
 
-  return ERROR_INVALID_HANDLE;
+  return -1;
 }
 /*****************************************************************************
  * Name      : DWORD HMDeviceHandler::GetExitCodeThread
@@ -1601,12 +1601,12 @@ DWORD  HMDeviceHandler::ResumeThread(PHMHANDLEDATA pHMHandleData)
  *
  * Author    : SvL
  *****************************************************************************/
-BOOL HMDeviceHandler::GetExitCodeThread(PHMHANDLEDATA pHMHandleData, LPDWORD lpExitCode)
+BOOL HMDeviceHandler::GetExitCodeThread(HANDLE hThread, PHMHANDLEDATA pHMHandleData, LPDWORD lpExitCode)
 {
   dprintf(("KERNEL32: ERROR: HandleManager::DeviceHandler::GetExitCodeThread %08xh",
            pHMHandleData->hHMHandle));
 
-  return ERROR_INVALID_HANDLE;
+  return FALSE;
 }
 /*****************************************************************************
  * Name      : DWORD HMDeviceHandler::SetThreadTerminated
@@ -1618,7 +1618,7 @@ BOOL HMDeviceHandler::GetExitCodeThread(PHMHANDLEDATA pHMHandleData, LPDWORD lpE
  *
  * Author    : SvL
  *****************************************************************************/
-BOOL HMDeviceHandler::SetThreadTerminated(PHMHANDLEDATA pHMHandleData)
+BOOL HMDeviceHandler::SetThreadTerminated(HANDLE hThread, PHMHANDLEDATA pHMHandleData)
 {
     return FALSE;
 }
