@@ -1,4 +1,4 @@
-/* $Id: overlappedio.cpp,v 1.15 2002-06-10 17:46:53 sandervl Exp $ */
+/* $Id: overlappedio.cpp,v 1.16 2002-06-11 12:51:43 sandervl Exp $ */
 
 /*
  * Win32 overlapped IO class
@@ -153,7 +153,7 @@ DWORD CALLBACK OverlappedIOThread(LPVOID lpThreadParam)
     DWORD dwOperation;
     OverlappedIOHandler *lpOverlappedObj;
 
-    if(threadparam == NULL) {
+    if(threadparam == NULL || threadparam->lpOverlappedObj == NULL) {
         DebugInt3();
         return 0;
     }
@@ -221,7 +221,7 @@ DWORD OverlappedIOHandler::threadHandler(DWORD dwOperation)
             lpRequest       = pending[index];
             pending[index]  = lpRequest->next;
 
-            //add to in process list
+            //add to the head of process list
             lpRequest->next = pending[ASYNC_INDEX_BUSY];
             pending[ASYNC_INDEX_BUSY] = lpRequest;
             ::LeaveCriticalSection(&critsect);
@@ -229,6 +229,17 @@ DWORD OverlappedIOHandler::threadHandler(DWORD dwOperation)
             lpOverlapped = lpRequest->lpOverlapped;;
             hHandle      = lpRequest->hHandle;
 
+#ifdef DEBUG
+            switch(lpRequest->dwAsyncType) {
+            case ASYNCIO_READ:
+            case ASYNCIO_WRITE:
+            case ASYNCIO_POLL:
+                break;
+            default:
+                DebugInt3();
+                break;
+            }
+#endif
             switch(dwOperation) {
             case ASYNCIO_READ:
             case ASYNCIO_READWRITE:
@@ -297,7 +308,7 @@ DWORD OverlappedIOHandler::threadHandler(DWORD dwOperation)
                 break;
             }
             //remove from in-process list and delete async request object
-            findAndRemoveRequest(ASYNC_INDEX_BUSY, hHandle);
+            removeRequest(ASYNC_INDEX_BUSY, lpRequest);
             delete lpRequest;
         } //while(TRUE)
     }
@@ -345,16 +356,7 @@ BOOL OverlappedIOHandler::WriteFile(HANDLE        hHandle,
     }
     else index = ASYNC_INDEX_WRITE;
 
-    ::EnterCriticalSection(&critsect);
-    if(pending[index]) {
-         current = pending[index];
-         while(current->next) {
-             current = current->next;
-         }
-         current->next = lpRequest;
-    }
-    else pending[index] = lpRequest;
-    ::LeaveCriticalSection(&critsect);
+    addRequest(index, lpRequest);
 
     lpOverlapped->Internal     = STATUS_PENDING;
     lpOverlapped->InternalHigh = 0;
@@ -403,16 +405,7 @@ BOOL OverlappedIOHandler::ReadFile(HANDLE        hHandle,
     lpRequest->dwTimeOut           = dwTimeOut;
     lpRequest->next                = NULL;
 
-    ::EnterCriticalSection(&critsect);
-    if(pending[ASYNC_INDEX_READ]) {
-         current = pending[ASYNC_INDEX_READ];
-         while(current->next) {
-             current = current->next;
-         }
-         current->next = lpRequest;
-    }
-    else pending[ASYNC_INDEX_READ] = lpRequest;
-    ::LeaveCriticalSection(&critsect);
+    addRequest(ASYNC_INDEX_READ, lpRequest);
 
     lpOverlapped->Internal     = STATUS_PENDING;
     lpOverlapped->InternalHigh = 0;
@@ -489,16 +482,7 @@ BOOL OverlappedIOHandler::WaitForEvent(HANDLE        hHandle,
         return (dwLastError == ERROR_SUCCESS);
     }
 
-    ::EnterCriticalSection(&critsect);
-    if(pending[ASYNC_INDEX_POLL]) {
-         current = pending[ASYNC_INDEX_READ];
-         while(current->next) {
-             current = current->next;
-         }
-         current->next = lpRequest;
-    }
-    else pending[ASYNC_INDEX_POLL] = lpRequest;
-    ::LeaveCriticalSection(&critsect);
+    addRequest(ASYNC_INDEX_POLL, lpRequest);
 
     //wake up async thread
     ::SetEvent(hEventPoll);
@@ -580,6 +564,51 @@ LPASYNCIOREQUEST OverlappedIOHandler::findAndRemoveRequest(int index, HANDLE hHa
     }
     ::LeaveCriticalSection(&critsect);
     return lpFound;
+}
+//******************************************************************************
+//******************************************************************************
+void OverlappedIOHandler::addRequest(int index, LPASYNCIOREQUEST lpRequest)
+{
+    LPASYNCIOREQUEST current;
+
+    ::EnterCriticalSection(&critsect);
+    if(pending[index]) {
+         current = pending[index];
+         while(current->next) {
+             current = current->next;
+         }
+         current->next = lpRequest;
+    }
+    else pending[index] = lpRequest;
+    ::LeaveCriticalSection(&critsect);
+}
+//******************************************************************************
+//******************************************************************************
+void OverlappedIOHandler::removeRequest(int index, LPASYNCIOREQUEST lpRequest)
+{
+    LPASYNCIOREQUEST current;
+
+    ::EnterCriticalSection(&critsect);
+    if(pending[index]) {
+        if(pending[index] == lpRequest) {
+            pending[index] = lpRequest->next;
+        }
+        else {
+            current = pending[index];
+            while(current->next && current->next != lpRequest) {
+                current = current->next;
+            }
+            if(current->next) {
+                current->next = lpRequest->next;
+            }
+            else {
+                dprintf(("!ERROR!: request %x not found!!!!!!", lpRequest));
+                DebugInt3();
+            }
+        }
+    }
+    //else removed from list by cancelio
+    ::LeaveCriticalSection(&critsect);
 }
 //******************************************************************************
 //******************************************************************************
