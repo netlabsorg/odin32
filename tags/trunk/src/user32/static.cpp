@@ -1,4 +1,4 @@
-/* $Id: static.cpp,v 1.2 1999-09-20 16:04:44 cbratschi Exp $ */
+/* $Id: static.cpp,v 1.3 1999-09-20 19:17:58 sandervl Exp $ */
 /*
  * Static control
  *
@@ -91,8 +91,8 @@ static HBITMAP STATIC_SetBitmap( HWND hwnd, HBITMAP hBitmap )
     if ((dwStyle & SS_TYPEMASK) != SS_BITMAP) return 0;
 
     if (hBitmap && GetObjectType(hBitmap) != OBJ_BITMAP) {
-        //ERR("huh? hBitmap!=0, but not bitmap\n");
-        return 0;
+	//ERR("huh? hBitmap!=0, but not bitmap\n");
+    	return 0;
     }
     hOldBitmap = infoPtr->hIcon;
     infoPtr->hIcon = hBitmap;
@@ -101,7 +101,7 @@ static HBITMAP STATIC_SetBitmap( HWND hwnd, HBITMAP hBitmap )
         BITMAP bm;
         GetObjectA(hBitmap, sizeof(bm), &bm);
         SetWindowPos( hwnd, 0, 0, 0, bm.bmWidth, bm.bmHeight,
-                      SWP_NOACTIVATE | SWP_NOMOVE | SWP_NOZORDER );
+		      SWP_NOACTIVATE | SWP_NOMOVE | SWP_NOZORDER );
 /* CB: alternative code, if necessary
       HDC hdc = GetDC(hwnd);
       BITMAPINFO info;
@@ -112,8 +112,8 @@ static HBITMAP STATIC_SetBitmap( HWND hwnd, HBITMAP hBitmap )
         SetWindowPos(hwnd,0,0,0,info.bmiHeader.biWidth,info.bmiHeader.biHeight,SWP_NOACTIVATE | SWP_NOMOVE | SWP_NOZORDER);
       }
       ReleaseDC(hwnd,hdc);
-*/
-
+*/      		
+		
     }
     return hOldBitmap;
 }
@@ -470,7 +470,6 @@ static void STATIC_PaintTextfn(HWND hwnd, HDC hdc )
       textLen++;
       text = (char*)malloc(textLen);
       GetWindowTextA(hwnd,text,textLen);
-      SetBkMode(hdc,TRANSPARENT);
       DrawTextA( hdc, text, -1, &rc, wFormat );
       free(text);
     }
@@ -545,18 +544,18 @@ static void STATIC_PaintBitmapfn(HWND hwnd, HDC hdc )
 
     if (infoPtr->hIcon) {
         BITMAP bm;
-        SIZE sz;
+	SIZE sz;
 
         if(GetObjectType(infoPtr->hIcon) != OBJ_BITMAP)
-            return;
+	    return;
         if (!(hMemDC = CreateCompatibleDC( hdc ))) return;
-        GetObjectA(infoPtr->hIcon, sizeof(bm), &bm);
-        GetBitmapDimensionEx(infoPtr->hIcon, &sz);
-        oldbitmap = SelectObject(hMemDC, infoPtr->hIcon);
-        BitBlt(hdc, sz.cx, sz.cy, bm.bmWidth, bm.bmHeight, hMemDC, 0, 0,
-               SRCCOPY);
-        SelectObject(hMemDC, oldbitmap);
-        DeleteDC(hMemDC);
+	GetObjectA(infoPtr->hIcon, sizeof(bm), &bm);
+	GetBitmapDimensionEx(infoPtr->hIcon, &sz);
+	oldbitmap = SelectObject(hMemDC, infoPtr->hIcon);
+	BitBlt(hdc, sz.cx, sz.cy, bm.bmWidth, bm.bmHeight, hMemDC, 0, 0,
+	       SRCCOPY);
+	SelectObject(hMemDC, oldbitmap);
+	DeleteDC(hMemDC);
     }
 }
 
