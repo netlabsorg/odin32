@@ -1,4 +1,4 @@
-; $Id: msvcrt20.def,v 1.11 2003-01-06 13:26:37 sandervl Exp $
+; $Id: msvcrt20.def,v 1.12 2003-01-10 13:13:49 sandervl Exp $
 
 ;
 ; Based on Windows 98 : MSVCRT20.DLL (v2.11.000)
@@ -586,7 +586,7 @@ EXPORTS
   _exit = _exit	@572
   _expand = _expand	@573
   _fcloseall = _fcloseall	@574
-;  _fcvt = _fcvt	@575
+  _fcvt = _fcvt	@575
   _fdopen = _fdopen	@576
   _fgetchar = _fgetchar	@577
   _fgetwchar = _fgetwchar	@578
@@ -873,7 +873,7 @@ EXPORTS
   _wcmdln = _wcmdln	@859
   _wcreat = _wcreat	@860
   _wcsdup = _wcsdup	@861
-;  _wcsicmp = _wcsicmp	@862
+  _wcsicmp = _wcsicmp	@862
   _wcsicoll = _wcsicoll	@863
   _wcslwr = _wcslwr	@864
 ;  _wcsncoll = _wcsncoll	@865
@@ -882,7 +882,7 @@ EXPORTS
   _wcsnset = _wcsnset	@868
   _wcsrev = _wcsrev	@869
   _wcsset = _wcsset	@870
-;  _wcsupr = _wcsupr	@871
+  _wcsupr = _wcsupr	@871
 ;  _wctime = _wctime	@872
   _wenviron = _wenviron	@873
 ;  _wexecl = _wexecl	@874
@@ -994,7 +994,7 @@ EXPORTS
   ftell = ftell	@980
   fwprintf = fwprintf	@981
   fwrite = fwrite	@982
-;  fwscanf = fwscanf	@983
+  fwscanf = fwscanf	@983
   getc = getc	@984
   getchar = getchar	@985
   getenv = getenv	@986
@@ -1095,7 +1095,7 @@ EXPORTS
   strtoul = strtoul	@1081
   strxfrm = strxfrm	@1082
   swprintf = swprintf	@1083
-;  swscanf = swscanf	@1084
+  swscanf = swscanf	@1084
   system = system	@1085
   tan = tan	@1086
   tanh = tanh	@1087
