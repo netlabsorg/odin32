@@ -94,6 +94,48 @@ typedef struct
 
 #define KL_NAMELENGTH      9
 
+typedef struct tagMOUSEINPUT
+{
+    LONG    dx;
+    LONG    dy;
+    DWORD   mouseData;
+    DWORD   dwFlags;
+    DWORD   time;
+    ULONG_PTR dwExtraInfo;
+} MOUSEINPUT, *PMOUSEINPUT, *LPMOUSEINPUT;
+
+typedef struct tagKEYBDINPUT
+{
+    WORD    wVk;
+    WORD    wScan;
+    DWORD   dwFlags;
+    DWORD   time;
+    ULONG_PTR dwExtraInfo;
+} KEYBDINPUT, *PKEYBDINPUT, *LPKEYBDINPUT;
+
+typedef struct tagHARDWAREINPUT
+{
+    DWORD   uMsg;
+    WORD    wParamL;
+    WORD    wParamH;
+} HARDWAREINPUT, *PHARDWAREINPUT, *LPHARDWAREINPUT;
+
+#define INPUT_MOUSE     0
+#define INPUT_KEYBOARD  1
+#define INPUT_HARDWARE  2
+
+typedef struct tagINPUT
+{
+    DWORD type;
+    union
+    {
+        MOUSEINPUT      mi;
+        KEYBDINPUT      ki;
+        HARDWAREINPUT   hi;
+    } DUMMYUNIONNAME;
+} INPUT, *PINPUT, *LPINPUT;
+
+
   /***** Dialogs *****/
 #ifdef FSHIFT
 /* Gcc on Solaris has a version of this that we don't care about.  */
@@ -255,6 +297,7 @@ typedef struct
   /* Dialog messages */
 #define DM_GETDEFID         (WM_USER+0)
 #define DM_SETDEFID         (WM_USER+1)
+#define DM_REPOSITION       (WM_USER+2)
 
 #define DC_HASDEFID         0x534b
 
@@ -1992,6 +2035,8 @@ typedef struct
   /* keybd_event flags */
 #define KEYEVENTF_EXTENDEDKEY        0x0001
 #define KEYEVENTF_KEYUP              0x0002
+#define KEYEVENTF_SCANCODE           0x0004 // @@@PH check this
+#define KEYEVENTF_UNICODE            0x0008 // @@@PH check this
 #define KEYEVENTF_WINE_FORCEEXTENDED 0x8000
 
   /* mouse_event flags */
@@ -3190,7 +3235,7 @@ DWORD       WINAPI OemKeyScan(WORD);
 BOOL        WINAPI ReleaseCapture(void);
 BOOL        WINAPI SetKeyboardState(LPBYTE);
 BOOL        WINAPI WaitMessage(VOID);
-
+LPARAM      WINAPI SetMessageExtraInfo(LPARAM);
 
 /* Declarations for functions that change between Win16 and Win32 */
 
