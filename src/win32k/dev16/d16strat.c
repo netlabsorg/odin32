@@ -1,4 +1,4 @@
-/* $Id: d16strat.c,v 1.8 2000-02-25 18:15:02 bird Exp $
+/* $Id: d16strat.c,v 1.8.4.1 2000-08-29 19:47:00 bird Exp $
  *
  * d16strat.c - 16-bit strategy routine, device headers, device_helper (ptr)
  *              and 16-bit IOClts.
@@ -14,6 +14,8 @@
 *******************************************************************************/
 #define INCL_DOSERRORS
 #define INCL_NOPMAPI
+
+#define NO_WIN32K_LIB_FUNCTIONS
 
 /*******************************************************************************
 *   Header Files                                                               *
