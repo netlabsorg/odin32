@@ -1,4 +1,4 @@
-/* $Id: rtl.cpp,v 1.3 1999-06-25 13:59:02 phaller Exp $ */
+/* $Id: rtl.cpp,v 1.4 1999-08-18 21:45:13 phaller Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -508,23 +508,6 @@ BOOLEAN WINAPI RtlGetNtProductType(LPDWORD type)
   return 1;
 }
 
-
-/**************************************************************************
- *                 NTDLL_chkstk                   [NTDLL.862]
- *                 NTDLL_alloca_probe             [NTDLL.861]
- * Glorified "enter xxxx".
- */
-/* @@@PH how to port this to VAC ?
-REGS_ENTRYPOINT(NTDLL_chkstk)
-{
-    ESP_reg(context) -= EAX_reg(context);
-}
-
-REGS_ENTRYPOINT(NTDLL_alloca_probe)
-{
-    ESP_reg(context) -= EAX_reg(context);
-}
-*/
 
 /******************************************************************************
  * RtlEnlargedIntegerMultiply [NTDLL.341]

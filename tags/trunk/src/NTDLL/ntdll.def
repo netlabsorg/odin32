@@ -1,4 +1,4 @@
-; $Id: ntdll.def,v 1.12 1999-08-18 19:35:30 phaller Exp $
+; $Id: ntdll.def,v 1.13 1999-08-18 21:45:13 phaller Exp $
 
 ;Created by BLAST for IBM's compiler
 ;Basis is NT4.0's NTDLL.DLL
@@ -15,14 +15,16 @@ IMPORTS
     fwd_RtlLeaveCriticalSection      =  KERNEL32.LeaveCriticalSection
     fwd_RtlEnterCriticalSection      =  KERNEL32.EnterCriticalSection
     fwd_RtlDeleteCriticalSection     =  KERNEL32.DeleteCriticalSection
-
+    _lstrncmpW@12                    =  KERNEL32.lstrncmpW
+    HEAP_strdupW                     =  KERNEL32.HEAP_strdupW
+    HEAP_strdupWtoA                  =  KERNEL32.HEAP_strdupWtoA
 
 EXPORTS
 
 ; unknown
     _alldiv                          = _OS2_alldiv
     _allmul                          = _OS2_allmul
-    _chkstk                          = _OS2_chkstk
+
     RtlLargeIntegerToChar            = _RtlLargeIntegerToChar@16     @425
 
 ; forwarders
@@ -37,8 +39,28 @@ EXPORTS
     RtlDeleteCriticalSection     =  fwd_RtlDeleteCriticalSection
 
 ; real functions
+    NtAlertThread                 = _NtAlertThread@8                  @57
+    ZwAlertThread                 = _NtAlertThread@8
     NtAllocateUuids               = _NtAllocateUuids@16               @59
     ZwAllocateUuids               = _NtAllocateUuids@16
+    NtTestAlert                   = _NtTestAlert@8                    @232
+    ZwTestAlert                   = _NtTestAlert@8
+    NtWriteRequestData            = _NtWriteRequestData@20            @246
+    ZwWriteRequestData            = _NtWriteRequestData@20
+    NtImpersonateClientOfPort     = _NtImpersonateClientOfPort@16     @112
+    ZwImpersonateClientOfPort     = _NtImpersonateClientOfPort@16
+    NtQuerySystemTime             = _NtQuerySystemTime@4              @169
+    ZwQuerySystemTime             = _NtQuerySystemTime@4
+    NtReadRequestData             = _NtReadRequestData@20             @178
+    ZwReadRequestData             = _NtReadRequestData@20
+
+    NtReplyPort                   = _NtReplyPort@16                   @187
+    ZwReplyPort                   = _NtReplyPort@16
+    NtReplyWaitReplyPort          = _NtReplyWaitReplyPort@16          @189
+    ZwReplyWaitReplyPort          = _NtReplyWaitReplyPort@16
+    NtRequestPort                 = _NtRequestPort@16                 @190
+    ZwRequestPort                 = _NtRequestPort@16
+
 
     NtOpenFile                    = _NtOpenFile@24                    @127
     ZwOpenFile                    = _NtOpenFile@24
@@ -141,6 +163,8 @@ EXPORTS
     ZwOpenEvent                   = _NtOpenEvent@12
     NtSetEvent                    = _NtSetEvent@8
     ZwSetEvent                    = _NtSetEvent@8
+    NtResetEvent                  = _NtResetEvent@4                   @192
+    ZwResetEvent                  = _NtResetEvent@4
 
     NtQueryObject                 = _NtQueryObject@20                 @161
     ZwQueryObject                 = _NtQueryObject@20
@@ -238,8 +262,9 @@ EXPORTS
     RtlFreeUnicodeString          = _RtlFreeUnicodeString@4           @377
     RtlFreeAnsiString             = _RtlFreeAnsiString@4              @373
     RtlFreeOemString              = _RtlFreeOemString@4
-    RtlUnicodeToOemN              = _RtlUnicodeToOemN@20              @515
     RtlUnicodeStringToOemString   = _RtlUnicodeStringToOemString@12   @511
+    RtlUnicodeToMultiByteN        = _RtlUnicodeToMultiByteN@20        @513
+    RtlUnicodeToOemN              = _RtlUnicodeToOemN@20              @515
     RtlUnicodeStringToAnsiString  = _RtlUnicodeStringToAnsiString@12  @507
     RtlEqualUnicodeString         = _RtlEqualUnicodeString@12
     RtlUpcaseUnicodeString        = _RtlUpcaseUnicodeString@12        @520
@@ -296,9 +321,14 @@ EXPORTS
 
     RtlTimeToElapsedTimeFields    = _RtlTimeToElapsedTimeFields@8
 
+    _alloca_probe                    = _OS2_alloca_probe             @861
+    _chkstk                          = _OS2_chkstk                   @862
 
 ; NTDLL's C runtime
 ; Note: CDECL does not decorate the function names with parameter bytes!
+    _wcsicmp                      = _OS2_wcsicmp                      @879
+    _wcslwr                       = _OS2_wcslwr                       @880
+    _wcsnicmp                     = _OS2_wcsnicmp                     @881
     _wcsupr                       = _OS2_wcsupr                       @882
     abs                           = _OS2abs                           @883
     atan                          = _OS2atan                          @884
@@ -344,3 +374,5 @@ EXPORTS
     wcsspn                        = _OS2wcsspn                        @945
     wcsstr                        = _OS2wcsstr                        @946
 
+    _stricmp                      = _OS2_stricmp
+    _itoa                         = _OS2_itoa
