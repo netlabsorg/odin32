@@ -1,4 +1,9 @@
-/* $Id: changelog,v 1.1754 2001-10-16 07:26:51 phaller Exp $ */
+/* $Id: changelog,v 1.1755 2001-10-16 14:48:46 sandervl Exp $ */
+
+ 2001-10-16: Sander van Leeuwen <sandervl@xs4all.nl>
+    - KERNEL32, CUSTOMBUILD, USER32:
+                o Custom build fixes + changes
+    - USER32:   o Fix for pointer conversion
 
  2001-10-16: Patrick Haller <patrick.haller@innotek.de>
     - WSOCK32:  o enabled receive and send timeout socket options
