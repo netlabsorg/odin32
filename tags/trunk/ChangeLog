@@ -1,7 +1,8 @@
- /* $Id: ChangeLog,v 1.508 1999-12-05 13:41:55 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.509 1999-12-05 13:47:20 sandervl Exp $ */
 
  99-12-05: Edgar Buerkle <Edgar.Buerkle@gmx.net>
 	- KERNEL32: Better logging for CreateProcessA
+	- DDRAW: io_init1 -> PUSH  OFFSET FLAT:devname
 
  99-12-05: Sander van Leeuwen <sandervl@xs4all.nl>
 	- GDI32: Changed DEFAULT_GUI_FONT to WarpSans.9
