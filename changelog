@@ -1,4 +1,8 @@
-/* $Id: changelog,v 1.1293 2001-02-28 20:22:21 sandervl Exp $ */
+/* $Id: changelog,v 1.1294 2001-03-02 12:51:50 bird Exp $ */
+ 
+ 2001-03-02: knut st. osmundsen <knut.stange.osmundsen@mynd.no>
+    - Win32k:   o Fixed some 16-bit compiler problems.
+				o Fixed 4.51 toolkit problems.
 
  2001-02-28: Sander van Leeuwen <sandervl@xs4all.nl>
     - KERNEL32: o Added support for high memory override key in odin.ini:
