@@ -1,4 +1,4 @@
-/* $Id: winicon.cpp,v 1.12 2000-11-09 20:20:33 sandervl Exp $ */
+/* $Id: winicon.cpp,v 1.13 2000-11-10 10:14:50 sandervl Exp $ */
 /*
  * Win32 Icon Code for OS/2
  *
@@ -706,6 +706,7 @@ static HGLOBAL CURSORICON_CreateFromResource( HINSTANCE hInstance, HGLOBAL hObj,
 
             hdc = CreateCompatibleDC(0);
 
+            memset(pInfo, 0, sizeof(BITMAPINFO)+colortablesize+3*sizeof(DWORD));
             pInfo->bmiHeader.biSize     = sizeof(BITMAPINFOHEADER);
             pInfo->bmiHeader.biPlanes   = info->bPlanes;
             pInfo->bmiHeader.biBitCount = info->bBitsPerPixel;
