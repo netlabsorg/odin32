@@ -1,4 +1,4 @@
-/* $Id: overlappedio.cpp,v 1.11 2001-12-10 12:55:12 sandervl Exp $ */
+/* $Id: overlappedio.cpp,v 1.12 2001-12-10 14:04:24 sandervl Exp $ */
 
 /*
  * Win32 overlapped IO class
@@ -351,8 +351,6 @@ BOOL OverlappedIOHandler::WriteFile(HANDLE        hHandle,
 
     lpOverlapped->Internal     = STATUS_PENDING;
     lpOverlapped->InternalHigh = 0;
-    lpOverlapped->Offset       = 0;
-    lpOverlapped->OffsetHigh   = 0;
     //reset overlapped semaphore to non-signalled
     ::ResetEvent(lpOverlapped->hEvent);
 
@@ -409,8 +407,6 @@ BOOL OverlappedIOHandler::ReadFile(HANDLE        hHandle,
 
     lpOverlapped->Internal     = STATUS_PENDING;
     lpOverlapped->InternalHigh = 0;
-    lpOverlapped->Offset       = 0;
-    lpOverlapped->OffsetHigh   = 0;
     //reset overlapped semaphore to non-signalled
     ::ResetEvent(lpOverlapped->hEvent);
 
@@ -461,8 +457,6 @@ BOOL OverlappedIOHandler::WaitForEvent(HANDLE        hHandle,
 
     lpOverlapped->Internal     = STATUS_PENDING;
     lpOverlapped->InternalHigh = 0;
-    lpOverlapped->Offset       = 0;
-    lpOverlapped->OffsetHigh   = 0;
     //reset overlapped semaphore to non-signalled
     ::ResetEvent(lpOverlapped->hEvent);
 
