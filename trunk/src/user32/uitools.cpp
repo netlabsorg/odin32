@@ -1,4 +1,4 @@
-/* $Id: uitools.cpp,v 1.16 1999-11-09 17:07:23 cbratschi Exp $ */
+/* $Id: uitools.cpp,v 1.17 1999-11-19 17:59:35 cbratschi Exp $ */
 /*
  * User Interface Functions
  *
@@ -1901,26 +1901,26 @@ BOOL WIN32API DrawMenuBar(HWND hwnd)
 }
 //******************************************************************************
 //******************************************************************************
-int WIN32API DrawTextW( HDC arg1, LPCWSTR arg2, int arg3, PRECT arg4, UINT  arg5)
+int WIN32API DrawTextW( HDC hDC, LPCWSTR lpString, int nCount, PRECT lpRect, UINT nFormat)
 {
- char *astring = UnicodeToAsciiString((LPWSTR)arg2);
+ char *astring = UnicodeToAsciiString((LPWSTR)lpString);
  int   rc;
 
 #ifdef DEBUG
     WriteLog("USER32:  DrawTextW %s\n", astring);
 #endif
-    rc = O32_DrawText(arg1, astring, arg3, arg4, arg5);
+    rc = O32_DrawText(hDC,astring,nCount,lpRect,nFormat);
     FreeAsciiString(astring);
     return(rc);
 }
 //******************************************************************************
 //******************************************************************************
-int WIN32API DrawTextA(HDC arg1, LPCSTR arg2, int arg3, PRECT arg4, UINT arg5)
+int WIN32API DrawTextA(HDC hDC, LPCSTR lpString, int nCount, PRECT lpRect, UINT nFormat)
 {
 #ifdef DEBUG
-    WriteLog("USER32: DrawTextA %s", arg2);
+    WriteLog("USER32: DrawTextA %s %d", lpString,nCount);
 #endif
-    return O32_DrawText(arg1, arg2, arg3, arg4, arg5);
+    return O32_DrawText(hDC,lpString,nCount,lpRect,nFormat);
 }
 /*****************************************************************************
  * Name      : BOOL WIN32API DrawAnimatedRects
