@@ -1,4 +1,4 @@
-# $Id: setup.os2debwat11.mk,v 1.4 2002-04-22 02:09:28 bird Exp $
+# $Id: setup.os2debwat11.mk,v 1.5 2002-04-30 06:20:03 bird Exp $
 
 # ---OS2, DEBUG, WAT11-------------------------
 ENV_NAME="OS/2, Debug, Watcom C/C++ v11.0c"
@@ -11,9 +11,10 @@ ENV_ENVS_FORCE=vac308 watcomc11c
 
 
 #
-# Include some shared standard stuff: ALP.
+# Include some shared standard stuff: ALP, VAC optional stuff.
 #
 !include $(PATH_MAKE)\setup.os2debalp.mk
+!include $(PATH_MAKE)\setup.optional.watcom11x.mk
 
 
 #
@@ -39,28 +40,27 @@ _AR_LNK1= "$(TARGET_OBJS: ="&^
 AR_LNK1= $(_AR_LNK1:""=)
 AR_LNK2= $(@R).lst
 
-CC_FLAGS_OS = -bt=os2v2
+_CC_FLAGS_OS = -bt=os2v2 -dOS2
 
-CC_FLAGS=$(CC_FLAGS_OS) -zq -zl -bm -ze -w4 -dDEBUG -d2 -hc -zc $(CC_DEFINES) $(ALL_DEFINES) $(BUILD_DEFINES) $(CC_INCLUDES:-I=-i=) $(ALL_INCLUDES:-I=-i=) -i=$(PATH_INCLUDES) -i=$(WATCOM)\h
+CC_FLAGS=$(_CC_FLAGS_OS) -zq -bm -ze -w4 -dDEBUG -d2 -hc -zc $(_CC_OPTIONAL) $(CC_DEFINES) $(ALL_DEFINES) $(BUILD_DEFINES) $(CC_INCLUDES:-I=-i=) $(ALL_INCLUDES:-I=-i=) -i=$(PATH_INCLUDES) -i=$(WATCOM)\h
 CC_FLAGS_EXE=$(CC_FLAGS)
 CC_FLAGS_DLL=$(CC_FLAGS) -bd
-CC_FLAGS_CRT=$(CC_FLAGS) -bd -br
 CC_FLAGS_SYS=$(CC_FLAGS)
 CC_FLAGS_VDD=$(CC_FLAGS_SYS)
-CC_FLAGS_IFS=$(CC_FLAGS_SYS)
+CC_FLAGS_IFS=$(CC_FLAGS_SYS) -bd
 CC_OBJ_OUT=-fo=
 CC_LST_OUT=
-CC_PC_2_STDOUT=
+CXX_PC_2_STDOUT=-pc
 
-CXX_FLAGS=$(CC_FLAGS_OS) -zq -zl -bm -ze -w4 -dDEBUG -d2 -hc -zc $(CXX_DEFINES) $(ALL_DEFINES) $(BUILD_DEFINES) $(CXX_INCLUDES:-I=-i=) $(ALL_INCLUDES:-I=-i=) -i=$(PATH_INCLUDES) -i=$(WATCOM)\h
+CXX_FLAGS=$(_CC_FLAGS_OS) -zq -bm -ze -w4 -dDEBUG -d2 -hc -zc (_CXX_OPTIONAL)  $(CXX_DEFINES) $(ALL_DEFINES) $(BUILD_DEFINES) $(CXX_INCLUDES:-I=-i=) $(ALL_INCLUDES:-I=-i=) -i=$(PATH_INCLUDES) -i=$(WATCOM)\h
 CXX_FLAGS_EXE=$(CXX_FLAGS)
 CXX_FLAGS_DLL=$(CXX_FLAGS) -bd
-CXX_FLAGS_CRT=$(CXX_FLAGS) -bd -br
 CXX_FLAGS_SYS=$(CXX_FLAGS) -s -zdp -zff -zgf
 CXX_FLAGS_VDD=$(CXX_FLAGS_SYS)
-CXX_FLAGS_IFS=$(CXX_FLAGS_SYS)
+CXX_FLAGS_IFS=$(CXX_FLAGS_SYS) -bd
 CXX_OBJ_OUT=-fo=
-CXX_PC_2_STDOUT=
+CXX_LST_OUT=
+CXX_PC_2_STDOUT=-pc
 
 IMPLIB_FLAGS=/NOI /Nologo
 
