@@ -21,43 +21,15 @@
 #ifndef _FXOS2_H_
 #define _FXOS2_H_
 
-//#define FX_MAJOR_VER 0
-//#define FX_MINOR_VER 0
-
-//extern FxU32 PCI_VENDOR_ID_LINUX;
-//extern FxU32 PCI_DEVICE_ID_LINUX;
-//extern FxU32 PCI_COMMAND_LINUX;
-//extern FxU32 PCI_BASE_ADDRESS_0_LINUX;
-//extern FxU32 SST1_PCI_INIT_ENABLE_LINUX;
-//extern FxU32 SST1_PCI_BUS_SNOOP0_LINUX;
-//extern FxU32 SST1_PCI_BUS_SNOOP1_LINUX;
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 FxBool
 hasDev3DfxOS2(void);
 
-FxBool 
-pciInitializeOS2(void);
-
 FxBool
 pciCloseOS2( void );
-
-FxU8 
-pioInByte(unsigned short port);
-
-FxU16 
-pioInWord(unsigned short port);
-
-FxU32 
-pioInLong(unsigned short port);
-
-FxBool 
-pioOutByte(unsigned short port, FxU8 data);
-
-FxBool 
-pioOutWord(unsigned short port, FxU16 data);
-
-FxBool 
-pioOutLong(unsigned short port, FxU32 data);
 
 FxBool 
 pciMapPhysicalToLinearOS2( FxU32 *linear_addr, FxU32 physical_addr,
@@ -73,5 +45,9 @@ pciFetchRegisterOS2( FxU32 cmd, FxU32 size, FxU32 device);
 
 int
 pciUpdateRegisterOS2(FxU32 cmd, FxU32 data, FxU32 size, FxU32 device);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

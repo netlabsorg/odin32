@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.1 2000-02-25 00:33:57 sandervl Exp $
+# $Id: makefile,v 1.2 2000-03-02 13:22:02 sandervl Exp $
 #
 # PD-Win32 API
 #
@@ -15,7 +15,7 @@ TARGET=pcilib
 !include $(PDWIN32_INCLUDE)/pdwin32.mk
 !include ..\..\sst1\3dfx.mak
 
-CINCLUDE=-I..\..\sst1\incsrc;..\fxmisc;..\..\sst1\init\initvg;..\..\sst1\glide;..\..\sst1\texus;..\..\sst1\init
+CINCLUDE=-I..\..\sst1\incsrc;..\fxmisc;..\..\sst1\init\initvg;..\..\sst1\glide;..\..\sst1\texus;..\..\sst1\init;$(PDWIN32_INCLUDE)
 
 CFLAGS = $(CFLAGS) $(CINCLUDE)
 CXXFLAGS = $(CXXFLAGS) $(CINCLUDE)

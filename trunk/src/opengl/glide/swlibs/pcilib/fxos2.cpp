@@ -23,7 +23,7 @@
 #define INCL_DOSPROCESS
 #define INCL_DOSMODULEMGR
 #define INCL_DOSDEVICES
-#include <os2.h>
+#include <os2wrap.h>
 
 #include <stdarg.h>
 #include <stdio.h>
@@ -38,6 +38,7 @@
 #include "3dfx.h"
 #include "fxpci.h"
 #include "pcilib.h"
+#include "fxos2.h"
 
 #ifdef __WIN32OS2__
 #define FX_CSTYLE __stdcall
@@ -746,13 +747,26 @@ pciOutputStringOS2(const char *msg)
 static FxBool 
 pciInitializeOS2(void)
 {
-  ULONG ulAction;
+  ULONG  ulAction;
+  APIRET rc;
 
   io_init1();
 
-  DosOpen("OEMHLP$", &hOemHlp, &ulAction, 0, FILE_NORMAL, OPEN_ACTION_OPEN_IF_EXISTS, OPEN_ACCESS_READWRITE|OPEN_SHARE_DENYREADWRITE, 0L);
-  DosOpen("TESTCFG$", &hTestCfg, &ulAction, 0, FILE_NORMAL, OPEN_ACTION_OPEN_IF_EXISTS, OPEN_ACCESS_READWRITE|OPEN_SHARE_DENYNONE, 0L );
-  DosOpen("SCREEN$", &hScreenDD, &ulAction, 0, FILE_NORMAL, OPEN_ACTION_OPEN_IF_EXISTS, OPEN_ACCESS_READWRITE|OPEN_SHARE_DENYNONE, 0L );
+  rc = DosOpen("OEMHLP$", &hOemHlp, &ulAction, 0, FILE_NORMAL, OPEN_ACTION_OPEN_IF_EXISTS, OPEN_ACCESS_READWRITE|OPEN_SHARE_DENYREADWRITE, 0L);
+  if(rc) {
+     pciErrorCode = PCI_ERR_NO_IO_PERM;
+     return FXFALSE;
+  }
+  rc = DosOpen("TESTCFG$", &hTestCfg, &ulAction, 0, FILE_NORMAL, OPEN_ACTION_OPEN_IF_EXISTS, OPEN_ACCESS_READWRITE|OPEN_SHARE_DENYNONE, 0L );
+  if(rc) {
+     pciErrorCode = PCI_ERR_NO_IO_PERM;
+     return FXFALSE;
+  }
+  rc = DosOpen("SCREEN$", &hScreenDD, &ulAction, 0, FILE_NORMAL, OPEN_ACTION_OPEN_IF_EXISTS, OPEN_ACCESS_READWRITE|OPEN_SHARE_DENYNONE, 0L );
+  if(rc) {
+     pciErrorCode = PCI_ERR_NO_IO_PERM;
+     return FXFALSE;
+  }
   findCards();
   if (numCards==0) {
      pciErrorCode = PCI_ERR_NO_IO_PERM;

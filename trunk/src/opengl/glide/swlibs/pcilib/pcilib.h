@@ -18,8 +18,8 @@
 ** COPYRIGHT 3DFX INTERACTIVE, INC. 1999, ALL RIGHTS RESERVED
 **
 **
-** $Revision: 1.1 $ 
-** $Date: 2000-02-25 00:33:57 $ 
+** $Revision: 1.2 $ 
+** $Date: 2000-03-02 13:22:03 $ 
 **
 */
 
@@ -117,6 +117,15 @@ extern const FxPlatformIOProcs* gCurPlatformIO;
 /* One should be defined per real platform (currently dos/win32) to
  * setup the platform function pointer struct.  
  */
-extern FxBool pciPlatformInit(void);
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+FxBool pciPlatformInit(void);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* _PCILIB_H_ */
