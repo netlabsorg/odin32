@@ -1,4 +1,4 @@
-/* $Id: win32dlg.h,v 1.12 2000-11-24 10:30:36 sandervl Exp $ */
+/* $Id: win32dlg.h,v 1.13 2001-06-09 14:50:21 sandervl Exp $ */
 /*
  * Win32 Dialog Code for OS/2
  *
@@ -66,7 +66,7 @@ virtual ~Win32Dialog();
        LRESULT  DefDlgProcA(UINT Msg, WPARAM wParam, LPARAM lParam);
        LRESULT  DefDlgProcW(UINT Msg, WPARAM wParam, LPARAM lParam);
 
-Win32BaseWindow *getDlgItem(int id) { return FindWindowById(id); };
+         HWND   getDlgItem(int id) { return FindWindowById(id); };
 
          BOOL   endDialog(int retval);
 

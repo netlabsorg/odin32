@@ -1,4 +1,4 @@
-/* $Id: win32wmdiclient.h,v 1.8 2000-01-18 20:08:17 sandervl Exp $ */
+/* $Id: win32wmdiclient.h,v 1.9 2001-06-09 14:50:23 sandervl Exp $ */
 /*
  * Win32 MDI Client Window Class for OS/2
  *
@@ -34,16 +34,16 @@ virtual  BOOL   isMDIClient();
 
            HWND getMDIMenu()                     { return hWindowMenu;     };
 
-Win32MDIChildWindow *getMaximizedChild()         { return maximizedChild;  };
-               void  setMaximizedChild(Win32MDIChildWindow *newchild) { maximizedChild = newchild; };
+           HWND getMaximizedChild()              { return maximizedChild;  };
+           void setMaximizedChild(HWND newchild) { maximizedChild = newchild; };
 
-Win32MDIChildWindow *getActiveChild()            { return activeChild;     };
-               void  setActiveChild(Win32MDIChildWindow *newchild) { activeChild = newchild; };
+           HWND getActiveChild()                 { return activeChild;     };
+           void setActiveChild(HWND newchild)    { activeChild = newchild; };
 
 Win32MDIChildWindow *getWindow(Win32MDIChildWindow *actchild, BOOL bNext, DWORD dwStyleMask);
 
-Win32MDIChildWindow *getChildByID(INT id);
-               void postUpdate(WORD recalc);
+           HWND getChildByID(INT id)             { return FindWindowById(id); };
+           void postUpdate(WORD recalc);
 
            int  getNrOfChildren()                { return nActiveChildren; };
            int  incNrActiveChildren()            { return ++nActiveChildren; };
@@ -69,12 +69,12 @@ Win32BaseWindow** buildWindowArray(UINT bwaFlags,PUINT total);
         void    calcDefaultChildPos(WORD n,LPPOINT lpPos,INT delta);
         BOOL    cascade(UINT fuCascade);
         BOOL    tile(UINT fuTile);
-        BOOL    augmentFrameMenu(Win32MDIChildWindow *child);
-        BOOL    restoreFrameMenu(Win32MDIChildWindow *child);
+        BOOL    augmentFrameMenu(HWND hwndChild);
+        BOOL    restoreFrameMenu(HWND hwndChild);
 
 private:
-  Win32MDIChildWindow *maximizedChild;
-  Win32MDIChildWindow *activeChild;
+        HWND    maximizedChild;
+        HWND    activeChild;
 
         HWND    hWindowMenu;
         int     idFirstChild;

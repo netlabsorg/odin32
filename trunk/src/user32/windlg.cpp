@@ -1,4 +1,4 @@
-/* $Id: windlg.cpp,v 1.22 2001-02-23 14:52:42 sandervl Exp $ */
+/* $Id: windlg.cpp,v 1.23 2001-06-09 14:50:25 sandervl Exp $ */
 /*
  * Win32 dialog apis for OS/2
  *
@@ -86,10 +86,13 @@ HWND WIN32API CreateDialogIndirectParamA(HINSTANCE hInst,
     if(GetLastError() != 0)
     {
         dprintf(("Win32Dialog error found (%0x)!!", GetLastError()));
+        RELEASE_WNDOBJ(dialog);
         delete dialog;
         return 0;
     }
-    return dialog->getWindowHandle();
+    HWND hwnd = dialog->getWindowHandle();
+    RELEASE_WNDOBJ(dialog);
+    return hwnd;
 }
 //******************************************************************************
 //******************************************************************************
@@ -114,10 +117,13 @@ HWND WIN32API CreateDialogIndirectParamW(HINSTANCE hInst,
     if(GetLastError() != 0)
     {
         dprintf(("Win32Dialog error found!!"));
+        RELEASE_WNDOBJ(dialog);
         delete dialog;
         return 0;
     }
-    return dialog->getWindowHandle();
+    HWND hwnd = dialog->getWindowHandle();
+    RELEASE_WNDOBJ(dialog);
+    return hwnd;
 }
 //******************************************************************************
 //******************************************************************************
@@ -126,6 +132,7 @@ INT  WIN32API DialogBoxIndirectParamA(HINSTANCE hInst,
                       HWND hwndParent, DLGPROC dlgproc,
                       LPARAM lParamInit)
 {
+    INT result;
     HWND hwnd = CreateDialogIndirectParamA(hInst, dlgtemplate, hwndParent, dlgproc,
                                            lParamInit);
     if (hwnd)
@@ -135,10 +142,13 @@ INT  WIN32API DialogBoxIndirectParamA(HINSTANCE hInst,
         dialog = (Win32Dialog *)Win32BaseWindow::GetWindowFromHandle(hwnd);
         if(!dialog || !dialog->IsDialog()) {
             dprintf(("DialogBoxIndirectParamA, dialog %x not found", hwnd));
+            if(dialog) RELEASE_WNDOBJ(dialog);
             SetLastError(ERROR_INVALID_WINDOW_HANDLE);
             return 0;
         }
-        return dialog->doDialogBox();
+        result = dialog->doDialogBox();
+        RELEASE_WNDOBJ(dialog);
+        return result;
     }
     return -1;
 }
@@ -148,6 +158,7 @@ INT  WIN32API DialogBoxIndirectParamW(HINSTANCE hInst, LPCDLGTEMPLATEW dlgtempla
                                       HWND hwndParent, DLGPROC dlgproc,
                                       LPARAM lParamInit)
 {
+    INT result;
     HWND hwnd = CreateDialogIndirectParamW(hInst, dlgtemplate, hwndParent, dlgproc,
                                            lParamInit);
     if (hwnd)
@@ -157,10 +168,13 @@ INT  WIN32API DialogBoxIndirectParamW(HINSTANCE hInst, LPCDLGTEMPLATEW dlgtempla
         dialog = (Win32Dialog *)Win32BaseWindow::GetWindowFromHandle(hwnd);
         if(!dialog || !dialog->IsDialog()) {
             dprintf(("DialogBoxIndirectParamW, dialog %x not found", hwnd));
+            if(dialog) RELEASE_WNDOBJ(dialog);
             SetLastError(ERROR_INVALID_WINDOW_HANDLE);
             return 0;
         }
-        return dialog->doDialogBox();
+        result = dialog->doDialogBox();
+        RELEASE_WNDOBJ(dialog);
+        return result;
     }
     return -1;
 }
@@ -169,6 +183,7 @@ INT  WIN32API DialogBoxIndirectParamW(HINSTANCE hInst, LPCDLGTEMPLATEW dlgtempla
 int WIN32API DialogBoxParamA(HINSTANCE hInst, LPCSTR lpszTemplate, HWND hwndOwner,
                      DLGPROC dlgproc, LPARAM  lParamInit)
 {
+    INT result;
     HWND hwnd = CreateDialogParamA( hInst, lpszTemplate, hwndOwner, dlgproc, lParamInit);
 
     if (hwnd)
@@ -178,10 +193,13 @@ int WIN32API DialogBoxParamA(HINSTANCE hInst, LPCSTR lpszTemplate, HWND hwndOwne
         dialog = (Win32Dialog *)Win32BaseWindow::GetWindowFromHandle(hwnd);
         if(!dialog || !dialog->IsDialog()) {
             dprintf(("DialogBoxParamA, dialog %x not found", hwnd));
+            if(dialog) RELEASE_WNDOBJ(dialog);
             SetLastError(ERROR_INVALID_WINDOW_HANDLE);
             return 0;
         }
-        return dialog->doDialogBox();
+        result = dialog->doDialogBox();
+        RELEASE_WNDOBJ(dialog);
+        return result;
     }
     return -1;
 }
@@ -190,6 +208,7 @@ int WIN32API DialogBoxParamA(HINSTANCE hInst, LPCSTR lpszTemplate, HWND hwndOwne
 int WIN32API DialogBoxParamW(HINSTANCE hInst, LPCWSTR lpszTemplate, HWND hwndOwner,
                              DLGPROC dlgproc, LPARAM lParamInit)
 {
+    INT result;
     HWND hwnd = CreateDialogParamW( hInst, lpszTemplate, hwndOwner, dlgproc, lParamInit);
 
     if (hwnd)
@@ -199,10 +218,13 @@ int WIN32API DialogBoxParamW(HINSTANCE hInst, LPCWSTR lpszTemplate, HWND hwndOwn
         dialog = (Win32Dialog *)Win32BaseWindow::GetWindowFromHandle(hwnd);
         if(!dialog || !dialog->IsDialog()) {
             dprintf(("DialogBoxParamW, dialog %x not found", hwnd));
+            if(dialog) RELEASE_WNDOBJ(dialog);
             SetLastError(ERROR_INVALID_WINDOW_HANDLE);
             return 0;
         }
-        return dialog->doDialogBox();
+        result = dialog->doDialogBox();
+        RELEASE_WNDOBJ(dialog);
+        return result;
     }
     return -1;
 }
@@ -212,8 +234,8 @@ int WIN32API DialogBoxParamW(HINSTANCE hInst, LPCWSTR lpszTemplate, HWND hwndOwn
 BOOL WIN32API MapDialogRect(HWND hwndDlg, LPRECT rect)
 {
   Win32Dialog *dialog;
-#ifdef DEBUG
   BOOL rc;
+#ifdef DEBUG
   RECT dlgRect = *rect;
 #endif
 
@@ -221,16 +243,13 @@ BOOL WIN32API MapDialogRect(HWND hwndDlg, LPRECT rect)
     if(!dialog || !dialog->IsDialog()) {
         dprintf(("MapDialogRect, window %x not found", hwndDlg));
         SetLastError(ERROR_INVALID_WINDOW_HANDLE);
+        if(dialog) RELEASE_WNDOBJ(dialog);
         return 0;
     }
-#ifdef DEBUG
     rc = dialog->MapDialogRect(rect);
     dprintf(("USER32: MapDialogRect %x (%d,%d)(%d,%d) -> (%d,%d)(%d,%d)", hwndDlg, dlgRect.left, dlgRect.top, dlgRect.right, dlgRect.bottom, rect->left, rect->top, rect->right, rect->bottom));
+    RELEASE_WNDOBJ(dialog);
     return rc;
-#else
-    dprintf(("USER32: MapDialogRect %x (%d,%d)(%d,%d)", hwndDlg, rect->left, rect->top, rect->right, rect->bottom));
-    return dialog->MapDialogRect(rect);
-#endif
 }
 //******************************************************************************
 //******************************************************************************
@@ -333,10 +352,7 @@ static HWND DIALOG_GetNextTabItem( HWND hwndMain, HWND hwndDlg, HWND hwndCtrl, B
 //******************************************************************************
 HWND WIN32API GetNextDlgTabItem(HWND hwndDlg, HWND hwndCtrl, BOOL fPrevious)
 {
-  Win32BaseWindow *window;
-
-    window = (Win32BaseWindow*)Win32BaseWindow::GetWindowFromHandle(hwndDlg);
-    if(!window) {
+    if(!IsWindow(hwndDlg)) {
         dprintf(("GetNextDlgTabItem, window %x not found", hwndDlg));
         SetLastError(ERROR_INVALID_WINDOW_HANDLE);
         return 0;
@@ -351,7 +367,8 @@ HWND WIN32API GetNextDlgTabItem(HWND hwndDlg, HWND hwndCtrl, BOOL fPrevious)
 //******************************************************************************
 HWND WIN32API GetDlgItem(HWND hwnd, int id)
 {
-  Win32BaseWindow *dlgcontrol, *window;
+  Win32BaseWindow *window;
+  HWND             hwndDlgItem;
 
     window = (Win32Dialog *)Win32BaseWindow::GetWindowFromHandle(hwnd);
     if(!window) {
@@ -359,10 +376,11 @@ HWND WIN32API GetDlgItem(HWND hwnd, int id)
         SetLastError(ERROR_INVALID_WINDOW_HANDLE);
         return 0;
     }
-    dlgcontrol = window->FindWindowById(id);
-    if(dlgcontrol) {
-        dprintf(("USER32: GetDlgItem %x %d returned %x\n", hwnd, id, dlgcontrol->getWindowHandle()));
-        return dlgcontrol->getWindowHandle();
+    hwndDlgItem = window->FindWindowById(id);
+    RELEASE_WNDOBJ(window);
+    if(hwndDlgItem) {
+        dprintf(("USER32: GetDlgItem %x %d returned %x\n", hwnd, id, hwndDlgItem));
+        return hwndDlgItem;
     }
     dprintf(("USER32: GetDlgItem %x %d NOT FOUND!\n", hwnd, id));
     SetLastError(ERROR_CONTROL_ID_NOT_FOUND);  //verified in NT4, SP6

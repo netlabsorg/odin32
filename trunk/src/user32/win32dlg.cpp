@@ -1,4 +1,4 @@
-/* $Id: win32dlg.cpp,v 1.65 2001-05-25 16:59:11 sandervl Exp $ */
+/* $Id: win32dlg.cpp,v 1.66 2001-06-09 14:50:20 sandervl Exp $ */
 /*
  * Win32 Dialog Code for OS/2
  *
@@ -38,7 +38,7 @@
 //******************************************************************************
 Win32Dialog::Win32Dialog(HINSTANCE hInst, LPCSTR dlgTemplate, HWND owner,
                          DLGPROC dlgProc, LPARAM param, BOOL isUnicode)
-                    : Win32BaseWindow(OBJTYPE_DIALOG)
+                    : Win32BaseWindow()
 {
   RECT rect;
   WORD style;
@@ -311,9 +311,10 @@ INT Win32Dialog::doDialogBox()
     dprintf(("doDialogBox %x", getWindowHandle()));
     /* Owner must be a top-level window */
     if(getOwner() == NULL) {
+         windowDesktop->addRef();
          topOwner = windowDesktop;
     }
-    else topOwner = getOwner()->GetTopParent();
+    else topOwner = GetWindowFromHandle(getOwner()->GetTopParent());
 
     if(topOwner == NULL) {
         dprintf(("Dialog box has no top owner!!!"));
@@ -414,6 +415,7 @@ INT Win32Dialog::doDialogBox()
         topOwner->setModalDialogOwner(bOldOwner);
         topOwner->setOS2HwndModalDialog(hwndOldDialog);
         if (!bOldOwner) topOwner->EnableWindow(TRUE);
+        RELEASE_WNDOBJ(topOwner);
     }
     retval = idResult;
     DestroyWindow();
@@ -868,6 +870,7 @@ LRESULT Win32Dialog::DefDlg_Proc(UINT msg, WPARAM wParam, LPARAM lParam)
                 if( CONTROLS_IsControl( wndFocus, EDIT_CONTROL ) &&
                     CONTROLS_IsControl( wndFocus->getParent(), COMBOBOX_CONTROL ))
                     wndFocus->SendMessageA(CB_SHOWDROPDOWN, FALSE, 0 );
+                RELEASE_WNDOBJ(wndFocus);
             }
         }
         return DefWindowProcA( msg, wParam, lParam );

@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.259 2001-05-27 19:01:35 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.260 2001-06-09 14:50:21 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -13,6 +13,13 @@
  *           1995 Alex Korobka
  *
  * TODO: Not thread/process safe
+ *
+ * NOTE: To access a window object, you must call GetWindowFromOS2Handle or
+ *       GetWindowFromHandle. Both these methods increase the reference count
+ *       of the object. When you're done with the object, you MUST call
+ *       the release method!
+ *       This mechanism prevents premature destruction of objects when there
+ *       are still clients using it.
  *
  * NOTE: Client rectangle always relative to frame window
  *       Window rectangle in parent coordinates (relative to parent's client window)
@@ -65,13 +72,15 @@ static ULONG currentProcessId = -1;
 
 //******************************************************************************
 //******************************************************************************
-Win32BaseWindow::Win32BaseWindow(DWORD objType) : GenericObject(&windows, objType)
+Win32BaseWindow::Win32BaseWindow() 
+                     : GenericObject(&windows, &critsect), ChildWindow(&critsect)
 {
   Init();
 }
 //******************************************************************************
 //******************************************************************************
-Win32BaseWindow::Win32BaseWindow(HWND hwndOS2, ULONG reserved) : GenericObject(&windows, OBJTYPE_WINDOW), ChildWindow()
+Win32BaseWindow::Win32BaseWindow(HWND hwndOS2, ULONG reserved)
+                     : GenericObject(&windows, &critsect), ChildWindow(&critsect)
 {
   Init();
   OS2Hwnd = hwndOS2;
@@ -79,7 +88,7 @@ Win32BaseWindow::Win32BaseWindow(HWND hwndOS2, ULONG reserved) : GenericObject(&
 //******************************************************************************
 //******************************************************************************
 Win32BaseWindow::Win32BaseWindow(CREATESTRUCTA *lpCreateStructA, ATOM classAtom, BOOL isUnicode)
-                        : GenericObject(&windows, OBJTYPE_WINDOW), ChildWindow()
+                     : GenericObject(&windows, &critsect), ChildWindow(&critsect)
 {
   Init();
   this->isUnicode = isUnicode;
@@ -114,7 +123,6 @@ void Win32BaseWindow::Init()
   userWindowBytes  = NULL;;
   nrUserWindowBytes= 0;
 
-  magic            = WIN32PM_MAGIC;
   OS2Hwnd          = 0;
   OS2HwndFrame     = 0;
   hSysMenu         = 0;
@@ -178,6 +186,10 @@ void Win32BaseWindow::Init()
 //******************************************************************************
 Win32BaseWindow::~Win32BaseWindow()
 {
+    if(getRefCount() < 0) {
+        DebugInt3();
+    }
+
     if(hTaskList) {
         OSLibWinRemoveFromTasklist(hTaskList);
     }
@@ -186,18 +198,6 @@ Win32BaseWindow::~Win32BaseWindow()
     OSLibWinSetWindowULong(OS2Hwnd, OFFSET_WIN32WNDPTR, 0);
     OSLibWinSetWindowULong(OS2Hwnd, OFFSET_WIN32PM_MAGIC, 0);
 
-    if(!fDestroyAll && getParent() && getParent()->getFirstChild() == this && getNextChild() == NULL)
-    {
-        //if we're the last child that's being destroyed and our
-        //parent window was also destroyed, then we delete the parent object
-        if(getParent()->IsWindowDestroyed())
-        {
-            dprintf(("Last Child (%x) destroyed, get rid of our parent window (%x)", getWindowHandle(), getParent()->getWindowHandle()));
-            delete getParent();
-            setParent(NULL);  //or else we'll crash in the dtor of the ChildWindow class
-        }
-    }
-    else
     if(fDestroyAll) {
         dprintf(("Destroying window %x %s", getWindowHandle(), windowNameA));
         setParent(NULL);  //or else we'll crash in the dtor of the ChildWindow class
@@ -205,7 +205,7 @@ Win32BaseWindow::~Win32BaseWindow()
 
     /* Decrement class window counter */
     if(windowClass) {
-        windowClass->DecreaseWindowCount();
+        RELEASE_CLASSOBJ(windowClass);
     }
 
     if(isOwnDC())
@@ -235,6 +235,13 @@ Win32BaseWindow::~Win32BaseWindow()
     }
     if(propertyList) {
         removeWindowProps();
+    }
+    Win32BaseWindow *wndparent = (Win32BaseWindow *)ChildWindow::getParentOfChild();
+    if(wndparent) {
+        RELEASE_WNDOBJ(wndparent);
+    }
+    if(windowClass) {
+        RELEASE_CLASSOBJ(windowClass);
     }
 }
 //******************************************************************************
@@ -286,10 +293,12 @@ BOOL Win32BaseWindow::CreateWindowExA(CREATESTRUCTA *cs, ATOM classAtom)
             /* Make sure parent is valid */
             if (!window->IsWindow() )
             {
+                    RELEASE_WNDOBJ(window);
                     dprintf(("Bad parent %04x\n", cs->hwndParent ));
                     SetLastError(ERROR_INVALID_PARAMETER);
                     return FALSE;
             }
+            RELEASE_WNDOBJ(window);
             /* Windows does this for overlapped windows
              * (I don't know about other styles.) */
             if (cs->hwndParent == GetDesktopWindow() && (!(cs->style & WS_CHILD) || (cs->style & WS_POPUP)))
@@ -313,8 +322,6 @@ BOOL Win32BaseWindow::CreateWindowExA(CREATESTRUCTA *cs, ATOM classAtom)
         SetLastError(ERROR_INVALID_PARAMETER);
         return 0;
     }
-    /* Increment class window counter */
-    windowClass->IncreaseWindowCount();
 
 #ifdef DEBUG
     if(HIWORD(cs->lpszClass))
@@ -416,7 +423,7 @@ BOOL Win32BaseWindow::CreateWindowExA(CREATESTRUCTA *cs, ATOM classAtom)
         }
         else
         {
-            owner = GetWindowFromHandle(cs->hwndParent)->GetTopParent();
+            owner = GetWindowFromHandle(GetWindowFromHandle(cs->hwndParent)->GetTopParent());
             if(owner == NULL)
             {
                 dprintf(("HwGetWindowHandleData couldn't find owner window %x!!!", cs->hwndParent));
@@ -490,7 +497,7 @@ BOOL Win32BaseWindow::MsgCreate(HWND hwndOS2)
 
     fNoSizeMsg = TRUE;
 
-    if(OSLibWinSetWindowULong(OS2Hwnd, OFFSET_WIN32WNDPTR, (ULONG)this) == FALSE) {
+    if(OSLibWinSetWindowULong(OS2Hwnd, OFFSET_WIN32WNDPTR, getWindowHandle()) == FALSE) {
         dprintf(("WM_CREATE: WinSetWindowULong %X failed!!", OS2Hwnd));
         SetLastError(ERROR_OUTOFMEMORY); //TODO: Better error
         return FALSE;
@@ -826,13 +833,15 @@ ULONG Win32BaseWindow::MsgDestroy()
     }
     SendInternalMessageA(WM_NCDESTROY, 0, 0);
 
-    TIMER_KillTimerFromWindow(OS2Hwnd);
+    TIMER_KillTimerFromWindow(getWindowHandle());
 
-    if(getFirstChild() == NULL && fCreationFinished) {
+    if(getRefCount() == 0 && getFirstChild() == NULL && fCreationFinished) {
         delete this;
     }
     else {
         //make sure no message can ever arrive for this window again (PM or from other win32 windows)
+        dprintf(("Mark window %x (%x) as deleted", getWindowHandle(), this));
+        markDeleted();
         OSLibWinSetWindowULong(OS2Hwnd, OFFSET_WIN32WNDPTR, 0);
         OSLibWinSetWindowULong(OS2Hwnd, OFFSET_WIN32PM_MAGIC, 0);
         if(Win32Hwnd) {
@@ -1027,7 +1036,7 @@ ULONG Win32BaseWindow::MsgButton(MSG *msg)
       HWND hwndTop;
 
         /* Activate the window if needed */
-        hwndTop = (GetTopParent()) ? GetTopParent()->getWindowHandle() : 0;
+        hwndTop = GetTopParent();
 
         HWND hwndActive = GetActiveWindow();
         if (hwndTop && (getWindowHandle() != hwndActive))
@@ -1672,9 +1681,10 @@ LRESULT Win32BaseWindow::DefWindowProcA(UINT Msg, WPARAM wParam, LPARAM lParam)
     case WM_SYSKEYDOWN:
         if(wParam == VK_F4) /* try to close the window */
         {
-            Win32BaseWindow *window = GetTopParent();
+            Win32BaseWindow *window = GetWindowFromHandle(GetTopParent());
             if(window && !(window->getClass()->getStyle() & CS_NOCLOSE))
                 PostMessageA(window->getWindowHandle(), WM_SYSCOMMAND, SC_CLOSE, 0);
+            if(window) RELEASE_WNDOBJ(window);
             return 0;
         }
 
@@ -2748,7 +2758,7 @@ HWND Win32BaseWindow::SetParent(HWND hwndNewParent)
         windowDesktop->addChild(this);
         OSLibWinSetParent(getOS2FrameWindowHandle(), OSLIB_HWND_DESKTOP);
 
-    //TODO: Send WM_STYLECHANGED msg?
+        //TODO: Send WM_STYLECHANGED msg?
         setStyle(getStyle() & ~WS_CHILD);
         setWindowId(0);
    }
@@ -2789,14 +2799,18 @@ HWND Win32BaseWindow::GetTopWindow()
     {
         topwindow = GetWindowFromOS2FrameHandle(hwndTop);
         if(topwindow) {
-            return topwindow->getWindowHandle();
+            hwndTop = topwindow->getWindowHandle();
+            RELEASE_WNDOBJ(topwindow);
+            return hwndTop;
         }
         return 0;
     }
     while(hwndTop) {
         topwindow = GetWindowFromOS2FrameHandle(hwndTop);
         if(topwindow) {
-            return topwindow->getWindowHandle();
+            hwndTop = topwindow->getWindowHandle();
+            RELEASE_WNDOBJ(topwindow);
+            return hwndTop;
         }
         hwndTop = OSLibWinQueryWindow(hwndTop, QWOS_NEXT);
     }
@@ -2806,15 +2820,21 @@ HWND Win32BaseWindow::GetTopWindow()
 //******************************************************************************
 // Get the top-level parent for a child window.
 //******************************************************************************
-Win32BaseWindow *Win32BaseWindow::GetTopParent()
+HWND Win32BaseWindow::GetTopParent()
 {
  Win32BaseWindow *window = this;
+ HWND             hwndTopParent = 0;
 
+    lock();
     while(window && (window->getStyle() & WS_CHILD))
     {
         window = window->getParent();
     }
-    return window;
+    if(window) {
+        hwndTopParent = window->getWindowHandle();
+    }
+    unlock();
+    return hwndTopParent;
 }
 //******************************************************************************
 //TODO: Should not enumerate children that are created during the enumeration!
@@ -2906,15 +2926,18 @@ BOOL Win32BaseWindow::EnumWindows(WNDENUMPROC lpfn, LPARAM lParam)
 }
 //******************************************************************************
 //******************************************************************************
-Win32BaseWindow *Win32BaseWindow::FindWindowById(int id)
+HWND Win32BaseWindow::FindWindowById(int id)
 {
+    lock();
     for (Win32BaseWindow *child = (Win32BaseWindow *)getFirstChild(); child; child = (Win32BaseWindow *)child->getNextChild())
     {
         if (child->getWindowId() == id)
         {
-            return child;
+            unlock();
+            return child->getWindowHandle();
         }
     }
+    unlock();
     return 0;
 }
 //******************************************************************************
@@ -2986,8 +3009,11 @@ HWND Win32BaseWindow::FindWindowEx(HWND hwndParent, HWND hwndChildAfter, ATOM at
                 {
                     OSLibWinEndEnumWindows(henum);
                     dprintf(("FindWindowEx: Found window %x", wnd->getWindowHandle()));
-                    return wnd->getWindowHandle();
+                    HWND hwndret = wnd->getWindowHandle();
+                    RELEASE_WNDOBJ(wnd);
+                    return hwndret;
                 }
+                RELEASE_WNDOBJ(wnd);
             }
             hwnd = OSLibWinGetNextWindow(henum);
         }
@@ -3013,6 +3039,7 @@ HWND Win32BaseWindow::GetWindow(UINT uCmd)
             window = GetWindowFromOS2FrameHandle(hwndRelated);
             if(window) {
                  hwndRelated = window->getWindowHandle();
+                 RELEASE_WNDOBJ(window);
             }
             else hwndRelated = 0;
         }
@@ -3030,6 +3057,7 @@ HWND Win32BaseWindow::GetWindow(UINT uCmd)
             window = GetWindowFromOS2FrameHandle(hwndRelated);
             if(window) {
                  hwndRelated = window->getWindowHandle();
+                 RELEASE_WNDOBJ(window);
             }
             else hwndRelated = 0;
         }
@@ -3045,6 +3073,7 @@ HWND Win32BaseWindow::GetWindow(UINT uCmd)
             window = GetWindowFromOS2FrameHandle(hwndRelated);
             if(window) {
                  hwndRelated = window->getWindowHandle();
+                 RELEASE_WNDOBJ(window);
             }
             else hwndRelated = 0;
         }
@@ -3060,6 +3089,7 @@ HWND Win32BaseWindow::GetWindow(UINT uCmd)
             window = GetWindowFromOS2FrameHandle(hwndRelated);
             if(window) {
                  hwndRelated = window->getWindowHandle();
+                 RELEASE_WNDOBJ(window);
             }
             else hwndRelated = 0;
         }
@@ -3080,6 +3110,7 @@ HWND Win32BaseWindow::GetWindow(UINT uCmd)
         window = GetWindowFromOS2FrameHandle(hwndRelated);
         if(window) {
              hwndRelated = window->getWindowHandle();
+             RELEASE_WNDOBJ(window);
         }
         else hwndRelated = 0;
         break;
@@ -3173,8 +3204,6 @@ BOOL Win32BaseWindow::CloseWindow()
 HWND Win32BaseWindow::GetActiveWindow()
 {
  HWND          hwndActive;
- Win32BaseWindow  *win32wnd;
- ULONG         magic;
 
   hwndActive = OSLibWinQueryActiveWindow();
 
@@ -3376,6 +3405,7 @@ LONG Win32BaseWindow::SetWindowLongA(int index, ULONG value, BOOL fUnicode)
                     type = (fUnicode) ? WIN_PROC_32W : WIN_PROC_32A;
                 }
                 oldval = (LONG)WINPROC_GetProc(win32wndproc, (fUnicode) ? WIN_PROC_32W : WIN_PROC_32A);
+                dprintf(("SetWindowLong GWL_WNDPROC %x old %x new style %x", getWindowHandle(), oldval, value));
                 WINPROC_SetProc((HWINDOWPROC *)&win32wndproc, (WNDPROC)value, type, WIN_PROC_WINDOW);
                 break;
         }
@@ -3499,45 +3529,6 @@ void Win32BaseWindow::setWindowId(DWORD id)
 }
 //******************************************************************************
 //******************************************************************************
-Win32BaseWindow *Win32BaseWindow::GetWindowFromHandle(HWND hwnd)
-{
- Win32BaseWindow *window;
-
-    if(HwGetWindowHandleData(hwnd, (DWORD *)&window) == TRUE) {
-         return window;
-    }
-//    dprintf2(("Win32BaseWindow::GetWindowFromHandle: not a win32 window %x", hwnd));
-    return NULL;
-}
-//******************************************************************************
-//******************************************************************************
-Win32BaseWindow *Win32BaseWindow::GetWindowFromOS2Handle(HWND hwnd)
-{
- Win32BaseWindow *win32wnd;
- DWORD        magic;
-
-    if(hwnd == OSLIB_HWND_DESKTOP)
-    {
-        return windowDesktop;
-    }
-
-    win32wnd = (Win32BaseWindow *)OSLibWinGetWindowULong(hwnd, OFFSET_WIN32WNDPTR);
-    magic    = OSLibWinGetWindowULong(hwnd, OFFSET_WIN32PM_MAGIC);
-
-    if(win32wnd && CheckMagicDword(magic)) {
-        return win32wnd;
-    }
-//  dprintf2(("Win32BaseWindow::GetWindowFromOS2Handle: not an Odin os2 window %x", hwnd));
-    return 0;
-}
-//******************************************************************************
-//******************************************************************************
-Win32BaseWindow *Win32BaseWindow::GetWindowFromOS2FrameHandle(HWND hwnd)
-{
-    return GetWindowFromOS2Handle(OSLibWinWindowFromID(hwnd,OSLIB_FID_CLIENT));
-}
-//******************************************************************************
-//******************************************************************************
 HWND Win32BaseWindow::getNextDlgGroupItem(HWND hwndCtrl, BOOL fPrevious)
 {
  Win32BaseWindow *child, *nextchild, *lastchild;
@@ -3621,6 +3612,103 @@ HWND Win32BaseWindow::getNextDlgGroupItem(HWND hwndCtrl, BOOL fPrevious)
 END:
     return retvalue;
 }
+//******************************************************************************
+//Locates window in linked list and increases reference count (if found)
+//Window object must be unreferenced after usage
+//******************************************************************************
+Win32BaseWindow *Win32BaseWindow::GetWindowFromHandle(HWND hwnd)
+{
+ Win32BaseWindow *window;
+
+    lock(&critsect);
+    if(HwGetWindowHandleData(hwnd, (DWORD *)&window) == TRUE) {
+         if(window) {
+////             dprintf(("addRef %x; refcount %d", hwnd, window->getRefCount()+1));
+             window->addRef();
+         }
+         unlock(&critsect);
+         return window;
+    }
+    unlock(&critsect);
+//    dprintf2(("Win32BaseWindow::GetWindowFromHandle: not a win32 window %x", hwnd));
+    return NULL;
+}
+//******************************************************************************
+//Locates window in linked list and increases reference count (if found)
+//Window object must be unreferenced after usage
+//******************************************************************************
+Win32BaseWindow *Win32BaseWindow::GetWindowFromOS2Handle(HWND hwndOS2)
+{
+ DWORD            magic;
+ HWND             hwnd; 
+
+    if(hwndOS2 == OSLIB_HWND_DESKTOP)
+    {
+        windowDesktop->addRef();
+        return windowDesktop;
+    }
+
+    hwnd  = (HWND)OSLibWinGetWindowULong(hwndOS2, OFFSET_WIN32WNDPTR);
+    magic = OSLibWinGetWindowULong(hwndOS2, OFFSET_WIN32PM_MAGIC);
+
+    if(hwnd && CheckMagicDword(magic)) {
+        return GetWindowFromHandle(hwnd);
+    }
+//  dprintf2(("Win32BaseWindow::GetWindowFromOS2Handle: not an Odin os2 window %x", hwndOS2));
+    return 0;
+}
+//******************************************************************************
+//Locates window in linked list and increases reference count (if found)
+//Window object must be unreferenced after usage
+//******************************************************************************
+Win32BaseWindow *Win32BaseWindow::GetWindowFromOS2FrameHandle(HWND hwnd)
+{
+    return GetWindowFromOS2Handle(OSLibWinWindowFromID(hwnd,OSLIB_FID_CLIENT));
+}
+//******************************************************************************
+//******************************************************************************
+HWND WIN32API Win32ToOS2Handle(HWND hwnd)
+{
+    HWND hwndOS2;
+
+    Win32BaseWindow *window = Win32BaseWindow::GetWindowFromHandle(hwnd);
+
+    if(window) {
+            hwndOS2 = window->getOS2WindowHandle();
+            RELEASE_WNDOBJ(window);
+            return hwndOS2;
+    }
+//    dprintf2(("Win32BaseWindow::Win32ToOS2Handle: not a win32 window %x", hwnd));
+    return hwnd;
+}
+//******************************************************************************
+//******************************************************************************
+HWND WIN32API OS2ToWin32Handle(HWND hwnd)
+{
+    Win32BaseWindow *window = Win32BaseWindow::GetWindowFromOS2Handle(hwnd);
+    HWND hwndWin32;
+
+    if(window) {
+            hwndWin32 = window->getWindowHandle();
+            RELEASE_WNDOBJ(window);
+            return hwndWin32;
+    }
+    window = Win32BaseWindow::GetWindowFromOS2FrameHandle(hwnd);
+    if(window) {
+            hwndWin32 = window->getWindowHandle();
+            RELEASE_WNDOBJ(window);
+            return hwndWin32;
+    }
+
+//    dprintf2(("Win32BaseWindow::OS2ToWin32Handle: not a win32 window %x", hwnd));
+    return 0;
+//    else    return hwnd;    //OS/2 window handle
+}
+//******************************************************************************
+//******************************************************************************
+GenericObject   *Win32BaseWindow::windows  = NULL;
+CRITICAL_SECTION Win32BaseWindow::critsect = {0};
+
 //******************************************************************************
 //******************************************************************************
 #ifdef DEBUG
@@ -3717,35 +3805,3 @@ void PrintWindowStyle(DWORD dwStyle, DWORD dwExStyle)
 #endif
 //******************************************************************************
 //******************************************************************************
-HWND WIN32API Win32ToOS2Handle(HWND hwnd)
-{
-    Win32BaseWindow *window = Win32BaseWindow::GetWindowFromHandle(hwnd);
-
-    if(window) {
-            return window->getOS2WindowHandle();
-    }
-//    dprintf2(("Win32BaseWindow::Win32ToOS2Handle: not a win32 window %x", hwnd));
-    return hwnd;
-}
-//******************************************************************************
-//******************************************************************************
-HWND WIN32API OS2ToWin32Handle(HWND hwnd)
-{
-    Win32BaseWindow *window = Win32BaseWindow::GetWindowFromOS2Handle(hwnd);
-
-    if(window) {
-            return window->getWindowHandle();
-    }
-    window = Win32BaseWindow::GetWindowFromOS2FrameHandle(hwnd);
-    if(window) {
-            return window->getWindowHandle();
-    }
-
-//    dprintf2(("Win32BaseWindow::OS2ToWin32Handle: not a win32 window %x", hwnd));
-    return 0;
-//    else    return hwnd;    //OS/2 window handle
-}
-//******************************************************************************
-//******************************************************************************
-
-GenericObject *Win32BaseWindow::windows  = NULL;

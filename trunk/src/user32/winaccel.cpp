@@ -1,4 +1,4 @@
-/* $Id: winaccel.cpp,v 1.7 2000-02-21 14:25:23 sandervl Exp $ */
+/* $Id: winaccel.cpp,v 1.8 2001-06-09 14:50:24 sandervl Exp $ */
 /*
  * Win32 accelerator key functions for OS/2
  *
@@ -84,7 +84,7 @@ static BOOL KBD_translate_accelerator(HWND hWnd,LPMSG msg,
                     mesg=3;
                 else
                 {
-                   Win32BaseWindow *window;
+                    Win32BaseWindow *window;
 
                     window = Win32BaseWindow::GetWindowFromHandle(hWnd);
                     if(!window) {
@@ -122,6 +122,7 @@ static BOOL KBD_translate_accelerator(HWND hWnd,LPMSG msg,
                         else
                             mesg=WM_COMMAND;
                     }
+                    RELEASE_WNDOBJ(window);
                 }
                 if ( mesg==WM_COMMAND || mesg==WM_SYSCOMMAND )
                 {
@@ -164,7 +165,6 @@ INT WINAPI TranslateAcceleratorA(HWND hWnd, HACCEL hAccel, LPMSG msg)
 {
     /* YES, Accel16! */
     LPACCEL lpAccelTbl;
-    Win32BaseWindow *window;
     int i;
 
     SetLastError(ERROR_SUCCESS);
@@ -180,8 +180,7 @@ INT WINAPI TranslateAcceleratorA(HWND hWnd, HACCEL hAccel, LPMSG msg)
           SetLastError(ERROR_INVALID_PARAMETER);
           return 0;
     }
-    window = Win32BaseWindow::GetWindowFromHandle(hWnd);
-    if(!window) {
+    if(!IsWindow(hWnd)) {
           dprintf(("TranslateAccelerator, window %x not found", hWnd));
           SetLastError(ERROR_INVALID_WINDOW_HANDLE);
           return 0;
@@ -232,12 +231,12 @@ BOOL WIN32API TranslateMDISysAccel(HWND hwndClient, LPMSG msg)
             return FALSE;
         }
 
-        mdichild = clientWnd->getActiveChild();
-        if(!mdichild) {
+        hwndChild = clientWnd->getActiveChild();
+        RELEASE_WNDOBJ(clientWnd);
+        if(!hwndChild) {
             dprintf(("TranslateMDISysAccel NO active MDI child!!"));
             return FALSE;
         }
-        hwndChild = mdichild->getWindowHandle();
 
         if(IsWindow(hwndChild) && !(GetWindowLongA(hwndChild,GWL_STYLE) & WS_DISABLED) )
 	    {

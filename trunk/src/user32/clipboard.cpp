@@ -1,4 +1,4 @@
-/* $Id: clipboard.cpp,v 1.11 2001-04-27 17:36:36 sandervl Exp $ */
+/* $Id: clipboard.cpp,v 1.12 2001-06-09 14:50:16 sandervl Exp $ */
 
 /*
  * Win32 Clipboard API functions for OS/2
@@ -26,6 +26,7 @@
 BOOL WIN32API ChangeClipboardChain( HWND hwndRemove, HWND hwndNext)
 {
   Win32BaseWindow *wndRemove, *wndNext;
+  HWND hwndOS2Remove, hwndOS2Next;
 
     wndRemove = Win32BaseWindow::GetWindowFromHandle(hwndRemove);
     if(!wndRemove) {
@@ -33,15 +34,20 @@ BOOL WIN32API ChangeClipboardChain( HWND hwndRemove, HWND hwndNext)
         SetLastError(ERROR_INVALID_WINDOW_HANDLE);
         return 0;
     }
+    hwndOS2Remove = wndRemove->getOS2WindowHandle();
+    RELEASE_WNDOBJ(wndRemove);
+
     wndNext = Win32BaseWindow::GetWindowFromHandle(hwndNext);
     if(!wndNext) {
         dprintf(("ChangeClipboardChain, window %x not found", hwndNext));
         SetLastError(ERROR_INVALID_WINDOW_HANDLE);
         return 0;
     }
+    hwndOS2Next = wndNext->getOS2WindowHandle();
+    RELEASE_WNDOBJ(wndNext);
+
     dprintf(("USER32:  ChangeClipboardChain\n"));
-    return O32_ChangeClipboardChain(wndRemove->getOS2WindowHandle(),
-                                    wndNext->getOS2WindowHandle());
+    return O32_ChangeClipboardChain(hwndOS2Remove, hwndOS2Next);
 }
 //******************************************************************************
 //******************************************************************************
@@ -113,7 +119,9 @@ HWND WIN32API GetClipboardOwner(void)
         //an OS/2 window probably owns the clipboard, we pretend nobody owns it
         return NULL;
     }
-    return window->getWindowHandle();
+    hwndOwner = window->getWindowHandle();
+    RELEASE_WNDOBJ(window);
+    return hwndOwner;
 }
 //******************************************************************************
 //******************************************************************************
@@ -130,7 +138,9 @@ HWND WIN32API GetClipboardViewer(void)
         //probably an OS/2 window, we pretend it's nobody
         return NULL;
     }
-    return window->getWindowHandle();
+    hwndViewer = window->getWindowHandle();
+    RELEASE_WNDOBJ(window);
+    return hwndViewer;
 }
 //******************************************************************************
 //******************************************************************************
@@ -147,7 +157,9 @@ HWND WIN32API GetOpenClipboardWindow(void)
         //probably an OS/2 window, we pretend it's nobody
         return NULL;
     }
-    return window->getWindowHandle();
+    hwnd = window->getWindowHandle();
+    RELEASE_WNDOBJ(window);
+    return hwnd;
 }
 //******************************************************************************
 //******************************************************************************
@@ -176,9 +188,11 @@ BOOL WIN32API OpenClipboard( HWND hwnd)
             SetLastError(ERROR_INVALID_WINDOW_HANDLE);
             return 0;
         }
+        hwnd = window->getOS2WindowHandle();
+        RELEASE_WNDOBJ(window);
     }
     dprintf(("USER32: OpenClipboard %x", hwnd));
-    return O32_OpenClipboard(hwnd ? window->getOS2WindowHandle() : NULL);
+    return O32_OpenClipboard(hwnd);
 }
 //******************************************************************************
 //******************************************************************************
@@ -213,22 +227,28 @@ HWND WIN32API SetClipboardViewer( HWND hwndNew)
 {
   Win32BaseWindow *wndnew, *wndold;
   HWND hwndOld;
+  HWND hwndOS2New;
 
     wndnew = Win32BaseWindow::GetWindowFromHandle(hwndNew);
     if(!wndnew) {
-        dprintf(("OpenClipboard, window %x not found", hwndNew));
+        dprintf(("SetClipboardViewer, window %x not found", hwndNew));
         SetLastError(ERROR_INVALID_WINDOW_HANDLE);
         return 0;
     }
-    dprintf(("USER32:  SetClipboardViewer\n"));
-    hwndOld = O32_SetClipboardViewer(wndnew->getOS2WindowHandle());
+    dprintf(("USER32: SetClipboardViewer %x", hwndNew));
+    hwndOS2New = wndnew->getOS2WindowHandle();
+    RELEASE_WNDOBJ(wndnew);
+
+    hwndOld = O32_SetClipboardViewer(hwndOS2New);
 
     wndold = Win32BaseWindow::GetWindowFromOS2Handle(hwndOld);
     if(!wndold) {
         //probably an OS/2 window, so pretend it's nobody
         return 0;
     }
-    return wndold->getWindowHandle();
+    hwndOld = wndold->getWindowHandle();
+    RELEASE_WNDOBJ(wndold);
+    return hwndOld;
 }
 //******************************************************************************
 //******************************************************************************

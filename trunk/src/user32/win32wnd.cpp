@@ -1,4 +1,4 @@
-/* $Id: win32wnd.cpp,v 1.9 2000-05-28 16:43:48 sandervl Exp $ */
+/* $Id: win32wnd.cpp,v 1.10 2001-06-09 14:50:23 sandervl Exp $ */
 /*
  * Win32 Window Class for OS/2
  *
@@ -53,7 +53,7 @@ Win32Window::~Win32Window()
 LRESULT Win32Window::DefFrameProcA(HWND hwndMDIClient, UINT Msg, WPARAM wParam, LPARAM lParam)
 {
  Win32MDIClientWindow *window = NULL;
- Win32MDIChildWindow *child;
+ HWND                  hwndChild;
 
     if(hwndMDIClient)
         window = (Win32MDIClientWindow*)GetWindowFromHandle(hwndMDIClient);
@@ -88,16 +88,17 @@ LRESULT Win32Window::DefFrameProcA(HWND hwndMDIClient, UINT Msg, WPARAM wParam, 
                 case SC_PREVWINDOW:
                 case SC_CLOSE:
                 case SC_RESTORE:
-                    child = window->getMaximizedChild();
-                    if (child)
-                    return ::SendMessageA(child->getWindowHandle(),WM_SYSCOMMAND,wParam,lParam);
+                    hwndChild = window->getMaximizedChild();
+                    RELEASE_WNDOBJ(window);
+                    if (hwndChild)
+                        return ::SendMessageA(hwndChild, WM_SYSCOMMAND, wParam, lParam);
                 }
             }
             else
             {
-                child = window->getChildByID(wParam);
-                if (child)
-                    ::SendMessageA(window->getWindowHandle(),WM_MDIACTIVATE,(WPARAM)child->getWindowHandle(),0L);
+                hwndChild = window->getChildByID(wParam);
+                if (hwndChild)
+                    ::SendMessageA(window->getWindowHandle(),WM_MDIACTIVATE,(WPARAM)hwndChild,0L);
             }
             break;
 
@@ -135,23 +136,17 @@ LRESULT Win32Window::DefFrameProcA(HWND hwndMDIClient, UINT Msg, WPARAM wParam, 
 #endif
         }
     }
+    if(window) RELEASE_WNDOBJ(window);
     return DefWindowProcA(Msg, wParam, lParam);
 }
 //******************************************************************************
 //******************************************************************************
 LRESULT Win32Window::DefFrameProcW(HWND hwndMDIClient, UINT Msg, WPARAM wParam, LPARAM lParam)
 {
- Win32Window *window = NULL;
-
-    if(hwndMDIClient)
-        window = (Win32Window *)GetWindowFromHandle(hwndMDIClient);
-
-    if(window)
+    switch(Msg)
     {
-        switch(Msg)
-        {
         case WM_NCACTIVATE:
-            window->SendMessageW(Msg, wParam, lParam);
+            ::SendMessageW(hwndMDIClient, Msg, wParam, lParam);
             break;
 
         case WM_SETTEXT:
@@ -165,7 +160,6 @@ LRESULT Win32Window::DefFrameProcW(HWND hwndMDIClient, UINT Msg, WPARAM wParam, 
         case WM_SETFOCUS:
         case WM_SIZE:
             return DefFrameProcA(hwndMDIClient, Msg, wParam, lParam );
-        }
     }
     return DefWindowProcW(Msg, wParam, lParam);
 }

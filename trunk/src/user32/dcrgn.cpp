@@ -1,4 +1,4 @@
-/* $Id: dcrgn.cpp,v 1.5 2001-05-11 13:31:54 sandervl Exp $ */
+/* $Id: dcrgn.cpp,v 1.6 2001-06-09 14:50:17 sandervl Exp $ */
 
 /*
  * DC functions for USER32
@@ -67,6 +67,7 @@ BOOL WIN32API GetUpdateRect(HWND hwnd, LPRECT pRect, BOOL erase)
     BOOL updateRegionExists = WinQueryUpdateRect(wnd->getOS2WindowHandle(), pRect ? &rectl : NULL);
     if (!pRect) {
         dprintf(("GetUpdateRect returned %d", updateRegionExists));
+        RELEASE_WNDOBJ(wnd);
         return (updateRegionExists);
     }
 
@@ -77,6 +78,7 @@ BOOL WIN32API GetUpdateRect(HWND hwnd, LPRECT pRect, BOOL erase)
             if(pRect) {
                 pRect->left = pRect->top = pRect->right = pRect->bottom = 0;
             }
+            RELEASE_WNDOBJ(wnd);
             return FALSE;
         }
         mapOS2ToWin32Rect(wnd->getClientHeight(), (PRECTLOS2)&rectl, pRect);
@@ -96,6 +98,7 @@ BOOL WIN32API GetUpdateRect(HWND hwnd, LPRECT pRect, BOOL erase)
    }
 
    dprintf(("GetUpdateRect returned (%d,%d)(%d,%d)", pRect->left, pRect->top, pRect->right, pRect->bottom));
+   RELEASE_WNDOBJ(wnd);
    return updateRegionExists;
 }
 //******************************************************************************
@@ -111,12 +114,14 @@ int WIN32API GetUpdateRgn(HWND hwnd, HRGN hrgn, BOOL erase)
     {
         dprintf(("WARNING: GetUpdateRgn %x %x %d; invalid handle", hwnd, hrgn, erase));
         SetLastError(ERROR_INVALID_WINDOW_HANDLE_W);
+        if(wnd) RELEASE_WNDOBJ(wnd);
         return ERROR_W;
     }
     lComplexity = WinQueryUpdateRegion(wnd->getOS2WindowHandle(), hrgn);
     if(lComplexity == RGN_ERROR) {
         dprintf(("WARNING: GetUpdateRgn %x %x %d; RGN_ERROR", hwnd, hrgn, erase));
         SetLastError(ERROR_INVALID_WINDOW_HANDLE_W);
+        RELEASE_WNDOBJ(wnd);
         return ERROR_W;
     }
 
@@ -126,10 +131,12 @@ int WIN32API GetUpdateRgn(HWND hwnd, HRGN hrgn, BOOL erase)
         {
             dprintf(("WARNING: GetUpdateRgn %x %x %d; setWinDeviceRegionFromPMDeviceRegion failed!", hwnd, hrgn, erase));
             SetLastError(ERROR_INVALID_WINDOW_HANDLE_W);
+            RELEASE_WNDOBJ(wnd);
             return ERROR_W;
         }
         if(erase) sendEraseBkgnd(wnd);
     }
+    RELEASE_WNDOBJ(wnd);
     return lComplexity;
 }
 //******************************************************************************
@@ -145,6 +152,7 @@ INT WIN32API ExcludeUpdateRgn(HDC hdc, HWND hwnd)
     {
         dprintf(("WARNING: ExcludeUpdateRgn %x %x; invalid handle", hdc, hwnd));
         SetLastError(ERROR_INVALID_WINDOW_HANDLE_W);
+        if(wnd) RELEASE_WNDOBJ(wnd);
         return ERROR_W;
     }
     dprintf(("USER32: ExcludeUpdateRgn %x %x", hdc, hwnd));
@@ -154,6 +162,8 @@ INT WIN32API ExcludeUpdateRgn(HDC hdc, HWND hwnd)
          SetLastError(ERROR_INVALID_HANDLE_W); //todo: correct error
     }
     else SetLastError(ERROR_SUCCESS_W);
+
+    RELEASE_WNDOBJ(wnd);
     return lComplexity;      // windows and PM values are identical
 }
 /*****************************************************************************
@@ -182,7 +192,7 @@ int WIN32API GetWindowRgn(HWND hwnd, HRGN hRgn)
     }
     dprintf(("USER32:GetWindowRgn (%x,%x)", hwnd, hRgn));
     hWindowRegion = window->GetWindowRegion();
-
+    RELEASE_WNDOBJ(window);
     return CombineRgn(hRgn, hWindowRegion, 0, RGN_COPY_W);
 }
 /*****************************************************************************
@@ -227,6 +237,7 @@ int WIN32API SetWindowRgn(HWND hwnd,
     if(bRedraw) {
         RedrawWindow(hwnd, 0, 0, RDW_UPDATENOW_W);
     }
+    RELEASE_WNDOBJ(window);
 //TODO:
 //  When this function is called, the system sends the WM_WINDOWPOSCHANGING and
 //  WM_WINDOWPOSCHANGED messages to the window.

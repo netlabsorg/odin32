@@ -1,4 +1,4 @@
-/* $Id: caret.cpp,v 1.17 2001-05-11 08:39:41 sandervl Exp $ */
+/* $Id: caret.cpp,v 1.18 2001-06-09 14:50:16 sandervl Exp $ */
 
 /*
  * Caret functions for USER32
@@ -78,6 +78,7 @@ BOOL WIN32API CreateCaret (HWND hwnd, HBITMAP hBmp, int width, int height)
        }
 
        wnd->RemoveFakeOpen32();
+       RELEASE_WNDOBJ(wnd);
        return (rc);
    }
 }
@@ -143,6 +144,7 @@ BOOL WIN32API SetCaretPos (int x, int y)
            pDCData pHps = (pDCData)GpiQueryDCData(hps);
            if (!pHps)
            {
+              RELEASE_WNDOBJ(wnd);
               SetLastError(ERROR_INTERNAL_ERROR);
               return FALSE;
            }
@@ -165,6 +167,7 @@ BOOL WIN32API SetCaretPos (int x, int y)
         hwndCaret = wnd->getWindowHandle();
         CaretPosX = x;
         CaretPosY = y;
+        RELEASE_WNDOBJ(wnd);
 
         rc = WinCreateCursor (cursorInfo.hwnd, xNew, yNew, 0, 0, CURSOR_SETPOS, NULL);
       }
@@ -211,6 +214,7 @@ BOOL WIN32API GetCaretPos (PPOINT pPoint)
             caretPos.y   += cursorInfo.cy;
             cursorInfo.y  = height - caretPos.y;
          }
+         RELEASE_WNDOBJ(wnd);
       }
       pPoint->x = cursorInfo.x;
       pPoint->y = cursorInfo.y;

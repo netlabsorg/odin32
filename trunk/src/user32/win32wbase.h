@@ -1,4 +1,4 @@
-/* $Id: win32wbase.h,v 1.117 2001-05-25 19:59:30 sandervl Exp $ */
+/* $Id: win32wbase.h,v 1.118 2001-06-09 14:50:21 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -33,6 +33,8 @@ class Win32BaseWindow;
 
 #define WIN32PM_MAGIC           0x12345678
 #define CheckMagicDword(a)      (a==WIN32PM_MAGIC)
+
+#define RELEASE_WNDOBJ(a)       { a->release(); a = NULL; }
 
 typedef struct {
         USHORT           cb;
@@ -108,9 +110,7 @@ typedef struct
 class Win32BaseWindow : public GenericObject, public ChildWindow
 {
 public:
-        DWORD   magic;
-
-                Win32BaseWindow(DWORD objType);
+                Win32BaseWindow();
                 Win32BaseWindow(CREATESTRUCTA *lpCreateStructA, ATOM classAtom, BOOL isUnicode);
                 Win32BaseWindow(HWND hwndOS2, ULONG reserved);
 
@@ -226,7 +226,7 @@ Win32BaseWindow *getParent();
          BOOL   SetWindowPlacement(WINDOWPLACEMENT *winpos);
          BOOL   GetWindowPlacement(LPWINDOWPLACEMENT winpos);
          BOOL   ScrollWindow(int dx, int dy);
-         BOOL   DestroyWindow();
+virtual  BOOL   DestroyWindow();
          HWND   SetActiveWindow();
          BOOL   DeactivateChildWindow();
          HWND   GetParent();
@@ -235,7 +235,7 @@ Win32BaseWindow *getParent();
          BOOL   IsChild(HWND hwndParent);
 
          HWND   GetTopWindow();
-Win32BaseWindow *GetTopParent();
+         HWND   GetTopParent();
 
          HWND   GetWindow(UINT uCmd);
  virtual BOOL   EnableWindow(BOOL fEnable);
@@ -294,7 +294,7 @@ static LRESULT  BroadcastMessageW(int type, UINT msg, WPARAM wParam, LPARAM lPar
 
          void   NotifyParent(UINT Msg, WPARAM wParam, LPARAM lParam);
 
-Win32BaseWindow *FindWindowById(int id);
+           HWND FindWindowById(int id);
 
     static HWND FindWindowEx(HWND hwndParent, HWND hwndChildAfter, ATOM atom, LPSTR lpszWindow);
 
@@ -315,6 +315,8 @@ Win32BaseWindow *FindWindowById(int id);
 	 INT    enumPropsExA(PROPENUMPROCEXA func, LPARAM lParam);
 	 INT    enumPropsExW(PROPENUMPROCEXW func, LPARAM lParam);
 
+//Locates window in linked list and increases reference count (if found)
+//Window object must be unreferenced after usage
 static Win32BaseWindow *GetWindowFromHandle(HWND hwnd);
 static Win32BaseWindow *GetWindowFromOS2Handle(HWND hwnd);
 static Win32BaseWindow *GetWindowFromOS2FrameHandle(HWND hwnd);
@@ -350,6 +352,7 @@ protected:
 /////   Win32BaseWindow *parent;                    //GWL_HWNDPARENT
         ULONG   dwIDMenu;               //GWL_ID
         ULONG   userData;               //GWL_USERDATA
+
 
          HWND   hwndLinkAfter;
         DWORD   flags;
@@ -415,6 +418,7 @@ SCROLLBAR_INFO *horzScrollInfo;
 Win32WndClass  *windowClass;
 
 static GenericObject *windows;
+static CRITICAL_SECTION  critsect;
 
 private:
 #ifndef OS2_INCLUDED

@@ -1,4 +1,4 @@
-/* $Id: win32wdesktop.cpp,v 1.16 2001-05-11 08:39:46 sandervl Exp $ */
+/* $Id: win32wdesktop.cpp,v 1.17 2001-06-09 14:50:22 sandervl Exp $ */
 /*
  * Win32 Desktop Window for OS/2
  *
@@ -43,7 +43,7 @@ void DestroyDesktopWindow()
 }
 //******************************************************************************
 //******************************************************************************
-Win32Desktop::Win32Desktop() : Win32BaseWindow(OBJTYPE_WINDOW)
+Win32Desktop::Win32Desktop() : Win32BaseWindow()
 {
   rectWindow.left   = 0;
   rectWindow.top    = 0;
@@ -85,6 +85,13 @@ BOOL Win32Desktop::isDesktopWindow()
 BOOL Win32Desktop::EnableWindow(BOOL fEnable)
 {
   return TRUE; //of course we succeeded
+}
+//******************************************************************************
+//******************************************************************************
+BOOL Win32Desktop::DestroyWindow()
+{
+  dprintf(("WARNING: can't destroy desktop window!!"));
+  return FALSE;
 }
 //******************************************************************************
 //Dummy window procedure. Does nothing.

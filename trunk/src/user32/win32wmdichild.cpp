@@ -1,4 +1,4 @@
-/* $Id: win32wmdichild.cpp,v 1.25 2000-11-09 18:15:22 sandervl Exp $ */
+/* $Id: win32wmdichild.cpp,v 1.26 2001-06-09 14:50:23 sandervl Exp $ */
 /*
  * Win32 MDI Child Window Class for OS/2
  *
@@ -45,7 +45,7 @@
 //******************************************************************************
 //******************************************************************************
 Win32MDIChildWindow::Win32MDIChildWindow(CREATESTRUCTA *lpCreateStructA, ATOM classAtom, BOOL fUnicode)
-                    : Win32BaseWindow(OBJTYPE_WINDOW)
+                    : Win32BaseWindow()
 {
     isUnicode = fUnicode;
     CreateWindowExA(lpCreateStructA, classAtom);
@@ -72,7 +72,7 @@ LRESULT Win32MDIChildWindow::DefMDIChildProcA(UINT Msg, WPARAM wParam, LPARAM lP
     case WM_SETTEXT:
         DefWindowProcA(Msg, wParam, lParam);
         menuModifyItem();
-        if( client->getMaximizedChild() == this )
+        if( client->getMaximizedChild() == getWindowHandle() )
                 client->updateFrameText(MDI_REPAINTFRAME, NULL);
         return 0;
 
@@ -92,7 +92,7 @@ LRESULT Win32MDIChildWindow::DefMDIChildProcA(UINT Msg, WPARAM wParam, LPARAM lP
         return 0;
 
     case WM_SETFOCUS:
-        if(client->getActiveChild() != this )
+        if(client->getActiveChild() != getWindowHandle() )
             client->childActivate(this);
         break;
 
@@ -107,7 +107,7 @@ LRESULT Win32MDIChildWindow::DefMDIChildProcA(UINT Msg, WPARAM wParam, LPARAM lP
         switch( wParam )
         {
         case SC_MOVE:
-            if( client->getMaximizedChild() == this)
+            if( client->getMaximizedChild() == getWindowHandle())
             {
                 return 0;
             }
@@ -118,7 +118,7 @@ LRESULT Win32MDIChildWindow::DefMDIChildProcA(UINT Msg, WPARAM wParam, LPARAM lP
             break;
 
         case SC_MAXIMIZE:
-            if( client->getMaximizedChild() == this)
+            if( client->getMaximizedChild() == getWindowHandle())
             {
                   return client->SendMessageA(Msg, wParam, lParam);
             }
@@ -144,32 +144,32 @@ LRESULT Win32MDIChildWindow::DefMDIChildProcA(UINT Msg, WPARAM wParam, LPARAM lP
 
     case WM_SIZE:
         /* do not change */
-        if( client->getActiveChild() == this && wParam != SIZE_MAXIMIZED )
+        if( client->getActiveChild() == getWindowHandle() && wParam != SIZE_MAXIMIZED )
         {
             client->setMaximizedChild(NULL);
-            client->restoreFrameMenu(this);
+            client->restoreFrameMenu(getWindowHandle());
             client->updateFrameText(MDI_REPAINTFRAME, NULL );
         }
 
         if( wParam == SIZE_MAXIMIZED )
         {
-            Win32MDIChildWindow *maxChild = client->getMaximizedChild();
+            HWND maxChild = client->getMaximizedChild();
 
-            if( maxChild == this ) break;
+            if( maxChild == getWindowHandle() ) break;
 
             if( maxChild)
             {
-                maxChild->SendMessageA(WM_SETREDRAW, FALSE, 0L );
+                ::SendMessageA(maxChild, WM_SETREDRAW, FALSE, 0L );
                 client->restoreFrameMenu(maxChild);
-                maxChild->ShowWindow(SW_SHOWNOACTIVATE);
+                ::ShowWindow(maxChild, SW_SHOWNOACTIVATE);
 
-                maxChild->SendMessageA(WM_SETREDRAW, TRUE, 0L );
+                ::SendMessageA(maxChild, WM_SETREDRAW, TRUE, 0L );
             }
 
-            client->setMaximizedChild(this);
-            client->setActiveChild(this);
+            client->setMaximizedChild(getWindowHandle());
+            client->setActiveChild(getWindowHandle());
 
-            client->augmentFrameMenu(this);
+            client->augmentFrameMenu(getWindowHandle());
 
             client->updateFrameText(MDI_REPAINTFRAME, NULL );
         }
@@ -220,7 +220,7 @@ LRESULT Win32MDIChildWindow::DefMDIChildProcW(UINT Msg, WPARAM wParam, LPARAM lP
     case WM_SETTEXT:
         DefWindowProcW(Msg, wParam, lParam);
         menuModifyItem();
-        if( client->getMaximizedChild() == this )
+        if( client->getMaximizedChild() == getWindowHandle() )
                 client->updateFrameText(MDI_REPAINTFRAME, NULL );
 
         return 0;
@@ -256,7 +256,8 @@ HWND Win32MDIChildWindow::createChild(Win32MDIClientWindow *client, LPMDICREATES
   DWORD        style = cs->style | (WS_CHILD | WS_CLIPSIBLINGS);
   WORD         wIDmenu = client->getFirstChildId() + client->getNrOfChildren();
   char         lpstrDef[]="junk!";
-  Win32MDIChildWindow *maximizedChild, *newchild;
+  Win32MDIChildWindow *newchild;
+  HWND         maximizedChild;
   CREATESTRUCTA createstruct;
   ATOM         classAtom;
   char         tmpClassA[20] = "";
@@ -286,7 +287,7 @@ HWND Win32MDIChildWindow::createChild(Win32MDIClientWindow *client, LPMDICREATES
 
         maximizedChild = client->getMaximizedChild();
 
-        maximizedChild->ShowWindow( SW_SHOWNOACTIVATE );
+        ::ShowWindow(maximizedChild, SW_SHOWNOACTIVATE );
 
         if( style & WS_MAXIMIZE )
             client->SendMessageA(WM_SETREDRAW, TRUE, 0L );
@@ -378,9 +379,9 @@ HWND Win32MDIChildWindow::createChild(Win32MDIClientWindow *client, LPMDICREATES
 
                 if((newchild->getStyle() & WS_MAXIMIZE) && !client->getMaximizedChild() )
                 {
-                    client->setMaximizedChild(newchild);
+                    client->setMaximizedChild(newchild->getWindowHandle());
 
-                    client->augmentFrameMenu(newchild);
+                    client->augmentFrameMenu(newchild->getWindowHandle());
 
                     client->updateFrameText(MDI_REPAINTFRAME, NULL );
                 }
@@ -399,8 +400,8 @@ HWND Win32MDIChildWindow::createChild(Win32MDIClientWindow *client, LPMDICREATES
 	}
 
         maximizedChild = client->getMaximizedChild();
-        if( maximizedChild && maximizedChild->IsWindow() )
-            maximizedChild->ShowWindow(SW_SHOWMAXIMIZED);
+        if( ::IsWindow(maximizedChild) )
+            ::ShowWindow(maximizedChild, SW_SHOWMAXIMIZED);
 
         dprintf(("MDI child creation failed!!"));
         return 0;
@@ -455,14 +456,15 @@ BOOL Win32MDIChildWindow::menuDeleteItem()
     /* walk the rest of MDI children to prevent gaps in the id
      * sequence and in the menu child list */
 
+    lock();
     for( index = id+1; index <= client->getNrOfChildren() +
          client->getFirstChildId(); index++ )
     {
-        Win32MDIChildWindow *tmpWnd = client->getChildByID(index);
+        Win32MDIChildWindow *tmpWnd = (Win32MDIChildWindow *)GetWindowFromHandle(client->getChildByID(index));
         if( !tmpWnd )
         {
-          dprintf(("no window for id=%i\n",index));
-          continue;
+            dprintf(("no window for id=%i\n",index));
+            continue;
         }
 
         /* set correct id */
@@ -472,10 +474,15 @@ BOOL Win32MDIChildWindow::menuDeleteItem()
         if (tmpWnd->getWindowNameA())
             lstrcpynA(buffer + n, tmpWnd->getWindowNameA(), sizeof(buffer) - n );
 
+        RELEASE_WNDOBJ(tmpWnd);
+
+        unlock();
         /* change menu */
         ModifyMenuA(client->getMDIMenu(), index ,MF_BYCOMMAND | MF_STRING,
                     index - 1 , buffer );
+        lock();
     }
+    unlock();
     return TRUE;
 }
 /**********************************************************************

@@ -1,4 +1,4 @@
-/* $Id: icontitle.cpp,v 1.6 2001-04-12 14:04:32 sandervl Exp $ */
+/* $Id: icontitle.cpp,v 1.7 2001-06-09 14:50:17 sandervl Exp $ */
 /*
  * Icontitle window class.
  *
@@ -51,12 +51,14 @@ HWND ICONTITLE_Create(Win32BaseWindow *parent)
         hWnd = CreateWindowExA( 0, ICONTITLECLASSNAME, NULL,
                                   WS_CLIPSIBLINGS, 0, 0, 1, 1,
                                   parent->getWindowHandle(),0,parent->getInstance(), NULL );
+
     win32wnd = Win32BaseWindow::GetWindowFromHandle(hWnd);
     if (win32wnd)
     {
         win32wnd->setOwner(parent);     /* MDI depends on this */
         win32wnd->setStyle(win32wnd->getStyle() & ~(WS_CAPTION | WS_BORDER));
         if (parent->getStyle() & WS_DISABLED ) win32wnd->setStyle(win32wnd->getStyle() | WS_DISABLED);
+        RELEASE_WNDOBJ(win32wnd);
         return hWnd;
     }
     return 0;
@@ -244,9 +246,9 @@ LRESULT WINAPI IconTitleWndProc( HWND hWnd, UINT msg,
                  goto END;
              }
     }
-
     retvalue = DefWindowProcA( hWnd, msg, wParam, lParam );
 END:
+    if(wnd) RELEASE_WNDOBJ(wnd);
     return retvalue;
 }
 

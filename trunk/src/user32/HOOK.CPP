@@ -1,4 +1,4 @@
-/* $Id: HOOK.CPP,v 1.19 2001-06-01 10:28:17 sandervl Exp $ */
+/* $Id: HOOK.CPP,v 1.20 2001-06-09 14:50:15 sandervl Exp $ */
 
 /*
  * Windows hook functions
@@ -766,6 +766,7 @@ BOOL ProcessKbdHook(LPMSG msg, BOOL remove )
 	    hi.hItemHandle = msg->hwnd;
 	    hi.dwContextId = wnd->getWindowContextHelpId();
 	    hi.MousePos = msg->pt;
+            RELEASE_WNDOBJ(wnd);
 	    SendMessageA(msg->hwnd, WM_HELP, 0, (LPARAM)&hi);
 	}
     }
