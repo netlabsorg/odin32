@@ -1,4 +1,4 @@
-/* $Id: typelib.cpp,v 1.2 1999-08-22 22:08:49 sandervl Exp $ */
+/* $Id: typelib.cpp,v 1.3 1999-09-06 20:13:23 davidr Exp $ */
 /*
  *	TYPELIB
  *
@@ -986,7 +986,7 @@ int TLB_ReadTypeLib(PCHAR file, ITypeLib **ppTypeLib)
     TLBLibInfo* pLibInfo=NULL;
     TLB2Header tlbHeader;
     TLBSegDir tlbSegDir;
-    if((cx.hFile=OpenFile(file, &ofStruct, OF_READWRITE))==HFILE_ERROR) {
+    if((cx.hFile=OpenFile(file, &ofStruct, OF_READ))==HFILE_ERROR) {
 	ERR_(typelib)("cannot open %s error 0x%lx\n",file, GetLastError());
 	return E_FAIL;
     }
