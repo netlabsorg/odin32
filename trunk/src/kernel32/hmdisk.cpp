@@ -1,4 +1,4 @@
-/* $Id: hmdisk.cpp,v 1.45 2002-05-17 16:49:34 sandervl Exp $ */
+/* $Id: hmdisk.cpp,v 1.46 2002-06-06 11:31:12 sandervl Exp $ */
 
 /*
  * Win32 Disk API functions for OS/2
@@ -19,10 +19,10 @@
 #include "mmap.h"
 #include <win\winioctl.h>
 #include <win\ntddscsi.h>
-#include <win\wnaspi32.h>
 #include <win\aspi.h>
 #include "oslibdos.h"
 #include "osliblvm.h"
+#include "oslibcdio.h"
 #include "asmutil.h"
 
 #define DBG_LOCALLOG    DBG_hmdisk
@@ -38,9 +38,7 @@
 
 typedef struct
 {
-    HINSTANCE hInstAspi;
-    DWORD     (WIN32API *GetASPI32SupportInfo)();
-    DWORD     (CDECL *SendASPI32Command)(LPSRB lpSRB);
+    BOOL      fCDIoSupported;    
     ULONG     driveLetter;
     ULONG     driveType;
     ULONG     dwVolumelabel;
@@ -286,19 +284,7 @@ DWORD HMDeviceDiskClass::CreateFile (LPCSTR        lpFileName,
         drvInfo->driveType = dwDriveType;
         if(drvInfo->driveType == DRIVE_CDROM)
         {
-            drvInfo->hInstAspi = LoadLibraryA("WNASPI32.DLL");
-            if(drvInfo->hInstAspi == NULL) {
-                if(pHMHandleData->hHMHandle) OSLibDosClose(pHMHandleData->hHMHandle);
-                free(drvInfo);
-                return ERROR_INVALID_PARAMETER;
-            }
-            *(FARPROC *)&drvInfo->GetASPI32SupportInfo = GetProcAddress(drvInfo->hInstAspi, "GetASPI32SupportInfo");
-            *(FARPROC *)&drvInfo->SendASPI32Command    = GetProcAddress(drvInfo->hInstAspi, "SendASPI32Command");
-
-            if(drvInfo->GetASPI32SupportInfo() == (SS_FAILED_INIT << 8)) {
-                FreeLibrary(drvInfo->hInstAspi);
-                drvInfo->hInstAspi = 0;
-            }
+            drvInfo->fCDIoSupported = OSLibCdIoIsSupported(pHMHandleData->hHMHandle);
 
             //get cdrom signature
             DWORD parsize = 4;
@@ -356,6 +342,17 @@ DWORD HMDeviceDiskClass::OpenDisk(PVOID pDrvInfo)
              dprintf(("Drive not ready"));
              return 0;
         }
+        if(drvInfo->driveType == DRIVE_CDROM)
+        {
+            drvInfo->fCDIoSupported = OSLibCdIoIsSupported(hFile);
+
+            //get cdrom signature
+            DWORD parsize = 4;
+            DWORD datasize = 4;
+            strcpy(drvInfo->signature, "CD01");
+            OSLibDosDevIOCtl(hFile, 0x80, 0x61, &drvInfo->signature[0], 4, &parsize,
+                             &drvInfo->signature[0], 4, &datasize);
+        }
         OSLibDosQueryVolumeSerialAndName(1 + drvInfo->driveLetter - 'A', &drvInfo->dwVolumelabel, NULL, 0);
         return hFile;
     }
@@ -372,7 +369,6 @@ BOOL HMDeviceDiskClass::CloseHandle(PHMHANDLEDATA pHMHandleData)
     }
     if(pHMHandleData->dwUserData) {
        DRIVE_INFO *drvInfo = (DRIVE_INFO*)pHMHandleData->dwUserData;
-       if(drvInfo->hInstAspi)    FreeLibrary(drvInfo->hInstAspi);
        free(drvInfo);
     }
     return ret;
@@ -1425,22 +1421,20 @@ writecheckfail:
     // SCSI passthru class
     // -------------------
 
-    case IOCTL_SCSI_PASS_THROUGH:
     case IOCTL_SCSI_MINIPORT:
     case IOCTL_SCSI_GET_INQUIRY_DATA:
+        break;
+
     case IOCTL_SCSI_GET_CAPABILITIES:
         break;
 
+    case IOCTL_SCSI_PASS_THROUGH:
+        //no break; same as IOCTL_SCSI_PASS_THROUGH_DIRECT
     case IOCTL_SCSI_PASS_THROUGH_DIRECT:
     {
         PSCSI_PASS_THROUGH_DIRECT pPacket = (PSCSI_PASS_THROUGH_DIRECT)lpOutBuffer;
-        SRB_ExecSCSICmd *psrb;
-
-        if(drvInfo->hInstAspi == NULL)
-        {
-            SetLastError(ERROR_ACCESS_DENIED);
-            return FALSE;
-        }
+        DRIVE_INFO *drvInfo = (DRIVE_INFO*)pHMHandleData->dwUserData;
+        CDIO_CMD_BUFFER cdiocmd;
 
         if(nOutBufferSize < sizeof(SCSI_PASS_THROUGH_DIRECT) ||
            !pPacket || pPacket->Length < sizeof(SCSI_PASS_THROUGH_DIRECT))
@@ -1448,72 +1442,69 @@ writecheckfail:
             SetLastError(ERROR_INSUFFICIENT_BUFFER);
             return FALSE;
         }
+        
+        if(!drvInfo || drvInfo->fCDIoSupported == FALSE) {
+            dprintf(("os2cdrom.dmd CD interface not supported!!"));
+            SetLastError(ERROR_ACCESS_DENIED);
+            return FALSE;
+        }
         if(lpBytesReturned) {
             *lpBytesReturned = 0;
         }
 
-        psrb = (SRB_ExecSCSICmd *)alloca(sizeof(SRB_ExecSCSICmd)+pPacket->SenseInfoLength);
-        if(psrb == NULL) {
-            dprintf(("not enough memory!!"));
-            SetLastError(ERROR_NOT_ENOUGH_MEMORY);
+        if(pPacket->CdbLength > sizeof(cdiocmd.arCDB)) {
+            dprintf(("CDB buffer too big (%d)!!", pPacket->CdbLength));
+            SetLastError(ERROR_INVALID_PARAMETER);
             return FALSE;
         }
-        memset(psrb, 0, sizeof(*psrb));
-        psrb->SRB_Cmd        = SC_EXEC_SCSI_CMD;
-        psrb->SRB_Status     = pPacket->ScsiStatus;
-        psrb->SRB_HaId       = pPacket->PathId;
-        psrb->SRB_Target     = pPacket->TargetId;
-        psrb->SRB_Lun        = pPacket->Lun;
-        psrb->SRB_BufLen     = pPacket->DataTransferLength;
-        psrb->SRB_SenseLen   = pPacket->SenseInfoLength;
-        psrb->SRB_CDBLen     = pPacket->CdbLength;
+
+        memset(&cdiocmd, 0, sizeof(cdiocmd));
+
         switch(pPacket->DataIn) {
         case SCSI_IOCTL_DATA_OUT:
-             psrb->SRB_Flags = 0x2 << 3;
-             break;
+            cdiocmd.flDirection = CMDDIR_OUTPUT;
+            break;
         case SCSI_IOCTL_DATA_IN:
-             psrb->SRB_Flags = 0x1 << 3;
-             break;
+            cdiocmd.flDirection = CMDDIR_INPUT;
+            break;
         case SCSI_IOCTL_DATA_UNSPECIFIED:
-             psrb->SRB_Flags = 0x3 << 3;
-             break;
+            cdiocmd.flDirection = CMDDIR_OUTPUT|CMDDIR_INPUT;;
+            break;
         }
-        if(pPacket->CdbLength > 16) {
-             SetLastError(ERROR_INVALID_PARAMETER);
-             return FALSE;
-        }
+
+        cdiocmd.cbCDB = pPacket->CdbLength;
+        memcpy(cdiocmd.arCDB, pPacket->Cdb, pPacket->CdbLength);
+
         dprintf(("IOCTL_SCSI_PASS_THROUGH_DIRECT %x len %x, %x%02x%02x%02x %x%02x", pPacket->Cdb[0], pPacket->DataTransferLength, pPacket->Cdb[2], pPacket->Cdb[3], pPacket->Cdb[4], pPacket->Cdb[5], pPacket->Cdb[7], pPacket->Cdb[8]));
-        psrb->SRB_BufPointer = (BYTE *)pPacket->DataBuffer;
-        memcpy(&psrb->CDBByte[0], &pPacket->Cdb[0], 16);
-        if(psrb->SRB_SenseLen) {
-            memcpy(&psrb->SenseArea[0], (char *)pPacket + pPacket->SenseInfoOffset, psrb->SRB_SenseLen);
-        }
-        //TODO: pPacket->TimeOutValue ignored
-        int rc = drvInfo->SendASPI32Command((LPSRB)psrb);
-        if(rc != SS_COMP) {
-            dprintf(("SendASPI32Command failed with error %d", rc));
-            if(rc == SS_ERR) {
-                 SetLastError(ERROR_ADAP_HDW_ERR); //returned by NT4, SP6
-            }
-            else SetLastError(ERROR_GEN_FAILURE);
+
+        if(OSLibCdIoSendCommand(pHMHandleData->hHMHandle, &cdiocmd, pPacket->DataBuffer, pPacket->DataTransferLength) == FALSE) {
+            dprintf(("OSLibCdIoSendCommand failed!!"));
+            pPacket->ScsiStatus = SS_ERR;
+            SetLastError(ERROR_ADAP_HDW_ERR); //returned by NT4, SP6
             return FALSE;
         }
-        pPacket->ScsiStatus = rc;
-        if(lpBytesReturned) {
-            *lpBytesReturned = 0;
+
+        if(pPacket->SenseInfoLength) {
+            if(OSLibCdIoRequestSense(pHMHandleData->hHMHandle, (char *)pPacket + pPacket->SenseInfoOffset, pPacket->SenseInfoLength) == FALSE) {
+                dprintf(("OSLibCdIoRequestSense failed!!"));
+                pPacket->ScsiStatus = SS_ERR;
+                SetLastError(ERROR_ADAP_HDW_ERR); //returned by NT4, SP6
+                return FALSE;
+            }
         }
-        pPacket->DataTransferLength = psrb->SRB_BufLen;
-        if(psrb->SRB_SenseLen) {
-            memcpy((char *)pPacket + pPacket->SenseInfoOffset, &psrb->SenseArea[0], psrb->SRB_SenseLen);
-        }
+        pPacket->ScsiStatus = SS_COMP;
         SetLastError(ERROR_SUCCESS);
         return TRUE;
     }
     case IOCTL_SCSI_GET_ADDRESS:
     {
-        DWORD numAdapters, rc;
-        SRB   srb;
-        int   i, j, k;
+        DRIVE_INFO *drvInfo = (DRIVE_INFO*)pHMHandleData->dwUserData;
+
+        if(!drvInfo || drvInfo->fCDIoSupported == FALSE) {
+            dprintf(("os2cdrom.dmd CD interface not supported!!"));
+            SetLastError(ERROR_ACCESS_DENIED);
+            return FALSE;
+        }
 
         if(!lpOutBuffer || nOutBufferSize < 8) {
             SetLastError(ERROR_INSUFFICIENT_BUFFER);  //todo: right error?
@@ -1523,53 +1514,11 @@ writecheckfail:
         addr->Length = sizeof(SCSI_ADDRESS);
         addr->PortNumber = 0;
         addr->PathId     = 0;
-
-        if(drvInfo->hInstAspi == NULL) {
-            SetLastError(ERROR_ACCESS_DENIED);
-            return FALSE;
-        }
-
-        numAdapters = drvInfo->GetASPI32SupportInfo();
-
-        memset(&srb, 0, sizeof(srb));
-        srb.common.SRB_Cmd = SC_HA_INQUIRY;
-        rc = drvInfo->SendASPI32Command(&srb);
-
-        char drivename[3];
-        drivename[0] = (char)drvInfo->driveLetter;
-        drivename[1] = ':';
-        drivename[2] = 0;
-
-        for(i=0;i<LOBYTE(numAdapters);i++) {
-            for(j=0;j<8;j++) {
-                for(k=0;k<16;k++) {
-                    memset(&srb, 0, sizeof(srb));
-                    srb.common.SRB_Cmd     = SC_GET_DEV_TYPE;
-                    srb.devtype.SRB_HaId   = i;
-                    srb.devtype.SRB_Target = j;
-                    srb.devtype.SRB_Lun    = k;
-                    rc = drvInfo->SendASPI32Command(&srb);
-                    if(rc == SS_COMP) {
-                        if(srb.devtype.SRB_DeviceType == SS_DEVTYPE_CDROM &&
-                           GetDriveTypeA(drivename) == DRIVE_CDROM)
-                        {
-                            goto done;
-                        }
-                    }
-                }
-            }
-        }
-done:
-        if(rc == SS_COMP) {
-            addr->TargetId   = j;
-            addr->Lun        = k;
-            SetLastError(ERROR_SUCCESS);
-        }
-        else    SetLastError(ERROR_FILE_NOT_FOUND); //todo
+        //irrelevant, since os2cdrom.dmd doesn't need them
+        addr->TargetId   = 1;
+        addr->Lun        = 0;
+        SetLastError(ERROR_SUCCESS);
         return TRUE;
-failure:
-        SetLastError(ERROR_INVALID_PARAMETER); //todo
-        return FALSE;
     }
 
     case IOCTL_SCSI_RESCAN_BUS:
