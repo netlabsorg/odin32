@@ -1,4 +1,23 @@
- /* $Id: changelog,v 1.1023 2000-07-03 12:18:02 bird Exp $ */
+ /* $Id: changelog,v 1.1024 2000-07-04 08:39:35 sandervl Exp $ */
+
+ 2000-07-04: Sander van Leeuwen <sandervl@xs4all.nl>
+    - KERNEL32: Unstubbed CopyFileExA/W (calls CopyFileA/W; not properly implemented)
+                Unstubbed CreateDirectoryExA/W (calls CreateDirectoryA/W; not properly implemented)
+                Fixed GetShortPathNameA/W; don't touch short path parameter if
+                it's NULL; behaviour (as seen in NT 4, SP6):
+                - converts long filename to 8.3 short filname (TODO: not yet done here!)
+                - fails on volume that doesn't support 8.3 filenames
+                - if lpszShortPath 0 or cchBuffer too small -> return required length
+                  (INCLUDING 0 terminator)
+                - if lpszLongPath == NULL -> ERROR_INVALID_PARAMETER (return 0)
+                - if lpszLongPath empty -> proceed as if nothing is wrong
+                  (Wine claims it sets last error to ERROR_BAD_PATHNAME)
+                - does NOT clear the last error if successful!
+                - if successful -> return length of string (excluding 0 terminator)
+    - USER32:   Fixed adding windows to tasklist (done too late)
+    - GDI32/USER32:
+                - Rewrote Set/GetViewportExtEx, Set/GetMapMode & moved them
+                  from gdi32 to user32
 
  2000-07-03: knut st. osmundsen <knut.stange.osmundsen@mynd.no>
     - KERNEL32: Added IsDebuggerPresent (debug.cpp). Returns FALSE, but by
