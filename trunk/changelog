@@ -1,4 +1,20 @@
- /* $Id: changelog,v 1.1058 2000-08-10 02:26:01 phaller Exp $ */
+ /* $Id: changelog,v 1.1059 2000-08-11 10:54:35 sandervl Exp $ */
+
+ 2000-08-11: Sander van Leeuwen <sandervl@xs4all.nl>
+    - KERNEL32: Lock/Unlock
+                64 bits values are only supported by JFS
+                Try the 32 bits DosSetFileLocks if it fails with ERROR_INVALID_PARAMETER
+                (TODO: should check the partition type instead)
+                Build fake dll header for system dlls and use it's address
+                as instance handle.
+    - SRC\*\initterm.cpp
+                Changed RegisterLxDll call for fake headers.
+    - INCLUDE\misc.h:
+                Removed versionos2.h dependancy
+    - VERSION\version.cpp
+                Include versionos2.h
+    - COMCTL32: Put back old property page code (breaks VPBuddy preferences
+                dialog). SameTime install property sheet now messed up (again).
 
  2000-08-10: Patrick Haller <phaller@gmx.net>
     - KERNEL32: OSLibDosQueryVolumeFS does no more return an error if
