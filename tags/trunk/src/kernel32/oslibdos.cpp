@@ -1,4 +1,4 @@
-/* $Id: oslibdos.cpp,v 1.73 2001-09-27 16:34:00 phaller Exp $ */
+/* $Id: oslibdos.cpp,v 1.74 2001-10-08 17:24:47 phaller Exp $ */
 /*
  * Wrappers for OS/2 Dos* API
  *
@@ -158,7 +158,10 @@ DWORD error2WinError(APIRET rc,DWORD defaultCode)
 
     case ERROR_LOCK_VIOLATION: //32
         return ERROR_LOCK_VIOLATION_W;
-
+    
+    case ERROR_WRONG_DISK: //34
+        return ERROR_WRONG_DISK_W;
+    
     case ERROR_SHARING_BUFFER_EXCEEDED: //36
         return ERROR_SHARING_BUFFER_EXCEEDED_W;
 
@@ -218,7 +221,16 @@ DWORD error2WinError(APIRET rc,DWORD defaultCode)
 
     case ERROR_DISCARDED: //157
         return ERROR_DISCARDED_W;
-
+    
+    case ERROR_INVALID_EXE_SIGNATURE: // 191
+      return ERROR_INVALID_EXE_SIGNATURE_W;
+    
+    case ERROR_EXE_MARKED_INVALID: // 192
+      return ERROR_EXE_MARKED_INVALID_W;
+    
+    case ERROR_BAD_EXE_FORMAT: // 193
+      return ERROR_BAD_EXE_FORMAT_W;
+    
     case ERROR_FILENAME_EXCED_RANGE: //206
         return ERROR_FILENAME_EXCED_RANGE_W;
 
