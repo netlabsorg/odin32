@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.199 2003-02-13 10:34:49 sandervl Exp $ */
+/* $Id: pmwindow.cpp,v 1.200 2003-02-22 09:54:25 sandervl Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -1903,6 +1903,20 @@ PosChangedEnd:
             rc = 0;
             break;
         }
+        //hack alert: as we return zero as border size (check handler) we need
+        //to do adjustments here as well or PM will calculate it for us and
+        //result will be illegal. Btw we do not honour PM border size settings
+        //and never will. I was unable to figure out why only X coordinate
+        //is being broken but not Y as well. 
+
+        if ((pswp->fl & SWP_MAXIMIZE) == SWP_MAXIMIZE)  
+        {
+            RECT rect;
+            rect.left = rect.top = rect.right = rect.bottom = 0;
+            win32wnd->AdjustMaximizedRect(&rect);
+
+            pswp->x += rect.left;
+        }
         goto RunDefFrameWndProc;
     }
 
@@ -1925,16 +1939,16 @@ PosChangedEnd:
         dprintf(("PMFRAME:WM_MINMAXFRAME %x",hwnd));
         if ((swp->fl & SWP_MAXIMIZE) == SWP_MAXIMIZE)
         {
-            win32wnd->setStyle((win32wnd->getStyle() & ~WS_MINIMIZE_W) | WS_MAXIMIZE_W);
-
             RECT rect;
-
             rect.left = rect.top = rect.right = rect.bottom = 0;
             win32wnd->AdjustMaximizedRect(&rect);
+
             swp->x += rect.left;
             swp->cx += rect.right-rect.left;
             swp->y -= rect.bottom;
             swp->cy += rect.bottom-rect.top;
+
+            win32wnd->ShowWindow(SW_RESTORE_W);
         }
         else
         if ((swp->fl & SWP_MINIMIZE) == SWP_MINIMIZE)
