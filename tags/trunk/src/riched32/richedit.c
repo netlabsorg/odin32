@@ -51,6 +51,10 @@ HANDLE RICHED32_hHeap = (HANDLE)NULL;
                      , \
                      hwnd, (UINT)wParam, (UINT)lParam)
 
+#ifdef __WIN32OS2__
+#define RICHEDIT_WND_PROP	"RICHEDIT_PROP"
+
+#endif
 
 /***********************************************************************
  * DllMain [Internal] Initializes the internal 'RICHED32.DLL'.
@@ -109,6 +113,15 @@ static LRESULT WINAPI RICHED32_WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam,
     LONG newstyle = 0;
     LONG style = 0;
 
+#ifdef __WIN32OS2__
+    HWND hwndEdit;
+    HWND hwndParent;
+    char* rtfBuffer;
+    HANDLE hProp = 0;
+    int rtfBufferSize;
+
+    CHARRANGE *cr;
+#else
     static HWND hwndEdit;
     static HWND hwndParent;
     static char* rtfBuffer;
@@ -116,6 +129,7 @@ static LRESULT WINAPI RICHED32_WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam,
 
     CHARRANGE *cr;
     TRACE("previous hwndEdit: %p hwndParent %p\n",hwndEdit,hwndParent);
+#endif
     hwndEdit = GetWindow(hwnd,GW_CHILD);
     TRACE("uMsg: 0x%x hwnd: %p hwndEdit: %p\n",uMsg,hwnd,hwndEdit);
 
@@ -142,6 +156,19 @@ static LRESULT WINAPI RICHED32_WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam,
     TRACE("hwndEdit: %p hwnd: %p\n",hwndEdit,hwnd);
 
 	    SetWindowLongA(hwnd,GWL_STYLE, newstyle);
+#ifdef __WIN32OS2__
+          {
+            CHARFORMAT2A *pcf;
+
+            hProp = GlobalAlloc(GMEM_MOVEABLE|GMEM_ZEROINIT, sizeof(CHARFORMAT2A));
+            SetPropA(hwnd, RICHEDIT_WND_PROP, hProp);
+            pcf = (CHARFORMAT2A *)GlobalLock(hProp);
+            if(pcf) {
+                pcf->cbSize = sizeof(CHARFORMAT2A);
+                GlobalUnlock(hProp);
+            }
+          }
+#endif
             return 0 ;
 
     case WM_SETFOCUS :
@@ -399,11 +426,70 @@ static LRESULT WINAPI RICHED32_WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam,
             return 0;
 
     case EM_SETBKGNDCOLOR:
+#ifdef __WIN32OS2__
+{
+            CHARFORMAT2A *pcf;
+
+            hProp = GetPropA(hwnd, RICHEDIT_WND_PROP);
+            pcf = (CHARFORMAT2A *)GlobalLock(hProp);
+            if(pcf) 
+            {
+                pcf->dwMask     |= CFM_BACKCOLOR;
+                pcf->crBackColor = (wParam) ? GetSysColor(COLOR_BACKGROUND) : (COLORREF)lParam;
+
+                //Destroy old brush if present
+                if(pcf->dwReserved) DeleteObject(pcf->dwReserved);
+
+                //Create a brush that we return in WM_CTLCOLORSTATIC
+                pcf->dwReserved  = (DWORD)CreateSolidBrush(pcf->crBackColor);
+ 
+                dprintf(("Set background color to %x brush %x", pcf->crBackColor, pcf->dwReserved));
+
+                GlobalUnlock(hProp);
+            }
+}
+#endif
             DPRINTF_EDIT_MSG32("EM_SETBKGNDCOLOR Ignored");
             return 0;
 
     case EM_SETCHARFORMAT:
+#ifdef __WIN32OS2__
+    {
+            CHARFORMAT2A *pnewcf = (CHARFORMAT2A *)lParam;
+            CHARFORMAT2A *pcf;
+
+            hProp = GetPropA(hwnd, RICHEDIT_WND_PROP);
+            pcf = (CHARFORMAT2A *)GlobalLock(hProp);
+            if(pcf && pnewcf && pnewcf->cbSize >= sizeof(CHARFORMATA)) 
+            {
+                if((pnewcf->dwMask & CFM_COLOR) && !(pnewcf->dwEffects & CFE_AUTOCOLOR)) {
+                    pcf->dwMask     |= CFM_COLOR;
+                    pcf->crTextColor = pnewcf->crTextColor;
+                    dprintf(("Set text color to %x", pcf->crTextColor));
+                }
+                if(pnewcf->cbSize == sizeof(CHARFORMAT2A)) 
+                {
+                    if((pnewcf->dwMask & CFM_BACKCOLOR) && !(pnewcf->dwEffects & CFE_AUTOBACKCOLOR)) 
+                    {
+                        pcf->dwMask     |= CFM_BACKCOLOR;
+                        pcf->crBackColor = pnewcf->crBackColor;
+ 
+                        //Destroy old brush if present
+                        if(pcf->dwReserved) DeleteObject(pcf->dwReserved);
+
+                        //Create a brush that we return in WM_CTLCOLORSTATIC
+                        pcf->dwReserved  = (DWORD)CreateSolidBrush(pcf->crBackColor);
+ 
+                        dprintf(("Set background color to %x brush %x", pcf->crBackColor, pcf->dwReserved));
+                    }
+                }
+            }
+
+            if(pcf) GlobalUnlock(hProp);
+    }
+#else
             DPRINTF_EDIT_MSG32("EM_SETCHARFORMAT Ignored");
+#endif
             return 0;
 
     case EM_SETEDITSTYLE:
@@ -656,6 +742,22 @@ static LRESULT WINAPI RICHED32_WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam,
         DPRINTF_EDIT_MSG32("WM_KILLFOCUS Passed to default");
         return DefWindowProcA( hwnd,uMsg,wParam,lParam);
     case WM_DESTROY:
+#ifdef __WIN32OS2__
+    {
+        CHARFORMAT2A *pcf;
+
+        hProp = GetPropA(hwnd, RICHEDIT_WND_PROP);
+        pcf = (CHARFORMAT2A *)GlobalLock(hProp);
+        if(pcf) {
+            //Destroy old brush if present
+            if(pcf->dwReserved) DeleteObject(pcf->dwReserved);
+            GlobalUnlock(hProp);
+        }
+
+        if(hProp) GlobalFree(hProp);
+        RemovePropA(hwnd, RICHEDIT_WND_PROP);
+    }
+#endif
         DPRINTF_EDIT_MSG32("WM_DESTROY Passed to default");
         return DefWindowProcA( hwnd,uMsg,wParam,lParam);
     case WM_CHILDACTIVATE:
@@ -671,9 +773,11 @@ static LRESULT WINAPI RICHED32_WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam,
 /*    case WM_INITIALUPDATE:
         DPRINTF_EDIT_MSG32("WM_INITIALUPDATE Passed to default");
         return DefWindowProcA( hwnd,uMsg,wParam,lParam); */
+#ifndef __WIN32OS2__
     case WM_CTLCOLOREDIT:
         DPRINTF_EDIT_MSG32("WM_CTLCOLOREDIT Passed to default");
         return DefWindowProcA( hwnd,uMsg,wParam,lParam);
+#endif
     case WM_SETCURSOR:
         DPRINTF_EDIT_MSG32("WM_SETCURSOR Passed to default");
         return DefWindowProcA( hwnd,uMsg,wParam,lParam);
@@ -699,6 +803,30 @@ static LRESULT WINAPI RICHED32_WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam,
         DPRINTF_EDIT_MSG32("WM_NCHITTEST Passed to default");
         return DefWindowProcA( hwnd,uMsg,wParam,lParam);
     case WM_CTLCOLORSTATIC:
+#ifdef __WIN32OS2__
+    case WM_CTLCOLOREDIT:
+{
+            CHARFORMAT2A *pcf;
+            HBRUSH hBrush = 0;
+            HDC hdc = (HDC)wParam;
+
+            hProp = GetPropA(hwnd, RICHEDIT_WND_PROP);
+            pcf = (CHARFORMAT2A *)GlobalLock(hProp);
+            if(pcf)
+            {
+                if(pcf->dwMask & CFM_BACKCOLOR) {
+                    SetBkColor(hdc, pcf->crBackColor);
+                    hBrush = pcf->dwReserved;
+                }
+                if(pcf->dwMask & CFM_COLOR) {
+                    SetTextColor(hdc, pcf->crTextColor);
+                }
+            }
+            if(pcf) GlobalUnlock(hProp);
+
+            if(hBrush) return hBrush;          
+}
+#endif
         DPRINTF_EDIT_MSG32("WM_CTLCOLORSTATIC Passed to default");
         return DefWindowProcA( hwnd,uMsg,wParam,lParam);
     case WM_NCMOUSEMOVE:
