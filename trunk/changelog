@@ -1,4 +1,8 @@
- /* $Id: changelog,v 1.241 1999-09-25 19:10:27 sandervl Exp $ */
+ /* $Id: changelog,v 1.242 1999-09-26 10:09:06 sandervl Exp $ */
+
+ 99-09-26: Sander van Leeuwen <sandervl@xs4all.nl>
+	- USER32:   Started with standard window scrollbar implementation
+                    Rewrote ScrollWindow (not done and not working correctly)
 
  99-09-25: Christoph Bratschi<cbratschi@datacomm.ch>
         - USER32: WS_EX_* 3D frame support for child windows

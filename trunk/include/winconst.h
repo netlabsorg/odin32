@@ -1,4 +1,4 @@
-/* $Id: winconst.h,v 1.8 1999-09-25 15:09:18 cbratschi Exp $ */
+/* $Id: winconst.h,v 1.9 1999-09-26 10:09:25 sandervl Exp $ */
 
 /*
  * Win32 constants
@@ -197,3 +197,25 @@
 #define SW_SHOWDEFAULT_W      10
 #define SW_MAX_W              10
 #define SW_NORMALNA_W         0xCC        /* undoc. flag in MinMaximize */
+
+
+/* scroll messages */
+#define WM_HSCROLL_W          0x0114
+#define WM_VSCROLL_W          0x0115
+
+/* WM_H/VSCROLL commands */
+#define SB_LINEUP_W           0
+#define SB_LINELEFT_W         0
+#define SB_LINEDOWN_W         1
+#define SB_LINERIGHT_W        1
+#define SB_PAGEUP_W           2
+#define SB_PAGELEFT_W         2
+#define SB_PAGEDOWN_W         3
+#define SB_PAGERIGHT_W        3
+#define SB_THUMBPOSITION_W    4
+#define SB_THUMBTRACK_W       5
+#define SB_TOP_W              6
+#define SB_LEFT_W             6
+#define SB_BOTTOM_W           7
+#define SB_RIGHT_W            7
+#define SB_ENDSCROLL_W        8
