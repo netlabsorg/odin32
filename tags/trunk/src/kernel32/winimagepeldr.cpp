@@ -1,4 +1,4 @@
-/* $Id: winimagepeldr.cpp,v 1.91 2001-11-15 14:59:06 phaller Exp $ */
+/* $Id: winimagepeldr.cpp,v 1.92 2001-11-24 14:58:04 sandervl Exp $ */
 
 /*
  * Win32 PE loader Image base class
@@ -40,6 +40,7 @@
 #define PRIVATE_LOGGING
 #include <misc.h>
 #include <win32api.h>
+#include <heapcode.h>
 #include "winimagebase.h"
 #include "winimagepeldr.h"
 #include "windllpeldr.h"
@@ -74,7 +75,9 @@ char szErrorModule[128] = "";
 static FILE *_privateLogFile = NULL;
 #endif
 
-ULONG MissingApi();
+ULONG WIN32API MissingApiOrd(char *dllname, int ordinal);
+ULONG WIN32API MissingApiName(char *dllname, char *functionname);
+ULONG WIN32API MissingApi(char *message);
 
 //******************************************************************************
 //******************************************************************************
@@ -1295,6 +1298,23 @@ void Win32PeLdrImage::AddOff16Fixup(ULONG fixupaddr, BOOL fHighFixup)
     }
 }
 //******************************************************************************
+#define MISSINGOFFSET_PUSHORDINAL    1
+#define MISSINGOFFSET_PUSHNAME       1
+#define MISSINGOFFSET_PUSHDLLNAME    6
+#define MISSINGOFFSET_FUNCTION       11
+
+char missingapicode[18] = {
+//push  dllname
+        0x68, 0x00, 0x00, 0x00, 0x00,
+//push  ordinal/name
+        0x68, 0x00, 0x00, 0x00, 0x00,
+//mov   ecx, MissingApiOrd/Name
+        0xB9, 0x99, 0x99, 0x99, 0x99,
+//call  ecx
+        0xFF, 0xD1,
+//ret
+        0xC3};
+
 //******************************************************************************
 void Win32PeLdrImage::StoreImportByOrd(Win32ImageBase *WinImage, ULONG ordinal, ULONG impaddr)
 {
@@ -1310,7 +1330,13 @@ void Win32PeLdrImage::StoreImportByOrd(Win32ImageBase *WinImage, ULONG ordinal, 
                  ordinal));
 
         dprintf((LOG, "--->>> NOT FOUND!" ));
-        *import = (ULONG)MissingApi;
+        char *code = (char *)_cmalloc(sizeof(missingapicode));
+
+        memcpy(code, missingapicode, sizeof(missingapicode));
+        *(DWORD *)&code[MISSINGOFFSET_PUSHDLLNAME] = (DWORD)WinImage->getModuleName();
+        *(DWORD *)&code[MISSINGOFFSET_PUSHORDINAL] = ordinal;
+        *(DWORD *)&code[MISSINGOFFSET_FUNCTION]    = (DWORD)MissingApiOrd;
+        *import = (ULONG)code;
     }
     else *import = apiaddr;
 }
@@ -1330,7 +1356,14 @@ void Win32PeLdrImage::StoreImportByName(Win32ImageBase *WinImage, char *impname,
                 impname));
 
         dprintf((LOG, "--->>> NOT FOUND!" ));
-        *import = (ULONG)MissingApi;
+
+        char *code = (char *)_cmalloc(sizeof(missingapicode));
+
+        memcpy(code, missingapicode, sizeof(missingapicode));
+        *(DWORD *)&code[MISSINGOFFSET_PUSHDLLNAME] = (DWORD)WinImage->getModuleName();
+        *(DWORD *)&code[MISSINGOFFSET_PUSHNAME]    = (DWORD)impname;
+        *(DWORD *)&code[MISSINGOFFSET_FUNCTION]    = (DWORD)MissingApiName;
+        *import = (ULONG)code;
     }
     else  *import = apiaddr;
 }
@@ -2014,7 +2047,25 @@ ULONG Win32PeLdrImage::getVersion()
 }
 //******************************************************************************
 //******************************************************************************
-ULONG MissingApi()
+ULONG WIN32API MissingApiOrd(char *dllname, int ordinal)
+{
+   char message[128];
+
+   sprintf(message, "The application has called the non-existing api %s->%d", dllname, ordinal);
+   return MissingApi(message);
+}
+//******************************************************************************
+//******************************************************************************
+ULONG WIN32API MissingApiName(char *dllname, char *functionname)
+{
+   char message[128];
+
+   sprintf(message, "The application has called the non-existing api %s->%s", dllname, functionname);
+   return MissingApi(message);
+}
+//******************************************************************************
+//******************************************************************************
+ULONG WIN32API MissingApi(char *message)
 {
  static BOOL fIgnore = FALSE;
  int r;
@@ -2024,7 +2075,7 @@ ULONG MissingApi()
         return(0);
 
     do {
-        r = WinMessageBox(HWND_DESKTOP, NULLHANDLE, "The application has called a non-existing api\n",
+        r = WinMessageBox(HWND_DESKTOP, NULLHANDLE, message,
                           "Internal Odin Error", 0, MB_ABORTRETRYIGNORE | MB_ICONEXCLAMATION | MB_MOVEABLE);
     }
     while(r == MBID_RETRY); //giggle
