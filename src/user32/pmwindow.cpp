@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.114 2001-02-17 14:49:26 sandervl Exp $ */
+/* $Id: pmwindow.cpp,v 1.115 2001-02-17 17:11:17 sandervl Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -342,18 +342,30 @@ MRESULT ProcessPMMessage(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2, Win32Base
         if ((wp.hwndInsertAfter != wpOld.hwndInsertAfter) ||
             (wp.x != wpOld.x) || (wp.y != wpOld.y) || (wp.cx != wpOld.cx) || (wp.cy != wpOld.cy) || (wp.flags != wpOld.flags))
         {
+            ULONG flags = pswp->fl;      //make a backup copy; OSLibMapWINDOWPOStoSWP will modify it
+
             dprintf(("OS2: WM_ADJUSTWINDOWPOS, app changed windowpos struct"));
             dprintf(("%x (%d,%d), (%d,%d)", pswp->fl, pswp->x, pswp->y, pswp->cx, pswp->cy));
 
             if(win32wnd->getParent()) {
-                OSLibMapWINDOWPOStoSWP(&wp, pswp, &swpOld, win32wnd->getParent()->getWindowHeight(),
-                                       win32wnd->getParent()->getClientRectPtr()->left,
-                                       win32wnd->getParent()->getClientRectPtr()->top,
-                                       hwnd);
+                  OSLibMapWINDOWPOStoSWP(&wp, pswp, &swpOld, win32wnd->getParent()->getWindowHeight(),
+                                         win32wnd->getParent()->getClientRectPtr()->left,
+                                         win32wnd->getParent()->getClientRectPtr()->top,
+                                         hwnd);
             }
             else  OSLibMapWINDOWPOStoSWP(&wp, pswp, &swpOld, OSLibQueryScreenHeight(), 0, 0, hwnd);
 
             dprintf(("%x (%d,%d), (%d,%d)", pswp->fl, pswp->x, pswp->y, pswp->cx, pswp->cy));
+
+            //OSLibMapWINDOWPOStoSWP can add flags, but we must not let it remove flags!
+            if(pswp->fl & SWP_SIZE)
+                flags |= SWP_SIZE;
+
+            if(pswp->fl & SWP_MOVE)
+                flags |= SWP_MOVE;
+
+            pswp->fl = flags;   //restore flags
+
             pswp->fl |= SWP_NOADJUST;
             pswp->hwndInsertBehind = hwndAfter;
             pswp->hwnd = hwnd;
