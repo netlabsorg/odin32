@@ -1,4 +1,4 @@
-; $Id: mytkExecPgm.asm,v 1.9 2000-02-23 16:52:18 bird Exp $
+; $Id: mytkExecPgm.asm,v 1.10 2000-02-23 16:53:04 bird Exp $
 ;
 ; mytkExecPgm - tkExecPgm overload
 ;
@@ -90,7 +90,7 @@ cchArgs     = dword ptr -14h
 ;OffArg      = -26h
 
     ASSUME CS:CODE32, DS:NOTHING, SS:NOTHING
-    int     3
+;    int     3
     push    ebp
     mov     ebp, esp
     lea     esp, [ebp + cchArgs]
