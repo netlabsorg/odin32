@@ -1,7 +1,18 @@
- /* $Id: ChangeLog,v 1.209 1999-09-18 10:35:01 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.210 1999-09-18 15:55:20 sandervl Exp $ */
+
+ 99-09-18: Sander van Leeuwen <sandervl@xs4all.nl>
+	- INCLUDE: Header file changes for win32 apps compiled in OS/2
+	- VERSION: Create correct import lib
+	- WINMM:   Create correct import lib
+	- MSACM32: Link with winmm.lib, don't import apis from .def file
+	- MSVFW32: Link with winmm.lib, don't import apis from .def file
+
+ 99-09-18: Przemyslaw Dobrowolski <dobrawka@asua.org.pl>
+	- KERNEL32: Implemented lstrncmpiA
 
  99-09-18: Jens Wiessner <wiessnej@rfi.de>
 	- CRTDLL: Added stubs
+	- SHELL32(NEW)/MSACM32/MSFW32: Link with kernel32 for lstrncmpiA
 
  99-09-17: Daniela Engert <dani@ngrt.de>
 	- USER32:   Fix: window focus management.
