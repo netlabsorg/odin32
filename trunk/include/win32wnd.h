@@ -1,0 +1,17 @@
+/* $Id: win32wnd.h,v 1.1 1999-09-23 18:38:32 sandervl Exp $ */
+
+/*
+ * Win32 window utility procedures (in USER32)
+ *
+ * Copyright 1999 Sander van Leeuwen (sandervl@xs4all.nl)
+ *
+ *
+ * Project Odin Software License can be found in LICENSE.TXT
+ *
+ */
+#ifndef __WIN32WND_H__
+#define __WIN32WND_H__
+
+HWND Win32ToOS2Handle(HWND hwndWin32);
+
+#endif //__WIN32WND_H__
