@@ -1,4 +1,4 @@
-# $Id: setup.os2relwat11.mk,v 1.1 2002-05-16 11:37:05 bird Exp $
+# $Id: setup.os2relwat11.mk,v 1.2 2002-08-20 19:14:34 bird Exp $
 
 # ---OS2, RELEASE, WAT11-------------------------
 ENV_NAME="OS/2, Release, Watcom C/C++ v11.0c"
@@ -35,11 +35,15 @@ EXEPACK=lxlite.exe
 # The flags
 #
 AR_FLAGS=/nologo /noignorecase
-AR_CMD=$(AR) $(AR_FLAGS) $@ @$(TARGET_LNK)
-_AR_LNK1= "$(TARGET_OBJS: ="&^
-")"
-AR_LNK1= $(_AR_LNK1:""=)
-AR_LNK2= $(@R).lst
+AR_CMD=$(AR) $(AR_FLAGS) @"$(TARGET_LNK)"
+AR_LNK1= "$(@R).$(EXT_LIB)"
+AR_LNK2=y
+_AR_LNK3= +"$(TARGET_OBJS: ="&^
+ +")"
+AR_LNK3= $(_AR_LNK3:+""&^
+=)
+AR_LNK4= "$(@R).lst";
+
 
 CC_FLAGS=-bt=os2v2 -dOS2 -d__32BIT__ -d__i386__ -omlinear -5r -zq -bm -ze -w4 -d2 -hc -zc $(_CC_OPTIONAL) $(CC_DEFINES) $(ALL_DEFINES) $(BUILD_DEFINES) $(CC_INCLUDES:-I=-i=) $(ALL_INCLUDES:-I=-i=) -i=$(PATH_INCLUDES) -i=$(WATCOM)\h
 CC_FLAGS_EXE=$(CC_FLAGS)

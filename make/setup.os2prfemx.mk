@@ -1,4 +1,4 @@
-# $Id: setup.os2prfemx.mk,v 1.3 2002-06-19 02:20:01 bird Exp $
+# $Id: setup.os2prfemx.mk,v 1.4 2002-08-20 19:14:32 bird Exp $
 
 # ---OS2, PROFILE, EMX----------------------------
 ENV_NAME="OS/2, Profile, EMX/GCC Compiler"
@@ -43,11 +43,15 @@ EXEPACK=lxlite.exe
 # The flags
 #
 AR_FLAGS=/nologo /noignorecase
-AR_CMD=$(AR) $(AR_FLAGS) $@ @$(TARGET_LNK)
-_AR_LNK1= "$(TARGET_OBJS: ="&^
-")"
-AR_LNK1= $(_AR_LNK1:""=)
-AR_LNK2= $(@R).lst
+AR_CMD=$(AR) $(AR_FLAGS) @"$(TARGET_LNK)"
+AR_LNK1= "$(@R).$(EXT_LIB)"
+AR_LNK2=y
+_AR_LNK3= +"$(TARGET_OBJS: ="&^
+ +")"
+AR_LNK3= $(_AR_LNK3:+""&^
+=)
+AR_LNK4= "$(@R).lst";
+
 
 CC_FLAGS=-c -DDEBUG -DOS2 -D__32BIT__ -DMODEL=FLAT -Zomf -Wall -Wstrict-prototypes -Wno-trigraphs \
          -fno-common -march=i586 -g $(_CC_OPTIONAL) \
