@@ -1,9 +1,10 @@
-/* $Id: button.h,v 1.1 1999-05-24 20:19:08 ktk Exp $ */
+/* $Id: button.h,v 1.2 1999-07-16 17:30:47 sandervl Exp $ */
 
 /*
  * Button-class extra info
  *
  * Copyright 1994 Alexandre Julliard
+ * Copyright 1999 Christoph Bratschi
  */
 
 #ifndef __WINE_BUTTON_H
@@ -18,7 +19,7 @@
 typedef struct
 {
     WORD     state;   /* Current state */
-    HFONT16  hFont;   /* Button font (or 0 for system font) */
+    HFONT    hFont;   /* Button font (or 0 for system font) */
     HANDLE   hImage;  /* Handle to the image or the icon */
 } BUTTONINFO;
 
@@ -34,4 +35,8 @@ typedef struct
 extern LRESULT WINAPI ButtonWndProc( HWND hWnd, UINT uMsg,
                                      WPARAM wParam, LPARAM lParam );
 
+void BUTTON_Register();
+void BUTTON_Unregister();
+
 #endif  /* __WINE_BUTTON_H */
+
