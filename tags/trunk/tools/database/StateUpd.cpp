@@ -1,4 +1,4 @@
-/* $Id: StateUpd.cpp,v 1.19 2000-02-18 12:42:06 bird Exp $
+/* $Id: StateUpd.cpp,v 1.20 2000-03-14 16:28:29 bird Exp $
  *
  * StateUpd - Scans source files for API functions and imports data on them.
  *
@@ -360,6 +360,7 @@ static void syntax()
            "    -s            Scan subdirectories.          default: disabled\n"
            "    -Old          Use old API style.            default: disabled\n"
            "    -OS2          Ignore 'OS2'-prefix on APIs.  default: disabled\n"
+           "    -Dll:<dllname> Name of the dll.             default: dirname\n"
            "    -h:<hostname> Database server hostname.     default: localhost\n"
            "    -u:<username> Username on the server.       default: root\n"
            "    -p:<password> Password.                     default: <empty>\n"
