@@ -111,6 +111,11 @@ extern const char * const debug_ch_name[];
 #undef  __SET_DEBUGGING
 #define __SET_DEBUGGING(dbcl,dbch,on)
 
+#undef DPRINTF dbg_printf
+#define DPRINTF WriteLog
+#undef MESSAGE dbg_printf
+#define MESSAGE WriteLog
+
 #endif
 
 
