@@ -1,4 +1,4 @@
-/* $Id: shell32_main.h,v 1.1 1999-10-09 11:13:23 sandervl Exp $ */
+/* $Id: shell32_main.h,v 1.2 1999-11-02 18:50:16 phaller Exp $ */
 
 /*
  * Win32 SHELL32 for OS/2
@@ -96,9 +96,9 @@ void SIC_Destroy(void);
 BOOL PidlToSicIndex (IShellFolder * sh, LPITEMIDLIST pidl, BOOL bBigIcon, UINT * pIndex);
 
 /* Classes Root */
-BOOL HCR_MapTypeToValue ( LPCSTR szExtension, LPSTR szFileType, LONG len, BOOL bPrependDot);
-BOOL HCR_GetExecuteCommand ( LPCSTR szClass, LPCSTR szVerb, LPSTR szDest, LONG len );
-BOOL HCR_GetDefaultIcon (LPCSTR szClass, LPSTR szDest, LONG len, LPDWORD dwNr);
+BOOL HCR_MapTypeToValue ( LPCSTR szExtension, LPSTR szFileType, DWORD len, BOOL bPrependDot);
+BOOL HCR_GetExecuteCommand ( LPCSTR szClass, LPCSTR szVerb, LPSTR szDest, DWORD len );
+BOOL HCR_GetDefaultIcon (LPCSTR szClass, LPSTR szDest, DWORD len, LPDWORD dwNr);
 BOOL HCR_GetClassName (REFIID riid, LPSTR szDest, DWORD len);
 BOOL HCR_GetFolderAttributes (REFIID riid, LPDWORD szDest);
 
