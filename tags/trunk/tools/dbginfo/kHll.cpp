@@ -1,4 +1,4 @@
-/* $Id: kHll.cpp,v 1.8 2000-03-27 12:52:13 bird Exp $
+/* $Id: kHll.cpp,v 1.9 2000-03-31 15:35:09 bird Exp $
  *
  * kHll - Implementation of the class kHll.
  *        That class is used to create HLL debuginfo.
@@ -658,7 +658,8 @@ int         kHll::write(FILE *phFile)
     /*
      * Hacking:
      * Writing an extra HLL header pointing to an non-existing directory
-     * staring at the last byte of this header.
+     * staring at the last byte of this header. This is present when linking
+     * with ilink...
      */
     if (fseek(phFile, lPosStart + cchWritten, SEEK_SET) != 0)
         return -2;
