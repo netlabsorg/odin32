@@ -1,4 +1,4 @@
-/* $Id: auxos2.cpp,v 1.6 1999-10-05 19:24:00 phaller Exp $ */
+/* $Id: auxos2.cpp,v 1.7 1999-12-29 10:44:16 sandervl Exp $ */
 
 /*
  * Auxilary multimedia OS/2 implementation
@@ -18,7 +18,7 @@
 #define  INCL_BASE
 #define  INCL_OS2MM
 #include <os2wrap.h>    //Odin32 OS/2 api wrappers
-#include <os2me.h>
+#include <os2mewrap.h>  //Odin32 OS/2 MMPM/2 api wrappers
 #include <string.h>
 
 #define  OS2_ONLY
