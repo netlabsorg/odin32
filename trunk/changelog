@@ -1,4 +1,7 @@
-/* $Id: changelog,v 1.2535 2003-03-31 11:52:55 sandervl Exp $ */
+/* $Id: changelog,v 1.2536 2003-04-01 10:00:10 sandervl Exp $ */
+
+ 2003-04-01: Platon Fomichev <stauff@innotek   >
+    - USER32:   o Functions for setting custom frame/cd/window class names
 
  2003-03-31: Dietrich Teickner <Dietrich_Teickner@t-online   >
     - SHELL32:  o Shell file operations update
