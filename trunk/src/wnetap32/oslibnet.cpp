@@ -26,16 +26,47 @@
 #define PURE_32
 #include <netcons.h>
 #include <wksta.h>
+#include <neterr.h>
 
 
 //******************************************************************************
 // translate OS/2 error codes to Windows codes
 // NOTE: add all codes you need, list is not complete!
 //******************************************************************************
-static DWORD error2WinError(APIRET rc,DWORD defaultCode = ERROR_NOT_ENOUGH_MEMORY_W)
+static DWORD error2WinError(APIRET rc)
 {
   switch (rc)
   {
+    // NT/LAN Manager specific error codes
+  case NERR_NetNotStarted:     return NERR_NetNotStarted;
+  case NERR_UnknownServer:     return NERR_UnknownServer;
+  case NERR_ShareMem:          return NERR_ShareMem;
+  case NERR_NoNetworkResource: return NERR_NoNetworkResource;
+  case NERR_RemoteOnly:        return NERR_RemoteOnly;
+  case NERR_DevNotRedirected:  return NERR_DevNotRedirected;
+  case NERR_ServerNotStarted:  return NERR_ServerNotStarted;
+  case NERR_ItemNotFound:      return NERR_ItemNotFound;
+  case NERR_UnknownDevDir:     return NERR_UnknownDevDir;
+  case NERR_RedirectedPath:    return NERR_RedirectedPath;
+  case NERR_DuplicateShare:    return NERR_DuplicateShare;
+  case NERR_NoRoom:            return NERR_NoRoom;
+  case NERR_TooManyItems:      return NERR_TooManyItems;
+  case NERR_InvalidMaxUsers:   return NERR_InvalidMaxUsers;
+  case NERR_BufTooSmall:       return NERR_BufTooSmall;
+  case NERR_RemoteErr:         return NERR_RemoteErr;
+  case NERR_LanmanIniError:    return NERR_LanmanIniError;
+    // case NERR_OS2IoctlError
+  case NERR_NetworkError:      return NERR_NetworkError;
+  case NERR_WkstaNotStarted:   return NERR_WkstaNotStarted;
+  case NERR_BASE + 39:         return NERR_BASE + 39;    // NERR_BrowserNotStarted
+  case NERR_InternalError:     return NERR_InternalError;
+  case NERR_BadTransactConfig: return NERR_BadTransactConfig;
+  case NERR_InvalidAPI:        return NERR_InvalidAPI;
+  case NERR_BadEventName:      return NERR_BadEventName;
+  case NERR_BASE + 44:         return NERR_BASE + 44; // NERR_DupNameReboot
+    
+  // ...
+    
     case NO_ERROR: //0
         return ERROR_SUCCESS_W;
 
@@ -167,7 +198,7 @@ static DWORD error2WinError(APIRET rc,DWORD defaultCode = ERROR_NOT_ENOUGH_MEMOR
 
     default:
       dprintf(("WARNING: error2WinError: error %d not included!!!!", rc));
-        return defaultCode;
+        return rc;
   }
 }
 
