@@ -182,7 +182,7 @@ int	CDAUDIO_SetDoor(WINE_CDAUDIO* wcda, int open)
         os2CDEject(wcda->hfOS2Handle);
     }
     else
-        BOOL os2CDCloseTray(HFILE hfDrive);
+        os2CDCloseTray(wcda->hfOS2Handle);
 
     return 0;
 }
