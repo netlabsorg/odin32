@@ -1,5 +1,5 @@
 ################################################################################
-# $Id: Makefile,v 1.56 2000-10-01 02:58:11 bird Exp $
+# $Id: Makefile,v 1.57 2000-10-16 20:47:59 bird Exp $
 #
 # Win32k makefile.
 #
@@ -727,9 +727,9 @@ dep:
     $(PDWIN32_TOOLS)\fastdep -a+ -o$$(WIN32KOBJ) \
         $(CINCLUDES16) dev16\*.c* \
         -objobj_e $(CINCLUDES16) dev16\*.c* \
-        -objobj_c $(CINCLUDES16) dev16\*.c*
-        -objobj_tst $(CINCLUDES16) dev16\*.c*
-        -objobj_init $(CINCLUDES16) dev16\*.c*
+        -objobj_c $(CINCLUDES16) dev16\*.c* \
+        -objobj_tst $(CINCLUDES16) dev16\*.c* \
+        -objobj_init $(CINCLUDES16) dev16\*.c* \
         -objobj_tst_init $(CINCLUDES16) dev16\*.c*
     cd pe2lx
     $(MAKE_CMD) dep
