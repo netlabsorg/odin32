@@ -1,4 +1,4 @@
- /* $Id: changelog,v 1.88 1999-08-16 18:54:53 sandervl Exp $ */
+ /* $Id: changelog,v 1.89 1999-08-16 20:21:09 phaller Exp $ */
  99-08-16: Sander van Leeuwen <sandervl@xs4all.nl>
 	- PE loader: Started with rewrite
 	- ODINCRT: Changed compile & link options
@@ -10,6 +10,7 @@
 
  99-08-16: Patrick Haller <phaller@gmx.net>
         - SHELL32: integrated Christoph Bratschis SHELL32 stubs
+        - WSOCK32: odinwrap macros
 
  99-08-16: Christoph Bratschi <cbratschi@datacomm.ch>
 	- USER32: uitools.cpp update
