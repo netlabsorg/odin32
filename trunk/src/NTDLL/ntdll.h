@@ -1,4 +1,4 @@
-/* $Id: ntdll.h,v 1.11 2000-01-05 19:37:29 sandervl Exp $ */
+/* $Id: ntdll.h,v 1.12 2000-08-20 15:16:57 phaller Exp $ */
 
 /*
    this file defines interfaces mainly exposed to device drivers and
@@ -630,7 +630,7 @@ DWORD WINAPI RtlNtStatusToDosError(DWORD error);
 BOOLEAN WINAPI RtlGetNtProductType(LPDWORD type);
 INT WINAPI RtlExtendedLargeIntegerDivide(LARGE_INTEGER dividend, DWORD divisor, LPDWORD rest);
 LARGE_INTEGER WINAPI RtlExtendedIntegerMultiply(LARGE_INTEGER factor1,INT factor2);
-DWORD WINAPI RtlFormatCurrentUserKeyPath(DWORD x);
+DWORD WINAPI RtlFormatCurrentUserKeyPath(PUNICODE_STRING pustrKeyPath);
 DWORD WINAPI RtlOpenCurrentUser(DWORD x1, DWORD *x2);
 BOOLEAN WINAPI RtlDosPathNameToNtPathName_U( LPWSTR from,PUNICODE_STRING us,DWORD x2,DWORD x3);
 DWORD WINAPI RtlCreateEnvironment(DWORD x1,DWORD x2);

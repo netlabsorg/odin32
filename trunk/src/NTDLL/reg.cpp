@@ -1,4 +1,4 @@
-/* $Id: reg.cpp,v 1.3 1999-08-11 22:23:47 phaller Exp $ */
+/* $Id: reg.cpp,v 1.4 2000-08-20 15:16:58 phaller Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -15,7 +15,73 @@
 #include <ntdef.h>
 #include <winreg.h>
 
+#include <heapstring.h>
+#include "debugtools.h"
 #include "ntdll.h"
+
+
+/* translates predefined paths to HKEY_ constants */
+static BOOLEAN _NtKeyToWinKey(
+                              IN POBJECT_ATTRIBUTES ObjectAttributes,
+                              OUT UINT * Offset,/* offset within ObjectName */
+                              OUT HKEY * KeyHandle)/* translated handle */
+{
+  static const WCHAR KeyPath_HKLM[] = {
+    '\\','R','E','G','I','S','T','R','Y',
+      '\\','M','A','C','H','I','N','E',0};
+  static const WCHAR KeyPath_HKU [] = {
+    '\\','R','E','G','I','S','T','R','Y',
+      '\\','U','S','E','R',0};
+  static const WCHAR KeyPath_HCC [] = {
+    '\\','R','E','G','I','S','T','R','Y',
+      '\\','M','A','C','H','I','N','E',
+      '\\','S','Y','S','T','E','M',
+      '\\','C','U','R','R','E','N','T','C','O','N','T','R','O','L','S','E','T',
+      '\\','H','A','R','D','W','A','R','E','P','R','O','F','I','L','E','S',
+      '\\','C','U','R','R','E','N','T',0};
+  static const WCHAR KeyPath_HCR [] = {
+    '\\','R','E','G','I','S','T','R','Y',
+      '\\','M','A','C','H','I','N','E',
+      '\\','S','O','F','T','W','A','R','E',
+      '\\','C','L','A','S','S','E','S',0};
+  int len;
+  PUNICODE_STRING ObjectName = ObjectAttributes->ObjectName;
+  
+  if(ObjectAttributes->RootDirectory)
+  {
+    len = 0;
+    *KeyHandle = ObjectAttributes->RootDirectory;
+  }
+  else if((ObjectName->Length > (len=lstrlenW(KeyPath_HKLM)))
+          && (0==lstrncmpiW(ObjectName->Buffer,KeyPath_HKLM,len)))
+  {  *KeyHandle = HKEY_LOCAL_MACHINE;
+  }
+  else if((ObjectName->Length > (len=lstrlenW(KeyPath_HKU)))
+          && (0==lstrncmpiW(ObjectName->Buffer,KeyPath_HKU,len)))
+  {  *KeyHandle = HKEY_USERS;
+  }
+  else if((ObjectName->Length > (len=lstrlenW(KeyPath_HCR)))
+          && (0==lstrncmpiW(ObjectName->Buffer,KeyPath_HCR,len)))
+  {  *KeyHandle = HKEY_CLASSES_ROOT;
+  }
+  else if((ObjectName->Length > (len=lstrlenW(KeyPath_HCC)))
+          && (0==lstrncmpiW(ObjectName->Buffer,KeyPath_HCC,len)))
+  {  *KeyHandle = HKEY_CURRENT_CONFIG;
+  }
+  else
+  {
+    *KeyHandle = 0;
+    *Offset = 0;
+    return FALSE;
+  }
+  
+  if (len > 0 && ObjectName->Buffer[len] == (WCHAR)'\\') len++;
+  *Offset = len;
+  
+  TRACE("off=%u hkey=0x%08x\n", *Offset, *KeyHandle);
+  return TRUE;
+}
+
 
 
 /******************************************************************************

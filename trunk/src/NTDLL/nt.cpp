@@ -1,4 +1,4 @@
-/* $Id: nt.cpp,v 1.8 2000-07-07 19:06:18 sandervl Exp $ */
+/* $Id: nt.cpp,v 1.9 2000-08-20 15:16:55 phaller Exp $ */
 
 
 /*
@@ -808,3 +808,38 @@ NTSTATUS WINAPI NtDisplayString (PUNICODE_STRING string)
 
   return 0;
 }
+
+/******************************************************************************
+ *  NtPowerInformation				[NTDLL] 
+ * 
+ */
+NTSTATUS WINAPI NtPowerInformation(DWORD x1,DWORD x2,DWORD x3,DWORD x4,DWORD x5)
+{
+  dprintf(("NTDLL: NtPowerInformation(0x%08lx,0x%08lx,0x%08lx,0x%08lx,0x%08lx) not implemented\n",
+           x1,x2,x3,x4,x5));
+  return 0;
+}
+
+/******************************************************************************
+ *  NtAllocateLocallyUniqueId
+ *
+ * FIXME: the server should do that
+ */
+NTSTATUS WINAPI NtAllocateLocallyUniqueId(PLUID pLuid)
+{
+  static LUID luid;
+
+  dprintf(("NTDLL: NtAllocateLocallyUniqueId %p (0x%08lx%08lx)\n",
+           pLuid,
+           luid.HighPart,
+           luid.LowPart));
+
+  luid.LowPart++;        // PH: why don't we use 64-bit arithmetic here?
+  if (luid.LowPart == 0) // handle overflow
+    luid.HighPart++;
+
+  pLuid->LowPart  = luid.LowPart;
+  pLuid->HighPart = luid.HighPart;
+  return STATUS_SUCCESS;
+}
+

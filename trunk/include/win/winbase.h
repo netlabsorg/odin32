@@ -1,4 +1,4 @@
-/* $Id: winbase.h,v 1.15 2000-08-18 02:04:12 phaller Exp $ */
+/* $Id: winbase.h,v 1.16 2000-08-20 15:16:21 phaller Exp $ */
 
 #ifndef __WINE_WINBASE_H
 #define __WINE_WINBASE_H
@@ -1557,7 +1557,7 @@ VOID        WINAPI RtlMoveMemory(LPVOID,LPCVOID,UINT);
 #define     MoveMemory RtlMoveMemory
 VOID        WINAPI RtlZeroMemory(LPVOID,UINT);
 #define     ZeroMemory RtlZeroMemory
-VOID        WINAPI RtlCopyMemory(LPVOID,const VOID*, DWORD);
+VOID        WINAPI RtlCopyMemory(LPVOID,const VOID*, UINT);
 #define     CopyMemory RtlCopyMemory
 BOOL        WINAPI RevertToSelf(void);
 DWORD       WINAPI SearchPathA(LPCSTR,LPCSTR,LPCSTR,DWORD,LPSTR,LPSTR*);
