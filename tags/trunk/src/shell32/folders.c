@@ -1,4 +1,4 @@
-/* $Id: folders.c,v 1.1 2000-08-30 13:52:51 sandervl Exp $ */
+/* $Id: folders.c,v 1.2 2000-09-07 18:13:50 sandervl Exp $ */
 /*
  *	Copyright 1997	Marcus Meissner
  *	Copyright 1998	Juergen Schmied
@@ -205,6 +205,41 @@ static HRESULT WINAPI IExtractIconA_fnGetIconLocation(
 	}
 	else	/* object is file */
 	{
+#ifdef __WIN32OS2__
+          if (_ILGetExtension (pSimplePidl, sTemp, MAX_PATH))
+          {
+            if (HCR_MapTypeToValue(sTemp, sTemp, MAX_PATH, TRUE)
+              && HCR_GetDefaultIcon(sTemp, sTemp, MAX_PATH, &dwNr))
+            {
+              if (!strcmp("%1",sTemp))            /* icon is in the file */
+              {
+                SHGetPathFromIDListA(This->pidl, sTemp);
+                dwNr = 0;
+              }
+              lstrcpynA(szIconFile, sTemp, cchMax);
+              *piIndex = dwNr;
+            } else
+            {
+              //icon is in the file/file is icon
+              if (stricmp(sTemp,"EXE") == 0) //CB: add more
+              {
+                SHGetPathFromIDListA(This->pidl, sTemp);
+                dwNr = 0;
+                lstrcpynA(szIconFile, sTemp, cchMax);
+                *piIndex = dwNr;
+              } else //default icon
+              {
+                lstrcpynA(szIconFile, "shell32.dll", cchMax);
+                *piIndex = 0;
+              }
+            }
+          } else                                  /* default icon */
+          {
+            lstrcpynA(szIconFile, "shell32.dll", cchMax);
+            *piIndex = 0;
+          }
+        }
+#else
 	  if (_ILGetExtension (pSimplePidl, sTemp, MAX_PATH)
 	      && HCR_MapTypeToValue(sTemp, sTemp, MAX_PATH, TRUE)
 	      && HCR_GetDefaultIcon(sTemp, sTemp, MAX_PATH, &dwNr))
@@ -223,7 +258,7 @@ static HRESULT WINAPI IExtractIconA_fnGetIconLocation(
 	    *piIndex = 0;
 	  }
 	}
-
+#endif
 	TRACE("-- %s %x\n", szIconFile, *piIndex);
 	return NOERROR;
 }
@@ -318,6 +353,46 @@ static HRESULT WINAPI IEIPersistFile_fnLoad(IPersistFile* iface, LPCOLESTR pszFi
 
 }
 
+#ifdef __WIN32OS2__
+/************************************************************************
+ * IEIPersistFile_IsDirty (IPersistFile)
+ */
+static HRESULT WINAPI IEIPersistFile_fnIsDirty(IPersistFile* iface)
+{
+  dprintf(("SHELL32: Folders: IEIPersistFile_fnIsDirty not implemented.\n"));
+  return E_NOTIMPL;
+}
+
+/************************************************************************
+ * IEIPersistFile_Save (IPersistFile)
+ */
+static HRESULT WINAPI IEIPersistFile_fnSave(IPersistFile* iface, LPCOLESTR pszFileName, DWORD dwMode)
+{
+  dprintf(("SHELL32: Folders: IEIPersistFile_fnSave not implemented.\n"));
+  return E_NOTIMPL;
+}
+
+
+/************************************************************************
+ * IEIPersistFile_SaveCompleted (IPersistFile)
+ */
+static HRESULT WINAPI IEIPersistFile_fnSaveCompleted(IPersistFile* iface, LPCOLESTR pszFileName)
+{
+  dprintf(("SHELL32: Folders: IEIPersistFile_fnSaveCompleted not implemented.\n"));
+  return E_NOTIMPL;
+}
+
+
+/************************************************************************
+ * IEIPersistFile_GetCurFile (IPersistFile)
+ */
+static HRESULT WINAPI IEIPersistFile_fnGetCurFile(IPersistFile* iface, LPOLESTR* pszFileName)
+{
+  dprintf(("SHELL32: Folders: IEIPersistFile_fnGetCurFile not implemented.\n"));
+  return E_NOTIMPL;
+}
+#endif
+
 static struct ICOM_VTABLE(IPersistFile) pfvt =
 {
 	ICOM_MSVTABLE_COMPAT_DummyRTTIVALUE
@@ -325,10 +400,20 @@ static struct ICOM_VTABLE(IPersistFile) pfvt =
 	IEIPersistFile_fnAddRef,
 	IEIPersistFile_fnRelease,
 	IEIPersistFile_fnGetClassID,
+#ifdef __WIN32OS2__
+        IEIPersistFile_fnIsDirty,       /* IEIPersistFile_fnIsDirty */
+#else
 	(void *) 0xdeadbeef /* IEIPersistFile_fnIsDirty */,
+#endif
 	IEIPersistFile_fnLoad,
+#ifdef __WIN32OS2__
+        IEIPersistFile_fnSave,          /* IEIPersistFile_fnSave */
+        IEIPersistFile_fnSaveCompleted, /* IEIPersistFile_fnSaveCompleted */
+        IEIPersistFile_fnGetCurFile     /* IEIPersistFile_fnGetCurFile */
+#else
 	(void *) 0xdeadbeef /* IEIPersistFile_fnSave */,
 	(void *) 0xdeadbeef /* IEIPersistFile_fnSaveCompleted */,
 	(void *) 0xdeadbeef /* IEIPersistFile_fnGetCurFile */
+#endif
 };
 
