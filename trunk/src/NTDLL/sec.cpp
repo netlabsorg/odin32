@@ -1,4 +1,4 @@
-/* $Id: sec.cpp,v 1.6 2000-10-02 13:10:12 phaller Exp $ */
+/* $Id: sec.cpp,v 1.7 2000-10-26 17:26:00 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -49,7 +49,7 @@ BOOLEAN WINAPI RtlAllocateAndInitializeSid ( PSID_IDENTIFIER_AUTHORITY pIdentifi
 					     PSID *pSid)
 {
   dprintf(("NTDLL: RtlAllocateAndInitializeSid(%08xh,%08xh,%08xh,"
-           "%08xh,%08xh,%08xh,%08xh,%08xh,%08xh,%08xh,%08xh) not implemented.\n",
+           "%08xh,%08xh,%08xh,%08xh,%08xh,%08xh,%08xh,%08xh)",
            pIdentifierAuthority,
            nSubAuthorityCount,
            nSubAuthority0,
