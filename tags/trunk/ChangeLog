@@ -1,6 +1,7 @@
- /* $Id: ChangeLog,v 1.109 1999-08-19 19:52:58 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.110 1999-08-20 00:58:50 phaller Exp $ */
 
  99-08-19: Patrick Haller <phaller@gmx.net>
+        - ODINWRAP: fixed invalid recursion in ODINFUNCTION0-Debug
         - WINMM:    odinwrap macros
         - TAPI32:   odinwrap macros
         - MPR:      odinwrap macros
