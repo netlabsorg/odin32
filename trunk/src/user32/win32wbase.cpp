@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.138 2000-01-09 17:57:48 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.139 2000-01-10 23:29:11 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -2006,6 +2006,9 @@ HMENU Win32BaseWindow::GetSystemMenu(BOOL fRevert)
 {
     if(!fOS2Look) {
         if(fRevert == FALSE) {
+            if(hSysMenu) {
+                DestroyMenu(hSysMenu);
+            }
             OS2SysMenu = LoadMenuA(hInstanceUser32, (LPCSTR)"SYSMENU");
             if(OS2SysMenu) {
                 OSLibWinSetSystemMenu(OS2SysMenu);

@@ -1,4 +1,4 @@
-/* $Id: timer.cpp,v 1.7 1999-12-17 17:18:03 cbratschi Exp $ */
+/* $Id: timer.cpp,v 1.8 2000-01-10 23:29:11 sandervl Exp $ */
 
 /*
  * timer functions for USER32
@@ -98,9 +98,10 @@ BOOL TIMER_HandleTimer (PQMSG pMsg)
     if (!pTimer->proc)
         return (FALSE);  /* forward message */
 
-    if (!WinInSendMsg (GetThreadHAB()))
+    if (!WinInSendMsg (GetThreadHAB())) {
+	dprintf2(("TIMER_HandleTimer %x %x %x", pTimer->hwnd, pTimer->id, pMsg->time));
         pTimer->proc (pTimer->hwnd, (pTimer->inUse == TIMER::SystemTimer) ? WM_SYSTIMER_W:WM_TIMER_W, pTimer->id, pMsg->time);
-
+    }
     return (TRUE);
 }
 
@@ -220,7 +221,7 @@ UINT WIN32API SetTimer (HWND hwnd, UINT id, UINT timeout, TIMERPROC proc)
 {
     UINT rc;
 
-    dprintf(("USER32: SetTimer %04x %d %d %08lx", hwnd, id, timeout, (LONG)proc));
+    dprintf(("USER32: SetTimer %x %d %d %08lx", hwnd, id, timeout, (LONG)proc));
 
     rc = TIMER_SetTimer (hwnd, id, timeout, proc, FALSE);
     return (rc);
@@ -246,7 +247,7 @@ BOOL WIN32API KillTimer (HWND hwnd, UINT id)
 {
     BOOL rc;
 
-    dprintf(("USER32: KillTimer %04x %d", hwnd, id));
+    dprintf(("USER32: KillTimer %x %d", hwnd, id));
 
     rc = TIMER_KillTimer (hwnd, id, FALSE);
     return (rc);
@@ -259,7 +260,7 @@ BOOL WIN32API KillSystemTimer (HWND hwnd, UINT id)
 {
     BOOL rc;
 
-    dprintf(("USER32: KillSystemTimer %04x %d", hwnd, id));
+    dprintf(("USER32: KillSystemTimer %x %d", hwnd, id));
 
     rc = TIMER_KillTimer (hwnd, id, TRUE);
     return (rc);

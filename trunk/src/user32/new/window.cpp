@@ -1,4 +1,4 @@
-/* $Id: window.cpp,v 1.28 2000-01-02 19:30:46 cbratschi Exp $ */
+/* $Id: window.cpp,v 1.29 2000-01-10 23:29:15 sandervl Exp $ */
 /*
  * Win32 window apis for OS/2
  *
@@ -647,7 +647,11 @@ BOOL WIN32API GetWindowRect( HWND hwnd, PRECT pRect)
         SetLastError(ERROR_INVALID_WINDOW_HANDLE);
         return 0;
     }
-    rc = window->GetWindowRect(pRect);
+    if(pRect == NULL) {
+        SetLastError(ERROR_INVALID_PARAMETER);
+	return 0;
+    }
+    *pRect = *window->getWindowRect();
     dprintf(("GetWindowRect %x (%d,%d) (%d,%d)", hwnd, pRect->left, pRect->top, pRect->right, pRect->bottom));
     return rc;
 }

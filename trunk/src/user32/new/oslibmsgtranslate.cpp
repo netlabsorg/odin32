@@ -1,4 +1,4 @@
-/* $Id: oslibmsgtranslate.cpp,v 1.9 2000-01-09 14:14:23 cbratschi Exp $ */
+/* $Id: oslibmsgtranslate.cpp,v 1.10 2000-01-10 23:29:12 sandervl Exp $ */
 /*
  * Window message translation functions for OS/2
  *
@@ -132,13 +132,16 @@ BOOL OS2ToWinMsgTranslate(void *pThdb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode
   OSLIBPOINT       point, ClientPoint;
   POSTMSG_PACKET  *packet;
   THDB            *thdb = (THDB *)pThdb;
+  ULONG            hittest;
   int i;
 
   memset(winMsg, 0, sizeof(MSG));
   win32wnd = Win32BaseWindow::GetWindowFromOS2Handle(os2Msg->hwnd);
   if (!win32wnd) win32wnd = Win32BaseWindow::GetWindowFromOS2FrameHandle(os2Msg->hwnd);
+
   //PostThreadMessage posts WIN32APP_POSTMSG msg without window handle
-  if(win32wnd == 0 && (os2Msg->msg != WM_CREATE && os2Msg->msg != WM_QUIT && os2Msg->msg != WIN32APP_POSTMSG))
+  //Realplayer starts a timer with hwnd 0 & proc 0; check this here
+  if(win32wnd == 0 && (os2Msg->msg != WM_CREATE && os2Msg->msg != WM_QUIT && os2Msg->msg != WM_TIMER && os2Msg->msg != WIN32APP_POSTMSG))
   {
         goto dummymessage; //not a win32 client window
   }
@@ -166,9 +169,12 @@ BOOL OS2ToWinMsgTranslate(void *pThdb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode
       case WM_BUTTON3UP:
       case WM_BUTTON3DBLCLK:
         //WM_NC*BUTTON* is posted when the cursor is in a non-client area of the window
+
+        hittest = win32wnd->MsgHitTest(winMsg->pt.x, winMsg->pt.y);
+
         if (IsNCMouseMsg(win32wnd)) {
             winMsg->message = WINWM_NCLBUTTONDOWN + (os2Msg->msg - WM_BUTTON1DOWN);
-            winMsg->wParam  = win32wnd->lastHitTestVal;
+            winMsg->wParam  = hittest;
             winMsg->lParam  = MAKELONG(winMsg->pt.x, winMsg->pt.y); //screen coordinates
         }
         else {
@@ -198,12 +204,15 @@ BOOL OS2ToWinMsgTranslate(void *pThdb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode
       case WM_MOUSEMOVE:
       {
         //WM_NCMOUSEMOVE is posted when the cursor moves into a non-client area of the window
-        if(IsNCMouseMsg(win32wnd))
+        hittest = win32wnd->MsgHitTest(winMsg->pt.x, winMsg->pt.y);
+
+        if (IsNCMouseMsg(win32wnd)) 
         {
           winMsg->message = WINWM_NCMOUSEMOVE;
-          winMsg->wParam  = (WPARAM)win32wnd->lastHitTestVal;
+          winMsg->wParam  = (WPARAM)hittest;
           winMsg->lParam  = MAKELONG(winMsg->pt.x,winMsg->pt.y);
-        } else
+        } 
+        else
         {
           winMsg->message = WINWM_MOUSEMOVE;
           winMsg->wParam  = GetMouseKeyState();
@@ -219,13 +228,13 @@ BOOL OS2ToWinMsgTranslate(void *pThdb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode
         return TRUE;
       }
 
-      case WM_HITTEST:
+      case WM_ACTIVATE:
       {
-        winMsg->message  = WINWM_NCHITTEST;
-        winMsg->wParam  = 0;
-        winMsg->lParam  = MAKELONG(winMsg->pt.x,winMsg->pt.y);
-        return TRUE;
+        winMsg->message = WINWM_NCACTIVATE;
+        winMsg->wParam  = SHORT1FROMMP(os2Msg->mp1);
+	return TRUE;
       }
+
     }
     //do normal translation for all other messages
   }
@@ -345,9 +354,11 @@ BOOL OS2ToWinMsgTranslate(void *pThdb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode
     case WM_BUTTON3UP:
     case WM_BUTTON3DBLCLK:
         //WM_NC*BUTTON* is posted when the cursor is in a non-client area of the window
+        hittest = win32wnd->MsgHitTest(winMsg->pt.x, winMsg->pt.y);
+
         if(IsNCMouseMsg(win32wnd)) {
             winMsg->message = WINWM_NCLBUTTONDOWN + (os2Msg->msg - WM_BUTTON1DOWN);
-            winMsg->wParam  = win32wnd->lastHitTestVal;
+            winMsg->wParam  = hittest;
             winMsg->lParam  = MAKELONG(winMsg->pt.x, winMsg->pt.y); //screen coordinates
         }
         else {
@@ -377,10 +388,12 @@ BOOL OS2ToWinMsgTranslate(void *pThdb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode
     case WM_MOUSEMOVE:
     {
         //WM_NCMOUSEMOVE is posted when the cursor moves into a non-client area of the window
+        hittest = win32wnd->MsgHitTest(winMsg->pt.x, winMsg->pt.y);
+
         if(IsNCMouseMsg(win32wnd))
         {
           winMsg->message = WINWM_NCMOUSEMOVE;
-          winMsg->wParam  = (WPARAM)win32wnd->lastHitTestVal;
+          winMsg->wParam  = (WPARAM)hittest;
           winMsg->lParam  = MAKELONG(winMsg->pt.x,winMsg->pt.y);
         } else
         {
@@ -577,7 +590,8 @@ VirtualKeyFound:
       WNDPARAMS *wndParams = (WNDPARAMS *)os2Msg->mp1;
 
         if(wndParams->fsStatus & WPM_TEXT) {
-            win32wnd->MsgSetText(wndParams->pszText, wndParams->cchText);
+            winMsg->message = WINWM_SETTEXT;
+            winMsg->lParam  = (LPARAM)wndParams->pszText;
             break;
         }
         goto dummymessage;
@@ -611,14 +625,6 @@ VirtualKeyFound:
                 winMsg->message = WINWM_PAINTICON;
         }
         else    winMsg->message = WINWM_PAINT;
-        break;
-    }
-
-    case WM_HITTEST:
-    {
-        winMsg->message  = WINWM_NCHITTEST;
-        winMsg->wParam  = 0;
-        winMsg->lParam  = MAKELONG(winMsg->pt.x,winMsg->pt.y);
         break;
     }
 

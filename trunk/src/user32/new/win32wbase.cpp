@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.28 2000-01-10 17:18:09 cbratschi Exp $ */
+/* $Id: win32wbase.cpp,v 1.29 2000-01-10 23:29:14 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -216,7 +216,6 @@ void Win32BaseWindow::Init()
   flags            = 0;
   isIcon           = FALSE;
   lastHitTestVal   = HTOS_NORMAL;
-  fIgnoreHitTest   = FALSE;
   owner            = NULL;
   windowClass      = 0;
 
@@ -878,20 +877,11 @@ ULONG Win32BaseWindow::MsgScroll(ULONG msg, ULONG scrollCode, ULONG scrollPos)
 }
 //******************************************************************************
 //******************************************************************************
-ULONG Win32BaseWindow::MsgHitTest(MSG *msg)
+ULONG Win32BaseWindow::MsgHitTest(ULONG x, ULONG y)
 {
-  lastHitTestVal = SendInternalMessageA(WM_NCHITTEST,msg->wParam,msg->lParam);
-  dprintf2(("MsgHitTest returned %x", lastHitTestVal));
-
-  if (lastHitTestVal == HTERROR)
-    return HTOS_ERROR;
-
-#if 0 //CB: problems with groupboxes, internal handling is better
-  if (lastHitTestVal == HTTRANSPARENT)
-    return HTOS_TRANSPARENT;
-#endif
-
-  return HTOS_NORMAL;
+  lastHitTestVal = SendInternalMessageA(WM_NCHITTEST, 0, MAKELONG((USHORT)x, (USHORT)y));
+  dprintf2(("MsgHitTest (%d,%d) (%d,%d) (%d,%d) returned %x", x, y, rectWindow.left, rectWindow.right, rectWindow.top, rectWindow.bottom, lastHitTestVal));
+  return lastHitTestVal;
 }
 //******************************************************************************
 //******************************************************************************
@@ -3095,6 +3085,26 @@ void Win32BaseWindow::NotifyParent(UINT Msg, WPARAM wParam, LPARAM lParam)
 }
 //******************************************************************************
 //******************************************************************************
+HMENU Win32BaseWindow::GetSystemMenu(BOOL fRevert)
+{
+    if(fRevert == FALSE) 
+    {
+            if(hSysMenu) {
+                DestroyMenu(hSysMenu);
+            }
+            hSysMenu = LoadMenuA(GetModuleHandleA("USER32"), (LPCSTR)"SYSMENU");
+            return hSysMenu;
+        }
+        else {//revert back to default system menu
+            if(hSysMenu) {
+                DestroyMenu(hSysMenu);
+                hSysMenu = 0;
+            }
+            return 0;
+    }
+}
+//******************************************************************************
+//******************************************************************************
 BOOL Win32BaseWindow::SetIcon(HICON hIcon)
 {
     dprintf(("Win32BaseWindow::SetIcon %x", hIcon));
@@ -3763,12 +3773,6 @@ BOOL Win32BaseWindow::IsWindowVisible()
 #else
     return OSLibWinIsWindowVisible(OS2HwndFrame);
 #endif
-}
-//******************************************************************************
-//******************************************************************************
-BOOL Win32BaseWindow::GetWindowRect(PRECT pRect)
-{
-    return OSLibWinQueryWindowRect(OS2HwndFrame, pRect, RELATIVE_TO_SCREEN);
 }
 //******************************************************************************
 //******************************************************************************
