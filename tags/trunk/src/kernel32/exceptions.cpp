@@ -1,4 +1,4 @@
-/* $Id: exceptions.cpp,v 1.56 2001-10-18 13:27:39 sandervl Exp $ */
+/* $Id: exceptions.cpp,v 1.57 2001-10-25 13:19:04 sandervl Exp $ */
 
 /*
  * Win32 Exception functions for OS/2
@@ -81,7 +81,7 @@ typedef struct
 
 //Global Process Unhandled exception filter
 static LPTOP_LEVEL_EXCEPTION_FILTER CurrentUnhExceptionFlt = NULL;
-static UINT                         CurrentErrorMode = SEM_FAILCRITICALERRORS;
+static UINT                         CurrentErrorMode = 0;
 static PEXCEPTION_HANDLER           StartupCodeHandler = NULL;
 
 extern "C" PWINEXCEPTION_FRAME GetExceptionRecord(ULONG offset, ULONG segment);
