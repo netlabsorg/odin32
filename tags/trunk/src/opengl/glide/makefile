@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.4 2000-03-06 23:33:43 bird Exp $
+# $Id: makefile,v 1.5 2000-03-08 14:49:40 bird Exp $
 #
 # Odin32 API
 #
@@ -11,9 +11,11 @@ PDWIN32_INCLUDE = ..\..\include
 # Common tools macros. (MAKE_CMD)
 !include ..\..\..\include\pdwin32.tools
 
+# Dummy all rule - nmake without target will make all targets of the first rule.
+all_: all
 
 # All, Lib, Clean and Dep rules.
-all lib clean dep:
+dep clean lib all:
     cd cvg
     $(MAKE_CMD) $@
     cd ..\sst1
