@@ -1,4 +1,4 @@
-/* $Id: odin32pack.cmd,v 1.18 2001-06-13 13:25:52 bird Exp $
+/* $Id: odin32pack.cmd,v 1.19 2001-07-19 17:43:40 achimha Exp $
  *
  * Make the two zip files.
  *
@@ -81,6 +81,7 @@ parse arg sDir, sType;
     /* Copy root files into the pack directory. */
 /*    call copy sRoot'\doc\odin.ini.txt' */
     call copy sRoot'\LICENSE.txt';
+    call copy sRoot'\WGSS50.lic';
     call copy sRoot'\ChangeLog';
     call copy sRoot'\doc\Readme.txt';
     call copy sRoot'\doc\Logging.txt';
