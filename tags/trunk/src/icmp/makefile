@@ -1,16 +1,16 @@
-# $Id: makefile,v 1.5 2000-11-19 09:15:25 bird Exp $
+# $Id: makefile,v 1.6 2000-12-02 23:39:37 bird Exp $
+
 #
 # icmp.dll makefile
 #
-# Project Odin Software License can be found in LICENSE.TXT
-#
+#       Project Odin Software License can be found in LICENSE.TXT
 #
 
 
 #
 # Compiler, tools, and interference rules.
 #
-!include ../../include/pdwin32.mk
+!include ../../makefile.inc
 
 
 #
@@ -27,10 +27,10 @@ $(DLLENTRY)
 #
 LIBS = \
 os2386.lib \
-$(PDWIN32_LIB)/wsock32.lib \
+$(ODIN32_LIB)/wsock32.lib \
 $(RTLLIB_O) \
-$(PDWIN32_LIB)/$(ODINCRT).lib \
-$(PDWIN32_LIB)/kernel32.lib
+$(ODIN32_LIB)/$(ODINCRT).lib \
+$(ODIN32_LIB)/kernel32.lib
 
 
 #
@@ -42,5 +42,5 @@ TARGET = icmp
 #
 # Includes the common rules.
 #
-!include $(PDWIN32_INCLUDE)/pdwin32.post
+!include $(ODIN32_POST_INC)
 

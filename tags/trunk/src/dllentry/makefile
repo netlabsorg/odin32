@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.6 2000-11-19 09:19:09 bird Exp $
+# $Id: makefile,v 1.7 2000-12-02 23:39:06 bird Exp $
 
 #
 # Odin32 API
@@ -17,7 +17,7 @@ NO_LNK_RULE = 1
 #
 # Compiler, tools, and interference rules.
 #
-!include ../../include/pdwin32.mk
+!include ../../makefile.inc
 
 
 #
@@ -41,7 +41,7 @@ TARGET = dllentry_watcom
 #
 # All rule - build objs and copies obj to lib.
 #
-all: $(OBJDIR) $(PDWIN32_LIB)\$(TARGET).obj
+all: $(OBJDIR) $(ODIN32_LIB)\$(TARGET).obj
 
 
 #
@@ -51,12 +51,12 @@ lib: all
 
 
 # Build objs and copies obj to lib.
-$(PDWIN32_LIB)\$(TARGET).obj: $(OBJS)
+$(ODIN32_LIB)\$(TARGET).obj: $(OBJS)
     $(CP) $(OBJS) $@
 
 
 #
 # Includes the common rules.
 #
-!include $(PDWIN32_INCLUDE)/pdwin32.post
+!include $(ODIN32_POST_INC)
 

@@ -1,108 +1,60 @@
-# $Id: makefile,v 1.13 2000-11-20 05:00:50 bird Exp $
+# $Id: makefile,v 1.14 2000-12-02 23:37:30 bird Exp $
 
 #
-# PD-Win32 API
+# Odin32 API
 #
-#	Top of the tree makefile
+#       crtdll.dll makefile
 #
-#
-#	Usage: nmake ( debug | nodebuginfo | release | all | dep | clean )
-#
-#            debug: Change to a debug build.
-#            debugsmp: Start nmake process in background that processes all
-#                      dlls in reverse
-#            nodebuginfo: Change to a debug build without debug info in binaries
-#            nodebuginfosmp: Change to an SMP debug build without debug info in binaries
-#            release: Change to a release build.
-#            releasesmp: Change to an SMP release build.
-#            all: Build the entire tree.
-#            dep: Make dependencies for the entire tree.
-#            clean: Bring tree back to a "virgin" state.
-#
-#
-#
-
-#
-# Directory macros.
-#
-PDWIN32_INCLUDE = .\include
-PDWIN32_TOOLS   = .\tools
-PDWIN32_LIB     = .\lib
-PDWIN32_BIN     = .\bin
 
 
 #
-# Include makefile. (Not completeled)
+# Compiler, tools, and interference rules.
 #
-#!include $(PDWIN32_INCLUDE)/pdwin32.mk
-
-all:		odin_libraries  needed_tools
-    cd src
-    nmake -nologo  all
-    cd ..\tools\install
-    nmake -nologo  all
-
-clean:
-    cd lib
-    nmake -nologo clean
-    cd ..\tools
-    nmake -nologo clean
-    cd ..\src
-    nmake -nologo clean
-
-debug:		odin_libraries  needed_tools
-    cd src
-    nmake -nologo all DEBUG=1
-    cd ..\tools\install
-    nmake -nologo all DEBUG=1
-
-debugsmp:	odin_libraries  needed_tools
-    cd src
-    nmake -nologo DEBUG=1 smp
-    cd ..\tools\install
-    nmake -nologo DEBUG=1 all
-
-nodebuginfo:	odin_libraries  needed_tools
-    cd src
-    nmake -nologo all DEBUG=1 NODEBUGINFO=1
-    cd ..\tools\install
-    nmake -nologo all DEBUG=1 NODEBUGINFO=1
-
-nodebuginfosmp:	odin_libraries  needed_tools
-    cd src
-    nmake -nologo DEBUG=1 NODEBUGINFO=1 smp
-    cd ..\tools\install
-    nmake -nologo DEBUG=1 NODEBUGINFO=1 all
-
-release:	odin_libraries  needed_tools
-    SET DEBUG=
-    cd src
-    nmake -nologo all
-    cd ..\tools\install
-    nmake -nologo all
-
-releasesmp:	odin_libraries  needed_tools
-    SET DEBUG=
-    cd src
-    nmake -nologo smp
-    cd ..\tools\install
-    nmake -nologo all
-
-dep: needed_tools
-    cd tools
-    nmake -nologo dep
-    cd ..\src
-    nmake -nologo dep
+!include ../../makefile.inc
 
 
-# --- common section ---
-odin_libraries:
-	cd lib
-	nmake -nologo
-	cd ..
+#
+# Object files. Prefix with OBJDIR and one space before the '\'.
+#
+OBJS = \
+$(OBJDIR)\crtdll_main.obj \
+$(OBJDIR)\dir.obj \
+$(OBJDIR)\exit.obj \
+$(OBJDIR)\file.obj \
+$(OBJDIR)\mbstring.obj \
+$(OBJDIR)\memory.obj \
+$(OBJDIR)\spawn.obj \
+                     \
+$(OBJDIR)\crtdll.obj \
+$(OBJDIR)\asmhlp.obj \
+$(OBJDIR)\stubs.obj \
+$(OBJDIR)\internal.obj \
+$(OBJDIR)\string.obj \
+$(OBJDIR)\crt_memory.obj \
+$(OBJDIR)\crt_wc.obj \
+$(OBJDIR)\initterm.obj \
+$(OBJDIR)\crtdllrsrc.obj
 
 
-needed_tools:
-    cd tools
-    nmake needed
-    cd ..
+#
+# Libraries. One space before the '\'.
+#
+LIBS = \
+$(ODIN32_LIB)/kernel32.lib \
+$(ODIN32_LIB)/$(ODINCRT).lib \
+$(ODIN32_LIB)/user32.lib \
+$(ODIN32_LIB)/pmwinx.lib \
+os2386.lib \
+$(RTLLIB_O)
+
+
+#
+# Target name - name of the dll without extention and path.
+#
+TARGET = crtdll
+
+
+#
+# Includes the common rules.
+#
+!include $(ODIN32_POST_INC)

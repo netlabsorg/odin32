@@ -1,4 +1,4 @@
-# $Id: ole32.mak,v 1.2 2000-11-21 11:36:51 sandervl Exp $
+# $Id: ole32.mak,v 1.3 2000-12-02 23:40:43 bird Exp $
 
 #
 # Odin32 API
@@ -15,7 +15,7 @@ MAKEFILE = ole32.mak
 #
 # Compiler, tools, and interference rules.
 #
-!include ../../include/pdwin32.mk
+!include ../../makefile.inc
 
 
 #
@@ -60,14 +60,14 @@ $(DLLENTRY)
 # Libraries. One space before the '\'.
 #
 LIBS = \
-$(PDWIN32_LIB)/rpcrt4.lib \
-$(PDWIN32_LIB)/user32.lib \
-$(PDWIN32_LIB)/gdi32.lib \
-$(PDWIN32_LIB)/comctl32.lib \
-$(PDWIN32_LIB)/advapi32.lib \
-$(PDWIN32_LIB)/kernel32.lib \
-$(PDWIN32_LIB)/oleaut32.lib \
-$(PDWIN32_LIB)/$(ODINCRT).lib \
+$(ODIN32_LIB)/rpcrt4.lib \
+$(ODIN32_LIB)/user32.lib \
+$(ODIN32_LIB)/gdi32.lib \
+$(ODIN32_LIB)/comctl32.lib \
+$(ODIN32_LIB)/advapi32.lib \
+$(ODIN32_LIB)/kernel32.lib \
+$(ODIN32_LIB)/oleaut32.lib \
+$(ODIN32_LIB)/$(ODINCRT).lib \
 OS2386.LIB \
 $(RTLLIB_O)
 
@@ -82,5 +82,5 @@ ORGTARGET   = ole32
 #
 # Includes the common rules.
 #
-!include $(PDWIN32_INCLUDE)/pdwin32.post
+!include $(ODIN32_POST_INC)
 

@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.20 2000-11-19 09:04:02 bird Exp $
+# $Id: makefile,v 1.21 2000-12-02 23:40:50 bird Exp $
 
 #
 # Odin32 API
@@ -10,7 +10,7 @@
 #
 # Compiler, tools, and interference rules.
 #
-!include ../../include/pdwin32.mk
+!include ../../makefile.inc
 
 
 #
@@ -45,13 +45,13 @@ $(OBJDIR)\oleaut32rsrc.obj
 # Libraries. One space before the '\'.
 #
 LIBS = \
-$(PDWIN32_LIB)/advapi32.lib \
-$(PDWIN32_LIB)/kernel32.lib \
-$(PDWIN32_LIB)/user32.lib \
-$(PDWIN32_LIB)/ole32.lib \
-$(PDWIN32_LIB)/gdi32.lib \
-$(PDWIN32_LIB)/$(ODINCRT).lib \
-$(PDWIN32_LIB)/pmwinx.lib \
+$(ODIN32_LIB)/advapi32.lib \
+$(ODIN32_LIB)/kernel32.lib \
+$(ODIN32_LIB)/user32.lib \
+$(ODIN32_LIB)/ole32.lib \
+$(ODIN32_LIB)/gdi32.lib \
+$(ODIN32_LIB)/$(ODINCRT).lib \
+$(ODIN32_LIB)/pmwinx.lib \
 OS2386.LIB \
 $(RTLLIB_O)
 
@@ -66,5 +66,5 @@ ORGTARGET   = oleaut32
 #
 # Includes the common rules.
 #
-!include $(PDWIN32_INCLUDE)/pdwin32.post
+!include $(ODIN32_POST_INC)
 
