@@ -1,4 +1,4 @@
-/* $Id: shlview.cpp,v 1.6 2000-01-08 02:24:13 phaller Exp $ */
+/* $Id: shlview.cpp,v 1.7 2000-03-22 16:55:52 cbratschi Exp $ */
 /*
  * ShellView
  *
@@ -308,9 +308,9 @@ static BOOL ShellView_CreateList (IShellViewImpl * This)
 static BOOL ShellView_InitList(IShellViewImpl * This)
 {
    LVCOLUMNA lvColumn;
-   SHELLDETAILS	sd;
-   int	i;
-   char	szTemp[50];
+   SHELLDETAILS sd;
+   int  i;
+   char szTemp[50];
 
    TRACE("%p\n",This);
 
@@ -322,13 +322,13 @@ static BOOL ShellView_InitList(IShellViewImpl * This)
    if (This->pSF2Parent)
    {
       for (i=0; 1; i++)
-      { 
+      {
         if (!SUCCEEDED(IShellFolder2_GetDetailsOf(This->pSF2Parent, NULL, i, &sd)))
-	  break;
-	lvColumn.fmt = sd.fmt;
-	lvColumn.cx = sd.cxChar*8; /* chars->pixel */
-	 StrRetToStrNA( szTemp, 50, &sd.str, NULL);
-	ListView_InsertColumnA(This->hWndList, i, &lvColumn);
+          break;
+        lvColumn.fmt = sd.fmt;
+        lvColumn.cx = sd.cxChar*8; /* chars->pixel */
+         StrRetToStrNA( szTemp, 50, &sd.str, NULL);
+        ListView_InsertColumnA(This->hWndList, i, &lvColumn);
       }
    }
    else
@@ -517,7 +517,7 @@ static HRESULT ShellView_FillList(IShellViewImpl * This)
      {
        ZeroMemory(&lvItem, sizeof(lvItem)); /* create the listviewitem*/
        lvItem.mask = LVIF_TEXT | LVIF_IMAGE | LVIF_PARAM;     /*set the mask*/
-       lvItem.iItem = ListView_GetItemCount(This->hWndList);  /*add the item to the end of the list*/
+       lvItem.iItem = i;  /*add the item to the end of the list*/
        lvItem.lParam = (LPARAM) pidl;             /*set the item's data*/
        lvItem.pszText = LPSTR_TEXTCALLBACKA;         /*get text on a callback basis*/
        lvItem.iImage = I_IMAGECALLBACK;           /*get the image on a callback basis*/
@@ -1072,24 +1072,24 @@ static LRESULT ShellView_OnNotify(IShellViewImpl * This, UINT CtlID, LPNMHDR lpn
        TRACE("-- LVN_GETDISPINFOA %p\n",This);
        pidl = (LPITEMIDLIST)lpdi->item.lParam;
 
-	    if(lpdi->item.mask & LVIF_TEXT)	/* text requested */
-	    {
-	      if (This->pSF2Parent)
-	      {
-	        SHELLDETAILS sd;
-	        IShellFolder2_GetDetailsOf(This->pSF2Parent, pidl, lpdi->item.iSubItem, &sd);
-	        StrRetToStrNA( lpdi->item.pszText, lpdi->item.cchTextMax, &sd.str, NULL);
-	        TRACE("-- text=%s\n",lpdi->item.pszText);		
-	      }
-	      else
-	      {
-	        FIXME("no SF2\n");
-	      }
-	    }
-	    if(lpdi->item.mask & LVIF_IMAGE)	/* image requested */
+            if(lpdi->item.mask & LVIF_TEXT)     /* text requested */
+            {
+              if (This->pSF2Parent)
+              {
+                SHELLDETAILS sd;
+                IShellFolder2_GetDetailsOf(This->pSF2Parent, pidl, lpdi->item.iSubItem, &sd);
+                StrRetToStrNA( lpdi->item.pszText, lpdi->item.cchTextMax, &sd.str, NULL);
+                TRACE("-- text=%s\n",lpdi->item.pszText);
+              }
+              else
+              {
+                FIXME("no SF2\n");
+              }
+            }
+            if(lpdi->item.mask & LVIF_IMAGE)    /* image requested */
          {
            lpdi->item.iImage = SHMapPIDLToSystemImageListIndex(This->pSFParent, pidl, 0);
-         }       
+         }
        break;
 
      case LVN_ITEMCHANGED:

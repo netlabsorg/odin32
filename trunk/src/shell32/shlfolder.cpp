@@ -1,4 +1,4 @@
-/* $Id: shlfolder.cpp,v 1.6 2000-01-08 04:37:01 phaller Exp $ */
+/* $Id: shlfolder.cpp,v 1.7 2000-03-22 16:55:52 cbratschi Exp $ */
 /*
  * Shell Folder stuff
  *
@@ -176,7 +176,8 @@ static HRESULT SHELL32_GetDisplayNameOfChild(
    TRACE("(%p)->(pidl=%p 0x%08lx %p 0x%08lx)\n",psf,pidl,dwFlags,szOut, dwOutLen);
    pdump(pidl);
 
-   if ((pidlFirst = ILCloneFirst(pidl)))
+   pidlFirst = ILCloneFirst(pidl);
+   if (pidlFirst)
    {
      hr = IShellFolder_BindToObject(psf, pidlFirst, NULL, &IID_IShellFolder, (LPVOID*)&psfChild);
      if (SUCCEEDED(hr))
@@ -561,7 +562,8 @@ static HRESULT WINAPI IShellFolder_fnBindToObject( IShellFolder2 * iface, LPCITE
 
    *ppvOut = NULL;
 
-   if ((iid=_ILGetGUIDPointer(pidl)))
+   iid = _ILGetGUIDPointer(pidl);
+   if (iid)
    {
      /* we have to create a alien folder */
      if (  SUCCEEDED(SHCoCreateInstance(NULL, iid, NULL, riid, (LPVOID*)&pShellFolder))
@@ -1316,7 +1318,8 @@ static HRESULT WINAPI ISF_Desktop_fnBindToObject( IShellFolder2 * iface, LPCITEM
 
    *ppvOut = NULL;
 
-   if ((clsid=_ILGetGUIDPointer(pidl)))
+   clsid = _ILGetGUIDPointer(pidl);
+   if (clsid)
    {
      if ( IsEqualIID(clsid, &IID_MyComputer))
      {
@@ -1418,7 +1421,8 @@ static HRESULT WINAPI ISF_Desktop_fnGetAttributesOf(IShellFolder2 * iface,UINT c
    {
      pdump (*apidl);
 
-     if ((clsid=_ILGetGUIDPointer(*apidl)))
+     clsid = _ILGetGUIDPointer(*apidl);
+     if (clsid)
      {
        if (IsEqualIID(clsid, &IID_MyComputer))
        {
@@ -1870,13 +1874,16 @@ static HRESULT WINAPI ISF_MyComputer_fnGetAttributesOf(IShellFolder2 * iface,UIN
      {
        *rgfInOut &= 0xf0000144;
        goto next;
-     }
-     else if ((clsid=_ILGetGUIDPointer(*apidl)))
+     } else
      {
-       if (HCR_GetFolderAttributes(clsid, &attributes))
+       clsid = _ILGetGUIDPointer(*apidl);
+       if (clsid)
        {
-         *rgfInOut &= attributes;
-         goto next;
+         if (HCR_GetFolderAttributes(clsid, &attributes))
+         {
+           *rgfInOut &= attributes;
+           goto next;
+         }
        }
      }
      hr = E_INVALIDARG;
