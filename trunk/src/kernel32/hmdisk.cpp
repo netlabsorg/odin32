@@ -1,4 +1,4 @@
-/* $Id: hmdisk.cpp,v 1.26 2001-10-29 20:08:40 sandervl Exp $ */
+/* $Id: hmdisk.cpp,v 1.27 2001-10-30 00:46:17 sandervl Exp $ */
 
 /*
  * Win32 Disk API functions for OS/2
@@ -37,6 +37,12 @@ typedef struct
     ULONG     driveLetter;
     ULONG     driveType;
     CHAR      signature[8];
+    DWORD     dwAccess;
+    DWORD     dwShare;
+    DWORD     dwCreation;
+    DWORD     dwFlags;
+    LPSECURITY_ATTRIBUTES lpSecurityAttributes;
+    HFILE     hTemplate;
 } DRIVE_INFO;
 
 HMDeviceDiskClass::HMDeviceDiskClass(LPCSTR lpDeviceName) : HMDeviceKernelObjectClass(lpDeviceName)
@@ -136,6 +142,13 @@ DWORD HMDeviceDiskClass::CreateFile (LPCSTR        lpFileName,
         pHMHandleData->dwUserData = (DWORD)drvInfo;
 
         memset(drvInfo, 0, sizeof(DRIVE_INFO));
+        drvInfo->dwAccess  = pHMHandleData->dwAccess;
+        drvInfo->dwAccess  = pHMHandleData->dwShare;
+        drvInfo->lpSecurityAttributes  = (LPSECURITY_ATTRIBUTES)lpSecurityAttributes;
+        drvInfo->dwAccess  = pHMHandleData->dwCreation;
+        drvInfo->dwAccess  = pHMHandleData->dwFlags;
+        drvInfo->hTemplate = hTemplate;
+
         drvInfo->driveLetter = *lpFileName; //save drive letter
         if(drvInfo->driveLetter >= 'a') {
             drvInfo->driveLetter = drvInfo->driveLetter - ((int)'a' - (int)'A');
@@ -172,6 +185,40 @@ DWORD HMDeviceDiskClass::CreateFile (LPCSTR        lpFileName,
         dprintf(("CreateFile failed; error %d", GetLastError()));
         return(GetLastError());
     }
+}
+//******************************************************************************
+//******************************************************************************
+DWORD HMDeviceDiskClass::OpenDisk(PVOID pDrvInfo)
+{
+    char filename[3];
+    DRIVE_INFO *drvInfo = (DRIVE_INFO*)pDrvInfo;
+    HFILE hFile;
+
+    filename[0] = 'A' + drvInfo->driveLetter;
+    filename[1] = ':';
+    filename[2] = 0;
+
+    //Disable error popus. NT allows an app to open a cdrom/dvd drive without a disk inside
+    //OS/2 fails in that case with error ERROR_NOT_READY
+    ULONG oldmode = SetErrorMode(SEM_FAILCRITICALERRORS);
+    hFile = OSLibDosCreateFile(filename,
+                               drvInfo->dwAccess,
+                               drvInfo->dwShare,
+                               drvInfo->lpSecurityAttributes,
+                               drvInfo->dwCreation,
+                               drvInfo->dwFlags,
+                               drvInfo->hTemplate);
+    SetErrorMode(oldmode);
+
+    if (hFile != INVALID_HANDLE_ERROR || GetLastError() == ERROR_NOT_READY)
+    {
+        if(hFile == INVALID_HANDLE_ERROR) {
+             dprintf(("Drive not ready"));
+             return 0; 
+        }
+        else return hFile;
+    }
+    return 0;
 }
 //******************************************************************************
 //******************************************************************************
@@ -522,6 +569,15 @@ BOOL HMDeviceDiskClass::DeviceIoControl(PHMHANDLEDATA pHMHandleData, DWORD dwIoC
         ULONG  bytesread, oldmode;
         APIRET rc;
 
+        if(!pHMHandleData->hHMHandle) {
+            pHMHandleData->hHMHandle = OpenDisk(drvInfo);
+            if(!pHMHandleData->hHMHandle) {
+                dprintf(("No disk inserted; aborting"));
+                SetLastError(ERROR_NOT_READY);
+                return FALSE;
+            }
+        }
+
         //Applications can use this IOCTL to check if the floppy has been changed
         //OSLibDosGetDiskGeometry won't fail when that happens so we read one
         //byte from the disk and return ERROR_MEDIA_CHANGED if it fails with
@@ -650,11 +706,12 @@ BOOL HMDeviceDiskClass::DeviceIoControl(PHMHANDLEDATA pHMHandleData, DWORD dwIoC
             pTOC->TrackData[i].Adr         = trackinfo.ucTrackControl & 0xF;
             pTOC->TrackData[i].Reserved1   = 0;
             //big endian format
-            pTOC->TrackData[i].Address[0]  = HIWORD(HIBYTE(trackinfo.ulTrackAddr));
-            pTOC->TrackData[i].Address[1]  = HIWORD(LOBYTE(trackinfo.ulTrackAddr));
-            pTOC->TrackData[i].Address[2]  = LOWORD(HIBYTE(trackinfo.ulTrackAddr));
-            pTOC->TrackData[i].Address[3]  = LOWORD(LOBYTE(trackinfo.ulTrackAddr));
+            pTOC->TrackData[i].Address[0]  = HIBYTE(HIWORD(trackinfo.ulTrackAddr));
+            pTOC->TrackData[i].Address[1]  = LOBYTE(HIWORD(trackinfo.ulTrackAddr));
+            pTOC->TrackData[i].Address[2]  = HIBYTE(LOWORD(trackinfo.ulTrackAddr));
+            pTOC->TrackData[i].Address[3]  = LOBYTE(LOWORD(trackinfo.ulTrackAddr));
         }
+
         //Add a track at the end (presumably so the app can determine the size of the 1st track)
         //That is what NT4, SP6 does anyway
         pTOC->TrackData[numtracks].TrackNumber = 0xAA;
@@ -664,10 +721,10 @@ BOOL HMDeviceDiskClass::DeviceIoControl(PHMHANDLEDATA pHMHandleData, DWORD dwIoC
         pTOC->TrackData[numtracks].Reserved1   = 0;
         //big endian format
         //Address of pseudo track is the address of the lead-out track
-        pTOC->TrackData[numtracks].Address[0]  = HIWORD(HIBYTE(diskinfo.ulLeadOutAddr));
-        pTOC->TrackData[numtracks].Address[1]  = HIWORD(LOBYTE(diskinfo.ulLeadOutAddr));
-        pTOC->TrackData[numtracks].Address[2]  = LOWORD(HIBYTE(diskinfo.ulLeadOutAddr));
-        pTOC->TrackData[numtracks].Address[3]  = LOWORD(LOBYTE(diskinfo.ulLeadOutAddr));
+        pTOC->TrackData[numtracks].Address[0]  = HIBYTE(HIWORD(diskinfo.ulLeadOutAddr));
+        pTOC->TrackData[numtracks].Address[1]  = LOBYTE(HIWORD(diskinfo.ulLeadOutAddr));
+        pTOC->TrackData[numtracks].Address[2]  = HIBYTE(LOWORD(diskinfo.ulLeadOutAddr));
+        pTOC->TrackData[numtracks].Address[3]  = LOBYTE(LOWORD(diskinfo.ulLeadOutAddr));
 
         if(lpBytesReturned)
             *lpBytesReturned = length;
@@ -875,6 +932,16 @@ BOOL HMDeviceDiskClass::DeviceIoControl(PHMHANDLEDATA pHMHandleData, DWORD dwIoC
         if(lpBytesReturned) {
             *lpBytesReturned = 0;
         }
+
+        if(!pHMHandleData->hHMHandle) {
+            pHMHandleData->hHMHandle = OpenDisk(drvInfo);
+            if(!pHMHandleData->hHMHandle) {
+                dprintf(("No disk inserted; aborting"));
+                SetLastError(ERROR_NOT_READY);
+                return FALSE;
+            }
+        }
+
 #pragma pack(1)
       typedef struct
       {
@@ -953,7 +1020,8 @@ BOOL HMDeviceDiskClass::DeviceIoControl(PHMHANDLEDATA pHMHandleData, DWORD dwIoC
         PSCSI_PASS_THROUGH_DIRECT pPacket = (PSCSI_PASS_THROUGH_DIRECT)lpOutBuffer;
         SRB_ExecSCSICmd *psrb;
 
-        if(drvInfo->hInstAspi == NULL) {
+        if(drvInfo->hInstAspi == NULL) 
+        {
             SetLastError(ERROR_ACCESS_DENIED);
             return FALSE;
         }
@@ -967,6 +1035,7 @@ BOOL HMDeviceDiskClass::DeviceIoControl(PHMHANDLEDATA pHMHandleData, DWORD dwIoC
         if(lpBytesReturned) {
             *lpBytesReturned = 0;
         }
+
         psrb = (SRB_ExecSCSICmd *)alloca(sizeof(SRB_ExecSCSICmd)+pPacket->SenseInfoLength);
         if(psrb == NULL) {
             dprintf(("not enough memory!!"));
@@ -1144,6 +1213,17 @@ BOOL HMDeviceDiskClass::ReadFile(PHMHANDLEDATA pHMHandleData,
     SetLastError(ERROR_INVALID_PARAMETER);
     return FALSE;
   }
+
+  if(!pHMHandleData->hHMHandle) {
+      DRIVE_INFO *drvInfo = (DRIVE_INFO*)pHMHandleData->dwUserData;
+      pHMHandleData->hHMHandle = OpenDisk(drvInfo);
+      if(!pHMHandleData->hHMHandle) {
+          dprintf(("No disk inserted; aborting"));
+          SetLastError(ERROR_NOT_READY);
+          return -1;
+      }
+  }
+
   if(!(pHMHandleData->dwFlags & FILE_FLAG_OVERLAPPED) && lpOverlapped) {
     dprintf(("Warning: lpOverlapped != NULL & !FILE_FLAG_OVERLAPPED; sync operation"));
   }
@@ -1210,6 +1290,16 @@ DWORD HMDeviceDiskClass::SetFilePointer(PHMHANDLEDATA pHMHandleData,
            lDistanceToMove,
            lpDistanceToMoveHigh,
            dwMoveMethod));
+
+  if(!pHMHandleData->hHMHandle) {
+      DRIVE_INFO *drvInfo = (DRIVE_INFO*)pHMHandleData->dwUserData;
+      pHMHandleData->hHMHandle = OpenDisk(drvInfo);
+      if(!pHMHandleData->hHMHandle) {
+          dprintf(("No disk inserted; aborting"));
+          SetLastError(ERROR_NOT_READY);
+          return -1;
+      }
+  }
 
   ret = OSLibDosSetFilePointer(pHMHandleData->hHMHandle,
                                lDistanceToMove,
