@@ -1,4 +1,4 @@
-# $Id: makefile.icc,v 1.7 2000-05-13 15:40:34 bird Exp $
+# $Id: makefile.icc,v 1.8 2000-05-13 16:04:44 bird Exp $
 
 #
 # PD-Win32 API
@@ -48,7 +48,7 @@ all:    $(OBJDIR) \
 
 
 commonicc.lib: $(OBJDIR)\commonicc.lib
-    $(CP) $@ $**
+    $(CP) $** $@
 
 $(OBJDIR)\commonicc.lib: $(OBJS)
     $(RM) $@
