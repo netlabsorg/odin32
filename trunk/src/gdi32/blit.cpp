@@ -1,4 +1,4 @@
-/* $Id: blit.cpp,v 1.33 2001-07-13 19:34:21 sandervl Exp $ */
+/* $Id: blit.cpp,v 1.34 2001-09-10 11:02:40 sandervl Exp $ */
 
 /*
  * GDI32 blit code
@@ -375,7 +375,7 @@ static INT StretchDIBits_(HDC hdc, INT xDst, INT yDst, INT widthDst,
                            const BITMAPINFO *info, UINT wUsage, DWORD dwRop )
 {
  INT rc;
- DWORD bitfields[3];
+ DWORD bitfields[3], compression = 0;
  WORD *newbits = NULL;
 
     dprintf(("GDI32: StretchDIBits %x to (%d,%d) (%d,%d) from (%d,%d) (%d,%d), %x %x %x %x", hdc, xDst, yDst, widthDst, heightDst, xSrc, ySrc, widthSrc, heightSrc, bits, info, wUsage, dwRop));
@@ -465,11 +465,20 @@ static INT StretchDIBits_(HDC hdc, INT xDst, INT yDst, INT widthDst,
         else RGB555to565(newbits, (WORD *)bits, imgsize/sizeof(WORD));
         bits = newbits;
     }
+    //SvL: Ignore BI_BITFIELDS type (SetDIBitsToDevice fails otherwise)
+    if(info->bmiHeader.biCompression == BI_BITFIELDS) {
+        ((BITMAPINFO *)info)->bmiHeader.biCompression = 0;
+        compression = BI_BITFIELDS;
+
+    }
 
     rc = O32_StretchDIBits(hdc, xDst, yDst, widthDst, heightDst, xSrc, ySrc,
                              widthSrc, heightSrc, (void *)bits,
                              (PBITMAPINFO)info, wUsage, dwRop);
 
+    if(compression == BI_BITFIELDS) {
+        ((BITMAPINFO *)info)->bmiHeader.biCompression = BI_BITFIELDS;
+    }
     if(newbits) free(newbits);
 
     //Open32 always returns height of bitmap (regardless of how many scanlines were copied)
