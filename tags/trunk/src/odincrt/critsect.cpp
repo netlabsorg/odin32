@@ -1,4 +1,4 @@
-/* $Id: critsect.cpp,v 1.2 2002-04-08 11:25:22 sandervl Exp $ */
+/* $Id: critsect.cpp,v 1.3 2002-07-18 20:26:28 sandervl Exp $ */
 /*
  * Critical sections
  * 
@@ -73,7 +73,7 @@ VOID WIN32API DosInitializeCriticalSection(CRITICAL_SECTION_OS2 *crit, PSZ pszSe
     crit->RecursionCount = 0;
     crit->OwningThread   = 0;
 
-    rc = DosCreateMutexSem(pszSemName, &crit->hmtxLock, (pszSemName) ? DC_SEM_SHARED : 0, FALSE);
+    rc = DosCreateMutexSem(pszSemName, &crit->hmtxLock, (pszSemName) ? DC_SEM_SHARED : 0, TRUE);
     if(rc != NO_ERROR) {
         DebugInt3();
         crit->hmtxLock = 0;
