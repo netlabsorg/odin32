@@ -1,4 +1,4 @@
-/* $Id: winimagepeldr.cpp,v 1.80 2001-06-01 08:10:48 sandervl Exp $ */
+/* $Id: winimagepeldr.cpp,v 1.81 2001-06-05 16:44:46 phaller Exp $ */
 
 /*
  * Win32 PE loader Image base class
@@ -1886,7 +1886,90 @@ ULONG Win32PeLdrImage::getApi(int ordinal)
  NameExport *nexport;
 
     curexport = ordexports;
+  
+#if 1
+  /* accelerated resolving of ordinal exports
+   * is based on the assumption the ordinal export
+   * table is always sorted ascending.
+   *
+   * When the step size is too small, we continue
+   * with the linear search.
+   */
+  
+  // start in the middle of the tree
+  i = nrOrdExports >> 1;
+  int iStep = i;
+  
+  for(;;)
+  {
+    int iThisExport = curexport[i].ordinal;
+    
+    iStep >>= 1;                    // next step will be narrower
 
+    if (iThisExport < ordinal)
+      i += iStep;                   // move farther down the list
+    else
+      if (iThisExport == ordinal)   // found the export?
+        return curexport[i].virtaddr;
+      else
+        i -= iStep;                 // move farther up the list
+
+    // if we're in the direct neighbourhood search linearly
+    if (iStep <= 1)
+    {
+      // decide if we're to search backward or forward
+      if (ordinal > curexport[i].ordinal)
+      {
+        // As a certain number of exports are 0 at the end
+        // of the array, this case will hit fairly often.
+        // the last comparison will send the loop off into the
+        // wrong direction!
+        if (curexport[i].ordinal == 0)
+        {
+          // start over with plain dump search
+          for(i = 0; i < nrOrdExports; i++)
+          {
+            if(curexport[i].ordinal == ordinal)
+              return(curexport[i].virtaddr);
+          }
+          break; // not found yet!
+        }
+        
+        for (;i<nrOrdExports;i++) // scan forward
+        {
+          iThisExport = curexport[i].ordinal;
+          if(iThisExport == ordinal)
+            return(curexport[i].virtaddr);
+          else
+            if (iThisExport > ordinal)
+            {
+              // Oops, cannot find the ordinal in the sorted list
+              break;
+            }
+        }
+      }
+      else
+      {
+        for (;i>=0;i--) // scan backward
+        {
+          iThisExport = curexport[i].ordinal;
+          if(curexport[i].ordinal == ordinal)
+            return(curexport[i].virtaddr);
+          else
+            if (iThisExport < ordinal)
+              // Oops, cannot find the ordinal in the sorted list
+              break;
+        }
+      }
+      
+      // not found yet.
+      break;
+    }
+  }
+#endif
+  
+  
+#if 0
     i = 0;    
     if(nrOrdExports > 1000) {
         for(i=0;i<nrOrdExports;i+=1000) {
@@ -1926,10 +2009,14 @@ ULONG Win32PeLdrImage::getApi(int ordinal)
         }
         if(i >= nrOrdExports) i -= 10;
     }
+#endif
+  
+#if 0
     for(i;i<nrOrdExports;i++) {
         if(curexport[i].ordinal == ordinal)
             return(curexport[i].virtaddr);
     }
+#endif
 
     //Name exports also contain an ordinal, so check this
     nexport = nameexports;
