@@ -31,7 +31,6 @@ OBJS =  ole32.obj \
 	guid.obj \
 	hglobalstream.obj \
 	initialise.obj \
-	initterm.obj \
 	itemmoniker.obj \
 	iunknown.obj \
 	library.obj \
@@ -47,14 +46,13 @@ OBJS =  ole32.obj \
 	stg_stream.obj \
 	storage.obj \
 	stubs.obj \
-	taskmem.obj
+	taskmem.obj resource.obj  $(PDWIN32_LIB)/dllentry.obj
 
 all: $(TARGET).dll $(ORGTARGET).lib regsvr32.exe
 
 
 $(TARGET).dll: $(OBJS) $(ORGTARGET).def 
 	$(LD) $(LDFLAGS) -Fm -Fe$@ $(OBJS) $(ORGTARGET).def \
-              $(PDWIN32_LIB)\pmwinx.lib \
               $(PDWIN32_LIB)\user32.lib \
               $(PDWIN32_LIB)\gdi32.lib \
               $(PDWIN32_LIB)\comctl32.lib \
@@ -63,7 +61,6 @@ $(TARGET).dll: $(OBJS) $(ORGTARGET).def
               $(PDWIN32_LIB)\oleaut32.lib \
               $(PDWIN32_LIB)/odincrt.lib OS2386.LIB $(RTLLIB_O)
 	$(CP) $@ $(PDWIN32_BIN)
-#              $(PDWIN32_LIB)\ntdll.lib \
 
 $(ORGTARGET).lib: $(ORGTARGET)exp.def
         $(IMPLIB) $(IMPLIBFLAGS) $@ $(ORGTARGET)exp.def
@@ -71,6 +68,11 @@ $(ORGTARGET).lib: $(ORGTARGET)exp.def
 
 $(ORGTARGET)exp.def: $(ORGTARGET).def
         $(IMPDEF) $** $@
+
+resource.asm: $(ORGTARGET).rc
+    $(RC) $(RCFLAGS) -o resource.asm $(ORGTARGET).rc
+
+resource.obj: resource.asm
 
 .\stubs.obj: \
     .\stubs.cpp \
@@ -272,9 +274,6 @@ $(ORGTARGET)exp.def: $(ORGTARGET).def
     $(PDWIN32_INCLUDE)/win/wine/obj_cache.h \
     $(PDWIN32_INCLUDE)/win/debugtools.h \
     $(PDWIN32_INCLUDE)/heapstring.h
-
-.\initterm.obj: \
-    .\initterm.cpp
 
 .\initialise.obj: \
     .\initialise.cpp \

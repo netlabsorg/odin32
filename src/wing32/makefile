@@ -18,7 +18,7 @@ CXXFLAGS = $(CXXFLAGS) -I$(PDWIN32_INCLUDE);
 
 TARGET = wing32
 
-OBJS =   initterm.obj wing32.obj
+OBJS =   initterm.obj wing32.obj resource.obj
 
 LIBS =  $(PDWIN32_LIB)\user32.lib $(PDWIN32_LIB)\gdi32.lib $(PDWIN32_LIB)\kernel32.lib $(PDWIN32_LIB)/odincrt.lib OS2386.LIB $(RTLLIB_O)
 
@@ -44,7 +44,12 @@ wing32.obj: wing32.cpp\
     $(PDWIN32_INCLUDE)\win\winuser.h
 
 
-initterm.obj: initterm.cpp initterm.h wing32impl.h
+resource.asm: $(TARGET).rc
+    $(RC) $(RCFLAGS) -o resource.asm $(TARGET).rc
+
+resource.obj: resource.asm
+
+initterm.obj: initterm.cpp wing32impl.h
 
 clean:
   $(RM) *.obj *.lib *.dll *.map *.pch

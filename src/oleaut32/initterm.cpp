@@ -1,4 +1,4 @@
-/* $Id: initterm.cpp,v 1.5 2000-01-26 11:26:04 sandervl Exp $ */
+/* $Id: initterm.cpp,v 1.6 2000-02-05 02:07:03 sandervl Exp $ */
 
 /*
  * DLL entry point
@@ -32,12 +32,16 @@
 #include <string.h>
 #include <odin.h>
 #include <win32type.h>
+#include <winconst.h>
 #include <odinlx.h>
 #include <misc.h>       /*PLF Wed  98-03-18 23:18:15*/
 
 extern "C" {
 void CDECL _ctordtorInit( void );
 void CDECL _ctordtorTerm( void );
+
+ //Win32 resource table (produced by wrc)
+ extern DWORD _Resource_PEResTab;
 }
 
 //Global DLL Data
@@ -50,15 +54,26 @@ int   loadNr = 0;
 
 void Hash_Initialise(void);
 
-/*-------------------------------------------------------------------*/
-/* A clean up routine registered with DosExitList must be used if    */
-/* runtime calls are required and the runtime is dynamically linked. */
-/* This will guarantee that this clean up routine is run before the  */
-/* library DLL is terminated.                                        */
-/*-------------------------------------------------------------------*/
-static void APIENTRY cleanup(ULONG reason);
+//******************************************************************************
+//******************************************************************************
+BOOL WINAPI LibMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID fImpLoad)
+{
+   switch (fdwReason)
+   {
+   case DLL_PROCESS_ATTACH:
+	return TRUE;
 
+   case DLL_THREAD_ATTACH:
+   case DLL_THREAD_DETACH:
+	return TRUE;
 
+   case DLL_PROCESS_DETACH:
+   	_ctordtorTerm();
+   	ClosePrivateLogFiles();
+	return TRUE;
+   }
+   return FALSE;
+}
 /****************************************************************************/
 /* _DLL_InitTerm is the function that gets called by the operating system   */
 /* loader when it loads and frees this DLL for each process that accesses   */
@@ -92,17 +107,8 @@ unsigned long SYSTEM _DLL_InitTerm(unsigned long hModule, unsigned long
 
          CheckVersionFromHMOD(PE2LX_VERSION, hModule); /*PLF Wed  98-03-18 05:28:48*/
 
-         /*******************************************************************/
-         /* A DosExitList routine must be used to clean up if runtime calls */
-         /* are required and the runtime is dynamically linked.             */
-         /*******************************************************************/
-
-	 if(RegisterLxDll(hModule, 0, 0) == FALSE) 
+	 if(RegisterLxDll(hModule, LibMain, (PVOID)&_Resource_PEResTab) == FALSE) 
 		return 0UL;
-
-         rc = DosExitList(0x0000F000|EXLST_ADD, cleanup);
-         if(rc)
-                return 0UL;
 
 #ifdef DEFAULT_LOGGING_OFF
     	 if(getenv("WIN32LOG_ENABLED")) {
@@ -111,9 +117,7 @@ unsigned long SYSTEM _DLL_InitTerm(unsigned long hModule, unsigned long
 #endif
          	OpenPrivateLogFiles();
 	 }
-
          Hash_Initialise();
-
 
          break;
       }
@@ -129,12 +133,5 @@ unsigned long SYSTEM _DLL_InitTerm(unsigned long hModule, unsigned long
    /***********************************************************/
    return 1UL;
 }
-
-
-static void APIENTRY cleanup(ULONG ulReason)
-{
-   _ctordtorTerm();
-   ClosePrivateLogFiles();
-   DosExitList(EXLST_EXIT, cleanup);
-   return ;
-}
+//******************************************************************************
+//******************************************************************************

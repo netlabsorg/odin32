@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.8 1999-12-09 00:56:54 bird Exp $
+# $Id: makefile,v 1.9 2000-02-05 02:19:02 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -20,31 +20,34 @@ CXXFLAGS = $(CXXFLAGS) -I$(PDWIN32_INCLUDE)
 
 
 TARGET = wnetap32
+ORGTARGET = netapi32
 
-OBJS =  wnetap32.obj initterm.obj
+OBJS =  wnetap32.obj resource.obj $(PDWIN32_LIB)/dllentry.obj
 
-all: $(TARGET).dll $(TARGET).lib
+all: $(TARGET).dll $(ORGTARGET).lib
 
 
-$(TARGET).dll: $(OBJS) $(TARGET).def
-	$(LD) $(LDFLAGS) -Fm -Fe$@ $(OBJS) $(TARGET).def \
-              $(PDWIN32_LIB)/pmwinx.lib $(PDWIN32_LIB)/kernel32.lib \
+$(TARGET).dll: $(OBJS) $(ORGTARGET).def
+	$(LD) $(LDFLAGS) -Fm -Fe$@ $(OBJS) $(ORGTARGET).def \
+              $(PDWIN32_LIB)/kernel32.lib \
               $(PDWIN32_LIB)/user32.lib $(PDWIN32_LIB)/odincrt.lib \
               OS2386.LIB $(RTLLIB_O)
 	$(CP) $@ $(PDWIN32_BIN)
 
 
-$(TARGET).lib: $(TARGET)exp.def
+$(ORGTARGET).lib: $(ORGTARGET)exp.def
 	$(IMPLIB) $(IMPLIBFLAGS) $@ $**
 	$(CP) $@ $(PDWIN32_LIB)
 
-$(TARGET)exp.def: $(TARGET).def
+$(ORGTARGET)exp.def: $(ORGTARGET).def
     $(IMPDEF) $** $@
 
+resource.asm: $(ORGTARGET).rc
+    $(RC) $(RCFLAGS) -o resource.asm $(ORGTARGET).rc
+
+resource.obj: resource.asm
 
 wnetap32.obj: wnetap32.cpp
-initterm.obj: initterm.cpp
-
 
 clean:
 	$(RM) *.obj *.lib *.dll *~ *.map *.pch

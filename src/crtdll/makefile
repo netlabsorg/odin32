@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.6 2000-02-03 21:37:49 sandervl Exp $
+# $Id: makefile,v 1.7 2000-02-05 01:55:11 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -22,7 +22,7 @@ CXXFLAGS = $(CXXFLAGS) -I$(PDWIN32_INCLUDE)
 TARGET = crtdll
 
 OBJS =  crtdll.obj asmhlp.obj stubs.obj internal.obj crt_string.obj \
-	crt_memory.obj crt_mb.obj crt_wc.obj initterm.obj
+	crt_memory.obj crt_mb.obj crt_wc.obj initterm.obj resource.obj
 
 all: $(TARGET).dll $(TARGET).lib
 
@@ -41,8 +41,12 @@ $(TARGET).LIB: $(TARGET)exp.def
 $(TARGET)exp.def: $(TARGET).def
         $(IMPDEF) $** $@
 
+resource.asm: $(TARGET).rc
+    $(RC) $(RCFLAGS) -o resource.asm $(TARGET).rc
 
-initterm.obj:	initterm.cpp
+resource.obj: resource.asm
+
+initterm.obj:	initterm.cpp $(PDWIN32_INCLUDE)\exitlist.h
 asmhlp.obj: 	asmhlp.asm
 stubs.obj:	stubs.cpp
 internal.obj:	internal.cpp

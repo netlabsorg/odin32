@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.4 1999-11-03 23:28:04 sandervl Exp $
+# $Id: makefile,v 1.5 2000-02-05 01:52:22 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -20,16 +20,16 @@ CXXFLAGS = $(CXXFLAGS) -I$(PDWIN32_INCLUDE)
 
 TARGET = avifil32
 
-OBJS =  avifile.obj initterm.obj
+OBJS =  avifile.obj resource.obj $(PDWIN32_LIB)/dllentry.obj
 
 all: $(TARGET).dll $(TARGET).lib
 
 
 $(TARGET).dll: $(OBJS) $(TARGET).def
         $(LD) $(LDFLAGS) -Fm -Fe$@ $(OBJS) $(TARGET).def \
-              $(PDWIN32_LIB)/pmwinx.lib $(PDWIN32_LIB)/kernel32.lib \
+              $(PDWIN32_LIB)/kernel32.lib \
               $(PDWIN32_LIB)/odincrt.lib OS2386.LIB $(RTLLIB_O) \
-              $(PDWIN32_LIB)/ole32.lib $(PDWIN32_LIB)/msvfw32.lib
+              $(PDWIN32_LIB)/ole32.lib $(PDWIN32_LIB)/msvfw32.lib 
         $(CP) $@ $(PDWIN32_BIN)
 
 
@@ -40,7 +40,11 @@ $(TARGET).lib: $(TARGET)exp.def
 $(TARGET)exp.def: $(TARGET).def
         $(IMPDEF) $** $@
 
-initterm.obj: initterm.cpp
+resource.asm: $(TARGET).rc
+    $(RC) $(RCFLAGS) -o resource.asm $(TARGET).rc
+
+resource.obj: resource.asm
+
 avifile.obj:  avifile.cpp
 
 clean:
