@@ -1,4 +1,4 @@
-/* $Id: dc.cpp,v 1.73 2000-10-08 14:09:40 sandervl Exp $ */
+/* $Id: dc.cpp,v 1.74 2000-10-09 17:26:47 sandervl Exp $ */
 
 /*
  * DC functions for USER32
@@ -329,7 +329,9 @@ VOID removeClientArea(Win32BaseWindow *window, pDCData pHps)
 
    pHps->isClient = FALSE;
 
+#ifdef DEBUG
    GreGetDCOrigin(pHps->hps, &point);
+#endif
 
    if(pHps->isClientArea)
    {
@@ -398,9 +400,10 @@ void selectClientArea(Win32BaseWindow *window, pDCData pHps)
         rcl.xRight  += rcltemp.xLeft;
         rcl.yTop    += rcltemp.yBottom;
         rcl.yBottom += rcltemp.yBottom;
+
+        pHps->ptlOrigin.x = rcltemp.xLeft;
+        pHps->ptlOrigin.y = rcltemp.yBottom;
    }
-   pHps->ptlOrigin.x = rcltemp.xLeft;
-   pHps->ptlOrigin.y = rcltemp.yBottom;
  
    dprintf2(("selectClientArea %x: (%d,%d) -> (%d,%d)", window->getWindowHandle(), rcltemp.xLeft, rcltemp.yBottom, rcl.xLeft, rcl.yBottom));
 
@@ -615,10 +618,10 @@ HDC WIN32API BeginPaint (HWND hWnd, PPAINTSTRUCT_W lpps)
 	memset(&rectl, 0, sizeof(rectl));
         dprintf (("USER32: WARNING: WinQueryUpdateRect failed (error or no update rectangle)!!"));
 
-   	selectClientArea(wnd, pHps);
-
 	HRGN hrgnClip = GpiCreateRegion(pHps->hps, 1, &rectl);
 	GpiSetClipRegion(pHps->hps, hrgnClip, &hrgnOldClip);
+
+   	selectClientArea(wnd, pHps);
 
         //save old clip region (restored for CS_OWNDC windows in EndPaint)
         wnd->SetClipRegion(hrgnOldClip);
@@ -668,11 +671,22 @@ HDC WIN32API BeginPaint (HWND hWnd, PPAINTSTRUCT_W lpps)
    HideCaret(hwnd);
    WinShowTrackRect(wnd->getOS2WindowHandle(), FALSE);
 
+#ifdef DEBUG
+   POINTL point;
+   GreGetDCOrigin(pHps->hps, &point);
+   dprintf(("dc origin (%d,%d)", point.x, point.y));
+#endif
+
    if(wnd->needsEraseBkgnd() && lComplexity != RGN_NULL) {
         wnd->setEraseBkgnd(FALSE);
         lpps->fErase = (wnd->MsgEraseBackGround(pHps->hps) != 0);
    }
    else lpps->fErase = TRUE;
+
+#ifdef DEBUG
+   GreGetDCOrigin(pHps->hps, &point);
+   dprintf(("dc origin (%d,%d)", point.x, point.y));
+#endif
 
    lpps->hdc    = (HDC)pHps->hps;
 
