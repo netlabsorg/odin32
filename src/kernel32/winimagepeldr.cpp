@@ -1,4 +1,4 @@
-/* $Id: winimagepeldr.cpp,v 1.6 1999-10-14 09:21:42 sandervl Exp $ */
+/* $Id: winimagepeldr.cpp,v 1.7 1999-10-14 09:57:35 sandervl Exp $ */
 
 /*
  * Win32 PE loader Image base class
@@ -167,6 +167,7 @@ BOOL Win32PeLdrImage::init(ULONG reservedMem)
   fout << "SizeOfHeapReserve : " << oh.SizeOfHeapReserve << endl;
   fout << "SizeOfHeapCommit  : " << oh.SizeOfHeapCommit << endl;
   fout << "FileAlignment     : " << oh.FileAlignment << endl;
+  fout << "Subsystem         : " << oh.Subsystem << endl;
 
   nSections = NR_SECTIONS(win32file);
 

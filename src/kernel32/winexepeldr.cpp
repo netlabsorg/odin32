@@ -1,4 +1,4 @@
-/* $Id: winexepeldr.cpp,v 1.2 1999-10-01 10:15:50 sandervl Exp $ */
+/* $Id: winexepeldr.cpp,v 1.3 1999-10-14 09:57:34 sandervl Exp $ */
 
 /*
  * Win32 PE loader Exe class
@@ -71,6 +71,14 @@ BOOL WIN32API CreateWin32PeLdrExe(char *szFileName, ULONG reservedMem)
         return FALSE;
   }
   OS2UnsetExceptionHandler(&exceptFrame);
+  if(WinExe->isConsoleApp()) {
+   	dprintf(("Console application!\n"));
+
+   	APIRET rc = iConsoleInit();                     /* initialize console subsystem */
+   	if (rc != NO_ERROR)                                  /* check for errors */
+            	dprintf(("KERNEL32:Win32Image:Init ConsoleInit failed with %u.\n", rc));
+  }
+
   WinExe->start();
 
   delete WinExe;
@@ -84,22 +92,22 @@ Win32PeLdrExe::Win32PeLdrExe(char *szFileName) :
 		   Win32ExeBase(-1),
 		   Win32PeLdrImage(szFileName)
 {
-  fConsoleApp = (oh.Subsystem == IMAGE_SUBSYSTEM_WINDOWS_CUI);
-
   dprintf(("Win32PeLdrExe ctor: %s", szFileName));
-
-  if(fConsoleApp) {
-   	dprintf(("Console application!\n"));
-
-   	APIRET rc = iConsoleInit();                     /* initialize console subsystem */
-   	if (rc != NO_ERROR)                                  /* check for errors */
-            	dprintf(("KERNEL32:Win32Image:Init ConsoleInit failed with %u.\n", rc));
-  }
 }
 //******************************************************************************
 //******************************************************************************
 Win32PeLdrExe::~Win32PeLdrExe()
 {
+}
+//******************************************************************************
+//******************************************************************************
+BOOL Win32PeLdrExe::init(ULONG reservedMem)
+{
+ BOOL rc;
+
+  rc = Win32PeLdrImage::init(reservedMem);
+  fConsoleApp = (oh.Subsystem == IMAGE_SUBSYSTEM_WINDOWS_CUI);
+  return rc;
 }
 //******************************************************************************
 //******************************************************************************

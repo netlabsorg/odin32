@@ -1,4 +1,4 @@
-/* $Id: wprocess.cpp,v 1.37 1999-10-14 09:21:43 sandervl Exp $ */
+/* $Id: wprocess.cpp,v 1.38 1999-10-14 09:57:38 sandervl Exp $ */
 
 /*
  * Win32 process functions
@@ -208,7 +208,7 @@ USHORT WIN32API SetWin32TIB()
    //If we're running an Odin32 OS/2 application (not converted!), then we
    //we don't switch FS selectors
    if(fIsOS2Image) {
-	return;
+	return GetFS();
    }
 
    winteb = (TEB *)*TIBFlatPtr;
