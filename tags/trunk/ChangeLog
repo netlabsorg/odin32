@@ -1,4 +1,7 @@
-/* $Id: ChangeLog,v 1.1423 2001-05-19 08:24:20 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.1424 2001-05-19 09:05:25 sandervl Exp $ */
+
+ 2001-05-19: Sander van Leeuwen <sandervl@xs4all.nl>
+    - WS2_32:   o Added more exports
 
  2001-05-19: Dietrich Teickner <Dietrich_Teickner@t-online.de>
     - KERNEL32: o LOCALE_IFIRSTDAYOFWEEK fix (GetLocaleInfo)
