@@ -14,6 +14,7 @@
 #define INCL_DOS
 
 #include <os2wrap.h>
+#include <win32type.h>
 //#include <cdrom.h>
 
 #pragma pack(1)
@@ -102,9 +103,9 @@ LONG static _CDCalculateSector(MSF* msf1)
 }
 
 
-HFILE os2CDOpen(char *drive)
+HANDLE os2CDOpen(char *drive)
 {
-    HFILE hfDrive = 0;
+    HANDLE hfDrive = 0;
     ULONG ulAction;
     ULONG rc;
     
@@ -130,7 +131,7 @@ ULONG os2CDClose(ULONG hfOS2Handle)
 	 -1: CD is Data Disk
 	 other: # Audio tracks */
 /******************************************/
-int os2GetNumTracks(HFILE hfOS2Handle, ULONG *ulLeadOut)
+int os2GetNumTracks(HANDLE hfOS2Handle, ULONG *ulLeadOut)
 {
     ULONG ulParamLen;
     ULONG ulDataLen;
@@ -179,7 +180,7 @@ int os2GetNumTracks(HFILE hfOS2Handle, ULONG *ulLeadOut)
     return cdInfo.ucLastTrack-cdInfo.ucFirstTrack+1;
 }	
 
-BOOL os2GetCDStatus(HFILE hfOS2Handle, ULONG  *ulStatus)
+BOOL os2GetCDStatus(HANDLE hfOS2Handle, ULONG  *ulStatus)
 {
     ULONG ulParamLen;
     ULONG ulDeviceStatus;
@@ -202,7 +203,7 @@ BOOL os2GetCDStatus(HFILE hfOS2Handle, ULONG  *ulStatus)
     return TRUE;
 }
 
-BOOL os2GetCDAudioStatus(HFILE hfOS2Handle, USHORT  *usStatus)
+BOOL os2GetCDAudioStatus(HANDLE hfOS2Handle, USHORT  *usStatus)
 {
     AUDIOSTATUS asStatus;
     ULONG ulParamLen;
@@ -228,7 +229,7 @@ BOOL os2GetCDAudioStatus(HFILE hfOS2Handle, USHORT  *usStatus)
 
 /* Returns sector info of track #numTrack */
 /* Starting with track 0 */
-ULONG  os2CDQueryTrackStartSector( HFILE hfDrive, ULONG numTrack, BOOL *pflAudio)
+ULONG  os2CDQueryTrackStartSector( HANDLE hfDrive, ULONG numTrack, BOOL *pflAudio)
 {	
     ULONG ulParamLen;
     ULONG ulDataLen;
@@ -280,7 +281,7 @@ ULONG  os2CDQueryTrackStartSector( HFILE hfDrive, ULONG numTrack, BOOL *pflAudio
 }
 
 
-BOOL os2CDEject(HFILE hfDrive)
+BOOL os2CDEject(HANDLE hfDrive)
 {
     ULONG ulParamLen;
     ULONG rc;
@@ -302,7 +303,7 @@ BOOL os2CDEject(HFILE hfDrive)
 #define CDROMDISK_CLOSETRAY 0x0045
 #endif
 
-BOOL os2CDCloseTray(HFILE hfDrive)
+BOOL os2CDCloseTray(HANDLE hfDrive)
 {
     ULONG ulParamLen;
     ULONG rc;
@@ -320,7 +321,7 @@ BOOL os2CDCloseTray(HFILE hfDrive)
     return TRUE;
 }
 
-BOOL os2CDStop(HFILE hfDrive)
+BOOL os2CDStop(HANDLE hfDrive)
 {
     ULONG ulParamLen;
     ULONG rc;
@@ -349,7 +350,7 @@ BOOL os2CDStop(HFILE hfDrive)
 /* Returns TRUE if successful            */
 /*                                       */
 /*****************************************/
-BOOL os2CDPlayRange(HFILE hfDrive ,ULONG ulFrom, ULONG ulTo)
+BOOL os2CDPlayRange(HANDLE hfDrive ,ULONG ulFrom, ULONG ulTo)
 {
     ULONG ulParamLen;
     ULONG ulDataLen;
@@ -383,7 +384,7 @@ BOOL os2CDPlayRange(HFILE hfDrive ,ULONG ulFrom, ULONG ulTo)
     return TRUE;    
 }
 
-BOOL  os2CDResume(HFILE hfDrive)
+BOOL  os2CDResume(HANDLE hfDrive)
 {
     ULONG ulParamLen;
     ULONG rc;
@@ -402,7 +403,7 @@ BOOL  os2CDResume(HFILE hfDrive)
     return TRUE;
 }
 
-BOOL os2CDGetHeadLocation(HFILE hfOS2Handle, ULONG  *ulHeadLocation)
+BOOL os2CDGetHeadLocation(HANDLE hfOS2Handle, ULONG  *ulHeadLocation)
 {
     UCHAR ucParam[5]={0};
     ULONG ulParamLen;
@@ -436,7 +437,7 @@ BOOL os2CDGetHeadLocation(HFILE hfOS2Handle, ULONG  *ulHeadLocation)
 
 }
 
-BOOL os2CDSeek(HFILE hfOS2Handle, ULONG  ulTo)
+BOOL os2CDSeek(HANDLE hfOS2Handle, ULONG  ulTo)
 {
     SEEKPARAM sp={0};
     ULONG ulParamLen;
@@ -465,7 +466,7 @@ BOOL os2CDSeek(HFILE hfOS2Handle, ULONG  ulTo)
     return TRUE;
 }
 
-BOOL os2CDQueryCurTrack(HFILE hfOS2Handle, UINT  * uiCurTrack)
+BOOL os2CDQueryCurTrack(HANDLE hfOS2Handle, UINT  * uiCurTrack)
 {
     ULONG ulParamLen;
     ULONG ulDeviceStatus;
@@ -502,7 +503,7 @@ BOOL os2CDQueryCurTrack(HFILE hfOS2Handle, UINT  * uiCurTrack)
 /**************************************************************/
 BOOL os2CDQueryCDDrives(int *iNumCD, char * cFirstDrive)
 {
-  HFILE hfDevice;
+  HANDLE hfDevice;
   ULONG ulAction;
   ULONG ulLen;
   static char cFirst=0;

@@ -92,20 +92,20 @@ int 	CDAUDIO_GetNumberOfTracks(WINE_CDAUDIO* wcda);
 BOOL 	CDAUDIO_GetTracksInfo(WINE_CDAUDIO* wcda);
 BOOL	CDAUDIO_GetCDStatus(WINE_CDAUDIO* wcda);
 
-HFILE os2CDOpen(char *drive);
+HANDLE os2CDOpen(char *drive);
 ULONG os2CDClose(ULONG hfOS2Handle);
-int os2GetNumTracks(HFILE hfOS2Handle,ULONG *ulLeadOut);
-BOOL os2GetCDStatus(HFILE hfOS2Handle, ULONG  *ulStatus);
-BOOL os2GetCDAudioStatus(HFILE hfOS2Handle, USHORT  *usStatus);
-ULONG  os2CDQueryTrackStartSector( HFILE hfDrive, ULONG numTrack, BOOL *flAudio);
-BOOL os2CDEject(HFILE hfDrive);
-BOOL os2CDCloseTray(HFILE hfDrive);
-BOOL os2CDStop(HFILE hfDrive);
-BOOL os2CDPlayRange(HFILE hfDrive ,ULONG ulFrom, ULONG ulTo);
-BOOL  os2CDResume(HFILE hfDrive);
-BOOL os2CDGetHeadLocation(HFILE hfOS2Handle, ULONG  *ulHeadLocation);
-BOOL os2CDSeek(HFILE hfOS2Handle, ULONG  ulTo);
-BOOL os2CDQueryCurTrack(HFILE hfOS2Handle, UINT  * uiCurTrack);
+int os2GetNumTracks(HANDLE hfOS2Handle,ULONG *ulLeadOut);
+BOOL os2GetCDStatus(HANDLE hfOS2Handle, ULONG  *ulStatus);
+BOOL os2GetCDAudioStatus(HANDLE hfOS2Handle, USHORT  *usStatus);
+ULONG  os2CDQueryTrackStartSector( HANDLE hfDrive, ULONG numTrack, BOOL *flAudio);
+BOOL os2CDEject(HANDLE hfDrive);
+BOOL os2CDCloseTray(HANDLE hfDrive);
+BOOL os2CDStop(HANDLE hfDrive);
+BOOL os2CDPlayRange(HANDLE hfDrive ,ULONG ulFrom, ULONG ulTo);
+BOOL  os2CDResume(HANDLE hfDrive);
+BOOL os2CDGetHeadLocation(HANDLE hfOS2Handle, ULONG  *ulHeadLocation);
+BOOL os2CDSeek(HANDLE hfOS2Handle, ULONG  ulTo);
+BOOL os2CDQueryCurTrack(HANDLE hfOS2Handle, UINT  * uiCurTrack);
 BOOL os2CDQueryCDDrives(int *iNumCD, char * cFirstDrive);
 
 #define CDFRAMES_PERSEC 		75
