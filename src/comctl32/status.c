@@ -1,4 +1,4 @@
-/* $Id: status.c,v 1.12 1999-10-24 22:49:46 sandervl Exp $ */
+/* $Id: status.c,v 1.13 1999-11-03 22:05:23 cbratschi Exp $ */
 /*
  * Interface code to StatusWindow widget/control
  *
@@ -45,6 +45,17 @@
 
 #define STATUSBAR_GetInfoPtr(hwnd) ((STATUSWINDOWINFO *)GetWindowLongA (hwnd, 0))
 
+
+static RECT STATUSBAR_GetSizeBox(HWND hwnd)
+{
+  RECT rect;
+
+  GetClientRect(hwnd,&rect);
+  rect.left = rect.right-GetSystemMetrics(SM_CXVSCROLL);
+  rect.top  = rect.bottom-GetSystemMetrics(SM_CYHSCROLL);
+
+  return rect;
+}
 
 static void
 STATUSBAR_DrawSizeGrip (HDC hdc, LPRECT lpRect)
@@ -487,6 +498,25 @@ STATUSBAR_GetUnicodeFormat (HWND hwnd)
     return infoPtr->bUnicode;
 }
 
+static LRESULT
+STATUSBAR_WMLButtonDown(HWND hwnd,WPARAM wParam,LPARAM lParam)
+{
+  DWORD dwStyle = GetWindowLongA(hwnd,GWL_STYLE);
+
+  if (dwStyle & SBARS_SIZEGRIP && !(dwStyle & CCS_TOP))
+  {
+    RECT rect = STATUSBAR_GetSizeBox(hwnd);
+    POINT point;
+
+    point.x = (SHORT)LOWORD(lParam);
+    point.y = (SHORT)HIWORD(lParam);
+    if (PtInRect(&rect,point)) TrackWin32Window(GetParent(hwnd),FALSE);
+
+    return 0;
+  }
+
+  return DefWindowProcA(hwnd,WM_LBUTTONDOWN,wParam,lParam);
+}
 
 static LRESULT
 STATUSBAR_IsSimple (HWND hwnd)
@@ -839,9 +869,9 @@ STATUSBAR_WMCreate (HWND hwnd, WPARAM wParam, LPARAM lParam)
 {
     LPCREATESTRUCTA lpCreate = (LPCREATESTRUCTA)lParam;
     NONCLIENTMETRICSA nclm;
-    RECT	rect;
-    int	        width, len;
-    HDC	hdc;
+    RECT        rect;
+    int         width, len;
+    HDC hdc;
     STATUSWINDOWINFO *self;
 
     self = (STATUSWINDOWINFO*)COMCTL32_Alloc (sizeof(STATUSWINDOWINFO));
@@ -874,58 +904,59 @@ STATUSBAR_WMCreate (HWND hwnd, WPARAM wParam, LPARAM lParam)
     self->parts[0].hIcon = 0;
 
     if (IsWindowUnicode (hwnd)) {
-	self->bUnicode = TRUE;
-	if (lpCreate->lpszName &&
-	    (len = lstrlenW ((LPCWSTR)lpCreate->lpszName))) {
-	    self->parts[0].text = COMCTL32_Alloc ((len + 1)*sizeof(WCHAR));
-	    lstrcpyW (self->parts[0].text, (LPCWSTR)lpCreate->lpszName);
-	}
+        self->bUnicode = TRUE;
+        if (lpCreate->lpszName &&
+            (len = lstrlenW ((LPCWSTR)lpCreate->lpszName))) {
+            self->parts[0].text = COMCTL32_Alloc ((len + 1)*sizeof(WCHAR));
+            lstrcpyW (self->parts[0].text, (LPCWSTR)lpCreate->lpszName);
+        }
     }
     else {
-	if (lpCreate->lpszName &&
-	    (len = lstrlenA ((LPCSTR)lpCreate->lpszName))) {
-	    self->parts[0].text = COMCTL32_Alloc ((len + 1)*sizeof(WCHAR));
-	    lstrcpyAtoW (self->parts[0].text, (LPCSTR)lpCreate->lpszName);
-	}
+        if (lpCreate->lpszName &&
+            (len = lstrlenA ((LPCSTR)lpCreate->lpszName))) {
+            self->parts[0].text = COMCTL32_Alloc ((len + 1)*sizeof(WCHAR));
+            lstrcpyAtoW (self->parts[0].text, (char*)lpCreate->lpszName);
+        }
     }
 
-    if ((hdc = GetDC (0))) {
-	TEXTMETRICA tm;
-	HFONT hOldFont;
+    hdc = GetDC(0);
+    if (hdc) {
+        TEXTMETRICA tm;
+        HFONT hOldFont;
 
-	hOldFont = SelectObject (hdc,self->hDefaultFont);
-	GetTextMetricsA(hdc, &tm);
-	self->textHeight = tm.tmHeight;
-	SelectObject (hdc, hOldFont);
-	ReleaseDC(0, hdc);
+        hOldFont = SelectObject (hdc,self->hDefaultFont);
+        GetTextMetricsA(hdc, &tm);
+        self->textHeight = tm.tmHeight;
+        SelectObject (hdc, hOldFont);
+        ReleaseDC(0, hdc);
     }
 
     if (GetWindowLongA (hwnd, GWL_STYLE) & SBT_TOOLTIPS) {
-	self->hwndToolTip =
-	    CreateWindowExA (0, TOOLTIPS_CLASSA, NULL, 0,
-			       CW_USEDEFAULT, CW_USEDEFAULT,
-			       CW_USEDEFAULT, CW_USEDEFAULT,
-			     hwnd, 0,
-			     GetWindowLongA (hwnd, GWL_HINSTANCE), NULL);
+        self->hwndToolTip =
+            CreateWindowExA (0, TOOLTIPS_CLASSA, NULL, 0,
+                               CW_USEDEFAULT, CW_USEDEFAULT,
+                               CW_USEDEFAULT, CW_USEDEFAULT,
+                             hwnd, 0,
+                             GetWindowLongA (hwnd, GWL_HINSTANCE), NULL);
 
-	if (self->hwndToolTip) {
-	    NMTOOLTIPSCREATED nmttc;
+        if (self->hwndToolTip) {
+            NMTOOLTIPSCREATED nmttc;
 
-	    nmttc.hdr.hwndFrom = hwnd;
-	    nmttc.hdr.idFrom = GetWindowLongA (hwnd, GWL_ID);
-	    nmttc.hdr.code = NM_TOOLTIPSCREATED;
-	    nmttc.hwndToolTips = self->hwndToolTip;
+            nmttc.hdr.hwndFrom = hwnd;
+            nmttc.hdr.idFrom = GetWindowLongA (hwnd, GWL_ID);
+            nmttc.hdr.code = NM_TOOLTIPSCREATED;
+            nmttc.hwndToolTips = self->hwndToolTip;
 
-	    SendMessageA (GetParent (hwnd), WM_NOTIFY,
-			    (WPARAM)nmttc.hdr.idFrom, (LPARAM)&nmttc);
-	}
+            SendMessageA (GetParent (hwnd), WM_NOTIFY,
+                            (WPARAM)nmttc.hdr.idFrom, (LPARAM)&nmttc);
+        }
     }
 
     GetClientRect (GetParent (hwnd), &rect);
     width = rect.right - rect.left;
     self->height = self->textHeight + 4 + VERT_BORDER;
     MoveWindow (hwnd, lpCreate->x, lpCreate->y-1,
-		  width, self->height, FALSE);
+                  width, self->height, FALSE);
     STATUSBAR_SetPartBounds (hwnd);
 
     return 0;
@@ -992,7 +1023,18 @@ STATUSBAR_WMGetText (HWND hwnd, WPARAM wParam, LPARAM lParam)
 static LRESULT
 STATUSBAR_WMMouseMove (HWND hwnd, WPARAM wParam, LPARAM lParam)
 {
-    STATUSWINDOWINFO *infoPtr = STATUSBAR_GetInfoPtr (hwnd);
+    STATUSWINDOWINFO *infoPtr = STATUSBAR_GetInfoPtr(hwnd);
+    DWORD dwStyle = GetWindowLongA(hwnd,GWL_STYLE);
+
+    if (dwStyle & SBARS_SIZEGRIP)
+    {
+      RECT rect = STATUSBAR_GetSizeBox(hwnd);
+      POINT point;
+
+      point.x = (SHORT)LOWORD(lParam);
+      point.y = (SHORT)HIWORD(lParam);
+      if (PtInRect(&rect,point)) SetCursor(LoadCursorA(0,IDC_SIZENWSEA));
+    }
 
     if (infoPtr->hwndToolTip)
         STATUSBAR_RelayEvent (infoPtr->hwndToolTip, hwnd,
@@ -1240,6 +1282,9 @@ StatusWindowProc (HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 
         case WM_LBUTTONDBLCLK:
             return STATUSBAR_SendNotify (hwnd, NM_DBLCLK);
+
+        case WM_LBUTTONDOWN:
+            return STATUSBAR_WMLButtonDown(hwnd,wParam,lParam);
 
         case WM_LBUTTONUP:
             return STATUSBAR_SendNotify (hwnd, NM_CLICK);
