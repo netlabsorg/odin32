@@ -1,4 +1,4 @@
-/* $Id: configure.cmd,v 1.4 2000-02-09 23:40:54 bird Exp $
+/* $Id: configure.cmd,v 1.5 2000-02-10 01:14:45 bird Exp $
  *
  * Configuration script.
  * Generates makefile.inc and an empty .depend file.
@@ -19,7 +19,7 @@
     call SysFileDelete sIncFile;
 
     /* create empty .depend file */
-    'echo #run nmake depend > .depend'
+    'echo #run nmake dep > .depend'
 
     /* open target file */
     if (stream(sIncFile, 'c', 'open write' ) <> '') then do
@@ -80,7 +80,7 @@
         say 'You should now verify that the settings are correct by listing the file';
         say ''''sIncFile'''';
         say ''
-        say 'Remember to do a ''nmake depend'' before making win32k.'
+        say 'Remember to do a ''nmake dep'' before making win32k.'
     end
     else do
         say 'oops, failed to open outputfile,' sIncFile;
