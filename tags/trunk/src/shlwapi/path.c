@@ -1162,6 +1162,14 @@ BOOL WINAPI PathIsURLA(LPCSTR lpstrPath)
     /* get protocol        */
     base.size = 24;
     res1 = SHLWAPI_1(lpstrPath, &base);
+
+#ifdef __WIN32OS2__  
+    // PH 2002-02-26 Fixes crash on Flask->About
+    // ShellExecute("..\doc\readme.html")
+    if (S_OK != res1)
+      return FALSE;
+#endif
+  
     return (base.fcncde) ? TRUE : FALSE;
 }  
 
@@ -1178,6 +1186,14 @@ BOOL WINAPI PathIsURLW(LPCWSTR lpstrPath)
     /* get protocol        */
     base.size = 24;
     res1 = SHLWAPI_2(lpstrPath, &base);
+  
+#ifdef __WIN32OS2__  
+    // PH 2002-02-26 Fixes crash on Flask->About
+    // ShellExecute("..\doc\readme.html")
+    if (S_OK != res1)
+      return FALSE;
+#endif
+  
     return (base.fcncde) ? TRUE : FALSE;
 }  
 
