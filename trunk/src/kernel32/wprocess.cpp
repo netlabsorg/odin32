@@ -1,4 +1,4 @@
-/* $Id: wprocess.cpp,v 1.175 2003-01-16 13:16:59 sandervl Exp $ */
+/* $Id: wprocess.cpp,v 1.176 2003-01-20 10:46:28 sandervl Exp $ */
 
 /*
  * Win32 process functions
@@ -1879,6 +1879,11 @@ BOOL WINAPI CreateProcessA( LPCSTR lpApplicationName, LPSTR lpCommandLine,
         }
       }
       else pThreadDB->o.odin.pidDebuggee = 0;
+
+      if(lpProcessInfo)
+      {
+          lpProcessInfo->dwThreadId = MAKE_THREADID(lpProcessInfo->dwProcessId, lpProcessInfo->dwThreadId);
+      }
 
       return(TRUE);
     }

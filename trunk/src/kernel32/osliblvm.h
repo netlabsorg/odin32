@@ -1,4 +1,4 @@
-/* $Id: osliblvm.h,v 1.5 2003-01-05 12:31:24 sandervl Exp $ */
+/* $Id: osliblvm.h,v 1.6 2003-01-20 10:46:27 sandervl Exp $ */
 /*
  * OS/2 LVM (Logical Volume Management) functions
  *
@@ -326,7 +326,6 @@ typedef struct _Volume_Information_Record {
 
 #define VOLUME_NAME_PREFIX  "\\\\?\\Volume\\"
 
-BOOL   OSLibLVMInit();
 void   OSLibLVMExit();
 HANDLE OSLibLVMQueryVolumeControlData();
 void   OSLibLVMFreeVolumeControlData(HANDLE hVolumeControlData);

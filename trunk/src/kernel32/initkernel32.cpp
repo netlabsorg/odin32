@@ -1,4 +1,4 @@
-/* $Id: initkernel32.cpp,v 1.24 2002-12-13 16:46:44 sandervl Exp $
+/* $Id: initkernel32.cpp,v 1.25 2003-01-20 10:46:26 sandervl Exp $
  *
  * KERNEL32 DLL entry point
  *
@@ -194,9 +194,6 @@ ULONG APIENTRY inittermKernel32(ULONG hModule, ULONG ulFlag)
             //InitDynamicRegistry creates/changes keys that may change (i.e. odin.ini
             //keys that affect windows version)
             InitDynamicRegistry();
-
-            //Load LVM subsystem for volume/mountpoint win32 functions
-            OSLibLVMInit();
 
             //Set the process affinity mask to the system affinity mask
             DWORD dwProcessAffinityMask, dwSystemAffinityMask;
