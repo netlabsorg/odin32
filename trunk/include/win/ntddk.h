@@ -1,4 +1,3 @@
-/* $Id: ntddk.h,v 1.7 2001-04-22 10:37:27 sandervl Exp $ */
 /*
 	this file defines interfaces mainly exposed to device drivers and
 	native nt dll's
@@ -643,8 +642,8 @@ DWORD WINAPI RtlDeleteSecurityObject(DWORD x1);
 LPVOID WINAPI RtlNormalizeProcessParams(LPVOID x);
 DWORD WINAPI RtlNtStatusToDosError(DWORD error);
 BOOLEAN WINAPI RtlGetNtProductType(LPDWORD type);
-INT WINAPI RtlExtendedLargeIntegerDivide(LARGE_INTEGER dividend, DWORD divisor, LPDWORD rest);
-LARGE_INTEGER WINAPI RtlExtendedIntegerMultiply(LARGE_INTEGER factor1,INT factor2);
+LONGLONG WINAPI RtlExtendedLargeIntegerDivide(LONGLONG dividend, INT divisor, INT *rest);
+LONGLONG WINAPI RtlExtendedIntegerMultiply(LONGLONG factor1,INT factor2);
 DWORD WINAPI RtlFormatCurrentUserKeyPath(PUNICODE_STRING String);
 DWORD WINAPI RtlOpenCurrentUser(DWORD x1, DWORD *x2);
 BOOLEAN WINAPI RtlDosPathNameToNtPathName_U( LPWSTR from,PUNICODE_STRING us,DWORD x2,DWORD x3);

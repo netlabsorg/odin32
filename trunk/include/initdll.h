@@ -65,5 +65,19 @@ extern DWORD _Resource_PEResTab;
 
 #endif
 
+ULONG APIENTRY inittermKernel32(ULONG hModule, ULONG ulFlag);
+void  APIENTRY cleanupKernel32(ULONG ulReason);
+
+ULONG APIENTRY inittermUser32(ULONG hModule, ULONG ulFlag);
+void  APIENTRY cleanupUser32(ULONG ulReason);
+
+ULONG APIENTRY inittermWinmm(ULONG hModule, ULONG ulFlag);
+ULONG APIENTRY inittermShell32(ULONG hModule, ULONG ulFlag);
+ULONG APIENTRY inittermOle32(ULONG hModule, ULONG ulFlag);
+ULONG APIENTRY inittermComdlg32(ULONG hModule, ULONG ulFlag);
+ULONG APIENTRY inittermComctl32(ULONG hModule, ULONG ulFlag);
+ULONG APIENTRY inittermGdi32(ULONG hModule, ULONG ulFlag);
+ULONG APIENTRY inittermWsock32(ULONG hModule, ULONG ulFlag);
+ULONG APIENTRY inittermRpcrt4(ULONG hModule, ULONG ulFlag);
 
 #endif //__INITDLL_H__
