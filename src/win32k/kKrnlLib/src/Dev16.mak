@@ -1,4 +1,4 @@
-# $Id: Dev16.mak,v 1.9 2002-08-24 22:07:40 bird Exp $
+# $Id: Dev16.mak,v 1.10 2002-12-16 01:52:23 bird Exp $
 
 #
 # kKrnlLib/dev16
@@ -34,9 +34,10 @@ TARGET_OBJS     =\
 $(PATH_TARGET)\d16Strat.$(EXT_OBJ)\
 $(PATH_TARGET)\d16Init.$(EXT_OBJ)\
 $(PATH_TARGET)\d16Globl.$(EXT_OBJ)\
-$(PATH_TARGET)\d16crt.$(EXT_OBJ)\
+$(PATH_TARGET)\devErrors.$(EXT_OBJ)\
+# $(PATH_TARGET)\d16crt.$(EXT_OBJ)\
 $(PATH_TARGET)\d16vprintf.$(EXT_OBJ)\
-$(PATH_TARGET)\d16ProbeKrnl.$(EXT_OBJ)\
+# $(PATH_TARGET)\d16ProbeKrnl.$(EXT_OBJ)\
 $(PATH_TARGET)\krnlImportTable.$(EXT_OBJ)\
 
 #
