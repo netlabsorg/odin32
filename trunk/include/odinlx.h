@@ -1,4 +1,4 @@
-/* $Id: odinlx.h,v 1.7 2001-03-06 21:44:39 mike Exp $ */
+/* $Id: odinlx.h,v 1.8 2002-02-03 13:15:40 sandervl Exp $ */
 
 /*
  *
@@ -15,6 +15,11 @@
 
 #include <win\peexe.h>
 #include <versionos2.h>
+
+#define ORDINAL_REGISTERLXDLL		1238
+#define ORDINAL_UNREGISTERLXDLL		1239
+#define ORDINAL_REGISTERLXEXE		1237
+#define ORDINAL_REGISTERDUMMYEXE	1249
 
 extern "C" {
 
@@ -51,5 +56,12 @@ BOOL WIN32API UnregisterLxDll(HINSTANCE hInstance);
 //System dlls set EntryPoint to 0
 //******************************************************************************
 BOOL WIN32API RegisterLxExe(WINMAIN EntryPoint, PVOID pResData);
+
+
+//******************************************************************************
+//Create Dummy Exe object
+//******************************************************************************
+BOOL WIN32API RegisterDummyExe(LPSTR pszExeName);
+
 }
 #endif
