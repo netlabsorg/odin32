@@ -1,4 +1,4 @@
-/* $Id: win32dlg.cpp,v 1.38 1999-12-24 18:39:11 sandervl Exp $ */
+/* $Id: win32dlg.cpp,v 1.39 1999-12-29 14:37:17 sandervl Exp $ */
 /*
  * Win32 Dialog Code for OS/2
  *
@@ -805,7 +805,7 @@ LRESULT Win32Dialog::DefDlg_Proc(UINT msg, WPARAM wParam, LPARAM lParam)
         return hUserFont;
 
     case WM_CLOSE:
-        PostMessageA(WM_COMMAND, IDCANCEL, (LPARAM)GetDlgItem( getWindowHandle(), IDCANCEL ) );
+        PostMessageA(getWindowHandle(), WM_COMMAND, IDCANCEL, (LPARAM)GetDlgItem( getWindowHandle(), IDCANCEL ) );
         return 0;
 
     case WM_NOTIFYFORMAT:

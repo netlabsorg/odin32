@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.123 1999-12-29 12:39:45 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.124 1999-12-29 14:37:17 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -922,9 +922,15 @@ void Win32BaseWindow::setExtendedKey(ULONG virtualkey, ULONG *lParam)
 }
 //******************************************************************************
 //******************************************************************************
-ULONG Win32BaseWindow::DispatchMsg(MSG *msg)
+ULONG Win32BaseWindow::DispatchMsgA(MSG *msg)
 {
     return SendInternalMessageA(msg->message, msg->wParam, msg->lParam);
+}
+//******************************************************************************
+//******************************************************************************
+ULONG Win32BaseWindow::DispatchMsgW(MSG *msg)
+{
+    return SendInternalMessageW(msg->message, msg->wParam, msg->lParam);
 }
 //******************************************************************************
 //******************************************************************************
@@ -1817,7 +1823,7 @@ LRESULT Win32BaseWindow::DefWindowProcA(UINT Msg, WPARAM wParam, LPARAM lParam)
         {
             Win32BaseWindow *window = GetTopParent();
             if(window && !(window->getClass()->getStyle() & CS_NOCLOSE))
-                window->PostMessageA(WM_SYSCOMMAND, SC_CLOSE, 0);
+                PostMessageA(getWindowHandle(), WM_SYSCOMMAND, SC_CLOSE, 0);
         }
 
         Win32BaseWindow *siblingWindow;
@@ -1976,37 +1982,23 @@ LRESULT Win32BaseWindow::DefWindowProcW(UINT Msg, WPARAM wParam, LPARAM lParam)
 //******************************************************************************
 LRESULT Win32BaseWindow::SendMessageA(ULONG Msg, WPARAM wParam, LPARAM lParam)
 {
- POSTMSG_PACKET *packet;
-
     //if the destination window is created by this process & thread, call window proc directly
     if(dwProcessId == currentProcessId && dwThreadId == GetCurrentThreadId()) {
         return SendInternalMessageA(Msg, wParam, lParam);
     }
     //otherwise use WinSendMsg to send it to the right process/thread
-    packet = (POSTMSG_PACKET *)_smalloc(sizeof(POSTMSG_PACKET));
-    packet->Msg = Msg;
-    packet->wParam = wParam;
-    packet->lParam = lParam;
-    packet->fUnicode = FALSE;
-    return OSLibSendMessage(getOS2WindowHandle(), WIN32APP_POSTMSG, WIN32PM_MAGIC, (DWORD)packet);
+    return OSLibSendMessage(getOS2WindowHandle(), Msg, wParam, lParam, FALSE);
 }
 //******************************************************************************
 //******************************************************************************
 LRESULT Win32BaseWindow::SendMessageW(ULONG Msg, WPARAM wParam, LPARAM lParam)
 {
- POSTMSG_PACKET *packet;
-
     //if the destination window is created by this process & thread, call window proc directly
     if(dwProcessId == currentProcessId && dwThreadId == GetCurrentThreadId()) {
         return SendInternalMessageW(Msg, wParam, lParam);
     }
     //otherwise use WinSendMsg to send it to the right process/thread
-    packet = (POSTMSG_PACKET *)_smalloc(sizeof(POSTMSG_PACKET));
-    packet->Msg = Msg;
-    packet->wParam = wParam;
-    packet->lParam = lParam;
-    packet->fUnicode = TRUE;
-    return OSLibSendMessage(getOS2WindowHandle(), WIN32APP_POSTMSG, WIN32PM_MAGIC, (DWORD)packet);
+    return OSLibSendMessage(getOS2WindowHandle(), Msg, wParam, lParam, TRUE);
 }
 //******************************************************************************
 //Called as a result of an OS/2 message or called from a class method
@@ -2126,71 +2118,6 @@ void Win32BaseWindow::CallWindowHookProc(ULONG hooktype, ULONG Msg, WPARAM wPara
 }
 //******************************************************************************
 //******************************************************************************
-BOOL Win32BaseWindow::PostMessageA(ULONG msg, WPARAM wParam, LPARAM lParam)
-{
- POSTMSG_PACKET *packet = (POSTMSG_PACKET *)_smalloc(sizeof(POSTMSG_PACKET));
-
-    packet->Msg = msg;
-    packet->wParam = wParam;
-    packet->lParam = lParam;
-    packet->fUnicode = FALSE;
-    return OSLibPostMessage(OS2Hwnd, WIN32APP_POSTMSG, WIN32PM_MAGIC, (DWORD)packet);
-}
-//******************************************************************************
-//******************************************************************************
-BOOL Win32BaseWindow::PostMessageW(ULONG msg, WPARAM wParam, LPARAM lParam)
-{
- POSTMSG_PACKET *packet = (POSTMSG_PACKET *)_smalloc(sizeof(POSTMSG_PACKET));
-
-    packet->Msg = msg;
-    packet->wParam = wParam;
-    packet->lParam = lParam;
-    packet->fUnicode = TRUE;
-    return OSLibPostMessage(OS2Hwnd, WIN32APP_POSTMSG, WIN32PM_MAGIC, (DWORD)packet);
-}
-//******************************************************************************
-//******************************************************************************
-BOOL Win32BaseWindow::PostThreadMessageA(ULONG threadid, UINT msg, WPARAM wParam, LPARAM lParam)
-{
- POSTMSG_PACKET *packet = (POSTMSG_PACKET *)_smalloc(sizeof(POSTMSG_PACKET));
-
-    dprintf(("PostThreadMessageA %x %x %x %x", threadid, msg, wParam, lParam));
-    packet->Msg = msg;
-    packet->wParam = wParam;
-    packet->lParam = lParam;
-    packet->fUnicode = FALSE;
-    return OSLibPostThreadMessage(threadid, WIN32APP_POSTMSG, WIN32PM_MAGIC, (LPARAM)packet);
-}
-//******************************************************************************
-//******************************************************************************
-BOOL Win32BaseWindow::PostThreadMessageW(ULONG threadid, UINT msg, WPARAM wParam, LPARAM lParam)
-{
- POSTMSG_PACKET *packet = (POSTMSG_PACKET *)_smalloc(sizeof(POSTMSG_PACKET));
-
-    dprintf(("PostThreadMessageW %x %x %x %x", threadid, msg, wParam, lParam));
-    packet->Msg = msg;
-    packet->wParam = wParam;
-    packet->lParam = lParam;
-    packet->fUnicode = TRUE;
-    return OSLibPostThreadMessage(threadid, WIN32APP_POSTMSG, WIN32PM_MAGIC, (LPARAM)packet);
-}
-//******************************************************************************
-//******************************************************************************
-ULONG Win32BaseWindow::PostMessage(POSTMSG_PACKET *packet)
-{
- ULONG rc;
-
-    if(packet == NULL)
-        return 0;
-
-    if(packet->fUnicode) {
-            rc = SendInternalMessageW(packet->Msg, packet->wParam, packet->lParam);
-    }
-    else    rc = SendInternalMessageA(packet->Msg, packet->wParam, packet->lParam);
-
-    free(packet);
-    return rc;
-}
 //******************************************************************************
 //TODO: Do this more efficiently
 //******************************************************************************
@@ -2210,7 +2137,7 @@ LRESULT Win32BaseWindow::BroadcastMessageA(int type, UINT msg, WPARAM wParam, LP
                 if(type == BROADCAST_SEND) {
                         window->SendInternalMessageA(msg, wParam, lParam);
                 }
-                else    window->PostMessageA(msg, wParam, lParam);
+                else    PostMessageA(window->getWindowHandle(), msg, wParam, lParam);
             }
         }
     }
@@ -2224,7 +2151,6 @@ LRESULT Win32BaseWindow::BroadcastMessageW(int type, UINT msg, WPARAM wParam, LP
  Win32BaseWindow *window;
  HWND hwnd = WNDHANDLE_MAGIC_HIGHWORD;
 
-
     dprintf(("BroadCastMessageW %x %x %x", msg, wParam, lParam));
 
     for(int i=0;i<MAX_WINDOW_HANDLES;i++) {
@@ -2236,7 +2162,7 @@ LRESULT Win32BaseWindow::BroadcastMessageW(int type, UINT msg, WPARAM wParam, LP
                 if(type == BROADCAST_SEND) {
                         window->SendInternalMessageW(msg, wParam, lParam);
                 }
-                else    window->PostMessageW(msg, wParam, lParam);
+                else    PostMessageW(window->getWindowHandle(), msg, wParam, lParam);
             }
         }
     }

@@ -1,4 +1,4 @@
-/* $Id: oslibmsg.cpp,v 1.17 1999-12-29 12:39:44 sandervl Exp $ */
+/* $Id: oslibmsg.cpp,v 1.18 1999-12-29 14:37:16 sandervl Exp $ */
 /*
  * Window message translation functions for OS/2
  *
@@ -123,8 +123,6 @@ void WinToOS2MsgTranslate(MSG *winMsg, QMSG *os2Msg, BOOL isUnicode)
 //******************************************************************************
 ULONG TranslateWinMsg(ULONG msg, BOOL fMinFilter)
 {
- POSTMSG_PACKET *packet;
-
     if(msg == 0)
         return 0;
 
@@ -234,7 +232,7 @@ continuegetmsg:
             eaten = TIMER_HandleTimer (MsgThreadPtr);
     } while (eaten);
   }
-  OS2ToWinMsgTranslate((PVOID)thdb, MsgThreadPtr, pMsg, isUnicode);
+  OS2ToWinMsgTranslate((PVOID)thdb, MsgThreadPtr, pMsg, isUnicode, MSG_REMOVE);
   return rc;
 }
 //******************************************************************************
@@ -286,7 +284,7 @@ continuepeekmsg:
     return FALSE;
   }
 
-  OS2ToWinMsgTranslate((PVOID)thdb, &os2msg, pMsg, isUnicode);
+  OS2ToWinMsgTranslate((PVOID)thdb, &os2msg, pMsg, isUnicode, (fRemove & PM_REMOVE_W) ? MSG_REMOVE : MSG_NOREMOVE);
   //TODO: This is not safe! There's no guarantee this message will be dispatched and it might overwrite a previous message
   if(fRemove & PM_REMOVE_W) {
         memcpy(MsgThreadPtr, &os2msg, sizeof(QMSG));
@@ -365,34 +363,50 @@ BOOL OSLibWinReplyMessage(ULONG result)
 }
 //******************************************************************************
 //******************************************************************************
-BOOL OSLibPostMessage(HWND hwnd, ULONG msg, ULONG wParam, ULONG lParam)
+ULONG OSLibSendMessage(HWND hwnd, ULONG msg, ULONG wParam, ULONG lParam, BOOL fUnicode)
 {
-  return WinPostMsg(hwnd, msg, (MPARAM)wParam, (MPARAM)lParam);
-}
-//******************************************************************************
-//******************************************************************************
-ULONG OSLibSendMessage(HWND hwnd, ULONG msg, ULONG wParam, ULONG lParam)
-{
-  return (ULONG)WinSendMsg(hwnd, msg, (MPARAM)wParam, (MPARAM)lParam);
+ POSTMSG_PACKET *packet = (POSTMSG_PACKET *)_smalloc(sizeof(POSTMSG_PACKET));
+
+    packet->Msg    = msg;
+    packet->wParam = wParam;
+    packet->lParam = lParam;
+
+    return (ULONG)WinSendMsg(hwnd, WIN32APP_POSTMSG, (MPARAM)((fUnicode) ? WIN32MSG_MAGICW : WIN32MSG_MAGICA), (MPARAM)packet);
 }
 //******************************************************************************
 //******************************************************************************
 ULONG OSLibWinBroadcastMsg(ULONG msg, ULONG wParam, ULONG lParam, BOOL fSend)
 {
-  return WinBroadcastMsg(HWND_DESKTOP, msg, (MPARAM)wParam, (MPARAM)lParam,
-                         (fSend) ? BMSG_SEND : BMSG_POST);
+    return WinBroadcastMsg(HWND_DESKTOP, msg, (MPARAM)wParam, (MPARAM)lParam,
+                           (fSend) ? BMSG_SEND : BMSG_POST);
 }
 //******************************************************************************
 //******************************************************************************
-BOOL OSLibPostThreadMessage(ULONG threadid, UINT msg, WPARAM wParam, LPARAM lParam)
+BOOL OSLibPostMessage(HWND hwnd, ULONG msg, ULONG wParam, ULONG lParam, BOOL fUnicode)
+{
+ POSTMSG_PACKET *packet = (POSTMSG_PACKET *)_smalloc(sizeof(POSTMSG_PACKET));
+
+    packet->Msg = msg;
+    packet->wParam = wParam;
+    packet->lParam = lParam;
+    return WinPostMsg(hwnd, WIN32APP_POSTMSG, (MPARAM)((fUnicode) ? WIN32MSG_MAGICW : WIN32MSG_MAGICA), (MPARAM)packet);
+}
+//******************************************************************************
+//******************************************************************************
+BOOL OSLibPostThreadMessage(ULONG threadid, UINT msg, WPARAM wParam, LPARAM lParam, BOOL fUnicode)
 {
  THDB *thdb = GetTHDBFromThreadId(threadid);
+ POSTMSG_PACKET *packet = (POSTMSG_PACKET *)_smalloc(sizeof(POSTMSG_PACKET));
 
     if(thdb == NULL) {
         dprintf(("OSLibPostThreadMessage: thread %x not found!", threadid));
         return FALSE;
     }
-    return WinPostQueueMsg(thdb->hmq, msg, (MPARAM)wParam, (MPARAM)lParam);
+    dprintf(("PostThreadMessageA %x %x %x %x", threadid, msg, wParam, lParam));
+    packet->Msg = msg;
+    packet->wParam = wParam;
+    packet->lParam = lParam;
+    return WinPostQueueMsg(thdb->hmq, WIN32APP_POSTMSG, (MPARAM)((fUnicode) ? WIN32MSG_MAGICW : WIN32MSG_MAGICA), (MPARAM)packet);
 }
 //******************************************************************************
 //******************************************************************************

@@ -1,4 +1,4 @@
-/* $Id: win32wmdichild.cpp,v 1.16 1999-12-21 17:03:45 cbratschi Exp $ */
+/* $Id: win32wmdichild.cpp,v 1.17 1999-12-29 14:37:18 sandervl Exp $ */
 /*
  * Win32 MDI Child Window Class for OS/2
  *
@@ -111,7 +111,7 @@ LRESULT Win32MDIChildWindow::DefMDIChildProcA(UINT Msg, WPARAM wParam, LPARAM lP
 
     case WM_MENUCHAR:
         /* MDI children don't have menu bars */
-        client->PostMessageA(WM_SYSCOMMAND, (WPARAM)SC_KEYMENU, (LPARAM)LOWORD(wParam) );
+        PostMessageA(client->getWindowHandle(), WM_SYSCOMMAND, (WPARAM)SC_KEYMENU, (LPARAM)LOWORD(wParam) );
         return 0x00010000L;
 
     case WM_CLOSE:
