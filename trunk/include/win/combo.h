@@ -1,4 +1,4 @@
-/* $Id: combo.h,v 1.5 2000-05-22 17:18:48 cbratschi Exp $ */
+/* $Id: combo.h,v 1.6 2001-04-26 16:59:55 sandervl Exp $ */
 
 /*
  * Combo box definitions
@@ -65,6 +65,10 @@ typedef struct
 BOOL 	COMBO_FlipListbox( LPHEADCOMBO, BOOL, BOOL );
 LRESULT COMBO_Directory( LPHEADCOMBO, UINT, LPSTR, BOOL );
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 BOOL LISTBOX_Register();
 BOOL LISTBOX_Unregister();
 BOOL COMBOLBOX_Register();
@@ -75,6 +79,10 @@ BOOL COMBOBOX_Unregister();
 
 BOOL EDIT_Register();
 BOOL EDIT_Unregister();
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* __WINE_COMBO_H */
 
