@@ -1,4 +1,4 @@
-/* $Id: windowmsg.cpp,v 1.39 2002-08-05 16:31:27 sandervl Exp $ */
+/* $Id: windowmsg.cpp,v 1.40 2003-02-27 14:22:22 sandervl Exp $ */
 /*
  * Win32 window message APIs for OS/2
  *
@@ -154,7 +154,7 @@ DWORD WIN32API GetMessagePos(void)
     DWORD pos;
 
     pos = OSLibWinGetMessagePos();
-    dprintf(("USER32: GetMessagePos -> (%d,%d)", HIWORD(pos), LOWORD(pos)));
+    dprintf(("USER32: GetMessagePos -> (%d,%d)", LOWORD(pos), HIWORD(pos)));
     return pos;
 }
 //******************************************************************************
