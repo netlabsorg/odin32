@@ -1,4 +1,4 @@
-/* $Id: winimagepeldr.cpp,v 1.99 2002-07-23 13:51:49 sandervl Exp $ */
+/* $Id: winimagepeldr.cpp,v 1.100 2002-07-24 11:29:23 sandervl Exp $ */
 
 /*
  * Win32 PE loader Image base class
@@ -194,6 +194,13 @@ BOOL Win32PeLdrImage::init(ULONG reservedMem, ULONG ulPEOffset)
     dprintf((LOG, "KERNEL32-PELDR: Opening PE-image (%s) returned handle %08xh.\n",
              szFileName,
              hFile));
+
+    //change to PE image start if necessary
+    if(ulPEOffset) {
+        if(OSLibDosSetFilePtr(hFile, ulPEOffset, OSLIB_SETPTR_FILE_BEGIN) == -1) {
+            goto failure;
+        }
+    }
   
     //default error:
     strcpy(szErrorModule, OSLibStripPath(szFileName));
@@ -240,8 +247,7 @@ BOOL Win32PeLdrImage::init(ULONG reservedMem, ULONG ulPEOffset)
     if(memmap == NULL || !memmap->Init()) {
         goto failure;
     }
-    //PE image starts at offset ulPEOffset (default 0)
-    win32file = memmap->mapViewOfFile(0, ulPEOffset, 2);
+    win32file = memmap->mapViewOfFile(0, 0, 2);
 
     if(DosQueryPathInfo(szFileName, FIL_QUERYFULLNAME, szFullPath, sizeof(szFullPath)) == 0) {
         setFullPath(szFullPath);
