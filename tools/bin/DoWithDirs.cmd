@@ -1,4 +1,4 @@
-/* $Id: DoWithDirs.cmd,v 1.8 2000-11-20 05:03:14 bird Exp $
+/* $Id: DoWithDirs.cmd,v 1.9 2001-01-22 20:25:02 phaller Exp $
  *
  * Syntax: dowithdirs.cmd [-e<list of excludes>] [-c] [-i] [-l] [-r] <cmd with args...>
  *    -e      Exclude directories.
@@ -13,8 +13,11 @@
  *    -s      Skip locked directories in stead of stopping.
  */
 
-    call RxFuncAdd 'SysLoadFuncs', 'RexxUtil', 'SysLoadFuncs'
-    call SysLoadFuncs
+if RxFuncQuery('SysLoadFuncs')=0 THEN
+DO
+  call RxFuncAdd 'SysLoadFuncs', 'RexxUtil', 'SysLoadFuncs'
+  call SysLoadFuncs
+END
 
     /* init options */
     fIgnoreFailure = 0;
