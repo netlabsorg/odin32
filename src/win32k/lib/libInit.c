@@ -1,4 +1,4 @@
-/* $Id: libInit.c,v 1.4 2001-02-21 07:47:58 bird Exp $
+/* $Id: libInit.c,v 1.5 2001-08-19 01:21:13 bird Exp $
  *
  * Inits the Win32k library functions.
  *
@@ -53,7 +53,7 @@ APIRET APIENTRY  libWin32kInit(void)
                      0UL,
                      FILE_NORMAL,
                      OPEN_ACTION_FAIL_IF_NEW | OPEN_ACTION_OPEN_IF_EXISTS,
-                     OPEN_SHARE_DENYNONE | OPEN_ACCESS_READONLY,
+                     OPEN_SHARE_DENYNONE | OPEN_ACCESS_READONLY | OPEN_FLAGS_NOINHERIT,
                      NULL);
 
         fInited = rc == NO_ERROR;
