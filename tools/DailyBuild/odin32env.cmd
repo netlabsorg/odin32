@@ -1,8 +1,8 @@
-/* $Id: odin32env.cmd,v 1.24 2002-04-11 16:27:03 bird Exp $
+/* $Id: odin32env.cmd,v 1.25 2002-06-26 22:13:14 bird Exp $
  *
  * Sets the build environment.
  *
- * Copyright (c) 1999-2000 knut st. osmundsen (knut.stange.osmundsen@mynd.no)
+ * Copyright (c) 1999-2002 knut st. osmundsen (bird@anduin.net)
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *
@@ -790,6 +790,7 @@ WarpIn: procedure
     sPathWarpIn = QueryPath('warpin');
     call EnvVar_Set      fRM, 'PATH_WARPIN', sPathWarpIn;
     call EnvVar_AddFront fRM, 'path',        sPathWarpIn';'
+    call EnvVar_AddFront fRM, 'beginlibpath',sPathWarpIn';'
     call EnvVar_AddFront fRM, 'bookshelf',   sPathWarpIn';'
 return 0;
 
