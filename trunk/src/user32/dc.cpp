@@ -1,4 +1,4 @@
-/* $Id: dc.cpp,v 1.101 2001-05-11 19:02:01 sandervl Exp $ */
+/* $Id: dc.cpp,v 1.102 2001-05-15 10:34:48 sandervl Exp $ */
 
 /*
  * DC functions for USER32
@@ -711,6 +711,7 @@ HDC WIN32API BeginPaint (HWND hWnd, PPAINTSTRUCT_W lpps)
         dprintfRegion(pHps->hps, wnd->getWindowHandle(), hrgnClip);
 
 #ifdef DEBUG
+        //Note: GpiQueryClipBox returns logical points
         lComplexity = GpiQueryClipBox(pHps->hps, &rectlClip);
         dprintf(("ClipBox (%d): (%d,%d)(%d,%d)", lComplexity, rectlClip.xLeft, rectlClip.yBottom, rectlClip.xRight, rectlClip.yTop));
 #endif
@@ -726,6 +727,7 @@ HDC WIN32API BeginPaint (HWND hWnd, PPAINTSTRUCT_W lpps)
         selectClientArea(wnd, pHps);
 
 #ifdef DEBUG
+        //Note: GpiQueryClipBox returns logical points
         GpiQueryClipBox(pHps->hps, &rectlClip);
         dprintf(("ClipBox (%d): (%d,%d)(%d,%d)", lComplexity, rectlClip.xLeft, rectlClip.yBottom, rectlClip.xRight, rectlClip.yTop));
 #endif
@@ -758,6 +760,9 @@ HDC WIN32API BeginPaint (HWND hWnd, PPAINTSTRUCT_W lpps)
         lpps->rcPaint.left   = rectl.xLeft;
         lpps->rcPaint.bottom = height - rectl.yBottom;
         lpps->rcPaint.right  = rectl.xRight;
+        //BeginPaint must return logical points instead of device points.
+        //(not the same if e.g. app changes page viewport)
+        DPtoLP(lpps->hdc, (LPPOINT)&lpps->rcPaint, 2);
     }
     else {
         lpps->rcPaint.bottom = lpps->rcPaint.top = 0;
