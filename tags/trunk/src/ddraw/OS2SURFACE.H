@@ -1,10 +1,6 @@
 #ifndef __OS2SURFACE_H__
 #define __OS2SURFACE_H__
 #define FAR
-#define INITGUID
-#include "os2ddraw.h"
-#include "os2clipper.h"
-#include "os2palette.h"
 #include "divewrap.h"
 #include <commctrl.h>
 

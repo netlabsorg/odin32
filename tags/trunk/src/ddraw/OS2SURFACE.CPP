@@ -5,6 +5,10 @@
                   ( (DWORD)(BYTE)(ch0) | ( (DWORD)(BYTE)(ch1) << 8 ) |    \
                   ( (DWORD)(BYTE)(ch2) << 16 ) | ( (DWORD)(BYTE)(ch3) << 24 ) )
 #include <fourcc.h>
+#define INITGUID
+#include "os2ddraw.h"
+#include "os2clipper.h"
+#include "os2palette.h"
 #include "os2surface.h"
 #include "rectangle.h"
 #define _OS2WIN_H
@@ -153,6 +157,27 @@ static void _dump_DDSCAPS(DWORD flagmask) {
       WriteLog("%s ",flags[i].name);
   WriteLog("\n");
 }
+
+static void _dump_DDSCAPS2(DWORD flagmask) {
+  int  i;
+  const struct {
+    DWORD  mask;
+    char  *name;
+  } flags[] = {
+#define FE(x) { x, #x},
+    FE(DDSCAPS2_HARDWAREDEINTERLACE)
+    FE(DDSCAPS2_HINTANTIALIASING)
+    FE(DDSCAPS2_HINTDYNAMIC)
+    FE(DDSCAPS2_HINTSTATIC)
+    FE(DDSCAPS2_OPAQUE)
+    FE(DDSCAPS2_TEXTUREMANAGE)
+  };
+  for (i=0;i<sizeof(flags)/sizeof(flags[0]);i++)
+    if (flags[i].mask & flagmask)
+      WriteLog("%s ",flags[i].name);
+  WriteLog("\n");
+}
+
 
 static void _dump_DDSD(DWORD flagmask) {
   int  i;
@@ -552,6 +577,8 @@ OS2IDirectDrawSurface::OS2IDirectDrawSurface(OS2IDirectDraw *lpDirectDraw,
       width  = DDSurfaceDesc.dwWidth;
       height = DDSurfaceDesc.dwHeight;
 
+      lpDraw->pPrimSurf = this;
+
       lastError = DD_OK;
       return;
     } // endif  DDSCAPS_PRIMARYSURFACE
@@ -590,7 +617,7 @@ OS2IDirectDrawSurface::OS2IDirectDrawSurface(OS2IDirectDraw *lpDirectDraw,
       else
       {
         WriteLog(" Use Screen Format :");
-        dwBpp = dwBytesPPDive << 3; // No use Screenformat
+        dwBpp = lpDraw->GetScreenBpp(); // No use Screenformat
         lpDDSurfaceDesc->ddpfPixelFormat.dwSize = sizeof(DDPIXELFORMAT);
         lpDDSurfaceDesc->ddpfPixelFormat.dwFourCC = (DWORD) lpDraw->GetScreenFourCC();
         lpDDSurfaceDesc->ddpfPixelFormat.dwRGBBitCount = dwBpp;
@@ -739,7 +766,6 @@ OS2IDirectDrawSurface::OS2IDirectDrawSurface(OS2IDirectDraw *lpDirectDraw,
 
           dwPitchFB = lpDDSurfaceDesc->dwWidth * (dwBpp<8?1:dwBpp/8);
           dwPitchFB = (dwPitchFB +7) & ~7;  // Align on QWords
-
           DDSurfaceDesc.lPitch    = dwPitchFB;
           lpDDSurfaceDesc->lPitch = dwPitchFB;
 
@@ -763,7 +789,7 @@ OS2IDirectDrawSurface::OS2IDirectDrawSurface(OS2IDirectDraw *lpDirectDraw,
 
           pFrameBuffer = (char*)(((int)pFBreal + 7) & ~7); // align to QWORD
 
-          WriteLog( " Framebuffer @ %08X QWAligned @ %08X with a Pitch of %d",
+          WriteLog( " Framebuffer @ %08X QWAligned @ %08X with a Pitch of %d\n",
                     pFBreal, pFrameBuffer, dwPitchFB);
 
           lpDDSurfaceDesc->lpSurface = pFrameBuffer;
@@ -779,6 +805,7 @@ OS2IDirectDrawSurface::OS2IDirectDrawSurface(OS2IDirectDraw *lpDirectDraw,
           else
           {
             WriteLog(" Alloc CCBuf ");
+            dwPitchDB = (lpDDSurfaceDesc->dwWidth * (lpDraw->dCaps.ulDepth/8) +7) & ~7;
             if(Mainchain)
             {
               WriteLog("with DIVE\n");
@@ -789,17 +816,21 @@ OS2IDirectDrawSurface::OS2IDirectDrawSurface(OS2IDirectDraw *lpDirectDraw,
                                     lpDraw->dCaps.fccColorEncoding,
                                     lpDDSurfaceDesc->dwWidth,
                                     lpDDSurfaceDesc->dwHeight,
-                                    (lpDDSurfaceDesc->dwWidth * (lpDraw->dCaps.ulDepth/8) +7) & ~7,
+                                    dwPitchDB,
                                     (PBYTE)pDiveBuffer);
             }
             else
             {
-              WriteLog("with malloc");
+              WriteLog( "with malloc (%dx%d) Pitch %d ",
+                        lpDDSurfaceDesc->dwHeight,
+                        lpDDSurfaceDesc->dwWidth,
+                        dwPitchDB);
               // No so we must create the Divebuffer to do the colortranslation
               // and blit to the real framebuffer on Unlock to do color conversion
               pDiveBuffer = (char*)malloc( lpDDSurfaceDesc->dwHeight *
-                                   ((lpDDSurfaceDesc->dwWidth * (lpDraw->dCaps.ulDepth/8) +7) & ~7) );
+                                           dwPitchDB);
             }
+            WriteLog( "  @ %08X\n", pDiveBuffer);
           }
 
         }  // end of 3rd case
@@ -1153,6 +1184,112 @@ HRESULT OS2IDirectDrawSurface::ColorFill(LPRECT lpDestRect,DWORD dwFillColor)
 //******************************************************************************
 void OS2IDirectDrawSurface::ColorConversion(LPRECT lpRect)
 {
+  char *pSrc,*pDst,*pSLine,*pDLine;
+  DWORD CCwidth,CCheight,x,y;
+  DWORD *pPal24;
+  WORD  *pPal16;
+
+  if(NULL== lpDraw->pPrimSurf)
+  {
+    WriteLog("No Primary Surface! => No CC\n");
+    return;
+  }
+
+  if(NULL== ((OS2IDirectDrawSurface*)lpDraw->pPrimSurf)->lpPalette)
+  {
+    WriteLog("No DDrawpalette defined!=> No CC\n");
+    return;
+  }
+
+  if(NULL==lpRect)
+  {
+    pSrc = pFrameBuffer;
+    pDst = pDiveBuffer;
+    CCwidth  = width;
+    CCheight = height;
+  }
+  else
+  {
+    // ToDo: Check why the top/bottom values come in swaped here
+    // for now simply reverse them with the following 3 lines
+    y = lpRect->top;
+    lpRect->top = lpRect->bottom;
+    lpRect->bottom = y;
+    // end of hack
+    pSrc = pFrameBuffer +
+           (lpRect->top * dwPitchFB) +
+           (lpRect->left* (lpDraw->dCaps.ulDepth/8));
+    pDst = pDiveBuffer +
+           (lpRect->top * dwPitchDB) +
+           (lpRect->left* dwBytesPPDive);
+    CCwidth  = lpRect->right - lpRect->left;
+    CCheight = lpRect->bottom - lpRect->top;
+
+  }
+
+  WriteLog( "H: %d W: %d\n SRC @ %08X\n DST @ %08X\n",
+            CCheight, CCwidth, pSrc,pDst);
+
+  pSLine = pSrc;
+  pDLine = pDst;
+
+  switch(lpDraw->dCaps.ulDepth)
+  {
+    case 8:
+      WriteLog(" 8Bit target CC not implemented\n");
+      break;
+    case 15:
+      WriteLog(" 15 Bit not implemented using 16bit might look ugly\n");
+    case 16:
+      if(8==lpDraw->GetScreenBpp())
+      {
+        pPal16 = ((OS2IDirectDrawSurface*)lpDraw->pPrimSurf)->lpPalette->aPal16;
+        WriteLog("8->16Bit CC\n");
+        for(y=0;CCheight;CCheight--,y++)
+        {
+          WriteLog("Converting Line %d\n",y);
+          for(x=0;x<width;x++)
+          {
+            *((WORD*)pDLine) = pPal16[pSLine[x]];
+          }
+          pSLine += dwPitchFB;
+          pDLine += dwPitchDB;
+        }
+      }
+      else
+      {
+        WriteLog("%d ->16Bit Not implemented",lpDraw->GetScreenBpp());
+      }
+      break;
+    case 24:
+      if(8==lpDraw->GetScreenBpp())
+      {
+        WriteLog("8->24Bit CC");
+      }
+      else
+      {
+        WriteLog("%d ->16Bit Not implemented",lpDraw->GetScreenBpp());
+      }
+      break;
+    case 32:
+      if(8==lpDraw->GetScreenBpp())
+      {
+        WriteLog("8->32Bit CC");
+      }
+      else
+      {
+        WriteLog("%d ->16Bit Not implemented",lpDraw->GetScreenBpp());
+      }
+      break;
+    default:
+      #ifdef DEBUG
+        WriteLog( "Unexpected Screen Bitdepth %d\n",
+                  lpDraw->dCaps.ulDepth);
+      #endif
+      break;
+  }
+
+/*
   SETUP_BLITTER sBlt;
   ULONG ulDN1, ulDN2;
   ULONG rc;
@@ -1182,6 +1319,10 @@ void OS2IDirectDrawSurface::ColorConversion(LPRECT lpRect)
   sBlt.lDstPosY          = sBlt.ulSrcPosY;
   sBlt.ulNumDstRects     = DIVE_FULLY_VISIBLE;
 
+  WriteLog( "Colorconversion:\n FCC SRC %08X\n FCC DST %08X\n",
+            sBlt.fccSrcColorFormat,
+            sBlt.fccDstColorFormat );
+
   rc = DiveAllocImageBuffer( hDiveCC,
                              &ulDN1,
                              sBlt.fccSrcColorFormat,
@@ -1189,7 +1330,7 @@ void OS2IDirectDrawSurface::ColorConversion(LPRECT lpRect)
                              height,
                              dwPitchFB,
                              (PBYTE)pFrameBuffer);
-  WriteLog("AllocDiveSrc Buffer rc= %X\n",rc);
+  WriteLog("AllocDiveSrc Buffer rc= 0x%08X\n",rc);
 
   rc = DiveAllocImageBuffer( hDiveCC,
                              &ulDN2,
@@ -1198,7 +1339,7 @@ void OS2IDirectDrawSurface::ColorConversion(LPRECT lpRect)
                              height,
                              dwPitchDB,
                              (PBYTE)pDiveBuffer);
-  WriteLog("AllocDiveDst Buffer rc= %Xd\n",rc);
+  WriteLog("AllocDiveDst Buffer rc= 0x%08X\n",rc);
 
   rc = DiveSetupBlitter( hDiveCC,
                          &sBlt);
@@ -1218,7 +1359,7 @@ void OS2IDirectDrawSurface::ColorConversion(LPRECT lpRect)
                             ulDN2);
 
   WriteLog("Free dst rc= %X\n",rc);
-
+*/
 }
 //******************************************************************************
 //******************************************************************************
@@ -2570,7 +2711,10 @@ HRESULT __stdcall SurfBltFast4( THIS This,
   BlitHeight = SrcRect.bottom - SrcRect.top;
   BlitWidth  = (SrcRect.right - SrcRect.left) * src->dwBytesPPDive;
 
-  if(dwTrans & DDBLTFAST_NOCOLORKEY)
+  // Remove unsupported wait flag
+  dwTrans &= ~DDBLTFAST_WAIT;
+
+  if(DDBLTFAST_NOCOLORKEY == dwTrans )
   {
     WriteLog("Solid Blit");
     #ifdef USE_ASM
@@ -2592,14 +2736,16 @@ HRESULT __stdcall SurfBltFast4( THIS This,
   }
   else
   {
-    WriteLog("TransBlit");
+    WriteLog("TransBlit\n");
 
     if(dwTrans & DDBLTFAST_SRCCOLORKEY)
     {
+      WriteLog("Trans SRC\n");
       // transparent source
       dwSrcColor = src->DDSurfaceDesc.ddckCKSrcBlt.dwColorSpaceLowValue;
       if(dwTrans & DDBLTFAST_DESTCOLORKEY)
       {
+        WriteLog("And Dest Colorkey");
         dwDestColor = dest->DDSurfaceDesc.ddckCKDestBlt.dwColorSpaceLowValue;
         // Source and dest colorkeying
         switch(dest->dwBytesPPDive)
@@ -2696,7 +2842,7 @@ HRESULT __stdcall SurfBltFast4( THIS This,
       {
         // This MMX detection should be moved into OS2Draw
         // and into the surface constructor a setup for blitting pointers
-
+        WriteLog("Only Src ColorKey");
         switch(dest->dwBytesPPDive)
         {
           case 1:
@@ -2767,6 +2913,8 @@ HRESULT __stdcall SurfBltFast4( THIS This,
     {
       if(dwTrans & DDBLTFAST_DESTCOLORKEY)
       {
+        WriteLog("DestColorKey\n");
+
         dwDestColor = dest->DDSurfaceDesc.ddckCKDestBlt.dwColorSpaceLowValue;
         switch(dest->dwBytesPPDive)
         {
@@ -2842,6 +2990,10 @@ HRESULT __stdcall SurfBltFast4( THIS This,
             }
             break;
         }  // End switch
+      }
+      else
+      {
+        WriteLog("Unexpected Flags");
       }
     }
   }
@@ -3348,7 +3500,9 @@ HRESULT __stdcall SurfGetCaps(THIS This, LPDDSCAPS lpDDCaps)
     return(DDERR_INVALIDPARAMS);
 
   lpDDCaps->dwCaps = me->DDSurfaceDesc.ddsCaps.dwCaps;
-
+  #ifdef DEBUG
+    _dump_DDSCAPS(lpDDCaps->dwCaps);
+  #endif
   return(DD_OK);
 }
 //******************************************************************************
@@ -3364,6 +3518,11 @@ HRESULT __stdcall SurfGetCaps4(THIS This, LPDDSCAPS2 lpDDCaps)
     return(DDERR_INVALIDPARAMS);
 
   memcpy(lpDDCaps, &(me->DDSurfaceDesc.ddsCaps), sizeof(DDSCAPS2) );
+  #ifdef DEBUG
+    _dump_DDSCAPS(lpDDCaps->dwCaps);
+    _dump_DDSCAPS2(lpDDCaps->dwCaps2);
+
+  #endif
 
   return(DD_OK);
 }
@@ -4097,8 +4256,9 @@ HRESULT __stdcall SurfSetPalette(THIS This, LPDIRECTDRAWPALETTE lpPalette)
       // palette that it is no longer attached to the
       // primary surface => doesn't modify physical palette
       if(me->surfaceType & DDSCAPS_PRIMARYSURFACE)
+      {
         me->lpPalette->SetIsPrimary(FALSE);
-
+      }
       me->lpPalette->Vtbl.Release((IDirectDrawPalette*)me->lpPalette);
       me->lpPalette = NULL;
       return(DD_OK);
@@ -4127,8 +4287,9 @@ HRESULT __stdcall SurfSetPalette(THIS This, LPDIRECTDRAWPALETTE lpPalette)
   // changes in the phys pal.
 
   if(me->surfaceType & DDSCAPS_PRIMARYSURFACE)
+  {
     me->lpPalette->SetIsPrimary(TRUE);
-
+  }
   me->lpVtbl->ChangeUniquenessValue(me);
 
   return(DD_OK);

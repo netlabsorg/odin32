@@ -1,7 +1,6 @@
 #ifndef __OS2PALETTE_H__
 #define __OS2PALETTE_H__
 
-#include "os2ddraw.h"
 #include "divewrap.h"
 #define FAR
 #undef THIS
@@ -26,7 +25,7 @@ class OS2IDirectDrawPalette
   IDirectDrawPaletteVtbl *lpVtbl;
   IDirectDrawPaletteVtbl  Vtbl;
 
-  OS2IDirectDrawPalette( OS2IDirectDraw *lpDirectDraw,
+  OS2IDirectDrawPalette( VOID *lpDirectDraw,
                          int palsize,
                          LPPALETTEENTRY lpColorTable,
                          DWORD dwPalFlags);
@@ -37,13 +36,16 @@ class OS2IDirectDrawPalette
   void          SetIsPrimary(BOOL newValue);
   int           Referenced;
   inline  HRESULT       GetLastError() { return lastError; };
+  WORD           aPal16[256];
+  DWORD          aPal24[256];
  private:
 
  protected:
   HDIVE          hDive;
+  HDIVE          hDiveCC;
   HRESULT        lastError;
   LPPALETTEENTRY os2pal;
-  OS2IDirectDraw *lpDraw;
+  VOID           *lpDraw;
   DWORD          dwCaps;
   DWORD          dwSize;
   BOOL           fAttachedToPrimary;
