@@ -1,4 +1,4 @@
-; $Id: odincrtp.def,v 1.1 2001-11-22 10:39:30 phaller Exp $
+; $Id: odincrtp.def,v 1.2 2001-12-19 09:37:24 phaller Exp $
 ; Odin VAC++ 3.08 shared multithreaded runtime
 LIBRARY ODINCRTP INITINSTANCE TERMINSTANCE
 DESCRIPTION 'Odin32 System DLL - VAC++ 3.08 Profile OdinCRT'
@@ -964,6 +964,8 @@ EXPORTS
     __u64toflt                                         @1030 NONAME
     __divi64                                           @1031 NONAME
     __divu64                                           @1032 NONAME
+
+    getcrtstat                                         @1033 NONAME
 
 
 ; ----------------
