@@ -1,4 +1,8 @@
-/* $Id: changelog,v 1.2540 2003-04-02 14:28:24 bird Exp $ */
+/* $Id: changelog,v 1.2541 2003-04-03 13:07:39 sandervl Exp $ */
+
+ 2003-04-03: Sander van Leeuwen <sandervl@innotek   >
+    - WINMM:    o Different method for detecting DirectAudio (uniaud, sblive, c-media)
+                o Added custom build function to disable DirectAudio (always use DART)
 
  2002-04-02: knut st. osmundsen <bird-odin-spam@anduin   >
     - WIN32K:   o Win32VersionValue in OptionalHeader.
