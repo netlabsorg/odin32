@@ -1,4 +1,4 @@
-/* $Id: oslibdos.cpp,v 1.76 2001-10-10 16:03:27 phaller Exp $ */
+/* $Id: oslibdos.cpp,v 1.77 2001-10-12 18:10:59 phaller Exp $ */
 /*
  * Wrappers for OS/2 Dos* API
  *
@@ -2582,11 +2582,54 @@ DWORD OSLibDosDevIOCtl( DWORD hFile, DWORD dwCat, DWORD dwFunc,
                         PVOID pData, DWORD dwDataMaxLen, DWORD *pdwDataLen)
 {
   APIRET rc;
+  PVOID pTiledParm    = pParm;
+  BOOL  flagTiledParm = FALSE;
+  PVOID pTiledData    = pData;
+  BOOL  flagTiledData = FALSE;
+  
+#define MEM_TILED_CEILING 0x1fffffff
+  
+  // bounce buffer support
+  if ( (DWORD)pTiledParm > MEM_TILED_CEILING)
+  {
+    rc = DosAllocMem(&pTiledParm, dwParmMaxLen, PAG_READ | PAG_WRITE);
+    if (rc)
+      goto _exit_ioctl;
+    
+    flagTiledParm = TRUE;
+  }
+  
+  if ( (DWORD)pTiledData > MEM_TILED_CEILING)
+  {
+    rc = DosAllocMem(&pTiledData, dwDataMaxLen, PAG_READ | PAG_WRITE);
+    if (rc)
+      goto _exit_ioctl;
+    
+    flagTiledData = TRUE;
+  }
 
   rc = DosDevIOCtl( (HFILE)hFile, dwCat, dwFunc,
                      pParm, dwParmMaxLen, pdwParmLen,
                      pData, dwDataMaxLen, pdwDataLen);
-
+  
+  // copy data from bounce buffers to real
+  // target buffers if necessary
+  if (pTiledParm != pParm)
+    memcpy(pParm, pTiledParm, *pdwParmLen);
+  
+  if (pTiledData != pData)
+    memcpy(pData, pTiledData, *pdwDataLen);
+  
+  
+  _exit_ioctl:
+  
+  // deallocate bounce buffers
+  if (flagTiledParm)
+    DosFreeMem(pTiledParm);
+  
+  if (flagTiledData)
+    DosFreeMem(pTiledData);
+  
   SetLastError(error2WinError(rc,ERROR_INVALID_HANDLE));
   return (DWORD)rc;
 }
