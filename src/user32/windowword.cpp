@@ -1,4 +1,4 @@
-/* $Id: windowword.cpp,v 1.12 2001-10-28 10:38:14 sandervl Exp $ */
+/* $Id: windowword.cpp,v 1.13 2003-05-27 09:46:30 sandervl Exp $ */
 
 /*
  * Win32 Get/SetWindowLong/Word user32 API functions for OS/2
@@ -10,13 +10,33 @@
  *
  */
 #include <os2win.h>
-#include <misc.h>
+#include <dbglog.h>
+#include <ctrlconf.h>
 
 #include <win32wbase.h>
 
 #define DBG_LOCALLOG    DBG_windowword
 #include "dbglocal.h"
 
+//******************************************************************************
+//Update the window style without sending WM_STYLECHANGING/ED
+//******************************************************************************
+void WIN_SetStyle(HWND hwnd, DWORD dwStyle)
+{
+ Win32BaseWindow *window;
+
+    window = Win32BaseWindow::GetWindowFromHandle(hwnd);
+    if(window)
+    {
+        window->setStyle(dwStyle);
+        RELEASE_WNDOBJ(window);
+        return;
+    }
+    else {
+        dprintf(("WIN_SetStyle window %x not found!", hwnd));
+        return;
+    }
+}
 //******************************************************************************
 //******************************************************************************
 LONG WIN32API SetWindowLongA(HWND hwnd, int nIndex, LONG  lNewLong)
