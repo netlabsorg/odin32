@@ -1,4 +1,21 @@
- /* $Id: ChangeLog,v 1.426 1999-11-09 09:31:14 phaller Exp $ */
+ /* $Id: ChangeLog,v 1.427 1999-11-09 14:13:45 sandervl Exp $ */
+
+ 99-11-09: Sander van Leeuwen <sandervl@xs4all.nl>
+	- OLE32: Renamed dll to OLE32OS2 to avoid conflicts with Lotus SmartSuite's
+                 OLE32.dll
+	- OLE32/OLEAUT32/AVIFIL32: compilation fixes
+	- KERNEL32: Fixed lstrcpynAtoW & lstrcpynWtoA, OS/2 unicode api
+                    translated up to maxlen characters -> heap corruption
+                    in Solitaire. Translate upto min(stringlength+1, maxlen).
+                    Also, terminate at strlen(strlength), not maxbuf-1 (lstrcpynWtoA)
+	- KERNEL32: Added code for renaming dlls (i.e. OLE32 <-> OLE32OS2)
+                    Odin.ini in bin directory needs to be present for PE loader
+                    (includes renaming entries for OLE32 & NETAPI32)
+          NOTE: Dll name in ole32.lib has changed, so a complete recompilation
+                is required!
+          NOTE 2: We might need to add some code to the file io apis in case
+                  dirty apps try to read directly from system dlls.
+	- KERNEL32: No need to export private apis by name & ordinal (ord is enough)
 
  99-11-09: Patrick Haller <phaller@gmx.net>
 	- NTDLL:	Add:	various new functions added (DbgXXX)

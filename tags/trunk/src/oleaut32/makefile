@@ -1,4 +1,4 @@
-#/* $Id: makefile,v 1.4 1999-09-08 15:23:22 davidr Exp $ */
+#/* $Id: makefile,v 1.5 1999-11-09 14:16:43 sandervl Exp $ */
 #
 # PD-Win32 API 
 #
@@ -60,7 +60,7 @@ guid.obj:       guid.cpp
 stubs.obj:      stubs.cpp
 
 clean:
-	$(RM) *.obj *.lib *.dll *~ *.map *.pch	
+	$(RM) *.obj *.lib *.dll *.map *.pch	
 	$(RM) $(PDWIN32_BIN)\$(TARGET).dll
 	$(RM) $(PDWIN32_LIB)\$(TARGET).lib
 
