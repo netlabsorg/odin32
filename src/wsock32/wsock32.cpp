@@ -1,4 +1,4 @@
-/* $Id: wsock32.cpp,v 1.6 1999-10-20 10:03:53 phaller Exp $ */
+/* $Id: wsock32.cpp,v 1.7 1999-10-20 11:04:13 phaller Exp $ */
 
 /*
  *
@@ -1400,26 +1400,6 @@ ODINFUNCTION0(int,OS2WSAGetLastError)
   {
     return LocalErrorNumber;
   }
-}
-
-
-/*****************************************************************************
- * Name      :
- * Purpose   :
- * Parameters:
- * Variables :
- * Result    :
- * Remark    :
- * Status    : UNTESTED STUB
- *
- * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
- *****************************************************************************/
-
-ODINFUNCTION0(BOOL,OS2WSAIsBlocking)
-{
-  dprintf(("WSOCK32: WSAIsBlocking unimplemented\n"));
-
-  return -5000; //WSAIsBlocking();
 }
 
 
