@@ -1,4 +1,4 @@
-/* $Id: window.cpp,v 1.123 2002-07-05 18:15:11 sandervl Exp $ */
+/* $Id: window.cpp,v 1.124 2002-07-08 10:21:55 sandervl Exp $ */
 /*
  * Win32 window apis for OS/2
  *
@@ -730,7 +730,7 @@ HWND WIN32API SetFocus(HWND hwnd)
 {
  Win32BaseWindow *window;
  Win32BaseWindow *oldfocuswnd;
- HWND lastFocus, lastFocus_W, hwnd_O, hwndTopParent;
+ HWND lastFocus, lastFocus_W, hwnd_O, hwndTopParent, hwndTop;
  BOOL activate, ret;
  TEB *teb;
     
@@ -739,19 +739,29 @@ HWND WIN32API SetFocus(HWND hwnd)
         DebugInt3();
         return 0;
     }
-   
-    if (!IsWindowVisible(hwnd)) 
-    {
-        dprintf(("SetFocus, %x not allowed on invisible window", hwnd));
-        SetLastError(ERROR_INVALID_WINDOW_HANDLE);
-        return 0;
-    }
 
     window = Win32BaseWindow::GetWindowFromHandle(hwnd);
     if(!window) {
         dprintf(("SetFocus, window %x not found", hwnd));
         SetLastError(ERROR_INVALID_WINDOW_HANDLE);
         return 0;
+    }
+
+    //SetFocus is not allowed for minimized or disabled windows (this window
+    //or any parent)
+    hwndTop = hwnd;
+    for (;;)
+    {
+        HWND parent;
+
+        LONG style = GetWindowLongW( hwndTop, GWL_STYLE );
+        if (style & (WS_MINIMIZE | WS_DISABLED)) {
+            dprintf(("SetFocus, %x not allowed on minimized or disabled window (%x)", hwnd, style));
+            return 0;
+        }
+        parent = GetParent(hwndTop);
+        if (!parent || parent == GetDesktopWindow()) break;
+        hwndTop = parent;
     }
 
     hwnd_O = window->getOS2WindowHandle();
