@@ -1,4 +1,4 @@
-/* $Id: virtual.cpp,v 1.49 2002-12-27 15:25:40 sandervl Exp $ */
+/* $Id: virtual.cpp,v 1.50 2003-02-18 18:48:55 sandervl Exp $ */
 
 /*
  * Win32 virtual memory functions
@@ -166,6 +166,7 @@ BOOL WINAPI FlushViewOfFile(
 {
  Win32MemMap *map;
  DWORD offset;
+ BOOL ret;
 
     if (!base)
     {
@@ -177,7 +178,9 @@ BOOL WINAPI FlushViewOfFile(
         SetLastError( ERROR_FILE_NOT_FOUND );
         return FALSE;
     }
-    return map->flushView(offset, cbFlush);
+    ret = map->flushView(offset, cbFlush);
+    map->Release();
+    return ret;
 }
 
 
@@ -195,22 +198,22 @@ BOOL WINAPI FlushViewOfFile(
 BOOL WINAPI UnmapViewOfFile(LPVOID addr /* [in] Address where mapped view begins */
 )
 {
- Win32MemMap *map;
- Win32MemMapView *view;
-
- DWORD offset;
+    Win32MemMap *map;
+    BOOL  ret;
 
     if (!addr)
     {
         SetLastError( ERROR_INVALID_PARAMETER );
         return FALSE;
     }
-    map = Win32MemMapView::findMapByView((ULONG)addr, &offset, MEMMAP_ACCESS_READ, &view);
+    map = Win32MemMapView::findMapByView((ULONG)addr);
     if(map == NULL) {
         SetLastError( ERROR_FILE_NOT_FOUND );
         return FALSE;
     }
-    return map->unmapViewOfFile(view);
+    ret = map->unmapViewOfFile(addr);
+    map->Release();
+    return ret;
 }
 
 /***********************************************************************
@@ -349,6 +352,7 @@ LPVOID WIN32API VirtualAlloc(LPVOID lpvAddress,
         if(map) {
             //TODO: We don't allow protection flag changes for mmaped files now
             map->commitPage(offset, FALSE, nrpages);
+            map->Release();
             return lpvAddress;
         }
     }

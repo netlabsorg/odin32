@@ -1,4 +1,4 @@
-/* $Id: mmap.cpp,v 1.60 2002-12-12 12:33:08 sandervl Exp $ */
+/* $Id: mmap.cpp,v 1.61 2003-02-18 18:48:55 sandervl Exp $ */
 
 /*
  * Win32 Memory mapped file & view classes
@@ -69,7 +69,6 @@ void InitializeMemMaps()
     }
 }
 //******************************************************************************
-//TODO: sharing between processes
 //******************************************************************************
 Win32MemMap::Win32MemMap(HFILE hfile, ULONG size, ULONG fdwProtect, LPSTR lpszName)
                : nrMappings(0), pMapping(NULL), mMapAccess(0), referenced(0), image(0)
@@ -79,7 +78,7 @@ Win32MemMap::Win32MemMap(HFILE hfile, ULONG size, ULONG fdwProtect, LPSTR lpszNa
     memmaps = this;
     DosLeaveCriticalSection(&globalmapcritsect);
 
-    hMemFile   = hfile;
+    hMemFile = hOrgMemFile = hfile;
 
     mSize      = size;
     mProtFlags = fdwProtect;
@@ -102,7 +101,7 @@ Win32MemMap::Win32MemMap(Win32PeLdrImage *pImage, ULONG baseAddress, ULONG size)
     memmaps = this;
     DosLeaveCriticalSection(&globalmapcritsect);
 
-    hMemFile   = -1;
+    hMemFile = hOrgMemFile = -1;
 
     mSize      = size;
     mProtFlags = PAGE_READWRITE;
@@ -217,6 +216,40 @@ Win32MemMap::~Win32MemMap()
     DosLeaveCriticalSection(&globalmapcritsect);
 }
 //******************************************************************************
+// Win32MemMap::setProtFlags
+//
+// Change the protection flags of this memory map if required
+// This is currently only used when creating a mapping for a file which already
+// has an existing mapping.
+// 
+//
+// Parameters:
+//
+//   DWORD dwNewProtect         - new protection flags
+//
+// Returns:
+//   TRUE                       - success
+//   FALSE                      - failure
+//
+// NOTE:
+//   We're ignoring the SEC_* flags for now
+//
+//******************************************************************************
+BOOL Win32MemMap::setProtFlags(DWORD dwNewProtect)
+{
+    if(!(dwNewProtect & (PAGE_READWRITE|PAGE_WRITECOPY))) return TRUE; //no need for changes
+
+    if(!(mProtFlags & PAGE_READWRITE)) 
+    {//ok, current mapping is readonly; need to change it to readwrite
+        mProtFlags &= ~PAGE_READONLY;
+        mProtFlags |= PAGE_READWRITE;
+
+        //that's all we need to do for now; memory mappings are readwrite by
+        //default (see mapViewOfFile)
+    }
+    return TRUE;
+}
+//******************************************************************************
 //If memory map has no more views left, then we can safely delete it when
 //it's handle is closed
 //******************************************************************************
@@ -329,13 +362,33 @@ fail:
   return FALSE;
 }
 //******************************************************************************
+// Win32MemMap::unmapViewOfFile
+//
+// Unmap the view identified by addr
+//
+// Parameters:
+//
+//   LPVOID addr                - view address; doesn't need to be the address
+//                                returned by MapViewOfFile(Ex) (as MSDN clearly says);
+//                                can be any address within the view range
+//
+// Returns:
+//   TRUE                       - success
+//   FALSE                      - failure
+//
 //******************************************************************************
-BOOL Win32MemMap::unmapViewOfFile(Win32MemMapView *view)
+BOOL Win32MemMap::unmapViewOfFile(LPVOID addr)
 {
-    dprintf(("Win32MemMap::unmapViewOfFile %x (nrmaps=%d)", view, nrMappings));
+    Win32MemMapView *view;
+
+    dprintf(("Win32MemMap::unmapViewOfFile %x (nrmaps=%d)", addr, nrMappings));
     mapMutex.enter();
 
     if(nrMappings == 0)
+        goto fail;
+
+    view = Win32MemMapView::findView((ULONG)addr);
+    if(view == NULL) 
         goto fail;
 
     delete view;
@@ -354,9 +407,6 @@ BOOL Win32MemMap::unmapViewOfFile(Win32MemMapView *view)
     return TRUE;
 fail:
     mapMutex.leave();
-    if(nrMappings == 0 && referenced == 0) {
-        delete this;
-    }
     return FALSE;
 }
 //******************************************************************************
@@ -404,12 +454,15 @@ LPVOID Win32MemMap::mapViewOfFile(ULONG size, ULONG offset, ULONG fdwAccess)
 #endif
 
     //Memory has already been allocated for executable image maps (only used internally)
-    if(!pMapping && nrMappings == 0) {//if not mapped, reserve/commit entire view
+    if(!pMapping && nrMappings == 0) 
+    {//if not mapped, reserve/commit entire view
         //SvL: Always read/write access or else ReadFile will crash once we
         //     start committing pages.
         //     This is most likely an OS/2 bug and doesn't happen in Aurora
         //     when allocating memory with the PAG_ANY bit set. (without this
         //     flag it will also crash)
+        //NOTE: If this is ever changed, then we must update setProtFlags!!!!
+        
         //All named file mappings are shared (files & memory only)
         if(lpszMapName) {
             pMapping = VirtualAllocShared(mSize, fAlloc, PAGE_READWRITE, lpszMapName);
@@ -549,8 +602,33 @@ Win32MemMap *Win32MemMap::findMap(LPSTR lpszName)
         map = map->next;
     }
   }
+  if(map) map->AddRef();
+
   DosLeaveCriticalSection(&globalmapcritsect);
   if(!map) dprintf(("Win32MemMap::findMap: couldn't find map %s", lpszName));
+  return map;
+}
+//******************************************************************************
+//******************************************************************************
+Win32MemMap *Win32MemMap::findMapByFile(HANDLE hFile)
+{
+  if(hFile == -1)
+    return NULL;
+
+  DosEnterCriticalSection(&globalmapcritsect);
+  Win32MemMap *map = memmaps;
+
+  if(map != NULL) 
+  {
+    while(map) {
+        if(map->hOrgMemFile == hFile)
+            break;
+        map = map->next;
+    }
+  }
+  if(map) map->AddRef();
+  DosLeaveCriticalSection(&globalmapcritsect);
+  if(!map) dprintf(("Win32MemMap::findMapByFile: couldn't find map with file handle %x", hFile));
   return map;
 }
 //******************************************************************************
@@ -570,6 +648,7 @@ Win32MemMap *Win32MemMap::findMap(ULONG address)
         map = map->next;
     }
   }
+  if(map) map->AddRef();
   DosLeaveCriticalSection(&globalmapcritsect);
   return map;
 }
@@ -737,16 +816,41 @@ void Win32MemMapView::deleteViews(Win32MemMap *map)
 }
 //******************************************************************************
 //******************************************************************************
+// Win32MemMap::findMapByView
+//
+// Find the map of the view that contains the specified starting address 
+// and has the specified access type
+//
+// Parameters:
+//
+//   ULONG address              - view address
+//   ULONG *offset              - address of ULONG that receives the offset
+//                                in the returned memory map
+//   ULONG accessType           - access type:
+//                                MEMMAP_ACCESS_READ
+//                                MEMMAP_ACCESS_WRITE
+//                                MEMMAP_ACCESS_EXECUTE
+//
+// Returns:
+//   <> NULL                    - success, address of parent map object
+//   NULL                       - failure
+//
+//******************************************************************************
+//******************************************************************************
 Win32MemMap *Win32MemMapView::findMapByView(ULONG address,
                                             ULONG *offset,
-                                            ULONG accessType,
-                                            Win32MemMapView **pView)
+                                            ULONG accessType)
 {
+  Win32MemMap *map = NULL;
+  ULONG ulOffset;
+
   if(mapviews == NULL) return NULL;
 
   DosEnterCriticalSection(&globalmapcritsect);
   Win32MemMapView *view = mapviews;
   ULONG ulViewAddr;
+
+  if(!offset)  offset = &ulOffset;
 
   *offset = 0;
 
@@ -781,7 +885,6 @@ Win32MemMap *Win32MemMapView::findMapByView(ULONG address,
     //failure if we get here
     view = NULL;
   }
-
 success:
 #ifdef DEBUG
   if(view && !view->getParentMap()->isImageMap())
@@ -792,23 +895,40 @@ success:
                *offset));
 #endif
 
+  if(view) {
+      map = view->getParentMap();
+      if(map) map->AddRef();
+  }
+
   DosLeaveCriticalSection(&globalmapcritsect);
 
-  if(pView)
-      *pView = view;
-
-  return (view) ? view->getParentMap() : NULL;
+  return map;
 }
 //******************************************************************************
+// Win32MemMap::findView
+//
+// Find the view that contains the specified starting address
+//
+// Parameters:
+//
+//   LPVOID address             - view address
+//
+// Returns:
+//   <> NULL                    - success, address view object
+//   NULL                       - failure
+//
 //******************************************************************************
-Win32MemMapView *Win32MemMapView::findView(LPVOID address)
+Win32MemMapView *Win32MemMapView::findView(ULONG address)
 {
-  Win32MemMapView *view = mapviews;
+  ULONG ulViewAddr;
 
   DosEnterCriticalSection(&globalmapcritsect);
+  Win32MemMapView *view = mapviews;
+
   if(view != NULL) {
     while(view) {
-        if(view->getViewAddr() == address)
+        ulViewAddr = (ULONG)view->getViewAddr();
+        if(ulViewAddr <= address && ulViewAddr + view->getSize() > address)
         {
             break;
         }
@@ -820,4 +940,3 @@ Win32MemMapView *Win32MemMapView::findView(LPVOID address)
 }
 //******************************************************************************
 //******************************************************************************
-
