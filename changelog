@@ -1,5 +1,10 @@
- /* $Id: changelog,v 1.814 2000-03-17 17:09:59 cbratschi Exp $ */
+ /* $Id: changelog,v 1.815 2000-03-18 15:14:29 sandervl Exp $ */
 
+ 2000-03-18: Sander van Leeuwen <sandervl@xs4all.nl>
+	- ODINCRT: Added FS wrapper for _fdopen 
+                   (fixes crash at exit in Professional MineSweeper when
+                    selection About Odin from the system menu)
+               
  2000-03-17: Christoph Bratschi <cbratschi@datacomm.ch>
 	- COMCTL32: fixed trackbar buddy alignment
 		    added useful internal tooltip styles
