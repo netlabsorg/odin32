@@ -1,4 +1,4 @@
-/* $Id: edit.cpp,v 1.2 1999-10-08 21:24:07 cbratschi Exp $ */
+/* $Id: edit.cpp,v 1.3 1999-10-12 18:14:54 sandervl Exp $ */
 /*
  *      Edit control
  *
@@ -3215,7 +3215,7 @@ static LRESULT EDIT_WM_MouseMove(HWND hwnd, EDITSTATE *es, DWORD keys, INT x, IN
         INT prex, prey;
 
         if (GetCapture() != hwnd)
-                return 0;
+                return 1; //SvL: Bugfix
 
         /*
          *      FIXME: gotta do some scrolling if outside client
@@ -3227,7 +3227,9 @@ static LRESULT EDIT_WM_MouseMove(HWND hwnd, EDITSTATE *es, DWORD keys, INT x, IN
         es->region_posy = (prey < y) ? -1 : ((prey > y) ? 1 : 0);
         e = EDIT_CharFromPos(hwnd, es, x, y, &after_wrap);
         EDIT_EM_SetSel(hwnd, es, es->selection_start, e, after_wrap);
-        return 0;
+
+	return 1; //SvL: Bugfix -> PMWINDOW expects non-zero return value if
+                  //               we want to restore the default mouse cursor
 }
 
 

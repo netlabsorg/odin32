@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.29 1999-10-12 14:47:21 sandervl Exp $
+# $Id: Makefile,v 1.30 1999-10-12 18:14:53 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -81,7 +81,7 @@ spy.obj: spy.cpp $(PDWIN32_INCLUDE)\spy.h
 controls.obj: controls.cpp $(PDWIN32_INCLUDE)\win\controls.h win32wmdiclient.h win32dlg.h win32wdesktop.h
 button.obj: button.cpp $(PDWIN32_INCLUDE)\win\button.h
 static.obj: static.cpp $(PDWIN32_INCLUDE)\win\static.h
-scroll.obj: scroll.cpp $(PDWIN32_INCLUDE)\win\scroll.h win32wbase.h
+scroll.obj: scroll.cpp $(PDWIN32_INCLUDE)\win\scroll.h win32wbase.h oslibwin.h
 listbox.obj: listbox.cpp $(PDWIN32_INCLUDE)\win\combo.h
 combo.obj: combo.cpp $(PDWIN32_INCLUDE)\win\combo.h
 edit.obj: edit.cpp $(PDWIN32_INCLUDE)\win\combo.h
