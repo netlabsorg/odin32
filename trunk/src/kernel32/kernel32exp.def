@@ -1,4 +1,4 @@
-; $Id: kernel32exp.def,v 1.10 1999-08-18 17:18:00 sandervl Exp $
+; $Id: kernel32exp.def,v 1.11 1999-08-19 14:19:14 sandervl Exp $
 
 ;Created by BLAST for IBM's compiler
 ;Basis is Windows95 KERNEL32
@@ -840,3 +840,4 @@ RestoreOS2FS                             @1230
    _GetThreadTEB@0                           @1234
    _GetThreadTHDB@0			   @1235
 
+   _CreateWin32Exe@4                       @1236

@@ -1,4 +1,4 @@
-/* $Id: winres.h,v 1.4 1999-08-19 12:52:49 sandervl Exp $ */
+/* $Id: winres.h,v 1.5 1999-08-19 14:18:24 sandervl Exp $ */
 
 /*
  * Win32 resource class
@@ -12,52 +12,6 @@
 #ifndef __WINRES_H__
 #define __WINRES_H__
 
-#ifdef INCL_WINRES
-
- typedef struct tagWINBITMAPINFOHEADER{
-        DWORD      biSize;
-        LONG       biWidth;
-        LONG       biHeight;
-        WORD       biPlanes;
-        WORD       biBitCount;
-        DWORD      biCompression;
-        DWORD      biSizeImage;
-        LONG       biXPelsPerMeter;
-        LONG       biYPelsPerMeter;
-        DWORD      biClrUsed;
-        DWORD      biClrImportant;
- } WINBITMAPINFOHEADER;
-
- typedef struct
- {
-   BYTE                      blue;
-   BYTE                      green;
-   BYTE                      red;
-   BYTE                      res;
- }  RGBQUAD;
-
- /*
-  * Defines for the fVirt field of the Accelerator table structure.
-  */
- #define FVIRTKEY  TRUE          /* Assumed to be == TRUE */
- #define FNOINVERT 0x02
- #define FSHIFT    0x04
- #define FCONTROL  0x08
- #define FALT      0x10
-
- //TODO: Aligned at 8 byte boundary or not??
- #pragma pack(1)
- typedef struct tagWINACCEL {
-     BYTE   fVirt;               /* Also called the flags field */
-     WORD   key;
-     WORD   cmd;
-     BYTE   align[3];
- } WINACCEL, *LPWINACCEL;
- #pragma pack()
-
-#endif
-
-#ifdef __cplusplus
 class Win32Image;
 
 //Use to distinguish between converted OS/2 resources in an image (pe2lx'ed) or
@@ -87,7 +41,9 @@ public:
 protected:
 
 private:
-             PVOID ConvertBitmap(void *bmpdata);
+             PVOID convertOS2Bitmap(void *bmpdata);
+
+	     PVOID convertResource(void *win32res);
 
        Win32Image *module;
 
@@ -110,7 +66,6 @@ private:
     friend    class Win32Image;
 };
 
-#endif // __cplusplus
 
     #define    NTRT_NEWRESOURCE      0x2000
     #define    NTRT_ERROR            0x7fff
