@@ -1,4 +1,20 @@
-/* $Id: changelog,v 1.1237 2001-02-01 18:00:56 sandervl Exp $ */
+/* $Id: changelog,v 1.1238 2001-02-02 08:54:17 bird Exp $ */
+
+ 2001-02-02: knut st. osmundsen <knut.stange.osmundsen@mynd.no>
+    - Win32k:   o Added option for the All-In-One-Object fix to be able
+                  to debug PE executables thru the ICAT. Works with pe2lx
+                  and win32k.sys.
+                  -1<+|-|[*]>
+                    +: Applied when needed.                 (checked)
+                    -: Never applied (use this to debug).   (not checked)
+                    *: Allways applied. (default)           (gray)
+                  It's also added to Win32kCC as a three state checkbutton.
+                  
+                  WARNING! This option should only be used for debugging 
+                  and will cause your system to crash if used with based 
+                  images!
+    - tools\Common:   
+                o Minor changes in the fileformat classes to use kFile.
 
  2001-02-01: Sander van Leeuwen <sandervl@xs4all.nl>
     - GDI32:    o LineDDA fix (wrong calling convention)
