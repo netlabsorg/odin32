@@ -1,4 +1,4 @@
-/* $Id: initkernel32.cpp,v 1.15 2002-04-29 17:05:30 sandervl Exp $
+/* $Id: initkernel32.cpp,v 1.16 2002-04-30 09:54:44 sandervl Exp $
  *
  * KERNEL32 DLL entry point
  *
@@ -240,7 +240,8 @@ void APIENTRY cleanupKernel32(ULONG ulReason)
     dprintf(("Leaked memory: %d bytes", totalmemalloc));
     dprintf(("*************  KERNEL32 STATISTICS END   *****************"));
 
-    _dump_allocated(0);
+    //SvL: This can cause an exitlist hang; disabled for now
+////    _dump_allocated(0);
 #endif
 
     //NOTE: Must be done after DestroyTIB
