@@ -1,4 +1,8 @@
- /* $Id: changelog,v 1.938 2000-05-13 16:00:13 bird Exp $ */
+ /* $Id: changelog,v 1.939 2000-05-15 02:41:50 phaller Exp $ */
+
+ 2000-05-14: Patrick Haller <phaller@gmx.net>
+    - SHLWAPI: finally separated SHELL32 and SHLWAPI,
+                adjusted to NT4 functions and exports
 
  2000-05-13: knut st. osmundsen <knut.stange.osmundsen@mynd.no>
     - tools\common: Corrected makefiles.
