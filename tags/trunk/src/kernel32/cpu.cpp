@@ -1,4 +1,4 @@
-/* $Id: cpu.cpp,v 1.11 2000-10-03 17:28:29 sandervl Exp $ */
+/* $Id: cpu.cpp,v 1.12 2001-06-27 13:35:45 sandervl Exp $ */
 /*
  * Odin win32 CPU apis
  *
@@ -231,8 +231,10 @@ BOOL WINAPI IsProcessorFeaturePresent (DWORD feature)	/* [in] feature number, se
   SYSTEM_INFO si;
   GetSystemInfo (&si); /* To ensure the information is loaded and cached */
 
-  if (feature < 64)
+  if (feature < 64) {
+    dprintf(("IsProcessorFeaturePresent %x -> %x", feature, PF[feature]));
     return PF[feature];
+  }
   else
     return FALSE;
 }
