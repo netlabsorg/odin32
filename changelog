@@ -1,9 +1,13 @@
-/* $Id: changelog,v 1.2152 2002-06-11 12:51:19 sandervl Exp $ */
+/* $Id: changelog,v 1.2153 2002-06-11 16:31:54 sandervl Exp $ */
 
- 2002-06-11: Sander van Leeuwen <sandervl@xs4all.nl>
+ 2002-06-11: Sander van Leeuwen <sandervl@innotek.de>
     - OLEAUT32, SHELL32:
                 o Some Wine updates
     - KERNEL32: o Overlapped IO bugfixes
+                o Thread TEB linking bugfix 
+                o Setup TEB structure before creating thread. Otherwise it's
+                  created too late and thread functions called by the app
+                  right after thread creation will fail.(e.g. SetThreadPriority)
 
  2002-06-10: Herwig Bauernfeind <herwig.bauernfeind@aon.at>
     - TOOLS\ODINBUG:
