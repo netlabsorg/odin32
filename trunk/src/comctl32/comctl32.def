@@ -1,4 +1,4 @@
-; $Id: comctl32.def,v 1.17 2000-09-04 18:46:18 sandervl Exp $
+; $Id: comctl32.def,v 1.18 2000-09-29 07:23:10 achimha Exp $
 LIBRARY COMCTL32 INITINSTANCE
 DESCRIPTION 'COMCTL32 Common Controls Library'
 DATA MULTIPLE NONSHARED
@@ -72,6 +72,8 @@ EXPORTS
   MakeDragList                 = _MakeDragList@4                     @13
   DrawInsert                   = _DrawInsert@12                      @15
   LBItemFromPt                 = _LBItemFromPt@16                    @14
+
+  _TrackMouseEvent             = __TrackMouseEvent@4                 @91
 
                         _COMCTL32_9@16             @9
                         _COMCTL32_10@16            @10
