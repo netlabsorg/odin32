@@ -1,3 +1,5 @@
+/* $Id: version.cpp,v 1.3 1999-06-10 16:29:00 phaller Exp $ */
+
 /*
  * Win32 Version resource APIs for OS/2
  *

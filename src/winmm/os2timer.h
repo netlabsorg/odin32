@@ -1,3 +1,5 @@
+/* $Id: os2timer.h,v 1.3 1999-06-10 16:24:34 phaller Exp $ */
+
 #ifndef __OS2TIMER_H__
 #define __OS2TIMER_H__
 /*

@@ -1,3 +1,5 @@
+/* $Id: initterm.cpp,v 1.2 1999-06-10 16:24:33 phaller Exp $ */
+
 /*
  * WINMM DLL entry point
  *

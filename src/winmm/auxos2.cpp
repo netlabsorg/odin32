@@ -1,3 +1,5 @@
+/* $Id: auxos2.cpp,v 1.3 1999-06-10 16:24:33 phaller Exp $ */
+
 /*
  * Auxilary multimedia OS/2 implementation
  *

@@ -1,3 +1,5 @@
+/* $Id: wavein.cpp,v 1.3 1999-06-10 16:24:35 phaller Exp $ */
+
 /*
  * Wave in stubs
  *
