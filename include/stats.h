@@ -74,7 +74,7 @@ void STATS_CreateBitmapIndirect(HBITMAP hBitmap, const BITMAP *pBitmap);
 #define STATS_CreateSolidBrush(a,b)
 #define STATS_CreateDCA(a,b,c,d,e)
 #define STATS_CreateICA(a,b,c,d,e)
-#define STATS_ExtCreatePen(a,b,c,d,e)
+#define STATS_ExtCreatePen(a,b,c,d,e,f)
 #define STATS_CreatePolyPolygonRgn(a,b,c,d,e)
 #define STATS_CreateRectRgn(a,b,c,d,e)
 #define STATS_CreateRoundRectRgn(a,b,c,d,e,f,g)
@@ -85,7 +85,7 @@ void STATS_CreateBitmapIndirect(HBITMAP hBitmap, const BITMAP *pBitmap);
 #define STATS_CreateDIBitmap(a,b,c,d,e,f,g)
 #define STATS_CreateCompatibleBitmap(a,b,c,d)
 #define STATS_CreateBitmap(a,b,c,d,e,f)
-#define STATS_CreateDIBSection(a,b,c,d,e,f)
+#define STATS_CreateDIBSection(a,b,c,d,e,f,g)
 #define STATS_CreateBitmapIndirect(a,b)
 
 #endif
