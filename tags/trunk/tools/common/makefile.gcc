@@ -1,4 +1,4 @@
-# $Id: makefile.gcc,v 1.4 2000-05-13 15:40:34 bird Exp $
+# $Id: makefile.gcc,v 1.5 2000-05-13 17:17:46 bird Exp $
 
 #
 # PD-Win32 API
@@ -7,17 +7,6 @@
 #
 #
 
-#
-# Directories and common tools.
-#
-PDWIN32_TOOLS   = ..\bin
-PDWIN32_INCLUDE = ..\..\include
-!include $(PDWIN32_INCLUDE)\pdwin32.tools
-
-# Definitions for pdwin32.post
-LOCALCLEAN  = 1
-CLEANEXTRAS = commongcc.*
-
 
 #
 # If OMF flag isn't set, set it to default value.
@@ -25,6 +14,21 @@ CLEANEXTRAS = commongcc.*
 !ifndef OMF
 OMF=0
 !endif
+
+
+#
+# Directories and common tools.
+#
+PDWIN32_INCLUDE = ..\..\include
+PDWIN32_BIN     = ..\..\bin\$(OBJDIR)
+PDWIN32_LIB     = ..\..\lib
+PDWIN32_TOOLS   = ..\bin
+PDWIN32_TCOMMON = ..\common
+!include $(PDWIN32_INCLUDE)\pdwin32.tools
+
+# Definitions for pdwin32.post
+LOCALCLEAN  = 1
+CLEANEXTRAS = commongcc.*
 
 
 #
