@@ -1,4 +1,10 @@
-/* $Id: changelog,v 1.1715 2001-10-01 17:27:39 sandervl Exp $ */
+/* $Id: changelog,v 1.1716 2001-10-02 17:16:18 sandervl Exp $ */
+
+ 2001-10-02: Sander van Leeuwen <sandervl@xs4all.nl>
+    - REGSVR32: o Must use LoadLibrary, not CoLoadLibrary
+                  (Some dlls (divx codec) call CoFreeUnusedLibraries which 
+                   unloads our dll if we use CoLoadLibrary (-> crash)
+                   NT's regsvr32 doesn't use CoLoadLibrary either)
 
  2001-10-01: Sander van Leeuwen <sandervl@xs4all.nl>
     - USER32:   o Lastest Wine revision of GetNextDlgGroupItem ported + modified
