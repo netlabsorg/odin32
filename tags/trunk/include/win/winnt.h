@@ -12,6 +12,8 @@
 #include "pshpack1.h"
 /* Defines */
 
+#define UNREFERENCED_PARAMETER(a)
+
 /* Argument 1 passed to the DllEntryProc. */
 #define	DLL_PROCESS_DETACH	0	/* detach process (unload library) */
 #define	DLL_PROCESS_ATTACH	1	/* attach process (load library) */
@@ -77,7 +79,7 @@
 /* These types are _not_ defined for the emulator, because they */
 /* depend on the UNICODE macro that only exists in user's code. */
 
-#ifndef __WINE__
+#if !defined(__WINE__) && !defined(__WINE_WINDEF_H)
 # ifdef UNICODE
 typedef LPWSTR LPTSTR;
 typedef LPCWSTR LPCTSTR;
