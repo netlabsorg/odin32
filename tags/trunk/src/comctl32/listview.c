@@ -140,6 +140,7 @@
  *   WM_CREATE does not issue WM_QUERYUISTATE and associated registry
  *     processing for "USEDOUBLECLICKTIME".
  */
+#define __T__
 
 #include "config.h"
 #include "wine/port.h"
@@ -7231,10 +7232,23 @@ static BOOL LISTVIEW_SetItemPosition(LISTVIEW_INFO *infoPtr, INT nItem, POINT pt
  *   SUCCESS : TRUE
  *   FAILURE : FALSE
  */
+#ifdef __T__
+static int zIndex = -2;
+typedef struct {
+     PVOID lTol;
+     HWND cHwnd;
+     HWND cHwndParent;
+     INT cItem;
+     } SetItemStateLink, *PSetItemStateLink;
+#endif
 static BOOL LISTVIEW_SetItemState(LISTVIEW_INFO *infoPtr, INT nItem, const LVITEMW *lpLVItem)
 {
     BOOL bResult = TRUE;
     LVITEMW lvItem;
+#ifdef __T__
+    int saveLastError = GetLastError();
+    SetItemStateLink cTol = { NULL, infoPtr->hwndSelf, infoPtr->hwndNotify, nItem};
+#endif
 
     lvItem.iItem = nItem;
     lvItem.iSubItem = 0;
@@ -7243,6 +7257,34 @@ static BOOL LISTVIEW_SetItemState(LISTVIEW_INFO *infoPtr, INT nItem, const LVITE
     lvItem.stateMask = lpLVItem->stateMask;
     TRACE("lvItem=%s\n", debuglvitem_t(&lvItem, TRUE));
 
+#ifdef __T__
+    if (-2 == zIndex)
+    {
+       zIndex = TlsAlloc();
+       SetLastError(saveLastError);
+    } /* endif */
+    if (zIndex >= 0)
+    {
+       cTol.lTol = TlsGetValue(zIndex);
+       if (cTol.lTol < (PVOID)&cTol)
+       {
+          cTol.lTol = NULL;
+       } /* endif */
+       SetLastError(saveLastError);
+       if (cTol.lTol
+       &&  (((PSetItemStateLink)cTol.lTol)->cHwnd == infoPtr->hwndSelf)
+       &&  (((PSetItemStateLink)cTol.lTol)->cHwndParent == infoPtr->hwndNotify)
+       &&  (((PSetItemStateLink)cTol.lTol)->cItem == nItem))
+       {
+         TRACE_(listview)("(DT) Hwnd:%x,%x Parent:%x,%x Item:%d,%d, stop the recursion\n", infoPtr->hwndSelf, ((PSetItemStateLink)cTol.lTol)->cHwnd,
+                infoPtr->hwndNotify, ((PSetItemStateLink)cTol.lTol)->cHwndParent,
+                nItem, ((PSetItemStateLink)cTol.lTol)->cItem);
+         return TRUE;
+       }
+       TlsSetValue(zIndex,(LPVOID)&cTol);
+       SetLastError(saveLastError);
+    }
+#endif
     if (nItem == -1)
     {
     	/* apply to all items */
@@ -7251,6 +7293,14 @@ static BOOL LISTVIEW_SetItemState(LISTVIEW_INFO *infoPtr, INT nItem, const LVITE
     }
     else
 	bResult = LISTVIEW_SetItemT(infoPtr, &lvItem, TRUE);
+#ifdef __T__
+    if (zIndex >= 0)
+    {
+       saveLastError = GetLastError();
+       TlsSetValue(zIndex,(LPVOID)cTol.lTol);
+       SetLastError(saveLastError);
+    }
+#endif
 
     /*
      *update selection mark

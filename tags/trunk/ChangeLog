@@ -1,4 +1,10 @@
-/* $Id: ChangeLog,v 1.2762 2005-03-27 09:38:39 sao2l02 Exp $ */
+/* $Id: ChangeLog,v 1.2763 2005-03-28 19:43:14 sao2l02 Exp $ */
+2005-03-28: Dietrich Teickner <dietrich_teickner@arcor   >
+    - comctl32: o src\comctl32\listview.c
+                  move the workaround for flashfxp 3.02 from message.cpp to listview.c,
+                  work's also with wine. flashfxp 3.02 connect also in wine.
+                  Found the double-click problem from FlashFXP in former odin-releases also in wine yet.
+    - user32:   o src\user32\message.cpp
 2005-03-27: Dietrich Teickner <dietrich_teickner@arcor   >
     - comctl32: o src\comctl32\listview.c
                   some resyncs with wine for flashfxp 3.02.
