@@ -1,4 +1,4 @@
-/* $Id: wingdi.h,v 1.15 2000-10-26 17:19:50 sandervl Exp $ */
+/* $Id: wingdi.h,v 1.16 2000-11-16 18:02:29 sandervl Exp $ */
 
 #ifndef __WINE_WINGDI_H
 #define __WINE_WINGDI_H
@@ -2603,45 +2603,6 @@ typedef struct
 
 DECL_WINELIB_TYPE_AW(DOCINFO)
 DECL_WINELIB_TYPE_AW(LPDOCINFO)
-
-typedef struct {
-	UINT		cbSize;
-	INT		iBorderWidth;
-	INT		iScrollWidth;
-	INT		iScrollHeight;
-	INT		iCaptionWidth;
-	INT		iCaptionHeight;
-	LOGFONTA	lfCaptionFont;
-	INT		iSmCaptionWidth;
-	INT		iSmCaptionHeight;
-	LOGFONTA	lfSmCaptionFont;
-	INT		iMenuWidth;
-	INT		iMenuHeight;
-	LOGFONTA	lfMenuFont;
-	LOGFONTA	lfStatusFont;
-	LOGFONTA	lfMessageFont;
-} NONCLIENTMETRICSA,*LPNONCLIENTMETRICSA;
-
-typedef struct {
-	UINT		cbSize;
-	INT		iBorderWidth;
-	INT		iScrollWidth;
-	INT		iScrollHeight;
-	INT		iCaptionWidth;
-	INT		iCaptionHeight;
-	LOGFONTW	lfCaptionFont;
-	INT		iSmCaptionWidth;
-	INT		iSmCaptionHeight;
-	LOGFONTW	lfSmCaptionFont;
-	INT		iMenuWidth;
-	INT		iMenuHeight;
-	LOGFONTW	lfMenuFont;
-	LOGFONTW	lfStatusFont;
-	LOGFONTW	lfMessageFont;
-} NONCLIENTMETRICSW,*LPNONCLIENTMETRICSW;
-
-DECL_WINELIB_TYPE_AW(NONCLIENTMETRICS)
-DECL_WINELIB_TYPE_AW(LPNONCLIENTMETRICS)
 
 /* Flags for PolyDraw and GetPath */
 #define PT_CLOSEFIGURE          0x0001
