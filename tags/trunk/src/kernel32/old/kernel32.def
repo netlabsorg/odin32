@@ -1,4 +1,4 @@
-; $Id: kernel32.def,v 1.1 1999-09-15 23:32:56 sandervl Exp $
+; $Id: kernel32.def,v 1.2 1999-09-25 19:06:16 sandervl Exp $
 
 ;Created by BLAST for IBM's compiler
 ;Basis is Windows95 KERNEL32
@@ -957,6 +957,7 @@ EXPORTS
 ;Used by tibfix page in dll (change ordinal in lx.cpp too!!)
 ;   DLLExitList                   = _DLLExitList@4                @1208
     RegisterDll                   = _RegisterDll@48               @1209
+
 ;Unicode
    UnicodeToAsciiString = _UnicodeToAsciiString@4                 @1210
    UnicodeToAscii       = _UnicodeToAscii@8                       @1211
@@ -994,6 +995,9 @@ EXPORTS
    GetThreadTHDB        = _GetThreadTHDB@0                        @1235
 
    CreateWin32Exe       = _CreateWin32Exe@4                       @1236
+
+    _RegisterLxDll@12                                             @1238
+    _UnregisterLxDll@4                                            @1239
 
 ; HEAP Management (heap.cpp, heapstring.cpp)
     HEAP_xalloc                = _HEAP_xalloc@12                  @1240
