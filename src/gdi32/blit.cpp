@@ -1,4 +1,4 @@
-/* $Id: blit.cpp,v 1.35 2001-11-13 13:18:22 sandervl Exp $ */
+/* $Id: blit.cpp,v 1.36 2001-12-30 22:19:04 sandervl Exp $ */
 
 /*
  * GDI32 blit code
@@ -50,7 +50,14 @@ BOOL WIN32API StretchBlt(HDC hdcDest, int nXOriginDest, int nYOriginDest,
         return rc;
     }
   }
-  return O32_StretchBlt(hdcDest, nXOriginDest, nYOriginDest, nWidthDest, nHeightDest, hdcSrc, nXOriginSrc, nYOriginSrc, nWidthSrc, nHeightSrc, dwRop);
+  rc = O32_StretchBlt(hdcDest, nXOriginDest, nYOriginDest, nWidthDest, nHeightDest, hdcSrc, nXOriginSrc, nYOriginSrc, nWidthSrc, nHeightSrc, dwRop);
+  if(DIBSection::getSection() != NULL) {
+      DIBSection *destdib = DIBSection::findHDC(hdcDest);
+      if(destdib) {
+          destdib->sync(hdcDest, nYOriginDest, nHeightDest);
+      }
+  }
+  return rc;
 }
 //******************************************************************************
 //******************************************************************************
@@ -86,7 +93,16 @@ BOOL WIN32API BitBlt(HDC hdcDest,
   }
   dprintf(("GDI32: BitBlt to hdc %X from hdc %x (%d,%d) to (%d,%d), (%d,%d) rop %X\n", 
            hdcDest, hdcSrc, nXSrc, nYSrc, nXDest, nYDest, nWidth, nHeight, dwRop));
-  return O32_BitBlt(hdcDest, nXDest, nYDest, nWidth, nHeight, hdcSrc, nXSrc, nYSrc, dwRop);
+
+  rc = O32_BitBlt(hdcDest, nXDest, nYDest, nWidth, nHeight, hdcSrc, nXSrc, nYSrc, dwRop);
+
+  if(DIBSection::getSection() != NULL) {
+      DIBSection *destdib = DIBSection::findHDC(hdcDest);
+      if(destdib) {
+          destdib->sync(hdcDest, nYDest, nHeight);
+      }
+  }
+  return rc;
 }
 //******************************************************************************
 //******************************************************************************
