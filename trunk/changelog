@@ -1,4 +1,7 @@
-/* $Id: changelog,v 1.2131 2002-06-06 06:55:26 sandervl Exp $ */
+/* $Id: changelog,v 1.2132 2002-06-06 11:28:38 sandervl Exp $ */
+
+ 2002-06-06: Sander van Leeuwen <sandervl@innotek.de>
+    - KERNEL32: o Use aspi interface in os2cdrom.dmd for SCSI ioctls
 
  2002-06-06: Platon Fomichev <platon@innotek.de>
     - SHELL32:  o Always expand root when initializing treeview
