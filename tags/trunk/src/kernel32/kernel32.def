@@ -1,4 +1,4 @@
-; $Id: kernel32.def,v 1.14 1999-07-04 09:41:32 sandervl Exp $
+; $Id: kernel32.def,v 1.15 1999-07-04 11:44:03 sandervl Exp $
 
 ;Created by BLAST for IBM's compiler
 ;Basis is Windows95 KERNEL32
@@ -971,3 +971,4 @@ EXPORTS
    ;SvL: HandleManager functions
    HMHandleAllocate__FPUlUl				           @1231
    HMHandleFree__FUl  	  	 	 	                   @1232
+   HMHandleTranslateToOS2__FUlPUl				   @1233
