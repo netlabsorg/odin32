@@ -1,4 +1,4 @@
-/* $Id: pe2lx.h,v 1.14 2001-09-28 07:43:38 sandervl Exp $
+/* $Id: pe2lx.h,v 1.15 2003-03-31 01:23:14 bird Exp $
  *
  * Pe2Lx class declarations. Ring 0 and Ring 3
  *
@@ -138,10 +138,14 @@ private:
     static PCSZ queryOdin32ModuleName(PCSZ pszWin32ModuleName);
     static BOOL initOdin32Path();
     static BOOL setOdin32Path(const char *psz);
+    #ifndef RING0
+    static BOOL isCustomDllExcluded(const char *pszModuleName);
+    #endif
 
     /** @cat static dump methods */
     static VOID dumpNtHeaders(PIMAGE_NT_HEADERS pNtHdrs);
     static VOID dumpSectionHeader(PIMAGE_SECTION_HEADER pSection);
+
 
 private:
     /** @cat private data members - allways present.  */
