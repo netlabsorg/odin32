@@ -31,6 +31,7 @@ typedef struct _Options
     const char *    pszObjectDir;
     BOOL            fObjRule;
     BOOL            fNoObjectPath;
+    BOOL            fSrcWhenObj;
 } OPTIONS, *POPTIONS;
 
 
@@ -89,7 +90,8 @@ int main(int argc, char **argv)
         FALSE,           /* fExcludeAll */
         szObjectDir,     /* pszObjectDir */
         TRUE,            /* fObjRule */
-        FALSE            /* fNoObjectPath */
+        FALSE,           /* fNoObjectPath */
+        TRUE             /* fSrcWhenObj */
     };
 
     /* look for depend filename option "-d <filename>" */
@@ -190,39 +192,25 @@ int main(int argc, char **argv)
             else
             {   /* not a parameter! */
                 ULONG        ulRc;
-                FILEFINDBUF3 filebuf;
+                FILEFINDBUF3 filebuf = {0};
                 HDIR         hDir = HDIR_CREATE;
                 ULONG        ulFound = 1;
 
                 ulRc = DosFindFirst(argv[argi], &hDir,
                                     FILE_READONLY |  FILE_HIDDEN | FILE_SYSTEM | FILE_ARCHIVED,
                                     &filebuf, sizeof(FILEFINDBUF3), &ulFound, FIL_STANDARD);
-                while (rc == NO_ERROR && ulFound == 1)
+                while (ulRc == NO_ERROR)
                 {
                     char *psz;
                     char  szSource[CCHMAXPATH];
-                    char  szObjectDirTmp[CCHMAXPATH];
 
                     if ((psz = strrchr(argv[argi], '\\')) || (psz = strrchr(argv[argi], '/')))
                     {
                         strncpy(szSource, argv[argi], psz - argv[argi] + 1);
                         szSource[psz - argv[argi] + 1]  = '\0';
-                        if (szObjectDir[0] == '\0')
-                        {
-                            strncpy(szObjectDirTmp, argv[argi], psz - argv[argi] + 1);
-                            szObjectDirTmp[psz - argv[argi] + 1]  = '\0';
-                        }
                     }
                     else
                         szSource[0]  = '\0';
-                    if (szObjectDir[0] != '\0')
-                    {
-                        int i;
-                        strcpy(szObjectDirTmp, szObjectDir);
-                        i = strlen(szObjectDirTmp);
-                        if (szObjectDirTmp[i - 1] == '\\' || szObjectDirTmp[i - 1] == '/')
-                            szObjectDirTmp[i - 1] = '\0';
-                    }
 
                     strcat(szSource, filebuf.achName);
                     rc -= makeDependent(phDep, &szSource[0], &options);
@@ -329,16 +317,16 @@ static int makeDependent(FILE *phDep, const char *pszFilename, POPTIONS pOptions
                     strcat(szObj, ".res");
                 else
                     strcat(szObj, ".obj");
-                fprintf(phDep, "%s:%-*s", szObj,
-                        strlen(szObj) > 19 ? 0 : 19 - strlen(szObj), "");
+                fprintf(phDep, "%s:", szObj);
+
+                if (pOptions->fSrcWhenObj)
+                    fprintf(phDep, " \\\n%6s %s", "", pszFilename);
             }
             else
-                fprintf(phDep, "%s:%-*s", pszFilename,
-                        strlen(pszFilename) > 19 ? 0 : 19 - strlen(pszFilename), "");
+                fprintf(phDep, "%s:", pszFilename);
         }
         else
-            fprintf(phDep, "%s:%-*s", pszFilename,
-                    strlen(pszFilename) > 19 ? 0 : 19 - strlen(pszFilename), "");
+            fprintf(phDep, "%s:", pszFilename);
 
         /*******************/
         /* find dependants */
@@ -351,22 +339,18 @@ static int makeDependent(FILE *phDep, const char *pszFilename, POPTIONS pOptions
                 /* search for #include or RCINCLUDE */
                 int cbLen;
                 int i = 0;
-                int f = 0;
                 iLine++;
 
                 cbLen = strlen(szBuffer);
-                while (i + 9 < cbLen
-                       && !(f = (strncmp(&szBuffer[i], "#include", 8) == 0
-                                 || strncmp(&szBuffer[i], "RCINCLUDE", 9) == 0)
-                            )
-                      )
+                while (i + 9 < cbLen && (szBuffer[i] == ' ' || szBuffer[i] == '\t'))
                     i++;
 
                 /* Found include! */
-                if (f)
+                if (strncmp(&szBuffer[i], "#include", 8) == 0 || strncmp(&szBuffer[i], "RCINCLUDE", 9) == 0)
                 {
+                    int f = 0;
+
                     /* extract info between "" or <> */
-                    f = 0;
                     while (i < cbLen && !(f = (szBuffer[i] == '"' || szBuffer[i] == '<')))
                         i++;
                     i++; /* skip '"' or '<' */
@@ -400,10 +384,7 @@ static int makeDependent(FILE *phDep, const char *pszFilename, POPTIONS pOptions
                                     pathlistFindFile(pOptions->pszExclude, szFullname, szBuffer2) != NULL
                                     )
                                     strcpy(szBuffer, szFullname);
-                                if (fwrite(" ", 1, 1, phDep) != 1) /* blank */
-                                    fprintf(stderr, "fwrite failed 1!\n");
-                                if (fwrite(szBuffer, strlen(szBuffer), 1, phDep) != 1)
-                                    fprintf(stderr, "fwrite failed 2!\n");
+                                fprintf(phDep, " \\\n%6.s %s", "", szBuffer);
                             }
                             else
                                 fprintf(stderr, "%s(%d): warning include file '%s' not found!\n",
@@ -421,7 +402,10 @@ static int makeDependent(FILE *phDep, const char *pszFilename, POPTIONS pOptions
         fclose(phFile);
     }
     else
+    {
+        fprintf(stderr, "failed to open '%s'\n", pszFilename);
         return -1;
+    }
 
     return 0;
 }
@@ -478,7 +462,7 @@ static int getFullIncludename(char *pszFilename, const char *pszInclude)
         ulRc = DosFindFirst(&szFileTmpIn[0], &hDir,
                             FILE_READONLY |  FILE_HIDDEN | FILE_SYSTEM | FILE_ARCHIVED,
                             &filebuf, sizeof(FILEFINDBUF3), &ulFound, FIL_STANDARD);
-        if (ulRc == NO_ERROR && ulFound == 1)
+        if (ulRc == NO_ERROR)
         {
             strcpy(pszFilename, szFileTmpIn);
             DosFindClose(hDir);
@@ -687,7 +671,7 @@ char *pathlistFindFile(const char *pszPathList, const char *pszFilename, char *p
             rc = DosFindFirst(szFile, &hDir, FILE_NORMAL, &FileFindBuf, sizeof(FileFindBuf),
                               &cFiles, FIL_STANDARD);
             DosFindClose(hDir);
-            if (rc == NO_ERROR && cFiles == 1UL)
+            if (rc == NO_ERROR)
             {
                 strncpy(pszBuffer, psz, pszNext - psz);
                 pszBuffer[pszNext - psz] = '\0';

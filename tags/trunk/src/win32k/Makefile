@@ -1,5 +1,5 @@
 ################################################################################
-# $Id: Makefile,v 1.7 1999-10-16 11:05:02 sandervl Exp $
+# $Id: Makefile,v 1.8 1999-10-17 02:03:29 bird Exp $
 #
 # Copyright 1998-1999 knut st. osmundsen
 #
@@ -20,10 +20,11 @@ CC          = icc
 !if "$(CCENV)" == "VAC36"
 ILIB        = ilib /nofree
 !else
-ILIB        = ilib3
+ILIB        = ilib
 !endif
 LD          = ilink
 AS          = alp
+
 
 CFLAGS      = -q -Ge -Gs- -Gr+ -Rn -Ss+ -Mp
 CFLAGS16    = -c -W4 -Asfw /NTCODE16 /NDDATA16 -G2s -Zp -Zl -nologo -Fo$@ -Fa
@@ -77,8 +78,8 @@ CINCLUDES16= -I$(WIN32KBASE)\include                \
              -I.                                    \
              -I$(DDKPATH)\h                         \
              -I$(MSCPATH)\include                   \
-#             -If:\ddktools\toolkits\msc60\include   \
              -I$(PDWIN32_INCLUDE)
+
 
 AINCLUDES  = -Fdi:$(WIN32KBASE)\include             \
              -Fdi:$(DDKPATH)\inc
@@ -211,7 +212,6 @@ ProbKrnl.exe: dev16\ProbKrnl.c $(WIN32KBASE)\include\sym.h \
         $(CDEFINES16) -DDEBUGR3 -Fa$(WIN32KLIST)\$(*B).s     \
         -Foprobkrnl.obj $(CINCLUDES16) dev16\probkrnl.c
     link /NOD /MAP:FULL /CO /pmtype:vio probkrnl.obj, probkrnl.exe, probkrnl.map, $(TOOLKIT)\lib\os2286.lib + $(MSCPATH)\lib\clibcep.lib;
-#     $(MSCPATH)\binb\link /NOD /MAP:FULL /CO /pmtype:vio probkrnl.obj, probkrnl.exe, probkrnl.map, $(TOOLKIT)\lib\os2286.lib + $(MSCPATH)\lib\clibcr.lib;
 
 
 
@@ -224,7 +224,7 @@ $(NAME).sys: $(OBJS) $(LIBS) last.lib $(OBJSINIT) $(LIBSINIT) $(NAME).def
 $(OBJS) $(LIBS) last.lib $(OBJSINIT) /IG $(LIBSINIT) $(NAME).def
 <<
     @mapsym $*.map > nul
-#    $(CP) $@ $(PDWIN32_BIN)
+    $(CP) $@ $(PDWIN32_BIN)
 
 
 ################################################################################
@@ -272,8 +272,8 @@ win32k.vpj:
 # Cleanup
 ################################################################################
 clean:
-   $(ECHO) cleaning....
-   $(ECHO) #do nmake depend > .depend
+   @$(ECHO) cleaning....
+   @$(ECHO) #do nmake depend > .depend
    $(RM) $(NAME).sys *.lib $(WIN32KOBJ)\* $(WIN32KLIST)\* *.obj *.exe
    $(RM) *.sym *.map
 #  @$(RM) $(PDWIN32_BIN)\$(NAME).sys
@@ -284,10 +284,11 @@ clean:
 #                asm deps must be updated by hand
 ################################################################################
 depend: fastdep.exe
-    @fastdep -oObject $(CINCLUDES) misc\*.c* ldr\*.c* dev32\*.c* dev16\*.c* pe2lx\*.c* include\*.h pe2lx\*.h*
+    fastdep -oObject $(CINCLUDES) misc\*.c* ldr\*.c* dev32\*.c* dev16\*.c* pe2lx\*.c* include\*.h
 
 fastdep.exe: fastdep.c
-    @icc -Q+ -O+ fastdep.c
+    @$(ECHO) making fastdep.exe
+    @icc -Q+ -Ti+ fastdep.c
 
 object\asmutils.obj:            misc\asmutils.asm     include\devsegdf.inc
 object\calltab.obj:             ldr\calltab.asm
