@@ -1,4 +1,4 @@
-/* $Id: crt.cpp,v 1.2 1999-12-21 13:46:24 sandervl Exp $ */
+/* $Id: crt.cpp,v 1.3 1999-12-24 18:40:41 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -54,7 +54,7 @@ int    CDECL CRTDLL__wcsnicmp(LPWSTR str1, LPWSTR str2, long l);
 
 int CDECL CRTDLL__wcsicmp(LPWSTR str1, LPWSTR str2)
 {
-  dprintf(("CRTDLL: _wcsicmp(%08xh,%08xh)\n",
+  dprintf2(("CRTDLL: _wcsicmp(%08xh,%08xh)\n",
            str1,
            str2));
 
@@ -80,7 +80,7 @@ LPWSTR CDECL CRTDLL__wcslwr(LPWSTR str)
 {
   DWORD dwIndex;
 
-  dprintf(("CRTDLL: _wcslwr(%08xh)\n",
+  dprintf2(("CRTDLL: _wcslwr(%08xh)\n",
            str));
 
   for (dwIndex = wcslen((const wchar_t*)str);
@@ -111,7 +111,7 @@ int CDECL CRTDLL__wcsnicmp(LPWSTR str1, LPWSTR str2, long l)
   LPWSTR w1;
   LPWSTR w2;
 
-  dprintf(("CRTDLL: _wcsnicmp(%08xh,%08xh,%08xh)\n",
+  dprintf2(("CRTDLL: _wcsnicmp(%08xh,%08xh,%08xh)\n",
            str1,
            str2,
            l));
@@ -143,7 +143,7 @@ LPWSTR CDECL CRTDLL__wcsupr(LPWSTR str)
 {
   DWORD dwIndex;
 
-  dprintf(("CRTDLL: _wcsupr(%08xh)\n",
+  dprintf2(("CRTDLL: _wcsupr(%08xh)\n",
            str));
 
   for (dwIndex = wcslen((const wchar_t*)str);
@@ -172,7 +172,7 @@ LPWSTR CDECL CRTDLL__wcsupr(LPWSTR str)
 
 double CDECL CRTDLL_abs(double d)
 {
-  dprintf(("CRTDLL: abs(%f)\n",
+  dprintf2(("CRTDLL: abs(%f)\n",
            d));
 
   return (abs(d));
@@ -193,7 +193,7 @@ double CDECL CRTDLL_abs(double d)
 
 double CDECL CRTDLL_atan(double d)
 {
-  dprintf(("CRTDLL: atan(%f)\n",
+  dprintf2(("CRTDLL: atan(%f)\n",
            d));
 
   return (atan(d));
@@ -214,7 +214,7 @@ double CDECL CRTDLL_atan(double d)
 
 int CDECL CRTDLL_atoi(LPSTR str)
 {
-  dprintf(("CRTDLL: atoi(%s)\n",
+  dprintf2(("CRTDLL: atoi(%s)\n",
            str));
 
   return (atoi(str));
@@ -235,7 +235,7 @@ int CDECL CRTDLL_atoi(LPSTR str)
 
 long CDECL CRTDLL_atol(LPSTR str)
 {
-  dprintf(("CRTDLL: atol(%s)\n",
+  dprintf2(("CRTDLL: atol(%s)\n",
            str));
 
   return (atol(str));
@@ -256,7 +256,7 @@ long CDECL CRTDLL_atol(LPSTR str)
 
 double CDECL CRTDLL_ceil(double d)
 {
-  dprintf(("CRTDLL: ceil(%f)\n",
+  dprintf2(("CRTDLL: ceil(%f)\n",
            d));
 
   return (ceil(d));
@@ -277,7 +277,7 @@ double CDECL CRTDLL_ceil(double d)
 
 double CDECL CRTDLL_cos(double d)
 {
-  dprintf(("CRTDLL: cos(%f)\n",
+  dprintf2(("CRTDLL: cos(%f)\n",
            d));
 
   return (cos(d));
@@ -298,7 +298,7 @@ double CDECL CRTDLL_cos(double d)
 
 double CDECL CRTDLL_fabs(double d)
 {
-  dprintf(("CRTDLL: fabs(%f)\n",
+  dprintf2(("CRTDLL: fabs(%f)\n",
            d));
 
   return (fabs(d));
@@ -319,7 +319,7 @@ double CDECL CRTDLL_fabs(double d)
 
 double CDECL CRTDLL_floor(double d)
 {
-  dprintf(("CRTDLL: floor(%f)\n",
+  dprintf2(("CRTDLL: floor(%f)\n",
            d));
 
   return (floor(d));
@@ -340,7 +340,7 @@ double CDECL CRTDLL_floor(double d)
 
 int CDECL CRTDLL_isalpha(int i)
 {
-  dprintf(("CRTDLL: isalpha(%08xh)\n",
+  dprintf2(("CRTDLL: isalpha(%08xh)\n",
            i));
 
   return (isalpha(i));
@@ -361,7 +361,7 @@ int CDECL CRTDLL_isalpha(int i)
 
 int CDECL CRTDLL_isdigit(int i)
 {
-  dprintf(("CRTDLL: isdigit(%08xh)\n",
+  dprintf2(("CRTDLL: isdigit(%08xh)\n",
            i));
 
   return (isdigit(i));
@@ -382,7 +382,7 @@ int CDECL CRTDLL_isdigit(int i)
 
 int CDECL CRTDLL_islower(int i)
 {
-  dprintf(("CRTDLL: islower(%08xh)\n",
+  dprintf2(("CRTDLL: islower(%08xh)\n",
            i));
 
   return (islower(i));
@@ -403,7 +403,7 @@ int CDECL CRTDLL_islower(int i)
 
 int CDECL CRTDLL_isprint(int i)
 {
-  dprintf(("CRTDLL: isprint(%08xh)\n",
+  dprintf2(("CRTDLL: isprint(%08xh)\n",
            i));
 
   return (isprint(i));
@@ -424,7 +424,7 @@ int CDECL CRTDLL_isprint(int i)
 
 int CDECL CRTDLL_isspace(int i)
 {
-  dprintf(("CRTDLL: isspace(%08xh)\n",
+  dprintf2(("CRTDLL: isspace(%08xh)\n",
            i));
 
   return (isspace(i));
@@ -445,7 +445,7 @@ int CDECL CRTDLL_isspace(int i)
 
 int CDECL CRTDLL_isupper(int i)
 {
-  dprintf(("CRTDLL: isupper(%08xh)\n",
+  dprintf2(("CRTDLL: isupper(%08xh)\n",
            i));
 
   return (isupper(i));
@@ -470,9 +470,9 @@ LPSTR CDECL CRTDLL_sprintf(LPSTR lpstrBuffer,
 {
   va_list argptr;                          /* -> variable argument list */
 
-//  dprintf(("CRTDLL: sprintf(%08xh,%s)\n",
-//           lpstrBuffer,
-//          lpstrFormat));
+  dprintf2(("CRTDLL: sprintf(%08xh,%s)\n",
+           lpstrBuffer,
+           lpstrFormat));
 
   va_start(argptr,
            lpstrFormat);                   /* get pointer to argument list */
@@ -501,7 +501,7 @@ LPSTR CDECL CRTDLL_sprintf(LPSTR lpstrBuffer,
 LPSTR CDECL CRTDLL_strcat(      LPSTR str1,
                       const LPSTR str2)
 {
-  dprintf(("CRTDLL: strcat\n"));
+  dprintf2(("CRTDLL: strcat\n"));
 
   return (strcat(str1, str2));
 }
@@ -522,7 +522,7 @@ LPSTR CDECL CRTDLL_strcat(      LPSTR str1,
 LPSTR CDECL CRTDLL_strchr(const LPSTR str,
                        int         i)
 {
-  dprintf(("CRTDLL: strchr(%s,%08xh)\n",
+  dprintf2(("CRTDLL: strchr(%s,%08xh)\n",
            str,
            i));
 
@@ -545,7 +545,7 @@ LPSTR CDECL CRTDLL_strchr(const LPSTR str,
 int CDECL CRTDLL_strcmp(const LPSTR str1,
                       const LPSTR str2)
 {
-  dprintf(("CRTDLL: strcmp(%s,%s)\n",
+  dprintf2(("CRTDLL: strcmp(%s,%s)\n",
            str1,
            str2));
 
@@ -568,9 +568,9 @@ int CDECL CRTDLL_strcmp(const LPSTR str1,
 int CDECL CRTDLL__stricmp(const LPSTR str1,
                       const LPSTR str2)
 {
-//  dprintf(("CRTDLL: _stricmp(%s,%s)\n",
-//           str1,
-//           str2));
+  dprintf2(("CRTDLL: _stricmp(%s,%s)\n",
+           str1,
+           str2));
 
   return (stricmp(str1, str2));
 }
@@ -591,7 +591,7 @@ int CDECL CRTDLL__stricmp(const LPSTR str1,
 LPSTR CDECL CRTDLL_strcpy(      LPSTR str1,
                        const LPSTR str2)
 {
-//  dprintf(("CRTDLL: strcpy\n"));
+  dprintf2(("CRTDLL: strcpy\n"));
 
   return (strcpy(str1, str2));
 }
@@ -612,9 +612,9 @@ LPSTR CDECL CRTDLL_strcpy(      LPSTR str1,
 size_t CDECL CRTDLL_strcspn(const LPSTR str1,
                                 LPSTR str2)
 {
-//  dprintf(("CRTDLL: strcspn(%s,%s)\n",
-//           str1,
-//           str2));
+  dprintf2(("CRTDLL: strcspn(%s,%s)\n",
+           str1,
+           str2));
 
   return (strcspn(str1, str2));
 }
@@ -634,8 +634,8 @@ size_t CDECL CRTDLL_strcspn(const LPSTR str1,
 
 size_t CDECL CRTDLL_strlen(const LPSTR str)
 {
-//  dprintf(("CRTDLL: strlen(%s)\n",
-//           str));
+  dprintf2(("CRTDLL: strlen(%s)\n",
+           str));
 
   return (strlen(str));
 }
@@ -657,10 +657,10 @@ LPSTR CDECL CRTDLL_strncat(      LPSTR str1,
                         const LPSTR str2,
                         size_t      i)
 {
-//  dprintf(("CRTDLL: strncat(%s,%s,%08xh)\n",
-//           str1,
-//           str2,
-//           i));
+  dprintf2(("CRTDLL: strncat(%s,%s,%08xh)\n",
+           str1,
+           str2,
+           i));
 
   return (strncat(str1, str2, i));
 }
@@ -682,10 +682,10 @@ int CDECL CRTDLL_strncmp(const LPSTR str1,
                        const LPSTR str2,
                        size_t      i)
 {
-//  dprintf(("CRTDLL: strncmp(%s,%s,%08xh)\n",
-//           str1,
-//           str2,
-//           i));
+  dprintf2(("CRTDLL: strncmp(%s,%s,%08xh)\n",
+           str1,
+           str2,
+           i));
 
   return (strncmp(str1, str2, i));
 }
@@ -707,10 +707,10 @@ LPSTR CDECL CRTDLL_strncpy(const LPSTR str1,
                         const LPSTR str2,
                         size_t      i)
 {
-//  dprintf(("CRTDLL: strncpy(%s,%s,%08xh)\n",
-//           str1,
-//           str2,
-//           i));
+  dprintf2(("CRTDLL: strncpy(%s,%s,%08xh)\n",
+           str1,
+           str2,
+           i));
 
   return (strncpy(str1, str2, i));
 }
@@ -731,7 +731,7 @@ LPSTR CDECL CRTDLL_strncpy(const LPSTR str1,
 LPSTR CDECL CRTDLL_strpbrk(const LPSTR str1,
                       const LPSTR str2)
 {
-  dprintf(("CRTDLL: strpbrk(%s,%s)\n",
+  dprintf2(("CRTDLL: strpbrk(%s,%s)\n",
            str1,
            str2));
 
@@ -754,7 +754,7 @@ LPSTR CDECL CRTDLL_strpbrk(const LPSTR str1,
 LPSTR CDECL CRTDLL_strrchr(const LPSTR str,
                         size_t      i)
 {
-  dprintf(("CRTDLL: strrchr(%s,%08xh)\n",
+  dprintf2(("CRTDLL: strrchr(%s,%08xh)\n",
            str,
            i));
 
@@ -777,7 +777,7 @@ LPSTR CDECL CRTDLL_strrchr(const LPSTR str,
 size_t CDECL CRTDLL_strspn(const LPSTR str1,
                        const LPSTR str2)
 {
-  dprintf(("CRTDLL: strspn(%s,%s)\n",
+  dprintf2(("CRTDLL: strspn(%s,%s)\n",
            str1,
            str2));
 
@@ -800,9 +800,9 @@ size_t CDECL CRTDLL_strspn(const LPSTR str1,
 LPSTR CDECL CRTDLL_strstr(const LPSTR str1,
                        const LPSTR str2)
 {
-//  dprintf(("CRTDLL: strstr(%s,%s)\n",
-//           str1,
-//           str2));
+  dprintf2(("CRTDLL: strstr(%s,%s)\n",
+           str1,
+           str2));
 
   return (strstr(str1, str2));
 }
@@ -828,10 +828,10 @@ int CDECL CRTDLL_swprintf(const LPWSTR str,
   va_list valist;
   int     rc;
 
-//  dprintf(("CRTDLL: swprintf(%s,%d,%s)\n",
-//           str,
-//           i,
-//           format));
+  dprintf2(("CRTDLL: swprintf(%s,%d,%s)\n",
+           str,
+           i,
+           format));
 
   va_start( valist, format );
   rc = vswprintf( (wchar_t*)str,
@@ -857,7 +857,7 @@ int CDECL CRTDLL_swprintf(const LPWSTR str,
 
 double CDECL CRTDLL_tan(double d)
 {
-  dprintf(("CRTDLL: tan(%f)\n",
+  dprintf2(("CRTDLL: tan(%f)\n",
            d));
 
   return (tan(d));
@@ -878,7 +878,7 @@ double CDECL CRTDLL_tan(double d)
 
 int CDECL CRTDLL_toupper(int c)
 {
-  dprintf(("CRTDLL: toupper(%c)\n",
+  dprintf2(("CRTDLL: toupper(%c)\n",
            c));
 
   return (toupper(c));
@@ -899,7 +899,7 @@ int CDECL CRTDLL_toupper(int c)
 
 int CDECL CRTDLL_tolower(int c)
 {
-  dprintf(("CRTDLL: tolower(%c)\n",
+  dprintf2(("CRTDLL: tolower(%c)\n",
            c));
 
   return (tolower(c));
@@ -920,7 +920,7 @@ int CDECL CRTDLL_tolower(int c)
 
 int CDECL CRTDLL_towupper(int c)
 {
-  dprintf(("CRTDLL: towupper(%c)\n",
+  dprintf2(("CRTDLL: towupper(%c)\n",
            c));
 
   return (towupper(c));
@@ -941,7 +941,7 @@ int CDECL CRTDLL_towupper(int c)
 
 int CDECL CRTDLL_towlower(int c)
 {
-  dprintf(("CRTDLL: towlower(%c)\n",
+  dprintf2(("CRTDLL: towlower(%c)\n",
            c));
 
   return (towlower(c));
@@ -964,7 +964,7 @@ int CDECL CRTDLL_towlower(int c)
 wchar_t* CDECL CRTDLL_wcscat(      wchar_t* str1,
                        const wchar_t* str2)
 {
-  dprintf(("CRTDLL: wcscat(%08xh,%08xh)\n",
+  dprintf2(("CRTDLL: wcscat(%08xh,%08xh)\n",
            str1,
            str2));
 
@@ -987,7 +987,7 @@ wchar_t* CDECL CRTDLL_wcscat(      wchar_t* str1,
 wchar_t* CDECL CRTDLL_wcschr(const wchar_t* str,
                        int          i)
 {
-  dprintf(("CRTDLL: wcschr(%08xh,%08xh)\n",
+  dprintf2(("CRTDLL: wcschr(%08xh,%08xh)\n",
            str,
            i));
 
@@ -1010,7 +1010,7 @@ wchar_t* CDECL CRTDLL_wcschr(const wchar_t* str,
 int CDECL CRTDLL_wcscmp(const wchar_t* str1,
                     const wchar_t* str2)
 {
-  dprintf(("CRTDLL: wcscmp(%08xh,%08xh)\n",
+  dprintf2(("CRTDLL: wcscmp(%08xh,%08xh)\n",
            str1,
            str2));
 
@@ -1033,7 +1033,7 @@ int CDECL CRTDLL_wcscmp(const wchar_t* str1,
 wchar_t* CDECL CRTDLL_wcscpy(      wchar_t* str1,
                        const wchar_t* str2)
 {
-  dprintf(("CRTDLL: wcscpy(%08xh,%08xh)\n",
+  dprintf2(("CRTDLL: wcscpy(%08xh,%08xh)\n",
            str1,
            str2));
 
@@ -1056,7 +1056,7 @@ wchar_t* CDECL CRTDLL_wcscpy(      wchar_t* str1,
 size_t CDECL CRTDLL_wcscspn(const wchar_t* str1,
                               wchar_t* str2)
 {
-  dprintf(("CRTDLL: wcscspn(%08xh,%08xh)\n",
+  dprintf2(("CRTDLL: wcscspn(%08xh,%08xh)\n",
            str1,
            str2));
 
@@ -1078,7 +1078,7 @@ size_t CDECL CRTDLL_wcscspn(const wchar_t* str1,
 
 size_t CDECL CRTDLL_wcslen(const wchar_t* str)
 {
-  dprintf(("CRTDLL: wcslen(%08xh)\n",
+  dprintf2(("CRTDLL: wcslen(%08xh)\n",
            str));
 
   return (wcslen(str));
@@ -1101,7 +1101,7 @@ wchar_t* CDECL CRTDLL_wcsncat(      wchar_t* str1,
                         const wchar_t* str2,
                         size_t      i)
 {
-  dprintf(("CRTDLL: wcsncat(%08xh,%08xh,%08xh)\n",
+  dprintf2(("CRTDLL: wcsncat(%08xh,%08xh,%08xh)\n",
            str1,
            str2,
            i));
@@ -1126,7 +1126,7 @@ int CDECL CRTDLL_wcsncmp(const wchar_t* str1,
                      const wchar_t* str2,
                      size_t      i)
 {
-  dprintf(("CRTDLL: wcsncmp(%08xh,%08xh,%08xh)\n",
+  dprintf2(("CRTDLL: wcsncmp(%08xh,%08xh,%08xh)\n",
            str1,
            str2,
            i));
@@ -1151,7 +1151,7 @@ wchar_t* CDECL CRTDLL_wcsncpy(      wchar_t* str1,
                           const wchar_t* str2,
                           size_t       i)
 {
-  dprintf(("CRTDLL: wcsncpy(%s,%s,%08xh)\n",
+  dprintf2(("CRTDLL: wcsncpy(%s,%s,%08xh)\n",
            str1,
            str2,
            i));
@@ -1175,7 +1175,7 @@ wchar_t* CDECL CRTDLL_wcsncpy(      wchar_t* str1,
 wchar_t* CDECL CRTDLL_wcspbrk(const wchar_t* str1,
                         const wchar_t* str2)
 {
-  dprintf(("CRTDLL: wcspbrk(%08xh,%08xh)\n",
+  dprintf2(("CRTDLL: wcspbrk(%08xh,%08xh)\n",
            str1,
            str2));
 
@@ -1198,7 +1198,7 @@ wchar_t* CDECL CRTDLL_wcspbrk(const wchar_t* str1,
 wchar_t* CDECL CRTDLL_wcsrchr(const wchar_t* str,
                         size_t       i)
 {
-  dprintf(("CRTDLL: wcsrchr(%08xh,%08xh)\n",
+  dprintf2(("CRTDLL: wcsrchr(%08xh,%08xh)\n",
            str,
            i));
 
@@ -1221,7 +1221,7 @@ wchar_t* CDECL CRTDLL_wcsrchr(const wchar_t* str,
 size_t CDECL CRTDLL_wcsspn(const wchar_t* str1,
                        const wchar_t* str2)
 {
-  dprintf(("CRTDLL: wcsspn(%08xh,%08xh)\n",
+  dprintf2(("CRTDLL: wcsspn(%08xh,%08xh)\n",
            str1,
            str2));
 
@@ -1244,7 +1244,7 @@ size_t CDECL CRTDLL_wcsspn(const wchar_t* str1,
 wchar_t* CDECL CRTDLL_wcsstr(const wchar_t* str1,
                          const wchar_t* str2)
 {
-  dprintf(("CRTDLL: wcsstr(%s,%s)\n",
+  dprintf2(("CRTDLL: wcsstr(%s,%s)\n",
            str1,
            str2));
 
@@ -1266,7 +1266,7 @@ wchar_t* CDECL CRTDLL_wcsstr(const wchar_t* str1,
 
 char * CDECL CRTDLL__itoa(int i, char *s, int r)
 {
-  dprintf(("CRTDLL: _itoa(%08xh, %08xh, %08xh)\n",
+  dprintf2(("CRTDLL: _itoa(%08xh, %08xh, %08xh)\n",
            i,
            s,
            r));
@@ -1376,7 +1376,7 @@ INT CDECL CRTDLL__memicmp(
 	LPCSTR s2,	/* [in] second string */
 	DWORD len	/* [in] length to compare */ )
 {
-	dprintf(("CRTDLL: memicmp(%08xh, %08xh, %08xh)\n",s1,s2,len));
+	dprintf2(("CRTDLL: memicmp(%08xh, %08xh, %08xh)\n",s1,s2,len));
 	int	i;
 
 	for (i=0;i<len;i++) {
@@ -1449,7 +1449,7 @@ int  CDECL CRTDLL__snwprintf( wchar_t *buf, size_t bufsize, const wchar_t *fmt, 
 
 void CDECL CRTDLL__splitpath( const char *path, char *drive, char *dir, char *fname, char *ext )
 {
-	dprintf(("CRTDLL: _splitpath"));
+	dprintf2(("CRTDLL: _splitpath"));
 
 	char *tmp_drive;
 	char *tmp_dir;
@@ -1503,7 +1503,7 @@ void CDECL CRTDLL__splitpath( const char *path, char *drive, char *dir, char *fn
 
 void CDECL CRTDLL__strcmpi( LPCSTR s1, LPCSTR s2 )
 {
-  dprintf(("CRTDLL: _strcmpi(%08xh, %08xh)\n",
+  dprintf2(("CRTDLL: _strcmpi(%08xh, %08xh)\n",
            s1,
            s2));
 
@@ -1527,13 +1527,13 @@ CHAR * CDECL CRTDLL__strlwr(char *x)
 {
   char *y =x;
 
-  dprintf(("CRTDLL: _strlwr got %s\n", x));
+  dprintf2(("CRTDLL: _strlwr got %s\n", x));
   while (*y) {
     if ((*y > 0x40) && (*y< 0x5b))
       *y = *y + 0x20;
     y++;
   }
-  dprintf(("   returned %s\n", x));
+  dprintf2(("   returned %s\n", x));
 		
   return x;
 }
@@ -1553,7 +1553,7 @@ CHAR * CDECL CRTDLL__strlwr(char *x)
 
 int  CDECL CRTDLL__strnicmp( LPCSTR s1, LPCSTR s2, INT n )
 {
-  dprintf(("CRTDLL: _strnicmp (%s,%s,%d)\n",
+  dprintf2(("CRTDLL: _strnicmp (%s,%s,%d)\n",
            s1,
            s2,
            n));
@@ -1589,7 +1589,7 @@ int  CDECL CRTDLL__strnicmp( LPCSTR s1, LPCSTR s2, INT n )
 
 LPSTR CDECL CRTDLL__strupr(LPSTR x)
 {
-  dprintf(("CRTDLL: _strupr(%s)\n",
+  dprintf2(("CRTDLL: _strupr(%s)\n",
            x));
 
   LPSTR y=x;
@@ -1635,7 +1635,7 @@ LPSTR  CDECL CRTDLL__ultoa(long x,LPSTR buf,INT radix)
 
 int CDECL CRTDLL__vsnprintf( char *s, size_t bufsize, const char *format, va_list arg )
 {
-  dprintf(("CRTDLL: _vsnprintf(%08xh, %08xh, %08xh)\n",
+  dprintf2(("CRTDLL: _vsnprintf(%08xh, %08xh, %08xh)\n",
            s,
            bufsize,
            format));
@@ -1658,7 +1658,7 @@ int CDECL CRTDLL__vsnprintf( char *s, size_t bufsize, const char *format, va_lis
 
 int CDECL CRTDLL_iswalpha(wint_t i)
 {
-  dprintf(("CRTDLL: iswalpha(%08xh)\n", i));
+  dprintf2(("CRTDLL: iswalpha(%08xh)\n", i));
 
   return (iswalpha(i));
 }
@@ -1678,7 +1678,7 @@ int CDECL CRTDLL_iswalpha(wint_t i)
 
 int CDECL CRTDLL_iswctype(wint_t i, wctype_t wct)
 {
-  dprintf(("CRTDLL: iswctype(%08xh, %08xh)\n", i, wct));
+  dprintf2(("CRTDLL: iswctype(%08xh, %08xh)\n", i, wct));
 
   return (iswctype(i, wct));
 }
@@ -1698,7 +1698,7 @@ int CDECL CRTDLL_iswctype(wint_t i, wctype_t wct)
 
 int CDECL CRTDLL_isxdigit(int i)
 {
-  dprintf(("CRTDLL: isxdigit(%08xh)\n", i));
+  dprintf2(("CRTDLL: isxdigit(%08xh)\n", i));
 
   return (isxdigit(i));
 }
@@ -1718,7 +1718,7 @@ int CDECL CRTDLL_isxdigit(int i)
 
 long int CDECL CRTDLL_labs( long int j )
 {
-  dprintf(("CRTDLL: labs(%08xh)\n", j));
+  dprintf2(("CRTDLL: labs(%08xh)\n", j));
 
   return (labs(j));
 }
@@ -1738,7 +1738,7 @@ long int CDECL CRTDLL_labs( long int j )
 
 double CDECL CRTDLL_log( double x )
 {
-  dprintf(("CRTDLL: log(%08xh)\n", x));
+  dprintf2(("CRTDLL: log(%08xh)\n", x));
   return (log(x));
 }
 
@@ -1757,7 +1757,7 @@ double CDECL CRTDLL_log( double x )
 
 size_t CDECL CRTDLL_mbstowcs( wchar_t *pwcs, const char *s, size_t n )
 {
-      dprintf(("CRTDLL: mbstowcs(%08xh, %08xh, %08xh)\n", pwcs, s, n));
+      dprintf2(("CRTDLL: mbstowcs(%08xh, %08xh, %08xh)\n", pwcs, s, n));
       return (mbstowcs(pwcs, s, n));
 }
 
@@ -1776,7 +1776,7 @@ size_t CDECL CRTDLL_mbstowcs( wchar_t *pwcs, const char *s, size_t n )
 
 void * CDECL CRTDLL_memchr( const void *s, int c, size_t n )
 {
-    dprintf(("CRTDLL: memchr(%08xh, %08xh, %08xh)\n", s, c, n));
+    dprintf2(("CRTDLL: memchr(%08xh, %08xh, %08xh)\n", s, c, n));
     return memchr( s, c, n );
 }
 
@@ -1795,7 +1795,7 @@ void * CDECL CRTDLL_memchr( const void *s, int c, size_t n )
 
 int CDECL CRTDLL_memcmp( const void * c1, const void * c2, size_t n )
 {
-    dprintf(("CRTDLL: memcmp(%08xh, %08xh, %08xh)\n", c1, c2, n));
+    dprintf2(("CRTDLL: memcmp(%08xh, %08xh, %08xh)\n", c1, c2, n));
     return memcmp( c1, c2, n );
 }
 
@@ -1813,7 +1813,7 @@ int CDECL CRTDLL_memcmp( const void * c1, const void * c2, size_t n )
 
 void * CDECL CRTDLL_memcpy( void *s1, const void *s2, size_t n )
 {
-    dprintf(("CRTDLL: memcpy(%08xh, %08xh, %08xh)\n", s1, s2, n));
+    dprintf2(("CRTDLL: memcpy(%08xh, %08xh, %08xh)\n", s1, s2, n));
     return memcpy( s1, s2, n );
 }
 
@@ -1832,7 +1832,7 @@ void * CDECL CRTDLL_memcpy( void *s1, const void *s2, size_t n )
 
 void * CDECL CRTDLL_memset( void *s, int i, size_t n )
 {
-    dprintf(("CRTDLL: memset(%08xh, %08xh, %08xh)\n", s, i, n));
+    dprintf2(("CRTDLL: memset(%08xh, %08xh, %08xh)\n", s, i, n));
     return memset( s, i, n );
 }
 //******************************************************************************
@@ -1856,7 +1856,7 @@ VOID CDECL CRTDLL_memmove(VOID UNALIGNED *Destination, CONST VOID UNALIGNED *Sou
 
 double CDECL CRTDLL_pow( double x, double y )	
 {
-    dprintf(("CRTDLL: pow(%08xh, %08xh)\n",x, y));
+    dprintf2(("CRTDLL: pow(%08xh, %08xh)\n",x, y));
     return pow( x, y );
 }
 
@@ -1876,7 +1876,7 @@ double CDECL CRTDLL_pow( double x, double y )
 
 double CDECL CRTDLL_sin( double x )
 {
-  dprintf(("CRTDLL: sin(%08xh)\n", x));
+  dprintf2(("CRTDLL: sin(%08xh)\n", x));
   return (sin(x));
 }
 
@@ -1895,7 +1895,7 @@ double CDECL CRTDLL_sin( double x )
 
 double CDECL CRTDLL_sqrt( double x )
 {
-  dprintf(("CRTDLL: sqrt(%08xh)\n", x));
+  dprintf2(("CRTDLL: sqrt(%08xh)\n", x));
   return (sqrt(x));
 }
 
@@ -1934,7 +1934,7 @@ int CDECL CRTDLL_sscanf( const char *s, const char *format, ... )
 
 int CDECL CRTDLL_vsprintf( char *s, const char *format, va_list arg )
 {
-  dprintf(("CRTDLL: vsprintf(%08xh, %08xh)\n", s, format));
+  dprintf2(("CRTDLL: vsprintf(%08xh, %08xh)\n", s, format));
   return (vsprintf(s, format, arg));
 }
 
@@ -1953,7 +1953,7 @@ int CDECL CRTDLL_vsprintf( char *s, const char *format, va_list arg )
 
 wchar_t * CDECL CRTDLL_wcstok( wchar_t *s1, const wchar_t *s2, wchar_t **ptr )
 {
-  dprintf(("CRTDLL: wcstok(%08xh, %08xh, %08xh)\n",s1,s2,ptr));
+  dprintf2(("CRTDLL: wcstok(%08xh, %08xh, %08xh)\n",s1,s2,ptr));
   return (wcstok(s1, s2, ptr));
 }
 
@@ -1971,7 +1971,7 @@ wchar_t * CDECL CRTDLL_wcstok( wchar_t *s1, const wchar_t *s2, wchar_t **ptr )
 
 long int CDECL CRTDLL_wcstol( const wchar_t *s1, wchar_t **s2, int i )
 {
-  dprintf(("CRTDLL: wcstol(%08xh, %08xh, %08xh)\n",s1,s2,i));
+  dprintf2(("CRTDLL: wcstol(%08xh, %08xh, %08xh)\n",s1,s2,i));
   return (wcstol(s1, s2, i));
 }
 
@@ -1990,7 +1990,7 @@ long int CDECL CRTDLL_wcstol( const wchar_t *s1, wchar_t **s2, int i )
 
 size_t CDECL CRTDLL_wcstombs( char *s, const wchar_t *pwcs, size_t n )
 {
-  dprintf(("CRTDLL: wcstombs(%08xh, %08xh, %08xh)\n",s,pwcs,n));
+  dprintf2(("CRTDLL: wcstombs(%08xh, %08xh, %08xh)\n",s,pwcs,n));
   return (wcstombs(s, pwcs, n));
 }
 
@@ -2009,7 +2009,7 @@ size_t CDECL CRTDLL_wcstombs( char *s, const wchar_t *pwcs, size_t n )
 
 unsigned long int CDECL CRTDLL_wcstoul( const wchar_t *s1, wchar_t **s2, int i )
 {
-  dprintf(("CRTDLL: wcstoul(%08xh, %08xh, %08xh)\n",s1,s2,i));
+  dprintf2(("CRTDLL: wcstoul(%08xh, %08xh, %08xh)\n",s1,s2,i));
   return (wcstoul(s1, s2, i));
 }
 
