@@ -1,4 +1,4 @@
-/* $Id: fastdep.c,v 1.21 2000-06-08 16:27:14 bird Exp $
+/* $Id: fastdep.c,v 1.22 2000-11-19 08:29:12 bird Exp $
  *
  * Fast dependents. (Fast = Quick and Dirty!)
  *
@@ -559,10 +559,10 @@ int main(int argc, char **argv)
                 case 'r':
                 case 'R':
                     if (strlen(argv[argi]) > 2)
-                        strcpy(szObjectExt, argv[argi]+2);
+                        strcpy(szRsrcExt, argv[argi]+2);
                     else
                     {
-                        strcpy(szObjectExt, argv[argi+1]);
+                        strcpy(szRsrcExt, argv[argi+1]);
                         argi++;
                     }
                     break;
