@@ -1,4 +1,4 @@
-/* $Id: conbuffervio.h,v 1.2 2001-12-05 14:15:57 sandervl Exp $ */
+/* $Id: conbuffervio.h,v 1.3 2003-04-11 12:08:36 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -55,6 +55,18 @@ class HMDeviceConsoleVioBufferClass : public HMDeviceConsoleBufferClass
                              LPDWORD       lpNumberOfBytesWritten,
                              LPOVERLAPPED  lpOverlapped,
                              LPOVERLAPPED_COMPLETION_ROUTINE  lpCompletionRoutine);
+
+  virtual DWORD  FillConsoleOutputAttribute(PHMHANDLEDATA pHMHandleData,
+                                            WORD          wAttribute,
+                                            DWORD         nLength,
+                                            COORD         dwWriteCoord,
+                                            LPDWORD       lpNumberOfAttrsWritten);
+
+DWORD HMDeviceConsoleVioBufferClass::FillConsoleOutputCharacterA(PHMHANDLEDATA pHMHandleData,
+                                                              UCHAR   ucCharacter,
+                                                              DWORD   nLength,
+                                                              COORD   dwWriteCoord,
+                                                              LPDWORD lpNumberOfCharsWritten);
 
 };
 

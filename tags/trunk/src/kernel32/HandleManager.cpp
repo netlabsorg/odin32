@@ -1,4 +1,4 @@
-/* $Id: HandleManager.cpp,v 1.98 2003-04-02 12:58:27 sandervl Exp $ */
+/* $Id: HandleManager.cpp,v 1.99 2003-04-11 12:08:34 sandervl Exp $ */
 
 /*
  * Win32 Unified Handle Manager for OS/2
@@ -878,6 +878,35 @@ BOOL HMSetStdHandle(DWORD  nStdHandle, HANDLE hHandleOpen32)
   }
 }
 
+/*****************************************************************************
+ * Name      : HANDLE  _HMUdptStdHandle
+ * Purpose   :
+ * Parameters: DWORD  nStdHandle
+ *             HANDLE hHandle
+ * Variables :
+ * Result    : BOOL fSuccess
+ * Remark    :
+ * Status    :
+ *
+ * Author    : Dmitry Froloff [Thu, 2003/03/03 17:44]
+ *****************************************************************************/
+
+BOOL HMUpdtStdHandle(DWORD  nStdHandle, HANDLE hHandle)
+{
+  switch (nStdHandle)
+  {
+    case STD_INPUT_HANDLE:  HMGlobals.hStandardIn    = hHandle; return TRUE;
+    case STD_OUTPUT_HANDLE: HMGlobals.hStandardOut   = hHandle; return TRUE;
+    case STD_ERROR_HANDLE:  HMGlobals.hStandardError = hHandle; return TRUE;
+
+    default:
+    {
+      SetLastError(ERROR_INVALID_PARAMETER);        /* set error information */
+      return (FALSE);                               /* raise error condition */
+    }
+  }
+}
+
 
 /*****************************************************************************
  * Name      : HANDLE  HMDuplicateHandle
@@ -923,7 +952,7 @@ BOOL HMDuplicateHandle(HANDLE  srcprocess,
 
   /* initialize the complete HMHANDLEDATA structure */
   pHMHandleData                = &TabWin32Handles[iIndexNew].hmHandleData;
-  if (fdwOptions & DUPLICATE_SAME_ACCESS) 
+  if (fdwOptions & DUPLICATE_SAME_ACCESS)
       pHMHandleData->dwAccess    = TabWin32Handles[srchandle].hmHandleData.dwAccess;
   else
       pHMHandleData->dwAccess    = fdwAccess;
@@ -1284,7 +1313,7 @@ HANDLE HMOpenFile(LPCSTR    lpFileName,
  * Variables :
  * Result    : TRUE / FALSE
  * Remark    :
- * Status    : 
+ * Status    :
  *
  * Author    : SvL
  *****************************************************************************/
@@ -1323,11 +1352,11 @@ BOOL HMGetHandleInformation(HANDLE hObject, LPDWORD lpdwFlags)
  * Variables :
  * Result    : TRUE / FALSE
  * Remark    :
- * Status    : 
+ * Status    :
  *
  * Author    : SvL
  *****************************************************************************/
-BOOL   HMSetHandleInformation       (HANDLE hObject, 
+BOOL   HMSetHandleInformation       (HANDLE hObject,
                                      DWORD  dwMask,
                                      DWORD  dwFlags)
 {
@@ -2073,7 +2102,7 @@ DWORD HMWaitForSingleObject(HANDLE hObject,
 
   if(dwTimeout && dwTimeout < 20) {
       dwThreadPriority = GetThreadPriority(hThread);
-      if(dwThreadPriority != THREAD_PRIORITY_TIME_CRITICAL) 
+      if(dwThreadPriority != THREAD_PRIORITY_TIME_CRITICAL)
       {
           dprintf(("Temporarily change priority to THREAD_PRIORITY_TIME_CRITICAL for better timing"));
           SetThreadPriority(hThread, THREAD_PRIORITY_TIME_CRITICAL);
@@ -3067,7 +3096,7 @@ DWORD HMWaitForMultipleObjects (DWORD   cObjects,
 
   if(dwTimeout && dwTimeout < 20) {
       dwThreadPriority = GetThreadPriority(hThread);
-      if(dwThreadPriority != THREAD_PRIORITY_TIME_CRITICAL) 
+      if(dwThreadPriority != THREAD_PRIORITY_TIME_CRITICAL)
       {
           dprintf(("Temporarily change priority to THREAD_PRIORITY_TIME_CRITICAL for better timing"));
           SetThreadPriority(hThread, THREAD_PRIORITY_TIME_CRITICAL);
@@ -3190,7 +3219,7 @@ DWORD  HMMsgWaitForMultipleObjects  (DWORD      cObjects,
 
   if(dwTimeout && dwTimeout < 20) {
       dwThreadPriority = GetThreadPriority(hThread);
-      if(dwThreadPriority != THREAD_PRIORITY_TIME_CRITICAL) 
+      if(dwThreadPriority != THREAD_PRIORITY_TIME_CRITICAL)
       {
           dprintf(("Temporarily change priority to THREAD_PRIORITY_TIME_CRITICAL for better timing"));
           SetThreadPriority(hThread, THREAD_PRIORITY_TIME_CRITICAL);
@@ -4245,8 +4274,8 @@ BOOL HMGetThreadTimes(HANDLE hThread, LPFILETIME lpCreationTime,
   }
 
   pHMHandle = &TabWin32Handles[iIndex];               /* call device handler */
-  lpResult = pHMHandle->pDeviceHandler->GetThreadTimes(hThread, &TabWin32Handles[iIndex].hmHandleData, 
-                                                       lpCreationTime, lpExitTime, 
+  lpResult = pHMHandle->pDeviceHandler->GetThreadTimes(hThread, &TabWin32Handles[iIndex].hmHandleData,
+                                                       lpCreationTime, lpExitTime,
                                                        lpKernelTime, lpUserTime);
 
   return (lpResult);                                  /* deliver return code */
