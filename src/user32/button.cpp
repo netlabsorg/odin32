@@ -1,4 +1,4 @@
-/* $Id: button.cpp,v 1.22 1999-12-19 17:46:24 cbratschi Exp $ */
+/* $Id: button.cpp,v 1.23 1999-12-20 16:45:16 cbratschi Exp $ */
 /* File: button.cpp -- Button type widgets
  *
  * Copyright (C) 1993 Johannes Ruscheinski
@@ -796,14 +796,21 @@ static void BUTTON_DrawPushButton(
             ICONINFO iconInfo;
             BITMAP   bm;
 
-            GetIconInfo((HICON)infoPtr->hImage, &iconInfo);
-            GetObjectA (iconInfo.hbmColor, sizeof(BITMAP), &bm);
+            GetIconInfo((HICON)infoPtr->hImage,&iconInfo);
+            if (iconInfo.hbmColor)
+            {
+              GetObjectA(iconInfo.hbmColor,sizeof(BITMAP),&bm);
+              imageWidth  = bm.bmWidth;
+              imageHeight = bm.bmHeight;
+            } else
+            {
+              GetObjectA(iconInfo.hbmMask,sizeof(BITMAP),&bm);
+              imageWidth  = bm.bmWidth;
+              imageHeight = bm.bmHeight/2;
+            }
 
-            imageWidth  = bm.bmWidth;
-            imageHeight = bm.bmHeight;
-
-            DeleteObject(iconInfo.hbmColor);
-            DeleteObject(iconInfo.hbmMask);
+            if (iconInfo.hbmColor) DeleteObject(iconInfo.hbmColor);
+            if (iconInfo.hbmMask) DeleteObject(iconInfo.hbmMask);
 
         }
         else

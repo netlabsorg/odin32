@@ -1,4 +1,4 @@
-/* $Id: static.cpp,v 1.12 1999-11-22 20:33:24 sandervl Exp $ */
+/* $Id: static.cpp,v 1.13 1999-12-20 16:45:16 cbratschi Exp $ */
 /*
  * Static control
  *
@@ -90,9 +90,18 @@ static HICON STATIC_SetIcon( HWND hwnd, HICON hicon )
     infoPtr->hIcon = hicon;
 
     if (!GetIconInfo(hicon,&ii)) return prevIcon;
-    GetObjectA(ii.hbmColor,sizeof(BITMAP),(LPVOID)&bmp);
+    if (ii.hbmColor)
+      GetObjectA(ii.hbmColor,sizeof(BITMAP),(LPVOID)&bmp);
+    else
+    {
+      GetObjectA(ii.hbmMask,sizeof(BITMAP),(LPVOID)&bmp);
+      bmp.bmHeight /= 2;
+    }
 
     if (!(dwStyle & (SS_CENTERIMAGE | SS_REALSIZEIMAGE))) STATIC_ResizeWindow(hwnd,dwStyle,bmp.bmWidth,bmp.bmHeight);
+
+    if (ii.hbmColor) DeleteObject(ii.hbmColor);
+    if (ii.hbmMask) DeleteObject(ii.hbmMask);
 
     return prevIcon;
 }
@@ -678,8 +687,16 @@ static void STATIC_PaintIconfn( HWND hwnd, HDC hdc )
       BITMAP bmp;
 
       if (!GetIconInfo(infoPtr->hIcon,&ii)) return;
-      GetObjectA(ii.hbmColor,sizeof(BITMAP),(LPVOID)&bmp);
+      if (ii.hbmColor)
+        GetObjectA(ii.hbmColor,sizeof(BITMAP),(LPVOID)&bmp);
+      else
+      {
+        GetObjectA(ii.hbmMask,sizeof(BITMAP),(LPVOID)&bmp);
+        bmp.bmHeight /= 2;
+      }
       DrawIcon(hdc,(rc.right-bmp.bmWidth)/2,(rc.bottom-bmp.bmHeight)/2,infoPtr->hIcon);
+      if (ii.hbmColor) DeleteObject(ii.hbmColor);
+      if (ii.hbmMask) DeleteObject(ii.hbmMask);
     } else if (infoPtr->hIcon) DrawIcon(hdc,rc.left,rc.top,infoPtr->hIcon);
 }
 
