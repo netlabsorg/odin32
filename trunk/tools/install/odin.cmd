@@ -1,8 +1,9 @@
-/* $Id: odin.cmd,v 1.19 2000-12-03 11:40:57 sandervl Exp $
+/* $Id: odin.cmd,v 1.20 2000-12-03 11:42:48 sandervl Exp $
  *
  * Odin32 API WarpIn installation script generator.
  *
  * Copyright (c) 2000 knut st. osmundsen (knut.stange.osmundsen@mynd.no)
+ * Copyright 2000 Sander van Leeuwen (sandervl@xs4all.nl)
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *
@@ -187,10 +188,12 @@ rc = lineout(sInstFile, '     Knut Stange Osmundsen');
 rc = lineout(sInstFile, '     Vitali E. Pelenyov');
 rc = lineout(sInstFile, '     Rene Pronk');
 rc = lineout(sInstFile, '     David Raison');
+rc = lineout(sInstFile, '     Kai Sommerfeld');
 rc = lineout(sInstFile, '     Carsten Tenbrink');
 rc = lineout(sInstFile, '     Vit Timchishin');
 rc = lineout(sInstFile, '     Joel Troster');
 rc = lineout(sInstFile, '     Jens Wiessner');
+rc = lineout(sInstFile, '     Chris Wohlgemuth');
 rc = lineout(sInstFile, '     Vince Vielhaber');
 rc = lineout(sInstFile, '     All the WINE people');
 rc = lineout(sInstFile, '');
