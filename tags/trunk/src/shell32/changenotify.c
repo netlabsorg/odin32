@@ -1,4 +1,4 @@
-/* $Id: changenotify.c,v 1.6 2002-06-25 07:13:02 sandervl Exp $ */
+/* $Id: changenotify.c,v 1.7 2002-06-26 06:55:29 sandervl Exp $ */
 /*
  *	shell change notification
  *
@@ -128,14 +128,13 @@ static BOOL DeleteNode(LPNOTIFICATIONLIST item)
 	    SHFree(item->apidl);
 	    SHFree(item);
 #ifdef __WIN32OS2__
-	    /* ret = TRUE;
-             * <rant> HEY! Have you guys ever heard about the break keyword?
-             * And please don't test if ret == FALSE. Test !ret!!! </rant>
+	    /* 
              * Anyway, ptr == item, we free item hence the memory shouldn't be
              * accessed by us any longer. We have to break here so we do NOT do
              * the next operation below!
              * -bird-
              */
+            ret = TRUE;
             break;
 #else
             ret = TRUE;
