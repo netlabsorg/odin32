@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.92 2001-08-31 20:23:44 phaller Exp $
+# $Id: Makefile,v 1.93 2001-09-19 15:39:47 sandervl Exp $
 
 #
 # Odin32 API
@@ -55,17 +55,17 @@ $(OBJDIR)\gen_object.obj \
 $(OBJDIR)\win32wndchild.obj \
 $(OBJDIR)\win32wbase.obj \
 $(OBJDIR)\win32wbasenonclient.obj \
-$(OBJDIR)\win32wnd.obj \
 $(OBJDIR)\win32wbasepos.obj \
 $(OBJDIR)\win32wbaseprop.obj \
 $(OBJDIR)\win32wndhandle.obj \
+$(OBJDIR)\win32wmisc.obj \
 $(OBJDIR)\windowword.obj \
 $(OBJDIR)\windowmsg.obj \
 $(OBJDIR)\winproc.obj \
 $(OBJDIR)\oslibmsg.obj \
 $(OBJDIR)\hook.obj \
-$(OBJDIR)\win32wmdichild.obj \
 $(OBJDIR)\win32wmdiclient.obj \
+$(OBJDIR)\mdi.obj \
 $(OBJDIR)\win32wdesktop.obj \
 $(OBJDIR)\win32dlg.obj \
 $(OBJDIR)\windlgmsg.obj \

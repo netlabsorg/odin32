@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.281 2001-09-15 15:23:12 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.282 2001-09-19 15:39:50 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -159,13 +159,16 @@ void Win32BaseWindow::Init()
   owner            = NULL;
   windowClass      = 0;
 
-  hIcon              = 0;
-  hIconSm            = 0;
+  hIcon            = 0;
+  hIconSm          = 0;
 
-  horzScrollInfo     = NULL;
-  vertScrollInfo     = NULL;
+  horzScrollInfo   = NULL;
+  vertScrollInfo   = NULL;
 
-  propertyList       = NULL;
+  propertyList     = NULL;
+
+  cbExtra          = 0;
+  pExtra           = NULL;
 
   ownDC              = 0;
   hWindowRegion      = 0;

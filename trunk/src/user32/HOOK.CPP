@@ -1,4 +1,4 @@
-/* $Id: HOOK.CPP,v 1.22 2001-06-14 14:49:16 sandervl Exp $ */
+/* $Id: HOOK.CPP,v 1.23 2001-09-19 15:39:47 sandervl Exp $ */
 
 /*
  * Windows hook functions
@@ -43,6 +43,7 @@
 #include <heapstring.h>
 #include <vmutex.h>
 #include <wprocess.h>
+#include "menu.h"
 
 #include "win32wbase.h"
 
@@ -773,8 +774,6 @@ ODINFUNCTION2(BOOL, CallMsgFilterW,
       return TRUE;
     return HOOK_CallHooksW( WH_MSGFILTER, code, 0, (LPARAM)msg );
 }
-
-BOOL IsMenuActive(void);
 
 BOOL ProcessKbdHook(LPMSG msg, BOOL remove )
 {

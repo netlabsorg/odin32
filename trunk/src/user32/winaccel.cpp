@@ -1,4 +1,4 @@
-/* $Id: winaccel.cpp,v 1.8 2001-06-09 14:50:24 sandervl Exp $ */
+/* $Id: winaccel.cpp,v 1.9 2001-09-19 15:39:52 sandervl Exp $ */
 /*
  * Win32 accelerator key functions for OS/2
  *
@@ -18,7 +18,6 @@
 #include <misc.h>
 #include <heapstring.h>
 #include "win32wbase.h"
-#include "win32wmdiclient.h"
 #include <win\winnls.h>
 
 #define DBG_LOCALLOG    DBG_winaccel
@@ -211,61 +210,6 @@ INT WINAPI TranslateAcceleratorA(HWND hWnd, HACCEL hAccel, LPMSG msg)
 
 //    WARN_(accel)("couldn't translate accelerator key\n");
     return 0;
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API TranslateMDISysAccel(HWND hwndClient, LPMSG msg)
-{
-    SetLastError(ERROR_SUCCESS);
-
-    if(IsWindow(hwndClient) && (msg->message == WM_KEYDOWN || msg->message == WM_SYSKEYDOWN))
-    {
-        Win32MDIClientWindow *clientWnd;
-        Win32MDIChildWindow  *mdichild;
-        HWND                  hwndChild;
-
-        clientWnd = (Win32MDIClientWindow *)Win32BaseWindow::GetWindowFromHandle(hwndClient);
-        if(!clientWnd) {
-            dprintf(("TranslateMDISysAccel window %x not found", hwndClient));
-            SetLastError(ERROR_INVALID_WINDOW_HANDLE);
-            return FALSE;
-        }
-
-        hwndChild = clientWnd->getActiveChild();
-        RELEASE_WNDOBJ(clientWnd);
-        if(!hwndChild) {
-            dprintf(("TranslateMDISysAccel NO active MDI child!!"));
-            return FALSE;
-        }
-
-        if(IsWindow(hwndChild) && !(GetWindowLongA(hwndChild,GWL_STYLE) & WS_DISABLED) )
-	    {
-    	    WPARAM	wParam = 0;
-
-	        /* translate if the Ctrl key is down and Alt not. */
-	        if( (GetKeyState(VK_CONTROL) & 0x8000) &&
-	            !(GetKeyState(VK_MENU) & 0x8000))
-	        {
-		        switch( msg->wParam )
-		        {
-		        case VK_F6:
-		        case VK_TAB:
-			        wParam = ( GetKeyState(VK_SHIFT) & 0x8000 )
-				                ? SC_NEXTWINDOW : SC_PREVWINDOW;
-			        break;
-		        case VK_F4:
-		        case VK_RBUTTON:
-			        wParam = SC_CLOSE;
-			        break;
-		        default:
-			        return 0;
-		        }
-	            SendMessageA(hwndChild, WM_SYSCOMMAND, wParam, (LPARAM)msg->wParam);
-	            return 1;
-	        }
-	    }
-    }
-    return 0; /* failure */
 }
 /**********************************************************************
  *			LoadAccelerators32W	[USER.177]

@@ -1,4 +1,4 @@
-/* $Id: window.cpp,v 1.105 2001-09-19 09:10:13 sandervl Exp $ */
+/* $Id: window.cpp,v 1.106 2001-09-19 15:39:52 sandervl Exp $ */
 /*
  * Win32 window apis for OS/2
  *
@@ -242,79 +242,6 @@ HWND WIN32API CreateFakeWindowEx(HWND hwndOS2)
         return 0;
     }
     HWND hwnd = window->getWindowHandle();
-    RELEASE_WNDOBJ(window);
-    return hwnd;
-}
-//******************************************************************************
-//******************************************************************************
-HWND WIN32API CreateMDIWindowA(LPCSTR lpszClassName, LPCSTR lpszWindowName,
-                               DWORD dwStyle, int x, int y, int nWidth,
-                               int nHeight, HWND hwndParent,
-                               HINSTANCE hInstance, LPARAM lParam )
-{
- HWND hwnd;
- MDICREATESTRUCTA cs;
- Win32BaseWindow *window;
-
-    window = Win32BaseWindow::GetWindowFromHandle(hwndParent);
-    if(!window) {
-        dprintf(("CreateMDIWindowA, window %x not found", hwndParent));
-        return 0;
-    }
-
-    cs.szClass        = lpszClassName;
-    cs.szTitle        = lpszWindowName;
-    cs.hOwner         = hInstance;
-    cs.x              = x;
-    cs.y              = y;
-    cs.cx             = nHeight;
-    cs.cy             = nWidth;
-    cs.style          = dwStyle;
-    cs.lParam         = lParam;
-
-    if(HIWORD(lpszClassName)) {
-         dprintf(("CreateMDIWindowA: class %s parent %x (%d,%d) (%d,%d), %x %x lParam=%x", lpszClassName, hwndParent, x, y, nWidth, nHeight, dwStyle, lParam));
-    }
-    else dprintf(("CreateMDIWindowA: class %d parent %x (%d,%d) (%d,%d), %x %x lParam=%x", lpszClassName, hwndParent, x, y, nWidth, nHeight, dwStyle, lParam));
-
-    hwnd = window->SendMessageA(WM_MDICREATE, 0, (LPARAM)&cs);
-    RELEASE_WNDOBJ(window);
-    return hwnd;
-}
-//******************************************************************************
-//******************************************************************************
-HWND WIN32API CreateMDIWindowW(LPCWSTR lpszClassName, LPCWSTR lpszWindowName,
-                               DWORD dwStyle, int x, int y, int nWidth,
-                               int nHeight, HWND hwndParent,
-                               HINSTANCE hInstance, LPARAM lParam )
-{
- HWND hwnd;
- MDICREATESTRUCTW cs;
- Win32BaseWindow *window;
-
-    window = Win32BaseWindow::GetWindowFromHandle(hwndParent);
-    if(!window) {
-        dprintf(("CreateMDIWindowW, window %x not found", hwndParent));
-        SetLastError(ERROR_INVALID_WINDOW_HANDLE);
-        return 0;
-    }
-
-    cs.szClass        = lpszClassName;
-    cs.szTitle        = lpszWindowName;
-    cs.hOwner         = hInstance;
-    cs.x              = x;
-    cs.y              = y;
-    cs.cx             = nHeight;
-    cs.cy             = nWidth;
-    cs.style          = dwStyle;
-    cs.lParam         = lParam;
-
-    if(HIWORD(lpszClassName)) {
-         dprintf(("CreateMDIWindowW: class %ls parent %x (%d,%d) (%d,%d), %x %x lParam=%x", lpszClassName, hwndParent, x, y, nWidth, nHeight, dwStyle, lParam));
-    }
-    else dprintf(("CreateMDIWindowW: class %d parent %x (%d,%d) (%d,%d), %x %x lParam=%x", lpszClassName, hwndParent, x, y, nWidth, nHeight, dwStyle, lParam));
-
-    hwnd = window->SendMessageW(WM_MDICREATE, 0, (LPARAM)&cs);
     RELEASE_WNDOBJ(window);
     return hwnd;
 }
