@@ -1,4 +1,4 @@
- /* $Id: changelog,v 1.129 1999-08-24 11:45:27 phaller Exp $ */
+ /* $Id: changelog,v 1.130 1999-08-24 12:25:19 sandervl Exp $ */
 
  99-08-24: Patrick Haller <phaller@gmx.net>
 	- USER32:   added extended Open32 WinX control styles (OS2CTLWX)
@@ -6,6 +6,13 @@
  99-08-24: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32\NEW: One mutex per type of generic object + mutex protection
                       of linked list access in win32 classes
+	- KERNEL32: Implemented VirtualQuery (not yet tested)
+                    VirtualQueryEx calls VirtualQuery, VirtualProtectEx calls
+                    VirtualProtect
+          NOTE: VirtualQueryEx & VirtualProtectEx can't handle addresses of other
+                processes
+	- KERNEL32: Added memory mapped file class (not hooked up to apis or
+                    exception handler yet; just committing my preliminary code)
 
  99-08-23: Sander van Leeuwen <sandervl@xs4all.nl>
 	- KERNEL32: Dll load order bugfix (PE loader)
