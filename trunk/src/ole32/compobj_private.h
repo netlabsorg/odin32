@@ -16,7 +16,6 @@
 extern HRESULT WINE_StringFromCLSID(const CLSID *id,LPSTR idstr);
 extern HRESULT create_marshalled_proxy(REFCLSID rclsid, REFIID iid, LPVOID *ppv);
 
-#ifndef __WIN32OS2__
 inline static HRESULT
 get_facbuf_for_iid(REFIID riid,IPSFactoryBuffer **facbuf) {
     HRESULT       hres;
@@ -26,7 +25,6 @@ get_facbuf_for_iid(REFIID riid,IPSFactoryBuffer **facbuf) {
 	return hres;
     return CoGetClassObject(&pxclsid,CLSCTX_INPROC_SERVER,NULL,&IID_IPSFactoryBuffer,(LPVOID*)facbuf);
 }
-#endif
 
 #define PIPEPREF "\\\\.\\pipe\\"
 #define OLESTUBMGR PIPEPREF"WINE_OLE_StubMgr"
