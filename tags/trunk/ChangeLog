@@ -1,4 +1,8 @@
- /* $Id: ChangeLog,v 1.1070 2000-08-16 08:03:32 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.1071 2000-08-17 17:09:00 cbratschi Exp $ */
+
+ 2000-08-16: Christoph Bratschi <cbratschi@datacomm.ch>
+    - COMCTL32: propsheet: workaround for PROPSHEET_GetPaddingInfoWizard
+                design issue
 
  2000-08-16: Sander van Leeuwen <sandervl@xs4all.nl>
     - KERNEL32: Changed search order for resource languages:
