@@ -1,4 +1,4 @@
-; $Id: shlwapi.def,v 1.17 2000-06-12 11:35:14 phaller Exp $
+; $Id: shlwapi.def,v 1.18 2000-08-24 09:32:43 sandervl Exp $
 
 ; updated export ordinals to NT4 SP6 version of SHLWAPI.DLL
 ; Note: W95/W98 has DIFFERENT export ordinals
@@ -105,7 +105,7 @@ EXPORTS
                              _GetWindowTextW@12                   @95
                              _GetWindowTextLengthW@4              @96
                              _GetWindowsDirectoryW@8              @97
-                             _InsertMenuW@20                      @98 ; @@@PH imcomplete
+                             _InsertMenuW@20                      @98 ; @@@PH incomplete
                              _IsDialogMessageW@8                  @99
                              _LoadAcceleratorsW@8                 @100
                              _LoadBitmapW@8                       @101
@@ -218,14 +218,14 @@ EXPORTS
     PathCanonicalizeW      = _PathCanonicalizeW@8                 @460
     PathCombineA           = _PathCombineA@12                     @461
     PathCombineW           = _PathCombineW@12                     @462
-  ; PathCommonPrefixA      = _PathCommonPrefixA@12                @463
-  ; PathCommonPrefixW      = _PathCommonPrefixW@?                 @464
-  ; PathCompactPathA       = _PathCompactPathA@12                 @465
-  ; PathCompactPathExA     = _PathCompactPathExA@12               @466
-  ; PathCompactPathExW     = _PathCompactPathExW@12               @467
-  ; PathCompactPathW       = _PathCompactPathW@12                 @468
-  ; PathCreateFromUrlA     = _PathCreateFromUrlA@?                @469
-  ; PathCreateFromUrlW     = _PathCreateFromUrlW@?                @470
+    PathCommonPrefixA      = _PathCommonPrefixA@12                @463
+    PathCommonPrefixW      = _PathCommonPrefixW@12                @464
+    PathCompactPathA       = _PathCompactPathA@12                 @465
+    PathCompactPathExA     = _PathCompactPathExA@16               @466
+    PathCompactPathExW     = _PathCompactPathExW@16               @467
+    PathCompactPathW       = _PathCompactPathW@12                 @468
+    PathCreateFromUrlA     = _PathCreateFromUrlA@16               @469
+    PathCreateFromUrlW     = _PathCreateFromUrlW@16               @470
     PathFileExistsA        = _PathFileExistsA@4                   @471
     PathFileExistsW        = _PathFileExistsW@4                   @472
     PathFindExtensionA     = _PathFindExtensionA@4                @473
@@ -240,52 +240,52 @@ EXPORTS
 ;   PathFindSuffixArrayW   = _PathFindSuffixArrayW@12             @482
     PathGetArgsA           = _PathGetArgsA@4                      @483
     PathGetArgsW           = _PathGetArgsW@4                      @484
-  ; PathGetCharTypeA       = _PathGetCharTypeA@?                  @485
-  ; PathGetCharTypeW       = _PathGetCharTypeW@?                  @486
+    PathGetCharTypeA       = _PathGetCharTypeA@4                  @485
+    PathGetCharTypeW       = _PathGetCharTypeW@4                  @486
     PathGetDriveNumberA    = _PathGetDriveNumberA@4               @487
     PathGetDriveNumberW    = _PathGetDriveNumberW@4               @488
-  ; PathIsContentTypeA     = _PathIsContentTypeA@8                @489
-  ; PathIsContentTypeW     = _PathIsContentTypeW@8                @490
+    PathIsContentTypeA     = _PathIsContentTypeA@8                @489
+    PathIsContentTypeW     = _PathIsContentTypeW@8                @490
     PathIsDirectoryA       = _PathIsDirectoryA@4                  @491
 ;   PathIsDirectoryEmptyA  = _PathIsDirectoryEmptyA@4             @492
 ;   PathIsDirectoryEmptyW  = _PathIsDirectoryEmptyW@4             @493
-  ; PathIsDirectoryW       = _PathIsDirectoryW@?                  @494
-  ; PathIsFileSpecA        = _PathIsFileSpecA@?                   @495
-  ; PathIsFileSpecW        = _PathIsFileSpecW@?                   @496
+    PathIsDirectoryW       = _PathIsDirectoryW@4                  @494
+    PathIsFileSpecA        = _PathIsFileSpecA@4                   @495
+    PathIsFileSpecW        = _PathIsFileSpecW@4                   @496
 ;   PathIsLFNFileSpecA     = _PathIsLFNFileSpecA@4                @497
 ;   PathIsLFNFileSpecW     = _PathIsLFNFileSpecW@4                @498
 ;   PathIsNetworkPathA     = _PathIsNetworkPathA@4                @499
 ;   PathIsNetworkPathW     = _PathIsNetworkPathW@4                @500
-  ; PathIsPrefixA          = _PathIsPrefixA@8                     @501
-  ; PathIsPrefixW          = _PathIsPrefixW@?                     @502
+    PathIsPrefixA          = _PathIsPrefixA@8                     @501
+    PathIsPrefixW          = _PathIsPrefixW@8                     @502
     PathIsRelativeA        = _PathIsRelativeA@4                   @503
     PathIsRelativeW        = _PathIsRelativeW@4                   @504
     PathIsRootA            = _PathIsRootA@4                       @505
     PathIsRootW            = _PathIsRootW@4                       @506
     PathIsSameRootA        = _PathIsSameRootA@8                   @507
     PathIsSameRootW        = _PathIsSameRootW@8                   @508
-  ; PathIsSystemFolderA    = _PathIsSystemFolderA@8               @509
-  ; PathIsSystemFolderW    = _PathIsSystemFolderW@8               @510
+    PathIsSystemFolderA    = _PathIsSystemFolderA@8               @509
+    PathIsSystemFolderW    = _PathIsSystemFolderW@8               @510
     PathIsUNCA             = _PathIsUNCA@4                        @511
-  ; PathIsUNCServerA       = _PathIsUNCServerA@?                  @512
-  ; PathIsUNCServerShareA  = _PathIsUNCServerShareA@?             @513
-  ; PathIsUNCServerShareW  = _PathIsUNCServerShareW@?             @514
-  ; PathIsUNCServerW       = _PathIsUNCServerW@?                  @515
+    PathIsUNCServerA       = _PathIsUNCServerA@4                  @512
+    PathIsUNCServerShareA  = _PathIsUNCServerShareA@4             @513
+    PathIsUNCServerShareW  = _PathIsUNCServerShareW@4             @514
+    PathIsUNCServerW       = _PathIsUNCServerW@4                  @515
     PathIsUNCW             = _PathIsUNCW@4                        @516
     PathIsURLA             = _PathIsURLA@4                        @517
     PathIsURLW             = _PathIsURLW@4                        @518
-  ; PathMakePrettyA        = _PathMakePrettyA@?                   @519
-  ; PathMakePrettyW        = _PathMakePrettyW@?                   @520
-  ; PathMakeSystemFolderA  = _PathMakeSystemFolderA@4             @521
-  ; PathMakeSystemFolderW  = _PathMakeSystemFolderW@4             @522
+    PathMakePrettyA        = _PathMakePrettyA@4                   @519
+    PathMakePrettyW        = _PathMakePrettyW@4                   @520
+    PathMakeSystemFolderA  = _PathMakeSystemFolderA@4             @521
+    PathMakeSystemFolderW  = _PathMakeSystemFolderW@4             @522
     PathMatchSpecA         = _PathMatchSpecA@8                    @523
     PathMatchSpecW         = _PathMatchSpecW@8                    @524
     PathParseIconLocationA = _PathParseIconLocationA@4            @525
     PathParseIconLocationW = _PathParseIconLocationW@4            @526
     PathQuoteSpacesA       = _PathQuoteSpacesA@4                  @527
     PathQuoteSpacesW       = _PathQuoteSpacesW@4                  @528
-  ; PathRelativePathToA    = _PathRelativePathToA@?               @529
-  ; PathRelativePathToW    = _PathRelativePathToW@?               @530
+    PathRelativePathToA    = _PathRelativePathToA@20              @529
+    PathRelativePathToW    = _PathRelativePathToW@20              @530
     PathRemoveArgsA        = _PathRemoveArgsA@4                   @531
     PathRemoveArgsW        = _PathRemoveArgsW@4                   @532
     PathRemoveBackslashA   = _PathRemoveBackslashA@4              @533
@@ -296,10 +296,10 @@ EXPORTS
     PathRemoveExtensionW   = _PathRemoveExtensionW@4              @538
     PathRemoveFileSpecA    = _PathRemoveFileSpecA@4               @539
     PathRemoveFileSpecW    = _PathRemoveFileSpecW@4               @540
-  ; PathRenameExtensionA   = _PathRenameExtensionA@@8             @541
-  ; PathRenameExtensionW   = _PathRenameExtensionW@?              @542
-  ; PathSearchAndQualifyA  = _PathSearchAndQualifyA@12            @543
-  ; PathSearchAndQualifyW  = _PathSearchAndQualifyW@12            @544
+    PathRenameExtensionA   = _PathRenameExtensionA@8              @541
+    PathRenameExtensionW   = _PathRenameExtensionW@8              @542
+    PathSearchAndQualifyA  = _PathSearchAndQualifyA@12            @543
+    PathSearchAndQualifyW  = _PathSearchAndQualifyW@12            @544
     PathSetDlgItemPathA    = _PathSetDlgItemPathA@12              @545
     PathSetDlgItemPathW    = _PathSetDlgItemPathW@12              @546
     PathSkipRootA          = _PathSkipRootA@4                     @547
@@ -310,23 +310,23 @@ EXPORTS
     PathStripToRootW       = _PathStripToRootW@4                  @552
 ;   PathUndecorateA        = _PathUndecorateA@4                   @553
 ;   PathUndecorateW        = _PathUndecorateW@4                   @554
-  ; PathUnmakeSystemFolderA= _PathUnmakeSystemFolderA@4           @555
-  ; PathUnmakeSystemFolderW= _PathUnmakeSystemFolderW@4           @556
+    PathUnmakeSystemFolderA= _PathUnmakeSystemFolderA@4           @555
+    PathUnmakeSystemFolderW= _PathUnmakeSystemFolderW@4           @556
     PathUnquoteSpacesA     = _PathUnquoteSpacesA@4                @557
     PathUnquoteSpacesW     = _PathUnquoteSpacesW@4                @558
 
 ;   SHAutoComplete         = _SHAutoComplete@8                    @559
   ; SHCopyKeyA             = _SHCopyKeyA@?                        @560
   ; SHCopyKeyW             = _SHCopyKeyW@?                        @561
-  ; SHCreateShellPalette   = _SHCreateShellPalette@?              @562
+    SHCreateShellPalette   = _SHCreateShellPalette@4              @562
   ; SHCreateStreamOnFileA  = _SHCreateStreamOnFileA@?             @563
   ; SHCreateStreamOnFileW  = _SHCreateStreamOnFileW@?             @564
   ; SHCreateStreamWrapper  = _SHCreateStreamWrapper@?             @565
                              _SHCreateThread@16                   @566
   ; SHDeleteEmptyKeyA      = _SHDeleteEmptyKeyA@?                 @567
   ; SHDeleteEmptyKeyW      = _SHDeleteEmptyKeyW@?                 @568
-  ; SHDeleteKeyA           = _SHDeleteKeyA@?                      @569
-  ; SHDeleteKeyW           = _SHDeleteKeyW@?                      @570
+    SHDeleteKeyA           = _SHDeleteKeyA@8                      @569
+    SHDeleteKeyW           = _SHDeleteKeyW@8                      @570
   ; SHDeleteOrphanKeyA     = _SHDeleteOrphanKeyA@?                @571
   ; SHDeleteOrphanKeyW     = _SHDeleteOrphanKeyW@?                @572
   ; SHDeleteValueA         = _SHDeleteValueA@?                    @573
@@ -341,14 +341,14 @@ EXPORTS
     SHGetValueA            = _SHGetValueA@24                      @582
     SHGetValueW            = _SHGetValueW@24                      @583
     SHIsLowMemoryMachine   = _SHIsLowMemoryMachine@4              @584
-  ; SHOpenRegStream2A      = _SHOpenRegStream2A@?                 @585
-  ; SHOpenRegStream2W      = _SHOpenRegStream2W@?                 @586
-  ; SHOpenRegStreamA       = _SHOpenRegStreamA@?                  @587
-  ; SHOpenRegStreamW       = _SHOpenRegStreamW@?                  @588
+    SHOpenRegStream2A      = _SHOpenRegStreamA@16                 @585
+    SHOpenRegStream2W      = _SHOpenRegStreamW@16                 @586
+    SHOpenRegStreamA       = _SHOpenRegStreamA@16                 @587
+    SHOpenRegStreamW       = _SHOpenRegStreamW@16                 @588
   ; SHQueryInfoKeyA        = _SHQueryInfoKeyA@?                   @589
   ; SHQueryInfoKeyW        = _SHQueryInfoKeyW@?                   @590
-  ; SHQueryValueExA        = _SHQueryValueExA@?                   @591
-  ; SHQueryValueExW        = _SHQueryValueExW@?                   @592
+    SHQueryValueExA        = _SHQueryValueExA@24                  @591
+    SHQueryValueExW        = _SHQueryValueExW@24                  @592
   ; SHRegCloseUSKey        = _SHRegCloseUSKey@?                   @593
     SHRegCreateUSKeyA      = _SHRegCreateUSKeyA@20                @594
     SHRegCreateUSKeyW      = _SHRegCreateUSKeyW@20                @595
@@ -376,30 +376,30 @@ EXPORTS
 ;   SHRegWriteUSValueA     = _SHRegWriteUSValueA@?                @617
 ;   SHRegWriteUSValueW     = _SHRegWriteUSValueW@?                @618
 ;   SHSetSetThreadRef      = _SHSetThreadRef@?                    @619
-;   SHSetValueA            = _SHSetValueA@?                       @620
+    SHSetValueA            = _SHSetValueA@24                      @620
 ;   SHSetValueW            = _SHSetValueW@?                       @621
 ;   SHSkipJunction         = _SHSkipJunction@8                    @622
 ;   SHStrDupA              = _SHStrDupA@?                         @623
 ;   SHStrDupW              = _SHStrDUpW@?                         @624
-  ; StrCSpnA               = _StrCSpnA@?                          @625
+    StrCSpnA               = _StrCSpnA@8                          @625
   ; StrCSpnIA              = _StrCSpnIA@?                         @626
   ; StrCSpnIW              = _StrCSpnIW@?                         @627
-  ; StrCSpnW               = _StrCSpnW@?                          @628
-;   StrCatBuffA            = _StrCatBuffA@?                       @629
-;   StrCatBuffW            = _StrCatBuffW@?                       @630
+    StrCSpnW               = _StrCSpnW@8                          @628
+    StrCatBuffA            = _StrCatBuffA@12                      @629
+    StrCatBuffW            = _StrCatBuffW@12                      @630
   ; StrCatA                = _StrCatA@?                                 ; not exported ?
   ; StrCatW                = _StrCatW@?                           @631
     StrChrA                = _StrChrA@8                           @632
     StrChrIA               = _StrChrIA@8                          @633
     StrChrIW               = _StrChrIW@8                          @634
     StrChrW                = _StrChrW@8                           @635
-  ; StrCmpIW               = _StrCmpIW@?                          @636
-  ; StrCmpNA               = _StrCmpNA@12                         @637
+    StrCmpIW               = _lstrcmpiW@8                         @636
+    StrCmpNA               = _StrCmpNA@12                         @637
     StrCmpNIA              = _StrCmpNIA@12                        @638
     StrCmpNIW              = _StrCmpNIW@12                        @639
-  ; StrCmpNW               = _StrCmpNW@12                         @640
-  ; StrCmpW                = _StrCmpW@?                           @641
-  ; StrCpyNW               = _StrCpyNW@?                          @642
+    StrCmpNW               = _StrCmpNW@12                         @640
+    StrCmpW                = _lstrcmpW@8                          @641
+    StrCpyNW               = _lstrcpynW@12                        @642
     StrCpyA                = _StrCpyA@8                                 ; not exported ?
     StrCpyW                = _StrCpyW@8                           @643
     StrDupA                = _StrDupA@4                           @644
@@ -429,10 +429,10 @@ EXPORTS
 ;   StrRetToStrW           = _StrRetToStrW@12                     @668
   ; StrSpnA                = _StrSpnA@?                           @669
   ; StrSpnW                = _StrSpnW@?                           @670
-  ; StrStrA                = _StrStrA@8                           @671
+    StrStrA                = _StrStrA@8                           @671
     StrStrIA               = _StrStrIA@8                          @672
     StrStrIW               = _StrStrIW@8                          @673
-  ; StrStrW                = _StrStrW@8                           @674
+    StrStrW                = _StrStrW@8                           @674
     StrToIntA              = _StrToIntA@4                         @675
   ; StrToIntExA            = _StrToIntExA@?                       @676
   ; StrToIntExW            = _StrToIntExW@?                       @677
@@ -465,53 +465,14 @@ EXPORTS
     UrlIsW                 = _UrlIsW@8                            @704
     UrlUnescapeA           = _UrlUnescapeA@16                     @705
     UrlUnescapeW           = _UrlUnescapeW@16                     @706
-;   wnsprintfA             = _wnsprintfA@16                       @707
-;   wnsprintfW             = _wnsprintfW@16                       @708
+    wnsprintfA             = _wnsprintfA                          @707
+    wnsprintfW             = _wnsprintfW                          @708
 ;   wvnsprintfA            = _wvnsprintfA@16                      @709
 ;   wvnsprintfW            = _wvnsprintfW@16                      @710
 
-; ------------------------------
-; Export for SHELL32 to catch up
-; ------------------------------
+;which ordinals??
+    StrRetToBufA           = _StrRetToBufA@16                     @800
+    StrRetToBufW           = _StrRetToBufW@16                     @801
 
-   _PathIsRootAW@4                      @1000
-   _PathBuildRootAW@8			@1001
-   _PathFindExtensionAW@4		@1002
-   _PathAddBackslashAW@4		@1003
-   _PathRemoveBlanksAW@4		@1004
-   _PathFindFileNameAW@4		@1005
-   _PathRemoveFileSpecAW@4		@1006
-   _PathAppendAW@8			@1007
-   _PathCombineAW@12			@1008
-   _PathStripPathAW@4			@1009
-   _PathIsUNCAW@4			@1010
-   _PathIsRelativeAW@4			@1011
-   _PathProcessCommandAW@16          	@1012
-   _PathParseIconLocationAW@4           @1013
-   _PathResolveAW@12                    @1014
-   _PathQualifyAW@4                     @1015
-   _PathGetArgsAW@4                     @1016
-   _PathMatchSpecAW@8                   @1017
-   _PathRemoveArgsAW@4                  @1018
-   _PathFindOnPathAW@8           	@1019
-   _PathIsSameRootAW@8 			@1020
-   _PathCleanupSpecAW@8 		@1021
-   _PathIsDirectoryAW@4                 @1022
-   _PathQuoteSpacesAW@4                 @1023
-   _PathGetExtensionAW@4                @1024
-   _PathGetShortPathAW@4		@1025
-   _PathStripToRootAW@4                 @1026
-   _PathUnquoteSpacesAW@4               @1027
-   _PathMakeUniqueNameAW@20             @1028
-   _PathSetDlgItemPathAW@12             @1029
-   _PathGetDriveNumberAW@4              @1030
-   _PathYetAnotherMakeUniqueNameAW@16   @1031
-   _PathIsExeAW@4                       @1032
-   _PathRemoveExtensionAW@4             @1033
-
-   _SHGetSpecialFolderPathAW@16         @1050
-   _SHGetSpecialFolderPathA@16          @1051
-   _SHGetSpecialFolderPathW@16          @1052
-
-   _IsLFNDriveA@4                       @1070
-
+    SHRegGetPathA          = _SHRegGetPathA@20                    @802
+    SHRegGetPathW          = _SHRegGetPathW@20                    @803
