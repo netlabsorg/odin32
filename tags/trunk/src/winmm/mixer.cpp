@@ -1,4 +1,4 @@
-/* $Id: mixer.cpp,v 1.25 2002-05-30 14:31:07 sandervl Exp $ */
+/* $Id: mixer.cpp,v 1.26 2002-07-12 08:12:29 sandervl Exp $ */
 
 /*
  * Mixer functions
@@ -506,7 +506,7 @@ MMRESULT WINAPI mixerSetControlDetails(HMIXEROBJ hmxobj, LPMIXERCONTROLDETAILS l
                                 dprintf(("OSLibMixGetRecSource failed!!"));
                                 return MIXERR_INVALCONTROL;
                             }
-                            return MMSYSERR_NOERROR;
+                            goto success;
                         }
                     }
                 }
@@ -537,7 +537,7 @@ MMRESULT WINAPI mixerSetControlDetails(HMIXEROBJ hmxobj, LPMIXERCONTROLDETAILS l
             }
             mixerControls[lpmcd->dwControlID].val[0].dwValue = dwVolumeL;
             mixerControls[lpmcd->dwControlID].val[1].dwValue = dwVolumeR;
-            return MMSYSERR_NOERROR;
+            goto success;
         }
 
         case MIXERCONTROL_CONTROLTYPE_MUTE: //assuming boolean
@@ -558,7 +558,7 @@ MMRESULT WINAPI mixerSetControlDetails(HMIXEROBJ hmxobj, LPMIXERCONTROLDETAILS l
                 return MMSYSERR_INVALPARAM;
             }
             mixerControls[lpmcd->dwControlID].val[0].dwValue = fMute;
-            return MMSYSERR_NOERROR;
+            goto success;
         }
 
         case MIXERCONTROL_CONTROLTYPE_BASS:
@@ -587,7 +587,7 @@ MMRESULT WINAPI mixerSetControlDetails(HMIXEROBJ hmxobj, LPMIXERCONTROLDETAILS l
                 return MMSYSERR_INVALPARAM;
             }
             mixerControls[lpmcd->dwControlID].val[0].dwValue = dwLevel;
-            return MMSYSERR_NOERROR;
+            goto success;
         }
         
 #ifdef DEBUG
@@ -677,6 +677,13 @@ MMRESULT WINAPI mixerSetControlDetails(HMIXEROBJ hmxobj, LPMIXERCONTROLDETAILS l
         break;
     }
     return MMSYSERR_NOTSUPPORTED;
+
+success:
+    if(pMixInfo->dwFlags & CALLBACK_WINDOW && pMixInfo->dwCallback) {
+        dprintf(("Notify window %x of control change", pMixInfo->dwCallback));
+        PostMessageA((HWND)pMixInfo->dwCallback, MM_MIXM_CONTROL_CHANGE, (WPARAM)hmxobj, (LPARAM)lpmcd->dwControlID);
+    }
+    return MMSYSERR_NOERROR;
 }
 /******************************************************************************/
 /******************************************************************************/
@@ -1527,7 +1534,9 @@ BOOL mixerInit()
 /******************************************************************************/
 /******************************************************************************/
 void mixerExit()
-{
+{ 
+    if(fMMPMAvailable == FALSE) return;
+
     OSLibMixerClose();
 }
 /******************************************************************************/
@@ -1554,6 +1563,7 @@ static MIXLINE *mixerAddSource(MIXLINE *pDestLine, DWORD dwSource)
     pline->Target.wMid           = WINMM_MIXER_CAPS_WMID;
     pline->Target.vDriverVersion = WINMM_MIXER_CAPS_VERSION;
     pline->dwSource              = nrSources;
+    OSLibMixGetLineCaps(dwSource, &pline->cChannels);
     nrSources++;
 
     switch(dwSource) {
@@ -1561,56 +1571,48 @@ static MIXLINE *mixerAddSource(MIXLINE *pDestLine, DWORD dwSource)
     case MIXER_SRC_IN_W_MONOIN:
     case MIXER_SRC_IN_L_PHONE:
     case MIXER_SRC_IN_W_PHONE:
-        pline->cChannels       = 1;
         pline->dwComponentType = MIXERLINE_COMPONENTTYPE_SRC_TELEPHONE;
         pline->Target.dwType   = MIXERLINE_TARGETTYPE_UNDEFINED;
         break;
 
     case MIXER_SRC_IN_L_MIC:
     case MIXER_SRC_IN_W_MIC:
-        pline->cChannels       = 1;
         pline->dwComponentType = MIXERLINE_COMPONENTTYPE_SRC_MICROPHONE;
         pline->Target.dwType   = MIXERLINE_TARGETTYPE_UNDEFINED;
         break;
 
     case MIXER_SRC_IN_L_LINE:
     case MIXER_SRC_IN_W_LINE:
-        pline->cChannels       = 2;
         pline->dwComponentType = MIXERLINE_COMPONENTTYPE_SRC_LINE;
         pline->Target.dwType   = MIXERLINE_TARGETTYPE_UNDEFINED;
         break;
 
     case MIXER_SRC_IN_L_CD:
     case MIXER_SRC_IN_W_CD:
-        pline->cChannels       = 2;
         pline->dwComponentType = MIXERLINE_COMPONENTTYPE_SRC_COMPACTDISC;
         pline->Target.dwType   = MIXERLINE_TARGETTYPE_UNDEFINED;
         break;
 
     case MIXER_SRC_IN_L_SPDIF:
     case MIXER_SRC_IN_W_SPDIF:
-        pline->cChannels       = 2;
         pline->dwComponentType = MIXERLINE_COMPONENTTYPE_SRC_DIGITAL;
         pline->Target.dwType   = MIXERLINE_TARGETTYPE_UNDEFINED;
         break;
 
     case MIXER_SRC_IN_L_VIDEO:
     case MIXER_SRC_IN_W_VIDEO:
-        pline->cChannels       = 2;
         pline->dwComponentType = MIXERLINE_COMPONENTTYPE_SRC_UNDEFINED;
         pline->Target.dwType   = MIXERLINE_TARGETTYPE_UNDEFINED;
         break;
 
     case MIXER_SRC_IN_L_AUX:
     case MIXER_SRC_IN_W_AUX:
-        pline->cChannels       = 2;
         pline->dwComponentType = MIXERLINE_COMPONENTTYPE_SRC_AUXILIARY;
         pline->Target.dwType   = MIXERLINE_TARGETTYPE_AUX;
         break;
 
     case MIXER_SRC_IN_L_PCM:
     case MIXER_SRC_IN_W_PCM:
-        pline->cChannels       = 2;
         pline->dwComponentType = MIXERLINE_COMPONENTTYPE_SRC_WAVEOUT;
         pline->Target.dwType   = MIXERLINE_TARGETTYPE_WAVEOUT;
         break;
@@ -1619,7 +1621,6 @@ static MIXLINE *mixerAddSource(MIXLINE *pDestLine, DWORD dwSource)
     case MIXER_SRC_IN_W_WAVETABLE:
     case MIXER_SRC_IN_L_MIDI:
     case MIXER_SRC_IN_W_MIDI:
-        pline->cChannels       = 2;
         pline->dwComponentType = MIXERLINE_COMPONENTTYPE_SRC_SYNTHESIZER;
         pline->Target.dwType   = MIXERLINE_TARGETTYPE_MIDIOUT;
         break;

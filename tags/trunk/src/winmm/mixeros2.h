@@ -1,4 +1,4 @@
-/* $Id: mixeros2.h,v 1.8 2002-05-28 17:10:02 sandervl Exp $ */
+/* $Id: mixeros2.h,v 1.9 2002-07-12 08:12:30 sandervl Exp $ */
 
 /*
  * Mixer multimedia
@@ -122,6 +122,8 @@ BOOL OSLibMixSetRecSource(DWORD dwRecSrc);
 BOOL OSLibMixGetRecSource(DWORD *pdwRecSrc);
 BOOL OSLibMixIsRecSourcePresent(DWORD dwRecSrc);
 BOOL OSLibMixGetCtrlCaps(DWORD dwControl, LONG *plMinimum, LONG *plMaximum, DWORD *pcSteps);
+BOOL OSLibMixGetLineCaps(DWORD dwControl, DWORD *pcChannels);
+BOOL OSLibGetAudioPDDName(char *pszPDDName);
 
 #ifdef __cplusplus
 }
