@@ -43,8 +43,11 @@ DEFAULT_DEBUG_CHANNEL(commdlg);
 
 #include "cdlg.h"
 
+#ifdef __WIN32OS2__
+static HBITMAP hBitmapTT = 0; 
+#else
 static HBITMAP16 hBitmapTT = 0; 
-
+#endif
 
 LRESULT WINAPI FormatCharDlgProcA(HWND hDlg, UINT uMsg, WPARAM wParam,
 				  LPARAM lParam);
