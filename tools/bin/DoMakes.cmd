@@ -1,4 +1,4 @@
-/* $Id: DoMakes.cmd,v 1.1 2001-09-30 00:24:35 bird Exp $
+/* $Id: DoMakes.cmd,v 1.2 2002-08-20 04:07:11 bird Exp $
  *
  * Rexx script which executes a given command with each of
  * the spesified makefiles using the option -f.
@@ -15,8 +15,7 @@ parse arg '"'sMakefiles'" 'sCommand
 /*
  * Color config.
  */
-if (  (value('BUILD_NOCOLOR',,'OS2ENVIRONMENT') = ''),
-    & (value('SLKRUNS',,'OS2ENVIRONMENT') = '')) then
+if ((getenv('BUILD_NOCOLORS') = '') & (getenv('SLKRUNS') = '')) then
 do
     sClrMak = '[35;1m'
     sClrErr = '[31;1m'
@@ -29,6 +28,13 @@ do
     sClrRst = ''
 end
 
+
+/*
+ * Build Pass
+ */
+sPass = getenv('_BUILD_PASS');
+if (sPass <> '') then
+    sPass = 'Pass '||sPass||' - '
 
 
 /*
@@ -54,14 +60,14 @@ do while (iStart <= length(sMakefiles))
         iStart = iEnd + 1;
         if (sMakefile = ' ' | sMakefile = '') then/* If empty directory name iterate. */
             iterate;
-        say sClrMak||'[Processing Makefile:' sMakefile']'||sClrRst;
+        say sClrMak||'['||sPass||'Processing Makefile:' sMakefile||']'||sClrRst;
         sCommand '-f' sMakefile
         if (rc <> 0) then
         do
-            say sClrErr||'[Failed rc='rc' makefile:' sMakefile']'||sClrRst;
+            say sClrErr||'['||sPass||'Failed rc='rc' makefile:' sMakefile||']'||sClrRst;
             exit(rc);
         end
-        say sClrMak||'[Successfully Processed Makefile:' sMakefile']'||sClrRst;
+        say sClrMak||'['||sPass||'Completed  Makefile:' sMakefile||']'||sClrRst;
     end
     else
         leave;                          /* No more directories left. */
@@ -72,3 +78,15 @@ end
  * Return successfully.
  */
 exit(0);
+
+
+/**
+ * Get environment variable value.
+ * @returns Environment variable value if set.
+ *          '' if not set.
+ * @param   sVar    Variable name.
+ */
+getenv: procedure
+parse arg sVar
+return value(sVar,,'OS2ENVIRONMENT');
+
