@@ -1,4 +1,4 @@
-/* $Id: lsa.cpp,v 1.3 1999-11-30 19:41:06 sandervl Exp $ */
+/* $Id: lsa.cpp,v 1.4 1999-11-30 22:07:19 sandervl Exp $ */
 
 /*
  * Win32 Security Database API functions for OS/2
@@ -79,7 +79,6 @@ typedef DWORD NTSTATUS;
 #endif
 
 #define STATUS_OBJECT_NAME_NOT_FOUND   2 // ERROR_FILE_NOT_FOUND
-#define STATUS_UNSUCCESSFUL           -3 // ERROR_GEN_FAILURE
 
 
 typedef DWORD ACCESS_MASK;
