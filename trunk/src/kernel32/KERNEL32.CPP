@@ -1,4 +1,4 @@
-/* $Id: KERNEL32.CPP,v 1.56 2000-10-04 19:36:24 sandervl Exp $ */
+/* $Id: KERNEL32.CPP,v 1.57 2000-10-26 17:21:38 sandervl Exp $ */
 
 /*
  * Win32 compatibility file functions for OS/2
@@ -177,9 +177,8 @@ UINT WIN32API GetOEMCP(VOID)
 }
 //******************************************************************************
 //******************************************************************************
-UINT WIN32API GetACP(VOID)
+ODINFUNCTION0(UINT, GetACP)
 {
-  dprintf(("KERNEL32:  GetACP\n"));
   return(O32_GetACP());
 }
 //******************************************************************************

@@ -1,4 +1,4 @@
-/* $Id: virtual.cpp,v 1.34 2000-09-18 19:26:16 sandervl Exp $ */
+/* $Id: virtual.cpp,v 1.35 2000-10-26 17:21:39 sandervl Exp $ */
 
 /*
  * Win32 virtual memory functions
@@ -27,7 +27,7 @@
 #include "mmap.h"
 #include "oslibdos.h"
 
-#define DBG_LOCALLOG	DBG_virtual
+#define DBG_LOCALLOG    DBG_virtual
 #include "dbglocal.h"
 
 ODINDEBUGCHANNEL(KERNEL32-VIRTUAL)
@@ -39,9 +39,9 @@ ODINDEBUGCHANNEL(KERNEL32-VIRTUAL)
  * Creates a named or unnamed file-mapping object for the specified file
  *
  * RETURNS
- *	Handle: Success
- *	0: Mapping object does not exist
- *	NULL: Failure
+ *  Handle: Success
+ *  0: Mapping object does not exist
+ *  NULL: Failure
  */
 HANDLE WINAPI CreateFileMappingA(
                 HFILE hFile,   /* [in] Handle of file to map */
@@ -81,8 +81,8 @@ HANDLE WINAPI CreateFileMappingW( HFILE hFile, LPSECURITY_ATTRIBUTES attr,
  * Opens a named file-mapping object.
  *
  * RETURNS
- *	Handle: Success
- *	NULL: Failure
+ *  Handle: Success
+ *  NULL: Failure
  */
 HANDLE WINAPI OpenFileMappingA(
                 DWORD access,   /* [in] Access mode */
@@ -112,8 +112,8 @@ HANDLE WINAPI OpenFileMappingW( DWORD access, BOOL inherit, LPCWSTR name)
  * Maps a view of a file into the address space
  *
  * RETURNS
- *	Starting address of mapped view
- *	NULL: Failure
+ *  Starting address of mapped view
+ *  NULL: Failure
  */
 LPVOID WINAPI MapViewOfFile(
               HANDLE mapping,  /* [in] File-mapping object to map */
@@ -133,8 +133,8 @@ LPVOID WINAPI MapViewOfFile(
  * Maps a view of a file into the address space
  *
  * RETURNS
- *	Starting address of mapped view
- *	NULL: Failure
+ *  Starting address of mapped view
+ *  NULL: Failure
  */
 LPVOID WINAPI MapViewOfFileEx(
               HANDLE handle,   /* [in] File-mapping object to map */
@@ -154,8 +154,8 @@ LPVOID WINAPI MapViewOfFileEx(
  * Writes to the disk a byte range within a mapped view of a file
  *
  * RETURNS
- *	TRUE: Success
- *	FALSE: Failure
+ *  TRUE: Success
+ *  FALSE: Failure
  */
 BOOL WINAPI FlushViewOfFile(
               LPCVOID base, /* [in] Start address of byte range to flush */
@@ -184,11 +184,11 @@ BOOL WINAPI FlushViewOfFile(
  * Unmaps a mapped view of a file.
  *
  * NOTES
- *	Should addr be an LPCVOID?
+ *  Should addr be an LPCVOID?
  *
  * RETURNS
- *	TRUE: Success
- *	FALSE: Failure
+ *  TRUE: Success
+ *  FALSE: Failure
  */
 BOOL WINAPI UnmapViewOfFile(LPVOID addr /* [in] Address where mapped view begins */
 )
@@ -215,8 +215,8 @@ BOOL WINAPI UnmapViewOfFile(LPVOID addr /* [in] Address where mapped view begins
  *             VIRTUAL_MapFileW
  *
  * Helper function to map a file to memory:
- *  name			-	file name
- *  [RETURN] ptr		-	pointer to mapped file
+ *  name            -   file name
+ *  [RETURN] ptr        -   pointer to mapped file
  */
 HANDLE WINAPI VIRTUAL_MapFileW( LPCWSTR name , LPVOID *lpMapping, BOOL fReadIntoMemory)
 {
@@ -240,8 +240,8 @@ HANDLE WINAPI VIRTUAL_MapFileW( LPCWSTR name , LPVOID *lpMapping, BOOL fReadInto
  *             VIRTUAL_MapFileA
  *
  * Helper function to map a file to memory:
- *  name			-	file name
- *  [RETURN] ptr		-	pointer to mapped file
+ *  name            -   file name
+ *  [RETURN] ptr        -   pointer to mapped file
  */
 HANDLE WINAPI VIRTUAL_MapFileA( LPCSTR name , LPVOID *lpMapping, BOOL fReadIntoMemory)
 {
@@ -276,7 +276,7 @@ ODINFUNCTION4(LPVOID, VirtualAlloc, LPVOID, lpvAddress,
 
   if (cbSize > 0x7fc00000)  /* 2Gb - 4Mb */
   {
-   	dprintf(("VirtualAlloc: size too large"));
+    dprintf(("VirtualAlloc: size too large"));
         SetLastError( ERROR_OUTOFMEMORY );
         return NULL;
   }
@@ -284,7 +284,7 @@ ODINFUNCTION4(LPVOID, VirtualAlloc, LPVOID, lpvAddress,
   if (!(fdwAllocationType & (MEM_COMMIT | MEM_RESERVE)) ||
        (fdwAllocationType & ~(MEM_COMMIT | MEM_RESERVE)))
   {
-   	dprintf(("VirtualAlloc: Invalid parameter"));
+        dprintf(("VirtualAlloc: Invalid parameter"));
         SetLastError( ERROR_INVALID_PARAMETER );
         return NULL;
   }
@@ -294,15 +294,15 @@ ODINFUNCTION4(LPVOID, VirtualAlloc, LPVOID, lpvAddress,
         dprintf(("VirtualAlloc: commit\n"));
         flag = PAG_COMMIT;
   }
-  
+
   if(fdwAllocationType & MEM_RESERVE) {
-	//SvL: DosRead crashes if memory is initially reserved with write
+    //SvL: DosRead crashes if memory is initially reserved with write
         //     access disabled (OS/2 bug) even if the commit sets the page
         //     flags to read/write:
-	// DosSetMem does not alter the 16 bit selectors so if you change memory
-	// attributes and then access the memory with a 16 bit API (such as DosRead),
-	// it will have the old (alloc time) attributes
-	flag |= PAG_READ|PAG_WRITE; 
+    // DosSetMem does not alter the 16 bit selectors so if you change memory
+    // attributes and then access the memory with a 16 bit API (such as DosRead),
+    // it will have the old (alloc time) attributes
+    flag |= PAG_READ|PAG_WRITE;
   }
   if(fdwProtect & PAGE_READONLY)     flag |= PAG_READ;
   if(fdwProtect & PAGE_NOACCESS)     flag |= PAG_READ; //can't do this in OS/2
@@ -314,7 +314,7 @@ ODINFUNCTION4(LPVOID, VirtualAlloc, LPVOID, lpvAddress,
   if(fdwProtect & PAGE_EXECUTE)      flag |= PAG_EXECUTE;
 
   if(fdwProtect & PAGE_GUARD) {
-	dprintf(("ERROR: PAGE_GUARD bit set for VirtualAlloc -> we don't support this right now!"));
+        dprintf(("ERROR: PAGE_GUARD bit set for VirtualAlloc -> we don't support this right now!"));
         flag |= PAG_GUARD;
   }
 
@@ -325,30 +325,30 @@ ODINFUNCTION4(LPVOID, VirtualAlloc, LPVOID, lpvAddress,
     flag |= PAG_READ | PAG_WRITE;
   }
 
-  if(lpvAddress) 
+  if(lpvAddress)
   {
    Win32MemMap *map;
    ULONG offset, nrpages, accessflags = 0;
 
-	nrpages = cbSize >> PAGE_SHIFT;
-	if(cbSize & 0xFFF)
-		nrpages++;
+    nrpages = cbSize >> PAGE_SHIFT;
+    if(cbSize & 0xFFF)
+        nrpages++;
 
-	if(flag & PAG_READ) {
-		accessflags |= MEMMAP_ACCESS_READ;
-	}
-	if(flag & PAG_WRITE) {
-		accessflags |= MEMMAP_ACCESS_WRITE;
-	}
-	if(flag & PAG_EXECUTE) {
-		accessflags |= MEMMAP_ACCESS_EXECUTE;
-	}
-  	map = Win32MemMapView::findMapByView((ULONG)lpvAddress, &offset, accessflags);
-  	if(map) {
-		//TODO: We don't allow protection flag changes for mmaped files now
-		map->commitPage(offset, FALSE, nrpages);
-		return lpvAddress;
-  	}
+    if(flag & PAG_READ) {
+        accessflags |= MEMMAP_ACCESS_READ;
+    }
+    if(flag & PAG_WRITE) {
+        accessflags |= MEMMAP_ACCESS_WRITE;
+    }
+    if(flag & PAG_EXECUTE) {
+        accessflags |= MEMMAP_ACCESS_EXECUTE;
+    }
+    map = Win32MemMapView::findMapByView((ULONG)lpvAddress, &offset, accessflags);
+    if(map) {
+        //TODO: We don't allow protection flag changes for mmaped files now
+        map->commitPage(offset, FALSE, nrpages);
+        return lpvAddress;
+    }
   }
 
   // commit memory
@@ -361,42 +361,67 @@ ODINFUNCTION4(LPVOID, VirtualAlloc, LPVOID, lpvAddress,
     //might try to commit larger part with same base address
     if(rc == OSLIB_ERROR_ACCESS_DENIED && cbSize > 4096 )
     { //knut: AND more than one page
-      char *newbase = (char *)lpvAddress + ((cbSize-1) & 0xFFFFF000); //knut: lets not start after the last page!
-      ULONG size, os2flags;
+        char *newbase = (char *)lpvAddress + ((cbSize-1) & 0xFFFFF000); //knut: lets not start after the last page!
+        ULONG size, os2flags;
 
-      while(newbase >= (char *)lpvAddress)
-      {  //knut: should check first page to!!
-        size     = 4096;
-        os2flags = 0;
-        rc = OSLibDosQueryMem(newbase, &size, &os2flags);
-        if(rc)
-          break;
+        while(newbase >= (char *)lpvAddress)
+        {     //knut: should check first page to!!
+            size     = 4096;
+            os2flags = 0;
+            rc = OSLibDosQueryMem(newbase, &size, &os2flags);
+            if(rc)
+                break;
 
-        if(os2flags & PAG_COMMIT)
-        {
-          newbase += 4096;
-          break;
+            if(os2flags & PAG_COMMIT)
+            {
+                newbase += 4096;
+                break;
+            }
+            newbase -= 4096;
         }
-        newbase -= 4096;
-      }
 
-      if(rc == 0)
-      {
-        //In case it wants to commit bytes that fall into the last
-        //page of the previous commit command
-        if(cbSize > ((int)newbase - (int)lpvAddress))
-          	rc = OSLibDosSetMem(newbase, cbSize - ((int)newbase - (int)lpvAddress), flag);
-      }
-      else      return(NULL);
+        if(rc == 0)
+        {
+            //In case it wants to commit bytes that fall into the last
+            //page of the previous commit command
+            if(cbSize > ((int)newbase - (int)lpvAddress))
+                rc = OSLibDosSetMem(newbase, cbSize - ((int)newbase - (int)lpvAddress), flag);
+        }
+        else  return(NULL);
 
     }
     else
     {
-      	if(rc == OSLIB_ERROR_INVALID_ADDRESS) {
-        	rc = OSLibDosAllocMem(&Address, cbSize, flag );
-	}
-      	else
-        if(rc)  dprintf(("Unexpected DosSetMem error %x", rc));
+        if(rc == OSLIB_ERROR_INVALID_ADDRESS) {
+            rc = OSLibDosAllocMem(&Address, cbSize, flag );
+        }
+        else {
+            if(rc) {
+                //check if the app tries to commit an already commited part of memory or change the protection flags
+                ULONG size = cbSize, os2flags, newrc;
+                newrc = OSLibDosQueryMem(lpvAddress, &size, &os2flags);
+                if(newrc == 0) {
+                    if(size >= cbSize && (os2flags & PAG_COMMIT)) {
+                            dprintf(("VirtualAlloc: commit on committed memory"));
+                            if((flag & (PAG_READ|PAG_WRITE|PAG_EXECUTE)) != (os2flags & (PAG_READ|PAG_WRITE|PAG_EXECUTE)))
+                            {   //change protection flags
+                                DWORD tmp;
+                                if(VirtualProtect(lpvAddress, cbSize, fdwAllocationType, &tmp) == TRUE) {
+                                    return lpvAddress;
+                                }
+                                dprintf(("ERROR: VirtualAlloc: commit on committed memory -> VirtualProtect failed!!"));
+                                return NULL;
+                            }
+                            //else everything ok
+                            return lpvAddress;
+                    }
+                    else    dprintf(("Unexpected DosSetMem error %x", rc));
+                }
+                else {
+                    dprintf(("Unexpected DosQueryMem error %x", newrc));
+                }
+            }
+        }
     }
   }
   else
@@ -445,13 +470,13 @@ ODINFUNCTION3(BOOL, VirtualFree, LPVOID, lpvAddress,
     rc = OSLibDosSetMem(lpvAddress, cbSize, PAG_DECOMMIT);
     if(rc)
     {
-	if(rc == 32803) { //SvL: ERROR_ALIAS
-      		dprintf(("KERNEL32:VirtualFree:OsLibSetMem rc = #%d; app tries to decommit aliased memory; ignore", rc));
-		return(TRUE);
-	}
-      	dprintf(("KERNEL32:VirtualFree:OsLibSetMem rc = #%d\n", rc));
-      	SetLastError(ERROR_INVALID_ADDRESS);
-	return(FALSE);
+    if(rc == 32803) { //SvL: ERROR_ALIAS
+            dprintf(("KERNEL32:VirtualFree:OsLibSetMem rc = #%d; app tries to decommit aliased memory; ignore", rc));
+        return(TRUE);
+    }
+        dprintf(("KERNEL32:VirtualFree:OsLibSetMem rc = #%d\n", rc));
+        SetLastError(ERROR_INVALID_ADDRESS);
+    return(FALSE);
     }
   }
 
@@ -491,7 +516,7 @@ ODINFUNCTION4(BOOL, VirtualProtect, LPVOID, lpvAddress,
 
   if(pfdwOldProtect == NULL) {
         dprintf(("WARNING: pfdwOldProtect == NULL"));
-  	SetLastError(ERROR_INVALID_PARAMETER);
+    SetLastError(ERROR_INVALID_PARAMETER);
         return(FALSE);
   }
 
@@ -541,10 +566,10 @@ ODINFUNCTION4(BOOL, VirtualProtect, LPVOID, lpvAddress,
 
   cb = (cbSize & 0xFFF) + offset; // !!! added, some optimization :)
   if( cb > 0 ) { // changed
-	npages++;
+    npages++;
   }
   if( cb > 4096 ) { // changed, note '>' sign ( not '>=' ) 4096 is exactly one page
-	npages++;
+    npages++;
   }
 
   lpvAddress = (LPVOID)((int)lpvAddress & ~0xFFF);
@@ -573,9 +598,9 @@ ODINFUNCTION3(DWORD, VirtualQuery, LPCVOID, lpvAddress,
 
   if(pmbiBuffer == NULL || cbLength != sizeof(MEMORY_BASIC_INFORMATION)) // check parameters
   {
-	dprintf(("WARNING: invalid parameter"));
-	SetLastError(ERROR_INVALID_PARAMETER);
-    	return 0;                             // nothing to return
+    dprintf(("WARNING: invalid parameter"));
+    SetLastError(ERROR_INVALID_PARAMETER);
+        return 0;                             // nothing to return
   }
 
   // determine exact page range
@@ -587,10 +612,10 @@ ODINFUNCTION3(DWORD, VirtualQuery, LPCVOID, lpvAddress,
                         &dAttr);
   if(rc)
   {
-    	dprintf(("VirtualQuery - OSLibDosQueryMem %x %x returned %d\n",
-             	  lpBase, cbLength, rc));
-	SetLastError(ERROR_INVALID_PARAMETER);
-    	return 0;
+        dprintf(("VirtualQuery - OSLibDosQueryMem %x %x returned %d\n",
+                  lpBase, cbLength, rc));
+    SetLastError(ERROR_INVALID_PARAMETER);
+        return 0;
   }
 
   memset(pmbiBuffer,
@@ -624,30 +649,30 @@ ODINFUNCTION3(DWORD, VirtualQuery, LPCVOID, lpvAddress,
       pmbiBuffer->State = MEM_RESERVE;
 
   if(!(dAttr & PAG_SHARED))
-    	pmbiBuffer->Type = MEM_PRIVATE;
+        pmbiBuffer->Type = MEM_PRIVATE;
 
   //TODO: This is not correct: AllocationProtect should contain the protection
   //      flags used in the initial call to VirtualAlloc
   pmbiBuffer->AllocationProtect = pmbiBuffer->Protect;
   if(dAttr & PAG_BASE) {
-    	pmbiBuffer->AllocationBase = lpBase;
+        pmbiBuffer->AllocationBase = lpBase;
   }
   else
   {
-    	while(lpBase > 0)
-    	{
-      		rc = OSLibDosQueryMem(lpBase, &cbRangeSize, &dAttr);
-	      	if(rc) {
-	         	dprintf(("VirtualQuery - OSLibDosQueryMem %x %x returned %d\n",
-	                  	  lpBase, cbLength, rc));
-	         	break;
-	      	}
-	      	if(dAttr & PAG_BASE) {
-	         	pmbiBuffer->AllocationBase = lpBase;
-	         	break;
-	      	}
-	     	lpBase = (LPVOID)((ULONG)lpBase - PAGE_SIZE);
-	}
+        while(lpBase > 0)
+        {
+            rc = OSLibDosQueryMem(lpBase, &cbRangeSize, &dAttr);
+            if(rc) {
+                dprintf(("VirtualQuery - OSLibDosQueryMem %x %x returned %d\n",
+                          lpBase, cbLength, rc));
+                break;
+            }
+            if(dAttr & PAG_BASE) {
+                pmbiBuffer->AllocationBase = lpBase;
+                break;
+            }
+            lpBase = (LPVOID)((ULONG)lpBase - PAGE_SIZE);
+    }
   }
   return sizeof(MEMORY_BASIC_INFORMATION);
 }
@@ -751,7 +776,7 @@ LPVOID VirtualAllocShared(DWORD  cbSize, DWORD  fdwAllocationType,
 
   if (cbSize > 0x7fc00000)  /* 2Gb - 4Mb */
   {
-   	dprintf(("VirtualAllocShared: size too large"));
+    dprintf(("VirtualAllocShared: size too large"));
         SetLastError( ERROR_OUTOFMEMORY );
         return NULL;
   }
@@ -759,7 +784,7 @@ LPVOID VirtualAllocShared(DWORD  cbSize, DWORD  fdwAllocationType,
   if (!(fdwAllocationType & (MEM_COMMIT | MEM_RESERVE)) ||
        (fdwAllocationType & ~(MEM_COMMIT | MEM_RESERVE)))
   {
-   	dprintf(("VirtualAllocShared: Invalid parameter"));
+    dprintf(("VirtualAllocShared: Invalid parameter"));
         SetLastError( ERROR_INVALID_PARAMETER );
         return NULL;
   }
@@ -780,7 +805,7 @@ LPVOID VirtualAllocShared(DWORD  cbSize, DWORD  fdwAllocationType,
   if(fdwProtect & PAGE_EXECUTE)      flag |= PAG_EXECUTE;
 
   if(fdwProtect & PAGE_GUARD) {
-	dprintf(("ERROR: PAGE_GUARD bit set for VirtualAllocShared -> we don't support this right now!"));
+    dprintf(("ERROR: PAGE_GUARD bit set for VirtualAllocShared -> we don't support this right now!"));
         flag |= PAG_GUARD;
   }
 

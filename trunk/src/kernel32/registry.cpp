@@ -1,4 +1,4 @@
-/* $Id: registry.cpp,v 1.6 2000-10-21 14:30:47 sandervl Exp $ */
+/* $Id: registry.cpp,v 1.7 2000-10-26 17:21:39 sandervl Exp $ */
 
 /*
  * Win32 registry API functions for OS/2
@@ -7,6 +7,9 @@
  *
  * Copyright 1998 Sander van Leeuwen
  * Copyright 1998 Patrick Haller
+ *
+ *
+ * TODO: Many unicode apis are still wrong (missing unicode conversions and wrong sizes)!!!!!
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *
@@ -438,7 +441,7 @@ ODINFUNCTION8(LONG,RegEnumKeyExW,HKEY,      arg1,
                         arg8);
   if(rc == ERROR_SUCCESS)
   {
-    astring = (char *)malloc(max(*arg4, *arg7));   //class & keyname
+    astring = (char *)malloc(max(*arg4+1, *arg7+1));   //class & keyname
     strcpy(astring, (char *)arg3);
     AsciiToUnicode(astring, arg3);
     if(arg6 != NULL)
@@ -496,32 +499,59 @@ ODINFUNCTION8(LONG,RegEnumValueA,HKEY,   arg1,
  * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
  *****************************************************************************/
 
-ODINFUNCTION8(LONG,RegEnumValueW,HKEY,   arg1,
-                                 DWORD,  arg2,
-                                 LPWSTR, arg3,
-                                 LPDWORD,arg4,
-                                 LPDWORD,arg5,
-                                 LPDWORD,arg6,
-                                 LPBYTE, arg7,
-                                 LPDWORD,arg8)
+ODINFUNCTION8(LONG,RegEnumValueW,HKEY,   hkey,
+                                 DWORD,  iValue,
+                                 LPWSTR, lpszValue,
+                                 LPDWORD,lpcchValue,
+                                 LPDWORD,lpdwReserved,
+                                 LPDWORD,lpdwType,
+                                 LPBYTE, lpbData,
+                                 LPDWORD,lpcbData)
 {
   char *astring;
-  LONG  rc;
+  LONG  rc, oldsize = 0;
 
-  rc = O32_RegEnumValue(ConvertKey(arg1),
-                        arg2,
-                        (char *)arg3,
-                        arg4,
-                        arg5,
-                        arg6,
-                        arg7,
-                        arg8);
+  if(lpcbData) {
+    oldsize = *lpcbData;
+  }
+  rc = O32_RegEnumValue(ConvertKey(hkey),
+                        iValue,
+                        (char *)lpszValue,
+                        lpcchValue,
+                        lpdwReserved,
+                        lpdwType,
+                        lpbData,
+                        lpcbData);
   if(rc == ERROR_SUCCESS)
   {
-    astring = (char *)malloc(*arg4);
-    strcpy(astring, (char *)arg3);
-    AsciiToUnicode(astring, arg3);
+    astring = (char *)malloc(*lpcchValue+1); //+ 0 terminator
+    strcpy(astring, (char *)lpszValue);
+    AsciiToUnicode(astring, lpszValue);
     free(astring);
+
+    if(lpcbData && lpbData)
+    {
+        switch(*lpdwType) {
+        case REG_SZ:
+        case REG_EXPAND_SZ:
+            if(oldsize < *lpcbData*sizeof(WCHAR)) {
+                *lpcbData = *lpcbData*sizeof(WCHAR);
+                return ERROR_MORE_DATA;
+            }
+            astring = (char *)malloc(*lpcbData);
+            strcpy(astring, (char *)lpbData);
+            lstrcpyAtoW((LPWSTR)lpbData, astring);
+            free(astring);
+            break;
+        case REG_MULTI_SZ:
+        case REG_LINK: //???
+            dprintf(("ERROR: key data must be translated from Unicode to Ascii!!"));
+            break;
+        default:
+            break;
+        }
+    }
+
   }
   return(rc);
 }
@@ -711,44 +741,45 @@ ODINFUNCTION12(LONG,RegQueryInfoKeyA,HKEY,       arg1,
  * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
  *****************************************************************************/
 
-ODINFUNCTION12(LONG,RegQueryInfoKeyW,HKEY,       arg1,
-                                      LPWSTR,     arg2,
-                                      LPDWORD,    arg3,
-                                      LPDWORD,    arg4,
-                                      LPDWORD,    arg5,
-                                      LPDWORD,    arg6,
-                                      LPDWORD,    arg7,
-                                      LPDWORD,    arg8,
-                                      LPDWORD,    arg9,
-                                      LPDWORD,    arg10,
-                                      LPDWORD,    arg11,
-                                      LPFILETIME, arg12)
+ODINFUNCTION12(LONG,RegQueryInfoKeyW,HKEY,       hkey,
+                                     LPWSTR,     lpszClass,
+                                     LPDWORD,    lpcchClass,
+                                     LPDWORD,    lpdwReserved,
+                                     LPDWORD,    lpcSubKeys,
+                                     LPDWORD,    lpcchMaxSubKey,
+                                     LPDWORD,    lpcchMaxClass,
+                                     LPDWORD,    lpcValues,
+                                     LPDWORD,    lpcchMaxValueName,
+                                     LPDWORD,    lpcbMaxValueData,
+                                     LPDWORD,    lpcbSecurityDescriptor,
+                                     LPFILETIME, lpftLastWriteTime)
 {
   char *astring;
   LONG  rc;
 
-  rc = O32_RegQueryInfoKey(ConvertKey(arg1),
-                           (char *)arg2,
-                           arg3,
-                           arg4,
-                           arg5,
-                           arg6,
-                           arg7,
-                           arg8,
-                           arg9,
-                           arg10,
-                           arg11,
-                           arg12);
+  rc = O32_RegQueryInfoKey(ConvertKey(hkey),
+                           (char *)lpszClass,
+                           lpcchClass,
+                           lpdwReserved,
+                           lpcSubKeys,
+                           lpcchMaxSubKey,
+                           lpcchMaxClass,
+                           lpcValues,
+                           lpcchMaxValueName,
+                           lpcbMaxValueData,
+                           lpcbSecurityDescriptor,
+                           lpftLastWriteTime);
   if(rc == ERROR_SUCCESS)
   {
-    if(*arg3) {
-            astring = (char *)malloc(*arg3);
-        strcpy(astring, (char *)arg2);
-            AsciiToUnicode(astring, arg2);
+    if(*lpcchClass) {
+            astring = (char *)malloc(*lpcchClass+1); //returned length does NOT include 0 terminator
+            strcpy(astring, (char *)lpszClass);
+            AsciiToUnicode(astring, lpszClass);
             free(astring);
     }
-    else    *arg2 = 0;
+    else    *lpszClass = 0;
   }
+  //TODO: lpcbMaxValueData could be wrong for string key values!!! (as it's in bytes)
   return(rc);
 }
 
@@ -807,7 +838,7 @@ ODINFUNCTION4(LONG,RegQueryValueW,HKEY,   hkey,
   if(rc == ERROR_SUCCESS)
   {
     if(pcbValue) {
-            astring2 = (char *)malloc(*pcbValue);
+            astring2 = (char *)malloc(*pcbValue);   //includes 0 terminator
             strcpy(astring2, (char *)lpszValue);
             AsciiToUnicode(astring2, lpszValue);
             free(astring2);
