@@ -1,7 +1,7 @@
-/* $Id: transform.cpp,v 1.3 2001-05-15 10:34:02 sandervl Exp $ */
+/* $Id: transform.cpp,v 1.4 2001-05-19 19:43:54 sandervl Exp $ */
 
 /*
- * GDI32 coordinate & translformation code
+ * GDI32 coordinate & transformation code
  *
  * Copyright 2000 Sander van Leeuwen (sandervl@xs4all.nl)
  *
@@ -33,6 +33,99 @@
 
 static const XFORM_W  XFORMIdentity    = { 1.0, 0.0, 0.0, 1.0, 0, 0 };
 
+//region.cpp (todo; move to header)
+LONG hdcHeight(HWND hwnd, pDCData pHps);
+LONG hdcWidth(HWND hwnd, pDCData pHps);
+
+//******************************************************************************
+//******************************************************************************
+BOOL WIN32API LPtoDP(HDC hdc, PPOINT lpPoints, int nCount)
+{
+ BOOL ret;
+ DWORD hdcwidth, hdcheight;
+ pDCData pHps;
+
+    pHps = (pDCData)OSLibGpiQueryDCData((HPS)hdc);
+    if(!pHps)
+    {
+        dprintf(("WARNING: LPtoDP %x invalid handle!!", hdc));
+        SetLastError(ERROR_INVALID_HANDLE_W);
+        return FALSE;
+    }
+
+    dprintf(("LPtoDP %x %x %d", hdc, lpPoints, nCount));
+
+    //GpiConvert doesn't like illegal values; TODO: check what NT does
+    if(nCount && lpPoints) {
+        hdcwidth  = hdcWidth(0, pHps);
+        hdcheight = hdcHeight(0, pHps);
+        for(int i=0;i<nCount;i++) {
+            dprintf(("LPtoDP in (%d,%d)", lpPoints[i].x, lpPoints[i].y));
+            if(lpPoints[i].x > hdcwidth) {
+                dprintf(("WARNING: LPtoDP correcting x value; hdcwidth = %d", hdcwidth));
+                lpPoints[i].x = 0;
+            }
+            if(lpPoints[i].y > hdcwidth) {
+                dprintf(("WARNING: LPtoDP correcting y value; hdcheight = %d", hdcheight));
+                lpPoints[i].y = 0;
+            }
+        }
+    }
+    ret = O32_LPtoDP(hdc, lpPoints, nCount);
+#ifdef DEBUG
+    if(nCount && lpPoints) {
+        for(int i=0;i<nCount;i++) {
+            dprintf(("LPtoDP out (%d,%d)", lpPoints[i].x, lpPoints[i].y));
+        }
+    }
+#endif
+    return ret;
+}
+//******************************************************************************
+//******************************************************************************
+BOOL WIN32API DPtoLP(HDC hdc, PPOINT lpPoints, int nCount)
+{
+    BOOL ret;
+    DWORD hdcwidth, hdcheight;
+    pDCData pHps;
+
+    pHps = (pDCData)OSLibGpiQueryDCData((HPS)hdc);
+    if(!pHps)
+    {
+        dprintf(("WARNING: DPtoLP %x invalid handle!!", hdc));
+        SetLastError(ERROR_INVALID_HANDLE_W);
+        return FALSE;
+    }
+
+    dprintf(("GDI32: DPtoLP %x %x %d", hdc, lpPoints, nCount));
+
+    //GpiConvert doesn't like illegal values; TODO: check what NT does
+    if(nCount && lpPoints) {
+        hdcwidth  = hdcWidth(0, pHps);
+        hdcheight = hdcHeight(0, pHps);
+        for(int i=0;i<nCount;i++) {
+            dprintf(("DPtoLP in (%d,%d)", lpPoints[i].x, lpPoints[i].y));
+            if(lpPoints[i].x > hdcwidth) {
+                dprintf(("WARNING: DPtoLP correcting x value; hdcwidth = %d", hdcwidth));
+                lpPoints[i].x = 0;
+            }
+            if(lpPoints[i].y > hdcwidth) {
+                dprintf(("WARNING: DPtoLP correcting y value; hdcheight = %d", hdcheight));
+                lpPoints[i].y = 0;
+            }
+        }
+    }
+
+    ret = O32_DPtoLP(hdc, lpPoints, nCount);
+#ifdef DEBUG
+    if(nCount && lpPoints) {
+        for(int i=0;i<nCount;i++) {
+            dprintf(("DPtoLP out (%d,%d)", lpPoints[i].x, lpPoints[i].y));
+        }
+    }
+#endif
+    return ret;
+}
 //******************************************************************************
 //******************************************************************************
 BOOL WIN32API SetWorldTransform(HDC hdc, const XFORM_W * pXform)
