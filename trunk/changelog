@@ -1,4 +1,7 @@
- /* $Id: changelog,v 1.59 1999-07-22 15:41:08 sandervl Exp $ */
+ /* $Id: changelog,v 1.60 1999-07-23 07:31:45 sandervl Exp $ */
+ 99-07-23: Edgar Buerkle <100566.557@compuserve.com>
+	- VERSION:  VerQueryValueA/W Wine implementation ported
+
  99-07-22: Przemysˆaw Dobrowolski <dobrawka@asua.org.pl>
 	- KERNEL32: Complete implementation of GetLocaleInfoA/W
 
