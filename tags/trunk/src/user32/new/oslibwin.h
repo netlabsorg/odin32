@@ -1,4 +1,4 @@
-/* $Id: oslibwin.h,v 1.16 1999-07-20 15:46:53 sandervl Exp $ */
+/* $Id: oslibwin.h,v 1.17 1999-07-24 14:01:44 sandervl Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -37,18 +37,6 @@ HWND OSLibWinQueryFocus(HWND hwndDeskTop);
 HWND OSLibWinWindowFromID(HWND hwndParent,ULONG id);
 BOOL OSLibWinSetFocus(HWND hwndDeskTop,HWND hwndNewFocus);
 ULONG OSLibGetWindowHeight(HWND hwnd); //for point transformation
-
-typedef struct _OSRECTL
-{
-  LONG xLeft;
-  LONG yBottom;
-  LONG xRight;
-  LONG yTop;
-} OSRECTL;
-
-typedef OSRECTL *POSRECTL;
-
-BOOL OSLibWinInvalidateRect(HWND hwnd,POSRECTL pwrc,BOOL fIncludeChildren); //must be RECTL pointer!
 
 //reserved deleted
 
@@ -181,7 +169,7 @@ BOOL  OSLibWinSetWindowPos(HWND hwnd, HWND hwndInsertBehind, LONG x, LONG y, LON
 BOOL  OSLibWinShowWindow(HWND hwnd, ULONG fl);
 
 BOOL  OSLibWinDestroyWindow(HWND hwnd);
-BOOL  OSLibWinQueryUpdateRect(HWND hwnd, PVOID pRect);
+
 BOOL  OSLibWinIsIconic(HWND hwnd);
 BOOL  OSLibWinSetActiveWindow(HWND hwnd);
 BOOL  OSLibWinSetFocus(HWND hwnd);
@@ -189,6 +177,11 @@ BOOL  OSLibWinEnableWindow(HWND hwnd, BOOL fEnable);
 BOOL  OSLibWinIsWindowEnabled(HWND hwnd);
 BOOL  OSLibWinIsWindowVisible(HWND hwnd);
 BOOL  OSLibWinQueryActiveWindow();
+
+
+#define RELATIVE_TO_WINDOW 0
+#define RELATIVE_TO_SCREEN 1
+BOOL  OSLibWinQueryWindowRect(HWND hwnd, PRECT pRect, int RelativeTo = RELATIVE_TO_WINDOW);
 
 #define QWOS_NEXT         0
 #define QWOS_PREV         1

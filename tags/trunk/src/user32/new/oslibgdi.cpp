@@ -1,4 +1,4 @@
-/* $Id: oslibgdi.cpp,v 1.4 1999-07-20 07:42:35 sandervl Exp $ */
+/* $Id: oslibgdi.cpp,v 1.5 1999-07-24 14:01:44 sandervl Exp $ */
 /*
  * Window GDI wrapper functions for OS/2
  *
@@ -48,12 +48,47 @@ BOOL MapOS2ToWin32Point(HWND hwndParent, HWND hwndChild, OSLIBPOINT *point)
     if(hwndParent == OSLIB_HWND_DESKTOP) {
         hwndParent = HWND_DESKTOP;
     }
-    if(WinMapWindowPoints(hwndChild, hwndParent, (POINTL *)point, 1) != 0) {
+    if(WinMapWindowPoints(hwndChild, hwndParent, (POINTL *)point, 1) != TRUE) {
         dprintf(("MapOS2ToWin32Point:WinMapWindowPoint %x %x returned false", hwndParent, hwndChild));
         return FALSE;
     }
     WinQueryWindowRect(hwndParent, (PRECTL)&rectParent);
     point->y = rectParent.yTop - point->y - 1;
+    return TRUE;
+}
+//******************************************************************************
+// MapOS2ToWin32Rect
+//   Map os/2 rectangle to screen coordinates and convert to win32 rect
+//
+// Parameters:
+//   hwndParent: Parent window handle
+//   hwndChild:  Child window handle
+//   rectOS2:    OS/2 child window RECTL
+//   rectWin32:  Win32 Child window RECT   (IN)
+//
+// Returns:
+//   TRUE:      Success
+//   FALSE:     Failures
+//******************************************************************************
+BOOL MapOS2ToWin32Rectl(HWND hwndParent, HWND hwndChild, PRECTLOS2 rectOS2, PRECT rectWin32)
+{
+ RECTLOS2 rectParent = {0};
+
+    if(hwndParent == OSLIB_HWND_DESKTOP) {
+        hwndParent = HWND_DESKTOP;
+    }
+    if(WinMapWindowPoints(hwndChild, hwndParent, (PPOINTL)rectOS2, 2) != TRUE) {
+        dprintf(("MapOS2ToWin32Rect:WinMapWindowPoint %x %x returned false", hwndParent, hwndChild));
+        return FALSE;
+    }
+
+    ULONG length = rectOS2->yTop - rectOS2->yBottom;
+
+    rectWin32->bottom = length - rectOS2->yBottom;
+    rectWin32->top    = length - rectOS2->yTop;
+    rectWin32->left   = rectOS2->xLeft;
+    rectWin32->right  = rectOS2->xRight;
+
     return TRUE;
 }
 //******************************************************************************
@@ -133,3 +168,28 @@ BOOL OSLibWinReleasePS(HDC hdc)
 }
 //******************************************************************************
 //******************************************************************************
+BOOL OSLibWinInvalidateRect(HWND hwnd, PRECT pRect, BOOL fIncludeChildren)
+{
+ RECTLOS2 rectl;
+
+  MapWin32ToOS2Rectl(pRect, &rectl);
+  return WinInvalidateRect(hwnd, (PRECTL)&rectl, fIncludeChildren);
+}
+//******************************************************************************
+//Returns rectangle in Win32 window coordinates
+//******************************************************************************
+BOOL OSLibWinQueryUpdateRect(HWND hwnd, PRECT pRect)
+{
+ BOOL rc;
+ RECTLOS2 rectl;
+
+  rc = WinQueryUpdateRect(hwnd, (PRECTL)&rectl);
+  if(rc) {
+        MapOS2ToWin32Rectl(&rectl, pRect);
+  }
+  else  memset(pRect, 0, sizeof(RECT));
+  return rc;
+}
+//******************************************************************************
+//******************************************************************************
+

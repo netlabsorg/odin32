@@ -1,4 +1,4 @@
-/* $Id: win32wnd.cpp,v 1.19 1999-07-24 12:39:53 sandervl Exp $ */
+/* $Id: win32wnd.cpp,v 1.20 1999-07-24 14:01:45 sandervl Exp $ */
 /*
  * Win32 Window Code for OS/2
  *
@@ -707,6 +707,7 @@ ULONG Win32Window::MsgCommand(ULONG cmd, ULONG Id, HWND hwnd)
         dprintf(("accelerator command"));
         return 0; //todo
   }
+  return 0;
 }
 //******************************************************************************
 //******************************************************************************
@@ -1408,31 +1409,31 @@ BOOL Win32Window::IsWindow()
 //******************************************************************************
 BOOL Win32Window::IsWindowEnabled()
 {
-  return OSLibWinIsWindowEnabled(OS2Hwnd);
+    return OSLibWinIsWindowEnabled(OS2Hwnd);
 }
 //******************************************************************************
 //******************************************************************************
 BOOL Win32Window::IsWindowVisible()
 {
-  return OSLibWinIsWindowVisible(OS2Hwnd);
+    return OSLibWinIsWindowVisible(OS2Hwnd);
 }
 //******************************************************************************
 //******************************************************************************
 BOOL Win32Window::GetWindowRect(PRECT pRect)
 {
-//  return OSLibWinIsWindowVisible(OS2Hwnd);
+    return OSLibWinQueryWindowRect(OS2Hwnd, pRect, RELATIVE_TO_SCREEN);
 }
 //******************************************************************************
 //******************************************************************************
 int Win32Window::GetWindowTextLengthA()
 {
-  return OSLibWinQueryWindowTextLength(OS2Hwnd);
+    return OSLibWinQueryWindowTextLength(OS2Hwnd);
 }
 //******************************************************************************
 //******************************************************************************
 int Win32Window::GetWindowTextA(LPSTR lpsz, int cch)
 {
-  return OSLibWinQueryWindowText(OS2Hwnd, cch, lpsz);
+    return OSLibWinQueryWindowText(OS2Hwnd, cch, lpsz);
 }
 //******************************************************************************
 //******************************************************************************

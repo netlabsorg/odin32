@@ -1,4 +1,4 @@
-/* $Id: window.cpp,v 1.8 1999-07-23 19:09:25 cbratschi Exp $ */
+/* $Id: window.cpp,v 1.9 1999-07-24 14:01:45 sandervl Exp $ */
 /*
  * Win32 window apis for OS/2
  *
@@ -19,6 +19,7 @@
 #include <misc.h>
 #include <win32wnd.h>
 #include <oslibwin.h>
+#include <oslibgdi.h>
 #include "user32.h"
 #include "icon.h"
 #include "usrcall.h"
@@ -587,13 +588,14 @@ BOOL WIN32API SetForegroundWindow(HWND arg1)
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API GetClientRect( HWND arg1, PRECT  arg2)
+BOOL WIN32API GetClientRect( HWND hwnd, PRECT pRect)
 {
 #ifdef DEBUG
-    WriteLog("USER32:  GetClientRect of %X\n", arg1);
+    WriteLog("USER32:  GetClientRect of %X\n", hwnd);
 #endif
-    arg1 = Win32Window::Win32ToOS2Handle(arg1);
-    return O32_GetClientRect(arg1, arg2);
+    hwnd = Win32Window::Win32ToOS2Handle(hwnd);
+    return OSLibWinQueryWindowRect(hwnd, pRect);
+//    return O32_GetClientRect(hwnd, arg2);
 }
 //******************************************************************************
 //******************************************************************************
@@ -859,7 +861,25 @@ BOOL WIN32API GetUpdateRect( HWND hwnd, PRECT lpRect, BOOL  bErase)
     dprintf(("GetUpdateRect %x %d\n", hwnd, bErase));
     if (!lpRect) return FALSE;
 
-    return OSLibWinQueryUpdateRect(Win32Window::Win32ToOS2Handle(hwnd), (PVOID)&lpRect);
+    return OSLibWinQueryUpdateRect(Win32Window::Win32ToOS2Handle(hwnd), lpRect);
+}
+//******************************************************************************
+//******************************************************************************
+BOOL WIN32API InvalidateRect(HWND hWnd, const RECT *lpRect, BOOL bErase)
+{
+#ifdef DEBUG
+    if(lpRect)
+         WriteLog("USER32:  InvalidateRect for window %X (%d,%d)(%d,%d) %d\n", hWnd, lpRect->left, lpRect->top, lpRect->right, lpRect->bottom, bErase);
+    else WriteLog("USER32:  InvalidateRect for window %X NULL, %d\n", hWnd, bErase);
+#endif
+
+    //CB: bErase no quite the same
+    hWnd = Win32Window::Win32ToOS2Handle(hWnd);
+    if (lpRect)
+    {
+      	 return OSLibWinInvalidateRect(hWnd, (PRECT)lpRect, bErase);
+    } 
+    else return OSLibWinInvalidateRect(hWnd,NULL,bErase);
 }
 //******************************************************************************
 //******************************************************************************
