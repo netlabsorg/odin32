@@ -1,4 +1,4 @@
-/* $Id: initsystem.cpp,v 1.11 2000-08-01 23:20:29 sandervl Exp $ */
+/* $Id: initsystem.cpp,v 1.12 2000-08-18 18:16:33 sandervl Exp $ */
 /*
  * Odin system initialization (registry, directories & environment)
  *
@@ -65,6 +65,11 @@
 #define DIR_PROGRAM             "ProgramFilesDir"
 #define DIR_PROGRAM_COMMON	"CommonFilesDir"
 #define DIR_SHARED              "SharedDir"
+#define HARDWARE_VIDEO_GRADD    "\\REGISTRY\\Machine\\System\\CurrentControlSet\\Services\\Gradd\\Device0"
+#define HARDWARE_VIDEO_GRADD_DESCRIPTION "OS/2 Display driver"
+#define HARDWARE_VIDEO_VGA      "\\REGISTRY\\Machine\\System\\CurrentControlSet\\Services\\VgaSave\\Device0"
+#define HARDWARE_VIDEO_VGA_DESCRIPTION   "OS/2 VGA Display driver"
+#define HARDWARE_VIDEO_COMPATIBLE "\\Device\\Video1"
 
 //******************************************************************************
 //******************************************************************************
@@ -345,6 +350,30 @@ BOOL InitSystemAndRegistry()
 
    RegCloseKey(hkey);
 
+   //[HKEY_LOCAL_MACHINE\HARDWARE\DEVICEMAP\VIDEO]
+   //"\\Device\\Video0"="\\REGISTRY\\Machine\\System\\ControlSet001\\Services\\mga64\\Device0"
+   //"\\Device\\Video1"="\\REGISTRY\\Machine\\System\\ControlSet001\\Services\\VgaSave\\Device0"
+   //"VgaCompatible"="\\Device\\Video1"
+   if(RegCreateKeyA(HKEY_LOCAL_MACHINE,"HARDWARE\\DEVICEMAP\\VIDEO",&hkey)!=ERROR_SUCCESS) {
+   	goto initreg_error;
+   }
+   RegSetValueExA(hkey,"\\Device\\Video0",0,REG_SZ, (LPBYTE)HARDWARE_VIDEO_GRADD, sizeof(HARDWARE_VIDEO_GRADD));
+   RegSetValueExA(hkey,"\\Device\\Video1",0,REG_SZ, (LPBYTE)HARDWARE_VIDEO_VGA, sizeof(HARDWARE_VIDEO_VGA));
+   RegSetValueExA(hkey, "VgaCompatible", 0,REG_SZ, (LPBYTE)HARDWARE_VIDEO_COMPATIBLE, sizeof(HARDWARE_VIDEO_COMPATIBLE));
+   RegCloseKey(hkey);
+
+   if(RegCreateKeyA(HKEY_LOCAL_MACHINE,"SYSTEM\\CurrentControlSet\\Services\\Gradd\\Device0",&hkey)!=ERROR_SUCCESS) {
+   	goto initreg_error;
+   }
+   RegSetValueExA(hkey,"Device Description", 0, REG_SZ, (LPBYTE)HARDWARE_VIDEO_GRADD_DESCRIPTION, sizeof(HARDWARE_VIDEO_GRADD_DESCRIPTION));
+   RegCloseKey(hkey);
+
+   if(RegCreateKeyA(HKEY_LOCAL_MACHINE,"SYSTEM\\CurrentControlSet\\Services\\VgaSave\\Device0",&hkey)!=ERROR_SUCCESS) {
+   	goto initreg_error;
+   }
+   RegSetValueExA(hkey,"Device Description", 0, REG_SZ, (LPBYTE)HARDWARE_VIDEO_VGA_DESCRIPTION, sizeof(HARDWARE_VIDEO_VGA_DESCRIPTION));
+   RegCloseKey(hkey);
+  
    return TRUE;
 
 initreg_error:
