@@ -1,4 +1,4 @@
-# $Id: setup.os2prfvac365.mk,v 1.9 2002-05-16 11:37:03 bird Exp $
+# $Id: setup.os2prfvac365.mk,v 1.10 2002-08-20 05:52:05 bird Exp $
 
 # ---OS2, PROFILE, VAC365-------------------------
 ENV_NAME="OS/2, Profile, IBM VisualAge for C++ 3.6.5"
@@ -54,7 +54,7 @@ CC_PC_2_STDOUT=/Pd+ /P+
 CXX_FLAGS=/Q /DDEBUG /DOS2 /D__i386__ /DMODEL=FLAT /Ti+ /O- /Gh+ /Ss+ /C+ $(_CXX_OPTIONAL) $(CXX_DEFINES) $(ALL_DEFINES) $(BUILD_DEFINES) $(CXX_INCLUDES) $(ALL_INCLUDES) /I$(PATH_INCLUDES)
 CXX_FLAGS_EXE=$(CXX_FLAGS) /Gm+ /Ge+
 CXX_FLAGS_DLL=$(CXX_FLAGS) /Gm+ /Ge-
-CXX_FLAGS_SYS=$(CXX_FLAGS) /Rn  /Ge+ /DRING0 /Gr+ /Gs- /Tm- /Wall+ppt-ppc-inl-cnv-gnr-vft- /Gx+
+CXX_FLAGS_SYS=$(CXX_FLAGS) /Rn  /Ge+ /DRING0 /Gr+ /Gs- /Wall+ppt-ppc-inl-cnv-gnr-vft- /Gx+
 CXX_FLAGS_VDD=$(CXX_FLAGS_SYS)
 CXX_FLAGS_IFS=$(CXX_FLAGS_SYS) /Ge-
 CXX_OBJ_OUT=/Fo
