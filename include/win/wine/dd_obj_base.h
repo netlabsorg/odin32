@@ -1,4 +1,4 @@
-/* $Id: dd_obj_base.h,v 1.1 1999-06-26 11:43:12 achimha Exp $ */
+/* $Id: dd_obj_base.h,v 1.2 1999-07-07 07:57:37 phaller Exp $ */
 /*
  * This file defines the macros and types necessary to define COM interfaces,
  * and the three most basic COM interfaces: IUnknown, IMalloc and IClassFactory.
@@ -312,19 +312,19 @@ inline BOOL operator!=(const GUID& guidOne, const GUID& guidOther)
 #define ICOM_METHOD(ret,xfn) \
     ret (CALLBACK *##xfn)(ICOM_INTERFACE* me);
 
-#define ICOM_METHOD1(ret,xfn,ta,na) \
+#define ICOM_METHOD1(ret,xfn,ta,a) \
     ret (CALLBACK *##xfn)(ICOM_INTERFACE* me,ta a);
 
-#define ICOM_METHOD2(ret,xfn,ta,na,tb,nb) \
+#define ICOM_METHOD2(ret,xfn,ta,a,tb,b) \
     ret (CALLBACK *##xfn)(ICOM_INTERFACE* me,ta a,tb b);
 
-#define ICOM_METHOD3(ret,xfn,ta,na,tb,nb,tc,nc) \
+#define ICOM_METHOD3(ret,xfn,ta,a,tb,b,tc,c) \
     ret (CALLBACK *##xfn)(ICOM_INTERFACE* me,ta a,tb b,tc c);
 
-#define ICOM_METHOD4(ret,xfn,ta,na,tb,nb,tc,nc,td,nd) \
+#define ICOM_METHOD4(ret,xfn,ta,a,tb,b,tc,c,td,d) \
     ret (CALLBACK *##xfn)(ICOM_INTERFACE* me,ta a,tb b,tc c,td d);
 
-#define ICOM_METHOD5(ret,xfn,ta,na,tb,nb,tc,nc,td,nd,te,ne) \
+#define ICOM_METHOD5(ret,xfn,ta,a,tb,b,tc,c,td,d,te,e) \
     ret (CALLBACK *##xfn)(ICOM_INTERFACE* me,ta a,tb b,tc c,td d,te e);
 
 #define ICOM_METHOD6(ret,xfn,ta,na,tb,nb,tc,nc,td,nd,te,ne,tf,nf) \

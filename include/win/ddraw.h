@@ -1,4 +1,4 @@
-/* $Id: ddraw.h,v 1.2 1999-06-26 11:43:12 achimha Exp $ */
+/* $Id: ddraw.h,v 1.3 1999-07-07 07:57:36 phaller Exp $ */
 
 #ifndef __WINE_DDRAW_H
   #define __WINE_DDRAW_H
@@ -1270,10 +1270,10 @@ ICOM_DEFINE(IDirectDraw2,IUnknown)
     /* added in v2 */ \
     ICOM_METHOD3(HRESULT,GetAvailableVidMem, LPDDSCAPS2,lpDDCaps, LPDWORD,lpdwTotal, LPDWORD,lpdwFree)\
     /* Added with V */ \
-    ICOM_METHOD2(HRESULT,GetSurfaceFromDC,    HDC,, LPDIRECTDRAWSURFACE4*,) \
+    ICOM_METHOD2(HRESULT,GetSurfaceFromDC,    HDC,hDC, LPDIRECTDRAWSURFACE4*,lpSurface) \
     ICOM_METHOD (HRESULT,RestoreAllSurfaces) \
     ICOM_METHOD (HRESULT,TestCooperativeLevel) \
-    ICOM_METHOD2(HRESULT,GetDeviceIdentifier, LPDDDEVICEIDENTIFIER,, DWORD,)
+    ICOM_METHOD2(HRESULT,GetDeviceIdentifier, LPDDDEVICEIDENTIFIER, lpArg1, DWORD, dwArg2)
 #define IDirectDraw4_IMETHODS \
     IUnknown_IMETHODS \
     IDirectDraw4_METHODS
@@ -1654,10 +1654,10 @@ ICOM_DEFINE(IDirectDrawSurface3,IUnknown)
     /* added in v3 */ \
     ICOM_METHOD2(HRESULT,SetSurfaceDesc, LPDDSURFACEDESC2,lpDDSD, DWORD,dwFlags) \
     /* added in v4 */ \
-    ICOM_METHOD4(HRESULT,SetPrivateData,       REFGUID,, LPVOID,, DWORD,, DWORD,) \
-    ICOM_METHOD3(HRESULT,GetPrivateData,       REFGUID,, LPVOID,, LPDWORD,) \
-    ICOM_METHOD1(HRESULT,FreePrivateData,      REFGUID,) \
-    ICOM_METHOD1(HRESULT,GetUniquenessValue,   LPDWORD,) \
+    ICOM_METHOD4(HRESULT,SetPrivateData,       REFGUID,arg1, LPVOID,arg2, DWORD,arg3, DWORD,arg4) \
+    ICOM_METHOD3(HRESULT,GetPrivateData,       REFGUID,arg1, LPVOID,arg2, LPDWORD,arg3) \
+    ICOM_METHOD1(HRESULT,FreePrivateData,      REFGUID,arg1) \
+    ICOM_METHOD1(HRESULT,GetUniquenessValue,   LPDWORD,arg1) \
     ICOM_METHOD (HRESULT,ChangeUniquenessValue)
 #define IDirectDrawSurface4_IMETHODS \
     IUnknown_IMETHODS \
