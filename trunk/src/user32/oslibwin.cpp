@@ -1,4 +1,4 @@
-/* $Id: oslibwin.cpp,v 1.66 2000-02-05 14:08:53 sandervl Exp $ */
+/* $Id: oslibwin.cpp,v 1.67 2000-02-05 19:45:16 cbratschi Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -50,7 +50,7 @@ BOOL OSLibWinSetOwner(HWND hwnd, HWND hwndOwner)
 //******************************************************************************
 HWND OSLibWinCreateWindow(HWND hwndParent,ULONG dwWinStyle,
                           char *pszName, HWND Owner, ULONG fHWND_BOTTOM, HWND *hwndFrame,
-                          ULONG id, BOOL fTaskList,BOOL saveBits)
+                          ULONG id, BOOL fTaskList,BOOL fShellPosition,BOOL saveBits)
 {
  HWND  hwndClient;
 
@@ -80,6 +80,7 @@ HWND OSLibWinCreateWindow(HWND hwndParent,ULONG dwWinStyle,
   {
     dwFrameStyle |= FCF_TASKLIST | FCF_NOMOVEWITHOWNER;
   }
+  if (fShellPosition) dwFrameStyle |= FCF_SHELLPOSITION;
 
   dwWinStyle &= ~WS_CLIPCHILDREN;
   FCData.flCreateFlags = dwFrameStyle;
@@ -101,7 +102,7 @@ HWND OSLibWinCreateWindow(HWND hwndParent,ULONG dwWinStyle,
 }
 //******************************************************************************
 //******************************************************************************
-BOOL OSLibWinConvertStyle(ULONG dwStyle, ULONG *dwExStyle, ULONG *OSWinStyle)
+BOOL OSLibWinConvertStyle(ULONG dwStyle, ULONG dwExStyle, ULONG *OSWinStyle)
 {
   *OSWinStyle   = 0;
 
@@ -911,7 +912,7 @@ void OSLibSetWindowStyle(HWND hwnd, ULONG dwStyle, ULONG dwExStyle, BOOL saveBit
 {
   ULONG dwWinStyle;
 
-  OSLibWinConvertStyle(dwStyle, &dwExStyle, &dwWinStyle);
+  OSLibWinConvertStyle(dwStyle, dwExStyle, &dwWinStyle);
 
   dwWinStyle = dwWinStyle & ~(WS_TABSTOP | WS_GROUP | WS_CLIPCHILDREN);
   if(saveBits) dwWinStyle |= WS_SAVEBITS;

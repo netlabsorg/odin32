@@ -1,4 +1,4 @@
-/* $Id: edit.cpp,v 1.31 2000-01-18 20:10:35 sandervl Exp $ */
+/* $Id: edit.cpp,v 1.32 2000-02-05 19:45:15 cbratschi Exp $ */
 /*
  *      Edit control
  *
@@ -3776,7 +3776,7 @@ static VOID EDIT_Refresh(HWND hwnd,EDITSTATE *es,BOOL useCache)
     return;
   }
 
-  //CB: original controls redraws many times, cache drawing
+  //CB: original control redraws many times, cache drawing
   HideCaret(hwnd);
   GetClientRect(hwnd,&rect);
   hdc = GetDC(hwnd);
