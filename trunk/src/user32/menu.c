@@ -1206,7 +1206,7 @@ static void MENU_DrawMenuItem( HWND hwnd, HMENU hmenu, HWND hwndOwner, HDC hdc, 
         dis.itemData  = (DWORD)lpitem->dwItemData;
         dis.itemState = 0;
         if (lpitem->fState & MF_CHECKED) dis.itemState |= ODS_CHECKED;
-        if (lpitem->fState & MF_GRAYED)  dis.itemState |= ODS_GRAYED;
+        if (lpitem->fState & MF_GRAYED)  dis.itemState |= ODS_GRAYED|ODS_DISABLED;
         if (lpitem->fState & MF_HILITE)  dis.itemState |= ODS_SELECTED;
         dis.itemAction = odaction; /* ODA_DRAWENTIRE | ODA_SELECT | ODA_FOCUS; */
         dis.hwndItem   = (HWND)hmenu;
@@ -1971,8 +1971,6 @@ static LPCSTR MENU_ParseResource( LPCSTR res, HMENU hMenu, BOOL unicode )
             id = GET_WORD(res);
             res += sizeof(WORD);
         }
-        if (!IS_STRING_ITEM(flags))
-            ERR("not a string item %04x\n", flags );
         str = res;
         if (!unicode) res += strlen(str) + 1;
         else res += (strlenW((LPCWSTR)str) + 1) * sizeof(WCHAR);
@@ -2037,10 +2035,16 @@ static LPCSTR MENUEX_ParseResource( LPCSTR res, HMENU hMenu)
 	    if (!(res = MENUEX_ParseResource(res, mii.hSubMenu))) {
 		DestroyMenu(mii.hSubMenu);
                 return NULL;
-        }
+            }
 	    mii.fMask |= MIIM_SUBMENU;
 	    mii.fType |= MF_POPUP;
         }
+	else if(!*mii.dwTypeData && !(mii.fType & MF_SEPARATOR))
+	{
+	    WARN("Converting NULL menu item %04x, type %04x to SEPARATOR\n",
+		mii.wID, mii.fType);
+	    mii.fType |= MF_SEPARATOR;
+	}
 	InsertMenuItemW(hMenu, -1, MF_BYPOSITION, &mii);
     } while (!(resinfo & MF_END));
     return res;
@@ -2822,14 +2826,12 @@ static INT MENU_TrackMenu( HMENU hmenu, UINT wFlags, INT x, INT y,
 	if ((msg.message >= WM_MOUSEFIRST) && (msg.message <= WM_MOUSELAST))
 	{
             /*
-             * use the mouse coordinates in lParam instead of those in the MSG
-             * struct to properly handle synthetic messages. lParam coords are
-             * relative to client area, so they must be converted; since they can
-             * be negative, we must use SLOWORD/SHIWORD instead of LOWORD/HIWORD.
+             * Use the mouse coordinates in lParam instead of those in the MSG
+             * struct to properly handle synthetic messages. They are already
+             * in screen coordinates.
              */
             mt.pt.x = SLOWORD(msg.lParam);
             mt.pt.y = SHIWORD(msg.lParam);
-            ClientToScreen(msg.hwnd,&mt.pt);
 
 	    /* Find a menu for this mouse event */
 	    hmenu = MENU_PtMenu( mt.hTopMenu, mt.pt );
@@ -3332,32 +3334,6 @@ UINT MENU_GetMenuBarHeight( HWND hwnd, UINT menubarWidth,
 
 
 /*******************************************************************
- *         ChangeMenu    (USER.153)
- */
-BOOL16 WINAPI ChangeMenu16( HMENU16 hMenu, UINT16 pos, SEGPTR data,
-                            UINT16 id, UINT16 flags )
-{
-    TRACE("menu=%04x pos=%d data=%08lx id=%04x flags=%04x\n",
-                  hMenu, pos, (DWORD)data, id, flags );
-    if (flags & MF_APPEND) return AppendMenu16( hMenu, flags & ~MF_APPEND,
-                                                id, data );
-
-    /* FIXME: Word passes the item id in 'pos' and 0 or 0xffff as id */
-    /* for MF_DELETE. We should check the parameters for all others */
-    /* MF_* actions also (anybody got a doc on ChangeMenu?). */
-
-    if (flags & MF_DELETE) return DeleteMenu16(hMenu, pos, flags & ~MF_DELETE);
-    if (flags & MF_CHANGE) return ModifyMenu16(hMenu, pos, flags & ~MF_CHANGE,
-                                               id, data );
-    if (flags & MF_REMOVE) return RemoveMenu16(hMenu,
-                                              flags & MF_BYPOSITION ? pos : id,
-                                              flags & ~MF_REMOVE );
-    /* Default: MF_INSERT */
-    return InsertMenu16( hMenu, pos, flags, id, data );
-}
-
-
-/*******************************************************************
  *         ChangeMenuA    (USER32.@)
  */
 BOOL WINAPI ChangeMenuA( HMENU hMenu, UINT pos, LPCSTR data,
@@ -3400,15 +3376,6 @@ BOOL WINAPI ChangeMenuW( HMENU hMenu, UINT pos, LPCWSTR data,
 
 
 /*******************************************************************
- *         CheckMenuItem    (USER.154)
- */
-BOOL16 WINAPI CheckMenuItem16( HMENU16 hMenu, UINT16 id, UINT16 flags )
-{
-    return (BOOL16)CheckMenuItem( hMenu, id, flags );
-}
-
-
-/*******************************************************************
  *         CheckMenuItem    (USER32.@)
  */
 DWORD WINAPI CheckMenuItem( HMENU hMenu, UINT id, UINT flags )
@@ -3422,15 +3389,6 @@ DWORD WINAPI CheckMenuItem( HMENU hMenu, UINT id, UINT flags )
     if (flags & MF_CHECKED) item->fState |= MF_CHECKED;
     else item->fState &= ~MF_CHECKED;
     return ret;
-}
-
-
-/**********************************************************************
- *         EnableMenuItem    (USER.155)
- */
-UINT16 WINAPI EnableMenuItem16( HMENU16 hMenu, UINT16 wItemID, UINT16 wFlags )
-{
-    return EnableMenuItem( hMenu, wItemID, wFlags );
 }
 
 
@@ -3475,16 +3433,6 @@ UINT WINAPI EnableMenuItem( HMENU hMenu, UINT wItemID, UINT wFlags )
 	}
 
     return oldflags;
-}
-
-
-/*******************************************************************
- *         GetMenuString    (USER.161)
- */
-INT16 WINAPI GetMenuString16( HMENU16 hMenu, UINT16 wItemID,
-                              LPSTR str, INT16 nMaxSiz, UINT16 wFlags )
-{
-    return GetMenuStringA( hMenu, wItemID, str, nMaxSiz, wFlags );
 }
 
 
@@ -3551,15 +3499,6 @@ BOOL WINAPI HiliteMenuItem( HWND hWnd, HMENU hMenu, UINT wItemID,
 
 
 /**********************************************************************
- *         GetMenuState    (USER.250)
- */
-UINT16 WINAPI GetMenuState16( HMENU16 hMenu, UINT16 wItemID, UINT16 wFlags )
-{
-    return GetMenuState( hMenu, wItemID, wFlags );
-}
-
-
-/**********************************************************************
  *         GetMenuState    (USER32.@)
  */
 UINT WINAPI GetMenuState( HMENU hMenu, UINT wItemID, UINT wFlags )
@@ -3582,19 +3521,6 @@ UINT WINAPI GetMenuState( HMENU hMenu, UINT wItemID, UINT wFlags )
 	/* return flag MF_SEPARATOR is outside that mask.  */
 	return (item->fType | item->fState);
     }
-}
-
-
-/**********************************************************************
- *         GetMenuItemCount    (USER.263)
- */
-INT16 WINAPI GetMenuItemCount16( HMENU16 hMenu )
-{
-    LPPOPUPMENU	menu = MENU_GetMenu(hMenu);
-    if (!menu) return -1;
-    TRACE("(%04x) returning %d\n",
-                  hMenu, menu->nItems );
-    return menu->nItems;
 }
 
 
@@ -3629,19 +3555,6 @@ UINT WINAPI GetMenuItemID( HMENU hMenu, INT nPos )
     if (lpmi->fType & MF_POPUP) return -1;
     return lpmi->wID;
 
-}
-
-/*******************************************************************
- *         InsertMenu    (USER.410)
- */
-BOOL16 WINAPI InsertMenu16( HMENU16 hMenu, UINT16 pos, UINT16 flags,
-                            UINT16 id, SEGPTR data )
-{
-    UINT pos32 = (UINT)pos;
-    if ((pos == (UINT16)-1) && (flags & MF_BYPOSITION)) pos32 = (UINT)-1;
-    if (IS_STRING_ITEM(flags) && data)
-        return InsertMenuA( hMenu, pos32, flags, id, MapSL(data) );
-    return InsertMenuA( hMenu, pos32, flags, id, (LPSTR)data );
 }
 
 
@@ -3702,15 +3615,6 @@ BOOL WINAPI InsertMenuA( HMENU hMenu, UINT pos, UINT flags,
 
 
 /*******************************************************************
- *         AppendMenu    (USER.411)
- */
-BOOL16 WINAPI AppendMenu16(HMENU16 hMenu, UINT16 flags, UINT16 id, SEGPTR data)
-{
-    return InsertMenu16( hMenu, -1, flags | MF_BYPOSITION, id, data );
-}
-
-
-/*******************************************************************
  *         AppendMenuA    (USER32.@)
  */
 BOOL WINAPI AppendMenuA( HMENU hMenu, UINT flags,
@@ -3727,15 +3631,6 @@ BOOL WINAPI AppendMenuW( HMENU hMenu, UINT flags,
                              UINT id, LPCWSTR data )
 {
     return InsertMenuW( hMenu, -1, flags | MF_BYPOSITION, id, data );
-}
-
-
-/**********************************************************************
- *         RemoveMenu   (USER.412)
- */
-BOOL16 WINAPI RemoveMenu16( HMENU16 hMenu, UINT16 nPos, UINT16 wFlags )
-{
-    return RemoveMenu( hMenu, nPos, wFlags );
 }
 
 
@@ -3776,15 +3671,6 @@ BOOL WINAPI RemoveMenu( HMENU hMenu, UINT nPos, UINT wFlags )
 
 
 /**********************************************************************
- *         DeleteMenu    (USER.413)
- */
-BOOL16 WINAPI DeleteMenu16( HMENU16 hMenu, UINT16 nPos, UINT16 wFlags )
-{
-    return DeleteMenu( hMenu, nPos, wFlags );
-}
-
-
-/**********************************************************************
  *         DeleteMenu    (USER32.@)
  */
 BOOL WINAPI DeleteMenu( HMENU hMenu, UINT nPos, UINT wFlags )
@@ -3795,18 +3681,6 @@ BOOL WINAPI DeleteMenu( HMENU hMenu, UINT nPos, UINT wFlags )
       /* nPos is now the position of the item */
     RemoveMenu( hMenu, nPos, wFlags | MF_BYPOSITION );
     return TRUE;
-}
-
-
-/*******************************************************************
- *         ModifyMenu    (USER.414)
- */
-BOOL16 WINAPI ModifyMenu16( HMENU16 hMenu, UINT16 pos, UINT16 flags,
-                            UINT16 id, SEGPTR data )
-{
-    if (IS_STRING_ITEM(flags))
-        return ModifyMenuA( hMenu, pos, flags, id, MapSL(data) );
-    return ModifyMenuA( hMenu, pos, flags, id, (LPSTR)data );
 }
 
 
@@ -3860,15 +3734,6 @@ BOOL WINAPI ModifyMenuA( HMENU hMenu, UINT pos, UINT flags,
 
 
 /**********************************************************************
- *         CreatePopupMenu    (USER.415)
- */
-HMENU16 WINAPI CreatePopupMenu16(void)
-{
-    return CreatePopupMenu();
-}
-
-
-/**********************************************************************
  *         CreatePopupMenu    (USER32.@)
  */
 HMENU WINAPI CreatePopupMenu(void)
@@ -3891,16 +3756,6 @@ HMENU WINAPI CreatePopupMenu(void)
 DWORD WINAPI GetMenuCheckMarkDimensions(void)
 {
     return MAKELONG( GetSystemMetrics(SM_CXMENUCHECK), GetSystemMetrics(SM_CYMENUCHECK) );
-}
-
-
-/**********************************************************************
- *         SetMenuItemBitmaps    (USER.418)
- */
-BOOL16 WINAPI SetMenuItemBitmaps16( HMENU16 hMenu, UINT16 nPos, UINT16 wFlags,
-                                    HBITMAP16 hNewUnCheck, HBITMAP16 hNewCheck)
-{
-    return SetMenuItemBitmaps( hMenu, nPos, wFlags, hNewUnCheck, hNewCheck );
 }
 
 
@@ -3930,15 +3785,6 @@ BOOL WINAPI SetMenuItemBitmaps( HMENU hMenu, UINT nPos, UINT wFlags,
 
 
 /**********************************************************************
- *         CreateMenu    (USER.151)
- */
-HMENU16 WINAPI CreateMenu16(void)
-{
-    return CreateMenu();
-}
-
-
-/**********************************************************************
  *         CreateMenu    (USER32.@)
  */
 HMENU WINAPI CreateMenu(void)
@@ -3961,15 +3807,6 @@ HMENU WINAPI CreateMenu(void)
     TRACE("return %04x\n", hMenu );
 
     return hMenu;
-}
-
-
-/**********************************************************************
- *         DestroyMenu    (USER.152)
- */
-BOOL16 WINAPI DestroyMenu16( HMENU16 hMenu )
-{
-    return DestroyMenu( hMenu );
 }
 
 
@@ -4211,15 +4048,6 @@ BOOL WINAPI SetMenu( HWND hWnd, HMENU hMenu )
 
 
 /**********************************************************************
- *         GetSubMenu    (USER.159)
- */
-HMENU16 WINAPI GetSubMenu16( HMENU16 hMenu, INT16 nPos )
-{
-    return GetSubMenu( hMenu, nPos );
-}
-
-
-/**********************************************************************
  *         GetSubMenu    (USER32.@)
  */
 HMENU WINAPI GetSubMenu( HMENU hMenu, INT nPos )
@@ -4435,15 +4263,6 @@ HMENU WINAPI LoadMenuIndirectW( LPCVOID template )
 {
     /* FIXME: is there anything different between A and W? */
     return LoadMenuIndirectA( template );
-}
-
-
-/**********************************************************************
- *		IsMenu    (USER.358)
- */
-BOOL16 WINAPI IsMenu16( HMENU16 hmenu )
-{
-    return IsMenu( hmenu );
 }
 
 
@@ -4789,32 +4608,6 @@ UINT WINAPI GetMenuDefaultItem(HMENU hmenu, UINT bypos, UINT flags)
 
 }
 
-/*******************************************************************
- *              InsertMenuItem   (USER.441)
- *
- * FIXME: untested
- */
-BOOL16 WINAPI InsertMenuItem16( HMENU16 hmenu, UINT16 pos, BOOL16 byposition,
-                                const MENUITEMINFO16 *mii )
-{
-    MENUITEMINFOA miia;
-
-    miia.cbSize        = sizeof(miia);
-    miia.fMask         = mii->fMask;
-    miia.dwTypeData    = (LPSTR)mii->dwTypeData;
-    miia.fType         = mii->fType;
-    miia.fState        = mii->fState;
-    miia.wID           = mii->wID;
-    miia.hSubMenu      = mii->hSubMenu;
-    miia.hbmpChecked   = mii->hbmpChecked;
-    miia.hbmpUnchecked = mii->hbmpUnchecked;
-    miia.dwItemData    = mii->dwItemData;
-    miia.cch           = mii->cch;
-    if (IS_STRING_ITEM(miia.fType))
-        miia.dwTypeData = MapSL(mii->dwTypeData);
-    return InsertMenuItemA( hmenu, pos, byposition, &miia );
-}
-
 
 /**********************************************************************
  *		InsertMenuItemA    (USER32.@)
@@ -4874,16 +4667,6 @@ BOOL WINAPI CheckMenuRadioItem(HMENU hMenu,
      }
 
      return TRUE;
-}
-
-/**********************************************************************
- *		CheckMenuRadioItem (USER.666)
- */
-BOOL16 WINAPI CheckMenuRadioItem16(HMENU16 hMenu,
-				   UINT16 first, UINT16 last, UINT16 check,
-				   BOOL16 bypos)
-{
-     return CheckMenuRadioItem (hMenu, first, last, check, bypos);
 }
 
 /**********************************************************************
@@ -5000,15 +4783,6 @@ BOOL WINAPI GetMenuInfo (HMENU hMenu, LPMENUINFO lpmi)
 }
 
 /**********************************************************************
- *         SetMenuContextHelpId    (USER.384)
- */
-BOOL16 WINAPI SetMenuContextHelpId16( HMENU16 hMenu, DWORD dwContextHelpID)
-{
-	return SetMenuContextHelpId( hMenu, dwContextHelpID );
-}
-
-
-/**********************************************************************
  *         SetMenuContextHelpId    (USER32.@)
  */
 BOOL WINAPI SetMenuContextHelpId( HMENU hMenu, DWORD dwContextHelpID)
@@ -5023,14 +4797,6 @@ BOOL WINAPI SetMenuContextHelpId( HMENU hMenu, DWORD dwContextHelpID)
 	return TRUE;
     }
     return FALSE;
-}
-
-/**********************************************************************
- *         GetMenuContextHelpId    (USER.385)
- */
-DWORD WINAPI GetMenuContextHelpId16( HMENU16 hMenu )
-{
-	return GetMenuContextHelpId( hMenu );
 }
 
 /**********************************************************************
