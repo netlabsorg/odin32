@@ -1,4 +1,4 @@
- /* $Id: ChangeLog,v 1.556 1999-12-19 19:52:39 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.557 1999-12-19 20:17:39 sandervl Exp $ */
 
  99-12-19: Christoph Bratschi <cbratschi@datacomm.ch>
 	- USER32: fixed child positioning
@@ -14,6 +14,9 @@
 	- KERNEL32: Fix for loading images (RSRC_LOAD)
                     Implemented FindResourceExA/W
                     CreateProcessW bugfix (string conversion)
+		    FormatMessageA/W bugfix (wrong calling convention for 
+                    WVSPRINTFAPROC type (should be WIN32API!) -> fixes crash
+                    in regedit
 	- USER32: SendMessageW bugfix
 
  99-12-18: Achim Hasenmueller <achimha@innotek.de>
