@@ -1,4 +1,4 @@
-/* $Id: wsock32.cpp,v 1.48 2002-02-20 16:08:03 sandervl Exp $ */
+/* $Id: wsock32.cpp,v 1.49 2002-02-23 16:39:10 sandervl Exp $ */
 
 /*
  *
@@ -64,13 +64,10 @@
 #define DBG_LOCALLOG	DBG_wsock32
 #include "dbglocal.h"
 
-//kso: dirty fix to make this compile! not permanent!
-BOOL WINAPI QueryPerformanceCounter(LARGE_INTEGER *p);
-#define LowPart u.LowPart
-
+//
+#define DUMP_PACKETS
 
 ODINDEBUGCHANNEL(WSOCK32-WSOCK32)
-
 
 /*****************************************************************************
  * Local variables                                                           *
@@ -208,6 +205,12 @@ void WIN32API WSASetLastError(int iError)
         case WSAHOST_NOT_FOUND:
             strcpy(msg, "WSAHOST_NOT_FOUND");
             break;
+        case WSAENOPROTOOPT:
+            strcpy(msg, "WSAENOPROTOOPT");
+            break;
+        case WSAEHOSTUNREACH:
+            strcpy(msg, "WSAEHOSTUNREACH");
+            break;
         default:
             strcpy(msg, "unknown");
     }
@@ -325,6 +328,8 @@ ODINFUNCTION3(int,OS2connect,
       	WSASetLastError(WSAEINPROGRESS);
       	return SOCKET_ERROR;
    }
+   dprintf(("connect to %s", inet_ntoa(((sockaddr_in*)name)->sin_addr)));
+
    ret = connect(s, (sockaddr *)name, namelen);
    // map BSD error codes
    if(ret == SOCKET_ERROR) {
@@ -549,6 +554,7 @@ ODINFUNCTION3(SOCKET,OS2accept, SOCKET,           s,
 	//if this socket has an active async. select pending, then call WSAAsyncSelect
         //with the same parameters for the new socket (see docs)
 	if(QueryAsyncEvent(s, &mode, &notifyHandle, &notifyData, &lEvent) == TRUE) {
+                dprintf(("Setting async select for socket %x, mode %d, %x %x %x", ret, mode, notifyHandle, notifyData, lEvent));
         	if(WSAAsyncSelectWorker(ret, mode, notifyHandle, notifyData, lEvent) == SOCKET_ERROR) {
             		ret = SOCKET_ERROR;
 		}
@@ -583,6 +589,7 @@ ODINFUNCTION3(int,OS2bind,
       	WSASetLastError(WSAEFAULT);
       	return SOCKET_ERROR;
    }
+   dprintf(("bind to %s", inet_ntoa(((sockaddr_in*)addr)->sin_addr)));
    ret = bind(s, (struct sockaddr *)addr, namelen);
 
    if(ret == SOCKET_ERROR) {
@@ -681,7 +688,15 @@ ODINFUNCTION4(int,OS2recv,
 		return SOCKET_ERROR;
 	}
    }
-   else WSASetLastError(NO_ERROR);
+   else {
+#ifdef DUMP_PACKETS
+       dprintf(("Packet length %d", ret));
+       for(int i=0;i<(ret+7)/8;i++) {
+           dprintf(("%02x %02x %02x %02x %02x %02x %02x %02x %c %c %c %c %c %c %c %c", buf[i*8], buf[i*8+1], buf[i*8+2], buf[i*8+3], buf[i*8+4], buf[i*8+5], buf[i*8+6], buf[i*8+7], buf[i*8], buf[i*8+1], buf[i*8+2], buf[i*8+3], buf[i*8+4], buf[i*8+5], buf[i*8+6], buf[i*8+7]));
+       }
+#endif
+       WSASetLastError(NO_ERROR);
+   }
 
    //Reset FD_READ event flagfor  WSAAsyncSelect thread if one was created for this socket
    EnableAsyncEvent(s, FD_READ);
@@ -713,12 +728,22 @@ ODINFUNCTION6(int,OS2recvfrom,
       	WSASetLastError(WSAEFAULT);
       	return SOCKET_ERROR;
    }
+   dprintf(("recvfrom to %s", inet_ntoa(((sockaddr_in*)from)->sin_addr)));
+
    ret = recvfrom(s, buf, len, flags, from, fromlen);
 
    if(ret == SOCKET_ERROR) {
  	WSASetLastError(wsaErrno());
    }
-   else WSASetLastError(NO_ERROR);
+   else {
+#ifdef DUMP_PACKETS
+       dprintf(("Packet length %d", ret));
+       for(int i=0;i<(ret+7)/8;i++) {
+           dprintf(("%02x %02x %02x %02x %02x %02x %02x %02x %c %c %c %c %c %c %c %c", buf[i*8], buf[i*8+1], buf[i*8+2], buf[i*8+3], buf[i*8+4], buf[i*8+5], buf[i*8+6], buf[i*8+7], buf[i*8], buf[i*8+1], buf[i*8+2], buf[i*8+3], buf[i*8+4], buf[i*8+5], buf[i*8+6], buf[i*8+7]));
+       }
+#endif
+       WSASetLastError(NO_ERROR);
+   }
 
    //Reset FD_READ event flagfor  WSAAsyncSelect thread if one was created for this socket
    EnableAsyncEvent(s, FD_READ);
@@ -733,6 +758,8 @@ ODINFUNCTION4(int,OS2send,
               int,flags)
 {
    int ret;
+   int optlen;
+   int option;
 
    if(!fWSAInitialized) {
       	WSASetLastError(WSANOTINITIALISED);
@@ -743,6 +770,23 @@ ODINFUNCTION4(int,OS2send,
       	WSASetLastError(WSAEINPROGRESS);
       	return SOCKET_ERROR;
    }
+   // check if the socket is a raw socket and has the IP_HDRINCL switch
+   // if this is the case, we overwrite the IP header length field with
+   // the actual length because some apps tend to put garbage in there
+   // and rely on Windows to correct this
+   optlen = sizeof(option);
+   option = 0;
+   ret = getsockopt(s, IPPROTO_IP, IP_HDRINCL_OS2, (char *)&option, &optlen);
+   if(ret == 0 && option != FALSE) {
+       *(u_short *)&buf[2] = len;
+   }
+
+#ifdef DUMP_PACKETS
+   dprintf(("Packet length %d", len));
+   for(int i=0;i<(len+7)/8;i++) {
+           dprintf(("%02x %02x %02x %02x %02x %02x %02x %02x %c %c %c %c %c %c %c %c", buf[i*8], buf[i*8+1], buf[i*8+2], buf[i*8+3], buf[i*8+4], buf[i*8+5], buf[i*8+6], buf[i*8+7], buf[i*8], buf[i*8+1], buf[i*8+2], buf[i*8+3], buf[i*8+4], buf[i*8+5], buf[i*8+6], buf[i*8+7]));
+   }
+#endif
    ret = send(s, (char *)buf, len, flags);
 
    if(ret == SOCKET_ERROR) {
@@ -784,8 +828,8 @@ ODINFUNCTION6(int,OS2sendto,
    }
    // check if the socket is a raw socket and has the IP_HDRINCL switch
    // if this is the case, we overwrite the IP header length field with
-   // the actual length because some apps tend to put in garbage in there
-   // and rely on Windows correcting this
+   // the actual length because some apps tend to put garbage in there
+   // and rely on Windows to correct this
    optlen = sizeof(option);
    option = 0;
    ret = getsockopt(s, IPPROTO_IP, IP_HDRINCL_OS2, (char *)&option, &optlen);
@@ -793,6 +837,12 @@ ODINFUNCTION6(int,OS2sendto,
        *(u_short *)&buf[2] = len;
    }
    dprintf(("sending to %s", inet_ntoa(((sockaddr_in*)to)->sin_addr)));
+#ifdef DUMP_PACKETS
+   dprintf(("Packet length %d", len));
+   for(int i=0;i<(len+7)/8;i++) {
+           dprintf(("%02x %02x %02x %02x %02x %02x %02x %02x %c %c %c %c %c %c %c %c", buf[i*8], buf[i*8+1], buf[i*8+2], buf[i*8+3], buf[i*8+4], buf[i*8+5], buf[i*8+6], buf[i*8+7], buf[i*8], buf[i*8+1], buf[i*8+2], buf[i*8+3], buf[i*8+4], buf[i*8+5], buf[i*8+6], buf[i*8+7]));
+   }
+#endif
    ret = sendto(s, (char *)buf, len, flags, (struct sockaddr *)to, tolen);
 
    if(ret == SOCKET_ERROR) {
@@ -1051,6 +1101,7 @@ tryagain:
                		WSASetLastError(WSAEFAULT);
                		return SOCKET_ERROR;
             	}
+                dprintf(("IPPROTO_TCP, TCP_NODELAY 0x%x", *optval));
                	ret = setsockopt(s, level, optname, (char *)optval, optlen);
         }
 	else {

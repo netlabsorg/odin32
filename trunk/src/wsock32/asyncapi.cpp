@@ -1,4 +1,4 @@
-/* $Id: asyncapi.cpp,v 1.19 2002-02-20 15:07:13 sandervl Exp $ */
+/* $Id: asyncapi.cpp,v 1.20 2002-02-23 16:39:09 sandervl Exp $ */
 
 /*
  *
@@ -530,6 +530,7 @@ asyncloopstart:
 	pThreadParm->fWaitSelect = TRUE;
 	ret = select((int *)sockets, nr(noread), nr(nowrite), nr(noexcept), -1);
 	pThreadParm->fWaitSelect = FALSE;
+
 	if(ret == SOCKET_ERROR) {
 		int selecterr = sock_errno();
         	dprintf(("WSAsyncSelectThreadProc %x rds=%d, wrs=%d, oos =%d, pending = %x select returned %x", pThreadParm->u.asyncselect.s, noread, nowrite, noexcept, lEventsPending, selecterr));
@@ -541,7 +542,7 @@ asyncloopstart:
 		case SOCEINTR:
 ////        		state = ioctl(s, FIOBSTATUS, (char *)&tmp, sizeof(tmp));
 ////			dprintf(("SOCEINTR; state = %x", state));
-			goto asyncloopstart;	//so_cancel was called
+			goto asyncloopstart;	//so_cancel/closesocket was called
 
 		case SOCECONNRESET:
 		case SOCEPIPE:
@@ -573,9 +574,12 @@ asyncloopstart:
  	{
         	state = ioctl(s, FIOBSTATUS, (char *)&tmp, sizeof(tmp));
 
-         	if(lEventsPending & FD_CONNECT) {
+                //Don't send FD_CONNECT is socket was already connected (accept returns connected socket)
+         	if(!pThreadParm->fConnected && (lEventsPending & FD_CONNECT)) 
+                {
 	    		if(state & SS_ISCONNECTED) {
 				AsyncSelectNotifyEvent(pThreadParm, FD_CONNECT, NO_ERROR);
+                                pThreadParm->fConnected = TRUE;
 	    		}
             		else {
             			sockoptlen = sizeof(int);
@@ -593,10 +597,10 @@ asyncloopstart:
 			AsyncSelectNotifyEvent(pThreadParm, FD_WRITE, NO_ERROR);
 		}
         }
-
       	if(ready(noread))
       	{
          	state = ioctl(s, FIONREAD, (CHAR *) &bytesread, sizeof(bytesread));
+                dprintf2(("state %x, bytesread %d", state, bytesread));
          	if(state == SOCKET_ERROR)
  		{
             		if(lEventsPending & FD_CLOSE)
@@ -768,6 +772,17 @@ int WSAAsyncSelectWorker(SOCKET s, int mode, DWORD notifyHandle, DWORD notifyDat
 	WSASetLastError(WSAEFAULT);
  	return SOCKET_ERROR;
    }
+
+   int size, state, tmp;
+   state = ioctl(s, FIOBSTATUS, (char *)&tmp, sizeof(tmp));
+   dprintf(("QueueAsyncJob: state %x", state));
+
+   //Don't send FD_CONNECT is socket was already connected (accept returns connected socket)
+   if(state & SS_ISCONNECTED) {
+        pThreadParm->fConnected = TRUE;
+   }
+   else pThreadParm->fConnected = FALSE;
+
    if(QueueAsyncJob(WSAsyncSelectThreadProc, pThreadParm) == 0) {
 	delete pThreadParm->u.asyncselect.asyncSem;
 	free(pThreadParm);
