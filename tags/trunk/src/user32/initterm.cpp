@@ -1,4 +1,4 @@
-/* $Id: initterm.cpp,v 1.13 1999-10-23 23:04:34 sandervl Exp $ */
+/* $Id: initterm.cpp,v 1.14 1999-10-28 12:00:34 sandervl Exp $ */
 
 /*
  * USER32 DLL entry point
@@ -37,7 +37,6 @@
 #include <odinlx.h>
 #include <spy.h>
 #include "pmwindow.h"
-#include "heapshared.h"
 #include "win32wdesktop.h"
 #include "syscolor.h"
 #include "initterm.h"
@@ -107,9 +106,6 @@ unsigned long SYSTEM _DLL_InitTerm(unsigned long hModule, unsigned long
          //SvL: Try to start communication with our message spy queue server
          InitSpyQueue();
 
-         if(InitializeSharedHeap() == FALSE)
-                return 0UL;
-
          //SvL: Init win32 PM classes
          if(InitPM() == FALSE) {
                 return 0UL;
@@ -150,7 +146,6 @@ static void APIENTRY cleanup(ULONG ulReason)
    SYSCOLOR_Save();
    DestroyDesktopWindow();
    UnregisterSystemClasses();
-   DestroySharedHeap();
    _ctordtorTerm();
    dprintf(("user32 exit done\n"));
    DosExitList(EXLST_EXIT, cleanup);

@@ -1,4 +1,4 @@
-/* $Id: initterm.cpp,v 1.18 1999-10-27 18:11:39 sandervl Exp $ */
+/* $Id: initterm.cpp,v 1.19 1999-10-28 12:01:12 sandervl Exp $ */
 
 /*
  * KERNEL32 DLL entry point
@@ -40,7 +40,7 @@
 #include <win32type.h>
 #include <odinlx.h>
 #include "oslibmisc.h"
-#include "heapshared.h"
+#include <heapshared.h>
 #include "mmap.h"
 
 /*-------------------------------------------------------------------*/
@@ -154,6 +154,7 @@ static void APIENTRY cleanup(ULONG ulReason)
 
     WriteOutProfiles();
     DestroyTIB();
+    DestroySharedHeap();
     //NOTE: Must be done after DestroyTIB
     CloseLogFile();
     _ctordtorTerm();

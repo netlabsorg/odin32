@@ -1,4 +1,4 @@
-/* $Id: KERNEL32.CPP,v 1.25 1999-10-27 18:11:38 sandervl Exp $ */
+/* $Id: KERNEL32.CPP,v 1.26 1999-10-28 12:01:11 sandervl Exp $ */
 
 /*
  * Win32 compatibility file functions for OS/2
@@ -839,7 +839,7 @@ LONG WIN32API GetVersion()
 /*                structures that lead to crashes if we don't identify as NT */
 
 //  return(WIN32OS2_VERSION);
-  return (0x00000400);
+  return (0x0000004);
 }
 //******************************************************************************
 //SvL: 26-6-'97 - Added

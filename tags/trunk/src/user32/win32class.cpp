@@ -1,4 +1,4 @@
-/* $Id: win32class.cpp,v 1.3 1999-10-24 22:56:09 sandervl Exp $ */
+/* $Id: win32class.cpp,v 1.4 1999-10-28 12:00:34 sandervl Exp $ */
 /*
  * Win32 Window Class Managment Code for OS/2
  *
@@ -122,7 +122,8 @@ Win32WndClass::Win32WndClass(WNDCLASSEXA *wndclass, BOOL isUnicode) : GenericObj
 //******************************************************************************
 Win32WndClass::~Win32WndClass()
 {
-  if(classNameA && (windowStyle & CS_GLOBALCLASS)) {
+  //SvL: Don't delete global classes
+  if(classNameA && !(windowStyle & CS_GLOBALCLASS)) {
 	GlobalDeleteAtom(classAtom);
   }
 

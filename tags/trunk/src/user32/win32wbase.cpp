@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.62 1999-10-23 23:04:38 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.63 1999-10-28 12:00:34 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -34,7 +34,6 @@
 #include "oslibdos.h"
 #include "syscolor.h"
 #include "win32wndhandle.h"
-#include "heapshared.h"
 #include "dc.h"
 #include "pmframe.h"
 #include "win32wdesktop.h"
@@ -507,8 +506,7 @@ BOOL Win32BaseWindow::CreateWindowExA(CREATESTRUCTA *cs, ATOM classAtom)
 
   DWORD dwOSWinStyle, dwOSFrameStyle;
 
-  OSLibWinConvertStyle(cs->style, &cs->dwExStyle, &dwOSWinStyle, &dwOSFrameStyle, &borderWidth, &borderHeight);
-  dwExStyle = cs->dwExStyle;
+  OSLibWinConvertStyle(dwStyle, &dwExStyle, &dwOSWinStyle, &dwOSFrameStyle, &borderWidth, &borderHeight);
 
   rectWindow.left   = cs->x;
   rectWindow.top    = cs->y;
@@ -579,12 +577,6 @@ BOOL Win32BaseWindow::MsgCreate(HWND hwndFrame, HWND hwndClient)
         SetLastError(ERROR_OUTOFMEMORY); //TODO: Better error
         return FALSE;
   }
-  //SvL: Need to store the shared memory base, or else other apps can map it into their memory space
-  if(OSLibWinSetWindowULong(OS2Hwnd, OFFSET_WIN32PM_SHAREDMEM, HeapGetSharedMemBase()) == FALSE) {
-        dprintf(("WM_CREATE: WinSetWindowULong2 %X failed!!", OS2Hwnd));
-        SetLastError(ERROR_OUTOFMEMORY); //TODO: Better error
-        return FALSE;
-  }
 #if 0
   if(OS2Hwnd != OS2HwndFrame) {
     if(OSLibWinSetWindowULong(OS2HwndFrame, OFFSET_WIN32WNDPTR, (ULONG)this) == FALSE) {
@@ -593,12 +585,6 @@ BOOL Win32BaseWindow::MsgCreate(HWND hwndFrame, HWND hwndClient)
             return FALSE;
     }
     if(OSLibWinSetWindowULong(OS2HwndFrame, OFFSET_WIN32PM_MAGIC, WIN32PM_MAGIC) == FALSE) {
-            dprintf(("WM_CREATE: WinSetWindowULong2 %X failed!!", OS2HwndFrame));
-            SetLastError(ERROR_OUTOFMEMORY); //TODO: Better error
-            return FALSE;
-    }
-    //SvL: Need to store the shared memory base, or else other apps can map it into their memory space
-    if(OSLibWinSetWindowULong(OS2HwndFrame, OFFSET_WIN32PM_SHAREDMEM, HeapGetSharedMemBase()) == FALSE) {
             dprintf(("WM_CREATE: WinSetWindowULong2 %X failed!!", OS2HwndFrame));
             SetLastError(ERROR_OUTOFMEMORY); //TODO: Better error
             return FALSE;
@@ -2313,12 +2299,6 @@ HWND Win32BaseWindow::FindWindowEx(HWND hwndParent, HWND hwndChildAfter, LPSTR l
             }
 
             if(wnd) {
-                LPVOID sharedmembase = (LPVOID)OSLibWinGetWindowULong(hwnd, OFFSET_WIN32PM_SHAREDMEM);
-
-                if(OSLibDosGetSharedMem(sharedmembase, MAX_HEAPSIZE, OSLIB_PAG_READ) != 0) {
-                    dprintf(("OSLibDosGetSharedMem returned error for %x", wnd));
-                    break;
-                }
                 if(wnd->getWindowClass()->hasClassName(lpszClass, fUnicode) &&
                    (!lpszWindow || wnd->hasWindowName(lpszWindow, fUnicode)))
                 {

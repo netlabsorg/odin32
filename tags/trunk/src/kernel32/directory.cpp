@@ -1,4 +1,4 @@
-/* $Id: directory.cpp,v 1.7 1999-10-23 12:34:46 sandervl Exp $ */
+/* $Id: directory.cpp,v 1.8 1999-10-28 12:01:12 sandervl Exp $ */
 
 /*
  * Win32 Directory functions for OS/2
@@ -188,11 +188,20 @@ ODINFUNCTION2(UINT,GetSystemDirectoryA,LPSTR,lpBuffer,
 
     len = PROFILE_GetOdinIniString(ODINDIRECTORIES,"SYSTEM","",lpBuffer,uSize);
     if (len > 2) {
+	if(lpBuffer[len-1] == '\\') {
+		lpBuffer[len-1] = 0; 
+		len--;
+	}
 	return len;
     }
     else {//SvL: Use path of kernel32.dll instead of calling Open32 api (which returns \OS2\SYSTEM)
 	lstrcpynA(lpBuffer, kernel32Path, uSize);
-	return lstrlenA(lpBuffer);
+	len = lstrlenA(lpBuffer);;
+	if(lpBuffer[len-1] == '\\') {
+		lpBuffer[len-1] = 0; 
+		len--;
+	}
+	return len;
     }
   }
 }
@@ -246,16 +255,22 @@ ODINFUNCTION2(UINT,GetWindowsDirectoryA,LPSTR,lpBuffer,
               lpstrEnv,
               uSize);
     return (lstrlenA(lpBuffer));                /* return number of copies bytes */
-  } else
+  } 
+  else
   {
     int len;
 
     len = PROFILE_GetOdinIniString(ODINDIRECTORIES,"WINDOWS","",lpBuffer,uSize);
-    if (len > 2) return len;
+    if (len > 2) {
+	if(lpBuffer[len-1] == '\\') {
+		lpBuffer[len-1] = 0; 
+		len--;
+	}
+	return len;
+    }
     else
-
-                               /* if no override by environment is available */
-      return O32_GetWindowsDirectory(lpBuffer,uSize);
+        /* if no override by environment is available */
+        return O32_GetWindowsDirectory(lpBuffer,uSize);
   }
 }
 

@@ -1,4 +1,4 @@
-/* $Id: win32wbasepos.cpp,v 1.5 1999-10-21 12:19:29 sandervl Exp $ */
+/* $Id: win32wbasepos.cpp,v 1.6 1999-10-28 12:00:35 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2 (nonclient/position methods)
  *
@@ -23,7 +23,6 @@
 #include <stdarg.h>
 #include <assert.h>
 #include <misc.h>
-#include <heapstring.h>
 #include <win32wbase.h>
 #include <winres.h>
 #include <spy.h>
@@ -37,7 +36,6 @@
 #include "oslibdos.h"
 #include "syscolor.h"
 #include "win32wndhandle.h"
-#include "heapshared.h"
 #include "dc.h"
 #include "pmframe.h"
 #include "win32wdesktop.h"

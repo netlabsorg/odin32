@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.49 1999-10-27 18:11:39 sandervl Exp $
+# $Id: makefile,v 1.50 1999-10-28 12:01:12 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -131,7 +131,7 @@ os2heap.OBJ: \
     $(PDWIN32_INCLUDE)\win32type.h \
     os2heap.h
 
-initterm.OBJ: .\initterm.cpp initterm.h  heapshared.h  mmap.h
+initterm.OBJ: .\initterm.cpp initterm.h  $(PDWIN32_INCLUDE)\heapshared.h  mmap.h
 
 thunk.OBJ: \
     .\thunk.cpp \
@@ -309,7 +309,7 @@ hmsemaphore.obj: \
         .\hmdevice.h \
         .\hmopen32.h
 
-hmmmap.obj: hmmmap.cpp hmdevice.h hmopen32.h mmap.h heapshared.h
+hmmmap.obj: hmmmap.cpp hmdevice.h hmopen32.h mmap.h $(PDWIN32_INCLUDE)\heapshared.h
 
 conprop.OBJ: \
         .\conprop.h \
@@ -326,7 +326,7 @@ async.OBJ: \
         $(PDWIN32_INCLUDE)\unicode.h
 
 virtual.obj:   virtual.cpp $(PDWIN32_INCLUDE)\win\virtual.h $(PDWIN32_INCLUDE)\handlemanager.h mmap.h
-mmap.obj:      mmap.cpp mmap.h $(PDWIN32_INCLUDE)\vmutex.h oslibdos.h heapshared.h
+mmap.obj:      mmap.cpp mmap.h $(PDWIN32_INCLUDE)\vmutex.h oslibdos.h $(PDWIN32_INCLUDE)\heapshared.h
 
 pefile.OBJ:    pefile.cpp $(PDWIN32_INCLUDE)\pefile.h $(PDWIN32_INCLUDE)\winres.h
 
@@ -361,7 +361,7 @@ cvtcursorgrp.obj: cvtcursorgrp.cpp $(PDWIN32_INCLUDE)\wincursor.h $(PDWIN32_INCL
 interlock.obj: interlock.asm
 toolhelp.obj: toolhelp.cpp
 
-heapshared.obj: heapshared.cpp heapshared.h
+heapshared.obj: heapshared.cpp $(PDWIN32_INCLUDE)\heapshared.h
 
 
 clean:

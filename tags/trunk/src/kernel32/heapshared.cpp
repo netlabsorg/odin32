@@ -1,10 +1,10 @@
-/* $Id: heapshared.cpp,v 1.1 1999-10-24 22:53:24 sandervl Exp $ */
+/* $Id: heapshared.cpp,v 1.2 1999-10-28 12:01:12 sandervl Exp $ */
 /*
  * Shared heap functions for OS/2
  *
  * Initially commit 16 kb, add more when required
  *
- * NOTE: Hardcoded limit of 256 KB per process (increase when required)
+ * NOTE: Hardcoded limit of 256 KB (increase when required)
  *
  * TODO: Not process/thread safe (initializing/destroying heap)
  * 
@@ -18,7 +18,7 @@
 #define INCL_DOSMEMMGR
 #include <os2wrap.h>
 #include <misc.h>
-#include "heapshared.h"
+#include <heapshared.h>
 
 //Global DLL Data
 #pragma data_seg(_GLOBALDATA)
@@ -68,6 +68,10 @@ BOOL InitializeSharedHeap()
 		dprintf(("InitializeSharedHeap: DosGetSharedMem failed!"));
 		return FALSE;
 	}
+	if(_uopen(sharedHeap) != 0) {
+		dprintf(("InitializeSharedHeap: unable to open shared heap!"));
+		return FALSE;
+	}
   }
   refCount++;
   return TRUE;
@@ -87,6 +91,9 @@ void DestroySharedHeap()
 		DosFreeMem(pSharedMem);
 		pSharedMem = NULL;
 	}
+  }
+  else {
+	_uclose(sharedHeap);
   }
 }
 //******************************************************************************
