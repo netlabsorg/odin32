@@ -1,4 +1,4 @@
-/* $Id: user32.cpp,v 1.24 2000-01-05 21:25:06 cbratschi Exp $ */
+/* $Id: user32.cpp,v 1.25 2000-01-11 10:38:33 sandervl Exp $ */
 
 /*
  * Win32 misc user32 API functions for OS/2
@@ -850,7 +850,7 @@ int WIN32API GetSystemMetrics(int nIndex)
         rc = O32_GetSystemMetrics(nIndex);
         break;
     }
-    dprintf(("USER32:  GetSystemMetrics %d returned %d\n", nIndex, rc));
+    dprintf2(("USER32:  GetSystemMetrics %d returned %d\n", nIndex, rc));
     return(rc);
 }
 //******************************************************************************

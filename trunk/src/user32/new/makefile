@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.55 2000-01-10 17:18:07 cbratschi Exp $
+# $Id: makefile,v 1.56 2000-01-11 10:38:33 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -42,7 +42,7 @@ OBJS =  user32.obj loadres.obj \
         win32wmdichild.obj winprop.obj wingdi.obj oslibgdi.obj winaccel.obj \
         win32wbasepos.obj oslibres.obj dummy.obj dc.obj timer.obj \
         caret.obj resource.obj winproc.obj text.obj oslibmsgtranslate.obj \
-        windlgmsg.obj windlg.obj win32wdesktop.obj
+        windlgmsg.obj windlg.obj win32wdesktop.obj win32wbasenonclient.obj
 
 
 all: $(TARGET).dll $(TARGET).lib
@@ -68,7 +68,6 @@ $(PDWIN32_LIB)/gdi32.lib
 $(PDWIN32_LIB)/kernel32.lib
 $(PDWIN32_LIB)/libuls.lib
 $(PDWIN32_LIB)/odincrt.lib
-$(PDWIN32_LIB)/shell32.lib
 OS2386.LIB
 $(RTLLIB_O)
 $(TARGET).def
@@ -132,6 +131,7 @@ pmwindow.obj:   pmwindow.cpp win32class.h win32wbase.h win32dlg.h pmwindow.h win
 pmframe.obj: pmframe.cpp win32class.h win32wbase.h pmframe.h win32wndchild.h
 win32class.obj: win32class.cpp win32class.h win32wbase.h win32dlg.h gen_object.h $(PDWIN32_INCLUDE)\heapshared.h oslibwin.h win32wndchild.h $(PDWIN32_INCLUDE)\win\winproc.h
 win32wbase.obj:   win32wbase.cpp win32class.h win32wbase.h win32dlg.h gen_object.h $(PDWIN32_INCLUDE)\heapshared.h oslibwin.h win32wndchild.h  $(PDWIN32_INCLUDE)\winres.h oslibres.h win32wndhandle.h oslibdos.h dc.h pmframe.h win32wdesktop.h controls.h winmouse.h $(PDWIN32_INCLUDE)\win\winproc.h $(PDWIN32_INCLUDE)\win\hook.h oslibmsg.h
+win32wbasenonclient.obj:   win32wbasenonclient.cpp win32class.h win32wbase.h win32dlg.h gen_object.h $(PDWIN32_INCLUDE)\heapshared.h oslibwin.h win32wndchild.h  $(PDWIN32_INCLUDE)\winres.h oslibres.h win32wndhandle.h oslibdos.h dc.h controls.h oslibmsg.h pmframe.h
 win32wbasepos.obj: win32wbasepos.cpp win32class.h win32wbase.h win32dlg.h gen_object.h $(PDWIN32_INCLUDE)\heapshared.h oslibwin.h win32wndchild.h  $(PDWIN32_INCLUDE)\winres.h oslibres.h win32wndhandle.h oslibdos.h dc.h pmframe.h win32wdesktop.h
 win32wnd.obj:   win32wnd.cpp win32class.h win32wbase.h win32wnd.h win32dlg.h gen_object.h $(PDWIN32_INCLUDE)\heapshared.h oslibwin.h win32wndchild.h  $(PDWIN32_INCLUDE)\winres.h oslibres.h win32wndhandle.h oslibdos.h
 win32dlg.obj:   win32dlg.cpp win32class.h win32wbase.h win32dlg.h gen_object.h $(PDWIN32_INCLUDE)\heapshared.h oslibwin.h win32wndchild.h oslibmsg.h controls.h $(PDWIN32_INCLUDE)\win\winproc.h
