@@ -1,4 +1,4 @@
-/* $Id: odin32ftp2.cmd,v 1.17 2001-06-27 08:57:57 bird Exp $
+/* $Id: odin32ftp2.cmd,v 1.18 2001-10-26 22:19:29 bird Exp $
  *
  * Uploads the relase and debug builds to the FTP sites.
  *
@@ -50,10 +50,12 @@ do i = 1 to 5 /* (Retries 5 times) */
     /*
      * Put files to SourceForge.
      */
+    /*
     rc = cleanSF();
     do j = 1 to asUploads.0
         rc = putSF(asUploads.j, 'SF-'||asUploads.j);
     end
+    */
 
     /*
      * Forwards files from sourceforge(t) to os2.ftp.org
