@@ -1083,6 +1083,31 @@ static BOOL PRINTDLG_ChangePrinterA(HWND hDlg, char *name,
     if(lpdm)
         GlobalUnlock(lppd->hDevMode);
 
+#ifdef __WIN32OS2__
+    //Yes, we need to update the device names in the printer dialog structure
+    //Some applications actually rely on that to change when the user chooses
+    //another printer
+    {
+	    DEVMODEA *lpdm = PrintStructures->lpDevMode, *lpdmReturn;
+	    PRINTER_INFO_2A *pi = PrintStructures->lpPrinterInfo;
+	    DRIVER_INFO_3A *di = PrintStructures->lpDriverInfo;
+
+	    if (lppd->hDevNames != 0) {
+	        WORD locks;
+		if((locks = (GlobalFlags(lppd->hDevNames) & GMEM_LOCKCOUNT))) {
+		    WARN("hDevNames has %d locks on it. Unlocking it now\n", locks);
+		    while(locks--)
+		        GlobalUnlock(lppd->hDevNames);
+		}
+	    }
+	    PRINTDLG_CreateDevNames(&(lppd->hDevNames),
+		    di->pDriverPath,
+		    pi->pPrinterName,
+		    pi->pPortName
+	    );
+    }
+#endif
+
     lpdm = PrintStructures->lpDevMode;  /* use this as a shortcut */
 
     if(!(lppd->Flags & PD_PRINTSETUP)) {
