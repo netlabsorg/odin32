@@ -1,4 +1,4 @@
-/* $Id: window.cpp,v 1.35 1999-11-14 12:00:01 sandervl Exp $ */
+/* $Id: window.cpp,v 1.36 1999-11-14 16:35:58 sandervl Exp $ */
 /*
  * Win32 window apis for OS/2
  *
@@ -1262,7 +1262,7 @@ HWND WIN32API WindowFromPoint( POINT point)
 	}
     }
     dprintf(("WindowFromPoint (%d,%d) %x->1\n", point.x, point.y, hwndOS2));
-    return 1;
+    return windowDesktop->getWindowHandle();
 }
 //******************************************************************************
 //******************************************************************************

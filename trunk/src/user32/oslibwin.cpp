@@ -1,4 +1,4 @@
-/* $Id: oslibwin.cpp,v 1.44 1999-11-11 13:17:29 sandervl Exp $ */
+/* $Id: oslibwin.cpp,v 1.45 1999-11-14 16:35:54 sandervl Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -432,7 +432,15 @@ BOOL OSLibWinSetFocus(HWND hwnd)
 //******************************************************************************
 BOOL OSLibWinEnableWindow(HWND hwnd, BOOL fEnable)
 {
-  return WinEnableWindow(hwnd, fEnable);
+ BOOL rc;
+ HWND hwndClient;
+
+  rc = WinEnableWindow(hwnd, fEnable);
+  hwndClient = WinWindowFromID(hwnd, FID_CLIENT);
+  if(hwndClient) {
+	WinEnableWindow(hwndClient, fEnable);
+  }
+  return rc;
 }
 //******************************************************************************
 //******************************************************************************

@@ -1,4 +1,4 @@
-/* $Id: windowclass.cpp,v 1.5 1999-11-14 13:07:03 sandervl Exp $ */
+/* $Id: windowclass.cpp,v 1.6 1999-11-14 16:35:58 sandervl Exp $ */
 /*
  * Win32 Window Class Code for OS/2
  *
@@ -297,7 +297,7 @@ LONG WIN32API SetClassLongA(HWND hwnd, int nIndex, LONG lNewVal)
 {
  Win32BaseWindow *wnd;
 
-    dprintf(("USER32: SetClassLongA\n"));
+    dprintf(("USER32: SetClassLongA %x %d %x", hwnd, nIndex, lNewVal));
     wnd = Win32BaseWindow::GetWindowFromHandle(hwnd);
     if(!wnd) {
         dprintf(("SetClassLongA wnd == NULL"));
@@ -353,7 +353,7 @@ LONG WIN32API GetClassLongA(HWND hwnd, int nIndex)
 {
  Win32BaseWindow *wnd;
 
-    dprintf(("USER32: GetClassLongA\n"));
+    dprintf(("USER32: GetClassLongA %x %d", hwnd, nIndex));
     wnd = Win32BaseWindow::GetWindowFromHandle(hwnd);
     if(!wnd) {
         dprintf(("GetClassLongA wnd == NULL"));
