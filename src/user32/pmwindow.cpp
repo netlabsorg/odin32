@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.224 2003-11-12 14:10:19 sandervl Exp $ */
+/* $Id: pmwindow.cpp,v 1.225 2003-11-15 12:28:47 sandervl Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -66,6 +66,7 @@
 
 #define ODIN_SetExceptionHandler(a)
 #define ODIN_UnsetExceptionHandler(a)
+#define hookInit(a)
 
 // Notification that focus change has completed (UNDOCUMENTED)
 #define WM_FOCUSCHANGED            0x000e
