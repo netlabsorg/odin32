@@ -1,4 +1,4 @@
-/* $Id: moniker.cpp,v 1.3 1999-09-08 11:29:27 davidr Exp $ */
+/* $Id: moniker.cpp,v 1.4 2000-02-12 11:51:03 davidr Exp $ */
 /* 
  * 
  * Project Odin Software License can be found in LICENSE.TXT
@@ -146,10 +146,10 @@ HRESULT WIN32API RunningObjectTableImpl_QueryInterface
 
     * ppvObject = 0;
 
-    if (IsEqualIID(&IID_IUnknown, &riid))
+    if (IsEqualIID(&IID_IUnknown, riid))
         * ppvObject = (IRunningObjectTable * )This;
     else
-        if (IsEqualIID(&IID_IRunningObjectTable, &riid))
+        if (IsEqualIID(&IID_IRunningObjectTable, riid))
             * ppvObject = (IRunningObjectTable * )This;
 
     if ((* ppvObject) == 0)
