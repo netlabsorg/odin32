@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.47 2000-02-10 23:40:10 bird Exp $
+# $Id: makefile,v 1.48 2000-02-10 23:43:35 bird Exp $
 
 #
 # PD-Win32 API
@@ -189,5 +189,5 @@ ReadAPIImportLogs:
 CleanDBLogs:
     $(DOWITHDIRS) -e$(NOTWIN32DLLS) -cp \
         $(RM) apiimport.log signals.log stateupd.log apiimport.def
-    $(RM) signals.log statupd.log
+    $(RM) signals.log stateupd.log
 
