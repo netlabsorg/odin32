@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.374 2003-05-15 12:40:19 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.375 2003-06-03 09:51:05 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -1970,43 +1970,6 @@ LRESULT Win32BaseWindow::DefWindowProcA(UINT Msg, WPARAM wParam, LPARAM lParam)
 	     else
 	        if( wParam == VK_ESCAPE && (GetKeyState(VK_SHIFT) & 0x8000))
                     SendMessageW(getWindowHandle(), WM_SYSCOMMAND, SC_KEYMENU, VK_SPACE );
-
-        Win32BaseWindow *siblingWindow;
-        HWND sibling;
-        char nameBuffer [40], mnemonic;
-        int nameLength;
-
-        GetWindowTextA (nameBuffer, 40);
-
-        // search all sibling to see it this key is their mnemonic
-        sibling = GetWindow (GW_HWNDFIRST);
-        while (sibling != 0) {
-            siblingWindow = GetWindowFromHandle (sibling);
-            nameLength = siblingWindow->GetWindowTextA (nameBuffer, 40);
-
-            // find the siblings mnemonic
-            mnemonic = '\0';
-            for (int i=0 ; i<nameLength ; i++) {
-                if (IsDBCSLeadByte(nameBuffer[i])) {
-                    // Skip DBCS
-                    continue;
-                }
-                if (nameBuffer [i] == '&') {
-                    mnemonic = nameBuffer [i+1];
-                    if ((mnemonic >= 'a') && (mnemonic <= 'z'))
-                        mnemonic -= 32; // make it uppercase
-                    break;  // stop searching
-                }
-            }
-
-            // key matches siblings mnemonic, send mouseclick
-            if (mnemonic == (char) wParam) {
-                ::SendMessageA(siblingWindow->getWindowHandle(), BM_CLICK, 0, 0);
-            }
-            sibling = siblingWindow->GetNextWindow (GW_HWNDNEXT);
-            RELEASE_WNDOBJ(siblingWindow);
-        }
-
         return 0;
     }
 
@@ -4101,6 +4064,10 @@ void Win32BaseWindow::addOpenDC(HDC hdc)
     }
     unlock(&critsect);
     if(i == MAX_OPENDCS) {
+        dprintf(("Open DCs:"));
+        for(int i=0;i<MAX_OPENDCS;i++) {
+            dprintf(("Window %x DC %x", WindowFromDC(hdcWindow[i]), hdcWindow[i]));
+        }
         DebugInt3(); //no room!
         return;
     }
