@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.358 2003-02-13 10:12:25 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.359 2003-02-17 13:40:11 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -2010,6 +2010,9 @@ LRESULT Win32BaseWindow::DefWindowProcA(UINT Msg, WPARAM wParam, LPARAM lParam)
     }
 
     case WM_KEYUP:
+        //Single Alt down + up always generates WM_SYSKEYUP
+        iMenuSysKey = 0;
+        // no break;
     case WM_SYSKEYUP:
 	/* Press and release F10 or ALT */
 	if (((wParam == VK_MENU) && iMenuSysKey) ||
