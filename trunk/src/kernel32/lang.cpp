@@ -1,4 +1,4 @@
-/* $Id: lang.cpp,v 1.20 2000-05-22 19:07:57 sandervl Exp $ */
+/* $Id: lang.cpp,v 1.21 2000-05-23 18:45:12 sandervl Exp $ */
 /*
  * Win32 language API functions for OS/2
  *
@@ -153,14 +153,14 @@ LCID WIN32API GetSystemDefaultLCID(void)
 //******************************************************************************
 LANGID WIN32API GetUserDefaultLangID()
 {
-  dprintf(("KERNEL32:  OS2GetUserDefaultLangID, returns %x", GetLanguageId()));
+  dprintf2(("KERNEL32:  GetUserDefaultLangID, returns %x", GetLanguageId()));
   return(GetLanguageId());
 }
 //******************************************************************************
 //******************************************************************************
 LANGID WIN32API GetSystemDefaultLangID(void)
 {
-  dprintf(("KERNEL32:  OS2GetSystemDefaultLangID returns %x", MAKELANGID(LANG_ENGLISH, SUBLANG_ENGLISH_US)));
+  dprintf2(("KERNEL32:  GetSystemDefaultLangID returns %x", MAKELANGID(LANG_ENGLISH, SUBLANG_ENGLISH_US)));
   return(MAKELANGID(LANG_ENGLISH, SUBLANG_ENGLISH_US));
 }
 

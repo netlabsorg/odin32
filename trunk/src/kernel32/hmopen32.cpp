@@ -1,4 +1,4 @@
-/* $Id: hmopen32.cpp,v 1.22 2000-05-22 19:07:56 sandervl Exp $ */
+/* $Id: hmopen32.cpp,v 1.23 2000-05-23 18:45:12 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -785,10 +785,10 @@ DWORD HMDeviceOpen32Class::OpenFile (LPCSTR        lpFileName,
   {
     pHMHandleData->hHMHandle = hFile;
 
-    ::GetFileTime(hFile,
-                  NULL,
-                  NULL,
-                  &filetime );
+    GetFileTime(pHMHandleData,
+                NULL,
+                NULL,
+                &filetime );
     FileTimeToDosDateTime(&filetime,
                           &filedatetime[0],
                           &filedatetime[1] );
