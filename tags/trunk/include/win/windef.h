@@ -1,4 +1,4 @@
-/* $Id: windef.h,v 1.9 1999-09-02 20:56:29 phaller Exp $ */
+/* $Id: windef.h,v 1.10 1999-09-08 13:46:36 sandervl Exp $ */
 
 /*
  * Basic types definitions
@@ -634,6 +634,33 @@ typedef const RECTL *LPCRECTL;
 #define CONV_RECT32TO16(r32,r16) \
     ((r16)->left  = (INT16)(r32)->left,  (r16)->top    = (INT16)(r32)->top, \
      (r16)->right = (INT16)(r32)->right, (r16)->bottom = (INT16)(r32)->bottom)
+
+/*
+ * 8.9.99 DJR DECIMAL support
+ */
+typedef struct tagDEC
+{
+    USHORT wReserved;
+    union
+    {
+      struct
+      {
+          BYTE scale;
+          BYTE sign;
+      } a;
+      USHORT signscale;
+    } b;
+    ULONG Hi32;
+    union
+    {
+      struct
+      {
+          ULONG Lo32;
+          ULONG Mid32;
+      } c;
+      ULONGLONG_W Lo64;
+    } d;
+} DECIMAL;
 
 #ifdef __cplusplus
 }
