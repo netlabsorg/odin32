@@ -1,9 +1,9 @@
-/* $Id: winimagebase.h,v 1.3 2000-04-15 21:08:37 bird Exp $ */
+/* $Id: winimagebase.h,v 1.4 2000-04-16 04:19:58 bird Exp $ */
 
 /*
  * Win32 PE Image base class
  *
- * Copyright 1998-1999 Sander van Leeuwen (sandervl@xs4all.nl)
+ * Copyright 1998-2000 Sander van Leeuwen (sandervl@xs4all.nl)
  *
  *
  * Project Odin Software License can be found in LICENSE.TXT
@@ -81,7 +81,8 @@ virtual ULONG getVersionSize();
 virtual BOOL  getVersionStruct(char *verstruct, ULONG bufLength);
 
 static  BOOL  isPEImage(char *szFileName);
-static  BOOL  findDll(const char *pszFileName, char *pszFullName, int cchFullName);
+static  BOOL  findDll(const char *pszFileName, char *pszFullName,
+                      int cchFullName, const char *pszAltPath = NULL);
 
     void  setEntryPoint(ULONG startAddress) { entryPoint = startAddress; };
 
