@@ -1,4 +1,4 @@
-/* $Id: oslibmsg.h,v 1.18 2002-08-15 15:45:45 sandervl Exp $ */
+/* $Id: oslibmsg.h,v 1.19 2003-01-03 16:35:54 sandervl Exp $ */
 /*
  * Window message translation functions for OS/2
  *
@@ -11,6 +11,9 @@
  */
 #ifndef __OSLIBMSG_H__
 #define __OSLIBMSG_H__
+
+
+#ifdef __cplusplus
 
 ULONG TranslateWinMsg(ULONG msg);
 
@@ -38,8 +41,6 @@ DWORD OSLibWinGetMessagePos();
 LONG  OSLibWinGetMessageTime();
 BOOL  OSLibWinReplyMessage(ULONG result);
 ULONG OSLibWinQueryQueueStatus();
-
-void  SetMenuDoubleClick(BOOL fSet);
 
 BOOL  OSLibPostThreadMessage(ULONG threadid, UINT msg, WPARAM wParam, LPARAM lParam, BOOL fUnicode);
 BOOL  OSLibPostMessage(HWND hwndWin32, HWND hwndOS2, ULONG msg, ULONG wParam, ULONG lParam, BOOL fUnicode);
@@ -374,5 +375,17 @@ BOOL OSLibPostMessageDirect(HWND hwnd, ULONG msg, ULONG wParam, ULONG lParam);
 
 #define OSWM_SYSCOMMAND              0x0021
 #define OSSC_SYSMENU                 0x8007
+
+#endif
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+void  OSLibSetMenuDoubleClick(BOOL fSet);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif //__OSLIBMSG_H__

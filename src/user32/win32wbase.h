@@ -1,4 +1,4 @@
-/* $Id: win32wbase.h,v 1.147 2002-12-04 15:23:41 sandervl Exp $ */
+/* $Id: win32wbase.h,v 1.148 2003-01-03 16:35:56 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -475,8 +475,8 @@ public:
         VOID  GetInsideRect(RECT *rect);
         LONG  HandleNCHitTest(POINT pt);
         BOOL  GetSysPopupPos(RECT* rect);
-private:
         BOOL  DrawSysButton(HDC hdc,RECT *rect);
+private:
         BOOL  DrawGrayButton(HDC hdc,int x,int y);
         VOID  DrawCloseButton(HDC hdc,RECT *rect,BOOL down,BOOL bGrayed);
         VOID  DrawMaxButton(HDC hdc,RECT *rect,BOOL down,BOOL bGrayed);

@@ -1,4 +1,4 @@
-/* $Id: oslibmsg.cpp,v 1.63 2002-10-28 12:22:31 sandervl Exp $ */
+/* $Id: oslibmsg.cpp,v 1.64 2003-01-03 16:35:54 sandervl Exp $ */
 /*
  * Window message translation functions for OS/2
  *
@@ -13,7 +13,18 @@
  *       (i.e. menu WM_COMMAND messages)
  *
  * TODO: Filter translation isn't correct! (for posted messages or messages that don't have
- *       a PM version.
+ *       a PM version)
+ *
+ * TODO: Flaw in our message handling; we don't handle posted/sent (by the app)
+ *       system messages properly if removed from the queue with PeekMessage.
+ *       e.g.
+ *       PostMessage(WM_KEYDOWN)
+ *       PeekMessage(any, PM_NOREMOVE)
+ *       ...
+ *       PeekMessage(WM_KEYDOWN, WM_KEYDOWN, PM_REMOVE)
+ *
+ *       So what we really need is a complete win to os2 message translation
+ *       in Post/SendMessage. Quite a lot of work though...
  *
  */
 #define  INCL_WIN

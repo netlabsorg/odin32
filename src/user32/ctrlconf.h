@@ -1,4 +1,4 @@
-/* $Id: ctrlconf.h,v 1.1 2002-12-18 12:28:02 sandervl Exp $ */
+/* $Id: ctrlconf.h,v 1.2 2003-01-03 16:35:51 sandervl Exp $ */
 /*
  * Win32 common controls
  *
@@ -8,6 +8,7 @@
 #define __CTRLCONF_H
 
 #include "wndmsg.h"
+#include "win32wmisc.h"
 
 #define SPY_GetMsgName(msg, hwnd)	GetMsgText(msg)
 
@@ -19,6 +20,10 @@
 
 #define  WIN_SuspendWndsLock()		0
 #define  WIN_RestoreWndsLock(ipreviousLock)
+
+//WIN31 look only -> we don't use it
+#define NC_DrawSysButton(hwnd, hdc, state)
+
 
 #define LOCAL_Alloc(ds, flags, size)		0
 #define LOCAL_ReAlloc(ds, handle, size, flags )	0
@@ -60,6 +65,8 @@ extern const struct builtin_class_descr COMBOLBOX_builtin_class;
 extern const struct builtin_class_descr COMBO_builtin_class;
 extern const struct builtin_class_descr EDIT_builtin_class;
 extern const struct builtin_class_descr MDICLIENT_builtin_class;
+extern const struct builtin_class_descr SCROLL_builtin_class;
+extern const struct builtin_class_descr MENU_builtin_class;
 
 #ifdef __cplusplus
 }

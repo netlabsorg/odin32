@@ -1,4 +1,4 @@
-/* $Id: HOOK.CPP,v 1.38 2002-05-23 07:13:00 sandervl Exp $ */
+/* $Id: HOOK.CPP,v 1.39 2003-01-03 16:35:50 sandervl Exp $ */
 
 /*
  * Windows hook functions
@@ -730,9 +730,6 @@ LRESULT WINAPI CallNextHookEx(HHOOK hhook, INT code, WPARAM wParam, LPARAM lPara
  */
 BOOL WIN32API CallMsgFilterA(LPMSG msg, INT code )
 {
-#if 0 //CB: not a Win32 API and unimplemented
-    if (GetSysModalWindow()) return FALSE;      /* ??? */
-#endif
     if (HOOK_CallHooksA( WH_SYSMSGFILTER, code, 0, (LPARAM)msg ))
       return TRUE;
     return HOOK_CallHooksA( WH_MSGFILTER, code, 0, (LPARAM)msg );
@@ -744,9 +741,6 @@ BOOL WIN32API CallMsgFilterA(LPMSG msg, INT code )
  */
 BOOL WIN32API CallMsgFilterW(LPMSG msg, INT code )
 {
-#if 0 //CB: not a Win32 API and unimplemented
-    if (GetSysModalWindow()) return FALSE;      /* ??? */
-#endif
     if (HOOK_CallHooksW( WH_SYSMSGFILTER, code, 0, (LPARAM)msg ))
       return TRUE;
     return HOOK_CallHooksW( WH_MSGFILTER, code, 0, (LPARAM)msg );
@@ -782,7 +776,7 @@ BOOL ProcessKbdHook(LPMSG msg, BOOL remove )
 	(msg->wParam == VK_F1) &&
 	remove &&
 	(msg->hwnd != GetDesktopWindow()) &&
-	!IsMenuActive())
+	!MENU_IsMenuActive())
     {   
 	HELPINFO hi;
         Win32BaseWindow *wnd = Win32BaseWindow::GetWindowFromHandle(msg->hwnd);
