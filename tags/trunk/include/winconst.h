@@ -1970,4 +1970,35 @@
 #define	DROPEFFECT_LINK_W		4
 #define	DROPEFFECT_SCROLL_W		0x80000000
 
+#define MB_OK_W                   0x00000000
+#define MB_OKCANCEL_W             0x00000001
+#define MB_ABORTRETRYIGNORE_W     0x00000002
+#define MB_YESNOCANCEL_W          0x00000003
+#define MB_YESNO_W                0x00000004
+#define MB_RETRYCANCEL_W          0x00000005
+#define MB_TYPEMASK_W             0x0000000F
+
+#define MB_ICONHAND_W             0x00000010
+#define MB_ICONQUESTION_W         0x00000020
+#define MB_ICONEXCLAMATION_W      0x00000030
+#define MB_ICONASTERISK_W         0x00000040
+#define MB_USERICON_W             0x00000080
+#define MB_ICONMASK_W             0x000000F0
+
+#define MB_ICONINFORMATION_W      MB_ICONASTERISK
+#define MB_ICONSTOP_W             MB_ICONHAND
+#define MB_ICONWARNING_W          MB_ICONEXCLAMATION
+#define MB_ICONERROR_W            MB_ICONHAND
+
+/* Standard dialog button IDs */
+#define IDOK_W                1
+#define IDCANCEL_W            2
+#define IDABORT_W             3
+#define IDRETRY_W             4
+#define IDIGNORE_W            5
+#define IDYES_W               6
+#define IDNO_W                7
+#define IDCLOSE_W             8
+#define IDHELP_W              9
+
 #endif //__WINCONST_H__
