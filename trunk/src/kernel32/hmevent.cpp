@@ -1,4 +1,4 @@
-/* $Id: hmevent.cpp,v 1.3 2000-02-16 14:23:59 sandervl Exp $ */
+/* $Id: hmevent.cpp,v 1.4 2001-03-19 19:27:13 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -139,8 +139,9 @@ DWORD HMDeviceEventClass::OpenEvent(PHMHANDLEDATA         pHMHandleData,
 
 BOOL HMDeviceEventClass::SetEvent(PHMHANDLEDATA pHMHandleData)
 {
+//testestest
   dprintf(("KERNEL32: HandleManager::Event::SetEvent(%08xh)\n",
-           pHMHandleData->hHMHandle));
+            pHMHandleData->hHMHandle));
 
   return (O32_SetEvent(pHMHandleData->hHMHandle));
 }
@@ -160,8 +161,8 @@ BOOL HMDeviceEventClass::SetEvent(PHMHANDLEDATA pHMHandleData)
 
 BOOL HMDeviceEventClass::PulseEvent(PHMHANDLEDATA pHMHandleData)
 {
-  dprintf(("KERNEL32: HandleManager::Event::PulseEvent(%08xh)\n",
-           pHMHandleData->hHMHandle));
+  dprintf2(("KERNEL32: HandleManager::Event::PulseEvent(%08xh)\n",
+            pHMHandleData->hHMHandle));
 
   return (O32_PulseEvent(pHMHandleData->hHMHandle));
 }
@@ -181,8 +182,8 @@ BOOL HMDeviceEventClass::PulseEvent(PHMHANDLEDATA pHMHandleData)
 
 BOOL HMDeviceEventClass::ResetEvent(PHMHANDLEDATA pHMHandleData)
 {
-  dprintf(("KERNEL32: HandleManager::Event::ResetEvent(%08xh)\n",
-           pHMHandleData->hHMHandle));
+  dprintf2(("KERNEL32: HandleManager::Event::ResetEvent(%08xh)\n",
+            pHMHandleData->hHMHandle));
 
   return (O32_ResetEvent(pHMHandleData->hHMHandle));
 }
