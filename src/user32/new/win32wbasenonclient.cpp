@@ -1,4 +1,4 @@
-/* $Id: win32wbasenonclient.cpp,v 1.11 2000-01-15 16:37:12 sandervl Exp $ */
+/* $Id: win32wbasenonclient.cpp,v 1.12 2000-01-15 17:27:20 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2 (non-client methods)
  *
@@ -244,12 +244,16 @@ LONG Win32BaseWindow::HandleNCLButtonDown(WPARAM wParam,LPARAM lParam)
   switch(wParam)  /* Hit test */
   {
     case HTCAPTION:
-      if (GetActiveWindow() != Win32Hwnd)
-        SetActiveWindow();
+    {
+      Win32BaseWindow *topparent = GetTopParent();
 
-      if (GetActiveWindow() == Win32Hwnd)
+      if (GetActiveWindow() != topparent->getWindowHandle())
+        topparent->SetActiveWindow();
+
+      if (GetActiveWindow() == topparent->getWindowHandle())
         SendInternalMessageA(WM_SYSCOMMAND,SC_MOVE+HTCAPTION,lParam);
       break;
+    }
 
     case HTSYSMENU:
       if(dwStyle & WS_SYSMENU )
@@ -649,8 +653,6 @@ BOOL Win32BaseWindow::GetSysPopupPos(RECT* rect)
       {
           GetInsideRect(rect );
           OffsetRect( rect, rectWindow.left, rectWindow.top);
-          if ((dwStyle & WS_CHILD) && getParent())
-              ClientToScreen(getParent()->getWindowHandle(), (POINT *)rect );
           rect->right = rect->left + GetSystemMetrics(SM_CYCAPTION) - 1;
           rect->bottom = rect->top + GetSystemMetrics(SM_CYCAPTION) - 1;
       }
