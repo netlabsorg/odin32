@@ -1,4 +1,4 @@
-/* $Id: os2timer.cpp,v 1.16 2000-10-01 21:16:29 phaller Exp $ */
+/* $Id: os2timer.cpp,v 1.17 2000-10-10 21:28:56 sandervl Exp $ */
 
 /*
  * OS/2 Timer class
@@ -414,8 +414,6 @@ void OS2Timer::TimerHandler()
                        PRTYC_TIMECRITICAL,  /* Time critical class    */
                        0L,                  /* Increase by 15         */
                        0L);                 /* Assume current thread  */
-
-  TimerStatus = Stopped;
 
   while(!fFatal)
   {
