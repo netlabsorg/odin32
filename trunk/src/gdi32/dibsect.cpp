@@ -1,4 +1,4 @@
-/* $Id: dibsect.cpp,v 1.66 2003-05-14 11:39:59 sandervl Exp $ */
+/* $Id: dibsect.cpp,v 1.67 2003-07-16 10:46:17 sandervl Exp $ */
 
 /*
  * GDI32 DIB sections
@@ -22,7 +22,6 @@
 #include <win32api.h>
 #include <winconst.h>
 #include <winuser32.h>
-#include <cpuhlp.h>
 #include <dcdata.h>
 #include "dibsect.h"
 #include "oslibgpi.h"
@@ -625,9 +624,7 @@ BOOL DIBSection::BitBlt(HDC hdcDest, int nXdest, int nYdest, int nDestWidth,
 
         if (iLength > 0)
         {
-            if(CPUFeatures & CPUID_MMX)
-                    RGB555to565MMX((WORD *)bmpBitsDblBuffer, (WORD *)bitmapBits, iLength/sizeof(WORD));
-            else    RGB555to565((WORD *)bmpBitsDblBuffer, (WORD *)bitmapBits, iLength/sizeof(WORD));
+            pRGB555to565((WORD *)bmpBitsDblBuffer, (WORD *)bitmapBits, iLength/sizeof(WORD));
         }
         else
         {
@@ -759,10 +756,7 @@ void DIBSection::sync(HDC hdc, DWORD nYdest, DWORD nDestHeight, BOOL orgYInversi
 
       destBuf = GetDIBObject() + nYdest*dibinfo.dsBm.bmWidthBytes;
 
-      if(CPUFeatures & CPUID_MMX) {
-            RGB565to555MMX((WORD *)destBuf, (WORD *)destBuf, (nDestHeight*dibinfo.dsBm.bmWidthBytes)/sizeof(WORD));
-      }
-      else  RGB565to555((WORD *)destBuf, (WORD *)destBuf, (nDestHeight*dibinfo.dsBm.bmWidthBytes)/sizeof(WORD));
+      pRGB565to555((WORD *)destBuf, (WORD *)destBuf, (nDestHeight*dibinfo.dsBm.bmWidthBytes)/sizeof(WORD));
   }
 
   free(tmphdr);

@@ -1,4 +1,4 @@
-//$Id: rgbcvt.h,v 1.3 2002-07-15 10:02:30 sandervl Exp $
+//$Id: rgbcvt.h,v 1.4 2003-07-16 10:46:18 sandervl Exp $
 #ifndef __RGBCVT_H__
 #define __RGBCVT_H__
 
@@ -30,5 +30,8 @@ void _Optlink RGB555to565MMX(WORD *dest, WORD *src, ULONG num);
 
 void _Optlink RGB565to555(WORD *dest, WORD *src, ULONG num);
 void _Optlink RGB565to555MMX(WORD *dest, WORD *src, ULONG num);
+
+extern void (_Optlink *pRGB555to565)(WORD *dest, WORD *src, ULONG num);
+extern void (_Optlink *pRGB565to555)(WORD *dest, WORD *src, ULONG num);
 
 #endif //__RGBCVT_H__

@@ -1,4 +1,4 @@
-/* $Id: blit.cpp,v 1.44 2003-05-02 15:32:27 sandervl Exp $ */
+/* $Id: blit.cpp,v 1.45 2003-07-16 10:46:16 sandervl Exp $ */
 
 /*
  * GDI32 blit code
@@ -182,11 +182,7 @@ static INT SetDIBitsToDevice_(HDC hdc, INT xDest, INT yDest, DWORD cx,
         dprintf(("RGB 555->565 conversion required %x %x %x", bitfields[0], bitfields[1], bitfields[2]));
 
         newbits = (WORD *)malloc(imgsize);
-        if(CPUFeatures & CPUID_MMX) {
-             RGB555to565MMX(newbits, (WORD *)bits, imgsize/sizeof(WORD));
-        }
-        else
-          RGB555to565(newbits, (WORD *)bits, imgsize/sizeof(WORD));
+        pRGB555to565(newbits, (WORD *)bits, imgsize/sizeof(WORD));
         bits = newbits;
     }
 
@@ -468,23 +464,22 @@ static INT StretchDIBits_(HDC hdc, INT xDst, INT yDst, INT widthDst,
         bitfields[2] = 0;
         break;
     }
+
     if(bitfields[1] == RGB555_GREEN_MASK) 
     {//RGB 555?
         dprintf(("RGB 555->565 conversion required %x %x %x", bitfields[0], bitfields[1], bitfields[2]));
 
         ULONG imgsize = CalcBitmapSize(info->bmiHeader.biBitCount,
-                                     widthSrc, heightSrc);
+                                     abs(info->bmiHeader.biWidth), heightSrc);
         ULONG offset = CalcBitmapSize(info->bmiHeader.biBitCount,
-                                     xSrc, ySrc)/sizeof(WORD);
+                                     abs(info->bmiHeader.biWidth), ySrc)/sizeof(WORD);
         newbits = (WORD *) HeapAlloc(GetProcessHeap(), 0, imgsize);
-//bugbug (too much)
-//bugbug
-        if(CPUFeatures & CPUID_MMX) {
-             RGB555to565MMX(newbits, (WORD *)bits+offset, imgsize/sizeof(WORD));
-        }
-        else 
-          RGB555to565(newbits, (WORD *)bits+offset, imgsize/sizeof(WORD));
+
+        //we still convert too much
+        pRGB555to565(newbits, (WORD *)bits+offset, imgsize/sizeof(WORD));
         bits = newbits;
+
+        ySrc = 0;
     }
     //SvL: Ignore BI_BITFIELDS type (StretchDIBits fails otherwise)
     if(info->bmiHeader.biCompression == BI_BITFIELDS) {

@@ -1,4 +1,4 @@
-/* $Id: dibitmap.cpp,v 1.40 2003-05-14 11:39:59 sandervl Exp $ */
+/* $Id: dibitmap.cpp,v 1.41 2003-07-16 10:46:17 sandervl Exp $ */
 
 /*
  * GDI32 dib & bitmap code
@@ -111,10 +111,8 @@ HBITMAP WIN32API CreateDIBitmap(HDC hdc, const BITMAPINFOHEADER *lpbmih,
         int imgsize = CalcBitmapSize(lpbmih->biBitCount, lpbmih->biWidth, lpbmih->biHeight);
 
         newbits = (WORD *)malloc(imgsize);
-        if(CPUFeatures & CPUID_MMX) {
-             RGB555to565MMX(newbits, (WORD *)lpbInit, imgsize/sizeof(WORD));
-        }
-        else RGB555to565(newbits, (WORD *)lpbInit, imgsize/sizeof(WORD));
+        pRGB555to565(newbits, (WORD *)lpbInit, imgsize/sizeof(WORD));
+
         lpbInit = newbits;
     }
 
@@ -495,10 +493,7 @@ int WIN32API GetDIBits(HDC hdc, HBITMAP hBitmap, UINT uStartScan, UINT cScanLine
         int imgsize = CalcBitmapSize(lpbi->bmiHeader.biBitCount,
                                      lpbi->bmiHeader.biWidth, nrlines);
 
-        if(CPUFeatures & CPUID_MMX) {
-             RGB565to555MMX((WORD *)lpvBits, (WORD *)lpvBits, imgsize/sizeof(WORD));
-        }
-        else RGB565to555((WORD *)lpvBits, (WORD *)lpvBits, imgsize/sizeof(WORD));
+        pRGB565to555((WORD *)lpvBits, (WORD *)lpvBits, imgsize/sizeof(WORD));
     }
 
     //WGSS/Open32 returns 1 when querying the bitmap info; must return nr of scanlines
@@ -514,10 +509,7 @@ int WIN32API GetDIBits(HDC hdc, HBITMAP hBitmap, UINT uStartScan, UINT cScanLine
 //******************************************************************************
 void WIN32API ConvertRGB555to565(LPVOID dest, LPVOID src, UINT imgsize)
 {
-    if(CPUFeatures & CPUID_MMX) {
-         RGB555to565MMX((WORD *)dest, (WORD *)src, imgsize/sizeof(WORD));
-    }
-    else RGB555to565((WORD *)dest, (WORD *)src, imgsize/sizeof(WORD));
+    pRGB555to565((WORD *)dest, (WORD *)src, imgsize/sizeof(WORD));
 }
 //******************************************************************************
 //******************************************************************************
@@ -591,10 +583,7 @@ int WIN32API SetDIBits(HDC hdc, HBITMAP hBitmap, UINT startscan, UINT numlines, 
                                      pBitmapInfo->bmiHeader.biWidth, numlines);
 
         newbits = (WORD *)malloc(imgsize);
-        if(CPUFeatures & CPUID_MMX) {
-             RGB555to565MMX(newbits, (WORD *)pBits, imgsize/sizeof(WORD));
-        }
-        else RGB555to565(newbits, (WORD *)pBits, imgsize/sizeof(WORD));
+        pRGB555to565(newbits, (WORD *)pBits, imgsize/sizeof(WORD));
         pBits = newbits;
     }
 
