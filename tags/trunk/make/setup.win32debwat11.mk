@@ -1,4 +1,4 @@
-# $Id: setup.win32debwat11.mk,v 1.7 2002-08-24 22:33:13 bird Exp $
+# $Id: setup.win32debwat11.mk,v 1.8 2002-08-27 03:03:14 bird Exp $
 
 # ---WIN32, DEBUG, WAT11-------------------------
 ENV_NAME="Win32, Debug, Watcom C/C++ v11.0c"
@@ -13,6 +13,7 @@ ENV_ENVS_FORCE=vac308 watcomc11c
 #
 # Include some shared standard stuff: ALP, optional stuff.
 #
+AS_DEBUG_TYPE = Codeview
 !include $(PATH_MAKE)\setup.os2debalp.mk
 !include $(PATH_MAKE)\setup.os2debwrc.mk
 !include $(PATH_MAKE)\setup.optional.watcom11x.mk

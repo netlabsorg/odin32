@@ -1,4 +1,11 @@
-# $Id: setup.os2relwat11-16.mk,v 1.8 2002-08-24 22:33:13 bird Exp $
+# $Id: setup.os2relwat11-16.mk,v 1.9 2002-08-27 03:03:14 bird Exp $
+
+#
+# Note! Watcom is unable to do debug info release builds.
+#       Because of a compiler bug which makes it emit code with
+#       no optimizations.
+#       Another reason is that lxlite isn't able to strip it.
+#
 
 # ---OS2, RELEASE, WAT11-------------------------
 ENV_NAME="OS/2, Release, Watcom C/C++ v11.0c 16-bit"
@@ -14,6 +21,7 @@ ENV_16BIT = 16
 #
 # Include some shared standard stuff: ALP, WRC, VAC optional stuff.
 #
+AS_DEBUG_TYPE = Codeview
 !include $(PATH_MAKE)\setup.os2relalp.mk
 !include $(PATH_MAKE)\setup.os2relwrc.mk
 !include $(PATH_MAKE)\setup.optional.watcom11x.mk
@@ -46,24 +54,22 @@ AR_LNK4= "$(@R).lst";
 
 _CC_FLAGS_OS =
 
-# Note: wlink doesn't like 16-bit objects with debuginfo if Debug is disabled. (Failes on make\testcase.)
-CC_FLAGS=-bt=os2 -dOS2 -d__16BIT__ -5 -omlinear -zq -bm -ze -w4 -zc $(_CC_OPTIONAL) $(CC_DEFINES) $(ALL_DEFINES) $(BUILD_DEFINES) $(CC_INCLUDES:-I=-i=) $(ALL_INCLUDES:-I=-i=) -i=$(PATH_INCLUDES) -i=$(WATCOM)\h
-CC_FLAGS_EXE=$(CC_FLAGS)
-CC_FLAGS_DLL=$(CC_FLAGS) -bd
-CC_FLAGS_SYS=$(CC_FLAGS) -s -zfp -zgp -zu
+CC_FLAGS=-bt=os2 -dOS2 -d__16BIT__ -5 -zq -bm -ze -w4 -zld $(_CC_OPTIONAL) $(CC_DEFINES) $(ALL_DEFINES) $(BUILD_DEFINES) $(CC_INCLUDES:-I=-i=) $(ALL_INCLUDES:-I=-i=) -i=$(PATH_INCLUDES) -i=$(WATCOM)\h
+CC_FLAGS_EXE=$(CC_FLAGS) -omlinear -zc
+CC_FLAGS_DLL=$(CC_FLAGS) -omlinear -zc -bd
+CC_FLAGS_SYS=$(CC_FLAGS) -omlinear -s -zff -zgf -zu
 CC_FLAGS_VDD=$(CC_FLAGS_SYS)
-CC_FLAGS_IFS=$(CC_FLAGS_SYS) -bd
+CC_FLAGS_IFS=$(CC_FLAGS) -out      -s -zff -zgf -zu -bd
 CC_OBJ_OUT=-fo=
 CC_LST_OUT=
 CC_PC_2_STDOUT=-pc
 
-# Note: wlink doesn't like 16-bit objects with debuginfo if Debug is disabled. (paranoia since CC failed)
-CXX_FLAGS=-bt=os2 -dOS2 -d__16BIT__ -5 -omlinear -zq -bm -ze -w4 -zc $(_CXX_OPTIONAL)  $(CXX_DEFINES) $(ALL_DEFINES) $(BUILD_DEFINES) $(CXX_INCLUDES:-I=-i=) $(ALL_INCLUDES:-I=-i=) -i=$(PATH_INCLUDES) -i=$(WATCOM)\h
-CXX_FLAGS_EXE=$(CXX_FLAGS)
-CXX_FLAGS_DLL=$(CXX_FLAGS) -bd
-CXX_FLAGS_SYS=$(CXX_FLAGS) -s -zfp -zgp -zu
+CXX_FLAGS=-bt=os2 -dOS2 -d__16BIT__ -5 -zq -bm -ze -w4 -zld $(_CXX_OPTIONAL)  $(CXX_DEFINES) $(ALL_DEFINES) $(BUILD_DEFINES) $(CXX_INCLUDES:-I=-i=) $(ALL_INCLUDES:-I=-i=) -i=$(PATH_INCLUDES) -i=$(WATCOM)\h
+CXX_FLAGS_EXE=$(CXX_FLAGS) -omlinear -zc
+CXX_FLAGS_DLL=$(CXX_FLAGS) -omlinear -zc -bd
+CXX_FLAGS_SYS=$(CXX_FLAGS) -omlinear -s -zff -zgf -zu
 CXX_FLAGS_VDD=$(CXX_FLAGS_SYS)
-CXX_FLAGS_IFS=$(CXX_FLAGS_SYS) -bd
+CXX_FLAGS_IFS=$(CXX_FLAGS) -omlnaru  -s -zff -zgf -zdp -zu -bd
 CXX_OBJ_OUT=-fo=
 CXX_LST_OUT=
 CXX_PC_2_STDOUT=-pc
@@ -92,17 +98,17 @@ CXX_FLAGS_IFS=$(CC_FLAGS_IFS)
 
 IMPLIB_FLAGS=/NOI /Nologo
 
-LINK_FLAGS=Sort global Debug codeview Option quiet, dosseg, eliminate, manglednames, caseexact
+LINK_FLAGS=Sort global Option eliminate, manglednames, caseexact, verbose, cache $(_LD_OPTIONAL) #Debug codeview all
 LINK_FLAGS_EXE=$(LINK_FLAGS)
 LINK_FLAGS_DLL=$(LINK_FLAGS)
-LINK_FLAGS_SYS=$(LINK_FLAGS) Option oneautodata, internalrelocs, togglerelocs
+LINK_FLAGS_SYS=$(LINK_FLAGS) segment type code preload segment type data preload Option internalrelocs, togglerelocs
 LINK_FLAGS_VDD=$(LINK_FLAGS_SYS)
-LINK_FLAGS_IFS=$(LINK_FLAGS_SYS)
-LINK_CMD_EXE=$(LINK) $(LINK_FLAGS_EXE) @$(TARGET_LNK)
-LINK_CMD_DLL=$(LINK) $(LINK_FLAGS_DLL) @$(TARGET_LNK)
-LINK_CMD_SYS=$(LINK) $(LINK_FLAGS_SYS) @$(TARGET_LNK)
-LINK_CMD_VDD=$(LINK) $(LINK_FLAGS_VDD) @$(TARGET_LNK)
-LINK_CMD_IFS=$(LINK) $(LINK_FLAGS_IFS) @$(TARGET_LNK)
+LINK_FLAGS_IFS=$(LINK_FLAGS) segment type code preload segment type data preload
+LINK_CMD_EXE=$(LINK) @$(TARGET_LNK)  $(LINK_FLAGS_EXE)
+LINK_CMD_DLL=$(LINK) @$(TARGET_LNK)  $(LINK_FLAGS_DLL)
+LINK_CMD_SYS=$(LINK) @$(TARGET_LNK)  $(LINK_FLAGS_SYS)
+LINK_CMD_VDD=$(LINK) @$(TARGET_LNK)  $(LINK_FLAGS_VDD)
+LINK_CMD_IFS=$(LINK) @$(TARGET_LNK)  $(LINK_FLAGS_IFS)
 LINK_LNK1=file       $(TARGET_OBJS: =^
 file       )
 LINK_LNK2=libpath    $(WATCOM)\lib286\os2;$(WATCOM)\lib286;

@@ -1,4 +1,4 @@
-# $Id: setup.optional.watcom11x.mk,v 1.3 2002-05-01 04:00:18 bird Exp $
+# $Id: setup.optional.watcom11x.mk,v 1.4 2002-08-27 03:03:13 bird Exp $
 
 #
 #  Helper file for all the optional stuff which is common for
@@ -9,7 +9,20 @@
 #
 # This is not optional (but I'm getting lazy)
 #
-TOOL_DEFCONV    = $(PATH_TOOLS)\kDef2Wat.exe $(BUILD_PLATFORM)
+_LD_FORMAT = $(BUILD_PLATFORM)
+!ifdef LD_FORMAT
+! if "$(LD_FORMAT)" == "NE"
+_LD_FORMAT = $(BUILD_PLATFORM)-16
+! else
+!  if "$(LD_FORMAT)" == "LX"
+_LD_FORMAT = os2
+!  else
+!   error LD_FORMAT other than NE and LXis not supported by this compiler ($(ENV_NAME)).
+!  endif
+! endif
+!endif
+TOOL_DEFCONV    = $(PATH_TOOLS)\kDef2Wat.exe $(_LD_FORMAT)
+
 
 #
 # C Compiler flags.
@@ -27,6 +40,7 @@ _CC_DEF_MODEL    = SMALL
 _CC_MODEL        = -mf
 _CC_DEF_MODEL    = FLAT
 !endif
+_CC_OPT_R        =
 
 !ifdef ALL_SEG_TEXT
 _CC_SEG_TEXT=-nt=$(ALL_SEG_TEXT)
@@ -106,7 +120,11 @@ _CC_DEF_MODEL= LARGE
 ! error Invalid MODEL. CC_MODEL=$(CC_MODEL)
 !endif
 
-_CC_OPTIONAL = $(_CC_SEG_TEXT) $(_CC_SEG_DATA) $(_CC_SEG_XCPT) $(_CC_DEFAULT_LIBS) $(_CC_PACK) $(_CC_MODEL) -d$(_CC_DEF_MODEL)
+!if defined(CC_SAVE_SEGS_ACCROSS_CALLS) || defined(ALL_SAVE_SEGS_ACCROSS_CALLS)
+_CC_OPT_R = -r
+!endif
+_CC_OPTIONAL = $(_CC_SEG_TEXT) $(_CC_SEG_DATA) $(_CC_SEG_XCPT) $(_CC_DEFAULT_LIBS) $(_CC_PACK) $(_CC_MODEL) -d$(_CC_DEF_MODEL) \
+               $(_CC_OPT_R)
 
 
 
@@ -128,6 +146,7 @@ _CXX_DEF_MODEL    = SMALL
 _CXX_MODEL        = -mf
 _CXX_DEF_MODEL    = FLAT
 !endif
+_CXX_OPT_R        =
 
 !ifdef ALL_SEG_TEXT
 _CXX_SEG_TEXT=-nt=$(ALL_SEG_TEXT)
@@ -218,7 +237,50 @@ _CXX_DEF_MODEL= LARGE
 !if "$(_CXX_MODEL)" == ""
 ! error Invalid MODEL. CXX_MODEL=$(CXX_MODEL)
 !endif
+!if defined(CXX_SAVE_SEGS_ACCROSS_CALLS) || defined(ALL_SAVE_SEGS_ACCROSS_CALLS)
+_CXX_OPT_R = -r
+!endif
 
-_CXX_OPTIONAL = $(_CXX_SEG_TEXT) $(_CXX_SEG_DATA) $(_CXX_SEG_XCPT) $(_CXX_DEFAULT_LIBS) $(_CXX_PACK) $(_CXX_XCPT) $(_CXX_MODEL) -d$(_CXX_DEF_MODEL)
+_CXX_OPTIONAL = $(_CXX_SEG_TEXT) $(_CXX_SEG_DATA) $(_CXX_SEG_XCPT) $(_CXX_DEFAULT_LIBS) $(_CXX_PACK) $(_CXX_XCPT) $(_CXX_MODEL) -d$(_CXX_DEF_MODEL) \
+                $(_CXX_OPT_R)
 
+
+#
+# Linker flags.
+#
+_LD_SORT            = Sort global
+# Option
+_LD_QUIET           =
+_LD_DEFAULT_LIBS    = ,nodefaultlibs
+_LD_ALIGN           =
+_LD_DOSSEG          = ,dosseg
+
+!if defined(LD_SORT_GLOBAL)
+_LD_SORT    = Sort global
+!endif
+!if defined(LD_SORT_ALPHABETICAL)
+_LD_SORT    = Sort alphabetical
+!endif
+!if defined(LD_SORT_BOTH)
+_LD_SORT    = Sort global alphabetical
+!endif
+
+# Option
+!if defined(BUILD_QUIET)
+_LD_QUIET   = ,quiet
+!endif
+!if defined(LD_ALIGN)
+_LD_ALIGN   = ,alignment=$(LD_ALIGN)
+!endif
+!if defined(LD_DEFAULT_LIBS) || defined(ALL_DEFAULT_LIBS)
+_LD_DEFAULT_LIBS =
+!endif
+!if defined(LD_DOSSEG_NO)
+_LD_DOSSEG  =
+!endif
+!if defined(LD_DOSSEG_YES)
+_LD_DOSSEG  = ,dosseg
+!endif
+
+_LD_OPTIONAL = $(_LD_SORT) Option verbose $(_LD_QUIET) $(_LD_ALIGN) $(_LD_DOSSEG)
 
