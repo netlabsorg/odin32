@@ -1,4 +1,4 @@
-/* $Id: oslibgdi.h,v 1.3 1999-07-20 07:42:35 sandervl Exp $ */
+/* $Id: oslibgdi.h,v 1.4 1999-07-24 14:01:44 sandervl Exp $ */
 /*
  * Window GDI wrapper functions for OS/2
  *
@@ -37,6 +37,9 @@ BOOL  OSLibWinEndPaint(HDC hdc);
 HDC   OSLibWinGetPS(HWND hwnd);
 BOOL  OSLibWinReleasePS(HDC hdc);
 
+BOOL  OSLibWinInvalidateRect(HWND hwnd, PRECT pRect, BOOL fIncludeChildren); //must be RECTL pointer!
+BOOL  OSLibWinQueryUpdateRect(HWND hwnd, PRECT pRect);
+
 //******************************************************************************
 //Map win32 y coordinate (in window coordinates) to OS/2 y coord. (in window coordinates)
 //******************************************************************************
@@ -47,6 +50,9 @@ inline ULONG MapOS2ToWin32Y(Win32Window *window, ULONG y)
 
 ULONG MapOS2ToWin32Y(HWND hwndParent, ULONG cy, ULONG y);
 BOOL  MapOS2ToWin32Point(HWND hwndParent, HWND hwndChild, OSLIBPOINT *point);
+
+//map os/2 rectangle to screen coordinates and convert to win32 rect
+BOOL  MapOS2ToWin32Rectl(HWND hwndParent, HWND hwndChild, PRECTLOS2 rectOS2, PRECT rectWin32);
 
 BOOL  MapOS2ToWin32Rectl(PRECTLOS2 rectOS2, PRECT rectWin32);
 BOOL  MapWin32ToOS2Rectl(PRECT rectWin32, PRECTLOS2 rectOS2);

@@ -1,4 +1,4 @@
-/* $Id: oslibwin.cpp,v 1.18 1999-07-20 15:46:53 sandervl Exp $ */
+/* $Id: oslibwin.cpp,v 1.19 1999-07-24 14:01:44 sandervl Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -182,12 +182,6 @@ ULONG OSLibGetWindowHeight(HWND hwnd)
 }
 //******************************************************************************
 //******************************************************************************
-BOOL OSLibWinInvalidateRect(HWND hwnd,POSRECTL pwrc,BOOL fIncludeChildren)
-{
-  return WinInvalidateRect(hwnd,(PRECTL)pwrc,fIncludeChildren);
-}
-//******************************************************************************
-//******************************************************************************
 LONG OSLibWinQuerySysValue(HWND hwndDeskTop,LONG iSysValue)
 {
   return WinQuerySysValue(hwndDeskTop,iSysValue);
@@ -259,16 +253,18 @@ BOOL OSLibWinDestroyWindow(HWND hwnd)
   return WinDestroyWindow(hwnd);
 }
 //******************************************************************************
-//Returns rectangle in Win32 window coordinates
 //******************************************************************************
-BOOL OSLibWinQueryUpdateRect(HWND hwnd, PVOID pRect)
+BOOL OSLibWinQueryWindowRect(HWND hwnd, PRECT pRect, int RelativeTo)
 {
- BOOL rc;
+ BOOL     rc;
  RECTLOS2 rectl;
 
-  rc = WinQueryUpdateRect(hwnd, (PRECTL)&rectl);
+  rc = WinQueryWindowRect(hwnd, (PRECTL)&rectl);
   if(rc) {
-        MapOS2ToWin32Rectl(&rectl, (PRECT)pRect);
+        if(RelativeTo == RELATIVE_TO_SCREEN) {
+                MapOS2ToWin32Rectl(OSLIB_HWND_DESKTOP, hwnd, &rectl, pRect);
+        }
+        else    MapOS2ToWin32Rectl(&rectl, pRect);
   }
   else  memset(pRect, 0, sizeof(RECT));
   return rc;

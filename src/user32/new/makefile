@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.17 1999-07-24 12:40:20 cbratschi Exp $
+# $Id: makefile,v 1.18 1999-07-24 14:01:44 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -82,7 +82,7 @@ combo.obj: combo.cpp $(PDWIN32_INCLUDE)\win\combo.h
 nativerc.obj: nativerc.cpp
 
 msgbox.obj:    msgbox.cpp
-window.obj:    window.cpp win32class.h win32wnd.h win32wndchild.h
+window.obj:    window.cpp win32class.h win32wnd.h win32wndchild.h oslibwin.h
 windowmsg.obj: windowmsg.cpp win32class.h win32wnd.h win32wndchild.h
 windlg.obj:    windlg.cpp win32wnd.h win32dlg.h
 winprop.obj:   winprop.cpp
