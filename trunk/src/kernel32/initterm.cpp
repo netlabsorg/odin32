@@ -1,4 +1,4 @@
-/* $Id: initterm.cpp,v 1.65 2001-11-24 13:55:57 sandervl Exp $
+/* $Id: initterm.cpp,v 1.66 2002-05-16 12:16:00 sandervl Exp $
  *
  * KERNEL32 DLL entry point
  *
@@ -103,8 +103,6 @@ ULONG DLLENTRYPOINT_CCONV DLLENTRYPOINT_NAME(ULONG hModule, ULONG ulFlag)
         case 0 :
         {
             ctordtorInit();
-
-            CheckVersionFromHMOD(PE2LX_VERSION, hModule); /*PLF Wed  98-03-18 05:28:48*/
 
             /*******************************************************************/
             /* A DosExitList routine must be used to clean up if runtime calls */

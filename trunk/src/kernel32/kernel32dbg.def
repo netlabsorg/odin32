@@ -1,4 +1,4 @@
-; $Id: kernel32dbg.def,v 1.11 2002-05-08 15:02:59 sandervl Exp $
+; $Id: kernel32dbg.def,v 1.12 2002-05-16 12:16:00 sandervl Exp $
 
 ;Basis is Windows95 KERNEL32
 LIBRARY KERNEL32 INITINSTANCE TERMINSTANCE
@@ -1209,6 +1209,10 @@ EXPORTS
     strcmpiW                                                      @2020 NONAME
     strstrW                                                       @2021 NONAME
     strncmpiW                                                     @2022 NONAME
+
+    cp_wcstombs                                                   @2023 NONAME
+    cp_mbstowcs                                                   @2024 NONAME
+    cp_get_table                                                  @2025 NONAME
 
     GetDisplayCodepage                                            @3000 NONAME
     GetWindowsCodepage                                            @3001 NONAME

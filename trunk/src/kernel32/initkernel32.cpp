@@ -1,4 +1,4 @@
-/* $Id: initkernel32.cpp,v 1.17 2002-05-09 13:55:33 sandervl Exp $
+/* $Id: initkernel32.cpp,v 1.18 2002-05-16 12:16:00 sandervl Exp $
  *
  * KERNEL32 DLL entry point
  *
@@ -121,10 +121,12 @@ ULONG APIENTRY inittermKernel32(ULONG hModule, ULONG ulFlag)
                     dprintf(("KERNEL32: initterm: libWin32kSetEnvironment failed with rc=%d\n", rc));
                 }
             }
-
             strcpy(kernel32Path, OSLibGetDllName(hModule));
             char *endofpath = strrchr(kernel32Path, '\\');
             *(endofpath+1) = 0;
+
+            CheckVersionFromHMOD(PE2LX_VERSION, hModule); /*PLF Wed  98-03-18 05:28:48*/
+
             dprintf(("kernel32 init %s %s (%x) Win32k - %s", __DATE__, __TIME__, inittermKernel32,
                      libWin32kInstalled() ? "Installed" : "Not Installed"));
 
