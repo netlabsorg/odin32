@@ -1,4 +1,4 @@
-/* $Id: winerror.h,v 1.1 1999-05-24 20:19:22 ktk Exp $ */
+/* $Id: winerror.h,v 1.2 1999-09-02 10:31:20 phaller Exp $ */
 
 #ifndef __WINE_WINERROR_H
 #define __WINE_WINERROR_H
@@ -611,6 +611,17 @@ extern int WIN32_LastError;
 #define TYPE_E_ELEMENTNOTFOUND           0x8002802BL
 #define TYPE_E_CANTLOADLIBRARY  0x80029C4AL
 
+/* OLE Clipboard */
+#define CLIPBRD_E_FIRST         0x800401D0L
+#define CLIPBRD_E_LAST          0x800401DFL
+#define CLIPBRD_S_FIRST         0x000401D0L
+#define CLIPBRD_S_LAST          0x000401DFL
+#define CLIPBRD_E_CANT_OPEN     0x800401D0L
+#define CLIPBRD_E_CANT_EMPTY    0x800401D1L
+#define CLIPBRD_E_CANT_SET      0x800401D2L
+#define CLIPBRD_E_BAD_DATA      0x800401D3L
+#define CLIPBRD_E_CANT_CLOSE    0x800401D4L
+
 
 /* Drag and Drop */
 #define DRAGDROP_S_DROP   0x00040100L
@@ -647,6 +658,11 @@ extern int WIN32_LastError;
 #define CO_E_ERRORINDLL                 0x800401F9
 #define CO_E_OBJISREG                   0x800401FB
 
+#define OLE_E_FIRST 0x80040000L
+#define OLE_E_LAST  0x800400FFL
+#define OLE_S_FIRST 0x00040000L
+#define OLE_S_LAST  0x000400FFL
+
 #define	OLE_E_ENUM_NOMORE		      0x80040002
 #define	OLE_E_ADVISENOTSUPPORTED  0x80040003
 #define	OLE_E_NOCONNECTION        0x80040004
@@ -660,6 +676,8 @@ extern int WIN32_LastError;
 
 #define DV_E_FORMATETC            0x80040064
 #define DV_E_DVASPECT             0x8004006B
+#define DV_E_LINDEX               0x80040068
+#define DV_E_TYMED                0x80040069
 
 #define CLASS_E_NOAGGREGATION     0x80040110
 #define	CLASS_E_CLASSNOTAVAILABLE 0x80040111
@@ -766,6 +784,7 @@ extern int WIN32_LastError;
 
 
 #define OLEOBJ_E_NOVERBS                0x00040180L
+#define OLEOBJ_E_INVALIDVERB            0x00040181L
 #define OLEOBJ_S_INVALIDVERB            0x00040180L
 
 #endif  /* __WINE_WINERROR_H */
