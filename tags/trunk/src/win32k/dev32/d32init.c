@@ -1,4 +1,4 @@
-/* $Id: d32init.c,v 1.20 2000-09-02 21:07:57 bird Exp $
+/* $Id: d32init.c,v 1.21 2000-09-04 02:04:20 bird Exp $
  *
  * d32init.c - 32-bits init routines.
  *
@@ -130,13 +130,20 @@ USHORT _loadds _Far32 _Pascal R0Init32(RP32INIT *pRpInit)
         switch (*pszTmp)
         {
             case 'c':
-            case 'C': /* -C[1|2] or -Com:[1|2]  -  com-port no, def:-C2 */
+            case 'C': /* -C[1|2|3|4] or -Com:[1|2|3|4]  -  com-port no, def:-C2 */
                 pszTmp2 = strpbrk(pszTmp, ":=/- ");
                 if (pszTmp2 != NULL && (*pszTmp2 == ':' || *pszTmp2 == '='))
                     pszTmp2++;
                 else
                     pszTmp2 = pszTmp + 1;
-                options.usCom = (USHORT)(*pszTmp2 == '1' ? OUTPUT_COM1 : OUTPUT_COM2);
+                ul = readnum(pszTmp2);
+                switch (ul)
+                {
+                    case 1: options.usCom = OUTPUT_COM1; break;
+                    case 2: options.usCom = OUTPUT_COM2; break;
+                    case 3: options.usCom = OUTPUT_COM3; break;
+                    case 4: options.usCom = OUTPUT_COM4; break;
+                }
                 break;
 
             case 'e':
