@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.320 2002-03-27 10:56:25 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.321 2002-03-28 16:20:06 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -45,6 +45,7 @@
 #include <misc.h>
 #include <heapstring.h>
 #include <winuser32.h>
+#include <custombuild.h>
 #include "win32wbase.h"
 #include "wndmsg.h"
 #include "oslibwin.h"
@@ -637,7 +638,7 @@ BOOL Win32BaseWindow::MsgCreate(HWND hwndOS2)
                           : HOOK_CallHooksA(WH_CBT, HCBT_CREATEWND, getWindowHandle(), (LPARAM)&cbtc);
         if(ret)
         {
-            dprintf(("CBT-hook returned 0!!"));
+            dprintf(("CBT-hook returned non-0 !!"));
             SetLastError(ERROR_CAN_NOT_COMPLETE); //todo: wrong error
             return FALSE;
         }
@@ -903,6 +904,9 @@ if (!cs->hMenu) cs->hMenu = LoadMenuA(windowClass->getInstance(),"MYAPP");
             /* Call WH_SHELL hook */
             if (!(getStyle() & WS_CHILD) && !owner)
                 HOOK_CallHooksA(WH_SHELL, HSHELL_WINDOWCREATED, getWindowHandle(), 0);
+
+            //Call custom Odin hook for window creation (for all windows)
+            HOOK_CallOdinHookA(HODIN_WINDOWCREATED, hwnd, 0);
 
             SetLastError(0);
             return TRUE;
