@@ -1269,4 +1269,37 @@ typedef DWORD HENHMETAFILE;
 
 #pragma pack()
 
+
+/*
+ * Low level hook flags
+ */
+#define LLKHF_EXTENDED       0x00000001
+#define LLKHF_INJECTED       0x00000010
+#define LLKHF_ALTDOWN        0x00000020
+#define LLKHF_UP             0x00000080
+
+#define LLMHF_INJECTED       0x00000001
+
+/*
+ * Structure used by WH_KEYBOARD_LL
+ */
+typedef struct tagKBDLLHOOKSTRUCT {
+    DWORD   vkCode;
+    DWORD   scanCode;
+    DWORD   flags;
+    DWORD   time;
+    DWORD   dwExtraInfo;
+} KBDLLHOOKSTRUCT, *LPKBDLLHOOKSTRUCT, *PKBDLLHOOKSTRUCT;
+
+/*
+ * Structure used by WH_MOUSE_LL
+ */
+typedef struct tagMSLLHOOKSTRUCT {
+    POINT   pt;
+    DWORD   mouseData;
+    DWORD   flags;
+    DWORD   time;
+    DWORD   dwExtraInfo;
+} MSLLHOOKSTRUCT, *LPMSLLHOOKSTRUCT, *PMSLLHOOKSTRUCT;
+
 #endif
