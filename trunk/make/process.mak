@@ -1,4 +1,4 @@
-# $Id: process.mak,v 1.1 2002-04-06 20:25:04 bird Exp $
+# $Id: process.mak,v 1.2 2002-04-07 22:43:25 bird Exp $
 
 #
 # Unix-like tools for OS/2
@@ -127,13 +127,13 @@ BUILD_TARGET_DEPEND=$(PATH_TARGET)\.depend
 # ----------------------
 
 .SUFFIXES:
-.SUFFIXES: .dll .exe .$(EXT_OBJ) .c .cpp .asm .res .rc .pre-c .pre-cpp # .h .def
+.SUFFIXES: .$(EXT_OBJ) .c .cpp .asm .$(EXT_RES) .rc .pre-c .pre-cpp # .h .def
 
 
 # Assembling assembly source.
 .asm{$(PATH_TARGET)}.$(EXT_OBJ):
     @$(ECHO) Assembling $(CLRFIL)$< $(CLRRST)
-!if "$(TARGET_MODE)" == "SYS" || "$(TARGET_MODE)" == "SYSLIB"
+!if "$(TARGET_MODE)" == "SYS" || "$(TARGET_MODE)" == "SYSLIB" || "$(TARGET_MODE)" == "IFS" || "$(TARGET_MODE)" == "IFSLIB"
     @$(AS) $(AS_FLAGS_SYS) $< $(AS_OBJ_OUT)$@
 !else
     @$(AS) $(AS_FLAGS) $< $(AS_OBJ_OUT)$@
@@ -141,7 +141,7 @@ BUILD_TARGET_DEPEND=$(PATH_TARGET)\.depend
 
 .asm.$(EXT_OBJ):
     @$(ECHO) Assembling $(CLRFIL)$< $(CLRRST)
-!if "$(TARGET_MODE)" == "SYS" || "$(TARGET_MODE)" == "SYSLIB"
+!if "$(TARGET_MODE)" == "SYS" || "$(TARGET_MODE)" == "SYSLIB" || "$(TARGET_MODE)" == "IFS" || "$(TARGET_MODE)" == "IFSLIB"
     @$(AS) $(AS_FLAGS_SYS) $< $(AS_OBJ_OUT)$(PATH_TARGET)\$(@F)
 !else
     @$(AS) $(AS_FLAGS) $< $(AS_OBJ_OUT)$(PATH_TARGET)\$(@F)
@@ -164,6 +164,12 @@ BUILD_TARGET_DEPEND=$(PATH_TARGET)\.depend
 !if "$(TARGET_MODE)" == "SYS" || "$(TARGET_MODE)" == "SYSLIB"
         $(CXX_FLAGS_SYS) \
 !endif
+!if "$(TARGET_MODE)" == "IFS" || "$(TARGET_MODE)" == "IFSLIB"
+        $(CXX_FLAGS_IFS) \
+!endif
+!ifdef CXX_LST_OUT
+        $(CXX_LST_OUT)$(PATH_TARGET)\$(@B).s \
+!endif
         $(CXX_OBJ_OUT)$@ $<
 
 .cpp.$(EXT_OBJ):
@@ -180,6 +186,12 @@ BUILD_TARGET_DEPEND=$(PATH_TARGET)\.depend
 !endif
 !if "$(TARGET_MODE)" == "SYS" || "$(TARGET_MODE)" == "SYSLIB"
         $(CXX_FLAGS_SYS) \
+!endif
+!if "$(TARGET_MODE)" == "IFS" || "$(TARGET_MODE)" == "IFSLIB"
+        $(CXX_FLAGS_IFS) \
+!endif
+!ifdef CXX_LST_OUT
+        $(CXX_LST_OUT)$(PATH_TARGET)\$(@B).s \
 !endif
         $(CXX_OBJ_OUT)$(PATH_TARGET)\$(@F) $<
 
@@ -200,6 +212,9 @@ BUILD_TARGET_DEPEND=$(PATH_TARGET)\.depend
 !if "$(TARGET_MODE)" == "SYS" || "$(TARGET_MODE)" == "SYSLIB"
         $(CXX_FLAGS_SYS) \
 !endif
+!if "$(TARGET_MODE)" == "IFS" || "$(TARGET_MODE)" == "IFSLIB"
+        $(CXX_FLAGS_IFS) \
+!endif
         $(CXX_PC_2_STDOUT) $< > $@
 
 
@@ -219,6 +234,12 @@ BUILD_TARGET_DEPEND=$(PATH_TARGET)\.depend
 !if "$(TARGET_MODE)" == "SYS" || "$(TARGET_MODE)" == "SYSLIB"
         $(CC_FLAGS_SYS) \
 !endif
+!if "$(TARGET_MODE)" == "IFS" || "$(TARGET_MODE)" == "IFSLIB"
+        $(CC_FLAGS_IFS) \
+!endif
+!ifdef CC_LST_OUT
+        $(CC_LST_OUT)$(PATH_TARGET)\$(@B).s \
+!endif
         $(CC_OBJ_OUT)$@ $<
 
 .c.$(EXT_OBJ):
@@ -235,6 +256,12 @@ BUILD_TARGET_DEPEND=$(PATH_TARGET)\.depend
 !endif
 !if "$(TARGET_MODE)" == "SYS" || "$(TARGET_MODE)" == "SYSLIB"
         $(CC_FLAGS_SYS) \
+!endif
+!if "$(TARGET_MODE)" == "IFS" || "$(TARGET_MODE)" == "IFSLIB"
+        $(CC_FLAGS_IFS) \
+!endif
+!ifdef CC_LST_OUT
+        $(CC_LST_OUT)$(PATH_TARGET)\$(@B).s \
 !endif
         $(CC_OBJ_OUT)$(PATH_TARGET)\$(@F) $<
 
@@ -254,6 +281,9 @@ BUILD_TARGET_DEPEND=$(PATH_TARGET)\.depend
 !endif
 !if "$(TARGET_MODE)" == "SYS" || "$(TARGET_MODE)" == "SYSLIB"
         $(CC_FLAGS_SYS) \
+!endif
+!if "$(TARGET_MODE)" == "IFS" || "$(TARGET_MODE)" == "IFSLIB"
+        $(CC_FLAGS_IFS) \
 !endif
         $(CC_PC_2_STDOUT) $< > $@
 
@@ -329,7 +359,7 @@ install:
 !if "$(TARGET_MODE)" == "DLL" || "$(TARGET_MODE)" == "CRT"
     if exist $(TARGET) $(TOOL_COPY) $(TARGET) $(PATH_DLL)
 !endif
-!if "$(TARGET_MODE)" == "SYS"
+!if "$(TARGET_MODE)" == "SYS" || "$(TARGET_MODE)" == "IFS" || "$(TARGET_MODE)" == "IFSLIB"
     if exist $(TARGET) $(TOOL_COPY) $(TARGET) $(PATH_SYS)
 !endif
 !if "$(TARGET_MODE)" == "LIB" || "$(TARGET_MODE)" == "PUBLIB" || "$(TARGET_MODE)" == "SYSLIB"
@@ -398,7 +428,6 @@ dep:
 #
 clean:
 !if "$(PATH_TARGET)" != ""              # paranoia
-!if "$(PATH_TARGET)" == "."
     $(TOOL_RM) \
         $(PATH_TARGET)\*.$(EXT_OBJ) \
         $(PATH_TARGET)\*.$(EXT_ILIB) \
@@ -406,25 +435,16 @@ clean:
         $(PATH_TARGET)\*.$(EXT_DLL) \
         $(PATH_TARGET)\*.$(EXT_RES) \
         $(PATH_TARGET)\*.$(EXT_SYS) \
-        $(PATH_TARGET)\*.$(EXT_LIB) \
+        $(PATH_TARGET)\*.$(EXT_LIB)
+    $(TOOL_RM) \
+        $(PATH_TARGET)\*.$(EXT_IFS) \
         $(PATH_TARGET)\*.map \
+        $(PATH_TARGET)\*.s \
+        $(PATH_TARGET)\*.lst \
         $(PATH_TARGET)\*.lnk \
         $(PATH_TARGET)\*.pre-c \
         $(PATH_TARGET)\*.pre-cpp \
-        $(PATH_TARGET)\*.lst
-!else
-    $(TOOL_RM) \
-        $(PATH_TARGET)\*.$(EXT_OBJ) \
-        $(PATH_TARGET)\*.$(EXT_ILIB) \
-        $(PATH_TARGET)\*.$(EXT_EXE) \
-        $(PATH_TARGET)\*.$(EXT_DLL) \
-        $(PATH_TARGET)\*.$(EXT_SYS) \
-        $(PATH_TARGET)\*.$(EXT_RES) \
-        $(PATH_TARGET)\*.$(EXT_LIB) \
-        $(PATH_TARGET)\*.map \
-        $(PATH_TARGET)\*.lnk \
-        $(PATH_TARGET)\*.lst
-!endif
+        $(PATH_TARGET)\.depend
 !endif
 !ifdef SUBDIRS
     @$(TOOL_DODIRS) "$(SUBDIRS)" $(TOOL_MAKE) $@
@@ -438,9 +458,9 @@ clean:
 
 
 #
-# EXE, DLL and SYS Targets
+# EXE, DLL, SYS and IFS Targets
 #
-!if "$(TARGET_MODE)" == "EXE" || "$(TARGET_MODE)" == "DLL" || "$(TARGET_MODE)" == "CRT" || "$(TARGET_MODE)" == "SYS"
+!if "$(TARGET_MODE)" == "EXE" || "$(TARGET_MODE)" == "DLL" || "$(TARGET_MODE)" == "CRT" || "$(TARGET_MODE)" == "SYS" || "$(TARGET_MODE)" == "IFS"
 ! if "$(TARGET_MODE)" == "DLL" || "$(TARGET_MODE)" == "CRT"
 TARGET_IGNORE_LINKER_WARNINGS=1
 !endif
@@ -457,6 +477,9 @@ $(TARGET): $(TARGET_OBJS) $(TARGET_RES) $(TARGET_DEF) $(TARGET_LNK) $(TARGET_DEP
 !endif
 !if "$(TARGET_MODE)" == "SYS"
     @$(LINK_CMD_SYS)
+!endif
+!if "$(TARGET_MODE)" == "IFS"
+    @$(LINK_CMD_IFS)
 !endif
 !if "$(TARGET_RES)" != "" && "$(RL)" != ""
     @$(ECHO) Linking Resources $(CLRRST)
@@ -495,7 +518,7 @@ $(TARGET_ILIB): $(TARGET_IDEF)
 #
 # Lib Targets.
 #
-!if "$(TARGET_MODE)" == "LIB" || "$(TARGET_MODE)" == "PUBLIB" || "$(TARGET_MODE)" == "SYSLIB"
+!if "$(TARGET_MODE)" == "LIB" || "$(TARGET_MODE)" == "PUBLIB" || "$(TARGET_MODE)" == "SYSLIB" || "$(TARGET_MODE)" == "IFSLIB"
 $(TARGET): $(TARGET_OBJS) $(TARGET_LNK) $(TARGET_DEPS)
     @$(ECHO) Creating Library $(CLRFIL)$@ $(CLRRST)
     $(TOOL_RM) $@

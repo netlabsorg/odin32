@@ -1,4 +1,4 @@
-# $Id: setup.mak,v 1.1 2002-04-06 20:25:05 bird Exp $
+# $Id: setup.mak,v 1.2 2002-04-07 22:43:25 bird Exp $
 
 #
 # Unix-like tools for OS/2
@@ -25,7 +25,7 @@ MAKE_SETUP_INCLUDED=YES
 !endif
 
 PATH_CURRENT=$(MAKEDIR)
-PATH_MAKE=$(PATH_ROOT)\tools\make
+PATH_MAKE=$(PATH_ROOT)\make
 PATH_TOOLS=$(PATH_ROOT)\tools\bin
 PATH_INCLUDE=$(PATH_ROOT)\include;$(PATH_ROOT)\include\win
 PATH_BIN=$(PATH_ROOT)\bin\$(BUILD_MODE)
