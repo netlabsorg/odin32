@@ -1,4 +1,4 @@
-/* $Id: myLDRQAppType.cpp,v 1.3.4.1 2000-07-16 22:43:35 bird Exp $
+/* $Id: myLDRQAppType.cpp,v 1.3.4.2 2000-08-19 14:37:14 bird Exp $
  *
  * _myLDRQAppType - _LDRQAppType overload.
  *
@@ -46,7 +46,7 @@ ULONG LDRCALL myLDRQAppType(ULONG p1, ULONG p2)
 
     kprintf(("myLDRQAppType: entry\n"));
 
-    rc = LDRGetSem();
+    rc = LDRRequestSem();
     if (rc != NO_ERROR)
     {
         kprintf(("myLDRQAppType: failed to get loader semaphore.\n"));

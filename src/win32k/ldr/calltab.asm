@@ -1,4 +1,4 @@
-; $Id: calltab.asm,v 1.12.4.2 2000-08-15 07:03:25 bird Exp $
+; $Id: calltab.asm,v 1.12.4.3 2000-08-19 14:37:13 bird Exp $
 ;
 ; callTab - Call back again table - table with entry for each function or
 ;           variable which is overrided.
@@ -43,6 +43,7 @@
     public _ldrOpenPath@16
     public _LDRClearSem@0
     public _KSEMRequestMutex@8
+    public _KSEMReleaseMutex@4
 
     public pLDRSem
     public LDRSem_offObject
@@ -205,61 +206,66 @@ _KSEMRequestMutex@8 PROC NEAR
 _KSEMRequestMutex@8 ENDP
 
 ; 21
+_KSEMReleaseMutex@4 PROC NEAR
+    db MAXSIZE_PROLOG dup(0cch)
+_KSEMReleaseMutex@4 ENDP
+
+; 22
 pLDRSem          dd  0
 LDRSem_offObject dd  0
 _fpLDRSem        dd  0
 LDRSem_sel       dw  0
     db (MAXSIZE_PROLOG - 14) dup(0cch)
 
-; 22
+; 23
 _TKSuBuff@16 PROC NEAR
     db MAXSIZE_PROLOG dup(0cch)
 _TKSuBuff@16 ENDP
 
-; 23
+; 24
 _TKFuBuff@16 PROC NEAR
     db MAXSIZE_PROLOG dup(0cch)
 _TKFuBuff@16 ENDP
 
-; 24
+; 25
 _TKFuBufLen@20 PROC NEAR
     db MAXSIZE_PROLOG dup(0cch)
 _TKFuBufLen@20 ENDP
 
-;25
+; 26
 _ldrValidateMteHandle@4 PROC NEAR
     db MAXSIZE_PROLOG dup(0cch)
 _ldrValidateMteHandle@4 ENDP
 
-; 26
+; 27
 ppTCBCur           dd  0
 pTCBCur_offObject  dd  0
 _fppTCBCur         dd  0
 pTCBCur_sel        dw  0
     db (MAXSIZE_PROLOG - 14) dup(0cch)
 
-; 27
+; 28
 ppPTDACur          dd  0
 pPTDACur_offObject dd  0
 _fppPTDACur        dd  0
 pPTDACur_sel       dw  0
     db (MAXSIZE_PROLOG - 14) dup(0cch)
 
-; 28
+; 29
 pptda_start          dd  0
 ptda_start_offObject dd  0
 _fpptda_start        dd  0
 ptda_start_sel       dw  0
     db (MAXSIZE_PROLOG - 14) dup(0cch)
 
-; 29
+; 30
 pptda_environ          dd  0
 ptda_environ_offObject dd  0
 _fpptda_environ        dd  0
 ptda_environ_sel       dw  0
     db (MAXSIZE_PROLOG - 14) dup(0cch)
 
-; 30
+; 31
 pptda_module          dd  0
 ptda_module_offObject dd  0
 _fpptda_module        dd  0
