@@ -1,4 +1,4 @@
-/* $Id: oslibdos.h,v 1.10 2000-01-02 22:51:12 sandervl Exp $ */
+/* $Id: oslibdos.h,v 1.11 2000-01-03 21:36:11 sandervl Exp $ */
 
 /*
  * Wrappers for OS/2 Dos* API
@@ -105,7 +105,9 @@ BOOL OSLibDosTransactNamedPipe( DWORD  hNamedPipe,
                                 DWORD nInBufferSize,
                                 LPVOID lpOutBuffer,
                                 DWORD nOutBufferSize,
-                                LPOVERLAPPED lpOverlapped );
+                                LPDWORD lpBytesRead,
+                                LPOVERLAPPED lpOverlapped);
+
 BOOL OSLibDosCallNamedPipe( LPCTSTR lpNamedPipeName,
                          LPVOID  lpInBuffer,
                          DWORD   nInBufferSize,
@@ -113,6 +115,13 @@ BOOL OSLibDosCallNamedPipe( LPCTSTR lpNamedPipeName,
                          DWORD   nOutBufferSize,
                          LPDWORD lpBytesRead,
                          DWORD   nTimeOut );
+
+BOOL OSLibDosPeekNamedPipe(DWORD   hPipe, 
+                        LPVOID  lpvBuffer, 
+                        DWORD   cbBuffer,
+                        LPDWORD lpcbRead, 
+                        LPDWORD lpcbAvail, 
+                        LPDWORD lpcbMessage);
 
 BOOL OSLibDosConnectNamedPipe(DWORD hNamedPipe, LPOVERLAPPED lpOverlapped);
 
@@ -124,6 +133,11 @@ DWORD OSLibDosCreateNamedPipe(LPCTSTR lpName,
                               DWORD   nInBufferSize, 
                               DWORD   nDefaultTimeOut,
                               void* lpSecurityAttributes);
+
+BOOL OSLibDosWaitNamedPipe(LPCSTR lpszNamedPipeName,
+                            DWORD   dwTimeout);
+
+BOOL OSLibDosDisconnectNamedPipe(DWORD hPipe);
 
 
 #endif

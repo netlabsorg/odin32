@@ -1,4 +1,4 @@
-/* $Id: thread.cpp,v 1.20 1999-12-19 17:49:38 sandervl Exp $ */
+/* $Id: thread.cpp,v 1.21 2000-01-03 21:36:11 sandervl Exp $ */
 
 /*
  * Win32 Thread API functions
@@ -28,6 +28,7 @@
 #include <windllbase.h>
 #include <winexebase.h>
 #include "exceptutil.h"
+#include "oslibmisc.h"
 
 ODINDEBUGCHANNEL(KERNEL32-THREAD)
 
@@ -221,6 +222,10 @@ static DWORD OPEN32API Win32ThreadProc(LPVOID lpData)
   THDB *thdb   = (THDB *)(winteb+1);
   thdb->entry_point = (void *)winthread;
   thdb->entry_arg   = (void *)userdata;
+
+  thdb->hab = OSLibWinInitialize();
+  thdb->hmq = OSLibWinQueryMsgQueue(thdb->hab);
+  dprintf(("Win32ThreadProc: hab %x hmq %x", thdb->hab, thdb->hmq));
 
   //Note: The Win32 exception structure referenced by FS:[0] is the same
   //      in OS/2
