@@ -1,12 +1,16 @@
-/* $Id: changelog,v 1.1722 2001-10-06 18:53:35 sandervl Exp $ */
+/* $Id: changelog,v 1.1723 2001-10-06 19:07:44 sandervl Exp $ */
 
  2001-10-06: Sander van Leeuwen <sandervl@xs4all.nl>
     - QUARTZ/OLEAUT32: 
                 o Wine 20011004 resync
     - KERNEL32: o Reduce overhead for heap allocation
                 o Always allocate heap memory from high memory (if available)
-                  (prevents running out of virtual memory space while loading
-                   big movies in The Playa)
+                o Allocate extra heap memory in 64kb units
+                  MUST use 64kb here or else we are at risk of running out 
+                  of virtual memory space. (when allocating 4kb we actually 
+                  get 4kb + 60k uncommited)
+                  (fixes out of resources error while loading big movies 
+                   in The Playa)
 
  2001-10-05: Sander van Leeuwen <sandervl@xs4all.nl>
     - DDRAW:    o Added stretching support for blitting to the screen
