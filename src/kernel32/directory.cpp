@@ -1,4 +1,4 @@
-/* $Id: directory.cpp,v 1.25 2000-06-12 14:59:37 phaller Exp $ */
+/* $Id: directory.cpp,v 1.26 2000-06-13 17:56:45 phaller Exp $ */
 
 /*
  * Win32 Directory functions for OS/2
@@ -157,8 +157,6 @@ ODINFUNCTION2(UINT, GetCurrentDirectoryW, UINT,   nBufferLength,
 ODINFUNCTION1(BOOL,   SetCurrentDirectoryA,
               LPCSTR, lpstrDirectory)
 {
-  char szBuffer[260]; // MAXPATHLEN
-  
   if(HIWORD(lpstrDirectory) == 0)
   {
     SetLastError(ERROR_INVALID_PARAMETER);
@@ -172,11 +170,12 @@ ODINFUNCTION1(BOOL,   SetCurrentDirectoryA,
          (lpstrDirectory[len - 1] == '/') ) &&
        (len != 1) )
   {
-    lstrcpynA(szBuffer,
+    LPSTR lpTemp = (LPSTR)_alloca(len);
+    lstrcpynA(lpTemp,
               lpstrDirectory,
               len - 1);
-    szBuffer[len - 1] = 0;
-    lpstrDirectory = szBuffer;
+    lpTemp[len - 1] = 0;
+    lpstrDirectory = lpTemp;
   }
 
   dprintf(("SetCurrentDirectoryA %s", lpstrDirectory));
@@ -224,18 +223,18 @@ ODINFUNCTION2(BOOL,                CreateDirectoryA,
               LPCSTR,              lpstrDirectory,
               PSECURITY_ATTRIBUTES,arg2)
 {
-  char szBuffer[260]; // MAXPATHLEN
   int len = strlen(lpstrDirectory);
   
   // cut off trailing backslashes
   if ( (lpstrDirectory[len - 1] == '\\') ||
        (lpstrDirectory[len - 1] == '/') )
   {
-    lstrcpynA(szBuffer,
+    LPSTR lpTemp = (LPSTR)_alloca(len);
+    lstrcpynA(lpTemp,
               lpstrDirectory,
               len - 1);
-    szBuffer[len - 1] = 0;
-    lpstrDirectory = szBuffer;
+    lpTemp[len - 1] = 0;
+    lpstrDirectory = lpTemp;
   }
   
   dprintf(("CreateDirectoryA %s", 
@@ -418,18 +417,18 @@ ODINFUNCTION2(UINT,GetWindowsDirectoryW,LPWSTR,lpBuffer,
 ODINFUNCTION1(BOOL,   RemoveDirectoryA,
               LPCSTR, lpstrDirectory)
 {
-  char szBuffer[260]; // MAXPATHLEN
   int len = strlen(lpstrDirectory);
   
   // cut off trailing backslashes
   if ( (lpstrDirectory[len - 1] == '\\') ||
        (lpstrDirectory[len - 1] == '/') )
   {
-    lstrcpynA(szBuffer,
+    LPSTR lpTemp = (LPSTR)_alloca(len);
+    lstrcpynA(lpTemp,
               lpstrDirectory,
               len - 1);
-    szBuffer[len - 1] = 0;
-    lpstrDirectory = szBuffer;
+    lpTemp[len - 1] = 0;
+    lpstrDirectory = lpTemp;
   }
   
   dprintf(("RemoveDirectory %s", 

@@ -1,4 +1,4 @@
- /* $Id: changelog,v 1.985 2000-06-13 06:42:56 phaller Exp $ */
+ /* $Id: changelog,v 1.986 2000-06-13 18:00:22 phaller Exp $ */
 
  2000-06-12: Patrick Haller <phaller@gmx.net>
     - LZ32:         - updated to current WINE level (minor changes)
@@ -6,7 +6,6 @@
  2000-06-11: Patrick Haller <phaller@gmx.net>
     - KERNEL32:     - moved GetNumberFormat to different source file and enhanced
                       it a little (WinRAR shows file sizes)
-                    - fixed (just too stupid) memory leaks in directory functions
                     - creating an existing directory does not return an error ?!
                     - updated GetStringTypeA/W and GetStringTypeExA/W
 
