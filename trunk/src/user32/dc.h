@@ -1,4 +1,4 @@
-/* $Id: dc.h,v 1.16 2001-02-18 14:18:38 sandervl Exp $ */
+/* $Id: dc.h,v 1.17 2001-05-11 08:39:42 sandervl Exp $ */
 /*
  * public dc functions
  *
@@ -15,6 +15,7 @@
 extern BOOL isYup (struct _DCData *pHps);
 extern HDC sendEraseBkgnd (Win32BaseWindow *wnd);
 extern void releaseOwnDC (HDC hps);
+BOOL setPageXForm(Win32BaseWindow *wnd, struct _DCData * pHps);
 
 void selectClientArea(Win32BaseWindow *wnd, HDC hdc);
 

@@ -1,4 +1,4 @@
-/* $Id: dcrgn.cpp,v 1.3 2000-06-17 11:56:14 sandervl Exp $ */
+/* $Id: dcrgn.cpp,v 1.4 2001-05-11 08:39:42 sandervl Exp $ */
 
 /*
  * DC functions for USER32
@@ -45,77 +45,54 @@
 //******************************************************************************
 BOOL WIN32API GetUpdateRect(HWND hwnd, LPRECT pRect, BOOL erase)
 {
-   if (!hwnd)
-   {
-	dprintf(("GetUpdateRect %x %x %d -> invalid handle!!", hwnd, pRect, erase));
-      	SetLastError(ERROR_INVALID_WINDOW_HANDLE_W);
-      	return FALSE;
-   }
+    if (!hwnd)
+    {
+        dprintf(("GetUpdateRect %x %x %d -> invalid handle!!", hwnd, pRect, erase));
+        SetLastError(ERROR_INVALID_WINDOW_HANDLE_W);
+        return FALSE;
+    }
 
-   RECTL rectl, rectlClient;
-   Win32BaseWindow *wnd = Win32BaseWindow::GetWindowFromHandle(hwnd);
+    RECTL rectl, rectlClient;
+    Win32BaseWindow *wnd = Win32BaseWindow::GetWindowFromHandle(hwnd);
 
-   if (!wnd)
-   {
-      	SetLastError(ERROR_INVALID_WINDOW_HANDLE_W);
-	dprintf(("GetUpdateRect %x %x %d -> invalid handle!!", hwnd, pRect, erase));
-      	return FALSE;
-   }
+    if (!wnd)
+    {
+        SetLastError(ERROR_INVALID_WINDOW_HANDLE_W);
+        dprintf(("GetUpdateRect %x %x %d -> invalid handle!!", hwnd, pRect, erase));
+        return FALSE;
+    }
 
-   dprintf(("GetUpdateRect %x %x %d", hwnd, pRect, erase));
+    dprintf(("GetUpdateRect %x %x %d", hwnd, pRect, erase));
 
-   BOOL updateRegionExists = WinQueryUpdateRect (wnd->getOS2WindowHandle(), pRect ? &rectl : NULL);
-   if (!pRect) {
-      return (updateRegionExists);
-   }
+    BOOL updateRegionExists = WinQueryUpdateRect(wnd->getOS2WindowHandle(), pRect ? &rectl : NULL);
+    if (!pRect) {
+        return (updateRegionExists);
+    }
 
-   if(updateRegionExists)
-   {
+    if(updateRegionExists)
+    {
         //CB: for PM empty rect is valid
         if ((rectl.xLeft == rectl.xRight) || (rectl.yTop == rectl.yBottom)) {
-                if(pRect) {
-                        pRect->left = pRect->top = pRect->right = pRect->bottom = 0;
-                }
-                return FALSE;
+            if(pRect) {
+                pRect->left = pRect->top = pRect->right = pRect->bottom = 0;
+            }
+            return FALSE;
         }
-   	mapWin32ToOS2Rect(wnd->getWindowHeight(), wnd->getClientRectPtr(), (PRECTLOS2)&rectlClient);
-   	WinIntersectRect(NULL, &rectl, &rectl, &rectlClient);
-	mapOS2ToWin32RectFrameToClient(wnd, (PRECTLOS2)&rectl, pRect);
+        mapOS2ToWin32Rect(wnd->getClientHeight(), (PRECTLOS2)&rectl, pRect);
 
         if(wnd->isOwnDC() && GetMapMode(wnd->getOwnDC()) != MM_TEXT_W)
         {
-		DPtoLP(wnd->getOwnDC(), (LPPOINT)pRect, 2);
+            DPtoLP(wnd->getOwnDC(), (LPPOINT)pRect, 2);
         }
         if (erase)
-                sendEraseBkgnd (wnd);
+            sendEraseBkgnd (wnd);
    }
    else
    {
         if(pRect) {
-                pRect->left = pRect->top = pRect->right = pRect->bottom = 0;
+            pRect->left = pRect->top = pRect->right = pRect->bottom = 0;
         }
    }
-
-   return updateRegionExists;
-}
-//******************************************************************************
-//******************************************************************************
-BOOL GetOS2UpdateRect(Win32BaseWindow *window, LPRECT pRect)
-{
-   RECTL rectl;
-   BOOL updateRegionExists = WinQueryUpdateRect(window->getOS2WindowHandle(),pRect ? &rectl:NULL);
-
-   if (!pRect)
-     return (updateRegionExists);
-
-   if (updateRegionExists)
-   {
-     //CB: for PM empty rect is valid
-     if ((rectl.xLeft == rectl.xRight) || (rectl.yTop == rectl.yBottom)) return FALSE;
-     mapOS2ToWin32Rect(window->getWindowHeight(), (PRECTLOS2)&rectl,pRect);
-   }
-   else
-       pRect->left = pRect->top = pRect->right = pRect->bottom = 0;
 
    return updateRegionExists;
 }
@@ -124,60 +101,58 @@ BOOL GetOS2UpdateRect(Win32BaseWindow *window, LPRECT pRect)
 //******************************************************************************
 int WIN32API GetUpdateRgn(HWND hwnd, HRGN hrgn, BOOL erase)
 {
-   LONG lComplexity;
-   Win32BaseWindow *wnd = Win32BaseWindow::GetWindowFromHandle(hwnd);
+    LONG lComplexity;
+    Win32BaseWindow *wnd = Win32BaseWindow::GetWindowFromHandle(hwnd);
 
-   hrgn = ObjWinToOS2Region(hrgn);
-   if(!wnd || !hrgn)
-   {
-	dprintf(("WARNING: GetUpdateRgn %x %x %d; invalid handle", hwnd, hrgn, erase));
-      	SetLastError(ERROR_INVALID_WINDOW_HANDLE_W);
-      	return ERROR_W;
-   }
-   lComplexity = WinQueryUpdateRegion(wnd->getOS2WindowHandle(), hrgn);
-   if(lComplexity == RGN_ERROR) {
-	dprintf(("WARNING: GetUpdateRgn %x %x %d; RGN_ERROR", hwnd, hrgn, erase));
-      	SetLastError(ERROR_INVALID_WINDOW_HANDLE_W);
-      	return ERROR_W;
-   }
+    hrgn = ObjWinToOS2Region(hrgn);
+    if(!wnd || !hrgn)
+    {
+        dprintf(("WARNING: GetUpdateRgn %x %x %d; invalid handle", hwnd, hrgn, erase));
+        SetLastError(ERROR_INVALID_WINDOW_HANDLE_W);
+        return ERROR_W;
+    }
+    lComplexity = WinQueryUpdateRegion(wnd->getOS2WindowHandle(), hrgn);
+    if(lComplexity == RGN_ERROR) {
+        dprintf(("WARNING: GetUpdateRgn %x %x %d; RGN_ERROR", hwnd, hrgn, erase));
+        SetLastError(ERROR_INVALID_WINDOW_HANDLE_W);
+        return ERROR_W;
+    }
 
-   if(lComplexity != RGN_NULL)
-   {
-      	if(!setWinDeviceRegionFromPMDeviceRegion(hrgn, hrgn, NULL, wnd->getOS2WindowHandle()))
-      	{
-		dprintf(("WARNING: GetUpdateRgn %x %x %d; setWinDeviceRegionFromPMDeviceRegion failed!", hwnd, hrgn, erase));
-      		SetLastError(ERROR_INVALID_WINDOW_HANDLE_W);
-      		return ERROR_W;
-      	}
-
+    if(lComplexity != RGN_NULL)
+    {
+        if(!setWinDeviceRegionFromPMDeviceRegion(hrgn, hrgn, NULL, wnd->getOS2WindowHandle()))
+        {
+            dprintf(("WARNING: GetUpdateRgn %x %x %d; setWinDeviceRegionFromPMDeviceRegion failed!", hwnd, hrgn, erase));
+            SetLastError(ERROR_INVALID_WINDOW_HANDLE_W);
+            return ERROR_W;
+        }
         if(erase) sendEraseBkgnd(wnd);
-   }
-
-   return lComplexity;
+    }
+    return lComplexity;
 }
 //******************************************************************************
 //TODO: Check
 //******************************************************************************
 INT WIN32API ExcludeUpdateRgn(HDC hdc, HWND hwnd)
 {
-   Win32BaseWindow *wnd = Win32BaseWindow::GetWindowFromHandle(hwnd);
-   pDCData          pHps = (pDCData)GpiQueryDCData((HPS)hdc);
-   LONG             lComplexity;
+    Win32BaseWindow *wnd = Win32BaseWindow::GetWindowFromHandle(hwnd);
+    pDCData          pHps = (pDCData)GpiQueryDCData((HPS)hdc);
+    LONG             lComplexity;
 
-   if(!wnd || !pHps)
-   {
-	dprintf(("WARNING: ExcludeUpdateRgn %x %x; invalid handle", hdc, hwnd));
-      	SetLastError(ERROR_INVALID_WINDOW_HANDLE_W);
-      	return ERROR_W;
-   }
-   dprintf(("USER32: ExcludeUpdateRgn %x %x", hdc, hwnd));
+    if(!wnd || !pHps)
+    {
+        dprintf(("WARNING: ExcludeUpdateRgn %x %x; invalid handle", hdc, hwnd));
+        SetLastError(ERROR_INVALID_WINDOW_HANDLE_W);
+        return ERROR_W;
+    }
+    dprintf(("USER32: ExcludeUpdateRgn %x %x", hdc, hwnd));
 
-   lComplexity = WinExcludeUpdateRegion(pHps->hps, wnd->getOS2WindowHandle());
-   if(lComplexity == RGN_ERROR) {
-	SetLastError(ERROR_INVALID_HANDLE_W); //todo: correct error
-   }
-   else	SetLastError(ERROR_SUCCESS_W); 
-   return lComplexity;      // windows and PM values are identical
+    lComplexity = WinExcludeUpdateRegion(pHps->hps, wnd->getOS2WindowHandle());
+    if(lComplexity == RGN_ERROR) {
+         SetLastError(ERROR_INVALID_HANDLE_W); //todo: correct error
+    }
+    else SetLastError(ERROR_SUCCESS_W);
+    return lComplexity;      // windows and PM values are identical
 }
 /*****************************************************************************
  * Name      : int WIN32API GetWindowRgn
@@ -194,8 +169,8 @@ INT WIN32API ExcludeUpdateRgn(HDC hdc, HWND hwnd)
 
 int WIN32API GetWindowRgn(HWND hwnd, HRGN hRgn)
 {
-  Win32BaseWindow *window;
-  HRGN hWindowRegion;
+    Win32BaseWindow *window;
+    HRGN hWindowRegion;
 
     window = Win32BaseWindow::GetWindowFromHandle(hwnd);
     if(!window) {
@@ -233,8 +208,8 @@ int WIN32API SetWindowRgn(HWND hwnd,
                           HRGN hRgn,
                           BOOL bRedraw)
 {
-  Win32BaseWindow *window;
-  HRGN hWindowRegion;
+    Win32BaseWindow *window;
+    HRGN hWindowRegion;
 
     window = Win32BaseWindow::GetWindowFromHandle(hwnd);
     if(!window) {

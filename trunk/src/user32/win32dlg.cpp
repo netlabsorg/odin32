@@ -1,8 +1,8 @@
-/* $Id: win32dlg.cpp,v 1.61 2001-04-04 09:32:25 sandervl Exp $ */
+/* $Id: win32dlg.cpp,v 1.62 2001-05-11 08:39:44 sandervl Exp $ */
 /*
  * Win32 Dialog Code for OS/2
  *
- * Copyright 1999 Sander van Leeuwen (sandervl@xs4all.nl) (Wine port & OS/2 adaption)
+ * Copyright 1999-2001 Sander van Leeuwen (sandervl@xs4all.nl) (Wine port & OS/2 adaption)
  *
  * Based on Wine code (990815; windows\dialog.c)
  *
@@ -23,6 +23,7 @@
 #include "win32wdesktop.h"
 #include "controls.h"
 #include "syscolor.h"
+#include "hook.h"
 #include <math.h>
 #include <unicode.h>
 
@@ -316,7 +317,7 @@ INT Win32Dialog::doDialogBox()
         bOldOwner = topOwner->IsModalDialogOwner();
         topOwner->setModalDialogOwner(TRUE);
         hwndOldDialog = topOwner->getOS2HwndModalDialog();
-        topOwner->setOS2HwndModalDialog(OS2Hwnd);
+        topOwner->setOS2HwndModalDialog(OS2HwndFrame);
         ShowWindow(SW_SHOW);
 
         //CB: 100% CPU usage, need a better solution with OSLibWinGetMsg
@@ -327,13 +328,36 @@ INT Win32Dialog::doDialogBox()
 #if 1
         while (TRUE)
         {
-          if (!OSLibWinPeekMsg(&msg,0,0,0,PM_NOREMOVE))
+          if (!PeekMessageA(&msg,0,0,0,PM_NOREMOVE))
           {
                 if(!(getStyle() & DS_NOIDLEMSG))
                     topOwner->SendMessageA(WM_ENTERIDLE,MSGF_DIALOGBOX,getWindowHandle());
-                OSLibWinGetMsg(&msg,0,0,0);
+                GetMessageA(&msg,0,0,0);
           }
-          else  OSLibWinPeekMsg(&msg,0,0,0,PM_REMOVE);
+          else  PeekMessageA(&msg,0,0,0,PM_REMOVE);
+
+          /* Call message filters */
+          if (HOOK_IsHooked( WH_SYSMSGFILTER ) || HOOK_IsHooked( WH_MSGFILTER ))
+          {
+            LPMSG pmsg = (LPMSG)HeapAlloc( GetProcessHeap(), 0, sizeof(MSG) );
+            if (pmsg)
+            {
+                BOOL ret;
+                *pmsg = msg;
+                ret = (HOOK_CallHooksA( WH_SYSMSGFILTER, MSGF_DIALOGBOX, 0,
+                                          (LPARAM) pmsg ) ||
+                       HOOK_CallHooksA( WH_MSGFILTER, MSGF_DIALOGBOX, 0,
+                                          (LPARAM) pmsg ));
+                       
+                HeapFree( GetProcessHeap(), 0, pmsg );
+                if (ret)
+                {
+                    /* Message filtered -> remove it from the queue */
+                    /* if it's still there. */
+                    continue;
+                }
+            }
+          }
 
           if(msg.message == WM_QUIT)
           {

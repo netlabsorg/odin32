@@ -1,4 +1,4 @@
-/* $Id: oslibmsgtranslate.cpp,v 1.49 2001-04-28 13:35:52 sandervl Exp $ */
+/* $Id: oslibmsgtranslate.cpp,v 1.50 2001-05-11 08:39:43 sandervl Exp $ */
 /*
  * Window message translation functions for OS/2
  *
@@ -193,25 +193,28 @@ BOOL OS2ToWinMsgTranslate(void *pTeb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode,
   BOOL             fWasDisabled = FALSE;
   int i;
 
-  memset(winMsg, 0, sizeof(MSG));
-  win32wnd = Win32BaseWindow::GetWindowFromOS2Handle(os2Msg->hwnd);
+    memset(winMsg, 0, sizeof(MSG));
+    win32wnd = Win32BaseWindow::GetWindowFromOS2Handle(os2Msg->hwnd);
+    if(!win32wnd) {
+        win32wnd = Win32BaseWindow::GetWindowFromOS2FrameHandle(os2Msg->hwnd);
+    }
 
-  //PostThreadMessage posts WIN32APP_POSTMSG msg without window handle
-  //Realplayer starts a timer with hwnd 0 & proc 0; check this here
-  if(win32wnd == 0 && (os2Msg->msg != WM_CREATE && os2Msg->msg != WM_QUIT && os2Msg->msg != WM_TIMER && os2Msg->msg != WIN32APP_POSTMSG))
-  {
+    //PostThreadMessage posts WIN32APP_POSTMSG msg without window handle
+    //Realplayer starts a timer with hwnd 0 & proc 0; check this here
+    if(win32wnd == 0 && (os2Msg->msg != WM_CREATE && os2Msg->msg != WM_QUIT && os2Msg->msg != WM_TIMER && os2Msg->msg != WIN32APP_POSTMSG))
+    {
         goto dummymessage; //not a win32 client window
-  }
-  winMsg->time = os2Msg->time;
-  //CB: PM bug or undocumented feature? ptl.x highword is set!
-  winMsg->pt.x = os2Msg->ptl.x & 0xFFFF;
-  winMsg->pt.y = mapScreenY(os2Msg->ptl.y);
+    }
+    winMsg->time = os2Msg->time;
+    //CB: PM bug or undocumented feature? ptl.x highword is set!
+    winMsg->pt.x = os2Msg->ptl.x & 0xFFFF;
+    winMsg->pt.y = mapScreenY(os2Msg->ptl.y);
 
-  if(win32wnd) //==0 for WM_CREATE/WM_QUIT
-    winMsg->hwnd = win32wnd->getWindowHandle();
+    if(win32wnd) //==0 for WM_CREATE/WM_QUIT
+        winMsg->hwnd = win32wnd->getWindowHandle();
 
-  switch(os2Msg->msg)
-  {
+    switch(os2Msg->msg)
+    {
     case WIN32APP_POSTMSG:
     {
         packet = (POSTMSG_PACKET *)os2Msg->mp2;
@@ -272,8 +275,6 @@ BOOL OS2ToWinMsgTranslate(void *pTeb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode,
       LONG      yDelta = pswp->cy - swpOld.cy;
       LONG      xDelta = pswp->cx - swpOld.cx;
 
-        dprintf(("OS2: WM_WINDOWPOSCHANGED %x %x (%d,%d) (%d,%d)", win32wnd->getWindowHandle(), pswp->fl, pswp->x, pswp->y, pswp->cx, pswp->cy));
-
         if ((pswp->fl & (SWP_SIZE | SWP_MOVE | SWP_ZORDER)) == 0) goto dummymessage;
 
         if(pswp->fl & (SWP_MOVE | SWP_SIZE)) {
@@ -285,12 +286,10 @@ BOOL OS2ToWinMsgTranslate(void *pTeb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode,
             }
         }
         if(win32wnd->getParent()) {
-              OSLibMapSWPtoWINDOWPOS(pswp, &teb->o.odin.wp, &swpOld, win32wnd->getParent()->getWindowHeight(),
-                                     win32wnd->getParent()->getClientRectPtr()->left,
-                                     win32wnd->getParent()->getClientRectPtr()->top,
+              OSLibMapSWPtoWINDOWPOS(pswp, &teb->o.odin.wp, &swpOld, win32wnd->getParent()->getClientHeight(),
                                      win32wnd->getOS2WindowHandle());
         }
-        else  OSLibMapSWPtoWINDOWPOS(pswp, &teb->o.odin.wp, &swpOld, OSLibQueryScreenHeight(), 0, 0, win32wnd->getOS2WindowHandle());
+        else  OSLibMapSWPtoWINDOWPOS(pswp, &teb->o.odin.wp, &swpOld, OSLibQueryScreenHeight(), win32wnd->getOS2WindowHandle());
 
         if (!win32wnd->CanReceiveSizeMsgs())    goto dummymessage;
 
@@ -319,9 +318,9 @@ BOOL OS2ToWinMsgTranslate(void *pTeb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode,
 
         hwndActivate = OS2ToWin32Handle(hwndActivate);
         if(hwndActivate == 0) {
-                //another (non-win32) application's window
-                //set to desktop window handle
-                hwndActivate = windowDesktop->getWindowHandle();
+            //another (non-win32) application's window
+            //set to desktop window handle
+            hwndActivate = windowDesktop->getWindowHandle();
         }
 
         if(win32wnd->getStyle() & WS_MINIMIZE_W)
@@ -360,20 +359,6 @@ BOOL OS2ToWinMsgTranslate(void *pTeb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode,
     //**************************************************************************
     //Mouse messages (OS/2 Window coordinates -> Win32 coordinates relative to screen
     //**************************************************************************
-#ifndef ODIN_HITTEST
-    case WM_HITTEST:
-      winMsg->message = WINWM_NCHITTEST;
-      winMsg->wParam  = 0;
-      winMsg->lParam  = MAKELONG(winMsg->pt.x,winMsg->pt.y);
-      if(!IsWindowEnabled(win32wnd->getWindowHandle())) {
-                if(win32wnd->getParent()) {
-                        winMsg->hwnd = win32wnd->getParent()->getWindowHandle();
-                }
-                else    goto dummymessage; //don't send mouse messages to disabled windows
-      }
-      break;
-#endif
-
     case WM_BUTTON1DOWN:
     case WM_BUTTON1UP:
     case WM_BUTTON1DBLCLK:
@@ -386,11 +371,10 @@ BOOL OS2ToWinMsgTranslate(void *pTeb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode,
     {
         //WM_NC*BUTTON* is posted when the cursor is in a non-client area of the window
 
-#ifdef ODIN_HITTEST
         HWND hwnd;
 
         DisableLogging();
-        if(GetCapture() != winMsg->hwnd) 
+        if(GetCapture() != winMsg->hwnd)
         {
             hwnd = WindowFromPoint(winMsg->pt);
             if(win32wnd->getWindowHandle() != hwnd) {
@@ -403,7 +387,6 @@ BOOL OS2ToWinMsgTranslate(void *pTeb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode,
                 winMsg->hwnd = hwnd;
             }
         }
-#endif
 
         //if a window is disabled, it's parent receives the mouse messages
         if(!IsWindowEnabled(win32wnd->getWindowHandle())) {
@@ -419,23 +402,14 @@ BOOL OS2ToWinMsgTranslate(void *pTeb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode,
             winMsg->lParam  = MAKELONG(winMsg->pt.x, winMsg->pt.y); //screen coordinates
         }
         else {
-#ifdef ODIN_HITTEST
             ClientPoint.x = winMsg->pt.x;
             ClientPoint.y = winMsg->pt.y;
             MapWindowPoints(0, win32wnd->getWindowHandle(), (LPPOINT)&ClientPoint, 1);
-#else
-            point.x         = (*(POINTS *)&os2Msg->mp1).x;
-            point.y         = (*(POINTS *)&os2Msg->mp1).y;
-            ClientPoint.x   = mapOS2ToWin32X(win32wnd, point.x);
-            ClientPoint.y   = mapOS2ToWin32Y(win32wnd, point.y);
-#endif
             winMsg->message = WINWM_LBUTTONDOWN + (os2Msg->msg - WM_BUTTON1DOWN);
             winMsg->wParam  = GetMouseKeyState();
             winMsg->lParam  = MAKELONG(ClientPoint.x, ClientPoint.y); //client coordinates
         }
-#ifdef ODIN_HITTEST
         EnableLogging();
-#endif
         if((fMsgRemoved == MSG_REMOVE) && ISMOUSE_CAPTURED())
         {
             if(DInputMouseHandler(win32wnd->getWindowHandle(), winMsg->message, winMsg->pt.x, winMsg->pt.y)) {
@@ -471,12 +445,11 @@ BOOL OS2ToWinMsgTranslate(void *pTeb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode,
     {
         //WM_NCMOUSEMOVE is posted when the cursor moves into a non-client area of the window
 
-#ifdef ODIN_HITTEST
         HWND hwnd;
 
         dprintf2(("WM_NCMOUSEMOVE (%d,%d)", winMsg->pt.x, winMsg->pt.y));
         DisableLogging();
-        if(GetCapture() != winMsg->hwnd) 
+        if(GetCapture() != winMsg->hwnd)
         {
             hwnd = WindowFromPoint(winMsg->pt);
             if(win32wnd->getWindowHandle() != hwnd) {
@@ -489,7 +462,6 @@ BOOL OS2ToWinMsgTranslate(void *pTeb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode,
                 winMsg->hwnd = hwnd;
             }
         }
-#endif
 
         //if a window is disabled, it's parent receives the mouse messages
         if(!IsWindowEnabled(win32wnd->getWindowHandle())) {
@@ -506,24 +478,15 @@ BOOL OS2ToWinMsgTranslate(void *pTeb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode,
         }
         else
         {
-#ifdef ODIN_HITTEST
             ClientPoint.x = winMsg->pt.x;
             ClientPoint.y = winMsg->pt.y;
             MapWindowPoints(0, win32wnd->getWindowHandle(), (LPPOINT)&ClientPoint, 1);
-#else
-            point.x         = (*(POINTS *)&os2Msg->mp1).x;
-            point.y         = (*(POINTS *)&os2Msg->mp1).y;
-            ClientPoint.x   = mapOS2ToWin32X(win32wnd, point.x);
-            ClientPoint.y   = mapOS2ToWin32Y(win32wnd, point.y);
-#endif
 
             winMsg->message = WINWM_MOUSEMOVE;
             winMsg->wParam  = GetMouseKeyState();
             winMsg->lParam  = MAKELONG(ClientPoint.x, ClientPoint.y); //client coordinates
         }
-#ifdef ODIN_HITTEST
         EnableLogging();
-#endif
         if((fMsgRemoved == MSG_REMOVE) && ISMOUSE_CAPTURED())
         {
             if(DInputMouseHandler(win32wnd->getWindowHandle(), winMsg->message, winMsg->pt.x, winMsg->pt.y)) {
@@ -821,8 +784,8 @@ dummymessage:
         winMsg->wParam  = 0;
         winMsg->lParam  = 0;
         return FALSE;
-  }
-  return TRUE;
+    }
+    return TRUE;
 }
 //******************************************************************************
 //******************************************************************************

@@ -1,8 +1,8 @@
-/* $Id: win32wbase.cpp,v 1.254 2001-05-03 17:51:01 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.255 2001-05-11 08:39:45 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
- * Copyright 1998-2000 Sander van Leeuwen (sandervl@xs4all.nl)
+ * Copyright 1998-2001 Sander van Leeuwen (sandervl@xs4all.nl)
  * Copyright 1999      Daniela Engert (dani@ngrt.de)
  * Copyright 1999-2000 Christoph Bratschi (cbratschi@datacomm.ch)
  *
@@ -105,7 +105,8 @@ void Win32BaseWindow::Init()
   fCreateSetWindowPos = FALSE;
   fCreationFinished= FALSE;
   fMinMaxChange    = FALSE;
-  fOwnDCDirty      = FALSE;
+  fVisibleRegionChanged = FALSE;
+  fEraseBkgndFlag  = TRUE;
 
   windowNameA      = NULL;
   windowNameW      = NULL;
@@ -115,6 +116,7 @@ void Win32BaseWindow::Init()
 
   magic            = WIN32PM_MAGIC;
   OS2Hwnd          = 0;
+  OS2HwndFrame     = 0;
   hSysMenu         = 0;
   Win32Hwnd        = 0;
 
@@ -145,8 +147,6 @@ void Win32BaseWindow::Init()
 
   hIcon              = 0;
   hIconSm            = 0;
-
-  EraseBkgndFlag     = TRUE;
 
   horzScrollInfo     = NULL;
   vertScrollInfo     = NULL;
@@ -466,7 +466,7 @@ BOOL Win32BaseWindow::CreateWindowExA(CREATESTRUCTA *cs, ATOM classAtom)
                                    dwOSWinStyle,(char *)windowNameA,
                                    (owner) ? owner->getOS2WindowHandle() : ((getParent()) ? getParent()->getOS2WindowHandle() : OSLIB_HWND_DESKTOP),
                                    (hwndLinkAfter == HWND_BOTTOM) ? TRUE : FALSE,
-                                   0, fTaskList,fXDefault | fCXDefault,windowClass->getStyle());
+                                   0, fTaskList,fXDefault | fCXDefault,windowClass->getStyle(), &OS2HwndFrame);
     if(OS2Hwnd == 0) {
         dprintf(("Window creation failed!! OS LastError %0x", OSLibWinGetLastError()));
         SetLastError(ERROR_OUTOFMEMORY); //TODO: Better error
@@ -687,7 +687,7 @@ if (!cs->hMenu) cs->hMenu = LoadMenuA(windowClass->getInstance(),"MYAPP");
     fCreated = TRUE;
 
     if(fTaskList) {
-        hTaskList = OSLibWinAddToTaskList(OS2Hwnd, windowNameA, (cs->style & WS_VISIBLE) ? 1 : 0);
+        hTaskList = OSLibWinAddToTaskList(OS2HwndFrame, windowNameA, (cs->style & WS_VISIBLE) ? 1 : 0);
     }
 
     localSend32 = (isUnicode) ? ::SendMessageW : ::SendMessageA;
@@ -870,7 +870,9 @@ ULONG Win32BaseWindow::MsgShow(BOOL fShow)
     }
     else setStyle(getStyle() & ~WS_VISIBLE);
 
-    return SendInternalMessageA(WM_SHOWWINDOW, fShow, 0);
+    //already sent from ShowWindow
+////    return SendInternalMessageA(WM_SHOWWINDOW, fShow, 0);
+    return 0;
 }
 //******************************************************************************
 //******************************************************************************
@@ -896,35 +898,12 @@ ULONG Win32BaseWindow::MsgPosChanged(LPARAM lp)
 }
 //******************************************************************************
 //******************************************************************************
-#if 0
-ULONG Win32BaseWindow::MsgMinMax()
-{
-
-}
-#endif
-//******************************************************************************
-//******************************************************************************
 ULONG Win32BaseWindow::MsgScroll(ULONG msg, ULONG scrollCode, ULONG scrollPos)
 {
   //According to the SDK docs, the scrollbar handle (lParam) is 0 when the standard
   //window scrollbars send these messages
   return SendInternalMessageA(msg, MAKELONG(scrollCode, scrollPos), 0);
 }
-//******************************************************************************
-//******************************************************************************
-#ifndef ODIN_HITTEST
-ULONG Win32BaseWindow::MsgHitTest(MSG *msg)
-{
-  lastHitTestVal = DispatchMsgA(msg);
-
-  dprintf2(("MsgHitTest %x (%d,%d) (%d,%d) (%d,%d) returned %x", getWindowHandle(), LOWORD(msg->lParam), HIWORD(msg->lParam), rectWindow.left, rectWindow.top, rectWindow.right, rectWindow.bottom, lastHitTestVal));
-
-  if (lastHitTestVal == HTTRANSPARENT)
-    return HTOS_TRANSPARENT;
-  else
-    return HTOS_NORMAL;
-}
-#endif
 //******************************************************************************
 //******************************************************************************
 ULONG Win32BaseWindow::MsgActivate(BOOL fActivate, BOOL fMinimized, HWND hwnd, HWND hwndOS2Win)
@@ -956,22 +935,22 @@ ULONG Win32BaseWindow::MsgActivate(BOOL fActivate, BOOL fMinimized, HWND hwnd, H
     rc = SendInternalMessageA(WM_ACTIVATE, MAKELONG((fActivate) ? WA_ACTIVE : WA_INACTIVE, fMinimized), hwnd);
 
     if(hwndOS2Win) {
-            threadidhwnd = O32_GetWindowThreadProcessId(hwndOS2Win, &procidhwnd);
+        threadidhwnd = O32_GetWindowThreadProcessId(hwndOS2Win, &procidhwnd);
     }
-//Warning: temporary hack to force focus to newly created window
-//RealPlayer 8 does not pass WM_ACTIVATE to defwindowproc and doesn't call
-//setfocus -> keyboard focus not set
-//TODO: Find real cause!!
+    //Warning: temporary hack to force focus to newly created window
+    //RealPlayer 8 does not pass WM_ACTIVATE to defwindowproc and doesn't call
+    //setfocus -> keyboard focus not set
+    //TODO: Find real cause!!
     if(GetFocus() == 0 && fActivate) {
         if(!(getStyle() & WS_MINIMIZE))
             SetFocus(getWindowHandle());
     }
-//Warning: temporary hack to force focus to newly created window
+    //Warning: temporary hack to force focus to newly created window
 
     if(fActivate) {
-            SendInternalMessageA(WM_ACTIVATEAPP, 1, dwThreadId);    //activate; specify window thread id
+         SendInternalMessageA(WM_ACTIVATEAPP, 1, dwThreadId);    //activate; specify window thread id
     }
-    else    SendInternalMessageA(WM_ACTIVATEAPP, 0, threadidhwnd);  //deactivate; specify thread id of other process
+    else SendInternalMessageA(WM_ACTIVATEAPP, 0, threadidhwnd);  //deactivate; specify thread id of other process
     return rc;
 }
 //******************************************************************************
@@ -1066,7 +1045,7 @@ ULONG Win32BaseWindow::MsgButton(MSG *msg)
                     Win32BaseWindow *win32top = Win32BaseWindow::GetWindowFromHandle(hwndTop);
 
                     //SvL: Calling OSLibSetActiveWindow(hwndTop); causes focus problems
-                    if (win32top) OSLibWinSetFocus(win32top->getOS2WindowHandle());
+                    if (win32top) OSLibWinSetFocus(win32top->getOS2FrameWindowHandle());
                 }
         }
     }
@@ -1121,36 +1100,30 @@ ULONG Win32BaseWindow::MsgChar(MSG *msg)
     return DispatchMsgA(msg);
 }
 //******************************************************************************
+//TODO: Should use update region, not rectangle
 //******************************************************************************
-ULONG Win32BaseWindow::MsgNCPaint()
+ULONG Win32BaseWindow::MsgNCPaint(PRECT pUpdateRect)
 {
-  RECT rect;
-
-  if(GetOS2UpdateRect(this,&rect))
-  {
     HRGN hrgn;
     ULONG rc;
     RECT client = rectClient;
 
-        if ((rect.left >= client.left) && (rect.left < client.right) &&
-           (rect.right >= client.left) && (rect.right < client.right) &&
-           (rect.top  >= client.top) && (rect.top < client.bottom) &&
-           (rect.bottom >= client.top) && (rect.bottom < client.bottom))
-        {
-                return 0;
-        }
+    if ((pUpdateRect->left >= client.left) && (pUpdateRect->left < client.right) &&
+       (pUpdateRect->right >= client.left) && (pUpdateRect->right < client.right) &&
+       (pUpdateRect->top  >= client.top) && (pUpdateRect->top < client.bottom) &&
+       (pUpdateRect->bottom >= client.top) && (pUpdateRect->bottom < client.bottom))
+    {
+        return 0;
+    }
 
-        dprintf(("MsgNCPaint (%d,%d)(%d,%d)", rect.left, rect.top, rect.right, rect.bottom));
-        hrgn = CreateRectRgnIndirect(&rect);
-        if (!hrgn) return 0;
+    dprintf(("MsgNCPaint (%d,%d)(%d,%d)", pUpdateRect->left, pUpdateRect->top, pUpdateRect->right, pUpdateRect->bottom));
+    hrgn = CreateRectRgnIndirect(pUpdateRect);
 
-        rc = SendInternalMessageA(WM_NCPAINT, hrgn, 0);
+    rc = SendInternalMessageA(WM_NCPAINT, hrgn, 0);
 
-        DeleteObject(hrgn);
+    DeleteObject(hrgn);
 
-        return rc;
-  }
-  else  return 0;
+    return rc;
 }
 //******************************************************************************
 //Called when either the frame's size or position has changed (lpWndPos != NULL)
@@ -1163,14 +1136,14 @@ ULONG Win32BaseWindow::MsgFormatFrame(WINDOWPOS *lpWndPos)
   WINDOWPOS wndPos;
   ULONG rc;
 
-  if(lpWndPos)
-  {
+    if(lpWndPos)
+    {
         //set new window rectangle
         setWindowRect(lpWndPos->x, lpWndPos->y, lpWndPos->x+lpWndPos->cx,
                       lpWndPos->y+lpWndPos->cy);
         newWindowRect = rectWindow;
-  }
-  else {
+    }
+    else {
         wndPos.hwnd  = getWindowHandle();
         wndPos.hwndInsertAfter = 0;
         newWindowRect= rectWindow;
@@ -1180,14 +1153,18 @@ ULONG Win32BaseWindow::MsgFormatFrame(WINDOWPOS *lpWndPos)
         wndPos.cy    = newWindowRect.bottom - newWindowRect.top;
         wndPos.flags = SWP_FRAMECHANGED;
         lpWndPos     = &wndPos;
-  }
+    }
 
-  newClientRect = rectClient;
-  rc = SendNCCalcSize(TRUE, &newWindowRect,  &oldWindowRect, &client, lpWndPos, &newClientRect);
-  rectClient = newClientRect; //must update rectClient here
+    newClientRect = rectClient;
+    rc = SendNCCalcSize(TRUE, &newWindowRect,  &oldWindowRect, &client, lpWndPos, &newClientRect);
+    rectClient = newClientRect; //must update rectClient here
 
-  dprintf(("MsgFormatFrame: old client rect (%d,%d)(%d,%d), new client (%d,%d)(%d,%d)", client.left, client.top, client.right, client.bottom, rectClient.left, rectClient.top, rectClient.right, rectClient.bottom));
-  dprintf(("MsgFormatFrame: old window rect (%d,%d)(%d,%d), new window (%d,%d)(%d,%d)", oldWindowRect.left, oldWindowRect.top, oldWindowRect.right, oldWindowRect.bottom, rectWindow.left, rectWindow.top, rectWindow.right, rectWindow.bottom));
+    dprintf(("MsgFormatFrame: old client rect (%d,%d)(%d,%d), new client (%d,%d)(%d,%d)", client.left, client.top, client.right, client.bottom, rectClient.left, rectClient.top, rectClient.right, rectClient.bottom));
+    dprintf(("MsgFormatFrame: old window rect (%d,%d)(%d,%d), new window (%d,%d)(%d,%d)", oldWindowRect.left, oldWindowRect.top, oldWindowRect.right, oldWindowRect.bottom, rectWindow.left, rectWindow.top, rectWindow.right, rectWindow.bottom));
+
+    if(fNoSizeMsg || !EqualRect(&client, &rectClient)) {
+        OSLibWinSetClientPos(getOS2WindowHandle(), rectClient.left, rectClient.top, getClientWidth(), getClientHeight(), getWindowHeight());
+    }
 
 #if 1
 //this doesn't always work
@@ -1429,7 +1406,7 @@ LRESULT Win32BaseWindow::DefWindowProcA(UINT Msg, WPARAM wParam, LPARAM lParam)
         {
             HandleNCPaint((HRGN)1);
             if(hTaskList) {
-                OSLibWinChangeTaskList(hTaskList, OS2Hwnd, getWindowNameA(), (getStyle() & WS_VISIBLE) ? 1 : 0);
+                OSLibWinChangeTaskList(hTaskList, OS2HwndFrame, getWindowNameA(), (getStyle() & WS_VISIBLE) ? 1 : 0);
             }
         }
 
@@ -1589,7 +1566,7 @@ LRESULT Win32BaseWindow::DefWindowProcA(UINT Msg, WPARAM wParam, LPARAM lParam)
           FillRect( (HDC)wParam, &rect, GetSysColorBrush(COLOR_WINDOWTEXT));
           return 1;
         }
-       
+
         if (!windowClass || !windowClass->getBackgroundBrush()) return 0;
 
         rc = GetClipBox( (HDC)wParam, &rect );
@@ -1916,10 +1893,10 @@ LRESULT Win32BaseWindow::DefWindowProcW(UINT Msg, WPARAM wParam, LPARAM lParam)
         dprintf(("WM_SETTEXT of %x\n",Win32Hwnd));
         if ((dwStyle & WS_CAPTION) == WS_CAPTION)
         {
-          HandleNCPaint((HRGN)1);
-          if(hTaskList) {
-        OSLibWinChangeTaskList(hTaskList, OS2Hwnd, getWindowNameA(), (getStyle() & WS_VISIBLE) ? 1 : 0);
-      }
+            HandleNCPaint((HRGN)1);
+            if(hTaskList) {
+                OSLibWinChangeTaskList(hTaskList, OS2HwndFrame, getWindowNameA(), (getStyle() & WS_VISIBLE) ? 1 : 0);
+            }
         }
 
         return TRUE;
@@ -2230,8 +2207,8 @@ BOOL Win32BaseWindow::ShowWindow(ULONG nCmdShow)
     {
     case SW_HIDE:
         if (!wasVisible) goto END;
-            swp |= SWP_HIDEWINDOW | SWP_NOSIZE | SWP_NOMOVE |
-        SWP_NOACTIVATE | SWP_NOZORDER;
+
+        swp |= SWP_HIDEWINDOW | SWP_NOSIZE | SWP_NOMOVE | SWP_NOACTIVATE | SWP_NOZORDER;
         break;
 
     case SW_SHOWMINNOACTIVE:
@@ -2241,21 +2218,12 @@ BOOL Win32BaseWindow::ShowWindow(ULONG nCmdShow)
         swp |= SWP_SHOWWINDOW;
         /* fall through */
     case SW_MINIMIZE:
-        if(!(getStyle() & WS_CHILD))
-        {
-            if( !(getStyle() & WS_MINIMIZE) )
-                 swp |= MinMaximize(SW_MINIMIZE, &newPos );
-
-            swp |= SWP_NOSIZE | SWP_NOMOVE | SWP_HIDEWINDOW;
+        swp |= SWP_FRAMECHANGED;
+        if( !(getStyle() & WS_MINIMIZE) ) {
+             swp |= MinMaximize(SW_MINIMIZE, &newPos );
+             fMinMaxChange = TRUE; //-> invalidate entire window in WM_CALCINVALIDRECT
         }
-        else {
-            swp |= SWP_FRAMECHANGED;
-            if( !(getStyle() & WS_MINIMIZE) ) {
-                 swp |= MinMaximize(SW_MINIMIZE, &newPos );
-                 fMinMaxChange = TRUE; //-> invalidate entire window in WM_CALCINVALIDRECT
-            }
-            else swp |= SWP_NOSIZE | SWP_NOMOVE;
-        }
+        else swp |= SWP_NOSIZE | SWP_NOMOVE;
         break;
 
     case SW_SHOWMAXIMIZED: /* same as SW_MAXIMIZE */
@@ -2316,7 +2284,7 @@ BOOL Win32BaseWindow::ShowWindow(ULONG nCmdShow)
     SetWindowPos(HWND_TOP, newPos.left, newPos.top, newPos.right, newPos.bottom, LOWORD(swp));
 
     if(!(swp & SWP_NOACTIVATE)) {
-        OSLibWinSetActiveWindow(OS2Hwnd);
+        OSLibWinSetActiveWindow(OS2HwndFrame);
     }
 
     if (flags & WIN_NEED_SIZE)
@@ -2453,16 +2421,15 @@ BOOL Win32BaseWindow::SetWindowPos(HWND hwndInsertAfter, int x, int y, int cx, i
                 dprintf(("WARNING: Win32BaseWindow::SetWindowPos window %x is child but has no parent!!", getWindowHandle()));
             }
         }
-        OSLibWinQueryWindowPos(OS2Hwnd, &swpOld);
+        OSLibWinQueryWindowPos(OS2HwndFrame, &swpOld);
     }
 
     if(getParent()) {
-          OSLibMapWINDOWPOStoSWP(&wpos, &swp, &swpOld, getParent()->getWindowHeight(),
-                                 getParent()->getClientRectPtr()->left,
-                                 getParent()->getClientRectPtr()->top,
-                                 OS2Hwnd);
+          OSLibMapWINDOWPOStoSWP(&wpos, &swp, &swpOld, getParent()->getClientHeight(),
+                                      OS2HwndFrame);
     }
-    else  OSLibMapWINDOWPOStoSWP(&wpos, &swp, &swpOld, OSLibQueryScreenHeight(), 0, 0, OS2Hwnd);
+    else  OSLibMapWINDOWPOStoSWP(&wpos, &swp, &swpOld, OSLibQueryScreenHeight(), OS2HwndFrame);
+
     if (swp.fl == 0) {
         if(fuFlags & SWP_FRAMECHANGED)
         {
@@ -2476,20 +2443,20 @@ BOOL Win32BaseWindow::SetWindowPos(HWND hwndInsertAfter, int x, int y, int cx, i
     {
         Win32BaseWindow *wndBehind = Win32BaseWindow::GetWindowFromHandle(swp.hwndInsertBehind);
         if(wndBehind) {
-            swp.hwndInsertBehind   = wndBehind->getOS2WindowHandle();
+            swp.hwndInsertBehind   = wndBehind->getOS2FrameWindowHandle();
         }
         else {
             dprintf(("ERROR: SetWindowPos: hwndInsertBehind %x invalid!",swp.hwndInsertBehind));
             swp.hwndInsertBehind = 0;
         }
     }
-    swp.hwnd = OS2Hwnd;
+    swp.hwnd = OS2HwndFrame;
 
     if(fuFlags & SWP_SHOWWINDOW && !IsWindowVisible(getWindowHandle())) {
         setStyle(getStyle() | WS_VISIBLE);
         if(hTaskList) {
             dprintf(("Adding window %x to tasklist", getWindowHandle()));
-            OSLibWinChangeTaskList(hTaskList, OS2Hwnd, getWindowNameA(), 1);
+            OSLibWinChangeTaskList(hTaskList, OS2HwndFrame, getWindowNameA(), 1);
         }
     }
     else
@@ -2497,7 +2464,7 @@ BOOL Win32BaseWindow::SetWindowPos(HWND hwndInsertAfter, int x, int y, int cx, i
         setStyle(getStyle() & ~WS_VISIBLE);
         if(hTaskList && !(getStyle() & WS_MINIMIZE)) {
             dprintf(("Removing window %x from tasklist", getWindowHandle()));
-            OSLibWinChangeTaskList(hTaskList, OS2Hwnd, getWindowNameA(), 0);
+            OSLibWinChangeTaskList(hTaskList, OS2HwndFrame, getWindowNameA(), 0);
         }
     }
     dprintf (("WinSetWindowPos %x %x (%d,%d)(%d,%d) %x", swp.hwnd, swp.hwndInsertBehind, swp.x, swp.y, swp.cx, swp.cy, swp.fl));
@@ -2509,16 +2476,9 @@ BOOL Win32BaseWindow::SetWindowPos(HWND hwndInsertAfter, int x, int y, int cx, i
         return 0;
     }
 
-    //Restore window origin of parent window with CS_OWNDC style
-    //(fixes paint offset problems in Opera windows)
-    if(getParent() && getParent()->isOwnDC()) {
-        dprintfOrigin(getParent()->getOwnDC());
-        selectClientArea(getParent(), getParent()->getOwnDC());
-    }
-
     if((fuFlags & SWP_FRAMECHANGED) && (fuFlags & (SWP_NOMOVE | SWP_NOSIZE) == (SWP_NOMOVE | SWP_NOSIZE)))
     {
-            NotifyFrameChanged(&wpos, &oldClientRect);
+        NotifyFrameChanged(&wpos, &oldClientRect);
     }
     return (rc);
 }
@@ -2712,7 +2672,7 @@ BOOL Win32BaseWindow::DestroyWindow()
     dprintf(("DestroyWindow %x -> HIDDEN", hwnd));
 
     fDestroyWindowCalled = TRUE;
-    return OSLibWinDestroyWindow(OS2Hwnd);
+    return OSLibWinDestroyWindow(OS2HwndFrame);
 }
 //******************************************************************************
 //******************************************************************************
@@ -2769,22 +2729,22 @@ HWND Win32BaseWindow::SetParent(HWND hwndNewParent)
    {
         setParent(newparent);
         getParent()->addChild(this);
-        OSLibWinSetParent(getOS2WindowHandle(), getParent()->getOS2WindowHandle());
+        OSLibWinSetParent(getOS2FrameWindowHandle(), getParent()->getOS2WindowHandle());
         if(!(getStyle() & WS_CHILD))
         {
             //TODO: Send WM_STYLECHANGED msg?
             setStyle(getStyle() | WS_CHILD);
             if(getWindowId())
-                {
-                        DestroyMenu( (HMENU) getWindowId() );
-                        setWindowId(0);
-                }
+            {
+                DestroyMenu( (HMENU) getWindowId() );
+                setWindowId(0);
+            }
         }
    }
    else {
         setParent(windowDesktop);
         windowDesktop->addChild(this);
-        OSLibWinSetParent(getOS2WindowHandle(), OSLIB_HWND_DESKTOP);
+        OSLibWinSetParent(getOS2FrameWindowHandle(), OSLIB_HWND_DESKTOP);
 
     //TODO: Send WM_STYLECHANGED msg?
         setStyle(getStyle() & ~WS_CHILD);
@@ -2823,18 +2783,19 @@ HWND Win32BaseWindow::GetTopWindow()
  Win32BaseWindow *topwindow;
 
     hwndTop = OSLibWinQueryWindow(getOS2WindowHandle(), QWOS_TOP);
-    if(!isDesktopWindow()) {
-    topwindow = GetWindowFromOS2Handle(hwndTop);
-    if(topwindow) {
-        return topwindow->getWindowHandle();
-    }
-    return 0;
+    if(!isDesktopWindow())
+    {
+        topwindow = GetWindowFromOS2FrameHandle(hwndTop);
+        if(topwindow) {
+            return topwindow->getWindowHandle();
+        }
+        return 0;
     }
     while(hwndTop) {
-    topwindow = GetWindowFromOS2Handle(hwndTop);
-    if(topwindow) {
-        return topwindow->getWindowHandle();
-    }
+        topwindow = GetWindowFromOS2FrameHandle(hwndTop);
+        if(topwindow) {
+            return topwindow->getWindowHandle();
+        }
         hwndTop = OSLibWinQueryWindow(hwndTop, QWOS_NEXT);
     }
 
@@ -3010,7 +2971,7 @@ HWND Win32BaseWindow::FindWindowEx(HWND hwndParent, HWND hwndChildAfter, ATOM at
 
         while(hwnd)
         {
-            wnd = GetWindowFromOS2Handle(hwnd);
+            wnd = GetWindowFromOS2FrameHandle(hwnd);
             if(wnd == NULL) {
                 hwnd = OSLibWinQueryClientWindow(hwnd);
                 if(hwnd)  wnd = GetWindowFromOS2Handle(hwnd);
@@ -3040,7 +3001,6 @@ HWND Win32BaseWindow::GetWindow(UINT uCmd)
  HWND hwndRelated = 0;
  Win32BaseWindow *window;
 
-#if 1
     switch(uCmd)
     {
     case GW_HWNDFIRST:
@@ -3048,40 +3008,63 @@ HWND Win32BaseWindow::GetWindow(UINT uCmd)
         {
             window = (Win32BaseWindow *)getParent();
             hwndRelated = OSLibWinQueryWindow(window->getOS2WindowHandle(), QWOS_TOP);
-            window = GetWindowFromOS2Handle(hwndRelated);
+            window = GetWindowFromOS2FrameHandle(hwndRelated);
             if(window) {
-                  hwndRelated = window->getWindowHandle();
+                 hwndRelated = window->getWindowHandle();
             }
             else hwndRelated = 0;
         }
-        else hwndRelated = 0; //TODO: not correct; should get first child in z-order of desktop
+        else {
+            dprintf(("WARNING: GW_HWNDFIRST not correctly implemented for toplevel/most windows!"));
+            hwndRelated = 0; //TODO: not correct; should get first child in z-order of desktop
+        }
         break;
 
     case GW_HWNDLAST:
-        hwndRelated = OSLibWinQueryWindow(getOS2WindowHandle(), QWOS_BOTTOM);
-        window = GetWindowFromOS2Handle(hwndRelated);
-        if(window) {
-             hwndRelated = window->getWindowHandle();
+        if(getParent()) {
+            window = (Win32BaseWindow *)getParent();
+            hwndRelated = OSLibWinQueryWindow(window->getOS2WindowHandle(), QWOS_BOTTOM);
+            dprintf(("os2 handle %x", hwndRelated));
+            window = GetWindowFromOS2FrameHandle(hwndRelated);
+            if(window) {
+                 hwndRelated = window->getWindowHandle();
+            }
+            else hwndRelated = 0;
         }
-        else hwndRelated = 0;
+        else {
+            dprintf(("WARNING: GW_HWNDLAST not correctly implemented for toplevel/most windows!"));
+            hwndRelated = 0; //TODO: not correct; should get first child in z-order of desktop
+        }
         break;
 
     case GW_HWNDNEXT:
-        hwndRelated = OSLibWinQueryWindow(getOS2WindowHandle(), QWOS_NEXT);
-        window = GetWindowFromOS2Handle(hwndRelated);
-        if(window) {
-             hwndRelated = window->getWindowHandle();
+        if(getParent()) {
+            hwndRelated = OSLibWinQueryWindow(getOS2FrameWindowHandle(), QWOS_NEXT);
+            window = GetWindowFromOS2FrameHandle(hwndRelated);
+            if(window) {
+                 hwndRelated = window->getWindowHandle();
+            }
+            else hwndRelated = 0;
         }
-        else hwndRelated = 0;
+        else {
+            dprintf(("WARNING: GW_HWNDNEXT not correctly implemented for toplevel/most windows!"));
+            hwndRelated = 0; //TODO: not correct; should get first child in z-order of desktop
+        }
         break;
 
     case GW_HWNDPREV:
-        hwndRelated = OSLibWinQueryWindow(getOS2WindowHandle(), QWOS_PREV);
-        window = GetWindowFromOS2Handle(hwndRelated);
-        if(window) {
-             hwndRelated = window->getWindowHandle();
+        if(getParent()) {
+            hwndRelated = OSLibWinQueryWindow(getOS2FrameWindowHandle(), QWOS_PREV);
+            window = GetWindowFromOS2FrameHandle(hwndRelated);
+            if(window) {
+                 hwndRelated = window->getWindowHandle();
+            }
+            else hwndRelated = 0;
         }
-        else hwndRelated = 0;
+        else {
+            dprintf(("WARNING: GW_HWNDPREV not correctly implemented for toplevel/most windows!"));
+            hwndRelated = 0; //TODO: not correct; should get first child in z-order of desktop
+        }
         break;
 
     case GW_OWNER:
@@ -3092,79 +3075,13 @@ HWND Win32BaseWindow::GetWindow(UINT uCmd)
 
     case GW_CHILD:
         hwndRelated = OSLibWinQueryWindow(getOS2WindowHandle(), QWOS_TOP);
-        window = GetWindowFromOS2Handle(hwndRelated);
+        window = GetWindowFromOS2FrameHandle(hwndRelated);
         if(window) {
              hwndRelated = window->getWindowHandle();
         }
         else hwndRelated = 0;
         break;
     }
-#else
-    switch(uCmd)
-    {
-    case GW_HWNDFIRST:
-        if(getParent()) {
-            window = (Win32BaseWindow *)getParent()->getFirstChild();
-            hwndRelated = window->getWindowHandle();
-        }
-        break;
-
-    case GW_HWNDLAST:
-        if(!getParent())
-        {
-            goto end;
-        }
-
-        window = this;
-        while(window->getNextChild())
-        {
-            window = (Win32BaseWindow *)window->getNextChild();
-        }
-        hwndRelated = window->getWindowHandle();
-        break;
-
-    case GW_HWNDNEXT:
-        window = (Win32BaseWindow *)getNextChild();
-        if(window) {
-            hwndRelated = window->getWindowHandle();
-        }
-        break;
-
-    case GW_HWNDPREV:
-        if(!getParent())
-        {
-            goto end;
-        }
-        window = (Win32BaseWindow *)(getParent()->getFirstChild()); /* First sibling */
-        if(window == this)
-        {
-            hwndRelated = 0;  /* First in list */
-            goto end;
-        }
-        while(window->getNextChild())
-        {
-            if (window->getNextChild() == this)
-            {
-                hwndRelated = window->getWindowHandle();
-                goto end;
-            }
-            window = (Win32BaseWindow *)window->getNextChild();
-        }
-        break;
-
-    case GW_OWNER:
-        if(getOwner()) {
-            hwndRelated = getOwner()->getWindowHandle();
-        }
-        break;
-
-    case GW_CHILD:
-        if(getFirstChild()) {
-            hwndRelated = ((Win32BaseWindow *)getFirstChild())->getWindowHandle();
-        }
-        break;
-    }
-#endif
 end:
     dprintf(("GetWindow %x %d returned %x", getWindowHandle(), uCmd, hwndRelated));
     return hwndRelated;
@@ -3226,7 +3143,7 @@ BOOL Win32BaseWindow::EnableWindow(BOOL fEnable)
   if(rc && !fEnable) {
         SendMessageA(WM_CANCELMODE, 0, 0);
   }
-  OSLibWinEnableWindow(OS2Hwnd, fEnable);
+  OSLibWinEnableWindow(OS2HwndFrame, fEnable);
   if(fEnable == FALSE) {
         //SvL: No need to clear focus as PM already does this
         if(getWindowHandle() == GetCapture()) {
@@ -3435,7 +3352,7 @@ LONG Win32BaseWindow::SetWindowLongA(int index, ULONG value, BOOL fUnicode)
                 SendInternalMessageA(WM_STYLECHANGING,GWL_STYLE,(LPARAM)&ss);
                 setStyle(ss.styleNew);
                 SendInternalMessageA(WM_STYLECHANGED,GWL_STYLE,(LPARAM)&ss);
-                OSLibSetWindowStyle(getOS2WindowHandle(), getStyle(), getExStyle());
+                OSLibSetWindowStyle(getOS2FrameWindowHandle(), getOS2WindowHandle(), getStyle(), getExStyle());
 #ifdef DEBUG
                 PrintWindowStyle(ss.styleNew, 0);
 #endif
@@ -3606,6 +3523,12 @@ Win32BaseWindow *Win32BaseWindow::GetWindowFromOS2Handle(HWND hwnd)
     }
 //  dprintf2(("Win32BaseWindow::GetWindowFromOS2Handle: not an Odin os2 window %x", hwnd));
     return 0;
+}
+//******************************************************************************
+//******************************************************************************
+Win32BaseWindow *Win32BaseWindow::GetWindowFromOS2FrameHandle(HWND hwnd)
+{
+    return GetWindowFromOS2Handle(OSLibWinWindowFromID(hwnd,OSLIB_FID_CLIENT));
 }
 //******************************************************************************
 //******************************************************************************
@@ -3807,6 +3730,11 @@ HWND WIN32API OS2ToWin32Handle(HWND hwnd)
     if(window) {
             return window->getWindowHandle();
     }
+    window = Win32BaseWindow::GetWindowFromOS2FrameHandle(hwnd);
+    if(window) {
+            return window->getWindowHandle();
+    }
+
 //    dprintf2(("Win32BaseWindow::OS2ToWin32Handle: not a win32 window %x", hwnd));
     return 0;
 //    else    return hwnd;    //OS/2 window handle

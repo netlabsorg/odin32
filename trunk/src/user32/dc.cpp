@@ -1,4 +1,4 @@
-/* $Id: dc.cpp,v 1.98 2001-05-04 17:02:50 sandervl Exp $ */
+/* $Id: dc.cpp,v 1.99 2001-05-11 08:39:41 sandervl Exp $ */
 
 /*
  * DC functions for USER32
@@ -386,181 +386,15 @@ BOOL changePageXForm(Win32BaseWindow *wnd, pDCData pHps, PPOINTL pValue, int x, 
 //******************************************************************************
 VOID removeClientArea(Win32BaseWindow *window, pDCData pHps)
 {
- POINTL point;
-
-   // This function checks to see if a client area is currently selected, if
-   // it is the origin plus the visible region of the frame are restored.
-
    pHps->isClient = FALSE;
-
-////   dprintfOrigin(pHps->hps);
-
-   if(pHps->isClientArea)
-   {
-        dprintf2(("removeClientArea %x: (%d,%d) -> (%d,%d)", window->getWindowHandle(), point.x, point.y, pHps->ptlOrigin.x, pHps->ptlOrigin.y));
-        pHps->isClientArea = FALSE;
-        GreSetupDC(pHps->hps,
-                   pHps->hrgnVis,
-                   pHps->ptlOrigin.x,
-                   pHps->ptlOrigin.y,
-                   0,
-                   SETUPDC_ORIGIN | SETUPDC_VISRGN | SETUPDC_RECALCCLIP);
-   }
-////   else dprintf2(("removeClientArea: %x (%d,%d) (%d,%d)", window->getWindowHandle(), point.x, point.y, pHps->ptlOrigin.x, pHps->ptlOrigin.y));
-
+   pHps->isClientArea = FALSE;
 }
 //******************************************************************************
 //******************************************************************************
 void selectClientArea(Win32BaseWindow *window, pDCData pHps)
 {
-   // This function checks to see if the DC needs to be adjusted to a client
-   // area and makes the adjustment.
-   RECTL rcl, rcltemp;
-   HRGN  hrgnRect, hrgnClip, hrgnOldClip = 0;
-   HWND  hwnd;
-   LONG  rc;
-   PRECT pClient = window->getClientRectPtr();
-   PRECT pWindow = window->getWindowRect();
-   RECT  rectWindow;
-   RECTL rectWindowOS2;
-
-   if(!window->isOwnDCDirty() && (pClient->left == 0 && pClient->top == 0 &&
-      window->getClientHeight() == window->getWindowHeight() &&
-      window->getClientWidth()  == window->getWindowWidth()))
-   {
-        //client rectangle = frame rectangle -> no change necessary
-        return;
-   }
    pHps->isClient = TRUE;
-
-   hwnd = window->getOS2WindowHandle();
-
-   mapWin32ToOS2Rect(window->getWindowHeight(), window->getClientRectPtr(), (PRECTLOS2)&rcl);
-
-   GetWindowRect(window->getWindowHandle(), &rectWindow);
-   mapWin32ToOS2Rect(GetScreenHeight(), &rectWindow, (PRECTLOS2)&rectWindowOS2);
-   dprintf2(("frame (%d,%d)(%d,%d) hps height %d", rectWindowOS2.xLeft, rectWindowOS2.yBottom, rectWindowOS2.xRight, rectWindowOS2.yTop, pHps->height));
-
-   //convert to screen coordinates
-   GreGetDCOrigin(pHps->hps, (PPOINTL)&rcltemp);
-
-   if(pHps->isClientArea)
-   {
-        //TODO: counter
-        dprintf2(("WARNING: selectClientArea %x; already selected! origin (%d,%d) original origin (%d,%d)", window->getWindowHandle(), rcltemp.xLeft, rcltemp.yBottom, pHps->ptlOrigin.x, pHps->ptlOrigin.y));
-        GetWindowRect(window->getWindowHandle(), &rectWindow);
-        mapWin32ToOS2Rect(GetScreenHeight(), &rectWindow, (PRECTLOS2)&rectWindowOS2);
-        if(rectWindowOS2.xLeft + rcl.xLeft != rcltemp.xLeft ||
-           rectWindowOS2.yBottom + rcl.yBottom != rcltemp.yBottom)
-        {
-                dprintf2(("WARNING: origin changed (%d,%d) instead of (%d,%d)!", rcltemp.xLeft, rcltemp.yBottom, rectWindowOS2.xLeft + rcl.xLeft, rectWindowOS2.yBottom + rcl.yBottom));
-                rcl.xLeft   += rectWindowOS2.xLeft;
-                rcl.xRight  += rectWindowOS2.xLeft;
-                rcl.yTop    += rectWindowOS2.yBottom;
-                rcl.yBottom += rectWindowOS2.yBottom;
-        }
-        else    return;
-   }
-   else {
-        rcl.xLeft   += rcltemp.xLeft;
-        rcl.xRight  += rcltemp.xLeft;
-        rcl.yTop    += rcltemp.yBottom;
-        rcl.yBottom += rcltemp.yBottom;
-
-        pHps->ptlOrigin.x = rcltemp.xLeft;
-        pHps->ptlOrigin.y = rcltemp.yBottom;
-   }
-   dprintf2(("selectClientArea %x: (%d,%d) -> (%d,%d)", window->getWindowHandle(), rcltemp.xLeft, rcltemp.yBottom, rcl.xLeft, rcl.yBottom));
-
-   if(pHps->hrgnVis == 0)
-        pHps->hrgnVis = GreCreateRectRegion(pHps->hps, &rcl, 1);
-
-   hrgnRect = GreCreateRectRegion(pHps->hps, &rcl, 1);
-#if 0
-   if(window->getParent())
-   {
-     HRGN hrgnParentClip;
-
-        pClient = window->getParent()->getClientRectPtr();
-        GetWindowRect(window->getParent()->getWindowHandle(), &rectWindow);
-        rectWindow.right   = rectWindow.left + pClient->right;
-        rectWindow.left   += pClient->left;
-        rectWindow.bottom  = rectWindow.top + pClient->bottom;
-        rectWindow.top    += pClient->top;
-        mapWin32ToOS2Rect(GetScreenHeight(), &rectWindow, (PRECTLOS2)&rectWindowOS2);
-
-        hrgnParentClip = GreCreateRectRegion(pHps->hps, &rectWindowOS2, 1);
-#ifdef DEBUG
-        dprintf(("Combining client & parent client regions"));
-        dprintfRegion1(pHps->hps, window->getWindowHandle(), hrgnParentClip);
-        dprintfRegion1(pHps->hps, window->getWindowHandle(), hrgnRect);
-#endif
-
-        GreCombineRegion(pHps->hps, hrgnRect, hrgnParentClip, hrgnRect, CRGN_AND);
-        GreDestroyRegion(pHps->hps, hrgnParentClip);
-   }
-#endif
-
-   // Query the visible region
-   GreCopyClipRegion(pHps->hps, pHps->hrgnVis, 0, COPYCRGN_VISRGN);
-   GpiQueryRegionBox(pHps->hps, pHps->hrgnVis, &rcltemp);
-   // And the visible region of the frame with the client rectangle
-   // to get the new visible region
-   GreCombineRegion(pHps->hps, hrgnRect, pHps->hrgnVis, hrgnRect, CRGN_AND);
-#ifdef DEBUG
-   dprintfRegion1(pHps->hps, window->getWindowHandle(), hrgnRect);
-#endif
-
-   // Set the new origin plus visible region in the DC
-   GreSetupDC(pHps->hps,
-              hrgnRect,
-              rcl.xLeft,
-              rcl.yBottom,
-              NULL,
-              SETUPDC_ORIGIN | SETUPDC_VISRGN | SETUPDC_RECALCCLIP);
-
-   // Destroy the region now we have finished with it.
-   GreDestroyRegion(pHps->hps, hrgnRect);
-
    pHps->isClientArea = TRUE;
-
-   if(pClient->left == 0 && pClient->top == 0 &&
-      window->getClientHeight() == window->getWindowHeight() &&
-      window->getClientWidth()  == window->getWindowWidth())
-   {
-       //client = frame, so no changes are necessary when switching between the two
-       pHps->isClient = FALSE;
-       pHps->isClientArea = FALSE;
-   }
-   if(window->isOwnDCDirty()) {
-       window->validateOwnDC();
-       setPageXForm(window, pHps);
-   }
-
-//testestest
-#if 0
-   GpiQueryViewingLimits(pHps->hps, &rectWindowOS2);
-   dprintf2(("view limits (%d,%d)(%d,%d)", rectWindowOS2.xLeft, rectWindowOS2.yBottom, rectWindowOS2.xRight, rectWindowOS2.yTop));
-   GpiQueryDefViewingLimits(pHps->hps, &rectWindowOS2);
-   dprintf2(("def view limits (%d,%d)(%d,%d)", rectWindowOS2.xLeft, rectWindowOS2.yBottom, rectWindowOS2.xRight, rectWindowOS2.yTop));
-   GpiQueryPageViewport(pHps->hps, &rectWindowOS2);
-   dprintf2(("page viewport (%d,%d)(%d,%d)", rectWindowOS2.xLeft, rectWindowOS2.yBottom, rectWindowOS2.xRight, rectWindowOS2.yTop));
-
-   GpiQueryBoundaryData(pHps->hps, &rectWindowOS2);
-   dprintf2(("boundary data (%d,%d)(%d,%d)", rectWindowOS2.xLeft, rectWindowOS2.yBottom, rectWindowOS2.xRight, rectWindowOS2.yTop));
-
-   GpiQueryGraphicsField(pHps->hps, &rectWindowOS2);
-   dprintf2(("graphics field (%d,%d)(%d,%d)", rectWindowOS2.xLeft, rectWindowOS2.yBottom, rectWindowOS2.xRight, rectWindowOS2.yTop));
-
-   SIZEL size;
-   GpiQueryPickApertureSize(pHps->hps, &size);
-   dprintf2(("page viewport (%d,%d)", size.cx, size.cy));
-
-   GpiQueryPS(pHps->hps, &size);
-   dprintf2(("page space (%d,%d)", size.cx, size.cy));
-#endif
-//testestest
-
 }
 //******************************************************************************
 //******************************************************************************
@@ -575,61 +409,70 @@ void selectClientArea(Win32BaseWindow *wnd, HDC hdc)
 //******************************************************************************
 LONG clientHeight(Win32BaseWindow *wnd, HWND hwnd, pDCData pHps)
 {
-   if ((hwnd == 0) && (pHps != 0))
-      hwnd = pHps->hwnd;
+    if ((hwnd == 0) && (pHps != 0))
+        hwnd = pHps->hwnd;
 
-   if ((hwnd != 0) || (pHps == 0))
-   {
+    if ((hwnd != 0) || (pHps == 0))
+    {
         if(wnd) {
-                if(pHps && !pHps->isClientArea) {
-                        return (wnd->getWindowHeight());
-                }
-                else    return (wnd->getClientHeight());
+            if(pHps && !pHps->isClientArea) {
+                return (wnd->getWindowHeight());
+            }
+            else return (wnd->getClientHeight());
         }
-        else    return OSLibQueryScreenHeight();
-   }
-   else if (pHps->bitmapHandle)
-   {
-      return pHps->bitmapHeight;
-   }
-   else if (pHps->isMetaPS)
-   {
-      return 0;
-   }
-   else if (pHps->isPrinter)
-   {
-      return pHps->printPageHeight;
-   }
-   else
-   {
-      return MEM_HPS_MAX;
-   }
+        else return OSLibQueryScreenHeight();
+    }
+    else if (pHps->bitmapHandle)
+    {
+        return pHps->bitmapHeight;
+    }
+    else if (pHps->isMetaPS)
+    {
+        return 0;
+    }
+    else if (pHps->isPrinter)
+    {
+        return pHps->printPageHeight;
+    }
+    else
+    {
+        return MEM_HPS_MAX;
+    }
 }
 //******************************************************************************
 //******************************************************************************
-BOOL   WIN32API changePageXForm(pDCData pHps, PPOINTL pValue, int x, int y, PPOINTL pPrev)
+BOOL WIN32API changePageXForm(pDCData pHps, PPOINTL pValue, int x, int y, PPOINTL pPrev)
 {
  Win32BaseWindow *wnd;
 
-   wnd = Win32BaseWindow::GetWindowFromOS2Handle(pHps->hwnd);
+   if(pHps->isClient) {
+        wnd = Win32BaseWindow::GetWindowFromOS2Handle(pHps->hwnd);
+   }
+   else wnd = Win32BaseWindow::GetWindowFromOS2FrameHandle(pHps->hwnd);
    return changePageXForm(wnd, pHps, pValue, x, y, pPrev);
 }
 //******************************************************************************
 //******************************************************************************
-BOOL   WIN32API setPageXForm(pDCData pHps)
+BOOL WIN32API setPageXForm(pDCData pHps)
 {
  Win32BaseWindow *wnd;
 
-   wnd = Win32BaseWindow::GetWindowFromOS2Handle(pHps->hwnd);
+   if(pHps->isClient) {
+        wnd = Win32BaseWindow::GetWindowFromOS2Handle(pHps->hwnd);
+   }
+   else wnd = Win32BaseWindow::GetWindowFromOS2FrameHandle(pHps->hwnd);
    return setPageXForm(wnd, pHps);
 }
 //******************************************************************************
 //******************************************************************************
-VOID   WIN32API removeClientArea(pDCData pHps)
+VOID WIN32API removeClientArea(pDCData pHps)
 {
  Win32BaseWindow *wnd;
 
-   wnd = Win32BaseWindow::GetWindowFromOS2Handle(pHps->hwnd);
+   if(pHps->isClient) {
+        wnd = Win32BaseWindow::GetWindowFromOS2Handle(pHps->hwnd);
+   }
+   else wnd = Win32BaseWindow::GetWindowFromOS2FrameHandle(pHps->hwnd);
    if(wnd) {
       removeClientArea(wnd, pHps);
    }
@@ -640,7 +483,10 @@ VOID WIN32API selectClientArea(pDCData pHps)
 {
  Win32BaseWindow *wnd;
 
-   wnd = Win32BaseWindow::GetWindowFromOS2Handle(pHps->hwnd);
+   if(pHps->isClient) {
+        wnd = Win32BaseWindow::GetWindowFromOS2Handle(pHps->hwnd);
+   }
+   else wnd = Win32BaseWindow::GetWindowFromOS2FrameHandle(pHps->hwnd);
    if(wnd) {
       selectClientArea(wnd, pHps);
    }
@@ -651,29 +497,37 @@ VOID WIN32API checkOrigin(pDCData pHps)
 {
  Win32BaseWindow *wnd;
 
-   wnd = Win32BaseWindow::GetWindowFromOS2Handle(pHps->hwnd);
+   if(pHps->isClient) {
+        wnd = Win32BaseWindow::GetWindowFromOS2Handle(pHps->hwnd);
+   }
+   else wnd = Win32BaseWindow::GetWindowFromOS2FrameHandle(pHps->hwnd);
    if(wnd) {
-      dprintfOrigin(pHps->hps);
       if(pHps->isClient)
           selectClientArea(wnd, pHps);
    }
 }
 //******************************************************************************
 //******************************************************************************
-LONG   WIN32API clientHeight(HWND hwnd, pDCData pHps)
+LONG WIN32API clientHeight(HWND hwnd, pDCData pHps)
 {
  Win32BaseWindow *wnd;
 
-   wnd = Win32BaseWindow::GetWindowFromOS2Handle(hwnd);
+   if(pHps->isClient) {
+        wnd = Win32BaseWindow::GetWindowFromOS2Handle(pHps->hwnd);
+   }
+   else wnd = Win32BaseWindow::GetWindowFromOS2FrameHandle(pHps->hwnd);
    return clientHeight(wnd, hwnd, pHps);
 }
 //******************************************************************************
 //******************************************************************************
-int  WIN32API setMapMode(pDCData pHps, int mode)
+int WIN32API setMapMode(pDCData pHps, int mode)
 {
  Win32BaseWindow *wnd;
 
-   wnd = Win32BaseWindow::GetWindowFromOS2Handle(pHps->hwnd);
+   if(pHps->isClient) {
+        wnd = Win32BaseWindow::GetWindowFromOS2Handle(pHps->hwnd);
+   }
+   else wnd = Win32BaseWindow::GetWindowFromOS2FrameHandle(pHps->hwnd);
    return setMapMode(wnd, pHps, mode);
 }
 //******************************************************************************
@@ -789,49 +643,50 @@ HDC WIN32API BeginPaint (HWND hWnd, PPAINTSTRUCT_W lpps)
  RECTL    rectlClient;
  RECTL    rectlClip;
 
-   if(lpps == NULL) {
+    if(lpps == NULL) {
         //BeginPaint does NOT change last error in this case
         //(verified in NT4, SP6)
         dprintf (("USER32: BeginPaint %x NULL PAINTSTRUCT pointer", hWnd));
         return 0;
-   }
-   memset(lpps, 0, sizeof(*lpps));
+    }
+    memset(lpps, 0, sizeof(*lpps));
 
-   Win32BaseWindow *wnd = Win32BaseWindow::GetWindowFromHandle(hwnd);
-   if(!wnd) {
+    Win32BaseWindow *wnd = Win32BaseWindow::GetWindowFromHandle(hwnd);
+    if(!wnd) {
         dprintf (("USER32: BeginPaint %x %x: invalid window handle!!", hWnd, lpps));
         SetLastError(ERROR_INVALID_WINDOW_HANDLE_W); //(verified in NT4, SP6)
         return (HDC)0;
-   }
-   HWND hwndClient = wnd->getOS2WindowHandle();
+    }
+    HWND hwndClient = wnd->getOS2WindowHandle();
 
-   if(hwnd != HWND_DESKTOP && wnd->isOwnDC())
-   {
+    if(hwnd != HWND_DESKTOP && wnd->isOwnDC())
+    {
         hPS_ownDC = wnd->getOwnDC();
         //SvL: Hack for memory.exe (doesn't get repainted properly otherwise)
         if(hPS_ownDC) {
-                pHps = (pDCData)GpiQueryDCData(hPS_ownDC);
-                if (!pHps)
-                {
-                        dprintf (("USER32: BeginPaint %x invalid parameter %x", hWnd, lpps));
-                        SetLastError(ERROR_INVALID_PARAMETER_W);
-                        return (HDC)NULLHANDLE;
-                }
-                hpsPaint = hPS_ownDC;
-        }
-   }
-   if(!hpsPaint) {
-        hpsPaint = GetDCEx(hwnd, 0, (DCX_CACHE_W|DCX_WINDOW_W|DCX_USESTYLE_W));
-        pHps = (pDCData)GpiQueryDCData(hpsPaint);
-        if (!pHps)
-        {
+            pHps = (pDCData)GpiQueryDCData(hPS_ownDC);
+            if (!pHps)
+            {
                 dprintf (("USER32: BeginPaint %x invalid parameter %x", hWnd, lpps));
                 SetLastError(ERROR_INVALID_PARAMETER_W);
                 return (HDC)NULLHANDLE;
+            }
+            hpsPaint = hPS_ownDC;
         }
-   }
+    }
+    if(!hpsPaint) {
+        hpsPaint = GetDCEx(hwnd, 0, (DCX_CACHE_W|DCX_USESTYLE_W));
+        pHps = (pDCData)GpiQueryDCData(hpsPaint);
+        if (!pHps)
+        {
+            dprintf (("USER32: BeginPaint %x invalid parameter %x", hWnd, lpps));
+            SetLastError(ERROR_INVALID_PARAMETER_W);
+            return (HDC)NULLHANDLE;
+        }
+    }
 
-   if(WinQueryUpdateRect(hwndClient, &rectl) == FALSE) {
+    if(WinQueryUpdateRect(hwndClient, &rectl) == FALSE)
+    {
         memset(&rectl, 0, sizeof(rectl));
         dprintf (("USER32: WARNING: WinQueryUpdateRect failed (error or no update rectangle)!!"));
 
@@ -843,8 +698,8 @@ HDC WIN32API BeginPaint (HWND hWnd, PPAINTSTRUCT_W lpps)
         //save old clip region (restored for CS_OWNDC windows in EndPaint)
         wnd->SetClipRegion(hrgnOldClip);
         lComplexity = RGN_NULL;
-   }
-   else {
+    }
+    else {
         rectlClip.yBottom = rectlClip.xLeft = 0;
         rectlClip.yTop = rectlClip.xRight = 1;
 
@@ -853,74 +708,63 @@ HDC WIN32API BeginPaint (HWND hWnd, PPAINTSTRUCT_W lpps)
         WinQueryUpdateRegion(hwndClient, hrgnClip);
         WinValidateRegion(hwndClient, hrgnClip, FALSE);
 
-        mapWin32ToOS2Rect(wnd->getWindowHeight(), wnd->getClientRectPtr(), (PRECTLOS2)&rectlClient);
-        WinIntersectRect(NULL, &rectlClip, &rectl, &rectlClient);
-        WinOffsetRect(NULL, &rectlClip, -rectlClient.xLeft, -rectlClient.yBottom);
+        dprintfRegion(pHps->hps, wnd->getWindowHandle(), hrgnClip);
 
-        //clip update region with client window rectangle
-        HRGN hrgnClient = GpiCreateRegion(pHps->hps, 1, &rectlClient);
-        GpiCombineRegion(pHps->hps, hrgnClip, hrgnClip, hrgnClient, CRGN_AND);
-        GpiDestroyRegion(pHps->hps, hrgnClient);
-
-        //change origin of clip region (window -> client)
-        POINTL point = {-rectlClient.xLeft, -rectlClient.yBottom};
-        GpiOffsetRegion(pHps->hps, hrgnClip, &point);
 #ifdef DEBUG
-        dprintfRegion1(pHps->hps, hWnd, hrgnClip);
+        lComplexity = GpiQueryClipBox(pHps->hps, &rectlClip);
+        dprintf(("ClipBox (%d): (%d,%d)(%d,%d)", lComplexity, rectlClip.xLeft, rectlClip.yBottom, rectlClip.xRight, rectlClip.yTop));
 #endif
+
         //set clip region
         lComplexity = GpiSetClipRegion(pHps->hps, hrgnClip, &hrgnOldClip);
 
-        //change presentation space for client window
-        //NOTE: MUST do this after GpiSetClipRegion call!
-        //      When a window with CS_OWNDC looses focus, for some reason
-        //      GpiSetClipRegion resets the window dc origin back to (0,0)
+        if(lComplexity == RGN_NULL) {
+            dprintf (("BeginPaint %x: EMPTY update rectangle (show=%d/%d vis=%d/%d", hWnd,  WinIsWindowVisible(wnd->getOS2FrameWindowHandle()), WinIsWindowVisible(wnd->getOS2WindowHandle()),  WinIsWindowShowing(wnd->getOS2FrameWindowHandle()), WinIsWindowShowing(wnd->getOS2WindowHandle())));
+        }
         selectClientArea(wnd, pHps);
 
-        GpiQueryClipBox(pHps->hps, &rectl);
-        dprintf(("ClipBox (%d): (%d,%d)(%d,%d)", lComplexity, rectl.xLeft, rectl.yBottom, rectl.xRight, rectl.yTop));
-
+#ifdef DEBUG
+        GpiQueryClipBox(pHps->hps, &rectlClip);
+        dprintf(("ClipBox (%d): (%d,%d)(%d,%d)", lComplexity, rectlClip.xLeft, rectlClip.yBottom, rectlClip.xRight, rectlClip.yTop));
+#endif
         //save old clip region (restored for CS_OWNDC windows in EndPaint)
         wnd->SetClipRegion(hrgnOldClip);
-        memcpy(&rectl, &rectlClip, sizeof(RECTL));
-        lComplexity = RGN_RECT;
-   }
+    }
 
-   if(hPS_ownDC == 0)
-      setMapMode (wnd, pHps, MM_TEXT_W);
-   else
-      setPageXForm(wnd, pHps);
+    if(hPS_ownDC == 0)
+        setMapMode (wnd, pHps, MM_TEXT_W);
+    else
+        setPageXForm(wnd, pHps);
 
-   pHps->hdcType = TYPE_3;
+    pHps->hdcType = TYPE_3;
 
-   HideCaret(hwnd);
-   WinShowTrackRect(wnd->getOS2WindowHandle(), FALSE);
+    HideCaret(hwnd);
+    WinShowTrackRect(wnd->getOS2WindowHandle(), FALSE);
 
-   if(wnd->needsEraseBkgnd() && lComplexity != RGN_NULL) {
+    if((wnd->needsEraseBkgnd() || wnd->IsVisibleRegionChanged()) && lComplexity != RGN_NULL) {
         wnd->setEraseBkgnd(FALSE);
+        wnd->SetVisibleRegionChanged(FALSE);
         lpps->fErase = (wnd->MsgEraseBackGround(pHps->hps) == 0);
-   }
-   else lpps->fErase = TRUE;
+    }
+    else lpps->fErase = TRUE;
 
-   dprintfOrigin(pHps->hps);
+    lpps->hdc    = (HDC)pHps->hps;
 
-   lpps->hdc    = (HDC)pHps->hps;
-
-   if(lComplexity != RGN_NULL) {
+    if(lComplexity != RGN_NULL) {
         long height  = wnd->getClientHeight();
         lpps->rcPaint.top    = height - rectl.yTop;
         lpps->rcPaint.left   = rectl.xLeft;
         lpps->rcPaint.bottom = height - rectl.yBottom;
         lpps->rcPaint.right  = rectl.xRight;
-   }
-   else {
+    }
+    else {
         lpps->rcPaint.bottom = lpps->rcPaint.top = 0;
         lpps->rcPaint.right = lpps->rcPaint.left = 0;
-   }
+    }
 
-   SetLastError(0);
-   dprintf(("USER32: BeginPaint %x -> hdc %x (%d,%d)(%d,%d)", hWnd, pHps->hps, lpps->rcPaint.left, lpps->rcPaint.top, lpps->rcPaint.right, lpps->rcPaint.bottom));
-   return (HDC)pHps->hps;
+    SetLastError(0);
+    dprintf(("USER32: BeginPaint %x -> hdc %x (%d,%d)(%d,%d)", hWnd, pHps->hps, lpps->rcPaint.left, lpps->rcPaint.top, lpps->rcPaint.right, lpps->rcPaint.bottom));
+    return (HDC)pHps->hps;
 }
 //******************************************************************************
 //******************************************************************************
@@ -930,38 +774,36 @@ BOOL WIN32API EndPaint (HWND hWnd, const PAINTSTRUCT_W *pPaint)
   HRGN    hrgnOld;
   pDCData pHps;
 
-   dprintf (("USER32: EndPaint(%x)", hwnd));
+    dprintf (("USER32: EndPaint(%x)", hwnd));
 
-   if (!pPaint || !pPaint->hdc )
-      return TRUE;
+    if (!pPaint || !pPaint->hdc )
+        return TRUE;
 
-   Win32BaseWindow *wnd = Win32BaseWindow::GetWindowFromHandle(hwnd);
+    Win32BaseWindow *wnd = Win32BaseWindow::GetWindowFromHandle(hwnd);
 
-   if (!wnd) goto exit;
+    if (!wnd) goto exit;
 
-   pHps = (pDCData)GpiQueryDCData((HPS)pPaint->hdc);
-   if (pHps && (pHps->hdcType == TYPE_3))
-   {
-        dprintfOrigin(pHps->hps);
-
+    pHps = (pDCData)GpiQueryDCData((HPS)pPaint->hdc);
+    if (pHps && (pHps->hdcType == TYPE_3))
+    {
         GpiSetClipRegion(pHps->hps, wnd->GetClipRegion(), &hrgnOld);
         wnd->SetClipRegion(0);
         if(hrgnOld) {
-                GpiDestroyRegion(pHps->hps, hrgnOld);
+            GpiDestroyRegion(pHps->hps, hrgnOld);
         }
         pHps->hdcType = TYPE_1; //otherwise Open32's ReleaseDC fails
         ReleaseDC(hwnd, pPaint->hdc);
-   }
-   else {
+    }
+    else {
         dprintf(("EndPaint: wrong hdc %x!!", pPaint->hdc));
-   }
-   wnd->setEraseBkgnd(TRUE);
-   ShowCaret(hwnd);
-   WinShowTrackRect(wnd->getOS2WindowHandle(), TRUE);
+    }
+    wnd->setEraseBkgnd(TRUE);
+    ShowCaret(hwnd);
+    WinShowTrackRect(wnd->getOS2WindowHandle(), TRUE);
 
 exit:
-   SetLastError(0);
-   return TRUE;
+    SetLastError(0);
+    return TRUE;
 }
 //******************************************************************************
 //******************************************************************************
@@ -970,44 +812,44 @@ int WIN32API ReleaseDC (HWND hwnd, HDC hdc)
    BOOL isOwnDC = FALSE;
    int rc;
 
-   if (hwnd)
-   {
+    if (hwnd)
+    {
         Win32BaseWindow *wnd = Win32BaseWindow::GetWindowFromHandle (hwnd);
         if(wnd == NULL) {
-                dprintf(("ERROR: ReleaseDC %x %x failed", hwnd, hdc));
-                return 0;
+            dprintf(("ERROR: ReleaseDC %x %x failed", hwnd, hdc));
+            return 0;
         }
         isOwnDC = wnd->isOwnDC() && (wnd->getOwnDC() == hdc);
         if(!isOwnDC)
         {
-                pDCData  pHps = (pDCData)GpiQueryDCData((HPS)hdc);
-                if(pHps && pHps->psType == MICRO_CACHED) {
-                        removeClientArea(wnd, pHps);
-                        if(pHps->hrgnVis) {
-                                GreDestroyRegion(pHps->hps, pHps->hrgnVis);
-                                pHps->hrgnVis = 0;
-                        }
+            pDCData  pHps = (pDCData)GpiQueryDCData((HPS)hdc);
+            if(pHps && pHps->psType == MICRO_CACHED) {
+                removeClientArea(wnd, pHps);
+                if(pHps->hrgnVis) {
+                    GreDestroyRegion(pHps->hps, pHps->hrgnVis);
+                    pHps->hrgnVis = 0;
                 }
-                else {
-                        dprintf(("ERROR: ReleaseDC: pHps == NULL!!"));
-                        DebugInt3();
-                }
+            }
+            else {
+                dprintf(("ERROR: ReleaseDC: pHps == NULL!!"));
+                DebugInt3();
+            }
         }
         else {
-                dprintf2(("ReleaseDC: CS_OWNDC, not released"));
+            dprintf2(("ReleaseDC: CS_OWNDC, not released"));
         }
-   }
+    }
 
-   if(isOwnDC) {
+    if(isOwnDC) {
         rc = TRUE;
-   }
-   else {
+    }
+    else {
         UnselectGDIObjects(hdc);
         rc = O32_ReleaseDC (0, hdc);
-   }
+    }
 
-   dprintf(("ReleaseDC %x %x", hwnd, hdc));
-   return (rc);
+    dprintf(("ReleaseDC %x %x", hwnd, hdc));
+    return (rc);
 }
 //******************************************************************************
 // This implementation of GetDCEx supports
@@ -1034,128 +876,129 @@ HDC WIN32API GetDCEx (HWND hwnd, HRGN hrgn, ULONG flags)
    BOOL     creatingOwnDC = FALSE;
    PS_Type  psType;
 
-   if(hwnd == 0) {
+    if(hwnd == 0) {
         dprintf(("error: GetDCEx window %x not found", hwnd));
         SetLastError(ERROR_INVALID_WINDOW_HANDLE_W);
         return 0;
-   }
+    }
 
-   if (hwnd)
-   {
+    if(hwnd)
+    {
         wnd = Win32BaseWindow::GetWindowFromHandle(hwnd);
         if(wnd == NULL) {
                 dprintf (("ERROR: User32: GetDCEx bad window handle %X!!!!!", hwnd));
                 SetLastError(ERROR_INVALID_WINDOW_HANDLE_W);
                 return 0;
         }
-        hWindow = wnd->getOS2WindowHandle();
-   }
-
-   isWindowOwnDC = (((hWindow == HWND_DESKTOP) ? FALSE : (wnd->isOwnDC()))
-                 && !(flags & (DCX_CACHE_W|DCX_WINDOW_W)));
-
-   if(isWindowOwnDC) //own dc always for client area
-   {
-      hps = wnd->getOwnDC();
-      if (hps)
-      {
-        pDCData pHps = (pDCData)GpiQueryDCData (hps);
-        if (!pHps)
-            goto error;
-
-        selectClientArea(wnd, pHps);
-
-        //TODO: Is this always necessary??
-        setPageXForm (wnd, pHps);
-        pHps->hdcType = TYPE_1;
-
-        //TODO: intersect/exclude clip region?
-        dprintf (("User32: GetDCEx hwnd %x (%x %x) -> wnd %x hdc %x", hwnd, hrgn, flags, wnd, hps));
-        return (HDC)hps;
-      }
-      else
-        creatingOwnDC = TRUE;
-   }
-
-   if(isWindowOwnDC)
-   {
-      SIZEL sizel = {0,0};
-      hps = GpiCreatePS (WinQueryAnchorBlock (hWindow),
-                         WinOpenWindowDC (hWindow),
-                         &sizel, PU_PELS | GPIT_MICRO | GPIA_ASSOC );
-      psType = MICRO;
-      // default cp is OS/2 one: set to windows default (ODIN.INI)
-      GpiSetCp(hps, GetDisplayCodepage());
-   }
-   else
-   {
-      if (hWindow == HWND_DESKTOP) {
-         hps = WinGetScreenPS (hWindow);
-      }
-      else {
-        int clipstyle = 0;
-        int clipwnd   = HWND_TOP;
-        if(flags & (DCX_USESTYLE_W)) {
-                int style = wnd->getStyle();
-                if(style & WS_CLIPCHILDREN_W) {
-                        clipstyle |= PSF_CLIPCHILDREN;
-                }
-                if(style & WS_CLIPSIBLINGS_W) {
-                        clipstyle |= PSF_CLIPSIBLINGS;
-                }
-                if(wnd->fHasParentDC()) {
-                        clipstyle |= PSF_PARENTCLIP;
-                }
+        if(flags & DCX_WINDOW_W) {
+             hWindow = wnd->getOS2FrameWindowHandle();
         }
-        if(flags & DCX_CLIPSIBLINGS_W) {
-                clipstyle |= PSF_CLIPSIBLINGS;
-        }
-        if(flags & DCX_CLIPCHILDREN_W) {
-                clipstyle |= PSF_CLIPCHILDREN;
-        }
-        if(flags & DCX_PARENTCLIP_W) {
-                clipstyle |= PSF_PARENTCLIP;
-        }
-        if(clipstyle) {
-                dprintf2(("WinGetClipPS style %x", clipstyle));
-                hps = WinGetClipPS(hWindow, clipwnd, clipstyle);
-        }
-        else    hps = WinGetPS (hWindow);
+        else hWindow = wnd->getOS2WindowHandle();
+    }
 
+    isWindowOwnDC = (((hWindow == HWND_DESKTOP) ? FALSE : (wnd->isOwnDC()))
+                    && !(flags & (DCX_CACHE_W|DCX_WINDOW_W)));
+
+    if(isWindowOwnDC) //own dc always for client area
+    {
+        hps = wnd->getOwnDC();
+        if (hps)
+        {
+            pDCData pHps = (pDCData)GpiQueryDCData (hps);
+            if (!pHps)
+                goto error;
+
+            selectClientArea(wnd, pHps);
+
+            //TODO: Is this always necessary??
+            setPageXForm (wnd, pHps);
+            pHps->hdcType = TYPE_1;
+
+            //TODO: intersect/exclude clip region?
+            dprintf (("User32: GetDCEx hwnd %x (%x %x) -> wnd %x hdc %x", hwnd, hrgn, flags, wnd, hps));
+            return (HDC)hps;
+        }
+        else creatingOwnDC = TRUE;
+    }
+
+    if(isWindowOwnDC)
+    {
+        SIZEL sizel = {0,0};
+        hps = GpiCreatePS (WinQueryAnchorBlock (hWindow),
+                           WinOpenWindowDC (hWindow),
+                           &sizel, PU_PELS | GPIT_MICRO | GPIA_ASSOC );
+        psType = MICRO;
         // default cp is OS/2 one: set to windows default (ODIN.INI)
         GpiSetCp(hps, GetDisplayCodepage());
-      }
-      psType = MICRO_CACHED;
-   }
+    }
+    else
+    {
+        if (hWindow == HWND_DESKTOP) {
+            hps = WinGetScreenPS (hWindow);
+        }
+        else {
+            int clipstyle = 0;
+            int clipwnd   = HWND_TOP;
+            if(flags & (DCX_USESTYLE_W)) {
+                int style = wnd->getStyle();
+                if(style & WS_CLIPCHILDREN_W) {
+                    clipstyle |= PSF_CLIPCHILDREN;
+                }
+                if(style & WS_CLIPSIBLINGS_W) {
+                    clipstyle |= PSF_CLIPSIBLINGS;
+                }
+                if(wnd->fHasParentDC()) {
+                    clipstyle |= PSF_PARENTCLIP;
+                }
+            }
+            if(flags & DCX_CLIPSIBLINGS_W) {
+                clipstyle |= PSF_CLIPSIBLINGS;
+            }
+            if(flags & DCX_CLIPCHILDREN_W) {
+                clipstyle |= PSF_CLIPCHILDREN;
+            }
+            if(flags & DCX_PARENTCLIP_W) {
+                clipstyle |= PSF_PARENTCLIP;
+            }
+            if(clipstyle) {
+                 dprintf2(("WinGetClipPS style %x", clipstyle));
+                 hps = WinGetClipPS(hWindow, clipwnd, clipstyle);
+            }
+            else hps = WinGetPS (hWindow);
 
-   if (!hps)
-      goto error;
+            // default cp is OS/2 one: set to windows default (ODIN.INI)
+            GpiSetCp(hps, GetDisplayCodepage());
+        }
+        psType = MICRO_CACHED;
+    }
 
-   HPSToHDC (hWindow, hps, NULL, NULL);
-   pHps = (pDCData)GpiQueryDCData (hps);
+    if (!hps)
+        goto error;
 
-   if(!(flags & DCX_WINDOW_W))
-   {
-        selectClientArea(wnd, pHps);
-   }
-   else removeClientArea(wnd, pHps);
+    HPSToHDC (hWindow, hps, NULL, NULL);
+    pHps = (pDCData)GpiQueryDCData (hps);
 
-   setMapMode(wnd, pHps, MM_TEXT_W);
+    if(flags & DCX_WINDOW_W) {
+         removeClientArea(wnd, pHps);
+    }
+    else selectClientArea(wnd, pHps);
 
-   if ((flags & DCX_EXCLUDERGN_W) || (flags & DCX_INTERSECTRGN_W))
-   {
-      ULONG BytesNeeded;
-      PRGNDATA RgnData;
-      PRECT pr;
-      int i;
-      RECTL rectl;
+    setMapMode(wnd, pHps, MM_TEXT_W);
 
-      if (!hrgn)
-         goto error;
+    if ((flags & DCX_EXCLUDERGN_W) || (flags & DCX_INTERSECTRGN_W))
+    {
+        ULONG BytesNeeded;
+        PRGNDATA RgnData;
+        PRECT pr;
+        int i;
+        RECTL rectl;
 
-      success = TRUE;
-      if (flags & DCX_EXCLUDERGN_W)
-      {
+        if (!hrgn)
+            goto error;
+
+        success = TRUE;
+        if (flags & DCX_EXCLUDERGN_W)
+        {
 #if 0 //CB: todo
          long height;
 
@@ -1180,76 +1023,77 @@ HDC WIN32API GetDCEx (HWND hwnd, HRGN hrgn, ULONG flags)
             success &= GpiExcludeClipRectangle (pHps->hps, pr);
          }
 #endif
-      }
-      else //DCX_INTERSECTRGN_W
-      {
-         //SvL: I'm getting paint problems when clipping a dc created in GetDCEx
-         //     with a region that covers the entire window (RealPlayer 7 Update 1)
-         //     Using SelectClipRgn here doesn't make any difference.
-         if(ExtSelectClipRgn(pHps->hps, hrgn, RGN_AND_W) == ERROR_W) {
+        }
+        else //DCX_INTERSECTRGN_W
+        {
+            //SvL: I'm getting paint problems when clipping a dc created in GetDCEx
+            //     with a region that covers the entire window (RealPlayer 7 Update 1)
+            //     Using SelectClipRgn here doesn't make any difference.
+            if(ExtSelectClipRgn(pHps->hps, hrgn, RGN_AND_W) == ERROR_W) {
                 dprintf(("ExtSelectClipRgn failed!!"));
-         }
-      }
-      if (!success)
-         goto error;
-   }
+            }
+        }
+        if (!success)
+            goto error;
+    }
 
-   if (creatingOwnDC)
-      wnd->setOwnDC ((HDC)hps);
+    if (creatingOwnDC)
+        wnd->setOwnDC ((HDC)hps);
 
-   pHps->psType  = psType;
-   pHps->hdcType = TYPE_1;
-   //TODO: WM_SETREDRAW affects drawingAllowed flag!!
-   GpiSetDrawControl (hps, DCTL_DISPLAY, drawingAllowed ? DCTL_ON : DCTL_OFF);
+    pHps->psType  = psType;
+    pHps->hdcType = TYPE_1;
+    //TODO: WM_SETREDRAW affects drawingAllowed flag!!
+    GpiSetDrawControl (hps, DCTL_DISPLAY, drawingAllowed ? DCTL_ON : DCTL_OFF);
 
-   dprintf (("User32: GetDCEx hwnd %x (%x %x) -> hdc %x", hwnd, hrgn, flags, pHps->hps));
-   return (HDC)pHps->hps;
+    dprintf (("User32: GetDCEx hwnd %x (%x %x) -> hdc %x", hwnd, hrgn, flags, pHps->hps));
+    return (HDC)pHps->hps;
 
 error:
-   /* Something went wrong; clean up
-    */
-   dprintf(("ERROR: GetDCEx hwnd %x (%x %x) FAILED!", hwnd, hrgn, flags));
-   DebugInt3();
-   if (pHps)
-   {
-      if (pHps->hps)
-      {
-         if(pHps->psType == MICRO_CACHED)
-            WinReleasePS(pHps->hps);
-         else
-            GpiDestroyPS(pHps->hps);
-      }
+    /* Something went wrong; clean up
+     */
+    dprintf(("ERROR: GetDCEx hwnd %x (%x %x) FAILED!", hwnd, hrgn, flags));
+    DebugInt3();
+    if (pHps)
+    {
+        if (pHps->hps)
+        {
+            if(pHps->psType == MICRO_CACHED)
+                WinReleasePS(pHps->hps);
+            else
+                GpiDestroyPS(pHps->hps);
+        }
 
-      if (pHps->hdc)     DevCloseDC(pHps->hdc);
-      if (pHps->hrgnHDC) GpiDestroyRegion(pHps->hps, pHps->hrgnHDC);
+        if (pHps->hdc)     DevCloseDC(pHps->hdc);
+        if (pHps->hrgnHDC) GpiDestroyRegion(pHps->hps, pHps->hrgnHDC);
 
-      O32_DeleteObject (pHps->nullBitmapHandle);
-   }
-   SetLastError(ERROR_INVALID_PARAMETER_W);
-   return NULL;
+        O32_DeleteObject (pHps->nullBitmapHandle);
+    }
+    SetLastError(ERROR_INVALID_PARAMETER_W);
+    return NULL;
 }
 //******************************************************************************
 //******************************************************************************
 HDC WIN32API GetDC (HWND hwnd)
 {
-  if(!hwnd)
-       return GetDCEx( GetDesktopWindow(), 0, DCX_CACHE_W | DCX_WINDOW_W );
-  return GetDCEx (hwnd, NULL, 0);
+    if(!hwnd)
+        return GetDCEx( GetDesktopWindow(), 0, DCX_CACHE_W | DCX_WINDOW_W );
+
+    return GetDCEx (hwnd, NULL, 0);
 }
 //******************************************************************************
 //******************************************************************************
 HDC WIN32API GetWindowDC (HWND hwnd)
 {
-  if (!hwnd) hwnd = GetDesktopWindow();
-  return GetDCEx (hwnd, NULL, DCX_WINDOW_W);
+    if (!hwnd) hwnd = GetDesktopWindow();
+    return GetDCEx (hwnd, NULL, DCX_WINDOW_W);
 }
 //******************************************************************************
 //Helper for RedrawWindow (RDW_ALLCHILDREN_W)
 //******************************************************************************
 LRESULT WIN32API RedrawChildEnumProc(HWND hwnd, LPARAM lParam)
 {
-  RedrawWindow(hwnd, NULL, 0, lParam);
-  return TRUE;
+    RedrawWindow(hwnd, NULL, 0, lParam);
+    return TRUE;
 }
 //******************************************************************************
 // This implementation of RedrawWindow supports
@@ -1264,22 +1108,23 @@ LRESULT WIN32API RedrawChildEnumProc(HWND hwnd, LPARAM lParam)
 // RDW_FRAME
 //
 //TODO: Works ok for RDW_FRAME??
+//      SDK docs say RDW_FRAME is only valid for RDW_INVALIDATE...
 //******************************************************************************
 BOOL WIN32API RedrawWindow(HWND hwnd, const RECT* pRect, HRGN hrgn, DWORD redraw)
 {
-   Win32BaseWindow *wnd;
+    Win32BaseWindow *wnd;
 
-   if(pRect) {
-          dprintf(("RedrawWindow %x (%d,%d)(%d,%d) %x %x", hwnd, pRect->left, pRect->top, pRect->right, pRect->bottom, hrgn, redraw));
-   }
-   else   dprintf(("RedrawWindow %x %x %x %x", hwnd, pRect, hrgn, redraw));
+    if(pRect) {
+         dprintf(("RedrawWindow %x (%d,%d)(%d,%d) %x %x", hwnd, pRect->left, pRect->top, pRect->right, pRect->bottom, hrgn, redraw));
+    }
+    else dprintf(("RedrawWindow %x %x %x %x", hwnd, pRect, hrgn, redraw));
 
-   if (hwnd == NULLHANDLE)
-   {
+    if (hwnd == NULLHANDLE)
+    {
 #if 1
         // Don't do this for now (causes lots of desktop repaints in WordPad)
-         SetLastError(ERROR_INVALID_PARAMETER_W);
-         return FALSE;
+        SetLastError(ERROR_INVALID_PARAMETER_W);
+        return FALSE;
 #else
         hwnd = HWND_DESKTOP;
         wnd  = Win32BaseWindow::GetWindowFromOS2Handle(OSLIB_HWND_DESKTOP);
@@ -1292,9 +1137,9 @@ BOOL WIN32API RedrawWindow(HWND hwnd, const RECT* pRect, HRGN hrgn, DWORD redraw
             return FALSE;
         }
 #endif
-   }
-   else
-   {
+    }
+    else
+    {
         wnd = Win32BaseWindow::GetWindowFromHandle (hwnd);
 
         if (!wnd)
@@ -1304,69 +1149,70 @@ BOOL WIN32API RedrawWindow(HWND hwnd, const RECT* pRect, HRGN hrgn, DWORD redraw
             SetLastError(ERROR_INVALID_PARAMETER_W);
             return FALSE;
         }
-        hwnd = wnd->getOS2WindowHandle();
-   }
+        if(redraw & RDW_FRAME_W) {
+             hwnd = wnd->getOS2FrameWindowHandle();
+        }
+        else hwnd = wnd->getOS2WindowHandle();
+    }
 
-   BOOL  IncludeChildren = (redraw & RDW_ALLCHILDREN_W) ? TRUE : FALSE;
-   BOOL  success = TRUE;
-   HPS   hpsTemp = NULLHANDLE;
-   HRGN  hrgnTemp = NULLHANDLE;
-   RECTL rectl;
+    BOOL  IncludeChildren = (redraw & RDW_ALLCHILDREN_W) ? TRUE : FALSE;
+    BOOL  success = TRUE;
+    HPS   hpsTemp = NULLHANDLE;
+    HRGN  hrgnTemp = NULLHANDLE;
+    RECTL rectl;
 
-   if (hrgn)
-   {
-      ULONG BytesNeeded;
-      PRGNDATA RgnData;
-      PRECTL pr;
-      int i;
-      LONG height;
+    if (hrgn)
+    {
+        ULONG BytesNeeded;
+        PRGNDATA RgnData;
+        PRECTL pr;
+        int i;
+        LONG height;
 
-      if(wnd) {
-                height = (redraw & RDW_FRAME_W) ? wnd->getWindowHeight() : wnd->getClientHeight();
-      }
-      else      height = OSLibQueryScreenHeight();
+        if(wnd) {
+             height = (redraw & RDW_FRAME_W) ? wnd->getWindowHeight() : wnd->getClientHeight();
+        }
+        else height = OSLibQueryScreenHeight();
 
-      if (!hrgn)
-         goto error;
+        if (!hrgn)
+            goto error;
 
-      BytesNeeded = GetRegionData (hrgn, 0, NULL);
-      RgnData = (PRGNDATA)_alloca (BytesNeeded);
-      if (RgnData == NULL)
+        BytesNeeded = GetRegionData (hrgn, 0, NULL);
+        RgnData = (PRGNDATA)_alloca (BytesNeeded);
+        if (RgnData == NULL)
           goto error;
-      GetRegionData (hrgn, BytesNeeded, RgnData);
+        GetRegionData (hrgn, BytesNeeded, RgnData);
 
-      pr = (PRECTL)(RgnData->Buffer);
-      for (i = RgnData->rdh.nCount; i > 0; i--, pr++) {
-         LONG temp = pr->yTop;
-         pr->yTop = height - pr->yBottom;
-         pr->yBottom = height - temp;
-         dprintf2(("RedrawWindow: region (%d,%d) (%d,%d)", pr->xLeft, pr->yBottom, pr->xRight, pr->yTop));
-      }
+        pr = (PRECTL)(RgnData->Buffer);
+        for (i = RgnData->rdh.nCount; i > 0; i--, pr++) {
+            LONG temp = pr->yTop;
+            pr->yTop = height - pr->yBottom;
+            pr->yBottom = height - temp;
+            dprintf2(("RedrawWindow: region (%d,%d) (%d,%d)", pr->xLeft, pr->yBottom, pr->xRight, pr->yTop));
+        }
 
-      hpsTemp = WinGetScreenPS (HWND_DESKTOP);
-      hrgnTemp = GpiCreateRegion (hpsTemp, RgnData->rdh.nCount, (PRECTL)(RgnData->Buffer));
-      if (!hrgnTemp) goto error;
-   }
-   else if (pRect)
-   {
-      if(wnd) {
-                if(redraw & RDW_FRAME_W) {
-                        mapWin32ToOS2Rect(wnd->getWindowHeight(), (PRECT)pRect, (PRECTLOS2)&rectl);
-                }
-                else    mapWin32ToOS2RectClientToFrame(wnd, (PRECT)pRect, (PRECTLOS2)&rectl);
-      }
-      else      mapWin32ToOS2Rect(OSLibQueryScreenHeight(), (PRECT)pRect, (PRECTLOS2)&rectl);
-   }
+        hpsTemp = WinGetScreenPS (HWND_DESKTOP);
+        hrgnTemp = GpiCreateRegion (hpsTemp, RgnData->rdh.nCount, (PRECTL)(RgnData->Buffer));
+        if (!hrgnTemp) goto error;
+    }
+    else if (pRect)
+    {
+        if(wnd) {
+            if(redraw & RDW_FRAME_W) {
+                 mapWin32ToOS2Rect(wnd->getWindowHeight(), (PRECT)pRect, (PRECTLOS2)&rectl);
+            }
+            else mapWin32ToOS2Rect(wnd->getClientHeight(), (PRECT)pRect, (PRECTLOS2)&rectl);
+        }
+        else mapWin32ToOS2Rect(OSLibQueryScreenHeight(), (PRECT)pRect, (PRECTLOS2)&rectl);
+    }
 
-   if (redraw & RDW_INVALIDATE_W)
-   {
+    if (redraw & RDW_INVALIDATE_W)
+    {
         //TODO: SvL: pingpong.exe doesn't have RDW_NOERASE, but doesn't want WM_ERASEBKGND msgs
         if (redraw & RDW_ERASE_W) {
              wnd->setEraseBkgnd(TRUE);
         }
-        else
-        if (redraw & RDW_NOERASE_W)
-            wnd->setEraseBkgnd(FALSE);
+        else wnd->setEraseBkgnd(FALSE);
 
         if (!pRect && !hrgn)
             success = WinInvalidateRect (hwnd, NULL, IncludeChildren);
@@ -1402,9 +1248,9 @@ BOOL WIN32API RedrawWindow(HWND hwnd, const RECT* pRect, HRGN hrgn, DWORD redraw
         }
 
         if (!success) goto error;
-   }
-   else if (redraw & RDW_VALIDATE_W)
-   {
+    }
+    else if (redraw & RDW_VALIDATE_W)
+    {
         if (redraw & RDW_NOERASE_W)
             wnd->setEraseBkgnd(FALSE);
 
@@ -1422,66 +1268,98 @@ BOOL WIN32API RedrawWindow(HWND hwnd, const RECT* pRect, HRGN hrgn, DWORD redraw
             }
             if(!success) goto error;
         }
-   }
+    }
 
-   if(WinQueryUpdateRect(hwnd, NULL))
-   {
+    if(WinQueryUpdateRect(hwnd, &rectl))
+    {
         //TODO: Does this work if RDW_ALLCHILDREN is set??
         if(redraw & RDW_UPDATENOW_W) {
-                wnd->MsgNCPaint();
-                wnd->MsgPaint(0, FALSE);
+            RECT rectUpdate;
+
+            if(redraw & RDW_FRAME_W) {
+                mapOS2ToWin32Rect(wnd->getWindowHeight(), (PRECTLOS2)&rectl, &rectUpdate);
+                wnd->MsgNCPaint(&rectUpdate);
+            }
+
+            wnd->MsgPaint(0, FALSE);
         }
         else
 //        if((redraw & RDW_ERASE_W) && (redraw & RDW_ERASENOW_W))
         if(redraw & RDW_ERASENOW_W && wnd->needsEraseBkgnd())
-                wnd->setEraseBkgnd(sendEraseBkgnd(wnd) == 0);
+            wnd->setEraseBkgnd(sendEraseBkgnd(wnd) == 0);
 //      if(redraw & RDW_ALLCHILDREN_W) {
 //              EnumChildWindows(wnd->getWindowHandle(), RedrawChildEnumProc, redraw);
 //      }
-   }
-   else if((redraw & RDW_INTERNALPAINT_W) && !(redraw & RDW_INVALIDATE_W))
-   {
+    }
+    else if((redraw & RDW_INTERNALPAINT_W) && !(redraw & RDW_INVALIDATE_W))
+    {
         if(redraw & RDW_UPDATENOW_W) {
-                wnd->MsgNCPaint();
-                wnd->MsgPaint (0, FALSE);
+            wnd->MsgPaint(0, FALSE);
         }
-        else    PostMessageA(hwnd, WINWM_PAINT, 0, 0);
-   }
+        else PostMessageA(hwnd, WINWM_PAINT, 0, 0);
+    }
 
 error:
-   /* clean up */
-   if (hrgnTemp)
-      GpiDestroyRegion (hpsTemp, hrgnTemp);
+    /* clean up */
+    if (hrgnTemp)
+        GpiDestroyRegion (hpsTemp, hrgnTemp);
 
-   if (hpsTemp)
-      WinReleasePS (hpsTemp);
+    if (hpsTemp)
+        WinReleasePS (hpsTemp);
 
-   if (!success) {
+    if (!success) {
         dprintf(("RedrawWindow failure!"));
         SetLastError(ERROR_INVALID_PARAMETER_W);
-   }
-   return (success);
+    }
+    return (success);
 }
 //******************************************************************************
 //******************************************************************************
 BOOL WIN32API UpdateWindow (HWND hwnd)
 {
   Win32BaseWindow *wnd = Win32BaseWindow::GetWindowFromHandle (hwnd);
+  RECTL rectl;
+  BOOL  rc;
 
-   if(!wnd) {
+    if(!wnd) {
+        dprintf (("ERROR: User32: UpdateWindow INVALID hwnd %x", hwnd));
         SetLastError(ERROR_INVALID_WINDOW_HANDLE_W);
         return FALSE;
-   }
+    }
 
-   dprintf (("User32: UpdateWindow hwnd %x", hwnd));
-//SvL: This doesn't work right (Wine uses RDW_NOCHILDREN_W -> doesn't work here)
-//     Breaks vpbuddy
-//   return RedrawWindow(hwnd, NULL, 0, RDW_UPDATENOW_W | RDW_ALLCHILDREN_W);
-//   -> RDW_UPDATENOW causes WM_PAINT messages to be directy posted to window
-//   handler; possibly bypassing queued WM_PAINT messages for parent window(s)
-//   -> out of sync painting (i.e. parent paints over child)
-   WinUpdateWindow(wnd->getOS2WindowHandle());
-   return TRUE;
+#ifdef DEBUG
+    if(WinQueryUpdateRect(wnd->getOS2WindowHandle(), &rectl))
+    {
+         RECT rectUpdate;
+         mapOS2ToWin32Rect(wnd->getClientHeight(), (PRECTLOS2)&rectl, &rectUpdate);
+
+         dprintf (("User32: UpdateWindow hwnd %x: update rectangle (%d,%d)(%d,%d)", hwnd, rectUpdate.left, rectUpdate.top, rectUpdate.right, rectUpdate.bottom));
+    }
+    else dprintf (("User32: UpdateWindow hwnd %x; EMPTY update rectangle (vis=%d/%d)", hwnd, WinIsWindowVisible(wnd->getOS2FrameWindowHandle()), WinIsWindowVisible(wnd->getOS2WindowHandle())));
+#endif
+    //SvL: This doesn't work right (Wine uses RDW_NOCHILDREN_W -> doesn't work here)
+    //     Breaks vpbuddy
+    //rc = RedrawWindow(hwnd, NULL, 0, RDW_UPDATENOW_W | RDW_ALLCHILDREN_W);
+    //   -> RDW_UPDATENOW causes WM_PAINT messages to be directy posted to window
+    //   handler; possibly bypassing queued WM_PAINT messages for parent window(s)
+    //   -> out of sync painting (i.e. parent paints over child)
+
+//    if(!WinIsWindowShowing(wnd->getOS2FrameWindowHandle()) || !WinIsWindowShowing(wnd->getOS2WindowHandle())) {
+//        dprintf(("UpdateWindow: window not showing %d/%d", WinIsWindowShowing(wnd->getOS2FrameWindowHandle()), WinIsWindowShowing(wnd->getOS2WindowHandle()) ));
+//        return FALSE;
+//    }
+    //Must use frame window here. If the frame window has a valid update region and we call
+    //WinUpdateWindow for the client window, then no WM_PAINT messages will be sent.
+    rc = WinUpdateWindow(wnd->getOS2FrameWindowHandle());
+#ifdef DEBUG
+    if(WinQueryUpdateRect(wnd->getOS2WindowHandle(), NULL))
+    {
+        //if parent has valid update region then WinUpdateWindow will still fail..
+        //might be harmless and happen even in windows
+        dprintf (("ERROR: User32: UpdateWindow didn't send WM_PAINT messages!!"));
+    }
+#endif
+    return rc;
 }
 //******************************************************************************
 //******************************************************************************
@@ -1507,42 +1385,42 @@ BOOL WIN32API InvalidateRect (HWND hwnd, const RECT *pRect, BOOL erase)
 {
    BOOL result;
 
-   if(pRect) {
+    if(pRect) {
         dprintf(("InvalidateRect %x (%d,%d)(%d,%d) erase=%d", hwnd, pRect->left, pRect->top, pRect->right, pRect->bottom, erase));
-   }
-   else dprintf(("InvalidateRect %x NULL erase=%d", hwnd, erase));
+    }
+    else dprintf(("InvalidateRect %x NULL erase=%d", hwnd, erase));
 #if 1
-   result = RedrawWindow (hwnd, pRect, NULLHANDLE,
-                          RDW_ALLCHILDREN_W | RDW_INVALIDATE_W |
-                          (erase ? RDW_ERASE_W : 0) |
-                          (hwnd == NULLHANDLE ? RDW_UPDATENOW_W : 0));
+    result = RedrawWindow (hwnd, pRect, NULLHANDLE,
+                           RDW_INVALIDATE_W |
+                           (erase ? RDW_ERASE_W : 0) |
+                           (hwnd == NULLHANDLE ? RDW_UPDATENOW_W : 0));
 #else
-   result = RedrawWindow (hwnd, pRect, NULLHANDLE,
-                          RDW_ALLCHILDREN_W | RDW_INVALIDATE_W |
-                          (erase ? RDW_ERASE_W : RDW_NOERASE_W) |
-                          (hwnd == NULLHANDLE ? RDW_UPDATENOW_W : 0));
+    result = RedrawWindow (hwnd, pRect, NULLHANDLE,
+                           RDW_ALLCHILDREN_W | RDW_INVALIDATE_W |
+                           (erase ? RDW_ERASE_W : RDW_NOERASE_W) |
+                           (hwnd == NULLHANDLE ? RDW_UPDATENOW_W : 0));
 #endif
-   return (result);
+    return (result);
 }
 //******************************************************************************
 //******************************************************************************
 BOOL WIN32API InvalidateRgn (HWND hwnd, HRGN hrgn, BOOL erase)
 {
-   BOOL result;
+    BOOL result;
 
-   dprintf(("InvalidateRgn %x %x erase=%d", hwnd, hrgn, erase));
+    dprintf(("InvalidateRgn %x %x erase=%d", hwnd, hrgn, erase));
 #if 1
-   result = RedrawWindow (hwnd, NULL, hrgn,
-                          RDW_ALLCHILDREN_W | RDW_INVALIDATE_W |
+    result = RedrawWindow (hwnd, NULL, hrgn,
+                          RDW_INVALIDATE_W |
                           (erase ? RDW_ERASE_W : 0) |
                           (hwnd == NULLHANDLE ? RDW_UPDATENOW_W : 0));
 #else
-   result = RedrawWindow (hwnd, NULL, hrgn,
+    result = RedrawWindow (hwnd, NULL, hrgn,
                           RDW_ALLCHILDREN_W | RDW_INVALIDATE_W |
                           (erase ? RDW_ERASE_W : RDW_NOERASE_W) |
                           (hwnd == NULLHANDLE ? RDW_UPDATENOW_W : 0));
 #endif
-   return (result);
+    return (result);
 }
 //******************************************************************************
 //TODO: Change for client rectangle!!!!!
@@ -1624,7 +1502,7 @@ BOOL WIN32API ScrollDC(HDC hDC, int dx, int dy, const RECT *pScroll,
    HWND    hwnd         = pHps->hwnd;
    Win32BaseWindow *wnd = Win32BaseWindow::GetWindowFromHandle (hwnd);
 
-   if ((hwnd == NULLHANDLE) || !wnd)
+   if((hwnd == NULLHANDLE) || !wnd)
    {
       return (FALSE);
    }
@@ -1701,34 +1579,19 @@ BOOL WIN32API ScrollDC(HDC hDC, int dx, int dy, const RECT *pScroll,
    }
    RECTL  rectlUpdate;
    HRGN   hrgn;
-   RECTL  clientRect;
    RECTL  clipOS2;
    RECTL  scrollOS2;
    PRECTL pScrollOS2 = NULL;
    PRECTL pClipOS2   = NULL;
 
-   mapWin32ToOS2Rect(wnd->getWindowHeight(), wnd->getClientRectPtr(), (PRECTLOS2)&clientRect);
-
    if(pScroll) {
-        mapWin32ToOS2RectClientToFrame(wnd, &scrollRect, (PRECTLOS2)&scrollOS2);
+        mapWin32ToOS2Rect(wnd->getClientHeight(), &scrollRect, (PRECTLOS2)&scrollOS2);
         pScrollOS2 = &scrollOS2;
-
-        //Scroll rectangle relative to client area
-        WinIntersectRect ((HAB) 0, pScrollOS2, pScrollOS2, &clientRect);
-   }
-   else {
-        pScrollOS2 = &clientRect;
    }
 
    if(pClip) {
-         mapWin32ToOS2RectClientToFrame(wnd, &clipRect, (PRECTLOS2)&clipOS2);
-         pClipOS2 = &clipOS2;
-
-         //Clip rectangle relative to client area
-         WinIntersectRect((HAB) 0, pClipOS2, pClipOS2, &clientRect);
-   }
-   else {
-         pClipOS2 = &clientRect;
+        mapWin32ToOS2Rect(wnd->getClientHeight(), &clipRect, (PRECTLOS2)&clipOS2);
+        pClipOS2 = &clipOS2;
    }
 
    LONG lComplexity = WinScrollWindow(hwnd, dx, dy, pScrollOS2,
@@ -1740,25 +1603,24 @@ BOOL WIN32API ScrollDC(HDC hDC, int dx, int dy, const RECT *pScroll,
 
    RECT winRectUpdate;
 
-   mapOS2ToWin32Rect(wnd->getWindowHeight(), (PRECTLOS2)&rectlUpdate, &winRectUpdate);
+   mapOS2ToWin32Rect(wnd->getClientHeight(), (PRECTLOS2)&rectlUpdate, &winRectUpdate);
 
    if (pRectUpdate)
       *pRectUpdate = winRectUpdate;
 
    if (hrgnUpdate)
-      rc = setPMRgnIntoWinRgn(hrgn, hrgnUpdate, wnd->getWindowHeight());
+      rc = setPMRgnIntoWinRgn(hrgn, hrgnUpdate, wnd->getClientHeight());
 
    return (rc);
 }
 //******************************************************************************
-//SvL: Using WinScrollWindow to scroll child windows is better (smoother).
+//Using WinScrollWindow to scroll child windows is better (smoother).
 //******************************************************************************
 INT WIN32API ScrollWindowEx(HWND hwnd, int dx, int dy, const RECT *pScroll, const RECT *pClip,
                             HRGN hrgnUpdate, PRECT pRectUpdate, UINT scrollFlag)
 {
  Win32BaseWindow *window;
  APIRET  rc;
- RECTL   clientRect;
  RECTL   scrollRect;
  RECTL   clipRect;
  PRECTL  pScrollOS2 = NULL;
@@ -1780,28 +1642,14 @@ INT WIN32API ScrollWindowEx(HWND hwnd, int dx, int dy, const RECT *pScroll, cons
     if (scrollFlag & SW_INVALIDATE_W)      scrollFlagsOS2 |= SW_INVALIDATERGN;
     if (scrollFlag & SW_SCROLLCHILDREN_W)  scrollFlagsOS2 |= SW_SCROLLCHILDREN;
 
-    mapWin32ToOS2Rect(window->getWindowHeight(), window->getClientRectPtr(), (PRECTLOS2)&clientRect);
-
     if(pScroll) {
-        mapWin32ToOS2RectClientToFrame(window,(RECT *)pScroll, (PRECTLOS2)&scrollRect);
+        mapWin32ToOS2Rect(window->getClientHeight(), (RECT *)pScroll, (PRECTLOS2)&scrollRect);
         pScrollOS2 = &scrollRect;
-
-        //Scroll rectangle relative to client area
-        WinIntersectRect ((HAB) 0, pScrollOS2, pScrollOS2, &clientRect);
-    }
-    else {
-        pScrollOS2 = &clientRect;
     }
 
     if(pClip) {
-         mapWin32ToOS2RectClientToFrame(window,(RECT *)pClip, (PRECTLOS2)&clipRect);
-         pClipOS2 = &clipRect;
-
-         //Clip rectangle relative to client area
-         WinIntersectRect ((HAB) 0, pClipOS2, pClipOS2, &clientRect);
-    }
-    else {
-         pClipOS2 = &clientRect;
+        mapWin32ToOS2Rect(window->getClientHeight(), (RECT *)pClip, (PRECTLOS2)&clipRect);
+        pClipOS2 = &clipRect;
     }
 
     RECTL rectlUpdate;
@@ -1815,10 +1663,9 @@ INT WIN32API ScrollWindowEx(HWND hwnd, int dx, int dy, const RECT *pScroll, cons
       //    is time in ms? time <-> iteration count?
     }
 
-    LONG lComplexity = WinScrollWindow (window->getOS2WindowHandle(), dx, dy,
-                                        pScrollOS2,
-                                        pClipOS2,
-                                        hrgn, &rectlUpdate, scrollFlagsOS2);
+    LONG lComplexity = WinScrollWindow(window->getOS2WindowHandle(), dx, dy,
+                                       pScrollOS2, pClipOS2,
+                                       hrgn, &rectlUpdate, scrollFlagsOS2);
     if (lComplexity == RGN_ERROR)
     {
         return ERROR_W;
@@ -1849,7 +1696,7 @@ INT WIN32API ScrollWindowEx(HWND hwnd, int dx, int dy, const RECT *pScroll, cons
                     return 0;
                 }
                 rectChild = *child->getWindowRect();
-                if(!pRectUpdate || IntersectRect(&rectChild, &rectChild, &rc))
+                if(!pScroll || IntersectRect(&rectChild, &rectChild, &rc))
                 {
                      dprintf(("ScrollWindowEx: Scroll child window %x", hwndChild));
                      child->ScrollWindow(dx, orgdy);
@@ -1861,13 +1708,13 @@ INT WIN32API ScrollWindowEx(HWND hwnd, int dx, int dy, const RECT *pScroll, cons
 
     RECT winRectUpdate;
 
-    mapOS2ToWin32Rect(window->getWindowHeight(), (PRECTLOS2)&rectlUpdate, &winRectUpdate);
+    mapOS2ToWin32Rect(window->getClientHeight(), (PRECTLOS2)&rectlUpdate, &winRectUpdate);
 
     if (pRectUpdate)
        *pRectUpdate = winRectUpdate;
 
     if (hrgnUpdate)
-       rc = setPMRgnIntoWinRgn (hrgn, hrgnUpdate, window->getWindowHeight());
+       rc = setPMRgnIntoWinRgn(hrgn, hrgnUpdate, window->getClientHeight());
 
 #if 0
     //SvL: WinScrollWindow already invalidates the area; no need to do it again
@@ -1890,18 +1737,18 @@ INT WIN32API ScrollWindowEx(HWND hwnd, int dx, int dy, const RECT *pScroll, cons
 
     switch (lComplexity)
     {
-       case RGN_NULL:
-         regionType = NULLREGION_W;
-         break;
-       case RGN_RECT:
-         regionType = SIMPLEREGION_W;
-         break;
-       case RGN_COMPLEX:
-         regionType = COMPLEXREGION_W;
-         break;
-       default:
-         regionType = ERROR_W;
-         break;
+    case RGN_NULL:
+        regionType = NULLREGION_W;
+        break;
+    case RGN_RECT:
+        regionType = SIMPLEREGION_W;
+        break;
+    case RGN_COMPLEX:
+        regionType = COMPLEXREGION_W;
+        break;
+    default:
+        regionType = ERROR_W;
+        break;
     }
 
     return (regionType);
@@ -1936,20 +1783,4 @@ HWND WIN32API WindowFromDC(HDC hdc)
 }
 //******************************************************************************
 //******************************************************************************
-#ifdef DEBUG
-void dprintfOrigin(HDC hdc)
-{
-   POINTL point;
 
-    pDCData  pHps = (pDCData)GpiQueryDCData((HPS)hdc);
-    if(!pHps)
-    {
-        return;
-    }
-
-    GreGetDCOrigin(pHps->hps, &point);
-    dprintf(("HDC %x origin (%d,%d) org (%d,%d)", hdc, point.x, point.y, pHps->ptlOrigin.x, pHps->ptlOrigin.y));
-}
-#endif
-//******************************************************************************
-//******************************************************************************

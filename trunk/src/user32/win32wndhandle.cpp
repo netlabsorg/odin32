@@ -1,4 +1,4 @@
-/* $Id: win32wndhandle.cpp,v 1.8 2001-01-02 18:14:59 sandervl Exp $ */
+/* $Id: win32wndhandle.cpp,v 1.9 2001-05-11 08:39:46 sandervl Exp $ */
 /*
  * Win32 Handle Management Code for OS/2
  *
@@ -63,6 +63,7 @@ BOOL HwAllocateWindowHandle(HWND *hwnd, DWORD dwUserData)
   *hwnd |= WNDHANDLE_MAGIC_HIGHWORD;
   WindowHandleTable[lastIndex] = dwUserData;
 
+  lastIndex++;
   tableMutex.leave(&hGlobalTableMutex);
   return TRUE;
 }

@@ -1,4 +1,4 @@
-/* $Id: win32wbasepos.cpp,v 1.23 2001-05-04 17:02:52 sandervl Exp $ */
+/* $Id: win32wbasepos.cpp,v 1.24 2001-05-11 08:39:45 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2 (nonclient/position methods)
  *
@@ -58,7 +58,7 @@ void Win32BaseWindow::GetMinMaxInfo(POINT *maxSize, POINT *maxPos,
 
     if(!(getStyle() & (WS_POPUP | WS_CHILD))) {
         RECT rect;
-        OSLibWinGetMaxPosition(getOS2WindowHandle(), &rect);
+        OSLibWinGetMaxPosition(getOS2FrameWindowHandle(), &rect);
         MinMax.ptMaxPosition.x = rect.left;
         MinMax.ptMaxPosition.y = rect.top;
 

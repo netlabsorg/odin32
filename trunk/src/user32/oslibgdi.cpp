@@ -1,4 +1,4 @@
-/* $Id: oslibgdi.cpp,v 1.13 2000-06-08 18:10:10 sandervl Exp $ */
+/* $Id: oslibgdi.cpp,v 1.14 2001-05-11 08:39:42 sandervl Exp $ */
 /*
  * Window GDI wrapper functions for OS/2
  *
@@ -119,6 +119,7 @@ BOOL mapWin32ToOS2Rect(int height, PRECT rectWin32, PRECTLOS2 rectOS2)
 
   return TRUE;
 }
+#ifndef CLIENTFRAME
 //******************************************************************************
 //Win32 rectangle in client coordinates (relative to upper left corner of client window)
 //Convert to frame coordinates (relative to lower left corner of window)
@@ -171,6 +172,7 @@ BOOL mapOS2ToWin32RectFrameToClient(Win32BaseWindow *window, PRECTLOS2 rectOS2,
 
   return TRUE;
 }
+#endif //CLIENTFRAME
 //******************************************************************************
 //******************************************************************************
 BOOL copyOS2ToWin32Rect(PRECTLOS2 rectOS2,PRECT rectWin32)
