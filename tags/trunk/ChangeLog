@@ -1,4 +1,9 @@
-/* $Id: ChangeLog,v 1.1411 2001-05-15 07:37:15 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.1412 2001-05-15 10:33:41 sandervl Exp $ */
+
+ 2001-05-15: Sander van Leeuwen <sandervl@xs4all.nl>
+    - USER32:   o BeginPaint must return logical points instead of device points.
+                  (not the same if e.g. app changes page viewport)
+                  (fixes scaling in Opera)
 
  2001-05-15: Dietrich Teickner <Dietrich_Teickner@t-online.de>
     - KERNEL32: o Added LOCALE_IFIRSTDAYOFWEEK case for GetLocaleInfoW
