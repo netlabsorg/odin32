@@ -510,12 +510,6 @@ BOOL HMSetNamedPipeHandleState(HANDLE  hNamedPipe,
                                LPDWORD lpcbMaxCollect,
                                LPDWORD lpdwCollectDataTimeout);
 
-BOOL HMCreatePipe(PHANDLE phRead,
-                PHANDLE phWrite,
-                LPSECURITY_ATTRIBUTES lpsa,
-                DWORD                 cbPipe);
-
-
 //Mailslot API
 HANDLE HMCreateMailslotA(LPCSTR lpName, DWORD nMaxMessageSize,
                          DWORD lReadTimeout,

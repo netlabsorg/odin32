@@ -1,4 +1,4 @@
-/* $Id: npipe.cpp,v 1.11 2003-04-02 12:58:30 sandervl Exp $ */
+/* $Id: npipe.cpp,v 1.12 2003-06-02 16:25:18 sandervl Exp $ */
 /*
  * Win32 Named pipes API
  *
@@ -37,7 +37,51 @@ BOOL WIN32API PeekNamedPipe(HANDLE hPipe, LPVOID lpvBuffer,
 BOOL WIN32API CreatePipe(PHANDLE phRead, PHANDLE  phWrite,
                          LPSECURITY_ATTRIBUTES lpsa, DWORD cbPipe)
 {
-  return (HMCreatePipe(phRead,phWrite,lpsa,cbPipe));
+  char        szPipeName[64];
+  HANDLE      hPipeRead, hPipeWrite;
+
+  // create a unique pipe name
+  for(int i=0;i<16;i++) 
+  {
+        sprintf(szPipeName, "\\\\.\\pipe\\Win32.Pipes.%08x.%08x", GetCurrentProcessId(), GetCurrentTime());
+        hPipeRead = ::CreateNamedPipeA(szPipeName, PIPE_ACCESS_DUPLEX, 
+                                     PIPE_TYPE_BYTE | PIPE_WAIT, 1, cbPipe, cbPipe, 
+                                     NMPWAIT_USE_DEFAULT_WAIT, lpsa);
+        if(hPipeRead != INVALID_HANDLE_VALUE) break;
+
+        Sleep(10);
+  } 
+
+  if (hPipeRead == INVALID_HANDLE_VALUE) {
+      dprintf(("ERROR: Unable to create named pipe with unique name!! (%s)", szPipeName));
+      return FALSE;
+  }
+
+  ULONG mode = PIPE_NOWAIT|PIPE_READMODE_BYTE;
+
+  //Set pipe in non-blocking mode
+  SetNamedPipeHandleState(hPipeRead, &mode, NULL, NULL);
+
+  //Set pipe in listening mode (so the next CreateFile will succeed)
+  ConnectNamedPipe(hPipeRead, NULL);
+
+  //Put pipe back in blocking mode
+  mode = PIPE_WAIT|PIPE_READMODE_BYTE;
+  SetNamedPipeHandleState(hPipeRead, &mode, NULL, NULL);
+
+  //Create write pipe
+  hPipeWrite = CreateFileA(szPipeName, GENERIC_WRITE, 0, lpsa, OPEN_EXISTING, 0, 0);
+  if (hPipeWrite == INVALID_HANDLE_VALUE) 
+  {
+      dprintf(("ERROR: Unable to create write handle for anonymous pipe!!"));
+      CloseHandle(hPipeRead);
+      return FALSE;
+  }
+
+  dprintf(("Created pipe with handles %x and %x", hPipeRead, hPipeWrite));
+  *phRead  = hPipeRead;
+  *phWrite = hPipeWrite;
+  return TRUE;
 }
 //******************************************************************************
 //******************************************************************************

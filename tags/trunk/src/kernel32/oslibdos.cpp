@@ -1,4 +1,4 @@
-/* $Id: oslibdos.cpp,v 1.119 2003-03-27 14:00:52 sandervl Exp $ */
+/* $Id: oslibdos.cpp,v 1.120 2003-06-02 16:25:19 sandervl Exp $ */
 /*
  * Wrappers for OS/2 Dos* API
  *
@@ -1594,7 +1594,7 @@ DWORD OSLibDosCreateNamedPipe(LPCTSTR lpName,
    DWORD hPipe;
    DWORD rc, ulAction;
 
-  if (dwOpenMode & PIPE_ACCESS_DUPLEX_W)
+  if ((dwOpenMode & PIPE_ACCESS_DUPLEX_W) == PIPE_ACCESS_DUPLEX_W)
     dwOS2Mode |= NP_ACCESS_DUPLEX;
   else
   if (dwOpenMode & PIPE_ACCESS_INBOUND_W)

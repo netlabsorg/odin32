@@ -1,4 +1,4 @@
-/* $Id: hmnpipe.h,v 1.6 2002-02-15 19:14:52 sandervl Exp $ */
+/* $Id: hmnpipe.h,v 1.7 2003-06-02 16:25:18 sandervl Exp $ */
 /*
  * Project Odin Software License can be found in LICENSE.TXT
  *
@@ -94,13 +94,6 @@ class HMDeviceNamedPipeClass : public HMDeviceFileClass
                                     LPOVERLAPPED  lpOverlapped,
                                     LPDWORD       arg3,
                                     BOOL          arg4);
-
-  virtual BOOL  CreatePipe(PHMHANDLEDATA pHMHandleDataRead,
-                           PHMHANDLEDATA pHMHandleDataWrite,
-                           LPSECURITY_ATTRIBUTES lpsa, 
-                           DWORD         cbPipe);
-
-
 };
 
 

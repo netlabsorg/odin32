@@ -1,4 +1,4 @@
-/* $Id: hmdevice.h,v 1.35 2003-05-06 12:06:09 sandervl Exp $ */
+/* $Id: hmdevice.h,v 1.36 2003-06-02 16:25:17 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -450,11 +450,6 @@ public:
                                       LPDWORD lpdwMode,
                                       LPDWORD lpcbMaxCollect,
                                       LPDWORD lpdwCollectDataTimeout);
-
-  virtual BOOL  CreatePipe(PHMHANDLEDATA pHMHandleDataRead,
-                           PHMHANDLEDATA pHMHandleDataWrite,
-                           LPSECURITY_ATTRIBUTES lpsa,
-                           DWORD         cbPipe);
 
   virtual BOOL GetMailslotInfo(PHMHANDLEDATA pHMHandleData,
                                LPDWORD lpMaxMessageSize,
