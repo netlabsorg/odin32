@@ -115,6 +115,8 @@ static DWORD SHELL_GetResourceTable(HFILE hFile, LPBYTE *retptr)
 
 	  size = ne_header.rname_tab_offset - ne_header.resource_tab_offset;
 
+//@@@PH no NE support
+#if 0
 	  if( size > sizeof(NE_TYPEINFO) )
 	  { pTypeInfo = (BYTE*)HeapAlloc( GetProcessHeap(), 0, size);
 	    if( pTypeInfo )
@@ -125,6 +127,8 @@ static DWORD SHELL_GetResourceTable(HFILE hFile, LPBYTE *retptr)
 	      }
 	    }
 	  }
+#endif
+
 	  *retptr = pTypeInfo;
 	  return IMAGE_OS2_SIGNATURE;
 	}
@@ -133,6 +137,8 @@ static DWORD SHELL_GetResourceTable(HFILE hFile, LPBYTE *retptr)
 /*************************************************************************
  *			SHELL_LoadResource
  */
+//@@@PH no NE support
+#if 0
 static BYTE * SHELL_LoadResource( HFILE hFile, NE_NAMEINFO* pNInfo, WORD sizeShift, ULONG *uSize)
 {	BYTE*  ptr;
 
@@ -146,6 +152,7 @@ static BYTE * SHELL_LoadResource( HFILE hFile, NE_NAMEINFO* pNInfo, WORD sizeShi
 	}
 	return 0;
 }
+#endif
 
 /*************************************************************************
  *                      ICO_LoadIcon
@@ -246,6 +253,8 @@ HGLOBAL WINAPI ICO_ExtractIconEx(LPCSTR lpszExeFileName, HICON * RetPtr, UINT nI
 
 	sig = SHELL_GetResourceTable(hFile,&pData);
 
+//@@@PH no NE support
+#if 0
 /* ico file */
 	if( sig==IMAGE_OS2_SIGNATURE || sig==1 ) /* .ICO file */
 	{ BYTE		*pCIDir = 0;
@@ -322,6 +331,7 @@ HGLOBAL WINAPI ICO_ExtractIconEx(LPCSTR lpszExeFileName, HICON * RetPtr, UINT nI
 	    HeapFree( GetProcessHeap(), 0, pData);
 	}
 /* end ico file */
+#endif
 
 /* exe/dll */
 	if( sig == IMAGE_NT_SIGNATURE)
