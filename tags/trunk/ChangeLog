@@ -1,8 +1,10 @@
-/* $Id: ChangeLog,v 1.2529 2003-03-27 10:42:23 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.2530 2003-03-27 11:02:11 sandervl Exp $ */
 
  2003-03-27: Sander van Leeuwen <sandervl@innotek   >
     - USER32:   o Don't change focus when processing mouse button message if
                   the top parent is a fake window
+                o Changes for window tracking (move/size) with full window
+                  dragging enabled
 
  2003-03-26: Sander van Leeuwen <sandervl@innotek   >
     - KERNEL32: o WaitForSingleObject/(Msg)WaitForMultipleObject fixes to 
