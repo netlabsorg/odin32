@@ -1,4 +1,4 @@
-/* $Id: hmdevio.cpp,v 1.14 2001-06-23 19:43:49 sandervl Exp $ */
+/* $Id: hmdevio.cpp,v 1.15 2001-10-28 12:48:04 sandervl Exp $ */
 
 /*
  * Win32 Device IOCTL API functions for OS/2
@@ -126,6 +126,26 @@ void RegisterDevices()
     }
 
     return;
+}
+//******************************************************************************
+//******************************************************************************
+BOOL WIN32API RegisterCustomDriver(PFNDRVOPEN pfnDriverOpen, PFNDRVCLOSE pfnDriverClose, 
+                                   PFNDRVIOCTL pfnDriverIOCtl, LPCSTR lpDeviceName)
+{
+ HMDeviceDriver *driver;
+ DWORD rc;
+ 
+    driver = new HMCustomDriver(pfnDriverOpen, pfnDriverClose, pfnDriverIOCtl, lpDeviceName);
+    if(driver == NULL) {
+        DebugInt3();
+        return FALSE;
+    }
+    rc = HMDeviceRegister((LPSTR)lpDeviceName, driver);
+    if (rc != NO_ERROR) {                                /* check for errors */
+        dprintf(("KERNEL32:RegisterDevices: registering %s failed with %u.\n", lpDeviceName, rc));
+        return FALSE;
+    }
+    return TRUE;
 }
 //******************************************************************************
 //******************************************************************************
@@ -437,7 +457,7 @@ static BOOL VPCIOCtl(HANDLE hDevice, DWORD dwIoControlCode, LPVOID lpInBuffer, D
 //******************************************************************************
 //******************************************************************************
 HMCustomDriver::HMCustomDriver(HINSTANCE hInstance, LPCSTR lpDeviceName)
-                : HMDeviceDriver(lpDeviceName)
+                : HMDeviceDriver(lpDeviceName), hDrvDll(0)
 {
     hDrvDll = hInstance ;
     *(ULONG *)&driverOpen  = (ULONG)GetProcAddress(hDrvDll, "DrvOpen");
@@ -446,9 +466,19 @@ HMCustomDriver::HMCustomDriver(HINSTANCE hInstance, LPCSTR lpDeviceName)
 }
 //******************************************************************************
 //******************************************************************************
+HMCustomDriver::HMCustomDriver(PFNDRVOPEN pfnDriverOpen, PFNDRVCLOSE pfnDriverClose, 
+                               PFNDRVIOCTL pfnDriverIOCtl, LPCSTR lpDeviceName)
+                : HMDeviceDriver(lpDeviceName), hDrvDll(0)
+{
+    driverOpen  = pfnDriverOpen;
+    driverClose = pfnDriverClose;
+    driverIOCtl = pfnDriverIOCtl;
+}
+//******************************************************************************
+//******************************************************************************
 HMCustomDriver::~HMCustomDriver()
 {
-   FreeLibrary(hDrvDll);
+   if(hDrvDll) FreeLibrary(hDrvDll);
 }
 //******************************************************************************
 //******************************************************************************
