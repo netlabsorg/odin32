@@ -1,4 +1,4 @@
-/* $Id: dc.cpp,v 1.6 1999-09-26 14:44:58 sandervl Exp $ */
+/* $Id: dc.cpp,v 1.7 1999-09-26 15:25:55 sandervl Exp $ */
 
 /*
  * DC functions for USER32
@@ -1300,7 +1300,7 @@ BOOL WIN32API ScrollWindow(HWND hwnd, int dx, int dy, const RECT *pScroll, const
  RECTL   clipRect;
  PRECTL  pScrollRect = NULL;
  PRECTL  pClipRect   = NULL;
- ULONG   scrollFlags = 0;
+ ULONG   scrollFlags = SW_INVALIDATERGN;
 
     window = Win32BaseWindow::GetWindowFromHandle(hwnd);
     if(!window) {
@@ -1309,6 +1309,15 @@ BOOL WIN32API ScrollWindow(HWND hwnd, int dx, int dy, const RECT *pScroll, const
     }
     dprintf(("ScrollWindow %x %d %d\n", hwnd, dx, dy));
     MapWin32ToOS2Rectl(window->getClientRect(), (PRECTLOS2)&clientRect);
+    //Rectangle could be relative to parent window, so fix this
+    if(clientRect.yBottom != 0) {
+	clientRect.yTop   -= clientRect.yBottom;
+	clientRect.yBottom = 0;
+    }
+    if(clientRect.xLeft != 0) {
+	clientRect.xRight -= clientRect.xLeft;
+	clientRect.xLeft   = 0;
+    }
     if(pScroll) {
     	 MapWin32ToOS2Rectl((RECT *)pScroll, (PRECTLOS2)&scrollRect);
 	 pScrollRect = &scrollRect;
