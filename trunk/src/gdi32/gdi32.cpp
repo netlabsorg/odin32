@@ -1,4 +1,4 @@
-/* $Id: gdi32.cpp,v 1.32 2000-01-26 23:19:55 sandervl Exp $ */
+/* $Id: gdi32.cpp,v 1.33 2000-01-26 23:48:02 sandervl Exp $ */
 
 /*
  * GDI32 apis
@@ -669,7 +669,7 @@ HBITMAP WIN32API CreateBitmap(int nWidth, int nHeight, UINT cPlanes,
  HBITMAP rc;
 
     rc = O32_CreateBitmap(nWidth, nHeight, cPlanes, cBitsPerPel, lpvBits);
-    dprintf(("GDI32: CreateBitmap (%d,%d) bps %d returned %x\n", nWidth, nHeight, cBitsPerPel, rc));
+    dprintf(("GDI32: CreateBitmap (%d,%d) bps %d returned %d\n", nWidth, nHeight, cBitsPerPel, rc));
     return(rc);
 }
 //******************************************************************************
@@ -2405,6 +2405,7 @@ DWORD WIN32API GetGlyphOutlineW(HDC hdc, UINT uChar, UINT uFormat, LPGLYPHMETRIC
   return(GDI_ERROR);
 }
 //******************************************************************************
+
 //******************************************************************************
 BOOL WIN32API SetObjectOwner( HGDIOBJ arg1, int arg2 )
 {
@@ -3135,29 +3136,6 @@ int WIN32API GetMetaRgn(HDC  hdc,
 
   return (0);
 }
-
-
-/*****************************************************************************
- * Name      : int GetPixelFormat
- * Purpose   : The GetPixelFormat function obtains the index of the specified
- *             device context's currently selected pixel format.
- * Parameters: HDC  hdc   handle of device context
- * Variables :
- * Result    : 0 / 1
- * Remark    :
- * Status    : UNTESTED STUB
- *
- * Author    : Patrick Haller [Mon, 1998/06/15 08:00]
- *****************************************************************************/
-
-int WIN32API GetPixelFormat(HDC hdc)
-{
-  dprintf(("GDI32: GetPixelFormat(%08xh) not implemented.\n",
-           hdc));
-
-  return (0);
-}
-
 
 /*****************************************************************************
  * Name      : BOOL SetDeviceGammaRamp
