@@ -1,4 +1,4 @@
-/* $Id: rsrc.orc,v 1.6 2000-08-09 15:57:55 cbratschi Exp $ */
+/* $Id: rsrc.orc,v 1.7 2002-05-08 11:25:02 sandervl Exp $ */
 /*
  * Top level resource file for Common Controls
  *
@@ -15,7 +15,7 @@
  * neutral language. This will prevent them from
  * being duplicated for each language.
  */
-#include "cctl_xx.orc"
+#include "resources\cctl_xx.orc"
 
 /*
  * Everything specific to any language goes
@@ -25,22 +25,22 @@
  * get localized bitmaps for example.
  */
 
-#include "cctl_Ca.orc"
-#include "cctl_Cs.orc"
-#include "cctl_Da.orc"
-#include "cctl_De.orc"
-#include "cctl_En.orc"
-#include "cctl_Eo.orc"
-#include "cctl_Es.orc"
-#include "cctl_Fi.orc"
-#include "cctl_Fr.orc"
-#include "cctl_Hu.orc"
-#include "cctl_It.orc"
-#include "cctl_Ko.orc"
-#include "cctl_Nl.orc"
-#include "cctl_No.orc"
-#include "cctl_Pl.orc"
-#include "cctl_Pt.orc"
-#include "cctl_Ru.orc"
-#include "cctl_Sv.orc"
-#include "cctl_Wa.orc"
+#include "resources\cctl_Ca.orc"
+#include "resources\cctl_Cs.orc"
+#include "resources\cctl_Da.orc"
+#include "resources\cctl_De.orc"
+#include "resources\cctl_En.orc"
+#include "resources\cctl_Eo.orc"
+#include "resources\cctl_Es.orc"
+#include "resources\cctl_Fi.orc"
+#include "resources\cctl_Fr.orc"
+#include "resources\cctl_Hu.orc"
+#include "resources\cctl_It.orc"
+#include "resources\cctl_Ko.orc"
+#include "resources\cctl_Nl.orc"
+#include "resources\cctl_No.orc"
+#include "resources\cctl_Pl.orc"
+#include "resources\cctl_Pt.orc"
+#include "resources\cctl_Ru.orc"
+#include "resources\cctl_Sv.orc"
+#include "resources\cctl_Wa.orc"

@@ -5,6 +5,20 @@
  * Copyright 1998, 1999 Eric Kohl
  * 		   1999 Eric Pouech
  *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
  * NOTES
  *   I will only improve this control once in a while.
  *     Eric <ekohl@abo.rhein-zeitung.de>
@@ -19,18 +33,27 @@
 #include "commctrl.h"
 #include "vfw.h"
 #include "mmsystem.h"
-#include "debugtools.h"
-#ifdef __WIN32OS2__
-#include "ccbase.h"
-#endif
+#include "wine/debug.h"
 
-DEFAULT_DEBUG_CHANNEL(animate);
+WINE_DEFAULT_DEBUG_CHANNEL(animate);
+
+static struct {
+    HMODULE	hModule;
+#ifdef __WIN32OS2__
+    HIC         (* WINAPI fnICOpen)(DWORD, DWORD, UINT);
+    LRESULT     (* WINAPI fnICClose)(HIC);
+    LRESULT     (* WINAPI fnICSendMessage)(HIC, UINT, DWORD, DWORD);
+    DWORD       (* WINAPIV fnICDecompress)(HIC,DWORD,LPBITMAPINFOHEADER,LPVOID,LPBITMAPINFOHEADER,LPVOID);
+#else
+    HIC         (WINAPI *fnICOpen)(DWORD, DWORD, UINT);
+    LRESULT     (WINAPI *fnICClose)(HIC);
+    LRESULT     (WINAPI *fnICSendMessage)(HIC, UINT, DWORD, DWORD);
+    DWORD       (WINAPIV *fnICDecompress)(HIC,DWORD,LPBITMAPINFOHEADER,LPVOID,LPBITMAPINFOHEADER,LPVOID);
+#endif
+} fnIC;
 
 typedef struct
 {
-#ifdef __WIN32OS2__
-   COMCTL32_HEADER      header;
-#endif
    /* reference to input stream (file or resource) */
    HGLOBAL 		hRes;
    HMMIO		hMMio;	/* handle to mmio stream */
@@ -70,24 +93,13 @@ static void ANIMATE_Notify(ANIMATE_INFO* infoPtr, UINT notif)
 		 (LPARAM)infoPtr->hWnd);
 }
 
-#ifdef __WIN32OS2__
-static BOOL ANIMATE_LoadRes(ANIMATE_INFO *infoPtr,HINSTANCE hInst,LPWSTR lpName,BOOL unicode)
-#else
 static BOOL ANIMATE_LoadResA(ANIMATE_INFO *infoPtr, HINSTANCE hInst, LPSTR lpName)
-#endif
 {
     HRSRC 	hrsrc;
     MMIOINFO	mminfo;
     LPVOID	lpAvi;
     
-#ifdef __WIN32OS2__
-    if (unicode)
-      hrsrc = FindResourceW(hInst,lpName,(LPWSTR)L"AVI");
-    else
-      hrsrc = FindResourceA(hInst,(LPCSTR)lpName,"AVI");
-#else
     hrsrc = FindResourceA(hInst, lpName, "AVI");
-#endif
     if (!hrsrc)
 	return FALSE;
     
@@ -113,21 +125,11 @@ static BOOL ANIMATE_LoadResA(ANIMATE_INFO *infoPtr, HINSTANCE hInst, LPSTR lpNam
 }
 
 
-#ifdef __WIN32OS2__
-static BOOL ANIMATE_LoadFile(ANIMATE_INFO *infoPtr,LPWSTR lpName,BOOL unicode)
-#else
 static BOOL ANIMATE_LoadFileA(ANIMATE_INFO *infoPtr, LPSTR lpName)
-#endif
 {
-#ifdef __WIN32OS2__
-    if (unicode)
-      infoPtr->hMMio = mmioOpenW(lpName,NULL,MMIO_ALLOCBUF | MMIO_READ | MMIO_DENYWRITE);
-    else
-      infoPtr->hMMio = mmioOpenA((LPSTR)lpName,NULL,MMIO_ALLOCBUF | MMIO_READ | MMIO_DENYWRITE);
-#else
     infoPtr->hMMio = mmioOpenA((LPSTR)lpName, NULL,
 			       MMIO_ALLOCBUF | MMIO_READ | MMIO_DENYWRITE);
-#endif
+    
     if (!infoPtr->hMMio)
 	return FALSE;
     
@@ -173,7 +175,7 @@ static void ANIMATE_Free(ANIMATE_INFO *infoPtr)
 	    infoPtr->lpIndex = NULL;
 	}
 	if (infoPtr->hic) {
-	    ICClose(infoPtr->hic);
+	    fnIC.fnICClose(infoPtr->hic);
 	    infoPtr->hic = 0;
 	}
 	if (infoPtr->inbih) {
@@ -347,7 +349,7 @@ static LRESULT ANIMATE_DrawFrame(ANIMATE_INFO* infoPtr)
     mmioRead(infoPtr->hMMio, infoPtr->indata, infoPtr->ash.dwSuggestedBufferSize);
     
     if (infoPtr->hic &&
-	ICDecompress(infoPtr->hic, 0, infoPtr->inbih, infoPtr->indata, 
+	fnIC.fnICDecompress(infoPtr->hic, 0, infoPtr->inbih, infoPtr->indata, 
 		     infoPtr->outbih, infoPtr->outdata) != ICERR_OK) {
 	LeaveCriticalSection(&infoPtr->cs);
 	WARN("Decompression error\n");
@@ -635,20 +637,21 @@ static BOOL    ANIMATE_GetAviCodec(ANIMATE_INFO *infoPtr)
 
     /* check uncompressed AVI */
     if ((infoPtr->ash.fccHandler == mmioFOURCC('D', 'I', 'B', ' ')) ||
-       (infoPtr->ash.fccHandler == mmioFOURCC('R', 'L', 'E', ' ')))
+       (infoPtr->ash.fccHandler == mmioFOURCC('R', 'L', 'E', ' ')) ||
+       (infoPtr->ash.fccHandler == mmioFOURCC(0, 0, 0, 0)))
     {
         infoPtr->hic = 0;             
 	return TRUE;
     }
 
     /* try to get a decompressor for that type */
-    infoPtr->hic = ICOpen(ICTYPE_VIDEO, infoPtr->ash.fccHandler, ICMODE_DECOMPRESS);
+    infoPtr->hic = fnIC.fnICOpen(ICTYPE_VIDEO, infoPtr->ash.fccHandler, ICMODE_DECOMPRESS);
     if (!infoPtr->hic) {
 	WARN("Can't load codec for the file\n");
 	return FALSE;
     }
     
-    outSize = ICSendMessage(infoPtr->hic, ICM_DECOMPRESS_GET_FORMAT, 
+    outSize = fnIC.fnICSendMessage(infoPtr->hic, ICM_DECOMPRESS_GET_FORMAT, 
 			    (DWORD)infoPtr->inbih, 0L);
 
     infoPtr->outbih = HeapAlloc(GetProcessHeap(), 0, outSize);
@@ -657,7 +660,7 @@ static BOOL    ANIMATE_GetAviCodec(ANIMATE_INFO *infoPtr)
 	return FALSE;
     }
 
-    if (ICSendMessage(infoPtr->hic, ICM_DECOMPRESS_GET_FORMAT, 
+    if (fnIC.fnICSendMessage(infoPtr->hic, ICM_DECOMPRESS_GET_FORMAT, 
 		      (DWORD)infoPtr->inbih, (DWORD)infoPtr->outbih) != ICERR_OK) {
 	WARN("Can't get output BIH\n");
 	return FALSE;
@@ -669,7 +672,7 @@ static BOOL    ANIMATE_GetAviCodec(ANIMATE_INFO *infoPtr)
 	return FALSE;
     }
 
-    if (ICSendMessage(infoPtr->hic, ICM_DECOMPRESS_BEGIN, 
+    if (fnIC.fnICSendMessage(infoPtr->hic, ICM_DECOMPRESS_BEGIN, 
 		      (DWORD)infoPtr->inbih, (DWORD)infoPtr->outbih) != ICERR_OK) {
 	WARN("Can't begin decompression\n");
 	return FALSE;
@@ -678,16 +681,13 @@ static BOOL    ANIMATE_GetAviCodec(ANIMATE_INFO *infoPtr)
     return TRUE;
 }
 
-#ifdef __WIN32OS2__
-static LRESULT ANIMATE_Open(HWND hWnd, WPARAM wParam, LPARAM lParam,BOOL unicode)
-#else
 static LRESULT ANIMATE_OpenA(HWND hWnd, WPARAM wParam, LPARAM lParam)
-#endif
 {
     ANIMATE_INFO *infoPtr = ANIMATE_GetInfoPtr(hWnd);
     HINSTANCE hInstance = (HINSTANCE)wParam;
 
     ANIMATE_Free(infoPtr);
+    infoPtr->hWnd = hWnd;
 
     if (!lParam) {
 	TRACE("Closing avi!\n");
@@ -697,26 +697,6 @@ static LRESULT ANIMATE_OpenA(HWND hWnd, WPARAM wParam, LPARAM lParam)
     if (!hInstance)
        hInstance = GetWindowLongA(hWnd, GWL_HINSTANCE);
 
-#ifdef __WIN32OS2__
-    if (HIWORD(lParam)) {
-        //TRACE("(\"%s\");\n", (LPSTR)lParam);
-
-        if (!ANIMATE_LoadRes(infoPtr, hInstance, (LPWSTR)lParam,unicode)) {
-            TRACE("No AVI resource found!\n");
-            if (!ANIMATE_LoadFile(infoPtr, (LPWSTR)lParam,unicode)) {
-                WARN("No AVI file found!\n");
-                return FALSE;
-            }
-        }
-    } else {
-        //TRACE("(%u);\n", (WORD)LOWORD(lParam));
-
-        if (!ANIMATE_LoadRes(infoPtr,hInstance,unicode ? MAKEINTRESOURCEW((INT)lParam):(LPWSTR)MAKEINTRESOURCEA((INT)lParam),unicode)) {
-            WARN("No AVI resource found!\n");
-            return FALSE;
-        }
-    }
-#else
     if (HIWORD(lParam)) {
 	TRACE("(\"%s\");\n", (LPSTR)lParam);
 
@@ -736,7 +716,7 @@ static LRESULT ANIMATE_OpenA(HWND hWnd, WPARAM wParam, LPARAM lParam)
 	    return FALSE;
 	}
     }
-#endif
+
     if (!ANIMATE_GetAviInfo(infoPtr)) {
 	WARN("Can't get AVI information\n");
 	ANIMATE_Free(infoPtr);
@@ -781,12 +761,24 @@ static LRESULT ANIMATE_Create(HWND hWnd, WPARAM wParam, LPARAM lParam)
 {
     ANIMATE_INFO*	infoPtr;
 
+    if (!fnIC.hModule) /* FIXME: not thread safe */
+    {
+	/* since there's a circular dep between msvfw32 and comctl32, we could either:
+	 * - fix the build chain to allow this circular dep
+	 * - handle it by hand
+	 * AJ wants the latter :-(
+	 */
+	fnIC.hModule = LoadLibraryA("msvfw32.dll");
+	if (!fnIC.hModule) return FALSE;
+
+	fnIC.fnICOpen        = (void*)GetProcAddress(fnIC.hModule, "ICOpen");
+	fnIC.fnICClose       = (void*)GetProcAddress(fnIC.hModule, "ICClose");
+	fnIC.fnICSendMessage = (void*)GetProcAddress(fnIC.hModule, "ICSendMessage");
+	fnIC.fnICDecompress  = (void*)GetProcAddress(fnIC.hModule, "ICDecompress");
+    }
+
     /* allocate memory for info structure */
-#ifdef __WIN32OS2__
-    infoPtr = (ANIMATE_INFO*)initControl(hWnd,sizeof(ANIMATE_INFO));
-#else
     infoPtr = (ANIMATE_INFO *)COMCTL32_Alloc(sizeof(ANIMATE_INFO));
-#endif
     if (!infoPtr) {
 	ERR("could not allocate info memory!\n");
 	return 0;
@@ -853,19 +845,11 @@ static LRESULT WINAPI ANIMATE_WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LP
 	return DefWindowProcA(hWnd, uMsg, wParam, lParam);
     switch (uMsg)
     {
-#ifdef __WIN32OS2__
-    case ACM_OPENA:
-        return ANIMATE_Open(hWnd,wParam,lParam,FALSE);
-
-    case ACM_OPENW:
-        return ANIMATE_Open(hWnd,wParam,lParam,TRUE);
-#else
     case ACM_OPENA:
 	return ANIMATE_OpenA(hWnd, wParam, lParam);
 	
 	/*	case ACM_OPEN32W: FIXME!! */
 	/*	    return ANIMATE_Open32W(hWnd, wParam, lParam); */
-#endif
 	
     case ACM_PLAY:
 	return ANIMATE_Play(hWnd, wParam, lParam);
@@ -943,15 +927,10 @@ static LRESULT WINAPI ANIMATE_WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LP
 	if (uMsg >= WM_USER)
 	    ERR("unknown msg %04x wp=%08x lp=%08lx\n", uMsg, wParam, lParam);
 	
-#ifdef __WIN32OS2__
-        return defComCtl32ProcA (hWnd, uMsg, wParam, lParam);
-#else
 	return DefWindowProcA(hWnd, uMsg, wParam, lParam);
-#endif
     }
     return 0;
 }
-
 
 void ANIMATE_Register(void)
 {
