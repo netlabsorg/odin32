@@ -5,7 +5,7 @@
 #include "os2ddraw.h"
 #include "os2clipper.h"
 #include "os2palette.h"
-#include <dive.h>
+#include "divewrap.h"
 #include <commctrl.h>
 
 #define FAR

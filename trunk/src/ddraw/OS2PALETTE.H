@@ -2,7 +2,7 @@
 #define __OS2PALETTE_H__
 
 #include "os2ddraw.h"
-#include <dive.h>
+#include "divewrap.h"
 #define FAR
 #undef THIS
 #define THIS IDirectDrawPalette*
