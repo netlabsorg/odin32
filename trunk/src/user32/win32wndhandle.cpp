@@ -1,4 +1,4 @@
-/* $Id: win32wndhandle.cpp,v 1.15 2002-07-30 18:20:44 achimha Exp $ */
+/* $Id: win32wndhandle.cpp,v 1.16 2002-08-09 11:19:56 sandervl Exp $ */
 /*
  * Win32 Handle Management Code for OS/2
  *
@@ -6,12 +6,12 @@
  * Copyright 1998 Sander van Leeuwen (sandervl@xs4all.nl)
  *
  *
- * TODO: a linear list might not be the optimal implementation. Look
- *       into using some sort of tree
  * TODO: The table should be dynamically increased when necessary
  *       This is just a quick and dirty implementation 
  * TODO: Probably need to clean up the table when app closes
  *       (also store PID and remove all handles with PID of terminating app)
+ * TODO: a linear list might not be the optimal implementation. Look
+ *       into using some sort of tree (not important)
  * 
  * Project Odin Software License can be found in LICENSE.TXT
  *

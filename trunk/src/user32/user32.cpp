@@ -1,4 +1,4 @@
-/* $Id: user32.cpp,v 1.122 2002-02-18 22:07:00 phaller Exp $ */
+/* $Id: user32.cpp,v 1.123 2002-08-09 11:19:56 sandervl Exp $ */
 
 /*
  * Win32 misc user32 API functions for OS/2
@@ -619,6 +619,8 @@ int WIN32API GetSystemMetrics(int nIndex)
       case SPI_SETSCREENSAVEACTIVE:
       case SPI_SETSCREENSAVETIMEOUT:
 */
+static int  dwScreenSaveTimeout = 180;
+static BOOL fScreenSaveActive   = FALSE;
 //******************************************************************************
 BOOL WIN32API SystemParametersInfoA(UINT uiAction, UINT uiParam, PVOID pvParam, UINT fWinIni)
 {
@@ -700,6 +702,30 @@ BOOL WIN32API SystemParametersInfoA(UINT uiAction, UINT uiParam, PVOID pvParam, 
 
     case SPI_SCREENSAVERRUNNING:
         *(BOOL *)pvParam = FALSE;
+        break;
+
+    case SPI_GETSCREENSAVETIMEOUT:
+        if(pvParam) {
+            *(DWORD *)pvParam = dwScreenSaveTimeout;
+        }
+        break;
+
+    case SPI_SETSCREENSAVETIMEOUT:
+        if(pvParam) {
+            dwScreenSaveTimeout = *(DWORD *)pvParam;
+        }
+        break;
+
+    case SPI_GETSCREENSAVEACTIVE:
+        if(pvParam) {
+            *(BOOL *)pvParam = fScreenSaveActive;
+        }
+        break;
+
+    case SPI_SETSCREENSAVEACTIVE:
+        if(pvParam) {
+            fScreenSaveActive = *(BOOL *)pvParam;
+        }
         break;
 
     case SPI_GETDRAGFULLWINDOWS:
@@ -2221,9 +2247,3 @@ DWORD WIN32API SetLogonNotifyWindow(HWINSTA hwinsta,HWND hwnd)
 }
 
 
-DWORD WIN32API GetGUIThreadInfo(DWORD arg1, DWORD arg2)
-{
-  dprintf(("USER32: GetGUIThreadInfo %x %x - empty stub!!", arg1, arg2));
-
-  return 0;
-}
