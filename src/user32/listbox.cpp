@@ -1,10 +1,11 @@
-/* $Id: listbox.cpp,v 1.19 2000-02-16 14:34:20 sandervl Exp $ */
+/* $Id: listbox.cpp,v 1.20 2000-02-21 17:25:27 cbratschi Exp $ */
 /*
  * Listbox controls
  *
  * Copyright 1996 Alexandre Julliard
  * Copyright 1999 Christoph Bratschi (ported from WINE)
  *
+ * Corel version: 20000212
  * WINE version: 991212
  */
 
@@ -17,7 +18,7 @@
 #include "combo.h"
 #include <misc.h>
 
-#define DBG_LOCALLOG	DBG_listbox
+#define DBG_LOCALLOG    DBG_listbox
 #include "dbglocal.h"
 
 /* Unimplemented yet:
@@ -79,6 +80,7 @@ typedef struct
     INT        *tabs;           /* Array of tabs */
     BOOL        caret_on;       /* Is caret on? */
     BOOL        captured;       /* Is mouse captured? */
+    BOOL        in_focus;
     HFONT       font;           /* Current font */
     LCID          locale;         /* Current locale for string comparisons */
     LPHEADCOMBO   lphc;           /* ComboLBox */
@@ -170,7 +172,13 @@ static void LISTBOX_UpdateScroll( HWND hwnd, LB_DESCR *descr )
 {
     SCROLLINFO info;
 
-    if (!(descr->style & WS_VSCROLL)) return;
+    /* Check the listbox scroll bar flags individually before we call
+       SetScrollInfo otherwise when the listbox style is WS_HSCROLL and
+       no WS_VSCROLL, we end up with an uninitialized, visible horizontal
+       scroll bar when we do not need one.
+              if (!(descr->style & WS_VSCROLL)) return;
+          */
+
     /*   It is important that we check descr->style, and not wnd->dwStyle,
        for WS_VSCROLL, as the former is exactly the one passed in
        argument to CreateWindow.
@@ -192,10 +200,12 @@ static void LISTBOX_UpdateScroll( HWND hwnd, LB_DESCR *descr )
         info.fMask = SIF_RANGE | SIF_POS | SIF_PAGE;
         if (descr->style & LBS_DISABLENOSCROLL)
             info.fMask |= SIF_DISABLENOSCROLL;
-        SetScrollInfo( hwnd, SB_HORZ, &info, TRUE );
+        if (descr->style & WS_HSCROLL)
+          SetScrollInfo( hwnd, SB_HORZ, &info, TRUE );
         info.nMax = 0;
         info.fMask = SIF_RANGE;
-        SetScrollInfo( hwnd, SB_VERT, &info, TRUE );
+        if (descr->style & WS_VSCROLL)
+          SetScrollInfo( hwnd, SB_VERT, &info, TRUE );
     }
     else
     {
@@ -206,8 +216,8 @@ static void LISTBOX_UpdateScroll( HWND hwnd, LB_DESCR *descr )
         info.fMask = SIF_RANGE | SIF_POS | SIF_PAGE;
         if (descr->style & LBS_DISABLENOSCROLL)
             info.fMask |= SIF_DISABLENOSCROLL;
-
-        SetScrollInfo( hwnd, SB_VERT, &info, TRUE );
+        if (descr->style & WS_VSCROLL)
+          SetScrollInfo( hwnd, SB_VERT, &info, TRUE );
 
         if (descr->horz_extent)
         {
@@ -218,7 +228,8 @@ static void LISTBOX_UpdateScroll( HWND hwnd, LB_DESCR *descr )
             info.fMask = SIF_RANGE | SIF_POS | SIF_PAGE;
             if (descr->style & LBS_DISABLENOSCROLL)
                 info.fMask |= SIF_DISABLENOSCROLL;
-            SetScrollInfo( hwnd, SB_HORZ, &info, TRUE );
+            if (descr->style & WS_HSCROLL)
+              SetScrollInfo( hwnd, SB_HORZ, &info, TRUE );
         }
     }
 }
@@ -312,9 +323,9 @@ static void LISTBOX_UpdateSize( HWND hwnd, LB_DESCR *descr )
     RECT rect, rectWindow;
 
     GetWindowRect( hwnd, &rectWindow );
-    OffsetRect(&rectWindow, -rectWindow.left, -rectWindow.top);
     GetClientRect( hwnd, &rect );
 
+    //CB: todo: doesn't works in ShellAbout dialog
     descr->width  = rect.right - rect.left;
     descr->height = rect.bottom - rect.top;
     if (!(descr->style & LBS_NOINTEGRALHEIGHT) && !IS_OWNERDRAW(descr))
@@ -477,7 +488,7 @@ static void LISTBOX_PaintItem( HWND hwnd, LB_DESCR *descr, HDC hdc,
         if (item && item->selected) dis.itemState |= ODS_SELECTED;
         if ((descr->focus_item == index) &&
             (descr->caret_on) &&
-            (GetFocus() == hwnd)) dis.itemState |= ODS_FOCUS;
+            (descr->in_focus)) dis.itemState |= ODS_FOCUS;
         if (dwStyle & WS_DISABLED) dis.itemState |= ODS_DISABLED;
         dis.itemData     = item ? item->data : 0;
         dis.rcItem       = *rect;
@@ -530,7 +541,7 @@ static void LISTBOX_PaintItem( HWND hwnd, LB_DESCR *descr, HDC hdc,
         }
         if ((descr->focus_item == index) &&
             (descr->caret_on) &&
-            (GetFocus() == hwnd)) DrawFocusRect( hdc, rect );
+            (descr->in_focus)) DrawFocusRect( hdc, rect );
     }
 }
 
@@ -876,7 +887,7 @@ static LRESULT LISTBOX_Paint( HWND hwnd, LB_DESCR *descr, HDC hdc )
         SetTextColor( hdc, GetSysColor( COLOR_GRAYTEXT ) );
 
     if (!descr->nb_items && (descr->focus_item != -1) && descr->caret_on &&
-        (GetFocus() == hwnd))
+        (descr->in_focus))
     {
         /* Special case for empty listbox: paint focus rect */
         rect.bottom = rect.top + descr->item_height;
@@ -1069,7 +1080,6 @@ static LRESULT LISTBOX_SetHorizontalExtent( HWND hwnd, LB_DESCR *descr,
  */
 static LRESULT LISTBOX_SetColumnWidth( HWND hwnd, LB_DESCR *descr, UINT width)
 {
-    width += 2;  /* For left and right margin */
     if (width == descr->column_width) return LB_OKAY;
     //TRACE("[%04x]: new column width = %d\n",
     //             wnd->hwndSelf, width );
@@ -1201,11 +1211,11 @@ static LRESULT LISTBOX_SetCaretIndex( HWND hwnd, LB_DESCR *descr, INT index,
     if ((index < 0) || (index >= descr->nb_items)) return LB_ERR;
     if (index == oldfocus) return LB_OKAY;
     descr->focus_item = index;
-    if ((oldfocus != -1) && descr->caret_on && (GetFocus() == hwnd))
+    if ((oldfocus != -1) && descr->caret_on && (descr->in_focus))
         LISTBOX_RepaintItem( hwnd, descr, oldfocus, ODA_FOCUS );
 
     LISTBOX_MakeItemVisible( hwnd, descr, index, fully_visible );
-    if (descr->caret_on && (GetFocus() == hwnd))
+    if (descr->caret_on && (descr->in_focus))
         LISTBOX_RepaintItem( hwnd, descr, index, ODA_FOCUS );
 
     return LB_OKAY;
@@ -1233,7 +1243,7 @@ static LRESULT LISTBOX_SetSelection( HWND hwnd, LB_DESCR *descr, INT index,
         if (oldsel != -1) descr->items[oldsel].selected = FALSE;
         if (index != -1) descr->items[index].selected = TRUE;
         descr->selected_item = index;
-        if (oldsel != -1) LISTBOX_RepaintItem( hwnd, descr, oldsel, 0);
+        if (oldsel != -1) LISTBOX_RepaintItem( hwnd, descr, oldsel, ODA_SELECT);
         if (index != -1) LISTBOX_RepaintItem( hwnd, descr, index, ODA_SELECT );
         if (send_notify && descr->nb_items) SEND_NOTIFICATION( hwnd, descr,
                                (index != -1) ? LBN_SELCHANGE : LBN_SELCANCEL );
@@ -1438,6 +1448,10 @@ static LRESULT LISTBOX_RemoveItem( HWND hwnd, LB_DESCR *descr, INT index )
 
     if (index == -1) index = descr->nb_items - 1;
     else if ((index < 0) || (index >= descr->nb_items)) return LB_ERR;
+
+    /* We need to Invalidate the original rect intead of the updated one. */
+    LISTBOX_InvalidateItems( hwnd, descr, index );
+
     LISTBOX_DeleteItem( hwnd, descr, index );
 
     /* Remove the item */
@@ -1478,7 +1492,7 @@ static LRESULT LISTBOX_RemoveItem( HWND hwnd, LB_DESCR *descr, INT index )
             descr->selected_item--;
       }
     }
-    LISTBOX_InvalidateItems( hwnd, descr, index );
+
     if (descr->focus_item >= descr->nb_items)
     {
           descr->focus_item = descr->nb_items - 1;
@@ -1731,6 +1745,23 @@ static LRESULT LISTBOX_HandleHScroll( HWND hwnd, LB_DESCR *descr,
     return 0;
 }
 
+static LRESULT LISTBOX_HandleMouseWheel(HWND hwnd, LB_DESCR *descr,WPARAM wParam, LPARAM lParam )
+{
+    short gcWheelDelta = 0;
+    UINT pulScrollLines = 3;
+
+    SystemParametersInfoW(SPI_GETWHEELSCROLLLINES,0, &pulScrollLines, 0);
+
+    gcWheelDelta -= (short) HIWORD(wParam);
+
+    if (abs(gcWheelDelta) >= WHEEL_DELTA && pulScrollLines)
+    {
+        int cLineScroll = (int) min((UINT) descr->page_size, pulScrollLines);
+        cLineScroll *= (gcWheelDelta / WHEEL_DELTA);
+        LISTBOX_SetTopItem( hwnd, descr, descr->top_item + cLineScroll, TRUE );
+    }
+    return 0;
+}
 
 /***********************************************************************
  *           LISTBOX_HandleLButtonDown
@@ -1741,7 +1772,7 @@ static LRESULT LISTBOX_HandleLButtonDown( HWND hwnd, LB_DESCR *descr,
     INT index = LISTBOX_GetItemFromPoint( hwnd, descr, x, y );
     //TRACE("[%04x]: lbuttondown %d,%d item %d\n",
     //             wnd->hwndSelf, x, y, index );
-    if (!descr->caret_on && (GetFocus() == hwnd)) return 0;
+    if (!descr->caret_on && (descr->in_focus)) return 0;
     if (index != -1)
     {
         if (descr->style & LBS_EXTENDEDSEL)
@@ -1766,9 +1797,12 @@ static LRESULT LISTBOX_HandleLButtonDown( HWND hwnd, LB_DESCR *descr,
         }
     }
 
-    if( !descr->lphc ) SetFocus( hwnd );
-    else SetFocus( (descr->lphc->hWndEdit) ? descr->lphc->hWndEdit
+    if (!descr->in_focus)
+    {
+      if( !descr->lphc ) SetFocus( hwnd );
+      else SetFocus( (descr->lphc->hWndEdit) ? descr->lphc->hWndEdit
                                              : descr->lphc->hwndself ) ;
+    }
 
     descr->captured = TRUE;
     SetCapture( hwnd );
@@ -2189,6 +2223,7 @@ static BOOL LISTBOX_Create( HWND hwnd, LPHEADCOMBO lphc )
     descr->nb_tabs       = 0;
     descr->tabs          = NULL;
     descr->caret_on      = TRUE;
+    descr->in_focus      = FALSE;
     descr->captured      = FALSE;
     descr->font          = 0;
     descr->locale        = 0;  /* FIXME */
@@ -2481,7 +2516,7 @@ LRESULT WINAPI ListBoxWndProc( HWND hwnd, UINT msg,
         if (descr->caret_on)
             return LB_OKAY;
         descr->caret_on = TRUE;
-        if ((descr->focus_item != -1) && (GetFocus() == hwnd))
+        if ((descr->focus_item != -1) && (descr->in_focus))
             LISTBOX_RepaintItem( hwnd, descr, descr->focus_item, ODA_FOCUS );
         return LB_OKAY;
 
@@ -2489,7 +2524,7 @@ LRESULT WINAPI ListBoxWndProc( HWND hwnd, UINT msg,
         if (!descr->caret_on)
             return LB_OKAY;
         descr->caret_on = FALSE;
-        if ((descr->focus_item != -1) && (GetFocus() == hwnd))
+        if ((descr->focus_item != -1) && (descr->in_focus))
             LISTBOX_RepaintItem( hwnd, descr, descr->focus_item, ODA_FOCUS );
         return LB_OKAY;
 
@@ -2526,12 +2561,14 @@ LRESULT WINAPI ListBoxWndProc( HWND hwnd, UINT msg,
         if (lParam) InvalidateRect( hwnd, 0, TRUE );
         return 0;
     case WM_SETFOCUS:
+        descr->in_focus = TRUE;
         descr->caret_on = TRUE;
         if (descr->focus_item != -1)
             LISTBOX_RepaintItem( hwnd, descr, descr->focus_item, ODA_FOCUS );
         SEND_NOTIFICATION( hwnd, descr, LBN_SETFOCUS );
         return 0;
     case WM_KILLFOCUS:
+        descr->in_focus = FALSE;
         if ((descr->focus_item != -1) && descr->caret_on)
             LISTBOX_RepaintItem( hwnd, descr, descr->focus_item, ODA_FOCUS );
         SEND_NOTIFICATION( hwnd, descr, LBN_KILLFOCUS );
@@ -2540,6 +2577,12 @@ LRESULT WINAPI ListBoxWndProc( HWND hwnd, UINT msg,
         return LISTBOX_HandleHScroll( hwnd, descr, wParam, lParam );
     case WM_VSCROLL:
         return LISTBOX_HandleVScroll( hwnd, descr, wParam, lParam );
+    case WM_MOUSEACTIVATE:
+        return MA_NOACTIVATE;
+    case WM_MOUSEWHEEL:
+        if (wParam & (MK_SHIFT | MK_CONTROL))
+            return DefWindowProcA( hwnd, msg, wParam, lParam );
+        return LISTBOX_HandleMouseWheel( hwnd, descr, wParam, lParam );
     case WM_LBUTTONDOWN:
         return LISTBOX_HandleLButtonDown( hwnd, descr, wParam,
                                           (INT16)LOWORD(lParam),
@@ -2648,7 +2691,7 @@ LRESULT WINAPI ComboLBWndProc( HWND hwnd, UINT msg,
 #undef  lpcs
                  return LISTBOX_Create( hwnd, lphc );
             case WM_MOUSEMOVE:
-                 if (CB_GETTYPE(lphc) != CBS_SIMPLE)
+                 if (lphc && (CB_GETTYPE(lphc) != CBS_SIMPLE))
                  {
                    POINT   mousePos;
                    BOOL    captured;
@@ -2689,6 +2732,8 @@ LRESULT WINAPI ComboLBWndProc( HWND hwnd, UINT msg,
                    return ListBoxWndProc( hwnd, msg, wParam, lParam );
                  }
             case WM_LBUTTONUP:
+            if (lphc)
+            {
                  POINT mousePos;
                  RECT  clientRect;
 
@@ -2717,6 +2762,7 @@ LRESULT WINAPI ComboLBWndProc( HWND hwnd, UINT msg,
                                       FALSE );
                  }
                  return LISTBOX_HandleLButtonUp( hwnd, descr );
+            }
             case WM_LBUTTONDOWN:
                  return LISTBOX_HandleLButtonDownCombo( hwnd, descr, wParam,
                          (INT16)LOWORD(lParam), (INT16)HIWORD(lParam));
@@ -2725,7 +2771,7 @@ LRESULT WINAPI ComboLBWndProc( HWND hwnd, UINT msg,
             case WM_NCACTIVATE:
                  return FALSE;
             case WM_KEYDOWN:
-                 if( CB_GETTYPE(lphc) != CBS_SIMPLE )
+                 if(lphc && (CB_GETTYPE(lphc) != CBS_SIMPLE))
                  {
                      /* for some reason(?) Windows makes it possible to
                       * show/hide ComboLBox by sending it WM_KEYDOWNs */
@@ -2744,7 +2790,7 @@ LRESULT WINAPI ComboLBWndProc( HWND hwnd, UINT msg,
                  lRet =(lRet == LB_ERR) ? lRet : descr->selected_item;
                  return lRet;
             case WM_NCDESTROY:
-                 if( CB_GETTYPE(lphc) != CBS_SIMPLE )
+                 if(lphc && (CB_GETTYPE(lphc) != CBS_SIMPLE))
                      lphc->hWndLBox = 0;
                  /* fall through */
 

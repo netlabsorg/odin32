@@ -1,4 +1,4 @@
-/* $Id: static.cpp,v 1.17 2000-02-16 14:34:34 sandervl Exp $ */
+/* $Id: static.cpp,v 1.18 2000-02-21 17:25:29 cbratschi Exp $ */
 /*
  * Static control
  *
@@ -6,6 +6,7 @@
  *
  * Copyright  David W. Metcalfe, 1993
  *
+ * Corel version: 20000212
  * WINE version: 990923
  *
  * Status:  complete
@@ -18,7 +19,7 @@
 #include "controls.h"
 #include "static.h"
 
-#define DBG_LOCALLOG	DBG_static
+#define DBG_LOCALLOG    DBG_static
 #include "dbglocal.h"
 
 //Prototypes
@@ -717,22 +718,54 @@ static void STATIC_PaintBitmapfn(HWND hwnd, HDC hdc )
                              hdc, hwnd );
     FillRect( hdc, &rc, hbrush );
 
-    if (infoPtr->hIcon) {
+    if (infoPtr->hIcon)
+    {
         BITMAP bm;
-        SIZE sz;
 
-        if(GetObjectType(infoPtr->hIcon) != OBJ_BITMAP)
-            return;
+        if(GetObjectType(infoPtr->hIcon) != OBJ_BITMAP) return;
         if (!(hMemDC = CreateCompatibleDC( hdc ))) return;
-        GetObjectA(infoPtr->hIcon, sizeof(bm), &bm);
-        GetBitmapDimensionEx(infoPtr->hIcon, &sz);
-        oldbitmap = SelectObject(hMemDC, infoPtr->hIcon);
-        if (dwStyle & SS_CENTERIMAGE)
-          BitBlt(hdc,sz.cx,sz.cy,bm.bmWidth,bm.bmHeight,hMemDC,(rc.right-bm.bmWidth)/2,(rc.bottom-bm.bmHeight)/2,SRCCOPY);
+
+	GetObjectA(infoPtr->hIcon, sizeof(bm), &bm);
+	oldbitmap = SelectObject(hMemDC, infoPtr->hIcon);
+
+	// Paint the image in center area
+	if(dwStyle & SS_CENTERIMAGE)
+	{
+            SIZE szbm;
+            SIZE szdc;
+
+            if(bm.bmWidth > rc.right - rc.left)
+            {
+                szdc.cx = 0;
+                szbm.cx = (bm.bmWidth - (rc.right - rc.left)) / 2;
+                bm.bmWidth = rc.right - rc.left;
+            }
+            else
+            {
+                szbm.cx = 0;
+                szdc.cx = ((rc.right - rc.left) - bm.bmWidth) / 2;
+            }
+            if(bm.bmHeight > rc.bottom - rc.top)
+            {
+                szdc.cy = 0;
+                szbm.cy = (bm.bmHeight - (rc.bottom - rc.top)) / 2;
+                bm.bmWidth = rc.bottom - rc.top;
+            }
+            else
+            {
+                szbm.cy = 0;
+                szdc.cy = ((rc.bottom - rc.top) - bm.bmHeight) / 2;
+            }
+            BitBlt(hdc, szdc.cx, szdc.cy, bm.bmWidth, bm.bmHeight, hMemDC,
+                szbm.cx, szbm.cy, SRCCOPY);
+        }
         else
-          BitBlt(hdc,sz.cx,sz.cy,bm.bmWidth,bm.bmHeight,hMemDC,0,0,SRCCOPY);
-        SelectObject(hMemDC, oldbitmap);
-        DeleteDC(hMemDC);
+        {
+            BitBlt(hdc, 0, 0, bm.bmWidth, bm.bmHeight, hMemDC, 0, 0, SRCCOPY);
+        }
+
+	SelectObject(hMemDC, oldbitmap);
+	DeleteDC(hMemDC);
     }
 }
 
@@ -763,7 +796,8 @@ static void STATIC_PaintOwnerDrawfn(HWND hwnd,HDC hdc)
   GetClientRect(hwnd,&di.rcItem);
   di.itemData   = 0;
 
-  SendMessageA(GetParent(hwnd),WM_DRAWITEM,GetWindowLongA(hwnd,GWL_ID),(LPARAM)&di);
+  SendMessageA(GetParent(hwnd),WM_CTLCOLORSTATIC,hdc,hwnd);
+  SendMessageA(GetParent(hwnd),WM_DRAWITEM,di.CtlID,(LPARAM)&di);
 }
 
 static void STATIC_PaintEtchedfn( HWND hwnd, HDC hdc )

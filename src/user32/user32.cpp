@@ -1,4 +1,4 @@
-/* $Id: user32.cpp,v 1.73 2000-02-16 14:34:39 sandervl Exp $ */
+/* $Id: user32.cpp,v 1.74 2000-02-21 17:25:29 cbratschi Exp $ */
 
 /*
  * Win32 misc user32 API functions for OS/2
@@ -41,7 +41,7 @@
 #include <win32wnd.h>
 #include <winuser.h>
 
-#define DBG_LOCALLOG	DBG_user32
+#define DBG_LOCALLOG    DBG_user32
 #include "dbglocal.h"
 
 //undocumented stuff
@@ -704,7 +704,8 @@ int WIN32API GetSystemMetrics(int nIndex)
         break;
 
     case SM_CYCAPTION:
-        rc = OSLibWinQuerySysValue(OSLIB_HWND_DESKTOP,SVOS_CYTITLEBAR);
+        rc = 19;
+        //rc = OSLibWinQuerySysValue(OSLIB_HWND_DESKTOP,SVOS_CYTITLEBAR);
         break;
 
     case SM_CXBORDER:

@@ -1,4 +1,4 @@
-/* $Id: win32wbase.h,v 1.83 2000-02-07 20:32:43 cbratschi Exp $ */
+/* $Id: win32wbase.h,v 1.84 2000-02-21 17:25:31 cbratschi Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -192,8 +192,8 @@ Win32BaseWindow *getParent();
          void   SetSysMenu(HMENU hSystemMenu)       { hSysMenu = hSystemMenu; };
          HMENU  GetSysMenu()                        { return hSysMenu; }
 
-         BOOL   SetIcon(HICON hIcon);
-         HICON  GetIcon()                           { return (HICON) iconResource; };
+         HICON  GetIcon()                           { return hIcon; }
+         HICON  GetSmallIcon()                      { return hIconSm; }
 
          void   SetWindowRegion(HRGN hRegion)       { hWindowRegion = hRegion; };
          HRGN   GetWindowRegion()                   { return hWindowRegion; };
@@ -356,7 +356,7 @@ protected:
         PVOID   pOldWndProc;
 
    Win32BaseWindow *owner;
-     Win32Resource *iconResource;
+        HICON   hIcon,hIconSm;
 
         char   *windowNameA;
         WCHAR  *windowNameW;
