@@ -32,6 +32,15 @@ DWORD SYSTEM OSLibDosDevIOCtl( DWORD hFile, DWORD dwCat, DWORD dwFunc,
                                PVOID pParm, DWORD dwParmMaxLen, DWORD *pdwParmLen,
                                PVOID pData, DWORD dwDataMaxLen, DWORD *pdwDataLen);
 
+static BOOL fDisableCDIo = FALSE;
+
+//----------------------------------------------------------------------//
+//	Open drive							//
+//----------------------------------------------------------------------//
+void WIN32API DisableCDIo()
+{
+    fDisableCDIo = TRUE;
+}
 
 //----------------------------------------------------------------------//
 //	Initialize CD/DVD drive access					//
@@ -42,6 +51,10 @@ BOOL OSLibCdIoInitialize(void)
     ULONG ulAction, ulFeatures;
     int	  fResult = 0;
     HFILE hDev;
+
+    if(fDisableCDIo) {
+        return FALSE;
+    }
 
     if( DosOpen("CD-ROM2$", &hDev, &ulAction, 0, FILE_NORMAL,
 	            OPEN_ACTION_OPEN_IF_EXISTS | OPEN_ACTION_FAIL_IF_NEW,
