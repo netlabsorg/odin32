@@ -1,9 +1,11 @@
-/* $Id: dplay.h,v 1.1 1999-05-24 20:19:11 ktk Exp $ */
-
 #ifndef __WINE_DPLAY_H
 #define __WINE_DPLAY_H
 
 #include "wine/obj_base.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif /* defined(__cplusplus) */
 
 #include "pshpack1.h"
 
@@ -128,12 +130,12 @@ typedef DWORD DPID, *LPDPID;
 typedef struct tagDPCAPS
 {
     DWORD dwSize;               /* Size of structure in bytes */
-    DWORD dwFlags;              
-    DWORD dwMaxBufferSize;      
+    DWORD dwFlags;
+    DWORD dwMaxBufferSize;
     DWORD dwMaxQueueSize;       /* Obsolete. */
     DWORD dwMaxPlayers;         /* Maximum players/groups (local + remote) */
     DWORD dwHundredBaud;        /* Bandwidth in 100 bits per second units;
-                                 * i.e. 24 is 2400, 96 is 9600, etc. 
+                                 * i.e. 24 is 2400, 96 is 9600, etc.
                                  */
     DWORD dwLatency;            /* Estimated latency; 0 = unknown */
     DWORD dwMaxLocalPlayers;    /* Maximum # of locally created players */
@@ -146,19 +148,19 @@ typedef struct tagDPCAPS
 
 typedef struct tagDPNAME
 {
-    DWORD   dwSize;             
+    DWORD   dwSize;
     DWORD   dwFlags;            /* Not used must be 0 */
 
     union /*playerShortName */      /* Player's Handle? */
-    {                           
-        LPWSTR  lpszShortName;  
-        LPSTR   lpszShortNameA; 
+    {
+        LPWSTR  lpszShortName;
+        LPSTR   lpszShortNameA;
     }psn;
 
     union /*playerLongName */       /* Player's formal/real name */
-    {                         
-        LPWSTR  lpszLongName;  
-        LPSTR   lpszLongNameA;  
+    {
+        LPWSTR  lpszLongName;
+        LPSTR   lpszLongNameA;
     }pln;
 
 } DPNAME, *LPDPNAME;
@@ -190,31 +192,31 @@ typedef struct tagDPSESSIONDESC
 
 typedef struct tagDPSESSIONDESC2
 {
-    DWORD   dwSize;             
-    DWORD   dwFlags;           
-    GUID    guidInstance;      
+    DWORD   dwSize;
+    DWORD   dwFlags;
+    GUID    guidInstance;
     GUID    guidApplication;   /* GUID of the DP application, GUID_NULL if
                                 * all applications! */
-                               
-    DWORD   dwMaxPlayers;      
+
+    DWORD   dwMaxPlayers;
     DWORD   dwCurrentPlayers;   /* (read only value) */
 
     union  /* Session name */
-    {                             
-        LPWSTR  lpszSessionName;  
-        LPSTR   lpszSessionNameA; 
+    {
+        LPWSTR  lpszSessionName;
+        LPSTR   lpszSessionNameA;
     }sess;
 
     union  /* Optional password */
-    {                           
-        LPWSTR  lpszPassword;   
-        LPSTR   lpszPasswordA;  
+    {
+        LPWSTR  lpszPassword;
+        LPSTR   lpszPasswordA;
     }pass;
 
-    DWORD   dwReserved1;       
+    DWORD   dwReserved1;
     DWORD   dwReserved2;
 
-    DWORD   dwUser1;        /* For use by the application */  
+    DWORD   dwUser1;        /* For use by the application */
     DWORD   dwUser2;
     DWORD   dwUser3;
     DWORD   dwUser4;
@@ -239,11 +241,11 @@ typedef const DPSESSIONDESC2* LPCDPSESSIONDESC2;
 
 typedef struct tagDPLCONNECTION
 {
-    DWORD               dwSize;          
-    DWORD               dwFlags;          
-    LPDPSESSIONDESC2    lpSessionDesc;  /* Ptr to session desc to use for connect */  
+    DWORD               dwSize;
+    DWORD               dwFlags;
+    LPDPSESSIONDESC2    lpSessionDesc;  /* Ptr to session desc to use for connect */
     LPDPNAME            lpPlayerName;   /* Ptr to player name structure */
-    GUID                guidSP;         /* GUID of Service Provider to use */ 
+    GUID                guidSP;         /* GUID of Service Provider to use */
     LPVOID              lpAddress;      /* Ptr to Address of Service Provider to use */
     DWORD               dwAddressSize;  /* Size of address data */
 } DPLCONNECTION, *LPDPLCONNECTION;
@@ -319,7 +321,7 @@ typedef BOOL (CALLBACK* LPDPENUMDPCALLBACKA)(
     LPGUID      lpguidSP,
     LPSTR       lpSPName,       /* ptr to str w/ driver description */
     DWORD       dwMajorVersion, /* Major # of driver spec in lpguidSP */
-    DWORD       dwMinorVersion, /* Minor # of driver spec in lpguidSP */ 
+    DWORD       dwMinorVersion, /* Minor # of driver spec in lpguidSP */
     LPVOID      lpContext);     /* User given */
 
 typedef const GUID   *LPCGUID;
@@ -364,6 +366,7 @@ typedef BOOL (CALLBACK* LPDPENUMSESSIONSCALLBACK2)(
     DWORD               dwFlags,
     LPVOID              lpContext );
 
+#include "poppack.h"
 
 /*****************************************************************************
  * IDirectPlay interface
@@ -372,26 +375,26 @@ typedef BOOL (CALLBACK* LPDPENUMSESSIONSCALLBACK2)(
 #define IDirectPlay_METHODS \
     ICOM_METHOD2(HRESULT,AddPlayerToGroup,      DPID,idGroup, DPID,idPlayer) \
     ICOM_METHOD (HRESULT,Close) \
-    ICOM_METHOD4(HRESULT,CreatePlayer,          LPDPID,lpidPlayer, LPSTR,lpPlayerName, LPSTR,, LPHANDLE,) \
-    ICOM_METHOD3(HRESULT,CreateGroup,           LPDPID,lpidGroup, LPSTR,lpGroupName, LPSTR,) \
+    ICOM_METHOD4(HRESULT,CreatePlayer,          LPDPID,lpidPlayer, LPSTR,lpPlayerName, LPSTR,arg3, LPHANDLE,arg4) \
+    ICOM_METHOD3(HRESULT,CreateGroup,           LPDPID,lpidGroup, LPSTR,lpGroupName, LPSTR,arg3) \
     ICOM_METHOD2(HRESULT,DeletePlayerFromGroup, DPID,idGroup, DPID,idPlayer) \
     ICOM_METHOD1(HRESULT,DestroyPlayer,         DPID,idPlayer) \
     ICOM_METHOD1(HRESULT,DestroyGroup,          DPID,idGroup) \
-    ICOM_METHOD1(HRESULT,EnableNewPlayers,      BOOL,) \
+    ICOM_METHOD1(HRESULT,EnableNewPlayers,      BOOL,arg1) \
     ICOM_METHOD4(HRESULT,EnumGroupPlayers,      DPID,idGroup, LPDPENUMPLAYERSCALLBACK,lpEnumPlayersCallback, LPVOID,lpContext, DWORD,dwFlags) \
-    ICOM_METHOD4(HRESULT,EnumGroups,            DWORD,, LPDPENUMPLAYERSCALLBACK,lpEnumPlayersCallback, LPVOID,lpContext, DWORD,dwFlags) \
-    ICOM_METHOD4(HRESULT,EnumPlayers,           DWORD,, LPDPENUMPLAYERSCALLBACK,lpEnumPlayersCallback, LPVOID,lpContext, DWORD,dwFlags) \
+    ICOM_METHOD4(HRESULT,EnumGroups,            DWORD,arg1, LPDPENUMPLAYERSCALLBACK,lpEnumPlayersCallback, LPVOID,lpContext, DWORD,dwFlags) \
+    ICOM_METHOD4(HRESULT,EnumPlayers,           DWORD,arg1, LPDPENUMPLAYERSCALLBACK,lpEnumPlayersCallback, LPVOID,lpContext, DWORD,dwFlags) \
     ICOM_METHOD5(HRESULT,EnumSessions,          LPDPSESSIONDESC,lpsd, DWORD,dwTimeout, LPDPENUMSESSIONSCALLBACK,lpEnumSessionsCallback, LPVOID,lpContext, DWORD,dwFlags) \
     ICOM_METHOD1(HRESULT,GetCaps,               LPDPCAPS,lpDPCaps) \
     ICOM_METHOD2(HRESULT,GetMessageCount,       DPID,idPlayer, LPDWORD,lpdwCount) \
     ICOM_METHOD2(HRESULT,GetPlayerCaps,         DPID,idPlayer, LPDPCAPS,lpPlayerCaps) \
-    ICOM_METHOD5(HRESULT,GetPlayerName,         DPID,idPlayer, LPSTR,, LPDWORD,, LPSTR,, LPDWORD,) \
+    ICOM_METHOD5(HRESULT,GetPlayerName,         DPID,idPlayer, LPSTR,arg2, LPDWORD,arg3, LPSTR,arg4, LPDWORD,arg5) \
     ICOM_METHOD1(HRESULT,Initialize,            LPGUID,lpGUID) \
     ICOM_METHOD1(HRESULT,Open,                  LPDPSESSIONDESC,lpsd) \
     ICOM_METHOD5(HRESULT,Receive,               LPDPID,lpidFrom, LPDPID,lpidTo, DWORD,dwFlags, LPVOID,lpData, LPDWORD,lpdwDataSize) \
-    ICOM_METHOD1(HRESULT,SaveSession,           LPSTR,) \
+    ICOM_METHOD1(HRESULT,SaveSession,           LPSTR,arg1) \
     ICOM_METHOD5(HRESULT,Send,                  DPID,idFrom, DPID,idTo, DWORD,dwFlags, LPVOID,lpData, DWORD,dwDataSize) \
-    ICOM_METHOD3(HRESULT,SetPlayerName,         DPID,idPlayer, LPSTR,lpPlayerName, LPSTR,)
+    ICOM_METHOD3(HRESULT,SetPlayerName,         DPID,idPlayer, LPSTR,lpPlayerName, LPSTR,arg3)
 #define IDirectPlay_IMETHODS \
     IUnknown_IMETHODS \
     IDirectPlay_METHODS
@@ -586,7 +589,8 @@ ICOM_DEFINE(IDirectPlay3,IDirectPlay2)
 #define IDirectPlay3_GetPlayerFlags(p,a,b)                 ICOM_CALL2(GetPlayerFlags,p,a,b)
 #endif
 
-
-#include "poppack.h"
+#ifdef __cplusplus
+} /* extern "C" */
+#endif /* defined(__cplusplus) */
 
 #endif /* __WINE_DPLAY_H */

@@ -1,12 +1,13 @@
-/* $Id: dplobby.h,v 1.1 1999-05-24 20:19:11 ktk Exp $ */
-
 #ifndef __WINE_DPLOBBY_H
 #define __WINE_DPLOBBY_H
 
 #include "dplay.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif /* defined(__cplusplus) */
 
-#pragma pack(1)
+#include "pshpack1.h"
 
 /*****************************************************************************
  * Predeclare the interfaces
@@ -32,12 +33,12 @@ typedef struct IDirectPlayLobby2 IDirectPlayLobby2A, *LPDIRECTPLAYLOBBY2A;
 
 typedef struct tagDPLAPPINFO
 {
-    DWORD       dwSize;            
-    GUID        guidApplication;   
+    DWORD       dwSize;
+    GUID        guidApplication;
 
     union appName
     {
-        LPSTR   lpszAppNameA;      
+        LPSTR   lpszAppNameA;
         LPWSTR  lpszAppName;
     };
 
@@ -74,23 +75,24 @@ typedef BOOL (CALLBACK* LPDPLENUMLOCALAPPLICATIONSCALLBACK)(
     LPVOID          lpContext,
     DWORD           dwFlags );
 
+#include "poppack.h"
 
 /*****************************************************************************
  * IDirectPlayLobby interface
  */
 #define ICOM_INTERFACE IDirectPlayLobby
 #define IDirectPlayLobby_METHODS \
-    ICOM_METHOD3(HRESULT,Connect,               DWORD,, LPDIRECTPLAY2*,, IUnknown*,) \
-    ICOM_METHOD6(HRESULT,CreateAddress,         REFGUID,, REFGUID,, LPCVOID,, DWORD,, LPVOID,, LPDWORD,) \
-    ICOM_METHOD4(HRESULT,EnumAddress,           LPDPENUMADDRESSCALLBACK,, LPCVOID,, DWORD,, LPVOID,) \
-    ICOM_METHOD4(HRESULT,EnumAddressTypes,      LPDPLENUMADDRESSTYPESCALLBACK,, REFGUID,, LPVOID,, DWORD,) \
-    ICOM_METHOD3(HRESULT,EnumLocalApplications, LPDPLENUMLOCALAPPLICATIONSCALLBACK,, LPVOID,, DWORD,) \
-    ICOM_METHOD3(HRESULT,GetConnectionSettings, DWORD,, LPVOID,, LPDWORD,) \
-    ICOM_METHOD5(HRESULT,ReceiveLobbyMessage,   DWORD,, DWORD,, LPDWORD,, LPVOID,, LPDWORD,) \
-    ICOM_METHOD4(HRESULT,RunApplication,        DWORD,, LPDWORD,, LPDPLCONNECTION,, HANDLE,) \
-    ICOM_METHOD4(HRESULT,SendLobbyMessage,      DWORD,, DWORD,, LPVOID,, DWORD,) \
-    ICOM_METHOD3(HRESULT,SetConnectionSettings, DWORD,, DWORD,, LPDPLCONNECTION,) \
-    ICOM_METHOD3(HRESULT,SetLobbyMessageEvent,  DWORD,, DWORD,, HANDLE,)
+    ICOM_METHOD3(HRESULT,Connect,               DWORD,arg1, LPDIRECTPLAY2*,arg2, IUnknown*,arg3) \
+    ICOM_METHOD6(HRESULT,CreateAddress,         REFGUID,arg1, REFGUID,arg2, LPCVOID,arg3, DWORD,arg4, LPVOID,arg5, LPDWORD,arg6) \
+    ICOM_METHOD4(HRESULT,EnumAddress,           LPDPENUMADDRESSCALLBACK,arg1, LPCVOID,arg2, DWORD,arg3, LPVOID,arg4) \
+    ICOM_METHOD4(HRESULT,EnumAddressTypes,      LPDPLENUMADDRESSTYPESCALLBACK,arg1, REFGUID,arg2, LPVOID,arg3, DWORD,arg4) \
+    ICOM_METHOD3(HRESULT,EnumLocalApplications, LPDPLENUMLOCALAPPLICATIONSCALLBACK,arg1, LPVOID,arg2, DWORD,arg3) \
+    ICOM_METHOD3(HRESULT,GetConnectionSettings, DWORD,arg1, LPVOID,arg2, LPDWORD,arg3) \
+    ICOM_METHOD5(HRESULT,ReceiveLobbyMessage,   DWORD,arg1, DWORD,arg2, LPDWORD,arg3, LPVOID,arg4, LPDWORD,arg5) \
+    ICOM_METHOD4(HRESULT,RunApplication,        DWORD,arg1, LPDWORD,arg2, LPDPLCONNECTION,arg3, HANDLE,arg4) \
+    ICOM_METHOD4(HRESULT,SendLobbyMessage,      DWORD,arg1, DWORD,arg2, LPVOID,arg3, DWORD,arg4) \
+    ICOM_METHOD3(HRESULT,SetConnectionSettings, DWORD,arg1, DWORD,arg2, LPDPLCONNECTION,arg3) \
+    ICOM_METHOD3(HRESULT,SetLobbyMessageEvent,  DWORD,arg1, DWORD,arg2, HANDLE,arg3)
 #define IDirectPlayLobby_IMETHODS \
     IUnknown_IMETHODS \
     IDirectPlayLobby_METHODS
@@ -122,7 +124,7 @@ ICOM_DEFINE(IDirectPlayLobby,IUnknown)
  */
 #define ICOM_INTERFACE IDirectPlayLobby2
 #define IDirectPlayLobby2_METHODS \
-    ICOM_METHOD4(HRESULT,CreateCompoundAddress, LPCDPCOMPOUNDADDRESSELEMENT,, DWORD,, LPVOID,, LPDWORD,)
+    ICOM_METHOD4(HRESULT,CreateCompoundAddress, LPCDPCOMPOUNDADDRESSELEMENT,arg1, DWORD,arg2, LPVOID,arg3, LPDWORD,arg4)
 #define IDirectPlayLobby2_IMETHODS \
     IDirectPlayLobby_IMETHODS \
     IDirectPlayLobby2_METHODS
@@ -150,7 +152,8 @@ ICOM_DEFINE(IDirectPlayLobby2,IDirectPlayLobby)
 #define IDirectPlayLobby2_CreateCompoundAddress(p,a,b,c,d) ICOM_CALL4(CreateCompoundAddress,p,a,b,c,d)
 #endif
 
-#pragma pack(4)
-
+#ifdef __cplusplus
+} /* extern "C" */
+#endif /* defined(__cplusplus) */
 
 #endif /* __WINE_DPLOBBY_H */
