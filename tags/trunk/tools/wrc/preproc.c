@@ -321,9 +321,9 @@ FILE *open_include(const char *name, int search, char **newpath)
 		strcat(path, "/");
 		strcat(path, cpy);
 #ifdef __EMX__
-		fp = fopen(cpy, "rb");
+		fp = fopen(path, "rb");
 #else
-		fp = fopen(cpy, "rt");
+		fp = fopen(path, "rt");
 #endif
 		if(fp && (debuglevel & DEBUGLEVEL_PPMSG))
 			printf("Going to include <%s>\n", path);
