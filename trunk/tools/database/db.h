@@ -1,4 +1,4 @@
-/* $Id: db.h,v 1.2 1999-12-06 18:11:50 bird Exp $ */
+/* $Id: db.h,v 1.3 2000-02-11 18:35:54 bird Exp $ */
 /*
  * DB - contains all database routines
  *
@@ -14,6 +14,13 @@
 extern "C" {
 #endif
 
+
+/*******************************************************************************
+*   Defined Constants                                                          *
+*******************************************************************************/
+#define NBR_FUNCTIONS   20
+#define NBR_AUTHORS     20
+
 /*******************************************************************************
 *   Structures and Typedefs                                                    *
 *******************************************************************************/
@@ -26,7 +33,8 @@ extern "C" {
         /* function name and type */
         char *pszName;
         char *pszReturnType;
-        long  lRefCode;
+        long  cRefCodes;
+        long  alRefCode[NBR_FUNCTIONS];
 
         /* parameters */
         int   cParams;
@@ -35,8 +43,8 @@ extern "C" {
 
         /* authors */
         int   cAuthors;
-        char *apszAuthor[20];
-        long  alAuthorRefCode[20];
+        char *apszAuthor[NBR_AUTHORS];
+        long  alAuthorRefCode[NBR_AUTHORS];
 
         /* status */
         char *pszStatus;
@@ -47,8 +55,8 @@ extern "C" {
     typedef struct _FunctionFindBuffer
     {
         unsigned long cFns;
-        signed long   alRefCode[10];
-        signed long   alDllRefCode[10];
+        signed long   alRefCode[NBR_FUNCTIONS];
+        signed long   alDllRefCode[NBR_FUNCTIONS];
     } FNFINDBUF, *PFNFINDBUF;
 
     typedef long (_System DBCALLBACKFETCH)(const char*, const char *, void *);
@@ -58,17 +66,30 @@ extern "C" {
 *******************************************************************************/
     char *          _System dbGetLastErrorDesc(void);
 
-    BOOL            _System dbConnect(const char *pszHost, const char *pszUser, const char *pszPassword, const char *pszDatabase);
+    BOOL            _System dbConnect(const char *pszHost,
+                                      const char *pszUser,
+                                      const char *pszPassword,
+                                      const char *pszDatabase);
     BOOL            _System dbDisconnect();
+    signed short    _System dbGetDll(const char *pszDllName);
+    signed long     _System dbCountFunctionInDll(signed long ulDll);
+
     signed short    _System dbCheckInsertDll(const char *pszDll);
-    unsigned short  _System dbGet(const char *pszTable, const char *pszGetColumn,
-                                const char *pszMatch1, const char *pszMatchValue1);
-    BOOL            _System dbInsertUpdateFunction(unsigned short usDll, const char *pszFunction,
-                                unsigned long ulOrdinal, BOOL fIgnoreOrdinal);
-    BOOL            _System dbFindFunction(const char *pszFunctionName, PFNFINDBUF pFnFindBuf);
+    unsigned short  _System dbGet(const char *pszTable,
+                                  const char *pszGetColumn,
+                                  const char *pszMatch1,
+                                  const char *pszMatchValue1);
+    BOOL            _System dbInsertUpdateFunction(unsigned short usDll,
+                                                   const char *pszFunction,
+                                                   const char *pszIntFunction,
+                                                   unsigned long ulOrdinal,
+                                                   BOOL fIgnoreOrdinal);
+    BOOL            _System dbFindFunction(const char *pszFunctionName,
+                                           PFNFINDBUF pFnFindBuf);
     signed long     _System dbFindAuthor(const char *pszAuthor);
     signed long     _System dbGetFunctionState(signed long lRefCode);
-    unsigned long   _System dbUpdateFunction(PFNDESC pFnDesc, char *pszError);
+    unsigned long   _System dbUpdateFunction(PFNDESC pFnDesc,
+                                             char *pszError);
     unsigned long   _System dbCreateHistory(char *pszError);
     unsigned long   _System dbCheckIntegrity(char *pszError);
 
@@ -76,9 +97,15 @@ extern "C" {
     void *          _System dbExecuteQuery(const char *pszQuery);
     signed long     _System dbQueryResultRows(void *pres);
     BOOL            _System dbFreeResult(void *pres);
-    BOOL            _System dbFetch(void *pres, DBCALLBACKFETCH dbFetchCallBack, void *pvUser);
+    BOOL            _System dbFetch(void *pres,
+                                    DBCALLBACKFETCH dbFetchCallBack,
+                                    void *pvUser);
     signed long     _System dbDateToDaysAfterChrist(const char *pszDate);
-    BOOL            _System dbDaysAfterChristToDate(signed long ulDays, char *pszDate);
+    BOOL            _System dbDaysAfterChristToDate(signed long ulDays,
+                                                    char *pszDate);
+    /* StateUpd stuff */
+    BOOL            _System dbGetNotUpdatedFunction(signed long lDll,
+                                                    DBCALLBACKFETCH dbFetchCallBack);
 
 #ifdef __cplusplus
 }

@@ -1,4 +1,4 @@
-/* $Id: APIImport.h,v 1.1 1999-09-05 02:53:04 bird Exp $ */
+/* $Id: APIImport.h,v 1.2 2000-02-11 18:35:53 bird Exp $ */
 /*
  * APIImportPE - imports a DLL with functions into the Odin32 database. Header.
  *
@@ -12,7 +12,7 @@
 *   Defined Constants                                                         *
 ******************************************************************************/
 #define MAJOR_VER 0
-#define MINOR_VER 4
+#define MINOR_VER 5
 
 /******************************************************************************
 *   Structures and Typedefs                                                   *

@@ -1,9 +1,9 @@
-/* $Id: APIImport.cpp,v 1.1 1999-09-05 02:53:04 bird Exp $ */
+/* $Id: APIImport.cpp,v 1.2 2000-02-11 18:35:53 bird Exp $ */
 /*
  *
  * APIImport - imports a DLL or Dll-.def with functions into the Odin32 database.
  *
- * Copyright (c) 1999 knut st. osmundsen
+ * Copyright (c) 1999-2000 knut st. osmundsen
  *
  */
 
@@ -33,7 +33,8 @@ static FILE  *phLog = NULL;
 static void syntax(void);
 static void openLog(void);
 static void closeLog(void);
-static long processFile(const char *pszFilename, const POPTIONS pOptions);
+static long processFile(const char *pszFilename, const POPTIONS pOptions, long &cFunctions);
+static void demangle(const char *pszMangledName, char *pszDemangled);
 
 
 /**
@@ -53,6 +54,8 @@ int main(int argc, char **argv)
     char   *pszDatabase = "Odin32";
     char   *pszUser     = "root";
     char   *pszPasswd   = "";
+    long    cFunctions  = 0;
+
 
     /**************************************************************************
     * parse arguments.
@@ -126,7 +129,7 @@ int main(int argc, char **argv)
             /* try connect to db */
             if (dbConnect(pszHost, pszUser, pszPasswd, pszDatabase))
             {
-                l = processFile(argv[argi], &options);
+                l = processFile(argv[argi], &options, cFunctions);
                 lRc = ((lRc & 0xffff0000UL) | (l & 0xffff0000UL)) | ((lRc & 0x0000ffffUL) + l & 0x0000ffffUL);
                 dbDisconnect();
             }
@@ -140,6 +143,10 @@ int main(int argc, char **argv)
         }
         argi++;
     }
+
+    /* write function count */
+    if (phLog != NULL)
+        fprintf(phLog, "\n %d functions were imported!\n\n", cFunctions);
 
     /* close the log */
     closeLog();
@@ -224,8 +231,9 @@ static void closeLog(void)
  *            high word, flags (currently not flags are defined/used).
  * @param     pszFilename  Pointer to the filename of the file which is to be processed.
  * @param     pOptions     Pointer to the options-struct.
+ * @param     cFunctions   Function count which is to be updated when functions are imported.
  */
-static long processFile(const char *pszFilename, const POPTIONS pOptions)
+static long processFile(const char *pszFilename, const POPTIONS pOptions, long &cFunctions)
 {
     kFileFormatBase  *pFile;
     FILE             *phFile;
@@ -274,24 +282,25 @@ static long processFile(const char *pszFilename, const POPTIONS pOptions)
                         /* check if name or not */
                         if (!pFile->isDef() || export.ulOrdinal < ORD_START_INTERNAL_FUNCTIONS)
                         {
-                            if (export.achName[0] != '\0')
-                            {   /* name */
-                                int iName = strncmp(&export.achName[0], "_OS2", 4) != 0 ? 0 : 4;
-                                fprintf(phLog, "%s: %08ld %s\n", pszFilename, export.ulOrdinal, &export.achName[iName]);
-                                fOk = dbInsertUpdateFunction(sDll, &export.achName[iName], export.ulOrdinal,
-                                                             pOptions->fIgnoreOrdinals && export.ulOrdinal != 0xffffffffUL);
-                            }
-                            else
-                            {   /* ordinal only */
-                                char szFn[50];
+                            char szIntName[64];
+                            char szName[64];
 
-                                sprintf(&szFn[0], "Ordinal%04ld", export.ulOrdinal);
-                                fprintf(phLog, "%s: %08ld %s\n", pszFilename, export.ulOrdinal, &szFn[0]);
-                                if (export.ulOrdinal != 0xffffffffUL)
-                                    fOk = dbInsertUpdateFunction(sDll, &szFn[0], export.ulOrdinal, pOptions->fIgnoreOrdinals);
-                                else
-                                    fprintf(phLog, "%s: error - invalid ordinal value!\n", pszFilename);
-                            }
+                            demangle(export.achIntName, &szIntName[0]);
+                            if (export.achName == '\0')
+                                sprintf(&szName[0], "Ordinal%04ld", export.ulOrdinal);
+                            else
+                                strcpy(&szName[0], &export.achName[0]);
+
+                            fprintf(phLog, "%s: %08ld %-30s %s\n",
+                                    pszFilename, export.ulOrdinal, &szName[0], &szIntName[0]);
+
+                            fOk = dbInsertUpdateFunction(sDll,
+                                                         &szName[0],
+                                                         &szIntName[0],
+                                                         export.ulOrdinal,
+                                                         pOptions->fIgnoreOrdinals && export.ulOrdinal != 0xffffffffUL);
+                            if (fOk)
+                                cFunctions++;
                         }
 
                         if (!fOk)
@@ -327,5 +336,32 @@ static long processFile(const char *pszFilename, const POPTIONS pOptions)
     dbDisconnect();
 
     return lRc;
+}
+
+
+/**
+ * Demangles stdcall functions.
+ * @param       pszMangledName  Mangled name
+ * @param       pszDemangled    Pointer to buffer which will hold the demangled name upon return.
+ */
+static void demangle(const char *pszMangledName, char *pszDemangled)
+{
+    int iEnd;
+    /* check for @ */
+    iEnd = strlen(pszMangledName);
+    if (iEnd-- > 3 && *pszMangledName == '_')
+    {
+        while ((pszMangledName[iEnd] >= '0' && pszMangledName[iEnd] <= '9') && iEnd > 0)
+            iEnd--;
+        if (pszMangledName[iEnd] == '@')
+        {
+            *pszDemangled = '\0';
+            strncat(pszDemangled, pszMangledName+1, iEnd - 1);
+            return;
+        }
+    }
+
+    /* not stdcall */
+    strcpy(pszDemangled, pszMangledName);
 }
 
