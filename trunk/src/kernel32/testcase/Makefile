@@ -1,6 +1,6 @@
-# $Id: Makefile,v 1.1 2002-04-16 00:07:00 bird Exp $
+# $Id: Makefile,v 1.2 2002-06-26 07:11:03 sandervl Exp $
 #
-# GetDriveType.exe makefile.
+# Kernel32 Testcases Toplevel Makefile.
 #
 # Copyright (c) 2002 knut st. osmundsen (bird@anduin.net)
 #
@@ -18,12 +18,12 @@
 # Include Setup.
 #
 PATH_ROOT=..\..\..
-!include $(PATH_ROOT)\make\setup.mak
+!include $(PATH_ROOT)\$(BUILD_SETUP_MAK)
+
 
 #
 # Post Setup Config
 #
-TARGET_NAME = kernel32_testcase_empty
 TARGET_MODE = EMPTY
 
 
@@ -31,8 +31,9 @@ TARGET_MODE = EMPTY
 # Makefiles
 #
 POSTMAKEFILES = \
-    GetDriveType.mak
-
+    GetDriveType.mak \
+    ConsoleCtrlHandler.mak \
+    MultiByteToWideChar.mak \
 
 
 #
