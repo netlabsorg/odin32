@@ -1,4 +1,4 @@
-/* $Id: ccollection.cpp,v 1.7 2001-10-11 00:59:43 phaller Exp $ */
+/* $Id: ccollection.cpp,v 1.8 2001-11-23 18:07:37 phaller Exp $ */
 
 /*
  * Collection class:
@@ -559,7 +559,7 @@ void CLinearList::removeElement(PLINEARLISTENTRY pLLE)
 }
 
 
-int CLinearList::removeElement(void* pObject)
+int CLinearList::removeObject(void* pObject)
 {
     PLINEARLISTENTRY pLLE = findForward(pObject);
     if (pLLE == NULL)

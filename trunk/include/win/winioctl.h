@@ -466,7 +466,7 @@ typedef struct tagMID {
 /* End VWIN32 information */
 
 
-typedef LARGE_INTEGER PHYSICAL_ADDRESS;
+typedef LARGE_INTEGER PHYSICAL_ADDRESS, *PPHYSICAL_ADDRESS;
 
 //Parallel Port IOCTLs
 typedef void* PPARALLEL_TRY_ALLOCATE_ROUTINE;

@@ -1,4 +1,9 @@
-/* $Id: changelog,v 1.1850 2001-11-23 04:19:10 bird Exp $ */
+/* $Id: changelog,v 1.1851 2001-11-23 18:04:44 phaller Exp $ */
+
+ 2001-11-23: Patrick Haller <patrick.haller@innotek.de>
+    - KERNEL32: o minor work in parallel port support (ioctls)
+                o "Kernel Object Namespace" -> handlenames.cpp introduced
+                  (yet inactive)
 
  2001-11-23: knut st. osmundsen <kosmunds@csc.com>
     - Misc. Makefiles: o Corrected the descriptions (on request from Ye][ow).
