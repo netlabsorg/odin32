@@ -1,4 +1,9 @@
-/* $Id: changelog,v 1.1227 2001-01-20 18:05:32 sandervl Exp $ */
+/* $Id: changelog,v 1.1228 2001-01-20 18:25:58 bird Exp $ */
+
+ 2001-01-20: knut st. osmundsen <knut.stange.osmundsen@mynd.no>
+    - tools\dailybuild, include\versionos2.h:
+                o Fixed netlabs upload.
+                o Moved buildlevel info from versionos2.h to odinbuild.h.
 
  2001-01-20: Sander van Leeuwen <sandervl@xs4all.nl>
     - AVIFIL32: o Resynched with latest Wine code
@@ -18,7 +23,7 @@
                   (fixes cursor position problems in e.g. Notepad)
 
  2000-01-19: Przemyslaw Dobrowolski <dobrawka@asua.org.pl>
-    - WNASPI32: o DosCreateMutexSem call bugfix. 
+    - WNASPI32: o DosCreateMutexSem call bugfix.
                   (CDRWIN works again)
 
  2001-01-19: knut st. osmundsen <knut.stange.osmundsen@mynd.no>
