@@ -1,4 +1,4 @@
-# $Id: win32k.mak,v 1.13.2.2 2001-09-27 03:27:18 bird Exp $
+# $Id: win32k.mak,v 1.13.2.3 2001-10-14 22:57:31 bird Exp $
 
 #
 # Win32k.sys makefile.
@@ -92,6 +92,7 @@ LIBS =\
 $(NAME).sys: $(WIN32KBIN)\$(NAME).sys
 
 $(WIN32KBIN)\$(NAME).sys:   $(WIN32KBIN)\clfix.exe \
+                            $(WIN32KBIN)\ignore.exe \
                             $(WIN32KINCLUDE)\options.inc \
                             $(WIN32KINCLUDE)\api.inc \
                             $(WIN32KINCLUDE)\win32k.inc \
@@ -215,6 +216,7 @@ TSTLIBS = $(LIBS)
 $(NAME)tst.exe: $(WIN32KBIN)\$(NAME)tst.exe
     $(CP) $(WIN32KBIN)\$@ $@
 $(WIN32KBIN)\$(NAME)tst.exe:    clfix.exe \
+                                ignore.exe \
                                 Test\TstFakers.c \
                                 $(NAME)tst.def \
                                 $(TSTOBJS:. = ) \
@@ -360,6 +362,12 @@ $(WIN32KBIN)\libconv.exe: kKrnlLib\tools\libconv.c
 #   MSC v6.0a compiler (cl.exe) (16-bit).
 #
 $(WIN32KBIN)\clfix.exe: kKrnlLib\tools\clfix.c
+    icc -Q+ -Ti+ -Fe$@ -Fo$(WIN32KOBJ)\$(*B).obj $**
+
+#
+# Ignore utility used to ignore output from icc and linker.
+#
+$(WIN32KBIN)\ignore.exe: kKrnlLib\tools\ignore.c
     icc -Q+ -Ti+ -Fe$@ -Fo$(WIN32KOBJ)\$(*B).obj $**
 
 
