@@ -1,15 +1,16 @@
-/* $Id: imagelist.c,v 1.10 1999-12-18 20:56:58 achimha Exp $ */
+/* $Id: imagelist.c,v 1.11 2000-02-04 17:02:07 cbratschi Exp $ */
 /*
  *  ImageList implementation
  *
  *  Copyright 1998 Eric Kohl
- * Copyright 1999 Achim Hasenmueller
+ *  Copyright 1999 Achim Hasenmueller
+ *  Copyright 2000 Christoph Bratschi
  *
  *  TODO:
  *    - Fix ImageList_DrawIndirect (xBitmap, yBitmap, rgbFg, rgbBk, dwRop).
  *    - Fix ImageList_GetIcon.
  *    - Fix drag functions.
- *    - Fix ImageList_Read and ImageList_Write.
+ *    - Fix ImageList_Write.
  *    - Fix ImageList_SetFilter (undocumented).
  *      BTW does anybody know anything about this function???
  *        - It removes 12 Bytes from the stack (3 Parameters).
@@ -25,11 +26,10 @@
  */
 
 /* CB: todo
-  - ImageList_Read
   - ImageList_Write
 */
 
-/* WINE 991212 level */
+/* WINE 20000130 level */
 
 /* This must be defined because the HIMAGELIST type is just a pointer
  * to the _IMAGELIST data structure. But M$ does not want us to know
@@ -37,6 +37,9 @@
  * an empty structure. It's just to keep compatibility.
  */
 #define __WINE_IMAGELIST_C
+
+#include "wine/obj_base.h"
+#include "wine/obj_storage.h"
 
 #include "imagelist.h"
 #include "commctrl.h"
@@ -168,6 +171,7 @@ IMAGELIST_InternalDraw(IMAGELISTDRAWPARAMS *pimldp, INT cx, INT cy)
 {
     HDC hImageDC;
     HBITMAP hOldBitmap;
+
     hImageDC = CreateCompatibleDC(0);
     hOldBitmap = SelectObject(hImageDC, pimldp->himl->hbmImage);
     BitBlt(pimldp->hdcDst,
@@ -222,7 +226,7 @@ IMAGELIST_InternalDrawMask(IMAGELISTDRAWPARAMS *pimldp, INT cx, INT cy)
     /* Draw the Background for the appropriate Styles
     */
     if( bUseCustomBackground && (pimldp->fStyle == ILD_NORMAL
-          || pimldp->fStyle & ILD_IMAGE
+          || (pimldp->fStyle & ILD_IMAGE)
           || bBlendFlag))
     {
         hBrush = CreateSolidBrush (himlLocal->clrBk);
@@ -237,7 +241,7 @@ IMAGELIST_InternalDrawMask(IMAGELISTDRAWPARAMS *pimldp, INT cx, INT cy)
     /* Draw Image Transparently over the current background
     */
     if(pimldp->fStyle == ILD_NORMAL
-        || pimldp->fStyle & ILD_TRANSPARENT
+        || (pimldp->fStyle & ILD_TRANSPARENT)
         || ((pimldp->fStyle & ILD_IMAGE) && bUseCustomBackground)
         || bBlendFlag)
     {
@@ -264,7 +268,7 @@ IMAGELIST_InternalDrawMask(IMAGELISTDRAWPARAMS *pimldp, INT cx, INT cy)
     }
     /* Draw the image when no Background is specified
     */
-    else if(pimldp->fStyle & ILD_IMAGE && !bUseCustomBackground)
+    else if((pimldp->fStyle & ILD_IMAGE) && !bUseCustomBackground)
     {
         BitBlt(pimldp->hdcDst,
             pimldp->x, pimldp->y, cx, cy,
@@ -1338,6 +1342,9 @@ ImageList_Duplicate (HIMAGELIST himlSrc)
 
         DeleteDC (hdcDst);
         DeleteDC (hdcSrc);
+
+	himlDst->cCurImage = himlSrc->cCurImage;
+	himlDst->cMaxImage = himlSrc->cMaxImage;
     }
 
     return himlDst;
@@ -1887,6 +1894,113 @@ ImageList_Merge (HIMAGELIST himl1, INT i1, HIMAGELIST himl2, INT i2,
 }
 
 
+/* helper for _read_bitmap currently unused */
+static int may_use_dibsection(HDC hdc) {
+    int bitspixel = GetDeviceCaps(hdc,BITSPIXEL)*GetDeviceCaps(hdc,PLANES);
+    if (bitspixel>8)
+	return TRUE;
+    if (bitspixel<=4)
+	return FALSE;
+    return GetDeviceCaps(hdc,94) & 0x10;
+}
+
+/* helper for ImageList_Read, see comments below */
+static HBITMAP _read_bitmap(LPSTREAM pstm,int ilcFlag,int cx,int cy) {
+    HDC			xdc = 0;
+    BITMAPFILEHEADER	bmfh;
+    BITMAPINFOHEADER	bmih;
+    int			bitsperpixel,palspace,longsperline,width,height;
+    LPBITMAPINFOHEADER	bmihc = NULL;
+    int			result = 0;
+    HBITMAP		hbitmap = 0;
+    LPBYTE		bits = NULL,nbits = NULL;
+    int			nbytesperline,bytesperline;
+
+    if (!SUCCEEDED(IStream_Read ( pstm, &bmfh, sizeof(bmfh), NULL))	||
+    	(bmfh.bfType != (('M'<<8)|'B'))					||
+    	!SUCCEEDED(IStream_Read ( pstm, &bmih, sizeof(bmih), NULL))	||
+    	(bmih.biSize != sizeof(bmih))
+    )
+	return 0;
+
+    bitsperpixel = bmih.biPlanes * bmih.biBitCount;
+    if (bitsperpixel<=8)
+    	palspace = (1<<bitsperpixel)*sizeof(RGBQUAD);
+    else
+    	palspace = 0;
+    width = bmih.biWidth;
+    height = bmih.biHeight;
+    bmihc = (LPBITMAPINFOHEADER)LocalAlloc(LMEM_ZEROINIT,sizeof(bmih)+palspace);
+    memcpy(bmihc,&bmih,sizeof(bmih));
+    longsperline	= ((width*bitsperpixel+31)&~0x1f)>>5;
+    bmihc->biSizeImage	= (longsperline*height)<<2;
+
+    /* read the palette right after the end of the bitmapinfoheader */
+    if (palspace)
+	if (!SUCCEEDED(IStream_Read ( pstm, bmihc+1, palspace, NULL)))
+	    goto ret1;
+
+    xdc = GetDC(0);
+#if 0 /* Magic for NxM -> 1x(N*M) not implemented for DIB Sections */
+    if ((bitsperpixel>1) &&
+	((ilcFlag!=ILC_COLORDDB) && (!ilcFlag || may_use_dibsection(xdc)))
+     ) {
+	hbitmap = CreateDIBSection(xdc,(BITMAPINFO*)bmihc,0,(LPVOID*)&bits,0,0);
+	if (!hbitmap)
+	    goto ret1;
+	if (!SUCCEEDED(IStream_Read( pstm, bits, bmihc->biSizeImage, NULL)))
+	    goto ret1;
+	result = 1;
+    } else
+#endif
+    {
+	int i,nwidth,nheight;
+
+	nwidth	= width*(height/cy);
+	nheight	= cy;
+
+	if (bitsperpixel==1)
+	    hbitmap = CreateBitmap(nwidth,nheight,1,1,NULL);
+	else
+	    hbitmap = CreateCompatibleBitmap(xdc,nwidth,nheight);
+
+	/* Might be a bit excessive memory use here */
+	bits = (LPBYTE)LocalAlloc(LMEM_ZEROINIT,bmihc->biSizeImage);
+	nbits = (LPBYTE)LocalAlloc(LMEM_ZEROINIT,bmihc->biSizeImage);
+	if (!SUCCEEDED(IStream_Read ( pstm, bits, bmihc->biSizeImage, NULL)))
+		goto ret1;
+
+	/* Copy the NxM bitmap into a 1x(N*M) bitmap we need, linewise */
+	/* Do not forget that windows bitmaps are bottom->top */
+	bytesperline	= longsperline*4;
+	nbytesperline	= (height/cy)*bytesperline;
+	for (i=0;i<height;i++) {
+	    memcpy(
+		nbits+((height-i)%cy)*nbytesperline+(i/cy)*bytesperline,
+		bits+bytesperline*(height-i),
+		bytesperline
+	    );
+	}
+	bmihc->biWidth	= nwidth;
+	bmihc->biHeight	= nheight;
+	if (!SetDIBits(xdc,hbitmap,0,nheight,nbits,(BITMAPINFO*)bmihc,0))
+		goto ret1;
+	LocalFree((HLOCAL)nbits);
+	LocalFree((HLOCAL)bits);
+	result = 1;
+    }
+ret1:
+    if (xdc)	ReleaseDC(0,xdc);
+    if (bmihc)	LocalFree((HLOCAL)bmihc);
+    if (!result) {
+	if (hbitmap) {
+	    DeleteObject(hbitmap);
+	    hbitmap = 0;
+	}
+    }
+    return hbitmap;
+}
+
 /*************************************************************************
  * ImageList_Read [COMCTL32.66]
  *
@@ -1899,35 +2013,87 @@ ImageList_Merge (HIMAGELIST himl1, INT i1, HIMAGELIST himl2, INT i2,
  *     Success: handle to image list
  *     Failure: NULL
  *
- * NOTES
- *     This function can not be implemented yet, because
- *     IStream32::Read is not implemented yet.
+ * The format is like this:
+ * 	ILHEAD 			ilheadstruct;
  *
- * BUGS
- *     empty stub.
+ * for the color image part:
+ * 	BITMAPFILEHEADER	bmfh;
+ * 	BITMAPINFOHEADER	bmih;
+ * only if it has a palette:
+ *	RGBQUAD		rgbs[nr_of_paletted_colors];
+ *
+ *	BYTE			colorbits[imagesize];
+ *
+ * the following only if the ILC_MASK bit is set in ILHEAD.ilFlags:
+ *	BITMAPFILEHEADER	bmfh_mask;
+ *	BITMAPINFOHEADER	bmih_mask;
+ * only if it has a palette (it usually does not):
+ *	RGBQUAD		rgbs[nr_of_paletted_colors];
+ *
+ *	BYTE			maskbits[imagesize];
+ *
+ * CAVEAT: Those images are within a NxM bitmap, not the 1xN we expect.
+ *         _read_bitmap needs to convert them.
  */
-
-//HIMAGELIST WINAPI ImageList_Read (LPSTREAM pstm)
-HIMAGELIST WINAPI ImageList_Read (PVOID pstm)
+HIMAGELIST WINAPI ImageList_Read (LPSTREAM pstm)
 {
-//    HRESULT errCode;
-//    ULONG ulRead;
-//    ILHEAD ilHead;
-//    HIMAGELIST himl;
+    ILHEAD	ilHead;
+    HIMAGELIST	himl;
+    HBITMAP	hbmColor=0,hbmMask=0;
+    int		i;
 
+    if (!SUCCEEDED(IStream_Read (pstm, &ilHead, sizeof(ILHEAD), NULL)))
+    	return NULL;
+    if (ilHead.usMagic != (('L' << 8) | 'I'))
+	return NULL;
+    if (ilHead.usVersion != 0x101) /* probably version? */
+	return NULL;
 
-    dprintf(("ImageList_Read empty stub!\n"));
+#if 0
+    FIXME("	ilHead.cCurImage = %d\n",ilHead.cCurImage);
+    FIXME("	ilHead.cMaxImage = %d\n",ilHead.cMaxImage);
+    FIXME("	ilHead.cGrow = %d\n",ilHead.cGrow);
+    FIXME("	ilHead.cx = %d\n",ilHead.cx);
+    FIXME("	ilHead.cy = %d\n",ilHead.cy);
+    FIXME("	ilHead.flags = %x\n",ilHead.flags);
+    FIXME("	ilHead.ovls[0] = %d\n",ilHead.ovls[0]);
+    FIXME("	ilHead.ovls[1] = %d\n",ilHead.ovls[1]);
+    FIXME("	ilHead.ovls[2] = %d\n",ilHead.ovls[2]);
+    FIXME("	ilHead.ovls[3] = %d\n",ilHead.ovls[3]);
+#endif
 
-//    errCode = IStream_Read (pstm, &ilHead, sizeof(ILHEAD), &ulRead);
-//    if (errCode != S_OK)
-//    return NULL;
+    hbmColor = _read_bitmap(pstm,ilHead.flags & ~ILC_MASK,ilHead.cx,ilHead.cy);
+    if (!hbmColor)
+	return NULL;
+    if (ilHead.flags & ILC_MASK) {
+	hbmMask = _read_bitmap(pstm,0,ilHead.cx,ilHead.cy);
+	if (!hbmMask) {
+	    DeleteObject(hbmColor);
+	    return NULL;
+	}
+    }
 
-    FIXME("Magic: 0x%x\n", ilHead.usMagic);
+    himl = ImageList_Create (
+		    ilHead.cx,
+		    ilHead.cy,
+		    ilHead.flags,
+		    1,		/* initial */
+		    ilHead.cGrow
+    );
+    if (!himl) {
+	DeleteObject(hbmColor);
+	DeleteObject(hbmMask);
+	return NULL;
+    }
+    himl->hbmImage = hbmColor;
+    himl->hbmMask = hbmMask;
+    himl->cCurImage = ilHead.cCurImage;
+    himl->cMaxImage = ilHead.cMaxImage;
 
-//    himl = ImageList_Create (32, 32, ILD_NORMAL, 2, 2);
-
-//    return himl;
-  return 0;
+    ImageList_SetBkColor(himl,ilHead.bkcolor);
+    for (i=0;i<4;i++)
+    	ImageList_SetOverlayImage(himl,ilHead.ovls[i],i+1);
+    return himl;
 }
 
 
@@ -2483,9 +2649,8 @@ ImageList_SetOverlayImage (HIMAGELIST himl, INT iImage, INT iOverlay)
         return FALSE;
     if ((iOverlay < 1) || (iOverlay > MAX_OVERLAYIMAGE))
         return FALSE;
-    if ((iImage < 0) || (iImage > himl->cCurImage))
+    if ((iImage != -1) && ((iImage < 0) || (iImage > himl->cCurImage)))
         return FALSE;
-
     himl->nOvlIdx[iOverlay - 1] = iImage;
     return TRUE;
 }

@@ -1,4 +1,4 @@
-/* $Id: treeview.c,v 1.21 1999-12-21 17:01:38 cbratschi Exp $ */
+/* $Id: treeview.c,v 1.22 2000-02-04 17:02:09 cbratschi Exp $ */
 /* Treeview control
  *
  * Copyright 1998 Eric Kohl <ekohl@abo.rhein-zeitung.de>
@@ -84,7 +84,7 @@ TREEVIEW_SendCustomDrawItemNotify (HWND hwnd, HDC hdc,
 static LRESULT
 TREEVIEW_DoSelectItem (HWND hwnd, INT action, HTREEITEM newSelect, INT cause);
 static void
-TREEVIEW_Refresh (HWND hwnd);
+TREEVIEW_Refresh (HWND hwnd,HDC hdc);
 
 static LRESULT CALLBACK
 TREEVIEW_Edit_SubclassProc (HWND hwnd, UINT uMsg, WPARAM wParam,
@@ -128,7 +128,6 @@ static TREEVIEW_ITEM* TREEVIEW_ValidItem(
 static TREEVIEW_ITEM *TREEVIEW_GetLastListItem(
   TREEVIEW_INFO *infoPtr,
   TREEVIEW_ITEM *tvItem)
-
 {
   TREEVIEW_ITEM *wineItem = tvItem;
 
@@ -393,8 +392,7 @@ TREEVIEW_GetImageList (HWND hwnd, WPARAM wParam, LPARAM lParam)
 {
   TREEVIEW_INFO *infoPtr = TREEVIEW_GetInfoPtr(hwnd);
 
-//  TRACE (treeview,"\n");
-  if (infoPtr==NULL) return 0;
+  //TRACE (treeview,"\n");
 
   if ((INT)wParam == TVSIL_NORMAL)
         return (LRESULT) infoPtr->himlNormal;
@@ -410,7 +408,7 @@ TREEVIEW_SetImageList (HWND hwnd, WPARAM wParam, LPARAM lParam)
     TREEVIEW_INFO *infoPtr = TREEVIEW_GetInfoPtr(hwnd);
     HIMAGELIST himlTemp;
 
-//    TRACE (treeview,"\n");
+    //TRACE (treeview,"\n");
     switch ((INT)wParam) {
         case TVSIL_NORMAL:
             himlTemp = infoPtr->himlNormal;
@@ -484,7 +482,7 @@ TREEVIEW_GetInsertMarkColor (HWND hwnd, WPARAM wParam, LPARAM lParam)
 {
   TREEVIEW_INFO *infoPtr = TREEVIEW_GetInfoPtr(hwnd);
 
-  TRACE("\n");
+  //TRACE("\n");
   return (LRESULT) infoPtr->clrInsertMark;
 }
 
@@ -494,7 +492,7 @@ TREEVIEW_SetInsertMarkColor (HWND hwnd, WPARAM wParam, LPARAM lParam)
   TREEVIEW_INFO *infoPtr = TREEVIEW_GetInfoPtr(hwnd);
   COLORREF prevColor=infoPtr->clrInsertMark;
 
-  TRACE("%d %ld\n",wParam,lParam);
+  //TRACE("%d %ld\n",wParam,lParam);
   infoPtr->clrInsertMark=(COLORREF) lParam;
   return (LRESULT) prevColor;
 }
@@ -503,14 +501,19 @@ static LRESULT
 TREEVIEW_SetInsertMark (HWND hwnd, WPARAM wParam, LPARAM lParam)
 {
   TREEVIEW_INFO *infoPtr = TREEVIEW_GetInfoPtr(hwnd);
+  HDC hdc;
 
-  FIXME("%d %ld\n",wParam,lParam);
+  //FIXME("%d %ld\n",wParam,lParam);
   if (!TREEVIEW_ValidItem (infoPtr, (HTREEITEM)lParam)) return 0;
-  FIXME("%d %ld\n",wParam,lParam);
+  //FIXME("%d %ld\n",wParam,lParam);
 
   infoPtr->insertBeforeorAfter=(BOOL) wParam;
   infoPtr->insertMarkItem=(HTREEITEM) lParam;
-  TREEVIEW_Refresh (hwnd);
+
+  hdc = GetDC(hwnd);
+  TREEVIEW_Refresh(hwnd,hdc);
+  ReleaseDC(hwnd,hdc);
+
   return 1;
 }
 
@@ -713,7 +716,7 @@ TREEVIEW_DrawItem (HWND hwnd, HDC hdc, TREEVIEW_ITEM *wineItem)
         himlp=&infoPtr->himlState;
         imageIndex=wineItem->state>>12;
         imageIndex++;          /* yeah, right */
-        TRACE ("imindex:%d\n",imageIndex);
+        //TRACE ("imindex:%d\n",imageIndex);
     if ((himlp) && (imageIndex))
     {
           imageIndex--;       /* see FIXME */
@@ -785,7 +788,7 @@ TREEVIEW_DrawItem (HWND hwnd, HDC hdc, TREEVIEW_ITEM *wineItem)
     wineItem->text.bottom= r.bottom;
 
     if (wineItem->pszText== LPSTR_TEXTCALLBACKA) {
-      TRACE("LPSTR_TEXTCALLBACK\n");
+      //TRACE("LPSTR_TEXTCALLBACK\n");
       TREEVIEW_SendDispInfoNotify (hwnd, wineItem, TVN_GETDISPINFO, TVIF_TEXT);
     }
 
@@ -863,9 +866,9 @@ TREEVIEW_DrawItem (HWND hwnd, HDC hdc, TREEVIEW_ITEM *wineItem)
 
   /* Draw insertion mark if necessary */
 
-  if (infoPtr->insertMarkItem)
-                TRACE ("item:%d,mark:%d\n", (int)wineItem->hItem,
-                               (int) infoPtr->insertMarkItem);
+  //if (infoPtr->insertMarkItem)
+  //              TRACE ("item:%d,mark:%d\n", (int)wineItem->hItem,
+  //                             (int) infoPtr->insertMarkItem);
   if (wineItem->hItem==infoPtr->insertMarkItem) {
                 HPEN hNewPen, hOldPen;
                 int offset;
@@ -895,7 +898,7 @@ TREEVIEW_DrawItem (HWND hwnd, HDC hdc, TREEVIEW_ITEM *wineItem)
   if (cditem & CDRF_NOTIFYPOSTPAINT) {
                 cditem=TREEVIEW_SendCustomDrawItemNotify
                        (hwnd, hdc, wineItem, CDDS_ITEMPOSTPAINT);
-                TRACE("postpaint:cditem-app returns 0x%x\n",cditem);
+                //TRACE("postpaint:cditem-app returns 0x%x\n",cditem);
         }
 
   SelectObject (hdc, hOldFont);
@@ -908,16 +911,21 @@ TREEVIEW_GetItemRect (HWND hwnd, WPARAM wParam, LPARAM lParam)
   TREEVIEW_ITEM *wineItem;
   HTREEITEM     *iItem;
   LPRECT        lpRect   = (LPRECT)lParam;
+  HDC hdc;
 
 //  TRACE (treeview,"\n");
   /*
    * validate parameters
    */
-  if ( (infoPtr==NULL) || (lpRect == NULL) )
+  if (lpRect == NULL)
     return FALSE;
 
   if (infoPtr->Timer & TV_REFRESH_TIMER_SET)
-                TREEVIEW_Refresh (hwnd);        /* we want a rect for the current view */
+  {
+    hdc = GetDC(hwnd);
+    TREEVIEW_Refresh(hwnd,hdc);        /* we want a rect for the current view */
+    ReleaseDC(hwnd,hdc);
+  }
 
   /*
    * retrieve the item ptr
@@ -997,8 +1005,8 @@ TREEVIEW_SetItemA (HWND hwnd, WPARAM wParam, LPARAM lParam)
   }
 
   if (tvItem->mask & TVIF_STATE) {
-                TRACE ("prevstate,state,mask:%x,%x,%x\n",wineItem->state,tvItem->state,
-tvItem->stateMask);
+                //TRACE ("prevstate,state,mask:%x,%x,%x\n",wineItem->state,tvItem->state,
+//tvItem->stateMask);
         wineItem->state&= ~tvItem->stateMask;
                 wineItem->state|= (tvItem->state & tvItem->stateMask);
                 wineItem->stateMask|= tvItem->stateMask;
@@ -1038,21 +1046,18 @@ TREEVIEW_GetItemState (HWND hwnd, WPARAM wParam, LPARAM lParam)
 }
 
 static void
-TREEVIEW_Refresh (HWND hwnd)
+TREEVIEW_Refresh (HWND hwnd,HDC hdc)
 
 {
     TREEVIEW_INFO *infoPtr = TREEVIEW_GetInfoPtr(hwnd);
-        TEXTMETRICA tm;
-        HBRUSH hbrBk;
+    TEXTMETRICA tm;
+    HBRUSH hbrBk;
     RECT rect;
-        HDC hdc;
     INT iItem, indent, x, y, cx, height, itemHeight;
     INT viewtop,viewbottom,viewleft,viewright;
     TREEVIEW_ITEM *wineItem, *prevItem;
 
     //TRACE("\n");
-
-        hdc=GetDC (hwnd);
 
     if (infoPtr->Timer & TV_REFRESH_TIMER_SET) {
                 KillTimer (hwnd, TV_REFRESH_TIMER);
@@ -1066,13 +1071,10 @@ TREEVIEW_Refresh (HWND hwnd)
     infoPtr->cdmode=TREEVIEW_SendCustomDrawNotify
                                                 (hwnd, CDDS_PREPAINT, hdc, rect);
 
-        if (infoPtr->cdmode==CDRF_SKIPDEFAULT) {
-                  ReleaseDC (hwnd, hdc);
-                  return;
-        }
+    if (infoPtr->cdmode==CDRF_SKIPDEFAULT) return;
 
-        infoPtr->uVisibleHeight= rect.bottom-rect.top;
-        infoPtr->uVisibleWidth= rect.right-rect.left;
+    infoPtr->uVisibleHeight= rect.bottom-rect.top;
+    infoPtr->uVisibleWidth= rect.right-rect.left;
 
     viewtop=infoPtr->cy;
     viewbottom=infoPtr->cy + rect.bottom-rect.top;
@@ -1187,7 +1189,6 @@ TREEVIEW_Refresh (HWND hwnd)
         infoPtr->cdmode=TREEVIEW_SendCustomDrawNotify
                                                                 (hwnd, CDDS_POSTPAINT, hdc, rect);
 
-    ReleaseDC (hwnd, hdc);
     //TRACE("done\n");
 }
 
@@ -1198,7 +1199,6 @@ TREEVIEW_HandleTimer (HWND hwnd, WPARAM wParam, LPARAM lParam)
   TREEVIEW_INFO *infoPtr = TREEVIEW_GetInfoPtr(hwnd);
 
 //  TRACE (treeview, " %d\n",wParam);
-  if (!infoPtr) return FALSE;
 
   switch (wParam) {
         case TV_REFRESH_TIMER:
@@ -1311,9 +1311,8 @@ TREEVIEW_GetNextItem (HWND hwnd, WPARAM wParam, LPARAM lParam)
   TREEVIEW_INFO *infoPtr = TREEVIEW_GetInfoPtr(hwnd);
   TREEVIEW_ITEM *wineItem, *returnItem;
   INT iItem, retval, flag;
+  HDC hdc;
 
-
-  if (!infoPtr) return FALSE;
   flag  = (INT) wParam;
   iItem = (INT) lParam;
   retval=0;
@@ -1322,11 +1321,12 @@ TREEVIEW_GetNextItem (HWND hwnd, WPARAM wParam, LPARAM lParam)
                                         break;
         case TVGN_CARET:retval=(INT)infoPtr->selectedItem;
                                         break;
-        case TVGN_FIRSTVISIBLE:
-                                TREEVIEW_Refresh (hwnd);
-/* FIXME:we should only recalculate, not redraw */
-                                        retval=(INT)infoPtr->firstVisible;
-                                        break;
+	case TVGN_FIRSTVISIBLE: /* FIXME:we should only recalculate, not redraw */
+  					hdc = GetDC (hwnd);
+  					TREEVIEW_Refresh (hwnd, hdc);
+  					ReleaseDC(hwnd,hdc);
+					retval=(INT)infoPtr->firstVisible;
+					break;
         case TVGN_DROPHILITE:
                                         retval=(INT)infoPtr->dropItem;
                                         break;
@@ -1982,7 +1982,6 @@ TREEVIEW_InsertItemA (HWND hwnd, WPARAM wParam, LPARAM lParam)
         wineItem->stateMask=tvItem->stateMask;
    }
 
-
    TREEVIEW_QueueRefresh (hwnd);
 
    return (LRESULT) iItem;
@@ -2048,7 +2047,6 @@ TREEVIEW_DeleteItem (HWND hwnd, WPARAM wParam, LPARAM lParam)
   TREEVIEW_ITEM *wineItem;
 
 //  TRACE (treeview,"\n");
-  if (!infoPtr) return FALSE;
 
   if (lParam == (INT)TVI_ROOT) {
         TREEVIEW_RemoveTree (hwnd);
@@ -2242,16 +2240,19 @@ TREEVIEW_Size (HWND hwnd, WPARAM wParam, LPARAM lParam)
 }
 
 
-
 static LRESULT
 TREEVIEW_StyleChanged (HWND hwnd, WPARAM wParam, LPARAM lParam)
 {
-//  TRACE (treeview,"(%x %lx)\n",wParam,lParam);
+  HDC hdc;
 
-  TREEVIEW_Refresh(hwnd);
+  //TRACE("(%x %lx)\n",wParam,lParam);
+  hdc = GetDC (hwnd);
+  TREEVIEW_Refresh (hwnd, hdc);
+  ReleaseDC(hwnd,hdc);
 
   return 0;
 }
+
 
 static LRESULT
 TREEVIEW_Create (HWND hwnd, WPARAM wParam, LPARAM lParam)
@@ -2262,19 +2263,19 @@ TREEVIEW_Create (HWND hwnd, WPARAM wParam, LPARAM lParam)
     TEXTMETRICA tm;
         HDC hdc;
 
-    TRACE("wnd %x, style %lx\n",hwnd,dwStyle);
+    //TRACE("wnd %x, style %lx\n",hwnd,dwStyle);
       /* allocate memory for info structure */
     infoPtr = (TREEVIEW_INFO *) COMCTL32_Alloc (sizeof(TREEVIEW_INFO));
 
     SetWindowLongA( hwnd, 0, (DWORD)infoPtr);
 
     if (infoPtr == NULL) {
-                ERR("could not allocate info memory!\n");
+                //ERR("could not allocate info memory!\n");
                 return 0;
     }
 
     if ((TREEVIEW_INFO*) GetWindowLongA( hwnd, 0) != infoPtr) {
-                ERR("pointer assignment error!\n");
+                //ERR("pointer assignment error!\n");
                 return 0;
     }
 
@@ -2307,7 +2308,7 @@ TREEVIEW_Create (HWND hwnd, WPARAM wParam, LPARAM lParam)
         infoPtr->insertBeforeorAfter=0;
     infoPtr->pCallBackSort=NULL;
     infoPtr->uScrollTime = 300;  /* milliseconds */
-
+    	infoPtr->wpEditOrig = NULL; /* we haven't subclassed anything yet */
         infoPtr->hwndToolTip=0;
     if (!(dwStyle & TVS_NOTOOLTIPS)) {   /* Create tooltip control */
                 TTTOOLINFOA ti;
@@ -2342,9 +2343,6 @@ TREEVIEW_Create (HWND hwnd, WPARAM wParam, LPARAM lParam)
         SendMessageA (infoPtr->hwndToolTip, TTM_ADDTOOLA, 0, (LPARAM)&ti);
     }
 
-   // @@@PH 1999/11/05
-    infoPtr->wpEditOrig = NULL; /* no subclass */
-
         infoPtr->hwndEdit = CreateWindowExA (
                           WS_EX_LEFT,
                           "EDIT",
@@ -2369,9 +2367,9 @@ TREEVIEW_Create (HWND hwnd, WPARAM wParam, LPARAM lParam)
              ImageList_Create (16, 16,ILC_COLOR|ILC_MASK, 15, 1);
 
                 hbmLoad = LoadBitmapA (COMCTL32_hModule, MAKEINTRESOURCEA(IDT_CHECK));
-                TRACE ("%x\n",hbmLoad);
+                //TRACE ("%x\n",hbmLoad);
         nIndex = ImageList_AddMasked (infoPtr->himlState, hbmLoad, CLR_DEFAULT);
-                TRACE ("%d\n",nIndex);
+                //TRACE ("%d\n",nIndex);
                 DeleteObject (hbmLoad);
         }
   ReleaseDC (hwnd, hdc);
@@ -2388,8 +2386,6 @@ TREEVIEW_Destroy (HWND hwnd)
 //   TRACE (treeview,"\n");
 
    TREEVIEW_RemoveTree (hwnd);
-
-   //@@@PH 1999/11/05 set infoPtr to NULL
    SetWindowLongA( hwnd, 0, (DWORD)NULL);
 
    if (infoPtr->Timer & TV_REFRESH_TIMER_SET)
@@ -2411,7 +2407,7 @@ TREEVIEW_Paint (HWND hwnd, WPARAM wParam, LPARAM lParam)
 
 //    TRACE (treeview,"\n");
     hdc = wParam==0 ? BeginPaint (hwnd, &ps) : (HDC)wParam;
-    TREEVIEW_Refresh (hwnd);
+    TREEVIEW_Refresh (hwnd,hdc);
     if(!wParam)
         EndPaint (hwnd, &ps);
 //    TRACE (treeview,"done\n");
@@ -2918,7 +2914,7 @@ TREEVIEW_HitTest (HWND hwnd, LPARAM lParam)
 
 done:
   lpht->hItem=wineItem->hItem;
-  TRACE ("(%ld,%ld):result %x\n",lpht->pt.x,lpht->pt.y,lpht->flags);
+  //TRACE ("(%ld,%ld):result %x\n",lpht->pt.x,lpht->pt.y,lpht->flags);
 
   return (LRESULT) wineItem->hItem;
 }
@@ -3049,7 +3045,7 @@ TREEVIEW_LButtonUp (HWND hwnd, WPARAM wParam, LPARAM lParam)
   ht.pt.x = (INT)LOWORD(lParam);
   ht.pt.y = (INT)HIWORD(lParam);
 
-  TRACE("\n");
+  //TRACE("\n");
 
   /* Return true to cancel default behaviour */
   if ( TREEVIEW_SendSimpleNotify (hwnd, NM_CLICK) )
@@ -3057,7 +3053,7 @@ TREEVIEW_LButtonUp (HWND hwnd, WPARAM wParam, LPARAM lParam)
 
   /* Get the item */
   iItem = TREEVIEW_HitTest (hwnd, (LPARAM) &ht);
-  TRACE ("%d\n",iItem);
+  //TRACE ("%d\n",iItem);
   if (!iItem)
     return 0;
 
@@ -3084,7 +3080,7 @@ TREEVIEW_LButtonUp (HWND hwnd, WPARAM wParam, LPARAM lParam)
         return 0;
       }
 
-                TRACE("Edit started for %s.\n", wineItem->pszText);
+                //TRACE("Edit started for %s.\n", wineItem->pszText);
                 infoPtr->editItem = wineItem->hItem;
 
                 SetWindowPos (
@@ -3118,10 +3114,10 @@ TREEVIEW_LButtonUp (HWND hwnd, WPARAM wParam, LPARAM lParam)
         if (dwStyle & TVS_CHECKBOXES) {      /* TVS_CHECKBOXES requires _us_ */
                         int state;                                       /* to toggle the current state */
                         state=1-(wineItem->state>>12);
-                        TRACE ("state:%x\n", state);
+                        //TRACE ("state:%x\n", state);
                         wineItem->state&= ~TVIS_STATEIMAGEMASK;
                         wineItem->state|=state<<12;
-                        TRACE ("state:%x\n", wineItem->state);
+                        //TRACE ("state:%x\n", wineItem->state);
                         TREEVIEW_QueueRefresh (hwnd);
                 }
   }
@@ -3687,6 +3683,12 @@ TREEVIEW_SetScrollTime (HWND hwnd, UINT uScrollTime)
 static LRESULT WINAPI
 TREEVIEW_WindowProc (HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
+   if (uMsg==WM_CREATE)
+		return TREEVIEW_Create (hwnd, wParam, lParam);
+
+   if (!TREEVIEW_GetInfoPtr(hwnd))
+       return DefWindowProcA (hwnd, uMsg, wParam, lParam);
+
     switch (uMsg) {
         case TVM_INSERTITEMA:
           return TREEVIEW_InsertItemA (hwnd, wParam, lParam);
@@ -3834,9 +3836,6 @@ TREEVIEW_WindowProc (HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
         case WM_COMMAND:
                 return TREEVIEW_Command (hwnd, wParam, lParam);
-
-        case WM_CREATE:
-                return TREEVIEW_Create (hwnd, wParam, lParam);
 
         case WM_DESTROY:
                 return TREEVIEW_Destroy (hwnd);

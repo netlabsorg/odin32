@@ -1,4 +1,4 @@
-/* $Id: tooltips.c,v 1.19 1999-12-27 17:13:40 cbratschi Exp $ */
+/* $Id: tooltips.c,v 1.20 2000-02-04 17:02:09 cbratschi Exp $ */
 /*
  * Tool tip control
  *
@@ -16,7 +16,7 @@
  *     hittest.exe, needtext.exe, newrect.exe, updtext.exe and winfrpt.exe.
  */
 
-/* WINE 991031 level */
+/* WINE 20000130 level */
 
 #include <string.h>
 

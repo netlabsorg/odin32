@@ -1,4 +1,4 @@
-/* $Id: comctl32undoc.c,v 1.16 1999-12-18 20:56:58 achimha Exp $ */
+/* $Id: comctl32undoc.c,v 1.17 2000-02-04 17:02:06 cbratschi Exp $ */
 /*
  * Undocumented functions from COMCTL32.DLL
  *
@@ -11,7 +11,7 @@
  *
  */
 
-/* WINE 991212 level */
+/* WINE 20000130 level */
 
 /* CB: todo
   - porting/implementing string functions
@@ -24,6 +24,9 @@
 #include <string.h>
 #include <stdlib.h>
 #include <ctype.h>
+#include <wchar.h>
+#include <wcstr.h>
+#include <wctype.h>
 
 extern HANDLE COMCTL32_hHeap; /* handle to the private heap */
 
@@ -294,7 +297,7 @@ typedef struct tagMRU
 
 HANDLE WINAPI
 CreateMRUListLazyA (LPCREATEMRULIST lpcml, DWORD dwParam2,
-		    DWORD dwParam3, DWORD dwParam4);
+                    DWORD dwParam3, DWORD dwParam4);
 
 
 /**************************************************************************
@@ -322,13 +325,13 @@ CreateMRUListA (LPCREATEMRULIST lpcml)
 DWORD WINAPI
 FreeMRUListA (HANDLE hMRUList)
 {
-    FIXME("(%08x) empty stub!\n", hMRUList);
+    //FIXME("(%08x) empty stub!\n", hMRUList);
 
 #if 0
     if (!(hmru->dwParam1 & 1001)) {
-	RegSetValueExA (hmru->hKeyMRU, "MRUList", 0, REG_SZ,
-			  hmru->lpszMRUString,
-			  lstrlenA (hmru->lpszMRUString));
+        RegSetValueExA (hmru->hKeyMRU, "MRUList", 0, REG_SZ,
+                          hmru->lpszMRUString,
+                          lstrlenA (hmru->lpszMRUString));
     }
 
 
@@ -342,7 +345,7 @@ FreeMRUListA (HANDLE hMRUList)
 
 /**************************************************************************
  *              AddMRUData [COMCTL32.167]
- * 
+ *
  * Add item to MRU binary list.  If item already exists in list them it is
  * simply moved up to the top of the list and not added again.  If list is
  * full then the least recently used item is removed to make room.
@@ -359,14 +362,14 @@ FreeMRUListA (HANDLE hMRUList)
 INT WINAPI
 AddMRUData (HANDLE hList, LPCVOID lpData, DWORD cbData)
 {
-    FIXME("(%08x, %p, %ld) empty stub!\n", hList, lpData, cbData);
+    //FIXME("(%08x, %p, %ld) empty stub!\n", hList, lpData, cbData);
 
     return 0;
 }
 
 /**************************************************************************
  *              AddMRUStringA [COMCTL32.153]
- * 
+ *
  * Add item to MRU string list.  If item already exists in list them it is
  * simply moved up to the top of the list and not added again.  If list is
  * full then the least recently used item is removed to make room.
@@ -382,7 +385,7 @@ AddMRUData (HANDLE hList, LPCVOID lpData, DWORD cbData)
 INT WINAPI
 AddMRUStringA(HANDLE hList, LPCSTR lpszString)
 {
-    FIXME("(%08x, %s) empty stub!\n", hList, debugstr_a(lpszString));
+    //FIXME("(%08x, %s) empty stub!\n", hList, debugstr_a(lpszString));
 
     return 0;
 }
@@ -402,13 +405,13 @@ AddMRUStringA(HANDLE hList, LPCSTR lpszString)
 BOOL WINAPI
 DelMRUString(HANDLE hList, INT nItemPos)
 {
-    FIXME("(%08x, %d): stub\n", hList, nItemPos);
+    //FIXME("(%08x, %d): stub\n", hList, nItemPos);
     return TRUE;
 }
 
 /**************************************************************************
  *                  FindMRUData [COMCTL32.169]
- * 
+ *
  * Searches binary list for item that matches lpData of length cbData.
  * Returns position in list order 0 -> MRU and if lpRegNum != NULL then value
  * corresponding to item's reg. name will be stored in it ('a' -> 0).
@@ -425,15 +428,15 @@ DelMRUString(HANDLE hList, INT nItemPos)
 INT WINAPI
 FindMRUData (HANDLE hList, LPCVOID lpData, DWORD cbData, LPINT lpRegNum)
 {
-    FIXME("(%08x, %p, %ld, %p) empty stub!\n",
-	   hList, lpData, cbData, lpRegNum);
+    //FIXME("(%08x, %p, %ld, %p) empty stub!\n",
+    //       hList, lpData, cbData, lpRegNum);
 
     return 0;
 }
 
 /**************************************************************************
  *                  FindMRUStringA [COMCTL32.155]
- * 
+ *
  * Searches string list for item that matches lpszString.
  * Returns position in list order 0 -> MRU and if lpRegNum != NULL then value
  * corresponding to item's reg. name will be stored in it ('a' -> 0).
@@ -449,8 +452,8 @@ FindMRUData (HANDLE hList, LPCVOID lpData, DWORD cbData, LPINT lpRegNum)
 INT WINAPI
 FindMRUStringA (HANDLE hList, LPCSTR lpszString, LPINT lpRegNum)
 {
-    FIXME("(%08x, %s, %p) empty stub!\n", hList, debugstr_a(lpszString),
-	  lpRegNum);
+    //FIXME("(%08x, %s, %p) empty stub!\n", hList, debugstr_a(lpszString),
+    //      lpRegNum);
 
     return 0;
 }
@@ -470,29 +473,29 @@ CreateMRUListLazyA (LPCREATEMRULIST lpcml, DWORD dwParam2, DWORD dwParam3, DWORD
     /* internal variables */
     LPVOID ptr;
 
-    FIXME("(%p) empty stub!\n", lpcml);
+    //FIXME("(%p) empty stub!\n", lpcml);
 
     if (lpcml == NULL)
-	return 0;
+        return 0;
 
     if (lpcml->cbSize < sizeof(CREATEMRULIST))
-	return 0;
+        return 0;
 
-    FIXME("(%lu %lu %lx %lx \"%s\" %p)\n",
-	  lpcml->cbSize, lpcml->nMaxItems, lpcml->dwFlags,
-	  (DWORD)lpcml->hKey, lpcml->lpszSubKey, lpcml->lpfnCompare);
+    //FIXME("(%lu %lu %lx %lx \"%s\" %p)\n",
+    //      lpcml->cbSize, lpcml->nMaxItems, lpcml->dwFlags,
+    //      (DWORD)lpcml->hKey, lpcml->lpszSubKey, lpcml->lpfnCompare);
 
     /* dummy pointer creation */
     ptr = COMCTL32_Alloc (32);
 
-    FIXME("-- ret = %p\n", ptr);
+    //FIXME("-- ret = %p\n", ptr);
 
     return (HANDLE)ptr;
 }
 
 /**************************************************************************
  *                EnumMRUListA [COMCTL32.154]
- * 
+ *
  * Enumerate item in a list
  *
  * PARAMS
@@ -506,13 +509,13 @@ CreateMRUListLazyA (LPCREATEMRULIST lpcml, DWORD dwParam2, DWORD dwParam3, DWORD
  *    string lists specifies full length of string.  Enumerating past the end
  *    of list returns -1.
  *    If lpBuffer == NULL or nItemPos is -ve return value is no. of items in
- *    the list. 
+ *    the list.
  */
 INT WINAPI EnumMRUListA(HANDLE hList, INT nItemPos, LPVOID lpBuffer,
 DWORD nBufferSize)
 {
-    FIXME("(%08x, %d, %p, %ld): stub\n", hList, nItemPos, lpBuffer,
-	  nBufferSize);
+    //FIXME("(%08x, %d, %p, %ld): stub\n", hList, nItemPos, lpBuffer,
+    //      nBufferSize);
     return 0;
 }
 
@@ -831,7 +834,7 @@ DSA_SetItem (const HDSA hdsa, INT nIndex, LPVOID pSrc)
         else {
             /* resize the block of memory */
             nNewItems =
-		hdsa->nGrow * ((INT)(((nIndex + 1) - 1) / hdsa->nGrow) + 1);
+                hdsa->nGrow * ((INT)(((nIndex + 1) - 1) / hdsa->nGrow) + 1);
             nSize = hdsa->nItemSize * nNewItems;
 
             lpTemp = (LPVOID)COMCTL32_ReAlloc (hdsa->pData, nSize);
@@ -1337,7 +1340,7 @@ DPA_SetPtr (const HDPA hdpa, INT i, LPVOID p)
         else {
             /* resize the block of memory */
             INT nNewItems =
-		hdpa->nGrow * ((INT)(((i+1) - 1) / hdpa->nGrow) + 1);
+                hdpa->nGrow * ((INT)(((i+1) - 1) / hdpa->nGrow) + 1);
             INT nSize = nNewItems * sizeof(LPVOID);
 
             lpTemp = (LPVOID*)HeapReAlloc (hdpa->hHeap, HEAP_ZERO_MEMORY,
@@ -1476,8 +1479,8 @@ DPA_QuickSort (LPVOID *lpPtrs, INT l, INT r,
     j = r;
     v = lpPtrs[(int)(l+r)/2];
     do {
-	while ((pfnCompare)(lpPtrs[i], v, lParam) < 0) i++;
-	while ((pfnCompare)(lpPtrs[j], v, lParam) > 0) j--;
+        while ((pfnCompare)(lpPtrs[i], v, lParam) < 0) i++;
+        while ((pfnCompare)(lpPtrs[j], v, lParam) > 0) j--;
         if (i <= j)
         {
             t = lpPtrs[i];
@@ -2016,7 +2019,7 @@ INT WINAPI COMCTL32_StrCmpNIW( LPCWSTR lpStr1, LPCWSTR lpStr2, int nChar) {
 }
 
 /***********************************************************************
- *           ChrCmpA   
+ *           ChrCmpA
  * This fuction returns FALSE if both words match, TRUE otherwise...
  */
 static BOOL ChrCmpA( WORD word1, WORD word2) {
@@ -2038,17 +2041,17 @@ LPSTR WINAPI COMCTL32_StrRChrA( LPCSTR lpStart, LPCSTR lpEnd, WORD wMatch) {
 
   if (!lpEnd) lpEnd = lpStart + strlen(lpStart);
 
-  for(; lpStart < lpEnd; lpStart = CharNextA(lpStart)) 
-    if (!ChrCmpA( GET_WORD(lpStart), wMatch)) 
+  for(; lpStart < lpEnd; lpStart = CharNextA(lpStart))
+    if (!ChrCmpA( GET_WORD(lpStart), wMatch))
       lpGotIt = lpStart;
-    
+
   return ((LPSTR)lpGotIt);
 
   return 0;
 }
 
 /***********************************************************************
- *           ChrCmpW   
+ *           ChrCmpW
  * This fuction returns FALSE if both words match, TRUE otherwise...
  */
 static BOOL ChrCmpW( WORD word1, WORD word2) {
@@ -2066,10 +2069,10 @@ LPWSTR WINAPI COMCTL32_StrRChrW( LPCWSTR lpStart, LPCWSTR lpEnd, WORD wMatch)
 
   if (!lpEnd) lpEnd = lpStart + lstrlenW(lpStart);
 
-  for(; lpStart < lpEnd; lpStart = CharNextW(lpStart)) 
-    if (!ChrCmpW( GET_WORD(lpStart), wMatch)) 
+  for(; lpStart < lpEnd; lpStart = CharNextW(lpStart))
+    if (!ChrCmpW( GET_WORD(lpStart), wMatch))
       lpGotIt = lpStart;
-    
+
   return (LPWSTR)lpGotIt;
 }
 
@@ -2118,7 +2121,7 @@ INT WINAPI COMCTL32_StrSpnW( LPWSTR lpStr, LPWSTR lpSet) {
 
 BOOL WINAPI comctl32_410( HWND hw, DWORD b, DWORD c, DWORD d) {
 
-   FIXME("(%x, %lx, %lx, %lx): stub!\n", hw, b, c, d);
+   //FIXME("(%x, %lx, %lx, %lx): stub!\n", hw, b, c, d);
 
    return TRUE;
 }
@@ -2132,7 +2135,7 @@ BOOL WINAPI comctl32_410( HWND hw, DWORD b, DWORD c, DWORD d) {
 
 BOOL WINAPI comctl32_411( HWND hw, DWORD b, DWORD c) {
 
-   FIXME("(%x, %lx, %lx): stub!\n", hw, b, c);
+   //FIXME("(%x, %lx, %lx): stub!\n", hw, b, c);
 
    return TRUE;
 }
@@ -2146,13 +2149,13 @@ BOOL WINAPI comctl32_411( HWND hw, DWORD b, DWORD c) {
 
 BOOL WINAPI comctl32_412( HWND hwnd, DWORD b, DWORD c)
 {
-    FIXME("(%x, %lx, %lx): stub!\n", hwnd, b, c);
+    //FIXME("(%x, %lx, %lx): stub!\n", hwnd, b, c);
 
     if (IsWindow (hwnd) == FALSE)
-	return FALSE;
+        return FALSE;
 
     if (b == 0)
-	return FALSE;
+        return FALSE;
 
 
     return TRUE;
@@ -2167,7 +2170,7 @@ BOOL WINAPI comctl32_412( HWND hwnd, DWORD b, DWORD c)
 
 BOOL WINAPI comctl32_413( HWND hw, DWORD b, DWORD c, DWORD d) {
 
-   FIXME("(%x, %lx, %lx, %lx): stub!\n", hw, b, c, d);
+   //FIXME("(%x, %lx, %lx, %lx): stub!\n", hw, b, c, d);
 
    return TRUE;
 }
@@ -2181,7 +2184,7 @@ BOOL WINAPI comctl32_413( HWND hw, DWORD b, DWORD c, DWORD d) {
 
 BOOL WINAPI InitMUILanguage( LANGID uiLang) {
 
-   FIXME("(%04x): stub!\n", uiLang);
+   //FIXME("(%04x): stub!\n", uiLang);
 
    return TRUE;
 }
