@@ -1,4 +1,4 @@
-/* $Id: win32type.h,v 1.22 1999-09-26 22:24:50 sandervl Exp $ */
+/* $Id: win32type.h,v 1.23 1999-09-29 08:26:39 sandervl Exp $ */
 
 /*
  * Win32 type definitions for OS/2
@@ -617,6 +617,19 @@ typedef struct {
 	HANDLE LockSemaphore;
 	DWORD Reserved;
 }CRITICAL_SECTION;
+
+/* Scrollbar info */
+typedef struct
+{
+    UINT    cbSize;
+    UINT    fMask;
+    INT     nMin;
+    INT     nMax;
+    UINT    nPage;
+    INT     nPos;
+    INT     nTrackPos;
+} SCROLLINFO, *LPSCROLLINFO;
+typedef SCROLLINFO CONST *LPCSCROLLINFO;
 
 #pragma pack()
 

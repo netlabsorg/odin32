@@ -1,4 +1,4 @@
-/* $Id: scroll.h,v 1.3 1999-07-23 17:55:27 sandervl Exp $ */
+/* $Id: scroll.h,v 1.4 1999-09-29 08:26:39 sandervl Exp $ */
 
 /*
  * Scroll-bar class extra info
@@ -12,8 +12,6 @@
 #define __WINE_SCROLL_H
 
 #define SCROLLBARCLASSNAME "SCROLLBAR"
-
-#include "windef.h"
 
 typedef struct
 {
