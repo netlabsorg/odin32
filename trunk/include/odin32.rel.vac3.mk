@@ -1,4 +1,4 @@
-# $Id: odin32.rel.vac3.mk,v 1.1 2000-12-02 23:50:48 bird Exp $
+# $Id: odin32.rel.vac3.mk,v 1.2 2000-12-16 15:39:56 sandervl Exp $
 
 #
 # Odin32 API
@@ -81,12 +81,16 @@ CDEFINES_WIN32APP= -D__WIN32OS2__ -D__i386__
 #   when we add new flags to for example LD2FLAGS too many times.
 #
 !ifdef EXETARGET
+!ifndef STACKSIZE
+STACKSIZE = 0x50000
+!endif
+
 !   ifdef VIO
-LDTARGETFLAGS    = -Ge+ -B"/pmtype:vio /stack:0x50000"
-LD2TARGETFLAGS   = /EXEC /pmtype:vio /stack:0x50000
+LDTARGETFLAGS    = -Ge+ -B"/pmtype:vio /stack:$(STACKSIZE)"
+LD2TARGETFLAGS   = /EXEC /pmtype:vio /stack:$(STACKSIZE)
 !   else
-LDTARGETFLAGS    = -Ge+ -B"/pmtype:pm /stack:0x50000"
-LD2TARGETFLAGS   = /EXEC /pmtype:pm /stack:0x50000
+LDTARGETFLAGS    = -Ge+ -B"/pmtype:pm /stack:$(STACKSIZE)"
+LD2TARGETFLAGS   = /EXEC /pmtype:pm /stack:$(STACKSIZE)
 !   endif
 !else
 LDTARGETFLAGS    = -Ge-
