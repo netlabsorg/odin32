@@ -1,3 +1,13 @@
+/* $Id: dataobject.cpp,v 1.2 1999-10-05 19:33:37 phaller Exp $ */
+
+/*
+ * Win32 SHELL32 for OS/2
+ *
+ * Copyright 1999 Patrick Haller (haller@zebra.fh-weingarten.de)
+ * Project Odin Software License can be found in LICENSE.TXT
+ *
+ */
+
 /*
  *	IEnumFORMATETC, IDataObject
  *
@@ -5,8 +15,17 @@
  *
  *	Copyright 1998, 1999	<juergen.schmied@metronet.de>
  */
+
+
+/*****************************************************************************
+ * Includes                                                                  *
+ *****************************************************************************/
+
+#include <stdlib.h>
 #include <string.h>
 #include <odin.h>
+#include <odinwrap.h>
+#include <os2sel.h>
 
 #define ICOM_CINTERFACE 1
 #define CINTERFACE 1
@@ -24,7 +43,9 @@
 
 #include <misc.h>
 
-DEFAULT_DEBUG_CHANNEL(shell)
+
+ODINDEBUGCHANNEL(shell32-dataobject)
+
 
 /***********************************************************************
 *   IEnumFORMATETC implementation
@@ -65,7 +86,11 @@ LPENUMFORMATETC IEnumFORMATETC_Constructor(UINT cfmt, const FORMATETC afmt[])
 {
 	IEnumFORMATETCImpl* ef;
 	DWORD size=cfmt * sizeof(FORMATETC);
-	
+
+  dprintf(("SHELL32:dataobject:IEnumFORMATETC_Constructor(%08xh,%08xh)\n",
+           cfmt,
+           afmt));
+
 	ef=(IEnumFORMATETCImpl*)HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, sizeof(IEnumFORMATETCImpl));
 
 	if(ef)
@@ -87,12 +112,18 @@ LPENUMFORMATETC IEnumFORMATETC_Constructor(UINT cfmt, const FORMATETC afmt[])
 	TRACE("(%p)->()\n",ef);
 	return (LPENUMFORMATETC)ef;
 }
+
+
 static HRESULT WINAPI IEnumFORMATETC_fnQueryInterface(LPENUMFORMATETC iface, REFIID riid, LPVOID* ppvObj)
 {
 	ICOM_THIS(IEnumFORMATETCImpl,iface);
 	char    xriid[50];
 	WINE_StringFromCLSID((LPCLSID)riid,xriid);
-	TRACE("(%p)->(\n\tIID:\t%s,%p)\n",This,xriid,ppvObj);
+
+  dprintf(("SHELL32:dataobject:IEnumFORMATETC_fnQueryInterface(%08xh,%08xh,%08xh)\n",
+           This,
+           riid,
+           xriid));
 
 			*ppvObj = NULL;
 
@@ -112,17 +143,27 @@ static HRESULT WINAPI IEnumFORMATETC_fnQueryInterface(LPENUMFORMATETC iface, REF
 	return E_NOINTERFACE;
 
 }
+
+
 static ULONG WINAPI IEnumFORMATETC_fnAddRef(LPENUMFORMATETC iface)
 {
 	ICOM_THIS(IEnumFORMATETCImpl,iface);
-	TRACE("(%p)->(count=%lu)\n",This, This->ref);
+
+  dprintf(("SHELL32:dataobject:IEnumFORMATETC_fnAddRef(%08xh,%08xh)\n",
+           This,
+           This->ref));
+
 	shell32_ObjCount++;
 	return ++(This->ref);
 }
+
+
 static ULONG WINAPI IEnumFORMATETC_fnRelease(LPENUMFORMATETC iface)
 {
 	ICOM_THIS(IEnumFORMATETCImpl,iface);
-	TRACE("(%p)->()\n",This);
+
+  dprintf(("SHELL32:dataobject:IEnumFORMATETC_fnRelease(%08xh)\n",
+           This));
 
 	shell32_ObjCount--;
 
@@ -136,13 +177,19 @@ static ULONG WINAPI IEnumFORMATETC_fnRelease(LPENUMFORMATETC iface)
 	}
 	return This->ref;
 }
+
+
 static HRESULT WINAPI IEnumFORMATETC_fnNext(LPENUMFORMATETC iface, ULONG celt, FORMATETC *rgelt, ULONG *pceltFethed)
 {
 	ICOM_THIS(IEnumFORMATETCImpl,iface);
 	UINT cfetch;
 	HRESULT hres = S_FALSE;
 
-	TRACE("(%p)->()\n", This);
+  dprintf(("SHELL32:dataobject:IEnumFORMATETC_fnNext(%08xh,%08xh,%08xh,%08xh)\n",
+           This,
+           celt,
+           rgelt,
+           pceltFethed));
 
 	if (This->posFmt < This->countFmt)
 	{
@@ -167,10 +214,15 @@ static HRESULT WINAPI IEnumFORMATETC_fnNext(LPENUMFORMATETC iface, ULONG celt, F
 
         return hres;
 }
+
+
 static HRESULT WINAPI IEnumFORMATETC_fnSkip(LPENUMFORMATETC iface, ULONG celt)
 {
 	ICOM_THIS(IEnumFORMATETCImpl,iface);
-	FIXME("(%p)->(num=%lu)\n", This, celt);
+
+  dprintf(("SHELL32:dataobject:IEnumFORMATETC_fnSkip(%08xh,%08xh) to be fixed\n",
+           This,
+           celt));
 
 	This->posFmt += celt;
 	if (This->posFmt > This->countFmt)
@@ -183,15 +235,23 @@ static HRESULT WINAPI IEnumFORMATETC_fnSkip(LPENUMFORMATETC iface, ULONG celt)
 static HRESULT WINAPI IEnumFORMATETC_fnReset(LPENUMFORMATETC iface)
 {
 	ICOM_THIS(IEnumFORMATETCImpl,iface);
-	FIXME("(%p)->()\n", This);
+
+  dprintf(("SHELL32:dataobject:IEnumFORMATETC_fnReset(%08xh) to be fixed\n",
+           This));
 
         This->posFmt = 0;
         return S_OK;
 }
+
+
 static HRESULT WINAPI IEnumFORMATETC_fnClone(LPENUMFORMATETC iface, LPENUMFORMATETC* ppenum)
 {
 	ICOM_THIS(IEnumFORMATETCImpl,iface);
-	FIXME("(%p)->(ppenum=%p)\n", This, ppenum);
+
+  dprintf(("SHELL32:dataobject:IEnumFORMATETC_fnClone(%08xh) not implemented\n",
+           This,
+           ppenum));
+
 	return E_NOTIMPL;
 }
 
@@ -263,17 +323,25 @@ LPIDLLIST IDLList_Constructor (UINT uStep)
 	LPIDLLIST lpidll;
 	lpidll = (LPIDLLIST)HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, sizeof(IDLList));
 
+  dprintf(("SHELL32:dataobject:IDLList_Constructor(%08xh, %08xh) not implemented\n",
+           lpidll,
+           uStep));
+
 	if (lpidll)
 	{
 	  lpidll->lpvtbl=&idllvt;
 	  lpidll->uStep=uStep;
 	}
 
-	TRACE("(%p)\n",lpidll);
 	return lpidll;
 }
+
+
 void IDLList_Destructor(LPIDLLIST THIS)
-{	TRACE("(%p)\n",THIS);
+{
+  dprintf(("SHELL32:dataobject:IDLList_Destructor(%08xh) not implemented\n",
+           THIS));
+
 	IDLList_CleanList(THIS);
 }
 
