@@ -1,4 +1,4 @@
-/* $Id: cpuhlp.h,v 1.7 2002-05-17 10:13:20 sandervl Exp $ */
+/* $Id: cpuhlp.h,v 1.8 2002-08-13 09:39:56 sandervl Exp $ */
 
 #ifndef _CPUHLP_H_
 #define _CPUHLP_H_
@@ -30,7 +30,7 @@ BOOL  CDECL SupportsCPUID();
 void  CDECL GetCPUVendorString(char *vendor);
 DWORD CDECL GetCPUFeatures();
 DWORD CDECL GetCPUSignature();
-void  CDECL GetTSC(LONG *high, LONG *low);
+void  CDECL GetTSC(LONG *pdwLow, LONG *pdwHigh);
 
 void  InitSystemInfo(int nrcpus);
 
