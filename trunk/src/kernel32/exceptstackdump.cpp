@@ -1,4 +1,4 @@
-/* $Id: exceptstackdump.cpp,v 1.1 2000-05-02 20:53:12 sandervl Exp $ */
+/* $Id: exceptstackdump.cpp,v 1.2 2000-05-13 07:16:11 sandervl Exp $ */
 /*
  * Stack dump code
  *
@@ -305,6 +305,20 @@ void dbgPrintStack(PEXCEPTIONREPORTRECORD       pERepRec,
 skiploop:
 	stacktop -= 1;
   } //while
+
+  addr = pCtxRec->ctx_RegEip;   
+  if(WinExe && WinExe->insideModule(addr) && WinExe->insideModuleCode(addr)) {
+     sprintf(Name, "%s.EXE", WinExe->getModuleName());
+     dprintf(("%-13s      at 0x%08x\n", Name, addr));
+  }
+  else {
+     Win32DllBase *dll = Win32DllBase::findModuleByAddr(addr);
+     if(dll && dll->insideModuleCode(addr)) {
+	sprintf(Name, "%s.DLL", dll->getModuleName());
+	dprintf(("%-13s      at 0x%08x\n", Name, addr));
+     }
+  }
+
   dprintf(("** END OF STACK DUMP **\n"));
   fEntered = FALSE;
 }
