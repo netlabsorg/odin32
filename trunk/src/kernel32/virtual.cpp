@@ -1,4 +1,4 @@
-/* $Id: virtual.cpp,v 1.46 2002-07-13 15:58:21 sandervl Exp $ */
+/* $Id: virtual.cpp,v 1.47 2002-07-13 16:30:40 sandervl Exp $ */
 
 /*
  * Win32 virtual memory functions
@@ -328,9 +328,9 @@ LPVOID WIN32API VirtualAlloc(LPVOID lpvAddress,
 
   if(lpvAddress)
   {
-   Win32MemMap *map;
-   ULONG offset, nrpages, accessflags = 0;
-
+    Win32MemMap *map;
+    ULONG offset, nrpages, accessflags = 0;
+    
     nrpages = cbSize >> PAGE_SHIFT;
     if(cbSize & 0xFFF)
         nrpages++;
@@ -518,79 +518,79 @@ BOOL WIN32API VirtualProtect(LPVOID lpvAddress,
                              DWORD  fdwNewProtect,
                              DWORD* pfdwOldProtect)
 {
-  DWORD rc;
-  DWORD  cb = cbSize;
-  ULONG  pageFlags = 0;
-  int npages;
+    DWORD rc;
+    DWORD  cb = cbSize;
+    ULONG  pageFlags = 0;
+    int npages;
 
-  if(pfdwOldProtect == NULL) {
+    if(pfdwOldProtect == NULL) {
         dprintf(("WARNING: pfdwOldProtect == NULL"));
         SetLastError(ERROR_INVALID_PARAMETER);
         return(FALSE);
-  }
+    }
 
-  SetLastError(ERROR_SUCCESS);
+    SetLastError(ERROR_SUCCESS);
 
-  rc = OSLibDosQueryMem(lpvAddress, &cb, &pageFlags);
-  if(rc) {
+    rc = OSLibDosQueryMem(lpvAddress, &cb, &pageFlags);
+    if(rc) {
         dprintf(("DosQueryMem returned %d\n", rc));
         return(FALSE);
-  }
-  dprintf(("Old memory flags %X\n", pageFlags));
-  *pfdwOldProtect = 0;
-  if(pageFlags & PAG_READ && !(pageFlags & PAG_WRITE))
+    }
+    dprintf(("Old memory flags %X\n", pageFlags));
+    *pfdwOldProtect = 0;
+    if(pageFlags & PAG_READ && !(pageFlags & PAG_WRITE))
         *pfdwOldProtect |= PAGE_READONLY;
-  if(pageFlags & (PAG_WRITE))
+    if(pageFlags & (PAG_WRITE))
         *pfdwOldProtect |= PAGE_READWRITE;
 
-  if((pageFlags & (PAG_WRITE | PAG_EXECUTE)) == (PAG_WRITE | PAG_EXECUTE))
+    if((pageFlags & (PAG_WRITE | PAG_EXECUTE)) == (PAG_WRITE | PAG_EXECUTE))
         *pfdwOldProtect |= PAGE_EXECUTE_READWRITE;
-  else
-  if(pageFlags & PAG_EXECUTE)
+    else
+    if(pageFlags & PAG_EXECUTE)
         *pfdwOldProtect |= PAGE_EXECUTE_READ;
 
-  if(pageFlags & PAG_GUARD)
+    if(pageFlags & PAG_GUARD)
         *pfdwOldProtect |= PAGE_GUARD;
-  pageFlags = 0;
+    pageFlags = 0;
 
-  if(fdwNewProtect & PAGE_READONLY)     pageFlags |= PAG_READ;
-  if(fdwNewProtect & PAGE_READWRITE)    pageFlags |= (PAG_READ | PAG_WRITE);
-  if(fdwNewProtect & PAGE_WRITECOPY)    pageFlags |= (PAG_READ | PAG_WRITE);
-  if(fdwNewProtect & PAGE_EXECUTE_READ) pageFlags |= (PAG_EXECUTE | PAG_READ);
-  if(fdwNewProtect & PAGE_EXECUTE_READWRITE)
+    if(fdwNewProtect & PAGE_READONLY)     pageFlags |= PAG_READ;
+    if(fdwNewProtect & PAGE_READWRITE)    pageFlags |= (PAG_READ | PAG_WRITE);
+    if(fdwNewProtect & PAGE_WRITECOPY)    pageFlags |= (PAG_READ | PAG_WRITE);
+    if(fdwNewProtect & PAGE_EXECUTE_READ) pageFlags |= (PAG_EXECUTE | PAG_READ);
+    if(fdwNewProtect & PAGE_EXECUTE_READWRITE)
         pageFlags |= (PAG_EXECUTE | PAG_WRITE | PAG_READ);
-  if(fdwNewProtect & PAGE_EXECUTE_WRITECOPY)
+    if(fdwNewProtect & PAGE_EXECUTE_WRITECOPY)
         pageFlags |= (PAG_EXECUTE | PAG_WRITE | PAG_READ);
-  if(fdwNewProtect & PAGE_GUARD)        pageFlags |= PAG_GUARD;
+    if(fdwNewProtect & PAGE_GUARD)        pageFlags |= PAG_GUARD;
 //Not supported in OS/2??
 //  if(fdwNewProtect & PAGE_NOACCESS)
 
-  dprintf(("New memory flags %X\n", pageFlags));
-  if(pageFlags == 0) {
+    dprintf(("New memory flags %X\n", pageFlags));
+    if(pageFlags == 0) {
         dprintf(("pageFlags == 0\n"));
         return(TRUE);   //nothing to do
-  }
-  ULONG offset = ((ULONG)lpvAddress & 0xFFF);
-  npages = (cbSize >> 12);
+    }
+    ULONG offset = ((ULONG)lpvAddress & 0xFFF);
+    npages = (cbSize >> 12);
 
-  cb = (cbSize & 0xFFF) + offset; // !!! added, some optimization :)
-  if( cb > 0 ) { // changed
-    npages++;
-  }
-  if( cb > 4096 ) { // changed, note '>' sign ( not '>=' ) 4096 is exactly one page
-    npages++;
-  }
+    cb = (cbSize & 0xFFF) + offset; // !!! added, some optimization :)
+    if( cb > 0 ) { // changed
+        npages++;
+    }
+    if( cb > 4096 ) { // changed, note '>' sign ( not '>=' ) 4096 is exactly one page
+        npages++;
+    }
 
-  lpvAddress = (LPVOID)((int)lpvAddress & ~0xFFF);
-  cbSize     = npages*4096;
-  dprintf(("lpvAddress = %X, cbSize = %d\n", lpvAddress, cbSize));
+    lpvAddress = (LPVOID)((int)lpvAddress & ~0xFFF);
+    cbSize     = npages*4096;
+    dprintf(("lpvAddress = %X, cbSize = %d\n", lpvAddress, cbSize));
 
-  rc = OSLibDosSetMem(lpvAddress, cbSize, pageFlags);
-  if(rc) {
+    rc = OSLibDosSetMem(lpvAddress, cbSize, pageFlags);
+    if(rc) {
         dprintf(("DosSetMem returned %d\n", rc));
         return(FALSE);
-  }
-  return(TRUE);
+    }
+    return(TRUE);
 }
 //******************************************************************************
 //******************************************************************************
@@ -669,6 +669,7 @@ DWORD WIN32API VirtualQuery(LPCVOID lpvAddress,
     }
     else
     {
+        pmbiBuffer->AllocationBase = 0;
         while(lpBase > 0)
         {
             rc = OSLibDosQueryMem(lpBase, &cbRangeSize, &dAttr);
@@ -684,6 +685,24 @@ DWORD WIN32API VirtualQuery(LPCVOID lpvAddress,
             lpBase = (LPVOID)((ULONG)lpBase - PAGE_SIZE);
         }
     }
+#if 0
+    //TODO!!!!!!!!!!!!
+    //NOTE: !!!!!!!!!!!!!!!!!!!!!!!
+    //Allocation base is always aligned at 64kb
+    //the page with the PAG_BASE attribute might not be the real allocation base
+    //(due to extra alloc + rounding (see oslibmem.cpp)
+    //Only exception to this rule is the stack
+    TEB *teb = GetThreadTEB();
+    if(teb) {
+        if(pmbiBuffer->AllocationBase >= teb->stack_low && pmbiBuffer->AllocationBase < teb->stack_top) {
+             pmbiBuffer->AllocationBase = pmbiBuffer->AllocationBase;
+        }
+        else pmbiBuffer->AllocationBase = (LPVOID)(((DWORD)pmbiBuffer->AllocationBase + 0xFFFF) & 0xFFFF);
+    }
+    else pmbiBuffer->AllocationBase = (LPVOID)(((DWORD)pmbiBuffer->AllocationBase + 0xFFFF) & 0xFFFF);
+    //END NOTE: !!!!!!!!!!!!!!!!!!!
+#endif
+
     dprintf(("Memory region alloc base          0x%08x", pmbiBuffer->AllocationBase));
     dprintf(("Memory region alloc protect flags %x", pmbiBuffer->AllocationProtect));
     dprintf(("Memory region base                0x%08x", pmbiBuffer->BaseAddress));
