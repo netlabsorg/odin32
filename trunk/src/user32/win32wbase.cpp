@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.278 2001-07-28 12:57:57 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.279 2001-08-02 14:50:43 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -2146,7 +2146,7 @@ LRESULT Win32BaseWindow::BroadcastMessageA(int type, UINT msg, WPARAM wParam, LP
  Win32BaseWindow *window;
  HWND hwnd = WNDHANDLE_MAGIC_HIGHWORD;
 
-    dprintf(("BroadCastMessageA %x %x %x", msg, wParam, lParam, GetFS()));
+    dprintf(("BroadCastMessageA %x %x %x %s", msg, wParam, lParam, (type == BROADCAST_SEND) ? "Send" : "Post"));
 
     for(int i=0;i<MAX_WINDOW_HANDLES;i++) {
         window = GetWindowFromHandle(hwnd++);
@@ -2171,7 +2171,7 @@ LRESULT Win32BaseWindow::BroadcastMessageW(int type, UINT msg, WPARAM wParam, LP
  Win32BaseWindow *window;
  HWND hwnd = WNDHANDLE_MAGIC_HIGHWORD;
 
-    dprintf(("BroadCastMessageW %x %x %x", msg, wParam, lParam));
+    dprintf(("BroadCastMessageW %x %x %x %s", msg, wParam, lParam, (type == BROADCAST_SEND) ? "Send" : "Post"));
 
     for(int i=0;i<MAX_WINDOW_HANDLES;i++) {
         window = GetWindowFromHandle(hwnd++);
