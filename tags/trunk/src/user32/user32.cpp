@@ -1,4 +1,4 @@
-/* $Id: user32.cpp,v 1.85 2000-10-18 20:12:45 sandervl Exp $ */
+/* $Id: user32.cpp,v 1.86 2000-11-05 13:39:50 sandervl Exp $ */
 
 /*
  * Win32 misc user32 API functions for OS/2
@@ -578,7 +578,7 @@ ODINFUNCTION2(BOOL, ExitWindowsEx, UINT,  uFlags,
                                    DWORD, dwReserved)
 {
   int rc = MessageBoxA(HWND_DESKTOP,
-                       "Are you sure you want to shutdown the system?",
+                       "Are you sure you want to shutdown the OS/2 system?",
                        "Shutdown ...",
                        MB_YESNOCANCEL | MB_ICONQUESTION);
   switch (rc)
