@@ -1,10 +1,9 @@
-/* $Id: wprocess.cpp,v 1.58 1999-12-14 19:14:28 sandervl Exp $ */
+/* $Id: wprocess.cpp,v 1.59 1999-12-16 00:12:55 sandervl Exp $ */
 
 /*
  * Win32 process functions
  *
  * Copyright 1998 Sander van Leeuwen (sandervl@xs4all.nl)
- *
  *
  * NOTE: Even though Odin32 OS/2 apps don't switch FS selectors,
  *       we still allocate a TEB to store misc information.
@@ -24,6 +23,7 @@
 #include <winexebase.h>
 #include <windllpeldr.h>
 #include <winfakepeldr.h>
+#include <vmutex.h>
 
 #ifdef __IBMCPP__
 #include <builtin.h>
@@ -52,6 +52,9 @@ PDB       ProcessPDB = {0};
 USHORT    ProcessTIBSel = 0;
 DWORD    *TIBFlatPtr    = 0;
 
+//list of thread database structures
+static THDB     *threadList = 0;
+static VMutex    threadListMutex;
 //******************************************************************************
 //******************************************************************************
 TEB *WIN32API GetThreadTEB()
@@ -78,6 +81,22 @@ THDB *WIN32API GetThreadTHDB()
   thdb = (THDB *)(winteb+1);
 
   return thdb;
+}
+//******************************************************************************
+//******************************************************************************
+THDB *WIN32API GetTHDBFromThreadId(ULONG threadId)
+{
+ THDB *thdb = threadList;
+
+   threadListMutex.enter();
+   while(thdb) {
+	if(thdb->threadId == threadId) {
+		break;
+	}
+	thdb = thdb->next;
+   }
+   threadListMutex.leave();
+   return thdb;
 }
 //******************************************************************************
 // Set up the TIB selector and memory for the current thread
@@ -132,10 +151,25 @@ TEB *InitializeTIB(BOOL fMainThread)
    thdb->teb_sel         = tibsel;
    thdb->OrgTIBSel       = GetFS();
    thdb->pWsockData      = NULL;
+   thdb->threadId        = GetCurrentThreadId();
+
+   threadListMutex.enter();
+   THDB *thdblast        = threadList;
+   if(!thdblast) {
+	threadList = thdb;
+   }
+   else {
+   	while(thdblast->next) {
+		thdblast = thdblast->next;
+	}
+	thdblast->next   = thdb;
+   }
+   thdb->next            = NULL;
+   threadListMutex.leave();
 
    if(OSLibGetPIB(PIB_TASKTYPE) == TASKTYPE_PM)
    {
-    thdb->flags      = 0;  //todo gui
+    	thdb->flags      = 0;  //todo gui
    }
    else thdb->flags      = 0;  //todo textmode
 
@@ -144,7 +178,7 @@ TEB *InitializeTIB(BOOL fMainThread)
     //todo initialize PDB during process creation
         //todo: initialize TLS array if required
         //TLS in executable always TLS index 0?
-    ProcessTIBSel = tibsel;
+    	ProcessTIBSel = tibsel;
         ProcessPDB.exit_code       = 0x103; /* STILL_ACTIVE */
         ProcessPDB.threads         = 1;
         ProcessPDB.running_threads = 1;
@@ -158,7 +192,7 @@ TEB *InitializeTIB(BOOL fMainThread)
         ProcessPDB.winver          = 0xffff; /* to be determined */
         ProcessPDB.server_pid      = (void *)GetCurrentProcessId();
 
-    GetSystemTime(&ProcessPDB.creationTime);
+    	GetSystemTime(&ProcessPDB.creationTime);
 
         /* Initialize the critical section */
         InitializeCriticalSection( &ProcessPDB.crit_section );
