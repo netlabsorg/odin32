@@ -1,4 +1,4 @@
-# $Id: odin32.rel.vac36.mk,v 1.4 2001-07-29 18:58:54 sandervl Exp $
+# $Id: odin32.rel.vac36.mk,v 1.5 2001-10-01 01:23:14 bird Exp $
 
 #
 # Odin32 API
@@ -65,11 +65,11 @@ CTARGETFLAGS     = -Ge-
 CXXTARGETFLAGS   = -Ge-
 !endif
 CXXEXCEPTIONS    = -Gx-
-CFLAGS           = -Q -Si -G5 -O+ -Oi+ -Ss+ -W3 -Gm+ /Gn+ $(CTARGETFLAGS)
-CXXFLAGS         = -Q -Si -G5 -O+ -Oi+ -Ss+ -W3 -Gm+ /Gn+ $(CXXTARGETFLAGS) /Gx+
-CXXFLAGS_ODINCRT = -Q -Si -G5 -O+ -Oi+ -Ss+ -W3 -Gm+ /Gn- $(CXXTARGETFLAGS) /Gx+
-CFLAGS_WIN32APP  = -Q -Si -G5 -O+ -Oi+ -Ss+ -W3 -Gm+ /Gn+ $(CTARGETFLAGS)
-CXXFLAGS_WIN32APP= -Q -Si -G5 -O+ -Oi+ -Ss+ -W3 -Gm+ /Gn+ $(CXXTARGETFLAGS)
+CFLAGS           = -c -Q -Si -G5 -O+ -Oi+ -Ss+ -W3 -Gm+ /Gn+ $(CTARGETFLAGS)
+CXXFLAGS         = -c -Q -Si -G5 -O+ -Oi+ -Ss+ -W3 -Gm+ /Gn+ $(CXXTARGETFLAGS) /Gx+
+CXXFLAGS_ODINCRT = -c -Q -Si -G5 -O+ -Oi+ -Ss+ -W3 -Gm+ /Gn- $(CXXTARGETFLAGS) /Gx+
+CFLAGS_WIN32APP  = -c -Q -Si -G5 -O+ -Oi+ -Ss+ -W3 -Gm+ /Gn+ $(CTARGETFLAGS)
+CXXFLAGS_WIN32APP= -c -Q -Si -G5 -O+ -Oi+ -Ss+ -W3 -Gm+ /Gn+ $(CXXTARGETFLAGS)
 CINCLUDES        = -I$(ODIN32_INCLUDE)\Win -I. -I$(ODIN32_INCLUDE)
 CDEFINES         = -D__WIN32OS2__ -D__WINE__ -D__i386__ -DTCPV40HDRS -DCOMCTL32UNDOC
 CDEFINES_ODINCRT = -D__WIN32OS2__ -D__WINE__ -D__i386__
