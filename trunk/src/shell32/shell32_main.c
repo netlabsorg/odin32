@@ -1,4 +1,4 @@
-/* $Id: shell32_main.c,v 1.4 2001-06-01 01:46:30 phaller Exp $ */
+/* $Id: shell32_main.c,v 1.5 2001-06-01 08:22:10 sandervl Exp $ */
 /*
  * 				Shell basics
  *
@@ -892,8 +892,7 @@ BOOL WINAPI Shell32LibMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID fImpLoad)
 
 	switch (fdwReason)
 	{
-        case DLL_PROCESS_ATTACH:
-          
+	  case DLL_PROCESS_ATTACH:
 	    shell32_RefCount++;
 	    if (shell32_hInstance) return TRUE;
 
@@ -913,7 +912,7 @@ BOOL WINAPI Shell32LibMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID fImpLoad)
 
 	    /* initialize the common controls */
             InitCommonControlsEx(NULL);
-          
+
 	    SIC_Initialize();
 	    SYSTRAY_Init();
 	    InitChangeNotifications();
