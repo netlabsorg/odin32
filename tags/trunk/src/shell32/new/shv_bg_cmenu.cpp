@@ -1,11 +1,25 @@
+/* $Id: shv_bg_cmenu.cpp,v 1.3 1999-10-07 10:34:48 phaller Exp $ */
+
+/*
+ * Project Odin Software License can be found in LICENSE.TXT
+ * Win32 SHELL32 Subsystem for OS/2
+ * 1998/05/19 PH Patrick Haller (haller@zebra.fh-weingarten.de)
+ */
+
 /*
  *	IContextMenu
  *	ShellView Background Context Menu (shv_bg_cm)
  *
  *	Copyright 1999	Juergen Schmied <juergen.schmied@metronet.de>
  */
+
+/*****************************************************************************
+ * Includes                                                                  *
+ *****************************************************************************/
+
 #include <string.h>
 #include <odin.h>
+#include <odinwrap.h>
 
 #define ICOM_CINTERFACE 1
 #define CINTERFACE 1
@@ -23,7 +37,8 @@
 
 #include <misc.h>
 
-DEFAULT_DEBUG_CHANNEL(shell)
+DEFAULT_DEBUG_CHANNEL(SHELL32-SHV-BG-CMENU)
+
 
 /**************************************************************************
 *  IContextMenu Implementation
@@ -46,7 +61,10 @@ static HRESULT WINAPI ISVBgCm_fnQueryInterface(IContextMenu *iface, REFIID riid,
 	char    xriid[50];
 	WINE_StringFromCLSID((LPCLSID)riid,xriid);
 
-	TRACE("(%p)->(\n\tIID:\t%s,%p)\n",This,xriid,ppvObj);
+  dprintf(("SHELL32:shv_bg_cmenu: ISVBgCm_fnQueryInterface(%08xh,%s,%08xh)\n",
+           This,
+           xriid,
+           ppvObj));
 
 	*ppvObj = NULL;
 
@@ -80,7 +98,9 @@ static ULONG WINAPI ISVBgCm_fnAddRef(IContextMenu *iface)
 {
 	ICOM_THIS(BgCmImpl, iface);
 
-	TRACE("(%p)->(count=%lu)\n",This, This->ref);
+  dprintf(("SHELL32:shv_bg_cmenu: ISVBgCm_fnAddRef(%08xh,%u)\n",
+           This,
+           This->ref));
 
 	shell32_ObjCount++;
 	return ++(This->ref);
@@ -93,7 +113,8 @@ static ULONG WINAPI ISVBgCm_fnRelease(IContextMenu *iface)
 {
 	ICOM_THIS(BgCmImpl, iface);
 
-	TRACE("(%p)->()\n",This);
+  dprintf(("SHELL32:shv_bg_cmenu: ISVBgCm_fnRelease(%08xh)\n",
+           This));
 
 	shell32_ObjCount--;
 
@@ -123,7 +144,13 @@ static HRESULT WINAPI ISVBgCm_fnQueryContextMenu(
 	
 	ICOM_THIS(BgCmImpl, iface);
 
-	TRACE("(%p)->(hmenu=%x indexmenu=%x cmdfirst=%x cmdlast=%x flags=%x )\n",This, hMenu, indexMenu, idCmdFirst, idCmdLast, uFlags);
+  dprintf(("SHELL32:shv_bg_cmenu: ISVBgCm_fnQueryContextMenu(%08xh,%08xh,%08xh,%08xh,%08xh,%08xh)\n",
+           This,
+           hMenu,
+           indexMenu,
+           idCmdFirst,
+           idCmdLast,
+           uFlags));
 
 	hMyMenu = LoadMenuA(shell32_hInstance, "MENU_002");
 
@@ -147,7 +174,11 @@ static HRESULT WINAPI ISVBgCm_fnInvokeCommand(
 	LPSHELLVIEW	lpSV;
 	HWND	hWndSV;
 
-	TRACE("(%p)->(invcom=%p verb=%p wnd=%x)\n",This,lpcmi,lpcmi->lpVerb, lpcmi->hwnd);
+  dprintf(("SHELL32:shv_bg_cmenu: ISVBgCm_fnInvokeCommand((%p)->(invcom=%p verb=%p wnd=%x)\n",
+           This,
+           lpcmi,
+           lpcmi->lpVerb,
+           lpcmi->hwnd));
 
 	/* get the active IShellView */
 	lpSB = (LPSHELLBROWSER)SendMessageA(lpcmi->hwnd, CWM_GETISHELLBROWSER,0,0);
@@ -214,7 +245,13 @@ static HRESULT WINAPI ISVBgCm_fnGetCommandString(
 {	
 	ICOM_THIS(BgCmImpl, iface);
 
-	TRACE("(%p)->(idcom=%x flags=%x %p name=%p len=%x)\n",This, idCommand, uFlags, lpReserved, lpszName, uMaxNameLen);
+  dprintf(("SHELL32:shv_bg_cmenu: ISVBgCm_fnGetCommandString((%p)->(idcom=%x flags=%x %p name=%p len=%x)\n",
+           This,
+           idCommand,
+           uFlags,
+           lpReserved,
+           lpszName,
+           uMaxNameLen));
 
 	/* test the existance of the menu items, the file dialog enables
 	   the buttons according to this */
@@ -246,7 +283,11 @@ static HRESULT WINAPI ISVBgCm_fnHandleMenuMsg(
 {
 	ICOM_THIS(BgCmImpl, iface);
 
-	FIXME("(%p)->(msg=%x wp=%x lp=%lx)\n",This, uMsg, wParam, lParam);
+  dprintf(("SHELL32:shv_bg_cmenu: ISVBgCm_fnHandleMenuMsg((%p)->(msg=%x wp=%x lp=%lx)\n",
+           This,
+           uMsg,
+           wParam,
+           lParam));
 
 	return E_NOTIMPL;
 }
@@ -279,7 +320,9 @@ IContextMenu *ISvBgCm_Constructor(void)
 	cm->lpvtbl=&cmvt;
 	cm->ref = 1;
 
-	TRACE("(%p)->()\n",cm);
+  dprintf(("SHELL32:shv_bg_cmenu: ISVBgCm_Constructor(%p)\n",
+           cm));
+
 	shell32_ObjCount++;
 	return (IContextMenu*)cm;
 }

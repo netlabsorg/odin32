@@ -1,4 +1,4 @@
-/* $Id: shresdef.h,v 1.2 1999-10-05 19:33:37 phaller Exp $ */
+/* $Id: shresdef.h,v 1.3 1999-10-07 10:34:48 phaller Exp $ */
 
 /*
  * Win32 SHELL32 for OS/2
@@ -10,12 +10,13 @@
  */
 
 
+#ifndef __WINE_SHELL_RES_H
+#define __WINE_SHELL_RES_H
+
+
 /*****************************************************************************
  * Includes                                                                  *
  *****************************************************************************/
-
-#ifndef __WINE_SHELL_RES_H
-#define __WINE_SHELL_RES_H
 
 /*
  * columntitles for the shellview
