@@ -1,4 +1,4 @@
-/* $Id: wprocess.cpp,v 1.162 2002-12-11 14:50:01 sandervl Exp $ */
+/* $Id: wprocess.cpp,v 1.163 2002-12-11 17:12:59 sandervl Exp $ */
 
 /*
  * Win32 process functions
@@ -2011,8 +2011,9 @@ BOOL WINAPI CreateProcessA( LPCSTR lpApplicationName, LPSTR lpCommandLine,
     if(fNEExe) {//16 bits windows app
         char *newcmdline;
 
-        newcmdline = (char *)malloc(strlen(szAppName) + strlen(cmdline) + 16);
-        sprintf(newcmdline, "%s %s", szNELoader, szAppName, lpCommandLine);
+        newcmdline = (char *)malloc(strlen(szAppName) + strlen(cmdline) + 512);
+
+        sprintf(newcmdline, "%s /PELDR=[%s] %s", szNELoader, szPEGUILoader, szAppName, lpCommandLine);
         free(cmdline);
         cmdline = newcmdline;
         //Force Open32 to use DosStartSession (DosExecPgm won't do)
