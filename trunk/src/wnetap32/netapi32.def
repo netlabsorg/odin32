@@ -1,6 +1,9 @@
-; $Id: netapi32.def,v 1.3 2000-10-02 21:19:11 phaller Exp $
+; $Id: netapi32.def,v 1.4 2000-12-16 22:53:50 bird Exp $
 
 LIBRARY WNETAP32 INITINSTANCE
+
+DESCRIPTION 'Odin32 System DLL - NetApi32 (renamed to WNetAp32)'
+
 DATA MULTIPLE NONSHARED
 
 IMPORTS

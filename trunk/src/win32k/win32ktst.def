@@ -4,7 +4,7 @@
 ; Project Odin Software License can be found in LICENSE.TXT
 ;******************************************************************************
 NAME Grace WINDOWCOMPAT
-DESCRIPTION "$@#knut st. osmundsen:v0.5.0alpha#@Grace - Odin32 and OS2NIX Ring-0 part - Copyright (c) 1998-2000 knut st. osmundsen"
+DESCRIPTION "Win32kTst - Odin32 Ring-3 - Copyright (c) 1998-2000 knut st. osmundsen"
 
 STACKSIZE 4096
 ;CODE PRELOAD EXECUTEREAD

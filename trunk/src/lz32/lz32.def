@@ -1,11 +1,11 @@
-; $Id: lz32.def,v 1.5 2000-01-03 10:25:57 sandervl Exp $
+; $Id: lz32.def,v 1.6 2000-12-16 22:53:22 bird Exp $
 ; Win32 32-bit decompression library
 
 ;
-; Based on NT 4.0 SP6: LZ32.DLL 
+; Based on NT 4.0 SP6: LZ32.DLL
 ;
 LIBRARY LZ32 INITINSTANCE TERMINSTANCE
-PROTMODE
+DESCRIPTION 'Odin32 System DLL - LZ32 - Decompression library'
 DATA MULTIPLE NONSHARED READWRITE LOADONCALL
 CODE LOADONCALL
 

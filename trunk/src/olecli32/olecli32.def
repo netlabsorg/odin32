@@ -1,70 +1,71 @@
-; $Id: olecli32.def,v 1.2 1999-12-28 10:31:02 sandervl Exp $
+; $Id: olecli32.def,v 1.3 2000-12-16 22:53:31 bird Exp $
 
 ;
-; Based on NT 4.0 SP6: OLECLI32.DLL 
+; Based on NT 4.0 SP6: OLECLI32.DLL
 ;
 LIBRARY OLECLI32 INITINSTANCE
+DESCRIPTION 'Odin32 System DLL - OleCli32'
 DATA MULTIPLE NONSHARED
 
 EXPORTS
-    OleDelete			= _OleDelete@4 			@2
-    OleSaveToStream		= _OleSaveToStream@8		@3
-    OleLoadFromStream		= _OleLoadFromStream@24		@4
-    OleClone			= _OleClone@20			@6
-    OleCopyFromLink		= _OleCopyFromLink@24		@7
-    OleEqual			= _OleEqual@8			@8
-    OleQueryLinkFromClip	= _OleQueryLinkFromClip@12	@9
-    OleQueryCreateFromClip	= _OleQueryCreateFromClip@12	@10
+    OleDelete           = _OleDelete@4          @2
+    OleSaveToStream     = _OleSaveToStream@8        @3
+    OleLoadFromStream       = _OleLoadFromStream@24     @4
+    OleClone            = _OleClone@20          @6
+    OleCopyFromLink     = _OleCopyFromLink@24       @7
+    OleEqual            = _OleEqual@8           @8
+    OleQueryLinkFromClip    = _OleQueryLinkFromClip@12  @9
+    OleQueryCreateFromClip  = _OleQueryCreateFromClip@12    @10
 
-    OleCreateLinkFromClip	= _OleCreateLinkFromClip@28	@11
-    OleCreateFromClip		= _OleCreateFromClip@28		@12
-    OleCopyToClipboard		= _OleCopyToClipboard@4		@13
-    OleQueryType		= _OleQueryType@8		@14
-    OleSetHostNames		= _OleSetHostNames@12		@15
-    OleSetTargetDevice		= _OleSetTargetDevice@8		@16
-    OleSetBounds		= _OleSetBounds@20		@17
-    OleQueryBounds		= _OleQueryBounds@20		@18
-    OleDraw			= _OleDraw@44			@19
+    OleCreateLinkFromClip   = _OleCreateLinkFromClip@28 @11
+    OleCreateFromClip       = _OleCreateFromClip@28     @12
+    OleCopyToClipboard      = _OleCopyToClipboard@4     @13
+    OleQueryType        = _OleQueryType@8       @14
+    OleSetHostNames     = _OleSetHostNames@12       @15
+    OleSetTargetDevice      = _OleSetTargetDevice@8     @16
+    OleSetBounds        = _OleSetBounds@20      @17
+    OleQueryBounds      = _OleQueryBounds@20        @18
+    OleDraw         = _OleDraw@44           @19
 
-    OleQueryOpen		= _OleQueryOpen@4		@20
-    OleActivate			= _OleActivate@36		@21
-    OleUpdate			= _OleUpdate@4			@22
-    OleReconnect		= _OleReconnect@4		@23
-    OleGetLinkUpdateOptions	= _OleGetLinkUpdateOptions@8	@24
-    OleSetLinkUpdateOptions	= _OleSetLinkUpdateOptions@8	@25
-    OleEnumFormats		= _OleEnumFormats@8		@26
-    OleClose			= _OleClose@4			@27
-    OleGetData			= _OleGetData@12		@28
-    OleSetData			= _OleSetData@12		@29
+    OleQueryOpen        = _OleQueryOpen@4       @20
+    OleActivate         = _OleActivate@36       @21
+    OleUpdate           = _OleUpdate@4          @22
+    OleReconnect        = _OleReconnect@4       @23
+    OleGetLinkUpdateOptions = _OleGetLinkUpdateOptions@8    @24
+    OleSetLinkUpdateOptions = _OleSetLinkUpdateOptions@8    @25
+    OleEnumFormats      = _OleEnumFormats@8     @26
+    OleClose            = _OleClose@4           @27
+    OleGetData          = _OleGetData@12        @28
+    OleSetData          = _OleSetData@12        @29
 
-    OleQueryProtocol		= _OleQueryProtocol@8		@30
-    OleQueryOutOfDate		= _OleQueryOutOfDate@4		@31
-    OleObjectConvert		= _OleObjectConvert@24		@32
-    OleCreateFromTemplate	= _OleCreateFromTemplate@32	@33
-    OleCreate			= _OleCreate@32			@34
-    OleQueryReleaseStatus	= _OleQueryReleaseStatus@4	@35
-    OleQueryReleaseError	= _OleQueryReleaseError@4	@36
-    OleQueryReleaseMethod	= _OleQueryReleaseMethod@4	@37
-    OleCreateFromFile		= _OleCreateFromFile@36		@38
-    OleCreateLinkFromFile	= _OleCreateLinkFromFile@40	@39
+    OleQueryProtocol        = _OleQueryProtocol@8       @30
+    OleQueryOutOfDate       = _OleQueryOutOfDate@4      @31
+    OleObjectConvert        = _OleObjectConvert@24      @32
+    OleCreateFromTemplate   = _OleCreateFromTemplate@32 @33
+    OleCreate           = _OleCreate@32         @34
+    OleQueryReleaseStatus   = _OleQueryReleaseStatus@4  @35
+    OleQueryReleaseError    = _OleQueryReleaseError@4   @36
+    OleQueryReleaseMethod   = _OleQueryReleaseMethod@4  @37
+    OleCreateFromFile       = _OleCreateFromFile@36     @38
+    OleCreateLinkFromFile   = _OleCreateLinkFromFile@40 @39
 
-    OleRelease			= _OleRelease@4			@40
-    OleRegisterClientDoc	= _OleRegisterClientDoc@16	@41
-    OleRevokeClientDoc		= _OleRevokeClientDoc@4		@42
-    OleRenameClientDoc		= _OleRenameClientDoc@8		@43
-    OleRevertClientDoc		= _OleRevertClientDoc@4		@44
-    OleSavedClientDoc		= _OleSavedClientDoc@4		@45
-    OleRename			= _OleRename@8			@46
-    OleEnumObjects		= _OleEnumObjects@8		@47
-    OleQueryName		= _OleQueryName@12		@48
-    OleSetColorScheme		= _OleSetColorScheme@12		@49
+    OleRelease          = _OleRelease@4         @40
+    OleRegisterClientDoc    = _OleRegisterClientDoc@16  @41
+    OleRevokeClientDoc      = _OleRevokeClientDoc@4     @42
+    OleRenameClientDoc      = _OleRenameClientDoc@8     @43
+    OleRevertClientDoc      = _OleRevertClientDoc@4     @44
+    OleSavedClientDoc       = _OleSavedClientDoc@4      @45
+    OleRename           = _OleRename@8          @46
+    OleEnumObjects      = _OleEnumObjects@8     @47
+    OleQueryName        = _OleQueryName@12      @48
+    OleSetColorScheme       = _OleSetColorScheme@12     @49
 
-    OleRequestData		= _OleRequestData@8		@50
-    OleLockServer		= _OleLockServer@8		@54
-    OleUnlockServer		= _OleUnlockServer@4		@55
-    OleQuerySize		= _OleQuerySize@8		@56
-    OleExecute			= _OleExecute@12		@57
-    OleCreateInvisible		= _OleCreateInvisible@36	@58
-    OleQueryClientVersion	= _OleQueryClientVersion@0	@59
+    OleRequestData      = _OleRequestData@8     @50
+    OleLockServer       = _OleLockServer@8      @54
+    OleUnlockServer     = _OleUnlockServer@4        @55
+    OleQuerySize        = _OleQuerySize@8       @56
+    OleExecute          = _OleExecute@12        @57
+    OleCreateInvisible      = _OleCreateInvisible@36    @58
+    OleQueryClientVersion   = _OleQueryClientVersion@0  @59
 
-    OleIsDcMeta			= _OleIsDcMeta@4		@60
+    OleIsDcMeta         = _OleIsDcMeta@4        @60

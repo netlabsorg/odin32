@@ -1,4 +1,4 @@
-; $Id: shlwapi.def,v 1.18 2000-08-24 09:32:43 sandervl Exp $
+; $Id: shlwapi.def,v 1.19 2000-12-16 22:53:44 bird Exp $
 
 ; updated export ordinals to NT4 SP6 version of SHLWAPI.DLL
 ; Note: W95/W98 has DIFFERENT export ordinals
@@ -7,6 +7,7 @@
 ;       5-0-2314-1000
 
 LIBRARY SHLWAPI INITINSTANCE TERMINSTANCE
+DESCRIPTION 'Odin32 System DLL - SHLWAPI'
 DATA MULTIPLE NONSHARED
 
 

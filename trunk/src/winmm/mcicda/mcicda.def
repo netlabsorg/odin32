@@ -1,9 +1,7 @@
-; $Id: mcicda.def,v 1.3 2000-12-03 10:15:01 sandervl Exp $
-
-;Created by BLAST for IBM's compiler
+; $Id: mcicda.def,v 1.4 2000-12-16 22:53:48 bird Exp $
 LIBRARY MCICDA INITINSTANCE
+DESCRIPTION 'Odin32 System DLL - MciCda'
 DATA MULTIPLE NONSHARED
 
-
 EXPORTS
-    DriverProc		= _MCICDAUDIO_DriverProc@20		@1
+    DriverProc      = _MCICDAUDIO_DriverProc@20     @1

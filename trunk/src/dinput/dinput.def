@@ -1,22 +1,22 @@
-;$Id: dinput.def,v 1.3 1999-12-28 10:31:00 sandervl Exp $
+;$Id: dinput.def,v 1.4 2000-12-16 22:53:20 bird Exp $
 
 ;
-; Based on Windows 98 DirectX7: DINPUT.DLL 
+; Based on Windows 98 DirectX7: DINPUT.DLL
 ;
 LIBRARY DINPUT INITINSTANCE TERMINSTANCE
+DESCRIPTION 'Odin32 System DLL - DInput - Direct Input'
 
-PROTMODE
 DATA MULTIPLE NONSHARED READWRITE LOADONCALL
 CODE LOADONCALL
 
 IMPORTS
 
 EXPORTS
- DirectInputCreateA = _DirectInputCreateA@16 		@1
-; DirectInputCreateEx					@2
-; DirectInputCreateW = _DirectInputCreateW@16 		@3
-; DllCanUnloadNow					@4
-; DllGetClassObject					@5
-; DllRegisterServer					@6
-; DllUnregisterServer					@7
+ DirectInputCreateA = _DirectInputCreateA@16        @1
+; DirectInputCreateEx                   @2
+; DirectInputCreateW = _DirectInputCreateW@16       @3
+; DllCanUnloadNow                   @4
+; DllGetClassObject                 @5
+; DllRegisterServer                 @6
+; DllUnregisterServer                   @7
 

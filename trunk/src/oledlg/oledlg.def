@@ -1,32 +1,33 @@
-; $Id: oledlg.def,v 1.2 1999-12-28 10:31:02 sandervl Exp $
+; $Id: oledlg.def,v 1.3 2000-12-16 22:53:32 bird Exp $
 
 ;
-; Based on NT 4.0 SP6: OLEDLG.DLL 
+; Based on NT 4.0 SP6: OLEDLG.DLL
 ;
 LIBRARY OLEDLG INITINSTANCE
+DESCRIPTION 'Odin32 System DLL - OleDlg'
 DATA MULTIPLE NONSHARED
 
 EXPORTS
-    OleUIAddVerbMenuA		= _OleUIAddVerbMenuA@36		@1
-    OleUICanConvertOrActivateAs	= _OleUICanConvertOrActivateAs@12	@2
-    OleUIInsertObjectA		= _OleUIInsertObjectA@4		@3
-    OleUIPasteSpecialA		= _OleUIPasteSpecialA@4		@4
-    OleUIEditLinksA		= _OleUIEditLinksA@4		@5
-    OleUIChangeIconA		= _OleUIChangeIconA@4		@6
-    OleUIConvertA		= _OleUIConvertA@4		@7
-    OleUIBusyA			= _OleUIBusyA@4			@8
-    OleUIUpdateLinksA		= _OleUIUpdateLinksA@16		@9
-    OleUIPromptUserA		= _OleUIPromptUserA		@10
-    OleUIObjectPropertiesA	= _OleUIObjectPropertiesA@4	@11
-    OleUIChangeSourceA		= _OleUIChangeSourceA@4		@12
-    OleUIPromptUserW		= _OleUIPromptUserW		@13
-    OleUIAddVerbMenuW		= _OleUIAddVerbMenuW@36		@14
-    OleUIBusyW			= _OleUIBusyW@4			@15
-    OleUIChangeIconW		= _OleUIChangeIconW@4		@16
-    OleUIChangeSourceW		= _OleUIChangeSourceW@4		@17
-    OleUIConvertW		= _OleUIConvertW@4		@18
-    OleUIEditLinksW		= _OleUIEditLinksW@4		@19
-    OleUIInsertObjectW		= _OleUIInsertObjectW@4		@20
-    OleUIObjectPropertiesW	= _OleUIObjectPropertiesW@4	@21
-    OleUIPasteSpecialW		= _OleUIPasteSpecialW@4		@22
-    OleUIUpdateLinksW		= _OleUIUpdateLinksW@16		@23
+    OleUIAddVerbMenuA       = _OleUIAddVerbMenuA@36     @1
+    OleUICanConvertOrActivateAs = _OleUICanConvertOrActivateAs@12   @2
+    OleUIInsertObjectA      = _OleUIInsertObjectA@4     @3
+    OleUIPasteSpecialA      = _OleUIPasteSpecialA@4     @4
+    OleUIEditLinksA     = _OleUIEditLinksA@4        @5
+    OleUIChangeIconA        = _OleUIChangeIconA@4       @6
+    OleUIConvertA       = _OleUIConvertA@4      @7
+    OleUIBusyA          = _OleUIBusyA@4         @8
+    OleUIUpdateLinksA       = _OleUIUpdateLinksA@16     @9
+    OleUIPromptUserA        = _OleUIPromptUserA     @10
+    OleUIObjectPropertiesA  = _OleUIObjectPropertiesA@4 @11
+    OleUIChangeSourceA      = _OleUIChangeSourceA@4     @12
+    OleUIPromptUserW        = _OleUIPromptUserW     @13
+    OleUIAddVerbMenuW       = _OleUIAddVerbMenuW@36     @14
+    OleUIBusyW          = _OleUIBusyW@4         @15
+    OleUIChangeIconW        = _OleUIChangeIconW@4       @16
+    OleUIChangeSourceW      = _OleUIChangeSourceW@4     @17
+    OleUIConvertW       = _OleUIConvertW@4      @18
+    OleUIEditLinksW     = _OleUIEditLinksW@4        @19
+    OleUIInsertObjectW      = _OleUIInsertObjectW@4     @20
+    OleUIObjectPropertiesW  = _OleUIObjectPropertiesW@4 @21
+    OleUIPasteSpecialW      = _OleUIPasteSpecialW@4     @22
+    OleUIUpdateLinksW       = _OleUIUpdateLinksW@16     @23

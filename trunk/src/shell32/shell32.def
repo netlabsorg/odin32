@@ -1,8 +1,8 @@
-; $Id: shell32.def,v 1.33 2000-11-06 10:20:55 sandervl Exp $
+; $Id: shell32.def,v 1.34 2000-12-16 22:53:43 bird Exp $
 
-;Created by BLAST for IBM's compiler
-;based on Windows 95
+; Based on Windows 95
 LIBRARY SHELL32 INITINSTANCE
+DESCRIPTION 'Odin32 System DLL - Shell32'
 DATA MULTIPLE NONSHARED
 
 

@@ -1,7 +1,7 @@
-; $Id: icmp.def,v 1.1 2000-05-19 18:48:59 jeroen Exp $
+; $Id: icmp.def,v 1.2 2000-12-16 22:53:21 bird Exp $
 
 LIBRARY ICMP
-PROTMODE
+DESCRIPTION 'Odin32 System DLL - ICMP'
 DATA MULTIPLE NONSHARED
 
 EXPORTS

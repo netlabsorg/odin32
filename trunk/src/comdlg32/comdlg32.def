@@ -1,9 +1,10 @@
-; $Id: comdlg32.def,v 1.6 2000-10-21 18:42:13 sandervl Exp $
+; $Id: comdlg32.def,v 1.7 2000-12-16 22:53:18 bird Exp $
 
 ;
-; Based on NT 4.0 SP6: COMDLG32.DLL 
+; Based on NT 4.0 SP6: COMDLG32.DLL
 ;
 LIBRARY COMDLG32 INITINSTANCE
+DESCRIPTION 'Odin32 System DLL - ComDlg32 - Common Dialogs'
 DATA MULTIPLE NONSHARED
 
 EXPORTS
@@ -20,14 +21,14 @@ EXPORTS
     GetOpenFileNameW           = _GetOpenFileNameW@4         @111
     GetSaveFileNameA           = _GetSaveFileNameA@4         @112
     GetSaveFileNameW           = _GetSaveFileNameW@4         @113
-;   LoadAlterBitmap					     @114
+;   LoadAlterBitmap                      @114
     PageSetupDlgA              = _PageSetupDlgA@4            @115
     PageSetupDlgW              = _PageSetupDlgW@4            @116
     PrintDlgA                  = _PrintDlgA@4                @117
     PrintDlgW                  = _PrintDlgW@4                @118
     ReplaceTextA               = _ReplaceTextA@4             @119
     ReplaceTextW               = _ReplaceTextW@4             @120
-;   WantArrows						     @121
-;   dwLBSubclass					     @122
-;   dwOKSubclass					     @123
+;   WantArrows                           @121
+;   dwLBSubclass                         @122
+;   dwOKSubclass                         @123
 

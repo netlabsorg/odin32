@@ -1,5 +1,6 @@
-;/* $Id: oleaut32.def,v 1.4 1999-12-06 21:31:19 sandervl Exp $ */
+;/* $Id: oleaut32.def,v 1.5 2000-12-16 22:53:31 bird Exp $ */
 LIBRARY OLAUTOS2 INITINSTANCE
+DESCRIPTION 'Odin32 System DLL - OleAut32'
 DATA MULTIPLE NONSHARED
 
 EXPORTS

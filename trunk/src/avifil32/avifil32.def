@@ -1,9 +1,11 @@
-; $Id: avifil32.def,v 1.3 1999-12-28 10:30:59 sandervl Exp $
+; $Id: avifil32.def,v 1.4 2000-12-16 22:53:17 bird Exp $
 
 ;
-; Based on NT 4.0 SP6: AVIFIL32.DLL 
+; Based on NT 4.0 SP6: AVIFIL32.DLL
 ;
 LIBRARY AVIFIL32 INITINSTANCE TERMINSTANCE
+
+DESCRIPTION 'Odin32 System DLL - AviFil32'
 
 PROTMODE
 DATA MULTIPLE NONSHARED READWRITE LOADONCALL
@@ -18,7 +20,7 @@ IMPORTS
 
 EXPORTS
 ; AVIBuildFilter             = _AVIBuildFilter@?               @1
-; AVIBuildFilterA            = _AVIBuildFilterA@?              @2 
+; AVIBuildFilterA            = _AVIBuildFilterA@?              @2
 ; AVIBuildFilterW            = _AVIBuildFilterW@?              @3
 ; AVIClearClipboard          = _AVIClearClipboard@?            @4
 ; AVIFileAddRef              = _AVIFileAddRef@?                @5

@@ -1,70 +1,71 @@
-; $Id: imagehlp.def,v 1.2 1999-12-28 10:31:00 sandervl Exp $
+; $Id: imagehlp.def,v 1.3 2000-12-16 22:53:21 bird Exp $
 
 ;
-; Based on NT 4.0 SP6: IMAGEHLP.DLL 
+; Based on NT 4.0 SP6: IMAGEHLP.DLL
 ;
 LIBRARY IMAGEHLP INITINSTANCE TERMINSTANCE
+DESCRIPTION 'Odin32 System DLL - ImageHlp - Executable Image Helpers'
 DATA MULTIPLE NONSHARED
 
 EXPORTS
-    BindImage			= _BindImage@12			@1
-    BindImageEx			= _BindImageEx@20		@2
-    CheckSumMappedFile		= _CheckSumMappedFile@16	@3
-    EnumerateLoadedModules	= _EnumerateLoadedModules@12	@4
-    FindDebugInfoFile		= _FindDebugInfoFile@12		@5
-    FindExecutableImage		= _FindExecutableImage@12	@6
-    GetImageConfigInformation	= _GetImageConfigInformation@8	@7
-    GetImageUnusedHeaderBytes	= _GetImageUnusedHeaderBytes@8	@8
-    GetTimestampForLoadedLibrary= _GetTimestampForLoadedLibrary@4	@9
-    ImageAddCertificate		= _ImageAddCertificate@12	@10
-    ImageDirectoryEntryToData	= _ImageDirectoryEntryToData@16	@11
-    ImageEnumerateCertificates	= _ImageEnumerateCertificates@20	@12
-    ImageGetCertificateData	= _ImageGetCertificateData@16	@13
-    ImageGetCertificateHeader	= _ImageGetCertificateHeader@12	@14
-    ImageGetDigestStream	= _ImageGetDigestStream@16	@15
-    ImageLoad			= _ImageLoad@8			@16
-    ImageNtHeader		= _ImageNtHeader@4		@17
-    ImageRemoveCertificate	= _ImageRemoveCertificate@8	@18
-    ImageRvaToSection		= _ImageRvaToSection@12		@19
-    ImageRvaToVa		= _ImageRvaToVa@16		@20
-    ImageUnload			= _ImageUnload@4		@21
-    ImagehlpApiVersion		= _ImagehlpApiVersion@0		@22
-    ImagehlpApiVersionEx	= _ImagehlpApiVersionEx@4	@23
-    MakeSureDirectoryPathExists	= _MakeSureDirectoryPathExists@4	@24
-    MapAndLoad			= _MapAndLoad@20		@25
-    MapDebugInformation		= _MapDebugInformation@16	@26
-    MapFileAndCheckSumA		= _MapFileAndCheckSumA@12	@27
-    MapFileAndCheckSumW		= _MapFileAndCheckSumW@12	@28
-;    MarkImageAsRunFromSwap	= _MarkImageAsRunFromSwap	@29
-    ReBaseImage			= _ReBaseImage@44		@30
-    RemovePrivateCvSymbolic	= _RemovePrivateCvSymbolic@12	@31
-    RemoveRelocations		= _RemoveRelocations@4		@32
-    SearchTreeForFile		= _SearchTreeForFile@12		@33
-    SetImageConfigInformation	= _SetImageConfigInformation@8	@34
-    SplitSymbols		= _SplitSymbols@16		@35
-    StackWalk			= _StackWalk@36			@36
-    SymCleanup			= _SymCleanup@4			@37
-    SymEnumerateModules		= _SymEnumerateModules@12	@38
-    SymEnumerateSymbols		= _SymEnumerateSymbols@16	@39
-    SymFunctionTableAccess	= _SymFunctionTableAccess@8	@40
-    SymGetModuleBase		= _SymGetModuleBase@8		@41
-    SymGetModuleInfo		= _SymGetModuleInfo@12		@42
-    SymGetOptions		= _SymGetOptions@0		@43
-    SymGetSearchPath		= _SymGetSearchPath@12		@44
-    SymGetSymFromAddr		= _SymGetSymFromAddr@16		@45
-    SymGetSymFromName		= _SymGetSymFromName@12		@46
-    SymGetSymNext		= _SymGetSymNext@8		@47
-    SymGetSymPrev		= _SymGetSymPrev@8		@48
-    SymInitialize		= _SymInitialize@12		@49
-    SymLoadModule		= _SymLoadModule@24		@50
-    SymRegisterCallback		= _SymRegisterCallback@12	@51
-    SymSetOptions		= _SymSetOptions@4		@52
-    SymSetSearchPath		= _SymSetSearchPath@8		@53
-    SymUnDName			= _SymUnDName@12		@54
-    SymUnloadModule		= _SymUnloadModule@8		@55
-    TouchFileTimes		= _TouchFileTimes@8		@56
-    UnDecorateSymbolName	= _UnDecorateSymbolName@16	@57
-    UnMapAndLoad		= _UnMapAndLoad@4		@58
-    UnmapDebugInformation	= _UnmapDebugInformation@4	@59
-    UpdateDebugInfoFile		= _UpdateDebugInfoFile@16	@60
-    UpdateDebugInfoFileEx	= _UpdateDebugInfoFileEx@20	@61
+    BindImage           = _BindImage@12         @1
+    BindImageEx         = _BindImageEx@20       @2
+    CheckSumMappedFile      = _CheckSumMappedFile@16    @3
+    EnumerateLoadedModules  = _EnumerateLoadedModules@12    @4
+    FindDebugInfoFile       = _FindDebugInfoFile@12     @5
+    FindExecutableImage     = _FindExecutableImage@12   @6
+    GetImageConfigInformation   = _GetImageConfigInformation@8  @7
+    GetImageUnusedHeaderBytes   = _GetImageUnusedHeaderBytes@8  @8
+    GetTimestampForLoadedLibrary= _GetTimestampForLoadedLibrary@4   @9
+    ImageAddCertificate     = _ImageAddCertificate@12   @10
+    ImageDirectoryEntryToData   = _ImageDirectoryEntryToData@16 @11
+    ImageEnumerateCertificates  = _ImageEnumerateCertificates@20    @12
+    ImageGetCertificateData = _ImageGetCertificateData@16   @13
+    ImageGetCertificateHeader   = _ImageGetCertificateHeader@12 @14
+    ImageGetDigestStream    = _ImageGetDigestStream@16  @15
+    ImageLoad           = _ImageLoad@8          @16
+    ImageNtHeader       = _ImageNtHeader@4      @17
+    ImageRemoveCertificate  = _ImageRemoveCertificate@8 @18
+    ImageRvaToSection       = _ImageRvaToSection@12     @19
+    ImageRvaToVa        = _ImageRvaToVa@16      @20
+    ImageUnload         = _ImageUnload@4        @21
+    ImagehlpApiVersion      = _ImagehlpApiVersion@0     @22
+    ImagehlpApiVersionEx    = _ImagehlpApiVersionEx@4   @23
+    MakeSureDirectoryPathExists = _MakeSureDirectoryPathExists@4    @24
+    MapAndLoad          = _MapAndLoad@20        @25
+    MapDebugInformation     = _MapDebugInformation@16   @26
+    MapFileAndCheckSumA     = _MapFileAndCheckSumA@12   @27
+    MapFileAndCheckSumW     = _MapFileAndCheckSumW@12   @28
+;    MarkImageAsRunFromSwap = _MarkImageAsRunFromSwap   @29
+    ReBaseImage         = _ReBaseImage@44       @30
+    RemovePrivateCvSymbolic = _RemovePrivateCvSymbolic@12   @31
+    RemoveRelocations       = _RemoveRelocations@4      @32
+    SearchTreeForFile       = _SearchTreeForFile@12     @33
+    SetImageConfigInformation   = _SetImageConfigInformation@8  @34
+    SplitSymbols        = _SplitSymbols@16      @35
+    StackWalk           = _StackWalk@36         @36
+    SymCleanup          = _SymCleanup@4         @37
+    SymEnumerateModules     = _SymEnumerateModules@12   @38
+    SymEnumerateSymbols     = _SymEnumerateSymbols@16   @39
+    SymFunctionTableAccess  = _SymFunctionTableAccess@8 @40
+    SymGetModuleBase        = _SymGetModuleBase@8       @41
+    SymGetModuleInfo        = _SymGetModuleInfo@12      @42
+    SymGetOptions       = _SymGetOptions@0      @43
+    SymGetSearchPath        = _SymGetSearchPath@12      @44
+    SymGetSymFromAddr       = _SymGetSymFromAddr@16     @45
+    SymGetSymFromName       = _SymGetSymFromName@12     @46
+    SymGetSymNext       = _SymGetSymNext@8      @47
+    SymGetSymPrev       = _SymGetSymPrev@8      @48
+    SymInitialize       = _SymInitialize@12     @49
+    SymLoadModule       = _SymLoadModule@24     @50
+    SymRegisterCallback     = _SymRegisterCallback@12   @51
+    SymSetOptions       = _SymSetOptions@4      @52
+    SymSetSearchPath        = _SymSetSearchPath@8       @53
+    SymUnDName          = _SymUnDName@12        @54
+    SymUnloadModule     = _SymUnloadModule@8        @55
+    TouchFileTimes      = _TouchFileTimes@8     @56
+    UnDecorateSymbolName    = _UnDecorateSymbolName@16  @57
+    UnMapAndLoad        = _UnMapAndLoad@4       @58
+    UnmapDebugInformation   = _UnmapDebugInformation@4  @59
+    UpdateDebugInfoFile     = _UpdateDebugInfoFile@16   @60
+    UpdateDebugInfoFileEx   = _UpdateDebugInfoFileEx@20 @61

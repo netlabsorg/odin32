@@ -1,20 +1,21 @@
-; $Id: olesvr32.def,v 1.2 1999-12-28 10:31:02 sandervl Exp $
+; $Id: olesvr32.def,v 1.3 2000-12-16 22:53:33 bird Exp $
 
 ;
-; Based on NT 4.0 SP6: OLESVR32.DLL 
+; Based on NT 4.0 SP6: OLESVR32.DLL
 ;
 LIBRARY OLESVR32 INITINSTANCE
+DESCRIPTION 'Odin32 System DLL - OleSvr32'
 DATA MULTIPLE NONSHARED
 
 EXPORTS
-    OleRegisterServer		= _OleRegisterServer@20		@2
-    OleRevokeServer		= _OleRevokeServer@4		@3
-    OleBlockServer		= _OleBlockServer@4		@4
-    OleUnblockServer		= _OleUnblockServer@8		@5
-    OleRegisterServerDoc	= _OleRegisterServerDoc@16	@6
-    OleRevokeServerDoc		= _OleRevokeServerDoc@4		@7
-    OleRenameServerDoc		= _OleRenameServerDoc@8		@8
-    OleRevertServerDoc		= _OleRevertServerDoc@4		@9
-    OleSavedServerDoc		= _OleSavedServerDoc@4		@10
-    OleRevokeObject		= _OleRevokeObject@4		@11
-    OleQueryServerVersion	= _OleQueryServerVersion@0	@12
+    OleRegisterServer       = _OleRegisterServer@20     @2
+    OleRevokeServer     = _OleRevokeServer@4        @3
+    OleBlockServer      = _OleBlockServer@4     @4
+    OleUnblockServer        = _OleUnblockServer@8       @5
+    OleRegisterServerDoc    = _OleRegisterServerDoc@16  @6
+    OleRevokeServerDoc      = _OleRevokeServerDoc@4     @7
+    OleRenameServerDoc      = _OleRenameServerDoc@8     @8
+    OleRevertServerDoc      = _OleRevertServerDoc@4     @9
+    OleSavedServerDoc       = _OleSavedServerDoc@4      @10
+    OleRevokeObject     = _OleRevokeObject@4        @11
+    OleQueryServerVersion   = _OleQueryServerVersion@0  @12
