@@ -1,4 +1,4 @@
-/* $Id: socket.cpp,v 1.13 2002-05-06 09:38:52 sandervl Exp $ */
+/* $Id: socket.cpp,v 1.14 2003-02-22 10:05:41 sandervl Exp $ */
 /*
  * based on Windows Sockets 1.1 specs
  * (ftp.microsoft.com:/Advsys/winsock/spec11/WINSOCK.TXT)
@@ -148,20 +148,66 @@ SOCKET WINAPI WSAAccept( SOCKET s, struct WS_sockaddr *addr, LPINT addrlen,
                                addr = (struct WS_sockaddr *)memcpy(addr, &src_addr, (*addrlen > size) ?  size : *addrlen );
                        return cs;
                case CF_DEFER:
-                       SetLastError(WSATRY_AGAIN);
+                       WSASetLastError(WSATRY_AGAIN);
                        return SOCKET_ERROR;
                case CF_REJECT:
                        closesocket(cs);
-                       SetLastError(WSAECONNREFUSED);
+                       WSASetLastError(WSAECONNREFUSED);
                        return SOCKET_ERROR;
                default:
                        FIXME("Unknown return type from Condition function\n");
-                       SetLastError(WSAENOTSOCK);
+                       WSASetLastError(WSAENOTSOCK);
                        return SOCKET_ERROR;
                }
 
-       SetLastError(WSAENOTSOCK);
+       WSASetLastError(WSAENOTSOCK);
        return SOCKET_ERROR;
 }
 //******************************************************************************
 //******************************************************************************
+/***********************************************************************
+ *		WSASendTo		(WS2_32.74)
+ */
+INT WINAPI WSASendTo( SOCKET s, LPWSABUF lpBuffers, DWORD dwBufferCount,
+                      LPDWORD lpNumberOfBytesSent, DWORD dwFlags,
+                      const struct WS_sockaddr *to, int tolen,
+                      LPWSAOVERLAPPED lpOverlapped,
+                      LPWSAOVERLAPPED_COMPLETION_ROUTINE lpCompletionRoutine )
+{
+    WSASetLastError(WSAENOTSOCK);
+    return SOCKET_ERROR;
+}
+/***********************************************************************
+ *		WSASend			(WS2_32.72)
+ */
+INT WINAPI WSASend( SOCKET s, LPWSABUF lpBuffers, DWORD dwBufferCount,
+                    LPDWORD lpNumberOfBytesSent, DWORD dwFlags,
+                    LPWSAOVERLAPPED lpOverlapped,
+                    LPWSAOVERLAPPED_COMPLETION_ROUTINE lpCompletionRoutine )
+{
+    return WSASendTo ( s, lpBuffers, dwBufferCount, lpNumberOfBytesSent, dwFlags,
+                       NULL, 0, lpOverlapped, lpCompletionRoutine );
+}
+/***********************************************************************
+ *              WSARecvFrom             (WS2_32.69)
+ */
+INT WINAPI WSARecvFrom( SOCKET s, LPWSABUF lpBuffers, DWORD dwBufferCount,
+                        LPDWORD lpNumberOfBytesRecvd, LPDWORD lpFlags, struct WS_sockaddr *lpFrom,
+                        LPINT lpFromlen, LPWSAOVERLAPPED lpOverlapped,
+                        LPWSAOVERLAPPED_COMPLETION_ROUTINE lpCompletionRoutine )
+
+{
+    WSASetLastError(WSAENOTSOCK);
+    return SOCKET_ERROR;
+}
+/***********************************************************************
+ *		WSARecv			(WS2_32.67)
+ */
+int WINAPI WSARecv (SOCKET s, LPWSABUF lpBuffers, DWORD dwBufferCount,
+		    LPDWORD NumberOfBytesReceived, LPDWORD lpFlags,
+		    LPWSAOVERLAPPED lpOverlapped,
+		    LPWSAOVERLAPPED_COMPLETION_ROUTINE lpCompletionRoutine)
+{
+    return WSARecvFrom (s, lpBuffers, dwBufferCount, NumberOfBytesReceived, lpFlags,
+                        NULL, NULL, lpOverlapped, lpCompletionRoutine);
+}
