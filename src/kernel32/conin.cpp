@@ -1,4 +1,4 @@
-/* $Id: conin.cpp,v 1.6 1999-10-27 18:36:34 phaller Exp $ */
+/* $Id: conin.cpp,v 1.7 1999-12-09 19:08:25 sandervl Exp $ */
 
 /*
  * Win32 Console API Translation for OS/2
@@ -113,7 +113,7 @@ DWORD HMDeviceConsoleInClass::CreateFile (LPCSTR        lpFileName,
  * Author    : Patrick Haller [Wed, 1998/02/11 20:44]
  *****************************************************************************/
 
-DWORD HMDeviceConsoleInClass::ReadFile(PHMHANDLEDATA pHMHandleData,
+BOOL HMDeviceConsoleInClass::ReadFile(PHMHANDLEDATA pHMHandleData,
                                        LPCVOID       lpBuffer,
                                        DWORD         nNumberOfBytesToRead,
                                        LPDWORD       lpNumberOfBytesRead,
@@ -264,7 +264,7 @@ DWORD HMDeviceConsoleInClass::ReadFile(PHMHANDLEDATA pHMHandleData,
  * Author    : Patrick Haller [Wed, 1998/02/11 20:44]
  *****************************************************************************/
 
-DWORD HMDeviceConsoleInClass::WriteFile(PHMHANDLEDATA pHMHandleData,
+BOOL HMDeviceConsoleInClass::WriteFile(PHMHANDLEDATA pHMHandleData,
                                         LPCVOID       lpBuffer,
                                         DWORD         nNumberOfBytesToWrite,
                                         LPDWORD       lpNumberOfBytesWritten,
@@ -281,7 +281,8 @@ DWORD HMDeviceConsoleInClass::WriteFile(PHMHANDLEDATA pHMHandleData,
            lpOverlapped);
 #endif
 
-  return(ERROR_ACCESS_DENIED);
+  SetLastError(ERROR_ACCESS_DENIED);
+  return FALSE;
 }
 
 

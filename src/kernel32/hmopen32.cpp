@@ -1,4 +1,4 @@
-/* $Id: hmopen32.cpp,v 1.14 1999-11-22 20:35:49 sandervl Exp $ */
+/* $Id: hmopen32.cpp,v 1.15 1999-12-09 19:08:28 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -250,7 +250,7 @@ DWORD HMDeviceOpen32Class::CloseHandle(PHMHANDLEDATA pHMHandleData)
 
 
 /*****************************************************************************
- * Name      : DWORD HMDeviceOpen32Class::ReadFile
+ * Name      : BOOL HMDeviceOpen32Class::ReadFile
  * Purpose   : read data from handle / device
  * Parameters: PHMHANDLEDATA pHMHandleData,
  *             LPCVOID       lpBuffer,
@@ -258,18 +258,18 @@ DWORD HMDeviceOpen32Class::CloseHandle(PHMHANDLEDATA pHMHandleData)
  *             LPDWORD       lpNumberOfBytesRead,
  *             LPOVERLAPPED  lpOverlapped
  * Variables :
- * Result    : API returncode
+ * Result    : Boolean
  * Remark    :
  * Status    :
  *
  * Author    : Patrick Haller [Wed, 1998/02/11 20:44]
  *****************************************************************************/
 
-DWORD HMDeviceOpen32Class::ReadFile(PHMHANDLEDATA pHMHandleData,
-                                    LPCVOID       lpBuffer,
-                                    DWORD         nNumberOfBytesToRead,
-                                    LPDWORD       lpNumberOfBytesRead,
-                                    LPOVERLAPPED  lpOverlapped)
+BOOL HMDeviceOpen32Class::ReadFile(PHMHANDLEDATA pHMHandleData,
+                                   LPCVOID       lpBuffer,
+                                   DWORD         nNumberOfBytesToRead,
+                                   LPDWORD       lpNumberOfBytesRead,
+                                   LPOVERLAPPED  lpOverlapped)
 {
   BOOL bRC;
   LPVOID lpRealBuf;
@@ -283,8 +283,28 @@ DWORD HMDeviceOpen32Class::ReadFile(PHMHANDLEDATA pHMHandleData,
            lpOverlapped));
 
 #if 1
+  Win32MemMap *map;
+  DWORD offset;
+
+  //SvL: DosRead doesn't like writing to memory addresses returned by 
+  //     DosAliasMem -> search for original memory mapped pointer and use 
+  //     that one
+  map = Win32MemMapView::findMapByView((ULONG)lpBuffer, &offset, MEMMAP_ACCESS_READ);
+  if(map) {
+	lpRealBuf = (LPVOID)((ULONG)map->getMappingAddr() + offset);
+	DWORD nrpages = nNumberOfBytesToRead/4096;
+	if(offset & 0xfff) 
+		nrpages++;
+	else
+	if(nNumberOfBytesToRead & 0xfff) 
+		nrpages++;
+
+	map->commitPage(offset & ~0xfff, TRUE, nrpages);
+  }
+  else  lpRealBuf = (LPVOID)lpBuffer;
+  
   bRC = O32_ReadFile(pHMHandleData->hHMHandle,
-                     (PVOID)lpBuffer,
+                     (PVOID)lpRealBuf,
                      nNumberOfBytesToRead,
                      lpNumberOfBytesRead,
                      lpOverlapped);
@@ -297,7 +317,7 @@ DWORD HMDeviceOpen32Class::ReadFile(PHMHANDLEDATA pHMHandleData,
   else 	dprintfl(("KERNEL32: HandleManager::Open32::ReadFile returned %08xh\n",
                    bRC));
 
-  return (DWORD)bRC;
+  return bRC;
 #else
   rc = OSLibDosRead(pHMHandleData->hHMHandle,
                     (PVOID) lpBuffer,
@@ -318,7 +338,7 @@ DWORD HMDeviceOpen32Class::ReadFile(PHMHANDLEDATA pHMHandleData,
 
 
 /*****************************************************************************
- * Name      : DWORD HMDeviceOpen32Class::WriteFile
+ * Name      : BOOL HMDeviceOpen32Class::WriteFile
  * Purpose   : write data to handle / device
  * Parameters: PHMHANDLEDATA pHMHandleData,
  *             LPCVOID       lpBuffer,
@@ -326,18 +346,18 @@ DWORD HMDeviceOpen32Class::ReadFile(PHMHANDLEDATA pHMHandleData,
  *             LPDWORD       lpNumberOfBytesWritten,
  *             LPOVERLAPPED  lpOverlapped
  * Variables :
- * Result    : API returncode
+ * Result    : Boolean
  * Remark    :
  * Status    :
  *
  * Author    : Patrick Haller [Wed, 1998/02/11 20:44]
  *****************************************************************************/
 
-DWORD HMDeviceOpen32Class::WriteFile(PHMHANDLEDATA pHMHandleData,
-                                 LPCVOID       lpBuffer,
-                                 DWORD         nNumberOfBytesToWrite,
-                                 LPDWORD       lpNumberOfBytesWritten,
-                                 LPOVERLAPPED  lpOverlapped)
+BOOL HMDeviceOpen32Class::WriteFile(PHMHANDLEDATA pHMHandleData,
+                                    LPCVOID       lpBuffer,
+                                    DWORD         nNumberOfBytesToWrite,
+                                    LPDWORD       lpNumberOfBytesWritten,
+                                    LPOVERLAPPED  lpOverlapped)
 {
   BOOL bRC;
 
@@ -359,7 +379,7 @@ DWORD HMDeviceOpen32Class::WriteFile(PHMHANDLEDATA pHMHandleData,
   dprintfl(("KERNEL32: HandleManager::Open32::WriteFile returned %08xh\n",
            bRC));
 
-  return (DWORD)bRC;
+  return bRC;
 #else
   rc = OSLibDosWrite(pHMHandleData->hHMHandle,
                      (PVOID) lpBuffer,

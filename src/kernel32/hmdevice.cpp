@@ -1,4 +1,4 @@
-/* $Id: hmdevice.cpp,v 1.10 1999-11-27 12:48:26 achimha Exp $ */
+/* $Id: hmdevice.cpp,v 1.11 1999-12-09 19:08:26 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -18,6 +18,7 @@
  *****************************************************************************/
 
 #include <odin.h>
+#include <os2win.h>
 #include <win32type.h>
 #include <misc.h>
 #include "HandleManager.h"
@@ -181,7 +182,7 @@ DWORD HMDeviceHandler::CloseHandle(PHMHANDLEDATA pHMHandleData)
 
 
 /*****************************************************************************
- * Name      : DWORD HMDeviceHandler::ReadFile
+ * Name      : BOOL HMDeviceHandler::ReadFile
  * Purpose   : read data from handle / device
  * Parameters: PHMHANDLEDATA pHMHandleData,
  *             LPCVOID       lpBuffer,
@@ -189,18 +190,18 @@ DWORD HMDeviceHandler::CloseHandle(PHMHANDLEDATA pHMHandleData)
  *             LPDWORD       lpNumberOfBytesRead,
  *             LPOVERLAPPED  lpOverlapped
  * Variables :
- * Result    : API returncode
+ * Result    : Boolean
  * Remark    :
  * Status    :
  *
  * Author    : Patrick Haller [Wed, 1998/02/11 20:44]
  *****************************************************************************/
 
-DWORD HMDeviceHandler::ReadFile(PHMHANDLEDATA pHMHandleData,
-                                LPCVOID       lpBuffer,
-                                DWORD         nNumberOfBytesToRead,
-                                LPDWORD       lpNumberOfBytesRead,
-                                LPOVERLAPPED  lpOverlapped)
+BOOL HMDeviceHandler::ReadFile(PHMHANDLEDATA pHMHandleData,
+                               LPCVOID       lpBuffer,
+                               DWORD         nNumberOfBytesToRead,
+                               LPDWORD       lpNumberOfBytesRead,
+                               LPOVERLAPPED  lpOverlapped)
 {
   dprintf(("KERNEL32:HandleManager::ReadFile %s(%08x,%08x,%08x,%08x,%08x) - stub?\n",
            lpHMDeviceName,
@@ -210,12 +211,13 @@ DWORD HMDeviceHandler::ReadFile(PHMHANDLEDATA pHMHandleData,
            lpNumberOfBytesRead,
            lpOverlapped));
 
-  return(ERROR_INVALID_FUNCTION);
+  SetLastError(ERROR_INVALID_FUNCTION);
+  return FALSE;
 }
 
 
 /*****************************************************************************
- * Name      : DWORD HMDeviceHandler::WriteFile
+ * Name      : BOOL HMDeviceHandler::WriteFile
  * Purpose   : write data to handle / device
  * Parameters: PHMHANDLEDATA pHMHandleData,
  *             LPCVOID       lpBuffer,
@@ -223,18 +225,18 @@ DWORD HMDeviceHandler::ReadFile(PHMHANDLEDATA pHMHandleData,
  *             LPDWORD       lpNumberOfBytesWritten,
  *             LPOVERLAPPED  lpOverlapped
  * Variables :
- * Result    : API returncode
+ * Result    : Boolean
  * Remark    :
  * Status    :
  *
  * Author    : Patrick Haller [Wed, 1998/02/11 20:44]
  *****************************************************************************/
 
-DWORD HMDeviceHandler::WriteFile(PHMHANDLEDATA pHMHandleData,
-                                 LPCVOID       lpBuffer,
-                                 DWORD         nNumberOfBytesToWrite,
-                                 LPDWORD       lpNumberOfBytesWritten,
-                                 LPOVERLAPPED  lpOverlapped)
+BOOL HMDeviceHandler::WriteFile(PHMHANDLEDATA pHMHandleData,
+                                LPCVOID       lpBuffer,
+                                DWORD         nNumberOfBytesToWrite,
+                                LPDWORD       lpNumberOfBytesWritten,
+                                LPOVERLAPPED  lpOverlapped)
 {
   dprintf(("KERNEL32:HandleManager::WriteFile %s(%08x,%08x,%08x,%08x,%08x) - stub?\n",
            lpHMDeviceName,
@@ -244,7 +246,8 @@ DWORD HMDeviceHandler::WriteFile(PHMHANDLEDATA pHMHandleData,
            lpNumberOfBytesWritten,
            lpOverlapped));
 
-  return(ERROR_INVALID_FUNCTION);
+  SetLastError(ERROR_INVALID_FUNCTION);
+  return FALSE;
 }
 
 

@@ -1,4 +1,4 @@
-/* $Id: conin.h,v 1.1 1999-06-17 18:21:38 phaller Exp $ */
+/* $Id: conin.h,v 1.2 1999-12-09 19:08:26 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -61,14 +61,14 @@ class HMDeviceConsoleInClass : public HMDeviceHandler
                              PHMHANDLEDATA pHMHandleDataTemplate);
 
                            /* this is a handler method for calls to ReadFile() */
-  virtual DWORD  ReadFile   (PHMHANDLEDATA pHMHandleData,
+  virtual BOOL   ReadFile   (PHMHANDLEDATA pHMHandleData,
                              LPCVOID       lpBuffer,
                              DWORD         nNumberOfBytesToRead,
                              LPDWORD       lpNumberOfBytesRead,
                              LPOVERLAPPED  lpOverlapped);
 
                         /* this is a handler method for calls to WriteFile() */
-  virtual DWORD  WriteFile  (PHMHANDLEDATA pHMHandleData,
+  virtual BOOL   WriteFile  (PHMHANDLEDATA pHMHandleData,
                              LPCVOID       lpBuffer,
                              DWORD         nNumberOfBytesToWrite,
                              LPDWORD       lpNumberOfBytesWritten,
