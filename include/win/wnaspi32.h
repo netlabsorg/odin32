@@ -1,4 +1,4 @@
-/* $Id: wnaspi32.h,v 1.1 1999-05-24 20:19:23 ktk Exp $ */
+/* $Id: wnaspi32.h,v 1.2 1999-09-15 11:28:13 phaller Exp $ */
 
 #if !defined(WNASPI32_H)
 #define WNASPI32_H
@@ -40,7 +40,7 @@ typedef struct tagSRB_ExecSCSICmd {
   void        *SRB_Rsvd2;         /* Reserved */
   BYTE        SRB_Rsvd3[16];      /* Reserved for expansion */
   BYTE        CDBByte[16];        /* SCSI CDB */
-  BYTE        SenseArea[0];       /* Request sense buffer - var length */
+  BYTE        SenseArea[1];       /* Request sense buffer - var length */
 } SRB_ExecSCSICmd WINE_PACKED;
 
 typedef struct tagSRB_Abort {
