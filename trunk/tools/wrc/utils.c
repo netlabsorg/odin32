@@ -448,7 +448,7 @@ int strcasecmp( char *p1, char *p2 )
     return stricmp( p1, p2 );
 }
 
-int lstrcmpiA( char *p1, char *p2 )
+INT WINAPI lstrcmpiA(LPCSTR p1, LPCSTR p2)
 {
     return stricmp( p1, p2 );
 }
