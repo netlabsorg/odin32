@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.15 1999-08-09 18:42:06 achimha Exp $
+# $Id: makefile,v 1.16 1999-08-10 12:43:24 phaller Exp $
 
 #
 # PD-Win32 API
@@ -99,7 +99,7 @@ $(PDWIN32_LIB)\pmwinx.lib:
 kernel32.OBJ: kernel32.cpp \
     except.h \
     $(PDWIN32_INCLUDE)\unicode.h \
-    heap.h \
+    $(PDWIN32_INCLUDE)\heap.h \
     $(PDWIN32_INCLUDE)\wprocess.h \
     os2util.h \
     $(PDWIN32_INCLUDE)\nameid.h
@@ -138,13 +138,13 @@ thread.OBJ: \
 
 heap.OBJ: \
     .\heap.cpp \
-    .\heap.h \
+    $(PDWIN32_INCLUDE)\heap.h \
     os2heap.h
 
 heapstring.obj: \
     .\heapstring.cpp \
-    .\heap.h \
-    .\heapstring.h
+    $(PDWIN32_INCLUDE)\heap.h \
+    $(PDWIN32_INCLUDE)\heapstring.h
 
 os2heap.OBJ: \
     .\os2heap.cpp \
