@@ -1,4 +1,4 @@
-/* $Id: wsock32.cpp,v 1.37 2001-07-08 15:44:27 achimha Exp $ */
+/* $Id: wsock32.cpp,v 1.38 2001-10-10 14:41:22 sandervl Exp $ */
 
 /*
  *
@@ -795,11 +795,15 @@ ODINFUNCTION5(int,OS2select,
 	if(exceptfds) {
 		nrexcept += exceptfds->fd_count;
 	}
+#if 0
       	if(nrread + nrwrite + nrexcept  == 0) {
+                dprintf(("ERROR: nrread + nrwrite + nrexcept  == 0"));
          	WSASetLastError(WSAEINVAL);
          	return SOCKET_ERROR;
 	}
+#endif
       	if(timeout != NULL && (timeout->tv_sec < 0 || timeout->tv_usec < 0)) {
+                dprintf(("ERROR: timeout->tv_sec < 0 || timeout->tv_usec < 0"));
          	WSASetLastError(WSAEINVAL);
          	return SOCKET_ERROR;
       	}
@@ -1017,6 +1021,28 @@ tryagain:
                ret = setsockopt(s, level, optname, (char *)optval, optlen);
                break;
            }
+
+           case IP_ADD_MEMBERSHIP:
+           case IP_DROP_MEMBERSHIP:
+               if (optlen < sizeof(struct ip_mreq))
+               {
+                   dprintf(("IPPROTO_IP, IP_ADD_MEMBERSHIP/IP_DROP_MEMBERSHIP, optlen too small"));
+                   WSASetLastError(WSAEFAULT);
+                   return SOCKET_ERROR;
+               }
+               ret = setsockopt(s, level, optname, (char *)optval, optlen);
+               break;
+
+           case IP_MULTICAST_LOOP:
+           case IP_MULTICAST_TTL:
+               if (optlen < sizeof(u_char))
+               {
+                   dprintf(("IPPROTO_IP, IP_MULTICAST_LOOP/IP_MULTICAST_TTL, optlen too small"));
+                   WSASetLastError(WSAEFAULT);
+                   return SOCKET_ERROR;
+               }
+               ret = setsockopt(s, level, optname, (char *)optval, optlen);
+               break;
 
            default:
 		dprintf(("setsockopt: IPPROTO_IP, unknown option %x", optname));
