@@ -1,4 +1,4 @@
-/* $Id: mmap.h,v 1.5 1999-08-24 12:23:54 sandervl Exp $ */
+/* $Id: mmap.h,v 1.6 1999-08-24 18:46:40 sandervl Exp $ */
 
 /*
  * Memory mapped class
@@ -24,13 +24,17 @@ public:
    Win32MemMap(HFILE hfile, ULONG size, ULONG fdwProtect, LPSTR lpszName);
   ~Win32MemMap();
 
-   HANDLE Init();
+   BOOL   Init(HANDLE hMemMap);
    BOOL   flushView(LPVOID lpvBase, ULONG cbFlush);
-   LPVOID mapFileView(ULONG size, ULONG offset, ULONG fdwAccess);
-   BOOL   unmapFileView();
+   LPVOID mapViewOfFile(ULONG size, ULONG offset, ULONG fdwAccess);
+   BOOL   unmapViewOfFile();
 
    HFILE  getMapHandle()                 { return hMemMap; };
    LPSTR  getMemName()                   { return lpszMapName; };
+   DWORD  getProtFlags()                 { return mProtFlags; };
+
+   void   AddRef()                       { ++referenced; };
+   void   Release()                      { if(--referenced == 0) delete this; };
 
 static Win32MemMap *findMap(LPSTR lpszName);
 static Win32MemMap *findMap(ULONG address);
@@ -43,6 +47,8 @@ protected:
    LPSTR  lpszMapName;
    void  *pMapping;
    BOOL   fMapped;
+
+   ULONG  referenced;
 
    VMutex mapMutex;
 

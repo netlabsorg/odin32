@@ -1,4 +1,4 @@
-/* $Id: HandleManager.h,v 1.5 1999-08-24 14:33:37 phaller Exp $ */
+/* $Id: HandleManager.h,v 1.6 1999-08-24 18:48:10 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -267,34 +267,26 @@ BOOL   HMReleaseSemaphore           (HANDLE                     hSemaphore,
                                      LONG                       cReleaseCount,
                                      LPLONG                     lpPreviousCount);
 
-HANDLE HMCreateFileMapping          (HANDLE                     hFile,
-                                     LPSECURITY_ATTRIBUTES      lpFileMappingAttributes,
-                                     DWORD                      flProtect,
-                                     DWORD                      dwMaximumSizeHigh,
-                                     DWORD                      dwMaximumSizeLow,
-                                     LPCTSTR                    lpName);
 
-HANDLE HMOpenFileMapping            (DWORD                      fdwAccess,
-                                     BOOL                       fInherit,
-                                     LPCTSTR                    lpName);
+HANDLE HMCreateFileMapping(
+                HFILE hFile,   /* [in] Handle of file to map */
+                SECURITY_ATTRIBUTES *sa, /* [in] Optional security attributes*/
+                DWORD protect,   /* [in] Protection for mapping object */
+                DWORD size_high, /* [in] High-order 32 bits of object size */
+                DWORD size_low,  /* [in] Low-order 32 bits of object size */
+                LPCSTR name);    /* [in] Name of file-mapping object */ 
 
-LPVOID HMMapViewOfFile              (HANDLE                     hFileMappingObject,
-                                     DWORD                      dwDesiredAccess,
-                                     DWORD                      dwFileOffsetHigh,
-                                     DWORD                      dwFileOffsetLow,
-                                     DWORD                      dwNumberOfBytesToMap);
+HANDLE HMOpenFileMapping(
+                DWORD access,   /* [in] Access mode */
+                BOOL inherit,   /* [in] Inherit flag */
+                LPCSTR name );  /* [in] Name of file-mapping object */
 
 LPVOID HMMapViewOfFileEx            (HANDLE                     hFileMappingObject,
                                      DWORD                      dwDesiredAccess,
                                      DWORD                      dwFileOffsetHigh,
                                      DWORD                      dwFileOffsetLow,
                                      DWORD                      dwNumberOfBytesToMap,
-                                     LPVOID                     lpBaseAddress);
-
-BOOL HMUnmapViewOfFile              (LPVOID                     lpBaseAddress);
-
-BOOL HMFlushViewOfFile              (LPVOID                     lpBaseAddress,
-                                     DWORD                      dwNumberOfBytesToFlush);
+			             LPVOID                     lpBaseAddress);
 
 #ifdef __cplusplus__
   }
