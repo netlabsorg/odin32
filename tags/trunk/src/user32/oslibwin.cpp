@@ -1,4 +1,4 @@
-/* $Id: oslibwin.cpp,v 1.65 2000-01-29 20:46:52 sandervl Exp $ */
+/* $Id: oslibwin.cpp,v 1.66 2000-02-05 14:08:53 sandervl Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -101,12 +101,9 @@ HWND OSLibWinCreateWindow(HWND hwndParent,ULONG dwWinStyle,
 }
 //******************************************************************************
 //******************************************************************************
-BOOL OSLibWinConvertStyle(ULONG dwStyle, ULONG *dwExStyle, ULONG *OSWinStyle, ULONG *OSFrameStyle, ULONG *borderWidth, ULONG *borderHeight)
+BOOL OSLibWinConvertStyle(ULONG dwStyle, ULONG *dwExStyle, ULONG *OSWinStyle)
 {
   *OSWinStyle   = 0;
-  *OSFrameStyle = 0;
-  *borderWidth  = 0;
-  *borderHeight = 0;
 
   /* Window styles */
   if(dwStyle & WS_MINIMIZE_W)
@@ -129,78 +126,6 @@ BOOL OSLibWinConvertStyle(ULONG dwStyle, ULONG *dwExStyle, ULONG *OSWinStyle, UL
   if(dwStyle & WS_TABSTOP_W)
         *OSWinStyle |= WS_TABSTOP;
 
-  if(dwStyle & WS_CHILD_W && !((dwStyle & WS_CAPTION_W) == WS_CAPTION_W))
-  {
-//SvL: Causes crash in VPBuddy if enabled -> find bug
-#if 0
-    if (!HAS_3DFRAME(*dwExStyle) && (dwStyle & (WS_DLGFRAME_W | WS_THICKFRAME_W))) *dwExStyle |= WS_EX_DLGMODALFRAME_W;
-#endif
-
-    if (*dwExStyle & WS_EX_CLIENTEDGE_W)
-    {
-      *OSFrameStyle |= FCF_SIZEBORDER;
-      *borderHeight = *borderWidth = 2;
-    }
-    else
-    if (*dwExStyle & WS_EX_DLGMODALFRAME_W)
-    {
-      *OSFrameStyle |= FCF_SIZEBORDER;
-      *borderHeight = *borderWidth = 3;
-    }
-    else
-    if (*dwExStyle & WS_EX_STATICEDGE_W)
-    {
-      *OSFrameStyle |= FCF_SIZEBORDER;
-      *borderHeight = *borderWidth = 2;
-    }
-    else
-    if(dwStyle & WS_BORDER_W)
-    {
-      *OSFrameStyle |= FCF_BORDER;
-      *borderHeight = *borderWidth = 1;
-    }
-    else if (*dwExStyle & WS_EX_WINDOWEDGE_W); //no border
-
-    if(dwStyle & WS_VSCROLL_W)
-          *OSFrameStyle |= FCF_VERTSCROLL;
-    if(dwStyle & WS_HSCROLL_W)
-          *OSFrameStyle |= FCF_HORZSCROLL;
-  }
-  else
-  {
-    if((dwStyle & WS_CAPTION_W) == WS_DLGFRAME_W)
-        *OSFrameStyle |= FCF_DLGBORDER;
-    else
-    {
-        if((dwStyle & WS_CAPTION_W) == WS_CAPTION_W)
-            *OSFrameStyle |= (FCF_TITLEBAR | FCF_BORDER);
-        else
-        if(dwStyle & WS_BORDER_W)
-            *OSFrameStyle |= FCF_BORDER;
-    }
-
-    if(dwStyle & WS_VSCROLL_W)
-          *OSFrameStyle |= FCF_VERTSCROLL;
-    if(dwStyle & WS_HSCROLL_W)
-          *OSFrameStyle |= FCF_HORZSCROLL;
-
-    if(dwStyle & WS_SYSMENU_W)
-          *OSFrameStyle |= FCF_SYSMENU;
-    if(dwStyle & WS_THICKFRAME_W)
-          *OSFrameStyle |= FCF_SIZEBORDER;        //??
-    if(dwStyle & WS_MINIMIZEBOX_W)
-          *OSFrameStyle |= FCF_MINBUTTON;
-    if(dwStyle & WS_MAXIMIZEBOX_W)
-          *OSFrameStyle |= FCF_MAXBUTTON;
-
-    if(*dwExStyle & WS_EX_DLGMODALFRAME_W)
-          *OSFrameStyle |= FCF_DLGBORDER;
-  }
-
-  //Clear certain frame bits when the window doesn't have a titlebar
-  if(!(*OSFrameStyle & FCF_TITLEBAR)) {
-        *OSFrameStyle &= ~(FCF_MINBUTTON|FCF_MAXBUTTON|FCF_SYSMENU);
-  }
   return TRUE;
 }
 //******************************************************************************
@@ -979,6 +904,23 @@ void OSLibWinShowTaskList(HWND hwndFrame)
 {
   //CB: don't know if this works on all machines
   WinSetActiveWindow(HWND_DESKTOP,0x8000000E);
+}
+//******************************************************************************
+//******************************************************************************
+void OSLibSetWindowStyle(HWND hwnd, ULONG dwStyle, ULONG dwExStyle, BOOL saveBits)
+{
+  ULONG dwWinStyle;
+
+  OSLibWinConvertStyle(dwStyle, &dwExStyle, &dwWinStyle);
+
+  dwWinStyle = dwWinStyle & ~(WS_TABSTOP | WS_GROUP | WS_CLIPCHILDREN);
+  if(saveBits) dwWinStyle |= WS_SAVEBITS;
+  if(dwStyle & WS_VISIBLE_W)
+        dwWinStyle |= WS_VISIBLE;
+
+  WinSetWindowULong(hwnd, QWL_STYLE,
+                    (WinQueryWindowULong(hwnd, QWL_STYLE) & ~0xffff0000) |
+                     dwWinStyle);
 }
 //******************************************************************************
 //******************************************************************************

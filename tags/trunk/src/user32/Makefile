@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.61 2000-02-05 02:12:20 sandervl Exp $
+# $Id: Makefile,v 1.62 2000-02-05 14:08:52 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -22,9 +22,6 @@ CXXFLAGS = $(CXXFLAGS) -I$(PDWIN32_INCLUDE)
 CFLAGS = $(CFLAGS) -DDEBUG_ENABLELOG_LEVEL2
 CXXFLAGS = $(CXXFLAGS) -DDEBUG_ENABLELOG_LEVEL2
 !endif
-
-RC = $(PDWIN32_TOOLS)\wrc
-RCFLAGS = -s -I. -I$(CPPMAIN)\include -I$(PDWIN32_INCLUDE) -I$(PDWIN32_INCLUDE)\win
 
 TARGET = user32
 
