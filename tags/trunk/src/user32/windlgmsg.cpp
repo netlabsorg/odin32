@@ -1,4 +1,4 @@
-/* $Id: windlgmsg.cpp,v 1.11 2001-11-30 18:45:51 sandervl Exp $ */
+/* $Id: windlgmsg.cpp,v 1.12 2002-05-17 13:12:02 sandervl Exp $ */
 /*
  * Win32 dialog message APIs for OS/2
  *
@@ -74,6 +74,13 @@ static BOOL DIALOG_IsAccelerator( HWND hwnd, HWND hwndDlg, WPARAM vKey )
     BOOL RetVal = FALSE;
     WCHAR buffer[128];
     INT dlgCode;
+
+#ifdef __WIN32OS2__
+    //@PF: Experimental DIALOG_IsAccelerator fix; return FALSE if window is not visible
+    //(fixes endless loop in property sheet when switching page with keyboard)
+    if (!IsWindowVisible(hwnd))
+      return FALSE;
+#endif
 
     if (vKey == VK_SPACE)
     {
