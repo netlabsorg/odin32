@@ -1,4 +1,4 @@
-/* $Id: text.cpp,v 1.34 2003-07-14 13:43:15 sandervl Exp $ */
+/* $Id: text.cpp,v 1.35 2003-12-01 13:27:39 sandervl Exp $ */
 
 /*
  * GDI32 text apis
@@ -20,6 +20,7 @@
 #include "oslibgpi.h"
 #include <dcdata.h>
 #include <unicode.h>
+#include "font.h"
 
 #define DBG_LOCALLOG    DBG_text
 #include "dbglocal.h"
@@ -385,58 +386,43 @@ BOOL WIN32API PolyTextOutW(HDC hdc,POLYTEXTW *pptxt,int cStrings)
 BOOL WIN32API GetTextExtentPointA(HDC hdc, LPCTSTR lpsz, int cbString,
                                   LPSIZE lpsSize)
 {
-#if 1
-   dprintf(("GDI32: GetTextExtentPointA %x %.*s %d", hdc, cbString, lpsz, cbString));
-
-   if(lpsz == NULL || cbString < 0 || lpsSize == NULL)
-   {
-      dprintf(("!WARNING!: GDI32: GetTextExtentPointA invalid parameter!"));
-      SetLastError(ERROR_INVALID_PARAMETER);
-      return FALSE;
+   BOOL ret = FALSE;
+   INT  wlen;
+   LPWSTR p = FONT_mbtowc(hdc, lpsz, cbString, &wlen, NULL);
+   if (p) {
+       ret = GetTextExtentPointW( hdc, p, wlen, lpsSize );
+       HeapFree( GetProcessHeap(), 0, p );
    }
-
-   lpsSize->cx = 0;
-   lpsSize->cy = 0;
-
-   // Verified with NT4, SP6
-   if(cbString == 0)
-   {
-      dprintf(("GDI32: GetTextExtentPointA cbString == 0"));
-      SetLastError(ERROR_SUCCESS);
-      return TRUE;
-   }
-
-   //SvL: This works better than the code below. Can been seen clearly
-   //     in the Settings dialog box of VirtualPC. Strings are clipped.
-   //     (e.g.: Hard Disk 1 -> Hard Disk)
-   BOOL rc = O32_GetTextExtentPoint(hdc, lpsz, cbString, lpsSize);
-   if(rc) {
-      dprintf(("GDI32: GetTextExtentPointA returned (%d,%d)", lpsSize->cx, lpsSize->cy));
-      SetLastError(ERROR_SUCCESS);
-      return TRUE;
-   }
-   return FALSE;
-#else
+   else DebugInt3();
+   return ret;
+}
+//******************************************************************************
+//******************************************************************************
+BOOL WIN32API GetTextExtentPointW(HDC    hdc,
+                                  LPCWSTR lpString,
+                                  int    cbString,
+                                  PSIZE  lpSize)
+{
    BOOL       rc;
    POINTLOS2  pts[TXTBOXOS_COUNT];
    POINTLOS2  widthHeight = { 0, 0};
    pDCData    pHps = (pDCData)OSLibGpiQueryDCData((HPS)hdc);
 
-   dprintf(("GDI32: GetTextExtentPointA %s\n", lpsz));
+   dprintf(("GDI32: GetTextExtentPointW %ls", lpString));
    if(pHps == NULL)
    {
       SetLastError(ERROR_INVALID_HANDLE);
       return FALSE;
    }
 
-   if(lpsz == NULL || cbString < 0 || lpsSize == NULL)
+   if(lpString == NULL || cbString < 0 || lpSize == NULL)
    {
       SetLastError(ERROR_INVALID_PARAMETER);
       return FALSE;
    }
 
-   lpsSize->cx = 0;
-   lpsSize->cy = 0;
+   lpSize->cx = 0;
+   lpSize->cy = 0;
 
    // Verified with NT4, SP6
    if(cbString == 0)
@@ -450,84 +436,52 @@ BOOL WIN32API GetTextExtentPointA(HDC hdc, LPCTSTR lpsz, int cbString,
       SIZE  newSize;
 
       dprintf(("WARNING: string longer than 512 chars; splitting up"));
-      lpsSize->cx = 0;
-      lpsSize->cy = 0;
+      lpSize->cx = 0;
+      lpSize->cy = 0;
       while(cbString) {
          cbStringNew = min(500, cbString);
-         rc = GetTextExtentPointA(hdc, lpsz, cbStringNew, &newSize);
+         rc = GetTextExtentPointW(hdc, lpString, cbStringNew, &newSize);
          if(rc == FALSE) {
              return FALSE;
          }
-         lpsSize->cx += newSize.cx;
-         lpsSize->cy  = max(newSize.cy, lpsSize->cy);
-         lpsz     += cbStringNew;
+         lpSize->cx += newSize.cx;
+         lpSize->cy  = max(newSize.cy, lpSize->cy);
+         lpString     += cbStringNew;
          cbString -= cbStringNew;
       }
       return TRUE;
    }
 
-   rc = OSLibGpiQueryTextBox(pHps, cbString, lpsz, TXTBOXOS_COUNT, pts);
+   int   len;
+   LPSTR astring;
+
+   len = WideCharToMultiByte( CP_ACP, 0, lpString, cbString, 0, 0, NULL, NULL );
+   astring = (char *)malloc( len + 1 );
+   lstrcpynWtoA(astring, lpString, len + 1 );
+
+   BOOL ret = OSLibGpiQueryTextBox(pHps, cbString, astring, TXTBOXOS_COUNT, pts);
+   free(astring);
+
    if(rc == FALSE)
    {
       SetLastError(ERROR_INVALID_PARAMETER);    //todo wrong error
       return FALSE;
    }
    calcDimensions(pts, &widthHeight);
-   lpsSize->cx = widthHeight.x;
-   lpsSize->cy = widthHeight.y;
+   lpSize->cx = widthHeight.x;
+   lpSize->cy = widthHeight.y;
 
    if(pHps && pHps->isPrinter && pHps->hdc)
    {//scale for printer dcs
        LONG alArray[2];
 
        if (OSLibDevQueryCaps(pHps, OSLIB_CAPS_HORIZONTAL_RESOLUTION, 2, &alArray[0]))
-         lpsSize->cx = lpsSize->cx * alArray[0] / alArray[1];
+         lpSize->cx = lpSize->cx * alArray[0] / alArray[1];
    }
 
-   dprintf(("GDI32: GetTextExtentPointA %x %s %d returned %d (%d,%d)", hdc, lpsz, cbString, rc, lpsSize->cx, lpsSize->cy));
+   dprintf(("GDI32: GetTextExtentPointW %x %ls %d returned %d (%d,%d)", hdc, lpString, cbString, rc, lpSize->cx, lpSize->cy));
    SetLastError(ERROR_SUCCESS);
    return TRUE;
-#endif
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API GetTextExtentPointW(HDC    hdc,
-                                  LPCWSTR lpString,
-                                  int    cbString,
-                                  PSIZE  lpSize)
-{
-  char *astring;
-  int  len;
-  BOOL rc;
-
-   if(lpString == NULL || cbString < 0 || lpSize == NULL)
-   {
-      dprintf(("!WARNING!: GDI32: GetTextExtentPointW invalid parameter!"));
-      SetLastError(ERROR_INVALID_PARAMETER);
-      return FALSE;
-   }
-
-   lpSize->cx = 0;
-   lpSize->cy = 0;
-
-   // Verified with NT4, SP6
-   if(cbString == 0)
-   {
-      dprintf(("GDI32: GetTextExtentPointW cbString == 0"));
-      SetLastError(ERROR_SUCCESS);
-      return TRUE;
-   }
-
-   dprintf(("GDI32: GetTextExtentPointW %x %.*ls %d %x", hdc, cbString, lpString, cbString, lpSize));
-
-   len = WideCharToMultiByte( CP_ACP, 0, lpString, cbString, 0, 0, NULL, NULL );
-   astring = (char *)malloc( len + 1 );
-   UnicodeToAsciiN(lpString, astring, len + 1 );
-   rc = GetTextExtentPointA(hdc, astring,
-                            len, lpSize);
-
-   free(astring);
-   return(rc);
 }
 //******************************************************************************
 //******************************************************************************
@@ -540,6 +494,65 @@ BOOL WIN32API GetTextExtentPoint32A( HDC hdc, LPCSTR lpsz, int cbString, PSIZE  
 BOOL WIN32API GetTextExtentPoint32W(HDC hdc, LPCWSTR lpsz, int cbString, PSIZE lpSize)
 {
     return GetTextExtentPointW(hdc, lpsz, cbString, lpSize);
+}
+//******************************************************************************
+//******************************************************************************
+BOOL WIN32API GetTextExtentExPointA(HDC hdc,
+                                    LPCSTR  str,
+                                    int     count,
+                                    int     maxExt,
+                                    LPINT   lpnFit,
+                                    LPINT   alpDx,
+                                    LPSIZE  size)
+{
+    BOOL ret;
+    INT wlen;
+    LPWSTR p = FONT_mbtowc( hdc, str, count, &wlen, NULL);
+    ret = GetTextExtentExPointW( hdc, p, wlen, maxExt, lpnFit, alpDx, size);
+    if (lpnFit) *lpnFit = WideCharToMultiByte(CP_ACP,0,p,*lpnFit,NULL,0,NULL,NULL);
+    HeapFree( GetProcessHeap(), 0, p );
+    return ret;
+}
+//******************************************************************************
+//******************************************************************************
+BOOL WIN32API GetTextExtentExPointW(HDC hdc,
+                                    LPCWSTR str,
+                                    int     count,
+                                    int     maxExt,
+                                    LPINT   lpnFit,
+                                    LPINT   alpDx,
+                                    LPSIZE  size)
+{
+    int index, nFit, extent;
+    SIZE tSize;
+    BOOL ret = FALSE;
+
+    size->cx = size->cy = nFit = extent = 0;
+    for(index = 0; index < count; index++)
+    {
+ 	if(!GetTextExtentPoint32W( hdc, str, 1, &tSize )) goto done;
+        /* GetTextExtentPoint includes intercharacter spacing. */
+        /* FIXME - justification needs doing yet.  Remember that the base
+         * data will not be in logical coordinates.
+         */
+	extent += tSize.cx;
+	if( !lpnFit || extent <= maxExt )
+        /* It is allowed to be equal. */
+        {
+	    nFit++;
+	    if( alpDx ) alpDx[index] = extent;
+        }
+	if( tSize.cy > size->cy ) size->cy = tSize.cy;
+	str++;
+    }
+    size->cx = extent;
+    if(lpnFit) *lpnFit = nFit;
+    ret = TRUE;
+
+    dprintf(("returning %d %ld x %ld\n",nFit,size->cx,size->cy));
+
+done:
+    return ret;
 }
 //******************************************************************************
 //******************************************************************************
