@@ -1,4 +1,4 @@
-/* $Id: pmframe.cpp,v 1.20 1999-11-03 22:04:22 cbratschi Exp $ */
+/* $Id: pmframe.cpp,v 1.21 1999-11-09 17:07:22 cbratschi Exp $ */
 /*
  * Win32 Frame Managment Code for OS/2
  *
@@ -50,7 +50,7 @@ VOID Draw3DRect(HPS hps,RECTL rect,LONG colorBR,LONG colorTL)
 }
 //******************************************************************************
 //******************************************************************************
-VOID DeflateRect(RECTL *rect)
+inline VOID DeflateRect(RECTL *rect)
 {
   rect->xLeft++;
   rect->xRight--;

@@ -1,4 +1,4 @@
-/* $Id: uitools.cpp,v 1.15 1999-10-30 09:19:44 sandervl Exp $ */
+/* $Id: uitools.cpp,v 1.16 1999-11-09 17:07:23 cbratschi Exp $ */
 /*
  * User Interface Functions
  *
@@ -190,8 +190,6 @@ static BOOL UITOOLS95_DrawDiagEdge(HDC hdc, LPRECT rc,
         spx = epx + SmallDiam;
         epy = rc->bottom;
         spy = epy - SmallDiam;
-        epx++;
-        epy--;
         break;
 
     case BF_TOPLEFT:
@@ -201,8 +199,6 @@ static BOOL UITOOLS95_DrawDiagEdge(HDC hdc, LPRECT rc,
         spx = epx + SmallDiam;
         epy = rc->top-1;
         spy = epy + SmallDiam;
-        epx++;
-        epy++;
         break;
 
     case BF_TOP:
@@ -220,8 +216,6 @@ static BOOL UITOOLS95_DrawDiagEdge(HDC hdc, LPRECT rc,
         epx = spx + SmallDiam;
         spy = rc->bottom-1;
         epy = spy - SmallDiam;
-        epx--;
-        epy++;
         break;
     }
 
@@ -357,11 +351,6 @@ static BOOL UITOOLS95_DrawDiagEdge(HDC hdc, LPRECT rc,
  * Same as DrawEdge invoked without BF_DIAGONAL
  *
  * 23-Nov-1997: Changed by Bertho Stultiens
- * 25-June-1999: Changed by Christoph Bratschi
- *
- * Attention: only draw in the rect's range!
- *   left to right-1
- *   top to bottom-1
  *
  * Well, I started testing this and found out that there are a few things
  * that weren't quite as win95. The following rewrite should reproduce
@@ -507,24 +496,24 @@ static BOOL UITOOLS95_DrawRectEdge(HDC hdc, LPRECT rc,
     if(uFlags & BF_TOP)
     {
         MoveToEx(hdc, InnerRect.left, InnerRect.top, NULL);
-        LineTo(hdc, InnerRect.right-1, InnerRect.top);
+        LineTo(hdc, InnerRect.right, InnerRect.top);
     }
     if(uFlags & BF_LEFT)
     {
         MoveToEx(hdc, InnerRect.left, InnerRect.top, NULL);
-        LineTo(hdc, InnerRect.left, InnerRect.bottom-1);
+        LineTo(hdc, InnerRect.left, InnerRect.bottom);
     }
 
     SelectObject(hdc, RBOuterPen);
     if(uFlags & BF_BOTTOM)
     {
         MoveToEx(hdc, InnerRect.right-1, InnerRect.bottom-1, NULL);
-        LineTo(hdc, InnerRect.left, InnerRect.bottom-1);
+        LineTo(hdc, InnerRect.left-1, InnerRect.bottom-1);
     }
     if(uFlags & BF_RIGHT)
     {
         MoveToEx(hdc, InnerRect.right-1, InnerRect.bottom-1, NULL);
-        LineTo(hdc, InnerRect.right-1, InnerRect.top);
+        LineTo(hdc, InnerRect.right-1, InnerRect.top-1);
     }
 
     /* Draw the inner edge */
@@ -532,23 +521,23 @@ static BOOL UITOOLS95_DrawRectEdge(HDC hdc, LPRECT rc,
     if(uFlags & BF_TOP)
     {
         MoveToEx(hdc, InnerRect.left+LTpenplus, InnerRect.top+1, NULL);
-        LineTo(hdc, InnerRect.right-RTpenplus-1, InnerRect.top+1);
+        LineTo(hdc, InnerRect.right-RTpenplus, InnerRect.top+1);
     }
     if(uFlags & BF_LEFT)
     {
         MoveToEx(hdc, InnerRect.left+1, InnerRect.top+LTpenplus, NULL);
-        LineTo(hdc, InnerRect.left+1, InnerRect.bottom-LBpenplus-1);
+        LineTo(hdc, InnerRect.left+1, InnerRect.bottom-LBpenplus);
     }
     SelectObject(hdc, RBInnerPen);
     if(uFlags & BF_BOTTOM)
     {
         MoveToEx(hdc, InnerRect.right-1-RBpenplus, InnerRect.bottom-2, NULL);
-        LineTo(hdc, InnerRect.left+LBpenplus, InnerRect.bottom-2);
+        LineTo(hdc, InnerRect.left-1+LBpenplus, InnerRect.bottom-2);
     }
     if(uFlags & BF_RIGHT)
     {
         MoveToEx(hdc, InnerRect.right-2, InnerRect.bottom-1-RBpenplus, NULL);
-        LineTo(hdc, InnerRect.right-2, InnerRect.top+RTpenplus);
+        LineTo(hdc, InnerRect.right-2, InnerRect.top-1+RTpenplus);
     }
 
     if( ((uFlags & BF_MIDDLE) && retval) || (uFlags & BF_ADJUST) )

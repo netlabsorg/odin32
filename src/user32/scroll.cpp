@@ -1,4 +1,4 @@
-/* $Id: scroll.cpp,v 1.18 1999-10-31 17:53:53 cbratschi Exp $ */
+/* $Id: scroll.cpp,v 1.19 1999-11-09 17:07:22 cbratschi Exp $ */
 /*
  * Scrollbar control
  *
@@ -530,9 +530,9 @@ void SCROLL_DrawSizeBox(HDC hdc,RECT rect)
   HPEN oldPen = SelectObject(hdc,penDark);
   INT x;
 
-  p1.x = rect.right-2;
+  p1.x = rect.right-1;
   p1.y = rect.bottom;
-  p2.x = rect.right-1;
+  p2.x = rect.right;
   p2.y = rect.bottom-1;
   for (x = 0;x < 3;x++)
   {
