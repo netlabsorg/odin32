@@ -18,6 +18,7 @@
 #include "winuser.h"
 #include <win/commctrl.h>
 #include "unicode.h"
+#include "wineuni.h"
 
 
 #ifdef __cplusplus
