@@ -1,4 +1,4 @@
-/* $Id: odin32.e,v 1.8 2001-10-22 04:11:08 bird Exp $
+/* $Id: odin32.e,v 1.9 2001-10-23 02:14:02 bird Exp $
  *
  * Visual SlickEdit Documentation Macros.
  *
@@ -311,7 +311,7 @@ void odin32_modulebox()
     _begin_line();
     if (file_eq(p_extension, 'asm'))
     {
-        _insert_text("; $Id: odin32.e,v 1.8 2001-10-22 04:11:08 bird Exp $\n");
+        _insert_text("; $Id: odin32.e,v 1.9 2001-10-23 02:14:02 bird Exp $\n");
         _insert_text("; \n");
         _insert_text("; \n");
         _insert_text("; \n");
@@ -324,7 +324,7 @@ void odin32_modulebox()
     }
     else
     {
-        _insert_text("/* $Id: odin32.e,v 1.8 2001-10-22 04:11:08 bird Exp $\n");
+        _insert_text("/* $Id: odin32.e,v 1.9 2001-10-23 02:14:02 bird Exp $\n");
         _insert_text(" * \n");
         _insert_text(" * \n");
         _insert_text(" * \n");
@@ -375,10 +375,14 @@ void odin32_klogentry()
         _str sParams = odin32_getparams();
         if (sParams)
         {
+            _str sRetType = odin32_getreturntype(true);
+            if (!sRetType || sRetType == "")
+                sRetType = "void";      /* paranoia! */
+
             /*
              * Insert text.
              */
-            if (!search("{"))
+            if (!odin32_searchcode("{"))
             {
                 p_col++;
                 cArgs = odin32_countparams(sParams);
@@ -392,10 +396,10 @@ void odin32_klogentry()
                             sArgs = sArgs', 'sName;
                     }
 
-                    _insert_text("\n    KLOGENTRY"cArgs"(\""sParams"\""sArgs");"); /* todo tab size.. or smart indent */
+                    _insert_text("\n    KLOGENTRY"cArgs"(\""sRetType"\",\""sParams"\""sArgs");"); /* todo tab size.. or smart indent */
                 }
                 else
-                    _insert_text("\n    KLOGENTRY0();"); /* todo tab size.. or smart indent */
+                    _insert_text("\n    KLOGENTRY0(\""sRetType"\");"); /* todo tab size.. or smart indent */
 
                 /*
                  * Check if the next word is KLOGENTRY.
@@ -438,33 +442,39 @@ void odin32_klogexit()
         _restore_pos2(org_pos);
         if (sType)
         {
+            boolean fReturn = true;     /* true if an return statment is following the KLOGEXIT statement. */
+
             /*
              * Insert text.
              */
             cur_col = p_col;
             if (sType == 'void' || sType == 'VOID')
-            {
-                while (p_col <= p_SyntaxIndent)
-                    keyin(" ");
-                _insert_text("KLOGEXITVOID();");
+            {   /* procedure */
+                fReturn = cur_word(iIgnorePos) == 'return';
+                if (!fReturn)
+                {
+                    while (p_col <= p_SyntaxIndent)
+                        keyin(" ");
+                }
+
+                _insert_text("KLOGEXITVOID();\n");
+
+                if (fReturn)
+                {
+                    for (i = 1; i < cur_col; i++)
+                        _insert_text(" ");
+                }
+                search(")","E-");
             }
             else
-            {
-                if (sType == 'unsigned' || sType == 'UNSIGNED' || sType == 'UINT')
-                    _insert_text("KLOGEXITUINT();");
-                else if (sType == 'int' || sType == 'INT')
-                    _insert_text("KLOGEXITINT();");
-                else if (sType == 'void *' || sType == 'VOID *' || sType == 'PVOID' || sType == 'LPVOID')
-                    _insert_text("KLOGEXITHEX();");
-                else
-                    _insert_text("KLOGEXIT(\""sType"\", );");
-                _insert_text("\n");
+            {   /* function */
+                _insert_text("KLOGEXIT();\n");
                 for (i = 1; i < cur_col; i++)
                     _insert_text(" ");
                 search(")","E-");
 
                 /*
-                 * Check if it's a simple return statement.
+                 * Insert value if possible.
                  */
                 _save_pos2(valuepos);
                 next_word();
@@ -475,36 +485,82 @@ void odin32_klogexit()
                     p_col += length('return');
                     _save_pos2(posStart);
                     offStart = _QROffset();
-                    if (!search(";", "E+"))
+                    if (!odin32_searchcode(";", "E+"))
                     {
                         offEnd = _QROffset();
                         _restore_pos2(posStart);
                         _str sValue = strip(get_text(offEnd - offStart));
-                        if (substr(sValue, 1, 1) == '(' && substr(sValue, length(sValue), 1) == ')')
-                            sValue = strip(substr(sValue, 2, length(sValue) - 2));
+                        //say 'sValue = 'sValue;
                         _restore_pos2(valuepos);
                         _save_pos2(valuepos);
                         _insert_text(sValue);
                     }
                 }
                 _restore_pos2(valuepos);
+            }
 
-                /*
-                 * Remove old KLOGEXIT statement on previous line if any.
-                 */
+            /*
+             * Remove old KLOGEXIT statement on previous line if any.
+             */
+            _save_pos2(valuepos);
+            newexitline = p_line;
+            p_line--; p_col = 1;
+            next_word();
+            if (def_next_word_style == 'E')
+                prev_word();
+            if (p_line == newexitline - 1 && substr(cur_word(iIgnorePos), 1, 8) == 'KLOGEXIT')
+                delete_line();
+            _restore_pos2(valuepos);
+
+            /*
+             * Check for missing '{...}'.
+             */
+            if (fReturn)
+            {
+                boolean fFound = false;
                 _save_pos2(valuepos);
-                newexitline = p_line;
-                p_line--; p_col = 1;
-                next_word();
-                if (def_next_word_style == 'E')
+                p_col--; find_matching_paren(); p_col += 2;
+                odin32_searchcode(';', 'E+'); /* places us at the ';' of the return. (hopefully) */
+
+                _str ch = odin32_get_next_code_text();
+                if (ch != '}')
+                {
+                    _restore_pos2(valuepos);
+                    _save_pos2(valuepos);
+                    p_col--; find_matching_paren(); p_col += 2;
+                    odin32_searchcode(';', 'E+'); /* places us at the ';' of the return. (hopefully) */
+                    p_col++;
+                    if (odin32_more_code_on_line())
+                        _insert_text(' }');
+                    else
+                    {
+                        _save_pos2(returnget);
+                        odin32_searchcode("return", "E-");
+                        return_col = p_col;
+                        _restore_pos2(returnget);
+
+                        end_line();
+                        _insert_text("\n");
+                        while (p_col < return_col - p_SyntaxIndent)
+                            _insert_text(' ');
+                        _insert_text('}');
+                    }
+
+                    _restore_pos2(valuepos);
+                    _save_pos2(valuepos);
                     prev_word();
-                if (p_line == newexitline - 1 && substr(cur_word(iIgnorePos), 1, 8) == 'KLOGEXIT')
-                    delete_line();
+                    p_col -= p_SyntaxIndent;
+                    codecol = p_col;
+                    _insert_text("{\n");
+                    while (p_col < codecol)
+                        _insert_text(' ');
+                }
+
                 _restore_pos2(valuepos);
             }
         }
         else
-            message("odin32_getparams failed, sType=" sType);
+            message("odin32_getreturntype failed, sType=" sType);
         return;
     }
 
@@ -596,7 +652,8 @@ static void odin32_klog_file_int(boolean fAsk)
         /*
          * Select procedure.
          */
-        while (!search("return", "WE<+") && odin32_getfunction() == sCurFunction)
+        while (   !odin32_searchcode("return", "WE<+")
+               &&  odin32_getfunction() == sCurFunction)
         {
             //say 'exit sub loop: ' p_line
             /*
@@ -630,7 +687,7 @@ static void odin32_klog_file_int(boolean fAsk)
         sType = odin32_getreturntype(true);
         if (!fUserCancel && sType && (sType == 'void' || sType == 'VOID'))
         {
-            if (    !search("{", "E+")
+            if (    !odin32_searchcode("{", "E+")
                 &&  !find_matching_paren())
             {
                 _save_pos2(funcend);
@@ -666,7 +723,6 @@ static void odin32_klog_file_int(boolean fAsk)
 }
 
 
-
 /**
  * Moves cursor to nearest function start.
  */
@@ -676,6 +732,20 @@ int odin32_func_goto_nearest()
     prev_line = -1;
     next_line = -1;
     _save_pos2(org_pos);
+
+    if (!next_proc(1))
+    {
+        next_line = p_line;
+        if (!prev_proc(1) && p_line == cur_line)
+        {
+            _restore_pos2(org_pos);
+            return 0;
+        }
+        _restore_pos2(org_pos);
+        _save_pos2(org_pos);
+    }
+    else
+        p_col++;                        /* fixes problem with single function files. */
 
     if (!prev_proc(1))
     {
@@ -689,17 +759,6 @@ int odin32_func_goto_nearest()
         _save_pos2(org_pos);
     }
 
-    if (!next_proc(1))
-    {
-        next_line = p_line;
-        if (!prev_proc(1) && p_line == cur_line)
-        {
-            _restore_pos2(org_pos);
-            return 0;
-        }
-        _restore_pos2(org_pos);
-        _save_pos2(org_pos);
-    }
 
     if (prev_line != -1 && (next_line == -1 || cur_line - prev_line <= next_line - cur_line))
     {
@@ -713,6 +772,7 @@ int odin32_func_goto_nearest()
         return 0;
     }
 
+    _restore_pos2(org_pos);
     return -1;
 }
 
@@ -730,7 +790,7 @@ boolean odin32_prototype()
     {
         proc_line = p_line;
 
-        if (!search("{", "E+"))
+        if (!odin32_searchcode("{"))
         {
             prev_proc();
             if (p_line != proc_line)
@@ -751,7 +811,11 @@ boolean odin32_prototype()
  */
 static _str odin32_getfunction()
 {
-    return current_proc();
+    sFunctionName = current_proc();
+    if (!sFunctionName)
+        sFunctionName == "";
+    //say 'functionanme='sFunctionName;
+    return sFunctionName;
 }
 
 
@@ -767,7 +831,7 @@ static _str odin32_getparams()
      * Go to nearest function.
      */
     if (    !odin32_func_goto_nearest()
-        &&  !search("(")               /* makes some assumptions. */
+        &&  !odin32_searchcode("(")               /* makes some assumptions. */
         )
     {
         /*
@@ -888,7 +952,7 @@ static int odin32_enumparams(_str sParams, int iParam, _str &sType, _str &sName,
     /* did we find the parameter? */
     if (iParam == iCurParam)
     {   /* (yeah, we did!) */
-        sArg = strip(substr(sParams, iStartParam, i - 1));
+        sArg = strip(substr(sParams, iStartParam, i - iStartParam));
 
         /* lazy approach, which doens't support function types */
 
@@ -969,13 +1033,14 @@ static _str odin32_getreturntype(boolean fPureType = false)
         _save_pos2(posStart);
         offStart = _QROffset();
 
-        if (!search("("))               /* makes some assumptions. */
+        if (!odin32_searchcode("("))               /* makes some assumptions. */
         {
             prev_word();
             offEnd = _QROffset();
             _restore_pos2(posStart);
-            _str sTypeRaw = strip(get_text(offEnd - offStart - 1));
+            _str sTypeRaw = strip(get_text(offEnd - offStart));
 
+            //say 'sTypeRaw='sTypeRaw;
             /*
              * Remove static, inline, _Optlink, stdcall, EXPENTRY etc.
              */
@@ -1004,6 +1069,10 @@ static _str odin32_getreturntype(boolean fPureType = false)
                 sTypeRaw = stranslate(sTypeRaw, "", "near", "I");
                 sTypeRaw = stranslate(sTypeRaw, "", "WIN32API", "I");
                 sTypeRaw = stranslate(sTypeRaw, "", "WINAPI", "I");
+                sTypeRaw = stranslate(sTypeRaw, "", "__operator__", "I"); /* operator fix */
+                sTypeRaw = stranslate(sTypeRaw, "", "__operator", "I");   /* operator fix */
+                sTypeRaw = stranslate(sTypeRaw, "", "operator__", "I");   /* operator fix */
+                sTypeRaw = stranslate(sTypeRaw, "", "operator", "I");     /* operator fix */
             }
 
             /*
@@ -1062,3 +1131,97 @@ static _str odin32_getreturntype(boolean fPureType = false)
     _restore_pos2(org_pos);
     return false;
 }
+
+
+/**
+ * Search for some piece of code.
+ */
+static int odin32_searchcode(_str sSearchString, _str sOptions = "E+")
+{
+    int rc;
+    rc = search(sSearchString, sOptions);
+    while (!rc && !odin32_in_code())
+    {
+        p_col++;
+        rc = search(sSearchString, sOptions);
+    }
+    return rc;
+}
+
+
+/**
+ * Checks if cursor is in code or in comment.
+ */
+static boolean odin32_in_code()
+{
+    _save_pos2(searchsave);
+    boolean fRc = !_in_comment();
+    _restore_pos2(searchsave);
+    return fRc;
+}
+
+
+/*
+ * Gets the next piece of code.
+ */
+static _str odin32_get_next_code_text()
+{
+    _str ch;
+    _save_pos2(searchsave);
+    ch = odin32_get_next_code_text2();
+    _restore_pos2(searchsave);
+    return ch;
+}
+
+
+/**
+ * Checks if there is more code on the line.
+ */
+static boolean odin32_more_code_on_line()
+{
+    boolean fRc;
+    int     curline = p_line;
+
+    _save_pos2(searchsave);
+    odin32_get_next_code_text2();
+    fRc = curline == p_line;
+    _restore_pos2(searchsave);
+
+    return fRc;
+}
+
+
+/**
+ * Gets the next piece of code.
+ * Doesn't preserver cursor position.
+ */
+static _str odin32_get_next_code_text2()
+{
+    _str ch;
+    do
+    {
+        curcol = ++p_col;
+        end_line()
+        if (p_col <= curcol)
+        {
+            p_line++;
+            p_col = 1;
+        }
+        else
+            p_col = curcol;
+
+        ch = get_text();
+        //say ch ' ('_asc(ch)')';
+        while (ch == "#")                  /* preprocessor stuff */
+        {
+            p_col = 1;
+            p_line++;
+            ch = get_text();
+            //say ch ' ('_asc(ch)')';
+            continue;
+        }
+    } while (ch :== ' ' || ch :== "\t" || ch :== "\n" || ch :== "\r" || !odin32_in_code());
+
+    return ch;
+}
+
