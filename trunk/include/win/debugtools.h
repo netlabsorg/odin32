@@ -186,9 +186,41 @@ extern const char * const debug_ch_name[];
 #ifdef __cplusplus
 extern "C" {
 #endif
-LPCSTR debugstr_guid1( void *id );
-//#define debugstr_guid(a) debugstr_guid1((void *)a)
-#define debugstr_guid(a) 0
+
+//LPCSTR debugstr_guid1( void *id );
+////#define debugstr_guid(a) debugstr_guid1((void *)a)
+//#define debugstr_guid(a) 0
+
+#ifndef GUID_DEFINED
+#define GUID_DEFINED
+typedef struct _GUID
+{
+    unsigned long Data1;
+    unsigned short Data2;
+    unsigned short Data3;
+    unsigned char Data4[8];
+} GUID;
+#endif
+
+static char *debugstr_guid( const GUID *id )
+{
+    static char temp[64];
+    char *str;
+
+    if (!id) return "(null)";
+    if (!HIWORD(id))
+    {
+        sprintf( temp, "<guid-0x%04x>", LOWORD(id) );
+    }
+    else
+    {
+        sprintf( temp, "{%08lx-%04x-%04x-%02x%02x-%02x%02x%02x%02x%02x%02x}",
+                 id->Data1, id->Data2, id->Data3,
+                 id->Data4[0], id->Data4[1], id->Data4[2], id->Data4[3],
+                 id->Data4[4], id->Data4[5], id->Data4[6], id->Data4[7] );
+    }
+    return temp;
+}
 
 #ifdef __cplusplus
 }
