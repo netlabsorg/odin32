@@ -1,4 +1,4 @@
-/* $Id: disk.cpp,v 1.28 2001-12-30 12:40:08 sandervl Exp $ */
+/* $Id: disk.cpp,v 1.29 2002-01-04 14:11:22 sandervl Exp $ */
 
 /*
  * Win32 Disk API functions for OS/2
@@ -238,8 +238,7 @@ UINT WIN32API GetDriveTypeA(LPCSTR lpszDrive)
     }
 
     //NOTE: Although GetDriveTypeW handles -1, GetDriveTypeA crashes in NT 4, SP6
-//    rc = OSLibGetDriveType(driveIndex);
-    rc = O32_GetDriveType(lpszDrive);
+    rc = OSLibGetDriveType(driveIndex);
     dprintf(("KERNEL32:  GetDriveType %s = %d", lpszDrive, rc));
     return rc;
 }
