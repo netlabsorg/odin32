@@ -1,4 +1,4 @@
-/* $Id: dc.cpp,v 1.79 2000-11-22 13:44:49 sandervl Exp $ */
+/* $Id: dc.cpp,v 1.80 2000-12-07 11:59:45 sandervl Exp $ */
 
 /*
  * DC functions for USER32
@@ -717,9 +717,6 @@ HDC WIN32API BeginPaint (HWND hWnd, PPAINTSTRUCT_W lpps)
 	WinIntersectRect(NULL, &rectlClip, &rectl, &rectlClient);
 	WinOffsetRect(NULL, &rectlClip, -rectlClient.xLeft, -rectlClient.yBottom);
 
-	//change presentation space for client window
-   	selectClientArea(wnd, pHps);
-
 	//clip update region with client window rectangle
 	HRGN hrgnClient = GpiCreateRegion(pHps->hps, 1, &rectlClient);
 	GpiCombineRegion(pHps->hps, hrgnClip, hrgnClip, hrgnClient, CRGN_AND);
@@ -733,6 +730,12 @@ HDC WIN32API BeginPaint (HWND hWnd, PPAINTSTRUCT_W lpps)
 #endif
 	//set clip region
 	lComplexity = GpiSetClipRegion(pHps->hps, hrgnClip, &hrgnOldClip);
+
+	//change presentation space for client window
+        //NOTE: MUST do this after GpiSetClipRegion call!
+        //      When a window with CS_OWNDC looses focus, for some reason
+        //      GpiSetClipRegion resets the window dc origin back to (0,0)
+   	selectClientArea(wnd, pHps);
 
         GpiQueryClipBox(pHps->hps, &rectl);
         dprintf(("ClipBox (%d): (%d,%d)(%d,%d)", lComplexity, rectl.xLeft, rectl.yBottom, rectl.xRight, rectl.yTop));
