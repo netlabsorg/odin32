@@ -1,4 +1,4 @@
-/* $Id: ntdll.h,v 1.6 1999-08-18 19:35:30 phaller Exp $ */
+/* $Id: ntdll.h,v 1.7 1999-08-22 22:45:52 sandervl Exp $ */
 
 /*
    this file defines interfaces mainly exposed to device drivers and
@@ -42,10 +42,6 @@ extern "C" {
 #ifndef BOOLEAN
 #  define BOOLEAN BOOL
 #endif
-
-/* prototypes */
-LPWSTR HEAP_strdupW(HANDLE    heap, DWORD   flags, LPCWSTR str);
-LPSTR  HEAP_strdupWtoA(HANDLE heap, DWORD   flags, LPCWSTR str);
 
 
 
