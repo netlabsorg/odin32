@@ -1,4 +1,4 @@
-/* $Id: dibsect.cpp,v 1.19 2000-02-21 10:34:46 sandervl Exp $ */
+/* $Id: dibsect.cpp,v 1.20 2000-02-21 20:26:45 sandervl Exp $ */
 
 /*
  * GDI32 DIB sections
@@ -245,9 +245,10 @@ int DIBSection::SetDIBits(HDC hdc, HBITMAP hbitmap, UINT startscan, UINT
       pOS2bmp->cBitCount != pbmi->biBitCount) 
    {
 	char *oldbits = bmpBits;
+	int oldsize = dibinfo.dsBm.bmWidthBytes * dibinfo.dsBm.bmHeight;
 
 	DosAllocMem((PPVOID)&bmpBits, bmpsize*pbmi->biHeight, PAG_READ|PAG_WRITE|PAG_COMMIT);
-	memcpy(bmpBits, oldbits, bmpsize*pbmi->biHeight);
+	memcpy(bmpBits, oldbits, min(oldsize, bmpsize*pbmi->biHeight));
 	DosFreeMem(oldbits);
    }
    pOS2bmp    = (BITMAPINFO2 *)realloc(pOS2bmp, os2bmpsize);
