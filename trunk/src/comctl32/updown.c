@@ -1,4 +1,4 @@
-/* $Id: updown.c,v 1.10 1999-10-24 22:49:50 sandervl Exp $ */
+/* $Id: updown.c,v 1.11 1999-12-27 17:13:40 cbratschi Exp $ */
 /*
  * Updown control
  *
@@ -29,14 +29,9 @@
  *   I do not like the arrows yet, I'll work more on them later on.
  */
 
-/* CB: Odin32 problems
-  - Open32 doesn't look for CS_DBLCLKS -> double clicks always sent
-*/
-
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-
 #include "winbase.h"
 #include "winuser.h"
 #include "commctrl.h"
