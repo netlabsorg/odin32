@@ -1,4 +1,4 @@
-/* $Id: unknown.cpp,v 1.9 2000-08-02 16:19:28 bird Exp $ */
+/* $Id: unknown.cpp,v 1.10 2000-10-02 18:56:17 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -14,6 +14,7 @@
 #include <os2wrap.h>
 #include <misc.h>
 #include <odinwrap.h>
+#include <win32api.h>
 #include "wsock32.h"
 
 #define DBG_LOCALLOG	DBG_unknown
