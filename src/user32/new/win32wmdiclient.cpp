@@ -1,4 +1,4 @@
-/* $Id: win32wmdiclient.cpp,v 1.5 1999-09-04 19:42:29 sandervl Exp $ */
+/* $Id: win32wmdiclient.cpp,v 1.6 1999-09-05 12:03:34 sandervl Exp $ */
 /*
  * Win32 MDI Client Window Class for OS/2
  *
@@ -519,7 +519,7 @@ void Win32MDIClientWindow::updateFrameText(BOOL repaint, LPCSTR lpTitle )
     else
     lpBuffer[0] = '\0';
 
-    getParent()->SetWindowText(lpBuffer);
+    getParent()->SetWindowTextA(lpBuffer);
     if( repaint == MDI_REPAINTFRAME)
         getParent()->SetWindowPos(0,0,0,0,0, SWP_FRAMECHANGED | SWP_NOSIZE | SWP_NOMOVE | SWP_NOACTIVATE | SWP_NOZORDER );
 }

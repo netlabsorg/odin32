@@ -1,4 +1,4 @@
-/* $Id: window.cpp,v 1.22 1999-09-04 19:42:30 sandervl Exp $ */
+/* $Id: window.cpp,v 1.23 1999-09-05 12:03:34 sandervl Exp $ */
 /*
  * Win32 window apis for OS/2
  *
@@ -571,7 +571,7 @@ int WIN32API GetWindowTextA( HWND hwnd, LPSTR lpsz, int cch)
         dprintf(("GetWindowTextA, window %x not found", hwnd));
         return 0;
     }
-    rc = window->GetWindowText(lpsz, cch);
+    rc = window->GetWindowTextA(lpsz, cch);
     dprintf(("GetWindowTextA %x %s", hwnd, lpsz));
     return rc;
 }
@@ -594,7 +594,7 @@ int WIN32API GetWindowTextW(HWND hwnd, LPWSTR lpsz, int cch)
         return 0;
     }
     dprintf(("GetWindowTextW %x", hwnd));
-    return window->GetWindowText((LPSTR)lpsz, cch);
+    return window->GetWindowTextW(lpsz, cch);
 }
 //******************************************************************************
 //******************************************************************************
@@ -608,7 +608,7 @@ BOOL WIN32API SetWindowTextA(HWND hwnd, LPCSTR lpsz)
         return 0;
     }
     dprintf(("SetWindowTextA %x %s", hwnd, lpsz));
-    return window->SetWindowText((LPSTR)lpsz);
+    return window->SetWindowTextA((LPSTR)lpsz);
 }
 //******************************************************************************
 //******************************************************************************
@@ -622,7 +622,7 @@ BOOL WIN32API SetWindowTextW( HWND hwnd, LPCWSTR lpsz)
         return 0;
     }
     dprintf(("SetWindowTextW %x", hwnd));
-    return window->SetWindowText((LPSTR)lpsz);
+    return window->SetWindowTextW((LPWSTR)lpsz);
 }
 /*******************************************************************
  *      InternalGetWindowText    (USER32.326)

@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.8 1999-09-04 19:51:46 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.9 1999-09-05 12:03:33 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -384,7 +384,7 @@ BOOL Win32BaseWindow::CreateWindowExA(CREATESTRUCTA *cs, ATOM classAtom)
 #endif
 
   if(cs->lpszName)
-        SetWindowText((LPSTR)cs->lpszName);
+        SetWindowTextA((LPSTR)cs->lpszName);
 
   OS2Hwnd = OSLibWinCreateWindow((getParent()) ? getParent()->getOS2WindowHandle() : OSLIB_HWND_DESKTOP,
                                  dwOSWinStyle, dwOSFrameStyle, (char *)windowNameA,
@@ -1158,6 +1158,8 @@ LRESULT Win32BaseWindow::DefWindowProcA(UINT Msg, WPARAM wParam, LPARAM lParam)
 
         return 1;
     }
+    case WM_GETDLGCODE:
+	    return 0;
 
     case WM_NCLBUTTONDOWN:
     case WM_NCLBUTTONUP:
@@ -1910,35 +1912,47 @@ int Win32BaseWindow::GetWindowTextLength()
 }
 //******************************************************************************
 //******************************************************************************
-int Win32BaseWindow::GetWindowText(LPSTR lpsz, int cch)
+int Win32BaseWindow::GetWindowTextA(LPSTR lpsz, int cch)
 {
-    if(isUnicode == FALSE) {
-        strncpy(lpsz, windowNameA, cch);
-    }
-    else {
-        lstrcpynW((LPWSTR)lpsz, windowNameW, cch);
-    }
+    strncpy(lpsz, windowNameA, cch);
     return wndNameLength;
 }
 //******************************************************************************
 //******************************************************************************
-BOOL Win32BaseWindow::SetWindowText(LPSTR lpsz)
+int Win32BaseWindow::GetWindowTextW(LPWSTR lpsz, int cch)
+{
+    lstrcpynW((LPWSTR)lpsz, windowNameW, cch);
+    return wndNameLength;
+}
+//******************************************************************************
+//******************************************************************************
+BOOL Win32BaseWindow::SetWindowTextA(LPSTR lpsz)
 {
     if(lpsz == NULL)
-    	return FALSE;
+        return FALSE;
 
-    if(isUnicode == FALSE) {
-        windowNameA = (LPSTR)_smalloc(strlen(lpsz)+1);
-        strcpy(windowNameA, lpsz);
-        windowNameW = (LPWSTR)_smalloc((strlen(lpsz)+1)*sizeof(WCHAR));
-        lstrcpyAtoW(windowNameW, windowNameA);
-    }
-    else {
-        windowNameW = (LPWSTR)_smalloc((lstrlenW((LPWSTR)lpsz)+1)*sizeof(WCHAR));
-        lstrcpyW(windowNameW, (LPWSTR)lpsz);
-        windowNameA = (LPSTR)_smalloc(lstrlenW((LPWSTR)lpsz)+1);
-        lstrcpyWtoA(windowNameA, windowNameW);
-    }
+    windowNameA = (LPSTR)_smalloc(strlen(lpsz)+1);
+    strcpy(windowNameA, lpsz);
+    windowNameW = (LPWSTR)_smalloc((strlen(lpsz)+1)*sizeof(WCHAR));
+    lstrcpyAtoW(windowNameW, windowNameA);
+    wndNameLength = strlen(windowNameA)+1; //including 0 terminator
+
+    if(OS2HwndFrame)
+        return OSLibWinSetWindowText(OS2HwndFrame, (LPSTR)windowNameA);
+
+    return TRUE;
+}
+//******************************************************************************
+//******************************************************************************
+BOOL Win32BaseWindow::SetWindowTextW(LPWSTR lpsz)
+{
+    if(lpsz == NULL)
+        return FALSE;
+
+    windowNameW = (LPWSTR)_smalloc((lstrlenW((LPWSTR)lpsz)+1)*sizeof(WCHAR));
+    lstrcpyW(windowNameW, (LPWSTR)lpsz);
+    windowNameA = (LPSTR)_smalloc(lstrlenW((LPWSTR)lpsz)+1);
+    lstrcpyWtoA(windowNameA, windowNameW);
     wndNameLength = strlen(windowNameA)+1; //including 0 terminator
 
     if(OS2HwndFrame)

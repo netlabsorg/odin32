@@ -1,4 +1,4 @@
-/* $Id: win32dlg.h,v 1.4 1999-09-04 19:42:29 sandervl Exp $ */
+/* $Id: win32dlg.h,v 1.5 1999-09-05 12:03:33 sandervl Exp $ */
 /*
  * Win32 Dialog Code for OS/2
  *
@@ -66,12 +66,17 @@ virtual ~Win32Dialog();
        LRESULT  DefDlgProcA(UINT Msg, WPARAM wParam, LPARAM lParam);
        LRESULT  DefDlgProcW(UINT Msg, WPARAM wParam, LPARAM lParam);
 
-       LRESULT  DefDlg_Epilog(UINT msg, BOOL fResult);
+Win32BaseWindow *getDlgItem(int id);
+
+         HWND   getNextDlgTabItem(HWND hwndCtrl, BOOL fPrevious);
+         BOOL   endDialog(int retval);
 
 virtual  ULONG  MsgOS2Create(HWND hwndOS2, ULONG initParam);
 
 virtual	 LONG   SetWindowLongA(int index, ULONG value);
 virtual	 ULONG  GetWindowLongA(int index);
+
+static	 ULONG  GetDialogBaseUnits()  { return MAKELONG(xBaseUnit, yBaseUnit); };
 
 protected:
 	BOOL    DIALOG_Init(void);
@@ -82,6 +87,8 @@ protected:
 	BOOL    createControls(LPCSTR dlgtemplate, HINSTANCE hInst);
 	
 	LRESULT DefDlg_Proc(UINT msg, WPARAM wParam, LPARAM lParam);
+        LRESULT DefDlg_Epilog(UINT msg, BOOL fResult);
+
 	BOOL    setDefButton(HWND hwndNew );
 	HWND    findDefButton();
 	BOOL    saveFocus();
@@ -109,8 +116,9 @@ private:
 };
 
 /* Built-in class names (see _Undocumented_Windows_ p.418) */
-#define DIALOG_CLASS_NAME    "#32770"  /* Dialog */
-#define DIALOG_CLASS_ATOM    32770     /* Dialog */
+#define DIALOG_CLASS_NAMEA    "#32770"  /* Dialog */
+#define DIALOG_CLASS_NAMEW   L"#32770"  /* Dialog */
+#define DIALOG_CLASS_ATOM       32770   /* Dialog */
 
 BOOL DIALOG_Register();
 BOOL DIALOG_Unregister();

@@ -1,4 +1,4 @@
-/* $Id: win32dlg.cpp,v 1.3 1999-09-04 19:42:28 sandervl Exp $ */
+/* $Id: win32dlg.cpp,v 1.4 1999-09-05 12:03:33 sandervl Exp $ */
 /*
  * Win32 Dialog Code for OS/2
  *
@@ -31,7 +31,7 @@ Win32Dialog::Win32Dialog(HINSTANCE hInst, LPCSTR dlgTemplate, HWND owner,
     this->isUnicode = isUnicode;
     hUserFont        = 0;
     hMenu        = 0;
-	hwndFocus    = 0;
+    hwndFocus    = 0;
     Win32DlgProc = 0;
     msgResult    = 0;
     userDlgData  = 0;
@@ -39,6 +39,7 @@ Win32Dialog::Win32Dialog(HINSTANCE hInst, LPCSTR dlgTemplate, HWND owner,
     dialogFlags  = 0;
     memset(&dlgInfo, 0, sizeof(dlgInfo));
 
+    dprintf(("********* CREATE DIALOG ************"));
     if(fInitialized == FALSE) {
         if(DIALOG_Init() == FALSE) {
             dprintf(("DIALOG_Init FAILED!"));
@@ -126,12 +127,12 @@ Win32Dialog::Win32Dialog(HINSTANCE hInst, LPCSTR dlgTemplate, HWND owner,
     /* Create the dialog window */
 
     /* Find the class atom */
-    if (HIWORD(dlgInfo.className))
+    if (!HIWORD(dlgInfo.className))
     {
         classAtom = (ATOM)LOWORD(dlgInfo.className);
     }
     else
-    if(!(classAtom = GlobalFindAtomA(dlgInfo.className)))
+    if(!(classAtom = GlobalFindAtomW((LPWSTR)dlgInfo.className)))
     {
         SetLastError(ERROR_INVALID_PARAMETER);
         return;
@@ -146,11 +147,31 @@ Win32Dialog::Win32Dialog(HINSTANCE hInst, LPCSTR dlgTemplate, HWND owner,
     cs.cx             = rect.right;
     cs.cy             = rect.bottom;
     cs.style          = dlgInfo.style & ~WS_VISIBLE;
-    cs.lpszName       = dlgInfo.caption;
-    cs.lpszClass      = dlgInfo.className;
+    if(!isUnicode) {
+        if(dlgInfo.caption) {
+                cs.lpszName  = UnicodeToAsciiString((LPWSTR)dlgInfo.caption);
+        }
+        else    cs.lpszName  = 0;
+        if(HIWORD(cs.lpszClass)) {
+                cs.lpszClass = UnicodeToAsciiString((LPWSTR)dlgInfo.className);
+        }
+        else    cs.lpszClass = dlgInfo.className;
+    }
+    else {
+        cs.lpszName       = dlgInfo.caption;
+        cs.lpszClass      = dlgInfo.className;
+    }
     cs.dwExStyle      = dlgInfo.exStyle;
 
+    fIsDialog = TRUE;
     CreateWindowExA(&cs, classAtom);
+
+    if(!isUnicode) {
+        if(cs.lpszName) FreeAsciiString((LPSTR)cs.lpszName);
+        if(HIWORD(cs.lpszClass)) {
+                FreeAsciiString((LPSTR)cs.lpszClass);
+        }
+    }
 
     if (!getWindowHandle())
     {
@@ -158,7 +179,6 @@ Win32Dialog::Win32Dialog(HINSTANCE hInst, LPCSTR dlgTemplate, HWND owner,
         if (hMenu) DestroyMenu( hMenu );
         return;
     }
-    fIsDialog = TRUE;
 
 //TODO:
 //    wndPtr->helpContext = helpId;
@@ -181,6 +201,7 @@ Win32Dialog::Win32Dialog(HINSTANCE hInst, LPCSTR dlgTemplate, HWND owner,
             ShowWindow( SW_SHOWNORMAL );    /* SW_SHOW doesn't always work */
             ::UpdateWindow( getWindowHandle() );
         }
+        dprintf(("********* DIALOG CREATED ************"));
         return;
     }
     DestroyWindow();
@@ -334,7 +355,7 @@ LPCSTR Win32Dialog::parseTemplate( LPCSTR dlgtemplate, DLG_TEMPLATE * result )
     switch(GET_WORD(p))
     {
     case 0x0000:
-        result->className = (LPCSTR)DIALOG_CLASS_ATOM;
+        result->className = (LPCSTR)DIALOG_CLASS_NAMEW;
         p++;
         break;
     case 0xffff:
@@ -441,12 +462,12 @@ WORD *Win32Dialog::getControl(const WORD *p, DLG_CONTROL_INFO *info, BOOL dialog
 
     if (GET_WORD(p) == 0xffff)  /* Is it an integer id? */
     {
-	    info->windowName = (LPCSTR)(UINT)GET_WORD(p + 1);
-	    p += 2;
+        info->windowName = (LPCSTR)(UINT)GET_WORD(p + 1);
+        p += 2;
     }
     else
     {
-	    info->windowName = (LPCSTR)p;
+        info->windowName = (LPCSTR)p;
         p += lstrlenW( (LPCWSTR)p ) + 1;
     }
 
@@ -527,53 +548,53 @@ LRESULT Win32Dialog::DefDlg_Proc(UINT msg, WPARAM wParam, LPARAM lParam)
         rc = GetClipBox( (HDC)wParam, &rect );
         if ((rc == SIMPLEREGION) || (rc == COMPLEXREGION))
             FillRect( (HDC)wParam, &rect, windowClass->getBackgroundBrush());
-	    return 1;
+        return 1;
     }
-	case WM_NCDESTROY:
-	      /* Free dialog heap (if created) */
-#if 0	
-	    if (dlgInfo->hDialogHeap)
-	    {
-    		GlobalUnlock16(dlgInfo->hDialogHeap);
-	    	GlobalFree16(dlgInfo->hDialogHeap);
-		    dlgInfo->hDialogHeap = 0;
-	    }
+    case WM_NCDESTROY:
+          /* Free dialog heap (if created) */
+#if 0
+        if (dlgInfo->hDialogHeap)
+        {
+            GlobalUnlock16(dlgInfo->hDialogHeap);
+            GlobalFree16(dlgInfo->hDialogHeap);
+            dlgInfo->hDialogHeap = 0;
+        }
 #endif
-	      /* Delete font */
-	    if (hUserFont)
-	    {
-    		DeleteObject( hUserFont );
-	    	hUserFont = 0;
-	    }
+          /* Delete font */
+        if (hUserFont)
+        {
+            DeleteObject( hUserFont );
+            hUserFont = 0;
+        }
 
-	      /* Delete menu */
-	    if (hMenu)
-	    {		
-		    DestroyMenu( hMenu );
-		    hMenu = 0;
-	    }
+          /* Delete menu */
+        if (hMenu)
+        {
+            DestroyMenu( hMenu );
+            hMenu = 0;
+        }
 
         /* Delete window procedure */
         Win32DlgProc = 0;
         dialogFlags |= DF_END;  /* just in case */
 
-	      /* Window clean-up */
-	    return DefWindowProcA(msg, wParam, lParam );
+          /* Window clean-up */
+        return DefWindowProcA(msg, wParam, lParam );
 
-	case WM_SHOWWINDOW:
-	    if (!wParam) saveFocus();
-	    return DefWindowProcA(msg, wParam, lParam );
+    case WM_SHOWWINDOW:
+        if (!wParam) saveFocus();
+        return DefWindowProcA(msg, wParam, lParam );
 
-	case WM_ACTIVATE:
-	    if (wParam) {
-	            restoreFocus();
-	    }
-	    else    saveFocus();
-	    return 0;
+    case WM_ACTIVATE:
+        if (wParam) {
+                restoreFocus();
+        }
+        else    saveFocus();
+        return 0;
 
-	case WM_SETFOCUS:
-	    restoreFocus();
-	    return 0;
+    case WM_SETFOCUS:
+        restoreFocus();
+        return 0;
 
     case DM_SETDEFID:
         if (dialogFlags & DF_END)
@@ -591,11 +612,11 @@ LRESULT Win32Dialog::DefDlg_Proc(UINT msg, WPARAM wParam, LPARAM lParam)
         if ((hwndDefId = findDefButton()))
             return MAKELONG( GetDlgCtrlID( hwndDefId ), DC_HASDEFID);
 
-	    return 0;
+        return 0;
     }
 
-	case WM_NEXTDLGCTL:
-	{
+    case WM_NEXTDLGCTL:
+    {
         HWND hwndDest = (HWND)wParam;
         if (!lParam)
             hwndDest = GetNextDlgTabItem(getWindowHandle(), GetFocus(), wParam);
@@ -626,10 +647,10 @@ LRESULT Win32Dialog::DefDlg_Proc(UINT msg, WPARAM wParam, LPARAM lParam)
             }
 #endif
         }
-	    return DefWindowProcA( msg, wParam, lParam );
+        return DefWindowProcA( msg, wParam, lParam );
     }
 
-	case WM_GETFONT:
+    case WM_GETFONT:
         return hUserFont;
 
     case WM_CLOSE:
@@ -637,7 +658,7 @@ LRESULT Win32Dialog::DefDlg_Proc(UINT msg, WPARAM wParam, LPARAM lParam)
         return 0;
 
     case WM_NOTIFYFORMAT:
-	    return DefWindowProcA(msg, wParam, lParam );
+        return DefWindowProcA(msg, wParam, lParam );
     }
     return 0;
 }
@@ -736,7 +757,7 @@ LRESULT Win32Dialog::DefDlg_Epilog(UINT msg, BOOL fResult)
 {
     /* see SDK 3.1 */
     if ((msg >= WM_CTLCOLORMSGBOX && msg <= WM_CTLCOLORSTATIC) ||
-	     msg == WM_CTLCOLOR || msg == WM_COMPAREITEM ||
+         msg == WM_CTLCOLOR || msg == WM_COMPAREITEM ||
          msg == WM_VKEYTOITEM || msg == WM_CHARTOITEM ||
          msg == WM_QUERYDRAGICON || msg == WM_INITDIALOG)
         return fResult;
@@ -843,19 +864,37 @@ BOOL Win32Dialog::setDefButton(HWND hwndNew )
 }
 //******************************************************************************
 //******************************************************************************
+HWND Win32Dialog::getNextDlgTabItem(HWND hwndCtrl, BOOL fPrevious)
+{
+    return 0;
+}
+//******************************************************************************
+//******************************************************************************
+Win32BaseWindow *Win32Dialog::getDlgItem(int id)
+{
+    return 0;
+}
+//******************************************************************************
+//******************************************************************************
+BOOL Win32Dialog::endDialog(int retval)
+{
+    return TRUE;
+}
+//******************************************************************************
+//******************************************************************************
 ULONG Win32Dialog::MsgOS2Create(HWND hwndOS2, ULONG initParam)
 {
-  OS2Hwnd = hwndOS2;
-  return win32wndproc(Win32Hwnd, WM_CREATE, 0, initParam);
+    OS2Hwnd = hwndOS2;
+    return win32wndproc(Win32Hwnd, WM_CREATE, 0, initParam);
 }
 //******************************************************************************
 //******************************************************************************
 LONG Win32Dialog::SetWindowLongA(int index, ULONG value)
 {
- LONG oldval;
+    LONG oldval;
 
-  switch(index)
-  {
+    switch(index)
+    {
     case DWL_DLGPROC:
         oldval = (LONG)Win32DlgProc;
         Win32DlgProc = (DLGPROC)index;
@@ -870,14 +909,14 @@ LONG Win32Dialog::SetWindowLongA(int index, ULONG value)
         return oldval;
     default:
         return Win32BaseWindow::SetWindowLongA(index, value);
-  }
+    }
 }
 //******************************************************************************
 //******************************************************************************
 ULONG Win32Dialog::GetWindowLongA(int index)
 {
-  switch(index)
-  {
+    switch(index)
+    {
     case DWL_DLGPROC:
         return (ULONG)Win32DlgProc;
     case DWL_MSGRESULT:
@@ -886,15 +925,13 @@ ULONG Win32Dialog::GetWindowLongA(int index)
         return userDlgData;
     default:
         return Win32BaseWindow::GetWindowLongA(index);
-  }
+    }
 }
 //******************************************************************************
 //******************************************************************************
 BOOL DIALOG_Register()
 {
     WNDCLASSA wndClass;
-
-    if (GlobalFindAtomA(DIALOG_CLASS_NAME)) return FALSE;
 
     ZeroMemory(&wndClass,sizeof(WNDCLASSA));
     wndClass.style         = CS_GLOBALCLASS | CS_SAVEBITS;
@@ -903,7 +940,7 @@ BOOL DIALOG_Register()
     wndClass.cbWndExtra    = 0;
     wndClass.hCursor       = (HCURSOR)IDC_ARROWA;
     wndClass.hbrBackground = LTGRAY_BRUSH;
-    wndClass.lpszClassName = DIALOG_CLASS_NAME;
+    wndClass.lpszClassName = DIALOG_CLASS_NAMEA;
 
     return RegisterClassA(&wndClass);
 }
@@ -911,8 +948,8 @@ BOOL DIALOG_Register()
 //******************************************************************************
 BOOL DIALOG_Unregister()
 {
-    if (GlobalFindAtomA(DIALOG_CLASS_NAME))
-            return UnregisterClassA(DIALOG_CLASS_NAME,(HINSTANCE)NULL);
+    if (GlobalFindAtomA(DIALOG_CLASS_NAMEA))
+            return UnregisterClassA(DIALOG_CLASS_NAMEA,(HINSTANCE)NULL);
     else    return FALSE;
 }
 //******************************************************************************
