@@ -1,3 +1,4 @@
+/* $Id: changenotify.c,v 1.6 2002-06-25 07:13:02 sandervl Exp $ */
 /*
  *	shell change notification
  *
