@@ -1,4 +1,4 @@
-/* $Id: text.cpp,v 1.36 2003-12-29 10:55:49 sandervl Exp $ */
+/* $Id: text.cpp,v 1.37 2003-12-29 11:54:54 sandervl Exp $ */
 
 /*
  * GDI32 text apis
@@ -408,7 +408,7 @@ BOOL WIN32API GetTextExtentPointW(HDC    hdc,
    POINTLOS2  widthHeight = { 0, 0};
    pDCData    pHps = (pDCData)OSLibGpiQueryDCData((HPS)hdc);
 
-   dprintf(("GDI32: GetTextExtentPointW %x %.*ls %d", hdc, cbString, lpString, cbString));
+   dprintf(("GDI32: GetTextExtentPointW %ls", lpString));
    if(pHps == NULL)
    {
       SetLastError(ERROR_INVALID_HANDLE);
@@ -459,7 +459,7 @@ BOOL WIN32API GetTextExtentPointW(HDC    hdc,
    astring = (char *)malloc( len + 1 );
    lstrcpynWtoA(astring, lpString, len + 1 );
 
-   rc = OSLibGpiQueryTextBox(pHps, cbString, astring, TXTBOXOS_COUNT, pts);
+   rc = OSLibGpiQueryTextBox(pHps, len, astring, TXTBOXOS_COUNT, pts);
    free(astring);
 
    if(rc == FALSE)
@@ -479,7 +479,7 @@ BOOL WIN32API GetTextExtentPointW(HDC    hdc,
          lpSize->cx = lpSize->cx * alArray[0] / alArray[1];
    }
 
-   dprintf(("GDI32: GetTextExtentPointW %x %.*ls %d returned %d (%d,%d)", hdc, cbString, lpString, cbString, rc, lpSize->cx, lpSize->cy));
+   dprintf(("GDI32: GetTextExtentPointW %x %ls %d returned %d (%d,%d)", hdc, lpString, cbString, rc, lpSize->cx, lpSize->cy));
    SetLastError(ERROR_SUCCESS);
    return TRUE;
 }
@@ -510,6 +510,28 @@ BOOL WIN32API GetTextExtentExPointA(HDC hdc,
     LPWSTR p = FONT_mbtowc( hdc, str, count, &wlen, NULL);
     ret = GetTextExtentExPointW( hdc, p, wlen, maxExt, lpnFit, alpDx, size);
     if (lpnFit) *lpnFit = WideCharToMultiByte(CP_ACP,0,p,*lpnFit,NULL,0,NULL,NULL);
+    if( IsDBCSEnv() && alpDx ) /* index of alpDx between ansi and wide may not match in DBCS !!! */
+    {
+        LPINT alpDxNew = ( LPINT )HeapAlloc( GetProcessHeap(), 0, *lpnFit );
+        int i, j;
+
+        for( i = j = 0; i < *lpnFit; i++, j++ )
+        {
+            if( IsDBCSLeadByte( str[ i ]))
+            {
+                alpDxNew[ i++ ] = alpDx[ j ] >> 1;
+                if( i < *lpnFit )
+                    alpDxNew[ i ] = alpDx[ j ] >> 1;
+            }
+            else
+                alpDxNew[ i ] = alpDx[ j ];
+
+        }
+
+        memcpy( alpDx, alpDxNew, sizeof( alpDx[ 0 ] ) * *lpnFit );
+
+        HeapFree( GetProcessHeap(), 0, alpDxNew );
+    }
     HeapFree( GetProcessHeap(), 0, p );
     return ret;
 }
@@ -530,20 +552,20 @@ BOOL WIN32API GetTextExtentExPointW(HDC hdc,
     size->cx = size->cy = nFit = extent = 0;
     for(index = 0; index < count; index++)
     {
- 	if(!GetTextExtentPoint32W( hdc, str, 1, &tSize )) goto done;
+    if(!GetTextExtentPoint32W( hdc, str, 1, &tSize )) goto done;
         /* GetTextExtentPoint includes intercharacter spacing. */
         /* FIXME - justification needs doing yet.  Remember that the base
          * data will not be in logical coordinates.
          */
-	extent += tSize.cx;
-	if( !lpnFit || extent <= maxExt )
+    extent += tSize.cx;
+    if( !lpnFit || extent <= maxExt )
         /* It is allowed to be equal. */
         {
-	    nFit++;
-	    if( alpDx ) alpDx[index] = extent;
+        nFit++;
+        if( alpDx ) alpDx[index] = extent;
         }
-	if( tSize.cy > size->cy ) size->cy = tSize.cy;
-	str++;
+    if( tSize.cy > size->cy ) size->cy = tSize.cy;
+    str++;
     }
     size->cx = extent;
     if(lpnFit) *lpnFit = nFit;
