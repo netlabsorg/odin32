@@ -1,4 +1,4 @@
-/* $Id: defwndproc.cpp,v 1.13 2000-02-16 14:34:15 sandervl Exp $ */
+/* $Id: defwndproc.cpp,v 1.14 2000-09-05 19:20:33 sandervl Exp $ */
 
 /*
  * Win32 default window API functions for OS/2
@@ -31,6 +31,7 @@ LRESULT WIN32API DefWindowProcA(HWND hwnd, UINT Msg, WPARAM wParam, LPARAM lPara
 {
   Win32BaseWindow *window;
 
+    dprintf2(("DefWindowProcA %x %x %x %x", hwnd, Msg, wParam, lParam));
     window = Win32BaseWindow::GetWindowFromHandle(hwnd);
     if(!window) {
         dprintf(("DefWindowProcA, window %x not found", hwnd));
@@ -44,6 +45,7 @@ LRESULT WIN32API DefWindowProcW(HWND hwnd, UINT Msg, WPARAM wParam, LPARAM lPara
 {
   Win32BaseWindow *window;
 
+    dprintf2(("DefWindowProcW %x %x %x %x", hwnd, Msg, wParam, lParam));
     window = Win32BaseWindow::GetWindowFromHandle(hwnd);
     if(!window) {
         dprintf(("DefWindowProcW, window %x not found", hwnd));

@@ -1,4 +1,4 @@
-/* $Id: win32class.cpp,v 1.17 2000-06-13 21:26:29 sandervl Exp $ */
+/* $Id: win32class.cpp,v 1.18 2000-09-05 19:20:35 sandervl Exp $ */
 /*
  * Win32 Window Class Managment Code for OS/2
  *
@@ -424,10 +424,6 @@ ULONG Win32WndClass::setClassLongA(int index, LONG lNewVal, BOOL fUnicode)
 {
  ULONG rc;
 
-  if(classNameA) {
-    dprintf2(("Win32WndClass::setClassLongA %s: %d %x", classNameA, index, lNewVal));
-  }
-  else  dprintf2(("Win32WndClass::setClassLongA %d: %d %x", classAtom, index, lNewVal));
   switch(index) {
         case GCL_CBCLSEXTRA: //TODO (doesn't affect allocated classes, so what does it do?)
                 rc = nrExtraClassWords;
@@ -466,6 +462,11 @@ ULONG Win32WndClass::setClassLongA(int index, LONG lNewVal, BOOL fUnicode)
                 windowStyle = lNewVal;
                 break;
         case GCL_WNDPROC:
+		//Note: Type of SetWindowLong determines new window proc type
+                //      UNLESS the new window proc has already been registered
+                //      (use the old type in that case)
+                //      (VERIFIED in NT 4, SP6)
+		//TODO: Is that also true for GCL_WNDPROC???????????????
                 rc = (LONG)WINPROC_GetProc(windowProc, (fUnicode) ? WIN_PROC_32W : WIN_PROC_32A );
                 WINPROC_SetProc((HWINDOWPROC *)&windowProc, (WNDPROC)lNewVal, (fUnicode) ? WIN_PROC_32W : WIN_PROC_32A, WIN_PROC_CLASS );
                 break;
@@ -476,11 +477,20 @@ ULONG Win32WndClass::setClassLongA(int index, LONG lNewVal, BOOL fUnicode)
                 if(index > 0 && index < nrExtraClassWords - sizeof(ULONG)) {
                         rc = userClassLong[index];
                         userClassLong[index] = lNewVal;
-                        return(rc);
+                        break;
                 }
                 SetLastError(ERROR_INVALID_PARAMETER);
+  		if(classNameA) {
+        	      dprintf2(("WARNING: Win32WndClass::setClassLongA %s: %d %x -> wrong INDEX", classNameA, index, lNewVal));
+  		}
+  		else  dprintf2(("WARNING: Win32WndClass::setClassLongA %d: %d %x -> wrong INDEX", classAtom, index, lNewVal));
                 return 0;
   }
+  SetLastError(ERROR_SUCCESS);
+  if(classNameA) {
+        dprintf2(("Win32WndClass::setClassLongA %s: %d %x returned %x", classNameA, index, lNewVal, rc));
+  }
+  else  dprintf2(("Win32WndClass::setClassLongA %d: %d %x returned %x", classAtom, index, lNewVal, rc));
   return(rc);
 }
 //******************************************************************************

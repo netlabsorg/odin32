@@ -1,4 +1,4 @@
-/* $Id: win32wbase.h,v 1.98 2000-06-07 21:45:52 sandervl Exp $ */
+/* $Id: win32wbase.h,v 1.99 2000-09-05 19:20:37 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -427,12 +427,6 @@ private:
                              RECT *oldClientRect, WINDOWPOS *winpos,
                              RECT *newClientRect );
 
-     LRESULT  SendInternalMessage(ULONG msg, WPARAM wParam, LPARAM lParam)
-     {
-        if(isUnicode)
-                return SendInternalMessageW(msg, wParam, lParam);
-        else    return SendInternalMessageA(msg, wParam, lParam);
-     }
 #else
 friend BOOL  OS2ToWinMsgTranslate(void *pThdb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode, BOOL fTranslateExtraMsgs);
 #endif
