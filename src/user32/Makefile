@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.101 2002-02-12 12:00:02 sandervl Exp $
+# $Id: Makefile,v 1.102 2002-03-08 11:09:14 sandervl Exp $
 
 #
 # Odin32 API
@@ -102,6 +102,7 @@ $(OBJDIR)\timer.obj \
 $(OBJDIR)\dbglocal.obj \
 $(OBJDIR)\caret.obj \
 $(OBJDIR)\text.obj \
+$(OBJDIR)\exticon.obj \
 $(OBJDIR)\wintrack.obj \
 $(OBJDIR)\oldnls32.obj \
 $(OBJDIR)\user32rsrc.obj \
