@@ -1,4 +1,4 @@
-/* $Id: d32init.c,v 1.32 2001-02-10 11:11:42 bird Exp $
+/* $Id: d32init.c,v 1.33 2001-02-11 15:21:09 bird Exp $
  *
  * d32init.c - 32-bits init routines.
  *
@@ -578,7 +578,7 @@ USHORT _loadds _Far32 _Pascal GetKernelInfo32(PKRNLINFO pKrnlInfo)
 
                                 /* Check for any revision flag */
                                 pKrnlInfo->fKernel = 0;
-                                if (*psz == 'A' || *psz == 'a')
+                                if ((*psz >= 'A' && *psz <= 'E') || (*psz >= 'a' && *psz <= 'e'))
                                 {
                                     pKrnlInfo->fKernel = (*psz - (*psz >= 'a' ? 'a'-1 : 'A'-1)) << KF_REV_SHIFT;
                                     psz++;
@@ -762,6 +762,9 @@ int interpretFunctionProlog32(char *pach, BOOL fOverload)
      *     xor r32, r/m32
      *  or
      *     mov eax, msoff32
+     *  or
+     *     push edi
+     *     mov eax, dword ptr [xxxxxxxx]
      *
      */
     if ((pach[0] == 0x55 && (pach[1] == 0x8b || pach[1] == 0xa1)) /* the two first prologs */
@@ -784,7 +787,9 @@ int interpretFunctionProlog32(char *pach, BOOL fOverload)
         ||
         (pach[0] == 0x33 && !fOverload) /* the next prolog */
         ||
-        (pach[0] == 0xa1 && !fOverload) /* last prolog */
+        (pach[0] == 0xa1 && !fOverload) /* the next prolog */
+        ||
+        (pach[0] == 0x57 &&  pach[1] == 0x8b && !fOverload) /* the last prolog */
         )
     {
         BOOL fForce = FALSE;
@@ -1449,6 +1454,13 @@ int importTabInit(void)
              * callTab-entry + a holds the 16-bit offset for the variable.
              * callTab-entry + c holds the selector for the object. (These two fields is the 16:16-bit pointer to the variable.)
              */
+            case EPT_VARIMPORTNR32:
+            case EPT_VARIMPORTNR16:
+                if (!aImportTab[i].fFound)
+                {
+                    memset(pchCTEntry, 0, VARIMPORT_ENTRY);
+                    break;
+                }
             case EPT_VARIMPORT32:
             case EPT_VARIMPORT16:
                 aImportTab[i].cbProlog = (char)0;
