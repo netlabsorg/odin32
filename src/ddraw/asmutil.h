@@ -1,4 +1,4 @@
-/* $Id: asmutil.h,v 1.8 2002-07-02 10:38:41 sandervl Exp $ */
+/* $Id: asmutil.h,v 1.9 2002-07-03 15:44:38 sandervl Exp $ */
 
 /*
  * asmutil.asm function definition
@@ -26,6 +26,9 @@ extern void __cdecl BltRec(PBYTE dest, PBYTE src, ULONG ulBltWidth, ULONG ulBltH
                            ULONG ulDestPitch, ULONG ulSrcPitch);
 extern void __cdecl MemFlip(PBYTE dest, PBYTE src, ULONG Size);
 extern int __cdecl CPUHasMMX();
+
+extern void CDECL ddmemfill16(PBYTE dest, ULONG value, ULONG size);
+extern void CDECL ddmemfill32(PBYTE dest, ULONG value, ULONG size);
 
 #ifdef __cplusplus
 }
