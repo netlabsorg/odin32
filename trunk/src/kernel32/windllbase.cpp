@@ -1,4 +1,4 @@
-/* $Id: windllbase.cpp,v 1.2 1999-10-04 22:25:02 phaller Exp $ */
+/* $Id: windllbase.cpp,v 1.3 1999-11-09 14:19:47 sandervl Exp $ */
 
 /*
  * Win32 Dll base class
@@ -32,6 +32,7 @@
 #include "vmutex.h"
 #include "oslibmisc.h"
 #include "oslibdos.h"
+#include "profile.h"
 
 VMutex dlllistmutex;   //protects linked lists of heaps
 
@@ -265,6 +266,45 @@ void Win32DllBase::deleteAll()
   while(Win32DllBase::head) {
 	delete Win32DllBase::head;
   }
+}
+//******************************************************************************
+//rename dll if necessary:
+// Win32 to OS/2 : (i.e. OLE32 -> OLE32OS2)
+// or
+// OS/2 to Win32 : (i.e. OLE32OS2 -> OLE32)
+//******************************************************************************
+void Win32DllBase::renameDll(char *dllname, BOOL fWinToOS2)
+{
+ char modname[CCHMAXPATH];
+ char renameddll[CCHMAXPATH];
+ char *namestart;
+ char *sectionname;
+
+  if(fWinToOS2) {
+	sectionname = DLLRENAMEWIN_SECTION;
+  }
+  else {
+	sectionname = DLLRENAMEOS2_SECTION;
+  }
+  namestart = OSLibStripPath(dllname);
+  strcpy(modname, namestart);
+  char *dot = strrchr(modname, '.');
+  if(dot)
+	*dot = 0;
+  strupr(modname);
+  if(ODIN_PROFILE_GetOdinIniString(sectionname, modname, "", renameddll, 
+                                   sizeof(renameddll)-1) > 1) 
+  {
+	if(namestart == dllname) {
+		strcpy(dllname, renameddll);
+	}
+	else {
+		*namestart = 0;
+		strcat(dllname, renameddll);
+	}
+	strcat(dllname, ".dll");
+  }
+  return;
 }
 //******************************************************************************
 //******************************************************************************

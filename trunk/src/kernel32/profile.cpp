@@ -1,4 +1,4 @@
-/* $Id: profile.cpp,v 1.19 1999-10-20 08:09:05 sandervl Exp $ */
+/* $Id: profile.cpp,v 1.20 1999-11-09 14:19:46 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -28,6 +28,7 @@
 #include "winuser.h"
 #include "winnls.h"
 
+#include "profile.h"
 
 ODINDEBUGCHANNEL(PROFILE)
 
@@ -79,13 +80,10 @@ static PROFILE *MRUProfile[N_CACHED_PROFILES]={NULL};
 
 /* ODIN.INI profile content */
 BOOL OdinProfileChanged = FALSE;
-static PROFILESECTION *PROFILE_OdinProfile;
+static PROFILESECTION *PROFILE_OdinProfile = NULL;
 
 #define PROFILE_MAX_LINE_LEN   1024
 #define WINININAME "WIN.INI"
-
-/* Odin profile name in KERNEL32.DLL directory */
-#define ODINININAME "ODIN.INI"
 
 /* Odin profile: the profile file being used */
 static char PROFILE_OdinIniUsed[MAX_PATHNAME_LEN] = "";
@@ -698,8 +696,8 @@ ODINFUNCTION5(int,PROFILE_GetOdinIniString,
   LPCSTR,section,
   LPCSTR,key_name,
   LPCSTR,def,
-  LPCSTR,buffer,
-  int,len)
+  LPSTR,buffer,
+  UINT,len)
 {
     int  ret;
 
