@@ -1,4 +1,4 @@
-/* $Id: menu.cpp,v 1.26 2000-11-01 20:51:37 sandervl Exp $*/
+/* $Id: menu.cpp,v 1.27 2000-11-21 15:17:12 sandervl Exp $*/
 /*
  * Menu functions
  *
@@ -1865,9 +1865,6 @@ static MENUITEM *MENU_InsertItem( HMENU hMenu, UINT pos, UINT flags )
         return NULL;
 
     /* Find where to insert new item */
-
-    /* Find where to insert new item */
-
     if (flags & MF_BYPOSITION) {
         if (pos > menu->nItems) 
             pos = menu->nItems;
@@ -1879,7 +1876,6 @@ static MENUITEM *MENU_InsertItem( HMENU hMenu, UINT pos, UINT flags )
                 return NULL;
         }
     }
-
     /* Create new items array */
 
     newItems = (MENUITEM*)HeapAlloc(GetProcessHeap(), 0, sizeof(MENUITEM) * (menu->nItems+1) );
@@ -3531,7 +3527,7 @@ INT WINAPI GetMenuStringW( HMENU hMenu, UINT wItemID,
 {
     MENUITEM *item;
 
-    dprintf(("USER32: GetMenuStringW"));
+    dprintf(("USER32: GetMenuStringW %x %d %x %d %d", hMenu, wItemID, str, nMaxSiz, wFlags));
 
     //TRACE("menu=%04x item=%04x ptr=%p len=%d flags=%04x\n",
     //             hMenu, wItemID, str, nMaxSiz, wFlags );
@@ -3617,7 +3613,7 @@ INT WINAPI GetMenuItemCount( HMENU hMenu )
 {
     LPPOPUPMENU menu = MENU_GetMenu(hMenu);
 
-    dprintf(("USER32: GetMenuItemCount"));
+    dprintf(("USER32: GetMenuItemCount %x", hMenu));
 
     if (!IS_A_MENU(menu)) return -1;
     //TRACE("(%04x) returning %d\n",
@@ -3632,7 +3628,7 @@ UINT WINAPI GetMenuItemID( HMENU hMenu, INT nPos )
 {
     MENUITEM * lpmi;
 
-    dprintf(("USER32: GetMenuItemID"));
+    dprintf(("USER32: GetMenuItemID %x %d", hMenu, nPos));
 
     if (!(lpmi = MENU_FindItem(&hMenu,(UINT*)&nPos,MF_BYPOSITION))) return 0xFFFFFFFF;
     if (lpmi->fType & MF_POPUP) return 0xFFFFFFFF;
