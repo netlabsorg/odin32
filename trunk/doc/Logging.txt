@@ -1,7 +1,7 @@
-/* $Id: Logging.txt,v 1.1 2000-07-09 22:27:52 phaller Exp $ */
+/* $Id: Logging.txt,v 1.2 2001-11-22 11:48:55 phaller Exp $ */
 
-            	Odin Logging
-            	~~~~~~~~~~~~
+            	Odin Logging and Profiling
+            	~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 1.0 Standard logging feature
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -52,4 +52,28 @@ Disable logging for kernel32, but enable it for profile.cpp & wprocess.cpp
 
 Enable logging for kernel32, but disable it for profile.cpp & wprocess.cpp
 	set dbg_kernel32=+dll -profile -wprocess
+
+
+3.0 ODIN Profiler
+~~~~~~~~~~~~~~~~~
+
+If the ODIN executables are compiled with IBM VisualAge C++ 3.08 and
+the generation of profile hooks is enabled (/Gh+), the runtime library
+ODINCRTP will reroute the _ProfileHook32 calls to the ODINPROF library.
+This is done by some sophisticated stack trickery.
+ODINPROF will be called upon each entry and exit of compiled C functions and
+C++ member functions. The profiler will then try to load the symbolic debug
+information file according to the module name (i. e. KERNEL32.sym) and
+lookup the symbol name according to the function's entry address. C++ name
+demangling is done automatically.
+If this fails, the profiler will auto-generate symbolic names.
+If a symbol table could be loaded, but the address looked for could not be
+found exactly in the debug information, the profiler will revert to the 
+closest symbol found and add the address difference as an offset suffix.
+(i. e. _MyAPI@4+1234h)
+
+Upon process termination the profiler will yield a file named '<pid>.prof'.
+It will contain a number of sorted tables about the collected performance 
+data.
+
 
