@@ -1,4 +1,7 @@
-/* $Id: ChangeLog,v 1.2741 2004-11-23 17:06:17 sao2l02 Exp $ */
+/* $Id: ChangeLog,v 1.2742 2004-11-23 17:45:37 sao2l02 Exp $ */
+2004-11-23: Dietrich Teickner <dietrich_teickner@arcor   >
+    - Kernel32: o src/kernel32/dbglog.cpp, *.def, include/debugtools.h
+                  Multiple debugstr_a/w in one TRACE statement. 
 2004-11-14: Dietrich Teickner <dietrich_teickner@arcor   >
     - User32:   o src/user32/hook.cpp
                   workaround against stackoverflow doring rekursive CallNextHookEx in IrfanView 3.XX. 
