@@ -1,12 +1,8 @@
-/* $Id: asmutil.h,v 1.3 1999-06-10 17:10:57 phaller Exp $ */
-
 /*
  * asmutil.asm function definition
  *
- * Copyright 1998 Sander van Leeuwen (sandervl@xs4all.nl)
- *
- * Project Odin Software License can be found in LICENSE.TXT
- *
+ * Copyright 1998 Sander van Leeuwen
+ *           1999 Markus Montkowski
  */
 
 #ifndef __ASMUTIL_H__
@@ -17,6 +13,14 @@ extern "C" {
 #endif
 
 extern void __cdecl BlitColorKey8(PBYTE dest, PBYTE src, ULONG key, ULONG linesize);
+extern void __cdecl BlitColorKey16(PBYTE dest, PBYTE src, ULONG key, ULONG linesize);
+extern void __cdecl BlitColorKey32(PBYTE dest, PBYTE src, ULONG key, ULONG linesize);
+extern void __cdecl BlitColorKey8MMX(PBYTE dest, PBYTE src, ULONG key, ULONG linesize);
+extern void __cdecl BlitColorKey16MMX(PBYTE dest, PBYTE src, ULONG key, ULONG linesize);
+extern void __cdecl BltRec(PBYTE dest, PBYTE src, ULONG ulBltWidth, ULONG ulBltHeight,
+                           ULONG ulDestPitch, ULONG ulSrcPitch);
+extern void __cdecl MemFlip(PBYTE dest, PBYTE src, ULONG Size);
+extern int __cdecl CPUHasMMX();
 
 #ifdef __cplusplus
 }
