@@ -11,6 +11,7 @@
 #include "controls.h"
 #include "button.h"
 #include "static.h"
+#include "scroll.h"
 
 /* registration */
 
@@ -21,6 +22,9 @@ void CONTROLS_Register()
 
   dprintf(("Register STATIC class"));
   if (!STATIC_Register()) dprintf(("failed!!!"));
+
+  dprintf(("Register SCROLLBAR class"));
+  if (!SCROLLBAR_Register()) dprintf(("failed!!!"));
 }
 
 void CONTROLS_Unregister()
@@ -30,6 +34,9 @@ void CONTROLS_Unregister()
 
   dprintf(("Unregister STATIC class"));
   STATIC_Unregister();
+
+  dprintf(("Unregister SCROLLBAR class"));
+  SCROLLBAR_Unregister();
 }
 
 /* Win32 <-> internal control name */
