@@ -1,4 +1,4 @@
- /* $Id: ChangeLog-2000,v 1.4 2000-10-01 12:05:24 sandervl Exp $ */
+ /* $Id: ChangeLog-2000,v 1.5 2000-10-05 18:47:35 sandervl Exp $ */
 
  2000-09-29: Sander van Leeuwen <sandervl@xs4all.nl>
     - USER32: Edit control fix; Ignore WM_SETTEXT if string is the same.
@@ -229,7 +229,7 @@
     - KERNEL32: GetDiskFreeSpaceExA: added support for 64 bits disk size
                 Rewrote GetDiskFreeSpace (no longer uses Open32)
     - USER32:   SetWindowLong GWL_WNDPROC changes/fixes
-    Type of SetWindowLong determines new window proc type
+                Type of SetWindowLong determines new window proc type
                 UNLESS the new window proc has already been registered
                 (use the old type in that case) (VERIFIED in NT 4, SP6)
                 Return original window procedure if types match (SetWindowLongX & proc type)
