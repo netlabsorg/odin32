@@ -1,4 +1,14 @@
-/* $Id: changelog,v 1.2317 2002-09-19 09:39:00 sandervl Exp $ */
+/* $Id: changelog,v 1.2318 2002-09-20 05:31:44 bird Exp $ */
+
+ 2002-09-19:
+    - MAKE, TOOLS/BIN/RM, FASTDEP:
+                o IPF and IPP support. They are built in the 'misc' pass.
+                  See make\testcase\ipf.mak for usage example.
+                  NB. FastDep does only C styled dependency generation
+                  for .IPP files.
+                o Corrected bad .orc dependency generation.
+                o Added some shortcut rules to restart/skip passes.
+                o Fixed rm -R filename. Suppressed ERROR_PATH_NOT_FOUND msgs.
 
  2002-09-19: Sander van Leeuwen <sandervl@innotek   >
     - ODINCRT:  o Include new & delete in memory statistics
