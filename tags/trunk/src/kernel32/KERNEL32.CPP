@@ -1,4 +1,4 @@
-/* $Id: KERNEL32.CPP,v 1.10 1999-06-30 16:47:57 phaller Exp $ */
+/* $Id: KERNEL32.CPP,v 1.11 1999-08-05 19:50:33 phaller Exp $ */
 
 /*
  *
@@ -575,23 +575,6 @@ VOID WIN32API FatalExit( UINT arg1)
 }
 //******************************************************************************
 //******************************************************************************
-int WIN32API lstrlenA(LPCSTR arg1)
-{
-    dprintf(("KERNEL32:  OS2lstrlen %X\n", arg1));
-    return O32_lstrlen(arg1);
-}
-//******************************************************************************
-//******************************************************************************
-int WIN32API lstrlenW(LPCWSTR arg1)
-{
- int rc;
-
-    rc = UniStrlen( (UniChar*)arg1);
-    dprintf(("KERNEL32: OS2lstrlenW returns %d\n", rc));
-    return rc;
-}
-//******************************************************************************
-//******************************************************************************
 LPSTR WIN32API GetEnvironmentStringsA(void)
 {
     dprintf(("KERNEL32:  OS2GetEnvironmentStringsA\n"));
@@ -640,107 +623,6 @@ HANDLE WIN32API OpenProcess(DWORD arg1, BOOL arg2, DWORD arg3)
     return O32_OpenProcess(arg1, arg2, arg3);
 }
 //******************************************************************************
-//******************************************************************************
-LPSTR WIN32API lstrcatA(LPSTR arg1, LPCSTR  arg2)
-{
-    dprintf(("KERNEL32:  OS2lstrcat\n"));
-    return O32_lstrcat(arg1, arg2);
-}
-//******************************************************************************
-//******************************************************************************
-LPWSTR WIN32API lstrcatW(LPWSTR arg1, LPCWSTR arg2)
-{
-    dprintf(("KERNEL32:  OS2lstrcatW\n"));
-    UniStrcat( (UniChar*) arg1, (UniChar*) arg2 );
-    return arg1;
-}
-//******************************************************************************
-//******************************************************************************
-int WIN32API lstrcmpA(LPCSTR arg1, LPCSTR  arg2)
-{
-    dprintf(("KERNEL32: OS2lstrcmpA %s %x\n", arg1, arg1));
-    dprintf(("KERNEL32: OS2lstrcmpA %s\n", arg2));
-    return O32_lstrcmp(arg1, arg2);
-}
-//******************************************************************************
-//******************************************************************************
-int WIN32API lstrcmpW(LPCWSTR arg1, LPCWSTR arg2)
-{
-    dprintf(("KERNEL32:  OS2lstrcmpW\n"));
-    return UniStrcmp( (UniChar*)arg1, (UniChar*)arg2 );
-}
-//******************************************************************************
-//******************************************************************************
-LPSTR WIN32API lstrcpyA(LPSTR arg1, LPCSTR  arg2)
-{
-    dprintf(("KERNEL32:  OS2lstrcpy %s\n", arg2));
-    return O32_lstrcpy(arg1, arg2);
-}
-//******************************************************************************
-//******************************************************************************
-LPWSTR WIN32API lstrcpyW(LPWSTR dest, LPCWSTR src)
-{
-    dprintf(("KERNEL32:  OS2lstrcpyW"));
-    UniStrcpy( (UniChar*)dest, (UniChar*)src );
-    return dest;
-}
-//******************************************************************************
-//******************************************************************************
-LPSTR WIN32API lstrcpynA(LPSTR arg1, LPCSTR  arg2, int arg3)
-{
-  register LPSTR p1 = arg1;
-  register LPSTR p2 = (LPSTR)arg2;
-
-  dprintf(("KERNEL32: OS2lstrcpyA(%08xh, %08xh, %08xh)\n",
-           arg1,
-           arg2,
-           arg3));
-
-  //PH: looks like either \0 or arg3 terminate the copy
-  //return strncpy(arg1, arg2, arg3);
-  arg3--; // pre-decrement to avoid exceeding buffer length
-          // results in better code than (arg1 > 1)
-
-  for (;*p2 && arg3; arg3--)
-    *p1++ = *p2++;
-
-  *p1 = 0; //CB: copy arg-1, set end 0
-
-  return arg1;
-}
-//******************************************************************************
-//******************************************************************************
-LPWSTR WIN32API lstrcpynW(LPWSTR dest, LPCWSTR src, int arg3)
-{
-    dprintf(("KERNEL32:  OS2lstrcpynW"));
-    if (arg3 == 0) return NULL;
-    UniStrncpy( (UniChar*)dest, (UniChar*)src, arg3-1); //CB: copy arg3-1 characters
-    dest[arg3-1] = 0; //CB: set end
-    return dest;
-}
-//******************************************************************************
-//******************************************************************************
-int WIN32API lstrcmpiA(LPCSTR arg1, LPCSTR  arg2)
-{
-    dprintf(("KERNEL32:  OS2lstrcmpi\n"));
-    return O32_lstrcmpi(arg1, arg2);
-}
-//******************************************************************************
-//******************************************************************************
-int WIN32API lstrcmpiW(LPCWSTR arg1, LPCWSTR arg2)
-{
- char *astr1, *astr2;
- int   rc;
-
-    dprintf(("KERNEL32:  OS2lstrcmpiW\n"));
-// NOTE: This function has not equivalent in uunidef.h
-    astr1 = UnicodeToAsciiString((LPWSTR)arg1);
-    astr2 = UnicodeToAsciiString((LPWSTR)arg2);
-    rc = O32_lstrcmpi(astr1, astr2);
-    FreeAsciiString(astr2);
-    FreeAsciiString(astr1);
-    return(rc);
-}
 //******************************************************************************
 //SvL: BUGFIX: C calling convention!
 //******************************************************************************
