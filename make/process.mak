@@ -1,4 +1,4 @@
-# $Id: process.mak,v 1.7 2002-04-22 02:22:18 bird Exp $
+# $Id: process.mak,v 1.8 2002-04-29 11:46:29 bird Exp $
 
 #
 # Unix-like tools for OS/2
@@ -752,8 +752,8 @@ $(TARGET_PUBNAME): $(TARGET)
 # The $(TARGET) rule - For EMPTY targets.
 # -----------------------------------------------------------------------------
 !if "$(TARGET_MODE)" == "EMPTY"
-$(TARGET):
-    @$(ECHO) .
+#$(TARGET):
+#    @$(ECHO) .
 !endif
 
 
