@@ -1,4 +1,4 @@
-/* $Id: oslibdebug.cpp,v 1.6 2001-10-09 20:25:20 sandervl Exp $ */
+/* $Id: oslibdebug.cpp,v 1.7 2002-05-28 09:53:34 sandervl Exp $ */
 
 /*
  * OS/2 debug apis
@@ -25,57 +25,140 @@
 #include <windllbase.h>
 #include <winconst.h>
 #include "oslibdebug.h"
+#include <stdio.h>
 
 #define DBG_LOCALLOG	DBG_oslibdebug
 #include "dbglocal.h"
+static int superpid = 0;
 
+#define DEBUG_SEMNAME   "\\SEM32\\ODINTRACE\\"
 #define DEBUG_QUEUENAME "\\QUEUES\\ODINTRACE\\"
 #define DEBUG_QSEMNAME  "\\SEM32\\ODINTRACEQ\\"
-#define DEBUG_SEMNAME   "\\SEM32\\ODINTRACE\\"
+
+#define DEBUG_WINQSEMNAME  "\\SEM32\\WINTRACEQ\\"
+#define DEBUG_WINQUEUENAME "\\QUEUES\\WINTRACE\\"
+
+#ifdef DEBUG
+typedef struct
+{
+    LPSTR pszMsg;
+    UINT msg;
+} MSGDESC, *PMSGDESC;
+
+//
+// Message description table.  Describes each message that can be spied on.
+// This table must be kept in sorted order.
+//
+MSGDESC debugMsgs[] =
+{
+    { "EXCEPTION_DEBUG_EVENT", EXCEPTION_DEBUG_EVENT},
+    { "CREATE_THREAD_DEBUG_EVENT", CREATE_THREAD_DEBUG_EVENT},                               // 0x0001
+    { "CREATE_PROCESS_DEBUG_EVENT", CREATE_PROCESS_DEBUG_EVENT},
+    { "EXIT_THREAD_DEBUG_EVENT", EXIT_THREAD_DEBUG_EVENT},
+    { "EXIT_PROCESS_DEBUG_EVENT", EXIT_PROCESS_DEBUG_EVENT},                                   // 0x0005
+    { "LOAD_DLL_DEBUG_EVENT", LOAD_DLL_DEBUG_EVENT},
+    { "UNLOAD_DLL_DEBUG_EVENT", UNLOAD_DLL_DEBUG_EVENT},
+    { "OUTPUT_DEBUG_STRING_EVENT", OUTPUT_DEBUG_STRING_EVENT},
+    { "RIP_EVENT", RIP_EVENT}
+};
+
+INT gcMessages = sizeof(debugMsgs) / sizeof(MSGDESC);
+
+char *GetDebugMsgText(int Msg)
+{
+ static char msgtxt[64];
+ int i;
+
+  for(i=0;i<gcMessages;i++) {
+        if(debugMsgs[i].msg == Msg)
+                return(debugMsgs[i].pszMsg);
+  }
+  sprintf(msgtxt, "%s %X ","Unknown Message ", Msg);
+  return(msgtxt);
+}
+#endif
 
 //******************************************************************************
 //******************************************************************************
 VOID _Optlink DebugThread(VOID *argpid)
 {
-  BOOL   fTerminate    = FALSE;
-  CHAR   QueueName[30] = DEBUG_QUEUENAME;
-  CHAR   SemName[30]   = DEBUG_SEMNAME;
-  CHAR   QSemName[30]  = DEBUG_QSEMNAME;
-  HQUEUE QueueHandle   = 0;
-  HEV    hevSem        = 0,
-         hevQSem       = 0;
-  uDB_t  DbgBuf        = {0};
-  int    rc;
+  BOOL   fTerminate       = FALSE;
+  CHAR   QueueName[30]    = DEBUG_QUEUENAME;
+  CHAR   WinQueueName[30] = DEBUG_WINQUEUENAME;
+  CHAR   SemName[30]      = DEBUG_SEMNAME;
+  CHAR   QSemName[30]     = DEBUG_QSEMNAME;
+  CHAR   WinQSemName[30]  = DEBUG_WINQSEMNAME;
+  HQUEUE QueueHandle      = 0;
+  HQUEUE WinQueueHandle   = 0;
+  HEV    hevSem           = 0,
+         hevQSem          = 0,
+         hevWinQSem	  = 0;	 
+  uDB_t  DbgBuf           = {0};
+  int    rc, rc2;
   char   path[CCHMAXPATH];
   Win32DllBase *winmod;
-  LPDEBUG_EVENT lpde;
+  REQUESTDATA Request     = {0};
+  LPDEBUG_EVENT lpde,lpde2;
   ULONG  *pid = (ULONG*)argpid;
   ULONG  staticPid = *pid;
+  ULONG  ulDataLen = 0, ulElemCode = 0, ulNumCalled = 0;
+  PVOID  DataBuffer;
+  BYTE   Priority = 0;
   char   tmp[12];
 
   dprintf(("KERNEL32: DebugThread pid:%d", *pid));
-
-  strcat(QueueName, itoa(getpid(), tmp, 10));
+  //------------ Output queue ----------------
+  strcat(QueueName, itoa(*pid, tmp, 10));
   rc = DosCreateQueue( &QueueHandle , QUE_FIFO, QueueName);
   if(rc != 0)
   {
-     dprintf(("DebugThread: Could not create queue:%s rc:%d", QueueName, rc));
+     dprintf(("DebugThread: Could not create output queue:%s rc:%d", QueueName, rc));
      return;
   }
-  strcat(SemName, itoa(getpid(), tmp, 10));
+  dprintf(("DebugThread: Output queue %s created", QueueName));
+  //------------ Odin internal queue ----------------
+  strcat(WinQueueName, itoa(*pid, tmp, 10));
+  rc = DosCreateQueue( &WinQueueHandle , QUE_FIFO, WinQueueName);
+  if(rc != 0)
+  {
+     dprintf(("DebugThread: Could not create Odin queue:%s rc:%d", WinQueueName, rc));
+     return;
+  }
+  dprintf(("DebugThread: Odin internal win32 queue %s created", WinQueueName));
+  //------------- Main Debug Semaphore -----------------
+  strcat(SemName, itoa(*pid, tmp, 10));
   rc = DosCreateEventSem(SemName, &hevSem, 0, TRUE);
   if(rc != 0)
   {
-     dprintf(("DebugThread: Could not create event sem:%s rc:%d", SemName, rc));
+     dprintf(("DebugThread: Could not create main debug sem:%s rc:%d", SemName, rc));
+     DosCloseQueue(QueueHandle);
+     DosCloseQueue(WinQueueHandle);
+     return;
+  }
+  dprintf(("DebugThread: Main debug semaphore %s created", SemName));
+
+  //------------- Odin internal queue semaphor ---------------
+  strcat(WinQSemName, itoa(*pid, tmp, 10));
+  rc = DosCreateEventSem(WinQSemName, &hevWinQSem, 0, FALSE);
+  if(rc != 0)
+  {
+     dprintf(("DebugThread: Could not create odin internal queue sem:%s rc:%d", QSemName, rc));
+     DosCloseEventSem(hevSem);
+     DosCloseQueue(WinQueueHandle);
      DosCloseQueue(QueueHandle);
      return;
   }
-  strcat(QSemName, itoa(getpid(), tmp, 10));
+  dprintf(("DebugThread: Odin internal queue semaphore %s created", WinQSemName));
+
+  //------------- Output queue semaphor ---------------
+  strcat(QSemName, itoa(*pid, tmp, 10));
   rc = DosCreateEventSem(QSemName, &hevQSem, 0, FALSE);
   if(rc != 0)
   {
-     dprintf(("DebugThread: Could not create event sem:%s rc:%d", QSemName, rc));
+     dprintf(("DebugThread: Could not create event output queue sem:%s rc:%d", QSemName, rc));
      DosCloseEventSem(hevSem);
+     DosCloseEventSem(hevWinQSem);
+     DosCloseQueue(WinQueueHandle);
      DosCloseQueue(QueueHandle);
      return;
   }
@@ -90,6 +173,7 @@ VOID _Optlink DebugThread(VOID *argpid)
   if (rc != 0)
   {
     dprintf(("DosDebug error: rc = %d error:%d", rc, DbgBuf.Value));
+    DosCloseQueue(WinQueueHandle);
     DosCloseQueue(QueueHandle);
     DosCloseEventSem(hevSem);
     return;
@@ -98,8 +182,9 @@ VOID _Optlink DebugThread(VOID *argpid)
   while (rc == 0)
   {
     DosWaitEventSem(hevSem, SEM_INDEFINITE_WAIT);
+    DosResetEventSem(hevSem,&ulNumCalled);
 
-    DosDebug_GO:
+DosDebug_GO:
     DbgBuf.Cmd = DBG_C_Go;
     DbgBuf.Pid = *pid;
 
@@ -150,9 +235,46 @@ VOID _Optlink DebugThread(VOID *argpid)
         // TODO: fill union
         // DosWriteQueue(QueueHandle, 0, sizeof(DEBUG_EVENT), lpde, 0);
         // break;
-        DbgBuf.Cmd = DBG_C_Continue;
-        DbgBuf.Value = XCPT_CONTINUE_SEARCH;
-        goto DebugApi;
+        if (DbgBuf.Value == 0 && DbgBuf.Buffer == XCPT_BREAKPOINT)
+        { 
+          dprintf(("Breakpoint encountered"));
+          // This may be win32 event exception as well as common int3 
+          Priority = 0;
+          ulElemCode = 0;
+          rc2 = DosPeekQueue(WinQueueHandle,&Request, &ulDataLen, (PPVOID)&lpde, &ulElemCode,DCWW_NOWAIT, &Priority, hevWinQSem);
+          if(rc2 == 0)
+          {
+             //There is a win32 event here
+             rc = DosReadQueue(WinQueueHandle, &Request, &ulDataLen, (PPVOID) &lpde, 0, DCWW_NOWAIT,
+                            &Priority, hevWinQSem);
+             if (rc != 0)
+             dprintf(("DebugThread - DosReadQueue failed!"));
+             //Forward it to receiver
+             lpde2 = (LPDEBUG_EVENT) malloc(sizeof(DEBUG_EVENT));
+             OSLibDebugReadMemory ( lpde, lpde2,sizeof(DEBUG_EVENT),NULL);  
+             dprintf(("DebugThread Win32 Event %s",GetDebugMsgText(lpde2->dwDebugEventCode)));
+             DosWriteQueue(QueueHandle, 0, sizeof(DEBUG_EVENT), lpde2, 0);
+             //Stay stopped
+          }
+          dprintf(("DebugThread - waiting for continue signal"));
+          DosWaitEventSem(hevSem, SEM_INDEFINITE_WAIT);          
+          DosResetEventSem(hevSem,&ulNumCalled);
+          DbgBuf.Cmd = DBG_C_ReadReg;
+          rc = DosDebug(&DbgBuf);
+          if (rc != 0)
+             dprintf(("DosDebug error: rc = %d", rc));
+          DbgBuf.EIP++;
+          DbgBuf.Cmd = DBG_C_WriteReg;
+          rc = DosDebug(&DbgBuf);
+          if (rc != 0)
+             dprintf(("DosDebug error: rc = %d", rc));
+          DbgBuf.Cmd = DBG_C_Continue;
+          DbgBuf.Value = XCPT_CONTINUE_EXECUTION;
+          goto DebugApi;
+       } 
+       DbgBuf.Cmd = DBG_C_Continue;
+       DbgBuf.Value = XCPT_CONTINUE_SEARCH;
+       goto DebugApi;
 
       case DBG_N_ModuleLoad:
         DosQueryModuleName(DbgBuf.Value, CCHMAXPATH, path);
@@ -245,7 +367,7 @@ VOID _Optlink DebugThread(VOID *argpid)
             //TODO: fill union
             lpde->u.CreateProcessInfo.hFile = 0;
             lpde->u.CreateProcessInfo.hProcess = 0;
-            lpde->u.CreateProcessInfo.hThread = 0;
+            lpde->u.CreateProcessInfo.hThread = 10;
             lpde->u.CreateProcessInfo.lpBaseOfImage = NULL;
             lpde->u.CreateProcessInfo.dwDebugInfoFileOffset = 0;
             lpde->u.CreateProcessInfo.nDebugInfoSize = 0;
@@ -274,7 +396,7 @@ VOID _Optlink DebugThread(VOID *argpid)
         if(!winmod)
         {
           dprintf(("DosDebug: os/2 module [%s], suppress", path));
-          break;
+          goto DosDebug_GO;
         }
         lpde = (LPDEBUG_EVENT) malloc(sizeof(DEBUG_EVENT));
         lpde->dwDebugEventCode = UNLOAD_DLL_DEBUG_EVENT_W;
@@ -298,6 +420,7 @@ VOID _Optlink DebugThread(VOID *argpid)
 
   dprintf(("DosDebug - ending the service thread"));
   DosCloseQueue(QueueHandle);
+  DosCloseQueue(WinQueueHandle);
   DosCloseEventSem(hevSem);
   DosCloseEventSem(hevQSem);
 //  *pid = 0;  No can do - for some reason *pid is invalid by now
@@ -320,13 +443,13 @@ BOOL OSLibWaitForDebugEvent(LPDEBUG_EVENT lpde, DWORD dwTimeout)
   char   tmp[12];
   USHORT sel = RestoreOS2FS();
 
-  strcat(SemName, itoa(getpid(),tmp, 10));
+  strcat(SemName, itoa(superpid,tmp, 10));
   rc = DosOpenEventSem(SemName, &hevQSem);
   if(rc != 0)
     goto fail;
 
   // get a DebugEvent from our DebugThread
-  strcat(QueueName, itoa(getpid(), tmp, 10));
+  strcat(QueueName, itoa(superpid, tmp, 10));
   rc = DosOpenQueue(&pidOwner, &QueueHandle, QueueName);
   Request.pid = pidOwner;
   rc = DosReadQueue(QueueHandle, &Request, &len, (PPVOID) &lpde_queue, 0, DCWW_NOWAIT,
@@ -342,6 +465,7 @@ BOOL OSLibWaitForDebugEvent(LPDEBUG_EVENT lpde, DWORD dwTimeout)
 
   // copy DebugEvent to user space and free queue pointer
   memcpy(lpde, lpde_queue, len);
+  // free our lpd
   free(lpde_queue);
   // DosCloseEventSem(hevSem);
   SetFS(sel);
@@ -367,7 +491,7 @@ BOOL OSLibContinueDebugEvent(DWORD dwProcessId, DWORD dwThreadId, DWORD dwContin
   USHORT sel = RestoreOS2FS();
 
   // only continue DebugThread, if queue is empty
-  strcat(QueueName, itoa(getpid(), tmp, 10));
+  strcat(QueueName, itoa(superpid, tmp, 10));
   rc = DosOpenQueue(&pidOwner, &QueueHandle, QueueName);
   rc = DosQueryQueue(QueueHandle, &QEntries);
   if(QEntries > 0) {
@@ -375,12 +499,22 @@ BOOL OSLibContinueDebugEvent(DWORD dwProcessId, DWORD dwThreadId, DWORD dwContin
     	return TRUE;
   }
   // continue DebugThread
-  strcat(SemName, itoa(getpid(), tmp, 10));
+  strcat(SemName, itoa(superpid, tmp, 10));
   rc = DosOpenEventSem(SemName, &hev);
+  if (rc != 0)
+  {
+    dprintf(("OSLibContinueDebugEvent: Failed to open even semaphore rc:%d",rc));
+    return FALSE;
+  }
   rc = DosPostEventSem(hev);
+  if (rc != 0)
+  {
+    dprintf(("OSLibContinueDebugEvent: Failed to trigger semaphore rc:%d",rc));
+    return FALSE;
+  }
   // DosCloseEventSem(hev);
   SetFS(sel);
-  return (rc == 0) ? TRUE : FALSE;
+  return TRUE;
 }
 //******************************************************************************
 //******************************************************************************
@@ -440,6 +574,7 @@ VOID OSLibStartDebugger(ULONG *pid)
  TID tid;
 
    tid = _beginthread(DebugThread, NULL, 1024, (PVOID) pid);
+   superpid = *pid;
    if (tid == 0)
    {
       dprintf(("OSLibStartDebugger: Could not create debug thread!"));
@@ -451,3 +586,90 @@ VOID OSLibStartDebugger(ULONG *pid)
 }
 //******************************************************************************
 //******************************************************************************
+VOID OSLibDebugReadMemory(LPCVOID lpBaseAddress,LPVOID lpBuffer, DWORD cbRead, LPDWORD lpNumberOfBytesRead)
+{
+  uDB_t  DbgBuf        = {0};
+  USHORT sel = RestoreOS2FS();
+  APIRET rc;
+  dprintf(("OSLibDebugReadMemory - reading from pid %d",superpid));	   
+  DbgBuf.Pid = superpid;
+  DbgBuf.Cmd = DBG_C_ReadMemBuf;
+  DbgBuf.Addr  = (ULONG)lpBaseAddress;
+  DbgBuf.Buffer  = (ULONG)lpBuffer;
+  DbgBuf.Len  = cbRead;
+  rc = DosDebug(&DbgBuf);
+  if (rc != 0)
+  {
+    dprintf(("OSLibDebugReadMemory(DosDebug) error: rc = %d error:%d", rc, DbgBuf.Value));
+    SetFS(sel);
+    return;
+  }
+ if (lpNumberOfBytesRead)
+  *lpNumberOfBytesRead = cbRead;
+ SetFS(sel);
+ return;
+}
+//******************************************************************************
+//******************************************************************************
+BOOL OSLibAddWin32Event(LPDEBUG_EVENT lpde)
+{
+  uDB_t  DbgBuf        = {0};
+  USHORT sel = RestoreOS2FS();
+  APIRET rc;
+  CHAR WinQueueName[30] = DEBUG_WINQUEUENAME;
+  CHAR SemName[30]      = DEBUG_SEMNAME;
+  HEV hevSem = 0;
+  HANDLE WinQueueHandle;
+  LPDEBUG_EVENT lpde_copy = NULL;
+  char   tmp[12];
+  PID    pidOwner;
+
+  dprintf(("OSLibAddWin32Event"));	   
+  // open main debug semaphore
+  strcat(SemName, itoa(getpid(),tmp, 10));
+  rc = DosOpenEventSem(SemName, &hevSem);
+  if(rc != 0)
+  {
+    dprintf(("OSLibAddWin32Event failed to open semaphore %s - rc %d",SemName, rc));
+    goto fail;
+  }
+
+  // open Queues
+  strcat(WinQueueName, itoa(getpid(), tmp, 10));
+  rc = DosOpenQueue(&pidOwner, &WinQueueHandle, WinQueueName);
+  if (rc != 0)
+  {
+    dprintf(("OSLibAddWin32Event failed to open queue - rc %d",rc));
+    goto fail;
+  }
+
+  // copy data to our buffer
+  lpde_copy = (LPDEBUG_EVENT) malloc(sizeof(DEBUG_EVENT));
+  memcpy(lpde_copy,lpde,sizeof(DEBUG_EVENT));
+  rc = DosWriteQueue(WinQueueHandle, 0, sizeof(DEBUG_EVENT), lpde_copy, 0);
+  if (rc !=0 )
+  {
+    dprintf(("OSLibAddWin32Event failed to write to queue - rc %d",rc));
+    goto fail;
+  }
+
+  // and post notification
+  rc = DosPostEventSem(hevSem);
+  if (rc != 0)
+  {
+    dprintf(("OSLibAddWin32Event failed to trigger semaphore - rc %d",rc));
+    goto fail;
+  }
+  _interrupt(3);
+  free(lpde_copy);  
+  DosCloseEventSem(hevSem);
+  DosCloseQueue(WinQueueHandle);
+  SetFS(sel);
+  return TRUE;
+fail:
+  if (lpde_copy) free(lpde_copy);  
+  DosCloseEventSem(hevSem);
+  DosCloseQueue(WinQueueHandle);
+  SetFS(sel);
+  return FALSE;
+}
