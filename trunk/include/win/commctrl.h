@@ -1,4 +1,4 @@
-/* $Id: commctrl.h,v 1.19 2000-02-12 18:08:22 cbratschi Exp $ */
+/* $Id: commctrl.h,v 1.20 2000-02-14 17:27:54 cbratschi Exp $ */
 /*
  * Common controls definitions
  */
@@ -2729,6 +2729,8 @@ typedef struct tagNMLVCACHEHINT
     (BOOL)SendMessageA((hwnd),LVM_SCROLL,(WPARAM)(INT)(dx),(LPARAM)(INT)(dy))
 #define ListView_EnsureVisible(hwnd,i,fPartialOk) \
     (BOOL)SendMessageA((hwnd),LVM_ENSUREVISIBLE,(WPARAM)(INT)i,(LPARAM)(BOOL)fPartialOk)
+#define ListView_EditLabel(hwnd,i) \
+    (HWND)SendMessageA((hwnd),LVM_EDITLABELA,(WPARAM)(INT)i,0L)
 #define ListView_SetBkColor(hwnd,clrBk) \
     (BOOL)SendMessageA((hwnd),LVM_SETBKCOLOR,0,(LPARAM)(COLORREF)(clrBk))
 #define ListView_GetImageList(hwnd,iImageList) \

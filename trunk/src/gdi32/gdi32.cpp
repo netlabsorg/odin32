@@ -1,4 +1,4 @@
-/* $Id: gdi32.cpp,v 1.41 2000-02-14 16:44:45 bird Exp $ */
+/* $Id: gdi32.cpp,v 1.42 2000-02-14 17:28:45 cbratschi Exp $ */
 
 /*
  * GDI32 apis
@@ -152,7 +152,7 @@ HPEN WIN32API CreatePen( int fnPenStyle, int nWidth, COLORREF crColor)
 
     //CB: todo: PS_DOT is different in Win32 (. . . . and not - - - -)
     //    Open32 looks like LINETYPE_SHORTDASH instead of LINETYPE_DOT!!!
-    //    -> difficult to fix!
+    //    -> difficult to fix without performance decrease!
 
     return O32_CreatePen(fnPenStyle,nWidth,crColor);
 }
@@ -491,7 +491,7 @@ HDC WIN32API CreateICA(LPCSTR lpszDriver, LPCSTR lpszDevice, LPCSTR lpszOutput,
     dprintf(("GDI32: CreateICA"));
     //SvL: Open32 tests for "DISPLAY"
     if(lpszDriver && !strcmp(lpszDriver, "display")) {
-	lpszDriver = szDisplay;
+        lpszDriver = szDisplay;
     }
     return O32_CreateIC(lpszDriver, lpszDevice, lpszOutput, lpdvmInit);
 }

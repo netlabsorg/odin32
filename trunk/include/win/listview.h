@@ -7,11 +7,7 @@
 #ifndef __WINE_LISTVIEW_H
 #define __WINE_LISTVIEW_H
 
-#include "commctrl.h"
-#include "windef.h"
-#include "wingdi.h"
-
-/* Some definitions for inline edit control */    
+/* Some definitions for inline edit control */
 typedef BOOL (*EditlblCallback)(HWND, LPSTR, DWORD);
 
 typedef struct tagEDITLABEL_ITEM
@@ -71,8 +67,9 @@ typedef struct tagLISTVIEW_INFO
     PFNLVCOMPARE pfnCompare;
     LPARAM lParamSort;
     HWND hwndEdit;
+    BOOL bDoEditLabel;
     EDITLABEL_ITEM *pedititem;
-    
+
 } LISTVIEW_INFO;
 
 

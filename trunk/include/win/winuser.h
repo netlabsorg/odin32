@@ -1,4 +1,4 @@
-/* $Id: winuser.h,v 1.33 2000-02-12 18:08:23 cbratschi Exp $ */
+/* $Id: winuser.h,v 1.34 2000-02-14 17:27:55 cbratschi Exp $ */
 
 #ifndef __INCLUDE_WINUSER_H
 #define __INCLUDE_WINUSER_H
@@ -641,6 +641,9 @@ typedef struct
 #define WM_MOUSEWHEEL       0x020A
 #define WM_MOUSEFIRST       WM_MOUSEMOVE
 #define WM_MOUSELAST        WM_MOUSEWHEEL
+
+#define WHEEL_DELTA      120
+#define WHEEL_PAGESCROLL (UINT_MAX)
 
 #define WM_PARENTNOTIFY     0x0210
 #define WM_ENTERMENULOOP    0x0211

@@ -1,4 +1,4 @@
-/* $Id: combo.h,v 1.3 1999-07-24 17:55:08 sandervl Exp $ */
+/* $Id: combo.h,v 1.4 2000-02-14 17:27:54 cbratschi Exp $ */
 
 /*
  * Combo box definitions
@@ -29,6 +29,7 @@
 #define CBF_NOREDRAW            0x0200
 #define CBF_SELCHANGE           0x0400
 #define CBF_NOEDITNOTIFY        0x1000
+#define CBF_NOLBSELECT          0x2000  /* do not change current selection */
 #define CBF_EUI                 0x8000
 
 /* Combo state struct */
