@@ -1,4 +1,4 @@
-/* $Id: status.c,v 1.16 1999-12-22 18:10:09 cbratschi Exp $ */
+/* $Id: status.c,v 1.17 1999-12-26 17:32:13 cbratschi Exp $ */
 /*
  * Interface code to StatusWindow widget/control
  *
@@ -999,28 +999,6 @@ STATUSBAR_WMGetText (HWND hwnd, WPARAM wParam, LPARAM lParam)
     return -1;
 }
 
-static LRESULT STATUSBAR_WMSetCursor(HWND hwnd,WPARAM wParam,LPARAM lParam)
-{
-  DWORD dwStyle = GetWindowLongA(hwnd,GWL_STYLE);
-
-  if (dwStyle & SBARS_SIZEGRIP)
-  {
-    RECT rect = STATUSBAR_GetSizeBox(hwnd);
-    POINT pt;
-
-    GetCursorPos(&pt);
-    ScreenToClient(hwnd,&pt);
-
-    if (PtInRect(&rect,pt))
-    {
-      SetCursor(LoadCursorA(0,IDC_SIZENWSEA));
-      return TRUE;
-    }
-  }
-
-  return DefWindowProcA(hwnd,WM_SETCURSOR,wParam,lParam);
-}
-
 static LRESULT
 STATUSBAR_WMMouseMove (HWND hwnd, WPARAM wParam, LPARAM lParam)
 {
@@ -1056,22 +1034,6 @@ STATUSBAR_WMNCHitTest (HWND hwnd, WPARAM wParam, LPARAM lParam)
 static LRESULT
 STATUSBAR_WMNCLButtonDown (HWND hwnd, WPARAM wParam, LPARAM lParam)
 {
-  DWORD dwStyle = GetWindowLongA(hwnd,GWL_STYLE);
-
-  if (dwStyle & SBARS_SIZEGRIP && !(dwStyle & CCS_TOP))
-  {
-    RECT rect = STATUSBAR_GetSizeBox(hwnd);
-    POINT point;
-
-    point.x = (SHORT)LOWORD(lParam);
-    point.y = (SHORT)HIWORD(lParam);
-    ScreenToClient(hwnd,&point);
-
-    if (PtInRect(&rect,point)) TrackWin32Window(GetParent(hwnd),FALSE);
-
-    return 0;
-  }
-
   PostMessageA (GetParent (hwnd), WM_NCLBUTTONDOWN, wParam, lParam);
   return 0;
 }
@@ -1310,9 +1272,6 @@ StatusWindowProc (HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 
         case WM_RBUTTONUP:
             return STATUSBAR_SendNotify (hwnd, NM_RCLICK);
-
-        case WM_SETCURSOR:
-            return STATUSBAR_WMSetCursor(hwnd,wParam,lParam);
 
         case WM_SETFONT:
             return STATUSBAR_WMSetFont (hwnd, wParam, lParam);

@@ -1,4 +1,4 @@
-/*$Id: listview.c,v 1.19 1999-12-21 17:01:36 cbratschi Exp $*/
+/*$Id: listview.c,v 1.20 1999-12-26 17:32:12 cbratschi Exp $*/
 /*
  * Listview control
  *
@@ -1649,7 +1649,7 @@ static BOOL LISTVIEW_SetItem(HWND hwnd, LPLVITEMA lpLVItem)
             bResult = TRUE;
           }
 
-          InvalidateRect(hwnd, NULL, FALSE);
+          InvalidateRect(hwnd, NULL, TRUE);
         }
       }
     }
@@ -1697,7 +1697,7 @@ static BOOL LISTVIEW_SetSubItem(HWND hwnd, LPLVITEMA lpLVItem)
             bResult = LISTVIEW_AddSubItem(hwnd, lpLVItem);
           }
 
-          InvalidateRect(hwnd, NULL, FALSE);
+          InvalidateRect(hwnd, NULL, TRUE);
         }
       }
     }
@@ -2573,7 +2573,7 @@ static LRESULT LISTVIEW_DeleteAllItems(HWND hwnd)
     LISTVIEW_UpdateScroll(hwnd);
 
     /* invalidate client area (optimization needed) */
-    InvalidateRect(hwnd, NULL, FALSE);
+    InvalidateRect(hwnd, NULL, TRUE);
   }
 
   return bResult;
@@ -2611,7 +2611,7 @@ static LRESULT LISTVIEW_DeleteColumn(HWND hwnd, INT nColumn)
       LISTVIEW_UpdateScroll(hwnd);
 
       /* refresh client area */
-      InvalidateRect(hwnd, NULL, FALSE);
+      InvalidateRect(hwnd, NULL, TRUE);
     }
   }
 
@@ -2722,7 +2722,7 @@ static LRESULT LISTVIEW_DeleteItem(HWND hwnd, INT nItem)
     LISTVIEW_UpdateScroll(hwnd);
 
     /* refresh client area */
-    InvalidateRect(hwnd, NULL, FALSE);
+    InvalidateRect(hwnd, NULL, TRUE);
   }
 
   return bResult;
@@ -3133,7 +3133,7 @@ static LRESULT LISTVIEW_FindItem(HWND hwnd, INT nStart,
       ptItem.y = lpFindInfo->pt.y;
     }
 
-    while (1)
+    while (TRUE)
     {
       while (nItem < nLast)
       {
@@ -4824,7 +4824,7 @@ static LRESULT LISTVIEW_InsertColumnA(HWND hwnd, INT nColumn,
     infoPtr->nItemWidth = LISTVIEW_GetItemWidth(hwnd);
 
     LISTVIEW_UpdateScroll(hwnd);
-    InvalidateRect(hwnd, NULL, FALSE);
+    InvalidateRect(hwnd, NULL, TRUE);
   }
 
   return nNewColumn;
@@ -4935,7 +4935,7 @@ static LRESULT LISTVIEW_InsertItemA(HWND hwnd, LPLVITEMA lpLVItem)
 
                 LISTVIEW_UpdateScroll(hwnd);
                 /* refresh client area */
-                InvalidateRect(hwnd, NULL, FALSE);
+                InvalidateRect(hwnd, NULL, TRUE);
               }
             }
           }
@@ -4998,7 +4998,7 @@ static LRESULT LISTVIEW_RedrawItems(HWND hwnd, INT nFirst, INT nLast)
       if ((nLast >= 0) && (nLast < GETITEMCOUNT(infoPtr)))
       {
         /* bResult = */
-        InvalidateRect(hwnd, &rc, FALSE);
+        InvalidateRect(hwnd, &rc, TRUE);
       }
     }
   }
@@ -5025,7 +5025,7 @@ static LRESULT LISTVIEW_SetBkColor(HWND hwnd, COLORREF clrBk)
   LISTVIEW_INFO *infoPtr = (LISTVIEW_INFO *)GetWindowLongA(hwnd, 0);
 
   infoPtr->clrBk = clrBk;
-  InvalidateRect(hwnd, NULL, FALSE);
+  InvalidateRect(hwnd, NULL, TRUE);
 
   return TRUE;
 }
@@ -5233,7 +5233,7 @@ static LRESULT LISTVIEW_SetColumnWidth(HWND hwnd, INT iCol, INT cx)
 
     infoPtr->nItemWidth = LISTVIEW_GetItemWidth(hwnd);
 
-    InvalidateRect(hwnd, NULL, FALSE); // force redraw of the listview
+    InvalidateRect(hwnd, NULL, TRUE); // force redraw of the listview
 
     return lret;
 }
@@ -5588,7 +5588,7 @@ static LRESULT LISTVIEW_SetTextBkColor(HWND hwnd, COLORREF clrTextBk)
   LISTVIEW_INFO *infoPtr = (LISTVIEW_INFO *)GetWindowLongA(hwnd, 0);
 
   infoPtr->clrTextBk = clrTextBk;
-  InvalidateRect(hwnd, NULL, FALSE);
+  InvalidateRect(hwnd, NULL, TRUE);
 
   return TRUE;
 }
@@ -5610,7 +5610,7 @@ static LRESULT LISTVIEW_SetTextColor (HWND hwnd, COLORREF clrText)
   LISTVIEW_INFO *infoPtr = (LISTVIEW_INFO *)GetWindowLongA(hwnd, 0);
 
   infoPtr->clrText = clrText;
-  InvalidateRect(hwnd, NULL, FALSE);
+  InvalidateRect(hwnd, NULL, TRUE);
 
   return TRUE;
 }
@@ -5684,9 +5684,13 @@ static LRESULT LISTVIEW_SortItems(HWND hwnd, WPARAM wParam, LPARAM lParam)
         // append pointers one by one to sortList
         for (i = 0; i < nCount; i++)
         {
-            if ((hdpaSubItems = (HDPA) DPA_GetPtr(infoPtr->hdpaItems, i)))
-                if ((lpItem = (LISTVIEW_ITEM *) DPA_GetPtr(hdpaSubItems, 0)))
-                    DPA_InsertPtr(sortList, nCount + 1, lpItem);
+            hdpaSubItems = (HDPA) DPA_GetPtr(infoPtr->hdpaItems, i);
+            if (hdpaSubItems)
+            {
+              lpItem = (LISTVIEW_ITEM *) DPA_GetPtr(hdpaSubItems, 0);
+              if (lpItem)
+                DPA_InsertPtr(sortList, nCount + 1, lpItem);
+            }
         }
 
         // sort the sortList
@@ -5695,9 +5699,13 @@ static LRESULT LISTVIEW_SortItems(HWND hwnd, WPARAM wParam, LPARAM lParam)
         // copy the pointers back
         for (i = 0; i < nCount; i++)
         {
-            if ((hdpaSubItems = (HDPA) DPA_GetPtr(infoPtr->hdpaItems, i)) &&
-                (lpItem = (LISTVIEW_ITEM *) DPA_GetPtr(sortList, i)))
+            hdpaSubItems = (HDPA) DPA_GetPtr(infoPtr->hdpaItems, i);
+            if (hdpaSubItems)
+            {
+              lpItem = (LISTVIEW_ITEM *) DPA_GetPtr(sortList, i);
+              if (lpItem)
                 DPA_SetPtr(hdpaSubItems, 0, lpItem);
+            }
         }
 
         DPA_Destroy(sortList);
@@ -5742,7 +5750,7 @@ static LRESULT LISTVIEW_Update(HWND hwnd, INT nItem)
       /* get item bounding rectangle */
       rc.left = LVIR_BOUNDS;
       ListView_GetItemRect(hwnd, nItem, &rc);
-      InvalidateRect(hwnd, &rc, FALSE);
+      InvalidateRect(hwnd, &rc, TRUE);
     }
   }
 
@@ -6171,7 +6179,7 @@ static LRESULT LISTVIEW_KeyDown(HWND hwnd, INT nVirtualKey, LONG lKeyData)
     if (bRedraw != FALSE)
     {
       /* refresh client area */
-      InvalidateRect(hwnd, NULL, FALSE);
+      InvalidateRect(hwnd, NULL, TRUE);
       UpdateWindow(hwnd);
     }
   }
@@ -6205,7 +6213,7 @@ static LRESULT LISTVIEW_KillFocus(HWND hwnd)
   infoPtr->bFocus = FALSE;
 
   /* NEED drawing optimization ; redraw the selected items */
-  InvalidateRect(hwnd, NULL, FALSE);
+  InvalidateRect(hwnd, NULL, TRUE);
 
   return 0;
 }
@@ -6717,7 +6725,7 @@ static LRESULT LISTVIEW_SetFocus(HWND hwnd, HWND hwndLoseFocus)
   /* set window focus flag */
   infoPtr->bFocus = TRUE;
 
-  InvalidateRect(hwnd, NULL, FALSE);
+  InvalidateRect(hwnd, NULL, TRUE);
   UpdateWindow(hwnd);
 
   return 0;
@@ -6759,7 +6767,7 @@ static LRESULT LISTVIEW_SetFont(HWND hwnd, HFONT hFont, WORD fRedraw)
   }
 
   /* invalidate listview control client area */
-  InvalidateRect(hwnd, NULL, FALSE);
+  InvalidateRect(hwnd, NULL, TRUE);
 
   if (fRedraw != FALSE)
   {
@@ -6806,7 +6814,7 @@ static LRESULT LISTVIEW_Size(HWND hwnd, int Width, int Height)
   LISTVIEW_UpdateScroll(hwnd);
 
   /* invalidate client area + erase background */
-  InvalidateRect(hwnd, NULL, FALSE);
+  InvalidateRect(hwnd, NULL, TRUE);
 
   return 0;
 }
@@ -6965,7 +6973,7 @@ static INT LISTVIEW_StyleChanged(HWND hwnd, WPARAM wStyleType,
     LISTVIEW_UpdateScroll(hwnd);
 
     /* invalidate client area + erase background */
-    InvalidateRect(hwnd, NULL, FALSE);
+    InvalidateRect(hwnd, NULL, TRUE);
 
     /* print the list of unsupported window styles */
     LISTVIEW_UnsupportedStyles(lpss->styleNew);
