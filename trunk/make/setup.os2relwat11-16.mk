@@ -1,4 +1,4 @@
-# $Id: setup.os2relwat11-16.mk,v 1.1 2002-05-16 11:37:05 bird Exp $
+# $Id: setup.os2relwat11-16.mk,v 1.2 2002-08-20 05:50:53 bird Exp $
 
 # ---OS2, RELEASE, WAT11-------------------------
 ENV_NAME="OS/2, Release, Watcom C/C++ v11.0c 16-bit"
@@ -35,11 +35,14 @@ EXEPACK=lxlite.exe
 # The flags
 #
 AR_FLAGS=/nologo /noignorecase
-AR_CMD=$(AR) $(AR_FLAGS) $@ @$(TARGET_LNK)
-_AR_LNK1= "$(TARGET_OBJS: ="&^
-")"
-AR_LNK1= $(_AR_LNK1:""=)
-AR_LNK2= $(@R).lst
+AR_CMD=$(AR) $(AR_FLAGS) @"$(TARGET_LNK)"
+AR_LNK1= "$(@R).$(EXT_LIB)"
+AR_LNK2=y
+_AR_LNK3= +"$(TARGET_OBJS: ="&^
+ +")"
+AR_LNK3= $(_AR_LNK3:+""&^
+=)
+AR_LNK4= "$(@R).lst"
 
 _CC_FLAGS_OS =
 
@@ -95,11 +98,11 @@ LINK_FLAGS_DLL=$(LINK_FLAGS)
 LINK_FLAGS_SYS=$(LINK_FLAGS) Option oneautodata, internalrelocs, togglerelocs
 LINK_FLAGS_VDD=$(LINK_FLAGS_SYS)
 LINK_FLAGS_IFS=$(LINK_FLAGS_SYS)
-LINK_CMD_EXE=$(LINK) $(LINK_FLAGS_EXE) @$(TARGET_LNK)
-LINK_CMD_DLL=$(LINK) $(LINK_FLAGS_DLL) @$(TARGET_LNK)
-LINK_CMD_SYS=$(LINK) $(LINK_FLAGS_SYS) @$(TARGET_LNK)
-LINK_CMD_VDD=$(LINK) $(LINK_FLAGS_VDD) @$(TARGET_LNK)
-LINK_CMD_IFS=$(LINK) $(LINK_FLAGS_IFS) @$(TARGET_LNK)
+LINK_CMD_EXE=$(LINK) $(LINK_FLAGS_EXE) @"$(TARGET_LNK)"
+LINK_CMD_DLL=$(LINK) $(LINK_FLAGS_DLL) @"$(TARGET_LNK)"
+LINK_CMD_SYS=$(LINK) $(LINK_FLAGS_SYS) @"$(TARGET_LNK)"
+LINK_CMD_VDD=$(LINK) $(LINK_FLAGS_VDD) @"$(TARGET_LNK)"
+LINK_CMD_IFS=$(LINK) $(LINK_FLAGS_IFS) @"$(TARGET_LNK)"
 LINK_LNK1=file       $(TARGET_OBJS: =^
 file       )
 LINK_LNK2=libpath    $(WATCOM)\lib286\os2;$(WATCOM)\lib286;

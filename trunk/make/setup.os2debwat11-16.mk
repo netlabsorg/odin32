@@ -1,4 +1,4 @@
-# $Id: setup.os2debwat11-16.mk,v 1.3 2002-05-16 11:37:01 bird Exp $
+# $Id: setup.os2debwat11-16.mk,v 1.4 2002-08-20 05:50:53 bird Exp $
 
 # ---OS2, DEBUG, WAT11-------------------------
 ENV_NAME="OS/2, Debug, Watcom C/C++ v11.0c 16-bit"
@@ -35,11 +35,14 @@ EXEPACK=lxlite.exe
 # The flags
 #
 AR_FLAGS=/nologo /noignorecase
-AR_CMD=$(AR) $(AR_FLAGS) $@ @$(TARGET_LNK)
-_AR_LNK1= "$(TARGET_OBJS: ="&^
-")"
-AR_LNK1= $(_AR_LNK1:""=)
-AR_LNK2= $(@R).lst
+AR_CMD=$(AR) $(AR_FLAGS) @"$(TARGET_LNK)"
+AR_LNK1= "$(@R).$(EXT_LIB)"
+AR_LNK2=y
+_AR_LNK3= +"$(TARGET_OBJS: ="&^
+ +")"
+AR_LNK3= $(_AR_LNK3:+""&^
+=)
+AR_LNK4= "$(@R).lst"
 
 CC_FLAGS=-bt=os2 -dOS2 -dDEBUG -d__16BIT__ -5 -zq -bm -ze -w4 -d2 -hc -zc $(_CC_OPTIONAL) $(CC_DEFINES) $(ALL_DEFINES) $(BUILD_DEFINES) $(CC_INCLUDES:-I=-i=) $(ALL_INCLUDES:-I=-i=) -i=$(PATH_INCLUDES) -i=$(WATCOM)\h
 CC_FLAGS_EXE=$(CC_FLAGS)
@@ -91,11 +94,11 @@ LINK_FLAGS_DLL=$(LINK_FLAGS)
 LINK_FLAGS_SYS=$(LINK_FLAGS) Option oneautodata, internalrelocs, togglerelocs
 LINK_FLAGS_VDD=$(LINK_FLAGS_SYS)
 LINK_FLAGS_IFS=$(LINK_FLAGS_SYS)
-LINK_CMD_EXE=$(LINK) $(LINK_FLAGS_EXE) @$(TARGET_LNK)
-LINK_CMD_DLL=$(LINK) $(LINK_FLAGS_DLL) @$(TARGET_LNK)
-LINK_CMD_SYS=$(LINK) $(LINK_FLAGS_SYS) @$(TARGET_LNK)
-LINK_CMD_VDD=$(LINK) $(LINK_FLAGS_VDD) @$(TARGET_LNK)
-LINK_CMD_IFS=$(LINK) $(LINK_FLAGS_IFS) @$(TARGET_LNK)
+LINK_CMD_EXE=$(LINK) $(LINK_FLAGS_EXE) @"$(TARGET_LNK)"
+LINK_CMD_DLL=$(LINK) $(LINK_FLAGS_DLL) @"$(TARGET_LNK)"
+LINK_CMD_SYS=$(LINK) $(LINK_FLAGS_SYS) @"$(TARGET_LNK)"
+LINK_CMD_VDD=$(LINK) $(LINK_FLAGS_VDD) @"$(TARGET_LNK)"
+LINK_CMD_IFS=$(LINK) $(LINK_FLAGS_IFS) @"$(TARGET_LNK)"
 LINK_LNK1=file       $(TARGET_OBJS: =^
 file       )
 LINK_LNK2=libpath    $(WATCOM)\lib286\os2;$(WATCOM)\lib286;

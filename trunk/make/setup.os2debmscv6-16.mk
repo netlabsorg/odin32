@@ -1,4 +1,4 @@
-# $Id: setup.os2debmscv6-16.mk,v 1.3 2002-05-16 11:37:01 bird Exp $
+# $Id: setup.os2debmscv6-16.mk,v 1.4 2002-08-20 05:50:52 bird Exp $
 
 # ---OS2, DEBUG, MSCV6-------------------------
 ENV_NAME="OS/2, Debug, Microsoft C v6.0a 16-bit"
@@ -8,6 +8,7 @@ ENV_ENVS=vac308 mscv6-16
 !else
 ENV_ENVS_FORCE=vac308 mscv6-16
 !endif
+SPACE=_
 ENV_16BIT = 16
 
 
@@ -34,11 +35,14 @@ EXEPACK=lxlite.exe
 # The flags
 #
 AR_FLAGS=/nologo /noignorecase
-AR_CMD=$(AR) $(AR_FLAGS) $@ @$(TARGET_LNK)
-_AR_LNK1= "$(TARGET_OBJS: ="&^
-")"
-AR_LNK1= $(_AR_LNK1:""=)
-AR_LNK2= $(@R).lst
+AR_CMD=$(AR) $(AR_FLAGS) @"$(TARGET_LNK)"
+AR_LNK1= "$(@R).$(EXT_LIB)"
+AR_LNK2=y
+_AR_LNK3= +"$(TARGET_OBJS: ="&^
+ +")"
+AR_LNK3= $(_AR_LNK3:+""&^
+=)
+AR_LNK4= "$(@R).lst"
 
 
 #
@@ -146,11 +150,11 @@ LINK_FLAGS_DLL=$(LINK_FLAGS) /DLL
 LINK_FLAGS_SYS=$(LINK_FLAGS) /PDD /Align:16
 LINK_FLAGS_VDD=$(LINK_FLAGS) /VDD /Align:16
 LINK_FLAGS_IFS=$(LINK_FLAGS_DLL)
-LINK_CMD_EXE=$(LINK) $(LINK_FLAGS_EXE) @$(TARGET_LNK)
-LINK_CMD_DLL=$(LINK) $(LINK_FLAGS_DLL) @$(TARGET_LNK)
-LINK_CMD_SYS=$(LINK) $(LINK_FLAGS_SYS) @$(TARGET_LNK)
-LINK_CMD_VDD=$(LINK) $(LINK_FLAGS_VDD) @$(TARGET_LNK)
-LINK_CMD_IFS=$(LINK) $(LINK_FLAGS_IFS) @$(TARGET_LNK)
+LINK_CMD_EXE=$(LINK) $(LINK_FLAGS_EXE) @"$(TARGET_LNK)"
+LINK_CMD_DLL=$(LINK) $(LINK_FLAGS_DLL) @"$(TARGET_LNK)"
+LINK_CMD_SYS=$(LINK) $(LINK_FLAGS_SYS) @"$(TARGET_LNK)"
+LINK_CMD_VDD=$(LINK) $(LINK_FLAGS_VDD) @"$(TARGET_LNK)"
+LINK_CMD_IFS=$(LINK) $(LINK_FLAGS_IFS) @"$(TARGET_LNK)"
 LINK_LNK1=$(TARGET_OBJS: =+^
 ),
 LINK_LNK2=$(TARGET),
