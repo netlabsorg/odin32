@@ -1,10 +1,10 @@
-/* $Id: heapshared.cpp,v 1.2 1999-10-28 12:01:12 sandervl Exp $ */
+/* $Id: heapshared.cpp,v 1.3 2000-01-18 20:46:40 sandervl Exp $ */
 /*
  * Shared heap functions for OS/2
  *
  * Initially commit 16 kb, add more when required
  *
- * NOTE: Hardcoded limit of 256 KB (increase when required)
+ * NOTE: Hardcoded limit of 512 KB (increase when required)
  *
  * TODO: Not process/thread safe (initializing/destroying heap)
  * 

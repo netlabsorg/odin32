@@ -1,4 +1,4 @@
-/* $Id: heapshared.h,v 1.1 1999-10-28 11:59:52 sandervl Exp $ */
+/* $Id: heapshared.h,v 1.2 2000-01-18 20:47:30 sandervl Exp $ */
 /*
  * Shared heap functions for OS/2
  *
@@ -13,7 +13,7 @@
 #include <umalloc.h>
 
 #define PAGE_SIZE		4096
-#define MAX_HEAPSIZE            (256*1024)
+#define MAX_HEAPSIZE            (512*1024)
 #define MAX_HEAPPAGES		(MAX_HEAPSIZE/PAGE_SIZE)
 #define INCR_HEAPSIZE		(16*1024)
 
