@@ -1,9 +1,10 @@
-/* $Id: changelog,v 1.2105 2002-05-28 14:08:18 sandervl Exp $ */
+/* $Id: changelog,v 1.2106 2002-05-28 17:08:55 sandervl Exp $ */
 
  2002-05-28: Sander van Leeuwen <sandervl@innotek.de>
     - REGSVR32: o Fixed startup
     - WINMM:    o Completely implemented mixerSetControlDetails
                 o Mixer updates
+                o Support added for master volume (ioctl90 mode)
                 o waveIn/OutOpen fix (check for WAVE_FORMAT_QUERY flag)
                 o Wave recording now works
 
