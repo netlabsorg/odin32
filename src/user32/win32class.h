@@ -1,4 +1,4 @@
-/* $Id: win32class.h,v 1.16 2002-12-18 12:28:06 sandervl Exp $ */
+/* $Id: win32class.h,v 1.17 2002-12-30 15:49:00 sandervl Exp $ */
 /*
  * Win32 Window Class Managment Code for OS/2
  *
@@ -30,14 +30,14 @@ public:
         Win32WndClass(WNDCLASSEXA *wndclass, WNDCLASS_TYPE fClassType = WNDCLASS_ASCII);
        ~Win32WndClass();
 
-         ULONG  getClassLongA(int index, BOOL fUnicode = TRUE);
+         ULONG  getClassLongA(int index, BOOL fUnicode = FALSE);
          ULONG  getClassLongW(int index)
          {
                 return getClassLongA(index, TRUE);
          };
          WORD   getClassWord(int index);
 
-         ULONG  setClassLongA(int index, LONG lNewVal, BOOL fUnicode = TRUE);
+         ULONG  setClassLongA(int index, LONG lNewVal, BOOL fUnicode = FALSE);
          ULONG  setClassLongW(int index, LONG lNewVal)
          {
                 return setClassLongA(index, lNewVal, TRUE);
