@@ -1,4 +1,4 @@
-/* $Id: probkrnl.h,v 1.8 2000-02-19 23:52:00 bird Exp $
+/* $Id: probkrnl.h,v 1.9 2000-02-20 04:27:24 bird Exp $
  *
  * Include file for ProbKrnl.
  *
@@ -33,10 +33,12 @@
 /* 32bit types */
 #define EPT_PROC32              (EPT_PROC | EPT_32BIT)
 #define EPT_PROCIMPORT32        (EPT_PROCIMPORT | EPT_32BIT)
+#define EPT_VARIMPORT32         (EPT_VARIMPORT | EPT_32BIT)
 
 /* 16bit types */
 #define EPT_PROC16              (EPT_PROC | EPT_16BIT)        /* no implemented yet! */
 #define EPT_PROCIMPORT16        (EPT_PROCIMPORT | EPT_16BIT)  /* far proc in calltab with a far jmp. */
+#define EPT_VARIMPORT16         (EPT_VARIMPORT | EPT_16BIT)
 
 
 /*******************************************************************************
@@ -52,6 +54,7 @@ typedef struct tagIMPORTKRNLSYM
    unsigned long  int  offObject;       /* Offset into the object */
    unsigned long  int  ulAddress;       /* 32-bit flat address */
    unsigned short int  usSel;           /* Select of the object */
+   unsigned char       cbProlog;        /* Size of the prolog needing to be exchanged */
    unsigned char       fType;           /* Entry-Point Type Flags */
 } IMPORTKRNLSYM;
 #pragma pack()

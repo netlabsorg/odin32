@@ -1,4 +1,4 @@
-; $Id: devlast.asm,v 1.2 1999-10-27 02:02:54 bird Exp $
+; $Id: devlast.asm,v 1.3 2000-02-20 04:27:23 bird Exp $
 ;
 ; DevLast - the object file termintating the resident part of the objects.
 ; Code after the ???END labes and object files and which are linked in
@@ -30,7 +30,7 @@
     public BSS32END
     public CONST32_ROEND
     public _CallR0Init32
-    public _CallVerifyProcTab32
+    public _CallVerifyImportTab32
 
 
 
@@ -51,7 +51,7 @@ DATA16_CONST ends
 
 
 extrn R0INIT32:FAR
-extrn VERIFYPROCTAB32:FAR
+extrn VERIFYIMPORTTAB32:FAR
 
 CODE16 segment
 CODE16END db ?
@@ -75,18 +75,18 @@ _CallR0Init32 ENDP
 
 
 ;;
-; Thunk procedure for VerifyProcTab32.
-; @cproto    USHORT NEAR CallVerifyProcTab32(void);
-; @returns   Same as VerifyProcTab32.
+; Thunk procedure for VerifyImportTab32.
+; @cproto    USHORT NEAR CallVerifyImportTab32(void);
+; @returns   Same as VerifyImportTab32.
 ; @status    completely implemented.
 ; @author    knut st. osmundsen
-_CallVerifyProcTab32 PROC NEAR
+_CallVerifyImportTab32 PROC NEAR
     ASSUME CS:CODE16
     push    ds
-    call    far ptr FLAT:VERIFYPROCTAB32
+    call    far ptr FLAT:VERIFYIMPORTTAB32
     pop     ds
     retn
-_CallVerifyProcTab32 ENDP
+_CallVerifyImportTab32 ENDP
 
 CODE16 ends
 

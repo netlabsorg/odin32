@@ -1,5 +1,5 @@
 ################################################################################
-# $Id: Makefile,v 1.24 2000-02-18 19:27:28 bird Exp $
+# $Id: Makefile,v 1.25 2000-02-20 04:27:22 bird Exp $
 #
 # Copyright 1998-1999 knut st. osmundsen
 #
@@ -55,7 +55,7 @@ ASDEFINES   = $(ASDEFINES)  -D:RELEASE
 CFLAGS      = $(CFLAGS)     -O- -Ti+
 CFLAGS16    = $(CFLAGS16)   -Zi -Od
 CPPFLAGS    = $(CPPFLAGS)   -O- -Ti+
-LFLAGS      = $(LFLAGS)     /NOEXEPACK /DEBUG
+LFLAGS      = $(LFLAGS)     /NOEXEPACK /DEBUG /NODEBUG
 ASFLAGS     = $(ASFLAGS)    -Od+
 CDEFINES    = $(CDEFINES)   -DDEBUG
 CDEFINES16  = $(CDEFINES16) -DDEBUG
