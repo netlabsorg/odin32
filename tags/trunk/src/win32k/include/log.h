@@ -1,5 +1,7 @@
-/* $Id: log.h,v 1.1 1999-09-06 02:19:58 bird Exp $
+/* $Id: log.h,v 1.2 1999-10-14 01:16:50 bird Exp $
+ *
  * log - C-style logging - kprintf.
+ * Dual mode, RING0 and RING3.
  *
  * Copyright (c) 1998-1999 knut st. osmundsen
  *
@@ -15,25 +17,18 @@ extern "C" {
 #define OUTPUT_COM1 0x3f8
 #define OUTPUT_COM2 0x2f8
 
-#ifndef RELEASE
-    #ifndef RING0_DEBUG_IN_RING3
-        void _kprintf(const char *, ...);
-        #define kprintf(a)          _kprintf a
-        #define kernel_printf(a)    kprintf a; _kprintf("\n")
-    #else
-        #include <stdio.h>
-        #define kprintf(a)          printf a; flushall()
-        #define kernel_printf(a)    printf a; printf("\n"); flushall()
-    #endif
+/*
+ * output macros
+ */
+#define dprintf kprintf
+#ifdef DEBUG
+    #include <stdarg.h>
+    #include "vprintf.h"
+    #define kprintf(a)          printf a
+    #define kernel_printf(a)    printf a, printf("\n") /* obsolete */
 #else
-    #ifndef RING0_DEBUG_IN_RING3
-        #define kprintf(a)          Yield()
-        #define kernel_printf(a)    Yield()
-    #else
-        #include <stdio.h>
-        #define kprintf(a)          (void)0
-        #define kernel_printf(a)    (void)0
-    #endif
+    #define kprintf(a)          (void)0
+    #define kernel_printf(a)    (void)0
 #endif
 
 #ifdef __cplusplus
