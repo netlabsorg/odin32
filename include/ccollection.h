@@ -1,4 +1,4 @@
-/* $Id: ccollection.h,v 1.9 2001-11-23 18:08:03 phaller Exp $ */
+/* $Id: ccollection.h,v 1.10 2002-05-17 10:13:20 sandervl Exp $ */
 
 /*
  * Collection class:
@@ -31,7 +31,7 @@ class CCollection
 
     public:
         CCollection(int iInitialSize = 0);
-        ~CCollection();
+        virtual ~CCollection();
 
         virtual void clear() = 0; // remove all elements from the table
                 int  getSize() { return iSize; } // query size of structure
@@ -48,7 +48,7 @@ class CIndexLookup : public CCollection
 {
     public:
         CIndexLookup(int iInitialSize = 0);
-        ~CIndexLookup();
+        virtual ~CIndexLookup();
 
         void* addElement(int iIndex, void *pObject);
         void* removeElement(int iIndex);
@@ -85,7 +85,7 @@ class CIndexLookupLimit : public CIndexLookup
     public:
         CIndexLookupLimit(int iHardLimitLow = 0,
                           int iHardLimitHigh = 0);
-        ~CIndexLookupLimit();
+        virtual ~CIndexLookupLimit();
 
 
     protected:
@@ -112,7 +112,7 @@ class CLinearList : public CCollection
 {
     public:
         CLinearList();
-        ~CLinearList();
+        virtual ~CLinearList();
 
         PLINEARLISTENTRY addFirst  (void *pObject);
         PLINEARLISTENTRY addLast   (void *pObject);
