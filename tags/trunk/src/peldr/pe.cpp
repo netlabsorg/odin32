@@ -1,4 +1,4 @@
-/* $Id: pe.cpp,v 1.6 1999-08-18 12:24:32 sandervl Exp $ */
+/* $Id: pe.cpp,v 1.7 1999-08-26 07:48:14 sandervl Exp $ */
 
 /*
  * PELDR main exe loader code
@@ -28,6 +28,8 @@
 #include <windll.h>
 #include <wprocess.h>
 #include "pe.h"
+#include "exceptions.h"
+#include "..\kernel32\exceptutil.h"
 
 char INFO_BANNER[]      = "Usage: PE winexe commandline";
 char szErrorTitle[]     = "Odin";
@@ -50,26 +52,31 @@ typedef ULONG (* APIENTRY WINMESSAGEBOXPROC) (HWND hwndParent,
                                 	      PCSZ  pszCaption,
                                 	      ULONG idWindow,
                                 	      ULONG flStyle);
+typedef void (* KRNL32EXCEPTPROC) (void *exceptframe);
 
 WININITIALIZEPROC      MyWinInitialize      = 0;
 WINTERMINATEPROC       MyWinTerminate       = 0;
 WINCREATEMSGQUEUEPROC  MyWinCreateMsgQueue  = 0;
 WINDESTROYMSGQUEUEPROC MyWinDestroyMsgQueue = 0;
 WINMESSAGEBOXPROC      MyWinMessageBox      = 0;
+KRNL32EXCEPTPROC       Krnl32SetExceptionHandler = 0;
+KRNL32EXCEPTPROC       Krnl32UnsetExceptionHandler = 0;
 
 WIN32CTOR              CreateWin32Exe       = 0;
 
 int main(int argc, char *argv[])
 {
- HAB    hab;                             /* PM anchor block handle       */
- HMQ    hmq;                             /* Message queue handle         */
+ HAB    hab = 0;                             /* PM anchor block handle       */
+ HMQ    hmq = 0;                             /* Message queue handle         */
  char  *szCmdLine;
  char   exeName[CCHMAXPATH];
  PPIB   ppib;
  PTIB   ptib;
  Win32Exe *WinExe;
  APIRET  rc;
- HMODULE hmodPMWin, hmodKernel32;
+ HMODULE hmodPMWin = 0, hmodKernel32 = 0;
+ WINEXCEPTION_FRAME exceptFrame;
+ ULONG curdisk, curlogdisk, flength = CCHMAXPATH;
 
   rc = DosLoadModule(exeName, sizeof(exeName), "PMWIN.DLL", &hmodPMWin);
   rc = DosQueryProcAddr(hmodPMWin, ORD_WIN32INITIALIZE, NULL, (PFN *)&MyWinInitialize);
@@ -80,15 +87,17 @@ int main(int argc, char *argv[])
 
   rc = DosLoadModule(exeName, sizeof(exeName), "KERNEL32.DLL", &hmodKernel32);
   rc = DosQueryProcAddr(hmodKernel32, 0, "CreateWin32Exe", (PFN *)&CreateWin32Exe);
+  rc = DosQueryProcAddr(hmodKernel32, 0, "OS2SetExceptionHandler", (PFN *)&Krnl32SetExceptionHandler);
+  rc = DosQueryProcAddr(hmodKernel32, 0, "OS2UnsetExceptionHandler", (PFN *)&Krnl32UnsetExceptionHandler);
 
   if ((hab = MyWinInitialize(0)) == 0L) /* Initialize PM     */
-	return(1);
+	goto fail;
 
   hmq = MyWinCreateMsgQueue(hab, 0);
   
   if(argc < 2) {
 	MyWinMessageBox(HWND_DESKTOP, NULL, INFO_BANNER, szErrorTitle, 0, MB_OK | MB_ERROR | MB_MOVEABLE);
-	return(0);
+        goto fail;
   }
 
   strcpy(exeName, argv[1]);
@@ -99,13 +108,13 @@ int main(int argc, char *argv[])
   WinExe = CreateWin32Exe(exeName);
   if(WinExe == NULL) {
         MyWinMessageBox(HWND_DESKTOP, HWND_DESKTOP, szMemErrorMsg, szErrorTitle, 0, MB_OK | MB_ERROR | MB_MOVEABLE);
-        return(1);
+        goto fail;
   }
   rc = DosGetInfoBlocks(&ptib, &ppib);
   if(rc) {
         MyWinMessageBox(HWND_DESKTOP, HWND_DESKTOP, szInteralErrorMsg, szErrorTitle, 0, MB_OK | MB_ERROR | MB_MOVEABLE);
         delete WinExe;
-        return(1);
+        goto fail;
   }
   szCmdLine = ppib->pib_pchcmd;
   while(*szCmdLine == ' ' && *szCmdLine )       //skip leading spaces
@@ -114,8 +123,6 @@ int main(int argc, char *argv[])
         szCmdLine++;
   while(*szCmdLine == ' ' && *szCmdLine )       //skip spaces
         szCmdLine++;
-
-  ULONG curdisk, curlogdisk, flength = CCHMAXPATH;
 
   DosQueryCurrentDisk(&curdisk, &curlogdisk);
   DosQueryCurrentDir(curdisk, &fullpath[3], &flength);
@@ -127,10 +134,12 @@ int main(int argc, char *argv[])
   WinExe->setFullPath(fullpath);
   WinExe->setCommandLine(szCmdLine);
 
+  Krnl32SetExceptionHandler(&exceptFrame);
   if(WinExe->init(ReserveMem()) == FALSE) {
         delete WinExe;
-        return(1);
+        goto fail;
   }
+  Krnl32UnsetExceptionHandler(&exceptFrame);
   WinExe->start();
 
   delete WinExe;
@@ -140,7 +149,15 @@ int main(int argc, char *argv[])
 
   DosFreeModule(hmodPMWin);
   DosFreeModule(hmodKernel32);
-  return(0);
+  return 0;
+
+fail:
+  if(hmq) MyWinDestroyMsgQueue( hmq );             /* Tidy up...                   */
+  if(hab) MyWinTerminate( hab );                   /* Terminate the application    */
+
+  if(hmodPMWin) 	DosFreeModule(hmodPMWin);
+  if(hmodKernel32) 	DosFreeModule(hmodKernel32);
+  return(1);
 }
 //******************************************************************************
 //******************************************************************************
