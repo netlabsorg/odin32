@@ -1,4 +1,4 @@
-/* $Id: oslibdos.cpp,v 1.102 2002-05-10 14:55:12 sandervl Exp $ */
+/* $Id: oslibdos.cpp,v 1.103 2002-06-06 15:10:06 sandervl Exp $ */
 /*
  * Wrappers for OS/2 Dos* API
  *
@@ -1107,8 +1107,15 @@ DWORD OSLibDosCreateFile(CHAR *lpszFile,
    if(fuAccess & GENERIC_READ_W)
         openMode |= OPEN_ACCESS_READONLY;
    else
+   //mgp: There seems to be a problem where OPEN_ACCESS_WRITEONLY gives an 
+   //     Access Error (0x05) if the file is opened with 
+   //     OPEN_ACTION_OPEN_IF_EXISTS.  So, in that case, change it to 
+   //     OPEN_ACCESS_READWRITE
    if(fuAccess & GENERIC_WRITE_W)
-        openMode |= OPEN_ACCESS_WRITEONLY;
+      if  (openFlag & OPEN_ACTION_OPEN_IF_EXISTS)
+        openMode |= OPEN_ACCESS_READWRITE;
+      else
+         openMode |= OPEN_ACCESS_WRITEONLY;
 
 #if 0
    //SvL: Not true; verified in NT! (also messed up access of files on
