@@ -1,4 +1,4 @@
-/* $Id: oslibdos.cpp,v 1.116 2003-02-27 11:27:11 sandervl Exp $ */
+/* $Id: oslibdos.cpp,v 1.117 2003-02-27 13:14:38 sandervl Exp $ */
 /*
  * Wrappers for OS/2 Dos* API
  *
@@ -530,14 +530,14 @@ BOOL OSLibDosMoveFile(LPCSTR lpszOldFile, LPCSTR lpszNewFile)
   if ((strlen(lOemOldFile) > 2) && (lOemOldFile[1] == ':'))
   {
       sourcePathAbsolute = TRUE;
-      sourceDrive = toupper(lOemOldFile[1]);
+      sourceDrive = toupper(lOemOldFile[0]);
   }
   BOOL targetPathAbsolute = FALSE;
   char targetDrive = currentDrive;
   if ((strlen(lOemNewFile) > 2) && (lOemNewFile[1] == ':'))
   {
       targetPathAbsolute = TRUE;
-      targetDrive = toupper(lOemNewFile[1]);
+      targetDrive = toupper(lOemNewFile[0]);
   }
 
   // if the source and target drives are different, we have to do take
