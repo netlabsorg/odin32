@@ -1,4 +1,9 @@
-/* $Id: changelog,v 1.1796 2001-10-26 12:47:59 phaller Exp $ */
+/* $Id: changelog,v 1.1797 2001-10-26 13:02:42 sandervl Exp $ */
+
+ 2001-10-25: Sander van Leeuwen <sandervl@xs4all.nl>
+    - KERNEL32: o Better implementation of IOCTL_CDROM(DISK/STORAGE)_CHECK_VERIFY
+                o CDROM ioctls: Use signature returned by IOCD_IDENTIFY ioctl
+                o Implemented IOCTL_CDROM_READ_TOC
 
  2001-10-26: Patrick Haller <patrick.haller@innotek.de>
     - USER32:   o fixed ESC keyboard event
