@@ -1,4 +1,4 @@
- /* $Id: ChangeLog,v 1.434 1999-11-10 17:10:23 cbratschi Exp $ */
+ /* $Id: ChangeLog,v 1.435 1999-11-10 22:14:12 phaller Exp $ */
 
  99-11-10: Christoph Bratschi <cbratschi@datacomm.ch>
 	- USER32: ShowScrollBar: create not existing scrollbars
@@ -20,6 +20,7 @@
  99-11-10: Patrick Haller <phaller@gmx.net>
 	- COMDLG32:	Fix: erroneous filter data for GetOpenFileName now tolerated
 			Open32 keeps to close to the docs :)
+	- SHELL32:	Add: update to WINE19991108
 
  99-11-10: knut.st.osmundsen <knut.stange.osmundsen@pmsc.no>
     	- PE2LX: Added OLE32 to the lie list. New Base class.
