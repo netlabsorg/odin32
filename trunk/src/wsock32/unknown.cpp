@@ -1,4 +1,4 @@
-/* $Id: unknown.cpp,v 1.2 1999-08-16 20:18:40 phaller Exp $ */
+/* $Id: unknown.cpp,v 1.3 1999-10-20 01:18:30 phaller Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -45,7 +45,7 @@ ODINFUNCTION6(int, OS2rexec, LPSTR*, lppArg1,
                              LPSTR,  lpArg5,
                              int*,   lpiArg6)
 {
-  dprintf(("WSOCK32: OS2rexec not implemented correctly.\n"));
+  dprintf(("WSOCK32: rexec not implemented correctly.\n"));
 
   return rexec(lppArg1,
                iArg2,
