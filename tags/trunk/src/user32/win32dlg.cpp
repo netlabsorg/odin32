@@ -1,4 +1,4 @@
-/* $Id: win32dlg.cpp,v 1.41 2000-01-18 20:10:52 sandervl Exp $ */
+/* $Id: win32dlg.cpp,v 1.42 2000-02-05 16:24:58 sandervl Exp $ */
 /*
  * Win32 Dialog Code for OS/2
  *
@@ -22,6 +22,7 @@
 #include "oslibwin.h"
 #include "win32wdesktop.h"
 #include "controls.h"
+#include "syscolor.h"
 
 #define DEFAULT_DLGFONT "9.WarpSans"
 
@@ -695,14 +696,25 @@ LRESULT Win32Dialog::DefDlg_Proc(UINT msg, WPARAM wParam, LPARAM lParam)
     {
       RECT rect;
       int rc;
-        /*  Since WM_ERASEBKGND may receive either a window dc or a    */
-        /*  client dc, the area to be erased has to be retrieved from  */
-        /*  the device context.                    */
-        rc = GetClipBox( (HDC)wParam, &rect );
+
+        if (!windowClass || !windowClass->getBackgroundBrush()) return 0;
+
+//        rc = GetClipBox( (HDC)wParam, &rect );
+        rc = GetRgnBox(hUpdateRegion, &rect);
         if ((rc == SIMPLEREGION) || (rc == COMPLEXREGION))
-            FillRect( (HDC)wParam, &rect, windowClass->getBackgroundBrush());
+        {
+            HBRUSH hBrush = windowClass->getBackgroundBrush();
+
+            if (hBrush <= (HBRUSH)(SYSCOLOR_GetLastColor()+1))
+                hBrush = GetSysColorBrush(hBrush-1);
+
+//          FillRect( (HDC)wParam, &rect, hBrush);
+                FillRgn((HDC)wParam, hUpdateRegion, hBrush);
+        }
+
         return 1;
     }
+
     case WM_NCDESTROY:
           /* Free dialog heap (if created) */
 #if 0
