@@ -1,4 +1,7 @@
-/* $Id: ChangeLog,v 1.1620 2001-07-29 18:58:09 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.1621 2001-07-29 23:30:00 bird Exp $ */
+
+ 2001-07-29: knut st. osmundsen <kosmunds@csc.com>
+    - Makefiles: o Force fastdep to scan all files if -a is specified to nmake.
 
  2001-07-29: Sander van Leeuwen <sandervl@xs4all.nl>
     - COMCTL32/COMDLG32/GDI32/KERNEL32/MSVFW32/USER32/SHELL32/WSOCK32/WINMM
@@ -10,7 +13,7 @@
                 o Updates
 
  2001-07-28: Sander van Leeuwen <sandervl@xs4all.nl>
-    - USER32:   o Set/GetWindowWord changes (must handle GWW_ID, GWW_HINSTANCE 
+    - USER32:   o Set/GetWindowWord changes (must handle GWW_ID, GWW_HINSTANCE
                   and GWW_HWNDPARENT
                 o Ported ArrangeIconicWindows from Wine (not complete yet)
                 o Rewrote Get/SetDoubleClickTime & SwapMouseButton
@@ -21,13 +24,13 @@
                 o Removed O32_HeapCreate/Destroy calls; return rtl heap handle
                 o No longer use Open32's GetProcAddress or GetModuleFileName
     - USER32/KERNEL32:
-                o Moved WaitForInputIdle & AttachThreadInput from user32 to 
+                o Moved WaitForInputIdle & AttachThreadInput from user32 to
                   kernel32
-    - TOOLS\INSTALL: 
+    - TOOLS\INSTALL:
                 o Create temp directory in windows dir
 
  2001-07-22: Sander van Leeuwen <sandervl@xs4all.nl>
-    - TOOLS\INSTALL: 
+    - TOOLS\INSTALL:
                 o Added some quartz.dll keys
     - COMCTL32: o Status window bugfix; check part number boundary
                   (fixes crash in AudioGalaxy)
@@ -36,7 +39,7 @@
                    of AudioGalaxy)
 
  2001-07-21: Sander van Leeuwen <sandervl@xs4all.nl>
-    - DINPUT, DPLAYX, ICMP, IMAGEHLP, IMM32, LZ32, 
+    - DINPUT, DPLAYX, ICMP, IMAGEHLP, IMM32, LZ32,
       MSVFW32, OLEPRO32, RICHED32, URLMON, VERSION, WININET
                 o Added Wine license
 
@@ -49,25 +52,25 @@
     - AVIFIL32: o Resync with Wine (20010720); all
     - GDI32:    o Fixed brush leak in InternalTextOutA
                   (fixes Macromedia Flash 5 error messages)
-    
+
  2001-07-20: Sander van Leeuwen <sandervl@xs4all.nl>
     - KERNEL32: o Moved wsnprintf to user32
     - USER32:   o Removed FatalAppExitA/W (already in kernel32)
     - SHLWAPI:  o Removed WINE_StringFromCLSID & StringFromGUID2 (not used)
                 o Removed several string function that were not used or exported
-    - NTDLL:    o Replaced 64 bits math assembly functions (disassembled Wine C code 
+    - NTDLL:    o Replaced 64 bits math assembly functions (disassembled Wine C code
                   compiled with VAC 3.6.5)
     - ODINCRT:  o Export 64 bits math rtl functions
-                o Added 64 bits math rtl functions for VAC 3.0 (assembly; 
+                o Added 64 bits math rtl functions for VAC 3.0 (assembly;
                   borrowed from VAC 3.6.5)
-                  NOTE: __divi64 might cause problems (in theory) since 
+                  NOTE: __divi64 might cause problems (in theory) since
                         it uses the FPU and doesn't save the FPU state
     - OLE32/WINMM/KERNEL32/USER32/GDI32/COMCTL32/COMDLG32/SHLWAPI/SHELL32/
       RPCRT4/WSOCK32/VERSION:
                 o Rewrote initterm + debug logging to allow us to build
                   a single dll containing the code of many Odin dlls
     - CUSTOMBUILD:
-                o Example of creating a custom dll with the Odin32 environment 
+                o Example of creating a custom dll with the Odin32 environment
                   that can be used for a ported win32 app. (not done yet)
 
  2001-07-19: Sander van Leeuwen <sandervl@xs4all.nl>
@@ -112,7 +115,7 @@
                    hangs in exitlist)
                 o Implemented HeapValidate
                 o GlobalReAlloc bugfix; must check if pointer has a handle
-                  associated with it. 
+                  associated with it.
                   (RealDraw install calls GlobalReAlloc with pointer returned
                    by GlobalLock(handle))
 
@@ -122,7 +125,7 @@
     - USER32:   o Allocate more memory for icon bitmap before calling
                   GpiCreateBitmap. This function seems to touch more bytes
                   than necessary (??).
-    - GDI32:    o AddFontResourceA: ignore if called with filename of PE 
+    - GDI32:    o AddFontResourceA: ignore if called with filename of PE
                   executable (return 1; gets rid of error message in Photoshop 6)
 
  2001-07-15: Sander van Leeuwen <sandervl@xs4all.nl>
@@ -148,24 +151,24 @@
     - KERNEL32: o Check for NULL pointer in lstrlenA/W
                   (fixes crash during AutoCAD 14 install)
     - USER32:   o Removed very old check for negative x or y coordinates during
-                  window creation. 
+                  window creation.
                   (file open dialog in InstallShield doesn't show weird edit control
                    anymore and the MS Word 97 main window looks better now)
-                o RegisterClassA/W: check icon first before copying it 
+                o RegisterClassA/W: check icon first before copying it
                   (gets rid of some annoying warnings in the logfile)
     - GDI32:    o Change BITMAPINFO height if negative
                   (fixes failing StretchDIBits calls with Matrox display driver)
 
  2001-07-12: Sander van Leeuwen <sandervl@xs4all.nl>
     - KERNEL32: o Atom fixes
-    - OLEAUT32: o Added RegisterActiveObject, RevokeActiveObject & 
+    - OLEAUT32: o Added RegisterActiveObject, RevokeActiveObject &
                   GetActiveObject from Wine.
 
  2001-07-10: Sander van Leeuwen <sandervl@xs4all.nl>
     - COMDLG32: o Don't clear filename when selecting of switching
                   directory is file open/save dialog.
 
- 2001-07-10: knut st. osmundsen <kosmunds@csc.com>:
+ 2001-07-10: knut st. osmundsen <kosmunds@csc.com>
     - WIN32K:   o Made DosKillProcessEx framework.
                 o Tried to fix missing unlocks of environment block.
     - KERNEL32: o Tried to fix missing unlocks of environment block.
@@ -223,7 +226,7 @@
     - SHLWAPI:  o Link with crtdll32.lib
     - PELDR:    o Fix for file not found error
 
- 2001-07-08: knut st. osmundsen <kosmunds@csc.com>:
+ 2001-07-08: knut st. osmundsen <kosmunds@csc.com>
     - KERNEL32: o Added call in initterm to tell win32k where the Odin32
                   environment block is. (Its in Open32, and I don't think
                   it is reallocated.)
@@ -256,7 +259,7 @@
                 o implemented WSAEventSelect
                 o implemented WSAEnumNetworkEvents (not correct)
 
- 2001-07-07: knut st. osmundsen <kosmunds@csc.com>:
+ 2001-07-07: knut st. osmundsen <kosmunds@csc.com>
     - URLMON:   o Stubbed HlinkSimpleNavigateToString and RegisterBindStatusCallback
                   to fix SYS2048 during RealPlayer install.
     - WIN32K:   o Fixed the DBExpert bug in the longdllname code.
