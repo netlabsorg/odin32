@@ -169,4 +169,6 @@ LONG    WIN32API InterlockedIncrement(LPLONG);
 UINT    WIN32API GetSystemDirectoryA(LPSTR,UINT);
 UINT    WIN32API GetWindowsDirectoryA(LPSTR,UINT);
 
+BOOL    WIN32API IsIconic( HWND hwnd);
+
 #endif

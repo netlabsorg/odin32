@@ -1496,3 +1496,286 @@
 #define WAIT_ABANDONED_0_W        STATUS_ABANDONED_WAIT_0_W
 #define WAIT_IO_COMPLETION_W      STATUS_USER_APC_W
 #define WAIT_TIMEOUT_W            STATUS_TIMEOUT_W
+
+#define WM_NULL_W                 0x0000
+#define WM_CREATE_W               0x0001
+#define WM_DESTROY_W              0x0002
+#define WM_MOVE_W                 0x0003
+#define WM_SIZEWAIT_W             0x0004
+#define WM_SIZE_W                 0x0005
+#define WM_ACTIVATE_W             0x0006
+#define WM_SETFOCUS_W             0x0007
+#define WM_KILLFOCUS_W            0x0008
+#define WM_SETVISIBLE_W           0x0009
+#define WM_ENABLE_W               0x000a
+#define WM_SETREDRAW_W            0x000b
+#define WM_SETTEXT_W              0x000c
+#define WM_GETTEXT_W              0x000d
+#define WM_GETTEXTLENGTH_W        0x000e
+#define WM_PAINT_W                0x000f
+#define WM_CLOSE_W                0x0010
+#define WM_QUERYENDSESSION_W      0x0011
+#define WM_QUIT_W                 0x0012
+#define WM_QUERYOPEN_W            0x0013
+#define WM_ERASEBKGND_W           0x0014
+#define WM_SYSCOLORCHANGE_W       0x0015
+#define WM_ENDSESSION_W           0x0016
+#define WM_SYSTEMERROR_W          0x0017
+#define WM_SHOWWINDOW_W           0x0018
+#define WM_CTLCOLOR_W             0x0019
+#define WM_WININICHANGE_W         0x001a
+#define WM_SETTINGCHANGE_W        WM_WININICHANGE_W
+#define WM_DEVMODECHANGE_W        0x001b
+#define WM_ACTIVATEAPP_W          0x001c
+#define WM_FONTCHANGE_W           0x001d
+#define WM_TIMECHANGE_W           0x001e
+#define WM_CANCELMODE_W           0x001f
+#define WM_SETCURSOR_W            0x0020
+#define WM_MOUSEACTIVATE_W        0x0021
+#define WM_CHILDACTIVATE_W        0x0022
+#define WM_QUEUESYNC_W            0x0023
+#define WM_GETMINMAXINFO_W        0x0024
+
+#define WM_PAINTICON_W            0x0026
+#define WM_ICONERASEBKGND_W       0x0027
+#define WM_NEXTDLGCTL_W           0x0028
+#define WM_ALTTABACTIVE_W         0x0029
+#define WM_SPOOLERSTATUS_W        0x002a
+#define WM_DRAWITEM_W             0x002b
+#define WM_MEASUREITEM_W          0x002c
+#define WM_DELETEITEM_W           0x002d
+#define WM_VKEYTOITEM_W           0x002e
+#define WM_CHARTOITEM_W           0x002f
+#define WM_SETFONT_W              0x0030
+#define WM_GETFONT_W              0x0031
+#define WM_SETHOTKEY_W            0x0032
+#define WM_GETHOTKEY_W            0x0033
+#define WM_FILESYSCHANGE_W        0x0034
+#define WM_ISACTIVEICON_W         0x0035
+#define WM_QUERYPARKICON_W        0x0036
+#define WM_QUERYDRAGICON_W        0x0037
+#define WM_QUERYSAVESTATE_W       0x0038
+#define WM_COMPAREITEM_W          0x0039
+#define WM_TESTING_W              0x003a
+#define WM_GETOBJECT_W            0x003D
+
+#define WM_OTHERWINDOWCREATED_W   0x003c
+#define WM_OTHERWINDOWDESTROYED_W 0x003d
+#define WM_ACTIVATESHELLWINDOW_W  0x003e
+
+#define WM_COMPACTING_W           0x0041
+
+#define WM_COMMNOTIFY_W           0x0044
+#define WM_WINDOWPOSCHANGING_W    0x0046
+#define WM_WINDOWPOSCHANGED_W     0x0047
+#define WM_POWER_W                0x0048
+
+  /* Win32 4.0 messages */
+#define WM_COPYDATA_W             0x004a
+#define WM_CANCELJOURNAL_W        0x004b
+#define WM_NOTIFY_W               0x004e
+#define WM_INPUTLANGCHANGEREQUEST_W       0x0050
+#define WM_INPUTLANGCHANGE_W              0x0051
+#define WM_TCARD_W                        0x0052
+#define WM_HELP_W                         0x0053
+#define WM_USERCHANGED_W                  0x0054
+#define WM_HELP_W                 0x0053
+#define WM_NOTIFYFORMAT_W         0x0055
+
+#define WM_CONTEXTMENU_W          0x007b
+#define WM_STYLECHANGING_W        0x007c
+#define WM_STYLECHANGED_W         0x007d
+#define WM_DISPLAYCHANGE_W        0x007e
+#define WM_GETICON_W              0x007f
+#define WM_SETICON_W              0x0080
+
+  /* Non-client system messages */
+#define WM_NCCREATE_W         0x0081
+#define WM_NCDESTROY_W        0x0082
+#define WM_NCCALCSIZE_W       0x0083
+#define WM_NCHITTEST_W        0x0084
+#define WM_NCPAINT_W          0x0085
+#define WM_NCACTIVATE_W       0x0086
+
+#define WM_GETDLGCODE_W       0x0087
+#define WM_SYNCPAINT_W        0x0088
+#define WM_SYNCTASK_W         0x0089
+
+  /* Non-client mouse messages */
+#define WM_NCMOUSEMOVE_W      0x00a0
+#define WM_NCLBUTTONDOWN_W    0x00a1
+#define WM_NCLBUTTONUP_W      0x00a2
+#define WM_NCLBUTTONDBLCLK_W  0x00a3
+#define WM_NCRBUTTONDOWN_W    0x00a4
+#define WM_NCRBUTTONUP_W      0x00a5
+#define WM_NCRBUTTONDBLCLK_W  0x00a6
+#define WM_NCMBUTTONDOWN_W    0x00a7
+#define WM_NCMBUTTONUP_W      0x00a8
+#define WM_NCMBUTTONDBLCLK_W  0x00a9
+
+  /* Keyboard messages */
+#define WM_KEYDOWN_W          0x0100
+#define WM_KEYUP_W            0x0101
+#define WM_CHAR_W             0x0102
+#define WM_DEADCHAR_W         0x0103
+#define WM_SYSKEYDOWN_W       0x0104
+#define WM_SYSKEYUP_W         0x0105
+#define WM_SYSCHAR_W          0x0106
+#define WM_SYSDEADCHAR_W      0x0107
+#define WM_KEYFIRST_W         WM_KEYDOWN_W
+#define WM_KEYLAST_W          0x0108
+
+#define WM_IME_STARTCOMPOSITION_W         0x010D
+#define WM_IME_ENDCOMPOSITION_W           0x010E
+#define WM_IME_COMPOSITION_W              0x010F
+#define WM_IME_KEYLAST_W                  0x010F
+
+#define WM_INITDIALOG_W       0x0110
+#define WM_COMMAND_W          0x0111
+#define WM_SYSCOMMAND_W       0x0112
+#define WM_TIMER_W            0x0113
+#define WM_SYSTIMER_W         0x0118
+
+  /* scroll messages */
+#define WM_HSCROLL_W          0x0114
+#define WM_VSCROLL_W          0x0115
+
+/* Menu messages */
+#define WM_INITMENU_W         0x0116
+#define WM_INITMENUPOPUP_W    0x0117
+
+#define WM_MENUSELECT_W       0x011F
+#define WM_MENUCHAR_W         0x0120
+#define WM_ENTERIDLE_W        0x0121
+#define WM_MENURBUTTONUP_W    0x0122
+#define WM_MENUDRAG_W         0x0123
+#define WM_MENUGETOBJECT_W    0x0124
+#define WM_UNINITMENUPOPUP_W  0x0125
+#define WM_MENUCOMMAND_W      0x0126
+
+#define WM_KEYBOARDCUES_W     0x0127
+
+#define WM_LBTRACKPOINT_W     0x0131
+
+  /* Win32 CTLCOLOR messages */
+#define WM_CTLCOLORMSGBOX_W    0x0132
+#define WM_CTLCOLOREDIT_W      0x0133
+#define WM_CTLCOLORLISTBOX_W   0x0134
+#define WM_CTLCOLORBTN_W       0x0135
+#define WM_CTLCOLORDLG_W       0x0136
+#define WM_CTLCOLORSCROLLBAR_W 0x0137
+#define WM_CTLCOLORSTATIC_W    0x0138
+
+  /* Mouse messages */
+#define WM_MOUSEMOVE_W        0x0200
+#define WM_LBUTTONDOWN_W      0x0201
+#define WM_LBUTTONUP_W        0x0202
+#define WM_LBUTTONDBLCLK_W    0x0203
+#define WM_RBUTTONDOWN_W      0x0204
+#define WM_RBUTTONUP_W        0x0205
+#define WM_RBUTTONDBLCLK_W    0x0206
+#define WM_MBUTTONDOWN_W      0x0207
+#define WM_MBUTTONUP_W        0x0208
+#define WM_MBUTTONDBLCLK_W    0x0209
+#define WM_MOUSEWHEEL_W       0x020A
+#define WM_MOUSEFIRST_W       WM_MOUSEMOVE_W
+#define WM_MOUSELAST_W        WM_MOUSEWHEEL_W
+
+#define WM_PARENTNOTIFY_W     0x0210
+#define WM_ENTERMENULOOP_W    0x0211
+#define WM_EXITMENULOOP_W     0x0212
+#define WM_NEXTMENU_W         0x0213
+
+  /* Win32 4.0 messages */
+#define WM_SIZING_W           0x0214
+#define WM_CAPTURECHANGED_W   0x0215
+#define WM_MOVING_W           0x0216
+
+#define WM_POWERBROADCAST_W   0x0218
+#define WM_DEVICECHANGE_W     0x0219
+
+/* wParam for WM_SIZING message */
+#define WMSZ_LEFT_W           1
+#define WMSZ_RIGHT_W          2
+#define WMSZ_TOP_W            3
+#define WMSZ_TOPLEFT_W        4
+#define WMSZ_TOPRIGHT_W       5
+#define WMSZ_BOTTOM_W         6
+#define WMSZ_BOTTOMLEFT_W     7
+#define WMSZ_BOTTOMRIGHT_W    8
+
+  /* MDI messages */
+#define WM_MDICREATE_W        0x0220
+#define WM_MDIDESTROY_W       0x0221
+#define WM_MDIACTIVATE_W      0x0222
+#define WM_MDIRESTORE_W       0x0223
+#define WM_MDINEXT_W          0x0224
+#define WM_MDIMAXIMIZE_W      0x0225
+#define WM_MDITILE_W          0x0226
+#define WM_MDICASCADE_W       0x0227
+#define WM_MDIICONARRANGE_W   0x0228
+#define WM_MDIGETACTIVE_W     0x0229
+#define WM_MDIREFRESHMENU_W   0x0234
+
+  /* D&D messages */
+#define WM_DROPOBJECT_W       0x022A
+#define WM_QUERYDROPOBJECT_W  0x022B
+#define WM_BEGINDRAG_W        0x022C
+#define WM_DRAGLOOP_W         0x022D
+#define WM_DRAGSELECT_W       0x022E
+#define WM_DRAGMOVE_W         0x022F
+#define WM_MDISETMENU_W       0x0230
+
+#define WM_ENTERSIZEMOVE_W    0x0231
+#define WM_EXITSIZEMOVE_W     0x0232
+#define WM_DROPFILES_W        0x0233
+
+#define WM_IME_SETCONTEXT_W               0x0281
+#define WM_IME_NOTIFY_W                   0x0282
+#define WM_IME_CONTROL_W                  0x0283
+#define WM_IME_COMPOSITIONFULL_W          0x0284
+#define WM_IME_SELECT_W                   0x0285
+#define WM_IME_CHAR_W                     0x0286
+#define WM_IME_REQUEST_W                  0x0288
+#define WM_IME_KEYDOWN_W                  0x0290
+#define WM_IME_KEYUP_W                    0x0291
+
+#define WM_MOUSEHOVER_W        0x02A1
+#define WM_MOUSELEAVE_W        0x02A3
+#define WM_NCMOUSEHOVER_W      0x02A0
+#define WM_NCMOUSELEAVE_W      0x02A2
+
+#define WM_CUT_W               0x0300
+#define WM_COPY_W              0x0301
+#define WM_PASTE_W             0x0302
+#define WM_CLEAR_W             0x0303
+#define WM_UNDO_W              0x0304
+#define WM_RENDERFORMAT_W      0x0305
+#define WM_RENDERALLFORMATS_W  0x0306
+#define WM_DESTROYCLIPBOARD_W  0x0307
+#define WM_DRAWCLIPBOARD_W     0x0308
+#define WM_PAINTCLIPBOARD_W    0x0309
+#define WM_VSCROLLCLIPBOARD_W  0x030A
+#define WM_SIZECLIPBOARD_W     0x030B
+#define WM_ASKCBFORMATNAME_W   0x030C
+#define WM_CHANGECBCHAIN_W     0x030D
+#define WM_HSCROLLCLIPBOARD_W  0x030E
+#define WM_QUERYNEWPALETTE_W   0x030F
+#define WM_PALETTEISCHANGING_W 0x0310
+#define WM_PALETTECHANGED_W    0x0311
+#define WM_HOTKEY_W            0x0312
+
+#define WM_PRINT_W             0x0317
+#define WM_PRINTCLIENT_W       0x0318
+
+#define WM_HANDHELDFIRST_W     0x0358
+#define WM_HANDHELDLAST_W      0x035F
+
+#define WM_AFXFIRST_W          0x0360
+#define WM_FORWARDMSG_W        0x037F
+#define WM_AFXLAST_W           0x037F
+
+#define WM_PENWINFIRST_W       0x0380
+#define WM_PENWINLAST_W        0x038F
+
+#define WM_APP_W               0x8000
