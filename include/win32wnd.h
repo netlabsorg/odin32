@@ -1,4 +1,4 @@
-/* $Id: win32wnd.h,v 1.2 2000-02-03 23:02:41 sandervl Exp $ */
+/* $Id: win32wnd.h,v 1.3 2000-04-18 11:09:53 sandervl Exp $ */
 
 /*
  * Win32 window utility procedures (in USER32)
@@ -14,5 +14,7 @@
 
 HWND Win32ToOS2Handle(HWND hwndWin32);
 HWND OS2ToWin32Handle(HWND hwnd);
+
+BOOL IsOS2FrameWindowHandle(HWND hwndWin32, HWND hwndOS2);
 
 #endif //__WIN32WND_H__
