@@ -1,5 +1,3 @@
-/* $Id: odininst.h,v 1.3 2001-04-02 09:54:45 sandervl Exp $ */
-
 /*
  * Exported installation procedure in kernel32
  *
@@ -28,6 +26,16 @@
 #define DPLAYX_LOBBY_CLASSID    "{2FE8F810-B2A5-11d0-A787-0000F803ABFC}"
 #define DPLAYX_LOBBY_DEFAULT    "DirectPlayLobby Object"
 #define DPLAYX_LOBBY_DLL        DPLAYX_DLL
+
+#define QUARTZ_DLL              "quartz.dll"
+#define QUARTZ_FILTER_CLASSID   "{CDA42200-BD88-11d0-BD4E-00A0C911CE86}"
+#define QUARTZ_FILTER_DEFAULT   "Filter Mapper2"
+#define QUARTZ_MEDIAPROP_CLASSID "{CDBD8D00-C193-11D0-BD4E-00A0C911CE86}"
+#define QUARTZ_MEDIAPROP_DEFAULT "CMediaPropertyBag"
+#define QUARTZ_DSOUNDREND_CLASSID "{79376820-07D0-11CF-A24D-0020AFD79767}"
+#define QUARTZ_DSOUNDREND_DEFAULT "DirectSound Audio Renderer"
+#define QUARTZ_FILTERGRAPHDIST_CLASSID "{e436ebb4-524f-11ce-9f53-0020af0ba770}"
+#define QUARTZ_FILTERGRAPHDIST_DEFAULT "Filter Graph Control Plug In Distributor"
 
 #define CLASS_DESKTOP           "Desktop"
 #define CLASS_SHORTCUT          "Shortcut"
