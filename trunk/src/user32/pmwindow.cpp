@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.34 1999-10-17 15:46:08 sandervl Exp $ */
+/* $Id: pmwindow.cpp,v 1.35 1999-10-17 18:09:22 sandervl Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -604,10 +604,10 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
 
         //OS/2 Window coordinates -> Win32 Window coordinates
         if(win32wnd->MsgMouseMove(keystate, SHORT1FROMMP(mp1), MapOS2ToWin32Y(win32wnd, SHORT2FROMMP(mp1))))
-    {
-        //Changes mouse cursor to default
-            goto RunDefWndProc;
-    }
+    	{
+        	//Changes mouse cursor to default
+            	goto RunDefWndProc;
+    	}
         break;
     }
 
@@ -948,6 +948,20 @@ MRESULT EXPENTRY Win32SubclassWindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARA
           hFrame = WinQueryWindow(hwnd, QW_PARENT);
 
         OSLibMapSWPtoWINDOWPOS(pswp,&wp,pswpo,hParent,hFrame);
+
+        SWP swpFrame;
+        WinQueryWindowPos(WinQueryWindow(hwnd, QW_PARENT), &swpFrame);
+        POINTL point;
+
+        point.x = swpFrame.x;
+        point.y = swpFrame.y;
+        WinMapWindowPoints(WinQueryWindow(hwnd, QW_PARENT), HWND_DESKTOP,
+                           &point, 1);
+        point.y = OSLibQueryScreenHeight() - point.y - swpFrame.cy;
+
+        win32wnd->setWindowRect(point.x, point.y, point.x+swpFrame.cx, point.y+swpFrame.cy);
+        win32wnd->setClientRect(pswpo->x, pswpo->y, pswpo->x + pswpo->cx, pswpo->y + pswpo->cy);
+
         win32wnd->MsgPosChanged((LPARAM)&wp);
 
         goto RunOldWndProc;
