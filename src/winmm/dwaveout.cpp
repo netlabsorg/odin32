@@ -1,4 +1,4 @@
-/* $Id: dwaveout.cpp,v 1.9 1999-10-26 22:44:15 phaller Exp $ */
+/* $Id: dwaveout.cpp,v 1.10 1999-10-26 22:47:23 phaller Exp $ */
 
 /*
  * Wave playback class
@@ -633,8 +633,6 @@ void DartWaveOut::handler(ULONG ulStatus, PMCI_MIX_BUFFER pBuffer, ULONG ulFlags
         whdr->lpNext = NULL;
         wmutex->leave();
 
-        dprintf(("WINMM:DartWaveOut::handler callback=%08xh\n",
-                 callback));
         if(mthdCallback) {
             callback((ULONG)this, WOM_DONE, dwInstance, whdr->dwUser, (ULONG)whdr);
         }
