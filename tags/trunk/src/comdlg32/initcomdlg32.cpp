@@ -1,3 +1,4 @@
+/* $Id: initcomdlg32.cpp,v 1.3 2001-09-05 12:12:02 bird Exp $ */
 /*
  * DLL entry point
  *
@@ -53,11 +54,11 @@ BOOL WINAPI LibMainComdlg32(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID fImpLoad
    case DLL_PROCESS_ATTACH:
    case DLL_THREAD_ATTACH:
    case DLL_THREAD_DETACH:
-	return COMDLG32_DllEntryPoint(hinstDLL, fdwReason, fImpLoad);
+    return COMDLG32_DllEntryPoint(hinstDLL, fdwReason, fImpLoad);
 
    case DLL_PROCESS_DETACH:
-	COMDLG32_DllEntryPoint(hinstDLL, fdwReason, fImpLoad);
-	return TRUE;
+    COMDLG32_DllEntryPoint(hinstDLL, fdwReason, fImpLoad);
+    return TRUE;
    }
    return FALSE;
 }
@@ -82,16 +83,16 @@ ULONG APIENTRY inittermComdlg32(ULONG hModule, ULONG ulFlag)
 
    switch (ulFlag) {
       case 0 :
-	 dllHandle = RegisterLxDll(hModule, LibMainComdlg32, (PVOID)&comdlg32_PEResTab,
+     dllHandle = RegisterLxDll(hModule, LibMainComdlg32, (PVOID)&comdlg32_PEResTab,
                                    COMDLG32_MAJORIMAGE_VERSION, COMDLG32_MINORIMAGE_VERSION,
                                    IMAGE_SUBSYSTEM_WINDOWS_GUI);
-         if(dllHandle == 0) 
-		return 0UL;
+         if(dllHandle == 0)
+        return 0UL;
 
          break;
       case 1 :
          if(dllHandle) {
-	 	UnregisterLxDll(dllHandle);
+        UnregisterLxDll(dllHandle);
          }
          break;
       default  :

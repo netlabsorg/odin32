@@ -1,6 +1,7 @@
+/* $Id: exit.c,v 1.2 2001-09-05 12:14:24 bird Exp $ */
 /*
  * CRTDLL exit/abort/atexit functions
- * 
+ *
  * Copyright 1996,1998 Marcus Meissner
  * Copyright 1996 Jukka Iivonen
  * Copyright 1997,2000 Uwe Bonnes
@@ -9,7 +10,7 @@
  * exit functions differ in whether they perform cleanup
  * and whether they return to the caller (really!).
  *            return      do
- *  Name      to caller?  cleanup? 
+ *  Name      to caller?  cleanup?
  *  _c_exit     Y           N
  *  _cexit      Y           Y
  *  _exit       N           N
@@ -53,17 +54,17 @@ void __CRTDLL__call_atexit(VOID)
 
 
 /*********************************************************************
- *	__dllonexit           			(CRTDLL.25)
+ *  __dllonexit                     (CRTDLL.25)
  */
 VOID CDECL CRTDLL___dllonexit ()
-{	
+{
   dprintf(("__dllonexit not implemented.\n"));
   SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
 }
 
 
 /*********************************************************************
- *	_abnormal_termination			(CRTDLL.36)
+ *  _abnormal_termination           (CRTDLL.36)
  */
 int CDECL CRTDLL__abnormal_termination(void)
 {
@@ -82,10 +83,10 @@ int CDECL CRTDLL__abnormal_termination(void)
 VOID CDECL CRTDLL__amsg_exit(int errnum)
 {
   dprintf2(("CRTDLL: _amsg_exit\n"));
-  
+
   // fprintf(stderr,strerror(errnum));
   // ExitProcess(-1);
-  
+
   CRTDLL_fprintf(CRTDLL_stderr,"\nrun-time error:\nError Code %d\n",errnum);
   CRTDLL__exit(255);
 }
@@ -94,18 +95,18 @@ VOID CDECL CRTDLL__amsg_exit(int errnum)
 /*********************************************************************
  *                  _assert     (CRTDLL.041)
  *
- * Print an assertion message and call abort(). Really only present 
+ * Print an assertion message and call abort(). Really only present
  * for win binaries. Winelib programs would typically use libc's
  * version.
  */
 VOID CDECL CRTDLL__assert(LPVOID str, LPVOID file, UINT line)
 {
   dprintf2(("CRTDLL: _assert\n"));
-  
+
   CRTDLL_fprintf(CRTDLL_stderr,"Assertion failed: %s, file %s, line %d\n\n",
                  (char*)str,(char*)file, line);
   CRTDLL_abort();
-  
+
   // _assert(str, file, line);
 }
 
@@ -118,9 +119,9 @@ VOID CDECL CRTDLL__c_exit(INT ret)
 {
   dprintf2(("_c_exit(%d)\n",ret));
   FIXME("not calling CRTDLL cleanup\n");
-  
+
   /* dont exit, return to caller */
-  
+
   ExitProcess(ret);
 }
 
@@ -134,7 +135,7 @@ VOID CDECL CRTDLL__cexit(INT ret)
   dprintf2(("_cexit(%d)\n",ret));
   FIXME("not calling CRTDLL cleanup\n");
   /* dont exit, return to caller */
-  
+
   ExitProcess(ret);
 }
 
@@ -144,7 +145,7 @@ VOID CDECL CRTDLL__cexit(INT ret)
  */
 VOID CDECL CRTDLL__exit(LONG ret)
 {
-  dprintf2(("CRTDLL: _exit (%08xh)\n", 
+  dprintf2(("CRTDLL: _exit (%08xh)\n",
             ret));
   TRACE(":exit code %ld\n",ret);
   CRTDLL__c_exit(ret);
@@ -198,7 +199,7 @@ VOID CDECL CRTDLL_exit(DWORD ret)
 VOID CDECL CRTDLL_abort()
 {
   dprintf2(("CRTDLL: abort\n"));
-  
+
   CRTDLL_fprintf(CRTDLL_stderr,"\nabnormal program termination\n");
   CRTDLL__exit(3);
   //abort();
@@ -206,16 +207,16 @@ VOID CDECL CRTDLL_abort()
 
 
 /*********************************************************************
- *                  atexit	(CRTDLL.342)
+ *                  atexit  (CRTDLL.342)
  *
  * Register a function to be called when the process terminates.
  */
 INT CDECL CRTDLL_atexit(void (*func)(void))
 {
   dprintf(("CRTDLL: atexit\n"));
-  
+
   return CRTDLL__onexit(func) == func ? 0 : -1;
-  
+
   // if (_atexit_n >= sizeof (_atexit_v) / sizeof (_atexit_v[0]))
   //   return -1;
   // _atexit_v[_atexit_n++] = func;

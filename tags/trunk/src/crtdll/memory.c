@@ -1,6 +1,7 @@
+/* $Id: memory.c,v 1.3 2001-09-05 12:14:25 bird Exp $ */
 /*
  * CRTDLL memory functions
- * 
+ *
  * Copyright 1996,1998 Marcus Meissner
  * Copyright 1996 Jukka Iivonen
  * Copyright 1997,2000 Uwe Bonnes
@@ -31,7 +32,7 @@ LPVOID CDECL CRTDLL_new(DWORD size)
 {
     VOID* result;
     if(!(result = HeapAlloc(GetProcessHeap(),0,size)) && new_handler)
-	(*new_handler)();
+    (*new_handler)();
     return result;
 }
 
@@ -78,7 +79,7 @@ LPVOID CDECL CRTDLL__expand(LPVOID ptr, INT size)
 INT CDECL CRTDLL__heapchk(VOID)
 {
   // return (_heapchk());
-  
+
   if (!HeapValidate( GetProcessHeap(), 0, NULL))
   {
     __CRTDLL__set_errno(GetLastError());
@@ -96,7 +97,7 @@ INT CDECL CRTDLL__heapchk(VOID)
 INT CDECL CRTDLL__heapmin(VOID)
 {
   // return (_heapmin());
-  
+
   if (!HeapCompact( GetProcessHeap(), 0 ))
   {
     if (GetLastError() != ERROR_CALL_NOT_IMPLEMENTED)
@@ -115,7 +116,7 @@ INT CDECL CRTDLL__heapmin(VOID)
 INT CDECL CRTDLL__heapset(UINT value)
 {
   // return (_heapset(fill));
-  
+
   INT retVal;
   struct _heapinfo heap;
 
@@ -143,7 +144,7 @@ INT CDECL CRTDLL__heapwalk(struct _heapinfo *next)
   phe.cbData = next->_size;
   phe.wFlags = next->_useflag == _USEDENTRY ? PROCESS_HEAP_ENTRY_BUSY : 0;
 
-  if (phe.lpData && phe.wFlags & PROCESS_HEAP_ENTRY_BUSY && 
+  if (phe.lpData && phe.wFlags & PROCESS_HEAP_ENTRY_BUSY &&
       !HeapValidate( GetProcessHeap(), 0, phe.lpData ))
   {
     __CRTDLL__set_errno(GetLastError());
@@ -179,7 +180,7 @@ INT CDECL CRTDLL__heapwalk(struct _heapinfo *next)
 LONG CDECL CRTDLL__msize(LPVOID mem)
 {
   // return (_msize(ptr));
-  
+
   LONG size = HeapSize(GetProcessHeap(),0,mem);
   if (size == -1)
   {
@@ -214,7 +215,7 @@ VOID CDECL CRTDLL_free(LPVOID ptr)
 
 /*********************************************************************
  *                  malloc        (CRTDLL.424)
- * 
+ *
  * Alocate memory from the heap.
  */
 LPVOID CDECL CRTDLL_malloc(DWORD size)
