@@ -1,4 +1,4 @@
-/* $Id: oslibgpi.cpp,v 1.14 2003-07-16 15:47:37 sandervl Exp $ */
+/* $Id: oslibgpi.cpp,v 1.15 2003-12-01 13:27:39 sandervl Exp $ */
 
 /*
  * GPI interface code
@@ -256,10 +256,17 @@ VOID calcDimensions(POINTLOS2 box[],PPOINTLOS2 point)
   ULONG    cx;
   ULONG    cy;
 
+  //ignore underhang (just like GetTextExtentPoint does in Windows)
+  if (box[TXTBOX_BOTTOMLEFT].x < 0) {
+      dprintf(("WARNING: Ignoring underhang!!"));
+      box[TXTBOX_BOTTOMLEFT].x = 0;
+  }
+
   if (box[TXTBOX_BOTTOMLEFT].y == box[TXTBOX_BOTTOMRIGHT].y)
   {
     point->y = labs (box[TXTBOX_BOTTOMLEFT].y-box[TXTBOX_TOPLEFT].y) + 1;
-    point->x = labs (box[TXTBOX_BOTTOMRIGHT].x-box[TXTBOX_BOTTOMLEFT].x) + 1;
+    point->x = labs (box[TXTBOX_CONCAT].x - box[TXTBOX_BOTTOMLEFT].x);
+
     if (box[TXTBOX_BOTTOMLEFT].x != box[TXTBOX_TOPLEFT].x)
     {
       if (point->y < 25)
