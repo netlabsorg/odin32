@@ -1,4 +1,4 @@
-/* $Id: initkernel32.cpp,v 1.27 2004-03-16 13:34:23 sandervl Exp $
+/* $Id: initkernel32.cpp,v 1.28 2004-05-24 08:56:06 sandervl Exp $
  *
  * KERNEL32 DLL entry point
  *
@@ -59,6 +59,7 @@
 #include <process.h>
 #include <stats.h>
 #include <heapshared.h>
+#include <heapstring.h>
 
 #define DBG_LOCALLOG    DBG_initterm
 #include "dbglocal.h"
@@ -70,6 +71,8 @@ extern "C" {
  extern DWORD kernel32_PEResTab;
 }
 
+extern PFN pfnImSetMsgQueueProperty;
+
        ULONG   flAllocMem = 0;    /* flag to optimize DosAllocMem to use all the memory on SMP machines */
        ULONG   ulMaxAddr = 0x20000000; /* end of user address space. */
        int     loadNr = 0;
@@ -77,6 +80,8 @@ extern "C" {
 static HMODULE dllHandle = 0;
        BOOL    fInit     = FALSE;
        BOOL    fWin32k   = FALSE;
+       HMODULE imHandle = 0;
+       char    szModName[ 256 ] = "";
 
 /****************************************************************************/
 /* _DLL_InitTerm is the function that gets called by the operating system   */
@@ -149,7 +154,7 @@ ULONG APIENTRY inittermKernel32(ULONG hModule, ULONG ulFlag)
             //SvL: Do it here instead of during the exe object creation
             //(std handles can be used in win32 dll initialization routines
             HMInitialize();             /* store standard handles within HandleManager */
-            
+
             // VP: Shared heap should be initialized before call to PROFILE_*
             // because they use a critical section which in turn uses smalloc
             // in debug build
@@ -215,6 +220,9 @@ ULONG APIENTRY inittermKernel32(ULONG hModule, ULONG ulFlag)
             /* Setup codepage info */
             CODEPAGE_Init();
 
+            if( IsDBCSEnv() && DosLoadModule( szModName, sizeof( szModName ), "OS2IM.DLL", &imHandle ) == 0 )
+                DosQueryProcAddr( imHandle, 140, NULL, &pfnImSetMsgQueueProperty );
+
             InitSystemInfo(ulSysinfo);
             //Set up environment as found in NT
             InitEnvironment(ulSysinfo);
@@ -254,6 +262,9 @@ ULONG APIENTRY inittermKernel32(ULONG hModule, ULONG ulFlag)
 void APIENTRY cleanupKernel32(ULONG ulReason)
 {
     dprintf(("kernel32 exit %d\n", ulReason));
+
+    if( IsDBCSEnv() && imHandle )
+        DosFreeModule( imHandle );
 
     //Flush and delete all open memory mapped files
     Win32MemMap::deleteAll();

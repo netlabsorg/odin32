@@ -1,4 +1,4 @@
-/* $Id: oslibmisc.h,v 1.13 2003-11-21 11:29:33 sandervl Exp $ */
+/* $Id: oslibmisc.h,v 1.14 2004-05-24 08:56:07 sandervl Exp $ */
 /*
  * Misc util. procedures
  *
@@ -33,17 +33,17 @@ PVOID OSLibSelToFlat(USHORT selector);
 //******************************************************************************
 BOOL  OSLibDisablePopups();
 
-#define TIB_STACKTOP 	0
-#define TIB_STACKLOW 	1
+#define TIB_STACKTOP    0
+#define TIB_STACKLOW    1
 
 ULONG OSLibGetTIB(int tiboff);
 
 #define PIB_HMTE        0
-#define PIB_TASKHNDL	PIB_HMTE
+#define PIB_TASKHNDL    PIB_HMTE
 #define PIB_TASKTYPE    1
 #define PIB_PCHCMD      2
 
-#define TASKTYPE_PM	    0
+#define TASKTYPE_PM     0
 #define TASKTYPE_VIO    1
 
 ULONG OSLibGetPIB(int iPIB);
@@ -98,6 +98,8 @@ ULONG OSLibWinSetCp(ULONG hmq, ULONG codepage);
 //#define CTRY_TAIWAN                  886
 
 ULONG OSLibQueryCountry();
+
+ULONG OSLibImSetMsgQueueProperty( ULONG hmq, ULONG ulFlag );
 
 #ifdef __cplusplus
 }

@@ -1,4 +1,4 @@
-; $Id: kernel32dbg.def,v 1.38 2004-01-31 02:05:05 bird Exp $
+; $Id: kernel32dbg.def,v 1.39 2004-05-24 08:56:06 sandervl Exp $
 
 ;Basis is Windows95 KERNEL32
 LIBRARY KERNEL32 INITINSTANCE TERMINSTANCE
@@ -1209,6 +1209,8 @@ EXPORTS
     cp_get_table                                                  @2025 NONAME
 
     OSLibDosDevIOCtl                                              @2026 NONAME
+
+    OSLibImSetMsgQueueProperty                                    @2029 NONAME
 
     fIsDBCSEnv                                                    @2103 NONAME
 

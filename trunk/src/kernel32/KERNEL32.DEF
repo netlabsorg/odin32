@@ -1,4 +1,4 @@
-; $Id: KERNEL32.DEF,v 1.163 2004-01-31 02:05:06 bird Exp $
+; $Id: KERNEL32.DEF,v 1.164 2004-05-24 08:56:05 sandervl Exp $
 
 ;Basis is Windows95 KERNEL32
 LIBRARY KERNEL32 INITINSTANCE TERMINSTANCE
@@ -1209,6 +1209,8 @@ EXPORTS
     cp_get_table                                                  @2025 NONAME
 
     OSLibDosDevIOCtl                                              @2026 NONAME
+
+    OSLibImSetMsgQueueProperty                                    @2029 NONAME
 
     fIsDBCSEnv                                                    @2103 NONAME
 
