@@ -1,4 +1,4 @@
-/* $Id: winimagebase.h,v 1.2 2000-04-14 22:35:28 sandervl Exp $ */
+/* $Id: winimagebase.h,v 1.3 2000-04-15 21:08:37 bird Exp $ */
 
 /*
  * Win32 PE Image base class
@@ -64,7 +64,7 @@ virtual ULONG     getVersion();
 virtual void setFullPath(char *name);
         char *getFullPath()           { return fullpath; };
 
-	char *getModuleName()	      { return szModule; };
+    char *getModuleName()         { return szModule; };
 
 virtual HRSRC findResourceA(LPCSTR lpszName, LPSTR lpszType, ULONG lang = LANG_GETFIRST);
         HRSRC findResourceW(LPWSTR lpszName, LPWSTR lpszType, ULONG lang = LANG_GETFIRST);
@@ -72,62 +72,62 @@ virtual ULONG getResourceSizeA(LPCSTR lpszName, LPSTR lpszType, ULONG lang = LAN
         ULONG getResourceSizeW(LPCWSTR lpszName, LPWSTR lpszType, ULONG lang = LANG_GETFIRST);
 virtual BOOL  enumResourceNamesA(HMODULE hmod, LPCTSTR  lpszType, ENUMRESNAMEPROCA lpEnumFunc, LONG lParam);
 virtual BOOL  enumResourceNamesW(HMODULE hmod, LPCWSTR  lpszType, ENUMRESNAMEPROCW lpEnumFunc, LONG lParam);
-virtual BOOL  enumResourceTypesA(HMODULE hmod, ENUMRESTYPEPROCA lpEnumFunc, 
+virtual BOOL  enumResourceTypesA(HMODULE hmod, ENUMRESTYPEPROCA lpEnumFunc,
                                  LONG lParam);
-virtual BOOL  enumResourceTypesW(HMODULE hmod, ENUMRESTYPEPROCW lpEnumFunc, 
+virtual BOOL  enumResourceTypesW(HMODULE hmod, ENUMRESTYPEPROCW lpEnumFunc,
                                  LONG lParam);
 
 virtual ULONG getVersionSize();
 virtual BOOL  getVersionStruct(char *verstruct, ULONG bufLength);
 
 static  BOOL  isPEImage(char *szFileName);
-static  void  findDll(char *szFileName, char *szFullName, int cchFullFileName);
+static  BOOL  findDll(const char *pszFileName, char *pszFullName, int cchFullName);
 
-	void  setEntryPoint(ULONG startAddress) { entryPoint = startAddress; };
+    void  setEntryPoint(ULONG startAddress) { entryPoint = startAddress; };
 
-        void  setTLSAddress(LPVOID dwTlsAddress)     	{ tlsAddress = dwTlsAddress; };
-        void  setTLSIndexAddr(LPDWORD dwTlsIndexAddr)	{ tlsIndexAddr = dwTlsIndexAddr; };
-        void  setTLSInitSize(ULONG dwTlsSize)		{ tlsInitSize = dwTlsSize; };
-        void  setTLSTotalSize(ULONG dwTlsSize)		{ tlsTotalSize = dwTlsSize; };
+        void  setTLSAddress(LPVOID dwTlsAddress)        { tlsAddress = dwTlsAddress; };
+        void  setTLSIndexAddr(LPDWORD dwTlsIndexAddr)   { tlsIndexAddr = dwTlsIndexAddr; };
+        void  setTLSInitSize(ULONG dwTlsSize)       { tlsInitSize = dwTlsSize; };
+        void  setTLSTotalSize(ULONG dwTlsSize)      { tlsTotalSize = dwTlsSize; };
         void  setTLSCallBackAddr(PIMAGE_TLS_CALLBACK *dwTlsCallBackAddr)
-	{
-	   tlsCallBackAddr = dwTlsCallBackAddr;
-	};
+    {
+       tlsCallBackAddr = dwTlsCallBackAddr;
+    };
 
-	void  tlsAttachThread();	//setup TLS structures for new thread
-	void  tlsDetachThread();	//destroy TLS structures
+    void  tlsAttachThread();    //setup TLS structures for new thread
+    void  tlsDetachThread();    //destroy TLS structures
 
-virtual	ULONG     getApi(char *name)  = 0;
+virtual ULONG     getApi(char *name)  = 0;
 virtual ULONG     getApi(int ordinal) = 0;
 
 virtual BOOL  isDll() = 0;
 
 static Win32ImageBase * findModule(HMODULE hModule);
 
-	//Add image to dependency list of this image
-	void  addDependency(Win32DllBase *dll);
+    //Add image to dependency list of this image
+    void  addDependency(Win32DllBase *dll);
         BOOL  dependsOn(Win32DllBase *dll);
 
 protected:
-	void tlsAlloc();		//Allocate TLS index for this module
-	void tlsDelete();		//Destroy TLS index for this module
+    void tlsAlloc();        //Allocate TLS index for this module
+    void tlsDelete();       //Destroy TLS index for this module
 
         Win32Resource        *winres;
 
         ULONG                 errorState, entryPoint;
 
         char                 *fullpath;
-	char      	      szModule[CCHMAXPATH];
-	char                  szFileName[CCHMAXPATH];
+    char              szModule[CCHMAXPATH];
+    char                  szFileName[CCHMAXPATH];
 
         HINSTANCE             hinstance;
 
-  	LPVOID 	              tlsAddress;		//address of TLS data
-  	LPDWORD		      tlsIndexAddr;		//address of DWORD that receives the TLS index
-  	ULONG 		      tlsInitSize;		//size of initialized TLS memory block
-  	ULONG 		      tlsTotalSize;		//size of TLS memory block
-  	PIMAGE_TLS_CALLBACK  *tlsCallBackAddr;	//ptr to TLS callback array
-	ULONG                 tlsIndex;		//module TLS index
+    LPVOID                tlsAddress;       //address of TLS data
+    LPDWORD           tlsIndexAddr;     //address of DWORD that receives the TLS index
+    ULONG             tlsInitSize;      //size of initialized TLS memory block
+    ULONG             tlsTotalSize;     //size of TLS memory block
+    PIMAGE_TLS_CALLBACK  *tlsCallBackAddr;  //ptr to TLS callback array
+    ULONG                 tlsIndex;     //module TLS index
 
         ULONG getPEResourceSize(ULONG id, ULONG type, ULONG lang = LANG_GETFIRST);
 
@@ -142,8 +142,8 @@ protected:
         //substracted from RVA data offsets
         ULONG                     ulRVAResourceSection;
 
-	//linked list of dlls loaded on behalf of this executable image (dll or exe)
-        Queue         		   loadedDlls;
+    //linked list of dlls loaded on behalf of this executable image (dll or exe)
+        Queue                  loadedDlls;
 private:
 
         friend class Win32Resource;
@@ -160,6 +160,6 @@ typedef struct
   ULONG           magic2;
 } WINIMAGE_LOOKUP;
 
-#define WINIMAGE_LOOKUPADDR(a)	(WINIMAGE_LOOKUP *)((ULONG)a + PAGE_SIZE - sizeof(WINIMAGE_LOOKUP))
+#define WINIMAGE_LOOKUPADDR(a)  (WINIMAGE_LOOKUP *)((ULONG)a + PAGE_SIZE - sizeof(WINIMAGE_LOOKUP))
 
 #endif //__WINIMAGEBASE_H__

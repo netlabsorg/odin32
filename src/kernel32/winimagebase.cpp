@@ -1,44 +1,44 @@
-/* $Id: winimagebase.cpp,v 1.13 2000-04-15 16:32:35 sandervl Exp $ */
+/* $Id: winimagebase.cpp,v 1.14 2000-04-15 21:08:36 bird Exp $ */
 
 /*
  * Win32 PE Image base class
  *
- * Copyright 1998-1999 Sander van Leeuwen (sandervl@xs4all.nl)
- * Copyright 1998 Knut St. Osmundsen
+ * Copyright 1998-2000 Sander van Leeuwen (sandervl@xs4all.nl)
+ * Copyright 1998-2000 Knut St. Osmundsen (knut.stange.osmundsen@pmsc.no)
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *
  */
 
-#define INCL_DOSFILEMGR          /* File Manager values      */
-#define INCL_DOSMODULEMGR
-#define INCL_DOSERRORS           /* DOS Error values         */
-#define INCL_DOSPROCESS          /* DOS Process values       */
-#define INCL_DOSMISC             /* DOS Miscellanous values  */
-#define INCL_WIN
-#define INCL_BASE
-#include <os2wrap.h>             //Odin32 OS/2 api wrappers
+#define INCL_DOSFILEMGR                 /* File Manager values */
+#define INCL_DOSMODULEMGR               /* DOS Module manager */
+#define INCL_DOSERRORS                  /* DOS Error values */
+#define INCL_DOSPROCESS                 /* DOS Process values */
+#define INCL_DOSMISC                    /* DOS Miscellanous values */
+#define INCL_WIN                        /* All Win API */
+#define INCL_BASE                       /* All Dos API */
+#include <os2wrap.h>                    /* Odin32 OS/2 API wrappers. */
 
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
+#include <stdio.h>                      /* C Library Standard I/O */
+#include <string.h>                     /* C Library string operations */
+#include <stdlib.h>                     /* C Library Standard stuff */
 
-#include <assert.h>
-#include <misc.h>
-#include <win32type.h>
-#include <winimagebase.h>
-#include <windllbase.h>
-#include <winexebase.h>
-#include <pefile.h>
-#include <unicode.h>
-#include <winres.h>
+#include <misc.h>                       /* Odin32 Miscellaneous definitions, debug stuff*/
+#include <win32type.h>                  /* Odin32 Common types and definition. */
+#include "winimagebase.h"               /* Odin32 Executable Image Base Class */
+#include "windllbase.h"                 /* Odin32 Dll Base Class */
+#include "winexebase.h"                 /* Odin32 Exe Base Class */
+#include <pefile.h>                     /* Odin32 PE definitions */
+#include <unicode.h>                    /* Odin32 Unicode conversion */
+#include <winres.h>                     /* Odin32 Resource Class */
 #include "oslibmisc.h"
 #include "oslibdos.h"
 #include "initterm.h"
-#include "directory.h"
 #include <win\virtual.h>
+#include "directory.h"                  /* InternalGet<Windows/System>Directory. */
+#include <os2newapi.h>                  /* DosQueryHeaderInfo. */
 
-#define DBG_LOCALLOG	DBG_winimagebase
+#define DBG_LOCALLOG    DBG_winimagebase
 #include "dbglocal.h"
 
 //******************************************************************************
@@ -114,11 +114,11 @@ BOOL Win32ImageBase::dependsOn(Win32DllBase *image)
   dlllistmutex.enter();
   item = loadedDlls.Head();
   while(item) {
-	if(loadedDlls.getItem(item) == (ULONG)image) {
-		ret = TRUE;
-		break;
-	}	  
-	item = loadedDlls.getNext(item);
+    if(loadedDlls.getItem(item) == (ULONG)image) {
+        ret = TRUE;
+        break;
+    }
+    item = loadedDlls.getNext(item);
   }
   dlllistmutex.leave();
   return ret;
@@ -132,53 +132,301 @@ ULONG Win32ImageBase::getVersion()
   return 0x40000; //NT 4
 }
 //******************************************************************************
-//******************************************************************************
-void Win32ImageBase::findDll(char *szFileName, char *szFullName, int cchFullFileName)
+/**
+ * Finds a executable module (or really any file) using the DLL search order.
+ * The search order used is:
+ *      1. The directory from which the application loaded.
+ *      2. The current directory.
+ *      3. System directory. (GetSystemDirectory returns its path)
+ *         (Windows NT/2k directory name: SYSTEM32)
+ *      4. (Windows NT/2k: The 16-bit Windows system directory. There
+ *         is no function that obtains the path of this directory.
+ *         (Directory name: SYSTEM)
+ *         THIS IS NOT SEARCHED BY ODIN.)
+ *      5. The Windows directory. (GetWindowsDirectory returns its path)
+ *      6. The Directories listed in the PATH environment variable.
+ *      7. The Directories listed in the BEGINLIBPATH.
+ *      8. The Directories listed in the LIBPATH.
+ *      9. The Directories listed in the ENDLIBPATH.
+ *
+ * @returns   Success indicator. TRUE: found  FALSE: not found.
+ *            Note! pszFullname will normally contain the contents of
+ *            pszFilename upon return, there is one case FALSE case when
+ *            pszFullname will be empty upon return. That's when the buffer
+ *            isn't large enough to hold the content of pszFilename including
+ *            an extention.
+ *            So, please check for the return value!
+ * @param     pszFilename   File to find. This name should not have a path!
+ *                          If it don't contains an '.', ".DLL" is appended to
+ *                          the name.
+ * @param     pszFullname   Pointer to output buffer, this will hold the
+ *                          filename upon return.
+ * @param     cchFullname   Size of the buffer pointer to by pszFullname.
+ *                          (A length of at least CCHMAXPATH is recommended.)
+ *
+ * @status    Completely implemented.
+ * @author    Sander van Leeuwen (sandervl@xs4all.nl)
+ *            knut st. osmundsen (knut.stange.osmundsen@pmsc.no)
+ * @remark
+ */
+BOOL Win32ImageBase::findDll(const char *pszFileName, char *pszFullName, int cchFullName)
 {
- char   modname[CCHMAXPATH];
- HFILE  dllfile;
- char  *imagepath;
+    BOOL            fRet = FALSE;       /* Return value. (Pessimistic attitude! Init it to FALSE...) */
+    char *          psz;                /* General string pointer. */
+    int             cchFileName;        /* Length of the normalized filename (after ".DLL" is added). */
+    struct localvars                    /* local variables which are to big to fit onto the stack. */
+    {
+        char            szPath[1024];   /* Path buffer. Used to store pathlists. 1024 should be enough */
+                                        /* for LIBPATH (which at least had a limit of ca. 750 chars). */
+        char            sz[CCHMAXPATH]; /* Filename/path buffer. (Normally used to build filenames */
+                                        /* which are passed in as search experessions to DosFindFirst.) */
+        FILEFINDBUF3    findbuf3;       /* DosFindFirst buffer. */
+    } *             plv;
+    int             iPath;              /* Current path or pathlist being examined. This is the loop */
+                                        /* variable looping on the FINDDLL_* defines. */
 
-  strcpy(szFullName, szFileName);
-  strupr(szFullName);
-  if(!strchr(szFullName, (int)'.')) {
-    	strcat(szFullName,".DLL");
-  }
+    /* These defines sets the order the paths and pathlists are examined. */
+    #define FINDDLL_EXECUTABLEDIR   1
+    #define FINDDLL_CURRENTDIR      2
+    #define FINDDLL_SYSTEM32DIR     3
+    #define FINDDLL_SYSTEM16DIR     4
+    #define FINDDLL_WINDIR          5
+    #define FINDDLL_PATH            6
+    #define FINDDLL_BEGINLIBPATH    7
+    #define FINDDLL_LIBPATH         8
+    #define FINDDLL_ENDLIBPATH      9
+    #define FINDDLL_FIRST           FINDDLL_EXECUTABLEDIR
+    #define FINDDLL_LAST            FINDDLL_ENDLIBPATH
 
-  //search order:
-  //1) exe dir
-  //2) current dir
-  //3) windows system dir (kernel32 path)
-  //4) windows dir
-  //5) path
-  strcpy(modname, WinExe->getFullPath());
-  //remove file name from full path
-  imagepath = modname + strlen(modname) - 1;
-  while(*imagepath != '\\') imagepath--;
-  imagepath[1] = 0;
-  strcat(modname, szFullName);
-  dllfile = OSLibDosOpen(modname, OSLIB_ACCESS_READONLY|OSLIB_ACCESS_SHAREDENYNONE);
-  if(dllfile == NULL) {
-	strcpy(modname, szFullName);
-  	dllfile = OSLibDosOpen(szFullName, OSLIB_ACCESS_READONLY|OSLIB_ACCESS_SHAREDENYNONE);
-	if(dllfile == NULL) {
-	    	strcpy(modname, InternalGetSystemDirectoryA());
-		strcat(modname, "\\");
-	    	strcat(modname, szFullName);
-		dllfile = OSLibDosOpen(modname, OSLIB_ACCESS_READONLY|OSLIB_ACCESS_SHAREDENYNONE);
-		if(dllfile == NULL) {
-			strcpy(modname, InternalGetWindowsDirectoryA());
-			strcat(modname, "\\");
-	    		strcat(modname, szFullName);
-			dllfile = OSLibDosOpen(modname, OSLIB_ACCESS_READONLY|OSLIB_ACCESS_SHAREDENYNONE);
-			if(dllfile == NULL) {
-				OSLibDosSearchPath(OSLIB_SEARCHENV, "PATH", szFullName, modname, sizeof(modname));
-			}
-		}
-	}
-  }
-  strcpy(szFullName, modname);
-  if(dllfile) OSLibDosClose(dllfile);
+
+    /** @sketch
+     * Copy the filename to be found to the outputbuffer, and add .DLL if not '.'
+     * is found in the name. This has two reasons:
+     *  1) When searching paths we simply append the buffer contents to the path
+     *     being examined.
+     *  2) The buffer will at least return the passed in filename.
+     */
+    psz = strchr(pszFileName, '.');
+    cchFileName = strlen(pszFileName) + (psz ? 0 : 4);
+    if (cchFileName >= cchFullName)
+    {
+        dassert(cchFileName < cchFullName, ("KERNEL32:Win32ImageBase::findDll(%s, 0x%08x, %d): "
+                 "cchFileName (%d) >= cchFullName (%d)",
+                 pszFileName, pszFullName, cchFullName, cchFileName, cchFullName));
+        *pszFullName = '\0';
+        return FALSE;
+    }
+    strcpy(pszFullName, pszFileName);
+    if (psz == NULL)
+        strcpy(pszFullName + cchFileName - 4, ".DLL");
+
+
+    /** @sketch
+     * Allocate memory for local variables.
+     */
+    plv = (struct localvars *)malloc(sizeof(*plv));
+    if (!plv)
+    {
+        dassert(plv, ("KERNEL32:Win32ImageBase::findDll(%s, 0x%08x, %d): "
+                "malloc failed allocating %d bytes of memory for local variables.",
+                pszFileName, pszFullName, cchFullName, sizeof(*plv)));
+        return FALSE;
+    }
+
+
+    /** @sketch
+     * Loop thru the paths and pathlists searching them for the filename.
+     */
+    for (iPath = FINDDLL_FIRST; iPath <= FINDDLL_LAST; iPath++)
+    {
+        APIRET          rc;             /* Returncode from OS/2 APIs. */
+        const char  *   pszPath;        /* Pointer to the path being examined. */
+
+        /** @sketch
+         * Get the path/dir to examin. (This is determined by the value if iPath.)
+         */
+        switch (iPath)
+        {
+            case FINDDLL_EXECUTABLEDIR:
+                //ASSUMES: getFullPath allways returns a fully qualified path, ie. with at least one backslash.
+                //         and that all slashes are backslashes!
+                pszPath = strcpy(plv->szPath, WinExe->getFullPath());
+                psz = strrchr(plv->szPath, '\\');
+                dassert(psz, ("KERNEL32:Win32ImageBase::findDll(%s, 0x%08x, %d): "
+                        "WinExe->getFullPath returned a path not fully qualified: %s",
+                        pszFileName, pszFullName, cchFullName, pszPath));
+                if (psz)
+                    *psz = '\0';
+                else
+                    continue;
+                break;
+
+            case FINDDLL_CURRENTDIR:
+                pszPath = ".";
+                break;
+
+            case FINDDLL_SYSTEM32DIR:
+                pszPath = InternalGetSystemDirectoryA();
+                break;
+
+            case FINDDLL_SYSTEM16DIR:
+                #if 1
+                continue;               /* Skip this index */
+                #else
+                pszPath = InternalGetWindowsDirectoryA();
+                strcpy(plv->sz2, InternalGetWindowsDirectoryA());
+                strcat(plv->sz2, "\SYSTEM");
+                break;
+                #endif
+
+            case FINDDLL_WINDIR:
+                pszPath = InternalGetWindowsDirectoryA();
+                break;
+
+            case FINDDLL_PATH:
+                pszPath = getenv("PATH");
+                break;
+
+            case FINDDLL_BEGINLIBPATH:
+                rc = DosQueryExtLIBPATH(plv->szPath, BEGIN_LIBPATH);
+                if (rc != NO_ERROR)
+                {
+                    dassert(rc == NO_ERROR, ("KERNEL32:Win32ImageBase::findDll(%s, 0x%08x, %d): "
+                             "DosQueryExtLIBPATH failed with rc=%d, iPath=%d",
+                             pszFileName, pszFullName, cchFullName, rc, iPath));
+                    continue;
+                }
+                pszPath = plv->szPath;
+                break;
+
+            case FINDDLL_LIBPATH:
+                rc = DosQueryHeaderInfo(NULLHANDLE, 0, plv->szPath, sizeof(plv->szPath), QHINF_LIBPATH);
+                if (rc != NO_ERROR)
+                {
+                    dassert(rc == NO_ERROR, ("KERNEL32:Win32ImageBase::findDll(%s, 0x%08x, %d): "
+                             "DosQueryHeaderInfo failed with rc=%d, iPath=%d",
+                             pszFileName, pszFullName, cchFullName, rc, iPath));
+                    continue;
+                }
+                pszPath = plv->szPath;
+                break;
+
+            case FINDDLL_ENDLIBPATH:
+                rc = DosQueryExtLIBPATH(plv->szPath, END_LIBPATH);
+                if (rc != NO_ERROR)
+                {
+                    dassert(rc == NO_ERROR, ("KERNEL32:Win32ImageBase::findDll(%s, 0x%08x, %d): "
+                             "DosQueryExtLIBPATH failed with rc=%d, iPath=%d",
+                             pszFileName, pszFullName, cchFullName, rc, iPath));
+                    continue;
+                }
+                pszPath = plv->szPath;
+                break;
+
+            default: /* !internalerror! */
+                goto end;
+        }
+
+        /** @sketch
+         * pszPath is now set to the pathlist to be searched.
+         * So we'll loop thru all the paths in the list.
+         */
+        while (pszPath != NULL && *pszPath != '\0')
+        {
+            HDIR    hDir;               /* Find handle used when calling FindFirst. */
+            ULONG   culFiles;           /* Number of files to find / found. */
+            char *  pszNext;            /* Pointer to the next pathlist path */
+            int     cch;                /* Length of path (including the slash after the slash is added). */
+
+            /** @sketch
+             * Find the end of the path.
+             * Copy the path into the plv->sz buffer.
+             * Set pszNext.
+             */
+            pszNext = strchr(pszPath, ';');
+            if (pszNext != NULL)
+            {
+                cch = pszNext - pszPath;
+                pszNext++;
+            }
+            else
+                cch = strlen(pszPath);
+
+            if (cch + cchFileName + 1 >= sizeof(plv->sz)) /* assertion */
+            {
+                dassert(cch + cchFileName + 1 < sizeof(plv->sz), ("KERNEL32:Win32ImageBase::findDll(%s, 0x%08x, %d): "
+                        "cch (%d) + cchFileName (%d) + 1 < sizeof(plv->sz) (%d) - paths too long!, iPath=%d",
+                        pszFileName, pszFullName, cchFullName, cch, cchFileName, sizeof(plv->sz), iPath));
+                pszPath = pszNext;
+                continue;
+            }
+            memcpy(plv->sz, pszPath, cch); //arg! Someone made strncpy not work as supposed!
+
+
+            /** @sketch
+             * Add a '\\' and the filename (pszFullname) to the path;
+             * then we'll have a fullpath.
+             */
+            plv->sz[cch++] = '\\';
+            strcpy(&plv->sz[cch], pszFullName);
+
+
+            /** @sketch
+             *  Use DosFindFirst to check if the file exists.
+             *  IF the file exists THEN
+             *      Query Fullpath using OS/2 API.
+             *      IF unsuccessfull THEN return relative name.
+             *          Check that the fullname buffer is large enough.
+             *          Copy the filename found to the fullname buffer.
+             *      ENDIF
+             *      goto end
+             *  ENDIF
+             */
+            hDir = HDIR_CREATE;
+            culFiles = 1;
+            rc = DosFindFirst(plv->sz, &hDir, FILE_NORMAL,
+                              &plv->findbuf3, sizeof(plv->findbuf3),
+                              &culFiles, FIL_STANDARD);
+            DosFindClose(hDir);
+            if (culFiles >= 1 && rc == NO_ERROR)
+            {
+                /* Return full path - we'll currently return a relative path. */
+                rc = DosQueryPathInfo(plv->sz, FIL_QUERYFULLNAME, pszFullName, cchFullName);
+                fRet = rc == NO_ERROR;
+                if (!fRet)
+                {
+                    /* Return a relative path - probably better that failing... */
+                    dassert(rc == NO_ERROR, ("KERNEL32:Win32ImageBase::findDll(%s, 0x%08x, %d): "
+                            "rc = %d",
+                            pszFileName, pszFullName, cchFullName, rc));
+
+                    if (cch + cchFileName + 1 <= cchFullName)
+                    {
+                        strcpy(pszFullName, plv->sz);
+                        strcpy(pszFullName + cch, plv->findbuf3.achName);
+                        fRet = TRUE;
+                    }
+                    else
+                    {
+                        dassert(cch + cchFileName + 1 > cchFullName, ("KERNEL32:Win32ImageBase::findDll(%s, 0x%08x, %d): "
+                                "cch (%d) + cchFileName (%d) + 1 < cchFullName (%d); %s",
+                                pszFileName, pszFullName, cchFullName, cch, cchFileName, cchFullName, plv->sz));
+                    }
+                }
+                goto end;
+            }
+
+            pszPath = pszNext;
+        }
+    } /* for iPath */
+
+
+end:
+    /*
+     * Cleanup: free local variables.
+     */
+    free(plv);
+    return fRet;
 }
 //******************************************************************************
 //******************************************************************************
@@ -196,7 +444,13 @@ BOOL Win32ImageBase::isPEImage(char *szFileName)
  ULONG  ulRead;
  int    nSections, i;
 
-  findDll(szFileName, filename, sizeof(filename));
+  if (!findDll(szFileName, filename, sizeof(filename)))
+  {
+        dprintf(("KERNEL32:Win32ImageBase::isPEImage(%s) findDll failed to find the file.\n",
+                 szFileName, rc));
+        return FALSE;
+  }
+
   rc = DosOpen(filename,                       /* File path name */
                &win32handle,                   /* File handle */
                &ulAction,                      /* Action taken */
