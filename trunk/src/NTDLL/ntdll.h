@@ -1,4 +1,4 @@
-/* $Id: ntdll.h,v 1.14 2003-01-16 15:22:38 sandervl Exp $ */
+/* $Id: ntdll.h,v 1.15 2003-02-13 17:17:06 sandervl Exp $ */
 
 /*
    this file defines interfaces mainly exposed to device drivers and
@@ -45,9 +45,8 @@ extern "C" {
 
 
 //SvL: Internal heap allocation definitions for NTDLL
-extern HANDLE NTDLL_hHeap;
-#define Heap_Alloc(a)	HeapAlloc(NTDLL_hHeap, HEAP_ZERO_MEMORY, a)
-#define Heap_Free(a)	HeapFree(NTDLL_hHeap, 0, (PVOID)a)
+#define Heap_Alloc(a)	HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, a)
+#define Heap_Free(a)	HeapFree(GetProcessHeap(), 0, (PVOID)a)
 
 typedef struct _IO_STATUS_BLOCK
 {  union
