@@ -1,4 +1,4 @@
-/* $Id: oslibwin.cpp,v 1.78 2000-05-26 18:43:34 sandervl Exp $ */
+/* $Id: oslibwin.cpp,v 1.79 2000-06-07 14:51:26 sandervl Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -52,13 +52,12 @@ BOOL OSLibWinSetOwner(HWND hwnd, HWND hwndOwner)
 //******************************************************************************
 //******************************************************************************
 HWND OSLibWinCreateWindow(HWND hwndParent,ULONG dwWinStyle,
-                          char *pszName, HWND Owner, ULONG fHWND_BOTTOM, HWND *hwndFrame,
+                          char *pszName, HWND Owner, ULONG fHWND_BOTTOM, 
                           ULONG id, BOOL fTaskList,BOOL fShellPosition,
                           int classStyle)
 {
  HWND  hwndClient;
-
-  dprintf(("WinCreateWindow %x %s %x task %d shell %d classstyle %x", hwndParent, pszName, id, fTaskList, fShellPosition, classStyle));
+ ULONG dwFrameStyle = 0;
 
   if(pszName && *pszName == 0) {
         pszName = NULL;
@@ -69,42 +68,38 @@ HWND OSLibWinCreateWindow(HWND hwndParent,ULONG dwWinStyle,
   if(Owner == OSLIB_HWND_DESKTOP) {
         Owner = HWND_DESKTOP;
   }
-  ULONG dwClientStyle = 0;
-  ULONG dwFrameStyle = 0;
-
   BOOL TopLevel = hwndParent == HWND_DESKTOP;
-
-  FRAMECDATA FCData = {sizeof (FRAMECDATA), 0, 0, 0};
 
   if(classStyle & CS_SAVEBITS_W) dwWinStyle |= WS_SAVEBITS;
   if(classStyle & CS_PARENTDC_W) dwWinStyle |= WS_PARENTCLIP;
 
-  dwClientStyle = dwWinStyle & ~(WS_TABSTOP | WS_GROUP | WS_CLIPSIBLINGS);
+  dwWinStyle = dwWinStyle & ~(WS_TABSTOP | WS_GROUP);
 
-  dwFrameStyle |= FCF_NOBYTEALIGN;
   if(fTaskList)
   {
     	dwFrameStyle |= FCF_NOMOVEWITHOWNER;
   }
   if (fShellPosition) dwFrameStyle |= FCF_SHELLPOSITION;
 
-  dwWinStyle &= ~WS_CLIPCHILDREN;
+  FRAMECDATA FCData = {sizeof (FRAMECDATA), 0, 0, 0};
   FCData.flCreateFlags = dwFrameStyle;
 
-  *hwndFrame = WinCreateWindow (hwndParent,
-                                TopLevel ? WC_FRAME : WIN32_INNERFRAME,
-                                pszName, dwWinStyle, 0, 0, 0, 0,
-                                Owner, HWND_TOP,
-                                id, &FCData, NULL);
+  dprintf(("WinCreateWindow %x %s %x task %d shell %d classstyle %x winstyle %x", hwndParent, pszName, id, fTaskList, fShellPosition, classStyle, dwWinStyle));
 
-  if (*hwndFrame) {
-    hwndClient = WinCreateWindow (*hwndFrame, (classStyle & CS_SAVEBITS_W) ? WIN32_STDCLASS2:WIN32_STDCLASS,
-                                  NULL, dwClientStyle, 0, 0, 0, 0,
-                                  *hwndFrame, HWND_TOP, FID_CLIENT, NULL, NULL);
-    return hwndClient;
-  }
-  dprintf(("OSLibWinCreateWindow: (FRAME) WinCreateStdWindow failed (%x)", WinGetLastError(GetThreadHAB())));
-  return 0;
+#if 1
+  return WinCreateWindow (hwndParent,
+//                          TopLevel ? WIN32_STDFRAMECLASS : WIN32_STDCLASS,
+                          WIN32_STDFRAMECLASS,
+                          pszName, dwWinStyle, 0, 0, 0, 0,
+                          Owner, HWND_TOP,
+                          id, &FCData, NULL);
+#else
+  return WinCreateWindow (hwndParent,
+                          WIN32_STDCLASS,
+                          pszName, dwWinStyle, 0, 0, 0, 0,
+                          Owner, HWND_TOP,
+                          id, NULL, NULL);
+#endif
 }
 //******************************************************************************
 //******************************************************************************
@@ -257,21 +252,23 @@ BOOL OSLibWinDestroyWindow(HWND hwnd)
 }
 //******************************************************************************
 //******************************************************************************
-BOOL OSLibWinQueryWindowRect(HWND hwnd, PRECT pRect, int RelativeTo)
+#if 0
+BOOL OSLibWinQueryWindowRect(Win32BaseWindow *window, PRECT pRect, int RelativeTo)
 {
  BOOL     rc;
  RECTLOS2 rectl;
 
-  rc = WinQueryWindowRect(hwnd, (PRECTL)&rectl);
+  rc = WinQueryWindowRect(window->getOS2WindowHandle(), (PRECTL)&rectl);
   if(rc) {
         if(RelativeTo == RELATIVE_TO_SCREEN) {
-                mapOS2ToWin32Rect(hwnd,OSLIB_HWND_DESKTOP,&rectl,pRect);
+                mapOS2ToWin32RectFrame(window,windowDesktop,&rectl,pRect);
         }
-        else    mapOS2ToWin32Rect(hwnd,&rectl,pRect);
+        else    mapOS2ToWin32RectFrame(window,&rectl,pRect);
   }
   else  memset(pRect, 0, sizeof(RECT));
   return rc;
 }
+#endif
 //******************************************************************************
 //******************************************************************************
 BOOL OSLibWinIsIconic(HWND hwnd)
@@ -293,7 +290,13 @@ BOOL OSLibWinIsIconic(HWND hwnd)
 //******************************************************************************
 BOOL OSLibWinSetActiveWindow(HWND hwnd)
 {
-  return WinSetActiveWindow(HWND_DESKTOP, hwnd);
+ BOOL rc;
+
+  rc = WinSetActiveWindow(HWND_DESKTOP, hwnd);
+  if(rc == FALSE) {
+	dprintf(("WinSetActiveWindow %x failure: %x", hwnd, OSLibWinGetLastError()));
+  }
+  return rc;
 }
 //******************************************************************************
 //******************************************************************************
@@ -391,21 +394,20 @@ BOOL OSLibWinQueryWindowPos (HWND hwnd, PSWP pswp)
 }
 //******************************************************************************
 //******************************************************************************
-void OSLibMapSWPtoWINDOWPOS(PSWP pswp, PWINDOWPOS pwpos, PSWP pswpOld, HWND hParent, HWND hFrame)
+void OSLibMapSWPtoWINDOWPOS(PSWP pswp, PWINDOWPOS pwpos, PSWP pswpOld, 
+                            int parentHeight, int clientOrgX, int clientOrgY, 
+                            HWND hwnd)
 {
    HWND hWindow            = pswp->hwnd;
    HWND hWndInsertAfter    = pswp->hwndInsertBehind;
-   long x                  = pswp->x;
-   long y                  = pswp->y;
+   long x                  = pswp->x - clientOrgX;
+   long y                  = pswp->y + clientOrgY;
    long cx                 = pswp->cx;
    long cy                 = pswp->cy;
    UINT fuFlags            = (UINT)pswp->fl;
-   ULONG parentHeight;
 
    HWND   hWinAfter;
    ULONG  flags = 0;
-   SWP    swpFrame, swpClient;
-   POINTL point;
 
    HWND  hWnd = (hWindow == HWND_DESKTOP) ? HWND_DESKTOP_W: hWindow;
 
@@ -428,30 +430,9 @@ void OSLibMapSWPtoWINDOWPOS(PSWP pswp, PWINDOWPOS pwpos, PSWP pswpOld, HWND hPar
     if (  fuFlags & SWP_HIDE)        flags |= SWP_HIDEWINDOW_W;
     if (  fuFlags & SWP_NOADJUST)    flags |= SWP_NOSENDCHANGING_W;
 
-    WinQueryWindowPos(hFrame, &swpFrame);
-
     if(fuFlags & (SWP_MOVE | SWP_SIZE))
     {
-        point.x = swpFrame.x;
-        point.y = swpFrame.y;
-
-        if (hParent)
-        {
-          RECTL parentRect;
-
-          WinQueryWindowRect(hParent,&parentRect);
-          parentHeight = parentRect.yTop;
-        } else
-        {
-          parentHeight = ScreenHeight;
-        }
-
-        point.y = parentHeight-point.y-swpFrame.cy;
-
-        cy = swpFrame.cy;
-        cx = swpFrame.cx;
-        x  = point.x;
-        y  = point.y;
+        y  = parentHeight - y - pswp->cy;
 
         if ((pswp->x == pswpOld->x) && (pswp->y == pswpOld->y))
             flags |= SWP_NOMOVE_W;
@@ -469,7 +450,7 @@ void OSLibMapSWPtoWINDOWPOS(PSWP pswp, PWINDOWPOS pwpos, PSWP pswpOld, HWND hPar
     }
 
     pswpOld->x  = pswp->x;
-    pswpOld->y  = swpFrame.cy-pswp->y-pswp->cy;
+    pswpOld->y  = parentHeight-pswp->y-pswp->cy;
     pswpOld->cx = pswp->cx;
     pswpOld->cy = pswp->cy;
 
@@ -486,109 +467,18 @@ void OSLibMapSWPtoWINDOWPOS(PSWP pswp, PWINDOWPOS pwpos, PSWP pswpOld, HWND hPar
 }
 //******************************************************************************
 //******************************************************************************
-void OSLibMapSWPtoWINDOWPOSFrame(PSWP pswp, struct tagWINDOWPOS *pwpos, PSWP pswpOld, HWND hParent, HWND hFrame)
-{
-   HWND hWindow            = pswp->hwnd;
-   HWND hWndInsertAfter    = pswp->hwndInsertBehind;
-   long x                  = pswp->x;
-   long y                  = pswp->y;
-   long cx                 = pswp->cx;
-   long cy                 = pswp->cy;
-   UINT fuFlags            = (UINT)pswp->fl;
-   ULONG parentHeight;
-
-   HWND   hWinAfter;
-   ULONG  flags = 0;
-   SWP    swpClient;
-   POINTL point;
-
-   HWND  hWnd = (hWindow == HWND_DESKTOP) ? HWND_DESKTOP_W: hWindow;
-
-    if (hWndInsertAfter == HWND_TOP)
-        hWinAfter = HWND_TOP_W;
-    else if (hWndInsertAfter == HWND_BOTTOM)
-        hWinAfter = HWND_BOTTOM_W;
-    else
-        hWinAfter = (HWND) hWndInsertAfter;
-
-    //***********************************
-    // convert PM flags to Windows flags
-    //***********************************
-    if (!(fuFlags & SWP_SIZE))       flags |= SWP_NOSIZE_W;
-    if (!(fuFlags & SWP_MOVE))       flags |= SWP_NOMOVE_W;
-    if (!(fuFlags & SWP_ZORDER))     flags |= SWP_NOZORDER_W;
-    if (  fuFlags & SWP_NOREDRAW)    flags |= SWP_NOREDRAW_W;
-    if (!(fuFlags & SWP_ACTIVATE))   flags |= SWP_NOACTIVATE_W;
-    if (  fuFlags & SWP_SHOW)        flags |= SWP_SHOWWINDOW_W;
-    if (  fuFlags & SWP_HIDE)        flags |= SWP_HIDEWINDOW_W;
-    if (  fuFlags & SWP_NOADJUST)    flags |= SWP_NOSENDCHANGING_W;
-
-    WinQueryWindowPos(WinWindowFromID(hFrame, FID_CLIENT), &swpClient);
-
-    if(fuFlags & (SWP_MOVE | SWP_SIZE))
-    {
-        if (hParent)
-        {
-          RECTL parentRect;
-
-          WinQueryWindowRect(hParent,&parentRect);
-          parentHeight = parentRect.yTop;
-        } else
-        {
-          parentHeight = ScreenHeight;
-        }
-
-        point.x = x;
-        point.y = parentHeight-y-cy;
-
-        x  = point.x;
-        y  = point.y;
-
-        if ((pswp->x == pswpOld->x) && (pswp->y == pswpOld->y))
-            flags |= SWP_NOMOVE_W;
-
-        if ((pswp->cx == pswpOld->cx) && (pswp->cy == pswpOld->cy))
-            flags |= SWP_NOSIZE_W;
-
-        if (fuFlags & SWP_SIZE)
-        {
-            if (pswp->cy != pswpOld->cy)
-            {
-                flags &= ~SWP_NOMOVE_W;
-            }
-        }
-    }
-
-    pswpOld->x  = swpClient.x;
-    pswpOld->y  = pswp->cy-swpClient.y-swpClient.cy;
-    pswpOld->cx = swpClient.cx;
-    pswpOld->cy = swpClient.cy;
-
-    dprintf(("window (%d,%d)(%d,%d)  client (%d,%d)(%d,%d)",
-             x,y,cx,cy, pswpOld->x,pswpOld->y,pswpOld->cx,pswpOld->cy));
-
-    pwpos->flags            = (UINT)flags;
-    pwpos->cy               = cy;
-    pwpos->cx               = cx;
-    pwpos->x                = x;
-    pwpos->y                = y;
-    pwpos->hwndInsertAfter  = hWinAfter;
-    pwpos->hwnd             = hWindow;
-}
-//******************************************************************************
-//******************************************************************************
-void OSLibMapWINDOWPOStoSWP(PWINDOWPOS pwpos, PSWP pswp, PSWP pswpOld, HWND hParent, HWND hFrame)
+void OSLibMapWINDOWPOStoSWP(struct tagWINDOWPOS *pwpos, PSWP pswp, PSWP pswpOld, 
+                            int parentHeight, int clientOrgX, int clientOrgY, HWND hFrame)
 {
  BOOL fCvt = FALSE;
 
    HWND hWnd            = pwpos->hwnd;
    HWND hWndInsertAfter = pwpos->hwndInsertAfter;
-   long x               = pwpos->x;
-   long y               = pwpos->y;
+   long x               = pwpos->x + clientOrgX;
+   long y               = pwpos->y + clientOrgY;
    long cx              = pwpos->cx;
    long cy              = pwpos->cy;
    UINT fuFlags         = pwpos->flags;
-   ULONG parentHeight;
 
    HWND  hWinAfter;
    ULONG flags = 0;
@@ -616,22 +506,17 @@ void OSLibMapWINDOWPOStoSWP(PWINDOWPOS pwpos, PSWP pswp, PSWP pswpOld, HWND hPar
    if (  fuFlags & SWP_HIDEWINDOW_W)  flags |= SWP_HIDE;
    if (  fuFlags & SWP_NOSENDCHANGING_W) flags |= SWP_NOADJUST;
 
-   if (flags & (SWP_MOVE | SWP_SIZE))
+   if(flags & (SWP_MOVE | SWP_SIZE))
    {
-      if (hParent == NULLHANDLE)
-        parentHeight = ScreenHeight;
-      else
-        parentHeight = OSLibGetWindowHeight(hParent);
-
-      if ((flags & SWP_MOVE) == 0)
+      if((flags & SWP_MOVE) == 0)
       {
          x = pswpOld->x;
          y = pswpOld->y;
 
-         y = parentHeight-y-pswpOld->cy;
-      }
+         y = parentHeight - y - pswpOld->cy;
+     }
 
-      if (flags & SWP_SIZE)
+      if(flags & SWP_SIZE)
       {
          if (cy != pswpOld->cy)
             flags |= SWP_MOVE;
@@ -641,7 +526,7 @@ void OSLibMapWINDOWPOStoSWP(PWINDOWPOS pwpos, PSWP pswp, PSWP pswpOld, HWND hPar
          cx = pswpOld->cx;
          cy = pswpOld->cy;
       }
-      y  = parentHeight-y-cy;
+      y = parentHeight - y - cy;
 
       if ((pswpOld->x == x) && (pswpOld->y == y))
          flags &= ~SWP_MOVE;
@@ -663,90 +548,7 @@ void OSLibMapWINDOWPOStoSWP(PWINDOWPOS pwpos, PSWP pswp, PSWP pswpOld, HWND hPar
 //******************************************************************************
 //Position in screen coordinates
 //******************************************************************************
-void OSLibMapWINDOWPOStoSWPFrame(PWINDOWPOS pwpos, PSWP pswp, PSWP pswpOld, HWND hParent, HWND hFrame)
-{
- BOOL fCvt = FALSE;
-
-   HWND hWnd            = pwpos->hwnd;
-   HWND hWndInsertAfter = pwpos->hwndInsertAfter;
-   long x               = pwpos->x;
-   long y               = pwpos->y;
-   long cx              = pwpos->cx;
-   long cy              = pwpos->cy;
-   UINT fuFlags         = pwpos->flags;
-   ULONG parentHeight;
-
-   HWND  hWinAfter;
-   ULONG flags = 0;
-   HWND  hWindow = hWnd ? (HWND)hWnd : HWND_DESKTOP;
-
-   if (hWndInsertAfter == HWND_TOPMOST_W)
-//      hWinAfter = HWND_TOPMOST;
-      hWinAfter = HWND_TOP;
-   else if (hWndInsertAfter == HWND_NOTOPMOST_W)
-//      hWinAfter = HWND_NOTOPMOST;
-      hWinAfter = HWND_TOP;
-   else if (hWndInsertAfter == HWND_TOP_W)
-      hWinAfter = HWND_TOP;
-   else if (hWndInsertAfter == HWND_BOTTOM_W)
-      hWinAfter = HWND_BOTTOM;
-   else
-      hWinAfter = (HWND) hWndInsertAfter;
-
-   if (!(fuFlags & SWP_NOSIZE_W    )) flags |= SWP_SIZE;
-   if (!(fuFlags & SWP_NOMOVE_W    )) flags |= SWP_MOVE;
-   if (!(fuFlags & SWP_NOZORDER_W  )) flags |= SWP_ZORDER;
-   if (  fuFlags & SWP_NOREDRAW_W  )  flags |= SWP_NOREDRAW;
-   if (!(fuFlags & SWP_NOACTIVATE_W)) flags |= SWP_ACTIVATE;
-   if (  fuFlags & SWP_SHOWWINDOW_W)  flags |= SWP_SHOW;
-   if (  fuFlags & SWP_HIDEWINDOW_W)  flags |= SWP_HIDE;
-   if (  fuFlags & SWP_NOSENDCHANGING_W) flags |= SWP_NOADJUST;
-
-   if (flags & (SWP_MOVE | SWP_SIZE))
-   {
-      if (hParent)
-      {
-        RECTL parentRect;
-
-        WinQueryWindowRect(hParent,&parentRect);
-        parentHeight = parentRect.yTop;
-      } else
-      {
-        parentHeight = ScreenHeight;
-      }
-
-      if (flags & SWP_SIZE)
-      {
-         if (cy != pswpOld->cy)
-            flags |= SWP_MOVE;
-      }
-      else
-      {
-         cx = pswpOld->cx;
-         cy = pswpOld->cy;
-      }
-      y  = parentHeight-y-cy;
-
-      if ((pswpOld->x == x) && (pswpOld->y == y))
-         flags &= ~SWP_MOVE;
-
-      if ((pswpOld->cx == cx) && (pswpOld->cy == cy))
-         flags &= ~SWP_SIZE;
-   }
-
-   pswp->fl               = flags;
-   pswp->cy               = cy;
-   pswp->cx               = cx;
-   pswp->x                = x;
-   pswp->y                = y;
-   pswp->hwndInsertBehind = hWinAfter;
-   pswp->hwnd             = hWindow;
-   pswp->ulReserved1      = 0;
-   pswp->ulReserved2      = 0;
-}
-//******************************************************************************
-//******************************************************************************
-BOOL  OSLibWinCalcFrameRect(HWND hwndFrame, RECT *pRect, BOOL fClient)
+BOOL OSLibWinCalcFrameRect(HWND hwndFrame, RECT *pRect, BOOL fClient)
 {
  BOOL rc;
 
