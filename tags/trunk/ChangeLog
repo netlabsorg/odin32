@@ -1,4 +1,7 @@
- /* $Id: ChangeLog,v 1.128 1999-08-24 09:19:39 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.129 1999-08-24 11:45:27 phaller Exp $ */
+
+ 99-08-24: Patrick Haller <phaller@gmx.net>
+	- USER32:   added extended Open32 WinX control styles (OS2CTLWX)
 
  99-08-24: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32\NEW: One mutex per type of generic object + mutex protection
