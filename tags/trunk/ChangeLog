@@ -1,4 +1,9 @@
-/* $Id: ChangeLog,v 1.1558 2001-07-03 22:05:13 bird Exp $ */
+/* $Id: ChangeLog,v 1.1559 2001-07-04 06:37:35 sandervl Exp $ */
+
+ 2001-07-04: Sander van Leeuwen <sandervl@xs4all.nl>
+    - USER32:   o Partial implementation of ToAsciiEx (just calls ToAscii)
+                o VkKeyScanExA/W: call VkKeyScanA/W
+                o MapVirtualKeyExA/W: call MapVirtualKeyA/W
 
  2001-07-03: knut st. osmundsen <kosmunds@csc.com>
     - KERNEL32: o Improoved the Unhandled exception message by
