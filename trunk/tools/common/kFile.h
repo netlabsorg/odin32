@@ -1,4 +1,4 @@
-/* $Id: kFile.h,v 1.8 2001-04-17 00:26:10 bird Exp $
+/* $Id: kFile.h,v 1.9 2001-10-17 14:22:33 bird Exp $
  *
  * kFile - Simple (for the time being) file class.
  *
@@ -65,7 +65,7 @@ public:
     static void *   readFile(const char *pszFilename) throw(int);
     BOOL            readln(char *pszBuffer, long cchBuffer);
 
-    BOOL            write(void *pvBuffer, long cbBuffer) throw(int);
+    BOOL            write(const void *pv, long cb) throw(int);
     BOOL            writeAt(void *pvBuffer, long cbBuffer, long off) throw(int);
 
     int             printf(const char *pszFormat, ...) throw (int);
