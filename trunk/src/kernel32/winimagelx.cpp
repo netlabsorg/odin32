@@ -1,4 +1,4 @@
-/* $Id: winimagelx.cpp,v 1.7 2000-05-28 16:45:13 sandervl Exp $ */
+/* $Id: winimagelx.cpp,v 1.8 2000-06-28 18:08:35 sandervl Exp $ */
 
 /*
  * Win32 LX Image base class
@@ -55,7 +55,7 @@ Win32LxImage::Win32LxImage(HINSTANCE hInstance, PVOID pResData)
   setFullPath(szFileName);
 
   //Pointer to PE resource tree generates by wrc (or NULL for system dlls)
-  pResDir = (PIMAGE_RESOURCE_DIRECTORY)pResData;
+  pResRootDir = (PIMAGE_RESOURCE_DIRECTORY)pResData;
 
   //ulRVAResourceSection contains the virtual address of the imagebase in the PE header
   //for the resource section (images loaded by the pe.exe)

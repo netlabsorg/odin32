@@ -1,4 +1,4 @@
-/* $Id: winimagebase.cpp,v 1.22 2000-06-08 18:08:56 sandervl Exp $ */
+/* $Id: winimagebase.cpp,v 1.23 2000-06-28 18:08:35 sandervl Exp $ */
 
 /*
  * Win32 PE Image base class
@@ -46,7 +46,7 @@
 Win32ImageBase::Win32ImageBase(HINSTANCE hInstance) :
     errorState(NO_ERROR), entryPoint(0), fullpath(NULL),
     tlsAddress(0), tlsIndexAddr(0), tlsInitSize(0), tlsTotalSize(0),
-    tlsCallBackAddr(0), tlsIndex(-1), pResDir(NULL),
+    tlsCallBackAddr(0), tlsIndex(-1), pResRootDir(NULL),
     ulRVAResourceSection(0)
 {
   magic = MAGIC_WINIMAGE;

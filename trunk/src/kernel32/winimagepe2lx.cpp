@@ -1,4 +1,4 @@
-/* $Id: winimagepe2lx.cpp,v 1.10 2000-04-19 22:16:49 bird Exp $ */
+/* $Id: winimagepe2lx.cpp,v 1.11 2000-06-28 18:08:35 sandervl Exp $ */
 
 /*
  * Win32 PE2LX Image base class
@@ -173,7 +173,7 @@ Win32Pe2LxImage::~Win32Pe2LxImage()
  *            Validate the NT headers.
  *            Read the PE section table the set the RVAs in paSections.
  *            Locate and set the entrypoint.
- *            Locate the resource directory (if any). (pResDir, ulRVAResourceSection)
+ *            Locate the resource directory (if any). (pResRootDir, ulRVAResourceSection)
  *            TLS - FIXME!
  * @status    completely implemented.
  * @author    knut st. osmundsen
@@ -258,7 +258,7 @@ BOOL Win32Pe2LxImage::init()
         && pNtHdrs->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_RESOURCE].VirtualAddress > 0UL)
     {
         ulRVAResourceSection = pNtHdrs->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_RESOURCE].VirtualAddress;
-        pResDir = (PIMAGE_RESOURCE_DIRECTORY)getPointerFromRVA(ulRVAResourceSection);
+        pResRootDir = (PIMAGE_RESOURCE_DIRECTORY)getPointerFromRVA(ulRVAResourceSection);
     }
 
     /* TLS - Thread Local Storage */

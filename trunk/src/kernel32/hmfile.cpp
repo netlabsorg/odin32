@@ -1,4 +1,4 @@
-/* $Id: hmfile.cpp,v 1.6 2000-06-25 12:33:16 sandervl Exp $ */
+/* $Id: hmfile.cpp,v 1.7 2000-06-28 18:08:34 sandervl Exp $ */
 
 /*
  * File IO win32 apis
@@ -857,7 +857,7 @@ DWORD HMDeviceFileClass::SetFilePointer(PHMHANDLEDATA pHMHandleData,
  * Author    : Patrick Haller [Wed, 1999/06/17 20:44]
  *****************************************************************************/
 
-DWORD HMDeviceFileClass::LockFile(PHMHANDLEDATA pHMHandleData,
+BOOL HMDeviceFileClass::LockFile(PHMHANDLEDATA pHMHandleData,
                                   DWORD         dwFileOffsetLow,
                                   DWORD         dwFileOffsetHigh,
                                   DWORD         cbLockLow,
@@ -897,7 +897,7 @@ DWORD HMDeviceFileClass::LockFile(PHMHANDLEDATA pHMHandleData,
  * Author    : Patrick Haller [Wed, 1999/06/17 20:44]
  *****************************************************************************/
 
-DWORD HMDeviceFileClass::LockFileEx(PHMHANDLEDATA pHMHandleData,
+BOOL HMDeviceFileClass::LockFileEx(PHMHANDLEDATA pHMHandleData,
                                     DWORD         dwFlags,
                                     DWORD         dwReserved,
                                     DWORD         nNumberOfBytesToLockLow,
@@ -941,7 +941,7 @@ DWORD HMDeviceFileClass::LockFileEx(PHMHANDLEDATA pHMHandleData,
  * Author    : Patrick Haller [Wed, 1999/06/17 20:44]
  *****************************************************************************/
 
-DWORD HMDeviceFileClass::UnlockFile(PHMHANDLEDATA pHMHandleData,
+BOOL HMDeviceFileClass::UnlockFile(PHMHANDLEDATA pHMHandleData,
                                     DWORD         dwFileOffsetLow,
                                     DWORD         dwFileOffsetHigh,
                                     DWORD         cbLockLow,
@@ -982,11 +982,11 @@ DWORD HMDeviceFileClass::UnlockFile(PHMHANDLEDATA pHMHandleData,
  * Author    : Patrick Haller [Wed, 1999/06/17 20:44]
  *****************************************************************************/
 
-DWORD HMDeviceFileClass::UnlockFileEx(PHMHANDLEDATA pHMHandleData,
-                                      DWORD         dwReserved,
-                                      DWORD         nNumberOfBytesToLockLow,
-                                      DWORD         nNumberOfBytesToLockHigh,
-                                      LPOVERLAPPED  lpOverlapped)
+BOOL HMDeviceFileClass::UnlockFileEx(PHMHANDLEDATA pHMHandleData,
+                                     DWORD         dwReserved,
+                                     DWORD         nNumberOfBytesToLockLow,
+                                     DWORD         nNumberOfBytesToLockHigh,
+                                     LPOVERLAPPED  lpOverlapped)
 {
 
   dprintfl(("KERNEL32: HMDeviceFileClass::UnlockFileEx %s(%08xh,%08xh,%08xh,%08xh,%08xh) not completely implemented!",
