@@ -1,4 +1,4 @@
-/* $Id: KERNEL32.CPP,v 1.6 1999-06-17 21:52:00 phaller Exp $ */
+/* $Id: KERNEL32.CPP,v 1.7 1999-06-21 23:23:36 phaller Exp $ */
 
 /*
  *
@@ -719,8 +719,20 @@ LPWSTR WIN32API lstrcpyW(LPWSTR dest, LPCWSTR src)
 //******************************************************************************
 LPSTR WIN32API lstrcpynA(LPSTR arg1, LPCSTR  arg2, int arg3)
 {
-    dprintf(("KERNEL32:  OS2lstrcpy\n"));
-    return strncpy(arg1, arg2, arg3);
+  register LPSTR p1 = arg1;
+  register LPSTR p2 = (LPSTR)arg2;
+
+  dprintf(("KERNEL32: OS2lstrcpyA(%08xh, %08xh, %08xh)\n",
+           arg1,
+           arg2,
+           arg3));
+
+  //PH: looks like either \0 or arg3 terminate the copy
+  //return strncpy(arg1, arg2, arg3);
+  for (;*p2 && arg3; arg3--)
+    *p1++ = *p2++;
+
+  return arg1;
 }
 //******************************************************************************
 //******************************************************************************
