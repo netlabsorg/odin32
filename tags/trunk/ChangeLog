@@ -1,9 +1,14 @@
-/* $Id: ChangeLog,v 1.1560 2001-07-04 08:04:20 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.1561 2001-07-04 09:29:26 sandervl Exp $ */
 
  2001-07-04: Sander van Leeuwen <sandervl@xs4all.nl>
     - USER32:   o Partial implementation of ToAsciiEx (just calls ToAscii)
                 o VkKeyScanExA/W: call VkKeyScanA/W
                 o MapVirtualKeyExA/W: call MapVirtualKeyA/W
+                o SetParent bugfix; even though the win32 coordinates might 
+                  not change, the PM coordinates can. We must make sure the 
+                  child stays at the same position (y) relative to the 
+                  (new) parent.
+                  (Cool Edit Pro LE play buttons now at the right position)
     - GDI32:    o Workaround for applications that depend on 16 bits
                   GDI object handles.
                   (TODO: must create our own 16 bits handles)
