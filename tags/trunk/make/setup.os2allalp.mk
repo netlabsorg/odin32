@@ -1,4 +1,4 @@
-# $Id: setup.os2allalp.mk,v 1.2 2002-10-04 04:44:02 bird Exp $
+# $Id: setup.os2allalp.mk,v 1.3 2003-11-14 22:02:28 bird Exp $
 
 #
 # The tool(s)
@@ -50,10 +50,11 @@ _AS_OPTIONAL = $(_AS_MODE) $(_AS_DEBUG_TYPE)
 AS_FLAGS    = -D:OS2 \
 !if "$(BUILD_MODE)" != "RELEASE"
               -D:DEBUG \
-!endif         
+!endif
                -Mb $(_AS_OPTIONAL) \
                $(BUILD_DEFINES:-D=-D:) $(ALL_DEFINES:-D=-D:) $(AS_DEFINES:-D=-D:)\
                $(AS_INCLUDES:-I=-i:) $(ALL_INCLUDES:-I=-i:) -i:$(PATH_INCLUDES)
 AS_FLAGS_SYS= $(AS_FLAGS) -D:RING0
 AS_OBJ_OUT  = -Fo:
+AS_LST_OUT  = -Fl:
 
