@@ -1,4 +1,4 @@
-/* $Id: hmdevice.h,v 1.33 2003-01-10 12:57:13 sandervl Exp $ */
+/* $Id: hmdevice.h,v 1.34 2003-02-04 11:28:56 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -91,7 +91,7 @@ public:
                                  ULONG         arg3,
                                  ULONG         arg4);
 
-  virtual BOOL DuplicateHandle(PHMHANDLEDATA pHMHandleData, HANDLE  srcprocess,
+  virtual BOOL DuplicateHandle(HANDLE srchandle, PHMHANDLEDATA pHMHandleData, HANDLE  srcprocess,
                                PHMHANDLEDATA pHMSrcHandle,
                                HANDLE  destprocess,
                                PHANDLE desthandle,
@@ -396,6 +396,9 @@ public:
 
  virtual BOOL   GetThreadContext(HANDLE hThread, PHMHANDLEDATA pHMHandleData, PCONTEXT lpContext);
  virtual BOOL   SetThreadContext(HANDLE hThread, PHMHANDLEDATA pHMHandleData, const CONTEXT *lpContext);
+ virtual BOOL   GetThreadTimes(HANDLE hThread, PHMHANDLEDATA pHMHandleData,
+                               FILETIME *lpCreationTime, FILETIME *lpExitTime,
+                               FILETIME *lpKernelTime, FILETIME *lpUserTime);
 
  virtual BOOL   TerminateThread(HANDLE hThread, PHMHANDLEDATA pHMHandleData, DWORD exitcode);
  virtual DWORD  ResumeThread(HANDLE hThread, PHMHANDLEDATA pHMHandleData);

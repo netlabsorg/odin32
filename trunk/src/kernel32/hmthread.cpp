@@ -1,4 +1,4 @@
-/* $Id: hmthread.cpp,v 1.17 2003-01-13 16:51:39 sandervl Exp $ */
+/* $Id: hmthread.cpp,v 1.18 2003-02-04 11:29:00 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -40,6 +40,13 @@
 #include "dbglocal.h"
 
 
+typedef struct {
+  HANDLE hDupThread;	//original thread handle if duplicated
+  DWORD  dwState;       //THREAD_ALIVE, THREAD_TERMINATED
+} OBJ_THREAD;
+
+#define GET_THREADHANDLE(hThread) (threadobj && threadobj->hDupThread) ? threadobj->hDupThread : hThread
+
 //******************************************************************************
 //******************************************************************************
 HANDLE HMDeviceThreadClass::CreateThread(PHMHANDLEDATA          pHMHandleData,
@@ -59,13 +66,21 @@ HANDLE HMDeviceThreadClass::CreateThread(PHMHANDLEDATA          pHMHandleData,
         lpIDThread = &threadid;
     }
     pHMHandleData->dwInternalType = HMTYPE_THREAD;
-    pHMHandleData->dwUserData     = THREAD_ALIVE;
+    OBJ_THREAD *threadobj = (OBJ_THREAD *)malloc(sizeof(OBJ_THREAD));
+    if(threadobj == 0) {
+        DebugInt3();
+        SetLastError(ERROR_NOT_ENOUGH_MEMORY);
+        return(0);
+    }
+    threadobj->hDupThread = 0;	//not a duplicate
+    threadobj->dwState = THREAD_ALIVE;
+    pHMHandleData->dwUserData = (DWORD)threadobj;
 
     //SvL: This doesn't really create a thread, but only sets up the
     //     handle of thread 0
     if(fFirstThread) {
-	    pHMHandleData->hHMHandle = O32_GetCurrentThread(); //return Open32 handle of thread
-	    return pHMHandleData->hHMHandle;
+        pHMHandleData->hHMHandle = O32_GetCurrentThread(); //return Open32 handle of thread
+        return pHMHandleData->hHMHandle;
     }
     winthread = new Win32Thread(lpStartAddr, lpvThreadParm, fdwCreate, hThread);
 
@@ -111,13 +126,72 @@ HANDLE HMDeviceThreadClass::CreateThread(PHMHANDLEDATA          pHMHandleData,
   
     return pHMHandleData->hHMHandle;
 }
+/*****************************************************************************
+ * Name      : HMDeviceFileClass::DuplicateHandle
+ * Purpose   :
+ * Parameters:
+ *             various parameters as required
+ * Variables :
+ * Result    :
+ * Remark    : DUPLICATE_CLOSE_SOURCE flag handled in HMDuplicateHandle
+ *
+ * Status    : partially implemented
+ *
+ * Author    : SvL
+ *****************************************************************************/
+BOOL HMDeviceThreadClass::DuplicateHandle(HANDLE srchandle, PHMHANDLEDATA pHMHandleData,
+                                          HANDLE  srcprocess,
+                                          PHMHANDLEDATA pHMSrcHandle,
+                                          HANDLE  destprocess,
+                                          PHANDLE desthandle,
+                                          DWORD   fdwAccess,
+                                          BOOL    fInherit,
+                                          DWORD   fdwOptions,
+                                          DWORD   fdwOdinOptions)
+{
+  BOOL ret;
+  OBJ_THREAD *threadsrc = (OBJ_THREAD *)pHMSrcHandle->dwUserData;
+
+  dprintf(("KERNEL32:HMDeviceThreadClass::DuplicateHandle (%08x,%08x,%08x,%08x,%08x)",
+           pHMHandleData, srcprocess, pHMSrcHandle->hHMHandle, destprocess, desthandle));
+
+  if(destprocess != srcprocess)
+  {
+      dprintf(("ERROR: DuplicateHandle; different processes not supported!!"));
+      SetLastError(ERROR_INVALID_HANDLE); //??
+      return FALSE;
+  }
+  ret = O32_DuplicateHandle(srcprocess, pHMSrcHandle->hHMHandle, destprocess, desthandle, fdwAccess, fInherit, fdwOptions);
+
+  if(ret == TRUE) {
+       OBJ_THREAD *threaddest = (OBJ_THREAD *)malloc(sizeof(OBJ_THREAD));
+       if(threaddest == NULL) {
+           O32_CloseHandle(*desthandle);
+           SetLastError(ERROR_NOT_ENOUGH_MEMORY);
+           return FALSE;
+       }
+       threaddest->hDupThread = 0;
+       threaddest->dwState    = THREAD_ALIVE;
+       pHMHandleData->dwUserData = (DWORD)threaddest;
+
+       if(threadsrc) {
+           threaddest->hDupThread = (threadsrc->hDupThread) ? threadsrc->hDupThread : srchandle;
+           threaddest->dwState    = threadsrc->dwState;
+       }
+
+       pHMHandleData->hHMHandle = *desthandle;
+       return TRUE;
+  }
+  else return FALSE;
+}
 //******************************************************************************
 //******************************************************************************
 DWORD HMDeviceThreadClass::SuspendThread(HANDLE hThread, PHMHANDLEDATA pHMHandleData)
 {
     DWORD dwSuspend;
+    OBJ_THREAD *threadobj = (OBJ_THREAD *)pHMHandleData->dwUserData;
 
-    TEB *teb = GetTEBFromThreadHandle(hThread);
+    TEB *teb = GetTEBFromThreadHandle(GET_THREADHANDLE(hThread));
     if(teb) {
         teb->o.odin.dwSuspend++;
         dprintf(("SuspendThread %08xh): count %d", pHMHandleData->hHMHandle, teb->o.odin.dwSuspend));
@@ -134,7 +208,9 @@ DWORD HMDeviceThreadClass::SuspendThread(HANDLE hThread, PHMHANDLEDATA pHMHandle
 DWORD HMDeviceThreadClass::ResumeThread(HANDLE hThread, PHMHANDLEDATA pHMHandleData)
 {
     DWORD dwSuspend;
-    TEB *teb = GetTEBFromThreadHandle(hThread);
+    OBJ_THREAD *threadobj = (OBJ_THREAD *)pHMHandleData->dwUserData;
+
+    TEB *teb = GetTEBFromThreadHandle(GET_THREADHANDLE(hThread));
     if(teb) {
         teb->o.odin.dwSuspend--;
         dprintf(("ResumeThread (%08xh) : count %d", pHMHandleData->hHMHandle, teb->o.odin.dwSuspend));
@@ -150,11 +226,11 @@ DWORD HMDeviceThreadClass::ResumeThread(HANDLE hThread, PHMHANDLEDATA pHMHandleD
 //******************************************************************************
 INT HMDeviceThreadClass::GetThreadPriority(HANDLE hThread, PHMHANDLEDATA pHMHandleData)
 {
-    TEB *teb;
+    OBJ_THREAD *threadobj = (OBJ_THREAD *)pHMHandleData->dwUserData;
 
     dprintf(("GetThreadPriority(%08xh)\n", pHMHandleData->hHMHandle));
 
-    teb = GetTEBFromThreadHandle(hThread);
+    TEB *teb = GetTEBFromThreadHandle(GET_THREADHANDLE(hThread));
     if(teb == NULL) {
         dprintf(("!WARNING!: TEB not found!!"));
         SetLastError(ERROR_INVALID_HANDLE);
@@ -166,11 +242,11 @@ INT HMDeviceThreadClass::GetThreadPriority(HANDLE hThread, PHMHANDLEDATA pHMHand
 //******************************************************************************
 BOOL HMDeviceThreadClass::SetThreadPriority(HANDLE hThread, PHMHANDLEDATA pHMHandleData, int priority)
 {
-    TEB  *teb;
+    OBJ_THREAD *threadobj = (OBJ_THREAD *)pHMHandleData->dwUserData;
 
     dprintf(("SetThreadPriority (%08xh,%08xh)", pHMHandleData->hHMHandle, priority));
 
-    teb = GetTEBFromThreadHandle(hThread);
+    TEB *teb = GetTEBFromThreadHandle(GET_THREADHANDLE(hThread));
     if(teb == NULL) {
         dprintf(("!WARNING!: TEB not found!!"));
         SetLastError(ERROR_INVALID_HANDLE);
@@ -213,22 +289,65 @@ BOOL HMDeviceThreadClass::SetThreadContext(HANDLE hThread, PHMHANDLEDATA pHMHand
 
   return FALSE;
 }
+/*****************************************************************************
+ * Name      : BOOL GetThreadTimes
+ * Purpose   : The GetThreadTimes function obtains timing information about a specified thread.
+ * Parameters: HANDLE     hThread       specifies the thread of interest
+ *             LPFILETIME lpCreationTime when the thread was created
+ *             LPFILETIME lpExitTime     when the thread exited
+ *             LPFILETIME lpKernelTime   time the thread has spent in kernel mode
+ *             LPFILETIME lpUserTime     time the thread has spent in user mode
+ * Variables :
+ * Result    : TRUE / FALSE
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Mon, 1998/06/15 08:00]
+ *****************************************************************************/
+
+BOOL HMDeviceThreadClass::GetThreadTimes(HANDLE        hThread,
+                                         PHMHANDLEDATA pHMHandleData,
+                                         LPFILETIME lpCreationTime,
+                                         LPFILETIME lpExitTime,
+                                         LPFILETIME lpKernelTime,
+                                         LPFILETIME lpUserTime)
+{
+  dprintf(("Kernel32: GetThreadTimes(%08xh,%08xh,%08xh,%08xh,%08xh) not implemented.\n",
+           hThread,
+           lpCreationTime,
+           lpExitTime,
+           lpKernelTime,
+           lpUserTime));
+
+  return (FALSE);
+}
 //******************************************************************************
 //******************************************************************************
 BOOL HMDeviceThreadClass::TerminateThread(HANDLE hThread, PHMHANDLEDATA pHMHandleData, DWORD exitcode)
 {
+    OBJ_THREAD *threadobj = (OBJ_THREAD *)pHMHandleData->dwUserData;
+
     dprintf(("TerminateThread (%08xh,%08xh)\n",
              pHMHandleData->hHMHandle,
              exitcode));
 
-    pHMHandleData->dwUserData = THREAD_TERMINATED;
+    if(threadobj) {
+        threadobj->dwState = THREAD_TERMINATED;
+    }
+    else DebugInt3();
     return O32_TerminateThread(pHMHandleData->hHMHandle, exitcode);
 }
 //******************************************************************************
 //******************************************************************************
 BOOL HMDeviceThreadClass::SetThreadTerminated(HANDLE hThread, PHMHANDLEDATA pHMHandleData)
 {
-    pHMHandleData->dwUserData = THREAD_TERMINATED;
+    OBJ_THREAD *threadobj = (OBJ_THREAD *)pHMHandleData->dwUserData;
+
+    if(threadobj) {
+        threadobj->dwState = THREAD_TERMINATED;
+    }
+    else DebugInt3();
+
     return TRUE;
 }
 //******************************************************************************
@@ -240,10 +359,13 @@ BOOL HMDeviceThreadClass::GetExitCodeThread(HANDLE hThread, PHMHANDLEDATA pHMHan
              lpExitCode));
 
 #if 0
-    if(pHMHandleData->dwUserData == THREAD_ALIVE) {
+    OBJ_THREAD *threadobj = (OBJ_THREAD *)pHMHandleData->dwUserData;
+
+    if(threadobj && threadobj->dwState == THREAD_ALIVE) {
 	lpExitCode == STILL_ALIVE;
 	return TRUE;
     }
+    else DebugInt3();
 #endif
     return O32_GetExitCodeThread(pHMHandleData->hHMHandle, lpExitCode);
 }
@@ -251,7 +373,14 @@ BOOL HMDeviceThreadClass::GetExitCodeThread(HANDLE hThread, PHMHANDLEDATA pHMHan
 //******************************************************************************
 BOOL HMDeviceThreadClass::CloseHandle(PHMHANDLEDATA pHMHandleData)
 {
+    OBJ_THREAD *threadobj = (OBJ_THREAD *)pHMHandleData->dwUserData;
+
     dprintf(("HMThread::CloseHandle %08x", pHMHandleData->hHMHandle));
+
+    if(threadobj) {
+        pHMHandleData->dwUserData = 0;
+        free(threadobj);
+    }
     return O32_CloseHandle(pHMHandleData->hHMHandle);
 }
 //******************************************************************************
@@ -259,12 +388,14 @@ BOOL HMDeviceThreadClass::CloseHandle(PHMHANDLEDATA pHMHandleData)
 DWORD HMDeviceThreadClass::WaitForSingleObject(PHMHANDLEDATA pHMHandleData,
                                                DWORD  dwTimeout)
 {
+  OBJ_THREAD *threadobj = (OBJ_THREAD *)pHMHandleData->dwUserData;
+
   dprintf(("HMThread::WaitForSingleObject (%08xh,%08xh)\n",
            pHMHandleData->hHMHandle,
            dwTimeout));
   
   //This doesn't work very well in Open32 (object's state never signaled)
-  if(pHMHandleData->dwUserData == THREAD_TERMINATED) {
+  if(threadobj && threadobj->dwState == THREAD_TERMINATED) {
 	return WAIT_OBJECT_0;
   }
   return HMDeviceOpen32Class::WaitForSingleObject(pHMHandleData, dwTimeout);
@@ -275,7 +406,10 @@ DWORD HMDeviceThreadClass::WaitForSingleObjectEx(PHMHANDLEDATA pHMHandleData,
                                                  DWORD  dwTimeout,
                                                  BOOL   fAlertable)
 {
-  if(pHMHandleData->dwUserData == THREAD_TERMINATED) {
+  OBJ_THREAD *threadobj = (OBJ_THREAD *)pHMHandleData->dwUserData;
+
+  //This doesn't work very well in Open32 (object's state never signaled)
+  if(threadobj && threadobj->dwState == THREAD_TERMINATED) {
 	return WAIT_OBJECT_0;
   }
   return HMDeviceOpen32Class::WaitForSingleObjectEx(pHMHandleData, dwTimeout, fAlertable);

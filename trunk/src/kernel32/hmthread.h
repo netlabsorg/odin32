@@ -1,4 +1,4 @@
-/* $Id: hmthread.h,v 1.4 2001-12-03 12:13:09 sandervl Exp $ */
+/* $Id: hmthread.h,v 1.5 2003-02-04 11:29:01 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -45,8 +45,21 @@ public:
   virtual DWORD  SuspendThread(HANDLE hThread, PHMHANDLEDATA pHMHandleData);
   virtual BOOL   SetThreadPriority(HANDLE hThread, PHMHANDLEDATA pHMHandleData, int priority);
 
+  virtual BOOL DuplicateHandle(HANDLE srchandle, PHMHANDLEDATA pHMHandleData, HANDLE  srcprocess,
+                               PHMHANDLEDATA pHMSrcHandle,
+                               HANDLE  destprocess,
+                               PHANDLE desthandle,
+                               DWORD   fdwAccess,
+                               BOOL    fInherit,
+                               DWORD   fdwOptions,
+                               DWORD   fdwOdinOptions);
+
   virtual BOOL   GetThreadContext(HANDLE hThread, PHMHANDLEDATA pHMHandleData, PCONTEXT lpContext);
   virtual BOOL   SetThreadContext(HANDLE hThread, PHMHANDLEDATA pHMHandleData, const CONTEXT *lpContext);
+
+  virtual BOOL   GetThreadTimes(HANDLE hThread, PHMHANDLEDATA pHMHandleData,
+                                LPFILETIME lpCreationTime, LPFILETIME lpExitTime,
+                                LPFILETIME lpKernelTime, LPFILETIME lpUserTime);
  
   virtual BOOL   TerminateThread(HANDLE hThread, PHMHANDLEDATA pHMHandleData, DWORD exitcode);
   virtual DWORD  ResumeThread(HANDLE hThread, PHMHANDLEDATA pHMHandleData);

@@ -1,4 +1,4 @@
-/* $Id: hmdevice.cpp,v 1.33 2003-01-10 12:57:12 sandervl Exp $ */
+/* $Id: hmdevice.cpp,v 1.34 2003-02-04 11:28:56 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -134,7 +134,7 @@ DWORD  HMDeviceHandler::_DeviceRequest (PHMHANDLEDATA pHMHandleData,
  *
  * Author    : Patrick Haller [Wed, 1998/02/11 20:44]
  *****************************************************************************/
-BOOL HMDeviceHandler::DuplicateHandle(PHMHANDLEDATA pHMHandleData, HANDLE  srcprocess,
+BOOL HMDeviceHandler::DuplicateHandle(HANDLE srchandle, PHMHANDLEDATA pHMHandleData, HANDLE  srcprocess,
                                PHMHANDLEDATA pHMSrcHandle,
                                HANDLE  destprocess,
                                PHANDLE desthandle,
@@ -1506,6 +1506,33 @@ BOOL HMDeviceHandler::SetThreadContext(HANDLE hThread, PHMHANDLEDATA pHMHandleDa
 
   return FALSE;
 }
+/*****************************************************************************
+ * Name      : DWORD HMDeviceHandler::SetThreadContext
+ * Purpose   :
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    :
+ *
+ * Author    : SvL
+ *****************************************************************************/
+BOOL HMDeviceHandler::GetThreadTimes(HANDLE        hThread,
+                                     PHMHANDLEDATA pHMHandleData,
+                                     LPFILETIME lpCreationTime,
+                                     LPFILETIME lpExitTime,
+                                     LPFILETIME lpKernelTime,
+                                     LPFILETIME lpUserTime)
+{
+  dprintf(("Kernel32: ERROR: GetThreadTimes(%08xh,%08xh,%08xh,%08xh,%08xh) not implemented.\n",
+           hThread,
+           lpCreationTime,
+           lpExitTime,
+           lpKernelTime,
+           lpUserTime));
+
+  return FALSE;
+}
+
 /*****************************************************************************
  * Name      : DWORD HMDeviceHandler::TerminateThread
  * Purpose   :

@@ -1,4 +1,4 @@
-/* $Id: hmopen32.cpp,v 1.29 2001-04-26 13:22:47 sandervl Exp $ */
+/* $Id: hmopen32.cpp,v 1.30 2003-02-04 11:28:59 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -110,7 +110,7 @@ BOOL HMDeviceOpen32Class::CloseHandle(PHMHANDLEDATA pHMHandleData)
  *
  * Author    : Patrick Haller [Wed, 1998/02/11 20:44]
  *****************************************************************************/
-BOOL HMDeviceOpen32Class::DuplicateHandle(PHMHANDLEDATA pHMHandleData, HANDLE  srcprocess,
+BOOL HMDeviceOpen32Class::DuplicateHandle(HANDLE srchandle, PHMHANDLEDATA pHMHandleData, HANDLE  srcprocess,
                                PHMHANDLEDATA pHMSrcHandle,
                                HANDLE  destprocess,
                                PHANDLE desthandle,

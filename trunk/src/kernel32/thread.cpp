@@ -1,4 +1,4 @@
-/* $Id: thread.cpp,v 1.49 2003-01-20 10:46:28 sandervl Exp $ */
+/* $Id: thread.cpp,v 1.50 2003-02-04 11:29:03 sandervl Exp $ */
 
 /*
  * Win32 Thread API functions
@@ -64,6 +64,7 @@ HANDLE WIN32API GetCurrentThread()
 
     teb = GetThreadTEB();
     if(teb == 0) {
+        DebugInt3();
     	SetLastError(ERROR_INVALID_HANDLE); //todo 
     	return 0;
     }

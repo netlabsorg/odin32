@@ -1,4 +1,4 @@
-/* $Id: hmopen32.h,v 1.8 2001-04-26 13:22:47 sandervl Exp $ */
+/* $Id: hmopen32.h,v 1.9 2003-02-04 11:28:59 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -41,7 +41,7 @@ public:
                                  ULONG         arg3,
                                  ULONG         arg4);
 
-  virtual BOOL DuplicateHandle(PHMHANDLEDATA pHMHandleData, HANDLE  srcprocess,
+  virtual BOOL DuplicateHandle(HANDLE srchandle, PHMHANDLEDATA pHMHandleData, HANDLE  srcprocess,
                                PHMHANDLEDATA pHMSrcHandle,
                                HANDLE  destprocess,
                                PHANDLE desthandle,

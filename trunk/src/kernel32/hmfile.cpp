@@ -1,4 +1,4 @@
-/* $Id: hmfile.cpp,v 1.38 2003-01-10 12:57:13 sandervl Exp $ */
+/* $Id: hmfile.cpp,v 1.39 2003-02-04 11:28:57 sandervl Exp $ */
 
 /*
  * File IO win32 apis
@@ -304,7 +304,7 @@ DWORD HMDeviceFileClass::OpenFile (LPCSTR        lpszFileName,
  *
  * Author    : SvL
  *****************************************************************************/
-BOOL HMDeviceFileClass::DuplicateHandle(PHMHANDLEDATA pHMHandleData,
+BOOL HMDeviceFileClass::DuplicateHandle(HANDLE srchandle, PHMHANDLEDATA pHMHandleData,
                                         HANDLE  srcprocess,
                                         PHMHANDLEDATA pHMSrcHandle,
                                         HANDLE  destprocess,
