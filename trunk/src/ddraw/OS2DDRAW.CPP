@@ -1,4 +1,4 @@
-/* $Id: OS2DDRAW.CPP,v 1.33 2002-02-17 20:40:04 sandervl Exp $ */
+/* $Id: OS2DDRAW.CPP,v 1.34 2002-03-22 13:49:54 sandervl Exp $ */
 
 /*
  * DX Draw base class implementation
@@ -224,30 +224,30 @@ OS2IDirectDraw::OS2IDirectDraw(GUID *lpGUID) :
   else
     bScale = FALSE;
 
-  rc = InitIO();
-
-  if(rc)  // try to get IOPL for the thread
+  // Check to see if FS DDraw is enabled in ODIN.INI
+  if (PROFILE_GetOdinIniBool(ODINDDRAW_SECTION, "Fullscreen", FALSE)) 
   {
-    dprintf(("DDRAW: No IOPL"));
-  }
-  else
-  {
-    dprintf(("DDRAW: IOPL 3!"));
-  }
+      rc = InitIO();
 
+      if(rc)  // try to get IOPL for the thread
+      {
+          dprintf(("DDRAW: No IOPL"));
+      }
+      else
+      {
+          dprintf(("DDRAW: IOPL 3!"));
+      }
 
-	// Check to see if FS DDraw is enabled in ODIN.INI
-	if (PROFILE_GetOdinIniBool(ODINDDRAW_SECTION, "Fullscreen", FALSE)) {
-		rc = LoadPMIService();
-		dprintf(("DDRAW: LoadPMIService() rc=0x%08X",rc));
+      rc = LoadPMIService();
+      dprintf(("DDRAW: LoadPMIService() rc=0x%08X",rc));
 		
-		if (!rc) {
-			SetUpModeTable();
+      if (!rc) {
+          SetUpModeTable();
 			
-			bUseFSDD = TRUE;
-			dprintf(("DDRAW: Fullscreen enabled",rc));
-		}	
-	}	
+   	  bUseFSDD = TRUE;
+          dprintf(("DDRAW: Fullscreen enabled",rc));
+      }	
+  }	
 }
 //******************************************************************************
 //******************************************************************************
