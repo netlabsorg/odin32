@@ -1,4 +1,4 @@
-/* $Id: profile.cpp,v 1.29 2001-06-08 11:04:24 sandervl Exp $ */
+/* $Id: profile.cpp,v 1.30 2001-06-09 19:46:01 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -252,7 +252,7 @@ static PROFILESECTION *PROFILE_Load( FILE *file )
                 next_key      = &section->key;
                 prev_key      = NULL;
 
-                dprintf(("Kernel32:Profile:New section: '%s'\n",section->name));
+                dprintf2(("Kernel32:Profile:New section: '%s'\n",section->name));
 
                 continue;
             }
@@ -279,7 +279,7 @@ static PROFILESECTION *PROFILE_Load( FILE *file )
            next_key   = &key->next;
            prev_key   = key;
 
-           dprintf(("Kernel32:Profile:New key: name='%s', value='%s'\n",key->name,key->value?key->value:"(none)"));
+           dprintf2(("Kernel32:Profile:New key: name='%s', value='%s'\n",key->name,key->value?key->value:"(none)"));
           }
     }
     return first_section;

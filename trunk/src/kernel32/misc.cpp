@@ -1,4 +1,4 @@
-/* $Id: misc.cpp,v 1.36 2001-04-29 15:44:48 sandervl Exp $ */
+/* $Id: misc.cpp,v 1.37 2001-06-09 19:46:00 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -251,7 +251,7 @@ static int  oldcrtmsghandle = 0;
 
 static BOOL fDisableThread[5] = {0};
 
-#define CHECK_ODINHEAP
+//#define CHECK_ODINHEAP
 #if defined(DEBUG) && defined(CHECK_ODINHEAP)
 int checkOdinHeap = 1;
 int checkingheap = 0;
