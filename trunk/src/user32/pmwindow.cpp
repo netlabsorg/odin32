@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.25 1999-10-12 14:47:22 sandervl Exp $ */
+/* $Id: pmwindow.cpp,v 1.26 1999-10-14 09:22:40 sandervl Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -167,10 +167,10 @@ BOOL InitPM()
 //******************************************************************************
 MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
 {
- POSTMSG_PACKET *postmsg;
- OSLIBPOINT      point, ClientPoint;
- Win32BaseWindow    *win32wnd;
- APIRET          rc;
+ POSTMSG_PACKET  *postmsg;
+ OSLIBPOINT       point, ClientPoint;
+ Win32BaseWindow *win32wnd;
+ APIRET           rc;
 
   //Restore our FS selector
   SetWin32TIB();
@@ -189,10 +189,26 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
   {
     //OS/2 msgs
     case WM_CREATE:
+    {
+     THDB *thdb = GetThreadTHDB();
+
+        if(thdb == NULL || thdb->newWindow == 0)
+            goto createfail;
+
         //Processing is done in after WinCreateWindow returns
         dprintf(("OS2: WM_CREATE %x", hwnd));
+        win32wnd = (Win32BaseWindow *)thdb->newWindow;
+
+        if(win32wnd->MsgCreate(WinQueryWindow(hwnd, QW_PARENT), hwnd) == FALSE)
+        {
+            delete win32wnd;
+            RestoreOS2TIB();
+            return (MRESULT)TRUE; //discontinue window creation
+        }
+    createfail:
         RestoreOS2TIB();
         return (MRESULT)FALSE;
+    }
 
     case WM_QUIT:
         dprintf(("OS2: WM_QUIT %x", hwnd));
@@ -284,6 +300,16 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
                 hFrame = win32wnd->getOS2FrameWindowHandle();
         }
         OSLibMapSWPtoWINDOWPOS(pswp, &wp, pswpo, hParent, hFrame);
+
+	SWP swpFrame;
+        WinQueryWindowPos(win32wnd->getOS2FrameWindowHandle(), &swpFrame);
+        dprintf(("WINDOWPOSCHANGE %x %x %x (%d,%d) (%d,%d)", win32wnd->getWindowHandle(), win32wnd->getOS2FrameWindowHandle(),
+                         swpFrame.fl,swpFrame.x, swpFrame.y, swpFrame.cx, swpFrame.cy));
+
+	RECTL rect;
+        WinQueryWindowRect(win32wnd->getOS2FrameWindowHandle(), &rect);
+        dprintf(("WINDOWPOSCHANGE %x %x (%d,%d) (%d,%d)", win32wnd->getWindowHandle(), win32wnd->getOS2FrameWindowHandle(),
+                         rect.xLeft, rect.yBottom, rect.xRight, rect.yTop));
 
         win32wnd->setWindowRect(wp.x, wp.y, wp.x + wp.cx, wp.y + wp.cy);
         win32wnd->setClientRect(pswpo->x, pswpo->y, pswpo->x + pswpo->cx, pswpo->y + pswpo->cy);

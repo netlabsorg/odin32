@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.40 1999-10-13 14:24:27 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.41 1999-10-14 09:22:42 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -39,6 +39,7 @@
 #include "dc.h"
 #include "pmframe.h"
 #include "win32wdesktop.h"
+#include <wprocess.h>
 
 #define HAS_DLGFRAME(style,exStyle) \
     (((exStyle) & WS_EX_DLGMODALFRAME) || \
@@ -95,10 +96,10 @@ Win32BaseWindow::Win32BaseWindow(CREATESTRUCTA *lpCreateStructA, ATOM classAtom,
 void Win32BaseWindow::Init()
 {
   isUnicode        = FALSE;
-  fCreated         = FALSE;
   fFirstShow       = TRUE;
   fIsDialog        = FALSE;
   fInternalMsg     = FALSE;
+  fNoSizeMsg       = FALSE;
 
   windowNameA      = NULL;
   windowNameW      = NULL;
@@ -202,13 +203,13 @@ BOOL Win32BaseWindow::isChild()
 BOOL Win32BaseWindow::CreateWindowExA(CREATESTRUCTA *cs, ATOM classAtom)
 {
  char  buffer[256];
- INT   sw = SW_SHOW;
  POINT maxSize, maxPos, minTrack, maxTrack;
 
 #ifdef DEBUG
     PrintWindowStyle(cs->style, cs->dwExStyle);
 #endif
 
+    sw = SW_SHOW;
     SetLastError(0);
 
     /* Find the parent window */
@@ -462,16 +463,26 @@ BOOL Win32BaseWindow::CreateWindowExA(CREATESTRUCTA *cs, ATOM classAtom)
   rectWindow.bottom = cs->y + cs->cy;
   rectClient        = rectWindow;
 
-//CB: dwOSFrameStyle handled by OSLibWinConvertStyle
-//    OSLibWinCreateWindow: perhaps problems
-//    shouldn't we always use a frame? -> no problems with scrollbars
-
   if(HIWORD(cs->lpszName))
   {
         if(isUnicode)
                 SetWindowTextW((LPWSTR)cs->lpszName);
         else    SetWindowTextA((LPSTR)cs->lpszName);
   }
+
+  //copy pointer of CREATESTRUCT for usage in MsgCreate method
+  tmpcs = cs;
+
+  //Store our window object pointer in thread local memory, so PMWINDOW.CPP can retrieve it
+  THDB *thdb = GetThreadTHDB();
+
+  if(thdb == NULL) {
+        dprintf(("Window creation failed - thdb == NULL")); //this is VERY bad
+        ExitProcess(666);
+        return FALSE;
+  }
+
+  thdb->newWindow = (ULONG)this;
 
   OS2Hwnd = OSLibWinCreateWindow((getParent()) ? getParent()->getOS2WindowHandle() : OSLIB_HWND_DESKTOP,
                                  dwOSWinStyle, dwOSFrameStyle, (char *)windowNameA,
@@ -484,6 +495,20 @@ BOOL Win32BaseWindow::CreateWindowExA(CREATESTRUCTA *cs, ATOM classAtom)
         SetLastError(ERROR_OUTOFMEMORY); //TODO: Better error
         return FALSE;
   }
+  SetLastError(0);
+  return TRUE;
+}
+//******************************************************************************
+//******************************************************************************
+BOOL Win32BaseWindow::MsgCreate(HWND hwndFrame, HWND hwndClient)
+{
+ POINT maxPos;
+ CREATESTRUCTA  *cs = tmpcs;  //pointer to CREATESTRUCT used in CreateWindowExA method
+
+  OS2Hwnd      = hwndClient;
+  OS2HwndFrame = hwndFrame;
+//  if(!isFrameWindow())
+//        OS2HwndFrame = hwndClient;
 
   if(OSLibWinSetWindowULong(OS2Hwnd, OFFSET_WIN32WNDPTR, (ULONG)this) == FALSE) {
         dprintf(("WM_CREATE: WinSetWindowULong %X failed!!", OS2Hwnd));
@@ -522,15 +547,15 @@ BOOL Win32BaseWindow::CreateWindowExA(CREATESTRUCTA *cs, ATOM classAtom)
   }
 #endif
 
-  if (cs->style & WS_HSCROLL)
+  if (dwStyle & WS_HSCROLL)
   {
         hwndHorzScroll = OSLibWinQueryScrollBarHandle(OS2HwndFrame, OSLIB_HSCROLL);
-        OSLibWinShowScrollBar(OS2HwndFrame, hwndHorzScroll, OSLIB_HSCROLL, FALSE, TRUE);
+//        OSLibWinShowScrollBar(OS2HwndFrame, hwndHorzScroll, OSLIB_HSCROLL, FALSE, TRUE);
   }
 
-  if (cs->style & WS_VSCROLL) {
+  if (dwStyle & WS_VSCROLL) {
         hwndVertScroll = OSLibWinQueryScrollBarHandle(OS2HwndFrame, OSLIB_VSCROLL);
-        OSLibWinShowScrollBar(OS2HwndFrame, hwndVertScroll, OSLIB_VSCROLL, FALSE, TRUE);
+//        OSLibWinShowScrollBar(OS2HwndFrame, hwndVertScroll, OSLIB_VSCROLL, FALSE, TRUE);
   }
 
   fakeWinBase.hwndThis     = OS2Hwnd;
@@ -558,6 +583,21 @@ BOOL Win32BaseWindow::CreateWindowExA(CREATESTRUCTA *cs, ATOM classAtom)
   if(windowClass->getIcon())
         SetIcon(windowClass->getIcon());
 
+  //Subclass frame
+  if(isFrameWindow() && (HAS_3DFRAME(dwExStyle) ||
+     (!HAS_DLGFRAME(dwStyle, dwExStyle) && (dwStyle & (WS_DLGFRAME|WS_BORDER|WS_THICKFRAME)) == WS_BORDER)))
+  {
+        pOldFrameProc = FrameSubclassFrameWindow(this);
+        if (isChild()) FrameSetBorderSize(this,TRUE);
+  }
+
+  /* Send the WM_CREATE message
+   * Perhaps we shouldn't allow width/height changes as well.
+   * See p327 in "Internals".
+   */
+  maxPos.x = rectWindow.left; maxPos.y = rectWindow.top;
+
+  fNoSizeMsg = TRUE;
   if(getParent()) {
         SetWindowPos(getParent()->getWindowHandle(), rectClient.left, rectClient.top,
                      rectClient.right-rectClient.left,
@@ -570,27 +610,10 @@ BOOL Win32BaseWindow::CreateWindowExA(CREATESTRUCTA *cs, ATOM classAtom)
                      rectClient.bottom-rectClient.top,
                      SWP_NOACTIVATE);
   }
-
-  //Subclass frame
-  if(isFrameWindow() && (HAS_3DFRAME(dwExStyle) ||
-     (!HAS_DLGFRAME(dwStyle, dwExStyle) && (dwStyle & (WS_DLGFRAME|WS_BORDER|WS_THICKFRAME)) == WS_BORDER)))
-  {
-        pOldFrameProc = FrameSubclassFrameWindow(this);
-        if (isChild()) FrameSetBorderSize(this,TRUE);
-  }
-
-  //Get the client window rectangle
-  GetClientRect(Win32Hwnd, &rectClient);
-
-  /* Send the WM_CREATE message
-   * Perhaps we shouldn't allow width/height changes as well.
-   * See p327 in "Internals".
-   */
-  maxPos.x = rectWindow.left; maxPos.y = rectWindow.top;
+  fNoSizeMsg = FALSE;
 
   if(SendMessageA(WM_NCCREATE, 0, (LPARAM)cs) )
   {
-        fCreated = TRUE; //Allow WM_SIZE messages now
         SendNCCalcSize(FALSE, &rectWindow, NULL, NULL, 0, &rectClient );
 
         OffsetRect(&rectWindow, maxPos.x - rectWindow.left, maxPos.y - rectWindow.top);
@@ -603,6 +626,7 @@ BOOL Win32BaseWindow::CreateWindowExA(CREATESTRUCTA *cs, ATOM classAtom)
                                          rectClient.bottom-rectClient.top));
                 SendMessageA(WM_MOVE, 0, MAKELONG( rectClient.left, rectClient.top ) );
             }
+
             if (cs->style & WS_VISIBLE) ShowWindow( sw );
 
 #if 0
@@ -616,19 +640,8 @@ BOOL Win32BaseWindow::CreateWindowExA(CREATESTRUCTA *cs, ATOM classAtom)
         }
   }
   dprintf(("Window creation FAILED (NCCREATE cancelled creation)"));
-  fCreated = FALSE;
-  OSLibWinSetWindowULong(OS2Hwnd, OFFSET_WIN32WNDPTR, 0);
-  OSLibWinSetWindowULong(OS2Hwnd, OFFSET_WIN32PM_MAGIC, 0);
-  DestroyWindow();
   SetLastError(ERROR_OUTOFMEMORY); //TODO: Better error
   return FALSE;
-}
-//******************************************************************************
-//******************************************************************************
-ULONG Win32BaseWindow::MsgCreate(HWND hwndOS2, ULONG initParam)
-{
-  OS2Hwnd = hwndOS2;
-  return SendInternalMessageA(WM_CREATE, 0, initParam);
 }
 //******************************************************************************
 //******************************************************************************
@@ -679,11 +692,9 @@ ULONG Win32BaseWindow::MsgShow(BOOL fShow)
 ULONG Win32BaseWindow::MsgPosChanging(LPARAM lp)
 {
     dprintf(("MsgPosChanging"));
-#if 1
-    if(fCreated == FALSE) {
+    if(fNoSizeMsg)
         return 1;
-    }
-#endif
+
     return SendInternalMessageA(WM_WINDOWPOSCHANGING, 0, lp);
 }
 //******************************************************************************
@@ -691,11 +702,9 @@ ULONG Win32BaseWindow::MsgPosChanging(LPARAM lp)
 ULONG Win32BaseWindow::MsgPosChanged(LPARAM lp)
 {
     dprintf(("MsgPosChanged"));
-#if 1
-    if(fCreated == FALSE) {
+    if(fNoSizeMsg)
         return 1;
-    }
-#endif
+
     return SendInternalMessageA(WM_WINDOWPOSCHANGED, 0, lp);
 }
 //******************************************************************************
@@ -703,9 +712,8 @@ ULONG Win32BaseWindow::MsgPosChanged(LPARAM lp)
 ULONG Win32BaseWindow::MsgMove(ULONG x, ULONG y)
 {
     dprintf(("MsgMove to (%d,%d)", x, y));
-    if(fCreated == FALSE) {
+    if(fNoSizeMsg)
         return 1;
-    }
 
     return SendInternalMessageA(WM_MOVE, 0, MAKELONG((USHORT)x, (USHORT)y));
 }
@@ -754,10 +762,6 @@ ULONG Win32BaseWindow::MsgHitTest(ULONG x, ULONG y)
 ULONG Win32BaseWindow::MsgSize(ULONG width, ULONG height, BOOL fMinimize, BOOL fMaximize)
 {
  WORD fwSizeType = 0;
-
-    if(fCreated == FALSE) {//Solitaire crashes if it receives a WM_SIZE during CreateWindowEx (normal or our fault?)
-        return 1;
-    }
 
     if(fMinimize) {
             fwSizeType = SIZE_MINIMIZED;
@@ -1114,6 +1118,15 @@ BOOL Win32BaseWindow::isMDIClient()
     return FALSE;
 }
 //******************************************************************************
+//******************************************************************************
+BOOL Win32BaseWindow::isFrameWindow()
+{
+    if((getParent() == NULL || getParent() == windowDesktop) && ((dwStyle & WS_CAPTION) == WS_CAPTION))
+        return TRUE;
+
+    return FALSE;
+}
+//******************************************************************************
 //TODO: Not complete (flags)
 //******************************************************************************
 SCROLLBAR_INFO *Win32BaseWindow::getScrollInfo(int nBar)
@@ -1175,6 +1188,7 @@ LONG Win32BaseWindow::setScrollInfo(int nBar, SCROLLINFO *info, int fRedraw)
         if( infoPtr->Page != info->nPage )
         {
             infoPtr->Page = info->nPage;
+            dprintf(("SetScrollInfo: Set pagesize to %d", info->nPage));
             OSLibWinSetScrollPageSize(OS2HwndFrame, hwndScroll, info->nPage, infoPtr->MaxVal, fRedraw);
         }
     }
@@ -1185,6 +1199,7 @@ LONG Win32BaseWindow::setScrollInfo(int nBar, SCROLLINFO *info, int fRedraw)
         if( infoPtr->CurVal != info->nPos )
         {
             infoPtr->CurVal = info->nPos;
+            dprintf(("SetScrollInfo: Set scroll position to %d", info->nPos));
             OSLibWinSetScrollPos(OS2HwndFrame, hwndScroll, info->nPos, fRedraw);
         }
     }
@@ -1207,6 +1222,7 @@ LONG Win32BaseWindow::setScrollInfo(int nBar, SCROLLINFO *info, int fRedraw)
                 infoPtr->MinVal = info->nMin;
                 infoPtr->MaxVal = info->nMax;
 
+                dprintf(("SetScrollInfo: Set scroll range to (%d,%d)", info->nMin, info->nMax));
                 OSLibWinSetScrollRange(OS2HwndFrame, hwndScroll, info->nMin, info->nMax, fRedraw);
             }
         }
@@ -1983,21 +1999,27 @@ BOOL Win32BaseWindow::SetWindowPos(HWND hwndInsertAfter, int x, int y, int cx, i
        if (isChild())
        {
            hParent = getParent()->getOS2WindowHandle();
-           OSLibWinQueryWindowPos(isFrameWindow() ? OS2HwndFrame:OS2Hwnd, &swpOld);
        }
-       else
-           OSLibWinQueryWindowPos(OS2HwndFrame, &swpOld);
+       OSLibWinQueryWindowPos(OS2HwndFrame, &swpOld);
    }
 
    OSLibMapWINDOWPOStoSWP(&wpos, &swp, &swpOld, hParent, OS2HwndFrame);
    if (swp.fl == 0)
       return TRUE;
 
-   if ((swp.fl & SWPOS_ZORDER) && (swp.hwndInsertBehind > HWNDOS_BOTTOM))
+//   if ((swp.fl & SWPOS_ZORDER) && (swp.hwndInsertBehind > HWNDOS_BOTTOM))
+   if ((swp.hwndInsertBehind > HWNDOS_BOTTOM))
    {
-      Win32BaseWindow *wndBehind = Win32BaseWindow::GetWindowFromHandle(swp.hwndInsertBehind);
-      swp.hwndInsertBehind   = wndBehind->getOS2WindowHandle();
+        Win32BaseWindow *wndBehind = Win32BaseWindow::GetWindowFromHandle(swp.hwndInsertBehind);
+        if(wndBehind) {
+            swp.hwndInsertBehind   = wndBehind->getOS2WindowHandle();
+        }
+        else {
+            dprintf(("ERROR: SetWindowPos: hwndInsertBehind %x invalid!",swp.hwndInsertBehind));
+            swp.hwndInsertBehind = 0;
+        }
    }
+#if 0
    if (isFrameWindow())
    {
       if (!isChild())
@@ -2014,7 +2036,8 @@ BOOL Win32BaseWindow::SetWindowPos(HWND hwndInsertAfter, int x, int y, int cx, i
       swp.hwnd = OS2HwndFrame;
    }
    else
-      swp.hwnd = OS2Hwnd;
+#endif
+      swp.hwnd = OS2HwndFrame;
 
    dprintf (("WinSetWindowPos %x %x (%d,%d)(%d,%d) %x", swp.hwnd, swp.hwndInsertBehind, swp.x, swp.y, swp.cx, swp.cy, swp.fl));
 
