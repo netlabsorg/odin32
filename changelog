@@ -1,4 +1,7 @@
- /* $Id: changelog,v 1.280 1999-10-07 13:03:08 achimha Exp $ */
+ /* $Id: changelog,v 1.281 1999-10-07 15:44:43 cbratschi Exp $ */
+
+ 99-10-07: Christoph Bratschi <cbratschi@datacomm.ch>
+	- USER32: GetCaretPos() fix
 
  99-10-07: Achim Hasenmueller <achimha@innotek.de>
         - USER32: Corrected pageup/pagedown behavior
