@@ -1,4 +1,4 @@
-/* $Id: odin.cmd,v 1.34 2001-07-19 20:17:02 sandervl Exp $
+/* $Id: odin.cmd,v 1.35 2001-08-07 21:33:09 sandervl Exp $
  *
  * Odin32 API WarpIn installation script generator.
  *
@@ -133,6 +133,11 @@ rc = lineout(sInstFile, '<HEAD>');
 rc = lineout(sInstFile, '<TITLE>Odin32 'sType' - 'sVer'</TITLE>');
 rc = lineout(sInstFile, '<PCK INDEX=1');
 rc = lineout(sInstFile, '     PACKAGEID="Odin\Odin\Odin Core Files\'sPackVer'"');
+rc = lineout(sInstFile, '     CREATEOBJECT="WPFolder|Odin|<WP_DESKTOP>|OBJECTID=<ODINFOLDER>;"');
+rc = lineout(sInstFile, '     CREATEOBJECT="WPProgram|Readme|<ODINFOLDER>|EXENAME=E.EXE;PARAMETERS=$(1)\Readme.txt"');
+rc = lineout(sInstFile, '     CREATEOBJECT="WPProgram|ChangeLog|<ODINFOLDER>|EXENAME=E.EXE;PARAMETERS=$(1)\ChangeLog"');
+rc = lineout(sInstFile, '     CREATEOBJECT="WPProgram|License|<ODINFOLDER>|EXENAME=E.EXE;PARAMETERS=$(1)\LICENSE.TXT"');
+rc = lineout(sInstFile, '     CREATEOBJECT="WPProgram|WGSS50 License|<ODINFOLDER>|EXENAME=E.EXE;PARAMETERS=$(1)\WGSS50.lic"');
 rc = lineout(sInstFile, '     TARGET="C:\ODIN" BASE');
 title = "     TITLE=""Odin "sType" ("date()")""";
 rc = lineout(sInstFile, title);
