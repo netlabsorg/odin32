@@ -1,9 +1,9 @@
-/* $Id: pshpack8.h,v 1.1 1999-05-24 20:19:18 ktk Exp $ */
+/* $Id: pshpack8.h,v 1.2 2002-05-10 14:53:30 sandervl Exp $ */
 
 #ifndef __WINE_PSHPACK_H
 #define __WINE_PSHPACK_H 8
 
-#if 0
+#if defined(__GNUC__) || defined(__SUNPRO_CC) || (defined(__IBMC__) || defined(__IBMCPP__)) || defined(__WATCOMC__)
 #pragma pack(8)
 #elif !defined(RC_INVOKED)
 #error "8 as alignment is not supported"
