@@ -1,8 +1,11 @@
- /* $Id: ChangeLog,v 1.585 1999-12-29 10:41:52 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.586 1999-12-29 12:40:21 sandervl Exp $ */
 
  99-12-29: Sander van Leeuwen <sandervl@xs4all.nl>
 	- WINMM: Created wrappers for mci* apis (to save/restore FS)
                  NOTE: You must include os2mewrap.h instead of os2me.h
+	- USER32: Fixed PostThreadMessage (RealPlayer G2 install almost works)
+	- KERNEL32: Removed logging from icon & cursor (group) conversion
+                    (compile with DEBUGALL=1 to enable it)
 
  99-12-28: Vit Timchishin <tvv@sbs.kiev.ua>
 	- USER32: Listbox fix; Commented out 'if (index == oldsel) return LB_OKAY;'
