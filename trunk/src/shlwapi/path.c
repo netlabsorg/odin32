@@ -1,9 +1,13 @@
-/* $Id: path.c,v 1.4 2000-06-13 18:14:19 phaller Exp $ */
+/* $Id: path.c,v 1.5 2000-07-21 18:30:29 sandervl Exp $ */
 
 /*
  * Path Functions
  *
  * Project Odin Software License can be found in LICENSE.TXT
+ *
+ * 
+ * NOTE: SHGetSpecialFolderPathA: StartMenu changed in 'Start Menu'
+ *
  *
  * Copyright 1997 Marcus Meissner
  *
@@ -1944,7 +1948,7 @@ BOOL WINAPI SHGetSpecialFolderPathA (
 	  case CSIDL_PROGRAMS:
 	    hRootKey = HKEY_CURRENT_USER;
 	    strcpy(szValueName, "Programs");
-	    strcpy(szDefaultPath, "StartMenu\\Programs");
+	    strcpy(szDefaultPath, "Start Menu\\Programs");
 	    break;
 
 	  case CSIDL_COMMON_PROGRAMS:
@@ -1967,26 +1971,26 @@ BOOL WINAPI SHGetSpecialFolderPathA (
 
 	  case CSIDL_STARTMENU:
 	    hRootKey = HKEY_CURRENT_USER;
-	    strcpy(szValueName, "StartMenu");
-	    strcpy(szDefaultPath, "StartMenu");
+	    strcpy(szValueName, "Start Menu");
+	    strcpy(szDefaultPath, "Start Menu");
 	    break;
 
 	  case CSIDL_COMMON_STARTMENU:
 	    hRootKey = HKEY_LOCAL_MACHINE;
-	    strcpy(szValueName, "Common StartMenu");
-	    strcpy(szDefaultPath, "StartMenu");
+	    strcpy(szValueName, "Common StartMenu"); //TODO: Start Menu?
+	    strcpy(szDefaultPath, "Start Menu");
 	    break;
 
 	  case CSIDL_STARTUP:
 	    hRootKey = HKEY_CURRENT_USER;
 	    strcpy(szValueName, "Startup");
-	    strcpy(szDefaultPath, "StartMenu\\Programs\\Startup");
+	    strcpy(szDefaultPath, "Start Menu\\Programs\\Startup");
 	    break;
 
 	  case CSIDL_COMMON_STARTUP:
 	    hRootKey = HKEY_LOCAL_MACHINE;
 	    strcpy(szValueName, "Common Startup");
-	    strcpy(szDefaultPath, "StartMenu\\Programs\\Startup");
+	    strcpy(szDefaultPath, "Start Menu\\Programs\\Startup");
 	    break;
 
 	  case CSIDL_TEMPLATES:
