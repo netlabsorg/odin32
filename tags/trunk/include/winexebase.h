@@ -1,4 +1,4 @@
-/* $Id: winexebase.h,v 1.2 1999-11-24 19:33:34 sandervl Exp $ */
+/* $Id: winexebase.h,v 1.3 2000-01-06 20:03:04 sandervl Exp $ */
 
 /*
  * Win32 PE Exe base class
@@ -23,8 +23,9 @@ public:
 	Win32ExeBase(HINSTANCE hInstance);
 virtual ~Win32ExeBase();
 
-	void  setCommandLine(char *cline)      { cmdline = cline; };
-	char *getCommandLine()                 { return cmdline;  };
+	void   setCommandLine(char *cline);
+	LPSTR  getCommandLineA()                { return cmdLineA;  };
+	LPWSTR getCommandLineW()                { return cmdLineW;  };
 
 	BOOL  isConsoleApp()                   { return fConsoleApp; };
 
@@ -33,8 +34,9 @@ virtual ULONG start();
 virtual BOOL  isDll();
 	
 protected:
-	char *cmdline;
-	BOOL  fConsoleApp;
+	LPSTR  cmdLineA;
+	LPWSTR cmdLineW;
+	BOOL   fConsoleApp;
 
 private:
 };

@@ -1,4 +1,4 @@
-/* $Id: crtdll.h,v 1.2 1999-11-30 14:19:02 sandervl Exp $ */
+/* $Id: crtdll.h,v 1.3 2000-01-06 20:03:04 sandervl Exp $ */
 
 #ifndef __WINE_CRTDLL_H
 #define __WINE_CRTDLL_H
@@ -67,5 +67,41 @@ char __syserr38[] = "No more files (ENMFILE)";
 
 /* function prototypes used in crtdll.c */
 extern int LastErrorToErrno(DWORD);
+
+void * __cdecl CRTDLL_malloc( DWORD size );
+void   __cdecl CRTDLL_free( void *ptr );
+
+LPSTR  __cdecl CRTDLL__mbsinc( LPCSTR str );
+INT    __cdecl CRTDLL__mbslen( LPCSTR str );
+LPWSTR __cdecl CRTDLL__wcsdup( LPCWSTR str );
+INT    __cdecl CRTDLL__wcsicmp( LPCWSTR str1, LPCWSTR str2 );
+INT    __cdecl CRTDLL__wcsicoll( LPCWSTR str1, LPCWSTR str2 );
+LPWSTR __cdecl CRTDLL__wcslwr( LPWSTR str );
+INT    __cdecl CRTDLL__wcsnicmp( LPCWSTR str1, LPCWSTR str2, INT n );
+LPWSTR __cdecl CRTDLL__wcsnset( LPWSTR str, WCHAR c, INT n );
+LPWSTR __cdecl CRTDLL__wcsrev( LPWSTR str );
+LPWSTR __cdecl CRTDLL__wcsset( LPWSTR str, WCHAR c );
+LPWSTR __cdecl CRTDLL__wcsupr( LPWSTR str );
+INT    __cdecl CRTDLL_mbstowcs( LPWSTR dst, LPCSTR src, INT n );
+INT    __cdecl CRTDLL_mbtowc( WCHAR *dst, LPCSTR str, INT n );
+WCHAR  __cdecl CRTDLL_towlower( WCHAR ch );
+WCHAR  __cdecl CRTDLL_towupper( WCHAR ch );
+LPWSTR __cdecl CRTDLL_wcscat( LPWSTR dst, LPCWSTR src );
+LPWSTR __cdecl CRTDLL_wcschr( LPCWSTR str, WCHAR ch );
+INT    __cdecl CRTDLL_wcscmp( LPCWSTR str1, LPCWSTR str2 );
+DWORD  __cdecl CRTDLL_wcscoll( LPCWSTR str1, LPCWSTR str2 );
+LPWSTR __cdecl CRTDLL_wcscpy( LPWSTR dst, LPCWSTR src );
+INT    __cdecl CRTDLL_wcscspn( LPCWSTR str, LPCWSTR reject );
+INT    __cdecl CRTDLL_wcslen( LPCWSTR str );
+LPWSTR __cdecl CRTDLL_wcsncat( LPWSTR s1, LPCWSTR s2, INT n );
+INT    __cdecl CRTDLL_wcsncmp( LPCWSTR str1, LPCWSTR str2, INT n );
+LPWSTR __cdecl CRTDLL_wcsncpy( LPWSTR s1, LPCWSTR s2, INT n );
+LPWSTR __cdecl CRTDLL_wcspbrk( LPCWSTR str, LPCWSTR accept );
+LPWSTR __cdecl CRTDLL_wcsrchr( LPWSTR str, WCHAR ch );
+INT    __cdecl CRTDLL_wcsspn( LPCWSTR str, LPCWSTR accept );
+LPWSTR __cdecl CRTDLL_wcsstr( LPCWSTR str, LPCWSTR sub );
+LPWSTR __cdecl CRTDLL_wcstok( LPWSTR str, LPCWSTR delim );
+INT    __cdecl CRTDLL_wcstombs( LPSTR dst, LPCWSTR src, INT n );
+INT    __cdecl CRTDLL_wctomb( LPSTR dst, WCHAR ch );
 
 #endif /* __WINE_CRTDLL_H */
