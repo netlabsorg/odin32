@@ -1,4 +1,4 @@
-/* $Id: win32wbasepos.cpp,v 1.22 2001-02-23 14:52:42 sandervl Exp $ */
+/* $Id: win32wbasepos.cpp,v 1.23 2001-05-04 17:02:52 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2 (nonclient/position methods)
  *
@@ -152,43 +152,35 @@ LONG Win32BaseWindow::SendNCCalcSize(BOOL calcValidRect, RECT *newWindowRect,
    LONG result = 0;
 
    /* Send WM_NCCALCSIZE message to get new client area */
-   if((winpos->flags & (SWP_FRAMECHANGED | SWP_NOSIZE)) != SWP_NOSIZE )
+   params.rgrc[0] = *newWindowRect;
+   if(calcValidRect)
    {
-        params.rgrc[0] = *newWindowRect;
-        if(calcValidRect)
-        {
-            winposCopy = *winpos;
-            params.rgrc[1] = *oldWindowRect;
-            params.rgrc[2] = *oldClientRect;
-            //client rectangel must be in parent coordinates
-            OffsetRect(&params.rgrc[2], rectWindow.left, rectWindow.top);
+        winposCopy = *winpos;
+        params.rgrc[1] = *oldWindowRect;
+        params.rgrc[2] = *oldClientRect;
+        //client rectangel must be in parent coordinates
+        OffsetRect(&params.rgrc[2], rectWindow.left, rectWindow.top);
 
-            params.lppos = &winposCopy;
-        }
-        result = SendInternalMessageA(WM_NCCALCSIZE, calcValidRect, (LPARAM)&params );
-
-        /* If the application send back garbage, ignore it */
-        if(params.rgrc[0].left <= params.rgrc[0].right && params.rgrc[0].top <= params.rgrc[0].bottom)
-        {
-            *newClientRect = params.rgrc[0];
-            //client rectangle now in parent coordinates; convert to 'frame' coordinates
-            OffsetRect(newClientRect, -rectWindow.left, -rectWindow.top);
-        }
-
-        /* FIXME: WVR_ALIGNxxx */
-        if(newClientRect->left != rectClient.left || newClientRect->top  != rectClient.top)
-           winpos->flags &= ~SWP_NOCLIENTMOVE;
-
-        if((newClientRect->right - newClientRect->left != rectClient.right - rectClient.left) ||
-           (newClientRect->bottom - newClientRect->top != rectClient.bottom - rectClient.top))
-             winpos->flags &= ~SWP_NOCLIENTSIZE;
-
+        params.lppos = &winposCopy;
    }
-   else
-   if(!(winpos->flags & SWP_NOMOVE) &&
-       (newClientRect->left != rectClient.left || newClientRect->top != rectClient.top)) {
-            winpos->flags &= ~SWP_NOCLIENTMOVE;
+   result = SendInternalMessageA(WM_NCCALCSIZE, calcValidRect, (LPARAM)&params );
+
+   /* If the application send back garbage, ignore it */
+   if(params.rgrc[0].left <= params.rgrc[0].right && params.rgrc[0].top <= params.rgrc[0].bottom)
+   {
+        *newClientRect = params.rgrc[0];
+        //client rectangle now in parent coordinates; convert to 'frame' coordinates
+        OffsetRect(newClientRect, -rectWindow.left, -rectWindow.top);
    }
+
+   /* FIXME: WVR_ALIGNxxx */
+   if(newClientRect->left != rectClient.left || newClientRect->top  != rectClient.top)
+        winpos->flags &= ~SWP_NOCLIENTMOVE;
+
+   if((newClientRect->right - newClientRect->left != rectClient.right - rectClient.left) ||
+       (newClientRect->bottom - newClientRect->top != rectClient.bottom - rectClient.top))
+        winpos->flags &= ~SWP_NOCLIENTSIZE;
+
    return result;
 }
 /***********************************************************************

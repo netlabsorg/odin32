@@ -1,4 +1,4 @@
-/* $Id: dc.cpp,v 1.97 2001-04-27 17:36:36 sandervl Exp $ */
+/* $Id: dc.cpp,v 1.98 2001-05-04 17:02:50 sandervl Exp $ */
 
 /*
  * DC functions for USER32
@@ -490,6 +490,12 @@ void selectClientArea(Win32BaseWindow *window, pDCData pHps)
         mapWin32ToOS2Rect(GetScreenHeight(), &rectWindow, (PRECTLOS2)&rectWindowOS2);
 
         hrgnParentClip = GreCreateRectRegion(pHps->hps, &rectWindowOS2, 1);
+#ifdef DEBUG
+        dprintf(("Combining client & parent client regions"));
+        dprintfRegion1(pHps->hps, window->getWindowHandle(), hrgnParentClip);
+        dprintfRegion1(pHps->hps, window->getWindowHandle(), hrgnRect);
+#endif
+
         GreCombineRegion(pHps->hps, hrgnRect, hrgnParentClip, hrgnRect, CRGN_AND);
         GreDestroyRegion(pHps->hps, hrgnParentClip);
    }
