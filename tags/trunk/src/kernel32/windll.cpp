@@ -1,4 +1,4 @@
-/* $Id: windll.cpp,v 1.13 1999-08-22 22:11:22 sandervl Exp $ */
+/* $Id: windll.cpp,v 1.14 1999-08-23 17:02:35 sandervl Exp $ */
 
 /*
  * Win32 DLL class
@@ -30,6 +30,9 @@
 #include "exceptions.h"
 #include "exceptutil.h"
 #include "cio.h"
+#include "vmutex.h"
+
+VMutex dlllistmutex;   //protects linked lists of heaps
 
 /***********************************
  * PH: fixups for missing os2win.h *
@@ -39,29 +42,60 @@ void _System SetLastError(ULONG ulError);
 
 //******************************************************************************
 //******************************************************************************
-Win32Dll::Win32Dll(char *szDllName) : Win32Image(szDllName), referenced(0), 
-				      fSkipEntryCalls(FALSE), fSystemDll(FALSE)
+Win32Dll::Win32Dll(char *szDllName, Win32Image *parentImage) 
+                : Win32Image(szDllName), referenced(0), 
+		  fSkipEntryCalls(FALSE), fSystemDll(FALSE),
+                  fAttachedToProcess(FALSE)
 {
   fSystemDll   = isSystemDll(szFileName);
   fUnloaded    = FALSE;
-  next = head;
-  head = this;
+
+  dlllistmutex.enter();
+  if(head == NULL || parentImage == NULL || parentImage->isDll() == FALSE) { //does the head dll depend on this one?
+  	next = head;
+  	head = this;
+  }
+  else {
+	//If we have a parent, we must make sure it is deleted before we are!
+        //(inserted after the parent)
+	if(head == parentImage) {
+		next = head->next;
+		head->next = this;
+	}
+	else {
+		Win32Dll *cur = head;
+		while(cur) {
+			if(cur == parentImage) {
+				break;
+			}
+			cur = cur->next;
+		}
+		next = cur->next;
+		cur->next = this;
+	}
+  }
+  dlllistmutex.leave();
 
   dllEntryPoint = 0;
 
-  dprintf(("Win32Dll::Win32Dll %s %s", szFileName, szModule));
+  dprintf(("Win32Dll::Win32Dll %s %s loaded by %s", szFileName, szModule,
+          (parentImage) ? parentImage->getModuleName() : "Unknown"));
 }
 //******************************************************************************
 //******************************************************************************
 Win32Dll::Win32Dll(HINSTANCE hinstance, int NameTableId, int Win32TableId,
 		   WIN32DLLENTRY DllEntryPoint) : 
 			Win32Image(hinstance, NameTableId, Win32TableId),
-			referenced(0), fSkipEntryCalls(FALSE), fSystemDll(FALSE)
+			referenced(0), fSkipEntryCalls(FALSE), fSystemDll(FALSE),
+                        fAttachedToProcess(FALSE)
 {
   dllEntryPoint = DllEntryPoint;
   fUnloaded     = FALSE;
+
+  dlllistmutex.enter();
   next = head;
   head = this;
+  dlllistmutex.leave();
 
   dprintf(("Win32Dll::Win32Dll %s", szModule));
 }
@@ -85,6 +119,7 @@ Win32Dll::~Win32Dll()
 
   //first remove it from the linked list so converted win32 dlls won't
   //be deleted twice (as DosFreeModule results in a call to DllExitList (wprocess.cpp)
+  dlllistmutex.enter();
   if(head == this) {
 	head = next;
   }
@@ -94,10 +129,12 @@ Win32Dll::~Win32Dll()
         }
 	if(dll == NULL) {
 		dprintf(("~Win32Dll: Can't find dll!\n"));
+		dlllistmutex.leave();
 		return;
 	}
 	dll->next = next;
   }
+  dlllistmutex.leave();
   if(errorState == NO_ERROR && !fUnloaded) 
   {
 	detachProcess();
@@ -280,6 +317,11 @@ BOOL Win32Dll::attachProcess()
  USHORT sel;
  BOOL rc;
 
+  if(fAttachedToProcess)
+	return TRUE;
+  
+  fAttachedToProcess = TRUE;
+
   //Allocate TLS index for this module
   tlsAlloc();
   tlsAttachThread();	//setup TLS (main thread)
@@ -379,8 +421,7 @@ BOOL Win32Dll::detachThread()
 //******************************************************************************
 void Win32Dll::attachThreadToAllDlls()
 {
- Win32Dll *dll = Win32Dll::head;
-
+  Win32Dll *dll = Win32Dll::head;
   while(dll) {
 	dll->attachThread();
 	dll = dll->getNext();
@@ -391,8 +432,7 @@ void Win32Dll::attachThreadToAllDlls()
 //******************************************************************************
 void Win32Dll::detachThreadFromAllDlls()
 {
- Win32Dll *dll = Win32Dll::head;
-
+  Win32Dll *dll = Win32Dll::head;
   while(dll) {
 	dll->detachThread();
 	dll = dll->getNext();
@@ -403,8 +443,7 @@ void Win32Dll::detachThreadFromAllDlls()
 //******************************************************************************
 void Win32Dll::tlsAttachThreadToAllDlls()
 {
- Win32Dll *dll = Win32Dll::head;
-
+  Win32Dll *dll = Win32Dll::head;
   while(dll) {
 	dll->tlsAttachThread();
 	dll = dll->getNext();
@@ -415,8 +454,7 @@ void Win32Dll::tlsAttachThreadToAllDlls()
 //******************************************************************************
 void Win32Dll::tlsDetachThreadFromAllDlls()
 {
- Win32Dll *dll = Win32Dll::head;
-
+  Win32Dll *dll = Win32Dll::head;
   while(dll) {
 	dll->tlsDetachThread();
 	dll = dll->getNext();
@@ -426,7 +464,18 @@ void Win32Dll::tlsDetachThreadFromAllDlls()
 //******************************************************************************
 void Win32Dll::deleteAll()
 {
-  //LIFO removal
+#ifdef DEBUG
+  dlllistmutex.enter();
+  Win32Dll *dll = head;
+
+  dprintf(("Win32Dll::deleteAll: List of loaded dlls:"));
+  while(dll) {
+	dprintf(("DLL %s", dll->szModule));
+	dll = dll->next;
+  }
+  dlllistmutex.leave();
+#endif
+
   while(Win32Dll::head) {
 	delete Win32Dll::head;
   }
@@ -435,7 +484,7 @@ void Win32Dll::deleteAll()
 //******************************************************************************
 Win32Dll *Win32Dll::findModule(char *dllname)
 {
- Win32Dll *dll = head;
+ Win32Dll *dll;
  char szDllName[CCHMAXPATH];
  char *dot, *temp;
 
@@ -447,42 +496,54 @@ Win32Dll *Win32Dll::findModule(char *dllname)
   if(dot)
 	*dot = 0;
 
+  dlllistmutex.enter();
+  dll = head;
   while(dll) {
-	if(strcmpi(szDllName, dll->szModule) == 0)
+	if(strcmpi(szDllName, dll->szModule) == 0) {
+		dlllistmutex.leave();
 		return(dll);
+        }
 
 	dll = dll->next;
   }
+  dlllistmutex.leave();
   return(NULL);
 }
 //******************************************************************************
 //******************************************************************************
 Win32Dll *Win32Dll::findModule(WIN32DLLENTRY DllEntryPoint)
 {
- Win32Dll *mod = Win32Dll::head;
-
    dprintf(("findModule %X", DllEntryPoint));
+
+   dlllistmutex.enter();
+   Win32Dll *mod = Win32Dll::head;
    while(mod != NULL) {
 	dbgCheckObj(mod);
-	if(mod->dllEntryPoint == DllEntryPoint)
+	if(mod->dllEntryPoint == DllEntryPoint) {
+		dlllistmutex.leave();
 		return(mod);
+        }
 	mod = mod->next;
    }
+   dlllistmutex.leave();
    return(NULL);
 }
 //******************************************************************************
 //******************************************************************************
 Win32Dll *Win32Dll::findModule(HINSTANCE hinstance)
 {
- Win32Dll *mod = Win32Dll::head;
+   dlllistmutex.enter();
 
-//   eprintf(("findModule inst %X", hinstance));
+   Win32Dll *mod = Win32Dll::head;
    while(mod != NULL) {
 	dbgCheckObj(mod);
-	if(mod->hinstance == hinstance)
+	if(mod->hinstance == hinstance) {
+		dlllistmutex.leave();
 		return(mod);
+        }
 	mod = mod->next;
    }
+   dlllistmutex.leave();
    return(NULL);
 }
 //******************************************************************************

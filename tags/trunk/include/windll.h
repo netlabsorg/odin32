@@ -1,4 +1,4 @@
-/* $Id: windll.h,v 1.5 1999-08-18 17:16:05 sandervl Exp $ */
+/* $Id: windll.h,v 1.6 1999-08-23 17:04:14 sandervl Exp $ */
 
 /*
  *
@@ -35,7 +35,7 @@ class Win32Dll : public Win32Image
 {
 public:
                   Win32Dll(HINSTANCE hinstance, int NameTableId, int Win32TableId, WIN32DLLENTRY DllEntryPoint);
-	          Win32Dll(char *szDllName);
+	          Win32Dll(char *szDllName, Win32Image *parentImage = NULL);
                  ~Win32Dll();
 
 	void      OS2DllInit(HINSTANCE hinstance, int NameTableId, int Win32TableId,
@@ -79,8 +79,11 @@ static  Win32Dll *findModule(char *dllname);
 static  Win32Dll *findModule(HINSTANCE hinstance);
 static  Win32Dll *findModule(WIN32DLLENTRY DllEntryPoint);
 
+
+virtual BOOL  isDll()                          { return FALSE; };
+
 protected:
-	BOOL      fSystemDll, fSkipEntryCalls, fUnloaded;
+	BOOL      fSystemDll, fSkipEntryCalls, fUnloaded, fAttachedToProcess;
 
 	WIN32DLLENTRY dllEntryPoint;
 private:
