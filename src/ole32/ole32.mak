@@ -1,4 +1,4 @@
-# $Id: ole32.mak,v 1.7 2001-06-06 17:11:17 sandervl Exp $
+# $Id: ole32.mak,v 1.8 2001-06-06 17:17:21 bird Exp $
 
 #
 # Odin32 API
@@ -21,10 +21,9 @@ MAKEFILE = ole32.mak
 #
 # Overrides.
 #
-!if "$(CCENV)" == "VAC36"
 CDEFINES    = $(CDEFINES) -DNONAMELESSSTRUCT -DNONAMELESSUNION
-!endif
 CDEFINES    = $(CDEFINES) -DWINE_LARGE_INTEGER
+
 
 #
 # Object files. Prefix with OBJDIR and one space before the '\'.
@@ -60,7 +59,7 @@ $(OBJDIR)\stg_stream.obj \
 $(OBJDIR)\storage32.obj \
 $(OBJDIR)\stubs.obj \
 $(OBJDIR)\ifs.obj \
-$(OBJDIR)\ole32rsrc.obj 
+$(OBJDIR)\ole32rsrc.obj
 
 
 #
