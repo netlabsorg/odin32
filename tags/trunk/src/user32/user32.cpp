@@ -1,4 +1,4 @@
-/* $Id: user32.cpp,v 1.48 1999-10-28 18:22:28 sandervl Exp $ */
+/* $Id: user32.cpp,v 1.49 1999-10-30 10:55:15 sandervl Exp $ */
 
 /*
  * Win32 misc user32 API functions for OS/2
@@ -2241,18 +2241,6 @@ LONG WIN32API TabbedTextOutW( HDC hdc, int x, int y, LPCWSTR lpString, int nCoun
     rc = O32_TabbedTextOut(hdc,x,y,astring,nCount,nTabPositions,lpnTabStopPositions,nTabOrigin);
     FreeAsciiString(astring);
     return rc;
-}
-
-/* Dialog Box Functions */
-
-BOOL WIN32API MapDialogRect( HWND hDlg, PRECT  lpRect)
-{
-#ifdef DEBUG
-    WriteLog("USER32:  MapDialogRect\n");
-#endif
-    hDlg = Win32Window::Win32ToOS2Handle(hDlg);
-
-    return O32_MapDialogRect(hDlg,lpRect);
 }
 
 /* Icon Functions */
