@@ -1,4 +1,4 @@
-# $Id: odin32.tools.mk,v 1.6 2001-08-16 04:13:21 bird Exp $
+# $Id: odin32.tools.mk,v 1.7 2001-08-16 04:25:10 bird Exp $
 
 #
 # Odin32 API
@@ -63,9 +63,11 @@ DEPEND      = $(ODIN32_TOOLS)\fastdep.exe -o$$(OBJDIR) -cy+ -F+
 
 !ifdef MULTIJOBS
 !ifndef WAT
+!ifndef NO_MULTIJOBS
 CMDQD_SUB   = $(CMDQD) submit
 CMDQD_WAIT  = $(CMDQD) wait
 CMDQD_INIT  = $(CMDQD) kill & $(CMDQD) init $(MULTIJOBS)
+!endif
 !endif
 !endif
 
