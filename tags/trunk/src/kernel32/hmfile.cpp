@@ -1,9 +1,26 @@
-/* $Id: hmfile.cpp,v 1.13 2000-07-17 00:34:05 phaller Exp $ */
+/* $Id: hmfile.cpp,v 1.14 2000-08-04 21:12:07 sandervl Exp $ */
 
 /*
  * File IO win32 apis
  *
  * Copyright 1999-2000 Sander van Leeuwen
+ *
+ * Notes: (#define SHARE_WORKAROUND)
+ *    - Temporary workaround for differences in share mode between
+ *      OS/2 & NT (for opening the same file multiple times):
+ *      NT: CreateFile with FILE_SHARE_READ
+ *          CreateFile with FILE_SHARE_READ | FILE_SHARE_WRITE
+ *          -> 2nd CreateFile overrides share flags of first one
+ *          -> CreateFile with GENERIC_WRITE is now allowed
+ *      OS2: DosOpen with OPEN_SHARE_DENYWRITE
+ *           DosOpen with OPEN_SHARE_DENYNONE
+ *           -> sharing violation; can't change share flags while
+ *              handle returned by 1st DosOpen isn't closed
+ *      --> 'Solution': always open files in FILE_SHARE_DENYNONE mode
+ *          (several installation programs depend on this behaviour)
+ *    
+ *    - Only for CreateFile; might also be necessary for OpenFile, but I haven't
+ *      seen any apps that require it (yet).
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *
@@ -36,6 +53,9 @@ inline void ignore_dprintf(...){}
 
 #define DBG_LOCALLOG	DBG_hmfile
 #include "dbglocal.h"
+
+//SvL: Share violation workaround for CreateFile
+#define SHARE_WORKAROUND
 
 /*****************************************************************************
  * Name      : DWORD HMDeviceFileClass::CreateFile
@@ -91,7 +111,9 @@ DWORD HMDeviceFileClass::CreateFile (LPCSTR        lpFileName,
   if(pHMHandleData->dwShare & FILE_SHARE_DELETE) {
 	pHMHandleData->dwShare &= ~FILE_SHARE_DELETE;
   }
-
+#ifdef SHARE_WORKAROUND
+  pHMHandleData->dwShare = FILE_SHARE_READ | FILE_SHARE_WRITE;
+#endif
   hFile = OSLibDosCreateFile((LPSTR)lpFileName,
                              pHMHandleData->dwAccess,
                              pHMHandleData->dwShare,
@@ -285,7 +307,8 @@ BOOL HMDeviceFileClass::DuplicateHandle(PHMHANDLEDATA pHMHandleData,
                                         PHANDLE desthandle,
                                         DWORD   fdwAccess,
                                         BOOL    fInherit,
-                                        DWORD   fdwOptions)
+                                        DWORD   fdwOptions,
+                                        DWORD   fdwOdinOptions)
 {
  HMFileInfo *srcfileinfo = (HMFileInfo *)pHMSrcHandle->dwUserData;
  DWORD rc;
@@ -308,17 +331,21 @@ BOOL HMDeviceFileClass::DuplicateHandle(PHMHANDLEDATA pHMHandleData,
 
   if(srcfileinfo)
   {
-#if 0
-    // @@@PH Why createfile here? Why not OSLibDupHandle() ?
-    if(CreateFile(srcfileinfo->lpszFileName, pHMHandleData,
-                  srcfileinfo->lpSecurityAttributes, NULL) == NO_ERROR) 
+    //SvL: Special duplicatehandle option used by memory mapped class to duplicate
+    //     file handle
+    //     Can't use DosDupHandle or else there can be a sharing violation
+    //     when an app tries to access the same file again
+    if(fdwOdinOptions) 
     {
-      return TRUE;
+    	if(CreateFile(srcfileinfo->lpszFileName, pHMHandleData,
+                      srcfileinfo->lpSecurityAttributes, NULL) == NO_ERROR) 
+        {
+      		return TRUE;
+        }
+    	dprintf(("ERROR: DuplicateHandle; CreateFile %s failed!", 
+                  srcfileinfo->lpszFileName));
+        return FALSE;
     }
-    dprintf(("ERROR: DuplicateHandle; CreateFile %s failed!", 
-             srcfileinfo->lpszFileName));
-    return FALSE;
-#else
     
     if(!(fdwOptions & DUPLICATE_SAME_ACCESS) && fdwAccess != pHMSrcHandle->dwAccess) {
     	dprintf(("WARNING: DuplicateHandle; app wants different access permission; Not supported!! (%x, %x)", fdwAccess, pHMSrcHandle->dwAccess));
@@ -338,7 +365,6 @@ BOOL HMDeviceFileClass::DuplicateHandle(PHMHANDLEDATA pHMHandleData,
       pHMHandleData->hHMHandle = *desthandle;
       return TRUE;    // OK
     }
-#endif
   }
   else
   {

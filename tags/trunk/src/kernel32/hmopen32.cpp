@@ -1,4 +1,4 @@
-/* $Id: hmopen32.cpp,v 1.24 2000-06-01 11:28:47 sandervl Exp $ */
+/* $Id: hmopen32.cpp,v 1.25 2000-08-04 21:12:08 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -116,7 +116,8 @@ BOOL HMDeviceOpen32Class::DuplicateHandle(PHMHANDLEDATA pHMHandleData, HANDLE  s
                                PHANDLE desthandle,
                        	       DWORD   fdwAccess,
                        	       BOOL    fInherit,
-                               DWORD   fdwOptions)
+                               DWORD   fdwOptions,
+                               DWORD   fdwOdinOptions)
 {
  BOOL rc;
 
