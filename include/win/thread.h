@@ -119,6 +119,8 @@ typedef struct _TEB
               struct _TEB   *next;
               DWORD          OrgTIBSel;      // Original OS/2 TIB selector (always the same, but let's not assume too much for future compatibility)
               ULONG          hmq;            // Thread message queue
+              HANDLE         hPostMsgEvent;  // Event semaphore to signal message post to MsgWaitForMultipleObjects
+              DWORD          dwWakeMask;     // Set by MsgWaitForMultipleObjects
               ULONG          hab;            // Thread Anchor block
               ULONG          hooks[WH_NB_HOOKS]; //list of hooks for this thread queue
               ULONG          threadId;       // Thread ID
