@@ -1,4 +1,4 @@
-/* $Id: defwndproc.cpp,v 1.9 1999-10-08 18:39:34 sandervl Exp $ */
+/* $Id: defwndproc.cpp,v 1.10 1999-10-08 19:46:54 sandervl Exp $ */
 
 /*
  * Win32 default window API functions for OS/2
@@ -56,12 +56,14 @@ LRESULT WIN32API DefDlgProcA(HWND hwnd, UINT Msg, WPARAM wParam, LPARAM lParam)
 
     dialog = (Win32Dialog *)Win32BaseWindow::GetWindowFromHandle(hwnd);
 //TODO: Wrong check?
-    if(!dialog || !dialog->IsDialog()) {
-//    if(!dialog) {
+//    if(!dialog || !dialog->IsDialog()) {
+    if(!dialog) {
         dprintf(("DefDlgProcA, window %x not found", hwnd));
         return 0;
     }
-    return dialog->DefDlgProcA(Msg, wParam, lParam);
+    if(dialog->IsDialog()) 
+    	 return dialog->DefDlgProcA(Msg, wParam, lParam);
+    else return dialog->DefWindowProcA(Msg, wParam, lParam);
 }
 //******************************************************************************
 //******************************************************************************
@@ -71,12 +73,14 @@ LRESULT WIN32API DefDlgProcW(HWND hwnd, UINT Msg, WPARAM wParam, LPARAM lParam)
 
     dialog = (Win32Dialog *)Win32BaseWindow::GetWindowFromHandle(hwnd);
 //TODO: Wrong check?
-    if(!dialog || !dialog->IsDialog()) {
-//    if(!dialog) {
+//    if(!dialog || !dialog->IsDialog()) {
+    if(!dialog) {
         dprintf(("DefDlgProcW, window %x not found", hwnd));
         return 0;
     }
-    return dialog->DefDlgProcW(Msg, wParam, lParam);
+    if(dialog->IsDialog()) 
+    	 return dialog->DefDlgProcW(Msg, wParam, lParam);
+    else return dialog->DefWindowProcW(Msg, wParam, lParam);
 }
 //******************************************************************************
 //******************************************************************************
