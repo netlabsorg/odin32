@@ -1,4 +1,4 @@
-/* $Id: k32AllocMemEx.cpp,v 1.1.2.1 2002-03-31 20:09:08 bird Exp $
+/* $Id: k32AllocMemEx.cpp,v 1.1.2.2 2002-04-01 09:06:04 bird Exp $
  *
  * k32AllocMemEx - Equivalent to DosAllocMem, but this one
  *                 uses the address in ppv.
@@ -8,6 +8,9 @@
  * Project Odin Software License can be found in LICENSE.TXT
  *
  */
+#ifndef NOFILEID
+static const char szFileId[] = "$Id: k32AllocMemEx.cpp,v 1.1.2.2 2002-04-01 09:06:04 bird Exp $";
+#endif
 
 
 /*******************************************************************************
@@ -105,6 +108,7 @@ ULONG vmApiF1[] =
  */
 APIRET k32AllocMemEx(PPVOID ppv, ULONG cb, ULONG flFlags, ULONG ulCS, ULONG ulEIP)
 {
+    KLOGENTRY5("APIRET","PPVOID ppv, ULONG cb, ULONG flFlags, ULONG ulCS, ULONG ulEIP", ppv, cb, flFlags, ulCS, ulEIP);
     APIRET  rc;
     ULONG   flVMFlags;
     ULONG   flSelFlags;
@@ -136,6 +140,7 @@ APIRET k32AllocMemEx(PPVOID ppv, ULONG cb, ULONG flFlags, ULONG ulCS, ULONG ulEI
         )
     {
         kprintf(("k32AllocMemEx: Bad param (1)\n"));
+        KLOGEXIT(ERROR_INVALID_PARAMETER);
         return ERROR_INVALID_PARAMETER;
     }
 
@@ -143,6 +148,7 @@ APIRET k32AllocMemEx(PPVOID ppv, ULONG cb, ULONG flFlags, ULONG ulCS, ULONG ulEI
     if (cb >= VirtualAddressLimit)
     {
         kprintf(("k32AllocMemEx: Bad size cb=%d\n", cb));
+        KLOGEXIT(ERROR_NOT_ENOUGH_MEMORY);
         return ERROR_NOT_ENOUGH_MEMORY;
     }
 
@@ -152,6 +158,7 @@ APIRET k32AllocMemEx(PPVOID ppv, ULONG cb, ULONG flFlags, ULONG ulCS, ULONG ulEI
         if (rc)
         {
             kprintf(("k32AllocMemEx: Failed to fetch *ppv. rc=%d\n", rc));
+            KLOGEXIT(rc);
             return rc;
         }
         kprintf(("k32AllocMemEx: Location *ppv =0x%08x\n", vmac.ac_va));
@@ -161,6 +168,7 @@ APIRET k32AllocMemEx(PPVOID ppv, ULONG cb, ULONG flFlags, ULONG ulCS, ULONG ulEI
                 )
         {
             kprintf(("k32AllocMemEx: *ppv has an invalid address. *ppv=0x%08x\n", vmac.ac_va));
+            KLOGEXIT(ERROR_INVALID_ADDRESS);
             return ERROR_INVALID_ADDRESS;
         }
     }
@@ -242,6 +250,7 @@ APIRET k32AllocMemEx(PPVOID ppv, ULONG cb, ULONG flFlags, ULONG ulCS, ULONG ulEI
         kprintf(("k32AllocMemEx: VMAllocMem failed with rc=%d\n", rc));
 
     kprintf(("k32AllocMemEx: returns rc=%d (*ppv=0x%08x)\n", rc, vmac.ac_va));
+    KLOGEXIT(rc);
     return rc;
 }
 

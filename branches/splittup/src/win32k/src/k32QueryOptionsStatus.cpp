@@ -1,4 +1,4 @@
-/* $Id: k32QueryOptionsStatus.cpp,v 1.1.2.1 2002-03-31 20:09:11 bird Exp $
+/* $Id: k32QueryOptionsStatus.cpp,v 1.1.2.2 2002-04-01 09:06:05 bird Exp $
  *
  * k32QueryOptionsStatus  - Queries the options and/or the status of
  *                          Win32k.sys driver.
@@ -8,6 +8,9 @@
  * Project Odin Software License can be found in LICENSE.TXT
  *
  */
+#ifndef NOFILEID
+static const char szFileId[] = "$Id: k32QueryOptionsStatus.cpp,v 1.1.2.2 2002-04-01 09:06:05 bird Exp $";
+#endif
 
 
 /*******************************************************************************
@@ -29,10 +32,9 @@
 *   Header Files                                                               *
 *******************************************************************************/
 #include <os2.h>                        /* OS/2 header file. */
-#include <peexe.h>                      /* Wine PE structs and definitions. */
-#include <neexe.h>                      /* Wine NE structs and definitions. */
-#include <newexe.h>                     /* OS/2 NE structs and definitions. */
-#include <exe386.h>                     /* OS/2 LX structs and definitions. */
+#include <NEexe.h>                      /* Wine NE structs and definitions. */
+#include <LXexe.h>                      /* OS/2 LX structs and definitions. */
+#include <PEexe.h>                      /* Wine PE structs and definitions. */
 #include <OS2Krnl.h>
 #include <kKrnlLib.h>
 
@@ -67,6 +69,7 @@
  */
 APIRET k32QueryOptionsStatus(PK32OPTIONS pOptions, PK32STATUS pStatus)
 {
+    KLOGENTRY2("APIRET","PK32OPTIONS pOptions, PK32STATUS pStatus", pOptions, pStatus);
     APIRET  rc;
     ULONG   cb;
 
@@ -87,18 +90,30 @@ APIRET k32QueryOptionsStatus(PK32OPTIONS pOptions, PK32STATUS pStatus)
     {
         rc = TKFuULongNF(SSToDS(&cb), &pOptions->cb);
         if (rc)
+        {
+            KLOGEXIT(rc);
             return rc;
+        }
         if (cb != sizeof(K32OPTIONS))
+        {
+            KLOGEXIT(ERROR_INVALID_PARAMETER);
             return ERROR_INVALID_PARAMETER;
+        }
     }
 
     if (pStatus != NULL)
     {
         rc = TKFuULongNF(SSToDS(&cb), &pStatus->cb);
         if (rc)
+        {
+            KLOGEXIT(rc);
             return rc;
+        }
         if (cb != sizeof(K32STATUS))
+        {
+            KLOGEXIT(ERROR_INVALID_PARAMETER);
             return ERROR_INVALID_PARAMETER;
+        }
     }
 
 
@@ -109,6 +124,7 @@ APIRET k32QueryOptionsStatus(PK32OPTIONS pOptions, PK32STATUS pStatus)
     if (rc != NO_ERROR)
     {
         kprintf(("k32QueryOptionsStatus: LDRRequestSem failed with rc = %d\n", rc));
+        KLOGEXIT(rc);
         return rc;
     }
 
@@ -215,6 +231,7 @@ APIRET k32QueryOptionsStatus(PK32OPTIONS pOptions, PK32STATUS pStatus)
      */
     LDRClearSem();
 
+    KLOGEXIT(rc);
     return rc;
 }
 

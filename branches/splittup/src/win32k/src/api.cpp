@@ -1,4 +1,4 @@
-/* $Id: api.cpp,v 1.1.2.1 2002-03-31 20:09:04 bird Exp $
+/* $Id: api.cpp,v 1.1.2.2 2002-04-01 09:06:02 bird Exp $
  *
  * API Overload Init and Helper Function.
  *
@@ -7,6 +7,9 @@
  * Project Odin Software License can be found in LICENSE.TXT
  *
  */
+#ifndef NOFILEID
+static const char szFileId[] = "$Id: api.cpp,v 1.1.2.2 2002-04-01 09:06:02 bird Exp $";
+#endif
 
 /*******************************************************************************
 *   Defined Constants And Macros                                               *
@@ -117,6 +120,7 @@ APIRET  apiWriteLine(SFN sfn, PULONG poff, PSZ pszString);
  */
 APIRET  apiReadIniFile(PSZ pszIniFile)
 {
+    KLOGENTRY1("APIRET","PSZ pszIniFile", pszIniFile);
     SFN     sfn;
     APIRET  rc;
 
@@ -171,6 +175,7 @@ APIRET  apiReadIniFile(PSZ pszIniFile)
     else
         kprintf(("apiReadIniFile: Failed to open file %s, rc=%d\n", pszIniFile, rc));
 
+    KLOGEXIT(rc);
     return rc;
 }
 
@@ -186,6 +191,7 @@ APIRET  apiReadIniFile(PSZ pszIniFile)
  */
 APIRET  apiParseIniFile(PSZ pszFile)
 {
+    KLOGENTRY1("APIRET","PSZ pszFile", pszFile);
     PAPIDATAENTRY   paNewApiData;
     PSZ *           ppszFile = (PSZ*)SSToDS(&pszFile);
     PSZ             pszLine;
@@ -198,6 +204,7 @@ APIRET  apiParseIniFile(PSZ pszFile)
     if (paNewApiData == NULL)
     {
         kprintf(("apiParseIniFile: failed to allocate temporary struct.\n"));
+        KLOGEXIT(ERROR_NOT_ENOUGH_MEMORY);
         return ERROR_NOT_ENOUGH_MEMORY;
     }
     memset(paNewApiData, 0, sizeof(aApiData));
@@ -303,6 +310,7 @@ APIRET  apiParseIniFile(PSZ pszFile)
         apiFreeApiData(paNewApiData);
     rfree(paNewApiData);
 
+    KLOGEXIT(rc);
     return rc;
 }
 
@@ -320,6 +328,7 @@ APIRET  apiParseIniFile(PSZ pszFile)
  */
 PSZ     apiStripIniLine(PSZ pszFile, PSZ * ppszFile)
 {
+    KLOGENTRY2("PSZ","PSZ pszFile, PSZ * ppszFile", pszFile, ppszFile);
     PSZ     pszComment;
     PSZ     pszLine;
     char    ch;
@@ -328,7 +337,10 @@ PSZ     apiStripIniLine(PSZ pszFile, PSZ * ppszFile)
      * If end of file Then return NULL.
      */
     if (*pszFile)
+    {
+        KLOGEXIT(NULL);
         return NULL;
+    }
 
     /*
      * Strip start of line.
@@ -374,6 +386,7 @@ PSZ     apiStripIniLine(PSZ pszFile, PSZ * ppszFile)
         pszComment--;
     pszComment[1] = '\0';
 
+    KLOGEXIT(pszLine);
     return pszLine;
 }
 
@@ -393,11 +406,15 @@ PSZ     apiStripIniLine(PSZ pszFile, PSZ * ppszFile)
  */
 int     apiInterpretApiNo(PSZ pszSection)
 {
+    KLOGENTRY1("int","PSZ pszSection", pszSection);
     int iApi = 0;
 
     pszSection++;                          /* skip '[' */
     if (*pszSection < '0' || *pszSection > '9')
+    {
+        KLOGEXIT(-1);
         return -1;
+    }
 
     while (*pszSection == ' ' || *pszSection == '\t')
         pszSection++;
@@ -408,6 +425,7 @@ int     apiInterpretApiNo(PSZ pszSection)
         pszSection++;
     }
 
+    KLOGEXIT(iApi);
     return iApi;
 }
 
@@ -422,6 +440,7 @@ int     apiInterpretApiNo(PSZ pszSection)
  */
 void    apiSortApiData(PAPIDATAENTRY paApiData)
 {
+    KLOGENTRY1("void","PAPIDATAENTRY paApiData", paApiData);
     int i;
 
     for (i = 0; i < API_CENTRIES; i++)
@@ -431,6 +450,7 @@ void    apiSortApiData(PAPIDATAENTRY paApiData)
         apiSortMaskArray(&paApiData[i].ModuleInc);
         apiSortMaskArray(&paApiData[i].ModuleExc);
     }
+    KLOGEXITVOID();
 }
 
 
@@ -446,6 +466,7 @@ void    apiSortApiData(PAPIDATAENTRY paApiData)
  */
 void    apiSortMaskArray(PMASKARRAY pMasks)
 {
+    KLOGENTRY1("void","PMASKARRAY pMasks", pMasks);
     int i;
     PSZ pszTmp;
 
@@ -468,6 +489,7 @@ void    apiSortMaskArray(PMASKARRAY pMasks)
             }
         }
     } while (pszTmp != NULL);
+    KLOGEXITVOID();
 }
 
 
@@ -481,6 +503,7 @@ void    apiSortMaskArray(PMASKARRAY pMasks)
  */
 void    apiFreeApiData(PAPIDATAENTRY paApiData)
 {
+    KLOGENTRY1("void","PAPIDATAENTRY paApiData", paApiData);
     int i;
 
     for (i = 0; i < API_CENTRIES; i++)
@@ -494,6 +517,7 @@ void    apiFreeApiData(PAPIDATAENTRY paApiData)
         if (paApiData[i].ModuleExc.cMasks)
             rfree(paApiData[i].ModuleExc.papszMasks);
     }
+    KLOGEXITVOID();
 }
 
 #if 1 //ndef RING0
@@ -509,6 +533,7 @@ void    apiFreeApiData(PAPIDATAENTRY paApiData)
  */
 APIRET  apiWriteIniFile(PSZ pszIniFile)
 {
+    KLOGENTRY1("APIRET","PSZ pszIniFile", pszIniFile);
     SFN     sfn;
     APIRET  rc;
 
@@ -564,6 +589,7 @@ APIRET  apiWriteIniFile(PSZ pszIniFile)
     else
         kprintf(("apiWriteIniFile: Failed open %s for write. rc=%d\n", pszIniFile, rc));
 
+    KLOGEXIT(rc);
     return rc;
 }
 
@@ -583,6 +609,7 @@ APIRET  apiWriteIniFile(PSZ pszIniFile)
  */
 APIRET  apiWriteMasks(SFN sfn, PULONG poff, PMASKARRAY pMasks, PSZ pszType, BOOL fEnabled)
 {
+    KLOGENTRY5("APIRET","SFN sfn, PULONG poff, PMASKARRAY pMasks, PSZ pszType, BOOL fEnabled", sfn, poff, pMasks, pszType, fEnabled);
     char    sz[48];
     PSZ     psz = (PSZ)SSToDS(&sz[0]);
     APIRET  rc = NO_ERROR;
@@ -594,11 +621,15 @@ APIRET  apiWriteMasks(SFN sfn, PULONG poff, PMASKARRAY pMasks, PSZ pszType, BOOL
         sprintf(psz, "Type=%s Disabled", pszType);
     rc = apiWriteLine(sfn, poff, psz);
     if (rc != NO_ERROR)
+    {
+        KLOGEXIT(rc);
         return rc;
+    }
 
     for (i = 0, rc = NO_ERROR; rc == NO_ERROR && i < pMasks->cMasks; i++)
         rc = apiWriteLine(sfn, poff, pMasks->papszMasks[i]);
 
+    KLOGEXIT(rc);
     return rc;
 }
 
@@ -616,6 +647,7 @@ APIRET  apiWriteMasks(SFN sfn, PULONG poff, PMASKARRAY pMasks, PSZ pszType, BOOL
  */
 APIRET  apiWriteLine(SFN sfn, PULONG poff, PSZ pszString)
 {
+    KLOGENTRY3("APIRET","SFN sfn, PULONG poff, PSZ pszString", sfn, poff, pszString);
     ULONG   cb = strlen(pszString);
     APIRET  rc;
 
@@ -629,6 +661,7 @@ APIRET  apiWriteLine(SFN sfn, PULONG poff, PSZ pszString)
             *poff += cb;
     }
 
+    KLOGEXIT(rc);
     return rc;
 }
 
@@ -650,12 +683,14 @@ APIRET KRNLCALL IOSftOpen(
     PULONG pulsomething
     )
 {
+    KLOGENTRY5("APIRET","PSZ pszFilename, ULONG flOpenFlags, ULONG flOpenMode, PSFN phFile, PULONG pulsomething", pszFilename, flOpenFlags, flOpenMode, phFile, pulsomething);
     APIRET  rc;
     ULONG   ulAction = 0;
 
     rc = DosOpen(pszFilename, phFile, &ulAction, 0, 0, flOpenFlags, flOpenMode, NULL);
 
     pulsomething = pulsomething;
+    KLOGEXIT(rc);
     return rc;
 }
 
@@ -676,12 +711,14 @@ APIRET KRNLCALL IOSftReadAt(
     ULONG flFlags,
     ULONG ulOffset)
 {
+    KLOGENTRY5("APIRET","SFN hFile, PULONG pcbActual, PVOID pvBuffer, ULONG flFlags, ULONG ulOffset", hFile, pcbActual, pvBuffer, flFlags, ulOffset);
     APIRET  rc;
     ULONG   ul;
     rc = DosSetFilePtr(hFile, ulOffset, FILE_BEGIN, &ul);
     if (rc == NO_ERROR)
         rc = DosRead(hFile, pvBuffer, *pcbActual, pcbActual);
     flFlags = flFlags;
+    KLOGEXIT(rc);
     return rc;
 }
 
@@ -703,12 +740,14 @@ APIRET KRNLCALL IOSftWriteAt(
     ULONG flFlags,
     ULONG ulOffset)
 {
+    KLOGENTRY5("APIRET","SFN hFile, PULONG pcbActual, PVOID pvBuffer, ULONG flFlags, ULONG ulOffset", hFile, pcbActual, pvBuffer, flFlags, ulOffset);
     APIRET  rc;
     ULONG   ul;
     rc = DosSetFilePtr(hFile, ulOffset, FILE_BEGIN, &ul);
     if (rc == NO_ERROR)
         rc = DosWrite(hFile, pvBuffer, *pcbActual, pcbActual);
     flFlags = flFlags;
+    KLOGEXIT(rc);
     return rc;
 }
 
@@ -722,12 +761,14 @@ APIRET KRNLCALL SftFileSize(
     SFN hFile,
     PULONG pcbFile)
 {
+    KLOGENTRY2("APIRET","SFN hFile, PULONG pcbFile", hFile, pcbFile);
     FILESTATUS3 fsts3;
     APIRET      rc;
 
     rc = DosQueryFileInfo(hFile, FIL_STANDARD, &fsts3, sizeof(fsts3));
     if (rc == NO_ERROR)
         *pcbFile = fsts3.cbFile;
+    KLOGEXIT(rc);
     return rc;
 }
 
@@ -746,6 +787,8 @@ APIRET KRNLCALL SftFileSize(
  */
 BOOL    apiFindNameInMaskArray(PSZ pszName, PMASKARRAY pMasks)
 {
+    KLOGENTRY2("BOOL","PSZ pszName, PMASKARRAY pMasks", pszName, pMasks);
+    KLOGEXIT(FALSE);
     return FALSE;
 }
 
@@ -766,6 +809,7 @@ BOOL    apiFindNameInMaskArray(PSZ pszName, PMASKARRAY pMasks)
  */
 APIRET  apiGetProccessName(PSZ pszName)
 {
+    KLOGENTRY1("APIRET","PSZ pszName", pszName);
     PPTDA pPTDA = ptdaGetCur();
     if (pPTDA)
     {
@@ -788,6 +832,7 @@ APIRET  apiGetProccessName(PSZ pszName)
                 ldrGetFileName2(psmte->smte_path, (PCHAR*)SSToDS(&psz), (PCHAR*)SSToDS(&pszExt));
                 if (!psz) psz = psmte->smte_path;
                 strcpy(pszName, psz);
+                KLOGEXIT(NO_ERROR);
                 return NO_ERROR;
             }
             else
@@ -799,6 +844,7 @@ APIRET  apiGetProccessName(PSZ pszName)
     else
         kprintf(("apiGetProcessName: No current PTDA!\n"));
 
+    KLOGEXIT(ERROR_INVALID_PARAMETER);
     return ERROR_INVALID_PARAMETER;
 }
 
@@ -818,6 +864,7 @@ APIRET  apiGetProccessName(PSZ pszName)
  */
 APIRET  apiGetModuleName(PSZ pszName, USHORT usCS, ULONG ulEIP)
 {
+    KLOGENTRY3("APIRET","PSZ pszName, USHORT usCS, ULONG ulEIP", pszName, usCS, ulEIP);
     HMTE hmte = VMGetOwner(usCS, ulEIP);
     if (hmte)
     {
@@ -837,6 +884,7 @@ APIRET  apiGetModuleName(PSZ pszName, USHORT usCS, ULONG ulEIP)
             ldrGetFileName2(psmte->smte_path, (PCHAR*)SSToDS(&psz), (PCHAR*)SSToDS(&pszExt));
             if (!psz) psz = psmte->smte_path;
             strcpy(pszName, psz);
+            KLOGEXIT(NO_ERROR);
             return NO_ERROR;
         }
         else
@@ -848,6 +896,7 @@ APIRET  apiGetModuleName(PSZ pszName, USHORT usCS, ULONG ulEIP)
     /*
      * We failed.
      */
+    KLOGEXIT(ERROR_INVALID_PARAMETER);
     return ERROR_INVALID_PARAMETER;
 }
 
@@ -869,13 +918,17 @@ APIRET  apiGetModuleName(PSZ pszName, USHORT usCS, ULONG ulEIP)
  */
 BOOL _Optlink   APIQueryEnabled(int iApi, USHORT usCS, LONG ulEIP)
 {
+    KLOGENTRY3("BOOL","int iApi, USHORT usCS, LONG ulEIP", iApi, usCS, ulEIP);
     PAPIDATAENTRY   pEntry;
 
     /*
      * Check if these enhancements are switched off globally.
      */
     if (isApiEnhDisabled())
+    {
+        KLOGEXIT(FALSE);
         return FALSE;
+    }
 
     /*
      * Aquire read lock.
@@ -924,6 +977,7 @@ BOOL _Optlink   APIQueryEnabled(int iApi, USHORT usCS, LONG ulEIP)
      */
     RWLockReleaseRead(&ApiInfoRWLock);
 
+    KLOGEXIT(fRet);
     return fRet;
 }
 
@@ -938,10 +992,12 @@ BOOL _Optlink   APIQueryEnabled(int iApi, USHORT usCS, LONG ulEIP)
  */
 APIRET _Optlink APIInit(void)
 {
+    KLOGENTRY0("APIRET");
     APIRET  rc;
 
     rc = apiReadIniFile(&szWin32kIni[0]);
 
+    KLOGEXIT(rc);
     return rc;
 }
 #endif

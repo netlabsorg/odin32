@@ -1,4 +1,4 @@
-/* $Id: myldrCheckInternalName.cpp,v 1.1.2.1 2002-03-31 20:09:15 bird Exp $
+/* $Id: myldrCheckInternalName.cpp,v 1.1.2.2 2002-04-01 09:06:08 bird Exp $
  *
  * ldrCheckInternalName - ldrCheckInternalName replacement with support for
  *                  long DLL names and no .DLL-extention dependency.
@@ -8,7 +8,9 @@
  * Project Odin Software License can be found in LICENSE.TXT
  *
  */
-
+#ifndef NOFILEID
+static const char szFileId[] = "$Id: myldrCheckInternalName.cpp,v 1.1.2.2 2002-04-01 09:06:08 bird Exp $";
+#endif
 
 /*******************************************************************************
 *   Defined Constants And Macros                                               *
@@ -24,8 +26,8 @@
 *   Header Files                                                               *
 *******************************************************************************/
 #include <os2.h>
-#include <peexe.h>
-#include <exe386.h>
+#include "LXexe.h"                      /* OS/2 LX structs and definitions. */
+#include "PEexe.h"                      /* Wine PE structs and definitions. */
 #include <OS2Krnl.h>
 #include <kKrnlLib.h>
 
@@ -61,6 +63,7 @@
  */
 ULONG LDRCALL myldrCheckInternalName(PMTE pMTE)
 {
+    KLOGENTRY1("ULONG","PMTE pMTE", pMTE);
     /* Check if this feature is enabled */
     if (isDllFixesDisabled())
     {
@@ -68,9 +71,12 @@ ULONG LDRCALL myldrCheckInternalName(PMTE pMTE)
         APIRET  rc = ldrCheckInternalName(pMTE);
         kprintf(("myldrCheckInternalName: pMTE=0x%08x intname=%.*s path=%s rc=%d\n", /* (original)\",*/
                  pMTE, *(PCHAR)pMTE->mte_swapmte->smte_restab, (PCHAR)pMTE->mte_swapmte->smte_restab + 1, ldrpFileNameBuf, rc));
+        KLOGEXIT(rc);
         return rc;
         #else
-        return ldrCheckInternalName(pMTE);
+        ULONG rc = ldrCheckInternalName(pMTE);
+        KLOGEXIT(rc);
+        return rc;
         #endif
     }
 
@@ -89,7 +95,10 @@ ULONG LDRCALL myldrCheckInternalName(PMTE pMTE)
      * Return successfully if not library module.
      */
     if (!(pMTE->mte_flags1 & LIBRARYMOD))
+    {
+        KLOGEXIT(NO_ERROR);
         return NO_ERROR;
+    }
 
 
     /*
@@ -184,6 +193,7 @@ ULONG LDRCALL myldrCheckInternalName(PMTE pMTE)
     kprintf(("myldrCheckInternalName: pMTE=0x%08x intname=%.*s path=%s rc=%d\n",
              pMTE, *(PCHAR)pMTE->mte_swapmte->smte_restab, (PCHAR)pMTE->mte_swapmte->smte_restab + 1, ldrpFileNameBuf, rc));
 
+    KLOGEXIT(rc);
     return rc;
 }
 

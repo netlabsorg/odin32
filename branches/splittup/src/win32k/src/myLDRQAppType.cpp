@@ -1,4 +1,4 @@
-/* $Id: myLDRQAppType.cpp,v 1.1.2.1 2002-03-31 20:09:15 bird Exp $
+/* $Id: myLDRQAppType.cpp,v 1.1.2.2 2002-04-01 09:06:07 bird Exp $
  *
  * _myLDRQAppType - _LDRQAppType overload.
  *
@@ -7,6 +7,9 @@
  * Project Odin Software License can be found in LICENSE.TXT
  *
  */
+#ifndef NOFILEID
+static const char szFileId[] = "$Id: myLDRQAppType.cpp,v 1.1.2.2 2002-04-01 09:06:07 bird Exp $";
+#endif
 
 /*******************************************************************************
 *   Defined Constants And Macros                                               *
@@ -45,19 +48,21 @@
  */
 ULONG LDRCALL myLDRQAppType(ULONG p1, ULONG p2)
 {
+    KLOGENTRY2("ULONG","ULONG p1, ULONG p2", p1, p2);
     APIRET rc;
 
-    kprintf(("myLDRQAppType: entry\n"));
     rc = KSEMRequestMutex(ptda_ptda_ptdasem(ptdaGetCur()), KSEM_INDEFINITE_WAIT);
     if (rc != NO_ERROR)
     {
         kprintf(("myLDRQAppType: failed to get intra-process semaphore.\n"));
+        KLOGEXIT(rc);
         return rc;
     }
     rc = LDRRequestSem();
     if (rc != NO_ERROR)
     {
         kprintf(("myLDRQAppType: failed to get loader semaphore.\n"));
+        KLOGEXIT(rc);
         return rc;
     }
 
@@ -71,7 +76,7 @@ ULONG LDRCALL myLDRQAppType(ULONG p1, ULONG p2)
 
     LDRClearSem();
     KSEMReleaseMutex(ptda_ptda_ptdasem(ptdaGetCur()));
-    kprintf(("myLDRQAppType: exit\n"));
 
+    KLOGEXIT(rc);
     return rc;
 }

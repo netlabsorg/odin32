@@ -1,4 +1,4 @@
-/* $Id: xx2lxmain.cpp,v 1.1.2.1 2002-03-31 20:09:21 bird Exp $
+/* $Id: xx2lxmain.cpp,v 1.1.2.2 2002-04-01 09:06:11 bird Exp $
  *
  * Xx2Lx main program. (Ring 3 only!)
  *
@@ -7,6 +7,9 @@
  * Project Odin Software License can be found in LICENSE.TXT
  *
  */
+#ifndef NOFILEID
+static const char szFileId[] = "$Id: xx2lxmain.cpp,v 1.1.2.2 2002-04-01 09:06:11 bird Exp $";
+#endif
 
 /*******************************************************************************
 *   Defined Constants And Macros                                               *
@@ -24,11 +27,10 @@
 *   Header Files                                                               *
 *******************************************************************************/
 #include <os2.h>
-#include <peexe.h>
-#include <neexe.h>
-#include <newexe.h>
-#include <exe386.h>
-#include "elf.h"
+#include "MZexe.h"                      /* MZ structs and definitions. */
+#include "LXexe.h"                      /* LX structs and definitions. */
+#include "PEexe.h"                      /* PE structs and definitions. */
+#include "ELFexe.h"                     /* ELF structs and definitions. */
 #include <malloc.h>
 #include <string.h>
 #include <stdlib.h>

@@ -1,4 +1,4 @@
-/* $Id: k32SendSystemEvent.cpp,v 1.1.2.1 2002-03-31 20:09:12 bird Exp $
+/* $Id: k32SendSystemEvent.cpp,v 1.1.2.2 2002-04-01 09:06:06 bird Exp $
  *
  * k32SendSystemEvent - Send a system event like Ctrl-Alt-Delete
  *          and Ctrl-Alt-2xNumLock.
@@ -8,6 +8,9 @@
  * Project Odin Software License can be found in LICENSE.TXT
  *
  */
+#ifndef NOFILEID
+static const char szFileId[] = "$Id: k32SendSystemEvent.cpp,v 1.1.2.2 2002-04-01 09:06:06 bird Exp $";
+#endif
 
 
 /*******************************************************************************
@@ -15,10 +18,9 @@
 *******************************************************************************/
 #define INCL_DOSMEMMGR
 #define INCL_DOSERRORS
-
 #define INCL_OS2KRNL_TK
 #define INCL_OS2KRNL_SEM
-
+#define INCL_KKL_LOG
 #define NO_WIN32K_LIB_FUNCTIONS
 
 /*******************************************************************************
@@ -57,6 +59,7 @@
  */
 APIRET k32SendSystemEvent(ULONG ulEvent, BOOL fHandle)
 {
+    KLOGENTRY2("APIRET","ULONG ulEvent, BOOL fHandle", ulEvent, fHandle);
     /*
      * Validate parameters.
      *  Event identifier range.
@@ -65,7 +68,10 @@ APIRET k32SendSystemEvent(ULONG ulEvent, BOOL fHandle)
     if (    ulEvent > K32_SYSEVENT_LAST
         ||  ((ULONG)hev & 0xFFFF0000UL) != 0x80010000UL /* 0x80010000 seems to be the shared event semaphore handle bits. */
         )
+    {
+        KLOGEXIT(ERROR_INVALID_PARAMETER);
         return ERROR_INVALID_PARAMETER;
+    }
 
 
     /*
@@ -74,7 +80,10 @@ APIRET k32SendSystemEvent(ULONG ulEvent, BOOL fHandle)
     if (    (fHandle  && aSysEventsOverrides[ulEvent].hev && !aSysEventsOverrides[ulEvent].fBad)
         ||  (!fHandle && aSysEventsOverrides[ulEvent].hev != hev && !aSysEventsOverrides[ulEvent].fBad)
         )
+    {
+        KLOGEXIT(ERROR_ACCESS_DENIED);
         return ERROR_ACCESS_DENIED;
+    }
 
 
     /*
@@ -90,6 +99,7 @@ APIRET k32SendSystemEvent(ULONG ulEvent, BOOL fHandle)
         aSysEventsOverrides[ulEvent].hev = NULLHANDLE;
     }
 
+    KLOGEXIT(NO_ERROR);
     return NO_ERROR;
 }
 

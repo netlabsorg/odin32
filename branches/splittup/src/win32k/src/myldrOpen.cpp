@@ -1,4 +1,4 @@
-/* $Id: myldrOpen.cpp,v 1.1.2.1 2002-03-31 20:09:17 bird Exp $
+/* $Id: myldrOpen.cpp,v 1.1.2.2 2002-04-01 09:06:09 bird Exp $
  *
  * myldrOpen - ldrOpen.
  *
@@ -7,6 +7,9 @@
  * Project Odin Software License can be found in LICENSE.TXT
  *
  */
+#ifndef NOFILEID
+static const char szFileId[] = "$Id: myldrOpen.cpp,v 1.1.2.2 2002-04-01 09:06:09 bird Exp $";
+#endif
 
 
 /*******************************************************************************
@@ -28,8 +31,10 @@
 *   Header Files                                                               *
 *******************************************************************************/
 #include <os2.h>
-#include <peexe.h>
-#include <exe386.h>
+#include "MZexe.h"                      /* LX structs and definitions. */
+#include "LXexe.h"                      /* LX structs and definitions. */
+#include "PEexe.h"                      /* PE structs and definitions. */
+#include "ELFexe.h"                     /* ELF structs and definitions. */
 #include <OS2Krnl.h>
 #include <kKrnlLib.h>
 
@@ -40,8 +45,6 @@
 #include <stdarg.h>
 
 #include "options.h"
-#include "elf.h"
-#include "OS2Krnl.h"
 #include "dev32.h"
 #include "ldr.h"
 #include "ModuleBase.h"
@@ -68,6 +71,7 @@
  */
 ULONG LDRCALL myldrOpen(PSFN phFile, PSZ pszFilename, PULONG pfl)
 {
+    KLOGENTRY3("ULONG","PSFN phFile, PSZ pszFilename, PULONG pfl", phFile, pszFilename, pfl);
     static  int cNesting = 0;           /* This is an variable which hold the nesting */
                                         /* level of this function. This is useful     */
                                         /* when we call it recurcively.               */
@@ -778,6 +782,7 @@ ret:
     if (rc == NO_ERROR && isForcePreloadEnabled() && pfl)
         *pfl &= ~0x1000UL; /* 0x1000 is the fixed media flag. */
 
+    KLOGEXIT(rc);
     return rc;
 }
 
@@ -809,6 +814,7 @@ ret:
  */
 APIRET AddArgsToFront(int cArgs,  ...)
 {
+    KLOGENTRY2("APIRET","int cArgs, ...", cArgs, &cArgs);
     va_list     vaarg;                  /* Variable length argument list. */
     int         cchOldArgs;             /* Length of the old arguments (including the first argument). */
                                         /* cchOldArgs = 1 means no arguments. It don't include the very last '\0' */
@@ -831,12 +837,14 @@ APIRET AddArgsToFront(int cArgs,  ...)
     if (!isLdrStateExecPgm())
     {
         kprintf(("AddArgsToFront: not in tkExecPgm state.\n"));
+        KLOGEXIT(ERROR_INVALID_PARAMETER);
         return ERROR_INVALID_PARAMETER;
     }
     #endif
     if (!fTkExecPgm)
     {
         kprintf(("AddArgsToFront: called when not in tkExecPgm data is invalid!\n"));
+        KLOGEXIT(ERROR_INVALID_PARAMETER);
         return ERROR_INVALID_PARAMETER;
     }
 
@@ -854,6 +862,7 @@ APIRET AddArgsToFront(int cArgs,  ...)
     if (cchNewArgs == 0)
     {
         kprintf(("AddArgsToFront: the size of the arguments to add is zero!\n"));
+        KLOGEXIT(ERROR_INVALID_PARAMETER);
         return ERROR_INVALID_PARAMETER;
     }
     #endif
@@ -869,6 +878,7 @@ APIRET AddArgsToFront(int cArgs,  ...)
     {
         kprintf(("AddArgsToFront: argument buffer is too small to hold the arguments to add, cchOldArgs=%d, cchNewArgs=%d\n",
                  cchOldArgs, cchNewArgs));
+        KLOGEXIT(ERROR_BAD_ARGUMENTS);
         return ERROR_BAD_ARGUMENTS;
     }
 
@@ -913,6 +923,7 @@ APIRET AddArgsToFront(int cArgs,  ...)
     }
     #endif
 
+    KLOGEXIT(NO_ERROR);
     return NO_ERROR;
 }
 
@@ -931,28 +942,33 @@ APIRET AddArgsToFront(int cArgs,  ...)
  */
 APIRET SetExecName(const char *pszExecName)
 {
+    KLOGENTRY1("APIRET","const char * pszExecName", pszExecName);
     #ifdef DEBUG
     int cch;
     cch = strlen(pszExecName);
     if (cch > CCHMAXPATH)
     {
         kprintf(("ChangeExecName: filename is too long! cch=%d. name=%s\n", cch, pszExecName));
+        KLOGEXIT(ERROR_FILENAME_EXCED_RANGE);
         return ERROR_FILENAME_EXCED_RANGE;
     }
     if (!isLdrStateExecPgm())
     {
         kprintf(("ChangeExecName: called when not in tkExecPgm state!!! FATAL ERROR!\n"));
+        KLOGEXIT(ERROR_INVALID_PARAMETER);
         return ERROR_INVALID_PARAMETER;
     }
     #endif
     if (!fTkExecPgm)
     {
         kprintf(("ChangeExecName: called when not in tkExecPgm data is invalid!!! FATAL ERROR!\n"));
+        KLOGEXIT(ERROR_INVALID_PARAMETER);
         return ERROR_INVALID_PARAMETER;
     }
 
     strcpy(achTkExecPgmFilename, pszExecName);
 
+    KLOGEXIT(0);
     return 0;
 }
 
@@ -973,6 +989,7 @@ APIRET SetExecName(const char *pszExecName)
  */
 APIRET OpenPATH(PSFN phFile, char *pszFilename, PULONG pfl)
 {
+    KLOGENTRY3("APIRET","PSFN phFile, char * pszFilename, PULONG pfl", phFile, pszFilename, pfl);
     APIRET      rc;
     USHORT      TCBFailErr_save;
     int         cchFile;                /* Filename length + 1. */
@@ -983,7 +1000,10 @@ APIRET OpenPATH(PSFN phFile, char *pszFilename, PULONG pfl)
      *  No PATH environment.
      */
     if (pszPath == NULL)
+    {
+        KLOGEXIT(ERROR_FILE_NOT_FOUND);
         return ERROR_FILE_NOT_FOUND;
+    }
 
     /**@sketch
      * Skip any paths in the filename.
@@ -1075,6 +1095,7 @@ APIRET OpenPATH(PSFN phFile, char *pszFilename, PULONG pfl)
                     strcpy(pszFilename, achFilename);
                 default:
                     tcbSetTCBFailErr(tcbGetCur(), TCBFailErr_save);
+                    KLOGEXIT(rc);
                     return rc;
             }
         }
@@ -1096,5 +1117,6 @@ APIRET OpenPATH(PSFN phFile, char *pszFilename, PULONG pfl)
      */
     *phFile = 0;
     tcbSetTCBFailErr(tcbGetCur(), TCBFailErr_save);
+    KLOGEXIT(ERROR_FILE_NOT_FOUND);
     return ERROR_FILE_NOT_FOUND;
 }

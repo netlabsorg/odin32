@@ -1,4 +1,4 @@
-/* $Id: myldrRead.cpp,v 1.1.2.1 2002-03-31 20:09:18 bird Exp $
+/* $Id: myldrRead.cpp,v 1.1.2.2 2002-04-01 09:06:09 bird Exp $
  *
  * myldrRead - ldrRead.
  *
@@ -7,6 +7,9 @@
  * Project Odin Software License can be found in LICENSE.TXT
  *
  */
+#ifndef NOFILEID
+static const char szFileId[] = "$Id: myldrRead.cpp,v 1.1.2.2 2002-04-01 09:06:09 bird Exp $";
+#endif
 
 /*******************************************************************************
 *   Defined Constants And Macros                                               *
@@ -21,8 +24,8 @@
 *   Header Files                                                               *
 *******************************************************************************/
 #include <os2.h>
-#include <peexe.h>
-#include <exe386.h>
+#include "LXexe.h"                      /* OS/2 LX structs and definitions. */
+#include "PEexe.h"                      /* Wine PE structs and definitions. */
 #include <OS2Krnl.h>
 #include <kKrnlLib.h>
 
@@ -65,6 +68,7 @@ ULONG LDRCALL myldrRead(
     PMTE    pMTE
     )
 {
+    KLOGENTRY6("ULONG","SFN hFile, ULONG ulOffset, PVOID pvBuffer, ULONG fpBuffer, ULONG cbToRead, PMTE pMTE", hFile, ulOffset, pvBuffer, fpBuffer, cbToRead, pMTE);
     ULONG   rc;
 
     /* Check if this is an overrided handle */
@@ -104,5 +108,6 @@ ULONG LDRCALL myldrRead(
              hFile, ulOffset, pvBuffer, fpBuffer, cbToRead, pMTE, rc));
     #endif
 
+    KLOGEXIT(rc);
     return rc;
 }

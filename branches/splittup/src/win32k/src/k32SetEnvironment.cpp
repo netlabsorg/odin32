@@ -1,4 +1,4 @@
-/* $Id: k32SetEnvironment.cpp,v 1.1.2.1 2002-03-31 20:09:13 bird Exp $
+/* $Id: k32SetEnvironment.cpp,v 1.1.2.2 2002-04-01 09:06:06 bird Exp $
  *
  * k32SetEnvironment - Sets the Odin32 environment for a process.
  *
@@ -7,6 +7,9 @@
  * Project Odin Software License can be found in LICENSE.TXT
  *
  */
+#ifndef NOFILEID
+static const char szFileId[] = "$Id: k32SetEnvironment.cpp,v 1.1.2.2 2002-04-01 09:06:06 bird Exp $";
+#endif
 
 
 /*******************************************************************************
@@ -55,6 +58,7 @@
  */
 APIRET k32SetEnvironment(PSZ pszzEnvironment, ULONG cchEnvironment, PID pid)
 {
+    KLOGENTRY3("APIRET","PSZ pszzEnvironment, ULONG cchEnvironment, PID pid", pszzEnvironment, cchEnvironment, pid);
     APIRET  rc;
     PPTD    pptd;
 
@@ -64,12 +68,14 @@ APIRET k32SetEnvironment(PSZ pszzEnvironment, ULONG cchEnvironment, PID pid)
     if (pid >= 0x10000)
     {
         kprintf(("k32SetEnvironment: invalid pid=%x\n", pid));
+        KLOGEXIT(ERROR_INVALID_PARAMETER);
         return ERROR_INVALID_PARAMETER;
     }
 
     if (pid != 0)
     {
         kprintf(("k32SetEnvironment: currently only supported for current pid. pid=%x\n", pid));
+        KLOGEXIT(ERROR_INVALID_PARAMETER);
         return ERROR_INVALID_PARAMETER;
     }
 
@@ -81,6 +87,7 @@ APIRET k32SetEnvironment(PSZ pszzEnvironment, ULONG cchEnvironment, PID pid)
     if (rc != NO_ERROR)
     {
         kprintf(("k32SetEnvironment: LDRRequestSem failed with rc = %d\n", rc));
+        KLOGEXIT(rc);
         return rc;
     }
 
@@ -119,6 +126,7 @@ APIRET k32SetEnvironment(PSZ pszzEnvironment, ULONG cchEnvironment, PID pid)
         rc = ERROR_NOT_ENOUGH_MEMORY;
 
     LDRClearSem();
+    KLOGEXIT(rc);
     return rc;
 }
 

@@ -1,4 +1,4 @@
-/* $Id: k32ProcessReadWrite.cpp,v 1.1.2.1 2002-03-31 20:09:09 bird Exp $
+/* $Id: k32ProcessReadWrite.cpp,v 1.1.2.2 2002-04-01 09:06:05 bird Exp $
  *
  * k32ProcessReadWrite  -  Read or write to another process.
  *
@@ -7,6 +7,9 @@
  * Project Odin Software License can be found in LICENSE.TXT
  *
  */
+#ifndef NOFILEID
+static const char szFileId[] = "$Id: k32ProcessReadWrite.cpp,v 1.1.2.2 2002-04-01 09:06:05 bird Exp $";
+#endif
 
 
 /*******************************************************************************
@@ -52,6 +55,7 @@
  */
 APIRET k32ProcessReadWrite(PID pid, ULONG cb, PVOID pvSource, PVOID pvTarget, BOOL fRead)
 {
+    KLOGENTRY5("APIRET","PID pid, ULONG cb, PVOID pvSource, PVOID pvTarget, BOOL fRead", pid, cb, pvSource, pvTarget, fRead);
     ULONG   ulAddrAlias;
     ULONG   cbAlias;
     APIRET  rc;
@@ -65,7 +69,10 @@ APIRET k32ProcessReadWrite(PID pid, ULONG cb, PVOID pvSource, PVOID pvTarget, BO
     ulAddrAlias = (ULONG)(fRead ? pvSource : pvTarget) & ~0xfffUL;
     cbAlias = (cb + 0xfffUL) & ~0xfffUL;
     if (cbAlias - 1 + ulAddrAlias < ulAddrAlias)
+    {
+        KLOGEXIT(ERROR_INVALID_ACCESS);
         return ERROR_INVALID_ACCESS;
+    }
 
     /*
      * Find the PTDA for the given PID.
@@ -77,6 +84,7 @@ APIRET k32ProcessReadWrite(PID pid, ULONG cb, PVOID pvSource, PVOID pvTarget, BO
         )
     {
         kprintf(("k32ProcessReadWrite: Failed with invalid PID.\n"));
+        KLOGEXIT(rc != NO_ERROR ? rc : ERROR_INVALID_PARAMETER);
         return rc != NO_ERROR ? rc : ERROR_INVALID_PARAMETER;
     }
 
@@ -87,6 +95,7 @@ APIRET k32ProcessReadWrite(PID pid, ULONG cb, PVOID pvSource, PVOID pvTarget, BO
     if (rc != NO_ERROR)
     {
         kprintf(("k32ProcessReadWrite: LDRRequestSem failed with rc=%d\n", rc));
+        KLOGEXIT(rc);
         return rc;
     }
 
@@ -102,6 +111,7 @@ APIRET k32ProcessReadWrite(PID pid, ULONG cb, PVOID pvSource, PVOID pvTarget, BO
     if (rc != NO_ERROR)
     {
         kprintf(("k32ProcessReadWrite: VMMapDebugAlias failed with rc=%d\n"));
+        KLOGEXIT(rc);
         return rc;
     }
 
@@ -128,6 +138,7 @@ APIRET k32ProcessReadWrite(PID pid, ULONG cb, PVOID pvSource, PVOID pvTarget, BO
     if (VMFreeMem(vmac.ac_va, hPTDA, 0))
         kprintf(("k32ProcessReadWrite: VMFreeMem failed!\n"));
 
+    KLOGEXIT(rc);
     return rc;
 }
 

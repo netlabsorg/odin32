@@ -1,4 +1,4 @@
-/* $Id: myldrFindModule.cpp,v 1.1.2.1 2002-03-31 20:09:16 bird Exp $
+/* $Id: myldrFindModule.cpp,v 1.1.2.2 2002-04-01 09:06:08 bird Exp $
  *
  * ldrFindModule - ldrFindModule replacement with support for long DLL names
  *                  and .DLL-extention dependency.
@@ -8,6 +8,9 @@
  * Project Odin Software License can be found in LICENSE.TXT
  *
  */
+#ifndef NOFILEID
+static const char szFileId[] = "$Id: myldrFindModule.cpp,v 1.1.2.2 2002-04-01 09:06:08 bird Exp $";
+#endif
 
 /*******************************************************************************
 *   Defined Constants And Macros                                               *
@@ -22,8 +25,8 @@
 *   Header Files                                                               *
 *******************************************************************************/
 #include <os2.h>
-#include <peexe.h>
-#include <exe386.h>
+#include "LXexe.h"                      /* OS/2 LX structs and definitions. */
+#include "PEexe.h"                      /* Wine PE structs and definitions. */
 #include <OS2Krnl.h>
 #include <kKrnlLib.h>
 
@@ -68,6 +71,7 @@ int     mymemicmp(void *pv1, void *pv2, unsigned int cch);
  */
 ULONG LDRCALL myldrFindModule(PCHAR pachFilename, USHORT cchFilename, USHORT usClass, PPMTE ppMTE)
 {
+    KLOGENTRY4("ULONG","PCHAR pachFilename, USHORT cchFilename, USHORT usClass, PPMTE ppMTE", pachFilename, cchFilename, usClass, ppMTE);
     /*
      * Log.
      */
@@ -86,8 +90,10 @@ ULONG LDRCALL myldrFindModule(PCHAR pachFilename, USHORT cchFilename, USHORT usC
                      : "myldrFindModule: Found pmte=0x%08x  hmte=0x%04x  modname=%.8s  path=%s (%x)\n",
                      *ppMTE, (*ppMTE)->mte_handle, (*ppMTE)->mte_modname,
                      (*ppMTE)->mte_swapmte->smte_path, (*ppMTE)->mte_flags1 & CLASS_MASK));
+        KLOGEXIT(rc);
         return rc;
         #else
+        KLOGEXIT(ldrFindModule(pachFilename, cchFilename, usClass, ppMTE));
         return ldrFindModule(pachFilename, cchFilename, usClass, ppMTE);
         #endif
     }
@@ -121,6 +127,7 @@ ULONG LDRCALL myldrFindModule(PCHAR pachFilename, USHORT cchFilename, USHORT usC
     if (usClass & ~(CLASS_ALL | CLASS_PROGRAM | CLASS_GLOBAL | CLASS_SPECIFIC | SEARCH_FULL_NAME))
     {
         kprintf(("myldrFindModule: Unknown class flag! usClass=%d\n", usClass));
+        KLOGEXIT(ldrFindModule(pachFilename, cchFilename, usClass, ppMTE));
         return ldrFindModule(pachFilename, cchFilename, usClass, ppMTE);
     }
     #endif
@@ -128,6 +135,7 @@ ULONG LDRCALL myldrFindModule(PCHAR pachFilename, USHORT cchFilename, USHORT usC
     if (pachFilename < (PCHAR)0x10000 || ppMTE < (PPMTE)0x10000)
     {
         kprintf(("myldrFindModule: Invalid pointer(s); pachFilename=0x%08x  ppMTE=0x%08x", pachFilename, ppMTE));
+        KLOGEXIT(ERROR_INVALID_ACCESS);
         return ERROR_INVALID_ACCESS;
     }
 
@@ -139,6 +147,7 @@ ULONG LDRCALL myldrFindModule(PCHAR pachFilename, USHORT cchFilename, USHORT usC
     {
         *ppMTE = NULL;
         kprintf(("myldrFindModule: Not found; cchFilename = 0\n"));
+        KLOGEXIT(ERROR_FILE_NOT_FOUND);
         return ERROR_FILE_NOT_FOUND;
     }
 
@@ -161,7 +170,10 @@ ULONG LDRCALL myldrFindModule(PCHAR pachFilename, USHORT cchFilename, USHORT usC
         {
             rc = ldrTransPath(pachFilename);
             if (rc)
+            {
+                KLOGEXIT(rc);
                 return rc;
+            }
             pachFilename = ldrpFileNameBuf;
             cchFilename = (USHORT)(strlen(pachFilename) + 1);
             ldrUCaseString(pachFilename, cchFilename);
@@ -223,6 +235,7 @@ ULONG LDRCALL myldrFindModule(PCHAR pachFilename, USHORT cchFilename, USHORT usC
             )
         {
             kprintf(("myldrFindModule: Invalid name in class global; name=%.*s\n", cchFilename, pachFilename));
+            KLOGEXIT(ERROR_INVALID_NAME);
             return ERROR_INVALID_NAME;
         }
         #endif
@@ -239,6 +252,7 @@ ULONG LDRCALL myldrFindModule(PCHAR pachFilename, USHORT cchFilename, USHORT usC
         if (cchName <= 0)
         {
             kprintf(("myldrFindModule: Invalid name! ldrGetFileName2 failed; name=%.*s\n", cchFilename, pachFilename));
+            KLOGEXIT(ERROR_INVALID_NAME);
             return ERROR_INVALID_NAME;
         }
         #endif
@@ -365,6 +379,7 @@ ULONG LDRCALL myldrFindModule(PCHAR pachFilename, USHORT cchFilename, USHORT usC
                 *ppMTE = pmte;
                 kprintf(("myldrFindModule: Found pmte=0x%08x  hmte=0x%04x  modname=%.8s  path=%s (GLOBAL)\n",
                          pmte, pmte->mte_handle, pmte->mte_modname, pmte->mte_swapmte->smte_path));
+                KLOGEXIT(NO_ERROR);
                 return NO_ERROR;
             }
         }
@@ -385,6 +400,7 @@ ULONG LDRCALL myldrFindModule(PCHAR pachFilename, USHORT cchFilename, USHORT usC
                 *ppMTE = pmte;
                 kprintf(("myldrFindModule: Found pmte=0x%08x  hmte=0x%04x  modname=%.8s  path=%s (%x)\n",
                          pmte, pmte->mte_handle, pmte->mte_modname, pSMTE->smte_path, pmte->mte_flags1 & CLASS_MASK));
+                KLOGEXIT(NO_ERROR);
                 return NO_ERROR;
             }
         }
@@ -396,6 +412,7 @@ ULONG LDRCALL myldrFindModule(PCHAR pachFilename, USHORT cchFilename, USHORT usC
      */
     *ppMTE = NULL;
     kprintf(("myldrFindModule: Not Found\n"));
+    KLOGEXIT(NO_ERROR);
     return NO_ERROR;
 }
 

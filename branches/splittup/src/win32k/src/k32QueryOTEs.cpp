@@ -1,4 +1,4 @@
-/* $Id: k32QueryOTEs.cpp,v 1.1.2.1 2002-03-31 20:09:10 bird Exp $
+/* $Id: k32QueryOTEs.cpp,v 1.1.2.2 2002-04-01 09:06:05 bird Exp $
  *
  * k32QueryOTEs  -  Get's the object table entries (OTEs) for a given
  *                  module (given by a module handle).
@@ -8,6 +8,9 @@
  * Project Odin Software License can be found in LICENSE.TXT
  *
  */
+#ifndef NOFILEID
+static const char szFileId[] = "$Id: k32QueryOTEs.cpp,v 1.1.2.2 2002-04-01 09:06:05 bird Exp $";
+#endif
 
 
 /*******************************************************************************
@@ -48,6 +51,7 @@
  */
 APIRET k32QueryOTEs(HMTE hMTE, PQOTEBUFFER pQOte, ULONG cbQOte)
 {
+    KLOGENTRY3("APIRET","HMTE hMTE, PQOTEBUFFER pQOte, ULONG cbQOte", hMTE, pQOte, cbQOte);
     APIRET  rc;
     PMTE    pMTE;
 
@@ -57,7 +61,10 @@ APIRET k32QueryOTEs(HMTE hMTE, PQOTEBUFFER pQOte, ULONG cbQOte)
      *  Ensure that the buffer not less than minimum size.
      */
     if ((ULONG)pQOte < 0x10000 || cbQOte < sizeof(QOTEBUFFER))
+    {
+        KLOGEXIT(ERROR_INVALID_PARAMETER);
         return ERROR_INVALID_PARAMETER;
+    }
 
     /*
      * Take loader semaphore. (We are accessing LDR structures.)
@@ -66,6 +73,7 @@ APIRET k32QueryOTEs(HMTE hMTE, PQOTEBUFFER pQOte, ULONG cbQOte)
     if (rc != NO_ERROR)
     {
         kprintf(("k32QueryOTEs: LDRRequestSem failed with rc = %d\n", rc));
+        KLOGEXIT(rc);
         return rc;
     }
 
@@ -114,6 +122,7 @@ bailout:
      */
     LDRClearSem();
 
+    KLOGEXIT(rc);
     return rc;
 }
 

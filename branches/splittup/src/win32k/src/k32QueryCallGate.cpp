@@ -1,4 +1,4 @@
-/* $Id: k32QueryCallGate.cpp,v 1.1.2.1 2002-03-31 20:09:10 bird Exp $
+/* $Id: k32QueryCallGate.cpp,v 1.1.2.2 2002-04-01 09:06:05 bird Exp $
  *
  * k32QueryCallGate - Query the callgate selector for the callgate to the k32 APIs.
  *
@@ -7,6 +7,9 @@
  * Project Odin Software License can be found in LICENSE.TXT
  *
  */
+#ifndef NOFILEID
+static const char szFileId[] = "$Id: k32QueryCallGate.cpp,v 1.1.2.2 2002-04-01 09:06:05 bird Exp $";
+#endif
 
 
 /*******************************************************************************
@@ -15,6 +18,7 @@
 #define INCL_DOSMEMMGR
 #define INCL_DOSERRORS
 #define INCL_OS2KRNL_TK
+#define INCL_KKL_LOG
 
 #define NO_WIN32K_LIB_FUNCTIONS
 
@@ -50,6 +54,7 @@
  */
 APIRET k32QueryCallGate(PUSHORT pusCGSelector)
 {
+    KLOGENTRY1("APIRET","PUSHORT pusCGSelector", pusCGSelector);
     APIRET  rc;
 
     if (CallGateGDT > 7)
@@ -57,6 +62,7 @@ APIRET k32QueryCallGate(PUSHORT pusCGSelector)
     else
         rc = ERROR_INVALID_CALLGATE;
 
+    KLOGEXIT(rc);
     return rc;
 }
 

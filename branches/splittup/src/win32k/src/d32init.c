@@ -1,4 +1,4 @@
-/* $Id: d32init.c,v 1.1.2.1 2002-03-31 20:09:07 bird Exp $
+/* $Id: d32init.c,v 1.1.2.2 2002-04-01 09:06:04 bird Exp $
  *
  * d32init.c - 32-bits init routines.
  *
@@ -7,6 +7,9 @@
  * Project Odin Software License can be found in LICENSE.TXT
  *
  */
+#ifndef NOFILEID
+static const char szFileId[] = "$Id: d32init.c,v 1.1.2.2 2002-04-01 09:06:04 bird Exp $";
+#endif
 
 /*******************************************************************************
 *   Defined Constants                                                          *
@@ -48,7 +51,7 @@ static char * apszInfoLevel[] = {"INFOLEVEL_QUIET", "INFOLEVEL_ERROR", "INFOLEVE
 /*******************************************************************************
 *   Internal Functions                                                         *
 *******************************************************************************/
- ULONG          readnum(const char *pszNum);
+ULONG          readnum(const char *pszNum);
 
 
 /*
@@ -67,6 +70,7 @@ static char * apszInfoLevel[] = {"INFOLEVEL_QUIET", "INFOLEVEL_ERROR", "INFOLEVE
  */
 ULONG _System R0Init(RP32INIT *pRpInit)
 {
+    KLOGENTRY1("ULONG _System","RP32INIT * pRpInit", pRpInit);
     char *      pszTmp2;
     char *      pszTmp;
     APIRET      rc;
@@ -265,12 +269,18 @@ ULONG _System R0Init(RP32INIT *pRpInit)
      */
     /* loader */
     if ((rc = ldrInit()) != NO_ERROR)
+    {
+        KLOGEXIT(rc);
         return rc;
+    }
 
     /* apis */
     #if 0
     if ((rc = APIInit()) != NO_ERROR)
+    {
+        KLOGEXIT(rc);
         return rc;
+    }
     #endif
 
     /* callgate */
@@ -278,6 +288,7 @@ ULONG _System R0Init(RP32INIT *pRpInit)
     if ((rc = InitCallGate()) != NO_ERROR)
     {
         kprintf(("R0Init32: InitCallGate failed with rc=%d\n", rc));
+        KLOGEXIT(rc);
         return rc;
     }
     #endif
@@ -304,6 +315,7 @@ ULONG _System R0Init(RP32INIT *pRpInit)
     if (rc != NO_ERROR)
         kprintf(("data segment lock failed with with rc=%d\n", rc));
 
+    KLOGEXIT(NO_ERROR);
     return NO_ERROR;
 }
 
@@ -317,6 +329,7 @@ ULONG _System R0Init(RP32INIT *pRpInit)
  */
 ULONG    readnum(const char *pszNum)
 {
+    KLOGENTRY1("ULONG","const char * pszNum", pszNum);
     ULONG ulRet = 0;
     ULONG ulBase = 10;
     int   i = 0;
@@ -348,6 +361,7 @@ ULONG    readnum(const char *pszNum)
         i++;
     }
 
+    KLOGEXIT(i > 0 ? ulRet : ~0UL);
     return i > 0 ? ulRet : ~0UL;
 }
 
