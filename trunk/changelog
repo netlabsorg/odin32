@@ -1,4 +1,21 @@
-/* $Id: changelog,v 1.2660 2004-01-14 11:05:39 sandervl Exp $ */
+/* $Id: changelog,v 1.2661 2004-01-15 10:42:25 sandervl Exp $ */
+
+ 2004-01-15: knut st. osmundsen <bird-changelog@innotek    >
+    - DBGWRAP:  o Added optional display of caller address.
+                  (Remove NO_CALLER #define)
+    - PE2LX:    o Process imports in Ring-3.
+    - KERNEL32: o Rewrote pe2lx classes to match pe2lx import changes.
+                o Made pe2lx classes use the generic export lookup.
+                o Rewrote the generic PE export lookup in the base class
+                  to use a binary search and support pe2lx images with
+                  differnet RVA calculation.
+                o Fixed a couple of COMMIT_ALL issues where pages were touched
+                  by winimagepeldr code before they were preloaded.
+    - USER32:   o Removed duplicate (and dangerous) checks on framewindows
+                  in a couple of enumerations (OSLibWinQueryClientWindow).
+    - MAKE:     o Warn about uninitialized variables for C++ code.
+                  (Looks like it give a lot of false warnings on C code, so
+                   let's skip it there.)
 
  2004-01-14: KO Myung-Hun <komh@chollian    >
     - GDI32:    o Fixed Ft2CharStringPosAtW(), passing lCount instead len.
