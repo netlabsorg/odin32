@@ -1,4 +1,27 @@
- /* $Id: changelog,v 1.972 2000-06-03 16:40:15 sandervl Exp $ */
+ /* $Id: changelog,v 1.973 2000-06-07 14:46:25 sandervl Exp $ */
+
+ 2000-06-07: Sander van Leeuwen <sandervl@xs4all.nl>
+    - USER32:       Fixed wrong dispatch of WM_NCHITTEST
+                    Fixed DC leak in EndPaint (reset hps type to TYPE_1)
+                    -> resulted in out of memory and very slow PM operations
+                    -> ICQ 2000a install now finishes (used to run out of mem)
+                    Rewrote window management; now one PM window (non-frame)
+                    is created for each win32 window (used to be a frame/client
+                    pair)
+                    -> speeds up drawing & fixes some repaint problems
+                    Window coordinates (internally stored) are now relative
+                    to window parent (or screen coord. if no parent); client
+                    coordinates relative to the frame window
+                    GetParent now returns owner if toplevel window
+                    SetParent hides and shows window when changing parent
+                    Added support for DCX_USESTYLE, DCX_CLIPSIBLINGS, DCX_CLIPCHILDREN
+                    and DCX_PARENTCLIP in GetDCEx
+                    Rewrote Set/GetWindowPlacement + SetInternalWindowPos (Wine port)
+                    Manual minimize, maximize & restore in ShowWindow + fixes
+                    TODO: Repaint problems, move child windows when client position/size
+                          changes
+    - SHELL32:      Disabled system tray window for now. (appears in top/right
+                    of the desktop otherwise)
 
  2000-06-03: Jeroen van den Horn <J.vandenHorn@fibre.a2000.nl>
     - WINMM:        Don't start playback when WaveOutRestart is called
