@@ -1,15 +1,30 @@
-/* $Id: probkrnl.h,v 1.8 2002-03-31 19:01:04 bird Exp $
+/* $Id: probkrnl.h,v 1.9 2002-12-16 00:28:37 bird Exp $
  *
- * Include file for ProbKrnl.
+ * krnlImportTable definitions.
  *
- * Copyright (c) 1998-2001 knut st. osmundsen (kosmunds@csc.com)
+ * Copyright (c) 1998-2003 knut st. osmundsen <bird@anduin.net>
  *
- * Project Odin Software License can be found in LICENSE.TXT
+ *
+ * This file is part of kKrnlLib.
+ *
+ * kKrnlLib is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * kKrnlLib is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with kKrnlLib; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  */
 
-#ifndef _ProbKrnl_h_
-#define _ProbKrnl_h_
+#ifndef __krnlImportTable_h__
+#define __krnlImportTable_h__
 
 /*******************************************************************************
 *   Defined Constants And Macros                                               *
@@ -107,7 +122,7 @@
 *   Structures and Typedefs                                                    *
 *******************************************************************************/
 #pragma pack(1)
-typedef struct tagIMPORTKRNLSYM
+typedef struct _IMPORTKRNLSYM
 {
     signed short int    iOrdinal;       /* The ordinal for this entry. (Count two ordinals for proc imports.) */
     unsigned char       fFound;         /* This is set when name is found */
@@ -129,7 +144,7 @@ typedef struct tagIMPORTKRNLSYM
  * Database of kernel symbols.
  */
 #pragma pack(1)
-typedef struct
+typedef struct _KRNLDBENTRY
 {
     unsigned short  usBuild;            /* Build number */
     unsigned short  fKernel;            /* Kernel flag (KF_* defines in options.h). */
@@ -150,20 +165,13 @@ typedef struct
 *   Global Variables                                                           *
 *   NOTE! These are only available at init time!                               *
 *******************************************************************************/
-extern IMPORTKRNLSYM DATA16_GLOBAL  aImportTab[NBR_OF_KRNLIMPORTS]; /* Defined in ProbKrnl.c */
-extern char          DATA16_GLOBAL  szSymbolFile[60];               /* Defined in ProbKrnl.c */
-#ifdef DB_16BIT
-extern const KRNLDBENTRY DATA16_INIT aKrnlSymDB[];                  /* Defined in symdb.c (for 16-bit usage) */
-#else
-extern const KRNLDBENTRY            aKrnlSymDB32[];                 /* Defined in symdb32.c */
-#endif
+extern IMPORTKRNLSYM        aImportTab[NBR_OF_KRNLIMPORTS]; /* Defined in ProbKrnl.c */
+extern char                 szSymbolFile[60];               /* Defined in ProbKrnl.c */
+extern const KRNLDBENTRY    aKrnlSymDB32[];                 /* Defined in symdb32.c */
 
 #if defined(__IBMC__) || defined(__IBMCPP__)
     #pragma map( aImportTab , "_aImportTab"  )
     #pragma map( szSymbolFile,"_szSymbolFile")
-#ifdef DB_16BIT
-    #pragma map( aKrnlSymDB , "_aKrnlSymDB"  )
-#endif
 #endif
 
 /*
