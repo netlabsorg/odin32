@@ -1,4 +1,4 @@
-/* $Id: kKLstdarg.h,v 1.1 2001-10-19 00:05:12 bird Exp $
+/* $Id: kKLstdarg.h,v 1.2 2002-01-09 03:21:58 bird Exp $
  *
  * Stdarg stuff, with additions to get around some SS != DS trouble.
  *
@@ -18,5 +18,12 @@
  */
 #undef va_start
 #define va_start(ap, last) ap = ((va_list)SSToDS(&last)) + __nextword(last)
+
+/*
+ * In order to get rid of the stupid warnings..
+ */
+#undef va_arg
+#define va_arg(ap, type)   ((type *)(void *)((ap += (int) __nextword(type)) - __nextword(type)))[0]
+
 
 #endif
