@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.51 2000-02-26 18:01:38 bird Exp $
+# $Id: makefile,v 1.52 2000-02-26 18:23:34 bird Exp $
 
 #
 # PD-Win32 API
@@ -135,6 +135,20 @@ all: libs
     $(MAKE_CMD)
     cd ..\twain_32
     $(MAKE_CMD)
+
+#
+# Sander, could you evaluate these two rules:
+# build:    This is a possible replacement of the all-rule in this makefile.
+#           It builds all libraries and dlls in directory order.
+#
+# revbuild: This is a possible replacement of the makefile.smp file.
+#           It builds the dlls in reverse (directory) order.
+#
+build: libs
+    $(DOWITHDIRS) -e$(NOTHAVELIBS)    -cp $(MAKE_CMD)
+
+revbuild:
+    $(DOWITHDIRS) -e$(NOTHAVELIBS) -r -cp $(MAKE_CMD)
 
 
 libs:
