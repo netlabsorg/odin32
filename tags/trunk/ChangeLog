@@ -1,4 +1,4 @@
- /* $Id: ChangeLog,v 1.782 2000-03-04 22:14:29 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.783 2000-03-04 23:43:36 sandervl Exp $ */
 
  2000-03-04: Jeroen van den Horn <J.vandenHorn@fibre.a2000.nl>
         - GLUT32: Added logic to escape from optimizer bug in VACPP
@@ -17,6 +17,14 @@
                  compiler and linker flags, this is allready done!
 
  2000-03-04: Sander van Leeuwen <sandervl@xs4all.nl>
+	- INCLUDE\pdwin32.tools, pdwin.vac*
+                   Added new build rules (conditional at this time)
+                   For each dll a subdir bin\release & bin\debug is created
+                   in which the object files of the release & build version
+                   are saved.
+        - INCLUDE\pdwin32.post
+                   Common makefile rules to be included by all makefiles
+	- USER32\KERNEL32: Switched to new build rules
 	- WSOCK32: Fixed bug in setsockopt for SO_LINGER (options size wasn't 
                    adjusted)
 	- KERNEL32: Fixed shell dirs (now all created in odin\bin dir)
