@@ -1,4 +1,4 @@
-# $Id: setup.os2relwat11-16.mk,v 1.5 2002-08-20 19:14:34 bird Exp $
+# $Id: setup.os2relwat11-16.mk,v 1.6 2002-08-20 21:20:10 bird Exp $
 
 # ---OS2, RELEASE, WAT11-------------------------
 ENV_NAME="OS/2, Release, Watcom C/C++ v11.0c 16-bit"
@@ -70,7 +70,7 @@ CXX_PC_2_STDOUT=-pc
 
 !if "$(CC_AS_CXX)" != ""
 ! if "$(CXX_AS_CC)" != ""
-!  if [@(ECHO) $(CLRERR)Error: Do you think you're smart? CC_AS_CXX and CXX_AS_CC is mutual execlusive!$(CLRRST)]
+!  if [@(ECHO) $(CLRERR)Error: CC_AS_CXX and CXX_AS_CC is mutual execlusive!$(CLRRST)]
 !  endif
 !  error
 ! endif
@@ -83,11 +83,11 @@ CC_FLAGS_IFS=$(CXX_FLAGS_IFS)
 !endif
 !if "$(CXX_AS_CC)" != ""
 CXX=$(CC)
-CXX_FLAGS_EXE=$(C_FLAGS_EXE)
-CXX_FLAGS_DLL=$(C_FLAGS_DLL)
-CXX_FLAGS_SYS=$(C_FLAGS_SYS)
-CXX_FLAGS_VDD=$(C_FLAGS_VDD)
-CXX_FLAGS_IFS=$(C_FLAGS_IFS)
+CXX_FLAGS_EXE=$(CC_FLAGS_EXE)
+CXX_FLAGS_DLL=$(CC_FLAGS_DLL)
+CXX_FLAGS_SYS=$(CC_FLAGS_SYS)
+CXX_FLAGS_VDD=$(CC_FLAGS_VDD)
+CXX_FLAGS_IFS=$(CC_FLAGS_IFS)
 !endif
 
 IMPLIB_FLAGS=/NOI /Nologo
@@ -125,6 +125,7 @@ _LIB_MT =
 !if "$(_OBJ_MODEL)" == "m"
 _LIB_MT = mt # this is the only one there is a MT edition of, don't know why.
 !endif
+_LIB_DLL=
 !if "$(TARGET_MODE)" == "DLL" # quirk! TODO/FIXME
 _LIB_DLL= dl
 !endif
