@@ -1,4 +1,4 @@
-/* $Id: dcdata.h,v 1.2 2000-11-04 16:30:01 sandervl Exp $ */
+/* $Id: dcdata.h,v 1.3 2001-01-09 18:14:44 sandervl Exp $ */
 /*
  * GDI32: public dc data definitions
  *
@@ -25,7 +25,7 @@ typedef struct _tagXFORM
     FLOAT eDy;
 } XFORM_W, *PXFORM_W, *LPXFORM_W;
 
-#if 0
+#ifndef USING_OPEN32
 #ifndef GPI_INCLUDED
    typedef struct _SIZEF
    {
