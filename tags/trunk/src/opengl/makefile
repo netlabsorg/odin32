@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.4 2000-02-09 12:08:31 bird Exp $
+# $Id: makefile,v 1.5 2000-02-09 13:44:31 sandervl Exp $
 #
 # PD-Win32 API
 #
@@ -34,7 +34,7 @@ TARGET1 = opengl32
 TARGET2 = glu\glu32
 TARGET3 = glut\glut32
 
-OBJS1=  opengl32.obj initterm.obj
+OBJS1=  opengl32.obj initterm.obj resource.obj
 
 all: $(TARGET1).dll $(TARGET1).lib \
      $(TARGET2).dll $(TARGET2).lib \
@@ -42,7 +42,7 @@ all: $(TARGET1).dll $(TARGET1).lib \
 
 $(TARGET1).dll: $(OBJS1) $(TARGET1).def
         $(LD) $(LDFLAGS) -Fm -Fe$@ $(OBJS1) $(TARGET1).def \
-              $(PDWIN32_LIB)/pmwinx.lib $(PDWIN32_LIB)/kernel32.lib \
+              $(PDWIN32_LIB)/gdi32.lib $(PDWIN32_LIB)/kernel32.lib \
               $(PDWIN32_LIB)/user32.lib $(PDWIN32_LIB)/odincrt.lib \
               OS2386.LIB $(RTLLIB_O)
         $(CP) $@ $(PDWIN32_BIN)
@@ -54,6 +54,11 @@ $(TARGET1).lib: $(TARGET1)exp.def
 
 $(TARGET1)exp.def: $(TARGET1).def
         $(IMPDEF) $** $@
+
+resource.asm: $(TARGET1).rc
+    $(RC) $(RCFLAGS) -o resource.asm $(TARGET1).rc
+
+resource.obj: resource.asm
 
 $(TARGET2).dll:
     cd glu
@@ -69,7 +74,7 @@ opengl32.obj: opengl32.cpp pglos2.h glos2.h initterm.h
 initterm.obj: initterm.cpp initterm.h
 
 clean:
-        $(RM) *.obj *.lib *.dll *.map
+        $(RM) *.obj *.lib *.dll *.map resource.asm *exp.def
         $(RM) $(PDWIN32_BIN)\$(TARGET1).dll
         $(RM) $(PDWIN32_LIB)\$(TARGET1).lib
         cd glut
