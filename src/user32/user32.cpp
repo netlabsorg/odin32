@@ -1,4 +1,4 @@
-/* $Id: user32.cpp,v 1.103 2001-06-23 09:14:06 sandervl Exp $ */
+/* $Id: user32.cpp,v 1.104 2001-07-03 18:33:27 sandervl Exp $ */
 
 /*
  * Win32 misc user32 API functions for OS/2
@@ -1035,8 +1035,13 @@ BOOL WIN32API WinHelpA( HWND hwnd, LPCSTR lpszHelp, UINT uCommand, DWORD  dwData
   else
     nlen = 0;
   size = sizeof(WINHELP) + nlen + dsize;
-  hwh = GlobalAlloc(0,size);
+#if 1
+  hwh = GlobalAlloc(GMEM_SHARE,size);
   lpwh = (WINHELP*)GlobalLock(hwh);
+#else
+  hwh  = (HANDLE)_smalloc(size);
+  lpwh = (WINHELP*)hwh;
+#endif
   lpwh->size = size;
   lpwh->command = uCommand;
   lpwh->data = dwData;
@@ -1319,56 +1324,6 @@ BOOL WIN32API RegisterHotKey(HWND hwnd, int idHotKey, UINT fuModifiers, UINT uVi
   dprintf(("USER32:  RegisterHotKey, not implemented\n"));
   hwnd = Win32ToOS2Handle(hwnd);
   return(TRUE);
-}
-/*****************************************************************************
- * Name      : int WIN32API ToUnicode
- * Purpose   : The ToUnicode function translates the specified virtual-key code
- *             and keyboard state to the corresponding Unicode character or characters.
- * Parameters: UINT   wVirtKey   virtual-key code
- *             UINT   wScanCode  scan code
- *             PBYTE  lpKeyState address of key-state array
- *             LPWSTR pwszBuff   buffer for translated key
- *             int    cchBuff    size of translated key buffer
- *             UINT   wFlags     set of function-conditioning flags
- * Variables :
- * Result    : - 1 The specified virtual key is a dead-key character (accent or
- *                 diacritic). This value is returned regardless of the keyboard
- *                 layout, even if several characters have been typed and are
- *                 stored in the keyboard state. If possible, even with Unicode
- *                 keyboard layouts, the function has written a spacing version of
- *                 the dead-key character to the buffer specified by pwszBuffer.
- *                 For example, the function writes the character SPACING ACUTE
- *                 (0x00B4), rather than the character NON_SPACING ACUTE (0x0301).
- *               0 The specified virtual key has no translation for the current
- *                 state of the keyboard. Nothing was written to the buffer
- *                 specified by pwszBuffer.
- *               1 One character was written to the buffer specified by pwszBuffer.
- *       2 or more Two or more characters were written to the buffer specified by
- *                 pwszBuff. The most common cause for this is that a dead-key
- *                 character (accent or diacritic) stored in the keyboard layout
- *                 could not be combined with the specified virtual key to form a
- *                 single character.
- * Remark    :
- * Status    : UNTESTED STUB
- *
- * Author    : Patrick Haller [Thu, 1998/02/26 11:55]
- *****************************************************************************/
-int WIN32API ToUnicode(UINT   uVirtKey,
-                          UINT   uScanCode,
-                          PBYTE  lpKeyState,
-                          LPWSTR pwszBuff,
-                          int    cchBuff,
-                          UINT   wFlags)
-{
-  dprintf(("USER32:ToUnicode (%u,%u,%08xh,%08xh,%u,%08x) not implemented.\n",
-         uVirtKey,
-         uScanCode,
-         lpKeyState,
-         pwszBuff,
-         cchBuff,
-         wFlags));
-
-  return (0);
 }
 /*****************************************************************************
  * Name      : BOOL WIN32API UnloadKeyboardLayout
