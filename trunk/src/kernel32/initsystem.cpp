@@ -1,4 +1,4 @@
-/* $Id: initsystem.cpp,v 1.24 2000-12-30 10:17:00 sandervl Exp $ */
+/* $Id: initsystem.cpp,v 1.25 2001-01-14 17:16:54 sandervl Exp $ */
 /*
  * Odin system initialization (registry, directories & environment)
  *
@@ -70,6 +70,7 @@
 #define CLASS_DESKTOP       "Desktop"
 #define CLASS_SHORTCUT          "Shortcut"
 #define CLASS_SHELL32DLL    "shell32.dll"
+#define CLASS_SHDOCVW       "shdocvw.dll"
 #define COM_CLASS_ID        "CLSID"
 #define COM_INPROCSERVER        "InprocServer32"
 #define COM_THREADMODEL     "ThreadingModel"
@@ -334,6 +335,35 @@ BOOL InitSystemAndRegistry()
     goto initreg_error;
    }
    RegSetValueExA(hkey, "", 0, REG_SZ, (LPBYTE)"", 0);
+   RegCloseKey(hkey);
+
+   //# Entries for IWebBrowser
+   //# Used by Internet Explorer HTML-rendering control
+   //[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\CLSID\{8856f961-340a-11d0-a96b-00c04fd705a2}]
+   //@="Shortcut"
+   //[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\CLSID\{8856f961-340a-11d0-a96b-00c04fd705a2}\InProcServer32]
+   //@="shdocvw.dll"
+   //"ThreadingModel"="Apartment"
+   //[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\CLSID\{8856f961-340a-11d0-a96b-00c04fd705a2}\shellex\MayChangeDefaultMenu]
+   //@=""
+
+   if(RegCreateKeyA(HKEY_LOCAL_MACHINE,"SOFTWARE\\Classes\\CLSID\\{8856f961-340a-11d0-a96b-00c04fd705a2}",&hkey)!=ERROR_SUCCESS) {
+    goto initreg_error;
+   }
+   RegSetValueExA(hkey, "", 0, REG_SZ, (LPBYTE)CLASS_SHORTCUT, sizeof(CLASS_SHORTCUT));
+   RegCloseKey(hkey);
+
+   if(RegCreateKeyA(HKEY_LOCAL_MACHINE,"SOFTWARE\\Classes\\CLSID\\{8856f961-340a-11d0-a96b-00c04fd705a2}\\InProcServer32",&hkey)!=ERROR_SUCCESS) {
+    goto initreg_error;
+   }
+   RegSetValueExA(hkey, "", 0, REG_SZ, (LPBYTE)CLASS_SHDOCVW, sizeof(CLASS_SHDOCVW));
+   RegSetValueExA(hkey, COM_THREADMODEL, 0, REG_SZ, (LPBYTE)COM_THREAD_APARTMENT, sizeof(COM_THREAD_APARTMENT));
+   RegCloseKey(hkey);
+
+   if(RegCreateKeyA(HKEY_LOCAL_MACHINE,"SOFTWARE\\Classes\\CLSID\\{8856f961-340a-11d0-a96b-00c04fd705a2}\\shellex\\MayChangeDefaultMenu",&hkey)!=ERROR_SUCCESS) {
+    goto initreg_error;
+   }
+   RegSetValueExA(hkey, "", 0, REG_SZ, (LPBYTE)"", 1);
    RegCloseKey(hkey);
 
    //Now the Ddraw & dsound registry keys:
