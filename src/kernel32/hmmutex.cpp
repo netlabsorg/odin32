@@ -1,4 +1,4 @@
-/* $Id: hmmutex.cpp,v 1.1 1999-07-06 15:48:47 phaller Exp $ */
+/* $Id: hmmutex.cpp,v 1.2 1999-10-26 22:35:25 phaller Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -73,7 +73,7 @@ DWORD HMDeviceMutexClass::CreateMutex(PHMHANDLEDATA         pHMHandleData,
                             fInitialOwner,
                             lpszMutexName);
 
-  if (INVALID_HANDLE_VALUE != hOpen32)         // check success
+  if (0 != hOpen32)                            // check success
   {
     pHMHandleData->hHMHandle = hOpen32;        // save handle
     return (NO_ERROR);
@@ -110,7 +110,7 @@ DWORD HMDeviceMutexClass::OpenMutex(PHMHANDLEDATA         pHMHandleData,
                           fInheritHandle,
                           lpszMutexName);
 
-  if (INVALID_HANDLE_VALUE != hOpen32)         // check success
+  if (0 != hOpen32)                            // check success
   {
     pHMHandleData->hHMHandle = hOpen32;        // save handle
     return (NO_ERROR);

@@ -1,4 +1,4 @@
-/* $Id: hmsemaphore.cpp,v 1.1 1999-07-06 15:48:48 phaller Exp $ */
+/* $Id: hmsemaphore.cpp,v 1.2 1999-10-26 22:35:25 phaller Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -76,7 +76,7 @@ DWORD HMDeviceSemaphoreClass::CreateSemaphore(PHMHANDLEDATA         pHMHandleDat
                                 lMaximumCount,
                                 (LPTSTR)lpszSemaphoreName);
 
-  if (INVALID_HANDLE_VALUE != hOpen32)         // check success
+  if (0 != hOpen32)                            // check success
   {
     pHMHandleData->hHMHandle = hOpen32;        // save handle
     return (NO_ERROR);
@@ -113,7 +113,7 @@ DWORD HMDeviceSemaphoreClass::OpenSemaphore(PHMHANDLEDATA         pHMHandleData,
                               fInheritHandle,
                               lpszSemaphoreName);
 
-  if (INVALID_HANDLE_VALUE != hOpen32)         // check success
+  if (0 != hOpen32)                            // check success
   {
     pHMHandleData->hHMHandle = hOpen32;        // save handle
     return (NO_ERROR);
