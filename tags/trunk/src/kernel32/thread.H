@@ -1,3 +1,5 @@
+/* $Id: thread.H,v 1.3 1999-06-10 19:11:31 phaller Exp $ */
+
 /*
  *
  * Project Odin Software License can be found in LICENSE.TXT

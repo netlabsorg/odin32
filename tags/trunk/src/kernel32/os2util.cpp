@@ -1,3 +1,5 @@
+/* $Id: os2util.cpp,v 1.2 1999-06-10 19:09:35 phaller Exp $ */
+
 /*
  * Misc util. procedures
  *

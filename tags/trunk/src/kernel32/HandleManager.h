@@ -1,11 +1,8 @@
+/* $Id: HandleManager.h,v 1.3 1999-06-10 19:11:30 phaller Exp $ */
+
 /*
- *
  * Project Odin Software License can be found in LICENSE.TXT
- *
- */
-/*
  * Win32 Unified Handle Manager for OS/2
- *
  * 1998/02/11 PH Patrick Haller (haller@zebra.fh-weingarten.de)
  *
  * @(#) HandleManager.Cpp       1.0.0   1998/02/11 PH start

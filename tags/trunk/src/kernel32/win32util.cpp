@@ -1,3 +1,5 @@
+/* $Id: win32util.cpp,v 1.2 1999-06-10 19:09:04 phaller Exp $ */
+
 /*
  * Misc functions
  *

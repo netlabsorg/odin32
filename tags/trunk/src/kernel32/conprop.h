@@ -1,3 +1,5 @@
+/* $Id: conprop.h,v 1.3 1999-06-10 19:11:30 phaller Exp $ */
+
 /*
  * Win32 Console Subsystem for OS/2
  *
