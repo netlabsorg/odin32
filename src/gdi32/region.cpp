@@ -1,4 +1,4 @@
-/* $Id: region.cpp,v 1.16 2000-11-05 18:48:22 sandervl Exp $ */
+/* $Id: region.cpp,v 1.17 2000-11-15 13:56:46 sandervl Exp $ */
 
 /*
  * GDI32 region code
@@ -373,6 +373,8 @@ ODINFUNCTIONNODBG2(int, SelectClipRgn, HDC, hdc, HRGN, hrgn)
         return ERROR_W;
     }
 
+    dprintf(("SelectClipRgn: %x %x", hdc, hrgn));
+
     if(hrgn)
     {
         hrgn = ObjGetHandleData(hrgn);
@@ -403,12 +405,16 @@ ODINFUNCTIONNODBG2(int, SelectClipRgn, HDC, hdc, HRGN, hrgn)
         lComplexity = GpiSetClipRegion(pHps->hps, hrgnNewClip, &hrgnOldClip);
         if (lComplexity != RGN_ERROR )
         {
-            dprintf(("SelectClipRgn: %x %x", hdc, hrgn));
             if(hrgnOldClip)
                 GpiDestroyRegion(pHps->hps, hrgnOldClip);
 
             //todo: metafile recording
             SetLastError(ERROR_SUCCESS_W);
+
+            //SvL: Must check if origin changed here. Sometimes happens when
+            //     window looses focus. (don't know why....)
+            if(pHps->isClient) 
+                selectClientArea(pHps);
             return lComplexity;
         }
     }
@@ -517,6 +523,12 @@ ODINFUNCTIONNODBG3(int, ExtSelectClipRgn, HDC, hdc, HRGN, hrgn, int, mode)
         HRGN hrgnOld;
         lComplexity = GpiSetClipRegion(pHps->hps, hrgnCurrent, &hrgnOld);
         SetLastError(ERROR_SUCCESS_W);
+
+        //SvL: Must check if origin changed here. Sometimes happens when
+        //     window looses focus. (don't know why....)
+        if(pHps->isClient) 
+            selectClientArea(pHps);
+
         if (lComplexity != RGN_ERROR)
             return lComplexity;
    }
