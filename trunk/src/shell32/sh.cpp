@@ -1,4 +1,4 @@
-/* $Id: sh.cpp,v 1.13 2002-02-14 12:10:09 sandervl Exp $ */
+/* $Id: sh.cpp,v 1.14 2002-02-19 12:53:38 sandervl Exp $ */
 
 /*
  * Win32 SHELL32 for OS/2
@@ -82,7 +82,7 @@ LPITEMIDLIST WIN32API SHBrowseForFolder(LPBROWSEINFOA lpbi)
  * Author    : Patrick Haller [Tue, 1999/06/09 20:02]
  *****************************************************************************/
 
-LPITEMIDLIST WIN32API SHBrowseForFolderW(LPBROWSEINFOA lpbi)
+LPITEMIDLIST WIN32API SHBrowseForFolderW(LPBROWSEINFOW lpbi)
 {
   dprintf(("SHELL32: SHBrowseForFolderW not implemented.\n"));
 
