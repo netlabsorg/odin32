@@ -1,4 +1,4 @@
-/* $Id: loadres.cpp,v 1.26 2000-04-18 11:12:59 sandervl Exp $ */
+/* $Id: loadres.cpp,v 1.27 2000-04-29 18:28:36 sandervl Exp $ */
 
 /*
  * Win32 resource API functions for OS/2
@@ -557,7 +557,7 @@ HANDLE WIN32API LoadImageA(HINSTANCE hinst, LPCSTR lpszName, UINT uType,
                 dprintf(("LoadImageA: unsupported type %d!!", uType));
                 return 0;
   }
-  dprintf(("LoadImageA returned %d\n", (int)hRet));
+  dprintf(("LoadImageA returned %x\n", (int)hRet));
 
   return(hRet);
 }
@@ -596,7 +596,7 @@ HANDLE WIN32API LoadImageW(HINSTANCE hinst, LPCWSTR lpszName, UINT uType,
                 dprintf(("LoadImageW: unsupported type %d!!", uType));
                 return 0;
   }
-  dprintf(("LoadImageW returned %d\n", (int)hRet));
+  dprintf(("LoadImageW returned %x\n", (int)hRet));
 
   return(hRet);
 }
