@@ -1,4 +1,4 @@
-/* $Id: hmdevice.cpp,v 1.36 2003-05-06 12:06:09 sandervl Exp $ */
+/* $Id: hmdevice.cpp,v 1.37 2003-06-02 16:25:16 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -1780,26 +1780,6 @@ BOOL HMDeviceHandler::SetNamedPipeHandleState(PHMHANDLEDATA pHMHandleData,
   return FALSE;
 }
 
-/*****************************************************************************
- * Name      : BOOL HMDeviceHandler::CreatePipe
- * Purpose   :
- * Variables :
- * Result    :
- * Remark    :
- * Status    :
- *
- * Author    : Przemyslaw Dobrowolski
- *****************************************************************************/
-BOOL HMDeviceHandler::CreatePipe(PHMHANDLEDATA pHMHandleDataRead,
-                                 PHMHANDLEDATA pHMHandleDataWrite,
-                                 LPSECURITY_ATTRIBUTES lpsa,
-                                 DWORD         cbPipe)
-{
-  dprintf(("KERNEL32: ERROR: HandleManager::DeviceHandler::CreatePipe (%08x,%08x)\n",
-           pHMHandleDataRead->hHMHandle,pHMHandleDataWrite->hHMHandle));
-
-    return(FALSE);
-}
 /*****************************************************************************
  * Name      : BOOL HMDeviceHandler::GetMailslotInfo
  * Purpose   :
