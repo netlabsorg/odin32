@@ -1,4 +1,4 @@
-/* $Id: oslibmsgtranslate.cpp,v 1.7 2000-01-08 16:47:46 cbratschi Exp $ */
+/* $Id: oslibmsgtranslate.cpp,v 1.8 2000-01-08 17:08:56 sandervl Exp $ */
 /*
  * Window message translation functions for OS/2
  *
@@ -138,7 +138,7 @@ BOOL OS2ToWinMsgTranslate(void *pThdb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode
   win32wnd = Win32BaseWindow::GetWindowFromOS2Handle(os2Msg->hwnd);
   if (!win32wnd) win32wnd = Win32BaseWindow::GetWindowFromOS2FrameHandle(os2Msg->hwnd);
   //PostThreadMessage posts WIN32APP_POSTMSG msg without window handle
-  if((win32wnd == 0) && (os2Msg->msg != WM_CREATE) && (os2Msg->msg != WIN32APP_POSTMSG))
+  if(win32wnd == 0 && (os2Msg->msg != WM_CREATE && os2Msg->msg != WM_QUIT && os2Msg->msg != WIN32APP_POSTMSG))
   {
         goto dummymessage; //not a win32 client window
   }
@@ -146,7 +146,7 @@ BOOL OS2ToWinMsgTranslate(void *pThdb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode
   winMsg->pt.x = os2Msg->ptl.x;
   winMsg->pt.y = mapScreenY(os2Msg->ptl.y);
 
-  if(win32wnd) //==0 for WM_CREATE
+  if(win32wnd) //==0 for WM_CREATE/WM_QUIT
     winMsg->hwnd = win32wnd->getWindowHandle();
 
   if (win32wnd && (os2Msg->hwnd == win32wnd->getOS2FrameWindowHandle()))
