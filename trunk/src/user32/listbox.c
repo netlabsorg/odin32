@@ -1248,6 +1248,12 @@ static INT LISTBOX_SetFont( HWND hwnd, LB_DESCR *descr, HFONT font )
     ReleaseDC( hwnd, hdc );
     if (!IS_OWNERDRAW(descr))
         LISTBOX_SetItemHeight( hwnd, descr, 0, tm.tmHeight, FALSE );
+
+#ifdef __WIN32OS2__
+    //Update item height here; (not done in WM_SETFONT handler)
+    descr->item_height =  tm.tmHeight;
+#endif
+
     return tm.tmHeight ;
 }
 
