@@ -12,17 +12,17 @@ extern "C" {
 
 #if (__IBMCPP__ == 300) || (__IBMC__ == 300)
 void _Optlink __ctordtorInit( void );
-#define ctordtorInit()	__ctordtorInit()
+#define ctordtorInit()  __ctordtorInit()
 
 void _Optlink __ctordtorTerm( void );
-#define ctordtorTerm()	__ctordtorTerm()
+#define ctordtorTerm()  __ctordtorTerm()
 
 #elif (__IBMCPP__ == 360) || (__IBMC__ == 360)
 void _Optlink __ctordtorInit( int flag );
-#define ctordtorInit()	__ctordtorInit(0)
+#define ctordtorInit()  __ctordtorInit(0)
 
 void _Optlink __ctordtorTerm( int flag );
-#define ctordtorTerm()	__ctordtorTerm(0)
+#define ctordtorTerm()  __ctordtorTerm(0)
 
 #else
 #error "Unknown compiler!"
@@ -54,6 +54,14 @@ void _Optlink _CRT_term(void);
 
 #define ctordtorInit()
 #define ctordtorTerm()
+
+#ifdef __cplusplus
+extern "C" {
+//prevent Watcom from mucking with this name
+extern DWORD _Resource_PEResTab;
+#pragma aux _Resource_PEResTab "*";
+}
+#endif
 
 #endif
 

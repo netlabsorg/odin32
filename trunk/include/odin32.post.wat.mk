@@ -1,4 +1,4 @@
-# $Id: odin32.post.wat.mk,v 1.11 2001-03-06 21:44:39 mike Exp $
+# $Id: odin32.post.wat.mk,v 1.12 2001-03-19 18:56:56 mike Exp $
 
 #
 # Odin32 API
@@ -111,7 +111,8 @@ all:    $(OBJDIR) \
 !ifndef NO_LIB_RULE
 lib:    $(OBJDIR) \
         $(OBJDIR)\$(ORGTARGET).lib \
-        $(ODIN32_LIB)\$(ORGTARGET).lib
+        $(ODIN32_LIB)\$(ORGTARGET).lib \
+        .SYMBOLIC
 !endif
 
 

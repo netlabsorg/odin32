@@ -1,4 +1,4 @@
-# $Id: odin32.dbg.wat.mk,v 1.3 2000-12-17 19:54:55 bird Exp $
+# $Id: odin32.dbg.wat.mk,v 1.4 2001-03-19 18:56:56 mike Exp $
 
 #
 # Odin32 API
@@ -18,7 +18,7 @@ SYMBOLIC = .SYMBOLIC
 #
 SOMLIB   = somtk.lib
 RTLLIB   = clib3r.lib
-RTLLIB_O = clib3r.lib
+RTLLIB_O = clib3r.lib plbrdll.lib mt7rdll.lib
 DLLENTRY = $(ODIN32_LIB)\dllentry.obj
 ODINCRT  = odincrtd
 
@@ -111,8 +111,8 @@ CXXFLAGS         += -bd
 #
 # Linker flags.
 #
-LDFLAGS          = option maxe=125, quiet, symfile, nodefaultlibs  LIBPath $(%WATCOM)\lib386\os2;$(%WATCOM)\lib386
-LDFLAGS_ODINCRT  = option maxe=125, quiet, symfile  LIBPath $(%WATCOM)\lib386\os2;$(%WATCOM)\lib386
+LDFLAGS          = option maxe=125, caseexact, quiet, symfile, nodefaultlibs  LIBPath $(%WATCOM)\lib386\os2;$(%WATCOM)\lib386
+LDFLAGS_ODINCRT  = option maxe=125, caseexact, quiet, symfile  LIBPath $(%WATCOM)\lib386\os2;$(%WATCOM)\lib386
 
 !ifndef NODEBUGINFO
 LDFLAGS          += debug all
