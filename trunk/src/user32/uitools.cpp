@@ -1,4 +1,4 @@
-/* $Id: uitools.cpp,v 1.33 2003-01-28 16:21:18 sandervl Exp $ */
+/* $Id: uitools.cpp,v 1.34 2003-01-29 13:07:31 sandervl Exp $ */
 /*
  * User Interface Functions
  *

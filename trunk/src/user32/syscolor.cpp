@@ -1,4 +1,4 @@
-/* $Id: syscolor.cpp,v 1.35 2003-01-03 21:43:16 sandervl Exp $ */
+/* $Id: syscolor.cpp,v 1.36 2003-01-29 13:07:31 sandervl Exp $ */
 
 /*
  * Win32 system color API functions for OS/2
@@ -215,7 +215,11 @@ COLORREF WIN32API GetSysColor(INT nIndex)
 
   if ((nIndex >= 0) && (nIndex < NUM_SYS_COLORS))
   {
-       return SysColors[nIndex];
+    if (USEWINCOLORS) return SysColors[nIndex];
+    else
+        if(nIndex < NUM_OPEN32_SYSCOLORS)
+                return O32_GetSysColor(nIndex);
+        else    return SysColors[nIndex];
   }
   else return 0;
 }
