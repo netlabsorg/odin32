@@ -1,4 +1,4 @@
-/* $Id: os2heap.cpp,v 1.3 1999-06-10 19:09:35 phaller Exp $ */
+/* $Id: os2heap.cpp,v 1.4 1999-06-19 10:54:42 sandervl Exp $ */
 
 /*
  * Heap class for OS/2
@@ -12,7 +12,7 @@
 #define  INCL_DOSMEMMGR
 #define  INCL_DOSSEMAPHORES
 #define  INCL_DOSERRORS
-#include <os2.h>
+#include <os2wrap.h>	//Odin32 OS/2 api wrappers
 #include <builtin.h>
 #include <stdlib.h>
 #include <string.h>

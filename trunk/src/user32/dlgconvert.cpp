@@ -1,4 +1,4 @@
-/* $Id: dlgconvert.cpp,v 1.4 1999-06-17 18:22:43 phaller Exp $ */
+/* $Id: dlgconvert.cpp,v 1.5 1999-06-19 10:54:46 sandervl Exp $ */
 
 /*
  * Win32 runtime dialog conversion functions for OS/2
@@ -16,7 +16,7 @@
 #define INCL_DOSPROCESS          /* DOS Process values       */
 #define INCL_DOSMISC             /* DOS Miscellanous values  */
 #define INCL_WIN
-#include <os2.h>
+#include <os2wrap.h>	//Odin32 OS/2 api wrappers
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>

@@ -41,10 +41,13 @@ Wine header notes:
 Coding conventions:
 	- Do NOT directly call the Open32 apis unless you're writing
 	  a wrapper for it.
+	- Do NOT include os2.h directly. Use os2wrap.h instead.
+	  os2wrap.h contains all the OS/2 apis with a wrapper around it to save
+          and restore the selector in FS. (some OS/2 apis set it back to the
+ 	  default value (150b))
 	- Use the correct Win32 api when there are two version (ascii & unicode)
 	  Calling the standard one (SendMessage) causes a error during compilation.
 	  Use SendMessageA instead.
 	- Source code style will be decided on in the near future.
 
-
-15/05/99: Sander van Leeuwen (sandervl@xs4all.nl)
+19/06/99: Sander van Leeuwen (sandervl@xs4all.nl)

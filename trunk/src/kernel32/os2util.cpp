@@ -1,4 +1,4 @@
-/* $Id: os2util.cpp,v 1.2 1999-06-10 19:09:35 phaller Exp $ */
+/* $Id: os2util.cpp,v 1.3 1999-06-19 10:54:42 sandervl Exp $ */
 
 /*
  * Misc util. procedures
@@ -13,7 +13,7 @@
  */
 #define INCL_BASE
 #define INCL_DOSPROCESS
-#include <os2.h>
+#include <os2wrap.h>	//Odin32 OS/2 api wrappers
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>  /*PLF Wed  98-03-18 05:15:04*/

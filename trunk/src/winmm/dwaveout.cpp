@@ -1,4 +1,4 @@
-/* $Id: dwaveout.cpp,v 1.3 1999-06-10 16:24:33 phaller Exp $ */
+/* $Id: dwaveout.cpp,v 1.4 1999-06-19 10:54:47 sandervl Exp $ */
 
 /*
  * Wave playback class
@@ -12,7 +12,7 @@
 
 #define  INCL_BASE
 #define  INCL_OS2MM
-#include <os2.h>
+#include <os2wrap.h>	//Odin32 OS/2 api wrappers
 #include <os2me.h>
 #include <stdlib.h>
 #include <string.h>
