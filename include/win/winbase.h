@@ -1,5 +1,3 @@
-/* $Id: winbase.h,v 1.25 2000-11-22 00:37:28 phaller Exp $ */
-
 #ifndef __WINE_WINBASE_H
 #define __WINE_WINBASE_H
 
@@ -1487,8 +1485,8 @@ HANDLE    WINAPI GetCurrentProcess(void);
 DWORD       WINAPI GetCurrentProcessId(void);
 HANDLE    WINAPI GetCurrentThread(void);
 DWORD       WINAPI GetCurrentThreadId(void);
-INT       WINAPI GetDateFormatA(LCID,DWORD,LPSYSTEMTIME,LPCSTR,LPSTR,INT);
-INT       WINAPI GetDateFormatW(LCID,DWORD,LPSYSTEMTIME,LPCWSTR,LPWSTR,INT);
+INT       WINAPI GetDateFormatA(LCID,DWORD,CONST SYSTEMTIME *,LPCSTR,LPSTR,INT);
+INT       WINAPI GetDateFormatW(LCID,DWORD,CONST SYSTEMTIME *,LPCWSTR,LPWSTR,INT);
 #define     GetDateFormat WINELIB_NAME_AW(GetDateFormat)
 LPSTR       WINAPI GetEnvironmentStringsA(void);
 LPWSTR      WINAPI GetEnvironmentStringsW(void);
@@ -1545,8 +1543,8 @@ BOOL      WINAPI GetStringTypeExW(LCID,DWORD,LPCWSTR,INT,LPWORD);
 VOID        WINAPI GetSystemInfo(LPSYSTEM_INFO);
 BOOL      WINAPI GetSystemPowerStatus(LPSYSTEM_POWER_STATUS);
 VOID        WINAPI GetSystemTime(LPSYSTEMTIME);
-INT       WINAPI GetTimeFormatA(LCID,DWORD,LPSYSTEMTIME,LPCSTR,LPSTR,INT);
-INT       WINAPI GetTimeFormatW(LCID,DWORD,LPSYSTEMTIME,LPCWSTR,LPWSTR,INT);
+INT       WINAPI GetTimeFormatA(LCID,DWORD,CONST SYSTEMTIME *,LPCSTR,LPSTR,INT);
+INT       WINAPI GetTimeFormatW(LCID,DWORD,CONST SYSTEMTIME *,LPCWSTR,LPWSTR,INT);
 #define     GetTimeFormat WINELIB_NAME_AW(GetTimeFormat)
 BOOL        WINAPI GetThreadContext(HANDLE,CONTEXT *);
 LCID        WINAPI GetThreadLocale(void);
