@@ -1,4 +1,4 @@
-/* $Id: odin.cmd,v 1.27 2001-01-12 14:49:38 bird Exp $
+/* $Id: odin.cmd,v 1.28 2001-01-12 16:06:49 bird Exp $
  *
  * Odin32 API WarpIn installation script generator.
  *
@@ -372,12 +372,8 @@ if (pos('DEBUG', translate(filespec('name', sDllDir)))) then
 do
     iDbg = lastpos('DEBUG', translate(sDllDir));
     sRelDir = substr(sDllDir, 1, iDbg - 1)||'release'||substr(sDllDir, iDbg + 5);
-    say sRelDir
-    say sRelDir
-    say sRelDir
-    say sRelDir
-    say sRelDir
     sWICCmd '2 -c'||sRelDir 'odincrt.dll odincrt.sym';
+    if (rc <> 0) then return rc;
 
     sWICCmd '2 -c'||sDllDir '*.sym';
     if (rc <> 0) then return rc;
