@@ -1,4 +1,4 @@
-/* $Id: dbglog.cpp,v 1.5 2003-01-22 17:06:18 sandervl Exp $ */
+/* $Id: dbglog.cpp,v 1.6 2003-02-13 15:30:52 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -308,7 +308,9 @@ int SYSTEM WriteLog(char *tekst, ...)
 
 #ifdef WIN32_IP_LOGGING
         char *logserver = getenv("WIN32LOG_IPSERVER");
-        if(logserver) {
+//testestset
+        if(logserver && loadNr == 1) {
+//testestset
              sock_init();
 
              memset(&servername, 0, sizeof(servername));
@@ -381,7 +383,7 @@ int SYSTEM WriteLog(char *tekst, ...)
       teb->o.odin.logfile = (DWORD)flog;
       
 #ifdef LOG_TIME
-      if(sel == 0x150b && !fIsOS2Image)
+      if(sel == 0x150b && fSwitchTIBSel)
         fprintf(flog, 
                 "t%02d (%3d): (%x) (FS=150B) ",
                 LOWORD(teb->o.odin.threadId),
@@ -394,7 +396,7 @@ int SYSTEM WriteLog(char *tekst, ...)
                 ulCallDepth,
                 GetTickCount());
 #else
-      if(sel == 0x150b && !fIsOS2Image) 
+      if(sel == 0x150b && fSwitchTIBSel) 
         fprintf(flog, 
 #ifdef SHOW_FPU_CONTROLREG
                 "t%02d (%3d)(%3x): ",
@@ -442,7 +444,7 @@ int SYSTEM WriteLog(char *tekst, ...)
 #else
             ulCallDepth = 0;
 #endif
-            if(sel == 0x150b && !fIsOS2Image) 
+            if(sel == 0x150b && fSwitchTIBSel) 
                 sprintf(logbuffer, "t%02d (%3d): (FS=150B) ",
                         LOWORD(teb->o.odin.threadId), ulCallDepth);
             else 

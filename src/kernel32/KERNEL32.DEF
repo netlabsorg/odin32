@@ -1,4 +1,4 @@
-; $Id: KERNEL32.DEF,v 1.149 2003-01-22 17:06:18 sandervl Exp $
+; $Id: KERNEL32.DEF,v 1.150 2003-02-13 15:30:51 sandervl Exp $
 
 ;Basis is Windows95 KERNEL32
 LIBRARY KERNEL32 INITINSTANCE TERMINSTANCE
@@ -1196,7 +1196,7 @@ EXPORTS
     _SetCustomBuildName@12                                        @2014 NONAME
     _RegisterCustomDriver@36                                      @2015 NONAME
 
-    strcmpiW                                                      @2020
+    strcmpiW                                                      @2020 NONAME
     strstrW                                                       @2021 NONAME
     strncmpiW                                                     @2022 NONAME
     strtolW                                                       @2027 NONAME
@@ -1212,6 +1212,9 @@ EXPORTS
     _ODIN_SetDllLoadCallback@4                                    @2100 NONAME
 ; override export
     _ODIN_SetProcAddress@12                                       @2101 NONAME
+
+; override TIB switching
+    _ODIN_SetTIBSwitch@4                                          @2102 NONAME                                           
 
     GetDisplayCodepage                                            @3000 NONAME
     GetWindowsCodepage                                            @3001 NONAME
