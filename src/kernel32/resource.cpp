@@ -1,4 +1,4 @@
-/* $Id: resource.cpp,v 1.7 1999-07-21 11:45:21 sandervl Exp $ */
+/* $Id: resource.cpp,v 1.8 1999-08-19 19:50:40 sandervl Exp $ */
 
 /*
  * Misc resource procedures
@@ -26,7 +26,7 @@ HRSRC WIN32API FindResourceA(HINSTANCE hModule, LPCSTR lpszName, LPCSTR lpszType
 
     dprintf(("FindResourceA %X", hModule));
     if(hModule == 0 || hModule == -1 || (WinExe != NULL && hModule ==
-       WinExe->getOS2InstanceHandle()))
+       WinExe->getInstanceHandle()))
     {
          module = (Win32Image *)WinExe;
     }
@@ -46,7 +46,7 @@ HRSRC WIN32API FindResourceW(HINSTANCE hModule, LPCWSTR lpszName,
 
     dprintf(("FindResourceW %X", hModule));
     if(hModule == 0 || hModule == -1 || (WinExe != NULL && hModule ==
-       WinExe->getOS2InstanceHandle()))
+       WinExe->getInstanceHandle()))
     {
          module = (Win32Image *)WinExe;
     }
@@ -91,7 +91,7 @@ DWORD WIN32API SizeofResource(HINSTANCE hModule, HRSRC hRes)
     if(res == NULL)
     return(0);
 
-    return res->sizeofResource();
+    return res->getSize();
 }
 //******************************************************************************
 //******************************************************************************
