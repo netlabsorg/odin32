@@ -1,4 +1,4 @@
-# $Id: pdwin32.mk,v 1.6 1999-08-25 11:24:08 sandervl Exp $
+# $Id: pdwin32.mk,v 1.7 1999-09-07 18:57:54 sandervl Exp $
 #
 # PD-Win32 Project
 #
@@ -20,7 +20,7 @@ CCENV=VAC3
 VAC3=1
 !else
 !if "$(CCENV)" == "VAC36"
-CCENV=VAC3
+CCENV=VAC36
 VAC36=1
 !endif
 !endif
