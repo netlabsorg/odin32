@@ -1,4 +1,4 @@
-/* $Id: StateUpd.cpp,v 1.34 2001-09-05 13:59:03 bird Exp $
+/* $Id: StateUpd.cpp,v 1.35 2001-09-05 23:14:12 bird Exp $
  *
  * StateUpd - Scans source files for API functions and imports data on them.
  *
@@ -687,7 +687,7 @@ static unsigned long processModuleHeader(char **papszLines, int i, int &iRet, co
      * keyword first.
      */
     iRet = i;
-    while (i < iRet + 10 && (psz = strstr(papszLines[i], "$Id"": ")) == NULL)
+    while (i < iRet + 10 && (psz = papszLines[i]) != NULL && (psz = strstr(psz, "$Id"": ")) == NULL) /* check for end-of-file */
         i++;
     if (psz != NULL)
     {   /* found $Id: */
