@@ -1,4 +1,4 @@
-/* $Id: version.cpp,v 1.6 1999-10-02 04:09:55 sandervl Exp $ */
+/* $Id: version.cpp,v 1.7 1999-10-04 20:53:08 sandervl Exp $ */
 
 /*
  * Win32 Version resource APIs for OS/2
@@ -78,8 +78,7 @@ VS_VERSION_INFO_STRUCT32 *VersionInfo32_FindChild(VS_VERSION_INFO_STRUCT32 *info
 
     while ( (DWORD)child < (DWORD)info + info->wLength )
     {
-//        if ( !lstrcmpniW( child->szKey, szKey, cbKey ) )
-        if ( !lstrcmpiW( child->szKey, szKey) )
+        if ( !lstrcmpniW( child->szKey, szKey, cbKey ) )
             return child;
 
         child = VersionInfo32_Next( child );
@@ -474,6 +473,10 @@ ODINFUNCTION4(BOOL,VerQueryValueA,LPVOID,  pBlock,
 
         AsciiToUnicode((char *)lpSubBlock, ustring);
         rc = VerQueryValueW( pBlock, (LPWSTR)ustring, &ubuffer, &len);
+	if(rc == 0) {
+	        free(ustring);
+		return 0;
+	}
         if(lpSubBlock[0] == '\\' && lpSubBlock[1] == 0)
           *lplpBuffer = ubuffer;
         else
